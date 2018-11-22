@@ -15,9 +15,17 @@ Diablo 2 and its content is ©2000 Blizzard Entertainment, Inc. All rights reser
 
 ALL OTHER TRADEMARKS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS.
 
+## Building
+To build this engine, you simply need to have [Microsoft Visual Studio 2017](https://visualstudio.microsoft.com/downloads/) installed with C#/Windows support. Although we currently do not support building in Linux with MonoDevelop, we would like to begin adding support for Linux and Mac in the very near future.
+
 ## Running
 When running via VisualStudio, go to the debug tab and specify the following command line options:
 
 `-p "C:\Program Files (x86)\Diablo II"`
 
 Substitute the path with wherever you have installed Diablo 2 and its expansions.
+
+## Contributing
+If you find something you'd like to fix thats obviously broken, create a branch, commit your code, and submit a pull request. If it's a new or missing feature you'd like to see, add an issue, and be descriptive!
+
+If you'd like to help out and are not quite sure how, you can look through any open issues and tasks.
