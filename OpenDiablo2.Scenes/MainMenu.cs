@@ -23,7 +23,7 @@ namespace OpenDiablo2.Scenes
         private readonly IMusicProvider musicProvider;
 
         private float logoFrame;
-        private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack, mouseSprite;
+        private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack, mouseSprite, wideButton;
 
         public MainMenu(
             IRenderWindow renderWindow,
@@ -56,6 +56,9 @@ namespace OpenDiablo2.Scenes
 
             mouseSprite = renderWindow.LoadSprite(ImageSet.LoadFromStream(mpqProvider.GetStream("data\\global\\ui\\CURSOR\\ohand.DC6")));
             mouseSprite.CurrentPalette = paletteProvider.PaletteTable["STATIC"];
+
+            wideButton = renderWindow.LoadSprite(ImageSet.LoadFromStream(mpqProvider.GetStream("data\\global\\ui\\FrontEnd\\WideButtonBlank.dc6")));
+            wideButton.CurrentPalette = paletteProvider.PaletteTable["ACT1"];
 
             logoFrame = 0f;
 
@@ -110,6 +113,14 @@ namespace OpenDiablo2.Scenes
             renderWindow.Draw(diabloLogoLeft);
             diabloLogoRight.Frame = (int)((float)diabloLogoRight.TotalFrames * logoFrame);
             renderWindow.Draw(diabloLogoRight);
+
+
+            wideButton.Location = new Point(260, 320);
+            wideButton.Frame = 0;
+            renderWindow.Draw(wideButton);
+            wideButton.Frame = 1;
+            wideButton.Location = new Point(260 + 256, 320);
+            renderWindow.Draw(wideButton);
 
             mouseSprite.Location = new Point(mouseInfoProvider.MouseX, mouseInfoProvider.MouseY + mouseSprite.FrameSize.Height - 1);
             renderWindow.Draw(mouseSprite);
