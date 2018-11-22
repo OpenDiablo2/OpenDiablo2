@@ -12,5 +12,6 @@ namespace OpenDiablo2.Common.Interfaces
         int MouseY { get; }
         bool LeftMouseDown { get; }
         bool RightMouseDown { get; }
+        bool ReserveMouse { get; set; }
     }
 }

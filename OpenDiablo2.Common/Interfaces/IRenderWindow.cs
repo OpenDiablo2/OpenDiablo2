@@ -15,6 +15,7 @@ namespace OpenDiablo2.Common.Interfaces
         void Update();
         void Clear();
         void Sync();
+        void Quit();
         ISprite LoadSprite(string resourcePath, string palette, Point location);
         ISprite LoadSprite(string resourcePath, string palette);
         IFont LoadFont(string resourcePath, string palette);

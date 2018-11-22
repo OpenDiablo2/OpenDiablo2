@@ -28,7 +28,7 @@ namespace OpenDiablo2.Scenes
         private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack;
         private IFont labelFont;
         private ILabel versionLabel, urlLabel;
-        private WideButton btnSinglePlayer;
+        private WideButton btnSinglePlayer, btnExit, btnWebsite;
 
         public MainMenu(
             IRenderWindow renderWindow,
@@ -55,6 +55,17 @@ namespace OpenDiablo2.Scenes
             btnSinglePlayer = createWideButton();
             btnSinglePlayer.Text = "Single Player".ToUpper();
             btnSinglePlayer.Location = new Point(264, 290);
+            btnSinglePlayer.OnActivate = OnSinglePlayerClicked;
+
+            btnWebsite = createWideButton();
+            btnWebsite.Text = "Visible Github".ToUpper();
+            btnWebsite.Location = new Point(264, 460);
+            btnWebsite.OnActivate = OnVisitWebsiteClicked;
+
+            btnExit = createWideButton();
+            btnExit.Text = "Exit Diablo II".ToUpper();
+            btnExit.Location = new Point(264, 500);
+            btnExit.OnActivate = OnExitClicked;
 
             labelFont = renderWindow.LoadFont(ResourcePaths.Font16, Palettes.Static);
             versionLabel = renderWindow.CreateLabel(labelFont, new Point(50, 555), "v0.01 Pre-Alpha");
@@ -84,6 +95,9 @@ namespace OpenDiablo2.Scenes
             musicProvider.PlaySong();
         }
 
+        private void OnVisitWebsiteClicked()
+            => System.Diagnostics.Process.Start("https://github.com/essial/OpenDiablo2/");
+
         public void Render()
         {
             // Render the background
@@ -101,6 +115,8 @@ namespace OpenDiablo2.Scenes
 
             // Render the UI buttons
             btnSinglePlayer.Render();
+            btnWebsite.Render();
+            btnExit.Render();
 
             //wideButton.Location = new Point(264, 290);
             //renderWindow.Draw(wideButton, 2, 1, 0);
@@ -114,6 +130,8 @@ namespace OpenDiablo2.Scenes
                 logoFrame -= 1f;
 
             btnSinglePlayer.Update();
+            btnWebsite.Update();
+            btnExit.Update();
 
         }
 
@@ -125,6 +143,11 @@ namespace OpenDiablo2.Scenes
         private void OnSinglePlayerClicked()
         {
 
+        }
+
+        private void OnExitClicked()
+        {
+            renderWindow.Quit();
         }
     }
 }

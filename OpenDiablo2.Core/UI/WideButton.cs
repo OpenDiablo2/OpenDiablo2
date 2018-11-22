@@ -33,6 +33,8 @@ namespace OpenDiablo2.Core.UI
         private IFont font;
         private ILabel label;
         private bool pressed = false;
+        private bool active = false; // When true, button is actively being focus pressed
+        private bool activeLock = false; // When true, something else is being pressed so ignore everything
         private Point labelOffset = new Point();
 
         private string text;
@@ -69,7 +71,32 @@ namespace OpenDiablo2.Core.UI
             var hovered = (mouseInfoProvider.MouseX >= location.X && mouseInfoProvider.MouseX < (location.X + buttonWidth))
                 && (mouseInfoProvider.MouseY >= location.Y && mouseInfoProvider.MouseY < (location.Y + buttonHeight));
 
-            pressed = hovered;
+
+            if (!activeLock && hovered && mouseInfoProvider.LeftMouseDown && !mouseInfoProvider.ReserveMouse)
+            {
+                // The button is being pressed down
+                mouseInfoProvider.ReserveMouse = true;
+                active = true;
+
+            }
+            else if (active && !mouseInfoProvider.LeftMouseDown)
+            {
+                mouseInfoProvider.ReserveMouse = false;
+                active = false;
+
+                if (hovered)
+                    OnActivate?.Invoke();
+            }
+            else if (!active && mouseInfoProvider.LeftMouseDown)
+            {
+                activeLock = true;
+            }
+            else if (activeLock && !mouseInfoProvider.LeftMouseDown)
+            {
+                activeLock = false;
+            }
+
+            pressed = (hovered && mouseInfoProvider.LeftMouseDown && active);
         }
 
         public void Render()

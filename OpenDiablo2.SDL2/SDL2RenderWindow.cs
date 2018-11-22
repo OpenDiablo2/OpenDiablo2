@@ -17,13 +17,13 @@ namespace OpenDiablo2.SDL2_
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private IntPtr window, renderer;
-        private bool running;
-        public bool IsRunning => running;
+        public bool IsRunning { get; private set; }
 
         public int MouseX { get; internal set; } = 0;
         public int MouseY { get; internal set; } = 0;
         public bool LeftMouseDown { get; internal set; } = false;
         public bool RightMouseDown { get; internal set; } = false;
+        public bool ReserveMouse { get; set; } = false;
 
         private readonly IMPQProvider mpqProvider;
         private readonly IPaletteProvider paletteProvider;
@@ -52,9 +52,12 @@ namespace OpenDiablo2.SDL2_
 
             SDL.SDL_ShowCursor(0);
 
-            running = true;
+            IsRunning = true;
 
         }
+
+        public void Quit() => IsRunning = false;
+
         public void Dispose()
         {
             SDL.SDL_DestroyRenderer(renderer);
@@ -84,9 +87,35 @@ namespace OpenDiablo2.SDL2_
                     continue;
                 }
 
-                if (evt.type == SDL.SDL_EventType.SDL_QUIT)
+                else if (evt.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN)
                 {
-                    running = false;
+                    switch((uint)evt.button.button)
+                    {
+                        case SDL.SDL_BUTTON_LEFT:
+                            LeftMouseDown = true;
+                            break;
+                        case SDL.SDL_BUTTON_RIGHT:
+                            RightMouseDown = true;
+                            break;
+                    }
+                }
+
+                else if (evt.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP)
+                {
+                    switch ((uint)evt.button.button)
+                    {
+                        case SDL.SDL_BUTTON_LEFT:
+                            LeftMouseDown = false;
+                            break;
+                        case SDL.SDL_BUTTON_RIGHT:
+                            RightMouseDown = false;
+                            break;
+                    }
+                }
+
+                else if (evt.type == SDL.SDL_EventType.SDL_QUIT)
+                {
+                    IsRunning = false;
                     continue;
                 }
             }
