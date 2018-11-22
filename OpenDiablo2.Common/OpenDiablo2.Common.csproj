@@ -75,6 +75,8 @@
     <Compile Include="Interfaces\IRenderWindow.cs" />
     <Compile Include="Interfaces\IScene.cs" />
     <Compile Include="Interfaces\ISprite.cs" />
+    <Compile Include="Interfaces\IMouseInfoProvider.cs" />
+    <Compile Include="Interfaces\ITextLabel.cs" />
     <Compile Include="Models\BitStream.cs" />
     <Compile Include="Models\GlobalConfiguration.cs" />
     <Compile Include="Models\ImageSet.cs" />

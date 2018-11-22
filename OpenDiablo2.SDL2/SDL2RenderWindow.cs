@@ -12,12 +12,18 @@ using Autofac;
 
 namespace OpenDiablo2.SDL2_
 {
-    public sealed class SDL2RenderWindow : IRenderWindow, IRenderTarget
+    public sealed class SDL2RenderWindow : IRenderWindow, IRenderTarget, IMouseInfoProvider
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private IntPtr window, renderer;
         private bool running;
         public bool IsRunning => running;
+
+        public int MouseX { get; internal set; } = 0;
+        public int MouseY { get; internal set; } = 0;
+        public bool LeftMouseDown { get; internal set; } = false;
+        public bool RightMouseDown { get; internal set; } = false;
+
         private readonly ILifetimeScope lifetimeScope;
 
         public SDL2RenderWindow(ILifetimeScope lifetimeScope)
@@ -37,6 +43,8 @@ namespace OpenDiablo2.SDL2_
                 throw new ApplicationException($"Unable to create SDL Window: {SDL.SDL_GetError()}");
 
             SDL.SDL_SetRenderDrawBlendMode(renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+
+            SDL.SDL_ShowCursor(0);
 
             running = true;
 
@@ -63,8 +71,18 @@ namespace OpenDiablo2.SDL2_
         {
             while (SDL.SDL_PollEvent(out SDL.SDL_Event evt) != 0)
             {
+                if (evt.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
+                {
+                    MouseX = evt.motion.x;
+                    MouseY = evt.motion.y;
+                    continue;
+                }
+
                 if (evt.type == SDL.SDL_EventType.SDL_QUIT)
+                {
                     running = false;
+                    continue;
+                }
             }
         }
 

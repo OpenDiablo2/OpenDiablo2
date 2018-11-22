@@ -69,9 +69,9 @@ namespace OpenDiablo2.SDL2_
         private Color AdjustColor(Color source)
         => Color.FromArgb(
                 source.A,
-                (byte)Math.Min((float)source.R * 1.2, 255),
-                (byte)Math.Min((float)source.G * 1.2, 255),
-                (byte)Math.Min((float)source.B * 1.2, 255)
+                (byte)Math.Min((float)source.R * 1.4, 255),
+                (byte)Math.Min((float)source.G * 1.4, 255),
+                (byte)Math.Min((float)source.B * 1.4, 255)
             );
 
         private IntPtr LoadFrame(ImageFrame frame, IntPtr renderer)
