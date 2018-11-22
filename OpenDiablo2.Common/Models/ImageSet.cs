@@ -1,0 +1,127 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OpenDiablo2.Common.Models
+{
+
+    public class ImageFrame
+    {
+        public UInt32 Flip;
+        public UInt32 Width;
+        public UInt32 Height;
+        public Int32 OffsetX;
+        public Int32 OffsetY;        // from bottom border, not up 
+        public UInt32 Unknown;
+        public UInt32 NextBlock;
+        public UInt32 Length;
+        public Int16[,] ImageData;
+
+        public Color GetColor(int x, int y, Palette palette)
+        {
+            var index = ImageData[x, y];
+            if (index == -1)
+                return Color.Transparent;
+
+            var color = palette.Colors[(int)index];
+
+            return Color.FromArgb(255, color.R, color.G, color.B);
+        }
+    }
+
+    public sealed class ImageSet
+    {
+        private UInt32 version;
+        private UInt32 unknown1;           // 01 00 00 00  ???
+        private UInt32 unknown2;           // 00 00 00 00  ???
+        private UInt32 termination;        // EE EE EE EE or CD CD CD CD  ???
+        private UInt32[] framePointers;
+        public ImageFrame[] Frames { get; private set; }
+
+        public UInt32 Directions { get; private set; }
+        public UInt32 FramesPerDirection { get; private set; }
+
+        public static ImageSet LoadFromStream(Stream stream)
+        {
+            var br = new BinaryReader(stream);
+            var result = new ImageSet
+            {
+                version = br.ReadUInt32(),
+                unknown1 = br.ReadUInt32(),
+                unknown2 = br.ReadUInt32(),
+                termination = br.ReadUInt32(),
+                Directions = br.ReadUInt32(),
+                FramesPerDirection = br.ReadUInt32()
+            };
+
+            result.framePointers = new uint[result.Directions * result.FramesPerDirection];
+            for (var i = 0; i < result.Directions * result.FramesPerDirection; i++)
+                result.framePointers[i] = br.ReadUInt32();
+
+            result.Frames = new ImageFrame[result.Directions * result.FramesPerDirection];
+            for (var i = 0; i < result.Directions * result.FramesPerDirection; i++)
+            {
+                stream.Seek(result.framePointers[i], SeekOrigin.Begin);
+
+                var frame = new ImageFrame
+                {
+                    Flip = br.ReadUInt32(),
+                    Width = br.ReadUInt32(),
+                    Height = br.ReadUInt32(),
+                    OffsetX = br.ReadInt32(),
+                    OffsetY = br.ReadInt32(),
+                    Unknown = br.ReadUInt32(),
+                    NextBlock = br.ReadUInt32(),
+                    Length = br.ReadUInt32()
+                };
+
+                frame.ImageData = new Int16[frame.Width, frame.Height];
+                for (int ty = 0; ty < frame.Height; ty++)
+                    for (int tx = 0; tx < frame.Width; tx++)
+                        frame.ImageData[tx, ty] = -1;
+
+
+                int x = 0;
+                int y = (int)frame.Height - 1;
+                while (true)
+                {
+                    var b = br.ReadByte();
+                    if (b == 0x80)
+                    {
+                        if (y == 0)
+                            break;
+
+                        y--;
+                        x = 0;
+                        continue;
+                    }
+
+                    if ((b & 0x80) > 0)
+                    {
+                        var transparentPixelsToWrite = b & 0x7F;
+                        for (int p = 0; p < transparentPixelsToWrite; p++)
+                        {
+                            frame.ImageData[x++, y] = -1;
+                        }
+                        continue;
+                    }
+
+
+                    for (int p = 0; p < b; p++)
+                    {
+                        frame.ImageData[x++, y] = br.ReadByte();
+                    }
+
+                }
+                result.Frames[i] = frame;
+            }
+
+
+            return result;
+        }
+    }
+}
