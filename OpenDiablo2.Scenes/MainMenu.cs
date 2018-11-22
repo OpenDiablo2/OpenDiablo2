@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OpenDiablo2.Scenes
@@ -19,6 +20,7 @@ namespace OpenDiablo2.Scenes
         private readonly IPaletteProvider paletteProvider;
         private readonly IMPQProvider mpqProvider;
         private readonly IMouseInfoProvider mouseInfoProvider;
+        private readonly IMusicProvider musicProvider;
 
         private float logoFrame;
         private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack, mouseSprite;
@@ -27,7 +29,8 @@ namespace OpenDiablo2.Scenes
             IRenderWindow renderWindow,
             IPaletteProvider paletteProvider,
             IMPQProvider mpqProvider,
-            IMouseInfoProvider mouseInfoProvider
+            IMouseInfoProvider mouseInfoProvider,
+            IMusicProvider musicProvider
             )
         {
             this.renderWindow = renderWindow;
@@ -61,6 +64,29 @@ namespace OpenDiablo2.Scenes
             diabloLogoLeftBlack.Location = new Point(400, 120);
             diabloLogoRightBlack.Location = new Point(400, 120);
 
+
+            var loadingSprite = renderWindow.LoadSprite(ImageSet.LoadFromStream(mpqProvider.GetStream("data\\global\\ui\\Loading\\loadingscreen.dc6")));
+            loadingSprite.CurrentPalette = paletteProvider.PaletteTable["loading"];
+            loadingSprite.Location = new Point(300, 400);
+            renderWindow.Clear();
+            renderWindow.Draw(loadingSprite);
+            renderWindow.Sync();
+
+            musicProvider.LoadSong(mpqProvider.GetStream("data\\global\\music\\introedit.wav"));
+
+            // TODO: Fake loading for now, this should be in its own scene as we start loading real stuff
+            var r = new Random();
+            for(int i = 1; i < 10; i++)
+            {
+                renderWindow.Clear();
+                loadingSprite.Frame = i;
+                renderWindow.Draw(loadingSprite);
+                renderWindow.Sync();
+                Thread.Sleep(r.Next(150));
+
+            }
+
+            musicProvider.PlaySong();
         }
 
         public void Render()
