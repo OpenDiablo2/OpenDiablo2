@@ -67,7 +67,7 @@ namespace OpenDiablo2.Common.Models
             {
                 stream.Seek(result.framePointers[i], SeekOrigin.Begin);
 
-                var frame = new ImageFrame
+                result.Frames[i] = new ImageFrame
                 {
                     Flip = br.ReadUInt32(),
                     Width = br.ReadUInt32(),
@@ -79,14 +79,14 @@ namespace OpenDiablo2.Common.Models
                     Length = br.ReadUInt32()
                 };
 
-                frame.ImageData = new Int16[frame.Width, frame.Height];
-                for (int ty = 0; ty < frame.Height; ty++)
-                    for (int tx = 0; tx < frame.Width; tx++)
-                        frame.ImageData[tx, ty] = -1;
+                result.Frames[i].ImageData = new Int16[result.Frames[i].Width, result.Frames[i].Height];
+                for (int ty = 0; ty < result.Frames[i].Height; ty++)
+                    for (int tx = 0; tx < result.Frames[i].Width; tx++)
+                        result.Frames[i].ImageData[tx, ty] = -1;
 
 
                 int x = 0;
-                int y = (int)frame.Height - 1;
+                int y = (int)result.Frames[i].Height - 1;
                 while (true)
                 {
                     var b = br.ReadByte();
@@ -105,7 +105,7 @@ namespace OpenDiablo2.Common.Models
                         var transparentPixelsToWrite = b & 0x7F;
                         for (int p = 0; p < transparentPixelsToWrite; p++)
                         {
-                            frame.ImageData[x++, y] = -1;
+                            result.Frames[i].ImageData[x++, y] = -1;
                         }
                         continue;
                     }
@@ -113,11 +113,10 @@ namespace OpenDiablo2.Common.Models
 
                     for (int p = 0; p < b; p++)
                     {
-                        frame.ImageData[x++, y] = br.ReadByte();
+                        result.Frames[i].ImageData[x++, y] = br.ReadByte();
                     }
 
                 }
-                result.Frames[i] = frame;
             }
 
 

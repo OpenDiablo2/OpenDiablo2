@@ -97,12 +97,15 @@ namespace OpenDiablo2.Scenes
             renderWindow.Clear();
 
             for (int y = 0; y < 3; y++)
+            {
                 for (int x = 0; x < 4; x++)
                 {
                     backgroundSprite.Frame = x + (y * 4);
-                    backgroundSprite.Location = new Point(x * backgroundSprite.FrameSize.Width, (y + 1) * backgroundSprite.FrameSize.Height);
+                    backgroundSprite.Location = new Point(x * 256, ((y+1) * 256) - (backgroundSprite.FrameSize.Height - backgroundSprite.LocalFrameSize.Height));
                     renderWindow.Draw(backgroundSprite);
                 }
+
+            }
 
             diabloLogoLeftBlack.Frame = (int)((float)diabloLogoLeftBlack.TotalFrames * logoFrame);
             renderWindow.Draw(diabloLogoLeftBlack);

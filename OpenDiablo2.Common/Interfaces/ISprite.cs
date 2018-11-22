@@ -8,6 +8,7 @@ namespace OpenDiablo2.Common.Interfaces
     {
         Point Location { get; set; }
         Size FrameSize { get; set; }
+        Size LocalFrameSize { get; }
         int Frame { get; set; }
         int TotalFrames { get; }
         Palette CurrentPalette { get; set; }

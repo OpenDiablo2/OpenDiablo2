@@ -50,6 +50,8 @@ namespace OpenDiablo2.SDL2_
                 (Location.Y - FrameSize.Height) + source.Frames[Frame].OffsetY
             );
 
+        public Size LocalFrameSize => new Size((int)source.Frames[Frame].Width, (int)source.Frames[Frame].Height);
+
         private void UpdateTextureData()
         {
             foreach (var texture in textures)
