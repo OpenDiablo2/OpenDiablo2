@@ -25,6 +25,8 @@ namespace OpenDiablo2.Scenes
 
         private float logoFrame;
         private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack, mouseSprite, wideButton;
+        private IFont labelFont;
+        private ILabel versionLabel, urlLabel;
 
         public MainMenu(
             IRenderWindow renderWindow,
@@ -48,6 +50,10 @@ namespace OpenDiablo2.Scenes
             mouseSprite = renderWindow.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units);
             wideButton = renderWindow.LoadSprite("data\\global\\ui\\FrontEnd\\WideButtonBlank.dc6", "ACT1");
 
+            labelFont = renderWindow.LoadFont(ResourcePaths.Font16, Palettes.Static);
+            versionLabel = renderWindow.CreateLabel(labelFont, new Point(50, 555), "v0.01 Pre-Alpha");
+            urlLabel = renderWindow.CreateLabel(labelFont, new Point(50, 569), "https://github.com/essial/OpenDiablo2/");
+            urlLabel.TextColor = Color.Magenta;
 
             var loadingSprite = renderWindow.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading, new Point(300, 400));
 
@@ -76,19 +82,25 @@ namespace OpenDiablo2.Scenes
         {
             renderWindow.Clear();
 
+            // Render the background
             renderWindow.Draw(backgroundSprite, 4, 3, 0);
 
+            // Render the flaming diablo 2 logo
             renderWindow.Draw(diabloLogoLeftBlack, (int)((float)diabloLogoLeftBlack.TotalFrames * logoFrame));
             renderWindow.Draw(diabloLogoRightBlack, (int)((float)diabloLogoRightBlack.TotalFrames * logoFrame));
-
             renderWindow.Draw(diabloLogoLeft, (int)((float)diabloLogoLeft.TotalFrames * logoFrame));
             renderWindow.Draw(diabloLogoRight, (int)((float)diabloLogoRight.TotalFrames * logoFrame));
 
+            // Render the text
+            renderWindow.Draw(versionLabel);
+            renderWindow.Draw(urlLabel);
+
+            // Render the UI buttons
             wideButton.Location = new Point(264, 290);
             renderWindow.Draw(wideButton, 2, 1, 0);
 
-            mouseSprite.Location = new Point(mouseInfoProvider.MouseX, mouseInfoProvider.MouseY + mouseSprite.FrameSize.Height - 1);
-            renderWindow.Draw(mouseSprite);
+            // Draw the mouse
+            renderWindow.Draw(mouseSprite, new Point(mouseInfoProvider.MouseX, mouseInfoProvider.MouseY + 3));
 
             renderWindow.Sync();
         }

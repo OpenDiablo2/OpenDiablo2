@@ -75,6 +75,8 @@
     <Compile Include="SDL2-CS\SDL2_image.cs" />
     <Compile Include="SDL2-CS\SDL2_mixer.cs" />
     <Compile Include="SDL2-CS\SDL2_ttf.cs" />
+    <Compile Include="SDL2Font.cs" />
+    <Compile Include="SDL2Label.cs" />
     <Compile Include="SDL2MusicPlayer.cs" />
     <Compile Include="SDL2RenderWindow.cs" />
     <Compile Include="SDL2Sprite.cs" />

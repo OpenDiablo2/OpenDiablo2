@@ -92,6 +92,11 @@ namespace OpenDiablo2.SDL2_
             }
         }
 
+        public void Draw(ISprite sprite, Point location)
+        {
+            sprite.Location = location;
+            Draw(sprite);
+        }
 
         public void Draw(ISprite sprite, int frame)
         {
@@ -143,10 +148,61 @@ namespace OpenDiablo2.SDL2_
         public ISprite LoadSprite(string resourcePath, string palette) => LoadSprite(resourcePath, palette, Point.Empty);
         public ISprite LoadSprite(string resourcePath, string palette, Point location)
         {
-            var result = new SDL2Sprite(ImageSet.LoadFromStream(mpqProvider.GetStream(resourcePath)), renderer);
-            result.CurrentPalette = paletteProvider.PaletteTable[palette];
-            result.Location = location;
+            var result = new SDL2Sprite(ImageSet.LoadFromStream(mpqProvider.GetStream(resourcePath)), renderer)
+            {
+                CurrentPalette = paletteProvider.PaletteTable[palette],
+                Location = location
+            };
             return result;
+        }
+
+        public IFont LoadFont(string resourcePath, string palette)
+        {
+            var result = new SDL2Font(MPQFont.LoadFromStream(mpqProvider.GetStream($"{resourcePath}.DC6"), mpqProvider.GetStream($"{resourcePath}.tbl")), renderer)
+            {
+                CurrentPalette = paletteProvider.PaletteTable[palette]
+            };
+            return result;
+        }
+
+
+        public ILabel CreateLabel(IFont font)
+        {
+            var result = new SDL2Label(font, renderer);
+            return result;
+        }
+
+        public ILabel CreateLabel(IFont font, string text)
+        {
+            var result = CreateLabel(font);
+            result.Text = text;
+            return result;
+        }
+
+        public ILabel CreateLabel(IFont font, Point position, string text)
+        {
+            var result = new SDL2Label(font, renderer)
+            {
+                Text = text,
+                Position = position
+            };
+
+            return result;
+        }
+
+        public void Draw(ILabel label)
+        {
+            var lbl = label as SDL2Label;
+            var loc = lbl.Position;
+
+            var destRect = new SDL.SDL_Rect
+            {
+                x = loc.X,
+                y = loc.Y,
+                w = lbl.textureSize.Width,
+                h = lbl.textureSize.Height
+            };
+            SDL.SDL_RenderCopy(renderer, lbl.texture, IntPtr.Zero, ref destRect);
         }
     }
 }

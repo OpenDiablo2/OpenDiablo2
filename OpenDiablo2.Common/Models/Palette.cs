@@ -19,10 +19,11 @@ namespace OpenDiablo2.Common.Models
         public string Name { get; set; }
         public PaletteEntry[] Colors;
 
-        public static Palette LoadFromStream(Stream stream)
+        public static Palette LoadFromStream(Stream stream, string paletteName)
         {
             var result = new Palette
             {
+                Name = paletteName,
                 Colors = new PaletteEntry[256]
             };
 

@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace OpenDiablo2.Common.Interfaces
 {
-    public interface IFont
+    public interface IFont : IDisposable
     {
+        
     }
 }

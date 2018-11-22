@@ -44,7 +44,7 @@ namespace OpenDiablo2.Core
             {
                 var paletteNameParts = paletteFile.Split('\\');
                 var paletteName = paletteNameParts[paletteNameParts.Count() - 2];
-                PaletteTable[paletteName] = Palette.LoadFromStream(mpqProvider.GetStream(paletteFile));
+                PaletteTable[paletteName] = Palette.LoadFromStream(mpqProvider.GetStream(paletteFile), paletteName);
             }
         }
 

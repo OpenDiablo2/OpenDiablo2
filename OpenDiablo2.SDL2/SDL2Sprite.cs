@@ -12,7 +12,7 @@ using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.SDL2_
 {
-    public sealed class SDL2Sprite : ISprite
+    internal sealed class SDL2Sprite : ISprite
     {
         public Point Location { get; set; } = new Point();
         public Size FrameSize { get; set; } = new Size();
@@ -71,9 +71,9 @@ namespace OpenDiablo2.SDL2_
         private Color AdjustColor(Color source)
         => Color.FromArgb(
                 source.A,
-                (byte)Math.Min((float)source.R * 1.0, 255),
-                (byte)Math.Min((float)source.G * 1.0, 255),
-                (byte)Math.Min((float)source.B * 1.0, 255)
+                (byte)Math.Min((float)source.R * 1.2, 255),
+                (byte)Math.Min((float)source.G * 1.2, 255),
+                (byte)Math.Min((float)source.B * 1.2, 255)
             );
 
         private IntPtr LoadFrame(ImageFrame frame, IntPtr renderer)
