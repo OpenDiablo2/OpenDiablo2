@@ -24,7 +24,7 @@ namespace OpenDiablo2.Scenes
         private readonly IMusicProvider musicProvider;
 
         private float logoFrame;
-        private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack, wideButton;
+        private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack;
         private IFont labelFont;
         private ILabel versionLabel, urlLabel;
 
@@ -47,7 +47,7 @@ namespace OpenDiablo2.Scenes
             diabloLogoLeftBlack = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoBlackLeft, Palettes.Units, new Point(400, 120));
             diabloLogoRightBlack = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoBlackRight, Palettes.Units, new Point(400, 120));
 
-            wideButton = renderWindow.LoadSprite("data\\global\\ui\\FrontEnd\\WideButtonBlank.dc6", "ACT1");
+            
 
             labelFont = renderWindow.LoadFont(ResourcePaths.Font16, Palettes.Static);
             versionLabel = renderWindow.CreateLabel(labelFont, new Point(50, 555), "v0.01 Pre-Alpha");
@@ -83,18 +83,18 @@ namespace OpenDiablo2.Scenes
             renderWindow.Draw(backgroundSprite, 4, 3, 0);
 
             // Render the flaming diablo 2 logo
-            renderWindow.Draw(diabloLogoLeftBlack, (int)((float)diabloLogoLeftBlack.TotalFrames * logoFrame));
-            renderWindow.Draw(diabloLogoRightBlack, (int)((float)diabloLogoRightBlack.TotalFrames * logoFrame));
-            renderWindow.Draw(diabloLogoLeft, (int)((float)diabloLogoLeft.TotalFrames * logoFrame));
-            renderWindow.Draw(diabloLogoRight, (int)((float)diabloLogoRight.TotalFrames * logoFrame));
+            renderWindow.Draw(diabloLogoLeftBlack, (int)(diabloLogoLeftBlack.TotalFrames * logoFrame));
+            renderWindow.Draw(diabloLogoRightBlack, (int)(diabloLogoRightBlack.TotalFrames * logoFrame));
+            renderWindow.Draw(diabloLogoLeft, (int)(diabloLogoLeft.TotalFrames * logoFrame));
+            renderWindow.Draw(diabloLogoRight, (int)(diabloLogoRight.TotalFrames * logoFrame));
 
             // Render the text
             renderWindow.Draw(versionLabel);
             renderWindow.Draw(urlLabel);
 
             // Render the UI buttons
-            wideButton.Location = new Point(264, 290);
-            renderWindow.Draw(wideButton, 2, 1, 0);
+            //wideButton.Location = new Point(264, 290);
+            //renderWindow.Draw(wideButton, 2, 1, 0);
         }
 
         public void Update(long ms)
