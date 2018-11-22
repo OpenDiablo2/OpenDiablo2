@@ -1,4 +1,5 @@
-﻿using OpenDiablo2.Common.Interfaces;
+﻿using OpenDiablo2.Common;
+using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
 using System;
 using System.Collections.Generic;
@@ -17,8 +18,10 @@ namespace OpenDiablo2.Core
 
         private readonly IMPQProvider mpqProvider;
         private readonly Func<IRenderWindow> getRenderWindow;
+        private readonly Func<IMouseInfoProvider> getMouseInfoProvider;
         private readonly Func<string, IScene> getScene;
         private IScene currentScene;
+        private ISprite mouseSprite;
 
         private readonly MPQ[] MPQs;
 
@@ -27,10 +30,16 @@ namespace OpenDiablo2.Core
         private Stopwatch sw = new Stopwatch();
 
 
-        public GameEngine(IMPQProvider mpqProvider, Func<IRenderWindow> getRenderWindow, Func<string, IScene> getScene)
+        public GameEngine(
+            IMPQProvider mpqProvider,
+            Func<IRenderWindow> getRenderWindow,
+            Func<IMouseInfoProvider> getMouseInfoProvider,
+            Func<string, IScene> getScene
+            )
         {
             this.mpqProvider = mpqProvider;
             this.getRenderWindow = getRenderWindow;
+            this.getMouseInfoProvider = getMouseInfoProvider;
             this.getScene = getScene;
 
             MPQs = mpqProvider.GetMPQs().ToArray();
@@ -63,8 +72,13 @@ namespace OpenDiablo2.Core
 
         public void Run()
         {
+            var renderWindow = getRenderWindow();
+            var mouseInfoProvider = getMouseInfoProvider();
+
             LoadPalettes();
             LoadSoundData();
+
+            mouseSprite = renderWindow.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units);
 
             currentScene = getScene("Main Menu");
             sw.Start();
@@ -84,8 +98,14 @@ namespace OpenDiablo2.Core
                 sw.Restart();
                 getRenderWindow().Update();
                 currentScene.Update(ms);
-                
+
+                renderWindow.Clear();
                 currentScene.Render();
+
+                // Draw the mouse
+                renderWindow.Draw(mouseSprite, new Point(mouseInfoProvider.MouseX, mouseInfoProvider.MouseY + 3));
+
+                renderWindow.Sync();
             }
         }
 

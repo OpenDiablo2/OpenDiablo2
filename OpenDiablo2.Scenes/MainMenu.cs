@@ -24,7 +24,7 @@ namespace OpenDiablo2.Scenes
         private readonly IMusicProvider musicProvider;
 
         private float logoFrame;
-        private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack, mouseSprite, wideButton;
+        private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack, wideButton;
         private IFont labelFont;
         private ILabel versionLabel, urlLabel;
 
@@ -47,7 +47,6 @@ namespace OpenDiablo2.Scenes
             diabloLogoLeftBlack = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoBlackLeft, Palettes.Units, new Point(400, 120));
             diabloLogoRightBlack = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoBlackRight, Palettes.Units, new Point(400, 120));
 
-            mouseSprite = renderWindow.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units);
             wideButton = renderWindow.LoadSprite("data\\global\\ui\\FrontEnd\\WideButtonBlank.dc6", "ACT1");
 
             labelFont = renderWindow.LoadFont(ResourcePaths.Font16, Palettes.Static);
@@ -80,8 +79,6 @@ namespace OpenDiablo2.Scenes
 
         public void Render()
         {
-            renderWindow.Clear();
-
             // Render the background
             renderWindow.Draw(backgroundSprite, 4, 3, 0);
 
@@ -98,11 +95,6 @@ namespace OpenDiablo2.Scenes
             // Render the UI buttons
             wideButton.Location = new Point(264, 290);
             renderWindow.Draw(wideButton, 2, 1, 0);
-
-            // Draw the mouse
-            renderWindow.Draw(mouseSprite, new Point(mouseInfoProvider.MouseX, mouseInfoProvider.MouseY + 3));
-
-            renderWindow.Sync();
         }
 
         public void Update(long ms)
