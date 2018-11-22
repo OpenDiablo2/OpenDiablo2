@@ -29,7 +29,7 @@ namespace OpenDiablo2.SDL2_
                 UpdateTextureData();
             }
         }
-        private readonly ImageSet source;
+        internal readonly ImageSet source;
         private readonly IntPtr renderer;
         internal IntPtr[] textures = new IntPtr[0];
 

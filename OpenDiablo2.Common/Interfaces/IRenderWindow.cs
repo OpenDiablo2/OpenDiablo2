@@ -16,5 +16,6 @@ namespace OpenDiablo2.Common.Interfaces
         void Sync();
         ISprite LoadSprite(ImageSet source);
         void Draw(ISprite sprite);
+        void Draw(ISprite sprite, int xSegments, int ySegments, int offset);
     }
 }

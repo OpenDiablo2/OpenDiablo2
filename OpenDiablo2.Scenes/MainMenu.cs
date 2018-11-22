@@ -41,6 +41,7 @@ namespace OpenDiablo2.Scenes
             //var texture = renderWindow.LoadSprite(ImageSet.LoadFromStream(mpqProvider.GetStream("data\\global\\ui\\Logo\\logo.DC6")));
             backgroundSprite = renderWindow.LoadSprite(ImageSet.LoadFromStream(mpqProvider.GetStream("data\\global\\ui\\FrontEnd\\gameselectscreenEXP.dc6")));
             backgroundSprite.CurrentPalette = paletteProvider.PaletteTable["Sky"];
+            backgroundSprite.Location = new Point(0, 0);
 
             diabloLogoLeft = renderWindow.LoadSprite(ImageSet.LoadFromStream(mpqProvider.GetStream("data\\global\\ui\\FrontEnd\\D2logoFireLeft.DC6")));
             diabloLogoLeft.CurrentPalette = paletteProvider.PaletteTable["Units"];
@@ -79,7 +80,7 @@ namespace OpenDiablo2.Scenes
 
             // TODO: Fake loading for now, this should be in its own scene as we start loading real stuff
             var r = new Random();
-            for(int i = 1; i < 10; i++)
+            for (int i = 1; i < 10; i++)
             {
                 renderWindow.Clear();
                 loadingSprite.Frame = i;
@@ -96,16 +97,7 @@ namespace OpenDiablo2.Scenes
         {
             renderWindow.Clear();
 
-            for (int y = 0; y < 3; y++)
-            {
-                for (int x = 0; x < 4; x++)
-                {
-                    backgroundSprite.Frame = x + (y * 4);
-                    backgroundSprite.Location = new Point(x * 256, ((y+1) * 256) - (backgroundSprite.FrameSize.Height - backgroundSprite.LocalFrameSize.Height));
-                    renderWindow.Draw(backgroundSprite);
-                }
-
-            }
+            renderWindow.Draw(backgroundSprite, 4, 3, 0);
 
             diabloLogoLeftBlack.Frame = (int)((float)diabloLogoLeftBlack.TotalFrames * logoFrame);
             renderWindow.Draw(diabloLogoLeftBlack);
@@ -117,13 +109,8 @@ namespace OpenDiablo2.Scenes
             diabloLogoRight.Frame = (int)((float)diabloLogoRight.TotalFrames * logoFrame);
             renderWindow.Draw(diabloLogoRight);
 
-
-            wideButton.Location = new Point(260, 320);
-            wideButton.Frame = 0;
-            renderWindow.Draw(wideButton);
-            wideButton.Frame = 1;
-            wideButton.Location = new Point(260 + 256, 320);
-            renderWindow.Draw(wideButton);
+            wideButton.Location = new Point(264, 290);
+            renderWindow.Draw(wideButton, 2, 1, 0);
 
             mouseSprite.Location = new Point(mouseInfoProvider.MouseX, mouseInfoProvider.MouseY + mouseSprite.FrameSize.Height - 1);
             renderWindow.Draw(mouseSprite);

@@ -103,6 +103,31 @@ namespace OpenDiablo2.SDL2_
 
         }
 
+        public void Draw(ISprite sprite, int xSegments, int ySegments, int offset)
+        {
+            var spr = sprite as SDL2Sprite;
+            var segSize = xSegments * ySegments;
+
+            for (var y = 0; y < ySegments; y++)
+            {
+                for (var x = 0; x < xSegments; x++)
+                {
+                    var textureIndex = x + (y * xSegments) + (offset * xSegments * ySegments);
+                    if (textureIndex >= spr.textures.Count())
+                        continue;
+
+                    var destRect = new SDL.SDL_Rect
+                    {
+                        x = sprite.Location.X + (x * 256),
+                        y = sprite.Location.Y + (y * 256) - (int)(spr.FrameSize.Height - spr.source.Frames[textureIndex].Height),
+                        w = spr.FrameSize.Width,
+                        h = spr.FrameSize.Height
+                    };
+                    SDL.SDL_RenderCopy(renderer, spr.textures[textureIndex], IntPtr.Zero, ref destRect);
+                }
+            }
+        }
+
         public ISprite LoadSprite(ImageSet source)
             => new SDL2Sprite(source, renderer);
     }
