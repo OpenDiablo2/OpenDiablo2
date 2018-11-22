@@ -15,6 +15,7 @@ namespace OpenDiablo2.SDL2_
     public sealed class SDL2RenderWindow : IRenderWindow, IRenderTarget, IMouseInfoProvider
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private IntPtr window, renderer;
         private bool running;
         public bool IsRunning => running;
@@ -24,11 +25,16 @@ namespace OpenDiablo2.SDL2_
         public bool LeftMouseDown { get; internal set; } = false;
         public bool RightMouseDown { get; internal set; } = false;
 
-        private readonly ILifetimeScope lifetimeScope;
+        private readonly IMPQProvider mpqProvider;
+        private readonly IPaletteProvider paletteProvider;
 
-        public SDL2RenderWindow(ILifetimeScope lifetimeScope)
+        public SDL2RenderWindow(
+            IMPQProvider mpqProvider,
+            IPaletteProvider paletteProvider
+            )
         {
-            this.lifetimeScope = lifetimeScope;
+            this.mpqProvider = mpqProvider;
+            this.paletteProvider = paletteProvider;
 
             SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
             if (SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "0") == SDL.SDL_bool.SDL_FALSE)
@@ -87,6 +93,12 @@ namespace OpenDiablo2.SDL2_
         }
 
 
+        public void Draw(ISprite sprite, int frame)
+        {
+            sprite.Frame = frame;
+            Draw(sprite);
+        }
+
         public void Draw(ISprite sprite)
         {
             var spr = sprite as SDL2Sprite;
@@ -128,7 +140,13 @@ namespace OpenDiablo2.SDL2_
             }
         }
 
-        public ISprite LoadSprite(ImageSet source)
-            => new SDL2Sprite(source, renderer);
+        public ISprite LoadSprite(string resourcePath, string palette) => LoadSprite(resourcePath, palette, Point.Empty);
+        public ISprite LoadSprite(string resourcePath, string palette, Point location)
+        {
+            var result = new SDL2Sprite(ImageSet.LoadFromStream(mpqProvider.GetStream(resourcePath)), renderer);
+            result.CurrentPalette = paletteProvider.PaletteTable[palette];
+            result.Location = location;
+            return result;
+        }
     }
 }

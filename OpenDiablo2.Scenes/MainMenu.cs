@@ -1,4 +1,5 @@
-﻿using OpenDiablo2.Common.Attributes;
+﻿using OpenDiablo2.Common;
+using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
 using System;
@@ -38,40 +39,18 @@ namespace OpenDiablo2.Scenes
             this.mpqProvider = mpqProvider;
             this.mouseInfoProvider = mouseInfoProvider;
 
-            //var texture = renderWindow.LoadSprite(ImageSet.LoadFromStream(mpqProvider.GetStream("data\\global\\ui\\Logo\\logo.DC6")));
-            backgroundSprite = renderWindow.LoadSprite(ImageSet.LoadFromStream(mpqProvider.GetStream("data\\global\\ui\\FrontEnd\\gameselectscreenEXP.dc6")));
-            backgroundSprite.CurrentPalette = paletteProvider.PaletteTable["Sky"];
-            backgroundSprite.Location = new Point(0, 0);
+            backgroundSprite = renderWindow.LoadSprite(ResourcePaths.GameSelectScreen, Palettes.Sky);
+            diabloLogoLeft = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoFireLeft, Palettes.Units, new Point(400, 120));
+            diabloLogoRight = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoFireRight, Palettes.Units, new Point(400, 120));
+            diabloLogoLeftBlack = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoBlackLeft, Palettes.Units, new Point(400, 120));
+            diabloLogoRightBlack = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoBlackRight, Palettes.Units, new Point(400, 120));
 
-            diabloLogoLeft = renderWindow.LoadSprite(ImageSet.LoadFromStream(mpqProvider.GetStream("data\\global\\ui\\FrontEnd\\D2logoFireLeft.DC6")));
-            diabloLogoLeft.CurrentPalette = paletteProvider.PaletteTable["Units"];
-
-            diabloLogoRight = renderWindow.LoadSprite(ImageSet.LoadFromStream(mpqProvider.GetStream("data\\global\\ui\\FrontEnd\\D2logoFireRight.DC6")));
-            diabloLogoRight.CurrentPalette = paletteProvider.PaletteTable["Units"];
-
-            diabloLogoLeftBlack = renderWindow.LoadSprite(ImageSet.LoadFromStream(mpqProvider.GetStream("data\\global\\ui\\FrontEnd\\D2logoBlackLeft.DC6")));
-            diabloLogoLeftBlack.CurrentPalette = paletteProvider.PaletteTable["Units"];
-
-            diabloLogoRightBlack = renderWindow.LoadSprite(ImageSet.LoadFromStream(mpqProvider.GetStream("data\\global\\ui\\FrontEnd\\D2logoBlackRight.DC6")));
-            diabloLogoRightBlack.CurrentPalette = paletteProvider.PaletteTable["Units"];
-
-            mouseSprite = renderWindow.LoadSprite(ImageSet.LoadFromStream(mpqProvider.GetStream("data\\global\\ui\\CURSOR\\ohand.DC6")));
-            mouseSprite.CurrentPalette = paletteProvider.PaletteTable["STATIC"];
-
-            wideButton = renderWindow.LoadSprite(ImageSet.LoadFromStream(mpqProvider.GetStream("data\\global\\ui\\FrontEnd\\WideButtonBlank.dc6")));
-            wideButton.CurrentPalette = paletteProvider.PaletteTable["ACT1"];
-
-            logoFrame = 0f;
-
-            diabloLogoLeft.Location = new Point(400, 120);
-            diabloLogoRight.Location = new Point(400, 120);
-            diabloLogoLeftBlack.Location = new Point(400, 120);
-            diabloLogoRightBlack.Location = new Point(400, 120);
+            mouseSprite = renderWindow.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units);
+            wideButton = renderWindow.LoadSprite("data\\global\\ui\\FrontEnd\\WideButtonBlank.dc6", "ACT1");
 
 
-            var loadingSprite = renderWindow.LoadSprite(ImageSet.LoadFromStream(mpqProvider.GetStream("data\\global\\ui\\Loading\\loadingscreen.dc6")));
-            loadingSprite.CurrentPalette = paletteProvider.PaletteTable["loading"];
-            loadingSprite.Location = new Point(300, 400);
+            var loadingSprite = renderWindow.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading, new Point(300, 400));
+
             renderWindow.Clear();
             renderWindow.Draw(loadingSprite);
             renderWindow.Sync();
@@ -99,15 +78,11 @@ namespace OpenDiablo2.Scenes
 
             renderWindow.Draw(backgroundSprite, 4, 3, 0);
 
-            diabloLogoLeftBlack.Frame = (int)((float)diabloLogoLeftBlack.TotalFrames * logoFrame);
-            renderWindow.Draw(diabloLogoLeftBlack);
-            diabloLogoRightBlack.Frame = (int)((float)diabloLogoRightBlack.TotalFrames * logoFrame);
-            renderWindow.Draw(diabloLogoRightBlack);
+            renderWindow.Draw(diabloLogoLeftBlack, (int)((float)diabloLogoLeftBlack.TotalFrames * logoFrame));
+            renderWindow.Draw(diabloLogoRightBlack, (int)((float)diabloLogoRightBlack.TotalFrames * logoFrame));
 
-            diabloLogoLeft.Frame = (int)((float)diabloLogoLeft.TotalFrames * logoFrame);
-            renderWindow.Draw(diabloLogoLeft);
-            diabloLogoRight.Frame = (int)((float)diabloLogoRight.TotalFrames * logoFrame);
-            renderWindow.Draw(diabloLogoRight);
+            renderWindow.Draw(diabloLogoLeft, (int)((float)diabloLogoLeft.TotalFrames * logoFrame));
+            renderWindow.Draw(diabloLogoRight, (int)((float)diabloLogoRight.TotalFrames * logoFrame));
 
             wideButton.Location = new Point(264, 290);
             renderWindow.Draw(wideButton, 2, 1, 0);

@@ -16,7 +16,7 @@ namespace OpenDiablo2.Core
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private readonly IMPQProvider mpqProvider;
-        private readonly IRenderWindow renderWindow;
+        private readonly Func<IRenderWindow> getRenderWindow;
         private readonly Func<string, IScene> getScene;
         private IScene currentScene;
 
@@ -27,10 +27,10 @@ namespace OpenDiablo2.Core
         private Stopwatch sw = new Stopwatch();
 
 
-        public GameEngine(IMPQProvider mpqProvider, IRenderWindow renderWindow, Func<string, IScene> getScene)
+        public GameEngine(IMPQProvider mpqProvider, Func<IRenderWindow> getRenderWindow, Func<string, IScene> getScene)
         {
             this.mpqProvider = mpqProvider;
-            this.renderWindow = renderWindow;
+            this.getRenderWindow = getRenderWindow;
             this.getScene = getScene;
 
             MPQs = mpqProvider.GetMPQs().ToArray();
@@ -68,7 +68,7 @@ namespace OpenDiablo2.Core
 
             currentScene = getScene("Main Menu");
             sw.Start();
-            while (renderWindow.IsRunning)
+            while (getRenderWindow().IsRunning)
             {
                 while (sw.ElapsedMilliseconds < 16)
                     Thread.Sleep(1); // Oh yes we did
@@ -82,7 +82,7 @@ namespace OpenDiablo2.Core
                     continue;
                 }
                 sw.Restart();
-                renderWindow.Update();
+                getRenderWindow().Update();
                 currentScene.Update(ms);
                 
                 currentScene.Render();
