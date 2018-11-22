@@ -28,10 +28,11 @@ namespace OpenDiablo2.Core.UI
             }
         }
 
+        private readonly int buttonWidth, buttonHeight;
         private ISprite sprite;
         private IFont font;
         private ILabel label;
-        private bool pressed;
+        private bool pressed = false;
         private Point labelOffset = new Point();
 
         private string text;
@@ -50,37 +51,42 @@ namespace OpenDiablo2.Core.UI
             this.renderWindow = renderWindow;
             this.mouseInfoProvider = mouseInfoProvider;
 
-            sprite = renderWindow.LoadSprite(ResourcePaths.WideButtonBlank, Palettes.Act1);
-            font = renderWindow.LoadFont(ResourcePaths.FontExocet10, Palettes.Menu4);
+            sprite = renderWindow.LoadSprite(ResourcePaths.WideButtonBlank, Palettes.Units);
+            font = renderWindow.LoadFont(ResourcePaths.FontExocet10, Palettes.Units);
             label = renderWindow.CreateLabel(font);
+
+            // TODO: Less stupid way of doing this would be nice
+            sprite.Frame = 0;
+            buttonWidth = sprite.LocalFrameSize.Width;
+            buttonHeight = sprite.LocalFrameSize.Height;
+            sprite.Frame = 1;
+            buttonWidth += sprite.LocalFrameSize.Width;
+
         }
 
         public void Update()
         {
+            var hovered = (mouseInfoProvider.MouseX >= location.X && mouseInfoProvider.MouseX < (location.X + buttonWidth))
+                && (mouseInfoProvider.MouseY >= location.Y && mouseInfoProvider.MouseY < (location.Y + buttonHeight));
 
+            pressed = hovered;
         }
 
         public void Render()
         {
             renderWindow.Draw(sprite, 2, 1, pressed ? 1 : 0);
-            var offset = pressed ? -5 : 0;
+            var offset = pressed ? -3 : 0;
 
-            label.Location = new Point(location.X + offset + labelOffset.X, location.Y + offset + labelOffset.Y);
+            label.Location = new Point(location.X + offset + labelOffset.X, location.Y - offset + labelOffset.Y);
             renderWindow.Draw(label);
         }
 
         private void UpdateText()
         {
             label.Text = text;
-            label.TextColor = Color.FromArgb(128, 128, 128);
+            label.TextColor = Color.FromArgb(75, 75, 75);
 
-            // TODO: Less stupid way of doing this would be nice
-            sprite.Frame = 0;
-            int btnWidth = sprite.LocalFrameSize.Width;
-            sprite.Frame = 1;
-            btnWidth += sprite.LocalFrameSize.Width;
-
-            var offsetX = (btnWidth / 2) - (label.TextArea.Width / 2);
+            var offsetX = (buttonWidth / 2) - (label.TextArea.Width / 2);
             labelOffset = new Point(offsetX, -5);
         }
     }
