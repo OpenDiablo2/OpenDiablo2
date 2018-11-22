@@ -20,7 +20,7 @@ namespace OpenDiablo2.Core
             builder.RegisterType<GameEngine>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<MPQProvider>().As<IMPQProvider>().SingleInstance();
 
-            builder.RegisterType<WideButton>().AsSelf().InstancePerRequest();
+            builder.RegisterType<WideButton>().AsSelf().InstancePerDependency();
         }
     }
 }

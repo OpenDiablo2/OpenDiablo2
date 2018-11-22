@@ -19,6 +19,18 @@ namespace OpenDiablo2.SDL2_
         public int Frame { get; set; }
         public int TotalFrames { get; internal set; }
 
+        private bool blend = false;
+        public bool Blend
+        {
+            get => blend;
+            set
+            {
+                blend = value;
+                foreach (var texture in textures)
+                    SDL.SDL_SetTextureBlendMode(texture, blend ? SDL.SDL_BlendMode.SDL_BLENDMODE_ADD : SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+            }
+        }
+
         private Palette palette;
         public Palette CurrentPalette
         {

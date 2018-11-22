@@ -13,23 +13,6 @@
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug\</OutputPath>
@@ -74,6 +57,10 @@
     <ProjectReference Include="..\OpenDiablo2.Common\OpenDiablo2.Common.csproj">
       <Project>{b743160e-a0bb-45dc-9998-967a85e50562}</Project>
       <Name>OpenDiablo2.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OpenDiablo2.Core\OpenDiablo2.Core.csproj">
+      <Project>{8FC6BF7D-835A-47C1-A6B2-125495FA0900}</Project>
+      <Name>OpenDiablo2.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

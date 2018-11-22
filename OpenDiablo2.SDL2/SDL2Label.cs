@@ -16,7 +16,7 @@ namespace OpenDiablo2.SDL2_
         private readonly IntPtr renderer;
         internal IntPtr texture;
         internal Size textureSize = new Size();
-        public Point Position { get; set; }
+        public Point Location { get; set; }
         public Size TextArea { get; set; } = new Size();
 
         private Color textColor = Color.White;
@@ -56,7 +56,7 @@ namespace OpenDiablo2.SDL2_
             {
                 var metric = font.font.CharacterMetric[(byte)ch];
                 w += metric.Width;
-                h = Math.Max(h, metric.Height);
+                h = Math.Max(Math.Max(h, metric.Height), font.sprite.FrameSize.Height);
             }
 
             return new Size(w, h);

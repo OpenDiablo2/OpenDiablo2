@@ -184,7 +184,7 @@ namespace OpenDiablo2.SDL2_
             var result = new SDL2Label(font, renderer)
             {
                 Text = text,
-                Position = position
+                Location = position
             };
 
             return result;
@@ -193,7 +193,7 @@ namespace OpenDiablo2.SDL2_
         public void Draw(ILabel label)
         {
             var lbl = label as SDL2Label;
-            var loc = lbl.Position;
+            var loc = lbl.Location;
 
             var destRect = new SDL.SDL_Rect
             {
@@ -202,6 +202,7 @@ namespace OpenDiablo2.SDL2_
                 w = lbl.textureSize.Width,
                 h = lbl.textureSize.Height
             };
+
             SDL.SDL_RenderCopy(renderer, lbl.texture, IntPtr.Zero, ref destRect);
         }
     }

@@ -2,6 +2,7 @@
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
+using OpenDiablo2.Core.UI;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -27,13 +28,15 @@ namespace OpenDiablo2.Scenes
         private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack;
         private IFont labelFont;
         private ILabel versionLabel, urlLabel;
+        private WideButton btnSinglePlayer;
 
         public MainMenu(
             IRenderWindow renderWindow,
             IPaletteProvider paletteProvider,
             IMPQProvider mpqProvider,
             IMouseInfoProvider mouseInfoProvider,
-            IMusicProvider musicProvider
+            IMusicProvider musicProvider,
+            Func<WideButton> createWideButton
             )
         {
             this.renderWindow = renderWindow;
@@ -43,11 +46,15 @@ namespace OpenDiablo2.Scenes
 
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.GameSelectScreen, Palettes.Sky);
             diabloLogoLeft = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoFireLeft, Palettes.Units, new Point(400, 120));
+            diabloLogoLeft.Blend = true;
             diabloLogoRight = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoFireRight, Palettes.Units, new Point(400, 120));
+            diabloLogoRight.Blend = true;
             diabloLogoLeftBlack = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoBlackLeft, Palettes.Units, new Point(400, 120));
             diabloLogoRightBlack = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoBlackRight, Palettes.Units, new Point(400, 120));
 
-            
+            btnSinglePlayer = createWideButton();
+            btnSinglePlayer.Text = "Single Player".ToUpper();
+            btnSinglePlayer.Location = new Point(264, 290);
 
             labelFont = renderWindow.LoadFont(ResourcePaths.Font16, Palettes.Static);
             versionLabel = renderWindow.CreateLabel(labelFont, new Point(50, 555), "v0.01 Pre-Alpha");
@@ -93,6 +100,8 @@ namespace OpenDiablo2.Scenes
             renderWindow.Draw(urlLabel);
 
             // Render the UI buttons
+            btnSinglePlayer.Render();
+
             //wideButton.Location = new Point(264, 290);
             //renderWindow.Draw(wideButton, 2, 1, 0);
         }
@@ -104,9 +113,16 @@ namespace OpenDiablo2.Scenes
             while (logoFrame >= 1f)
                 logoFrame -= 1f;
 
+            btnSinglePlayer.Update();
+
         }
 
         public void Dispose()
+        {
+
+        }
+
+        private void OnSinglePlayerClicked()
         {
 
         }
