@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Core.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,8 @@ namespace OpenDiablo2.Core
 
             builder.RegisterType<GameEngine>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<MPQProvider>().As<IMPQProvider>().SingleInstance();
+
+            builder.RegisterType<WideButton>().AsSelf().InstancePerRequest();
         }
     }
 }
