@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,10 +32,11 @@ namespace OpenDiablo2.Scenes
         Retreating
     }
 
-    struct HeroRenderInfo
+    class HeroRenderInfo
     {
         public ISprite IdleSprite, IdleSelectedSprite, ApproacingSprite, SelectedSprite, RetreatingSprite;
         public eHeroStance Stance;
+        public Rectangle SelectionBounds = new Rectangle();
     }
 
     [Scene("Select Hero Class")]
@@ -80,49 +82,56 @@ namespace OpenDiablo2.Scenes
             {
                 Stance = eHeroStance.Idle,
                 IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselected, Palettes.Fechar, new System.Drawing.Point(400, 330)),
-                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselectedH, Palettes.Fechar, new System.Drawing.Point(400, 330))
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselectedH, Palettes.Fechar, new System.Drawing.Point(400, 330)),
+                SelectionBounds = new Rectangle(364, 201, 90, 170)
             };
 
             heroRenderInfo[eHero.Sorceress] = new HeroRenderInfo
             {
                 Stance = eHeroStance.Idle,
                 IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselected, Palettes.Fechar, new System.Drawing.Point(626, 352)),
-                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselectedH, Palettes.Fechar, new System.Drawing.Point(626, 352))
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselectedH, Palettes.Fechar, new System.Drawing.Point(626, 352)),
+                SelectionBounds = new Rectangle(580, 240, 65, 160)
             };
 
             heroRenderInfo[eHero.Necromancer] = new HeroRenderInfo
             {
                 Stance = eHeroStance.Idle,
                 IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselected, Palettes.Fechar, new System.Drawing.Point(300, 335)),
-                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselectedH, Palettes.Fechar, new System.Drawing.Point(300, 335))
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselectedH, Palettes.Fechar, new System.Drawing.Point(300, 335)),
+                SelectionBounds = new Rectangle(265, 220, 55, 175)
             };
 
             heroRenderInfo[eHero.Paladin] = new HeroRenderInfo
             {
                 Stance = eHeroStance.Idle,
                 IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselected, Palettes.Fechar, new System.Drawing.Point(521, 338)),
-                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselectedH, Palettes.Fechar, new System.Drawing.Point(521, 338))
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselectedH, Palettes.Fechar, new System.Drawing.Point(521, 338)),
+                SelectionBounds = new Rectangle(490, 210, 65, 180)
             };
 
             heroRenderInfo[eHero.Amazon] = new HeroRenderInfo
             {
                 Stance = eHeroStance.Idle,
                 IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselected, Palettes.Fechar, new System.Drawing.Point(100, 339)),
-                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselectedH, Palettes.Fechar, new System.Drawing.Point(100, 339))
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselectedH, Palettes.Fechar, new System.Drawing.Point(100, 339)),
+                SelectionBounds = new Rectangle(70, 220, 55, 200)
             };
 
             heroRenderInfo[eHero.Assassin] = new HeroRenderInfo
             {
                 Stance = eHeroStance.Idle,
                 IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselected, Palettes.Fechar, new System.Drawing.Point(231, 365)),
-                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselectedH, Palettes.Fechar, new System.Drawing.Point(231, 365))
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselectedH, Palettes.Fechar, new System.Drawing.Point(231, 365)),
+                SelectionBounds = new Rectangle(175, 235, 50, 180)
             };
 
             heroRenderInfo[eHero.Druid] = new HeroRenderInfo
             {
                 Stance = eHeroStance.Idle,
                 IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidUnselected, Palettes.Fechar, new System.Drawing.Point(720, 370)),
-                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidUnselectedH, Palettes.Fechar, new System.Drawing.Point(720, 370))
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidUnselectedH, Palettes.Fechar, new System.Drawing.Point(720, 370)),
+                SelectionBounds = new Rectangle(680, 220, 70, 195)
             };
 
             headingFont = renderWindow.LoadFont(ResourcePaths.Font30, Palettes.Units);
@@ -189,7 +198,28 @@ namespace OpenDiablo2.Scenes
             while (secondTimer >= 1f)
                 secondTimer -= 1f;
 
+            // Don't update hero selection if one of them is walking to or from the campfire
+            if (heroRenderInfo.All(x => x.Value.Stance == eHeroStance.Idle || x.Value.Stance == eHeroStance.IdleSelected || x.Value.Stance == eHeroStance.Selected))
+                foreach (var hero in Enum.GetValues(typeof(eHero)).Cast<eHero>())
+                    UpdateHeroSelectionHover(hero);
+
             exitButton.Update();
+        }
+
+        private void UpdateHeroSelectionHover(eHero hero)
+        {
+            // No need to highlight a hero if they are next to the campfire
+            if (heroRenderInfo[hero].Stance == eHeroStance.Selected)
+                return;
+
+            var mouseX = mouseInfoProvider.MouseX;
+            var mouseY = mouseInfoProvider.MouseY;
+
+            var b = heroRenderInfo[hero].SelectionBounds;
+
+            var mouseHover = (mouseX >= b.Left) && (mouseX <= b.Left + b.Width) && (mouseY >= b.Top) && (mouseY <= b.Top + b.Height);
+
+            heroRenderInfo[hero].Stance = mouseHover ? eHeroStance.IdleSelected : eHeroStance.Idle;
         }
 
         public void Dispose()
