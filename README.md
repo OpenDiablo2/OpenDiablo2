@@ -1,3 +1,4 @@
+[![Build Status](https://dev.azure.com/lunaticedit/OpenDiablo2/_apis/build/status/OpenDiablo2%20for%20Windows)](https://dev.azure.com/lunaticedit/OpenDiablo2/_build/latest?definitionId=3)
 # OpenDiablo2
 An open source re-implementation of Diablo 2 in C#
 
