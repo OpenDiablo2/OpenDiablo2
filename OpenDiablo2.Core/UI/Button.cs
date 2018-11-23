@@ -1,5 +1,6 @@
 ﻿using OpenDiablo2.Common;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Common.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -9,10 +10,13 @@ using System.Threading.Tasks;
 
 namespace OpenDiablo2.Core.UI
 {
-    public sealed class WideButton
+
+
+    public sealed class Button : IDisposable
     {
         private readonly IMouseInfoProvider mouseInfoProvider;
         private readonly IRenderWindow renderWindow;
+        private readonly ButtonLayout buttonLayout;
 
         public delegate void OnActivateDelegate();
         public OnActivateDelegate OnActivate { get; set; }
@@ -28,7 +32,7 @@ namespace OpenDiablo2.Core.UI
             }
         }
 
-        private readonly int buttonWidth, buttonHeight;
+        private int buttonWidth, buttonHeight;
         private ISprite sprite;
         private IFont font;
         private ILabel label;
@@ -36,7 +40,7 @@ namespace OpenDiablo2.Core.UI
         private bool active = false; // When true, button is actively being focus pressed
         private bool activeLock = false; // When true, something else is being pressed so ignore everything
         private Point labelOffset = new Point();
-
+        
         private string text;
         public string Text
         {
@@ -48,22 +52,32 @@ namespace OpenDiablo2.Core.UI
             }
         }
 
-        public WideButton(IRenderWindow renderWindow, IMouseInfoProvider mouseInfoProvider)
+
+        public Button(
+            ButtonLayout buttonLayout,
+            IRenderWindow renderWindow, 
+            IMouseInfoProvider mouseInfoProvider
+            )
         {
+            this.buttonLayout = buttonLayout;
             this.renderWindow = renderWindow;
             this.mouseInfoProvider = mouseInfoProvider;
 
-            sprite = renderWindow.LoadSprite(ResourcePaths.WideButtonBlank, Palettes.Units);
             font = renderWindow.LoadFont(ResourcePaths.FontExocet10, Palettes.Units);
             label = renderWindow.CreateLabel(font);
 
-            // TODO: Less stupid way of doing this would be nice
-            sprite.Frame = 0;
-            buttonWidth = sprite.LocalFrameSize.Width;
-            buttonHeight = sprite.LocalFrameSize.Height;
-            sprite.Frame = 1;
-            buttonWidth += sprite.LocalFrameSize.Width;
 
+            sprite = renderWindow.LoadSprite(buttonLayout.ResourceName, buttonLayout.PaletteName);
+
+            // TODO: Less stupid way of doing this would be nice
+            buttonWidth = 0;
+            buttonHeight = 0;
+            for (int i = 0; i < buttonLayout.XSegments; i++)
+            {
+                sprite.Frame = i;
+                buttonWidth += sprite.LocalFrameSize.Width;
+                buttonHeight = Math.Max(buttonHeight, sprite.LocalFrameSize.Height);
+            }
         }
 
         public void Update()
@@ -101,7 +115,7 @@ namespace OpenDiablo2.Core.UI
 
         public void Render()
         {
-            renderWindow.Draw(sprite, 2, 1, pressed ? 1 : 0);
+            renderWindow.Draw(sprite, buttonLayout.XSegments, 1, pressed ? 1 : 0);
             var offset = pressed ? -3 : 0;
 
             label.Location = new Point(location.X + offset + labelOffset.X, location.Y - offset + labelOffset.Y);
@@ -116,5 +130,12 @@ namespace OpenDiablo2.Core.UI
             var offsetX = (buttonWidth / 2) - (label.TextArea.Width / 2);
             labelOffset = new Point(offsetX, -5);
         }
-    }
+
+        public void Dispose()
+        {
+            sprite.Dispose();
+            font.Dispose();
+            label.Dispose();
+        }
+    }        
 }

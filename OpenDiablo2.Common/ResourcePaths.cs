@@ -40,6 +40,7 @@ namespace OpenDiablo2.Common
 
         // --- UI ---
         public static string WideButtonBlank = "data\\global\\ui\\FrontEnd\\WideButtonBlank.dc6";
+        public static string CancelButton = "data\\global\\ui\\FrontEnd\\CancelButtonBlank.dc6";
 
     }
 }

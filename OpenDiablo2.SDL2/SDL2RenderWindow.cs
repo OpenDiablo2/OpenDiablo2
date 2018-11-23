@@ -27,14 +27,17 @@ namespace OpenDiablo2.SDL2_
 
         private readonly IMPQProvider mpqProvider;
         private readonly IPaletteProvider paletteProvider;
+        private readonly IResourceManager resourceManager;
 
         public SDL2RenderWindow(
             IMPQProvider mpqProvider,
-            IPaletteProvider paletteProvider
+            IPaletteProvider paletteProvider,
+            IResourceManager resourceManager
             )
         {
             this.mpqProvider = mpqProvider;
             this.paletteProvider = paletteProvider;
+            this.resourceManager = resourceManager;
 
             SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
             if (SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "0") == SDL.SDL_bool.SDL_FALSE)
@@ -178,7 +181,7 @@ namespace OpenDiablo2.SDL2_
         public ISprite LoadSprite(string resourcePath, string palette) => LoadSprite(resourcePath, palette, Point.Empty);
         public ISprite LoadSprite(string resourcePath, string palette, Point location)
         {
-            var result = new SDL2Sprite(ImageSet.LoadFromStream(mpqProvider.GetStream(resourcePath)), renderer)
+            var result = new SDL2Sprite(resourceManager.GetImageSet(resourcePath), renderer)
             {
                 CurrentPalette = paletteProvider.PaletteTable[palette],
                 Location = location
@@ -188,7 +191,7 @@ namespace OpenDiablo2.SDL2_
 
         public IFont LoadFont(string resourcePath, string palette)
         {
-            var result = new SDL2Font(MPQFont.LoadFromStream(mpqProvider.GetStream($"{resourcePath}.DC6"), mpqProvider.GetStream($"{resourcePath}.tbl")), renderer)
+            var result = new SDL2Font(resourceManager.GetMPQFont(resourcePath), renderer)
             {
                 CurrentPalette = paletteProvider.PaletteTable[palette]
             };

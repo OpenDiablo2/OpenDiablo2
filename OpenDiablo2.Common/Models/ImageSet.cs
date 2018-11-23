@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace OpenDiablo2.Common.Models
 {
 
-    public class ImageFrame
+    public class ImageFrame : IDisposable
     {
         public UInt32 Flip;
         public UInt32 Width;
@@ -20,6 +20,11 @@ namespace OpenDiablo2.Common.Models
         public UInt32 NextBlock;
         public UInt32 Length;
         public Int16[,] ImageData;
+
+        public void Dispose()
+        {
+            ImageData = new Int16[0, 0];
+        }
 
         public Color GetColor(int x, int y, Palette palette)
         {
@@ -33,7 +38,7 @@ namespace OpenDiablo2.Common.Models
         }
     }
 
-    public sealed class ImageSet
+    public sealed class ImageSet : IDisposable
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -112,7 +117,6 @@ namespace OpenDiablo2.Common.Models
                         continue;
                     }
 
-
                     for (int p = 0; p < b; p++)
                     {
                         result.Frames[i].ImageData[x++, y] = br.ReadByte();
@@ -121,6 +125,10 @@ namespace OpenDiablo2.Common.Models
                 }
             }
             return result;
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

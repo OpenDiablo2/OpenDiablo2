@@ -5,7 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
+using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Core.UI;
 
 namespace OpenDiablo2.Scenes
 {
@@ -25,6 +27,7 @@ namespace OpenDiablo2.Scenes
         private ISprite backgroundSprite, campfireSprite;
         private IFont headingFont;
         private ILabel headingLabel;
+        private Button exitButton;
 
         public SelectHeroClass(
             IRenderWindow renderWindow,
@@ -32,7 +35,8 @@ namespace OpenDiablo2.Scenes
             IMPQProvider mpqProvider,
             IMouseInfoProvider mouseInfoProvider,
             IMusicProvider musicProvider,
-            ISceneManager sceneManager
+            ISceneManager sceneManager,
+            Func<eButtonType, Button> createButton
             )
         {
             this.renderWindow = renderWindow;
@@ -49,14 +53,23 @@ namespace OpenDiablo2.Scenes
             headingLabel.Text = "Select Hero Class";
             headingLabel.Location = new System.Drawing.Point(400 - (headingLabel.TextArea.Width / 2), 20);
 
+            exitButton = createButton(eButtonType.Cancel);
+            exitButton.Text = "EXIT";
+            exitButton.Location = new System.Drawing.Point(30, 550);
+            exitButton.OnActivate = OnExitClicked;
+        }
 
+        private void OnExitClicked()
+        {
+            sceneManager.ChangeScene("Main Menu");
         }
 
         public void Render()
         {
             renderWindow.Draw(backgroundSprite, 4, 3, 0);
             renderWindow.Draw(campfireSprite, (int)(campfireSprite.TotalFrames * secondTimer));
-            //renderWindow.Draw(headingLabel);
+            renderWindow.Draw(headingLabel);
+            exitButton.Render();
         }
 
         public void Update(long ms)
@@ -66,11 +79,15 @@ namespace OpenDiablo2.Scenes
             while (secondTimer >= 1f)
                 secondTimer -= 1f;
 
+            exitButton.Update();
         }
 
         public void Dispose()
         {
-            
+            backgroundSprite.Dispose();
+            campfireSprite.Dispose();
+            headingFont.Dispose();
+            headingLabel.Dispose();
         }
     }
 }

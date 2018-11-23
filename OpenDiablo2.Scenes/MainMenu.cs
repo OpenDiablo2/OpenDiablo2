@@ -1,5 +1,6 @@
 ﻿using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
+using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
 using OpenDiablo2.Core.UI;
@@ -29,7 +30,7 @@ namespace OpenDiablo2.Scenes
         private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack;
         private IFont labelFont;
         private ILabel versionLabel, urlLabel;
-        private WideButton btnSinglePlayer, btnExit, btnWebsite;
+        private Button btnSinglePlayer, btnExit, btnWebsite;
 
         public MainMenu(
             IRenderWindow renderWindow,
@@ -38,7 +39,7 @@ namespace OpenDiablo2.Scenes
             IMouseInfoProvider mouseInfoProvider,
             IMusicProvider musicProvider,
             ISceneManager sceneManager,
-            Func<WideButton> createWideButton
+            Func<eButtonType, Button> createButton
             )
         {
             this.renderWindow = renderWindow;
@@ -55,17 +56,17 @@ namespace OpenDiablo2.Scenes
             diabloLogoLeftBlack = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoBlackLeft, Palettes.Units, new Point(400, 120));
             diabloLogoRightBlack = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoBlackRight, Palettes.Units, new Point(400, 120));
 
-            btnSinglePlayer = createWideButton();
+            btnSinglePlayer = createButton(eButtonType.Wide);
             btnSinglePlayer.Text = "Single Player".ToUpper();
             btnSinglePlayer.Location = new Point(264, 290);
             btnSinglePlayer.OnActivate = OnSinglePlayerClicked;
 
-            btnWebsite = createWideButton();
-            btnWebsite.Text = "Visible Github".ToUpper();
+            btnWebsite = createButton(eButtonType.Wide);
+            btnWebsite.Text = "Visit Github".ToUpper();
             btnWebsite.Location = new Point(264, 460);
             btnWebsite.OnActivate = OnVisitWebsiteClicked;
 
-            btnExit = createWideButton();
+            btnExit = createButton(eButtonType.Wide);
             btnExit.Text = "Exit Diablo II".ToUpper();
             btnExit.Location = new Point(264, 500);
             btnExit.OnActivate = OnExitClicked;
@@ -142,7 +143,17 @@ namespace OpenDiablo2.Scenes
 
         public void Dispose()
         {
-
+            backgroundSprite.Dispose();
+            diabloLogoLeft.Dispose();
+            diabloLogoRight.Dispose();
+            diabloLogoLeftBlack.Dispose();
+            diabloLogoRightBlack.Dispose();
+            labelFont.Dispose();
+            versionLabel.Dispose();
+            urlLabel.Dispose();
+            btnSinglePlayer.Dispose();
+            btnExit.Dispose();
+            btnWebsite.Dispose();
         }
 
         private void OnSinglePlayerClicked()

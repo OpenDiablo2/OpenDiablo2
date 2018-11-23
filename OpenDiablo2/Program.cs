@@ -10,23 +10,32 @@ using OpenDiablo2.Common.Models;
 using System.Reflection;
 using OpenDiablo2.Common.Interfaces;
 using System.Diagnostics;
+using OpenDiablo2.Core.UI;
+using OpenDiablo2.Common.Enums;
 
 namespace OpenDiablo2
 {
     static class Program
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
+        private static GlobalConfiguration globalConfiguration;
         static void Main(string[] args)
         {
             log.Info("OpenDiablo 2: The Free and Open Source Diablo 2 clone!");
+
+            Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed<CommandLineOptions>(o =>
+            {
+                globalConfiguration = new GlobalConfiguration
+                {
+                    BaseDataPath = Path.GetFullPath(o.DataPath ?? Directory.GetCurrentDirectory())
+                };
+            });
 
 #if !DEBUG
             try
             {
 #endif
             BuildContainer()
-                .ResolveCommandLineOptions(args)
                 .Resolve<IGameEngine>()
                 .Run();
 #if !DEBUG
@@ -44,21 +53,12 @@ namespace OpenDiablo2
             .Build();
 
 
-        static IContainer ResolveCommandLineOptions(this IContainer container, IEnumerable<string> args)
-        {
-            var globalConfiguration = container.Resolve<GlobalConfiguration>();
-
-            Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed<CommandLineOptions>(o =>
-            {
-                globalConfiguration.BaseDataPath = Path.GetFullPath(o.DataPath ?? Directory.GetCurrentDirectory());
-            });
-
-            return container;
-        }
-
         static ContainerBuilder RegisterLocalTypes(this ContainerBuilder containerBuilder)
         {
-            containerBuilder.RegisterType<GlobalConfiguration>().AsSelf().SingleInstance();
+            containerBuilder.Register<GlobalConfiguration>(x =>
+            {
+                return globalConfiguration;
+            }).AsSelf().SingleInstance();
 
             containerBuilder.Register<Func<string, IScene>>(c =>
             {
@@ -66,12 +66,18 @@ namespace OpenDiablo2
                 return (sceneName) => componentContext.ResolveKeyed<IScene>(sceneName);
             });
 
+            containerBuilder.Register<Func<eButtonType, Button>>(c =>
+            {
+                var componentContext = c.Resolve<IComponentContext>();
+                return (buttonType) => componentContext.Resolve<Button>(new NamedParameter("buttonLayout", ButtonLayout.Values[buttonType]));
+            });
+
             return containerBuilder;
         }
 
         static ContainerBuilder LoadAssemblyModules(this ContainerBuilder containerBuilder)
         {
-            var filesToLoad = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.dll");
+            var filesToLoad = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.dll").Where(x => Path.GetFileName(x).StartsWith("OpenDiablo2."));
             foreach (var file in filesToLoad)
             {
                 try

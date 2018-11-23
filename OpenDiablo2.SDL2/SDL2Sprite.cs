@@ -134,7 +134,6 @@ namespace OpenDiablo2.SDL2_
             {
                 SDL.SDL_DestroyTexture(texture);
             }
-            textures = new IntPtr[0];
         }
     }
 }
