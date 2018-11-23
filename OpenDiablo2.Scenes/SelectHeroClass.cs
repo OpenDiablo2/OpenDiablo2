@@ -52,11 +52,13 @@ namespace OpenDiablo2.Scenes
         private readonly IMouseInfoProvider mouseInfoProvider;
         private readonly IMusicProvider musicProvider;
         private readonly ISceneManager sceneManager;
+        private readonly ITextDictionary textDictionary;
 
+        private eHero? selectedHero = null;
         private float secondTimer;
         private ISprite backgroundSprite, campfireSprite;
         private IFont headingFont;
-        private ILabel headingLabel;
+        private ILabel headingLabel, heroClassLabel;
         private Button exitButton;
         private Dictionary<eHero, HeroRenderInfo> heroRenderInfo = new Dictionary<eHero, HeroRenderInfo>();
 
@@ -67,7 +69,8 @@ namespace OpenDiablo2.Scenes
             IMouseInfoProvider mouseInfoProvider,
             IMusicProvider musicProvider,
             ISceneManager sceneManager,
-            Func<eButtonType, Button> createButton
+            Func<eButtonType, Button> createButton,
+            ITextDictionary textDictionary
             )
         {
             this.renderWindow = renderWindow;
@@ -75,6 +78,7 @@ namespace OpenDiablo2.Scenes
             this.mpqProvider = mpqProvider;
             this.mouseInfoProvider = mouseInfoProvider;
             this.sceneManager = sceneManager;
+            this.textDictionary = textDictionary;
 
 
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBackground, Palettes.Fechar);
@@ -189,9 +193,14 @@ namespace OpenDiablo2.Scenes
             };
 
             headingFont = renderWindow.LoadFont(ResourcePaths.Font30, Palettes.Units);
+
             headingLabel = renderWindow.CreateLabel(headingFont);
-            headingLabel.Text = "Select Hero Class";
+            headingLabel.Text = textDictionary.Translate("strSelectHeroClass");
             headingLabel.Location = new Point(400 - (headingLabel.TextArea.Width / 2), 17);
+
+            heroClassLabel = renderWindow.CreateLabel(headingFont);
+            heroClassLabel.Text = "";
+            heroClassLabel.Location = new Point(400 - (heroClassLabel.TextArea.Width / 2), 65);
 
             exitButton = createButton(eButtonType.Medium);
             exitButton.Text = "EXIT";
@@ -219,6 +228,8 @@ namespace OpenDiablo2.Scenes
 
             renderWindow.Draw(campfireSprite, (int)(campfireSprite.TotalFrames * secondTimer));
             renderWindow.Draw(headingLabel);
+            if (selectedHero.HasValue)
+                renderWindow.Draw(heroClassLabel);
             exitButton.Render();
         }
 
@@ -285,6 +296,11 @@ namespace OpenDiablo2.Scenes
 
             foreach (var hero in Enum.GetValues(typeof(eHero)).Cast<eHero>())
                 UpdateHeroSelectionHover(hero, ms, canSelect);
+
+            if (selectedHero.HasValue && heroRenderInfo.All(x => x.Value.Stance == eHeroStance.Idle))
+            {
+                selectedHero = null;
+            }
 
             exitButton.Update();
         }
@@ -353,10 +369,53 @@ namespace OpenDiablo2.Scenes
                     break;
                 }
 
+                selectedHero = hero;
+                UpdateHeroText();
+
                 return;
             }
 
             heroRenderInfo[hero].Stance = mouseHover ? eHeroStance.IdleSelected : eHeroStance.Idle;
+
+            if (selectedHero == null && mouseHover)
+            {
+                selectedHero = hero;
+                UpdateHeroText();
+            }
+
+        }
+
+        private void UpdateHeroText()
+        {
+            if (selectedHero == null)
+                return;
+
+            switch (selectedHero.Value)
+            {
+                case eHero.Barbarian:
+                    heroClassLabel.Text = textDictionary.Translate("strBarbarian");
+                    break;
+                case eHero.Necromancer:
+                    heroClassLabel.Text = textDictionary.Translate("strNecromancer");
+                    break;
+                case eHero.Paladin:
+                    heroClassLabel.Text = textDictionary.Translate("strPaladin");
+                    break;
+                case eHero.Assassin:
+                    heroClassLabel.Text = textDictionary.Translate("strAssassin");
+                    break;
+                case eHero.Sorceress:
+                    heroClassLabel.Text = textDictionary.Translate("strSorceress");
+                    break;
+                case eHero.Amazon:
+                    heroClassLabel.Text = textDictionary.Translate("strAmazon");
+                    break;
+                case eHero.Druid:
+                    heroClassLabel.Text = textDictionary.Translate("strDruid");
+                    break;
+            }
+
+            heroClassLabel.Location = new Point(400 - (heroClassLabel.TextArea.Width / 2), 65);
         }
 
         public void Dispose()

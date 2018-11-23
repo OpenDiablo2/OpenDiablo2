@@ -79,15 +79,15 @@ namespace OpenDiablo2.SDL2_
 
             TextArea = CalculateSize();
             textureSize = new Size(Pow2(TextArea.Width), Pow2(TextArea.Height));
-            texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, textureSize.Width, textureSize.Height);
 
+            texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, textureSize.Width, textureSize.Height);
             if (texture == IntPtr.Zero)
                 throw new ApplicationException("Unaple to initialize texture.");
 
             SDL.SDL_SetTextureBlendMode(texture, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
             SDL.SDL_SetRenderTarget(renderer, texture);
             SDL.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-            SDL.SDL_RenderFillRect(renderer, IntPtr.Zero);
+            SDL.SDL_RenderClear(renderer);
             SDL.SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
             int cx = 0;

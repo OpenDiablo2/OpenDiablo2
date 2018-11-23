@@ -90,15 +90,6 @@ namespace OpenDiablo2.SDL2_
 
         }
 
-        // TODO: Less dumb color correction
-        private Color AdjustColor(Color source)
-        => Color.FromArgb(
-                source.A,
-                (byte)Math.Min((float)source.R * 1.2, 255),
-                (byte)Math.Min((float)source.G * 1.2, 255),
-                (byte)Math.Min((float)source.B * 1.2, 255)
-            );
-
         private unsafe void LoadFrame(int index)
         {
             var frame = source.Frames[index];
@@ -124,9 +115,7 @@ namespace OpenDiablo2.SDL2_
                         }
 
                         
-                        var palColor = frame.GetColor(x, (int)(y - frameOffset), CurrentPalette);
-                        //var col = AdjustColor(palColor);
-                        data[x + (y * (pitch / 4))] = palColor;
+                        data[x + (y * (pitch / 4))] = frame.GetColor(x, (int)(y - frameOffset), CurrentPalette);
                     }
                 }
             }

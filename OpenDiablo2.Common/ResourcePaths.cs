@@ -74,7 +74,6 @@ namespace OpenDiablo2.Common
         public static string CharacterSelectDruidForwardWalk = "data\\global\\ui\\FrontEnd\\druid\\DZFW.DC6";
         public static string CharacterSelectDruidBackWalk = "data\\global\\ui\\FrontEnd\\druid\\DZBW.DC6";
 
-
         // --- Mouse Pointers ---
         public static string CursorDefault = "data\\global\\ui\\CURSOR\\ohand.DC6";
 
@@ -90,11 +89,13 @@ namespace OpenDiablo2.Common
         public static string FontExocet10 = "data\\local\\font\\latin\\fontexocet10";
         public static string FontExocet8 = "data\\local\\font\\latin\\fontexocet8";
 
-
         // --- UI ---
         public static string WideButtonBlank = "data\\global\\ui\\FrontEnd\\WideButtonBlank.dc6";
         public static string MediumButtonBlank = "data\\global\\ui\\FrontEnd\\MediumButtonBlank.dc6";
         public static string CancelButton = "data\\global\\ui\\FrontEnd\\CancelButtonBlank.dc6";
 
+        // --- Data ---
+        // TODO: Doesn't sound right :)
+        public static string EnglishTable = "data\\local\\lng\\eng\\English.txt";
     }
 }
