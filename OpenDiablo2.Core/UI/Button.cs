@@ -116,7 +116,7 @@ namespace OpenDiablo2.Core.UI
         public void Render()
         {
             renderWindow.Draw(sprite, buttonLayout.XSegments, 1, pressed ? 1 : 0);
-            var offset = pressed ? -3 : 0;
+            var offset = pressed ? -2 : 0;
 
             label.Location = new Point(location.X + offset + labelOffset.X, location.Y - offset + labelOffset.Y);
             renderWindow.Draw(label);
