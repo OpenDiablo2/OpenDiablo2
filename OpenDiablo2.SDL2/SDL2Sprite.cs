@@ -1,14 +1,10 @@
-﻿using OpenDiablo2.Common.Interfaces;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SDL2;
 using System.Runtime.InteropServices;
+using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
+using SDL2;
 
 namespace OpenDiablo2.SDL2_
 {
@@ -16,16 +12,24 @@ namespace OpenDiablo2.SDL2_
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        internal readonly ImageSet source;
+        private readonly IntPtr renderer;
+        internal IntPtr texture = IntPtr.Zero;
+
         public Point Location { get; set; } = new Point();
         public Size FrameSize { get; set; } = new Size();
 
-        private int frame;
+        private int frame = -1;
         public int Frame
         {
             get => frame;
             set
             {
+                if (frame == value && texture != IntPtr.Zero)
+                    return;
+
                 frame = Math.Max(0, Math.Min(value, TotalFrames));
+                LoadFrame(frame);
             }
         }
         public int TotalFrames { get; internal set; }
@@ -37,9 +41,7 @@ namespace OpenDiablo2.SDL2_
             set
             {
                 blend = value;
-
-                foreach (var texture in textures)
-                    SDL.SDL_SetTextureBlendMode(texture, blend ? SDL.SDL_BlendMode.SDL_BLENDMODE_ADD : SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+                SDL.SDL_SetTextureBlendMode(texture, blend ? SDL.SDL_BlendMode.SDL_BLENDMODE_ADD : SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
             }
         }
 
@@ -53,9 +55,7 @@ namespace OpenDiablo2.SDL2_
                 UpdateTextureData();
             }
         }
-        internal readonly ImageSet source;
-        private readonly IntPtr renderer;
-        internal IntPtr[] textures = new IntPtr[0];
+
 
         public SDL2Sprite(ImageSet source, IntPtr renderer)
         {
@@ -63,14 +63,8 @@ namespace OpenDiablo2.SDL2_
             this.renderer = renderer;
 
 
-            this.TotalFrames = source.Frames.Count();
-            this.FrameSize = new Size(Pow2((int)source.Frames.Max(x => x.Width)), Pow2((int)source.Frames.Max(x => x.Height)));
-            this.textures = new IntPtr[TotalFrames];
-            for(var i = 0; i < this.textures.Count(); i++)
-            {
-                this.textures[i] = IntPtr.Zero;
-            }
-
+            TotalFrames = source.Frames.Count();
+            FrameSize = new Size(Pow2((int)source.Frames.Max(x => x.Width)), Pow2((int)source.Frames.Max(x => x.Height)));
         }
 
         internal Point GetRenderPoint()
@@ -84,8 +78,16 @@ namespace OpenDiablo2.SDL2_
         // TODO: This is slow. Make fix.
         private void UpdateTextureData()
         {
-            for (var i = 0; i < source.Frames.Count(); i++)
-                LoadFrame(i, renderer);
+            if (texture == IntPtr.Zero)
+            {
+                texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, Pow2(FrameSize.Width), Pow2(FrameSize.Height));
+
+                if (texture == IntPtr.Zero)
+                    throw new ApplicationException("Unaple to initialize texture.");
+
+                Frame = 0;
+            }
+
         }
 
         // TODO: Less dumb color correction
@@ -97,39 +99,41 @@ namespace OpenDiablo2.SDL2_
                 (byte)Math.Min((float)source.B * 1.2, 255)
             );
 
-        object bob = new object();
-        private void LoadFrame(int index, IntPtr renderer)
+        private unsafe void LoadFrame(int index)
         {
             var frame = source.Frames[index];
 
-            if (textures[index] == IntPtr.Zero)
-                textures[index] = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Pow2(FrameSize.Width), Pow2(FrameSize.Height));
+            IntPtr pixels;
+            int pitch;
+            var fullRect = new SDL.SDL_Rect { x = 0, y = 0, w = FrameSize.Width, h = FrameSize.Height };
+            SDL.SDL_SetTextureBlendMode(texture, blend ? SDL.SDL_BlendMode.SDL_BLENDMODE_ADD : SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
-            if (textures[index] == IntPtr.Zero)
-                throw new ApplicationException("Unaple to initialize texture.");
-
-            SDL.SDL_SetTextureBlendMode(textures[index], SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
-            SDL.SDL_SetRenderTarget(renderer, textures[index]);
-            SDL.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-            SDL.SDL_RenderFillRect(renderer, IntPtr.Zero);
-            SDL.SDL_SetRenderTarget(renderer, IntPtr.Zero);
-
-            var binaryData = new UInt32[frame.Width * frame.Height];
-            for (var y = 0; y < frame.Height; y++)
+            SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
+            try
             {
-                for (int x = 0; x < frame.Width; x++)
+                UInt32* data = (UInt32*)pixels;
+                var frameOffset = FrameSize.Height - frame.Height;
+                for (var y = 0; y < FrameSize.Height; y++)
                 {
-                    var palColor = frame.GetColor(x, (int)y, CurrentPalette);
-                    //var col = AdjustColor(palColor);
-                    binaryData[x + y * frame.Width] = (uint)palColor.ToArgb();
+                    for (int x = 0; x < FrameSize.Width; x++)
+                    {
+                        if ((x >= frame.Width) || (y < frameOffset))
+                        {
+                            data[x + (y * (pitch / 4))] = 0;
+                            continue;
+                        }
+
+                        
+                        var palColor = frame.GetColor(x, (int)(y - frameOffset), CurrentPalette);
+                        //var col = AdjustColor(palColor);
+                        data[x + (y * (pitch / 4))] = palColor;
+                    }
                 }
             }
-
-
-            var rect = new SDL.SDL_Rect { x = 0, y = FrameSize.Height - (int)frame.Height, w = (int)frame.Width, h = (int)frame.Height };
-            GCHandle pinnedArray = GCHandle.Alloc(binaryData, GCHandleType.Pinned);
-            SDL.SDL_UpdateTexture(textures[index], ref rect, pinnedArray.AddrOfPinnedObject(), (int)frame.Width * 4);
-            pinnedArray.Free();
+            finally
+            {
+                SDL.SDL_UnlockTexture(texture);
+            }
 
 
         }
@@ -144,10 +148,7 @@ namespace OpenDiablo2.SDL2_
 
         public void Dispose()
         {
-            foreach (var texture in textures)
-            {
-                SDL.SDL_DestroyTexture(texture);
-            }
+            SDL.SDL_DestroyTexture(texture);
         }
     }
 }

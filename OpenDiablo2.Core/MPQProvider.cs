@@ -13,6 +13,7 @@ namespace OpenDiablo2.Core
     {
         private readonly GlobalConfiguration globalConfiguration;
         private readonly MPQ[] mpqs;
+        private Dictionary<string, int> mpqLookup = new Dictionary<string, int>();
 
         public MPQProvider(GlobalConfiguration globalConfiguration)
         {
@@ -22,12 +23,22 @@ namespace OpenDiablo2.Core
                 .Where(x => !Path.GetFileName(x).StartsWith("patch"))
                 .Select(file => new MPQ(file))
                 .ToArray();
+
+            for(var i = 0; i < mpqs.Count(); i++)
+            {
+                foreach(var file in mpqs[i].Files)
+                {
+                    mpqLookup[file.ToLower()] = i;
+                }
+            }
         }
 
         public IEnumerable<MPQ> GetMPQs() => mpqs;
 
         public Stream GetStream(string fileName)
-            => mpqs.First(x => x.Files.Any(z =>z.ToLower() == fileName.ToLower())).OpenFile(fileName);
+        { 
+            return mpqs[mpqLookup[fileName.ToLower()]].OpenFile(fileName);
+        }
 
         public IEnumerable<IEnumerable<string>> GetTextFile(string fileName)
         {
