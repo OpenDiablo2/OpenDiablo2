@@ -97,5 +97,7 @@ namespace OpenDiablo2.Common
         // --- Data ---
         // TODO: Doesn't sound right :)
         public static string EnglishTable = "data\\local\\lng\\eng\\English.txt";
+        public static string ExpansionStringTable = "data\\local\\lng\\eng\\expansionstring.tbl";
+
     }
 }
