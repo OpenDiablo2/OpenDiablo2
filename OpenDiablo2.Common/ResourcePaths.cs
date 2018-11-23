@@ -22,6 +22,29 @@ namespace OpenDiablo2.Common
         public static string CharacterSelectBackground = "data\\global\\ui\\FrontEnd\\charactercreationscreenEXP.dc6";
         public static string CharacterSelectCampfire = "data\\global\\ui\\FrontEnd\\fire.DC6";
 
+        public static string CharacterSelectBarbarianUnselected = "data\\global\\ui\\FrontEnd\\barbarian\\banu1.DC6";
+        public static string CharacterSelectBarbarianUnselectedH = "data\\global\\ui\\FrontEnd\\barbarian\\banu2.DC6";
+
+        public static string CharacterSelecSorceressUnselected = "data\\global\\ui\\FrontEnd\\sorceress\\SONU1.DC6";
+        public static string CharacterSelecSorceressUnselectedH = "data\\global\\ui\\FrontEnd\\sorceress\\SONU2.DC6";
+
+        public static string CharacterSelectNecromancerUnselected = "data\\global\\ui\\FrontEnd\\necromancer\\NENU1.DC6";
+        public static string CharacterSelectNecromancerUnselectedH = "data\\global\\ui\\FrontEnd\\necromancer\\NENU2.DC6";
+
+        public static string CharacterSelectPaladinUnselected = "data\\global\\ui\\FrontEnd\\paladin\\PANU1.DC6";
+        public static string CharacterSelectPaladinUnselectedH = "data\\global\\ui\\FrontEnd\\paladin\\PANU2.DC6";
+
+        public static string CharacterSelectAmazonUnselected = "data\\global\\ui\\FrontEnd\\amazon\\AMNU1.DC6";
+        public static string CharacterSelectAmazonUnselectedH = "data\\global\\ui\\FrontEnd\\amazon\\AMNU2.DC6";
+
+        public static string CharacterSelectAssassinUnselected = "data\\global\\ui\\FrontEnd\\assassin\\ASNU1.DC6";
+        public static string CharacterSelectAssassinUnselectedH = "data\\global\\ui\\FrontEnd\\assassin\\ASNU2.DC6";
+
+        public static string CharacterSelectDruidUnselected = "data\\global\\ui\\FrontEnd\\druid\\DZNU1.dc6";
+        public static string CharacterSelectDruidUnselectedH = "data\\global\\ui\\FrontEnd\\druid\\DZNU2.dc6";
+
+
+
         // --- Mouse Pointers ---
         public static string CursorDefault = "data\\global\\ui\\CURSOR\\ohand.DC6";
 

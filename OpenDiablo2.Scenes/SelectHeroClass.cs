@@ -24,7 +24,14 @@ namespace OpenDiablo2.Scenes
         private readonly ISceneManager sceneManager;
 
         private float secondTimer;
-        private ISprite backgroundSprite, campfireSprite;
+        private ISprite backgroundSprite, campfireSprite,
+            barbarianUnselected, barbarianUnselectedH,
+            sorceressUnselected, sorceressUnselectedH,
+            necromancerUnselected, necromancerUnselectedH,
+            paladinUnselected, paladinUnselectedH,
+            amazonUnselected, amazonUnselectedH,
+            assassinUnselected, assassinUnselectedH,
+            druidUnselected, druidUnselectedH;
         private IFont headingFont;
         private ILabel headingLabel;
         private Button exitButton;
@@ -48,6 +55,27 @@ namespace OpenDiablo2.Scenes
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBackground, Palettes.Fechar);
             campfireSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectCampfire, Palettes.Fechar, new System.Drawing.Point(380, 335));
 
+            barbarianUnselected = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselected, Palettes.Fechar, new System.Drawing.Point(400, 330));
+            barbarianUnselectedH = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselectedH, Palettes.Fechar, new System.Drawing.Point(400, 330));
+
+            sorceressUnselected = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselected, Palettes.Fechar, new System.Drawing.Point(626, 352));
+            sorceressUnselectedH = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselectedH, Palettes.Fechar, new System.Drawing.Point(626, 352));
+
+            necromancerUnselected = renderWindow.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselected, Palettes.Fechar, new System.Drawing.Point(300, 335));
+            necromancerUnselectedH = renderWindow.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselectedH, Palettes.Fechar, new System.Drawing.Point(300, 335));
+
+            paladinUnselected = renderWindow.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselected, Palettes.Fechar, new System.Drawing.Point(521, 338));
+            paladinUnselectedH = renderWindow.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselectedH, Palettes.Fechar, new System.Drawing.Point(521, 338));
+
+            amazonUnselected = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselected, Palettes.Fechar, new System.Drawing.Point(100, 339));
+            amazonUnselectedH = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselectedH, Palettes.Fechar, new System.Drawing.Point(100, 339));
+
+            assassinUnselected = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselected, Palettes.Fechar, new System.Drawing.Point(231, 365));
+            assassinUnselectedH = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselectedH, Palettes.Fechar, new System.Drawing.Point(231, 365));
+
+            druidUnselected = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidUnselected, Palettes.Fechar, new System.Drawing.Point(720, 370));
+            druidUnselectedH = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidUnselectedH, Palettes.Fechar, new System.Drawing.Point(720, 370));
+
             headingFont = renderWindow.LoadFont(ResourcePaths.Font30, Palettes.Units);
             headingLabel = renderWindow.CreateLabel(headingFont);
             headingLabel.Text = "Select Hero Class";
@@ -67,6 +95,15 @@ namespace OpenDiablo2.Scenes
         public void Render()
         {
             renderWindow.Draw(backgroundSprite, 4, 3, 0);
+
+            renderWindow.Draw(barbarianUnselected, (int)(barbarianUnselected.TotalFrames * secondTimer));
+            renderWindow.Draw(sorceressUnselected, (int)(sorceressUnselected.TotalFrames * secondTimer));
+            renderWindow.Draw(necromancerUnselected, (int)(necromancerUnselected.TotalFrames * secondTimer));
+            renderWindow.Draw(paladinUnselected, (int)(paladinUnselected.TotalFrames * secondTimer));
+            renderWindow.Draw(amazonUnselected, (int)(amazonUnselected.TotalFrames * secondTimer));
+            renderWindow.Draw(assassinUnselected, (int)(assassinUnselected.TotalFrames * secondTimer));
+            renderWindow.Draw(druidUnselected, (int)(druidUnselected.TotalFrames * secondTimer));
+
             renderWindow.Draw(campfireSprite, (int)(campfireSprite.TotalFrames * secondTimer));
             renderWindow.Draw(headingLabel);
             exitButton.Render();

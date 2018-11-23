@@ -54,8 +54,13 @@ namespace OpenDiablo2.SDL2_
             this.renderer = renderer;
 
 
-            TotalFrames = source.Frames.Count();
-            FrameSize = new Size(Pow2((int)source.Frames.Max(x => x.Width)), Pow2((int)source.Frames.Max(x => x.Height)));
+            this.TotalFrames = source.Frames.Count();
+            this.FrameSize = new Size(Pow2((int)source.Frames.Max(x => x.Width)), Pow2((int)source.Frames.Max(x => x.Height)));
+            this.textures = new IntPtr[TotalFrames];
+            for(var i = 0; i < this.textures.Count(); i++)
+            {
+                this.textures[i] = IntPtr.Zero;
+            }
 
         }
 
@@ -70,12 +75,8 @@ namespace OpenDiablo2.SDL2_
         // TODO: This is slow. Make fix.
         private void UpdateTextureData()
         {
-            textures = new IntPtr[TotalFrames];
-
             for (var i = 0; i < source.Frames.Count(); i++)
                 LoadFrame(i, renderer);
-
-
         }
 
         // TODO: Less dumb color correction
