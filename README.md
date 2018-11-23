@@ -1,7 +1,8 @@
-# OpenDiablo2
-An open source re-implementation of Diablo 2 in C#
+# OpenDiablo2 [![Build Status](https://dev.azure.com/lunaticedit/OpenDiablo2/_apis/build/status/OpenDiablo2%20for%20Windows)](https://dev.azure.com/lunaticedit/OpenDiablo2/_build/latest?definitionId=3)
+An open source re-implementation of Diablo 2 in C# 
 
-[Join us on Discord!](https://discord.gg/pRy8tdc)
+[Join us on Discord!](https://discord.gg/pRy8tdc)\
+[Development Live stream](https://www.twitch.tv/essial/)
 
 <img src="https://raw.githubusercontent.com/essial/OpenDiablo2/master/Screenshot.png" />
 <img src="https://raw.githubusercontent.com/essial/OpenDiablo2/master/Screenshot2.png" />

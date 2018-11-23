@@ -86,7 +86,6 @@ namespace OpenDiablo2.Core
             mouseSprite = renderWindow.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units);
 
 
-
             currentScene = getScene("Main Menu");
             sw.Start();
             while (getRenderWindow().IsRunning)

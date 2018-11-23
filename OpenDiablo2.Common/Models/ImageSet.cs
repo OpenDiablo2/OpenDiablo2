@@ -26,15 +26,15 @@ namespace OpenDiablo2.Common.Models
             ImageData = new Int16[0];
         }
 
-        public Color GetColor(int x, int y, Palette palette)
+        public UInt32 GetColor(int x, int y, Palette palette)
         {
             var index = ImageData[x + (y * Width)];
             if (index == -1)
-                return Color.Transparent;
+                return 0;
 
-            var color = palette.Colors[(int)index];
+            var color = palette.Colors[index];
 
-            return Color.FromArgb(255, color.R, color.G, color.B);
+            return ((UInt32)255 << 24) + ((UInt32)color.R << 16) + ((UInt32)color.G << 8) + (UInt32)color.B;
         }
     }
 

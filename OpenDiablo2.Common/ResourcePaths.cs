@@ -24,25 +24,55 @@ namespace OpenDiablo2.Common
 
         public static string CharacterSelectBarbarianUnselected = "data\\global\\ui\\FrontEnd\\barbarian\\banu1.DC6";
         public static string CharacterSelectBarbarianUnselectedH = "data\\global\\ui\\FrontEnd\\barbarian\\banu2.DC6";
+        public static string CharacterSelectBarbarianSelected = "data\\global\\ui\\FrontEnd\\barbarian\\banu3.DC6";
+        public static string CharacterSelectBarbarianForwardWalk = "data\\global\\ui\\FrontEnd\\barbarian\\bafw.DC6";
+        public static string CharacterSelectBarbarianForwardWalkOverlay = "data\\global\\ui\\FrontEnd\\barbarian\\BAFWs.DC6";
+        public static string CharacterSelectBarbarianBackWalk = "data\\global\\ui\\FrontEnd\\barbarian\\babw.DC6";
 
         public static string CharacterSelecSorceressUnselected = "data\\global\\ui\\FrontEnd\\sorceress\\SONU1.DC6";
         public static string CharacterSelecSorceressUnselectedH = "data\\global\\ui\\FrontEnd\\sorceress\\SONU2.DC6";
+        public static string CharacterSelecSorceressSelected = "data\\global\\ui\\FrontEnd\\sorceress\\SONU3.DC6";
+        public static string CharacterSelecSorceressSelectedOverlay = "data\\global\\ui\\FrontEnd\\sorceress\\SONU3s.DC6";
+        public static string CharacterSelecSorceressForwardWalk= "data\\global\\ui\\FrontEnd\\sorceress\\SOFW.DC6";
+        public static string CharacterSelecSorceressForwardWalkOverlay = "data\\global\\ui\\FrontEnd\\sorceress\\SOFWs.DC6";
+        public static string CharacterSelecSorceressBackWalk = "data\\global\\ui\\FrontEnd\\sorceress\\SOBW.DC6";
+        public static string CharacterSelecSorceressBackWalkOverlay = "data\\global\\ui\\FrontEnd\\sorceress\\SOBWs.DC6";
 
         public static string CharacterSelectNecromancerUnselected = "data\\global\\ui\\FrontEnd\\necromancer\\NENU1.DC6";
         public static string CharacterSelectNecromancerUnselectedH = "data\\global\\ui\\FrontEnd\\necromancer\\NENU2.DC6";
+        public static string CharacterSelecNecromancerSelected = "data\\global\\ui\\FrontEnd\\necromancer\\NENU3.DC6";
+        public static string CharacterSelecNecromancerSelectedOverlay = "data\\global\\ui\\FrontEnd\\necromancer\\NENU3s.DC6";
+        public static string CharacterSelecNecromancerForwardWalk = "data\\global\\ui\\FrontEnd\\necromancer\\NEFW.DC6";
+        public static string CharacterSelecNecromancerForwardWalkOverlay = "data\\global\\ui\\FrontEnd\\necromancer\\NEFWs.DC6";
+        public static string CharacterSelecNecromancerBackWalk = "data\\global\\ui\\FrontEnd\\necromancer\\NEBW.DC6";
+        public static string CharacterSelecNecromancerBackWalkOverlay = "data\\global\\ui\\FrontEnd\\necromancer\\NEBWs.DC6";
 
         public static string CharacterSelectPaladinUnselected = "data\\global\\ui\\FrontEnd\\paladin\\PANU1.DC6";
         public static string CharacterSelectPaladinUnselectedH = "data\\global\\ui\\FrontEnd\\paladin\\PANU2.DC6";
+        public static string CharacterSelecPaladinSelected = "data\\global\\ui\\FrontEnd\\paladin\\PANU3.DC6";
+        public static string CharacterSelecPaladinForwardWalk = "data\\global\\ui\\FrontEnd\\paladin\\PAFW.DC6";
+        public static string CharacterSelecPaladinForwardWalkOverlay = "data\\global\\ui\\FrontEnd\\paladin\\PAFWs.DC6";
+        public static string CharacterSelecPaladinBackWalk = "data\\global\\ui\\FrontEnd\\paladin\\PABW.DC6";
+
 
         public static string CharacterSelectAmazonUnselected = "data\\global\\ui\\FrontEnd\\amazon\\AMNU1.DC6";
         public static string CharacterSelectAmazonUnselectedH = "data\\global\\ui\\FrontEnd\\amazon\\AMNU2.DC6";
+        public static string CharacterSelecAmazonSelected = "data\\global\\ui\\FrontEnd\\amazon\\AMNU3.DC6";
+        public static string CharacterSelecAmazonForwardWalk = "data\\global\\ui\\FrontEnd\\amazon\\AMFW.DC6";
+        public static string CharacterSelecAmazonForwardWalkOverlay = "data\\global\\ui\\FrontEnd\\amazon\\AMFWs.DC6";
+        public static string CharacterSelecAmazonBackWalk = "data\\global\\ui\\FrontEnd\\amazon\\AMBW.DC6";
 
         public static string CharacterSelectAssassinUnselected = "data\\global\\ui\\FrontEnd\\assassin\\ASNU1.DC6";
         public static string CharacterSelectAssassinUnselectedH = "data\\global\\ui\\FrontEnd\\assassin\\ASNU2.DC6";
+        public static string CharacterSelectAssassinSelected = "data\\global\\ui\\FrontEnd\\assassin\\ASNU3.DC6";
+        public static string CharacterSelectAssassinForwardWalk = "data\\global\\ui\\FrontEnd\\assassin\\ASFW.DC6";
+        public static string CharacterSelectAssassinBackWalk = "data\\global\\ui\\FrontEnd\\assassin\\ASBW.DC6";
 
         public static string CharacterSelectDruidUnselected = "data\\global\\ui\\FrontEnd\\druid\\DZNU1.dc6";
         public static string CharacterSelectDruidUnselectedH = "data\\global\\ui\\FrontEnd\\druid\\DZNU2.dc6";
-
+        public static string CharacterSelectDruidSelected = "data\\global\\ui\\FrontEnd\\druid\\DZNU3.DC6";
+        public static string CharacterSelectDruidForwardWalk = "data\\global\\ui\\FrontEnd\\druid\\DZFW.DC6";
+        public static string CharacterSelectDruidBackWalk = "data\\global\\ui\\FrontEnd\\druid\\DZBW.DC6";
 
 
         // --- Mouse Pointers ---

@@ -111,8 +111,9 @@ namespace OpenDiablo2.SDL2_
                 h = font.sprite.FrameSize.Height
             };
 
-            SDL.SDL_SetTextureColorMod(font.sprite.textures[character], TextColor.R, TextColor.G, TextColor.B);
-            SDL.SDL_RenderCopy(renderer, font.sprite.textures[character], IntPtr.Zero, ref rect);
+            font.sprite.Frame = character;
+            SDL.SDL_SetTextureColorMod(font.sprite.texture, TextColor.R, TextColor.G, TextColor.B);
+            SDL.SDL_RenderCopy(renderer, font.sprite.texture, IntPtr.Zero, ref rect);
 
         }
 

@@ -70,6 +70,8 @@ namespace OpenDiablo2.SDL2_
 
         public void Clear()
         {
+            SDL.SDL_SetRenderTarget(renderer, IntPtr.Zero);
+            SDL.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL.SDL_RenderClear(renderer);
 
         }
@@ -148,7 +150,7 @@ namespace OpenDiablo2.SDL2_
                 w = spr.FrameSize.Width,
                 h = spr.FrameSize.Height
             };
-            SDL.SDL_RenderCopy(renderer, spr.textures[spr.Frame], IntPtr.Zero, ref destRect);
+            SDL.SDL_RenderCopy(renderer, spr.texture, IntPtr.Zero, ref destRect);
 
         }
 
@@ -162,9 +164,7 @@ namespace OpenDiablo2.SDL2_
                 for (var x = 0; x < xSegments; x++)
                 {
                     var textureIndex = x + (y * xSegments) + (offset * xSegments * ySegments);
-                    textureIndex = Math.Min(spr.textures.Count() - 1, Math.Max(0, textureIndex));
-                    if (textureIndex >= spr.textures.Count())
-                        continue;
+                    spr.Frame = Math.Min(spr.TotalFrames - 1, Math.Max(0, textureIndex));
 
                     var destRect = new SDL.SDL_Rect
                     {
@@ -173,7 +173,7 @@ namespace OpenDiablo2.SDL2_
                         w = spr.FrameSize.Width,
                         h = spr.FrameSize.Height
                     };
-                    SDL.SDL_RenderCopy(renderer, spr.textures[textureIndex], IntPtr.Zero, ref destRect);
+                    SDL.SDL_RenderCopy(renderer, spr.texture, IntPtr.Zero, ref destRect);
                 }
             }
         }
