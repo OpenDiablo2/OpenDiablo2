@@ -57,8 +57,8 @@ namespace OpenDiablo2.Scenes
         private eHero? selectedHero = null;
         private float secondTimer;
         private ISprite backgroundSprite, campfireSprite;
-        private IFont headingFont;
-        private ILabel headingLabel, heroClassLabel;
+        private IFont headingFont, heroDescFont;
+        private ILabel headingLabel, heroClassLabel, heroDesc1Label, heroDesc2Label, heroDesc3Label;
         private Button exitButton;
         private Dictionary<eHero, HeroRenderInfo> heroRenderInfo = new Dictionary<eHero, HeroRenderInfo>();
 
@@ -193,6 +193,7 @@ namespace OpenDiablo2.Scenes
             };
 
             headingFont = renderWindow.LoadFont(ResourcePaths.Font30, Palettes.Units);
+            heroDescFont = renderWindow.LoadFont(ResourcePaths.Font16, Palettes.Units);
 
             headingLabel = renderWindow.CreateLabel(headingFont);
             headingLabel.Text = textDictionary.Translate("strSelectHeroClass");
@@ -201,6 +202,10 @@ namespace OpenDiablo2.Scenes
             heroClassLabel = renderWindow.CreateLabel(headingFont);
             heroClassLabel.Text = "";
             heroClassLabel.Location = new Point(400 - (heroClassLabel.TextArea.Width / 2), 65);
+
+            heroDesc1Label = renderWindow.CreateLabel(heroDescFont);
+            heroDesc2Label = renderWindow.CreateLabel(heroDescFont);
+            heroDesc3Label = renderWindow.CreateLabel(heroDescFont);
 
             exitButton = createButton(eButtonType.Medium);
             exitButton.Text = "EXIT";
@@ -229,7 +234,12 @@ namespace OpenDiablo2.Scenes
             renderWindow.Draw(campfireSprite, (int)(campfireSprite.TotalFrames * secondTimer));
             renderWindow.Draw(headingLabel);
             if (selectedHero.HasValue)
+            {
                 renderWindow.Draw(heroClassLabel);
+                renderWindow.Draw(heroDesc1Label);
+                renderWindow.Draw(heroDesc2Label);
+                renderWindow.Draw(heroDesc3Label);
+            }
             exitButton.Render();
         }
 
@@ -394,28 +404,53 @@ namespace OpenDiablo2.Scenes
             {
                 case eHero.Barbarian:
                     heroClassLabel.Text = textDictionary.Translate("strBarbarian");
+                    heroDesc1Label.Text = "He is unequaled in close-quarters";
+                    heroDesc2Label.Text = "combat and mastery of weapons.";
+                    heroDesc3Label.Text = "";
                     break;
                 case eHero.Necromancer:
                     heroClassLabel.Text = textDictionary.Translate("strNecromancer");
+                    heroDesc1Label.Text = "Summoning undead minions and cursing";
+                    heroDesc2Label.Text = "his enemies are his specialties.";
+                    heroDesc3Label.Text = "";
                     break;
                 case eHero.Paladin:
                     heroClassLabel.Text = textDictionary.Translate("strPaladin");
+                    heroDesc1Label.Text = "He is a natural party leader, holy";
+                    heroDesc2Label.Text = "man, and blessed warrior.";
+                    heroDesc3Label.Text = "";
                     break;
                 case eHero.Assassin:
                     heroClassLabel.Text = textDictionary.Translate("strAssassin");
+                    heroDesc1Label.Text = "Schooled in the Material Arts. Her";
+                    heroDesc2Label.Text = "mind and body are deadly weapons.";
+                    heroDesc3Label.Text = "";
                     break;
                 case eHero.Sorceress:
                     heroClassLabel.Text = textDictionary.Translate("strSorceress");
+                    heroClassLabel.Text = textDictionary.Translate("strAmazon");
+                    heroDesc1Label.Text = "She has mastered the elemental";
+                    heroDesc2Label.Text = "magicks -- fire, lightning, and ice.";
+                    heroDesc3Label.Text = "";
                     break;
                 case eHero.Amazon:
                     heroClassLabel.Text = textDictionary.Translate("strAmazon");
+                    heroDesc1Label.Text = "Skilled with the spear and the bow,";
+                    heroDesc2Label.Text = "she is a very versatile fighter.";
+                    heroDesc3Label.Text = "";
                     break;
                 case eHero.Druid:
                     heroClassLabel.Text = textDictionary.Translate("strDruid");
+                    heroDesc1Label.Text = "Commanding the forces of nature, he";
+                    heroDesc2Label.Text = "summons wild beasts and raging";
+                    heroDesc3Label.Text = "storms to his side.";
                     break;
             }
 
             heroClassLabel.Location = new Point(400 - (heroClassLabel.TextArea.Width / 2), 65);
+            heroDesc1Label.Location = new Point(400 - (heroDesc1Label.TextArea.Width / 2), 100);
+            heroDesc2Label.Location = new Point(400 - (heroDesc2Label.TextArea.Width / 2), 115);
+            heroDesc3Label.Location = new Point(400 - (heroDesc3Label.TextArea.Width / 2), 130);
         }
 
         public void Dispose()
