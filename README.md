@@ -1,5 +1,6 @@
 # OpenDiablo2
 An open source re-implementation of Diablo 2 in C#
+
 [Join us on Discord!](https://discord.gg/pRy8tdc)
 
 <img src="https://raw.githubusercontent.com/essial/OpenDiablo2/master/Screenshot.png" />
