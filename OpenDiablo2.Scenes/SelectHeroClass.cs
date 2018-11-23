@@ -14,12 +14,12 @@ namespace OpenDiablo2.Scenes
 {
     enum eHero
     {
-        Amazon,
-        Assassin,
-        Necromancer,
         Barbarian,
+        Necromancer,
         Paladin,
+        Assassin,
         Sorceress,
+        Amazon,
         Druid
     }
 
@@ -34,8 +34,10 @@ namespace OpenDiablo2.Scenes
 
     class HeroRenderInfo
     {
-        public ISprite IdleSprite, IdleSelectedSprite, ApproacingSprite, SelectedSprite, RetreatingSprite;
+        public ISprite IdleSprite, IdleSelectedSprite, ForwardWalkSprite, ForwardWalkSpriteOverlay, SelectedSprite, SelectedSpriteOverlay, BackWalkSprite, BackWalkSpriteOverlay;
         public eHeroStance Stance;
+        public long ForwardWalkTimeMs, BackWalkTimeMs;
+        public long SpecialFrameTime;
         public Rectangle SelectionBounds = new Rectangle();
     }
 
@@ -76,77 +78,136 @@ namespace OpenDiablo2.Scenes
 
 
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBackground, Palettes.Fechar);
-            campfireSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectCampfire, Palettes.Fechar, new System.Drawing.Point(380, 335));
+            campfireSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectCampfire, Palettes.Fechar, new Point(380, 335));
+            campfireSprite.Blend = true;
 
             heroRenderInfo[eHero.Barbarian] = new HeroRenderInfo
             {
                 Stance = eHeroStance.Idle,
-                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselected, Palettes.Fechar, new System.Drawing.Point(400, 330)),
-                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselectedH, Palettes.Fechar, new System.Drawing.Point(400, 330)),
-                SelectionBounds = new Rectangle(364, 201, 90, 170)
+                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselected, Palettes.Fechar, new Point(400, 330)),
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselectedH, Palettes.Fechar, new Point(400, 330)),
+                ForwardWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianForwardWalk, Palettes.Fechar, new Point(400, 330)),
+                ForwardWalkSpriteOverlay = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianForwardWalkOverlay, Palettes.Fechar, new Point(400, 330)),
+                SelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianSelected, Palettes.Fechar, new Point(400, 330)),
+                BackWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianBackWalk, Palettes.Fechar, new Point(400, 330)),
+                SelectionBounds = new Rectangle(364, 201, 90, 170),
+                ForwardWalkTimeMs = 3000,
+                BackWalkTimeMs = 1000
             };
 
             heroRenderInfo[eHero.Sorceress] = new HeroRenderInfo
             {
                 Stance = eHeroStance.Idle,
-                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselected, Palettes.Fechar, new System.Drawing.Point(626, 352)),
-                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselectedH, Palettes.Fechar, new System.Drawing.Point(626, 352)),
-                SelectionBounds = new Rectangle(580, 240, 65, 160)
+                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselected, Palettes.Fechar, new Point(626, 352)),
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselectedH, Palettes.Fechar, new Point(626, 352)),
+                ForwardWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressForwardWalk, Palettes.Fechar, new Point(626, 352)),
+                ForwardWalkSpriteOverlay = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressForwardWalkOverlay, Palettes.Fechar, new Point(626, 352)),
+                SelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressSelected, Palettes.Fechar, new Point(626, 352)),
+                SelectedSpriteOverlay = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressSelectedOverlay, Palettes.Fechar, new Point(626, 352)),
+                BackWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressBackWalk, Palettes.Fechar, new Point(626, 352)),
+                BackWalkSpriteOverlay = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressBackWalkOverlay, Palettes.Fechar, new Point(626, 352)),
+                SelectionBounds = new Rectangle(580, 240, 65, 160),
+                ForwardWalkTimeMs = 3000,
+                BackWalkTimeMs = 1200
             };
+            heroRenderInfo[eHero.Sorceress].SelectedSpriteOverlay.Blend = true;
+            heroRenderInfo[eHero.Sorceress].ForwardWalkSpriteOverlay.Blend = true;
+            heroRenderInfo[eHero.Sorceress].BackWalkSpriteOverlay.Blend = true;
+
 
             heroRenderInfo[eHero.Necromancer] = new HeroRenderInfo
             {
                 Stance = eHeroStance.Idle,
-                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselected, Palettes.Fechar, new System.Drawing.Point(300, 335)),
-                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselectedH, Palettes.Fechar, new System.Drawing.Point(300, 335)),
-                SelectionBounds = new Rectangle(265, 220, 55, 175)
+                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselected, Palettes.Fechar, new Point(300, 335)),
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselectedH, Palettes.Fechar, new Point(300, 335)),
+                ForwardWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecNecromancerForwardWalk, Palettes.Fechar, new Point(300, 335)),
+                ForwardWalkSpriteOverlay = renderWindow.LoadSprite(ResourcePaths.CharacterSelecNecromancerForwardWalkOverlay, Palettes.Fechar, new Point(300, 335)),
+                SelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecNecromancerSelected, Palettes.Fechar, new Point(300, 335)),
+                SelectedSpriteOverlay = renderWindow.LoadSprite(ResourcePaths.CharacterSelecNecromancerSelectedOverlay, Palettes.Fechar, new Point(300, 335)),
+                BackWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecNecromancerBackWalk, Palettes.Fechar, new Point(300, 335)),
+                BackWalkSpriteOverlay = renderWindow.LoadSprite(ResourcePaths.CharacterSelecNecromancerBackWalkOverlay, Palettes.Fechar, new Point(300, 335)),
+                SelectionBounds = new Rectangle(265, 220, 55, 175),
+                ForwardWalkTimeMs = 3000,
+                BackWalkTimeMs = 1500,
             };
+            heroRenderInfo[eHero.Necromancer].ForwardWalkSpriteOverlay.Blend = true;
+            heroRenderInfo[eHero.Necromancer].BackWalkSpriteOverlay.Blend = true;
+            heroRenderInfo[eHero.Necromancer].SelectedSpriteOverlay.Blend = true;
 
             heroRenderInfo[eHero.Paladin] = new HeroRenderInfo
             {
                 Stance = eHeroStance.Idle,
-                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselected, Palettes.Fechar, new System.Drawing.Point(521, 338)),
-                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselectedH, Palettes.Fechar, new System.Drawing.Point(521, 338)),
-                SelectionBounds = new Rectangle(490, 210, 65, 180)
+                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselected, Palettes.Fechar, new Point(521, 338)),
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselectedH, Palettes.Fechar, new Point(521, 338)),
+                ForwardWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecPaladinForwardWalk, Palettes.Fechar, new Point(521, 338)),
+                ForwardWalkSpriteOverlay = renderWindow.LoadSprite(ResourcePaths.CharacterSelecPaladinForwardWalkOverlay, Palettes.Fechar, new Point(521, 338)),
+                SelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecPaladinSelected, Palettes.Fechar, new Point(521, 338)),
+                BackWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecPaladinBackWalk, Palettes.Fechar, new Point(521, 338)),
+                SelectionBounds = new Rectangle(490, 210, 65, 180),
+                ForwardWalkTimeMs = 4000,
+                BackWalkTimeMs = 1300
             };
 
             heroRenderInfo[eHero.Amazon] = new HeroRenderInfo
             {
                 Stance = eHeroStance.Idle,
-                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselected, Palettes.Fechar, new System.Drawing.Point(100, 339)),
-                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselectedH, Palettes.Fechar, new System.Drawing.Point(100, 339)),
-                SelectionBounds = new Rectangle(70, 220, 55, 200)
+                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselected, Palettes.Fechar, new Point(100, 339)),
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselectedH, Palettes.Fechar, new Point(100, 339)),
+                ForwardWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecAmazonForwardWalk, Palettes.Fechar, new Point(100, 339)),
+                //ForwardWalkSpriteOverlay = renderWindow.LoadSprite(ResourcePaths.CharacterSelecAmazonForwardWalkOverlay, Palettes.Fechar, new Point(100, 339)),
+                SelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecAmazonSelected, Palettes.Fechar, new Point(100, 339)),
+                BackWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecAmazonBackWalk, Palettes.Fechar, new Point(100, 339)),
+                SelectionBounds = new Rectangle(70, 220, 55, 200),
+                ForwardWalkTimeMs = 2600,
+                BackWalkTimeMs = 1500
             };
 
             heroRenderInfo[eHero.Assassin] = new HeroRenderInfo
             {
                 Stance = eHeroStance.Idle,
-                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselected, Palettes.Fechar, new System.Drawing.Point(231, 365)),
-                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselectedH, Palettes.Fechar, new System.Drawing.Point(231, 365)),
-                SelectionBounds = new Rectangle(175, 235, 50, 180)
+                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselected, Palettes.Fechar, new Point(231, 365)),
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselectedH, Palettes.Fechar, new Point(231, 365)),
+                ForwardWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinForwardWalk, Palettes.Fechar, new Point(231, 365)),
+                SelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinSelected, Palettes.Fechar, new Point(231, 365)),
+                BackWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinBackWalk, Palettes.Fechar, new Point(231, 365)),
+                SelectionBounds = new Rectangle(175, 235, 50, 180),
+                ForwardWalkTimeMs = 3000,
+                BackWalkTimeMs = 1500
             };
 
             heroRenderInfo[eHero.Druid] = new HeroRenderInfo
             {
                 Stance = eHeroStance.Idle,
-                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidUnselected, Palettes.Fechar, new System.Drawing.Point(720, 370)),
-                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidUnselectedH, Palettes.Fechar, new System.Drawing.Point(720, 370)),
-                SelectionBounds = new Rectangle(680, 220, 70, 195)
+                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidUnselected, Palettes.Fechar, new Point(720, 370)),
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidUnselectedH, Palettes.Fechar, new Point(720, 370)),
+                ForwardWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidForwardWalk, Palettes.Fechar, new Point(720, 370)),
+                SelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidSelected, Palettes.Fechar, new Point(720, 370)),
+                BackWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidBackWalk, Palettes.Fechar, new Point(720, 370)),
+                SelectionBounds = new Rectangle(680, 220, 70, 195),
+                ForwardWalkTimeMs = 3000,
+                BackWalkTimeMs = 1500
             };
 
             headingFont = renderWindow.LoadFont(ResourcePaths.Font30, Palettes.Units);
             headingLabel = renderWindow.CreateLabel(headingFont);
             headingLabel.Text = "Select Hero Class";
-            headingLabel.Location = new System.Drawing.Point(400 - (headingLabel.TextArea.Width / 2), 17);
+            headingLabel.Location = new Point(400 - (headingLabel.TextArea.Width / 2), 17);
 
             exitButton = createButton(eButtonType.Medium);
             exitButton.Text = "EXIT";
-            exitButton.Location = new System.Drawing.Point(30, 540);
+            exitButton.Location = new Point(30, 540);
             exitButton.OnActivate = OnExitClicked;
         }
 
         private void OnExitClicked()
         {
+            var heros = Enum.GetValues(typeof(eHero)).Cast<eHero>();
+            foreach(var hero in heros)
+            {
+                heroRenderInfo[hero].SpecialFrameTime = 0;
+                heroRenderInfo[hero].Stance = eHeroStance.Idle;
+            }
+
             sceneManager.ChangeScene("Main Menu");
         }
 
@@ -163,9 +224,14 @@ namespace OpenDiablo2.Scenes
 
         private void RenderHeros()
         {
-            foreach (var hero in Enum.GetValues(typeof(eHero)).Cast<eHero>())
-                RenderHero(hero);
+            var heros = Enum.GetValues(typeof(eHero)).Cast<eHero>();
+            foreach (var hero in heros)
+                if (heroRenderInfo[hero].Stance == eHeroStance.Idle || heroRenderInfo[hero].Stance == eHeroStance.IdleSelected)
+                    RenderHero(hero);
 
+            foreach (var hero in heros)
+                if (heroRenderInfo[hero].Stance != eHeroStance.Idle && heroRenderInfo[hero].Stance != eHeroStance.IdleSelected)
+                    RenderHero(hero);
         }
 
         private void RenderHero(eHero hero)
@@ -180,12 +246,28 @@ namespace OpenDiablo2.Scenes
                     renderWindow.Draw(renderInfo.IdleSelectedSprite, (int)(renderInfo.IdleSelectedSprite.TotalFrames * secondTimer));
                     break;
                 case eHeroStance.Approaching:
+                    {
+                        var framePct = (float)renderInfo.SpecialFrameTime / (float)renderInfo.ForwardWalkTimeMs;
+                        renderWindow.Draw(renderInfo.ForwardWalkSprite, (int)(renderInfo.ForwardWalkSprite.TotalFrames * framePct));
+                        if (renderInfo.ForwardWalkSpriteOverlay != null)
+                            renderWindow.Draw(renderInfo.ForwardWalkSpriteOverlay, (int)(renderInfo.ForwardWalkSpriteOverlay.TotalFrames * framePct));
+                    }
                     break;
                 case eHeroStance.Selected:
+                    {
+                        var framePct = (float)renderInfo.SpecialFrameTime / (float)1000;
+                        renderWindow.Draw(renderInfo.SelectedSprite, (int)(renderInfo.SelectedSprite.TotalFrames * framePct));
+                        if (renderInfo.SelectedSpriteOverlay != null)
+                            renderWindow.Draw(renderInfo.SelectedSpriteOverlay, (int)(renderInfo.SelectedSpriteOverlay.TotalFrames * framePct));
+                    }
                     break;
                 case eHeroStance.Retreating:
-                    break;
-                default:
+                    {
+                        var framePct = (float)renderInfo.SpecialFrameTime / (float)renderInfo.BackWalkTimeMs;
+                        renderWindow.Draw(renderInfo.BackWalkSprite, (int)(renderInfo.BackWalkSprite.TotalFrames * framePct));
+                        if (renderInfo.BackWalkSpriteOverlay != null)
+                            renderWindow.Draw(renderInfo.BackWalkSpriteOverlay, (int)(renderInfo.BackWalkSpriteOverlay.TotalFrames * framePct));
+                    }
                     break;
             }
 
@@ -199,25 +281,80 @@ namespace OpenDiablo2.Scenes
                 secondTimer -= 1f;
 
             // Don't update hero selection if one of them is walking to or from the campfire
-            if (heroRenderInfo.All(x => x.Value.Stance == eHeroStance.Idle || x.Value.Stance == eHeroStance.IdleSelected || x.Value.Stance == eHeroStance.Selected))
-                foreach (var hero in Enum.GetValues(typeof(eHero)).Cast<eHero>())
-                    UpdateHeroSelectionHover(hero);
+            var canSelect = heroRenderInfo.All(x => x.Value.Stance == eHeroStance.Idle || x.Value.Stance == eHeroStance.IdleSelected || x.Value.Stance == eHeroStance.Selected);
+
+            foreach (var hero in Enum.GetValues(typeof(eHero)).Cast<eHero>())
+                UpdateHeroSelectionHover(hero, ms, canSelect);
 
             exitButton.Update();
         }
 
-        private void UpdateHeroSelectionHover(eHero hero)
+        private void UpdateHeroSelectionHover(eHero hero, long ms, bool canSelect)
         {
+            var renderInfo = heroRenderInfo[hero];
+            if (renderInfo.Stance == eHeroStance.Approaching)
+            {
+                renderInfo.SpecialFrameTime += ms;
+                if (renderInfo.SpecialFrameTime >= renderInfo.ForwardWalkTimeMs)
+                {
+                    renderInfo.Stance = eHeroStance.Selected;
+                    renderInfo.SpecialFrameTime = 0;
+                }
+
+                return;
+            }
+
+            if (renderInfo.Stance == eHeroStance.Retreating)
+            {
+                renderInfo.SpecialFrameTime += ms;
+                if (renderInfo.SpecialFrameTime >= renderInfo.BackWalkTimeMs)
+                {
+                    renderInfo.Stance = eHeroStance.Idle;
+                    renderInfo.SpecialFrameTime = 0;
+                }
+
+                return;
+            }
+
+            if (renderInfo.Stance == eHeroStance.Selected)
+            {
+                renderInfo.SpecialFrameTime += ms;
+                while (renderInfo.SpecialFrameTime >= 1000)
+                    renderInfo.SpecialFrameTime -= 1000;
+                return;
+            }
+
+            if (!canSelect)
+                return;
+
             // No need to highlight a hero if they are next to the campfire
-            if (heroRenderInfo[hero].Stance == eHeroStance.Selected)
+            if (renderInfo.Stance == eHeroStance.Selected)
                 return;
 
             var mouseX = mouseInfoProvider.MouseX;
             var mouseY = mouseInfoProvider.MouseY;
 
-            var b = heroRenderInfo[hero].SelectionBounds;
-
+            var b = renderInfo.SelectionBounds;
             var mouseHover = (mouseX >= b.Left) && (mouseX <= b.Left + b.Width) && (mouseY >= b.Top) && (mouseY <= b.Top + b.Height);
+
+            if (mouseHover && mouseInfoProvider.LeftMouseDown)
+            {
+                renderInfo.Stance = eHeroStance.Approaching;
+                renderInfo.SpecialFrameTime = 0;
+
+
+                foreach(var ri in heroRenderInfo)
+                {
+                    if (ri.Value.Stance != eHeroStance.Selected)
+                        continue;
+
+                    ri.Value.Stance = eHeroStance.Retreating;
+                    ri.Value.SpecialFrameTime = 0;
+                    break;
+                }
+
+                return;
+            }
 
             heroRenderInfo[hero].Stance = mouseHover ? eHeroStance.IdleSelected : eHeroStance.Idle;
         }

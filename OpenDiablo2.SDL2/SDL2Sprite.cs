@@ -18,7 +18,16 @@ namespace OpenDiablo2.SDL2_
 
         public Point Location { get; set; } = new Point();
         public Size FrameSize { get; set; } = new Size();
-        public int Frame { get; set; }
+
+        private int frame;
+        public int Frame
+        {
+            get => frame;
+            set
+            {
+                frame = Math.Max(0, Math.Min(value, TotalFrames));
+            }
+        }
         public int TotalFrames { get; internal set; }
 
         private bool blend = false;
