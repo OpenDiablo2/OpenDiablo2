@@ -54,12 +54,13 @@ namespace OpenDiablo2.Scenes
         private readonly ISceneManager sceneManager;
         private readonly ITextDictionary textDictionary;
 
+        private bool showEntryUi = false;
         private eHero? selectedHero = null;
         private float secondTimer;
         private ISprite backgroundSprite, campfireSprite;
         private IFont headingFont, heroDescFont;
         private ILabel headingLabel, heroClassLabel, heroDesc1Label, heroDesc2Label, heroDesc3Label;
-        private Button exitButton;
+        private Button exitButton, okButton;
         private Dictionary<eHero, HeroRenderInfo> heroRenderInfo = new Dictionary<eHero, HeroRenderInfo>();
 
         public SelectHeroClass(
@@ -211,6 +212,18 @@ namespace OpenDiablo2.Scenes
             exitButton.Text = "EXIT";
             exitButton.Location = new Point(30, 540);
             exitButton.OnActivate = OnExitClicked;
+
+            okButton = createButton(eButtonType.Medium);
+            okButton.Text = "OK";
+            okButton.Location = new Point(630, 540);
+            okButton.OnActivate = OnOkclicked;
+            okButton.Enabled = false;
+
+        }
+
+        private void OnOkclicked()
+        {
+            
         }
 
         private void OnExitClicked()
@@ -221,6 +234,7 @@ namespace OpenDiablo2.Scenes
                 heroRenderInfo[hero].SpecialFrameTime = 0;
                 heroRenderInfo[hero].Stance = eHeroStance.Idle;
             }
+            showEntryUi = false;
 
             sceneManager.ChangeScene("Main Menu");
         }
@@ -240,7 +254,11 @@ namespace OpenDiablo2.Scenes
                 renderWindow.Draw(heroDesc2Label);
                 renderWindow.Draw(heroDesc3Label);
             }
+
             exitButton.Render();
+
+            if (showEntryUi)
+                okButton.Render();
         }
 
         private void RenderHeros()
@@ -313,6 +331,7 @@ namespace OpenDiablo2.Scenes
             }
 
             exitButton.Update();
+            okButton.Update();
         }
 
         private void UpdateHeroSelectionHover(eHero hero, long ms, bool canSelect)
@@ -365,6 +384,7 @@ namespace OpenDiablo2.Scenes
 
             if (mouseHover && mouseInfoProvider.LeftMouseDown)
             {
+                showEntryUi = true;
                 renderInfo.Stance = eHeroStance.Approaching;
                 renderInfo.SpecialFrameTime = 0;
 

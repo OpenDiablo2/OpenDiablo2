@@ -19,6 +19,19 @@ namespace OpenDiablo2.SDL2_
         public Point Location { get; set; } = new Point();
         public Size FrameSize { get; set; } = new Size();
 
+        private bool darken;
+        public bool Darken
+        {
+            get => darken;
+            set
+            {
+                if (darken == value)
+                    return;
+                darken = value;
+                LoadFrame(frame);
+            }
+        }
+
         private int frame = -1;
         public int Frame
         {
@@ -75,7 +88,6 @@ namespace OpenDiablo2.SDL2_
 
         public Size LocalFrameSize => new Size((int)source.Frames[Frame].Width, (int)source.Frames[Frame].Height);
 
-        // TODO: This is slow. Make fix.
         private void UpdateTextureData()
         {
             if (texture == IntPtr.Zero)
@@ -87,7 +99,6 @@ namespace OpenDiablo2.SDL2_
 
                 Frame = 0;
             }
-
         }
 
         private unsafe void LoadFrame(int index)
@@ -114,8 +125,10 @@ namespace OpenDiablo2.SDL2_
                             continue;
                         }
 
-                        
-                        data[x + (y * (pitch / 4))] = frame.GetColor(x, (int)(y - frameOffset), CurrentPalette);
+                        var color = frame.GetColor(x, (int)(y - frameOffset), CurrentPalette);
+                        if (darken)
+                            color = ((color & 0xFF000000) > 0) ? (color >> 1) & 0xFF7F7F7F | 0xFF000000 : 0;
+                        data[x + (y * (pitch / 4))] = color;
                     }
                 }
             }

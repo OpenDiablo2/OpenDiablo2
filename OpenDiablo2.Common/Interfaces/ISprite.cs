@@ -13,5 +13,6 @@ namespace OpenDiablo2.Common.Interfaces
         int TotalFrames { get; }
         Palette CurrentPalette { get; set; }
         bool Blend { get; set; }
+        bool Darken { get; set; }
     }
 }
