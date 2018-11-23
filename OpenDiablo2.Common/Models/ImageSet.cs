@@ -19,16 +19,16 @@ namespace OpenDiablo2.Common.Models
         public UInt32 Unknown;
         public UInt32 NextBlock;
         public UInt32 Length;
-        public Int16[,] ImageData;
+        public Int16[] ImageData;
 
         public void Dispose()
         {
-            ImageData = new Int16[0, 0];
+            ImageData = new Int16[0];
         }
 
         public Color GetColor(int x, int y, Palette palette)
         {
-            var index = ImageData[x, y];
+            var index = ImageData[x + (y * Width)];
             if (index == -1)
                 return Color.Transparent;
 
@@ -86,10 +86,10 @@ namespace OpenDiablo2.Common.Models
                     Length = br.ReadUInt32()
                 };
 
-                result.Frames[i].ImageData = new Int16[result.Frames[i].Width, result.Frames[i].Height];
+                result.Frames[i].ImageData = new Int16[result.Frames[i].Width * result.Frames[i].Height];
                 for (int ty = 0; ty < result.Frames[i].Height; ty++)
                     for (int tx = 0; tx < result.Frames[i].Width; tx++)
-                        result.Frames[i].ImageData[tx, ty] = -1;
+                        result.Frames[i].ImageData[tx + (ty * result.Frames[i].Width)] = -1;
 
 
                 int x = 0;
@@ -110,17 +110,19 @@ namespace OpenDiablo2.Common.Models
                     if ((b & 0x80) > 0)
                     {
                         var transparentPixelsToWrite = b & 0x7F;
-                        for (int p = 0; p < transparentPixelsToWrite; p++)
-                        {
-                            result.Frames[i].ImageData[x++, y] = -1;
-                        }
+
+                        Enumerable.Repeat<Int16>(-1, transparentPixelsToWrite).ToArray()
+                            .CopyTo(result.Frames[i].ImageData, x + (y * result.Frames[i].Width));
+                        x += transparentPixelsToWrite;
+
                         continue;
                     }
 
-                    for (int p = 0; p < b; p++)
-                    {
-                        result.Frames[i].ImageData[x++, y] = br.ReadByte();
-                    }
+
+                    br.ReadBytes(b).CopyTo(result.Frames[i].ImageData, x + (y * result.Frames[i].Width));
+                    x += b;
+
+
 
                 }
             }

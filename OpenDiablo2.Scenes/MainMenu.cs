@@ -85,18 +85,6 @@ namespace OpenDiablo2.Scenes
             /*
             musicProvider.LoadSong(mpqProvider.GetStream("data\\global\\music\\introedit.wav"));
 
-            // TODO: Fake loading for now, this should be in its own scene as we start loading real stuff
-            var r = new Random();
-            for (int i = 1; i < 10; i++)
-            {
-                renderWindow.Clear();
-                loadingSprite.Frame = i;
-                renderWindow.Draw(loadingSprite);
-                renderWindow.Sync();
-                Thread.Sleep(r.Next(150));
-
-            }
-
             musicProvider.PlaySong();
             */
         }

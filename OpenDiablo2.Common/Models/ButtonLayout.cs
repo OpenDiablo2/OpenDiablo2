@@ -16,6 +16,7 @@ namespace OpenDiablo2.Common.Models
         public static Dictionary<eButtonType, ButtonLayout> Values = new Dictionary<eButtonType, ButtonLayout>
         {
             {eButtonType.Wide,  new ButtonLayout { XSegments = 2, ResourceName = ResourcePaths.WideButtonBlank, PaletteName = Palettes.Units } },
+            {eButtonType.Medium, new ButtonLayout{ XSegments = 1, ResourceName=ResourcePaths.MediumButtonBlank, PaletteName = Palettes.Units } },
             {eButtonType.Cancel, new ButtonLayout {XSegments = 1,ResourceName = ResourcePaths.CancelButton,PaletteName = Palettes.Units } }
         };
     }

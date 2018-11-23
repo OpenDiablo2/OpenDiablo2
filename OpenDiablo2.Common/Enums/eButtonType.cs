@@ -3,6 +3,7 @@
     public enum eButtonType
     {
         Wide,
+        Medium,
         Cancel
     }
 }

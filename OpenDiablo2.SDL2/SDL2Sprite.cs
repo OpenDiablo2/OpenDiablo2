@@ -67,17 +67,13 @@ namespace OpenDiablo2.SDL2_
 
         public Size LocalFrameSize => new Size((int)source.Frames[Frame].Width, (int)source.Frames[Frame].Height);
 
+        // TODO: This is slow. Make fix.
         private void UpdateTextureData()
         {
-            foreach (var texture in textures)
-            {
-                SDL.SDL_DestroyTexture(texture);
-            }
-
             textures = new IntPtr[TotalFrames];
 
             for (var i = 0; i < source.Frames.Count(); i++)
-                textures[i] = LoadFrame(source.Frames[i], renderer);
+                LoadFrame(i, renderer);
 
 
         }
@@ -91,32 +87,40 @@ namespace OpenDiablo2.SDL2_
                 (byte)Math.Min((float)source.B * 1.2, 255)
             );
 
-        private IntPtr LoadFrame(ImageFrame frame, IntPtr renderer)
+        object bob = new object();
+        private void LoadFrame(int index, IntPtr renderer)
         {
-            var texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Pow2(FrameSize.Width), Pow2(FrameSize.Height));
+            var frame = source.Frames[index];
 
-            if (texture == IntPtr.Zero)
+            if (textures[index] == IntPtr.Zero)
+                textures[index] = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, Pow2(FrameSize.Width), Pow2(FrameSize.Height));
+
+            if (textures[index] == IntPtr.Zero)
                 throw new ApplicationException("Unaple to initialize texture.");
 
-            SDL.SDL_SetTextureBlendMode(texture, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
-            SDL.SDL_SetRenderTarget(renderer, texture);
+            SDL.SDL_SetTextureBlendMode(textures[index], SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+            SDL.SDL_SetRenderTarget(renderer, textures[index]);
             SDL.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
             SDL.SDL_RenderFillRect(renderer, IntPtr.Zero);
             SDL.SDL_SetRenderTarget(renderer, IntPtr.Zero);
 
             var binaryData = new UInt32[frame.Width * frame.Height];
-            for (int y = 0; y < frame.Height; y++)
+            for (var y = 0; y < frame.Height; y++)
+            {
                 for (int x = 0; x < frame.Width; x++)
                 {
-                    var col = AdjustColor(frame.GetColor(x, y, CurrentPalette));
-                    binaryData[x + y * frame.Width] = (uint)col.ToArgb();
+                    var palColor = frame.GetColor(x, (int)y, CurrentPalette);
+                    //var col = AdjustColor(palColor);
+                    binaryData[x + y * frame.Width] = (uint)palColor.ToArgb();
                 }
+            }
+
+
             var rect = new SDL.SDL_Rect { x = 0, y = FrameSize.Height - (int)frame.Height, w = (int)frame.Width, h = (int)frame.Height };
             GCHandle pinnedArray = GCHandle.Alloc(binaryData, GCHandleType.Pinned);
-            SDL.SDL_UpdateTexture(texture, ref rect, pinnedArray.AddrOfPinnedObject(), (int)frame.Width * 4);
+            SDL.SDL_UpdateTexture(textures[index], ref rect, pinnedArray.AddrOfPinnedObject(), (int)frame.Width * 4);
             pinnedArray.Free();
 
-            return texture;
 
         }
 

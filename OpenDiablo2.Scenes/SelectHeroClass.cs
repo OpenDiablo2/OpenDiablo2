@@ -51,11 +51,11 @@ namespace OpenDiablo2.Scenes
             headingFont = renderWindow.LoadFont(ResourcePaths.Font30, Palettes.Units);
             headingLabel = renderWindow.CreateLabel(headingFont);
             headingLabel.Text = "Select Hero Class";
-            headingLabel.Location = new System.Drawing.Point(400 - (headingLabel.TextArea.Width / 2), 20);
+            headingLabel.Location = new System.Drawing.Point(400 - (headingLabel.TextArea.Width / 2), 17);
 
-            exitButton = createButton(eButtonType.Cancel);
+            exitButton = createButton(eButtonType.Medium);
             exitButton.Text = "EXIT";
-            exitButton.Location = new System.Drawing.Point(30, 550);
+            exitButton.Location = new System.Drawing.Point(30, 540);
             exitButton.OnActivate = OnExitClicked;
         }
 
