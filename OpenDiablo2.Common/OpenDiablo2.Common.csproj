@@ -55,6 +55,9 @@
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.84.0.0, Culture=neutral, PublicKeyToken=1b03e6acf1164f73">
       <HintPath>..\packages\NetSword.Common.ICSharpCode.SharpZipLib.0.84.0\lib\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
+    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -67,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\SceneAttribute.cs" />
+    <Compile Include="Enums\eButtonType.cs" />
     <Compile Include="Enums\eMPQFormatVersion.cs" />
     <Compile Include="Interfaces\IFont.cs" />
     <Compile Include="Interfaces\IGameEngine.cs" />
@@ -76,11 +80,14 @@
     <Compile Include="Interfaces\IPaletteProvider.cs" />
     <Compile Include="Interfaces\IRenderTarget.cs" />
     <Compile Include="Interfaces\IRenderWindow.cs" />
+    <Compile Include="Interfaces\IResourceManager.cs" />
     <Compile Include="Interfaces\IScene.cs" />
+    <Compile Include="Interfaces\ISceneManager.cs" />
     <Compile Include="Interfaces\ISprite.cs" />
     <Compile Include="Interfaces\IMouseInfoProvider.cs" />
     <Compile Include="Interfaces\ITextLabel.cs" />
     <Compile Include="Models\BitStream.cs" />
+    <Compile Include="Models\ButtonLayout.cs" />
     <Compile Include="Models\MPQFont.cs" />
     <Compile Include="Models\GlobalConfiguration.cs" />
     <Compile Include="Models\ImageSet.cs" />

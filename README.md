@@ -1,7 +1,10 @@
 # OpenDiablo2
 An open source re-implementation of Diablo 2 in C#
 
+[Join us on Discord!](https://discord.gg/pRy8tdc)
+
 <img src="https://raw.githubusercontent.com/essial/OpenDiablo2/master/Screenshot.png" />
+<img src="https://raw.githubusercontent.com/essial/OpenDiablo2/master/Screenshot2.png" />
 
 ## About this project
 
@@ -16,7 +19,9 @@ Diablo 2 and its content is ©2000 Blizzard Entertainment, Inc. All rights reser
 ALL OTHER TRADEMARKS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS.
 
 ## Building
-To build this engine, you simply need to have [Microsoft Visual Studio 2017](https://visualstudio.microsoft.com/downloads/) installed with C#/Windows support. Although we currently do not support building in Linux with MonoDevelop, we would like to begin adding support for Linux and Mac in the very near future.
+To build this engine, you simply need to have [Microsoft Visual Studio 2017](https://visualstudio.microsoft.com/downloads/) installed with C#/Windows support. Also make sure that only the x64 architecture is selected as we are not shipping 32-bit versions of SDL currently.
+
+Although we currently do not support building in Linux with MonoDevelop, we would like to begin adding support for Linux and Mac in the very near future.
 
 ## Running
 When running via VisualStudio, go to the debug tab and specify the following command line options:

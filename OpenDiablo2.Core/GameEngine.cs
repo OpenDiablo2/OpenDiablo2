@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace OpenDiablo2.Core
 {
-    public sealed class GameEngine : IGameEngine, IPaletteProvider
+    public sealed class GameEngine : IGameEngine, IPaletteProvider, ISceneManager
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -20,7 +20,10 @@ namespace OpenDiablo2.Core
         private readonly Func<IRenderWindow> getRenderWindow;
         private readonly Func<IMouseInfoProvider> getMouseInfoProvider;
         private readonly Func<string, IScene> getScene;
+        private readonly Func<IResourceManager> getResourceManager;
+
         private IScene currentScene;
+        private IScene nextScene = null;
         private ISprite mouseSprite;
 
         private readonly MPQ[] MPQs;
@@ -34,13 +37,15 @@ namespace OpenDiablo2.Core
             IMPQProvider mpqProvider,
             Func<IRenderWindow> getRenderWindow,
             Func<IMouseInfoProvider> getMouseInfoProvider,
-            Func<string, IScene> getScene
+            Func<string, IScene> getScene,
+            Func<IResourceManager> getResourceManager
             )
         {
             this.mpqProvider = mpqProvider;
             this.getRenderWindow = getRenderWindow;
             this.getMouseInfoProvider = getMouseInfoProvider;
             this.getScene = getScene;
+            this.getResourceManager = getResourceManager;
 
             MPQs = mpqProvider.GetMPQs().ToArray();
         }
@@ -53,7 +58,7 @@ namespace OpenDiablo2.Core
             {
                 var paletteNameParts = paletteFile.Split('\\');
                 var paletteName = paletteNameParts[paletteNameParts.Count() - 2];
-                PaletteTable[paletteName] = Palette.LoadFromStream(mpqProvider.GetStream(paletteFile), paletteName);
+                PaletteTable[paletteName] = getResourceManager().GetPalette(paletteFile);
             }
         }
 
@@ -80,6 +85,8 @@ namespace OpenDiablo2.Core
 
             mouseSprite = renderWindow.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units);
 
+
+
             currentScene = getScene("Main Menu");
             sw.Start();
             while (getRenderWindow().IsRunning)
@@ -98,6 +105,12 @@ namespace OpenDiablo2.Core
                 sw.Restart();
                 getRenderWindow().Update();
                 currentScene.Update(ms);
+                if (nextScene!= null)
+                {
+                    currentScene = nextScene;
+                    nextScene = null;
+                    continue;
+                }
 
                 renderWindow.Clear();
                 currentScene.Render();
@@ -111,7 +124,10 @@ namespace OpenDiablo2.Core
 
         public void Dispose()
         {
-
+            currentScene?.Dispose();
         }
+
+        public void ChangeScene(string sceneName)
+            => nextScene = getScene(sceneName);
     }
 }

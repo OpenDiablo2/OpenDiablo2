@@ -85,16 +85,18 @@ namespace OpenDiablo2.Common.Models
 
         private List<string> GetFilePaths()
         {
-            var stream = OpenFile("(listfile)");
-            if (stream == null)
+            using (var stream = OpenFile("(listfile)"))
             {
-                return new List<string>();
+                if (stream == null)
+                {
+                    return new List<string>();
+                }
+
+                var sr = new StreamReader(stream);
+                var text = sr.ReadToEnd();
+
+                return text.Split('\n').Where(x => !String.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToList();
             }
-
-            var sr = new StreamReader(stream);
-            var text = sr.ReadToEnd();
-
-            return text.Split('\n').Where(x => !String.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).ToList();
         }
 
         static MPQ()

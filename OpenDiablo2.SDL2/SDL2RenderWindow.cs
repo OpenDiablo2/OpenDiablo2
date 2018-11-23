@@ -17,24 +17,27 @@ namespace OpenDiablo2.SDL2_
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private IntPtr window, renderer;
-        private bool running;
-        public bool IsRunning => running;
+        public bool IsRunning { get; private set; }
 
         public int MouseX { get; internal set; } = 0;
         public int MouseY { get; internal set; } = 0;
         public bool LeftMouseDown { get; internal set; } = false;
         public bool RightMouseDown { get; internal set; } = false;
+        public bool ReserveMouse { get; set; } = false;
 
         private readonly IMPQProvider mpqProvider;
         private readonly IPaletteProvider paletteProvider;
+        private readonly IResourceManager resourceManager;
 
         public SDL2RenderWindow(
             IMPQProvider mpqProvider,
-            IPaletteProvider paletteProvider
+            IPaletteProvider paletteProvider,
+            IResourceManager resourceManager
             )
         {
             this.mpqProvider = mpqProvider;
             this.paletteProvider = paletteProvider;
+            this.resourceManager = resourceManager;
 
             SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
             if (SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "0") == SDL.SDL_bool.SDL_FALSE)
@@ -52,9 +55,12 @@ namespace OpenDiablo2.SDL2_
 
             SDL.SDL_ShowCursor(0);
 
-            running = true;
+            IsRunning = true;
 
         }
+
+        public void Quit() => IsRunning = false;
+
         public void Dispose()
         {
             SDL.SDL_DestroyRenderer(renderer);
@@ -84,9 +90,35 @@ namespace OpenDiablo2.SDL2_
                     continue;
                 }
 
-                if (evt.type == SDL.SDL_EventType.SDL_QUIT)
+                else if (evt.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN)
                 {
-                    running = false;
+                    switch((uint)evt.button.button)
+                    {
+                        case SDL.SDL_BUTTON_LEFT:
+                            LeftMouseDown = true;
+                            break;
+                        case SDL.SDL_BUTTON_RIGHT:
+                            RightMouseDown = true;
+                            break;
+                    }
+                }
+
+                else if (evt.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP)
+                {
+                    switch ((uint)evt.button.button)
+                    {
+                        case SDL.SDL_BUTTON_LEFT:
+                            LeftMouseDown = false;
+                            break;
+                        case SDL.SDL_BUTTON_RIGHT:
+                            RightMouseDown = false;
+                            break;
+                    }
+                }
+
+                else if (evt.type == SDL.SDL_EventType.SDL_QUIT)
+                {
+                    IsRunning = false;
                     continue;
                 }
             }
@@ -130,6 +162,7 @@ namespace OpenDiablo2.SDL2_
                 for (var x = 0; x < xSegments; x++)
                 {
                     var textureIndex = x + (y * xSegments) + (offset * xSegments * ySegments);
+                    textureIndex = Math.Min(spr.textures.Count() - 1, Math.Max(0, textureIndex));
                     if (textureIndex >= spr.textures.Count())
                         continue;
 
@@ -148,7 +181,7 @@ namespace OpenDiablo2.SDL2_
         public ISprite LoadSprite(string resourcePath, string palette) => LoadSprite(resourcePath, palette, Point.Empty);
         public ISprite LoadSprite(string resourcePath, string palette, Point location)
         {
-            var result = new SDL2Sprite(ImageSet.LoadFromStream(mpqProvider.GetStream(resourcePath)), renderer)
+            var result = new SDL2Sprite(resourceManager.GetImageSet(resourcePath), renderer)
             {
                 CurrentPalette = paletteProvider.PaletteTable[palette],
                 Location = location
@@ -158,7 +191,7 @@ namespace OpenDiablo2.SDL2_
 
         public IFont LoadFont(string resourcePath, string palette)
         {
-            var result = new SDL2Font(MPQFont.LoadFromStream(mpqProvider.GetStream($"{resourcePath}.DC6"), mpqProvider.GetStream($"{resourcePath}.tbl")), renderer)
+            var result = new SDL2Font(resourceManager.GetMPQFont(resourcePath), renderer)
             {
                 CurrentPalette = paletteProvider.PaletteTable[palette]
             };
@@ -184,7 +217,7 @@ namespace OpenDiablo2.SDL2_
             var result = new SDL2Label(font, renderer)
             {
                 Text = text,
-                Position = position
+                Location = position
             };
 
             return result;
@@ -193,7 +226,7 @@ namespace OpenDiablo2.SDL2_
         public void Draw(ILabel label)
         {
             var lbl = label as SDL2Label;
-            var loc = lbl.Position;
+            var loc = lbl.Location;
 
             var destRect = new SDL.SDL_Rect
             {
@@ -202,6 +235,7 @@ namespace OpenDiablo2.SDL2_
                 w = lbl.textureSize.Width,
                 h = lbl.textureSize.Height
             };
+
             SDL.SDL_RenderCopy(renderer, lbl.texture, IntPtr.Zero, ref destRect);
         }
     }

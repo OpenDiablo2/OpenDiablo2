@@ -12,11 +12,13 @@ namespace OpenDiablo2.SDL2_
 {
     internal sealed class SDL2Label : ILabel
     {
+        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private readonly SDL2Font font;
         private readonly IntPtr renderer;
         internal IntPtr texture;
         internal Size textureSize = new Size();
-        public Point Position { get; set; }
+        public Point Location { get; set; }
         public Size TextArea { get; set; } = new Size();
 
         private Color textColor = Color.White;
@@ -45,7 +47,7 @@ namespace OpenDiablo2.SDL2_
         {
             this.renderer = renderer;
             this.font = font as SDL2Font;
-            texture = IntPtr.Zero;
+            this.texture = IntPtr.Zero;
         }
 
         internal Size CalculateSize()
@@ -56,7 +58,7 @@ namespace OpenDiablo2.SDL2_
             {
                 var metric = font.font.CharacterMetric[(byte)ch];
                 w += metric.Width;
-                h = Math.Max(h, metric.Height);
+                h = Math.Max(Math.Max(h, metric.Height), font.sprite.FrameSize.Height);
             }
 
             return new Size(w, h);
@@ -118,6 +120,7 @@ namespace OpenDiablo2.SDL2_
         {
             if (texture != IntPtr.Zero)
                 SDL.SDL_DestroyTexture(texture);
+            texture = IntPtr.Zero;
         }
     }
 }
