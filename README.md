@@ -2,6 +2,7 @@
 An open source re-implementation of Diablo 2 in C#
 
 <img src="https://raw.githubusercontent.com/essial/OpenDiablo2/master/Screenshot.png" />
+<img src="https://raw.githubusercontent.com/essial/OpenDiablo2/master/Screenshot2.png" />
 
 ## About this project
 
