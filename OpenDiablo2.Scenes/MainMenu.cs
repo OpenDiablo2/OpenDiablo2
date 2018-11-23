@@ -39,7 +39,8 @@ namespace OpenDiablo2.Scenes
             IMouseInfoProvider mouseInfoProvider,
             IMusicProvider musicProvider,
             ISceneManager sceneManager,
-            Func<eButtonType, Button> createButton
+            Func<eButtonType, Button> createButton,
+            Func<string, IScene> getScene // Temporary until SDL load functions are sped up
             )
         {
             this.renderWindow = renderWindow;
@@ -78,9 +79,18 @@ namespace OpenDiablo2.Scenes
 
             var loadingSprite = renderWindow.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading, new Point(300, 400));
 
-            renderWindow.Clear();
-            renderWindow.Draw(loadingSprite);
-            renderWindow.Sync();
+
+            // Pre-load all the scenes for now until we fix the sdl load problem
+            var scenesToLoad = new string[] {"Select Hero Class" };
+            for (int i = 0; i < scenesToLoad.Count(); i++)
+            {
+                renderWindow.Clear();
+                renderWindow.Draw(loadingSprite, (int)((float)loadingSprite.TotalFrames * ((float)i / (float)scenesToLoad.Count())));
+                renderWindow.Sync();
+                getScene(scenesToLoad[i]);
+            }
+
+            
 
             /*
             musicProvider.LoadSong(mpqProvider.GetStream("data\\global\\music\\introedit.wav"));

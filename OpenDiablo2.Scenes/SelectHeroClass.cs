@@ -11,6 +11,32 @@ using OpenDiablo2.Core.UI;
 
 namespace OpenDiablo2.Scenes
 {
+    enum eHero
+    {
+        Amazon,
+        Assassin,
+        Necromancer,
+        Barbarian,
+        Paladin,
+        Sorceress,
+        Druid
+    }
+
+    enum eHeroStance
+    {
+        Idle,
+        IdleSelected,
+        Approaching,
+        Selected,
+        Retreating
+    }
+
+    struct HeroRenderInfo
+    {
+        public ISprite IdleSprite, IdleSelectedSprite, ApproacingSprite, SelectedSprite, RetreatingSprite;
+        public eHeroStance Stance;
+    }
+
     [Scene("Select Hero Class")]
     public sealed class SelectHeroClass : IScene
     {
@@ -24,17 +50,11 @@ namespace OpenDiablo2.Scenes
         private readonly ISceneManager sceneManager;
 
         private float secondTimer;
-        private ISprite backgroundSprite, campfireSprite,
-            barbarianUnselected, barbarianUnselectedH,
-            sorceressUnselected, sorceressUnselectedH,
-            necromancerUnselected, necromancerUnselectedH,
-            paladinUnselected, paladinUnselectedH,
-            amazonUnselected, amazonUnselectedH,
-            assassinUnselected, assassinUnselectedH,
-            druidUnselected, druidUnselectedH;
+        private ISprite backgroundSprite, campfireSprite;
         private IFont headingFont;
         private ILabel headingLabel;
         private Button exitButton;
+        private Dictionary<eHero, HeroRenderInfo> heroRenderInfo = new Dictionary<eHero, HeroRenderInfo>();
 
         public SelectHeroClass(
             IRenderWindow renderWindow,
@@ -52,29 +72,58 @@ namespace OpenDiablo2.Scenes
             this.mouseInfoProvider = mouseInfoProvider;
             this.sceneManager = sceneManager;
 
+
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBackground, Palettes.Fechar);
             campfireSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectCampfire, Palettes.Fechar, new System.Drawing.Point(380, 335));
 
-            barbarianUnselected = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselected, Palettes.Fechar, new System.Drawing.Point(400, 330));
-            barbarianUnselectedH = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselectedH, Palettes.Fechar, new System.Drawing.Point(400, 330));
+            heroRenderInfo[eHero.Barbarian] = new HeroRenderInfo
+            {
+                Stance = eHeroStance.Idle,
+                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselected, Palettes.Fechar, new System.Drawing.Point(400, 330)),
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselectedH, Palettes.Fechar, new System.Drawing.Point(400, 330))
+            };
 
-            sorceressUnselected = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselected, Palettes.Fechar, new System.Drawing.Point(626, 352));
-            sorceressUnselectedH = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselectedH, Palettes.Fechar, new System.Drawing.Point(626, 352));
+            heroRenderInfo[eHero.Sorceress] = new HeroRenderInfo
+            {
+                Stance = eHeroStance.Idle,
+                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselected, Palettes.Fechar, new System.Drawing.Point(626, 352)),
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselectedH, Palettes.Fechar, new System.Drawing.Point(626, 352))
+            };
 
-            necromancerUnselected = renderWindow.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselected, Palettes.Fechar, new System.Drawing.Point(300, 335));
-            necromancerUnselectedH = renderWindow.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselectedH, Palettes.Fechar, new System.Drawing.Point(300, 335));
+            heroRenderInfo[eHero.Necromancer] = new HeroRenderInfo
+            {
+                Stance = eHeroStance.Idle,
+                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselected, Palettes.Fechar, new System.Drawing.Point(300, 335)),
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselectedH, Palettes.Fechar, new System.Drawing.Point(300, 335))
+            };
 
-            paladinUnselected = renderWindow.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselected, Palettes.Fechar, new System.Drawing.Point(521, 338));
-            paladinUnselectedH = renderWindow.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselectedH, Palettes.Fechar, new System.Drawing.Point(521, 338));
+            heroRenderInfo[eHero.Paladin] = new HeroRenderInfo
+            {
+                Stance = eHeroStance.Idle,
+                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselected, Palettes.Fechar, new System.Drawing.Point(521, 338)),
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselectedH, Palettes.Fechar, new System.Drawing.Point(521, 338))
+            };
 
-            amazonUnselected = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselected, Palettes.Fechar, new System.Drawing.Point(100, 339));
-            amazonUnselectedH = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselectedH, Palettes.Fechar, new System.Drawing.Point(100, 339));
+            heroRenderInfo[eHero.Amazon] = new HeroRenderInfo
+            {
+                Stance = eHeroStance.Idle,
+                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselected, Palettes.Fechar, new System.Drawing.Point(100, 339)),
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselectedH, Palettes.Fechar, new System.Drawing.Point(100, 339))
+            };
 
-            assassinUnselected = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselected, Palettes.Fechar, new System.Drawing.Point(231, 365));
-            assassinUnselectedH = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselectedH, Palettes.Fechar, new System.Drawing.Point(231, 365));
+            heroRenderInfo[eHero.Assassin] = new HeroRenderInfo
+            {
+                Stance = eHeroStance.Idle,
+                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselected, Palettes.Fechar, new System.Drawing.Point(231, 365)),
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselectedH, Palettes.Fechar, new System.Drawing.Point(231, 365))
+            };
 
-            druidUnselected = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidUnselected, Palettes.Fechar, new System.Drawing.Point(720, 370));
-            druidUnselectedH = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidUnselectedH, Palettes.Fechar, new System.Drawing.Point(720, 370));
+            heroRenderInfo[eHero.Druid] = new HeroRenderInfo
+            {
+                Stance = eHeroStance.Idle,
+                IdleSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidUnselected, Palettes.Fechar, new System.Drawing.Point(720, 370)),
+                IdleSelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidUnselectedH, Palettes.Fechar, new System.Drawing.Point(720, 370))
+            };
 
             headingFont = renderWindow.LoadFont(ResourcePaths.Font30, Palettes.Units);
             headingLabel = renderWindow.CreateLabel(headingFont);
@@ -96,22 +145,46 @@ namespace OpenDiablo2.Scenes
         {
             renderWindow.Draw(backgroundSprite, 4, 3, 0);
 
-            renderWindow.Draw(barbarianUnselected, (int)(barbarianUnselected.TotalFrames * secondTimer));
-            renderWindow.Draw(sorceressUnselected, (int)(sorceressUnselected.TotalFrames * secondTimer));
-            renderWindow.Draw(necromancerUnselected, (int)(necromancerUnselected.TotalFrames * secondTimer));
-            renderWindow.Draw(paladinUnselected, (int)(paladinUnselected.TotalFrames * secondTimer));
-            renderWindow.Draw(amazonUnselected, (int)(amazonUnselected.TotalFrames * secondTimer));
-            renderWindow.Draw(assassinUnselected, (int)(assassinUnselected.TotalFrames * secondTimer));
-            renderWindow.Draw(druidUnselected, (int)(druidUnselected.TotalFrames * secondTimer));
+            RenderHeros();
 
             renderWindow.Draw(campfireSprite, (int)(campfireSprite.TotalFrames * secondTimer));
             renderWindow.Draw(headingLabel);
             exitButton.Render();
         }
 
+        private void RenderHeros()
+        {
+            foreach (var hero in Enum.GetValues(typeof(eHero)).Cast<eHero>())
+                RenderHero(hero);
+
+        }
+
+        private void RenderHero(eHero hero)
+        {
+            var renderInfo = heroRenderInfo[hero];
+            switch (renderInfo.Stance)
+            {
+                case eHeroStance.Idle:
+                    renderWindow.Draw(renderInfo.IdleSprite, (int)(renderInfo.IdleSprite.TotalFrames * secondTimer));
+                    break;
+                case eHeroStance.IdleSelected:
+                    renderWindow.Draw(renderInfo.IdleSelectedSprite, (int)(renderInfo.IdleSelectedSprite.TotalFrames * secondTimer));
+                    break;
+                case eHeroStance.Approaching:
+                    break;
+                case eHeroStance.Selected:
+                    break;
+                case eHeroStance.Retreating:
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
         public void Update(long ms)
         {
-            float seconds = ((float)ms / 1000f);
+            float seconds = ((float)ms / 1500f);
             secondTimer += seconds;
             while (secondTimer >= 1f)
                 secondTimer -= 1f;
