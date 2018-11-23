@@ -18,6 +18,10 @@ namespace OpenDiablo2.Common
         public static string Diablo2LogoBlackLeft = "data\\global\\ui\\FrontEnd\\D2logoBlackLeft.DC6";
         public static string Diablo2LogoBlackRight = "data\\global\\ui\\FrontEnd\\D2logoBlackRight.DC6";
 
+        // --- Character Select Screen ---
+        public static string CharacterSelectBackground = "data\\global\\ui\\FrontEnd\\charactercreationscreenEXP.dc6";
+        public static string CharacterSelectCampfire = "data\\global\\ui\\FrontEnd\\fire.DC6";
+
         // --- Mouse Pointers ---
         public static string CursorDefault = "data\\global\\ui\\CURSOR\\ohand.DC6";
 

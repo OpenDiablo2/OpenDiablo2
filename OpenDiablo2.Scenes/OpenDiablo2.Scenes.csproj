@@ -52,6 +52,7 @@
     <Compile Include="AutofacModule.cs" />
     <Compile Include="MainMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SelectHeroClass.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenDiablo2.Common\OpenDiablo2.Common.csproj">

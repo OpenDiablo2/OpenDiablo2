@@ -35,6 +35,8 @@ namespace OpenDiablo2.Common.Models
 
     public sealed class ImageSet
     {
+        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private UInt32 version;
         private UInt32 unknown1;           // 01 00 00 00  ???
         private UInt32 unknown2;           // 00 00 00 00  ???
@@ -118,8 +120,6 @@ namespace OpenDiablo2.Common.Models
 
                 }
             }
-
-
             return result;
         }
     }

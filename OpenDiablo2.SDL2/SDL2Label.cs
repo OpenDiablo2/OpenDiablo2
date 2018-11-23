@@ -45,7 +45,7 @@ namespace OpenDiablo2.SDL2_
         {
             this.renderer = renderer;
             this.font = font as SDL2Font;
-            texture = IntPtr.Zero;
+            this.texture = IntPtr.Zero;
         }
 
         internal Size CalculateSize()
@@ -118,6 +118,7 @@ namespace OpenDiablo2.SDL2_
         {
             if (texture != IntPtr.Zero)
                 SDL.SDL_DestroyTexture(texture);
+            texture = IntPtr.Zero;
         }
     }
 }

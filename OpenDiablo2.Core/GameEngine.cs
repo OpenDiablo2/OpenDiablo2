@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace OpenDiablo2.Core
 {
-    public sealed class GameEngine : IGameEngine, IPaletteProvider
+    public sealed class GameEngine : IGameEngine, IPaletteProvider, ISceneManager
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -21,6 +21,7 @@ namespace OpenDiablo2.Core
         private readonly Func<IMouseInfoProvider> getMouseInfoProvider;
         private readonly Func<string, IScene> getScene;
         private IScene currentScene;
+        private IScene nextScene = null;
         private ISprite mouseSprite;
 
         private readonly MPQ[] MPQs;
@@ -98,6 +99,13 @@ namespace OpenDiablo2.Core
                 sw.Restart();
                 getRenderWindow().Update();
                 currentScene.Update(ms);
+                if (nextScene!= null)
+                {
+                    currentScene.Dispose();
+                    currentScene = nextScene;
+                    nextScene = null;
+                    continue;
+                }
 
                 renderWindow.Clear();
                 currentScene.Render();
@@ -111,7 +119,10 @@ namespace OpenDiablo2.Core
 
         public void Dispose()
         {
-
+            currentScene?.Dispose();
         }
+
+        public void ChangeScene(string sceneName)
+            => nextScene = getScene(sceneName);
     }
 }

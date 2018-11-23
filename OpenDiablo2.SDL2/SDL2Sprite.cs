@@ -14,6 +14,8 @@ namespace OpenDiablo2.SDL2_
 {
     internal sealed class SDL2Sprite : ISprite
     {
+        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public Point Location { get; set; } = new Point();
         public Size FrameSize { get; set; } = new Size();
         public int Frame { get; set; }
@@ -26,6 +28,7 @@ namespace OpenDiablo2.SDL2_
             set
             {
                 blend = value;
+
                 foreach (var texture in textures)
                     SDL.SDL_SetTextureBlendMode(texture, blend ? SDL.SDL_BlendMode.SDL_BLENDMODE_ADD : SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
             }
@@ -130,8 +133,8 @@ namespace OpenDiablo2.SDL2_
             foreach (var texture in textures)
             {
                 SDL.SDL_DestroyTexture(texture);
-
             }
+            textures = new IntPtr[0];
         }
     }
 }

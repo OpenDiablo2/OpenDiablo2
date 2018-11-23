@@ -159,6 +159,7 @@ namespace OpenDiablo2.SDL2_
                 for (var x = 0; x < xSegments; x++)
                 {
                     var textureIndex = x + (y * xSegments) + (offset * xSegments * ySegments);
+                    textureIndex = Math.Min(spr.textures.Count() - 1, Math.Max(0, textureIndex));
                     if (textureIndex >= spr.textures.Count())
                         continue;
 

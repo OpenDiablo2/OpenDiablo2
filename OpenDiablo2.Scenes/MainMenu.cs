@@ -23,6 +23,7 @@ namespace OpenDiablo2.Scenes
         private readonly IMPQProvider mpqProvider;
         private readonly IMouseInfoProvider mouseInfoProvider;
         private readonly IMusicProvider musicProvider;
+        private readonly ISceneManager sceneManager;
 
         private float logoFrame;
         private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack;
@@ -36,6 +37,7 @@ namespace OpenDiablo2.Scenes
             IMPQProvider mpqProvider,
             IMouseInfoProvider mouseInfoProvider,
             IMusicProvider musicProvider,
+            ISceneManager sceneManager,
             Func<WideButton> createWideButton
             )
         {
@@ -43,6 +45,7 @@ namespace OpenDiablo2.Scenes
             this.paletteProvider = paletteProvider;
             this.mpqProvider = mpqProvider;
             this.mouseInfoProvider = mouseInfoProvider;
+            this.sceneManager = sceneManager;
 
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.GameSelectScreen, Palettes.Sky);
             diabloLogoLeft = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoFireLeft, Palettes.Units, new Point(400, 120));
@@ -78,6 +81,7 @@ namespace OpenDiablo2.Scenes
             renderWindow.Draw(loadingSprite);
             renderWindow.Sync();
 
+            /*
             musicProvider.LoadSong(mpqProvider.GetStream("data\\global\\music\\introedit.wav"));
 
             // TODO: Fake loading for now, this should be in its own scene as we start loading real stuff
@@ -93,6 +97,7 @@ namespace OpenDiablo2.Scenes
             }
 
             musicProvider.PlaySong();
+            */
         }
 
         private void OnVisitWebsiteClicked()
@@ -141,9 +146,7 @@ namespace OpenDiablo2.Scenes
         }
 
         private void OnSinglePlayerClicked()
-        {
-
-        }
+            => sceneManager.ChangeScene("Select Hero Class");
 
         private void OnExitClicked()
         {
