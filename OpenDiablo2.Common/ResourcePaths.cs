@@ -79,7 +79,7 @@ namespace OpenDiablo2.Common
         public static string GameGlobeOverlap = "data\\global\\ui\\PANEL\\overlap.DC6";
         public static string HealthMana = "data\\global\\ui\\PANEL\\hlthmana.DC6";
         public static string GameSmallMenuButton = "data\\global\\ui\\PANEL\\menubutton.DC6"; // TODO: Used for inventory popout
-        public static string SkillIcon = "data\\global\\ui\\PANEL\\Skillicon.DC6";
+        public static string SkillIcon = "data\\global\\ui\\PANEL\\Skillicon.DC6"; // TODO: Used for skill icon button
 
         // --- Mouse Pointers ---
         public static string CursorDefault = "data\\global\\ui\\CURSOR\\ohand.DC6";
