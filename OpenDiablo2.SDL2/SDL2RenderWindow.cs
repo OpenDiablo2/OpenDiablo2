@@ -10,6 +10,7 @@ using System.Drawing;
 using OpenDiablo2.Common.Models;
 using Autofac;
 using System.Runtime.InteropServices;
+using OpenDiablo2.Common.Enums;
 
 namespace OpenDiablo2.SDL2_
 {
@@ -266,5 +267,8 @@ namespace OpenDiablo2.SDL2_
 
             SDL.SDL_RenderCopy(renderer, lbl.texture, IntPtr.Zero, ref destRect);
         }
+
+        public ISprite GenerateMapCell(MPQDS1 mapData, int x, int y, eRenderCellType cellType, Palette palette)
+            => new SDL2Sprite(this.renderer, palette, mapData, x, y, cellType);
     }
 }

@@ -6,7 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
+using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Core.GameState_;
 
 namespace OpenDiablo2.Scenes
 {
@@ -15,13 +17,17 @@ namespace OpenDiablo2.Scenes
     {
         private readonly IRenderWindow renderWindow;
         private readonly IResourceManager resourceManager;
+        private GameState gameState;
+
+        private ISprite testSprite;
 
         private ISprite panelSprite, healthManaSprite, gameGlobeOverlapSprite;
 
-        public Game(IRenderWindow renderWindow, IResourceManager resourceManager)
+        public Game(IRenderWindow renderWindow, IResourceManager resourceManager, GameState gameState)
         {
             this.renderWindow = renderWindow;
             this.resourceManager = resourceManager;
+            this.gameState = gameState;
 
             panelSprite = renderWindow.LoadSprite(ResourcePaths.GamePanels, Palettes.Act1);
             healthManaSprite = renderWindow.LoadSprite(ResourcePaths.HealthMana, Palettes.Act1);
@@ -30,6 +36,10 @@ namespace OpenDiablo2.Scenes
 
         public void Render()
         {
+            if (gameState.MapDirty)
+                RedrawMap();
+
+            renderWindow.Draw(testSprite);
 
             DrawPanel();
             
@@ -63,6 +73,16 @@ namespace OpenDiablo2.Scenes
         public void Dispose()
         {
 
+        }
+
+        private void RedrawMap()
+        {
+            gameState.MapDirty = false;
+
+            var x = 0;
+            var y = 0;
+            testSprite = renderWindow.GenerateMapCell(gameState.MapData, 0, 0, eRenderCellType.Floor, gameState.CurrentPalette);
+            testSprite.Location = new Point(((x * 80) - (y * 80)) + 100, ((x * 40) + (y * 40)) + 100);
         }
     }
 }

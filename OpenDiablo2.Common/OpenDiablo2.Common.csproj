@@ -73,6 +73,7 @@
     <Compile Include="Enums\eButtonType.cs" />
     <Compile Include="Enums\eHero.cs" />
     <Compile Include="Enums\eMPQFormatVersion.cs" />
+    <Compile Include="Enums\eRenderCellType.cs" />
     <Compile Include="Interfaces\IEngineDataManager.cs" />
     <Compile Include="Interfaces\IFont.cs" />
     <Compile Include="Interfaces\IGameEngine.cs" />

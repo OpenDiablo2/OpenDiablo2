@@ -50,6 +50,8 @@ namespace OpenDiablo2.Scenes
             this.mouseInfoProvider = mouseInfoProvider;
             this.sceneManager = sceneManager;
 
+            resourceManager.GetMPQDS1(ResourcePaths.MapAct1TownE1, -1, 1);
+
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.GameSelectScreen, Palettes.Sky);
             diabloLogoLeft = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoFireLeft, Palettes.Units, new Point(400, 120));
             diabloLogoLeft.Blend = true;

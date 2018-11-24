@@ -15,7 +15,7 @@ namespace OpenDiablo2.Common.Models
         public byte GridY { get; internal set; }
         public UInt16 Format { get; internal set; }
         public UInt32 Length { get; internal set; }
-        public Int32 FileOffset { get; internal set; }
+        public UInt32 FileOffset { get; internal set; }
         public Int16[] PixelData { get; internal set; }
     }
 
@@ -55,57 +55,53 @@ namespace OpenDiablo2.Common.Models
 
             for (int tileIndex = 0; tileIndex < NumberOfTiles; tileIndex++)
             {
+                stream.Seek(tileHeaderOffset + (96 * tileIndex), SeekOrigin.Begin);
                 Tiles[tileIndex] = new MPQDT1Tile();
-                Tiles[tileIndex].Direction = br.ReadUInt32();
-                Tiles[tileIndex].RoofHeight = br.ReadUInt16();
-                Tiles[tileIndex].SoundIndex = br.ReadByte();
-                Tiles[tileIndex].Animated = br.ReadByte() == 1;
-                Tiles[tileIndex].Height = br.ReadInt32();
-                Tiles[tileIndex].Width = br.ReadInt32();
+                var tile = Tiles[tileIndex];
+
+                tile.Direction = br.ReadUInt32();
+                tile.RoofHeight = br.ReadUInt16();
+                tile.SoundIndex = br.ReadByte();
+                tile.Animated = br.ReadByte() == 1;
+                tile.Height = br.ReadInt32();
+                tile.Width = br.ReadInt32();
                 br.ReadBytes(4);
-                Tiles[tileIndex].Orientation = br.ReadUInt32();
-                Tiles[tileIndex].MainIndex = br.ReadUInt32();
-                Tiles[tileIndex].SubIndex = br.ReadUInt32();
-                Tiles[tileIndex].RarityOrFrameIndex = br.ReadUInt32();
+                tile.Orientation = br.ReadUInt32();
+                tile.MainIndex = br.ReadUInt32();
+                tile.SubIndex = br.ReadUInt32();
+                tile.RarityOrFrameIndex = br.ReadUInt32();
                 br.ReadBytes(4);
                 for (int i = 0; i < 25; i++)
-                    Tiles[tileIndex].SubTileFlags[i] = br.ReadByte();
+                    tile.SubTileFlags[i] = br.ReadByte();
                 br.ReadBytes(7);
-                Tiles[tileIndex].BlockHeadersPointer = br.ReadUInt32();
-                Tiles[tileIndex].BlockDataLength = br.ReadUInt32();
-                Tiles[tileIndex].NumberOfBlocks = br.ReadUInt32();
+                tile.BlockHeadersPointer = br.ReadUInt32();
+                tile.BlockDataLength = br.ReadUInt32();
+                tile.NumberOfBlocks = br.ReadUInt32();
                 br.ReadBytes(12);
-            }
 
-
-            for (int tileIndex = 0; tileIndex < NumberOfTiles; tileIndex++)
-            {
-                var tile = Tiles[tileIndex];
-                if (tile.BlockHeadersPointer == 0)
+                if (tile.BlockHeadersPointer == 0 || tile.Width == 0 || tile.Height == 0)
                 {
                     tile.Blocks = new MPQDT1Block[0];
                     continue;
                 }
-                stream.Seek(tile.BlockHeadersPointer, SeekOrigin.Begin);
 
                 tile.Blocks = new MPQDT1Block[tile.NumberOfBlocks];
                 for (int blockIndex = 0; blockIndex < tile.NumberOfBlocks; blockIndex++)
                 {
+                    stream.Seek(tile.BlockHeadersPointer + (20 * blockIndex), SeekOrigin.Begin);
                     tile.Blocks[blockIndex] = new MPQDT1Block();
-                    tile.Blocks[blockIndex].PositionX = br.ReadUInt16();
-                    tile.Blocks[blockIndex].PositionY = br.ReadUInt16();
-                    br.ReadBytes(2);
-                    tile.Blocks[blockIndex].GridX = br.ReadByte();
-                    tile.Blocks[blockIndex].GridX = br.ReadByte();
-                    tile.Blocks[blockIndex].Format = br.ReadUInt16();
-                    tile.Blocks[blockIndex].Length = br.ReadUInt32();
-                    br.ReadBytes(2);
-                    tile.Blocks[blockIndex].FileOffset = br.ReadInt32();
-                }
-
-                for (int blockIndex = 0; blockIndex < tile.NumberOfBlocks; blockIndex++)
-                {
                     var block = tile.Blocks[blockIndex];
+
+                    block.PositionX = br.ReadUInt16();
+                    block.PositionY = br.ReadUInt16();
+                    br.ReadBytes(2);
+                    block.GridX = br.ReadByte();
+                    block.GridX = br.ReadByte();
+                    block.Format = br.ReadUInt16();
+                    block.Length = br.ReadUInt32();
+                    br.ReadBytes(2);
+                    block.FileOffset = br.ReadUInt32();
+                    
                     stream.Seek(tile.BlockHeadersPointer + block.FileOffset, SeekOrigin.Begin);
 
                     if (block.Format == 1)
@@ -136,18 +132,18 @@ namespace OpenDiablo2.Common.Models
                         }
 
                     }
-                    else
+                    else 
                     {
-                        // TODO: This doesn't work.. memory pointer issues?
-                        continue;
-
                         // RLE block
+                        /* TODO: BROKEN
                         var length = block.Length;
                         byte b1;
                         byte b2;
                         int x = 0;
                         int y = 0;
-                        block.PixelData = new Int16[32 * 16];
+                        int width = (block.Format >> 8);
+                        int height = (block.Format & 0xFF);
+                        block.PixelData = new Int16[width * height];
                         while (length > 0)
                         {
                             b1 = br.ReadByte();
@@ -157,7 +153,7 @@ namespace OpenDiablo2.Common.Models
                             {
                                 x += b1;
                                 length -= b2;
-                                while(b2 > 0)
+                                while (b2 > 0)
                                 {
                                     block.PixelData[x + (y * 32)] = br.ReadByte();
                                     br.ReadByte();
@@ -171,6 +167,7 @@ namespace OpenDiablo2.Common.Models
                                 y++;
                             }
                         }
+                        */
                     }
                 }
             }

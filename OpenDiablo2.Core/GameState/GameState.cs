@@ -14,18 +14,33 @@ namespace OpenDiablo2.Core.GameState_
     {
         private readonly ISceneManager sceneManager;
         private readonly IResourceManager resourceManager;
-        MPQDS1 mapData;
+        private readonly IPaletteProvider paletteProvider;
 
-        public GameState(ISceneManager sceneManager, IResourceManager resourceManager)
+        public MPQDS1 MapData { get; set; }
+        public bool MapDirty { get; set; }
+        public int Act { get; private set; }
+        public string MapName { get; set; }
+        public Palette CurrentPalette => paletteProvider.PaletteTable[$"ACT{Act}"];
+
+        public GameState(ISceneManager sceneManager, IResourceManager resourceManager, IPaletteProvider paletteProvider)
         {
             this.sceneManager = sceneManager;
             this.resourceManager = resourceManager;
+            this.paletteProvider = paletteProvider;
         }
 
         public void Initialize(string characterName, eHero hero)
         {
             sceneManager.ChangeScene("Game");
-            mapData = resourceManager.GetMPQDS1(ResourcePaths.MapAct1TownE1, -1, 1);
+            ChangeMap(ResourcePaths.MapAct1TownE1, 1);
+        }
+
+        public void ChangeMap(string mapName, int act)
+        {
+            MapName = mapName;
+            Act = act;
+            MapDirty = true;
+            MapData = resourceManager.GetMPQDS1(mapName, -1, act);
         }
     }
 }
