@@ -16,7 +16,6 @@ namespace OpenDiablo2.SDL2_
         internal readonly ImageSet source;
         private readonly IntPtr renderer;
         internal IntPtr texture = IntPtr.Zero;
-        private Point globalFrameOffset = new Point(0, 0);
 
         public Point Location { get; set; } = new Point();
         public Size FrameSize { get; set; } = new Size();
@@ -94,10 +93,19 @@ namespace OpenDiablo2.SDL2_
             var floor = floorLayer.Props[x + (y * mapData.Width)];
 
             if (floor.Prop1 == 0)
+            {
+                texture = IntPtr.Zero;
                 return;
+            }
 
             var sub_index = floor.Prop2;
-            var main_index = (floor.Prop3 / 16) + ((floor.Prop4 & 0x0F) * 16);
+            var main_index =  (floor.Prop3 >> 4) + ((floor.Prop4 & 0x03) << 4);
+            if (mapData.DT1s[main_index] == null)
+                return;
+
+            if (mapData.DT1s[main_index].Tiles.Count() <= sub_index)
+                return;
+
             var tile = mapData.DT1s[main_index].Tiles[sub_index];
 
             FrameSize = new Size(tile.Width, Math.Abs(tile.Height));
@@ -114,19 +122,33 @@ namespace OpenDiablo2.SDL2_
             SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
             try
             {
-                UInt32* data = (UInt32*)pixels;
-                for (var i = 0; i < FrameSize.Width * FrameSize.Height; i++)
-                    data[i] = 0;
-
-                for (var subtileX = 0; subtileX < 5; subtileX++)
+                if (tile.Orientation == 0)
                 {
-                    for (var subtileY = 0; subtileY < 5; subtileY++)
-                    {
-                        var subtileFlags = tile.SubTileFlags[subtileX + (subtileY * 5)];
+                    UInt32* data = (UInt32*)pixels;
+                    for (var i = 0; i < FrameSize.Width * FrameSize.Height; i++)
+                        data[i] = 0x0;
 
+                    foreach (var block in tile.Blocks)
+                    {
+                        var px = block.PositionX;
+                        var py = block.PositionY;
+
+                        //var px = 0;
+                        //var py = 0;
+                        for (int yy = 0; yy < 32; yy++)
+                        {
+                            for (int xx = 0; xx < 32; xx++)
+                            {
+                                var index = px + xx + ((py + yy) * (pitch / 4));
+                                if (index > (FrameSize.Width * FrameSize.Height))
+                                    continue;
+                                if (index < 0)
+                                    continue;
+                                data[index] = palette.Colors[block.PixelData[xx + ((31-yy) * 32)]];
+                            }
+                        }
                     }
                 }
-
             }
             finally
             {
@@ -137,7 +159,7 @@ namespace OpenDiablo2.SDL2_
         internal Point GetRenderPoint()
         {
             return source == null
-                ? globalFrameOffset
+                ? Location
                 : new Point(Location.X + source.Frames[Frame].OffsetX, (Location.Y - FrameSize.Height) + source.Frames[Frame].OffsetY);
         }
 

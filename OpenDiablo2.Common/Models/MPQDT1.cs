@@ -135,7 +135,7 @@ namespace OpenDiablo2.Common.Models
                         int[] xjump = { 14, 12, 10, 8, 6, 4, 2, 0, 2, 4, 6, 8, 10, 12, 14 };
                         int[] nbpix = { 4, 8, 12, 16, 20, 24, 28, 32, 28, 24, 20, 16, 12, 8, 4 };
                         var length = 256;
-                        block.PixelData = new Int16[32 * 16];
+                        block.PixelData = new Int16[32 * 32];
                         while (length > 0)
                         {
                             x = xjump[y];
@@ -143,7 +143,7 @@ namespace OpenDiablo2.Common.Models
                             length -= n;
                             while (n > 0)
                             {
-                                block.PixelData[x + (y * 32)] = br.ReadByte();
+                                block.PixelData[x + ((31-y) * 32)] = br.ReadByte();
                                 x++;
                                 n--;
                             }
@@ -154,15 +154,12 @@ namespace OpenDiablo2.Common.Models
                     else
                     {
                         // RLE block
-                        /*
                         var length = block.Length;
                         byte b1;
                         byte b2;
                         int x = 0;
                         int y = 0;
-                        int width = (block.Format >> 8);
-                        int height = (block.Format & 0xFF);
-                        block.PixelData = new Int16[256 * 256];
+                        block.PixelData = new Int16[32 * 32];
                         while (length > 0)
                         {
                             b1 = br.ReadByte();
@@ -179,13 +176,11 @@ namespace OpenDiablo2.Common.Models
                             length -= b2;
                             while (b2 > 0)
                             {
-                                block.PixelData[x + (y * 32)] = br.ReadByte();
-                                br.ReadByte();
+                                block.PixelData[x + ((31-y) * 32)] = br.ReadByte();
                                 x++;
                                 b2--;
                             }
                         }
-                        */
                     }
                 }
             }

@@ -42,7 +42,7 @@ namespace OpenDiablo2.Common.Models
             {
                 Name = row[0],
                 Def = Convert.ToInt32(row[1]),
-                LevelId = row[2] == "#REF!" ? 0 : Convert.ToInt32(row[2]), // TODO: Why is this a thing?
+                LevelId = Convert.ToInt32(row[2]),
                 Populate = Convert.ToInt32(row[3]) == 1,
                 Logicals = Convert.ToInt32(row[4]),
                 Outdoors = Convert.ToInt32(row[5]),

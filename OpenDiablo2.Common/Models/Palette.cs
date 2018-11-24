@@ -7,34 +7,27 @@ using System.Threading.Tasks;
 
 namespace OpenDiablo2.Common.Models
 {
-    public struct PaletteEntry
-    {
-        public int R;
-        public int G;
-        public int B;
-    }
-
     public struct Palette
     {
         public string Name { get; set; }
-        public PaletteEntry[] Colors;
+        public UInt32[] Colors;
 
         public static Palette LoadFromStream(Stream stream, string paletteName)
         {
             var result = new Palette
             {
                 Name = paletteName,
-                Colors = new PaletteEntry[256]
+                Colors = new UInt32[256]
             };
 
             var br = new BinaryReader(stream);
             for (var i = 0; i <= 255; i++)
-                result.Colors[i] = new PaletteEntry
-                {
-                    B = br.ReadByte(),
-                    G = br.ReadByte(),
-                    R = br.ReadByte()
-                };
+            {
+                var b = br.ReadByte();
+                var g = br.ReadByte();
+                var r = br.ReadByte();
+                result.Colors[i] = ((UInt32)255 << 24) + ((UInt32)r << 16) + ((UInt32)g << 8) + (UInt32)b;
+            }
 
             return result;
         }

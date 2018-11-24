@@ -50,6 +50,14 @@ namespace OpenDiablo2.Common.Models
         public Int32 DS1Flags { get; internal set; }
     }
 
+    public sealed class MPQDS1Group
+    {
+        public Int32 TileX { get; internal set; }
+        public Int32 TileY { get; internal set; }
+        public Int32 Width { get; internal set; }
+        public Int32 Height { get; internal set; }
+    }
+
     public sealed class MPQDS1
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -64,14 +72,17 @@ namespace OpenDiablo2.Common.Models
         public Int32 NumberOfFloors { get; internal set; }
         public Int32 NumberOfObjects { get; internal set; }
         public Int32 NumberOfNPCs { get; internal set; }
+        public Int32 NumberOfTags { get; internal set; }
+        public Int32 NumberOfGroups { get; internal set; }
 
-        public MPQDT1[] DT1s = new MPQDT1[32];
-        
+        public MPQDT1[] DT1s = new MPQDT1[33];
+
         public List<string> FileNames { get; internal set; } = new List<string>();
-        public List<MPQDS1WallLayer> WallLayers { get; internal set; } = new List<MPQDS1WallLayer>();
-        public List<MPQDS1FloorLayer> FloorLayers { get; internal set; } = new List<MPQDS1FloorLayer>();
-        public MPQDS1ShadowLayer ShadowLayer { get; internal set; } = new MPQDS1ShadowLayer();
-        public List<MPQDS1Object> Objects { get; internal set; } = new List<MPQDS1Object>();
+        public MPQDS1WallLayer[] WallLayers { get; internal set; }
+        public MPQDS1FloorLayer[] FloorLayers { get; internal set; }
+        public MPQDS1ShadowLayer[] ShadowLayers { get; internal set; }
+        public MPQDS1Object[] Objects { get; internal set; }
+        public MPQDS1Group[] Groups { get; internal set; }
 
         // TODO: DI magic please
         public MPQDS1(Stream stream, string fileName, int definition, int act, IEngineDataManager engineDataManager, IResourceManager resourceManager)
@@ -81,130 +92,232 @@ namespace OpenDiablo2.Common.Models
             Version = br.ReadInt32();
             Width = br.ReadInt32() + 1;
             Height = br.ReadInt32() + 1;
-            Act = br.ReadInt32();
-            TagType = br.ReadInt32();
-            FileCount = br.ReadInt32();
+            Act = br.ReadInt32() + 1;
 
-
-
-            if (TagType != 0)
-                throw new ApplicationException("We don't currently handle those tag things...");
-
-            for (int i = 0; i < FileCount; i++)
+            if (Version >= 10)
             {
-                var fn = "";
-                while (true)
-                {
-                    var b = br.ReadByte();
-                    if (b == 0)
-                        break;
-                    fn += (char)b;
-                }
-                if (fn.StartsWith("\\d2\\"))
-                    fn = fn.Substring(4);
-                FileNames.Add(fn);
+                TagType = br.ReadInt32();
+                if (TagType == 1 || TagType == 2)
+                    NumberOfTags = 1;
             }
 
-            NumberOfWalls = br.ReadInt32();
-            NumberOfFloors = br.ReadInt32();
-
-            for (int i = 0; i < NumberOfWalls; i++)
+            FileCount = 0;
+            if (Version >= 3)
             {
-                var wallLayer = new MPQDS1WallLayer
+                FileCount = br.ReadInt32();
+                for (int i = 0; i < FileCount; i++)
                 {
-                    Props = new MPQDS1TileProps[Width * Height],
-                    Orientations = new MPQDS1WallOrientationTileProps[Width * Height]
+                    var fn = "";
+                    while (true)
+                    {
+                        var b = br.ReadByte();
+                        if (b == 0)
+                            break;
+                        fn += (char)b;
+                    }
+                    if (fn.StartsWith("\\d2\\"))
+                        fn = fn.Substring(4);
+                    FileNames.Add(fn);
+                }
+            }
+
+            if (Version >= 9 && Version <= 13)
+            {
+                br.ReadBytes(8);
+            }
+
+            if (Version >= 4)
+            {
+                NumberOfWalls = br.ReadInt32();
+
+                if (Version >= 16)
+                {
+                    NumberOfFloors = br.ReadInt32();
+                }
+                else NumberOfFloors = 1;
+            }
+            else
+            {
+                NumberOfFloors = 1;
+                NumberOfWalls = 1;
+                NumberOfTags = 1;
+            }
+
+
+
+            var layoutStream = new List<int>();
+
+            if (Version < 4)
+            {
+                layoutStream.AddRange(new int[] { 1, 9, 5, 12, 11 });
+            }
+            else
+            {
+                for (var x = 0; x < NumberOfWalls; x++)
+                {
+                    layoutStream.Add(1 + x);
+                    layoutStream.Add(5 + x);
+                }
+                for (var x = 0; x < NumberOfFloors; x++)
+                    layoutStream.Add(9 + x);
+
+                layoutStream.Add(11);
+
+                if (NumberOfTags > 0)
+                    layoutStream.Add(12);
+            }
+
+            WallLayers = new MPQDS1WallLayer[NumberOfWalls];
+            for (var l = 0; l < NumberOfWalls; l++)
+            {
+                WallLayers[l] = new MPQDS1WallLayer
+                {
+                    Orientations = new MPQDS1WallOrientationTileProps[Width * Height],
+                    Props = new MPQDS1TileProps[Width * Height]
                 };
-
-                for (int y = 0; y < Height; y++)
-                {
-                    for (int x = 0; x < Width; x++)
-                    {
-                        wallLayer.Props[x + (y * Width)] = new MPQDS1TileProps
-                        {
-                            Prop1 = br.ReadByte(),
-                            Prop2 = br.ReadByte(),
-                            Prop3 = br.ReadByte(),
-                            Prop4 = br.ReadByte()
-                        };
-                    }
-                }
-
-                for (int y = 0; y < Height; y++)
-                {
-                    for (int x = 0; x < Width; x++)
-                    {
-                        wallLayer.Orientations[x + (y * Width)] = new MPQDS1WallOrientationTileProps
-                        {
-                            Orientation1 = br.ReadByte(),
-                            Orientation2 = br.ReadByte(),
-                            Orientation3 = br.ReadByte(),
-                            Orientation4 = br.ReadByte()
-                        };
-                    }
-                }
-                WallLayers.Add(wallLayer);
             }
 
-            for (int i = 0; i < NumberOfFloors; i++)
+            FloorLayers = new MPQDS1FloorLayer[NumberOfFloors];
+            for (var l = 0; l < NumberOfFloors; l++)
             {
-                var floorLayer = new MPQDS1FloorLayer
+                FloorLayers[l] = new MPQDS1FloorLayer
                 {
                     Props = new MPQDS1TileProps[Width * Height]
                 };
+            }
 
-                for (int y = 0; y < Height; y++)
+            ShadowLayers = new MPQDS1ShadowLayer[1];
+            for (var l = 0; l < 1; l++)
+            {
+                ShadowLayers[l] = new MPQDS1ShadowLayer
                 {
-                    for (int x = 0; x < Width; x++)
+                    Props = new MPQDS1TileProps[Width * Height]
+                };
+            }
+
+
+            for (int n = 0; n < layoutStream.Count(); n++)
+            {
+                for (var y = 0; y < Height; y++)
+                {
+                    for (var x = 0; x < Width; x++)
                     {
-                        floorLayer.Props[x + (y * Width)] = new MPQDS1TileProps
+                        switch (layoutStream[n])
                         {
-                            Prop1 = br.ReadByte(),
-                            Prop2 = br.ReadByte(),
-                            Prop3 = br.ReadByte(),
-                            Prop4 = br.ReadByte()
-                        };
+                            // Walls
+                            case 1:
+                            case 2:
+                            case 3:
+                            case 4:
+                                WallLayers[layoutStream[n] - 1].Props[x + (y * Width)] = new MPQDS1TileProps
+                                {
+                                    Prop1 = br.ReadByte(),
+                                    Prop2 = br.ReadByte(),
+                                    Prop3 = br.ReadByte(),
+                                    Prop4 = br.ReadByte()
+                                };
+                                break;
+
+                            // Orientations
+                            case 5:
+                            case 6:
+                            case 7:
+                            case 8:
+                                // TODO: Orientations
+                                if (Version < 7)
+                                {
+                                    br.ReadBytes(4);
+                                }
+                                else
+                                {
+                                    br.ReadBytes(4);
+                                }
+                                break;
+
+                            // Floors
+                            case 9:
+                            case 10:
+                                FloorLayers[layoutStream[n] - 9].Props[x + (y * Width)] = new MPQDS1TileProps
+                                {
+                                    Prop1 = br.ReadByte(),
+                                    Prop2 = br.ReadByte(),
+                                    Prop3 = br.ReadByte(),
+                                    Prop4 = br.ReadByte()
+                                };
+                                break;
+                            // Shadow
+                            case 11:
+                                ShadowLayers[layoutStream[n] - 11].Props[x + (y * Width)] = new MPQDS1TileProps
+                                {
+                                    Prop1 = br.ReadByte(),
+                                    Prop2 = br.ReadByte(),
+                                    Prop3 = br.ReadByte(),
+                                    Prop4 = br.ReadByte()
+                                };
+                                break;
+                            // Tags
+                            case 12:
+                                // TODO: Tags
+                                br.ReadBytes(4);
+                                break;
+                        }
                     }
                 }
-                FloorLayers.Add(floorLayer);
             }
-
-            ShadowLayer.Props = new MPQDS1TileProps[Width * Height];
-            for (int y = 0; y < Height; y++)
+            /*
+            NumberOfObjects = 0;
+            if (Version >= 2)
             {
-                for (int x = 0; x < Width; x++)
+
+                NumberOfObjects = br.ReadInt32();
+                Objects = new MPQDS1Object[NumberOfObjects];
+
+                for (int i = 0; i < NumberOfObjects; i++)
                 {
-                    ShadowLayer.Props[x + (y * Width)] = new MPQDS1TileProps
+                    Objects[i] = new MPQDS1Object
                     {
-                        Prop1 = br.ReadByte(),
-                        Prop2 = br.ReadByte(),
-                        Prop3 = br.ReadByte(),
-                        Prop4 = br.ReadByte()
+                        Type = br.ReadInt32(),
+                        Id = br.ReadInt32(),
+                        X = br.ReadInt32(),
+                        Y = br.ReadInt32()
                     };
+
+                    if (Version > 5)
+                        Objects[i].DS1Flags = br.ReadInt32();
+
                 }
             }
 
-            // TODO: Tag layer goes here (tag = 1)
 
-            NumberOfObjects = br.ReadInt32();
-            for (int i = 0; i < NumberOfObjects; i++)
+            if (Version >= 12 && TagType == 1 || TagType == 2)
             {
-                Objects.Add(new MPQDS1Object
+                if (Version >= 18)
+                    br.ReadBytes(4);
+
+                NumberOfGroups = br.ReadInt32();
+            }
+            else NumberOfGroups = 0;
+
+
+            Groups = new MPQDS1Group[NumberOfGroups];
+            for (var x = 0; x < NumberOfGroups; x++)
+            {
+                Groups[x] = new MPQDS1Group
                 {
-                    Type = br.ReadInt32(),
-                    Id = br.ReadInt32(),
-                    X = br.ReadInt32(),
-                    Y = br.ReadInt32(),
-                    DS1Flags = br.ReadInt32()
-                });
+                    TileX = br.ReadInt32(),
+                    TileY = br.ReadInt32(),
+                    Width = br.ReadInt32(),
+                    Height = br.ReadInt32(),
+                };
+                if (Version >= 13)
+                    br.ReadBytes(4);
             }
 
-            // TODO: Option groups go here (tag = 1)
+            if (Version >= 14)
+            {
 
-            NumberOfNPCs = br.ReadInt32();
-
-
-            // TODO: WalkPaths
+                NumberOfNPCs = br.ReadInt32();
+            }*/
 
             LevelPreset levelPreset;
             if (definition == -1)
@@ -224,6 +337,7 @@ namespace OpenDiablo2.Common.Models
 
             var dt1Mask = levelPreset.Dt1Mask;
             var levelType = engineDataManager.LevelTypes.First(x => x.Id == levelPreset.LevelId && x.Act == act);
+
 
             for (int i = 0; i < 32; i++)
             {

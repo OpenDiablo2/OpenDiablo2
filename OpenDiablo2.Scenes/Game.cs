@@ -19,7 +19,7 @@ namespace OpenDiablo2.Scenes
         private readonly IResourceManager resourceManager;
         private GameState gameState;
 
-        private ISprite testSprite;
+        private ISprite[] testSprite;
 
         private ISprite panelSprite, healthManaSprite, gameGlobeOverlapSprite;
 
@@ -39,10 +39,11 @@ namespace OpenDiablo2.Scenes
             if (gameState.MapDirty)
                 RedrawMap();
 
-            renderWindow.Draw(testSprite);
+            for (int i = 0; i < gameState.MapData.Width * gameState.MapData.Height; i++)
+                renderWindow.Draw(testSprite[i]);
 
             DrawPanel();
-            
+
         }
 
         private void DrawPanel()
@@ -67,7 +68,7 @@ namespace OpenDiablo2.Scenes
 
         public void Update(long ms)
         {
-            
+
         }
 
         public void Dispose()
@@ -79,10 +80,18 @@ namespace OpenDiablo2.Scenes
         {
             gameState.MapDirty = false;
 
-            var x = 0;
-            var y = 0;
-            testSprite = renderWindow.GenerateMapCell(gameState.MapData, 0, 0, eRenderCellType.Floor, gameState.CurrentPalette);
-            testSprite.Location = new Point(((x * 80) - (y * 80)) + 100, ((x * 40) + (y * 40)) + 100);
+            testSprite = new ISprite[gameState.MapData.Width * gameState.MapData.Height];
+            var idx = 0;
+            for (int y = 0; y < gameState.MapData.Height; y++)
+            {
+                for (int x = 0; x < gameState.MapData.Width; x++)
+                {
+                    testSprite[idx] = renderWindow.GenerateMapCell(gameState.MapData, x, y, eRenderCellType.Floor, gameState.CurrentPalette);
+                    testSprite[idx].Location = new Point(((x - y) * 80) - 900, ((x + y) * 40) - 1100);
+                    idx++;
+                }
+            }
+
         }
     }
 }

@@ -65,14 +65,14 @@ namespace OpenDiablo2.Core
         private void LoadSoundData()
         {
             log.Info("Loading sound configuration data");
-            foreach (var soundDescFile in mpqProvider.GetTextFile("data\\global\\excel\\Sounds.txt"))
+            var soundDescFile = mpqProvider.GetTextFile("data\\global\\excel\\Sounds.txt");
+            
+            foreach (var row in soundDescFile.Skip(1).Where(x => !String.IsNullOrWhiteSpace(x)))
             {
-                foreach (var row in soundDescFile.Skip(1).Where(x => !String.IsNullOrWhiteSpace(x)))
-                {
-                    var soundEntry = row.ToSoundEntry();
-                    soundTable[soundEntry.Handle] = soundEntry;
-                }
+                var soundEntry = row.ToSoundEntry();
+                soundTable[soundEntry.Handle] = soundEntry;
             }
+            
         }
 
         public void Run()

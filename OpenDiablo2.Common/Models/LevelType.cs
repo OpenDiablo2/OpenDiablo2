@@ -10,7 +10,7 @@ namespace OpenDiablo2.Common.Models
     {
         public string Name { get; set; }
         public int Id { get; set; }
-        public string[] File { get; set; } = new string[32];
+        public string[] File { get; set; } = new string[33];
         public bool Beta { get; set; }
         public int Act { get; set; }
     }
