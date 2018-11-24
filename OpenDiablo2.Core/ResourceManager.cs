@@ -11,13 +11,17 @@ namespace OpenDiablo2.Core
     public sealed class ResourceManager : IResourceManager
     {
         private readonly IMPQProvider mpqProvider;
+        private readonly IEngineDataManager engineDataManager;
+
         private Dictionary<string, ImageSet> ImageSets = new Dictionary<string, ImageSet>();
         private Dictionary<string, MPQFont> MPQFonts = new Dictionary<string, MPQFont>();
         private Dictionary<string, Palette> Palettes = new Dictionary<string, Palette>();
+        private Dictionary<string, MPQDT1> DTs = new Dictionary<string, MPQDT1>();
 
-        public ResourceManager(IMPQProvider mpqProvider)
+        public ResourceManager(IMPQProvider mpqProvider, IEngineDataManager engineDataManager)
         {
             this.mpqProvider = mpqProvider;
+            this.engineDataManager = engineDataManager;
         }
 
         public ImageSet GetImageSet(string resourcePath)
@@ -36,6 +40,12 @@ namespace OpenDiablo2.Core
             return MPQFonts[resourcePath];
         }
 
+        public MPQDS1 GetMPQDS1(string resourcePath, int definition, int act)
+        {
+            var mapName = resourcePath.Replace("data\\global\\tiles\\", "").Replace("\\", "/");
+            return new MPQDS1(mpqProvider.GetStream(resourcePath), mapName, definition, act, engineDataManager, this);
+        }
+
         public Palette GetPalette(string paletteFile)
         {
             if (!Palettes.ContainsKey(paletteFile))
@@ -47,7 +57,15 @@ namespace OpenDiablo2.Core
 
             return Palettes[paletteFile];
 
-            
+
+        }
+
+        public MPQDT1 GetMPQDT1(string resourcePath)
+        {
+            if (!DTs.ContainsKey(resourcePath))
+                DTs[resourcePath] = new MPQDT1(mpqProvider.GetStream(resourcePath));
+
+            return DTs[resourcePath];
         }
     }
 }

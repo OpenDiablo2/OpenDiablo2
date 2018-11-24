@@ -73,11 +73,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutofacModule.cs" />
+    <Compile Include="EngineDataManager.cs" />
     <Compile Include="GameEngine.cs" />
+    <Compile Include="GameState\GameState.cs" />
     <Compile Include="MPQProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceManager.cs" />
+    <Compile Include="TextDictionary.cs" />
     <Compile Include="UI\Button.cs" />
+    <Compile Include="UI\TextBox.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenDiablo2.Common\OpenDiablo2.Common.csproj">

@@ -40,6 +40,20 @@ namespace OpenDiablo2.Core.UI
         private bool active = false; // When true, button is actively being focus pressed
         private bool activeLock = false; // When true, something else is being pressed so ignore everything
         private Point labelOffset = new Point();
+
+        private bool enabled = true;
+        public bool Enabled
+        {
+            get => enabled;
+            set
+            {
+                if (value == enabled)
+                    return;
+                enabled = value;
+
+                sprite.Darken = !enabled;
+            }
+        }
         
         private string text;
         public string Text
@@ -82,6 +96,19 @@ namespace OpenDiablo2.Core.UI
 
         public void Update()
         {
+            if (!enabled)
+            {
+                // Prevent sticky locks
+                if (activeLock && mouseInfoProvider.ReserveMouse)
+                {
+                    activeLock = false;
+                    mouseInfoProvider.ReserveMouse = false;
+                }
+
+                active = false;
+                return;
+            }
+
             var hovered = (mouseInfoProvider.MouseX >= location.X && mouseInfoProvider.MouseX < (location.X + buttonWidth))
                 && (mouseInfoProvider.MouseY >= location.Y && mouseInfoProvider.MouseY < (location.Y + buttonHeight));
 

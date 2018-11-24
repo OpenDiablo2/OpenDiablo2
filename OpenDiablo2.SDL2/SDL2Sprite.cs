@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
+using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
 using SDL2;
@@ -15,9 +16,24 @@ namespace OpenDiablo2.SDL2_
         internal readonly ImageSet source;
         private readonly IntPtr renderer;
         internal IntPtr texture = IntPtr.Zero;
+        private Point globalFrameOffset = new Point(0, 0);
 
         public Point Location { get; set; } = new Point();
         public Size FrameSize { get; set; } = new Size();
+
+
+        private bool darken;
+        public bool Darken
+        {
+            get => darken;
+            set
+            {
+                if (darken == value)
+                    return;
+                darken = value;
+                LoadFrame(frame);
+            }
+        }
 
         private int frame = -1;
         public int Frame
@@ -67,15 +83,66 @@ namespace OpenDiablo2.SDL2_
             FrameSize = new Size(Pow2((int)source.Frames.Max(x => x.Width)), Pow2((int)source.Frames.Max(x => x.Height)));
         }
 
+        public unsafe SDL2Sprite(IntPtr renderer, Palette palette, MPQDS1 mapData, int x, int y, eRenderCellType cellType)
+        {
+            this.renderer = renderer;
+            // TODO: Cell types
+
+            // Floor cell types
+            // Todo: multiple floor layers
+            var floorLayer = mapData.FloorLayers.First();
+            var floor = floorLayer.Props[x + (y * mapData.Width)];
+
+            if (floor.Prop1 == 0)
+                return;
+
+            var sub_index = floor.Prop2;
+            var main_index = (floor.Prop3 / 16) + ((floor.Prop4 & 0x0F) * 16);
+            var tile = mapData.DT1s[main_index].Tiles[sub_index];
+
+            FrameSize = new Size(tile.Width, Math.Abs(tile.Height));
+            TotalFrames = 1;
+            frame = 0;
+            IntPtr pixels;
+            int pitch;
+
+            texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, FrameSize.Width, FrameSize.Height);
+
+            if (texture == IntPtr.Zero)
+                throw new ApplicationException($"Unaple to initialize texture: {SDL.SDL_GetError()}");
+
+            SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
+            try
+            {
+                UInt32* data = (UInt32*)pixels;
+                for (var i = 0; i < FrameSize.Width * FrameSize.Height; i++)
+                    data[i] = 0;
+
+                for (var subtileX = 0; subtileX < 5; subtileX++)
+                {
+                    for (var subtileY = 0; subtileY < 5; subtileY++)
+                    {
+                        var subtileFlags = tile.SubTileFlags[subtileX + (subtileY * 5)];
+
+                    }
+                }
+
+            }
+            finally
+            {
+                SDL.SDL_UnlockTexture(texture);
+            }
+        }
+
         internal Point GetRenderPoint()
-            => new Point(
-                Location.X + source.Frames[Frame].OffsetX,
-                (Location.Y - FrameSize.Height) + source.Frames[Frame].OffsetY
-            );
+        {
+            return source == null
+                ? globalFrameOffset
+                : new Point(Location.X + source.Frames[Frame].OffsetX, (Location.Y - FrameSize.Height) + source.Frames[Frame].OffsetY);
+        }
 
         public Size LocalFrameSize => new Size((int)source.Frames[Frame].Width, (int)source.Frames[Frame].Height);
 
-        // TODO: This is slow. Make fix.
         private void UpdateTextureData()
         {
             if (texture == IntPtr.Zero)
@@ -87,17 +154,7 @@ namespace OpenDiablo2.SDL2_
 
                 Frame = 0;
             }
-
         }
-
-        // TODO: Less dumb color correction
-        private Color AdjustColor(Color source)
-        => Color.FromArgb(
-                source.A,
-                (byte)Math.Min((float)source.R * 1.2, 255),
-                (byte)Math.Min((float)source.G * 1.2, 255),
-                (byte)Math.Min((float)source.B * 1.2, 255)
-            );
 
         private unsafe void LoadFrame(int index)
         {
@@ -123,10 +180,10 @@ namespace OpenDiablo2.SDL2_
                             continue;
                         }
 
-                        
-                        var palColor = frame.GetColor(x, (int)(y - frameOffset), CurrentPalette);
-                        //var col = AdjustColor(palColor);
-                        data[x + (y * (pitch / 4))] = palColor;
+                        var color = frame.GetColor(x, (int)(y - frameOffset), CurrentPalette);
+                        if (darken)
+                            color = ((color & 0xFF000000) > 0) ? (color >> 1) & 0xFF7F7F7F | 0xFF000000 : 0;
+                        data[x + (y * (pitch / 4))] = color;
                     }
                 }
             }
@@ -150,5 +207,6 @@ namespace OpenDiablo2.SDL2_
         {
             SDL.SDL_DestroyTexture(texture);
         }
+
     }
 }

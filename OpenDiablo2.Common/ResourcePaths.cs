@@ -74,6 +74,12 @@ namespace OpenDiablo2.Common
         public static string CharacterSelectDruidForwardWalk = "data\\global\\ui\\FrontEnd\\druid\\DZFW.DC6";
         public static string CharacterSelectDruidBackWalk = "data\\global\\ui\\FrontEnd\\druid\\DZBW.DC6";
 
+        // --- Game ---
+        public static string GamePanels = "data\\global\\ui\\PANEL\\800ctrlpnl7.dc6";
+        public static string GameGlobeOverlap = "data\\global\\ui\\PANEL\\overlap.DC6";
+        public static string HealthMana = "data\\global\\ui\\PANEL\\hlthmana.DC6";
+        public static string GameSmallMenuButton = "data\\global\\ui\\PANEL\\menubutton.DC6"; // TODO: Used for inventory popout
+        public static string SkillIcon = "data\\global\\ui\\PANEL\\Skillicon.DC6"; // TODO: Used for skill icon button
 
         // --- Mouse Pointers ---
         public static string CursorDefault = "data\\global\\ui\\CURSOR\\ohand.DC6";
@@ -90,11 +96,21 @@ namespace OpenDiablo2.Common
         public static string FontExocet10 = "data\\local\\font\\latin\\fontexocet10";
         public static string FontExocet8 = "data\\local\\font\\latin\\fontexocet8";
 
-
         // --- UI ---
         public static string WideButtonBlank = "data\\global\\ui\\FrontEnd\\WideButtonBlank.dc6";
         public static string MediumButtonBlank = "data\\global\\ui\\FrontEnd\\MediumButtonBlank.dc6";
         public static string CancelButton = "data\\global\\ui\\FrontEnd\\CancelButtonBlank.dc6";
+        public static string TextBox2 = "data\\global\\ui\\FrontEnd\\textbox2.dc6";
+
+        // --- Data ---
+        // TODO: Doesn't sound right :)
+        public static string EnglishTable = "data\\local\\lng\\eng\\English.txt";
+        public static string ExpansionStringTable = "data\\local\\lng\\eng\\expansionstring.tbl";
+        public static string LevelPreset = "data\\global\\excel\\LvlPrest.txt";
+        public static string LevelType = "data\\global\\excel\\LvlTypes.txt";
+
+        // --- Maps ---
+        public static string MapAct1TownE1 = "data\\global\\tiles\\ACT1\\Town\\townE1.ds1";
 
     }
 }

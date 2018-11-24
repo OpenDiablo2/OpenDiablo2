@@ -39,6 +39,7 @@ namespace OpenDiablo2.Scenes
             IMouseInfoProvider mouseInfoProvider,
             IMusicProvider musicProvider,
             ISceneManager sceneManager,
+            IResourceManager resourceManager,
             Func<eButtonType, Button> createButton,
             Func<string, IScene> getScene // Temporary until SDL load functions are sped up
             )
@@ -48,6 +49,8 @@ namespace OpenDiablo2.Scenes
             this.mpqProvider = mpqProvider;
             this.mouseInfoProvider = mouseInfoProvider;
             this.sceneManager = sceneManager;
+
+            resourceManager.GetMPQDS1(ResourcePaths.MapAct1TownE1, -1, 1);
 
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.GameSelectScreen, Palettes.Sky);
             diabloLogoLeft = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoFireLeft, Palettes.Units, new Point(400, 120));
