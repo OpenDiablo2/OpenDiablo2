@@ -43,27 +43,27 @@ namespace OpenDiablo2.Common.Models
 
     public sealed class MPQDS1Object
     {
-        public UInt32 Type { get; internal set; }
-        public UInt32 Id { get; internal set; }
-        public UInt32 X { get; internal set; }
-        public UInt32 Y { get; internal set; }
-        public UInt32 DS1Flags { get; internal set; }
+        public Int32 Type { get; internal set; }
+        public Int32 Id { get; internal set; }
+        public Int32 X { get; internal set; }
+        public Int32 Y { get; internal set; }
+        public Int32 DS1Flags { get; internal set; }
     }
 
     public sealed class MPQDS1
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public UInt32 Version { get; internal set; }
-        public UInt32 Width { get; internal set; }
-        public UInt32 Height { get; internal set; }
-        public UInt32 Act { get; internal set; } // ???
-        public UInt32 TagType { get; internal set; } // ???
-        public UInt32 FileCount { get; internal set; }
-        public UInt32 NumberOfWalls { get; internal set; }
-        public UInt32 NumberOfFloors { get; internal set; }
-        public UInt32 NumberOfObjects { get; internal set; }
-        public UInt32 NumberOfNPCs { get; internal set; }
+        public Int32 Version { get; internal set; }
+        public Int32 Width { get; internal set; }
+        public Int32 Height { get; internal set; }
+        public Int32 Act { get; internal set; } // ???
+        public Int32 TagType { get; internal set; } // ???
+        public Int32 FileCount { get; internal set; }
+        public Int32 NumberOfWalls { get; internal set; }
+        public Int32 NumberOfFloors { get; internal set; }
+        public Int32 NumberOfObjects { get; internal set; }
+        public Int32 NumberOfNPCs { get; internal set; }
 
         public MPQDT1[] DT1s = new MPQDT1[32];
         
@@ -78,12 +78,12 @@ namespace OpenDiablo2.Common.Models
         {
             log.Debug($"Loading {fileName} (Act {act}) Def {definition}");
             var br = new BinaryReader(stream);
-            Version = br.ReadUInt32();
-            Width = br.ReadUInt32() + 1;
-            Height = br.ReadUInt32() + 1;
-            Act = br.ReadUInt32();
-            TagType = br.ReadUInt32();
-            FileCount = br.ReadUInt32();
+            Version = br.ReadInt32();
+            Width = br.ReadInt32() + 1;
+            Height = br.ReadInt32() + 1;
+            Act = br.ReadInt32();
+            TagType = br.ReadInt32();
+            FileCount = br.ReadInt32();
 
 
 
@@ -105,8 +105,8 @@ namespace OpenDiablo2.Common.Models
                 FileNames.Add(fn);
             }
 
-            NumberOfWalls = br.ReadUInt32();
-            NumberOfFloors = br.ReadUInt32();
+            NumberOfWalls = br.ReadInt32();
+            NumberOfFloors = br.ReadInt32();
 
             for (int i = 0; i < NumberOfWalls; i++)
             {
@@ -186,22 +186,22 @@ namespace OpenDiablo2.Common.Models
 
             // TODO: Tag layer goes here (tag = 1)
 
-            NumberOfObjects = br.ReadUInt32();
+            NumberOfObjects = br.ReadInt32();
             for (int i = 0; i < NumberOfObjects; i++)
             {
                 Objects.Add(new MPQDS1Object
                 {
-                    Type = br.ReadUInt32(),
-                    Id = br.ReadUInt32(),
-                    X = br.ReadUInt32(),
-                    Y = br.ReadUInt32(),
-                    DS1Flags = br.ReadUInt32()
+                    Type = br.ReadInt32(),
+                    Id = br.ReadInt32(),
+                    X = br.ReadInt32(),
+                    Y = br.ReadInt32(),
+                    DS1Flags = br.ReadInt32()
                 });
             }
 
             // TODO: Option groups go here (tag = 1)
 
-            NumberOfNPCs = br.ReadUInt32();
+            NumberOfNPCs = br.ReadInt32();
 
 
             // TODO: WalkPaths
