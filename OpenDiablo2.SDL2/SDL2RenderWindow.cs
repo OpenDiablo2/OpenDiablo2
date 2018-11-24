@@ -153,6 +153,13 @@ namespace OpenDiablo2.SDL2_
             Draw(sprite);
         }
 
+        public void Draw(ISprite sprite, int frame, Point location)
+        {
+            sprite.Location = location;
+            sprite.Frame = frame;
+            Draw(sprite);
+        }
+
         public void Draw(ISprite sprite, int frame)
         {
             sprite.Frame = frame;

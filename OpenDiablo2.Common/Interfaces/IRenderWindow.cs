@@ -24,6 +24,7 @@ namespace OpenDiablo2.Common.Interfaces
         ILabel CreateLabel(IFont font, Point position, string text);
         void Draw(ISprite sprite);
         void Draw(ISprite sprite, Point location);
+        void Draw(ISprite sprite, int frame, Point location);
         void Draw(ISprite sprite, int frame);
         void Draw(ISprite sprite, int xSegments, int ySegments, int offset);
         void Draw(ILabel label);

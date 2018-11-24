@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Core.GameState_;
 using OpenDiablo2.Core.UI;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace OpenDiablo2.Core
             builder.RegisterType<TextDictionary>().As<ITextDictionary>().SingleInstance();
             builder.RegisterType<Button>().AsSelf().InstancePerDependency();
             builder.RegisterType<TextBox>().AsSelf().InstancePerDependency();
-
+            builder.RegisterType<GameState>().AsSelf().SingleInstance();
         }
     }
 }

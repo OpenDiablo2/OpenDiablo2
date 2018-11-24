@@ -8,20 +8,11 @@ using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Core.GameState_;
 using OpenDiablo2.Core.UI;
 
 namespace OpenDiablo2.Scenes
 {
-    enum eHero
-    {
-        Barbarian,
-        Necromancer,
-        Paladin,
-        Assassin,
-        Sorceress,
-        Amazon,
-        Druid
-    }
 
     enum eHeroStance
     {
@@ -54,6 +45,7 @@ namespace OpenDiablo2.Scenes
         private readonly ISceneManager sceneManager;
         private readonly ITextDictionary textDictionary;
         private readonly IKeyboardInfoProvider keyboardInfoProvider;
+        private readonly GameState gameState;
 
         private bool showEntryUi = false;
         private eHero? selectedHero = null;
@@ -75,7 +67,8 @@ namespace OpenDiablo2.Scenes
             Func<eButtonType, Button> createButton,
             Func<TextBox> createTextBox,
             ITextDictionary textDictionary,
-            IKeyboardInfoProvider keyboardInfoProvider
+            IKeyboardInfoProvider keyboardInfoProvider,
+            GameState gameState
             )
         {
             this.renderWindow = renderWindow;
@@ -85,6 +78,7 @@ namespace OpenDiablo2.Scenes
             this.sceneManager = sceneManager;
             this.textDictionary = textDictionary;
             this.keyboardInfoProvider = keyboardInfoProvider;
+            this.gameState = gameState;
 
 
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBackground, Palettes.Fechar);
@@ -238,7 +232,7 @@ namespace OpenDiablo2.Scenes
 
         private void OnOkclicked()
         {
-            
+            gameState.Initialize(characterNameTextBox.Text, selectedHero.Value);
         }
 
         private void OnExitClicked()
