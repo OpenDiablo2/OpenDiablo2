@@ -319,6 +319,7 @@ namespace OpenDiablo2.Common.Models
                 NumberOfNPCs = br.ReadInt32();
             }*/
 
+
             LevelPreset levelPreset;
             if (definition == -1)
             {
@@ -349,6 +350,7 @@ namespace OpenDiablo2.Common.Models
                 log.Debug($"Loading DT resource {levelType.File[i]}");
 
                 DT1s[i] = resourceManager.GetMPQDT1("data\\global\\tiles\\" + levelType.File[i].Replace("/", "\\"));
+
             }
         }
     }

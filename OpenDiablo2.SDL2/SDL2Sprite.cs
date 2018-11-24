@@ -99,14 +99,21 @@ namespace OpenDiablo2.SDL2_
             }
 
             var sub_index = floor.Prop2;
-            var main_index =  (floor.Prop3 >> 4) + ((floor.Prop4 & 0x03) << 4);
-            if (mapData.DT1s[main_index] == null)
-                return;
+            var main_index = (floor.Prop3 >> 4) + ((floor.Prop4 & 0x03) << 4);
 
-            if (mapData.DT1s[main_index].Tiles.Count() <= sub_index)
-                return;
+            MPQDT1Tile tile = null;
+            for (int i = 0; i < mapData.DT1s.Count(); i++)
+            {
+                if (mapData.DT1s[i] == null)
+                    continue;
 
-            var tile = mapData.DT1s[main_index].Tiles[sub_index];
+                tile = mapData.DT1s[i].Tiles.FirstOrDefault(z => z.MainIndex == main_index && z.SubIndex == sub_index);
+                if (tile != null)
+                    break;
+            }
+
+            if (tile == null)
+                throw new ApplicationException("Could not locate tile!");
 
             FrameSize = new Size(tile.Width, Math.Abs(tile.Height));
             TotalFrames = 1;
@@ -122,30 +129,27 @@ namespace OpenDiablo2.SDL2_
             SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
             try
             {
-                if (tile.Orientation == 0)
+                UInt32* data = (UInt32*)pixels;
+                for (var i = 0; i < FrameSize.Width * FrameSize.Height; i++)
+                    data[i] = 0x0;
+
+                foreach (var block in tile.Blocks.Take(1))
                 {
-                    UInt32* data = (UInt32*)pixels;
-                    for (var i = 0; i < FrameSize.Width * FrameSize.Height; i++)
-                        data[i] = 0x0;
+                    //var px = block.PositionX;
+                    //var py = block.PositionY;
 
-                    foreach (var block in tile.Blocks)
+                    var px = 0;
+                    var py = 0;
+                    for (int yy = 0; yy < 32; yy++)
                     {
-                        var px = block.PositionX;
-                        var py = block.PositionY;
-
-                        //var px = 0;
-                        //var py = 0;
-                        for (int yy = 0; yy < 32; yy++)
+                        for (int xx = 0; xx < 32; xx++)
                         {
-                            for (int xx = 0; xx < 32; xx++)
-                            {
-                                var index = px + xx + ((py + yy) * (pitch / 4));
-                                if (index > (FrameSize.Width * FrameSize.Height))
-                                    continue;
-                                if (index < 0)
-                                    continue;
-                                data[index] = palette.Colors[block.PixelData[xx + ((31-yy) * 32)]];
-                            }
+                            var index = px + xx + ((py + yy) * (pitch / 4));
+                            if (index > (FrameSize.Width * FrameSize.Height))
+                                continue;
+                            if (index < 0)
+                                continue;
+                            data[index] = palette.Colors[block.PixelData[xx + (yy * 32)]];
                         }
                     }
                 }
