@@ -170,6 +170,9 @@ namespace OpenDiablo2.SDL2_
         public void Draw(ISprite sprite)
         {
             var spr = sprite as SDL2Sprite;
+            if (spr.texture == IntPtr.Zero)
+                return;
+
             var loc = spr.GetRenderPoint();
 
             var destRect = new SDL.SDL_Rect

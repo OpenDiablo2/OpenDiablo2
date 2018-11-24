@@ -28,10 +28,10 @@ namespace OpenDiablo2.Core
         {
             var data = mpqProvider
                 .GetTextFile(ResourcePaths.LevelType)
-                .First()
                 .Skip(1)
                 .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
+                .Where(x => x.Count() == 36 && x[0] != "Expansion")
                 .ToArray()
                 .Select(x => x.ToLevelType());
 
@@ -42,10 +42,10 @@ namespace OpenDiablo2.Core
         {
             var data = mpqProvider
                 .GetTextFile(ResourcePaths.LevelPreset)
-                .First()
                 .Skip(1)
                 .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
+                .Where(x => x.Count() == 24 && x[0] != "Expansion")
                 .ToArray()
                 .Select(x => x.ToLevelPreset());
 

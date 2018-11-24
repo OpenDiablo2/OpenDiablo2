@@ -18,15 +18,38 @@ namespace OpenDiablo2.Core
         public MPQProvider(GlobalConfiguration globalConfiguration)
         {
             this.globalConfiguration = globalConfiguration;
+            // TODO: Make this less dumb. We need to an external file to configure mpq load order.
+            var mpqsToLoad = new string[]
+            {
+
+            };
             this.mpqs = Directory
                 .EnumerateFiles(globalConfiguration.BaseDataPath, "*.mpq")
                 .Where(x => !Path.GetFileName(x).StartsWith("patch"))
                 .Select(file => new MPQ(file))
                 .ToArray();
 
+            
+
+            // Load the base game files
             for(var i = 0; i < mpqs.Count(); i++)
             {
+                if (Path.GetFileName(mpqs[i].Path).StartsWith("d2exp") || Path.GetFileName(mpqs[i].Path).StartsWith("d2x"))
+                    continue;
+
                 foreach(var file in mpqs[i].Files)
+                {
+                    mpqLookup[file.ToLower()] = i;
+                }
+            }
+
+            // Load the expansion game files
+            for (var i = 0; i < mpqs.Count(); i++)
+            {
+                if (!Path.GetFileName(mpqs[i].Path).StartsWith("d2exp") && !Path.GetFileName(mpqs[i].Path).StartsWith("d2x"))
+                    continue;
+
+                foreach (var file in mpqs[i].Files)
                 {
                     mpqLookup[file.ToLower()] = i;
                 }
@@ -36,15 +59,11 @@ namespace OpenDiablo2.Core
         public IEnumerable<MPQ> GetMPQs() => mpqs;
 
         public Stream GetStream(string fileName)
-        { 
-            return mpqs[mpqLookup[fileName.ToLower()]].OpenFile(fileName);
-        }
+            => mpqs[mpqLookup[fileName.ToLower()]].OpenFile(fileName);
+        
 
-        public IEnumerable<IEnumerable<string>> GetTextFile(string fileName)
-        {
-            foreach (var stream in mpqs.Where(x => x.Files.Contains(fileName)).Select(x => x.OpenFile(fileName)))
-                yield return new StreamReader(stream).ReadToEnd().Split('\n').Select(x => x.Trim());
-        }
+        public IEnumerable<string> GetTextFile(string fileName)
+            => new StreamReader(mpqs[mpqLookup[fileName.ToLower()]].OpenFile(fileName)).ReadToEnd().Split('\n');
 
 
     }

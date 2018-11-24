@@ -89,7 +89,7 @@ namespace OpenDiablo2.Core
 
         private void LoadDictionary()
         {
-            var text = mpqProvider.GetTextFile(ResourcePaths.EnglishTable).First();
+            var text = mpqProvider.GetTextFile(ResourcePaths.EnglishTable);
 
             var rowstoLoad = text.Where(x => x.Split(',').Count() == 3).Select(x => x.Split(',').Select(z => z.Trim()).ToArray());
             foreach (var row in rowstoLoad)

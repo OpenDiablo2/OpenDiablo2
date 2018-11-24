@@ -8,7 +8,7 @@ namespace OpenDiablo2.Common.Interfaces
     public interface IMPQProvider
     {
         IEnumerable<MPQ> GetMPQs();
-        IEnumerable<IEnumerable<String>> GetTextFile(string fileName);
+        IEnumerable<String> GetTextFile(string fileName);
         Stream GetStream(string fileName);
     }
 }
