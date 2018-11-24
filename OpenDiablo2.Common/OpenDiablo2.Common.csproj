@@ -73,6 +73,7 @@
     <Compile Include="Enums\eButtonType.cs" />
     <Compile Include="Enums\eHero.cs" />
     <Compile Include="Enums\eMPQFormatVersion.cs" />
+    <Compile Include="Interfaces\IEngineDataManager.cs" />
     <Compile Include="Interfaces\IFont.cs" />
     <Compile Include="Interfaces\IGameEngine.cs" />
     <Compile Include="Interfaces\IKeyboardInfoProvider.cs" />
@@ -91,6 +92,10 @@
     <Compile Include="Interfaces\ITextLabel.cs" />
     <Compile Include="Models\BitStream.cs" />
     <Compile Include="Models\ButtonLayout.cs" />
+    <Compile Include="Models\LevelPreset.cs" />
+    <Compile Include="Models\LevelType.cs" />
+    <Compile Include="Models\MPQDS1.cs" />
+    <Compile Include="Models\MPQDT1.cs" />
     <Compile Include="Models\MPQFont.cs" />
     <Compile Include="Models\GlobalConfiguration.cs" />
     <Compile Include="Models\ImageSet.cs" />

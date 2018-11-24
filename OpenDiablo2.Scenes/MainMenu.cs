@@ -39,6 +39,7 @@ namespace OpenDiablo2.Scenes
             IMouseInfoProvider mouseInfoProvider,
             IMusicProvider musicProvider,
             ISceneManager sceneManager,
+            IResourceManager resourceManager,
             Func<eButtonType, Button> createButton,
             Func<string, IScene> getScene // Temporary until SDL load functions are sped up
             )
