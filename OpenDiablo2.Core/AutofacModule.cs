@@ -22,6 +22,8 @@ namespace OpenDiablo2.Core
             builder.RegisterType<ResourceManager>().As<IResourceManager>().SingleInstance();
             builder.RegisterType<TextDictionary>().As<ITextDictionary>().SingleInstance();
             builder.RegisterType<Button>().AsSelf().InstancePerDependency();
+            builder.RegisterType<TextBox>().AsSelf().InstancePerDependency();
+
         }
     }
 }

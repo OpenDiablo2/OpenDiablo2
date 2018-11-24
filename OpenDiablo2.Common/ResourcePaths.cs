@@ -93,6 +93,7 @@ namespace OpenDiablo2.Common
         public static string WideButtonBlank = "data\\global\\ui\\FrontEnd\\WideButtonBlank.dc6";
         public static string MediumButtonBlank = "data\\global\\ui\\FrontEnd\\MediumButtonBlank.dc6";
         public static string CancelButton = "data\\global\\ui\\FrontEnd\\CancelButtonBlank.dc6";
+        public static string TextBox2 = "data\\global\\ui\\FrontEnd\\textbox2.dc6";
 
         // --- Data ---
         // TODO: Doesn't sound right :)

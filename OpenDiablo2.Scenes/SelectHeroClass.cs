@@ -53,14 +53,16 @@ namespace OpenDiablo2.Scenes
         private readonly IMusicProvider musicProvider;
         private readonly ISceneManager sceneManager;
         private readonly ITextDictionary textDictionary;
+        private readonly IKeyboardInfoProvider keyboardInfoProvider;
 
         private bool showEntryUi = false;
         private eHero? selectedHero = null;
         private float secondTimer;
         private ISprite backgroundSprite, campfireSprite;
-        private IFont headingFont, heroDescFont;
-        private ILabel headingLabel, heroClassLabel, heroDesc1Label, heroDesc2Label, heroDesc3Label;
+        private IFont headingFont, heroDescFont, uiFont;
+        private ILabel headingLabel, heroClassLabel, heroDesc1Label, heroDesc2Label, heroDesc3Label, characterNameLabel;
         private Button exitButton, okButton;
+        private TextBox characterNameTextBox;
         private Dictionary<eHero, HeroRenderInfo> heroRenderInfo = new Dictionary<eHero, HeroRenderInfo>();
 
         public SelectHeroClass(
@@ -71,7 +73,9 @@ namespace OpenDiablo2.Scenes
             IMusicProvider musicProvider,
             ISceneManager sceneManager,
             Func<eButtonType, Button> createButton,
-            ITextDictionary textDictionary
+            Func<TextBox> createTextBox,
+            ITextDictionary textDictionary,
+            IKeyboardInfoProvider keyboardInfoProvider
             )
         {
             this.renderWindow = renderWindow;
@@ -80,6 +84,7 @@ namespace OpenDiablo2.Scenes
             this.mouseInfoProvider = mouseInfoProvider;
             this.sceneManager = sceneManager;
             this.textDictionary = textDictionary;
+            this.keyboardInfoProvider = keyboardInfoProvider;
 
 
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBackground, Palettes.Fechar);
@@ -195,6 +200,7 @@ namespace OpenDiablo2.Scenes
 
             headingFont = renderWindow.LoadFont(ResourcePaths.Font30, Palettes.Units);
             heroDescFont = renderWindow.LoadFont(ResourcePaths.Font16, Palettes.Units);
+            uiFont = renderWindow.LoadFont(ResourcePaths.Font16, Palettes.Units);
 
             headingLabel = renderWindow.CreateLabel(headingFont);
             headingLabel.Text = textDictionary.Translate("strSelectHeroClass");
@@ -208,16 +214,25 @@ namespace OpenDiablo2.Scenes
             heroDesc2Label = renderWindow.CreateLabel(heroDescFont);
             heroDesc3Label = renderWindow.CreateLabel(heroDescFont);
 
+            characterNameLabel = renderWindow.CreateLabel(uiFont);
+            characterNameLabel.Text = "Character Name"; // TODO Translation table
+            characterNameLabel.Location = new Point(320, 475);
+            characterNameLabel.TextColor = Color.FromArgb(216, 196, 128);
+
             exitButton = createButton(eButtonType.Medium);
-            exitButton.Text = "EXIT";
+            exitButton.Text = "EXIT"; // TODO Translation table
             exitButton.Location = new Point(30, 540);
             exitButton.OnActivate = OnExitClicked;
 
             okButton = createButton(eButtonType.Medium);
-            okButton.Text = "OK";
+            okButton.Text = "OK"; // TODO Translation table
             okButton.Location = new Point(630, 540);
             okButton.OnActivate = OnOkclicked;
             okButton.Enabled = false;
+
+            characterNameTextBox = createTextBox();
+            characterNameTextBox.Text = "";
+            characterNameTextBox.Location = new Point(320, 493);
 
         }
 
@@ -235,6 +250,9 @@ namespace OpenDiablo2.Scenes
                 heroRenderInfo[hero].Stance = eHeroStance.Idle;
             }
             showEntryUi = false;
+            keyboardInfoProvider.KeyPressCallback = null;
+            characterNameTextBox.Text = "";
+            okButton.Enabled = false;
 
             sceneManager.ChangeScene("Main Menu");
         }
@@ -258,7 +276,11 @@ namespace OpenDiablo2.Scenes
             exitButton.Render();
 
             if (showEntryUi)
+            {
+                renderWindow.Draw(characterNameLabel);
                 okButton.Render();
+                characterNameTextBox.Render();
+            }
         }
 
         private void RenderHeros()
@@ -312,12 +334,36 @@ namespace OpenDiablo2.Scenes
 
         }
 
+        private void OnKeyPressed(char charcode)
+        {
+            if (charcode == '\b')
+            {
+                if (characterNameTextBox.Text.Length == 0)
+                    return;
+
+                characterNameTextBox.Text = characterNameTextBox.Text.Substring(0, characterNameTextBox.Text.Length - 1);
+                okButton.Enabled = characterNameTextBox.Text.Length >= 2;
+                return;
+            }
+
+            if (characterNameTextBox.Text.Length >= 15)
+                return;
+
+            if (!"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".Contains(charcode))
+                return;
+            characterNameTextBox.Text += charcode;
+            okButton.Enabled = characterNameTextBox.Text.Length >= 2;
+        }
+
         public void Update(long ms)
         {
             float seconds = ((float)ms / 1500f);
             secondTimer += seconds;
             while (secondTimer >= 1f)
                 secondTimer -= 1f;
+
+            if (keyboardInfoProvider.KeyPressCallback == null)
+                keyboardInfoProvider.KeyPressCallback = OnKeyPressed;
 
             // Don't update hero selection if one of them is walking to or from the campfire
             var canSelect = heroRenderInfo.All(x => x.Value.Stance == eHeroStance.Idle || x.Value.Stance == eHeroStance.IdleSelected || x.Value.Stance == eHeroStance.Selected);
@@ -332,6 +378,7 @@ namespace OpenDiablo2.Scenes
 
             exitButton.Update();
             okButton.Update();
+            characterNameTextBox.Update(ms);
         }
 
         private void UpdateHeroSelectionHover(eHero hero, long ms, bool canSelect)

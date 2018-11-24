@@ -2,6 +2,7 @@
 using OpenDiablo2.Common.Models;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,6 +30,19 @@ namespace OpenDiablo2.SDL2_
         public void Dispose()
         {
             sprite.Dispose();
+        }
+
+        public Size CalculateSize(string text)
+        {
+            int w = 0;
+            int h = 0;
+            foreach(byte ch in text)
+            {
+                w += font.CharacterMetric[ch].Width;
+                h = Math.Max(h, font.CharacterMetric[ch].Height);
+            }
+
+            return new Size(w, h);
         }
     }
 }

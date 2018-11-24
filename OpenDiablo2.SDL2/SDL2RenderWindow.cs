@@ -9,10 +9,11 @@ using System.IO;
 using System.Drawing;
 using OpenDiablo2.Common.Models;
 using Autofac;
+using System.Runtime.InteropServices;
 
 namespace OpenDiablo2.SDL2_
 {
-    public sealed class SDL2RenderWindow : IRenderWindow, IRenderTarget, IMouseInfoProvider
+    public sealed class SDL2RenderWindow : IRenderWindow, IRenderTarget, IMouseInfoProvider, IKeyboardInfoProvider
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -24,6 +25,8 @@ namespace OpenDiablo2.SDL2_
         public bool LeftMouseDown { get; internal set; } = false;
         public bool RightMouseDown { get; internal set; } = false;
         public bool ReserveMouse { get; set; } = false;
+
+        public OnKeyPressed KeyPressCallback { get; set; }
 
         private readonly IMPQProvider mpqProvider;
         private readonly IPaletteProvider paletteProvider;
@@ -51,8 +54,8 @@ namespace OpenDiablo2.SDL2_
             if (renderer == IntPtr.Zero)
                 throw new ApplicationException($"Unable to create SDL Window: {SDL.SDL_GetError()}");
 
-            SDL.SDL_SetRenderDrawBlendMode(renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
+            SDL.SDL_SetRenderDrawBlendMode(renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
             SDL.SDL_ShowCursor(0);
 
             IsRunning = true;
@@ -68,6 +71,14 @@ namespace OpenDiablo2.SDL2_
             SDL.SDL_Quit();
         }
 
+        public unsafe bool KeyIsPressed(int scancode)
+        {
+            int numKeys;
+            byte* keys = (byte*)SDL.SDL_GetKeyboardState(out numKeys);
+            return keys[scancode] > 0;
+
+        }
+
         public void Clear()
         {
             SDL.SDL_SetRenderTarget(renderer, IntPtr.Zero);
@@ -81,7 +92,7 @@ namespace OpenDiablo2.SDL2_
             SDL.SDL_RenderPresent(renderer);
         }
 
-        public void Update()
+        public unsafe void Update()
         {
             while (SDL.SDL_PollEvent(out SDL.SDL_Event evt) != 0)
             {
@@ -116,6 +127,16 @@ namespace OpenDiablo2.SDL2_
                             RightMouseDown = false;
                             break;
                     }
+                }
+                else if (evt.type == SDL.SDL_EventType.SDL_KEYDOWN)
+                {
+                    if (evt.key.keysym.sym == SDL.SDL_Keycode.SDLK_BACKSPACE && KeyPressCallback != null)
+                        KeyPressCallback('\b');
+                }
+                else if (evt.type == SDL.SDL_EventType.SDL_TEXTINPUT)
+                {
+                    KeyPressCallback?.Invoke(Marshal.PtrToStringAnsi((IntPtr)evt.text.text)[0]);
+                    continue;
                 }
 
                 else if (evt.type == SDL.SDL_EventType.SDL_QUIT)
