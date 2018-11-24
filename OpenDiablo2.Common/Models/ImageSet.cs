@@ -32,9 +32,7 @@ namespace OpenDiablo2.Common.Models
             if (index == -1)
                 return 0;
 
-            var color = palette.Colors[index];
-
-            return ((UInt32)255 << 24) + ((UInt32)color.R << 16) + ((UInt32)color.G << 8) + (UInt32)color.B;
+            return palette.Colors[index];
         }
     }
 

@@ -154,15 +154,12 @@ namespace OpenDiablo2.Common.Models
                     else
                     {
                         // RLE block
-                        /*
                         var length = block.Length;
                         byte b1;
                         byte b2;
                         int x = 0;
                         int y = 0;
-                        int width = (block.Format >> 8);
-                        int height = (block.Format & 0xFF);
-                        block.PixelData = new Int16[256 * 256];
+                        block.PixelData = new Int16[32 * 32];
                         while (length > 0)
                         {
                             b1 = br.ReadByte();
@@ -180,12 +177,10 @@ namespace OpenDiablo2.Common.Models
                             while (b2 > 0)
                             {
                                 block.PixelData[x + (y * 32)] = br.ReadByte();
-                                br.ReadByte();
                                 x++;
                                 b2--;
                             }
                         }
-                        */
                     }
                 }
             }

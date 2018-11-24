@@ -118,12 +118,17 @@ namespace OpenDiablo2.SDL2_
                 for (var i = 0; i < FrameSize.Width * FrameSize.Height; i++)
                     data[i] = 0;
 
-                for (var subtileX = 0; subtileX < 5; subtileX++)
-                {
-                    for (var subtileY = 0; subtileY < 5; subtileY++)
-                    {
-                        var subtileFlags = tile.SubTileFlags[subtileX + (subtileY * 5)];
 
+                foreach (var block in tile.Blocks)
+                {
+                    var px = block.PositionX;
+                    var py = FrameSize.Height + block.PositionY;
+                    for (int yy = 0; yy < 32; yy++)
+                    {
+                        for (int xx = 0; xx < 32; xx++)
+                        {
+                            data[px + xx + ((py + yy) * pitch / 4)] = palette.Colors[block.PixelData[xx + (yy * 32)]];
+                        }
                     }
                 }
 
