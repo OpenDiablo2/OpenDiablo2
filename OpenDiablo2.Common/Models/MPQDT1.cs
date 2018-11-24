@@ -143,7 +143,7 @@ namespace OpenDiablo2.Common.Models
                             length -= n;
                             while (n > 0)
                             {
-                                block.PixelData[x + ((31-y) * 32)] = br.ReadByte();
+                                block.PixelData[x + (y * 32)] = br.ReadByte();
                                 x++;
                                 n--;
                             }
@@ -176,7 +176,7 @@ namespace OpenDiablo2.Common.Models
                             length -= b2;
                             while (b2 > 0)
                             {
-                                block.PixelData[x + ((31-y) * 32)] = br.ReadByte();
+                                block.PixelData[x + (y * 32)] = br.ReadByte();
                                 x++;
                                 b2--;
                             }
