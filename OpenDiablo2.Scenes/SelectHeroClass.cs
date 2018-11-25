@@ -208,17 +208,17 @@ namespace OpenDiablo2.Scenes
             heroDesc3Label = renderWindow.CreateLabel(heroDescFont);
 
             characterNameLabel = renderWindow.CreateLabel(uiFont);
-            characterNameLabel.Text = "Character Name"; // TODO Translation table
+            characterNameLabel.Text = textDictionary.Translate("strCharacterName");
             characterNameLabel.Location = new Point(320, 475);
             characterNameLabel.TextColor = Color.FromArgb(216, 196, 128);
 
             exitButton = createButton(eButtonType.Medium);
-            exitButton.Text = "EXIT"; // TODO Translation table
+            exitButton.Text = textDictionary.Translate("strExit");
             exitButton.Location = new Point(30, 540);
             exitButton.OnActivate = OnExitClicked;
 
             okButton = createButton(eButtonType.Medium);
-            okButton.Text = "OK"; // TODO Translation table
+            okButton.Text = textDictionary.Translate("strOk");
             okButton.Location = new Point(630, 540);
             okButton.OnActivate = OnOkclicked;
             okButton.Enabled = false;
@@ -455,6 +455,15 @@ namespace OpenDiablo2.Scenes
 
         }
 
+        private void setDescLabels(string descKey)
+        {
+            var heroDesc = textDictionary.Translate(descKey);
+            var parts = StringUtils.SplitIntoLinesWithMaxWidth(heroDesc, 37);
+            heroDesc1Label.Text = parts.Count > 0 ? parts[0] : "";
+            heroDesc2Label.Text = parts.Count > 1 ? parts[1] : "";
+            heroDesc3Label.Text = parts.Count > 2 ? parts[2] : "";
+        }
+
         private void UpdateHeroText()
         {
             if (selectedHero == null)
@@ -464,21 +473,15 @@ namespace OpenDiablo2.Scenes
             {
                 case eHero.Barbarian:
                     heroClassLabel.Text = textDictionary.Translate("strBarbarian");
-                    heroDesc1Label.Text = "He is unequaled in close-quarters";
-                    heroDesc2Label.Text = "combat and mastery of weapons.";
-                    heroDesc3Label.Text = "";
+                    setDescLabels("strBarbDesc");
                     break;
                 case eHero.Necromancer:
                     heroClassLabel.Text = textDictionary.Translate("strNecromancer");
-                    heroDesc1Label.Text = "Summoning undead minions and cursing";
-                    heroDesc2Label.Text = "his enemies are his specialties.";
-                    heroDesc3Label.Text = "";
+                    setDescLabels("strNecroDesc");
                     break;
                 case eHero.Paladin:
                     heroClassLabel.Text = textDictionary.Translate("strPaladin");
-                    heroDesc1Label.Text = "He is a natural party leader, holy";
-                    heroDesc2Label.Text = "man, and blessed warrior.";
-                    heroDesc3Label.Text = "";
+                    setDescLabels("strPalDesc");
                     break;
                 case eHero.Assassin:
                     heroClassLabel.Text = textDictionary.Translate("strAssassin");
@@ -488,16 +491,11 @@ namespace OpenDiablo2.Scenes
                     break;
                 case eHero.Sorceress:
                     heroClassLabel.Text = textDictionary.Translate("strSorceress");
-                    heroClassLabel.Text = textDictionary.Translate("strAmazon");
-                    heroDesc1Label.Text = "She has mastered the elemental";
-                    heroDesc2Label.Text = "magicks -- fire, lightning, and ice.";
-                    heroDesc3Label.Text = "";
+                    setDescLabels("strSorcDesc");
                     break;
                 case eHero.Amazon:
                     heroClassLabel.Text = textDictionary.Translate("strAmazon");
-                    heroDesc1Label.Text = "Skilled with the spear and the bow,";
-                    heroDesc2Label.Text = "she is a very versatile fighter.";
-                    heroDesc3Label.Text = "";
+                    setDescLabels("strAmazonDesc");
                     break;
                 case eHero.Druid:
                     heroClassLabel.Text = textDictionary.Translate("strDruid");
