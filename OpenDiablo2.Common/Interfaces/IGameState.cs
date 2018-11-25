@@ -12,6 +12,7 @@ namespace OpenDiablo2.Common.Interfaces
     {
         MPQDS1 MapData { get; }
         int Act { get; }
+        int Seed { get; }
         string MapName { get; }
         Palette CurrentPalette { get; }
 

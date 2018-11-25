@@ -29,6 +29,6 @@ namespace OpenDiablo2.Common.Interfaces
         void Draw(ISprite sprite, int frame);
         void Draw(ISprite sprite, int xSegments, int ySegments, int offset);
         void Draw(ILabel label);
-        void DrawMapCell(int xCell, int yCell, int xPixel, int yPixel, MPQDS1 mapData, int main_index, int sub_index, Palette palette);
+        void DrawMapCell(int xCell, int yCell, int xPixel, int yPixel, MPQDS1 mapData, int main_index, int sub_index, Palette palette, MPQDS1WallOrientationTileProps orientation);
     }
 }
