@@ -57,11 +57,11 @@ namespace OpenDiablo2.Scenes
             renderWindow.Draw(panelSprite, 5, new Point(685, 600));
 
             // Render the health bar
-            renderWindow.Draw(healthManaSprite, 0, new Point(28, 590));
+            renderWindow.Draw(healthManaSprite, 0, new Point(30, 587));
             renderWindow.Draw(gameGlobeOverlapSprite, 0, new Point(28, 595));
 
             // Render the mana bar
-            renderWindow.Draw(healthManaSprite, 1, new Point(691, 590));
+            renderWindow.Draw(healthManaSprite, 1, new Point(692, 588));
             renderWindow.Draw(gameGlobeOverlapSprite, 1, new Point(693, 591));
 
         }
@@ -87,7 +87,7 @@ namespace OpenDiablo2.Scenes
                 for (int x = 0; x < gameState.MapData.Width; x++)
                 {
                     testSprite[idx] = renderWindow.GenerateMapCell(gameState.MapData, x, y, eRenderCellType.Floor, gameState.CurrentPalette);
-                    testSprite[idx].Location = new Point(((x - y) * 80) - 1200, ((x + y) * 40) - 1200);
+                    testSprite[idx].Location = new Point(((x - y) * 80) - 2900, ((x + y) * 40) - 1900);
                     idx++;
                 }
             }
