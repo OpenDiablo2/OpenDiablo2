@@ -91,10 +91,17 @@ namespace OpenDiablo2.Core
         {
             var text = mpqProvider.GetTextFile(ResourcePaths.EnglishTable);
 
-            var rowstoLoad = text.Where(x => x.Split(',').Count() == 3).Select(x => x.Split(',').Select(z => z.Trim()).ToArray());
-            foreach (var row in rowstoLoad)
-                lookupTable[row[1]] = !(row[2].StartsWith("\"") && row[2].EndsWith("\"")) ? row[2] : row[2].Substring(1, row[2].Length - 2);
+            var rowsToLoad = text.Where(
+                x => x.Length > 0 &&
+                     !x.StartsWith("//") &&
+                     !x.StartsWith("#") &&
+                     x.Split(',').Length >= 3
+            ).Select(x => x.Split(new[] {','}, 3).Select(z => z.Trim()).ToArray());
 
+            foreach (var row in rowsToLoad)
+                lookupTable[row[1]] = !(row[2].StartsWith("\"") && row[2].EndsWith("\""))
+                    ? row[2]
+                    : row[2].Substring(1, row[2].Length - 2);
         }
 
         public string Translate(string key) => lookupTable[key];
