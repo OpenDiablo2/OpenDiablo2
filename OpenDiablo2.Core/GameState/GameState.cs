@@ -48,7 +48,7 @@ namespace OpenDiablo2.Core.GameState_
             Seed = random.Next();
 
             sceneManager.ChangeScene("Game");
-            ChangeMap(eLevelId.Act1_Town1);
+            ChangeMap(eLevelId.Act5_BaalEntrance);
         }
 
         public void ChangeMap(eLevelId levelId)

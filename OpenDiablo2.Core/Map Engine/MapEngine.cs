@@ -57,7 +57,7 @@ namespace OpenDiablo2.Core.Map_Engine
         {
             PurgeAllMapData();
             LoadNewMapData();
-            //CameraLocation = new PointF(gameState.MapData.Width / 2, gameState.MapData.Height / 2);
+            CameraLocation = new PointF(gameState.MapData.Width / 2, gameState.MapData.Height / 2);
         }
 
         private void LoadNewMapData()
