@@ -10,23 +10,29 @@ using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Core.GameState_
 {
-    public sealed class GameState
+    public sealed class GameState : IGameState
     {
         private readonly ISceneManager sceneManager;
         private readonly IResourceManager resourceManager;
         private readonly IPaletteProvider paletteProvider;
+        private readonly Func<IMapEngine> getMapEngine;
 
-        public MPQDS1 MapData { get; set; }
-        public bool MapDirty { get; set; }
+        public MPQDS1 MapData { get; private set; }
         public int Act { get; private set; }
-        public string MapName { get; set; }
+        public string MapName { get; private set; }
         public Palette CurrentPalette => paletteProvider.PaletteTable[$"ACT{Act}"];
 
-        public GameState(ISceneManager sceneManager, IResourceManager resourceManager, IPaletteProvider paletteProvider)
+        public GameState(
+            ISceneManager sceneManager,
+            IResourceManager resourceManager,
+            IPaletteProvider paletteProvider,
+            Func<IMapEngine> getMapEngine
+            )
         {
             this.sceneManager = sceneManager;
             this.resourceManager = resourceManager;
             this.paletteProvider = paletteProvider;
+            this.getMapEngine = getMapEngine;
         }
 
         public void Initialize(string characterName, eHero hero)
@@ -39,8 +45,8 @@ namespace OpenDiablo2.Core.GameState_
         {
             MapName = mapName;
             Act = act;
-            MapDirty = true;
             MapData = resourceManager.GetMPQDS1(mapName, -1, act);
+            getMapEngine().NotifyMapChanged();
         }
     }
 }
