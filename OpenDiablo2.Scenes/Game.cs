@@ -39,10 +39,15 @@ namespace OpenDiablo2.Scenes
 
             runButton = createButton(eButtonType.Run);
             runButton.Location = new Point(256, 570);
-
+            
             menuButton = createButton(eButtonType.Menu);
             menuButton.Location = new Point(393, 561);
-            //skillButton.OnActivate = OnSinglePlayerClicked;
+            menuButton.OnActivate = OnSomething;
+        }
+
+        private void OnSomething()
+        {
+
         }
 
         public void Render()
