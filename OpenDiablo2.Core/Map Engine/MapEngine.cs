@@ -35,9 +35,7 @@ namespace OpenDiablo2.Core.Map_Engine
         }
 
         private ISprite loadingSprite;
-        private ISprite[] tempMapCell;
-
-        private int cellOffsetX, cellOffsetY, pixelOffsetX, pixelOffsetY;
+        //private ISprite[] tempMapCell;
 
         private const int
             cellSizeX = 160,
@@ -66,6 +64,7 @@ namespace OpenDiablo2.Core.Map_Engine
 
         private void LoadNewMapData()
         {
+            /*
             var cellsToLoad = gameState.MapData.Width * gameState.MapData.Height;
             tempMapCell = new ISprite[cellsToLoad];
 
@@ -84,7 +83,7 @@ namespace OpenDiablo2.Core.Map_Engine
                     gameState.CurrentPalette
                 );
             }
-            
+            */
             //CameraLocation = new Point(((gameState.MapData.Width * cellSizeX) / 2) - 400, ((gameState.MapData.Height * cellSizeY) / 2) - 300);
         }
 
@@ -96,21 +95,24 @@ namespace OpenDiablo2.Core.Map_Engine
             for (int y = 0; y < gameState.MapData.Width; y++)
                 for (int x = 0; x < gameState.MapData.Height; x++)
                 {
-                    RenderFloorCell(
-                        (x + cellOffsetX),
-                        (y + cellOffsetY),
-                        ((x - y) * 80) - cOffX,
-                        ((x + y) * 40) - cOffY
-                    );
+
+                    var visualX = ((x - y) * (cellSizeX / 2)) - cOffX;
+                    var visualY = ((x + y) * (cellSizeY / 2)) - cOffY;
+
+                    if (visualX < -160 || visualX > 800 || visualY < -80 || visualY > 600)
+                        continue;
+
+                    RenderFloorCell(x, y, ((x - y) * 80) - cOffX, ((x + y) * 40) - cOffY);
                 }
         }
 
-        public void RenderFloorCell(int x, int y, int xp, int yp)
+        private void RenderFloorCell(int x, int y, int xp, int yp)
         {
             if (x < 0 || y < 0 || x >= gameState.MapData.Width || y >= gameState.MapData.Height)
                 return;
 
-            renderWindow.Draw(tempMapCell[x + (y * gameState.MapData.Width)], new Point(xp, yp));
+
+            renderWindow.DrawMapCell(x, y, xp, yp, gameState.MapData);
         }
 
         public void Update(long ms)
