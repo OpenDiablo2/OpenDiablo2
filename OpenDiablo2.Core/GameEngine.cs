@@ -90,8 +90,8 @@ namespace OpenDiablo2.Core
             sw.Start();
             while (getRenderWindow().IsRunning)
             {
-                while (sw.ElapsedMilliseconds < 40)
-                    Thread.Sleep((int)Math.Min(1, 40 -sw.ElapsedMilliseconds)); // The original runs at about 25 fps.
+                while (sw.ElapsedMilliseconds < 33)
+                    Thread.Sleep((int)Math.Min(1, 33 -sw.ElapsedMilliseconds)); // Lock to 30fps
 
                 var ms = sw.ElapsedMilliseconds;
 
