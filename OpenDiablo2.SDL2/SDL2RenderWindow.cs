@@ -32,18 +32,21 @@ namespace OpenDiablo2.SDL2_
         private readonly IMPQProvider mpqProvider;
         private readonly IPaletteProvider paletteProvider;
         private readonly IResourceManager resourceManager;
+        private readonly IGameState gameState;
 
         private IntPtr cellTexture;
 
         public SDL2RenderWindow(
             IMPQProvider mpqProvider,
             IPaletteProvider paletteProvider,
-            IResourceManager resourceManager
+            IResourceManager resourceManager,
+            IGameState gameState
             )
         {
             this.mpqProvider = mpqProvider;
             this.paletteProvider = paletteProvider;
             this.resourceManager = resourceManager;
+            this.gameState = gameState;
 
             SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
             if (SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "0") == SDL.SDL_bool.SDL_FALSE)
@@ -61,7 +64,7 @@ namespace OpenDiablo2.SDL2_
             SDL.SDL_SetRenderDrawBlendMode(renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
             SDL.SDL_ShowCursor(0);
 
-            cellTexture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, 256, 256);
+            cellTexture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, 256, 1024);
             SDL.SDL_SetTextureBlendMode(cellTexture, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
 
@@ -277,23 +280,34 @@ namespace OpenDiablo2.SDL2_
             SDL.SDL_RenderCopy(renderer, lbl.texture, IntPtr.Zero, ref destRect);
         }
 
-        public unsafe void DrawMapCell(int xCell, int yCell, int xPixel, int yPixel, MPQDS1 mapData, int main_index, int sub_index, Palette palette)
+        public unsafe void DrawMapCell(int xCell, int yCell, int xPixel, int yPixel, MPQDS1 mapData, int main_index, int sub_index, Palette palette, MPQDS1WallOrientationTileProps orientation)
         {
 
+           var tiles = mapData.LookupTable.Where(x => 
+                x.MainIndex == main_index && 
+                x.SubIndex == sub_index && 
+                (orientation == null || x.Orientation == orientation.Orientation1)).Select(x => x.TileRef);
+
+            if (!tiles.Any())
+                return; // TODO: Why does this happen....
+
             MPQDT1Tile tile = null;
-            for (int i = 0; i < mapData.DT1s.Count(); i++)
+            if (tiles.Count() > 0)
             {
-                if (mapData.DT1s[i] == null)
-                    continue;
-
-                tile = mapData.DT1s[i].Tiles.FirstOrDefault(z => z.MainIndex == main_index && z.SubIndex == sub_index);
-                if (tile != null)
-                    break;
-            }
-
-            if (tile == null)
-                throw new ApplicationException("Could not locate tile!");
-
+                var totalRarity = tiles.Sum(q => q.RarityOrFrameIndex);
+                var random = new Random(gameState.Seed + xCell + (mapData.Width * yCell));
+                var x = random.Next(totalRarity);
+                var z = 0;
+                foreach(var t in tiles)
+                {
+                    z += t.RarityOrFrameIndex;
+                    if (x <= z)
+                    {
+                        tile = t;
+                        break;
+                    }
+                }
+            } else tile = tiles.First();
 
             var frameSize = new Size(tile.Width, Math.Abs(tile.Height));
             var srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = frameSize.Width, h = frameSize.Height };
@@ -315,16 +329,20 @@ namespace OpenDiablo2.SDL2_
                 {
                     var index = block.PositionX + ((block.PositionY) * pitchChange);
                     var xx = 0;
+                    var yy = 0;
                     foreach (var colorIndex in block.PixelData)
                     {
                         try
                         {
+                            if (colorIndex == 0)
+                                continue;
                             var color = palette.Colors[colorIndex];
-
+                            
                             if ((color & 0xFFFFFF) > 0)
                                 data[index] = color;
 
-                        } finally
+                        }
+                        finally
                         {
                             index++;
                             xx++;
@@ -333,6 +351,7 @@ namespace OpenDiablo2.SDL2_
                                 index -= 32;
                                 index += pitchChange;
                                 xx = 0;
+                                yy++;
                             }
                         }
                     }
@@ -343,8 +362,9 @@ namespace OpenDiablo2.SDL2_
                 SDL.SDL_UnlockTexture(cellTexture);
             }
 
-
-            var dstRect = new SDL.SDL_Rect { x = xPixel, y = yPixel, w = frameSize.Width, h = frameSize.Height };
+            SDL.SDL_SetRenderDrawBlendMode(renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+            SDL.SDL_SetTextureBlendMode(cellTexture, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+            var dstRect = new SDL.SDL_Rect { x = xPixel, y = yPixel - tile.RoofHeight, w = frameSize.Width, h = frameSize.Height };
             SDL.SDL_RenderCopy(renderer, cellTexture, ref srcRect, ref dstRect);
         }
 

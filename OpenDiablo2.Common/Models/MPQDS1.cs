@@ -58,6 +58,17 @@ namespace OpenDiablo2.Common.Models
         public Int32 Height { get; internal set; }
     }
 
+    public struct DS1LookupTable
+    {
+        public int Orientation;
+        public int MainIndex;
+        public int SubIndex;
+        public int Frame;
+
+        public MPQDT1Tile TileRef;
+
+    }
+
     public sealed class MPQDS1
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -76,6 +87,7 @@ namespace OpenDiablo2.Common.Models
         public Int32 NumberOfGroups { get; internal set; }
 
         public MPQDT1[] DT1s = new MPQDT1[33];
+        public List<DS1LookupTable> LookupTable { get; internal set; }
 
         public List<string> FileNames { get; internal set; } = new List<string>();
         public MPQDS1WallLayer[] WallLayers { get; internal set; }
@@ -230,7 +242,13 @@ namespace OpenDiablo2.Common.Models
                                 }
                                 else
                                 {
-                                    br.ReadBytes(4);
+                                    WallLayers[layoutStream[n] - 5].Orientations[x + (y * Width)] = new MPQDS1WallOrientationTileProps
+                                    {
+                                        Orientation1 = br.ReadByte(),
+                                        Orientation2 = br.ReadByte(),
+                                        Orientation3 = br.ReadByte(),
+                                        Orientation4 = br.ReadByte(),
+                                    };
                                 }
                                 break;
 
@@ -264,60 +282,6 @@ namespace OpenDiablo2.Common.Models
                     }
                 }
             }
-            /*
-            NumberOfObjects = 0;
-            if (Version >= 2)
-            {
-
-                NumberOfObjects = br.ReadInt32();
-                Objects = new MPQDS1Object[NumberOfObjects];
-
-                for (int i = 0; i < NumberOfObjects; i++)
-                {
-                    Objects[i] = new MPQDS1Object
-                    {
-                        Type = br.ReadInt32(),
-                        Id = br.ReadInt32(),
-                        X = br.ReadInt32(),
-                        Y = br.ReadInt32()
-                    };
-
-                    if (Version > 5)
-                        Objects[i].DS1Flags = br.ReadInt32();
-
-                }
-            }
-
-
-            if (Version >= 12 && TagType == 1 || TagType == 2)
-            {
-                if (Version >= 18)
-                    br.ReadBytes(4);
-
-                NumberOfGroups = br.ReadInt32();
-            }
-            else NumberOfGroups = 0;
-
-
-            Groups = new MPQDS1Group[NumberOfGroups];
-            for (var x = 0; x < NumberOfGroups; x++)
-            {
-                Groups[x] = new MPQDS1Group
-                {
-                    TileX = br.ReadInt32(),
-                    TileY = br.ReadInt32(),
-                    Width = br.ReadInt32(),
-                    Height = br.ReadInt32(),
-                };
-                if (Version >= 13)
-                    br.ReadBytes(4);
-            }
-
-            if (Version >= 14)
-            {
-
-                NumberOfNPCs = br.ReadInt32();
-            }*/
 
 
 
@@ -335,6 +299,24 @@ namespace OpenDiablo2.Common.Models
                 DT1s[i] = resourceManager.GetMPQDT1("data\\global\\tiles\\" + levelType.File[i].Replace("/", "\\"));
 
             }
+
+            LookupTable = new List<DS1LookupTable>();
+            foreach(var dt1 in DT1s.Where(x => x != null))
+            {
+                foreach(var tile in dt1.Tiles)
+                {
+                    LookupTable.Add(new DS1LookupTable
+                    {
+                        MainIndex = tile.MainIndex,
+                        Orientation = tile.Orientation,
+                        SubIndex = tile.SubIndex,
+                        Frame = tile.RarityOrFrameIndex,
+                        TileRef = tile
+                    });
+                }
+            }
+
+            
         }
     }
 }

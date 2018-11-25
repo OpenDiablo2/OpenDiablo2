@@ -23,6 +23,8 @@ namespace OpenDiablo2.Core.GameState_
         public string MapName { get; private set; }
         public Palette CurrentPalette => paletteProvider.PaletteTable[$"ACT{Act}"];
 
+        public int Seed { get; internal set; }
+
         public GameState(
             ISceneManager sceneManager,
             IResourceManager resourceManager,
@@ -36,10 +38,15 @@ namespace OpenDiablo2.Core.GameState_
             this.paletteProvider = paletteProvider;
             this.getMapEngine = getMapEngine;
             this.engineDataManager = engineDataManager;
+
+            
         }
 
         public void Initialize(string characterName, eHero hero)
         {
+            var random = new Random();
+            Seed = random.Next();
+
             sceneManager.ChangeScene("Game");
             ChangeMap(eLevelId.Act1_Town);
         }
@@ -59,10 +66,10 @@ namespace OpenDiablo2.Core.GameState_
             if (level.File5 != "0") mapNames.Add(level.File5);
             if (level.File6 != "0") mapNames.Add(level.File6);
 
-            var random = new Random();
+            var random = new Random(Seed);
             var mapName = "data\\global\\tiles\\" + mapNames[random.Next(mapNames.Count())].Replace("/", "\\");
             MapName = level.Name;
-            Act = Convert.ToInt32(mapNames.First().Substring(3, 1));
+            Act = levelType.Act;
             MapData = resourceManager.GetMPQDS1(mapName, level, levelDetails, levelType);
             getMapEngine().NotifyMapChanged();
         }

@@ -57,36 +57,27 @@ namespace OpenDiablo2.Core.Map_Engine
         {
             PurgeAllMapData();
             LoadNewMapData();
-            CameraLocation = new PointF(gameState.MapData.Width / 2, gameState.MapData.Height / 2);
+            //CameraLocation = new PointF(gameState.MapData.Width / 2, gameState.MapData.Height / 2);
         }
 
         private void LoadNewMapData()
         {
-            /*
-            var cellsToLoad = gameState.MapData.Width * gameState.MapData.Height;
-            tempMapCell = new ISprite[cellsToLoad];
 
-            for (var cell = 0; cell < cellsToLoad; cell++)
-            {
-                renderWindow.Clear();
-                loadingSprite.Frame = (int)(loadingSprite.TotalFrames * ((float)cell / (float)cellsToLoad));
-                renderWindow.Draw(loadingSprite);
-                renderWindow.Sync();
-
-                tempMapCell[cell] = renderWindow.GenerateMapCell(
-                    gameState.MapData, 
-                    cell % gameState.MapData.Width, 
-                    cell / gameState.MapData.Width, 
-                    Common.Enums.eRenderCellType.Floor, 
-                    gameState.CurrentPalette
-                );
-            }
-            */
-            //CameraLocation = new Point(((gameState.MapData.Width * cellSizeX) / 2) - 400, ((gameState.MapData.Height * cellSizeY) / 2) - 300);
         }
 
         public void Render()
         {
+            // Lower Walls, Floors, and Shadows
+
+            // Shadows of objects
+
+            // Objects with OrderFlag = 1
+
+            // Upper Walls and objects with ORderFlag = 0 or 2
+
+            // Roofs
+
+
             for (int y = 0; y < gameState.MapData.Width; y++)
                 for (int x = 0; x < gameState.MapData.Height; x++)
                 {
@@ -94,27 +85,63 @@ namespace OpenDiablo2.Core.Map_Engine
                     var visualX = ((x - y) * (cellSizeX / 2)) - cOffX;
                     var visualY = ((x + y) * (cellSizeY / 2)) - cOffY;
 
-                    if (visualX < -160 || visualX > 800 || visualY < -80 || visualY > 600)
+                    if (visualX < -160 || visualX > 800 || visualY < -120 || visualY > 650)
                         continue;
 
-                    var floorLayer = gameState.MapData.FloorLayers[0];
-                    var idx = x + (y * gameState.MapData.Width);
-                    if (idx >= floorLayer.Props.Length)
-                        break;
-                    var floor = floorLayer.Props[idx];
+                    // Render the floor
+                    foreach (var floorLayer in gameState.MapData.FloorLayers)
+                    {
+                        var idx = x + (y * gameState.MapData.Width);
+                        if (idx >= floorLayer.Props.Length)
+                            break;
+                        var floor = floorLayer.Props[idx];
 
-                    if (floor.Prop1 == 0)
-                        return;
+                        if (floor.Prop1 == 0)
+                            continue;
 
-                    var sub_index = floor.Prop2;
-                    var main_index = (floor.Prop3 >> 4) + ((floor.Prop4 & 0x03) << 4);
+                        var sub_index = floor.Prop2;
+                        var main_index = (floor.Prop3 >> 4) + ((floor.Prop4 & 0x03) << 4);
 
 
-                    if (x < 0 || y < 0 || x >= gameState.MapData.Width || y >= gameState.MapData.Height)
-                        continue;
+                        renderWindow.DrawMapCell(x, y, ((x - y) * 80) - cOffX, ((x + y) * 40) - cOffY, gameState.MapData, main_index, sub_index, gameState.CurrentPalette, null);
+                    }
 
-                    renderWindow.DrawMapCell(x, y, ((x - y) * 80) - cOffX, ((x + y) * 40) - cOffY, gameState.MapData, main_index, sub_index, gameState.CurrentPalette);
                 }
+            /*
+
+            // Render the walls
+            foreach (var wallLayer in gameState.MapData.WallLayers)
+            {
+
+                for (int y = 0; y < gameState.MapData.Width; y++)
+                    for (int x = 0; x < gameState.MapData.Height; x++)
+                    {
+
+                        var visualX = ((x - y) * (cellSizeX / 2)) - cOffX;
+                        var visualY = ((x + y) * (cellSizeY / 2)) - cOffY;
+
+                        if (visualX < -160 || visualX > 800 || visualY < -120 || visualY > 650)
+                            continue;
+
+                        var idx = x + (y * gameState.MapData.Width);
+                        if (idx >= wallLayer.Props.Length)
+                            continue;
+                        var wall = wallLayer.Props[idx];
+
+                        if (wall.Prop1 == 0)
+                            continue;
+
+                        var sub_index = wall.Prop2;
+                        var main_index = (wall.Prop3 >> 4) + ((wall.Prop4 & 0x03) << 4);
+
+                        var orientation = wallLayer.Orientations[x + (y * gameState.MapData.Width)];
+                        renderWindow.DrawMapCell(x, y, ((x - y) * 80) - cOffX, ((x + y) * 40) - cOffY + 80, gameState.MapData, main_index, sub_index, gameState.CurrentPalette, orientation);
+
+                    }
+
+            }
+            */
+
         }
 
         public void Update(long ms)
