@@ -24,6 +24,8 @@ namespace OpenDiablo2.Core.UI
         public delegate void OnToggleDelegate(bool isToggled);
         public OnToggleDelegate OnToggle { get; set; }
 
+        public int BaseFrame { get; set; } = 0;
+
         private Point location = new Point();
         public Point Location
         {
@@ -41,7 +43,7 @@ namespace OpenDiablo2.Core.UI
         private ILabel label;
         private bool pressed = false;
         private bool active = false; // When true, button is actively being focus pressed
-        private bool activeLock = false; // When true, we have locked the mouse from everything else
+        private bool activeLock = false; // When true, something else is being pressed so ignore everything
         private bool toggled = false;
 
         private Point labelOffset = new Point();
@@ -164,19 +166,19 @@ namespace OpenDiablo2.Core.UI
 
         public void Render()
         {
-            var frame = 0;
+            var frame = BaseFrame;
 
             if(toggled && pressed)
             {
-                frame = 3;
+                frame = BaseFrame + 3;
             }
             else if(pressed)
             {
-                frame = 1;
+                frame = BaseFrame + 1;
             }
             else if(toggled)
             {
-                frame = 2;
+                frame = BaseFrame + 2;
             }
 
             renderWindow.Draw(sprite, buttonLayout.XSegments, 1, frame);

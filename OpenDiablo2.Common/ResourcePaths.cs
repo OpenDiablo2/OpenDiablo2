@@ -104,6 +104,9 @@ namespace OpenDiablo2.Common
         public static string TextBox2 = "data\\global\\ui\\FrontEnd\\textbox2.dc6";
 
         // --- GAME UI ---
+        public static string MinipanelSmall = "data\\global\\ui\\PANEL\\minipanel_s.dc6";
+        public static string MinipanelButton = "data\\global\\ui\\PANEL\\minipanelbtn.DC6";
+
         public static string RunButton = "data\\global\\ui\\PANEL\\runbutton.dc6";
         public static string MenuButton = "data\\global\\ui\\PANEL\\menubutton.DC6";
 

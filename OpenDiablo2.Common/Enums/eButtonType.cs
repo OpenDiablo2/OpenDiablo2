@@ -7,6 +7,7 @@
         Narrow,
         Cancel,
         // Game UI
+        Minimap,
         Run,
         Menu
     }
