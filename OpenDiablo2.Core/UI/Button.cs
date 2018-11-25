@@ -41,7 +41,7 @@ namespace OpenDiablo2.Core.UI
         private ILabel label;
         private bool pressed = false;
         private bool active = false; // When true, button is actively being focus pressed
-        private bool activeLock = false; // When true, something else is being pressed so ignore everything
+        private bool activeLock = false; // When true, we have locked the mouse from everything else
         private bool toggled = false;
 
         private Point labelOffset = new Point();
