@@ -20,6 +20,7 @@ namespace OpenDiablo2.SDL2_
         public Point Location { get; set; } = new Point();
         public Size FrameSize { get; set; } = new Size();
 
+        private Point mapTileOffset = new Point();
 
         private bool darken;
         public bool Darken
@@ -82,6 +83,7 @@ namespace OpenDiablo2.SDL2_
             FrameSize = new Size(Pow2((int)source.Frames.Max(x => x.Width)), Pow2((int)source.Frames.Max(x => x.Height)));
         }
 
+        private int[] idxtable = new int[] { 20, 21, 22, 23, 24, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4 };
         public unsafe SDL2Sprite(IntPtr renderer, Palette palette, MPQDS1 mapData, int x, int y, eRenderCellType cellType)
         {
             this.renderer = renderer;
@@ -115,11 +117,24 @@ namespace OpenDiablo2.SDL2_
             if (tile == null)
                 throw new ApplicationException("Could not locate tile!");
 
-            FrameSize = new Size(tile.Width, Math.Abs(tile.Height));
+
+            //FrameSize = new Size(tile.Width, Math.Abs(tile.Height));
             TotalFrames = 1;
             frame = 0;
             IntPtr pixels;
             int pitch;
+
+
+            var maxX = tile.Blocks.Max(z => z.PositionX + 32);
+            var maxY = tile.Blocks.Max(z => z.PositionY + 32);
+            var minX = tile.Blocks.Min(z => z.PositionX);
+            var minY = tile.Blocks.Min(z => z.PositionY);
+
+            FrameSize = new Size(Pow2(maxX - minX), Pow2(maxY - minY));
+            var yDiff = Math.Abs(minY);
+            var xDiff = Math.Abs(maxY);
+
+            mapTileOffset = new Point(minX, minY);
 
             texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, FrameSize.Width, FrameSize.Height);
 
@@ -133,13 +148,13 @@ namespace OpenDiablo2.SDL2_
                 for (var i = 0; i < FrameSize.Width * FrameSize.Height; i++)
                     data[i] = 0x0;
 
-                foreach (var block in tile.Blocks.Take(1))
+                foreach(var block in tile.Blocks)
                 {
-                    //var px = block.PositionX;
-                    //var py = block.PositionY;
+                    var px = block.PositionX + xDiff;
+                    var py = block.PositionY + yDiff;
 
-                    var px = 0;
-                    var py = 0;
+                    //var px = 0;
+                    //var py = 0;
                     for (int yy = 0; yy < 32; yy++)
                     {
                         for (int xx = 0; xx < 32; xx++)
@@ -149,7 +164,9 @@ namespace OpenDiablo2.SDL2_
                                 continue;
                             if (index < 0)
                                 continue;
-                            data[index] = palette.Colors[block.PixelData[xx + (yy * 32)]];
+                            var color = palette.Colors[block.PixelData[xx + (yy * 32)]];
+                            if ((color >> 24) > 0)
+                                data[index] = color;
                         }
                     }
                 }
@@ -163,7 +180,7 @@ namespace OpenDiablo2.SDL2_
         internal Point GetRenderPoint()
         {
             return source == null
-                ? Location
+                ? new Point(Location.X + mapTileOffset.X, (Location.Y - FrameSize.Height) + mapTileOffset.Y)
                 : new Point(Location.X + source.Frames[Frame].OffsetX, (Location.Y - FrameSize.Height) + source.Frames[Frame].OffsetY);
         }
 
