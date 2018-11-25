@@ -108,6 +108,18 @@ namespace OpenDiablo2.Core.UI
             return toggled;
         }
 
+        public bool Toggle(bool isToggled)
+        {
+            if(toggled != isToggled)
+            {
+                OnToggle?.Invoke(isToggled);
+
+                toggled = isToggled;
+            }
+
+            return isToggled;
+        }
+
         public void Update()
         {
             if (!enabled)
