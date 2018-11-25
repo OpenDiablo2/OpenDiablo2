@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Models;
 using System.IO;

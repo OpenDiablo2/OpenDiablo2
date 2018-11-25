@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.SDL2", "OpenDia
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.Scenes", "OpenDiablo2.Scenes\OpenDiablo2.Scenes.csproj", "{05224FE7-293F-4184-B1D6-89F5171B60E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.Core.UT", "OpenDiablo2.Core.UT\OpenDiablo2.Core.UT.csproj", "{9E33ABEB-B81D-4A53-886B-00D069E50370}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.Core.UT", "OpenDiablo2.Core.UT\OpenDiablo2.Core.UT.csproj", "{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,14 +61,14 @@ Global
 		{05224FE7-293F-4184-B1D6-89F5171B60E0}.Release|Any CPU.ActiveCfg = Release|x64
 		{05224FE7-293F-4184-B1D6-89F5171B60E0}.Release|x64.ActiveCfg = Release|x64
 		{05224FE7-293F-4184-B1D6-89F5171B60E0}.Release|x64.Build.0 = Release|x64
-		{9E33ABEB-B81D-4A53-886B-00D069E50370}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9E33ABEB-B81D-4A53-886B-00D069E50370}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9E33ABEB-B81D-4A53-886B-00D069E50370}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{9E33ABEB-B81D-4A53-886B-00D069E50370}.Debug|x64.Build.0 = Debug|Any CPU
-		{9E33ABEB-B81D-4A53-886B-00D069E50370}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9E33ABEB-B81D-4A53-886B-00D069E50370}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9E33ABEB-B81D-4A53-886B-00D069E50370}.Release|x64.ActiveCfg = Release|Any CPU
-		{9E33ABEB-B81D-4A53-886B-00D069E50370}.Release|x64.Build.0 = Release|Any CPU
+		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Debug|x64.Build.0 = Debug|Any CPU
+		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Release|x64.ActiveCfg = Release|Any CPU
+		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
