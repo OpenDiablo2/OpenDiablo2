@@ -8,6 +8,13 @@
         Cancel,
         // Game UI
         Run,
-        Menu
+        Menu,
+        MinipanelCharacter,
+        MinipanelInventory,
+        MinipanelSkill,
+        MinipanelAutomap,
+        MinipanelMessage,
+        MinipanelQuest,
+        MinipanelMenu
     }
 }
