@@ -11,7 +11,7 @@ namespace OpenDiablo2.Common.Interfaces
     {
         ImageSet GetImageSet(string resourcePath);
         MPQFont GetMPQFont(string resourcePath);
-        MPQDS1 GetMPQDS1(string resourcePath, int definition, int act);
+        MPQDS1 GetMPQDS1(string resourcePath, LevelPreset level, LevelDetail levelDetail, LevelType levelType);
         MPQDT1 GetMPQDT1(string resourcePath);
         Palette GetPalette(string paletteName);
     }

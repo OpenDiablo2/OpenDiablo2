@@ -11,5 +11,6 @@ namespace OpenDiablo2.Common.Interfaces
     {
         List<LevelPreset> LevelPresets { get; }
         List<LevelType> LevelTypes { get; }
+        List<LevelDetail> LevelDetails { get; }
     }
 }

@@ -15,6 +15,7 @@ namespace OpenDiablo2.Core
 
         public List<LevelPreset> LevelPresets { get; internal set; }
         public List<LevelType> LevelTypes { get; internal set; }
+        public List<LevelDetail> LevelDetails { get; internal set; }
 
         public EngineDataManager(IMPQProvider mpqProvider)
         {
@@ -22,6 +23,7 @@ namespace OpenDiablo2.Core
 
             LoadLevelPresets();
             LoadLevelTypes();
+            LoadLevelDetails();
         }
 
         private void LoadLevelTypes()
@@ -50,6 +52,20 @@ namespace OpenDiablo2.Core
                 .Select(x => x.ToLevelPreset());
 
             LevelPresets = new List<LevelPreset>(data);
+        }
+
+        private void LoadLevelDetails()
+        {
+            var data = mpqProvider
+                .GetTextFile(ResourcePaths.LevelDetails)
+                .Skip(1)
+                .Where(x => !String.IsNullOrWhiteSpace(x))
+                .Select(x => x.Split('\t'))
+                .Where(x => x.Count() > 80 && x[0] != "Expansion")
+                .ToArray()
+                .Select(x => x.ToLevelDetail());
+
+            LevelDetails = new List<LevelDetail>(data);
         }
     }
 }

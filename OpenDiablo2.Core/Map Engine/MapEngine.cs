@@ -25,16 +25,13 @@ namespace OpenDiablo2.Core.Map_Engine
                     return;
 
                 cameraLocation = value;
-                /*
-                cellOffsetX = CameraLocation.X / cellSizeX;
-                cellOffsetY = CameraLocation.Y / cellSizeY;
-                pixelOffsetX = CameraLocation.X % cellSizeX;
-                pixelOffsetY = CameraLocation.Y % cellSizeY;
-                */
+                cOffX = (int)((cameraLocation.X - cameraLocation.Y) * (cellSizeX / 2));
+                cOffY = (int)((cameraLocation.X + cameraLocation.Y) * (cellSizeY / 2));
             }
         }
 
         private ISprite loadingSprite;
+        private int cOffX, cOffY;
         //private ISprite[] tempMapCell;
 
         private const int
@@ -60,6 +57,7 @@ namespace OpenDiablo2.Core.Map_Engine
         {
             PurgeAllMapData();
             LoadNewMapData();
+            CameraLocation = new PointF(gameState.MapData.Width / 2, gameState.MapData.Height / 2);
         }
 
         private void LoadNewMapData()
@@ -89,9 +87,6 @@ namespace OpenDiablo2.Core.Map_Engine
 
         public void Render()
         {
-            var cOffX = (int)((cameraLocation.X - cameraLocation.Y) * (cellSizeX / 2));
-            var cOffY = (int)((cameraLocation.X + cameraLocation.Y) * (cellSizeY / 2));
-
             for (int y = 0; y < gameState.MapData.Width; y++)
                 for (int x = 0; x < gameState.MapData.Height; x++)
                 {
