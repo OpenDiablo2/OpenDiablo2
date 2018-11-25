@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.Scenes", "OpenD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.Core.UT", "OpenDiablo2.Core.UT\OpenDiablo2.Core.UT.csproj", "{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.TestConsole", "OpenDiablo2.TestConsole\OpenDiablo2.TestConsole.csproj", "{40BD2DDE-DC6F-4F6D-9050-9B423C631192}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,14 @@ Global
 		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Release|x64.ActiveCfg = Release|Any CPU
 		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Release|x64.Build.0 = Release|Any CPU
+		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Debug|x64.Build.0 = Debug|Any CPU
+		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Release|x64.ActiveCfg = Release|Any CPU
+		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

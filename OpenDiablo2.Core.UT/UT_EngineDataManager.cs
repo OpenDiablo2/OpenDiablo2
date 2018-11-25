@@ -33,15 +33,5 @@ namespace OpenDiablo2.Core.UT
             Assert.IsTrue(edm.LevelPresets.Count > 0);
             Assert.IsTrue(edm.LevelTypes.Count > 0);
         }
-
-        [TestMethod]
-        public void GenerateELevelIdTest()
-        {
-            EngineDataManager edm = LoadData();
-
-            string output = ELevelIdHelper.GenerateEnum(edm.LevelPresets);
-
-            Assert.IsTrue(output.Length > 0);
-        }
     }
 }
