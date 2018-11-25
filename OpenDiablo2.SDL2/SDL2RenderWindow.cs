@@ -277,17 +277,8 @@ namespace OpenDiablo2.SDL2_
             SDL.SDL_RenderCopy(renderer, lbl.texture, IntPtr.Zero, ref destRect);
         }
 
-        public unsafe void DrawMapCell(int xCell, int yCell, int xPixel, int yPixel, MPQDS1 mapData)
+        public unsafe void DrawMapCell(int xCell, int yCell, int xPixel, int yPixel, MPQDS1 mapData, int main_index, int sub_index, Palette palette)
         {
-            var floorLayer = mapData.FloorLayers.First();
-            var floor = floorLayer.Props[xCell + (yCell * mapData.Width)];
-
-            if (floor.Prop1 == 0)
-                return;
-
-            var palette = paletteProvider.PaletteTable[$"ACT{mapData.Act}"];
-            var sub_index = floor.Prop2;
-            var main_index = (floor.Prop3 >> 4) + ((floor.Prop4 & 0x03) << 4);
 
             MPQDT1Tile tile = null;
             for (int i = 0; i < mapData.DT1s.Count(); i++)
@@ -307,7 +298,11 @@ namespace OpenDiablo2.SDL2_
             var frameSize = new Size(tile.Width, Math.Abs(tile.Height));
             var srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = frameSize.Width, h = frameSize.Height };
             var frameSizeMax = frameSize.Width * frameSize.Height;
-            SDL.SDL_LockTexture(cellTexture, ref srcRect, out IntPtr pixels, out int pitch);
+            if (SDL.SDL_LockTexture(cellTexture, IntPtr.Zero, out IntPtr pixels, out int pitch) != 0)
+            {
+                log.Error("Could not lock texture for map rendering");
+                return;
+            }
             try
             {
                 UInt32* data = (UInt32*)pixels;
@@ -318,24 +313,27 @@ namespace OpenDiablo2.SDL2_
 
                 foreach (var block in tile.Blocks)
                 {
-                    for (int yy = 0; yy < 32; yy++)
+                    var index = block.PositionX + ((block.PositionY) * pitchChange);
+                    var xx = 0;
+                    foreach (var colorIndex in block.PixelData)
                     {
-                        var index = block.PositionX + ((block.PositionY + yy) * pitchChange);
-
-                        for (int xx = 0; xx < 32; xx++)
+                        try
                         {
-                            index++;
-
-                            if (index > frameSizeMax)
-                                continue;
-                            if (index < 0)
-                                continue;
-
-                            var color = palette.Colors[block.PixelData[xx + (yy * 32)]];
+                            var color = palette.Colors[colorIndex];
 
                             if ((color & 0xFFFFFF) > 0)
                                 data[index] = color;
 
+                        } finally
+                        {
+                            index++;
+                            xx++;
+                            if (xx == 32)
+                            {
+                                index -= 32;
+                                index += pitchChange;
+                                xx = 0;
+                            }
                         }
                     }
                 }

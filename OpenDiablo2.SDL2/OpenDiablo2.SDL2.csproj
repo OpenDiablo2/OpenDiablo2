@@ -70,12 +70,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutofacModule.cs" />
+    <Compile Include="CS-SDL\SDL2.cs" />
+    <Compile Include="CS-SDL\SDL2_image.cs" />
+    <Compile Include="CS-SDL\SDL2_mixer.cs" />
+    <Compile Include="CS-SDL\SDL2_ttf.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SDL2-CS\LPUtf8StrMarshaler.cs" />
-    <Compile Include="SDL2-CS\SDL2.cs" />
-    <Compile Include="SDL2-CS\SDL2_image.cs" />
-    <Compile Include="SDL2-CS\SDL2_mixer.cs" />
-    <Compile Include="SDL2-CS\SDL2_ttf.cs" />
     <Compile Include="SDL2Font.cs" />
     <Compile Include="SDL2Label.cs" />
     <Compile Include="SDL2MusicPlayer.cs" />

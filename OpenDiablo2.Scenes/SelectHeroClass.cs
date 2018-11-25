@@ -130,7 +130,7 @@ namespace OpenDiablo2.Scenes
                 BackWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecNecromancerBackWalk, Palettes.Fechar, new Point(300, 335)),
                 BackWalkSpriteOverlay = renderWindow.LoadSprite(ResourcePaths.CharacterSelecNecromancerBackWalkOverlay, Palettes.Fechar, new Point(300, 335)),
                 SelectionBounds = new Rectangle(265, 220, 55, 175),
-                ForwardWalkTimeMs = 3000,
+                ForwardWalkTimeMs = 2000,
                 BackWalkTimeMs = 1500,
             };
             heroRenderInfo[eHero.Necromancer].ForwardWalkSpriteOverlay.Blend = true;
