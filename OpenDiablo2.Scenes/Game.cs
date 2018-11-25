@@ -87,7 +87,7 @@ namespace OpenDiablo2.Scenes
                 for (int x = 0; x < gameState.MapData.Width; x++)
                 {
                     testSprite[idx] = renderWindow.GenerateMapCell(gameState.MapData, x, y, eRenderCellType.Floor, gameState.CurrentPalette);
-                    testSprite[idx].Location = new Point(((x - y) * 80) - 900, ((x + y) * 40) - 900);
+                    testSprite[idx].Location = new Point(((x - y) * 80) - 2900, ((x + y) * 40) - 1900);
                     idx++;
                 }
             }
