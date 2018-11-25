@@ -13,6 +13,7 @@ namespace OpenDiablo2.Common.Models
         public string ResourceName { get; internal set; }
         public string PaletteName { get; internal set; }
         public bool Toggleable { get; internal set; } = false;
+        public int BaseFrame { get; internal set; } = 0;
 
         public static Dictionary<eButtonType, ButtonLayout> Values = new Dictionary<eButtonType, ButtonLayout>
         {
@@ -20,6 +21,15 @@ namespace OpenDiablo2.Common.Models
             {eButtonType.Medium, new ButtonLayout{ XSegments = 1, ResourceName=ResourcePaths.MediumButtonBlank, PaletteName = Palettes.Units } },
             {eButtonType.Narrow, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.NarrowButtonBlank,PaletteName = Palettes.Units } },
             {eButtonType.Cancel, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.CancelButton,PaletteName = Palettes.Units } },
+            // Minipanel
+            {eButtonType.MinipanelCharacter, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MinipanelButton,PaletteName = Palettes.Units, BaseFrame = 0 } },
+            {eButtonType.MinipanelInventory, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MinipanelButton,PaletteName = Palettes.Units, BaseFrame = 2 } },
+            {eButtonType.MinipanelSkill, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MinipanelButton,PaletteName = Palettes.Units, BaseFrame = 4 } },
+            {eButtonType.MinipanelAutomap, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MinipanelButton,PaletteName = Palettes.Units, BaseFrame = 8 } },
+            {eButtonType.MinipanelMessage, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MinipanelButton,PaletteName = Palettes.Units, BaseFrame = 10 } },
+            {eButtonType.MinipanelQuest, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MinipanelButton,PaletteName = Palettes.Units, BaseFrame = 12 } },
+            {eButtonType.MinipanelMenu, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MinipanelButton,PaletteName = Palettes.Units, BaseFrame = 14 } },
+
             {eButtonType.Run, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.RunButton,PaletteName = Palettes.Units, Toggleable = true } },
             {eButtonType.Menu, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MenuButton,PaletteName = Palettes.Units, Toggleable = true } },
         };
