@@ -137,6 +137,7 @@ namespace OpenDiablo2.SDL2_
             mapTileOffset = new Point(minX, minY);
 
             texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, FrameSize.Width, FrameSize.Height);
+            SDL.SDL_SetTextureBlendMode(texture, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
             if (texture == IntPtr.Zero)
                 throw new ApplicationException($"Unaple to initialize texture: {SDL.SDL_GetError()}");
@@ -165,7 +166,7 @@ namespace OpenDiablo2.SDL2_
                             if (index < 0)
                                 continue;
                             var color = palette.Colors[block.PixelData[xx + (yy * 32)]];
-                            if ((color >> 24) > 0)
+                            if ((color & 0xFFFFFF) > 0)
                                 data[index] = color;
                         }
                     }
