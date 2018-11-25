@@ -21,6 +21,7 @@ namespace OpenDiablo2.Common.Models
 
     public sealed class MPQDT1Tile
     {
+        public Guid Id { get; set; } = Guid.NewGuid();
         public Int32 Direction { get; internal set; }
         public Int16 RoofHeight { get; internal set; }
         public byte SoundIndex { get; internal set; }
@@ -40,6 +41,8 @@ namespace OpenDiablo2.Common.Models
 
     public sealed class MPQDT1
     {
+        public Int32 X1 { get; private set; }
+        public Int32 X2 { get; private set; }
         public Int32 NumberOfTiles { get; private set; }
         public MPQDT1Tile[] Tiles { get; private set; }
         private Int32 tileHeaderOffset;
@@ -48,7 +51,11 @@ namespace OpenDiablo2.Common.Models
         {
             var br = new BinaryReader(stream);
 
+            X1 = br.ReadInt32();
+            X2 = br.ReadInt32();
+
             stream.Seek(268, SeekOrigin.Begin); // Skip useless header info
+
             NumberOfTiles = br.ReadInt32();
             tileHeaderOffset = br.ReadInt32();
             
@@ -62,6 +69,7 @@ namespace OpenDiablo2.Common.Models
             Tiles = new MPQDT1Tile[NumberOfTiles];
             for (int tileIndex = 0; tileIndex < NumberOfTiles; tileIndex++)
             {
+                br.BaseStream.Seek(tileHeaderOffset + (tileIndex * 96), SeekOrigin.Begin);
                 Tiles[tileIndex] = new MPQDT1Tile();
                 var tile = Tiles[tileIndex];
 
@@ -93,11 +101,12 @@ namespace OpenDiablo2.Common.Models
             for (int tileIndex = 0; tileIndex < NumberOfTiles; tileIndex++)
             {
                 var tile = Tiles[tileIndex];
-                br.BaseStream.Seek(tile.BlockHeadersPointer, SeekOrigin.Begin);
                 tile.Blocks = new MPQDT1Block[tile.NumberOfBlocks];
 
                 for (int blockIndex = 0; blockIndex < tile.NumberOfBlocks; blockIndex++)
                 {
+                    br.BaseStream.Seek(tile.BlockHeadersPointer + (blockIndex * 20), SeekOrigin.Begin);
+
                     tile.Blocks[blockIndex] = new MPQDT1Block();
                     var block = tile.Blocks[blockIndex];
 

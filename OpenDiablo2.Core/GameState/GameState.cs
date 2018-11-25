@@ -48,7 +48,7 @@ namespace OpenDiablo2.Core.GameState_
             Seed = random.Next();
 
             sceneManager.ChangeScene("Game");
-            ChangeMap(eLevelId.Act5_BaalEntrance);
+            ChangeMap(eLevelId.Act3_MephistoComplex);
         }
 
         public void ChangeMap(eLevelId levelId)
@@ -71,6 +71,7 @@ namespace OpenDiablo2.Core.GameState_
             MapName = level.Name;
             Act = levelType.Act;
             MapData = resourceManager.GetMPQDS1(mapName, level, levelDetails, levelType);
+
             getMapEngine().NotifyMapChanged();
         }
     }
