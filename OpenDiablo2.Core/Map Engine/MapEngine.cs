@@ -97,17 +97,21 @@ namespace OpenDiablo2.Core.Map_Engine
                     if (visualX < -160 || visualX > 800 || visualY < -80 || visualY > 600)
                         continue;
 
-                    RenderFloorCell(x, y, ((x - y) * 80) - cOffX, ((x + y) * 40) - cOffY);
+                    var floorLayer = gameState.MapData.FloorLayers[0];
+                    var floor = floorLayer.Props[x + (y * gameState.MapData.Width)];
+
+                    if (floor.Prop1 == 0)
+                        return;
+
+                    var sub_index = floor.Prop2;
+                    var main_index = (floor.Prop3 >> 4) + ((floor.Prop4 & 0x03) << 4);
+
+
+                    if (x < 0 || y < 0 || x >= gameState.MapData.Width || y >= gameState.MapData.Height)
+                        continue;
+
+                    renderWindow.DrawMapCell(x, y, ((x - y) * 80) - cOffX, ((x + y) * 40) - cOffY, gameState.MapData, main_index, sub_index, gameState.CurrentPalette);
                 }
-        }
-
-        private void RenderFloorCell(int x, int y, int xp, int yp)
-        {
-            if (x < 0 || y < 0 || x >= gameState.MapData.Width || y >= gameState.MapData.Height)
-                return;
-
-
-            renderWindow.DrawMapCell(x, y, xp, yp, gameState.MapData);
         }
 
         public void Update(long ms)
