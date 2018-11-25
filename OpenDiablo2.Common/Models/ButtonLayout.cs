@@ -17,6 +17,7 @@ namespace OpenDiablo2.Common.Models
         {
             {eButtonType.Wide,  new ButtonLayout { XSegments = 2, ResourceName = ResourcePaths.WideButtonBlank, PaletteName = Palettes.Units } },
             {eButtonType.Medium, new ButtonLayout{ XSegments = 1, ResourceName=ResourcePaths.MediumButtonBlank, PaletteName = Palettes.Units } },
+            {eButtonType.Narrow, new ButtonLayout {XSegments = 1,ResourceName = ResourcePaths.NarrowButtonBlank,PaletteName = Palettes.Units } },
             {eButtonType.Cancel, new ButtonLayout {XSegments = 1,ResourceName = ResourcePaths.CancelButton,PaletteName = Palettes.Units } }
         };
     }

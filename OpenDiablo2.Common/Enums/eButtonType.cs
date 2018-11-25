@@ -4,6 +4,7 @@
     {
         Wide,
         Medium,
+        Narrow,
         Cancel
     }
 }

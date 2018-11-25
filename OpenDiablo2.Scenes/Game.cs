@@ -9,6 +9,7 @@ using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Core.GameState_;
+using OpenDiablo2.Core.UI;
 
 namespace OpenDiablo2.Scenes
 {
@@ -23,15 +24,23 @@ namespace OpenDiablo2.Scenes
 
         private ISprite panelSprite, healthManaSprite, gameGlobeOverlapSprite;
 
-        public Game(IRenderWindow renderWindow, IResourceManager resourceManager, GameState gameState)
+        private Button skillButton;
+
+        public Game(IRenderWindow renderWindow, IResourceManager resourceManager, GameState gameState,Func<eButtonType, Button> createButton)
         {
             this.renderWindow = renderWindow;
             this.resourceManager = resourceManager;
             this.gameState = gameState;
+            
 
             panelSprite = renderWindow.LoadSprite(ResourcePaths.GamePanels, Palettes.Act1);
             healthManaSprite = renderWindow.LoadSprite(ResourcePaths.HealthMana, Palettes.Act1);
             gameGlobeOverlapSprite = renderWindow.LoadSprite(ResourcePaths.GameGlobeOverlap, Palettes.Act1);
+
+            skillButton = createButton(eButtonType.Narrow);
+            skillButton.Text = "Single Player".ToUpper();
+            skillButton.Location = new Point(264, 290);
+            //skillButton.OnActivate = OnSinglePlayerClicked;
         }
 
         public void Render()
@@ -63,6 +72,8 @@ namespace OpenDiablo2.Scenes
             // Render the mana bar
             renderWindow.Draw(healthManaSprite, 1, new Point(691, 590));
             renderWindow.Draw(gameGlobeOverlapSprite, 1, new Point(693, 591));
+
+            skillButton.Render();
 
         }
 
