@@ -41,7 +41,7 @@ namespace OpenDiablo2.Core.GameState_
         public void Initialize(string characterName, eHero hero)
         {
             sceneManager.ChangeScene("Game");
-            ChangeMap(eLevelId.Act1_Town);
+            ChangeMap(eLevelId.Act1_Town1);
         }
 
         public void ChangeMap(eLevelId levelId)
