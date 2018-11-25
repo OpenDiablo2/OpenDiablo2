@@ -24,7 +24,7 @@ namespace OpenDiablo2.Scenes
 
         private ISprite panelSprite, healthManaSprite, gameGlobeOverlapSprite;
 
-        private Button skillButton;
+        private Button runButton, menuButton;
 
         public Game(IRenderWindow renderWindow, IResourceManager resourceManager, GameState gameState,Func<eButtonType, Button> createButton)
         {
@@ -37,9 +37,11 @@ namespace OpenDiablo2.Scenes
             healthManaSprite = renderWindow.LoadSprite(ResourcePaths.HealthMana, Palettes.Act1);
             gameGlobeOverlapSprite = renderWindow.LoadSprite(ResourcePaths.GameGlobeOverlap, Palettes.Act1);
 
-            skillButton = createButton(eButtonType.Narrow);
-            skillButton.Text = "Single Player".ToUpper();
-            skillButton.Location = new Point(264, 290);
+            runButton = createButton(eButtonType.Run);
+            runButton.Location = new Point(256, 570);
+
+            menuButton = createButton(eButtonType.Menu);
+            menuButton.Location = new Point(393, 561);
             //skillButton.OnActivate = OnSinglePlayerClicked;
         }
 
@@ -73,13 +75,14 @@ namespace OpenDiablo2.Scenes
             renderWindow.Draw(healthManaSprite, 1, new Point(692, 588));
             renderWindow.Draw(gameGlobeOverlapSprite, 1, new Point(693, 591));
 
-            skillButton.Render();
-
+            runButton.Render();
+            menuButton.Render();
         }
 
         public void Update(long ms)
         {
-
+            runButton.Update();
+            menuButton.Update();
         }
 
         public void Dispose()

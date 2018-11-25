@@ -103,6 +103,10 @@ namespace OpenDiablo2.Common
         public static string NarrowButtonBlank = "data\\global\\ui\\FrontEnd\\NarrowButtonBlank.dc6";
         public static string TextBox2 = "data\\global\\ui\\FrontEnd\\textbox2.dc6";
 
+        // --- GAME UI ---
+        public static string RunButton = "data\\global\\ui\\PANEL\\runbutton.dc6";
+        public static string MenuButton = "data\\global\\ui\\PANEL\\menubutton.DC6";
+
         // --- Data ---
         // TODO: Doesn't sound right :)
         public static string EnglishTable = "data\\local\\lng\\eng\\English.txt";
