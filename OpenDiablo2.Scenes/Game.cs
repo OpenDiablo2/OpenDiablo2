@@ -16,6 +16,8 @@ namespace OpenDiablo2.Scenes
     [Scene("Game")]
     public sealed class Game : IScene
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private readonly IRenderWindow renderWindow;
         private readonly IResourceManager resourceManager;
         private readonly IMapEngine mapEngine;
@@ -29,9 +31,9 @@ namespace OpenDiablo2.Scenes
         private Button runButton, menuButton;
 
         public Game(
-            IRenderWindow renderWindow, 
-            IResourceManager resourceManager, 
-            IMapEngine mapEngine, 
+            IRenderWindow renderWindow,
+            IResourceManager resourceManager,
+            IMapEngine mapEngine,
             IGameState gameState,
             IKeyboardInfoProvider keyboardInfoProvider,
             Func<eButtonType, Button> createButton
@@ -50,15 +52,21 @@ namespace OpenDiablo2.Scenes
 
             runButton = createButton(eButtonType.Run);
             runButton.Location = new Point(256, 570);
-            
+            runButton.OnToggle = OnRunToggle;
+
             menuButton = createButton(eButtonType.Menu);
             menuButton.Location = new Point(393, 561);
-            menuButton.OnActivate = OnSomething;
+            menuButton.OnToggle = OnMenuToggle;
         }
 
-        private void OnSomething()
+        private void OnMenuToggle(bool isToggled)
         {
+            log.Debug("Menu Toggle: " + isToggled);
+        }
 
+        private void OnRunToggle(bool isToggled)
+        {
+            log.Debug("Run Toggle: " + isToggled);
         }
 
         public void Render()
