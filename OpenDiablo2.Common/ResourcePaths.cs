@@ -113,9 +113,8 @@ namespace OpenDiablo2.Common
         public static string ExpansionStringTable = "data\\local\\lng\\eng\\expansionstring.tbl";
         public static string LevelPreset = "data\\global\\excel\\LvlPrest.txt";
         public static string LevelType = "data\\global\\excel\\LvlTypes.txt";
-
-        // --- Maps ---
-        public static string MapAct1TownE1 = "data\\global\\tiles\\ACT1\\Town\\townE1.ds1";
         public static string LevelDetails = "data\\global\\excel\\Levels.txt";
+
+
     }
 }
