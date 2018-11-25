@@ -24,8 +24,6 @@ namespace OpenDiablo2.Core.UI
         public delegate void OnToggleDelegate(bool isToggled);
         public OnToggleDelegate OnToggle { get; set; }
 
-        public int BaseFrame { get; set; } = 0;
-
         private Point location = new Point();
         public Point Location
         {
@@ -166,19 +164,19 @@ namespace OpenDiablo2.Core.UI
 
         public void Render()
         {
-            var frame = BaseFrame;
+            var frame = buttonLayout.BaseFrame;
 
             if(toggled && pressed)
             {
-                frame = BaseFrame + 3;
+                frame = buttonLayout.BaseFrame + 3;
             }
             else if(pressed)
             {
-                frame = BaseFrame + 1;
+                frame = buttonLayout.BaseFrame + 1;
             }
             else if(toggled)
             {
-                frame = BaseFrame + 2;
+                frame = buttonLayout.BaseFrame + 2;
             }
 
             renderWindow.Draw(sprite, buttonLayout.XSegments, 1, frame);

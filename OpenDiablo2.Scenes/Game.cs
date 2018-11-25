@@ -52,7 +52,6 @@ namespace OpenDiablo2.Scenes
             gameGlobeOverlapSprite = renderWindow.LoadSprite(ResourcePaths.GameGlobeOverlap, Palettes.Act1);
 
             minipanel = new Minipanel(renderWindow, createButton);
-            minipanel.Location = new Point(400, 600);
 
             runButton = createButton(eButtonType.Run);
             runButton.Location = new Point(256, 570);

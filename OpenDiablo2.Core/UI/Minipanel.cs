@@ -35,40 +35,30 @@ namespace OpenDiablo2.Core.UI
         public Minipanel(IRenderWindow renderWindow, Func<eButtonType, Button> createButton)
         {
             this.renderWindow = renderWindow;
+            Location = new Point(400, 600);
 
-            sprite = renderWindow.LoadSprite(ResourcePaths.TextBox2, Palettes.Units);
+            sprite = renderWindow.LoadSprite(ResourcePaths.MinipanelSmall, Palettes.Units);
 
-            // TODO: Move button configuration to a readonly dictionary indexed by name
-            characterBtn = createButton(eButtonType.Minimap);
-            characterBtn.BaseFrame = 0;
+            characterBtn = createButton(eButtonType.MinipanelCharacter);
             characterBtn.Location = new Point(0, 0);
-            
-            inventoryBtn = createButton(eButtonType.Minimap);
-            inventoryBtn.BaseFrame = 2;
+
+            inventoryBtn = createButton(eButtonType.MinipanelInventory);
             inventoryBtn.Location = new Point(20, 0);
 
-            skillBtn = createButton(eButtonType.Minimap);
-            skillBtn.BaseFrame = 4;
+            skillBtn = createButton(eButtonType.MinipanelSkill);
             skillBtn.Location = new Point(40, 0);
-            
-            automapBtn = createButton(eButtonType.Minimap);
-            automapBtn.BaseFrame = 8;
+
+            automapBtn = createButton(eButtonType.MinipanelAutomap);
             automapBtn.Location = new Point(60, 0);
 
-            messageBtn = createButton(eButtonType.Minimap);
-            messageBtn.BaseFrame = 10;
+            messageBtn = createButton(eButtonType.MinipanelMessage);
             messageBtn.Location = new Point(80, 0);
-            
 
-            questBtn = createButton(eButtonType.Minimap);
-            questBtn.BaseFrame = 12;
+            questBtn = createButton(eButtonType.MinipanelQuest);
             questBtn.Location = new Point(100, 0);
-            
 
-            menuBtn = createButton(eButtonType.Minimap);
-            menuBtn.BaseFrame = 14;
+            menuBtn = createButton(eButtonType.MinipanelMenu);
             menuBtn.Location = new Point(120, 0);
-            
         }
 
 
@@ -86,26 +76,13 @@ namespace OpenDiablo2.Core.UI
         public void Render()
         {
             renderWindow.Draw(sprite);
-
-            characterBtn.Location.Offset(Location);
+            
             characterBtn.Render();
-
-            inventoryBtn.Location.Offset(Location);
             inventoryBtn.Render();
-
-            skillBtn.Location.Offset(Location);
             skillBtn.Render();
-
-            automapBtn.Location.Offset(Location);
             automapBtn.Render();
-
-            messageBtn.Location.Offset(Location);
             messageBtn.Render();
-
-            questBtn.Location.Offset(Location);
             questBtn.Render();
-
-            menuBtn.Location.Offset(Location);
             menuBtn.Render();
         }
     }

@@ -7,8 +7,14 @@
         Narrow,
         Cancel,
         // Game UI
-        Minimap,
         Run,
-        Menu
+        Menu,
+        MinipanelCharacter,
+        MinipanelInventory,
+        MinipanelSkill,
+        MinipanelAutomap,
+        MinipanelMessage,
+        MinipanelQuest,
+        MinipanelMenu
     }
 }
