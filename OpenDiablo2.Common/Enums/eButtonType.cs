@@ -4,6 +4,10 @@
     {
         Wide,
         Medium,
-        Cancel
+        Narrow,
+        Cancel,
+        // Game UI
+        Run,
+        Menu
     }
 }
