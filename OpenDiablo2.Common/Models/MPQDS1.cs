@@ -85,9 +85,9 @@ namespace OpenDiablo2.Common.Models
         public MPQDS1Group[] Groups { get; internal set; }
 
         // TODO: DI magic please
-        public MPQDS1(Stream stream, string fileName, int definition, int act, IEngineDataManager engineDataManager, IResourceManager resourceManager)
+        public MPQDS1(Stream stream, LevelPreset level, LevelDetail levelDetail, LevelType levelType, IEngineDataManager engineDataManager, IResourceManager resourceManager)
         {
-            log.Debug($"Loading {fileName} (Act {act}) Def {definition}");
+            log.Debug($"Loading {level.Name} (Act {levelDetail.Act})...");
             var br = new BinaryReader(stream);
             Version = br.ReadInt32();
             Width = br.ReadInt32() + 1;
@@ -320,26 +320,9 @@ namespace OpenDiablo2.Common.Models
             }*/
 
 
-            LevelPreset levelPreset;
-            if (definition == -1)
-            {
-                levelPreset = engineDataManager.LevelPresets.First(x =>
-                   x.File1.ToLower() == fileName.ToLower()
-                || x.File2.ToLower() == fileName.ToLower()
-                || x.File3.ToLower() == fileName.ToLower()
-                || x.File4.ToLower() == fileName.ToLower()
-                || x.File5.ToLower() == fileName.ToLower()
-                || x.File6.ToLower() == fileName.ToLower());
-            }
-            else
-            {
-                levelPreset = engineDataManager.LevelPresets.First(x => x.Def == definition);
-            }
-
-            var dt1Mask = levelPreset.Dt1Mask;
-            var levelType = engineDataManager.LevelTypes.First(x => x.Id == levelPreset.LevelId && x.Act == act);
 
 
+            var dt1Mask = level.Dt1Mask;
             for (int i = 0; i < 32; i++)
             {
                 var tilePath = levelType.File[i];

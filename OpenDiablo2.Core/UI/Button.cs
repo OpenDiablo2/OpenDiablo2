@@ -21,6 +21,9 @@ namespace OpenDiablo2.Core.UI
         public delegate void OnActivateDelegate();
         public OnActivateDelegate OnActivate { get; set; }
 
+        public delegate void OnToggleDelegate(bool isToggled);
+        public OnToggleDelegate OnToggle { get; set; }
+
         private Point location = new Point();
         public Point Location
         {
@@ -38,7 +41,9 @@ namespace OpenDiablo2.Core.UI
         private ILabel label;
         private bool pressed = false;
         private bool active = false; // When true, button is actively being focus pressed
-        private bool activeLock = false; // When true, something else is being pressed so ignore everything
+        private bool activeLock = false; // When true, we have locked the mouse from everything else
+        private bool toggled = false;
+
         private Point labelOffset = new Point();
 
         private bool enabled = true;
@@ -94,6 +99,15 @@ namespace OpenDiablo2.Core.UI
             }
         }
 
+        public bool Toggle()
+        {
+            toggled = !toggled;
+
+            OnToggle?.Invoke(toggled);
+
+            return toggled;
+        }
+
         public void Update()
         {
             if (!enabled)
@@ -126,7 +140,15 @@ namespace OpenDiablo2.Core.UI
                 active = false;
 
                 if (hovered)
+                {
                     OnActivate?.Invoke();
+
+                    if (buttonLayout.Toggleable)
+                    {
+                        Toggle();
+                    }
+                }
+                    
             }
             else if (!active && mouseInfoProvider.LeftMouseDown)
             {
@@ -142,7 +164,22 @@ namespace OpenDiablo2.Core.UI
 
         public void Render()
         {
-            renderWindow.Draw(sprite, buttonLayout.XSegments, 1, pressed ? 1 : 0);
+            var frame = 0;
+
+            if(toggled && pressed)
+            {
+                frame = 3;
+            }
+            else if(pressed)
+            {
+                frame = 1;
+            }
+            else if(toggled)
+            {
+                frame = 2;
+            }
+
+            renderWindow.Draw(sprite, buttonLayout.XSegments, 1, frame);
             var offset = pressed ? -2 : 0;
 
             label.Location = new Point(location.X + offset + labelOffset.X, location.Y - offset + labelOffset.Y);

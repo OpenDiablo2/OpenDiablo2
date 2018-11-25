@@ -72,6 +72,7 @@
     <Compile Include="Attributes\SceneAttribute.cs" />
     <Compile Include="Enums\eButtonType.cs" />
     <Compile Include="Enums\eHero.cs" />
+    <Compile Include="Enums\eLevelId.cs" />
     <Compile Include="Enums\eMPQFormatVersion.cs" />
     <Compile Include="Enums\eRenderCellType.cs" />
     <Compile Include="Interfaces\IEngineDataManager.cs" />
@@ -95,6 +96,7 @@
     <Compile Include="Interfaces\ITextLabel.cs" />
     <Compile Include="Models\BitStream.cs" />
     <Compile Include="Models\ButtonLayout.cs" />
+    <Compile Include="Models\LevelDetail.cs" />
     <Compile Include="Models\LevelPreset.cs" />
     <Compile Include="Models\LevelType.cs" />
     <Compile Include="Models\MPQDS1.cs" />

@@ -100,7 +100,12 @@ namespace OpenDiablo2.Common
         public static string WideButtonBlank = "data\\global\\ui\\FrontEnd\\WideButtonBlank.dc6";
         public static string MediumButtonBlank = "data\\global\\ui\\FrontEnd\\MediumButtonBlank.dc6";
         public static string CancelButton = "data\\global\\ui\\FrontEnd\\CancelButtonBlank.dc6";
+        public static string NarrowButtonBlank = "data\\global\\ui\\FrontEnd\\NarrowButtonBlank.dc6";
         public static string TextBox2 = "data\\global\\ui\\FrontEnd\\textbox2.dc6";
+
+        // --- GAME UI ---
+        public static string RunButton = "data\\global\\ui\\PANEL\\runbutton.dc6";
+        public static string MenuButton = "data\\global\\ui\\PANEL\\menubutton.DC6";
 
         // --- Data ---
         // TODO: Doesn't sound right :)
@@ -108,9 +113,8 @@ namespace OpenDiablo2.Common
         public static string ExpansionStringTable = "data\\local\\lng\\eng\\expansionstring.tbl";
         public static string LevelPreset = "data\\global\\excel\\LvlPrest.txt";
         public static string LevelType = "data\\global\\excel\\LvlTypes.txt";
+        public static string LevelDetails = "data\\global\\excel\\Levels.txt";
 
-        // --- Maps ---
-        public static string MapAct1TownE1 = "data\\global\\tiles\\ACT1\\Town\\townE1.ds1";
 
     }
 }
