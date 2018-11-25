@@ -41,7 +41,7 @@ namespace OpenDiablo2.Core.GameState_
         public void Initialize(string characterName, eHero hero)
         {
             sceneManager.ChangeScene("Game");
-            ChangeMap(eLevelId.Act5_Baal_Entrance);
+            ChangeMap(eLevelId.Act1_Town);
         }
 
         public void ChangeMap(eLevelId levelId)
@@ -62,7 +62,7 @@ namespace OpenDiablo2.Core.GameState_
             var random = new Random();
             var mapName = "data\\global\\tiles\\" + mapNames[random.Next(mapNames.Count())].Replace("/", "\\");
             MapName = level.Name;
-            Act = Convert.ToInt32(mapNames.First().ElementAt(3));
+            Act = Convert.ToInt32(mapNames.First().Substring(3, 1));
             MapData = resourceManager.GetMPQDS1(mapName, level, levelDetails, levelType);
             getMapEngine().NotifyMapChanged();
         }
