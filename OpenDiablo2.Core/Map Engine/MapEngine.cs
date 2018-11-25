@@ -98,7 +98,10 @@ namespace OpenDiablo2.Core.Map_Engine
                         continue;
 
                     var floorLayer = gameState.MapData.FloorLayers[0];
-                    var floor = floorLayer.Props[x + (y * gameState.MapData.Width)];
+                    var idx = x + (y * gameState.MapData.Width);
+                    if (idx >= floorLayer.Props.Length)
+                        break;
+                    var floor = floorLayer.Props[idx];
 
                     if (floor.Prop1 == 0)
                         return;
