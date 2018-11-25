@@ -116,6 +116,6 @@ namespace OpenDiablo2.Common
 
         // --- Maps ---
         public static string MapAct1TownE1 = "data\\global\\tiles\\ACT1\\Town\\townE1.ds1";
-
+        public static string LevelDetails = "data\\global\\excel\\Levels.txt";
     }
 }

@@ -33,6 +33,8 @@ namespace OpenDiablo2.SDL2_
         private readonly IPaletteProvider paletteProvider;
         private readonly IResourceManager resourceManager;
 
+        private IntPtr cellTexture;
+
         public SDL2RenderWindow(
             IMPQProvider mpqProvider,
             IPaletteProvider paletteProvider,
@@ -58,6 +60,10 @@ namespace OpenDiablo2.SDL2_
 
             SDL.SDL_SetRenderDrawBlendMode(renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
             SDL.SDL_ShowCursor(0);
+
+            cellTexture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, 256, 256);
+            SDL.SDL_SetTextureBlendMode(cellTexture, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+
 
             IsRunning = true;
 
@@ -106,7 +112,7 @@ namespace OpenDiablo2.SDL2_
 
                 else if (evt.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN)
                 {
-                    switch((uint)evt.button.button)
+                    switch ((uint)evt.button.button)
                     {
                         case SDL.SDL_BUTTON_LEFT:
                             LeftMouseDown = true;
@@ -271,7 +277,78 @@ namespace OpenDiablo2.SDL2_
             SDL.SDL_RenderCopy(renderer, lbl.texture, IntPtr.Zero, ref destRect);
         }
 
-        public ISprite GenerateMapCell(MPQDS1 mapData, int x, int y, eRenderCellType cellType, Palette palette)
-            => new SDL2Sprite(this.renderer, palette, mapData, x, y, cellType);
+        public unsafe void DrawMapCell(int xCell, int yCell, int xPixel, int yPixel, MPQDS1 mapData)
+        {
+            var floorLayer = mapData.FloorLayers.First();
+            var floor = floorLayer.Props[xCell + (yCell * mapData.Width)];
+
+            if (floor.Prop1 == 0)
+                return;
+
+            var palette = paletteProvider.PaletteTable[$"ACT{mapData.Act}"];
+            var sub_index = floor.Prop2;
+            var main_index = (floor.Prop3 >> 4) + ((floor.Prop4 & 0x03) << 4);
+
+            MPQDT1Tile tile = null;
+            for (int i = 0; i < mapData.DT1s.Count(); i++)
+            {
+                if (mapData.DT1s[i] == null)
+                    continue;
+
+                tile = mapData.DT1s[i].Tiles.FirstOrDefault(z => z.MainIndex == main_index && z.SubIndex == sub_index);
+                if (tile != null)
+                    break;
+            }
+
+            if (tile == null)
+                throw new ApplicationException("Could not locate tile!");
+
+
+            var frameSize = new Size(tile.Width, Math.Abs(tile.Height));
+            var srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = frameSize.Width, h = frameSize.Height };
+            var frameSizeMax = frameSize.Width * frameSize.Height;
+            SDL.SDL_LockTexture(cellTexture, ref srcRect, out IntPtr pixels, out int pitch);
+            try
+            {
+                UInt32* data = (UInt32*)pixels;
+                for (var i = 0; i < frameSizeMax; i++)
+                    data[i] = 0x0;
+
+                var pitchChange = (pitch / 4);
+
+                foreach (var block in tile.Blocks)
+                {
+                    for (int yy = 0; yy < 32; yy++)
+                    {
+                        var index = block.PositionX + ((block.PositionY + yy) * pitchChange);
+
+                        for (int xx = 0; xx < 32; xx++)
+                        {
+                            index++;
+
+                            if (index > frameSizeMax)
+                                continue;
+                            if (index < 0)
+                                continue;
+
+                            var color = palette.Colors[block.PixelData[xx + (yy * 32)]];
+
+                            if ((color & 0xFFFFFF) > 0)
+                                data[index] = color;
+
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                SDL.SDL_UnlockTexture(cellTexture);
+            }
+
+
+            var dstRect = new SDL.SDL_Rect { x = xPixel, y = yPixel, w = frameSize.Width, h = frameSize.Height };
+            SDL.SDL_RenderCopy(renderer, cellTexture, ref srcRect, ref dstRect);
+        }
+
     }
 }
