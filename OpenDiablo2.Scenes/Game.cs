@@ -18,20 +18,31 @@ namespace OpenDiablo2.Scenes
     {
         private readonly IRenderWindow renderWindow;
         private readonly IResourceManager resourceManager;
-        private GameState gameState;
+        private readonly IMapEngine mapEngine;
+        private readonly IGameState gameState;
+        private readonly IKeyboardInfoProvider keyboardInfoProvider;
 
-        private ISprite[] testSprite;
+        //private ISprite[] testSprite;
 
         private ISprite panelSprite, healthManaSprite, gameGlobeOverlapSprite;
 
         private Button runButton, menuButton;
 
-        public Game(IRenderWindow renderWindow, IResourceManager resourceManager, GameState gameState,Func<eButtonType, Button> createButton)
+        public Game(
+            IRenderWindow renderWindow, 
+            IResourceManager resourceManager, 
+            IMapEngine mapEngine, 
+            IGameState gameState,
+            IKeyboardInfoProvider keyboardInfoProvider,
+            Func<eButtonType, Button> createButton
+        )
         {
             this.renderWindow = renderWindow;
             this.resourceManager = resourceManager;
+            this.mapEngine = mapEngine;
             this.gameState = gameState;
-            
+            this.keyboardInfoProvider = keyboardInfoProvider;
+
 
             panelSprite = renderWindow.LoadSprite(ResourcePaths.GamePanels, Palettes.Act1);
             healthManaSprite = renderWindow.LoadSprite(ResourcePaths.HealthMana, Palettes.Act1);
@@ -52,12 +63,14 @@ namespace OpenDiablo2.Scenes
 
         public void Render()
         {
+            /*
             if (gameState.MapDirty)
                 RedrawMap();
 
             for (int i = 0; i < gameState.MapData.Width * gameState.MapData.Height; i++)
                 renderWindow.Draw(testSprite[i]);
-
+                */
+            mapEngine.Render();
             DrawPanel();
 
         }
@@ -88,13 +101,46 @@ namespace OpenDiablo2.Scenes
         {
             runButton.Update();
             menuButton.Update();
+
+            var seconds = (float)ms / 1000f;
+            var xMod = 0f;
+            var yMod = 0f;
+
+            if (keyboardInfoProvider.KeyIsPressed(80 /*left*/))
+            {
+                xMod = -8f * seconds;
+                yMod = 8f * seconds;
+            }
+
+            if (keyboardInfoProvider.KeyIsPressed(79 /*right*/))
+            {
+                xMod = 8f * seconds;
+                yMod = -8f * seconds;
+            }
+
+            if (keyboardInfoProvider.KeyIsPressed(81 /*down*/))
+            {
+                yMod = 10f * seconds;
+                xMod = 10f * seconds;
+            }
+
+            if (keyboardInfoProvider.KeyIsPressed(82 /*up*/))
+            {
+                yMod = -10f * seconds;
+                xMod = -10f * seconds;
+            }
+
+            if (xMod != 0f || yMod != 0f)
+                mapEngine.CameraLocation = new PointF(mapEngine.CameraLocation.X + xMod, mapEngine.CameraLocation.Y + yMod);
+
+            mapEngine.Update(ms);
         }
 
         public void Dispose()
         {
 
         }
-
+        /*
         private void RedrawMap()
         {
             gameState.MapDirty = false;
@@ -111,6 +157,6 @@ namespace OpenDiablo2.Scenes
                 }
             }
 
-        }
+        }*/
     }
 }

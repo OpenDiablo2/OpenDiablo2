@@ -82,6 +82,7 @@ namespace OpenDiablo2.SDL2_
             FrameSize = new Size(Pow2((int)source.Frames.Max(x => x.Width)), Pow2((int)source.Frames.Max(x => x.Height)));
         }
 
+        
         public unsafe SDL2Sprite(IntPtr renderer, Palette palette, MPQDS1 mapData, int x, int y, eRenderCellType cellType)
         {
             this.renderer = renderer;
@@ -136,16 +137,11 @@ namespace OpenDiablo2.SDL2_
 
                 foreach(var block in tile.Blocks)
                 {
-                    var px = block.PositionX;
-                    var py = block.PositionY;
-
-                    //var px = 0;
-                    //var py = 0;
                     for (int yy = 0; yy < 32; yy++)
                     {
                         for (int xx = 0; xx < 32; xx++)
                         {
-                            var index = px + xx + ((py + yy) * (pitch / 4));
+                            var index = block.PositionX + xx + ((block.PositionY + yy) * (pitch / 4));
                             if (index > (FrameSize.Width * FrameSize.Height))
                                 continue;
                             if (index < 0)
@@ -162,7 +158,7 @@ namespace OpenDiablo2.SDL2_
                 SDL.SDL_UnlockTexture(texture);
             }
         }
-
+        
         internal Point GetRenderPoint()
         {
             return source == null

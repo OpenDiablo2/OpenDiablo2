@@ -8,7 +8,6 @@ using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
-using OpenDiablo2.Core.GameState_;
 using OpenDiablo2.Core.UI;
 
 namespace OpenDiablo2.Scenes
@@ -45,7 +44,7 @@ namespace OpenDiablo2.Scenes
         private readonly ISceneManager sceneManager;
         private readonly ITextDictionary textDictionary;
         private readonly IKeyboardInfoProvider keyboardInfoProvider;
-        private readonly GameState gameState;
+        private readonly IGameState gameState;
 
         private bool showEntryUi = false;
         private eHero? selectedHero = null;
@@ -68,7 +67,7 @@ namespace OpenDiablo2.Scenes
             Func<TextBox> createTextBox,
             ITextDictionary textDictionary,
             IKeyboardInfoProvider keyboardInfoProvider,
-            GameState gameState
+            IGameState gameState
             )
         {
             this.renderWindow = renderWindow;
