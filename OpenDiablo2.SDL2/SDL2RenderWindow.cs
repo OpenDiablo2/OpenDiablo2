@@ -53,7 +53,7 @@ namespace OpenDiablo2.SDL2_
             if (window == IntPtr.Zero)
                 throw new ApplicationException($"Unable to create SDL Window: {SDL.SDL_GetError()}");
 
-            renderer = SDL.SDL_CreateRenderer(window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
+            renderer = SDL.SDL_CreateRenderer(window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_SOFTWARE);
             if (renderer == IntPtr.Zero)
                 throw new ApplicationException($"Unable to create SDL Window: {SDL.SDL_GetError()}");
 
