@@ -10,7 +10,7 @@ namespace OpenDiablo2.Common.Models
     public struct Palette
     {
         public string Name { get; set; }
-        public UInt32[] Colors;
+        public UInt32[] Colors { get; set; }
 
         public static Palette LoadFromStream(Stream stream, string paletteName)
         {

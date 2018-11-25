@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Core.Map_Engine
 {
@@ -65,83 +66,126 @@ namespace OpenDiablo2.Core.Map_Engine
 
         }
 
+
+
         public void Render()
         {
             // Lower Walls, Floors, and Shadows
-
-            // Shadows of objects
-
-            // Objects with OrderFlag = 1
-
-            // Upper Walls and objects with ORderFlag = 0 or 2
-
-            // Roofs
-
-
-            for (int y = 0; y < gameState.MapData.Width; y++)
-                for (int x = 0; x < gameState.MapData.Height; x++)
+            for (int y = 0; y < gameState.MapData.Height; y++)
+            {
+                for (int x = 0; x < gameState.MapData.Width; x++)
                 {
-
                     var visualX = ((x - y) * (cellSizeX / 2)) - cOffX;
                     var visualY = ((x + y) * (cellSizeY / 2)) - cOffY;
 
-                    if (visualX < -160 || visualX > 800 || visualY < -120 || visualY > 650)
-                        continue;
-
-                    // Render the floor
-                    foreach (var floorLayer in gameState.MapData.FloorLayers)
-                    {
-                        var idx = x + (y * gameState.MapData.Width);
-                        if (idx >= floorLayer.Props.Length)
-                            break;
-                        var floor = floorLayer.Props[idx];
-
-                        if (floor.Prop1 == 0)
-                            continue;
-
-                        var sub_index = floor.Prop2;
-                        var main_index = (floor.Prop3 >> 4) + ((floor.Prop4 & 0x03) << 4);
-
-
-                        renderWindow.DrawMapCell(x, y, ((x - y) * 80) - cOffX, ((x + y) * 40) - cOffY, gameState.MapData, main_index, sub_index, gameState.CurrentPalette, null);
-                    }
-
+                    
+                    DrawWall(x, y, visualX, visualY, false);
+                    DrawFloor(x, y, visualX, visualY);
+                    DrawWall(x, y, visualX, visualY, true);
+                    DrawRoof(x, y, visualX, visualY);
+                   // //DrawShadow(x, y, visualX, visualY);
                 }
-            /*
+            }
 
-            // Render the walls
+        }
+
+        private void DrawRoof(int x, int y, int visualX, int visualY)
+        {
+            var cx = ((x - y) * 80) - cOffX;
+            var cy = ((x + y) * 40) - cOffY;
+
+
             foreach (var wallLayer in gameState.MapData.WallLayers)
             {
+                var wall = wallLayer.Props[x + (y * gameState.MapData.Width)];
+                var orientation = wallLayer.Orientations[x + (y * gameState.MapData.Width)].Orientation1;
 
-                for (int y = 0; y < gameState.MapData.Width; y++)
-                    for (int x = 0; x < gameState.MapData.Height; x++)
-                    {
+                if (orientation != 15) // Only 15 (roof)
+                    return;
 
-                        var visualX = ((x - y) * (cellSizeX / 2)) - cOffX;
-                        var visualY = ((x + y) * (cellSizeY / 2)) - cOffY;
+                if (wall.Prop1 == 0)
+                    continue;
 
-                        if (visualX < -160 || visualX > 800 || visualY < -120 || visualY > 650)
-                            continue;
+                if ((wall.Prop4 & 0x80) > 0)
+                {
+                    if (orientation != 10 && orientation != 11)
+                        return;
+                }
 
-                        var idx = x + (y * gameState.MapData.Width);
-                        if (idx >= wallLayer.Props.Length)
-                            continue;
-                        var wall = wallLayer.Props[idx];
+                var sub_index = wall.Prop2;
+                var main_index = (wall.Prop3 >> 4) + ((wall.Prop4 & 0x03) << 4);
 
-                        if (wall.Prop1 == 0)
-                            continue;
-
-                        var sub_index = wall.Prop2;
-                        var main_index = (wall.Prop3 >> 4) + ((wall.Prop4 & 0x03) << 4);
-
-                        var orientation = wallLayer.Orientations[x + (y * gameState.MapData.Width)];
-                        renderWindow.DrawMapCell(x, y, ((x - y) * 80) - cOffX, ((x + y) * 40) - cOffY + 80, gameState.MapData, main_index, sub_index, gameState.CurrentPalette, orientation);
-
-                    }
-
+                var lt = gameState.MapData.LookupTable.First(z => z.MainIndex == main_index && z.SubIndex == sub_index && z.Orientation == orientation);
+                renderWindow.DrawMapCell(x, y, cx, cy - lt.TileRef.RoofHeight, gameState.MapData, main_index, sub_index, gameState.CurrentPalette, orientation);
             }
-            */
+        }
 
+        private void DrawShadow(int x, int y, int visualX, int visualY)
+        {
+            
+        }
+
+        private void DrawFloor(int x, int y, int visualX, int visualY)
+        {
+            if (visualX < -160 || visualX > 800 || visualY < -120 || visualY > 650)
+                return;
+
+            var cx = ((x - y) * 80) - cOffX;
+            var cy = ((x + y) * 40) - cOffY;
+
+            // Render the floor
+            foreach (var floorLayer in gameState.MapData.FloorLayers)
+            {
+                var idx = x + (y * gameState.MapData.Width);
+                if (idx >= floorLayer.Props.Length)
+                    break;
+                var floor = floorLayer.Props[idx];
+
+                if (floor.Prop1 == 0)
+                    continue;
+
+                var sub_index = floor.Prop2;
+                var main_index = (floor.Prop3 >> 4) + ((floor.Prop4 & 0x03) << 4);
+
+
+                renderWindow.DrawMapCell(x, y, cx, cy, gameState.MapData, main_index, sub_index, gameState.CurrentPalette);
+            }
+        }
+
+        private void DrawWall(int x, int y, int visualX, int visualY, bool upper)
+        {
+            var cx = ((x - y) * 80) - cOffX;
+            var cy = ((x + y) * 40) - cOffY;
+
+
+            foreach (var wallLayer in gameState.MapData.WallLayers)
+            {
+                var wall = wallLayer.Props[x + (y * gameState.MapData.Width)];
+                var orientation = wallLayer.Orientations[x + (y * gameState.MapData.Width)].Orientation1;
+
+
+                if (wall.Prop1 == 0)
+                    continue;
+
+                if (upper && orientation <= 15)
+                    return;
+
+
+                if (orientation == 10 || orientation == 11)
+                    return; // TODO: Support special walls
+                
+                if ((wall.Prop4 & 0x80) > 0)
+                {
+                    if (orientation != 10 && orientation != 11)
+                        return;
+                }
+
+                var sub_index = wall.Prop2;
+                var main_index = (wall.Prop3 >> 4) + ((wall.Prop4 & 0x03) << 4);
+
+                var lt = gameState.MapData.LookupTable.First(z => z.MainIndex == main_index && z.SubIndex == sub_index && z.Orientation == orientation);
+                renderWindow.DrawMapCell(x, y, cx, cy + 80, gameState.MapData, main_index, sub_index, gameState.CurrentPalette, orientation);
+            }
         }
 
         public void Update(long ms)
