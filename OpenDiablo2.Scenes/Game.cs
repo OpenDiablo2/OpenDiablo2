@@ -28,6 +28,8 @@ namespace OpenDiablo2.Scenes
 
         private ISprite panelSprite, healthManaSprite, gameGlobeOverlapSprite;
 
+        private Minipanel minipanel;
+        private bool showMinipanel = false;
         private Button runButton, menuButton;
 
         public Game(
@@ -50,6 +52,10 @@ namespace OpenDiablo2.Scenes
             healthManaSprite = renderWindow.LoadSprite(ResourcePaths.HealthMana, Palettes.Act1);
             gameGlobeOverlapSprite = renderWindow.LoadSprite(ResourcePaths.GameGlobeOverlap, Palettes.Act1);
 
+            minipanel = new Minipanel(renderWindow, createButton);
+            // Maybe? Not sure. 
+            // miniPanel.OnMenuActivate();
+
             runButton = createButton(eButtonType.Run);
             runButton.Location = new Point(256, 570);
             runButton.OnToggle = OnRunToggle;
@@ -61,7 +67,7 @@ namespace OpenDiablo2.Scenes
 
         private void OnMenuToggle(bool isToggled)
         {
-            log.Debug("Menu Toggle: " + isToggled);
+            this.showMinipanel = isToggled;
         }
 
         private void OnRunToggle(bool isToggled)
@@ -101,12 +107,22 @@ namespace OpenDiablo2.Scenes
             renderWindow.Draw(healthManaSprite, 1, new Point(692, 588));
             renderWindow.Draw(gameGlobeOverlapSprite, 1, new Point(693, 591));
 
+            if(showMinipanel)
+            {
+                minipanel.Render();
+            }
+            
             runButton.Render();
             menuButton.Render();
         }
 
         public void Update(long ms)
         {
+            if(showMinipanel)
+            {
+                minipanel.Update();
+            }
+            
             runButton.Update();
             menuButton.Update();
 

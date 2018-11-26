@@ -108,6 +108,18 @@ namespace OpenDiablo2.Core.UI
             return toggled;
         }
 
+        public bool Toggle(bool isToggled)
+        {
+            if(toggled != isToggled)
+            {
+                OnToggle?.Invoke(isToggled);
+
+                toggled = isToggled;
+            }
+
+            return isToggled;
+        }
+
         public void Update()
         {
             if (!enabled)
@@ -164,19 +176,19 @@ namespace OpenDiablo2.Core.UI
 
         public void Render()
         {
-            var frame = 0;
+            var frame = buttonLayout.BaseFrame;
 
             if(toggled && pressed)
             {
-                frame = 3;
+                frame = buttonLayout.BaseFrame + 3;
             }
             else if(pressed)
             {
-                frame = 1;
+                frame = buttonLayout.BaseFrame + 1;
             }
             else if(toggled)
             {
-                frame = 2;
+                frame = buttonLayout.BaseFrame + 2;
             }
 
             renderWindow.Draw(sprite, buttonLayout.XSegments, 1, frame);
