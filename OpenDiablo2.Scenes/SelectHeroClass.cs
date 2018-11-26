@@ -339,7 +339,7 @@ namespace OpenDiablo2.Scenes
                 return;
             }
 
-            if (characterNameTextBox.Text.Length >= 15)
+            if (characterNameTextBox.Text.Length >= 15 || !selectedHero.HasValue)
                 return;
 
             if (!"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".Contains(charcode))
