@@ -79,8 +79,8 @@ namespace OpenDiablo2.Core.Map_Engine
                     var visualY = ((x + y) * (cellSizeY / 2)) - cOffY;
 
                     
-                    DrawWall(x, y, visualX, visualY, false);
                     DrawFloor(x, y, visualX, visualY);
+                    DrawWall(x, y, visualX, visualY, false);
                     DrawWall(x, y, visualX, visualY, true);
                     DrawRoof(x, y, visualX, visualY);
                    // //DrawShadow(x, y, visualX, visualY);

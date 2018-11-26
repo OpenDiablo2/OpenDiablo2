@@ -19,10 +19,11 @@ Diablo 2 and its content is ©2000 Blizzard Entertainment, Inc. All rights reser
 
 ALL OTHER TRADEMARKS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS.
 
-## Building
+## Building On Windows
 To build this engine, you simply need to have [Microsoft Visual Studio 2017](https://visualstudio.microsoft.com/downloads/) installed with C#/Windows support. Also make sure that only the x64 architecture is selected as we are not shipping 32-bit versions of SDL currently.
 
-Although we currently do not support building in Linux with MonoDevelop, we would like to begin adding support for Linux and Mac in the very near future.
+## Building On Linux
+You need to have MonoDevelop installed, as well as any depenencies for that. You also need LibSDL2 installed (installing via your favorite package manager should be fine).
 
 ## Running
 When running via VisualStudio, go to the debug tab and specify the following command line options:
