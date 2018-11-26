@@ -11,12 +11,12 @@ using OpenDiablo2.Common.Interfaces;
 namespace OpenDiablo2.Core.UI 
 {
     // TODO: Allow to set Minipanel.buttons.character.OnAction or similar for button delegates
-    public sealed class Minipanel : IDisposable
+    public sealed class MiniPanel : IMiniPanel
     {
         private readonly IRenderWindow renderWindow;
         private ISprite sprite;
 
-        private Button characterBtn, inventoryBtn, skillBtn, automapBtn, messageBtn, questBtn, menuBtn;
+        private IButton characterBtn, inventoryBtn, skillBtn, automapBtn, messageBtn, questBtn, menuBtn;
 
         private Point location = new Point();
         public Point Location
@@ -32,7 +32,7 @@ namespace OpenDiablo2.Core.UI
             }
         }
 
-        public Minipanel(IRenderWindow renderWindow, Func<eButtonType, Button> createButton)
+        public MiniPanel(IRenderWindow renderWindow, Func<eButtonType, IButton> createButton)
         {
             this.renderWindow = renderWindow;
             
