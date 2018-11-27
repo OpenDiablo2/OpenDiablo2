@@ -94,6 +94,7 @@ namespace OpenDiablo2.Core
                     Thread.Sleep((int)Math.Min(1, 33 -sw.ElapsedMilliseconds)); // Lock to 30fps
 
                 var ms = sw.ElapsedMilliseconds;
+                sw.Restart();
 
                 // Prevent falco-punch updates
                 if (ms > 1000)
@@ -101,7 +102,6 @@ namespace OpenDiablo2.Core
                     sw.Restart();
                     continue;
                 }
-                sw.Restart();
                 getRenderWindow().Update();
                 currentScene.Update(ms);
                 if (nextScene!= null)

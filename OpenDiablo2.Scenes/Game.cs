@@ -8,8 +8,6 @@ using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
-using OpenDiablo2.Core.GameState_;
-using OpenDiablo2.Core.UI;
 
 namespace OpenDiablo2.Scenes
 {
@@ -28,9 +26,9 @@ namespace OpenDiablo2.Scenes
 
         private ISprite panelSprite, healthManaSprite, gameGlobeOverlapSprite;
 
-        private Minipanel minipanel;
+        private IMiniPanel minipanel;
         private bool showMinipanel = false;
-        private Button runButton, menuButton;
+        private IButton runButton, menuButton;
 
         public Game(
             IRenderWindow renderWindow,
@@ -38,7 +36,8 @@ namespace OpenDiablo2.Scenes
             IMapEngine mapEngine,
             IGameState gameState,
             IKeyboardInfoProvider keyboardInfoProvider,
-            Func<eButtonType, Button> createButton
+            Func<eButtonType, IButton> createButton,
+            Func<IMiniPanel> createMiniPanel
         )
         {
             this.renderWindow = renderWindow;
@@ -52,7 +51,7 @@ namespace OpenDiablo2.Scenes
             healthManaSprite = renderWindow.LoadSprite(ResourcePaths.HealthMana, Palettes.Act1);
             gameGlobeOverlapSprite = renderWindow.LoadSprite(ResourcePaths.GameGlobeOverlap, Palettes.Act1);
 
-            minipanel = new Minipanel(renderWindow, createButton);
+            minipanel = createMiniPanel();
             // Maybe? Not sure. 
             // miniPanel.OnMenuActivate();
 
