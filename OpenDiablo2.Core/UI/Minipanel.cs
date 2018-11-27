@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 
-namespace OpenDiablo2.Core.UI 
+namespace OpenDiablo2.Core.UI
 {
     // TODO: Allow to set Minipanel.buttons.character.OnAction or similar for button delegates
     public sealed class MiniPanel : IMiniPanel
