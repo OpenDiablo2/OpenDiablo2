@@ -1,5 +1,4 @@
-# OpenDiablo2 [![Build status](https://ci.appveyor.com/api/projects/status/cukx2g6j42i7pk2n?svg=true)](https://ci.appveyor.com/project/essial/opendiablo2)
-
+# OpenDiablo2 [![Build status](https://ci.appveyor.com/api/projects/status/jx83as0ku784r5vh?svg=true)](https://ci.appveyor.com/project/essial/opendiablo2)
 
 An open source re-implementation of Diablo 2 in C# 
 
