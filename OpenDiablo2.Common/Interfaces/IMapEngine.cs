@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Common.Interfaces
@@ -14,5 +10,7 @@ namespace OpenDiablo2.Common.Interfaces
         void Update(long ms);
         void Render();
         void NotifyMapChanged();
+        MapCellInfo GetMapCellInfo(Guid mapId, Guid tileId);
+        void SetMapCellInfo(Guid mapId, MapCellInfo cellInfo);
     }
 }

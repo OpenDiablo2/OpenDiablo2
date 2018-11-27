@@ -1,5 +1,5 @@
-﻿using OpenDiablo2.Common.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Common.Interfaces
 {

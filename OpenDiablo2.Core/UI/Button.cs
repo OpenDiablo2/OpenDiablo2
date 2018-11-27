@@ -12,16 +12,13 @@ namespace OpenDiablo2.Core.UI
 {
 
 
-    public sealed class Button : IDisposable
+    public sealed class Button : IButton
     {
         private readonly IMouseInfoProvider mouseInfoProvider;
         private readonly IRenderWindow renderWindow;
         private readonly ButtonLayout buttonLayout;
 
-        public delegate void OnActivateDelegate();
         public OnActivateDelegate OnActivate { get; set; }
-
-        public delegate void OnToggleDelegate(bool isToggled);
         public OnToggleDelegate OnToggle { get; set; }
 
         private Point location = new Point();

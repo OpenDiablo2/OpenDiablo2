@@ -70,11 +70,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\SceneAttribute.cs" />
+    <Compile Include="AutofacModule.cs" />
     <Compile Include="Enums\eButtonType.cs" />
     <Compile Include="Enums\eHero.cs" />
     <Compile Include="Enums\eLevelId.cs" />
     <Compile Include="Enums\eMPQFormatVersion.cs" />
     <Compile Include="Enums\eRenderCellType.cs" />
+    <Compile Include="Interfaces\IButton.cs" />
     <Compile Include="Interfaces\IEngineDataManager.cs" />
     <Compile Include="Interfaces\IFont.cs" />
     <Compile Include="Interfaces\IGameEngine.cs" />
@@ -82,6 +84,7 @@
     <Compile Include="Interfaces\IKeyboardInfoProvider.cs" />
     <Compile Include="Interfaces\ILabel.cs" />
     <Compile Include="Interfaces\IMapEngine.cs" />
+    <Compile Include="Interfaces\IMiniPanel.cs" />
     <Compile Include="Interfaces\IMPQProvider.cs" />
     <Compile Include="Interfaces\IMusicProvider.cs" />
     <Compile Include="Interfaces\IPaletteProvider.cs" />
@@ -92,13 +95,16 @@
     <Compile Include="Interfaces\ISceneManager.cs" />
     <Compile Include="Interfaces\ISprite.cs" />
     <Compile Include="Interfaces\IMouseInfoProvider.cs" />
+    <Compile Include="Interfaces\ITextBox.cs" />
     <Compile Include="Interfaces\ITextDictionary.cs" />
     <Compile Include="Interfaces\ITextLabel.cs" />
+    <Compile Include="Interfaces\ITexture.cs" />
     <Compile Include="Models\BitStream.cs" />
     <Compile Include="Models\ButtonLayout.cs" />
     <Compile Include="Models\LevelDetail.cs" />
     <Compile Include="Models\LevelPreset.cs" />
     <Compile Include="Models\LevelType.cs" />
+    <Compile Include="Models\MapCellInfo.cs" />
     <Compile Include="Models\MPQDS1.cs" />
     <Compile Include="Models\MPQDT1.cs" />
     <Compile Include="Models\MPQFont.cs" />

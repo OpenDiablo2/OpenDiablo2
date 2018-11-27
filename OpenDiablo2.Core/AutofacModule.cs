@@ -3,11 +3,6 @@ using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Core.GameState_;
 using OpenDiablo2.Core.Map_Engine;
 using OpenDiablo2.Core.UI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpenDiablo2.Core
 {
@@ -19,15 +14,16 @@ namespace OpenDiablo2.Core
         {
             log.Info("Configuring OpenDiablo2.Core service implementations.");
 
+            builder.RegisterType<Button>().As<IButton>().InstancePerDependency();
+            builder.RegisterType<EngineDataManager>().As<IEngineDataManager>().SingleInstance();
             builder.RegisterType<GameEngine>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<GameState>().As<IGameState>().SingleInstance();
+            builder.RegisterType<MapEngine>().As<IMapEngine>().SingleInstance();
+            builder.RegisterType<MiniPanel>().As<IMiniPanel>().InstancePerDependency();
             builder.RegisterType<MPQProvider>().As<IMPQProvider>().SingleInstance();
             builder.RegisterType<ResourceManager>().As<IResourceManager>().SingleInstance();
             builder.RegisterType<TextDictionary>().As<ITextDictionary>().SingleInstance();
-            builder.RegisterType<Button>().AsSelf().InstancePerDependency(); // TODO: Never register as Self() if we aren't in common...
-            builder.RegisterType<TextBox>().AsSelf().InstancePerDependency(); // TODO: Never register as Self() if we aren't in common...
-            builder.RegisterType<GameState>().As<IGameState>().SingleInstance();
-            builder.RegisterType<EngineDataManager>().As<IEngineDataManager>().SingleInstance();
-            builder.RegisterType<MapEngine>().As<IMapEngine>().SingleInstance();
+            builder.RegisterType<TextBox>().As<ITextBox>().InstancePerDependency();
         }
     }
 }
