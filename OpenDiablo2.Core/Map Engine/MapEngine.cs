@@ -16,6 +16,9 @@ namespace OpenDiablo2.Core.Map_Engine
         private readonly IRenderWindow renderWindow;
         private readonly IResourceManager resourceManager;
 
+        // TODO: Break this out further so we can support multiple maps
+        private Dictionary<Guid, List<MapCellInfo>> mapDataLookup = new Dictionary<Guid, List<MapCellInfo>>();
+
         private PointF cameraLocation = new PointF();
         public PointF CameraLocation
         {
@@ -196,6 +199,22 @@ namespace OpenDiablo2.Core.Map_Engine
         private void PurgeAllMapData()
         {
 
+        }
+
+        public MapCellInfo GetMapCellInfo(Guid mapId, Guid tileId)
+        {
+            if (!mapDataLookup.ContainsKey(mapId))
+                return null;
+
+            return  mapDataLookup[mapId].FirstOrDefault(x => x.TileId == tileId);
+        }
+
+        public void SetMapCellInfo(Guid mapId, MapCellInfo cellInfo)
+        {
+            if (!mapDataLookup.ContainsKey(mapId))
+                mapDataLookup[mapId] = new List<MapCellInfo>();
+
+            mapDataLookup[mapId].Add(cellInfo);
         }
     }
 }

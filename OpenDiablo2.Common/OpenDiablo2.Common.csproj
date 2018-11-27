@@ -98,11 +98,13 @@
     <Compile Include="Interfaces\ITextBox.cs" />
     <Compile Include="Interfaces\ITextDictionary.cs" />
     <Compile Include="Interfaces\ITextLabel.cs" />
+    <Compile Include="Interfaces\ITexture.cs" />
     <Compile Include="Models\BitStream.cs" />
     <Compile Include="Models\ButtonLayout.cs" />
     <Compile Include="Models\LevelDetail.cs" />
     <Compile Include="Models\LevelPreset.cs" />
     <Compile Include="Models\LevelType.cs" />
+    <Compile Include="Models\MapCellInfo.cs" />
     <Compile Include="Models\MPQDS1.cs" />
     <Compile Include="Models\MPQDT1.cs" />
     <Compile Include="Models\MPQFont.cs" />
