@@ -1,4 +1,6 @@
-# OpenDiablo2 [![Build Status](https://dev.azure.com/lunaticedit/OpenDiablo2/_apis/build/status/OpenDiablo2%20for%20Windows)](https://dev.azure.com/lunaticedit/OpenDiablo2/_build/latest?definitionId=3)
+# OpenDiablo2 [![Build status](https://ci.appveyor.com/api/projects/status/cukx2g6j42i7pk2n?svg=true)](https://ci.appveyor.com/project/essial/opendiablo2)
+
+
 An open source re-implementation of Diablo 2 in C# 
 
 [Join us on Discord!](https://discord.gg/pRy8tdc)\
@@ -33,6 +35,5 @@ When running via VisualStudio, go to the debug tab and specify the following com
 Substitute the path with wherever you have installed Diablo 2 and its expansions.
 
 ## Contributing
-If you find something you'd like to fix thats obviously broken, create a branch, commit your code, and submit a pull request. If it's a new or missing feature you'd like to see, add an issue, and be descriptive!
-
+If you find something you'd like to fix thats obviously broken, create a branch, commit your code, and submit a pull request. If it's a new or missing feature you'd like to see, add an issue, and be descriptive! 
 If you'd like to help out and are not quite sure how, you can look through any open issues and tasks.
