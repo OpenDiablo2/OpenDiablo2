@@ -243,6 +243,7 @@ namespace OpenDiablo2.Scenes
             keyboardInfoProvider.KeyPressCallback = null;
             characterNameTextBox.Text = "";
             okButton.Enabled = false;
+            selectedHero = null;
 
             sceneManager.ChangeScene("Main Menu");
         }
