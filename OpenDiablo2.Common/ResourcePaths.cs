@@ -74,6 +74,10 @@ namespace OpenDiablo2.Common
         public static string CharacterSelectDruidForwardWalk = "data\\global\\ui\\FrontEnd\\druid\\DZFW.DC6";
         public static string CharacterSelectDruidBackWalk = "data\\global\\ui\\FrontEnd\\druid\\DZBW.DC6";
 
+        // -- Character Selection
+        public static string CharacterSelectionBackground = "data\\global\\ui\\CharSelect\\characterselectscreenEXP.dc6";
+        public static string CharacterSelectionTallButton = "data\\global\\ui\\CharSelect\\TallButtonBlank.dc6";
+        
         // --- Game ---
         public static string GamePanels = "data\\global\\ui\\PANEL\\800ctrlpnl7.dc6";
         public static string GameGlobeOverlap = "data\\global\\ui\\PANEL\\overlap.DC6";

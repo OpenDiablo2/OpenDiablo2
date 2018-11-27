@@ -247,7 +247,7 @@ namespace OpenDiablo2.Scenes
             characterNameTextBox.Text = "";
             okButton.Enabled = false;
 
-            sceneManager.ChangeScene("Main Menu");
+            sceneManager.ChangeScene("Select Character");
         }
 
         public void Render()

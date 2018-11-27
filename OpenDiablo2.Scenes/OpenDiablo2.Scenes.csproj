@@ -53,6 +53,7 @@
     <Compile Include="Game.cs" />
     <Compile Include="MainMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CharacterSelection.cs" />
     <Compile Include="SelectHeroClass.cs" />
   </ItemGroup>
   <ItemGroup>
