@@ -16,7 +16,6 @@ artifacts:
   name: Win64
 deploy:
 - provider: GitHub
-  tag: v0.1.$(appveyor_build_version)
   release: opendiablo2-dev-win64
   description: Bleeding edge build of OpenDiablo 2.
   auth_token:
