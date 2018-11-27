@@ -1,7 +1,7 @@
-﻿using OpenDiablo2.Common.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Common.Interfaces
 {

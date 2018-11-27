@@ -1,6 +1,6 @@
-﻿using OpenDiablo2.Common.Models;
-using System;
+﻿using System;
 using System.Drawing;
+using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Common.Interfaces
 {

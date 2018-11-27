@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
@@ -163,23 +159,5 @@ namespace OpenDiablo2.Scenes
         {
 
         }
-        /*
-        private void RedrawMap()
-        {
-            gameState.MapDirty = false;
-
-            testSprite = new ISprite[gameState.MapData.Width * gameState.MapData.Height];
-            var idx = 0;
-            for (int y = 0; y < gameState.MapData.Height; y++)
-            {
-                for (int x = 0; x < gameState.MapData.Width; x++)
-                {
-                    testSprite[idx] = renderWindow.GenerateMapCell(gameState.MapData, x, y, eRenderCellType.Floor, gameState.CurrentPalette);
-                    testSprite[idx].Location = new Point(((x - y) * 80) - 2900, ((x + y) * 40) - 1900);
-                    idx++;
-                }
-            }
-
-        }*/
     }
 }
