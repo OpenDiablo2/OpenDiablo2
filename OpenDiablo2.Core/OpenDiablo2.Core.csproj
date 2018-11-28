@@ -83,7 +83,7 @@
     <Compile Include="TextDictionary.cs" />
     <Compile Include="UI\Button.cs" />
     <Compile Include="UI\TextBox.cs" />
-    <Compile Include="UI\MiniPanel.cs" />
+    <Compile Include="UI\Minipanel.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenDiablo2.Common\OpenDiablo2.Common.csproj">
