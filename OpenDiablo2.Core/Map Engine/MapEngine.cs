@@ -151,7 +151,7 @@ namespace OpenDiablo2.Core.Map_Engine
                 var main_index = (floor.Prop3 >> 4) + ((floor.Prop4 & 0x03) << 4);
 
 
-                renderWindow.DrawMapCell(x, y, cx, cy, gameState.MapData, main_index, sub_index, gameState.CurrentPalette);
+                renderWindow.DrawMapCell(x, y, cx, cy, gameState.MapData, main_index, sub_index, gameState.CurrentPalette, 0);
             }
         }
 
