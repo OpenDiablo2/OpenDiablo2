@@ -3,11 +3,11 @@ using System.Drawing;
 
 namespace OpenDiablo2.Common.Interfaces
 {
-    public interface ILabel : IDisposable
+    public interface ITextBox : IDisposable
     {
         string Text { get; set; }
         Point Location { get; set; }
-        Size TextArea { get; set; }
-        Color TextColor { get; set; }
+        void Render();
+        void Update(long ms);
     }
 }

@@ -3,7 +3,6 @@ using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
-using OpenDiablo2.Core.UI;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -23,24 +22,24 @@ namespace OpenDiablo2.Scenes
         private readonly IPaletteProvider paletteProvider;
         private readonly IMPQProvider mpqProvider;
         private readonly IMouseInfoProvider mouseInfoProvider;
-        private readonly IMusicProvider musicProvider;
+        //private readonly IMusicProvider musicProvider;
         private readonly ISceneManager sceneManager;
 
         private float logoFrame;
         private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack;
         private IFont labelFont;
         private ILabel versionLabel, urlLabel;
-        private Button btnSinglePlayer, btnExit, btnWebsite;
+        private IButton btnSinglePlayer, btnExit, btnWebsite;
 
         public MainMenu(
             IRenderWindow renderWindow,
             IPaletteProvider paletteProvider,
             IMPQProvider mpqProvider,
             IMouseInfoProvider mouseInfoProvider,
-            IMusicProvider musicProvider,
+            //IMusicProvider musicProvider,
             ISceneManager sceneManager,
             IResourceManager resourceManager,
-            Func<eButtonType, Button> createButton,
+            Func<eButtonType, IButton> createButton,
             Func<string, IScene> getScene // Temporary until SDL load functions are sped up
             )
         {

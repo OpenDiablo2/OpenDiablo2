@@ -9,7 +9,7 @@ using OpenDiablo2.Common.Interfaces;
 
 namespace OpenDiablo2.Core.UI
 {
-    public sealed class TextBox
+    public sealed class TextBox : ITextBox
     {
         private readonly IRenderWindow renderWindow;
         private ISprite sprite;
@@ -96,6 +96,11 @@ namespace OpenDiablo2.Core.UI
             renderWindow.Draw(label);
             if (frameTime < 0.5)
                 renderWindow.Draw(linebar);
+        }
+
+        public void Dispose()
+        {
+
         }
     }
 }

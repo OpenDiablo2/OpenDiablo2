@@ -2,9 +2,9 @@
 
 namespace OpenDiablo2.Common.Interfaces
 {
-    public interface IScene : IDisposable
+    public interface IMiniPanel : IDisposable
     {
-        void Update(long ms);
         void Render();
+        void Update();
     }
 }

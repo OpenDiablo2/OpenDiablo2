@@ -32,25 +32,31 @@ namespace OpenDiablo2.SDL2_
         private readonly IMPQProvider mpqProvider;
         private readonly IPaletteProvider paletteProvider;
         private readonly IResourceManager resourceManager;
+        private readonly GlobalConfiguration globalConfig;
         private readonly IGameState gameState;
+        private readonly Func<IMapEngine> getMapEngine;
 
         public SDL2RenderWindow(
+            GlobalConfiguration globalConfig,
             IMPQProvider mpqProvider,
             IPaletteProvider paletteProvider,
             IResourceManager resourceManager,
-            IGameState gameState
+            IGameState gameState,
+            Func<IMapEngine> getMapEngine
             )
         {
+            this.globalConfig = globalConfig;
             this.mpqProvider = mpqProvider;
             this.paletteProvider = paletteProvider;
             this.resourceManager = resourceManager;
             this.gameState = gameState;
+            this.getMapEngine = getMapEngine;
 
             SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
             if (SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "0") == SDL.SDL_bool.SDL_FALSE)
                 throw new ApplicationException($"Unable to Init hinting: {SDL.SDL_GetError()}");
 
-            window = SDL.SDL_CreateWindow("OpenDiablo2", SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
+            window = SDL.SDL_CreateWindow("OpenDiablo2", SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN | SDL.SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI);
             if (window == IntPtr.Zero)
                 throw new ApplicationException($"Unable to create SDL Window: {SDL.SDL_GetError()}");
 
@@ -60,7 +66,8 @@ namespace OpenDiablo2.SDL2_
 
 
             SDL.SDL_SetRenderDrawBlendMode(renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
-            SDL.SDL_ShowCursor(0);
+            
+            SDL.SDL_ShowCursor(globalConfig.MouseMode == eMouseMode.Hardware ? 1 : 0);
 
             IsRunning = true;
 
@@ -274,28 +281,15 @@ namespace OpenDiablo2.SDL2_
             SDL.SDL_RenderCopy(renderer, lbl.texture, IntPtr.Zero, ref destRect);
         }
 
-        // TODO: Clean this up
-        class _MapDataLookup
-        {
-            public Guid TileId;
-            public int OffX;
-            public int OffY;
-            public int FrameWidth;
-            public int FrameHeight;
-            public SDL.SDL_Rect SrcRect;
-            public IntPtr Texture;
-        }
-        private Dictionary<Guid, List<_MapDataLookup>> mapDataLookup = new Dictionary<Guid, List<_MapDataLookup>>();
         public unsafe void DrawMapCell(int xCell, int yCell, int xPixel, int yPixel, MPQDS1 mapData, int main_index, int sub_index, Palette palette, int orientation)
         {
-           var tiles = mapData.LookupTable.Where(x => 
-                x.MainIndex == main_index && 
-                x.SubIndex == sub_index && 
-                (orientation == -1 || x.Orientation == orientation)).Select(x => x.TileRef);
+            var tiles = mapData.LookupTable.Where(x =>
+                 x.MainIndex == main_index &&
+                 x.SubIndex == sub_index &&
+                 (orientation == -1 || x.Orientation == orientation)).Select(x => x.TileRef);
 
             if (!tiles.Any())
-                return;
-                //throw new ApplicationException("Invalid tile id found!");
+                throw new ApplicationException("Invalid tile id found!");
 
 
             // TODO: This isn't good.. should be remembered in the map engine layer
@@ -306,7 +300,7 @@ namespace OpenDiablo2.SDL2_
                 var random = new Random(gameState.Seed + xCell + (mapData.Width * yCell));
                 var x = random.Next(totalRarity);
                 var z = 0;
-                foreach(var t in tiles)
+                foreach (var t in tiles)
                 {
                     z += t.RarityOrFrameIndex;
                     if (x <= z)
@@ -315,23 +309,20 @@ namespace OpenDiablo2.SDL2_
                         break;
                     }
                 }
-            } else tile = tiles.First();
+            }
+            else tile = tiles.First();
 
             // This WILL happen to you
             if (tile.Width == 0 || tile.Height == 0)
                 return;
 
-            if (mapDataLookup.ContainsKey(mapData.Id))
+            var mapCellInfo = getMapEngine().GetMapCellInfo(mapData.Id, tile.Id); ;
+            if (mapCellInfo != null)
             {
-                var lookupDetails = mapDataLookup[mapData.Id].FirstOrDefault(x => x.TileId == tile.Id);
-                if (lookupDetails != null)
-                {
-
-                    var dx = new SDL.SDL_Rect { x = xPixel - lookupDetails.OffX, y = yPixel - lookupDetails.OffY, w = lookupDetails.FrameWidth, h = lookupDetails.FrameHeight };
-                    SDL.SDL_RenderCopy(renderer, lookupDetails.Texture, ref lookupDetails.SrcRect, ref dx);
-                    return;
-                }
-
+                var xd = new SDL.SDL_Rect { x = xPixel - mapCellInfo.OffX, y = yPixel - mapCellInfo.OffY, w = mapCellInfo.FrameWidth, h = mapCellInfo.FrameHeight };
+                var xs = mapCellInfo.Rect.ToSDL2Rect();
+                SDL.SDL_RenderCopy(renderer, ((SDL2Texture)mapCellInfo.Texture).Pointer, ref xs, ref xd);
+                return;
             }
 
 
@@ -365,10 +356,10 @@ namespace OpenDiablo2.SDL2_
                 UInt32* data = (UInt32*)pixels;
 
                 var pitchChange = (pitch / 4);
-                
+
                 for (var i = 0; i < frameSize.Height * pitchChange; i++)
                     data[i] = 0x0;
-                    
+
 
                 foreach (var block in tile.Blocks)
                 {
@@ -382,7 +373,7 @@ namespace OpenDiablo2.SDL2_
                             if (colorIndex == 0)
                                 continue;
                             var color = palette.Colors[colorIndex];
-                            
+
                             if (color > 0)
                                 data[index] = color;
 
@@ -407,28 +398,51 @@ namespace OpenDiablo2.SDL2_
                 SDL.SDL_UnlockTexture(texId);
             }
 
-            if (!mapDataLookup.ContainsKey(mapData.Id))
-                mapDataLookup[mapData.Id] = new List<_MapDataLookup>();
-
-            var lookup = new _MapDataLookup
+            var lookup = new MapCellInfo
             {
                 FrameHeight = frameSize.Height,
                 FrameWidth = frameSize.Width,
                 OffX = offX,
                 OffY = offy,
-                SrcRect = srcRect,
+                Rect = srcRect.ToRectangle(),
                 TileId = tile.Id,
-                Texture = texId
+                Texture = new SDL2Texture { Pointer = texId }
             };
 
-            mapDataLookup[mapData.Id].Add(lookup);
+            getMapEngine().SetMapCellInfo(mapData.Id, lookup);
 
             var dr = new SDL.SDL_Rect { x = xPixel - lookup.OffX, y = yPixel - lookup.OffY, w = lookup.FrameWidth, h = lookup.FrameHeight };
-            SDL.SDL_RenderCopy(renderer, lookup.Texture, ref lookup.SrcRect, ref dr);
-
-
-
+            SDL.SDL_RenderCopy(renderer, texId, ref srcRect, ref dr);
         }
 
+        public unsafe IMouseCursor LoadCursor(ISprite sprite, int frame, Point hotspot)
+        {
+            if (globalConfig.MouseMode != eMouseMode.Hardware)
+                throw new ApplicationException("Tried to set a hardware cursor, but we are using software cursors!");
+
+            var multiple = globalConfig.HardwareMouseScale;
+            var spr = sprite as SDL2Sprite;
+            var surface = SDL.SDL_CreateRGBSurface(0, spr.FrameSize.Width * multiple, spr.FrameSize.Height * multiple, 32, 0xFF0000, 0xFF00, 0xFF, 0xFF000000);
+
+            var pixels = (UInt32*)((SDL.SDL_Surface*)surface)->pixels;
+            for (var y = 0; y < (spr.FrameSize.Height * multiple) - 1; y ++)
+                for (var x = 0; x < (spr.FrameSize.Width * multiple) - 1; x ++)
+                {
+                    pixels[x + (y * spr.FrameSize.Width * multiple)] = spr.source.Frames[frame].GetColor(x / multiple, y / multiple, sprite.CurrentPalette);
+                }
+
+            var cursor = SDL.SDL_CreateColorCursor(surface, hotspot.X, hotspot.Y);
+            if (cursor == IntPtr.Zero)
+                throw new ApplicationException($"Unable to set the cursor cursor: {SDL.SDL_GetError()}"); // TODO: Is this supported everywhere? May need to still support software cursors.
+            return new SDL2MouseCursor { Surface = cursor };
+        }
+
+        public void SetCursor(IMouseCursor mouseCursor)
+        {
+            if (globalConfig.MouseMode != eMouseMode.Hardware)
+                throw new ApplicationException("Tried to set a hardware cursor, but we are using software cursors!");
+
+            SDL.SDL_SetCursor((mouseCursor as SDL2MouseCursor).Surface);
+        }
     }
 }

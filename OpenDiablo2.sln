@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.Scenes", "OpenD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.TestConsole", "OpenDiablo2.TestConsole\OpenDiablo2.TestConsole.csproj", "{40BD2DDE-DC6F-4F6D-9050-9B423C631192}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{A1AAF640-AEFB-48E7-8BCE-E01D287B5286}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,8 +65,8 @@ Global
 		{05224FE7-293F-4184-B1D6-89F5171B60E0}.Release|x64.Build.0 = Release|x64
 		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Debug|x64.Build.0 = Debug|Any CPU
+		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Debug|x64.ActiveCfg = Debug|x64
+		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Debug|x64.Build.0 = Debug|x64
 		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Release|Any CPU.Build.0 = Release|Any CPU
 		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Release|x64.ActiveCfg = Release|Any CPU
@@ -72,6 +74,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{40BD2DDE-DC6F-4F6D-9050-9B423C631192} = {A1AAF640-AEFB-48E7-8BCE-E01D287B5286}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {782826E1-7E8E-4878-88FB-1B564D82C621}
