@@ -1,17 +1,12 @@
-﻿using CommandLine;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autofac;
-using OpenDiablo2.Common.Models;
 using System.Reflection;
-using OpenDiablo2.Common.Interfaces;
-using System.Diagnostics;
-using OpenDiablo2.Core.UI;
+using Autofac;
+using CommandLine;
 using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2
 {
@@ -23,13 +18,16 @@ namespace OpenDiablo2
         {
             log.Info("OpenDiablo 2: The Free and Open Source Diablo 2 clone!");
 
-            Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed<CommandLineOptions>(o =>
+            Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed(o => globalConfiguration = new GlobalConfiguration
             {
-                globalConfiguration = new GlobalConfiguration
-                {
-                    BaseDataPath = Path.GetFullPath(o.DataPath ?? Directory.GetCurrentDirectory())
-                };
-            });
+                BaseDataPath = Path.GetFullPath(o.DataPath ?? Directory.GetCurrentDirectory()),
+                MouseMode = o.HardwareMouse == true ? eMouseMode.Hardware : eMouseMode.Software,
+                HardwareMouseScale = o.MouseScale
+            }).WithNotParsed(o =>
+            {
+                log.Warn($"Could not parse command line options.");
+                globalConfiguration = new GlobalConfiguration { BaseDataPath = Directory.GetCurrentDirectory(), MouseMode = eMouseMode.Software };
+            }); ;
 
 #if !DEBUG
             try
@@ -55,10 +53,7 @@ namespace OpenDiablo2
 
         static ContainerBuilder RegisterLocalTypes(this ContainerBuilder containerBuilder)
         {
-            containerBuilder.Register<GlobalConfiguration>(x =>
-            {
-                return globalConfiguration;
-            }).AsSelf().SingleInstance();
+            containerBuilder.Register(x => globalConfiguration).AsSelf().SingleInstance();
 
             containerBuilder.Register<Func<string, IScene>>(c =>
             {
@@ -66,10 +61,10 @@ namespace OpenDiablo2
                 return (sceneName) => componentContext.ResolveKeyed<IScene>(sceneName);
             });
 
-            containerBuilder.Register<Func<eButtonType, Button>>(c =>
+            containerBuilder.Register<Func<eButtonType, IButton>>(c =>
             {
                 var componentContext = c.Resolve<IComponentContext>();
-                return (buttonType) => componentContext.Resolve<Button>(new NamedParameter("buttonLayout", ButtonLayout.Values[buttonType]));
+                return (buttonType) => componentContext.Resolve<IButton>(new NamedParameter("buttonLayout", ButtonLayout.Values[buttonType]));
             });
 
             /* Uncomment the below if we support multiple textbox types

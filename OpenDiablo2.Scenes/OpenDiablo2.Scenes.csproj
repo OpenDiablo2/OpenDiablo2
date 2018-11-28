@@ -60,10 +60,6 @@
       <Project>{b743160e-a0bb-45dc-9998-967a85e50562}</Project>
       <Name>OpenDiablo2.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\OpenDiablo2.Core\OpenDiablo2.Core.csproj">
-      <Project>{8FC6BF7D-835A-47C1-A6B2-125495FA0900}</Project>
-      <Name>OpenDiablo2.Core</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

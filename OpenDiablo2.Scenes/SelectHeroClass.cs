@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
-using OpenDiablo2.Core.UI;
 
 namespace OpenDiablo2.Scenes
 {
@@ -52,8 +49,8 @@ namespace OpenDiablo2.Scenes
         private ISprite backgroundSprite, campfireSprite;
         private IFont headingFont, heroDescFont, uiFont;
         private ILabel headingLabel, heroClassLabel, heroDesc1Label, heroDesc2Label, heroDesc3Label, characterNameLabel;
-        private Button exitButton, okButton;
-        private TextBox characterNameTextBox;
+        private IButton exitButton, okButton;
+        private ITextBox characterNameTextBox;
         private Dictionary<eHero, HeroRenderInfo> heroRenderInfo = new Dictionary<eHero, HeroRenderInfo>();
 
         public SelectHeroClass(
@@ -63,8 +60,8 @@ namespace OpenDiablo2.Scenes
             IMouseInfoProvider mouseInfoProvider,
             IMusicProvider musicProvider,
             ISceneManager sceneManager,
-            Func<eButtonType, Button> createButton,
-            Func<TextBox> createTextBox,
+            Func<eButtonType, IButton> createButton,
+            Func<ITextBox> createTextBox,
             ITextDictionary textDictionary,
             IKeyboardInfoProvider keyboardInfoProvider,
             IGameState gameState
@@ -246,6 +243,7 @@ namespace OpenDiablo2.Scenes
             keyboardInfoProvider.KeyPressCallback = null;
             characterNameTextBox.Text = "";
             okButton.Enabled = false;
+            selectedHero = null;
 
             sceneManager.ChangeScene("Main Menu");
         }
@@ -339,7 +337,7 @@ namespace OpenDiablo2.Scenes
                 return;
             }
 
-            if (characterNameTextBox.Text.Length >= 15)
+            if (characterNameTextBox.Text.Length >= 15 || !selectedHero.HasValue)
                 return;
 
             if (!"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".Contains(charcode))

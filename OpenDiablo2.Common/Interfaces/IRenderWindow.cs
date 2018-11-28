@@ -1,12 +1,6 @@
-﻿using OpenDiablo2.Common.Enums;
-using OpenDiablo2.Common.Models;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Common.Interfaces
 {
@@ -28,6 +22,8 @@ namespace OpenDiablo2.Common.Interfaces
         void Draw(ISprite sprite, int frame, Point location);
         void Draw(ISprite sprite, int frame);
         void Draw(ISprite sprite, int xSegments, int ySegments, int offset);
+        IMouseCursor LoadCursor(ISprite sprite, int frame, Point hotspot);
+        void SetCursor(IMouseCursor mouseCursor);
         void Draw(ILabel label);
         void DrawMapCell(int xCell, int yCell, int xPixel, int yPixel, MPQDS1 mapData, int main_index, int sub_index, Palette palette, int orientation = -1);
     }
