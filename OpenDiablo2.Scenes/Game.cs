@@ -23,6 +23,8 @@ namespace OpenDiablo2.Scenes
         private ISprite panelSprite, healthManaSprite, gameGlobeOverlapSprite;
 
         private IMiniPanel minipanel;
+        private ICharacterPanel characterpanel;
+
         private bool showMinipanel = false;
         private IButton runButton, menuButton;
 
@@ -33,7 +35,8 @@ namespace OpenDiablo2.Scenes
             IGameState gameState,
             IKeyboardInfoProvider keyboardInfoProvider,
             Func<eButtonType, IButton> createButton,
-            Func<IMiniPanel> createMiniPanel
+            Func<IMiniPanel> createMiniPanel,
+            Func<ICharacterPanel> createCharacterPanel
         )
         {
             this.renderWindow = renderWindow;
@@ -50,6 +53,8 @@ namespace OpenDiablo2.Scenes
             minipanel = createMiniPanel();
             // Maybe? Not sure. 
             // miniPanel.OnMenuActivate();
+
+            characterpanel = createCharacterPanel();
 
             runButton = createButton(eButtonType.Run);
             runButton.Location = new Point(256, 570);
@@ -106,6 +111,8 @@ namespace OpenDiablo2.Scenes
             {
                 minipanel.Render();
             }
+
+            characterpanel.Render();
             
             runButton.Render();
             menuButton.Render();
@@ -117,7 +124,9 @@ namespace OpenDiablo2.Scenes
             {
                 minipanel.Update();
             }
-            
+
+            characterpanel.Update();
+
             runButton.Update();
             menuButton.Update();
 
