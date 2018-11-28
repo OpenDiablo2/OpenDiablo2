@@ -28,7 +28,11 @@ namespace OpenDiablo2.Common.Models
 
         public UInt32 GetColor(int x, int y, Palette palette)
         {
-            var index = ImageData[x + (y * Width)];
+            var i = x + (y * Width);
+            if (i >= ImageData.Length)
+                    return 0;
+
+            var index = ImageData[i];
             if (index == -1)
                 return 0;
 

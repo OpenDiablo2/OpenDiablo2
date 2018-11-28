@@ -78,6 +78,7 @@
     <Compile Include="SDL2Extensions.cs" />
     <Compile Include="SDL2Font.cs" />
     <Compile Include="SDL2Label.cs" />
+    <Compile Include="SDL2MouseCursor.cs" />
     <Compile Include="SDL2MusicPlayer.cs" />
     <Compile Include="SDL2RenderWindow.cs" />
     <Compile Include="SDL2Sprite.cs" />

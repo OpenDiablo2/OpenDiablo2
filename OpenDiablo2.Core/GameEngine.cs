@@ -16,6 +16,7 @@ namespace OpenDiablo2.Core
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        private readonly GlobalConfiguration globalConfig;
         private readonly IMPQProvider mpqProvider;
         private readonly Func<IRenderWindow> getRenderWindow;
         private readonly Func<IMouseInfoProvider> getMouseInfoProvider;
@@ -34,6 +35,7 @@ namespace OpenDiablo2.Core
 
 
         public GameEngine(
+            GlobalConfiguration globalConfig,
             IMPQProvider mpqProvider,
             Func<IRenderWindow> getRenderWindow,
             Func<IMouseInfoProvider> getMouseInfoProvider,
@@ -41,6 +43,7 @@ namespace OpenDiablo2.Core
             Func<IResourceManager> getResourceManager
             )
         {
+            this.globalConfig = globalConfig;
             this.mpqProvider = mpqProvider;
             this.getRenderWindow = getRenderWindow;
             this.getMouseInfoProvider = getMouseInfoProvider;
@@ -84,14 +87,19 @@ namespace OpenDiablo2.Core
             LoadSoundData();
 
             mouseSprite = renderWindow.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units);
-
+            IMouseCursor cursor;
+            if (globalConfig.MouseMode == eMouseMode.Hardware)
+            {
+                cursor = renderWindow.LoadCursor(mouseSprite, 0, new Point(0, 0));
+                renderWindow.SetCursor(cursor);
+            }
 
             currentScene = getScene("Main Menu");
             sw.Start();
             while (getRenderWindow().IsRunning)
             {
                 while (sw.ElapsedMilliseconds < 33)
-                    Thread.Sleep((int)Math.Min(1, 33 -sw.ElapsedMilliseconds)); // Lock to 30fps
+                    Thread.Sleep(1);
 
                 var ms = sw.ElapsedMilliseconds;
                 sw.Restart();
@@ -114,8 +122,8 @@ namespace OpenDiablo2.Core
                 renderWindow.Clear();
                 currentScene.Render();
 
-                // Draw the mouse
-                renderWindow.Draw(mouseSprite, new Point(mouseInfoProvider.MouseX, mouseInfoProvider.MouseY + 3));
+                if (globalConfig.MouseMode == eMouseMode.Software)
+                    renderWindow.Draw(mouseSprite, new Point(mouseInfoProvider.MouseX, mouseInfoProvider.MouseY + 3));
 
                 renderWindow.Sync();
             }

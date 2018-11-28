@@ -32,10 +32,12 @@ namespace OpenDiablo2.SDL2_
         private readonly IMPQProvider mpqProvider;
         private readonly IPaletteProvider paletteProvider;
         private readonly IResourceManager resourceManager;
+        private readonly GlobalConfiguration globalConfig;
         private readonly IGameState gameState;
         private readonly Func<IMapEngine> getMapEngine;
 
         public SDL2RenderWindow(
+            GlobalConfiguration globalConfig,
             IMPQProvider mpqProvider,
             IPaletteProvider paletteProvider,
             IResourceManager resourceManager,
@@ -43,6 +45,7 @@ namespace OpenDiablo2.SDL2_
             Func<IMapEngine> getMapEngine
             )
         {
+            this.globalConfig = globalConfig;
             this.mpqProvider = mpqProvider;
             this.paletteProvider = paletteProvider;
             this.resourceManager = resourceManager;
@@ -53,7 +56,7 @@ namespace OpenDiablo2.SDL2_
             if (SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "0") == SDL.SDL_bool.SDL_FALSE)
                 throw new ApplicationException($"Unable to Init hinting: {SDL.SDL_GetError()}");
 
-            window = SDL.SDL_CreateWindow("OpenDiablo2", SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
+            window = SDL.SDL_CreateWindow("OpenDiablo2", SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN | SDL.SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI);
             if (window == IntPtr.Zero)
                 throw new ApplicationException($"Unable to create SDL Window: {SDL.SDL_GetError()}");
 
@@ -63,7 +66,8 @@ namespace OpenDiablo2.SDL2_
 
 
             SDL.SDL_SetRenderDrawBlendMode(renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
-            SDL.SDL_ShowCursor(0);
+            
+            SDL.SDL_ShowCursor(globalConfig.MouseMode == eMouseMode.Hardware ? 1 : 0);
 
             IsRunning = true;
 
@@ -411,5 +415,34 @@ namespace OpenDiablo2.SDL2_
             SDL.SDL_RenderCopy(renderer, texId, ref srcRect, ref dr);
         }
 
+        public unsafe IMouseCursor LoadCursor(ISprite sprite, int frame, Point hotspot)
+        {
+            if (globalConfig.MouseMode != eMouseMode.Hardware)
+                throw new ApplicationException("Tried to set a hardware cursor, but we are using software cursors!");
+
+            var multiple = globalConfig.HardwareMouseScale;
+            var spr = sprite as SDL2Sprite;
+            var surface = SDL.SDL_CreateRGBSurface(0, spr.FrameSize.Width * multiple, spr.FrameSize.Height * multiple, 32, 0xFF0000, 0xFF00, 0xFF, 0xFF000000);
+
+            var pixels = (UInt32*)((SDL.SDL_Surface*)surface)->pixels;
+            for (var y = 0; y < (spr.FrameSize.Height * multiple) - 1; y ++)
+                for (var x = 0; x < (spr.FrameSize.Width * multiple) - 1; x ++)
+                {
+                    pixels[x + (y * spr.FrameSize.Width * multiple)] = spr.source.Frames[frame].GetColor(x / multiple, y / multiple, sprite.CurrentPalette);
+                }
+
+            var cursor = SDL.SDL_CreateColorCursor(surface, hotspot.X, hotspot.Y);
+            if (cursor == IntPtr.Zero)
+                throw new ApplicationException($"Unable to set the cursor cursor: {SDL.SDL_GetError()}"); // TODO: Is this supported everywhere? May need to still support software cursors.
+            return new SDL2MouseCursor { Surface = cursor };
+        }
+
+        public void SetCursor(IMouseCursor mouseCursor)
+        {
+            if (globalConfig.MouseMode != eMouseMode.Hardware)
+                throw new ApplicationException("Tried to set a hardware cursor, but we are using software cursors!");
+
+            SDL.SDL_SetCursor((mouseCursor as SDL2MouseCursor).Surface);
+        }
     }
 }
