@@ -10,7 +10,5 @@ namespace OpenDiablo2.Common.Interfaces
         void Update(long ms);
         void Render();
         void NotifyMapChanged();
-        MapCellInfo GetMapCellInfo(Guid mapId, Guid tileId);
-        void SetMapCellInfo(Guid mapId, MapCellInfo cellInfo);
     }
 }

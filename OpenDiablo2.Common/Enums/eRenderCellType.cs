@@ -9,6 +9,8 @@ namespace OpenDiablo2.Common.Enums
     public enum eRenderCellType
     {
         Floor,
-        Wall
+        WallUpper,
+        WallLower,
+        Roof
     }
 }

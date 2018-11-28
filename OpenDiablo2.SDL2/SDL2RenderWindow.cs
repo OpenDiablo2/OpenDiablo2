@@ -281,55 +281,12 @@ namespace OpenDiablo2.SDL2_
             SDL.SDL_RenderCopy(renderer, lbl.texture, IntPtr.Zero, ref destRect);
         }
 
-        public unsafe void DrawMapCell(int xCell, int yCell, int xPixel, int yPixel, MPQDS1 mapData, int main_index, int sub_index, Palette palette, int orientation)
+        public unsafe MapCellInfo CacheMapCell(MPQDT1Tile mapCell)
         {
-            var tiles = mapData.LookupTable.Where(x =>
-                 x.MainIndex == main_index &&
-                 x.SubIndex == sub_index &&
-                 (orientation == -1 || x.Orientation == orientation)).Select(x => x.TileRef);
-
-            if (!tiles.Any())
-                throw new ApplicationException("Invalid tile id found!");
-
-
-            // TODO: This isn't good.. should be remembered in the map engine layer
-            MPQDT1Tile tile = null;
-            if (tiles.Count() > 0)
-            {
-                var totalRarity = tiles.Sum(q => q.RarityOrFrameIndex);
-                var random = new Random(gameState.Seed + xCell + (mapData.Width * yCell));
-                var x = random.Next(totalRarity);
-                var z = 0;
-                foreach (var t in tiles)
-                {
-                    z += t.RarityOrFrameIndex;
-                    if (x <= z)
-                    {
-                        tile = t;
-                        break;
-                    }
-                }
-            }
-            else tile = tiles.First();
-
-            // This WILL happen to you
-            if (tile.Width == 0 || tile.Height == 0)
-                return;
-
-            var mapCellInfo = getMapEngine().GetMapCellInfo(mapData.Id, tile.Id); ;
-            if (mapCellInfo != null)
-            {
-                var xd = new SDL.SDL_Rect { x = xPixel - mapCellInfo.OffX, y = yPixel - mapCellInfo.OffY, w = mapCellInfo.FrameWidth, h = mapCellInfo.FrameHeight };
-                var xs = mapCellInfo.Rect.ToSDL2Rect();
-                SDL.SDL_RenderCopy(renderer, ((SDL2Texture)mapCellInfo.Texture).Pointer, ref xs, ref xd);
-                return;
-            }
-
-
-            var minX = tile.Blocks.Min(x => x.PositionX);
-            var minY = tile.Blocks.Min(x => x.PositionY);
-            var maxX = tile.Blocks.Max(x => x.PositionX + 32);
-            var maxY = tile.Blocks.Max(x => x.PositionY + 32);
+            var minX = mapCell.Blocks.Min(x => x.PositionX);
+            var minY = mapCell.Blocks.Min(x => x.PositionY);
+            var maxX = mapCell.Blocks.Max(x => x.PositionX + 32);
+            var maxY = mapCell.Blocks.Max(x => x.PositionY + 32);
             var diffX = maxX - minX;
             var diffY = maxY - minY;
 
@@ -345,12 +302,9 @@ namespace OpenDiablo2.SDL2_
             var texId = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, frameSize.Width, frameSize.Height);
             SDL.SDL_SetTextureBlendMode(texId, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
-
             if (SDL.SDL_LockTexture(texId, IntPtr.Zero, out IntPtr pixels, out int pitch) != 0)
-            {
-                log.Error("Could not lock texture for map rendering");
-                return;
-            }
+                throw new ApplicationException("Could not lock texture for map rendering");
+
             try
             {
                 UInt32* data = (UInt32*)pixels;
@@ -361,7 +315,7 @@ namespace OpenDiablo2.SDL2_
                     data[i] = 0x0;
 
 
-                foreach (var block in tile.Blocks)
+                foreach (var block in mapCell.Blocks)
                 {
                     var index = block.PositionX + offX + ((block.PositionY + offy) * pitchChange);
                     var xx = 0;
@@ -372,7 +326,7 @@ namespace OpenDiablo2.SDL2_
                         {
                             if (colorIndex == 0)
                                 continue;
-                            var color = palette.Colors[colorIndex];
+                            var color = gameState.CurrentPalette.Colors[colorIndex];
 
                             if (color > 0)
                                 data[index] = color;
@@ -398,21 +352,23 @@ namespace OpenDiablo2.SDL2_
                 SDL.SDL_UnlockTexture(texId);
             }
 
-            var lookup = new MapCellInfo
+            return new MapCellInfo
             {
                 FrameHeight = frameSize.Height,
                 FrameWidth = frameSize.Width,
                 OffX = offX,
                 OffY = offy,
                 Rect = srcRect.ToRectangle(),
-                TileId = tile.Id,
+                TileId = mapCell.Id,
                 Texture = new SDL2Texture { Pointer = texId }
             };
+        }
 
-            getMapEngine().SetMapCellInfo(mapData.Id, lookup);
-
-            var dr = new SDL.SDL_Rect { x = xPixel - lookup.OffX, y = yPixel - lookup.OffY, w = lookup.FrameWidth, h = lookup.FrameHeight };
-            SDL.SDL_RenderCopy(renderer, texId, ref srcRect, ref dr);
+        public void DrawMapCell(MapCellInfo mapCellInfo, int xPixel, int yPixel)
+        {
+            var srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = mapCellInfo.FrameWidth, h = Math.Abs(mapCellInfo.FrameHeight) };
+            var destRect = new SDL.SDL_Rect { x = xPixel - mapCellInfo.OffX, y = yPixel - mapCellInfo.OffY, w = mapCellInfo.FrameWidth, h = mapCellInfo.FrameHeight};
+            SDL.SDL_RenderCopy(renderer, (mapCellInfo.Texture as SDL2Texture).Pointer, ref srcRect, ref destRect);
         }
 
         public unsafe IMouseCursor LoadCursor(ISprite sprite, int frame, Point hotspot)
