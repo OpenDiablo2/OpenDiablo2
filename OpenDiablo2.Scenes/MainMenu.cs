@@ -155,7 +155,7 @@ namespace OpenDiablo2.Scenes
         }
 
         private void OnSinglePlayerClicked()
-            => sceneManager.ChangeScene("Select Character");
+            => sceneManager.ChangeScene("Select Hero Class");
 
         private void OnExitClicked()
         {

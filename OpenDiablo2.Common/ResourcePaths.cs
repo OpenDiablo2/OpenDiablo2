@@ -76,7 +76,6 @@ namespace OpenDiablo2.Common
 
         // -- Character Selection
         public static string CharacterSelectionBackground = "data\\global\\ui\\CharSelect\\characterselectscreenEXP.dc6";
-        public static string CharacterSelectionTallButton = "data\\global\\ui\\CharSelect\\TallButtonBlank.dc6";
         
         // --- Game ---
         public static string GamePanels = "data\\global\\ui\\PANEL\\800ctrlpnl7.dc6";
@@ -106,6 +105,7 @@ namespace OpenDiablo2.Common
         public static string CancelButton = "data\\global\\ui\\FrontEnd\\CancelButtonBlank.dc6";
         public static string NarrowButtonBlank = "data\\global\\ui\\FrontEnd\\NarrowButtonBlank.dc6";
         public static string TextBox2 = "data\\global\\ui\\FrontEnd\\textbox2.dc6";
+        public static string TallButtonBlank = "data\\global\\ui\\CharSelect\\TallButtonBlank.dc6";
 
         // --- GAME UI ---
         public static string MinipanelSmall = "data\\global\\ui\\PANEL\\minipanel_s.dc6";

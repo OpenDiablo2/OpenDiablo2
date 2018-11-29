@@ -1,11 +1,12 @@
+using System;
 using System.Drawing;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
+using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 
 namespace OpenDiablo2.Scenes
 {
-
     [Scene("Select Character")]
     public sealed class CharacterSelection : IScene
     {
@@ -13,71 +14,62 @@ namespace OpenDiablo2.Scenes
             log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private readonly IRenderWindow renderWindow;
-        private readonly IPaletteProvider paletteProvider;
-        private readonly IMPQProvider mpqProvider;
-        private readonly IMouseInfoProvider mouseInfoProvider;
-        private readonly IMusicProvider musicProvider;
-        private readonly ISceneManager sceneManager;
-        private readonly ITextDictionary textDictionary;
-        private readonly IKeyboardInfoProvider keyboardInfoProvider;
-        private readonly IGameState gameState;
 
-        private ISprite backgroundSprite, largeButtonSprite, largeButtonSprite2;
+        private readonly ISprite backgroundSprite;
+        private readonly IButton createNewCharacterButton, deleteCharacterButton, exitButton, okButton;
 
-        public CharacterSelection(IRenderWindow renderWindow, IPaletteProvider paletteProvider, IMPQProvider mpqProvider, IMouseInfoProvider mouseInfoProvider, IMusicProvider musicProvider, ISceneManager sceneManager, ITextDictionary textDictionary, IKeyboardInfoProvider keyboardInfoProvider, IGameState gameState)
+        public CharacterSelection(IRenderWindow renderWindow,
+            ISceneManager sceneManager, ITextDictionary textDictionary, Func<eButtonType, IButton> createButton)
         {
             this.renderWindow = renderWindow;
-            this.paletteProvider = paletteProvider;
-            this.mpqProvider = mpqProvider;
-            this.mouseInfoProvider = mouseInfoProvider;
-            this.musicProvider = musicProvider;
-            this.sceneManager = sceneManager;
-            this.textDictionary = textDictionary;
-            this.keyboardInfoProvider = keyboardInfoProvider;
-            this.gameState = gameState;
-            
+
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectionBackground, Palettes.Sky);
-            largeButtonSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectionTallButton, Palettes.Sky);
-            largeButtonSprite2 = renderWindow.LoadSprite(ResourcePaths.CharacterSelectionTallButton, Palettes.Sky);
+            createNewCharacterButton = createButton(eButtonType.Tall);
+            // TODO: use strCreateNewCharacter -- need to get the text to split after 10 chars though.
+            createNewCharacterButton.Text = "Create New".ToUpper();
+            createNewCharacterButton.Location = new Point(33, 467);
+            createNewCharacterButton.OnActivate = () => sceneManager.ChangeScene("Select Hero Class");
+
+            deleteCharacterButton = createButton(eButtonType.Tall);
+            deleteCharacterButton.Text = textDictionary.Translate("strDelete");
+            deleteCharacterButton.Location = new Point(433, 467);
+
+            exitButton = createButton(eButtonType.Medium);
+            exitButton.Text = textDictionary.Translate("strExit");
+            exitButton.Location = new Point(33, 540);
+            exitButton.OnActivate = () => sceneManager.ChangeScene("Main Menu");
+
+            okButton = createButton(eButtonType.Medium);
+            okButton.Text = textDictionary.Translate("strOk");
+            okButton.Location = new Point(630, 540);
+            okButton.Enabled = false;
         }
 
         public void Update(long ms)
         {
-            var point = new Point(33, 527);
-            var buttonSize = largeButtonSprite.FrameSize;
-            
-            var mouseX = mouseInfoProvider.MouseX - 33;
-            var mouseY = mouseInfoProvider.MouseY - 527 + buttonSize.Height;
-
-            if (mouseX > 0 && mouseX < buttonSize.Width && mouseY > 0 && mouseY < buttonSize.Height)
-            {
-                log.Info("redraw as pressed");
-                renderWindow.Draw(largeButtonSprite, 1, new Point(33, 527));
-            }
-            else
-            {
-                log.Info("redraw as normal");
-                renderWindow.Draw(largeButtonSprite, 0, new Point(33, 527));
-            }
+            createNewCharacterButton.Update();
+            deleteCharacterButton.Update();
+            exitButton.Update();
+            okButton.Update();
         }
 
         public void Render()
         {
             renderWindow.Draw(backgroundSprite, 4, 3, 0);
-            
-            renderWindow.Draw(largeButtonSprite, new Point(33, 527));
-            renderWindow.Draw(largeButtonSprite2, new Point(433, 527));
-        }
 
-        private void OnExitClicked()
-        {
-            sceneManager.ChangeScene("Main Menu");
-
+            createNewCharacterButton.Render();
+            deleteCharacterButton.Render();
+            exitButton.Render();
+            okButton.Render();
         }
 
         public void Dispose()
         {
             backgroundSprite.Dispose();
+            createNewCharacterButton.Dispose();
+            deleteCharacterButton.Dispose();
+            exitButton.Dispose();
+            okButton.Dispose();
         }
     }
 }
