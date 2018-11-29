@@ -211,7 +211,7 @@ namespace OpenDiablo2.Scenes
 
             exitButton = createButton(eButtonType.Medium);
             exitButton.Text = textDictionary.Translate("strExit");
-            exitButton.Location = new Point(30, 540);
+            exitButton.Location = new Point(33, 540);
             exitButton.OnActivate = OnExitClicked;
 
             okButton = createButton(eButtonType.Medium);
@@ -245,7 +245,7 @@ namespace OpenDiablo2.Scenes
             okButton.Enabled = false;
             selectedHero = null;
 
-            sceneManager.ChangeScene("Main Menu");
+            sceneManager.ChangeScene("Select Character");
         }
 
         public void Render()
