@@ -22,7 +22,8 @@ namespace OpenDiablo2
             {
                 BaseDataPath = Path.GetFullPath(o.DataPath ?? Directory.GetCurrentDirectory()),
                 MouseMode = o.HardwareMouse == true ? eMouseMode.Hardware : eMouseMode.Software,
-                HardwareMouseScale = o.MouseScale
+                HardwareMouseScale = o.MouseScale,
+                FullScreen = o.FullScreen
             }).WithNotParsed(o =>
             {
                 log.Warn($"Could not parse command line options.");
