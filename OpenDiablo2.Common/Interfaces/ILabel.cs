@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using OpenDiablo2.Common.Enums;
 
 namespace OpenDiablo2.Common.Interfaces
 {
@@ -9,5 +10,7 @@ namespace OpenDiablo2.Common.Interfaces
         Point Location { get; set; }
         Size TextArea { get; set; }
         Color TextColor { get; set; }
+        int MaxWidth { get; set; }
+        eTextAlign Alignment { get; set; }
     }
 }

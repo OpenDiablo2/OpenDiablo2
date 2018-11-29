@@ -26,7 +26,7 @@ namespace OpenDiablo2.Scenes
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectionBackground, Palettes.Sky);
             createNewCharacterButton = createButton(eButtonType.Tall);
             // TODO: use strCreateNewCharacter -- need to get the text to split after 10 chars though.
-            createNewCharacterButton.Text = "Create New".ToUpper();
+            createNewCharacterButton.Text = textDictionary.Translate("strCreateNewCharacter");// "Create New".ToUpper();
             createNewCharacterButton.Location = new Point(33, 467);
             createNewCharacterButton.OnActivate = () => sceneManager.ChangeScene("Select Hero Class");
 
