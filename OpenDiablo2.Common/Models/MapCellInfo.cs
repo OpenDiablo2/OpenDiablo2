@@ -7,7 +7,7 @@ namespace OpenDiablo2.Common.Models
     // Represents a single cell on a map
     public sealed class MapCellInfo
     {
-        public Guid TileId { get; set; }
+        public bool Ignore { get; set; } = false;
         public int AnimationId { get; set; }
         public int OffX { get; set; }
         public int OffY { get; set; }

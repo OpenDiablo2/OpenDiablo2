@@ -11,6 +11,7 @@ namespace OpenDiablo2.Common.Enums
         Floor,
         WallUpper,
         WallLower,
-        Roof
+        Roof,
+        MAX
     }
 }

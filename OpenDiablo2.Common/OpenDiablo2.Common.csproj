@@ -106,6 +106,7 @@
     <Compile Include="Models\LevelPreset.cs" />
     <Compile Include="Models\LevelType.cs" />
     <Compile Include="Models\MapCellInfo.cs" />
+    <Compile Include="Models\MapInfo.cs" />
     <Compile Include="Models\MPQDS1.cs" />
     <Compile Include="Models\MPQDT1.cs" />
     <Compile Include="Models\MPQFont.cs" />

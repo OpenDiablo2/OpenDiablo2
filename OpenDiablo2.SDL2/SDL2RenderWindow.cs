@@ -1,16 +1,10 @@
-﻿using OpenDiablo2.Common.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SDL2;
-using System.IO;
+﻿using System;
 using System.Drawing;
-using OpenDiablo2.Common.Models;
-using Autofac;
+using System.Linq;
 using System.Runtime.InteropServices;
-using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Common.Models;
+using SDL2;
 
 namespace OpenDiablo2.SDL2_
 {
@@ -33,7 +27,7 @@ namespace OpenDiablo2.SDL2_
         private readonly IPaletteProvider paletteProvider;
         private readonly IResourceManager resourceManager;
         private readonly GlobalConfiguration globalConfig;
-        private readonly IGameState gameState;
+        private readonly Func<IGameState> getGameState;
         private readonly Func<IMapEngine> getMapEngine;
 
         public SDL2RenderWindow(
@@ -41,7 +35,7 @@ namespace OpenDiablo2.SDL2_
             IMPQProvider mpqProvider,
             IPaletteProvider paletteProvider,
             IResourceManager resourceManager,
-            IGameState gameState,
+            Func<IGameState> getGameState,
             Func<IMapEngine> getMapEngine
             )
         {
@@ -49,14 +43,14 @@ namespace OpenDiablo2.SDL2_
             this.mpqProvider = mpqProvider;
             this.paletteProvider = paletteProvider;
             this.resourceManager = resourceManager;
-            this.gameState = gameState;
+            this.getGameState = getGameState;
             this.getMapEngine = getMapEngine;
 
             SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
             if (SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "0") == SDL.SDL_bool.SDL_FALSE)
                 throw new ApplicationException($"Unable to Init hinting: {SDL.SDL_GetError()}");
 
-            window = SDL.SDL_CreateWindow("OpenDiablo2", SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN | SDL.SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI);
+            window = SDL.SDL_CreateWindow("OpenDiablo2", SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
             if (window == IntPtr.Zero)
                 throw new ApplicationException($"Unable to create SDL Window: {SDL.SDL_GetError()}");
 
@@ -66,7 +60,7 @@ namespace OpenDiablo2.SDL2_
 
 
             SDL.SDL_SetRenderDrawBlendMode(renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
-            
+            SDL.SDL_GL_SetSwapInterval(1);
             SDL.SDL_ShowCursor(globalConfig.MouseMode == eMouseMode.Hardware ? 1 : 0);
 
             IsRunning = true;
@@ -283,6 +277,8 @@ namespace OpenDiablo2.SDL2_
 
         public unsafe MapCellInfo CacheMapCell(MPQDT1Tile mapCell)
         {
+            log.Debug($"Caching map cell {mapCell.Id}");
+
             var minX = mapCell.Blocks.Min(x => x.PositionX);
             var minY = mapCell.Blocks.Min(x => x.PositionY);
             var maxX = mapCell.Blocks.Max(x => x.PositionX + 32);
@@ -291,7 +287,7 @@ namespace OpenDiablo2.SDL2_
             var diffY = maxY - minY;
 
             var offX = -minX;
-            var offy = -minY;
+            var offY = -minY;
 
             var frameSize = new Size(diffX, Math.Abs(diffY));
 
@@ -317,7 +313,7 @@ namespace OpenDiablo2.SDL2_
 
                 foreach (var block in mapCell.Blocks)
                 {
-                    var index = block.PositionX + offX + ((block.PositionY + offy) * pitchChange);
+                    var index = block.PositionX + offX + ((block.PositionY + offY) * pitchChange);
                     var xx = 0;
                     var yy = 0;
                     foreach (var colorIndex in block.PixelData)
@@ -326,7 +322,7 @@ namespace OpenDiablo2.SDL2_
                         {
                             if (colorIndex == 0)
                                 continue;
-                            var color = gameState.CurrentPalette.Colors[colorIndex];
+                            var color = getGameState().CurrentPalette.Colors[colorIndex];
 
                             if (color > 0)
                                 data[index] = color;
@@ -354,12 +350,12 @@ namespace OpenDiablo2.SDL2_
 
             return new MapCellInfo
             {
+                Tile = mapCell,
                 FrameHeight = frameSize.Height,
                 FrameWidth = frameSize.Width,
                 OffX = offX,
-                OffY = offy,
+                OffY = offY,
                 Rect = srcRect.ToRectangle(),
-                TileId = mapCell.Id,
                 Texture = new SDL2Texture { Pointer = texId }
             };
         }
@@ -367,7 +363,7 @@ namespace OpenDiablo2.SDL2_
         public void DrawMapCell(MapCellInfo mapCellInfo, int xPixel, int yPixel)
         {
             var srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = mapCellInfo.FrameWidth, h = Math.Abs(mapCellInfo.FrameHeight) };
-            var destRect = new SDL.SDL_Rect { x = xPixel - mapCellInfo.OffX, y = yPixel - mapCellInfo.OffY, w = mapCellInfo.FrameWidth, h = mapCellInfo.FrameHeight};
+            var destRect = new SDL.SDL_Rect { x = xPixel - mapCellInfo.OffX, y = yPixel - mapCellInfo.OffY, w = mapCellInfo.FrameWidth, h = mapCellInfo.FrameHeight };
             SDL.SDL_RenderCopy(renderer, (mapCellInfo.Texture as SDL2Texture).Pointer, ref srcRect, ref destRect);
         }
 
@@ -381,8 +377,8 @@ namespace OpenDiablo2.SDL2_
             var surface = SDL.SDL_CreateRGBSurface(0, spr.FrameSize.Width * multiple, spr.FrameSize.Height * multiple, 32, 0xFF0000, 0xFF00, 0xFF, 0xFF000000);
 
             var pixels = (UInt32*)((SDL.SDL_Surface*)surface)->pixels;
-            for (var y = 0; y < (spr.FrameSize.Height * multiple) - 1; y ++)
-                for (var x = 0; x < (spr.FrameSize.Width * multiple) - 1; x ++)
+            for (var y = 0; y < (spr.FrameSize.Height * multiple) - 1; y++)
+                for (var x = 0; x < (spr.FrameSize.Width * multiple) - 1; x++)
                 {
                     pixels[x + (y * spr.FrameSize.Width * multiple)] = spr.source.Frames[frame].GetColor(x / multiple, y / multiple, sprite.CurrentPalette);
                 }
