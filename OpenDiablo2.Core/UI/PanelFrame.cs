@@ -9,7 +9,7 @@ namespace OpenDiablo2.Core.UI
     public sealed class PanelFrame : IPanelFrame
     {
         private readonly IRenderWindow renderWindow;
-        private ISprite sprite, framesprite;
+        private ISprite sprite;
         private ePanelFrameType panelFrameType;
 
         private Point location = new Point();
@@ -29,7 +29,7 @@ namespace OpenDiablo2.Core.UI
             this.renderWindow = renderWindow;
             this.panelFrameType = type;
             
-            framesprite = renderWindow.LoadSprite(ResourcePaths.Frame, Palettes.Units, new Point(0, 0));
+            sprite = renderWindow.LoadSprite(ResourcePaths.Frame, Palettes.Units, new Point(0, 0));
 
             Location = new Point(0, 0);
 
@@ -41,18 +41,18 @@ namespace OpenDiablo2.Core.UI
             switch(this.panelFrameType)
             {
                 case ePanelFrameType.Left:
-                    renderWindow.Draw(framesprite, 0, new Point(0, 256));
-                    renderWindow.Draw(framesprite, 1, new Point(256, 66));
-                    renderWindow.Draw(framesprite, 2, new Point(0, 256 + 231));
-                    renderWindow.Draw(framesprite, 3, new Point(0, 256 + 231 + 66));
-                    renderWindow.Draw(framesprite, 4, new Point(256, 256 + 231 + 66));
+                    renderWindow.Draw(sprite, 0, new Point(0, 256));
+                    renderWindow.Draw(sprite, 1, new Point(256, 66));
+                    renderWindow.Draw(sprite, 2, new Point(0, 256 + 231));
+                    renderWindow.Draw(sprite, 3, new Point(0, 256 + 231 + 66));
+                    renderWindow.Draw(sprite, 4, new Point(256, 256 + 231 + 66));
                     break;
                 case ePanelFrameType.Right:
-                    renderWindow.Draw(framesprite, 5, new Point(400 + 0, 66));
-                    renderWindow.Draw(framesprite, 6, new Point(400 + 145, 256));
-                    renderWindow.Draw(framesprite, 7, new Point(400 + 145 + 169, 256 + 231));
-                    renderWindow.Draw(framesprite, 8, new Point(400 + 145, 256 + 231 + 66));
-                    renderWindow.Draw(framesprite, 9, new Point(400 + 0, 256 + 231 + 66));
+                    renderWindow.Draw(sprite, 5, new Point(400 + 0, 66));
+                    renderWindow.Draw(sprite, 6, new Point(400 + 145, 256));
+                    renderWindow.Draw(sprite, 7, new Point(400 + 145 + 169, 256 + 231));
+                    renderWindow.Draw(sprite, 8, new Point(400 + 145, 256 + 231 + 66));
+                    renderWindow.Draw(sprite, 9, new Point(400 + 0, 256 + 231 + 66));
                     break;
             }
         }
@@ -71,7 +71,7 @@ namespace OpenDiablo2.Core.UI
 
         public void Dispose()
         {
-            framesprite.Dispose();
+            sprite.Dispose();
         }
     }
 }

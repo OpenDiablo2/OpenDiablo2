@@ -26,7 +26,7 @@ namespace OpenDiablo2.Scenes
         private ICharacterPanel characterpanel;
         private IInventoryPanel inventorypanel;
 
-        private bool showMinipanel = false, showCharacterPanel = true, showInventoryPanel = true;
+        private bool showMinipanel = false;
         private IButton runButton, menuButton;
 
         public Game(
@@ -94,12 +94,12 @@ namespace OpenDiablo2.Scenes
 
         private void DrawPanel()
         {
-            if(this.showInventoryPanel)
+            if(gameState.ShowInventoryPanel)
             {
                 inventorypanel.Render();
             }
 
-            if (this.showCharacterPanel)
+            if (gameState.ShowCharacterPanel)
             {
                 characterpanel.Render();
             }
