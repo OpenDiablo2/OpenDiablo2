@@ -8,7 +8,7 @@ using SDL2;
 
 namespace OpenDiablo2.SDL2_
 {
-    public sealed class SDL2RenderWindow : IRenderWindow, IRenderTarget, IMouseInfoProvider, IKeyboardInfoProvider
+    public sealed class SDL2RenderWindow : IRenderWindow, IMouseInfoProvider, IKeyboardInfoProvider
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -50,11 +50,12 @@ namespace OpenDiablo2.SDL2_
             if (SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "0") == SDL.SDL_bool.SDL_FALSE)
                 throw new ApplicationException($"Unable to Init hinting: {SDL.SDL_GetError()}");
 
-            window = SDL.SDL_CreateWindow("OpenDiablo2", SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
+            window = SDL.SDL_CreateWindow("OpenDiablo2", SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, 800, 600, 
+                SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN | SDL.SDL_WindowFlags.SDL_WINDOW_VULKAN);
             if (window == IntPtr.Zero)
                 throw new ApplicationException($"Unable to create SDL Window: {SDL.SDL_GetError()}");
 
-            renderer = SDL.SDL_CreateRenderer(window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_SOFTWARE);
+            renderer = SDL.SDL_CreateRenderer(window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED | SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
             if (renderer == IntPtr.Zero)
                 throw new ApplicationException($"Unable to create SDL Window: {SDL.SDL_GetError()}");
 
@@ -396,5 +397,7 @@ namespace OpenDiablo2.SDL2_
 
             SDL.SDL_SetCursor((mouseCursor as SDL2MouseCursor).Surface);
         }
+
+        public uint GetTicks() => SDL.SDL_GetTicks();
     }
 }
