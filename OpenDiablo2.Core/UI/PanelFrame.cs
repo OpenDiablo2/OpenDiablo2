@@ -24,10 +24,10 @@ namespace OpenDiablo2.Core.UI
             }
         }
 
-        public PanelFrame(IRenderWindow renderWindow, ePanelFrameType type)
+        public PanelFrame(IRenderWindow renderWindow, ePanelFrameType panelFrameType)
         {
             this.renderWindow = renderWindow;
-            this.panelFrameType = type;
+            this.panelFrameType = panelFrameType;
             
             sprite = renderWindow.LoadSprite(ResourcePaths.Frame, Palettes.Units, new Point(0, 0));
 
