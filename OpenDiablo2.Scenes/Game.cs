@@ -24,6 +24,7 @@ namespace OpenDiablo2.Scenes
 
         private IMiniPanel minipanel;
         private ICharacterPanel characterpanel;
+        private IInventoryPanel inventorypanel;
 
         private bool showMinipanel = false;
         private IButton runButton, menuButton;
@@ -36,7 +37,8 @@ namespace OpenDiablo2.Scenes
             IKeyboardInfoProvider keyboardInfoProvider,
             Func<eButtonType, IButton> createButton,
             Func<IMiniPanel> createMiniPanel,
-            Func<ICharacterPanel> createCharacterPanel
+            Func<ICharacterPanel> createCharacterPanel,
+            Func<IInventoryPanel> createInventoryPanel
         )
         {
             this.renderWindow = renderWindow;
@@ -55,6 +57,7 @@ namespace OpenDiablo2.Scenes
             // miniPanel.OnMenuActivate();
 
             characterpanel = createCharacterPanel();
+            inventorypanel = createInventoryPanel();
 
             runButton = createButton(eButtonType.Run);
             runButton.Location = new Point(256, 570);
@@ -91,6 +94,9 @@ namespace OpenDiablo2.Scenes
 
         private void DrawPanel()
         {
+            characterpanel.Render();
+            inventorypanel.Render();
+
             // Render the background bottom bar
             renderWindow.Draw(panelSprite, 0, new Point(0, 600));
             renderWindow.Draw(panelSprite, 1, new Point(166, 600));
@@ -112,7 +118,7 @@ namespace OpenDiablo2.Scenes
                 minipanel.Render();
             }
 
-            characterpanel.Render();
+            
             
             runButton.Render();
             menuButton.Render();
