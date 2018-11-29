@@ -2,8 +2,8 @@
 {
     public enum eLevelSubType
     {
-        Act1BorderCliff = 1,
-        Act1BorderMiddle = 2,
+        Act1BorderCliff = 0,
+        Act1BorderMiddle = 1,
         Act1BorderCorner = 2,
         Act1BorderBorder = 3,
         Act1Waypoint = 4,

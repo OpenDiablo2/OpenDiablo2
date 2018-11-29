@@ -133,11 +133,6 @@ namespace OpenDiablo2.Core.GameState_
 
         public MapInfo LoadMap(eLevelId levelId, Point origin)
         {
-            // Don't generate the map if it doesn't already exist
-            var existing = mapInfo.FirstOrDefault(x => x.LevelId == levelId);
-            if (existing != null)
-                return existing;
-
             var level = engineDataManager.LevelPresets.First(x => x.LevelId == (int)levelId);
             var levelDetails = engineDataManager.LevelDetails.First(x => x.Id == level.LevelId);
             var levelType = engineDataManager.LevelTypes.First(x => x.Id == levelDetails.LevelType);
