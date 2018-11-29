@@ -64,8 +64,71 @@ namespace OpenDiablo2.Core.GameState_
             // TODO: Loading may make this 'fun'..
             mapInfo = new List<MapInfo>();
 
-            LoadMap(eLevelId.Act1_Town1, new Point(0, 0));
+            (new MapGenerator(this)).Generate();
 
+            // TODO: We need a map generator here...
+            /*
+            {
+                // TODO: TEMP CODE AHEAD! 
+                var transId = nw ? 3 : 2;
+                var level = engineDataManager.LevelPresets.First(x => x.Def == (int)transId);
+                var levelDetails = engineDataManager.LevelDetails.First(x => x.Id == level.LevelId);
+                var levelType = engineDataManager.LevelTypes.First(x => x.Id == levelDetails.LevelType);
+
+                // Some maps have variations, so lets pick a random one
+                var mapNames = new List<string>();
+                if (level.File1 != "0") mapNames.Add(level.File1);
+                if (level.File2 != "0") mapNames.Add(level.File2);
+                if (level.File3 != "0") mapNames.Add(level.File3);
+                if (level.File4 != "0") mapNames.Add(level.File4);
+                if (level.File5 != "0") mapNames.Add(level.File5);
+                if (level.File6 != "0") mapNames.Add(level.File6);
+
+
+                var random = new Random(Seed);
+                var mapName = "data\\global\\tiles\\" + mapNames[random.Next(mapNames.Count())].Replace("/", "\\");
+                _mapDataTemp2 = resourceManager.GetMPQDS1(mapName, level, levelDetails, levelType);
+
+            }
+            */
+
+        }
+
+
+        public MapInfo LoadSubMap(int levelDefId, Point origin)
+        {
+            var level = engineDataManager.LevelPresets.First(x => x.Def == levelDefId);
+            var levelDetails = engineDataManager.LevelDetails.First(x => x.Id == level.LevelId);
+            var levelType = engineDataManager.LevelTypes.First(x => x.Id == levelDetails.LevelType);
+
+            // Some maps have variations, so lets pick a random one
+            var mapNames = new List<string>();
+            if (level.File1 != "0") mapNames.Add(level.File1);
+            if (level.File2 != "0") mapNames.Add(level.File2);
+            if (level.File3 != "0") mapNames.Add(level.File3);
+            if (level.File4 != "0") mapNames.Add(level.File4);
+            if (level.File5 != "0") mapNames.Add(level.File5);
+            if (level.File6 != "0") mapNames.Add(level.File6);
+
+
+            var random = new Random(Seed);
+            var mapName = "data\\global\\tiles\\" + mapNames[random.Next(mapNames.Count())].Replace("/", "\\");
+            var fileData = resourceManager.GetMPQDS1(mapName, level, levelDetails, levelType);
+
+            var result = new MapInfo
+            {
+                LevelId = eLevelId.None,
+                LevelPreset = level,
+                LevelDetail = levelDetails,
+                LevelType = levelType,
+                FileData = fileData,
+                CellInfo = new Dictionary<eRenderCellType, MapCellInfo[]>(),
+                TileLocation = new Rectangle(origin, new Size(fileData.Width, fileData.Height))
+            };
+
+            mapInfo.Add(result);
+
+            return result;
         }
 
         public MapInfo LoadMap(eLevelId levelId, Point origin)
@@ -108,32 +171,8 @@ namespace OpenDiablo2.Core.GameState_
             };
 
             mapInfo.Add(result);
+
             return result;
-            /*
-            {
-                // TODO: TEMP CODE AHEAD! 
-                var transId = nw ? 3 : 2;
-                var level = engineDataManager.LevelPresets.First(x => x.Def == (int)transId);
-                var levelDetails = engineDataManager.LevelDetails.First(x => x.Id == level.LevelId);
-                var levelType = engineDataManager.LevelTypes.First(x => x.Id == levelDetails.LevelType);
-
-                // Some maps have variations, so lets pick a random one
-                var mapNames = new List<string>();
-                if (level.File1 != "0") mapNames.Add(level.File1);
-                if (level.File2 != "0") mapNames.Add(level.File2);
-                if (level.File3 != "0") mapNames.Add(level.File3);
-                if (level.File4 != "0") mapNames.Add(level.File4);
-                if (level.File5 != "0") mapNames.Add(level.File5);
-                if (level.File6 != "0") mapNames.Add(level.File6);
-
-
-                var random = new Random(Seed);
-                var mapName = "data\\global\\tiles\\" + mapNames[random.Next(mapNames.Count())].Replace("/", "\\");
-                _mapDataTemp2 = resourceManager.GetMPQDS1(mapName, level, levelDetails, levelType);
-
-            }
-            */
-            getMapEngine().NotifyMapChanged();
         }
 
         public IEnumerable<MapCellInfo> GetMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType)
@@ -174,7 +213,6 @@ namespace OpenDiablo2.Core.GameState_
             var map = mapInfo.FirstOrDefault(z => z.TileLocation.Contains(x, y));
             if (map == null)
             {
-                // TODO: Generate map here
                 return null;
             }
 
@@ -283,7 +321,7 @@ namespace OpenDiablo2.Core.GameState_
             }
 
             int frame = 0;
-            var tiles = map.FileData.LookupTable
+            var tiles = (map.PrimaryMap ?? map).FileData.LookupTable
                 .Where(x => x.MainIndex == main_index && x.SubIndex == sub_index && x.Orientation == orientation)
                 .Select(x => x.TileRef);
 

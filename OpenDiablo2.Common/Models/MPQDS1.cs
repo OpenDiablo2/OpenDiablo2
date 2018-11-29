@@ -73,6 +73,8 @@ namespace OpenDiablo2.Common.Models
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        public string MapFile { get; set; }
+
         public Int32 Version { get; internal set; }
         public Int32 Width { get; internal set; }
         public Int32 Height { get; internal set; }

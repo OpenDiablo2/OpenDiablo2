@@ -74,8 +74,10 @@
     <Compile Include="Enums\eButtonType.cs" />
     <Compile Include="Enums\eHero.cs" />
     <Compile Include="Enums\eLevelId.cs" />
+    <Compile Include="Enums\eLevelSubType.cs" />
     <Compile Include="Enums\eMPQFormatVersion.cs" />
     <Compile Include="Enums\eRenderCellType.cs" />
+    <Compile Include="Enums\eWildBorder.cs" />
     <Compile Include="Interfaces\IButton.cs" />
     <Compile Include="Interfaces\IEngineDataManager.cs" />
     <Compile Include="Interfaces\IFont.cs" />

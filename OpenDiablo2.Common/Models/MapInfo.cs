@@ -7,6 +7,7 @@ namespace OpenDiablo2.Common.Models
     public sealed class MapInfo
     {
         public eLevelId LevelId { get; set; } = eLevelId.None;
+        public MapInfo PrimaryMap { get; set; } = null;
         public MPQDS1 FileData { get; set; }
         public LevelPreset LevelPreset { get; set; }
         public LevelDetail LevelDetail { get; set; }

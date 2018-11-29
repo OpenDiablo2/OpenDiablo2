@@ -50,17 +50,6 @@ namespace OpenDiablo2.Core.Map_Engine
             loadingSprite = renderWindow.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading, new Point(300, 400));
         }
 
-        public void NotifyMapChanged()
-        {
-            LoadNewMapData();
-            CameraLocation = new PointF(0, 0);
-        }
-
-        private void LoadNewMapData()
-        {
-
-        }
-
         public void Render()
         {
             var cx = -(cameraLocation.X - Math.Truncate(cameraLocation.X));
