@@ -123,7 +123,7 @@ namespace OpenDiablo2.Core.GameState_
                 LevelType = levelType,
                 FileData = fileData,
                 CellInfo = new Dictionary<eRenderCellType, MapCellInfo[]>(),
-                TileLocation = new Rectangle(origin, new Size(fileData.Width, fileData.Height))
+                TileLocation = new Rectangle(origin, new Size(fileData.Width - 1, fileData.Height - 1))
             };
 
             mapInfo.Add(result);
@@ -162,7 +162,7 @@ namespace OpenDiablo2.Core.GameState_
                 LevelType = levelType,
                 FileData = fileData,
                 CellInfo = new Dictionary<eRenderCellType, MapCellInfo[]>(),
-                TileLocation = new Rectangle(origin, new Size(fileData.Width, fileData.Height))
+                TileLocation = new Rectangle(origin, new Size(fileData.Width - 1, fileData.Height - 1))
             };
 
             mapInfo.Add(result);
@@ -205,7 +205,8 @@ namespace OpenDiablo2.Core.GameState_
         {
             var x = cellX;
             var y = cellY;
-            var map = mapInfo.FirstOrDefault(z => z.TileLocation.Contains(x, y));
+            var map = mapInfo.FirstOrDefault(z => (x >= z.TileLocation.X) && (y >= z.TileLocation.Y)
+                && (x < z.TileLocation.Right) && (y < z.TileLocation.Bottom));
             if (map == null)
             {
                 return null;
