@@ -76,6 +76,9 @@
     <Compile Include="Enums\eLevelId.cs" />
     <Compile Include="Enums\eMPQFormatVersion.cs" />
     <Compile Include="Enums\eRenderCellType.cs" />
+    <Compile Include="Enums\Mobs\eDamageTypes.cs" />
+    <Compile Include="Enums\Mobs\eMobFlags.cs" />
+    <Compile Include="Enums\Mobs\eStatModifierType.cs" />
     <Compile Include="Interfaces\IButton.cs" />
     <Compile Include="Interfaces\IEngineDataManager.cs" />
     <Compile Include="Interfaces\IFont.cs" />
@@ -98,11 +101,19 @@
     <Compile Include="Interfaces\ITextBox.cs" />
     <Compile Include="Interfaces\ITextDictionary.cs" />
     <Compile Include="Interfaces\ITextLabel.cs" />
+    <Compile Include="Interfaces\Mobs\IMobCondition.cs" />
+    <Compile Include="Interfaces\Mobs\IMobManager.cs" />
+    <Compile Include="Interfaces\Mobs\IStatModifier.cs" />
     <Compile Include="Models\BitStream.cs" />
     <Compile Include="Models\ButtonLayout.cs" />
     <Compile Include="Models\LevelDetail.cs" />
     <Compile Include="Models\LevelPreset.cs" />
     <Compile Include="Models\LevelType.cs" />
+    <Compile Include="Models\Mobs\EnemyState.cs" />
+    <Compile Include="Models\Mobs\MobCondition.cs" />
+    <Compile Include="Models\Mobs\MobState.cs" />
+    <Compile Include="Models\Mobs\Stat.cs" />
+    <Compile Include="Models\Mobs\StatModifier.cs" />
     <Compile Include="Models\MPQDS1.cs" />
     <Compile Include="Models\MPQDT1.cs" />
     <Compile Include="Models\MPQFont.cs" />
@@ -114,6 +125,7 @@
     <Compile Include="Models\MPQWavCompression.cs" />
     <Compile Include="Models\Palette.cs" />
     <Compile Include="Models\PKLibDecompress.cs" />
+    <Compile Include="Models\Mobs\PlayerState.cs" />
     <Compile Include="Models\SoundEntry.cs" />
     <Compile Include="Palettes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -123,5 +135,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
