@@ -43,7 +43,10 @@ namespace OpenDiablo2.Core
         public MPQDS1 GetMPQDS1(string resourcePath, LevelPreset level, LevelDetail levelDetail, LevelType levelType)
         {
             var mapName = resourcePath.Replace("data\\global\\tiles\\", "").Replace("\\", "/");
-            return new MPQDS1(mpqProvider.GetStream(resourcePath), level, levelDetail, levelType, engineDataManager, this);
+            return new MPQDS1(mpqProvider.GetStream(resourcePath), level, levelDetail, levelType, engineDataManager, this)
+            {
+                MapFile = resourcePath
+            };
         }
 
         public Palette GetPalette(string paletteFile)
