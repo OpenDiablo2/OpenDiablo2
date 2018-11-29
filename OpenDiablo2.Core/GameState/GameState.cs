@@ -5,6 +5,7 @@ using System.Linq;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
+using OpenDiablo2.Core.Map_Engine;
 
 namespace OpenDiablo2.Core.GameState_
 {

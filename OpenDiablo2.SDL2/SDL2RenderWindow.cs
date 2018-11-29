@@ -8,11 +8,13 @@ using SDL2;
 
 namespace OpenDiablo2.SDL2_
 {
-    public sealed class SDL2RenderWindow : IRenderWindow, IRenderTarget, IMouseInfoProvider, IKeyboardInfoProvider
+    public sealed class SDL2RenderWindow : IRenderWindow, IMouseInfoProvider, IKeyboardInfoProvider
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private IntPtr window, renderer;
+        private bool fullscreen;
+
         public bool IsRunning { get; private set; }
 
         public int MouseX { get; internal set; } = 0;
@@ -45,16 +47,18 @@ namespace OpenDiablo2.SDL2_
             this.resourceManager = resourceManager;
             this.getGameState = getGameState;
             this.getMapEngine = getMapEngine;
+            this.fullscreen = globalConfig.FullScreen;
 
             SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
             if (SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "0") == SDL.SDL_bool.SDL_FALSE)
                 throw new ApplicationException($"Unable to Init hinting: {SDL.SDL_GetError()}");
 
-            window = SDL.SDL_CreateWindow("OpenDiablo2", SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
+            window = SDL.SDL_CreateWindow("OpenDiablo2", SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, 800, 600,
+                SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN | (fullscreen ? SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN : 0));
             if (window == IntPtr.Zero)
                 throw new ApplicationException($"Unable to create SDL Window: {SDL.SDL_GetError()}");
 
-            renderer = SDL.SDL_CreateRenderer(window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_SOFTWARE);
+            renderer = SDL.SDL_CreateRenderer(window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED | SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
             if (renderer == IntPtr.Zero)
                 throw new ApplicationException($"Unable to create SDL Window: {SDL.SDL_GetError()}");
 
@@ -135,7 +139,13 @@ namespace OpenDiablo2.SDL2_
                 }
                 else if (evt.type == SDL.SDL_EventType.SDL_KEYDOWN)
                 {
-                    if (evt.key.keysym.sym == SDL.SDL_Keycode.SDLK_BACKSPACE && KeyPressCallback != null)
+                    /* NOTE: This absolutely trashes rendering for some reason...
+                    if (evt.key.keysym.mod.HasFlag(SDL.SDL_Keymod.KMOD_RALT) && evt.key.keysym.scancode.HasFlag(SDL.SDL_Scancode.SDL_SCANCODE_RETURN))
+                    {
+                        fullscreen = !fullscreen;
+                        SDL.SDL_SetWindowFullscreen(window, (uint)(fullscreen ? SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN : 0));
+                    }
+                    else*/ if (evt.key.keysym.sym == SDL.SDL_Keycode.SDLK_BACKSPACE && KeyPressCallback != null)
                         KeyPressCallback('\b');
                 }
                 else if (evt.type == SDL.SDL_EventType.SDL_TEXTINPUT)
@@ -396,5 +406,7 @@ namespace OpenDiablo2.SDL2_
 
             SDL.SDL_SetCursor((mouseCursor as SDL2MouseCursor).Surface);
         }
+
+        public uint GetTicks() => SDL.SDL_GetTicks();
     }
 }

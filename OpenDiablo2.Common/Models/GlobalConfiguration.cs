@@ -11,6 +11,6 @@
         public string BaseDataPath { get; set; }
         public eMouseMode MouseMode { get; set; }
         public int HardwareMouseScale { get; set; }
-
+        public bool FullScreen { get; set; }
     }
 }
