@@ -71,6 +71,7 @@
   <ItemGroup>
     <Compile Include="Attributes\SceneAttribute.cs" />
     <Compile Include="AutofacModule.cs" />
+    <Compile Include="Enums\ePanelFrameType.cs" />
     <Compile Include="Enums\eButtonType.cs" />
     <Compile Include="Enums\eHero.cs" />
     <Compile Include="Enums\eLevelId.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Enums\eTextAlign.cs" />
     <Compile Include="Enums\eWildBorder.cs" />
     <Compile Include="Interfaces\IButton.cs" />
+    <Compile Include="Interfaces\IPanelFrame.cs" />
     <Compile Include="Interfaces\IInventoryPanel.cs" />
     <Compile Include="Interfaces\IEngineDataManager.cs" />
     <Compile Include="Interfaces\IFont.cs" />
@@ -106,6 +108,7 @@
     <Compile Include="Interfaces\ITextLabel.cs" />
     <Compile Include="Interfaces\ITexture.cs" />
     <Compile Include="Models\BitStream.cs" />
+    <Compile Include="Models\PanelFrameLayout.cs" />
     <Compile Include="Models\ButtonLayout.cs" />
     <Compile Include="Models\LevelDetail.cs" />
     <Compile Include="Models\LevelPreset.cs" />

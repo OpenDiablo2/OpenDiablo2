@@ -9,7 +9,8 @@ namespace OpenDiablo2.Core.UI
     public sealed class CharacterPanel : ICharacterPanel
     {
         private readonly IRenderWindow renderWindow;
-        private ISprite sprite, framesprite;
+        private ISprite sprite;
+        private IPanelFrame panelFrame;
 
         private Point location = new Point();
         public Point Location
@@ -23,11 +24,10 @@ namespace OpenDiablo2.Core.UI
             }
         }
 
-        public CharacterPanel(IRenderWindow renderWindow)
+        public CharacterPanel(IRenderWindow renderWindow, Func<ePanelFrameType, IPanelFrame> createPanelFrame)
         {
             this.renderWindow = renderWindow;
-            
-            framesprite = renderWindow.LoadSprite(ResourcePaths.Frame, Palettes.Units, new Point(0, 0));
+            this.panelFrame = createPanelFrame(ePanelFrameType.Left);
 
             sprite = renderWindow.LoadSprite(ResourcePaths.InventoryCharacterPanel, Palettes.Units, new Point(79,61));
             Location = new Point(0, 0);
@@ -35,26 +35,15 @@ namespace OpenDiablo2.Core.UI
            
         }
 
-        private void DrawPanel()
-        {
-            renderWindow.Draw(framesprite, 0, new Point(0,256));
-            renderWindow.Draw(framesprite, 1, new Point(256, 66));
-            renderWindow.Draw(framesprite, 2, new Point(0, 256+231));
-            renderWindow.Draw(framesprite, 3, new Point(0, 256 + 231 + 66));
-            renderWindow.Draw(framesprite, 4, new Point(256, 256 + 231 + 66));
-            renderWindow.Draw(sprite, 2, 2, 0);
-        }
-
-
         public void Update()
         {
-            
             
         }
 
         public void Render()
         {
-            DrawPanel();
+            panelFrame.Render();
+            renderWindow.Draw(sprite, 2, 2, 0);
         }
 
         public void Dispose()
