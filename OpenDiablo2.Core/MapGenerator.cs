@@ -37,7 +37,7 @@ namespace OpenDiablo2.Core
                 var borderMap = gameState.LoadSubMap(defId, new Point(0, townMap.FileData.Height - 2));
                 borderMap.PrimaryMap = townMap;
 
-                var wilderness = gameState.LoadSubMap(wildBorder, new Point(26, townMap.FileData.Height + borderMap.FileData.Height));
+                var wilderness = gameState.LoadSubMap(wildBorder, new Point(26, townMap.FileData.Height + borderMap.FileData.Height - 2));
                 wilderness.PrimaryMap = townMap;
 
                 bloodMooreRect = new Rectangle(-40, townMap.FileData.Height + borderMap.FileData.Height, 120, 80);
