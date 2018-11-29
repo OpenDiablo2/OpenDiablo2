@@ -1,14 +1,11 @@
-﻿using OpenDiablo2.Common;
-using OpenDiablo2.Common.Interfaces;
-using OpenDiablo2.Common.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using OpenDiablo2.Common;
+using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Core
 {
@@ -16,11 +13,13 @@ namespace OpenDiablo2.Core
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        private readonly GlobalConfiguration globalConfig;
         private readonly IMPQProvider mpqProvider;
         private readonly Func<IRenderWindow> getRenderWindow;
         private readonly Func<IMouseInfoProvider> getMouseInfoProvider;
         private readonly Func<string, IScene> getScene;
         private readonly Func<IResourceManager> getResourceManager;
+        private readonly Func<IGameState> getGameState;
 
         private IScene currentScene;
         private IScene nextScene = null;
@@ -34,18 +33,22 @@ namespace OpenDiablo2.Core
 
 
         public GameEngine(
+            GlobalConfiguration globalConfig,
             IMPQProvider mpqProvider,
             Func<IRenderWindow> getRenderWindow,
             Func<IMouseInfoProvider> getMouseInfoProvider,
             Func<string, IScene> getScene,
-            Func<IResourceManager> getResourceManager
+            Func<IResourceManager> getResourceManager,
+            Func<IGameState> getGameState
             )
         {
+            this.globalConfig = globalConfig;
             this.mpqProvider = mpqProvider;
             this.getRenderWindow = getRenderWindow;
             this.getMouseInfoProvider = getMouseInfoProvider;
             this.getScene = getScene;
             this.getResourceManager = getResourceManager;
+            this.getGameState = getGameState;
 
             MPQs = mpqProvider.GetMPQs().ToArray();
         }
@@ -84,15 +87,17 @@ namespace OpenDiablo2.Core
             LoadSoundData();
 
             mouseSprite = renderWindow.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units);
-
+            IMouseCursor cursor;
+            if (globalConfig.MouseMode == eMouseMode.Hardware)
+            {
+                cursor = renderWindow.LoadCursor(mouseSprite, 0, new Point(0, 0));
+                renderWindow.SetCursor(cursor);
+            }
 
             currentScene = getScene("Main Menu");
             sw.Start();
             while (getRenderWindow().IsRunning)
             {
-                while (sw.ElapsedMilliseconds < 33)
-                    Thread.Sleep((int)Math.Min(1, 33 -sw.ElapsedMilliseconds)); // Lock to 30fps
-
                 var ms = sw.ElapsedMilliseconds;
                 sw.Restart();
 
@@ -102,6 +107,8 @@ namespace OpenDiablo2.Core
                     sw.Restart();
                     continue;
                 }
+
+                getGameState().Update(ms);
                 getRenderWindow().Update();
                 currentScene.Update(ms);
                 if (nextScene!= null)
@@ -114,8 +121,8 @@ namespace OpenDiablo2.Core
                 renderWindow.Clear();
                 currentScene.Render();
 
-                // Draw the mouse
-                renderWindow.Draw(mouseSprite, new Point(mouseInfoProvider.MouseX, mouseInfoProvider.MouseY + 3));
+                if (globalConfig.MouseMode == eMouseMode.Software)
+                    renderWindow.Draw(mouseSprite, new Point(mouseInfoProvider.MouseX, mouseInfoProvider.MouseY + 3));
 
                 renderWindow.Sync();
             }

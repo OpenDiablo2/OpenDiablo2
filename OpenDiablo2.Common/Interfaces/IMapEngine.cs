@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
+using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Common.Interfaces
 {
@@ -7,6 +9,5 @@ namespace OpenDiablo2.Common.Interfaces
         PointF CameraLocation { get; set; } 
         void Update(long ms);
         void Render();
-        void NotifyMapChanged();
     }
 }
