@@ -10,7 +10,7 @@ An open source re-implementation of Diablo 2 in C#
 
 ## About this project
 
-This is an attempt to re-create Diablo 2's game engine in C#, and potentially make it cross platform as well. This project does not ship with the assets or content required to work. You must have a legally purchased copy of [Diablo 2](https://us.shop.battle.net/en-us/product/diablo-ii) and its expansion [Lord of Destruction](https://us.shop.battle.net/en-us/product/diablo-ii-lord-of-destruction) installed on your computer in order to run this engine. If you have an original copy of the disks, those files should work fine as well.
+This is an attempt to re-create Diablo 2's game engine in C#, and make it cross platform as well. This project does not ship with the assets or content required to work. You must have a legally purchased copy of [Diablo 2](https://us.shop.battle.net/en-us/product/diablo-ii) and its expansion [Lord of Destruction](https://us.shop.battle.net/en-us/product/diablo-ii-lord-of-destruction) installed on your computer in order to run this engine. If you have an original copy of the disks, those files should work fine as well.
 
 Please note that **this game is neither developed by, nor endorsed by Blizzard or its parent company Activision**.
 
@@ -26,12 +26,22 @@ To build this engine, you simply need to have [Microsoft Visual Studio 2017](htt
 ## Building On Linux
 You need to have MonoDevelop installed, as well as any depenencies for that. You also need LibSDL2 installed (installing via your favorite package manager should be fine).
 
-## Running
-When running via VisualStudio, go to the debug tab and specify the following command line options:
+## Command Line Parameters
+| Long Name    | Description                                                  |
+| ------------ | ------------------------------------------------------------ |
+| --datapath   | Defines the path where the data files can be found           |
+| --hwmouse    | Use the hardware mouse instead of software                   |
+| --mousescale | When hardware mouse is enabled, this defines the pixel scale of the mouse. No effect for software mode |
 
-`-p "C:\Program Files (x86)\Diablo II"`
+By default OpenDiablo2 assumes the media files are in the same folder as itself. At minimum you'll most likely want to specify this option:
+
+```-p "C:\Program Files (x86)\Diablo II"```
 
 Substitute the path with wherever you have installed Diablo 2 and its expansions.
+
+When running via VisualStudio, go to the debug section of the OpenDiablo2 project and specify the command line options there. At minimum you'll want to specify the path to the data files.
+
+
 
 ## Contributing
 If you find something you'd like to fix thats obviously broken, create a branch, commit your code, and submit a pull request. If it's a new or missing feature you'd like to see, add an issue, and be descriptive! 
