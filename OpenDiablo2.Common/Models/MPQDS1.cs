@@ -73,7 +73,8 @@ namespace OpenDiablo2.Common.Models
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public Guid Id { get; } = Guid.NewGuid();
+        public string MapFile { get; set; }
+
         public Int32 Version { get; internal set; }
         public Int32 Width { get; internal set; }
         public Int32 Height { get; internal set; }
@@ -292,7 +293,7 @@ namespace OpenDiablo2.Common.Models
             {
                 var tilePath = levelType.File[i];
                 var isMasked = ((dt1Mask >> i) & 1) == 1;
-                if (!isMasked)
+                if (!isMasked || levelType.File[i] == "0")
                     continue;
 
                 log.Debug($"Loading DT resource {levelType.File[i]}");

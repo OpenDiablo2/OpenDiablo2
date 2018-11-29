@@ -74,8 +74,11 @@
     <Compile Include="Enums\eButtonType.cs" />
     <Compile Include="Enums\eHero.cs" />
     <Compile Include="Enums\eLevelId.cs" />
+    <Compile Include="Enums\eLevelSubType.cs" />
     <Compile Include="Enums\eMPQFormatVersion.cs" />
     <Compile Include="Enums\eRenderCellType.cs" />
+    <Compile Include="Enums\eTextAlign.cs" />
+    <Compile Include="Enums\eWildBorder.cs" />
     <Compile Include="Interfaces\IButton.cs" />
     <Compile Include="Interfaces\IInventoryPanel.cs" />
     <Compile Include="Interfaces\IEngineDataManager.cs" />
@@ -108,6 +111,7 @@
     <Compile Include="Models\LevelPreset.cs" />
     <Compile Include="Models\LevelType.cs" />
     <Compile Include="Models\MapCellInfo.cs" />
+    <Compile Include="Models\MapInfo.cs" />
     <Compile Include="Models\MPQDS1.cs" />
     <Compile Include="Models\MPQDT1.cs" />
     <Compile Include="Models\MPQFont.cs" />

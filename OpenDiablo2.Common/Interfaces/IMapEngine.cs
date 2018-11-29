@@ -9,8 +9,5 @@ namespace OpenDiablo2.Common.Interfaces
         PointF CameraLocation { get; set; } 
         void Update(long ms);
         void Render();
-        void NotifyMapChanged();
-        MapCellInfo GetMapCellInfo(Guid mapId, Guid tileId);
-        void SetMapCellInfo(Guid mapId, MapCellInfo cellInfo);
     }
 }

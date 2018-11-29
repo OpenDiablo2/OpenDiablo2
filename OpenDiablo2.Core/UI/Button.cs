@@ -82,7 +82,6 @@ namespace OpenDiablo2.Core.UI
             font = renderWindow.LoadFont(ResourcePaths.FontExocet10, Palettes.Units);
             label = renderWindow.CreateLabel(font);
 
-
             sprite = renderWindow.LoadSprite(buttonLayout.ResourceName, buttonLayout.PaletteName);
 
             // TODO: Less stupid way of doing this would be nice
@@ -94,6 +93,9 @@ namespace OpenDiablo2.Core.UI
                 buttonWidth += sprite.LocalFrameSize.Width;
                 buttonHeight = Math.Max(buttonHeight, sprite.LocalFrameSize.Height);
             }
+
+            label.MaxWidth = buttonWidth - 8;
+            label.Alignment = Common.Enums.eTextAlign.Centered;
         }
 
         public bool Toggle()
@@ -201,7 +203,8 @@ namespace OpenDiablo2.Core.UI
             label.TextColor = Color.FromArgb(75, 75, 75);
 
             var offsetX = (buttonWidth / 2) - (label.TextArea.Width / 2);
-            labelOffset = new Point(offsetX, -5);
+            var offsetY = (buttonHeight / 2) - (label.TextArea.Height / 2);
+            labelOffset = new Point(offsetX, offsetY - 5);
         }
 
         public void Dispose()

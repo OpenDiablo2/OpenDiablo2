@@ -143,29 +143,29 @@ namespace OpenDiablo2.Scenes
             if (keyboardInfoProvider.KeyIsPressed(80 /*left*/))
             {
                 xMod = -8f * seconds;
-                yMod = 8f * seconds;
             }
 
             if (keyboardInfoProvider.KeyIsPressed(79 /*right*/))
             {
                 xMod = 8f * seconds;
-                yMod = -8f * seconds;
             }
 
             if (keyboardInfoProvider.KeyIsPressed(81 /*down*/))
             {
                 yMod = 10f * seconds;
-                xMod = 10f * seconds;
             }
 
             if (keyboardInfoProvider.KeyIsPressed(82 /*up*/))
             {
                 yMod = -10f * seconds;
-                xMod = -10f * seconds;
             }
 
             if (xMod != 0f || yMod != 0f)
+            {
+                xMod *= .5f;
+                yMod *= .5f;
                 mapEngine.CameraLocation = new PointF(mapEngine.CameraLocation.X + xMod, mapEngine.CameraLocation.Y + yMod);
+            }
 
             mapEngine.Update(ms);
         }
