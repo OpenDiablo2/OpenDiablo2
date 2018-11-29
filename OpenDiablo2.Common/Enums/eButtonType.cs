@@ -6,6 +6,7 @@
         Medium,
         Narrow,
         Cancel,
+        Tall,
         // Game UI
         Run,
         Menu,

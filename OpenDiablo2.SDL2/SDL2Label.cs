@@ -1,4 +1,5 @@
-﻿using OpenDiablo2.Common.Interfaces;
+﻿using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Interfaces;
 using SDL2;
 using System;
 using System.Collections.Generic;
@@ -43,25 +44,59 @@ namespace OpenDiablo2.SDL2_
             }
         }
 
+        public int MaxWidth { get; set; }
+        public eTextAlign Alignment { get; set; }
+
         internal SDL2Label(IFont font, IntPtr renderer)
         {
             this.renderer = renderer;
             this.font = font as SDL2Font;
             this.texture = IntPtr.Zero;
+            this.MaxWidth = -1;
         }
 
         internal Size CalculateSize()
         {
-            int w = 0;
-            int h = 0;
-            foreach (var ch in text)
+            if (MaxWidth == -1)
             {
-                var metric = font.font.CharacterMetric[(byte)ch];
-                w += metric.Width;
-                h = Math.Max(Math.Max(h, metric.Height), font.sprite.FrameSize.Height);
+                int w = 0;
+                int h = 0;
+                foreach (var ch in text)
+                {
+                    var metric = font.font.CharacterMetric[(byte)ch];
+                    w += metric.Width;
+                    h = Math.Max(Math.Max(h, metric.Height), font.sprite.FrameSize.Height);
+                }
+
+                return new Size(w, h);
             }
 
-            return new Size(w, h);
+            if (MaxWidth < (font.sprite.FrameSize.Width))
+                throw new ApplicationException("Max label width cannot be smaller than a single character.");
+
+            var lastWordIndex = 0;
+            var width = 0;
+            var maxWidth = 0;
+            var height = font.sprite.FrameSize.Height;
+            for (int idx = 0; idx < text.Length; idx++)
+            {
+                width += font.font.CharacterMetric[(byte)text[idx]].Width;
+
+                if (width >= MaxWidth)
+                {
+                    idx = lastWordIndex;
+                    height += font.font.CharacterMetric[(byte)'|'].Height + 6;
+                    width = 0;
+                    continue;
+                }
+                maxWidth = Math.Max(width, maxWidth);
+
+                if (idx > 0 && (text[idx - 1] == ' ') && (text[idx] != ' '))
+                    lastWordIndex = idx;
+            }
+
+            return new Size(maxWidth, height);
+
         }
 
         internal int Pow2(int input)
@@ -90,14 +125,65 @@ namespace OpenDiablo2.SDL2_
             SDL.SDL_RenderClear(renderer);
             SDL.SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
-            int cx = 0;
-            int cy = 0;
-            foreach (var ch in text)
+            if (MaxWidth == -1)
             {
-                WriteCharacter(cx, cy, (byte)ch);
-                cx += font.font.CharacterMetric[(byte)ch].Width;
-            }
 
+                int cx = 0;
+                int cy = 0;
+                foreach (var ch in text)
+                {
+                    WriteCharacter(cx, cy, (byte)ch);
+                    cx += font.font.CharacterMetric[(byte)ch].Width;
+                }
+            }
+            else
+            {
+                var linesToRender = new List<string>();
+
+                var lastWordIndex = 0;
+                var width = 0;
+                var lastStartX = 0;
+                for (int idx = 0; idx < text.Length; idx++)
+                {
+                    width += font.font.CharacterMetric[(byte)text[idx]].Width;
+
+                    if (width >= MaxWidth)
+                    {
+                        idx = lastWordIndex;
+                        linesToRender.Add(text.Substring(lastStartX, lastWordIndex- lastStartX));
+                        lastStartX = idx;
+                        width = 0;
+                        continue;
+                    }
+
+                    if (idx > 0 && text[idx - 1] == ' ' && text[idx] != ' ')
+                        lastWordIndex = idx;
+                }
+
+                var lastLine = text.Substring(lastStartX)?.Trim();
+                if (!String.IsNullOrEmpty(lastLine))
+                    linesToRender.Add(lastLine);
+
+                var y = 0;
+                foreach(var line in linesToRender)
+                {
+                    var lineWidth = (line.Sum(c => font.font.CharacterMetric[(byte)c].Width));
+                    var x = 0;
+
+                    if (Alignment == eTextAlign.Centered)
+                        x = (TextArea.Width / 2) - (lineWidth / 2);
+                    else if (Alignment == eTextAlign.Right)
+                        x = TextArea.Width - lineWidth;
+
+                    foreach (var ch in line)
+                    {
+                        WriteCharacter(x, y, (byte)ch);
+                        x += font.font.CharacterMetric[(byte)ch].Width;
+                    }
+
+                    y += font.font.CharacterMetric[(byte)'|'].Height + 6;
+                }
+            }
             SDL.SDL_SetRenderTarget(renderer, IntPtr.Zero);
         }
 

@@ -119,9 +119,11 @@ namespace OpenDiablo2.SDL2_
             {
                 UInt32* data = (UInt32*)pixels;
                 var frameOffset = FrameSize.Height - frame.Height;
-                for (var y = 0; y < FrameSize.Height; y++)
+                var frameWidth = FrameSize.Width;
+                var frameHeight = FrameSize.Height;
+                for (var y = 0; y < frameHeight; y++)
                 {
-                    for (int x = 0; x < FrameSize.Width; x++)
+                    for (int x = 0; x < frameWidth; x++)
                     {
                         if ((x >= frame.Width) || (y < frameOffset))
                         {
