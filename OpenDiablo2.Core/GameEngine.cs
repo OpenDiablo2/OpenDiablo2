@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
@@ -29,7 +30,6 @@ namespace OpenDiablo2.Core
 
         private Dictionary<string, SoundEntry> soundTable = new Dictionary<string, SoundEntry>();
         public Dictionary<string, Palette> PaletteTable { get; private set; } = new Dictionary<string, Palette>();
-        private Stopwatch sw = new Stopwatch();
 
 
         public GameEngine(
@@ -95,18 +95,29 @@ namespace OpenDiablo2.Core
             }
 
             currentScene = getScene("Main Menu");
-            sw.Start();
+            var lastTicks = renderWindow.GetTicks();
             while (getRenderWindow().IsRunning)
             {
-                var ms = sw.ElapsedMilliseconds;
-                sw.Restart();
+                var curTicks = renderWindow.GetTicks();
+                var ms = curTicks - lastTicks;
+
+                if (ms < 0)
+                    continue;
+
+                if (ms < 33)
+                {
+                    Thread.Sleep(33 - (int)ms);
+                    continue;
+                }
 
                 // Prevent falco-punch updates
                 if (ms > 1000)
                 {
-                    sw.Restart();
+                    lastTicks = renderWindow.GetTicks();
                     continue;
                 }
+
+                lastTicks = curTicks;
 
                 getGameState().Update(ms);
                 getRenderWindow().Update();
