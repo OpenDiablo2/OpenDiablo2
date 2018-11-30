@@ -228,7 +228,8 @@ namespace OpenDiablo2.Scenes
 
         private void OnOkclicked()
         {
-            gameState.Initialize(characterNameTextBox.Text, selectedHero.Value);
+            // TODO: Support other session types
+            gameState.Initialize(characterNameTextBox.Text, selectedHero.Value, eSessionType.Local);
         }
 
         private void OnExitClicked()

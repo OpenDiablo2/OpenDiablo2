@@ -6,6 +6,8 @@ namespace OpenDiablo2.Common.Interfaces
 {
     public interface IRenderWindow : IDisposable
     {
+        IMouseCursor MouseCursor { get; set; }
+
         bool IsRunning { get; }
         void Update();
         void Clear();
@@ -24,7 +26,6 @@ namespace OpenDiablo2.Common.Interfaces
         void Draw(ISprite sprite, int frame);
         void Draw(ISprite sprite, int xSegments, int ySegments, int offset);
         IMouseCursor LoadCursor(ISprite sprite, int frame, Point hotspot);
-        void SetCursor(IMouseCursor mouseCursor);
         void Draw(ILabel label);
         MapCellInfo CacheMapCell(MPQDT1Tile mapCell);
         void DrawMapCell(MapCellInfo mapCellInfo, int xPixel, int yPixel);

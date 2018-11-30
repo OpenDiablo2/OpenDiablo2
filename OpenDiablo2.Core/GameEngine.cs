@@ -17,7 +17,6 @@ namespace OpenDiablo2.Core
         private readonly GlobalConfiguration globalConfig;
         private readonly IMPQProvider mpqProvider;
         private readonly Func<IRenderWindow> getRenderWindow;
-        private readonly Func<IMouseInfoProvider> getMouseInfoProvider;
         private readonly Func<string, IScene> getScene;
         private readonly Func<IResourceManager> getResourceManager;
         private readonly Func<IGameState> getGameState;
@@ -36,7 +35,6 @@ namespace OpenDiablo2.Core
             GlobalConfiguration globalConfig,
             IMPQProvider mpqProvider,
             Func<IRenderWindow> getRenderWindow,
-            Func<IMouseInfoProvider> getMouseInfoProvider,
             Func<string, IScene> getScene,
             Func<IResourceManager> getResourceManager,
             Func<IGameState> getGameState
@@ -45,7 +43,6 @@ namespace OpenDiablo2.Core
             this.globalConfig = globalConfig;
             this.mpqProvider = mpqProvider;
             this.getRenderWindow = getRenderWindow;
-            this.getMouseInfoProvider = getMouseInfoProvider;
             this.getScene = getScene;
             this.getResourceManager = getResourceManager;
             this.getGameState = getGameState;
@@ -81,19 +78,14 @@ namespace OpenDiablo2.Core
         public void Run()
         {
             var renderWindow = getRenderWindow();
-            var mouseInfoProvider = getMouseInfoProvider();
 
             LoadPalettes();
             LoadSoundData();
 
             mouseSprite = renderWindow.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units);
-            IMouseCursor cursor;
-            if (globalConfig.MouseMode == eMouseMode.Hardware)
-            {
-                cursor = renderWindow.LoadCursor(mouseSprite, 0, new Point(0, 0));
-                renderWindow.SetCursor(cursor);
-            }
-
+            var cursor = renderWindow.LoadCursor(mouseSprite, 0, new Point(0, 3));
+            renderWindow.MouseCursor = cursor;
+            
             currentScene = getScene("Main Menu");
             var lastTicks = renderWindow.GetTicks();
             while (getRenderWindow().IsRunning)
@@ -131,9 +123,6 @@ namespace OpenDiablo2.Core
 
                 renderWindow.Clear();
                 currentScene.Render();
-
-                if (globalConfig.MouseMode == eMouseMode.Software)
-                    renderWindow.Draw(mouseSprite, new Point(mouseInfoProvider.MouseX, mouseInfoProvider.MouseY + 3));
 
                 renderWindow.Sync();
             }

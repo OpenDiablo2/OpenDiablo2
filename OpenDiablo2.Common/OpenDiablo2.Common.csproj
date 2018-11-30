@@ -61,11 +61,14 @@
     <Compile Include="Enums\eLevelSubType.cs" />
     <Compile Include="Enums\eMPQFormatVersion.cs" />
     <Compile Include="Enums\eRenderCellType.cs" />
+    <Compile Include="Enums\eSessionType.cs" />
     <Compile Include="Enums\eTextAlign.cs" />
     <Compile Include="Enums\eWildBorder.cs" />
     <Compile Include="Enums\Mobs\eDamageTypes.cs" />
     <Compile Include="Enums\Mobs\eMobFlags.cs" />
     <Compile Include="Enums\Mobs\eStatModifierType.cs" />
+    <Compile Include="Interfaces\ISessionManager.cs" />
+    <Compile Include="Interfaces\ISessionServer.cs" />
     <Compile Include="Interfaces\UI\IButton.cs" />
     <Compile Include="Interfaces\UI\IPanelFrame.cs" />
     <Compile Include="Interfaces\UI\IInventoryPanel.cs" />
@@ -134,6 +137,9 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Message Frames\Requests\" />
+    <Folder Include="Message Frames\Responses\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

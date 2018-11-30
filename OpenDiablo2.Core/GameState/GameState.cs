@@ -19,16 +19,12 @@ namespace OpenDiablo2.Core.GameState_
         private readonly IEngineDataManager engineDataManager;
         private readonly IRenderWindow renderWindow;
         private readonly Func<IMapEngine> getMapEngine;
+        private readonly Func<eSessionType, ISessionManager> getSessionManager;
 
         private float animationTime = 0f;
         private List<MapInfo> mapInfo;
         private List<MapCellInfo> mapDataLookup = new List<MapCellInfo>();
-
-        // TODO: Break this out further so we can support multiple maps---------------------------------------------
-        //private MPQDS1 _mapDataTemp, _mapDataTemp2;
-        //private Dictionary<Guid, List<MapCellInfo>> mapDataLookup = new Dictionary<Guid, List<MapCellInfo>>();
-        //private Dictionary<Guid, List<MapCellInfo>> mapDataLookup2 = new Dictionary<Guid, List<MapCellInfo>>();
-        // ---------------------------------------------------------------------------------------------------------
+        private ISessionManager sessionManager;
 
         public int Act { get; private set; }
         public string MapName { get; private set; }
@@ -45,57 +41,31 @@ namespace OpenDiablo2.Core.GameState_
             IPaletteProvider paletteProvider,
             IEngineDataManager engineDataManager,
             IRenderWindow renderWindow,
-            Func<IMapEngine> getMapEngine
+            Func<IMapEngine> getMapEngine,
+            Func<eSessionType, ISessionManager> getSessionManager
             )
         {
             this.sceneManager = sceneManager;
             this.resourceManager = resourceManager;
             this.paletteProvider = paletteProvider;
             this.getMapEngine = getMapEngine;
+            this.getSessionManager = getSessionManager;
             this.engineDataManager = engineDataManager;
             this.renderWindow = renderWindow;
 
         }
 
-        public void Initialize(string characterName, eHero hero)
+        public void Initialize(string characterName, eHero hero, eSessionType sessionType)
         {
+            sessionManager = getSessionManager(sessionType);
+            sessionManager.Initialize();
+
             var random = new Random();
-            Seed = random.Next();
+            Seed = random.Next(); // TODO: Seed does not go here ;-(
 
             sceneManager.ChangeScene("Game");
-
-            // Initialize our first village
-            // TODO: Loading may make this 'fun'..
             mapInfo = new List<MapInfo>();
-
             (new MapGenerator(this)).Generate();
-
-            // TODO: We need a map generator here...
-            /*
-            {
-                // TODO: TEMP CODE AHEAD! 
-                var transId = nw ? 3 : 2;
-                var level = engineDataManager.LevelPresets.First(x => x.Def == (int)transId);
-                var levelDetails = engineDataManager.LevelDetails.First(x => x.Id == level.LevelId);
-                var levelType = engineDataManager.LevelTypes.First(x => x.Id == levelDetails.LevelType);
-
-                // Some maps have variations, so lets pick a random one
-                var mapNames = new List<string>();
-                if (level.File1 != "0") mapNames.Add(level.File1);
-                if (level.File2 != "0") mapNames.Add(level.File2);
-                if (level.File3 != "0") mapNames.Add(level.File3);
-                if (level.File4 != "0") mapNames.Add(level.File4);
-                if (level.File5 != "0") mapNames.Add(level.File5);
-                if (level.File6 != "0") mapNames.Add(level.File6);
-
-
-                var random = new Random(Seed);
-                var mapName = "data\\global\\tiles\\" + mapNames[random.Next(mapNames.Count())].Replace("/", "\\");
-                _mapDataTemp2 = resourceManager.GetMPQDS1(mapName, level, levelDetails, levelType);
-
-            }
-            */
-
         }
 
 
