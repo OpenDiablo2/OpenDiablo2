@@ -69,6 +69,7 @@
   <ItemGroup>
     <Compile Include="UT_MobState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UT_PlayerState.cs" />
     <Compile Include="UT_Stat.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -18,18 +18,20 @@ namespace OpenDiablo2.Common.Models.Mobs
         protected float Y = 0;
 
         protected Stat Health;
-        protected Stat Stamina;
-        protected Stat Mana;
+
+        protected Dictionary<eDamageTypes, StatDouble> Resistances = new Dictionary<eDamageTypes, StatDouble>();
+        protected List<eDamageTypes> Immunities = new List<eDamageTypes>();
+        
+        public int Level { get; protected set; }
 
         protected Dictionary<eMobFlags, bool> Flags = new Dictionary<eMobFlags, bool>();
 
-        public MobState(string name, int id, int maxhealth, int maxmana, int maxstamina, float x, float y)
+        public MobState(string name, int id, int level, int maxhealth, float x, float y)
         {
             Name = name;
             Id = id;
+            Level = level;
             Health = new Stat(0, maxhealth, maxhealth, true);
-            Mana = new Stat(0, maxmana, maxmana, true);
-            Stamina = new Stat(0, maxstamina, maxstamina, true);
             X = x;
             Y = y;
         }
@@ -55,45 +57,33 @@ namespace OpenDiablo2.Common.Models.Mobs
         }
         #endregion Position and Movement
 
-        #region Mana
-        public int GetMana()
-        {
-            return Mana.GetCurrent();
-        }
-        public int GetManaMax()
-        {
-            return Mana.GetMax();
-        }
-        public void RecoverMana(int mana)
-        {
-            Mana.AddCurrent(mana);
-        }
-        public void UseMana(int mana)
-        {
-            Mana.AddCurrent(-mana);
-        }
-        #endregion Mana
-
-        #region Stamina
-        public int GetStamina()
-        {
-            return Stamina.GetCurrent();
-        }
-        public int GetStaminaMax()
-        {
-            return Stamina.GetMax();
-        }
-        public void RecoverStamina(int stamina)
-        {
-            Stamina.AddCurrent(stamina);
-        }
-        public void UseStamina(int stamina)
-        {
-            Stamina.AddCurrent(-stamina);
-        }
-        #endregion Stamina
-
         #region Combat and Damage
+        public void SetResistance(eDamageTypes damagetype, double val)
+        {
+            if (!Resistances.ContainsKey(damagetype))
+            {
+                Resistances.Add(damagetype, new StatDouble(0, 100.0, val, false));
+            }
+            else
+            {
+                Resistances[damagetype].SetCurrent(val);
+            }
+        }
+        public void AddImmunitiy(eDamageTypes damagetype)
+        {
+            if (!Immunities.Contains(damagetype))
+            {
+                Immunities.Add(damagetype);
+            }
+        }
+        public void RemoveImmunity(eDamageTypes damagetype)
+        {
+            if (Immunities.Contains(damagetype))
+            {
+                Immunities.Remove(damagetype);
+            }
+        }
+
         public int GetHealth()
         {
             return Health.GetCurrent();
@@ -109,13 +99,33 @@ namespace OpenDiablo2.Common.Models.Mobs
         public int TakeDamage(int damage, eDamageTypes damagetype, MobState source = null)
         {
             // returns the actual amount of damage taken
-            // TODO: implement resistances based on damage type and change 'damage'
+            damage = HandleResistances(damage, damagetype, source);
             Health.AddCurrent(-1 * damage);
             int newhp = Health.GetCurrent();
             if(newhp <= 0)
             {
                 Die(source);
             }
+            return damage;
+        }
+        protected int HandleResistances(int damage, eDamageTypes damagetype, MobState source = null)
+        {
+            if(damagetype == eDamageTypes.NONE)
+            {
+                return damage;
+            }
+            if (Immunities.Contains(damagetype))
+            {
+                return 0;
+            }
+            if (!Resistances.ContainsKey(damagetype))
+            {
+                return damage;
+            }
+
+            // TODO: need to verify 1) is damage integer? and 2) if so, how is this rounding down?
+            // e.g. is it always 'round down' / 'round up' or does it use 'math.round'
+            damage = (int)(damage * Resistances[damagetype].GetCurrent());
             return damage;
         }
 

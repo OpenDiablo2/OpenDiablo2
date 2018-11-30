@@ -10,11 +10,11 @@ namespace OpenDiablo2.Common.Models.Mobs
 {
     public class StatModifierAddition : IStatModifier
     {
-        public int Value = 0;
+        public double Value = 0;
         public int Priority { get; private set; }
         public string Name { get; private set; }
         public eStatModifierType ModifierType { get; private set; }
-        public StatModifierAddition(string name, int value, int priority = 0, eStatModifierType modifiertype = eStatModifierType.CURRENT)
+        public StatModifierAddition(string name, double value, int priority = 0, eStatModifierType modifiertype = eStatModifierType.CURRENT)
         {
             Value = value;
             Priority = priority;
@@ -23,7 +23,11 @@ namespace OpenDiablo2.Common.Models.Mobs
         }
         public int GetValue(int min, int max, int current)
         {
-            return Value; 
+            return (int)Value; 
+        }
+        public double GetValue(double min, double max, double current)
+        {
+            return Value;
         }
     }
 
@@ -50,6 +54,19 @@ namespace OpenDiablo2.Common.Models.Mobs
                     return (int)(max * Value);
                 case eStatModifierType.MIN:
                     return (int)(min * Value);
+            }
+            return 0; // shouldn't reach this
+        }
+        public double GetValue(double min, double max, double current)
+        {
+            switch (ModifierType)
+            {
+                case eStatModifierType.CURRENT:
+                    return (current * Value);
+                case eStatModifierType.MAX:
+                    return (max * Value);
+                case eStatModifierType.MIN:
+                    return (min * Value);
             }
             return 0; // shouldn't reach this
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenDiablo2.Common.Enums.Mobs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,10 +9,13 @@ namespace OpenDiablo2.Common.Models.Mobs
 {
     public class EnemyState : MobState
     {
-        public EnemyState(string name, int id, int maxhealth, int maxmana, int maxstamina, float x, float y)
-            : base(name, id, maxhealth, maxmana, maxstamina, x, y)
-        {
+        public int ExperienceGiven { get; protected set; }
 
+        public EnemyState(string name, int id, int level, int maxhealth, float x, float y, int experiencegiven)
+            : base(name, id, level, maxhealth, x, y)
+        {
+            ExperienceGiven = experiencegiven;
+            AddFlag(eMobFlags.ENEMY);
         }
     }
 }

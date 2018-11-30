@@ -14,5 +14,6 @@ namespace OpenDiablo2.Common.Interfaces.Mobs
         // modifiers at the same priority level occur simultaneously
         eStatModifierType ModifierType { get; } // does it affect current, min or max?
         int GetValue(int min, int max, int current); // what does this modifier add to the stat's current value?
+        double GetValue(double min, double max, double current);
     }
 }

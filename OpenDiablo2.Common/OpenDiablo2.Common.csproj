@@ -105,6 +105,8 @@
     <Compile Include="Interfaces\ITextBox.cs" />
     <Compile Include="Interfaces\ITextDictionary.cs" />
     <Compile Include="Interfaces\ITextLabel.cs" />
+    <Compile Include="Interfaces\Mobs\IHeroTypeConfig.cs" />
+    <Compile Include="Interfaces\Mobs\ILevelExperienceConfig.cs" />
     <Compile Include="Interfaces\Mobs\IMobCondition.cs" />
     <Compile Include="Interfaces\Mobs\IMobManager.cs" />
     <Compile Include="Interfaces\Mobs\IStatModifier.cs" />
@@ -115,9 +117,13 @@
     <Compile Include="Models\LevelPreset.cs" />
     <Compile Include="Models\LevelType.cs" />
     <Compile Include="Models\Mobs\EnemyState.cs" />
+    <Compile Include="Models\Mobs\HeroTypeConfig.cs" />
+    <Compile Include="Models\Mobs\LevelExperienceConfig.cs" />
     <Compile Include="Models\Mobs\MobCondition.cs" />
     <Compile Include="Models\Mobs\MobState.cs" />
     <Compile Include="Models\Mobs\Stat.cs" />
+    <Compile Include="Models\Mobs\StatBase.cs" />
+    <Compile Include="Models\Mobs\StatDouble.cs" />
     <Compile Include="Models\Mobs\StatModifier.cs" />
     <Compile Include="Models\MapCellInfo.cs" />
     <Compile Include="Models\MapInfo.cs" />

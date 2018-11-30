@@ -4,6 +4,7 @@ using OpenDiablo2.Common.Models.Mobs;
 using OpenDiablo2.Core.GameState_;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,9 +18,9 @@ namespace OpenDiablo2.Core.UT
         public void FindMobsTest()
         {
             MobManager mobman = new MobManager();
-            MobState mob1 = new MobState("test1", 1, 100, 100, 100, 0, 0);
-            MobState mob2 = new MobState("test2", 1, 100, 100, 100, 0, 0);
-            MobState mob3 = new MobState("test3", 1, 100, 100, 100, 0, 0);
+            MobState mob1 = new MobState("test1", mobman.GetNextAvailableMobId(), 1, 100, 0, 0);
+            MobState mob2 = new MobState("test2", mobman.GetNextAvailableMobId(), 1, 100, 0, 0);
+            MobState mob3 = new MobState("test3", mobman.GetNextAvailableMobId(), 1, 100, 0, 0);
             mob1.AddFlag(eMobFlags.ENEMY);
             mob2.AddFlag(eMobFlags.ENEMY);
             mob2.AddFlag(eMobFlags.INVULNERABLE);
@@ -52,9 +53,9 @@ namespace OpenDiablo2.Core.UT
         public void FindMobsInRadiusTest()
         {
             MobManager mobman = new MobManager();
-            MobState mob1 = new MobState("test1", 1, 100, 100, 100, 0, 0);
-            MobState mob2 = new MobState("test2", 1, 100, 100, 100, 10, 10);
-            MobState mob3 = new MobState("test3", 1, 100, 100, 100, 3, 1);
+            MobState mob1 = new MobState("test1", mobman.GetNextAvailableMobId(), 1, 100, 0, 0);
+            MobState mob2 = new MobState("test2", mobman.GetNextAvailableMobId(), 1, 100, 10, 10);
+            MobState mob3 = new MobState("test3", mobman.GetNextAvailableMobId(), 1, 100, 3, 1);
             mob1.AddFlag(eMobFlags.ENEMY);
             mob2.AddFlag(eMobFlags.ENEMY);
             mob2.AddFlag(eMobFlags.INVULNERABLE);

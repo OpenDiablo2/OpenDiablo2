@@ -14,17 +14,18 @@ namespace OpenDiablo2.Core.GameState_
         private List<MobState> Mobs = new List<MobState>(); // all mobs (including players!)
         private List<PlayerState> Players = new List<PlayerState>();
         private List<EnemyState> Enemies = new List<EnemyState>();
+        private List<int> IdsUsed = new List<int>();
 
         #region Player Controls
         public void AddPlayer(PlayerState player)
         {
             Players.Add(player);
-            Mobs.Add(player);
+            AddMob(player);
         }
         public void RemovePlayer(PlayerState player)
         {
             Players.Remove(player);
-            Mobs.Remove(player);
+            RemoveMob(player);
         }
         #endregion Player Controls
 
@@ -32,10 +33,40 @@ namespace OpenDiablo2.Core.GameState_
         public void AddMob(MobState mob)
         {
             Mobs.Add(mob);
+            // add id to idsused in order
+            int i = 0;
+            while(i < IdsUsed.Count)
+            {
+                if(IdsUsed[i] > mob.Id)
+                {
+                    IdsUsed.Insert(i, mob.Id);
+                    break;
+                }
+                i++;
+            }
+            if(i == IdsUsed.Count)
+            {
+                // didn't get added
+                IdsUsed.Add(mob.Id);
+            }
         }
         public void RemoveMob(MobState mob)
         {
             Mobs.Remove(mob);
+            IdsUsed.Remove(mob.Id);
+        }
+        public int GetNextAvailableMobId()
+        {
+            int i = 0;
+            while(i < IdsUsed.Count)
+            {
+                if(IdsUsed[i] != i)
+                {
+                    return i;
+                }
+                i++;
+            }
+            return IdsUsed.Count;
         }
         #endregion Mob Controls
 
@@ -43,12 +74,12 @@ namespace OpenDiablo2.Core.GameState_
         public void AddEnemy(EnemyState enemy)
         {
             Enemies.Add(enemy);
-            Mobs.Add(enemy);
+            AddMob(enemy);
         }
         public void RemoveEnemy(EnemyState enemy)
         {
             Enemies.Remove(enemy);
-            Mobs.Remove(enemy);
+            RemoveMob(enemy);
         }
         #endregion Enemy Controls
 

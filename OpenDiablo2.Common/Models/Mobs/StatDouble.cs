@@ -8,30 +8,30 @@ using System.Threading.Tasks;
 
 namespace OpenDiablo2.Common.Models.Mobs
 {
-    public class Stat : StatBase
+    public class StatDouble : StatBase
     {
-        protected int Min = 0;
-        protected int Max = 0;
-        protected int Current = 0; // the current value BEFORE modifiers
+        protected double Min = 0;
+        protected double Max = 0;
+        protected double Current = 0; // the current value BEFORE modifiers
 
         public bool AllowedToOverflowFromModifiers = false; // if true, can return a value greater than Max 
         // if a modifier is increasing the current value
 
-        public Stat(int min, int max, int current, bool allowedToOverflowFromModifiers)
+        public StatDouble(double min, double max, double current, bool allowedToOverflowFromModifiers)
         {
             Min = min;
             Max = max;
             Current = current;
             AllowedToOverflowFromModifiers = allowedToOverflowFromModifiers;
         }
-        
-        public void AddCurrent(int value)
+
+        public void AddCurrent(double value)
         {
             Current += value;
             ClampCurrent();
         }
 
-        public void SetCurrent(int value)
+        public void SetCurrent(double value)
         {
             Current = value;
             ClampCurrent();
@@ -39,8 +39,8 @@ namespace OpenDiablo2.Common.Models.Mobs
 
         private void ClampCurrent()
         {
-            int currentmax = GetMax();
-            int currentmin = GetMin();
+            double currentmax = GetMax();
+            double currentmin = GetMin();
             if (Current > currentmax)
             {
                 Current = currentmax;
@@ -51,33 +51,33 @@ namespace OpenDiablo2.Common.Models.Mobs
             }
         }
 
-        public void AddMax(int value)
+        public void AddMax(double value)
         {
             Max += value;
             ClampCurrent();
         }
-        
-        public void SetMax(int value)
+
+        public void SetMax(double value)
         {
             Max = value;
             ClampCurrent();
         }
 
-        public void AddMin(int value)
+        public void AddMin(double value)
         {
             Min += value;
             ClampCurrent();
         }
 
-        public void SetMin(int value)
+        public void SetMin(double value)
         {
             Min = value;
             ClampCurrent();
         }
 
-        public int GetCurrent()
+        public double GetCurrent()
         {
-            int val = Current;
+            double val = Current;
             // take the current value and apply each modifier to it
             // the modifiers are done in priority order
             // OrderedModifierKeys holds the list of priorities in order from highest to lowest
@@ -87,12 +87,12 @@ namespace OpenDiablo2.Common.Models.Mobs
             //      then we would get 20 + 10 + 10, NOT 20 + 10 + 15
             //      However, if one of the modifiers now has a different priority, say 4, then we would get
             //      20 + 10 + 15
-            foreach(int k in OrderedModifierKeys)
+            foreach (int k in OrderedModifierKeys)
             {
-                int newval = val;
-                foreach(IStatModifier mod in Modifiers[k])
+                double newval = val;
+                foreach (IStatModifier mod in Modifiers[k])
                 {
-                    if(mod.ModifierType == eStatModifierType.CURRENT)
+                    if (mod.ModifierType == eStatModifierType.CURRENT)
                     {
                         newval += mod.GetValue(Min, Max, val);
                     }
@@ -104,8 +104,8 @@ namespace OpenDiablo2.Common.Models.Mobs
             {
                 // if we aren't allowed to go over max, even with modifiers, we must double check
                 // that we're within our bounds
-                int currentmax = GetMax();
-                int currentmin = GetMin();
+                double currentmax = GetMax();
+                double currentmin = GetMin();
                 if (val > currentmax)
                 {
                     val = currentmax;
@@ -119,12 +119,12 @@ namespace OpenDiablo2.Common.Models.Mobs
             return val;
         }
 
-        public int GetMin()
+        public double GetMin()
         {
-            int val = Min;
+            double val = Min;
             foreach (int k in OrderedModifierKeys)
             {
-                int newval = val;
+                double newval = val;
                 foreach (IStatModifier mod in Modifiers[k])
                 {
                     if (mod.ModifierType == eStatModifierType.MIN)
@@ -137,12 +137,12 @@ namespace OpenDiablo2.Common.Models.Mobs
             return val;
         }
 
-        public int GetMax()
+        public double GetMax()
         {
-            int val = Max;
+            double val = Max;
             foreach (int k in OrderedModifierKeys)
             {
-                int newval = val;
+                double newval = val;
                 foreach (IStatModifier mod in Modifiers[k])
                 {
                     if (mod.ModifierType == eStatModifierType.MAX)
