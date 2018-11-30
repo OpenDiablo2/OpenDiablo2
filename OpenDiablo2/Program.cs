@@ -68,6 +68,12 @@ namespace OpenDiablo2
                 return (buttonType) => componentContext.Resolve<IButton>(new NamedParameter("buttonLayout", ButtonLayout.Values[buttonType]));
             });
 
+            containerBuilder.Register<Func<ePanelFrameType, IPanelFrame>>(c =>
+            {
+                var componentContext = c.Resolve<IComponentContext>();
+                return (panelFrameType) => componentContext.Resolve<IPanelFrame>(new NamedParameter("panelFrameType", panelFrameType));
+            });
+
             /* Uncomment the below if we support multiple textbox types
             containerBuilder.Register<Func<TextBox>>(c =>
             {
