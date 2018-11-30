@@ -23,6 +23,9 @@ namespace OpenDiablo2.Scenes
         private ISprite panelSprite, healthManaSprite, gameGlobeOverlapSprite;
 
         private IMiniPanel minipanel;
+        private ICharacterPanel characterpanel;
+        private IInventoryPanel inventorypanel;
+
         private bool showMinipanel = false;
         private IButton runButton, menuButton;
 
@@ -33,7 +36,9 @@ namespace OpenDiablo2.Scenes
             IGameState gameState,
             IKeyboardInfoProvider keyboardInfoProvider,
             Func<eButtonType, IButton> createButton,
-            Func<IMiniPanel> createMiniPanel
+            Func<IMiniPanel> createMiniPanel,
+            Func<ICharacterPanel> createCharacterPanel,
+            Func<IInventoryPanel> createInventoryPanel
         )
         {
             this.renderWindow = renderWindow;
@@ -50,6 +55,9 @@ namespace OpenDiablo2.Scenes
             minipanel = createMiniPanel();
             // Maybe? Not sure. 
             // miniPanel.OnMenuActivate();
+
+            characterpanel = createCharacterPanel();
+            inventorypanel = createInventoryPanel();
 
             runButton = createButton(eButtonType.Run);
             runButton.Location = new Point(256, 570);
@@ -86,6 +94,16 @@ namespace OpenDiablo2.Scenes
 
         private void DrawPanel()
         {
+            if(gameState.ShowInventoryPanel)
+            {
+                inventorypanel.Render();
+            }
+
+            if (gameState.ShowCharacterPanel)
+            {
+                characterpanel.Render();
+            }
+
             // Render the background bottom bar
             renderWindow.Draw(panelSprite, 0, new Point(0, 600));
             renderWindow.Draw(panelSprite, 1, new Point(166, 600));
@@ -106,6 +124,8 @@ namespace OpenDiablo2.Scenes
             {
                 minipanel.Render();
             }
+
+            
             
             runButton.Render();
             menuButton.Render();
@@ -117,7 +137,9 @@ namespace OpenDiablo2.Scenes
             {
                 minipanel.Update();
             }
-            
+
+            characterpanel.Update();
+
             runButton.Update();
             menuButton.Update();
 

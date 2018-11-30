@@ -34,6 +34,9 @@ namespace OpenDiablo2.Core.GameState_
         public string MapName { get; private set; }
         public Palette CurrentPalette => paletteProvider.PaletteTable[$"ACT{Act}"];
 
+        public bool ShowInventoryPanel { get; set; } = false;
+        public bool ShowCharacterPanel { get; set; } = false;
+
         public int Seed { get; internal set; }
 
         public GameState(
@@ -221,6 +224,20 @@ namespace OpenDiablo2.Core.GameState_
         public void UpdateMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType, IEnumerable<MapCellInfo> mapCellInfo)
         {
 
+        }
+
+        public bool ToggleShowInventoryPanel()
+        {
+            ShowInventoryPanel = !ShowInventoryPanel;
+
+            return ShowInventoryPanel;
+        }
+
+        public bool ToggleShowCharacterPanel()
+        {
+            ShowCharacterPanel = !ShowCharacterPanel;
+
+            return ShowCharacterPanel;
         }
 
 
