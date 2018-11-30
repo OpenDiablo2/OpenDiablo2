@@ -12,6 +12,12 @@ namespace OpenDiablo2.Common.Interfaces
         string MapName { get; }
         Palette CurrentPalette { get; }
 
+        bool ToggleShowInventoryPanel();
+        bool ShowInventoryPanel { get; set; }
+
+        bool ToggleShowCharacterPanel();
+        bool ShowCharacterPanel { get; set; }
+
         void Initialize(string text, eHero value);
         void Update(long ms);
         IEnumerable<MapCellInfo> GetMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType);

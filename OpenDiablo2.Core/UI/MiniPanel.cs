@@ -6,7 +6,7 @@ using OpenDiablo2.Common.Interfaces;
 
 namespace OpenDiablo2.Core.UI
 {
-    // TODO: Allow to set Minipanel.buttons.character.OnAction or similar for button delegates
+    // TODO: Self-align when side panels are open
     public sealed class MiniPanel : IMiniPanel
     {
         private readonly IRenderWindow renderWindow;
@@ -28,7 +28,7 @@ namespace OpenDiablo2.Core.UI
             }
         }
 
-        public MiniPanel(IRenderWindow renderWindow, Func<eButtonType, IButton> createButton)
+        public MiniPanel(IRenderWindow renderWindow, IGameState gameState, Func<eButtonType, IButton> createButton)
         {
             this.renderWindow = renderWindow;
             
@@ -37,9 +37,11 @@ namespace OpenDiablo2.Core.UI
 
             characterBtn = createButton(eButtonType.MinipanelCharacter);
             characterBtn.Location = new Point(3 + Location.X, 3 + Location.Y);
+            characterBtn.OnActivate = () => gameState.ToggleShowCharacterPanel();
 
             inventoryBtn = createButton(eButtonType.MinipanelInventory);
             inventoryBtn.Location = new Point(24 + Location.X, 3 + Location.Y);
+            inventoryBtn.OnActivate = () => gameState.ToggleShowInventoryPanel();
 
             skillBtn = createButton(eButtonType.MinipanelSkill);
             skillBtn.Location = new Point(45 + Location.X, 3 + Location.Y);

@@ -5,6 +5,7 @@ using System.Linq;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
+using OpenDiablo2.Core.Map_Engine;
 
 namespace OpenDiablo2.Core.GameState_
 {
@@ -32,6 +33,9 @@ namespace OpenDiablo2.Core.GameState_
         public int Act { get; private set; }
         public string MapName { get; private set; }
         public Palette CurrentPalette => paletteProvider.PaletteTable[$"ACT{Act}"];
+
+        public bool ShowInventoryPanel { get; set; } = false;
+        public bool ShowCharacterPanel { get; set; } = false;
 
         public int Seed { get; internal set; }
 
@@ -220,6 +224,20 @@ namespace OpenDiablo2.Core.GameState_
         public void UpdateMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType, IEnumerable<MapCellInfo> mapCellInfo)
         {
 
+        }
+
+        public bool ToggleShowInventoryPanel()
+        {
+            ShowInventoryPanel = !ShowInventoryPanel;
+
+            return ShowInventoryPanel;
+        }
+
+        public bool ToggleShowCharacterPanel()
+        {
+            ShowCharacterPanel = !ShowCharacterPanel;
+
+            return ShowCharacterPanel;
         }
 
 

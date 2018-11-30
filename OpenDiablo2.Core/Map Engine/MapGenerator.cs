@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
-using OpenDiablo2.Common.Models;
 
-namespace OpenDiablo2.Core
+namespace OpenDiablo2.Core.Map_Engine
 {
     public sealed class MapGenerator
     {
