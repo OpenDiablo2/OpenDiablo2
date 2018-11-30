@@ -70,7 +70,8 @@ namespace OpenDiablo2.Scenes
 
             var item = itemManager.getItem("bsd");
             var cursorsprite = renderWindow.LoadSprite("data\\global\\items\\" + item.InvFile + ".dc6", Palettes.Units);
-            renderWindow.LoadCursor(cursorsprite, 0, new Point(0,0));
+            
+            renderWindow.MouseCursor = renderWindow.LoadCursor(cursorsprite, 0, new Point(0, 0));
         }
 
         private void OnMenuToggle(bool isToggled)
