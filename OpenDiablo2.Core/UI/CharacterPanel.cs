@@ -12,17 +12,7 @@ namespace OpenDiablo2.Core.UI
         private ISprite sprite;
         private IPanelFrame panelFrame;
 
-        private Point location = new Point();
-        public Point Location
-        {
-            get => location;
-            set
-            {
-                if (location == value)
-                    return;
-                location = value;
-            }
-        }
+        public Point Location { get; set; }
 
         public CharacterPanel(IRenderWindow renderWindow, Func<ePanelFrameType, IPanelFrame> createPanelFrame)
         {
