@@ -18,6 +18,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.Common.UT", "OpenDiablo2.Common.UT\OpenDiablo2.Common.UT.csproj", "{77B00705-A2A5-4675-9A16-1FAB2692151B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.Core.UT", "OpenDiablo2.Core.UT\OpenDiablo2.Core.UT.csproj", "{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{A1AAF640-AEFB-48E7-8BCE-E01D287B5286}"
 EndProject
 Global
@@ -50,6 +51,14 @@ Global
 		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Debug|x64.Build.0 = Debug|x64
 		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Release|x64.ActiveCfg = Release|x64
 		{40BD2DDE-DC6F-4F6D-9050-9B423C631192}.Release|x64.Build.0 = Release|x64
+		{77B00705-A2A5-4675-9A16-1FAB2692151B}.Debug|x64.ActiveCfg = Debug|x64
+		{77B00705-A2A5-4675-9A16-1FAB2692151B}.Debug|x64.Build.0 = Debug|x64
+		{77B00705-A2A5-4675-9A16-1FAB2692151B}.Release|x64.ActiveCfg = Release|x64
+		{77B00705-A2A5-4675-9A16-1FAB2692151B}.Release|x64.Build.0 = Release|x64
+		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Debug|x64.ActiveCfg = Debug|x64
+		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Debug|x64.Build.0 = Debug|x64
+		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Release|x64.ActiveCfg = Release|x64
+		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
