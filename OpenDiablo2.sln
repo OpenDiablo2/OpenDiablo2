@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.Core.UT", "Open
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{A1AAF640-AEFB-48E7-8BCE-E01D287B5286}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{1FAD6E2F-6535-4AAB-82DC-7CEEC38B3F00}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -65,6 +67,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{40BD2DDE-DC6F-4F6D-9050-9B423C631192} = {A1AAF640-AEFB-48E7-8BCE-E01D287B5286}
+		{77B00705-A2A5-4675-9A16-1FAB2692151B} = {1FAD6E2F-6535-4AAB-82DC-7CEEC38B3F00}
+		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1} = {1FAD6E2F-6535-4AAB-82DC-7CEEC38B3F00}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {782826E1-7E8E-4878-88FB-1B564D82C621}
