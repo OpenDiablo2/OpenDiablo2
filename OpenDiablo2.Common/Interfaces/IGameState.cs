@@ -18,7 +18,7 @@ namespace OpenDiablo2.Common.Interfaces
         bool ToggleShowCharacterPanel();
         bool ShowCharacterPanel { get; set; }
 
-        void Initialize(string text, eHero value);
+        void Initialize(string text, eHero value, eSessionType sessionType);
         void Update(long ms);
         IEnumerable<MapCellInfo> GetMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType);
         void UpdateMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType, IEnumerable<MapCellInfo> mapCellInfo);

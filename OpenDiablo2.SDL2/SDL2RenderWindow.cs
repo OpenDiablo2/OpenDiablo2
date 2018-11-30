@@ -25,6 +25,19 @@ namespace OpenDiablo2.SDL2_
 
         public OnKeyPressed KeyPressCallback { get; set; }
 
+        private IMouseCursor mouseCursor = null;
+        public IMouseCursor MouseCursor
+        {
+            get => mouseCursor;
+            set
+            {
+                if (mouseCursor == value)
+                    return;
+
+                SetCursor(value);
+            }
+        }
+
         private readonly IMPQProvider mpqProvider;
         private readonly IPaletteProvider paletteProvider;
         private readonly IResourceManager resourceManager;
@@ -96,8 +109,33 @@ namespace OpenDiablo2.SDL2_
 
         }
 
-        public void Sync()
+        public unsafe void Sync()
         {
+            if (globalConfig.MouseMode == eMouseMode.Software)
+            {
+                var cursor = mouseCursor as SDL2MouseCursor;
+                var texture = cursor.SWTexture;
+
+                var srcRect = new SDL.SDL_Rect
+                {
+                    x = 0,
+                    y = 0,
+                    w = cursor.ImageSize.Width,
+                    h = cursor.ImageSize.Height
+                };
+
+                var destRect = new SDL.SDL_Rect
+                {
+                    x = MouseX - cursor.Hotspot.X,
+                    y = MouseY - cursor.Hotspot.Y,
+                    w = cursor.ImageSize.Width,
+                    h = cursor.ImageSize.Height
+                };
+
+                SDL.SDL_RenderCopy(renderer, texture, ref srcRect, ref destRect);
+            }
+
+
             SDL.SDL_RenderPresent(renderer);
         }
 
@@ -145,7 +183,8 @@ namespace OpenDiablo2.SDL2_
                         fullscreen = !fullscreen;
                         SDL.SDL_SetWindowFullscreen(window, (uint)(fullscreen ? SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN : 0));
                     }
-                    else*/ if (evt.key.keysym.sym == SDL.SDL_Keycode.SDLK_BACKSPACE && KeyPressCallback != null)
+                    else*/
+                    if (evt.key.keysym.sym == SDL.SDL_Keycode.SDLK_BACKSPACE && KeyPressCallback != null)
                         KeyPressCallback('\b');
                 }
                 else if (evt.type == SDL.SDL_EventType.SDL_TEXTINPUT)
@@ -287,8 +326,6 @@ namespace OpenDiablo2.SDL2_
 
         public unsafe MapCellInfo CacheMapCell(MPQDT1Tile mapCell)
         {
-            log.Debug($"Caching map cell {mapCell.Id}");
-
             var minX = mapCell.Blocks.Min(x => x.PositionX);
             var minY = mapCell.Blocks.Min(x => x.PositionY);
             var maxX = mapCell.Blocks.Max(x => x.PositionX + 32);
@@ -379,34 +416,55 @@ namespace OpenDiablo2.SDL2_
 
         public unsafe IMouseCursor LoadCursor(ISprite sprite, int frame, Point hotspot)
         {
-            if (globalConfig.MouseMode != eMouseMode.Hardware)
-                throw new ApplicationException("Tried to set a hardware cursor, but we are using software cursors!");
+            if (globalConfig.MouseMode == eMouseMode.Software)
+            {
+                sprite.Frame = frame;
+
+                var texId = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888,
+                    (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, sprite.LocalFrameSize.Width, sprite.LocalFrameSize.Height);
+                SDL.SDL_SetTextureBlendMode(texId, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+
+                SDL.SDL_SetRenderTarget(renderer, texId);
+                SDL.SDL_RenderCopy(renderer, (sprite as SDL2Sprite).texture, IntPtr.Zero, IntPtr.Zero);
+                SDL.SDL_SetRenderTarget(renderer, IntPtr.Zero);
+
+                return new SDL2MouseCursor
+                {
+                    Hotspot = hotspot,
+                    ImageSize = sprite.LocalFrameSize,
+                    SWTexture = texId
+                };
+            }
 
             var multiple = globalConfig.HardwareMouseScale;
             var spr = sprite as SDL2Sprite;
-            var surface = SDL.SDL_CreateRGBSurface(0, spr.FrameSize.Width * multiple, spr.FrameSize.Height * multiple, 32, 0xFF0000, 0xFF00, 0xFF, 0xFF000000);
-
+            var surface = SDL.SDL_CreateRGBSurface(0, spr.LocalFrameSize.Width * multiple, spr.LocalFrameSize.Height * multiple, 32, 0xFF0000, 0xFF00, 0xFF, 0xFF000000);
+            var yOffset = (spr.FrameSize.Height - spr.LocalFrameSize.Height);
+            var XOffset = (spr.FrameSize.Width - spr.LocalFrameSize.Width);
             var pixels = (UInt32*)((SDL.SDL_Surface*)surface)->pixels;
-            for (var y = 0; y < (spr.FrameSize.Height * multiple) - 1; y++)
-                for (var x = 0; x < (spr.FrameSize.Width * multiple) - 1; x++)
+            for (var y = 0; y < (spr.LocalFrameSize.Height * multiple) - 1; y++)
+                for (var x = 0; x < (spr.LocalFrameSize.Width * multiple) - 1; x++)
                 {
-                    pixels[x + (y * spr.FrameSize.Width * multiple)] = spr.source.Frames[frame].GetColor(x / multiple, y / multiple, sprite.CurrentPalette);
+                    pixels[x + XOffset + ((y + yOffset) * spr.LocalFrameSize.Width * multiple)] = spr.source.Frames[frame].GetColor(x / multiple, y / multiple, sprite.CurrentPalette);
                 }
 
-            var cursor = SDL.SDL_CreateColorCursor(surface, hotspot.X, hotspot.Y);
+            var cursor = SDL.SDL_CreateColorCursor(surface, hotspot.X * multiple, hotspot.Y * multiple);
             if (cursor == IntPtr.Zero)
                 throw new ApplicationException($"Unable to set the cursor cursor: {SDL.SDL_GetError()}"); // TODO: Is this supported everywhere? May need to still support software cursors.
-            return new SDL2MouseCursor { Surface = cursor };
+            return new SDL2MouseCursor { HWSurface = cursor };
         }
 
-        public void SetCursor(IMouseCursor mouseCursor)
+        private void SetCursor(IMouseCursor mouseCursor)
         {
-            if (globalConfig.MouseMode != eMouseMode.Hardware)
-                throw new ApplicationException("Tried to set a hardware cursor, but we are using software cursors!");
+            this.mouseCursor = mouseCursor;
 
-            SDL.SDL_SetCursor((mouseCursor as SDL2MouseCursor).Surface);
+            if (globalConfig.MouseMode != eMouseMode.Hardware)
+                return;
+
+            SDL.SDL_SetCursor((mouseCursor as SDL2MouseCursor).HWSurface);
         }
 
         public uint GetTicks() => SDL.SDL_GetTicks();
+
     }
 }
