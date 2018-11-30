@@ -103,6 +103,7 @@
     <Compile Include="Models\Item\Item.cs" />
     <Compile Include="Models\Item\Armor.cs" />
     <Compile Include="Models\Item\Weapon.cs" />
+    <Compile Include="Models\Item\Misc.cs" />
     <Compile Include="Models\LevelPreset.cs" />
     <Compile Include="Models\LevelType.cs" />
     <Compile Include="Models\MapCellInfo.cs" />
