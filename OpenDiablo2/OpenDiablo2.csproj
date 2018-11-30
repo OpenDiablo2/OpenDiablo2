@@ -107,6 +107,10 @@
       <Project>{1f8731d5-393b-4561-9cea-887a2f466576}</Project>
       <Name>OpenDiablo2.SDL2</Name>
     </ProjectReference>
+    <ProjectReference Include="..\OpenDiablo2.ServiceBus\OpenDiablo2.ServiceBus.csproj">
+      <Project>{d3f0f44f-2ab4-4342-a684-53193032a621}</Project>
+      <Name>OpenDiablo2.ServiceBus</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
