@@ -64,6 +64,7 @@
     <Compile Include="Enums\eTextAlign.cs" />
     <Compile Include="Enums\eWildBorder.cs" />
     <Compile Include="Interfaces\IButton.cs" />
+    <Compile Include="Interfaces\IItem.cs" />
     <Compile Include="Interfaces\IPanelFrame.cs" />
     <Compile Include="Interfaces\IInventoryPanel.cs" />
     <Compile Include="Interfaces\IEngineDataManager.cs" />
@@ -89,9 +90,13 @@
     <Compile Include="Interfaces\ITextDictionary.cs" />
     <Compile Include="Interfaces\ITextLabel.cs" />
     <Compile Include="Interfaces\ITexture.cs" />
+    <Compile Include="Models\Item\Misc.cs" />
     <Compile Include="Models\BitStream.cs" />
     <Compile Include="Models\ButtonLayout.cs" />
     <Compile Include="Models\LevelDetail.cs" />
+    <Compile Include="Models\Item\Item.cs" />
+    <Compile Include="Models\Item\Armor.cs" />
+    <Compile Include="Models\Item\Weapon.cs" />
     <Compile Include="Models\LevelPreset.cs" />
     <Compile Include="Models\LevelType.cs" />
     <Compile Include="Models\MapCellInfo.cs" />

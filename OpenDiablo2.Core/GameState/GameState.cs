@@ -20,6 +20,8 @@ namespace OpenDiablo2.Core.GameState_
         private readonly IRenderWindow renderWindow;
         private readonly Func<IMapEngine> getMapEngine;
 
+        public Item SelectedItem { get; internal set; }
+
         private float animationTime = 0f;
         private List<MapInfo> mapInfo;
         private List<MapCellInfo> mapDataLookup = new List<MapCellInfo>();
@@ -240,6 +242,15 @@ namespace OpenDiablo2.Core.GameState_
             return ShowCharacterPanel;
         }
 
+        public void SelectItem(Item item)
+        {
+            this.SelectedItem = item;
+        }
+
+        public void PlaceSelectedItem()
+        {
+            this.SelectedItem = null;
+        }
 
         private MapCellInfo GetMapCellInfo(
             MapInfo map,

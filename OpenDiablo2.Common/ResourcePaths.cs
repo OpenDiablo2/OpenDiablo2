@@ -125,6 +125,10 @@ namespace OpenDiablo2.Common
         public static string LevelType = "data\\global\\excel\\LvlTypes.txt";
         public static string LevelDetails = "data\\global\\excel\\Levels.txt";
 
+        // --- Inventory Data ---
+        public static string Weapons = "data\\global\\excel\\weapons.txt";
+        public static string Armor = "data\\global\\excel\\armor.txt";
+        public static string Misc = "data\\global\\excel\\misc.txt";
 
     }
 }
