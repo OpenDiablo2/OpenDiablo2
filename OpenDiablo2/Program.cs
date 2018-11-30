@@ -22,7 +22,8 @@ namespace OpenDiablo2
             {
                 BaseDataPath = Path.GetFullPath(o.DataPath ?? Directory.GetCurrentDirectory()),
                 MouseMode = o.HardwareMouse == true ? eMouseMode.Hardware : eMouseMode.Software,
-                HardwareMouseScale = o.MouseScale
+                HardwareMouseScale = o.MouseScale,
+                FullScreen = o.FullScreen
             }).WithNotParsed(o =>
             {
                 log.Warn($"Could not parse command line options.");
@@ -65,6 +66,12 @@ namespace OpenDiablo2
             {
                 var componentContext = c.Resolve<IComponentContext>();
                 return (buttonType) => componentContext.Resolve<IButton>(new NamedParameter("buttonLayout", ButtonLayout.Values[buttonType]));
+            });
+
+            containerBuilder.Register<Func<ePanelFrameType, IPanelFrame>>(c =>
+            {
+                var componentContext = c.Resolve<IComponentContext>();
+                return (panelFrameType) => componentContext.Resolve<IPanelFrame>(new NamedParameter("panelFrameType", panelFrameType));
             });
 
             /* Uncomment the below if we support multiple textbox types

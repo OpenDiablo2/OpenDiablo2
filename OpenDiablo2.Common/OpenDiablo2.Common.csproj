@@ -13,23 +13,6 @@
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug\</OutputPath>
@@ -71,18 +54,18 @@
   <ItemGroup>
     <Compile Include="Attributes\SceneAttribute.cs" />
     <Compile Include="AutofacModule.cs" />
+    <Compile Include="Enums\ePanelFrameType.cs" />
     <Compile Include="Enums\eButtonType.cs" />
     <Compile Include="Enums\eHero.cs" />
     <Compile Include="Enums\eLevelId.cs" />
     <Compile Include="Enums\eLevelSubType.cs" />
     <Compile Include="Enums\eMPQFormatVersion.cs" />
     <Compile Include="Enums\eRenderCellType.cs" />
-    <Compile Include="Enums\Mobs\eDamageTypes.cs" />
-    <Compile Include="Enums\Mobs\eMobFlags.cs" />
-    <Compile Include="Enums\Mobs\eStatModifierType.cs" />
     <Compile Include="Enums\eTextAlign.cs" />
     <Compile Include="Enums\eWildBorder.cs" />
     <Compile Include="Interfaces\IButton.cs" />
+    <Compile Include="Interfaces\IPanelFrame.cs" />
+    <Compile Include="Interfaces\IInventoryPanel.cs" />
     <Compile Include="Interfaces\IEngineDataManager.cs" />
     <Compile Include="Interfaces\IFont.cs" />
     <Compile Include="Interfaces\IGameEngine.cs" />
@@ -91,11 +74,11 @@
     <Compile Include="Interfaces\ILabel.cs" />
     <Compile Include="Interfaces\IMapEngine.cs" />
     <Compile Include="Interfaces\IMiniPanel.cs" />
+    <Compile Include="Interfaces\ICharacterPanel.cs" />
     <Compile Include="Interfaces\IMouseCursor.cs" />
     <Compile Include="Interfaces\IMPQProvider.cs" />
     <Compile Include="Interfaces\IMusicProvider.cs" />
     <Compile Include="Interfaces\IPaletteProvider.cs" />
-    <Compile Include="Interfaces\IRenderTarget.cs" />
     <Compile Include="Interfaces\IRenderWindow.cs" />
     <Compile Include="Interfaces\IResourceManager.cs" />
     <Compile Include="Interfaces\IScene.cs" />
@@ -105,26 +88,12 @@
     <Compile Include="Interfaces\ITextBox.cs" />
     <Compile Include="Interfaces\ITextDictionary.cs" />
     <Compile Include="Interfaces\ITextLabel.cs" />
-    <Compile Include="Interfaces\Mobs\IHeroTypeConfig.cs" />
-    <Compile Include="Interfaces\Mobs\ILevelExperienceConfig.cs" />
-    <Compile Include="Interfaces\Mobs\IMobCondition.cs" />
-    <Compile Include="Interfaces\Mobs\IMobManager.cs" />
-    <Compile Include="Interfaces\Mobs\IStatModifier.cs" />
     <Compile Include="Interfaces\ITexture.cs" />
     <Compile Include="Models\BitStream.cs" />
     <Compile Include="Models\ButtonLayout.cs" />
     <Compile Include="Models\LevelDetail.cs" />
     <Compile Include="Models\LevelPreset.cs" />
     <Compile Include="Models\LevelType.cs" />
-    <Compile Include="Models\Mobs\EnemyState.cs" />
-    <Compile Include="Models\Mobs\HeroTypeConfig.cs" />
-    <Compile Include="Models\Mobs\LevelExperienceConfig.cs" />
-    <Compile Include="Models\Mobs\MobCondition.cs" />
-    <Compile Include="Models\Mobs\MobState.cs" />
-    <Compile Include="Models\Mobs\Stat.cs" />
-    <Compile Include="Models\Mobs\StatBase.cs" />
-    <Compile Include="Models\Mobs\StatDouble.cs" />
-    <Compile Include="Models\Mobs\StatModifier.cs" />
     <Compile Include="Models\MapCellInfo.cs" />
     <Compile Include="Models\MapInfo.cs" />
     <Compile Include="Models\MPQDS1.cs" />
@@ -138,7 +107,6 @@
     <Compile Include="Models\MPQWavCompression.cs" />
     <Compile Include="Models\Palette.cs" />
     <Compile Include="Models\PKLibDecompress.cs" />
-    <Compile Include="Models\Mobs\PlayerState.cs" />
     <Compile Include="Models\SoundEntry.cs" />
     <Compile Include="Palettes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -148,6 +116,5 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
