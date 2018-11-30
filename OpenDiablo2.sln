@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{1FAD6E2F-6535-4AAB-82DC-7CEEC38B3F00}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.ServiceBus", "OpenDiablo2.ServiceBus\OpenDiablo2.ServiceBus.csproj", "{D3F0F44F-2AB4-4342-A684-53193032A621}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -61,6 +63,10 @@ Global
 		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Debug|x64.Build.0 = Debug|x64
 		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Release|x64.ActiveCfg = Release|x64
 		{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}.Release|x64.Build.0 = Release|x64
+		{D3F0F44F-2AB4-4342-A684-53193032A621}.Debug|x64.ActiveCfg = Debug|x64
+		{D3F0F44F-2AB4-4342-A684-53193032A621}.Debug|x64.Build.0 = Debug|x64
+		{D3F0F44F-2AB4-4342-A684-53193032A621}.Release|x64.ActiveCfg = Release|x64
+		{D3F0F44F-2AB4-4342-A684-53193032A621}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
