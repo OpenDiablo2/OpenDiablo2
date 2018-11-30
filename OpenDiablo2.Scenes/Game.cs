@@ -35,6 +35,7 @@ namespace OpenDiablo2.Scenes
             IMapEngine mapEngine,
             IGameState gameState,
             IKeyboardInfoProvider keyboardInfoProvider,
+            IItemManager itemManager,
             Func<eButtonType, IButton> createButton,
             Func<IMiniPanel> createMiniPanel,
             Func<ICharacterPanel> createCharacterPanel,
@@ -66,6 +67,10 @@ namespace OpenDiablo2.Scenes
             menuButton = createButton(eButtonType.Menu);
             menuButton.Location = new Point(393, 561);
             menuButton.OnToggle = OnMenuToggle;
+
+            var item = itemManager.getItem("bsd");
+            var cursorsprite = renderWindow.LoadSprite("data\\global\\items\\" + item.InvFile + ".dc6", Palettes.Units);
+            renderWindow.LoadCursor(cursorsprite, 0, new Point(0,0));
         }
 
         private void OnMenuToggle(bool isToggled)

@@ -16,6 +16,7 @@ namespace OpenDiablo2.Core
 
             builder.RegisterType<Button>().As<IButton>().InstancePerDependency();
             builder.RegisterType<EngineDataManager>().As<IEngineDataManager>().SingleInstance();
+            builder.RegisterType<ItemManager>().As<IItemManager>().SingleInstance();
             builder.RegisterType<GameEngine>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<GameState>().As<IGameState>().SingleInstance();
             builder.RegisterType<MapEngine>().As<IMapEngine>().SingleInstance();

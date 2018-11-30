@@ -67,6 +67,7 @@
     <Compile Include="Enums\Mobs\eDamageTypes.cs" />
     <Compile Include="Enums\Mobs\eMobFlags.cs" />
     <Compile Include="Enums\Mobs\eStatModifierType.cs" />
+    <Compile Include="Interfaces\IItemManager.cs" />
     <Compile Include="Interfaces\ISessionManager.cs" />
     <Compile Include="Interfaces\ISessionServer.cs" />
     <Compile Include="Interfaces\UI\IButton.cs" />
