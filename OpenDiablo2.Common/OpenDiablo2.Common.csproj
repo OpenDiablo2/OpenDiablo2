@@ -63,6 +63,9 @@
     <Compile Include="Enums\eRenderCellType.cs" />
     <Compile Include="Enums\eTextAlign.cs" />
     <Compile Include="Enums\eWildBorder.cs" />
+    <Compile Include="Enums\Mobs\eDamageTypes.cs" />
+    <Compile Include="Enums\Mobs\eMobFlags.cs" />
+    <Compile Include="Enums\Mobs\eStatModifierType.cs" />
     <Compile Include="Interfaces\IButton.cs" />
     <Compile Include="Interfaces\IPanelFrame.cs" />
     <Compile Include="Interfaces\IInventoryPanel.cs" />
@@ -89,6 +92,11 @@
     <Compile Include="Interfaces\ITextDictionary.cs" />
     <Compile Include="Interfaces\ITextLabel.cs" />
     <Compile Include="Interfaces\ITexture.cs" />
+    <Compile Include="Interfaces\Mobs\IHeroTypeConfig.cs" />
+    <Compile Include="Interfaces\Mobs\ILevelExperienceConfig.cs" />
+    <Compile Include="Interfaces\Mobs\IMobCondition.cs" />
+    <Compile Include="Interfaces\Mobs\IMobManager.cs" />
+    <Compile Include="Interfaces\Mobs\IStatModifier.cs" />
     <Compile Include="Models\BitStream.cs" />
     <Compile Include="Models\ButtonLayout.cs" />
     <Compile Include="Models\LevelDetail.cs" />
@@ -96,6 +104,16 @@
     <Compile Include="Models\LevelType.cs" />
     <Compile Include="Models\MapCellInfo.cs" />
     <Compile Include="Models\MapInfo.cs" />
+    <Compile Include="Models\Mobs\EnemyState.cs" />
+    <Compile Include="Models\Mobs\HeroTypeConfig.cs" />
+    <Compile Include="Models\Mobs\LevelExperienceConfig.cs" />
+    <Compile Include="Models\Mobs\MobCondition.cs" />
+    <Compile Include="Models\Mobs\MobState.cs" />
+    <Compile Include="Models\Mobs\PlayerState.cs" />
+    <Compile Include="Models\Mobs\Stat.cs" />
+    <Compile Include="Models\Mobs\StatBase.cs" />
+    <Compile Include="Models\Mobs\StatDouble.cs" />
+    <Compile Include="Models\Mobs\StatModifier.cs" />
     <Compile Include="Models\MPQDS1.cs" />
     <Compile Include="Models\MPQDT1.cs" />
     <Compile Include="Models\MPQFont.cs" />
@@ -116,5 +134,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

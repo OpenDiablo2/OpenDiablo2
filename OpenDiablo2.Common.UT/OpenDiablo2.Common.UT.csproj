@@ -3,12 +3,12 @@
   <Import Project="..\packages\MSTest.TestAdapter.1.2.0\build\net45\MSTest.TestAdapter.props" Condition="Exists('..\packages\MSTest.TestAdapter.1.2.0\build\net45\MSTest.TestAdapter.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
-    <ProjectGuid>{F187FACE-CBA2-4012-8308-06CCDC9D6AB1}</ProjectGuid>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{77B00705-A2A5-4675-9A16-1FAB2692151B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OpenDiablo2.Core.UT</RootNamespace>
-    <AssemblyName>OpenDiablo2.Core.UT</AssemblyName>
+    <RootNamespace>OpenDiablo2.Common.UT</RootNamespace>
+    <AssemblyName>OpenDiablo2.Common.UT</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -20,23 +20,23 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\x64\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -49,20 +49,18 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UT_MobState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UT_MobManager.cs" />
+    <Compile Include="UT_PlayerState.cs" />
+    <Compile Include="UT_Stat.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenDiablo2.Common\OpenDiablo2.Common.csproj">
-      <Project>{b743160e-a0bb-45dc-9998-967a85e50562}</Project>
+      <Project>{B743160E-A0BB-45DC-9998-967A85E50562}</Project>
       <Name>OpenDiablo2.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\OpenDiablo2.Core\OpenDiablo2.Core.csproj">
-      <Project>{8fc6bf7d-835a-47c1-a6b2-125495fa0900}</Project>
-      <Name>OpenDiablo2.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
