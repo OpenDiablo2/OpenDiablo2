@@ -68,7 +68,7 @@ namespace OpenDiablo2.Scenes
             menuButton.Location = new Point(393, 561);
             menuButton.OnToggle = OnMenuToggle;
 
-            var item = itemManager.getItem("bsd");
+            var item = itemManager.getItem("hax");
             var cursorsprite = renderWindow.LoadSprite("data\\global\\items\\" + item.InvFile + ".dc6", Palettes.Units);
             
             renderWindow.MouseCursor = renderWindow.LoadCursor(cursorsprite, 0, new Point(0, 0));
