@@ -7,7 +7,8 @@ using NetMQ.Sockets;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
-using OpenDiablo2.ServiceBus.Message_Frames;
+using OpenDiablo2.Common.Interfaces.MessageBus;
+using OpenDiablo2.ServiceBus.Message_Frames.Server;
 
 namespace OpenDiablo2.ServiceBus
 {
@@ -16,26 +17,34 @@ namespace OpenDiablo2.ServiceBus
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private readonly eSessionType sessionType;
+        private readonly IGameServer gameServer;
         private readonly Func<eMessageFrameType, IMessageFrame> getMessageFrame;
+
         private AutoResetEvent resetEvent = new AutoResetEvent(false);
         public AutoResetEvent WaitServerStartEvent { get; set; } = new AutoResetEvent(false);
-
-        private int gameSeed;
         private bool running = false;
         private ResponseSocket responseSocket;
 
         public OnSetSeedEvent OnSetSeed { get; set; }
         public OnJoinGameEvent OnJoinGame { get; set; }
+        public OnLocatePlayersEvent OnLocatePlayers { get; set; }
 
-        public SessionServer(eSessionType sessionType, Func<eMessageFrameType, IMessageFrame> getMessageFrame)
+        public SessionServer(
+            eSessionType sessionType, 
+            IGameServer gameServer,
+            Func<eMessageFrameType, IMessageFrame> getMessageFrame
+            )
         {
             this.sessionType = sessionType;
             this.getMessageFrame = getMessageFrame;
+            this.gameServer = gameServer;
         }
 
         public void Start()
         {
-            gameSeed = (new Random()).Next();
+            // TODO: Loading existing games...
+            gameServer.InitializeNewGame();
+
             Task.Run(() => Serve());
         }
 
@@ -64,7 +73,7 @@ namespace OpenDiablo2.ServiceBus
                 var frameData = bytes.Skip(1).ToArray(); // TODO: Can we maybe use pointers? This seems wasteful
                     var messageFrame = getMessageFrame(frameType);
                 messageFrame.Data = frameData;
-                messageFrame.Process(socket, this);
+                messageFrame.Process(socket.GetHashCode(), this);
             });
             running = true;
             WaitServerStartEvent.Set();
@@ -89,16 +98,17 @@ namespace OpenDiablo2.ServiceBus
             Stop();
         }
 
-        private void Send(NetMQSocket target, IMessageFrame messageFrame)
+        private void Send(IMessageFrame messageFrame, bool more = false)
         {
             var attr = messageFrame.GetType().GetCustomAttributes(true).First(x => typeof(MessageFrameAttribute).IsAssignableFrom(x.GetType())) as MessageFrameAttribute;
-            responseSocket.SendFrame(new byte[] { (byte)attr.FrameType }.Concat(messageFrame.Data).ToArray());
+            responseSocket.SendFrame(new byte[] { (byte)attr.FrameType }.Concat(messageFrame.Data).ToArray(), more);
         }
 
-        private void OnJoinGameHandler(object sender, Guid playerId, string playerName)
+        private void OnJoinGameHandler(int clientHash, eHero heroType, string playerName)
         {
-            // TODO: Try to make this less stupid
-            Send(sender as NetMQSocket, new MFSetSeed(gameSeed));
+            gameServer.SpawnNewPlayer(clientHash, playerName, heroType);
+            Send(new MFSetSeed(gameServer.Seed), true);
+            Send(new MFLocatePlayers(gameServer.Players.Select(x => x.ToPlayerLocationDetails())));
         }
     }
 }

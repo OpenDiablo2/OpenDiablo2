@@ -1,14 +1,11 @@
-﻿using OpenDiablo2.Common.Enums.Mobs;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using OpenDiablo2.Common.Enums.Mobs;
 
 namespace OpenDiablo2.Common.Models.Mobs
 {
-    public class MobState
+    public class MobState : IComparable
     {
         public readonly string Name;
         public readonly int Id;
@@ -25,6 +22,8 @@ namespace OpenDiablo2.Common.Models.Mobs
         public int Level { get; protected set; }
 
         protected Dictionary<eMobFlags, bool> Flags = new Dictionary<eMobFlags, bool>();
+
+        public MobState() { }
 
         public MobState(string name, int id, int level, int maxhealth, float x, float y)
         {
@@ -163,6 +162,10 @@ namespace OpenDiablo2.Common.Models.Mobs
             }
             return false;
         }
+
         #endregion Flags
+
+
+        public int CompareTo(object obj) => Id - ((MobState)obj).Id;
     }
 }

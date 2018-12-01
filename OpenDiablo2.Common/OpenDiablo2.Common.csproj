@@ -69,10 +69,13 @@
     <Compile Include="Enums\Mobs\eDamageTypes.cs" />
     <Compile Include="Enums\Mobs\eMobFlags.cs" />
     <Compile Include="Enums\Mobs\eStatModifierType.cs" />
+    <Compile Include="Extensions\MobManagerExtensions.cs" />
+    <Compile Include="Interfaces\IGameServer.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionEventProvider.cs" />
     <Compile Include="Interfaces\MessageBus\IMessageFrame.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionManager.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionServer.cs" />
+    <Compile Include="Interfaces\MessageBus\PlayerLocationDetails.cs" />
     <Compile Include="Interfaces\UI\IButton.cs" />
     <Compile Include="Interfaces\UI\IPanelFrame.cs" />
     <Compile Include="Interfaces\UI\IInventoryPanel.cs" />
@@ -101,7 +104,6 @@
     <Compile Include="Interfaces\Drawing\ITexture.cs" />
     <Compile Include="Interfaces\Mobs\IHeroTypeConfig.cs" />
     <Compile Include="Interfaces\Mobs\ILevelExperienceConfig.cs" />
-    <Compile Include="Interfaces\Mobs\IMobCondition.cs" />
     <Compile Include="Interfaces\Mobs\IMobManager.cs" />
     <Compile Include="Interfaces\Mobs\IStatModifier.cs" />
     <Compile Include="Models\BitStream.cs" />
@@ -114,7 +116,6 @@
     <Compile Include="Models\Mobs\EnemyState.cs" />
     <Compile Include="Models\Mobs\HeroTypeConfig.cs" />
     <Compile Include="Models\Mobs\LevelExperienceConfig.cs" />
-    <Compile Include="Models\Mobs\MobCondition.cs" />
     <Compile Include="Models\Mobs\MobState.cs" />
     <Compile Include="Models\Mobs\PlayerState.cs" />
     <Compile Include="Models\Mobs\Stat.cs" />

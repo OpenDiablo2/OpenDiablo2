@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Common.Interfaces.MessageBus;
 using OpenDiablo2.Common.Models;
 using OpenDiablo2.Core.Map_Engine;
 
@@ -21,7 +22,6 @@ namespace OpenDiablo2.Core.GameState_
         private readonly Func<IMapEngine> getMapEngine;
         private readonly Func<eSessionType, ISessionManager> getSessionManager;
 
-        private Guid playerId;
         private float animationTime = 0f;
         private List<MapInfo> mapInfo;
         private List<MapCellInfo> mapDataLookup = new List<MapCellInfo>();
@@ -30,6 +30,7 @@ namespace OpenDiablo2.Core.GameState_
         public int Act { get; private set; }
         public string MapName { get; private set; }
         public Palette CurrentPalette => paletteProvider.PaletteTable[$"ACT{Act}"];
+        public IEnumerable<PlayerLocationDetails> PlayerLocationDetails { get; private set; } = new List<PlayerLocationDetails>();
 
         public bool ShowInventoryPanel { get; set; } = false;
         public bool ShowCharacterPanel { get; set; } = false;
@@ -64,19 +65,20 @@ namespace OpenDiablo2.Core.GameState_
             sessionManager.Initialize();
 
             sessionManager.OnSetSeed += OnSetSeedEvent;
+            sessionManager.OnLocatePlayers += OnLocatePlayers;
 
             mapInfo = new List<MapInfo>();
             sceneManager.ChangeScene("Game");
 
-            sessionManager.JoinGame(characterName, (id) =>
-            {
-                log.Info("hoo");
-                playerId = id;
-            }); // TODO: we need more attributes...
-            log.Info("woo");
+            sessionManager.JoinGame(characterName, hero);
         }
 
-        private void OnSetSeedEvent(object sender, int seed)
+        private void OnLocatePlayers(int clientHash, IEnumerable<PlayerLocationDetails> playerLocationDetails)
+        {
+            PlayerLocationDetails = playerLocationDetails;
+        }
+
+        private void OnSetSeedEvent(int clientHash, int seed)
         {
             log.Info($"Setting seed to {seed}");
             this.Seed = seed;
@@ -224,15 +226,7 @@ namespace OpenDiablo2.Core.GameState_
             return ShowCharacterPanel;
         }
 
-
-        private MapCellInfo GetMapCellInfo(
-            MapInfo map,
-            int cellX,
-            int cellY,
-            MPQDS1TileProps props,
-            eRenderCellType cellType,
-            MPQDS1WallOrientationTileProps wallOrientations = null
-            )
+        private MapCellInfo GetMapCellInfo(MapInfo map, int cellX, int cellY, MPQDS1TileProps props, eRenderCellType cellType, MPQDS1WallOrientationTileProps wallOrientations = null)
         {
             if (!map.CellInfo.ContainsKey(cellType))
             {

@@ -3,7 +3,7 @@ using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 
-namespace OpenDiablo2.ServiceBus.Message_Frames
+namespace OpenDiablo2.ServiceBus.Message_Frames.Server
 {
     [MessageFrame(eMessageFrameType.SetSeed)]
     public sealed class MFSetSeed : IMessageFrame
@@ -19,7 +19,6 @@ namespace OpenDiablo2.ServiceBus.Message_Frames
 
         public MFSetSeed()
         {
-            Seed = (new Random()).Next();
         }
 
         public MFSetSeed(int seed)
@@ -27,9 +26,8 @@ namespace OpenDiablo2.ServiceBus.Message_Frames
             Seed = seed;
         }
 
-        public void Process(object sender, ISessionEventProvider sessionEventProvider)
-        {
-            sessionEventProvider.OnSetSeed?.Invoke(sender, Seed);
-        }
+        public void Process(int clientHash, ISessionEventProvider sessionEventProvider)
+            => sessionEventProvider.OnSetSeed?.Invoke(clientHash, Seed);
+
     }
 }

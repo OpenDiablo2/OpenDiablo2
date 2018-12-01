@@ -12,6 +12,8 @@ namespace OpenDiablo2.Core.Map_Engine
         private readonly IRenderWindow renderWindow;
         private readonly IResourceManager resourceManager;
 
+        public int FocusedMobId { get; set; } = -1;
+
         private PointF cameraLocation = new PointF();
         public PointF CameraLocation
         {

@@ -5,18 +5,19 @@ using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 
-namespace OpenDiablo2.ServiceBus.Message_Frames
+namespace OpenDiablo2.ServiceBus.Message_Frames.Client
 {
     [MessageFrame(eMessageFrameType.JoinGame)]
     public sealed class MFJoinGame : IMessageFrame
     {
-        public Guid PlayerId { get; set; }
         public string PlayerName { get; set; }
+        public eHero HeroType { get; set; }
+
         public byte[] Data
         {
             get
             {
-                return PlayerId.ToByteArray()
+                return new byte[] { (byte)HeroType }
                     .Concat(BitConverter.GetBytes((UInt16)PlayerName.Length))
                     .Concat(Encoding.UTF8.GetBytes(PlayerName))
                     .ToArray();
@@ -24,10 +25,9 @@ namespace OpenDiablo2.ServiceBus.Message_Frames
 
             set
             {
-
-                PlayerId = new Guid(value.Take(16).ToArray());
-                var playerNameLen = BitConverter.ToUInt16(value, 16);
-                PlayerName = Encoding.UTF8.GetString(value, 18, value.Length - 18);
+                HeroType = (eHero)value[0];
+                var playerNameLen = BitConverter.ToUInt16(value, 1);
+                PlayerName = Encoding.UTF8.GetString(value, 3, value.Length - 3);
 
                 if (PlayerName.Length != playerNameLen)
                     throw new ApplicationException("Invalid player length!");
@@ -35,15 +35,15 @@ namespace OpenDiablo2.ServiceBus.Message_Frames
         }
 
         public MFJoinGame() { }
-        public MFJoinGame(string playerName)
+        public MFJoinGame(string playerName, eHero heroType)
         {
-            PlayerId = Guid.NewGuid();
             PlayerName = playerName;
+            HeroType = heroType;
         }
 
-        public void Process(object sender, ISessionEventProvider sessionEventProvider)
+        public void Process(int clientHash, ISessionEventProvider sessionEventProvider)
         {
-            sessionEventProvider.OnJoinGame(sender, PlayerId, PlayerName);
+            sessionEventProvider.OnJoinGame(clientHash, HeroType, PlayerName);
         }
     }
 }

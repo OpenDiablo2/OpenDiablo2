@@ -27,7 +27,7 @@ namespace OpenDiablo2.Common.UT
                 2250,
                 4125,
             });
-            PlayerState ps = new PlayerState("player1", id: 1, level: 1, x: 0, y: 0,
+            PlayerState ps = new PlayerState(0, "player1", id: 1, level: 1, x: 0, y: 0,
                 vitality: herotypeconfig.StartingVitality,
                 strength: herotypeconfig.StartingStrength,
                 energy: herotypeconfig.StartingEnergy,

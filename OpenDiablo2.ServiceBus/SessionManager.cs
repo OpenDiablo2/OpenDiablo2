@@ -7,7 +7,8 @@ using NetMQ.Sockets;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
-using OpenDiablo2.ServiceBus.Message_Frames;
+using OpenDiablo2.ServiceBus.Message_Frames.Client;
+using OpenDiablo2.ServiceBus.Message_Frames.Server;
 
 namespace OpenDiablo2.ServiceBus
 {
@@ -23,11 +24,12 @@ namespace OpenDiablo2.ServiceBus
         private RequestSocket requestSocket;
         private AutoResetEvent resetEvent = new AutoResetEvent(false);
         private ISessionServer sessionServer;
-        private Guid playerId;
+        public Guid PlayerId { get; private set; }
         private bool running = false;
 
         public OnSetSeedEvent OnSetSeed { get; set; }
         public OnJoinGameEvent OnJoinGame { get; set; }
+        public OnLocatePlayersEvent OnLocatePlayers { get; set; }
 
         public SessionManager(
             eSessionType sessionType, 
@@ -71,15 +73,7 @@ namespace OpenDiablo2.ServiceBus
                 default:
                     throw new ApplicationException("This session type is currently unsupported.");
             }
-
-
-            //var bytes = message.First().ToByteArray();
-            //var frameType = (eMessageFrameType)bytes[0];
-            //var frameData = bytes.Skip(1).ToArray(); // TODO: Can we maybe use pointers? This seems wasteful
-            //var messageFrame = getMessageFrame(frameType);
-            //messageFrame.Data = frameData;
-            //messageFrame.Process(socket, this);
-
+            
             running = true;
             resetEvent.WaitOne();
             running = false;
@@ -124,22 +118,17 @@ namespace OpenDiablo2.ServiceBus
             messageFrame.Data = frameData;
             lock (getGameState().ThreadLocker)
             {
-                messageFrame.Process(requestSocket, this);
+                messageFrame.Process(requestSocket.GetHashCode(), this);
             }
         }
 
-        public void JoinGame(string playerName, Action<Guid> callback)
+        public void JoinGame(string playerName, eHero heroType)
         {
             Task.Run(() =>
             {
-                var mf = new MFJoinGame(playerName);
-                playerId = mf.PlayerId;
-                Send(mf);
+                Send(new MFJoinGame(playerName, heroType));
                 ProcessMessageFrame<MFSetSeed>();
-                lock (getGameState().ThreadLocker)
-                {
-                    callback(playerId);
-                }
+                ProcessMessageFrame<MFLocatePlayers>();
             });
         }
     }

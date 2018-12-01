@@ -9,6 +9,6 @@ namespace OpenDiablo2.Common.Interfaces
     public interface IMessageFrame
     {
         byte[] Data { get; set; }
-        void Process(object sender, ISessionEventProvider sessionEventProvider);
+        void Process(int clientHash, ISessionEventProvider sessionEventProvider);
     }
 }

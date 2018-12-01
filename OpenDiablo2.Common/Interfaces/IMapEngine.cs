@@ -1,11 +1,10 @@
-﻿using System;
-using System.Drawing;
-using OpenDiablo2.Common.Models;
+﻿using System.Drawing;
 
 namespace OpenDiablo2.Common.Interfaces
 {
     public interface IMapEngine
     {
+        int FocusedMobId { get; set; }
         PointF CameraLocation { get; set; } 
         void Update(long ms);
         void Render();

@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Interfaces.MessageBus;
 
 namespace OpenDiablo2.Common.Interfaces
 {
-    public delegate void OnSetSeedEvent(object sender, int seed);
-    public delegate void OnJoinGameEvent(object sender, Guid playerId, string playerName); // TODO: Not the final version..
+    public delegate void OnSetSeedEvent(int clientHash, int seed);
+    public delegate void OnJoinGameEvent(int clientHash, eHero heroType, string playerName);
+    public delegate void OnLocatePlayersEvent(int clientHash, IEnumerable<PlayerLocationDetails> playerLocationDetails);
 
     public interface ISessionEventProvider
     {
-
         OnSetSeedEvent OnSetSeed { get; set; }
         OnJoinGameEvent OnJoinGame { get; set; }
+        OnLocatePlayersEvent OnLocatePlayers { get; set; }
     }
 }
