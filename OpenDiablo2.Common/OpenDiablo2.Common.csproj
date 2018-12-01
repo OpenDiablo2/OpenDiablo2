@@ -72,8 +72,6 @@
     <Compile Include="Enums\Mobs\eMobFlags.cs" />
     <Compile Include="Enums\Mobs\eStatModifierType.cs" />
     <Compile Include="Interfaces\IItemManager.cs" />
-    <Compile Include="Interfaces\ISessionManager.cs" />
-    <Compile Include="Interfaces\ISessionServer.cs" />
     <Compile Include="Extensions\MobManagerExtensions.cs" />
     <Compile Include="Interfaces\IGameServer.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionEventProvider.cs" />
