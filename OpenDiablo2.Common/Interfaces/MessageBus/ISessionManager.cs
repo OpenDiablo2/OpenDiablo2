@@ -11,6 +11,7 @@ namespace OpenDiablo2.Common.Interfaces
     {
         void Initialize();
         void Stop();
-        void JoinGame(string playerName);
+
+        void JoinGame(string playerName, Action<Guid> callback);
     }
 }

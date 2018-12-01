@@ -21,6 +21,7 @@ namespace OpenDiablo2.Core.GameState_
         private readonly Func<IMapEngine> getMapEngine;
         private readonly Func<eSessionType, ISessionManager> getSessionManager;
 
+        private Guid playerId;
         private float animationTime = 0f;
         private List<MapInfo> mapInfo;
         private List<MapCellInfo> mapDataLookup = new List<MapCellInfo>();
@@ -34,6 +35,8 @@ namespace OpenDiablo2.Core.GameState_
         public bool ShowCharacterPanel { get; set; } = false;
 
         public int Seed { get; internal set; }
+
+        public object ThreadLocker { get; } = new object();
 
         public GameState(
             ISceneManager sceneManager,
@@ -65,7 +68,12 @@ namespace OpenDiablo2.Core.GameState_
             mapInfo = new List<MapInfo>();
             sceneManager.ChangeScene("Game");
 
-            sessionManager.JoinGame(characterName); // TODO: we need more attributes...
+            sessionManager.JoinGame(characterName, (id) =>
+            {
+                log.Info("hoo");
+                playerId = id;
+            }); // TODO: we need more attributes...
+            log.Info("woo");
         }
 
         private void OnSetSeedEvent(object sender, int seed)

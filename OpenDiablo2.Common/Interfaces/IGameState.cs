@@ -8,6 +8,8 @@ namespace OpenDiablo2.Common.Interfaces
 {
     public interface IGameState : IDisposable
     {
+        object ThreadLocker { get; }
+
         int Act { get; }
         int Seed { get; }
         string MapName { get; }

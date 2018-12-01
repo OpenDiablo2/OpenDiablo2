@@ -18,6 +18,7 @@ namespace OpenDiablo2.ServiceBus
         private readonly Func<eSessionType, ISessionServer> getSessionServer;
         private readonly eSessionType sessionType;
         private readonly Func<eMessageFrameType, IMessageFrame> getMessageFrame;
+        private readonly Func<IGameState> getGameState;
 
         private RequestSocket requestSocket;
         private AutoResetEvent resetEvent = new AutoResetEvent(false);
@@ -28,11 +29,17 @@ namespace OpenDiablo2.ServiceBus
         public OnSetSeedEvent OnSetSeed { get; set; }
         public OnJoinGameEvent OnJoinGame { get; set; }
 
-        public SessionManager(eSessionType sessionType, Func<eSessionType, ISessionServer> getSessionServer, Func<eMessageFrameType, IMessageFrame> getMessageFrame)
+        public SessionManager(
+            eSessionType sessionType, 
+            Func<eSessionType, ISessionServer> getSessionServer, 
+            Func<eMessageFrameType, IMessageFrame> getMessageFrame,
+            Func<IGameState> getGameState
+            )
         {
             this.getSessionServer = getSessionServer;
             this.sessionType = sessionType;
             this.getMessageFrame = getMessageFrame;
+            this.getGameState = getGameState;
         }
 
         public void Initialize()
@@ -115,15 +122,25 @@ namespace OpenDiablo2.ServiceBus
             if (messageFrame.GetType() != typeof(T))
                 throw new ApplicationException("Recieved unexpected message frame!");
             messageFrame.Data = frameData;
-            messageFrame.Process(requestSocket, this);
+            lock (getGameState().ThreadLocker)
+            {
+                messageFrame.Process(requestSocket, this);
+            }
         }
 
-        public void JoinGame(string playerName)
+        public void JoinGame(string playerName, Action<Guid> callback)
         {
-            var mf = new MFJoinGame(playerName);
-            playerId = mf.PlayerId;
-            Send(mf);
-            ProcessMessageFrame<MFSetSeed>();
+            Task.Run(() =>
+            {
+                var mf = new MFJoinGame(playerName);
+                playerId = mf.PlayerId;
+                Send(mf);
+                ProcessMessageFrame<MFSetSeed>();
+                lock (getGameState().ThreadLocker)
+                {
+                    callback(playerId);
+                }
+            });
         }
     }
 }
