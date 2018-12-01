@@ -69,6 +69,7 @@
     <Compile Include="SessionServer.cs" />
     <Compile Include="TextDictionary.cs" />
     <Compile Include="UI\Button.cs" />
+    <Compile Include="UI\ItemContainer.cs" />
     <Compile Include="UI\PanelFrame.cs" />
     <Compile Include="UI\InventoryPanel.cs" />
     <Compile Include="UI\TextBox.cs" />

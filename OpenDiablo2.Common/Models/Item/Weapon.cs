@@ -18,7 +18,7 @@ namespace OpenDiablo2.Common.Models
             => new Weapon
             {
                 Name = row[0],
-                Code = row[30],
+                Code = row[2],
                 InvFile = row[45]
             };
     }   

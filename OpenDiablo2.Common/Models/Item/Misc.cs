@@ -18,8 +18,8 @@ namespace OpenDiablo2.Common.Models
             => new Misc
             {
                 Name = row[0],
-                Code = row[10],
-                InvFile = row[19]
+                Code = row[12],
+                InvFile = row[21]
             };
     }   
 }

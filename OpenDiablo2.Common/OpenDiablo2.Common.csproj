@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Attributes\SceneAttribute.cs" />
     <Compile Include="AutofacModule.cs" />
+    <Compile Include="Enums\eItemContainerType.cs" />
     <Compile Include="Enums\ePanelFrameType.cs" />
     <Compile Include="Enums\eButtonType.cs" />
     <Compile Include="Enums\eHero.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="Interfaces\ISessionManager.cs" />
     <Compile Include="Interfaces\ISessionServer.cs" />
     <Compile Include="Interfaces\UI\IButton.cs" />
+    <Compile Include="Interfaces\UI\IItemContainer.cs" />
     <Compile Include="Interfaces\UI\IPanelFrame.cs" />
     <Compile Include="Interfaces\UI\IInventoryPanel.cs" />
     <Compile Include="Interfaces\IEngineDataManager.cs" />

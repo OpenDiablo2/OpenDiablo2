@@ -35,6 +35,8 @@ namespace OpenDiablo2.Core.GameState_
 
         public int Seed { get; internal set; }
 
+        public Item SelectedItem { get; internal set; }
+
         public GameState(
             ISceneManager sceneManager,
             IResourceManager resourceManager,
@@ -210,6 +212,14 @@ namespace OpenDiablo2.Core.GameState_
             return ShowCharacterPanel;
         }
 
+        public void SelectItem(Item item)
+        {
+            if(SelectedItem == null)
+            {
+
+            }
+            this.SelectedItem = item;
+        }
 
         private MapCellInfo GetMapCellInfo(
             MapInfo map,

@@ -18,8 +18,8 @@ namespace OpenDiablo2.Common.Models
             => new Armor
             {
                 Name = row[0],
-                Code = row[15],
-                InvFile = row[28]
+                Code = row[17],
+                InvFile = row[33]
             };
     }   
 }
