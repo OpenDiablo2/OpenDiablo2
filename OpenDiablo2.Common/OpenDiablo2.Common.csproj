@@ -52,8 +52,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\MessageFrameAttribute.cs" />
     <Compile Include="Attributes\SceneAttribute.cs" />
     <Compile Include="AutofacModule.cs" />
+    <Compile Include="Enums\eMessageFrameType.cs" />
     <Compile Include="Enums\ePanelFrameType.cs" />
     <Compile Include="Enums\eButtonType.cs" />
     <Compile Include="Enums\eHero.cs" />
@@ -67,8 +69,10 @@
     <Compile Include="Enums\Mobs\eDamageTypes.cs" />
     <Compile Include="Enums\Mobs\eMobFlags.cs" />
     <Compile Include="Enums\Mobs\eStatModifierType.cs" />
-    <Compile Include="Interfaces\ISessionManager.cs" />
-    <Compile Include="Interfaces\ISessionServer.cs" />
+    <Compile Include="Interfaces\MessageBus\ISessionEventProvider.cs" />
+    <Compile Include="Interfaces\MessageBus\IMessageFrame.cs" />
+    <Compile Include="Interfaces\MessageBus\ISessionManager.cs" />
+    <Compile Include="Interfaces\MessageBus\ISessionServer.cs" />
     <Compile Include="Interfaces\UI\IButton.cs" />
     <Compile Include="Interfaces\UI\IPanelFrame.cs" />
     <Compile Include="Interfaces\UI\IInventoryPanel.cs" />
@@ -137,9 +141,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Message Frames\Requests\" />
-    <Folder Include="Message Frames\Responses\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

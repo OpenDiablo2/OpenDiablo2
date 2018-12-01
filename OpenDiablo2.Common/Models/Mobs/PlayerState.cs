@@ -11,6 +11,7 @@ namespace OpenDiablo2.Common.Models.Mobs
 {
     public class PlayerState : MobState
     {
+        public Guid Id { get; protected set; }
         public eHero HeroType { get; protected set; }
         private IHeroTypeConfig HeroTypeConfig;
         private ILevelExperienceConfig ExperienceConfig;

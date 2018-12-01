@@ -56,8 +56,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutofacModule.cs" />
-    <Compile Include="LocalSessionManager.cs" />
+    <Compile Include="Message Frames\MFJoinGame.cs" />
+    <Compile Include="Message Frames\MFSetSeed.cs" />
+    <Compile Include="SessionManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SessionServer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

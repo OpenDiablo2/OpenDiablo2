@@ -27,7 +27,6 @@ namespace OpenDiablo2.Core
             builder.RegisterType<ResourceManager>().As<IResourceManager>().SingleInstance();
             builder.RegisterType<TextDictionary>().As<ITextDictionary>().SingleInstance();
             builder.RegisterType<TextBox>().As<ITextBox>().InstancePerDependency();
-            builder.RegisterType<SessionServer>().As<ISessionServer>().InstancePerLifetimeScope();
         }
     }
 }

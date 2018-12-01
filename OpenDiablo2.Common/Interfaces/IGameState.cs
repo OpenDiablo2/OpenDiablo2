@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Common.Interfaces
 {
-    public interface IGameState
+    public interface IGameState : IDisposable
     {
         int Act { get; }
         int Seed { get; }

@@ -60,14 +60,20 @@ namespace OpenDiablo2.Core.GameState_
             sessionManager = getSessionManager(sessionType);
             sessionManager.Initialize();
 
-            var random = new Random();
-            Seed = random.Next(); // TODO: Seed does not go here ;-(
+            sessionManager.OnSetSeed += OnSetSeedEvent;
 
-            sceneManager.ChangeScene("Game");
             mapInfo = new List<MapInfo>();
-            (new MapGenerator(this)).Generate();
+            sceneManager.ChangeScene("Game");
+
+            sessionManager.JoinGame(characterName); // TODO: we need more attributes...
         }
 
+        private void OnSetSeedEvent(object sender, int seed)
+        {
+            log.Info($"Setting seed to {seed}");
+            this.Seed = seed;
+            (new MapGenerator(this)).Generate();
+        }
 
         public MapInfo LoadSubMap(int levelDefId, Point origin)
         {
@@ -390,6 +396,11 @@ namespace OpenDiablo2.Core.GameState_
         {
             animationTime += ((float)ms / 1000f);
             animationTime -= (float)Math.Truncate(animationTime);
+        }
+
+        public void Dispose()
+        {
+            sessionManager?.Dispose();
         }
     }
 }

@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace OpenDiablo2.Common.Interfaces
 {
-    public interface ISessionManager : IDisposable
+
+    public interface ISessionManager : ISessionEventProvider, IDisposable
     {
         void Initialize();
         void Stop();
+        void JoinGame(string playerName);
     }
 }

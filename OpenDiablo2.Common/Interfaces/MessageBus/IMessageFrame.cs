@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace OpenDiablo2.Common.Interfaces
 {
-    public interface ISessionServer : IDisposable
+    public interface IMessageFrame
     {
+        byte[] Data { get; set; }
+        void Process(object sender, ISessionEventProvider sessionEventProvider);
     }
 }
