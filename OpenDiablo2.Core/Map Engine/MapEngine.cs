@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
@@ -11,6 +12,8 @@ namespace OpenDiablo2.Core.Map_Engine
         private readonly IGameState gameState;
         private readonly IRenderWindow renderWindow;
         private readonly IResourceManager resourceManager;
+
+        public int FocusedPlayerId { get; set; } = 0;
 
         private PointF cameraLocation = new PointF();
         public PointF CameraLocation
@@ -52,6 +55,8 @@ namespace OpenDiablo2.Core.Map_Engine
 
         public void Render()
         {
+            var xOffset = (gameState.ShowInventoryPanel ? -200 : 0) + (gameState.ShowCharacterPanel ? 200 : 0);
+
             var cx = -(cameraLocation.X - Math.Truncate(cameraLocation.X));
             var cy = -(cameraLocation.Y - Math.Truncate(cameraLocation.Y));
 
@@ -70,16 +75,16 @@ namespace OpenDiablo2.Core.Map_Engine
 
 
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.Floor))
-                        renderWindow.DrawMapCell(cellInfo, 320 + (int)px + (int)ox, 210 + (int)py + (int)oy);
+                        renderWindow.DrawMapCell(cellInfo, 320 + (int)px + (int)ox + xOffset, 210 + (int)py + (int)oy);
 
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallLower))
-                        renderWindow.DrawMapCell(cellInfo, 320 + (int)px + (int)ox, 210 + (int)py + (int)oy);
+                        renderWindow.DrawMapCell(cellInfo, 320 + (int)px + (int)ox + xOffset, 210 + (int)py + (int)oy);
 
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallUpper))
-                        renderWindow.DrawMapCell(cellInfo, 320 + (int)px + (int)ox, 210 + (int)py + (int)oy);
+                        renderWindow.DrawMapCell(cellInfo, 320 + (int)px + (int)ox + xOffset, 210 + (int)py + (int)oy);
 
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.Roof))
-                        renderWindow.DrawMapCell(cellInfo, 320 + (int)px + (int)ox, 210 + (int)py + (int)oy);
+                        renderWindow.DrawMapCell(cellInfo, 320 + (int)px + (int)ox + xOffset, 210 + (int)py + (int)oy);
 
                 }
             }
@@ -89,6 +94,15 @@ namespace OpenDiablo2.Core.Map_Engine
 
         public void Update(long ms)
         {
+            if (FocusedPlayerId != 0)
+            {
+                var player = gameState.PlayerInfos.FirstOrDefault(x => x.LocationDetails.PlayerId == FocusedPlayerId);
+                if (player != null)
+                {
+                    // TODO: Maybe smooth movement? Maybe not?
+                    CameraLocation = new PointF(player.LocationDetails.PlayerX, player.LocationDetails.PlayerY);
+                }
+            }
         }
 
 

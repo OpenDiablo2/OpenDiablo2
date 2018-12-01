@@ -1,20 +1,21 @@
-﻿using OpenDiablo2.Common.Enums;
+﻿using System;
+using System.Collections.Generic;
 using OpenDiablo2.Common.Interfaces.Mobs;
 using OpenDiablo2.Common.Models.Mobs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpenDiablo2.Core.GameState_
 {
     public class MobManager : IMobManager
     {
-        private List<MobState> Mobs = new List<MobState>(); // all mobs (including players!)
-        private List<PlayerState> Players = new List<PlayerState>();
-        private List<EnemyState> Enemies = new List<EnemyState>();
-        private List<int> IdsUsed = new List<int>();
+        public HashSet<MobState> Mobs { get; private set; } = new HashSet<MobState>(); // all mobs (including players!)
+        public HashSet<PlayerState> Players { get; private set; } = new HashSet<PlayerState>();
+        public HashSet<EnemyState> Enemies { get; private set;} = new HashSet<EnemyState>();
+
+        IEnumerable<MobState> IMobManager.Mobs => Mobs;
+        IEnumerable<PlayerState> IMobManager.Players => Players;
+        IEnumerable<EnemyState> IMobManager.Enemies => Enemies;
+
+        private HashSet<int> IdsUsed = new HashSet<int>();
 
         #region Player Controls
         public void AddPlayer(PlayerState player)
@@ -33,22 +34,9 @@ namespace OpenDiablo2.Core.GameState_
         public void AddMob(MobState mob)
         {
             Mobs.Add(mob);
-            // add id to idsused in order
-            int i = 0;
-            while(i < IdsUsed.Count)
-            {
-                if(IdsUsed[i] > mob.Id)
-                {
-                    IdsUsed.Insert(i, mob.Id);
-                    break;
-                }
-                i++;
-            }
-            if(i == IdsUsed.Count)
-            {
-                // didn't get added
-                IdsUsed.Add(mob.Id);
-            }
+            if (IdsUsed.Contains(mob.Id))
+                throw new ApplicationException("Tried to insert an existing mob id!");
+            IdsUsed.Add(mob.Id);
         }
         public void RemoveMob(MobState mob)
         {
@@ -57,16 +45,11 @@ namespace OpenDiablo2.Core.GameState_
         }
         public int GetNextAvailableMobId()
         {
-            int i = 0;
-            while(i < IdsUsed.Count)
-            {
-                if(IdsUsed[i] != i)
-                {
+            for (var i = 1; i < int.MaxValue; i++)
+                if (!IdsUsed.Contains(i))
                     return i;
-                }
-                i++;
-            }
-            return IdsUsed.Count;
+
+            throw new ApplicationException("Ran out of IDs. How did this even happen?!");
         }
         #endregion Mob Controls
 
@@ -83,59 +66,5 @@ namespace OpenDiablo2.Core.GameState_
         }
         #endregion Enemy Controls
 
-        #region Searching and Filtering
-        public List<MobState> FilterMobs(IEnumerable<MobState> mobs, IMobCondition condition)
-        {
-            // note: if condition is null, returns full list
-            List<MobState> filtered = new List<MobState>();
-            foreach(MobState mob in mobs)
-            {
-                if (condition == null || condition.Evaluate(mob))
-                {
-                    filtered.Add(mob);
-                }
-            }
-            return filtered;
-        }
-
-        public List<MobState> FindMobs(IMobCondition condition)
-        {
-            return FilterMobs(Mobs, condition);
-        }
-        public List<MobState> FindEnemies(IMobCondition condition)
-        {
-            return FilterMobs(Enemies, condition);
-        }
-        public List<MobState> FindPlayers(IMobCondition condition)
-        {
-            return FilterMobs(Players, condition);
-        }
-
-        public List<MobState> FindInRadius(IEnumerable<MobState> mobs, float centerx, float centery, float radius)
-        {
-            List<MobState> filtered = new List<MobState>();
-            foreach(MobState mob in mobs)
-            {
-                if(mob.GetDistance(centerx, centery) <= radius)
-                {
-                    filtered.Add(mob);
-                }
-            }
-            return filtered;
-        }
-
-        public List<MobState> FindMobsInRadius(float centerx, float centery, float radius, IMobCondition condition)
-        {
-            return FilterMobs(FindInRadius(Mobs, centerx, centery, radius), condition);
-        }
-        public List<MobState> FindEnemiesInRadius(float centerx, float centery, float radius, IMobCondition condition)
-        {
-            return FilterMobs(FindInRadius(Enemies, centerx, centery, radius), condition);
-        }
-        public List<MobState> FindPlayersInRadius(float centerx, float centery, float radius, IMobCondition condition)
-        {
-            return FilterMobs(FindInRadius(Players, centerx, centery, radius), condition);
-        }
-        #endregion Searching and Filtering
     }
 }

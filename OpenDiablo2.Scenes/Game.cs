@@ -15,7 +15,9 @@ namespace OpenDiablo2.Scenes
         private readonly IRenderWindow renderWindow;
         private readonly IResourceManager resourceManager;
         private readonly IMapEngine mapEngine;
+        private readonly IMouseInfoProvider mouseInfoProvider;
         private readonly IGameState gameState;
+        private readonly ISessionManager sessionManager;
         private readonly IKeyboardInfoProvider keyboardInfoProvider;
 
         //private ISprite[] testSprite;
@@ -28,13 +30,20 @@ namespace OpenDiablo2.Scenes
 
         private bool showMinipanel = false;
         private IButton runButton, menuButton;
+        private eMovementType lastMovementType = eMovementType.Stopped;
+        private int lastDirection = -1;
+
+        const double Rad2Deg = 180.0 / Math.PI;
+        const double Deg2Rad = Math.PI / 180.0;
 
         public Game(
             IRenderWindow renderWindow,
             IResourceManager resourceManager,
             IMapEngine mapEngine,
             IGameState gameState,
+            IMouseInfoProvider mouseInfoProvider,
             IKeyboardInfoProvider keyboardInfoProvider,
+            ISessionManager sessionManager,
             Func<eButtonType, IButton> createButton,
             Func<IMiniPanel> createMiniPanel,
             Func<ICharacterPanel> createCharacterPanel,
@@ -45,7 +54,9 @@ namespace OpenDiablo2.Scenes
             this.resourceManager = resourceManager;
             this.mapEngine = mapEngine;
             this.gameState = gameState;
+            this.mouseInfoProvider = mouseInfoProvider;
             this.keyboardInfoProvider = keyboardInfoProvider;
+            this.sessionManager = sessionManager;
 
 
             panelSprite = renderWindow.LoadSprite(ResourcePaths.GamePanels, Palettes.Act1);
@@ -80,13 +91,10 @@ namespace OpenDiablo2.Scenes
 
         public void Render()
         {
-            /*
-            if (gameState.MapDirty)
-                RedrawMap();
+            // TODO: Maybe show some sort of connecting/loading message?
+            if (mapEngine.FocusedPlayerId == 0)
+                return;
 
-            for (int i = 0; i < gameState.MapData.Width * gameState.MapData.Height; i++)
-                renderWindow.Draw(testSprite[i]);
-                */
             mapEngine.Render();
             DrawPanel();
 
@@ -133,6 +141,8 @@ namespace OpenDiablo2.Scenes
 
         public void Update(long ms)
         {
+            var seconds = ms / 1000f;
+
             if(showMinipanel)
             {
                 minipanel.Update();
@@ -143,38 +153,70 @@ namespace OpenDiablo2.Scenes
             runButton.Update();
             menuButton.Update();
 
-            var seconds = (float)ms / 1000f;
-            var xMod = 0f;
-            var yMod = 0f;
+            HandleMovement();
+            //var xMod = 0f;
+            //var yMod = 0f;
 
-            if (keyboardInfoProvider.KeyIsPressed(80 /*left*/))
-            {
-                xMod = -8f * seconds;
-            }
 
-            if (keyboardInfoProvider.KeyIsPressed(79 /*right*/))
-            {
-                xMod = 8f * seconds;
-            }
+            //if (keyboardInfoProvider.KeyIsPressed(80 /*left*/))
+            //{
+            //    xMod = -8f * seconds;
+            //}
 
-            if (keyboardInfoProvider.KeyIsPressed(81 /*down*/))
-            {
-                yMod = 10f * seconds;
-            }
+            //if (keyboardInfoProvider.KeyIsPressed(79 /*right*/))
+            //{
+            //    xMod = 8f * seconds;
+            //}
 
-            if (keyboardInfoProvider.KeyIsPressed(82 /*up*/))
-            {
-                yMod = -10f * seconds;
-            }
+            //if (keyboardInfoProvider.KeyIsPressed(81 /*down*/))
+            //{
+            //    yMod = 10f * seconds;
+            //}
 
-            if (xMod != 0f || yMod != 0f)
-            {
-                xMod *= .5f;
-                yMod *= .5f;
-                mapEngine.CameraLocation = new PointF(mapEngine.CameraLocation.X + xMod, mapEngine.CameraLocation.Y + yMod);
-            }
+            //if (keyboardInfoProvider.KeyIsPressed(82 /*up*/))
+            //{
+            //    yMod = -10f * seconds;
+            //}
+
+            //if (xMod != 0f || yMod != 0f)
+            //{
+            //    xMod *= .5f;
+            //    yMod *= .5f;
+            //    mapEngine.CameraLocation = new PointF(mapEngine.CameraLocation.X + xMod, mapEngine.CameraLocation.Y + yMod);
+            //}
 
             mapEngine.Update(ms);
+        }
+
+        private void HandleMovement()
+        {
+            if (mouseInfoProvider.MouseY > 530) // 550 is what it should be, but the minipanel check needs to happent oo
+                return;
+
+            if (gameState.ShowInventoryPanel && mouseInfoProvider.MouseX >= 400)
+                return;
+
+            if (gameState.ShowCharacterPanel && mouseInfoProvider.MouseX < 400)
+                return;
+
+
+            // TODO: Filter movement for inventory panel
+            var xOffset = (gameState.ShowInventoryPanel ? -200 : 0) + (gameState.ShowCharacterPanel ? 200 : 0);
+
+            var cursorDirection = (int)Math.Round(((Math.Atan2(300 - mouseInfoProvider.MouseY, mouseInfoProvider.MouseX - (400 + xOffset)) * Rad2Deg) + 180) / 32);
+
+            if (mouseInfoProvider.LeftMouseDown && (lastMovementType == eMovementType.Stopped || lastDirection != cursorDirection))
+            {
+                lastDirection = cursorDirection;
+                lastMovementType = runButton.Toggled ? eMovementType.Running : eMovementType.Walking;
+                sessionManager.MoveRequest(cursorDirection, lastMovementType);
+            }
+            else if (!mouseInfoProvider.LeftMouseDown && lastMovementType != eMovementType.Stopped)
+            {
+                lastDirection = cursorDirection;
+                lastMovementType = eMovementType.Stopped;
+                sessionManager.MoveRequest(cursorDirection, lastMovementType);
+            }
         }
 
         public void Dispose()
