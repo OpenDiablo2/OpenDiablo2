@@ -29,7 +29,7 @@ You need to have MonoDevelop installed, as well as any depenencies for that. You
 ## Command Line Parameters
 | Long Name    | Description                                                  |
 | ------------ | ------------------------------------------------------------ |
-| --datapath   | (-d) Defines the path where the data files can be found      |
+| --datapath   | (-p) Defines the path where the data files can be found      |
 | --hwmouse    | Use the hardware mouse instead of software                   |
 | --mousescale | When hardware mouse is enabled, this defines the pixel scale of the mouse. No effect for software mode |
 | --fullscreen | (-f) When set, the game launches in full screen mode at 800x600. |

@@ -101,7 +101,6 @@ namespace OpenDiablo2.Common.Models
         // TODO: DI magic please
         public MPQDS1(Stream stream, LevelPreset level, LevelDetail levelDetail, LevelType levelType, IEngineDataManager engineDataManager, IResourceManager resourceManager)
         {
-            log.Debug($"Loading {level.Name} (Act {levelDetail.Act})...");
             var br = new BinaryReader(stream);
             Version = br.ReadInt32();
             Width = br.ReadInt32() + 1;
@@ -295,8 +294,6 @@ namespace OpenDiablo2.Common.Models
                 var isMasked = ((dt1Mask >> i) & 1) == 1;
                 if (!isMasked || levelType.File[i] == "0")
                     continue;
-
-                log.Debug($"Loading DT resource {levelType.File[i]}");
 
                 DT1s[i] = resourceManager.GetMPQDT1("data\\global\\tiles\\" + levelType.File[i].Replace("/", "\\"));
 

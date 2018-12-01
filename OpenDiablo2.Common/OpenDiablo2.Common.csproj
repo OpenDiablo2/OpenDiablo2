@@ -52,9 +52,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\MessageFrameAttribute.cs" />
     <Compile Include="Attributes\SceneAttribute.cs" />
     <Compile Include="AutofacModule.cs" />
     <Compile Include="Enums\eItemContainerType.cs" />
+    <Compile Include="Enums\eMessageFrameType.cs" />
+    <Compile Include="Enums\eMovementType.cs" />
     <Compile Include="Enums\ePanelFrameType.cs" />
     <Compile Include="Enums\eButtonType.cs" />
     <Compile Include="Enums\eHero.cs" />
@@ -71,6 +74,14 @@
     <Compile Include="Interfaces\IItemManager.cs" />
     <Compile Include="Interfaces\ISessionManager.cs" />
     <Compile Include="Interfaces\ISessionServer.cs" />
+    <Compile Include="Extensions\MobManagerExtensions.cs" />
+    <Compile Include="Interfaces\IGameServer.cs" />
+    <Compile Include="Interfaces\MessageBus\ISessionEventProvider.cs" />
+    <Compile Include="Interfaces\MessageBus\IMessageFrame.cs" />
+    <Compile Include="Interfaces\MessageBus\ISessionManager.cs" />
+    <Compile Include="Interfaces\MessageBus\ISessionServer.cs" />
+    <Compile Include="Interfaces\MessageBus\PlayerInfo.cs" />
+    <Compile Include="Interfaces\MessageBus\PlayerLocationDetails.cs" />
     <Compile Include="Interfaces\UI\IButton.cs" />
     <Compile Include="Interfaces\UI\IItemContainer.cs" />
     <Compile Include="Interfaces\UI\IPanelFrame.cs" />
@@ -100,7 +111,6 @@
     <Compile Include="Interfaces\Drawing\ITexture.cs" />
     <Compile Include="Interfaces\Mobs\IHeroTypeConfig.cs" />
     <Compile Include="Interfaces\Mobs\ILevelExperienceConfig.cs" />
-    <Compile Include="Interfaces\Mobs\IMobCondition.cs" />
     <Compile Include="Interfaces\Mobs\IMobManager.cs" />
     <Compile Include="Interfaces\Mobs\IStatModifier.cs" />
     <Compile Include="Models\BitStream.cs" />
@@ -117,7 +127,6 @@
     <Compile Include="Models\Mobs\EnemyState.cs" />
     <Compile Include="Models\Mobs\HeroTypeConfig.cs" />
     <Compile Include="Models\Mobs\LevelExperienceConfig.cs" />
-    <Compile Include="Models\Mobs\MobCondition.cs" />
     <Compile Include="Models\Mobs\MobState.cs" />
     <Compile Include="Models\Mobs\PlayerState.cs" />
     <Compile Include="Models\Mobs\Stat.cs" />
@@ -144,9 +153,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Message Frames\Requests\" />
-    <Folder Include="Message Frames\Responses\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

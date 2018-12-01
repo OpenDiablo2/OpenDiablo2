@@ -1,11 +1,7 @@
-﻿using OpenDiablo2.Common.Enums;
+﻿using System;
+using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Enums.Mobs;
 using OpenDiablo2.Common.Interfaces.Mobs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpenDiablo2.Common.Models.Mobs
 {
@@ -14,13 +10,14 @@ namespace OpenDiablo2.Common.Models.Mobs
         public eHero HeroType { get; protected set; }
         private IHeroTypeConfig HeroTypeConfig;
         private ILevelExperienceConfig ExperienceConfig;
+        public int ClientHash { get; protected set; }
 
         // Player character stats
         protected Stat Vitality;
         protected Stat Strength;
         protected Stat Energy;
         protected Stat Dexterity;
-        
+
         protected Stat DefenseRating;
         protected Stat AttackRating;
 
@@ -29,11 +26,14 @@ namespace OpenDiablo2.Common.Models.Mobs
 
         public int Experience { get; protected set; }
 
-        public PlayerState(string name, int id, int level, float x, float y,
-            int vitality, int strength, int energy, int dexterity, int experience, eHero herotype, 
+        public PlayerState() : base() { }
+
+        public PlayerState(int clientHash, string name, int id, int level, float x, float y,
+            int vitality, int strength, int energy, int dexterity, int experience, eHero herotype,
             IHeroTypeConfig heroconfig, ILevelExperienceConfig expconfig)
             : base(name, id, level, 0, x, y)
         {
+            this.ClientHash = clientHash;
             Stamina = new Stat(0, 0, 0, true);
             Mana = new Stat(0, 0, 0, true);
 
@@ -42,7 +42,7 @@ namespace OpenDiablo2.Common.Models.Mobs
             Energy = new Stat(0, energy, energy, true);
             Dexterity = new Stat(0, dexterity, dexterity, true);
 
-            AttackRating = new Stat(0, 0, 0, false); 
+            AttackRating = new Stat(0, 0, 0, false);
             DefenseRating = new Stat(0, 0, 0, false);
 
             Experience = experience; // how much total exp do they have
@@ -81,11 +81,11 @@ namespace OpenDiablo2.Common.Models.Mobs
         }
         public bool TryLevelUp()
         {
-            if(Level >= GetMaxLevel())
+            if (Level >= GetMaxLevel())
             {
                 return false; // can't level up anymore
             }
-            if(GetExperienceToLevel() > 0)
+            if (GetExperienceToLevel() > 0)
             {
                 return false; // not enough exp
             }

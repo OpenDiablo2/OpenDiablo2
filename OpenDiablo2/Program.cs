@@ -34,9 +34,20 @@ namespace OpenDiablo2
             try
             {
 #endif
-            BuildContainer()
-                .Resolve<IGameEngine>()
-                .Run();
+            var container = BuildContainer();
+            try
+            {
+                using (var gameEngine = container.Resolve<IGameEngine>())
+                {
+                    gameEngine.Run();
+                }
+            }
+            finally
+            {
+                container.Dispose();
+            }
+
+
 #if !DEBUG
             }
             catch (Exception ex)
