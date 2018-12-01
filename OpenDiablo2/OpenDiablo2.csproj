@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{2B0CF1AC-06DD-4322-AE8B-FF8A8C70A3CD}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>OpenDiablo2</RootNamespace>
     <AssemblyName>OpenDiablo2</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>

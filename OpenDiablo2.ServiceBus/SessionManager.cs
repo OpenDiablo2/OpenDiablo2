@@ -32,10 +32,11 @@ namespace OpenDiablo2.ServiceBus
         public OnLocatePlayersEvent OnLocatePlayers { get; set; }
         public OnPlayerInfoEvent OnPlayerInfo { get; set; }
         public OnFocusOnPlayer OnFocusOnPlayer { get; set; }
+        public OnMoveRequest OnMoveRequest { get; set; }
 
         public SessionManager(
-            eSessionType sessionType, 
-            Func<eSessionType, ISessionServer> getSessionServer, 
+            eSessionType sessionType,
+            Func<eSessionType, ISessionServer> getSessionServer,
             Func<eMessageFrameType, IMessageFrame> getMessageFrame,
             Func<IGameState> getGameState
             )
@@ -75,7 +76,7 @@ namespace OpenDiablo2.ServiceBus
                 default:
                     throw new ApplicationException("This session type is currently unsupported.");
             }
-            
+
             running = true;
             resetEvent.WaitOne();
             running = false;
@@ -100,10 +101,10 @@ namespace OpenDiablo2.ServiceBus
             Stop();
         }
 
-        public void Send(IMessageFrame messageFrame)
+        public void Send(IMessageFrame messageFrame, bool more = false)
         {
             var attr = messageFrame.GetType().GetCustomAttributes(true).First(x => typeof(MessageFrameAttribute).IsAssignableFrom(x.GetType())) as MessageFrameAttribute;
-            requestSocket.SendFrame(new byte[] { (byte)attr.FrameType }.Concat(messageFrame.Data).ToArray());
+            requestSocket.SendFrame(new byte[] { (byte)attr.FrameType }.Concat(messageFrame.Data).ToArray(), more);
         }
 
         private void ProcessMessageFrame<T>() where T : IMessageFrame, new()
@@ -113,6 +114,7 @@ namespace OpenDiablo2.ServiceBus
 
             var bytes = requestSocket.ReceiveFrameBytes();
             var frameType = (eMessageFrameType)bytes[0];
+
             var frameData = bytes.Skip(1).ToArray(); // TODO: Can we maybe use pointers? This seems wasteful
             var messageFrame = getMessageFrame(frameType);
             if (messageFrame.GetType() != typeof(T))
@@ -122,6 +124,13 @@ namespace OpenDiablo2.ServiceBus
             {
                 messageFrame.Process(requestSocket.GetHashCode(), this);
             }
+        }
+
+        private void NoOp()
+        {
+            var bytes = requestSocket.ReceiveFrameBytes();
+            if ((eMessageFrameType)bytes[0] != eMessageFrameType.None)
+                throw new ApplicationException("Excepted a NoOp but got a command instead!");
         }
 
         public void JoinGame(string playerName, eHero heroType)
@@ -135,5 +144,12 @@ namespace OpenDiablo2.ServiceBus
                 ProcessMessageFrame<MFFocusOnPlayer>();
             });
         }
+
+        public void MoveRequest(int direction, eMovementType movementType)
+            => Task.Run(() =>
+            {
+                Send(new MFMoveRequest(direction, movementType));
+                NoOp();
+            });
     }
 }

@@ -9,6 +9,7 @@ namespace OpenDiablo2.Common.Interfaces
     public delegate void OnLocatePlayersEvent(int clientHash, IEnumerable<PlayerLocationDetails> playerLocationDetails);
     public delegate void OnPlayerInfoEvent(int clientHash, IEnumerable<PlayerInfo> playerInfo);
     public delegate void OnFocusOnPlayer(int clientHash, int playerId);
+    public delegate void OnMoveRequest(int clientHash, int direction, eMovementType movementType);
 
     public interface ISessionEventProvider
     {
@@ -17,5 +18,6 @@ namespace OpenDiablo2.Common.Interfaces
         OnLocatePlayersEvent OnLocatePlayers { get; set; }
         OnPlayerInfoEvent OnPlayerInfo { get; set; }
         OnFocusOnPlayer OnFocusOnPlayer { get; set; }
+        OnMoveRequest OnMoveRequest { get; set; }
     }
 }

@@ -9,6 +9,8 @@
         LocatePlayers = 0x03,
         PlayerInfo = 0x04,
         FocusOnPlayer = 0x05,
+        MoveRequest = 0x06,
+        PlayerMove = 0x07,
 
 
         MAX = 0xFF, // NOTE:

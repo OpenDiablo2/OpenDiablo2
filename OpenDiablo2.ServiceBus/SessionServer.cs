@@ -25,8 +25,11 @@ namespace OpenDiablo2.ServiceBus
         private bool running = false;
         private ResponseSocket responseSocket;
 
-        public OnSetSeedEvent OnSetSeed { get; set; }
         public OnJoinGameEvent OnJoinGame { get; set; }
+        public OnMoveRequest OnMoveRequest { get; set; }
+
+        // TODO: Fix interface so we don't need this in the session server
+        public OnSetSeedEvent OnSetSeed { get; set; }
         public OnLocatePlayersEvent OnLocatePlayers { get; set; }
         public OnPlayerInfoEvent OnPlayerInfo { get; set; }
         public OnFocusOnPlayer OnFocusOnPlayer { get; set; }
@@ -67,6 +70,7 @@ namespace OpenDiablo2.ServiceBus
             }
 
             OnJoinGame += OnJoinGameHandler;
+            OnMoveRequest += OnMovementRequestHandler;
 
             var proactor = new NetMQProactor(responseSocket, (socket, message) =>
             {
@@ -86,6 +90,16 @@ namespace OpenDiablo2.ServiceBus
             log.Info("Session server has stopped.");
         }
 
+        private void OnMovementRequestHandler(int clientHash, int direction, eMovementType movementType)
+        {
+            // TODO: Actually move the player ....
+            var player = gameServer.Players.FirstOrDefault(x => x.ClientHash == clientHash);
+            if (player == null)
+                return;
+            log.Info($"Player {player.Id} requested to move in {direction} direction: {movementType.ToString()}");
+
+            NoOp();
+        }
 
         public void Stop()
         {
@@ -98,6 +112,11 @@ namespace OpenDiablo2.ServiceBus
         public void Dispose()
         {
             Stop();
+        }
+
+        private void NoOp()
+        {
+            responseSocket.SendFrame(new byte[] { (byte)eMessageFrameType.None });
         }
 
         private void Send(IMessageFrame messageFrame, bool more = false)

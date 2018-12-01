@@ -31,6 +31,11 @@ namespace OpenDiablo2.Common.Interfaces
         bool Enabled { get; set; }
 
         /// <summary>
+        /// If true, the button is pushed down, false otherwise. Only valid for toggle buttons.
+        /// </summary>
+        bool Toggled { get; }
+
+        /// <summary>
         /// The position of the button on the screen.
         /// </summary>
         Point Location { get; set; }
