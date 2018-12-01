@@ -30,6 +30,8 @@ namespace OpenDiablo2.ServiceBus
         public OnSetSeedEvent OnSetSeed { get; set; }
         public OnJoinGameEvent OnJoinGame { get; set; }
         public OnLocatePlayersEvent OnLocatePlayers { get; set; }
+        public OnPlayerInfoEvent OnPlayerInfo { get; set; }
+        public OnFocusOnPlayer OnFocusOnPlayer { get; set; }
 
         public SessionManager(
             eSessionType sessionType, 
@@ -128,7 +130,9 @@ namespace OpenDiablo2.ServiceBus
             {
                 Send(new MFJoinGame(playerName, heroType));
                 ProcessMessageFrame<MFSetSeed>();
+                ProcessMessageFrame<MFPlayerInfo>();
                 ProcessMessageFrame<MFLocatePlayers>();
+                ProcessMessageFrame<MFFocusOnPlayer>();
             });
         }
     }

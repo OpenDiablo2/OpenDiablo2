@@ -4,7 +4,7 @@ namespace OpenDiablo2.Common.Interfaces
 {
     public interface IMapEngine
     {
-        int FocusedMobId { get; set; }
+        int FocusedPlayerId { get; set; }
         PointF CameraLocation { get; set; } 
         void Update(long ms);
         void Render();

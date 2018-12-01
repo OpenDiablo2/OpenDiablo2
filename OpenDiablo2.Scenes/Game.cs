@@ -80,13 +80,10 @@ namespace OpenDiablo2.Scenes
 
         public void Render()
         {
-            /*
-            if (gameState.MapDirty)
-                RedrawMap();
+            // TODO: Maybe show some sort of connecting/loading message?
+            if (mapEngine.FocusedPlayerId == 0)
+                return;
 
-            for (int i = 0; i < gameState.MapData.Width * gameState.MapData.Height; i++)
-                renderWindow.Draw(testSprite[i]);
-                */
             mapEngine.Render();
             DrawPanel();
 

@@ -31,6 +31,7 @@ namespace OpenDiablo2.Core.GameState_
         public string MapName { get; private set; }
         public Palette CurrentPalette => paletteProvider.PaletteTable[$"ACT{Act}"];
         public IEnumerable<PlayerLocationDetails> PlayerLocationDetails { get; private set; } = new List<PlayerLocationDetails>();
+        public IEnumerable<PlayerInfo> PlayerInfos { get; private set; } = new List<PlayerInfo>();
 
         public bool ShowInventoryPanel { get; set; } = false;
         public bool ShowCharacterPanel { get; set; } = false;
@@ -66,12 +67,20 @@ namespace OpenDiablo2.Core.GameState_
 
             sessionManager.OnSetSeed += OnSetSeedEvent;
             sessionManager.OnLocatePlayers += OnLocatePlayers;
+            sessionManager.OnPlayerInfo += OnPlayerInfo;
+            sessionManager.OnFocusOnPlayer += OnFocusOnPlayer;
 
             mapInfo = new List<MapInfo>();
             sceneManager.ChangeScene("Game");
 
             sessionManager.JoinGame(characterName, hero);
         }
+
+        private void OnFocusOnPlayer(int clientHash, int playerId)
+            => getMapEngine().FocusedPlayerId = playerId;
+
+        private void OnPlayerInfo(int clientHash, IEnumerable<PlayerInfo> playerInfo)
+            => this.PlayerInfos = playerInfo;
 
         private void OnLocatePlayers(int clientHash, IEnumerable<PlayerLocationDetails> playerLocationDetails)
         {

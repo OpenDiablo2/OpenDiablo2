@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Interfaces.MessageBus;
 using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Common.Interfaces
@@ -14,6 +15,7 @@ namespace OpenDiablo2.Common.Interfaces
         int Seed { get; }
         string MapName { get; }
         Palette CurrentPalette { get; }
+        IEnumerable<PlayerInfo> PlayerInfos { get; }
 
         bool ToggleShowInventoryPanel();
         bool ShowInventoryPanel { get; set; }

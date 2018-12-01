@@ -28,6 +28,8 @@ namespace OpenDiablo2.ServiceBus
         public OnSetSeedEvent OnSetSeed { get; set; }
         public OnJoinGameEvent OnJoinGame { get; set; }
         public OnLocatePlayersEvent OnLocatePlayers { get; set; }
+        public OnPlayerInfoEvent OnPlayerInfo { get; set; }
+        public OnFocusOnPlayer OnFocusOnPlayer { get; set; }
 
         public SessionServer(
             eSessionType sessionType, 
@@ -108,7 +110,9 @@ namespace OpenDiablo2.ServiceBus
         {
             gameServer.SpawnNewPlayer(clientHash, playerName, heroType);
             Send(new MFSetSeed(gameServer.Seed), true);
-            Send(new MFLocatePlayers(gameServer.Players.Select(x => x.ToPlayerLocationDetails())));
+            Send(new MFPlayerInfo(gameServer.Players.Select(x => x.ToPlayerInfo())), true);
+            Send(new MFLocatePlayers(gameServer.Players.Select(x => x.ToPlayerLocationDetails())), true);
+            Send(new MFFocusOnPlayer(gameServer.Players.First(x => x.ClientHash == clientHash).Id));
         }
     }
 }

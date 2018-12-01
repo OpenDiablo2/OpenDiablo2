@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
@@ -12,7 +13,7 @@ namespace OpenDiablo2.Core.Map_Engine
         private readonly IRenderWindow renderWindow;
         private readonly IResourceManager resourceManager;
 
-        public int FocusedMobId { get; set; } = -1;
+        public int FocusedPlayerId { get; set; } = 0;
 
         private PointF cameraLocation = new PointF();
         public PointF CameraLocation
@@ -91,6 +92,15 @@ namespace OpenDiablo2.Core.Map_Engine
 
         public void Update(long ms)
         {
+            if (FocusedPlayerId != 0)
+            {
+                var player = gameState.PlayerInfos.FirstOrDefault(x => x.LocationDetails.PlayerId == FocusedPlayerId);
+                if (player != null)
+                {
+                    // TODO: Maybe smooth movement? Maybe not?
+                    CameraLocation = new PointF(player.LocationDetails.PlayerX, player.LocationDetails.PlayerY);
+                }
+            }
         }
 
 
