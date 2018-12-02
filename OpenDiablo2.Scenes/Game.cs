@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Numerics;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
@@ -31,10 +32,9 @@ namespace OpenDiablo2.Scenes
         private bool showMinipanel = false;
         private IButton runButton, menuButton;
         private eMovementType lastMovementType = eMovementType.Stopped;
-        private int lastDirection = -1;
+        private byte lastDirection = 255;
 
         const double Rad2Deg = 180.0 / Math.PI;
-        const double Deg2Rad = Math.PI / 180.0;
 
         public Game(
             IRenderWindow renderWindow,
@@ -154,36 +154,6 @@ namespace OpenDiablo2.Scenes
             menuButton.Update();
 
             HandleMovement();
-            //var xMod = 0f;
-            //var yMod = 0f;
-
-
-            //if (keyboardInfoProvider.KeyIsPressed(80 /*left*/))
-            //{
-            //    xMod = -8f * seconds;
-            //}
-
-            //if (keyboardInfoProvider.KeyIsPressed(79 /*right*/))
-            //{
-            //    xMod = 8f * seconds;
-            //}
-
-            //if (keyboardInfoProvider.KeyIsPressed(81 /*down*/))
-            //{
-            //    yMod = 10f * seconds;
-            //}
-
-            //if (keyboardInfoProvider.KeyIsPressed(82 /*up*/))
-            //{
-            //    yMod = -10f * seconds;
-            //}
-
-            //if (xMod != 0f || yMod != 0f)
-            //{
-            //    xMod *= .5f;
-            //    yMod *= .5f;
-            //    mapEngine.CameraLocation = new PointF(mapEngine.CameraLocation.X + xMod, mapEngine.CameraLocation.Y + yMod);
-            //}
 
             mapEngine.Update(ms);
         }
@@ -203,19 +173,27 @@ namespace OpenDiablo2.Scenes
             // TODO: Filter movement for inventory panel
             var xOffset = (gameState.ShowInventoryPanel ? -200 : 0) + (gameState.ShowCharacterPanel ? 200 : 0);
 
-            var cursorDirection = (int)Math.Round(((Math.Atan2(300 - mouseInfoProvider.MouseY, mouseInfoProvider.MouseX - (400 + xOffset)) * Rad2Deg) + 180) / 32);
+            var mx = (mouseInfoProvider.MouseX - 400) - xOffset;
+            var my = (mouseInfoProvider.MouseY - 300);
 
-            if (mouseInfoProvider.LeftMouseDown && (lastMovementType == eMovementType.Stopped || lastDirection != cursorDirection))
+            var tx = (mx / 60f + my / 40f) / 2f;
+            var ty = (my / 40f - (mx / 60f)) / 2f;
+            var cursorDirection = (int)Math.Round(Math.Atan2(ty, tx) * Rad2Deg);
+            if (cursorDirection < 0)
+                cursorDirection += 360;
+            var actualDirection = (byte)(cursorDirection / 22);
+
+            if (mouseInfoProvider.LeftMouseDown && (lastMovementType == eMovementType.Stopped || lastDirection != actualDirection))
             {
-                lastDirection = cursorDirection;
+                lastDirection = actualDirection;
                 lastMovementType = runButton.Toggled ? eMovementType.Running : eMovementType.Walking;
-                sessionManager.MoveRequest(cursorDirection, lastMovementType);
+                sessionManager.MoveRequest(actualDirection, lastMovementType);
             }
             else if (!mouseInfoProvider.LeftMouseDown && lastMovementType != eMovementType.Stopped)
             {
-                lastDirection = cursorDirection;
+                lastDirection = actualDirection;
                 lastMovementType = eMovementType.Stopped;
-                sessionManager.MoveRequest(cursorDirection, lastMovementType);
+                sessionManager.MoveRequest(actualDirection, lastMovementType);
             }
         }
 

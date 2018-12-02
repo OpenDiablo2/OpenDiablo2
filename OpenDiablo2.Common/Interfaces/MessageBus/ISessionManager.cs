@@ -16,6 +16,6 @@ namespace OpenDiablo2.Common.Interfaces
         void Stop();
 
         void JoinGame(string playerName, eHero heroType);
-        void MoveRequest(int direction, eMovementType movementType);
+        void MoveRequest(byte direction, eMovementType movementType);
     }
 }

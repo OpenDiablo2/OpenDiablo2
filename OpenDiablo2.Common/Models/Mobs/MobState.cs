@@ -11,8 +11,8 @@ namespace OpenDiablo2.Common.Models.Mobs
         public readonly int Id;
         public bool Alive { get; protected set; } = true;
 
-        protected float X = 0;
-        protected float Y = 0;
+        public float X { get; set; } = 0;
+        public float Y { get; set; } = 0;
 
         protected Stat Health;
 

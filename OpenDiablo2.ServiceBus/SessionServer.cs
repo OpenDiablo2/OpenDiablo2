@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ using NetMQ.Sockets;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
-using OpenDiablo2.Common.Interfaces.MessageBus;
+using OpenDiablo2.Common.Models;
 using OpenDiablo2.ServiceBus.Message_Frames.Server;
 
 namespace OpenDiablo2.ServiceBus
@@ -33,6 +34,8 @@ namespace OpenDiablo2.ServiceBus
         public OnLocatePlayersEvent OnLocatePlayers { get; set; }
         public OnPlayerInfoEvent OnPlayerInfo { get; set; }
         public OnFocusOnPlayer OnFocusOnPlayer { get; set; }
+
+        const int serverUpdateRate = 30;
 
         public SessionServer(
             eSessionType sessionType, 
@@ -83,22 +86,41 @@ namespace OpenDiablo2.ServiceBus
             });
             running = true;
             WaitServerStartEvent.Set();
+            Task.Run(() =>
+            {
+                var lastRun = DateTime.Now;
+                while(running)
+                {
+                    var newTime = DateTime.Now;
+                    var timeDiff = (newTime - lastRun).TotalMilliseconds;
+                    lastRun = newTime;
+
+                    gameServer.Update((int)timeDiff);
+                    if (timeDiff < serverUpdateRate)
+                        Thread.Sleep((int)Math.Min(serverUpdateRate, Math.Max(0, serverUpdateRate - timeDiff)));
+                }
+            });
             resetEvent.WaitOne();
             proactor.Dispose();
             running = false;
             responseSocket.Dispose();
             log.Info("Session server has stopped.");
         }
+        
 
-        private void OnMovementRequestHandler(int clientHash, int direction, eMovementType movementType)
+        private void OnMovementRequestHandler(int clientHash, byte direction, eMovementType movementType)
         {
             // TODO: Actually move the player ....
             var player = gameServer.Players.FirstOrDefault(x => x.ClientHash == clientHash);
             if (player == null)
                 return;
-            log.Info($"Player {player.Id} requested to move in {direction} direction: {movementType.ToString()}");
 
-            NoOp();
+            // TODO: The server needs to actually manage player movement...
+            player.MovementDirection = direction;
+            player.MovementType = movementType;
+            player.MovementDirection = direction;
+
+            Send(new MFLocatePlayers(gameServer.Players.Select(x => x.ToPlayerLocationDetails())));
         }
 
         public void Stop()

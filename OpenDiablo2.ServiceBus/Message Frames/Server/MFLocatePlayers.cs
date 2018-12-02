@@ -4,7 +4,7 @@ using System.Linq;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
-using OpenDiablo2.Common.Interfaces.MessageBus;
+using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.ServiceBus.Message_Frames.Server
 {
