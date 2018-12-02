@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using OpenDiablo2.Common.Enums;
-using OpenDiablo2.Common.Interfaces.MessageBus;
+using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Common.Interfaces
 {
@@ -9,7 +9,7 @@ namespace OpenDiablo2.Common.Interfaces
     public delegate void OnLocatePlayersEvent(int clientHash, IEnumerable<PlayerLocationDetails> playerLocationDetails);
     public delegate void OnPlayerInfoEvent(int clientHash, IEnumerable<PlayerInfo> playerInfo);
     public delegate void OnFocusOnPlayer(int clientHash, int playerId);
-    public delegate void OnMoveRequest(int clientHash, int direction, eMovementType movementType);
+    public delegate void OnMoveRequest(int clientHash, byte direction, eMovementType movementType);
 
     public interface ISessionEventProvider
     {

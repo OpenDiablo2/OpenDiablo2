@@ -12,7 +12,7 @@ namespace OpenDiablo2.ServiceBus.Message_Frames.Server
         public byte[] Data
         {
             get => BitConverter.GetBytes(Seed);
-            set => BitConverter.ToInt32(value, 0);
+            set => Seed = BitConverter.ToInt32(value, 0);
         }
 
         public Int32 Seed { get; private set; }

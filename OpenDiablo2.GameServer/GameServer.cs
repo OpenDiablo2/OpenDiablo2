@@ -16,6 +16,8 @@ namespace OpenDiablo2.GameServer_
         public int Seed { get; private set; }
         public IEnumerable<PlayerState> Players => mobManager.Players;
 
+        const double Deg2Rad = Math.PI / 180.0;
+
         public GameServer(IMobManager mobManager)
         {
             this.mobManager = mobManager;
@@ -34,6 +36,30 @@ namespace OpenDiablo2.GameServer_
 
             mobManager.AddPlayer(newPlayer);
             return newPlayer.Id;
+        }
+
+        public void Update(int ms)
+        {
+            var seconds = (float)ms / 1000f;
+            foreach(var player in Players)
+            {
+                UpdatePlayerMovement(player, seconds);
+            }
+        }
+
+        private void UpdatePlayerMovement(PlayerState player, float seconds)
+        {
+            // TODO: We need to do collision detection here...
+            if (player.MovementType == eMovementType.Stopped)
+                return;
+
+            var rads = (float)player.MovementDirection * 22 * (float)Deg2Rad;
+
+            var moveX = (float)Math.Cos(rads) * seconds * 2f;
+            var moveY = (float)Math.Sin(rads) * seconds * 2f;
+
+            player.X += moveX;
+            player.Y += moveY;
         }
 
         public void Dispose()

@@ -5,7 +5,6 @@ using System.Linq;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
-using OpenDiablo2.Common.Interfaces.MessageBus;
 using OpenDiablo2.Common.Models;
 using OpenDiablo2.Core.Map_Engine;
 
@@ -31,8 +30,7 @@ namespace OpenDiablo2.Core.GameState_
         public int Act { get; private set; }
         public string MapName { get; private set; }
         public Palette CurrentPalette => paletteProvider.PaletteTable[$"ACT{Act}"];
-        public IEnumerable<PlayerLocationDetails> PlayerLocationDetails { get; private set; } = new List<PlayerLocationDetails>();
-        public IEnumerable<PlayerInfo> PlayerInfos { get; private set; } = new List<PlayerInfo>();
+        public List<PlayerInfo> PlayerInfos { get; private set; } = new List<PlayerInfo>();
 
         public bool ShowInventoryPanel { get; set; } = false;
         public bool ShowCharacterPanel { get; set; } = false;
@@ -43,6 +41,10 @@ namespace OpenDiablo2.Core.GameState_
 
         public Item SelectedItem { get; internal set; }
         public object ThreadLocker { get; } = new object();
+
+        IEnumerable<PlayerInfo> IGameState.PlayerInfos => PlayerInfos;
+
+        const double Deg2Rad = Math.PI / 180.0;
 
         public GameState(
             ISceneManager sceneManager,
@@ -86,11 +88,18 @@ namespace OpenDiablo2.Core.GameState_
             => getMapEngine().FocusedPlayerId = playerId;
 
         private void OnPlayerInfo(int clientHash, IEnumerable<PlayerInfo> playerInfo)
-            => this.PlayerInfos = playerInfo;
+            => this.PlayerInfos = playerInfo.ToList();
 
         private void OnLocatePlayers(int clientHash, IEnumerable<PlayerLocationDetails> playerLocationDetails)
         {
-            PlayerLocationDetails = playerLocationDetails;
+            foreach (var player in PlayerInfos)
+            {
+                var details = playerLocationDetails.FirstOrDefault(x => x.PlayerId == player.LocationDetails.PlayerId);
+                if (details == null)
+                    continue;
+
+                player.LocationDetails = details;
+            }
         }
 
         private void OnSetSeedEvent(int clientHash, int seed)
@@ -427,6 +436,24 @@ namespace OpenDiablo2.Core.GameState_
         {
             animationTime += ((float)ms / 1000f);
             animationTime -= (float)Math.Truncate(animationTime);
+            var seconds = ms / 1000f;
+
+            foreach (var player in PlayerInfos)
+                UpdatePlayer(player, seconds);
+        }
+
+        private void UpdatePlayer(PlayerInfo player, float seconds)
+        {
+            if (player.LocationDetails.MovementType == eMovementType.Stopped)
+                return;
+
+            var rads = (float)player.LocationDetails.MovementDirection * 22 * (float)Deg2Rad;
+
+            var moveX = (float)Math.Cos(rads) * seconds * 2f;
+            var moveY = (float)Math.Sin(rads) * seconds * 2f;
+
+            player.LocationDetails.PlayerX += moveX;
+            player.LocationDetails.PlayerY += moveY;
         }
 
         public void Dispose()
