@@ -5,6 +5,7 @@
         int MouseX { get; }
         int MouseY { get; }
         bool LeftMouseDown { get; }
+        bool LeftMousePressed { get; }
         bool RightMouseDown { get; }
         bool ReserveMouse { get; set; }
     }

@@ -56,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutofacModule.cs" />
+    <Compile Include="ItemManager.cs" />
     <Compile Include="EngineDataManager.cs" />
     <Compile Include="GameEngine.cs" />
     <Compile Include="GameState\GameState.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="ResourceManager.cs" />
     <Compile Include="TextDictionary.cs" />
     <Compile Include="UI\Button.cs" />
+    <Compile Include="UI\ItemContainer.cs" />
     <Compile Include="UI\PanelFrame.cs" />
     <Compile Include="UI\InventoryPanel.cs" />
     <Compile Include="UI\TextBox.cs" />
