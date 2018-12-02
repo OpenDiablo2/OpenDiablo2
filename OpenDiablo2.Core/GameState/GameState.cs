@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Interfaces.MessageBus;
@@ -36,6 +37,8 @@ namespace OpenDiablo2.Core.GameState_
         public bool ShowInventoryPanel { get; set; } = false;
         public bool ShowCharacterPanel { get; set; } = false;
 
+        readonly private IMouseCursor originalMouseCursor;
+
         public int Seed { get; internal set; }
 
         public Item SelectedItem { get; internal set; }
@@ -58,6 +61,8 @@ namespace OpenDiablo2.Core.GameState_
             this.getSessionManager = getSessionManager;
             this.engineDataManager = engineDataManager;
             this.renderWindow = renderWindow;
+
+            this.originalMouseCursor = renderWindow.MouseCursor;
 
         }
 
@@ -238,10 +243,15 @@ namespace OpenDiablo2.Core.GameState_
 
         public void SelectItem(Item item)
         {
-            if(SelectedItem == null)
+            if(item == null)
             {
+                renderWindow.MouseCursor = this.originalMouseCursor;
+            } else {
+                var cursorsprite = renderWindow.LoadSprite(ResourcePaths.GeneratePathForItem(item.InvFile), Palettes.Units);
 
+                renderWindow.MouseCursor = renderWindow.LoadCursor(cursorsprite, 0, new Point(cursorsprite.FrameSize.Width / 2, cursorsprite.FrameSize.Height / 2));
             }
+
             this.SelectedItem = item;
         }
 

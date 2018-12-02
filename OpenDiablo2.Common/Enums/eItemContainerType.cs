@@ -6,6 +6,7 @@
         Glove,
         Armor,
         Belt,
+        Boots,
         Weapon,
         Amulet,
         Ring,
