@@ -139,7 +139,7 @@ namespace OpenDiablo2.Common
 
         public static string GeneratePathForItem(string spriteName)
         {
-            return "data\\global\\items\\" + spriteName + ".dc6";
+            return $"data\\global\\items\\{spriteName}.dc6";
         }
     }
 }

@@ -15,17 +15,14 @@ namespace OpenDiablo2.Core.UI
         private readonly IGameState gameState;
         private ISprite sprite;
 
-        private eItemContainerType itemContainerType;
+        private ItemContainerLayout itemContainerLayout;
         private IMouseInfoProvider mouseInfoProvider;
 
-        public Item ContainedItem { get; set; }
-
-        public bool waitForMouseUp = false;
+        public Item ContainedItem { get; internal set; }
 
         private Dictionary<eItemContainerType, ISprite> sprites = new Dictionary<eItemContainerType, ISprite>();
 
         private Point location = new Point();
-        private Item previouslyContainedItem;
 
         public Point Location
         {
@@ -36,34 +33,41 @@ namespace OpenDiablo2.Core.UI
                     return;
                 location = value;
 
-                sprite.Location = new Point(value.X, value.Y + sprite.LocalFrameSize.Height);
+                placeholderSprite.Location = new Point(value.X, value.Y + placeholderSprite.LocalFrameSize.Height);
             }
         }
 
-        public ItemContainer(IRenderWindow renderWindow, IGameState gameState, eItemContainerType itemContainerType, IMouseInfoProvider mouseInfoProvider)
+        private ISprite placeholderSprite;
+
+        public Size Size { get; internal set; }
+        
+        public ItemContainer(IRenderWindow renderWindow, IGameState gameState, ItemContainerLayout itemContainerLayout, IMouseInfoProvider mouseInfoProvider)
         {
             this.renderWindow = renderWindow;
             this.gameState = gameState;
-            this.itemContainerType = itemContainerType;
+            this.itemContainerLayout = itemContainerLayout;
             this.mouseInfoProvider = mouseInfoProvider;
 
-            sprite = renderWindow.LoadSprite(ResourcePaths.MinipanelSmall, Palettes.Units); // Ignore for now
+            placeholderSprite = renderWindow.LoadSprite(itemContainerLayout.ResourceName, itemContainerLayout.PaletteName);
+            placeholderSprite.Location = new Point(location.X, location.Y + placeholderSprite.LocalFrameSize.Height);
+            this.Size = placeholderSprite.FrameSize; // For all but generic size is equal to the placeholder size. Source: me.
+        }
 
-            sprites.Add(eItemContainerType.Helm, renderWindow.LoadSprite(ResourcePaths.HelmGlovePlaceholder, Palettes.Units));
-            sprites.Add(eItemContainerType.Glove, renderWindow.LoadSprite(ResourcePaths.HelmGlovePlaceholder, Palettes.Units));
-            sprites.Add(eItemContainerType.Armor, renderWindow.LoadSprite(ResourcePaths.ArmorPlaceholder, Palettes.Units));
-            sprites.Add(eItemContainerType.Belt, renderWindow.LoadSprite(ResourcePaths.BeltPlaceholder, Palettes.Units));
-            sprites.Add(eItemContainerType.Boots, renderWindow.LoadSprite(ResourcePaths.BootsPlaceholder, Palettes.Units));
-            sprites.Add(eItemContainerType.Weapon, renderWindow.LoadSprite(ResourcePaths.WeaponsPlaceholder, Palettes.Units));
-            sprites.Add(eItemContainerType.Amulet, renderWindow.LoadSprite(ResourcePaths.RingAmuletPlaceholder, Palettes.Units));
-            sprites.Add(eItemContainerType.Ring, renderWindow.LoadSprite(ResourcePaths.RingAmuletPlaceholder, Palettes.Units));
+        public void SetContainedItem(Item containedItem)
+        {
+            ContainedItem = containedItem;
+
+            if (ContainedItem != null)
+            {
+                sprite = renderWindow.LoadSprite(ResourcePaths.GeneratePathForItem(this.ContainedItem.InvFile), Palettes.Units);
+                sprite.Location = new Point(location.X, location.Y + sprite.LocalFrameSize.Height);
+            }
         }
 
         public void Update()
         {
-            previouslyContainedItem = ContainedItem;
-            var hovered = (mouseInfoProvider.MouseX >= location.X && mouseInfoProvider.MouseX < (location.X + this.sprites[this.itemContainerType].FrameSize.Width))
-                && (mouseInfoProvider.MouseY >= location.Y && mouseInfoProvider.MouseY < (location.Y + this.sprites[this.itemContainerType].FrameSize.Height));
+            var hovered = (mouseInfoProvider.MouseX >= location.X && mouseInfoProvider.MouseX < (location.X + this.Size.Width))
+                && (mouseInfoProvider.MouseY >= location.Y && mouseInfoProvider.MouseY < (location.Y + this.Size.Height));
 
             if (hovered && mouseInfoProvider.LeftMousePressed)
             {
@@ -75,61 +79,27 @@ namespace OpenDiablo2.Core.UI
                         var switchItem = this.gameState.SelectedItem;
 
                         this.gameState.SelectItem(this.ContainedItem);
-                        this.ContainedItem = switchItem;
+                        this.SetContainedItem(switchItem);
                     } else
                     {
                         this.gameState.SelectItem(this.ContainedItem);
-                        this.ContainedItem = null;
+                        this.SetContainedItem(null);
                     }
                     
                 }
                 else if (this.gameState.SelectedItem != null)
                 {
-                    this.ContainedItem = this.gameState.SelectedItem;
+                    this.SetContainedItem(this.gameState.SelectedItem);
                     this.gameState.SelectItem(null);
                 }
             }
-
-            if (this.ContainedItem == null)
-            {
-                if (this.itemContainerType != eItemContainerType.Generic && sprite != sprites[this.itemContainerType])
-                {
-                    sprite = sprites[this.itemContainerType];
-                    sprite.Location = new Point(location.X, location.Y + sprite.LocalFrameSize.Height);
-                }
-            }
-            else
-            {
-                if (ContainedItem != previouslyContainedItem)
-                {
-                    sprite = renderWindow.LoadSprite(ResourcePaths.GeneratePathForItem(this.ContainedItem.InvFile), Palettes.Units);
-                    sprite.Location = new Point(location.X, location.Y + sprite.LocalFrameSize.Height);
-                }
-            }
-
         }
 
         public void Render()
         {
             if (this.ContainedItem == null)
             {
-                switch (this.itemContainerType)
-                {
-                    case eItemContainerType.Helm:
-                        renderWindow.Draw(sprite, 1);
-                        break;
-                    case eItemContainerType.Ring:
-                        renderWindow.Draw(sprite, 1);
-                        break;
-                    case eItemContainerType.Glove:
-                    case eItemContainerType.Armor:
-                    case eItemContainerType.Belt:
-                    case eItemContainerType.Weapon:
-                    case eItemContainerType.Amulet:
-                    case eItemContainerType.Boots:
-                        renderWindow.Draw(sprite);
-                        break;
-                }
+                renderWindow.Draw(placeholderSprite, this.itemContainerLayout.BaseFrame);
             }
             else
             {

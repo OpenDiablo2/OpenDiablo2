@@ -88,7 +88,7 @@ namespace OpenDiablo2
             containerBuilder.Register<Func<eItemContainerType, IItemContainer>>(c =>
             {
                 var componentContext = c.Resolve<IComponentContext>();
-                return (itemContainerType) => componentContext.Resolve<IItemContainer>(new NamedParameter("itemContainerType", itemContainerType));
+                return (itemContainerType) => componentContext.Resolve<IItemContainer>(new NamedParameter("itemContainerLayout", ItemContainerLayout.Values[itemContainerType]));
             });
 
             /* Uncomment the below if we support multiple textbox types
