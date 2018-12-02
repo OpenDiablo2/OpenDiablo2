@@ -11,6 +11,8 @@ namespace OpenDiablo2.Common.Models.Mobs
         private IHeroTypeConfig HeroTypeConfig;
         private ILevelExperienceConfig ExperienceConfig;
         public int ClientHash { get; protected set; }
+        public byte MovementDirection { get; set; } = 0;
+        public eMovementType MovementType { get; set; } = eMovementType.Stopped;
 
         // Player character stats
         protected Stat Vitality;

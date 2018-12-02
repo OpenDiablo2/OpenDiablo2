@@ -76,8 +76,8 @@
     <Compile Include="Interfaces\MessageBus\IMessageFrame.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionManager.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionServer.cs" />
-    <Compile Include="Interfaces\MessageBus\PlayerInfo.cs" />
-    <Compile Include="Interfaces\MessageBus\PlayerLocationDetails.cs" />
+    <Compile Include="Models\PlayerInfo.cs" />
+    <Compile Include="Models\PlayerLocationDetails.cs" />
     <Compile Include="Interfaces\UI\IButton.cs" />
     <Compile Include="Interfaces\UI\IPanelFrame.cs" />
     <Compile Include="Interfaces\UI\IInventoryPanel.cs" />

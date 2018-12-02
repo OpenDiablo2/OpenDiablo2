@@ -145,11 +145,11 @@ namespace OpenDiablo2.ServiceBus
             });
         }
 
-        public void MoveRequest(int direction, eMovementType movementType)
+        public void MoveRequest(byte direction, eMovementType movementType)
             => Task.Run(() =>
             {
                 Send(new MFMoveRequest(direction, movementType));
-                NoOp();
+                ProcessMessageFrame<MFLocatePlayers>();
             });
     }
 }

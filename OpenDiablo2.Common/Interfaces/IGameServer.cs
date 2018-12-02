@@ -10,6 +10,7 @@ namespace OpenDiablo2.Common.Interfaces
         IEnumerable<PlayerState> Players { get; }
         int Seed { get; }
 
+        void Update(int ms);
         void InitializeNewGame();
         int SpawnNewPlayer(int clientHash, string playerName, eHero heroType);
     }
