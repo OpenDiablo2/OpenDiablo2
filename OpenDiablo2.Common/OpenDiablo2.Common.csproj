@@ -55,6 +55,7 @@
     <Compile Include="Attributes\MessageFrameAttribute.cs" />
     <Compile Include="Attributes\SceneAttribute.cs" />
     <Compile Include="AutofacModule.cs" />
+    <Compile Include="Enums\eItemContainerType.cs" />
     <Compile Include="Enums\eMessageFrameType.cs" />
     <Compile Include="Enums\eMovementType.cs" />
     <Compile Include="Enums\ePanelFrameType.cs" />
@@ -70,15 +71,18 @@
     <Compile Include="Enums\Mobs\eDamageTypes.cs" />
     <Compile Include="Enums\Mobs\eMobFlags.cs" />
     <Compile Include="Enums\Mobs\eStatModifierType.cs" />
+    <Compile Include="Interfaces\IItemManager.cs" />
     <Compile Include="Extensions\MobManagerExtensions.cs" />
     <Compile Include="Interfaces\IGameServer.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionEventProvider.cs" />
     <Compile Include="Interfaces\MessageBus\IMessageFrame.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionManager.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionServer.cs" />
+    <Compile Include="Models\ItemContainerLayout.cs" />
     <Compile Include="Models\PlayerInfo.cs" />
     <Compile Include="Models\PlayerLocationDetails.cs" />
     <Compile Include="Interfaces\UI\IButton.cs" />
+    <Compile Include="Interfaces\UI\IItemContainer.cs" />
     <Compile Include="Interfaces\UI\IPanelFrame.cs" />
     <Compile Include="Interfaces\UI\IInventoryPanel.cs" />
     <Compile Include="Interfaces\IEngineDataManager.cs" />
@@ -111,6 +115,10 @@
     <Compile Include="Models\BitStream.cs" />
     <Compile Include="Models\ButtonLayout.cs" />
     <Compile Include="Models\LevelDetail.cs" />
+    <Compile Include="Models\Item\Item.cs" />
+    <Compile Include="Models\Item\Armor.cs" />
+    <Compile Include="Models\Item\Weapon.cs" />
+    <Compile Include="Models\Item\Misc.cs" />
     <Compile Include="Models\LevelPreset.cs" />
     <Compile Include="Models\LevelType.cs" />
     <Compile Include="Models\MapCellInfo.cs" />
