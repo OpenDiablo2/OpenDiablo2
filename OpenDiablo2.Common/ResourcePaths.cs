@@ -137,6 +137,9 @@ namespace OpenDiablo2.Common
         public static string Armor = "data\\global\\excel\\armor.txt";
         public static string Misc = "data\\global\\excel\\misc.txt";
 
+        // --- Character Data ---
+        public static string Experience = "data\\global\\excel\\experience.txt";
+
         public static string GeneratePathForItem(string spriteName)
         {
             return $"data\\global\\items\\{spriteName}.dc6";

@@ -12,15 +12,17 @@ namespace OpenDiablo2.GameServer_
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private readonly IMobManager mobManager;
+        private readonly IEngineDataManager engineDataManager;
 
         public int Seed { get; private set; }
         public IEnumerable<PlayerState> Players => mobManager.Players;
 
         const double Deg2Rad = Math.PI / 180.0;
 
-        public GameServer(IMobManager mobManager)
+        public GameServer(IMobManager mobManager, IEngineDataManager engineDataManager)
         {
             this.mobManager = mobManager;
+            this.engineDataManager = engineDataManager;
         }
 
         public void InitializeNewGame()
@@ -31,8 +33,20 @@ namespace OpenDiablo2.GameServer_
 
         public int SpawnNewPlayer(int clientHash, string playerName, eHero heroType)
         {
+            ILevelExperienceConfig expConfig = null;
+            try
+            {
+                expConfig = engineDataManager.ExperienceConfigs[heroType];
+            }
+            catch(Exception e)
+            {
+                log.Error("Error: Experience Config not loaded for '" + heroType.ToString() + "'.");
+                expConfig = new LevelExperienceConfig(new List<long>() { 100 });
+                // TODO: should we have a more robust default experience config?
+                // or should we just fail in some way here?
+            }
             var newPlayer = new PlayerState(clientHash, playerName, mobManager.GetNextAvailableMobId(), 1, 20.0f, 20.0f, 10, 10, 10, 10, 0, heroType, 
-                new HeroTypeConfig(10, 10, 10, 50, 50, 50, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), new LevelExperienceConfig(new List<int>() { 100 }));
+                new HeroTypeConfig(10, 10, 10, 50, 50, 50, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), expConfig);
 
             mobManager.AddPlayer(newPlayer);
             return newPlayer.Id;

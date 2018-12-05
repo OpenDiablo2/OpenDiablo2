@@ -26,12 +26,12 @@ namespace OpenDiablo2.Common.Models.Mobs
         protected Stat Stamina;
         protected Stat Mana;
 
-        public int Experience { get; protected set; }
+        public long Experience { get; protected set; }
 
         public PlayerState() : base() { }
 
         public PlayerState(int clientHash, string name, int id, int level, float x, float y,
-            int vitality, int strength, int energy, int dexterity, int experience, eHero herotype,
+            int vitality, int strength, int energy, int dexterity, long experience, eHero herotype,
             IHeroTypeConfig heroconfig, ILevelExperienceConfig expconfig)
             : base(name, id, level, 0, x, y)
         {
@@ -63,11 +63,11 @@ namespace OpenDiablo2.Common.Models.Mobs
         }
 
         #region Level and Experience
-        public int GetExperienceToLevel()
+        public long GetExperienceToLevel()
         {
             return GetExperienceTotalToLevel() - Experience;
         }
-        public int GetExperienceTotalToLevel()
+        public long GetExperienceTotalToLevel()
         {
             return ExperienceConfig.GetTotalExperienceForLevel(Level + 1);
         }
@@ -75,7 +75,7 @@ namespace OpenDiablo2.Common.Models.Mobs
         {
             return ExperienceConfig.GetMaxLevel();
         }
-        public bool AddExperience(int amount)
+        public bool AddExperience(long amount)
         {
             // returns true if you level up from this
             Experience += amount;
