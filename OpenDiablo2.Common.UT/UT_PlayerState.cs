@@ -18,7 +18,7 @@ namespace OpenDiablo2.Common.UT
                 perlevelhealth: 3, perlevelmana: 1.5, perlevelstamina: 1,
                 pervitalityhealth: 2, pervitalitystamina: 1, perenergymana: 1.5,
                 baseatkrating: -30, basedefrating: -30, perdexterityatkrating: 5, perdexteritydefrating: 4);
-            LevelExperienceConfig expconfig = new LevelExperienceConfig(new List<int>()
+            LevelExperienceConfig expconfig = new LevelExperienceConfig(new List<long>()
             {
                 0, // level 0
                 0, // level 1
