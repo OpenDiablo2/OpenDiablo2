@@ -42,38 +42,26 @@ namespace OpenDiablo2.Common.Models.Mobs
                 // i starts at 1 because we want to skip the first column
                 // the first column is just the row titles
                 string heroname = data[i][0]; // first row is the hero name
-                // LEFT OFF HERE:
-                //need to figure out ehero from heroname
-                eHero herotype = eHero.Amazon;
-                try
-                {
-                    herotype = (eHero)Enum.Parse(typeof(eHero), heroname);
-                }
-                catch
+                eHero herotype = default(eHero);
+                if(!Enum.TryParse<eHero>(heroname, out herotype))
                 {
                     continue; // skip this hero if we can't parse the name into a valid hero type
                 }
                 int maxlevel = -1;
-                try
+                if(!int.TryParse(data[1][i], out maxlevel))
                 {
-                    maxlevel = int.Parse(data[1][i]);
-                }
-                catch
-                {
-                    maxlevel = -1; // we don't need to fail in this case since maxlevel 
+                    maxlevel = -1;// we don't need to fail in this case since maxlevel 
                     // can be inferred from the number of experience listings
                 }
                 List<long> expperlevel = new List<long>();
                 for (int o = 2; o < data.Length && (o-2 < maxlevel || maxlevel == -1); o++)
                 {
-                    try
-                    {
-                        expperlevel.Add(long.Parse(data[o][i]));
-                    }
-                    catch
+                    long exp = 0;
+                    if(!long.TryParse(data[o][i], out exp))
                     {
                         throw new Exception("Could not parse experience number '" + data[o][i] + "'.");
                     }
+                    expperlevel.Add(exp);
                 }
                 result.Add(herotype, new LevelExperienceConfig(expperlevel));
             }
