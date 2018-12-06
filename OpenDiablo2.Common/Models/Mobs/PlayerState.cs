@@ -195,6 +195,10 @@ namespace OpenDiablo2.Common.Models.Mobs
         {
             Mana.AddCurrent(-mana);
         }
+        public int GetManaRegen()
+        {
+            return ManaRegen.GetCurrent();
+        }
         #endregion Mana
 
         #region Stamina
@@ -215,6 +219,21 @@ namespace OpenDiablo2.Common.Models.Mobs
             Stamina.AddCurrent(-stamina);
         }
         #endregion Stamina
+
+        #region Movement
+        public int GetRunVelocity()
+        {
+            return RunVelocity.GetCurrent();
+        }
+        public int GetWalkVeloicty()
+        {
+            return WalkVelocity.GetCurrent();
+        }
+        public int GetRunDrain()
+        {
+            return RunDrain.GetCurrent();
+        }
+        #endregion Movement
 
         // TODO: when a player equips an item, apply the relevant modifiers to their stats
         // TODO: when a player unequips an item, remove the relevant modifiers from their stats
