@@ -1,4 +1,6 @@
-﻿using OpenDiablo2.Common.Models;
+﻿using System.Collections.Generic;
+using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Common.Interfaces
 {
@@ -17,5 +19,9 @@ namespace OpenDiablo2.Common.Interfaces
         MPQDS1 GetMPQDS1(string resourcePath, LevelPreset level, LevelDetail levelDetail, LevelType levelType);
         MPQDT1 GetMPQDT1(string resourcePath);
         Palette GetPalette(string paletteName);
+        MPQCOF GetPlayerAnimation(eHero hero, eWeaponClass weaponClass, eMobMode mobMode);
+        MPQDCC GetPlayerDCC(MPQCOF.COFLayer cofLayer, eArmorType armorType, Palette palette);
+
+        Dictionary<string, List<AnimationData>> Animations { get; }
     }
 }

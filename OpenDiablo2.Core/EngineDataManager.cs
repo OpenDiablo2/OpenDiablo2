@@ -11,6 +11,8 @@ namespace OpenDiablo2.Core
 {
     public sealed class EngineDataManager : IEngineDataManager
     {
+        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private readonly IMPQProvider mpqProvider;
 
         public List<LevelPreset> LevelPresets { get; internal set; }
@@ -28,6 +30,7 @@ namespace OpenDiablo2.Core
 
         private void LoadLevelTypes()
         {
+            log.Info("Loading level types");
             var data = mpqProvider
                 .GetTextFile(ResourcePaths.LevelType)
                 .Skip(1)
@@ -42,6 +45,7 @@ namespace OpenDiablo2.Core
 
         private void LoadLevelPresets()
         {
+            log.Info("Loading level presets");
             var data = mpqProvider
                 .GetTextFile(ResourcePaths.LevelPreset)
                 .Skip(1)
@@ -56,6 +60,7 @@ namespace OpenDiablo2.Core
 
         private void LoadLevelDetails()
         {
+            log.Info("Loading level details");
             var data = mpqProvider
                 .GetTextFile(ResourcePaths.LevelDetails)
                 .Skip(1)

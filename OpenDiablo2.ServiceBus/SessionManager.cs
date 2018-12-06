@@ -24,7 +24,6 @@ namespace OpenDiablo2.ServiceBus
         private RequestSocket requestSocket;
         private AutoResetEvent resetEvent = new AutoResetEvent(false);
         private ISessionServer sessionServer;
-        public Guid PlayerId { get; private set; }
         private bool running = false;
 
         public OnSetSeedEvent OnSetSeed { get; set; }

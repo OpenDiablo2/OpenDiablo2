@@ -10,8 +10,6 @@ namespace OpenDiablo2.Common.Interfaces
 
     public interface ISessionManager : ISessionEventProvider, IDisposable
     {
-        Guid PlayerId { get; }
-
         void Initialize();
         void Stop();
 

@@ -79,6 +79,10 @@ namespace OpenDiablo2.Scenes
 
             var loadingSprite = renderWindow.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading, new Point(300, 400));
 
+            // TODO: This is just a test
+            //var animation = resourceManager.GetPlayerAnimation(eHero.Necromancer, eWeaponClass.HandToHand, eMobMode.PlayerTownNeutral);
+            //var path = animation.Layers.First().GetDCCPath(eArmorType.Lite);
+            //var test = resourceManager.GetPlayerDCC(animation.Layers.First(), eArmorType.Lite, paletteProvider.PaletteTable["Units"]);
 
             // Pre-load all the scenes for now until we fix the sdl load problem
             var scenesToLoad = new string[] {"Select Hero Class" };

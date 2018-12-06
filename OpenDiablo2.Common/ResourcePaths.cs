@@ -125,6 +125,11 @@ namespace OpenDiablo2.Common
         public static string LevelType = "data\\global\\excel\\LvlTypes.txt";
         public static string LevelDetails = "data\\global\\excel\\Levels.txt";
 
+        // --- Animations ---
+        public static string ObjectData = "data\\global\\objects";
+        public static string AnimationData = "data\\global\\animdata.d2";
+        public static string PlayerAnimationBase = "data\\global\\CHARS";
+
 
     }
 }

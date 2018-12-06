@@ -28,8 +28,7 @@ namespace OpenDiablo2.Core
 
         private Dictionary<string, SoundEntry> soundTable = new Dictionary<string, SoundEntry>();
         public Dictionary<string, Palette> PaletteTable { get; private set; } = new Dictionary<string, Palette>();
-
-
+        
         public GameEngine(
             GlobalConfiguration globalConfig,
             IMPQProvider mpqProvider,

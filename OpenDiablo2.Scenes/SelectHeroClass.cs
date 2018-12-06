@@ -37,7 +37,6 @@ namespace OpenDiablo2.Scenes
         private readonly IPaletteProvider paletteProvider;
         private readonly IMPQProvider mpqProvider;
         private readonly IMouseInfoProvider mouseInfoProvider;
-        private readonly IMusicProvider musicProvider;
         private readonly ISceneManager sceneManager;
         private readonly ITextDictionary textDictionary;
         private readonly IKeyboardInfoProvider keyboardInfoProvider;
@@ -58,7 +57,6 @@ namespace OpenDiablo2.Scenes
             IPaletteProvider paletteProvider,
             IMPQProvider mpqProvider,
             IMouseInfoProvider mouseInfoProvider,
-            IMusicProvider musicProvider,
             ISceneManager sceneManager,
             Func<eButtonType, IButton> createButton,
             Func<ITextBox> createTextBox,
