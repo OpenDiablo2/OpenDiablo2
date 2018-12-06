@@ -34,19 +34,34 @@ namespace OpenDiablo2.GameServer_
         public int SpawnNewPlayer(int clientHash, string playerName, eHero heroType)
         {
             ILevelExperienceConfig expConfig = null;
-            try
+            IHeroTypeConfig heroConfig = null;
+            if (engineDataManager.ExperienceConfigs.ContainsKey(heroType))
             {
                 expConfig = engineDataManager.ExperienceConfigs[heroType];
             }
-            catch(Exception e)
+            else
             {
                 log.Error("Error: Experience Config not loaded for '" + heroType.ToString() + "'.");
                 expConfig = new LevelExperienceConfig(new List<long>() { 100 });
                 // TODO: should we have a more robust default experience config?
                 // or should we just fail in some way here?
             }
+            if (engineDataManager.HeroTypeConfigs.ContainsKey(heroType))
+            {
+                heroConfig = engineDataManager.HeroTypeConfigs[heroType];
+            }
+            else
+            {
+                log.Error("Error: Hero Config not loaded for '" + heroType.ToString() + "'.");
+                heroConfig = new HeroTypeConfig(10, 10, 10, 10, 10, 10, 10, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 9,
+                    1, 10, 10, 10, 10, 10, 10, 0, "hth", new List<string>(), new List<string>(), new List<int>());
+                // TODO: should we have a more robust default hero config?
+                // or should we just fail in some way here?
+                // ... we should probably just fail here
+            }
+
             var newPlayer = new PlayerState(clientHash, playerName, mobManager.GetNextAvailableMobId(), 1, 20.0f, 20.0f, 10, 10, 10, 10, 0, heroType, 
-                new HeroTypeConfig(10, 10, 10, 50, 50, 50, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), expConfig);
+                heroConfig, expConfig);
 
             mobManager.AddPlayer(newPlayer);
             return newPlayer.Id;

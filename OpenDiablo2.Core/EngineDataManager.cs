@@ -21,6 +21,7 @@ namespace OpenDiablo2.Core
         public List<LevelDetail> LevelDetails { get; internal set; }
         public List<Item> Items { get; internal set; } = new List<Item>();
         public Dictionary<eHero, ILevelExperienceConfig> ExperienceConfigs { get; internal set; } = new Dictionary<eHero, ILevelExperienceConfig>();
+        public Dictionary<eHero, IHeroTypeConfig> HeroTypeConfigs { get; internal set; } = new Dictionary<eHero, IHeroTypeConfig>();
 
         public EngineDataManager(IMPQProvider mpqProvider)
         {
@@ -134,6 +135,7 @@ namespace OpenDiablo2.Core
         private void LoadCharacterData()
         {
             LoadExperienceConfig();
+            LoadHeroTypeConfig();
         }
 
         private void LoadExperienceConfig()
@@ -146,6 +148,20 @@ namespace OpenDiablo2.Core
                 .ToLevelExperienceConfigs();
             
             ExperienceConfigs = data;
+        }
+
+        private void LoadHeroTypeConfig()
+        {
+            var data = mpqProvider
+                .GetTextFile(ResourcePaths.CharStats)
+                .Skip(1)
+                .Where(x => !String.IsNullOrWhiteSpace(x))
+                .Select(x => x.Split('\t'))
+                .Where(x => x[0] != "Expansion")
+                .ToArray()
+                .ToDictionary(x => (eHero)Enum.Parse(typeof(eHero),x[0]), x => x.ToHeroTypeConfig());
+
+            HeroTypeConfigs = data;
         }
     }
 }
