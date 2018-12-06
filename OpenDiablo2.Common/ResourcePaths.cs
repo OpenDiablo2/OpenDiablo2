@@ -117,6 +117,13 @@ namespace OpenDiablo2.Common
         public static string RunButton = "data\\global\\ui\\PANEL\\runbutton.dc6";
         public static string MenuButton = "data\\global\\ui\\PANEL\\menubutton.DC6";
 
+        public static string ArmorPlaceholder = "data\\global\\ui\\PANEL\\inv_armor.DC6";
+        public static string BeltPlaceholder = "data\\global\\ui\\PANEL\\inv_belt.DC6";
+        public static string BootsPlaceholder = "data\\global\\ui\\PANEL\\inv_boots.DC6";
+        public static string HelmGlovePlaceholder = "data\\global\\ui\\PANEL\\inv_helm_glove.DC6";
+        public static string RingAmuletPlaceholder = "data\\global\\ui\\PANEL\\inv_ring_amulet.DC6";
+        public static string WeaponsPlaceholder = "data\\global\\ui\\PANEL\\inv_weapons.DC6";
+
         // --- Data ---
         // TODO: Doesn't sound right :)
         public static string EnglishTable = "data\\local\\lng\\eng\\English.txt";
@@ -130,6 +137,18 @@ namespace OpenDiablo2.Common
         public static string AnimationData = "data\\global\\animdata.d2";
         public static string PlayerAnimationBase = "data\\global\\CHARS";
 
+        // --- Inventory Data ---
+        public static string Weapons = "data\\global\\excel\\weapons.txt";
+        public static string Armor = "data\\global\\excel\\armor.txt";
+        public static string Misc = "data\\global\\excel\\misc.txt";
 
+        // --- Character Data ---
+        public static string Experience = "data\\global\\excel\\experience.txt";
+        public static string CharStats = "data\\global\\excel\\charstats.txt";
+
+        public static string GeneratePathForItem(string spriteName)
+        {
+            return $"data\\global\\items\\{spriteName}.dc6";
+        }
     }
 }

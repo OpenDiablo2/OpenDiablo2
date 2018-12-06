@@ -25,19 +25,27 @@ namespace OpenDiablo2.Common.Models.Mobs
 
         protected Stat Stamina;
         protected Stat Mana;
+        protected Stat ManaRegen;
 
-        public int Experience { get; protected set; }
+        protected Stat WalkVelocity;
+        protected Stat RunVelocity;
+        protected Stat RunDrain;
+
+
+
+        public long Experience { get; protected set; }
 
         public PlayerState() : base() { }
 
         public PlayerState(int clientHash, string name, int id, int level, float x, float y,
-            int vitality, int strength, int energy, int dexterity, int experience, eHero herotype,
+            int vitality, int strength, int energy, int dexterity, long experience, eHero herotype,
             IHeroTypeConfig heroconfig, ILevelExperienceConfig expconfig)
             : base(name, id, level, 0, x, y)
         {
             this.ClientHash = clientHash;
             Stamina = new Stat(0, 0, 0, true);
             Mana = new Stat(0, 0, 0, true);
+            ManaRegen = new Stat(0, heroconfig.StartingManaRegen, heroconfig.StartingManaRegen, true);
 
             Vitality = new Stat(0, vitality, vitality, true);
             Strength = new Stat(0, strength, strength, true);
@@ -46,6 +54,10 @@ namespace OpenDiablo2.Common.Models.Mobs
 
             AttackRating = new Stat(0, 0, 0, false);
             DefenseRating = new Stat(0, 0, 0, false);
+
+            WalkVelocity = new Stat(0, heroconfig.WalkVelocity, 100, false); // TODO: what should max velocity be? (replace the 100)
+            RunVelocity = new Stat(0, heroconfig.RunVelocity, 100, false); // TODO: what should max velocity be?
+            RunDrain = new Stat(0, heroconfig.RunDrain, heroconfig.RunDrain, true);
 
             Experience = experience; // how much total exp do they have
 
@@ -63,11 +75,11 @@ namespace OpenDiablo2.Common.Models.Mobs
         }
 
         #region Level and Experience
-        public int GetExperienceToLevel()
+        public long GetExperienceToLevel()
         {
             return GetExperienceTotalToLevel() - Experience;
         }
-        public int GetExperienceTotalToLevel()
+        public long GetExperienceTotalToLevel()
         {
             return ExperienceConfig.GetTotalExperienceForLevel(Level + 1);
         }
@@ -75,7 +87,7 @@ namespace OpenDiablo2.Common.Models.Mobs
         {
             return ExperienceConfig.GetMaxLevel();
         }
-        public bool AddExperience(int amount)
+        public bool AddExperience(long amount)
         {
             // returns true if you level up from this
             Experience += amount;
@@ -183,6 +195,10 @@ namespace OpenDiablo2.Common.Models.Mobs
         {
             Mana.AddCurrent(-mana);
         }
+        public int GetManaRegen()
+        {
+            return ManaRegen.GetCurrent();
+        }
         #endregion Mana
 
         #region Stamina
@@ -203,6 +219,21 @@ namespace OpenDiablo2.Common.Models.Mobs
             Stamina.AddCurrent(-stamina);
         }
         #endregion Stamina
+
+        #region Movement
+        public int GetRunVelocity()
+        {
+            return RunVelocity.GetCurrent();
+        }
+        public int GetWalkVeloicty()
+        {
+            return WalkVelocity.GetCurrent();
+        }
+        public int GetRunDrain()
+        {
+            return RunDrain.GetCurrent();
+        }
+        #endregion Movement
 
         // TODO: when a player equips an item, apply the relevant modifiers to their stats
         // TODO: when a player unequips an item, remove the relevant modifiers from their stats

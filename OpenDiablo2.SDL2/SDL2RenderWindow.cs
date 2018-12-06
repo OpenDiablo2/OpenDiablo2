@@ -20,6 +20,7 @@ namespace OpenDiablo2.SDL2_
         public int MouseX { get; internal set; } = 0;
         public int MouseY { get; internal set; } = 0;
         public bool LeftMouseDown { get; internal set; } = false;
+        public bool LeftMousePressed { get; internal set; } = false;
         public bool RightMouseDown { get; internal set; } = false;
         public bool ReserveMouse { get; set; } = false;
 
@@ -141,6 +142,8 @@ namespace OpenDiablo2.SDL2_
 
         public unsafe void Update()
         {
+            LeftMousePressed = false;
+
             while (SDL.SDL_PollEvent(out SDL.SDL_Event evt) != 0)
             {
                 if (evt.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
@@ -155,6 +158,7 @@ namespace OpenDiablo2.SDL2_
                     switch ((uint)evt.button.button)
                     {
                         case SDL.SDL_BUTTON_LEFT:
+                            LeftMousePressed = true; // Cannot find a better to handle a single press
                             LeftMouseDown = true;
                             break;
                         case SDL.SDL_BUTTON_RIGHT:
@@ -439,8 +443,8 @@ namespace OpenDiablo2.SDL2_
             var multiple = globalConfig.HardwareMouseScale;
             var spr = sprite as SDL2Sprite;
             var surface = SDL.SDL_CreateRGBSurface(0, spr.LocalFrameSize.Width * multiple, spr.LocalFrameSize.Height * multiple, 32, 0xFF0000, 0xFF00, 0xFF, 0xFF000000);
-            var yOffset = (spr.FrameSize.Height - spr.LocalFrameSize.Height);
-            var XOffset = (spr.FrameSize.Width - spr.LocalFrameSize.Width);
+            var yOffset = 0; //(spr.FrameSize.Height - spr.LocalFrameSize.Height);
+            var XOffset = 0; //(spr.FrameSize.Width - spr.LocalFrameSize.Width);
             var pixels = (UInt32*)((SDL.SDL_Surface*)surface)->pixels;
             for (var y = 0; y < (spr.LocalFrameSize.Height * multiple) - 1; y++)
                 for (var x = 0; x < (spr.LocalFrameSize.Width * multiple) - 1; x++)
