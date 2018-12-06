@@ -139,6 +139,7 @@ namespace OpenDiablo2.Common
 
         // --- Character Data ---
         public static string Experience = "data\\global\\excel\\experience.txt";
+        public static string CharStats = "data\\global\\excel\\charstats.txt";
 
         public static string GeneratePathForItem(string spriteName)
         {

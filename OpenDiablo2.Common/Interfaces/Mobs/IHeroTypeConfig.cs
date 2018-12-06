@@ -15,6 +15,7 @@ namespace OpenDiablo2.Common.Interfaces.Mobs
         int StartingHealth { get; }
         int StartingMana { get; }
         int StartingStamina { get; }
+        int StartingManaRegen { get; }
 
         double PerLevelHealth { get; } // NOTE: these are doubles because some classes have
         // e.g. 1.5 mana per level, which means they get 1 mana on even levels (e.g. -> 2)
@@ -31,5 +32,23 @@ namespace OpenDiablo2.Common.Interfaces.Mobs
 
         int BaseDefenseRating { get; }
         int PerDexterityDefenseRating { get; }
+
+        int WalkVelocity { get; }
+        int RunVelocity { get; }
+        int RunDrain { get; }
+
+        int WalkFrames { get; }
+        int RunFrames { get; }
+        int SwingFrames { get; }
+        int SpellFrames { get; }
+        int GetHitFrames { get; }
+        int BowFrames { get; }
+
+        int StartingSkill { get; }
+        string BaseWeaponClass { get; }
+
+        IEnumerable<string> ItemNames { get; }
+        IEnumerable<string> ItemLocs { get; }
+        IEnumerable<int> ItemCounts { get; }
     }
 }

@@ -12,5 +12,6 @@ namespace OpenDiablo2.Common.Interfaces
         List<LevelDetail> LevelDetails { get; }
         List<Item> Items { get; }
         Dictionary<eHero, ILevelExperienceConfig> ExperienceConfigs { get; }
+        Dictionary<eHero, IHeroTypeConfig> HeroTypeConfigs { get; }
     }
 }
