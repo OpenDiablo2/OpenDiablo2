@@ -25,11 +25,8 @@ namespace OpenDiablo2.Scenes
 
         private ISprite panelSprite, healthManaSprite, gameGlobeOverlapSprite;
 
-        private IMiniPanel minipanel;
-        private ICharacterPanel characterpanel;
-        private IInventoryPanel inventorypanel;
-
-        private bool showMinipanel = false;
+        private readonly IMiniPanel minipanel;
+        
         private IButton runButton, menuButton;
         private eMovementType lastMovementType = eMovementType.Stopped;
         private byte lastDirection = 255;
@@ -46,9 +43,7 @@ namespace OpenDiablo2.Scenes
             IItemManager itemManager,
             ISessionManager sessionManager,
             Func<eButtonType, IButton> createButton,
-            Func<IMiniPanel> createMiniPanel,
-            Func<ICharacterPanel> createCharacterPanel,
-            Func<IInventoryPanel> createInventoryPanel
+            Func<IMiniPanel> createMiniPanel
         )
         {
             this.renderWindow = renderWindow;
@@ -65,29 +60,20 @@ namespace OpenDiablo2.Scenes
             gameGlobeOverlapSprite = renderWindow.LoadSprite(ResourcePaths.GameGlobeOverlap, Palettes.Act1);
 
             minipanel = createMiniPanel();
-            // Maybe? Not sure. 
-            // miniPanel.OnMenuActivate();
-
-            characterpanel = createCharacterPanel();
-            inventorypanel = createInventoryPanel();
 
             runButton = createButton(eButtonType.Run);
             runButton.Location = new Point(256, 570);
             runButton.OnToggle = OnRunToggle;
 
+            // move to minipanel?
             menuButton = createButton(eButtonType.Menu);
             menuButton.Location = new Point(393, 561);
-            menuButton.OnToggle = OnMenuToggle;
+            menuButton.OnToggle = minipanel.OnMenuToggle;
 
             /*var item = itemManager.getItem("hdm");
             var cursorsprite = renderWindow.LoadSprite(ResourcePaths.GeneratePathForItem(item.InvFile), Palettes.Units);
             
             renderWindow.MouseCursor = renderWindow.LoadCursor(cursorsprite, 0, new Point(cursorsprite.FrameSize.Width/2, cursorsprite.FrameSize.Height / 2));*/
-        }
-
-        private void OnMenuToggle(bool isToggled)
-        {
-            this.showMinipanel = isToggled;
         }
 
         private void OnRunToggle(bool isToggled)
@@ -108,15 +94,7 @@ namespace OpenDiablo2.Scenes
 
         private void DrawPanel()
         {
-            if(gameState.ShowInventoryPanel)
-            {
-                inventorypanel.Render();
-            }
-
-            if (gameState.ShowCharacterPanel)
-            {
-                characterpanel.Render();
-            }
+            minipanel.Render();
 
             // Render the background bottom bar
             renderWindow.Draw(panelSprite, 0, new Point(0, 600));
@@ -134,11 +112,6 @@ namespace OpenDiablo2.Scenes
             renderWindow.Draw(healthManaSprite, 1, new Point(692, 588));
             renderWindow.Draw(gameGlobeOverlapSprite, 1, new Point(693, 591));
 
-            if(showMinipanel)
-            {
-                minipanel.Render();
-            }
-
             
             
             runButton.Render();
@@ -149,20 +122,7 @@ namespace OpenDiablo2.Scenes
         {
             var seconds = ms / 1000f;
 
-            if(showMinipanel)
-            {
-                minipanel.Update();
-            }
-
-            if (gameState.ShowInventoryPanel)
-            {
-                inventorypanel.Update();
-            }
-
-            if (gameState.ShowCharacterPanel)
-            {
-                characterpanel.Update();
-            }
+            minipanel.Update();
 
             runButton.Update();
             menuButton.Update();
@@ -177,17 +137,15 @@ namespace OpenDiablo2.Scenes
             if (mouseInfoProvider.MouseY > 530) // 550 is what it should be, but the minipanel check needs to happent oo
                 return;
 
-            if (gameState.ShowInventoryPanel && mouseInfoProvider.MouseX >= 400)
+            if (minipanel.IsRightPanelVisible && mouseInfoProvider.MouseX >= 400)
                 return;
 
-            if (gameState.ShowCharacterPanel && mouseInfoProvider.MouseX < 400)
+            if (minipanel.IsLeftPanelVisible && mouseInfoProvider.MouseX < 400)
                 return;
 
 
             // TODO: Filter movement for inventory panel
-            var xOffset = (gameState.ShowInventoryPanel ? -200 : 0) + (gameState.ShowCharacterPanel ? 200 : 0);
-
-            var mx = (mouseInfoProvider.MouseX - 400) - xOffset;
+            var mx = (mouseInfoProvider.MouseX - 400) - gameState.CameraOffset;
             var my = (mouseInfoProvider.MouseY - 300);
 
             var tx = (mx / 60f + my / 40f) / 2f;
