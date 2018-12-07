@@ -47,13 +47,21 @@ namespace OpenDiablo2.Common.Models
 
         private int MakeSigned(int value, int bits)
         {
-            var msbSet = ((value & (1 << (bits - 1))) != 0);
-            if (msbSet)
+            if (bits == 1)
+                return -value;
+
+            if ((value & (1 << (bits - 1))) == 0)
+                return value;
+
+            var result = UInt32.MaxValue;
+            for (byte i = 0; i < bits; i++)
             {
-                value = ~value + 1;
+                if (((value >> i) & 1) == 0)
+                    result -= (UInt32)(1 << i);
             }
 
-            return value;
+            var newResult = (int)result;
+            return newResult;
         }
 
     }

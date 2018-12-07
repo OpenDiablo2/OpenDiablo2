@@ -8,7 +8,7 @@ namespace OpenDiablo2.Common.Models
 {
     public sealed class MPQDCC
     {
-        public struct PixelBufferEntry
+        public class PixelBufferEntry
         {
             public byte[] Value;
             public int Frame;
@@ -62,23 +62,25 @@ namespace OpenDiablo2.Common.Models
             public void MakeCells(MPQDCCDirection direction)
             {
                 var w = 4 - ((Box.Left - direction.Box.Left) % 4); // Width of the first column (in pixels)
-                if ((Box.Width - w) <= 1)
+                if ((Width - w) <= 1)
                     HorizontalCellCount = 1;
                 else
                 {
-                    HorizontalCellCount = 2 + ((Box.Width - w - 1) / 4);
-                    if (((Box.Width - w - 1) % 4) == 0)
+                    var tmp = Width - w - 1;
+                    HorizontalCellCount = 2 + (tmp / 4);
+                    if ((tmp % 4) == 0)
                         HorizontalCellCount--;
                 }
 
 
                 var h = 4 - ((Box.Top - direction.Box.Top) % 4); // Height of the first column (in pixels)
-                if ((Box.Height - h) <= 1)
+                if ((Height - h) <= 1)
                     VerticalCellCount = 1;
                 else
                 {
-                    VerticalCellCount = 2 + ((Box.Height - h - 1) / 4);
-                    if (((Box.Height - h - 1) % 4) == 0)
+                    var tmp = Height - h - 1;
+                    VerticalCellCount = 2 + (tmp / 4);
+                    if ((tmp % 4) == 0)
                         VerticalCellCount--;
                 }
 
@@ -87,24 +89,24 @@ namespace OpenDiablo2.Common.Models
                 // Calculate the cell widths and heights
                 var cellWidths = new int[HorizontalCellCount];
                 if (HorizontalCellCount == 1)
-                    cellWidths[0] = Box.Width;
+                    cellWidths[0] = Width;
                 else
                 {
                     cellWidths[0] = w;
                     for (var i = 1; i < (HorizontalCellCount - 1); i++)
                         cellWidths[i] = 4;
-                    cellWidths[HorizontalCellCount - 1] = Box.Width - w - (4 * (HorizontalCellCount - 2));
+                    cellWidths[HorizontalCellCount - 1] = Width - w - (4 * (HorizontalCellCount - 2));
                 }
 
                 var cellHeights = new int[VerticalCellCount];
                 if (VerticalCellCount == 1)
-                    cellHeights[0] = Box.Height;
+                    cellHeights[0] = Height;
                 else
                 {
                     cellHeights[0] = h;
                     for (var i = 1; i < (VerticalCellCount - 1); i++)
                         cellHeights[i] = 4;
-                    cellHeights[VerticalCellCount - 1] = Box.Height - h - (4 * (VerticalCellCount - 2));
+                    cellHeights[VerticalCellCount - 1] = Height - h - (4 * (VerticalCellCount - 2));
                 }
 
                 Cells = new Cell[HorizontalCellCount * VerticalCellCount];
@@ -129,6 +131,7 @@ namespace OpenDiablo2.Common.Models
         }
         public sealed class MPQDCCDirection
         {
+            const int DCC_MAX_PB_ENTRY = 85000; // But why is this the magic number?
             public int OutSizeCoded { get; private set; }
             public int CompressionFlags { get; private set; }
             public int Variable0Bits { get; private set; }
@@ -148,7 +151,7 @@ namespace OpenDiablo2.Common.Models
             public Cell[] Cells { get; private set; }
             public int HorizontalCellCount { get; private set; }
             public int VerticalCellCount { get; private set; }
-            public List<PixelBufferEntry> PixelBuffer { get; private set; }
+            public PixelBufferEntry[] PixelBuffer { get; private set; }
 
             private static readonly byte[] crazyBitTable = { 0, 1, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 26, 28, 30, 32 };
             public MPQDCCDirection(BitMuncher bm, MPQDCC file)
@@ -164,9 +167,6 @@ namespace OpenDiablo2.Common.Models
                 CodedBytesBits = crazyBitTable[bm.GetBits(4)];
 
                 Frames = new MPQDCCDirectionFrame[file.NumberOfFrames];
-
-                if (Variable0Bits != 0)
-                    throw new ApplicationException("Variable0Bits is not 0. This is not ok.");
 
                 // Load the frame headers
                 for (var frameIdx = 0; frameIdx < file.NumberOfFrames; frameIdx++)
@@ -253,30 +253,32 @@ namespace OpenDiablo2.Common.Models
             private void FillPixelBuffer(BitMuncher pcd, BitMuncher ec, BitMuncher pm, BitMuncher et, BitMuncher rp)
             {
                 UInt32 lastPixel = 0;
-                var cellBuffer = new int[HorizontalCellCount * VerticalCellCount]; // Store the offset to the cell buffer
-                for (var i = 0; i < cellBuffer.Length; i++)
-                    cellBuffer[i] = -1;
+                
+                PixelBuffer = new PixelBufferEntry[DCC_MAX_PB_ENTRY];
+                for (var i = 0; i < DCC_MAX_PB_ENTRY; i++)
+                    PixelBuffer[i] = new PixelBufferEntry { Frame = -1, FrameCellIndex = -1, Value = new byte[4] };
 
-                PixelBuffer = new List<PixelBufferEntry>();
+                var cellBuffer = new PixelBufferEntry[Cells.Length];
 
                 var frameIndex = -1;
+                var pbIndex = -1;
                 UInt32 pixelMask = 0x00;
                 foreach (var frame in Frames)
                 {
                     frameIndex++;
                     var originCellX = (frame.Box.Left - Box.Left) / 4;
                     var originCellY = (frame.Box.Top - Box.Top) / 4;
-
+                    var frameCellIndex = 0;
                     for (var cellY = 0; cellY < frame.VerticalCellCount; cellY++)
                     {
                         var currentCellY = cellY + originCellY;
-                        for (var cellX = 0; cellX < frame.HorizontalCellCount; cellX++)
+                        for (var cellX = 0; cellX < frame.HorizontalCellCount; cellX++, frameCellIndex++)
                         {
-                            var currentCell = (originCellX + cellX) + (currentCellY * HorizontalCellCount);
+                            var currentCell = (originCellX + cellX) + (currentCellY * frame.HorizontalCellCount);
                             var nextCell = false;
-                            if (cellBuffer[currentCell] != -1)
+                            var tmp = 0;
+                            if (cellBuffer[currentCell] != null)
                             {
-                                var tmp = 0;
                                 if (EqualCellsBitstreamSize > 0)
                                     tmp = ec.GetBit();
 
@@ -287,65 +289,67 @@ namespace OpenDiablo2.Common.Models
                             }
                             else pixelMask = 0x0F;
 
+                            if (nextCell)
+                                continue;
 
-                            if (nextCell == false)
+                            // Decode the pixels
+                            var pixelStack = new UInt32[4];
+                            lastPixel = 0;
+                            int numberOfPixelBits = pixelMaskLookup[pixelMask];
+                            var encodingType = ((numberOfPixelBits != 0) && (EncodingTypeBitsreamSize > 0))
+                                ? et.GetBit()
+                                : 0;
+                            int decodedPixel = 0;
+                            for (int i = 0; i < numberOfPixelBits; i++)
                             {
-                                // Decode the pixels
-                                UInt32[] pixelStack = new UInt32[4];
-                                int numberOfPixelBits = pixelMaskLookup[pixelMask];
-                                var encodingType = ((numberOfPixelBits != 0) && (EncodingTypeBitsreamSize > 0))
-                                    ? et.GetBit()
-                                    : 0;
-                                int decodedPixel = 0;
-                                for (int i = 0; i < numberOfPixelBits; i++)
+                                if (encodingType != 0)
                                 {
-                                    if (encodingType != 0)
+                                    pixelStack[i] = (UInt32)rp.GetBits(8);
+                                }
+                                else
+                                {
+                                    pixelStack[i] = lastPixel;
+                                    var pixelDisplacement = pcd.GetBits(4);
+                                    pixelStack[i] += (UInt32)pixelDisplacement;
+                                    while (pixelDisplacement == 15)
                                     {
-                                        pixelStack[i] = (UInt32)rp.GetBits(8);
-                                    }
-                                    else
-                                    {
-                                        pixelStack[i] = lastPixel;
-                                        var pixelDisplacement = pcd.GetBits(4);
+                                        pixelDisplacement = pcd.GetBits(4);
                                         pixelStack[i] += (UInt32)pixelDisplacement;
-                                        while (pixelDisplacement == 15)
-                                        {
-                                            pixelDisplacement = pcd.GetBits(4);
-                                            pixelStack[i] += (UInt32)pixelDisplacement;
-                                        }
-                                    }
-                                    if (pixelStack[i] == lastPixel)
-                                    {
-                                        pixelStack[i] = 0;
-                                        i = numberOfPixelBits; // Just break here....
-                                    }
-                                    else
-                                    {
-                                        lastPixel = pixelStack[i];
-                                        decodedPixel++;
                                     }
                                 }
-
-                                var oldEntry = cellBuffer[currentCell];
-                                var curIdx = decodedPixel - 1;
-                                var newEntry = new PixelBufferEntry { Value = new byte[4] };
-                                for (int i = 0; i < 4; i++)
+                                if (pixelStack[i] == lastPixel)
                                 {
-                                    if ((pixelMask * (1 << i)) != 0)
-                                    {
-                                        if (curIdx >= 0)
-                                            newEntry.Value[i] = (byte)pixelStack[curIdx--];
-                                        else
-                                            newEntry.Value[i] = 0;
-                                    }
-                                    else
-                                        newEntry.Value[i] = PixelBuffer[oldEntry].Value[i];
+                                    pixelStack[i] = 0;
+                                    i = numberOfPixelBits; // Just break here....
                                 }
-                                newEntry.Frame = frameIndex;
-                                newEntry.FrameCellIndex = XOffsetBits + (cellY * HorizontalCellCount);
-                                PixelBuffer.Add(newEntry);
-                                cellBuffer[currentCell] = PixelBuffer.Count() - 1;
+                                else
+                                {
+                                    lastPixel = pixelStack[i];
+                                    decodedPixel++;
+                                }
                             }
+
+                            var oldEntry = cellBuffer[currentCell];
+                            pbIndex++;
+                            var newEntry = PixelBuffer[pbIndex];
+                            var curIdx = decodedPixel - 1;
+                            
+                            for (int i = 0; i < 4; i++)
+                            {
+                                if ((pixelMask & (1 << i)) != 0)
+                                {
+                                    if (curIdx >= 0)
+                                        newEntry.Value[i] = (byte)pixelStack[curIdx--];
+                                    else
+                                        newEntry.Value[i] = 0;
+                                }
+                                else
+                                    newEntry.Value[i] = oldEntry.Value[i];
+                            }
+
+                            cellBuffer[currentCell] = newEntry;
+                            newEntry.Frame = frameIndex;
+                            newEntry.FrameCellIndex = cellX + (cellY * HorizontalCellCount);
                         }
                     }
                 }
