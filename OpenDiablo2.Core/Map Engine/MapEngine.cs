@@ -109,7 +109,7 @@ namespace OpenDiablo2.Core.Map_Engine
 
         public void Render()
         {
-            var xOffset = (gameState.ShowInventoryPanel ? -200 : 0) + (gameState.ShowCharacterPanel ? 200 : 0);
+            var xOffset = gameState.CameraOffset;
 
             var cx = -(cameraLocation.X - Math.Truncate(cameraLocation.X));
             var cy = -(cameraLocation.Y - Math.Truncate(cameraLocation.Y));

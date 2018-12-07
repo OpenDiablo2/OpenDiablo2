@@ -14,7 +14,6 @@ namespace OpenDiablo2.Core.UI
     {
         private readonly IRenderWindow renderWindow;
         private ISprite sprite;
-        private IPanelFrame panelFrame;
         private Point location;
 
         public Point Location {
@@ -25,6 +24,9 @@ namespace OpenDiablo2.Core.UI
             }
         }
 
+        public eButtonType PanelType => eButtonType.MinipanelInventory;
+        public ePanelFrameType FrameType => ePanelFrameType.Right;
+
         // Test vars
         public IItemContainer helmContainer, armorContainer, weaponLeftContainer, weaponRightContainer, beltContainer, gloveContainer, bootsContainer;
         private Point previouslyContainedItem;
@@ -32,10 +34,9 @@ namespace OpenDiablo2.Core.UI
         private IItemContainer ringtRightContainer;
         private IItemContainer amuletContainer;
 
-        public InventoryPanel(Func<ePanelFrameType, IPanelFrame> createPanelFrame, IRenderWindow renderWindow, IItemManager itemManager, Func<eItemContainerType, IItemContainer> createItemContainer)
+        public InventoryPanel(IRenderWindow renderWindow, IItemManager itemManager, Func<eItemContainerType, IItemContainer> createItemContainer)
         {
             this.renderWindow = renderWindow;
-            this.panelFrame = createPanelFrame(ePanelFrameType.Right);
 
             sprite = renderWindow.LoadSprite(ResourcePaths.InventoryCharacterPanel, Palettes.Units, new Point(402,61));
             Location = new Point(400, 0);
@@ -83,7 +84,6 @@ namespace OpenDiablo2.Core.UI
 
         public void Update()
         {
-
             helmContainer.Update();
             amuletContainer.Update();
             armorContainer.Update();
@@ -98,7 +98,6 @@ namespace OpenDiablo2.Core.UI
 
         public void Render()
         {
-            panelFrame.Render();
             renderWindow.Draw(sprite, 2, 2, 1);
 
             helmContainer.Render();

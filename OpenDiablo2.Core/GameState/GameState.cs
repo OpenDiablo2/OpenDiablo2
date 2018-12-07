@@ -32,15 +32,14 @@ namespace OpenDiablo2.Core.GameState_
         public Palette CurrentPalette => paletteProvider.PaletteTable[$"ACT{Act}"];
         public List<PlayerInfo> PlayerInfos { get; private set; } = new List<PlayerInfo>();
 
-        public bool ShowInventoryPanel { get; set; } = false;
-        public bool ShowCharacterPanel { get; set; } = false;
-
         readonly private IMouseCursor originalMouseCursor;
 
         public int Seed { get; internal set; }
 
         public Item SelectedItem { get; internal set; }
         public object ThreadLocker { get; } = new object();
+
+        public int CameraOffset { get; set; } = 0;
 
         IEnumerable<PlayerInfo> IGameState.PlayerInfos => PlayerInfos;
 
@@ -189,7 +188,7 @@ namespace OpenDiablo2.Core.GameState_
             var map = GetMap(ref cellX, ref cellY);
 
             if (map == null)
-                return new List<MapCellInfo>();
+                return Enumerable.Empty<MapCellInfo>();
 
             if (cellY >= map.FileData.Height || cellX >= map.FileData.Width)
                 return new List<MapCellInfo>(); // Temporary code
@@ -234,20 +233,6 @@ namespace OpenDiablo2.Core.GameState_
         public void UpdateMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType, IEnumerable<MapCellInfo> mapCellInfo)
         {
 
-        }
-
-        public bool ToggleShowInventoryPanel()
-        {
-            ShowInventoryPanel = !ShowInventoryPanel;
-
-            return ShowInventoryPanel;
-        }
-
-        public bool ToggleShowCharacterPanel()
-        {
-            ShowCharacterPanel = !ShowCharacterPanel;
-
-            return ShowCharacterPanel;
         }
 
         public void SelectItem(Item item)

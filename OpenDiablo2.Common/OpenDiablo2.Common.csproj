@@ -86,6 +86,7 @@
     <Compile Include="Interfaces\MessageBus\IMessageFrame.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionManager.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionServer.cs" />
+    <Compile Include="Interfaces\UI\IPanel.cs" />
     <Compile Include="Models\AnimationData.cs" />
     <Compile Include="Models\BitMuncher.cs" />
     <Compile Include="Models\MPQCOF.cs" />
