@@ -21,9 +21,9 @@ namespace OpenDiablo2.Common.Models
             this.data = source.data;
             this.Offset = source.Offset;
         }
-        public int GetBit()
+        public UInt32 GetBit()
         {
-            var result = (data[Offset / 8] >> (Offset % 8)) & 0x01;
+            var result = (UInt32)(data[Offset / 8] >> (Offset % 8)) & 0x01;
             Offset++;
             BitsRead++;
             return result;
@@ -33,10 +33,14 @@ namespace OpenDiablo2.Common.Models
 
         public byte GetByte() => (byte)GetBits(8);
         public Int32 GetInt32() => MakeSigned(GetBits(32), 32);
+        public UInt32 GetUInt32() => GetBits(32);
 
-        public int GetBits(int bits)
+        public UInt32 GetBits(int bits)
         {
-            var result = 0;
+            if (bits == 0)
+                return 0;
+
+            var result = 0U;
             for (var i = 0; i < bits; i++)
                 result |= (GetBit() << i);
 
@@ -45,14 +49,21 @@ namespace OpenDiablo2.Common.Models
 
         public int GetSignedBits(int bits) => MakeSigned(GetBits(bits), bits);
 
-        private int MakeSigned(int value, int bits)
+
+        private Int32 MakeSigned(UInt32 value, int bits)
         {
+            if (bits == 0)
+                return 0;
+            // If its a single bit, a value of 1 is -1 automagically
             if (bits == 1)
-                return -value;
+                return -(Int32)value;
 
+            // If there is no sign bit, return the value as is
             if ((value & (1 << (bits - 1))) == 0)
-                return value;
+                return (Int32)value;
 
+            // We need to extend the signed bit out so that the negative value
+            // representation still works with the 2s compliment rule.
             var result = UInt32.MaxValue;
             for (byte i = 0; i < bits; i++)
             {
@@ -60,8 +71,7 @@ namespace OpenDiablo2.Common.Models
                     result -= (UInt32)(1 << i);
             }
 
-            var newResult = (int)result;
-            return newResult;
+            return (Int32)result; // Force casting to a signed value
         }
 
     }

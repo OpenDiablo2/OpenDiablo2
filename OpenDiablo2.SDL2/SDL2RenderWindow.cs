@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Common.Interfaces.Drawing;
 using OpenDiablo2.Common.Models;
 using SDL2;
 
@@ -470,5 +471,7 @@ namespace OpenDiablo2.SDL2_
 
         public uint GetTicks() => SDL.SDL_GetTicks();
 
+        public ICharacterRenderer CreateCharacterRenderer()
+            => new SDL2CharacterRenderer(this.renderer, resourceManager, paletteProvider);
     }
 }

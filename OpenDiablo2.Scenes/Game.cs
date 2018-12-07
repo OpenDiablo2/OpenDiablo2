@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Numerics;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
@@ -78,11 +77,6 @@ namespace OpenDiablo2.Scenes
             menuButton = createButton(eButtonType.Menu);
             menuButton.Location = new Point(393, 561);
             menuButton.OnToggle = OnMenuToggle;
-
-            /*var item = itemManager.getItem("hdm");
-            var cursorsprite = renderWindow.LoadSprite(ResourcePaths.GeneratePathForItem(item.InvFile), Palettes.Units);
-            
-            renderWindow.MouseCursor = renderWindow.LoadCursor(cursorsprite, 0, new Point(cursorsprite.FrameSize.Width/2, cursorsprite.FrameSize.Height / 2));*/
         }
 
         private void OnMenuToggle(bool isToggled)

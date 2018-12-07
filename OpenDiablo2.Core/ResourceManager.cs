@@ -93,9 +93,14 @@ namespace OpenDiablo2.Core
 
         public MPQDCC GetPlayerDCC(MPQCOF.COFLayer cofLayer, eArmorType armorType, Palette palette)
         {
+            // TODO: We need to cache this...
             byte[] binaryData;
+            
             using (var stream = mpqProvider.GetStream(cofLayer.GetDCCPath(armorType)))
             {
+                if (stream == null)
+                    return null;
+
                 binaryData = new byte[stream.Length];
                 stream.Read(binaryData, 0, (int)stream.Length);
             }

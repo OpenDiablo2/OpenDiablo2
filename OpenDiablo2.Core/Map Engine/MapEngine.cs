@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Common.Interfaces.Drawing;
+using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Core.Map_Engine
 {
@@ -12,6 +15,9 @@ namespace OpenDiablo2.Core.Map_Engine
         private readonly IGameState gameState;
         private readonly IRenderWindow renderWindow;
         private readonly IResourceManager resourceManager;
+        private readonly ISessionManager sessionManager;
+
+        private List<ICharacterRenderer> characterRenderers = new List<ICharacterRenderer>();
 
         public int FocusedPlayerId { get; set; } = 0;
 
@@ -32,7 +38,6 @@ namespace OpenDiablo2.Core.Map_Engine
 
         private ISprite loadingSprite;
         private int cOffX, cOffY;
-        //private ISprite[] tempMapCell;
 
         private const int
             cellSizeX = 160,
@@ -43,14 +48,63 @@ namespace OpenDiablo2.Core.Map_Engine
         public MapEngine(
             IGameState gameState,
             IRenderWindow renderWindow,
-            IResourceManager resourceManager
+            IResourceManager resourceManager,
+            ISessionManager sessionManager
             )
         {
             this.gameState = gameState;
             this.renderWindow = renderWindow;
             this.resourceManager = resourceManager;
+            this.sessionManager = sessionManager;
 
             loadingSprite = renderWindow.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading, new Point(300, 400));
+            sessionManager.OnPlayerInfo += OnPlayerInfo;
+            sessionManager.OnLocatePlayers += OnLocatePlayers;
+        }
+
+        private void OnLocatePlayers(int clientHash, IEnumerable<PlayerLocationDetails> playerLocationDetails)
+        {
+            foreach(var loc in playerLocationDetails)
+            {
+                var cr = characterRenderers.FirstOrDefault(x => x.LocationDetails.PlayerId == loc.PlayerId);
+                cr.LocationDetails = loc;
+            }
+        }
+
+        private void OnPlayerInfo(int clientHash, IEnumerable<PlayerInfo> playerInfo)
+        {
+            // Remove character renderers for players that no longer exist...
+            characterRenderers.RemoveAll(x => playerInfo.Any(z => z.UID == x.UID));
+
+            // Update existing character renderers
+            foreach (var cr in characterRenderers)
+            {
+                var info = playerInfo.FirstOrDefault(x => x.UID == cr.UID);
+                if (info == null)
+                    continue;
+
+                // TODO: This shouldn't be necessary...
+                cr.LocationDetails = info.LocationDetails;
+                cr.MobMode = info.MobMode;
+                cr.WeaponClass = info.WeaponClass;
+                cr.Hero = info.Hero;
+                cr.ArmorType = info.ArmorType;
+                
+            }
+
+            // Add character renderers for characters that now exist
+            foreach(var info in playerInfo.Where(x => !characterRenderers.Any(z => x.UID == z.UID)))
+            {
+                var cr = renderWindow.CreateCharacterRenderer();
+                cr.UID = info.UID;
+                cr.LocationDetails = info.LocationDetails;
+                cr.MobMode = info.MobMode;
+                cr.WeaponClass = info.WeaponClass;
+                cr.Hero = info.Hero;
+                cr.ArmorType = info.ArmorType;
+                characterRenderers.Add(cr);
+                cr.ResetAnimationData();
+            }
         }
 
         public void Render()
@@ -77,8 +131,14 @@ namespace OpenDiablo2.Core.Map_Engine
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.Floor))
                         renderWindow.DrawMapCell(cellInfo, 320 + (int)px + (int)ox + xOffset, 210 + (int)py + (int)oy);
 
+
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallLower))
                         renderWindow.DrawMapCell(cellInfo, 320 + (int)px + (int)ox + xOffset, 210 + (int)py + (int)oy);
+
+                    // TODO: We need to render the characters infront of, or behind the wall properly...
+                    foreach (var character in characterRenderers.Where(x => Math.Truncate(x.LocationDetails.PlayerX) == ax && Math.Truncate(x.LocationDetails.PlayerY) == ay))
+                        character.Render(320 + (int)px + (int)ox + xOffset, 210 + (int)py + (int)oy);
+
 
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallUpper))
                         renderWindow.DrawMapCell(cellInfo, 320 + (int)px + (int)ox + xOffset, 210 + (int)py + (int)oy);
@@ -94,6 +154,9 @@ namespace OpenDiablo2.Core.Map_Engine
 
         public void Update(long ms)
         {
+            foreach (var character in characterRenderers)
+                character.Update(ms);
+
             if (FocusedPlayerId != 0)
             {
                 var player = gameState.PlayerInfos.FirstOrDefault(x => x.LocationDetails.PlayerId == FocusedPlayerId);
