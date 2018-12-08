@@ -84,8 +84,10 @@ namespace OpenDiablo2.GameServer_
 
             var rads = (float)player.MovementDirection * 22 * (float)Deg2Rad;
 
-            var moveX = (float)Math.Cos(rads) * seconds * 2f;
-            var moveY = (float)Math.Sin(rads) * seconds * 2f;
+            var speed = (float)(player.MovementType == eMovementType.Running ? player.GetRunVelocity() : player.GetWalkVeloicty()) / 4f;
+
+            var moveX = (float)Math.Cos(rads) * seconds * speed;
+            var moveY = (float)Math.Sin(rads) * seconds * speed;
 
             player.X += moveX;
             player.Y += moveY;

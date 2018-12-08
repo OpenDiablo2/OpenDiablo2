@@ -20,7 +20,10 @@ namespace OpenDiablo2.Common.Models
             public eWeaponClass WeaponClass { get; internal set; }
 
             public string GetDCCPath(eArmorType armorType)
-                => $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}{armorType.ToToken()}{COF.MobMode.ToToken()}{COF.WeaponClass.ToToken()}.dcc";
+            {
+                var result = $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}{armorType.ToToken()}{COF.MobMode.ToToken()}{COF.WeaponClass.ToToken()}.dcc";
+                return result;
+            }
 
         }
 

@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Common.Interfaces.Drawing;
 using OpenDiablo2.Common.Interfaces.Mobs;
 using OpenDiablo2.Core.GameState_;
 using OpenDiablo2.Core.Map_Engine;
@@ -30,7 +31,6 @@ namespace OpenDiablo2.Core
             builder.RegisterType<ResourceManager>().As<IResourceManager>().SingleInstance();
             builder.RegisterType<TextDictionary>().As<ITextDictionary>().SingleInstance();
             builder.RegisterType<TextBox>().As<ITextBox>().InstancePerDependency();
-
             builder.RegisterType<MobManager>().As<IMobManager>().SingleInstance(); // TODO: This needs to have client and server versions...
         }
     }

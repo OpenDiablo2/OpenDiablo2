@@ -78,6 +78,7 @@
     <Compile Include="Enums\Mobs\eDamageTypes.cs" />
     <Compile Include="Enums\Mobs\eMobFlags.cs" />
     <Compile Include="Enums\Mobs\eStatModifierType.cs" />
+    <Compile Include="Interfaces\Drawing\ICharacterRenderer.cs" />
     <Compile Include="Interfaces\IItemManager.cs" />
     <Compile Include="Extensions\MobManagerExtensions.cs" />
     <Compile Include="Interfaces\IGameServer.cs" />

@@ -59,7 +59,12 @@ namespace OpenDiablo2.Core
         public IEnumerable<MPQ> GetMPQs() => mpqs;
 
         public Stream GetStream(string fileName)
-            => mpqs[mpqLookup[fileName.ToLower()]].OpenFile(fileName);
+        {
+            if (!mpqLookup.ContainsKey(fileName.ToLower()))
+                return null;
+
+            return mpqs[mpqLookup[fileName.ToLower()]].OpenFile(fileName);
+        }
         
 
         public IEnumerable<string> GetTextFile(string fileName)

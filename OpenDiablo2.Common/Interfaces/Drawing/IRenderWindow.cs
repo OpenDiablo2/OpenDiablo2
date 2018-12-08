@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using OpenDiablo2.Common.Interfaces.Drawing;
 using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Common.Interfaces
@@ -29,5 +30,6 @@ namespace OpenDiablo2.Common.Interfaces
         void Draw(ILabel label);
         MapCellInfo CacheMapCell(MPQDT1Tile mapCell);
         void DrawMapCell(MapCellInfo mapCellInfo, int xPixel, int yPixel);
+        ICharacterRenderer CreateCharacterRenderer();
     }
 }

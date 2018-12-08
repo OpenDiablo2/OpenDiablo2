@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Numerics;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
@@ -154,6 +153,8 @@ namespace OpenDiablo2.Scenes
             if (cursorDirection < 0)
                 cursorDirection += 360;
             var actualDirection = (byte)(cursorDirection / 22);
+            if (actualDirection >= 16)
+                actualDirection -= 16;
 
             if (mouseInfoProvider.LeftMouseDown && (lastMovementType == eMovementType.Stopped || lastDirection != actualDirection))
             {
