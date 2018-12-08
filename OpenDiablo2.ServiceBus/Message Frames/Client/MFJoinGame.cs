@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 
 namespace OpenDiablo2.ServiceBus.Message_Frames.Client
@@ -30,7 +31,7 @@ namespace OpenDiablo2.ServiceBus.Message_Frames.Client
                 PlayerName = Encoding.UTF8.GetString(value, 3, value.Length - 3);
 
                 if (PlayerName.Length != playerNameLen)
-                    throw new ApplicationException("Invalid player length!");
+                    throw new OpenDiablo2Exception("Invalid player length!");
             }
         }
 

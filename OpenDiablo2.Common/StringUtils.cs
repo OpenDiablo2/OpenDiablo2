@@ -3,7 +3,7 @@ using System.Text;
 
 namespace OpenDiablo2.Common
 {
-    public class StringUtils
+    public static class StringUtils
     {
         public static List<string> SplitIntoLinesWithMaxWidth(string fullSentence, int maxChars)
         {

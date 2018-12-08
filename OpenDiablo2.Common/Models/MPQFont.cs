@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Text;
+using OpenDiablo2.Common.Exceptions;
 
 namespace OpenDiablo2.Common.Models
 {
@@ -37,7 +38,7 @@ namespace OpenDiablo2.Common.Models
             var br = new BinaryReader(tableStream);
             var wooCheck = Encoding.UTF8.GetString(br.ReadBytes(4));
             if (wooCheck != "Woo!")
-                throw new ApplicationException("Error loading font. Missing the Woo!");
+                throw new OpenDiablo2Exception("Error loading font. Missing the Woo!");
             br.ReadBytes(8);
 
             while (tableStream.Position < tableStream.Length)

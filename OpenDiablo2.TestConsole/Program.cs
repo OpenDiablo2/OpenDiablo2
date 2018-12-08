@@ -1,16 +1,13 @@
-﻿using OpenDiablo2.Common.Enums;
-using OpenDiablo2.Common.Models;
-using OpenDiablo2.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Models;
+using OpenDiablo2.Core;
 
 namespace OpenDiablo2.TestConsole
 {
-    class Program
+    static class Program
     {
         private static GlobalConfiguration GlobalConfig = null;
         private static MPQProvider MPQProv = null;

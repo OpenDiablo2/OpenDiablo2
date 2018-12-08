@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Interfaces.Drawing;
 using OpenDiablo2.Common.Models;
@@ -134,7 +135,7 @@ namespace OpenDiablo2.SDL2_
 
             animationData = resourceManager.GetPlayerAnimation(Hero, WeaponClass, MobMode);
             if (animationData == null)
-                throw new ApplicationException("Could not locate animation for the character!");
+                throw new OpenDiablo2Exception("Could not locate animation for the character!");
 
             var palette = paletteProvider.PaletteTable["Units"];
             CacheFrames(animationData.Layers.Select(layer => resourceManager.GetPlayerDCC(layer, ArmorType, palette)));
@@ -221,7 +222,7 @@ namespace OpenDiablo2.SDL2_
                                 var offsetX = x + cell.XOffset + (frame.Box.X - minX);
                                 var offsetY = y + cell.YOffset + (frame.Box.Y - minY);
                                 if (offsetX < 0 || offsetX > frameW || offsetY < 0 || offsetY > frameH)
-                                    throw new ApplicationException("There is nothing we can do now.");
+                                    throw new OpenDiablo2Exception("There is nothing we can do now.");
 
                                 data[offsetX + (offsetY * (pitch / 4))] = color;
                             }
