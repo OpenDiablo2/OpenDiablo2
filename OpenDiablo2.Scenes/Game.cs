@@ -22,11 +22,6 @@ namespace OpenDiablo2.Scenes
 
         //private ISprite[] testSprite;
 
-        private readonly ISprite panelSprite, healthManaSprite, gameGlobeOverlapSprite;
-
-        private readonly IMiniPanel minipanel;
-        
-        private readonly IButton runButton, menuButton;
         private eMovementType lastMovementType = eMovementType.Stopped;
         private byte lastDirection = 255;
 
