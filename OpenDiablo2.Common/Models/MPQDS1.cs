@@ -60,12 +60,12 @@ namespace OpenDiablo2.Common.Models
 
     public struct DS1LookupTable
     {
-        public int Orientation;
-        public int MainIndex;
-        public int SubIndex;
-        public int Frame;
+        public int Orientation { get; internal set; }
+        public int MainIndex { get; internal set; }
+        public int SubIndex { get; internal set; }
+        public int Frame { get; internal set; }
 
-        public MPQDT1Tile TileRef;
+        public MPQDT1Tile TileRef { get; internal set; }
 
     }
 

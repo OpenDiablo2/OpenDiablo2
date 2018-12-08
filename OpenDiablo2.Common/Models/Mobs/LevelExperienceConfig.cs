@@ -11,7 +11,7 @@ namespace OpenDiablo2.Common.Models.Mobs
 {
     public class LevelExperienceConfig : ILevelExperienceConfig
     {
-        private readonly List<long> ExperiencePerLevel = new List<long>();
+        private readonly List<long> ExperiencePerLevel;
 
         public LevelExperienceConfig(List<long> expperlevel)
         {

@@ -11,24 +11,24 @@ namespace OpenDiablo2.Common.Models
     {
         public sealed class PixelBufferEntry
         {
-            public byte[] Value;
-            public int Frame;
-            public int FrameCellIndex;
+            public byte[] Value { get; internal set; }
+            public int Frame { get; internal set; }
+            public int FrameCellIndex { get; internal set; }
         }
 
         public sealed class Cell
         {
-            public int Width;
-            public int Height;
-            public int XOffset;
-            public int YOffset;
+            public int Width { get; internal set; }
+            public int Height { get; internal set; }
+            public int XOffset { get; internal set; }
+            public int YOffset { get; internal set; }
 
-            public int LastWidth;
-            public int LastHeight;
-            public int LastXOffset;
-            public int LastYOffset;
+            public int LastWidth { get; internal set; }
+            public int LastHeight { get; internal set; }
+            public int LastXOffset { get; internal set; }
+            public int LastYOffset { get; internal set; }
 
-            public byte[] PixelData;
+            public byte[] PixelData { get; internal set; }
         }
 
         public sealed class MPQDCCDirectionFrame
@@ -49,7 +49,7 @@ namespace OpenDiablo2.Common.Models
 
             public MPQDCCDirectionFrame(BitMuncher bits, MPQDCCDirection direction)
             {
-                var variable0 = bits.GetBits(direction.Variable0Bits);
+                bits.GetBits(direction.Variable0Bits); // Variable0
                 Width = (int)bits.GetBits(direction.WidthBits);
                 Height = (int)bits.GetBits(direction.HeightBits);
                 XOffset = bits.GetSignedBits(direction.XOffsetBits);
@@ -218,7 +218,7 @@ namespace OpenDiablo2.Common.Models
                 for (var i = 0; i < 256; i++)
                     paletteEntries.Add(bm.GetBit() != 0);
 
-                PaletteEntries = new byte[paletteEntries.Count(x => x == true)];
+                PaletteEntries = new byte[paletteEntries.Count(x => x)];
                 var paletteOffset = 0;
                 for (var i = 0; i < 256; i++)
                 {
@@ -295,8 +295,6 @@ namespace OpenDiablo2.Common.Models
                 foreach (var frame in Frames)
                 {
                     frameIndex++;
-                    var numberOfCells = frame.HorizontalCellCount * frame.VerticalCellCount;
-
                     var c = -1;
                     foreach (var cell in frame.Cells)
                     {
@@ -393,7 +391,7 @@ namespace OpenDiablo2.Common.Models
                         var currentCellY = cellY + originCellY;
                         for (var cellX = 0; cellX < frame.HorizontalCellCount; cellX++, frameCellIndex++)
                         {
-                            var currentCell = (originCellX + cellX) + (currentCellY * HorizontalCellCount);
+                            var currentCell = originCellX + cellX + (currentCellY * HorizontalCellCount);
                             var nextCell = false;
                             var tmp = 0;
                             if (cellBuffer[currentCell] != null)

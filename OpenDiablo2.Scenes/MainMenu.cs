@@ -107,7 +107,7 @@ namespace OpenDiablo2.Scenes
 
         public void Update(long ms)
         {
-            float seconds = ((float)ms / 1000f);
+            float seconds = (float)ms / 1000f;
             logoFrame += seconds;
             while (logoFrame >= 1f)
                 logoFrame -= 1f;

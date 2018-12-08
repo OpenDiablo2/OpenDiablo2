@@ -48,7 +48,7 @@ namespace OpenDiablo2.Common.Models
 
             var numLayers = br.ReadByte();
             var framesPerDir = br.ReadByte();
-            var numDirections = br.ReadByte();
+            br.ReadByte(); // Number of directions
 
             br.ReadBytes(25); // Skip 25 unknown bytes...
 

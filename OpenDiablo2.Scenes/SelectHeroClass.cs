@@ -341,7 +341,7 @@ namespace OpenDiablo2.Scenes
 
         public void Update(long ms)
         {
-            float seconds = ((float)ms / 1500f);
+            float seconds = (float)ms / 1500f;
             secondTimer += seconds;
             while (secondTimer >= 1f)
                 secondTimer -= 1f;

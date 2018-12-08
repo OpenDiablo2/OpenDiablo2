@@ -373,7 +373,7 @@ namespace OpenDiablo2.SDL2_
             {
                 UInt32* data = (UInt32*)pixels;
 
-                var pitchChange = (pitch / 4);
+                var pitchChange = pitch / 4;
 
                 for (var i = 0; i < frameSize.Height * pitchChange; i++)
                     data[i] = 0x0;

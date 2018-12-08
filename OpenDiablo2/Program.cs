@@ -44,7 +44,7 @@ namespace OpenDiablo2
             Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed(o => globalConfiguration = new GlobalConfiguration
             {
                 BaseDataPath = Path.GetFullPath(o.DataPath ?? Directory.GetCurrentDirectory()),
-                MouseMode = o.HardwareMouse == true ? eMouseMode.Hardware : eMouseMode.Software,
+                MouseMode = o.HardwareMouse ? eMouseMode.Hardware : eMouseMode.Software,
                 HardwareMouseScale = o.MouseScale,
                 FullScreen = o.FullScreen
             }).WithNotParsed(o =>

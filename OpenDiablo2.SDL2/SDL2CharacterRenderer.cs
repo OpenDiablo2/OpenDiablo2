@@ -91,8 +91,8 @@ namespace OpenDiablo2.SDL2_
             if (currentDirectionCache == null)
                 return;
 
-            seconds += ((float)ms / 1000f);
-            var animationSeg = (15f / (float)currentDirectionCache.AnimationSpeed);
+            seconds += (float)ms / 1000f;
+            var animationSeg = 15f / (float)currentDirectionCache.AnimationSpeed;
             while (seconds >= animationSeg)
             {
                 seconds -= animationSeg;

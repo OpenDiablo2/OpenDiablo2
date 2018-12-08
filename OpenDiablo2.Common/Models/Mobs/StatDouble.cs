@@ -14,7 +14,7 @@ namespace OpenDiablo2.Common.Models.Mobs
         protected double Max = 0;
         protected double Current = 0; // the current value BEFORE modifiers
 
-        public bool AllowedToOverflowFromModifiers = false; // if true, can return a value greater than Max 
+        public bool AllowedToOverflowFromModifiers { get; set; } = false; // if true, can return a value greater than Max 
         // if a modifier is increasing the current value
 
         public StatDouble(double min, double max, double current, bool allowedToOverflowFromModifiers)

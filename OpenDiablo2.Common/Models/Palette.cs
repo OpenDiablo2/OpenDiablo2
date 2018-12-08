@@ -26,7 +26,7 @@ namespace OpenDiablo2.Common.Models
                 var b = br.ReadByte();
                 var g = br.ReadByte();
                 var r = br.ReadByte();
-                result.Colors[i] = ((UInt32)255 << 24) + ((UInt32)r << 16) + ((UInt32)g << 8) + (UInt32)b;
+                result.Colors[i] = ((UInt32)255 << 24) + ((UInt32)r << 16) + ((UInt32)g << 8) + b;
             }
 
             return result;

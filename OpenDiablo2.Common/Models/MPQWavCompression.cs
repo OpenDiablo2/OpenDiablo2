@@ -85,17 +85,17 @@ namespace OpenDiablo2.Common.Models
                     int temp2 = temp1 >> shift;
 
                     if ((value & 1) != 0)
-                        temp2 += (temp1 >> 0);
+                        temp2 += temp1 >> 0;
                     if ((value & 2) != 0)
-                        temp2 += (temp1 >> 1);
+                        temp2 += temp1 >> 1;
                     if ((value & 4) != 0)
-                        temp2 += (temp1 >> 2);
+                        temp2 += temp1 >> 2;
                     if ((value & 8) != 0)
-                        temp2 += (temp1 >> 3);
+                        temp2 += temp1 >> 3;
                     if ((value & 0x10) != 0)
-                        temp2 += (temp1 >> 4);
+                        temp2 += temp1 >> 4;
                     if ((value & 0x20) != 0)
-                        temp2 += (temp1 >> 5);
+                        temp2 += temp1 >> 5;
 
                     int temp3 = Array2[channel];
                     if ((value & 0x40) != 0)

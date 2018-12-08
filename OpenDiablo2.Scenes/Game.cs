@@ -68,8 +68,8 @@ namespace OpenDiablo2.Scenes
             if (gameHUD.IsMouseOver())
                 return;
 
-            var mx = (mouseInfoProvider.MouseX - 400) - gameState.CameraOffset;
-            var my = (mouseInfoProvider.MouseY - 300);
+            var mx = mouseInfoProvider.MouseX - 400 - gameState.CameraOffset;
+            var my = mouseInfoProvider.MouseY - 300;
 
             var tx = (mx / 60f + my / 40f) / 2f;
             var ty = (my / 40f - (mx / 60f)) / 2f;
