@@ -2,11 +2,11 @@
 
 namespace OpenDiablo2.Common.Interfaces
 {
-    public delegate void PanelSelectedEvent(IPanel panel);
+    public delegate void OnPanelToggledEvent(IPanel panel);
 
     public interface IMiniPanel : IDisposable
     {
-        event PanelSelectedEvent PanelSelected;
+        event OnPanelToggledEvent OnPanelToggled;
 
         bool IsMouseOver();
         void UpdatePanelLocation();

@@ -1,4 +1,20 @@
-﻿using OpenDiablo2.Common;
+﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+ *  
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
+using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using System;
@@ -32,7 +48,7 @@ namespace OpenDiablo2.Core.UI
             this.gameState = gameState;
             this.mouseInfoProvider = mouseInfoProvider;
             minipanel = createMiniPanel();
-            minipanel.PanelSelected += OpenPanel;
+            minipanel.OnPanelToggled += TogglePanel;
 
             leftPanelFrame = createPanelFrame(ePanelFrameType.Left);
             rightPanelFrame = createPanelFrame(ePanelFrameType.Right);
@@ -59,7 +75,7 @@ namespace OpenDiablo2.Core.UI
         public bool IsRightPanelVisible => RightPanel != null;
         public bool IsRunningEnabled => runButton.Toggled;
 
-        public void OpenPanel(IPanel panel)
+        public void TogglePanel(IPanel panel)
         {
             switch (panel.FrameType)
             {
@@ -101,6 +117,14 @@ namespace OpenDiablo2.Core.UI
             ArePanelsBounded = true;
         }
 
+        public void ClosePanels()
+        {
+            LeftPanel = null;
+            RightPanel = null;
+            UpdateCameraOffset();
+            ArePanelsBounded = false;
+        }
+
         public bool IsMouseOver()
         {
             return mouseInfoProvider.MouseY >= 550
@@ -122,9 +146,6 @@ namespace OpenDiablo2.Core.UI
                 RightPanel.Render();
                 rightPanelFrame.Render();
             }
-
-            if (!IsLeftPanelVisible || !IsRightPanelVisible)
-                minipanel.Render();
             
             // Render the background bottom bar
             renderWindow.Draw(panelSprite, 0, new Point(0, 600));
@@ -141,6 +162,9 @@ namespace OpenDiablo2.Core.UI
             // Render the mana bar
             renderWindow.Draw(healthManaSprite, 1, new Point(692, 588));
             renderWindow.Draw(gameGlobeOverlapSprite, 1, new Point(693, 591));
+            
+            if (!IsLeftPanelVisible || !IsRightPanelVisible)
+                minipanel.Render();
 
             runButton.Render();
             menuButton.Render();

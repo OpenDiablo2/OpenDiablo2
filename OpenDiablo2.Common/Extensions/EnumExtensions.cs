@@ -15,19 +15,28 @@
  */
 
 using OpenDiablo2.Common.Enums;
-using System;
+using System.Drawing;
 
-namespace OpenDiablo2.Common.Interfaces
+namespace OpenDiablo2.Common.Extensions
 {
-    public delegate void OnPanelClosedEvent(IPanel panel);
-
-    public interface IPanel : IDisposable
+    public static class EnumExtensions
     {
-        event OnPanelClosedEvent OnPanelClosed;
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        eButtonType PanelType { get; }
-        ePanelFrameType FrameType { get; }
-        void Render();
-        void Update();
+        public static Point GetOffset(this ePanelFrameType value)
+        {
+            switch (value)
+            {
+                case ePanelFrameType.Left:
+                    return new Point(80, 63);
+                case ePanelFrameType.Right:
+                    return new Point(400, 63);
+                case ePanelFrameType.Center:
+                    return new Point(0, 0);
+            }
+
+            log.Warn($"Unknown panel positon, {value}");
+            return default(Point);
+        }
     }
 }
