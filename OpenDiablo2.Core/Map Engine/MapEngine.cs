@@ -136,7 +136,7 @@ namespace OpenDiablo2.Core.Map_Engine
                         foreach (var character in characterRenderers/*.Where(x => Math.Truncate(x.LocationDetails.PlayerX) == ax && Math.Truncate(x.LocationDetails.PlayerY) == ay)*/)
                         {
                             // TODO: Temporary hack
-                            character.Render(400, 280);
+                            character.Render(400 + gameState.CameraOffset, 280);
                         }
                     }
 
