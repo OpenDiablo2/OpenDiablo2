@@ -25,7 +25,10 @@
  *
  */
 #endregion
-
+#pragma warning disable S4200
+#pragma warning disable S4214
+#pragma warning disable S2344
+#pragma warning disable S101
 #region Using Statements
 using System;
 using System.Runtime.InteropServices;

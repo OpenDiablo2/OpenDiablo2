@@ -25,7 +25,20 @@
  *
  */
 #endregion
-
+#pragma warning disable S4200
+#pragma warning disable S4214
+#pragma warning disable S2346
+#pragma warning disable S3459
+#pragma warning disable S1854
+#pragma warning disable S101
+#pragma warning disable S2344
+#pragma warning disable S1134
+#pragma warning disable S1144
+#pragma warning disable S125
+#pragma warning disable S1135
+#pragma warning disable S1168
+#pragma warning disable S1104
+#pragma warning disable S1168
 #region Using Statements
 using System;
 using System.Runtime.InteropServices;
@@ -158,13 +171,13 @@ namespace SDL2
 
 		/* mem refers to a void*, IntPtr to an SDL_RWops* */
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr SDL_RWFromMem(IntPtr mem, int size);
+        public static extern IntPtr SDL_RWFromMem(IntPtr mem, int size);
 
-		#endregion
+        #endregion
 
-		#region SDL_main.h
+        #region SDL_main.h
 
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern void SDL_SetMainReady();
 
 		/* This is used as a function pointer to a C main() function for SDL_WinRTRunApp() */
