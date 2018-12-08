@@ -1,6 +1,21 @@
-﻿using System;
+﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+ *  
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
+using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
@@ -34,9 +49,9 @@ namespace OpenDiablo2.SDL2_
         public eArmorType ArmorType { get; set; }
         public eMobMode MobMode { get; set; }
 
-        private IntPtr renderer;
+        private readonly IntPtr renderer;
 
-        private List<DirectionCacheItem> directionCache = new List<DirectionCacheItem>();
+        private readonly List<DirectionCacheItem> directionCache = new List<DirectionCacheItem>();
         DirectionCacheItem currentDirectionCache;
         private float seconds;
 
@@ -172,10 +187,8 @@ namespace OpenDiablo2.SDL2_
             for (var frameIndex = 0; frameIndex < cache.FramesToAnimate; frameIndex++)
             {
                 var texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, frameW, frameH);
-                IntPtr pixels;
-                int pitch;
 
-                SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
+                SDL.SDL_LockTexture(texture, IntPtr.Zero, out IntPtr pixels, out int pitch);
                 UInt32* data = (UInt32*)pixels;
 
                 foreach (var layer in layerData)

@@ -36,7 +36,7 @@ namespace OpenDiablo2.ServiceBus
         private readonly IGameServer gameServer;
         private readonly Func<eMessageFrameType, IMessageFrame> getMessageFrame;
 
-        private AutoResetEvent resetEvent = new AutoResetEvent(false);
+        private readonly AutoResetEvent resetEvent = new AutoResetEvent(false);
         public AutoResetEvent WaitServerStartEvent { get; set; } = new AutoResetEvent(false);
         private bool running = false;
         private ResponseSocket responseSocket;

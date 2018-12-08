@@ -41,12 +41,12 @@ namespace OpenDiablo2.Common.Models
     /// </summary>
     public class PKLibDecompress
     {
-        private BitStream _bitstream;
-        private CompressionType _compressionType;
-        private int _dictSizeBits;  // Dictionary size in bits
+        private readonly BitStream _bitstream;
+        private readonly CompressionType _compressionType;
+        private readonly int _dictSizeBits;  // Dictionary size in bits
 
-        private static byte[] sPosition1;
-        private static byte[] sPosition2;
+        private static readonly byte[] sPosition1;
+        private static readonly byte[] sPosition2;
 
         private static readonly byte[] sLenBits =
         {

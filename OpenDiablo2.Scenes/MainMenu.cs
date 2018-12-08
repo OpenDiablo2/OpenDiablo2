@@ -11,27 +11,17 @@ namespace OpenDiablo2.Scenes
     [Scene(eSceneType.MainMenu)]
     public class MainMenu : IScene
     {
-        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         private readonly IRenderWindow renderWindow;
-        private readonly IPaletteProvider paletteProvider;
-        private readonly IMPQProvider mpqProvider;
-        private readonly IMouseInfoProvider mouseInfoProvider;
-        //private readonly IMusicProvider musicProvider;
         private readonly ISceneManager sceneManager;
 
         private float logoFrame;
-        private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack;
-        private IFont labelFont;
-        private ILabel versionLabel, urlLabel;
-        private IButton btnSinglePlayer, btnExit, btnWebsite;
+        private readonly ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack;
+        private readonly IFont labelFont;
+        private readonly ILabel versionLabel, urlLabel;
+        private readonly IButton btnSinglePlayer, btnExit, btnWebsite;
 
         public MainMenu(
             IRenderWindow renderWindow,
-            IPaletteProvider paletteProvider,
-            IMPQProvider mpqProvider,
-            IMouseInfoProvider mouseInfoProvider,
-            //IMusicProvider musicProvider,
             ISceneManager sceneManager,
             IResourceManager resourceManager,
             Func<eButtonType, IButton> createButton,
@@ -39,10 +29,6 @@ namespace OpenDiablo2.Scenes
             )
         {
             this.renderWindow = renderWindow;
-            this.paletteProvider = paletteProvider;
-            this.mpqProvider = mpqProvider;
-            this.mouseInfoProvider = mouseInfoProvider;
-            this.sceneManager = sceneManager;
             
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.GameSelectScreen, Palettes.Sky);
             diabloLogoLeft = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoFireLeft, Palettes.Units, new Point(400, 120));

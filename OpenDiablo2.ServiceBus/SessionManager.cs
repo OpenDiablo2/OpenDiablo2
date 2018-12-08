@@ -38,7 +38,7 @@ namespace OpenDiablo2.ServiceBus
         private readonly Func<IGameState> getGameState;
 
         private RequestSocket requestSocket;
-        private AutoResetEvent resetEvent = new AutoResetEvent(false);
+        private readonly AutoResetEvent resetEvent = new AutoResetEvent(false);
         private ISessionServer sessionServer;
         private bool running = false;
 

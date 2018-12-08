@@ -9,8 +9,8 @@ namespace OpenDiablo2.Common.Models.Mobs
     {
         public Guid UID { get; protected set; } = Guid.NewGuid();
         public eHero HeroType { get; protected set; }
-        private IHeroTypeConfig HeroTypeConfig;
-        private ILevelExperienceConfig ExperienceConfig;
+        private readonly IHeroTypeConfig HeroTypeConfig;
+        private readonly ILevelExperienceConfig ExperienceConfig;
         public int ClientHash { get; protected set; }
         public byte MovementDirection { get; set; } = 0;
         public eMovementType MovementType { get; set; } = eMovementType.Stopped; // TODO: This needs to mess with MobMode somehow

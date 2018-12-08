@@ -55,10 +55,12 @@ namespace OpenDiablo2.Common.Models
             var layers = new List<COFLayer>();
             for (var layerIdx = 0; layerIdx < numLayers; layerIdx++)
             {
-                var layer = new COFLayer();
-                layer.COF = result;
-                layer.CompositType = (eCompositType)br.ReadByte();
-                layer.Shadow = br.ReadByte();
+                var layer = new COFLayer
+                {
+                    COF = result,
+                    CompositType = (eCompositType)br.ReadByte(),
+                    Shadow = br.ReadByte()
+                };
                 br.ReadByte(); // Unknown
                 layer.IsTransparent = br.ReadByte() != 0;
                 layer.DrawEffect = (eDrawEffect)br.ReadByte();

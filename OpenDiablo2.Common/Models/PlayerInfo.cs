@@ -33,11 +33,13 @@ namespace OpenDiablo2.Common.Models
 
         public static PlayerInfo FromBytes(byte[] data, int offset = 0)
         {
-            var result = new PlayerInfo();
-            result.Hero = (eHero)data[offset];
-            result.WeaponClass= (eWeaponClass)data[offset + 1];
-            result.ArmorType = (eArmorType)data[offset + 2];
-            result.MobMode = (eMobMode)data[offset + 3];
+            var result = new PlayerInfo
+            {
+                Hero = (eHero)data[offset],
+                WeaponClass = (eWeaponClass)data[offset + 1],
+                ArmorType = (eArmorType)data[offset + 2],
+                MobMode = (eMobMode)data[offset + 3]
+            };
             var nameLength = BitConverter.ToInt32(data, offset + 4);
             result.Name = Encoding.UTF8.GetString(data, offset + 8, nameLength);
             result.LocationDetails = PlayerLocationDetails.FromBytes(data, offset + 8 + nameLength);

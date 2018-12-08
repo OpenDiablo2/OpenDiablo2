@@ -10,7 +10,7 @@ namespace OpenDiablo2.Common.Models.Mobs
 {
     public class LevelExperienceConfig : ILevelExperienceConfig
     {
-        private List<long> ExperiencePerLevel = new List<long>();
+        private readonly List<long> ExperiencePerLevel = new List<long>();
 
         public LevelExperienceConfig(List<long> expperlevel)
         {
@@ -42,8 +42,7 @@ namespace OpenDiablo2.Common.Models.Mobs
                 // i starts at 1 because we want to skip the first column
                 // the first column is just the row titles
                 string heroname = data[i][0]; // first row is the hero name
-                eHero herotype = default(eHero);
-                if(!Enum.TryParse<eHero>(heroname, out herotype))
+                if (!Enum.TryParse<eHero>(heroname, out eHero herotype))
                 {
                     continue; // skip this hero if we can't parse the name into a valid hero type
                 }
@@ -56,8 +55,7 @@ namespace OpenDiablo2.Common.Models.Mobs
                 List<long> expperlevel = new List<long>();
                 for (int o = 2; o < data.Length && (o-2 < maxlevel || maxlevel == -1); o++)
                 {
-                    long exp = 0;
-                    if(!long.TryParse(data[o][i], out exp))
+                    if (!long.TryParse(data[o][i], out long exp))
                     {
                         throw new Exception("Could not parse experience number '" + data[o][i] + "'.");
                     }

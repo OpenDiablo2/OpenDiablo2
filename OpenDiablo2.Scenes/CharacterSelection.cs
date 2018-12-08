@@ -10,11 +10,7 @@ namespace OpenDiablo2.Scenes
     [Scene(eSceneType.SelectCharacter)]
     public sealed class CharacterSelection : IScene
     {
-        static readonly log4net.ILog log =
-            log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         private readonly IRenderWindow renderWindow;
-
         private readonly ISprite backgroundSprite;
         private readonly IButton createNewCharacterButton, deleteCharacterButton, exitButton, okButton;
 

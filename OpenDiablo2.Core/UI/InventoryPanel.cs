@@ -13,7 +13,7 @@ namespace OpenDiablo2.Core.UI
     public sealed class InventoryPanel : IInventoryPanel
     {
         private readonly IRenderWindow renderWindow;
-        private ISprite sprite;
+        private readonly ISprite sprite;
         private Point location;
 
         public Point Location {
@@ -30,9 +30,9 @@ namespace OpenDiablo2.Core.UI
         // Test vars
         public IItemContainer helmContainer, armorContainer, weaponLeftContainer, weaponRightContainer, beltContainer, gloveContainer, bootsContainer;
         private Point previouslyContainedItem;
-        private IItemContainer ringtLeftContainer;
-        private IItemContainer ringtRightContainer;
-        private IItemContainer amuletContainer;
+        private readonly IItemContainer ringtLeftContainer;
+        private readonly IItemContainer ringtRightContainer;
+        private readonly IItemContainer amuletContainer;
 
         public InventoryPanel(IRenderWindow renderWindow, IItemManager itemManager, Func<eItemContainerType, IItemContainer> createItemContainer)
         {

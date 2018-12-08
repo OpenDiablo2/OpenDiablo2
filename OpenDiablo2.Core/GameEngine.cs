@@ -14,7 +14,6 @@ namespace OpenDiablo2.Core
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private readonly GlobalConfiguration globalConfig;
         private readonly IMPQProvider mpqProvider;
         private readonly Func<IRenderWindow> getRenderWindow;
         private readonly Func<eSceneType, IScene> getScene;
@@ -27,11 +26,10 @@ namespace OpenDiablo2.Core
 
         private readonly MPQ[] MPQs;
 
-        private Dictionary<string, SoundEntry> soundTable = new Dictionary<string, SoundEntry>();
+        private readonly Dictionary<string, SoundEntry> soundTable = new Dictionary<string, SoundEntry>();
         public Dictionary<string, Palette> PaletteTable { get; private set; } = new Dictionary<string, Palette>();
         
         public GameEngine(
-            GlobalConfiguration globalConfig,
             IMPQProvider mpqProvider,
             Func<IRenderWindow> getRenderWindow,
             Func<eSceneType, IScene> getScene,
@@ -39,7 +37,6 @@ namespace OpenDiablo2.Core
             Func<IGameState> getGameState
             )
         {
-            this.globalConfig = globalConfig;
             this.mpqProvider = mpqProvider;
             this.getRenderWindow = getRenderWindow;
             this.getScene = getScene;

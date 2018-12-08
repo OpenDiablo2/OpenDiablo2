@@ -9,7 +9,7 @@ namespace OpenDiablo2.Core.UI
     public sealed class CharacterPanel : ICharacterPanel
     {
         private readonly IRenderWindow renderWindow;
-        private ISprite sprite;
+        private readonly ISprite sprite;
 
         public Point Location { get; set; }
 

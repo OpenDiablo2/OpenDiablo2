@@ -23,7 +23,7 @@ namespace OpenDiablo2.Core
     {
         private readonly IMPQProvider mpqProvider;
 
-        private Dictionary<string, string> lookupTable = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> lookupTable = new Dictionary<string, string>();
 
         public TextDictionary(IMPQProvider mpqProvider)
         {

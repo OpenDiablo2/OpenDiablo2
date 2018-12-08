@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Interfaces.Drawing;
@@ -14,10 +13,8 @@ namespace OpenDiablo2.Core.Map_Engine
     {
         private readonly IGameState gameState;
         private readonly IRenderWindow renderWindow;
-        private readonly IResourceManager resourceManager;
-        private readonly ISessionManager sessionManager;
 
-        private List<ICharacterRenderer> characterRenderers = new List<ICharacterRenderer>();
+        private readonly List<ICharacterRenderer> characterRenderers = new List<ICharacterRenderer>();
 
         public int FocusedPlayerId { get; set; } = 0;
 
@@ -31,33 +28,24 @@ namespace OpenDiablo2.Core.Map_Engine
                     return;
 
                 cameraLocation = value;
-                cOffX = (int)((cameraLocation.X - cameraLocation.Y) * (cellSizeX / 2));
-                cOffY = (int)((cameraLocation.X + cameraLocation.Y) * (cellSizeY / 2));
+                //cOffX = (int)((cameraLocation.X - cameraLocation.Y) * (cellSizeX / 2));
+                //cOffY = (int)((cameraLocation.X + cameraLocation.Y) * (cellSizeY / 2));
             }
         }
-
-        private ISprite loadingSprite;
-        private int cOffX, cOffY;
-
+        
         private const int
             cellSizeX = 160,
-            cellSizeY = 80,
-            renderCellsX = (800 / cellSizeX),
-            renderCellsY = (600 / cellSizeY);
+            cellSizeY = 80;
 
         public MapEngine(
             IGameState gameState,
             IRenderWindow renderWindow,
-            IResourceManager resourceManager,
             ISessionManager sessionManager
             )
         {
             this.gameState = gameState;
             this.renderWindow = renderWindow;
-            this.resourceManager = resourceManager;
-            this.sessionManager = sessionManager;
 
-            loadingSprite = renderWindow.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading, new Point(300, 400));
             sessionManager.OnPlayerInfo += OnPlayerInfo;
             sessionManager.OnLocatePlayers += OnLocatePlayers;
         }
