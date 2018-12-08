@@ -76,7 +76,7 @@ namespace OpenDiablo2.SDL2_
                 int h = 0;
                 foreach (var ch in text)
                 {
-                    var metric = font.font.CharacterMetric[(byte)ch];
+                    var metric = font.font.CharacterMetric[ch];
                     w += metric.Width;
                     h = Math.Max(Math.Max(h, metric.Height), font.sprite.FrameSize.Height);
                 }
@@ -93,12 +93,12 @@ namespace OpenDiablo2.SDL2_
             var height = font.sprite.FrameSize.Height;
             for (int idx = 0; idx < text.Length; idx++)
             {
-                width += font.font.CharacterMetric[(byte)text[idx]].Width;
+                width += font.font.CharacterMetric[text[idx]].Width;
 
                 if (width >= MaxWidth)
                 {
                     idx = lastWordIndex;
-                    height += font.font.CharacterMetric[(byte)'|'].Height + 6;
+                    height += font.font.CharacterMetric['|'].Height + 6;
                     width = 0;
                     continue;
                 }
@@ -146,7 +146,7 @@ namespace OpenDiablo2.SDL2_
                 foreach (var ch in text)
                 {
                     WriteCharacter(cx, cy, (byte)ch);
-                    cx += font.font.CharacterMetric[(byte)ch].Width;
+                    cx += font.font.CharacterMetric[ch].Width;
                 }
             }
             else
@@ -158,7 +158,7 @@ namespace OpenDiablo2.SDL2_
                 var lastStartX = 0;
                 for (int idx = 0; idx < text.Length; idx++)
                 {
-                    width += font.font.CharacterMetric[(byte)text[idx]].Width;
+                    width += font.font.CharacterMetric[text[idx]].Width;
 
                     if (width >= MaxWidth)
                     {
@@ -180,7 +180,7 @@ namespace OpenDiablo2.SDL2_
                 var y = 0;
                 foreach(var line in linesToRender)
                 {
-                    var lineWidth = (line.Sum(c => font.font.CharacterMetric[(byte)c].Width));
+                    var lineWidth = (line.Sum(c => font.font.CharacterMetric[c].Width));
                     var x = 0;
 
                     if (Alignment == eTextAlign.Centered)
@@ -191,10 +191,10 @@ namespace OpenDiablo2.SDL2_
                     foreach (var ch in line)
                     {
                         WriteCharacter(x, y, (byte)ch);
-                        x += font.font.CharacterMetric[(byte)ch].Width;
+                        x += font.font.CharacterMetric[ch].Width;
                     }
 
-                    y += font.font.CharacterMetric[(byte)'|'].Height + 6;
+                    y += font.font.CharacterMetric['|'].Height + 6;
                 }
             }
             SDL.SDL_SetRenderTarget(renderer, IntPtr.Zero);
