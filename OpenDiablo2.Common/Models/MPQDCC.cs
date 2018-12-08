@@ -3,6 +3,7 @@ using System.Linq;
 using System.IO;
 using System.Collections.Generic;
 using System.Drawing;
+using OpenDiablo2.Common.Exceptions;
 
 namespace OpenDiablo2.Common.Models
 {
@@ -198,7 +199,7 @@ namespace OpenDiablo2.Common.Models
                 };
 
                 if (OptionalDataBits > 0)
-                    throw new ApplicationException("Optional bits in DCC data is not currently supported.");
+                    throw new OpenDiablo2Exception("Optional bits in DCC data is not currently supported.");
 
                 if ((CompressionFlags & 0x2) > 0)
                     EqualCellsBitstreamSize = (int)bm.GetBits(20);
@@ -259,25 +260,25 @@ namespace OpenDiablo2.Common.Models
                 FillPixelBuffer(pixelCodeandDisplacement, equalCellsBitstream, pixelMaskBitstream, encodingTypeBitsream, rawPixelCodesBitstream);
 
                 // Generate the actual frame pixel data
-                GenerateFrames(file, pixelCodeandDisplacement);
+                GenerateFrames(pixelCodeandDisplacement);
 
                 // Verify that everything we expected to read was actually read (sanity check)...
                 if (equalCellsBitstream.BitsRead != EqualCellsBitstreamSize)
-                    throw new ApplicationException("Did not read the correct number of bits!");
+                    throw new OpenDiablo2Exception("Did not read the correct number of bits!");
 
                 if (pixelMaskBitstream.BitsRead != PixelMaskBitstreamSize)
-                    throw new ApplicationException("Did not read the correct number of bits!");
+                    throw new OpenDiablo2Exception("Did not read the correct number of bits!");
 
                 if (encodingTypeBitsream.BitsRead != EncodingTypeBitsreamSize)
-                    throw new ApplicationException("Did not read the correct number of bits!");
+                    throw new OpenDiablo2Exception("Did not read the correct number of bits!");
 
                 if (rawPixelCodesBitstream.BitsRead != RawPixelCodesBitstreamSize)
-                    throw new ApplicationException("Did not read the correct number of bits!");
+                    throw new OpenDiablo2Exception("Did not read the correct number of bits!");
 
                 bm.SkipBits(pixelCodeandDisplacement.BitsRead);
             }
 
-            private void GenerateFrames(MPQDCC file, BitMuncher pcd)
+            private void GenerateFrames(BitMuncher pcd)
             {
                 var pbIdx = 0;
 
@@ -552,14 +553,14 @@ namespace OpenDiablo2.Common.Models
             var bm = new BitMuncher(data);
             Signature = bm.GetByte();
             if (Signature != 0x74)
-                throw new ApplicationException("Signature expected to be 0x74 but it is not.");
+                throw new OpenDiablo2Exception("Signature expected to be 0x74 but it is not.");
 
             Version = bm.GetByte();
             NumberOfDirections = bm.GetByte();
             FramesPerDirection = bm.GetInt32();
 
             if (bm.GetInt32() != 1)
-                throw new ApplicationException("This value isn't 1. It has to be 1.");
+                throw new OpenDiablo2Exception("This value isn't 1. It has to be 1.");
 
             var totalSizeCoded = bm.GetInt32();
             var directionOffsets = new int[NumberOfDirections];

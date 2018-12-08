@@ -29,6 +29,7 @@
 using System;
 using System.IO;
 using System.Collections;
+using OpenDiablo2.Common.Exceptions;
 
 namespace OpenDiablo2.Common.Models
 {
@@ -265,7 +266,7 @@ namespace OpenDiablo2.Common.Models
             {
                 int bit = input.ReadBits(1);
                 if (bit == -1)
-                    throw new Exception("Unexpected end of file");
+                    throw new OpenDiablo2Exception("Unexpected end of file");
 
                 node = bit == 0 ? node.Child0 : node.Child1;
             }
@@ -384,6 +385,9 @@ namespace OpenDiablo2.Common.Models
                 current.Next.Prev = current.Prev;
 
                 // insert current after prev
+                if (prev == null)
+                    throw new OpenDiablo2Exception("Previous frame not defined!");
+
                 LinkedNode temp = prev.Next;
                 current.Next = temp;
                 current.Prev = prev;

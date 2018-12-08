@@ -22,6 +22,7 @@ using NetMQ;
 using NetMQ.Sockets;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.ServiceBus.Message_Frames.Client;
 using OpenDiablo2.ServiceBus.Message_Frames.Server;
@@ -89,7 +90,7 @@ namespace OpenDiablo2.ServiceBus
                 case eSessionType.Server:
                 case eSessionType.Remote:
                 default:
-                    throw new ApplicationException("This session type is currently unsupported.");
+                    throw new OpenDiablo2Exception("This session type is currently unsupported.");
             }
 
             running = true;
@@ -125,7 +126,7 @@ namespace OpenDiablo2.ServiceBus
         private void ProcessMessageFrame<T>() where T : IMessageFrame, new()
         {
             if (!running)
-                throw new ApplicationException("You have made a terrible mistake. Cannot get a message frame if you are not connected.");
+                throw new OpenDiablo2Exception("You have made a terrible mistake. Cannot get a message frame if you are not connected.");
 
             var bytes = requestSocket.ReceiveFrameBytes();
             var frameType = (eMessageFrameType)bytes[0];
@@ -133,7 +134,7 @@ namespace OpenDiablo2.ServiceBus
             var frameData = bytes.Skip(1).ToArray(); // TODO: Can we maybe use pointers? This seems wasteful
             var messageFrame = getMessageFrame(frameType);
             if (messageFrame.GetType() != typeof(T))
-                throw new ApplicationException("Recieved unexpected message frame!");
+                throw new OpenDiablo2Exception("Recieved unexpected message frame!");
             messageFrame.Data = frameData;
             lock (getGameState().ThreadLocker)
             {
@@ -145,7 +146,7 @@ namespace OpenDiablo2.ServiceBus
         {
             var bytes = requestSocket.ReceiveFrameBytes();
             if ((eMessageFrameType)bytes[0] != eMessageFrameType.None)
-                throw new ApplicationException("Excepted a NoOp but got a command instead!");
+                throw new OpenDiablo2Exception("Excepted a NoOp but got a command instead!");
         }
 
         public void JoinGame(string playerName, eHero heroType)

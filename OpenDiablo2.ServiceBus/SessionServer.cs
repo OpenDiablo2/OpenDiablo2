@@ -22,6 +22,7 @@ using NetMQ;
 using NetMQ.Sockets;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
 using OpenDiablo2.ServiceBus.Message_Frames.Server;
@@ -84,7 +85,7 @@ namespace OpenDiablo2.ServiceBus
                 case eSessionType.Server:
                 case eSessionType.Remote:
                 default:
-                    throw new ApplicationException("This session type is currently unsupported.");
+                    throw new OpenDiablo2Exception("This session type is currently unsupported.");
             }
 
             OnJoinGame += OnJoinGameHandler;
