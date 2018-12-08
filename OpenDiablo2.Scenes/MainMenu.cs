@@ -40,7 +40,7 @@ namespace OpenDiablo2.Scenes
             IRenderWindow renderWindow,
             ISceneManager sceneManager,
             IResourceManager resourceManager,
-            IMusicProvider musicProvider,
+            ISoundProvider soundProvider,
             IMPQProvider mpqProvider,
             Func<eButtonType, IButton> createButton,
             Func<eSceneType, IScene> getScene // Temporary until SDL load functions are sped up
@@ -89,8 +89,8 @@ namespace OpenDiablo2.Scenes
                 getScene(scenesToLoad[i]);
             }
 
-            musicProvider.LoadSong(mpqProvider.GetStream("data\\global\\music\\introedit.wav"));
-            musicProvider.PlaySong();
+            soundProvider.LoadSong(mpqProvider.GetStream(ResourcePaths.BGMTitle));
+            soundProvider.PlaySong();
         }
 
         private void OnVisitWebsiteClicked()

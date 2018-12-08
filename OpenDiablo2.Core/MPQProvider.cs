@@ -51,6 +51,22 @@ namespace OpenDiablo2.Core
             }
         }
 
+        public byte[] GetBytes(string fileName)
+        {
+            var stream = GetStream(fileName);
+            var result = new byte[stream.Length];
+            stream.Read(result, 0, (int)stream.Length);
+            return result;
+        }
+
+        public void GetBytesAsync(string fileName, Action<byte[]> callback)
+        {
+            var stream = GetStream(fileName);
+            var result = new byte[stream.Length];
+            stream.Read(result, 0, (int)stream.Length);
+            callback(result);
+        }
+
         public IEnumerable<MPQ> GetMPQs() => mpqs;
 
         public Stream GetStream(string fileName)
