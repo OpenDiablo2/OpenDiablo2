@@ -25,7 +25,9 @@
  *
  */
 #endregion
-
+#pragma warning disable S4200
+#pragma warning disable S4214
+#pragma warning disable S101
 #region Using Statements
 using System;
 using System.Runtime.InteropServices;
@@ -486,3 +488,5 @@ namespace SDL2
 		#endregion
 	}
 }
+#pragma warning restore S4214
+#pragma warning restore S4200 // Native methods should be wrapped

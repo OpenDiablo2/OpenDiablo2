@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using OpenDiablo2.Common.Enums;
 
 namespace OpenDiablo2.Common.Models
@@ -15,7 +12,7 @@ namespace OpenDiablo2.Common.Models
         public bool Toggleable { get; internal set; } = false;
         public int BaseFrame { get; internal set; } = 0;
 
-        public static Dictionary<eButtonType, ButtonLayout> Values = new Dictionary<eButtonType, ButtonLayout>
+        public static ImmutableDictionary<eButtonType, ButtonLayout> Values { get; } = new Dictionary<eButtonType, ButtonLayout>
         {
             {eButtonType.Wide,  new ButtonLayout { XSegments = 2, ResourceName = ResourcePaths.WideButtonBlank, PaletteName = Palettes.Units } },
             {eButtonType.Medium, new ButtonLayout{ XSegments = 1, ResourceName=ResourcePaths.MediumButtonBlank, PaletteName = Palettes.Units } },
@@ -33,7 +30,7 @@ namespace OpenDiablo2.Common.Models
 
             {eButtonType.Run, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.RunButton,PaletteName = Palettes.Units, Toggleable = true } },
             {eButtonType.Menu, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MenuButton,PaletteName = Palettes.Units, Toggleable = true } },
-        };
+        }.ToImmutableDictionary();
     }
 
 }

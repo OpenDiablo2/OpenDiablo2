@@ -16,13 +16,10 @@ namespace OpenDiablo2.ServiceBus.Message_Frames.Client
 
         public byte[] Data
         {
-            get
-            {
-                return new byte[] { (byte)HeroType }
+            get => new byte[] { (byte)HeroType }
                     .Concat(BitConverter.GetBytes((UInt16)PlayerName.Length))
                     .Concat(Encoding.UTF8.GetBytes(PlayerName))
                     .ToArray();
-            }
 
             set
             {

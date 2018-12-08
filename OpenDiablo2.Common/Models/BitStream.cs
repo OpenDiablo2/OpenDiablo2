@@ -20,8 +20,8 @@ namespace OpenDiablo2.Common.Models
         public int ReadBits(int bitCount)
         {
             if (bitCount > 16)
-                throw new ArgumentOutOfRangeException("BitCount", "Maximum BitCount is 16");
-            if (EnsureBits(bitCount) == false) return -1;
+                throw new ArgumentOutOfRangeException("bitCount", "Maximum BitCount is 16");
+            if (!EnsureBits(bitCount)) return -1;
             int result = _current & (0xffff >> (16 - bitCount));
             WasteBits(bitCount);
             return result;
@@ -29,7 +29,7 @@ namespace OpenDiablo2.Common.Models
 
         public int PeekByte()
         {
-            if (EnsureBits(8) == false) return -1;
+            if (!EnsureBits(8)) return -1;
             return _current & 0xff;
         }
 
@@ -44,11 +44,10 @@ namespace OpenDiablo2.Common.Models
             return true;
         }
 
-        private bool WasteBits(int bitCount)
+        private void WasteBits(int bitCount)
         {
             _current >>= bitCount;
             _bitCount -= bitCount;
-            return true;
         }
     }
 }
