@@ -85,7 +85,7 @@ namespace OpenDiablo2.SDL2_
                 return new Size(w, h);
             }
 
-            if (MaxWidth < (font.sprite.FrameSize.Width))
+            if (MaxWidth < font.sprite.FrameSize.Width)
                 throw new OpenDiablo2Exception("Max label width cannot be smaller than a single character.");
 
             var lastWordIndex = 0;
@@ -181,7 +181,7 @@ namespace OpenDiablo2.SDL2_
                 var y = 0;
                 foreach(var line in linesToRender)
                 {
-                    var lineWidth = (line.Sum(c => font.font.CharacterMetric[c].Width));
+                    var lineWidth = line.Sum(c => font.font.CharacterMetric[c].Width);
                     var x = 0;
 
                     if (Alignment == eTextAlign.Centered)

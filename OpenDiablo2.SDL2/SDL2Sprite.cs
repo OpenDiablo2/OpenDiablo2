@@ -102,7 +102,7 @@ namespace OpenDiablo2.SDL2_
         {
             return source == null
                 ? Location
-                : new Point(Location.X + source.Frames[Frame].OffsetX, (Location.Y - FrameSize.Height) + source.Frames[Frame].OffsetY);
+                : new Point(Location.X + source.Frames[Frame].OffsetX, Location.Y - FrameSize.Height + source.Frames[Frame].OffsetY);
         }
 
         public Size LocalFrameSize => new Size((int)source.Frames[Frame].Width, (int)source.Frames[Frame].Height);

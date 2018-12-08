@@ -203,11 +203,11 @@ namespace SDL2
 		public const uint SDL_INIT_EVENTS =		0x00004000;
 		public const uint SDL_INIT_SENSOR =		0x00008000;
 		public const uint SDL_INIT_NOPARACHUTE =	0x00100000;
-		public const uint SDL_INIT_EVERYTHING = (
+		public const uint SDL_INIT_EVERYTHING = 
 			SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO | 
 			SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC |
 			SDL_INIT_GAMECONTROLLER | SDL_INIT_SENSOR
-		);
+		;
 
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern int SDL_Init(uint flags);
@@ -934,7 +934,7 @@ namespace SDL2
 
 		public static bool SDL_VERSION_ATLEAST(int X, int Y, int Z)
 		{
-			return (SDL_COMPILEDVERSION >= SDL_VERSIONNUM(X, Y, Z));
+			return SDL_COMPILEDVERSION >= SDL_VERSIONNUM(X, Y, Z);
 		}
 
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
@@ -1054,7 +1054,7 @@ namespace SDL2
 			SDL_WINDOW_INPUT_FOCUS =	0x00000200,
 			SDL_WINDOW_MOUSE_FOCUS =	0x00000400,
 			SDL_WINDOW_FULLSCREEN_DESKTOP =
-				(SDL_WINDOW_FULLSCREEN | 0x00001000),
+				SDL_WINDOW_FULLSCREEN | 0x00001000,
 			SDL_WINDOW_FOREIGN =		0x00000800,
 			SDL_WINDOW_ALLOW_HIGHDPI =	0x00002000,	/* Only available in 2.0.1 */
 			SDL_WINDOW_MOUSE_CAPTURE =	0x00004000,	/* Only available in 2.0.4 */
@@ -1088,7 +1088,7 @@ namespace SDL2
 
 		public static int SDL_WINDOWPOS_UNDEFINED_DISPLAY(int X)
 		{
-			return (SDL_WINDOWPOS_UNDEFINED_MASK | X);
+			return SDL_WINDOWPOS_UNDEFINED_MASK | X;
 		}
 
 		public static bool SDL_WINDOWPOS_ISUNDEFINED(int X)
@@ -1098,7 +1098,7 @@ namespace SDL2
 
 		public static int SDL_WINDOWPOS_CENTERED_DISPLAY(int X)
 		{
-			return (SDL_WINDOWPOS_CENTERED_MASK | X);
+			return SDL_WINDOWPOS_CENTERED_MASK | X;
 		}
 
 		public static bool SDL_WINDOWPOS_ISCENTERED(int X)
@@ -2535,11 +2535,11 @@ namespace SDL2
 			}
 			SDL_PIXELTYPE_ENUM pType =
 					(SDL_PIXELTYPE_ENUM) SDL_PIXELTYPE(format);
-			return (
+			return 
 				pType == SDL_PIXELTYPE_ENUM.SDL_PIXELTYPE_INDEX1 ||
 				pType == SDL_PIXELTYPE_ENUM.SDL_PIXELTYPE_INDEX4 ||
 				pType == SDL_PIXELTYPE_ENUM.SDL_PIXELTYPE_INDEX8
-			);
+			;
 		}
 
 		public static bool SDL_ISPIXELFORMAT_ALPHA(uint format)
@@ -2550,12 +2550,12 @@ namespace SDL2
 			}
 			SDL_PIXELORDER_ENUM pOrder =
 					(SDL_PIXELORDER_ENUM) SDL_PIXELORDER(format);
-			return (
+			return 
 				pOrder == SDL_PIXELORDER_ENUM.SDL_PACKEDORDER_ARGB ||
 				pOrder == SDL_PIXELORDER_ENUM.SDL_PACKEDORDER_RGBA ||
 				pOrder == SDL_PIXELORDER_ENUM.SDL_PACKEDORDER_ABGR ||
 				pOrder == SDL_PIXELORDER_ENUM.SDL_PACKEDORDER_BGRA
-			);
+			;
 		}
 
 		public static bool SDL_ISPIXELFORMAT_FOURCC(uint format)
@@ -4498,7 +4498,7 @@ namespace SDL2
 
 		#region SDL_keycode.h
 
-		public const int SDLK_SCANCODE_MASK = (1 << 30);
+		public const int SDLK_SCANCODE_MASK = 1 << 30;
 		public static SDL_Keycode SDL_SCANCODE_TO_KEYCODE(SDL_Scancode X)
 		{
 			return (SDL_Keycode)((int)X | SDLK_SCANCODE_MASK);
@@ -4794,10 +4794,10 @@ namespace SDL2
 			KMOD_RESERVED = 0x8000,
 
 			/* These are defines in the SDL headers */
-			KMOD_CTRL = (KMOD_LCTRL | KMOD_RCTRL),
-			KMOD_SHIFT = (KMOD_LSHIFT | KMOD_RSHIFT),
-			KMOD_ALT = (KMOD_LALT | KMOD_RALT),
-			KMOD_GUI = (KMOD_LGUI | KMOD_RGUI)
+			KMOD_CTRL = KMOD_LCTRL | KMOD_RCTRL,
+			KMOD_SHIFT = KMOD_LSHIFT | KMOD_RSHIFT,
+			KMOD_ALT = KMOD_LALT | KMOD_RALT,
+			KMOD_GUI = KMOD_LGUI | KMOD_RGUI
 		}
 
 		#endregion
@@ -5738,21 +5738,21 @@ namespace SDL2
 		#region SDL_haptic.h
 
 		/* SDL_HapticEffect type */
-		public const ushort SDL_HAPTIC_CONSTANT =	(1 << 0);
-		public const ushort SDL_HAPTIC_SINE =		(1 << 1);
-		public const ushort SDL_HAPTIC_LEFTRIGHT =	(1 << 2);
-		public const ushort SDL_HAPTIC_TRIANGLE =	(1 << 3);
-		public const ushort SDL_HAPTIC_SAWTOOTHUP =	(1 << 4);
-		public const ushort SDL_HAPTIC_SAWTOOTHDOWN =	(1 << 5);
-		public const ushort SDL_HAPTIC_SPRING =		(1 << 7);
-		public const ushort SDL_HAPTIC_DAMPER =		(1 << 8);
-		public const ushort SDL_HAPTIC_INERTIA =	(1 << 9);
-		public const ushort SDL_HAPTIC_FRICTION =	(1 << 10);
-		public const ushort SDL_HAPTIC_CUSTOM =		(1 << 11);
-		public const ushort SDL_HAPTIC_GAIN =		(1 << 12);
-		public const ushort SDL_HAPTIC_AUTOCENTER =	(1 << 13);
-		public const ushort SDL_HAPTIC_STATUS =		(1 << 14);
-		public const ushort SDL_HAPTIC_PAUSE =		(1 << 15);
+		public const ushort SDL_HAPTIC_CONSTANT =	1 << 0;
+		public const ushort SDL_HAPTIC_SINE =		1 << 1;
+		public const ushort SDL_HAPTIC_LEFTRIGHT =	1 << 2;
+		public const ushort SDL_HAPTIC_TRIANGLE =	1 << 3;
+		public const ushort SDL_HAPTIC_SAWTOOTHUP =	1 << 4;
+		public const ushort SDL_HAPTIC_SAWTOOTHDOWN =	1 << 5;
+		public const ushort SDL_HAPTIC_SPRING =		1 << 7;
+		public const ushort SDL_HAPTIC_DAMPER =		1 << 8;
+		public const ushort SDL_HAPTIC_INERTIA =	1 << 9;
+		public const ushort SDL_HAPTIC_FRICTION =	1 << 10;
+		public const ushort SDL_HAPTIC_CUSTOM =		1 << 11;
+		public const ushort SDL_HAPTIC_GAIN =		1 << 12;
+		public const ushort SDL_HAPTIC_AUTOCENTER =	1 << 13;
+		public const ushort SDL_HAPTIC_STATUS =		1 << 14;
+		public const ushort SDL_HAPTIC_PAUSE =		1 << 15;
 
 		/* SDL_HapticDirection type */
 		public const byte SDL_HAPTIC_POLAR =		0;
@@ -6153,9 +6153,9 @@ namespace SDL2
 		#region SDL_audio.h
 
 		public const ushort SDL_AUDIO_MASK_BITSIZE =	0xFF;
-		public const ushort SDL_AUDIO_MASK_DATATYPE =	(1 << 8);
-		public const ushort SDL_AUDIO_MASK_ENDIAN =	(1 << 12);
-		public const ushort SDL_AUDIO_MASK_SIGNED =	(1 << 15);
+		public const ushort SDL_AUDIO_MASK_DATATYPE =	1 << 8;
+		public const ushort SDL_AUDIO_MASK_ENDIAN =	1 << 12;
+		public const ushort SDL_AUDIO_MASK_SIGNED =	1 << 15;
 
 		public static ushort SDL_AUDIO_BITSIZE(ushort x)
 		{
@@ -6220,12 +6220,12 @@ namespace SDL2
 		public const uint SDL_AUDIO_ALLOW_FORMAT_CHANGE =	0x00000002;
 		public const uint SDL_AUDIO_ALLOW_CHANNELS_CHANGE =	0x00000004;
 		public const uint SDL_AUDIO_ALLOW_SAMPLES_CHANGE =	0x00000008;
-		public const uint SDL_AUDIO_ALLOW_ANY_CHANGE = (
+		public const uint SDL_AUDIO_ALLOW_ANY_CHANGE = 
 			SDL_AUDIO_ALLOW_FREQUENCY_CHANGE |
 			SDL_AUDIO_ALLOW_FORMAT_CHANGE |
 			SDL_AUDIO_ALLOW_CHANNELS_CHANGE |
 			SDL_AUDIO_ALLOW_SAMPLES_CHANGE
-		);
+		;
 
 		public const int SDL_MIX_MAXVOLUME = 128;
 
@@ -6535,7 +6535,7 @@ namespace SDL2
 		 */
 		public static bool SDL_TICKS_PASSED(UInt32 A, UInt32 B)
 		{
-			return ((Int32)(B - A) <= 0);
+			return (Int32)(B - A) <= 0;
 		}
 
 		/* Delays the thread's processing based on the milliseconds parameter */

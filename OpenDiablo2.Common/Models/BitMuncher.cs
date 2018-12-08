@@ -42,7 +42,7 @@ namespace OpenDiablo2.Common.Models
 
             var result = 0U;
             for (var i = 0; i < bits; i++)
-                result |= (GetBit() << i);
+                result |= GetBit() << i;
 
             return result;
         }

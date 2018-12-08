@@ -187,7 +187,7 @@ namespace OpenDiablo2.Common.Models
 
         private int DecodeDist(int length)
         {
-            if (_bitstream.EnsureBits(8) == false) return 0;
+            if (!_bitstream.EnsureBits(8)) return 0;
             int pos = sPosition1[_bitstream.PeekByte()];
             byte skip = sDistBits[pos];     // Number of bits to skip
 
@@ -196,13 +196,13 @@ namespace OpenDiablo2.Common.Models
 
             if (length == 2)
             {
-                if (_bitstream.EnsureBits(2) == false) return 0;
+                if (!_bitstream.EnsureBits(2)) return 0;
                 pos = (pos << 2) | _bitstream.ReadBits(2);
             }
             else
             {
-                if (_bitstream.EnsureBits(_dictSizeBits) == false) return 0;
-                pos = ((pos << _dictSizeBits)) | _bitstream.ReadBits(_dictSizeBits);
+                if (!_bitstream.EnsureBits(_dictSizeBits)) return 0;
+                pos = (pos << _dictSizeBits) | _bitstream.ReadBits(_dictSizeBits);
             }
 
             return pos + 1;

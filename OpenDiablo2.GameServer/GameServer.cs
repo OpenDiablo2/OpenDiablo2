@@ -28,7 +28,7 @@ namespace OpenDiablo2.GameServer_
         public void InitializeNewGame()
         {
             log.Info("Initializing a new game");
-            Seed = (new Random()).Next();
+            Seed = new Random().Next();
         }
 
         public int SpawnNewPlayer(int clientHash, string playerName, eHero heroType)

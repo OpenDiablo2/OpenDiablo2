@@ -129,8 +129,8 @@ namespace OpenDiablo2.Core.UI
                 return;
             }
 
-            var hovered = (mouseInfoProvider.MouseX >= location.X && mouseInfoProvider.MouseX < (location.X + buttonWidth))
-                && (mouseInfoProvider.MouseY >= location.Y && mouseInfoProvider.MouseY < (location.Y + buttonHeight));
+            var hovered = mouseInfoProvider.MouseX >= location.X && mouseInfoProvider.MouseX < (location.X + buttonWidth)
+                && mouseInfoProvider.MouseY >= location.Y && mouseInfoProvider.MouseY < (location.Y + buttonHeight);
 
 
             if (!activeLock && hovered && mouseInfoProvider.LeftMouseDown && !mouseInfoProvider.ReserveMouse)
@@ -165,7 +165,7 @@ namespace OpenDiablo2.Core.UI
                 activeLock = false;
             }
 
-            pressed = (hovered && mouseInfoProvider.LeftMouseDown && active);
+            pressed = hovered && mouseInfoProvider.LeftMouseDown && active;
         }
 
         public void Render()

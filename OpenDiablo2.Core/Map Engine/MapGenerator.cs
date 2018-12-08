@@ -54,10 +54,10 @@ namespace OpenDiablo2.Core.Map_Engine
             }
 
             // Generate the Blood Moore?
-            for (var y = 0; y < (bloodMooreRect.Height); y+= 8)
+            for (var y = 0; y < bloodMooreRect.Height; y+= 8)
             {
                 
-                for (var x = 0; x < (bloodMooreRect.Width); x += 8)
+                for (var x = 0; x < bloodMooreRect.Width; x += 8)
                 {
                     var tileIdx = 35;
                     var mapTile = gameState.LoadSubMap(tileIdx, new Point(bloodMooreRect.Left + x, bloodMooreRect.Top + y));

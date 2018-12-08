@@ -174,5 +174,6 @@ namespace OpenDiablo2.Common.Models.Mobs
         public static bool operator >(MobState obj1, MobState obj2) => obj1?.Id > obj2?.Id;
         public static bool operator <=(MobState obj1, MobState obj2) => obj1?.Id <= obj2?.Id;
         public static bool operator >=(MobState obj1, MobState obj2) => obj1?.Id >= obj2?.Id;
+        public override int GetHashCode() => Id.GetHashCode();
     }
 }
