@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces.Mobs;
 using OpenDiablo2.Common.Models.Mobs;
 
@@ -35,7 +36,7 @@ namespace OpenDiablo2.Core.GameState_
         {
             Mobs.Add(mob);
             if (IdsUsed.Contains(mob.Id))
-                throw new ApplicationException("Tried to insert an existing mob id!");
+                throw new OpenDiablo2Exception("Tried to insert an existing mob id!");
             IdsUsed.Add(mob.Id);
         }
         public void RemoveMob(MobState mob)
@@ -49,7 +50,7 @@ namespace OpenDiablo2.Core.GameState_
                 if (!IdsUsed.Contains(i))
                     return i;
 
-            throw new ApplicationException("Ran out of IDs. How did this even happen?!");
+            throw new OpenDiablo2Exception("Ran out of IDs. How did this even happen?!");
         }
         #endregion Mob Controls
 

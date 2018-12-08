@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
 using OpenDiablo2.Core.Map_Engine;
@@ -210,7 +211,7 @@ namespace OpenDiablo2.Core.GameState_
                         .Where(x => x != null);
 
                 default:
-                    throw new ApplicationException("Unknown render cell type!");
+                    throw new OpenDiablo2Exception("Unknown render cell type!");
             }
         }
 
@@ -353,7 +354,7 @@ namespace OpenDiablo2.Core.GameState_
             {
 #if DEBUG
                 if (!tiles.All(x => x.Animated))
-                    throw new ApplicationException("Some tiles are animated and some aren't...");
+                    throw new OpenDiablo2Exception("Some tiles are animated and some aren't...");
 #endif
                 var frameIndex = (int)Math.Floor(tiles.Count() * animationTime);
                 tile = tiles.ElementAt(frameIndex);
@@ -377,7 +378,7 @@ namespace OpenDiablo2.Core.GameState_
                     }
 
                     if (tile.Animated)
-                        throw new ApplicationException("Why are we randomly finding an animated tile? Something's wrong here.");
+                        throw new OpenDiablo2Exception("Why are we randomly finding an animated tile? Something's wrong here.");
                 }
                 else tile = tiles.First();
             }

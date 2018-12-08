@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OpenDiablo2.Common.Exceptions;
 
 namespace OpenDiablo2.Common.Models
 {
@@ -136,7 +137,7 @@ namespace OpenDiablo2.Common.Models
                     {
                         // 3D isometric block
                         if (block.Length != 256)
-                            throw new ApplicationException($"Expected exactly 256 bytes of data, but got {block.Length} instead!");
+                            throw new OpenDiablo2Exception($"Expected exactly 256 bytes of data, but got {block.Length} instead!");
 
                         int x = 0;
                         int y = 0;

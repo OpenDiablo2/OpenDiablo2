@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 using SDL2;
 
@@ -85,7 +86,7 @@ namespace OpenDiablo2.SDL2_
             }
 
             if (MaxWidth < (font.sprite.FrameSize.Width))
-                throw new ApplicationException("Max label width cannot be smaller than a single character.");
+                throw new OpenDiablo2Exception("Max label width cannot be smaller than a single character.");
 
             var lastWordIndex = 0;
             var width = 0;
@@ -130,7 +131,7 @@ namespace OpenDiablo2.SDL2_
 
             texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, textureSize.Width, textureSize.Height);
             if (texture == IntPtr.Zero)
-                throw new ApplicationException("Unaple to initialize texture.");
+                throw new OpenDiablo2Exception("Unaple to initialize texture.");
 
             SDL.SDL_SetTextureBlendMode(texture, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
             SDL.SDL_SetRenderTarget(renderer, texture);

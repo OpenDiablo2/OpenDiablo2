@@ -46,7 +46,7 @@ namespace OpenDiablo2.Common.Enums
         Act5_BaalEntrance = 120,
     }
 
-    public class ELevelIdHelper
+    public static class ELevelIdHelper
     {
         public static string GenerateEnum(List<LevelPreset> levelPresets)
         {

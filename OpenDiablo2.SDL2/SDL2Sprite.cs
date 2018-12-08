@@ -17,6 +17,7 @@
 using System;
 using System.Drawing;
 using System.Linq;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
 using SDL2;
@@ -113,7 +114,7 @@ namespace OpenDiablo2.SDL2_
                 texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, Pow2(FrameSize.Width), Pow2(FrameSize.Height));
 
                 if (texture == IntPtr.Zero)
-                    throw new ApplicationException("Unaple to initialize texture.");
+                    throw new OpenDiablo2Exception("Unaple to initialize texture.");
 
                 Frame = 0;
             }

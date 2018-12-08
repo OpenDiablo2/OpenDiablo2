@@ -1,4 +1,5 @@
 ﻿using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces.Mobs;
 using System;
 using System.Collections.Generic;
@@ -57,7 +58,7 @@ namespace OpenDiablo2.Common.Models.Mobs
                 {
                     if (!long.TryParse(data[o][i], out long exp))
                     {
-                        throw new Exception("Could not parse experience number '" + data[o][i] + "'.");
+                        throw new OpenDiablo2Exception("Could not parse experience number '" + data[o][i] + "'.");
                     }
                     expperlevel.Add(exp);
                 }

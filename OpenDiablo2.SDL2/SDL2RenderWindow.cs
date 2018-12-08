@@ -18,6 +18,7 @@ using System;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Interfaces.Drawing;
 using OpenDiablo2.Common.Models;
@@ -82,16 +83,16 @@ namespace OpenDiablo2.SDL2_
 
             SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
             if (SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "0") == SDL.SDL_bool.SDL_FALSE)
-                throw new ApplicationException($"Unable to Init hinting: {SDL.SDL_GetError()}");
+                throw new OpenDiablo2Exception($"Unable to Init hinting: {SDL.SDL_GetError()}");
 
             window = SDL.SDL_CreateWindow("OpenDiablo2", SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, 800, 600,
                 SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN | (fullscreen ? SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN : 0));
             if (window == IntPtr.Zero)
-                throw new ApplicationException($"Unable to create SDL Window: {SDL.SDL_GetError()}");
+                throw new OpenDiablo2Exception($"Unable to create SDL Window: {SDL.SDL_GetError()}");
 
             renderer = SDL.SDL_CreateRenderer(window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED | SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
             if (renderer == IntPtr.Zero)
-                throw new ApplicationException($"Unable to create SDL Window: {SDL.SDL_GetError()}");
+                throw new OpenDiablo2Exception($"Unable to create SDL Window: {SDL.SDL_GetError()}");
 
 
             SDL.SDL_SetRenderDrawBlendMode(renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
@@ -366,7 +367,7 @@ namespace OpenDiablo2.SDL2_
             SDL.SDL_SetTextureBlendMode(texId, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
             if (SDL.SDL_LockTexture(texId, IntPtr.Zero, out IntPtr pixels, out int pitch) != 0)
-                throw new ApplicationException("Could not lock texture for map rendering");
+                throw new OpenDiablo2Exception("Could not lock texture for map rendering");
 
             try
             {
@@ -470,7 +471,7 @@ namespace OpenDiablo2.SDL2_
 
             var cursor = SDL.SDL_CreateColorCursor(surface, hotspot.X * multiple, hotspot.Y * multiple);
             if (cursor == IntPtr.Zero)
-                throw new ApplicationException($"Unable to set the cursor cursor: {SDL.SDL_GetError()}"); // TODO: Is this supported everywhere? May need to still support software cursors.
+                throw new OpenDiablo2Exception($"Unable to set the cursor cursor: {SDL.SDL_GetError()}"); // TODO: Is this supported everywhere? May need to still support software cursors.
             return new SDL2MouseCursor { HWSurface = cursor };
         }
 

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Exceptions;
 
 namespace OpenDiablo2.Common.Models
 {
@@ -115,7 +116,7 @@ namespace OpenDiablo2.Common.Models
             {
                 var header = Encoding.ASCII.GetString(br.ReadBytes(4));
                 if (header != HEADER_SIGNATURE)
-                    throw new ApplicationException($"Unknown header signature '{header}' detected while processing '{Path}'!");
+                    throw new OpenDiablo2Exception($"Unknown header signature '{header}' detected while processing '{Path}'!");
 
                 ParseMPQHeader(br);
             }
@@ -198,10 +199,10 @@ namespace OpenDiablo2.Common.Models
             };
 
             if (FormatVersion != eMPQFormatVersion.Format1)
-                throw new ApplicationException($"Unsupported MPQ format version of {Header.FormatVersion} detected for '{Path}'!");
+                throw new OpenDiablo2Exception($"Unsupported MPQ format version of {Header.FormatVersion} detected for '{Path}'!");
 
             if (br.BaseStream.Position != Header.HeaderSize)
-                throw new ApplicationException($"Invalid header size detected for '{Path}'. Expected to be at offset {Header.HeaderSize} but we are at offset {br.BaseStream.Position} instead!");
+                throw new OpenDiablo2Exception($"Invalid header size detected for '{Path}'. Expected to be at offset {Header.HeaderSize} but we are at offset {br.BaseStream.Position} instead!");
 
             br.BaseStream.Seek(Header.BlockTablePos, SeekOrigin.Begin);
 
@@ -254,7 +255,7 @@ namespace OpenDiablo2.Common.Models
         private static UInt32 HashString(string inputString, UInt32 hashType)
         {
             if (hashType > MPQ_HASH_FILE_KEY)
-                throw new ApplicationException($"Unknown hash type {hashType} for input string {inputString}");
+                throw new OpenDiablo2Exception($"Unknown hash type {hashType} for input string {inputString}");
 
             UInt32 seed1 = 0x7FED7FED;
             UInt32 seed2 = 0xEEEEEEEE;
