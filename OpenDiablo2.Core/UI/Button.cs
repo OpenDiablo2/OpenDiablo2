@@ -10,7 +10,9 @@ namespace OpenDiablo2.Core.UI
     {
         private readonly IMouseInfoProvider mouseInfoProvider;
         private readonly IRenderWindow renderWindow;
+        private readonly ISoundProvider musicProvider;
         private readonly ButtonLayout buttonLayout;
+        private readonly byte[] sfxButtonClick;
 
         public OnActivateDelegate OnActivate { get; set; }
         public OnToggleDelegate OnToggle { get; set; }
@@ -67,12 +69,15 @@ namespace OpenDiablo2.Core.UI
         public Button(
             ButtonLayout buttonLayout,
             IRenderWindow renderWindow, 
-            IMouseInfoProvider mouseInfoProvider
+            IMouseInfoProvider mouseInfoProvider,
+            ISoundProvider soundProvider,
+            IMPQProvider mpqProvider
             )
         {
             this.buttonLayout = buttonLayout;
             this.renderWindow = renderWindow;
             this.mouseInfoProvider = mouseInfoProvider;
+            this.musicProvider = soundProvider;
 
             font = renderWindow.LoadFont(ResourcePaths.FontExocet10, Palettes.Units);
             label = renderWindow.CreateLabel(font);
@@ -91,6 +96,8 @@ namespace OpenDiablo2.Core.UI
 
             label.MaxWidth = buttonWidth - 8;
             label.Alignment = Common.Enums.eTextAlign.Centered;
+
+            sfxButtonClick = mpqProvider.GetBytes(ResourcePaths.SFXButtonClick);
         }
 
         public bool Toggle()
@@ -138,7 +145,7 @@ namespace OpenDiablo2.Core.UI
                 // The button is being pressed down
                 mouseInfoProvider.ReserveMouse = true;
                 active = true;
-
+                musicProvider.PlaySfx(sfxButtonClick);
             }
             else if (active && !mouseInfoProvider.LeftMouseDown)
             {

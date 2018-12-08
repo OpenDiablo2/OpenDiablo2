@@ -158,6 +158,27 @@ namespace OpenDiablo2.Common
         public const string Experience = @"data\global\excel\experience.txt";
         public const string CharStats = @"data\global\excel\charstats.txt";
 
+        // --- Music ---
+        public const string BGMTitle = @"data\global\music\introedit.wav";
+        public const string BGMTown1 = @"data\global\music\Act1\town1.wav";
+
+        // --- Sound Effects ---
+        public const string SFXButtonClick = @"data\global\sfx\Cursor\button.wav";
+        public const string SFXAmazonDeselect = @"data\global\sfx\Cursor\intro\amazon deselect.wav";
+        public const string SFXAmazonSelect = @"data\global\sfx\Cursor\intro\amazon select.wav";
+        public const string SFXAssassinDeselect = @"data\global\sfx\Cursor\intro\assassin deselect.wav";
+        public const string SFXAssassinSelect = @"data\global\sfx\Cursor\intro\assassin select.wav";
+        public const string SFXBarbarianDeselect = @"data\global\sfx\Cursor\intro\barbarian deselect.wav";
+        public const string SFXBarbarianSelect = @"data\global\sfx\Cursor\intro\barbarian select.wav";
+        public const string SFXDruidDeselect = @"data\global\sfx\Cursor\intro\druid deselect.wav";
+        public const string SFXDruidSelect = @"data\global\sfx\Cursor\intro\druid select.wav";
+        public const string SFXNecromancerDeselect = @"data\global\sfx\Cursor\intro\necromancer deselect.wav";
+        public const string SFXNecromancerSelect = @"data\global\sfx\Cursor\intro\necromancer select.wav";
+        public const string SFXPaladinDeselect = @"data\global\sfx\Cursor\intro\paladin deselect.wav";
+        public const string SFXPaladinSelect = @"data\global\sfx\Cursor\intro\paladin select.wav";
+        public const string SFXSorceressDeselect = @"data\global\sfx\Cursor\intro\sorceress deselect.wav";
+        public const string SFXSorceressSelect = @"data\global\sfx\Cursor\intro\sorceress select.wav";
+
         public static string GeneratePathForItem(string spriteName)
         {
             return $@"data\global\items\{spriteName}.dc6";

@@ -13,7 +13,7 @@ namespace OpenDiablo2.SDL2_
             log.Info("Configuring OpenDiablo2.Core service implementations.");
 
             builder.RegisterType<SDL2RenderWindow>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterType<SDL2MusicPlayer>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<SDL2MusicProvider>().AsImplementedInterfaces().SingleInstance();
         }
     }
 }

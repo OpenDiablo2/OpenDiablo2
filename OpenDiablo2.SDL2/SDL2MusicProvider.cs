@@ -16,25 +16,31 @@
 
 using System;
 using System.IO;
+using System.Threading;
 using OpenDiablo2.Common.Interfaces;
 using SDL2;
 
 namespace OpenDiablo2.SDL2_
 {
-    public sealed class SDL2MusicPlayer : IMusicProvider
+    public sealed class SDL2MusicProvider : ISoundProvider
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private IntPtr music = IntPtr.Zero;
+        private int musicChannel;
+        private byte[] musicBytes; // Cannot be local or GC will destory it with great anger
 
-        public SDL2MusicPlayer()
+        public SDL2MusicProvider()
         {
-            if (SDL_mixer.Mix_OpenAudio(22050, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+            if (SDL_mixer.Mix_OpenAudio(22050, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 1024) < 0)
                 log.Error($"SDL_mixer could not initialize! SDL_mixer Error: {SDL.SDL_GetError()}");
         }
 
         public void PlaySong()
         {
-            SDL_mixer.Mix_PlayChannel(-1, music, 1);
+            if (music == IntPtr.Zero)
+                return;
+
+            musicChannel = SDL_mixer.Mix_PlayChannel(-1, music, 1);
         }
 
         public void LoadSong(Stream data)
@@ -42,16 +48,23 @@ namespace OpenDiablo2.SDL2_
             if (music != IntPtr.Zero)
                 StopSong();
 
-            var br = new BinaryReader(data);
-            var bytes = br.ReadBytes((int)(data.Length - data.Position));
-            music = SDL_mixer.Mix_QuickLoad_WAV(bytes);
+            musicBytes = new byte[data.Length - data.Position];
+            data.ReadAsync(musicBytes, 0, (int)(data.Length - data.Position));
+
+            // Wait until SOMETHING gets written out
+            while (musicBytes[8] == 0)
+                Thread.Sleep(1);
+
+            music = SDL_mixer.Mix_QuickLoad_WAV(musicBytes);
         }
 
         public void StopSong()
         {
             if (music == IntPtr.Zero)
                 return;
+            SDL_mixer.Mix_HaltChannel(musicChannel);
             SDL_mixer.Mix_FreeChunk(music);
+            music = IntPtr.Zero;
         }
 
         public void Dispose()
@@ -60,21 +73,10 @@ namespace OpenDiablo2.SDL2_
             SDL_mixer.Mix_CloseAudio();
         }
 
-        /*
-
-            musicStream = data;
-            SDL.SDL_AudioSpec want = new SDL.SDL_AudioSpec
-            {
-                freq = 22050,
-                format = SDL.AUDIO_S16LSB,
-                channels = 2,
-                samples = 4096,
-                callback = AudioCallback
-            };
-
-            SDL.SDL_OpenAudio(ref want, out audioSpec);
-            SDL.SDL_PauseAudio(0);
-         */
-
+        public void PlaySfx(byte[] data)
+        {
+            var sound = SDL_mixer.Mix_QuickLoad_WAV(data);
+            SDL_mixer.Mix_PlayChannel(-1, sound, 0);
+        }
     }
 }

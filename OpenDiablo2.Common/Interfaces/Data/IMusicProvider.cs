@@ -3,10 +3,11 @@ using System.IO;
 
 namespace OpenDiablo2.Common.Interfaces
 {
-    public interface IMusicProvider : IDisposable
+    public interface ISoundProvider : IDisposable
     {
         void LoadSong(Stream data);
         void PlaySong();
         void StopSong();
+        void PlaySfx(byte[] data);
     }
 }

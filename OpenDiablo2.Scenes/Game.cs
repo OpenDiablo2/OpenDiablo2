@@ -14,6 +14,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
+using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
@@ -43,6 +44,8 @@ namespace OpenDiablo2.Scenes
             IMouseInfoProvider mouseInfoProvider,
             IItemManager itemManager,
             ISessionManager sessionManager,
+            ISoundProvider soundProvider,
+            IMPQProvider mpqProvider,
             IGameHUD gameHUD
         )
         {
@@ -53,6 +56,10 @@ namespace OpenDiablo2.Scenes
             this.sessionManager = sessionManager;
             this.gameHUD = gameHUD;
 
+            // TODO: Dynamic based on actual location
+            soundProvider.StopSong();
+            soundProvider.LoadSong(mpqProvider.GetStream(ResourcePaths.BGMTown1));
+            soundProvider.PlaySong();
             //var item = itemManager.getItem("hdm");
         }
 

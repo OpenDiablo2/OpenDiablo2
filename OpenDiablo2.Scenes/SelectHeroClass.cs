@@ -37,6 +37,7 @@ namespace OpenDiablo2.Scenes
         private readonly ITextDictionary textDictionary;
         private readonly IKeyboardInfoProvider keyboardInfoProvider;
         private readonly IGameState gameState;
+        private readonly ISoundProvider soundProvider;
 
         private bool showEntryUi = false;
         private eHero? selectedHero = null;
@@ -50,14 +51,20 @@ namespace OpenDiablo2.Scenes
         private readonly ITextBox characterNameTextBox;
         private readonly Dictionary<eHero, HeroRenderInfo> heroRenderInfo = new Dictionary<eHero, HeroRenderInfo>();
 
+        private byte[] sfxAmazonSelect, sfxAmazonDeselect, sfxAssassinSelect, sfxAssassinDeselect, sfxBarbarianSelect, sfxBarbarianDeselect,
+            sfxDruidSelect, sfxDruidDeselect, sfxNecromancerSelect, sfxNecromancerDeselect, sfxPaladinSelect, sfxPaladinDeselect,
+            sfxSorceressSelect, sfxSorceressDeselect;
+
         public SelectHeroClass(
             IRenderWindow renderWindow,
             IMouseInfoProvider mouseInfoProvider,
             ISceneManager sceneManager,
+            ISoundProvider soundProvider,
             Func<eButtonType, IButton> createButton,
             Func<ITextBox> createTextBox,
             ITextDictionary textDictionary,
             IKeyboardInfoProvider keyboardInfoProvider,
+            IMPQProvider mpqProvider,
             IGameState gameState
             )
         {
@@ -66,6 +73,7 @@ namespace OpenDiablo2.Scenes
             this.sceneManager = sceneManager;
             this.textDictionary = textDictionary;
             this.keyboardInfoProvider = keyboardInfoProvider;
+            this.soundProvider = soundProvider;
             this.gameState = gameState;
 
 
@@ -83,7 +91,7 @@ namespace OpenDiablo2.Scenes
                 SelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianSelected, Palettes.Fechar, new Point(400, 330)),
                 BackWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBarbarianBackWalk, Palettes.Fechar, new Point(400, 330)),
                 SelectionBounds = new Rectangle(364, 201, 90, 170),
-                ForwardWalkTimeMs = 3000,
+                ForwardWalkTimeMs = 2500,
                 BackWalkTimeMs = 1000
             };
 
@@ -99,7 +107,7 @@ namespace OpenDiablo2.Scenes
                 BackWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressBackWalk, Palettes.Fechar, new Point(626, 352)),
                 BackWalkSpriteOverlay = renderWindow.LoadSprite(ResourcePaths.CharacterSelecSorceressBackWalkOverlay, Palettes.Fechar, new Point(626, 352)),
                 SelectionBounds = new Rectangle(580, 240, 65, 160),
-                ForwardWalkTimeMs = 3000,
+                ForwardWalkTimeMs = 2300,
                 BackWalkTimeMs = 1200
             };
             heroRenderInfo[eHero.Sorceress].SelectedSpriteOverlay.Blend = true;
@@ -136,7 +144,7 @@ namespace OpenDiablo2.Scenes
                 SelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecPaladinSelected, Palettes.Fechar, new Point(521, 338)),
                 BackWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecPaladinBackWalk, Palettes.Fechar, new Point(521, 338)),
                 SelectionBounds = new Rectangle(490, 210, 65, 180),
-                ForwardWalkTimeMs = 4000,
+                ForwardWalkTimeMs = 3400,
                 BackWalkTimeMs = 1300
             };
 
@@ -150,7 +158,7 @@ namespace OpenDiablo2.Scenes
                 SelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecAmazonSelected, Palettes.Fechar, new Point(100, 339)),
                 BackWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelecAmazonBackWalk, Palettes.Fechar, new Point(100, 339)),
                 SelectionBounds = new Rectangle(70, 220, 55, 200),
-                ForwardWalkTimeMs = 2600,
+                ForwardWalkTimeMs = 2200,
                 BackWalkTimeMs = 1500
             };
 
@@ -163,7 +171,7 @@ namespace OpenDiablo2.Scenes
                 SelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinSelected, Palettes.Fechar, new Point(231, 365)),
                 BackWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectAssassinBackWalk, Palettes.Fechar, new Point(231, 365)),
                 SelectionBounds = new Rectangle(175, 235, 50, 180),
-                ForwardWalkTimeMs = 3000,
+                ForwardWalkTimeMs = 3800,
                 BackWalkTimeMs = 1500
             };
 
@@ -176,7 +184,7 @@ namespace OpenDiablo2.Scenes
                 SelectedSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidSelected, Palettes.Fechar, new Point(720, 370)),
                 BackWalkSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectDruidBackWalk, Palettes.Fechar, new Point(720, 370)),
                 SelectionBounds = new Rectangle(680, 220, 70, 195),
-                ForwardWalkTimeMs = 3000,
+                ForwardWalkTimeMs = 4800,
                 BackWalkTimeMs = 1500
             };
 
@@ -215,6 +223,21 @@ namespace OpenDiablo2.Scenes
             characterNameTextBox = createTextBox();
             characterNameTextBox.Text = "";
             characterNameTextBox.Location = new Point(320, 493);
+
+            mpqProvider.GetBytesAsync(ResourcePaths.SFXAmazonSelect, x => sfxAmazonSelect = x);
+            mpqProvider.GetBytesAsync(ResourcePaths.SFXAmazonDeselect, x => sfxAmazonDeselect = x);
+            mpqProvider.GetBytesAsync(ResourcePaths.SFXAssassinSelect, x => sfxAssassinSelect = x);
+            mpqProvider.GetBytesAsync(ResourcePaths.SFXAssassinDeselect, x => sfxAssassinDeselect = x);
+            mpqProvider.GetBytesAsync(ResourcePaths.SFXBarbarianSelect, x => sfxBarbarianSelect = x);
+            mpqProvider.GetBytesAsync(ResourcePaths.SFXBarbarianDeselect, x => sfxBarbarianDeselect = x);
+            mpqProvider.GetBytesAsync(ResourcePaths.SFXDruidSelect, x => sfxDruidSelect = x);
+            mpqProvider.GetBytesAsync(ResourcePaths.SFXDruidDeselect, x => sfxDruidDeselect = x);
+            mpqProvider.GetBytesAsync(ResourcePaths.SFXNecromancerSelect, x => sfxNecromancerSelect = x);
+            mpqProvider.GetBytesAsync(ResourcePaths.SFXNecromancerDeselect, x => sfxNecromancerDeselect = x);
+            mpqProvider.GetBytesAsync(ResourcePaths.SFXPaladinSelect, x => sfxPaladinSelect = x);
+            mpqProvider.GetBytesAsync(ResourcePaths.SFXPaladinDeselect, x => sfxPaladinDeselect = x);
+            mpqProvider.GetBytesAsync(ResourcePaths.SFXSorceressSelect, x => sfxSorceressSelect = x);
+            mpqProvider.GetBytesAsync(ResourcePaths.SFXSorceressDeselect, x => sfxSorceressDeselect = x);
 
         }
 
@@ -432,6 +455,7 @@ namespace OpenDiablo2.Scenes
 
                 selectedHero = hero;
                 UpdateHeroText();
+                PlayHeroSelected(hero);
 
                 return;
             }
@@ -444,6 +468,66 @@ namespace OpenDiablo2.Scenes
                 UpdateHeroText();
             }
 
+        }
+
+        private void PlayHeroSelected(eHero hero)
+        {
+            switch (hero)
+            {
+                case eHero.Barbarian:
+                    soundProvider.PlaySfx(sfxBarbarianSelect);
+                    break;
+                case eHero.Necromancer:
+                    soundProvider.PlaySfx(sfxNecromancerSelect);
+                    break;
+                case eHero.Paladin:
+                    soundProvider.PlaySfx(sfxPaladinSelect);
+                    break;
+                case eHero.Assassin:
+                    soundProvider.PlaySfx(sfxAssassinSelect);
+                    break;
+                case eHero.Sorceress:
+                    soundProvider.PlaySfx(sfxSorceressSelect);
+                    break;
+                case eHero.Amazon:
+                    soundProvider.PlaySfx(sfxAmazonSelect);
+                    break;
+                case eHero.Druid:
+                    soundProvider.PlaySfx(sfxDruidSelect);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void PlayHeroDeselected(eHero hero)
+        {
+            switch (hero)
+            {
+                case eHero.Barbarian:
+                    soundProvider.PlaySfx(sfxBarbarianDeselect);
+                    break;
+                case eHero.Necromancer:
+                    soundProvider.PlaySfx(sfxNecromancerDeselect);
+                    break;
+                case eHero.Paladin:
+                    soundProvider.PlaySfx(sfxPaladinDeselect);
+                    break;
+                case eHero.Assassin:
+                    soundProvider.PlaySfx(sfxAssassinDeselect);
+                    break;
+                case eHero.Sorceress:
+                    soundProvider.PlaySfx(sfxSorceressDeselect);
+                    break;
+                case eHero.Amazon:
+                    soundProvider.PlaySfx(sfxAmazonDeselect);
+                    break;
+                case eHero.Druid:
+                    soundProvider.PlaySfx(sfxDruidDeselect);
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void SetDescLabels(string descKey)
