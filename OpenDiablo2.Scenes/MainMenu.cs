@@ -29,6 +29,7 @@ namespace OpenDiablo2.Scenes
             )
         {
             this.renderWindow = renderWindow;
+            this.sceneManager = sceneManager;
             
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.GameSelectScreen, Palettes.Sky);
             diabloLogoLeft = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoFireLeft, Palettes.Units, new Point(400, 120));
