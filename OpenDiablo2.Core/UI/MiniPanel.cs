@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using OpenDiablo2.Common;
+﻿using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 
 namespace OpenDiablo2.Core.UI
 {
@@ -15,29 +14,26 @@ namespace OpenDiablo2.Core.UI
             eButtonType.MinipanelSkill, eButtonType.MinipanelAutomap, eButtonType.MinipanelMessage, eButtonType.MinipanelQuest, eButtonType.MinipanelMenu };
 
         private readonly IRenderWindow renderWindow;
+        private readonly IMouseInfoProvider mouseInfoProvider;
         private readonly IGameState gameState;
         private readonly ISprite sprite;
         private readonly IReadOnlyList<IButton> buttons;
         private readonly IEnumerable<IPanel> panels;
-        private readonly IPanelFrame leftPanelFrame;
-        private readonly IPanelFrame rightPanelFrame;
 
         private bool isPanelVisible;
 
-        public IPanel LeftPanel { get; private set; }
-        public IPanel RightPanel { get; private set; }
-        public bool IsLeftPanelVisible => LeftPanel != null;
-        public bool IsRightPanelVisible => RightPanel != null;
+        public event PanelSelectedEvent PanelSelected;
 
-        public MiniPanel(IRenderWindow renderWindow, IGameState gameState, 
-            IEnumerable<IPanel> panels, Func<eButtonType, IButton> createButton,
-            Func<ePanelFrameType, IPanelFrame> createPanelFrame)
+        public MiniPanel(IRenderWindow renderWindow, 
+            IGameState gameState,
+            IMouseInfoProvider mouseInfoProvider,
+            IEnumerable<IPanel> panels, 
+            Func<eButtonType, IButton> createButton)
         {
             this.renderWindow = renderWindow;
+            this.mouseInfoProvider = mouseInfoProvider;
             this.gameState = gameState;
             this.panels = panels;
-            leftPanelFrame = createPanelFrame(ePanelFrameType.Left);
-            rightPanelFrame = createPanelFrame(ePanelFrameType.Right);
 
             sprite = renderWindow.LoadSprite(ResourcePaths.MinipanelSmall, Palettes.Units);
 
@@ -48,59 +44,44 @@ namespace OpenDiablo2.Core.UI
                 {
                     var panel = panels.SingleOrDefault(o => o.PanelType == x);
                     if (panel == null) return;
-                    TogglePanel(panel);
+                    PanelSelected?.Invoke(panel);
                 };
                 return newBtn;
             }).ToList().AsReadOnly();
 
             UpdatePanelLocation();
-            OnMenuToggle(true);
         }
 
         public void OnMenuToggle(bool isToggled) => isPanelVisible = isToggled;
 
-        public void Update()
+        public bool IsMouseOver()
         {
-            if (IsLeftPanelVisible)
-            {
-                LeftPanel.Update();
-                leftPanelFrame.Update();
-            }
+            int xDiff = mouseInfoProvider.MouseX - sprite.Location.X;
+            int yDiff = mouseInfoProvider.MouseY - sprite.Location.Y + sprite.LocalFrameSize.Height;
 
-            if (IsRightPanelVisible)
-            {
-                RightPanel.Update();
-                rightPanelFrame.Update();
-            }
-            
-            if (!isPanelVisible || (IsLeftPanelVisible && IsRightPanelVisible))
-                return;
-
-            foreach (var button in buttons)
-                button.Update();
+            return isPanelVisible
+                && xDiff >= 0 && xDiff <= sprite.LocalFrameSize.Width
+                && yDiff >= 0 && yDiff <= sprite.LocalFrameSize.Height;
         }
 
         public void Render()
         {
-            if (IsLeftPanelVisible)
-            {
-                LeftPanel.Render();
-                leftPanelFrame.Render();
-            }
-
-            if (IsRightPanelVisible)
-            {
-                RightPanel.Render();
-                rightPanelFrame.Render();
-            }
-
-            if (!isPanelVisible || (IsLeftPanelVisible && IsRightPanelVisible))
+            if (!isPanelVisible)
                 return;
 
             renderWindow.Draw(sprite);
 
             foreach (var button in buttons)
                 button.Render();
+        }
+
+        public void Update()
+        {
+            if (!isPanelVisible)
+                return;
+
+            foreach (var button in buttons)
+                button.Update();
         }
 
         public void Dispose()
@@ -111,34 +92,7 @@ namespace OpenDiablo2.Core.UI
             sprite.Dispose();
         }
 
-        private void TogglePanel(IPanel panel)
-        {
-            switch (panel.FrameType)
-            {
-                case ePanelFrameType.Left:
-                    LeftPanel = LeftPanel == panel ? null : panel;
-                    break;
-                case ePanelFrameType.Right:
-                    RightPanel = RightPanel == panel ? null : panel;
-                    break;
-                case ePanelFrameType.Center:
-                    // todo; stack center panels
-                    break;
-                default:
-                    Debug.Fail("Unknown frame type");
-                    break;
-            }
-
-            UpdateCameraOffset();
-        }
-
-        private void UpdateCameraOffset()
-        {
-            gameState.CameraOffset = (IsRightPanelVisible ? -200 : 0) + (IsLeftPanelVisible ? 200 : 0);
-            UpdatePanelLocation();
-        }
-
-        private void UpdatePanelLocation()
+        public void UpdatePanelLocation()
         {
             sprite.Location = new Point((800 - sprite.LocalFrameSize.Width + (int)(gameState.CameraOffset * 1.3f)) / 2, 
                 526 + sprite.LocalFrameSize.Height);

@@ -68,6 +68,7 @@
     <Compile Include="ResourceManager.cs" />
     <Compile Include="TextDictionary.cs" />
     <Compile Include="UI\Button.cs" />
+    <Compile Include="UI\GameHUD.cs" />
     <Compile Include="UI\ItemContainer.cs" />
     <Compile Include="UI\PanelFrame.cs" />
     <Compile Include="UI\InventoryPanel.cs" />
