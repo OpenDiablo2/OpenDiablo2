@@ -48,7 +48,7 @@ namespace OpenDiablo2.SDL2_
         {
             int w = 0;
             int h = 0;
-            foreach(byte ch in text)
+            foreach(var ch in text)
             {
                 w += font.CharacterMetric[ch].Width;
                 h = Math.Max(h, font.CharacterMetric[ch].Height);

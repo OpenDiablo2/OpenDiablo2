@@ -59,7 +59,6 @@ namespace OpenDiablo2.SDL2_
         private readonly IPaletteProvider paletteProvider;
 
         private MPQCOF animationData;
-        private MPQDCC[] layerData;
 
         static readonly byte[] directionConversion = new byte[] { 3, 15, 4, 8, 0, 9, 5, 10, 1, 11, 6, 12, 2, 13, 7, 14 };
 
@@ -138,19 +137,10 @@ namespace OpenDiablo2.SDL2_
                 throw new ApplicationException("Could not locate animation for the character!");
 
             var palette = paletteProvider.PaletteTable["Units"];
-            var data = animationData.Layers
-                .Select(layer => resourceManager.GetPlayerDCC(layer, ArmorType, palette))
-                .ToArray();
-
-            log.Warn($"{data.Where(x => x == null).Count()} animation layers were not found!");
-
-            layerData = data.Where(x => x != null)
-                .ToArray();
-
-            CacheFrames();
+            CacheFrames(animationData.Layers.Select(layer => resourceManager.GetPlayerDCC(layer, ArmorType, palette)));
         }
 
-        private unsafe void CacheFrames()
+        private unsafe void CacheFrames(IEnumerable<MPQDCC> layerData)
         {
             var cache = new DirectionCacheItem
             {
@@ -170,13 +160,25 @@ namespace OpenDiablo2.SDL2_
             var maxX = Int32.MinValue;
             var maxY = Int32.MinValue;
 
+            var layersIgnored = 0;
+            var layersToRender = new List<MPQDCC>();
             foreach (var layer in layerData)
             {
+                if (layer == null)
+                {
+                    layersIgnored++;
+                    continue;
+                }
+
+                layersToRender.Add(layer);
                 minX = Math.Min(minX, layer.Directions[directionConversion[LocationDetails.MovementDirection]].Box.Left);
                 minY = Math.Min(minY, layer.Directions[directionConversion[LocationDetails.MovementDirection]].Box.Top);
                 maxX = Math.Max(maxX, layer.Directions[directionConversion[LocationDetails.MovementDirection]].Box.Right);
                 maxY = Math.Max(maxY, layer.Directions[directionConversion[LocationDetails.MovementDirection]].Box.Bottom);
             }
+
+            if (layersIgnored > 0)
+                log.Warn($"{layersIgnored} animation layer(s) were not found!");
 
             var frameW = (maxX - minX) * 2; // Hack
             var frameH = (maxY - minY) * 2;
@@ -191,8 +193,11 @@ namespace OpenDiablo2.SDL2_
                 SDL.SDL_LockTexture(texture, IntPtr.Zero, out IntPtr pixels, out int pitch);
                 UInt32* data = (UInt32*)pixels;
 
-                foreach (var layer in layerData)
+                foreach (var layer in layersToRender)
                 {
+                    if (layer == null)
+                        continue;
+
                     var direction = layer.Directions[directionConversion[LocationDetails.MovementDirection]];
                     var frame = direction.Frames[frameIndex];
 
@@ -212,8 +217,6 @@ namespace OpenDiablo2.SDL2_
                                     continue;
 
                                 var color = palette.Colors[paletteIndex];
-                                var relativeX = (frame.XOffset - minX);
-                                var relativeY = (frame.YOffset - minY);
 
                                 var offsetX = x + cell.XOffset + (frame.Box.X - minX);
                                 var offsetY = y + cell.YOffset + (frame.Box.Y - minY);
@@ -228,6 +231,7 @@ namespace OpenDiablo2.SDL2_
 
                 SDL.SDL_UnlockTexture(texture);
                 SDL.SDL_SetTextureBlendMode(texture, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+
                 // TODO: Temporary code!
                 cache.SpriteTexture[frameIndex] = texture;
                 cache.SpriteRect[frameIndex] = new SDL.SDL_Rect { x = minX, y = minY, w = frameW, h = frameH };

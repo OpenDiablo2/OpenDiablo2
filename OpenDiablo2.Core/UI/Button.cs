@@ -2,16 +2,10 @@
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpenDiablo2.Core.UI
 {
-
-
     public sealed class Button : IButton
     {
         private readonly IMouseInfoProvider mouseInfoProvider;
