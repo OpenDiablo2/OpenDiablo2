@@ -153,6 +153,8 @@ namespace OpenDiablo2.Scenes
             if (cursorDirection < 0)
                 cursorDirection += 360;
             var actualDirection = (byte)(cursorDirection / 22);
+            if (actualDirection >= 16)
+                actualDirection -= 16;
 
             if (mouseInfoProvider.LeftMouseDown && (lastMovementType == eMovementType.Stopped || lastDirection != actualDirection))
             {

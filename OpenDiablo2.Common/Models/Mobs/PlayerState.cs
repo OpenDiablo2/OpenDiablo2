@@ -16,7 +16,7 @@ namespace OpenDiablo2.Common.Models.Mobs
         public eMovementType MovementType { get; set; } = eMovementType.Stopped; // TODO: This needs to mess with MobMode somehow
         public eWeaponClass WeaponClass { get; set; } = eWeaponClass.HandToHand; // Temporary
         public eArmorType ArmorType { get; set; } = eArmorType.Lite; // Temporary
-        public eMobMode MobMode { get; set; } = eMobMode.PlayerNeutral; // Temporary
+        public eMobMode MobMode { get; set; } = eMobMode.PlayerTownWalk; // Temporary
 
         // Player character stats
         protected Stat Vitality;

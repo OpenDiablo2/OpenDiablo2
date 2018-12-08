@@ -434,8 +434,8 @@ namespace OpenDiablo2.Core.GameState_
 
             var rads = (float)player.LocationDetails.MovementDirection * 22 * (float)Deg2Rad;
 
-            var moveX = (float)Math.Cos(rads) * seconds * 2f;
-            var moveY = (float)Math.Sin(rads) * seconds * 2f;
+            var moveX = (float)Math.Cos(rads) * seconds * player.LocationDetails.MovementSpeed;
+            var moveY = (float)Math.Sin(rads) * seconds * player.LocationDetails.MovementSpeed;
 
             player.LocationDetails.PlayerX += moveX;
             player.LocationDetails.PlayerY += moveY;

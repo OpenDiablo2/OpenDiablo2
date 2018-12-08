@@ -42,12 +42,12 @@ namespace OpenDiablo2.Common.Models
             result.Name = Encoding.UTF8.GetString(data, offset + 8, nameLength);
             result.LocationDetails = PlayerLocationDetails.FromBytes(data, offset + 8 + nameLength);
             var uidBytes = new byte[16];
-            Array.Copy(data, offset + 8 + nameLength + PlayerLocationDetails.SizeInBytes + 1, uidBytes, 0, 16);
+            Array.Copy(data, offset + 8 + nameLength + PlayerLocationDetails.SizeInBytes, uidBytes, 0, 16);
             result.UID = new Guid(uidBytes);
             return result;
         }
 
-        public int SizeInBytes => 5 + Encoding.UTF8.GetByteCount(Name) + PlayerLocationDetails.SizeInBytes;
+        public int SizeInBytes => 8 + Encoding.UTF8.GetByteCount(Name) + PlayerLocationDetails.SizeInBytes + 16;
     }
 
 

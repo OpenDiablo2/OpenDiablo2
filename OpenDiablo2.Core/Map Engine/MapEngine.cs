@@ -67,7 +67,11 @@ namespace OpenDiablo2.Core.Map_Engine
             foreach(var loc in playerLocationDetails)
             {
                 var cr = characterRenderers.FirstOrDefault(x => x.LocationDetails.PlayerId == loc.PlayerId);
+                var newDirection = loc.MovementDirection != cr.LocationDetails.MovementDirection;
+                var stanceChanged = loc.MovementType != cr.LocationDetails.MovementType;
                 cr.LocationDetails = loc;
+                if (newDirection || stanceChanged)
+                    cr.ResetAnimationData();
             }
         }
 
@@ -135,19 +139,26 @@ namespace OpenDiablo2.Core.Map_Engine
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallLower))
                         renderWindow.DrawMapCell(cellInfo, 320 + (int)px + (int)ox + xOffset, 210 + (int)py + (int)oy);
 
-                    // TODO: We need to render the characters infront of, or behind the wall properly...
-                    foreach (var character in characterRenderers.Where(x => Math.Truncate(x.LocationDetails.PlayerX) == ax && Math.Truncate(x.LocationDetails.PlayerY) == ay))
-                        character.Render(320 + (int)px + (int)ox + xOffset, 210 + (int)py + (int)oy);
-
-
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallUpper))
                         renderWindow.DrawMapCell(cellInfo, 320 + (int)px + (int)ox + xOffset, 210 + (int)py + (int)oy);
 
+                    // TODO: We need to render the characters infront of, or behind the wall properly...
+                    if (ty == 1 && tx == 1)
+                    {
+                        foreach (var character in characterRenderers/*.Where(x => Math.Truncate(x.LocationDetails.PlayerX) == ax && Math.Truncate(x.LocationDetails.PlayerY) == ay)*/)
+                        {
+                            // TODO: Temporary hack
+                            character.Render(400, 280);
+                        }
+                    }
+
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.Roof))
                         renderWindow.DrawMapCell(cellInfo, 320 + (int)px + (int)ox + xOffset, 210 + (int)py + (int)oy);
-
                 }
             }
+
+
+
 
         }
 

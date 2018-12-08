@@ -110,15 +110,14 @@ namespace OpenDiablo2.ServiceBus
 
         private void OnMovementRequestHandler(int clientHash, byte direction, eMovementType movementType)
         {
-            // TODO: Actually move the player ....
             var player = gameServer.Players.FirstOrDefault(x => x.ClientHash == clientHash);
             if (player == null)
                 return;
 
-            // TODO: The server needs to actually manage player movement...
             player.MovementDirection = direction;
             player.MovementType = movementType;
             player.MovementDirection = direction;
+
 
             Send(new MFLocatePlayers(gameServer.Players.Select(x => x.ToPlayerLocationDetails())));
         }
