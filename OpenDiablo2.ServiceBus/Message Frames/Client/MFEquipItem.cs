@@ -11,8 +11,8 @@ using OpenDiablo2.Common.Interfaces;
 
 namespace OpenDiablo2.ServiceBus.Message_Frames.Client
 {
-    [MessageFrame(eMessageFrameType.JoinGame)]
-    public sealed class MFJoinGame : IMessageFrame
+    [MessageFrame(eMessageFrameType.EquipItem)]
+    public sealed class MFEquipitem : IMessageFrame
     {
         public string PlayerName { get; set; }
         public eHero HeroType { get; set; }
@@ -41,10 +41,9 @@ namespace OpenDiablo2.ServiceBus.Message_Frames.Client
             }
         }
 
-        public MFJoinGame() { }
-        public MFJoinGame(string playerName, eHero heroType)
+        public MFEquipitem() { }
+        public MFEquipitem(eHero heroType)
         {
-            PlayerName = playerName;
             HeroType = heroType;
         }
 

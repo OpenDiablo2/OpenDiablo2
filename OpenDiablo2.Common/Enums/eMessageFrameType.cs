@@ -11,6 +11,7 @@
         FocusOnPlayer = 0x05,
         MoveRequest = 0x06,
         PlayerMove = 0x07,
+        EquipItem = 0x0B,
 
 
         MAX = 0xFF, // NOTE:
