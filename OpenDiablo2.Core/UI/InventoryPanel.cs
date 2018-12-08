@@ -19,7 +19,9 @@ namespace OpenDiablo2.Core.UI
         public Point Location {
             get => location;
             set {
+#pragma warning disable S4275 // Getters and setters should access the expected fields
                 previouslyContainedItem = location;
+#pragma warning restore S4275 // Getters and setters should access the expected fields
                 location = value;
             }
         }

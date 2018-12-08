@@ -28,8 +28,6 @@ namespace OpenDiablo2.SDL2_
 {
     public sealed class SDL2RenderWindow : IRenderWindow, IMouseInfoProvider, IKeyboardInfoProvider
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         private readonly IntPtr window, renderer;
         private readonly bool fullscreen;
 
@@ -263,7 +261,6 @@ namespace OpenDiablo2.SDL2_
         public void Draw(ISprite sprite, int xSegments, int ySegments, int offset)
         {
             var spr = sprite as SDL2Sprite;
-            var segSize = xSegments * ySegments;
 
             for (var y = 0; y < ySegments; y++)
             {
@@ -360,7 +357,7 @@ namespace OpenDiablo2.SDL2_
             var frameSize = new Size(diffX, Math.Abs(diffY));
 
             var srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = frameSize.Width, h = Math.Abs(frameSize.Height) };
-            var frameSizeMax = diffX * Math.Abs(diffY);
+            //var frameSizeMax = diffX * Math.Abs(diffY);
 
 
             var texId = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, frameSize.Width, frameSize.Height);

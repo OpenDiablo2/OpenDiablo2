@@ -12,7 +12,7 @@ namespace OpenDiablo2.ServiceBus.Message_Frames.Server
 
         public byte[] Data
         {
-            get => BitConverter.GetBytes((Int32)PlayerToFocusOn);
+            get => BitConverter.GetBytes(PlayerToFocusOn);
             set => PlayerToFocusOn = BitConverter.ToInt32(value, 0);
         }
 

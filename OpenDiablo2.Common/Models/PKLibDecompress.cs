@@ -85,11 +85,13 @@ namespace OpenDiablo2.Common.Models
             0xF0, 0x70, 0xB0, 0x30, 0xD0, 0x50, 0x90, 0x10, 0xE0, 0x60, 0xA0, 0x20, 0xC0, 0x40, 0x80, 0x00
         };
 
+#pragma warning disable S3963 // "static" fields should be initialized inline (it'l complain even if you put it in static constructor)
         static PKLibDecompress()
         {
             sPosition1 = GenerateDecodeTable(sDistBits, sDistCode);
             sPosition2 = GenerateDecodeTable(sLenBits, sLenCode);
         }
+#pragma warning restore S3963 // "static" fields should be initialized inline
 
         public PKLibDecompress(Stream input)
         {

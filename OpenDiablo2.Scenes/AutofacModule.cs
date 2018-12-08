@@ -16,7 +16,7 @@ namespace OpenDiablo2.Scenes
             var types = ThisAssembly.GetTypes().Where(x => typeof(IScene).IsAssignableFrom(x) && x.IsClass);
             foreach (var type in types)
             {
-                var att = type.GetCustomAttributes(true).First(x => typeof(SceneAttribute).IsAssignableFrom(x.GetType())) as SceneAttribute;
+                var att = type.GetCustomAttributes(true).First(x => (x is SceneAttribute)) as SceneAttribute;
                 builder
                     .RegisterType(type)
                     .Keyed<IScene>(att.SceneType)

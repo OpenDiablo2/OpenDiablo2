@@ -5,7 +5,7 @@ using System.Linq;
 namespace OpenDiablo2.Common.Models
 {
 
-    public class ImageFrame : IDisposable
+    public sealed class ImageFrame : IDisposable
     {
         public UInt32 Flip { get; internal set; }
         public UInt32 Width { get; internal set; }
@@ -19,7 +19,7 @@ namespace OpenDiablo2.Common.Models
 
         public void Dispose()
         {
-            ImageData = new Int16[0];
+            ImageData = null;
         }
 
         public UInt32 GetColor(int x, int y, Palette palette)
