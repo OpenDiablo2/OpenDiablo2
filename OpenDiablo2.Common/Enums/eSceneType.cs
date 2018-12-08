@@ -14,13 +14,16 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
-using System;
-using OpenDiablo2.Common.Interfaces;
-
-namespace OpenDiablo2.SDL2_
+namespace OpenDiablo2.Common.Enums
 {
-    public sealed class SDL2Texture : ITexture
+    /// <summary>
+    /// Defines a scene type.
+    /// </summary>
+    public enum eSceneType
     {
-        public IntPtr Pointer { get; set; }
+        MainMenu,
+        SelectHeroClass,
+        SelectCharacter,
+        Game
     }
 }

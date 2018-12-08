@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
@@ -15,12 +14,12 @@ namespace OpenDiablo2.Core.UI
         private readonly IGameState gameState;
         private ISprite sprite;
 
-        private ItemContainerLayout itemContainerLayout;
-        private IMouseInfoProvider mouseInfoProvider;
+        private readonly ItemContainerLayout itemContainerLayout;
+        private readonly IMouseInfoProvider mouseInfoProvider;
 
         public Item ContainedItem { get; internal set; }
 
-        private Dictionary<eItemContainerType, ISprite> sprites = new Dictionary<eItemContainerType, ISprite>();
+        private readonly Dictionary<eItemContainerType, ISprite> sprites = new Dictionary<eItemContainerType, ISprite>();
 
         private Point location = new Point();
 
@@ -37,7 +36,7 @@ namespace OpenDiablo2.Core.UI
             }
         }
 
-        private ISprite placeholderSprite;
+        private readonly ISprite placeholderSprite;
 
         public Size Size { get; internal set; }
         

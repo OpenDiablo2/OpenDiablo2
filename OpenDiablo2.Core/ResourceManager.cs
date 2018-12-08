@@ -15,11 +15,11 @@ namespace OpenDiablo2.Core
         private readonly IMPQProvider mpqProvider;
         private readonly IEngineDataManager engineDataManager;
 
-        private Dictionary<string, ImageSet> ImageSets = new Dictionary<string, ImageSet>();
-        private Dictionary<string, MPQFont> MPQFonts = new Dictionary<string, MPQFont>();
-        private Dictionary<string, Palette> Palettes = new Dictionary<string, Palette>();
-        private Dictionary<string, MPQDT1> DTs = new Dictionary<string, MPQDT1>();
-        private Dictionary<string, MPQCOF> PlayerCOFs = new Dictionary<string, MPQCOF>();
+        private readonly Dictionary<string, ImageSet> ImageSets = new Dictionary<string, ImageSet>();
+        private readonly Dictionary<string, MPQFont> MPQFonts = new Dictionary<string, MPQFont>();
+        private readonly Dictionary<string, Palette> Palettes = new Dictionary<string, Palette>();
+        private readonly Dictionary<string, MPQDT1> DTs = new Dictionary<string, MPQDT1>();
+        private readonly Dictionary<string, MPQCOF> PlayerCOFs = new Dictionary<string, MPQCOF>();
 
         public Dictionary<string, List<AnimationData>> Animations { get; private set; } = new Dictionary<string, List<AnimationData>>();
 

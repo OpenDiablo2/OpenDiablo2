@@ -9,8 +9,8 @@ namespace OpenDiablo2.Core.UI
     public sealed class PanelFrame : IPanelFrame
     {
         private readonly IRenderWindow renderWindow;
-        private ISprite sprite;
-        private ePanelFrameType panelFrameType;
+        private readonly ISprite sprite;
+        private readonly ePanelFrameType panelFrameType;
 
         public Point Location { get; set; }
 

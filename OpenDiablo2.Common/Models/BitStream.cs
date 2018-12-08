@@ -8,7 +8,7 @@ namespace OpenDiablo2.Common.Models
     /// </summary>
     internal class BitStream
     {
-        private Stream _baseStream;
+        private readonly Stream _baseStream;
         private int _current;
         private int _bitCount;
 

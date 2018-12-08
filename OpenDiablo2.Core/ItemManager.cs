@@ -11,7 +11,7 @@ namespace OpenDiablo2.Core
 {
     public sealed class ItemManager : IItemManager
     {
-        private IEngineDataManager engineDataManager;
+        private readonly IEngineDataManager engineDataManager;
 
         public ItemManager(IEngineDataManager engineDataManager)
         {

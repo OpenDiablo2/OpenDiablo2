@@ -7,13 +7,12 @@ using OpenDiablo2.Common.Interfaces;
 
 namespace OpenDiablo2.Scenes
 {
-    [Scene("Game")]
+    [Scene(eSceneType.Game)]
     public sealed class Game : IScene
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private readonly IRenderWindow renderWindow;
-        private readonly IResourceManager resourceManager;
         private readonly IMapEngine mapEngine;
         private readonly IMouseInfoProvider mouseInfoProvider;
         private readonly IGameState gameState;
@@ -22,7 +21,12 @@ namespace OpenDiablo2.Scenes
         private readonly IGameHUD gameHUD;
 
         //private ISprite[] testSprite;
+
+        private readonly ISprite panelSprite, healthManaSprite, gameGlobeOverlapSprite;
+
+        private readonly IMiniPanel minipanel;
         
+        private readonly IButton runButton, menuButton;
         private eMovementType lastMovementType = eMovementType.Stopped;
         private byte lastDirection = 255;
 
@@ -30,7 +34,6 @@ namespace OpenDiablo2.Scenes
 
         public Game(
             IRenderWindow renderWindow,
-            IResourceManager resourceManager,
             IMapEngine mapEngine,
             IGameState gameState,
             IMouseInfoProvider mouseInfoProvider,
@@ -41,7 +44,6 @@ namespace OpenDiablo2.Scenes
         )
         {
             this.renderWindow = renderWindow;
-            this.resourceManager = resourceManager;
             this.mapEngine = mapEngine;
             this.gameState = gameState;
             this.mouseInfoProvider = mouseInfoProvider;
@@ -49,10 +51,7 @@ namespace OpenDiablo2.Scenes
             this.sessionManager = sessionManager;
             this.gameHUD = gameHUD;
 
-            /*var item = itemManager.getItem("hdm");
-            var cursorsprite = renderWindow.LoadSprite(ResourcePaths.GeneratePathForItem(item.InvFile), Palettes.Units);
-            
-            renderWindow.MouseCursor = renderWindow.LoadCursor(cursorsprite, 0, new Point(cursorsprite.FrameSize.Width/2, cursorsprite.FrameSize.Height / 2));*/
+            //var item = itemManager.getItem("hdm");
         }
 
         public void Render()

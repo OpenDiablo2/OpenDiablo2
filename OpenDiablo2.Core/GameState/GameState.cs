@@ -24,7 +24,7 @@ namespace OpenDiablo2.Core.GameState_
 
         private float animationTime = 0f;
         private List<MapInfo> mapInfo;
-        private List<MapCellInfo> mapDataLookup = new List<MapCellInfo>();
+        private readonly List<MapCellInfo> mapDataLookup = new List<MapCellInfo>();
         private ISessionManager sessionManager;
 
         public int Act { get; private set; }
@@ -78,7 +78,7 @@ namespace OpenDiablo2.Core.GameState_
             sessionManager.OnFocusOnPlayer += OnFocusOnPlayer;
 
             mapInfo = new List<MapInfo>();
-            sceneManager.ChangeScene("Game");
+            sceneManager.ChangeScene(eSceneType.Game);
 
             sessionManager.JoinGame(characterName, hero);
         }

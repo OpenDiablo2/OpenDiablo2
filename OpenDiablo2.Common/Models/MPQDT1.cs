@@ -45,7 +45,7 @@ namespace OpenDiablo2.Common.Models
         public Int32 X2 { get; private set; }
         public Int32 NumberOfTiles { get; private set; }
         public MPQDT1Tile[] Tiles { get; private set; }
-        private Int32 tileHeaderOffset;
+        private readonly Int32 tileHeaderOffset;
 
         public MPQDT1(Stream stream)
         {

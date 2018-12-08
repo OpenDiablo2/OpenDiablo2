@@ -1,52 +1,34 @@
-﻿using OpenDiablo2.Common;
+﻿using System;
+using System.Drawing;
+using System.Linq;
+using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
-using OpenDiablo2.Common.Models;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OpenDiablo2.Scenes
 {
-    [Scene("Main Menu")]
+    [Scene(eSceneType.MainMenu)]
     public class MainMenu : IScene
     {
-        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         private readonly IRenderWindow renderWindow;
-        private readonly IPaletteProvider paletteProvider;
-        private readonly IMPQProvider mpqProvider;
-        private readonly IMouseInfoProvider mouseInfoProvider;
-        //private readonly IMusicProvider musicProvider;
         private readonly ISceneManager sceneManager;
 
         private float logoFrame;
-        private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack;
-        private IFont labelFont;
-        private ILabel versionLabel, urlLabel;
-        private IButton btnSinglePlayer, btnExit, btnWebsite;
+        private readonly ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack;
+        private readonly IFont labelFont;
+        private readonly ILabel versionLabel, urlLabel;
+        private readonly IButton btnSinglePlayer, btnExit, btnWebsite;
 
         public MainMenu(
             IRenderWindow renderWindow,
-            IPaletteProvider paletteProvider,
-            IMPQProvider mpqProvider,
-            IMouseInfoProvider mouseInfoProvider,
-            //IMusicProvider musicProvider,
             ISceneManager sceneManager,
             IResourceManager resourceManager,
             Func<eButtonType, IButton> createButton,
-            Func<string, IScene> getScene // Temporary until SDL load functions are sped up
+            Func<eSceneType, IScene> getScene // Temporary until SDL load functions are sped up
             )
         {
             this.renderWindow = renderWindow;
-            this.paletteProvider = paletteProvider;
-            this.mpqProvider = mpqProvider;
-            this.mouseInfoProvider = mouseInfoProvider;
             this.sceneManager = sceneManager;
             
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.GameSelectScreen, Palettes.Sky);
@@ -80,7 +62,7 @@ namespace OpenDiablo2.Scenes
             var loadingSprite = renderWindow.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading, new Point(300, 400));
 
             // Pre-load all the scenes for now until we fix the sdl load problem
-            var scenesToLoad = new string[] {"Select Hero Class" };
+            var scenesToLoad = new eSceneType[] { eSceneType.SelectHeroClass };
             for (int i = 0; i < scenesToLoad.Count(); i++)
             {
                 renderWindow.Clear();
@@ -152,7 +134,7 @@ namespace OpenDiablo2.Scenes
         }
 
         private void OnSinglePlayerClicked()
-            => sceneManager.ChangeScene("Select Hero Class");
+            => sceneManager.ChangeScene(eSceneType.SelectHeroClass);
 
         private void OnExitClicked()
         {

@@ -28,14 +28,10 @@ namespace OpenDiablo2.Scenes
         public Rectangle SelectionBounds = new Rectangle();
     }
 
-    [Scene("Select Hero Class")]
+    [Scene(eSceneType.SelectHeroClass)]
     public sealed class SelectHeroClass : IScene
     {
-        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         private readonly IRenderWindow renderWindow;
-        private readonly IPaletteProvider paletteProvider;
-        private readonly IMPQProvider mpqProvider;
         private readonly IMouseInfoProvider mouseInfoProvider;
         private readonly ISceneManager sceneManager;
         private readonly ITextDictionary textDictionary;
@@ -45,17 +41,17 @@ namespace OpenDiablo2.Scenes
         private bool showEntryUi = false;
         private eHero? selectedHero = null;
         private float secondTimer;
-        private ISprite backgroundSprite, campfireSprite;
-        private IFont headingFont, heroDescFont, uiFont;
-        private ILabel headingLabel, heroClassLabel, heroDesc1Label, heroDesc2Label, heroDesc3Label, characterNameLabel;
-        private IButton exitButton, okButton;
-        private ITextBox characterNameTextBox;
-        private Dictionary<eHero, HeroRenderInfo> heroRenderInfo = new Dictionary<eHero, HeroRenderInfo>();
+        private readonly ISprite backgroundSprite, campfireSprite;
+        private readonly IFont headingFont;
+        private readonly IFont heroDescFont;
+        private readonly IFont uiFont;
+        private readonly ILabel headingLabel, heroClassLabel, heroDesc1Label, heroDesc2Label, heroDesc3Label, characterNameLabel;
+        private readonly IButton exitButton, okButton;
+        private readonly ITextBox characterNameTextBox;
+        private readonly Dictionary<eHero, HeroRenderInfo> heroRenderInfo = new Dictionary<eHero, HeroRenderInfo>();
 
         public SelectHeroClass(
             IRenderWindow renderWindow,
-            IPaletteProvider paletteProvider,
-            IMPQProvider mpqProvider,
             IMouseInfoProvider mouseInfoProvider,
             ISceneManager sceneManager,
             Func<eButtonType, IButton> createButton,
@@ -66,8 +62,6 @@ namespace OpenDiablo2.Scenes
             )
         {
             this.renderWindow = renderWindow;
-            this.paletteProvider = paletteProvider;
-            this.mpqProvider = mpqProvider;
             this.mouseInfoProvider = mouseInfoProvider;
             this.sceneManager = sceneManager;
             this.textDictionary = textDictionary;
@@ -244,7 +238,7 @@ namespace OpenDiablo2.Scenes
             okButton.Enabled = false;
             selectedHero = null;
 
-            sceneManager.ChangeScene("Select Character");
+            sceneManager.ChangeScene(eSceneType.SelectCharacter);
         }
 
         public void Render()
@@ -452,7 +446,7 @@ namespace OpenDiablo2.Scenes
 
         }
 
-        private void setDescLabels(string descKey)
+        private void SetDescLabels(string descKey)
         {
             var heroDesc = textDictionary.Translate(descKey);
             var parts = StringUtils.SplitIntoLinesWithMaxWidth(heroDesc, 37);
@@ -470,15 +464,15 @@ namespace OpenDiablo2.Scenes
             {
                 case eHero.Barbarian:
                     heroClassLabel.Text = textDictionary.Translate("strBarbarian");
-                    setDescLabels("strBarbDesc");
+                    SetDescLabels("strBarbDesc");
                     break;
                 case eHero.Necromancer:
                     heroClassLabel.Text = textDictionary.Translate("strNecromancer");
-                    setDescLabels("strNecroDesc");
+                    SetDescLabels("strNecroDesc");
                     break;
                 case eHero.Paladin:
                     heroClassLabel.Text = textDictionary.Translate("strPaladin");
-                    setDescLabels("strPalDesc");
+                    SetDescLabels("strPalDesc");
                     break;
                 case eHero.Assassin:
                     heroClassLabel.Text = textDictionary.Translate("strAssassin");
@@ -488,11 +482,11 @@ namespace OpenDiablo2.Scenes
                     break;
                 case eHero.Sorceress:
                     heroClassLabel.Text = textDictionary.Translate("strSorceress");
-                    setDescLabels("strSorcDesc");
+                    SetDescLabels("strSorcDesc");
                     break;
                 case eHero.Amazon:
                     heroClassLabel.Text = textDictionary.Translate("strAmazon");
-                    setDescLabels("strAmazonDesc");
+                    SetDescLabels("strAmazonDesc");
                     break;
                 case eHero.Druid:
                     heroClassLabel.Text = textDictionary.Translate("strDruid");

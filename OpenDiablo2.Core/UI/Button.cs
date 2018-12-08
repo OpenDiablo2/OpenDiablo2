@@ -26,10 +26,11 @@ namespace OpenDiablo2.Core.UI
             }
         }
 
-        private int buttonWidth, buttonHeight;
-        private ISprite sprite;
-        private IFont font;
-        private ILabel label;
+        private readonly int buttonWidth;
+        private readonly int buttonHeight;
+        private readonly ISprite sprite;
+        private readonly IFont font;
+        private readonly ILabel label;
         private bool pressed = false;
         private bool active = false; // When true, button is actively being focus pressed
         private bool activeLock = false; // When true, we have locked the mouse from everything else
