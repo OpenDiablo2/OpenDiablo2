@@ -33,7 +33,7 @@ namespace OpenDiablo2.ServiceBus
             var types = ThisAssembly.GetTypes().Where(x => typeof(IMessageFrame).IsAssignableFrom(x) && x.IsClass);
             foreach (var type in types)
             {
-                var att = type.GetCustomAttributes(true).First(x => typeof(MessageFrameAttribute).IsAssignableFrom(x.GetType())) as MessageFrameAttribute;
+                var att = type.GetCustomAttributes(true).First(x => (x is MessageFrameAttribute)) as MessageFrameAttribute;
                 builder
                     .RegisterType(type)
                     .Keyed<IMessageFrame>(att.FrameType)

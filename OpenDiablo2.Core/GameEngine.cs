@@ -22,7 +22,6 @@ namespace OpenDiablo2.Core
 
         private IScene currentScene;
         private IScene nextScene = null;
-        private ISprite mouseSprite;
 
         private readonly MPQ[] MPQs;
 
@@ -78,7 +77,7 @@ namespace OpenDiablo2.Core
             LoadPalettes();
             LoadSoundData();
 
-            mouseSprite = renderWindow.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units);
+            var mouseSprite = renderWindow.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units);
             var cursor = renderWindow.LoadCursor(mouseSprite, 0, new Point(0, 3));
             renderWindow.MouseCursor = cursor;
             

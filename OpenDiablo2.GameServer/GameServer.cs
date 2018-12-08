@@ -69,7 +69,7 @@ namespace OpenDiablo2.GameServer_
 
         public void Update(int ms)
         {
-            var seconds = (float)ms / 1000f;
+            var seconds = ms / 1000f;
             foreach(var player in Players)
             {
                 UpdatePlayerMovement(player, seconds);
@@ -84,7 +84,7 @@ namespace OpenDiablo2.GameServer_
 
             var rads = (float)player.MovementDirection * 22 * (float)Deg2Rad;
 
-            var speed = (float)(player.MovementType == eMovementType.Running ? player.GetRunVelocity() : player.GetWalkVeloicty()) / 4f;
+            var speed = (player.MovementType == eMovementType.Running ? player.GetRunVelocity() : player.GetWalkVeloicty()) / 4f;
 
             var moveX = (float)Math.Cos(rads) * seconds * speed;
             var moveY = (float)Math.Sin(rads) * seconds * speed;

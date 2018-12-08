@@ -26,14 +26,12 @@ namespace OpenDiablo2.SDL2_
 {
     internal sealed class SDL2Sprite : ISprite
     {
-        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         internal readonly ImageSet source;
         private readonly IntPtr renderer;
         internal IntPtr texture = IntPtr.Zero;
 
-        public Point Location { get; set; } = new Point();
-        public Size FrameSize { get; set; } = new Size();
+        public Point Location { get; set; }
+        public Size FrameSize { get; set; }
 
 
         private bool darken;
@@ -94,6 +92,7 @@ namespace OpenDiablo2.SDL2_
 
 
             TotalFrames = source.Frames.Count();
+            Location = Point.Empty;
             FrameSize = new Size(Pow2((int)source.Frames.Max(x => x.Width)), Pow2((int)source.Frames.Max(x => x.Height)));
         }
 
@@ -122,28 +121,28 @@ namespace OpenDiablo2.SDL2_
 
         private unsafe void LoadFrame(int index)
         {
-            var frame = source.Frames[index];
-            var fullRect = new SDL.SDL_Rect { x = 0, y = 0, w = FrameSize.Width, h = FrameSize.Height };
+            var sourceFrame = source.Frames[index];
+            //var fullRect = new SDL.SDL_Rect { x = 0, y = 0, w = FrameSize.Width, h = FrameSize.Height };
             SDL.SDL_SetTextureBlendMode(texture, blend ? SDL.SDL_BlendMode.SDL_BLENDMODE_ADD : SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
             SDL.SDL_LockTexture(texture, IntPtr.Zero, out IntPtr pixels, out int pitch);
             try
             {
                 UInt32* data = (UInt32*)pixels;
-                var frameOffset = FrameSize.Height - frame.Height;
+                var frameOffset = FrameSize.Height - sourceFrame.Height;
                 var frameWidth = FrameSize.Width;
                 var frameHeight = FrameSize.Height;
                 for (var y = 0; y < frameHeight; y++)
                 {
                     for (int x = 0; x < frameWidth; x++)
                     {
-                        if ((x >= frame.Width) || (y < frameOffset))
+                        if ((x >= sourceFrame.Width) || (y < frameOffset))
                         {
                             data[x + (y * (pitch / 4))] = 0;
                             continue;
                         }
 
-                        var color = frame.GetColor(x, (int)(y - frameOffset), CurrentPalette);
+                        var color = sourceFrame.GetColor(x, (int)(y - frameOffset), CurrentPalette);
                         if (darken)
                             color = ((color & 0xFF000000) > 0) ? (color >> 1) & 0xFF7F7F7F | 0xFF000000 : 0;
                         data[x + (y * (pitch / 4))] = color;

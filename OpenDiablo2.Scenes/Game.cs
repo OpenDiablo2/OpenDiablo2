@@ -54,8 +54,6 @@ namespace OpenDiablo2.Scenes
 
         public void Update(long ms)
         {
-            var seconds = ms / 1000f;
-
             HandleMovement();
 
             mapEngine.Update(ms);

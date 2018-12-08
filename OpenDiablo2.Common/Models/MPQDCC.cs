@@ -560,7 +560,7 @@ namespace OpenDiablo2.Common.Models
             if (bm.GetInt32() != 1)
                 throw new OpenDiablo2Exception("This value isn't 1. It has to be 1.");
 
-            var totalSizeCoded = bm.GetInt32();
+            bm.GetInt32(); // TotalSizeCoded
             var directionOffsets = new int[NumberOfDirections];
             for (var i = 0; i < NumberOfDirections; i++)
                 directionOffsets[i] = bm.GetInt32();

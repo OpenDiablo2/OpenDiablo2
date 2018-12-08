@@ -27,8 +27,6 @@ namespace OpenDiablo2.SDL2_
 {
     internal sealed class SDL2Label : ILabel
     {
-        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         private readonly SDL2Font font;
         private readonly IntPtr renderer;
         internal IntPtr texture;
