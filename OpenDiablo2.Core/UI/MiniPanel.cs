@@ -22,7 +22,7 @@ namespace OpenDiablo2.Core.UI
 
         private bool isPanelVisible;
 
-        public event PanelSelectedEvent PanelSelected;
+        public event OnPanelToggledEvent OnPanelToggled;
 
         public MiniPanel(IRenderWindow renderWindow, 
             IGameState gameState,
@@ -40,12 +40,13 @@ namespace OpenDiablo2.Core.UI
             buttons = panelButtons.Select((x, i) =>
             {
                 var newBtn = createButton(x);
-                newBtn.OnActivate = () =>
+                var panel = panels.SingleOrDefault(o => o.PanelType == x);
+
+                if (panel != null)
                 {
-                    var panel = panels.SingleOrDefault(o => o.PanelType == x);
-                    if (panel == null) return;
-                    PanelSelected?.Invoke(panel);
-                };
+                    newBtn.OnActivate = () => OnPanelToggled?.Invoke(panel);
+                    panel.OnPanelClosed += Panel_OnPanelClosed;
+                }
                 return newBtn;
             }).ToList().AsReadOnly();
 
@@ -99,6 +100,11 @@ namespace OpenDiablo2.Core.UI
 
             for (int i = 0; i < buttons.Count; i++)
                 buttons[i].Location = new Point(3 + 21 * i + sprite.Location.X, 3 + sprite.Location.Y - sprite.LocalFrameSize.Height);
+        }
+
+        private void Panel_OnPanelClosed(IPanel panel)
+        {
+            OnPanelToggled?.Invoke(panel);
         }
     }
 }

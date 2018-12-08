@@ -1,9 +1,5 @@
-﻿using System;
+﻿using OpenDiablo2.Common.Enums;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenDiablo2.Common.Enums;
 
 namespace OpenDiablo2.Common.Models
 {
@@ -33,6 +29,8 @@ namespace OpenDiablo2.Common.Models
 
             {eButtonType.Run, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.RunButton,PaletteName = Palettes.Units, Toggleable = true } },
             {eButtonType.Menu, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MenuButton,PaletteName = Palettes.Units, Toggleable = true } },
+            {eButtonType.GoldCoin, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.GoldCoinButton,PaletteName = Palettes.Units } },
+            {eButtonType.Close, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.SquareButton,PaletteName = Palettes.Units, BaseFrame = 10 } },
         };
     }
 

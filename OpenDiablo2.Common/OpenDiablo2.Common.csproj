@@ -81,6 +81,7 @@
     <Compile Include="Enums\Mobs\eMobFlags.cs" />
     <Compile Include="Enums\Mobs\eStatModifierType.cs" />
     <Compile Include="Exceptions\OpenDiablo2Exception.cs" />
+    <Compile Include="Extensions\EnumExtensions.cs" />
     <Compile Include="Interfaces\Drawing\ICharacterRenderer.cs" />
     <Compile Include="Interfaces\ICache.cs" />
     <Compile Include="Interfaces\IItemManager.cs" />
