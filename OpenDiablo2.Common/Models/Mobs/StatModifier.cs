@@ -1,16 +1,27 @@
-﻿using OpenDiablo2.Common.Enums.Mobs;
+﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+ *  
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
+using OpenDiablo2.Common.Enums.Mobs;
 using OpenDiablo2.Common.Interfaces.Mobs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpenDiablo2.Common.Models.Mobs
 {
     public class StatModifierAddition : IStatModifier
     {
-        public double Value = 0;
+        public double Value { get; set; } = 0;
         public int Priority { get; private set; }
         public string Name { get; private set; }
         public eStatModifierType ModifierType { get; private set; }
@@ -33,7 +44,7 @@ namespace OpenDiablo2.Common.Models.Mobs
 
     public class StatModifierMultiplication : IStatModifier
     {
-        public double Value = 0;
+        public double Value { get; set; } = 0;
         public int Priority { get; private set; }
         public string Name { get; private set; }
         public eStatModifierType ModifierType { get; private set; }
@@ -62,11 +73,11 @@ namespace OpenDiablo2.Common.Models.Mobs
             switch (ModifierType)
             {
                 case eStatModifierType.CURRENT:
-                    return (current * Value);
+                    return current * Value;
                 case eStatModifierType.MAX:
-                    return (max * Value);
+                    return max * Value;
                 case eStatModifierType.MIN:
-                    return (min * Value);
+                    return min * Value;
             }
             return 0; // shouldn't reach this
         }

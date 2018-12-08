@@ -9,7 +9,7 @@ using OpenDiablo2.Common.Interfaces;
 namespace OpenDiablo2.Scenes
 {
     [Scene(eSceneType.MainMenu)]
-    public class MainMenu : IScene
+    public sealed class MainMenu : IScene
     {
         private readonly IRenderWindow renderWindow;
         private readonly ISceneManager sceneManager;
@@ -66,7 +66,7 @@ namespace OpenDiablo2.Scenes
             for (int i = 0; i < scenesToLoad.Count(); i++)
             {
                 renderWindow.Clear();
-                renderWindow.Draw(loadingSprite, (int)((float)loadingSprite.TotalFrames * ((float)i / (float)scenesToLoad.Count())));
+                renderWindow.Draw(loadingSprite, (int)(loadingSprite.TotalFrames * (i / (float)scenesToLoad.Count())));
                 renderWindow.Sync();
                 getScene(scenesToLoad[i]);
             }
@@ -107,7 +107,7 @@ namespace OpenDiablo2.Scenes
 
         public void Update(long ms)
         {
-            float seconds = ((float)ms / 1000f);
+            float seconds = ms / 1000f;
             logoFrame += seconds;
             while (logoFrame >= 1f)
                 logoFrame -= 1f;

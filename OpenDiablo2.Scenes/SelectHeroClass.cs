@@ -292,7 +292,7 @@ namespace OpenDiablo2.Scenes
                     break;
                 case eHeroStance.Approaching:
                     {
-                        var framePct = (float)renderInfo.SpecialFrameTime / (float)renderInfo.ForwardWalkTimeMs;
+                        var framePct = renderInfo.SpecialFrameTime / (float)renderInfo.ForwardWalkTimeMs;
                         renderWindow.Draw(renderInfo.ForwardWalkSprite, (int)(renderInfo.ForwardWalkSprite.TotalFrames * framePct));
                         if (renderInfo.ForwardWalkSpriteOverlay != null)
                             renderWindow.Draw(renderInfo.ForwardWalkSpriteOverlay, (int)(renderInfo.ForwardWalkSpriteOverlay.TotalFrames * framePct));
@@ -300,7 +300,7 @@ namespace OpenDiablo2.Scenes
                     break;
                 case eHeroStance.Selected:
                     {
-                        var framePct = (float)renderInfo.SpecialFrameTime / (float)1000;
+                        var framePct = renderInfo.SpecialFrameTime / (float)1000;
                         renderWindow.Draw(renderInfo.SelectedSprite, (int)(renderInfo.SelectedSprite.TotalFrames * framePct));
                         if (renderInfo.SelectedSpriteOverlay != null)
                             renderWindow.Draw(renderInfo.SelectedSpriteOverlay, (int)(renderInfo.SelectedSpriteOverlay.TotalFrames * framePct));
@@ -308,7 +308,7 @@ namespace OpenDiablo2.Scenes
                     break;
                 case eHeroStance.Retreating:
                     {
-                        var framePct = (float)renderInfo.SpecialFrameTime / (float)renderInfo.BackWalkTimeMs;
+                        var framePct = renderInfo.SpecialFrameTime / (float)renderInfo.BackWalkTimeMs;
                         renderWindow.Draw(renderInfo.BackWalkSprite, (int)(renderInfo.BackWalkSprite.TotalFrames * framePct));
                         if (renderInfo.BackWalkSpriteOverlay != null)
                             renderWindow.Draw(renderInfo.BackWalkSpriteOverlay, (int)(renderInfo.BackWalkSpriteOverlay.TotalFrames * framePct));
@@ -341,7 +341,7 @@ namespace OpenDiablo2.Scenes
 
         public void Update(long ms)
         {
-            float seconds = ((float)ms / 1500f);
+            float seconds = ms / 1500f;
             secondTimer += seconds;
             while (secondTimer >= 1f)
                 secondTimer -= 1f;

@@ -27,8 +27,6 @@ namespace OpenDiablo2.SDL2_
 {
     internal sealed class SDL2Label : ILabel
     {
-        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         private readonly SDL2Font font;
         private readonly IntPtr renderer;
         internal IntPtr texture;
@@ -85,7 +83,7 @@ namespace OpenDiablo2.SDL2_
                 return new Size(w, h);
             }
 
-            if (MaxWidth < (font.sprite.FrameSize.Width))
+            if (MaxWidth < font.sprite.FrameSize.Width)
                 throw new OpenDiablo2Exception("Max label width cannot be smaller than a single character.");
 
             var lastWordIndex = 0;
@@ -181,7 +179,7 @@ namespace OpenDiablo2.SDL2_
                 var y = 0;
                 foreach(var line in linesToRender)
                 {
-                    var lineWidth = (line.Sum(c => font.font.CharacterMetric[c].Width));
+                    var lineWidth = line.Sum(c => font.font.CharacterMetric[c].Width);
                     var x = 0;
 
                     if (Alignment == eTextAlign.Centered)

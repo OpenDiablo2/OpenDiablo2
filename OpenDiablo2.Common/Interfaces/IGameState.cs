@@ -21,7 +21,7 @@ namespace OpenDiablo2.Common.Interfaces
 
         int CameraOffset { get; set; }
 
-        void Initialize(string text, eHero value, eSessionType sessionType);
+        void Initialize(string characterName, eHero hero, eSessionType sessionType);
         void Update(long ms);
         IEnumerable<MapCellInfo> GetMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType);
         void UpdateMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType, IEnumerable<MapCellInfo> mapCellInfo);

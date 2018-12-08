@@ -50,7 +50,7 @@ namespace OpenDiablo2.Common.Enums
     {
         public static string GenerateEnum(List<LevelPreset> levelPresets)
         {
-            string output = string.Empty;
+            var output = new StringBuilder();
             foreach (LevelPreset lp in levelPresets)
             {
                 // need to convert e.g. 'Act 1 - Town 1' to 'Act1_Town'
@@ -59,9 +59,9 @@ namespace OpenDiablo2.Common.Enums
                     continue;
                 }
                 string name = lp.Name.Replace(" - ", "_").Replace(" ", "").Replace("'", "");
-                output += name + " = " + lp.LevelId + ",\r\n";
+                output.AppendLine($"{name}={lp.LevelId}");
             }
-            return output;
+            return output.ToString();
         }
     }
 }

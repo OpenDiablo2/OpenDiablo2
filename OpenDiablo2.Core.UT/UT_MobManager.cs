@@ -28,7 +28,7 @@ namespace OpenDiablo2.Core.UT
 
             Assert.IsTrue(mobman.Mobs.Count(x => x.HasFlag(eMobFlags.ENEMY)) == 2);
             Assert.IsTrue(mobman.Mobs.Count(x => x.HasFlag(eMobFlags.INVULNERABLE)) == 1);
-            Assert.IsTrue(mobman.Mobs.Count(x => x.HasFlag(eMobFlags.PLAYER)) == 0);
+            Assert.IsTrue(!mobman.Mobs.Any(x => x.HasFlag(eMobFlags.PLAYER)));
             Assert.IsTrue(mobman.Mobs.Count(x => !x.HasFlag(eMobFlags.PLAYER)) == 3);
         }
 

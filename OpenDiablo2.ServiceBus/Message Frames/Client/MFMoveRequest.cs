@@ -12,7 +12,7 @@ namespace OpenDiablo2.ServiceBus.Message_Frames.Client
 
         public byte[] Data
         {
-            get => new byte[] { (byte)Direction, (byte)MovementType };
+            get => new byte[] { Direction, (byte)MovementType };
             set
             {
                 Direction = value[0];

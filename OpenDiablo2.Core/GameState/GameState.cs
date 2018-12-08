@@ -106,7 +106,7 @@ namespace OpenDiablo2.Core.GameState_
         {
             log.Info($"Setting seed to {seed}");
             this.Seed = seed;
-            (new MapGenerator(this)).Generate();
+            new MapGenerator(this).Generate();
         }
 
         public MapInfo LoadSubMap(int levelDefId, Point origin)
@@ -126,7 +126,7 @@ namespace OpenDiablo2.Core.GameState_
 
 
             var random = new Random(Seed);
-            var mapName = "data\\global\\tiles\\" + mapNames[random.Next(mapNames.Count())].Replace("/", "\\");
+            var mapName = "data\\global\\tiles\\" + mapNames[random.Next(mapNames.Count)].Replace("/", "\\");
             var fileData = resourceManager.GetMPQDS1(mapName, level, levelDetails, levelType);
 
             var result = new MapInfo
@@ -162,7 +162,7 @@ namespace OpenDiablo2.Core.GameState_
 
 
             var random = new Random(Seed);
-            var mapName = "data\\global\\tiles\\" + mapNames[random.Next(mapNames.Count())].Replace("/", "\\");
+            var mapName = "data\\global\\tiles\\" + mapNames[random.Next(mapNames.Count)].Replace("/", "\\");
             MapName = level.Name;
             Act = levelType.Act;
 
@@ -233,15 +233,17 @@ namespace OpenDiablo2.Core.GameState_
 
         public void UpdateMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType, IEnumerable<MapCellInfo> mapCellInfo)
         {
-
+            throw new NotImplementedException();
         }
 
         public void SelectItem(Item item)
         {
-            if(item == null)
+            if (item == null)
             {
                 renderWindow.MouseCursor = this.originalMouseCursor;
-            } else {
+            }
+            else
+            {
                 var cursorsprite = renderWindow.LoadSprite(ResourcePaths.GeneratePathForItem(item.InvFile), Palettes.Units);
 
                 renderWindow.MouseCursor = renderWindow.LoadCursor(cursorsprite, 0, new Point(cursorsprite.FrameSize.Width / 2, cursorsprite.FrameSize.Height / 2));
@@ -266,14 +268,11 @@ namespace OpenDiablo2.Core.GameState_
             var main_index = (props.Prop3 >> 4) + ((props.Prop4 & 0x03) << 4);
             var orientation = 0;
 
-            if (cellType == eRenderCellType.Floor)
+            // Floors can't have rotations, should we blow up here?
+            if (cellType == eRenderCellType.Floor && props.Prop1 == 0)
             {
-                // Floors can't have rotations, should we blow up here?
-                if (props.Prop1 == 0)
-                {
-                    map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                    return null;
-                }
+                map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                return null;
             }
 
             if (cellType == eRenderCellType.Roof)
@@ -290,14 +289,12 @@ namespace OpenDiablo2.Core.GameState_
                     return null;
                 }
 
-                if ((props.Prop4 & 0x80) > 0)
+                if (((props.Prop4 & 0x80) > 0) && (orientation != 10 && orientation != 11))
                 {
-                    if (orientation != 10 && orientation != 11)
-                    {
-                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                        return null;
-                    }
+                    map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                    return null;
                 }
+
             }
             if (cellType == eRenderCellType.WallUpper || cellType == eRenderCellType.WallLower)
             {
@@ -325,15 +322,11 @@ namespace OpenDiablo2.Core.GameState_
                 }
 
                 // This is also a thing apparently
-                if ((props.Prop4 & 0x80) > 0)
+                if (((props.Prop4 & 0x80) > 0) && (orientation != 10 && orientation != 11))
                 {
-                    if (orientation != 10 && orientation != 11)
-                    {
-                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                        return null;
-                    }
+                    map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                    return null;
                 }
-
             }
 
             int frame = 0;
@@ -347,8 +340,6 @@ namespace OpenDiablo2.Core.GameState_
                 return null;
             }
 
-            //throw new ApplicationException("Invalid tile id found!");
-
             MPQDT1Tile tile = null;
             if (tiles.First().Animated)
             {
@@ -361,7 +352,7 @@ namespace OpenDiablo2.Core.GameState_
             }
             else
             {
-                if (tiles.Count() > 0)
+                if (tiles.Any())
                 {
                     var totalRarity = tiles.Sum(q => q.RarityOrFrameIndex);
                     var random = new Random(Seed + cellX + (map.FileData.Width * cellY));
@@ -420,7 +411,7 @@ namespace OpenDiablo2.Core.GameState_
 
         public void Update(long ms)
         {
-            animationTime += ((float)ms / 1000f);
+            animationTime += ms / 1000f;
             animationTime -= (float)Math.Truncate(animationTime);
             var seconds = ms / 1000f;
 

@@ -264,7 +264,7 @@ namespace OpenDiablo2.Common.Models
             for (int j = 0; j < 5; j++) result.ObjGrp0_7[j] = Convert.ToInt32(v[i++]);
             result.ObjPrb0_7 = new int[8];
             for (int j = 0; j < 5; j++) result.ObjPrb0_7[j] = Convert.ToInt32(v[i++]);
-            result.Beta = Convert.ToInt32(v[i++]) == 1;
+            result.Beta = Convert.ToInt32(v[i]) == 1;
 
 
             return result;

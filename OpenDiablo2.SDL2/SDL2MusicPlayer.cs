@@ -29,10 +29,7 @@ namespace OpenDiablo2.SDL2_
         public SDL2MusicPlayer()
         {
             if (SDL_mixer.Mix_OpenAudio(22050, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 2048) < 0)
-            {
                 log.Error($"SDL_mixer could not initialize! SDL_mixer Error: {SDL.SDL_GetError()}");
-                return;
-            }
         }
 
         public void PlaySong()

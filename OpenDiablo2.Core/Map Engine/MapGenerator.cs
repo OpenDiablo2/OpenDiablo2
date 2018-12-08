@@ -16,9 +16,6 @@ namespace OpenDiablo2.Core.Map_Engine
 
         public void Generate()
         {
-            var random = new Random(gameState.Seed);
-
-            var test = gameState.LoadSubMap(2, new Point(10000, 10000));
             var wildBorder = 5; // (4-15)
             // TODO: Is there no data file that explicitly defines this??
             var townMap = gameState.LoadMap(eLevelId.Act1_Town1, new Point(0, 0));
@@ -54,10 +51,10 @@ namespace OpenDiablo2.Core.Map_Engine
             }
 
             // Generate the Blood Moore?
-            for (var y = 0; y < (bloodMooreRect.Height); y+= 8)
+            for (var y = 0; y < bloodMooreRect.Height; y+= 8)
             {
                 
-                for (var x = 0; x < (bloodMooreRect.Width); x += 8)
+                for (var x = 0; x < bloodMooreRect.Width; x += 8)
                 {
                     var tileIdx = 35;
                     var mapTile = gameState.LoadSubMap(tileIdx, new Point(bloodMooreRect.Left + x, bloodMooreRect.Top + y));

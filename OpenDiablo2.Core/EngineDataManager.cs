@@ -47,7 +47,6 @@ namespace OpenDiablo2.Core
                 .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
                 .Where(x => x.Count() == 36 && x[0] != "Expansion")
-                .ToArray()
                 .Select(x => x.ToLevelType());
 
             LevelTypes = new List<LevelType>(data);
@@ -62,7 +61,6 @@ namespace OpenDiablo2.Core
                 .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
                 .Where(x => x.Count() == 24 && x[0] != "Expansion")
-                .ToArray()
                 .Select(x => x.ToLevelPreset());
 
             LevelPresets = new List<LevelPreset>(data);
@@ -77,7 +75,6 @@ namespace OpenDiablo2.Core
                 .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
                 .Where(x => x.Count() > 80 && x[0] != "Expansion")
-                .ToArray()
                 .Select(x => x.ToLevelDetail());
 
             LevelDetails = new List<LevelDetail>(data);
@@ -102,11 +99,9 @@ namespace OpenDiablo2.Core
                 .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
                 //.Where(x => !String.IsNullOrWhiteSpace(x[27]))
-                .ToArray()
                 .Select(x => x.ToWeapon());
 
                 return data;
-            ;
         }
 
         private IEnumerable<Armor> LoadArmorData()
@@ -117,7 +112,6 @@ namespace OpenDiablo2.Core
                 .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
                 //.Where(x => !String.IsNullOrWhiteSpace(x[27]))
-                .ToArray()
                 .Select(x => x.ToArmor());
 
                  return data;
@@ -131,7 +125,6 @@ namespace OpenDiablo2.Core
                 .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
                 //.Where(x => !String.IsNullOrWhiteSpace(x[27]))
-                .ToArray()
                 .Select(x => x.ToMisc());
 
                 return data;
@@ -163,7 +156,6 @@ namespace OpenDiablo2.Core
                 .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
                 .Where(x => x[0] != "Expansion")
-                .ToArray()
                 .ToDictionary(x => (eHero)Enum.Parse(typeof(eHero),x[0]), x => x.ToHeroTypeConfig());
 
             HeroTypeConfigs = data;

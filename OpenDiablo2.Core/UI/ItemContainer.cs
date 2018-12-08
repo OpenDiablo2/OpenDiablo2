@@ -65,8 +65,8 @@ namespace OpenDiablo2.Core.UI
 
         public void Update()
         {
-            var hovered = (mouseInfoProvider.MouseX >= location.X && mouseInfoProvider.MouseX < (location.X + this.Size.Width))
-                && (mouseInfoProvider.MouseY >= location.Y && mouseInfoProvider.MouseY < (location.Y + this.Size.Height));
+            var hovered = mouseInfoProvider.MouseX >= location.X && mouseInfoProvider.MouseX < (location.X + this.Size.Width)
+                && mouseInfoProvider.MouseY >= location.Y && mouseInfoProvider.MouseY < (location.Y + this.Size.Height);
 
             if (hovered && mouseInfoProvider.LeftMousePressed)
             {

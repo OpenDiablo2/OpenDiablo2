@@ -167,5 +167,13 @@ namespace OpenDiablo2.Common.Models.Mobs
 
 
         public int CompareTo(object obj) => Id - ((MobState)obj).Id;
+        public override bool Equals(object obj) => Id == (obj as MobState)?.Id;
+        public static bool operator ==(MobState obj1, MobState obj2) => obj1?.Id == obj2?.Id;
+        public static bool operator !=(MobState obj1, MobState obj2) => obj1?.Id != obj2?.Id;
+        public static bool operator <(MobState obj1, MobState obj2) => obj1?.Id < obj2?.Id;
+        public static bool operator >(MobState obj1, MobState obj2) => obj1?.Id > obj2?.Id;
+        public static bool operator <=(MobState obj1, MobState obj2) => obj1?.Id <= obj2?.Id;
+        public static bool operator >=(MobState obj1, MobState obj2) => obj1?.Id >= obj2?.Id;
+        public override int GetHashCode() => Id.GetHashCode();
     }
 }

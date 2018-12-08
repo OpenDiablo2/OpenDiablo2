@@ -44,14 +44,14 @@ namespace OpenDiablo2
             Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed(o => globalConfiguration = new GlobalConfiguration
             {
                 BaseDataPath = Path.GetFullPath(o.DataPath ?? Directory.GetCurrentDirectory()),
-                MouseMode = o.HardwareMouse == true ? eMouseMode.Hardware : eMouseMode.Software,
+                MouseMode = o.HardwareMouse ? eMouseMode.Hardware : eMouseMode.Software,
                 HardwareMouseScale = o.MouseScale,
                 FullScreen = o.FullScreen
             }).WithNotParsed(o =>
             {
                 log.Warn($"Could not parse command line options.");
                 globalConfiguration = new GlobalConfiguration { BaseDataPath = Directory.GetCurrentDirectory(), MouseMode = eMouseMode.Software };
-            }); ;
+            });
 
 #if !DEBUG
             try
@@ -135,7 +135,9 @@ namespace OpenDiablo2
             {
                 try
                 {
+#pragma warning disable S3885 // "Assembly.Load" should be used (This warning is inccorect. Using .Load will fail.)
                     var assembly = Assembly.LoadFrom(file);
+#pragma warning restore S3885 // "Assembly.Load" should be used
                     containerBuilder.RegisterAssemblyModules(assembly);
 
                 }

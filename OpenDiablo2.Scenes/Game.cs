@@ -24,17 +24,12 @@ namespace OpenDiablo2.Scenes
     [Scene(eSceneType.Game)]
     public sealed class Game : IScene
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         private readonly IRenderWindow renderWindow;
         private readonly IMapEngine mapEngine;
         private readonly IMouseInfoProvider mouseInfoProvider;
         private readonly IGameState gameState;
         private readonly ISessionManager sessionManager;
-        private readonly IKeyboardInfoProvider keyboardInfoProvider;
         private readonly IGameHUD gameHUD;
-
-        //private ISprite[] testSprite;
 
         private eMovementType lastMovementType = eMovementType.Stopped;
         private byte lastDirection = 255;
@@ -46,7 +41,6 @@ namespace OpenDiablo2.Scenes
             IMapEngine mapEngine,
             IGameState gameState,
             IMouseInfoProvider mouseInfoProvider,
-            IKeyboardInfoProvider keyboardInfoProvider,
             IItemManager itemManager,
             ISessionManager sessionManager,
             IGameHUD gameHUD
@@ -56,7 +50,6 @@ namespace OpenDiablo2.Scenes
             this.mapEngine = mapEngine;
             this.gameState = gameState;
             this.mouseInfoProvider = mouseInfoProvider;
-            this.keyboardInfoProvider = keyboardInfoProvider;
             this.sessionManager = sessionManager;
             this.gameHUD = gameHUD;
 
@@ -75,8 +68,6 @@ namespace OpenDiablo2.Scenes
 
         public void Update(long ms)
         {
-            var seconds = ms / 1000f;
-
             HandleMovement();
 
             mapEngine.Update(ms);
@@ -89,8 +80,8 @@ namespace OpenDiablo2.Scenes
             if (gameHUD.IsMouseOver())
                 return;
 
-            var mx = (mouseInfoProvider.MouseX - 400) - gameState.CameraOffset;
-            var my = (mouseInfoProvider.MouseY - 300);
+            var mx = mouseInfoProvider.MouseX - 400 - gameState.CameraOffset;
+            var my = mouseInfoProvider.MouseY - 300;
 
             var tx = (mx / 60f + my / 40f) / 2f;
             var ty = (my / 40f - (mx / 60f)) / 2f;
