@@ -1,8 +1,22 @@
-﻿using System;
+﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+ *  
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
+using System;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.InteropServices;
-using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
 using SDL2;
@@ -108,13 +122,10 @@ namespace OpenDiablo2.SDL2_
         private unsafe void LoadFrame(int index)
         {
             var frame = source.Frames[index];
-
-            IntPtr pixels;
-            int pitch;
             var fullRect = new SDL.SDL_Rect { x = 0, y = 0, w = FrameSize.Width, h = FrameSize.Height };
             SDL.SDL_SetTextureBlendMode(texture, blend ? SDL.SDL_BlendMode.SDL_BLENDMODE_ADD : SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
-            SDL.SDL_LockTexture(texture, IntPtr.Zero, out pixels, out pitch);
+            SDL.SDL_LockTexture(texture, IntPtr.Zero, out IntPtr pixels, out int pitch);
             try
             {
                 UInt32* data = (UInt32*)pixels;

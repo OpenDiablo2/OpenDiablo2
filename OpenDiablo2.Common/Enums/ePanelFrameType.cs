@@ -3,6 +3,7 @@
     public enum ePanelFrameType
     {
         Left,
-        Right
+        Right,
+        Center
     }
 }

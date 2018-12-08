@@ -16,4 +16,21 @@ namespace OpenDiablo2.Common.Enums
         Amazon,
         Druid
     }
+
+    public static class eHeroExtensions
+    {
+        public readonly static Dictionary<eHero, string> tokens = new Dictionary<eHero, string>
+        {
+            { eHero.Amazon      , "AM" },
+            { eHero.Sorceress   , "SO" },
+            { eHero.Necromancer , "NE" },
+            { eHero.Paladin     , "PA" },
+            { eHero.Barbarian   , "BA" },
+            { eHero.Druid       , "DZ" },
+            { eHero.Assassin    , "AI" }
+        };
+
+        public static string ToToken(this eHero source) => tokens[source];
+        public static eHero ToHero(this string source) => tokens.First(x => x.Value.ToUpper() == source.ToUpper()).Key;
+    }
 }

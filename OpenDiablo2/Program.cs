@@ -1,4 +1,20 @@
-﻿using System;
+﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+ *  
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -13,11 +29,18 @@ namespace OpenDiablo2
     static class Program
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+        // We store the global configuration here so we can bind it and return it to anything that needs it.
         private static GlobalConfiguration globalConfiguration;
+
         static void Main(string[] args)
         {
-            log.Info("OpenDiablo 2: The Free and Open Source Diablo 2 clone!");
+            log.Info("OpenDiablo 2: The Free and Open Source Diablo 2 clone!\n" +
+                     "This program comes with ABSOLUTELY NO WARRANTY.\n" +
+                     "This is free software, and you are welcome to redistribute it\n" +
+                     "under certain conditions;");
 
+            // Parse the command-line arguments.
             Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed(o => globalConfiguration = new GlobalConfiguration
             {
                 BaseDataPath = Path.GetFullPath(o.DataPath ?? Directory.GetCurrentDirectory()),
@@ -34,16 +57,20 @@ namespace OpenDiablo2
             try
             {
 #endif
+            // Create the AutoFac DI container
             var container = BuildContainer();
             try
             {
+                // Resolve the game engine
                 using (var gameEngine = container.Resolve<IGameEngine>())
                 {
+                    // Start the game!
                     gameEngine.Run();
                 }
             }
             finally
             {
+                // Dispose the container, disposing any instantiated objects in the process
                 container.Dispose();
             }
 
@@ -67,10 +94,10 @@ namespace OpenDiablo2
         {
             containerBuilder.Register(x => globalConfiguration).AsSelf().SingleInstance();
 
-            containerBuilder.Register<Func<string, IScene>>(c =>
+            containerBuilder.Register<Func<eSceneType, IScene>>(c =>
             {
                 var componentContext = c.Resolve<IComponentContext>();
-                return (sceneName) => componentContext.ResolveKeyed<IScene>(sceneName);
+                return (sceneType) => componentContext.ResolveKeyed<IScene>(sceneType);
             });
 
             containerBuilder.Register<Func<eButtonType, IButton>>(c =>

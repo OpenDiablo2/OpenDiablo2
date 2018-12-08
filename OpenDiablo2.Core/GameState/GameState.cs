@@ -24,7 +24,7 @@ namespace OpenDiablo2.Core.GameState_
 
         private float animationTime = 0f;
         private List<MapInfo> mapInfo;
-        private List<MapCellInfo> mapDataLookup = new List<MapCellInfo>();
+        private readonly List<MapCellInfo> mapDataLookup = new List<MapCellInfo>();
         private ISessionManager sessionManager;
 
         public int Act { get; private set; }
@@ -32,15 +32,14 @@ namespace OpenDiablo2.Core.GameState_
         public Palette CurrentPalette => paletteProvider.PaletteTable[$"ACT{Act}"];
         public List<PlayerInfo> PlayerInfos { get; private set; } = new List<PlayerInfo>();
 
-        public bool ShowInventoryPanel { get; set; } = false;
-        public bool ShowCharacterPanel { get; set; } = false;
-
         readonly private IMouseCursor originalMouseCursor;
 
         public int Seed { get; internal set; }
 
         public Item SelectedItem { get; internal set; }
         public object ThreadLocker { get; } = new object();
+
+        public int CameraOffset { get; set; } = 0;
 
         IEnumerable<PlayerInfo> IGameState.PlayerInfos => PlayerInfos;
 
@@ -79,7 +78,7 @@ namespace OpenDiablo2.Core.GameState_
             sessionManager.OnFocusOnPlayer += OnFocusOnPlayer;
 
             mapInfo = new List<MapInfo>();
-            sceneManager.ChangeScene("Game");
+            sceneManager.ChangeScene(eSceneType.Game);
 
             sessionManager.JoinGame(characterName, hero);
         }
@@ -189,7 +188,7 @@ namespace OpenDiablo2.Core.GameState_
             var map = GetMap(ref cellX, ref cellY);
 
             if (map == null)
-                return new List<MapCellInfo>();
+                return Enumerable.Empty<MapCellInfo>();
 
             if (cellY >= map.FileData.Height || cellX >= map.FileData.Width)
                 return new List<MapCellInfo>(); // Temporary code
@@ -234,20 +233,6 @@ namespace OpenDiablo2.Core.GameState_
         public void UpdateMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType, IEnumerable<MapCellInfo> mapCellInfo)
         {
 
-        }
-
-        public bool ToggleShowInventoryPanel()
-        {
-            ShowInventoryPanel = !ShowInventoryPanel;
-
-            return ShowInventoryPanel;
-        }
-
-        public bool ToggleShowCharacterPanel()
-        {
-            ShowCharacterPanel = !ShowCharacterPanel;
-
-            return ShowCharacterPanel;
         }
 
         public void SelectItem(Item item)
@@ -449,8 +434,8 @@ namespace OpenDiablo2.Core.GameState_
 
             var rads = (float)player.LocationDetails.MovementDirection * 22 * (float)Deg2Rad;
 
-            var moveX = (float)Math.Cos(rads) * seconds * 2f;
-            var moveY = (float)Math.Sin(rads) * seconds * 2f;
+            var moveX = (float)Math.Cos(rads) * seconds * player.LocationDetails.MovementSpeed;
+            var moveY = (float)Math.Sin(rads) * seconds * player.LocationDetails.MovementSpeed;
 
             player.LocationDetails.PlayerX += moveX;
             player.LocationDetails.PlayerY += moveY;

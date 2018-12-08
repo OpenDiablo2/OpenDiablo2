@@ -1,10 +1,6 @@
-﻿using System;
-
-namespace OpenDiablo2.Common.Interfaces
+﻿namespace OpenDiablo2.Common.Interfaces
 {
-    public interface ICharacterPanel : IDisposable
+    public interface ICharacterPanel : IPanel
     {
-        void Render();
-        void Update();
     }
 }

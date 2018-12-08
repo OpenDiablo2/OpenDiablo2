@@ -11,18 +11,13 @@ namespace OpenDiablo2.Core
 {
     public sealed class MPQProvider : IMPQProvider
     {
-        private readonly GlobalConfiguration globalConfiguration;
         private readonly MPQ[] mpqs;
-        private Dictionary<string, int> mpqLookup = new Dictionary<string, int>();
+        private readonly Dictionary<string, int> mpqLookup = new Dictionary<string, int>();
 
         public MPQProvider(GlobalConfiguration globalConfiguration)
         {
-            this.globalConfiguration = globalConfiguration;
             // TODO: Make this less dumb. We need to an external file to configure mpq load order.
-            var mpqsToLoad = new string[]
-            {
 
-            };
             this.mpqs = Directory
                 .EnumerateFiles(globalConfiguration.BaseDataPath, "*.mpq")
                 .Where(x => !Path.GetFileName(x).StartsWith("patch"))
@@ -59,7 +54,12 @@ namespace OpenDiablo2.Core
         public IEnumerable<MPQ> GetMPQs() => mpqs;
 
         public Stream GetStream(string fileName)
-            => mpqs[mpqLookup[fileName.ToLower()]].OpenFile(fileName);
+        {
+            if (!mpqLookup.ContainsKey(fileName.ToLower()))
+                return null;
+
+            return mpqs[mpqLookup[fileName.ToLower()]].OpenFile(fileName);
+        }
         
 
         public IEnumerable<string> GetTextFile(string fileName)

@@ -8,7 +8,7 @@ namespace OpenDiablo2.Common.Interfaces.Mobs
 {
     public interface ILevelExperienceConfig
     {
-        int GetTotalExperienceForLevel(int level);
+        long GetTotalExperienceForLevel(int level);
         int GetMaxLevel();
     }
 }

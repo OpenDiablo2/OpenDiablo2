@@ -14,11 +14,14 @@ namespace OpenDiablo2.Common.UT
         private PlayerState MakePlayer()
         {
             HeroTypeConfig herotypeconfig = new HeroTypeConfig(vitality: 20, strength: 20, dexterity: 20,
-                energy: 20, health: 50, mana: 40, stamina: 30,
+                energy: 20, health: 50, mana: 40, stamina: 30, manaRegen: 20,
                 perlevelhealth: 3, perlevelmana: 1.5, perlevelstamina: 1,
                 pervitalityhealth: 2, pervitalitystamina: 1, perenergymana: 1.5,
-                baseatkrating: -30, basedefrating: -30, perdexterityatkrating: 5, perdexteritydefrating: 4);
-            LevelExperienceConfig expconfig = new LevelExperienceConfig(new List<int>()
+                baseatkrating: -30, basedefrating: -30, perdexterityatkrating: 5, perdexteritydefrating: 4,
+                walkVelocity: 6, runVelocity: 9, runDrain: 20, walkFrames: 8, runFrames: 8, swingFrames: 8,
+                spellFrames: 8, getHitFrames: 8, bowFrames: 8, startingSkill: 0, baseWeaponClass: "hth", 
+                itemNames: new List<string>(), itemLocs: new List<string>(), itemCounts: new List<int>());
+            LevelExperienceConfig expconfig = new LevelExperienceConfig(new List<long>()
             {
                 0, // level 0
                 0, // level 1

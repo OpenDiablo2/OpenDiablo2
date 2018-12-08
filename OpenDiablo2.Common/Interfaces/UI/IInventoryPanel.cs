@@ -1,10 +1,6 @@
-﻿using System;
-
-namespace OpenDiablo2.Common.Interfaces
+﻿namespace OpenDiablo2.Common.Interfaces
 {
-    public interface IInventoryPanel : IDisposable
+    public interface IInventoryPanel : IPanel
     {
-        void Render();
-        void Update();
     }
 }

@@ -1,17 +1,16 @@
-﻿using OpenDiablo2.Common.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using OpenDiablo2.Common.Enums;
 
 namespace OpenDiablo2.Common.Models
 {
     public sealed class MPQ : IDisposable
     {
         private const string HEADER_SIGNATURE = "MPQ\x1A";
-        private const string USERDATA_SIGNATURE = "MPQ\x1B";
+        //private const string USERDATA_SIGNATURE = "MPQ\x1B";
         private const string LISTFILE_NAME = "(listfile)";
         private const int MPQ_HASH_FILE_KEY = 3;
         private const int MPQ_HASH_TABLE_OFFSET = 0;
@@ -34,7 +33,9 @@ namespace OpenDiablo2.Common.Models
         }
 
         [Flags]
+#pragma warning disable IDE1006 // Naming Styles
         internal enum eBlockRecordFlags : UInt32
+#pragma warning restore IDE1006 // Naming Styles
         {
             IsFile = 0x80000000, // Block is a file, and follows the file data format; otherwise, block is free space or unused. If the block is not a file, all other flags should be cleared, and FileSize should be 0.
             SingleUnit = 0x01000000, // File is stored as a single unit, rather than split into sectors.
@@ -72,8 +73,8 @@ namespace OpenDiablo2.Common.Models
 
         internal static UInt32[] cryptTable = new UInt32[0x500];
         internal HeaderRecord Header;
-        private List<BlockRecord> blockTable = new List<BlockRecord>();
-        private List<HashRecord> hashTable = new List<HashRecord>();
+        private readonly List<BlockRecord> blockTable = new List<BlockRecord>();
+        private readonly List<HashRecord> hashTable = new List<HashRecord>();
         internal Stream fileStream;
 
         public UInt16 LanguageId = 0;
@@ -85,7 +86,7 @@ namespace OpenDiablo2.Common.Models
 
         private List<string> GetFilePaths()
         {
-            using (var stream = OpenFile("(listfile)"))
+            using (var stream = OpenFile(LISTFILE_NAME))
             {
                 if (stream == null)
                 {
@@ -346,13 +347,10 @@ namespace OpenDiablo2.Common.Models
 
         public MPQStream OpenFile(string filename)
         {
-            HashRecord hash;
-            BlockRecord block;
-
-            if (!GetHashRecord(filename, out hash))
+            if (!GetHashRecord(filename, out HashRecord hash))
                 throw new FileNotFoundException("File not found: " + filename);
 
-            block = blockTable[(int)hash.FileBlockIndex];
+            BlockRecord block = blockTable[(int)hash.FileBlockIndex];
             block.FileName = filename.ToLower();
             block.EncryptionSeed = CalculateEncryptionSeed(block);
             return new MPQStream(this, block);

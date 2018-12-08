@@ -30,7 +30,7 @@ namespace OpenDiablo2.Common.Models
         {
             var i = x + (y * Width);
             if (i >= ImageData.Length)
-                    return 0;
+                return 0;
 
             var index = ImageData[i];
             if (index == -1)
@@ -44,10 +44,6 @@ namespace OpenDiablo2.Common.Models
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private UInt32 version;
-        private UInt32 unknown1;           // 01 00 00 00  ???
-        private UInt32 unknown2;           // 00 00 00 00  ???
-        private UInt32 termination;        // EE EE EE EE or CD CD CD CD  ???
         private UInt32[] framePointers;
         public ImageFrame[] Frames { get; private set; }
 
@@ -57,12 +53,13 @@ namespace OpenDiablo2.Common.Models
         public static ImageSet LoadFromStream(Stream stream)
         {
             var br = new BinaryReader(stream);
+            var version = br.ReadUInt32();
+            var unknown1 = br.ReadUInt32();
+            var unknown2 = br.ReadUInt32();
+            var termination = br.ReadUInt32();
+
             var result = new ImageSet
             {
-                version = br.ReadUInt32(),
-                unknown1 = br.ReadUInt32(),
-                unknown2 = br.ReadUInt32(),
-                termination = br.ReadUInt32(),
                 Directions = br.ReadUInt32(),
                 FramesPerDirection = br.ReadUInt32()
             };

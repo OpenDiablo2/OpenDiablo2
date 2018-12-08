@@ -18,7 +18,7 @@ namespace OpenDiablo2.Common.Models
         private long position;
         private byte[] _currentData;
         private int _currentBlockIndex = -1;
-        private int blockSize;
+        private readonly int blockSize;
 
         internal MPQStream(MPQ mpq, BlockRecord blockRecord)
         {

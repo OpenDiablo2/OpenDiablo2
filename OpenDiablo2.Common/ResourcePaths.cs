@@ -132,10 +132,19 @@ namespace OpenDiablo2.Common
         public static string LevelType = "data\\global\\excel\\LvlTypes.txt";
         public static string LevelDetails = "data\\global\\excel\\Levels.txt";
 
+        // --- Animations ---
+        public static string ObjectData = "data\\global\\objects";
+        public static string AnimationData = "data\\global\\animdata.d2";
+        public static string PlayerAnimationBase = "data\\global\\CHARS";
+
         // --- Inventory Data ---
         public static string Weapons = "data\\global\\excel\\weapons.txt";
         public static string Armor = "data\\global\\excel\\armor.txt";
         public static string Misc = "data\\global\\excel\\misc.txt";
+
+        // --- Character Data ---
+        public static string Experience = "data\\global\\excel\\experience.txt";
+        public static string CharStats = "data\\global\\excel\\charstats.txt";
 
         public static string GeneratePathForItem(string spriteName)
         {

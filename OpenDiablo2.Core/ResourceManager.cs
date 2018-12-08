@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OpenDiablo2.Common;
+using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
 
@@ -13,15 +15,20 @@ namespace OpenDiablo2.Core
         private readonly IMPQProvider mpqProvider;
         private readonly IEngineDataManager engineDataManager;
 
-        private Dictionary<string, ImageSet> ImageSets = new Dictionary<string, ImageSet>();
-        private Dictionary<string, MPQFont> MPQFonts = new Dictionary<string, MPQFont>();
-        private Dictionary<string, Palette> Palettes = new Dictionary<string, Palette>();
-        private Dictionary<string, MPQDT1> DTs = new Dictionary<string, MPQDT1>();
+        private readonly Dictionary<string, ImageSet> ImageSets = new Dictionary<string, ImageSet>();
+        private readonly Dictionary<string, MPQFont> MPQFonts = new Dictionary<string, MPQFont>();
+        private readonly Dictionary<string, Palette> Palettes = new Dictionary<string, Palette>();
+        private readonly Dictionary<string, MPQDT1> DTs = new Dictionary<string, MPQDT1>();
+        private readonly Dictionary<string, MPQCOF> PlayerCOFs = new Dictionary<string, MPQCOF>();
+
+        public Dictionary<string, List<AnimationData>> Animations { get; private set; } = new Dictionary<string, List<AnimationData>>();
 
         public ResourceManager(IMPQProvider mpqProvider, IEngineDataManager engineDataManager)
         {
             this.mpqProvider = mpqProvider;
             this.engineDataManager = engineDataManager;
+
+            Animations = AnimationData.LoadFromStream(mpqProvider.GetStream(ResourcePaths.AnimationData));
         }
 
         public ImageSet GetImageSet(string resourcePath)
@@ -69,6 +76,36 @@ namespace OpenDiablo2.Core
                 DTs[resourcePath] = new MPQDT1(mpqProvider.GetStream(resourcePath));
 
             return DTs[resourcePath];
+        }
+
+        public MPQCOF GetPlayerAnimation(eHero hero, eWeaponClass weaponClass, eMobMode mobMode)
+        {
+            var key = $"{hero.ToToken()}{mobMode.ToToken()}{weaponClass.ToToken()}";
+            if (PlayerCOFs.ContainsKey(key))
+                return PlayerCOFs[key];
+
+            var path = $"{ResourcePaths.PlayerAnimationBase}\\{hero.ToToken()}\\COF\\{hero.ToToken()}{mobMode.ToToken()}{weaponClass.ToToken()}.cof";
+            var result = MPQCOF.Load(mpqProvider.GetStream(path), Animations, hero, weaponClass, mobMode);
+            PlayerCOFs[key] = result;
+
+            return result;
+        }
+
+        public MPQDCC GetPlayerDCC(MPQCOF.COFLayer cofLayer, eArmorType armorType, Palette palette)
+        {
+            // TODO: We need to cache this...
+            byte[] binaryData;
+            
+            using (var stream = mpqProvider.GetStream(cofLayer.GetDCCPath(armorType)))
+            {
+                if (stream == null)
+                    return null;
+
+                binaryData = new byte[stream.Length];
+                stream.Read(binaryData, 0, (int)stream.Length);
+            }
+            var result = new MPQDCC(binaryData, palette);
+            return result;
         }
     }
 }

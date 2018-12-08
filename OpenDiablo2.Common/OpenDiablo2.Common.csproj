@@ -21,6 +21,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <NoWarn>IDE0049</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -56,7 +57,12 @@
     <Compile Include="Attributes\SceneAttribute.cs" />
     <Compile Include="AutofacModule.cs" />
     <Compile Include="Enums\eItemContainerType.cs" />
+    <Compile Include="Enums\eAnimationFrame.cs" />
+    <Compile Include="Enums\eArmorType.cs" />
+    <Compile Include="Enums\eCompositType.cs" />
+    <Compile Include="Enums\eDrawEffect.cs" />
     <Compile Include="Enums\eMessageFrameType.cs" />
+    <Compile Include="Enums\eMobMode.cs" />
     <Compile Include="Enums\eMovementType.cs" />
     <Compile Include="Enums\ePanelFrameType.cs" />
     <Compile Include="Enums\eButtonType.cs" />
@@ -65,12 +71,15 @@
     <Compile Include="Enums\eLevelSubType.cs" />
     <Compile Include="Enums\eMPQFormatVersion.cs" />
     <Compile Include="Enums\eRenderCellType.cs" />
+    <Compile Include="Enums\eSceneType.cs" />
     <Compile Include="Enums\eSessionType.cs" />
     <Compile Include="Enums\eTextAlign.cs" />
+    <Compile Include="Enums\eWeaponClass.cs" />
     <Compile Include="Enums\eWildBorder.cs" />
     <Compile Include="Enums\Mobs\eDamageTypes.cs" />
     <Compile Include="Enums\Mobs\eMobFlags.cs" />
     <Compile Include="Enums\Mobs\eStatModifierType.cs" />
+    <Compile Include="Interfaces\Drawing\ICharacterRenderer.cs" />
     <Compile Include="Interfaces\IItemManager.cs" />
     <Compile Include="Extensions\MobManagerExtensions.cs" />
     <Compile Include="Interfaces\IGameServer.cs" />
@@ -78,6 +87,11 @@
     <Compile Include="Interfaces\MessageBus\IMessageFrame.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionManager.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionServer.cs" />
+    <Compile Include="Interfaces\UI\IPanel.cs" />
+    <Compile Include="Models\AnimationData.cs" />
+    <Compile Include="Models\BitMuncher.cs" />
+    <Compile Include="Models\MPQCOF.cs" />
+    <Compile Include="Models\MPQDCC.cs" />
     <Compile Include="Models\ItemContainerLayout.cs" />
     <Compile Include="Models\PlayerInfo.cs" />
     <Compile Include="Models\PlayerLocationDetails.cs" />

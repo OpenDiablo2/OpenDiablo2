@@ -3665,9 +3665,9 @@ namespace SDL2
 			public UInt32 timestamp;
 			public UInt32 display;
 			public SDL_DisplayEventID displayEvent; // event, lolC#
-			private byte padding1;
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding1;
+			private readonly byte padding2;
+			private readonly byte padding3;
 			public Int32 data1;
 		}
 #pragma warning restore 0169
@@ -3682,9 +3682,9 @@ namespace SDL2
 			public UInt32 timestamp;
 			public UInt32 windowID;
 			public SDL_WindowEventID windowEvent; // event, lolC#
-			private byte padding1;
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding1;
+			private readonly byte padding2;
+			private readonly byte padding3;
 			public Int32 data1;
 			public Int32 data2;
 		}
@@ -3701,8 +3701,8 @@ namespace SDL2
 			public UInt32 windowID;
 			public byte state;
 			public byte repeat; /* non-zero if this is a repeat */
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding2;
+			private readonly byte padding3;
 			public SDL_Keysym keysym;
 		}
 #pragma warning restore 0169
@@ -3738,9 +3738,9 @@ namespace SDL2
 			public UInt32 windowID;
 			public UInt32 which;
 			public byte state; /* bitmask of buttons */
-			private byte padding1;
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding1;
+			private readonly byte padding2;
+			private readonly byte padding3;
 			public Int32 x;
 			public Int32 y;
 			public Int32 xrel;
@@ -3761,7 +3761,7 @@ namespace SDL2
 			public byte button; /* button id */
 			public byte state; /* SDL_PRESSED or SDL_RELEASED */
 			public byte clicks; /* 1 for single-click, 2 for double-click, etc. */
-			private byte padding1;
+			private readonly byte padding1;
 			public Int32 x;
 			public Int32 y;
 		}
@@ -3790,9 +3790,9 @@ namespace SDL2
 			public UInt32 timestamp;
 			public Int32 which; /* SDL_JoystickID */
 			public byte axis;
-			private byte padding1;
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding1;
+			private readonly byte padding2;
+			private readonly byte padding3;
 			public Int16 axisValue; /* value, lolC# */
 			public UInt16 padding4;
 		}
@@ -3808,9 +3808,9 @@ namespace SDL2
 			public UInt32 timestamp;
 			public Int32 which; /* SDL_JoystickID */
 			public byte ball;
-			private byte padding1;
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding1;
+			private readonly byte padding2;
+			private readonly byte padding3;
 			public Int16 xrel;
 			public Int16 yrel;
 		}
@@ -3827,8 +3827,8 @@ namespace SDL2
 			public Int32 which; /* SDL_JoystickID */
 			public byte hat; /* index of the hat */
 			public byte hatValue; /* value, lolC# */
-			private byte padding1;
-			private byte padding2;
+			private readonly byte padding1;
+			private readonly byte padding2;
 		}
 #pragma warning restore 0169
 
@@ -3843,8 +3843,8 @@ namespace SDL2
 			public Int32 which; /* SDL_JoystickID */
 			public byte button;
 			public byte state; /* SDL_PRESSED or SDL_RELEASED */
-			private byte padding1;
-			private byte padding2;
+			private readonly byte padding1;
+			private readonly byte padding2;
 		}
 #pragma warning restore 0169
 
@@ -3867,11 +3867,11 @@ namespace SDL2
 			public UInt32 timestamp;
 			public Int32 which; /* SDL_JoystickID */
 			public byte axis;
-			private byte padding1;
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding1;
+			private readonly byte padding2;
+			private readonly byte padding3;
 			public Int16 axisValue; /* value, lolC# */
-			private UInt16 padding4;
+			private readonly UInt16 padding4;
 		}
 #pragma warning restore 0169
 
@@ -3886,8 +3886,8 @@ namespace SDL2
 			public Int32 which; /* SDL_JoystickID */
 			public byte button;
 			public byte state;
-			private byte padding1;
-			private byte padding2;
+			private readonly byte padding1;
+			private readonly byte padding2;
 		}
 #pragma warning restore 0169
 
@@ -3912,9 +3912,9 @@ namespace SDL2
 			public UInt32 timestamp;
 			public UInt32 which;
 			public byte iscapture;
-			private byte padding1;
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding1;
+			private readonly byte padding2;
+			private readonly byte padding3;
 		}
 #pragma warning restore 0169
 
@@ -5626,9 +5626,11 @@ namespace SDL2
 				gamecontroller,
 				axis
 			);
-			SDL_GameControllerButtonBind result = new SDL_GameControllerButtonBind();
-			result.bindType = (SDL_GameControllerBindType) dumb.bindType;
-			result.value.hat.hat = dumb.unionVal0;
+            SDL_GameControllerButtonBind result = new SDL_GameControllerButtonBind
+            {
+                bindType = (SDL_GameControllerBindType)dumb.bindType
+            };
+            result.value.hat.hat = dumb.unionVal0;
 			result.value.hat.hat_mask = dumb.unionVal1;
 			return result;
 		}
@@ -5679,9 +5681,11 @@ namespace SDL2
 				gamecontroller,
 				button
 			);
-			SDL_GameControllerButtonBind result = new SDL_GameControllerButtonBind();
-			result.bindType = (SDL_GameControllerBindType) dumb.bindType;
-			result.value.hat.hat = dumb.unionVal0;
+            SDL_GameControllerButtonBind result = new SDL_GameControllerButtonBind
+            {
+                bindType = (SDL_GameControllerBindType)dumb.bindType
+            };
+            result.value.hat.hat = dumb.unionVal0;
 			result.value.hat.hat_mask = dumb.unionVal1;
 			return result;
 		}

@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutofacModule.cs" />
+    <Compile Include="SDL2CharacterRenderer.cs" />
     <Compile Include="CS-SDL\SDL2.cs" />
     <Compile Include="CS-SDL\SDL2_image.cs" />
     <Compile Include="CS-SDL\SDL2_mixer.cs" />

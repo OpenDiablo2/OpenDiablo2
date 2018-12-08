@@ -15,7 +15,7 @@ namespace OpenDiablo2.Core.GameState_
         IEnumerable<PlayerState> IMobManager.Players => Players;
         IEnumerable<EnemyState> IMobManager.Enemies => Enemies;
 
-        private HashSet<int> IdsUsed = new HashSet<int>();
+        private readonly HashSet<int> IdsUsed = new HashSet<int>();
 
         #region Player Controls
         public void AddPlayer(PlayerState player)

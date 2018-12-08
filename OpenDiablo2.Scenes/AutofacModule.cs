@@ -19,7 +19,7 @@ namespace OpenDiablo2.Scenes
                 var att = type.GetCustomAttributes(true).First(x => typeof(SceneAttribute).IsAssignableFrom(x.GetType())) as SceneAttribute;
                 builder
                     .RegisterType(type)
-                    .Keyed<IScene>(att.SceneName)
+                    .Keyed<IScene>(att.SceneType)
                     .SingleInstance();
             }
         }

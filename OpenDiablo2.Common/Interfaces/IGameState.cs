@@ -16,14 +16,10 @@ namespace OpenDiablo2.Common.Interfaces
         Palette CurrentPalette { get; }
         IEnumerable<PlayerInfo> PlayerInfos { get; }
 
-        bool ToggleShowInventoryPanel();
-        bool ShowInventoryPanel { get; set; }
-
-        bool ToggleShowCharacterPanel();
-        bool ShowCharacterPanel { get; set; }
-
         Item SelectedItem { get; }
         void SelectItem(Item item);
+
+        int CameraOffset { get; set; }
 
         void Initialize(string text, eHero value, eSessionType sessionType);
         void Update(long ms);
