@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading;
 using OpenDiablo2.Common;
+using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
 
@@ -16,7 +17,7 @@ namespace OpenDiablo2.Core
         private readonly GlobalConfiguration globalConfig;
         private readonly IMPQProvider mpqProvider;
         private readonly Func<IRenderWindow> getRenderWindow;
-        private readonly Func<string, IScene> getScene;
+        private readonly Func<eSceneType, IScene> getScene;
         private readonly Func<IResourceManager> getResourceManager;
         private readonly Func<IGameState> getGameState;
 
@@ -33,7 +34,7 @@ namespace OpenDiablo2.Core
             GlobalConfiguration globalConfig,
             IMPQProvider mpqProvider,
             Func<IRenderWindow> getRenderWindow,
-            Func<string, IScene> getScene,
+            Func<eSceneType, IScene> getScene,
             Func<IResourceManager> getResourceManager,
             Func<IGameState> getGameState
             )
@@ -84,7 +85,7 @@ namespace OpenDiablo2.Core
             var cursor = renderWindow.LoadCursor(mouseSprite, 0, new Point(0, 3));
             renderWindow.MouseCursor = cursor;
             
-            currentScene = getScene("Main Menu");
+            currentScene = getScene(eSceneType.MainMenu);
             var lastTicks = renderWindow.GetTicks();
             while (getRenderWindow().IsRunning)
             {
@@ -135,7 +136,7 @@ namespace OpenDiablo2.Core
             currentScene?.Dispose();
         }
 
-        public void ChangeScene(string sceneName)
-            => nextScene = getScene(sceneName);
+        public void ChangeScene(eSceneType sceneType)
+            => nextScene = getScene(sceneType);
     }
 }

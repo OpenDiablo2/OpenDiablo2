@@ -78,7 +78,7 @@ namespace OpenDiablo2.Core.GameState_
             sessionManager.OnFocusOnPlayer += OnFocusOnPlayer;
 
             mapInfo = new List<MapInfo>();
-            sceneManager.ChangeScene("Game");
+            sceneManager.ChangeScene(eSceneType.Game);
 
             sessionManager.JoinGame(characterName, hero);
         }

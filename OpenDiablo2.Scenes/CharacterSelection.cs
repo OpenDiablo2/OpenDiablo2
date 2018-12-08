@@ -7,7 +7,7 @@ using OpenDiablo2.Common.Interfaces;
 
 namespace OpenDiablo2.Scenes
 {
-    [Scene("Select Character")]
+    [Scene(eSceneType.SelectCharacter)]
     public sealed class CharacterSelection : IScene
     {
         static readonly log4net.ILog log =
@@ -28,7 +28,7 @@ namespace OpenDiablo2.Scenes
             // TODO: use strCreateNewCharacter -- need to get the text to split after 10 chars though.
             createNewCharacterButton.Text = textDictionary.Translate("strCreateNewCharacter");// "Create New".ToUpper();
             createNewCharacterButton.Location = new Point(33, 467);
-            createNewCharacterButton.OnActivate = () => sceneManager.ChangeScene("Select Hero Class");
+            createNewCharacterButton.OnActivate = () => sceneManager.ChangeScene(eSceneType.SelectHeroClass);
 
             deleteCharacterButton = createButton(eButtonType.Tall);
             deleteCharacterButton.Text = textDictionary.Translate("strDelete");
@@ -37,7 +37,7 @@ namespace OpenDiablo2.Scenes
             exitButton = createButton(eButtonType.Medium);
             exitButton.Text = textDictionary.Translate("strExit");
             exitButton.Location = new Point(33, 540);
-            exitButton.OnActivate = () => sceneManager.ChangeScene("Main Menu");
+            exitButton.OnActivate = () => sceneManager.ChangeScene(eSceneType.MainMenu);
 
             okButton = createButton(eButtonType.Medium);
             okButton.Text = textDictionary.Translate("strOk");

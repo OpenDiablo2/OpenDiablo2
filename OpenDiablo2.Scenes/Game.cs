@@ -7,7 +7,7 @@ using OpenDiablo2.Common.Interfaces;
 
 namespace OpenDiablo2.Scenes
 {
-    [Scene("Game")]
+    [Scene(eSceneType.Game)]
     public sealed class Game : IScene
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);

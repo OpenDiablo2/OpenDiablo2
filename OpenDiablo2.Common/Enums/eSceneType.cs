@@ -14,26 +14,16 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
-using System;
-using OpenDiablo2.Common.Enums;
-
-namespace OpenDiablo2.Common.Attributes
+namespace OpenDiablo2.Common.Enums
 {
     /// <summary>
-    /// Defines this class as a scene.
+    /// Defines a scene type.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-    public sealed class SceneAttribute : Attribute
+    public enum eSceneType
     {
-        /// <summary>
-        /// Defines the type of scene that this class represents.
-        /// </summary>
-        public eSceneType SceneType { get; }
-
-        /// <summary>
-        /// Defines this class as a scene type
-        /// </summary>
-        /// <param name="sceneType"></param>
-        public SceneAttribute(eSceneType sceneType) => SceneType = sceneType;
+        MainMenu,
+        SelectHeroClass,
+        SelectCharacter,
+        Game
     }
 }

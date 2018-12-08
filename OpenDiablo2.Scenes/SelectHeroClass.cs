@@ -28,7 +28,7 @@ namespace OpenDiablo2.Scenes
         public Rectangle SelectionBounds = new Rectangle();
     }
 
-    [Scene("Select Hero Class")]
+    [Scene(eSceneType.SelectHeroClass)]
     public sealed class SelectHeroClass : IScene
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -244,7 +244,7 @@ namespace OpenDiablo2.Scenes
             okButton.Enabled = false;
             selectedHero = null;
 
-            sceneManager.ChangeScene("Select Character");
+            sceneManager.ChangeScene(eSceneType.SelectCharacter);
         }
 
         public void Render()
