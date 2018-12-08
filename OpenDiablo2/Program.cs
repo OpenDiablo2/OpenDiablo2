@@ -38,7 +38,7 @@ namespace OpenDiablo2
             log.Info("OpenDiablo 2: The Free and Open Source Diablo 2 clone!\n" +
                      "This program comes with ABSOLUTELY NO WARRANTY.\n" +
                      "This is free software, and you are welcome to redistribute it\n" +
-                     "under certain conditions; type `show c' for details.");
+                     "under certain conditions;");
 
             // Parse the command-line arguments.
             Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed(o => globalConfiguration = new GlobalConfiguration
