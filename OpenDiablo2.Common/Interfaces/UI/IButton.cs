@@ -46,6 +46,11 @@ namespace OpenDiablo2.Common.Interfaces
         /// </summary>
         OnToggleDelegate OnToggle { get; set; }
 
+        /// <summary>
+        /// Toggle the button. Only valid for toggle buttons.
+        /// </summary>
+        bool Toggle();
+
         string Text { get; set; }
 
         /// <summary>
