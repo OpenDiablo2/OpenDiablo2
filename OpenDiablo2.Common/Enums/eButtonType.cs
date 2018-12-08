@@ -10,6 +10,8 @@
         // Game UI
         Run,
         Menu,
+        GoldCoin,
+        Close,
         MinipanelCharacter,
         MinipanelInventory,
         MinipanelSkill,
