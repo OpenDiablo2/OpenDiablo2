@@ -22,6 +22,7 @@ namespace OpenDiablo2.Core
             builder.RegisterType<GameEngine>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<GameState>().As<IGameState>().SingleInstance();
             builder.RegisterType<MapEngine>().As<IMapEngine>().SingleInstance();
+            builder.RegisterType<GameHUD>().As<IGameHUD>().InstancePerDependency();
             builder.RegisterType<MiniPanel>().As<IMiniPanel>().InstancePerDependency();
             builder.RegisterType<PanelFrame>().As<IPanelFrame>().InstancePerDependency();
             builder.RegisterType<CharacterPanel>().AsImplementedInterfaces().InstancePerDependency();
