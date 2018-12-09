@@ -129,7 +129,6 @@ namespace OpenDiablo2.SDL2_
             if (currentDirectionCache != null)
             {
                 currentDirectionCache.RenderFrameIndex = 0;
-                seconds = 0f;
                 return;
             }
 
@@ -186,7 +185,7 @@ namespace OpenDiablo2.SDL2_
 
             directionCache.SpriteTexture = new IntPtr[directionCache.FramesToAnimate];
             directionCache.SpriteRect = new SDL.SDL_Rect[directionCache.FramesToAnimate];
-
+            
             for (var frameIndex = 0; frameIndex < directionCache.FramesToAnimate; frameIndex++)
             {
                 var texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, frameW, frameH);
@@ -201,6 +200,7 @@ namespace OpenDiablo2.SDL2_
 
                     var direction = layer.Directions[directionConversion[LocationDetails.MovementDirection]];
                     var frame = direction.Frames[frameIndex];
+
 
                     for (var y = 0; y < direction.Box.Height; y++)
                     {

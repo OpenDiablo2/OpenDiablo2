@@ -27,8 +27,6 @@ namespace OpenDiablo2.Common.Models
             public int LastHeight { get; internal set; }
             public int LastXOffset { get; internal set; }
             public int LastYOffset { get; internal set; }
-
-            public byte[] PixelData { get; internal set; }
         }
 
         public sealed class MPQDCCDirectionFrame
@@ -41,7 +39,7 @@ namespace OpenDiablo2.Common.Models
             public int NumberOfCodedBytes { get; private set; }
             public bool FrameIsBottomUp { get; private set; }
             public Rectangle Box { get; private set; }
-            public Cell[] Cells { get; private set; }
+            public Cell[] Cells { get; internal set; }
             public byte[] PixelData { get; internal set; }
             public int HorizontalCellCount { get; private set; }
             public int VerticalCellCount { get; private set; }
@@ -157,6 +155,7 @@ namespace OpenDiablo2.Common.Models
             public byte[] PaletteEntries { get; private set; }
             public Rectangle Box { get; private set; }
             public Cell[] Cells { get; private set; }
+            public byte[] PixelData { get; private set; }
             public int HorizontalCellCount { get; private set; }
             public int VerticalCellCount { get; private set; }
             public PixelBufferEntry[] PixelBuffer { get; private set; }
@@ -287,23 +286,21 @@ namespace OpenDiablo2.Common.Models
                 {
                     cell.LastWidth = -1;
                     cell.LastHeight = -1;
-                    cell.PixelData = new byte[cell.Width * cell.Height];
                 }
 
 
+                PixelData = new byte[Box.Width * Box.Height];
 
                 var frameIndex = -1;
                 foreach (var frame in Frames)
                 {
                     frameIndex++;
                     frame.PixelData = new byte[Box.Width * Box.Height];
+
                     var c = -1;
                     foreach (var cell in frame.Cells)
                     {
                         c++;
-
-                        if (cell.PixelData == null)
-                            cell.PixelData = new byte[cell.Width * cell.Height];
 
                         var cellX = cell.XOffset / 4;
                         var cellY = cell.YOffset / 4;
@@ -318,7 +315,13 @@ namespace OpenDiablo2.Common.Models
                             {
                                 // Different sizes
                                 /// TODO: Clear the pixels of the frame cell
-                                cell.PixelData = new byte[cell.Width * cell.Height];
+                                for (int y = 0; y < cell.Height; y++)
+                                {
+                                    for (int x = 0; x < cell.Width; x++)
+                                    {
+                                        PixelData[x + cell.XOffset + ((y + cell.YOffset) * frame.Width)] = 0;
+                                    }
+                                }
                             }
                             else
                             {
@@ -329,25 +332,25 @@ namespace OpenDiablo2.Common.Models
                                 {
                                     for (var fx = 0; fx < cell.Width; fx++)
                                     {
+                                        // Frame (buff.lastx, buff.lasty) -> Frame (cell.offx, cell.offy)
+                                        // Cell (0, 0,) -> 
                                         // blit(dir->bmp, dir->bmp, buff_cell->last_x0, buff_cell->last_y0, cell->x0, cell->y0, cell->w, cell->h );
-                                        frame.PixelData[fx + cell.XOffset + ((fy + cell.YOffset) * Box.Width)]
-                                            = frame.PixelData[fx + bufferCell.LastXOffset + ((fy + bufferCell.LastYOffset) * Box.Width)];
+                                        PixelData[fx + cell.XOffset + ((fy + cell.YOffset) * Box.Width)]
+                                            = PixelData[fx + bufferCell.LastXOffset + ((fy + bufferCell.LastYOffset) * Box.Width)];
 
                                     }
                                 }
 
-                                //// Copy it again into the final frame image
+                                // Copy it again into the final frame image
                                 for (var fy = 0; fy < cell.Height; fy++)
                                 {
                                     for (var fx = 0; fx < cell.Width; fx++)
                                     {
                                         // blit(cell->bmp, frm_bmp, 0, 0, cell->x0, cell->y0, cell->w, cell->h );
                                         frame.PixelData[fx + cell.XOffset + ((fy + cell.YOffset) * Box.Width)]
-                                            = cell.PixelData[fx + (fy * cell.Width)];
+                                            = PixelData[cell.XOffset + fx + ((cell.YOffset + fy) * Box.Width)];
                                     }
                                 }
-
-
                             }
                         }
                         else
@@ -355,7 +358,14 @@ namespace OpenDiablo2.Common.Models
                             if (pbe.Value[0] == pbe.Value[1])
                             {
                                 // Clear the frame
-                                cell.PixelData = new byte[cell.Width * cell.Height];
+                                //cell.PixelData = new byte[cell.Width * cell.Height];
+                                for (var y = 0; y < cell.Height; y++)
+                                {
+                                    for (var x = 0; x < cell.Width; x++)
+                                    {
+                                        PixelData[x + cell.XOffset + ((y + cell.YOffset) * Box.Width)] = pbe.Value[0];
+                                    }
+                                }
                             }
                             else
                             {
@@ -367,7 +377,7 @@ namespace OpenDiablo2.Common.Models
                                     for (var x = 0; x < cell.Width; x++)
                                     {
                                         var paletteIndex = pcd.GetBits(bitsToRead);
-                                        cell.PixelData[x + (y * cell.Width)] = pbe.Value[paletteIndex];
+                                        PixelData[x + cell.XOffset + ((y + cell.YOffset) * Box.Width)] = pbe.Value[paletteIndex];
                                     }
                                 }
                             }
@@ -379,7 +389,7 @@ namespace OpenDiablo2.Common.Models
                                 {
                                     //blit(cell->bmp, frm_bmp, 0, 0, cell->x0, cell->y0, cell->w, cell->h );
                                     frame.PixelData[fx + cell.XOffset + ((fy + cell.YOffset) * Box.Width)]
-                                        = cell.PixelData[fx + (fy * cell.Width)];
+                                        = PixelData[fx + cell.XOffset + ((fy + cell.YOffset) * Box.Width)];
                                 }
                             }
                             pbIdx++;
@@ -391,7 +401,13 @@ namespace OpenDiablo2.Common.Models
                         bufferCell.LastXOffset = cell.XOffset;
                         bufferCell.LastYOffset = cell.YOffset;
                     }
+
+                    // Free up the stuff we no longer need
+                    frame.Cells = null;
                 }
+
+                Cells = null;
+                PixelData = null;
             }
 
             private static readonly int[] pixelMaskLookup = new int[] { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4 };
@@ -509,12 +525,11 @@ namespace OpenDiablo2.Common.Models
 
 
                 // Convert the palette entry index into actual palette entries
-                for (var i = 0; i < pbIndex; i++)
+                for (var i = 0; i <= pbIndex; i++)
                 {
                     for (var x = 0; x < 4; x++)
                     {
-                        var y = PixelBuffer[i].Value[x];
-                        PixelBuffer[i].Value[x] = PaletteEntries[y];
+                        PixelBuffer[i].Value[x] = PaletteEntries[PixelBuffer[i].Value[x]];
                     }
                 }
             }
