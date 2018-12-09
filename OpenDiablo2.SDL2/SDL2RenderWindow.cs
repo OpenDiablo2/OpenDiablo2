@@ -18,6 +18,7 @@ using System;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
+using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Interfaces.Drawing;
@@ -342,28 +343,33 @@ namespace OpenDiablo2.SDL2_
             SDL.SDL_RenderCopy(renderer, lbl.texture, IntPtr.Zero, ref destRect);
         }
 
-        public unsafe MapCellInfo CacheMapCell(MPQDT1Tile mapCell)
+        public unsafe MapCellInfo CacheMapCell(MPQDT1Tile mapCell, eRenderCellType cellType)
         {
             var minX = mapCell.Blocks.Min(x => x.PositionX);
             var minY = mapCell.Blocks.Min(x => x.PositionY);
             var maxX = mapCell.Blocks.Max(x => x.PositionX + 32);
             var maxY = mapCell.Blocks.Max(x => x.PositionY + 32);
-            var diffX = maxX - minX;
-            var diffY = maxY - minY;
+            var frameWidth = maxX - minX;
+            var frameHeight = maxY - minY;
 
-            var offX = -minX;
-            var offY = -minY;
+            var dx = minX;
+            var dy = minY;
 
-            var frameSize = new Size(Math.Abs(diffX), Math.Abs(diffY));
+            dx -= 80;
 
-            var srcRect = new SDL.SDL_Rect { x = minX, y = minY, w = frameSize.Width, h = frameSize.Height };
+            
+            var srcRect = new SDL.SDL_Rect { x = dx, y = dy, w = frameWidth, h = frameHeight };
 
-            var texId = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, frameSize.Width, frameSize.Height);
+            var texId = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, frameWidth, frameHeight);
+
+            if (texId == IntPtr.Zero)
+                throw new OpenDiablo2Exception("Could not create texture");
+
             SDL.SDL_SetTextureBlendMode(texId, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
             if (SDL.SDL_LockTexture(texId, IntPtr.Zero, out IntPtr pixels, out int pitch) != 0)
                 throw new OpenDiablo2Exception("Could not lock texture for map rendering");
-
+            
             try
             {
                 UInt32* data = (UInt32*)pixels;
@@ -373,15 +379,15 @@ namespace OpenDiablo2.SDL2_
 
                 foreach (var block in mapCell.Blocks)
                 {
-                    var index = block.PositionX + offX + ((block.PositionY + offY) * pitchChange);
+                    var index = (block.PositionX - minX) + ((block.PositionY - minY) * pitchChange);
                     var xx = 0;
-                    var yy = 0;
                     foreach (var colorIndex in block.PixelData)
                     {
                         try
                         {
                             if (colorIndex == 0)
                                 continue;
+
                             var color = colors[colorIndex];
 
                             if (color > 0)
@@ -396,7 +402,6 @@ namespace OpenDiablo2.SDL2_
                             {
                                 index += pitchChange - 32;
                                 xx = 0;
-                                yy++;
                             }
                         }
                     }
@@ -410,10 +415,8 @@ namespace OpenDiablo2.SDL2_
             return new MapCellInfo
             {
                 Tile = mapCell,
-                FrameHeight = frameSize.Height,
-                FrameWidth = frameSize.Width,
-                OffX = offX,
-                OffY = offY,
+                FrameHeight = frameHeight,
+                FrameWidth = frameWidth,
                 Rect = srcRect.ToRectangle(),
                 Texture = new SDL2Texture { Pointer = texId }
             };

@@ -25,6 +25,8 @@ namespace OpenDiablo2.Core
 {
     public sealed class ResourceManager : IResourceManager
     {
+        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private readonly ICache cache;
         private readonly IMPQProvider mpqProvider;
         private readonly IEngineDataManager engineDataManager;
@@ -73,10 +75,14 @@ namespace OpenDiablo2.Core
             // TODO: We need to cache this...
             byte[] binaryData;
 
-            using (var stream = mpqProvider.GetStream(cofLayer.GetDCCPath(armorType)))
+            var streamPath = cofLayer.GetDCCPath(armorType);
+            using (var stream = mpqProvider.GetStream(streamPath))
             {
                 if (stream == null)
+                {
+                    log.Error($"Could not load Player DCC: {streamPath}");
                     return null;
+                }
 
                 binaryData = new byte[stream.Length];
                 stream.Read(binaryData, 0, (int)stream.Length);

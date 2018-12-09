@@ -28,8 +28,6 @@ namespace OpenDiablo2.Core.Map_Engine
                     return;
 
                 cameraLocation = value;
-                //cOffX = (int)((cameraLocation.X - cameraLocation.Y) * (cellSizeX / 2));
-                //cOffY = (int)((cameraLocation.X + cameraLocation.Y) * (cellSizeY / 2));
             }
         }
 
@@ -102,6 +100,7 @@ namespace OpenDiablo2.Core.Map_Engine
 
         const int skewX = 400;
         const int skewY = 300;
+
         public void Render()
         {
             var xOffset = gameState.CameraOffset;
@@ -126,23 +125,10 @@ namespace OpenDiablo2.Core.Map_Engine
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.Floor))
                         renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy);
 
-                }
-            }
-
-            for (int ty = -7; ty <= 9; ty++)
-            {
-                for (int tx = -8; tx <= 8; tx++)
-                {
-                    var ax = tx + Math.Truncate(cameraLocation.X);
-                    var ay = ty + Math.Truncate(cameraLocation.Y);
-
-                    var px = (tx - ty) * (cellSizeX / 2);
-                    var py = (tx + ty) * (cellSizeY / 2);
-
-                    var ox = (cx - cy) * (cellSizeX / 2);
-                    var oy = (cx + cy) * (cellSizeY / 2);
-
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallLower))
+                        renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy + 80);
+
+                    foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallUpper))
                         renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy + 80);
 
                     foreach (var character in characterRenderers.Where(x => Math.Truncate(x.LocationDetails.PlayerX) == ax && Math.Truncate(x.LocationDetails.PlayerY) == ay))
@@ -156,11 +142,8 @@ namespace OpenDiablo2.Core.Map_Engine
                         character.Render(skewX + (int)ppx + (int)ox + xOffset, skewY + (int)ppy + (int)oy);
                     }
 
-                    foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallUpper))
-                        renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy);
-
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.Roof))
-                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 300 + py + (int)oy);
+                        renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy);
                 }
             }
 
