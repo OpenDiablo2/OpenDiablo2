@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
@@ -51,9 +52,7 @@ namespace OpenDiablo2.Scenes
         private readonly ITextBox characterNameTextBox;
         private readonly Dictionary<eHero, HeroRenderInfo> heroRenderInfo = new Dictionary<eHero, HeroRenderInfo>();
 
-        private byte[] sfxAmazonSelect, sfxAmazonDeselect, sfxAssassinSelect, sfxAssassinDeselect, sfxBarbarianSelect, sfxBarbarianDeselect,
-            sfxDruidSelect, sfxDruidDeselect, sfxNecromancerSelect, sfxNecromancerDeselect, sfxPaladinSelect, sfxPaladinDeselect,
-            sfxSorceressSelect, sfxSorceressDeselect;
+        private Dictionary<string, byte[]> sfxDictionary;
 
         public SelectHeroClass(
             IRenderWindow renderWindow,
@@ -75,7 +74,7 @@ namespace OpenDiablo2.Scenes
             this.keyboardInfoProvider = keyboardInfoProvider;
             this.soundProvider = soundProvider;
             this.gameState = gameState;
-
+            sfxDictionary = new Dictionary<string, byte[]>();
 
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectBackground, Palettes.Fechar);
             campfireSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectCampfire, Palettes.Fechar, new Point(380, 335));
@@ -224,21 +223,23 @@ namespace OpenDiablo2.Scenes
             characterNameTextBox.Text = "";
             characterNameTextBox.Location = new Point(320, 493);
 
-            mpqProvider.GetBytesAsync(ResourcePaths.SFXAmazonSelect, x => sfxAmazonSelect = x);
-            mpqProvider.GetBytesAsync(ResourcePaths.SFXAmazonDeselect, x => sfxAmazonDeselect = x);
-            mpqProvider.GetBytesAsync(ResourcePaths.SFXAssassinSelect, x => sfxAssassinSelect = x);
-            mpqProvider.GetBytesAsync(ResourcePaths.SFXAssassinDeselect, x => sfxAssassinDeselect = x);
-            mpqProvider.GetBytesAsync(ResourcePaths.SFXBarbarianSelect, x => sfxBarbarianSelect = x);
-            mpqProvider.GetBytesAsync(ResourcePaths.SFXBarbarianDeselect, x => sfxBarbarianDeselect = x);
-            mpqProvider.GetBytesAsync(ResourcePaths.SFXDruidSelect, x => sfxDruidSelect = x);
-            mpqProvider.GetBytesAsync(ResourcePaths.SFXDruidDeselect, x => sfxDruidDeselect = x);
-            mpqProvider.GetBytesAsync(ResourcePaths.SFXNecromancerSelect, x => sfxNecromancerSelect = x);
-            mpqProvider.GetBytesAsync(ResourcePaths.SFXNecromancerDeselect, x => sfxNecromancerDeselect = x);
-            mpqProvider.GetBytesAsync(ResourcePaths.SFXPaladinSelect, x => sfxPaladinSelect = x);
-            mpqProvider.GetBytesAsync(ResourcePaths.SFXPaladinDeselect, x => sfxPaladinDeselect = x);
-            mpqProvider.GetBytesAsync(ResourcePaths.SFXSorceressSelect, x => sfxSorceressSelect = x);
-            mpqProvider.GetBytesAsync(ResourcePaths.SFXSorceressDeselect, x => sfxSorceressDeselect = x);
-
+            Parallel.ForEach(new[]
+            {
+                ResourcePaths.SFXAmazonSelect,
+                ResourcePaths.SFXAmazonDeselect,
+                ResourcePaths.SFXAssassinSelect,
+                ResourcePaths.SFXAssassinDeselect,
+                ResourcePaths.SFXBarbarianSelect,
+                ResourcePaths.SFXBarbarianDeselect,
+                ResourcePaths.SFXDruidSelect,
+                ResourcePaths.SFXDruidDeselect,
+                ResourcePaths.SFXNecromancerSelect,
+                ResourcePaths.SFXNecromancerDeselect,
+                ResourcePaths.SFXPaladinSelect,
+                ResourcePaths.SFXPaladinDeselect,
+                ResourcePaths.SFXSorceressSelect,
+                ResourcePaths.SFXSorceressDeselect
+            }, (path => sfxDictionary.Add(path, mpqProvider.GetBytes(path))));
         }
 
         private void OnOkclicked()
@@ -475,25 +476,25 @@ namespace OpenDiablo2.Scenes
             switch (hero)
             {
                 case eHero.Barbarian:
-                    soundProvider.PlaySfx(sfxBarbarianSelect);
+                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXBarbarianSelect]);
                     break;
                 case eHero.Necromancer:
-                    soundProvider.PlaySfx(sfxNecromancerSelect);
+                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXNecromancerSelect]);
                     break;
                 case eHero.Paladin:
-                    soundProvider.PlaySfx(sfxPaladinSelect);
+                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXPaladinSelect]);
                     break;
                 case eHero.Assassin:
-                    soundProvider.PlaySfx(sfxAssassinSelect);
+                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXAssassinSelect]);
                     break;
                 case eHero.Sorceress:
-                    soundProvider.PlaySfx(sfxSorceressSelect);
+                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXSorceressSelect]);
                     break;
                 case eHero.Amazon:
-                    soundProvider.PlaySfx(sfxAmazonSelect);
+                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXAmazonSelect]);
                     break;
                 case eHero.Druid:
-                    soundProvider.PlaySfx(sfxDruidSelect);
+                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXDruidSelect]);
                     break;
                 default:
                     break;
@@ -505,25 +506,25 @@ namespace OpenDiablo2.Scenes
             switch (hero)
             {
                 case eHero.Barbarian:
-                    soundProvider.PlaySfx(sfxBarbarianDeselect);
+                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXBarbarianDeselect]);
                     break;
                 case eHero.Necromancer:
-                    soundProvider.PlaySfx(sfxNecromancerDeselect);
+                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXNecromancerDeselect]);
                     break;
                 case eHero.Paladin:
-                    soundProvider.PlaySfx(sfxPaladinDeselect);
+                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXPaladinDeselect]);
                     break;
                 case eHero.Assassin:
-                    soundProvider.PlaySfx(sfxAssassinDeselect);
+                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXAssassinDeselect]);
                     break;
                 case eHero.Sorceress:
-                    soundProvider.PlaySfx(sfxSorceressDeselect);
+                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXSorceressDeselect]);
                     break;
                 case eHero.Amazon:
-                    soundProvider.PlaySfx(sfxAmazonDeselect);
+                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXAmazonDeselect]);
                     break;
                 case eHero.Druid:
-                    soundProvider.PlaySfx(sfxDruidDeselect);
+                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXDruidDeselect]);
                     break;
                 default:
                     break;
