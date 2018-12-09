@@ -2,7 +2,7 @@
 
 namespace OpenDiablo2.Common.Enums
 {
-    public enum eItemContainerType
+    public enum eItemLocation
     {
         Helm,
         Glove,

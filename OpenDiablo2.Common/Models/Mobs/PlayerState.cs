@@ -34,6 +34,7 @@ namespace OpenDiablo2.Common.Models.Mobs
         public eWeaponClass WeaponClass { get; set; } = eWeaponClass.HandToHand; // Temporary
         public eArmorType ArmorType { get; set; } = eArmorType.Lite; // Temporary
         public eMobMode MobMode { get; set; } = eMobMode.PlayerTownWalk; // Temporary
+        public string ShieldCode { get; set; }
 
         // Player character stats
         protected Stat Vitality;
@@ -108,6 +109,11 @@ namespace OpenDiablo2.Common.Models.Mobs
             if(item.Item is Weapon)
             {
                 WeaponClass = ((Weapon)item.Item).WeaponClass.ToWeaponClass();
+            }
+
+            if(item.Item is Armor && slot == "larm") // Shield
+            {
+                ShieldCode = item.Item.Code;
             }
         }
         
