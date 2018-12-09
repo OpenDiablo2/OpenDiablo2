@@ -16,8 +16,8 @@ namespace OpenDiablo2.Common.Interfaces
         Palette CurrentPalette { get; }
         IEnumerable<PlayerInfo> PlayerInfos { get; }
 
-        Item SelectedItem { get; }
-        void SelectItem(Item item);
+        ItemInstance SelectedItem { get; }
+        void SelectItem(ItemInstance item);
 
         int CameraOffset { get; set; }
 

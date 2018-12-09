@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutofacModule.cs" />
+    <Compile Include="Message Frames\Client\MFEquipItem.cs" />
     <Compile Include="Message Frames\Client\MFJoinGame.cs" />
     <Compile Include="Message Frames\Client\MFMoveRequest.cs" />
     <Compile Include="Message Frames\Server\MFFocusOnPlayer.cs" />

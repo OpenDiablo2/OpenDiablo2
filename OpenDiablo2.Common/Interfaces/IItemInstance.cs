@@ -14,32 +14,17 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
-using System.Linq;
-using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
+using System;
+using System.Runtime.Caching;
 
-namespace OpenDiablo2.Core
+namespace OpenDiablo2.Common.Interfaces
 {
-    public sealed class ItemManager : IItemManager
+    public interface IItemInstance
     {
-        private readonly IEngineDataManager engineDataManager;
-
-        public ItemManager(IEngineDataManager engineDataManager)
-        {
-            this.engineDataManager = engineDataManager;
-        }
-
-        public Item getItem(string code)
-        {
-            Item item = engineDataManager.Items.FirstOrDefault(x => x.Code == code);
-
-            return item;
-        }
-
-        public ItemInstance getItemInstance(string code)
-        {
-            return new ItemInstance(getItem(code));
-        }
-
+        Item Item { get; }
+        string Name { get; }
+        int Level { get; }
+        bool Identified { get; }
     }
 }

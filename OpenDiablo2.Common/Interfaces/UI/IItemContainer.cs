@@ -6,10 +6,10 @@ namespace OpenDiablo2.Common.Interfaces
 {
     public interface IItemContainer : IDisposable
     {
-        Item ContainedItem { get; }
+        ItemInstance ContainedItem { get; }
         Point Location { get; set; }
 
-        void SetContainedItem(Item containedItem);
+        void SetContainedItem(ItemInstance containedItem);
         void Render();
         void Update();
     }

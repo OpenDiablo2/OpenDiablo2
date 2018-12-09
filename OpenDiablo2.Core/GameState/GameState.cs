@@ -37,7 +37,7 @@ namespace OpenDiablo2.Core.GameState_
 
         public int Seed { get; internal set; }
 
-        public Item SelectedItem { get; internal set; }
+        public ItemInstance SelectedItem { get; internal set; }
         public object ThreadLocker { get; } = new object();
 
         public int CameraOffset { get; set; } = 0;
@@ -236,7 +236,7 @@ namespace OpenDiablo2.Core.GameState_
             throw new NotImplementedException();
         }
 
-        public void SelectItem(Item item)
+        public void SelectItem(ItemInstance item)
         {
             if (item == null)
             {
@@ -244,7 +244,7 @@ namespace OpenDiablo2.Core.GameState_
             }
             else
             {
-                var cursorsprite = renderWindow.LoadSprite(ResourcePaths.GeneratePathForItem(item.InvFile), Palettes.Units);
+                var cursorsprite = renderWindow.LoadSprite(ResourcePaths.GeneratePathForItem(item.Item.InvFile), Palettes.Units);
 
                 renderWindow.MouseCursor = renderWindow.LoadCursor(cursorsprite, 0, new Point(cursorsprite.FrameSize.Width / 2, cursorsprite.FrameSize.Height / 2));
             }

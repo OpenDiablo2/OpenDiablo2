@@ -15,6 +15,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Enums.Mobs;
 using OpenDiablo2.Common.Interfaces.Mobs;
@@ -51,7 +52,7 @@ namespace OpenDiablo2.Common.Models.Mobs
         protected Stat RunVelocity;
         protected Stat RunDrain;
 
-
+        public Dictionary<String, ItemInstance> Equipment = new Dictionary<string, ItemInstance> ();
 
         public long Experience { get; protected set; }
 
@@ -81,6 +82,7 @@ namespace OpenDiablo2.Common.Models.Mobs
 
             Experience = experience; // how much total exp do they have
 
+
             HeroType = herotype;
             HeroTypeConfig = heroconfig;
             ExperienceConfig = expconfig;
@@ -94,6 +96,21 @@ namespace OpenDiablo2.Common.Models.Mobs
             RefreshDerived();
         }
 
+        public void UpdateEquipment(string slot, ItemInstance item)
+        {
+            if(Equipment.ContainsKey(slot))
+            {
+                Equipment.Remove(slot);
+            }
+
+            Equipment.Add(slot, item);
+
+            if(item.Item is Weapon)
+            {
+                WeaponClass = ((Weapon)item.Item).WeaponClass.ToWeaponClass();
+            }
+        }
+        
         #region Level and Experience
         public long GetExperienceToLevel()
         {

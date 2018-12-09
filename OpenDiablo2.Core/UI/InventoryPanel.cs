@@ -63,43 +63,33 @@ namespace OpenDiablo2.Core.UI
 
             helmContainer = createItemContainer(eItemContainerType.Helm);
             helmContainer.Location = sprite.Location + new Size(135, 5);
-            helmContainer.SetContainedItem(itemManager.getItem("cap"));
             
             amuletContainer = createItemContainer(eItemContainerType.Amulet);
             amuletContainer.Location = sprite.Location + new Size(209, 34);
-            amuletContainer.SetContainedItem(itemManager.getItem("vip"));
             
             armorContainer = createItemContainer(eItemContainerType.Armor);
             armorContainer.Location = sprite.Location + new Size(135, 75);
-            armorContainer.SetContainedItem(itemManager.getItem("hla"));
             
             weaponLeftContainer = createItemContainer(eItemContainerType.Weapon);
             weaponLeftContainer.Location = sprite.Location + new Size(20, 47);
-            weaponLeftContainer.SetContainedItem(itemManager.getItem("ame"));
             
             weaponRightContainer = createItemContainer(eItemContainerType.Weapon);
             weaponRightContainer.Location = sprite.Location + new Size(253, 47);
-            weaponRightContainer.SetContainedItem(itemManager.getItem("paf"));
             
             beltContainer = createItemContainer(eItemContainerType.Belt);
             beltContainer.Location = sprite.Location + new Size(136, 178);
-            beltContainer.SetContainedItem(itemManager.getItem("vbl"));
             
             ringtLeftContainer = createItemContainer(eItemContainerType.Ring);
             ringtLeftContainer.Location = sprite.Location + new Size(95, 179);
-            ringtLeftContainer.SetContainedItem(itemManager.getItem("rin"));
             
             ringtRightContainer = createItemContainer(eItemContainerType.Ring);
             ringtRightContainer.Location = sprite.Location + new Size(209, 179);
-            ringtRightContainer.SetContainedItem(itemManager.getItem("rin"));
             
             gloveContainer = createItemContainer(eItemContainerType.Glove);
             gloveContainer.Location = sprite.Location + new Size(20, 179);
-            gloveContainer.SetContainedItem(itemManager.getItem("tgl"));
             
             bootsContainer = createItemContainer(eItemContainerType.Boots);
             bootsContainer.Location = sprite.Location + new Size(251, 178);
-            bootsContainer.SetContainedItem(itemManager.getItem("lbt"));
         }
 
         public void Update()
