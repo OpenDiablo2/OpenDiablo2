@@ -16,9 +16,11 @@ namespace OpenDiablo2.Core.Map_Engine
 
         public void Generate()
         {
-            var wildBorder = 5; // (4-15)
+            //var wildBorder = 5; // (4-15)
             // TODO: Is there no data file that explicitly defines this??
             var townMap = gameState.LoadMap(eLevelId.Act1_Town1, new Point(0, 0));
+
+            /*
             Rectangle bloodMooreRect;
 
             // 32-37 is grassy field?
@@ -61,6 +63,7 @@ namespace OpenDiablo2.Core.Map_Engine
                     mapTile.PrimaryMap = townMap;
                 }
             }
+            */
 
         }
 

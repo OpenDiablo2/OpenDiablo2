@@ -200,14 +200,14 @@ namespace OpenDiablo2.Core.GameState_
             {
                 case eRenderCellType.Floor:
                     return map.FileData.FloorLayers
-                        .Select(floorLayer => GetMapCellInfo(map, cellX, cellY, floorLayer.Props[idx], eRenderCellType.Floor))
+                        .Select(floorLayer => GetMapCellInfo(map, cellX, cellY, floorLayer.Props[idx], eRenderCellType.Floor, 0))
                         .Where(x => x != null);
 
                 case eRenderCellType.WallUpper:
                 case eRenderCellType.WallLower:
                 case eRenderCellType.Roof:
                     return map.FileData.WallLayers
-                        .Select(wallLayer => GetMapCellInfo(map, cellX, cellY, wallLayer.Props[idx], renderCellType, wallLayer.Orientations[idx]))
+                        .Select(wallLayer => GetMapCellInfo(map, cellX, cellY, wallLayer.Props[idx], renderCellType, wallLayer.Orientations[idx].Orientation1))
                         .Where(x => x != null);
 
                 default:
@@ -252,7 +252,7 @@ namespace OpenDiablo2.Core.GameState_
             this.SelectedItem = item;
         }
 
-        private MapCellInfo GetMapCellInfo(MapInfo map, int cellX, int cellY, MPQDS1TileProps props, eRenderCellType cellType, MPQDS1WallOrientationTileProps wallOrientations = null)
+        private MapCellInfo GetMapCellInfo(MapInfo map, int cellX, int cellY, MPQDS1TileProps props, eRenderCellType cellType, byte orientation)
         {
             if (!map.CellInfo.ContainsKey(cellType))
             {
@@ -260,13 +260,12 @@ namespace OpenDiablo2.Core.GameState_
             }
 
             var cellInfo = map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)];
-            if (cellInfo != null)
+            if (cellInfo != null && cellInfo?.Tile?.Animated != true)
                 return cellInfo.Ignore ? null : cellInfo;
 
 
             var sub_index = props.Prop2;
             var main_index = (props.Prop3 >> 4) + ((props.Prop4 & 0x03) << 4);
-            var orientation = 0;
 
             // Floors can't have rotations, should we blow up here?
             if (cellType == eRenderCellType.Floor && props.Prop1 == 0)
@@ -282,7 +281,7 @@ namespace OpenDiablo2.Core.GameState_
                     map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
                     return null;
                 }
-
+                
                 if (props.Prop1 == 0)
                 {
                     map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
@@ -294,13 +293,10 @@ namespace OpenDiablo2.Core.GameState_
                     map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
                     return null;
                 }
-
+                
             }
-            if (cellType == eRenderCellType.WallUpper || cellType == eRenderCellType.WallLower)
+            else if (cellType == eRenderCellType.WallUpper || cellType == eRenderCellType.WallLower)
             {
-                orientation = wallOrientations.Orientation1;
-
-
                 if (props.Prop1 == 0)
                 {
                     map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
@@ -374,6 +370,39 @@ namespace OpenDiablo2.Core.GameState_
                 else tile = tiles.First();
             }
 
+            switch (cellType)
+            {
+                case eRenderCellType.Floor:
+                    if (tile.Orientation != 0)
+                    {
+                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                        return null;
+                    }
+                    break;
+                case eRenderCellType.WallLower:
+                    if (tile.Orientation < 1 || tile.Orientation == 10 || tile.Orientation == 11 || tile.Orientation == 13 || tile.Orientation > 14)
+                    {
+                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                        return null;
+                    }
+                    break;
+                case eRenderCellType.WallUpper:
+                    if (tile.Orientation <= 15)
+                    {
+                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                        return null;
+                    }
+                    break;
+                case eRenderCellType.Roof:
+                    if (tile.Orientation != 15)
+                    {
+                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                        return null;
+                    }
+                    break;
+                default:
+                    break;
+            }
             // This WILL happen to you
             if (tile.Width == 0 || tile.Height == 0)
             {
@@ -392,17 +421,8 @@ namespace OpenDiablo2.Core.GameState_
             var mapCellInfo = mapDataLookup.FirstOrDefault(x => x.Tile.Id == tile.Id && x.AnimationId == frame);
             if (mapCellInfo == null)
             {
-                mapCellInfo = renderWindow.CacheMapCell(tile);
+                mapCellInfo = renderWindow.CacheMapCell(tile, cellType);
                 mapDataLookup.Add(mapCellInfo);
-
-                switch (cellType)
-                {
-                    case eRenderCellType.WallUpper:
-                    case eRenderCellType.WallLower:
-                        mapCellInfo.OffY -= 80;
-                        break;
-                }
-
             }
 
             map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = mapCellInfo;

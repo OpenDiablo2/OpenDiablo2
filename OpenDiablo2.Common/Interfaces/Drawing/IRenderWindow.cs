@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces.Drawing;
 using OpenDiablo2.Common.Models;
 
@@ -28,7 +29,7 @@ namespace OpenDiablo2.Common.Interfaces
         void Draw(ISprite sprite, int xSegments, int ySegments, int offset);
         IMouseCursor LoadCursor(ISprite sprite, int frame, Point hotspot);
         void Draw(ILabel label);
-        MapCellInfo CacheMapCell(MPQDT1Tile mapCell);
+        MapCellInfo CacheMapCell(MPQDT1Tile mapCell, eRenderCellType cellType);
         void DrawMapCell(MapCellInfo mapCellInfo, int xPixel, int yPixel);
         ICharacterRenderer CreateCharacterRenderer();
     }
