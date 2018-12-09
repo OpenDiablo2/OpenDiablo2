@@ -73,10 +73,15 @@ namespace OpenDiablo2.SDL2_
             SDL_mixer.Mix_CloseAudio();
         }
 
-        public void PlaySfx(byte[] data)
+        public int PlaySfx(byte[] data)
         {
             var sound = SDL_mixer.Mix_QuickLoad_WAV(data);
-            SDL_mixer.Mix_PlayChannel(-1, sound, 0);
+            return SDL_mixer.Mix_PlayChannel(-1, sound, 0);
+        }
+
+        public void StopSfx(int channel)
+        {
+            SDL_mixer.Mix_HaltChannel(channel);
         }
     }
 }

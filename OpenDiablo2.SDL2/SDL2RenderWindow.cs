@@ -354,11 +354,9 @@ namespace OpenDiablo2.SDL2_
             var offX = -minX;
             var offY = -minY;
 
-            var frameSize = new Size(diffX, Math.Abs(diffY));
+            var frameSize = new Size(Math.Abs(diffX), Math.Abs(diffY));
 
-            var srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = frameSize.Width, h = Math.Abs(frameSize.Height) };
-            //var frameSizeMax = diffX * Math.Abs(diffY);
-
+            var srcRect = new SDL.SDL_Rect { x = minX, y = minY, w = frameSize.Width, h = frameSize.Height };
 
             var texId = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, frameSize.Width, frameSize.Height);
             SDL.SDL_SetTextureBlendMode(texId, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
@@ -371,10 +369,7 @@ namespace OpenDiablo2.SDL2_
                 UInt32* data = (UInt32*)pixels;
 
                 var pitchChange = pitch / 4;
-
-                for (var i = 0; i < frameSize.Height * pitchChange; i++)
-                    data[i] = 0x0;
-
+                var colors = getGameState().CurrentPalette.Colors;
 
                 foreach (var block in mapCell.Blocks)
                 {
@@ -387,7 +382,7 @@ namespace OpenDiablo2.SDL2_
                         {
                             if (colorIndex == 0)
                                 continue;
-                            var color = getGameState().CurrentPalette.Colors[colorIndex];
+                            var color = colors[colorIndex];
 
                             if (color > 0)
                                 data[index] = color;
@@ -399,8 +394,7 @@ namespace OpenDiablo2.SDL2_
                             xx++;
                             if (xx == 32)
                             {
-                                index -= 32;
-                                index += pitchChange;
+                                index += pitchChange - 32;
                                 xx = 0;
                                 yy++;
                             }
@@ -428,7 +422,7 @@ namespace OpenDiablo2.SDL2_
         public void DrawMapCell(MapCellInfo mapCellInfo, int xPixel, int yPixel)
         {
             var srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = mapCellInfo.FrameWidth, h = Math.Abs(mapCellInfo.FrameHeight) };
-            var destRect = new SDL.SDL_Rect { x = xPixel - mapCellInfo.OffX, y = yPixel - mapCellInfo.OffY, w = mapCellInfo.FrameWidth, h = mapCellInfo.FrameHeight };
+            var destRect = new SDL.SDL_Rect { x = xPixel + mapCellInfo.Rect.X, y = yPixel + mapCellInfo.Rect.Y, w = mapCellInfo.FrameWidth, h = mapCellInfo.FrameHeight };
             SDL.SDL_RenderCopy(renderer, (mapCellInfo.Texture as SDL2Texture).Pointer, ref srcRect, ref destRect);
         }
 
