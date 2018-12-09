@@ -125,7 +125,7 @@ namespace OpenDiablo2.Core.Map_Engine
 
 
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallLower))
-                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 210 + py + (int)oy);
+                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 210 + py + (int)oy + 80);
 
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallUpper))
                         renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 210 + py + (int)oy);

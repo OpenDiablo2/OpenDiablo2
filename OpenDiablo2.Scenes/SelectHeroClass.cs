@@ -43,6 +43,8 @@ namespace OpenDiablo2.Scenes
         private bool showEntryUi = false;
         private eHero? selectedHero = null;
         private float secondTimer;
+        private int sfxChannel = -1;
+        private int sfxChannel2 = -1;
         private readonly ISprite backgroundSprite, campfireSprite;
         private readonly IFont headingFont;
         private readonly IFont heroDescFont;
@@ -242,14 +244,27 @@ namespace OpenDiablo2.Scenes
             }, (path => sfxDictionary.Add(path, mpqProvider.GetBytes(path))));
         }
 
+        private void StopSfx()
+        {
+            if (sfxChannel > -1)
+                soundProvider.StopSfx(sfxChannel);
+
+            if (sfxChannel2 > -1)
+                soundProvider.StopSfx(sfxChannel);
+        }
+
         private void OnOkclicked()
         {
+            StopSfx();
+
             // TODO: Support other session types
             gameState.Initialize(characterNameTextBox.Text, selectedHero.Value, eSessionType.Local);
         }
 
         private void OnExitClicked()
         {
+            StopSfx();
+
             var heros = Enum.GetValues(typeof(eHero)).Cast<eHero>();
             foreach(var hero in heros)
             {
@@ -449,6 +464,7 @@ namespace OpenDiablo2.Scenes
                     if (ri.Value.Stance != eHeroStance.Selected)
                         continue;
 
+                    PlayHeroDeselected(ri.Key);
                     ri.Value.Stance = eHeroStance.Retreating;
                     ri.Value.SpecialFrameTime = 0;
                     break;
@@ -476,25 +492,25 @@ namespace OpenDiablo2.Scenes
             switch (hero)
             {
                 case eHero.Barbarian:
-                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXBarbarianSelect]);
+                    sfxChannel = soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXBarbarianSelect]);
                     break;
                 case eHero.Necromancer:
-                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXNecromancerSelect]);
+                    sfxChannel = soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXNecromancerSelect]);
                     break;
                 case eHero.Paladin:
-                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXPaladinSelect]);
+                    sfxChannel = soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXPaladinSelect]);
                     break;
                 case eHero.Assassin:
-                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXAssassinSelect]);
+                    sfxChannel = soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXAssassinSelect]);
                     break;
                 case eHero.Sorceress:
-                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXSorceressSelect]);
+                    sfxChannel = soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXSorceressSelect]);
                     break;
                 case eHero.Amazon:
-                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXAmazonSelect]);
+                    sfxChannel = soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXAmazonSelect]);
                     break;
                 case eHero.Druid:
-                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXDruidSelect]);
+                    sfxChannel = soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXDruidSelect]);
                     break;
                 default:
                     break;
@@ -506,25 +522,25 @@ namespace OpenDiablo2.Scenes
             switch (hero)
             {
                 case eHero.Barbarian:
-                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXBarbarianDeselect]);
+                    sfxChannel2 = soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXBarbarianDeselect]);
                     break;
                 case eHero.Necromancer:
-                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXNecromancerDeselect]);
+                    sfxChannel2 = soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXNecromancerDeselect]);
                     break;
                 case eHero.Paladin:
-                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXPaladinDeselect]);
+                    sfxChannel2 = soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXPaladinDeselect]);
                     break;
                 case eHero.Assassin:
-                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXAssassinDeselect]);
+                    sfxChannel2 = soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXAssassinDeselect]);
                     break;
                 case eHero.Sorceress:
-                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXSorceressDeselect]);
+                    sfxChannel2 = soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXSorceressDeselect]);
                     break;
                 case eHero.Amazon:
-                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXAmazonDeselect]);
+                    sfxChannel2 = soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXAmazonDeselect]);
                     break;
                 case eHero.Druid:
-                    soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXDruidDeselect]);
+                    sfxChannel2 = soundProvider.PlaySfx(sfxDictionary[ResourcePaths.SFXDruidDeselect]);
                     break;
                 default:
                     break;

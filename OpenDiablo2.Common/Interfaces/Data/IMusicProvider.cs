@@ -8,6 +8,7 @@ namespace OpenDiablo2.Common.Interfaces
         void LoadSong(Stream data);
         void PlaySong();
         void StopSong();
-        void PlaySfx(byte[] data);
+        void StopSfx(int channel);
+        int PlaySfx(byte[] data);
     }
 }
