@@ -32,7 +32,7 @@ namespace OpenDiablo2.Core.Map_Engine
                 //cOffY = (int)((cameraLocation.X + cameraLocation.Y) * (cellSizeY / 2));
             }
         }
-        
+
         private const int
             cellSizeX = 160,
             cellSizeY = 80;
@@ -52,7 +52,7 @@ namespace OpenDiablo2.Core.Map_Engine
 
         private void OnLocatePlayers(int clientHash, IEnumerable<PlayerLocationDetails> playerLocationDetails)
         {
-            foreach(var loc in playerLocationDetails)
+            foreach (var loc in playerLocationDetails)
             {
                 var cr = characterRenderers.FirstOrDefault(x => x.LocationDetails.PlayerId == loc.PlayerId);
                 var newDirection = loc.MovementDirection != cr.LocationDetails.MovementDirection;
@@ -81,11 +81,11 @@ namespace OpenDiablo2.Core.Map_Engine
                 cr.WeaponClass = info.WeaponClass;
                 cr.Hero = info.Hero;
                 cr.ArmorType = info.ArmorType;
-                
+
             }
 
             // Add character renderers for characters that now exist
-            foreach(var info in playerInfo.Where(x => !characterRenderers.Any(z => x.UID == z.UID)))
+            foreach (var info in playerInfo.Where(x => !characterRenderers.Any(z => x.UID == z.UID)))
             {
                 var cr = renderWindow.CreateCharacterRenderer();
                 cr.UID = info.UID;
@@ -99,6 +99,9 @@ namespace OpenDiablo2.Core.Map_Engine
             }
         }
 
+
+        const int skewX = 400;
+        const int skewY = 300;
         public void Render()
         {
             var xOffset = gameState.CameraOffset;
@@ -106,9 +109,9 @@ namespace OpenDiablo2.Core.Map_Engine
             var cx = -(cameraLocation.X - Math.Truncate(cameraLocation.X));
             var cy = -(cameraLocation.Y - Math.Truncate(cameraLocation.Y));
 
-            for (int ty = -5; ty <= 9; ty++)
+            for (int ty = -7; ty <= 9; ty++)
             {
-                for (int tx = -5; tx <= 9; tx++)
+                for (int tx = -8; tx <= 8; tx++)
                 {
                     var ax = tx + Math.Truncate(cameraLocation.X);
                     var ay = ty + Math.Truncate(cameraLocation.Y);
@@ -121,27 +124,43 @@ namespace OpenDiablo2.Core.Map_Engine
 
 
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.Floor))
-                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 210 + py + (int)oy);
+                        renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy);
 
+                }
+            }
+
+            for (int ty = -7; ty <= 9; ty++)
+            {
+                for (int tx = -8; tx <= 8; tx++)
+                {
+                    var ax = tx + Math.Truncate(cameraLocation.X);
+                    var ay = ty + Math.Truncate(cameraLocation.Y);
+
+                    var px = (tx - ty) * (cellSizeX / 2);
+                    var py = (tx + ty) * (cellSizeY / 2);
+
+                    var ox = (cx - cy) * (cellSizeX / 2);
+                    var oy = (cx + cy) * (cellSizeY / 2);
 
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallLower))
-                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 210 + py + (int)oy);
+                        renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy + 80);
 
-                    foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallUpper))
-                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 210 + py + (int)oy);
-
-                    // TODO: We need to render the characters infront of, or behind the wall properly...
-                    if (ty == 1 && tx == 1)
+                    foreach (var character in characterRenderers.Where(x => Math.Truncate(x.LocationDetails.PlayerX) == ax && Math.Truncate(x.LocationDetails.PlayerY) == ay))
                     {
-                        foreach (var character in characterRenderers/*.Where(x => Math.Truncate(x.LocationDetails.PlayerX) == ax && Math.Truncate(x.LocationDetails.PlayerY) == ay)*/)
-                        {
-                            // TODO: Temporary hack
-                            character.Render(400 + gameState.CameraOffset, 280);
-                        }
+                        var ptx = character.LocationDetails.PlayerX - Math.Truncate(cameraLocation.X);
+                        var pty = character.LocationDetails.PlayerY - Math.Truncate(cameraLocation.Y);
+
+                        var ppx = (ptx - pty) * (cellSizeX / 2);
+                        var ppy = (ptx + pty) * (cellSizeY / 2);
+
+                        character.Render(skewX + (int)ppx + (int)ox + xOffset, skewY + (int)ppy + (int)oy);
                     }
 
+                    foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallUpper))
+                        renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy);
+
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.Roof))
-                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 210 + py + (int)oy);
+                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 300 + py + (int)oy);
                 }
             }
 

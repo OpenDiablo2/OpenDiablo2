@@ -129,7 +129,6 @@ namespace OpenDiablo2.SDL2_
             if (currentDirectionCache != null)
             {
                 currentDirectionCache.RenderFrameIndex = 0;
-                seconds = 0f;
                 return;
             }
 
@@ -143,7 +142,7 @@ namespace OpenDiablo2.SDL2_
 
         private unsafe void CacheFrames(IEnumerable<MPQDCC> layerData)
         {
-            var cache = new DirectionCacheItem
+            var directionCache = new DirectionCacheItem
             {
                 MobMode = MobMode,
                 Direction = directionConversion[LocationDetails.MovementDirection]
@@ -152,9 +151,9 @@ namespace OpenDiablo2.SDL2_
             var palette = paletteProvider.PaletteTable[Palettes.Units];
 
             var dirAnimation = animationData.Animations[0];
-            cache.FramesToAnimate = dirAnimation.FramesPerDirection;
-            cache.AnimationSpeed = dirAnimation.AnimationSpeed;
-            cache.RenderFrameIndex = 0;
+            directionCache.FramesToAnimate = dirAnimation.FramesPerDirection;
+            directionCache.AnimationSpeed = dirAnimation.AnimationSpeed;
+            directionCache.RenderFrameIndex = 0;
 
             var minX = Int32.MaxValue;
             var minY = Int32.MaxValue;
@@ -181,13 +180,13 @@ namespace OpenDiablo2.SDL2_
             if (layersIgnored > 0)
                 log.Warn($"{layersIgnored} animation layer(s) were not found!");
 
-            var frameW = (maxX - minX) * 2; // Hack
-            var frameH = (maxY - minY) * 2;
+            var frameW = (maxX - minX);
+            var frameH = (maxY - minY);
 
-            cache.SpriteTexture = new IntPtr[cache.FramesToAnimate];
-            cache.SpriteRect = new SDL.SDL_Rect[cache.FramesToAnimate];
-
-            for (var frameIndex = 0; frameIndex < cache.FramesToAnimate; frameIndex++)
+            directionCache.SpriteTexture = new IntPtr[directionCache.FramesToAnimate];
+            directionCache.SpriteRect = new SDL.SDL_Rect[directionCache.FramesToAnimate];
+            
+            for (var frameIndex = 0; frameIndex < directionCache.FramesToAnimate; frameIndex++)
             {
                 var texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, frameW, frameH);
 
@@ -202,43 +201,35 @@ namespace OpenDiablo2.SDL2_
                     var direction = layer.Directions[directionConversion[LocationDetails.MovementDirection]];
                     var frame = direction.Frames[frameIndex];
 
-                    foreach (var cell in frame.Cells)
+
+                    for (var y = 0; y < direction.Box.Height; y++)
                     {
-                        if (cell.PixelData == null)
-                            continue; // TODO: This isn't good
-
-                        for (int y = 0; y < cell.Height; y++)
+                        for (var x = 0; x < direction.Box.Width; x++)
                         {
-                            for (int x = 0; x < cell.Width; x++)
-                            {
-                                // Index 0 is always transparent
-                                var paletteIndex = cell.PixelData[x + (y * cell.Width)];
+                            var paletteIndex = frame.PixelData[x + (y * direction.Box.Width)];
 
-                                if (paletteIndex == 0)
-                                    continue;
+                            if (paletteIndex == 0)
+                                continue;
 
-                                var color = palette.Colors[paletteIndex];
+                            var color = palette.Colors[paletteIndex];
+                            var actualX = x + direction.Box.X - minX;
+                            var actualY = y + direction.Box.Y - minY;
 
-                                var offsetX = x + cell.XOffset + (frame.Box.X - minX);
-                                var offsetY = y + cell.YOffset + (frame.Box.Y - minY);
-                                if (offsetX < 0 || offsetX > frameW || offsetY < 0 || offsetY > frameH)
-                                    throw new OpenDiablo2Exception("There is nothing we can do now.");
+                            data[actualX + (actualY * (pitch / 4))] = color;
 
-                                data[offsetX + (offsetY * (pitch / 4))] = color;
-                            }
                         }
                     }
+                  
                 }
 
                 SDL.SDL_UnlockTexture(texture);
                 SDL.SDL_SetTextureBlendMode(texture, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+                
+                directionCache.SpriteTexture[frameIndex] = texture;
+                directionCache.SpriteRect[frameIndex] = new SDL.SDL_Rect { x = minX, y = minY, w = frameW, h = frameH };
 
-                // TODO: Temporary code!
-                cache.SpriteTexture[frameIndex] = texture;
-                cache.SpriteRect[frameIndex] = new SDL.SDL_Rect { x = minX, y = minY, w = frameW, h = frameH };
-
-                directionCache.Add(cache);
-                currentDirectionCache = cache;
+                this.directionCache.Add(directionCache);
+                currentDirectionCache = directionCache;
             }
         }
 
