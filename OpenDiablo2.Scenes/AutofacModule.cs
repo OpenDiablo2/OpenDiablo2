@@ -20,7 +20,7 @@ namespace OpenDiablo2.Scenes
                 builder
                     .RegisterType(type)
                     .Keyed<IScene>(att.SceneType)
-                    .SingleInstance();
+                    .InstancePerDependency();
             }
         }
     }

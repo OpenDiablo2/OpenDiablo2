@@ -35,5 +35,8 @@ namespace OpenDiablo2.Common.Interfaces
         /// <param name="cacheItemPolicy">Pass in a new policy to control how this item is handled. Typically you can leave this null.</param>
         /// <returns>The item requested</returns>
         T AddOrGetExisting<T>(string key, Func<T> valueFactory, CacheItemPolicy cacheItemPolicy = null);
+        bool Exists(string key);
+        T GetExisting<T>(string key) where T : class, new();
+        void Add<T>(string key, T value, CacheItemPolicy cacheItemPolicy = null);
     }
 }

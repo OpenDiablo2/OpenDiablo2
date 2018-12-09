@@ -19,7 +19,7 @@ namespace OpenDiablo2.Core.UI
             this.renderWindow = renderWindow;
             this.panelFrameType = panelFrameType;
             
-            sprite = renderWindow.LoadSprite(ResourcePaths.Frame, Palettes.Units, new Point(0, 0));
+            sprite = renderWindow.LoadSprite(ResourcePaths.Frame, Palettes.Units, new Point(0, 0), true);
 
             Location = new Point(0, 0);
 

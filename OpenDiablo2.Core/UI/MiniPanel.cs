@@ -35,7 +35,7 @@ namespace OpenDiablo2.Core.UI
             this.gameState = gameState;
             this.panels = panels;
 
-            sprite = renderWindow.LoadSprite(ResourcePaths.MinipanelSmall, Palettes.Units);
+            sprite = renderWindow.LoadSprite(ResourcePaths.MinipanelSmall, Palettes.Units, true);
 
             buttons = panelButtons.Select((x, i) =>
             {
