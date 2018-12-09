@@ -41,14 +41,12 @@ namespace OpenDiablo2.Core
             this.getScene = getScene;
             this.getResourceManager = getResourceManager;
             this.getGameState = getGameState;
-
-            MPQs = mpqProvider.GetMPQs().ToArray();
         }
 
         private void LoadPalettes()
         {
             log.Info("Loading palettes");
-            var paletteFiles = MPQs.SelectMany(x => x.Files).Where(x => x.StartsWith("data\\global\\palette\\") && x.EndsWith(".dat"));
+            var paletteFiles = mpqProvider.SelectMany(x => x.Files).Where(x => x.StartsWith("data\\global\\palette\\") && x.EndsWith(".dat"));
             foreach (var paletteFile in paletteFiles)
             {
                 var paletteNameParts = paletteFile.Split('\\');
