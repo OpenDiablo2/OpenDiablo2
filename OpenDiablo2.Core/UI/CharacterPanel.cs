@@ -26,7 +26,7 @@ namespace OpenDiablo2.Core.UI
     public sealed class CharacterPanel : ICharacterPanel
     {
         private readonly IRenderWindow renderWindow;
-        private readonly ISprite sprite;
+        private readonly ISprite panelSprite;
 
         private readonly IButton closeButton;
 
@@ -38,10 +38,10 @@ namespace OpenDiablo2.Core.UI
         {
             this.renderWindow = renderWindow;
 
-            sprite = renderWindow.LoadSprite(ResourcePaths.InventoryCharacterPanel, Palettes.Act1, FrameType.GetOffset(), true);
+            panelSprite = renderWindow.LoadSprite(ResourcePaths.InventoryCharacterPanel, Palettes.Act1, FrameType.GetOffset(), true);
 
             closeButton = createButton(eButtonType.Close);
-            closeButton.Location = sprite.Location + new Size(128, 388);
+            closeButton.Location = panelSprite.Location + new Size(128, 388);
             closeButton.OnActivate = () => OnPanelClosed?.Invoke(this);
         }
 
@@ -55,14 +55,14 @@ namespace OpenDiablo2.Core.UI
 
         public void Render()
         {
-            renderWindow.Draw(sprite, 2, 2, 0);
+            renderWindow.Draw(panelSprite, 2, 2, 0);
 
             closeButton.Render();
         }
 
         public void Dispose()
         {
-            sprite.Dispose();
+            panelSprite.Dispose();
         }
     }
 }

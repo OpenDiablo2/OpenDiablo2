@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Drawing;
 using OpenDiablo2.Common.Enums;
 
 namespace OpenDiablo2.Common.Models
@@ -27,7 +28,8 @@ namespace OpenDiablo2.Common.Models
             {eButtonType.MinipanelMessage, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MinipanelButton,PaletteName = Palettes.Units, BaseFrame = 10 } },
             {eButtonType.MinipanelQuest, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MinipanelButton,PaletteName = Palettes.Units, BaseFrame = 12 } },
             {eButtonType.MinipanelMenu, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MinipanelButton,PaletteName = Palettes.Units, BaseFrame = 14 } },
-
+            
+            {eButtonType.SecondaryInvHand, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.InventoryWeaponsTab, PaletteName = Palettes.Units } },
             {eButtonType.Run, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.RunButton,PaletteName = Palettes.Units, Toggleable = true } },
             {eButtonType.Menu, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MenuButton,PaletteName = Palettes.Units, Toggleable = true } },
             {eButtonType.GoldCoin, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.GoldCoinButton,PaletteName = Palettes.Units } },

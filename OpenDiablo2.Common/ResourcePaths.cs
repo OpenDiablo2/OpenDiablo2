@@ -122,7 +122,8 @@ namespace OpenDiablo2.Common
         public const string MinipanelButton = @"data\global\ui\PANEL\minipanelbtn.DC6";
 
         public const string Frame = @"data\global\ui\PANEL\800borderframe.dc6";
-        public const string InventoryCharacterPanel = @"data\global\ui\PANEL\invchar.DC6";
+        public const string InventoryCharacterPanel = @"data\global\ui\PANEL\invchar6.DC6";
+        public const string InventoryWeaponsTab = @"data\global\ui\PANEL\invchar6Tab.DC6";
 
         public const string RunButton = @"data\global\ui\PANEL\runbutton.dc6";
         public const string MenuButton = @"data\global\ui\PANEL\menubutton.DC6";

@@ -40,6 +40,9 @@ namespace OpenDiablo2.Core.UI
 
         private Point labelOffset = new Point();
 
+        public Size ClickableRect { get; set; }
+        public bool AllowFrameChange { get; set; } = true;
+
         private bool enabled = true;
         public bool Enabled
         {
@@ -136,8 +139,10 @@ namespace OpenDiablo2.Core.UI
                 return;
             }
 
-            var hovered = mouseInfoProvider.MouseX >= location.X && mouseInfoProvider.MouseX < (location.X + buttonWidth)
-                && mouseInfoProvider.MouseY >= location.Y && mouseInfoProvider.MouseY < (location.Y + buttonHeight);
+            int clickWidth = ClickableRect.Width > 0 ? ClickableRect.Width : buttonWidth;
+            int clickHeight = ClickableRect.Height > 0 ? ClickableRect.Height : buttonHeight;
+            var hovered = mouseInfoProvider.MouseX >= location.X && mouseInfoProvider.MouseX < (location.X + clickWidth)
+                && mouseInfoProvider.MouseY >= location.Y && mouseInfoProvider.MouseY < (location.Y + clickHeight);
 
 
             if (!activeLock && hovered && mouseInfoProvider.LeftMouseDown && !mouseInfoProvider.ReserveMouse)
@@ -179,17 +184,20 @@ namespace OpenDiablo2.Core.UI
         {
             var frame = buttonLayout.BaseFrame;
 
-            if(Toggled && pressed)
+            if (AllowFrameChange)
             {
-                frame = buttonLayout.BaseFrame + 3;
-            }
-            else if(pressed)
-            {
-                frame = buttonLayout.BaseFrame + 1;
-            }
-            else if(Toggled)
-            {
-                frame = buttonLayout.BaseFrame + 2;
+                if (Toggled && pressed)
+                {
+                    frame = buttonLayout.BaseFrame + 3;
+                }
+                else if (pressed)
+                {
+                    frame = buttonLayout.BaseFrame + 1;
+                }
+                else if (Toggled)
+                {
+                    frame = buttonLayout.BaseFrame + 2;
+                }
             }
 
             renderWindow.Draw(sprite, buttonLayout.XSegments, 1, frame);

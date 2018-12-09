@@ -29,18 +29,13 @@ namespace OpenDiablo2.Core.UI
     public sealed class InventoryPanel : IInventoryPanel
     {
         private readonly IRenderWindow renderWindow;
-        private readonly ISprite sprite;
+        private readonly ISprite panelSprite;
+        
+        public IItemContainer helmContainer, armorContainer, beltContainer, gloveContainer, bootsContainer,
+            leftHandContainer, rightHandContainer, secondaryLeftHandContainer, secondaryRightHandContainer,
+            ringtLeftContainer, ringtRightContainer, amuletContainer;
 
-        public eButtonType PanelType => eButtonType.MinipanelInventory;
-        public ePanelFrameType FrameType => ePanelFrameType.Right;
-
-        // Test vars
-        public IItemContainer helmContainer, armorContainer, weaponLeftContainer, weaponRightContainer, beltContainer, gloveContainer, bootsContainer;
-        private readonly IItemContainer ringtLeftContainer;
-        private readonly IItemContainer ringtRightContainer;
-        private readonly IItemContainer amuletContainer;
-
-        private readonly IButton closeButton, goldButton;
+        private readonly IButton closeButton, secondaryLeftButton, secondaryRightButton, goldButton;
 
         public event OnPanelClosedEvent OnPanelClosed;
 
@@ -51,57 +46,92 @@ namespace OpenDiablo2.Core.UI
         {
             this.renderWindow = renderWindow;
 
-            sprite = renderWindow.LoadSprite(ResourcePaths.InventoryCharacterPanel, Palettes.Units, FrameType.GetOffset(), true);
+            panelSprite = renderWindow.LoadSprite(ResourcePaths.InventoryCharacterPanel, Palettes.Units, FrameType.GetOffset(), true);
 
             closeButton = createButton(eButtonType.Close);
-            closeButton.Location = sprite.Location + new Size(18, 384);
+            closeButton.Location = panelSprite.Location + new Size(18, 384);
             closeButton.OnActivate = () => OnPanelClosed?.Invoke(this);
 
+            secondaryLeftButton = createButton(eButtonType.SecondaryInvHand);
+            secondaryLeftButton.Location = panelSprite.Location + new Size(15, 22);
+            secondaryLeftButton.OnActivate = ToggleWeaponsSlot;
+            secondaryLeftButton.ClickableRect = new Size(0, 20);
+            secondaryLeftButton.AllowFrameChange = false;
+
+            secondaryRightButton = createButton(eButtonType.SecondaryInvHand);
+            secondaryRightButton.Location = panelSprite.Location + new Size(246, 22);
+            secondaryRightButton.OnActivate = ToggleWeaponsSlot;
+            secondaryRightButton.ClickableRect = new Size(0, 20);
+            secondaryRightButton.AllowFrameChange = false;
+
             goldButton = createButton(eButtonType.GoldCoin);
-            goldButton.Location = sprite.Location + new Size(84, 391);
+            goldButton.Location = panelSprite.Location + new Size(84, 391);
             goldButton.OnActivate = OpenGoldDrop;
 
             helmContainer = createItemContainer(eItemContainerType.Helm);
-            helmContainer.Location = sprite.Location + new Size(135, 5);
+            helmContainer.Location = panelSprite.Location + new Size(135, 5);
             
             amuletContainer = createItemContainer(eItemContainerType.Amulet);
-            amuletContainer.Location = sprite.Location + new Size(209, 34);
+            amuletContainer.Location = panelSprite.Location + new Size(209, 34);
             
             armorContainer = createItemContainer(eItemContainerType.Armor);
-            armorContainer.Location = sprite.Location + new Size(135, 75);
-            
-            weaponLeftContainer = createItemContainer(eItemContainerType.Weapon);
-            weaponLeftContainer.Location = sprite.Location + new Size(20, 47);
-            
-            weaponRightContainer = createItemContainer(eItemContainerType.Weapon);
-            weaponRightContainer.Location = sprite.Location + new Size(253, 47);
-            
+            armorContainer.Location = panelSprite.Location + new Size(135, 75);
+
+            leftHandContainer = createItemContainer(eItemContainerType.Weapon);
+            leftHandContainer.Location = panelSprite.Location + new Size(20, 47);
+
+            rightHandContainer = createItemContainer(eItemContainerType.Weapon);
+            rightHandContainer.Location = panelSprite.Location + new Size(253, 47);
+
+            secondaryLeftHandContainer = createItemContainer(eItemContainerType.Weapon);
+            secondaryLeftHandContainer.Location = panelSprite.Location + new Size(24, 45);
+
+            secondaryRightHandContainer = createItemContainer(eItemContainerType.Weapon);
+            secondaryRightHandContainer.Location = panelSprite.Location + new Size(257, 45);
+
             beltContainer = createItemContainer(eItemContainerType.Belt);
-            beltContainer.Location = sprite.Location + new Size(136, 178);
+            beltContainer.Location = panelSprite.Location + new Size(136, 178);
             
             ringtLeftContainer = createItemContainer(eItemContainerType.Ring);
-            ringtLeftContainer.Location = sprite.Location + new Size(95, 179);
+            ringtLeftContainer.Location = panelSprite.Location + new Size(95, 179);
             
             ringtRightContainer = createItemContainer(eItemContainerType.Ring);
-            ringtRightContainer.Location = sprite.Location + new Size(209, 179);
+            ringtRightContainer.Location = panelSprite.Location + new Size(209, 179);
             
             gloveContainer = createItemContainer(eItemContainerType.Glove);
-            gloveContainer.Location = sprite.Location + new Size(20, 179);
+            gloveContainer.Location = panelSprite.Location + new Size(20, 179);
             
             bootsContainer = createItemContainer(eItemContainerType.Boots);
-            bootsContainer.Location = sprite.Location + new Size(251, 178);
+            bootsContainer.Location = panelSprite.Location + new Size(251, 178);
         }
+
+        public eButtonType PanelType => eButtonType.MinipanelInventory;
+        public ePanelFrameType FrameType => ePanelFrameType.Right;
+
+        public bool IsSecondaryEquipped { get; private set; }
 
         public void Update()
         {
+            if (IsSecondaryEquipped)
+            {
+                secondaryLeftHandContainer.Update();
+                secondaryRightHandContainer.Update();
+            }
+            else
+            {
+                leftHandContainer.Update();
+                rightHandContainer.Update();
+            }
+
+            secondaryLeftButton.Update();
+            secondaryRightButton.Update();
+
             closeButton.Update();
             goldButton.Update();
 
             helmContainer.Update();
             amuletContainer.Update();
             armorContainer.Update();
-            weaponLeftContainer.Update();
-            weaponRightContainer.Update();
             beltContainer.Update();
             ringtLeftContainer.Update();
             ringtRightContainer.Update();
@@ -111,7 +141,20 @@ namespace OpenDiablo2.Core.UI
 
         public void Render()
         {
-            renderWindow.Draw(sprite, 2, 2, 1);
+            renderWindow.Draw(panelSprite, 2, 2, 1);
+
+            if (IsSecondaryEquipped)
+            {
+                secondaryLeftButton.Render();
+                secondaryRightButton.Render();
+                secondaryLeftHandContainer.Render();
+                secondaryRightHandContainer.Render();
+            }
+            else
+            {
+                leftHandContainer.Render();
+                rightHandContainer.Render();
+            }
 
             closeButton.Render();
             goldButton.Render();
@@ -119,8 +162,6 @@ namespace OpenDiablo2.Core.UI
             helmContainer.Render();
             amuletContainer.Render();
             armorContainer.Render();
-            weaponLeftContainer.Render();
-            weaponRightContainer.Render();
             beltContainer.Render();
             ringtLeftContainer.Render();
             ringtRightContainer.Render();
@@ -130,12 +171,17 @@ namespace OpenDiablo2.Core.UI
 
         public void Dispose()
         {
-            sprite.Dispose();
+            panelSprite.Dispose();
+        }
+
+        private void ToggleWeaponsSlot()
+        {
+            IsSecondaryEquipped = !IsSecondaryEquipped;
         }
 
         private void OpenGoldDrop()
         {
-            // todo;
+
         }
     }
 }
