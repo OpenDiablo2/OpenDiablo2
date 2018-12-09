@@ -12,6 +12,7 @@
         Menu,
         GoldCoin,
         Close,
+        SecondaryInvHand,
         MinipanelCharacter,
         MinipanelInventory,
         MinipanelSkill,
