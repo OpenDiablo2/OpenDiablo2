@@ -150,6 +150,8 @@ namespace OpenDiablo2.Common.Models.Mobs
                 item.name = row[i];
                 item.location = row[i + 1];
                 item.count = Convert.ToInt32(row[i + 2]);
+
+                initialEquipment.Add(item);
             }
 
             return new HeroTypeConfig(

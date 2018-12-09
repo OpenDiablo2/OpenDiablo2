@@ -19,9 +19,17 @@ namespace OpenDiablo2.Common.Models
             public eDrawEffect DrawEffect { get; internal set; }
             public eWeaponClass WeaponClass { get; internal set; }
 
+            // TODO: Move logic somewhere else.
+            // TODO: Consider two hand weapons. 
             public string GetDCCPath(eArmorType armorType)
             {
-                var result = $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}{armorType.ToToken()}{COF.MobMode.ToToken()}{COF.WeaponClass.ToToken()}.dcc";
+                var weaponClass = COF.WeaponClass;
+                if(CompositType != eCompositType.RightArm && CompositType != eCompositType.RightHand)
+                {
+                    weaponClass = eWeaponClass.HandToHand;
+                }
+
+                var result = $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}{armorType.ToToken()}{COF.MobMode.ToToken()}{weaponClass.ToToken()}.dcc";
                 return result;
             }
 
