@@ -42,6 +42,7 @@ namespace OpenDiablo2.Common.Models
             public bool FrameIsBottomUp { get; private set; }
             public Rectangle Box { get; private set; }
             public Cell[] Cells { get; private set; }
+            public byte[] PixelData { get; internal set; }
             public int HorizontalCellCount { get; private set; }
             public int VerticalCellCount { get; private set; }
 
@@ -289,48 +290,64 @@ namespace OpenDiablo2.Common.Models
                     cell.PixelData = new byte[cell.Width * cell.Height];
                 }
 
-                
 
-                    var frameIndex = -1;
+
+                var frameIndex = -1;
                 foreach (var frame in Frames)
                 {
                     frameIndex++;
+                    frame.PixelData = new byte[Box.Width * Box.Height];
                     var c = -1;
                     foreach (var cell in frame.Cells)
                     {
                         c++;
+
+                        if (cell.PixelData == null)
+                            cell.PixelData = new byte[cell.Width * cell.Height];
+
                         var cellX = cell.XOffset / 4;
                         var cellY = cell.YOffset / 4;
                         var cellIndex = cellX + (cellY * HorizontalCellCount);
                         var bufferCell = Cells[cellIndex];
-
                         var pbe = PixelBuffer[pbIdx];
+
                         if ((pbe.Frame != frameIndex) || (pbe.FrameCellIndex != c))
                         {
                             // This buffer cell has an EqualCell bit set to 1, so copy the frame cell or clear it
-
                             if ((cell.Width != bufferCell.LastWidth) || (cell.Height != bufferCell.LastHeight))
                             {
                                 // Different sizes
                                 /// TODO: Clear the pixels of the frame cell
-                                for (var i = 0; i < bufferCell.PixelData.Length; i++)
-                                    bufferCell.PixelData[i] = 0x00;
-
+                                cell.PixelData = new byte[cell.Width * cell.Height];
                             }
                             else
                             {
                                 // Same sizes
 
                                 // Copy the old frame cell into the new position
-                                // blit(dir->bmp, dir->bmp, buff_cell->last_x0, buff_cell->last_y0, cell->x0, cell->y0, cell->w, cell->h );
-                                for (var i = 0; i < bufferCell.PixelData.Length; i++)
-                                    bufferCell.PixelData[i] = cell.PixelData[i];
+                                for (var fy = 0; fy < cell.Height; fy++)
+                                {
+                                    for (var fx = 0; fx < cell.Width; fx++)
+                                    {
+                                        // blit(dir->bmp, dir->bmp, buff_cell->last_x0, buff_cell->last_y0, cell->x0, cell->y0, cell->w, cell->h );
+                                        frame.PixelData[fx + cell.XOffset + ((fy + cell.YOffset) * Box.Width)]
+                                            = frame.PixelData[fx + bufferCell.LastXOffset + ((fy + bufferCell.LastYOffset) * Box.Width)];
+
+                                    }
+                                }
+
+                                //// Copy it again into the final frame image
+                                for (var fy = 0; fy < cell.Height; fy++)
+                                {
+                                    for (var fx = 0; fx < cell.Width; fx++)
+                                    {
+                                        // blit(cell->bmp, frm_bmp, 0, 0, cell->x0, cell->y0, cell->w, cell->h );
+                                        frame.PixelData[fx + cell.XOffset + ((fy + cell.YOffset) * Box.Width)]
+                                            = cell.PixelData[fx + (fy * cell.Width)];
+                                    }
+                                }
 
 
-                                bufferCell.LastWidth = cell.LastWidth;
-                                bufferCell.LastHeight = cell.LastHeight;
-                                // Copy it again into the final frame image
-                                // blit(cell->bmp, frm_bmp, 0, 0, cell->x0, cell->y0, cell->w, cell->h );
                             }
                         }
                         else
@@ -338,12 +355,12 @@ namespace OpenDiablo2.Common.Models
                             if (pbe.Value[0] == pbe.Value[1])
                             {
                                 // Clear the frame
+                                cell.PixelData = new byte[cell.Width * cell.Height];
                             }
                             else
                             {
                                 // Fill the frame cell with the pixels
                                 var bitsToRead = (pbe.Value[1] == pbe.Value[2]) ? 1 : 2;
-                                cell.PixelData = new byte[cell.Width * cell.Height];
 
                                 for (var y = 0; y < cell.Height; y++)
                                 {
@@ -356,9 +373,23 @@ namespace OpenDiablo2.Common.Models
                             }
 
                             // Copy the frame cell into the frame
-                            //blit(cell->bmp, frm_bmp, 0, 0, cell->x0, cell->y0, cell->w, cell->h );
+                            for (var fy = 0; fy < cell.Height; fy++)
+                            {
+                                for (var fx = 0; fx < cell.Width; fx++)
+                                {
+                                    //blit(cell->bmp, frm_bmp, 0, 0, cell->x0, cell->y0, cell->w, cell->h );
+                                    frame.PixelData[fx + cell.XOffset + ((fy + cell.YOffset) * Box.Width)]
+                                        = cell.PixelData[fx + (fy * cell.Width)];
+                                }
+                            }
                             pbIdx++;
                         }
+
+                        bufferCell.LastWidth = cell.Width;
+                        bufferCell.LastHeight = cell.Height;
+
+                        bufferCell.LastXOffset = cell.XOffset;
+                        bufferCell.LastYOffset = cell.YOffset;
                     }
                 }
             }

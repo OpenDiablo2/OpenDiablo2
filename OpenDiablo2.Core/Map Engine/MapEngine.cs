@@ -106,9 +106,9 @@ namespace OpenDiablo2.Core.Map_Engine
             var cx = -(cameraLocation.X - Math.Truncate(cameraLocation.X));
             var cy = -(cameraLocation.Y - Math.Truncate(cameraLocation.Y));
 
-            for (int ty = -5; ty <= 9; ty++)
+            for (int ty = -7; ty <= 8; ty++)
             {
-                for (int tx = -5; tx <= 9; tx++)
+                for (int tx = -7; tx <= 8; tx++)
                 {
                     var ax = tx + Math.Truncate(cameraLocation.X);
                     var ay = ty + Math.Truncate(cameraLocation.Y);
@@ -121,27 +121,27 @@ namespace OpenDiablo2.Core.Map_Engine
 
 
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.Floor))
-                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 210 + py + (int)oy);
+                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 300 + py + (int)oy);
 
 
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallLower))
-                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 210 + py + (int)oy + 80);
+                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 300 + py + (int)oy + 80);
 
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallUpper))
-                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 210 + py + (int)oy);
+                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 300 + py + (int)oy);
 
                     // TODO: We need to render the characters infront of, or behind the wall properly...
-                    if (ty == 1 && tx == 1)
+                    if (ty == 0 && tx == 0)
                     {
                         foreach (var character in characterRenderers/*.Where(x => Math.Truncate(x.LocationDetails.PlayerX) == ax && Math.Truncate(x.LocationDetails.PlayerY) == ay)*/)
                         {
                             // TODO: Temporary hack
-                            character.Render(400 + gameState.CameraOffset, 280);
+                            character.Render(400 + gameState.CameraOffset, 300);
                         }
                     }
 
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.Roof))
-                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 210 + py + (int)oy);
+                        renderWindow.DrawMapCell(cellInfo, 320 + px + (int)ox + xOffset, 300 + py + (int)oy);
                 }
             }
 
