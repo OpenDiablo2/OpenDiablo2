@@ -62,9 +62,9 @@ namespace OpenDiablo2.Core.UI
             menuButton.OnToggle = minipanel.OnMenuToggle;
             menuButton.Toggle();
 
-            panelSprite = renderWindow.LoadSprite(ResourcePaths.GamePanels, Palettes.Act1);
-            healthManaSprite = renderWindow.LoadSprite(ResourcePaths.HealthMana, Palettes.Act1);
-            gameGlobeOverlapSprite = renderWindow.LoadSprite(ResourcePaths.GameGlobeOverlap, Palettes.Act1);
+            panelSprite = renderWindow.LoadSprite(ResourcePaths.GamePanels, Palettes.Act1, true);
+            healthManaSprite = renderWindow.LoadSprite(ResourcePaths.HealthMana, Palettes.Act1, true);
+            gameGlobeOverlapSprite = renderWindow.LoadSprite(ResourcePaths.GameGlobeOverlap, Palettes.Act1, true);
         }
         
         public IPanel LeftPanel { get; private set; }

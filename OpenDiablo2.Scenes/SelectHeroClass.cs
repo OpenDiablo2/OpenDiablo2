@@ -228,18 +228,19 @@ namespace OpenDiablo2.Scenes
             Parallel.ForEach(new[]
             {
                 ResourcePaths.SFXAmazonSelect,
-                ResourcePaths.SFXAmazonDeselect,
                 ResourcePaths.SFXAssassinSelect,
-                ResourcePaths.SFXAssassinDeselect,
                 ResourcePaths.SFXBarbarianSelect,
-                ResourcePaths.SFXBarbarianDeselect,
                 ResourcePaths.SFXDruidSelect,
-                ResourcePaths.SFXDruidDeselect,
                 ResourcePaths.SFXNecromancerSelect,
-                ResourcePaths.SFXNecromancerDeselect,
                 ResourcePaths.SFXPaladinSelect,
-                ResourcePaths.SFXPaladinDeselect,
                 ResourcePaths.SFXSorceressSelect,
+
+                ResourcePaths.SFXAmazonDeselect,
+                ResourcePaths.SFXAssassinDeselect,
+                ResourcePaths.SFXBarbarianDeselect,
+                ResourcePaths.SFXDruidDeselect,
+                ResourcePaths.SFXNecromancerDeselect,
+                ResourcePaths.SFXPaladinDeselect,
                 ResourcePaths.SFXSorceressDeselect
             }, (path => sfxDictionary.Add(path, mpqProvider.GetBytes(path))));
         }
@@ -609,6 +610,7 @@ namespace OpenDiablo2.Scenes
             campfireSprite.Dispose();
             headingFont.Dispose();
             headingLabel.Dispose();
+            sfxDictionary.Clear();
         }
     }
 }

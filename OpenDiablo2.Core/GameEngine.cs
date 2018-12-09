@@ -22,9 +22,7 @@ namespace OpenDiablo2.Core
 
         private IScene currentScene;
         private IScene nextScene = null;
-
-        private readonly MPQ[] MPQs;
-
+        
         private readonly Dictionary<string, SoundEntry> soundTable = new Dictionary<string, SoundEntry>();
         public Dictionary<string, Palette> PaletteTable { get; private set; } = new Dictionary<string, Palette>();
         
@@ -92,7 +90,9 @@ namespace OpenDiablo2.Core
                 if (ms < 33)
                 {
                     Thread.Sleep(33 - (int)ms);
-                    continue;
+                } else
+                {
+                    log.Info($"Full frame time used - {ms} milliseconds to frame");
                 }
 
                 // Prevent falco-punch updates

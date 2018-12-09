@@ -15,8 +15,8 @@ namespace OpenDiablo2.Common.Interfaces
         void Sync();
         void Quit();
         uint GetTicks();
-        ISprite LoadSprite(string resourcePath, string palette, Point location);
-        ISprite LoadSprite(string resourcePath, string palette);
+        ISprite LoadSprite(string resourcePath, string palette, Point location, bool cacheFrames = false);
+        ISprite LoadSprite(string resourcePath, string palette, bool cacheFrames = false);
         IFont LoadFont(string resourcePath, string palette);
         ILabel CreateLabel(IFont font);
         ILabel CreateLabel(IFont font, string text);

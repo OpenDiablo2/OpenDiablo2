@@ -36,7 +36,7 @@ namespace OpenDiablo2.SDL2_
         {
             this.font = font;
 
-            sprite = new SDL2Sprite(font.FontImageSet, renderer);
+            sprite = new SDL2Sprite(font.FontImageSet, renderer, true);
         }
 
         public void Dispose()

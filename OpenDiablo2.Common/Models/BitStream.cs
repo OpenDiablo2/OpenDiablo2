@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace OpenDiablo2.Common.Models
 {
@@ -33,6 +34,7 @@ namespace OpenDiablo2.Common.Models
             return _current & 0xff;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool EnsureBits(int bitCount)
         {
             if (bitCount <= _bitCount) return true;
