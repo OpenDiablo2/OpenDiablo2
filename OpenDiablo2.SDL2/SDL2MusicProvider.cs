@@ -75,6 +75,9 @@ namespace OpenDiablo2.SDL2_
 
         public int PlaySfx(byte[] data)
         {
+            if (data == null || data.Length == 0)
+                return -1;
+
             var sound = SDL_mixer.Mix_QuickLoad_WAV(data);
             return SDL_mixer.Mix_PlayChannel(-1, sound, 0);
         }

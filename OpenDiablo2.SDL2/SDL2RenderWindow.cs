@@ -242,7 +242,7 @@ namespace OpenDiablo2.SDL2_
         public void Draw(ISprite sprite)
         {
             var spr = sprite as SDL2Sprite;
-            if (spr.texture == IntPtr.Zero)
+            if (spr.Texture == IntPtr.Zero)
                 return;
 
             var loc = spr.GetRenderPoint();
@@ -254,7 +254,7 @@ namespace OpenDiablo2.SDL2_
                 w = spr.FrameSize.Width,
                 h = spr.FrameSize.Height
             };
-            SDL.SDL_RenderCopy(renderer, spr.texture, IntPtr.Zero, ref destRect);
+            SDL.SDL_RenderCopy(renderer, spr.Texture, IntPtr.Zero, ref destRect);
 
         }
 
@@ -276,15 +276,15 @@ namespace OpenDiablo2.SDL2_
                         w = spr.FrameSize.Width,
                         h = spr.FrameSize.Height
                     };
-                    SDL.SDL_RenderCopy(renderer, spr.texture, IntPtr.Zero, ref destRect);
+                    SDL.SDL_RenderCopy(renderer, spr.Texture, IntPtr.Zero, ref destRect);
                 }
             }
         }
 
-        public ISprite LoadSprite(string resourcePath, string palette) => LoadSprite(resourcePath, palette, Point.Empty);
-        public ISprite LoadSprite(string resourcePath, string palette, Point location)
+        public ISprite LoadSprite(string resourcePath, string palette, bool cacheFrames = false) => LoadSprite(resourcePath, palette, Point.Empty, cacheFrames);
+        public ISprite LoadSprite(string resourcePath, string palette, Point location, bool cacheFrames = false)
         {
-            var result = new SDL2Sprite(resourceManager.GetImageSet(resourcePath), renderer)
+            var result = new SDL2Sprite(resourceManager.GetImageSet(resourcePath), renderer, cacheFrames)
             {
                 CurrentPalette = paletteProvider.PaletteTable[palette],
                 Location = location
@@ -437,7 +437,7 @@ namespace OpenDiablo2.SDL2_
                 SDL.SDL_SetTextureBlendMode(texId, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
                 SDL.SDL_SetRenderTarget(renderer, texId);
-                SDL.SDL_RenderCopy(renderer, (sprite as SDL2Sprite).texture, IntPtr.Zero, IntPtr.Zero);
+                SDL.SDL_RenderCopy(renderer, (sprite as SDL2Sprite).Texture, IntPtr.Zero, IntPtr.Zero);
                 SDL.SDL_SetRenderTarget(renderer, IntPtr.Zero);
 
                 return new SDL2MouseCursor

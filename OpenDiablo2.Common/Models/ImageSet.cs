@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace OpenDiablo2.Common.Models
 {
@@ -22,17 +23,11 @@ namespace OpenDiablo2.Common.Models
             ImageData = null;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UInt32 GetColor(int x, int y, Palette palette)
         {
-            var i = x + (y * Width);
-            if (i >= ImageData.Length)
-                return 0;
-
-            var index = ImageData[i];
-            if (index == -1)
-                return 0;
-
-            return palette.Colors[index];
+            var index = ImageData[x + (y * Width)];
+            return index == -1 ? 0 : palette.Colors[index];
         }
     }
 

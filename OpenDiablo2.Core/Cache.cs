@@ -40,5 +40,12 @@ namespace OpenDiablo2.Core
                 throw;
             }
         }
+
+        public bool Exists(string key) => _cache.Contains(key);
+
+        public T GetExisting<T>(string key) where T : class, new() => (_cache.Get(key) as Lazy<T>)?.Value;
+
+        public void Add<T>(string key, T value, CacheItemPolicy cacheItemPolicy = null) => _cache.Add(key, value, cacheItemPolicy ?? new CacheItemPolicy());
+
     }
 }

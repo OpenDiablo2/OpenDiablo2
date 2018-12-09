@@ -38,7 +38,7 @@ namespace OpenDiablo2.Core.UI
         {
             this.renderWindow = renderWindow;
 
-            sprite = renderWindow.LoadSprite(ResourcePaths.InventoryCharacterPanel, Palettes.Act1, FrameType.GetOffset());
+            sprite = renderWindow.LoadSprite(ResourcePaths.InventoryCharacterPanel, Palettes.Act1, FrameType.GetOffset(), true);
 
             closeButton = createButton(eButtonType.Close);
             closeButton.Location = sprite.Location + new Size(128, 388);

@@ -47,7 +47,7 @@ namespace OpenDiablo2.Core.UI
             this.itemContainerLayout = itemContainerLayout;
             this.mouseInfoProvider = mouseInfoProvider;
 
-            placeholderSprite = renderWindow.LoadSprite(itemContainerLayout.ResourceName, itemContainerLayout.PaletteName);
+            placeholderSprite = renderWindow.LoadSprite(itemContainerLayout.ResourceName, itemContainerLayout.PaletteName, true);
             placeholderSprite.Location = new Point(location.X, location.Y + placeholderSprite.LocalFrameSize.Height);
             this.Size = placeholderSprite.FrameSize; // For all but generic size is equal to the placeholder size. Source: me.
         }
@@ -58,7 +58,7 @@ namespace OpenDiablo2.Core.UI
 
             if (ContainedItem != null)
             {
-                sprite = renderWindow.LoadSprite(ResourcePaths.GeneratePathForItem(this.ContainedItem.Item.InvFile), Palettes.Units);
+                sprite = renderWindow.LoadSprite(ResourcePaths.GeneratePathForItem(this.ContainedItem.Item.InvFile), Palettes.Units, true);
                 sprite.Location = new Point(location.X, location.Y + sprite.LocalFrameSize.Height);
             }
         }

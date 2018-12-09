@@ -82,7 +82,7 @@ namespace OpenDiablo2.Core.UI
             font = renderWindow.LoadFont(ResourcePaths.FontExocet10, Palettes.Units);
             label = renderWindow.CreateLabel(font);
 
-            sprite = renderWindow.LoadSprite(buttonLayout.ResourceName, buttonLayout.PaletteName);
+            sprite = renderWindow.LoadSprite(buttonLayout.ResourceName, buttonLayout.PaletteName, true);
 
             // TODO: Less stupid way of doing this would be nice
             buttonWidth = 0;
