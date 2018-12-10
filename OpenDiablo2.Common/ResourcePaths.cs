@@ -14,6 +14,8 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
+using OpenDiablo2.Common.Enums;
+
 namespace OpenDiablo2.Common
 {
     public static class ResourcePaths
@@ -161,7 +163,43 @@ namespace OpenDiablo2.Common
 
         // --- Music ---
         public const string BGMTitle = @"data\global\music\introedit.wav";
-        public const string BGMTown1 = @"data\global\music\Act1\town1.wav";
+        public const string BGMOptions = @"data\global\music\Common\options.wav";
+        public const string BGMAct1AndarielAction = @"data\global\music\Act1\andarielaction.wav";
+        public const string BGMAct1BloodRavenResolution = @"data\global\music\Act1\bloodravenresolution.wav";
+        public const string BGMAct1Caves = @"data\global\music\Act1\caves.wav";
+        public const string BGMAct1Crypt = @"data\global\music\Act1\crypt.wav";
+        public const string BGMAct1DenOfEvilAction = @"data\global\music\Act1\denofevilaction.wav";
+        public const string BGMAct1Monastery = @"data\global\music\Act1\monastery.wav";
+        public const string BGMAct1Town1 = @"data\global\music\Act1\town1.wav";
+        public const string BGMAct1Tristram = @"data\global\music\Act1\tristram.wav";
+        public const string BGMAct1Wild = @"data\global\music\Act1\wild.wav";
+        public const string BGMAct2Desert = @"data\global\music\Act2\desert.wav";
+        public const string BGMAct2Harem = @"data\global\music\Act2\harem.wav";
+        public const string BGMAct2HoradricAction = @"data\global\music\Act2\horadricaction.wav";
+        public const string BGMAct2Lair = @"data\global\music\Act2\lair.wav";
+        public const string BGMAct2RadamentResolution = @"data\global\music\Act2\radamentresolution.wav";
+        public const string BGMAct2Sanctuary = @"data\global\music\Act2\sanctuary.wav";
+        public const string BGMAct2Sewer = @"data\global\music\Act2\sewer.wav";
+        public const string BGMAct2TaintedSunAction = @"data\global\music\Act2\taintedsunaction.wav";
+        public const string BGMAct2Tombs = @"data\global\music\Act2\tombs.wav";
+        public const string BGMAct2Town2 = @"data\global\music\Act2\town2.wav";
+        public const string BGMAct2Valley = @"data\global\music\Act2\valley.wav";
+        public const string BGMAct3Jungle = @"data\global\music\Act3\jungle.wav";
+        public const string BGMAct3Kurast = @"data\global\music\Act3\kurast.wav";
+        public const string BGMAct3KurastSewer = @"data\global\music\Act3\kurastsewer.wav";
+        public const string BGMAct3MefDeathAction = @"data\global\music\Act3\mefdeathaction.wav";
+        public const string BGMAct3OrbAction = @"data\global\music\Act3\orbaction.wav";
+        public const string BGMAct3Spider = @"data\global\music\Act3\spider.wav";
+        public const string BGMAct3Town3 = @"data\global\music\Act3\town3.wav";
+        public const string BGMAct4Diablo = @"data\global\music\Act4\diablo.wav";
+        public const string BGMAct4DiabloAction = @"data\global\music\Act4\diabloaction.wav";
+        public const string BGMAct4ForgeAction = @"data\global\music\Act4\forgeaction.wav";
+        public const string BGMAct4IzualAction = @"data\global\music\Act4\izualaction.wav";
+        public const string BGMAct4Mesa = @"data\global\music\Act4\mesa.wav";
+        public const string BGMAct4Town4 = @"data\global\music\Act4\town4.wav";
+        public const string BGMAct5Baal = @"data\global\music\Act5\baal.wav";
+        public const string BGMAct5XTown = @"data\global\music\Act5\xtown.wav";
+
 
         // --- Sound Effects ---
         public const string SFXButtonClick = @"data\global\sfx\Cursor\button.wav";
@@ -183,6 +221,85 @@ namespace OpenDiablo2.Common
         public static string GeneratePathForItem(string spriteName)
         {
             return $@"data\global\items\{spriteName}.dc6";
+        }
+
+        public static string GetMusicPathForLevel(eLevelId levelId)
+        {
+            switch (levelId)
+            {
+                case eLevelId.None:
+                    return string.Empty;
+                case eLevelId.Act1_Town1:
+                    return BGMAct1Town1;
+                case eLevelId.Act1_CaveTreasure2:
+                    return BGMAct1Caves;
+                case eLevelId.Act1_CaveTreasure3:
+                    return BGMAct1Caves;
+                case eLevelId.Act1_CaveTreasure4:
+                    return BGMAct1Caves;
+                case eLevelId.Act1_CaveTreasure5:
+                    return BGMAct1Caves;
+                case eLevelId.Act1_CryptCountessX:
+                    return BGMAct1BloodRavenResolution; // TODO: Verify
+                case eLevelId.Act1_Tower2:
+                    return BGMAct1Caves; // TODO: Verify
+                case eLevelId.Act1_MonFront:
+                    return BGMAct1DenOfEvilAction; // TODO: Verify
+                case eLevelId.Act1_Courtyard1:
+                    return BGMAct1Monastery; // TODO: Verify
+                case eLevelId.Act1_Courtyard2:
+                    return BGMAct1Monastery; // TODO: Verify
+                case eLevelId.Act1_Cathedral:
+                    return BGMAct1Monastery; // TODO: Verify
+                case eLevelId.Act1_Andariel:
+                    return BGMAct1AndarielAction; 
+                case eLevelId.Act1_Tristram:
+                    return BGMAct1Tristram;
+                case eLevelId.Act2_Town:
+                    return BGMAct2Town2;
+                case eLevelId.Act2_Harem:
+                    return BGMAct2Harem;
+                case eLevelId.Act2_DurielsLair:
+                    return BGMAct2Lair;
+                case eLevelId.Act3_Town:
+                    return BGMAct3Town3;
+                case eLevelId.Act3_DungeonTreasure1:
+                    return BGMAct3Kurast; // TODO: Verify
+                case eLevelId.Act3_DungeonTreasure2:
+                    return BGMAct3Kurast; // TODO: Verify
+                case eLevelId.Act3_SewerTreasureX:
+                    return BGMAct3KurastSewer; // TODO: Verify
+                case eLevelId.Act3_Temple1:
+                    return BGMAct3Kurast; // TODO: Verify
+                case eLevelId.Act3_Temple2:
+                    return BGMAct3Kurast; // TODO: Verify
+                case eLevelId.Act3_Temple3:
+                    return BGMAct3Kurast; // TODO: Verify
+                case eLevelId.Act3_Temple4:
+                    return BGMAct3Kurast; // TODO: Verify
+                case eLevelId.Act3_Temple5:
+                    return BGMAct3Kurast; // TODO: Verify
+                case eLevelId.Act3_Temple6:
+                    return BGMAct3Kurast; // TODO: Verify
+                case eLevelId.Act3_MephistoComplex:
+                    return BGMAct3MefDeathAction; // TODO: Verify
+                case eLevelId.Act4_Fortress:
+                    return BGMAct4Mesa; // TODO: Verify
+                case eLevelId.Act5_Town:
+                    return BGMAct5XTown;
+                case eLevelId.Act5_TempleFinalRoom:
+                    return BGMAct2Sanctuary; // TODO: Verify
+                case eLevelId.Act5_ThroneRoom:
+                    return BGMAct2Sanctuary; // TODO: Verify
+                case eLevelId.Act5_WorldStone:
+                    return BGMAct4ForgeAction; // TODO: Verify
+                case eLevelId.Act5_TempleEntrance:
+                    return BGMAct5Baal; // TODO: Verify
+                case eLevelId.Act5_BaalEntrance:
+                    return BGMAct5Baal; // TODO: Verify
+                default:
+                    return string.Empty;
+            }
         }
     }
 }

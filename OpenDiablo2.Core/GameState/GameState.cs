@@ -20,6 +20,8 @@ namespace OpenDiablo2.Core.GameState_
         private readonly IPaletteProvider paletteProvider;
         private readonly IEngineDataManager engineDataManager;
         private readonly IRenderWindow renderWindow;
+        private readonly ISoundProvider soundProvider;
+        private readonly IMPQProvider mpqProvider;
         private readonly Func<IMapEngine> getMapEngine;
         private readonly Func<eSessionType, ISessionManager> getSessionManager;
 
@@ -52,6 +54,8 @@ namespace OpenDiablo2.Core.GameState_
             IPaletteProvider paletteProvider,
             IEngineDataManager engineDataManager,
             IRenderWindow renderWindow,
+            ISoundProvider soundProvider,
+            IMPQProvider mpqProvider,
             Func<IMapEngine> getMapEngine,
             Func<eSessionType, ISessionManager> getSessionManager
             )
@@ -63,8 +67,10 @@ namespace OpenDiablo2.Core.GameState_
             this.getSessionManager = getSessionManager;
             this.engineDataManager = engineDataManager;
             this.renderWindow = renderWindow;
+            this.soundProvider = soundProvider;
+            this.mpqProvider = mpqProvider;
 
-            this.originalMouseCursor = renderWindow.MouseCursor;
+            originalMouseCursor = renderWindow.MouseCursor;
 
         }
 
@@ -181,6 +187,11 @@ namespace OpenDiablo2.Core.GameState_
 
             mapInfo.Add(result);
 
+            soundProvider.StopSong();
+            soundProvider.LoadSong(mpqProvider.GetStream(ResourcePaths.GetMusicPathForLevel(levelId)));
+            soundProvider.PlaySong();
+
+
             return result;
         }
 
@@ -254,76 +265,54 @@ namespace OpenDiablo2.Core.GameState_
 
         private MapCellInfo GetMapCellInfo(MapInfo map, int cellX, int cellY, MPQDS1TileProps props, eRenderCellType cellType, byte orientation)
         {
+            if (props.Prop1 == 0)
+                return null;
+
             if (!map.CellInfo.ContainsKey(cellType))
             {
                 map.CellInfo[cellType] = new MapCellInfo[map.FileData.Width * map.FileData.Height];
             }
 
             var cellInfo = map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)];
-            if (cellInfo != null && cellInfo?.Tile?.Animated != true)
+
+            if (cellInfo != null && (cellInfo.Ignore || !cellInfo.Tile.Animated))
                 return cellInfo.Ignore ? null : cellInfo;
 
-
-            var sub_index = props.Prop2;
             var main_index = (props.Prop3 >> 4) + ((props.Prop4 & 0x03) << 4);
+            var sub_index = props.Prop2;
 
-            // Floors can't have rotations, should we blow up here?
-            if (cellType == eRenderCellType.Floor && props.Prop1 == 0)
+            switch(cellType)
             {
-                map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                return null;
+                case eRenderCellType.Floor: 
+                    if (orientation != 0)
+                    {
+                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                        return null;
+                    }
+                    break;
+                case eRenderCellType.WallLower:
+                    if (orientation != 0 && orientation <= 15)
+                    {
+                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                        return null;
+                    }
+                    break;
+                case eRenderCellType.WallUpper:
+                    if (orientation >= 15)
+                    {
+                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                        return null;
+                    }
+                    break;
+                case eRenderCellType.Roof:
+                    if (orientation != 15)
+                    {
+                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                        return null;
+                    }
+                    break;
             }
-
-            if (cellType == eRenderCellType.Roof)
-            {
-                if (orientation != 15) // Only 15 (roof)
-                {
-                    map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                    return null;
-                }
-                
-                if (props.Prop1 == 0)
-                {
-                    map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                    return null;
-                }
-
-                if (((props.Prop4 & 0x80) > 0) && (orientation != 10 && orientation != 11))
-                {
-                    map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                    return null;
-                }
-                
-            }
-            else if (cellType == eRenderCellType.WallUpper || cellType == eRenderCellType.WallLower)
-            {
-                if (props.Prop1 == 0)
-                {
-                    map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                    return null;
-                }
-
-                // < 15 shouldn't happen for upper wall types, should we even check for this?
-                if (cellType == eRenderCellType.WallUpper && orientation <= 15)
-                {
-                    map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                    return null;
-                }
-
-                // TODO: Support special walls
-                if (orientation == 10 || orientation == 11)
-                {
-                    map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                    return null;
-                }
-
-                // This is also a thing apparently
-                if (((props.Prop4 & 0x80) > 0) && (orientation != 10 && orientation != 11))
-                {
-                    map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                    return null;
-                }
-            }
+            
 
             int frame = 0;
             var tiles = (map.PrimaryMap ?? map).FileData.LookupTable
@@ -370,39 +359,7 @@ namespace OpenDiablo2.Core.GameState_
                 else tile = tiles.First();
             }
 
-            switch (cellType)
-            {
-                case eRenderCellType.Floor:
-                    if (tile.Orientation != 0)
-                    {
-                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                        return null;
-                    }
-                    break;
-                case eRenderCellType.WallLower:
-                    if (tile.Orientation < 1 || tile.Orientation == 10 || tile.Orientation == 11 || tile.Orientation == 13 || tile.Orientation > 14)
-                    {
-                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                        return null;
-                    }
-                    break;
-                case eRenderCellType.WallUpper:
-                    if (tile.Orientation <= 15)
-                    {
-                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                        return null;
-                    }
-                    break;
-                case eRenderCellType.Roof:
-                    if (tile.Orientation != 15)
-                    {
-                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                        return null;
-                    }
-                    break;
-                default:
-                    break;
-            }
+
             // This WILL happen to you
             if (tile.Width == 0 || tile.Height == 0)
             {
