@@ -115,7 +115,9 @@ namespace OpenDiablo2.Core.GameState_
             new MapGenerator(this).Generate();
         }
 
-        public MapInfo LoadSubMap(int levelDefId, Point origin)
+
+
+        public MapInfo LoadSubMap(int levelDefId, Point origin, MapInfo primaryMap, int subTile = -1)
         {
             var level = engineDataManager.LevelPresets.First(x => x.Def == levelDefId);
             var levelDetails = engineDataManager.LevelDetails.First(x => x.Id == level.LevelId);
@@ -131,8 +133,8 @@ namespace OpenDiablo2.Core.GameState_
             if (level.File6 != "0") mapNames.Add(level.File6);
 
 
-            var random = new Random(Seed);
-            var mapName = "data\\global\\tiles\\" + mapNames[random.Next(mapNames.Count)].Replace("/", "\\");
+            var random = new Random(Seed + origin.X + origin.Y);
+            var mapName = "data\\global\\tiles\\" + mapNames[subTile == -1 ? random.Next(mapNames.Count) : subTile].Replace("/", "\\");
             var fileData = resourceManager.GetMPQDS1(mapName, level, levelDetails, levelType);
 
             var result = new MapInfo
@@ -142,6 +144,7 @@ namespace OpenDiablo2.Core.GameState_
                 LevelDetail = levelDetails,
                 LevelType = levelType,
                 FileData = fileData,
+                PrimaryMap = primaryMap,
                 CellInfo = new Dictionary<eRenderCellType, MapCellInfo[]>(),
                 TileLocation = new Rectangle(origin, new Size(fileData.Width - 1, fileData.Height - 1))
             };
@@ -168,12 +171,14 @@ namespace OpenDiablo2.Core.GameState_
 
 
             var random = new Random(Seed);
-            var mapName = "data\\global\\tiles\\" + mapNames[random.Next(mapNames.Count)].Replace("/", "\\");
+            //var mapName = "data\\global\\tiles\\" + mapNames[random.Next(mapNames.Count)].Replace("/", "\\");
+            // TEMP FOR TESTING
+            var mapName = "data\\global\\tiles\\" + mapNames[0].Replace("/", "\\");
             MapName = level.Name;
             Act = levelType.Act;
 
             var fileData = resourceManager.GetMPQDS1(mapName, level, levelDetails, levelType);
-
+            
             var result = new MapInfo
             {
                 LevelId = levelId,
@@ -214,7 +219,7 @@ namespace OpenDiablo2.Core.GameState_
                         .Select(floorLayer => GetMapCellInfo(map, cellX, cellY, floorLayer.Props[idx], eRenderCellType.Floor, 0))
                         .Where(x => x != null);
 
-                case eRenderCellType.WallUpper:
+                case eRenderCellType.WallNormal:
                 case eRenderCellType.WallLower:
                 case eRenderCellType.Roof:
                     return map.FileData.WallLayers
@@ -281,38 +286,57 @@ namespace OpenDiablo2.Core.GameState_
             var main_index = (props.Prop3 >> 4) + ((props.Prop4 & 0x03) << 4);
             var sub_index = props.Prop2;
 
-            switch(cellType)
+            if (orientation == 0)
             {
-                case eRenderCellType.Floor: 
-                    if (orientation != 0)
-                    {
-                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                        return null;
-                    }
-                    break;
-                case eRenderCellType.WallLower:
-                    if (orientation != 0 && orientation <= 15)
-                    {
-                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                        return null;
-                    }
-                    break;
-                case eRenderCellType.WallUpper:
-                    if (orientation >= 15)
-                    {
-                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                        return null;
-                    }
-                    break;
-                case eRenderCellType.Roof:
-                    if (orientation != 15)
-                    {
-                        map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
-                        return null;
-                    }
-                    break;
+                // Floor
+                if (cellType != eRenderCellType.Floor)
+                {
+                    map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                    return null;
+                }
             }
-            
+            else if (orientation == 10 || orientation == 11)
+            {
+                // Special tile
+                map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                return null;
+            }
+            else if (orientation == 14)
+            {
+                // Walls (objects?) with precedent shadows
+                if (cellType != eRenderCellType.WallNormal)
+                {
+                    map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                    return null;
+                }
+            }
+            else if (orientation < 15)
+            {
+                // Upper walls
+                if (cellType != eRenderCellType.WallNormal)
+                {
+                    map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                    return null;
+                }
+            }
+            else if (orientation == 15)
+            {
+                // Roof
+                if (cellType != eRenderCellType.Roof)
+                {
+                    map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                    return null;
+                }
+            }
+            else
+            {
+                // Lower Walls
+                if (cellType != eRenderCellType.WallLower)
+                {
+                    map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
+                    return null;
+                }
+            }
 
             int frame = 0;
             var tiles = (map.PrimaryMap ?? map).FileData.LookupTable

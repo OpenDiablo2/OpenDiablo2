@@ -26,6 +26,6 @@ namespace OpenDiablo2.Common.Interfaces
         IEnumerable<MapCellInfo> GetMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType);
         void UpdateMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType, IEnumerable<MapCellInfo> mapCellInfo);
         MapInfo LoadMap(eLevelId levelId, Point origin);
-        MapInfo LoadSubMap(int levelDefId, Point origin);
+        MapInfo LoadSubMap(int levelDefId, Point origin, MapInfo primaryMap, int subTile = -1);
     }
 }

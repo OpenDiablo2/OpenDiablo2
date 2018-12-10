@@ -87,9 +87,9 @@ namespace OpenDiablo2.Core
                 if (ms < 0)
                     continue;
 
-                if (ms < 33)
+                if (ms < 40)
                 {
-                    Thread.Sleep(33 - (int)ms);
+                    Thread.Sleep(40 - (int)ms); // Diablo 2 runs at 25FPS.
                 } else
                 {
                     log.Info($"Full frame time used - {ms} milliseconds to frame");
