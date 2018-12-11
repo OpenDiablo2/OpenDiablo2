@@ -34,7 +34,12 @@ namespace OpenDiablo2.Common.Models
                 if(CompositType == eCompositType.Shield)
                 {
                     result = $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}{ShieldCode}{COF.MobMode.ToToken()}{weaponClass.ToToken()}.dcc";
-                } else
+                }
+                else if (CompositType == eCompositType.RightHand)
+                {
+                    result = $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}axe{COF.MobMode.ToToken()}{weaponClass.ToToken()}.dcc";
+                }
+                else
                 {
                     result = $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}{armorType.ToToken()}{COF.MobMode.ToToken()}{weaponClass.ToToken()}.dcc";
                 }
