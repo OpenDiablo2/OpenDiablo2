@@ -19,7 +19,7 @@ namespace OpenDiablo2.Common.Interfaces
         MPQDS1 GetMPQDS1(string resourcePath, LevelPreset level, LevelType levelType);
         MPQDT1 GetMPQDT1(string resourcePath);
         Palette GetPalette(string paletteFile);
-        MPQCOF GetPlayerAnimation(eHero hero, eWeaponClass weaponClass, eMobMode mobMode, string ShieldCode);
+        MPQCOF GetPlayerAnimation(eHero hero, eWeaponClass weaponClass, eMobMode mobMode, string ShieldCode, string weaponCode);
         MPQDCC GetPlayerDCC(MPQCOF.COFLayer cofLayer, eArmorType armorType, Palette palette);
 
         Dictionary<string, List<AnimationData>> Animations { get; }

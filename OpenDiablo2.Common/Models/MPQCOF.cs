@@ -19,6 +19,7 @@ namespace OpenDiablo2.Common.Models
             public eDrawEffect DrawEffect { get; internal set; }
             public eWeaponClass WeaponClass { get; internal set; }
             public string ShieldCode { get; internal set; }
+            public string WeaponCode { get; internal set; }
 
             // TODO: Move logic somewhere else.
             // TODO: Consider two hand weapons. 
@@ -37,7 +38,7 @@ namespace OpenDiablo2.Common.Models
                 }
                 else if (CompositType == eCompositType.RightHand)
                 {
-                    result = $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}axe{COF.MobMode.ToToken()}{weaponClass.ToToken()}.dcc";
+                    result = $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}{WeaponCode}{COF.MobMode.ToToken()}{weaponClass.ToToken()}.dcc";
                 }
                 else
                 {
@@ -57,7 +58,7 @@ namespace OpenDiablo2.Common.Models
         public IEnumerable<COFLayer> Layers { get; private set; }
         public IEnumerable<eAnimationFrame> AnimationFrames { get; private set; }
 
-        public static MPQCOF Load(Stream stream, Dictionary<string, List<AnimationData>> animations, eHero hero, eWeaponClass weaponClass, eMobMode mobMode, string ShieldCode)
+        public static MPQCOF Load(Stream stream, Dictionary<string, List<AnimationData>> animations, eHero hero, eWeaponClass weaponClass, eMobMode mobMode, string ShieldCode, string weaponCode)
         {
             var result = new MPQCOF
             {
@@ -89,6 +90,7 @@ namespace OpenDiablo2.Common.Models
                 layers.Add(layer);
                 layer.WeaponClass = Encoding.ASCII.GetString(br.ReadBytes(4)).Trim('\0').ToWeaponClass();
                 layer.ShieldCode = ShieldCode;
+                layer.WeaponCode = weaponCode;
             }
             result.Layers = layers;
             result.AnimationFrames = br.ReadBytes(framesPerDir).Select(x => (eAnimationFrame)x);

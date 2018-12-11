@@ -33,6 +33,7 @@ namespace OpenDiablo2.Common.Models
         public eMobMode MobMode { get; set; }
         public PlayerLocationDetails LocationDetails { get; set; }
         public string ShieldCode { get; set; }
+        public string WeaponCode { get; set; }
 
         public byte[] GetBytes()
         {
@@ -44,7 +45,8 @@ namespace OpenDiablo2.Common.Models
                 writer.Write((byte)ArmorType);
                 writer.Write((byte)MobMode);
                 writer.Write(Name);
-                writer.Write(ShieldCode);
+                writer.Write(ShieldCode != null ? ShieldCode : "");
+                writer.Write(WeaponCode != null ? WeaponCode : "");
                 writer.Write(LocationDetails.GetBytes());
                 writer.Write(UID.ToByteArray());
 
@@ -67,6 +69,7 @@ namespace OpenDiablo2.Common.Models
                     MobMode = (eMobMode)reader.ReadByte(),
                     Name = reader.ReadString(),
                     ShieldCode = reader.ReadString(),
+                    WeaponCode = reader.ReadString(),
                     LocationDetails = PlayerLocationDetails.FromBytes(reader.ReadBytes(PlayerLocationDetails.SizeInBytes)),
                     UID = new Guid(reader.ReadBytes(16))
                 };
@@ -97,7 +100,8 @@ namespace OpenDiablo2.Common.Models
                 WeaponClass = source.WeaponClass,
                 ArmorType = source.ArmorType,
                 MobMode = source.MobMode,
-                ShieldCode = source.ShieldCode
+                ShieldCode = source.ShieldCode,
+                WeaponCode = source.WeaponCode
             };
     }
 }

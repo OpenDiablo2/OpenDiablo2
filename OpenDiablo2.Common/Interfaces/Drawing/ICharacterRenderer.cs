@@ -13,6 +13,7 @@ namespace OpenDiablo2.Common.Interfaces.Drawing
         eArmorType ArmorType { get; set; }
         eMobMode MobMode { get; set; }
         string ShieldCode { get; set; }
+        string WeaponCode { get; set; }
 
         void Update(long ms);
         void Render(int pixelOffsetX, int pixelOffsetY);
