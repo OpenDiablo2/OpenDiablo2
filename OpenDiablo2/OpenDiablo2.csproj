@@ -106,6 +106,10 @@
       <Project>{c29a84e8-e708-4be2-9946-202899b68e19}</Project>
       <Name>OpenDiablo2.GameServer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\OpenDiablo2.MapGenerators\OpenDiablo2.MapGenerators.csproj">
+      <Project>{a3370223-a28b-45b8-ad79-c17ead99af36}</Project>
+      <Name>OpenDiablo2.MapGenerators</Name>
+    </ProjectReference>
     <ProjectReference Include="..\OpenDiablo2.Scenes\OpenDiablo2.Scenes.csproj">
       <Project>{05224fe7-293f-4184-b1d6-89f5171b60e0}</Project>
       <Name>OpenDiablo2.Scenes</Name>

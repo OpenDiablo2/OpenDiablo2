@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Models;
 using OpenDiablo2.Core;
@@ -152,7 +153,7 @@ namespace OpenDiablo2.TestConsole
             }
             string path = words[0];
             string output = "public enum eLevelId\r\n{\r\nNone,\r\n";
-            output += ELevelIdHelper.GenerateEnum(EngineDataMan.LevelPresets);
+            output += ELevelIdHelper.GenerateEnum(EngineDataMan.Levels.Select(x => x.LevelPreset).Distinct().ToList());
             output += "}";
             File.WriteAllText(path, output);
             Console.WriteLine("Wrote eLevelIds enum to " + path + ".");

@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\MessageFrameAttribute.cs" />
+    <Compile Include="Attributes\RandomizedMapAttribute.cs" />
     <Compile Include="Attributes\SceneAttribute.cs" />
     <Compile Include="AutofacModule.cs" />
     <Compile Include="Enums\eItemContainerType.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="Interfaces\IItemManager.cs" />
     <Compile Include="Extensions\MobManagerExtensions.cs" />
     <Compile Include="Interfaces\IGameServer.cs" />
+    <Compile Include="Interfaces\IRandomizedMapGenerator.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionEventProvider.cs" />
     <Compile Include="Interfaces\MessageBus\IMessageFrame.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionManager.cs" />

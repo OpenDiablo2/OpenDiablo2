@@ -48,9 +48,9 @@ namespace OpenDiablo2.Core
         public MPQFont GetMPQFont(string resourcePath)
             => cache.AddOrGetExisting($"Font::{resourcePath}", () => MPQFont.LoadFromStream(mpqProvider.GetStream($"{resourcePath}.DC6"), mpqProvider.GetStream($"{resourcePath}.tbl")));
 
-        public MPQDS1 GetMPQDS1(string resourcePath, LevelPreset level, LevelDetail levelDetail, LevelType levelType)
-            => cache.AddOrGetExisting($"DS1::{resourcePath}::{level}::{levelDetail}::{levelType}", ()
-                => new MPQDS1(mpqProvider.GetStream(resourcePath), level, levelDetail, levelType, engineDataManager, this) { MapFile = resourcePath });
+        public MPQDS1 GetMPQDS1(string resourcePath, LevelPreset level, LevelType levelType)
+            => cache.AddOrGetExisting($"DS1::{resourcePath}::{level}::{levelType}", ()
+                => new MPQDS1(mpqProvider.GetStream(resourcePath), level, levelType, engineDataManager, this) { MapFile = resourcePath });
 
         public Palette GetPalette(string paletteFile)
             => cache.AddOrGetExisting($"Palette::{paletteFile}", () =>

@@ -41,6 +41,8 @@ namespace OpenDiablo2.SDL2_
                 return;
 
             musicChannel = SDL_mixer.Mix_PlayChannel(-1, music, 1);
+            //SDL_mixer.Mix_Volume(musicChannel, 64); // TODO: Customizable volume
+            
         }
 
         public void LoadSong(Stream data)
@@ -79,7 +81,9 @@ namespace OpenDiablo2.SDL2_
                 return -1;
 
             var sound = SDL_mixer.Mix_QuickLoad_WAV(data);
-            return SDL_mixer.Mix_PlayChannel(-1, sound, 0);
+            var channel = SDL_mixer.Mix_PlayChannel(-1, sound, 0);
+            //SDL_mixer.Mix_Volume(channel, 64); // TODO: Customizable volume
+            return channel;
         }
 
         public void StopSfx(int channel)

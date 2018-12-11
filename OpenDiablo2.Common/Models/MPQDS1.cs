@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using OpenDiablo2.Common.Interfaces;
 
 namespace OpenDiablo2.Common.Models
@@ -96,7 +95,7 @@ namespace OpenDiablo2.Common.Models
         public MPQDS1Object[] Objects { get; internal set; }
         public MPQDS1Group[] Groups { get; internal set; }
 
-        public MPQDS1(Stream stream, LevelPreset level, LevelDetail levelDetail, LevelType levelType, IEngineDataManager engineDataManager, IResourceManager resourceManager)
+        public MPQDS1(Stream stream, LevelPreset level, LevelType levelType, IEngineDataManager engineDataManager, IResourceManager resourceManager)
         {
             var br = new BinaryReader(stream);
             Version = br.ReadInt32();
@@ -294,6 +293,7 @@ namespace OpenDiablo2.Common.Models
 
                 DT1s[i] = resourceManager.GetMPQDT1("data\\global\\tiles\\" + levelType.File[i].Replace("/", "\\"));
             }
+
 
             LookupTable = new List<DS1LookupTable>();
             foreach(var dt1 in DT1s.Where(x => x != null))

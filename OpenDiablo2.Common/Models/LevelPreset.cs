@@ -9,30 +9,30 @@ namespace OpenDiablo2.Common.Models
     //
     public sealed class LevelPreset
     {
-        public string Name { get; set; }
-        public int Def { get; set; }
-        public int LevelId { get; set; }
-        public bool Populate { get; set; }
-        public int Logicals { get; set; }
-        public int Outdoors { get; set; }
-        public int Animate { get; set; }
-        public int KillEdge { get; set; }
-        public int FillBlanks { get; set; }
-        public int SizeX { get; set; }
-        public int SizeY { get; set; }
-        public int AutoMap { get; set; }
-        public int Scan { get; set; }
-        public int Pops { get; set; }
-        public int PopPad { get; set; }
-        public int Files { get; set; }
-        public string File1 { get; set; }
-        public string File2 { get; set; }
-        public string File3 { get; set; }
-        public string File4 { get; set; }
-        public string File5 { get; set; }
-        public string File6 { get; set; }
-        public UInt32 Dt1Mask { get; set; }
-        public bool Beta { get; set; }
+        public string Name { get; internal set; }
+        public int Def { get; internal set; }
+        public int LevelId { get; internal set; }
+        public bool Populate { get; internal set; }
+        public int Logicals { get; internal set; }
+        public int Outdoors { get; internal set; }
+        public int Animate { get; internal set; }
+        public int KillEdge { get; internal set; }
+        public int FillBlanks { get; internal set; }
+        public int SizeX { get; internal set; }
+        public int SizeY { get; internal set; }
+        public int AutoMap { get; internal set; }
+        public int Scan { get; internal set; }
+        public int Pops { get; internal set; }
+        public int PopPad { get; internal set; }
+        public int Files { get; internal set; }
+        public string File1 { get; internal set; }
+        public string File2 { get; internal set; }
+        public string File3 { get; internal set; }
+        public string File4 { get; internal set; }
+        public string File5 { get; internal set; }
+        public string File6 { get; internal set; }
+        public UInt32 Dt1Mask { get; internal set; }
+        public bool Beta { get; internal set; }
     }
 
     public static class LevelPresetHelper
@@ -63,7 +63,7 @@ namespace OpenDiablo2.Common.Models
                 File5 = row[20],
                 File6 = row[21],
                 Dt1Mask = Convert.ToUInt32(row[22]),
-                Beta = Convert.ToInt32(row[23]) == 1,
+                Beta = Convert.ToInt32(row[23]) == 1
             };
-    }   
+    }
 }
