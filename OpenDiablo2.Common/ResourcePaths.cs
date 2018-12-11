@@ -95,6 +95,7 @@ namespace OpenDiablo2.Common
         public const string HealthMana = @"data\global\ui\PANEL\hlthmana.DC6";
         public const string GameSmallMenuButton = @"data\global\ui\PANEL\menubutton.DC6"; // TODO: Used for inventory popout
         public const string SkillIcon = @"data\global\ui\PANEL\Skillicon.DC6"; // TODO: Used for skill icon button
+        public const string AddSkillButton = @"data\global\ui\PANEL\level.DC6";
 
         // --- Mouse Pointers ---
         public const string CursorDefault = @"data\global\ui\CURSOR\ohand.DC6";

@@ -105,7 +105,7 @@ namespace OpenDiablo2.Core.UI
             bootsContainer.Location = panelSprite.Location + new Size(251, 178);
         }
 
-        public eButtonType PanelType => eButtonType.MinipanelInventory;
+        public ePanelType PanelType => ePanelType.Inventory;
         public ePanelFrameType FrameType => ePanelFrameType.Right;
 
         public bool IsSecondaryEquipped { get; private set; }
