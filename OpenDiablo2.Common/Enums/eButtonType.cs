@@ -8,6 +8,7 @@
         Cancel,
         Tall,
         // Game UI
+        Skill,
         Run,
         Menu,
         GoldCoin,

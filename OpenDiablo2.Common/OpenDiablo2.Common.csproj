@@ -75,6 +75,7 @@
     <Compile Include="Enums\eLevelId.cs" />
     <Compile Include="Enums\eLevelSubType.cs" />
     <Compile Include="Enums\eMPQFormatVersion.cs" />
+    <Compile Include="Enums\ePanelType.cs" />
     <Compile Include="Enums\eRenderCellType.cs" />
     <Compile Include="Enums\eSceneType.cs" />
     <Compile Include="Enums\eSessionType.cs" />
