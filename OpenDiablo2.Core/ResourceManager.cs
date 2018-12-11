@@ -63,11 +63,11 @@ namespace OpenDiablo2.Core
         public MPQDT1 GetMPQDT1(string resourcePath)
             => cache.AddOrGetExisting($"DT1::{resourcePath}", () => new MPQDT1(mpqProvider.GetStream(resourcePath)));
 
-        public MPQCOF GetPlayerAnimation(eHero hero, eWeaponClass weaponClass, eMobMode mobMode)
+        public MPQCOF GetPlayerAnimation(eHero hero, eWeaponClass weaponClass, eMobMode mobMode, string shieldCode, string weaponCode)
             => cache.AddOrGetExisting($"COF::{hero}::{weaponClass}::{mobMode}", () =>
             {
                 var path = $"{ResourcePaths.PlayerAnimationBase}\\{hero.ToToken()}\\COF\\{hero.ToToken()}{mobMode.ToToken()}{weaponClass.ToToken()}.cof";
-                return MPQCOF.Load(mpqProvider.GetStream(path), Animations, hero, weaponClass, mobMode);
+                return MPQCOF.Load(mpqProvider.GetStream(path), Animations, hero, weaponClass, mobMode, shieldCode, weaponCode);
             });
 
         public MPQDCC GetPlayerDCC(MPQCOF.COFLayer cofLayer, eArmorType armorType, Palette palette)

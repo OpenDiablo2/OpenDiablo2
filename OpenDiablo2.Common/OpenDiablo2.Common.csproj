@@ -87,6 +87,7 @@
     <Compile Include="Exceptions\OpenDiablo2Exception.cs" />
     <Compile Include="Extensions\EnumExtensions.cs" />
     <Compile Include="Interfaces\Drawing\ICharacterRenderer.cs" />
+    <Compile Include="Interfaces\IItemInstance.cs" />
     <Compile Include="Interfaces\ICache.cs" />
     <Compile Include="Interfaces\IItemManager.cs" />
     <Compile Include="Extensions\MobManagerExtensions.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="Interfaces\UI\IPanel.cs" />
     <Compile Include="Models\AnimationData.cs" />
     <Compile Include="Models\BitMuncher.cs" />
+    <Compile Include="Models\Item\ItemInstance.cs" />
     <Compile Include="Models\MPQCOF.cs" />
     <Compile Include="Models\MPQDCC.cs" />
     <Compile Include="Models\ItemContainerLayout.cs" />

@@ -17,7 +17,7 @@ namespace OpenDiablo2.Core.UI
         private readonly ItemContainerLayout itemContainerLayout;
         private readonly IMouseInfoProvider mouseInfoProvider;
 
-        public Item ContainedItem { get; internal set; }
+        public ItemInstance ContainedItem { get; internal set; }
 
         private readonly Dictionary<eItemContainerType, ISprite> sprites = new Dictionary<eItemContainerType, ISprite>();
 
@@ -52,13 +52,13 @@ namespace OpenDiablo2.Core.UI
             this.Size = placeholderSprite.FrameSize; // For all but generic size is equal to the placeholder size. Source: me.
         }
 
-        public void SetContainedItem(Item containedItem)
+        public void SetContainedItem(ItemInstance containedItem)
         {
             ContainedItem = containedItem;
 
             if (ContainedItem != null)
             {
-                sprite = renderWindow.LoadSprite(ResourcePaths.GeneratePathForItem(this.ContainedItem.InvFile), Palettes.Units, true);
+                sprite = renderWindow.LoadSprite(ResourcePaths.GeneratePathForItem(this.ContainedItem.Item.InvFile), Palettes.Units, true);
                 sprite.Location = new Point(location.X, location.Y + sprite.LocalFrameSize.Height);
             }
         }
@@ -108,7 +108,10 @@ namespace OpenDiablo2.Core.UI
 
         public void Dispose()
         {
-            sprite.Dispose();
+            if(sprite != null)
+            {
+                sprite.Dispose();
+            }
         }
     }
 }

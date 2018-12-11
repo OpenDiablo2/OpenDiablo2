@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Models.Mobs;
@@ -31,38 +32,50 @@ namespace OpenDiablo2.Common.Models
         public eArmorType ArmorType { get; set; }
         public eMobMode MobMode { get; set; }
         public PlayerLocationDetails LocationDetails { get; set; }
+        public string ShieldCode { get; set; }
+        public string WeaponCode { get; set; }
 
         public byte[] GetBytes()
         {
-            var result = new List<byte>();
-            var nameBytes = Encoding.UTF8.GetBytes(Name);
-            result.Add((byte)Hero);
-            result.Add((byte)WeaponClass);
-            result.Add((byte)ArmorType);
-            result.Add((byte)MobMode);
-            result.AddRange(BitConverter.GetBytes(nameBytes.Length));
-            result.AddRange(nameBytes);
-            result.AddRange(LocationDetails.GetBytes());
-            result.AddRange(UID.ToByteArray());
-            return result.ToArray();
+            using (var stream = new MemoryStream())
+            using (var writer = new BinaryWriter(stream))
+            {
+                writer.Write((byte)Hero);
+                writer.Write((byte)WeaponClass);
+                writer.Write((byte)ArmorType);
+                writer.Write((byte)MobMode);
+                writer.Write(Name);
+                writer.Write(ShieldCode != null ? ShieldCode : "");
+                writer.Write(WeaponCode != null ? WeaponCode : "");
+                writer.Write(LocationDetails.GetBytes());
+                writer.Write(UID.ToByteArray());
+
+                return stream.ToArray();
+            }
         }
 
         public static PlayerInfo FromBytes(byte[] data, int offset = 0)
         {
-            var result = new PlayerInfo
+            using (var stream = new MemoryStream(data))
+            using (var reader = new BinaryReader(stream))
             {
-                Hero = (eHero)data[offset],
-                WeaponClass = (eWeaponClass)data[offset + 1],
-                ArmorType = (eArmorType)data[offset + 2],
-                MobMode = (eMobMode)data[offset + 3]
-            };
-            var nameLength = BitConverter.ToInt32(data, offset + 4);
-            result.Name = Encoding.UTF8.GetString(data, offset + 8, nameLength);
-            result.LocationDetails = PlayerLocationDetails.FromBytes(data, offset + 8 + nameLength);
-            var uidBytes = new byte[16];
-            Array.Copy(data, offset + 8 + nameLength + PlayerLocationDetails.SizeInBytes, uidBytes, 0, 16);
-            result.UID = new Guid(uidBytes);
-            return result;
+                reader.ReadBytes(offset); // Skip
+
+                var result = new PlayerInfo
+                {
+                    Hero = (eHero)reader.ReadByte(),
+                    WeaponClass = (eWeaponClass)reader.ReadByte(),
+                    ArmorType = (eArmorType)reader.ReadByte(),
+                    MobMode = (eMobMode)reader.ReadByte(),
+                    Name = reader.ReadString(),
+                    ShieldCode = reader.ReadString(),
+                    WeaponCode = reader.ReadString(),
+                    LocationDetails = PlayerLocationDetails.FromBytes(reader.ReadBytes(PlayerLocationDetails.SizeInBytes)),
+                    UID = new Guid(reader.ReadBytes(16))
+                };
+
+                return result;
+            }
         }
 
         public int SizeInBytes => 8 + Encoding.UTF8.GetByteCount(Name) + PlayerLocationDetails.SizeInBytes + 16;
@@ -86,7 +99,9 @@ namespace OpenDiablo2.Common.Models
                 Name = source.Name,
                 WeaponClass = source.WeaponClass,
                 ArmorType = source.ArmorType,
-                MobMode = source.MobMode
+                MobMode = source.MobMode,
+                ShieldCode = source.ShieldCode,
+                WeaponCode = source.WeaponCode
             };
     }
 }

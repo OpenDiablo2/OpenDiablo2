@@ -92,6 +92,8 @@ namespace OpenDiablo2.Core.Map_Engine
                 cr.WeaponClass = info.WeaponClass;
                 cr.Hero = info.Hero;
                 cr.ArmorType = info.ArmorType;
+                cr.ShieldCode = info.ShieldCode;
+                cr.WeaponCode = info.WeaponCode;
                 characterRenderers.Add(cr);
                 cr.ResetAnimationData();
             }

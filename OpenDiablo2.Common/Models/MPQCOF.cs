@@ -18,10 +18,33 @@ namespace OpenDiablo2.Common.Models
             public bool IsTransparent { get; internal set; }
             public eDrawEffect DrawEffect { get; internal set; }
             public eWeaponClass WeaponClass { get; internal set; }
+            public string ShieldCode { get; internal set; }
+            public string WeaponCode { get; internal set; }
 
+            // TODO: Move logic somewhere else.
+            // TODO: Consider two hand weapons. 
             public string GetDCCPath(eArmorType armorType)
             {
-                var result = $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}{armorType.ToToken()}{COF.MobMode.ToToken()}{COF.WeaponClass.ToToken()}.dcc";
+                string result = null;
+                var weaponClass = COF.WeaponClass;
+                if(CompositType != eCompositType.RightArm && CompositType != eCompositType.RightHand)
+                {
+                    weaponClass = eWeaponClass.HandToHand;
+                }
+
+                if(CompositType == eCompositType.Shield)
+                {
+                    result = $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}{ShieldCode}{COF.MobMode.ToToken()}{weaponClass.ToToken()}.dcc";
+                }
+                else if (CompositType == eCompositType.RightHand)
+                {
+                    result = $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}{WeaponCode}{COF.MobMode.ToToken()}{weaponClass.ToToken()}.dcc";
+                }
+                else
+                {
+                    result = $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}{armorType.ToToken()}{COF.MobMode.ToToken()}{weaponClass.ToToken()}.dcc";
+                }
+                
                 return result;
             }
 
@@ -35,7 +58,7 @@ namespace OpenDiablo2.Common.Models
         public IEnumerable<COFLayer> Layers { get; private set; }
         public IEnumerable<eAnimationFrame> AnimationFrames { get; private set; }
 
-        public static MPQCOF Load(Stream stream, Dictionary<string, List<AnimationData>> animations, eHero hero, eWeaponClass weaponClass, eMobMode mobMode)
+        public static MPQCOF Load(Stream stream, Dictionary<string, List<AnimationData>> animations, eHero hero, eWeaponClass weaponClass, eMobMode mobMode, string ShieldCode, string weaponCode)
         {
             var result = new MPQCOF
             {
@@ -66,6 +89,8 @@ namespace OpenDiablo2.Common.Models
                 layer.DrawEffect = (eDrawEffect)br.ReadByte();
                 layers.Add(layer);
                 layer.WeaponClass = Encoding.ASCII.GetString(br.ReadBytes(4)).Trim('\0').ToWeaponClass();
+                layer.ShieldCode = ShieldCode;
+                layer.WeaponCode = weaponCode;
             }
             result.Layers = layers;
             result.AnimationFrames = br.ReadBytes(framesPerDir).Select(x => (eAnimationFrame)x);

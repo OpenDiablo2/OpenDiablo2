@@ -46,9 +46,7 @@ namespace OpenDiablo2.Common.Models.Mobs
         public int StartingSkill { get; protected set; }
         public string BaseWeaponClass { get; protected set; }
 
-        public IEnumerable<string> ItemNames { get; }
-        public IEnumerable<string> ItemLocs { get; }
-        public IEnumerable<int> ItemCounts { get; }
+        public List<InitialEquipment> InitialEquipment { get; }
 
         public HeroTypeConfig(int vitality, int strength, int dexterity, int energy,
             int health, int mana, int stamina, int manaRegen,
@@ -59,7 +57,7 @@ namespace OpenDiablo2.Common.Models.Mobs
             int walkFrames, int runFrames, int swingFrames, int spellFrames, int getHitFrames, int bowFrames,
             int startingSkill,
             string baseWeaponClass,
-            List<string> itemNames, List<string> itemLocs, List<int> itemCounts)
+            List<InitialEquipment> initialEquipment)
         {
             StartingDexterity = dexterity;
             StartingVitality = vitality;
@@ -97,11 +95,16 @@ namespace OpenDiablo2.Common.Models.Mobs
             StartingSkill = startingSkill;
             BaseWeaponClass = baseWeaponClass;
 
-            ItemNames = itemNames;
-            ItemLocs = itemLocs;
-            ItemCounts = itemCounts;
+            InitialEquipment = initialEquipment;
         }
     }
+
+    public struct InitialEquipment
+    {
+        public string name;
+        public string location;
+        public int count;
+    };
 
     public static class HeroTypeConfigHelper
     {
@@ -134,15 +137,21 @@ namespace OpenDiablo2.Common.Models.Mobs
             // 57       58          59          60      61          62
             // item9	item9loc	item9count	item10	item10loc	item10count
 
+            
+
             List<string> itemNames = new List<string>();
             List<string> itemLocs = new List<string>();
             List<int> itemCounts = new List<int>();
+            List<InitialEquipment> initialEquipment = new List<InitialEquipment>();
 
             for(int i = 33; i <= 60; i+=3)
             {
-                itemNames.Add(row[i]);
-                itemLocs.Add(row[i + 1]);
-                itemCounts.Add(Convert.ToInt32(row[i + 2]));
+                var item = new InitialEquipment();
+                item.name = row[i];
+                item.location = row[i + 1];
+                item.count = Convert.ToInt32(row[i + 2]);
+
+                initialEquipment.Add(item);
             }
 
             return new HeroTypeConfig(
@@ -175,9 +184,7 @@ namespace OpenDiablo2.Common.Models.Mobs
                 bowFrames: Convert.ToInt32(row[29]),
                 startingSkill: Convert.ToInt32(row[31]),
                 baseWeaponClass: row[32],
-                itemNames: itemNames,
-                itemLocs: itemLocs,
-                itemCounts: itemCounts);
+                initialEquipment: initialEquipment);
         }
     }
 }

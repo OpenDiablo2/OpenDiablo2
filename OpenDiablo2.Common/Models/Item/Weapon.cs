@@ -9,7 +9,7 @@ namespace OpenDiablo2.Common.Models
 {
     public sealed class Weapon : Item 
     {
-        
+        public string WeaponClass { get; internal set; }
     }
 
     public static class WeaponHelper
@@ -19,6 +19,7 @@ namespace OpenDiablo2.Common.Models
             {
                 Name = row[0],
                 Code = row[2],
+                WeaponClass = row[34],
                 InvFile = row[45]
             };
     }   

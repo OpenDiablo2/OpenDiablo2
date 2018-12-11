@@ -49,6 +49,8 @@ namespace OpenDiablo2.SDL2_
         public eWeaponClass WeaponClass { get; set; }
         public eArmorType ArmorType { get; set; }
         public eMobMode MobMode { get; set; }
+        public string ShieldCode { get; set; }
+        public string WeaponCode { get; set; }
 
         private readonly IntPtr renderer;
 
@@ -132,7 +134,7 @@ namespace OpenDiablo2.SDL2_
                 return;
             }
 
-            animationData = resourceManager.GetPlayerAnimation(Hero, WeaponClass, MobMode);
+            animationData = resourceManager.GetPlayerAnimation(Hero, WeaponClass, MobMode, ShieldCode, WeaponCode);
             if (animationData == null)
                 throw new OpenDiablo2Exception("Could not locate animation for the character!");
 

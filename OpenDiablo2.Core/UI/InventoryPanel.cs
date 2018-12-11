@@ -70,51 +70,39 @@ namespace OpenDiablo2.Core.UI
 
             helmContainer = createItemContainer(eItemContainerType.Helm);
             helmContainer.Location = panelSprite.Location + new Size(135, 5);
-            helmContainer.SetContainedItem(itemManager.getItem("cap"));
             
             amuletContainer = createItemContainer(eItemContainerType.Amulet);
             amuletContainer.Location = panelSprite.Location + new Size(209, 34);
-            amuletContainer.SetContainedItem(itemManager.getItem("vip"));
             
             armorContainer = createItemContainer(eItemContainerType.Armor);
             armorContainer.Location = panelSprite.Location + new Size(135, 75);
-            armorContainer.SetContainedItem(itemManager.getItem("hla"));
 
             leftHandContainer = createItemContainer(eItemContainerType.Weapon);
             leftHandContainer.Location = panelSprite.Location + new Size(20, 47);
-            leftHandContainer.SetContainedItem(itemManager.getItem("ame"));
 
             rightHandContainer = createItemContainer(eItemContainerType.Weapon);
             rightHandContainer.Location = panelSprite.Location + new Size(253, 47);
-            rightHandContainer.SetContainedItem(itemManager.getItem("paf"));
 
             secondaryLeftHandContainer = createItemContainer(eItemContainerType.Weapon);
             secondaryLeftHandContainer.Location = panelSprite.Location + new Size(24, 45);
-            secondaryLeftHandContainer.SetContainedItem(itemManager.getItem("crs"));
 
             secondaryRightHandContainer = createItemContainer(eItemContainerType.Weapon);
             secondaryRightHandContainer.Location = panelSprite.Location + new Size(257, 45);
-            secondaryRightHandContainer.SetContainedItem(itemManager.getItem("kit"));
 
             beltContainer = createItemContainer(eItemContainerType.Belt);
             beltContainer.Location = panelSprite.Location + new Size(136, 178);
-            beltContainer.SetContainedItem(itemManager.getItem("vbl"));
             
             ringtLeftContainer = createItemContainer(eItemContainerType.Ring);
             ringtLeftContainer.Location = panelSprite.Location + new Size(95, 179);
-            ringtLeftContainer.SetContainedItem(itemManager.getItem("rin"));
             
             ringtRightContainer = createItemContainer(eItemContainerType.Ring);
             ringtRightContainer.Location = panelSprite.Location + new Size(209, 179);
-            ringtRightContainer.SetContainedItem(itemManager.getItem("rin"));
             
             gloveContainer = createItemContainer(eItemContainerType.Glove);
             gloveContainer.Location = panelSprite.Location + new Size(20, 179);
-            gloveContainer.SetContainedItem(itemManager.getItem("tgl"));
             
             bootsContainer = createItemContainer(eItemContainerType.Boots);
             bootsContainer.Location = panelSprite.Location + new Size(251, 178);
-            bootsContainer.SetContainedItem(itemManager.getItem("lbt"));
         }
 
         public eButtonType PanelType => eButtonType.MinipanelInventory;
