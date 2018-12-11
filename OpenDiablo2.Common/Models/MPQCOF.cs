@@ -57,6 +57,10 @@ namespace OpenDiablo2.Common.Models
 
         public IEnumerable<COFLayer> Layers { get; private set; }
         public IEnumerable<eAnimationFrame> AnimationFrames { get; private set; }
+        public byte[] Priority { get; private set; }
+        public int NumberOfDirections { get; internal set; }
+        public int FramesPerDirection { get; internal set; }
+        public int NumberOfLayers { get; internal set; }
 
         public static MPQCOF Load(Stream stream, Dictionary<string, List<AnimationData>> animations, eHero hero, eWeaponClass weaponClass, eMobMode mobMode, string ShieldCode, string weaponCode)
         {
@@ -69,14 +73,14 @@ namespace OpenDiablo2.Common.Models
 
             var br = new BinaryReader(stream);
 
-            var numLayers = br.ReadByte();
-            var framesPerDir = br.ReadByte();
-            br.ReadByte(); // Number of directions
+            result.NumberOfLayers = br.ReadByte();
+            result.FramesPerDirection = br.ReadByte();
+            result.NumberOfDirections = br.ReadByte(); // Number of directions
 
             br.ReadBytes(25); // Skip 25 unknown bytes...
 
             var layers = new List<COFLayer>();
-            for (var layerIdx = 0; layerIdx < numLayers; layerIdx++)
+            for (var layerIdx = 0; layerIdx < result.NumberOfLayers; layerIdx++)
             {
                 var layer = new COFLayer
                 {
@@ -93,7 +97,8 @@ namespace OpenDiablo2.Common.Models
                 layer.WeaponCode = weaponCode;
             }
             result.Layers = layers;
-            result.AnimationFrames = br.ReadBytes(framesPerDir).Select(x => (eAnimationFrame)x);
+            result.AnimationFrames = br.ReadBytes(result.FramesPerDirection).Select(x => (eAnimationFrame)x);
+            result.Priority = br.ReadBytes(result.FramesPerDirection * result.NumberOfLayers * result.NumberOfDirections);
 
             var cofName = $"{hero.ToToken()}{mobMode.ToToken()}{weaponClass.ToToken()}".ToUpper();
             result.Animations = animations[cofName];

@@ -22,14 +22,14 @@ using SDL2;
 
 namespace OpenDiablo2.SDL2_
 {
-    public sealed class SDL2MusicProvider : ISoundProvider
+    public sealed class SDL2SoundProvider : ISoundProvider
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private IntPtr music = IntPtr.Zero;
         private int musicChannel;
         private byte[] musicBytes; // Cannot be local or GC will destory it with great anger
 
-        public SDL2MusicProvider()
+        public SDL2SoundProvider()
         {
             if (SDL_mixer.Mix_OpenAudio(22050, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 1024) < 0)
                 log.Error($"SDL_mixer could not initialize! SDL_mixer Error: {SDL.SDL_GetError()}");

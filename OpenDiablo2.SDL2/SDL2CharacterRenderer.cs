@@ -38,7 +38,6 @@ namespace OpenDiablo2.SDL2_
             public IntPtr[] SpriteTexture { get; set; }
             public int FramesToAnimate { get; set; }
             public int AnimationSpeed { get; set; }
-            public int RenderFrameIndex { get; set; }
         }
 
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -57,6 +56,7 @@ namespace OpenDiablo2.SDL2_
         private readonly List<DirectionCacheItem> directionCache = new List<DirectionCacheItem>();
         DirectionCacheItem currentDirectionCache;
         private float seconds;
+        private int renderFrameIndex = 0;
 
         private readonly IResourceManager resourceManager;
         private readonly IPaletteProvider paletteProvider;
@@ -79,13 +79,13 @@ namespace OpenDiablo2.SDL2_
 
             var destRect = new SDL.SDL_Rect
             {
-                x = pixelOffsetX + currentDirectionCache.SpriteRect[currentDirectionCache.RenderFrameIndex].x,
-                y = pixelOffsetY + currentDirectionCache.SpriteRect[currentDirectionCache.RenderFrameIndex].y,
-                w = currentDirectionCache.SpriteRect[currentDirectionCache.RenderFrameIndex].w,
-                h = currentDirectionCache.SpriteRect[currentDirectionCache.RenderFrameIndex].h
+                x = pixelOffsetX + currentDirectionCache.SpriteRect[renderFrameIndex].x,
+                y = pixelOffsetY + currentDirectionCache.SpriteRect[renderFrameIndex].y,
+                w = currentDirectionCache.SpriteRect[renderFrameIndex].w,
+                h = currentDirectionCache.SpriteRect[renderFrameIndex].h
             };
 
-            SDL.SDL_RenderCopy(renderer, currentDirectionCache.SpriteTexture[currentDirectionCache.RenderFrameIndex], IntPtr.Zero, ref destRect);
+            SDL.SDL_RenderCopy(renderer, currentDirectionCache.SpriteTexture[renderFrameIndex], IntPtr.Zero, ref destRect);
         }
 
         public void Update(long ms)
@@ -98,9 +98,9 @@ namespace OpenDiablo2.SDL2_
             while (seconds >= animationSeg)
             {
                 seconds -= animationSeg;
-                currentDirectionCache.RenderFrameIndex++;
-                if (currentDirectionCache.RenderFrameIndex >= currentDirectionCache.FramesToAnimate)
-                    currentDirectionCache.RenderFrameIndex = 0;
+                renderFrameIndex++;
+                while (renderFrameIndex >= currentDirectionCache.FramesToAnimate)
+                    renderFrameIndex -= currentDirectionCache.FramesToAnimate;
             }
         }
 
@@ -111,6 +111,7 @@ namespace OpenDiablo2.SDL2_
 
         public void ResetAnimationData()
         {
+            var lastMobMode = MobMode;
             switch (LocationDetails.MovementType)
             {
                 case eMovementType.Stopped:
@@ -126,23 +127,22 @@ namespace OpenDiablo2.SDL2_
                     MobMode = eMobMode.PlayerNeutral;
                     break;
             }
+            if (lastMobMode != MobMode)
+                renderFrameIndex = 0;
 
             currentDirectionCache = directionCache.FirstOrDefault(x => x.MobMode == MobMode && x.Direction == directionConversion[LocationDetails.MovementDirection]);
             if (currentDirectionCache != null)
-            {
-                currentDirectionCache.RenderFrameIndex = 0;
                 return;
-            }
 
             animationData = resourceManager.GetPlayerAnimation(Hero, WeaponClass, MobMode, ShieldCode, WeaponCode);
             if (animationData == null)
                 throw new OpenDiablo2Exception("Could not locate animation for the character!");
 
             var palette = paletteProvider.PaletteTable["Units"];
-            CacheFrames(animationData.Layers.Select(layer => resourceManager.GetPlayerDCC(layer, ArmorType, palette)));
+            CacheFrames(animationData.Layers.Select(layer => resourceManager.GetPlayerDCC(layer, ArmorType, palette)).ToArray());
         }
 
-        private unsafe void CacheFrames(IEnumerable<MPQDCC> layerData)
+        private unsafe void CacheFrames(MPQDCC[] layerData)
         {
             var directionCache = new DirectionCacheItem
             {
@@ -155,7 +155,6 @@ namespace OpenDiablo2.SDL2_
             var dirAnimation = animationData.Animations[0];
             directionCache.FramesToAnimate = dirAnimation.FramesPerDirection;
             directionCache.AnimationSpeed = dirAnimation.AnimationSpeed;
-            directionCache.RenderFrameIndex = 0;
 
             var minX = Int32.MaxValue;
             var minY = Int32.MaxValue;
@@ -163,7 +162,6 @@ namespace OpenDiablo2.SDL2_
             var maxY = Int32.MinValue;
 
             var layersIgnored = 0;
-            var layersToRender = new List<MPQDCC>();
             foreach (var layer in layerData)
             {
                 if (layer == null)
@@ -172,7 +170,6 @@ namespace OpenDiablo2.SDL2_
                     continue;
                 }
 
-                layersToRender.Add(layer);
                 minX = Math.Min(minX, layer.Directions[directionConversion[LocationDetails.MovementDirection]].Box.Left);
                 minY = Math.Min(minY, layer.Directions[directionConversion[LocationDetails.MovementDirection]].Box.Top);
                 maxX = Math.Max(maxX, layer.Directions[directionConversion[LocationDetails.MovementDirection]].Box.Right);
@@ -187,7 +184,7 @@ namespace OpenDiablo2.SDL2_
 
             directionCache.SpriteTexture = new IntPtr[directionCache.FramesToAnimate];
             directionCache.SpriteRect = new SDL.SDL_Rect[directionCache.FramesToAnimate];
-            
+
             for (var frameIndex = 0; frameIndex < directionCache.FramesToAnimate; frameIndex++)
             {
                 var texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, frameW, frameH);
@@ -195,8 +192,21 @@ namespace OpenDiablo2.SDL2_
                 SDL.SDL_LockTexture(texture, IntPtr.Zero, out IntPtr pixels, out int pitch);
                 UInt32* data = (UInt32*)pixels;
 
-                foreach (var layer in layersToRender)
+                var priorities = new int[animationData.NumberOfLayers];
+                Array.Copy(
+                    animationData.Priority,
+                    (directionConversion[LocationDetails.MovementDirection] * animationData.FramesPerDirection * animationData.NumberOfLayers)
+                        + (frameIndex * animationData.NumberOfLayers),
+                    priorities,
+                    0,
+                    animationData.NumberOfLayers
+                );
+
+                for (var i = 0; i < layerData.Length; i++)
                 {
+                    //var layer = layerData[priorities[i]];
+                    var layer = layerData[i];
+
                     if (layer == null)
                         continue;
 
@@ -221,18 +231,19 @@ namespace OpenDiablo2.SDL2_
 
                         }
                     }
-                  
+
                 }
 
                 SDL.SDL_UnlockTexture(texture);
                 SDL.SDL_SetTextureBlendMode(texture, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
-                
+
                 directionCache.SpriteTexture[frameIndex] = texture;
                 directionCache.SpriteRect[frameIndex] = new SDL.SDL_Rect { x = minX, y = minY, w = frameW, h = frameH };
 
                 this.directionCache.Add(directionCache);
-                currentDirectionCache = directionCache;
             }
+
+            currentDirectionCache = directionCache;
         }
 
     }

@@ -269,10 +269,8 @@ namespace OpenDiablo2.Core.GameState_
 
         private IMapInfo GetMap(ref int cellX, ref int cellY)
         {
-            var x = cellX;
-            var y = cellY;
-            var map = mapInfo.LastOrDefault(z => (x >= z.TileLocation.X) && (y >= z.TileLocation.Y)
-                && (x < z.TileLocation.Right) && (y < z.TileLocation.Bottom));
+            var p = new Point(cellX, cellY);
+            var map = mapInfo.LastOrDefault(z => z.TileLocation.Contains(p));
             if (map == null)
             {
                 return null;
