@@ -14,6 +14,8 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
+using OpenDiablo2.Common.Enums;
+
 namespace OpenDiablo2.Common.Interfaces
 {
     public interface IGameHUD
@@ -23,6 +25,7 @@ namespace OpenDiablo2.Common.Interfaces
         bool IsRightPanelVisible { get; }
 
         bool IsMouseOver();
+        void TogglePanel(ePanelType panelType);
         void TogglePanel(IPanel panel);
         void OpenPanels(IPanel leftPanel, IPanel rightPanel);
         void ClosePanels();

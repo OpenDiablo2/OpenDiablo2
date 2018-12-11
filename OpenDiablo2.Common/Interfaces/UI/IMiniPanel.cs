@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenDiablo2.Common.Enums;
+using System;
 
 namespace OpenDiablo2.Common.Interfaces
 {
@@ -8,6 +9,7 @@ namespace OpenDiablo2.Common.Interfaces
     {
         event OnPanelToggledEvent OnPanelToggled;
 
+        IPanel GetPanel(ePanelType panelType);
         bool IsMouseOver();
         void UpdatePanelLocation();
         void OnMenuToggle(bool isToggled);

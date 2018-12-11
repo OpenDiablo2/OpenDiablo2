@@ -38,5 +38,28 @@ namespace OpenDiablo2.Common.Extensions
             log.Warn($"Unknown panel positon, {value}");
             return default(Point);
         }
+
+        public static ePanelType GetPanelType(this eButtonType value)
+        {
+            switch(value)
+            {
+                case eButtonType.MinipanelAutomap:
+                    return ePanelType.Automap;
+                case eButtonType.MinipanelCharacter:
+                    return ePanelType.Character;
+                case eButtonType.MinipanelInventory:
+                    return ePanelType.Inventory;
+                case eButtonType.MinipanelMenu:
+                    return ePanelType.Menu;
+                case eButtonType.MinipanelMessage:
+                    return ePanelType.Message;
+                case eButtonType.MinipanelQuest:
+                    return ePanelType.Quest;
+                case eButtonType.MinipanelSkill:
+                    return ePanelType.Skill;
+                default:
+                    return ePanelType.None;
+            }
+        }
     }
 }

@@ -53,7 +53,8 @@ namespace OpenDiablo2.Core.UI
                     return;
                 enabled = value;
 
-                sprite.Darken = !enabled;
+                if(buttonLayout.IsDarkenedWhenDisabled)
+                    sprite.Darken = !enabled;
             }
         }
         
@@ -186,7 +187,11 @@ namespace OpenDiablo2.Core.UI
 
             if (AllowFrameChange)
             {
-                if (Toggled && pressed)
+                if(!Enabled && buttonLayout.DisabledFrame >= 0)
+                {
+                    frame = buttonLayout.DisabledFrame;
+                }
+                else if (Toggled && pressed)
                 {
                     frame = buttonLayout.BaseFrame + 3;
                 }

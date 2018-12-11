@@ -45,7 +45,7 @@ namespace OpenDiablo2.Core.UI
             closeButton.OnActivate = () => OnPanelClosed?.Invoke(this);
         }
 
-        public eButtonType PanelType => eButtonType.MinipanelCharacter;
+        public ePanelType PanelType => ePanelType.Character;
         public ePanelFrameType FrameType => ePanelFrameType.Left;
 
         public void Update()

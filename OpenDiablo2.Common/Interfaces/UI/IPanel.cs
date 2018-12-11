@@ -25,7 +25,7 @@ namespace OpenDiablo2.Common.Interfaces
     {
         event OnPanelClosedEvent OnPanelClosed;
 
-        eButtonType PanelType { get; }
+        ePanelType PanelType { get; }
         ePanelFrameType FrameType { get; }
         void Render();
         void Update();

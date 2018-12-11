@@ -32,9 +32,13 @@ namespace OpenDiablo2.Core.UI
         private readonly IMouseInfoProvider mouseInfoProvider;
         private readonly IMiniPanel minipanel;
 
-        private readonly IButton runButton, menuButton;
+        private readonly IButton runButton, menuButton, addStatButton, addSkillButton;
         private readonly ISprite panelSprite, healthManaSprite, gameGlobeOverlapSprite;
         private readonly IPanelFrame leftPanelFrame, rightPanelFrame;
+
+        // Test fields
+        private bool addNewAttribute = true;
+        private bool addNewSkill = false;
 
         public GameHUD(
             IRenderWindow renderWindow,
@@ -62,6 +66,15 @@ namespace OpenDiablo2.Core.UI
             menuButton.OnToggle = minipanel.OnMenuToggle;
             menuButton.Toggle();
 
+            addStatButton = createButton(eButtonType.Skill);
+            addStatButton.Location = new Point(207, 562);
+            addStatButton.Enabled = addNewAttribute;
+            addStatButton.OnActivate = () => TogglePanel(ePanelType.Character);
+
+            addSkillButton = createButton(eButtonType.Skill);
+            addSkillButton.Location = new Point(564, 562);
+            addSkillButton.Enabled = addNewSkill;
+
             panelSprite = renderWindow.LoadSprite(ResourcePaths.GamePanels, Palettes.Act1, true);
             healthManaSprite = renderWindow.LoadSprite(ResourcePaths.HealthMana, Palettes.Act1, true);
             gameGlobeOverlapSprite = renderWindow.LoadSprite(ResourcePaths.GameGlobeOverlap, Palettes.Act1, true);
@@ -74,6 +87,11 @@ namespace OpenDiablo2.Core.UI
         public bool IsLeftPanelVisible => LeftPanel != null;
         public bool IsRightPanelVisible => RightPanel != null;
         public bool IsRunningEnabled => runButton.Toggled;
+
+        public void TogglePanel(ePanelType panelType)
+        {
+            TogglePanel(minipanel.GetPanel(panelType));
+        }
 
         public void TogglePanel(IPanel panel)
         {
@@ -168,12 +186,16 @@ namespace OpenDiablo2.Core.UI
 
             runButton.Render();
             menuButton.Render();
+            addStatButton.Render();
+            addSkillButton.Render();
         }
 
         public void Update()
         {
             runButton.Update();
             menuButton.Update();
+            addStatButton.Update();
+            addSkillButton.Update();
 
             if (IsLeftPanelVisible)
             {
