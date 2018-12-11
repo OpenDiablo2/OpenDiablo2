@@ -61,7 +61,6 @@
     <Compile Include="Attributes\RandomizedMapAttribute.cs" />
     <Compile Include="Attributes\SceneAttribute.cs" />
     <Compile Include="AutofacModule.cs" />
-    <Compile Include="Enums\eItemLocation.cs" />
     <Compile Include="Enums\eItemContainerType.cs" />
     <Compile Include="Enums\eAnimationFrame.cs" />
     <Compile Include="Enums\eArmorType.cs" />
