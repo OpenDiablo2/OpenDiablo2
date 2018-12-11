@@ -77,18 +77,6 @@ namespace OpenDiablo2.Scenes
             urlLabel = renderWindow.CreateLabel(labelFont, new Point(50, 569), "https://github.com/essial/OpenDiablo2/");
             urlLabel.TextColor = Color.Magenta;
 
-            var loadingSprite = renderWindow.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading, new Point(300, 400));
-
-            // Pre-load all the scenes for now until we fix the sdl load problem
-            var scenesToLoad = new eSceneType[] { eSceneType.SelectHeroClass };
-            for (int i = 0; i < scenesToLoad.Count(); i++)
-            {
-                renderWindow.Clear();
-                renderWindow.Draw(loadingSprite, (int)(loadingSprite.TotalFrames * (i / (float)scenesToLoad.Count())));
-                renderWindow.Sync();
-                getScene(scenesToLoad[i]);
-            }
-
             soundProvider.LoadSong(mpqProvider.GetStream(ResourcePaths.BGMTitle));
             soundProvider.PlaySong();
         }

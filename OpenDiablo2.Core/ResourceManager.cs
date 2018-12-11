@@ -43,7 +43,8 @@ namespace OpenDiablo2.Core
         }
 
         public ImageSet GetImageSet(string resourcePath)
-            => cache.AddOrGetExisting($"ImageSet::{resourcePath}", () => ImageSet.LoadFromStream(mpqProvider.GetStream(resourcePath)));
+            // => cache.AddOrGetExisting($"ImageSet::{resourcePath}", () => ImageSet.LoadFromStream(mpqProvider.GetStream(resourcePath)));
+            => ImageSet.LoadFromStream(mpqProvider.GetStream(resourcePath));
 
         public MPQFont GetMPQFont(string resourcePath)
             => cache.AddOrGetExisting($"Font::{resourcePath}", () => MPQFont.LoadFromStream(mpqProvider.GetStream($"{resourcePath}.DC6"), mpqProvider.GetStream($"{resourcePath}.tbl")));
@@ -68,46 +69,29 @@ namespace OpenDiablo2.Core
             {
                 var path = $"{ResourcePaths.PlayerAnimationBase}\\{hero.ToToken()}\\COF\\{hero.ToToken()}{mobMode.ToToken()}{weaponClass.ToToken()}.cof";
                 return MPQCOF.Load(mpqProvider.GetStream(path), Animations, hero, weaponClass, mobMode, shieldCode, weaponCode);
-            });
+            }, new System.Runtime.Caching.CacheItemPolicy { Priority = System.Runtime.Caching.CacheItemPriority.NotRemovable });
 
         public MPQDCC GetPlayerDCC(MPQCOF.COFLayer cofLayer, eArmorType armorType, Palette palette)
         {
-            // TODO: We need to cache this...
-            byte[] binaryData;
+            return cache.AddOrGetExisting($"PlayerDCC::{cofLayer.GetDCCPath(armorType)}", () =>
+             {
+                 byte[] binaryData;
 
-            var streamPath = cofLayer.GetDCCPath(armorType);
-            using (var stream = mpqProvider.GetStream(streamPath))
-            {
-                if (stream == null)
-                {
-                    log.Error($"Could not load Player DCC: {streamPath}");
-                    return null;
-                }
+                 var streamPath = cofLayer.GetDCCPath(armorType);
+                 using (var stream = mpqProvider.GetStream(streamPath))
+                 {
+                     if (stream == null)
+                     {
+                         log.Error($"Could not load Player DCC: {streamPath}");
+                         return null;
+                     }
 
-                binaryData = new byte[stream.Length];
-                stream.Read(binaryData, 0, (int)stream.Length);
-            }
-            var result = new MPQDCC(binaryData, palette);
-            return result;
+                     binaryData = new byte[stream.Length];
+                     stream.Read(binaryData, 0, (int)stream.Length);
+                 }
+                 var result = new MPQDCC(binaryData, palette);
+                 return result;
+             });
         }
-
-        /*
-            => cache.AddOrGetExisting($"DCC::{cofLayer}::{armorType}::{palette.Name}", () =>
-            {
-                byte[] binaryData;
-
-                using (var stream = mpqProvider.GetStream(cofLayer.GetDCCPath(armorType)))
-                {
-                    if (stream == null)
-                        return null;
-
-                    binaryData = new byte[stream.Length];
-                    stream.Read(binaryData, 0, (int)stream.Length);
-                }
-                var result = new MPQDCC(binaryData, palette);
-                return result;
-            });
-        /*
-         */
     }
 }
