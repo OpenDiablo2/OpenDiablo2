@@ -118,6 +118,12 @@ namespace OpenDiablo2
                 return (itemContainerType) => componentContext.Resolve<IItemContainer>(new NamedParameter("itemContainerLayout", ItemContainerLayout.Values[itemContainerType]));
             });
 
+            containerBuilder.Register<Func<string, IRandomizedMapGenerator>>(c =>
+            {
+                var componentContext = c.Resolve<IComponentContext>();
+                return (levelName) => componentContext.ResolveKeyed<IRandomizedMapGenerator>(levelName);
+            });
+
             /* Uncomment the below if we support multiple textbox types
             containerBuilder.Register<Func<TextBox>>(c =>
             {

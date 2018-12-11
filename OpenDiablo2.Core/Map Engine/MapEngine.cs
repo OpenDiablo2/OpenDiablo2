@@ -123,13 +123,14 @@ namespace OpenDiablo2.Core.Map_Engine
                     var oy = (cx + cy) * (cellSizeY / 2);
 
 
-                    foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.Floor))
-                        renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy);
-
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallLower))
                         renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy + 80);
 
-                    foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallUpper))
+                    foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.Floor))
+                        renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy);
+
+
+                    foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallNormal))
                         renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy + 80);
 
                     foreach (var character in characterRenderers.Where(x => Math.Truncate(x.LocationDetails.PlayerX) == ax && Math.Truncate(x.LocationDetails.PlayerY) == ay))
@@ -144,7 +145,7 @@ namespace OpenDiablo2.Core.Map_Engine
                     }
 
                     foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.Roof))
-                        renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy);
+                        renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy - 80);
                 }
             }
 

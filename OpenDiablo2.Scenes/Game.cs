@@ -56,10 +56,6 @@ namespace OpenDiablo2.Scenes
             this.sessionManager = sessionManager;
             this.gameHUD = gameHUD;
 
-            // TODO: Dynamic based on actual location
-            soundProvider.StopSong();
-            soundProvider.LoadSong(mpqProvider.GetStream(ResourcePaths.BGMTown1));
-            soundProvider.PlaySong();
             //var item = itemManager.getItem("hdm");
         }
 

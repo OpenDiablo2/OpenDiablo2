@@ -120,6 +120,7 @@ namespace OpenDiablo2.Common.Models
         {
             this.Path = path;
 
+            // If you crash here, you may have Diablo2 open... can't do that :)
             fileStream = new FileStream(path, FileMode.Open);
 
             using (var br = new BinaryReader(fileStream, Encoding.Default, true))

@@ -16,7 +16,7 @@ namespace OpenDiablo2.Common.Interfaces
         /// <returns>The <see cref="ImageSet"/> that was requested. Throw an exception if not found.</returns>
         ImageSet GetImageSet(string resourcePath);
         MPQFont GetMPQFont(string resourcePath);
-        MPQDS1 GetMPQDS1(string resourcePath, LevelPreset level, LevelDetail levelDetail, LevelType levelType);
+        MPQDS1 GetMPQDS1(string resourcePath, LevelPreset level, LevelType levelType);
         MPQDT1 GetMPQDT1(string resourcePath);
         Palette GetPalette(string paletteFile);
         MPQCOF GetPlayerAnimation(eHero hero, eWeaponClass weaponClass, eMobMode mobMode, string ShieldCode);

@@ -3,6 +3,7 @@ using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces.Mobs;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ namespace OpenDiablo2.Common.Models.Mobs
 
     public static class LevelExperienceConfigHelper
     {
-        public static Dictionary<eHero, ILevelExperienceConfig> ToLevelExperienceConfigs(this string[][] data)
+        public static ImmutableDictionary<eHero, ILevelExperienceConfig> ToLevelExperienceConfigs(this string[][] data)
         {
             Dictionary<eHero, ILevelExperienceConfig> result = new Dictionary<eHero, ILevelExperienceConfig>();
             for (int i = 1; i < data[0].Length; i++)
@@ -65,7 +66,7 @@ namespace OpenDiablo2.Common.Models.Mobs
                 result.Add(herotype, new LevelExperienceConfig(expperlevel));
             }
 
-            return result;
+            return result.ToImmutableDictionary();
         }
     }
 }

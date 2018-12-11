@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28315.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2", "OpenDiablo2\OpenDiablo2.csproj", "{2B0CF1AC-06DD-4322-AE8B-FF8A8C70A3CD}"
 EndProject
@@ -26,6 +26,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.ServiceBus", "OpenDiablo2.ServiceBus\OpenDiablo2.ServiceBus.csproj", "{D3F0F44F-2AB4-4342-A684-53193032A621}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.GameServer", "OpenDiablo2.GameServer\OpenDiablo2.GameServer.csproj", "{C29A84E8-E708-4BE2-9946-202899B68E19}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDiablo2.MapGenerators", "OpenDiablo2.MapGenerators\OpenDiablo2.MapGenerators.csproj", "{A3370223-A28B-45B8-AD79-C17EAD99AF36}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -73,6 +75,10 @@ Global
 		{C29A84E8-E708-4BE2-9946-202899B68E19}.Debug|x64.Build.0 = Debug|x64
 		{C29A84E8-E708-4BE2-9946-202899B68E19}.Release|x64.ActiveCfg = Release|x64
 		{C29A84E8-E708-4BE2-9946-202899B68E19}.Release|x64.Build.0 = Release|x64
+		{A3370223-A28B-45B8-AD79-C17EAD99AF36}.Debug|x64.ActiveCfg = Debug|x64
+		{A3370223-A28B-45B8-AD79-C17EAD99AF36}.Debug|x64.Build.0 = Debug|x64
+		{A3370223-A28B-45B8-AD79-C17EAD99AF36}.Release|x64.ActiveCfg = Release|x64
+		{A3370223-A28B-45B8-AD79-C17EAD99AF36}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
