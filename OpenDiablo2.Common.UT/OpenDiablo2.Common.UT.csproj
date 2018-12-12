@@ -49,6 +49,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UT_EnemyState.cs" />
     <Compile Include="UT_MobState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UT_PlayerState.cs" />

@@ -12,6 +12,7 @@ namespace OpenDiablo2.Common.Interfaces.Drawing
         eHero Hero { get; set; }
         PlayerEquipment Equipment { get; set; }
         eMobMode MobMode { get; set; }
+
         void Update(long ms);
         void Render(int pixelOffsetX, int pixelOffsetY);
         void ResetAnimationData();
