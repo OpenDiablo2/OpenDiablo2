@@ -56,6 +56,7 @@
     <Compile Include="Attributes\MessageFrameAttribute.cs" />
     <Compile Include="Attributes\SceneAttribute.cs" />
     <Compile Include="AutofacModule.cs" />
+    <Compile Include="Enums\eDifficulty.cs" />
     <Compile Include="Enums\eItemContainerType.cs" />
     <Compile Include="Enums\eAnimationFrame.cs" />
     <Compile Include="Enums\eArmorType.cs" />
@@ -85,8 +86,16 @@
     <Compile Include="Interfaces\MessageBus\IMessageFrame.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionManager.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionServer.cs" />
+    <Compile Include="Interfaces\Mobs\IEnemyTypeAppearanceConfig.cs" />
+    <Compile Include="Interfaces\Mobs\IEnemyTypeCombatConfig.cs" />
+    <Compile Include="Interfaces\Mobs\IEnemyTypeConfig.cs" />
+    <Compile Include="Interfaces\Mobs\IEnemyTypeDifficultyConfig.cs" />
     <Compile Include="Models\AnimationData.cs" />
     <Compile Include="Models\BitMuncher.cs" />
+    <Compile Include="Models\Mobs\EnemyTypeAppearanceConfig.cs" />
+    <Compile Include="Models\Mobs\EnemyTypeCombatConfig.cs" />
+    <Compile Include="Models\Mobs\EnemyTypeConfig.cs" />
+    <Compile Include="Models\Mobs\EnemyTypeDifficultyConfig.cs" />
     <Compile Include="Models\MPQCOF.cs" />
     <Compile Include="Models\MPQDCC.cs" />
     <Compile Include="Models\ItemContainerLayout.cs" />

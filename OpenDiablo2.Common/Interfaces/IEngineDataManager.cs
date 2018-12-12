@@ -13,5 +13,6 @@ namespace OpenDiablo2.Common.Interfaces
         List<Item> Items { get; }
         Dictionary<eHero, ILevelExperienceConfig> ExperienceConfigs { get; }
         Dictionary<eHero, IHeroTypeConfig> HeroTypeConfigs { get; }
+        List<IEnemyTypeConfig> EnemyTypeConfigs { get; }
     }
 }
