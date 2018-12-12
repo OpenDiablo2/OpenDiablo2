@@ -9,17 +9,6 @@ namespace OpenDiablo2.Common.Models.Mobs
 {
     public class EnemyTypeDifficultyConfig : IEnemyTypeDifficultyConfig
     {
-        // (127) DamageResist	MagicResist	FireResist	LightResist	ColdResist	PoisonResist
-        // (133) DamageResist(N)	MagicResist(N)	FireResist(N)	LightResist(N)	ColdResist(N)	PoisonResist(N)
-        // (139) DamageResist(H)	MagicResist(H)	FireResist(H)	LightResist(H)	ColdResist(H)	PoisonResist(H)
-        // (158) MinHP	MaxHP	AC	Exp	ToBlock
-        // (163) A1MinD	A1MaxD	A1ToHit	A2MinD	A2MaxD	A2ToHit	S1MinD	S1MaxD	S1ToHit
-        // (175) MinHP(N)	MaxHP(N)	AC(N)	Exp(N)	A1MinD(N)	A1MaxD(N)	A1ToHit(N)	A2MinD(N)	A2MaxD(N)	A2ToHit(N)	S1MinD(N)	S1MaxD(N)	S1ToHit(N)
-        // (188) MinHP(H)	MaxHP(H)	AC(H)	Exp(H)	A1MinD(H)	A1MaxD(H)	A1ToHit(H)	A2MinD(H)	A2MaxD(H)	A2ToHit(H)	S1MinD(H)	S1MaxD(H)	S1ToHit(H)
-
-        // (201) TreasureClass1	TreasureClass2	TreasureClass3	TreasureClass4
-        // (205) TreasureClass1(N)	TreasureClass2(N)	TreasureClass3(N)	TreasureClass4(N)
-        // (209) TreasureClass1(H)	TreasureClass2(H)	TreasureClass3(H)	TreasureClass4(H)
 
         public int Level { get; private set; }
 

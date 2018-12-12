@@ -84,7 +84,7 @@ namespace OpenDiablo2.Common.Models.Mobs
         public IEnemyTypeDifficultyConfig NightmareDifficultyConfig { get; private set; }
         public IEnemyTypeDifficultyConfig HellDifficultyConfig { get; private set; }
 
-        public EnemyTypeConfig(string Name, string UniqueName, string Type, string Descriptor,
+        public EnemyTypeConfig(string InternalName, string Name, string Type, string Descriptor,
             int BaseId, int PopulateId, bool Spawned, bool Beta, string Code, bool ClientOnly, bool NoMap,
             int SizeX, int SizeY, int Height, bool NoOverlays, int OverlayHeight,
             int Velocity, int RunVelocity,
@@ -107,8 +107,8 @@ namespace OpenDiablo2.Common.Models.Mobs
             IEnemyTypeDifficultyConfig NightmareDifficultyConfig,
             IEnemyTypeDifficultyConfig HellDifficultyConfig)
         {
-            this.InternalName = Name;
-            this.DisplayName = UniqueName;
+            this.InternalName = InternalName;
+            this.DisplayName = Name;
             this.Type = Type;
             this.Descriptor = Descriptor;
 
