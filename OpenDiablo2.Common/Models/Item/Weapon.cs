@@ -1,6 +1,7 @@
 ﻿using OpenDiablo2.Common.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,5 +23,19 @@ namespace OpenDiablo2.Common.Models
                 WeaponClass = row[34],
                 InvFile = row[45]
             };
+
+        public static void Write(this BinaryWriter binaryWriter, Weapon weapon)
+        {
+            (weapon as Item).Write(binaryWriter);
+            binaryWriter.Write(weapon.WeaponClass);
+        }
+
+        public static Weapon ReadItemWeapon(this BinaryReader binaryReader)
+        {
+            var result = new Weapon();
+            Item.Read(binaryReader, result);
+            result.WeaponClass = binaryReader.ReadString();
+            return result;
+        }
     }   
 }

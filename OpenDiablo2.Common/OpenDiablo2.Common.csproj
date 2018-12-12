@@ -102,7 +102,11 @@
     <Compile Include="Interfaces\UI\IPanel.cs" />
     <Compile Include="Models\AnimationData.cs" />
     <Compile Include="Models\BitMuncher.cs" />
+    <Compile Include="Models\Item\Armor.cs" />
     <Compile Include="Models\Item\ItemInstance.cs" />
+    <Compile Include="Models\Item\Misc.cs" />
+    <Compile Include="Models\Item\Weapon.cs" />
+    <Compile Include="Models\Mobs\PlayerEquipment.cs" />
     <Compile Include="Models\MPQCOF.cs" />
     <Compile Include="Models\MPQDCC.cs" />
     <Compile Include="Models\ItemContainerLayout.cs" />
@@ -143,9 +147,6 @@
     <Compile Include="Models\ButtonLayout.cs" />
     <Compile Include="Models\LevelDetail.cs" />
     <Compile Include="Models\Item\Item.cs" />
-    <Compile Include="Models\Item\Armor.cs" />
-    <Compile Include="Models\Item\Weapon.cs" />
-    <Compile Include="Models\Item\Misc.cs" />
     <Compile Include="Models\LevelPreset.cs" />
     <Compile Include="Models\LevelType.cs" />
     <Compile Include="Models\MapCellInfo.cs" />
