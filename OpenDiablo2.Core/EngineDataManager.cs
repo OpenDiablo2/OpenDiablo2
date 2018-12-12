@@ -144,17 +144,13 @@ namespace OpenDiablo2.Core
                 .ToArray()
                 .ToImmutableDictionary(x => (eHero)Enum.Parse(typeof(eHero), x[0]), x => x.ToHeroTypeConfig());
 
-            HeroTypeConfigs = data;
-        }
-
         private void LoadEnemyData()
         {
-            LoadEnemyTypeConfig();
+            EnemyTypeConfigs = LoadEnemyTypeConfig();
         }
 
-        private void LoadEnemyTypeConfig()
-        {
-            var data = mpqProvider
+        private ImmutableList<IEnemyTypeConfig> LoadEnemyTypeConfig()
+            => mpqProvider
                 .GetTextFile(ResourcePaths.MonStats)
                 .Skip(1)
                 .Where(x => !String.IsNullOrWhiteSpace(x))
@@ -163,8 +159,5 @@ namespace OpenDiablo2.Core
                 .ToArray()
                 .Select(x => x.ToEnemyTypeConfig())
                 .ToImmutableList();
-            
-            EnemyTypeConfigs = data;
-        }
     }
 }
