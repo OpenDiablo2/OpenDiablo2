@@ -55,9 +55,10 @@ namespace OpenDiablo2.Common.Models
         public eMobMode MobMode { get; private set; }
         public List<AnimationData> Animations { get; private set; }
 
-        public IEnumerable<COFLayer> Layers { get; private set; }
+        public COFLayer[] Layers { get; private set; }
+        public Dictionary<eCompositType, int> CompositLayers { get; private set; }
         public IEnumerable<eAnimationFrame> AnimationFrames { get; private set; }
-        public byte[] Priority { get; private set; }
+        public eCompositType[] Priority { get; private set; }
         public int NumberOfDirections { get; internal set; }
         public int FramesPerDirection { get; internal set; }
         public int NumberOfLayers { get; internal set; }
@@ -80,6 +81,8 @@ namespace OpenDiablo2.Common.Models
             br.ReadBytes(25); // Skip 25 unknown bytes...
 
             var layers = new List<COFLayer>();
+            result.CompositLayers = new Dictionary<eCompositType, int>();
+
             for (var layerIdx = 0; layerIdx < result.NumberOfLayers; layerIdx++)
             {
                 var layer = new COFLayer
@@ -91,14 +94,15 @@ namespace OpenDiablo2.Common.Models
                 br.ReadByte(); // Unknown
                 layer.IsTransparent = br.ReadByte() != 0;
                 layer.DrawEffect = (eDrawEffect)br.ReadByte();
-                layers.Add(layer);
                 layer.WeaponClass = Encoding.ASCII.GetString(br.ReadBytes(4)).Trim('\0').ToWeaponClass();
                 layer.ShieldCode = ShieldCode;
                 layer.WeaponCode = weaponCode;
+                layers.Add(layer);
+                result.CompositLayers[layer.CompositType] = layerIdx;
             }
-            result.Layers = layers;
+            result.Layers = layers.ToArray();
             result.AnimationFrames = br.ReadBytes(result.FramesPerDirection).Select(x => (eAnimationFrame)x);
-            result.Priority = br.ReadBytes(result.FramesPerDirection * result.NumberOfLayers * result.NumberOfDirections);
+            result.Priority = br.ReadBytes(result.FramesPerDirection * result.NumberOfLayers * result.NumberOfDirections).Select(x => (eCompositType)x).ToArray();
 
             var cofName = $"{hero.ToToken()}{mobMode.ToToken()}{weaponClass.ToToken()}".ToUpper();
             result.Animations = animations[cofName];

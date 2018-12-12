@@ -89,8 +89,7 @@ namespace OpenDiablo2.Core
                      binaryData = new byte[stream.Length];
                      stream.Read(binaryData, 0, (int)stream.Length);
                  }
-                 var result = new MPQDCC(binaryData, palette);
-                 return result;
+                 return new MPQDCC(binaryData, palette);
              });
         }
     }

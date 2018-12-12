@@ -192,23 +192,18 @@ namespace OpenDiablo2.SDL2_
                 SDL.SDL_LockTexture(texture, IntPtr.Zero, out IntPtr pixels, out int pitch);
                 UInt32* data = (UInt32*)pixels;
 
-                var priorities = new int[animationData.NumberOfLayers];
-                Array.Copy(
-                    animationData.Priority,
-                    (directionConversion[LocationDetails.MovementDirection] * animationData.FramesPerDirection * animationData.NumberOfLayers)
-                        + (frameIndex * animationData.NumberOfLayers),
-                    priorities,
-                    0,
-                    animationData.NumberOfLayers
-                );
-
-                for (var i = 0; i < layerData.Length; i++)
+                var priorityBase = (directionConversion[LocationDetails.MovementDirection] * animationData.FramesPerDirection * animationData.NumberOfLayers)
+                        + (frameIndex * animationData.NumberOfLayers);
+                for (var i = 0; i < animationData.NumberOfLayers; i++)
                 {
-                    //var layer = layerData[priorities[i]];
-                    var layer = layerData[i];
+                    var comp = animationData.Priority[priorityBase + i];
+                    if (!animationData.CompositLayers.ContainsKey(comp))
+                        continue;
+
+                    var layer = layerData[animationData.CompositLayers[comp]];
 
                     if (layer == null)
-                        continue;
+                        continue; // TODO: This is most likely not ok
 
                     var direction = layer.Directions[directionConversion[LocationDetails.MovementDirection]];
                     var frame = direction.Frames[frameIndex];
