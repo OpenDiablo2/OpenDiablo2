@@ -20,6 +20,7 @@ using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
+using OpenDiablo2.Common.Models.Mobs;
 
 namespace OpenDiablo2.Core
 {
@@ -64,20 +65,27 @@ namespace OpenDiablo2.Core
         public MPQDT1 GetMPQDT1(string resourcePath)
             => cache.AddOrGetExisting($"DT1::{resourcePath}", () => new MPQDT1(mpqProvider.GetStream(resourcePath)));
 
-        public MPQCOF GetPlayerAnimation(eHero hero, eWeaponClass weaponClass, eMobMode mobMode, string shieldCode, string weaponCode)
-            => cache.AddOrGetExisting($"COF::{hero}::{weaponClass}::{mobMode}", () =>
+        public MPQCOF GetPlayerAnimation(eHero hero, eMobMode mobMode, PlayerEquipment equipment)
+            => cache.AddOrGetExisting($"COF::{hero}{mobMode.ToToken()}{equipment.HashKey}", () =>
             {
-                var path = $"{ResourcePaths.PlayerAnimationBase}\\{hero.ToToken()}\\COF\\{hero.ToToken()}{mobMode.ToToken()}{weaponClass.ToToken()}.cof";
-                return MPQCOF.Load(mpqProvider.GetStream(path), Animations, hero, weaponClass, mobMode, shieldCode, weaponCode);
+
+                var path = $"{ResourcePaths.PlayerAnimationBase}\\{hero.ToToken()}\\COF\\{hero.ToToken()}{mobMode.ToToken()}{equipment.WeaponClass.ToToken()}.cof";
+                return MPQCOF.Load(mpqProvider.GetStream(path), Animations, hero, mobMode, equipment);
             }, new System.Runtime.Caching.CacheItemPolicy { Priority = System.Runtime.Caching.CacheItemPriority.NotRemovable });
 
-        public MPQDCC GetPlayerDCC(MPQCOF.COFLayer cofLayer, eArmorType armorType, Palette palette)
+        public MPQDCC GetPlayerDCC(MPQCOF.COFLayer cofLayer, PlayerEquipment equipment, Palette palette)
         {
-            return cache.AddOrGetExisting($"PlayerDCC::{cofLayer.GetDCCPath(armorType)}", () =>
+            // TODO: Smarter hashing maybe
+            return cache.AddOrGetExisting($"PlayerDCC::{cofLayer.CompositType.ToToken()}{cofLayer.COF.MobMode.ToToken()}{equipment.HashKey}", () =>
              {
                  byte[] binaryData;
+                 
+                 var streamPath = mpqProvider.GetCharacterDccPath(cofLayer.COF.Hero, cofLayer.COF.MobMode, cofLayer.CompositType, equipment);
 
-                 var streamPath = cofLayer.GetDCCPath(armorType);
+                 // If stream path is null, there is nothing to load for this layer (this is NOT an error!)
+                 if (streamPath == null)
+                     return null;
+
                  using (var stream = mpqProvider.GetStream(streamPath))
                  {
                      if (stream == null)

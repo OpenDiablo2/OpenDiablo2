@@ -14,7 +14,9 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
+using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Models;
+using OpenDiablo2.Common.Models.Mobs;
 using System.Collections.Generic;
 using System.IO;
 
@@ -25,5 +27,6 @@ namespace OpenDiablo2.Common.Interfaces
         IEnumerable<string> GetTextFile(string fileName);
         Stream GetStream(string fileName);
         byte[] GetBytes(string fileName);
+        string GetCharacterDccPath(eHero hero, eMobMode mobMode, eCompositType compositType, PlayerEquipment equipment);
     }
 }

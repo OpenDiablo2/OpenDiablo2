@@ -23,6 +23,7 @@ using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Interfaces.Drawing;
 using OpenDiablo2.Common.Models;
+using OpenDiablo2.Common.Models.Mobs;
 using SDL2;
 
 namespace OpenDiablo2.SDL2_
@@ -45,8 +46,7 @@ namespace OpenDiablo2.SDL2_
         public Guid UID { get; set; }
         public PlayerLocationDetails LocationDetails { get; set; }
         public eHero Hero { get; set; }
-        public eWeaponClass WeaponClass { get; set; }
-        public eArmorType ArmorType { get; set; }
+        public PlayerEquipment Equipment { get; set; }
         public eMobMode MobMode { get; set; }
         public string ShieldCode { get; set; }
         public string WeaponCode { get; set; }
@@ -134,12 +134,12 @@ namespace OpenDiablo2.SDL2_
             if (currentDirectionCache != null)
                 return;
 
-            animationData = resourceManager.GetPlayerAnimation(Hero, WeaponClass, MobMode, ShieldCode, WeaponCode);
+            animationData = resourceManager.GetPlayerAnimation(Hero, MobMode, Equipment);
             if (animationData == null)
                 throw new OpenDiablo2Exception("Could not locate animation for the character!");
 
             var palette = paletteProvider.PaletteTable["Units"];
-            CacheFrames(animationData.Layers.Select(layer => resourceManager.GetPlayerDCC(layer, ArmorType, palette)).ToArray());
+            CacheFrames(animationData.Layers.Select(layer => resourceManager.GetPlayerDCC(layer, Equipment, palette)).ToArray());
         }
 
         private unsafe void CacheFrames(MPQDCC[] layerData)

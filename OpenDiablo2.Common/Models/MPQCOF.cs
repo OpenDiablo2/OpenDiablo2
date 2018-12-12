@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Models.Mobs;
 
 namespace OpenDiablo2.Common.Models
 {
@@ -18,40 +19,9 @@ namespace OpenDiablo2.Common.Models
             public bool IsTransparent { get; internal set; }
             public eDrawEffect DrawEffect { get; internal set; }
             public eWeaponClass WeaponClass { get; internal set; }
-            public string ShieldCode { get; internal set; }
-            public string WeaponCode { get; internal set; }
-
-            // TODO: Move logic somewhere else.
-            // TODO: Consider two hand weapons. 
-            public string GetDCCPath(eArmorType armorType)
-            {
-                string result = null;
-                var weaponClass = COF.WeaponClass;
-                if(CompositType != eCompositType.RightArm && CompositType != eCompositType.RightHand)
-                {
-                    weaponClass = eWeaponClass.HandToHand;
-                }
-
-                if(CompositType == eCompositType.Shield)
-                {
-                    result = $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}{ShieldCode}{COF.MobMode.ToToken()}{weaponClass.ToToken()}.dcc";
-                }
-                else if (CompositType == eCompositType.RightHand)
-                {
-                    result = $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}{WeaponCode}{COF.MobMode.ToToken()}{weaponClass.ToToken()}.dcc";
-                }
-                else
-                {
-                    result = $"{ResourcePaths.PlayerAnimationBase}\\{COF.Hero.ToToken()}\\{CompositType.ToToken()}\\{COF.Hero.ToToken()}{CompositType.ToToken()}{armorType.ToToken()}{COF.MobMode.ToToken()}{weaponClass.ToToken()}.dcc";
-                }
-                
-                return result;
-            }
-
         }
 
         public eHero Hero { get; private set; }
-        public eWeaponClass WeaponClass { get; private set; }
         public eMobMode MobMode { get; private set; }
         public List<AnimationData> Animations { get; private set; }
 
@@ -63,11 +33,10 @@ namespace OpenDiablo2.Common.Models
         public int FramesPerDirection { get; internal set; }
         public int NumberOfLayers { get; internal set; }
 
-        public static MPQCOF Load(Stream stream, Dictionary<string, List<AnimationData>> animations, eHero hero, eWeaponClass weaponClass, eMobMode mobMode, string ShieldCode, string weaponCode)
+        public static MPQCOF Load(Stream stream, Dictionary<string, List<AnimationData>> animations, eHero hero, eMobMode mobMode, PlayerEquipment equipment)
         {
             var result = new MPQCOF
             {
-                WeaponClass = weaponClass,
                 MobMode = mobMode,
                 Hero = hero
             };
@@ -95,8 +64,6 @@ namespace OpenDiablo2.Common.Models
                 layer.IsTransparent = br.ReadByte() != 0;
                 layer.DrawEffect = (eDrawEffect)br.ReadByte();
                 layer.WeaponClass = Encoding.ASCII.GetString(br.ReadBytes(4)).Trim('\0').ToWeaponClass();
-                layer.ShieldCode = ShieldCode;
-                layer.WeaponCode = weaponCode;
                 layers.Add(layer);
                 result.CompositLayers[layer.CompositType] = layerIdx;
             }
@@ -104,7 +71,7 @@ namespace OpenDiablo2.Common.Models
             result.AnimationFrames = br.ReadBytes(result.FramesPerDirection).Select(x => (eAnimationFrame)x);
             result.Priority = br.ReadBytes(result.FramesPerDirection * result.NumberOfLayers * result.NumberOfDirections).Select(x => (eCompositType)x).ToArray();
 
-            var cofName = $"{hero.ToToken()}{mobMode.ToToken()}{weaponClass.ToToken()}".ToUpper();
+            var cofName = $"{hero.ToToken()}{mobMode.ToToken()}{equipment.WeaponClass.ToToken()}".ToUpper();
             result.Animations = animations[cofName];
             br.Dispose();
             return result;
