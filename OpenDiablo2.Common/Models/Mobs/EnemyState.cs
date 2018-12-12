@@ -15,6 +15,8 @@ namespace OpenDiablo2.Common.Models.Mobs
         public Stat DefenseRating { get; protected set; }
         public Stat HealthRegen { get; protected set; }
 
+        public eDifficulty CreatedDifficulty { get; protected set; }
+
         public EnemyState() : base() { }
 
         public EnemyState(string name, int id, float x, float y,
@@ -22,29 +24,30 @@ namespace OpenDiablo2.Common.Models.Mobs
             : base(name, id, 0, 0, x, y)
         {
             this.EnemyConfig = EnemyConfig;
-            IEnemyTypeDifficultyConfig difficulty = EnemyConfig.GetDifficultyConfig(Difficulty);
+            IEnemyTypeDifficultyConfig difficultyConfig = EnemyConfig.GetDifficultyConfig(Difficulty);
+            CreatedDifficulty = Difficulty;
 
-            int maxhp = Rand.Next(difficulty.MinHP, difficulty.MaxHP + 1);
+            int maxhp = Rand.Next(difficultyConfig.MinHP, difficultyConfig.MaxHP + 1);
             Health = new Stat(0, maxhp, maxhp, true);
-            ExperienceGiven = difficulty.Exp;
-            Level = difficulty.Level;
+            ExperienceGiven = difficultyConfig.Exp;
+            Level = difficultyConfig.Level;
 
             // stats
             AttackRating = new Stat[2];
-            AttackRating[0] = new Stat(0, difficulty.AttackChanceToHit[0], difficulty.AttackChanceToHit[0], false);
-            AttackRating[1] = new Stat(0, difficulty.AttackChanceToHit[1], difficulty.AttackChanceToHit[1], false);
+            AttackRating[0] = new Stat(0, difficultyConfig.AttackChanceToHit[0], difficultyConfig.AttackChanceToHit[0], false);
+            AttackRating[1] = new Stat(0, difficultyConfig.AttackChanceToHit[1], difficultyConfig.AttackChanceToHit[1], false);
 
             DefenseRating = new Stat(0, EnemyConfig.CombatConfig.ChanceToBlock, EnemyConfig.CombatConfig.ChanceToBlock, false);
 
             HealthRegen = new Stat(0, EnemyConfig.HealthRegen, EnemyConfig.HealthRegen, true);
 
             // handle immunities / resistances
-            SetResistance(eDamageTypes.COLD, difficulty.ColdResist);
-            SetResistance(eDamageTypes.FIRE, difficulty.FireResist);
-            SetResistance(eDamageTypes.MAGIC, difficulty.MagicResist);
-            SetResistance(eDamageTypes.PHYSICAL, difficulty.DamageResist);
-            SetResistance(eDamageTypes.POISON, difficulty.PoisonResist);
-            SetResistance(eDamageTypes.LIGHTNING, difficulty.LightningResist);
+            SetResistance(eDamageTypes.COLD, difficultyConfig.ColdResist);
+            SetResistance(eDamageTypes.FIRE, difficultyConfig.FireResist);
+            SetResistance(eDamageTypes.MAGIC, difficultyConfig.MagicResist);
+            SetResistance(eDamageTypes.PHYSICAL, difficultyConfig.DamageResist);
+            SetResistance(eDamageTypes.POISON, difficultyConfig.PoisonResist);
+            SetResistance(eDamageTypes.LIGHTNING, difficultyConfig.LightningResist);
             // interestingly, monsters don't actually have immunity flags
             // TODO: should we treat a resistance of 1 differently?
             // should a resistance of 1 be an immunity (e.g. the main difference is that
