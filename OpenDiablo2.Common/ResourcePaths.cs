@@ -1,4 +1,4 @@
-﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
  *  
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -307,3 +307,4 @@ namespace OpenDiablo2.Common
         }
     }
 }
+

@@ -76,9 +76,8 @@ namespace OpenDiablo2.Core.Map_Engine
                 // TODO: This shouldn't be necessary...
                 cr.LocationDetails = info.LocationDetails;
                 cr.MobMode = info.MobMode;
-                cr.WeaponClass = info.WeaponClass;
                 cr.Hero = info.Hero;
-                cr.ArmorType = info.ArmorType;
+                cr.Equipment = info.Equipment;
 
             }
 
@@ -89,11 +88,8 @@ namespace OpenDiablo2.Core.Map_Engine
                 cr.UID = info.UID;
                 cr.LocationDetails = info.LocationDetails;
                 cr.MobMode = info.MobMode;
-                cr.WeaponClass = info.WeaponClass;
+                cr.Equipment = info.Equipment;
                 cr.Hero = info.Hero;
-                cr.ArmorType = info.ArmorType;
-                cr.ShieldCode = info.ShieldCode;
-                cr.WeaponCode = info.WeaponCode;
                 characterRenderers.Add(cr);
                 cr.ResetAnimationData();
             }

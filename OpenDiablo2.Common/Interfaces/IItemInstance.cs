@@ -15,8 +15,6 @@
  */
 
 using OpenDiablo2.Common.Models;
-using System;
-using System.Runtime.Caching;
 
 namespace OpenDiablo2.Common.Interfaces
 {
