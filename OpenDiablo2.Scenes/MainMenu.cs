@@ -1,52 +1,52 @@
-﻿using OpenDiablo2.Common;
+﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+ *  
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
+using System;
+using System.Drawing;
+using System.Linq;
+using OpenDiablo2.Common;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
-using OpenDiablo2.Common.Models;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OpenDiablo2.Scenes
 {
-    [Scene("Main Menu")]
-    public class MainMenu : IScene
+    [Scene(eSceneType.MainMenu)]
+    public sealed class MainMenu : IScene
     {
-        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         private readonly IRenderWindow renderWindow;
-        private readonly IPaletteProvider paletteProvider;
-        private readonly IMPQProvider mpqProvider;
-        private readonly IMouseInfoProvider mouseInfoProvider;
-        //private readonly IMusicProvider musicProvider;
         private readonly ISceneManager sceneManager;
 
         private float logoFrame;
-        private ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack;
-        private IFont labelFont;
-        private ILabel versionLabel, urlLabel;
-        private IButton btnSinglePlayer, btnExit, btnWebsite;
+        private readonly ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack;
+        private readonly IFont labelFont;
+        private readonly ILabel versionLabel, urlLabel;
+        private readonly IButton btnSinglePlayer, btnExit, btnWebsite;
 
         public MainMenu(
             IRenderWindow renderWindow,
-            IPaletteProvider paletteProvider,
-            IMPQProvider mpqProvider,
-            IMouseInfoProvider mouseInfoProvider,
-            //IMusicProvider musicProvider,
             ISceneManager sceneManager,
             IResourceManager resourceManager,
+            ISoundProvider soundProvider,
+            IMPQProvider mpqProvider,
             Func<eButtonType, IButton> createButton,
-            Func<string, IScene> getScene // Temporary until SDL load functions are sped up
+            Func<eSceneType, IScene> getScene // Temporary until SDL load functions are sped up
             )
         {
             this.renderWindow = renderWindow;
-            this.paletteProvider = paletteProvider;
-            this.mpqProvider = mpqProvider;
-            this.mouseInfoProvider = mouseInfoProvider;
             this.sceneManager = sceneManager;
             
             backgroundSprite = renderWindow.LoadSprite(ResourcePaths.GameSelectScreen, Palettes.Sky);
@@ -77,30 +77,8 @@ namespace OpenDiablo2.Scenes
             urlLabel = renderWindow.CreateLabel(labelFont, new Point(50, 569), "https://github.com/essial/OpenDiablo2/");
             urlLabel.TextColor = Color.Magenta;
 
-            var loadingSprite = renderWindow.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading, new Point(300, 400));
-
-            // TODO: This is just a test
-            //var animation = resourceManager.GetPlayerAnimation(eHero.Necromancer, eWeaponClass.HandToHand, eMobMode.PlayerTownNeutral);
-            //var path = animation.Layers.First().GetDCCPath(eArmorType.Lite);
-            //var test = resourceManager.GetPlayerDCC(animation.Layers.First(), eArmorType.Lite, paletteProvider.PaletteTable["Units"]);
-
-            // Pre-load all the scenes for now until we fix the sdl load problem
-            var scenesToLoad = new string[] {"Select Hero Class" };
-            for (int i = 0; i < scenesToLoad.Count(); i++)
-            {
-                renderWindow.Clear();
-                renderWindow.Draw(loadingSprite, (int)((float)loadingSprite.TotalFrames * ((float)i / (float)scenesToLoad.Count())));
-                renderWindow.Sync();
-                getScene(scenesToLoad[i]);
-            }
-
-            
-
-            /*
-            musicProvider.LoadSong(mpqProvider.GetStream("data\\global\\music\\introedit.wav"));
-
-            musicProvider.PlaySong();
-            */
+            soundProvider.LoadSong(mpqProvider.GetStream(ResourcePaths.BGMTitle));
+            soundProvider.PlaySong();
         }
 
         private void OnVisitWebsiteClicked()
@@ -132,7 +110,7 @@ namespace OpenDiablo2.Scenes
 
         public void Update(long ms)
         {
-            float seconds = ((float)ms / 1000f);
+            float seconds = ms / 1000f;
             logoFrame += seconds;
             while (logoFrame >= 1f)
                 logoFrame -= 1f;
@@ -159,7 +137,7 @@ namespace OpenDiablo2.Scenes
         }
 
         private void OnSinglePlayerClicked()
-            => sceneManager.ChangeScene("Select Hero Class");
+            => sceneManager.ChangeScene(eSceneType.SelectHeroClass);
 
         private void OnExitClicked()
         {

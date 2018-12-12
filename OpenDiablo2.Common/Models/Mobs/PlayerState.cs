@@ -1,4 +1,21 @@
-﻿using System;
+﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+ *  
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
+using System;
+using System.Collections.Generic;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Enums.Mobs;
 using OpenDiablo2.Common.Interfaces.Mobs;
@@ -7,12 +24,21 @@ namespace OpenDiablo2.Common.Models.Mobs
 {
     public class PlayerState : MobState
     {
+        public Guid UID { get; protected set; } = Guid.NewGuid();
         public eHero HeroType { get; protected set; }
-        private IHeroTypeConfig HeroTypeConfig;
-        private ILevelExperienceConfig ExperienceConfig;
+        private readonly IHeroTypeConfig HeroTypeConfig;
+        private readonly ILevelExperienceConfig ExperienceConfig;
         public int ClientHash { get; protected set; }
         public byte MovementDirection { get; set; } = 0;
-        public eMovementType MovementType { get; set; } = eMovementType.Stopped;
+        public eMovementType MovementType { get; set; } = eMovementType.Stopped; // TODO: This needs to mess with MobMode somehow
+        public eWeaponClass WeaponClass { get; set; } = eWeaponClass.HandToHand; // Temporary
+        public eArmorType ArmorType { get; set; } = eArmorType.Lite; // Temporary
+        public eMobMode MobMode { get; set; } = eMobMode.PlayerTownWalk; // Temporary
+
+        // Remove when we're passing the full inventory. Used for animations.
+        public string ShieldCode { get; set; } 
+        public string WeaponCode { get; set; }
+        // ---
 
         // Player character stats
         protected Stat Vitality;
@@ -31,7 +57,7 @@ namespace OpenDiablo2.Common.Models.Mobs
         protected Stat RunVelocity;
         protected Stat RunDrain;
 
-
+        public Dictionary<String, ItemInstance> Equipment = new Dictionary<string, ItemInstance> ();
 
         public long Experience { get; protected set; }
 
@@ -61,6 +87,7 @@ namespace OpenDiablo2.Common.Models.Mobs
 
             Experience = experience; // how much total exp do they have
 
+
             HeroType = herotype;
             HeroTypeConfig = heroconfig;
             ExperienceConfig = expconfig;
@@ -74,6 +101,27 @@ namespace OpenDiablo2.Common.Models.Mobs
             RefreshDerived();
         }
 
+        public void UpdateEquipment(string slot, ItemInstance item)
+        {
+            if(Equipment.ContainsKey(slot))
+            {
+                Equipment.Remove(slot);
+            }
+
+            Equipment.Add(slot, item);
+
+            if(item.Item is Weapon)
+            {
+                WeaponClass = ((Weapon)item.Item).WeaponClass.ToWeaponClass();
+                WeaponCode = item.Item.Code;
+            }
+
+            if(item.Item is Armor && slot == "larm") // Shield
+            {
+                ShieldCode = item.Item.Code;
+            }
+        }
+        
         #region Level and Experience
         public long GetExperienceToLevel()
         {
@@ -120,7 +168,7 @@ namespace OpenDiablo2.Common.Models.Mobs
         {
             // on even levels, e.g. 2, 4, 6, you gain 1 from an increase of 1.5
             // on odd levels, you gain 2 from an increase of 1.5
-            return (int)(((Level % 2) * Math.Ceiling(increase)) + ((1 - (Level % 2)) * Math.Floor(increase)));
+            return (int)((Level % 2 * Math.Ceiling(increase)) + ((1 - (Level % 2)) * Math.Floor(increase)));
         }
         #endregion Level and Experience
 

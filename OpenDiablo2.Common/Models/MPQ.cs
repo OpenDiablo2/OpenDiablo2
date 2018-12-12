@@ -1,24 +1,36 @@
-﻿using OpenDiablo2.Common.Enums;
+﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+ *  
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Exceptions;
 
 namespace OpenDiablo2.Common.Models
 {
     public sealed class MPQ : IDisposable
     {
         private const string HEADER_SIGNATURE = "MPQ\x1A";
-        private const string USERDATA_SIGNATURE = "MPQ\x1B";
         private const string LISTFILE_NAME = "(listfile)";
         private const int MPQ_HASH_FILE_KEY = 3;
-        private const int MPQ_HASH_TABLE_OFFSET = 0;
         private const int MPQ_HASH_NAME_A = 1;
         private const int MPQ_HASH_NAME_B = 2;
-        private const UInt32 MPQ_HASH_ENTRY_EMPTY = 0xFFFFFFFF;
-        private const UInt32 MPQ_HASH_ENTRY_DELETED = 0xFFFFFFFE;
 
         internal struct HeaderRecord
         {
@@ -34,7 +46,7 @@ namespace OpenDiablo2.Common.Models
         }
 
         [Flags]
-        internal enum eBlockRecordFlags : UInt32
+        internal enum eBlockRecordBitflag : UInt32
         {
             IsFile = 0x80000000, // Block is a file, and follows the file data format; otherwise, block is free space or unused. If the block is not a file, all other flags should be cleared, and FileSize should be 0.
             SingleUnit = 0x01000000, // File is stored as a single unit, rather than split into sectors.
@@ -53,12 +65,12 @@ namespace OpenDiablo2.Common.Models
             public uint EncryptionSeed { get; set; }
             public string FileName { get; internal set; }
 
-            public bool IsFile => (Flags & (UInt32)eBlockRecordFlags.IsFile) != 0;
-            public bool SingleUnit => (Flags & (UInt32)eBlockRecordFlags.SingleUnit) != 0;
-            public bool KeyAdjusted => (Flags & (UInt32)eBlockRecordFlags.KeyAdjusted) != 0;
-            public bool IsEncrypted => (Flags & (UInt32)eBlockRecordFlags.IsEncrypted) != 0;
-            public bool IsCompressed => (Flags & (UInt32)eBlockRecordFlags.IsCompressed) != 0;
-            public bool IsImploded => (Flags & (UInt32)eBlockRecordFlags.IsImploded) != 0;
+            public bool IsFile => (Flags & (UInt32)eBlockRecordBitflag.IsFile) != 0;
+            public bool SingleUnit => (Flags & (UInt32)eBlockRecordBitflag.SingleUnit) != 0;
+            public bool KeyAdjusted => (Flags & (UInt32)eBlockRecordBitflag.KeyAdjusted) != 0;
+            public bool IsEncrypted => (Flags & (UInt32)eBlockRecordBitflag.IsEncrypted) != 0;
+            public bool IsCompressed => (Flags & (UInt32)eBlockRecordBitflag.IsCompressed) != 0;
+            public bool IsImploded => (Flags & (UInt32)eBlockRecordBitflag.IsImploded) != 0;
         }
 
         internal struct HashRecord
@@ -70,13 +82,13 @@ namespace OpenDiablo2.Common.Models
             public UInt32 FileBlockIndex;
         }
 
-        internal static UInt32[] cryptTable = new UInt32[0x500];
+        internal static readonly UInt32[] cryptTable = new UInt32[0x500];
         internal HeaderRecord Header;
-        private List<BlockRecord> blockTable = new List<BlockRecord>();
-        private List<HashRecord> hashTable = new List<HashRecord>();
+        private readonly List<BlockRecord> blockTable = new List<BlockRecord>();
+        private readonly List<HashRecord> hashTable = new List<HashRecord>();
         internal Stream fileStream;
 
-        public UInt16 LanguageId = 0;
+        public UInt16 LanguageId { get; internal set; } = 0;
         public const byte Platform = 0;
 
         public string Path { get; private set; }
@@ -85,7 +97,7 @@ namespace OpenDiablo2.Common.Models
 
         private List<string> GetFilePaths()
         {
-            using (var stream = OpenFile("(listfile)"))
+            using (var stream = OpenFile(LISTFILE_NAME))
             {
                 if (stream == null)
                 {
@@ -108,13 +120,14 @@ namespace OpenDiablo2.Common.Models
         {
             this.Path = path;
 
+            // If you crash here, you may have Diablo2 open... can't do that :)
             fileStream = new FileStream(path, FileMode.Open);
 
             using (var br = new BinaryReader(fileStream, Encoding.Default, true))
             {
                 var header = Encoding.ASCII.GetString(br.ReadBytes(4));
                 if (header != HEADER_SIGNATURE)
-                    throw new ApplicationException($"Unknown header signature '{header}' detected while processing '{Path}'!");
+                    throw new OpenDiablo2Exception($"Unknown header signature '{header}' detected while processing '{Path}'!");
 
                 ParseMPQHeader(br);
             }
@@ -137,7 +150,7 @@ namespace OpenDiablo2.Common.Models
 
                     seed = (seed * 125 + 3) % 0x2AAAAB;
 
-                    cryptTable[index2] = (temp | (seed & 0xFFFF));
+                    cryptTable[index2] = temp | (seed & 0xFFFF);
                 }
             }
         }
@@ -169,15 +182,15 @@ namespace OpenDiablo2.Common.Models
                 seed2 += cryptTable[(int)(0x400 + (seed1 & 0xff))];
 
                 uint result = BitConverter.ToUInt32(data, i);
-                result ^= (seed1 + seed2);
+                result ^= seed1 + seed2;
 
                 seed1 = ((~seed1 << 21) + 0x11111111) | (seed1 >> 11);
                 seed2 = result + seed2 + (seed2 << 5) + 3;
 
-                data[i + 0] = ((byte)(result & 0xff));
-                data[i + 1] = ((byte)((result >> 8) & 0xff));
-                data[i + 2] = ((byte)((result >> 16) & 0xff));
-                data[i + 3] = ((byte)((result >> 24) & 0xff));
+                data[i + 0] = (byte)(result & 0xff);
+                data[i + 1] = (byte)((result >> 8) & 0xff);
+                data[i + 2] = (byte)((result >> 16) & 0xff);
+                data[i + 3] = (byte)((result >> 24) & 0xff);
             }
         }
 
@@ -197,10 +210,10 @@ namespace OpenDiablo2.Common.Models
             };
 
             if (FormatVersion != eMPQFormatVersion.Format1)
-                throw new ApplicationException($"Unsupported MPQ format version of {Header.FormatVersion} detected for '{Path}'!");
+                throw new OpenDiablo2Exception($"Unsupported MPQ format version of {Header.FormatVersion} detected for '{Path}'!");
 
             if (br.BaseStream.Position != Header.HeaderSize)
-                throw new ApplicationException($"Invalid header size detected for '{Path}'. Expected to be at offset {Header.HeaderSize} but we are at offset {br.BaseStream.Position} instead!");
+                throw new OpenDiablo2Exception($"Invalid header size detected for '{Path}'. Expected to be at offset {Header.HeaderSize} but we are at offset {br.BaseStream.Position} instead!");
 
             br.BaseStream.Seek(Header.BlockTablePos, SeekOrigin.Begin);
 
@@ -253,7 +266,7 @@ namespace OpenDiablo2.Common.Models
         private static UInt32 HashString(string inputString, UInt32 hashType)
         {
             if (hashType > MPQ_HASH_FILE_KEY)
-                throw new ApplicationException($"Unknown hash type {hashType} for input string {inputString}");
+                throw new OpenDiablo2Exception($"Unknown hash type {hashType} for input string {inputString}");
 
             UInt32 seed1 = 0x7FED7FED;
             UInt32 seed2 = 0xEEEEEEEE;
@@ -267,6 +280,7 @@ namespace OpenDiablo2.Common.Models
             return seed1;
         }
 
+        /*
         private static UInt32 ComputeFileKey(string filePath, BlockRecord blockRecord, UInt32 archiveOffset)
         {
             var fileName = filePath.Split('\\').Last();
@@ -280,13 +294,13 @@ namespace OpenDiablo2.Common.Models
 
             return fileKey;
         }
-
+        
         private bool FindFileInHashTable(string filePath, out UInt32 fileHashEntry)
         {
             fileHashEntry = 0;
 
             // Find the home entry in the hash table for the file
-            UInt32 initEntry = HashString(filePath, MPQ_HASH_TABLE_OFFSET) & (UInt32)(Header.HashTableSize - 1);
+            UInt32 initEntry = HashString(filePath, MPQ_HASH_TABLE_OFFSET) & Header.HashTableSize - 1;
 
             // Is there anything there at all?
             if (hashTable[(int)initEntry].FileBlockIndex == MPQ_HASH_ENTRY_EMPTY)
@@ -313,12 +327,12 @@ namespace OpenDiablo2.Common.Models
                     }
                 }
 
-                iCurEntry = (iCurEntry + 1) & (UInt32)(Header.HashTableSize - 1);
+                iCurEntry = (iCurEntry + 1) & Header.HashTableSize - 1;
             } while (iCurEntry != initEntry && hashTable[(int)iCurEntry].FileBlockIndex != MPQ_HASH_ENTRY_EMPTY);
 
             return false;
         }
-
+        */
         private bool GetHashRecord(string fileName, out HashRecord hash)
         {
             uint index = HashString(fileName, 0);
@@ -326,7 +340,7 @@ namespace OpenDiablo2.Common.Models
             uint name1 = HashString(fileName, MPQ_HASH_NAME_A);
             uint name2 = HashString(fileName, MPQ_HASH_NAME_B);
 
-            for (uint i = index; i < hashTable.Count(); ++i)
+            for (uint i = index; i < hashTable.Count; ++i)
             {
                 hash = hashTable[(int)i];
                 if (hash.FilePathHashA == name1 && hash.FilePathHashB == name2)
@@ -346,13 +360,10 @@ namespace OpenDiablo2.Common.Models
 
         public MPQStream OpenFile(string filename)
         {
-            HashRecord hash;
-            BlockRecord block;
-
-            if (!GetHashRecord(filename, out hash))
+            if (!GetHashRecord(filename, out HashRecord hash))
                 throw new FileNotFoundException("File not found: " + filename);
 
-            block = blockTable[(int)hash.FileBlockIndex];
+            BlockRecord block = blockTable[(int)hash.FileBlockIndex];
             block.FileName = filename.ToLower();
             block.EncryptionSeed = CalculateEncryptionSeed(block);
             return new MPQStream(this, block);

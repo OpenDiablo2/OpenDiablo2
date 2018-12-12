@@ -25,7 +25,20 @@
  *
  */
 #endregion
-
+#pragma warning disable S4200
+#pragma warning disable S4214
+#pragma warning disable S2346
+#pragma warning disable S3459
+#pragma warning disable S1854
+#pragma warning disable S101
+#pragma warning disable S2344
+#pragma warning disable S1134
+#pragma warning disable S1144
+#pragma warning disable S125
+#pragma warning disable S1135
+#pragma warning disable S1168
+#pragma warning disable S1104
+#pragma warning disable S1168
 #region Using Statements
 using System;
 using System.Runtime.InteropServices;
@@ -158,13 +171,13 @@ namespace SDL2
 
 		/* mem refers to a void*, IntPtr to an SDL_RWops* */
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr SDL_RWFromMem(IntPtr mem, int size);
+        public static extern IntPtr SDL_RWFromMem(IntPtr mem, int size);
 
-		#endregion
+        #endregion
 
-		#region SDL_main.h
+        #region SDL_main.h
 
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern void SDL_SetMainReady();
 
 		/* This is used as a function pointer to a C main() function for SDL_WinRTRunApp() */
@@ -190,11 +203,11 @@ namespace SDL2
 		public const uint SDL_INIT_EVENTS =		0x00004000;
 		public const uint SDL_INIT_SENSOR =		0x00008000;
 		public const uint SDL_INIT_NOPARACHUTE =	0x00100000;
-		public const uint SDL_INIT_EVERYTHING = (
+		public const uint SDL_INIT_EVERYTHING = 
 			SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO | 
 			SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC |
 			SDL_INIT_GAMECONTROLLER | SDL_INIT_SENSOR
-		);
+		;
 
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern int SDL_Init(uint flags);
@@ -921,7 +934,7 @@ namespace SDL2
 
 		public static bool SDL_VERSION_ATLEAST(int X, int Y, int Z)
 		{
-			return (SDL_COMPILEDVERSION >= SDL_VERSIONNUM(X, Y, Z));
+			return SDL_COMPILEDVERSION >= SDL_VERSIONNUM(X, Y, Z);
 		}
 
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
@@ -1041,7 +1054,7 @@ namespace SDL2
 			SDL_WINDOW_INPUT_FOCUS =	0x00000200,
 			SDL_WINDOW_MOUSE_FOCUS =	0x00000400,
 			SDL_WINDOW_FULLSCREEN_DESKTOP =
-				(SDL_WINDOW_FULLSCREEN | 0x00001000),
+				SDL_WINDOW_FULLSCREEN | 0x00001000,
 			SDL_WINDOW_FOREIGN =		0x00000800,
 			SDL_WINDOW_ALLOW_HIGHDPI =	0x00002000,	/* Only available in 2.0.1 */
 			SDL_WINDOW_MOUSE_CAPTURE =	0x00004000,	/* Only available in 2.0.4 */
@@ -1075,7 +1088,7 @@ namespace SDL2
 
 		public static int SDL_WINDOWPOS_UNDEFINED_DISPLAY(int X)
 		{
-			return (SDL_WINDOWPOS_UNDEFINED_MASK | X);
+			return SDL_WINDOWPOS_UNDEFINED_MASK | X;
 		}
 
 		public static bool SDL_WINDOWPOS_ISUNDEFINED(int X)
@@ -1085,7 +1098,7 @@ namespace SDL2
 
 		public static int SDL_WINDOWPOS_CENTERED_DISPLAY(int X)
 		{
-			return (SDL_WINDOWPOS_CENTERED_MASK | X);
+			return SDL_WINDOWPOS_CENTERED_MASK | X;
 		}
 
 		public static bool SDL_WINDOWPOS_ISCENTERED(int X)
@@ -2522,11 +2535,11 @@ namespace SDL2
 			}
 			SDL_PIXELTYPE_ENUM pType =
 					(SDL_PIXELTYPE_ENUM) SDL_PIXELTYPE(format);
-			return (
+			return 
 				pType == SDL_PIXELTYPE_ENUM.SDL_PIXELTYPE_INDEX1 ||
 				pType == SDL_PIXELTYPE_ENUM.SDL_PIXELTYPE_INDEX4 ||
 				pType == SDL_PIXELTYPE_ENUM.SDL_PIXELTYPE_INDEX8
-			);
+			;
 		}
 
 		public static bool SDL_ISPIXELFORMAT_ALPHA(uint format)
@@ -2537,12 +2550,12 @@ namespace SDL2
 			}
 			SDL_PIXELORDER_ENUM pOrder =
 					(SDL_PIXELORDER_ENUM) SDL_PIXELORDER(format);
-			return (
+			return 
 				pOrder == SDL_PIXELORDER_ENUM.SDL_PACKEDORDER_ARGB ||
 				pOrder == SDL_PIXELORDER_ENUM.SDL_PACKEDORDER_RGBA ||
 				pOrder == SDL_PIXELORDER_ENUM.SDL_PACKEDORDER_ABGR ||
 				pOrder == SDL_PIXELORDER_ENUM.SDL_PACKEDORDER_BGRA
-			);
+			;
 		}
 
 		public static bool SDL_ISPIXELFORMAT_FOURCC(uint format)
@@ -3665,9 +3678,9 @@ namespace SDL2
 			public UInt32 timestamp;
 			public UInt32 display;
 			public SDL_DisplayEventID displayEvent; // event, lolC#
-			private byte padding1;
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding1;
+			private readonly byte padding2;
+			private readonly byte padding3;
 			public Int32 data1;
 		}
 #pragma warning restore 0169
@@ -3682,9 +3695,9 @@ namespace SDL2
 			public UInt32 timestamp;
 			public UInt32 windowID;
 			public SDL_WindowEventID windowEvent; // event, lolC#
-			private byte padding1;
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding1;
+			private readonly byte padding2;
+			private readonly byte padding3;
 			public Int32 data1;
 			public Int32 data2;
 		}
@@ -3701,8 +3714,8 @@ namespace SDL2
 			public UInt32 windowID;
 			public byte state;
 			public byte repeat; /* non-zero if this is a repeat */
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding2;
+			private readonly byte padding3;
 			public SDL_Keysym keysym;
 		}
 #pragma warning restore 0169
@@ -3738,9 +3751,9 @@ namespace SDL2
 			public UInt32 windowID;
 			public UInt32 which;
 			public byte state; /* bitmask of buttons */
-			private byte padding1;
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding1;
+			private readonly byte padding2;
+			private readonly byte padding3;
 			public Int32 x;
 			public Int32 y;
 			public Int32 xrel;
@@ -3761,7 +3774,7 @@ namespace SDL2
 			public byte button; /* button id */
 			public byte state; /* SDL_PRESSED or SDL_RELEASED */
 			public byte clicks; /* 1 for single-click, 2 for double-click, etc. */
-			private byte padding1;
+			private readonly byte padding1;
 			public Int32 x;
 			public Int32 y;
 		}
@@ -3790,9 +3803,9 @@ namespace SDL2
 			public UInt32 timestamp;
 			public Int32 which; /* SDL_JoystickID */
 			public byte axis;
-			private byte padding1;
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding1;
+			private readonly byte padding2;
+			private readonly byte padding3;
 			public Int16 axisValue; /* value, lolC# */
 			public UInt16 padding4;
 		}
@@ -3808,9 +3821,9 @@ namespace SDL2
 			public UInt32 timestamp;
 			public Int32 which; /* SDL_JoystickID */
 			public byte ball;
-			private byte padding1;
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding1;
+			private readonly byte padding2;
+			private readonly byte padding3;
 			public Int16 xrel;
 			public Int16 yrel;
 		}
@@ -3827,8 +3840,8 @@ namespace SDL2
 			public Int32 which; /* SDL_JoystickID */
 			public byte hat; /* index of the hat */
 			public byte hatValue; /* value, lolC# */
-			private byte padding1;
-			private byte padding2;
+			private readonly byte padding1;
+			private readonly byte padding2;
 		}
 #pragma warning restore 0169
 
@@ -3843,8 +3856,8 @@ namespace SDL2
 			public Int32 which; /* SDL_JoystickID */
 			public byte button;
 			public byte state; /* SDL_PRESSED or SDL_RELEASED */
-			private byte padding1;
-			private byte padding2;
+			private readonly byte padding1;
+			private readonly byte padding2;
 		}
 #pragma warning restore 0169
 
@@ -3867,11 +3880,11 @@ namespace SDL2
 			public UInt32 timestamp;
 			public Int32 which; /* SDL_JoystickID */
 			public byte axis;
-			private byte padding1;
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding1;
+			private readonly byte padding2;
+			private readonly byte padding3;
 			public Int16 axisValue; /* value, lolC# */
-			private UInt16 padding4;
+			private readonly UInt16 padding4;
 		}
 #pragma warning restore 0169
 
@@ -3886,8 +3899,8 @@ namespace SDL2
 			public Int32 which; /* SDL_JoystickID */
 			public byte button;
 			public byte state;
-			private byte padding1;
-			private byte padding2;
+			private readonly byte padding1;
+			private readonly byte padding2;
 		}
 #pragma warning restore 0169
 
@@ -3912,9 +3925,9 @@ namespace SDL2
 			public UInt32 timestamp;
 			public UInt32 which;
 			public byte iscapture;
-			private byte padding1;
-			private byte padding2;
-			private byte padding3;
+			private readonly byte padding1;
+			private readonly byte padding2;
+			private readonly byte padding3;
 		}
 #pragma warning restore 0169
 
@@ -4485,7 +4498,7 @@ namespace SDL2
 
 		#region SDL_keycode.h
 
-		public const int SDLK_SCANCODE_MASK = (1 << 30);
+		public const int SDLK_SCANCODE_MASK = 1 << 30;
 		public static SDL_Keycode SDL_SCANCODE_TO_KEYCODE(SDL_Scancode X)
 		{
 			return (SDL_Keycode)((int)X | SDLK_SCANCODE_MASK);
@@ -4572,194 +4585,194 @@ namespace SDL2
 			SDLK_y = 'y',
 			SDLK_z = 'z',
 
-			SDLK_CAPSLOCK = (int)SDL_Scancode.SDL_SCANCODE_CAPSLOCK | SDLK_SCANCODE_MASK,
+			SDLK_CAPSLOCK = SDL_Scancode.SDL_SCANCODE_CAPSLOCK | SDLK_SCANCODE_MASK,
 
-			SDLK_F1 = (int)SDL_Scancode.SDL_SCANCODE_F1 | SDLK_SCANCODE_MASK,
-			SDLK_F2 = (int)SDL_Scancode.SDL_SCANCODE_F2 | SDLK_SCANCODE_MASK,
-			SDLK_F3 = (int)SDL_Scancode.SDL_SCANCODE_F3 | SDLK_SCANCODE_MASK,
-			SDLK_F4 = (int)SDL_Scancode.SDL_SCANCODE_F4 | SDLK_SCANCODE_MASK,
-			SDLK_F5 = (int)SDL_Scancode.SDL_SCANCODE_F5 | SDLK_SCANCODE_MASK,
-			SDLK_F6 = (int)SDL_Scancode.SDL_SCANCODE_F6 | SDLK_SCANCODE_MASK,
-			SDLK_F7 = (int)SDL_Scancode.SDL_SCANCODE_F7 | SDLK_SCANCODE_MASK,
-			SDLK_F8 = (int)SDL_Scancode.SDL_SCANCODE_F8 | SDLK_SCANCODE_MASK,
-			SDLK_F9 = (int)SDL_Scancode.SDL_SCANCODE_F9 | SDLK_SCANCODE_MASK,
-			SDLK_F10 = (int)SDL_Scancode.SDL_SCANCODE_F10 | SDLK_SCANCODE_MASK,
-			SDLK_F11 = (int)SDL_Scancode.SDL_SCANCODE_F11 | SDLK_SCANCODE_MASK,
-			SDLK_F12 = (int)SDL_Scancode.SDL_SCANCODE_F12 | SDLK_SCANCODE_MASK,
+			SDLK_F1 = SDL_Scancode.SDL_SCANCODE_F1 | SDLK_SCANCODE_MASK,
+			SDLK_F2 = SDL_Scancode.SDL_SCANCODE_F2 | SDLK_SCANCODE_MASK,
+			SDLK_F3 = SDL_Scancode.SDL_SCANCODE_F3 | SDLK_SCANCODE_MASK,
+			SDLK_F4 = SDL_Scancode.SDL_SCANCODE_F4 | SDLK_SCANCODE_MASK,
+			SDLK_F5 = SDL_Scancode.SDL_SCANCODE_F5 | SDLK_SCANCODE_MASK,
+			SDLK_F6 = SDL_Scancode.SDL_SCANCODE_F6 | SDLK_SCANCODE_MASK,
+			SDLK_F7 = SDL_Scancode.SDL_SCANCODE_F7 | SDLK_SCANCODE_MASK,
+			SDLK_F8 = SDL_Scancode.SDL_SCANCODE_F8 | SDLK_SCANCODE_MASK,
+			SDLK_F9 = SDL_Scancode.SDL_SCANCODE_F9 | SDLK_SCANCODE_MASK,
+			SDLK_F10 = SDL_Scancode.SDL_SCANCODE_F10 | SDLK_SCANCODE_MASK,
+			SDLK_F11 = SDL_Scancode.SDL_SCANCODE_F11 | SDLK_SCANCODE_MASK,
+			SDLK_F12 = SDL_Scancode.SDL_SCANCODE_F12 | SDLK_SCANCODE_MASK,
 
-			SDLK_PRINTSCREEN = (int)SDL_Scancode.SDL_SCANCODE_PRINTSCREEN | SDLK_SCANCODE_MASK,
-			SDLK_SCROLLLOCK = (int)SDL_Scancode.SDL_SCANCODE_SCROLLLOCK | SDLK_SCANCODE_MASK,
-			SDLK_PAUSE = (int)SDL_Scancode.SDL_SCANCODE_PAUSE | SDLK_SCANCODE_MASK,
-			SDLK_INSERT = (int)SDL_Scancode.SDL_SCANCODE_INSERT | SDLK_SCANCODE_MASK,
-			SDLK_HOME = (int)SDL_Scancode.SDL_SCANCODE_HOME | SDLK_SCANCODE_MASK,
-			SDLK_PAGEUP = (int)SDL_Scancode.SDL_SCANCODE_PAGEUP | SDLK_SCANCODE_MASK,
+			SDLK_PRINTSCREEN = SDL_Scancode.SDL_SCANCODE_PRINTSCREEN | SDLK_SCANCODE_MASK,
+			SDLK_SCROLLLOCK = SDL_Scancode.SDL_SCANCODE_SCROLLLOCK | SDLK_SCANCODE_MASK,
+			SDLK_PAUSE = SDL_Scancode.SDL_SCANCODE_PAUSE | SDLK_SCANCODE_MASK,
+			SDLK_INSERT = SDL_Scancode.SDL_SCANCODE_INSERT | SDLK_SCANCODE_MASK,
+			SDLK_HOME = SDL_Scancode.SDL_SCANCODE_HOME | SDLK_SCANCODE_MASK,
+			SDLK_PAGEUP = SDL_Scancode.SDL_SCANCODE_PAGEUP | SDLK_SCANCODE_MASK,
 			SDLK_DELETE = 127,
-			SDLK_END = (int)SDL_Scancode.SDL_SCANCODE_END | SDLK_SCANCODE_MASK,
-			SDLK_PAGEDOWN = (int)SDL_Scancode.SDL_SCANCODE_PAGEDOWN | SDLK_SCANCODE_MASK,
-			SDLK_RIGHT = (int)SDL_Scancode.SDL_SCANCODE_RIGHT | SDLK_SCANCODE_MASK,
-			SDLK_LEFT = (int)SDL_Scancode.SDL_SCANCODE_LEFT | SDLK_SCANCODE_MASK,
-			SDLK_DOWN = (int)SDL_Scancode.SDL_SCANCODE_DOWN | SDLK_SCANCODE_MASK,
-			SDLK_UP = (int)SDL_Scancode.SDL_SCANCODE_UP | SDLK_SCANCODE_MASK,
+			SDLK_END = SDL_Scancode.SDL_SCANCODE_END | SDLK_SCANCODE_MASK,
+			SDLK_PAGEDOWN = SDL_Scancode.SDL_SCANCODE_PAGEDOWN | SDLK_SCANCODE_MASK,
+			SDLK_RIGHT = SDL_Scancode.SDL_SCANCODE_RIGHT | SDLK_SCANCODE_MASK,
+			SDLK_LEFT = SDL_Scancode.SDL_SCANCODE_LEFT | SDLK_SCANCODE_MASK,
+			SDLK_DOWN = SDL_Scancode.SDL_SCANCODE_DOWN | SDLK_SCANCODE_MASK,
+			SDLK_UP = SDL_Scancode.SDL_SCANCODE_UP | SDLK_SCANCODE_MASK,
 
-			SDLK_NUMLOCKCLEAR = (int)SDL_Scancode.SDL_SCANCODE_NUMLOCKCLEAR | SDLK_SCANCODE_MASK,
-			SDLK_KP_DIVIDE = (int)SDL_Scancode.SDL_SCANCODE_KP_DIVIDE | SDLK_SCANCODE_MASK,
-			SDLK_KP_MULTIPLY = (int)SDL_Scancode.SDL_SCANCODE_KP_MULTIPLY | SDLK_SCANCODE_MASK,
-			SDLK_KP_MINUS = (int)SDL_Scancode.SDL_SCANCODE_KP_MINUS | SDLK_SCANCODE_MASK,
-			SDLK_KP_PLUS = (int)SDL_Scancode.SDL_SCANCODE_KP_PLUS | SDLK_SCANCODE_MASK,
-			SDLK_KP_ENTER = (int)SDL_Scancode.SDL_SCANCODE_KP_ENTER | SDLK_SCANCODE_MASK,
-			SDLK_KP_1 = (int)SDL_Scancode.SDL_SCANCODE_KP_1 | SDLK_SCANCODE_MASK,
-			SDLK_KP_2 = (int)SDL_Scancode.SDL_SCANCODE_KP_2 | SDLK_SCANCODE_MASK,
-			SDLK_KP_3 = (int)SDL_Scancode.SDL_SCANCODE_KP_3 | SDLK_SCANCODE_MASK,
-			SDLK_KP_4 = (int)SDL_Scancode.SDL_SCANCODE_KP_4 | SDLK_SCANCODE_MASK,
-			SDLK_KP_5 = (int)SDL_Scancode.SDL_SCANCODE_KP_5 | SDLK_SCANCODE_MASK,
-			SDLK_KP_6 = (int)SDL_Scancode.SDL_SCANCODE_KP_6 | SDLK_SCANCODE_MASK,
-			SDLK_KP_7 = (int)SDL_Scancode.SDL_SCANCODE_KP_7 | SDLK_SCANCODE_MASK,
-			SDLK_KP_8 = (int)SDL_Scancode.SDL_SCANCODE_KP_8 | SDLK_SCANCODE_MASK,
-			SDLK_KP_9 = (int)SDL_Scancode.SDL_SCANCODE_KP_9 | SDLK_SCANCODE_MASK,
-			SDLK_KP_0 = (int)SDL_Scancode.SDL_SCANCODE_KP_0 | SDLK_SCANCODE_MASK,
-			SDLK_KP_PERIOD = (int)SDL_Scancode.SDL_SCANCODE_KP_PERIOD | SDLK_SCANCODE_MASK,
+			SDLK_NUMLOCKCLEAR = SDL_Scancode.SDL_SCANCODE_NUMLOCKCLEAR | SDLK_SCANCODE_MASK,
+			SDLK_KP_DIVIDE = SDL_Scancode.SDL_SCANCODE_KP_DIVIDE | SDLK_SCANCODE_MASK,
+			SDLK_KP_MULTIPLY = SDL_Scancode.SDL_SCANCODE_KP_MULTIPLY | SDLK_SCANCODE_MASK,
+			SDLK_KP_MINUS = SDL_Scancode.SDL_SCANCODE_KP_MINUS | SDLK_SCANCODE_MASK,
+			SDLK_KP_PLUS = SDL_Scancode.SDL_SCANCODE_KP_PLUS | SDLK_SCANCODE_MASK,
+			SDLK_KP_ENTER = SDL_Scancode.SDL_SCANCODE_KP_ENTER | SDLK_SCANCODE_MASK,
+			SDLK_KP_1 = SDL_Scancode.SDL_SCANCODE_KP_1 | SDLK_SCANCODE_MASK,
+			SDLK_KP_2 = SDL_Scancode.SDL_SCANCODE_KP_2 | SDLK_SCANCODE_MASK,
+			SDLK_KP_3 = SDL_Scancode.SDL_SCANCODE_KP_3 | SDLK_SCANCODE_MASK,
+			SDLK_KP_4 = SDL_Scancode.SDL_SCANCODE_KP_4 | SDLK_SCANCODE_MASK,
+			SDLK_KP_5 = SDL_Scancode.SDL_SCANCODE_KP_5 | SDLK_SCANCODE_MASK,
+			SDLK_KP_6 = SDL_Scancode.SDL_SCANCODE_KP_6 | SDLK_SCANCODE_MASK,
+			SDLK_KP_7 = SDL_Scancode.SDL_SCANCODE_KP_7 | SDLK_SCANCODE_MASK,
+			SDLK_KP_8 = SDL_Scancode.SDL_SCANCODE_KP_8 | SDLK_SCANCODE_MASK,
+			SDLK_KP_9 = SDL_Scancode.SDL_SCANCODE_KP_9 | SDLK_SCANCODE_MASK,
+			SDLK_KP_0 = SDL_Scancode.SDL_SCANCODE_KP_0 | SDLK_SCANCODE_MASK,
+			SDLK_KP_PERIOD = SDL_Scancode.SDL_SCANCODE_KP_PERIOD | SDLK_SCANCODE_MASK,
 
-			SDLK_APPLICATION = (int)SDL_Scancode.SDL_SCANCODE_APPLICATION | SDLK_SCANCODE_MASK,
-			SDLK_POWER = (int)SDL_Scancode.SDL_SCANCODE_POWER | SDLK_SCANCODE_MASK,
-			SDLK_KP_EQUALS = (int)SDL_Scancode.SDL_SCANCODE_KP_EQUALS | SDLK_SCANCODE_MASK,
-			SDLK_F13 = (int)SDL_Scancode.SDL_SCANCODE_F13 | SDLK_SCANCODE_MASK,
-			SDLK_F14 = (int)SDL_Scancode.SDL_SCANCODE_F14 | SDLK_SCANCODE_MASK,
-			SDLK_F15 = (int)SDL_Scancode.SDL_SCANCODE_F15 | SDLK_SCANCODE_MASK,
-			SDLK_F16 = (int)SDL_Scancode.SDL_SCANCODE_F16 | SDLK_SCANCODE_MASK,
-			SDLK_F17 = (int)SDL_Scancode.SDL_SCANCODE_F17 | SDLK_SCANCODE_MASK,
-			SDLK_F18 = (int)SDL_Scancode.SDL_SCANCODE_F18 | SDLK_SCANCODE_MASK,
-			SDLK_F19 = (int)SDL_Scancode.SDL_SCANCODE_F19 | SDLK_SCANCODE_MASK,
-			SDLK_F20 = (int)SDL_Scancode.SDL_SCANCODE_F20 | SDLK_SCANCODE_MASK,
-			SDLK_F21 = (int)SDL_Scancode.SDL_SCANCODE_F21 | SDLK_SCANCODE_MASK,
-			SDLK_F22 = (int)SDL_Scancode.SDL_SCANCODE_F22 | SDLK_SCANCODE_MASK,
-			SDLK_F23 = (int)SDL_Scancode.SDL_SCANCODE_F23 | SDLK_SCANCODE_MASK,
-			SDLK_F24 = (int)SDL_Scancode.SDL_SCANCODE_F24 | SDLK_SCANCODE_MASK,
-			SDLK_EXECUTE = (int)SDL_Scancode.SDL_SCANCODE_EXECUTE | SDLK_SCANCODE_MASK,
-			SDLK_HELP = (int)SDL_Scancode.SDL_SCANCODE_HELP | SDLK_SCANCODE_MASK,
-			SDLK_MENU = (int)SDL_Scancode.SDL_SCANCODE_MENU | SDLK_SCANCODE_MASK,
-			SDLK_SELECT = (int)SDL_Scancode.SDL_SCANCODE_SELECT | SDLK_SCANCODE_MASK,
-			SDLK_STOP = (int)SDL_Scancode.SDL_SCANCODE_STOP | SDLK_SCANCODE_MASK,
-			SDLK_AGAIN = (int)SDL_Scancode.SDL_SCANCODE_AGAIN | SDLK_SCANCODE_MASK,
-			SDLK_UNDO = (int)SDL_Scancode.SDL_SCANCODE_UNDO | SDLK_SCANCODE_MASK,
-			SDLK_CUT = (int)SDL_Scancode.SDL_SCANCODE_CUT | SDLK_SCANCODE_MASK,
-			SDLK_COPY = (int)SDL_Scancode.SDL_SCANCODE_COPY | SDLK_SCANCODE_MASK,
-			SDLK_PASTE = (int)SDL_Scancode.SDL_SCANCODE_PASTE | SDLK_SCANCODE_MASK,
-			SDLK_FIND = (int)SDL_Scancode.SDL_SCANCODE_FIND | SDLK_SCANCODE_MASK,
-			SDLK_MUTE = (int)SDL_Scancode.SDL_SCANCODE_MUTE | SDLK_SCANCODE_MASK,
-			SDLK_VOLUMEUP = (int)SDL_Scancode.SDL_SCANCODE_VOLUMEUP | SDLK_SCANCODE_MASK,
-			SDLK_VOLUMEDOWN = (int)SDL_Scancode.SDL_SCANCODE_VOLUMEDOWN | SDLK_SCANCODE_MASK,
-			SDLK_KP_COMMA = (int)SDL_Scancode.SDL_SCANCODE_KP_COMMA | SDLK_SCANCODE_MASK,
+			SDLK_APPLICATION = SDL_Scancode.SDL_SCANCODE_APPLICATION | SDLK_SCANCODE_MASK,
+			SDLK_POWER = SDL_Scancode.SDL_SCANCODE_POWER | SDLK_SCANCODE_MASK,
+			SDLK_KP_EQUALS = SDL_Scancode.SDL_SCANCODE_KP_EQUALS | SDLK_SCANCODE_MASK,
+			SDLK_F13 = SDL_Scancode.SDL_SCANCODE_F13 | SDLK_SCANCODE_MASK,
+			SDLK_F14 = SDL_Scancode.SDL_SCANCODE_F14 | SDLK_SCANCODE_MASK,
+			SDLK_F15 = SDL_Scancode.SDL_SCANCODE_F15 | SDLK_SCANCODE_MASK,
+			SDLK_F16 = SDL_Scancode.SDL_SCANCODE_F16 | SDLK_SCANCODE_MASK,
+			SDLK_F17 = SDL_Scancode.SDL_SCANCODE_F17 | SDLK_SCANCODE_MASK,
+			SDLK_F18 = SDL_Scancode.SDL_SCANCODE_F18 | SDLK_SCANCODE_MASK,
+			SDLK_F19 = SDL_Scancode.SDL_SCANCODE_F19 | SDLK_SCANCODE_MASK,
+			SDLK_F20 = SDL_Scancode.SDL_SCANCODE_F20 | SDLK_SCANCODE_MASK,
+			SDLK_F21 = SDL_Scancode.SDL_SCANCODE_F21 | SDLK_SCANCODE_MASK,
+			SDLK_F22 = SDL_Scancode.SDL_SCANCODE_F22 | SDLK_SCANCODE_MASK,
+			SDLK_F23 = SDL_Scancode.SDL_SCANCODE_F23 | SDLK_SCANCODE_MASK,
+			SDLK_F24 = SDL_Scancode.SDL_SCANCODE_F24 | SDLK_SCANCODE_MASK,
+			SDLK_EXECUTE = SDL_Scancode.SDL_SCANCODE_EXECUTE | SDLK_SCANCODE_MASK,
+			SDLK_HELP = SDL_Scancode.SDL_SCANCODE_HELP | SDLK_SCANCODE_MASK,
+			SDLK_MENU = SDL_Scancode.SDL_SCANCODE_MENU | SDLK_SCANCODE_MASK,
+			SDLK_SELECT = SDL_Scancode.SDL_SCANCODE_SELECT | SDLK_SCANCODE_MASK,
+			SDLK_STOP = SDL_Scancode.SDL_SCANCODE_STOP | SDLK_SCANCODE_MASK,
+			SDLK_AGAIN = SDL_Scancode.SDL_SCANCODE_AGAIN | SDLK_SCANCODE_MASK,
+			SDLK_UNDO = SDL_Scancode.SDL_SCANCODE_UNDO | SDLK_SCANCODE_MASK,
+			SDLK_CUT = SDL_Scancode.SDL_SCANCODE_CUT | SDLK_SCANCODE_MASK,
+			SDLK_COPY = SDL_Scancode.SDL_SCANCODE_COPY | SDLK_SCANCODE_MASK,
+			SDLK_PASTE = SDL_Scancode.SDL_SCANCODE_PASTE | SDLK_SCANCODE_MASK,
+			SDLK_FIND = SDL_Scancode.SDL_SCANCODE_FIND | SDLK_SCANCODE_MASK,
+			SDLK_MUTE = SDL_Scancode.SDL_SCANCODE_MUTE | SDLK_SCANCODE_MASK,
+			SDLK_VOLUMEUP = SDL_Scancode.SDL_SCANCODE_VOLUMEUP | SDLK_SCANCODE_MASK,
+			SDLK_VOLUMEDOWN = SDL_Scancode.SDL_SCANCODE_VOLUMEDOWN | SDLK_SCANCODE_MASK,
+			SDLK_KP_COMMA = SDL_Scancode.SDL_SCANCODE_KP_COMMA | SDLK_SCANCODE_MASK,
 			SDLK_KP_EQUALSAS400 =
-			(int)SDL_Scancode.SDL_SCANCODE_KP_EQUALSAS400 | SDLK_SCANCODE_MASK,
+            SDL_Scancode.SDL_SCANCODE_KP_EQUALSAS400 | SDLK_SCANCODE_MASK,
 
-			SDLK_ALTERASE = (int)SDL_Scancode.SDL_SCANCODE_ALTERASE | SDLK_SCANCODE_MASK,
-			SDLK_SYSREQ = (int)SDL_Scancode.SDL_SCANCODE_SYSREQ | SDLK_SCANCODE_MASK,
-			SDLK_CANCEL = (int)SDL_Scancode.SDL_SCANCODE_CANCEL | SDLK_SCANCODE_MASK,
-			SDLK_CLEAR = (int)SDL_Scancode.SDL_SCANCODE_CLEAR | SDLK_SCANCODE_MASK,
-			SDLK_PRIOR = (int)SDL_Scancode.SDL_SCANCODE_PRIOR | SDLK_SCANCODE_MASK,
-			SDLK_RETURN2 = (int)SDL_Scancode.SDL_SCANCODE_RETURN2 | SDLK_SCANCODE_MASK,
-			SDLK_SEPARATOR = (int)SDL_Scancode.SDL_SCANCODE_SEPARATOR | SDLK_SCANCODE_MASK,
-			SDLK_OUT = (int)SDL_Scancode.SDL_SCANCODE_OUT | SDLK_SCANCODE_MASK,
-			SDLK_OPER = (int)SDL_Scancode.SDL_SCANCODE_OPER | SDLK_SCANCODE_MASK,
-			SDLK_CLEARAGAIN = (int)SDL_Scancode.SDL_SCANCODE_CLEARAGAIN | SDLK_SCANCODE_MASK,
-			SDLK_CRSEL = (int)SDL_Scancode.SDL_SCANCODE_CRSEL | SDLK_SCANCODE_MASK,
-			SDLK_EXSEL = (int)SDL_Scancode.SDL_SCANCODE_EXSEL | SDLK_SCANCODE_MASK,
+			SDLK_ALTERASE = SDL_Scancode.SDL_SCANCODE_ALTERASE | SDLK_SCANCODE_MASK,
+			SDLK_SYSREQ = SDL_Scancode.SDL_SCANCODE_SYSREQ | SDLK_SCANCODE_MASK,
+			SDLK_CANCEL = SDL_Scancode.SDL_SCANCODE_CANCEL | SDLK_SCANCODE_MASK,
+			SDLK_CLEAR = SDL_Scancode.SDL_SCANCODE_CLEAR | SDLK_SCANCODE_MASK,
+			SDLK_PRIOR = SDL_Scancode.SDL_SCANCODE_PRIOR | SDLK_SCANCODE_MASK,
+			SDLK_RETURN2 = SDL_Scancode.SDL_SCANCODE_RETURN2 | SDLK_SCANCODE_MASK,
+			SDLK_SEPARATOR = SDL_Scancode.SDL_SCANCODE_SEPARATOR | SDLK_SCANCODE_MASK,
+			SDLK_OUT = SDL_Scancode.SDL_SCANCODE_OUT | SDLK_SCANCODE_MASK,
+			SDLK_OPER = SDL_Scancode.SDL_SCANCODE_OPER | SDLK_SCANCODE_MASK,
+			SDLK_CLEARAGAIN = SDL_Scancode.SDL_SCANCODE_CLEARAGAIN | SDLK_SCANCODE_MASK,
+			SDLK_CRSEL = SDL_Scancode.SDL_SCANCODE_CRSEL | SDLK_SCANCODE_MASK,
+			SDLK_EXSEL = SDL_Scancode.SDL_SCANCODE_EXSEL | SDLK_SCANCODE_MASK,
 
-			SDLK_KP_00 = (int)SDL_Scancode.SDL_SCANCODE_KP_00 | SDLK_SCANCODE_MASK,
-			SDLK_KP_000 = (int)SDL_Scancode.SDL_SCANCODE_KP_000 | SDLK_SCANCODE_MASK,
+			SDLK_KP_00 = SDL_Scancode.SDL_SCANCODE_KP_00 | SDLK_SCANCODE_MASK,
+			SDLK_KP_000 = SDL_Scancode.SDL_SCANCODE_KP_000 | SDLK_SCANCODE_MASK,
 			SDLK_THOUSANDSSEPARATOR =
-			(int)SDL_Scancode.SDL_SCANCODE_THOUSANDSSEPARATOR | SDLK_SCANCODE_MASK,
+            SDL_Scancode.SDL_SCANCODE_THOUSANDSSEPARATOR | SDLK_SCANCODE_MASK,
 			SDLK_DECIMALSEPARATOR =
-			(int)SDL_Scancode.SDL_SCANCODE_DECIMALSEPARATOR | SDLK_SCANCODE_MASK,
-			SDLK_CURRENCYUNIT = (int)SDL_Scancode.SDL_SCANCODE_CURRENCYUNIT | SDLK_SCANCODE_MASK,
+            SDL_Scancode.SDL_SCANCODE_DECIMALSEPARATOR | SDLK_SCANCODE_MASK,
+			SDLK_CURRENCYUNIT = SDL_Scancode.SDL_SCANCODE_CURRENCYUNIT | SDLK_SCANCODE_MASK,
 			SDLK_CURRENCYSUBUNIT =
-			(int)SDL_Scancode.SDL_SCANCODE_CURRENCYSUBUNIT | SDLK_SCANCODE_MASK,
-			SDLK_KP_LEFTPAREN = (int)SDL_Scancode.SDL_SCANCODE_KP_LEFTPAREN | SDLK_SCANCODE_MASK,
-			SDLK_KP_RIGHTPAREN = (int)SDL_Scancode.SDL_SCANCODE_KP_RIGHTPAREN | SDLK_SCANCODE_MASK,
-			SDLK_KP_LEFTBRACE = (int)SDL_Scancode.SDL_SCANCODE_KP_LEFTBRACE | SDLK_SCANCODE_MASK,
-			SDLK_KP_RIGHTBRACE = (int)SDL_Scancode.SDL_SCANCODE_KP_RIGHTBRACE | SDLK_SCANCODE_MASK,
-			SDLK_KP_TAB = (int)SDL_Scancode.SDL_SCANCODE_KP_TAB | SDLK_SCANCODE_MASK,
-			SDLK_KP_BACKSPACE = (int)SDL_Scancode.SDL_SCANCODE_KP_BACKSPACE | SDLK_SCANCODE_MASK,
-			SDLK_KP_A = (int)SDL_Scancode.SDL_SCANCODE_KP_A | SDLK_SCANCODE_MASK,
-			SDLK_KP_B = (int)SDL_Scancode.SDL_SCANCODE_KP_B | SDLK_SCANCODE_MASK,
-			SDLK_KP_C = (int)SDL_Scancode.SDL_SCANCODE_KP_C | SDLK_SCANCODE_MASK,
-			SDLK_KP_D = (int)SDL_Scancode.SDL_SCANCODE_KP_D | SDLK_SCANCODE_MASK,
-			SDLK_KP_E = (int)SDL_Scancode.SDL_SCANCODE_KP_E | SDLK_SCANCODE_MASK,
-			SDLK_KP_F = (int)SDL_Scancode.SDL_SCANCODE_KP_F | SDLK_SCANCODE_MASK,
-			SDLK_KP_XOR = (int)SDL_Scancode.SDL_SCANCODE_KP_XOR | SDLK_SCANCODE_MASK,
-			SDLK_KP_POWER = (int)SDL_Scancode.SDL_SCANCODE_KP_POWER | SDLK_SCANCODE_MASK,
-			SDLK_KP_PERCENT = (int)SDL_Scancode.SDL_SCANCODE_KP_PERCENT | SDLK_SCANCODE_MASK,
-			SDLK_KP_LESS = (int)SDL_Scancode.SDL_SCANCODE_KP_LESS | SDLK_SCANCODE_MASK,
-			SDLK_KP_GREATER = (int)SDL_Scancode.SDL_SCANCODE_KP_GREATER | SDLK_SCANCODE_MASK,
-			SDLK_KP_AMPERSAND = (int)SDL_Scancode.SDL_SCANCODE_KP_AMPERSAND | SDLK_SCANCODE_MASK,
+            SDL_Scancode.SDL_SCANCODE_CURRENCYSUBUNIT | SDLK_SCANCODE_MASK,
+			SDLK_KP_LEFTPAREN = SDL_Scancode.SDL_SCANCODE_KP_LEFTPAREN | SDLK_SCANCODE_MASK,
+			SDLK_KP_RIGHTPAREN = SDL_Scancode.SDL_SCANCODE_KP_RIGHTPAREN | SDLK_SCANCODE_MASK,
+			SDLK_KP_LEFTBRACE = SDL_Scancode.SDL_SCANCODE_KP_LEFTBRACE | SDLK_SCANCODE_MASK,
+			SDLK_KP_RIGHTBRACE = SDL_Scancode.SDL_SCANCODE_KP_RIGHTBRACE | SDLK_SCANCODE_MASK,
+			SDLK_KP_TAB = SDL_Scancode.SDL_SCANCODE_KP_TAB | SDLK_SCANCODE_MASK,
+			SDLK_KP_BACKSPACE = SDL_Scancode.SDL_SCANCODE_KP_BACKSPACE | SDLK_SCANCODE_MASK,
+			SDLK_KP_A = SDL_Scancode.SDL_SCANCODE_KP_A | SDLK_SCANCODE_MASK,
+			SDLK_KP_B = SDL_Scancode.SDL_SCANCODE_KP_B | SDLK_SCANCODE_MASK,
+			SDLK_KP_C = SDL_Scancode.SDL_SCANCODE_KP_C | SDLK_SCANCODE_MASK,
+			SDLK_KP_D = SDL_Scancode.SDL_SCANCODE_KP_D | SDLK_SCANCODE_MASK,
+			SDLK_KP_E = SDL_Scancode.SDL_SCANCODE_KP_E | SDLK_SCANCODE_MASK,
+			SDLK_KP_F = SDL_Scancode.SDL_SCANCODE_KP_F | SDLK_SCANCODE_MASK,
+			SDLK_KP_XOR = SDL_Scancode.SDL_SCANCODE_KP_XOR | SDLK_SCANCODE_MASK,
+			SDLK_KP_POWER = SDL_Scancode.SDL_SCANCODE_KP_POWER | SDLK_SCANCODE_MASK,
+			SDLK_KP_PERCENT = SDL_Scancode.SDL_SCANCODE_KP_PERCENT | SDLK_SCANCODE_MASK,
+			SDLK_KP_LESS = SDL_Scancode.SDL_SCANCODE_KP_LESS | SDLK_SCANCODE_MASK,
+			SDLK_KP_GREATER = SDL_Scancode.SDL_SCANCODE_KP_GREATER | SDLK_SCANCODE_MASK,
+			SDLK_KP_AMPERSAND = SDL_Scancode.SDL_SCANCODE_KP_AMPERSAND | SDLK_SCANCODE_MASK,
 			SDLK_KP_DBLAMPERSAND =
-			(int)SDL_Scancode.SDL_SCANCODE_KP_DBLAMPERSAND | SDLK_SCANCODE_MASK,
+            SDL_Scancode.SDL_SCANCODE_KP_DBLAMPERSAND | SDLK_SCANCODE_MASK,
 			SDLK_KP_VERTICALBAR =
-			(int)SDL_Scancode.SDL_SCANCODE_KP_VERTICALBAR | SDLK_SCANCODE_MASK,
+            SDL_Scancode.SDL_SCANCODE_KP_VERTICALBAR | SDLK_SCANCODE_MASK,
 			SDLK_KP_DBLVERTICALBAR =
-			(int)SDL_Scancode.SDL_SCANCODE_KP_DBLVERTICALBAR | SDLK_SCANCODE_MASK,
-			SDLK_KP_COLON = (int)SDL_Scancode.SDL_SCANCODE_KP_COLON | SDLK_SCANCODE_MASK,
-			SDLK_KP_HASH = (int)SDL_Scancode.SDL_SCANCODE_KP_HASH | SDLK_SCANCODE_MASK,
-			SDLK_KP_SPACE = (int)SDL_Scancode.SDL_SCANCODE_KP_SPACE | SDLK_SCANCODE_MASK,
-			SDLK_KP_AT = (int)SDL_Scancode.SDL_SCANCODE_KP_AT | SDLK_SCANCODE_MASK,
-			SDLK_KP_EXCLAM = (int)SDL_Scancode.SDL_SCANCODE_KP_EXCLAM | SDLK_SCANCODE_MASK,
-			SDLK_KP_MEMSTORE = (int)SDL_Scancode.SDL_SCANCODE_KP_MEMSTORE | SDLK_SCANCODE_MASK,
-			SDLK_KP_MEMRECALL = (int)SDL_Scancode.SDL_SCANCODE_KP_MEMRECALL | SDLK_SCANCODE_MASK,
-			SDLK_KP_MEMCLEAR = (int)SDL_Scancode.SDL_SCANCODE_KP_MEMCLEAR | SDLK_SCANCODE_MASK,
-			SDLK_KP_MEMADD = (int)SDL_Scancode.SDL_SCANCODE_KP_MEMADD | SDLK_SCANCODE_MASK,
+            SDL_Scancode.SDL_SCANCODE_KP_DBLVERTICALBAR | SDLK_SCANCODE_MASK,
+			SDLK_KP_COLON = SDL_Scancode.SDL_SCANCODE_KP_COLON | SDLK_SCANCODE_MASK,
+			SDLK_KP_HASH = SDL_Scancode.SDL_SCANCODE_KP_HASH | SDLK_SCANCODE_MASK,
+			SDLK_KP_SPACE = SDL_Scancode.SDL_SCANCODE_KP_SPACE | SDLK_SCANCODE_MASK,
+			SDLK_KP_AT = SDL_Scancode.SDL_SCANCODE_KP_AT | SDLK_SCANCODE_MASK,
+			SDLK_KP_EXCLAM = SDL_Scancode.SDL_SCANCODE_KP_EXCLAM | SDLK_SCANCODE_MASK,
+			SDLK_KP_MEMSTORE = SDL_Scancode.SDL_SCANCODE_KP_MEMSTORE | SDLK_SCANCODE_MASK,
+			SDLK_KP_MEMRECALL = SDL_Scancode.SDL_SCANCODE_KP_MEMRECALL | SDLK_SCANCODE_MASK,
+			SDLK_KP_MEMCLEAR = SDL_Scancode.SDL_SCANCODE_KP_MEMCLEAR | SDLK_SCANCODE_MASK,
+			SDLK_KP_MEMADD = SDL_Scancode.SDL_SCANCODE_KP_MEMADD | SDLK_SCANCODE_MASK,
 			SDLK_KP_MEMSUBTRACT =
-			(int)SDL_Scancode.SDL_SCANCODE_KP_MEMSUBTRACT | SDLK_SCANCODE_MASK,
+            SDL_Scancode.SDL_SCANCODE_KP_MEMSUBTRACT | SDLK_SCANCODE_MASK,
 			SDLK_KP_MEMMULTIPLY =
-			(int)SDL_Scancode.SDL_SCANCODE_KP_MEMMULTIPLY | SDLK_SCANCODE_MASK,
-			SDLK_KP_MEMDIVIDE = (int)SDL_Scancode.SDL_SCANCODE_KP_MEMDIVIDE | SDLK_SCANCODE_MASK,
-			SDLK_KP_PLUSMINUS = (int)SDL_Scancode.SDL_SCANCODE_KP_PLUSMINUS | SDLK_SCANCODE_MASK,
-			SDLK_KP_CLEAR = (int)SDL_Scancode.SDL_SCANCODE_KP_CLEAR | SDLK_SCANCODE_MASK,
-			SDLK_KP_CLEARENTRY = (int)SDL_Scancode.SDL_SCANCODE_KP_CLEARENTRY | SDLK_SCANCODE_MASK,
-			SDLK_KP_BINARY = (int)SDL_Scancode.SDL_SCANCODE_KP_BINARY | SDLK_SCANCODE_MASK,
-			SDLK_KP_OCTAL = (int)SDL_Scancode.SDL_SCANCODE_KP_OCTAL | SDLK_SCANCODE_MASK,
-			SDLK_KP_DECIMAL = (int)SDL_Scancode.SDL_SCANCODE_KP_DECIMAL | SDLK_SCANCODE_MASK,
+            SDL_Scancode.SDL_SCANCODE_KP_MEMMULTIPLY | SDLK_SCANCODE_MASK,
+			SDLK_KP_MEMDIVIDE = SDL_Scancode.SDL_SCANCODE_KP_MEMDIVIDE | SDLK_SCANCODE_MASK,
+			SDLK_KP_PLUSMINUS = SDL_Scancode.SDL_SCANCODE_KP_PLUSMINUS | SDLK_SCANCODE_MASK,
+			SDLK_KP_CLEAR = SDL_Scancode.SDL_SCANCODE_KP_CLEAR | SDLK_SCANCODE_MASK,
+			SDLK_KP_CLEARENTRY = SDL_Scancode.SDL_SCANCODE_KP_CLEARENTRY | SDLK_SCANCODE_MASK,
+			SDLK_KP_BINARY = SDL_Scancode.SDL_SCANCODE_KP_BINARY | SDLK_SCANCODE_MASK,
+			SDLK_KP_OCTAL = SDL_Scancode.SDL_SCANCODE_KP_OCTAL | SDLK_SCANCODE_MASK,
+			SDLK_KP_DECIMAL = SDL_Scancode.SDL_SCANCODE_KP_DECIMAL | SDLK_SCANCODE_MASK,
 			SDLK_KP_HEXADECIMAL =
-			(int)SDL_Scancode.SDL_SCANCODE_KP_HEXADECIMAL | SDLK_SCANCODE_MASK,
+            SDL_Scancode.SDL_SCANCODE_KP_HEXADECIMAL | SDLK_SCANCODE_MASK,
 
-			SDLK_LCTRL = (int)SDL_Scancode.SDL_SCANCODE_LCTRL | SDLK_SCANCODE_MASK,
-			SDLK_LSHIFT = (int)SDL_Scancode.SDL_SCANCODE_LSHIFT | SDLK_SCANCODE_MASK,
-			SDLK_LALT = (int)SDL_Scancode.SDL_SCANCODE_LALT | SDLK_SCANCODE_MASK,
-			SDLK_LGUI = (int)SDL_Scancode.SDL_SCANCODE_LGUI | SDLK_SCANCODE_MASK,
-			SDLK_RCTRL = (int)SDL_Scancode.SDL_SCANCODE_RCTRL | SDLK_SCANCODE_MASK,
-			SDLK_RSHIFT = (int)SDL_Scancode.SDL_SCANCODE_RSHIFT | SDLK_SCANCODE_MASK,
-			SDLK_RALT = (int)SDL_Scancode.SDL_SCANCODE_RALT | SDLK_SCANCODE_MASK,
-			SDLK_RGUI = (int)SDL_Scancode.SDL_SCANCODE_RGUI | SDLK_SCANCODE_MASK,
+			SDLK_LCTRL = SDL_Scancode.SDL_SCANCODE_LCTRL | SDLK_SCANCODE_MASK,
+			SDLK_LSHIFT = SDL_Scancode.SDL_SCANCODE_LSHIFT | SDLK_SCANCODE_MASK,
+			SDLK_LALT = SDL_Scancode.SDL_SCANCODE_LALT | SDLK_SCANCODE_MASK,
+			SDLK_LGUI = SDL_Scancode.SDL_SCANCODE_LGUI | SDLK_SCANCODE_MASK,
+			SDLK_RCTRL = SDL_Scancode.SDL_SCANCODE_RCTRL | SDLK_SCANCODE_MASK,
+			SDLK_RSHIFT = SDL_Scancode.SDL_SCANCODE_RSHIFT | SDLK_SCANCODE_MASK,
+			SDLK_RALT = SDL_Scancode.SDL_SCANCODE_RALT | SDLK_SCANCODE_MASK,
+			SDLK_RGUI = SDL_Scancode.SDL_SCANCODE_RGUI | SDLK_SCANCODE_MASK,
 
-			SDLK_MODE = (int)SDL_Scancode.SDL_SCANCODE_MODE | SDLK_SCANCODE_MASK,
+			SDLK_MODE = SDL_Scancode.SDL_SCANCODE_MODE | SDLK_SCANCODE_MASK,
 
-			SDLK_AUDIONEXT = (int)SDL_Scancode.SDL_SCANCODE_AUDIONEXT | SDLK_SCANCODE_MASK,
-			SDLK_AUDIOPREV = (int)SDL_Scancode.SDL_SCANCODE_AUDIOPREV | SDLK_SCANCODE_MASK,
-			SDLK_AUDIOSTOP = (int)SDL_Scancode.SDL_SCANCODE_AUDIOSTOP | SDLK_SCANCODE_MASK,
-			SDLK_AUDIOPLAY = (int)SDL_Scancode.SDL_SCANCODE_AUDIOPLAY | SDLK_SCANCODE_MASK,
-			SDLK_AUDIOMUTE = (int)SDL_Scancode.SDL_SCANCODE_AUDIOMUTE | SDLK_SCANCODE_MASK,
-			SDLK_MEDIASELECT = (int)SDL_Scancode.SDL_SCANCODE_MEDIASELECT | SDLK_SCANCODE_MASK,
-			SDLK_WWW = (int)SDL_Scancode.SDL_SCANCODE_WWW | SDLK_SCANCODE_MASK,
-			SDLK_MAIL = (int)SDL_Scancode.SDL_SCANCODE_MAIL | SDLK_SCANCODE_MASK,
-			SDLK_CALCULATOR = (int)SDL_Scancode.SDL_SCANCODE_CALCULATOR | SDLK_SCANCODE_MASK,
-			SDLK_COMPUTER = (int)SDL_Scancode.SDL_SCANCODE_COMPUTER | SDLK_SCANCODE_MASK,
-			SDLK_AC_SEARCH = (int)SDL_Scancode.SDL_SCANCODE_AC_SEARCH | SDLK_SCANCODE_MASK,
-			SDLK_AC_HOME = (int)SDL_Scancode.SDL_SCANCODE_AC_HOME | SDLK_SCANCODE_MASK,
-			SDLK_AC_BACK = (int)SDL_Scancode.SDL_SCANCODE_AC_BACK | SDLK_SCANCODE_MASK,
-			SDLK_AC_FORWARD = (int)SDL_Scancode.SDL_SCANCODE_AC_FORWARD | SDLK_SCANCODE_MASK,
-			SDLK_AC_STOP = (int)SDL_Scancode.SDL_SCANCODE_AC_STOP | SDLK_SCANCODE_MASK,
-			SDLK_AC_REFRESH = (int)SDL_Scancode.SDL_SCANCODE_AC_REFRESH | SDLK_SCANCODE_MASK,
-			SDLK_AC_BOOKMARKS = (int)SDL_Scancode.SDL_SCANCODE_AC_BOOKMARKS | SDLK_SCANCODE_MASK,
+			SDLK_AUDIONEXT = SDL_Scancode.SDL_SCANCODE_AUDIONEXT | SDLK_SCANCODE_MASK,
+			SDLK_AUDIOPREV = SDL_Scancode.SDL_SCANCODE_AUDIOPREV | SDLK_SCANCODE_MASK,
+			SDLK_AUDIOSTOP = SDL_Scancode.SDL_SCANCODE_AUDIOSTOP | SDLK_SCANCODE_MASK,
+			SDLK_AUDIOPLAY = SDL_Scancode.SDL_SCANCODE_AUDIOPLAY | SDLK_SCANCODE_MASK,
+			SDLK_AUDIOMUTE = SDL_Scancode.SDL_SCANCODE_AUDIOMUTE | SDLK_SCANCODE_MASK,
+			SDLK_MEDIASELECT = SDL_Scancode.SDL_SCANCODE_MEDIASELECT | SDLK_SCANCODE_MASK,
+			SDLK_WWW = SDL_Scancode.SDL_SCANCODE_WWW | SDLK_SCANCODE_MASK,
+			SDLK_MAIL = SDL_Scancode.SDL_SCANCODE_MAIL | SDLK_SCANCODE_MASK,
+			SDLK_CALCULATOR = SDL_Scancode.SDL_SCANCODE_CALCULATOR | SDLK_SCANCODE_MASK,
+			SDLK_COMPUTER = SDL_Scancode.SDL_SCANCODE_COMPUTER | SDLK_SCANCODE_MASK,
+			SDLK_AC_SEARCH = SDL_Scancode.SDL_SCANCODE_AC_SEARCH | SDLK_SCANCODE_MASK,
+			SDLK_AC_HOME = SDL_Scancode.SDL_SCANCODE_AC_HOME | SDLK_SCANCODE_MASK,
+			SDLK_AC_BACK = SDL_Scancode.SDL_SCANCODE_AC_BACK | SDLK_SCANCODE_MASK,
+			SDLK_AC_FORWARD = SDL_Scancode.SDL_SCANCODE_AC_FORWARD | SDLK_SCANCODE_MASK,
+			SDLK_AC_STOP = SDL_Scancode.SDL_SCANCODE_AC_STOP | SDLK_SCANCODE_MASK,
+			SDLK_AC_REFRESH = SDL_Scancode.SDL_SCANCODE_AC_REFRESH | SDLK_SCANCODE_MASK,
+			SDLK_AC_BOOKMARKS = SDL_Scancode.SDL_SCANCODE_AC_BOOKMARKS | SDLK_SCANCODE_MASK,
 
 			SDLK_BRIGHTNESSDOWN =
-			(int)SDL_Scancode.SDL_SCANCODE_BRIGHTNESSDOWN | SDLK_SCANCODE_MASK,
-			SDLK_BRIGHTNESSUP = (int)SDL_Scancode.SDL_SCANCODE_BRIGHTNESSUP | SDLK_SCANCODE_MASK,
-			SDLK_DISPLAYSWITCH = (int)SDL_Scancode.SDL_SCANCODE_DISPLAYSWITCH | SDLK_SCANCODE_MASK,
+            SDL_Scancode.SDL_SCANCODE_BRIGHTNESSDOWN | SDLK_SCANCODE_MASK,
+			SDLK_BRIGHTNESSUP = SDL_Scancode.SDL_SCANCODE_BRIGHTNESSUP | SDLK_SCANCODE_MASK,
+			SDLK_DISPLAYSWITCH = SDL_Scancode.SDL_SCANCODE_DISPLAYSWITCH | SDLK_SCANCODE_MASK,
 			SDLK_KBDILLUMTOGGLE =
-			(int)SDL_Scancode.SDL_SCANCODE_KBDILLUMTOGGLE | SDLK_SCANCODE_MASK,
-			SDLK_KBDILLUMDOWN = (int)SDL_Scancode.SDL_SCANCODE_KBDILLUMDOWN | SDLK_SCANCODE_MASK,
-			SDLK_KBDILLUMUP = (int)SDL_Scancode.SDL_SCANCODE_KBDILLUMUP | SDLK_SCANCODE_MASK,
-			SDLK_EJECT = (int)SDL_Scancode.SDL_SCANCODE_EJECT | SDLK_SCANCODE_MASK,
-			SDLK_SLEEP = (int)SDL_Scancode.SDL_SCANCODE_SLEEP | SDLK_SCANCODE_MASK
+            SDL_Scancode.SDL_SCANCODE_KBDILLUMTOGGLE | SDLK_SCANCODE_MASK,
+			SDLK_KBDILLUMDOWN = SDL_Scancode.SDL_SCANCODE_KBDILLUMDOWN | SDLK_SCANCODE_MASK,
+			SDLK_KBDILLUMUP = SDL_Scancode.SDL_SCANCODE_KBDILLUMUP | SDLK_SCANCODE_MASK,
+			SDLK_EJECT = SDL_Scancode.SDL_SCANCODE_EJECT | SDLK_SCANCODE_MASK,
+			SDLK_SLEEP = SDL_Scancode.SDL_SCANCODE_SLEEP | SDLK_SCANCODE_MASK
 		}
 
 		/* Key modifiers (bitfield) */
@@ -4781,10 +4794,10 @@ namespace SDL2
 			KMOD_RESERVED = 0x8000,
 
 			/* These are defines in the SDL headers */
-			KMOD_CTRL = (KMOD_LCTRL | KMOD_RCTRL),
-			KMOD_SHIFT = (KMOD_LSHIFT | KMOD_RSHIFT),
-			KMOD_ALT = (KMOD_LALT | KMOD_RALT),
-			KMOD_GUI = (KMOD_LGUI | KMOD_RGUI)
+			KMOD_CTRL = KMOD_LCTRL | KMOD_RCTRL,
+			KMOD_SHIFT = KMOD_LSHIFT | KMOD_RSHIFT,
+			KMOD_ALT = KMOD_LALT | KMOD_RALT,
+			KMOD_GUI = KMOD_LGUI | KMOD_RGUI
 		}
 
 		#endregion
@@ -5626,9 +5639,11 @@ namespace SDL2
 				gamecontroller,
 				axis
 			);
-			SDL_GameControllerButtonBind result = new SDL_GameControllerButtonBind();
-			result.bindType = (SDL_GameControllerBindType) dumb.bindType;
-			result.value.hat.hat = dumb.unionVal0;
+            SDL_GameControllerButtonBind result = new SDL_GameControllerButtonBind
+            {
+                bindType = (SDL_GameControllerBindType)dumb.bindType
+            };
+            result.value.hat.hat = dumb.unionVal0;
 			result.value.hat.hat_mask = dumb.unionVal1;
 			return result;
 		}
@@ -5679,9 +5694,11 @@ namespace SDL2
 				gamecontroller,
 				button
 			);
-			SDL_GameControllerButtonBind result = new SDL_GameControllerButtonBind();
-			result.bindType = (SDL_GameControllerBindType) dumb.bindType;
-			result.value.hat.hat = dumb.unionVal0;
+            SDL_GameControllerButtonBind result = new SDL_GameControllerButtonBind
+            {
+                bindType = (SDL_GameControllerBindType)dumb.bindType
+            };
+            result.value.hat.hat = dumb.unionVal0;
 			result.value.hat.hat_mask = dumb.unionVal1;
 			return result;
 		}
@@ -5721,21 +5738,21 @@ namespace SDL2
 		#region SDL_haptic.h
 
 		/* SDL_HapticEffect type */
-		public const ushort SDL_HAPTIC_CONSTANT =	(1 << 0);
-		public const ushort SDL_HAPTIC_SINE =		(1 << 1);
-		public const ushort SDL_HAPTIC_LEFTRIGHT =	(1 << 2);
-		public const ushort SDL_HAPTIC_TRIANGLE =	(1 << 3);
-		public const ushort SDL_HAPTIC_SAWTOOTHUP =	(1 << 4);
-		public const ushort SDL_HAPTIC_SAWTOOTHDOWN =	(1 << 5);
-		public const ushort SDL_HAPTIC_SPRING =		(1 << 7);
-		public const ushort SDL_HAPTIC_DAMPER =		(1 << 8);
-		public const ushort SDL_HAPTIC_INERTIA =	(1 << 9);
-		public const ushort SDL_HAPTIC_FRICTION =	(1 << 10);
-		public const ushort SDL_HAPTIC_CUSTOM =		(1 << 11);
-		public const ushort SDL_HAPTIC_GAIN =		(1 << 12);
-		public const ushort SDL_HAPTIC_AUTOCENTER =	(1 << 13);
-		public const ushort SDL_HAPTIC_STATUS =		(1 << 14);
-		public const ushort SDL_HAPTIC_PAUSE =		(1 << 15);
+		public const ushort SDL_HAPTIC_CONSTANT =	1 << 0;
+		public const ushort SDL_HAPTIC_SINE =		1 << 1;
+		public const ushort SDL_HAPTIC_LEFTRIGHT =	1 << 2;
+		public const ushort SDL_HAPTIC_TRIANGLE =	1 << 3;
+		public const ushort SDL_HAPTIC_SAWTOOTHUP =	1 << 4;
+		public const ushort SDL_HAPTIC_SAWTOOTHDOWN =	1 << 5;
+		public const ushort SDL_HAPTIC_SPRING =		1 << 7;
+		public const ushort SDL_HAPTIC_DAMPER =		1 << 8;
+		public const ushort SDL_HAPTIC_INERTIA =	1 << 9;
+		public const ushort SDL_HAPTIC_FRICTION =	1 << 10;
+		public const ushort SDL_HAPTIC_CUSTOM =		1 << 11;
+		public const ushort SDL_HAPTIC_GAIN =		1 << 12;
+		public const ushort SDL_HAPTIC_AUTOCENTER =	1 << 13;
+		public const ushort SDL_HAPTIC_STATUS =		1 << 14;
+		public const ushort SDL_HAPTIC_PAUSE =		1 << 15;
 
 		/* SDL_HapticDirection type */
 		public const byte SDL_HAPTIC_POLAR =		0;
@@ -6136,9 +6153,9 @@ namespace SDL2
 		#region SDL_audio.h
 
 		public const ushort SDL_AUDIO_MASK_BITSIZE =	0xFF;
-		public const ushort SDL_AUDIO_MASK_DATATYPE =	(1 << 8);
-		public const ushort SDL_AUDIO_MASK_ENDIAN =	(1 << 12);
-		public const ushort SDL_AUDIO_MASK_SIGNED =	(1 << 15);
+		public const ushort SDL_AUDIO_MASK_DATATYPE =	1 << 8;
+		public const ushort SDL_AUDIO_MASK_ENDIAN =	1 << 12;
+		public const ushort SDL_AUDIO_MASK_SIGNED =	1 << 15;
 
 		public static ushort SDL_AUDIO_BITSIZE(ushort x)
 		{
@@ -6203,12 +6220,12 @@ namespace SDL2
 		public const uint SDL_AUDIO_ALLOW_FORMAT_CHANGE =	0x00000002;
 		public const uint SDL_AUDIO_ALLOW_CHANNELS_CHANGE =	0x00000004;
 		public const uint SDL_AUDIO_ALLOW_SAMPLES_CHANGE =	0x00000008;
-		public const uint SDL_AUDIO_ALLOW_ANY_CHANGE = (
+		public const uint SDL_AUDIO_ALLOW_ANY_CHANGE = 
 			SDL_AUDIO_ALLOW_FREQUENCY_CHANGE |
 			SDL_AUDIO_ALLOW_FORMAT_CHANGE |
 			SDL_AUDIO_ALLOW_CHANNELS_CHANGE |
 			SDL_AUDIO_ALLOW_SAMPLES_CHANGE
-		);
+		;
 
 		public const int SDL_MIX_MAXVOLUME = 128;
 
@@ -6518,7 +6535,7 @@ namespace SDL2
 		 */
 		public static bool SDL_TICKS_PASSED(UInt32 A, UInt32 B)
 		{
-			return ((Int32)(B - A) <= 0);
+			return (Int32)(B - A) <= 0;
 		}
 
 		/* Delays the thread's processing based on the milliseconds parameter */

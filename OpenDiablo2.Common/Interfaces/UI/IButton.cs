@@ -41,10 +41,25 @@ namespace OpenDiablo2.Common.Interfaces
         Point Location { get; set; }
 
         /// <summary>
+        /// Area from upper left corner that reacts to clicking
+        /// </summary>
+        Size ClickableRect { get; set; }
+
+        /// <summary>
+        /// Indicates if button sprite should react to Toggle and Activate on hover
+        /// </summary>
+        bool AllowFrameChange { get; set; }
+
+        /// <summary>
         /// Assigning a function to this property will cause that function to be called
         /// when the button is toggled on or off.
         /// </summary>
         OnToggleDelegate OnToggle { get; set; }
+
+        /// <summary>
+        /// Toggle the button. Only valid for toggle buttons.
+        /// </summary>
+        bool Toggle();
 
         string Text { get; set; }
 

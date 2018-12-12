@@ -1,49 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace OpenDiablo2.Common.Models
 {
 
-    public class ImageFrame : IDisposable
+    public sealed class ImageFrame
     {
-        public UInt32 Flip;
-        public UInt32 Width;
-        public UInt32 Height;
-        public Int32 OffsetX;
-        public Int32 OffsetY;        // from bottom border, not up 
-        public UInt32 Unknown;
-        public UInt32 NextBlock;
-        public UInt32 Length;
-        public Int16[] ImageData;
+        public UInt32 Flip { get; internal set; }
+        public UInt32 Width { get; internal set; }
+        public UInt32 Height { get; internal set; }
+        public Int32 OffsetX { get; internal set; }
+        public Int32 OffsetY { get; internal set; }        // from bottom border, not up 
+        public UInt32 Unknown { get; internal set; }
+        public UInt32 NextBlock { get; internal set; }
+        public UInt32 Length { get; internal set; }
+        public Int16[] ImageData { get; internal set; }
 
-        public void Dispose()
+
+        ~ImageFrame()
         {
-            ImageData = new Int16[0];
+            ImageData = null;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UInt32 GetColor(int x, int y, Palette palette)
         {
-            var i = x + (y * Width);
-            if (i >= ImageData.Length)
-                return 0;
-
-            var index = ImageData[i];
-            if (index == -1)
-                return 0;
-
-            return palette.Colors[index];
+            var index = ImageData[x + (y * Width)];
+            return index == -1 ? 0 : palette.Colors[index];
         }
     }
 
-    public sealed class ImageSet : IDisposable
+    public sealed class ImageSet
     {
-        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         private UInt32[] framePointers;
         public ImageFrame[] Frames { get; private set; }
 
@@ -53,10 +43,10 @@ namespace OpenDiablo2.Common.Models
         public static ImageSet LoadFromStream(Stream stream)
         {
             var br = new BinaryReader(stream);
-            var version = br.ReadUInt32();
-            var unknown1 = br.ReadUInt32();
-            var unknown2 = br.ReadUInt32();
-            var termination = br.ReadUInt32();
+            br.ReadUInt32(); // Version
+            br.ReadUInt32(); // Unknown 1
+            br.ReadUInt32(); // Unknown 2
+            br.ReadUInt32(); // Termination
 
             var result = new ImageSet
             {
@@ -128,8 +118,10 @@ namespace OpenDiablo2.Common.Models
             return result;
         }
 
-        public void Dispose()
+        ~ImageSet()
         {
+            framePointers = null;
+            Frames = Array.Empty<ImageFrame>();
         }
     }
 }

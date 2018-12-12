@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OpenDiablo2.Common.Exceptions;
 
 namespace OpenDiablo2.Common.Models
 {
@@ -45,7 +46,7 @@ namespace OpenDiablo2.Common.Models
         public Int32 X2 { get; private set; }
         public Int32 NumberOfTiles { get; private set; }
         public MPQDT1Tile[] Tiles { get; private set; }
-        private Int32 tileHeaderOffset;
+        private readonly Int32 tileHeaderOffset;
 
         public MPQDT1(Stream stream)
         {
@@ -136,7 +137,7 @@ namespace OpenDiablo2.Common.Models
                     {
                         // 3D isometric block
                         if (block.Length != 256)
-                            throw new ApplicationException($"Expected exactly 256 bytes of data, but got {block.Length} instead!");
+                            throw new OpenDiablo2Exception($"Expected exactly 256 bytes of data, but got {block.Length} instead!");
 
                         int x = 0;
                         int y = 0;

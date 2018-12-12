@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{2B0CF1AC-06DD-4322-AE8B-FF8A8C70A3CD}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>OpenDiablo2</RootNamespace>
     <AssemblyName>OpenDiablo2</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -63,6 +63,9 @@
       <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable, Version=1.2.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Collections.Immutable.1.5.0\lib\netstandard2.0\System.Collections.Immutable.dll</HintPath>
+    </Reference>
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Console, Version=4.0.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Console.4.3.1\lib\net46\System.Console.dll</HintPath>
@@ -102,6 +105,10 @@
     <ProjectReference Include="..\OpenDiablo2.GameServer\OpenDiablo2.GameServer.csproj">
       <Project>{c29a84e8-e708-4be2-9946-202899b68e19}</Project>
       <Name>OpenDiablo2.GameServer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OpenDiablo2.MapGenerators\OpenDiablo2.MapGenerators.csproj">
+      <Project>{a3370223-a28b-45b8-ad79-c17ead99af36}</Project>
+      <Name>OpenDiablo2.MapGenerators</Name>
     </ProjectReference>
     <ProjectReference Include="..\OpenDiablo2.Scenes\OpenDiablo2.Scenes.csproj">
       <Project>{05224fe7-293f-4184-b1d6-89f5171b60e0}</Project>

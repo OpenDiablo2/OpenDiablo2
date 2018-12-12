@@ -29,6 +29,7 @@
 using System;
 using System.IO;
 using System.Collections;
+using OpenDiablo2.Common.Exceptions;
 
 namespace OpenDiablo2.Common.Models
 {
@@ -265,7 +266,7 @@ namespace OpenDiablo2.Common.Models
             {
                 int bit = input.ReadBits(1);
                 if (bit == -1)
-                    throw new Exception("Unexpected end of file");
+                    throw new OpenDiablo2Exception("Unexpected end of file");
 
                 node = bit == 0 ? node.Child0 : node.Child1;
             }
@@ -297,8 +298,10 @@ namespace OpenDiablo2.Common.Models
                 LinkedNode child1 = current.Prev;
                 if (child1 == null) break;
 
-                LinkedNode parent = new LinkedNode(0, child0.Weight + child1.Weight);
-                parent.Child0 = child0;
+                LinkedNode parent = new LinkedNode(0, child0.Weight + child1.Weight)
+                {
+                    Child0 = child0
+                };
                 child0.Parent = parent;
                 child1.Parent = parent;
 
@@ -313,11 +316,15 @@ namespace OpenDiablo2.Common.Models
             LinkedNode parent = tail;
             LinkedNode result = tail.Prev; // This will be the new tail after the tree is updated
 
-            LinkedNode temp = new LinkedNode(parent.DecompressedValue, parent.Weight);
-            temp.Parent = parent;
+            LinkedNode temp = new LinkedNode(parent.DecompressedValue, parent.Weight)
+            {
+                Parent = parent
+            };
 
-            LinkedNode newnode = new LinkedNode(decomp, 0);
-            newnode.Parent = parent;
+            LinkedNode newnode = new LinkedNode(decomp, 0)
+            {
+                Parent = parent
+            };
 
             parent.Child0 = newnode;
 
@@ -378,6 +385,9 @@ namespace OpenDiablo2.Common.Models
                 current.Next.Prev = current.Prev;
 
                 // insert current after prev
+                if (prev == null)
+                    throw new OpenDiablo2Exception("Previous frame not defined!");
+
                 LinkedNode temp = prev.Next;
                 current.Next = temp;
                 current.Prev = prev;

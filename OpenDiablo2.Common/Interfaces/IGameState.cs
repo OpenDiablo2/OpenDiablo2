@@ -16,20 +16,22 @@ namespace OpenDiablo2.Common.Interfaces
         Palette CurrentPalette { get; }
         IEnumerable<PlayerInfo> PlayerInfos { get; }
 
-        bool ToggleShowInventoryPanel();
-        bool ShowInventoryPanel { get; set; }
+        ItemInstance SelectedItem { get; }
+        void SelectItem(ItemInstance item);
 
-        bool ToggleShowCharacterPanel();
-        bool ShowCharacterPanel { get; set; }
+        int CameraOffset { get; set; }
 
-        Item SelectedItem { get; }
-        void SelectItem(Item item);
-
-        void Initialize(string text, eHero value, eSessionType sessionType);
+        void Initialize(string characterName, eHero hero, eSessionType sessionType);
         void Update(long ms);
         IEnumerable<MapCellInfo> GetMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType);
         void UpdateMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType, IEnumerable<MapCellInfo> mapCellInfo);
-        MapInfo LoadMap(eLevelId levelId, Point origin);
-        MapInfo LoadSubMap(int levelDefId, Point origin);
+        IMapInfo InsertMap(eLevelId levelId, IMapInfo parentMap = null);
+        IMapInfo InsertMap(int levelId, Point origin, IMapInfo parentMap = null);
+        IMapInfo InsertSubMap(int levelPresetId, int levelTypeId, Point origin, IMapInfo primaryMap, int subTile = -1);
+        IMapInfo GetSubMapInfo(int levelPresetId, int levelTypeId, IMapInfo primaryMap, Point origin, int subTile = -1);
+        void AddMap(IMapInfo map);
+        int HasMap(int cellX, int cellY);
+        IEnumerable<Size> GetMapSizes(int cellX, int cellY);
+        void RemoveEverythingAt(int cellX, int cellY);
     }
 }

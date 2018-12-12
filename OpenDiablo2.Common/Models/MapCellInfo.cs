@@ -9,8 +9,6 @@ namespace OpenDiablo2.Common.Models
     {
         public bool Ignore { get; set; } = false;
         public int AnimationId { get; set; }
-        public int OffX { get; set; }
-        public int OffY { get; set; }
         public int FrameWidth { get; set; }
         public int FrameHeight { get; set; }
         public MPQDT1Tile Tile { get; set; }

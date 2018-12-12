@@ -12,9 +12,9 @@ namespace OpenDiablo2.Core.UI
     public sealed class TextBox : ITextBox
     {
         private readonly IRenderWindow renderWindow;
-        private ISprite sprite;
-        private IFont font;
-        private ILabel label, linebar;
+        private readonly ISprite sprite;
+        private readonly IFont font;
+        private readonly ILabel label, linebar;
         private float frameTime = 0f;
 
         private Point location = new Point();
@@ -75,7 +75,7 @@ namespace OpenDiablo2.Core.UI
         {
             this.renderWindow = renderWindow;
 
-            sprite = renderWindow.LoadSprite(ResourcePaths.TextBox2, Palettes.Units);
+            sprite = renderWindow.LoadSprite(ResourcePaths.TextBox2, Palettes.Units, true);
             font = renderWindow.LoadFont(ResourcePaths.FontFormal11, Palettes.Units);
             label = renderWindow.CreateLabel(font);
             linebar = renderWindow.CreateLabel(font);

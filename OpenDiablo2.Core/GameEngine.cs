@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading;
 using OpenDiablo2.Common;
+using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
 
@@ -13,45 +14,37 @@ namespace OpenDiablo2.Core
     {
         static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private readonly GlobalConfiguration globalConfig;
         private readonly IMPQProvider mpqProvider;
         private readonly Func<IRenderWindow> getRenderWindow;
-        private readonly Func<string, IScene> getScene;
+        private readonly Func<eSceneType, IScene> getScene;
         private readonly Func<IResourceManager> getResourceManager;
         private readonly Func<IGameState> getGameState;
 
         private IScene currentScene;
         private IScene nextScene = null;
-        private ISprite mouseSprite;
-
-        private readonly MPQ[] MPQs;
-
-        private Dictionary<string, SoundEntry> soundTable = new Dictionary<string, SoundEntry>();
+        
+        private readonly Dictionary<string, SoundEntry> soundTable = new Dictionary<string, SoundEntry>();
         public Dictionary<string, Palette> PaletteTable { get; private set; } = new Dictionary<string, Palette>();
         
         public GameEngine(
-            GlobalConfiguration globalConfig,
             IMPQProvider mpqProvider,
             Func<IRenderWindow> getRenderWindow,
-            Func<string, IScene> getScene,
+            Func<eSceneType, IScene> getScene,
             Func<IResourceManager> getResourceManager,
             Func<IGameState> getGameState
             )
         {
-            this.globalConfig = globalConfig;
             this.mpqProvider = mpqProvider;
             this.getRenderWindow = getRenderWindow;
             this.getScene = getScene;
             this.getResourceManager = getResourceManager;
             this.getGameState = getGameState;
-
-            MPQs = mpqProvider.GetMPQs().ToArray();
         }
 
         private void LoadPalettes()
         {
             log.Info("Loading palettes");
-            var paletteFiles = MPQs.SelectMany(x => x.Files).Where(x => x.StartsWith("data\\global\\palette\\") && x.EndsWith(".dat"));
+            var paletteFiles = mpqProvider.SelectMany(x => x.Files).Where(x => x.StartsWith("data\\global\\palette\\") && x.EndsWith(".dat"));
             foreach (var paletteFile in paletteFiles)
             {
                 var paletteNameParts = paletteFile.Split('\\');
@@ -80,11 +73,11 @@ namespace OpenDiablo2.Core
             LoadPalettes();
             LoadSoundData();
 
-            mouseSprite = renderWindow.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units);
+            var mouseSprite = renderWindow.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units);
             var cursor = renderWindow.LoadCursor(mouseSprite, 0, new Point(0, 3));
             renderWindow.MouseCursor = cursor;
             
-            currentScene = getScene("Main Menu");
+            currentScene = getScene(eSceneType.MainMenu);
             var lastTicks = renderWindow.GetTicks();
             while (getRenderWindow().IsRunning)
             {
@@ -94,10 +87,12 @@ namespace OpenDiablo2.Core
                 if (ms < 0)
                     continue;
 
-                if (ms < 33)
+                if (ms < 40)
                 {
-                    Thread.Sleep(33 - (int)ms);
-                    continue;
+                    Thread.Sleep(40 - (int)ms); // Diablo 2 runs at 25FPS.
+                } else
+                {
+                    log.Info($"Full frame time used - {ms} milliseconds to frame");
                 }
 
                 // Prevent falco-punch updates
@@ -117,6 +112,7 @@ namespace OpenDiablo2.Core
 
                     if (nextScene!= null)
                     {
+                        currentScene.Dispose();
                         currentScene = nextScene;
                         nextScene = null;
                         continue;
@@ -135,7 +131,14 @@ namespace OpenDiablo2.Core
             currentScene?.Dispose();
         }
 
-        public void ChangeScene(string sceneName)
-            => nextScene = getScene(sceneName);
+        public void ChangeScene(eSceneType sceneType)
+        {
+            var loadingSprite = getRenderWindow().LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading, new Point(300, 400));
+
+            getRenderWindow().Clear();
+            getRenderWindow().Draw(loadingSprite);
+            getRenderWindow().Sync();
+            nextScene = getScene(sceneType);
+        }
     }
 }

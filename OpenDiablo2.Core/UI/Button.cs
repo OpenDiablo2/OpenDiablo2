@@ -2,21 +2,17 @@
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpenDiablo2.Core.UI
 {
-
-
     public sealed class Button : IButton
     {
         private readonly IMouseInfoProvider mouseInfoProvider;
         private readonly IRenderWindow renderWindow;
+        private readonly ISoundProvider musicProvider;
         private readonly ButtonLayout buttonLayout;
+        private readonly byte[] sfxButtonClick;
 
         public OnActivateDelegate OnActivate { get; set; }
         public OnToggleDelegate OnToggle { get; set; }
@@ -32,16 +28,20 @@ namespace OpenDiablo2.Core.UI
             }
         }
 
-        private int buttonWidth, buttonHeight;
-        private ISprite sprite;
-        private IFont font;
-        private ILabel label;
+        private readonly int buttonWidth;
+        private readonly int buttonHeight;
+        private readonly ISprite sprite;
+        private readonly IFont font;
+        private readonly ILabel label;
         private bool pressed = false;
         private bool active = false; // When true, button is actively being focus pressed
         private bool activeLock = false; // When true, we have locked the mouse from everything else
         public bool Toggled { get; private set; } = false;
 
         private Point labelOffset = new Point();
+
+        public Size ClickableRect { get; set; }
+        public bool AllowFrameChange { get; set; } = true;
 
         private bool enabled = true;
         public bool Enabled
@@ -53,7 +53,8 @@ namespace OpenDiablo2.Core.UI
                     return;
                 enabled = value;
 
-                sprite.Darken = !enabled;
+                if(buttonLayout.IsDarkenedWhenDisabled)
+                    sprite.Darken = !enabled;
             }
         }
         
@@ -72,17 +73,20 @@ namespace OpenDiablo2.Core.UI
         public Button(
             ButtonLayout buttonLayout,
             IRenderWindow renderWindow, 
-            IMouseInfoProvider mouseInfoProvider
+            IMouseInfoProvider mouseInfoProvider,
+            ISoundProvider soundProvider,
+            IMPQProvider mpqProvider
             )
         {
             this.buttonLayout = buttonLayout;
             this.renderWindow = renderWindow;
             this.mouseInfoProvider = mouseInfoProvider;
+            this.musicProvider = soundProvider;
 
             font = renderWindow.LoadFont(ResourcePaths.FontExocet10, Palettes.Units);
             label = renderWindow.CreateLabel(font);
 
-            sprite = renderWindow.LoadSprite(buttonLayout.ResourceName, buttonLayout.PaletteName);
+            sprite = renderWindow.LoadSprite(buttonLayout.ResourceName, buttonLayout.PaletteName, true);
 
             // TODO: Less stupid way of doing this would be nice
             buttonWidth = 0;
@@ -96,6 +100,8 @@ namespace OpenDiablo2.Core.UI
 
             label.MaxWidth = buttonWidth - 8;
             label.Alignment = Common.Enums.eTextAlign.Centered;
+
+            sfxButtonClick = mpqProvider.GetBytes(ResourcePaths.SFXButtonClick);
         }
 
         public bool Toggle()
@@ -134,8 +140,10 @@ namespace OpenDiablo2.Core.UI
                 return;
             }
 
-            var hovered = (mouseInfoProvider.MouseX >= location.X && mouseInfoProvider.MouseX < (location.X + buttonWidth))
-                && (mouseInfoProvider.MouseY >= location.Y && mouseInfoProvider.MouseY < (location.Y + buttonHeight));
+            int clickWidth = ClickableRect.Width > 0 ? ClickableRect.Width : buttonWidth;
+            int clickHeight = ClickableRect.Height > 0 ? ClickableRect.Height : buttonHeight;
+            var hovered = mouseInfoProvider.MouseX >= location.X && mouseInfoProvider.MouseX < (location.X + clickWidth)
+                && mouseInfoProvider.MouseY >= location.Y && mouseInfoProvider.MouseY < (location.Y + clickHeight);
 
 
             if (!activeLock && hovered && mouseInfoProvider.LeftMouseDown && !mouseInfoProvider.ReserveMouse)
@@ -143,7 +151,7 @@ namespace OpenDiablo2.Core.UI
                 // The button is being pressed down
                 mouseInfoProvider.ReserveMouse = true;
                 active = true;
-
+                musicProvider.PlaySfx(sfxButtonClick);
             }
             else if (active && !mouseInfoProvider.LeftMouseDown)
             {
@@ -170,24 +178,31 @@ namespace OpenDiablo2.Core.UI
                 activeLock = false;
             }
 
-            pressed = (hovered && mouseInfoProvider.LeftMouseDown && active);
+            pressed = hovered && mouseInfoProvider.LeftMouseDown && active;
         }
 
         public void Render()
         {
             var frame = buttonLayout.BaseFrame;
 
-            if(Toggled && pressed)
+            if (AllowFrameChange)
             {
-                frame = buttonLayout.BaseFrame + 3;
-            }
-            else if(pressed)
-            {
-                frame = buttonLayout.BaseFrame + 1;
-            }
-            else if(Toggled)
-            {
-                frame = buttonLayout.BaseFrame + 2;
+                if(!Enabled && buttonLayout.DisabledFrame >= 0)
+                {
+                    frame = buttonLayout.DisabledFrame;
+                }
+                else if (Toggled && pressed)
+                {
+                    frame = buttonLayout.BaseFrame + 3;
+                }
+                else if (pressed)
+                {
+                    frame = buttonLayout.BaseFrame + 1;
+                }
+                else if (Toggled)
+                {
+                    frame = buttonLayout.BaseFrame + 2;
+                }
             }
 
             renderWindow.Draw(sprite, buttonLayout.XSegments, 1, frame);

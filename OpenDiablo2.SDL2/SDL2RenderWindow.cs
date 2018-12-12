@@ -1,8 +1,27 @@
-﻿using System;
+﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+ *  
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
+using System;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
+using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Common.Interfaces.Drawing;
 using OpenDiablo2.Common.Models;
 using SDL2;
 
@@ -10,10 +29,8 @@ namespace OpenDiablo2.SDL2_
 {
     public sealed class SDL2RenderWindow : IRenderWindow, IMouseInfoProvider, IKeyboardInfoProvider
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-        private IntPtr window, renderer;
-        private bool fullscreen;
+        private readonly IntPtr window, renderer;
+        private readonly bool fullscreen;
 
         public bool IsRunning { get; private set; }
 
@@ -65,16 +82,16 @@ namespace OpenDiablo2.SDL2_
 
             SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
             if (SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_SCALE_QUALITY, "0") == SDL.SDL_bool.SDL_FALSE)
-                throw new ApplicationException($"Unable to Init hinting: {SDL.SDL_GetError()}");
+                throw new OpenDiablo2Exception($"Unable to Init hinting: {SDL.SDL_GetError()}");
 
             window = SDL.SDL_CreateWindow("OpenDiablo2", SDL.SDL_WINDOWPOS_UNDEFINED, SDL.SDL_WINDOWPOS_UNDEFINED, 800, 600,
                 SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN | (fullscreen ? SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN : 0));
             if (window == IntPtr.Zero)
-                throw new ApplicationException($"Unable to create SDL Window: {SDL.SDL_GetError()}");
+                throw new OpenDiablo2Exception($"Unable to create SDL Window: {SDL.SDL_GetError()}");
 
             renderer = SDL.SDL_CreateRenderer(window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED | SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
             if (renderer == IntPtr.Zero)
-                throw new ApplicationException($"Unable to create SDL Window: {SDL.SDL_GetError()}");
+                throw new OpenDiablo2Exception($"Unable to create SDL Window: {SDL.SDL_GetError()}");
 
 
             SDL.SDL_SetRenderDrawBlendMode(renderer, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
@@ -96,8 +113,7 @@ namespace OpenDiablo2.SDL2_
 
         public unsafe bool KeyIsPressed(int scancode)
         {
-            int numKeys;
-            byte* keys = (byte*)SDL.SDL_GetKeyboardState(out numKeys);
+            byte* keys = (byte*)SDL.SDL_GetKeyboardState(out int numKeys);
             return keys[scancode] > 0;
 
         }
@@ -227,7 +243,7 @@ namespace OpenDiablo2.SDL2_
         public void Draw(ISprite sprite)
         {
             var spr = sprite as SDL2Sprite;
-            if (spr.texture == IntPtr.Zero)
+            if (spr.Texture == IntPtr.Zero)
                 return;
 
             var loc = spr.GetRenderPoint();
@@ -239,14 +255,13 @@ namespace OpenDiablo2.SDL2_
                 w = spr.FrameSize.Width,
                 h = spr.FrameSize.Height
             };
-            SDL.SDL_RenderCopy(renderer, spr.texture, IntPtr.Zero, ref destRect);
+            SDL.SDL_RenderCopy(renderer, spr.Texture, IntPtr.Zero, ref destRect);
 
         }
 
         public void Draw(ISprite sprite, int xSegments, int ySegments, int offset)
         {
             var spr = sprite as SDL2Sprite;
-            var segSize = xSegments * ySegments;
 
             for (var y = 0; y < ySegments; y++)
             {
@@ -262,15 +277,15 @@ namespace OpenDiablo2.SDL2_
                         w = spr.FrameSize.Width,
                         h = spr.FrameSize.Height
                     };
-                    SDL.SDL_RenderCopy(renderer, spr.texture, IntPtr.Zero, ref destRect);
+                    SDL.SDL_RenderCopy(renderer, spr.Texture, IntPtr.Zero, ref destRect);
                 }
             }
         }
 
-        public ISprite LoadSprite(string resourcePath, string palette) => LoadSprite(resourcePath, palette, Point.Empty);
-        public ISprite LoadSprite(string resourcePath, string palette, Point location)
+        public ISprite LoadSprite(string resourcePath, string palette, bool cacheFrames = false) => LoadSprite(resourcePath, palette, Point.Empty, cacheFrames);
+        public ISprite LoadSprite(string resourcePath, string palette, Point location, bool cacheFrames = false)
         {
-            var result = new SDL2Sprite(resourceManager.GetImageSet(resourcePath), renderer)
+            var result = new SDL2Sprite(resourceManager.GetImageSet(resourcePath), renderer, cacheFrames)
             {
                 CurrentPalette = paletteProvider.PaletteTable[palette],
                 Location = location
@@ -328,52 +343,52 @@ namespace OpenDiablo2.SDL2_
             SDL.SDL_RenderCopy(renderer, lbl.texture, IntPtr.Zero, ref destRect);
         }
 
-        public unsafe MapCellInfo CacheMapCell(MPQDT1Tile mapCell)
+        public unsafe MapCellInfo CacheMapCell(MPQDT1Tile mapCell, eRenderCellType cellType)
         {
             var minX = mapCell.Blocks.Min(x => x.PositionX);
             var minY = mapCell.Blocks.Min(x => x.PositionY);
             var maxX = mapCell.Blocks.Max(x => x.PositionX + 32);
             var maxY = mapCell.Blocks.Max(x => x.PositionY + 32);
-            var diffX = maxX - minX;
-            var diffY = maxY - minY;
+            var frameWidth = maxX - minX;
+            var frameHeight = maxY - minY;
 
-            var offX = -minX;
-            var offY = -minY;
+            var dx = minX;
+            var dy = minY;
 
-            var frameSize = new Size(diffX, Math.Abs(diffY));
+            dx -= 80;
 
-            var srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = frameSize.Width, h = Math.Abs(frameSize.Height) };
-            var frameSizeMax = diffX * Math.Abs(diffY);
+            
+            var srcRect = new SDL.SDL_Rect { x = dx, y = dy, w = frameWidth, h = frameHeight };
 
+            var texId = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, frameWidth, frameHeight);
 
-            var texId = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, frameSize.Width, frameSize.Height);
+            if (texId == IntPtr.Zero)
+                throw new OpenDiablo2Exception("Could not create texture");
+
             SDL.SDL_SetTextureBlendMode(texId, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
             if (SDL.SDL_LockTexture(texId, IntPtr.Zero, out IntPtr pixels, out int pitch) != 0)
-                throw new ApplicationException("Could not lock texture for map rendering");
-
+                throw new OpenDiablo2Exception("Could not lock texture for map rendering");
+            
             try
             {
                 UInt32* data = (UInt32*)pixels;
 
-                var pitchChange = (pitch / 4);
-
-                for (var i = 0; i < frameSize.Height * pitchChange; i++)
-                    data[i] = 0x0;
-
+                var pitchChange = pitch / 4;
+                var colors = getGameState().CurrentPalette.Colors;
 
                 foreach (var block in mapCell.Blocks)
                 {
-                    var index = block.PositionX + offX + ((block.PositionY + offY) * pitchChange);
+                    var index = (block.PositionX - minX) + ((block.PositionY - minY) * pitchChange);
                     var xx = 0;
-                    var yy = 0;
                     foreach (var colorIndex in block.PixelData)
                     {
                         try
                         {
                             if (colorIndex == 0)
                                 continue;
-                            var color = getGameState().CurrentPalette.Colors[colorIndex];
+
+                            var color = colors[colorIndex];
 
                             if (color > 0)
                                 data[index] = color;
@@ -385,10 +400,8 @@ namespace OpenDiablo2.SDL2_
                             xx++;
                             if (xx == 32)
                             {
-                                index -= 32;
-                                index += pitchChange;
+                                index += pitchChange - 32;
                                 xx = 0;
-                                yy++;
                             }
                         }
                     }
@@ -402,10 +415,8 @@ namespace OpenDiablo2.SDL2_
             return new MapCellInfo
             {
                 Tile = mapCell,
-                FrameHeight = frameSize.Height,
-                FrameWidth = frameSize.Width,
-                OffX = offX,
-                OffY = offY,
+                FrameHeight = frameHeight,
+                FrameWidth = frameWidth,
                 Rect = srcRect.ToRectangle(),
                 Texture = new SDL2Texture { Pointer = texId }
             };
@@ -414,7 +425,7 @@ namespace OpenDiablo2.SDL2_
         public void DrawMapCell(MapCellInfo mapCellInfo, int xPixel, int yPixel)
         {
             var srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = mapCellInfo.FrameWidth, h = Math.Abs(mapCellInfo.FrameHeight) };
-            var destRect = new SDL.SDL_Rect { x = xPixel - mapCellInfo.OffX, y = yPixel - mapCellInfo.OffY, w = mapCellInfo.FrameWidth, h = mapCellInfo.FrameHeight };
+            var destRect = new SDL.SDL_Rect { x = xPixel + mapCellInfo.Rect.X, y = yPixel + mapCellInfo.Rect.Y, w = mapCellInfo.FrameWidth, h = mapCellInfo.FrameHeight };
             SDL.SDL_RenderCopy(renderer, (mapCellInfo.Texture as SDL2Texture).Pointer, ref srcRect, ref destRect);
         }
 
@@ -429,7 +440,7 @@ namespace OpenDiablo2.SDL2_
                 SDL.SDL_SetTextureBlendMode(texId, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
                 SDL.SDL_SetRenderTarget(renderer, texId);
-                SDL.SDL_RenderCopy(renderer, (sprite as SDL2Sprite).texture, IntPtr.Zero, IntPtr.Zero);
+                SDL.SDL_RenderCopy(renderer, (sprite as SDL2Sprite).Texture, IntPtr.Zero, IntPtr.Zero);
                 SDL.SDL_SetRenderTarget(renderer, IntPtr.Zero);
 
                 return new SDL2MouseCursor
@@ -454,7 +465,7 @@ namespace OpenDiablo2.SDL2_
 
             var cursor = SDL.SDL_CreateColorCursor(surface, hotspot.X * multiple, hotspot.Y * multiple);
             if (cursor == IntPtr.Zero)
-                throw new ApplicationException($"Unable to set the cursor cursor: {SDL.SDL_GetError()}"); // TODO: Is this supported everywhere? May need to still support software cursors.
+                throw new OpenDiablo2Exception($"Unable to set the cursor cursor: {SDL.SDL_GetError()}"); // TODO: Is this supported everywhere? May need to still support software cursors.
             return new SDL2MouseCursor { HWSurface = cursor };
         }
 
@@ -470,5 +481,7 @@ namespace OpenDiablo2.SDL2_
 
         public uint GetTicks() => SDL.SDL_GetTicks();
 
+        public ICharacterRenderer CreateCharacterRenderer()
+            => new SDL2CharacterRenderer(this.renderer, resourceManager, paletteProvider);
     }
 }

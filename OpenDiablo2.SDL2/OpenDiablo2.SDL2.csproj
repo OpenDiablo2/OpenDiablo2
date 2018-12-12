@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutofacModule.cs" />
+    <Compile Include="SDL2CharacterRenderer.cs" />
     <Compile Include="CS-SDL\SDL2.cs" />
     <Compile Include="CS-SDL\SDL2_image.cs" />
     <Compile Include="CS-SDL\SDL2_mixer.cs" />
@@ -61,7 +62,7 @@
     <Compile Include="SDL2Font.cs" />
     <Compile Include="SDL2Label.cs" />
     <Compile Include="SDL2MouseCursor.cs" />
-    <Compile Include="SDL2MusicPlayer.cs" />
+    <Compile Include="SDL2SoundProvider.cs" />
     <Compile Include="SDL2RenderWindow.cs" />
     <Compile Include="SDL2Sprite.cs" />
     <Compile Include="SDL2Texture.cs" />

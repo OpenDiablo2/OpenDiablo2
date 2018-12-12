@@ -1,4 +1,5 @@
-﻿using OpenDiablo2.Common.Interfaces;
+﻿using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace OpenDiablo2.Common.Models
 {
     public sealed class Armor : Item 
     {
-        
+        public string Type { get; internal set; }
     }
 
     public static class ArmorHelper

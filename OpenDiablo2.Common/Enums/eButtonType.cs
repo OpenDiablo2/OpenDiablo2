@@ -8,8 +8,12 @@
         Cancel,
         Tall,
         // Game UI
+        Skill,
         Run,
         Menu,
+        GoldCoin,
+        Close,
+        SecondaryInvHand,
         MinipanelCharacter,
         MinipanelInventory,
         MinipanelSkill,

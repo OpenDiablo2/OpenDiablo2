@@ -1,4 +1,5 @@
 ﻿using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
+using OpenDiablo2.Common.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,7 +19,7 @@ namespace OpenDiablo2.Common.Models
         private long position;
         private byte[] _currentData;
         private int _currentBlockIndex = -1;
-        private int blockSize;
+        private readonly int blockSize;
 
         internal MPQStream(MPQ mpq, BlockRecord blockRecord)
         {
@@ -53,9 +54,9 @@ namespace OpenDiablo2.Common.Models
                 MPQ.DecryptBlock(blockPositions, blockRecord.EncryptionSeed - 1);
 
                 if (blockPositions[0] != blockpossize)
-                    throw new ApplicationException("Decryption failed");
+                    throw new OpenDiablo2Exception("Decryption failed");
                 if (blockPositions[1] > blockSize + blockpossize)
-                    throw new ApplicationException("Decryption failed");
+                    throw new OpenDiablo2Exception("Decryption failed");
             }
 
         }
@@ -120,7 +121,7 @@ namespace OpenDiablo2.Common.Models
                 mpq.fileStream.Seek(mpq.Header.HeaderSize + blockRecord.BlockOffset, SeekOrigin.Begin);
                 int read = mpq.fileStream.Read(filedata, 0, filedata.Length);
                 if (read != filedata.Length)
-                    throw new ApplicationException("Insufficient data or invalid data length");
+                    throw new OpenDiablo2Exception("Insufficient data or invalid data length");
             }
 
             if (blockSize == blockRecord.FileSize)
@@ -204,13 +205,13 @@ namespace OpenDiablo2.Common.Models
                 mpq.fileStream.Seek(offset, SeekOrigin.Begin);
                 int read = mpq.fileStream.Read(data, 0, toread);
                 if (read != toread)
-                    throw new ApplicationException("Insufficient data or invalid data length");
+                    throw new OpenDiablo2Exception("Insufficient data or invalid data length");
             }
 
             if (blockRecord.IsEncrypted && blockRecord.FileSize > 3)
             {
                 if (blockRecord.EncryptionSeed == 0)
-                    throw new ApplicationException("Unable to determine encryption key");
+                    throw new OpenDiablo2Exception("Unable to determine encryption key");
 
                 encryptionseed = (uint)(blockIndex + blockRecord.EncryptionSeed);
                 MPQ.DecryptBlock(data, encryptionseed);
@@ -250,14 +251,14 @@ namespace OpenDiablo2.Common.Models
                     return MpqWavCompression.Decompress(sinput, 1);
 
                 case 0x12:
-                    throw new ApplicationException("LZMA compression is not yet supported");
+                    throw new OpenDiablo2Exception("LZMA compression is not yet supported");
                 // Combos
                 case 0x22:
                     // TODO: sparse then zlib
-                    throw new ApplicationException("Sparse compression + Deflate compression is not yet supported");
+                    throw new OpenDiablo2Exception("Sparse compression + Deflate compression is not yet supported");
                 case 0x30:
                     // TODO: sparse then bzip2
-                    throw new ApplicationException("Sparse compression + BZip2 compression is not yet supported");
+                    throw new OpenDiablo2Exception("Sparse compression + BZip2 compression is not yet supported");
                 case 0x41:
                     sinput = MpqHuffman.Decompress(sinput);
                     return MpqWavCompression.Decompress(sinput, 1);
@@ -275,7 +276,7 @@ namespace OpenDiablo2.Common.Models
                         return MpqWavCompression.Decompress(new MemoryStream(result), 2);
                     }
                 default:
-                    throw new ApplicationException("Compression is not yet supported: 0x" + comptype.ToString("X"));
+                    throw new OpenDiablo2Exception("Compression is not yet supported: 0x" + comptype.ToString("X"));
             }
         }
 
@@ -327,13 +328,13 @@ namespace OpenDiablo2.Common.Models
                     target = Length + offset;
                     break;
                 default:
-                    throw new ArgumentException("Origin", "Invalid SeekOrigin");
+                    throw new ArgumentException("Invalid SeekOrigin", "origin");
             }
 
             if (target < 0)
-                throw new ArgumentOutOfRangeException("Attmpted to Seek before the beginning of the stream");
+                throw new ArgumentOutOfRangeException("offset", "Attmpted to Seek before the beginning of the stream");
             if (target >= Length)
-                throw new ArgumentOutOfRangeException("Attmpted to Seek beyond the end of the stream");
+                throw new ArgumentOutOfRangeException("offset", "Attmpted to Seek beyond the end of the stream");
 
             position = target;
 

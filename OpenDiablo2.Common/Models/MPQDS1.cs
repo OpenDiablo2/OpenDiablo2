@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using OpenDiablo2.Common.Interfaces;
 
 namespace OpenDiablo2.Common.Models
@@ -60,19 +59,17 @@ namespace OpenDiablo2.Common.Models
 
     public struct DS1LookupTable
     {
-        public int Orientation;
-        public int MainIndex;
-        public int SubIndex;
-        public int Frame;
+        public int Orientation { get; internal set; }
+        public int MainIndex { get; internal set; }
+        public int SubIndex { get; internal set; }
+        public int Frame { get; internal set; }
 
-        public MPQDT1Tile TileRef;
+        public MPQDT1Tile TileRef { get; internal set; }
 
     }
 
     public sealed class MPQDS1
     {
-        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         public string MapFile { get; set; }
 
         public Int32 Version { get; internal set; }
@@ -88,7 +85,7 @@ namespace OpenDiablo2.Common.Models
         public Int32 NumberOfTags { get; internal set; }
         public Int32 NumberOfGroups { get; internal set; }
 
-        public MPQDT1[] DT1s = new MPQDT1[33];
+        public MPQDT1[] DT1s { get; internal set; } = new MPQDT1[33];
         public List<DS1LookupTable> LookupTable { get; internal set; }
 
         public List<string> FileNames { get; internal set; } = new List<string>();
@@ -98,8 +95,7 @@ namespace OpenDiablo2.Common.Models
         public MPQDS1Object[] Objects { get; internal set; }
         public MPQDS1Group[] Groups { get; internal set; }
 
-        // TODO: DI magic please
-        public MPQDS1(Stream stream, LevelPreset level, LevelDetail levelDetail, LevelType levelType, IEngineDataManager engineDataManager, IResourceManager resourceManager)
+        public MPQDS1(Stream stream, LevelPreset level, LevelType levelType, IEngineDataManager engineDataManager, IResourceManager resourceManager)
         {
             var br = new BinaryReader(stream);
             Version = br.ReadInt32();
@@ -120,17 +116,18 @@ namespace OpenDiablo2.Common.Models
                 FileCount = br.ReadInt32();
                 for (int i = 0; i < FileCount; i++)
                 {
-                    var fn = "";
+                    var fn = new StringBuilder();
                     while (true)
                     {
                         var b = br.ReadByte();
                         if (b == 0)
                             break;
-                        fn += (char)b;
+                        fn.Append((char)b);
                     }
-                    if (fn.StartsWith("\\d2\\"))
-                        fn = fn.Substring(4);
-                    FileNames.Add(fn);
+                    var fnStr = fn.ToString();
+                    if (fnStr.StartsWith("\\d2\\"))
+                        fnStr = fnStr.Substring(4);
+                    FileNames.Add(fnStr);
                 }
             }
 
@@ -209,7 +206,7 @@ namespace OpenDiablo2.Common.Models
             }
 
 
-            for (int n = 0; n < layoutStream.Count(); n++)
+            for (int n = 0; n < layoutStream.Count; n++)
             {
                 for (var y = 0; y < Height; y++)
                 {
@@ -290,14 +287,13 @@ namespace OpenDiablo2.Common.Models
             var dt1Mask = level.Dt1Mask;
             for (int i = 0; i < 32; i++)
             {
-                var tilePath = levelType.File[i];
                 var isMasked = ((dt1Mask >> i) & 1) == 1;
                 if (!isMasked || levelType.File[i] == "0")
                     continue;
 
                 DT1s[i] = resourceManager.GetMPQDT1("data\\global\\tiles\\" + levelType.File[i].Replace("/", "\\"));
-
             }
+
 
             LookupTable = new List<DS1LookupTable>();
             foreach(var dt1 in DT1s.Where(x => x != null))

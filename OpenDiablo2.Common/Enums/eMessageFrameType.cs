@@ -12,7 +12,6 @@
         MoveRequest = 0x06,
         PlayerMove = 0x07,
 
-
         MAX = 0xFF, // NOTE:
         // You absolutely cannot have a higher ID than this without
         // changing the message header to multi-byte for ALL frame types!!!

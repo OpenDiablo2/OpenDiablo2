@@ -23,7 +23,7 @@ namespace OpenDiablo2.Core
     {
         private readonly IMPQProvider mpqProvider;
 
-        private Dictionary<string, string> lookupTable = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> lookupTable = new Dictionary<string, string>();
 
         public TextDictionary(IMPQProvider mpqProvider)
         {
@@ -41,9 +41,9 @@ namespace OpenDiablo2.Core
                 var numberOfElements = br.ReadUInt16();
                 var hashTableSize = br.ReadUInt32();
                 br.ReadByte(); // Version (always 0)
-                var stringOffset = br.ReadUInt32();
-                var numberOfLoopsOffset = br.ReadUInt32();
-                var fileSize = br.ReadUInt32();
+                br.ReadUInt32(); // StringOffset
+                br.ReadUInt32(); // NumberOfLoopsOffset
+                br.ReadUInt32(); // FileSize
 
                 var elementIndexes = new List<UInt16>();
                 for (var elementIndex = 0; elementIndex < numberOfElements; elementIndex++)
@@ -72,16 +72,16 @@ namespace OpenDiablo2.Core
 
                     stream.Seek(hashEntry.IndexString, SeekOrigin.Begin);
 
-                    var key = "";
+                    var key = new StringBuilder();
                     while(true)
                     {
                         var b = br.ReadByte();
                         if (b == 0)
                             break;
-                        key += (char)b;
+                        key.Append((char)b);
                     }
 
-                    lookupTable[key] = value;
+                    lookupTable[key.ToString()] = value;
                     
                 }
             }

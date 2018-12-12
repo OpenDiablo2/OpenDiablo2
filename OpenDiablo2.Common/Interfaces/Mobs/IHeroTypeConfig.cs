@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenDiablo2.Common.Models.Mobs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,8 +48,6 @@ namespace OpenDiablo2.Common.Interfaces.Mobs
         int StartingSkill { get; }
         string BaseWeaponClass { get; }
 
-        IEnumerable<string> ItemNames { get; }
-        IEnumerable<string> ItemLocs { get; }
-        IEnumerable<int> ItemCounts { get; }
+        List<InitialEquipment> InitialEquipment { get; }
     }
 }

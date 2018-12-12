@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Drawing;
 using OpenDiablo2.Common.Enums;
 
 namespace OpenDiablo2.Common.Models
@@ -14,8 +12,11 @@ namespace OpenDiablo2.Common.Models
         public string PaletteName { get; internal set; }
         public bool Toggleable { get; internal set; } = false;
         public int BaseFrame { get; internal set; } = 0;
+        public int DisabledFrame { get; internal set; } = -1;
 
-        public static Dictionary<eButtonType, ButtonLayout> Values = new Dictionary<eButtonType, ButtonLayout>
+        public bool IsDarkenedWhenDisabled => DisabledFrame == -1;
+
+        public static ImmutableDictionary<eButtonType, ButtonLayout> Values { get; } = new Dictionary<eButtonType, ButtonLayout>
         {
             {eButtonType.Wide,  new ButtonLayout { XSegments = 2, ResourceName = ResourcePaths.WideButtonBlank, PaletteName = Palettes.Units } },
             {eButtonType.Medium, new ButtonLayout{ XSegments = 1, ResourceName=ResourcePaths.MediumButtonBlank, PaletteName = Palettes.Units } },
@@ -30,10 +31,14 @@ namespace OpenDiablo2.Common.Models
             {eButtonType.MinipanelMessage, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MinipanelButton,PaletteName = Palettes.Units, BaseFrame = 10 } },
             {eButtonType.MinipanelQuest, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MinipanelButton,PaletteName = Palettes.Units, BaseFrame = 12 } },
             {eButtonType.MinipanelMenu, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MinipanelButton,PaletteName = Palettes.Units, BaseFrame = 14 } },
-
+            
+            {eButtonType.SecondaryInvHand, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.InventoryWeaponsTab, PaletteName = Palettes.Units } },
             {eButtonType.Run, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.RunButton,PaletteName = Palettes.Units, Toggleable = true } },
             {eButtonType.Menu, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MenuButton,PaletteName = Palettes.Units, Toggleable = true } },
-        };
+            {eButtonType.GoldCoin, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.GoldCoinButton,PaletteName = Palettes.Units } },
+            {eButtonType.Close, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.SquareButton,PaletteName = Palettes.Units, BaseFrame = 10 } },
+            {eButtonType.Skill, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.AddSkillButton, PaletteName = Palettes.Units, DisabledFrame = 2 } },
+        }.ToImmutableDictionary();
     }
 
 }

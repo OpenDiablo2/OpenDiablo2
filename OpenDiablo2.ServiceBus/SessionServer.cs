@@ -1,5 +1,20 @@
-﻿using System;
-using System.Diagnostics;
+﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+ *  
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +22,7 @@ using NetMQ;
 using NetMQ.Sockets;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
 using OpenDiablo2.ServiceBus.Message_Frames.Server;
@@ -21,7 +37,7 @@ namespace OpenDiablo2.ServiceBus
         private readonly IGameServer gameServer;
         private readonly Func<eMessageFrameType, IMessageFrame> getMessageFrame;
 
-        private AutoResetEvent resetEvent = new AutoResetEvent(false);
+        private readonly AutoResetEvent resetEvent = new AutoResetEvent(false);
         public AutoResetEvent WaitServerStartEvent { get; set; } = new AutoResetEvent(false);
         private bool running = false;
         private ResponseSocket responseSocket;
@@ -69,7 +85,7 @@ namespace OpenDiablo2.ServiceBus
                 case eSessionType.Server:
                 case eSessionType.Remote:
                 default:
-                    throw new ApplicationException("This session type is currently unsupported.");
+                    throw new OpenDiablo2Exception("This session type is currently unsupported.");
             }
 
             OnJoinGame += OnJoinGameHandler;
@@ -110,15 +126,14 @@ namespace OpenDiablo2.ServiceBus
 
         private void OnMovementRequestHandler(int clientHash, byte direction, eMovementType movementType)
         {
-            // TODO: Actually move the player ....
             var player = gameServer.Players.FirstOrDefault(x => x.ClientHash == clientHash);
             if (player == null)
                 return;
 
-            // TODO: The server needs to actually manage player movement...
             player.MovementDirection = direction;
             player.MovementType = movementType;
             player.MovementDirection = direction;
+
 
             Send(new MFLocatePlayers(gameServer.Players.Select(x => x.ToPlayerLocationDetails())));
         }
@@ -143,7 +158,7 @@ namespace OpenDiablo2.ServiceBus
 
         private void Send(IMessageFrame messageFrame, bool more = false)
         {
-            var attr = messageFrame.GetType().GetCustomAttributes(true).First(x => typeof(MessageFrameAttribute).IsAssignableFrom(x.GetType())) as MessageFrameAttribute;
+            var attr = messageFrame.GetType().GetCustomAttributes(true).First(x => (x is MessageFrameAttribute)) as MessageFrameAttribute;
             responseSocket.SendFrame(new byte[] { (byte)attr.FrameType }.Concat(messageFrame.Data).ToArray(), more);
         }
 

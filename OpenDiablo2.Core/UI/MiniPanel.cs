@@ -1,101 +1,132 @@
-﻿using System;
-using System.Drawing;
+﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+ *  
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Extensions;
 using OpenDiablo2.Common.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 
 namespace OpenDiablo2.Core.UI
 {
-    // TODO: Self-align when side panels are open
     public sealed class MiniPanel : IMiniPanel
     {
+        private static readonly IEnumerable<eButtonType> panelButtons = new[] { eButtonType.MinipanelCharacter, eButtonType.MinipanelInventory,
+            eButtonType.MinipanelSkill, eButtonType.MinipanelAutomap, eButtonType.MinipanelMessage, eButtonType.MinipanelQuest, eButtonType.MinipanelMenu };
+
         private readonly IRenderWindow renderWindow;
-        private ISprite sprite;
+        private readonly IMouseInfoProvider mouseInfoProvider;
+        private readonly IGameState gameState;
+        private readonly ISprite sprite;
+        private readonly IReadOnlyList<IButton> buttons;
+        private readonly IEnumerable<IPanel> panels;
 
-        private IButton characterBtn, inventoryBtn, skillBtn, automapBtn, messageBtn, questBtn, menuBtn;
+        private bool isPanelVisible;
 
-        private Point location = new Point();
-        public Point Location
-        {
-            get => location;
-            set
-            {
-                if (location == value)
-                    return;
-                location = value;
+        public event OnPanelToggledEvent OnPanelToggled;
 
-                sprite.Location = new Point(value.X, value.Y + sprite.LocalFrameSize.Height);
-            }
-        }
-
-        public MiniPanel(IRenderWindow renderWindow, IGameState gameState, Func<eButtonType, IButton> createButton)
+        public MiniPanel(IRenderWindow renderWindow, 
+            IGameState gameState,
+            IMouseInfoProvider mouseInfoProvider,
+            IEnumerable<IPanel> panels, 
+            Func<eButtonType, IButton> createButton)
         {
             this.renderWindow = renderWindow;
-            
-            sprite = renderWindow.LoadSprite(ResourcePaths.MinipanelSmall, Palettes.Units);
-            Location = new Point(800/2-sprite.LocalFrameSize.Width/2, 526);
+            this.mouseInfoProvider = mouseInfoProvider;
+            this.gameState = gameState;
+            this.panels = panels;
 
-            characterBtn = createButton(eButtonType.MinipanelCharacter);
-            characterBtn.Location = new Point(3 + Location.X, 3 + Location.Y);
-            characterBtn.OnActivate = () => gameState.ToggleShowCharacterPanel();
+            sprite = renderWindow.LoadSprite(ResourcePaths.MinipanelSmall, Palettes.Units, true);
 
-            inventoryBtn = createButton(eButtonType.MinipanelInventory);
-            inventoryBtn.Location = new Point(24 + Location.X, 3 + Location.Y);
-            inventoryBtn.OnActivate = () => gameState.ToggleShowInventoryPanel();
+            buttons = panelButtons.Select((x, i) =>
+            {
+                var newBtn = createButton(x);
+                var panel = panels.SingleOrDefault(o => o.PanelType == x.GetPanelType());
 
-            skillBtn = createButton(eButtonType.MinipanelSkill);
-            skillBtn.Location = new Point(45 + Location.X, 3 + Location.Y);
+                if (panel != null)
+                {
+                    newBtn.OnActivate = () => OnPanelToggled?.Invoke(panel);
+                    panel.OnPanelClosed += Panel_OnPanelClosed;
+                }
+                return newBtn;
+            }).ToList().AsReadOnly();
 
-            automapBtn = createButton(eButtonType.MinipanelAutomap);
-            automapBtn.Location = new Point(66 + Location.X, 3 + Location.Y);
-
-            messageBtn = createButton(eButtonType.MinipanelMessage);
-            messageBtn.Location = new Point(87 + Location.X, 3 + Location.Y);
-
-            questBtn = createButton(eButtonType.MinipanelQuest);
-            questBtn.Location = new Point(108 + Location.X, 3 + Location.Y);
-
-            menuBtn = createButton(eButtonType.MinipanelMenu);
-            menuBtn.Location = new Point(129 + Location.X, 3 + Location.Y);
+            UpdatePanelLocation();
         }
 
+        public void OnMenuToggle(bool isToggled) => isPanelVisible = isToggled;
 
-        public void Update()
+        public IPanel GetPanel(ePanelType panelType)
         {
-            characterBtn.Update();
-            inventoryBtn.Update();
-            skillBtn.Update();
-            automapBtn.Update();
-            messageBtn.Update();
-            questBtn.Update();
-            menuBtn.Update();
-            
+            return panels.SingleOrDefault(o => o.PanelType == panelType);
+        }
+
+        public bool IsMouseOver()
+        {
+            int xDiff = mouseInfoProvider.MouseX - sprite.Location.X;
+            int yDiff = mouseInfoProvider.MouseY - sprite.Location.Y + sprite.LocalFrameSize.Height;
+
+            return isPanelVisible
+                && xDiff >= 0 && xDiff <= sprite.LocalFrameSize.Width
+                && yDiff >= 0 && yDiff <= sprite.LocalFrameSize.Height;
         }
 
         public void Render()
         {
+            if (!isPanelVisible)
+                return;
+
             renderWindow.Draw(sprite);
-            
-            characterBtn.Render();
-            inventoryBtn.Render();
-            skillBtn.Render();
-            automapBtn.Render();
-            messageBtn.Render();
-            questBtn.Render();
-            menuBtn.Render();
+
+            foreach (var button in buttons)
+                button.Render();
+        }
+
+        public void Update()
+        {
+            if (!isPanelVisible)
+                return;
+
+            foreach (var button in buttons)
+                button.Update();
         }
 
         public void Dispose()
         {
-            characterBtn.Dispose();
-            inventoryBtn.Dispose();
-            skillBtn.Dispose();
-            automapBtn.Dispose();
-            messageBtn.Dispose();
-            questBtn.Dispose();
-            menuBtn.Dispose();
+            foreach (var button in buttons)
+                button.Dispose();
 
             sprite.Dispose();
+        }
+
+        public void UpdatePanelLocation()
+        {
+            sprite.Location = new Point((800 - sprite.LocalFrameSize.Width + (int)(gameState.CameraOffset * 1.3f)) / 2, 
+                526 + sprite.LocalFrameSize.Height);
+
+            for (int i = 0; i < buttons.Count; i++)
+                buttons[i].Location = new Point(3 + 21 * i + sprite.Location.X, 3 + sprite.Location.Y - sprite.LocalFrameSize.Height);
+        }
+
+        private void Panel_OnPanelClosed(IPanel panel)
+        {
+            OnPanelToggled?.Invoke(panel);
         }
     }
 }

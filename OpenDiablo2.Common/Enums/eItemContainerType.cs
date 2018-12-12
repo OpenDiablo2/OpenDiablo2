@@ -1,4 +1,6 @@
-﻿namespace OpenDiablo2.Common.Enums
+﻿using System.Collections.Generic;
+
+namespace OpenDiablo2.Common.Enums
 {
     public enum eItemContainerType
     {

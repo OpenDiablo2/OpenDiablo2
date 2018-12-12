@@ -20,7 +20,7 @@ namespace OpenDiablo2.Common.UT
                 baseatkrating: -30, basedefrating: -30, perdexterityatkrating: 5, perdexteritydefrating: 4,
                 walkVelocity: 6, runVelocity: 9, runDrain: 20, walkFrames: 8, runFrames: 8, swingFrames: 8,
                 spellFrames: 8, getHitFrames: 8, bowFrames: 8, startingSkill: 0, baseWeaponClass: "hth", 
-                itemNames: new List<string>(), itemLocs: new List<string>(), itemCounts: new List<int>());
+                initialEquipment: new List<InitialEquipment>());
             LevelExperienceConfig expconfig = new LevelExperienceConfig(new List<long>()
             {
                 0, // level 0

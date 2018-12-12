@@ -9,8 +9,8 @@ namespace OpenDiablo2.Core.UI
     public sealed class PanelFrame : IPanelFrame
     {
         private readonly IRenderWindow renderWindow;
-        private ISprite sprite;
-        private ePanelFrameType panelFrameType;
+        private readonly ISprite sprite;
+        private readonly ePanelFrameType panelFrameType;
 
         public Point Location { get; set; }
 
@@ -19,7 +19,7 @@ namespace OpenDiablo2.Core.UI
             this.renderWindow = renderWindow;
             this.panelFrameType = panelFrameType;
             
-            sprite = renderWindow.LoadSprite(ResourcePaths.Frame, Palettes.Units, new Point(0, 0));
+            sprite = renderWindow.LoadSprite(ResourcePaths.Frame, Palettes.Units, new Point(0, 0), true);
 
             Location = new Point(0, 0);
 

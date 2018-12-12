@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Common.Interfaces.Drawing;
 
 namespace OpenDiablo2.SDL2_
 {
@@ -12,8 +13,7 @@ namespace OpenDiablo2.SDL2_
             log.Info("Configuring OpenDiablo2.Core service implementations.");
 
             builder.RegisterType<SDL2RenderWindow>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterType<SDL2MusicPlayer>().AsImplementedInterfaces().SingleInstance();
-            
+            builder.RegisterType<SDL2SoundProvider>().AsImplementedInterfaces().SingleInstance();
         }
     }
 }

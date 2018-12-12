@@ -1,20 +1,32 @@
-﻿using OpenDiablo2.Common.Enums;
-using OpenDiablo2.Common.Interfaces;
-using SDL2;
+﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+ *  
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Exceptions;
+using OpenDiablo2.Common.Interfaces;
+using SDL2;
 
 namespace OpenDiablo2.SDL2_
 {
     internal sealed class SDL2Label : ILabel
     {
-        static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         private readonly SDL2Font font;
         private readonly IntPtr renderer;
         internal IntPtr texture;
@@ -63,7 +75,7 @@ namespace OpenDiablo2.SDL2_
                 int h = 0;
                 foreach (var ch in text)
                 {
-                    var metric = font.font.CharacterMetric[(byte)ch];
+                    var metric = font.font.CharacterMetric[ch];
                     w += metric.Width;
                     h = Math.Max(Math.Max(h, metric.Height), font.sprite.FrameSize.Height);
                 }
@@ -71,8 +83,8 @@ namespace OpenDiablo2.SDL2_
                 return new Size(w, h);
             }
 
-            if (MaxWidth < (font.sprite.FrameSize.Width))
-                throw new ApplicationException("Max label width cannot be smaller than a single character.");
+            if (MaxWidth < font.sprite.FrameSize.Width)
+                throw new OpenDiablo2Exception("Max label width cannot be smaller than a single character.");
 
             var lastWordIndex = 0;
             var width = 0;
@@ -80,12 +92,12 @@ namespace OpenDiablo2.SDL2_
             var height = font.sprite.FrameSize.Height;
             for (int idx = 0; idx < text.Length; idx++)
             {
-                width += font.font.CharacterMetric[(byte)text[idx]].Width;
+                width += font.font.CharacterMetric[text[idx]].Width;
 
                 if (width >= MaxWidth)
                 {
                     idx = lastWordIndex;
-                    height += font.font.CharacterMetric[(byte)'|'].Height + 6;
+                    height += font.font.CharacterMetric['|'].Height + 6;
                     width = 0;
                     continue;
                 }
@@ -117,7 +129,7 @@ namespace OpenDiablo2.SDL2_
 
             texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, textureSize.Width, textureSize.Height);
             if (texture == IntPtr.Zero)
-                throw new ApplicationException("Unaple to initialize texture.");
+                throw new OpenDiablo2Exception("Unaple to initialize texture.");
 
             SDL.SDL_SetTextureBlendMode(texture, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
             SDL.SDL_SetRenderTarget(renderer, texture);
@@ -133,7 +145,7 @@ namespace OpenDiablo2.SDL2_
                 foreach (var ch in text)
                 {
                     WriteCharacter(cx, cy, (byte)ch);
-                    cx += font.font.CharacterMetric[(byte)ch].Width;
+                    cx += font.font.CharacterMetric[ch].Width;
                 }
             }
             else
@@ -145,7 +157,7 @@ namespace OpenDiablo2.SDL2_
                 var lastStartX = 0;
                 for (int idx = 0; idx < text.Length; idx++)
                 {
-                    width += font.font.CharacterMetric[(byte)text[idx]].Width;
+                    width += font.font.CharacterMetric[text[idx]].Width;
 
                     if (width >= MaxWidth)
                     {
@@ -167,7 +179,7 @@ namespace OpenDiablo2.SDL2_
                 var y = 0;
                 foreach(var line in linesToRender)
                 {
-                    var lineWidth = (line.Sum(c => font.font.CharacterMetric[(byte)c].Width));
+                    var lineWidth = line.Sum(c => font.font.CharacterMetric[c].Width);
                     var x = 0;
 
                     if (Alignment == eTextAlign.Centered)
@@ -178,10 +190,10 @@ namespace OpenDiablo2.SDL2_
                     foreach (var ch in line)
                     {
                         WriteCharacter(x, y, (byte)ch);
-                        x += font.font.CharacterMetric[(byte)ch].Width;
+                        x += font.font.CharacterMetric[ch].Width;
                     }
 
-                    y += font.font.CharacterMetric[(byte)'|'].Height + 6;
+                    y += font.font.CharacterMetric['|'].Height + 6;
                 }
             }
             SDL.SDL_SetRenderTarget(renderer, IntPtr.Zero);
@@ -198,8 +210,8 @@ namespace OpenDiablo2.SDL2_
             };
 
             font.sprite.Frame = character;
-            SDL.SDL_SetTextureColorMod(font.sprite.texture, TextColor.R, TextColor.G, TextColor.B);
-            SDL.SDL_RenderCopy(renderer, font.sprite.texture, IntPtr.Zero, ref rect);
+            SDL.SDL_SetTextureColorMod(font.sprite.Texture, TextColor.R, TextColor.G, TextColor.B);
+            SDL.SDL_RenderCopy(renderer, font.sprite.Texture, IntPtr.Zero, ref rect);
 
         }
 

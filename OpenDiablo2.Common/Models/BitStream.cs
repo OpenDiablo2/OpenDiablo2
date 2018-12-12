@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace OpenDiablo2.Common.Models
 {
@@ -8,7 +9,7 @@ namespace OpenDiablo2.Common.Models
     /// </summary>
     internal class BitStream
     {
-        private Stream _baseStream;
+        private readonly Stream _baseStream;
         private int _current;
         private int _bitCount;
 
@@ -20,8 +21,8 @@ namespace OpenDiablo2.Common.Models
         public int ReadBits(int bitCount)
         {
             if (bitCount > 16)
-                throw new ArgumentOutOfRangeException("BitCount", "Maximum BitCount is 16");
-            if (EnsureBits(bitCount) == false) return -1;
+                throw new ArgumentOutOfRangeException("bitCount", "Maximum BitCount is 16");
+            if (!EnsureBits(bitCount)) return -1;
             int result = _current & (0xffff >> (16 - bitCount));
             WasteBits(bitCount);
             return result;
@@ -29,10 +30,11 @@ namespace OpenDiablo2.Common.Models
 
         public int PeekByte()
         {
-            if (EnsureBits(8) == false) return -1;
+            if (!EnsureBits(8)) return -1;
             return _current & 0xff;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool EnsureBits(int bitCount)
         {
             if (bitCount <= _bitCount) return true;
@@ -44,11 +46,10 @@ namespace OpenDiablo2.Common.Models
             return true;
         }
 
-        private bool WasteBits(int bitCount)
+        private void WasteBits(int bitCount)
         {
             _current >>= bitCount;
             _bitCount -= bitCount;
-            return true;
         }
     }
 }

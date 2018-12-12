@@ -1,7 +1,9 @@
-﻿namespace OpenDiablo2.Common.Interfaces
+﻿using OpenDiablo2.Common.Enums;
+
+namespace OpenDiablo2.Common.Interfaces
 {
     public interface ISceneManager
     {
-        void ChangeScene(string sceneName);
+        void ChangeScene(eSceneType sceneType);
     }
 }

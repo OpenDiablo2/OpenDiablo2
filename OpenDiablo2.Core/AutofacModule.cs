@@ -1,4 +1,20 @@
-﻿using Autofac;
+﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+ *  
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
+using Autofac;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Interfaces.Mobs;
 using OpenDiablo2.Core.GameState_;
@@ -15,22 +31,23 @@ namespace OpenDiablo2.Core
         {
             log.Info("Configuring OpenDiablo2.Core service implementations.");
 
+            builder.RegisterType<Cache>().As<ICache>().SingleInstance();
             builder.RegisterType<Button>().As<IButton>().InstancePerDependency();
             builder.RegisterType<EngineDataManager>().As<IEngineDataManager>().SingleInstance();
             builder.RegisterType<ItemManager>().As<IItemManager>().SingleInstance();
             builder.RegisterType<GameEngine>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterType<GameState>().As<IGameState>().SingleInstance();
             builder.RegisterType<MapEngine>().As<IMapEngine>().SingleInstance();
+            builder.RegisterType<GameHUD>().As<IGameHUD>().InstancePerDependency();
             builder.RegisterType<MiniPanel>().As<IMiniPanel>().InstancePerDependency();
             builder.RegisterType<PanelFrame>().As<IPanelFrame>().InstancePerDependency();
-            builder.RegisterType<CharacterPanel>().As<ICharacterPanel>().InstancePerDependency();
-            builder.RegisterType<InventoryPanel>().As<IInventoryPanel>().InstancePerDependency();
+            builder.RegisterType<CharacterPanel>().AsImplementedInterfaces().InstancePerDependency();
+            builder.RegisterType<InventoryPanel>().AsImplementedInterfaces().InstancePerDependency();
             builder.RegisterType<ItemContainer>().As<IItemContainer>().InstancePerDependency();
             builder.RegisterType<MPQProvider>().As<IMPQProvider>().SingleInstance();
             builder.RegisterType<ResourceManager>().As<IResourceManager>().SingleInstance();
             builder.RegisterType<TextDictionary>().As<ITextDictionary>().SingleInstance();
             builder.RegisterType<TextBox>().As<ITextBox>().InstancePerDependency();
-
             builder.RegisterType<MobManager>().As<IMobManager>().SingleInstance(); // TODO: This needs to have client and server versions...
         }
     }

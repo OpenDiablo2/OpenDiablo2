@@ -1,4 +1,20 @@
-﻿using System;
+﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+ *  
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,6 +22,7 @@ using NetMQ;
 using NetMQ.Sockets;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.ServiceBus.Message_Frames.Client;
 using OpenDiablo2.ServiceBus.Message_Frames.Server;
@@ -22,7 +39,7 @@ namespace OpenDiablo2.ServiceBus
         private readonly Func<IGameState> getGameState;
 
         private RequestSocket requestSocket;
-        private AutoResetEvent resetEvent = new AutoResetEvent(false);
+        private readonly AutoResetEvent resetEvent = new AutoResetEvent(false);
         private ISessionServer sessionServer;
         private bool running = false;
 
@@ -73,7 +90,7 @@ namespace OpenDiablo2.ServiceBus
                 case eSessionType.Server:
                 case eSessionType.Remote:
                 default:
-                    throw new ApplicationException("This session type is currently unsupported.");
+                    throw new OpenDiablo2Exception("This session type is currently unsupported.");
             }
 
             running = true;
@@ -102,14 +119,14 @@ namespace OpenDiablo2.ServiceBus
 
         public void Send(IMessageFrame messageFrame, bool more = false)
         {
-            var attr = messageFrame.GetType().GetCustomAttributes(true).First(x => typeof(MessageFrameAttribute).IsAssignableFrom(x.GetType())) as MessageFrameAttribute;
+            var attr = messageFrame.GetType().GetCustomAttributes(true).First(x => (x is MessageFrameAttribute)) as MessageFrameAttribute;
             requestSocket.SendFrame(new byte[] { (byte)attr.FrameType }.Concat(messageFrame.Data).ToArray(), more);
         }
 
         private void ProcessMessageFrame<T>() where T : IMessageFrame, new()
         {
             if (!running)
-                throw new ApplicationException("You have made a terrible mistake. Cannot get a message frame if you are not connected.");
+                throw new OpenDiablo2Exception("You have made a terrible mistake. Cannot get a message frame if you are not connected.");
 
             var bytes = requestSocket.ReceiveFrameBytes();
             var frameType = (eMessageFrameType)bytes[0];
@@ -117,7 +134,7 @@ namespace OpenDiablo2.ServiceBus
             var frameData = bytes.Skip(1).ToArray(); // TODO: Can we maybe use pointers? This seems wasteful
             var messageFrame = getMessageFrame(frameType);
             if (messageFrame.GetType() != typeof(T))
-                throw new ApplicationException("Recieved unexpected message frame!");
+                throw new OpenDiablo2Exception("Recieved unexpected message frame!");
             messageFrame.Data = frameData;
             lock (getGameState().ThreadLocker)
             {
@@ -129,7 +146,7 @@ namespace OpenDiablo2.ServiceBus
         {
             var bytes = requestSocket.ReceiveFrameBytes();
             if ((eMessageFrameType)bytes[0] != eMessageFrameType.None)
-                throw new ApplicationException("Excepted a NoOp but got a command instead!");
+                throw new OpenDiablo2Exception("Excepted a NoOp but got a command instead!");
         }
 
         public void JoinGame(string playerName, eHero heroType)

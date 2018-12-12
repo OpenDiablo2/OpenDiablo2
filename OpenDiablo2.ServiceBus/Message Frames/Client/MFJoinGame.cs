@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 
 namespace OpenDiablo2.ServiceBus.Message_Frames.Client
@@ -17,20 +21,23 @@ namespace OpenDiablo2.ServiceBus.Message_Frames.Client
         {
             get
             {
-                return new byte[] { (byte)HeroType }
-                    .Concat(BitConverter.GetBytes((UInt16)PlayerName.Length))
-                    .Concat(Encoding.UTF8.GetBytes(PlayerName))
-                    .ToArray();
-            }
+                using (var stream = new MemoryStream())
+                using (var writer = new BinaryWriter(stream)) {
+                    writer.Write((byte)HeroType);
+                    writer.Write(PlayerName);
 
+                    return stream.ToArray();
+                }
+            }
+                
             set
             {
-                HeroType = (eHero)value[0];
-                var playerNameLen = BitConverter.ToUInt16(value, 1);
-                PlayerName = Encoding.UTF8.GetString(value, 3, value.Length - 3);
-
-                if (PlayerName.Length != playerNameLen)
-                    throw new ApplicationException("Invalid player length!");
+                using(var stream = new MemoryStream(value))
+                using(var reader = new BinaryReader(stream))
+                {
+                    HeroType = (eHero)reader.ReadByte();
+                    PlayerName = reader.ReadString();
+                }
             }
         }
 
