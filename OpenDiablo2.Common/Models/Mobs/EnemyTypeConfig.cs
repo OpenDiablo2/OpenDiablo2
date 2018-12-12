@@ -250,8 +250,8 @@ namespace OpenDiablo2.Common.Models.Mobs
         public static IEnemyTypeConfig ToEnemyTypeConfig(this string[] row)
         {
             return new EnemyTypeConfig(
-                Name: row[0],
-                UniqueName: row[1],
+                InternalName: row[0],
+                Name: row[1],
                 Type: row[2],
                 Descriptor: row[3],
 

@@ -17,8 +17,8 @@ namespace OpenDiablo2.Common.UT
         {
             // does not correspond to any particular enemy in the actual data, just for testing
             EnemyTypeConfig config = new EnemyTypeConfig(
-                Name: "TestEnemy",
-                UniqueName: "TestEnemy1",
+                InternalName: "TestEnemy",
+                Name: "TestEnemy1",
                 Type: "Skeleton", 
                 Descriptor: "",
                 BaseId: 1,
