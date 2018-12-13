@@ -1,4 +1,4 @@
-﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
  *  
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -219,6 +219,9 @@ namespace OpenDiablo2.Common
         public const string SFXSorceressDeselect = @"data\global\sfx\Cursor\intro\sorceress deselect.wav";
         public const string SFXSorceressSelect = @"data\global\sfx\Cursor\intro\sorceress select.wav";
 
+        // --- Enemy Data ---
+        public static string MonStats = "data\\global\\excel\\monstats.txt";
+
         public static string GeneratePathForItem(string spriteName)
         {
             return $@"data\global\items\{spriteName}.dc6";
@@ -304,3 +307,4 @@ namespace OpenDiablo2.Common
         }
     }
 }
+

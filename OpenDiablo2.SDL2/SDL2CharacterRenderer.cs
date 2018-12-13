@@ -23,6 +23,7 @@ using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Interfaces.Drawing;
 using OpenDiablo2.Common.Models;
+using OpenDiablo2.Common.Models.Mobs;
 using SDL2;
 
 namespace OpenDiablo2.SDL2_
@@ -45,8 +46,7 @@ namespace OpenDiablo2.SDL2_
         public Guid UID { get; set; }
         public PlayerLocationDetails LocationDetails { get; set; }
         public eHero Hero { get; set; }
-        public eWeaponClass WeaponClass { get; set; }
-        public eArmorType ArmorType { get; set; }
+        public PlayerEquipment Equipment { get; set; }
         public eMobMode MobMode { get; set; }
         public string ShieldCode { get; set; }
         public string WeaponCode { get; set; }
@@ -134,12 +134,12 @@ namespace OpenDiablo2.SDL2_
             if (currentDirectionCache != null)
                 return;
 
-            animationData = resourceManager.GetPlayerAnimation(Hero, WeaponClass, MobMode, ShieldCode, WeaponCode);
+            animationData = resourceManager.GetPlayerAnimation(Hero, MobMode, Equipment);
             if (animationData == null)
                 throw new OpenDiablo2Exception("Could not locate animation for the character!");
 
             var palette = paletteProvider.PaletteTable["Units"];
-            CacheFrames(animationData.Layers.Select(layer => resourceManager.GetPlayerDCC(layer, ArmorType, palette)).ToArray());
+            CacheFrames(animationData.Layers.Select(layer => resourceManager.GetPlayerDCC(layer, Equipment, palette)).ToArray());
         }
 
         private unsafe void CacheFrames(MPQDCC[] layerData)
@@ -192,23 +192,18 @@ namespace OpenDiablo2.SDL2_
                 SDL.SDL_LockTexture(texture, IntPtr.Zero, out IntPtr pixels, out int pitch);
                 UInt32* data = (UInt32*)pixels;
 
-                var priorities = new int[animationData.NumberOfLayers];
-                Array.Copy(
-                    animationData.Priority,
-                    (directionConversion[LocationDetails.MovementDirection] * animationData.FramesPerDirection * animationData.NumberOfLayers)
-                        + (frameIndex * animationData.NumberOfLayers),
-                    priorities,
-                    0,
-                    animationData.NumberOfLayers
-                );
-
-                for (var i = 0; i < layerData.Length; i++)
+                var priorityBase = (directionConversion[LocationDetails.MovementDirection] * animationData.FramesPerDirection * animationData.NumberOfLayers)
+                        + (frameIndex * animationData.NumberOfLayers);
+                for (var i = 0; i < animationData.NumberOfLayers; i++)
                 {
-                    //var layer = layerData[priorities[i]];
-                    var layer = layerData[i];
+                    var comp = animationData.Priority[priorityBase + i];
+                    if (!animationData.CompositLayers.ContainsKey(comp))
+                        continue;
+
+                    var layer = layerData[animationData.CompositLayers[comp]];
 
                     if (layer == null)
-                        continue;
+                        continue; // TODO: This is most likely not ok
 
                     var direction = layer.Directions[directionConversion[LocationDetails.MovementDirection]];
                     var frame = direction.Frames[frameIndex];

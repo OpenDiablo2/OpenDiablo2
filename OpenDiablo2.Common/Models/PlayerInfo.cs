@@ -28,12 +28,9 @@ namespace OpenDiablo2.Common.Models
         public Guid UID { get; set; }
         public string Name { get; set; }
         public eHero Hero { get; set; }
-        public eWeaponClass WeaponClass { get; set; }
-        public eArmorType ArmorType { get; set; }
         public eMobMode MobMode { get; set; }
         public PlayerLocationDetails LocationDetails { get; set; }
-        public string ShieldCode { get; set; }
-        public string WeaponCode { get; set; }
+        public PlayerEquipment Equipment { get; set; }
 
         public byte[] GetBytes()
         {
@@ -41,12 +38,9 @@ namespace OpenDiablo2.Common.Models
             using (var writer = new BinaryWriter(stream))
             {
                 writer.Write((byte)Hero);
-                writer.Write((byte)WeaponClass);
-                writer.Write((byte)ArmorType);
                 writer.Write((byte)MobMode);
                 writer.Write(Name);
-                writer.Write(ShieldCode != null ? ShieldCode : "");
-                writer.Write(WeaponCode != null ? WeaponCode : "");
+                writer.Write(Equipment);
                 writer.Write(LocationDetails.GetBytes());
                 writer.Write(UID.ToByteArray());
 
@@ -64,12 +58,9 @@ namespace OpenDiablo2.Common.Models
                 var result = new PlayerInfo
                 {
                     Hero = (eHero)reader.ReadByte(),
-                    WeaponClass = (eWeaponClass)reader.ReadByte(),
-                    ArmorType = (eArmorType)reader.ReadByte(),
                     MobMode = (eMobMode)reader.ReadByte(),
                     Name = reader.ReadString(),
-                    ShieldCode = reader.ReadString(),
-                    WeaponCode = reader.ReadString(),
+                    Equipment = reader.ReadPlayerEquipment(),
                     LocationDetails = PlayerLocationDetails.FromBytes(reader.ReadBytes(PlayerLocationDetails.SizeInBytes)),
                     UID = new Guid(reader.ReadBytes(16))
                 };
@@ -97,11 +88,8 @@ namespace OpenDiablo2.Common.Models
                     PlayerY = source.GetPosition().Y,
                 },
                 Name = source.Name,
-                WeaponClass = source.WeaponClass,
-                ArmorType = source.ArmorType,
                 MobMode = source.MobMode,
-                ShieldCode = source.ShieldCode,
-                WeaponCode = source.WeaponCode
+                Equipment = source.Equipment
             };
     }
 }

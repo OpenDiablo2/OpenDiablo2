@@ -24,21 +24,17 @@ namespace OpenDiablo2.Common.Models.Mobs
 {
     public class PlayerState : MobState
     {
-        public Guid UID { get; protected set; } = Guid.NewGuid();
-        public eHero HeroType { get; protected set; }
         private readonly IHeroTypeConfig HeroTypeConfig;
         private readonly ILevelExperienceConfig ExperienceConfig;
+
+        public Guid UID { get; protected set; } = Guid.NewGuid();
+        public eHero HeroType { get; protected set; }
         public int ClientHash { get; protected set; }
         public byte MovementDirection { get; set; } = 0;
         public eMovementType MovementType { get; set; } = eMovementType.Stopped; // TODO: This needs to mess with MobMode somehow
-        public eWeaponClass WeaponClass { get; set; } = eWeaponClass.HandToHand; // Temporary
-        public eArmorType ArmorType { get; set; } = eArmorType.Lite; // Temporary
-        public eMobMode MobMode { get; set; } = eMobMode.PlayerTownWalk; // Temporary
+        public eMobMode MobMode { get; set; } = eMobMode.PlayerTownWalk;
+        public PlayerEquipment Equipment { get; set; } = new PlayerEquipment();
 
-        // Remove when we're passing the full inventory. Used for animations.
-        public string ShieldCode { get; set; } 
-        public string WeaponCode { get; set; }
-        // ---
 
         // Player character stats
         protected Stat Vitality;
@@ -56,9 +52,7 @@ namespace OpenDiablo2.Common.Models.Mobs
         protected Stat WalkVelocity;
         protected Stat RunVelocity;
         protected Stat RunDrain;
-
-        public Dictionary<String, ItemInstance> Equipment = new Dictionary<string, ItemInstance> ();
-
+        
         public long Experience { get; protected set; }
 
         public PlayerState() : base() { }
@@ -101,26 +95,7 @@ namespace OpenDiablo2.Common.Models.Mobs
             RefreshDerived();
         }
 
-        public void UpdateEquipment(string slot, ItemInstance item)
-        {
-            if(Equipment.ContainsKey(slot))
-            {
-                Equipment.Remove(slot);
-            }
-
-            Equipment.Add(slot, item);
-
-            if(item.Item is Weapon)
-            {
-                WeaponClass = ((Weapon)item.Item).WeaponClass.ToWeaponClass();
-                WeaponCode = item.Item.Code;
-            }
-
-            if(item.Item is Armor && slot == "larm") // Shield
-            {
-                ShieldCode = item.Item.Code;
-            }
-        }
+        public void UpdateEquipment(string slot, ItemInstance item) => Equipment.EquipItem(slot, item);
         
         #region Level and Experience
         public long GetExperienceToLevel()

@@ -26,6 +26,7 @@ namespace OpenDiablo2.Core
         public ImmutableList<Item> Items { get; internal set; }
         public ImmutableDictionary<eHero, ILevelExperienceConfig> ExperienceConfigs { get; internal set; }
         public ImmutableDictionary<eHero, IHeroTypeConfig> HeroTypeConfigs { get; internal set; }
+        public ImmutableList<IEnemyTypeConfig> EnemyTypeConfigs { get; internal set; } 
 
         public EngineDataManager(IMPQProvider mpqProvider)
         {
@@ -33,6 +34,7 @@ namespace OpenDiablo2.Core
 
             LoadLevelDetails();
             LoadCharacterData();
+            LoadEnemyData();
 
             Items = LoadItemData();
         }
@@ -139,6 +141,23 @@ namespace OpenDiablo2.Core
                 .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
                 .Where(x => x[0] != "Expansion")
+                .ToArray()
                 .ToImmutableDictionary(x => (eHero)Enum.Parse(typeof(eHero), x[0]), x => x.ToHeroTypeConfig());
+
+        private void LoadEnemyData()
+        {
+            EnemyTypeConfigs = LoadEnemyTypeConfig();
+        }
+
+        private ImmutableList<IEnemyTypeConfig> LoadEnemyTypeConfig()
+            => mpqProvider
+                .GetTextFile(ResourcePaths.MonStats)
+                .Skip(1)
+                .Where(x => !String.IsNullOrWhiteSpace(x))
+                .Select(x => x.Split('\t'))
+                .Where(x => x[0] != "Expansion" && x[0] != "unused")
+                .ToArray()
+                .Select(x => x.ToEnemyTypeConfig())
+                .ToImmutableList();
     }
 }

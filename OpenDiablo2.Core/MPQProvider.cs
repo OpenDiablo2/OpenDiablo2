@@ -13,9 +13,13 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
- 
+
+using OpenDiablo2.Common;
+using OpenDiablo2.Common.Enums;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
+using OpenDiablo2.Common.Models.Mobs;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -93,5 +97,59 @@ namespace OpenDiablo2.Core
         
         public IEnumerable<string> GetTextFile(string fileName)
             => new StreamReader(mpqs[mpqLookup[fileName.ToLower()]].OpenFile(fileName)).ReadToEnd().Split('\n');
+
+        public string GetCharacterDccPath(eHero hero, eMobMode mobMode, eCompositType compositType, PlayerEquipment equipment)
+        {
+            var fileName = ($@"{ResourcePaths.PlayerAnimationBase}\{hero.ToToken()}\{compositType.ToToken()}\{hero.ToToken()}{compositType.ToToken()}").ToLower();
+
+            switch (compositType)
+            {
+                case eCompositType.Head:
+                    fileName += $"{equipment.Head?.Item.Code ?? eArmorType.Lite.ToToken()}{mobMode.ToToken()}";
+                    return mpqLookup.ContainsKey($"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower())
+                        ? $"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower()
+                        : $"{fileName}{eWeaponClass.HandToHand.ToToken()}.dcc".ToLower();
+                case eCompositType.Torso:
+                case eCompositType.Legs:
+                case eCompositType.RightArm:
+                case eCompositType.LeftArm:
+                    fileName += $"{equipment.ArmorType.ToToken()}{mobMode.ToToken()}";
+                    return mpqLookup.ContainsKey($"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower())
+                        ? $"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower()
+                        : $"{fileName}{eWeaponClass.HandToHand.ToToken()}.dcc".ToLower();
+                case eCompositType.RightHand:
+                    if (!(equipment.RightArm?.Item is Weapon))
+                        return null;
+                    fileName += $"{equipment.RightArm.Item.Code}{mobMode.ToToken()}{equipment.WeaponClass.ToToken()}.dcc".ToLower();
+                    return fileName;
+                case eCompositType.LeftHand:
+                    if (!(equipment.LeftArm?.Item is Weapon))
+                        return null;
+                    fileName += $"{equipment.LeftArm.Item.Code}{mobMode.ToToken()}{equipment.WeaponClass.ToToken()}.dcc".ToLower();
+                    return fileName;
+                case eCompositType.Shield:
+                    if (!(equipment.LeftArm?.Item is Armor))
+                        return null;
+                    fileName += $"{equipment.LeftArm.Item.Code}{mobMode.ToToken()}";
+                    return mpqLookup.ContainsKey($"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower())
+                        ? $"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower()
+                        : $"{fileName}{eWeaponClass.HandToHand.ToToken()}.dcc".ToLower();
+                // TODO: Figure these out...
+                case eCompositType.Special1:
+                case eCompositType.Special2:
+                    fileName += $"{equipment.ArmorType.ToToken()}{mobMode.ToToken()}{equipment.WeaponClass}.dcc".ToLower();
+                    return mpqLookup.ContainsKey(fileName)
+                        ? fileName
+                        : null; // TODO: Should we silence this?
+                case eCompositType.Special3:
+                case eCompositType.Special4:
+                case eCompositType.Special5:
+                case eCompositType.Special6:
+                case eCompositType.Special7:
+                case eCompositType.Special8:
+                default:
+                    return null;
+            }
+        }
     }
 }
