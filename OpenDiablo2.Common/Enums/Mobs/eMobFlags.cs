@@ -20,6 +20,14 @@ namespace OpenDiablo2.Common.Enums.Mobs
     {
         PLAYER,
         ENEMY,
-        INVULNERABLE
+        INVULNERABLE,
+        BOSS,
+        NPC,
+        CRITTER,
+        LARGE,
+        SMALL,
+        INTERACTABLE,
+        DEMON,
+        IGNORED_BY_SUMMONS,
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 namespace OpenDiablo2.Common.Models
 {
 
-    public sealed class ImageFrame : IDisposable
+    public sealed class ImageFrame
     {
         public UInt32 Flip { get; internal set; }
         public UInt32 Width { get; internal set; }
@@ -18,7 +18,8 @@ namespace OpenDiablo2.Common.Models
         public UInt32 Length { get; internal set; }
         public Int16[] ImageData { get; internal set; }
 
-        public void Dispose()
+
+        ~ImageFrame()
         {
             ImageData = null;
         }
@@ -31,7 +32,7 @@ namespace OpenDiablo2.Common.Models
         }
     }
 
-    public sealed class ImageSet : IDisposable
+    public sealed class ImageSet
     {
         private UInt32[] framePointers;
         public ImageFrame[] Frames { get; private set; }
@@ -117,8 +118,10 @@ namespace OpenDiablo2.Common.Models
             return result;
         }
 
-        public void Dispose()
+        ~ImageSet()
         {
+            framePointers = null;
+            Frames = Array.Empty<ImageFrame>();
         }
     }
 }

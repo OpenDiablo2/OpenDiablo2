@@ -34,7 +34,7 @@ namespace OpenDiablo2.Scenes
         private readonly ISprite backgroundSprite, diabloLogoLeft, diabloLogoRight, diabloLogoLeftBlack, diabloLogoRightBlack;
         private readonly IFont labelFont;
         private readonly ILabel versionLabel, urlLabel;
-        private readonly IButton btnSinglePlayer, btnExit, btnWebsite;
+        private readonly IButton btnSinglePlayer, btnExit, btnWebsite, btnCredits;
 
         public MainMenu(
             IRenderWindow renderWindow,
@@ -42,8 +42,7 @@ namespace OpenDiablo2.Scenes
             IResourceManager resourceManager,
             ISoundProvider soundProvider,
             IMPQProvider mpqProvider,
-            Func<eButtonType, IButton> createButton,
-            Func<eSceneType, IScene> getScene // Temporary until SDL load functions are sped up
+            Func<eButtonType, IButton> createButton
             )
         {
             this.renderWindow = renderWindow;
@@ -64,7 +63,7 @@ namespace OpenDiablo2.Scenes
 
             btnWebsite = createButton(eButtonType.Wide);
             btnWebsite.Text = "Visit Github".ToUpper();
-            btnWebsite.Location = new Point(264, 460);
+            btnWebsite.Location = new Point(264, 330);
             btnWebsite.OnActivate = OnVisitWebsiteClicked;
 
             btnExit = createButton(eButtonType.Wide);
@@ -72,26 +71,22 @@ namespace OpenDiablo2.Scenes
             btnExit.Location = new Point(264, 500);
             btnExit.OnActivate = OnExitClicked;
 
+            btnCredits = createButton(eButtonType.Short);
+            btnCredits.Text = "Credits".ToUpper(); /* TODO: We apparently need a 'half font' option... */
+            btnCredits.Location = new Point(264, 470);
+            btnCredits.OnActivate = OnCreditsClicked;
+
             labelFont = renderWindow.LoadFont(ResourcePaths.Font16, Palettes.Static);
-            versionLabel = renderWindow.CreateLabel(labelFont, new Point(50, 555), "v0.01 Pre-Alpha");
+            versionLabel = renderWindow.CreateLabel(labelFont, new Point(50, 555), "v0.02 Pre-Alpha");
             urlLabel = renderWindow.CreateLabel(labelFont, new Point(50, 569), "https://github.com/essial/OpenDiablo2/");
             urlLabel.TextColor = Color.Magenta;
-
-            var loadingSprite = renderWindow.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading, new Point(300, 400));
-
-            // Pre-load all the scenes for now until we fix the sdl load problem
-            var scenesToLoad = new eSceneType[] { eSceneType.SelectHeroClass };
-            for (int i = 0; i < scenesToLoad.Count(); i++)
-            {
-                renderWindow.Clear();
-                renderWindow.Draw(loadingSprite, (int)(loadingSprite.TotalFrames * (i / (float)scenesToLoad.Count())));
-                renderWindow.Sync();
-                getScene(scenesToLoad[i]);
-            }
 
             soundProvider.LoadSong(mpqProvider.GetStream(ResourcePaths.BGMTitle));
             soundProvider.PlaySong();
         }
+
+        private void OnCreditsClicked()
+            => sceneManager.ChangeScene(eSceneType.Credits);
 
         private void OnVisitWebsiteClicked()
             => System.Diagnostics.Process.Start("https://github.com/essial/OpenDiablo2/");
@@ -115,6 +110,7 @@ namespace OpenDiablo2.Scenes
             btnSinglePlayer.Render();
             btnWebsite.Render();
             btnExit.Render();
+            btnCredits.Render();
 
             //wideButton.Location = new Point(264, 290);
             //renderWindow.Draw(wideButton, 2, 1, 0);
@@ -130,6 +126,7 @@ namespace OpenDiablo2.Scenes
             btnSinglePlayer.Update();
             btnWebsite.Update();
             btnExit.Update();
+            btnCredits.Update();
 
         }
 

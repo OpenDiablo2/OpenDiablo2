@@ -20,13 +20,25 @@ namespace OpenDiablo2.Scenes
         Retreating
     }
 
-    class HeroRenderInfo
+    class HeroRenderInfo : IDisposable
     {
         public ISprite IdleSprite, IdleSelectedSprite, ForwardWalkSprite, ForwardWalkSpriteOverlay, SelectedSprite, SelectedSpriteOverlay, BackWalkSprite, BackWalkSpriteOverlay;
         public eHeroStance Stance;
         public long ForwardWalkTimeMs, BackWalkTimeMs;
         public long SpecialFrameTime;
         public Rectangle SelectionBounds = new Rectangle();
+
+        public void Dispose()
+        {
+            IdleSprite?.Dispose();
+            IdleSelectedSprite?.Dispose();
+            ForwardWalkSprite?.Dispose();
+            ForwardWalkSpriteOverlay?.Dispose();
+            SelectedSprite?.Dispose();
+            SelectedSpriteOverlay?.Dispose();
+            BackWalkSprite?.Dispose();
+            BackWalkSpriteOverlay?.Dispose();
+        }
     }
 
     [Scene(eSceneType.SelectHeroClass)]
@@ -267,7 +279,7 @@ namespace OpenDiablo2.Scenes
             StopSfx();
 
             var heros = Enum.GetValues(typeof(eHero)).Cast<eHero>();
-            foreach(var hero in heros)
+            foreach (var hero in heros)
             {
                 heroRenderInfo[hero].SpecialFrameTime = 0;
                 heroRenderInfo[hero].Stance = eHeroStance.Idle;
@@ -460,7 +472,7 @@ namespace OpenDiablo2.Scenes
                 renderInfo.SpecialFrameTime = 0;
 
 
-                foreach(var ri in heroRenderInfo)
+                foreach (var ri in heroRenderInfo)
                 {
                     if (ri.Value.Stance != eHeroStance.Selected)
                         continue;
@@ -611,6 +623,12 @@ namespace OpenDiablo2.Scenes
             headingFont.Dispose();
             headingLabel.Dispose();
             sfxDictionary.Clear();
+
+            foreach (var hri in heroRenderInfo)
+                hri.Value.Dispose();
+
+            heroRenderInfo.Clear();
         }
+
     }
 }

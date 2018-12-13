@@ -83,7 +83,7 @@ namespace OpenDiablo2.Core.UI
             this.mouseInfoProvider = mouseInfoProvider;
             this.musicProvider = soundProvider;
 
-            font = renderWindow.LoadFont(ResourcePaths.FontExocet10, Palettes.Units);
+            font = renderWindow.LoadFont(buttonLayout.FontPath, Palettes.Units);
             label = renderWindow.CreateLabel(font);
 
             sprite = renderWindow.LoadSprite(buttonLayout.ResourceName, buttonLayout.PaletteName, true);

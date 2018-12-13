@@ -112,6 +112,7 @@ namespace OpenDiablo2.Core
 
                     if (nextScene!= null)
                     {
+                        currentScene.Dispose();
                         currentScene = nextScene;
                         nextScene = null;
                         continue;
@@ -131,6 +132,13 @@ namespace OpenDiablo2.Core
         }
 
         public void ChangeScene(eSceneType sceneType)
-            => nextScene = getScene(sceneType);
+        {
+            var loadingSprite = getRenderWindow().LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading, new Point(300, 400));
+
+            getRenderWindow().Clear();
+            getRenderWindow().Draw(loadingSprite);
+            getRenderWindow().Sync();
+            nextScene = getScene(sceneType);
+        }
     }
 }

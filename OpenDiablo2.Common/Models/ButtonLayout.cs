@@ -13,6 +13,7 @@ namespace OpenDiablo2.Common.Models
         public bool Toggleable { get; internal set; } = false;
         public int BaseFrame { get; internal set; } = 0;
         public int DisabledFrame { get; internal set; } = -1;
+        public string FontPath { get; internal set; } = ResourcePaths.FontExocet10;
 
         public bool IsDarkenedWhenDisabled => DisabledFrame == -1;
 
@@ -22,6 +23,7 @@ namespace OpenDiablo2.Common.Models
             {eButtonType.Medium, new ButtonLayout{ XSegments = 1, ResourceName=ResourcePaths.MediumButtonBlank, PaletteName = Palettes.Units } },
             {eButtonType.Narrow, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.NarrowButtonBlank,PaletteName = Palettes.Units } },
             {eButtonType.Tall, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.TallButtonBlank, PaletteName = Palettes.Units } },
+            {eButtonType.Short, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.ShortButtonBlank, PaletteName = Palettes.Units, FontPath = ResourcePaths.FontExocet10 } },
             {eButtonType.Cancel, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.CancelButton,PaletteName = Palettes.Units } },
             // Minipanel
             {eButtonType.MinipanelCharacter, new ButtonLayout {XSegments = 1, ResourceName = ResourcePaths.MinipanelButton,PaletteName = Palettes.Units, BaseFrame = 0 } },

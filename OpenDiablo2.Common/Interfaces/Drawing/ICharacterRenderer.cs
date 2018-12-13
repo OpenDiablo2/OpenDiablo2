@@ -1,6 +1,7 @@
 ﻿using System;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Models;
+using OpenDiablo2.Common.Models.Mobs;
 
 namespace OpenDiablo2.Common.Interfaces.Drawing
 {
@@ -9,11 +10,8 @@ namespace OpenDiablo2.Common.Interfaces.Drawing
         Guid UID { get; set; }
         PlayerLocationDetails LocationDetails { get; set; }
         eHero Hero { get; set; }
-        eWeaponClass WeaponClass { get; set; }
-        eArmorType ArmorType { get; set; }
+        PlayerEquipment Equipment { get; set; }
         eMobMode MobMode { get; set; }
-        string ShieldCode { get; set; }
-        string WeaponCode { get; set; }
 
         void Update(long ms);
         void Render(int pixelOffsetX, int pixelOffsetY);

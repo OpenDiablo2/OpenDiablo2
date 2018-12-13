@@ -26,7 +26,7 @@ namespace OpenDiablo2.SDL2_
 {
     internal sealed class SDL2Sprite : ISprite
     {
-        internal readonly ImageSet source;
+        internal ImageSet source;
         private readonly IntPtr renderer;
         private readonly bool cacheFrames;
 
@@ -96,7 +96,7 @@ namespace OpenDiablo2.SDL2_
                             SDL.SDL_SetTextureBlendMode(texture[i], blend ? SDL.SDL_BlendMode.SDL_BLENDMODE_ADD : SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
                 }
                 else
-                    if (texture[TextureIndex] != IntPtr.Zero)
+                    if (texture != null && texture[TextureIndex] != IntPtr.Zero)
                         SDL.SDL_SetTextureBlendMode(texture[TextureIndex], blend ? SDL.SDL_BlendMode.SDL_BLENDMODE_ADD : SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
             }
@@ -206,6 +206,23 @@ namespace OpenDiablo2.SDL2_
             var framestoClear = cacheFrames ? TotalFrames : 1;
             for (int i = 0; i < framestoClear; i++)
                 frameLoaded[i] = false;
+
+            DestroyTextures();
+        }
+
+        private void DestroyTextures()
+        {
+            var framestoClear = cacheFrames ? TotalFrames : 1;
+            for (var i = 0; i < framestoClear; i++)
+            {
+                if (!frameLoaded[i])
+                    continue;
+                SDL.SDL_DestroyTexture(texture[i]);
+                texture[i] = IntPtr.Zero;
+                frameLoaded[i] = false;
+            }
+
+            texture = new IntPtr[TotalFrames];
         }
 
         public void Dispose()
@@ -213,16 +230,11 @@ namespace OpenDiablo2.SDL2_
             if (disposed)
                 return;
 
-            var framestoClear = cacheFrames ? TotalFrames : 1;
-            for (var i = 0; i < framestoClear; i++)
-            {
-                SDL.SDL_DestroyTexture(texture[i]);
-                texture[i] = IntPtr.Zero;
-            }
-
-            texture = Array.Empty<IntPtr>();
+            DestroyTextures();
+            source = null;
             disposed = true;
         }
+
 
     }
 }
