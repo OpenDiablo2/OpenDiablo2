@@ -7,6 +7,7 @@
         Narrow,
         Cancel,
         Tall,
+        Short,
         // Game UI
         Skill,
         Run,

@@ -22,6 +22,7 @@ namespace OpenDiablo2.Common.Enums
     public enum eSceneType
     {
         MainMenu,
+        Credits,
         SelectHeroClass,
         SelectCharacter,
         Game

@@ -30,6 +30,9 @@ namespace OpenDiablo2.Common
         public const string Diablo2LogoBlackLeft = @"data\global\ui\FrontEnd\D2logoBlackLeft.DC6";
         public const string Diablo2LogoBlackRight = @"data\global\ui\FrontEnd\D2logoBlackRight.DC6";
 
+        // --- Credits ---
+        public const string CreditsBackground = @"data\global\ui\CharSelect\creditsbckgexpand.dc6";
+        public const string CreditsText = @"data\local\ui\eng\ExpansionCredits.txt";
         // --- Character Select Screen ---
         public const string CharacterSelectBackground = @"data\global\ui\FrontEnd\charactercreationscreenEXP.dc6";
         public const string CharacterSelectCampfire = @"data\global\ui\FrontEnd\fire.DC6";
@@ -117,6 +120,7 @@ namespace OpenDiablo2.Common
         public const string MediumButtonBlank = @"data\global\ui\FrontEnd\MediumButtonBlank.dc6";
         public const string CancelButton = @"data\global\ui\FrontEnd\CancelButtonBlank.dc6";
         public const string NarrowButtonBlank = @"data\global\ui\FrontEnd\NarrowButtonBlank.dc6";
+        public const string ShortButtonBlank = @"data\global\ui\CharSelect\ShortButtonBlank.dc6";
         public const string TextBox2 = @"data\global\ui\FrontEnd\textbox2.dc6";
         public const string TallButtonBlank = @"data\global\ui\CharSelect\TallButtonBlank.dc6";
 
