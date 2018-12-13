@@ -15,6 +15,7 @@
  */
 
 using OpenDiablo2.Common.Enums;
+using System;
 
 namespace OpenDiablo2.Common
 {
@@ -131,6 +132,13 @@ namespace OpenDiablo2.Common
         public const string Frame = @"data\global\ui\PANEL\800borderframe.dc6";
         public const string InventoryCharacterPanel = @"data\global\ui\PANEL\invchar6.DC6";
         public const string InventoryWeaponsTab = @"data\global\ui\PANEL\invchar6Tab.DC6";
+        public const string SkillsPanelAmazon = @"data\global\ui\SPELLS\skltree_a_back.DC6";
+        public const string SkillsPanelBarbarian = @"data\global\ui\SPELLS\skltree_b_back.DC6";
+        public const string SkillsPanelDruid = @"data\global\ui\SPELLS\skltree_d_back.DC6";
+        public const string SkillsPanelAssassin = @"data\global\ui\SPELLS\skltree_i_back.DC6";
+        public const string SkillsPanelNecromancer = @"data\global\ui\SPELLS\skltree_n_back.DC6";
+        public const string SkillsPanelPaladin = @"data\global\ui\SPELLS\skltree_p_back.DC6";
+        public const string SkillsPanelSorcerer = @"data\global\ui\SPELLS\skltree_s_back.DC6";
 
         public const string RunButton = @"data\global\ui\PANEL\runbutton.dc6";
         public const string MenuButton = @"data\global\ui\PANEL\menubutton.DC6";
@@ -307,6 +315,29 @@ namespace OpenDiablo2.Common
                     return BGMAct5Baal; // TODO: Verify
                 default:
                     return string.Empty;
+            }
+        }
+
+        public static string GetHeroSkillPanel(eHero hero)
+        {
+            switch (hero)
+            {
+                case eHero.Amazon:
+                    return SkillsPanelAmazon;
+                case eHero.Assassin:
+                    return SkillsPanelAssassin;
+                case eHero.Barbarian:
+                    return SkillsPanelBarbarian;
+                case eHero.Druid:
+                    return SkillsPanelDruid;
+                case eHero.Necromancer:
+                    return SkillsPanelNecromancer;
+                case eHero.Paladin:
+                    return SkillsPanelPaladin;
+                case eHero.Sorceress:
+                    return SkillsPanelSorcerer;
+                default:
+                    throw new ArgumentException($"Unknown hero type: {hero}");
             }
         }
     }

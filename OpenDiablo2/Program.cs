@@ -15,11 +15,13 @@
  */
 
 using System;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using Autofac;
 using CommandLine;
+using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
@@ -104,6 +106,21 @@ namespace OpenDiablo2
             {
                 var componentContext = c.Resolve<IComponentContext>();
                 return (buttonType) => componentContext.Resolve<IButton>(new NamedParameter("buttonLayout", ButtonLayout.Values[buttonType]));
+            });
+
+            containerBuilder.Register<Func<eHero, int, IButton>>(c =>
+            {
+                var componentContext = c.Resolve<IComponentContext>();
+                return (hero, tabIndex) => componentContext.Resolve<IButton>(new NamedParameter("buttonLayout", new ButtonLayout()
+                {
+                    XSegments = 2,
+                    YSegments = 2,
+                    BaseFrame = 3 - tabIndex,   // tabs are ordered from the bottom in the files
+                    PaletteName = Palettes.Units,
+                    ResourceName = ResourcePaths.GetHeroSkillPanel(hero),
+                    ClickableRect = new Rectangle(227, (tabIndex + 1) * 107, 95, 108),   // todo; verify clickable rectangle
+                    AllowFrameChange = false
+                }));
             });
 
             containerBuilder.Register<Func<ePanelFrameType, IPanelFrame>>(c =>
