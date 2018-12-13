@@ -38,7 +38,7 @@ namespace OpenDiablo2.Core.UI
 
         // Test fields
         private bool addNewAttribute = true;
-        private bool addNewSkill = false;
+        private bool addNewSkill = true;
 
         public GameHUD(
             IRenderWindow renderWindow,
@@ -74,6 +74,7 @@ namespace OpenDiablo2.Core.UI
             addSkillButton = createButton(eButtonType.Skill);
             addSkillButton.Location = new Point(564, 562);
             addSkillButton.Enabled = addNewSkill;
+            addSkillButton.OnActivate = () => TogglePanel(ePanelType.Skill);
 
             panelSprite = renderWindow.LoadSprite(ResourcePaths.GamePanels, Palettes.Act1, true);
             healthManaSprite = renderWindow.LoadSprite(ResourcePaths.HealthMana, Palettes.Act1, true);

@@ -1,7 +1,6 @@
 ﻿using OpenDiablo2.Common;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
-using System;
 using System.Drawing;
 
 namespace OpenDiablo2.Core.UI
@@ -39,9 +38,6 @@ namespace OpenDiablo2.Core.UI
         public bool Toggled { get; private set; } = false;
 
         private Point labelOffset = new Point();
-
-        public Size ClickableRect { get; set; }
-        public bool AllowFrameChange { get; set; } = true;
 
         private bool enabled = true;
         public bool Enabled
@@ -88,14 +84,18 @@ namespace OpenDiablo2.Core.UI
 
             sprite = renderWindow.LoadSprite(buttonLayout.ResourceName, buttonLayout.PaletteName, true);
 
-            // TODO: Less stupid way of doing this would be nice
+            // TODO: Less stupid way of doing this would be super nice
             buttonWidth = 0;
             buttonHeight = 0;
             for (int i = 0; i < buttonLayout.XSegments; i++)
             {
                 sprite.Frame = i;
                 buttonWidth += sprite.LocalFrameSize.Width;
-                buttonHeight = Math.Max(buttonHeight, sprite.LocalFrameSize.Height);
+            }
+            for(int i = 0; i < buttonLayout.YSegments; i++)
+            {
+                sprite.Frame = i * buttonLayout.YSegments;
+                buttonHeight += sprite.LocalFrameSize.Height;
             }
 
             label.MaxWidth = buttonWidth - 8;
@@ -140,11 +140,13 @@ namespace OpenDiablo2.Core.UI
                 return;
             }
 
-            int clickWidth = ClickableRect.Width > 0 ? ClickableRect.Width : buttonWidth;
-            int clickHeight = ClickableRect.Height > 0 ? ClickableRect.Height : buttonHeight;
-            var hovered = mouseInfoProvider.MouseX >= location.X && mouseInfoProvider.MouseX < (location.X + clickWidth)
-                && mouseInfoProvider.MouseY >= location.Y && mouseInfoProvider.MouseY < (location.Y + clickHeight);
+            int clickWidth = buttonLayout.ClickableRect.Width > 0 ? buttonLayout.ClickableRect.Width : buttonWidth;
+            int clickHeight = buttonLayout.ClickableRect.Height > 0 ? buttonLayout.ClickableRect.Height : buttonHeight;
 
+            var hovered = mouseInfoProvider.MouseX >= location.X + buttonLayout.ClickableRect.X 
+                && mouseInfoProvider.MouseY >= location.Y + buttonLayout.ClickableRect.Y
+                && mouseInfoProvider.MouseX < location.X + clickWidth + buttonLayout.ClickableRect.X
+                && mouseInfoProvider.MouseY < location.Y + clickHeight + buttonLayout.ClickableRect.Y;
 
             if (!activeLock && hovered && mouseInfoProvider.LeftMouseDown && !mouseInfoProvider.ReserveMouse)
             {
@@ -185,7 +187,7 @@ namespace OpenDiablo2.Core.UI
         {
             var frame = buttonLayout.BaseFrame;
 
-            if (AllowFrameChange)
+            if (buttonLayout.AllowFrameChange)
             {
                 if(!Enabled && buttonLayout.DisabledFrame >= 0)
                 {
@@ -205,7 +207,7 @@ namespace OpenDiablo2.Core.UI
                 }
             }
 
-            renderWindow.Draw(sprite, buttonLayout.XSegments, 1, frame);
+            renderWindow.Draw(sprite, buttonLayout.XSegments, buttonLayout.YSegments, frame);
             var offset = pressed ? -2 : 0;
 
             label.Location = new Point(location.X + offset + labelOffset.X, location.Y - offset + labelOffset.Y);
