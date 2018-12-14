@@ -15,5 +15,6 @@ namespace OpenDiablo2.Common.Interfaces
         ImmutableDictionary<eHero, ILevelExperienceConfig> ExperienceConfigs { get; }
         ImmutableDictionary<eHero, IHeroTypeConfig> HeroTypeConfigs { get; }
         ImmutableList<IEnemyTypeConfig> EnemyTypeConfigs { get; }
+        ImmutableList<ObjectInfo> Objects { get; }
     }
 }
