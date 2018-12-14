@@ -121,6 +121,7 @@
     <Compile Include="Models\MPQDCC.cs" />
     <Compile Include="Models\ItemContainerLayout.cs" />
     <Compile Include="Models\ObjectInfo.cs" />
+    <Compile Include="Models\ObjectTypeInfo.cs" />
     <Compile Include="Models\PlayerInfo.cs" />
     <Compile Include="Models\PlayerLocationDetails.cs" />
     <Compile Include="Interfaces\UI\IButton.cs" />

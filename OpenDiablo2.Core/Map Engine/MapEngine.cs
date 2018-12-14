@@ -11,29 +11,32 @@ namespace OpenDiablo2.Core.Map_Engine
 {
     public sealed class MapEngine : IMapEngine
     {
-        private readonly IGameState gameState;
-        private readonly IRenderWindow renderWindow;
+        private readonly IGameState _gameState;
+        private readonly IRenderWindow _renderWindow;
 
-        private readonly List<ICharacterRenderer> characterRenderers = new List<ICharacterRenderer>();
+        private readonly List<ICharacterRenderer> _characterRenderers = new List<ICharacterRenderer>();
 
         public int FocusedPlayerId { get; set; } = 0;
 
-        private PointF cameraLocation = new PointF();
+        private PointF _cameraLocation = new PointF();
         public PointF CameraLocation
         {
-            get => cameraLocation;
+            get => _cameraLocation;
             set
             {
-                if (cameraLocation == value)
+                // ReSharper disable once RedundantCheckBeforeAssignment (This is a false positive)
+                if (_cameraLocation == value)
                     return;
 
-                cameraLocation = value;
+                _cameraLocation = value;
             }
         }
 
         private const int
-            cellSizeX = 160,
-            cellSizeY = 80;
+            CellSizeX = 160,
+            CellSizeY = 80,
+            CellSizeXHalf = 80,
+            CellSizeYHalf = 40;
 
         public MapEngine(
             IGameState gameState,
@@ -41,8 +44,8 @@ namespace OpenDiablo2.Core.Map_Engine
             ISessionManager sessionManager
             )
         {
-            this.gameState = gameState;
-            this.renderWindow = renderWindow;
+            _gameState = gameState;
+            _renderWindow = renderWindow;
 
             sessionManager.OnPlayerInfo += OnPlayerInfo;
             sessionManager.OnLocatePlayers += OnLocatePlayers;
@@ -52,7 +55,12 @@ namespace OpenDiablo2.Core.Map_Engine
         {
             foreach (var loc in playerLocationDetails)
             {
-                var cr = characterRenderers.FirstOrDefault(x => x.LocationDetails.PlayerId == loc.PlayerId);
+                var cr = _characterRenderers.FirstOrDefault(x => x.LocationDetails.PlayerId == loc.PlayerId);
+                if (cr == null)
+                {
+                    // TODO: Should we log this?
+                    continue;
+                }
                 var newDirection = loc.MovementDirection != cr.LocationDetails.MovementDirection;
                 var stanceChanged = loc.MovementType != cr.LocationDetails.MovementType;
                 cr.LocationDetails = loc;
@@ -64,10 +72,10 @@ namespace OpenDiablo2.Core.Map_Engine
         private void OnPlayerInfo(int clientHash, IEnumerable<PlayerInfo> playerInfo)
         {
             // Remove character renderers for players that no longer exist...
-            characterRenderers.RemoveAll(x => playerInfo.Any(z => z.UID == x.UID));
+            _characterRenderers.RemoveAll(x => playerInfo.Any(z => z.UID == x.UID));
 
             // Update existing character renderers
-            foreach (var cr in characterRenderers)
+            foreach (var cr in _characterRenderers)
             {
                 var info = playerInfo.FirstOrDefault(x => x.UID == cr.UID);
                 if (info == null)
@@ -82,67 +90,70 @@ namespace OpenDiablo2.Core.Map_Engine
             }
 
             // Add character renderers for characters that now exist
-            foreach (var info in playerInfo.Where(x => !characterRenderers.Any(z => x.UID == z.UID)))
+            foreach (var info in playerInfo.Where(x => _characterRenderers.All(z => x.UID != z.UID)).ToArray())
             {
-                var cr = renderWindow.CreateCharacterRenderer();
+                var cr = _renderWindow.CreateCharacterRenderer();
                 cr.UID = info.UID;
                 cr.LocationDetails = info.LocationDetails;
                 cr.MobMode = info.MobMode;
                 cr.Equipment = info.Equipment;
                 cr.Hero = info.Hero;
-                characterRenderers.Add(cr);
+                _characterRenderers.Add(cr);
                 cr.ResetAnimationData();
             }
         }
 
 
-        const int skewX = 400;
-        const int skewY = 300;
+        private const int SkewX = 400;
+        private const int SkewY = 300;
 
         public void Render()
         {
-            var xOffset = gameState.CameraOffset;
+            var xOffset = _gameState.CameraOffset;
 
-            var cx = -(cameraLocation.X - Math.Truncate(cameraLocation.X));
-            var cy = -(cameraLocation.Y - Math.Truncate(cameraLocation.Y));
+            var cx = -(_cameraLocation.X - Math.Truncate(_cameraLocation.X));
+            var cy = -(_cameraLocation.Y - Math.Truncate(_cameraLocation.Y));
 
-            for (int ty = -7; ty <= 9; ty++)
+            for (var ty = -7; ty <= 9; ty++)
             {
-                for (int tx = -8; tx <= 8; tx++)
+                for (var tx = -8; tx <= 8; tx++)
                 {
-                    var ax = tx + Math.Truncate(cameraLocation.X);
-                    var ay = ty + Math.Truncate(cameraLocation.Y);
+                    var ax = (int)(tx + Math.Truncate(_cameraLocation.X));
+                    var ay = (int)(ty + Math.Truncate(_cameraLocation.Y));
 
-                    var px = (tx - ty) * (cellSizeX / 2);
-                    var py = (tx + ty) * (cellSizeY / 2);
+                    var px = (tx - ty) * CellSizeXHalf;
+                    var py = (tx + ty) * CellSizeYHalf;
 
-                    var ox = (cx - cy) * (cellSizeX / 2);
-                    var oy = (cx + cy) * (cellSizeY / 2);
-
-
-                    foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallLower))
-                        renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy + 80);
-
-                    foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.Floor))
-                        renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy);
+                    var ox = (cx - cy) * CellSizeXHalf;
+                    var oy = (cx + cy) * CellSizeYHalf;
 
 
-                    foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.WallNormal))
-                        renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy + 80);
+                    foreach (var cellInfo in _gameState.GetMapCellInfo(ax, ay, eRenderCellType.WallLower))
+                        _renderWindow.DrawMapCell(cellInfo, SkewX + px + (int)ox + xOffset, SkewY + py + (int)oy + 80);
 
-                    foreach (var character in characterRenderers.Where(x => Math.Truncate(x.LocationDetails.PlayerX) == ax && Math.Truncate(x.LocationDetails.PlayerY) == ay))
+                    foreach (var cellInfo in _gameState.GetMapCellInfo(ax, ay, eRenderCellType.Floor))
+                        _renderWindow.DrawMapCell(cellInfo, SkewX + px + (int)ox + xOffset, SkewY + py + (int)oy);
+
+
+                    foreach (var cellInfo in _gameState.GetMapCellInfo(ax, ay, eRenderCellType.WallNormal))
+                        _renderWindow.DrawMapCell(cellInfo, SkewX + px + (int)ox + xOffset, SkewY + py + (int)oy + 80);
+
+                    foreach (var character in _characterRenderers.Where(x =>
+                        (int)Math.Truncate(x.LocationDetails.PlayerX) == ax &&
+                        (int)Math.Truncate(x.LocationDetails.PlayerY) == ay)
+                    )
                     {
-                        var ptx = character.LocationDetails.PlayerX - Math.Truncate(cameraLocation.X);
-                        var pty = character.LocationDetails.PlayerY - Math.Truncate(cameraLocation.Y);
+                        var ptx = character.LocationDetails.PlayerX - Math.Truncate(_cameraLocation.X);
+                        var pty = character.LocationDetails.PlayerY - Math.Truncate(_cameraLocation.Y);
 
-                        var ppx = (ptx - pty) * (cellSizeX / 2);
-                        var ppy = (ptx + pty) * (cellSizeY / 2);
+                        var ppx = (int)((ptx - pty) * CellSizeXHalf);
+                        var ppy = (int)((ptx + pty) * CellSizeYHalf);
 
-                        character.Render(skewX + (int)ppx + (int)ox + xOffset, skewY + (int)ppy + (int)oy);
+                        character.Render(SkewX + (int)ppx + (int)ox + xOffset, SkewY + (int)ppy + (int)oy);
                     }
 
-                    foreach (var cellInfo in gameState.GetMapCellInfo((int)ax, (int)ay, eRenderCellType.Roof))
-                        renderWindow.DrawMapCell(cellInfo, skewX + px + (int)ox + xOffset, skewY + py + (int)oy - 80);
+                    foreach (var cellInfo in _gameState.GetMapCellInfo(ax, ay, eRenderCellType.Roof))
+                        _renderWindow.DrawMapCell(cellInfo, SkewX + px + (int)ox + xOffset, SkewY + py + (int)oy - 80);
                 }
             }
 
@@ -154,18 +165,18 @@ namespace OpenDiablo2.Core.Map_Engine
 
         public void Update(long ms)
         {
-            foreach (var character in characterRenderers)
+            foreach (var character in _characterRenderers)
                 character.Update(ms);
 
-            if (FocusedPlayerId != 0)
-            {
-                var player = gameState.PlayerInfos.FirstOrDefault(x => x.LocationDetails.PlayerId == FocusedPlayerId);
-                if (player != null)
-                {
-                    // TODO: Maybe smooth movement? Maybe not?
-                    CameraLocation = new PointF(player.LocationDetails.PlayerX, player.LocationDetails.PlayerY);
-                }
-            }
+            if (FocusedPlayerId == 0)
+                return;
+
+            var player = _gameState.PlayerInfos.FirstOrDefault(x => x.LocationDetails.PlayerId == FocusedPlayerId);
+            if (player == null)
+                return;
+
+            CameraLocation = new PointF(player.LocationDetails.PlayerX, player.LocationDetails.PlayerY);
+
         }
 
 

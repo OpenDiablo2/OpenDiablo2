@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 
 namespace OpenDiablo2.Common.Models
@@ -40,6 +42,11 @@ namespace OpenDiablo2.Common.Models
         public MPQDS1TileProps[] Props { get; internal set; }
     }
 
+    public sealed class MPQDS1TagLayer
+    {
+        public Int32 Number { get; internal set; }
+    }
+
     public sealed class MPQDS1Object
     {
         public Int32 Type { get; internal set; }
@@ -47,6 +54,7 @@ namespace OpenDiablo2.Common.Models
         public Int32 X { get; internal set; }
         public Int32 Y { get; internal set; }
         public Int32 DS1Flags { get; internal set; }
+        public ObjectInfo Info { get; internal set; }
     }
 
     public sealed class MPQDS1Group
@@ -92,6 +100,7 @@ namespace OpenDiablo2.Common.Models
         public MPQDS1WallLayer[] WallLayers { get; internal set; }
         public MPQDS1FloorLayer[] FloorLayers { get; internal set; }
         public MPQDS1ShadowLayer[] ShadowLayers { get; internal set; }
+        public MPQDS1TagLayer[] TagLayers { get; internal set; }
         public MPQDS1Object[] Objects { get; internal set; }
         public MPQDS1Group[] Groups { get; internal set; }
 
@@ -125,7 +134,7 @@ namespace OpenDiablo2.Common.Models
                         fn.Append((char)b);
                     }
                     var fnStr = fn.ToString();
-                    if (fnStr.StartsWith("\\d2\\"))
+                    if (fnStr.StartsWith(@"\d2\"))
                         fnStr = fnStr.Substring(4);
                     FileNames.Add(fnStr);
                 }
@@ -139,12 +148,7 @@ namespace OpenDiablo2.Common.Models
             if (Version >= 4)
             {
                 NumberOfWalls = br.ReadInt32();
-
-                if (Version >= 16)
-                {
-                    NumberOfFloors = br.ReadInt32();
-                }
-                else NumberOfFloors = 1;
+                NumberOfFloors = Version >= 16 ? br.ReadInt32() : 1;
             }
             else
             {
@@ -159,7 +163,7 @@ namespace OpenDiablo2.Common.Models
 
             if (Version < 4)
             {
-                layoutStream.AddRange(new int[] { 1, 9, 5, 12, 11 });
+                layoutStream.AddRange(new[] { 1, 9, 5, 12, 11 });
             }
             else
             {
@@ -205,21 +209,27 @@ namespace OpenDiablo2.Common.Models
                 };
             }
 
+            TagLayers = new MPQDS1TagLayer[NumberOfTags];
+            for (var l = 0; l < NumberOfTags; l++)
+            {
+                TagLayers[l] = new MPQDS1TagLayer { Number = -1 };
+            }
 
-            for (int n = 0; n < layoutStream.Count; n++)
+
+            foreach (var idx in layoutStream)
             {
                 for (var y = 0; y < Height; y++)
                 {
                     for (var x = 0; x < Width; x++)
                     {
-                        switch (layoutStream[n])
+                        switch (idx)
                         {
                             // Walls
                             case 1:
                             case 2:
                             case 3:
                             case 4:
-                                WallLayers[layoutStream[n] - 1].Props[x + (y * Width)] = new MPQDS1TileProps
+                                WallLayers[idx - 1].Props[x + (y * Width)] = new MPQDS1TileProps
                                 {
                                     Prop1 = br.ReadByte(),
                                     Prop2 = br.ReadByte(),
@@ -240,7 +250,7 @@ namespace OpenDiablo2.Common.Models
                                 }
                                 else
                                 {
-                                    WallLayers[layoutStream[n] - 5].Orientations[x + (y * Width)] = new MPQDS1WallOrientationTileProps
+                                    WallLayers[idx - 5].Orientations[x + (y * Width)] = new MPQDS1WallOrientationTileProps
                                     {
                                         Orientation1 = br.ReadByte(),
                                         Orientation2 = br.ReadByte(),
@@ -253,7 +263,7 @@ namespace OpenDiablo2.Common.Models
                             // Floors
                             case 9:
                             case 10:
-                                FloorLayers[layoutStream[n] - 9].Props[x + (y * Width)] = new MPQDS1TileProps
+                                FloorLayers[idx - 9].Props[x + (y * Width)] = new MPQDS1TileProps
                                 {
                                     Prop1 = br.ReadByte(),
                                     Prop2 = br.ReadByte(),
@@ -263,7 +273,7 @@ namespace OpenDiablo2.Common.Models
                                 break;
                             // Shadow
                             case 11:
-                                ShadowLayers[layoutStream[n] - 11].Props[x + (y * Width)] = new MPQDS1TileProps
+                                ShadowLayers[idx - 11].Props[x + (y * Width)] = new MPQDS1TileProps
                                 {
                                     Prop1 = br.ReadByte(),
                                     Prop2 = br.ReadByte(),
@@ -273,32 +283,80 @@ namespace OpenDiablo2.Common.Models
                                 break;
                             // Tags
                             case 12:
-                                // TODO: Tags
-                                br.ReadBytes(4);
+                                TagLayers[idx - 12].Number = br.ReadInt32();
                                 break;
+                            default:
+                                throw new OpenDiablo2Exception($"Unknown layer {idx} encountered.");
                         }
                     }
                 }
             }
 
 
+            // Load the objects
+            NumberOfObjects = br.ReadInt32();
+            Objects = new MPQDS1Object[NumberOfObjects];
+            for (var i = 0; i < NumberOfObjects; i++)
+            {
+                Objects[i] = new MPQDS1Object
+                {
+                    Type = br.ReadInt32(),
+                    Id = br.ReadInt32(),
+                    X = br.ReadInt32(),
+                    Y = br.ReadInt32(),
+                };
 
+                if (Version > 5)
+                    Objects[i].DS1Flags = br.ReadInt32();
+
+                Objects[i].Info = engineDataManager.Objects.First(x => x.Id == Objects[i].Id);
+            }
+
+            if (Version >= 12 && (TagType == 1 || TagType == 2))
+            {
+                if (Version >= 18)
+                    br.ReadInt32(); // Skip a byte (but why?)
+
+                NumberOfGroups = br.ReadInt32();
+                Groups = new MPQDS1Group[NumberOfGroups];
+                for (var i = 0; i < NumberOfGroups; i++)
+                {
+                    Groups[i] = new MPQDS1Group
+                    {
+                        TileX = br.ReadInt32(),
+                        TileY = br.ReadInt32(),
+                        Width = br.ReadInt32(),
+                        Height = br.ReadInt32()
+                    };
+                    if (Version >= 13)
+                        br.ReadInt32(); // Unknown group property value (what is this???)
+                }
+
+            }
+            else
+                Groups = new MPQDS1Group[0];
+
+
+            if (Version >= 14)
+            {
+                // TODO: NPC Paths
+            }
 
             var dt1Mask = level.Dt1Mask;
-            for (int i = 0; i < 32; i++)
+            for (var i = 0; i < 32; i++)
             {
                 var isMasked = ((dt1Mask >> i) & 1) == 1;
                 if (!isMasked || levelType.File[i] == "0")
                     continue;
 
-                DT1s[i] = resourceManager.GetMPQDT1("data\\global\\tiles\\" + levelType.File[i].Replace("/", "\\"));
+                DT1s[i] = resourceManager.GetMPQDT1(@"data\global\tiles\" + levelType.File[i].Replace("/", "\\"));
             }
 
 
             LookupTable = new List<DS1LookupTable>();
-            foreach(var dt1 in DT1s.Where(x => x != null))
+            foreach (var dt1 in DT1s.Where(x => x != null))
             {
-                foreach(var tile in dt1.Tiles)
+                foreach (var tile in dt1.Tiles)
                 {
                     LookupTable.Add(new DS1LookupTable
                     {
@@ -311,7 +369,8 @@ namespace OpenDiablo2.Common.Models
                 }
             }
 
-            
+
+
         }
     }
 }
