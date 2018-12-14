@@ -117,8 +117,8 @@ namespace OpenDiablo2.Core.UI
 
         public void OnPlayerInfo(int clientHash, IEnumerable<PlayerInfo> playerInfos)
         {
-            // Hack, only for one player. Match by clientHash... somehow
-            var currentPLayer = playerInfos.First();
+            // TODO: Ugly hack. Update when we can look up by GUID
+            var currentPLayer = playerInfos.ToArray()[mapEngine.FocusedPlayerId];
 
             leftHandContainer.SetContainedItem(currentPLayer.Equipment.LeftArm);
             rightHandContainer.SetContainedItem(currentPLayer.Equipment.RightArm);
