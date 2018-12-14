@@ -15,6 +15,7 @@
  */
 
 using OpenDiablo2.Common.Enums;
+using System;
 
 namespace OpenDiablo2.Common
 {
@@ -30,6 +31,9 @@ namespace OpenDiablo2.Common
         public const string Diablo2LogoBlackLeft = @"data\global\ui\FrontEnd\D2logoBlackLeft.DC6";
         public const string Diablo2LogoBlackRight = @"data\global\ui\FrontEnd\D2logoBlackRight.DC6";
 
+        // --- Credits ---
+        public const string CreditsBackground = @"data\global\ui\CharSelect\creditsbckgexpand.dc6";
+        public const string CreditsText = @"data\local\ui\eng\ExpansionCredits.txt";
         // --- Character Select Screen ---
         public const string CharacterSelectBackground = @"data\global\ui\FrontEnd\charactercreationscreenEXP.dc6";
         public const string CharacterSelectCampfire = @"data\global\ui\FrontEnd\fire.DC6";
@@ -117,6 +121,7 @@ namespace OpenDiablo2.Common
         public const string MediumButtonBlank = @"data\global\ui\FrontEnd\MediumButtonBlank.dc6";
         public const string CancelButton = @"data\global\ui\FrontEnd\CancelButtonBlank.dc6";
         public const string NarrowButtonBlank = @"data\global\ui\FrontEnd\NarrowButtonBlank.dc6";
+        public const string ShortButtonBlank = @"data\global\ui\CharSelect\ShortButtonBlank.dc6";
         public const string TextBox2 = @"data\global\ui\FrontEnd\textbox2.dc6";
         public const string TallButtonBlank = @"data\global\ui\CharSelect\TallButtonBlank.dc6";
 
@@ -127,6 +132,13 @@ namespace OpenDiablo2.Common
         public const string Frame = @"data\global\ui\PANEL\800borderframe.dc6";
         public const string InventoryCharacterPanel = @"data\global\ui\PANEL\invchar6.DC6";
         public const string InventoryWeaponsTab = @"data\global\ui\PANEL\invchar6Tab.DC6";
+        public const string SkillsPanelAmazon = @"data\global\ui\SPELLS\skltree_a_back.DC6";
+        public const string SkillsPanelBarbarian = @"data\global\ui\SPELLS\skltree_b_back.DC6";
+        public const string SkillsPanelDruid = @"data\global\ui\SPELLS\skltree_d_back.DC6";
+        public const string SkillsPanelAssassin = @"data\global\ui\SPELLS\skltree_i_back.DC6";
+        public const string SkillsPanelNecromancer = @"data\global\ui\SPELLS\skltree_n_back.DC6";
+        public const string SkillsPanelPaladin = @"data\global\ui\SPELLS\skltree_p_back.DC6";
+        public const string SkillsPanelSorcerer = @"data\global\ui\SPELLS\skltree_s_back.DC6";
 
         public const string RunButton = @"data\global\ui\PANEL\runbutton.dc6";
         public const string MenuButton = @"data\global\ui\PANEL\menubutton.DC6";
@@ -303,6 +315,29 @@ namespace OpenDiablo2.Common
                     return BGMAct5Baal; // TODO: Verify
                 default:
                     return string.Empty;
+            }
+        }
+
+        public static string GetHeroSkillPanel(eHero hero)
+        {
+            switch (hero)
+            {
+                case eHero.Amazon:
+                    return SkillsPanelAmazon;
+                case eHero.Assassin:
+                    return SkillsPanelAssassin;
+                case eHero.Barbarian:
+                    return SkillsPanelBarbarian;
+                case eHero.Druid:
+                    return SkillsPanelDruid;
+                case eHero.Necromancer:
+                    return SkillsPanelNecromancer;
+                case eHero.Paladin:
+                    return SkillsPanelPaladin;
+                case eHero.Sorceress:
+                    return SkillsPanelSorcerer;
+                default:
+                    throw new ArgumentException($"Unknown hero type: {hero}");
             }
         }
     }

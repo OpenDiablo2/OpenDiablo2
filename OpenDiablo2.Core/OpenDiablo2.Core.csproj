@@ -76,10 +76,11 @@
     <Compile Include="UI\GameHUD.cs" />
     <Compile Include="UI\ItemContainer.cs" />
     <Compile Include="UI\PanelFrame.cs" />
-    <Compile Include="UI\InventoryPanel.cs" />
+    <Compile Include="UI\Panels\InventoryPanel.cs" />
+    <Compile Include="UI\Panels\SkillsPanel.cs" />
     <Compile Include="UI\TextBox.cs" />
     <Compile Include="UI\MiniPanel.cs" />
-    <Compile Include="UI\CharacterPanel.cs" />
+    <Compile Include="UI\Panels\CharacterPanel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

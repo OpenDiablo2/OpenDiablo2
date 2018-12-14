@@ -64,14 +64,10 @@ namespace OpenDiablo2.Core.UI
             secondaryLeftButton = createButton(eButtonType.SecondaryInvHand);
             secondaryLeftButton.Location = panelSprite.Location + new Size(15, 22);
             secondaryLeftButton.OnActivate = ToggleWeaponsSlot;
-            secondaryLeftButton.ClickableRect = new Size(0, 20);
-            secondaryLeftButton.AllowFrameChange = false;
 
             secondaryRightButton = createButton(eButtonType.SecondaryInvHand);
             secondaryRightButton.Location = panelSprite.Location + new Size(246, 22);
             secondaryRightButton.OnActivate = ToggleWeaponsSlot;
-            secondaryRightButton.ClickableRect = new Size(0, 20);
-            secondaryRightButton.AllowFrameChange = false;
 
             goldButton = createButton(eButtonType.GoldCoin);
             goldButton.Location = panelSprite.Location + new Size(84, 391);

@@ -103,6 +103,7 @@
     <Compile Include="Interfaces\Mobs\IEnemyTypeCombatConfig.cs" />
     <Compile Include="Interfaces\Mobs\IEnemyTypeConfig.cs" />
     <Compile Include="Interfaces\Mobs\IEnemyTypeDifficultyConfig.cs" />
+    <Compile Include="Interfaces\UI\ISkillsPanel.cs" />
     <Compile Include="Models\Mobs\EnemyTypeAppearanceConfig.cs" />
     <Compile Include="Models\Mobs\EnemyTypeCombatConfig.cs" />
     <Compile Include="Models\Mobs\EnemyTypeConfig.cs" />
