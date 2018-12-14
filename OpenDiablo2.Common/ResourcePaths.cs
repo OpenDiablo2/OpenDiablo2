@@ -34,6 +34,7 @@ namespace OpenDiablo2.Common
         // --- Credits ---
         public const string CreditsBackground = @"data\global\ui\CharSelect\creditsbckgexpand.dc6";
         public const string CreditsText = @"data\local\ui\eng\ExpansionCredits.txt";
+
         // --- Character Select Screen ---
         public const string CharacterSelectBackground = @"data\global\ui\FrontEnd\charactercreationscreenEXP.dc6";
         public const string CharacterSelectCampfire = @"data\global\ui\FrontEnd\fire.DC6";
@@ -153,12 +154,12 @@ namespace OpenDiablo2.Common
         public const string WeaponsPlaceholder = @"data\global\ui\PANEL\inv_weapons.DC6";
 
         // --- Data ---
-        // TODO: Doesn't sound right :)
         public const string EnglishTable = @"data\local\lng\eng\English.txt";
         public const string ExpansionStringTable = @"data\local\lng\eng\expansionstring.tbl";
         public const string LevelPreset = @"data\global\excel\LvlPrest.txt";
         public const string LevelType = @"data\global\excel\LvlTypes.txt";
         public const string LevelDetails = @"data\global\excel\Levels.txt";
+        public const string ObjectDetails = @"data\global\excel\Objects.txt";
 
         // --- Animations ---
         public const string ObjectData = @"data\global\objects";
