@@ -42,7 +42,7 @@ namespace OpenDiablo2.Core
                 .EnumerateFiles(globalConfiguration.BaseDataPath, "*.mpq")
                 .Where(x => !(Path.GetFileName(x)?.StartsWith("patch") ?? false))
                 .Select(file => new MPQ(file))
-                .ToArray();
+                .ToList();
 
 
             if (!_mpqs.Any())
@@ -74,6 +74,32 @@ namespace OpenDiablo2.Core
                 foreach (var file in _mpqs[i].Files)
                     _mpqLookup[file.ToLower()] = i;
             }
+
+            // Get the combined list file by joining all of the other mpqs
+            List<string> superListFile = _mpqs.SelectMany(x => x.Files).ToList();
+
+            var patchMPQ = Directory
+                .EnumerateFiles(globalConfiguration.BaseDataPath, "*.mpq")
+                .Where(x => Path.GetFileName(x).StartsWith("patch"))
+                .Select(file => new MPQ(file, superListFile))
+                .First();
+
+            _mpqs.Add(patchMPQ);
+            int patchMPQIndex = _mpqs.Count - 1;
+            
+            // Replace existing mpqLookups with those from the patch, which take precedence
+            foreach (var file in patchMPQ.Files)
+            {
+                // unlike the other mpqs, we need to ensure that the files actually exist
+                // inside of the patch mpq instead of assuming that they do, because
+                // we can't trust the filelist
+                if (!patchMPQ.HasFile(file))
+                {
+                    continue;
+                }
+
+                _mpqLookup[file.ToLower()] = patchMPQIndex;
+            }
         }
 
         public byte[] GetBytes(string fileName)
@@ -98,6 +124,11 @@ namespace OpenDiablo2.Core
         public string GetCharacterDccPath(eHero hero, eMobMode mobMode, eCompositType compositType, PlayerEquipment equipment)
         {
             var fileName = $@"{ResourcePaths.PlayerAnimationBase}\{hero.ToToken()}\{compositType.ToToken()}\{hero.ToToken()}{compositType.ToToken()}".ToLower();
+            var armorType = eArmorType.Lite;
+
+            // Override default armor type based on equipped torso
+            if(equipment.Torso != null && (equipment.Torso.Item as Armor).ArmorTypes.ContainsKey(compositType))
+                armorType = (equipment.Torso.Item as Armor).ArmorTypes[compositType];
 
             switch (compositType)
             {
@@ -110,7 +141,7 @@ namespace OpenDiablo2.Core
                 case eCompositType.Legs:
                 case eCompositType.RightArm:
                 case eCompositType.LeftArm:
-                    fileName += $"{equipment.ArmorType.ToToken()}{mobMode.ToToken()}";
+                    fileName += $"{armorType.ToToken()}{mobMode.ToToken()}";
                     return _mpqLookup.ContainsKey($"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower())
                         ? $"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower()
                         : $"{fileName}{eWeaponClass.HandToHand.ToToken()}.dcc".ToLower();
@@ -134,7 +165,7 @@ namespace OpenDiablo2.Core
                 // TODO: Figure these out...
                 case eCompositType.Special1:
                 case eCompositType.Special2:
-                    fileName += $"{equipment.ArmorType.ToToken()}{mobMode.ToToken()}{equipment.WeaponClass}.dcc".ToLower();
+                    fileName += $"{armorType.ToToken()}{mobMode.ToToken()}{equipment.WeaponClass}.dcc".ToLower();
                     return _mpqLookup.ContainsKey(fileName)
                         ? fileName
                         : null; // TODO: Should we silence this?

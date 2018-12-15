@@ -93,6 +93,8 @@ namespace OpenDiablo2.GameServer_
                 }
             }
 
+            // TODO: Default torso for testing. Remove when... we're done testing.
+            newPlayer.UpdateEquipment("tors", itemManager.getItemInstance("aar"));
         
             mobManager.AddPlayer(newPlayer);
             return newPlayer.Id;

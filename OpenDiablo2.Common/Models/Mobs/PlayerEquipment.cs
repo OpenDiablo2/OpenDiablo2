@@ -35,15 +35,6 @@ namespace OpenDiablo2.Common.Models.Mobs
             }
         }
 
-        public eArmorType ArmorType
-        {
-            get
-            {
-                // TODO: Make things happen here
-                return eArmorType.Lite;
-            }
-        }
-
         public string HashKey
             => $"{Head?.Item.Name}{Neck?.Item.Name}{Torso?.Item.Name}{RightArm?.Item.Name}{LeftArm?.Item.Name}" +
             $"{RightRing?.Item.Name}{LeftRing?.Item.Name}{Feet?.Item.Name}{Belt?.Item.Name}{Gloves?.Item.Name}";

@@ -17,9 +17,13 @@ namespace OpenDiablo2.Common.UT
                 energy: 20, health: 50, mana: 40, stamina: 30, manaRegen: 20,
                 perlevelhealth: 3, perlevelmana: 1.5, perlevelstamina: 1,
                 pervitalityhealth: 2, pervitalitystamina: 1, perenergymana: 1.5,
+                perLevelStatPoints: 5,
                 baseatkrating: -30, basedefrating: -30, perdexterityatkrating: 5, perdexteritydefrating: 4,
                 walkVelocity: 6, runVelocity: 9, runDrain: 20, walkFrames: 8, runFrames: 8, swingFrames: 8,
-                spellFrames: 8, getHitFrames: 8, bowFrames: 8, startingSkill: 0, baseWeaponClass: "hth", 
+                spellFrames: 8, getHitFrames: 8, bowFrames: 8, startingSkill: "",
+                startingSkills: new string[] { },
+                allSkillsBonusString: "", firstTabBonusString: "", secondTabBonusString: "",
+                thirdTabBonusString: "", classOnlyBonusString: "", baseWeaponClass: "hth", 
                 initialEquipment: new List<InitialEquipment>());
             LevelExperienceConfig expconfig = new LevelExperienceConfig(new List<long>()
             {

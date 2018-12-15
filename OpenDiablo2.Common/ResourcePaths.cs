@@ -141,6 +141,15 @@ namespace OpenDiablo2.Common
         public const string SkillsPanelPaladin = @"data\global\ui\SPELLS\skltree_p_back.DC6";
         public const string SkillsPanelSorcerer = @"data\global\ui\SPELLS\skltree_s_back.DC6";
 
+        public const string GenericSkills = @"data\global\ui\SPELLS\Skillicon.DC6";
+        public const string AmazonSkills = @"data\global\ui\SPELLS\AmSkillicon.DC6";
+        public const string BarbarianSkills = @"data\global\ui\SPELLS\BaSkillicon.DC6";
+        public const string DruidSkills = @"data\global\ui\SPELLS\DrSkillicon.DC6";
+        public const string AssassinSkills = @"data\global\ui\SPELLS\AsSkillicon.DC6";
+        public const string NecromancerSkills = @"data\global\ui\SPELLS\NeSkillicon.DC6";
+        public const string PaladinSkills = @"data\global\ui\SPELLS\PaSkillicon.DC6";
+        public const string SorcererSkills = @"data\global\ui\SPELLS\SoSkillicon.DC6";
+
         public const string RunButton = @"data\global\ui\PANEL\runbutton.dc6";
         public const string MenuButton = @"data\global\ui\PANEL\menubutton.DC6";
         public const string GoldCoinButton = @"data\global\ui\panel\goldcoinbtn.dc6";
@@ -234,6 +243,9 @@ namespace OpenDiablo2.Common
 
         // --- Enemy Data ---
         public static string MonStats = "data\\global\\excel\\monstats.txt";
+
+        // --- Skill Data ---
+        public static string Missiles = "data\\global\\excel\\missiles.txt";
 
         public static string GeneratePathForItem(string spriteName)
         {
@@ -337,6 +349,31 @@ namespace OpenDiablo2.Common
                     return SkillsPanelPaladin;
                 case eHero.Sorceress:
                     return SkillsPanelSorcerer;
+                default:
+                    throw new ArgumentException($"Unknown hero type: {hero}");
+            }
+        }
+
+        public static string GetHeroSkillsIcons(eHero hero)
+        {
+            switch (hero)
+            {
+                case eHero.None:
+                    return GenericSkills;
+                case eHero.Amazon:
+                    return AmazonSkills;
+                case eHero.Assassin:
+                    return AssassinSkills;
+                case eHero.Barbarian:
+                    return BarbarianSkills;
+                case eHero.Druid:
+                    return DruidSkills;
+                case eHero.Necromancer:
+                    return NecromancerSkills;
+                case eHero.Paladin:
+                    return PaladinSkills;
+                case eHero.Sorceress:
+                    return SorcererSkills;
                 default:
                     throw new ArgumentException($"Unknown hero type: {hero}");
             }

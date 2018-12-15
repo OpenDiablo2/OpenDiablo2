@@ -26,6 +26,8 @@ namespace OpenDiablo2.Common.Models.Mobs
         public double PerVitalityStamina { get; protected set; }
         public double PerEnergyMana { get; protected set; }
 
+        public int PerLevelStatPoints { get; protected set; }
+
         public int BaseAttackRating { get; protected set; }
         public int PerDexterityAttackRating { get; protected set; }
 
@@ -43,7 +45,15 @@ namespace OpenDiablo2.Common.Models.Mobs
         public int GetHitFrames { get; protected set; }
         public int BowFrames { get; protected set; }
 
-        public int StartingSkill { get; protected set; }
+        public string StartingSkill { get; protected set; }
+        public string[] StartingSkills { get; protected set; }
+
+        public string AllSkillsBonusString { get; protected set; }
+        public string FirstTabBonusString { get; protected set; }
+        public string SecondTabBonusString { get; protected set; }
+        public string ThirdTabBonusString { get; protected set; }
+        public string ClassOnlyBonusString { get; protected set; }
+
         public string BaseWeaponClass { get; protected set; }
 
         public List<InitialEquipment> InitialEquipment { get; }
@@ -52,10 +62,13 @@ namespace OpenDiablo2.Common.Models.Mobs
             int health, int mana, int stamina, int manaRegen,
             double perlevelhealth, double perlevelmana, double perlevelstamina,
             double pervitalityhealth, double pervitalitystamina, double perenergymana,
+            int perLevelStatPoints,
             int baseatkrating, int basedefrating, int perdexterityatkrating, int perdexteritydefrating,
             int walkVelocity, int runVelocity, int runDrain,
             int walkFrames, int runFrames, int swingFrames, int spellFrames, int getHitFrames, int bowFrames,
-            int startingSkill,
+            string startingSkill, string[] startingSkills,
+            string allSkillsBonusString, string firstTabBonusString, string secondTabBonusString,
+            string thirdTabBonusString, string classOnlyBonusString,
             string baseWeaponClass,
             List<InitialEquipment> initialEquipment)
         {
@@ -76,6 +89,8 @@ namespace OpenDiablo2.Common.Models.Mobs
             PerVitalityStamina = pervitalitystamina;
             PerEnergyMana = perenergymana;
 
+            PerLevelStatPoints = perLevelStatPoints;
+
             BaseAttackRating = baseatkrating;
             BaseDefenseRating = basedefrating;
             PerDexterityAttackRating = perdexterityatkrating;
@@ -93,6 +108,13 @@ namespace OpenDiablo2.Common.Models.Mobs
             BowFrames = bowFrames;
 
             StartingSkill = startingSkill;
+            StartingSkills = startingSkills;
+            AllSkillsBonusString = allSkillsBonusString;
+            FirstTabBonusString = firstTabBonusString;
+            SecondTabBonusString = secondTabBonusString;
+            ThirdTabBonusString = thirdTabBonusString;
+            ClassOnlyBonusString = classOnlyBonusString;
+
             BaseWeaponClass = baseWeaponClass;
 
             InitialEquipment = initialEquipment;
@@ -122,29 +144,35 @@ namespace OpenDiablo2.Common.Models.Mobs
             // RunDrain	Comment	LifePerLevel	StaminaPerLevel	ManaPerLevel
             // 21               22                  23
             // LifePerVitality	StaminaPerVitality	ManaPerMagic	
-            // 24       25      26      27      28      29
+            // 24
+            // StatPerLevel
+            // 25       26      27      28      29      30
             // #walk	#run	#swing	#spell	#gethit	#bow	
-            // 30           31          32
-            // BlockFactor	StartSkill	baseWClass	
-            // 33       34          35          36      37          38
+            // 31           32          
+            // BlockFactor	StartSkill	
+            // 33 ... 42
+            // Skill1 ... Skill10
+            // 43           44              45              46              47
+            // StrAllSkills StrSkillTab1    StrSkillTab2    StrSkillTab3    StrClassOnly
+            // 48
+            // baseWClass	
+            // 49       50          51          49+3    50+3        51+3
             // item1	item1loc	item1count	item2	item2loc	item2count
-            // 39       40          41          42      43          44
             // item3	item3loc	item3count	item4	item4loc	item4count
-            // 45       46          47          48      49          50
             // item5	item5loc	item5count	item6	item6loc	item6count
-            // 51       52          53          54      55          56
             // item7	item7loc	item7count	item8	item8loc	item8count
-            // 57       58          59          60      61          62
             // item9	item9loc	item9count	item10	item10loc	item10count
+            // itemn = 49 + (n-1)*3, itemnloc = 50 + (n-1)*3, itemncount = 51 + (n-1)*3
 
-            
+            // NEW TODO: StatPerLevel Skill1 ... Skill10
+            //  StrAllSkills StrSkillTab1    StrSkillTab2    StrSkillTab3    StrClassOnly
 
             List<string> itemNames = new List<string>();
             List<string> itemLocs = new List<string>();
             List<int> itemCounts = new List<int>();
             List<InitialEquipment> initialEquipment = new List<InitialEquipment>();
 
-            for(int i = 33; i <= 60; i+=3)
+            for(int i = 49; i <= 78; i+=3)
             {
                 var item = new InitialEquipment();
                 item.name = row[i];
@@ -169,21 +197,31 @@ namespace OpenDiablo2.Common.Models.Mobs
                 pervitalityhealth: Convert.ToInt32(row[21]) / 4.0,
                 pervitalitystamina: Convert.ToInt32(row[22]) / 4.0,
                 perenergymana: Convert.ToInt32(row[23]) / 4.0,
+                perLevelStatPoints: Convert.ToInt32(row[24]),
                 baseatkrating: Convert.ToInt32(row[13]),
-                basedefrating: Convert.ToInt32(row[30]),
+                basedefrating: Convert.ToInt32(row[31]),
                 perdexterityatkrating: 5,
                 perdexteritydefrating: 4,
                 walkVelocity: Convert.ToInt32(row[14]),
                 runVelocity: Convert.ToInt32(row[15]),
                 runDrain: Convert.ToInt32(row[16]),
-                walkFrames: Convert.ToInt32(row[24]),
-                runFrames: Convert.ToInt32(row[25]),
-                swingFrames: Convert.ToInt32(row[26]),
-                spellFrames: Convert.ToInt32(row[27]),
-                getHitFrames: Convert.ToInt32(row[28]),
-                bowFrames: Convert.ToInt32(row[29]),
-                startingSkill: Convert.ToInt32(row[31]),
-                baseWeaponClass: row[32],
+                walkFrames: Convert.ToInt32(row[25]),
+                runFrames: Convert.ToInt32(row[26]),
+                swingFrames: Convert.ToInt32(row[27]),
+                spellFrames: Convert.ToInt32(row[28]),
+                getHitFrames: Convert.ToInt32(row[29]),
+                bowFrames: Convert.ToInt32(row[30]),
+                startingSkill: row[32],
+                startingSkills: new string[]
+                {
+                    row[33], row[34], row[35], row[36], row[37], row[38], row[39], row[40], row[41], row[42]
+                },
+                allSkillsBonusString: row[43],
+                firstTabBonusString: row[44],
+                secondTabBonusString: row[45],
+                thirdTabBonusString: row[46],
+                classOnlyBonusString: row[47],
+                baseWeaponClass: row[48],
                 initialEquipment: initialEquipment);
         }
     }

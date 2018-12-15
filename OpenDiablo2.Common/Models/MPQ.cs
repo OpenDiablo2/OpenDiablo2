@@ -53,7 +53,9 @@ namespace OpenDiablo2.Common.Models
             KeyAdjusted = 0x00020000, // The file's encryption key is adjusted by the block offset and file size (explained in detail in the File Data section). File must be encrypted.
             IsEncrypted = 0x00010000, // File is encrypted.
             IsCompressed = 0x00000200, // File is compressed. File cannot be imploded.
-            IsImploded = 0x00000100  // File is imploded. File cannot be compressed.
+            IsImploded = 0x00000100,  // File is imploded. File cannot be compressed.
+            IsPatchFile = 0x00100000, // Marks as a mpq patch file
+            IsDeleteFile = 0x02000000, // Marks as a delete request
         }
 
         internal struct BlockRecord
@@ -71,6 +73,8 @@ namespace OpenDiablo2.Common.Models
             public bool IsEncrypted => (Flags & (UInt32)eBlockRecordBitflag.IsEncrypted) != 0;
             public bool IsCompressed => (Flags & (UInt32)eBlockRecordBitflag.IsCompressed) != 0;
             public bool IsImploded => (Flags & (UInt32)eBlockRecordBitflag.IsImploded) != 0;
+            public bool IsPatchFile => (Flags & (UInt32)eBlockRecordBitflag.IsPatchFile) != 0;
+            public bool IsDeleteFile => (Flags & (UInt32)eBlockRecordBitflag.IsDeleteFile) != 0;
         }
 
         internal struct HashRecord
@@ -94,9 +98,15 @@ namespace OpenDiablo2.Common.Models
         public string Path { get; private set; }
         public eMPQFormatVersion FormatVersion => (eMPQFormatVersion)Header.FormatVersion;
         public List<string> Files => GetFilePaths();
+        private List<string> FilesOverride = null;
 
         private List<string> GetFilePaths()
         {
+            if(FilesOverride != null)
+            {
+                return FilesOverride; // if we were passed in an existing listfile,
+                // don't query again; use the one we were given instead
+            }
             using (var stream = OpenFile(LISTFILE_NAME))
             {
                 if (stream == null)
@@ -116,9 +126,10 @@ namespace OpenDiablo2.Common.Models
             InitializeCryptTable();
         }
 
-        public MPQ(string path)
+        public MPQ(string path, List<string> listfile = null)
         {
             this.Path = path;
+            this.FilesOverride = listfile;
 
             // If you crash here, you may have Diablo2 open... can't do that :)
             fileStream = new FileStream(path, FileMode.Open);
@@ -367,6 +378,11 @@ namespace OpenDiablo2.Common.Models
             block.FileName = filename.ToLower();
             block.EncryptionSeed = CalculateEncryptionSeed(block);
             return new MPQStream(this, block);
+        }
+
+        public bool HasFile(string filename)
+        {
+            return GetHashRecord(filename, out HashRecord hash);
         }
 
         public void Dispose()

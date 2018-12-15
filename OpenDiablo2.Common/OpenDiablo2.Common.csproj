@@ -60,6 +60,7 @@
     <Compile Include="Attributes\MessageFrameAttribute.cs" />
     <Compile Include="Attributes\RandomizedMapAttribute.cs" />
     <Compile Include="Attributes\SceneAttribute.cs" />
+    <Compile Include="Attributes\SkillInfoAttribute.cs" />
     <Compile Include="AutofacModule.cs" />
     <Compile Include="Enums\eDifficulty.cs" />
     <Compile Include="Enums\eItemContainerType.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Enums\eRenderCellType.cs" />
     <Compile Include="Enums\eSceneType.cs" />
     <Compile Include="Enums\eSessionType.cs" />
+    <Compile Include="Enums\eSkill.cs" />
     <Compile Include="Enums\eTextAlign.cs" />
     <Compile Include="Enums\eWeaponClass.cs" />
     <Compile Include="Enums\eWildBorder.cs" />
@@ -104,6 +106,7 @@
     <Compile Include="Interfaces\Mobs\IEnemyTypeCombatConfig.cs" />
     <Compile Include="Interfaces\Mobs\IEnemyTypeConfig.cs" />
     <Compile Include="Interfaces\Mobs\IEnemyTypeDifficultyConfig.cs" />
+    <Compile Include="Interfaces\Mobs\IMissileTypeConfig.cs" />
     <Compile Include="Interfaces\UI\ISkillsPanel.cs" />
     <Compile Include="Models\Mobs\EnemyTypeAppearanceConfig.cs" />
     <Compile Include="Models\Mobs\EnemyTypeCombatConfig.cs" />
@@ -117,6 +120,7 @@
     <Compile Include="Models\Item\ItemInstance.cs" />
     <Compile Include="Models\Item\Misc.cs" />
     <Compile Include="Models\Item\Weapon.cs" />
+    <Compile Include="Models\Mobs\MissileTypeConfig.cs" />
     <Compile Include="Models\Mobs\PlayerEquipment.cs" />
     <Compile Include="Models\MPQCOF.cs" />
     <Compile Include="Models\MPQDCC.cs" />
