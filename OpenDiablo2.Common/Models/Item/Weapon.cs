@@ -20,8 +20,8 @@ namespace OpenDiablo2.Common.Models
             {
                 Name = row[0],
                 Code = row[3],
-                WeaponClass = row[34],
-                InvFile = row[45]
+                WeaponClass = row[37],
+                InvFile = row[48]
             };
 
         public static void Write(this BinaryWriter binaryWriter, Weapon weapon)

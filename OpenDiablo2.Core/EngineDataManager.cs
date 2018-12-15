@@ -52,7 +52,7 @@ namespace OpenDiablo2.Core
                 .Skip(1)
                 .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
-                .Where(x => x.Count() == 36 && x[0] != "Expansion")
+                .Where(x => x.Count() >= 36 && x[0] != "Expansion")
                 .Select(x => x.ToLevelType())
                 .ToImmutableList();
 
@@ -63,7 +63,7 @@ namespace OpenDiablo2.Core
                 .Skip(1)
                 .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
-                .Where(x => x.Count() == 24 && x[0] != "Expansion")
+                .Where(x => x.Count() >= 24 && x[0] != "Expansion")
                 .Select(x => x.ToLevelPreset())
                 .ToImmutableList();
             

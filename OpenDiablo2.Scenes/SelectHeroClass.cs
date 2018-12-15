@@ -271,7 +271,8 @@ namespace OpenDiablo2.Scenes
             StopSfx();
 
             // TODO: Support other session types
-            gameState.Initialize(characterNameTextBox.Text, selectedHero.Value, eSessionType.Local);
+            // TODO: support other difficulty types
+            gameState.Initialize(characterNameTextBox.Text, selectedHero.Value, eSessionType.Local, eDifficulty.NORMAL);
         }
 
         private void OnExitClicked()

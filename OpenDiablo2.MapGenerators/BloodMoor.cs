@@ -16,10 +16,10 @@ namespace OpenDiablo2.MapGenerators
         private readonly LevelDetail levelDetail;
         private readonly eDifficulty difficulty;
 
-        public BloodMoor(IGameState gameState, IEngineDataManager dataManager, eDifficulty difficulty)
+        public BloodMoor(IGameState gameState, IEngineDataManager dataManager)
         {
             this.gameState = gameState;
-            this.difficulty = difficulty;
+            this.difficulty = gameState.Difficulty;
 
             levelDetail = dataManager.Levels.First(x => x.LevelName == "Blood Moor");
         }
