@@ -116,7 +116,7 @@ namespace OpenDiablo2.Common.Models.Mobs
                 LoopAnimation: (row[14] == "1"),
                 CelFilePath: row[15],
 
-                //TODO: these rows are wrong! research why our missiles.txt has different columns thatn the one in the guide???
+                // TODO: these rows are wrong! research why our missiles.txt has different columns thatn the one in the guide???
                 // TODO: UNFINISHED
                 AnimationRate: Convert.ToInt32(row[16]),
                 AnimationLength: Convert.ToInt32(row[17]),
