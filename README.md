@@ -5,9 +5,6 @@ An open source re-implementation of Diablo 2 in C#
 [Join us on Discord!](https://discord.gg/pRy8tdc)\
 [Development Live stream](https://www.twitch.tv/essial/)
 
-<img src="https://raw.githubusercontent.com/essial/OpenDiablo2/master/Screenshot.png" />
-<img src="https://raw.githubusercontent.com/essial/OpenDiablo2/master/Screenshot2.png" />
-
 ## About this project
 
 This is an attempt to re-create Diablo 2's game engine in C#, and make it cross platform as well. This project does not ship with the assets or content required to work. You must have a legally purchased copy of [Diablo 2](https://us.shop.battle.net/en-us/product/diablo-ii) and its expansion [Lord of Destruction](https://us.shop.battle.net/en-us/product/diablo-ii-lord-of-destruction) installed on your computer in order to run this engine. If you have an original copy of the disks, those files should work fine as well.
