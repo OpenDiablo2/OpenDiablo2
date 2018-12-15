@@ -15,11 +15,14 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Extensions;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Common.Models;
 
 namespace OpenDiablo2.Core.UI
 {
@@ -29,11 +32,12 @@ namespace OpenDiablo2.Core.UI
     public sealed class InventoryPanel : IInventoryPanel
     {
         private readonly IRenderWindow renderWindow;
+        private readonly IMapEngine mapEngine;
         private readonly ISprite panelSprite;
         
-        public IItemContainer helmContainer, armorContainer, beltContainer, gloveContainer, bootsContainer,
+        public IItemContainer headContainer, torsoContainer, beltContainer, gloveContainer, bootsContainer,
             leftHandContainer, rightHandContainer, secondaryLeftHandContainer, secondaryRightHandContainer,
-            ringtLeftContainer, ringtRightContainer, amuletContainer;
+            ringLeftContainer, ringRightContainer, neckContainer;
 
         private readonly IButton closeButton, secondaryLeftButton, secondaryRightButton, goldButton;
 
@@ -41,10 +45,15 @@ namespace OpenDiablo2.Core.UI
 
         public InventoryPanel(IRenderWindow renderWindow, 
             IItemManager itemManager, 
+            IMapEngine mapEngine,
+            ISessionManager sessionManager,
             Func<eItemContainerType, IItemContainer> createItemContainer,
             Func<eButtonType, IButton> createButton)
         {
             this.renderWindow = renderWindow;
+            this.mapEngine = mapEngine;
+
+            sessionManager.OnPlayerInfo += OnPlayerInfo;
 
             panelSprite = renderWindow.LoadSprite(ResourcePaths.InventoryCharacterPanel, Palettes.Units, FrameType.GetOffset(), true);
 
@@ -55,33 +64,29 @@ namespace OpenDiablo2.Core.UI
             secondaryLeftButton = createButton(eButtonType.SecondaryInvHand);
             secondaryLeftButton.Location = panelSprite.Location + new Size(15, 22);
             secondaryLeftButton.OnActivate = ToggleWeaponsSlot;
-            secondaryLeftButton.ClickableRect = new Size(0, 20);
-            secondaryLeftButton.AllowFrameChange = false;
 
             secondaryRightButton = createButton(eButtonType.SecondaryInvHand);
             secondaryRightButton.Location = panelSprite.Location + new Size(246, 22);
             secondaryRightButton.OnActivate = ToggleWeaponsSlot;
-            secondaryRightButton.ClickableRect = new Size(0, 20);
-            secondaryRightButton.AllowFrameChange = false;
 
             goldButton = createButton(eButtonType.GoldCoin);
             goldButton.Location = panelSprite.Location + new Size(84, 391);
             goldButton.OnActivate = OpenGoldDrop;
 
-            helmContainer = createItemContainer(eItemContainerType.Helm);
-            helmContainer.Location = panelSprite.Location + new Size(135, 5);
+            headContainer = createItemContainer(eItemContainerType.Helm);
+            headContainer.Location = panelSprite.Location + new Size(135, 5);
             
-            amuletContainer = createItemContainer(eItemContainerType.Amulet);
-            amuletContainer.Location = panelSprite.Location + new Size(209, 34);
+            neckContainer = createItemContainer(eItemContainerType.Amulet);
+            neckContainer.Location = panelSprite.Location + new Size(209, 34);
             
-            armorContainer = createItemContainer(eItemContainerType.Armor);
-            armorContainer.Location = panelSprite.Location + new Size(135, 75);
-
-            leftHandContainer = createItemContainer(eItemContainerType.Weapon);
-            leftHandContainer.Location = panelSprite.Location + new Size(20, 47);
+            torsoContainer = createItemContainer(eItemContainerType.Armor);
+            torsoContainer.Location = panelSprite.Location + new Size(135, 75);
 
             rightHandContainer = createItemContainer(eItemContainerType.Weapon);
-            rightHandContainer.Location = panelSprite.Location + new Size(253, 47);
+            rightHandContainer.Location = panelSprite.Location + new Size(20, 47);
+
+            leftHandContainer = createItemContainer(eItemContainerType.Weapon);
+            leftHandContainer.Location = panelSprite.Location + new Size(253, 47);
 
             secondaryLeftHandContainer = createItemContainer(eItemContainerType.Weapon);
             secondaryLeftHandContainer.Location = panelSprite.Location + new Size(24, 45);
@@ -92,11 +97,11 @@ namespace OpenDiablo2.Core.UI
             beltContainer = createItemContainer(eItemContainerType.Belt);
             beltContainer.Location = panelSprite.Location + new Size(136, 178);
             
-            ringtLeftContainer = createItemContainer(eItemContainerType.Ring);
-            ringtLeftContainer.Location = panelSprite.Location + new Size(95, 179);
+            ringLeftContainer = createItemContainer(eItemContainerType.Ring);
+            ringLeftContainer.Location = panelSprite.Location + new Size(95, 179);
             
-            ringtRightContainer = createItemContainer(eItemContainerType.Ring);
-            ringtRightContainer.Location = panelSprite.Location + new Size(209, 179);
+            ringRightContainer = createItemContainer(eItemContainerType.Ring);
+            ringRightContainer.Location = panelSprite.Location + new Size(209, 179);
             
             gloveContainer = createItemContainer(eItemContainerType.Glove);
             gloveContainer.Location = panelSprite.Location + new Size(20, 179);
@@ -109,6 +114,23 @@ namespace OpenDiablo2.Core.UI
         public ePanelFrameType FrameType => ePanelFrameType.Right;
 
         public bool IsSecondaryEquipped { get; private set; }
+
+        public void OnPlayerInfo(int clientHash, IEnumerable<PlayerInfo> playerInfos)
+        {
+            // TODO: Ugly hack. Update when we can look up by GUID
+            var currentPLayer = playerInfos.ToArray()[mapEngine.FocusedPlayerId];
+
+            leftHandContainer.SetContainedItem(currentPLayer.Equipment.LeftArm);
+            rightHandContainer.SetContainedItem(currentPLayer.Equipment.RightArm);
+            torsoContainer.SetContainedItem(currentPLayer.Equipment.Torso);
+            headContainer.SetContainedItem(currentPLayer.Equipment.Head);
+            ringLeftContainer.SetContainedItem(currentPLayer.Equipment.LeftRing);
+            ringRightContainer.SetContainedItem(currentPLayer.Equipment.RightRing);
+            beltContainer.SetContainedItem(currentPLayer.Equipment.Belt);
+            neckContainer.SetContainedItem(currentPLayer.Equipment.Neck);
+            gloveContainer.SetContainedItem(currentPLayer.Equipment.Gloves);
+
+        }
 
         public void Update()
         {
@@ -129,12 +151,12 @@ namespace OpenDiablo2.Core.UI
             closeButton.Update();
             goldButton.Update();
 
-            helmContainer.Update();
-            amuletContainer.Update();
-            armorContainer.Update();
+            headContainer.Update();
+            neckContainer.Update();
+            torsoContainer.Update();
             beltContainer.Update();
-            ringtLeftContainer.Update();
-            ringtRightContainer.Update();
+            ringLeftContainer.Update();
+            ringRightContainer.Update();
             gloveContainer.Update();
             bootsContainer.Update();
         }
@@ -159,12 +181,12 @@ namespace OpenDiablo2.Core.UI
             closeButton.Render();
             goldButton.Render();
 
-            helmContainer.Render();
-            amuletContainer.Render();
-            armorContainer.Render();
+            headContainer.Render();
+            neckContainer.Render();
+            torsoContainer.Render();
             beltContainer.Render();
-            ringtLeftContainer.Render();
-            ringtRightContainer.Render();
+            ringLeftContainer.Render();
+            ringRightContainer.Render();
             gloveContainer.Render();
             bootsContainer.Render();
         }

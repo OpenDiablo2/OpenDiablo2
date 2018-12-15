@@ -14,17 +14,10 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
-namespace OpenDiablo2.Common.Enums
+namespace OpenDiablo2.Common.Interfaces.UI
 {
-    /// <summary>
-    /// Defines a scene type.
-    /// </summary>
-    public enum eSceneType
+    public interface ISkillsPanel : IPanel
     {
-        MainMenu,
-        Credits,
-        SelectHeroClass,
-        SelectCharacter,
-        Game
+        int ActivePanelIndex { get; }
     }
 }

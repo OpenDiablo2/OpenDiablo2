@@ -43,8 +43,9 @@ namespace OpenDiablo2.Core
             builder.RegisterType<PanelFrame>().As<IPanelFrame>().InstancePerDependency();
             builder.RegisterType<CharacterPanel>().AsImplementedInterfaces().InstancePerDependency();
             builder.RegisterType<InventoryPanel>().AsImplementedInterfaces().InstancePerDependency();
+            builder.RegisterType<SkillsPanel>().AsImplementedInterfaces().InstancePerDependency();
             builder.RegisterType<ItemContainer>().As<IItemContainer>().InstancePerDependency();
-            builder.RegisterType<MPQProvider>().As<IMPQProvider>().SingleInstance();
+            builder.RegisterType<MpqProvider>().As<IMPQProvider>().SingleInstance();
             builder.RegisterType<ResourceManager>().As<IResourceManager>().SingleInstance();
             builder.RegisterType<TextDictionary>().As<ITextDictionary>().SingleInstance();
             builder.RegisterType<TextBox>().As<ITextBox>().InstancePerDependency();

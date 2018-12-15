@@ -104,6 +104,7 @@
     <Compile Include="Interfaces\Mobs\IEnemyTypeConfig.cs" />
     <Compile Include="Interfaces\Mobs\IEnemyTypeDifficultyConfig.cs" />
     <Compile Include="Interfaces\Mobs\IMissileTypeConfig.cs" />
+    <Compile Include="Interfaces\UI\ISkillsPanel.cs" />
     <Compile Include="Models\Mobs\EnemyTypeAppearanceConfig.cs" />
     <Compile Include="Models\Mobs\EnemyTypeCombatConfig.cs" />
     <Compile Include="Models\Mobs\EnemyTypeConfig.cs" />
@@ -121,6 +122,8 @@
     <Compile Include="Models\MPQCOF.cs" />
     <Compile Include="Models\MPQDCC.cs" />
     <Compile Include="Models\ItemContainerLayout.cs" />
+    <Compile Include="Models\ObjectInfo.cs" />
+    <Compile Include="Models\ObjectTypeInfo.cs" />
     <Compile Include="Models\PlayerInfo.cs" />
     <Compile Include="Models\PlayerLocationDetails.cs" />
     <Compile Include="Interfaces\UI\IButton.cs" />

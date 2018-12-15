@@ -45,7 +45,7 @@ namespace OpenDiablo2.SDL2_
             }
         }
 
-        private string text;
+        private string text = string.Empty;
         public string Text
         {
             get => text;

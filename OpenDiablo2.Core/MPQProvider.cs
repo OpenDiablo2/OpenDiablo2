@@ -27,44 +27,54 @@ using System.Linq;
 
 namespace OpenDiablo2.Core
 {
-    public sealed class MPQProvider : IMPQProvider
+    public sealed class MpqProvider : IMPQProvider
     {
-        private readonly IList<MPQ> mpqs;
-        private readonly Dictionary<string, int> mpqLookup = new Dictionary<string, int>();
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        
+        private readonly IList<MPQ> _mpqs;
+        private readonly Dictionary<string, int> _mpqLookup = new Dictionary<string, int>();
 
-        public MPQProvider(GlobalConfiguration globalConfiguration)
+        public MpqProvider(GlobalConfiguration globalConfiguration)
         {
             // TODO: Make this less dumb. We need to an external file to configure mpq load order.
             
-            this.mpqs = Directory
+            _mpqs = Directory
                 .EnumerateFiles(globalConfiguration.BaseDataPath, "*.mpq")
-                .Where(x => !Path.GetFileName(x).StartsWith("patch"))
+                .Where(x => !(Path.GetFileName(x)?.StartsWith("patch") ?? false))
                 .Select(file => new MPQ(file))
                 .ToList();
             
+                .ToArray();
+
+
+            if (!_mpqs.Any())
+            {
+                _log.Fatal("No data files were found! Are you specifying the correct data path?");
+                throw new OpenDiablo2Exception("No data files were found.");
+            }
 
             // Load the base game files
-            for(var i = 0; i < mpqs.Count(); i++)
+            for(var i = 0; i < _mpqs.Count; i++)
             {
-                if (Path.GetFileName(mpqs[i].Path).StartsWith("d2exp") || Path.GetFileName(mpqs[i].Path).StartsWith("d2x"))
+                var path = Path.GetFileName(_mpqs[i].Path) ?? string.Empty;
+                
+                if (path.StartsWith("d2exp") || path.StartsWith("d2x"))
                     continue;
 
-                foreach(var file in mpqs[i].Files)
-                {
-                    mpqLookup[file.ToLower()] = i;
-                }
+                foreach(var file in _mpqs[i].Files)
+                    _mpqLookup[file.ToLower()] = i;
             }
 
             // Load the expansion game files
-            for (var i = 0; i < mpqs.Count(); i++)
+            for (var i = 0; i < _mpqs.Count; i++)
             {
-                if (!Path.GetFileName(mpqs[i].Path).StartsWith("d2exp") && !Path.GetFileName(mpqs[i].Path).StartsWith("d2x"))
+                var path = Path.GetFileName(_mpqs[i].Path) ?? string.Empty;
+                
+                if (!path.StartsWith("d2exp") && !path.StartsWith("d2x"))
                     continue;
 
-                foreach (var file in mpqs[i].Files)
-                {
-                    mpqLookup[file.ToLower()] = i;
-                }
+                foreach (var file in _mpqs[i].Files)
+                    _mpqLookup[file.ToLower()] = i;
             }
 
             // Get the combined list file by joining all of the other mpqs
@@ -102,36 +112,26 @@ namespace OpenDiablo2.Core
             return result;
         }
 
-        public IEnumerator<MPQ> GetEnumerator()
-        {
-            return mpqs.GetEnumerator();
-        }
+        public IEnumerator<MPQ> GetEnumerator() => _mpqs.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public Stream GetStream(string fileName)
-        {
-            if (!mpqLookup.ContainsKey(fileName.ToLower()))
-                return null;
+        public Stream GetStream(string fileName) => !_mpqLookup.ContainsKey(fileName.ToLower()) 
+            ? null 
+            : _mpqs[_mpqLookup[fileName.ToLower()]].OpenFile(fileName);
 
-            return mpqs[mpqLookup[fileName.ToLower()]].OpenFile(fileName);
-        }
-        
         public IEnumerable<string> GetTextFile(string fileName)
-            => new StreamReader(mpqs[mpqLookup[fileName.ToLower()]].OpenFile(fileName)).ReadToEnd().Split('\n');
+            => new StreamReader(_mpqs[_mpqLookup[fileName.ToLower()]].OpenFile(fileName)).ReadToEnd().Split('\n');
 
         public string GetCharacterDccPath(eHero hero, eMobMode mobMode, eCompositType compositType, PlayerEquipment equipment)
         {
-            var fileName = ($@"{ResourcePaths.PlayerAnimationBase}\{hero.ToToken()}\{compositType.ToToken()}\{hero.ToToken()}{compositType.ToToken()}").ToLower();
+            var fileName = $@"{ResourcePaths.PlayerAnimationBase}\{hero.ToToken()}\{compositType.ToToken()}\{hero.ToToken()}{compositType.ToToken()}".ToLower();
 
             switch (compositType)
             {
                 case eCompositType.Head:
                     fileName += $"{equipment.Head?.Item.Code ?? eArmorType.Lite.ToToken()}{mobMode.ToToken()}";
-                    return mpqLookup.ContainsKey($"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower())
+                    return _mpqLookup.ContainsKey($"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower())
                         ? $"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower()
                         : $"{fileName}{eWeaponClass.HandToHand.ToToken()}.dcc".ToLower();
                 case eCompositType.Torso:
@@ -139,7 +139,7 @@ namespace OpenDiablo2.Core
                 case eCompositType.RightArm:
                 case eCompositType.LeftArm:
                     fileName += $"{equipment.ArmorType.ToToken()}{mobMode.ToToken()}";
-                    return mpqLookup.ContainsKey($"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower())
+                    return _mpqLookup.ContainsKey($"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower())
                         ? $"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower()
                         : $"{fileName}{eWeaponClass.HandToHand.ToToken()}.dcc".ToLower();
                 case eCompositType.RightHand:
@@ -156,14 +156,14 @@ namespace OpenDiablo2.Core
                     if (!(equipment.LeftArm?.Item is Armor))
                         return null;
                     fileName += $"{equipment.LeftArm.Item.Code}{mobMode.ToToken()}";
-                    return mpqLookup.ContainsKey($"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower())
+                    return _mpqLookup.ContainsKey($"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower())
                         ? $"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower()
                         : $"{fileName}{eWeaponClass.HandToHand.ToToken()}.dcc".ToLower();
                 // TODO: Figure these out...
                 case eCompositType.Special1:
                 case eCompositType.Special2:
                     fileName += $"{equipment.ArmorType.ToToken()}{mobMode.ToToken()}{equipment.WeaponClass}.dcc".ToLower();
-                    return mpqLookup.ContainsKey(fileName)
+                    return _mpqLookup.ContainsKey(fileName)
                         ? fileName
                         : null; // TODO: Should we silence this?
                 case eCompositType.Special3:

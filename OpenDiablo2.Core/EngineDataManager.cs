@@ -22,6 +22,8 @@ namespace OpenDiablo2.Core
         public ImmutableList<LevelDetail> Levels { get; internal set; }
         public ImmutableList<LevelPreset> LevelPresets { get; internal set; }
         public ImmutableList<LevelType> LevelTypes { get; internal set; }
+        public ImmutableList<ObjectInfo> Objects { get; internal set; }
+        public ImmutableList<ObjectTypeInfo> ObjectTypes { get; internal set; }
 
         public ImmutableList<Item> Items { get; internal set; }
         public ImmutableDictionary<eHero, ILevelExperienceConfig> ExperienceConfigs { get; internal set; }
@@ -74,6 +76,28 @@ namespace OpenDiablo2.Core
                 .Where(x => x.Count() > 80 && x[0] != "Expansion")
                 .Select(x => x.ToLevelDetail(LevelPresets, LevelTypes))
                 .ToImmutableList();
+
+            log.Info("Loading objects");
+            Objects = mpqProvider
+                .GetTextFile(ResourcePaths.ObjectDetails)
+                .Skip(1)
+                .Where(x => !String.IsNullOrWhiteSpace(x))
+                .Select(x => x.Split('\t'))
+                .Where(x => x.Count() > 150 && x[0] != "Expansion")
+                .Select(x => x.ToObjectInfo())
+                .ToImmutableList();
+
+            log.Info("Loading object types");
+            ObjectTypes = mpqProvider
+                .GetTextFile(ResourcePaths.ObjectDetails)
+                .Skip(1)
+                .Where(x => !String.IsNullOrWhiteSpace(x))
+                .Select(x => x.Split('\t'))
+                .Where(x => x.Count() == 3 && x[0] != "Expansion")
+                .Select(x => x.ToObjectTypeInfo())
+                .ToImmutableList();
+
+
         }
 
         private ImmutableList<Item> LoadItemData()

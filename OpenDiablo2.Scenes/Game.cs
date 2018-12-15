@@ -34,6 +34,7 @@ namespace OpenDiablo2.Scenes
 
         private eMovementType lastMovementType = eMovementType.Stopped;
         private byte lastDirection = 255;
+        private bool clickedOnHud = false;
 
         const double Rad2Deg = 180.0 / Math.PI;
 
@@ -76,11 +77,15 @@ namespace OpenDiablo2.Scenes
             mapEngine.Update(ms);
             gameHUD.Update();
         }
-
+        
         private void HandleMovement()
         {
-            // todo; if clicked on hud, then we don't move. But when clicked on map and move cursor over hud, then it's fine
-            if (gameHUD.IsMouseOver())
+            if(gameHUD.IsMouseOver() && lastMovementType == eMovementType.Stopped)
+                clickedOnHud = true;
+            else if (!mouseInfoProvider.LeftMouseDown)
+                clickedOnHud = false;
+
+            if (clickedOnHud)
                 return;
 
             var mx = mouseInfoProvider.MouseX - 400 - gameState.CameraOffset;
