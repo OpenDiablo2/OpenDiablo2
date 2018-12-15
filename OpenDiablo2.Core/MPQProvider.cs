@@ -124,6 +124,11 @@ namespace OpenDiablo2.Core
         public string GetCharacterDccPath(eHero hero, eMobMode mobMode, eCompositType compositType, PlayerEquipment equipment)
         {
             var fileName = $@"{ResourcePaths.PlayerAnimationBase}\{hero.ToToken()}\{compositType.ToToken()}\{hero.ToToken()}{compositType.ToToken()}".ToLower();
+            var armorType = eArmorType.Lite;
+
+            // Override default armor type based on equipped torso
+            if(equipment.Torso != null && (equipment.Torso.Item as Armor).ArmorTypes.ContainsKey(compositType))
+                armorType = (equipment.Torso.Item as Armor).ArmorTypes[compositType];
 
             switch (compositType)
             {
@@ -136,7 +141,7 @@ namespace OpenDiablo2.Core
                 case eCompositType.Legs:
                 case eCompositType.RightArm:
                 case eCompositType.LeftArm:
-                    fileName += $"{equipment.ArmorType.ToToken()}{mobMode.ToToken()}";
+                    fileName += $"{armorType.ToToken()}{mobMode.ToToken()}";
                     return _mpqLookup.ContainsKey($"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower())
                         ? $"{fileName}{equipment.WeaponClass.ToToken()}.dcc".ToLower()
                         : $"{fileName}{eWeaponClass.HandToHand.ToToken()}.dcc".ToLower();
@@ -160,7 +165,7 @@ namespace OpenDiablo2.Core
                 // TODO: Figure these out...
                 case eCompositType.Special1:
                 case eCompositType.Special2:
-                    fileName += $"{equipment.ArmorType.ToToken()}{mobMode.ToToken()}{equipment.WeaponClass}.dcc".ToLower();
+                    fileName += $"{armorType.ToToken()}{mobMode.ToToken()}{equipment.WeaponClass}.dcc".ToLower();
                     return _mpqLookup.ContainsKey(fileName)
                         ? fileName
                         : null; // TODO: Should we silence this?
