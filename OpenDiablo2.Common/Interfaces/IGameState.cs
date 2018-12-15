@@ -15,13 +15,14 @@ namespace OpenDiablo2.Common.Interfaces
         string MapName { get; }
         Palette CurrentPalette { get; }
         IEnumerable<PlayerInfo> PlayerInfos { get; }
+        eDifficulty Difficulty { get; }
 
         ItemInstance SelectedItem { get; }
         void SelectItem(ItemInstance item);
 
         int CameraOffset { get; set; }
 
-        void Initialize(string characterName, eHero hero, eSessionType sessionType);
+        void Initialize(string characterName, eHero hero, eSessionType sessionType, eDifficulty difficulty);
         void Update(long ms);
         IEnumerable<MapCellInfo> GetMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType);
         void UpdateMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType, IEnumerable<MapCellInfo> mapCellInfo);

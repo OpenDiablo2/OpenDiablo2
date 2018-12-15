@@ -244,6 +244,9 @@ namespace OpenDiablo2.Common
         // --- Enemy Data ---
         public static string MonStats = "data\\global\\excel\\monstats.txt";
 
+        // --- Skill Data ---
+        public static string Missiles = "data\\global\\excel\\missiles.txt";
+
         public static string GeneratePathForItem(string spriteName)
         {
             return $@"data\global\items\{spriteName}.dc6";

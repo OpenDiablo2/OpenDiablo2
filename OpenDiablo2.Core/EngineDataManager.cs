@@ -29,6 +29,7 @@ namespace OpenDiablo2.Core
         public ImmutableDictionary<eHero, ILevelExperienceConfig> ExperienceConfigs { get; internal set; }
         public ImmutableDictionary<eHero, IHeroTypeConfig> HeroTypeConfigs { get; internal set; }
         public ImmutableList<IEnemyTypeConfig> EnemyTypeConfigs { get; internal set; } 
+        public ImmutableDictionary<int, IMissileTypeConfig> MissileTypeConfigs { get; internal set; }
 
         public EngineDataManager(IMPQProvider mpqProvider)
         {
@@ -37,6 +38,7 @@ namespace OpenDiablo2.Core
             LoadLevelDetails();
             LoadCharacterData();
             LoadEnemyData();
+            LoadSkillData();
 
             Items = LoadItemData();
         }
@@ -50,7 +52,7 @@ namespace OpenDiablo2.Core
                 .Skip(1)
                 .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
-                .Where(x => x.Count() == 36 && x[0] != "Expansion")
+                .Where(x => x.Count() >= 36 && x[0] != "Expansion")
                 .Select(x => x.ToLevelType())
                 .ToImmutableList();
 
@@ -61,7 +63,7 @@ namespace OpenDiablo2.Core
                 .Skip(1)
                 .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
-                .Where(x => x.Count() == 24 && x[0] != "Expansion")
+                .Where(x => x.Count() >= 24 && x[0] != "Expansion")
                 .Select(x => x.ToLevelPreset())
                 .ToImmutableList();
             
@@ -170,7 +172,8 @@ namespace OpenDiablo2.Core
 
         private void LoadEnemyData()
         {
-            EnemyTypeConfigs = LoadEnemyTypeConfig();
+            //TODO: RE-ENABLE THIS once monstats is being loaded properly
+            //EnemyTypeConfigs = LoadEnemyTypeConfig();
         }
 
         private ImmutableList<IEnemyTypeConfig> LoadEnemyTypeConfig()
@@ -183,5 +186,26 @@ namespace OpenDiablo2.Core
                 .ToArray()
                 .Select(x => x.ToEnemyTypeConfig())
                 .ToImmutableList();
+
+        private void LoadSkillData()
+        {
+            MissileTypeConfigs = LoadMissileTypeConfig();
+        }
+
+        private ImmutableDictionary<int, IMissileTypeConfig> LoadMissileTypeConfig()
+        {
+            var data = mpqProvider
+                .GetTextFile(ResourcePaths.Missiles)
+                .Where(x => !String.IsNullOrWhiteSpace(x));
+
+            var splitdata = data
+                .Select(x => x.Split('\t'))
+                .Where(x => x[0] != "Expansion" && x[0] != "unused")
+                .ToArray();
+
+            // TODO: UNFINISHED
+
+            return null;
+        }
     }
 }

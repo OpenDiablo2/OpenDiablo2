@@ -35,6 +35,7 @@ namespace OpenDiablo2.Core.GameState_
         public string MapName { get; private set; }
         public Palette CurrentPalette => paletteProvider.PaletteTable[$"ACT{Act}"];
         public List<PlayerInfo> PlayerInfos { get; private set; }
+        public eDifficulty Difficulty { get; private set; }
 
         readonly private IMouseCursor originalMouseCursor;
 
@@ -78,7 +79,7 @@ namespace OpenDiablo2.Core.GameState_
             mapDataLookup = new List<MapCellInfo>();
         }
 
-        public void Initialize(string characterName, eHero hero, eSessionType sessionType)
+        public void Initialize(string characterName, eHero hero, eSessionType sessionType, eDifficulty difficulty)
         {
             sessionManager = getSessionManager(sessionType);
             sessionManager.Initialize();
@@ -87,6 +88,8 @@ namespace OpenDiablo2.Core.GameState_
             sessionManager.OnLocatePlayers += OnLocatePlayers;
             sessionManager.OnPlayerInfo += OnPlayerInfo;
             sessionManager.OnFocusOnPlayer += OnFocusOnPlayer;
+
+            Difficulty = difficulty;
 
             mapInfo = new List<IMapInfo>();
             

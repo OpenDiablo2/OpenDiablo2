@@ -19,8 +19,8 @@ namespace OpenDiablo2.Common.Models
             => new Misc
             {
                 Name = row[0],
-                Code = row[12],
-                InvFile = row[21]
+                Code = row[13],
+                InvFile = row[23]
             };
 
         public static void Write(this BinaryWriter binaryWriter, Misc misc)

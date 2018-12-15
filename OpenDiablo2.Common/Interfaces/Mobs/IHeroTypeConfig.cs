@@ -28,6 +28,8 @@ namespace OpenDiablo2.Common.Interfaces.Mobs
         double PerVitalityStamina { get; }
         double PerEnergyMana { get; }
 
+        int PerLevelStatPoints { get; }
+
         int BaseAttackRating { get; }
         int PerDexterityAttackRating { get; }
 
@@ -45,7 +47,14 @@ namespace OpenDiablo2.Common.Interfaces.Mobs
         int GetHitFrames { get; }
         int BowFrames { get; }
 
-        int StartingSkill { get; }
+        string StartingSkill { get; }
+        string[] StartingSkills { get; }
+
+        string AllSkillsBonusString { get; }
+        string FirstTabBonusString { get; }
+        string SecondTabBonusString { get; }
+        string ThirdTabBonusString { get; }
+        string ClassOnlyBonusString { get; }
         string BaseWeaponClass { get; }
 
         List<InitialEquipment> InitialEquipment { get; }
