@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
@@ -13,6 +14,16 @@ namespace OpenDiablo2.ServiceBus.Message_Frames.Server
         {
             get => BitConverter.GetBytes(Seed);
             set => Seed = BitConverter.ToInt32(value, 0);
+        }
+
+        public void LoadFrom(BinaryReader br)
+        {
+            Seed = br.ReadInt32();
+        }
+
+        public void WriteTo(BinaryWriter bw)
+        {
+            bw.Write((Int32)Seed);
         }
 
         public Int32 Seed { get; private set; }

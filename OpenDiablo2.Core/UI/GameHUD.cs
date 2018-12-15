@@ -28,7 +28,6 @@ namespace OpenDiablo2.Core.UI
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private readonly IRenderWindow renderWindow;
-        private readonly IGameState gameState;
         private readonly IMouseInfoProvider mouseInfoProvider;
         private readonly IMiniPanel minipanel;
 
@@ -42,14 +41,12 @@ namespace OpenDiablo2.Core.UI
 
         public GameHUD(
             IRenderWindow renderWindow,
-            IGameState gameState,
             IMouseInfoProvider mouseInfoProvider,
             Func<IMiniPanel> createMiniPanel,
             Func<eButtonType, IButton> createButton,
             Func<ePanelFrameType, IPanelFrame> createPanelFrame)
         {
             this.renderWindow = renderWindow;
-            this.gameState = gameState;
             this.mouseInfoProvider = mouseInfoProvider;
             minipanel = createMiniPanel();
             minipanel.OnPanelToggled += TogglePanel;
@@ -88,6 +85,8 @@ namespace OpenDiablo2.Core.UI
         public bool IsLeftPanelVisible => LeftPanel != null;
         public bool IsRightPanelVisible => RightPanel != null;
         public bool IsRunningEnabled => runButton.Toggled;
+
+        private bool needsCameraUpdate = true;
 
         public void TogglePanel(ePanelType panelType)
         {
@@ -193,6 +192,12 @@ namespace OpenDiablo2.Core.UI
 
         public void Update()
         {
+            if (needsCameraUpdate)
+            {
+                needsCameraUpdate = false;
+                UpdateCameraOffset();
+            }
+
             runButton.Update();
             menuButton.Update();
             addStatButton.Update();
@@ -215,14 +220,9 @@ namespace OpenDiablo2.Core.UI
         }
 
         private void UpdateCameraOffset()
-        {
-            gameState.CameraOffset = (IsRightPanelVisible ? -200 : 0) + (IsLeftPanelVisible ? 200 : 0);
-            minipanel.UpdatePanelLocation();
-        }
+            => minipanel.UpdatePanelLocation();
 
         private void OnRunToggle(bool isToggled)
-        {
-            log.Debug("Run Toggle: " + isToggled);
-        }
+            => log.Debug("Run Toggle: " + isToggled);
     }
 }

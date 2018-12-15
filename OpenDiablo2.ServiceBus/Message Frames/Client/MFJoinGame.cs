@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.IO;
-using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using OpenDiablo2.Common.Attributes;
+﻿using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
-using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
+using System.IO;
 
 namespace OpenDiablo2.ServiceBus.Message_Frames.Client
 {
@@ -17,28 +11,16 @@ namespace OpenDiablo2.ServiceBus.Message_Frames.Client
         public string PlayerName { get; set; }
         public eHero HeroType { get; set; }
 
-        public byte[] Data
+        public void WriteTo(BinaryWriter bw)
         {
-            get
-            {
-                using (var stream = new MemoryStream())
-                using (var writer = new BinaryWriter(stream)) {
-                    writer.Write((byte)HeroType);
-                    writer.Write(PlayerName);
+            bw.Write((byte)HeroType);
+            bw.Write(PlayerName);
+        }
 
-                    return stream.ToArray();
-                }
-            }
-                
-            set
-            {
-                using(var stream = new MemoryStream(value))
-                using(var reader = new BinaryReader(stream))
-                {
-                    HeroType = (eHero)reader.ReadByte();
-                    PlayerName = reader.ReadString();
-                }
-            }
+        public void LoadFrom(BinaryReader br)
+        {
+            HeroType = (eHero)br.ReadByte();
+            PlayerName = br.ReadString();
         }
 
         public MFJoinGame() { }

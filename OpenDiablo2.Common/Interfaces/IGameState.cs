@@ -19,8 +19,6 @@ namespace OpenDiablo2.Common.Interfaces
         ItemInstance SelectedItem { get; }
         void SelectItem(ItemInstance item);
 
-        int CameraOffset { get; set; }
-
         void Initialize(string characterName, eHero hero, eSessionType sessionType);
         void Update(long ms);
         IEnumerable<MapCellInfo> GetMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType);

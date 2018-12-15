@@ -32,24 +32,24 @@ namespace OpenDiablo2.Core.UI
 
         private readonly IRenderWindow renderWindow;
         private readonly IMouseInfoProvider mouseInfoProvider;
-        private readonly IGameState gameState;
         private readonly ISprite sprite;
         private readonly IReadOnlyList<IButton> buttons;
         private readonly IEnumerable<IPanel> panels;
+        private readonly Func<IGameHUD> _getGameHud;
 
         private bool isPanelVisible;
 
         public event OnPanelToggledEvent OnPanelToggled;
 
-        public MiniPanel(IRenderWindow renderWindow, 
-            IGameState gameState,
+        public MiniPanel(IRenderWindow renderWindow,
+            Func<IGameHUD> getGameHud,
             IMouseInfoProvider mouseInfoProvider,
             IEnumerable<IPanel> panels, 
             Func<eButtonType, IButton> createButton)
         {
             this.renderWindow = renderWindow;
             this.mouseInfoProvider = mouseInfoProvider;
-            this.gameState = gameState;
+            this._getGameHud = getGameHud;
             this.panels = panels;
 
             sprite = renderWindow.LoadSprite(ResourcePaths.MinipanelSmall, Palettes.Units, true);
@@ -66,8 +66,6 @@ namespace OpenDiablo2.Core.UI
                 }
                 return newBtn;
             }).ToList().AsReadOnly();
-
-            UpdatePanelLocation();
         }
 
         public void OnMenuToggle(bool isToggled) => isPanelVisible = isToggled;
@@ -117,7 +115,8 @@ namespace OpenDiablo2.Core.UI
 
         public void UpdatePanelLocation()
         {
-            sprite.Location = new Point((800 - sprite.LocalFrameSize.Width + (int)(gameState.CameraOffset * 1.3f)) / 2, 
+            var cameraOffset = (_getGameHud().IsRightPanelVisible ? -200 : 0) + (_getGameHud().IsLeftPanelVisible ? 200 : 0);
+            sprite.Location = new Point((800 - sprite.LocalFrameSize.Width + (int)(cameraOffset * 1.3f)) / 2, 
                 526 + sprite.LocalFrameSize.Height);
 
             for (int i = 0; i < buttons.Count; i++)

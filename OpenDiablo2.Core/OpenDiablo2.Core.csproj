@@ -66,7 +66,7 @@
     <Compile Include="GameEngine.cs" />
     <Compile Include="GameState\GameState.cs" />
     <Compile Include="GameState\MobManager.cs" />
-    <Compile Include="Map Engine\MapEngine.cs" />
+    <Compile Include="Map Engine\MapRenderer.cs" />
     <Compile Include="Map Engine\MapGenerator.cs" />
     <Compile Include="MPQProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

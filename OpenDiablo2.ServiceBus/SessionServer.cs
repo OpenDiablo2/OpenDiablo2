@@ -15,6 +15,9 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,6 +28,7 @@ using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
+using OpenDiablo2.Common.Models.Mobs;
 using OpenDiablo2.ServiceBus.Message_Frames.Server;
 
 namespace OpenDiablo2.ServiceBus
@@ -54,7 +58,7 @@ namespace OpenDiablo2.ServiceBus
         const int serverUpdateRate = 30;
 
         public SessionServer(
-            eSessionType sessionType, 
+            eSessionType sessionType,
             IGameServer gameServer,
             Func<eMessageFrameType, IMessageFrame> getMessageFrame
             )
@@ -93,19 +97,23 @@ namespace OpenDiablo2.ServiceBus
 
             var proactor = new NetMQProactor(responseSocket, (socket, message) =>
             {
-                var bytes = message.First().ToByteArray();
-                var frameType = (eMessageFrameType)bytes[0];
-                var frameData = bytes.Skip(1).ToArray(); // TODO: Can we maybe use pointers? This seems wasteful
-                    var messageFrame = getMessageFrame(frameType);
-                messageFrame.Data = frameData;
-                messageFrame.Process(socket.GetHashCode(), this);
+                foreach (var msg in message)
+                {
+                    using (var ms = new MemoryStream(msg.ToByteArray()))
+                    using (var br = new BinaryReader(ms))
+                    {
+                        var messageFrame = getMessageFrame((eMessageFrameType)br.ReadByte());
+                        messageFrame.LoadFrom(br);
+                        messageFrame.Process(socket.GetHashCode(), this);
+                    }
+                }
             });
             running = true;
             WaitServerStartEvent.Set();
             Task.Run(() =>
             {
                 var lastRun = DateTime.Now;
-                while(running)
+                while (running)
                 {
                     var newTime = DateTime.Now;
                     var timeDiff = (newTime - lastRun).TotalMilliseconds;
@@ -122,20 +130,62 @@ namespace OpenDiablo2.ServiceBus
             responseSocket.Dispose();
             log.Info("Session server has stopped.");
         }
-        
 
-        private void OnMovementRequestHandler(int clientHash, byte direction, eMovementType movementType)
+
+        private void OnMovementRequestHandler(int clientHash, PointF targetCell, eMovementType movementType)
         {
             var player = gameServer.Players.FirstOrDefault(x => x.ClientHash == clientHash);
             if (player == null)
                 return;
 
-            player.MovementDirection = direction;
             player.MovementType = movementType;
-            player.MovementDirection = direction;
-
+            player.MovementSpeed = (player.MovementType == eMovementType.Running ? player.GetRunVelocity() : player.GetWalkVeloicty()) / 4f;
+            player.Waypoints = CalculateWaypoints(player, targetCell);
 
             Send(new MFLocatePlayers(gameServer.Players.Select(x => x.ToPlayerLocationDetails())));
+        }
+
+        private List<PointF> CalculateWaypoints(PlayerState player, PointF targetCell)
+        {
+            // TODO: Move this somewhere else...
+            var result = new List<PointF>();
+            result.Add(targetCell);
+            /*
+            // Ensure they aren't sending crazy coordinates..
+            var targetX = Math.Round(targetCell.X, 1);
+            var targetY = Math.Round(targetCell.Y, 1);
+
+            // TODO: Legit Pathfind here...
+            result.Add(new PointF(player.X, player.Y));
+            int maxTries = 50;
+            var curX = player.X;
+            var curY = player.Y;
+            var nextX = curX;
+            var nextY = curY;
+            while (--maxTries > 0)
+            {
+                if (curX < targetX)
+                    nextX += .1f;
+                else if (curX > targetX)
+                    nextX -= .1f;
+
+                if (curY < targetY)
+                    nextY += .1f;
+                else if (curY > targetY)
+                    nextY -= .1f;
+
+                result.Add(new PointF((float)Math.Round(nextX, 1), (float)Math.Round(nextY, 1)));
+
+                curX = nextX;
+                curY = nextY;
+
+                // If we reached our target, stop here
+                if (Math.Abs(curX - targetX) < 0.1f && Math.Abs(curY - targetY) < 0.1f)
+                    break;
+            }
+
+            */
+            return result;
         }
 
         public void Stop()
@@ -159,7 +209,13 @@ namespace OpenDiablo2.ServiceBus
         private void Send(IMessageFrame messageFrame, bool more = false)
         {
             var attr = messageFrame.GetType().GetCustomAttributes(true).First(x => (x is MessageFrameAttribute)) as MessageFrameAttribute;
-            responseSocket.SendFrame(new byte[] { (byte)attr.FrameType }.Concat(messageFrame.Data).ToArray(), more);
+            using (var ms = new MemoryStream())
+            using (var br = new BinaryWriter(ms))
+            {
+                br.Write((byte)attr.FrameType);
+                messageFrame.WriteTo(br);
+                responseSocket.SendFrame(ms.ToArray(), more);
+            }
         }
 
         private void OnJoinGameHandler(int clientHash, eHero heroType, string playerName)
@@ -168,7 +224,7 @@ namespace OpenDiablo2.ServiceBus
             Send(new MFSetSeed(gameServer.Seed), true);
             Send(new MFPlayerInfo(gameServer.Players.Select(x => x.ToPlayerInfo())), true);
             Send(new MFLocatePlayers(gameServer.Players.Select(x => x.ToPlayerLocationDetails())), true);
-            Send(new MFFocusOnPlayer(gameServer.Players.First(x => x.ClientHash == clientHash).Id));
+            Send(new MFFocusOnPlayer(gameServer.Players.First(x => x.ClientHash == clientHash).UID));
         }
     }
 }

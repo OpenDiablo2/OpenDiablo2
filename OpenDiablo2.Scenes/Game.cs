@@ -19,14 +19,17 @@ using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using System;
+using System.Linq;
 
 namespace OpenDiablo2.Scenes
 {
     [Scene(eSceneType.Game)]
     public sealed class Game : IScene
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private readonly IRenderWindow renderWindow;
-        private readonly IMapEngine mapEngine;
+        private readonly IMapRenderer _mapRenderer;
         private readonly IMouseInfoProvider mouseInfoProvider;
         private readonly IGameState gameState;
         private readonly ISessionManager sessionManager;
@@ -35,12 +38,12 @@ namespace OpenDiablo2.Scenes
         private eMovementType lastMovementType = eMovementType.Stopped;
         private byte lastDirection = 255;
         private bool clickedOnHud = false;
-
-        const double Rad2Deg = 180.0 / Math.PI;
+        private float lastMoveSend = 0f;
+        private float holdMoveTime = 0f;
 
         public Game(
             IRenderWindow renderWindow,
-            IMapEngine mapEngine,
+            IMapRenderer mapRenderer,
             IGameState gameState,
             IMouseInfoProvider mouseInfoProvider,
             IItemManager itemManager,
@@ -51,7 +54,7 @@ namespace OpenDiablo2.Scenes
         )
         {
             this.renderWindow = renderWindow;
-            this.mapEngine = mapEngine;
+            this._mapRenderer = mapRenderer;
             this.gameState = gameState;
             this.mouseInfoProvider = mouseInfoProvider;
             this.sessionManager = sessionManager;
@@ -63,23 +66,26 @@ namespace OpenDiablo2.Scenes
         public void Render()
         {
             // TODO: Maybe show some sort of connecting/loading message?
-            if (mapEngine.FocusedPlayerId == 0)
+            if (_mapRenderer.FocusedPlayerId == Guid.Empty)
                 return;
 
-            mapEngine.Render();
+            _mapRenderer.Render();
             gameHUD.Render();
         }
 
         public void Update(long ms)
         {
-            HandleMovement();
+            HandleMovement(ms);
 
-            mapEngine.Update(ms);
+            _mapRenderer.Update(ms);
             gameHUD.Update();
         }
         
-        private void HandleMovement()
+        private void HandleMovement(long ms)
         {
+            if (mouseInfoProvider.ReserveMouse)
+                return;
+
             if(gameHUD.IsMouseOver() && lastMovementType == eMovementType.Stopped)
                 clickedOnHud = true;
             else if (!mouseInfoProvider.LeftMouseDown)
@@ -88,11 +94,40 @@ namespace OpenDiablo2.Scenes
             if (clickedOnHud)
                 return;
 
+            /*
             var mx = mouseInfoProvider.MouseX - 400 - gameState.CameraOffset;
             var my = mouseInfoProvider.MouseY - 300;
 
             var tx = (mx / 60f + my / 40f) / 2f;
             var ty = (my / 40f - (mx / 60f)) / 2f;
+            */
+
+            if (mouseInfoProvider.LeftMouseDown)
+            {
+                lastMoveSend += (ms / 1000f);
+                holdMoveTime += (ms / 1000f);
+                if (lastMoveSend < .25f)
+                    return;
+                lastMoveSend = 0f;
+                var selectedCell = _mapRenderer.GetCellPositionAt(mouseInfoProvider.MouseX, mouseInfoProvider.MouseY);
+#if DEBUG
+                log.Debug($"Move to cell: ({selectedCell.X}, {selectedCell.Y})");
+#endif
+                sessionManager.MoveRequest(selectedCell, gameHUD.IsRunningEnabled ? eMovementType.Running : eMovementType.Walking);
+            }
+            else
+            {
+                lastMoveSend = 1f; // Next click will always send a mouse move request (TODO: Should this be limited as well?)
+
+                if (holdMoveTime > 0.2f)
+                {
+                    var player = gameState.PlayerInfos.First(x => x.UID == _mapRenderer.FocusedPlayerId);
+                    sessionManager.MoveRequest(new System.Drawing.PointF(player.X, player.Y), eMovementType.Stopped);
+                }
+                holdMoveTime = 0f;
+            }
+
+            /*
             var cursorDirection = (int)Math.Round(Math.Atan2(ty, tx) * Rad2Deg);
             if (cursorDirection < 0)
                 cursorDirection += 360;
@@ -112,6 +147,7 @@ namespace OpenDiablo2.Scenes
                 lastMovementType = eMovementType.Stopped;
                 sessionManager.MoveRequest(actualDirection, lastMovementType);
             }
+            */
         }
 
         public void Dispose()

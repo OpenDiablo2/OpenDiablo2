@@ -1,4 +1,20 @@
-﻿using System;
+﻿/*  OpenDiablo 2 - An open source re-implementation of Diablo 2 in C#
+ *  
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -7,6 +23,7 @@ using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
+using OpenDiablo2.Common.Services;
 using OpenDiablo2.Core.Map_Engine;
 
 namespace OpenDiablo2.Core.GameState_
@@ -22,9 +39,12 @@ namespace OpenDiablo2.Core.GameState_
         private readonly IRenderWindow renderWindow;
         private readonly ISoundProvider soundProvider;
         private readonly IMPQProvider mpqProvider;
-        private readonly Func<IMapEngine> getMapEngine;
+        private readonly Func<IMapRenderer> getMapEngine;
         private readonly Func<eSessionType, ISessionManager> getSessionManager;
         private readonly Func<string, IRandomizedMapGenerator> getRandomizedMapGenerator;
+
+        readonly private IMouseCursor originalMouseCursor;
+
 
         private float animationTime;
         private List<IMapInfo> mapInfo;
@@ -35,14 +55,9 @@ namespace OpenDiablo2.Core.GameState_
         public string MapName { get; private set; }
         public Palette CurrentPalette => paletteProvider.PaletteTable[$"ACT{Act}"];
         public List<PlayerInfo> PlayerInfos { get; private set; }
-
-        readonly private IMouseCursor originalMouseCursor;
-
         public int Seed { get; internal set; }
-
         public ItemInstance SelectedItem { get; internal set; }
         public object ThreadLocker { get; } = new object();
-
         public int CameraOffset { get; set; } = 0;
 
         IEnumerable<PlayerInfo> IGameState.PlayerInfos => PlayerInfos;
@@ -57,7 +72,7 @@ namespace OpenDiablo2.Core.GameState_
             IRenderWindow renderWindow,
             ISoundProvider soundProvider,
             IMPQProvider mpqProvider,
-            Func<IMapEngine> getMapEngine,
+            Func<IMapRenderer> getMapEngine,
             Func<eSessionType, ISessionManager> getSessionManager,
             Func<string, IRandomizedMapGenerator> getRandomizedMapGenerator
             )
@@ -89,26 +104,28 @@ namespace OpenDiablo2.Core.GameState_
             sessionManager.OnFocusOnPlayer += OnFocusOnPlayer;
 
             mapInfo = new List<IMapInfo>();
-            
+
             sceneManager.ChangeScene(eSceneType.Game);
             sessionManager.JoinGame(characterName, hero);
         }
 
-        private void OnFocusOnPlayer(int clientHash, int playerId)
+        private void OnFocusOnPlayer(int clientHash, Guid playerId)
             => getMapEngine().FocusedPlayerId = playerId;
 
         private void OnPlayerInfo(int clientHash, IEnumerable<PlayerInfo> playerInfo)
             => PlayerInfos = playerInfo.ToList();
 
-        private void OnLocatePlayers(int clientHash, IEnumerable<PlayerLocationDetails> playerLocationDetails)
+        private void OnLocatePlayers(int clientHash, IEnumerable<LocationDetails> playerLocationDetails)
         {
             foreach (var player in PlayerInfos)
             {
-                var details = playerLocationDetails.FirstOrDefault(x => x.PlayerId == player.LocationDetails.PlayerId);
+                
+                var details = playerLocationDetails.FirstOrDefault(x => x.UID == player.UID);
+
                 if (details == null)
                     continue;
 
-                player.LocationDetails = details;
+                details.CopyMobLocationDetailsTo(player);
             }
         }
 
@@ -120,7 +137,7 @@ namespace OpenDiablo2.Core.GameState_
         }
 
         public int HasMap(int cellX, int cellY)
-            => mapInfo.Count(z => (cellX >= z.TileLocation.Left) && (cellX < z.TileLocation.Right) 
+            => mapInfo.Count(z => (cellX >= z.TileLocation.Left) && (cellX < z.TileLocation.Right)
             && (cellY >= z.TileLocation.Top) && (cellY < z.TileLocation.Bottom));
 
         public IEnumerable<Size> GetMapSizes(int cellX, int cellY)
@@ -157,7 +174,7 @@ namespace OpenDiablo2.Core.GameState_
                 CellInfo = new Dictionary<eRenderCellType, MapCellInfo[]>(),
                 TileLocation = new Rectangle(origin, new Size(fileData.Width - 1, fileData.Height - 1))
             };
-            
+
             return result;
         }
 
@@ -283,7 +300,7 @@ namespace OpenDiablo2.Core.GameState_
                     mi = mapInfo[i];
                     break;
                 }
-                
+
             }
             if (mi == null)
                 return null;
@@ -471,16 +488,8 @@ namespace OpenDiablo2.Core.GameState_
 
         private void UpdatePlayer(PlayerInfo player, float seconds)
         {
-            if (player.LocationDetails.MovementType == eMovementType.Stopped)
-                return;
+            (new MobMovementService(player)).CalculateMovement(seconds);
 
-            var rads = (float)player.LocationDetails.MovementDirection * 22 * (float)Deg2Rad;
-
-            var moveX = (float)Math.Cos(rads) * seconds * player.LocationDetails.MovementSpeed;
-            var moveY = (float)Math.Sin(rads) * seconds * player.LocationDetails.MovementSpeed;
-
-            player.LocationDetails.PlayerX += moveX;
-            player.LocationDetails.PlayerY += moveY;
         }
 
         public void Dispose()

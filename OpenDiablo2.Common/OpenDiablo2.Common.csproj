@@ -94,6 +94,7 @@
     <Compile Include="Interfaces\IItemManager.cs" />
     <Compile Include="Extensions\MobManagerExtensions.cs" />
     <Compile Include="Interfaces\IGameServer.cs" />
+    <Compile Include="Interfaces\IMobLocation.cs" />
     <Compile Include="Interfaces\IRandomizedMapGenerator.cs" />
     <Compile Include="Interfaces\MessageBus\ISessionEventProvider.cs" />
     <Compile Include="Interfaces\MessageBus\IMessageFrame.cs" />
@@ -123,7 +124,7 @@
     <Compile Include="Models\ObjectInfo.cs" />
     <Compile Include="Models\ObjectTypeInfo.cs" />
     <Compile Include="Models\PlayerInfo.cs" />
-    <Compile Include="Models\PlayerLocationDetails.cs" />
+    <Compile Include="Models\LocationDetails.cs" />
     <Compile Include="Interfaces\UI\IButton.cs" />
     <Compile Include="Interfaces\UI\IItemContainer.cs" />
     <Compile Include="Interfaces\UI\IPanelFrame.cs" />
@@ -134,7 +135,7 @@
     <Compile Include="Interfaces\IGameState.cs" />
     <Compile Include="Interfaces\System\IKeyboardInfoProvider.cs" />
     <Compile Include="Interfaces\UI\ILabel.cs" />
-    <Compile Include="Interfaces\IMapEngine.cs" />
+    <Compile Include="Interfaces\IMapRenderer.cs" />
     <Compile Include="Interfaces\UI\IMiniPanel.cs" />
     <Compile Include="Interfaces\UI\ICharacterPanel.cs" />
     <Compile Include="Interfaces\System\IMouseCursor.cs" />
@@ -187,6 +188,7 @@
     <Compile Include="Palettes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourcePaths.cs" />
+    <Compile Include="Services\MobMovementService.cs" />
     <Compile Include="StringUtils.cs" />
   </ItemGroup>
   <ItemGroup>

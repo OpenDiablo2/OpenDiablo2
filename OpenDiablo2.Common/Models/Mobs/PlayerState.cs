@@ -16,13 +16,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Enums.Mobs;
+using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Interfaces.Mobs;
 
 namespace OpenDiablo2.Common.Models.Mobs
 {
-    public class PlayerState : MobState
+    public class PlayerState : MobState, IMobLocation
     {
         private readonly IHeroTypeConfig HeroTypeConfig;
         private readonly ILevelExperienceConfig ExperienceConfig;
@@ -30,8 +32,8 @@ namespace OpenDiablo2.Common.Models.Mobs
         public Guid UID { get; protected set; } = Guid.NewGuid();
         public eHero HeroType { get; protected set; }
         public int ClientHash { get; protected set; }
-        public byte MovementDirection { get; set; } = 0;
-        public eMovementType MovementType { get; set; } = eMovementType.Stopped; // TODO: This needs to mess with MobMode somehow
+        public List<PointF> Waypoints { get; set; } = new List<PointF>();
+        public eMovementType MovementType { get; set; } = eMovementType.Stopped;
         public eMobMode MobMode { get; set; } = eMobMode.PlayerTownWalk;
         public PlayerEquipment Equipment { get; set; } = new PlayerEquipment();
 
