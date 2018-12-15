@@ -322,7 +322,7 @@ namespace OpenDiablo2.Scenes
 
         private void RenderHeros()
         {
-            var heros = Enum.GetValues(typeof(eHero)).Cast<eHero>();
+            var heros = Enum.GetValues(typeof(eHero)).Cast<eHero>().Skip(1); // skip NONE
             foreach (var hero in heros)
                 if (heroRenderInfo[hero].Stance == eHeroStance.Idle || heroRenderInfo[hero].Stance == eHeroStance.IdleSelected)
                     RenderHero(hero);
@@ -420,6 +420,10 @@ namespace OpenDiablo2.Scenes
 
         private void UpdateHeroSelectionHover(eHero hero, long ms, bool canSelect)
         {
+            if(hero == eHero.None)
+            {
+                return;
+            }
             var renderInfo = heroRenderInfo[hero];
             if (renderInfo.Stance == eHeroStance.Approaching)
             {
