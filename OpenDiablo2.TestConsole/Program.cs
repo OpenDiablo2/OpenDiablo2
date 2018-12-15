@@ -11,7 +11,7 @@ namespace OpenDiablo2.TestConsole
     static class Program
     {
         private static GlobalConfiguration GlobalConfig = null;
-        private static MPQProvider MPQProv = null;
+        private static MpqProvider MPQProv = null;
         private static EngineDataManager EngineDataMan = null;
 
         static void Main(string[] args)
@@ -126,7 +126,7 @@ namespace OpenDiablo2.TestConsole
                     BaseDataPath = Path.GetFullPath(path)
                 };
 
-                MPQProv = new MPQProvider(GlobalConfig);
+                MPQProv = new MpqProvider(GlobalConfig);
 
                 EngineDataMan = new EngineDataManager(MPQProv);
             }

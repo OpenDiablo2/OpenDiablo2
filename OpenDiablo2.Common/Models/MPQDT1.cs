@@ -46,7 +46,7 @@ namespace OpenDiablo2.Common.Models
         public Int32 X2 { get; private set; }
         public Int32 NumberOfTiles { get; private set; }
         public MPQDT1Tile[] Tiles { get; private set; }
-        private readonly Int32 tileHeaderOffset;
+        private readonly Int32 _tileHeaderOffset;
 
         public MPQDT1(Stream stream)
         {
@@ -58,19 +58,19 @@ namespace OpenDiablo2.Common.Models
             stream.Seek(268, SeekOrigin.Begin); // Skip useless header info
 
             NumberOfTiles = br.ReadInt32();
-            tileHeaderOffset = br.ReadInt32();
-            
+            _tileHeaderOffset = br.ReadInt32();
+
             ReadTiles(br);
             ReadBlockHeaders(br);
             ReadBlockGraphics(br);
-            
+
         }
         private void ReadTiles(BinaryReader br)
         {
             Tiles = new MPQDT1Tile[NumberOfTiles];
-            for (int tileIndex = 0; tileIndex < NumberOfTiles; tileIndex++)
+            for (var tileIndex = 0; tileIndex < NumberOfTiles; tileIndex++)
             {
-                br.BaseStream.Seek(tileHeaderOffset + (tileIndex * 96), SeekOrigin.Begin);
+                br.BaseStream.Seek(_tileHeaderOffset + (tileIndex * 96), SeekOrigin.Begin);
                 Tiles[tileIndex] = new MPQDT1Tile();
                 var tile = Tiles[tileIndex];
 
@@ -86,7 +86,7 @@ namespace OpenDiablo2.Common.Models
                 tile.SubIndex = br.ReadInt32();
                 tile.RarityOrFrameIndex = br.ReadInt32();
                 br.ReadBytes(4);
-                for (int i = 0; i < 25; i++)
+                for (var i = 0; i < 25; i++)
                     tile.SubTileFlags[i] = br.ReadByte();
                 br.ReadBytes(7);
                 tile.BlockHeadersPointer = br.ReadInt32();
@@ -99,12 +99,12 @@ namespace OpenDiablo2.Common.Models
 
         private void ReadBlockHeaders(BinaryReader br)
         {
-            for (int tileIndex = 0; tileIndex < NumberOfTiles; tileIndex++)
+            for (var tileIndex = 0; tileIndex < NumberOfTiles; tileIndex++)
             {
                 var tile = Tiles[tileIndex];
                 tile.Blocks = new MPQDT1Block[tile.NumberOfBlocks];
 
-                for (int blockIndex = 0; blockIndex < tile.NumberOfBlocks; blockIndex++)
+                for (var blockIndex = 0; blockIndex < tile.NumberOfBlocks; blockIndex++)
                 {
                     br.BaseStream.Seek(tile.BlockHeadersPointer + (blockIndex * 20), SeekOrigin.Begin);
 
@@ -126,9 +126,9 @@ namespace OpenDiablo2.Common.Models
 
         private void ReadBlockGraphics(BinaryReader br)
         {
-            for (int tileIndex = 0; tileIndex < NumberOfTiles; tileIndex++)
+            for (var tileIndex = 0; tileIndex < NumberOfTiles; tileIndex++)
             {
-                for (int blockIndex = 0; blockIndex < Tiles[tileIndex].NumberOfBlocks; blockIndex++)
+                for (var blockIndex = 0; blockIndex < Tiles[tileIndex].NumberOfBlocks; blockIndex++)
                 {
                     var block = Tiles[tileIndex].Blocks[blockIndex];
                     br.BaseStream.Seek(Tiles[tileIndex].BlockHeadersPointer + block.FileOffset, SeekOrigin.Begin);
@@ -139,17 +139,13 @@ namespace OpenDiablo2.Common.Models
                         if (block.Length != 256)
                             throw new OpenDiablo2Exception($"Expected exactly 256 bytes of data, but got {block.Length} instead!");
 
-                        int x = 0;
-                        int y = 0;
-                        int n = 0;
-                        int[] xjump = { 14, 12, 10, 8, 6, 4, 2, 0, 2, 4, 6, 8, 10, 12, 14 };
-                        int[] nbpix = { 4, 8, 12, 16, 20, 24, 28, 32, 28, 24, 20, 16, 12, 8, 4 };
+                        var y = 0;
                         var length = 256;
                         block.PixelData = new Int16[32 * 32];
                         while (length > 0)
                         {
-                            x = xjump[y];
-                            n = nbpix[y];
+                            var x = new[] { 14, 12, 10, 8, 6, 4, 2, 0, 2, 4, 6, 8, 10, 12, 14 }[y];
+                            var n = new[] { 4, 8, 12, 16, 20, 24, 28, 32, 28, 24, 20, 16, 12, 8, 4 }[y];
                             length -= n;
                             while (n > 0)
                             {
@@ -165,15 +161,13 @@ namespace OpenDiablo2.Common.Models
                     {
                         // RLE block
                         var length = block.Length;
-                        byte b1;
-                        byte b2;
-                        int x = 0;
-                        int y = 0;
+                        var x = 0;
+                        var y = 0;
                         block.PixelData = new Int16[32 * 32];
                         while (length > 0)
                         {
-                            b1 = br.ReadByte();
-                            b2 = br.ReadByte();
+                            var b1 = br.ReadByte();
+                            var b2 = br.ReadByte();
                             length -= 2;
                             if (b1 + b2 == 0)
                             {
