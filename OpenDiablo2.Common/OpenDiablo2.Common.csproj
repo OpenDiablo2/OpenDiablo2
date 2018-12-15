@@ -60,6 +60,7 @@
     <Compile Include="Attributes\MessageFrameAttribute.cs" />
     <Compile Include="Attributes\RandomizedMapAttribute.cs" />
     <Compile Include="Attributes\SceneAttribute.cs" />
+    <Compile Include="Attributes\SkillInfoAttribute.cs" />
     <Compile Include="AutofacModule.cs" />
     <Compile Include="Enums\eDifficulty.cs" />
     <Compile Include="Enums\eItemContainerType.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Enums\eRenderCellType.cs" />
     <Compile Include="Enums\eSceneType.cs" />
     <Compile Include="Enums\eSessionType.cs" />
+    <Compile Include="Enums\eSkill.cs" />
     <Compile Include="Enums\eTextAlign.cs" />
     <Compile Include="Enums\eWeaponClass.cs" />
     <Compile Include="Enums\eWildBorder.cs" />
