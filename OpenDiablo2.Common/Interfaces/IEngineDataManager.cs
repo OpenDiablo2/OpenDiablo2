@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using OpenDiablo2.Common.Enums;
+﻿using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces.Mobs;
 using OpenDiablo2.Common.Models;
+using System.Collections.Immutable;
 
 namespace OpenDiablo2.Common.Interfaces
 {
@@ -15,5 +14,7 @@ namespace OpenDiablo2.Common.Interfaces
         ImmutableDictionary<eHero, ILevelExperienceConfig> ExperienceConfigs { get; }
         ImmutableDictionary<eHero, IHeroTypeConfig> HeroTypeConfigs { get; }
         ImmutableList<IEnemyTypeConfig> EnemyTypeConfigs { get; }
+        ImmutableList<ObjectInfo> Objects { get; }
+        ImmutableList<ObjectTypeInfo> ObjectTypes { get; }
     }
 }

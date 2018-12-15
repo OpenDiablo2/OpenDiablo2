@@ -27,7 +27,7 @@ namespace OpenDiablo2.Common.Models
             this.blockRecord = blockRecord;
             this.blockSize = 0x200 << mpq.Header.BlockSize;
 
-            if (blockRecord.IsCompressed && !blockRecord.SingleUnit)
+            if ((blockRecord.IsCompressed || blockRecord.IsImploded) && !blockRecord.SingleUnit)
                 LoadBlockOffsets();
 
         }
@@ -187,7 +187,7 @@ namespace OpenDiablo2.Common.Models
             int toread;
             uint encryptionseed;
 
-            if (blockRecord.IsCompressed)
+            if (blockRecord.IsCompressed || blockRecord.IsImploded)
             {
                 offset = blockPositions[blockIndex];
                 toread = (int)(blockPositions[blockIndex + 1] - offset);
@@ -224,6 +224,11 @@ namespace OpenDiablo2.Common.Models
                     data = DecompressMulti(data, expectedLength);
                 else
                     data = PKDecompress(new MemoryStream(data), expectedLength);
+            }
+
+            if (blockRecord.IsImploded && (toread != expectedLength))
+            {
+                data = PKDecompress(new MemoryStream(data), expectedLength);
             }
 
             return data;

@@ -21,7 +21,7 @@ namespace OpenDiablo2.Common.Models
             {
                 Name = row[0],
                 Code = row[17],
-                InvFile = row[33]
+                InvFile = row[34]
             };
 
         public static void Write(this BinaryWriter binaryWriter, Armor armor)

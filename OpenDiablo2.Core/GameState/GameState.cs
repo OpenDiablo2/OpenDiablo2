@@ -26,15 +26,16 @@ namespace OpenDiablo2.Core.GameState_
         private readonly Func<eSessionType, ISessionManager> getSessionManager;
         private readonly Func<string, IRandomizedMapGenerator> getRandomizedMapGenerator;
 
-        private float animationTime = 0f;
+        private float animationTime;
         private List<IMapInfo> mapInfo;
-        private readonly List<MapCellInfo> mapDataLookup = new List<MapCellInfo>();
+        private readonly List<MapCellInfo> mapDataLookup;
         private ISessionManager sessionManager;
 
         public int Act { get; private set; }
         public string MapName { get; private set; }
         public Palette CurrentPalette => paletteProvider.PaletteTable[$"ACT{Act}"];
-        public List<PlayerInfo> PlayerInfos { get; private set; } = new List<PlayerInfo>();
+        public List<PlayerInfo> PlayerInfos { get; private set; }
+        public eDifficulty Difficulty { get; private set; }
 
         readonly private IMouseCursor originalMouseCursor;
 
@@ -74,10 +75,11 @@ namespace OpenDiablo2.Core.GameState_
             this.getRandomizedMapGenerator = getRandomizedMapGenerator;
 
             originalMouseCursor = renderWindow.MouseCursor;
-
+            PlayerInfos = new List<PlayerInfo>();
+            mapDataLookup = new List<MapCellInfo>();
         }
 
-        public void Initialize(string characterName, eHero hero, eSessionType sessionType)
+        public void Initialize(string characterName, eHero hero, eSessionType sessionType, eDifficulty difficulty)
         {
             sessionManager = getSessionManager(sessionType);
             sessionManager.Initialize();
@@ -87,9 +89,11 @@ namespace OpenDiablo2.Core.GameState_
             sessionManager.OnPlayerInfo += OnPlayerInfo;
             sessionManager.OnFocusOnPlayer += OnFocusOnPlayer;
 
-            mapInfo = new List<IMapInfo>();
-            sceneManager.ChangeScene(eSceneType.Game);
+            Difficulty = difficulty;
 
+            mapInfo = new List<IMapInfo>();
+            
+            sceneManager.ChangeScene(eSceneType.Game);
             sessionManager.JoinGame(characterName, hero);
         }
 
@@ -97,7 +101,7 @@ namespace OpenDiablo2.Core.GameState_
             => getMapEngine().FocusedPlayerId = playerId;
 
         private void OnPlayerInfo(int clientHash, IEnumerable<PlayerInfo> playerInfo)
-            => this.PlayerInfos = playerInfo.ToList();
+            => PlayerInfos = playerInfo.ToList();
 
         private void OnLocatePlayers(int clientHash, IEnumerable<PlayerLocationDetails> playerLocationDetails)
         {
@@ -203,9 +207,12 @@ namespace OpenDiablo2.Core.GameState_
 
 
             var random = new Random(Seed);
-            //var mapName = "data\\global\\tiles\\" + mapNames[random.Next(mapNames.Count)].Replace("/", "\\");
+            // -------------------------------------------------------------------------------------
+            // var mapName = "data\\global\\tiles\\" + mapNames[random.Next(mapNames.Count)].Replace("/", "\\");
+            // -------------------------------------------------------------------------------------
             // TODO: ***TEMP FOR TESTING
             var mapName = "data\\global\\tiles\\" + mapNames[0].Replace("/", "\\");
+            // -------------------------------------------------------------------------------------
             MapName = levelDetails.LevelPreset.Name;
             Act = levelDetails.LevelType.Act;
 
@@ -270,15 +277,23 @@ namespace OpenDiablo2.Core.GameState_
         private IMapInfo GetMap(ref int cellX, ref int cellY)
         {
             var p = new Point(cellX, cellY);
-            var map = mapInfo.LastOrDefault(z => z.TileLocation.Contains(p));
-            if (map == null)
-            {
-                return null;
-            }
 
-            cellX -= map.TileLocation.X;
-            cellY -= map.TileLocation.Y;
-            return map;
+            IMapInfo mi = null;
+            for (var i = mapInfo.Count - 1; i >= 0; i--)
+            {
+                if (mapInfo[i].TileLocation.Contains(p))
+                {
+                    mi = mapInfo[i];
+                    break;
+                }
+                
+            }
+            if (mi == null)
+                return null;
+
+            cellX -= mi.TileLocation.X;
+            cellY -= mi.TileLocation.Y;
+            return mi;
         }
 
         public void UpdateMapCellInfo(int cellX, int cellY, eRenderCellType renderCellType, IEnumerable<MapCellInfo> mapCellInfo)
@@ -294,9 +309,8 @@ namespace OpenDiablo2.Core.GameState_
             }
             else
             {
-                var cursorsprite = renderWindow.LoadSprite(ResourcePaths.GeneratePathForItem(item.Item.InvFile), Palettes.Units);
-
-                renderWindow.MouseCursor = renderWindow.LoadCursor(cursorsprite, 0, new Point(cursorsprite.FrameSize.Width / 2, cursorsprite.FrameSize.Height / 2));
+                var cursorSprite = renderWindow.LoadSprite(ResourcePaths.GeneratePathForItem(item.Item.InvFile), Palettes.Units);
+                renderWindow.MouseCursor = renderWindow.LoadCursor(cursorSprite, 0, new Point(cursorSprite.FrameSize.Width / 2, cursorSprite.FrameSize.Height / 2));
             }
 
             this.SelectedItem = item;
@@ -317,8 +331,8 @@ namespace OpenDiablo2.Core.GameState_
             if (cellInfo != null && (cellInfo.Ignore || !cellInfo.Tile.Animated))
                 return cellInfo.Ignore ? null : cellInfo;
 
-            var main_index = (props.Prop3 >> 4) + ((props.Prop4 & 0x03) << 4);
-            var sub_index = props.Prop2;
+            var mainIndex = (props.Prop3 >> 4) + ((props.Prop4 & 0x03) << 4);
+            var subIndex = props.Prop2;
 
             if (orientation == 0)
             {
@@ -375,15 +389,14 @@ namespace OpenDiablo2.Core.GameState_
                 }
             }
 
-            int frame = 0;
             IEnumerable<MPQDT1Tile> tiles = Enumerable.Empty<MPQDT1Tile>();
             tiles = map.FileData.LookupTable
-                .Where(x => x.MainIndex == main_index && x.SubIndex == sub_index && x.Orientation == orientation)
+                .Where(x => x.MainIndex == mainIndex && x.SubIndex == subIndex && x.Orientation == orientation)
                 .Select(x => x.TileRef);
 
             if (tiles == null || !tiles.Any())
             {
-                log.Error($"Could not find tile [{main_index}:{sub_index}:{orientation}]!");
+                log.Error($"Could not find tile [{mainIndex}:{subIndex}:{orientation}]!");
                 map.CellInfo[cellType][cellX + (cellY * map.FileData.Width)] = new MapCellInfo { Ignore = true };
                 return null;
             }
@@ -438,7 +451,7 @@ namespace OpenDiablo2.Core.GameState_
             }
 
 
-            var mapCellInfo = mapDataLookup.FirstOrDefault(x => x.Tile.Id == tile.Id && x.AnimationId == frame);
+            var mapCellInfo = mapDataLookup.FirstOrDefault(x => x.Tile.Id == tile.Id);
             if (mapCellInfo == null)
             {
                 mapCellInfo = renderWindow.CacheMapCell(tile, cellType);

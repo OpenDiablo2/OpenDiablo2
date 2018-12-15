@@ -189,8 +189,8 @@ namespace OpenDiablo2.SDL2_
             {
                 var texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, frameW, frameH);
 
-                SDL.SDL_LockTexture(texture, IntPtr.Zero, out IntPtr pixels, out int pitch);
-                UInt32* data = (UInt32*)pixels;
+                SDL.SDL_LockTexture(texture, IntPtr.Zero, out var pixels, out var pitch);
+                var data = (UInt32*)pixels;
 
                 var priorityBase = (directionConversion[LocationDetails.MovementDirection] * animationData.FramesPerDirection * animationData.NumberOfLayers)
                         + (frameIndex * animationData.NumberOfLayers);
