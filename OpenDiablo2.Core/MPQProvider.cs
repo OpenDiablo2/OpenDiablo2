@@ -40,8 +40,7 @@ namespace OpenDiablo2.Core
                 .EnumerateFiles(globalConfiguration.BaseDataPath, "*.mpq")
                 .Where(x => !Path.GetFileName(x).StartsWith("patch"))
                 .Select(file => new MPQ(file))
-                .ToArray();
-
+                .ToList();
             
 
             // Load the base game files
@@ -66,6 +65,32 @@ namespace OpenDiablo2.Core
                 {
                     mpqLookup[file.ToLower()] = i;
                 }
+            }
+
+            // Get the combined list file by joining all of the other mpqs
+            List<string> superListFile = mpqs.SelectMany(x => x.Files).ToList();
+
+            var patchMPQ = Directory
+                .EnumerateFiles(globalConfiguration.BaseDataPath, "*.mpq")
+                .Where(x => Path.GetFileName(x).StartsWith("patch"))
+                .Select(file => new MPQ(file, superListFile))
+                .First();
+
+            mpqs.Add(patchMPQ);
+            int patchMPQIndex = mpqs.Count - 1;
+            
+            // Replace existing mpqLookups with those from the patch, which take precedence
+            foreach (var file in patchMPQ.Files)
+            {
+                // unlike the other mpqs, we need to ensure that the files actually exist
+                // inside of the patch mpq instead of assuming that they do, because
+                // we can't trust the filelist
+                if (!patchMPQ.HasFile(file))
+                {
+                    continue;
+                }
+
+                mpqLookup[file.ToLower()] = patchMPQIndex;
             }
         }
 

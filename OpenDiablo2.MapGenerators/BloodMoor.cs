@@ -14,10 +14,12 @@ namespace OpenDiablo2.MapGenerators
         private readonly IGameState gameState;
 
         private readonly LevelDetail levelDetail;
+        private readonly eDifficulty difficulty;
 
-        public BloodMoor(IGameState gameState, IEngineDataManager dataManager)
+        public BloodMoor(IGameState gameState, IEngineDataManager dataManager, eDifficulty difficulty)
         {
             this.gameState = gameState;
+            this.difficulty = difficulty;
 
             levelDetail = dataManager.Levels.First(x => x.LevelName == "Blood Moor");
         }
@@ -192,8 +194,8 @@ namespace OpenDiablo2.MapGenerators
             // Generate the cave
             while (true)
             {
-                var rx = random.Next(8, levelDetail.SizeX - 16);
-                var ry = random.Next(8, levelDetail.SizeY - 16);
+                var rx = random.Next(8, levelDetail.Difficulties[difficulty].SizeX - 16);
+                var ry = random.Next(8, levelDetail.Difficulties[difficulty].SizeY - 16);
                 rx -= (rx % 8);
                 ry -= (ry % 8);
                 var caveX = rx + location.X;
@@ -215,8 +217,8 @@ namespace OpenDiablo2.MapGenerators
             var campsToGenerate = 3;
             while (campsToGenerate > 0)
             {
-                var rx = random.Next(8, levelDetail.SizeX - 16);
-                var ry = random.Next(8, levelDetail.SizeY - 16);
+                var rx = random.Next(8, levelDetail.Difficulties[difficulty].SizeX - 16);
+                var ry = random.Next(8, levelDetail.Difficulties[difficulty].SizeY - 16);
                 rx -= (rx % 8);
                 ry -= (ry % 8);
                 var campX = rx + location.X;
@@ -243,8 +245,8 @@ namespace OpenDiablo2.MapGenerators
         static int[] tileFillIds = new int[] { 29, 30, 31, 38, 39, 40, 41 };
         private void FillCenterArea(Point location, IMapInfo parentMap)
         {
-            var rightEdge = levelDetail.SizeX - 8;
-            var bottomEdge = levelDetail.SizeY - 8;
+            var rightEdge = levelDetail.Difficulties[difficulty].SizeX - 8;
+            var bottomEdge = levelDetail.Difficulties[difficulty].SizeY - 8;
 
             for (var y = 8; y < bottomEdge; y += 8)
             {
