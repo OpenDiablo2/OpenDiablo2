@@ -8,6 +8,7 @@ using System.Linq;
 
 namespace OpenDiablo2.MapGenerators
 {
+    // TODO: Different difficulties have different sizes. We need to read this from levels.txt
     [RandomizedMap("Blood Moor")]
     public sealed class BloodMoor : IRandomizedMapGenerator
     {

@@ -15,6 +15,8 @@
  */
 
 using System;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -120,7 +122,13 @@ namespace OpenDiablo2.ServiceBus
         public void Send(IMessageFrame messageFrame, bool more = false)
         {
             var attr = messageFrame.GetType().GetCustomAttributes(true).First(x => (x is MessageFrameAttribute)) as MessageFrameAttribute;
-            requestSocket.SendFrame(new byte[] { (byte)attr.FrameType }.Concat(messageFrame.Data).ToArray(), more);
+            using (var ms = new MemoryStream())
+            using (var bw = new BinaryWriter(ms))
+            {
+                bw.Write((byte)attr.FrameType);
+                messageFrame.WriteTo(bw);
+                requestSocket.SendFrame(ms.ToArray(), more);
+            }
         }
 
         private void ProcessMessageFrame<T>() where T : IMessageFrame, new()
@@ -128,17 +136,18 @@ namespace OpenDiablo2.ServiceBus
             if (!running)
                 throw new OpenDiablo2Exception("You have made a terrible mistake. Cannot get a message frame if you are not connected.");
 
-            var bytes = requestSocket.ReceiveFrameBytes();
-            var frameType = (eMessageFrameType)bytes[0];
-
-            var frameData = bytes.Skip(1).ToArray(); // TODO: Can we maybe use pointers? This seems wasteful
-            var messageFrame = getMessageFrame(frameType);
-            if (messageFrame.GetType() != typeof(T))
-                throw new OpenDiablo2Exception("Recieved unexpected message frame!");
-            messageFrame.Data = frameData;
-            lock (getGameState().ThreadLocker)
+            using (var ms = new MemoryStream(requestSocket.ReceiveFrameBytes()))
+            using (var br = new BinaryReader(ms))
             {
-                messageFrame.Process(requestSocket.GetHashCode(), this);
+                var messageFrame = getMessageFrame((eMessageFrameType)br.ReadByte());
+
+                if (messageFrame.GetType() != typeof(T))
+                    throw new OpenDiablo2Exception("Recieved unexpected message frame!");
+
+                messageFrame.LoadFrom(br);
+
+                lock (getGameState().ThreadLocker)
+                    messageFrame.Process(requestSocket.GetHashCode(), this);
             }
         }
 
@@ -161,10 +170,10 @@ namespace OpenDiablo2.ServiceBus
             });
         }
 
-        public void MoveRequest(byte direction, eMovementType movementType)
+        public void MoveRequest(PointF targetCell, eMovementType movementType)
             => Task.Run(() =>
             {
-                Send(new MFMoveRequest(direction, movementType));
+                Send(new MFMoveRequest(targetCell, movementType));
                 ProcessMessageFrame<MFLocatePlayers>();
             });
     }

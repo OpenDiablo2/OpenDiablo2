@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
@@ -13,31 +14,23 @@ namespace OpenDiablo2.ServiceBus.Message_Frames.Server
     {
         public IEnumerable<PlayerInfo> PlayerInfos { get; set; } = new List<PlayerInfo>();
 
-        public byte[] Data
+        public void LoadFrom(BinaryReader br)
         {
-            get
-            {
-                var result = BitConverter.GetBytes(PlayerInfos.Count())
-                .Concat(PlayerInfos.SelectMany(x => x.GetBytes()))
-                .ToArray();
-                return result;
-            }
+            var count = br.ReadUInt16();
+            var playerInfos = new PlayerInfo[count];
+            for (var i = 0; i < count; i++)
+                playerInfos[i] = PlayerInfo.FromBytes(br);
 
-            set
-            {
-                var count = BitConverter.ToInt32(value, 0);
-                var playerInfos = new List<PlayerInfo>();
-                var offset = 4;
-                for (var i = 0; i < count; i++)
-                {
-                    var playerInfo = PlayerInfo.FromBytes(value, offset);
-                    playerInfos.Add(playerInfo);
-                    offset += playerInfo.SizeInBytes;
-                }
-
-                PlayerInfos = playerInfos;
-            }
+            PlayerInfos = playerInfos;
         }
+
+        public void WriteTo(BinaryWriter bw)
+        {
+            bw.Write((UInt16)PlayerInfos.Count());
+            foreach (var playerInfo in PlayerInfos)
+                playerInfo.WriteBytes(bw);
+        }
+
 
         public MFPlayerInfo() { }
         public MFPlayerInfo(IEnumerable<PlayerInfo> playerInfo)

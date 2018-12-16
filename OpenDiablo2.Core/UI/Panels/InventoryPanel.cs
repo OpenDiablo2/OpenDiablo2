@@ -32,8 +32,9 @@ namespace OpenDiablo2.Core.UI
     public sealed class InventoryPanel : IInventoryPanel
     {
         private readonly IRenderWindow renderWindow;
-        private readonly IMapEngine mapEngine;
+        private readonly IMapRenderer mapRenderer;
         private readonly ISprite panelSprite;
+        private readonly IGameState gameState;
         
         public IItemContainer headContainer, torsoContainer, beltContainer, gloveContainer, bootsContainer,
             leftHandContainer, rightHandContainer, secondaryLeftHandContainer, secondaryRightHandContainer,
@@ -45,14 +46,17 @@ namespace OpenDiablo2.Core.UI
 
         public InventoryPanel(IRenderWindow renderWindow, 
             IItemManager itemManager, 
-            IMapEngine mapEngine,
+            IMapRenderer mapRenderer,
             ISessionManager sessionManager,
             Func<eItemContainerType, IItemContainer> createItemContainer,
+            IGameState gameState,
             Func<eButtonType, IButton> createButton)
         {
             this.renderWindow = renderWindow;
-            this.mapEngine = mapEngine;
+            this.mapRenderer = mapRenderer;
+            this.gameState = gameState;
 
+            sessionManager.OnFocusOnPlayer += OnFocusOnPlayer;
             sessionManager.OnPlayerInfo += OnPlayerInfo;
 
             panelSprite = renderWindow.LoadSprite(ResourcePaths.InventoryCharacterPanel, Palettes.Units, FrameType.GetOffset(), true);
@@ -110,27 +114,37 @@ namespace OpenDiablo2.Core.UI
             bootsContainer.Location = panelSprite.Location + new Size(251, 178);
         }
 
+        private void OnPlayerInfo(int clientHash, IEnumerable<PlayerInfo> playerInfo)
+        {
+            var currentPlayer = gameState.PlayerInfos.FirstOrDefault(x => x.UID == mapRenderer.FocusedPlayerId);
+            if (currentPlayer != null)
+                UpdateInventoryPanel(currentPlayer);
+        }
+
+        private void OnFocusOnPlayer(int clientHash, Guid playerId)
+        {
+            var currentPlayer = gameState.PlayerInfos.FirstOrDefault(x => x.UID == playerId);
+            if (currentPlayer != null)
+                UpdateInventoryPanel(currentPlayer);
+        }
+
+        private void UpdateInventoryPanel(PlayerInfo currentPlayer)
+        {
+            leftHandContainer.SetContainedItem(currentPlayer.Equipment.LeftArm);
+            rightHandContainer.SetContainedItem(currentPlayer.Equipment.RightArm);
+            torsoContainer.SetContainedItem(currentPlayer.Equipment.Torso);
+            headContainer.SetContainedItem(currentPlayer.Equipment.Head);
+            ringLeftContainer.SetContainedItem(currentPlayer.Equipment.LeftRing);
+            ringRightContainer.SetContainedItem(currentPlayer.Equipment.RightRing);
+            beltContainer.SetContainedItem(currentPlayer.Equipment.Belt);
+            neckContainer.SetContainedItem(currentPlayer.Equipment.Neck);
+            gloveContainer.SetContainedItem(currentPlayer.Equipment.Gloves);
+        }
+
         public ePanelType PanelType => ePanelType.Inventory;
         public ePanelFrameType FrameType => ePanelFrameType.Right;
 
         public bool IsSecondaryEquipped { get; private set; }
-
-        public void OnPlayerInfo(int clientHash, IEnumerable<PlayerInfo> playerInfos)
-        {
-            // TODO: Ugly hack. Update when we can look up by GUID
-            var currentPLayer = playerInfos.ToArray()[mapEngine.FocusedPlayerId];
-
-            leftHandContainer.SetContainedItem(currentPLayer.Equipment.LeftArm);
-            rightHandContainer.SetContainedItem(currentPLayer.Equipment.RightArm);
-            torsoContainer.SetContainedItem(currentPLayer.Equipment.Torso);
-            headContainer.SetContainedItem(currentPLayer.Equipment.Head);
-            ringLeftContainer.SetContainedItem(currentPLayer.Equipment.LeftRing);
-            ringRightContainer.SetContainedItem(currentPLayer.Equipment.RightRing);
-            beltContainer.SetContainedItem(currentPLayer.Equipment.Belt);
-            neckContainer.SetContainedItem(currentPLayer.Equipment.Neck);
-            gloveContainer.SetContainedItem(currentPLayer.Equipment.Gloves);
-
-        }
 
         public void Update()
         {

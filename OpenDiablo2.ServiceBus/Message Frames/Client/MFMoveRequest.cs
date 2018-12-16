@@ -1,34 +1,44 @@
 ﻿using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
+using System;
+using System.Drawing;
+using System.IO;
 
 namespace OpenDiablo2.ServiceBus.Message_Frames.Client
 {
     [MessageFrame(eMessageFrameType.MoveRequest)]
     public sealed class MFMoveRequest : IMessageFrame
     {
-        public byte Direction { get; set; } = 0;
+        public PointF Target { get; set; }
         public eMovementType MovementType { get; set; } = eMovementType.Stopped;
-
-        public byte[] Data
-        {
-            get => new byte[] { Direction, (byte)MovementType };
-            set
-            {
-                Direction = value[0];
-                MovementType = (eMovementType)value[1];
-            }
-        }
 
         public MFMoveRequest() { }
 
-        public MFMoveRequest(byte direction, eMovementType movementType)
+        public MFMoveRequest(PointF targetCell, eMovementType movementType)
         {
-            this.Direction = direction;
+            this.Target = targetCell;
             this.MovementType = movementType;
         }
 
+        public void LoadFrom(BinaryReader br)
+        {
+            MovementType = (eMovementType)br.ReadByte();
+            Target = new PointF
+            {
+                X = br.ReadSingle(),
+                Y = br.ReadSingle()
+            };
+        }
+
+        public void WriteTo(BinaryWriter bw)
+        {
+            bw.Write((byte)MovementType);
+            bw.Write((Single)Target.X);
+            bw.Write((Single)Target.Y);
+        }
+
         public void Process(int clientHash, ISessionEventProvider sessionEventProvider)
-            => sessionEventProvider.OnMoveRequest(clientHash, Direction, MovementType);
+            => sessionEventProvider.OnMoveRequest(clientHash, Target, MovementType);
     }
 }

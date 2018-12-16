@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,6 @@ namespace OpenDiablo2.Common.Interfaces
         void Stop();
 
         void JoinGame(string playerName, eHero heroType);
-        void MoveRequest(byte direction, eMovementType movementType);
+        void MoveRequest(PointF targetCell, eMovementType movementType);
     }
 }

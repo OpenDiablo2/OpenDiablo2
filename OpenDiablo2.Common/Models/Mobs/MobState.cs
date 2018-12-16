@@ -11,8 +11,17 @@ namespace OpenDiablo2.Common.Models.Mobs
         public readonly int Id;
         public bool Alive { get; protected set; } = true;
 
+        /// <summary>The X tile location of the mob</summary>
         public float X { get; set; } = 0;
+
+        /// <summary>The Y tile location of the mob</summary>
         public float Y { get; set; } = 0;
+
+        /// <summary>The speed of the mob (in units per second)</summary>
+        public float MovementSpeed { get; set; }
+
+        /// <summary>Represents the movement direction of the mob (16 angular segments)</summary>
+        public int MovementDirection { get; set; }
 
         protected Stat Health;
 

@@ -61,7 +61,7 @@ namespace OpenDiablo2.SDL2_
         private readonly IResourceManager resourceManager;
         private readonly GlobalConfiguration globalConfig;
         private readonly Func<IGameState> getGameState;
-        private readonly Func<IMapEngine> getMapEngine;
+        private readonly Func<IMapRenderer> getMapRenderer;
 
         public SDL2RenderWindow(
             GlobalConfiguration globalConfig,
@@ -69,7 +69,7 @@ namespace OpenDiablo2.SDL2_
             IPaletteProvider paletteProvider,
             IResourceManager resourceManager,
             Func<IGameState> getGameState,
-            Func<IMapEngine> getMapEngine
+            Func<IMapRenderer> getMapEngine
             )
         {
             this.globalConfig = globalConfig;
@@ -77,7 +77,7 @@ namespace OpenDiablo2.SDL2_
             this.paletteProvider = paletteProvider;
             this.resourceManager = resourceManager;
             this.getGameState = getGameState;
-            this.getMapEngine = getMapEngine;
+            this.getMapRenderer = getMapEngine;
             this.fullscreen = globalConfig.FullScreen;
 
             SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
@@ -482,6 +482,6 @@ namespace OpenDiablo2.SDL2_
         public uint GetTicks() => SDL.SDL_GetTicks();
 
         public ICharacterRenderer CreateCharacterRenderer()
-            => new SDL2CharacterRenderer(this.renderer, resourceManager, paletteProvider);
+            => new SDL2CharacterRenderer(this.renderer, resourceManager, paletteProvider, getGameState());
     }
 }

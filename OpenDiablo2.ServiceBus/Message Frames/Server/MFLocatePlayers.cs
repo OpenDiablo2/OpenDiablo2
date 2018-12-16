@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
@@ -11,34 +12,30 @@ namespace OpenDiablo2.ServiceBus.Message_Frames.Server
     [MessageFrame(eMessageFrameType.LocatePlayers)]
     public sealed class MFLocatePlayers : IMessageFrame
     {
-        public IEnumerable<PlayerLocationDetails> LocationDetails { get; set; } 
+        public IEnumerable<LocationDetails> LocationDetails { get; set; }
 
-        public byte[] Data
+        public void LoadFrom(BinaryReader br)
         {
-            get
+            var count = br.ReadUInt16();
+            var result = new List<LocationDetails>();
+
+            for (var i = 0; i < count; i++)
             {
-                var result = new List<byte>();
-                result.AddRange(BitConverter.GetBytes((UInt16)LocationDetails.Count()));
-                result.AddRange(LocationDetails.SelectMany(x => x.GetBytes()));
-                return result.ToArray();
+                result.Add(Common.Models.LocationDetails.FromBytes(br));
             }
 
-            set
-            {
-                var count = BitConverter.ToUInt16(value, 0);
-                var result = new List<PlayerLocationDetails>();
-                
-                for(var i = 0; i < count; i++)
-                {
-                    result.Add(PlayerLocationDetails.FromBytes(value, 2 + (i * PlayerLocationDetails.SizeInBytes)));
-                }
+            LocationDetails = result;
+        }
 
-                LocationDetails = result;
-            }
+        public void WriteTo(BinaryWriter bw)
+        {
+            bw.Write((UInt16)LocationDetails.Count());
+            foreach (var locationDetail in LocationDetails)
+                locationDetail.WriteBytes(bw);
         }
 
         public MFLocatePlayers() { }
-        public MFLocatePlayers(IEnumerable<PlayerLocationDetails> locationDetails)
+        public MFLocatePlayers(IEnumerable<LocationDetails> locationDetails)
         {
             this.LocationDetails = locationDetails;
         }
