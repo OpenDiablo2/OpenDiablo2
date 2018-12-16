@@ -35,7 +35,7 @@ namespace OpenDiablo2.Core.UI
         private readonly IMapRenderer mapRenderer;
         private readonly ISprite panelSprite;
         private readonly IGameState gameState;
-        
+
         public IItemContainer headContainer, torsoContainer, beltContainer, gloveContainer, bootsContainer,
             leftHandContainer, rightHandContainer, secondaryLeftHandContainer, secondaryRightHandContainer,
             ringLeftContainer, ringRightContainer, neckContainer;

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using OpenDiablo2.Common;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
@@ -16,12 +17,14 @@ namespace OpenDiablo2.Core.UI
 
         private readonly ItemContainerLayout itemContainerLayout;
         private readonly IMouseInfoProvider mouseInfoProvider;
+        private readonly ISessionManager sessionManager;
 
         public ItemInstance ContainedItem { get; internal set; }
 
         private readonly Dictionary<eItemContainerType, ISprite> sprites = new Dictionary<eItemContainerType, ISprite>();
 
         private Point location = new Point();
+        private IMapRenderer mapRenderer;
 
         public Point Location
         {
@@ -40,12 +43,14 @@ namespace OpenDiablo2.Core.UI
 
         public Size Size { get; internal set; }
         
-        public ItemContainer(IRenderWindow renderWindow, IGameState gameState, ItemContainerLayout itemContainerLayout, IMouseInfoProvider mouseInfoProvider)
+        public ItemContainer(IRenderWindow renderWindow, IGameState gameState, ItemContainerLayout itemContainerLayout, IMouseInfoProvider mouseInfoProvider, ISessionManager sessionManager, IMapRenderer mapRenderer)
         {
             this.renderWindow = renderWindow;
             this.gameState = gameState;
             this.itemContainerLayout = itemContainerLayout;
             this.mouseInfoProvider = mouseInfoProvider;
+            this.sessionManager = sessionManager;
+            this.mapRenderer = mapRenderer;
 
             placeholderSprite = renderWindow.LoadSprite(itemContainerLayout.ResourceName, itemContainerLayout.PaletteName, true);
             placeholderSprite.Location = new Point(location.X, location.Y + placeholderSprite.LocalFrameSize.Height);
@@ -84,12 +89,20 @@ namespace OpenDiablo2.Core.UI
                         this.gameState.SelectItem(this.ContainedItem);
                         this.SetContainedItem(null);
                     }
+
                     
+                    var currentPlayer = gameState.PlayerInfos.FirstOrDefault(x => x.UID == mapRenderer.FocusedPlayerId);
+                    if (currentPlayer != null)
+                        sessionManager.UpdateEquipment(currentPlayer.Equipment);
                 }
                 else if (this.gameState.SelectedItem != null)
                 {
                     this.SetContainedItem(this.gameState.SelectedItem);
                     this.gameState.SelectItem(null);
+
+                    var currentPlayer = gameState.PlayerInfos.FirstOrDefault(x => x.UID == mapRenderer.FocusedPlayerId);
+                    if (currentPlayer != null)
+                        sessionManager.UpdateEquipment(currentPlayer.Equipment);
                 }
             }
         }

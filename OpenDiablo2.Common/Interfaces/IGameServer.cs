@@ -13,5 +13,6 @@ namespace OpenDiablo2.Common.Interfaces
         void Update(int ms);
         void InitializeNewGame();
         int SpawnNewPlayer(int clientHash, string playerName, eHero heroType);
+        void UpdateEquipment(int clientHash, PlayerEquipment playerEquipment);
     }
 }

@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Interfaces.Mobs;
@@ -98,6 +99,22 @@ namespace OpenDiablo2.GameServer_
         
             mobManager.AddPlayer(newPlayer);
             return newPlayer.Id;
+        }
+
+        public void UpdateEquipment(int clienthash, PlayerEquipment playerEquipment)
+        {
+            var player = mobManager.Players.FirstOrDefault(x => x.ClientHash == clienthash);
+
+            player.Equipment.EquipItem("head", playerEquipment.Head);
+            player.Equipment.EquipItem("neck", playerEquipment.Neck);
+            player.Equipment.EquipItem("tors", playerEquipment.Torso);
+            player.Equipment.EquipItem("rarm", playerEquipment.RightArm);
+            player.Equipment.EquipItem("larm", playerEquipment.LeftArm);
+            player.Equipment.EquipItem("rrin", playerEquipment.RightRing);
+            player.Equipment.EquipItem("lrin", playerEquipment.LeftRing);
+            player.Equipment.EquipItem("belt", playerEquipment.Belt);
+            player.Equipment.EquipItem("feet", playerEquipment.Feet);
+            player.Equipment.EquipItem("glov", playerEquipment.Gloves);
         }
 
         public void Update(int ms)
