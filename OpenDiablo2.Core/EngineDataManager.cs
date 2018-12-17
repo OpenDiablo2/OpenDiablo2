@@ -196,16 +196,15 @@ namespace OpenDiablo2.Core
         {
             var data = mpqProvider
                 .GetTextFile(ResourcePaths.Missiles)
-                .Where(x => !String.IsNullOrWhiteSpace(x));
-
-            var splitdata = data
+                .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
                 .Where(x => x[0] != "Expansion" && x[0] != "unused")
-                .ToArray();
+                .ToArray()
+                .Skip(1)
+                .Select(x => x.ToMissileTypeConfig())
+                .ToImmutableDictionary(x => x.Id, x => x);
 
-            // TODO: UNFINISHED
-
-            return null;
+            return data;
         }
     }
 }
