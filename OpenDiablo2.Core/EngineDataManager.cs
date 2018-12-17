@@ -30,6 +30,7 @@ namespace OpenDiablo2.Core
         public ImmutableDictionary<eHero, IHeroTypeConfig> HeroTypeConfigs { get; internal set; }
         public ImmutableList<IEnemyTypeConfig> EnemyTypeConfigs { get; internal set; } 
         public ImmutableDictionary<int, IMissileTypeConfig> MissileTypeConfigs { get; internal set; }
+        public ImmutableDictionary<string, int> MissileTypeConfigsLookup { get; internal set; }
 
         public EngineDataManager(IMPQProvider mpqProvider)
         {
@@ -190,6 +191,8 @@ namespace OpenDiablo2.Core
         private void LoadSkillData()
         {
             MissileTypeConfigs = LoadMissileTypeConfig();
+            MissileTypeConfigsLookup = MissileTypeConfigs.Values
+                .ToImmutableDictionary(x => x.Name, x => x.Id);
         }
 
         private ImmutableDictionary<int, IMissileTypeConfig> LoadMissileTypeConfig()
