@@ -55,6 +55,7 @@ namespace OpenDiablo2.ServiceBus
         public OnLocatePlayersEvent OnLocatePlayers { get; set; }
         public OnPlayerInfoEvent OnPlayerInfo { get; set; }
         public OnFocusOnPlayer OnFocusOnPlayer { get; set; }
+        public OnChangeEquipment OnChangeEquipment { get; set; }
 
         const int serverUpdateRate = 30;
 
@@ -229,10 +230,14 @@ namespace OpenDiablo2.ServiceBus
             Send(new MFFocusOnPlayer(gameServer.Players.First(x => x.ClientHash == clientHash).UID));
         }
 
-        private void OnUpdateEquipmentHandler(int clientHash, PlayerEquipment playerEquipment)
+        private void OnUpdateEquipmentHandler(int clientHash, string Slot, ItemInstance itemInstance)
         {
-            gameServer.UpdateEquipment(clientHash, playerEquipment);
-            Send(new MFPlayerInfo(gameServer.Players.Select(x => x.ToPlayerInfo())), true);
+            var player = gameServer.Players.FirstOrDefault(x => x.ClientHash == clientHash);
+            if (player == null)
+                return;
+
+            var equipment = gameServer.UpdateEquipment(clientHash, Slot, itemInstance);
+            Send(new MFChangeEquipment(player.UID, equipment));
         }
     }
 }

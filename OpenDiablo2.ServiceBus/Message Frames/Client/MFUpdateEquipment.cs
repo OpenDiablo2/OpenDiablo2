@@ -1,35 +1,40 @@
 ﻿using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Common.Models;
 using OpenDiablo2.Common.Models.Mobs;
 using System.IO;
 
 namespace OpenDiablo2.ServiceBus.Message_Frames.Client
 {
-    [MessageFrame(eMessageFrameType.JoinGame)]
+    [MessageFrame(eMessageFrameType.UpdateEquipment)]
     public sealed class MFUpdateEquipment : IMessageFrame
     {
-        public PlayerEquipment PlayerEquipment { get; internal set; }
+        public ItemInstance ItemInstance { get; internal set; }
+        public string Slot { get; private set; }
 
         public void WriteTo(BinaryWriter bw)
         {
-            bw.Write(PlayerEquipment);
+            bw.Write(Slot);
+            bw.Write(ItemInstance);
         }
 
         public void LoadFrom(BinaryReader br)
         {
-            PlayerEquipment = br.ReadPlayerEquipment();
+            Slot = br.ReadString();
+            ItemInstance = br.ReadItemInstance();
         }
 
         public MFUpdateEquipment() { }
-        public MFUpdateEquipment(PlayerEquipment playerEquipment)
+        public MFUpdateEquipment(string slot, ItemInstance itemInstance)
         {
-            PlayerEquipment = playerEquipment;
+            Slot = slot;
+            ItemInstance = itemInstance;
         }
 
         public void Process(int clientHash, ISessionEventProvider sessionEventProvider)
         {
-            sessionEventProvider.OnUpdateEquipment(clientHash, PlayerEquipment);
+            sessionEventProvider.OnUpdateEquipment(clientHash, Slot, ItemInstance);
         }
     }
 }

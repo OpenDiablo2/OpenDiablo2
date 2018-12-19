@@ -12,5 +12,6 @@ namespace OpenDiablo2.Common.Interfaces.Drawing
         void Update(long ms);
         void Render(int pixelOffsetX, int pixelOffsetY);
         void ResetAnimationData();
+        void ResetCache();
     }
 }

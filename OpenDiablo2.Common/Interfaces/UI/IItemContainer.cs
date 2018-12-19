@@ -8,6 +8,7 @@ namespace OpenDiablo2.Common.Interfaces
     {
         ItemInstance ContainedItem { get; }
         Point Location { get; set; }
+        string Slot { get; set; }
 
         void SetContainedItem(ItemInstance containedItem);
         void Render();

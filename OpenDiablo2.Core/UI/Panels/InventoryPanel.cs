@@ -23,6 +23,7 @@ using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Extensions;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Models;
+using OpenDiablo2.Common.Models.Mobs;
 
 namespace OpenDiablo2.Core.UI
 {
@@ -58,6 +59,7 @@ namespace OpenDiablo2.Core.UI
 
             sessionManager.OnFocusOnPlayer += OnFocusOnPlayer;
             sessionManager.OnPlayerInfo += OnPlayerInfo;
+            sessionManager.OnChangeEquipment += OnChangeEquipment;
 
             panelSprite = renderWindow.LoadSprite(ResourcePaths.InventoryCharacterPanel, Palettes.Units, FrameType.GetOffset(), true);
 
@@ -79,18 +81,23 @@ namespace OpenDiablo2.Core.UI
 
             headContainer = createItemContainer(eItemContainerType.Helm);
             headContainer.Location = panelSprite.Location + new Size(135, 5);
+            headContainer.Slot = "head";
             
             neckContainer = createItemContainer(eItemContainerType.Amulet);
             neckContainer.Location = panelSprite.Location + new Size(209, 34);
-            
+            neckContainer.Slot = "neck";
+
             torsoContainer = createItemContainer(eItemContainerType.Armor);
             torsoContainer.Location = panelSprite.Location + new Size(135, 75);
+            torsoContainer.Slot = "tors";
 
             rightHandContainer = createItemContainer(eItemContainerType.Weapon);
             rightHandContainer.Location = panelSprite.Location + new Size(20, 47);
+            rightHandContainer.Slot = "rarm";
 
             leftHandContainer = createItemContainer(eItemContainerType.Weapon);
             leftHandContainer.Location = panelSprite.Location + new Size(253, 47);
+            leftHandContainer.Slot = "larm";
 
             secondaryLeftHandContainer = createItemContainer(eItemContainerType.Weapon);
             secondaryLeftHandContainer.Location = panelSprite.Location + new Size(24, 45);
@@ -100,45 +107,63 @@ namespace OpenDiablo2.Core.UI
 
             beltContainer = createItemContainer(eItemContainerType.Belt);
             beltContainer.Location = panelSprite.Location + new Size(136, 178);
-            
+            beltContainer.Slot = "belt";
+
             ringLeftContainer = createItemContainer(eItemContainerType.Ring);
             ringLeftContainer.Location = panelSprite.Location + new Size(95, 179);
-            
+            ringLeftContainer.Slot = "rrin";
+
             ringRightContainer = createItemContainer(eItemContainerType.Ring);
             ringRightContainer.Location = panelSprite.Location + new Size(209, 179);
-            
+            ringRightContainer.Slot = "lrin";
+
             gloveContainer = createItemContainer(eItemContainerType.Glove);
             gloveContainer.Location = panelSprite.Location + new Size(20, 179);
-            
+            gloveContainer.Slot = "glov";
+
             bootsContainer = createItemContainer(eItemContainerType.Boots);
             bootsContainer.Location = panelSprite.Location + new Size(251, 178);
+            bootsContainer.Slot = "feet";
         }
 
         private void OnPlayerInfo(int clientHash, IEnumerable<PlayerInfo> playerInfo)
         {
             var currentPlayer = gameState.PlayerInfos.FirstOrDefault(x => x.UID == mapRenderer.FocusedPlayerId);
             if (currentPlayer != null)
-                UpdateInventoryPanel(currentPlayer);
+                UpdateInventoryPanel(currentPlayer.Equipment);
         }
 
         private void OnFocusOnPlayer(int clientHash, Guid playerId)
         {
             var currentPlayer = gameState.PlayerInfos.FirstOrDefault(x => x.UID == playerId);
-            if (currentPlayer != null)
-                UpdateInventoryPanel(currentPlayer);
+            if (currentPlayer != null) { }
+                UpdateInventoryPanel(currentPlayer.Equipment);
         }
 
-        private void UpdateInventoryPanel(PlayerInfo currentPlayer)
+        private void OnChangeEquipment(int clientHash, Guid playerUID, PlayerEquipment playerEquipment)
         {
-            leftHandContainer.SetContainedItem(currentPlayer.Equipment.LeftArm);
-            rightHandContainer.SetContainedItem(currentPlayer.Equipment.RightArm);
-            torsoContainer.SetContainedItem(currentPlayer.Equipment.Torso);
-            headContainer.SetContainedItem(currentPlayer.Equipment.Head);
-            ringLeftContainer.SetContainedItem(currentPlayer.Equipment.LeftRing);
-            ringRightContainer.SetContainedItem(currentPlayer.Equipment.RightRing);
-            beltContainer.SetContainedItem(currentPlayer.Equipment.Belt);
-            neckContainer.SetContainedItem(currentPlayer.Equipment.Neck);
-            gloveContainer.SetContainedItem(currentPlayer.Equipment.Gloves);
+            var player = gameState.PlayerInfos.FirstOrDefault(x => x.UID == playerUID);
+            if (player != null)
+            {
+                player.Equipment = playerEquipment;
+                UpdateInventoryPanel(playerEquipment);
+            }
+                
+        }
+
+        private void UpdateInventoryPanel(PlayerEquipment playerEquipment)
+        {
+            leftHandContainer.SetContainedItem(playerEquipment.LeftArm);
+            rightHandContainer.SetContainedItem(playerEquipment.RightArm);
+            torsoContainer.SetContainedItem(playerEquipment.Torso);
+            headContainer.SetContainedItem(playerEquipment.Head);
+            ringLeftContainer.SetContainedItem(playerEquipment.LeftRing);
+            ringRightContainer.SetContainedItem(playerEquipment.RightRing);
+            beltContainer.SetContainedItem(playerEquipment.Belt);
+            neckContainer.SetContainedItem(playerEquipment.Neck);
+            gloveContainer.SetContainedItem(playerEquipment.Gloves);
+
+
         }
 
         public ePanelType PanelType => ePanelType.Inventory;

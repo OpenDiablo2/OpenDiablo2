@@ -66,6 +66,7 @@
     <Compile Include="Message Frames\Server\MFPlayerInfo.cs" />
     <Compile Include="Message Frames\Server\MFLocatePlayers.cs" />
     <Compile Include="Message Frames\Server\MFSetSeed.cs" />
+    <Compile Include="Message Frames\Server\MFChangeEquipment.cs" />
     <Compile Include="SessionManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SessionServer.cs" />

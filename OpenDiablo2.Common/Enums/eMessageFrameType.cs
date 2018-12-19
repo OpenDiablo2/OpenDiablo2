@@ -12,6 +12,7 @@
         MoveRequest = 0x06,
         PlayerMove = 0x07,
         UpdateEquipment = 0x08,
+        ChangeEquipment = 0x09,
 
         MAX = 0xFF, // NOTE:
         // You absolutely cannot have a higher ID than this without
