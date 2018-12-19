@@ -16,5 +16,7 @@ namespace OpenDiablo2.Common.Interfaces
         ImmutableList<IEnemyTypeConfig> EnemyTypeConfigs { get; }
         ImmutableList<ObjectInfo> Objects { get; }
         ImmutableList<ObjectTypeInfo> ObjectTypes { get; }
+        ImmutableDictionary<int, IMissileTypeConfig> MissileTypeConfigs { get; }
+        ImmutableDictionary<string, int> MissileTypeConfigsLookup { get; }
     }
 }
