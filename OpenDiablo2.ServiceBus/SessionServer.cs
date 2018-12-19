@@ -48,12 +48,14 @@ namespace OpenDiablo2.ServiceBus
 
         public OnJoinGameEvent OnJoinGame { get; set; }
         public OnMoveRequest OnMoveRequest { get; set; }
+        public OnUpdateEquipmentEvent OnUpdateEquipment { get; set; }
 
         // TODO: Fix interface so we don't need this in the session server
         public OnSetSeedEvent OnSetSeed { get; set; }
         public OnLocatePlayersEvent OnLocatePlayers { get; set; }
         public OnPlayerInfoEvent OnPlayerInfo { get; set; }
         public OnFocusOnPlayer OnFocusOnPlayer { get; set; }
+        public OnChangeEquipment OnChangeEquipment { get; set; }
 
         const int serverUpdateRate = 30;
 
@@ -94,6 +96,7 @@ namespace OpenDiablo2.ServiceBus
 
             OnJoinGame += OnJoinGameHandler;
             OnMoveRequest += OnMovementRequestHandler;
+            OnUpdateEquipment += OnUpdateEquipmentHandler;
 
             var proactor = new NetMQProactor(responseSocket, (socket, message) =>
             {
@@ -225,6 +228,16 @@ namespace OpenDiablo2.ServiceBus
             Send(new MFPlayerInfo(gameServer.Players.Select(x => x.ToPlayerInfo())), true);
             Send(new MFLocatePlayers(gameServer.Players.Select(x => x.ToPlayerLocationDetails())), true);
             Send(new MFFocusOnPlayer(gameServer.Players.First(x => x.ClientHash == clientHash).UID));
+        }
+
+        private void OnUpdateEquipmentHandler(int clientHash, string Slot, ItemInstance itemInstance)
+        {
+            var player = gameServer.Players.FirstOrDefault(x => x.ClientHash == clientHash);
+            if (player == null)
+                return;
+
+            var equipment = gameServer.UpdateEquipment(clientHash, Slot, itemInstance);
+            Send(new MFChangeEquipment(player.UID, equipment));
         }
     }
 }

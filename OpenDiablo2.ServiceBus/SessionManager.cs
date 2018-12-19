@@ -26,6 +26,8 @@ using OpenDiablo2.Common.Attributes;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Exceptions;
 using OpenDiablo2.Common.Interfaces;
+using OpenDiablo2.Common.Models;
+using OpenDiablo2.Common.Models.Mobs;
 using OpenDiablo2.ServiceBus.Message_Frames.Client;
 using OpenDiablo2.ServiceBus.Message_Frames.Server;
 
@@ -51,6 +53,8 @@ namespace OpenDiablo2.ServiceBus
         public OnPlayerInfoEvent OnPlayerInfo { get; set; }
         public OnFocusOnPlayer OnFocusOnPlayer { get; set; }
         public OnMoveRequest OnMoveRequest { get; set; }
+        public OnUpdateEquipmentEvent OnUpdateEquipment { get; set; }
+        public OnChangeEquipment OnChangeEquipment { get; set; }
 
         public SessionManager(
             eSessionType sessionType,
@@ -176,5 +180,14 @@ namespace OpenDiablo2.ServiceBus
                 Send(new MFMoveRequest(targetCell, movementType));
                 ProcessMessageFrame<MFLocatePlayers>();
             });
+
+        public void UpdateEquipment(string slot, ItemInstance itemInstance)
+        {
+            Task.Run(() =>
+            {
+                Send(new MFUpdateEquipment(slot, itemInstance));
+                ProcessMessageFrame<MFChangeEquipment>();
+            });
+        }
     }
 }

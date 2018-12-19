@@ -6,6 +6,7 @@ using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Interfaces.Drawing;
 using OpenDiablo2.Common.Models;
+using OpenDiablo2.Common.Models.Mobs;
 
 namespace OpenDiablo2.Core.Map_Engine
 {
@@ -91,7 +92,6 @@ namespace OpenDiablo2.Core.Map_Engine
             }
         }
 
-
         private const int SkewX = 400;
         private const int SkewY = 300;
 
@@ -175,8 +175,8 @@ namespace OpenDiablo2.Core.Map_Engine
             var my = y - 300;
             return new PointF
             {
-                X = (float) Math.Round((mx / (float) CellSizeXHalf) + (my / (float) CellSizeYHalf) / 2f, 1) + _cameraLocation.X,
-                Y = (float) Math.Round((my / (float) CellSizeYHalf) - (mx / (float) CellSizeXHalf) / 2f, 1) + _cameraLocation.Y
+                X = (float)Math.Round((mx / (float)CellSizeXHalf) + (my / (float)CellSizeYHalf) / 2f, 1) + _cameraLocation.X,
+                Y = (float)Math.Round((my / (float)CellSizeYHalf) - (mx / (float)CellSizeXHalf) / 2f, 1) + _cameraLocation.Y
             };
         }
         /*

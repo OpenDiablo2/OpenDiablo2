@@ -68,7 +68,6 @@ namespace OpenDiablo2.Core
         public MPQCOF GetPlayerAnimation(eHero hero, eMobMode mobMode, PlayerEquipment equipment)
             => cache.AddOrGetExisting($"COF::{hero}{mobMode.ToToken()}{equipment.HashKey}", () =>
             {
-
                 var path = $"{ResourcePaths.PlayerAnimationBase}\\{hero.ToToken()}\\COF\\{hero.ToToken()}{mobMode.ToToken()}{equipment.WeaponClass.ToToken()}.cof";
                 return MPQCOF.Load(mpqProvider.GetStream(path), Animations, hero, mobMode, equipment);
             }, new System.Runtime.Caching.CacheItemPolicy { Priority = System.Runtime.Caching.CacheItemPriority.NotRemovable });

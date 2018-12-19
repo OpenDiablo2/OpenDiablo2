@@ -16,9 +16,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces;
 using OpenDiablo2.Common.Interfaces.Mobs;
+using OpenDiablo2.Common.Models;
 using OpenDiablo2.Common.Models.Mobs;
 using OpenDiablo2.Common.Services;
 
@@ -98,6 +100,15 @@ namespace OpenDiablo2.GameServer_
         
             mobManager.AddPlayer(newPlayer);
             return newPlayer.Id;
+        }
+
+        public PlayerEquipment UpdateEquipment(int clienthash, string slot, ItemInstance itemInstance)
+        {
+            var player = mobManager.Players.FirstOrDefault(x => x.ClientHash == clienthash);
+
+            player.Equipment.EquipItem(slot, itemInstance);
+
+            return player.Equipment;
         }
 
         public void Update(int ms)

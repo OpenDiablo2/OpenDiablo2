@@ -31,7 +31,7 @@ namespace OpenDiablo2.Common.Models.Mobs
                 else if (RightArm?.Item is Weapon)
                     return ((Weapon)RightArm.Item).WeaponClass.ToWeaponClass();
                 else
-                    return eWeaponClass.None;
+                    return eWeaponClass.HandToHand;
             }
         }
 
