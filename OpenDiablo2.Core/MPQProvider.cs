@@ -40,7 +40,7 @@ namespace OpenDiablo2.Core
             
             _mpqs = Directory
                 .EnumerateFiles(globalConfiguration.BaseDataPath, "*.mpq")
-                .Where(x => !(Path.GetFileName(x)?.StartsWith("patch") ?? false))
+                .Where(x => !(Path.GetFileName(x)?.StartsWith("patch", System.StringComparison.InvariantCultureIgnoreCase) ?? false))
                 .Select(file => new MPQ(file))
                 .ToList();
 
@@ -56,7 +56,7 @@ namespace OpenDiablo2.Core
             {
                 var path = Path.GetFileName(_mpqs[i].Path) ?? string.Empty;
                 
-                if (path.StartsWith("d2exp") || path.StartsWith("d2x"))
+                if (path.StartsWith("d2exp", System.StringComparison.InvariantCultureIgnoreCase) || path.StartsWith("d2x", System.StringComparison.InvariantCultureIgnoreCase))
                     continue;
 
                 foreach(var file in _mpqs[i].Files)
@@ -68,7 +68,7 @@ namespace OpenDiablo2.Core
             {
                 var path = Path.GetFileName(_mpqs[i].Path) ?? string.Empty;
                 
-                if (!path.StartsWith("d2exp") && !path.StartsWith("d2x"))
+                if (!path.StartsWith("d2exp", System.StringComparison.InvariantCultureIgnoreCase) && !path.StartsWith("d2x", System.StringComparison.InvariantCultureIgnoreCase))
                     continue;
 
                 foreach (var file in _mpqs[i].Files)
@@ -80,7 +80,7 @@ namespace OpenDiablo2.Core
 
             var patchMPQ = Directory
                 .EnumerateFiles(globalConfiguration.BaseDataPath, "*.mpq")
-                .Where(x => Path.GetFileName(x).StartsWith("patch"))
+                .Where(x => Path.GetFileName(x).StartsWith("patch", System.StringComparison.InvariantCultureIgnoreCase))
                 .Select(file => new MPQ(file, superListFile))
                 .First();
 
