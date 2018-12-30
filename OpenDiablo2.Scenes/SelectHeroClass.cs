@@ -94,6 +94,17 @@ namespace OpenDiablo2.Scenes
             campfireSprite = renderWindow.LoadSprite(ResourcePaths.CharacterSelectCampfire, Palettes.Fechar, new Point(380, 335));
             campfireSprite.Blend = true;
 
+            heroRenderInfo[eHero.None] = new HeroRenderInfo
+            {
+                Stance = eHeroStance.Idle,
+                IdleSprite = null,
+                IdleSelectedSprite = null,
+                ForwardWalkSprite = null,
+                ForwardWalkSpriteOverlay = null,
+                SelectedSprite = null,
+                BackWalkSprite = null
+            };
+
             heroRenderInfo[eHero.Barbarian] = new HeroRenderInfo
             {
                 Stance = eHeroStance.Idle,
