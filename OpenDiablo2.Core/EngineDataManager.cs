@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,18 +18,18 @@ namespace OpenDiablo2.Core
 
         private readonly IMPQProvider mpqProvider;
 
-        public ImmutableList<LevelDetail> Levels { get; internal set; }
-        public ImmutableList<LevelPreset> LevelPresets { get; internal set; }
-        public ImmutableList<LevelType> LevelTypes { get; internal set; }
-        public ImmutableList<ObjectInfo> Objects { get; internal set; }
-        public ImmutableList<ObjectTypeInfo> ObjectTypes { get; internal set; }
+        public List<LevelDetail> Levels { get; internal set; }
+        public List<LevelPreset> LevelPresets { get; internal set; }
+        public List<LevelType> LevelTypes { get; internal set; }
+        public List<ObjectInfo> Objects { get; internal set; }
+        public List<ObjectTypeInfo> ObjectTypes { get; internal set; }
 
-        public ImmutableList<Item> Items { get; internal set; }
-        public ImmutableDictionary<eHero, ILevelExperienceConfig> ExperienceConfigs { get; internal set; }
-        public ImmutableDictionary<eHero, IHeroTypeConfig> HeroTypeConfigs { get; internal set; }
-        public ImmutableList<IEnemyTypeConfig> EnemyTypeConfigs { get; internal set; } 
-        public ImmutableDictionary<int, IMissileTypeConfig> MissileTypeConfigs { get; internal set; }
-        public ImmutableDictionary<string, int> MissileTypeConfigsLookup { get; internal set; }
+        public List<Item> Items { get; internal set; }
+        public Dictionary<eHero, ILevelExperienceConfig> ExperienceConfigs { get; internal set; }
+        public Dictionary<eHero, IHeroTypeConfig> HeroTypeConfigs { get; internal set; }
+        public List<IEnemyTypeConfig> EnemyTypeConfigs { get; internal set; } 
+        public Dictionary<int, IMissileTypeConfig> MissileTypeConfigs { get; internal set; }
+        public Dictionary<string, int> MissileTypeConfigsLookup { get; internal set; }
 
         public EngineDataManager(IMPQProvider mpqProvider)
         {
@@ -55,9 +54,8 @@ namespace OpenDiablo2.Core
                 .Select(x => x.Split('\t'))
                 .Where(x => x.Count() >= 36 && x[0] != "Expansion")
                 .Select(x => x.ToLevelType())
-                .ToImmutableList();
+                .ToList();
 
-            
             log.Info("Loading level presets");
             LevelPresets = mpqProvider
                 .GetTextFile(ResourcePaths.LevelPreset)
@@ -66,8 +64,8 @@ namespace OpenDiablo2.Core
                 .Select(x => x.Split('\t'))
                 .Where(x => x.Count() >= 24 && x[0] != "Expansion")
                 .Select(x => x.ToLevelPreset())
-                .ToImmutableList();
-            
+                .ToList();
+
             log.Info("Loading level details");
             Levels = mpqProvider
                 .GetTextFile(ResourcePaths.LevelDetails)
@@ -76,7 +74,7 @@ namespace OpenDiablo2.Core
                 .Select(x => x.Split('\t'))
                 .Where(x => x.Count() > 80 && x[0] != "Expansion")
                 .Select(x => x.ToLevelDetail(LevelPresets, LevelTypes))
-                .ToImmutableList();
+                .ToList();
 
             log.Info("Loading objects");
             Objects = mpqProvider
@@ -86,7 +84,7 @@ namespace OpenDiablo2.Core
                 .Select(x => x.Split('\t'))
                 .Where(x => x.Count() > 150 && x[0] != "Expansion")
                 .Select(x => x.ToObjectInfo())
-                .ToImmutableList();
+                .ToList();
 
             log.Info("Loading object types");
             ObjectTypes = mpqProvider
@@ -96,17 +94,15 @@ namespace OpenDiablo2.Core
                 .Select(x => x.Split('\t'))
                 .Where(x => x.Count() == 3 && x[0] != "Expansion")
                 .Select(x => x.ToObjectTypeInfo())
-                .ToImmutableList();
-
-
+                .ToList();
         }
 
-        private ImmutableList<Item> LoadItemData()
+        private List<Item> LoadItemData()
             => new List<Item>()
                 .Concat(LoadWeaponData())
                 .Concat(LoadArmorData())
                 .Concat(LoadMiscData())
-                .ToImmutableList();
+                .ToList();
 
         private IEnumerable<Weapon> LoadWeaponData()
         {
@@ -153,7 +149,7 @@ namespace OpenDiablo2.Core
             HeroTypeConfigs = LoadHeroTypeConfig();
         }
 
-        private ImmutableDictionary<eHero, ILevelExperienceConfig> LoadExperienceConfig()
+        private Dictionary<eHero, ILevelExperienceConfig> LoadExperienceConfig()
             => mpqProvider
                 .GetTextFile(ResourcePaths.Experience)
                 .Where(x => !String.IsNullOrWhiteSpace(x))
@@ -161,7 +157,7 @@ namespace OpenDiablo2.Core
                 .ToArray()
                 .ToLevelExperienceConfigs();
 
-        private ImmutableDictionary<eHero, IHeroTypeConfig> LoadHeroTypeConfig()
+        private Dictionary<eHero, IHeroTypeConfig> LoadHeroTypeConfig()
             => mpqProvider
                 .GetTextFile(ResourcePaths.CharStats)
                 .Skip(1)
@@ -169,7 +165,7 @@ namespace OpenDiablo2.Core
                 .Select(x => x.Split('\t'))
                 .Where(x => x[0] != "Expansion")
                 .ToArray()
-                .ToImmutableDictionary(x => (eHero)Enum.Parse(typeof(eHero), x[0]), x => x.ToHeroTypeConfig());
+                .ToDictionary(x => (eHero)Enum.Parse(typeof(eHero), x[0]), x => x.ToHeroTypeConfig());
 
         private void LoadEnemyData()
         {
@@ -177,25 +173,23 @@ namespace OpenDiablo2.Core
             //EnemyTypeConfigs = LoadEnemyTypeConfig();
         }
 
-        private ImmutableList<IEnemyTypeConfig> LoadEnemyTypeConfig()
-            => mpqProvider
+        private List<IEnemyTypeConfig> LoadEnemyTypeConfig()
+            => (List<IEnemyTypeConfig>)mpqProvider
                 .GetTextFile(ResourcePaths.MonStats)
                 .Skip(1)
                 .Where(x => !String.IsNullOrWhiteSpace(x))
                 .Select(x => x.Split('\t'))
                 .Where(x => x[0] != "Expansion" && x[0] != "unused")
                 .ToArray()
-                .Select(x => x.ToEnemyTypeConfig())
-                .ToImmutableList();
+                .Select(x => x.ToEnemyTypeConfig());
 
         private void LoadSkillData()
         {
             MissileTypeConfigs = LoadMissileTypeConfig();
-            MissileTypeConfigsLookup = MissileTypeConfigs.Values
-                .ToImmutableDictionary(x => x.Name, x => x.Id);
+            MissileTypeConfigsLookup = MissileTypeConfigs.Values.ToDictionary(x => x.Name, x => x.Id);
         }
 
-        private ImmutableDictionary<int, IMissileTypeConfig> LoadMissileTypeConfig()
+        private Dictionary<int, IMissileTypeConfig> LoadMissileTypeConfig()
         {
             var data = mpqProvider
                 .GetTextFile(ResourcePaths.Missiles)
@@ -205,7 +199,7 @@ namespace OpenDiablo2.Core
                 .ToArray()
                 .Skip(1)
                 .Select(x => x.ToMissileTypeConfig())
-                .ToImmutableDictionary(x => x.Id, x => x);
+                .ToDictionary(x => x.Id, x => x);
 
             return data;
         }

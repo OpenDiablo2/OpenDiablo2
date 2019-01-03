@@ -1,22 +1,22 @@
 ﻿using OpenDiablo2.Common.Enums;
 using OpenDiablo2.Common.Interfaces.Mobs;
 using OpenDiablo2.Common.Models;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 
 namespace OpenDiablo2.Common.Interfaces
 {
     public interface IEngineDataManager
     {
-        ImmutableList<LevelDetail> Levels { get; }
-        ImmutableList<LevelPreset> LevelPresets { get; }
-        ImmutableList<LevelType> LevelTypes { get; }
-        ImmutableList<Item> Items { get; }
-        ImmutableDictionary<eHero, ILevelExperienceConfig> ExperienceConfigs { get; }
-        ImmutableDictionary<eHero, IHeroTypeConfig> HeroTypeConfigs { get; }
-        ImmutableList<IEnemyTypeConfig> EnemyTypeConfigs { get; }
-        ImmutableList<ObjectInfo> Objects { get; }
-        ImmutableList<ObjectTypeInfo> ObjectTypes { get; }
-        ImmutableDictionary<int, IMissileTypeConfig> MissileTypeConfigs { get; }
-        ImmutableDictionary<string, int> MissileTypeConfigsLookup { get; }
+        List<LevelDetail> Levels { get; }
+        List<LevelPreset> LevelPresets { get; }
+        List<LevelType> LevelTypes { get; }
+        List<Item> Items { get; }
+        Dictionary<eHero, ILevelExperienceConfig> ExperienceConfigs { get; }
+        Dictionary<eHero, IHeroTypeConfig> HeroTypeConfigs { get; }
+        List<IEnemyTypeConfig> EnemyTypeConfigs { get; }
+        List<ObjectInfo> Objects { get; }
+        List<ObjectTypeInfo> ObjectTypes { get; }
+        Dictionary<int, IMissileTypeConfig> MissileTypeConfigs { get; }
+        Dictionary<string, int> MissileTypeConfigsLookup { get; }
     }
 }
