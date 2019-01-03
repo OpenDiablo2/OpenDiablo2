@@ -15,7 +15,6 @@
  */
 
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace OpenDiablo2.Common.Enums
@@ -34,7 +33,7 @@ namespace OpenDiablo2.Common.Enums
 
     public static class eHeroExtensions
     {
-        public readonly static ImmutableDictionary<eHero, string> tokens = new Dictionary<eHero, string>
+        public readonly static Dictionary<eHero, string> tokens = new Dictionary<eHero, string>
         {
             { eHero.Amazon      , "AM" },
             { eHero.Sorceress   , "SO" },
@@ -43,7 +42,7 @@ namespace OpenDiablo2.Common.Enums
             { eHero.Barbarian   , "BA" },
             { eHero.Druid       , "DZ" },
             { eHero.Assassin    , "AI" }
-        }.ToImmutableDictionary();
+        };
 
         public static string ToToken(this eHero source) => tokens[source];
         public static eHero ToHero(this string source) => tokens.First(x => x.Value.ToUpper() == source.ToUpper()).Key;

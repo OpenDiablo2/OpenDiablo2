@@ -16,7 +16,6 @@
 
 using OpenDiablo2.Common.Enums;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Drawing;
 
 namespace OpenDiablo2.Common.Models
@@ -36,7 +35,7 @@ namespace OpenDiablo2.Common.Models
 
         public bool IsDarkenedWhenDisabled => DisabledFrame == -1;
 
-        public static ImmutableDictionary<eButtonType, ButtonLayout> Values { get; } = new Dictionary<eButtonType, ButtonLayout>
+        public static Dictionary<eButtonType, ButtonLayout> Values { get; } = new Dictionary<eButtonType, ButtonLayout>
         {
             {eButtonType.Wide,  new ButtonLayout { XSegments = 2, ResourceName = ResourcePaths.WideButtonBlank, PaletteName = Palettes.Units } },
             {eButtonType.Medium, new ButtonLayout{ ResourceName = ResourcePaths.MediumButtonBlank, PaletteName = Palettes.Units } },
@@ -52,7 +51,7 @@ namespace OpenDiablo2.Common.Models
             {eButtonType.MinipanelMessage, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = Palettes.Units, BaseFrame = 10 } },
             {eButtonType.MinipanelQuest, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = Palettes.Units, BaseFrame = 12 } },
             {eButtonType.MinipanelMenu, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = Palettes.Units, BaseFrame = 14 } },
-            
+
             {eButtonType.SecondaryInvHand, new ButtonLayout { ResourceName = ResourcePaths.InventoryWeaponsTab, PaletteName = Palettes.Units,
                 ClickableRect = new Rectangle(0, 0, 0, 20), AllowFrameChange = false } },
             {eButtonType.Run, new ButtonLayout { ResourceName = ResourcePaths.RunButton, PaletteName = Palettes.Units, Toggleable = true } },
@@ -60,7 +59,7 @@ namespace OpenDiablo2.Common.Models
             {eButtonType.GoldCoin, new ButtonLayout { ResourceName = ResourcePaths.GoldCoinButton, PaletteName = Palettes.Units } },
             {eButtonType.Close, new ButtonLayout { ResourceName = ResourcePaths.SquareButton, PaletteName = Palettes.Units, BaseFrame = 10 } },
             {eButtonType.Skill, new ButtonLayout { ResourceName = ResourcePaths.AddSkillButton, PaletteName = Palettes.Units, DisabledFrame = 2 } },
-        }.ToImmutableDictionary();
+        };
     }
 
 }

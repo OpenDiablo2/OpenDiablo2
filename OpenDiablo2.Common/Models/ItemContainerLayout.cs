@@ -15,7 +15,6 @@
  */
 
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using OpenDiablo2.Common.Enums;
 
 namespace OpenDiablo2.Common.Models
@@ -26,7 +25,7 @@ namespace OpenDiablo2.Common.Models
         public string PaletteName { get; internal set; } = Palettes.Units;
         public int BaseFrame { get; internal set; } = 0;
 
-        public static ImmutableDictionary<eItemContainerType, ItemContainerLayout> Values { get; } = new Dictionary<eItemContainerType, ItemContainerLayout>
+        public static Dictionary<eItemContainerType, ItemContainerLayout> Values { get; } = new Dictionary<eItemContainerType, ItemContainerLayout>
         {
             {eItemContainerType.Helm,  new ItemContainerLayout { ResourceName = ResourcePaths.HelmGlovePlaceholder,  BaseFrame = 1 } },
             {eItemContainerType.Amulet, new ItemContainerLayout{ ResourceName = ResourcePaths.RingAmuletPlaceholder  } },
@@ -36,7 +35,7 @@ namespace OpenDiablo2.Common.Models
             {eItemContainerType.Ring, new ItemContainerLayout { ResourceName = ResourcePaths.RingAmuletPlaceholder, BaseFrame = 1 } },
             {eItemContainerType.Glove, new ItemContainerLayout { ResourceName = ResourcePaths.HelmGlovePlaceholder } },
             {eItemContainerType.Boots, new ItemContainerLayout { ResourceName = ResourcePaths.BootsPlaceholder } },
-        }.ToImmutableDictionary();
+        };
     }
 
 }
