@@ -39,6 +39,7 @@ namespace OpenDiablo2.Scenes
         public MainMenu(
             IRenderWindow renderWindow,
             ISceneManager sceneManager,
+            ITextDictionary textDictionary,
             IResourceManager resourceManager,
             ISoundProvider soundProvider,
             IMPQProvider mpqProvider,
@@ -57,7 +58,7 @@ namespace OpenDiablo2.Scenes
             diabloLogoRightBlack = renderWindow.LoadSprite(ResourcePaths.Diablo2LogoBlackRight, Palettes.Units, new Point(400, 120));
 
             btnSinglePlayer = createButton(eButtonType.Wide);
-            btnSinglePlayer.Text = "Single Player".ToUpper();
+            btnSinglePlayer.Text = textDictionary.Translate("strStartMenu1");
             btnSinglePlayer.Location = new Point(264, 290);
             btnSinglePlayer.OnActivate = OnSinglePlayerClicked;
 
@@ -67,12 +68,12 @@ namespace OpenDiablo2.Scenes
             btnWebsite.OnActivate = OnVisitWebsiteClicked;
 
             btnExit = createButton(eButtonType.Wide);
-            btnExit.Text = "Exit Diablo II".ToUpper();
+            btnExit.Text = textDictionary.Translate("strexitentiregame");
             btnExit.Location = new Point(264, 500);
             btnExit.OnActivate = OnExitClicked;
 
             btnCredits = createButton(eButtonType.Short);
-            btnCredits.Text = "Credits".ToUpper(); /* TODO: We apparently need a 'half font' option... */
+            btnCredits.Text = textDictionary.Translate("strGameCredits"); /* TODO: We apparently need a 'half font' option... */
             btnCredits.Location = new Point(264, 470);
             btnCredits.OnActivate = OnCreditsClicked;
 
