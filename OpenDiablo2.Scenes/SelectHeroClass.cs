@@ -279,8 +279,7 @@ namespace OpenDiablo2.Scenes
         {
             StopSfx();
 
-            var heros = Enum.GetValues(typeof(eHero)).Cast<eHero>();
-            foreach (var hero in heros)
+            foreach (var hero in eHeroExtensions.all)
             {
                 heroRenderInfo[hero].SpecialFrameTime = 0;
                 heroRenderInfo[hero].Stance = eHeroStance.Idle;
@@ -291,7 +290,7 @@ namespace OpenDiablo2.Scenes
             okButton.Enabled = false;
             selectedHero = null;
 
-            sceneManager.ChangeScene(eSceneType.SelectCharacter);
+            sceneManager.ChangeScene(eSceneType.MainMenu);
         }
 
         public void Render()

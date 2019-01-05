@@ -14,6 +14,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -33,15 +34,25 @@ namespace OpenDiablo2.Common.Enums
 
     public static class eHeroExtensions
     {
+        public readonly static eHero[] all = {
+            eHero.Barbarian,
+            eHero.Necromancer,
+            eHero.Paladin,
+            eHero.Assassin,
+            eHero.Sorceress,
+            eHero.Amazon,
+            eHero.Druid,
+        };
+
         public readonly static Dictionary<eHero, string> tokens = new Dictionary<eHero, string>
         {
-            { eHero.Amazon      , "AM" },
-            { eHero.Sorceress   , "SO" },
+            { eHero.Barbarian   , "BA" },
             { eHero.Necromancer , "NE" },
             { eHero.Paladin     , "PA" },
-            { eHero.Barbarian   , "BA" },
+            { eHero.Assassin    , "AI" },
+            { eHero.Sorceress   , "SO" },
+            { eHero.Amazon      , "AM" },
             { eHero.Druid       , "DZ" },
-            { eHero.Assassin    , "AI" }
         };
 
         public static string ToToken(this eHero source) => tokens[source];
