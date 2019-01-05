@@ -290,7 +290,7 @@ namespace OpenDiablo2.Scenes
             okButton.Enabled = false;
             selectedHero = null;
 
-            sceneManager.ChangeScene(eSceneType.MainMenu);
+            sceneManager.ChangeScene(eSceneType.SelectCharacter);
         }
 
         public void Render()
