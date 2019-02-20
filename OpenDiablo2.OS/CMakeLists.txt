@@ -17,10 +17,3 @@ add_library(OpenDiablo2.OS
 target_link_libraries(OpenDiablo2.OS
     glfw
 )
-
-target_include_directories(OpenDiablo2.OS PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-    PRIVATE src
-)
-
