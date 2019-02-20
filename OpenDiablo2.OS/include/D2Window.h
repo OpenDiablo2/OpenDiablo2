@@ -2,9 +2,8 @@
 #define OPENDIABLO2_WINDOW_H
 
 #include <memory>
+#include <GLFW/glfw3.h>
 
-
-class GLFWwindow;
 
 namespace OpenDiablo2 { namespace OS {
 
