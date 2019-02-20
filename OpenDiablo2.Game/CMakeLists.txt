@@ -1,3 +1,4 @@
+add_executable(OpenDiablo2 src/main.cpp)
 
-
-add_executable(OpenDiablo2 main.cpp)
+include_directories(OpenDiablo2 ../OpenDiablo2.OS/include)
+target_link_libraries(OpenDiablo2 OpenDiablo2.OS)
