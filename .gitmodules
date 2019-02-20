@@ -1,4 +1,4 @@
-[submodule "bgfx.cmake"]
+[submodule "3rdparty/bgfx"]
 	path = 3rdparty/bgfx
 	url = https://github.com/JoshuaBrookover/bgfx.cmake.git
 [submodule "3rdparty/glfw"]
