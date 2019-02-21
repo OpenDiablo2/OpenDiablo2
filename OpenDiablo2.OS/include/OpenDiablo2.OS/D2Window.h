@@ -2,23 +2,22 @@
 #define OPENDIABLO2_WINDOW_H
 
 #include <memory>
-#include <GLFW/glfw3.h>
 
+
+class GLFWwindow;
 
 namespace OpenDiablo2 { namespace OS {
 
 class D2Window {
 public:
 	D2Window();
-	void Run();
+	void Initialize();
+	void Finalize();
+	bool WindowStillOpen();
+	void FlipBuffer();
+	void PollEvents();
 private:
 	GLFWwindow* glfwWindow;
-
-	void
-	InitializeWindow();
-
-	void
-	FinalizeWindow();
 };
 
 typedef std::unique_ptr<D2Window> D2WindowPtr;

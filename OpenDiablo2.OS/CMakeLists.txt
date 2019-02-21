@@ -1,19 +1,19 @@
 project(libOpenDiablo2.OS VERSION 0.1 LANGUAGES CXX)
 
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(../3rdparty/glfw build)
-
 include_directories(
     include
     ../3rdparty/glfw/include
+    ../3rdparty/spdlog/include
 )
 
-add_library(OpenDiablo2.OS
+add_library(OpenDiablo2.OS SHARED
     src/D2Window.cpp
 )
 
-target_link_libraries(OpenDiablo2.OS
-    glfw
-)
+target_link_libraries(OpenDiablo2.OS glfw)
+
+if(MSVC)
+    target_compile_options(OpenDiablo2.OS PRIVATE /W4 /WX)
+else(MSVC)
+    target_compile_options(OpenDiablo2.OS PRIVATE -Wall -Wextra -pedantic -Werror)
+endif(MSVC)
