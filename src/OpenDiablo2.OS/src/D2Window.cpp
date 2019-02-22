@@ -21,7 +21,7 @@ namespace OpenDiablo2 {
 			spdlog::debug("Creating GLFW window");
 			glfwWindowHint(GLFW_RESIZABLE, 0);
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 			glfwWindow = glfwCreateWindow(800, 600, "OpenDiablo 2", nullptr, nullptr);
 		}
 

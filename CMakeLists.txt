@@ -10,12 +10,13 @@ include(CTest)
 include(CMakeDependentOption)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CXX_STANDARD 17)
 set(OpenGL_GL_PREFERENCE "GLVND")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 add_subdirectory(3rdparty)
 
-add_subdirectory(OpenDiablo2.OS)
-add_subdirectory(OpenDiablo2.Graphics)
-add_subdirectory(OpenDiablo2.Game)
+add_subdirectory(src/OpenDiablo2.OS)
+add_subdirectory(src/OpenDiablo2.Graphics)
+add_subdirectory(src/OpenDiablo2.Game)
