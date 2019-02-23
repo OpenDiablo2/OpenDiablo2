@@ -1,9 +1,0 @@
-[submodule "3rdparty/spdlog"]
-	path = 3rdparty/spdlog
-	url = git@github.com:gabime/spdlog.git
-[submodule "3rdparty/stormlib"]
-	path = 3rdparty/stormlib
-	url = git@github.com:ladislav-zezula/StormLib.git
-[submodule "3rdparty/cli11"]
-	path = 3rdparty/cli11
-	url = git@github.com:CLIUtils/CLI11.git
