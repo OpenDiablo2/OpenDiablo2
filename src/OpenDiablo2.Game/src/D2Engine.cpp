@@ -1,21 +1,25 @@
 #include <OpenDiablo2.Game/D2Engine.h>
 
 
-OpenDiablo2::Game::D2Engine::D2Engine() {
-	window = std::make_unique<OpenDiablo2::OS::D2Window>();
-	gfx = std::make_unique<OpenDiablo2::Graphics::D2Graphics>();
+OpenDiablo2::Game::D2Engine::D2Engine(const D2EngineConfig &config)
+: config(config) {
+	gfx = std::make_unique<OpenDiablo2::System::D2Graphics>();
+	input = std::make_unique<OpenDiablo2::System::D2Input>();
 }
 
 void
 OpenDiablo2::Game::D2Engine::Run() {
-	window->Initialize();
+	gfx->InitializeWindow();
 
-	while (window->WindowStillOpen()) {
-		window->PollEvents();
+	while (isRunning) {
+		input->ProcessEvents();
+		if (input->QuitIsRequested()) {
+			isRunning = false;
+			break;
+		}
 		gfx->Clear();
 
-		window->FlipBuffer();
+		gfx->Present();
 	}
-
-	window->Finalize();
 }
+
