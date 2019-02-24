@@ -1,0 +1,12 @@
+[submodule "3rdparty/sdl2"]
+	path = 3rdparty/sdl2
+	url = https://github.com/SDL-mirror/SDL.git
+[submodule "3rdparty/spdlog"]
+	path = 3rdparty/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "3rdparty/cli11"]
+	path = 3rdparty/cli11
+	url = https://github.com/CLIUtils/CLI11.git
+[submodule "3rdparty/stormlib"]
+	path = 3rdparty/stormlib
+	url = https://github.com/ladislav-zezula/StormLib.git
