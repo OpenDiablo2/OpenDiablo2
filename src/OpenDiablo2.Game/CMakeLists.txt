@@ -10,6 +10,8 @@ set (HEADERS
 	include/OpenDiablo2.Game/D2Engine.h
 	include/OpenDiablo2.Game/D2EngineConfig.h
 	include/OpenDiablo2.Game/Common/D2Palette.h
+	include/OpenDiablo2.Game/Common/D2Point.h
+	include/OpenDiablo2.Game/Common/D2Size.h
 	include/OpenDiablo2.Game/Scenes/D2Scene.h
 	include/OpenDiablo2.Game/Scenes/D2MainMenu.h
 )

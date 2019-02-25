@@ -3,6 +3,7 @@ project(OpenDiablo2.SDL2 VERSION 0.1 LANGUAGES CXX)
 set (SOURCES
 	src/D2Graphics.cpp
 	src/D2Input.cpp
+	src/D2Sprite.cpp
 )
 
 set (HEADERS
