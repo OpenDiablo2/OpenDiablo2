@@ -1,9 +1,16 @@
 project(OpenDiablo2.SDL2 VERSION 0.1 LANGUAGES CXX)
 
-add_library(OpenDiablo2.SDL2 STATIC
+set (SOURCES 
     src/D2Graphics.cpp
     src/D2Input.cpp
 )
+
+set (HEADERS
+    include/OpenDiablo2.System/D2Graphics.h
+    include/OpenDiablo2.System/D2Input.h
+)
+
+add_library(OpenDiablo2.SDL2 SHARED ${SOURCES} ${HEADERS})
 
 target_include_directories(OpenDiablo2.SDL2
     PUBLIC
@@ -14,5 +21,5 @@ target_include_directories(OpenDiablo2.SDL2
 
 target_link_libraries(OpenDiablo2.SDL2
         spdlog::spdlog
-        SDL2
+        SDL2-static
 )

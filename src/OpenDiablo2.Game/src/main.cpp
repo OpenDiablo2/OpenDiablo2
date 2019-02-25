@@ -37,8 +37,8 @@ main(int    argc,
 	SFileCloseFile(mpq);
 	spdlog::info("Content files were located, starting engine.");
 
-	// Start up the engine
-	auto engine = std::make_unique<OpenDiablo2::Game::D2Engine>(engineConfig);
+	// Off to the races we go!
+	auto engine = std::make_shared<OpenDiablo2::Game::D2Engine>(engineConfig);
 	engine->Run();
 
 	return 0;

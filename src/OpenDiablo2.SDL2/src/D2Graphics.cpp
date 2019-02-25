@@ -34,7 +34,7 @@ namespace OpenDiablo2 {
 				exit(1);
 			}
 
-			spdlog::debug("Destroying SDL renderer");
+			spdlog::debug("Initializing SDL renderer");
 			renderer = std::unique_ptr<SDL_Renderer, SDLRendererDestroyer>(SDL_CreateRenderer(window.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC));
 			if (renderer == nullptr){
 				spdlog::error("Could not create sdl2 window: " + std::string(SDL_GetError()));

@@ -56,6 +56,10 @@ set( BGFX_CONFIG_DEBUG     OFF )
 set( SDL_STATIC_PIC        ON  )
 set( SDL_SHARED            OFF )
 set( BUILD_SHARED_LIBS     OFF )
+set( CMAKE_CXX_STANDARD    17  )
+set( CXX_STANDARD          17  )
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/spdlog   spdlog)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/cli11    cli11)
