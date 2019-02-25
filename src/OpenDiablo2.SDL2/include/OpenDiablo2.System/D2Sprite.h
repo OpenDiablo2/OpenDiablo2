@@ -9,6 +9,10 @@ namespace OpenDiablo2::System {
 
 class D2Sprite {
 public:
+	D2Sprite();
+	D2Sprite(std::string resourcePath, std::string palette, Game::Common::D2Point location, bool cacheFrames = false);
+	D2Sprite(std::string resourcePath, std::string palette, bool cacheFrames = false);
+
 	int Frame;
 	int TotalFrames;
 	bool Blend;
@@ -18,11 +22,7 @@ public:
 	OpenDiablo2::Game::Common::D2Size LocalFrameSize;
 	OpenDiablo2::Game::Common::D2Palette::Entry CurrentPalette;
 
-	static D2Sprite * Load(std::string resourcePath, std::string palette, Game::Common::D2Point location, bool cacheFrames = false);
-	static D2Sprite * Load(std::string resourcePath, std::string palette, bool cacheFrames = false);
 
-private:
-	D2Sprite();
 };
 
 }
