@@ -28,6 +28,8 @@ struct SDLRendererDestroyer
 	}
 };
 
+
+
 class D2Graphics
 {
 public:

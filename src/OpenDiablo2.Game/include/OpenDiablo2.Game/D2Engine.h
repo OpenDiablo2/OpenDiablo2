@@ -3,6 +3,7 @@
 
 #include <stack>
 #include <memory>
+#include <OpenDiablo2.Game/D2DataManager.h>
 #include <OpenDiablo2.System/D2Graphics.h>
 #include <OpenDiablo2.System/D2Input.h>
 #include <OpenDiablo2.Game/Scenes/D2Scene.h>
@@ -20,15 +21,13 @@ public:
 	// Runs the engine
 	void Run();
 
+	OpenDiablo2::Game::D2DataManager::Ptr dataManager;
+	OpenDiablo2::System::D2Graphics::Ptr gfx;
+	OpenDiablo2::System::D2Input::Ptr input;
+
 private:
 	// Represents the engine configuration
 	const D2EngineConfig config;
-
-	// The graphics subsystem
-	OpenDiablo2::System::D2Graphics::Ptr gfx;
-
-	// The input subsystem
-	OpenDiablo2::System::D2Input::Ptr input;
 
 	// Indicates the system should keep running (if set to true)
 	bool isRunning = true;

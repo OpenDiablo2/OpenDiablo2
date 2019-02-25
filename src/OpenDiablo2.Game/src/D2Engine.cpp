@@ -3,10 +3,11 @@
 
 
 OpenDiablo2::Game::D2Engine::D2Engine(const D2EngineConfig &config)
-: config(config) {
-	gfx = std::make_unique<OpenDiablo2::System::D2Graphics>();
-	input = std::make_unique<OpenDiablo2::System::D2Input>();
-}
+: config(config)
+, gfx(std::make_unique<OpenDiablo2::System::D2Graphics>())
+, input(std::make_unique<OpenDiablo2::System::D2Input>())
+, dataManager(std::make_unique<OpenDiablo2::Game::D2DataManager>(config))
+{ }
 
 void
 OpenDiablo2::Game::D2Engine::Run() {
