@@ -4,7 +4,7 @@
 #include <string>
 
 namespace OpenDiablo2::Game::Common {
-class Palette {
+class D2Palette {
 public:
 	typedef std::string Entry;
 	const Entry Act1 = "ACT1";
