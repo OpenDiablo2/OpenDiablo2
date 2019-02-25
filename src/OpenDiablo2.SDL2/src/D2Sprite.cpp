@@ -14,9 +14,9 @@ OpenDiablo2::System::D2Sprite::D2Sprite()
 
 OpenDiablo2::System::D2Sprite *
 OpenDiablo2::System::D2Sprite::Load(
-	std::string           resourcePath,
-	std::string           palette,
-	bool                  cacheFrames)
+	std::string resourcePath,
+	std::string palette,
+	bool        cacheFrames)
 {
 	return Load(resourcePath, palette, OpenDiablo2::Game::Common::D2Point {0, 0}, cacheFrames);
 }

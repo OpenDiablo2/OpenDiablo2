@@ -5,8 +5,10 @@
 
 namespace fs = std::experimental::filesystem;
 
-OpenDiablo2::Game::D2DataManager::D2DataManager(const D2EngineConfig &engineConfig)
-: fileEntries() {
+OpenDiablo2::Game::D2DataManager::D2DataManager(
+	const D2EngineConfig &engineConfig)
+: fileEntries()
+{
 	spdlog::info("Loading data files");
 	auto mpqExt = std::string(".mpq");
 	for (auto &p : fs::recursive_directory_iterator(engineConfig.BasePath))

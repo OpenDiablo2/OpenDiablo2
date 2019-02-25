@@ -7,8 +7,9 @@
 #include <StormLib.h>
 
 int
-main(int    argc,
-	 char** argv)
+main(
+	int    argc,
+	char** argv)
 {
 	spdlog::set_level(spdlog::level::trace);
 	spdlog::set_pattern("[%^%l%$] %v");
