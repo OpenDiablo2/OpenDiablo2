@@ -11,18 +11,24 @@ set (HEADERS
 	include/OpenDiablo2.System/D2Input.h
 )
 
+find_package(SDL2 REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+
 add_library(OpenDiablo2.SDL2 SHARED ${SOURCES} ${HEADERS})
 
 target_include_directories(OpenDiablo2.SDL2
 	PUBLIC
 		include
 	PRIVATE
+		../Common
+		../OpenDiablo2.Game/include
 		include
+		sdl2::sdl2
+		SDL2::SDL2main
 )
 
 target_link_libraries(OpenDiablo2.SDL2
-	spdlog::spdlog
-	SDL2-static
+	${SDL2_LIBRARY}
 )
 
 set_target_properties(OpenDiablo2.SDL2 PROPERTIES

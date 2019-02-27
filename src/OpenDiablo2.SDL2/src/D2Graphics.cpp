@@ -1,5 +1,5 @@
-#include <OpenDiablo2.System/D2Graphics.h>
 #include <spdlog/spdlog.h>
+#include <OpenDiablo2.System/D2Graphics.h>
 #include <string>
 #include <SDL2/SDL.h>
 
