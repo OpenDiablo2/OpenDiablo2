@@ -1,5 +1,5 @@
 #include <OpenDiablo2.System/D2Sprite.h>
-#include <OpenDiablo2.Game/Common/D2Palette.h>
+#include <OpenDiablo2.Common/D2Palette.h>
 
 OpenDiablo2::System::D2Sprite::D2Sprite()
 {

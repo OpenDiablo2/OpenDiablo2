@@ -1,9 +1,9 @@
 #ifndef OPENDIABLO2_SYSTEM_D2SPRITE_H
 #define OPENDIABLO2_SYSTEM_D2SPRITE_H
 
-#include <OpenDiablo2.Game/Common/D2Palette.h>
-#include <OpenDiablo2.Game/Common/D2Point.h>
-#include <OpenDiablo2.Game/Common/D2Size.h>
+#include <OpenDiablo2.Common/D2Palette.h>
+#include <OpenDiablo2.Common/D2Point.h>
+#include <OpenDiablo2.Common/D2Size.h>
 
 namespace OpenDiablo2::System {
 

@@ -19,8 +19,8 @@ target_include_directories(OpenDiablo2.SDL2
 	PUBLIC
 		include
 	PRIVATE
-		../Common
-		../OpenDiablo2.Game/include
+		../ExtraUtils
+		../OpenDiablo2.Common/include
 		include
 		sdl2::sdl2
 		SDL2::SDL2main
