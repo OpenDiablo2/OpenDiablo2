@@ -17,8 +17,6 @@ set (HEADERS
 	include/OpenDiablo2.Game/Scenes/D2MainMenu.h
 )
 
-find_package(CLI11 REQUIRED)
-
 add_executable(OpenDiablo2.Game ${SOURCES} ${HEADERS})
 
 include_directories(OpenDiablo2.Game
@@ -31,7 +29,6 @@ include_directories(OpenDiablo2.Game
 target_link_libraries(OpenDiablo2.Game
 	OpenDiablo2.SDL2
 	storm
-	CLI11::CLI11
 	stdc++fs
 )
 

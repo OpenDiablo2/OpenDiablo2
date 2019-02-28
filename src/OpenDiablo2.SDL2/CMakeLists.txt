@@ -12,7 +12,6 @@ set (HEADERS
 )
 
 find_package(SDL2 REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
 
 add_library(OpenDiablo2.SDL2 SHARED ${SOURCES} ${HEADERS})
 

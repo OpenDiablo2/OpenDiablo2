@@ -25,6 +25,7 @@ project(OpenDiablo2 VERSION 0.1
         DESCRIPTION "An open source Diablo2 engine.")
 # ----------------------------------------------------------------------------------------------------------------------
 
+enable_language(CXX)
 
 # Freaky relocatable exe stuff -----------------------------------------------------------------------------------------
 set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "")
