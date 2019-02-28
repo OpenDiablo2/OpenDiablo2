@@ -1,9 +1,9 @@
-#ifndef OPENDIABLO2_GAME_COMMON_D2RESOURCEPATH_H
-#define OPENDIABLO2_GAME_COMMON_D2RESOURCEPATH_H
+#ifndef OPENDIABLO2_COMMON_D2RESOURCEPATH_H
+#define OPENDIABLO2_COMMON_D2RESOURCEPATH_H
 
 #include <string>
 
-namespace OpenDiablo2::Game::Common {
+namespace OpenDiablo2::Common {
 
 class D2ResourcePath {
 public:
@@ -464,4 +464,4 @@ const std::string D2ResourcePath::Missiles = "data\\global\\excel\\missiles.txt"
 
 }
 
-#endif // OPENDIABLO2_GAME_COMMON_D2RESOURCEPATH_H
+#endif // OPENDIABLO2_COMMON_D2RESOURCEPATH_H

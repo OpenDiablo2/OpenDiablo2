@@ -1,9 +1,9 @@
-#ifndef OPENDIABLO2_GAME_COMMON_D2PALETTE_H
-#define OPENDIABLO2_GAME_COMMON_D2PALETTE_H
+#ifndef OPENDIABLO2_COMMON_D2PALETTE_H
+#define OPENDIABLO2_COMMON_D2PALETTE_H
 
 #include <string>
 
-namespace OpenDiablo2::Game::Common {
+namespace OpenDiablo2::Common {
 class D2Palette {
 public:
 	typedef std::string Entry;
@@ -52,4 +52,4 @@ const D2Palette::Entry D2Palette::Units = "Units";
 
 }
 
-#endif // OPENDIABLO2_GAME_COMMON_PALETTE_H
+#endif // OPENDIABLO2_COMMON_D2PALETTE_H

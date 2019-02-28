@@ -1,7 +1,7 @@
-#ifndef OPENDIABLO2_GAME_COMMON_D2POINT_H
-#define OPENDIABLO2_GAME_COMMON_D2POINT_H
+#ifndef OPENDIABLO2_COMMON_D2POINT_H
+#define OPENDIABLO2_COMMON_D2POINT_H
 
-namespace OpenDiablo2::Game::Common {
+namespace OpenDiablo2::Common {
 
 struct D2Point {
 	int X;
@@ -10,4 +10,4 @@ struct D2Point {
 
 }
 
-#endif // OPENDIABLO2_GAME_COMMON_D2POINT_H
+#endif // OPENDIABLO2_COMMON_D2POINT_H

@@ -1,11 +1,11 @@
 #include <experimental/filesystem>
 #include <spdlog/spdlog.h>
 #include <StormLib.h>
-#include <OpenDiablo2.Game/D2DataManager.h>
+#include <OpenDiablo2.Common/D2DataManager.h>
 
 namespace fs = std::experimental::filesystem;
 
-OpenDiablo2::Game::D2DataManager::D2DataManager(
+OpenDiablo2::Common::D2DataManager::D2DataManager(
 	const D2EngineConfig &engineConfig)
 : fileEntries()
 {

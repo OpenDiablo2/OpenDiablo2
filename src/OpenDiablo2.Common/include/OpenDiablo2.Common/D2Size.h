@@ -1,7 +1,7 @@
-#ifndef OPENDIABLO2_GAME_COMMON_D2SIZE_H
-#define OPENDIABLO2_GAME_COMMON_D2SIZE_H
+#ifndef OPENDIABLO2_COMMON_D2SIZE_H
+#define OPENDIABLO2_COMMON_D2SIZE_H
 
-namespace OpenDiablo2::Game::Common {
+namespace OpenDiablo2::Common {
 
 struct D2Size {
 	int Width;
@@ -10,4 +10,4 @@ struct D2Size {
 
 }
 
-#endif // OPENDIABLO2_GAME_COMMON_D2SIZE_H
+#endif // OPENDIABLO2_COMMON_D2SIZE_H

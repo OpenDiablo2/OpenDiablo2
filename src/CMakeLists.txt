@@ -33,6 +33,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "")
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Import the actual projects -------------------------------------------------------------------------------------------
+add_subdirectory(OpenDiablo2.Common)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/OpenDiablo2.Common/include)
+
 add_subdirectory(OpenDiablo2.SDL2)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/OpenDiablo2.SDL2/include)
 

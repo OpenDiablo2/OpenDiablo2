@@ -1,12 +1,12 @@
-#ifndef OPENDIABLO2_GAME_D2DATAMANAGER_H
-#define OPENDIABLO2_GAME_D2DATAMANAGER_H
+#ifndef OPENDIABLO2_COMMON_D2DATAMANAGER_H
+#define OPENDIABLO2_COMMON_D2DATAMANAGER_H
 
 #include <memory>
 #include <map>
 #include <string>
-#include <OpenDiablo2.Game/D2EngineConfig.h>
+#include <OpenDiablo2.Common/D2EngineConfig.h>
 
-namespace OpenDiablo2::Game {
+namespace OpenDiablo2::Common {
 
 class D2DataManager {
 public:
@@ -18,4 +18,4 @@ private:
 
 }
 
-#endif // OPENDIABLO2_GAME_D2DATAMANAGER_H
+#endif // OPENDIABLO2_COMMON_D2DATAMANAGER_H

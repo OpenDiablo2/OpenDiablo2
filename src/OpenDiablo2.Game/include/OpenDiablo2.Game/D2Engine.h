@@ -3,11 +3,11 @@
 
 #include <stack>
 #include <memory>
-#include <OpenDiablo2.Game/D2DataManager.h>
+#include <OpenDiablo2.Common/D2DataManager.h>
 #include <OpenDiablo2.System/D2Graphics.h>
 #include <OpenDiablo2.System/D2Input.h>
 #include <OpenDiablo2.Game/Scenes/D2Scene.h>
-#include "D2EngineConfig.h"
+#include "OpenDiablo2.Common/D2EngineConfig.h"
 
 namespace OpenDiablo2::Game
 {
@@ -16,18 +16,18 @@ namespace OpenDiablo2::Game
 class D2Engine : public std::enable_shared_from_this<D2Engine>
 {
 public:
-	D2Engine(const D2EngineConfig &config);
+	D2Engine(const Common::D2EngineConfig &config);
 
 	// Runs the engine
 	void Run();
 
-	OpenDiablo2::Game::D2DataManager::Ptr dataManager;
+	OpenDiablo2::Common::D2DataManager::Ptr dataManager;
 	OpenDiablo2::System::D2Graphics::Ptr gfx;
 	OpenDiablo2::System::D2Input::Ptr input;
 
 private:
 	// Represents the engine configuration
-	const D2EngineConfig config;
+	const Common::D2EngineConfig config;
 
 	// Indicates the system should keep running (if set to true)
 	bool isRunning = true;

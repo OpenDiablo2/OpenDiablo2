@@ -17,7 +17,7 @@ main(
 
 	CLI::App app{"OpenDiablo2 - An open source re-implementation of Diablo 2."};
 
-	OpenDiablo2::Game::D2EngineConfig engineConfig;
+	OpenDiablo2::Common::D2EngineConfig engineConfig;
 	engineConfig.BasePath = std::experimental::filesystem::current_path().string();
 
 	app.add_option("-p,--path", engineConfig.BasePath, "The base path for Diablo 2");

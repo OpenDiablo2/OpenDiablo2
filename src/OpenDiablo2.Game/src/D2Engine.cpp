@@ -2,11 +2,11 @@
 #include <OpenDiablo2.Game/Scenes/D2MainMenu.h>
 
 OpenDiablo2::Game::D2Engine::D2Engine(
-	const D2EngineConfig &config)
+	const Common::D2EngineConfig &config)
 : config(config)
 , gfx(std::make_unique<OpenDiablo2::System::D2Graphics>())
 , input(std::make_unique<OpenDiablo2::System::D2Input>())
-, dataManager(std::make_unique<OpenDiablo2::Game::D2DataManager>(config))
+, dataManager(std::make_unique<OpenDiablo2::Common::D2DataManager>(config))
 { }
 
 void
