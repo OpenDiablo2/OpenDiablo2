@@ -1,4 +1,4 @@
 #!/bin/bash
-go get -d ./src/App
+go get ./src/App
 golangci-lint run ./src/App
 go build ./src/App
