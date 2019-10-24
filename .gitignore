@@ -1,4 +1,2 @@
-cmake-build-*
-.idea
-.vscode
-build/
+__debug_bin
+.vscode/*.*
