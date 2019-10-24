@@ -1,4 +1,4 @@
-# OpenDiablo2 [![Build status](https://ci.appveyor.com/api/projects/status/jx83as0ku784r5vh?svg=true)](https://ci.appveyor.com/project/essial/opendiablo2)
+# OpenDiablo2 [![Build Status](https://travis-ci.org/essial/OpenDiablo2.svg?branch=master)](https://travis-ci.org/essial/OpenDiablo2)
 
 [Join us on Discord!](https://discord.gg/pRy8tdc)\
 [Development Live stream](https://www.twitch.tv/essial/)
