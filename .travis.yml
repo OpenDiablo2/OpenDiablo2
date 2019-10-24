@@ -1,13 +1,6 @@
-dist: xenial
 language: go
-go:
-  - 1.13.x
+script: buildci.sh
 git:
   depth: 1
 notifications:
   email: false
-before_script:
-  - go get -d ./src/App
-script:
-  - golangci-lint run ./src/App
-  - go  build ./src/App
