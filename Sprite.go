@@ -2,6 +2,7 @@ package OpenDiablo2
 
 import (
 	"encoding/binary"
+	"image/color"
 	"time"
 
 	"github.com/hajimehoshi/ebiten"
@@ -16,6 +17,7 @@ type Sprite struct {
 	Blend              bool
 	LastFrameTime      time.Time
 	Animate            bool
+	ColorMod           color.Color
 }
 
 type SpriteFrame struct {
@@ -38,6 +40,7 @@ func CreateSprite(data []byte, palette Palette) Sprite {
 		Frame:              0,
 		Direction:          0,
 		Blend:              false,
+		ColorMod:           nil,
 		Directions:         binary.LittleEndian.Uint32(data[16:20]),
 		FramesPerDirection: binary.LittleEndian.Uint32(data[20:24]),
 		Animate:            false,
@@ -149,7 +152,9 @@ func (v *Sprite) Draw(target *ebiten.Image) {
 	if v.Blend {
 		opts.CompositeMode = ebiten.CompositeModeLighter
 	}
-	//opts.ColorM.ChangeHSV(0.0, 1.0, 0.9)
+	if v.ColorMod != nil {
+		opts.ColorM = ColorToColorM(v.ColorMod)
+	}
 	target.DrawImage(frame.Image, opts)
 }
 
@@ -166,6 +171,12 @@ func (v *Sprite) DrawSegments(target *ebiten.Image, xSegments, ySegments, offset
 				float64(int32(v.X)+frame.OffsetX+xOffset),
 				float64(int32(v.Y)+frame.OffsetY+yOffset),
 			)
+			if v.Blend {
+				opts.CompositeMode = ebiten.CompositeModeLighter
+			}
+			if v.ColorMod != nil {
+				opts.ColorM = ColorToColorM(v.ColorMod)
+			}
 			target.DrawImage(frame.Image, opts)
 			xOffset += int32(frame.Width)
 			biggestYOffset = MaxInt32(biggestYOffset, int32(frame.Height))

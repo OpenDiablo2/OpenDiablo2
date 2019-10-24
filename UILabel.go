@@ -1,7 +1,17 @@
 package OpenDiablo2
 
 import (
+	"image/color"
+
 	"github.com/hajimehoshi/ebiten"
+)
+
+type UILabelAlignment uint8
+
+const (
+	UILabelAlignLeft   UILabelAlignment = 0
+	UILabelAlignCenter UILabelAlignment = 1
+	UILabelAlignRight  UILabelAlignment = 2
 )
 
 type UILabel struct {
@@ -10,14 +20,18 @@ type UILabel struct {
 	Y         int
 	Width     uint32
 	Height    uint32
+	Alignment UILabelAlignment
 	font      *MPQFont
 	imageData *ebiten.Image
+	ColorMod  color.Color
 }
 
 // CreateUILabel creates a new instance of a UI label
 func CreateUILabel(engine *Engine, font, palette string) *UILabel {
 	result := &UILabel{
-		font: engine.GetFont(font, palette),
+		Alignment: UILabelAlignLeft,
+		ColorMod:  nil,
+		font:      engine.GetFont(font, palette),
 	}
 
 	return result
@@ -30,7 +44,14 @@ func (v *UILabel) Draw(target *ebiten.Image) {
 	}
 	v.cacheImage()
 	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(float64(v.X), float64(v.Y))
+
+	if v.Alignment == UILabelAlignCenter {
+		opts.GeoM.Translate(float64(v.X-int(v.Width/2)), float64(v.Y))
+	} else if v.Alignment == UILabelAlignRight {
+		opts.GeoM.Translate(float64(v.X-int(v.Width)), float64(v.Y))
+	} else {
+		opts.GeoM.Translate(float64(v.X), float64(v.Y))
+	}
 	opts.CompositeMode = ebiten.CompositeModeSourceAtop
 	opts.Filter = ebiten.FilterNearest
 	target.DrawImage(v.imageData, opts)
@@ -39,7 +60,7 @@ func (v *UILabel) Draw(target *ebiten.Image) {
 func (v *UILabel) calculateSize() (uint32, uint32) {
 	width := uint32(0)
 	height := uint32(0)
-	for ch := range v.text {
+	for _, ch := range v.text {
 		metric := v.font.Metrics[uint8(ch)]
 		width += uint32(metric.Width)
 		height = Max(height, uint32(metric.Height))
@@ -61,11 +82,12 @@ func (v *UILabel) cacheImage() {
 	v.Height = height
 	v.imageData, _ = ebiten.NewImage(int(width), int(height), ebiten.FilterNearest)
 	x := uint32(0)
+	v.font.FontSprite.ColorMod = v.ColorMod
 	for _, ch := range v.text {
 		char := uint8(ch)
 		metric := v.font.Metrics[char]
 		v.font.FontSprite.Frame = char
-		v.font.FontSprite.MoveTo(v.X+int(x), int(v.Height))
+		v.font.FontSprite.MoveTo(int(x), int(height))
 		v.font.FontSprite.Draw(v.imageData)
 		x += uint32(metric.Width)
 	}
