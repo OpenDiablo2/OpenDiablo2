@@ -80,42 +80,43 @@ func CreateSprite(data []byte, palette Palette) Sprite {
 
 		x := uint32(0)
 		y := uint32(result.Frames[i].Height - 1)
-		for true {
-			b := data[dataPointer]
-			dataPointer++
-			if b == 0x80 {
-				if y == 0 {
-					break
+		go func(ix, dataPointer uint32) {
+			for true {
+				b := data[dataPointer]
+				dataPointer++
+				if b == 0x80 {
+					if y == 0 {
+						break
+					}
+					y--
+					x = 0
+				} else if (b & 0x80) > 0 {
+					transparentPixels := b & 0x7F
+					for ti := byte(0); ti < transparentPixels; ti++ {
+						result.Frames[ix].ImageData[x+(y*result.Frames[ix].Width)+uint32(ti)] = -1
+					}
+					x += uint32(transparentPixels)
+				} else {
+					for bi := 0; bi < int(b); bi++ {
+						result.Frames[ix].ImageData[x+(y*result.Frames[ix].Width)+uint32(bi)] = int16(data[dataPointer])
+						dataPointer++
+					}
+					x += uint32(b)
 				}
-				y--
-				x = 0
-			} else if (b & 0x80) > 0 {
-				transparentPixels := b & 0x7F
-				for ti := byte(0); ti < transparentPixels; ti++ {
-					result.Frames[i].ImageData[x+(y*result.Frames[i].Width)+uint32(ti)] = -1
-				}
-				x += uint32(transparentPixels)
-			} else {
-				for bi := 0; bi < int(b); bi++ {
-					result.Frames[i].ImageData[x+(y*result.Frames[i].Width)+uint32(bi)] = int16(data[dataPointer])
-					dataPointer++
-				}
-				x += uint32(b)
 			}
-		}
-		result.Frames[i].Image, _ = ebiten.NewImage(int(result.Frames[i].Width), int(result.Frames[i].Height), ebiten.FilterNearest)
-		newData := make([]byte, result.Frames[i].Width*result.Frames[i].Height*4)
-		for ii := uint32(0); ii < result.Frames[i].Width*result.Frames[i].Height; ii++ {
-			if result.Frames[i].ImageData[ii] == -1 {
-				continue
+			result.Frames[ix].Image, _ = ebiten.NewImage(int(result.Frames[ix].Width), int(result.Frames[ix].Height), ebiten.FilterNearest)
+			newData := make([]byte, result.Frames[ix].Width*result.Frames[ix].Height*4)
+			for ii := uint32(0); ii < result.Frames[ix].Width*result.Frames[ix].Height; ii++ {
+				if result.Frames[ix].ImageData[ii] == -1 {
+					continue
+				}
+				newData[ii*4] = palette.Colors[result.Frames[ix].ImageData[ii]].R
+				newData[(ii*4)+1] = palette.Colors[result.Frames[ix].ImageData[ii]].G
+				newData[(ii*4)+2] = palette.Colors[result.Frames[ix].ImageData[ii]].B
+				newData[(ii*4)+3] = 0xFF
 			}
-			newData[ii*4] = palette.Colors[result.Frames[i].ImageData[ii]].R
-			newData[(ii*4)+1] = palette.Colors[result.Frames[i].ImageData[ii]].G
-			newData[(ii*4)+2] = palette.Colors[result.Frames[i].ImageData[ii]].B
-			newData[(ii*4)+3] = 0xFF
-		}
-
-		result.Frames[i].Image.ReplacePixels(newData)
+			result.Frames[ix].Image.ReplacePixels(newData)
+		}(i, dataPointer)
 	}
 	return result
 }
