@@ -19,9 +19,15 @@ ALL OTHER TRADEMARKS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS.
 
 ## Building
 
-In the root folder, run `go get -d ./src/App` to pull down all dependencies.
+To pull the project down, run `go get https://github.com/essial/OpenDiablo2`
 
-To run the project, run `go run ./src/App` from the root project folder.
+On windows this folder will most likely be in `C:\\users\\(you)\\go\\src\\github.com\\essial\\OpenDiablo2`
+
+In the root folder, run `go get -d` to pull down all dependencies.
+
+To run the project, run `go run ./cmd/Client` from the root folder.
+
+You can also open the root folder in VSCode. Make sure you have the `ms-vscode.go` plugin installed.
 
 ## Configuration
 
