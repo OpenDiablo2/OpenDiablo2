@@ -51,6 +51,7 @@ type Engine struct {
 	fontCache       map[string]*MPQFont   // The font cash
 	audioContext    *audio.Context        // The Audio context
 	bgmAudio        *audio.Player         // The audio player
+	fullscreenKey   bool                  // When true, the fullscreen toggle is still being pressed
 }
 
 // CreateEngine creates and instance of the OpenDiablo2 engine
@@ -194,6 +195,15 @@ func (v *Engine) CursorButtonPressed(button CursorButton) bool {
 
 // Update updates the internal state of the engine
 func (v *Engine) Update() {
+	if ebiten.IsKeyPressed(ebiten.KeyAlt) && ebiten.IsKeyPressed(ebiten.KeyEnter) {
+		if !v.fullscreenKey {
+			ebiten.SetFullscreen(!ebiten.IsFullscreen())
+		}
+		v.fullscreenKey = true
+	} else {
+		v.fullscreenKey = false
+	}
+
 	v.updateScene()
 	if v.CurrentScene == nil {
 		log.Fatal("no scene loaded")
