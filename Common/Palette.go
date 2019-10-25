@@ -1,4 +1,4 @@
-package OpenDiablo2
+package Common
 
 import "github.com/essial/OpenDiablo2/Palettes"
 

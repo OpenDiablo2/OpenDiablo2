@@ -3,6 +3,7 @@ package OpenDiablo2
 import (
 	"image/color"
 
+	"github.com/essial/OpenDiablo2/Common"
 	"github.com/essial/OpenDiablo2/Palettes"
 
 	"github.com/essial/OpenDiablo2/ResourcePaths"
@@ -12,12 +13,12 @@ import (
 // MainMenu represents the main menu
 type MainMenu struct {
 	engine              *Engine
-	trademarkBackground *Sprite
-	background          *Sprite
-	diabloLogoLeft      *Sprite
-	diabloLogoRight     *Sprite
-	diabloLogoLeftBack  *Sprite
-	diabloLogoRightBack *Sprite
+	trademarkBackground *Common.Sprite
+	background          *Common.Sprite
+	diabloLogoLeft      *Common.Sprite
+	diabloLogoRight     *Common.Sprite
+	diabloLogoLeftBack  *Common.Sprite
+	diabloLogoRightBack *Common.Sprite
 	copyrightLabel      *UILabel
 	copyrightLabel2     *UILabel
 	showTrademarkScreen bool

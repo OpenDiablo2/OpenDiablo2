@@ -11,6 +11,7 @@ import (
 	"github.com/essial/OpenDiablo2/Common"
 	"github.com/essial/OpenDiablo2/Palettes"
 	"github.com/essial/OpenDiablo2/ResourcePaths"
+	"github.com/essial/OpenDiablo2/UI"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/audio"
@@ -40,22 +41,22 @@ const (
 
 // Engine is the core OpenDiablo2 engine
 type Engine struct {
-	Settings        EngineConfig                 // Engine configuration settings from json file
-	Files           map[string]string            // Map that defines which files are in which MPQs
-	Palettes        map[Palettes.Palette]Palette // Color palettes
-	SoundEntries    map[string]SoundEntry        // Sound configurations
-	CursorSprite    *Sprite                      // The sprite shown for cursors
-	LoadingSprite   *Sprite                      // The sprite shown when loading stuff
-	CursorX         int                          // X position of the cursor
-	CursorY         int                          // Y position of the cursor
-	CursorButtons   CursorButton                 // The buttons that are currently being pressed
-	LoadingProgress float64                      // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
-	CurrentScene    Common.SceneInterface        // The current scene being rendered
-	nextScene       Common.SceneInterface        // The next scene to be loaded at the end of the game loop
-	fontCache       map[string]*MPQFont          // The font cash
-	audioContext    *audio.Context               // The Audio context
-	bgmAudio        *audio.Player                // The audio player
-	fullscreenKey   bool                         // When true, the fullscreen toggle is still being pressed
+	Settings        EngineConfig                        // Engine configuration settings from json file
+	Files           map[string]string                   // Map that defines which files are in which MPQs
+	Palettes        map[Palettes.Palette]Common.Palette // Color palettes
+	SoundEntries    map[string]SoundEntry               // Sound configurations
+	LoadingSprite   *Common.Sprite                      // The sprite shown when loading stuff
+	CursorX         int                                 // X position of the cursor
+	CursorY         int                                 // Y position of the cursor
+	CursorButtons   CursorButton                        // The buttons that are currently being pressed
+	LoadingProgress float64                             // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
+	CurrentScene    Common.SceneInterface               // The current scene being rendered
+	UIManager       *UI.Manager                         // The UI manager
+	nextScene       Common.SceneInterface               // The next scene to be loaded at the end of the game loop
+	fontCache       map[string]*MPQFont                 // The font cash
+	audioContext    *audio.Context                      // The Audio context
+	bgmAudio        *audio.Player                       // The audio player
+	fullscreenKey   bool                                // When true, the fullscreen toggle is still being pressed
 }
 
 // CreateEngine creates and instance of the OpenDiablo2 engine
@@ -70,12 +71,12 @@ func CreateEngine() *Engine {
 	result.mapMpqFiles()
 	result.loadPalettes()
 	result.loadSoundEntries()
+	result.UIManager = UI.CreateManager(result)
 	audioContext, err := audio.NewContext(22050)
 	if err != nil {
 		log.Fatal(err)
 	}
 	result.audioContext = audioContext
-	result.CursorSprite = result.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units)
 	result.LoadingSprite = result.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading)
 	loadingSpriteSizeX, loadingSpriteSizeY := result.LoadingSprite.GetSize()
 	result.LoadingSprite.MoveTo(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
@@ -146,7 +147,7 @@ func (v *Engine) IsLoading() bool {
 }
 
 func (v *Engine) loadPalettes() {
-	v.Palettes = make(map[Palettes.Palette]Palette)
+	v.Palettes = make(map[Palettes.Palette]Common.Palette)
 	log.Println("loading palettes")
 	for file := range v.Files {
 		if strings.Index(file, "/data/global/palette/") != 0 || strings.Index(file, ".dat") != len(file)-4 {
@@ -154,7 +155,7 @@ func (v *Engine) loadPalettes() {
 		}
 		nameParts := strings.Split(file, `/`)
 		paletteName := Palettes.Palette(nameParts[len(nameParts)-2])
-		palette := CreatePalette(paletteName, v.GetFile(file))
+		palette := Common.CreatePalette(paletteName, v.GetFile(file))
 		v.Palettes[paletteName] = palette
 	}
 }
@@ -173,9 +174,9 @@ func (v *Engine) loadSoundEntries() {
 }
 
 // LoadSprite loads a sprite from the game's data files
-func (v *Engine) LoadSprite(fileName string, palette Palettes.Palette) *Sprite {
+func (v *Engine) LoadSprite(fileName string, palette Palettes.Palette) *Common.Sprite {
 	data := v.GetFile(fileName)
-	sprite := CreateSprite(data, v.Palettes[palette])
+	sprite := Common.CreateSprite(data, v.Palettes[palette])
 	return sprite
 }
 
@@ -189,6 +190,7 @@ func (v *Engine) updateScene() {
 	}
 	v.CurrentScene = v.nextScene
 	v.nextScene = nil
+	v.UIManager.Reset()
 	v.CurrentScene.Load()
 }
 
@@ -212,6 +214,10 @@ func (v *Engine) Update() {
 	if v.CurrentScene == nil {
 		log.Fatal("no scene loaded")
 	}
+
+	if v.IsLoading() {
+		return
+	}
 	v.CursorButtons = 0
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		v.CursorButtons |= CursorButtonLeft
@@ -220,23 +226,22 @@ func (v *Engine) Update() {
 		v.CursorButtons |= CursorButtonRight
 	}
 	v.CurrentScene.Update()
+	v.UIManager.Update()
 }
 
 // Draw draws the game
 func (v *Engine) Draw(screen *ebiten.Image) {
 	v.CursorX, v.CursorY = ebiten.CursorPosition()
 	if v.LoadingProgress < 1.0 {
-		v.LoadingSprite.Frame = uint8(Max(0, Min(uint32(len(v.LoadingSprite.Frames)-1), uint32(float64(len(v.LoadingSprite.Frames)-1)*v.LoadingProgress))))
+		v.LoadingSprite.Frame = uint8(Common.Max(0, Common.Min(uint32(len(v.LoadingSprite.Frames)-1), uint32(float64(len(v.LoadingSprite.Frames)-1)*v.LoadingProgress))))
 		v.LoadingSprite.Draw(screen)
 	} else {
 		if v.CurrentScene == nil {
 			log.Fatal("no scene loaded")
 		}
 		v.CurrentScene.Render(screen)
+		v.UIManager.Draw(screen)
 	}
-
-	v.CursorSprite.MoveTo(v.CursorX, v.CursorY)
-	v.CursorSprite.Draw(screen)
 }
 
 // SetNextScene tells the engine what scene to load on the next update cycle

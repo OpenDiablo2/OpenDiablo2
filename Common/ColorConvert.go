@@ -1,4 +1,4 @@
-package OpenDiablo2
+package Common
 
 import (
 	"image/color"
@@ -32,6 +32,7 @@ func now() int64 {
 	return monotonicClock
 }
 
+// ColorToColorM converts a normal color to a color matrix
 func ColorToColorM(clr color.Color) ebiten.ColorM {
 	// RGBA() is in [0 - 0xffff]. Adjust them in [0 - 0xff].
 	cr, cg, cb, ca := clr.RGBA()

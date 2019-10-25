@@ -1,4 +1,4 @@
-package OpenDiablo2
+package Common
 
 // Min returns the lower of two values
 func Min(a, b uint32) uint32 {
@@ -16,7 +16,7 @@ func Max(a, b uint32) uint32 {
 	return b
 }
 
-// Max returns the higher of two values
+// MaxInt32 returns the higher of two values
 func MaxInt32(a, b int32) int32 {
 	if a > b {
 		return a

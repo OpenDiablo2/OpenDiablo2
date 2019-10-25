@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/JoshVarga/blast"
+	"github.com/essial/OpenDiablo2/Common"
 	"github.com/essial/OpenDiablo2/Compression"
 )
 
@@ -84,7 +85,7 @@ func (v *MPQStream) readInternalSingleUnit(buffer []byte, offset, count uint32) 
 		v.loadSingleUnit()
 	}
 
-	bytesToCopy := Min(uint32(len(v.CurrentData))-v.CurrentPosition, count)
+	bytesToCopy := Common.Min(uint32(len(v.CurrentData))-v.CurrentPosition, count)
 	copy(buffer[offset:offset+bytesToCopy], v.CurrentData[v.CurrentPosition:v.CurrentPosition+bytesToCopy])
 	v.CurrentPosition += bytesToCopy
 	return bytesToCopy
@@ -93,7 +94,7 @@ func (v *MPQStream) readInternalSingleUnit(buffer []byte, offset, count uint32) 
 func (v *MPQStream) readInternal(buffer []byte, offset, count uint32) uint32 {
 	v.bufferData()
 	localPosition := v.CurrentPosition % v.BlockSize
-	bytesToCopy := Min(uint32(len(v.CurrentData))-localPosition, count)
+	bytesToCopy := Common.Min(uint32(len(v.CurrentData))-localPosition, count)
 	if bytesToCopy <= 0 {
 		return 0
 	}
@@ -107,7 +108,7 @@ func (v *MPQStream) bufferData() {
 	if requiredBlock == v.CurrentBlockIndex {
 		return
 	}
-	expectedLength := Min(v.BlockTableEntry.UncompressedFileSize-(requiredBlock*v.BlockSize), v.BlockSize)
+	expectedLength := Common.Min(v.BlockTableEntry.UncompressedFileSize-(requiredBlock*v.BlockSize), v.BlockSize)
 	v.CurrentData = v.loadBlock(requiredBlock, expectedLength)
 	v.CurrentBlockIndex = requiredBlock
 }

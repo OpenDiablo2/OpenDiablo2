@@ -1,6 +1,9 @@
 package OpenDiablo2
 
-import "github.com/essial/OpenDiablo2/Palettes"
+import (
+	"github.com/essial/OpenDiablo2/Common"
+	"github.com/essial/OpenDiablo2/Palettes"
+)
 
 // MPQFontSize represents the size of a character in a font
 type MPQFontSize struct {
@@ -11,7 +14,7 @@ type MPQFontSize struct {
 // MPQFont represents a font
 type MPQFont struct {
 	Engine     *Engine
-	FontSprite *Sprite
+	FontSprite *Common.Sprite
 	Metrics    map[uint8]MPQFontSize
 }
 

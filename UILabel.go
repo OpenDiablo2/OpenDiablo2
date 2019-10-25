@@ -3,18 +3,24 @@ package OpenDiablo2
 import (
 	"image/color"
 
+	"github.com/essial/OpenDiablo2/Common"
 	"github.com/essial/OpenDiablo2/Palettes"
 	"github.com/hajimehoshi/ebiten"
 )
 
+// UILabelAlignment represents a label's alignment
 type UILabelAlignment uint8
 
 const (
-	UILabelAlignLeft   UILabelAlignment = 0
+	// UILabelAlignLeft represents a left-aligned label
+	UILabelAlignLeft UILabelAlignment = 0
+	// UILabelAlignCenter represents a center-aligned label
 	UILabelAlignCenter UILabelAlignment = 1
-	UILabelAlignRight  UILabelAlignment = 2
+	// UILabelAlignRight represents a right-aligned label
+	UILabelAlignRight UILabelAlignment = 2
 )
 
+// UILabel represents a user interface label
 type UILabel struct {
 	text      string
 	X         int
@@ -64,11 +70,12 @@ func (v *UILabel) calculateSize() (uint32, uint32) {
 	for _, ch := range v.text {
 		metric := v.font.Metrics[uint8(ch)]
 		width += uint32(metric.Width)
-		height = Max(height, uint32(metric.Height))
+		height = Common.Max(height, uint32(metric.Height))
 	}
 	return width, height
 }
 
+// MoveTo moves the label to the specified location
 func (v *UILabel) MoveTo(x, y int) {
 	v.X = x
 	v.Y = y
@@ -94,6 +101,7 @@ func (v *UILabel) cacheImage() {
 	}
 }
 
+// SetText sets the label's text
 func (v *UILabel) SetText(newText string) {
 	if v.text == newText {
 		return
