@@ -1,18 +1,22 @@
 package OpenDiablo2
 
+import "github.com/essial/OpenDiablo2/Palettes"
+
+// MPQFontSize represents the size of a character in a font
 type MPQFontSize struct {
 	Width  uint8
 	Height uint8
 }
 
+// MPQFont represents a font
 type MPQFont struct {
 	Engine     *Engine
-	FontSprite Sprite
+	FontSprite *Sprite
 	Metrics    map[uint8]MPQFontSize
 }
 
 // CreateMPQFont creates an instance of a MPQ Font
-func CreateMPQFont(engine *Engine, font string, palette Palette) *MPQFont {
+func CreateMPQFont(engine *Engine, font string, palette Palettes.Palette) *MPQFont {
 	result := &MPQFont{
 		Engine:  engine,
 		Metrics: make(map[uint8]MPQFontSize),

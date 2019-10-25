@@ -8,6 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
+// Sprite represents a type of object in D2 that is comprised of one or more frames and directions
 type Sprite struct {
 	Directions         uint32
 	FramesPerDirection uint32
@@ -18,8 +19,10 @@ type Sprite struct {
 	LastFrameTime      time.Time
 	Animate            bool
 	ColorMod           color.Color
+	visible            bool
 }
 
+// SpriteFrame represents a single frame of a sprite
 type SpriteFrame struct {
 	Flip      uint32
 	Width     uint32
@@ -33,8 +36,9 @@ type SpriteFrame struct {
 	Image     *ebiten.Image
 }
 
-func CreateSprite(data []byte, palette Palette) Sprite {
-	result := Sprite{
+// CreateSprite creates an instance of a sprite
+func CreateSprite(data []byte, palette Palette) *Sprite {
+	result := &Sprite{
 		X:                  50,
 		Y:                  50,
 		Frame:              0,
@@ -121,6 +125,7 @@ func CreateSprite(data []byte, palette Palette) Sprite {
 	return result
 }
 
+// GetSize returns the size of the sprite
 func (v *Sprite) GetSize() (uint32, uint32) {
 	frame := v.Frames[uint32(v.Frame)+(uint32(v.Direction)*v.FramesPerDirection)]
 	return frame.Width, frame.Height
@@ -159,6 +164,7 @@ func (v *Sprite) Draw(target *ebiten.Image) {
 	target.DrawImage(frame.Image, opts)
 }
 
+// DrawSegments draws the sprite via a grid of segments
 func (v *Sprite) DrawSegments(target *ebiten.Image, xSegments, ySegments, offset int) {
 	v.updateAnimation()
 	yOffset := int32(0)
@@ -190,4 +196,9 @@ func (v *Sprite) DrawSegments(target *ebiten.Image, xSegments, ySegments, offset
 func (v *Sprite) MoveTo(x, y int) {
 	v.X = x
 	v.Y = y
+}
+
+// GetLocation returns the location of the sprite
+func (v *Sprite) GetLocation() (int, int) {
+	return v.X, v.Y
 }

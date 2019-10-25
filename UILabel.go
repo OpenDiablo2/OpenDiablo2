@@ -3,6 +3,7 @@ package OpenDiablo2
 import (
 	"image/color"
 
+	"github.com/essial/OpenDiablo2/Palettes"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -27,7 +28,7 @@ type UILabel struct {
 }
 
 // CreateUILabel creates a new instance of a UI label
-func CreateUILabel(engine *Engine, font, palette string) *UILabel {
+func CreateUILabel(engine *Engine, font string, palette Palettes.Palette) *UILabel {
 	result := &UILabel{
 		Alignment: UILabelAlignLeft,
 		ColorMod:  nil,

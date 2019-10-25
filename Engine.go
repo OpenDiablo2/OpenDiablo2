@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/essial/OpenDiablo2/Common"
+	"github.com/essial/OpenDiablo2/Palettes"
 	"github.com/essial/OpenDiablo2/ResourcePaths"
 
 	"github.com/hajimehoshi/ebiten"
@@ -27,31 +28,34 @@ type EngineConfig struct {
 	MpqLoadOrder    []string
 }
 
-// Engine is the core OpenDiablo2 engine
+// CursorButton represents a mouse button
 type CursorButton uint8
 
 const (
-	CursorButtonLeft  CursorButton = 1
+	// CursorButtonLeft represents the left mouse button
+	CursorButtonLeft CursorButton = 1
+	// CursorButtonRight represents the right mouse button
 	CursorButtonRight CursorButton = 2
 )
 
+// Engine is the core OpenDiablo2 engine
 type Engine struct {
-	Settings        EngineConfig          // Engine configuration settings from json file
-	Files           map[string]string     // Map that defines which files are in which MPQs
-	Palettes        map[string]Palette    // Color palettes
-	SoundEntries    map[string]SoundEntry // Sound configurations
-	CursorSprite    Sprite                // The sprite shown for cursors
-	LoadingSprite   Sprite                // The sprite shown when loading stuff
-	CursorX         int                   // X position of the cursor
-	CursorY         int                   // Y position of the cursor
-	CursorButtons   CursorButton          // The buttons that are currently being pressed
-	LoadingProgress float64               // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
-	CurrentScene    Common.SceneInterface // The current scene being rendered
-	nextScene       Common.SceneInterface // The next scene to be loaded at the end of the game loop
-	fontCache       map[string]*MPQFont   // The font cash
-	audioContext    *audio.Context        // The Audio context
-	bgmAudio        *audio.Player         // The audio player
-	fullscreenKey   bool                  // When true, the fullscreen toggle is still being pressed
+	Settings        EngineConfig                 // Engine configuration settings from json file
+	Files           map[string]string            // Map that defines which files are in which MPQs
+	Palettes        map[Palettes.Palette]Palette // Color palettes
+	SoundEntries    map[string]SoundEntry        // Sound configurations
+	CursorSprite    *Sprite                      // The sprite shown for cursors
+	LoadingSprite   *Sprite                      // The sprite shown when loading stuff
+	CursorX         int                          // X position of the cursor
+	CursorY         int                          // Y position of the cursor
+	CursorButtons   CursorButton                 // The buttons that are currently being pressed
+	LoadingProgress float64                      // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
+	CurrentScene    Common.SceneInterface        // The current scene being rendered
+	nextScene       Common.SceneInterface        // The next scene to be loaded at the end of the game loop
+	fontCache       map[string]*MPQFont          // The font cash
+	audioContext    *audio.Context               // The Audio context
+	bgmAudio        *audio.Player                // The audio player
+	fullscreenKey   bool                         // When true, the fullscreen toggle is still being pressed
 }
 
 // CreateEngine creates and instance of the OpenDiablo2 engine
@@ -71,8 +75,8 @@ func CreateEngine() *Engine {
 		log.Fatal(err)
 	}
 	result.audioContext = audioContext
-	result.CursorSprite = result.LoadSprite(ResourcePaths.CursorDefault, result.Palettes["units"])
-	result.LoadingSprite = result.LoadSprite(ResourcePaths.LoadingScreen, result.Palettes["loading"])
+	result.CursorSprite = result.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units)
+	result.LoadingSprite = result.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading)
 	loadingSpriteSizeX, loadingSpriteSizeY := result.LoadingSprite.GetSize()
 	result.LoadingSprite.MoveTo(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
 	result.SetNextScene(CreateMainMenu(result))
@@ -142,14 +146,14 @@ func (v *Engine) IsLoading() bool {
 }
 
 func (v *Engine) loadPalettes() {
-	v.Palettes = make(map[string]Palette)
+	v.Palettes = make(map[Palettes.Palette]Palette)
 	log.Println("loading palettes")
 	for file := range v.Files {
 		if strings.Index(file, "/data/global/palette/") != 0 || strings.Index(file, ".dat") != len(file)-4 {
 			continue
 		}
 		nameParts := strings.Split(file, `/`)
-		paletteName := nameParts[len(nameParts)-2]
+		paletteName := Palettes.Palette(nameParts[len(nameParts)-2])
 		palette := CreatePalette(paletteName, v.GetFile(file))
 		v.Palettes[paletteName] = palette
 	}
@@ -169,9 +173,9 @@ func (v *Engine) loadSoundEntries() {
 }
 
 // LoadSprite loads a sprite from the game's data files
-func (v *Engine) LoadSprite(fileName string, palette Palette) Sprite {
+func (v *Engine) LoadSprite(fileName string, palette Palettes.Palette) *Sprite {
 	data := v.GetFile(fileName)
-	sprite := CreateSprite(data, palette)
+	sprite := CreateSprite(data, v.Palettes[palette])
 	return sprite
 }
 
@@ -241,13 +245,13 @@ func (v *Engine) SetNextScene(nextScene Common.SceneInterface) {
 }
 
 // GetFont creates or loads an existing font
-func (v *Engine) GetFont(font, palette string) *MPQFont {
-	cacheItem, exists := v.fontCache[font+"_"+palette]
+func (v *Engine) GetFont(font string, palette Palettes.Palette) *MPQFont {
+	cacheItem, exists := v.fontCache[font+"_"+string(palette)]
 	if exists {
 		return cacheItem
 	}
-	newFont := CreateMPQFont(v, font, v.Palettes[palette])
-	v.fontCache[font+"_"+palette] = newFont
+	newFont := CreateMPQFont(v, font, palette)
+	v.fontCache[font+"_"+string(palette)] = newFont
 	return newFont
 }
 
