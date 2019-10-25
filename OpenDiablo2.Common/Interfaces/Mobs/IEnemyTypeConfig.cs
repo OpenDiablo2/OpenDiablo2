@@ -10,8 +10,8 @@ namespace OpenDiablo2.Common.Interfaces.Mobs
     public interface IEnemyTypeConfig
     {
         string InternalName { get; }
-        string DisplayName { get; } // Note the distinction here; the second column 
-        // in the monstats is a unique identifier string, whereas the first is non-unique
+        int InternalId { get; }
+        string DisplayName { get; }
         string Type { get; }
         string Descriptor { get; }
 
@@ -19,7 +19,6 @@ namespace OpenDiablo2.Common.Interfaces.Mobs
         int PopulateId { get; }
         bool Spawned { get; }
         bool Beta { get; }
-        string Code { get; }
         bool ClientOnly { get; }
         bool NoMap { get; }
 

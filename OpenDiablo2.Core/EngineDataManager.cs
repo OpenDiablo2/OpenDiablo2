@@ -28,7 +28,7 @@ namespace OpenDiablo2.Core
         public ImmutableList<Item> Items { get; internal set; }
         public ImmutableDictionary<eHero, ILevelExperienceConfig> ExperienceConfigs { get; internal set; }
         public ImmutableDictionary<eHero, IHeroTypeConfig> HeroTypeConfigs { get; internal set; }
-        public ImmutableList<IEnemyTypeConfig> EnemyTypeConfigs { get; internal set; } 
+        public ImmutableDictionary<int, IEnemyTypeConfig> EnemyTypeConfigs { get; internal set; } 
         public ImmutableDictionary<int, IMissileTypeConfig> MissileTypeConfigs { get; internal set; }
         public ImmutableDictionary<string, int> MissileTypeConfigsLookup { get; internal set; }
 
@@ -173,12 +173,51 @@ namespace OpenDiablo2.Core
 
         private void LoadEnemyData()
         {
-            //TODO: RE-ENABLE THIS once monstats is being loaded properly
-            //EnemyTypeConfigs = LoadEnemyTypeConfig();
+            EnemyTypeConfigs = LoadEnemyTypeConfig();
         }
 
-        private ImmutableList<IEnemyTypeConfig> LoadEnemyTypeConfig()
-            => mpqProvider
+        private ImmutableDictionary<int, IEnemyTypeConfig> LoadEnemyTypeConfig()
+        {
+            var monstatsrows1 = mpqProvider
+                .GetTextFile(ResourcePaths.MonStats)
+                .Skip(1)
+                .Where(x => !String.IsNullOrWhiteSpace(x))
+                .Select(x => x.Split('\t'))
+                .Where(x => x[0] != "Expansion" && x[0] != "unused")
+                .ToArray();
+            var monstatsrows2 = mpqProvider
+                .GetTextFile(ResourcePaths.MonStats2)
+                .Skip(1)
+                .Where(x => !String.IsNullOrWhiteSpace(x))
+                .Select(x => x.Split('\t'))
+                .Where(x => x[0] != "Expansion" && x[0] != "unused")
+                .ToArray();
+            var monproprows = mpqProvider
+                .GetTextFile(ResourcePaths.MonProp)
+                .Skip(1)
+                .Where(x => !String.IsNullOrWhiteSpace(x))
+                .Select(x => x.Split('\t'))
+                .Where(x => x[0] != "Expansion" && x[0] != "unused")
+                .ToArray();
+            Dictionary<int, IEnemyTypeConfig> results = new Dictionary<int, IEnemyTypeConfig>();
+            for(int i = 0; i < monstatsrows1.Length; i++)
+            {
+                IEnemyTypeConfig conf = EnemyTypeConfigHelper.MakeEnemyTypeConfig(
+                    monstatsrows1[i],
+                    monstatsrows2.Where(x => x[0] == monstatsrows1[i][6]).FirstOrDefault(),
+                    monproprows.Where(x => x[0] == monstatsrows1[i][7]).FirstOrDefault());
+                // Note the logic here: every monstats1 has a field called "MonStatsEx" which
+                // contains the name of the row in monstats2 that it uses
+                // (note MonStatsEx is at column 6)
+                // Also, every monstats1 has a field called "MonProp" which contains the name
+                // of the row in monprop that it uses (at column 7)
+                // Important to note that neither of these files are guaranteed to have rows for each
+                // monster, so we need to handle that case
+                results.Add(conf.InternalId, conf);
+            }
+            return results.ToImmutableDictionary();
+
+            /*mpqProvider
                 .GetTextFile(ResourcePaths.MonStats)
                 .Skip(1)
                 .Where(x => !String.IsNullOrWhiteSpace(x))
@@ -186,7 +225,8 @@ namespace OpenDiablo2.Core
                 .Where(x => x[0] != "Expansion" && x[0] != "unused")
                 .ToArray()
                 .Select(x => x.ToEnemyTypeConfig())
-                .ToImmutableList();
+                .ToImmutableList();*/
+        }
 
         private void LoadSkillData()
         {

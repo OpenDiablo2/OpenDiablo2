@@ -17,13 +17,12 @@ namespace OpenDiablo2.Common.Interfaces.Mobs
         int ElementalMaxDamage { get;}
         int ElementalDuration { get;} // duration of effects like cold and poison
 
-        // TODO: these could be switched to SHORTS, is there any benefit to that?
-        int[] MissileForAttack { get;} // 1-2, which missile is used per attack
+        string[] MissileForAttack { get;} // 1-2, which missile is used per attack
         // important note: 65535 = NONE. See missiles.txt, corresponds to a row number -2
-        int[] MissileForSkill { get;} // 1-4, which missile is used for a skill
+        string[] MissileForSkill { get;} // 1-4, which missile is used for a skill
         // important note: 65535 = NONE. See missiles.txt, corresponds to a row number -2
-        int MissileForCase { get;} // see above, specifies a missile for Case
-        int MissileForSequence { get;} // see above, specifies a missile for Sequence
+        string MissileForCast { get;} // see above, specifies a missile for Cast
+        string MissileForSequence { get;} // see above, specifies a missile for Sequence
 
         bool[] CanMoveAttack { get;} // 1-2, can move while using attack 1 / 2
         bool[] CanMoveSkill { get;} // 1-4, can move while using skill 1/2/3/4

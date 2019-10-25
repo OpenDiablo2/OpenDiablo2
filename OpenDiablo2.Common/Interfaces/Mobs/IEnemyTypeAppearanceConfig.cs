@@ -8,6 +8,9 @@ namespace OpenDiablo2.Common.Interfaces.Mobs
 {
     public interface IEnemyTypeAppearanceConfig
     {
+        int PalleteNo { get; } // which pallete to use
+        string Code { get; } // what is the name of this monster's animations folder
+
         bool HasDeathAnimation { get; }
         bool HasNeutralAnimation { get; }
         bool HasWalkAnimation { get; }

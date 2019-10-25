@@ -10,6 +10,19 @@ namespace OpenDiablo2.Common.Models.Mobs
 {
     public class EnemyTypeCombatConfig : IEnemyTypeCombatConfig
     {
+        public int Threat { get; private set; } // the higher this is, the higher priority mercs give to killing this first
+        
+        public string[] MissileForAttack { get; private set; } // 1-2, which missile is used per attack
+        // important note: 65535 = NONE. See missiles.txt, corresponds to a row number -2
+        public string[] MissileForSkill { get; private set; } // 1-4, which missile is used for a skill
+        // important note: 65535 = NONE. See missiles.txt, corresponds to a row number -2
+        public string MissileForCast { get; private set; } // see above, specifies a missile for Case
+        public string MissileForSequence { get; private set; } // see above, specifies a missile for Sequence
+
+        public bool IsMelee { get; private set; } // is this a melee attacker?
+
+        // vvv old
+
         public int ElementalAttackMode { get; private set; } // 4 = on hit, rest are unknown?
         public eDamageTypes ElementalAttackType { get; private set; } // 1=fire, 2=lightning, 4=cold, 5=poison
         public int ElementalOverlayId { get; private set; } // see overlays.txt, corresponds to a row number -2
@@ -18,19 +31,12 @@ namespace OpenDiablo2.Common.Models.Mobs
         public int ElementalMaxDamage { get; private set; }
         public int ElementalDuration { get; private set; } // duration of effects like cold and poison
 
-        // TODO: these could be switched to SHORTS, is there any benefit to that?
-        public int[] MissileForAttack { get; private set; } // 1-2, which missile is used per attack
-        // important note: 65535 = NONE. See missiles.txt, corresponds to a row number -2
-        public int[] MissileForSkill { get; private set; } // 1-4, which missile is used for a skill
-        // important note: 65535 = NONE. See missiles.txt, corresponds to a row number -2
-        public int MissileForCase { get; private set; } // see above, specifies a missile for Case
-        public int MissileForSequence { get; private set; } // see above, specifies a missile for Sequence
-
+        
         public bool[] CanMoveAttack { get; private set; } // 1-2, can move while using attack 1 / 2
         public bool[] CanMoveSkill { get; private set; } // 1-4, can move while using skill 1/2/3/4
         public bool CanMoveCast { get; private set; } // can move while casting?
 
-        public bool IsMelee { get; private set; } // is this a melee attacker?
+        
         public bool IsAttackable { get; private set; } // is this monster attackable?
 
         public int MeleeRange { get; private set; }
@@ -56,11 +62,17 @@ namespace OpenDiablo2.Common.Models.Mobs
         // (146) eLUndead	eHUndead	eDemon	eMagicUsing	eLarge	eSmall	eFlying	eOpenDoors	eSpawnCol	eBoss
 
 
-        public EnemyTypeCombatConfig(int ElementalAttackMode, eDamageTypes ElementalAttackType, int ElementalOverlayId,
+        public EnemyTypeCombatConfig(
+            int Threat,
+            string[] MissileForAttack, string[] MissileForSkill, string MissileForCast, string MissileForSequence,
+            bool IsMelee,
+
+
+            int ElementalAttackMode, eDamageTypes ElementalAttackType, int ElementalOverlayId,
             int ElementalChance, int ElementalMinDamage, int ElementalMaxDamage, int ElementalDuration,
-            int[] MissileForAttack, int[] MissileForSkill, int MissileForCase, int MissileForSequence,
+            
             bool[] CanMoveAttack, bool[] CanMoveSkill, bool CanMoveCast,
-            bool IsMelee, bool IsAttackable,
+             bool IsAttackable,
             int MeleeRange,
             int[] SkillType, int[] SkillSequence, int[] SkillLevel,
             bool IsUndeadWithPhysicalAttacks, bool IsUndeadWithMagicAttacks, bool UsesMagicAttacks,
@@ -69,6 +81,17 @@ namespace OpenDiablo2.Common.Models.Mobs
             bool IgnoredBySummons
             )
         {
+            this.Threat = Threat;
+
+            this.MissileForAttack = MissileForAttack;
+            this.MissileForSkill = MissileForSkill;
+            this.MissileForCast = MissileForCast;
+            this.MissileForSequence = MissileForSequence;
+
+            this.IsMelee = IsMelee;
+
+
+            // vvv
             this.ElementalAttackMode = ElementalAttackMode;
             this.ElementalAttackType = ElementalAttackType;
             this.ElementalOverlayId = ElementalOverlayId;
@@ -77,16 +100,13 @@ namespace OpenDiablo2.Common.Models.Mobs
             this.ElementalMaxDamage = ElementalMaxDamage;
             this.ElementalDuration = ElementalDuration;
 
-            this.MissileForAttack = MissileForAttack;
-            this.MissileForSkill = MissileForSkill;
-            this.MissileForCase = MissileForCase;
-            this.MissileForSequence = MissileForSequence;
+            
 
             this.CanMoveAttack = CanMoveAttack;
             this.CanMoveSkill = CanMoveSkill;
             this.CanMoveCast = CanMoveCast;
 
-            this.IsMelee = IsMelee;
+            
             this.IsAttackable = IsAttackable;
 
             this.MeleeRange = MeleeRange;

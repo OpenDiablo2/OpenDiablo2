@@ -9,8 +9,14 @@ namespace OpenDiablo2.Common.Models.Mobs
 {
     public class EnemyTypeDifficultyConfig : IEnemyTypeDifficultyConfig
     {
-
         public int Level { get; private set; }
+
+        public int AiDelay { get; private set; } // Delay between AI Ticks, lower = they act faster
+        public int AiActivationDistance { get; private set; } // distance at which ai becomes active
+        // if left blank, should default to 35
+        public int[] AiParams { get; private set; } // 1-8, used in AI Functions
+
+        //vvv
 
         public double DamageResist { get; private set; }
         public double MagicResist { get; private set; }
@@ -34,6 +40,8 @@ namespace OpenDiablo2.Common.Models.Mobs
         public string[] TreasureClass { get; private set; } // 1-4
         
         public EnemyTypeDifficultyConfig (int Level,
+            int AiDelay, int AiActivationDistance, int[] AiParams,
+
             double DamageResist, double MagicResist, double FireResist, double LightResist,
             double ColdResist, double PoisonResist,
             int MinHP, int MaxHP, int AC, int Exp,
@@ -42,6 +50,16 @@ namespace OpenDiablo2.Common.Models.Mobs
             string[] TreasureClass)
         {
             this.Level = Level;
+
+            this.AiDelay = AiDelay;
+            if(AiActivationDistance == 0)
+            {
+                AiActivationDistance = 35; // should default to 35 if not specified
+            }
+            this.AiActivationDistance = AiActivationDistance;
+            this.AiParams = AiParams;
+
+
 
             this.DamageResist = DamageResist;
             this.MagicResist = MagicResist;

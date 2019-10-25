@@ -16,11 +16,70 @@ namespace OpenDiablo2.Common.Models.Mobs
         public string Type { get; private set; }
         public string Descriptor { get; private set; }
 
-        public int BaseId { get; private set; }
-        public int PopulateId { get; private set; }
+
+        public int InternalId { get; private set; }
+        public string BaseName { get; private set; } // name of the monster it is a subtype of
+        public string NextInClass { get; private set; } // name of the next monster in the subtype chain
+        public bool Enabled { get; private set; } // if false, monster cannot be used in any way
+
+        public bool IsRanged { get; private set; }
+
+        public bool IsSpawner { get; private set; } // tells the game this is a nest / spawner that makes other monsters
+        public string SpawnName { get; private set; } // name of what this nest spawns
+        public int SpawnOffsetX { get; private set; } // offset of spawned monsters
+        public int SpawnOffsetY { get; private set; } // offset of spawned monsters
+        public string SpawnAnimationMode { get; private set; } // what animation mode the monsters spawn in
+
+        public string[] MinionNames { get; private set; } // 1-2; when a monster is spawned, it will
+        // create minions with these names around it
+        public bool SpawnsBoss { get; private set; } // is the unit it spawns a boss?
+        public bool BossTransfers { get; private set; } // if true, boss status is passed to one of this
+        // monster's minions when it is killed
+        public int MinionMin { get; private set; } // how many minions to spawn
+        public int MinionMax { get; private set; }
+
+        public int MinimumGrouping { get; private set; } // how many of this monster to spawn
+        public int MaximumGrouping { get; private set; }
+        public int SpawnChance { get; private set; } // when game chooses to spawn this monster, it will
+        // have this chance of spawning something else instead 
+        // NOTE SPECIAL CASE: if spawnchance is 0, it should be considered as 100%
+
+        public int Velocity { get; private set; }
+        public int RunVelocity { get; private set; }
+
+        public int Rarity { get; private set; }
+
+        public string Sound { get; private set; } // name of this monster's sound bank
+        public string UniqueSound { get; private set; } // name of the sound bank if unique
+
+        public bool Allied { get; private set; } // Is this enemy on the player's side?
+        public bool Neutral { get; private set; } // If this is set, not allied nor a monster
         public bool Spawned { get; private set; }
+        public bool IsNPC { get; private set; } // is this an NPC?
+        public bool IsInteractable { get; private set; } // can this be interacted with? like an NPC
+
+        public bool HasInventory { get; private set; } // does this have an inventory?
+        // needed if monster has equipment data in monequip.txt or if this is an npc whose inventory
+        // you can access
+        public bool CanEnterTown { get; private set; } // can this enter town or not?
+        public bool LowUndead { get; private set; } // low undead can be rez'd by high undead
+        public bool HighUndead { get; private set; } // cannot be rez'd
+        public bool IsDemon { get; private set; } // demon?
+        public bool IsFlying { get; private set; } // can move over water for instance
+        public bool CanOpenDoors { get; private set; }
+        public bool IsBoss { get; private set; } // Bosses ignore the level settings and always spawn with
+        // their monstats level. Bosses are also immune to being stunned. (TODO: research full extent of boss powers)
+
+        public bool IsPrimeEvil { get; private set; } // Primevils have a 300% bonus vs hirelings and summons
+        public bool IsKillable { get; private set; }
+        public bool CanBeConverted { get; private set; } // if true, can be switched to Allied by spells like Conversion
+
+
+        // OLD 
+
+        public int PopulateId { get; private set; }
+        
         public bool Beta { get; private set; }
-        public string Code { get; private set; }
         public bool ClientOnly { get; private set; }
         public bool NoMap { get; private set; }
 
@@ -29,43 +88,31 @@ namespace OpenDiablo2.Common.Models.Mobs
         public int Height { get; private set; }
         public bool NoOverlays { get; private set; }
         public int OverlayHeight { get; private set; }
-
-        public int Velocity { get; private set; }
-        public int RunVelocity { get; private set; }
-
+        
         public bool CanStealFrom { get; private set; }
         public int ColdEffect { get; private set; }
-
-        public bool Rarity { get; private set; }
         
-        public int MinimumGrouping { get; private set; }
-        public int MaximumGrouping { get; private set; }
-
         public string BaseWeapon { get; private set; }
 
-        public int[] AIParams { get; private set; } // up to 5
-
-        public bool Allied { get; private set; } // Is this enemy on the player's side?
-        public bool IsNPC { get; private set; } // is this an NPC?
+        
+        
         public bool IsCritter { get; private set; } // is this a critter? (e.g. the chickens)
-        public bool CanEnterTown { get; private set; } // can this enter town or not?
+        
 
         public int HealthRegen { get; private set; } // hp regen per minute
 
-        public bool IsDemon { get; private set; } // demon?
+        
         public bool IsLarge { get; private set; } // size large (e.g. bosses)
         public bool IsSmall { get; private set; } // size small (e.g. fallen)
-        public bool IsFlying { get; private set; } // can move over water for instance
-        public bool CanOpenDoors { get; private set; } 
+        
+        
         public int SpawningColumn { get; private set; } // is the monster area restricted
         // 0 = no, spawns through levels.txt, 1-3 unknown? 
         // TODO: understand spawningcolumn
-        public bool IsBoss { get; private set; }
-        public bool IsInteractable { get; private set; } // can this be interacted with? like an NPC
-
-        public bool IsKillable { get; private set; }
-        public bool CanBeConverted { get; private set; } // if true, can be switched to Allied by spells like Conversion
-
+        
+        
+        
+        
         public int HitClass { get; private set; } // TODO: find out what this is
 
         public bool HasSpecialEndDeath { get; private set; } // marks if a monster dies a special death
@@ -84,20 +131,27 @@ namespace OpenDiablo2.Common.Models.Mobs
         public IEnemyTypeDifficultyConfig NightmareDifficultyConfig { get; private set; }
         public IEnemyTypeDifficultyConfig HellDifficultyConfig { get; private set; }
 
-        public EnemyTypeConfig(string InternalName, string Name, string Type, string Descriptor,
-            int BaseId, int PopulateId, bool Spawned, bool Beta, string Code, bool ClientOnly, bool NoMap,
+        public EnemyTypeConfig(string InternalName, int InternalId, string BaseId, string NextInClass,
+            string Name, string Type, string Descriptor,
+            bool IsRanged, bool IsSpawner, string SpawnName, int SpawnOffsetX, int SpawnOffsetY,
+            string SpawnAnimationMode, string[] MinionNames, bool SpawnsBoss, bool BossTransfers,
+            int MinionMin, int MinionMax, int MinimumGrouping, int MaximumGrouping,
+            int SpawnChance, int Velocity, int RunVelocity, int Rarity,
+            string Sound, string UniqueSound,
+            bool Allied, bool Neutral, bool Spawned, bool IsNPC, bool IsInteractable,
+            bool HasInventory, bool CanEnterTown, bool LowUndead, bool HighUndead,
+            bool IsDemon, bool IsFlying, bool CanOpenDoors, bool IsBoss,
+            bool IsPrimeEvil, bool IsKillable, bool CanBeConverted,
+
+
+            int PopulateId, bool Beta, bool ClientOnly, bool NoMap,
             int SizeX, int SizeY, int Height, bool NoOverlays, int OverlayHeight,
-            int Velocity, int RunVelocity,
             bool CanStealFrom, int ColdEffect,
-            bool Rarity,
-            int MinimumGrouping, int MaximumGrouping,
             string BaseWeapon,
-            int[] AIParams,
-            bool Allied, bool IsNPC, bool IsCritter, bool CanEnterTown,
+            bool IsCritter, 
             int HealthRegen,
-            bool IsDemon, bool IsLarge, bool IsSmall, bool IsFlying, bool CanOpenDoors, int SpawningColumn,
-            bool IsBoss, bool IsInteractable,
-            bool IsKillable, bool CanBeConverted,
+            bool IsLarge, bool IsSmall,  int SpawningColumn,
+            
             int HitClass,
             bool HasSpecialEndDeath, bool DeadCollision,
             bool CanBeRevivedByOtherMonsters,
@@ -108,15 +162,60 @@ namespace OpenDiablo2.Common.Models.Mobs
             IEnemyTypeDifficultyConfig HellDifficultyConfig)
         {
             this.InternalName = InternalName;
+            this.InternalId = InternalId;
             this.DisplayName = Name;
             this.Type = Type;
             this.Descriptor = Descriptor;
 
-            this.BaseId = BaseId;
-            this.PopulateId = PopulateId;
+            this.BaseName = BaseId;
+            this.NextInClass = NextInClass;
+
+            this.IsRanged = IsRanged;
+            this.IsSpawner = IsSpawner;
+            this.SpawnName = SpawnName;
+            this.SpawnOffsetX = SpawnOffsetX;
+            this.SpawnOffsetY = SpawnOffsetY;
+            this.SpawnAnimationMode = SpawnAnimationMode;
+            this.MinionNames = MinionNames;
+            this.SpawnsBoss = SpawnsBoss;
+            this.BossTransfers = BossTransfers;
+            this.MinionMin = MinionMin;
+            this.MinionMax = MinionMax;
+            this.MinimumGrouping = MinimumGrouping;
+            this.MaximumGrouping = MaximumGrouping;
+            this.SpawnChance = SpawnChance;
+            if(SpawnChance == 0)
+            {
+                this.SpawnChance = 100; // override behavior
+            }
+            this.Velocity = Velocity;
+            this.RunVelocity = RunVelocity;
+            this.Rarity = Rarity;
+
+            this.Sound = Sound;
+            this.UniqueSound = UniqueSound;
+
+            this.Allied = Allied;
+            this.Neutral = Neutral;
             this.Spawned = Spawned;
+            this.IsNPC = IsNPC;
+            this.IsInteractable = IsInteractable;
+
+            this.HasInventory = HasInventory;
+            this.CanEnterTown = CanEnterTown;
+            this.LowUndead = LowUndead;
+            this.HighUndead = HighUndead;
+            this.IsDemon = IsDemon;
+            this.IsFlying = IsFlying;
+            this.CanOpenDoors = CanOpenDoors;
+            this.IsBoss = IsBoss;
+            this.IsPrimeEvil = IsPrimeEvil;
+            this.IsKillable = IsKillable;
+            this.CanBeConverted = CanBeConverted;
+
+            // vvv
+            this.PopulateId = PopulateId;
             this.Beta = Beta;
-            this.Code = Code;
             this.ClientOnly = ClientOnly;
             this.NoMap = NoMap;
 
@@ -126,39 +225,21 @@ namespace OpenDiablo2.Common.Models.Mobs
             this.NoOverlays = NoOverlays;
             this.OverlayHeight = OverlayHeight;
 
-            this.Velocity = Velocity;
-            this.RunVelocity = RunVelocity;
-
             this.CanStealFrom = CanStealFrom;
             this.ColdEffect = ColdEffect;
 
-            this.Rarity = Rarity;
-
-            this.MinimumGrouping = MinimumGrouping;
-            this.MaximumGrouping = MaximumGrouping;
-
             this.BaseWeapon = BaseWeapon;
-
-            this.AIParams = AIParams;
-
-            this.Allied = Allied;
-            this.IsNPC = IsNPC;
+            
+            
             this.IsCritter = IsCritter;
             this.CanEnterTown = CanEnterTown;
 
             this.HealthRegen = HealthRegen;
-
-            this.IsDemon = IsDemon;
+            
             this.IsLarge = IsLarge;
             this.IsSmall = IsSmall;
-            this.IsFlying = IsFlying;
-            this.CanOpenDoors = CanOpenDoors;
             this.SpawningColumn = SpawningColumn;
-            this.IsBoss = IsBoss;
-            this.IsInteractable = IsInteractable;
-
-            this.IsKillable = IsKillable;
-            this.CanBeConverted = CanBeConverted;
+            
 
             this.HitClass = HitClass;
 
@@ -194,49 +275,7 @@ namespace OpenDiablo2.Common.Models.Mobs
 
     public static class EnemyTypeConfigHelper
     {
-
-        // (0) Class	namco	Type	Descriptor
-        // (4) BaseId	PopulateId	Spawned	Beta	Code	ClientOnly	NoMap
-        // (11) SizeX	SizeY	Height
-        // (14) NoOverlays	OverlayHeight
-        // (16) Velocity	Run
-        // (18) CanStealFrom	ColdEffect
-        // (20) Rarity	Level	Level(N)	Level(H)
-        // (24) MeleeRng	MinGrp	MaxGrp
-        // (27) HD	TR	LG	RA	LA	RH	LH	SH	S1	S2	S3	S4	S5	S6	S7	S8
-        // (43) TotalPieces	SpawnComponents	BaseW
-        // (46) AIParam1	Comment	AIParam2	Comment	AIParam3	Comment	AIParam4	Comment	AIParam5	Comment
-        // (56) ModeDH	ModeN	ModeW	ModeGH	ModeA1	ModeA2	ModeB	ModeC
-        // (64) ModeS1	ModeS2	ModeS3	ModeS4	ModeDD	ModeKB	ModeSQ	ModeRN
-        // (72) ElMode	ElType	ElOver	ElPct	ElMinD	ElMaxD	ElDur
-        // (79) MissA1	MissA2	MissS1	MissS2	MissS3	MissS4	MissC	MissSQ
-        // (87) A1Move	A2Move	S1Move	S2Move	S3Move	S4Move	Cmove
-        // (94) Align	
-        // (95) IsMelee	IsSel	IsSel2	NeverSel	CorpseSel	IsAtt	IsNPC	IsCritter	InTown
-        // (104) Bleed	Shadow	Light	NoUniqueShift	CompositeDeath
-        // (109) Skill1	Skill1Seq	Skill1Lvl	Skill2	Skill2Seq	Skill2Lvl	Skill3	Skill3Seq	Skill3Lvl	Skill4	Skill4Seq	Skill4Lvl	Skill5	Skill5Seq	Skill5Lvl
-        // (124) LightR	LightG	LightB
-        // (127) DamageResist	MagicResist	FireResist	LightResist	ColdResist	PoisonResist
-        // (133) DamageResist(N)	MagicResist(N)	FireResist(N)	LightResist(N)	ColdResist(N)	PoisonResist(N)
-        // (139) DamageResist(H)	MagicResist(H)	FireResist(H)	LightResist(H)	ColdResist(H)	PoisonResist(H)
-        // (145) DamageRegen
-        // (146) eLUndead	eHUndead	eDemon	eMagicUsing	eLarge	eSmall	eFlying	eOpenDoors	eSpawnCol	eBoss
-        // (156) PixHeight	Interact
-        // (158) MinHP	MaxHP	AC	Exp	ToBlock
-        // (163) A1MinD	A1MaxD	A1ToHit	A2MinD	A2MaxD	A2ToHit	S1MinD	S1MaxD	S1ToHit
-
-
-        // (172) MinHP(N)	MaxHP(N)	AC(N)	Exp(N)	A1MinD(N)	A1MaxD(N)	A1ToHit(N)	A2MinD(N)	A2MaxD(N)	A2ToHit(N)	S1MinD(N)	S1MaxD(N)	S1ToHit(N)
-        // (185) MinHP(H)	MaxHP(H)	AC(H)	Exp(H)	A1MinD(H)	A1MaxD(H)	A1ToHit(H)	A2MinD(H)	A2MaxD(H)	A2ToHit(H)	S1MinD(H)	S1MaxD(H)	S1ToHit(H)
-        // (198) TreasureClass1	TreasureClass2	TreasureClass3	TreasureClass4
-        // (202) TreasureClass1(N)	TreasureClass2(N)	TreasureClass3(N)	TreasureClass4(N)
-        // (206) TreasureClass1(H)	TreasureClass2(H)	TreasureClass3(H)	TreasureClass4(H)
-        // (210) SpawnPctBonus	Soft	Heart	BodyPart	Killable	Switch	Restore	NeverCount	HitClass
-        // (219) SplEndDeath	SplGetModeChart	SplEndGeneric	SplClientEnd
-        // (223) DeadCollision	UnflatDead	BloodLocal	DeathDamage
-        // (227) PetIgnore	NoGfxHitTest
-        // (229) HitTestTop	HitTestLeft	HitTestWidth	HitTestHeight
-        // (233) GenericSpawn	AutomapCel	SparsePopulate	Zoo	ObjectCollision	Inert
+        
         private static int IntConvert(string s)
         {
             // this is a convenience because sometimes they forget to put a 0 in the D2 monstats.txt
@@ -246,6 +285,132 @@ namespace OpenDiablo2.Common.Models.Mobs
             }
             return Convert.ToInt32(s);
         }
+
+        public static IEnemyTypeConfig MakeEnemyTypeConfig(string[] row, string[] row2, string[] rowsprop)
+        {
+            // important to note: rows2 and rowsprop may be empty
+            return new EnemyTypeConfig(
+                InternalName: row[0],
+                InternalId: IntConvert(row[1]),
+                BaseId: row[2],
+                NextInClass: row[3],
+                Name: row[5],
+                Type: row[9],
+                Descriptor: row[10],
+
+                IsRanged: (row[13] == "1"),
+                IsSpawner: (row[14] == "1"),
+                SpawnName: row[15],
+                SpawnOffsetX: IntConvert(row[16]),
+                SpawnOffsetY: IntConvert(row[17]),
+                SpawnAnimationMode: row[18],
+                MinionNames: new string[] { row[19], row[20] },
+                SpawnsBoss: (row[21] == "1"),
+                BossTransfers: (row[22] == "1"),
+                MinionMin: IntConvert(row[23]),
+                MinionMax: IntConvert(row[24]),
+                MinimumGrouping: IntConvert(row[25]),
+                MaximumGrouping: IntConvert(row[26]),
+                SpawnChance: IntConvert(row[27]),
+                Velocity: IntConvert(row[28]),
+                RunVelocity: IntConvert(row[29]),
+                Rarity: IntConvert(row[30]),
+
+                Sound: row[34],
+                UniqueSound: row[35],
+
+                Allied: (row[75] == "1"),
+                Neutral: (row[75] == "2"),
+                IsNPC: (row[78] == "1"),
+                IsInteractable: (row[79] == "1"),
+
+                HasInventory: (row[80] == "1"),
+                CanEnterTown: (row[81] == "1"),
+                LowUndead: (row[82] == "1"),
+                HighUndead: (row[83] == "1"),
+                IsDemon: (row[84] == "1"),
+                IsFlying: (row[85] == "1"),
+                CanOpenDoors: (row[86] == "1"),
+                IsBoss: (row[87] == "1"),
+                IsPrimeEvil: (row[88] == "1"),
+                IsKillable: (row[89] == "1"),
+                CanBeConverted: (row[90] == "1"),
+
+                CombatConfig: new EnemyTypeCombatConfig(
+                    Threat: IntConvert(row[36]),
+                    MissileForAttack: new string[]
+                    {
+                        row[67],
+                        row[68]
+                    },
+                    MissileForSkill: new string[]
+                    {
+                        row[69],
+                        row[70],
+                        row[71],
+                        row[72]
+                    },
+                    MissileForCast: row[73],
+                    MissileForSequence: row[74],
+                    IsMelee: (row[77] == "1"),
+                    ),
+
+                AppearanceConfig: new EnemyTypeAppearanceConfig(
+                    PalleteNo: IntConvert(row[4]),
+                    Code: row[11],
+                    ),
+                
+                NormalDifficultyConfig: new EnemyTypeDifficultyConfig(
+                    Level: IntConvert(row[31]),
+                    AiDelay: IntConvert(row[37]),
+                    AiActivationDistance: IntConvert(row[40]),
+                    AiParams: new int[]
+                    {
+                        IntConvert(row[43]),
+                        IntConvert(row[46]),
+                        IntConvert(row[49]),
+                        IntConvert(row[52]),
+                        IntConvert(row[55]),
+                        IntConvert(row[58]),
+                        IntConvert(row[61]),
+                        IntConvert(row[64])
+                    },
+                    ),
+                NightmareDifficultyConfig: new EnemyTypeDifficultyConfig(
+                    Level: IntConvert(row[32]),
+                    AiDelay: IntConvert(row[38]),
+                    AiActivationDistance: IntConvert(row[41]),
+                    AiParams: new int[]
+                    {
+                        IntConvert(row[44]),
+                        IntConvert(row[47]),
+                        IntConvert(row[50]),
+                        IntConvert(row[53]),
+                        IntConvert(row[56]),
+                        IntConvert(row[59]),
+                        IntConvert(row[62]),
+                        IntConvert(row[65])
+                    },
+                    ),
+                HellDifficultyConfig: new EnemyTypeDifficultyConfig(
+                    Level: IntConvert(row[33]),
+                    AiDelay: IntConvert(row[39]),
+                    AiActivationDistance: IntConvert(row[42]),
+                    AiParams: new int[]
+                    {
+                        IntConvert(row[45]),
+                        IntConvert(row[48]),
+                        IntConvert(row[51]),
+                        IntConvert(row[54]),
+                        IntConvert(row[57]),
+                        IntConvert(row[60]),
+                        IntConvert(row[63]),
+                        IntConvert(row[66])
+                    },
+                    )
+                );
+        }
+
 
         public static IEnemyTypeConfig ToEnemyTypeConfig(this string[] row)
         {

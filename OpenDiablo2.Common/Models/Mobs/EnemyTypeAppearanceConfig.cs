@@ -9,6 +9,9 @@ namespace OpenDiablo2.Common.Models.Mobs
 {
     public class EnemyTypeAppearanceConfig : IEnemyTypeAppearanceConfig
     {
+        public int PalleteNo { get; private set; }
+        public string Code { get; private set; }
+
         public bool HasDeathAnimation { get; private set; }
         public bool HasNeutralAnimation { get; private set; }
         public bool HasWalkAnimation { get; private set; }
@@ -39,7 +42,8 @@ namespace OpenDiablo2.Common.Models.Mobs
 
         public byte[] LightRGB { get; private set; } // 0: R, 1: G, 2: B
 
-        public EnemyTypeAppearanceConfig(bool HasDeathAnimation, bool HasNeutralAnimation,
+        public EnemyTypeAppearanceConfig(int PalleteNo, string Code,
+            bool HasDeathAnimation, bool HasNeutralAnimation,
             bool HasWalkAnimation, bool HasGetHitAnimation, bool HasAttack1Animation,
             bool HasAttack2Animation, bool HasBlockAnimation, bool HasCastAnimation,
             bool[] HasSkillAnimation, bool HasCorpseAnimation, bool HasKnockbackAnimation,
@@ -48,6 +52,9 @@ namespace OpenDiablo2.Common.Models.Mobs
             int BleedType, bool HasShadow, int LightRadius, bool HasUniqueBossColors, bool CompositeDeath,
             byte[] LightRGB)
         {
+            this.PalleteNo = PalleteNo;
+            this.Code = Code;
+
             this.HasDeathAnimation = HasDeathAnimation;
             this.HasNeutralAnimation = HasNeutralAnimation;
             this.HasWalkAnimation = HasWalkAnimation;

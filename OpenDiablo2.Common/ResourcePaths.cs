@@ -243,6 +243,8 @@ namespace OpenDiablo2.Common
 
         // --- Enemy Data ---
         public static string MonStats = "data\\global\\excel\\monstats.txt";
+        public static string MonStats2 = "data\\global\\excel\\monstats2.txt";
+        public static string MonProp = "data\\global\\excel\\monprop.txt";
 
         // --- Skill Data ---
         public static string Missiles = "data\\global\\excel\\missiles.txt";
