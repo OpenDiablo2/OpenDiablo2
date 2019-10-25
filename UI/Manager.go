@@ -14,7 +14,7 @@ type Manager struct {
 }
 
 // CreateManager creates a new instance of a UI manager
-func CreateManager(provider Common.SpriteProvider) *Manager {
+func CreateManager(provider Common.FileProvider) *Manager {
 	result := &Manager{
 		widgets:      make([]*Widget, 0),
 		cursorSprite: provider.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units),

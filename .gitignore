@@ -1,2 +1,4 @@
-__debug_bin
+**/*__debug_bin
 .vscode/*.*
+**/Client.exe
+**/Client

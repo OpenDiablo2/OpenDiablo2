@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/essial/OpenDiablo2/Common"
+	"github.com/essial/OpenDiablo2/MPQ"
 	"github.com/essial/OpenDiablo2/Palettes"
 	"github.com/essial/OpenDiablo2/ResourcePaths"
 	"github.com/essial/OpenDiablo2/UI"
@@ -53,7 +54,6 @@ type Engine struct {
 	CurrentScene    Common.SceneInterface               // The current scene being rendered
 	UIManager       *UI.Manager                         // The UI manager
 	nextScene       Common.SceneInterface               // The next scene to be loaded at the end of the game loop
-	fontCache       map[string]*MPQFont                 // The font cash
 	audioContext    *audio.Context                      // The Audio context
 	bgmAudio        *audio.Player                       // The audio player
 	fullscreenKey   bool                                // When true, the fullscreen toggle is still being pressed
@@ -65,7 +65,6 @@ func CreateEngine() *Engine {
 		LoadingProgress: float64(0.0),
 		CurrentScene:    nil,
 		nextScene:       nil,
-		fontCache:       make(map[string]*MPQFont),
 	}
 	result.loadConfigurationFile()
 	result.mapMpqFiles()
@@ -102,7 +101,7 @@ func (v *Engine) mapMpqFiles() {
 	lock := sync.RWMutex{}
 	for _, mpqFileName := range v.Settings.MpqLoadOrder {
 		mpqPath := path.Join(v.Settings.MpqPath, mpqFileName)
-		mpq, err := LoadMPQ(mpqPath)
+		mpq, err := MPQ.Load(mpqPath)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -121,20 +120,20 @@ func (v *Engine) mapMpqFiles() {
 	}
 }
 
-// GetFile loads a file from the specified mpq and returns the data as a byte array
-func (v *Engine) GetFile(fileName string) []byte {
+// LoadFile loads a file from the specified mpq and returns the data as a byte array
+func (v *Engine) LoadFile(fileName string) []byte {
 	// TODO: May want to cache some things if performance becomes an issue
 	mpqFile := v.Files[strings.ToLower(fileName)]
-	mpq, err := LoadMPQ(mpqFile)
+	mpq, err := MPQ.Load(mpqFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fileName = strings.ReplaceAll(fileName, `/`, `\`)[1:]
-	blockTableEntry, err := mpq.getFileBlockData(fileName)
+	blockTableEntry, err := mpq.GetFileBlockData(fileName)
 	if err != nil {
 		log.Fatal(err)
 	}
-	mpqStream := CreateMPQStream(mpq, blockTableEntry, fileName)
+	mpqStream := MPQ.CreateStream(mpq, blockTableEntry, fileName)
 	result := make([]byte, blockTableEntry.UncompressedFileSize)
 	mpqStream.Read(result, 0, blockTableEntry.UncompressedFileSize)
 
@@ -155,7 +154,7 @@ func (v *Engine) loadPalettes() {
 		}
 		nameParts := strings.Split(file, `/`)
 		paletteName := Palettes.Palette(nameParts[len(nameParts)-2])
-		palette := Common.CreatePalette(paletteName, v.GetFile(file))
+		palette := Common.CreatePalette(paletteName, v.LoadFile(file))
 		v.Palettes[paletteName] = palette
 	}
 }
@@ -163,7 +162,7 @@ func (v *Engine) loadPalettes() {
 func (v *Engine) loadSoundEntries() {
 	log.Println("loading sound configurations")
 	v.SoundEntries = make(map[string]SoundEntry)
-	soundData := strings.Split(string(v.GetFile(ResourcePaths.SoundSettings)), "\r\n")[1:]
+	soundData := strings.Split(string(v.LoadFile(ResourcePaths.SoundSettings)), "\r\n")[1:]
 	for _, line := range soundData {
 		if len(line) == 0 {
 			continue
@@ -175,7 +174,7 @@ func (v *Engine) loadSoundEntries() {
 
 // LoadSprite loads a sprite from the game's data files
 func (v *Engine) LoadSprite(fileName string, palette Palettes.Palette) *Common.Sprite {
-	data := v.GetFile(fileName)
+	data := v.LoadFile(fileName)
 	sprite := Common.CreateSprite(data, v.Palettes[palette])
 	return sprite
 }
@@ -249,24 +248,13 @@ func (v *Engine) SetNextScene(nextScene Common.SceneInterface) {
 	v.nextScene = nextScene
 }
 
-// GetFont creates or loads an existing font
-func (v *Engine) GetFont(font string, palette Palettes.Palette) *MPQFont {
-	cacheItem, exists := v.fontCache[font+"_"+string(palette)]
-	if exists {
-		return cacheItem
-	}
-	newFont := CreateMPQFont(v, font, palette)
-	v.fontCache[font+"_"+string(palette)] = newFont
-	return newFont
-}
-
 // PlayBGM plays an infinitely looping background track
 func (v *Engine) PlayBGM(song string) {
 	go func() {
 		if v.bgmAudio != nil {
 			v.bgmAudio.Close()
 		}
-		audioData := v.GetFile(song)
+		audioData := v.LoadFile(song)
 		d, err := wav.Decode(v.audioContext, audio.BytesReadSeekCloser(audioData))
 		if err != nil {
 			log.Fatal(err)

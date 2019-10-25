@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/essial/OpenDiablo2"
+	"github.com/essial/OpenDiablo2/MPQ"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -11,7 +12,7 @@ var d2Engine *OpenDiablo2.Engine
 
 func main() {
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
-	OpenDiablo2.InitializeCryptoBuffer()
+	MPQ.InitializeCryptoBuffer()
 	d2Engine = OpenDiablo2.CreateEngine()
 	ebiten.SetCursorVisible(false)
 	ebiten.SetFullscreen(d2Engine.Settings.FullScreen)

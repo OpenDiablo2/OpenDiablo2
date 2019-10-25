@@ -5,6 +5,7 @@ import (
 
 	"github.com/essial/OpenDiablo2/Common"
 	"github.com/essial/OpenDiablo2/Palettes"
+	"github.com/essial/OpenDiablo2/UI"
 
 	"github.com/essial/OpenDiablo2/ResourcePaths"
 	"github.com/hajimehoshi/ebiten"
@@ -19,8 +20,8 @@ type MainMenu struct {
 	diabloLogoRight     *Common.Sprite
 	diabloLogoLeftBack  *Common.Sprite
 	diabloLogoRightBack *Common.Sprite
-	copyrightLabel      *UILabel
-	copyrightLabel2     *UILabel
+	copyrightLabel      *UI.Label
+	copyrightLabel2     *UI.Label
 	showTrademarkScreen bool
 	leftButtonHeld      bool
 }
@@ -42,16 +43,16 @@ func (v *MainMenu) Load() {
 		loadStep := 1.0 / 8.0
 		v.engine.LoadingProgress = 0
 		{
-			v.copyrightLabel = CreateUILabel(v.engine, ResourcePaths.FontFormal12, Palettes.Static)
-			v.copyrightLabel.Alignment = UILabelAlignCenter
+			v.copyrightLabel = UI.CreateLabel(v.engine, ResourcePaths.FontFormal12, Palettes.Static)
+			v.copyrightLabel.Alignment = UI.LabelAlignCenter
 			v.copyrightLabel.SetText("Diablo 2 is © Copyright 2000-2016 Blizzard Entertainment")
 			v.copyrightLabel.ColorMod = color.RGBA{188, 168, 140, 255}
 			v.copyrightLabel.MoveTo(400, 500)
 			v.engine.LoadingProgress += loadStep
 		}
 		{
-			v.copyrightLabel2 = CreateUILabel(v.engine, ResourcePaths.FontFormal12, Palettes.Static)
-			v.copyrightLabel2.Alignment = UILabelAlignCenter
+			v.copyrightLabel2 = UI.CreateLabel(v.engine, ResourcePaths.FontFormal12, Palettes.Static)
+			v.copyrightLabel2.Alignment = UI.LabelAlignCenter
 			v.copyrightLabel2.SetText("All Rights Reserved.")
 			v.copyrightLabel2.ColorMod = color.RGBA{188, 168, 140, 255}
 			v.copyrightLabel2.MoveTo(400, 525)
