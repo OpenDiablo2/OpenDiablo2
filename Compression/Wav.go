@@ -1,10 +1,7 @@
 package Compression
 
 import (
-	"bufio"
-	"bytes"
-	"encoding/binary"
-	"io"
+	"github.com/essial/OpenDiablo2/Common"
 )
 
 var sLookup = []int{
@@ -33,25 +30,21 @@ func WavDecompress(data []byte, channelCount int) []byte {
 	Array1 := []int{0x2c, 0x2c}
 	Array2 := make([]int, channelCount)
 
-	input := bytes.NewReader(data)
-	var output bytes.Buffer
-	outputWriter := bufio.NewWriter(&output)
-	input.ReadByte()
+	input := Common.CreateStreamReader(data)
+	output := Common.CreateStreamWriter()
+	input.GetByte()
 
-	shift, _ := input.ReadByte()
+	shift := input.GetByte()
 
 	for i := 0; i < channelCount; i++ {
-		temp := int16(0)
-		binary.Read(input, binary.LittleEndian, &temp)
+		temp := input.GetSWord()
 		Array2[i] = int(temp)
-		binary.Write(outputWriter, binary.LittleEndian, &temp)
+		output.PushSWord(temp)
 	}
 
 	channel := channelCount - 1
-	pos, _ := input.Seek(0, io.SeekCurrent)
-	input.Seek(pos, io.SeekStart)
-	for pos < int64(input.Len()) {
-		value, _ := input.ReadByte()
+	for input.GetPosition() < input.GetSize() {
+		value := input.GetByte()
 
 		if channelCount == 2 {
 			channel = 1 - channel
@@ -63,8 +56,7 @@ func WavDecompress(data []byte, channelCount int) []byte {
 				if Array1[channel] != 0 {
 					Array1[channel]--
 				}
-				d := int16(Array2[channel])
-				binary.Write(outputWriter, binary.LittleEndian, &d)
+				output.PushSWord(int16(Array2[channel]))
 				break
 			case 1:
 				Array1[channel] += 8
@@ -123,9 +115,7 @@ func WavDecompress(data []byte, channelCount int) []byte {
 				}
 			}
 			Array2[channel] = temp3
-			d := int16(temp3)
-			binary.Write(outputWriter, binary.LittleEndian, &d)
-
+			output.PushSWord(int16(temp3))
 			Array1[channel] += sLookup2[value&0x1f]
 
 			if Array1[channel] < 0 {
@@ -137,5 +127,5 @@ func WavDecompress(data []byte, channelCount int) []byte {
 			}
 		}
 	}
-	return output.Bytes()
+	return output.GetBytes()
 }

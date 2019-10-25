@@ -10,6 +10,7 @@ type BitStream struct {
 	bitCount     int
 }
 
+// CreateBitStream creates a new BitStream
 func CreateBitStream(newData []byte) *BitStream {
 	result := &BitStream{
 		data:         newData,
@@ -20,6 +21,7 @@ func CreateBitStream(newData []byte) *BitStream {
 	return result
 }
 
+// ReadBits reads the specified number of bits and returns the value
 func (v *BitStream) ReadBits(bitCount int) int {
 	if bitCount > 16 {
 		log.Panic("Maximum BitCount is 16")
@@ -32,6 +34,7 @@ func (v *BitStream) ReadBits(bitCount int) int {
 	return result
 }
 
+// PeekByte returns the current byte without adjusting the position
 func (v *BitStream) PeekByte() int {
 	if !v.EnsureBits(8) {
 		return -1
@@ -39,6 +42,7 @@ func (v *BitStream) PeekByte() int {
 	return v.current & 0xff
 }
 
+// EnsureBits ensures that the specified number of bits are available
 func (v *BitStream) EnsureBits(bitCount int) bool {
 	if bitCount <= v.bitCount {
 		return true
@@ -53,6 +57,7 @@ func (v *BitStream) EnsureBits(bitCount int) bool {
 	return true
 }
 
+// WasteBits dry-reads the specified number of bits
 func (v *BitStream) WasteBits(bitCount int) {
 	v.current >>= bitCount
 	v.bitCount -= bitCount

@@ -30,7 +30,6 @@
 package Compression
 
 import (
-	"bytes"
 	"log"
 
 	"github.com/essial/OpenDiablo2/Common"
@@ -345,7 +344,7 @@ func HuffmanDecompress(data []byte) []byte {
 	tail := buildList(sPrime[comptype])
 	head := buildTree(tail)
 
-	var outputstream bytes.Buffer
+	outputstream := Common.CreateStreamWriter()
 	bitstream := Common.CreateBitStream(data[1:])
 	var decoded int
 	for true {
@@ -356,11 +355,11 @@ func HuffmanDecompress(data []byte) []byte {
 			break
 		case 257:
 			newvalue := bitstream.ReadBits(8)
-			outputstream.WriteByte(byte(newvalue))
+			outputstream.PushByte(byte(newvalue))
 			tail = insertNode(tail, newvalue)
 			break
 		default:
-			outputstream.WriteByte(byte(decoded))
+			outputstream.PushByte(byte(decoded))
 			break
 		}
 		if decoded == 256 {
@@ -368,5 +367,5 @@ func HuffmanDecompress(data []byte) []byte {
 		}
 	}
 
-	return outputstream.Bytes()
+	return outputstream.GetBytes()
 }

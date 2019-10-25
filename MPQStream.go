@@ -198,7 +198,7 @@ func decompressMulti(data []byte, expectedLength uint32) []byte {
 		panic("pk + mpqwav decompression not supported")
 	case 0x81:
 		sinput := Compression.HuffmanDecompress(data[1:])
-		sinput = Compression.WavDecompress(sinput, 1)
+		sinput = Compression.WavDecompress(sinput, 2)
 		tmp := make([]byte, len(sinput))
 		copy(tmp, sinput)
 		return tmp

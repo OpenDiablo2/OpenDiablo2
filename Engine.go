@@ -65,7 +65,7 @@ func CreateEngine() *Engine {
 	result.mapMpqFiles()
 	result.loadPalettes()
 	result.loadSoundEntries()
-	audioContext, err := audio.NewContext(48000)
+	audioContext, err := audio.NewContext(22050)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -248,15 +248,13 @@ func (v *Engine) PlayBGM(song string) {
 			v.bgmAudio.Close()
 		}
 		audioData := v.GetFile(song)
-		//audioData2, _ := ioutil.ReadFile(`C:\Users\lunat\Desktop\D2\Extracted\data\global\music\introedit.wav`)
-		//log.Printf("%d, %d", len(audioData), len(audioData2))
 		d, err := wav.Decode(v.audioContext, audio.BytesReadSeekCloser(audioData))
 		if err != nil {
 			log.Fatal(err)
 		}
-		//s := audio.NewInfiniteLoop(d, int64(len(audioData)))
+		s := audio.NewInfiniteLoop(d, int64(len(audioData)))
 
-		v.bgmAudio, err = audio.NewPlayer(v.audioContext, d)
+		v.bgmAudio, err = audio.NewPlayer(v.audioContext, s)
 		if err != nil {
 			log.Fatal(err)
 		}
