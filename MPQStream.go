@@ -5,8 +5,10 @@ import (
 	"compress/zlib"
 	"encoding/binary"
 	"fmt"
+	"strings"
 
 	"github.com/JoshVarga/blast"
+	"github.com/essial/OpenDiablo2/Compression"
 )
 
 // MPQStream represents a stream of data in an MPQ archive
@@ -23,13 +25,14 @@ type MPQStream struct {
 }
 
 // CreateMPQStream creates an MPQ stream
-func CreateMPQStream(mpq MPQ, blockTableEntry MPQBlockTableEntry, fileName string) MPQStream {
-	result := MPQStream{
+func CreateMPQStream(mpq MPQ, blockTableEntry MPQBlockTableEntry, fileName string) *MPQStream {
+	result := &MPQStream{
 		MPQData:           mpq,
 		BlockTableEntry:   blockTableEntry,
 		CurrentBlockIndex: 0xFFFFFFFF,
 	}
-	result.EncryptionSeed = hashString(fileName, 3)
+	fileSegs := strings.Split(fileName, `\`)
+	result.EncryptionSeed = hashString(fileSegs[len(fileSegs)-1], 3)
 	if result.BlockTableEntry.HasFlag(MpqFileFixKey) {
 		result.EncryptionSeed = (result.EncryptionSeed + result.BlockTableEntry.FilePosition) ^ result.BlockTableEntry.UncompressedFileSize
 	}
@@ -184,17 +187,21 @@ func decompressMulti(data []byte, expectedLength uint32) []byte {
 		// TODO: sparse then bzip2
 		panic("sparse decompression + bzip2 decompression not supported")
 	case 0x41:
-		//sinput = MpqHuffman.Decompress(sinput);
-		//return MpqWavCompression.Decompress(sinput, 1);
-		panic("mpqhuffman decompression not supported")
+		sinput := Compression.HuffmanDecompress(data[1:])
+		sinput = Compression.WavDecompress(sinput, 1)
+		tmp := make([]byte, len(sinput))
+		copy(tmp, sinput)
+		return tmp
 	case 0x48:
 		//byte[] result = PKDecompress(sinput, outputLength);
 		//return MpqWavCompression.Decompress(new MemoryStream(result), 1);
 		panic("pk + mpqwav decompression not supported")
 	case 0x81:
-		//sinput = MpqHuffman.Decompress(sinput);
-		//return MpqWavCompression.Decompress(sinput, 2);
-		panic("huff + mpqwav decompression not supported")
+		sinput := Compression.HuffmanDecompress(data[1:])
+		sinput = Compression.WavDecompress(sinput, 1)
+		tmp := make([]byte, len(sinput))
+		copy(tmp, sinput)
+		return tmp
 	case 0x88:
 		//byte[] result = PKDecompress(sinput, outputLength);
 		//return MpqWavCompression.Decompress(new MemoryStream(result), 2);

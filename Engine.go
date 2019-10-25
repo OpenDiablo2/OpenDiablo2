@@ -12,6 +12,8 @@ import (
 	"github.com/essial/OpenDiablo2/ResourcePaths"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/audio"
+	"github.com/hajimehoshi/ebiten/audio/wav"
 )
 
 // EngineConfig defines the configuration for the engine, loaded from config.json
@@ -26,6 +28,13 @@ type EngineConfig struct {
 }
 
 // Engine is the core OpenDiablo2 engine
+type CursorButton uint8
+
+const (
+	CursorButtonLeft  CursorButton = 1
+	CursorButtonRight CursorButton = 2
+)
+
 type Engine struct {
 	Settings        EngineConfig          // Engine configuration settings from json file
 	Files           map[string]string     // Map that defines which files are in which MPQs
@@ -35,10 +44,13 @@ type Engine struct {
 	LoadingSprite   Sprite                // The sprite shown when loading stuff
 	CursorX         int                   // X position of the cursor
 	CursorY         int                   // Y position of the cursor
+	CursorButtons   CursorButton          // The buttons that are currently being pressed
 	LoadingProgress float64               // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
 	CurrentScene    Common.SceneInterface // The current scene being rendered
 	nextScene       Common.SceneInterface // The next scene to be loaded at the end of the game loop
 	fontCache       map[string]*MPQFont   // The font cash
+	audioContext    *audio.Context        // The Audio context
+	bgmAudio        *audio.Player         // The audio player
 }
 
 // CreateEngine creates and instance of the OpenDiablo2 engine
@@ -53,6 +65,11 @@ func CreateEngine() *Engine {
 	result.mapMpqFiles()
 	result.loadPalettes()
 	result.loadSoundEntries()
+	audioContext, err := audio.NewContext(48000)
+	if err != nil {
+		log.Fatal(err)
+	}
+	result.audioContext = audioContext
 	result.CursorSprite = result.LoadSprite(ResourcePaths.CursorDefault, result.Palettes["units"])
 	result.LoadingSprite = result.LoadSprite(ResourcePaths.LoadingScreen, result.Palettes["loading"])
 	loadingSpriteSizeX, loadingSpriteSizeY := result.LoadingSprite.GetSize()
@@ -65,7 +82,7 @@ func (v *Engine) loadConfigurationFile() {
 	log.Println("loading configuration file")
 	configJSON, err := ioutil.ReadFile("config.json")
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	var config EngineConfig
 
@@ -81,11 +98,11 @@ func (v *Engine) mapMpqFiles() {
 		mpqPath := path.Join(v.Settings.MpqPath, mpqFileName)
 		mpq, err := LoadMPQ(mpqPath)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		fileListText, err := mpq.ReadFile("(listfile)")
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		fileList := strings.Split(string(fileListText), "\r\n")
 		for _, filePath := range fileList {
@@ -104,11 +121,12 @@ func (v *Engine) GetFile(fileName string) []byte {
 	mpqFile := v.Files[strings.ToLower(fileName)]
 	mpq, err := LoadMPQ(mpqFile)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	blockTableEntry, err := mpq.getFileBlockData(strings.ReplaceAll(fileName, `/`, `\`)[1:])
+	fileName = strings.ReplaceAll(fileName, `/`, `\`)[1:]
+	blockTableEntry, err := mpq.getFileBlockData(fileName)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	mpqStream := CreateMPQStream(mpq, blockTableEntry, fileName)
 	result := make([]byte, blockTableEntry.UncompressedFileSize)
@@ -169,11 +187,23 @@ func (v *Engine) updateScene() {
 	v.CurrentScene.Load()
 }
 
+// CursorButtonPressed determines if the specified button has been pressed
+func (v *Engine) CursorButtonPressed(button CursorButton) bool {
+	return v.CursorButtons&button > 0
+}
+
 // Update updates the internal state of the engine
 func (v *Engine) Update() {
 	v.updateScene()
 	if v.CurrentScene == nil {
-		panic("no scene loaded")
+		log.Fatal("no scene loaded")
+	}
+	v.CursorButtons = 0
+	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		v.CursorButtons |= CursorButtonLeft
+	}
+	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
+		v.CursorButtons |= CursorButtonRight
 	}
 	v.CurrentScene.Update()
 }
@@ -186,7 +216,7 @@ func (v *Engine) Draw(screen *ebiten.Image) {
 		v.LoadingSprite.Draw(screen)
 	} else {
 		if v.CurrentScene == nil {
-			panic("no scene loaded")
+			log.Fatal("no scene loaded")
 		}
 		v.CurrentScene.Render(screen)
 	}
@@ -209,4 +239,29 @@ func (v *Engine) GetFont(font, palette string) *MPQFont {
 	newFont := CreateMPQFont(v, font, v.Palettes[palette])
 	v.fontCache[font+"_"+palette] = newFont
 	return newFont
+}
+
+// PlayBGM plays an infinitely looping background track
+func (v *Engine) PlayBGM(song string) {
+	go func() {
+		if v.bgmAudio != nil {
+			v.bgmAudio.Close()
+		}
+		audioData := v.GetFile(song)
+		//audioData2, _ := ioutil.ReadFile(`C:\Users\lunat\Desktop\D2\Extracted\data\global\music\introedit.wav`)
+		//log.Printf("%d, %d", len(audioData), len(audioData2))
+		d, err := wav.Decode(v.audioContext, audio.BytesReadSeekCloser(audioData))
+		if err != nil {
+			log.Fatal(err)
+		}
+		//s := audio.NewInfiniteLoop(d, int64(len(audioData)))
+
+		v.bgmAudio, err = audio.NewPlayer(v.audioContext, d)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// Play the infinite-length stream. This never ends.
+		v.bgmAudio.Rewind()
+		v.bgmAudio.Play()
+	}()
 }

@@ -18,6 +18,7 @@ type MainMenu struct {
 	CopyrightLabel      *UILabel
 	CopyrightLabel2     *UILabel
 	ShowTrademarkScreen bool
+	LeftButtonHeld      bool
 }
 
 func CreateMainMenu(engine *Engine) *MainMenu {
@@ -30,6 +31,7 @@ func CreateMainMenu(engine *Engine) *MainMenu {
 }
 
 func (v *MainMenu) Load() {
+	v.Engine.PlayBGM(ResourcePaths.BGMTitle)
 	go func() {
 		loadStep := 1.0 / 8.0
 		v.Engine.LoadingProgress = 0
@@ -110,5 +112,11 @@ func (v *MainMenu) Render(screen *ebiten.Image) {
 }
 
 func (v *MainMenu) Update() {
-
+	if v.ShowTrademarkScreen {
+		if v.Engine.CursorButtonPressed(CursorButtonLeft) {
+			v.LeftButtonHeld = true
+			v.ShowTrademarkScreen = false
+		}
+		return
+	}
 }
