@@ -29,9 +29,39 @@ To run the project, run `go run ./cmd/Client` from the root folder.
 
 You can also open the root folder in VSCode. Make sure you have the `ms-vscode.go` plugin installed.
 
+## VS Code Extensions
+
+The following extensions are recommended for working with this project:
+ * ms-vscode.go
+ * defaltd.go-coverage-viewer
+
+For the Go extension, it is recommended you add the following to settings.json:
+```json
+    "go.languageServerExperimentalFeatures": {
+        "format": true,
+        "autoComplete": true,
+        "rename": true,
+        "goToDefinition": true,
+        "hover": true,
+        "signatureHelp": true,
+        "goToTypeDefinition": true,
+        "goToImplementation": true,
+        "documentSymbols": true,
+        "workspaceSymbols": true,
+        "findReferences": true,
+        "diagnostics": true,
+        "documentLink": true
+    },
+```
+
+You can get to it by going to settings <kbd>Ctrl+,</kbd>, expanding `Extensions` and selecting `Go configuration`,
+then clicking on `Edit in settings.json`. Just paste that section where appropriate.
+
 ## Configuration
 
-The engine is configured via the `config.json` file.
+The engine is configured via the `config.json` file. By default, the configuration assumes that you have installed Diablo 2 and the
+expansion via the official Blizzard Diablo2 installers using the default file paths. If you are not on Windows, or have installed
+the game in a different location, the base path may have to be adjusted.
 
 
 ## Contributing
