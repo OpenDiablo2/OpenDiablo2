@@ -23,6 +23,7 @@ type MainMenu struct {
 	diabloLogoRight     *Common.Sprite
 	diabloLogoLeftBack  *Common.Sprite
 	diabloLogoRightBack *Common.Sprite
+	exitDiabloButton    *UI.Button
 	copyrightLabel      *UI.Label
 	copyrightLabel2     *UI.Label
 	showTrademarkScreen bool
@@ -48,14 +49,14 @@ func (v *MainMenu) Load() []func() {
 			v.copyrightLabel = UI.CreateLabel(v.fileProvider, ResourcePaths.FontFormal12, Palettes.Static)
 			v.copyrightLabel.Alignment = UI.LabelAlignCenter
 			v.copyrightLabel.SetText("Diablo 2 is © Copyright 2000-2016 Blizzard Entertainment")
-			v.copyrightLabel.ColorMod = color.RGBA{188, 168, 140, 255}
+			v.copyrightLabel.Color = color.RGBA{188, 168, 140, 255}
 			v.copyrightLabel.MoveTo(400, 500)
 		},
 		func() {
 			v.copyrightLabel2 = UI.CreateLabel(v.fileProvider, ResourcePaths.FontFormal12, Palettes.Static)
 			v.copyrightLabel2.Alignment = UI.LabelAlignCenter
 			v.copyrightLabel2.SetText("All Rights Reserved.")
-			v.copyrightLabel2.ColorMod = color.RGBA{188, 168, 140, 255}
+			v.copyrightLabel2.Color = color.RGBA{188, 168, 140, 255}
 			v.copyrightLabel2.MoveTo(400, 525)
 		},
 		func() {
@@ -85,6 +86,12 @@ func (v *MainMenu) Load() []func() {
 		func() {
 			v.diabloLogoRightBack = v.fileProvider.LoadSprite(ResourcePaths.Diablo2LogoBlackRight, Palettes.Units)
 			v.diabloLogoRightBack.MoveTo(400, 120)
+		},
+		func() {
+			v.exitDiabloButton = UI.CreateButton(v.fileProvider, "EXIT DIABLO II")
+			v.exitDiabloButton.MoveTo(264, 535)
+			v.exitDiabloButton.SetVisible(false)
+			v.uiManager.AddWidget(v.exitDiabloButton)
 		},
 	}
 }
@@ -120,6 +127,7 @@ func (v *MainMenu) Update() {
 		if v.uiManager.CursorButtonPressed(UI.CursorButtonLeft) {
 			v.leftButtonHeld = true
 			v.showTrademarkScreen = false
+			v.exitDiabloButton.SetVisible(true)
 		}
 		return
 	}

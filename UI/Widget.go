@@ -7,6 +7,6 @@ import (
 // Widget defines an object that is a UI widget
 type Widget interface {
 	Common.Drawable
-	getEnabled() bool
-	setEnabled(bool)
+	GetEnabled() bool
+	SetEnabled(enabled bool)
 }

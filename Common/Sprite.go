@@ -12,7 +12,7 @@ import (
 type Sprite struct {
 	Directions         uint32
 	FramesPerDirection uint32
-	Frames             []SpriteFrame
+	Frames             []*SpriteFrame
 	X, Y               int
 	Frame, Direction   uint8
 	Blend              bool
@@ -34,6 +34,7 @@ type SpriteFrame struct {
 	Length    uint32
 	ImageData []int16
 	Image     *ebiten.Image
+	Loaded    bool
 }
 
 // CreateSprite creates an instance of a sprite
@@ -57,10 +58,10 @@ func CreateSprite(data []byte, palette Palette) *Sprite {
 		framePointers[i] = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
 		dataPointer += 4
 	}
-	result.Frames = make([]SpriteFrame, totalFrames)
+	result.Frames = make([]*SpriteFrame, totalFrames)
 	for i := uint32(0); i < totalFrames; i++ {
 		dataPointer = framePointers[i]
-
+		result.Frames[i] = &SpriteFrame{}
 		result.Frames[i].Flip = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
 		dataPointer += 4
 		result.Frames[i].Width = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
@@ -120,6 +121,7 @@ func CreateSprite(data []byte, palette Palette) *Sprite {
 				newData[(ii*4)+3] = 0xFF
 			}
 			result.Frames[ix].Image.ReplacePixels(newData)
+			result.Frames[ix].Loaded = true
 		}(i, dataPointer)
 	}
 	return result
@@ -156,10 +158,15 @@ func (v *Sprite) Draw(target *ebiten.Image) {
 		float64((int32(v.Y) - int32(frame.Height) + frame.OffsetY)),
 	)
 	if v.Blend {
-		opts.CompositeMode = ebiten.CompositeModeLighter
+		opts.CompositeMode = ebiten.CompositeModeSourceOver
+	} else {
+		opts.CompositeMode = ebiten.CompositeModeSourceOver
 	}
 	if v.ColorMod != nil {
 		opts.ColorM = ColorToColorM(v.ColorMod)
+	}
+	for frame.Image == nil {
+		time.Sleep(time.Millisecond)
 	}
 	target.DrawImage(frame.Image, opts)
 }
@@ -180,9 +187,14 @@ func (v *Sprite) DrawSegments(target *ebiten.Image, xSegments, ySegments, offset
 			)
 			if v.Blend {
 				opts.CompositeMode = ebiten.CompositeModeLighter
+			} else {
+				opts.CompositeMode = ebiten.CompositeModeSourceOver
 			}
 			if v.ColorMod != nil {
 				opts.ColorM = ColorToColorM(v.ColorMod)
+			}
+			for frame.Image == nil {
+				time.Sleep(time.Millisecond)
 			}
 			target.DrawImage(frame.Image, opts)
 			xOffset += int32(frame.Width)

@@ -30,14 +30,14 @@ type Label struct {
 	Alignment LabelAlignment
 	font      *Font
 	imageData *ebiten.Image
-	ColorMod  color.Color
+	Color     color.Color
 }
 
 // CreateLabel creates a new instance of a UI label
 func CreateLabel(provider Common.FileProvider, font string, palette Palettes.Palette) *Label {
 	result := &Label{
 		Alignment: LabelAlignLeft,
-		ColorMod:  nil,
+		Color:     color.White,
 		font:      GetFont(font, palette, provider),
 	}
 
@@ -64,17 +64,6 @@ func (v *Label) Draw(target *ebiten.Image) {
 	target.DrawImage(v.imageData, opts)
 }
 
-func (v *Label) calculateSize() (uint32, uint32) {
-	width := uint32(0)
-	height := uint32(0)
-	for _, ch := range v.text {
-		metric := v.font.Metrics[uint8(ch)]
-		width += uint32(metric.Width)
-		height = Common.Max(height, uint32(metric.Height))
-	}
-	return width, height
-}
-
 // MoveTo moves the label to the specified location
 func (v *Label) MoveTo(x, y int) {
 	v.X = x
@@ -85,20 +74,11 @@ func (v *Label) cacheImage() {
 	if v.imageData != nil {
 		return
 	}
-	width, height := v.calculateSize()
+	width, height := v.font.GetTextMetrics(v.text)
 	v.Width = width
 	v.Height = height
 	v.imageData, _ = ebiten.NewImage(int(width), int(height), ebiten.FilterNearest)
-	x := uint32(0)
-	v.font.FontSprite.ColorMod = v.ColorMod
-	for _, ch := range v.text {
-		char := uint8(ch)
-		metric := v.font.Metrics[char]
-		v.font.FontSprite.Frame = char
-		v.font.FontSprite.MoveTo(int(x), int(height))
-		v.font.FontSprite.Draw(v.imageData)
-		x += uint32(metric.Width)
-	}
+	v.font.Draw(0, 0, v.text, v.Color, v.imageData)
 }
 
 // SetText sets the label's text

@@ -104,8 +104,11 @@ func (v *Engine) mapMpqFiles() {
 	}
 }
 
+var mutex sync.Mutex
+
 // LoadFile loads a file from the specified mpq and returns the data as a byte array
 func (v *Engine) LoadFile(fileName string) []byte {
+	mutex.Lock()
 	// TODO: May want to cache some things if performance becomes an issue
 	mpqFile := v.Files[strings.ToLower(fileName)]
 	mpq, err := MPQ.Load(mpqFile)
@@ -120,7 +123,7 @@ func (v *Engine) LoadFile(fileName string) []byte {
 	mpqStream := MPQ.CreateStream(mpq, blockTableEntry, fileName)
 	result := make([]byte, blockTableEntry.UncompressedFileSize)
 	mpqStream.Read(result, 0, blockTableEntry.UncompressedFileSize)
-
+	mutex.Unlock()
 	return result
 }
 
