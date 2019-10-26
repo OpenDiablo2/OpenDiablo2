@@ -63,7 +63,7 @@ func CreateEngine() *Engine {
 	result.LoadingSprite = result.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading)
 	loadingSpriteSizeX, loadingSpriteSizeY := result.LoadingSprite.GetSize()
 	result.LoadingSprite.MoveTo(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
-	result.SetNextScene(Scenes.CreateMainMenu(result, result.UIManager, result.SoundManager))
+	result.SetNextScene(Scenes.CreateMainMenu(result, result, result.UIManager, result.SoundManager))
 	return result
 }
 

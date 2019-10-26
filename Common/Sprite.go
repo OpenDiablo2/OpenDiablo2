@@ -112,7 +112,7 @@ func CreateSprite(data []byte, palette Palette) *Sprite {
 			result.Frames[ix].Image, _ = ebiten.NewImage(int(result.Frames[ix].Width), int(result.Frames[ix].Height), ebiten.FilterNearest)
 			newData := make([]byte, result.Frames[ix].Width*result.Frames[ix].Height*4)
 			for ii := uint32(0); ii < result.Frames[ix].Width*result.Frames[ix].Height; ii++ {
-				if result.Frames[ix].ImageData[ii] == -1 {
+				if result.Frames[ix].ImageData[ii] < 1 { // TODO: Is this == -1 or < 1?
 					continue
 				}
 				newData[ii*4] = palette.Colors[result.Frames[ix].ImageData[ii]].R

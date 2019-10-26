@@ -18,6 +18,7 @@ type MainMenu struct {
 	uiManager           *UI.Manager
 	soundManager        *Sound.Manager
 	fileProvider        Common.FileProvider
+	sceneProvider       SceneProvider
 	trademarkBackground *Common.Sprite
 	background          *Common.Sprite
 	diabloLogoLeft      *Common.Sprite
@@ -33,11 +34,12 @@ type MainMenu struct {
 }
 
 // CreateMainMenu creates an instance of MainMenu
-func CreateMainMenu(fileProvider Common.FileProvider, uiManager *UI.Manager, soundManager *Sound.Manager) *MainMenu {
+func CreateMainMenu(fileProvider Common.FileProvider, sceneProvider SceneProvider, uiManager *UI.Manager, soundManager *Sound.Manager) *MainMenu {
 	result := &MainMenu{
 		fileProvider:        fileProvider,
 		uiManager:           uiManager,
 		soundManager:        soundManager,
+		sceneProvider:       sceneProvider,
 		showTrademarkScreen: true,
 	}
 	return result
@@ -100,6 +102,7 @@ func (v *MainMenu) Load() []func() {
 			v.creditsButton = UI.CreateButton(UI.ButtonTypeShort, v.fileProvider, "CREDITS")
 			v.creditsButton.MoveTo(264, 505)
 			v.creditsButton.SetVisible(false)
+			v.creditsButton.OnActivated(func() { v.onCreditsButtonClicked() })
 			v.uiManager.AddWidget(v.creditsButton)
 		},
 	}
@@ -107,6 +110,10 @@ func (v *MainMenu) Load() []func() {
 
 func (v *MainMenu) onExitButtonClicked() {
 	os.Exit(0)
+}
+
+func (v *MainMenu) onCreditsButtonClicked() {
+	v.sceneProvider.SetNextScene(CreateCredits(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager))
 }
 
 // Unload unloads the data for the main menu

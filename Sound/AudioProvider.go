@@ -13,6 +13,7 @@ type Manager struct {
 	fileProvider Common.FileProvider
 	audioContext *audio.Context // The Audio context
 	bgmAudio     *audio.Player  // The audio player
+	lastBgm      string
 }
 
 // CreateManager creates a sound provider
@@ -30,6 +31,10 @@ func CreateManager(fileProvider Common.FileProvider) *Manager {
 
 // PlayBGM plays an infinitely looping background track
 func (v *Manager) PlayBGM(song string) {
+	if v.lastBgm == song {
+		return
+	}
+	v.lastBgm = song
 	go func() {
 		if v.bgmAudio != nil {
 			v.bgmAudio.Close()
