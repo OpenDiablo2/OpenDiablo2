@@ -1,6 +1,6 @@
 language: go
 go:
-  - 1.12
+  - 1.13.3
 before_install:
   - sudo apt-get -y install libx11-dev  mesa-common-dev libglfw3-dev libgles2-mesa-dev libasound2-dev
 script: buildci.sh
