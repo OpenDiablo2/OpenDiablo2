@@ -54,11 +54,11 @@ type ButtonLayout struct {
 
 // ButtonLayouts define the type of buttons you can have
 var ButtonLayouts = map[ButtonType]ButtonLayout{
-	ButtonTypeWide:  {2, 1, ResourcePaths.WideButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontExocet10, nil, true},
-	ButtonTypeShort: {1, 1, ResourcePaths.ShortButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontExocet8, nil, true},
+	ButtonTypeWide:   {2, 1, ResourcePaths.WideButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontExocet10, nil, true},
+	ButtonTypeShort:  {1, 1, ResourcePaths.ShortButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontExocet8, nil, true},
+	ButtonTypeMedium: {1, 1, ResourcePaths.MediumButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontExocet10, nil, true},
 	/*
 		{eButtonType.Wide,  new ButtonLayout { XSegments = 2, ResourceName = ResourcePaths.WideButtonBlank, PaletteName = Palettes.Units } },
-		{eButtonType.Medium, new ButtonLayout{ ResourceName = ResourcePaths.MediumButtonBlank, PaletteName = Palettes.Units } },
 		{eButtonType.Narrow, new ButtonLayout { ResourceName = ResourcePaths.NarrowButtonBlank, PaletteName = Palettes.Units } },
 		{eButtonType.Tall, new ButtonLayout { ResourceName = ResourcePaths.TallButtonBlank, PaletteName = Palettes.Units } },
 

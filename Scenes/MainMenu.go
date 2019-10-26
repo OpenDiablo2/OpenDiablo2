@@ -29,7 +29,7 @@ type MainMenu struct {
 	creditsButton       *UI.Button
 	copyrightLabel      *UI.Label
 	copyrightLabel2     *UI.Label
-	showTrademarkScreen bool
+	ShowTrademarkScreen bool
 	leftButtonHeld      bool
 }
 
@@ -40,7 +40,7 @@ func CreateMainMenu(fileProvider Common.FileProvider, sceneProvider SceneProvide
 		uiManager:           uiManager,
 		soundManager:        soundManager,
 		sceneProvider:       sceneProvider,
-		showTrademarkScreen: true,
+		ShowTrademarkScreen: true,
 	}
 	return result
 }
@@ -94,14 +94,14 @@ func (v *MainMenu) Load() []func() {
 		func() {
 			v.exitDiabloButton = UI.CreateButton(UI.ButtonTypeWide, v.fileProvider, "EXIT DIABLO II")
 			v.exitDiabloButton.MoveTo(264, 535)
-			v.exitDiabloButton.SetVisible(false)
+			v.exitDiabloButton.SetVisible(!v.ShowTrademarkScreen)
 			v.exitDiabloButton.OnActivated(func() { v.onExitButtonClicked() })
 			v.uiManager.AddWidget(v.exitDiabloButton)
 		},
 		func() {
 			v.creditsButton = UI.CreateButton(UI.ButtonTypeShort, v.fileProvider, "CREDITS")
 			v.creditsButton.MoveTo(264, 505)
-			v.creditsButton.SetVisible(false)
+			v.creditsButton.SetVisible(!v.ShowTrademarkScreen)
 			v.creditsButton.OnActivated(func() { v.onCreditsButtonClicked() })
 			v.uiManager.AddWidget(v.creditsButton)
 		},
@@ -123,7 +123,7 @@ func (v *MainMenu) Unload() {
 
 // Render renders the main menu
 func (v *MainMenu) Render(screen *ebiten.Image) {
-	if v.showTrademarkScreen {
+	if v.ShowTrademarkScreen {
 		v.trademarkBackground.DrawSegments(screen, 4, 3, 0)
 	} else {
 		v.background.DrawSegments(screen, 4, 3, 0)
@@ -133,7 +133,7 @@ func (v *MainMenu) Render(screen *ebiten.Image) {
 	v.diabloLogoLeft.Draw(screen)
 	v.diabloLogoRight.Draw(screen)
 
-	if v.showTrademarkScreen {
+	if v.ShowTrademarkScreen {
 		v.copyrightLabel.Draw(screen)
 		v.copyrightLabel2.Draw(screen)
 	} else {
@@ -143,10 +143,10 @@ func (v *MainMenu) Render(screen *ebiten.Image) {
 
 // Update runs the update logic on the main menu
 func (v *MainMenu) Update() {
-	if v.showTrademarkScreen {
+	if v.ShowTrademarkScreen {
 		if v.uiManager.CursorButtonPressed(UI.CursorButtonLeft) {
 			v.leftButtonHeld = true
-			v.showTrademarkScreen = false
+			v.ShowTrademarkScreen = false
 			v.exitDiabloButton.SetVisible(true)
 			v.creditsButton.SetVisible(true)
 		}
