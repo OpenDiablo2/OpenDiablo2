@@ -3,6 +3,8 @@
 [Join us on Discord!](https://discord.gg/pRy8tdc)\
 [Development Live stream](https://www.twitch.tv/essial/)
 
+![Main Menu](docs/MainMenuSS.png)
+
 ## About this project
 
 OpenDiablo2 is an ARPG game engine in the same vein of the 2000's games, and supports playing Diablo 2. The engine is written in golang and is cross platform. However, please note that this project does not ship with the assets or content required to play Diablo 2. You must have a legally purchased copy of [Diablo 2](https://us.shop.battle.net/en-us/product/diablo-ii) and its expansion [Lord of Destruction](https://us.shop.battle.net/en-us/product/diablo-ii-lord-of-destruction) installed on your computer in order to run that game on this engine. If you have an original copy of the disks, those files should work fine as well.

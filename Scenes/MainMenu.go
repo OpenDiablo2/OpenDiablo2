@@ -1,8 +1,12 @@
 package Scenes
 
 import (
+	"fmt"
 	"image/color"
+	"log"
 	"os"
+	"os/exec"
+	"runtime"
 
 	"github.com/essial/OpenDiablo2/Common"
 	"github.com/essial/OpenDiablo2/Palettes"
@@ -25,10 +29,14 @@ type MainMenu struct {
 	diabloLogoRight     *Common.Sprite
 	diabloLogoLeftBack  *Common.Sprite
 	diabloLogoRightBack *Common.Sprite
+	singlePlayerButton  *UI.Button
+	githubButton        *UI.Button
 	exitDiabloButton    *UI.Button
 	creditsButton       *UI.Button
+	cinematicsButton    *UI.Button
 	copyrightLabel      *UI.Label
 	copyrightLabel2     *UI.Label
+	openDiabloLabel     *UI.Label
 	ShowTrademarkScreen bool
 	leftButtonHeld      bool
 }
@@ -62,6 +70,13 @@ func (v *MainMenu) Load() []func() {
 			v.copyrightLabel2.SetText("All Rights Reserved.")
 			v.copyrightLabel2.Color = color.RGBA{188, 168, 140, 255}
 			v.copyrightLabel2.MoveTo(400, 525)
+		},
+		func() {
+			v.openDiabloLabel = UI.CreateLabel(v.fileProvider, ResourcePaths.FontFormal10, Palettes.Static)
+			v.openDiabloLabel.Alignment = UI.LabelAlignCenter
+			v.openDiabloLabel.SetText("OpenDiablo2 is neither developed by, nor endorsed by Blizzard or its parent company Activision")
+			v.openDiabloLabel.Color = color.RGBA{255, 255, 140, 255}
+			v.openDiabloLabel.MoveTo(400, 580)
 		},
 		func() {
 			v.background = v.fileProvider.LoadSprite(ResourcePaths.GameSelectScreen, Palettes.Sky)
@@ -105,7 +120,49 @@ func (v *MainMenu) Load() []func() {
 			v.creditsButton.OnActivated(func() { v.onCreditsButtonClicked() })
 			v.uiManager.AddWidget(v.creditsButton)
 		},
+		func() {
+			v.cinematicsButton = UI.CreateButton(UI.ButtonTypeShort, v.fileProvider, "CINEMATICS")
+			v.cinematicsButton.MoveTo(401, 505)
+			v.cinematicsButton.SetVisible(!v.ShowTrademarkScreen)
+			v.uiManager.AddWidget(v.cinematicsButton)
+		},
+		func() {
+			v.singlePlayerButton = UI.CreateButton(UI.ButtonTypeWide, v.fileProvider, "SINGLE PLAYER")
+			v.singlePlayerButton.MoveTo(264, 290)
+			v.singlePlayerButton.SetVisible(!v.ShowTrademarkScreen)
+			v.uiManager.AddWidget(v.singlePlayerButton)
+		},
+		func() {
+			v.githubButton = UI.CreateButton(UI.ButtonTypeWide, v.fileProvider, "PROJECT WEBSITE")
+			v.githubButton.MoveTo(264, 330)
+			v.githubButton.SetVisible(!v.ShowTrademarkScreen)
+			v.githubButton.OnActivated(func() { v.onGithubButtonClicked() })
+			v.uiManager.AddWidget(v.githubButton)
+		},
 	}
+}
+
+func openbrowser(url string) {
+	var err error
+
+	switch runtime.GOOS {
+	case "linux":
+		err = exec.Command("xdg-open", url).Start()
+	case "windows":
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	default:
+		err = fmt.Errorf("unsupported platform")
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+func (v *MainMenu) onGithubButtonClicked() {
+	openbrowser("https://www.github.com/essial/OpenDiablo2")
 }
 
 func (v *MainMenu) onExitButtonClicked() {
@@ -137,7 +194,7 @@ func (v *MainMenu) Render(screen *ebiten.Image) {
 		v.copyrightLabel.Draw(screen)
 		v.copyrightLabel2.Draw(screen)
 	} else {
-
+		v.openDiabloLabel.Draw(screen)
 	}
 }
 
@@ -149,6 +206,9 @@ func (v *MainMenu) Update(tickTime float64) {
 			v.ShowTrademarkScreen = false
 			v.exitDiabloButton.SetVisible(true)
 			v.creditsButton.SetVisible(true)
+			v.cinematicsButton.SetVisible(true)
+			v.singlePlayerButton.SetVisible(true)
+			v.githubButton.SetVisible(true)
 		}
 		return
 	}

@@ -131,7 +131,7 @@ func CreateSprite(data []byte, palette Palette) *Sprite {
 func (v *Sprite) GetSize() (uint32, uint32) {
 	frame := v.Frames[uint32(v.Frame)+(uint32(v.Direction)*v.FramesPerDirection)]
 	for frame.Loaded == false {
-		time.Sleep(time.Millisecond)
+		time.Sleep(time.Millisecond * 5)
 	}
 	return frame.Width, frame.Height
 }
@@ -212,7 +212,7 @@ func (v *Sprite) DrawSegments(target *ebiten.Image, xSegments, ySegments, offset
 				opts.ColorM = ColorToColorM(v.ColorMod)
 			}
 			for frame.Loaded == false {
-				time.Sleep(time.Millisecond)
+				time.Sleep(time.Millisecond * 5)
 			}
 			target.DrawImage(frame.Image, opts)
 			xOffset += int32(frame.Width)

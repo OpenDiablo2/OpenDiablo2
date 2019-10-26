@@ -62,8 +62,8 @@ func (v *Font) GetTextMetrics(text string) (width, height uint32) {
 		ch := text[i]
 		metric := v.metrics[uint8(ch)]
 		width += uint32(metric.Width)
-		_, h := v.fontSprite.GetFrameSize(int(ch))
-		height = Common.Max(height, h)
+		//_, h := v.fontSprite.GetFrameSize(int(ch))
+		height = Common.Max(height, uint32(metric.Height))
 	}
 	return
 }

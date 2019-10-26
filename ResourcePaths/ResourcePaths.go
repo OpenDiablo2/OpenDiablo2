@@ -94,16 +94,18 @@ const (
 
 	// --- Fonts ---
 
-	Font6        = "/data/local/font/latin/font6"
-	Font8        = "/data/local/font/latin/font8"
-	Font16       = "/data/local/font/latin/font16"
-	Font24       = "/data/local/font/latin/font24"
-	Font30       = "/data/local/font/latin/font30"
-	FontFormal12 = "/data/local/font/latin/fontformal12"
-	FontFormal11 = "/data/local/font/latin/fontformal11"
-	FontFormal10 = "/data/local/font/latin/fontformal10"
-	FontExocet10 = "/data/local/font/latin/fontexocet10"
-	FontExocet8  = "/data/local/font/latin/fontexocet8"
+	Font6          = "/data/local/font/latin/font6"
+	Font8          = "/data/local/font/latin/font8"
+	Font16         = "/data/local/font/latin/font16"
+	Font24         = "/data/local/font/latin/font24"
+	Font30         = "/data/local/font/latin/font30"
+	FontFormal12   = "/data/local/font/latin/fontformal12"
+	FontFormal11   = "/data/local/font/latin/fontformal11"
+	FontFormal10   = "/data/local/font/latin/fontformal10"
+	FontExocet10   = "/data/local/font/latin/fontexocet10"
+	FontExocet8    = "/data/local/font/latin/fontexocet8"
+	FontSucker     = "/data/local/font/latin/ReallyTheLastSucker"
+	FontRediculous = "/data/local/font/latin/fontridiculous"
 
 	// --- UI ---
 

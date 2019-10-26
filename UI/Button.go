@@ -55,7 +55,7 @@ type ButtonLayout struct {
 // ButtonLayouts define the type of buttons you can have
 var ButtonLayouts = map[ButtonType]ButtonLayout{
 	ButtonTypeWide:   {2, 1, ResourcePaths.WideButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontExocet10, nil, true},
-	ButtonTypeShort:  {1, 1, ResourcePaths.ShortButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontExocet8, nil, true},
+	ButtonTypeShort:  {1, 1, ResourcePaths.ShortButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontRediculous, nil, true},
 	ButtonTypeMedium: {1, 1, ResourcePaths.MediumButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontExocet10, nil, true},
 	/*
 		{eButtonType.Wide,  new ButtonLayout { XSegments = 2, ResourceName = ResourcePaths.WideButtonBlank, PaletteName = Palettes.Units } },
@@ -123,9 +123,9 @@ func CreateButton(buttonType ButtonType, fileProvider Common.FileProvider, text 
 
 	result.normalImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
 	result.pressedImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
-	textWidth, textHeight := font.GetTextMetrics(text)
+	textWidth, _ := font.GetTextMetrics(text)
 	textX := (result.width / 2) - (textWidth / 2)
-	textY := (result.height / 2) - (textHeight / 2) + 1
+	textY := (result.height / 2)
 	buttonSprite.MoveTo(0, 0)
 	buttonSprite.Blend = true
 	buttonSprite.DrawSegments(result.normalImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame)
