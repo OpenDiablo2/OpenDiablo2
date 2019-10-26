@@ -61,7 +61,8 @@ func (v *Font) GetTextMetrics(text string) (width, height uint32) {
 	for _, ch := range text {
 		metric := v.metrics[uint8(ch)]
 		width += uint32(metric.Width)
-		height = Common.Max(height, uint32(metric.Height))
+		_, h := v.fontSprite.GetFrameSize(int(ch))
+		height = Common.Max(height, h)
 	}
 	return
 }
@@ -69,7 +70,7 @@ func (v *Font) GetTextMetrics(text string) (width, height uint32) {
 // Draw draws the font on the target surface
 func (v *Font) Draw(x, y int, text string, color color.Color, target *ebiten.Image) {
 	v.fontSprite.ColorMod = color
-	v.fontSprite.Blend = true
+	v.fontSprite.Blend = false
 	_, height := v.GetTextMetrics(text)
 	for _, ch := range text {
 		char := uint8(ch)

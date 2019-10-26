@@ -25,6 +25,7 @@ type MainMenu struct {
 	diabloLogoLeftBack  *Common.Sprite
 	diabloLogoRightBack *Common.Sprite
 	exitDiabloButton    *UI.Button
+	creditsButton       *UI.Button
 	copyrightLabel      *UI.Label
 	copyrightLabel2     *UI.Label
 	showTrademarkScreen bool
@@ -95,6 +96,12 @@ func (v *MainMenu) Load() []func() {
 			v.exitDiabloButton.OnActivated(func() { v.onExitButtonClicked() })
 			v.uiManager.AddWidget(v.exitDiabloButton)
 		},
+		func() {
+			v.creditsButton = UI.CreateButton(UI.ButtonTypeShort, v.fileProvider, "CREDITS")
+			v.creditsButton.MoveTo(264, 505)
+			v.creditsButton.SetVisible(false)
+			v.uiManager.AddWidget(v.creditsButton)
+		},
 	}
 }
 
@@ -134,6 +141,7 @@ func (v *MainMenu) Update() {
 			v.leftButtonHeld = true
 			v.showTrademarkScreen = false
 			v.exitDiabloButton.SetVisible(true)
+			v.creditsButton.SetVisible(true)
 		}
 		return
 	}

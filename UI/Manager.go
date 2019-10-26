@@ -91,7 +91,6 @@ func (v *Manager) Update() {
 					v.widgets[i].SetPressed(true)
 					found = true
 				}
-				break
 			} else {
 				widget.SetPressed(false)
 			}

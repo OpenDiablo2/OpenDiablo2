@@ -109,8 +109,8 @@ func CreateButton(buttonType ButtonType, fileProvider Common.FileProvider, text 
 		pressed:      false,
 	}
 	buttonLayout := ButtonLayouts[buttonType]
-	font := GetFont(buttonLayout.FontPath, buttonLayout.PaletteName, fileProvider)
-	buttonSprite := fileProvider.LoadSprite(ResourcePaths.WideButtonBlank, Palettes.Units)
+	font := GetFont(buttonLayout.FontPath, Palettes.Units, fileProvider)
+	buttonSprite := fileProvider.LoadSprite(buttonLayout.ResourceName, buttonLayout.PaletteName)
 	totalButtonTypes := buttonSprite.GetTotalFrames() / (buttonLayout.XSegments * buttonLayout.YSegments)
 	for i := 0; i < buttonLayout.XSegments; i++ {
 		w, _ := buttonSprite.GetFrameSize(i)
@@ -125,26 +125,26 @@ func CreateButton(buttonType ButtonType, fileProvider Common.FileProvider, text 
 	result.pressedImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
 	textWidth, textHeight := font.GetTextMetrics(text)
 	textX := (result.width / 2) - (textWidth / 2)
-	textY := (result.height / 2) - (textHeight / 2) + 5
+	textY := (result.height / 2) - (textHeight / 2) + 1
 	buttonSprite.MoveTo(0, 0)
 	buttonSprite.Blend = true
-	buttonSprite.DrawSegments(result.normalImage, 2, 1, buttonLayout.BaseFrame)
+	buttonSprite.DrawSegments(result.normalImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame)
 	font.Draw(int(textX), int(textY), text, color.RGBA{100, 100, 100, 255}, result.normalImage)
 	if buttonLayout.AllowFrameChange {
 		if totalButtonTypes > 1 {
-			buttonSprite.DrawSegments(result.pressedImage, 2, 1, buttonLayout.BaseFrame+1)
+			buttonSprite.DrawSegments(result.pressedImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+1)
 			font.Draw(int(textX-2), int(textY+2), text, color.RGBA{100, 100, 100, 255}, result.pressedImage)
 		}
 		if totalButtonTypes > 2 {
-			buttonSprite.DrawSegments(result.toggledImage, 2, 1, buttonLayout.BaseFrame+2)
+			buttonSprite.DrawSegments(result.toggledImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+2)
 			font.Draw(int(textX), int(textY), text, color.RGBA{100, 100, 100, 255}, result.toggledImage)
 		}
 		if totalButtonTypes > 3 {
-			buttonSprite.DrawSegments(result.pressedToggledImage, 2, 1, buttonLayout.BaseFrame+3)
+			buttonSprite.DrawSegments(result.pressedToggledImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+3)
 			font.Draw(int(textX), int(textY), text, color.RGBA{100, 100, 100, 255}, result.pressedToggledImage)
 		}
 		if buttonLayout.DisabledFrame != -1 {
-			buttonSprite.DrawSegments(result.disabledImage, 2, 1, buttonLayout.DisabledFrame)
+			buttonSprite.DrawSegments(result.disabledImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.DisabledFrame)
 			font.Draw(int(textX), int(textY), text, color.RGBA{100, 100, 100, 255}, result.disabledImage)
 		}
 	}

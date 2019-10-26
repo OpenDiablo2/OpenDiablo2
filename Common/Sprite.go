@@ -179,7 +179,7 @@ func (v *Sprite) Draw(target *ebiten.Image) {
 		float64((int32(v.Y) - int32(frame.Height) + frame.OffsetY)),
 	)
 	if v.Blend {
-		opts.CompositeMode = ebiten.CompositeModeSourceOver
+		opts.CompositeMode = ebiten.CompositeModeLighter
 	} else {
 		opts.CompositeMode = ebiten.CompositeModeSourceOver
 	}
