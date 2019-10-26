@@ -1,4 +1,4 @@
-package OpenDiablo2
+package Core
 
 import (
 	"encoding/json"
@@ -37,7 +37,7 @@ type Engine struct {
 	Settings        EngineConfig                        // Engine configuration settings from json file
 	Files           map[string]string                   // Map that defines which files are in which MPQs
 	Palettes        map[Palettes.Palette]Common.Palette // Color palettes
-	SoundEntries    map[string]SoundEntry               // Sound configurations
+	SoundEntries    map[string]Sound.SoundEntry         // Sound configurations
 	LoadingSprite   *Common.Sprite                      // The sprite shown when loading stuff
 	loadingProgress float64                             // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
 	stepLoadingSize float64                             // The size for each loading step
@@ -148,13 +148,13 @@ func (v *Engine) loadPalettes() {
 
 func (v *Engine) loadSoundEntries() {
 	log.Println("loading sound configurations")
-	v.SoundEntries = make(map[string]SoundEntry)
+	v.SoundEntries = make(map[string]Sound.SoundEntry)
 	soundData := strings.Split(string(v.LoadFile(ResourcePaths.SoundSettings)), "\r\n")[1:]
 	for _, line := range soundData {
 		if len(line) == 0 {
 			continue
 		}
-		soundEntry := CreateSoundEntry(line)
+		soundEntry := Sound.CreateSoundEntry(line)
 		v.SoundEntries[soundEntry.Handle] = soundEntry
 	}
 }

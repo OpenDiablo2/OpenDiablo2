@@ -1,19 +1,19 @@
 package main
 
 import (
+	"github.com/essial/OpenDiablo2/Core"
 	"log"
 
-	"github.com/essial/OpenDiablo2"
 	"github.com/essial/OpenDiablo2/MPQ"
 	"github.com/hajimehoshi/ebiten"
 )
 
-var d2Engine *OpenDiablo2.Engine
+var d2Engine *Core.Engine
 
 func main() {
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
 	MPQ.InitializeCryptoBuffer()
-	d2Engine = OpenDiablo2.CreateEngine()
+	d2Engine = Core.CreateEngine()
 	ebiten.SetCursorVisible(false)
 	ebiten.SetFullscreen(d2Engine.Settings.FullScreen)
 	ebiten.SetRunnableInBackground(d2Engine.Settings.RunInBackground)

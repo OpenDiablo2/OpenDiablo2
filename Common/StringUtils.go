@@ -1,4 +1,4 @@
-package OpenDiablo2
+package Common
 
 import "strconv"
 
