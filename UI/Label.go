@@ -89,3 +89,11 @@ func (v *Label) SetText(newText string) {
 	v.text = newText
 	v.imageData = nil
 }
+
+// GetSize returns the size of the label
+func (v *Label) GetSize() (width, height uint32) {
+	v.cacheImage()
+	width = v.Width
+	height = v.Height
+	return
+}

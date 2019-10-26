@@ -89,8 +89,11 @@ func (v *Credits) Load() []func() {
 			v.uiManager.AddWidget(v.exitButton)
 		},
 		func() {
-			fileData, _ := utf16BytesToString(v.fileProvider.LoadFile(ResourcePaths.CreditsText))
+			fileData, _ := utf16BytesToString(v.fileProvider.LoadFile(ResourcePaths.CreditsText)[2:])
 			v.creditsText = strings.Split(fileData, "\r\n")
+			for i := range v.creditsText {
+				v.creditsText[i] = strings.Trim(v.creditsText[i], " ")
+			}
 		},
 	}
 }
@@ -111,11 +114,11 @@ func (v *Credits) Render(screen *ebiten.Image) {
 	}
 }
 
-const secondsPerCycle = (float64(4) / float64(100000))
+const secondsPerCycle = (float64(40) / float64(1000))
 
 // Update runs the update logic on the credits scene
 func (v *Credits) Update(tickTime float64) {
-	v.cycleTime += tickTime / float64(1000)
+	v.cycleTime += tickTime
 	for v.cycleTime >= secondsPerCycle {
 		v.cycleTime -= secondsPerCycle
 		v.cyclesTillNextLine--
@@ -148,39 +151,39 @@ func (v *Credits) addNextItem() {
 		return
 	}
 
-	text := strings.Trim(v.creditsText[0], " ")
+	text := v.creditsText[0]
 	v.creditsText = v.creditsText[1:]
 	if len(text) == 0 {
 		v.cyclesTillNextLine = 18
 		return
 	}
 	isHeading := text[0] == '*'
-	isNextHeading := len(v.creditsText) > 0 && v.creditsText[1][0] == '*'
-	isNextSpace := len(v.creditsText) > 0 && len(strings.Trim(v.creditsText[1], " ")) == 0
+	isNextHeading := len(v.creditsText) > 0 && len(v.creditsText[0]) > 0 && v.creditsText[0][0] == '*'
+	isNextSpace := len(v.creditsText) > 0 && len(v.creditsText[0]) == 0
 	var label = v.getNewFontLabel(isHeading)
 	if isHeading {
 		label.SetText(text[1:])
 	} else {
 		label.SetText(text)
 	}
-
+	width, _ := label.GetSize()
 	isDoubled := false
 	if !isHeading && !isNextHeading && !isNextSpace {
 		isDoubled = true
 
 		// Gotta go side by side
-		label.MoveTo(390-int(label.Width), 605)
+		label.MoveTo(390-int(width), 605)
 
-		text2 := strings.Trim(v.creditsText[0], " ")
+		text2 := v.creditsText[0]
 		v.creditsText = v.creditsText[1:]
 
-		isNextHeading = len(v.creditsText[1]) > 0 && v.creditsText[1][0] == '*'
+		isNextHeading = len(v.creditsText) > 0 && len(v.creditsText[0]) > 0 && v.creditsText[0][0] == '*'
 		label2 := v.getNewFontLabel(isHeading)
 		label2.SetText(text2)
 
 		label2.MoveTo(410, 605)
 	} else {
-		label.MoveTo(400-int(label.Width/2), 605)
+		label.MoveTo(400-int(width/2), 605)
 	}
 
 	if isHeading && isNextHeading {
@@ -202,6 +205,11 @@ func (v *Credits) getNewFontLabel(isHeading bool) *UI.Label {
 	for _, label := range v.labels {
 		if label.Available {
 			label.Available = false
+			if isHeading {
+				label.Label.Color = color.RGBA{255, 88, 82, 255}
+			} else {
+				label.Label.Color = color.RGBA{198, 178, 150, 255}
+			}
 			return label.Label
 		}
 	}
