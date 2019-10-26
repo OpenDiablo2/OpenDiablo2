@@ -2,6 +2,7 @@ package Scenes
 
 import (
 	"image/color"
+	"os"
 
 	"github.com/essial/OpenDiablo2/Common"
 	"github.com/essial/OpenDiablo2/Palettes"
@@ -88,12 +89,17 @@ func (v *MainMenu) Load() []func() {
 			v.diabloLogoRightBack.MoveTo(400, 120)
 		},
 		func() {
-			v.exitDiabloButton = UI.CreateButton(v.fileProvider, "EXIT DIABLO II")
+			v.exitDiabloButton = UI.CreateButton(UI.ButtonTypeWide, v.fileProvider, "EXIT DIABLO II")
 			v.exitDiabloButton.MoveTo(264, 535)
 			v.exitDiabloButton.SetVisible(false)
+			v.exitDiabloButton.OnActivated(func() { v.onExitButtonClicked() })
 			v.uiManager.AddWidget(v.exitDiabloButton)
 		},
 	}
+}
+
+func (v *MainMenu) onExitButtonClicked() {
+	os.Exit(0)
 }
 
 // Unload unloads the data for the main menu

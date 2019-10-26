@@ -22,6 +22,7 @@ type Manager struct {
 	widgets       []Widget
 	cursorSprite  *Common.Sprite
 	cursorButtons CursorButton
+	pressedIndex  int
 	CursorX       int
 	CursorY       int
 }
@@ -29,6 +30,7 @@ type Manager struct {
 // CreateManager creates a new instance of a UI manager
 func CreateManager(provider Common.FileProvider) *Manager {
 	result := &Manager{
+		pressedIndex: -1,
 		widgets:      make([]Widget, 0),
 		cursorSprite: provider.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units),
 	}
@@ -38,6 +40,7 @@ func CreateManager(provider Common.FileProvider) *Manager {
 // Reset resets the state of the UI manager. Typically called for new scenes
 func (v *Manager) Reset() {
 	v.widgets = make([]Widget, 0)
+	v.pressedIndex = -1
 }
 
 // AddWidget adds a widget to the UI manager
@@ -69,6 +72,55 @@ func (v *Manager) Update() {
 		v.cursorButtons |= CursorButtonRight
 	}
 	v.CursorX, v.CursorY = ebiten.CursorPosition()
+	if v.CursorButtonPressed(CursorButtonLeft) {
+		found := false
+		for i, widget := range v.widgets {
+			if !widget.GetVisible() || !widget.GetEnabled() {
+				continue
+			}
+			wx, wy := widget.GetLocation()
+			ww, wh := widget.GetSize()
+			if v.CursorX >= wx && v.CursorX <= wx+int(ww) && v.CursorY >= wy && v.CursorY <= wy+int(wh) {
+				widget.SetPressed(true)
+				if v.pressedIndex == -1 {
+					found = true
+					v.pressedIndex = i
+				} else if v.pressedIndex > -1 && v.pressedIndex != i {
+					v.widgets[i].SetPressed(false)
+				} else {
+					v.widgets[i].SetPressed(true)
+					found = true
+				}
+				break
+			} else {
+				widget.SetPressed(false)
+			}
+		}
+		if !found {
+			if v.pressedIndex > -1 {
+				v.widgets[v.pressedIndex].SetPressed(false)
+			} else {
+				v.pressedIndex = -2
+			}
+		}
+	} else {
+		if v.pressedIndex > -1 {
+			widget := v.widgets[v.pressedIndex]
+			wx, wy := widget.GetLocation()
+			ww, wh := widget.GetSize()
+			if v.CursorX >= wx && v.CursorX <= wx+int(ww) && v.CursorY >= wy && v.CursorY <= wy+int(wh) {
+				widget.Activate()
+			}
+		} else {
+			for _, widget := range v.widgets {
+				if !widget.GetVisible() || !widget.GetEnabled() {
+					continue
+				}
+				widget.SetPressed(false)
+			}
+		}
+		v.pressedIndex = -1
+	}
 }
 
 // CursorButtonPressed determines if the specified button has been pressed

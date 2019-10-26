@@ -9,4 +9,8 @@ type Widget interface {
 	Common.Drawable
 	GetEnabled() bool
 	SetEnabled(enabled bool)
+	SetPressed(pressed bool)
+	GetPressed() bool
+	OnActivated(callback func())
+	Activate()
 }
