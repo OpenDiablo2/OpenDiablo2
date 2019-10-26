@@ -58,7 +58,8 @@ func CreateFont(font string, palette Palettes.Palette, fileProvider Common.FileP
 func (v *Font) GetTextMetrics(text string) (width, height uint32) {
 	width = uint32(0)
 	height = uint32(0)
-	for _, ch := range text {
+	for i := 0; i < len(text); i++ {
+		ch := text[i]
 		metric := v.metrics[uint8(ch)]
 		width += uint32(metric.Width)
 		_, h := v.fontSprite.GetFrameSize(int(ch))

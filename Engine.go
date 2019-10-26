@@ -209,7 +209,7 @@ func (v *Engine) Update() {
 		return
 	}
 
-	v.CurrentScene.Update()
+	v.CurrentScene.Update(float64(1) / ebiten.CurrentTPS())
 	v.UIManager.Update()
 }
 

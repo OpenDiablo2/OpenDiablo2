@@ -9,5 +9,5 @@ type Scene interface {
 	Load() []func()
 	Unload()
 	Render(screen *ebiten.Image)
-	Update()
+	Update(tickTime float64)
 }

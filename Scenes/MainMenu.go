@@ -142,7 +142,7 @@ func (v *MainMenu) Render(screen *ebiten.Image) {
 }
 
 // Update runs the update logic on the main menu
-func (v *MainMenu) Update() {
+func (v *MainMenu) Update(tickTime float64) {
 	if v.ShowTrademarkScreen {
 		if v.uiManager.CursorButtonPressed(UI.CursorButtonLeft) {
 			v.leftButtonHeld = true
