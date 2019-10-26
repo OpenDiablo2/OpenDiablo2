@@ -1,6 +1,6 @@
 language: go
 before_install:
-  - sudo apt-get -y install libx11-dev  mesa-common-dev libglfw3-dev libgles2-mesa-dev
+  - sudo apt-get -y install libx11-dev  mesa-common-dev libglfw3-dev libgles2-mesa-dev libasound2-dev
 script: buildci.sh
 git:
   depth: 1
