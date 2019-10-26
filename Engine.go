@@ -4,19 +4,21 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"math"
 	"path"
 	"strings"
 	"sync"
+
+	"github.com/essial/OpenDiablo2/Sound"
 
 	"github.com/essial/OpenDiablo2/Common"
 	"github.com/essial/OpenDiablo2/MPQ"
 	"github.com/essial/OpenDiablo2/Palettes"
 	"github.com/essial/OpenDiablo2/ResourcePaths"
+	"github.com/essial/OpenDiablo2/Scenes"
 	"github.com/essial/OpenDiablo2/UI"
 
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/audio"
-	"github.com/hajimehoshi/ebiten/audio/wav"
 )
 
 // EngineConfig defines the configuration for the engine, loaded from config.json
@@ -30,16 +32,6 @@ type EngineConfig struct {
 	MpqLoadOrder    []string
 }
 
-// CursorButton represents a mouse button
-type CursorButton uint8
-
-const (
-	// CursorButtonLeft represents the left mouse button
-	CursorButtonLeft CursorButton = 1
-	// CursorButtonRight represents the right mouse button
-	CursorButtonRight CursorButton = 2
-)
-
 // Engine is the core OpenDiablo2 engine
 type Engine struct {
 	Settings        EngineConfig                        // Engine configuration settings from json file
@@ -47,39 +39,31 @@ type Engine struct {
 	Palettes        map[Palettes.Palette]Common.Palette // Color palettes
 	SoundEntries    map[string]SoundEntry               // Sound configurations
 	LoadingSprite   *Common.Sprite                      // The sprite shown when loading stuff
-	CursorX         int                                 // X position of the cursor
-	CursorY         int                                 // Y position of the cursor
-	CursorButtons   CursorButton                        // The buttons that are currently being pressed
-	LoadingProgress float64                             // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
-	CurrentScene    Common.SceneInterface               // The current scene being rendered
+	loadingProgress float64                             // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
+	stepLoadingSize float64                             // The size for each loading step
+	CurrentScene    Scenes.Scene                        // The current scene being rendered
 	UIManager       *UI.Manager                         // The UI manager
-	nextScene       Common.SceneInterface               // The next scene to be loaded at the end of the game loop
-	audioContext    *audio.Context                      // The Audio context
-	bgmAudio        *audio.Player                       // The audio player
+	SoundManager    *Sound.Manager                      // The sound manager
+	nextScene       Scenes.Scene                        // The next scene to be loaded at the end of the game loop
 	fullscreenKey   bool                                // When true, the fullscreen toggle is still being pressed
 }
 
 // CreateEngine creates and instance of the OpenDiablo2 engine
 func CreateEngine() *Engine {
 	result := &Engine{
-		LoadingProgress: float64(0.0),
-		CurrentScene:    nil,
-		nextScene:       nil,
+		CurrentScene: nil,
+		nextScene:    nil,
 	}
 	result.loadConfigurationFile()
 	result.mapMpqFiles()
 	result.loadPalettes()
 	result.loadSoundEntries()
+	result.SoundManager = Sound.CreateManager(result)
 	result.UIManager = UI.CreateManager(result)
-	audioContext, err := audio.NewContext(22050)
-	if err != nil {
-		log.Fatal(err)
-	}
-	result.audioContext = audioContext
 	result.LoadingSprite = result.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading)
 	loadingSpriteSizeX, loadingSpriteSizeY := result.LoadingSprite.GetSize()
 	result.LoadingSprite.MoveTo(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
-	result.SetNextScene(CreateMainMenu(result))
+	result.SetNextScene(Scenes.CreateMainMenu(result, result.UIManager, result.SoundManager))
 	return result
 }
 
@@ -142,7 +126,7 @@ func (v *Engine) LoadFile(fileName string) []byte {
 
 // IsLoading returns true if the engine is currently in a loading state
 func (v *Engine) IsLoading() bool {
-	return v.LoadingProgress < 1.0
+	return v.loadingProgress < 1.0
 }
 
 func (v *Engine) loadPalettes() {
@@ -190,12 +174,16 @@ func (v *Engine) updateScene() {
 	v.CurrentScene = v.nextScene
 	v.nextScene = nil
 	v.UIManager.Reset()
-	v.CurrentScene.Load()
-}
-
-// CursorButtonPressed determines if the specified button has been pressed
-func (v *Engine) CursorButtonPressed(button CursorButton) bool {
-	return v.CursorButtons&button > 0
+	thingsToLoad := v.CurrentScene.Load()
+	v.SetLoadingStepSize(1.0 / float64(len(thingsToLoad)))
+	v.ResetLoading()
+	go func() {
+		for _, f := range thingsToLoad {
+			f()
+			v.StepLoading()
+		}
+		v.FinishLoading()
+	}()
 }
 
 // Update updates the internal state of the engine
@@ -217,22 +205,15 @@ func (v *Engine) Update() {
 	if v.IsLoading() {
 		return
 	}
-	v.CursorButtons = 0
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		v.CursorButtons |= CursorButtonLeft
-	}
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
-		v.CursorButtons |= CursorButtonRight
-	}
+
 	v.CurrentScene.Update()
 	v.UIManager.Update()
 }
 
 // Draw draws the game
 func (v *Engine) Draw(screen *ebiten.Image) {
-	v.CursorX, v.CursorY = ebiten.CursorPosition()
-	if v.LoadingProgress < 1.0 {
-		v.LoadingSprite.Frame = uint8(Common.Max(0, Common.Min(uint32(len(v.LoadingSprite.Frames)-1), uint32(float64(len(v.LoadingSprite.Frames)-1)*v.LoadingProgress))))
+	if v.loadingProgress < 1.0 {
+		v.LoadingSprite.Frame = uint8(Common.Max(0, Common.Min(uint32(len(v.LoadingSprite.Frames)-1), uint32(float64(len(v.LoadingSprite.Frames)-1)*v.loadingProgress))))
 		v.LoadingSprite.Draw(screen)
 	} else {
 		if v.CurrentScene == nil {
@@ -244,29 +225,26 @@ func (v *Engine) Draw(screen *ebiten.Image) {
 }
 
 // SetNextScene tells the engine what scene to load on the next update cycle
-func (v *Engine) SetNextScene(nextScene Common.SceneInterface) {
+func (v *Engine) SetNextScene(nextScene Scenes.Scene) {
 	v.nextScene = nextScene
 }
 
-// PlayBGM plays an infinitely looping background track
-func (v *Engine) PlayBGM(song string) {
-	go func() {
-		if v.bgmAudio != nil {
-			v.bgmAudio.Close()
-		}
-		audioData := v.LoadFile(song)
-		d, err := wav.Decode(v.audioContext, audio.BytesReadSeekCloser(audioData))
-		if err != nil {
-			log.Fatal(err)
-		}
-		s := audio.NewInfiniteLoop(d, int64(len(audioData)))
+// SetLoadingStepSize sets the size of the loading step
+func (v *Engine) SetLoadingStepSize(size float64) {
+	v.stepLoadingSize = size
+}
 
-		v.bgmAudio, err = audio.NewPlayer(v.audioContext, s)
-		if err != nil {
-			log.Fatal(err)
-		}
-		// Play the infinite-length stream. This never ends.
-		v.bgmAudio.Rewind()
-		v.bgmAudio.Play()
-	}()
+// ResetLoading resets the loading progress
+func (v *Engine) ResetLoading() {
+	v.loadingProgress = 0.0
+}
+
+// StepLoading increments the loading progress
+func (v *Engine) StepLoading() {
+	v.loadingProgress = math.Min(1.0, v.loadingProgress+v.stepLoadingSize)
+}
+
+// FinishLoading terminates the loading phase
+func (v *Engine) FinishLoading() {
+	v.loadingProgress = 1.0
 }
