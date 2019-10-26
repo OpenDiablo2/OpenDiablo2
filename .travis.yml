@@ -1,6 +1,6 @@
 language: go
 before_install:
-  - sudo apt-get -y install libx11-dev
+  - sudo apt-get -y install libx11-dev libmesa-dev
 script: buildci.sh
 git:
   depth: 1
