@@ -50,6 +50,7 @@ type SelectHeroClass struct {
 	heroDesc3Label *UI.Label
 	heroRenderInfo map[Common.Hero]*HeroRenderInfo
 	selectedHero   Common.Hero
+	exitButton     *UI.Button
 }
 
 func CreateSelectHeroClass(
@@ -106,6 +107,12 @@ func (v *SelectHeroClass) Load() []func() {
 			v.campfire = v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectCampfire, Palettes.Fechar)
 			v.campfire.MoveTo(380, 335)
 			v.campfire.Animate = true
+		},
+		func() {
+			v.exitButton = UI.CreateButton(UI.ButtonTypeMedium, v.fileProvider, "EXIT")
+			v.exitButton.MoveTo(33, 537)
+			v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
+			v.uiManager.AddWidget(v.exitButton)
 		},
 		func() {
 			v.heroRenderInfo[Common.HeroBarbarian] = &HeroRenderInfo{
@@ -356,6 +363,10 @@ func (v *SelectHeroClass) Load() []func() {
 
 func (v *SelectHeroClass) Unload() {
 
+}
+
+func (v *SelectHeroClass) onExitButtonClicked() {
+	v.sceneProvider.SetNextScene(CreateCharacterSelect(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager))
 }
 
 func (v *SelectHeroClass) Render(screen *ebiten.Image) {

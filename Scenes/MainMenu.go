@@ -34,6 +34,7 @@ type MainMenu struct {
 	exitDiabloButton    *UI.Button
 	creditsButton       *UI.Button
 	cinematicsButton    *UI.Button
+	mapTestButton       *UI.Button
 	copyrightLabel      *UI.Label
 	copyrightLabel2     *UI.Label
 	openDiabloLabel     *UI.Label
@@ -142,7 +143,18 @@ func (v *MainMenu) Load() []func() {
 			v.githubButton.OnActivated(func() { v.onGithubButtonClicked() })
 			v.uiManager.AddWidget(v.githubButton)
 		},
+		func() {
+			v.mapTestButton = UI.CreateButton(UI.ButtonTypeWide, v.fileProvider, "MAP ENGINE TEST")
+			v.mapTestButton.MoveTo(264, 450)
+			v.mapTestButton.SetVisible(!v.ShowTrademarkScreen)
+			v.mapTestButton.OnActivated(func() { v.onMapTestClicked() })
+			v.uiManager.AddWidget(v.mapTestButton)
+		},
 	}
+}
+
+func (v *MainMenu) onMapTestClicked() {
+	v.sceneProvider.SetNextScene(CreateMapEngineTest(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager))
 }
 
 func openbrowser(url string) {
@@ -165,7 +177,9 @@ func openbrowser(url string) {
 }
 
 func (v *MainMenu) onSinglePlayerClicked() {
-	v.sceneProvider.SetNextScene(CreateCharacterSelect(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager))
+	// Go here only if existing characters are available to select
+	//v.sceneProvider.SetNextScene(CreateCharacterSelect(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager))
+	v.sceneProvider.SetNextScene(CreateSelectHeroClass(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager))
 }
 
 func (v *MainMenu) onGithubButtonClicked() {
@@ -212,6 +226,7 @@ func (v *MainMenu) Update(tickTime float64) {
 			if v.leftButtonHeld {
 				return
 			}
+			v.uiManager.WaitForMouseRelease()
 			v.leftButtonHeld = true
 			v.ShowTrademarkScreen = false
 			v.exitDiabloButton.SetVisible(true)
@@ -219,6 +234,7 @@ func (v *MainMenu) Update(tickTime float64) {
 			v.cinematicsButton.SetVisible(true)
 			v.singlePlayerButton.SetVisible(true)
 			v.githubButton.SetVisible(true)
+			v.mapTestButton.SetVisible(true)
 		} else {
 			v.leftButtonHeld = false
 		}

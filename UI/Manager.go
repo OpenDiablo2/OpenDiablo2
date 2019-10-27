@@ -20,22 +20,24 @@ const (
 
 // Manager represents the UI manager
 type Manager struct {
-	widgets       []Widget
-	cursorSprite  *Common.Sprite
-	cursorButtons CursorButton
-	pressedIndex  int
-	CursorX       int
-	CursorY       int
-	clickSfx      *Sound.SoundEffect
+	widgets            []Widget
+	cursorSprite       *Common.Sprite
+	cursorButtons      CursorButton
+	pressedIndex       int
+	CursorX            int
+	CursorY            int
+	clickSfx           *Sound.SoundEffect
+	waitForLeftMouseUp bool
 }
 
 // CreateManager creates a new instance of a UI manager
 func CreateManager(fileProvider Common.FileProvider, soundManager Sound.Manager) *Manager {
 	result := &Manager{
-		pressedIndex: -1,
-		widgets:      make([]Widget, 0),
-		cursorSprite: fileProvider.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units),
-		clickSfx:     soundManager.LoadSoundEffect(ResourcePaths.SFXButtonClick),
+		pressedIndex:       -1,
+		widgets:            make([]Widget, 0),
+		cursorSprite:       fileProvider.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units),
+		clickSfx:           soundManager.LoadSoundEffect(ResourcePaths.SFXButtonClick),
+		waitForLeftMouseUp: false,
 	}
 	return result
 }
@@ -44,11 +46,16 @@ func CreateManager(fileProvider Common.FileProvider, soundManager Sound.Manager)
 func (v *Manager) Reset() {
 	v.widgets = make([]Widget, 0)
 	v.pressedIndex = -1
+	v.waitForLeftMouseUp = true
 }
 
 // AddWidget adds a widget to the UI manager
 func (v *Manager) AddWidget(widget Widget) {
 	v.widgets = append(v.widgets, widget)
+}
+
+func (v *Manager) WaitForMouseRelease() {
+	v.waitForLeftMouseUp = true
 }
 
 // Draw renders all of the UI elements
@@ -69,7 +76,13 @@ func (v *Manager) Draw(screen *ebiten.Image) {
 func (v *Manager) Update() {
 	v.cursorButtons = 0
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		v.cursorButtons |= CursorButtonLeft
+		if !v.waitForLeftMouseUp {
+			v.cursorButtons |= CursorButtonLeft
+		}
+	} else {
+		if v.waitForLeftMouseUp {
+			v.waitForLeftMouseUp = false
+		}
 	}
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
 		v.cursorButtons |= CursorButtonRight
@@ -92,7 +105,6 @@ func (v *Manager) Update() {
 				} else if v.pressedIndex > -1 && v.pressedIndex != i {
 					v.widgets[i].SetPressed(false)
 				} else {
-					v.widgets[i].SetPressed(true)
 					found = true
 				}
 			} else {

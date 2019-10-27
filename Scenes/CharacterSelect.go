@@ -82,7 +82,9 @@ func (v *CharacterSelect) onNewCharButtonClicked() {
 }
 
 func (v *CharacterSelect) onExitButtonClicked() {
-	v.sceneProvider.SetNextScene(CreateMainMenu(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager))
+	mainMenu := CreateMainMenu(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager)
+	mainMenu.ShowTrademarkScreen = false
+	v.sceneProvider.SetNextScene(mainMenu)
 }
 
 func (v *CharacterSelect) Unload() {
