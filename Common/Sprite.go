@@ -13,6 +13,8 @@ type Sprite struct {
 	Directions         uint32
 	FramesPerDirection uint32
 	Frames             []*SpriteFrame
+	SpecialFrameTime   int
+	StopOnLastFrame    bool
 	X, Y               int
 	Frame, Direction   uint8
 	Blend              bool
@@ -50,6 +52,8 @@ func CreateSprite(data []byte, palette Palette) *Sprite {
 		FramesPerDirection: binary.LittleEndian.Uint32(data[20:24]),
 		Animate:            false,
 		LastFrameTime:      time.Now(),
+		SpecialFrameTime:   -1,
+		StopOnLastFrame:    false,
 	}
 	dataPointer := uint32(24)
 	totalFrames := result.Directions * result.FramesPerDirection
@@ -140,15 +144,33 @@ func (v *Sprite) updateAnimation() {
 	if !v.Animate {
 		return
 	}
-	tNow := time.Now()
-	if v.LastFrameTime.Add(time.Millisecond * 25).After(tNow) {
-		return
+	var timePerFrame time.Duration
+
+	if v.SpecialFrameTime >= 0 {
+		timePerFrame = time.Duration(float64(time.Millisecond) * (float64(v.SpecialFrameTime) / float64(len(v.Frames))))
+	} else {
+		timePerFrame = time.Duration(float64(time.Second) * (1.0 / float64(len(v.Frames))))
 	}
-	v.LastFrameTime = tNow
-	v.Frame++
-	if v.Frame >= uint8(v.FramesPerDirection) {
-		v.Frame = 0
+	for time.Now().Sub(v.LastFrameTime) >= timePerFrame {
+		v.LastFrameTime = v.LastFrameTime.Add(timePerFrame)
+		v.Frame++
+		if v.Frame >= uint8(v.FramesPerDirection) {
+			if v.StopOnLastFrame {
+				v.Frame = uint8(v.FramesPerDirection) - 1
+			} else {
+				v.Frame = 0
+			}
+		}
 	}
+}
+
+func (v *Sprite) ResetAnimation() {
+	v.LastFrameTime = time.Now()
+	v.Frame = 0
+}
+
+func (v *Sprite) OnLastFrame() bool {
+	return v.Frame == uint8(v.FramesPerDirection-1)
 }
 
 // GetFrameSize returns the size of the specific frame

@@ -25,7 +25,8 @@ type CharacterSelect struct {
 func CreateCharacterSelect(
 	fileProvider Common.FileProvider,
 	sceneProvider SceneProvider,
-	uiManager *UI.Manager, soundManager *Sound.Manager,
+	uiManager *UI.Manager,
+	soundManager *Sound.Manager,
 ) *CharacterSelect {
 	result := &CharacterSelect{
 		uiManager:     uiManager,
@@ -46,6 +47,7 @@ func (v *CharacterSelect) Load() []func() {
 		func() {
 			v.newCharButton = UI.CreateButton(UI.ButtonTypeTall, v.fileProvider, "CREATE NEW\nCHARACTER")
 			v.newCharButton.MoveTo(33, 468)
+			v.newCharButton.OnActivated(func() { v.onNewCharButtonClicked() })
 			v.uiManager.AddWidget(v.newCharButton)
 		},
 		func() {
@@ -75,12 +77,15 @@ func (v *CharacterSelect) Load() []func() {
 	}
 }
 
+func (v *CharacterSelect) onNewCharButtonClicked() {
+	v.sceneProvider.SetNextScene(CreateSelectHeroClass(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager))
+}
+
 func (v *CharacterSelect) onExitButtonClicked() {
 	v.sceneProvider.SetNextScene(CreateMainMenu(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager))
 }
 
 func (v *CharacterSelect) Unload() {
-
 }
 
 func (v *CharacterSelect) Render(screen *ebiten.Image) {
@@ -88,5 +93,4 @@ func (v *CharacterSelect) Render(screen *ebiten.Image) {
 }
 
 func (v *CharacterSelect) Update(tickTime float64) {
-
 }

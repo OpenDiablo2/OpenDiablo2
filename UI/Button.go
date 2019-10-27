@@ -40,24 +40,25 @@ const (
 
 // ButtonLayout defines the type of buttons
 type ButtonLayout struct {
-	XSegments        int //1
-	YSegments        int // 1
-	ResourceName     string
-	PaletteName      Palettes.Palette
+	XSegments        int              //1
+	YSegments        int              // 1
+	ResourceName     string           // Font Name
+	PaletteName      Palettes.Palette // Palette
 	Toggleable       bool             // false
 	BaseFrame        int              // 0
 	DisabledFrame    int              // -1
 	FontPath         string           // ResourcePaths.FontExocet10
 	ClickableRect    *image.Rectangle // nil
 	AllowFrameChange bool             // true
+	TextOffset       int              // 0
 }
 
 // ButtonLayouts define the type of buttons you can have
 var ButtonLayouts = map[ButtonType]ButtonLayout{
-	ButtonTypeWide:   {2, 1, ResourcePaths.WideButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontExocet10, nil, true},
-	ButtonTypeShort:  {1, 1, ResourcePaths.ShortButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontRediculous, nil, true},
-	ButtonTypeMedium: {1, 1, ResourcePaths.MediumButtonBlank, Palettes.Units, false, 0, 0, ResourcePaths.FontExocet10, nil, true},
-	ButtonTypeTall:   {1, 1, ResourcePaths.TallButtonBlank, Palettes.Units, false, 0, 0, ResourcePaths.FontExocet10, nil, true},
+	ButtonTypeWide:   {2, 1, ResourcePaths.WideButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontExocet10, nil, true, 1},
+	ButtonTypeShort:  {1, 1, ResourcePaths.ShortButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontRediculous, nil, true, -1},
+	ButtonTypeMedium: {1, 1, ResourcePaths.MediumButtonBlank, Palettes.Units, false, 0, 0, ResourcePaths.FontExocet10, nil, true, 0},
+	ButtonTypeTall:   {1, 1, ResourcePaths.TallButtonBlank, Palettes.Units, false, 0, 0, ResourcePaths.FontExocet10, nil, true, 5},
 	/*
 		{eButtonType.Wide,  new ButtonLayout { XSegments = 2, ResourceName = ResourcePaths.WideButtonBlank, PaletteName = Palettes.Units } },
 		{eButtonType.Narrow, new ButtonLayout { ResourceName = ResourcePaths.NarrowButtonBlank, PaletteName = Palettes.Units } },
@@ -124,11 +125,8 @@ func CreateButton(buttonType ButtonType, fileProvider Common.FileProvider, text 
 
 	result.normalImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
 	_, fontHeight := font.GetTextMetrics(text)
-	textY := int((result.height/2)-(fontHeight/2)) + 6
-	// Nasty size hack, please remove this
-	if buttonType == ButtonTypeShort {
-		textY -= 3
-	}
+	textY := int((result.height/2)-(fontHeight/2)) + buttonLayout.TextOffset
+
 	buttonSprite.MoveTo(0, 0)
 	buttonSprite.Blend = true
 	buttonSprite.DrawSegments(result.normalImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame)

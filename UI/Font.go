@@ -61,7 +61,7 @@ func (v *Font) GetTextMetrics(text string) (width, height uint32) {
 	curWidth := uint32(0)
 	height = uint32(0)
 	maxCharHeight := uint32(0)
-	for _, m := range v.metrics {
+	for _, m := range v.fontSprite.Frames {
 		maxCharHeight = Common.Max(maxCharHeight, uint32(m.Height))
 	}
 	for i := 0; i < len(text); i++ {
@@ -100,7 +100,7 @@ func (v *Font) Draw(x, y int, text string, color color.Color, target *ebiten.Ima
 			char := uint8(ch)
 			metric := v.metrics[char]
 			v.fontSprite.Frame = char
-			v.fontSprite.MoveTo(xPos, y+int(metric.Height))
+			v.fontSprite.MoveTo(xPos, y+int(v.fontSprite.Frames[char].Height))
 			v.fontSprite.Draw(target)
 			xPos += int(metric.Width)
 		}
