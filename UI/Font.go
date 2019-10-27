@@ -2,6 +2,7 @@ package UI
 
 import (
 	"image/color"
+	"strings"
 
 	"github.com/essial/OpenDiablo2/Common"
 	"github.com/essial/OpenDiablo2/Palettes"
@@ -57,14 +58,25 @@ func CreateFont(font string, palette Palettes.Palette, fileProvider Common.FileP
 // GetTextMetrics returns the size of the specified text
 func (v *Font) GetTextMetrics(text string) (width, height uint32) {
 	width = uint32(0)
+	curWidth := uint32(0)
 	height = uint32(0)
+	maxCharHeight := uint32(0)
+	for _, m := range v.metrics {
+		maxCharHeight = Common.Max(maxCharHeight, uint32(m.Height))
+	}
 	for i := 0; i < len(text); i++ {
 		ch := text[i]
+		if ch == '\n' {
+			width = Common.Max(width, curWidth)
+			curWidth = 0
+			height += maxCharHeight + 6
+			continue
+		}
 		metric := v.metrics[uint8(ch)]
-		width += uint32(metric.Width)
-		//_, h := v.fontSprite.GetFrameSize(int(ch))
-		height = Common.Max(height, uint32(metric.Height))
+		curWidth += uint32(metric.Width)
 	}
+	width = Common.Max(width, curWidth)
+	height += maxCharHeight
 	return
 }
 
@@ -72,13 +84,32 @@ func (v *Font) GetTextMetrics(text string) (width, height uint32) {
 func (v *Font) Draw(x, y int, text string, color color.Color, target *ebiten.Image) {
 	v.fontSprite.ColorMod = color
 	v.fontSprite.Blend = false
-	_, height := v.GetTextMetrics(text)
-	for _, ch := range text {
-		char := uint8(ch)
-		metric := v.metrics[char]
-		v.fontSprite.Frame = char
-		v.fontSprite.MoveTo(x, y+int(height))
-		v.fontSprite.Draw(target)
-		x += int(metric.Width)
+
+	maxCharHeight := uint32(0)
+	for _, m := range v.metrics {
+		maxCharHeight = Common.Max(maxCharHeight, uint32(m.Height))
+	}
+
+	targetWidth, _ := target.Size()
+	lines := strings.Split(text, "\n")
+	for lineIdx, line := range lines {
+		lineWidth, _ := v.GetTextMetrics(line)
+		xPos := x + ((targetWidth / 2) - int(lineWidth/2))
+
+		for _, ch := range line {
+			char := uint8(ch)
+			metric := v.metrics[char]
+			v.fontSprite.Frame = char
+			v.fontSprite.MoveTo(xPos, y+int(metric.Height))
+			v.fontSprite.Draw(target)
+			xPos += int(metric.Width)
+		}
+
+		if lineIdx >= len(lines)-1 {
+			break
+		}
+
+		xPos = x
+		y += int(maxCharHeight + 6)
 	}
 }

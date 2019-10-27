@@ -50,6 +50,7 @@ func CreateMainMenu(fileProvider Common.FileProvider, sceneProvider SceneProvide
 		soundManager:        soundManager,
 		sceneProvider:       sceneProvider,
 		ShowTrademarkScreen: true,
+		leftButtonHeld:      true,
 	}
 	return result
 }
@@ -131,6 +132,7 @@ func (v *MainMenu) Load() []func() {
 			v.singlePlayerButton = UI.CreateButton(UI.ButtonTypeWide, v.fileProvider, "SINGLE PLAYER")
 			v.singlePlayerButton.MoveTo(264, 290)
 			v.singlePlayerButton.SetVisible(!v.ShowTrademarkScreen)
+			v.singlePlayerButton.OnActivated(func() { v.onSinglePlayerClicked() })
 			v.uiManager.AddWidget(v.singlePlayerButton)
 		},
 		func() {
@@ -160,6 +162,10 @@ func openbrowser(url string) {
 		log.Fatal(err)
 	}
 
+}
+
+func (v *MainMenu) onSinglePlayerClicked() {
+	v.sceneProvider.SetNextScene(CreateCharacterSelect(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager))
 }
 
 func (v *MainMenu) onGithubButtonClicked() {
@@ -203,6 +209,9 @@ func (v *MainMenu) Render(screen *ebiten.Image) {
 func (v *MainMenu) Update(tickTime float64) {
 	if v.ShowTrademarkScreen {
 		if v.uiManager.CursorButtonPressed(UI.CursorButtonLeft) {
+			if v.leftButtonHeld {
+				return
+			}
 			v.leftButtonHeld = true
 			v.ShowTrademarkScreen = false
 			v.exitDiabloButton.SetVisible(true)
@@ -210,6 +219,8 @@ func (v *MainMenu) Update(tickTime float64) {
 			v.cinematicsButton.SetVisible(true)
 			v.singlePlayerButton.SetVisible(true)
 			v.githubButton.SetVisible(true)
+		} else {
+			v.leftButtonHeld = false
 		}
 		return
 	}

@@ -56,12 +56,11 @@ type ButtonLayout struct {
 var ButtonLayouts = map[ButtonType]ButtonLayout{
 	ButtonTypeWide:   {2, 1, ResourcePaths.WideButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontExocet10, nil, true},
 	ButtonTypeShort:  {1, 1, ResourcePaths.ShortButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontRediculous, nil, true},
-	ButtonTypeMedium: {1, 1, ResourcePaths.MediumButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontExocet10, nil, true},
+	ButtonTypeMedium: {1, 1, ResourcePaths.MediumButtonBlank, Palettes.Units, false, 0, 0, ResourcePaths.FontExocet10, nil, true},
+	ButtonTypeTall:   {1, 1, ResourcePaths.TallButtonBlank, Palettes.Units, false, 0, 0, ResourcePaths.FontExocet10, nil, true},
 	/*
 		{eButtonType.Wide,  new ButtonLayout { XSegments = 2, ResourceName = ResourcePaths.WideButtonBlank, PaletteName = Palettes.Units } },
 		{eButtonType.Narrow, new ButtonLayout { ResourceName = ResourcePaths.NarrowButtonBlank, PaletteName = Palettes.Units } },
-		{eButtonType.Tall, new ButtonLayout { ResourceName = ResourcePaths.TallButtonBlank, PaletteName = Palettes.Units } },
-
 		{eButtonType.Cancel, new ButtonLayout { ResourceName = ResourcePaths.CancelButton, PaletteName = Palettes.Units } },
 		// Minipanel
 		{eButtonType.MinipanelCharacter, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = Palettes.Units, BaseFrame = 0 } },
@@ -95,6 +94,7 @@ type Button struct {
 	toggledImage        *ebiten.Image
 	pressedToggledImage *ebiten.Image
 	disabledImage       *ebiten.Image
+	buttonLayout        ButtonLayout
 	onClick             func()
 }
 
@@ -109,6 +109,7 @@ func CreateButton(buttonType ButtonType, fileProvider Common.FileProvider, text 
 		pressed:      false,
 	}
 	buttonLayout := ButtonLayouts[buttonType]
+	result.buttonLayout = buttonLayout
 	font := GetFont(buttonLayout.FontPath, Palettes.Units, fileProvider)
 	buttonSprite := fileProvider.LoadSprite(buttonLayout.ResourceName, buttonLayout.PaletteName)
 	totalButtonTypes := buttonSprite.GetTotalFrames() / (buttonLayout.XSegments * buttonLayout.YSegments)
@@ -122,30 +123,36 @@ func CreateButton(buttonType ButtonType, fileProvider Common.FileProvider, text 
 	}
 
 	result.normalImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
-	result.pressedImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
-	textWidth, _ := font.GetTextMetrics(text)
-	textX := (result.width / 2) - (textWidth / 2)
-	textY := (result.height / 2)
+	_, fontHeight := font.GetTextMetrics(text)
+	textY := int((result.height/2)-(fontHeight/2)) + 6
+	// Nasty size hack, please remove this
+	if buttonType == ButtonTypeShort {
+		textY -= 3
+	}
 	buttonSprite.MoveTo(0, 0)
 	buttonSprite.Blend = true
 	buttonSprite.DrawSegments(result.normalImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame)
-	font.Draw(int(textX), int(textY), text, color.RGBA{100, 100, 100, 255}, result.normalImage)
+	font.Draw(0, textY, text, color.RGBA{100, 100, 100, 255}, result.normalImage)
 	if buttonLayout.AllowFrameChange {
 		if totalButtonTypes > 1 {
+			result.pressedImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
 			buttonSprite.DrawSegments(result.pressedImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+1)
-			font.Draw(int(textX-2), int(textY+2), text, color.RGBA{100, 100, 100, 255}, result.pressedImage)
+			font.Draw(-2, textY+2, text, color.RGBA{100, 100, 100, 255}, result.pressedImage)
 		}
 		if totalButtonTypes > 2 {
+			result.toggledImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
 			buttonSprite.DrawSegments(result.toggledImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+2)
-			font.Draw(int(textX), int(textY), text, color.RGBA{100, 100, 100, 255}, result.toggledImage)
+			font.Draw(0, textY, text, color.RGBA{100, 100, 100, 255}, result.toggledImage)
 		}
 		if totalButtonTypes > 3 {
+			result.pressedToggledImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
 			buttonSprite.DrawSegments(result.pressedToggledImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+3)
-			font.Draw(int(textX), int(textY), text, color.RGBA{100, 100, 100, 255}, result.pressedToggledImage)
+			font.Draw(0, textY, text, color.RGBA{100, 100, 100, 255}, result.pressedToggledImage)
 		}
 		if buttonLayout.DisabledFrame != -1 {
+			result.disabledImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
 			buttonSprite.DrawSegments(result.disabledImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.DisabledFrame)
-			font.Draw(int(textX), int(textY), text, color.RGBA{100, 100, 100, 255}, result.disabledImage)
+			font.Draw(0, textY-1, text, color.RGBA{100, 100, 100, 255}, result.disabledImage)
 		}
 	}
 	return result
@@ -173,6 +180,8 @@ func (v *Button) Draw(target *ebiten.Image) {
 	opts.GeoM.Translate(float64(v.x), float64(v.y))
 
 	if !v.enabled {
+		//opts.CompositeMode = ebiten.CompositeModeLighter
+		opts.ColorM = Common.ColorToColorM(color.RGBA{128, 128, 128, 195})
 		target.DrawImage(v.disabledImage, opts)
 	} else if v.toggled && v.pressed {
 		target.DrawImage(v.pressedToggledImage, opts)

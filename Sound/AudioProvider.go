@@ -49,7 +49,7 @@ func (v *Manager) PlayBGM(song string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		s := audio.NewInfiniteLoop(d, int64(len(audioData)))
+		s := audio.NewInfiniteLoop(d, d.Length())
 		v.bgmAudio, err = audio.NewPlayer(v.audioContext, s)
 		if err != nil {
 			log.Fatal(err)
