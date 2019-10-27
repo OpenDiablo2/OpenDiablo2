@@ -36,3 +36,7 @@ func (v *SoundEffect) Play() {
 	v.player.Rewind()
 	v.player.Play()
 }
+
+func (v *SoundEffect) Stop() {
+	v.player.Pause()
+}

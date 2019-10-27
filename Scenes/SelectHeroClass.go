@@ -32,6 +32,8 @@ type HeroRenderInfo struct {
 	BackWalkSprite           *Common.Sprite
 	BackWalkSpriteOverlay    *Common.Sprite
 	SelectionBounds          image.Rectangle
+	SelectSfx                *Sound.SoundEffect
+	DeselectSfx              *Sound.SoundEffect
 }
 
 type SelectHeroClass struct {
@@ -91,6 +93,8 @@ func (v *SelectHeroClass) Load() []func() {
 				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectBarbarianBackWalk, Palettes.Fechar),
 				nil,
 				image.Rectangle{Min: image.Point{364, 201}, Max: image.Point{90, 170}},
+				v.soundManager.LoadSoundEffect(ResourcePaths.SFXBarbarianSelect),
+				v.soundManager.LoadSoundEffect(ResourcePaths.SFXBarbarianDeselect),
 			}
 			v.heroRenderInfo[Common.HeroBarbarian].IdleSprite.MoveTo(400, 330)
 			v.heroRenderInfo[Common.HeroBarbarian].IdleSprite.Animate = true
@@ -123,6 +127,8 @@ func (v *SelectHeroClass) Load() []func() {
 				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressBackWalk, Palettes.Fechar),
 				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressBackWalkOverlay, Palettes.Fechar),
 				image.Rectangle{Min: image.Point{580, 240}, Max: image.Point{65, 160}},
+				v.soundManager.LoadSoundEffect(ResourcePaths.SFXSorceressSelect),
+				v.soundManager.LoadSoundEffect(ResourcePaths.SFXSorceressDeselect),
 			}
 			v.heroRenderInfo[Common.HeroSorceress].IdleSprite.MoveTo(626, 352)
 			v.heroRenderInfo[Common.HeroSorceress].IdleSprite.Animate = true
@@ -164,6 +170,8 @@ func (v *SelectHeroClass) Load() []func() {
 				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerBackWalk, Palettes.Fechar),
 				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerBackWalkOverlay, Palettes.Fechar),
 				image.Rectangle{Min: image.Point{265, 220}, Max: image.Point{55, 175}},
+				v.soundManager.LoadSoundEffect(ResourcePaths.SFXNecromancerSelect),
+				v.soundManager.LoadSoundEffect(ResourcePaths.SFXNecromancerDeselect),
 			}
 			v.heroRenderInfo[Common.HeroNecromancer].IdleSprite.MoveTo(300, 335)
 			v.heroRenderInfo[Common.HeroNecromancer].IdleSprite.Animate = true
@@ -205,6 +213,8 @@ func (v *SelectHeroClass) Load() []func() {
 				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecPaladinBackWalk, Palettes.Fechar),
 				nil,
 				image.Rectangle{Min: image.Point{490, 210}, Max: image.Point{65, 180}},
+				v.soundManager.LoadSoundEffect(ResourcePaths.SFXPaladinSelect),
+				v.soundManager.LoadSoundEffect(ResourcePaths.SFXPaladinDeselect),
 			}
 			v.heroRenderInfo[Common.HeroPaladin].IdleSprite.MoveTo(521, 338)
 			v.heroRenderInfo[Common.HeroPaladin].IdleSprite.Animate = true
@@ -237,6 +247,8 @@ func (v *SelectHeroClass) Load() []func() {
 				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecAmazonBackWalk, Palettes.Fechar),
 				nil,
 				image.Rectangle{Min: image.Point{70, 220}, Max: image.Point{55, 200}},
+				v.soundManager.LoadSoundEffect(ResourcePaths.SFXAmazonSelect),
+				v.soundManager.LoadSoundEffect(ResourcePaths.SFXAmazonDeselect),
 			}
 			v.heroRenderInfo[Common.HeroAmazon].IdleSprite.MoveTo(100, 339)
 			v.heroRenderInfo[Common.HeroAmazon].IdleSprite.Animate = true
@@ -265,6 +277,8 @@ func (v *SelectHeroClass) Load() []func() {
 				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinBackWalk, Palettes.Fechar),
 				nil,
 				image.Rectangle{Min: image.Point{175, 235}, Max: image.Point{50, 180}},
+				v.soundManager.LoadSoundEffect(ResourcePaths.SFXAssassinSelect),
+				v.soundManager.LoadSoundEffect(ResourcePaths.SFXAssassinDeselect),
 			}
 			v.heroRenderInfo[Common.HeroAssassin].IdleSprite.MoveTo(231, 365)
 			v.heroRenderInfo[Common.HeroAssassin].IdleSprite.Animate = true
@@ -293,6 +307,8 @@ func (v *SelectHeroClass) Load() []func() {
 				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidBackWalk, Palettes.Fechar),
 				nil,
 				image.Rectangle{Min: image.Point{680, 220}, Max: image.Point{70, 195}},
+				v.soundManager.LoadSoundEffect(ResourcePaths.SFXDruidSelect),
+				v.soundManager.LoadSoundEffect(ResourcePaths.SFXDruidDeselect),
 			}
 			v.heroRenderInfo[Common.HeroDruid].IdleSprite.MoveTo(720, 370)
 			v.heroRenderInfo[Common.HeroDruid].IdleSprite.Animate = true
@@ -385,7 +401,8 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero Common.Hero, canSelect b
 			if heroInfo.Stance != HeroStanceSelected {
 				continue
 			}
-			// PlayHeroDeselected(ri.Key);
+			heroInfo.SelectSfx.Stop()
+			heroInfo.DeselectSfx.Play()
 			heroInfo.Stance = HeroStanceRetreating
 			heroInfo.BackWalkSprite.ResetAnimation()
 			if heroInfo.BackWalkSpriteOverlay != nil {
@@ -394,7 +411,7 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero Common.Hero, canSelect b
 		}
 		// selectedHero = hero;
 		// UpdateHeroText();
-		// PlayHeroSelected(hero);
+		renderInfo.SelectSfx.Play()
 
 		return
 	}
