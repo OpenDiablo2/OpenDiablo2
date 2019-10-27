@@ -24,6 +24,14 @@ func MaxInt32(a, b int32) int32 {
 	return b
 }
 
+// MinInt32 returns the higher of two values
+func MinInt32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 // BytesToInt32 converts 4 bytes to int32
 func BytesToInt32(b []byte) int32 {
 	// equivalnt of return int32(binary.LittleEndian.Uint32(b))

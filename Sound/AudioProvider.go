@@ -14,6 +14,8 @@ type Manager struct {
 	audioContext *audio.Context // The Audio context
 	bgmAudio     *audio.Player  // The audio player
 	lastBgm      string
+	sfxVolume    float64
+	bgmVolume    float64
 }
 
 // CreateManager creates a sound provider
@@ -21,7 +23,7 @@ func CreateManager(fileProvider Common.FileProvider) *Manager {
 	result := &Manager{
 		fileProvider: fileProvider,
 	}
-	audioContext, err := audio.NewContext(22050)
+	audioContext, err := audio.NewContext(44100)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -37,7 +39,10 @@ func (v *Manager) PlayBGM(song string) {
 	v.lastBgm = song
 	go func() {
 		if v.bgmAudio != nil {
-			v.bgmAudio.Close()
+			err := v.bgmAudio.Close()
+			if err != nil {
+				log.Panic(err)
+			}
 		}
 		audioData := v.fileProvider.LoadFile(song)
 		d, err := wav.Decode(v.audioContext, audio.BytesReadSeekCloser(audioData))
@@ -45,13 +50,29 @@ func (v *Manager) PlayBGM(song string) {
 			log.Fatal(err)
 		}
 		s := audio.NewInfiniteLoop(d, int64(len(audioData)))
-
 		v.bgmAudio, err = audio.NewPlayer(v.audioContext, s)
 		if err != nil {
 			log.Fatal(err)
 		}
+		v.bgmAudio.SetVolume(v.bgmVolume)
 		// Play the infinite-length stream. This never ends.
-		v.bgmAudio.Rewind()
-		v.bgmAudio.Play()
+		err = v.bgmAudio.Rewind()
+		if err != nil {
+			panic(err)
+		}
+		err = v.bgmAudio.Play()
+		if err != nil {
+			panic(err)
+		}
 	}()
+}
+
+func (v *Manager) LoadSoundEffect(sfx string) *SoundEffect {
+	result := CreateSoundEffect(sfx, v.fileProvider, v.audioContext, v.sfxVolume)
+	return result
+}
+
+func (v *Manager) SetVolumes(bgmVolume, sfxVolume float64) {
+	v.sfxVolume = sfxVolume
+	v.bgmVolume = bgmVolume
 }

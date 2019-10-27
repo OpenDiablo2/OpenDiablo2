@@ -50,9 +50,9 @@ func (v *BitStream) EnsureBits(bitCount int) bool {
 	if v.dataPosition >= len(v.data) {
 		return false
 	}
-	nextvalue := v.data[v.dataPosition]
+	nextValue := v.data[v.dataPosition]
 	v.dataPosition++
-	v.current |= int(nextvalue) << v.bitCount
+	v.current |= int(nextValue) << v.bitCount
 	v.bitCount += 8
 	return true
 }

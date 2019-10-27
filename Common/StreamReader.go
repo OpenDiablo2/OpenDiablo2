@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"io"
+	"log"
 )
 
 // StreamReader allows you to read data from a byte array in various formats
@@ -41,7 +42,7 @@ func (v *StreamReader) GetByte() byte {
 // GetWord returns a uint16 word from the stream
 func (v *StreamReader) GetWord() uint16 {
 	result := uint16(v.data[v.position])
-	result += (uint16(v.data[v.position+1]) << 8)
+	result += uint16(v.data[v.position+1]) << 8
 	v.position += 2
 	return result
 }
@@ -49,7 +50,10 @@ func (v *StreamReader) GetWord() uint16 {
 // GetSWord returns a int16 word from the stream
 func (v *StreamReader) GetSWord() int16 {
 	var result int16
-	binary.Read(bytes.NewReader([]byte{v.data[v.position], v.data[v.position+1]}), binary.LittleEndian, &result)
+	err := binary.Read(bytes.NewReader([]byte{v.data[v.position], v.data[v.position+1]}), binary.LittleEndian, &result)
+	if err != nil {
+		log.Panic(err)
+	}
 	v.position += 2
 	return result
 }
@@ -57,9 +61,9 @@ func (v *StreamReader) GetSWord() int16 {
 // GetDword returns a uint32 dword from the stream
 func (v *StreamReader) GetDword() uint32 {
 	result := uint32(v.data[v.position])
-	result += (uint32(v.data[v.position+1]) << 8)
-	result += (uint32(v.data[v.position+2]) << 16)
-	result += (uint32(v.data[v.position+3]) << 24)
+	result += uint32(v.data[v.position+1]) << 8
+	result += uint32(v.data[v.position+2]) << 16
+	result += uint32(v.data[v.position+3]) << 24
 	v.position += 4
 	return result
 }

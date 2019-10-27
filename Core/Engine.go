@@ -30,6 +30,8 @@ type EngineConfig struct {
 	VsyncEnabled    bool
 	MpqPath         string
 	MpqLoadOrder    []string
+	SfxVolume       float64
+	BgmVolume       float64
 }
 
 // Engine is the core OpenDiablo2 engine
@@ -59,7 +61,8 @@ func CreateEngine() *Engine {
 	result.loadPalettes()
 	result.loadSoundEntries()
 	result.SoundManager = Sound.CreateManager(result)
-	result.UIManager = UI.CreateManager(result)
+	result.SoundManager.SetVolumes(result.Settings.BgmVolume, result.Settings.SfxVolume)
+	result.UIManager = UI.CreateManager(result, *result.SoundManager)
 	result.LoadingSprite = result.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading)
 	loadingSpriteSizeX, loadingSpriteSizeY := result.LoadingSprite.GetSize()
 	result.LoadingSprite.MoveTo(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
@@ -75,7 +78,10 @@ func (v *Engine) loadConfigurationFile() {
 	}
 	var config EngineConfig
 
-	json.Unmarshal(configJSON, &config)
+	err = json.Unmarshal(configJSON, &config)
+	if err != nil {
+		log.Fatal(err)
+	}
 	v.Settings = config
 }
 

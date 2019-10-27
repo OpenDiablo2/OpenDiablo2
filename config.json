@@ -4,6 +4,8 @@
     "TicksPerSecond": 60,
     "RunInBackground": true,
     "VsyncEnabled": true,
+    "SfxVolume": 1.0,
+    "BgmVolume": 0.3,
     "MpqPath": "C:/Program Files (x86)/Diablo II",
     "MpqLoadOrder": [
         "d2exp.mpq",

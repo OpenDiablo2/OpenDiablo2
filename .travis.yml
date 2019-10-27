@@ -3,7 +3,7 @@ go:
   - 1.13.3
 before_install:
   - sudo apt-get -y install libx11-dev  mesa-common-dev libglfw3-dev libgles2-mesa-dev libasound2-dev
-script: buildci.sh
+script: go get && golangci-lint run . && go build ./cmd/Client
 git:
   depth: 1
 notifications:

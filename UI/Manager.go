@@ -4,6 +4,7 @@ import (
 	"github.com/essial/OpenDiablo2/Common"
 	"github.com/essial/OpenDiablo2/Palettes"
 	"github.com/essial/OpenDiablo2/ResourcePaths"
+	"github.com/essial/OpenDiablo2/Sound"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -25,14 +26,16 @@ type Manager struct {
 	pressedIndex  int
 	CursorX       int
 	CursorY       int
+	clickSfx      *Sound.SoundEffect
 }
 
 // CreateManager creates a new instance of a UI manager
-func CreateManager(provider Common.FileProvider) *Manager {
+func CreateManager(fileProvider Common.FileProvider, soundManager Sound.Manager) *Manager {
 	result := &Manager{
 		pressedIndex: -1,
 		widgets:      make([]Widget, 0),
-		cursorSprite: provider.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units),
+		cursorSprite: fileProvider.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units),
+		clickSfx:     soundManager.LoadSoundEffect(ResourcePaths.SFXButtonClick),
 	}
 	return result
 }
@@ -85,6 +88,7 @@ func (v *Manager) Update() {
 				if v.pressedIndex == -1 {
 					found = true
 					v.pressedIndex = i
+					v.clickSfx.Play()
 				} else if v.pressedIndex > -1 && v.pressedIndex != i {
 					v.widgets[i].SetPressed(false)
 				} else {

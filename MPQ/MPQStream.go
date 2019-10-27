@@ -5,6 +5,7 @@ import (
 	"compress/zlib"
 	"encoding/binary"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/JoshVarga/blast"
@@ -34,12 +35,12 @@ func CreateStream(mpq MPQ, blockTableEntry BlockTableEntry, fileName string) *St
 	}
 	fileSegs := strings.Split(fileName, `\`)
 	result.EncryptionSeed = hashString(fileSegs[len(fileSegs)-1], 3)
-	if result.BlockTableEntry.HasFlag(MpqFileFixKey) {
+	if result.BlockTableEntry.HasFlag(FileFixKey) {
 		result.EncryptionSeed = (result.EncryptionSeed + result.BlockTableEntry.FilePosition) ^ result.BlockTableEntry.UncompressedFileSize
 	}
 	result.BlockSize = 0x200 << result.MPQData.Data.BlockSize
 
-	if (result.BlockTableEntry.HasFlag(MpqFileCompress) || result.BlockTableEntry.HasFlag(MpqFileImplode)) && !result.BlockTableEntry.HasFlag(MpqFileSingleUnit) {
+	if (result.BlockTableEntry.HasFlag(FileCompress) || result.BlockTableEntry.HasFlag(FileImplode)) && !result.BlockTableEntry.HasFlag(FileSingleUnit) {
 		result.loadBlockOffsets()
 	}
 	return result
@@ -51,7 +52,7 @@ func (v *Stream) loadBlockOffsets() {
 	v.MPQData.File.Seek(int64(v.BlockTableEntry.FilePosition), 0)
 	binary.Read(v.MPQData.File, binary.LittleEndian, &v.BlockPositions)
 	blockPosSize := blockPositionCount << 2
-	if v.BlockTableEntry.HasFlag(MpqFileEncrypted) {
+	if v.BlockTableEntry.HasFlag(FileEncrypted) {
 		decrypt(v.BlockPositions, v.EncryptionSeed-1)
 		if v.BlockPositions[0] != blockPosSize {
 			panic("Decryption of MPQ failed!")
@@ -63,7 +64,7 @@ func (v *Stream) loadBlockOffsets() {
 }
 
 func (v *Stream) Read(buffer []byte, offset, count uint32) uint32 {
-	if v.BlockTableEntry.HasFlag(MpqFileSingleUnit) {
+	if v.BlockTableEntry.HasFlag(FileSingleUnit) {
 		return v.readInternalSingleUnit(buffer, offset, count)
 	}
 	toRead := count
@@ -94,13 +95,13 @@ func (v *Stream) readInternalSingleUnit(buffer []byte, offset, count uint32) uin
 func (v *Stream) readInternal(buffer []byte, offset, count uint32) uint32 {
 	v.bufferData()
 	localPosition := v.CurrentPosition % v.BlockSize
-	bytesToCopy := Common.Min(uint32(len(v.CurrentData))-localPosition, count)
+	bytesToCopy := Common.MinInt32(int32(len(v.CurrentData))-int32(localPosition), int32(count))
 	if bytesToCopy <= 0 {
 		return 0
 	}
-	copy(buffer[offset:offset+bytesToCopy], v.CurrentData[localPosition:localPosition+bytesToCopy])
-	v.CurrentPosition += bytesToCopy
-	return bytesToCopy
+	copy(buffer[offset:offset+uint32(bytesToCopy)], v.CurrentData[localPosition:localPosition+uint32(bytesToCopy)])
+	v.CurrentPosition += uint32(bytesToCopy)
+	return uint32(bytesToCopy)
 }
 
 func (v *Stream) bufferData() {
@@ -129,7 +130,7 @@ func (v *Stream) loadBlock(blockIndex, expectedLength uint32) []byte {
 		offset uint32
 		toRead uint32
 	)
-	if v.BlockTableEntry.HasFlag(MpqFileCompress) || v.BlockTableEntry.HasFlag(MpqFileImplode) {
+	if v.BlockTableEntry.HasFlag(FileCompress) || v.BlockTableEntry.HasFlag(FileImplode) {
 		offset = v.BlockPositions[blockIndex]
 		toRead = v.BlockPositions[blockIndex+1] - offset
 	} else {
@@ -140,21 +141,21 @@ func (v *Stream) loadBlock(blockIndex, expectedLength uint32) []byte {
 	data := make([]byte, toRead)
 	v.MPQData.File.Seek(int64(offset), 0)
 	binary.Read(v.MPQData.File, binary.LittleEndian, &data)
-	if v.BlockTableEntry.HasFlag(MpqFileEncrypted) && v.BlockTableEntry.UncompressedFileSize > 3 {
+	if v.BlockTableEntry.HasFlag(FileEncrypted) && v.BlockTableEntry.UncompressedFileSize > 3 {
 		if v.EncryptionSeed == 0 {
 			panic("Unable to determine encryption key")
 		}
 
 		decryptBytes(data, blockIndex+v.EncryptionSeed)
 	}
-	if v.BlockTableEntry.HasFlag(MpqFileCompress) && (toRead != expectedLength) {
-		if !v.BlockTableEntry.HasFlag(MpqFileSingleUnit) {
+	if v.BlockTableEntry.HasFlag(FileCompress) && (toRead != expectedLength) {
+		if !v.BlockTableEntry.HasFlag(FileSingleUnit) {
 			data = decompressMulti(data, expectedLength)
 		} else {
 			data = pkDecompress(data)
 		}
 	}
-	if v.BlockTableEntry.HasFlag(MpqFileImplode) && (toRead != expectedLength) {
+	if v.BlockTableEntry.HasFlag(FileImplode) && (toRead != expectedLength) {
 		data = pkDecompress(data)
 	}
 
@@ -215,23 +216,35 @@ func decompressMulti(data []byte, expectedLength uint32) []byte {
 func deflate(data []byte) []byte {
 	b := bytes.NewReader(data)
 	r, err := zlib.NewReader(b)
-	defer r.Close()
 	if err != nil {
 		panic(err)
 	}
 	buffer := new(bytes.Buffer)
-	buffer.ReadFrom(r)
+	_, err = buffer.ReadFrom(r)
+	if err != nil {
+		log.Panic(err)
+	}
+	err = r.Close()
+	if err != nil {
+		log.Panic(err)
+	}
 	return buffer.Bytes()
 }
 
 func pkDecompress(data []byte) []byte {
 	b := bytes.NewReader(data)
 	r, err := blast.NewReader(b)
-	defer r.Close()
 	if err != nil {
 		panic(err)
 	}
 	buffer := new(bytes.Buffer)
-	buffer.ReadFrom(r)
+	_, err = buffer.ReadFrom(r)
+	if err != nil {
+		panic(err)
+	}
+	err = r.Close()
+	if err != nil {
+		panic(err)
+	}
 	return buffer.Bytes()
 }

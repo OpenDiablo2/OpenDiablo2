@@ -43,26 +43,26 @@ type HashTableEntry struct { // 16 bytes
 type FileFlag uint32
 
 const (
-	// MpqFileImplode - File is compressed using PKWARE Data compression library
-	MpqFileImplode FileFlag = 0x00000100
-	// MpqFileCompress - File is compressed using combination of compression methods
-	MpqFileCompress FileFlag = 0x00000200
-	// MpqFileEncrypted - The file is encrypted
-	MpqFileEncrypted FileFlag = 0x00010000
-	// MpqFileFixKey - The decryption key for the file is altered according to the position of the file in the archive
-	MpqFileFixKey FileFlag = 0x00020000
-	// MpqFilePatchFile - The file contains incremental patch for an existing file in base MPQ
-	MpqFilePatchFile FileFlag = 0x00100000
-	// MpqFileSingleUnit - Instead of being divided to 0x1000-bytes blocks, the file is stored as single unit
-	MpqFileSingleUnit FileFlag = 0x01000000
+	// FileImplode - File is compressed using PKWARE Data compression library
+	FileImplode FileFlag = 0x00000100
+	// FileCompress - File is compressed using combination of compression methods
+	FileCompress FileFlag = 0x00000200
+	// FileEncrypted - The file is encrypted
+	FileEncrypted FileFlag = 0x00010000
+	// FileFixKey - The decryption key for the file is altered according to the position of the file in the archive
+	FileFixKey FileFlag = 0x00020000
+	// FilePatchFile - The file contains incremental patch for an existing file in base MPQ
+	FilePatchFile FileFlag = 0x00100000
+	// FileSingleUnit - Instead of being divided to 0x1000-bytes blocks, the file is stored as single unit
+	FileSingleUnit FileFlag = 0x01000000
 	// FileDeleteMarker - File is a deletion marker, indicating that the file no longer exists. This is used to allow patch
 	// archives to delete files present in lower-priority archives in the search chain. The file usually
 	// has length of 0 or 1 byte and its name is a hash
 	FileDeleteMarker FileFlag = 0x02000000
-	// FileSEctorCrc - File has checksums for each sector. Ignored if file is not compressed or imploded.
-	FileSEctorCrc FileFlag = 0x04000000
-	// MpqFileExists - Set if file exists, reset when the file was deleted
-	MpqFileExists FileFlag = 0x80000000
+	// FileSectorCrc - File has checksums for each sector. Ignored if file is not compressed or imploded.
+	FileSectorCrc FileFlag = 0x04000000
+	// FileExists - Set if file exists, reset when the file was deleted
+	FileExists FileFlag = 0x80000000
 )
 
 // BlockTableEntry represents an entry in the block table
@@ -111,9 +111,15 @@ func (v *MPQ) readHeader() error {
 }
 
 func (v *MPQ) loadHashTable() {
-	v.File.Seek(int64(v.Data.HashTableOffset), 0)
+	_, err := v.File.Seek(int64(v.Data.HashTableOffset), 0)
+	if err != nil {
+		log.Panic(err)
+	}
 	hashData := make([]uint32, v.Data.HashTableEntries*4)
-	binary.Read(v.File, binary.LittleEndian, &hashData)
+	err = binary.Read(v.File, binary.LittleEndian, &hashData)
+	if err != nil {
+		log.Panic(err)
+	}
 	decrypt(hashData, hashString("(hash table)", 3))
 	for i := uint32(0); i < v.Data.HashTableEntries; i++ {
 		v.HashTableEntries = append(v.HashTableEntries, HashTableEntry{
@@ -128,9 +134,15 @@ func (v *MPQ) loadHashTable() {
 }
 
 func (v *MPQ) loadBlockTable() {
-	v.File.Seek(int64(v.Data.BlockTableOffset), 0)
+	_, err := v.File.Seek(int64(v.Data.BlockTableOffset), 0)
+	if err != nil {
+		log.Panic(err)
+	}
 	blockData := make([]uint32, v.Data.BlockTableEntries*4)
-	binary.Read(v.File, binary.LittleEndian, &blockData)
+	err = binary.Read(v.File, binary.LittleEndian, &blockData)
+	if err != nil {
+		log.Panic(err)
+	}
 	decrypt(blockData, hashString("(block table)", 3))
 	for i := uint32(0); i < v.Data.BlockTableEntries; i++ {
 		v.BlockTableEntries = append(v.BlockTableEntries, BlockTableEntry{
@@ -208,9 +220,12 @@ func (v MPQ) GetFileBlockData(fileName string) (BlockTableEntry, error) {
 	return v.BlockTableEntries[fileEntry.BlockIndex], nil
 }
 
-// Close closses the MPQ file
+// Close closes the MPQ file
 func (v *MPQ) Close() {
-	v.File.Close()
+	err := v.File.Close()
+	if err != nil {
+		log.Panic(err)
+	}
 }
 
 // ReadFile reads a file from the MPQ and returns a memory stream
@@ -239,7 +254,7 @@ func (v MPQ) ReadTextFile(fileName string) (string, error) {
 func (v *BlockTableEntry) calculateEncryptionSeed() {
 	fileName := path.Base(v.FileName)
 	v.EncryptionSeed = hashString(fileName, 3)
-	if !v.HasFlag(MpqFileFixKey) {
+	if !v.HasFlag(FileFixKey) {
 		return
 	}
 	v.EncryptionSeed = (v.EncryptionSeed + v.FilePosition) ^ v.UncompressedFileSize

@@ -37,6 +37,7 @@ type MainMenu struct {
 	copyrightLabel      *UI.Label
 	copyrightLabel2     *UI.Label
 	openDiabloLabel     *UI.Label
+
 	ShowTrademarkScreen bool
 	leftButtonHeld      bool
 }
