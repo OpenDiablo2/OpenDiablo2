@@ -152,6 +152,163 @@ func (v *SelectHeroClass) Load() []func() {
 			v.heroRenderInfo[Common.HeroSorceress].BackWalkSpriteOverlay.SpecialFrameTime = 1200
 			v.heroRenderInfo[Common.HeroSorceress].BackWalkSpriteOverlay.StopOnLastFrame = true
 		},
+		func() {
+			v.heroRenderInfo[Common.HeroNecromancer] = &HeroRenderInfo{
+				HeroStanceIdle,
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselected, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselectedH, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerForwardWalk, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerForwardWalkOverlay, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerSelected, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerSelectedOverlay, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerBackWalk, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerBackWalkOverlay, Palettes.Fechar),
+				image.Rectangle{Min: image.Point{265, 220}, Max: image.Point{55, 175}},
+			}
+			v.heroRenderInfo[Common.HeroNecromancer].IdleSprite.MoveTo(300, 335)
+			v.heroRenderInfo[Common.HeroNecromancer].IdleSprite.Animate = true
+			v.heroRenderInfo[Common.HeroNecromancer].IdleSelectedSprite.MoveTo(300, 335)
+			v.heroRenderInfo[Common.HeroNecromancer].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[Common.HeroNecromancer].ForwardWalkSprite.MoveTo(300, 335)
+			v.heroRenderInfo[Common.HeroNecromancer].ForwardWalkSprite.Animate = true
+			v.heroRenderInfo[Common.HeroNecromancer].ForwardWalkSprite.SpecialFrameTime = 2000
+			v.heroRenderInfo[Common.HeroNecromancer].ForwardWalkSprite.StopOnLastFrame = true
+			v.heroRenderInfo[Common.HeroNecromancer].ForwardWalkSpriteOverlay.Blend = true
+			v.heroRenderInfo[Common.HeroNecromancer].ForwardWalkSpriteOverlay.MoveTo(300, 335)
+			v.heroRenderInfo[Common.HeroNecromancer].ForwardWalkSpriteOverlay.Animate = true
+			v.heroRenderInfo[Common.HeroNecromancer].ForwardWalkSpriteOverlay.SpecialFrameTime = 2000
+			v.heroRenderInfo[Common.HeroNecromancer].ForwardWalkSpriteOverlay.StopOnLastFrame = true
+			v.heroRenderInfo[Common.HeroNecromancer].SelectedSprite.MoveTo(300, 335)
+			v.heroRenderInfo[Common.HeroNecromancer].SelectedSprite.Animate = true
+			v.heroRenderInfo[Common.HeroNecromancer].SelectedSpriteOverlay.Blend = true
+			v.heroRenderInfo[Common.HeroNecromancer].SelectedSpriteOverlay.MoveTo(300, 335)
+			v.heroRenderInfo[Common.HeroNecromancer].SelectedSpriteOverlay.Animate = true
+			v.heroRenderInfo[Common.HeroNecromancer].BackWalkSprite.MoveTo(300, 335)
+			v.heroRenderInfo[Common.HeroNecromancer].BackWalkSprite.Animate = true
+			v.heroRenderInfo[Common.HeroNecromancer].BackWalkSprite.SpecialFrameTime = 1500
+			v.heroRenderInfo[Common.HeroNecromancer].BackWalkSprite.StopOnLastFrame = true
+			v.heroRenderInfo[Common.HeroNecromancer].BackWalkSpriteOverlay.Blend = true
+			v.heroRenderInfo[Common.HeroNecromancer].BackWalkSpriteOverlay.MoveTo(300, 335)
+			v.heroRenderInfo[Common.HeroNecromancer].BackWalkSpriteOverlay.Animate = true
+			v.heroRenderInfo[Common.HeroNecromancer].BackWalkSpriteOverlay.SpecialFrameTime = 1500
+			v.heroRenderInfo[Common.HeroNecromancer].BackWalkSpriteOverlay.StopOnLastFrame = true
+		},
+		func() {
+			v.heroRenderInfo[Common.HeroPaladin] = &HeroRenderInfo{
+				HeroStanceIdle,
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselected, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselectedH, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecPaladinForwardWalk, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecPaladinForwardWalkOverlay, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecPaladinSelected, Palettes.Fechar),
+				nil,
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecPaladinBackWalk, Palettes.Fechar),
+				nil,
+				image.Rectangle{Min: image.Point{490, 210}, Max: image.Point{65, 180}},
+			}
+			v.heroRenderInfo[Common.HeroPaladin].IdleSprite.MoveTo(521, 338)
+			v.heroRenderInfo[Common.HeroPaladin].IdleSprite.Animate = true
+			v.heroRenderInfo[Common.HeroPaladin].IdleSelectedSprite.MoveTo(521, 338)
+			v.heroRenderInfo[Common.HeroPaladin].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[Common.HeroPaladin].ForwardWalkSprite.MoveTo(521, 338)
+			v.heroRenderInfo[Common.HeroPaladin].ForwardWalkSprite.Animate = true
+			v.heroRenderInfo[Common.HeroPaladin].ForwardWalkSprite.SpecialFrameTime = 3400
+			v.heroRenderInfo[Common.HeroPaladin].ForwardWalkSprite.StopOnLastFrame = true
+			v.heroRenderInfo[Common.HeroPaladin].ForwardWalkSpriteOverlay.MoveTo(521, 338)
+			v.heroRenderInfo[Common.HeroPaladin].ForwardWalkSpriteOverlay.Animate = true
+			v.heroRenderInfo[Common.HeroPaladin].ForwardWalkSpriteOverlay.SpecialFrameTime = 3400
+			v.heroRenderInfo[Common.HeroPaladin].ForwardWalkSpriteOverlay.StopOnLastFrame = true
+			v.heroRenderInfo[Common.HeroPaladin].SelectedSprite.MoveTo(521, 338)
+			v.heroRenderInfo[Common.HeroPaladin].SelectedSprite.Animate = true
+			v.heroRenderInfo[Common.HeroPaladin].BackWalkSprite.MoveTo(521, 338)
+			v.heroRenderInfo[Common.HeroPaladin].BackWalkSprite.Animate = true
+			v.heroRenderInfo[Common.HeroPaladin].BackWalkSprite.SpecialFrameTime = 1300
+			v.heroRenderInfo[Common.HeroPaladin].BackWalkSprite.StopOnLastFrame = true
+		},
+		func() {
+			v.heroRenderInfo[Common.HeroAmazon] = &HeroRenderInfo{
+				HeroStanceIdle,
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselected, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselectedH, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecAmazonForwardWalk, Palettes.Fechar),
+				nil,
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecAmazonSelected, Palettes.Fechar),
+				nil,
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecAmazonBackWalk, Palettes.Fechar),
+				nil,
+				image.Rectangle{Min: image.Point{70, 220}, Max: image.Point{55, 200}},
+			}
+			v.heroRenderInfo[Common.HeroAmazon].IdleSprite.MoveTo(100, 339)
+			v.heroRenderInfo[Common.HeroAmazon].IdleSprite.Animate = true
+			v.heroRenderInfo[Common.HeroAmazon].IdleSelectedSprite.MoveTo(100, 339)
+			v.heroRenderInfo[Common.HeroAmazon].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[Common.HeroAmazon].ForwardWalkSprite.MoveTo(100, 339)
+			v.heroRenderInfo[Common.HeroAmazon].ForwardWalkSprite.Animate = true
+			v.heroRenderInfo[Common.HeroAmazon].ForwardWalkSprite.SpecialFrameTime = 2200
+			v.heroRenderInfo[Common.HeroAmazon].ForwardWalkSprite.StopOnLastFrame = true
+			v.heroRenderInfo[Common.HeroAmazon].SelectedSprite.MoveTo(100, 339)
+			v.heroRenderInfo[Common.HeroAmazon].SelectedSprite.Animate = true
+			v.heroRenderInfo[Common.HeroAmazon].BackWalkSprite.MoveTo(100, 339)
+			v.heroRenderInfo[Common.HeroAmazon].BackWalkSprite.Animate = true
+			v.heroRenderInfo[Common.HeroAmazon].BackWalkSprite.SpecialFrameTime = 1500
+			v.heroRenderInfo[Common.HeroAmazon].BackWalkSprite.StopOnLastFrame = true
+		},
+		func() {
+			v.heroRenderInfo[Common.HeroAssassin] = &HeroRenderInfo{
+				HeroStanceIdle,
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselected, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselectedH, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinForwardWalk, Palettes.Fechar),
+				nil,
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinSelected, Palettes.Fechar),
+				nil,
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinBackWalk, Palettes.Fechar),
+				nil,
+				image.Rectangle{Min: image.Point{175, 235}, Max: image.Point{50, 180}},
+			}
+			v.heroRenderInfo[Common.HeroAssassin].IdleSprite.MoveTo(231, 365)
+			v.heroRenderInfo[Common.HeroAssassin].IdleSprite.Animate = true
+			v.heroRenderInfo[Common.HeroAssassin].IdleSelectedSprite.MoveTo(231, 365)
+			v.heroRenderInfo[Common.HeroAssassin].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[Common.HeroAssassin].ForwardWalkSprite.MoveTo(231, 365)
+			v.heroRenderInfo[Common.HeroAssassin].ForwardWalkSprite.Animate = true
+			v.heroRenderInfo[Common.HeroAssassin].ForwardWalkSprite.SpecialFrameTime = 3800
+			v.heroRenderInfo[Common.HeroAssassin].ForwardWalkSprite.StopOnLastFrame = true
+			v.heroRenderInfo[Common.HeroAssassin].SelectedSprite.MoveTo(231, 365)
+			v.heroRenderInfo[Common.HeroAssassin].SelectedSprite.Animate = true
+			v.heroRenderInfo[Common.HeroAssassin].BackWalkSprite.MoveTo(231, 365)
+			v.heroRenderInfo[Common.HeroAssassin].BackWalkSprite.Animate = true
+			v.heroRenderInfo[Common.HeroAssassin].BackWalkSprite.SpecialFrameTime = 1500
+			v.heroRenderInfo[Common.HeroAssassin].BackWalkSprite.StopOnLastFrame = true
+		},
+		func() {
+			v.heroRenderInfo[Common.HeroDruid] = &HeroRenderInfo{
+				HeroStanceIdle,
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidUnselected, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidUnselectedH, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidForwardWalk, Palettes.Fechar),
+				nil,
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidSelected, Palettes.Fechar),
+				nil,
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidBackWalk, Palettes.Fechar),
+				nil,
+				image.Rectangle{Min: image.Point{680, 220}, Max: image.Point{70, 195}},
+			}
+			v.heroRenderInfo[Common.HeroDruid].IdleSprite.MoveTo(720, 370)
+			v.heroRenderInfo[Common.HeroDruid].IdleSprite.Animate = true
+			v.heroRenderInfo[Common.HeroDruid].IdleSelectedSprite.MoveTo(720, 370)
+			v.heroRenderInfo[Common.HeroDruid].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[Common.HeroDruid].ForwardWalkSprite.MoveTo(720, 370)
+			v.heroRenderInfo[Common.HeroDruid].ForwardWalkSprite.Animate = true
+			v.heroRenderInfo[Common.HeroDruid].ForwardWalkSprite.SpecialFrameTime = 4800
+			v.heroRenderInfo[Common.HeroDruid].ForwardWalkSprite.StopOnLastFrame = true
+			v.heroRenderInfo[Common.HeroDruid].SelectedSprite.MoveTo(720, 370)
+			v.heroRenderInfo[Common.HeroDruid].SelectedSprite.Animate = true
+			v.heroRenderInfo[Common.HeroDruid].BackWalkSprite.MoveTo(720, 370)
+			v.heroRenderInfo[Common.HeroDruid].BackWalkSprite.Animate = true
+			v.heroRenderInfo[Common.HeroDruid].BackWalkSprite.SpecialFrameTime = 1500
+			v.heroRenderInfo[Common.HeroDruid].BackWalkSprite.StopOnLastFrame = true
+		},
 	}
 }
 
