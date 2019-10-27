@@ -1,12 +1,8 @@
 package Scenes
 
 import (
-	"bytes"
-	"fmt"
 	"image/color"
 	"strings"
-	"unicode/utf16"
-	"unicode/utf8"
 
 	"github.com/essial/OpenDiablo2/Common"
 	"github.com/essial/OpenDiablo2/Palettes"
@@ -52,29 +48,6 @@ func CreateCredits(fileProvider Common.FileProvider, sceneProvider SceneProvider
 	return result
 }
 
-func utf16BytesToString(b []byte) (string, error) {
-
-	if len(b)%2 != 0 {
-		return "", fmt.Errorf("Must have even length byte slice")
-	}
-
-	u16s := make([]uint16, 1)
-
-	ret := &bytes.Buffer{}
-
-	b8buf := make([]byte, 4)
-
-	lb := len(b)
-	for i := 0; i < lb; i += 2 {
-		u16s[0] = uint16(b[i]) + (uint16(b[i+1]) << 8)
-		r := utf16.Decode(u16s)
-		n := utf8.EncodeRune(b8buf, r[0])
-		ret.Write(b8buf[:n])
-	}
-
-	return ret.String(), nil
-}
-
 // Load is called to load the resources for the credits scene
 func (v *Credits) Load() []func() {
 	return []func(){
@@ -89,7 +62,7 @@ func (v *Credits) Load() []func() {
 			v.uiManager.AddWidget(v.exitButton)
 		},
 		func() {
-			fileData, _ := utf16BytesToString(v.fileProvider.LoadFile(ResourcePaths.CreditsText)[2:])
+			fileData, _ := Common.Utf16BytesToString(v.fileProvider.LoadFile(ResourcePaths.CreditsText)[2:])
 			v.creditsText = strings.Split(fileData, "\r\n")
 			for i := range v.creditsText {
 				v.creditsText[i] = strings.Trim(v.creditsText[i], " ")

@@ -39,16 +39,16 @@ func (v *StreamReader) GetByte() byte {
 	return result
 }
 
-// GetWord returns a uint16 word from the stream
-func (v *StreamReader) GetWord() uint16 {
+// GetUInt16 returns a uint16 word from the stream
+func (v *StreamReader) GetUInt16() uint16 {
 	result := uint16(v.data[v.position])
 	result += uint16(v.data[v.position+1]) << 8
 	v.position += 2
 	return result
 }
 
-// GetSWord returns a int16 word from the stream
-func (v *StreamReader) GetSWord() int16 {
+// GetInt16 returns a int16 word from the stream
+func (v *StreamReader) GetInt16() int16 {
 	var result int16
 	err := binary.Read(bytes.NewReader([]byte{v.data[v.position], v.data[v.position+1]}), binary.LittleEndian, &result)
 	if err != nil {
@@ -58,12 +58,23 @@ func (v *StreamReader) GetSWord() int16 {
 	return result
 }
 
-// GetDword returns a uint32 dword from the stream
-func (v *StreamReader) GetDword() uint32 {
-	result := uint32(v.data[v.position])
-	result += uint32(v.data[v.position+1]) << 8
-	result += uint32(v.data[v.position+2]) << 16
-	result += uint32(v.data[v.position+3]) << 24
+func (v *StreamReader) SetPosition(newPosition uint64) {
+	v.position = newPosition
+}
+
+// GetUInt32 returns a uint32 word from the stream
+func (v *StreamReader) GetUInt32() uint32 {
+	var result uint32
+	err := binary.Read(bytes.NewReader(
+		[]byte{
+			v.data[v.position],
+			v.data[v.position+1],
+			v.data[v.position+2],
+			v.data[v.position+3],
+		}), binary.LittleEndian, &result)
+	if err != nil {
+		log.Panic(err)
+	}
 	v.position += 4
 	return result
 }
@@ -71,6 +82,15 @@ func (v *StreamReader) GetDword() uint32 {
 // ReadByte implements io.ByteReader
 func (v *StreamReader) ReadByte() (byte, error) {
 	return v.GetByte(), nil
+}
+
+// ReadBytes reads multiple bytes
+func (v *StreamReader) ReadBytes(count int) ([]byte, error) {
+	result := make([]byte, count)
+	for i := 0; i < count; i++ {
+		result[i] = v.GetByte()
+	}
+	return result, nil
 }
 
 // Read implements io.Reader
@@ -85,4 +105,8 @@ func (v *StreamReader) Read(p []byte) (n int, err error) {
 		}
 		p[i] = v.GetByte()
 	}
+}
+
+func (v *StreamReader) Eof() bool {
+	return v.position >= uint64(len(v.data))
 }

@@ -60,6 +60,7 @@ func CreateEngine() *Engine {
 	result.mapMpqFiles()
 	result.loadPalettes()
 	result.loadSoundEntries()
+	Common.LoadTextDictionary(result)
 	result.SoundManager = Sound.CreateManager(result)
 	result.SoundManager.SetVolumes(result.Settings.BgmVolume, result.Settings.SfxVolume)
 	result.UIManager = UI.CreateManager(result, *result.SoundManager)

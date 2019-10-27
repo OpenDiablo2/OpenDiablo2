@@ -69,7 +69,7 @@ func (v *MainMenu) Load() []func() {
 		func() {
 			v.copyrightLabel2 = UI.CreateLabel(v.fileProvider, ResourcePaths.FontFormal12, Palettes.Static)
 			v.copyrightLabel2.Alignment = UI.LabelAlignCenter
-			v.copyrightLabel2.SetText("All Rights Reserved.")
+			v.copyrightLabel2.SetText(Common.TranslateString("#1614"))
 			v.copyrightLabel2.Color = color.RGBA{188, 168, 140, 255}
 			v.copyrightLabel2.MoveTo(400, 525)
 		},
@@ -109,27 +109,27 @@ func (v *MainMenu) Load() []func() {
 			v.diabloLogoRightBack.MoveTo(400, 120)
 		},
 		func() {
-			v.exitDiabloButton = UI.CreateButton(UI.ButtonTypeWide, v.fileProvider, "EXIT DIABLO II")
+			v.exitDiabloButton = UI.CreateButton(UI.ButtonTypeWide, v.fileProvider, Common.TranslateString("#1625"))
 			v.exitDiabloButton.MoveTo(264, 535)
 			v.exitDiabloButton.SetVisible(!v.ShowTrademarkScreen)
 			v.exitDiabloButton.OnActivated(func() { v.onExitButtonClicked() })
 			v.uiManager.AddWidget(v.exitDiabloButton)
 		},
 		func() {
-			v.creditsButton = UI.CreateButton(UI.ButtonTypeShort, v.fileProvider, "CREDITS")
+			v.creditsButton = UI.CreateButton(UI.ButtonTypeShort, v.fileProvider, Common.TranslateString("#1627"))
 			v.creditsButton.MoveTo(264, 505)
 			v.creditsButton.SetVisible(!v.ShowTrademarkScreen)
 			v.creditsButton.OnActivated(func() { v.onCreditsButtonClicked() })
 			v.uiManager.AddWidget(v.creditsButton)
 		},
 		func() {
-			v.cinematicsButton = UI.CreateButton(UI.ButtonTypeShort, v.fileProvider, "CINEMATICS")
+			v.cinematicsButton = UI.CreateButton(UI.ButtonTypeShort, v.fileProvider, Common.TranslateString("#1639"))
 			v.cinematicsButton.MoveTo(401, 505)
 			v.cinematicsButton.SetVisible(!v.ShowTrademarkScreen)
 			v.uiManager.AddWidget(v.cinematicsButton)
 		},
 		func() {
-			v.singlePlayerButton = UI.CreateButton(UI.ButtonTypeWide, v.fileProvider, "SINGLE PLAYER")
+			v.singlePlayerButton = UI.CreateButton(UI.ButtonTypeWide, v.fileProvider, Common.TranslateString("#1620"))
 			v.singlePlayerButton.MoveTo(264, 290)
 			v.singlePlayerButton.SetVisible(!v.ShowTrademarkScreen)
 			v.singlePlayerButton.OnActivated(func() { v.onSinglePlayerClicked() })

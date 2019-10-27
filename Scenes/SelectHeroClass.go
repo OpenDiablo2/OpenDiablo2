@@ -44,7 +44,12 @@ type SelectHeroClass struct {
 	bgImage        *Common.Sprite
 	campfire       *Common.Sprite
 	headingLabel   *UI.Label
+	heroClassLabel *UI.Label
+	heroDesc1Label *UI.Label
+	heroDesc2Label *UI.Label
+	heroDesc3Label *UI.Label
 	heroRenderInfo map[Common.Hero]*HeroRenderInfo
+	selectedHero   Common.Hero
 }
 
 func CreateSelectHeroClass(
@@ -58,6 +63,7 @@ func CreateSelectHeroClass(
 		fileProvider:   fileProvider,
 		soundManager:   soundManager,
 		heroRenderInfo: make(map[Common.Hero]*HeroRenderInfo),
+		selectedHero:   Common.HeroNone,
 	}
 	return result
 }
@@ -75,6 +81,26 @@ func (v *SelectHeroClass) Load() []func() {
 			v.headingLabel.MoveTo(400-int(fontWidth/2), 17)
 			v.headingLabel.SetText("Select Hero Class")
 			v.headingLabel.Alignment = UI.LabelAlignCenter
+		},
+		func() {
+			v.heroClassLabel = UI.CreateLabel(v.fileProvider, ResourcePaths.Font30, Palettes.Units)
+			v.heroClassLabel.Alignment = UI.LabelAlignCenter
+			v.heroClassLabel.MoveTo(400, 65)
+		},
+		func() {
+			v.heroDesc1Label = UI.CreateLabel(v.fileProvider, ResourcePaths.Font16, Palettes.Units)
+			v.heroDesc1Label.Alignment = UI.LabelAlignCenter
+			v.heroDesc1Label.MoveTo(400, 100)
+		},
+		func() {
+			v.heroDesc2Label = UI.CreateLabel(v.fileProvider, ResourcePaths.Font16, Palettes.Units)
+			v.heroDesc2Label.Alignment = UI.LabelAlignCenter
+			v.heroDesc2Label.MoveTo(400, 115)
+		},
+		func() {
+			v.heroDesc3Label = UI.CreateLabel(v.fileProvider, ResourcePaths.Font16, Palettes.Units)
+			v.heroDesc3Label.Alignment = UI.LabelAlignCenter
+			v.heroDesc3Label.MoveTo(400, 130)
 		},
 		func() {
 			v.campfire = v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectCampfire, Palettes.Fechar)
@@ -335,6 +361,12 @@ func (v *SelectHeroClass) Unload() {
 func (v *SelectHeroClass) Render(screen *ebiten.Image) {
 	v.bgImage.DrawSegments(screen, 4, 3, 0)
 	v.headingLabel.Draw(screen)
+	if v.selectedHero != Common.HeroNone {
+		v.heroClassLabel.Draw(screen)
+		v.heroDesc1Label.Draw(screen)
+		v.heroDesc2Label.Draw(screen)
+		v.heroDesc3Label.Draw(screen)
+	}
 	for heroClass, heroInfo := range v.heroRenderInfo {
 		if heroInfo.Stance == HeroStanceIdle || heroInfo.Stance == HeroStanceIdleSelected {
 			v.renderHero(screen, heroClass)
@@ -356,8 +388,15 @@ func (v *SelectHeroClass) Update(tickTime float64) {
 			break
 		}
 	}
-	for heroType := range v.heroRenderInfo {
+	allIdle := true
+	for heroType, data := range v.heroRenderInfo {
+		if allIdle && data.Stance != HeroStanceIdle {
+			allIdle = false
+		}
 		v.updateHeroSelectionHover(heroType, canSelect)
+	}
+	if v.selectedHero != Common.HeroNone && allIdle {
+		v.selectedHero = Common.HeroNone
 	}
 }
 
@@ -409,8 +448,8 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero Common.Hero, canSelect b
 				heroInfo.BackWalkSpriteOverlay.ResetAnimation()
 			}
 		}
-		// selectedHero = hero;
-		// UpdateHeroText();
+		v.selectedHero = hero
+		v.updateHeroText()
 		renderInfo.SelectSfx.Play()
 
 		return
@@ -422,13 +461,10 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero Common.Hero, canSelect b
 		renderInfo.Stance = HeroStanceIdle
 	}
 
-	/*
-		   if (selectedHero == null && mouseHover)
-		   {
-			   selectedHero = hero;
-			   UpdateHeroText();
-		   }
-	*/
+	if v.selectedHero == Common.HeroNone && mouseHover {
+		v.selectedHero = hero
+		v.updateHeroText()
+	}
 
 }
 
@@ -454,5 +490,67 @@ func (v *SelectHeroClass) renderHero(screen *ebiten.Image, hero Common.Hero) {
 		if renderInfo.BackWalkSpriteOverlay != nil {
 			renderInfo.BackWalkSpriteOverlay.Draw(screen)
 		}
+	}
+}
+
+func (v *SelectHeroClass) updateHeroText() {
+	switch v.selectedHero {
+	case Common.HeroNone:
+		return
+	case Common.HeroBarbarian:
+		v.heroClassLabel.SetText(Common.TranslateString("partycharbar"))
+		v.setDescLabels("#1709")
+	case Common.HeroNecromancer:
+		v.heroClassLabel.SetText(Common.TranslateString("partycharnec"))
+		v.setDescLabels("#1704")
+	case Common.HeroPaladin:
+		v.heroClassLabel.SetText(Common.TranslateString("partycharpal"))
+		v.setDescLabels("#1711")
+	case Common.HeroAssassin:
+		v.heroClassLabel.SetText(Common.TranslateString("partycharass"))
+		v.setDescLabels("#305")
+	case Common.HeroSorceress:
+		v.heroClassLabel.SetText(Common.TranslateString("partycharsor"))
+		v.setDescLabels("#1710")
+	case Common.HeroAmazon:
+		v.heroClassLabel.SetText(Common.TranslateString("partycharama"))
+		v.setDescLabels("#1698")
+	case Common.HeroDruid:
+		v.heroClassLabel.SetText(Common.TranslateString("partychardru"))
+		v.setDescLabels("#304")
+	}
+	/*
+	   if (selectedHero == null)
+	                   return;
+
+	               switch (selectedHero.Value)
+	               {
+
+	               }
+
+	               heroClassLabel.Location = new Point(400 - (heroClassLabel.TextArea.Width / 2), 65);
+	               heroDesc1Label.Location = new Point(400 - (heroDesc1Label.TextArea.Width / 2), 100);
+	               heroDesc2Label.Location = new Point(400 - (heroDesc2Label.TextArea.Width / 2), 115);
+	               heroDesc3Label.Location = new Point(400 - (heroDesc3Label.TextArea.Width / 2), 130);
+	*/
+}
+
+func (v *SelectHeroClass) setDescLabels(descKey string) {
+	heroDesc := Common.TranslateString(descKey)
+	parts := Common.SplitIntoLinesWithMaxWidth(heroDesc, 37)
+	if len(parts) > 1 {
+		v.heroDesc1Label.SetText(parts[0])
+	} else {
+		v.heroDesc1Label.SetText("")
+	}
+	if len(parts) > 1 {
+		v.heroDesc2Label.SetText(parts[1])
+	} else {
+		v.heroDesc2Label.SetText("")
+	}
+	if len(parts) > 2 {
+		v.heroDesc3Label.SetText(parts[2])
+	} else {
+		v.heroDesc3Label.SetText("")
 	}
 }

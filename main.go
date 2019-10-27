@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/essial/OpenDiablo2/Core"
 	"log"
+
+	"github.com/essial/OpenDiablo2/Core"
 
 	"github.com/essial/OpenDiablo2/MPQ"
 	"github.com/hajimehoshi/ebiten"

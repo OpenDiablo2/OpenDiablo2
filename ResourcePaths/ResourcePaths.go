@@ -156,8 +156,9 @@ const (
 
 	// --- Data ---
 
-	EnglishTable         = "/data/local/lng/eng/English.txt"
 	ExpansionStringTable = "/data/local/lng/eng/expansionstring.tbl"
+	StringTable          = "/data/local/lng/eng/string.tbl"
+	PatchStringTable     = "/data/local/lng/eng/patchstring.tbl"
 	LevelPreset          = "/data/global/excel/LvlPrest.txt"
 	LevelType            = "/data/global/excel/LvlTypes.txt"
 	LevelDetails         = "/data/global/excel/Levels.txt"

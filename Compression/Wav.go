@@ -37,7 +37,7 @@ func WavDecompress(data []byte, channelCount int) []byte {
 	shift := input.GetByte()
 
 	for i := 0; i < channelCount; i++ {
-		temp := input.GetSWord()
+		temp := input.GetInt16()
 		Array2[i] = int(temp)
 		output.PushSWord(temp)
 	}
