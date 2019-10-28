@@ -136,7 +136,7 @@ func LoadDS1(path string, fileProvider Common.FileProvider) *DS1 {
 	}
 	if ds1.Version >= 9 && ds1.Version <= 13 {
 		// Skipping two dwords because they are "meaningless"?
-		_, _ = br.ReadBytes(16)
+		br.SkipBytes(16)
 	}
 	if ds1.Version >= 4 {
 		ds1.NumberOfWalls = br.GetInt32()
@@ -297,9 +297,9 @@ func LoadDS1(path string, fileProvider Common.FileProvider) *DS1 {
 				}
 			} else {
 				if ds1.Version >= 15 {
-					_, _ = br.ReadBytes(int(numPaths) * 3)
+					br.SkipBytes(int(numPaths) * 3)
 				} else {
-					_, _ = br.ReadBytes(int(numPaths) * 2)
+					br.SkipBytes(int(numPaths) * 2)
 				}
 			}
 		}

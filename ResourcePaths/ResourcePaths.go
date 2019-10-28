@@ -159,10 +159,10 @@ const (
 	ExpansionStringTable = "/data/local/lng/eng/expansionstring.tbl"
 	StringTable          = "/data/local/lng/eng/string.tbl"
 	PatchStringTable     = "/data/local/lng/eng/patchstring.tbl"
-	LevelPreset          = "/data/global/excel/LvlPrest.txt"
-	LevelType            = "/data/global/excel/LvlTypes.txt"
-	LevelDetails         = "/data/global/excel/Levels.txt"
-	ObjectDetails        = "/data/global/excel/Objects.txt"
+	LevelPreset          = "/data/global/excel/LvlPrest.bin"
+	LevelType            = "/data/global/excel/LvlTypes.bin"
+	LevelDetails         = "/data/global/excel/Levels.bin"
+	ObjectDetails        = "/data/global/excel/Objects.bin"
 	SoundSettings        = "/data/global/excel/Sounds.txt"
 
 	// --- Animations ---

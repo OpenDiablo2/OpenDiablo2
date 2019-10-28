@@ -29,7 +29,8 @@ func (v *MapEngineTest) Load() []func() {
 	v.soundManager.PlayBGM("")
 	return []func(){
 		func() {
-			_ = MapEngine.LoadDS1("/data/global/tiles/ACT1/town/townE1.ds1", v.fileProvider)
+			//_ = MapEngine.LoadDS1("/data/global/tiles/ACT1/town/townE1.ds1", v.fileProvider)
+			_ = MapEngine.LoadDT1("/data/global/tiles/ACT1/town/floor.dt1", v.fileProvider)
 		},
 	}
 }

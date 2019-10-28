@@ -110,6 +110,10 @@ func (v *StreamReader) ReadBytes(count int) ([]byte, error) {
 	return result, nil
 }
 
+func (v *StreamReader) SkipBytes(count int) {
+	v.position += uint64(count)
+}
+
 // Read implements io.Reader
 func (v *StreamReader) Read(p []byte) (n int, err error) {
 	streamLength := v.GetSize()

@@ -232,7 +232,7 @@ func (v *MPQ) Close() {
 func (v MPQ) ReadFile(fileName string) ([]byte, error) {
 	fileBlockData, err := v.GetFileBlockData(fileName)
 	if err != nil {
-		return nil, err
+		log.Panic(err)
 	}
 	fileBlockData.FileName = strings.ToLower(fileName)
 	fileBlockData.calculateEncryptionSeed()
