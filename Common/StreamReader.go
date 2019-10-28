@@ -79,6 +79,23 @@ func (v *StreamReader) GetUInt32() uint32 {
 	return result
 }
 
+// GetInt32 returns an int32 word from the stream
+func (v *StreamReader) GetInt32() int32 {
+	var result int32
+	err := binary.Read(bytes.NewReader(
+		[]byte{
+			v.data[v.position],
+			v.data[v.position+1],
+			v.data[v.position+2],
+			v.data[v.position+3],
+		}), binary.LittleEndian, &result)
+	if err != nil {
+		log.Panic(err)
+	}
+	v.position += 4
+	return result
+}
+
 // ReadByte implements io.ByteReader
 func (v *StreamReader) ReadByte() (byte, error) {
 	return v.GetByte(), nil

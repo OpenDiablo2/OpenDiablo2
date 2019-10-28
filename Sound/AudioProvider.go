@@ -37,6 +37,10 @@ func (v *Manager) PlayBGM(song string) {
 		return
 	}
 	v.lastBgm = song
+	if song == "" && v.bgmAudio != nil && v.bgmAudio.IsPlaying() {
+		_ = v.bgmAudio.Pause()
+		return
+	}
 	go func() {
 		if v.bgmAudio != nil {
 			err := v.bgmAudio.Close()

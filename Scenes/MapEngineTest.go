@@ -2,6 +2,7 @@ package Scenes
 
 import (
 	"github.com/essial/OpenDiablo2/Common"
+	"github.com/essial/OpenDiablo2/MapEngine"
 	"github.com/essial/OpenDiablo2/Sound"
 	"github.com/essial/OpenDiablo2/UI"
 	"github.com/hajimehoshi/ebiten"
@@ -25,7 +26,12 @@ func CreateMapEngineTest(fileProvider Common.FileProvider, sceneProvider ScenePr
 }
 
 func (v *MapEngineTest) Load() []func() {
-	return []func(){}
+	v.soundManager.PlayBGM("")
+	return []func(){
+		func() {
+			_ = MapEngine.LoadDS1("/data/global/tiles/ACT1/town/townE1.ds1", v.fileProvider)
+		},
+	}
 }
 
 func (v *MapEngineTest) Unload() {
