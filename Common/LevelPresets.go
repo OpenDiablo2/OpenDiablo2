@@ -43,13 +43,14 @@ func LoadLevelPresets(fileProvider FileProvider) {
 		LevelPresets[i].Animate = sr.GetInt32() != 0
 		LevelPresets[i].KillEdge = sr.GetInt32() != 0
 		LevelPresets[i].FillBlanks = sr.GetInt32() != 0
+		sr.GetInt32() // What is this field?
 		LevelPresets[i].SizeX = sr.GetInt32()
 		LevelPresets[i].SizeY = sr.GetInt32()
 		LevelPresets[i].AutoMap = sr.GetInt32() != 0
 		LevelPresets[i].Scan = sr.GetInt32() != 0
 		LevelPresets[i].Pops = sr.GetInt32()
 		LevelPresets[i].PopPad = sr.GetInt32()
-		sr.GetInt32()
+		sr.GetUInt32() // Most likely NumFiles
 		for fileIdx := 0; fileIdx < 6; fileIdx++ {
 			strData, _ := sr.ReadBytes(60)
 			s := strings.Trim(string(strData), string(0))
@@ -61,6 +62,7 @@ func LoadLevelPresets(fileProvider FileProvider) {
 
 		}
 		LevelPresets[i].Dt1Mask = sr.GetUInt32()
+
 	}
-	log.Printf("Loaded %d LevelPreset records")
+	log.Printf("Loaded %d LevelPreset records", len(LevelPresets))
 }
