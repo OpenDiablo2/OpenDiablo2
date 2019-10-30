@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"os"
 	"path"
 	"strings"
 	"sync"
@@ -19,6 +20,7 @@ import (
 	"github.com/essial/OpenDiablo2/UI"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/mitchellh/go-homedir"
 )
 
 // EngineConfig defines the configuration for the engine, loaded from config.json
@@ -36,7 +38,7 @@ type EngineConfig struct {
 
 // Engine is the core OpenDiablo2 engine
 type Engine struct {
-	Settings        EngineConfig                        // Engine configuration settings from json file
+	Settings        *EngineConfig                        // Engine configuration settings from json file
 	Files           map[string]string                   // Map that defines which files are in which MPQs
 	Palettes        map[Palettes.Palette]Common.Palette // Color palettes
 	SoundEntries    map[string]Sound.SoundEntry         // Sound configurations
@@ -74,7 +76,7 @@ func CreateEngine() *Engine {
 }
 
 func (v *Engine) loadConfigurationFile() {
-	log.Println("loading configuration file")
+	log.Println("Loading configuration file")
 	configJSON, err := ioutil.ReadFile("config.json")
 	if err != nil {
 		log.Fatal(err)
@@ -85,7 +87,20 @@ func (v *Engine) loadConfigurationFile() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	v.Settings = config
+	v.Settings = &config
+	// Path fixup for wine-installed diablo 2 in linux
+	if v.Settings.MpqPath[0] != '/' {
+		if _, err := os.Stat(v.Settings.MpqPath); os.IsNotExist(err) {
+			homeDir, _ := homedir.Dir()
+			newPath := strings.ReplaceAll(v.Settings.MpqPath, `C:\`, homeDir + "/.wine/drive_c/")
+			newPath = strings.ReplaceAll(newPath, "C:/", homeDir + "/.wine/drive_c/")
+			newPath = strings.ReplaceAll(newPath, `\`, "/")
+			if _, err := os.Stat(newPath); !os.IsNotExist(err) {
+				log.Printf("Detected linux wine installation, path updated to wine prefix path.")
+				v.Settings.MpqPath = newPath
+			}
+		}
+	}
 }
 
 func (v *Engine) mapMpqFiles() {
