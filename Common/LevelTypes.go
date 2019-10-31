@@ -15,7 +15,6 @@ type LevelTypeRecord struct {
 var LevelTypes []LevelTypeRecord
 
 func LoadLevelTypes(fileProvider FileProvider) {
-	LevelTypes = make([]LevelTypeRecord, 0)
 	levelTypesData := fileProvider.LoadFile(ResourcePaths.LevelType)
 	sr := CreateStreamReader(levelTypesData)
 	numRecords := sr.GetInt32()

@@ -29,7 +29,6 @@ type LevelPresetRecord struct {
 var LevelPresets []LevelPresetRecord
 
 func LoadLevelPresets(fileProvider FileProvider) {
-	LevelPresets = make([]LevelPresetRecord, 0)
 	levelTypesData := fileProvider.LoadFile(ResourcePaths.LevelPreset)
 	sr := CreateStreamReader(levelTypesData)
 	numRecords := sr.GetInt32()

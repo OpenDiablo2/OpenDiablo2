@@ -9,13 +9,14 @@ import (
 // https://d2mods.info/forum/viewtopic.php?t=65163
 
 type Block struct {
-	X          int16
-	Y          int16
-	GridX      byte
-	GridY      byte
-	Format     int16
-	Length     int32
-	FileOffset int32
+	X           int16
+	Y           int16
+	GridX       byte
+	GridY       byte
+	Format      BlockDataFormat
+	EncodedData []byte
+	Length      int32
+	FileOffset  int32
 }
 
 type Tile struct {
@@ -32,12 +33,19 @@ type Tile struct {
 	SubTileFlags       [25]byte
 	blockHeaderPointer int32
 	blockHeaderSize    int32
-	blocks             []Block
+	Blocks             []Block
 }
 
 type DT1 struct {
 	Tiles []Tile
 }
+
+type BlockDataFormat int16
+
+const (
+	BlockFormatRLE       BlockDataFormat = 0 // Not 1
+	BlockFormatIsometric BlockDataFormat = 1
+)
 
 func LoadDT1(path string, fileProvider Common.FileProvider) *DT1 {
 	result := &DT1{}
@@ -72,30 +80,29 @@ func LoadDT1(path string, fileProvider Common.FileProvider) *DT1 {
 		br.SkipBytes(7)
 		newTile.blockHeaderPointer = br.GetInt32()
 		newTile.blockHeaderSize = br.GetInt32()
-		newTile.blocks = make([]Block, br.GetInt32())
+		newTile.Blocks = make([]Block, br.GetInt32())
 		br.SkipBytes(12)
 		result.Tiles[tileIdx] = newTile
 	}
 	for tileIdx, tile := range result.Tiles {
 		br.SetPosition(uint64(tile.blockHeaderPointer))
-		for blockIdx := range tile.blocks {
-			result.Tiles[tileIdx].blocks[blockIdx].X = br.GetInt16()
-			result.Tiles[tileIdx].blocks[blockIdx].Y = br.GetInt16()
+		for blockIdx := range tile.Blocks {
+			result.Tiles[tileIdx].Blocks[blockIdx].X = br.GetInt16()
+			result.Tiles[tileIdx].Blocks[blockIdx].Y = br.GetInt16()
 			br.SkipBytes(2)
-			result.Tiles[tileIdx].blocks[blockIdx].GridX = br.GetByte()
-			result.Tiles[tileIdx].blocks[blockIdx].GridY = br.GetByte()
-			result.Tiles[tileIdx].blocks[blockIdx].Format = br.GetInt16()
-			result.Tiles[tileIdx].blocks[blockIdx].Length = br.GetInt32()
+			result.Tiles[tileIdx].Blocks[blockIdx].GridX = br.GetByte()
+			result.Tiles[tileIdx].Blocks[blockIdx].GridY = br.GetByte()
+			result.Tiles[tileIdx].Blocks[blockIdx].Format = BlockDataFormat(br.GetInt16())
+			result.Tiles[tileIdx].Blocks[blockIdx].Length = br.GetInt32()
 			br.SkipBytes(2)
-			result.Tiles[tileIdx].blocks[blockIdx].FileOffset = br.GetInt32()
+			result.Tiles[tileIdx].Blocks[blockIdx].FileOffset = br.GetInt32()
 		}
-		/*
-			for blockIdx, block := range tile.blocks {
-				br.SetPosition(uint64(tile.blockHeaderPointer + block.FileOffset))
-				encodedData, _ := br.ReadBytes(block.Length)
-				bs := Common.CreateBitStream(encodedData)
-			}
-		*/
+		for blockIndex, block := range tile.Blocks {
+			br.SetPosition(uint64(tile.blockHeaderPointer + block.FileOffset))
+			encodedData, _ := br.ReadBytes(int(block.Length))
+			tile.Blocks[blockIndex].EncodedData = encodedData
+		}
+
 	}
 	return result
 }
