@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/Palettes"
+	"github.com/essial/OpenDiablo2/PaletteDefs"
 	"github.com/essial/OpenDiablo2/ResourcePaths"
 	"github.com/essial/OpenDiablo2/Sound"
 	"github.com/essial/OpenDiablo2/UI"
@@ -52,7 +52,7 @@ func CreateCredits(fileProvider Common.FileProvider, sceneProvider SceneProvider
 func (v *Credits) Load() []func() {
 	return []func(){
 		func() {
-			v.creditsBackground = v.fileProvider.LoadSprite(ResourcePaths.CreditsBackground, Palettes.Sky)
+			v.creditsBackground = v.fileProvider.LoadSprite(ResourcePaths.CreditsBackground, PaletteDefs.Sky)
 			v.creditsBackground.MoveTo(0, 0)
 		},
 		func() {
@@ -87,7 +87,7 @@ func (v *Credits) Render(screen *ebiten.Image) {
 	}
 }
 
-const secondsPerCycle = (float64(40) / float64(1000))
+const secondsPerCycle = float64(0.02)
 
 // Update runs the update logic on the credits scene
 func (v *Credits) Update(tickTime float64) {
@@ -190,7 +190,7 @@ func (v *Credits) getNewFontLabel(isHeading bool) *UI.Label {
 	newLabelItem := &labelItem{
 		Available: false,
 		IsHeading: isHeading,
-		Label:     UI.CreateLabel(v.fileProvider, ResourcePaths.FontFormal10, Palettes.Sky),
+		Label:     UI.CreateLabel(v.fileProvider, ResourcePaths.FontFormal10, PaletteDefs.Sky),
 	}
 
 	if isHeading {

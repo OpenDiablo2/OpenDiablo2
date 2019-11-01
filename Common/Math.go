@@ -24,6 +24,13 @@ func MaxInt32(a, b int32) int32 {
 	return b
 }
 
+func AbsInt32(a int32) int32 {
+	if a < 0 {
+		return -a
+	}
+	return a
+}
+
 // MinInt32 returns the higher of two values
 func MinInt32(a, b int32) int32 {
 	if a < b {

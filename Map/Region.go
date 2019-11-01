@@ -4,11 +4,20 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"strconv"
+
+	"github.com/essial/OpenDiablo2/PaletteDefs"
 
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/essial/OpenDiablo2/Common"
 )
+
+type TileCacheRecord struct {
+	Image   *ebiten.Image
+	XOffset int
+	YOffset int
+}
 
 type Region struct {
 	levelType   Common.LevelTypeRecord
@@ -17,6 +26,8 @@ type Region struct {
 	TileHeight  int32
 	Tiles       []Tile
 	DS1         *DS1
+	Palette     Common.PaletteRec
+	TileCache   map[uint32]*TileCacheRecord
 }
 
 type RegionLayerType int
@@ -71,8 +82,16 @@ func LoadRegion(seed rand.Source, levelType RegionIdType, levelPreset int, fileP
 		levelType:   Common.LevelTypes[levelType],
 		levelPreset: Common.LevelPresets[levelPreset],
 		Tiles:       make([]Tile, 0),
+		TileCache:   make(map[uint32]*TileCacheRecord),
 	}
+	result.Palette = Common.Palettes[PaletteDefs.PaletteType("act"+strconv.Itoa(int(result.levelType.Act)))]
+	bm := result.levelPreset.Dt1Mask
 	for _, levelTypeDt1 := range result.levelType.Files {
+		if bm&1 == 0 {
+			bm >>= 1
+			continue
+		}
+		bm >>= 1
 		if len(levelTypeDt1) == 0 || levelTypeDt1 == "" || levelTypeDt1 == "0" {
 			continue
 		}
@@ -105,21 +124,126 @@ func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType Region
 	}
 }
 
-func (v *Region) getTile(mainIndex, subIndex int32) Tile {
+func (v *Region) getTile(mainIndex, subIndex, orientation int32) Tile {
 	// TODO: Need to support randomly grabbing tile based on x/y as there can be multiple matches for same main/sub index
 	for _, tile := range v.Tiles {
-		if tile.MainIndex != mainIndex || tile.SubIndex != subIndex {
+		if tile.MainIndex != mainIndex || tile.SubIndex != subIndex || tile.Orientation != orientation {
 			continue
 		}
 		return tile
 	}
-	log.Fatalf("Unknown tile ID [%d %d]", mainIndex, subIndex)
+	log.Fatalf("Unknown tile ID [%d %d %d]", mainIndex, subIndex, orientation)
 	return Tile{}
 }
 
 func (v *Region) renderFloor(tile FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image) {
-	tileData := v.getTile(int32(tile.MainIndex), int32(tile.SubIndex))
-	log.Printf("Pro1: %d", tileData.Direction)
+	tileCacheIndex := (uint32(tile.MainIndex) << 16) + (uint32(tile.SubIndex) << 8)
+	tileCache := v.TileCache[tileCacheIndex]
+	if tileCache == nil {
+		v.TileCache[tileCacheIndex] = v.generateFloorCache(tile)
+		tileCache = v.TileCache[tileCacheIndex]
+	}
+	opts := &ebiten.DrawImageOptions{}
+	opts.GeoM.Translate(float64(offsetX+tileCache.XOffset), float64(offsetY+tileCache.YOffset))
+	target.DrawImage(tileCache.Image, opts)
+}
+
+func (v *Region) generateFloorCache(tile FloorShadowRecord) *TileCacheRecord {
+	var pixels []byte
+
+	tileData := v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), 0)
+	tileYMinimum := int32(0)
+	for _, block := range tileData.Blocks {
+		tileYMinimum = Common.MinInt32(tileYMinimum, int32(block.Y))
+	}
+	tileYOffset := Common.AbsInt32(tileYMinimum)
+
+	tileHeight := Common.AbsInt32(tileData.Height)
+	image, _ := ebiten.NewImage(int(tileData.Width), int(tileHeight), ebiten.FilterNearest)
+	special := false
+	pixels = make([]byte, 4*tileData.Width*tileHeight)
+	for _, block := range tileData.Blocks {
+		// TODO: Move this to a less stupid place
+		if block.Format == BlockFormatIsometric {
+			// 3D isometric decoding
+			xjump := []int32{14, 12, 10, 8, 6, 4, 2, 0, 2, 4, 6, 8, 10, 12, 14}
+			nbpix := []int32{4, 8, 12, 16, 20, 24, 28, 32, 28, 24, 20, 16, 12, 8, 4}
+			blockX := int32(block.X)
+			blockY := int32(block.Y)
+			length := int32(256)
+			x := int32(0)
+			y := int32(0)
+			idx := 0
+			for length > 0 {
+				x = xjump[y]
+				n := nbpix[y]
+				length -= n
+				for n > 0 {
+					colorIndex := block.EncodedData[idx]
+					if colorIndex != 0 {
+						pixelColor := v.Palette.Colors[colorIndex]
+						pixels[(4 * (((blockY + y) * tileData.Width) + (blockX + x)))] = pixelColor.R
+						pixels[(4*(((blockY+y)*tileData.Width)+(blockX+x)))+1] = pixelColor.G
+						pixels[(4*(((blockY+y)*tileData.Width)+(blockX+x)))+2] = pixelColor.B
+						pixels[(4*(((blockY+y)*tileData.Width)+(blockX+x)))+3] = 255
+					} else {
+						pixels[(4*(((blockY+y)*tileData.Width)+(blockX+x)))+3] = 0
+					}
+					x++
+					n--
+					idx++
+				}
+				y++
+			}
+		} else {
+			// RLE Encoding
+			special = true
+			blockX := int32(block.X)
+			blockY := int32(block.Y)
+			x := int32(0)
+			y := int32(0)
+			idx := 0
+			length := block.Length
+			for length > 0 {
+				length -= 2
+				if (block.EncodedData[idx] + block.EncodedData[idx+1]) == 0 {
+					x = 0
+					y++
+					idx += 2
+					continue
+				}
+				length -= int32(block.EncodedData[idx+1])
+				x += int32(block.EncodedData[idx])
+				b2 := block.EncodedData[idx+1]
+				idx += 2
+				for b2 > 0 {
+					colorIndex := block.EncodedData[idx]
+					if colorIndex != 0 {
+						pixelColor := v.Palette.Colors[colorIndex]
+						pixels[(4 * (((blockY + y + tileYOffset) * tileData.Width) + (blockX + x)))] = pixelColor.R
+						pixels[(4*(((blockY+y+tileYOffset)*tileData.Width)+(blockX+x)))+1] = pixelColor.G
+						pixels[(4*(((blockY+y+tileYOffset)*tileData.Width)+(blockX+x)))+2] = pixelColor.B
+						pixels[(4*(((blockY+y+tileYOffset)*tileData.Width)+(blockX+x)))+3] = 255
+					} else {
+						pixels[(4*(((blockY+y+tileYOffset)*tileData.Width)+(blockX+x)))+3] = 0
+					}
+					idx++
+					x++
+					b2--
+				}
+			}
+		}
+	}
+	image.ReplacePixels(pixels)
+	yOffset := 0
+	if special {
+		yOffset = int(128 + tileData.Height)
+	}
+	return &TileCacheRecord{
+		image,
+		int(tileData.Width),
+		yOffset,
+	}
 }
 
 func (v *Region) renderWall(tile WallRecord, offsetX, offsetY int, target *ebiten.Image) {

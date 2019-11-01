@@ -18,7 +18,11 @@ type MapEngineTest struct {
 	mapEngine *Map.Engine
 }
 
-func CreateMapEngineTest(fileProvider Common.FileProvider, sceneProvider SceneProvider, uiManager *UI.Manager, soundManager *Sound.Manager) *MapEngineTest {
+func CreateMapEngineTest(
+	fileProvider Common.FileProvider,
+	sceneProvider SceneProvider,
+	uiManager *UI.Manager,
+	soundManager *Sound.Manager) *MapEngineTest {
 	result := &MapEngineTest{
 		fileProvider:  fileProvider,
 		uiManager:     uiManager,
@@ -50,5 +54,16 @@ func (v *MapEngineTest) Render(screen *ebiten.Image) {
 }
 
 func (v *MapEngineTest) Update(tickTime float64) {
-
+	if v.uiManager.KeyPressed(ebiten.KeyDown) {
+		v.mapEngine.OffsetY -= tickTime * 800
+	}
+	if v.uiManager.KeyPressed(ebiten.KeyUp) {
+		v.mapEngine.OffsetY += tickTime * 800
+	}
+	if v.uiManager.KeyPressed(ebiten.KeyLeft) {
+		v.mapEngine.OffsetX += tickTime * 800
+	}
+	if v.uiManager.KeyPressed(ebiten.KeyRight) {
+		v.mapEngine.OffsetX -= tickTime * 800
+	}
 }

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/Palettes"
+	"github.com/essial/OpenDiablo2/PaletteDefs"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -24,7 +24,7 @@ type Font struct {
 }
 
 // GetFont creates or loads an existing font
-func GetFont(font string, palette Palettes.Palette, fileProvider Common.FileProvider) *Font {
+func GetFont(font string, palette PaletteDefs.PaletteType, fileProvider Common.FileProvider) *Font {
 	cacheItem, exists := fontCache[font+"_"+string(palette)]
 	if exists {
 		return cacheItem
@@ -35,7 +35,7 @@ func GetFont(font string, palette Palettes.Palette, fileProvider Common.FileProv
 }
 
 // CreateFont creates an instance of a MPQ Font
-func CreateFont(font string, palette Palettes.Palette, fileProvider Common.FileProvider) *Font {
+func CreateFont(font string, palette PaletteDefs.PaletteType, fileProvider Common.FileProvider) *Font {
 	result := &Font{
 		metrics: make(map[uint8]FontSize),
 	}

@@ -9,7 +9,7 @@ import (
 	"runtime"
 
 	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/Palettes"
+	"github.com/essial/OpenDiablo2/PaletteDefs"
 	"github.com/essial/OpenDiablo2/Sound"
 	"github.com/essial/OpenDiablo2/UI"
 
@@ -61,52 +61,52 @@ func (v *MainMenu) Load() []func() {
 	v.soundManager.PlayBGM(ResourcePaths.BGMTitle)
 	return []func(){
 		func() {
-			v.copyrightLabel = UI.CreateLabel(v.fileProvider, ResourcePaths.FontFormal12, Palettes.Static)
+			v.copyrightLabel = UI.CreateLabel(v.fileProvider, ResourcePaths.FontFormal12, PaletteDefs.Static)
 			v.copyrightLabel.Alignment = UI.LabelAlignCenter
 			v.copyrightLabel.SetText("Diablo 2 is © Copyright 2000-2016 Blizzard Entertainment")
 			v.copyrightLabel.Color = color.RGBA{188, 168, 140, 255}
 			v.copyrightLabel.MoveTo(400, 500)
 		},
 		func() {
-			v.copyrightLabel2 = UI.CreateLabel(v.fileProvider, ResourcePaths.FontFormal12, Palettes.Static)
+			v.copyrightLabel2 = UI.CreateLabel(v.fileProvider, ResourcePaths.FontFormal12, PaletteDefs.Static)
 			v.copyrightLabel2.Alignment = UI.LabelAlignCenter
 			v.copyrightLabel2.SetText(Common.TranslateString("#1614"))
 			v.copyrightLabel2.Color = color.RGBA{188, 168, 140, 255}
 			v.copyrightLabel2.MoveTo(400, 525)
 		},
 		func() {
-			v.openDiabloLabel = UI.CreateLabel(v.fileProvider, ResourcePaths.FontFormal10, Palettes.Static)
+			v.openDiabloLabel = UI.CreateLabel(v.fileProvider, ResourcePaths.FontFormal10, PaletteDefs.Static)
 			v.openDiabloLabel.Alignment = UI.LabelAlignCenter
 			v.openDiabloLabel.SetText("OpenDiablo2 is neither developed by, nor endorsed by Blizzard or its parent company Activision")
 			v.openDiabloLabel.Color = color.RGBA{255, 255, 140, 255}
 			v.openDiabloLabel.MoveTo(400, 580)
 		},
 		func() {
-			v.background = v.fileProvider.LoadSprite(ResourcePaths.GameSelectScreen, Palettes.Sky)
+			v.background = v.fileProvider.LoadSprite(ResourcePaths.GameSelectScreen, PaletteDefs.Sky)
 			v.background.MoveTo(0, 0)
 		},
 		func() {
-			v.trademarkBackground = v.fileProvider.LoadSprite(ResourcePaths.TrademarkScreen, Palettes.Sky)
+			v.trademarkBackground = v.fileProvider.LoadSprite(ResourcePaths.TrademarkScreen, PaletteDefs.Sky)
 			v.trademarkBackground.MoveTo(0, 0)
 		},
 		func() {
-			v.diabloLogoLeft = v.fileProvider.LoadSprite(ResourcePaths.Diablo2LogoFireLeft, Palettes.Units)
+			v.diabloLogoLeft = v.fileProvider.LoadSprite(ResourcePaths.Diablo2LogoFireLeft, PaletteDefs.Units)
 			v.diabloLogoLeft.Blend = true
 			v.diabloLogoLeft.Animate = true
 			v.diabloLogoLeft.MoveTo(400, 120)
 		},
 		func() {
-			v.diabloLogoRight = v.fileProvider.LoadSprite(ResourcePaths.Diablo2LogoFireRight, Palettes.Units)
+			v.diabloLogoRight = v.fileProvider.LoadSprite(ResourcePaths.Diablo2LogoFireRight, PaletteDefs.Units)
 			v.diabloLogoRight.Blend = true
 			v.diabloLogoRight.Animate = true
 			v.diabloLogoRight.MoveTo(400, 120)
 		},
 		func() {
-			v.diabloLogoLeftBack = v.fileProvider.LoadSprite(ResourcePaths.Diablo2LogoBlackLeft, Palettes.Units)
+			v.diabloLogoLeftBack = v.fileProvider.LoadSprite(ResourcePaths.Diablo2LogoBlackLeft, PaletteDefs.Units)
 			v.diabloLogoLeftBack.MoveTo(400, 120)
 		},
 		func() {
-			v.diabloLogoRightBack = v.fileProvider.LoadSprite(ResourcePaths.Diablo2LogoBlackRight, Palettes.Units)
+			v.diabloLogoRightBack = v.fileProvider.LoadSprite(ResourcePaths.Diablo2LogoBlackRight, PaletteDefs.Units)
 			v.diabloLogoRightBack.MoveTo(400, 120)
 		},
 		func() {

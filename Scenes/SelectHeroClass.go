@@ -4,7 +4,7 @@ import (
 	"image"
 
 	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/Palettes"
+	"github.com/essial/OpenDiablo2/PaletteDefs"
 	"github.com/essial/OpenDiablo2/ResourcePaths"
 	"github.com/essial/OpenDiablo2/Sound"
 	"github.com/essial/OpenDiablo2/UI"
@@ -73,38 +73,38 @@ func (v *SelectHeroClass) Load() []func() {
 	v.soundManager.PlayBGM(ResourcePaths.BGMTitle)
 	return []func(){
 		func() {
-			v.bgImage = v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectBackground, Palettes.Fechar)
+			v.bgImage = v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectBackground, PaletteDefs.Fechar)
 			v.bgImage.MoveTo(0, 0)
 		},
 		func() {
-			v.headingLabel = UI.CreateLabel(v.fileProvider, ResourcePaths.Font30, Palettes.Units)
+			v.headingLabel = UI.CreateLabel(v.fileProvider, ResourcePaths.Font30, PaletteDefs.Units)
 			fontWidth, _ := v.headingLabel.GetSize()
 			v.headingLabel.MoveTo(400-int(fontWidth/2), 17)
 			v.headingLabel.SetText("Select Hero Class")
 			v.headingLabel.Alignment = UI.LabelAlignCenter
 		},
 		func() {
-			v.heroClassLabel = UI.CreateLabel(v.fileProvider, ResourcePaths.Font30, Palettes.Units)
+			v.heroClassLabel = UI.CreateLabel(v.fileProvider, ResourcePaths.Font30, PaletteDefs.Units)
 			v.heroClassLabel.Alignment = UI.LabelAlignCenter
 			v.heroClassLabel.MoveTo(400, 65)
 		},
 		func() {
-			v.heroDesc1Label = UI.CreateLabel(v.fileProvider, ResourcePaths.Font16, Palettes.Units)
+			v.heroDesc1Label = UI.CreateLabel(v.fileProvider, ResourcePaths.Font16, PaletteDefs.Units)
 			v.heroDesc1Label.Alignment = UI.LabelAlignCenter
 			v.heroDesc1Label.MoveTo(400, 100)
 		},
 		func() {
-			v.heroDesc2Label = UI.CreateLabel(v.fileProvider, ResourcePaths.Font16, Palettes.Units)
+			v.heroDesc2Label = UI.CreateLabel(v.fileProvider, ResourcePaths.Font16, PaletteDefs.Units)
 			v.heroDesc2Label.Alignment = UI.LabelAlignCenter
 			v.heroDesc2Label.MoveTo(400, 115)
 		},
 		func() {
-			v.heroDesc3Label = UI.CreateLabel(v.fileProvider, ResourcePaths.Font16, Palettes.Units)
+			v.heroDesc3Label = UI.CreateLabel(v.fileProvider, ResourcePaths.Font16, PaletteDefs.Units)
 			v.heroDesc3Label.Alignment = UI.LabelAlignCenter
 			v.heroDesc3Label.MoveTo(400, 130)
 		},
 		func() {
-			v.campfire = v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectCampfire, Palettes.Fechar)
+			v.campfire = v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectCampfire, PaletteDefs.Fechar)
 			v.campfire.MoveTo(380, 335)
 			v.campfire.Animate = true
 			v.campfire.Blend = true
@@ -118,13 +118,13 @@ func (v *SelectHeroClass) Load() []func() {
 		func() {
 			v.heroRenderInfo[Common.HeroBarbarian] = &HeroRenderInfo{
 				HeroStanceIdle,
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselected, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselectedH, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectBarbarianForwardWalk, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectBarbarianForwardWalkOverlay, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectBarbarianSelected, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselected, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectBarbarianUnselectedH, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectBarbarianForwardWalk, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectBarbarianForwardWalkOverlay, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectBarbarianSelected, PaletteDefs.Fechar),
 				nil,
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectBarbarianBackWalk, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectBarbarianBackWalk, PaletteDefs.Fechar),
 				nil,
 				image.Rectangle{Min: image.Point{364, 201}, Max: image.Point{90, 170}},
 				v.soundManager.LoadSoundEffect(ResourcePaths.SFXBarbarianSelect),
@@ -152,14 +152,14 @@ func (v *SelectHeroClass) Load() []func() {
 		func() {
 			v.heroRenderInfo[Common.HeroSorceress] = &HeroRenderInfo{
 				HeroStanceIdle,
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselected, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselectedH, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressForwardWalk, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressForwardWalkOverlay, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressSelected, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressSelectedOverlay, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressBackWalk, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressBackWalkOverlay, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselected, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressUnselectedH, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressForwardWalk, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressForwardWalkOverlay, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressSelected, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressSelectedOverlay, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressBackWalk, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecSorceressBackWalkOverlay, PaletteDefs.Fechar),
 				image.Rectangle{Min: image.Point{580, 240}, Max: image.Point{65, 160}},
 				v.soundManager.LoadSoundEffect(ResourcePaths.SFXSorceressSelect),
 				v.soundManager.LoadSoundEffect(ResourcePaths.SFXSorceressDeselect),
@@ -195,14 +195,14 @@ func (v *SelectHeroClass) Load() []func() {
 		func() {
 			v.heroRenderInfo[Common.HeroNecromancer] = &HeroRenderInfo{
 				HeroStanceIdle,
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselected, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselectedH, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerForwardWalk, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerForwardWalkOverlay, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerSelected, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerSelectedOverlay, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerBackWalk, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerBackWalkOverlay, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselected, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectNecromancerUnselectedH, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerForwardWalk, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerForwardWalkOverlay, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerSelected, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerSelectedOverlay, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerBackWalk, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecNecromancerBackWalkOverlay, PaletteDefs.Fechar),
 				image.Rectangle{Min: image.Point{265, 220}, Max: image.Point{55, 175}},
 				v.soundManager.LoadSoundEffect(ResourcePaths.SFXNecromancerSelect),
 				v.soundManager.LoadSoundEffect(ResourcePaths.SFXNecromancerDeselect),
@@ -238,13 +238,13 @@ func (v *SelectHeroClass) Load() []func() {
 		func() {
 			v.heroRenderInfo[Common.HeroPaladin] = &HeroRenderInfo{
 				HeroStanceIdle,
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselected, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselectedH, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecPaladinForwardWalk, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecPaladinForwardWalkOverlay, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecPaladinSelected, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselected, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectPaladinUnselectedH, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecPaladinForwardWalk, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecPaladinForwardWalkOverlay, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecPaladinSelected, PaletteDefs.Fechar),
 				nil,
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecPaladinBackWalk, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecPaladinBackWalk, PaletteDefs.Fechar),
 				nil,
 				image.Rectangle{Min: image.Point{490, 210}, Max: image.Point{65, 180}},
 				v.soundManager.LoadSoundEffect(ResourcePaths.SFXPaladinSelect),
@@ -272,13 +272,13 @@ func (v *SelectHeroClass) Load() []func() {
 		func() {
 			v.heroRenderInfo[Common.HeroAmazon] = &HeroRenderInfo{
 				HeroStanceIdle,
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselected, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselectedH, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecAmazonForwardWalk, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselected, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAmazonUnselectedH, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecAmazonForwardWalk, PaletteDefs.Fechar),
 				nil,
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecAmazonSelected, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecAmazonSelected, PaletteDefs.Fechar),
 				nil,
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecAmazonBackWalk, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelecAmazonBackWalk, PaletteDefs.Fechar),
 				nil,
 				image.Rectangle{Min: image.Point{70, 220}, Max: image.Point{55, 200}},
 				v.soundManager.LoadSoundEffect(ResourcePaths.SFXAmazonSelect),
@@ -302,13 +302,13 @@ func (v *SelectHeroClass) Load() []func() {
 		func() {
 			v.heroRenderInfo[Common.HeroAssassin] = &HeroRenderInfo{
 				HeroStanceIdle,
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselected, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselectedH, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinForwardWalk, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselected, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinUnselectedH, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinForwardWalk, PaletteDefs.Fechar),
 				nil,
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinSelected, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinSelected, PaletteDefs.Fechar),
 				nil,
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinBackWalk, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectAssassinBackWalk, PaletteDefs.Fechar),
 				nil,
 				image.Rectangle{Min: image.Point{175, 235}, Max: image.Point{50, 180}},
 				v.soundManager.LoadSoundEffect(ResourcePaths.SFXAssassinSelect),
@@ -332,13 +332,13 @@ func (v *SelectHeroClass) Load() []func() {
 		func() {
 			v.heroRenderInfo[Common.HeroDruid] = &HeroRenderInfo{
 				HeroStanceIdle,
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidUnselected, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidUnselectedH, Palettes.Fechar),
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidForwardWalk, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidUnselected, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidUnselectedH, PaletteDefs.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidForwardWalk, PaletteDefs.Fechar),
 				nil,
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidSelected, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidSelected, PaletteDefs.Fechar),
 				nil,
-				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidBackWalk, Palettes.Fechar),
+				v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectDruidBackWalk, PaletteDefs.Fechar),
 				nil,
 				image.Rectangle{Min: image.Point{680, 220}, Max: image.Point{70, 195}},
 				v.soundManager.LoadSoundEffect(ResourcePaths.SFXDruidSelect),

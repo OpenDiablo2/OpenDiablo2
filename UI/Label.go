@@ -4,7 +4,7 @@ import (
 	"image/color"
 
 	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/Palettes"
+	"github.com/essial/OpenDiablo2/PaletteDefs"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -34,7 +34,7 @@ type Label struct {
 }
 
 // CreateLabel creates a new instance of a UI label
-func CreateLabel(provider Common.FileProvider, font string, palette Palettes.Palette) *Label {
+func CreateLabel(provider Common.FileProvider, font string, palette PaletteDefs.PaletteType) *Label {
 	result := &Label{
 		Alignment: LabelAlignLeft,
 		Color:     color.White,

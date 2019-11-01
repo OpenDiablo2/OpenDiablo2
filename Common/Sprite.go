@@ -40,7 +40,7 @@ type SpriteFrame struct {
 }
 
 // CreateSprite creates an instance of a sprite
-func CreateSprite(data []byte, palette Palette) *Sprite {
+func CreateSprite(data []byte, palette PaletteRec) *Sprite {
 	result := &Sprite{
 		X:                  50,
 		Y:                  50,

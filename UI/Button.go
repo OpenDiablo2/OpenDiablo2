@@ -5,7 +5,7 @@ import (
 	"image/color"
 
 	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/Palettes"
+	"github.com/essial/OpenDiablo2/PaletteDefs"
 	"github.com/essial/OpenDiablo2/ResourcePaths"
 	"github.com/hajimehoshi/ebiten"
 )
@@ -40,44 +40,44 @@ const (
 
 // ButtonLayout defines the type of buttons
 type ButtonLayout struct {
-	XSegments        int              //1
-	YSegments        int              // 1
-	ResourceName     string           // Font Name
-	PaletteName      Palettes.Palette // Palette
-	Toggleable       bool             // false
-	BaseFrame        int              // 0
-	DisabledFrame    int              // -1
-	FontPath         string           // ResourcePaths.FontExocet10
-	ClickableRect    *image.Rectangle // nil
-	AllowFrameChange bool             // true
-	TextOffset       int              // 0
+	XSegments        int                     //1
+	YSegments        int                     // 1
+	ResourceName     string                  // Font Name
+	PaletteName      PaletteDefs.PaletteType // PaletteType
+	Toggleable       bool                    // false
+	BaseFrame        int                     // 0
+	DisabledFrame    int                     // -1
+	FontPath         string                  // ResourcePaths.FontExocet10
+	ClickableRect    *image.Rectangle        // nil
+	AllowFrameChange bool                    // true
+	TextOffset       int                     // 0
 }
 
 // ButtonLayouts define the type of buttons you can have
 var ButtonLayouts = map[ButtonType]ButtonLayout{
-	ButtonTypeWide:   {2, 1, ResourcePaths.WideButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontExocet10, nil, true, 1},
-	ButtonTypeShort:  {1, 1, ResourcePaths.ShortButtonBlank, Palettes.Units, false, 0, -1, ResourcePaths.FontRediculous, nil, true, -1},
-	ButtonTypeMedium: {1, 1, ResourcePaths.MediumButtonBlank, Palettes.Units, false, 0, 0, ResourcePaths.FontExocet10, nil, true, 0},
-	ButtonTypeTall:   {1, 1, ResourcePaths.TallButtonBlank, Palettes.Units, false, 0, 0, ResourcePaths.FontExocet10, nil, true, 5},
+	ButtonTypeWide:   {2, 1, ResourcePaths.WideButtonBlank, PaletteDefs.Units, false, 0, -1, ResourcePaths.FontExocet10, nil, true, 1},
+	ButtonTypeShort:  {1, 1, ResourcePaths.ShortButtonBlank, PaletteDefs.Units, false, 0, -1, ResourcePaths.FontRediculous, nil, true, -1},
+	ButtonTypeMedium: {1, 1, ResourcePaths.MediumButtonBlank, PaletteDefs.Units, false, 0, 0, ResourcePaths.FontExocet10, nil, true, 0},
+	ButtonTypeTall:   {1, 1, ResourcePaths.TallButtonBlank, PaletteDefs.Units, false, 0, 0, ResourcePaths.FontExocet10, nil, true, 5},
 	/*
-		{eButtonType.Wide,  new ButtonLayout { XSegments = 2, ResourceName = ResourcePaths.WideButtonBlank, PaletteName = Palettes.Units } },
-		{eButtonType.Narrow, new ButtonLayout { ResourceName = ResourcePaths.NarrowButtonBlank, PaletteName = Palettes.Units } },
-		{eButtonType.Cancel, new ButtonLayout { ResourceName = ResourcePaths.CancelButton, PaletteName = Palettes.Units } },
+		{eButtonType.Wide,  new ButtonLayout { XSegments = 2, ResourceName = ResourcePaths.WideButtonBlank, PaletteName = PaletteDefs.Units } },
+		{eButtonType.Narrow, new ButtonLayout { ResourceName = ResourcePaths.NarrowButtonBlank, PaletteName = PaletteDefs.Units } },
+		{eButtonType.Cancel, new ButtonLayout { ResourceName = ResourcePaths.CancelButton, PaletteName = PaletteDefs.Units } },
 		// Minipanel
-		{eButtonType.MinipanelCharacter, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = Palettes.Units, BaseFrame = 0 } },
-		{eButtonType.MinipanelInventory, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = Palettes.Units, BaseFrame = 2 } },
-		{eButtonType.MinipanelSkill, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = Palettes.Units, BaseFrame = 4 } },
-		{eButtonType.MinipanelAutomap, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = Palettes.Units, BaseFrame = 8 } },
-		{eButtonType.MinipanelMessage, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = Palettes.Units, BaseFrame = 10 } },
-		{eButtonType.MinipanelQuest, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = Palettes.Units, BaseFrame = 12 } },
-		{eButtonType.MinipanelMenu, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = Palettes.Units, BaseFrame = 14 } },
+		{eButtonType.MinipanelCharacter, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = PaletteDefs.Units, BaseFrame = 0 } },
+		{eButtonType.MinipanelInventory, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = PaletteDefs.Units, BaseFrame = 2 } },
+		{eButtonType.MinipanelSkill, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = PaletteDefs.Units, BaseFrame = 4 } },
+		{eButtonType.MinipanelAutomap, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = PaletteDefs.Units, BaseFrame = 8 } },
+		{eButtonType.MinipanelMessage, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = PaletteDefs.Units, BaseFrame = 10 } },
+		{eButtonType.MinipanelQuest, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = PaletteDefs.Units, BaseFrame = 12 } },
+		{eButtonType.MinipanelMenu, new ButtonLayout { ResourceName = ResourcePaths.MinipanelButton, PaletteName = PaletteDefs.Units, BaseFrame = 14 } },
 
-		{eButtonType.SecondaryInvHand, new ButtonLayout { ResourceName = ResourcePaths.InventoryWeaponsTab, PaletteName = Palettes.Units, ClickableRect = new Rectangle(0, 0, 0, 20), AllowFrameChange = false } },
-		{eButtonType.Run, new ButtonLayout { ResourceName = ResourcePaths.RunButton, PaletteName = Palettes.Units, Toggleable = true } },
-		{eButtonType.Menu, new ButtonLayout { ResourceName = ResourcePaths.MenuButton, PaletteName = Palettes.Units, Toggleable = true } },
-		{eButtonType.GoldCoin, new ButtonLayout { ResourceName = ResourcePaths.GoldCoinButton, PaletteName = Palettes.Units } },
-		{eButtonType.Close, new ButtonLayout { ResourceName = ResourcePaths.SquareButton, PaletteName = Palettes.Units, BaseFrame = 10 } },
-		{eButtonType.Skill, new ButtonLayout { ResourceName = ResourcePaths.AddSkillButton, PaletteName = Palettes.Units, DisabledFrame = 2
+		{eButtonType.SecondaryInvHand, new ButtonLayout { ResourceName = ResourcePaths.InventoryWeaponsTab, PaletteName = PaletteDefs.Units, ClickableRect = new Rectangle(0, 0, 0, 20), AllowFrameChange = false } },
+		{eButtonType.Run, new ButtonLayout { ResourceName = ResourcePaths.RunButton, PaletteName = PaletteDefs.Units, Toggleable = true } },
+		{eButtonType.Menu, new ButtonLayout { ResourceName = ResourcePaths.MenuButton, PaletteName = PaletteDefs.Units, Toggleable = true } },
+		{eButtonType.GoldCoin, new ButtonLayout { ResourceName = ResourcePaths.GoldCoinButton, PaletteName = PaletteDefs.Units } },
+		{eButtonType.Close, new ButtonLayout { ResourceName = ResourcePaths.SquareButton, PaletteName = PaletteDefs.Units, BaseFrame = 10 } },
+		{eButtonType.Skill, new ButtonLayout { ResourceName = ResourcePaths.AddSkillButton, PaletteName = PaletteDefs.Units, DisabledFrame = 2
 	*/
 }
 
@@ -111,7 +111,7 @@ func CreateButton(buttonType ButtonType, fileProvider Common.FileProvider, text 
 	}
 	buttonLayout := ButtonLayouts[buttonType]
 	result.buttonLayout = buttonLayout
-	font := GetFont(buttonLayout.FontPath, Palettes.Units, fileProvider)
+	font := GetFont(buttonLayout.FontPath, PaletteDefs.Units, fileProvider)
 	buttonSprite := fileProvider.LoadSprite(buttonLayout.ResourceName, buttonLayout.PaletteName)
 	totalButtonTypes := buttonSprite.GetTotalFrames() / (buttonLayout.XSegments * buttonLayout.YSegments)
 	for i := 0; i < buttonLayout.XSegments; i++ {

@@ -2,7 +2,7 @@ package Scenes
 
 import (
 	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/Palettes"
+	"github.com/essial/OpenDiablo2/PaletteDefs"
 	"github.com/essial/OpenDiablo2/ResourcePaths"
 	"github.com/essial/OpenDiablo2/Sound"
 	"github.com/essial/OpenDiablo2/UI"
@@ -41,7 +41,7 @@ func (v *CharacterSelect) Load() []func() {
 	v.soundManager.PlayBGM(ResourcePaths.BGMTitle)
 	return []func(){
 		func() {
-			v.background = v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectionBackground, Palettes.Sky)
+			v.background = v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectionBackground, PaletteDefs.Sky)
 			v.background.MoveTo(0, 0)
 		},
 		func() {

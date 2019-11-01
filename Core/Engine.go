@@ -10,11 +10,12 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/essial/OpenDiablo2/PaletteDefs"
+
 	"github.com/essial/OpenDiablo2/Sound"
 
 	"github.com/essial/OpenDiablo2/Common"
 	"github.com/essial/OpenDiablo2/MPQ"
-	"github.com/essial/OpenDiablo2/Palettes"
 	"github.com/essial/OpenDiablo2/ResourcePaths"
 	"github.com/essial/OpenDiablo2/Scenes"
 	"github.com/essial/OpenDiablo2/UI"
@@ -37,25 +38,18 @@ type EngineConfig struct {
 	BgmVolume       float64
 }
 
-type MpqFileRecord struct {
-	MpqFile          string
-	IsPatch          bool
-	UnpatchedMpqFile string
-}
-
 // Engine is the core OpenDiablo2 engine
 type Engine struct {
-	Settings        *EngineConfig                       // Engine configuration settings from json file
-	Files           map[string]*MpqFileRecord           // Map that defines which files are in which MPQs
-	Palettes        map[Palettes.Palette]Common.Palette // Color palettes
-	LoadingSprite   *Common.Sprite                      // The sprite shown when loading stuff
-	loadingProgress float64                             // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
-	stepLoadingSize float64                             // The size for each loading step
-	CurrentScene    Scenes.Scene                        // The current scene being rendered
-	UIManager       *UI.Manager                         // The UI manager
-	SoundManager    *Sound.Manager                      // The sound manager
-	nextScene       Scenes.Scene                        // The next scene to be loaded at the end of the game loop
-	fullscreenKey   bool                                // When true, the fullscreen toggle is still being pressed
+	Settings        *EngineConfig                    // Engine configuration settings from json file
+	Files           map[string]*Common.MpqFileRecord // Map that defines which files are in which MPQs
+	LoadingSprite   *Common.Sprite                   // The sprite shown when loading stuff
+	loadingProgress float64                          // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
+	stepLoadingSize float64                          // The size for each loading step
+	CurrentScene    Scenes.Scene                     // The current scene being rendered
+	UIManager       *UI.Manager                      // The UI manager
+	SoundManager    *Sound.Manager                   // The sound manager
+	nextScene       Scenes.Scene                     // The next scene to be loaded at the end of the game loop
+	fullscreenKey   bool                             // When true, the fullscreen toggle is still being pressed
 }
 
 // CreateEngine creates and instance of the OpenDiablo2 engine
@@ -67,7 +61,7 @@ func CreateEngine() *Engine {
 	result.loadConfigurationFile()
 	ResourcePaths.LanguageCode = result.Settings.Language
 	result.mapMpqFiles()
-	result.loadPalettes()
+	Common.LoadPalettes(result.Files, result)
 	Common.LoadTextDictionary(result)
 	Common.LoadLevelTypes(result)
 	Common.LoadLevelPresets(result)
@@ -75,7 +69,7 @@ func CreateEngine() *Engine {
 	result.SoundManager = Sound.CreateManager(result)
 	result.SoundManager.SetVolumes(result.Settings.BgmVolume, result.Settings.SfxVolume)
 	result.UIManager = UI.CreateManager(result, *result.SoundManager)
-	result.LoadingSprite = result.LoadSprite(ResourcePaths.LoadingScreen, Palettes.Loading)
+	result.LoadingSprite = result.LoadSprite(ResourcePaths.LoadingScreen, PaletteDefs.Loading)
 	loadingSpriteSizeX, loadingSpriteSizeY := result.LoadingSprite.GetSize()
 	result.LoadingSprite.MoveTo(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
 	result.SetNextScene(Scenes.CreateMainMenu(result, result, result.UIManager, result.SoundManager))
@@ -113,7 +107,7 @@ func (v *Engine) loadConfigurationFile() {
 
 func (v *Engine) mapMpqFiles() {
 	log.Println("mapping mpq file structure")
-	v.Files = make(map[string]*MpqFileRecord)
+	v.Files = make(map[string]*Common.MpqFileRecord)
 	for _, mpqFileName := range v.Settings.MpqLoadOrder {
 		mpqPath := path.Join(v.Settings.MpqPath, mpqFileName)
 		mpq, err := MPQ.Load(mpqPath)
@@ -134,7 +128,8 @@ func (v *Engine) mapMpqFiles() {
 				}
 				continue
 			}
-			v.Files[`/`+strings.ReplaceAll(strings.ToLower(filePath), `\`, `/`)] = &MpqFileRecord{mpqPath, false, ""}
+			v.Files[`/`+strings.ReplaceAll(strings.ToLower(filePath), `\`, `/`)] = &Common.MpqFileRecord{
+				mpqPath, false, ""}
 		}
 	}
 }
@@ -162,7 +157,7 @@ func (v *Engine) LoadFile(fileName string) []byte {
 				continue
 			}
 			// We found the super-secret file!
-			v.Files[strings.ToLower(fileName)] = &MpqFileRecord{mpqFilePath, false, ""}
+			v.Files[strings.ToLower(fileName)] = &Common.MpqFileRecord{mpqFilePath, false, ""}
 			break
 		}
 	} else if mpqFile.IsPatch {
@@ -193,24 +188,10 @@ func (v *Engine) IsLoading() bool {
 	return v.loadingProgress < 1.0
 }
 
-func (v *Engine) loadPalettes() {
-	v.Palettes = make(map[Palettes.Palette]Common.Palette)
-	log.Println("loading palettes")
-	for file := range v.Files {
-		if strings.Index(file, "/data/global/palette/") != 0 || strings.Index(file, ".dat") != len(file)-4 {
-			continue
-		}
-		nameParts := strings.Split(file, `/`)
-		paletteName := Palettes.Palette(nameParts[len(nameParts)-2])
-		palette := Common.CreatePalette(paletteName, v.LoadFile(file))
-		v.Palettes[paletteName] = palette
-	}
-}
-
 // LoadSprite loads a sprite from the game's data files
-func (v *Engine) LoadSprite(fileName string, palette Palettes.Palette) *Common.Sprite {
+func (v *Engine) LoadSprite(fileName string, palette PaletteDefs.PaletteType) *Common.Sprite {
 	data := v.LoadFile(fileName)
-	sprite := Common.CreateSprite(data, v.Palettes[palette])
+	sprite := Common.CreateSprite(data, Common.Palettes[palette])
 	return sprite
 }
 

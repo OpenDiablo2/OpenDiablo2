@@ -23,7 +23,7 @@ type Tile struct {
 	Direction          int32
 	RoofHeight         int16
 	SoundIndex         byte
-	Animated           byte
+	Animated           bool
 	Height             int32
 	Width              int32
 	Orientation        int32
@@ -58,14 +58,14 @@ func LoadDT1(path string, fileProvider Common.FileProvider) *DT1 {
 	}
 	br.SkipBytes(260)
 	numberOfTiles := br.GetInt32()
-	br.SkipBytes(4)
+	br.SetPosition(uint64(br.GetInt32()))
 	result.Tiles = make([]Tile, numberOfTiles)
 	for tileIdx := range result.Tiles {
 		newTile := Tile{}
 		newTile.Direction = br.GetInt32()
 		newTile.RoofHeight = br.GetInt16()
 		newTile.SoundIndex = br.GetByte()
-		newTile.Animated = br.GetByte()
+		newTile.Animated = br.GetByte() == 1
 		newTile.Height = br.GetInt32()
 		newTile.Width = br.GetInt32()
 		br.SkipBytes(4)
@@ -92,7 +92,12 @@ func LoadDT1(path string, fileProvider Common.FileProvider) *DT1 {
 			br.SkipBytes(2)
 			result.Tiles[tileIdx].Blocks[blockIdx].GridX = br.GetByte()
 			result.Tiles[tileIdx].Blocks[blockIdx].GridY = br.GetByte()
-			result.Tiles[tileIdx].Blocks[blockIdx].Format = BlockDataFormat(br.GetInt16())
+			formatValue := br.GetInt16()
+			if formatValue == 1 {
+				result.Tiles[tileIdx].Blocks[blockIdx].Format = BlockFormatIsometric
+			} else {
+				result.Tiles[tileIdx].Blocks[blockIdx].Format = BlockFormatRLE
+			}
 			result.Tiles[tileIdx].Blocks[blockIdx].Length = br.GetInt32()
 			br.SkipBytes(2)
 			result.Tiles[tileIdx].Blocks[blockIdx].FileOffset = br.GetInt32()

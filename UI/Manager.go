@@ -2,7 +2,7 @@ package UI
 
 import (
 	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/Palettes"
+	"github.com/essial/OpenDiablo2/PaletteDefs"
 	"github.com/essial/OpenDiablo2/ResourcePaths"
 	"github.com/essial/OpenDiablo2/Sound"
 	"github.com/hajimehoshi/ebiten"
@@ -35,7 +35,7 @@ func CreateManager(fileProvider Common.FileProvider, soundManager Sound.Manager)
 	result := &Manager{
 		pressedIndex:       -1,
 		widgets:            make([]Widget, 0),
-		cursorSprite:       fileProvider.LoadSprite(ResourcePaths.CursorDefault, Palettes.Units),
+		cursorSprite:       fileProvider.LoadSprite(ResourcePaths.CursorDefault, PaletteDefs.Units),
 		clickSfx:           soundManager.LoadSoundEffect(ResourcePaths.SFXButtonClick),
 		waitForLeftMouseUp: false,
 	}
@@ -141,4 +141,8 @@ func (v *Manager) Update() {
 // CursorButtonPressed determines if the specified button has been pressed
 func (v *Manager) CursorButtonPressed(button CursorButton) bool {
 	return v.cursorButtons&button > 0
+}
+
+func (v *Manager) KeyPressed(key ebiten.Key) bool {
+	return ebiten.IsKeyPressed(key)
 }
