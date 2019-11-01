@@ -29,7 +29,7 @@ func (v *BitStream) ReadBits(bitCount int) int {
 	if !v.EnsureBits(bitCount) {
 		return -1
 	}
-	result := v.current & (0xffff >> (16 - bitCount))
+	result := v.current & (0xffff >> uint(16-bitCount))
 	v.WasteBits(bitCount)
 	return result
 }
@@ -52,13 +52,13 @@ func (v *BitStream) EnsureBits(bitCount int) bool {
 	}
 	nextValue := v.data[v.dataPosition]
 	v.dataPosition++
-	v.current |= int(nextValue) << v.bitCount
+	v.current |= int(nextValue) << uint(v.bitCount)
 	v.bitCount += 8
 	return true
 }
 
 // WasteBits dry-reads the specified number of bits
 func (v *BitStream) WasteBits(bitCount int) {
-	v.current >>= bitCount
+	v.current >>= uint(bitCount)
 	v.bitCount -= bitCount
 }
