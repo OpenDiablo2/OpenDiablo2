@@ -1,4 +1,4 @@
-package MapEngine
+package Map
 
 import (
 	"github.com/essial/OpenDiablo2/Common"

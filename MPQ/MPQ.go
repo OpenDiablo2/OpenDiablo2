@@ -11,6 +11,7 @@ import (
 
 // MPQ represents an MPQ archive
 type MPQ struct {
+	FileName          string
 	File              *os.File
 	HashTableEntries  []HashTableEntry
 	BlockTableEntries []BlockTableEntry
@@ -83,7 +84,9 @@ func (v BlockTableEntry) HasFlag(flag FileFlag) bool {
 
 // Load loads an MPQ file and returns a MPQ structure
 func Load(fileName string) (MPQ, error) {
-	result := MPQ{}
+	result := MPQ{
+		FileName: fileName,
+	}
 	file, err := os.Open(fileName)
 	if err != nil {
 		return MPQ{}, err

@@ -1,4 +1,4 @@
-package MapEngine
+package Map
 
 import (
 	"log"
@@ -77,9 +77,7 @@ func LoadRegion(seed rand.Source, levelType RegionIdType, levelPreset int, fileP
 			continue
 		}
 		dt1 := LoadDT1("/data/global/tiles/"+levelTypeDt1, fileProvider)
-		for _, tileData := range dt1.Tiles {
-			result.Tiles = append(result.Tiles, tileData)
-		}
+		result.Tiles = append(result.Tiles, dt1.Tiles...)
 	}
 	levelFilesToPick := make([]string, 0)
 	for _, fileRecord := range result.levelPreset.Files {

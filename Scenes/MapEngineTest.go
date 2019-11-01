@@ -1,11 +1,8 @@
 package Scenes
 
 import (
-	"math/rand"
-	"time"
-
 	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/MapEngine"
+	"github.com/essial/OpenDiablo2/Map"
 	"github.com/essial/OpenDiablo2/Sound"
 	"github.com/essial/OpenDiablo2/UI"
 	"github.com/hajimehoshi/ebiten"
@@ -16,7 +13,9 @@ type MapEngineTest struct {
 	soundManager  *Sound.Manager
 	fileProvider  Common.FileProvider
 	sceneProvider SceneProvider
-	region        *MapEngine.Region
+	//region        *Map.Region
+	gameState *Common.GameState
+	mapEngine *Map.Engine
 }
 
 func CreateMapEngineTest(fileProvider Common.FileProvider, sceneProvider SceneProvider, uiManager *UI.Manager, soundManager *Sound.Manager) *MapEngineTest {
@@ -26,16 +25,18 @@ func CreateMapEngineTest(fileProvider Common.FileProvider, sceneProvider ScenePr
 		soundManager:  soundManager,
 		sceneProvider: sceneProvider,
 	}
+	result.gameState = Common.CreateGameState()
 	return result
 }
 
 func (v *MapEngineTest) Load() []func() {
 	// TODO: Game seed comes from the game state object
-	randomSource := rand.NewSource(time.Now().UnixNano())
+
 	v.soundManager.PlayBGM("")
 	return []func(){
 		func() {
-			v.region = MapEngine.LoadRegion(randomSource, MapEngine.RegionAct1Tristram, 300, v.fileProvider)
+			v.mapEngine = Map.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider)
+			v.mapEngine.GenerateMap(Map.RegionAct1Tristram, 300)
 		},
 	}
 }
@@ -45,7 +46,7 @@ func (v *MapEngineTest) Unload() {
 }
 
 func (v *MapEngineTest) Render(screen *ebiten.Image) {
-	v.region.RenderTile(300, 300, 0, 0, MapEngine.RegionLayerTypeFloors, 0, screen)
+	v.mapEngine.Render(screen)
 }
 
 func (v *MapEngineTest) Update(tickTime float64) {

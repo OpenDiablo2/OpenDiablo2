@@ -38,7 +38,7 @@ type EngineConfig struct {
 
 // Engine is the core OpenDiablo2 engine
 type Engine struct {
-	Settings        *EngineConfig                        // Engine configuration settings from json file
+	Settings        *EngineConfig                       // Engine configuration settings from json file
 	Files           map[string]string                   // Map that defines which files are in which MPQs
 	Palettes        map[Palettes.Palette]Common.Palette // Color palettes
 	SoundEntries    map[string]Sound.SoundEntry         // Sound configurations
@@ -72,6 +72,7 @@ func CreateEngine() *Engine {
 	loadingSpriteSizeX, loadingSpriteSizeY := result.LoadingSprite.GetSize()
 	result.LoadingSprite.MoveTo(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
 	result.SetNextScene(Scenes.CreateMainMenu(result, result, result.UIManager, result.SoundManager))
+	//result.SetNextScene(Scenes.CreateBlizzardIntro(result, result))
 	return result
 }
 
@@ -92,8 +93,8 @@ func (v *Engine) loadConfigurationFile() {
 	if v.Settings.MpqPath[0] != '/' {
 		if _, err := os.Stat(v.Settings.MpqPath); os.IsNotExist(err) {
 			homeDir, _ := homedir.Dir()
-			newPath := strings.ReplaceAll(v.Settings.MpqPath, `C:\`, homeDir + "/.wine/drive_c/")
-			newPath = strings.ReplaceAll(newPath, "C:/", homeDir + "/.wine/drive_c/")
+			newPath := strings.ReplaceAll(v.Settings.MpqPath, `C:\`, homeDir+"/.wine/drive_c/")
+			newPath = strings.ReplaceAll(newPath, "C:/", homeDir+"/.wine/drive_c/")
 			newPath = strings.ReplaceAll(newPath, `\`, "/")
 			if _, err := os.Stat(newPath); !os.IsNotExist(err) {
 				log.Printf("Detected linux wine installation, path updated to wine prefix path.")
@@ -137,11 +138,13 @@ func (v *Engine) LoadFile(fileName string) []byte {
 	mpqFile := v.Files[strings.ToLower(fileName)]
 	mpq, err := MPQ.Load(mpqFile)
 	if err != nil {
+		log.Printf("Error loading file '%s'", fileName)
 		log.Fatal(err)
 	}
 	fileName = strings.ReplaceAll(fileName, `/`, `\`)[1:]
 	blockTableEntry, err := mpq.GetFileBlockData(fileName)
 	if err != nil {
+		log.Printf("Error locating block data entry for '%s' in mpq file '%s'", fileName, mpq.FileName)
 		log.Fatal(err)
 	}
 	mpqStream := MPQ.CreateStream(mpq, blockTableEntry, fileName)

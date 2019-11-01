@@ -1,5 +1,7 @@
 github.com/JoshVarga/blast v0.0.0-20180421040937-681c804fb9f0 h1:tDnuU0igiBiQFjsvq1Bi7DpoUjqI76VVvW045vpeFeM=
 github.com/JoshVarga/blast v0.0.0-20180421040937-681c804fb9f0/go.mod h1:h/5OEGj4G+fpYxluLjSMZbFY011ZxAntO98nCl8mrCs=
+github.com/giorgisio/goav v0.1.0 h1:ZyfG3NfX7PMSimv4ulhmnQJf/XeHpMdGCn+afRmY5Oc=
+github.com/giorgisio/goav v0.1.0/go.mod h1:RtH8HyxLRLU1iY0pjfhWBKRhnbsnmfoI+FxMwb5bfEo=
 github.com/go-gl/glfw v0.0.0-20181213070059-819e8ce5125f h1:7MsFMbSn8Lcw0blK4+NEOf8DuHoOBDhJsHz04yh13pM=
 github.com/go-gl/glfw v0.0.0-20181213070059-819e8ce5125f/go.mod h1:vR7hzQXu2zJy9AVAgeJqvqgH9Q5CA+iKCZ2gyEVpxRU=
 github.com/gofrs/flock v0.7.0/go.mod h1:F1TvTiK9OcQqauNUHlbJvyl9Qa1QvF/gOUDKA14jxHU=
@@ -11,6 +13,8 @@ github.com/gopherjs/gopherwasm v0.1.1/go.mod h1:kx4n9a+MzHH0BJJhvlsQ65hqLFXDO/m2
 github.com/gopherjs/gopherwasm v1.0.0/go.mod h1:SkZ8z7CWBz5VXbhJel8TxCmAcsQqzgWGR/8nMhyhZSI=
 github.com/gopherjs/gopherwasm v1.1.0 h1:fA2uLoctU5+T3OhOn2vYP0DVT6pxc7xhTlBB1paATqQ=
 github.com/gopherjs/gopherwasm v1.1.0/go.mod h1:SkZ8z7CWBz5VXbhJel8TxCmAcsQqzgWGR/8nMhyhZSI=
+github.com/gosuri/uilive v0.0.0-20170323041506-ac356e6e42cd/go.mod h1:qkLSc0A5EXSP6B04TrN4oQoxqFI7A8XvoXSlJi8cwk8=
+github.com/gosuri/uiprogress v0.0.0-20170224063937-d0567a9d84a1/go.mod h1:C1RTYn4Sc7iEyf6j8ft5dyoZ4212h8G1ol9QQluh5+0=
 github.com/hajimehoshi/bitmapfont v1.1.1/go.mod h1:Hamfxgney7tDSmVOSDh2AWzoDH70OaC+P24zc02Gum4=
 github.com/hajimehoshi/ebiten v1.9.3 h1:YijWGMBwH2XA1ZytUQFy33UDHeCSS6d4JZKH1wq38O0=
 github.com/hajimehoshi/ebiten v1.9.3/go.mod h1:XxiJ4Eltvb1KmcD0i6F81eIB1asJhK47y5DC+FPkyso=

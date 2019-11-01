@@ -1,4 +1,4 @@
-package MapEngine
+package Map
 
 import (
 	"log"
