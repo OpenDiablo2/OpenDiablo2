@@ -1,4 +1,5 @@
 {
+    "Language": "ENG",
     "FullScreen": false,
     "Scale": 1,
     "TicksPerSecond": 60,
@@ -8,6 +9,7 @@
     "BgmVolume": 0.3,
     "MpqPath": "C:/Program Files (x86)/Diablo II",
     "MpqLoadOrder": [
+        "Patch_D2.mpq",
         "d2exp.mpq",
         "d2xmusic.mpq",
         "d2xtalk.mpq",

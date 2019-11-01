@@ -7,6 +7,8 @@ import (
 	"os"
 	"path"
 	"strings"
+
+	"github.com/essial/OpenDiablo2/ResourcePaths"
 )
 
 // MPQ represents an MPQ archive
@@ -38,6 +40,13 @@ type HashTableEntry struct { // 16 bytes
 	Locale     uint16
 	Platform   uint16
 	BlockIndex uint32
+}
+
+type PatchInfo struct {
+	Length   uint32   // Length of patch info header, in bytes
+	Flags    uint32   // Flags. 0x80000000 = MD5 (?)
+	DataSize uint32   // Uncompressed size of the patch file
+	Md5      [16]byte // MD5 of the entire patch file after decompression
 }
 
 // FileFlag represents flags for a file record in the MPQ archive
@@ -216,6 +225,7 @@ func (v MPQ) getFileHashEntry(fileName string) (HashTableEntry, error) {
 
 // GetFileBlockData gets a block table entry
 func (v MPQ) GetFileBlockData(fileName string) (BlockTableEntry, error) {
+	fileName = strings.ReplaceAll(fileName, "{LANG}", ResourcePaths.LanguageCode)
 	fileEntry, err := v.getFileHashEntry(fileName)
 	if err != nil {
 		return BlockTableEntry{}, err
@@ -231,11 +241,18 @@ func (v *MPQ) Close() {
 	}
 }
 
+func (v MPQ) FileExists(fileName string) bool {
+	fileName = strings.ReplaceAll(fileName, "{LANG}", ResourcePaths.LanguageCode)
+	_, err := v.getFileHashEntry(fileName)
+	return err == nil
+}
+
 // ReadFile reads a file from the MPQ and returns a memory stream
 func (v MPQ) ReadFile(fileName string) ([]byte, error) {
+	fileName = strings.ReplaceAll(fileName, "{LANG}", ResourcePaths.LanguageCode)
 	fileBlockData, err := v.GetFileBlockData(fileName)
 	if err != nil {
-		log.Panic(err)
+		return []byte{}, err
 	}
 	fileBlockData.FileName = strings.ToLower(fileName)
 	fileBlockData.calculateEncryptionSeed()
@@ -247,6 +264,7 @@ func (v MPQ) ReadFile(fileName string) ([]byte, error) {
 
 // ReadTextFile reads a file and returns it as a string
 func (v MPQ) ReadTextFile(fileName string) (string, error) {
+	fileName = strings.ReplaceAll(fileName, "{LANG}", ResourcePaths.LanguageCode)
 	data, err := v.ReadFile(fileName)
 	if err != nil {
 		return "", err
@@ -270,6 +288,5 @@ func (v MPQ) GetFileList() ([]string, error) {
 		return nil, err
 	}
 	log.Printf("File Contents:\n%s", strings.TrimRight(string(data), "\x00"))
-	data = nil
 	return []string{""}, nil
 }

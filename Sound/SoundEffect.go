@@ -16,8 +16,14 @@ type SoundEffect struct {
 
 func CreateSoundEffect(sfx string, fileProvider Common.FileProvider, context *audio.Context, volume float64) *SoundEffect {
 	result := &SoundEffect{}
-
-	audioData := fileProvider.LoadFile(sfx)
+	var soundFile string
+	if _, exists := Common.Sounds[sfx]; exists {
+		soundEntry := Common.Sounds[sfx]
+		soundFile = soundEntry.FileName
+	} else {
+		soundFile = sfx
+	}
+	audioData := fileProvider.LoadFile(soundFile)
 	d, err := wav.Decode(context, audio.BytesReadSeekCloser(audioData))
 	if err != nil {
 		log.Fatal(err)

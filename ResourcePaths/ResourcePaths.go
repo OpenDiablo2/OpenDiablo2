@@ -1,5 +1,7 @@
 package ResourcePaths
 
+var LanguageCode string
+
 const (
 	// --- Screens ---
 
@@ -17,7 +19,7 @@ const (
 	// --- Credits ---
 
 	CreditsBackground = "/data/global/ui/CharSelect/creditsbckgexpand.dc6"
-	CreditsText       = "/data/local/ui/eng/ExpansionCredits.txt"
+	CreditsText       = "/data/local/ui/{LANG}/ExpansionCredits.txt"
 
 	// --- Character Select Screen ---
 
@@ -156,9 +158,9 @@ const (
 
 	// --- Data ---
 
-	ExpansionStringTable = "/data/local/lng/eng/expansionstring.tbl"
-	StringTable          = "/data/local/lng/eng/string.tbl"
-	PatchStringTable     = "/data/local/lng/eng/patchstring.tbl"
+	ExpansionStringTable = "/data/local/lng/{LANG}/expansionstring.tbl"
+	StringTable          = "/data/local/lng/{LANG}/string.tbl"
+	PatchStringTable     = "/data/local/lng/{LANG}/patchstring.tbl"
 	LevelPreset          = "/data/global/excel/LvlPrest.bin"
 	LevelType            = "/data/global/excel/LvlTypes.bin"
 	LevelDetails         = "/data/global/excel/Levels.bin"
@@ -224,21 +226,21 @@ const (
 
 	// --- Sound Effects ---
 
-	SFXButtonClick         = "/data/global/sfx/Cursor/button.wav"
-	SFXAmazonDeselect      = "/data/global/sfx/Cursor/intro/amazon deselect.wav"
-	SFXAmazonSelect        = "/data/global/sfx/Cursor/intro/amazon select.wav"
+	SFXButtonClick         = "ESOUND_CURSOR_BUTTON_CLICK"
+	SFXAmazonDeselect      = "ESOUND_CURSOR_AMAZON_DESELECT"
+	SFXAmazonSelect        = "ESOUND_CURSOR_AMAZON_SELECT"
 	SFXAssassinDeselect    = "/data/global/sfx/Cursor/intro/assassin deselect.wav"
 	SFXAssassinSelect      = "/data/global/sfx/Cursor/intro/assassin select.wav"
-	SFXBarbarianDeselect   = "/data/global/sfx/Cursor/intro/barbarian deselect.wav"
-	SFXBarbarianSelect     = "/data/global/sfx/Cursor/intro/barbarian select.wav"
+	SFXBarbarianDeselect   = "ESOUND_CURSOR_BARBARIAN_DESELECT"
+	SFXBarbarianSelect     = "ESOUND_CURSOR_BARBARIAN_SELECT"
 	SFXDruidDeselect       = "/data/global/sfx/Cursor/intro/druid deselect.wav"
 	SFXDruidSelect         = "/data/global/sfx/Cursor/intro/druid select.wav"
-	SFXNecromancerDeselect = "/data/global/sfx/Cursor/intro/necromancer deselect.wav"
-	SFXNecromancerSelect   = "/data/global/sfx/Cursor/intro/necromancer select.wav"
-	SFXPaladinDeselect     = "/data/global/sfx/Cursor/intro/paladin deselect.wav"
-	SFXPaladinSelect       = "/data/global/sfx/Cursor/intro/paladin select.wav"
-	SFXSorceressDeselect   = "/data/global/sfx/Cursor/intro/sorceress deselect.wav"
-	SFXSorceressSelect     = "/data/global/sfx/Cursor/intro/sorceress select.wav"
+	SFXNecromancerDeselect = "ESOUND_CURSOR_NECROMANCER_DESELECT"
+	SFXNecromancerSelect   = "ESOUND_CURSOR_NECROMANCER_SELECT"
+	SFXPaladinDeselect     = "ESOUND_CURSOR_PALADIN_DESELECT"
+	SFXPaladinSelect       = "ESOUND_CURSOR_PALADIN_SELECT"
+	SFXSorceressDeselect   = "ESOUND_CURSOR_SORCERESS_DESELECT"
+	SFXSorceressSelect     = "ESOUND_CURSOR_SORCERESS_SELECT"
 
 	// --- Enemy Data ---
 

@@ -25,6 +25,7 @@ import (
 
 // EngineConfig defines the configuration for the engine, loaded from config.json
 type EngineConfig struct {
+	Language        string
 	FullScreen      bool
 	Scale           float64
 	RunInBackground bool
@@ -36,12 +37,17 @@ type EngineConfig struct {
 	BgmVolume       float64
 }
 
+type MpqFileRecord struct {
+	MpqFile          string
+	IsPatch          bool
+	UnpatchedMpqFile string
+}
+
 // Engine is the core OpenDiablo2 engine
 type Engine struct {
 	Settings        *EngineConfig                       // Engine configuration settings from json file
-	Files           map[string]string                   // Map that defines which files are in which MPQs
+	Files           map[string]*MpqFileRecord           // Map that defines which files are in which MPQs
 	Palettes        map[Palettes.Palette]Common.Palette // Color palettes
-	SoundEntries    map[string]Sound.SoundEntry         // Sound configurations
 	LoadingSprite   *Common.Sprite                      // The sprite shown when loading stuff
 	loadingProgress float64                             // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
 	stepLoadingSize float64                             // The size for each loading step
@@ -59,12 +65,13 @@ func CreateEngine() *Engine {
 		nextScene:    nil,
 	}
 	result.loadConfigurationFile()
+	ResourcePaths.LanguageCode = result.Settings.Language
 	result.mapMpqFiles()
 	result.loadPalettes()
-	result.loadSoundEntries()
 	Common.LoadTextDictionary(result)
 	Common.LoadLevelTypes(result)
 	Common.LoadLevelPresets(result)
+	Common.LoadSounds(result)
 	result.SoundManager = Sound.CreateManager(result)
 	result.SoundManager.SetVolumes(result.Settings.BgmVolume, result.Settings.SfxVolume)
 	result.UIManager = UI.CreateManager(result, *result.SoundManager)
@@ -106,8 +113,7 @@ func (v *Engine) loadConfigurationFile() {
 
 func (v *Engine) mapMpqFiles() {
 	log.Println("mapping mpq file structure")
-	v.Files = make(map[string]string)
-	lock := sync.RWMutex{}
+	v.Files = make(map[string]*MpqFileRecord)
 	for _, mpqFileName := range v.Settings.MpqLoadOrder {
 		mpqPath := path.Join(v.Settings.MpqPath, mpqFileName)
 		mpq, err := MPQ.Load(mpqPath)
@@ -115,16 +121,20 @@ func (v *Engine) mapMpqFiles() {
 			log.Fatal(err)
 		}
 		fileListText, err := mpq.ReadFile("(listfile)")
-		if err != nil {
-			log.Fatal(err)
+		if err != nil || fileListText == nil {
+			// Super secret patch file activate!
+			continue
 		}
 		fileList := strings.Split(string(fileListText), "\r\n")
+
 		for _, filePath := range fileList {
 			if _, exists := v.Files[strings.ToLower(filePath)]; exists {
-				lock.RUnlock()
+				if v.Files[strings.ToLower(filePath)].IsPatch {
+					v.Files[strings.ToLower(filePath)].UnpatchedMpqFile = mpqPath
+				}
 				continue
 			}
-			v.Files[`/`+strings.ReplaceAll(strings.ToLower(filePath), `\`, `/`)] = mpqPath
+			v.Files[`/`+strings.ReplaceAll(strings.ToLower(filePath), `\`, `/`)] = &MpqFileRecord{mpqPath, false, ""}
 		}
 	}
 }
@@ -133,14 +143,38 @@ var mutex sync.Mutex
 
 // LoadFile loads a file from the specified mpq and returns the data as a byte array
 func (v *Engine) LoadFile(fileName string) []byte {
+	fileName = strings.ReplaceAll(fileName, "{LANG}", ResourcePaths.LanguageCode)
 	mutex.Lock()
 	// TODO: May want to cache some things if performance becomes an issue
 	mpqFile := v.Files[strings.ToLower(fileName)]
-	mpq, err := MPQ.Load(mpqFile)
-	if err != nil {
-		log.Printf("Error loading file '%s'", fileName)
-		log.Fatal(err)
+	var mpq MPQ.MPQ
+	var err error
+	if mpqFile == nil {
+		// Super secret non-listed file?
+		for _, mpqFile := range v.Settings.MpqLoadOrder {
+			mpqFilePath := path.Join(v.Settings.MpqPath, mpqFile)
+			mpq, err = MPQ.Load(mpqFilePath)
+			newFileName := strings.ReplaceAll(fileName, `/`, `\`)[1:]
+			if err != nil {
+				continue
+			}
+			if !mpq.FileExists(newFileName) {
+				continue
+			}
+			// We found the super-secret file!
+			v.Files[strings.ToLower(fileName)] = &MpqFileRecord{mpqFilePath, false, ""}
+			break
+		}
+	} else if mpqFile.IsPatch {
+		log.Fatal("Tried to load a patchfile")
+	} else {
+		mpq, err = MPQ.Load(mpqFile.MpqFile)
+		if err != nil {
+			log.Printf("Error loading file '%s'", fileName)
+			log.Fatal(err)
+		}
 	}
+
 	fileName = strings.ReplaceAll(fileName, `/`, `\`)[1:]
 	blockTableEntry, err := mpq.GetFileBlockData(fileName)
 	if err != nil {
@@ -170,19 +204,6 @@ func (v *Engine) loadPalettes() {
 		paletteName := Palettes.Palette(nameParts[len(nameParts)-2])
 		palette := Common.CreatePalette(paletteName, v.LoadFile(file))
 		v.Palettes[paletteName] = palette
-	}
-}
-
-func (v *Engine) loadSoundEntries() {
-	log.Println("loading sound configurations")
-	v.SoundEntries = make(map[string]Sound.SoundEntry)
-	soundData := strings.Split(string(v.LoadFile(ResourcePaths.SoundSettings)), "\r\n")[1:]
-	for _, line := range soundData {
-		if len(line) == 0 {
-			continue
-		}
-		soundEntry := Sound.CreateSoundEntry(line)
-		v.SoundEntries[soundEntry.Handle] = soundEntry
 	}
 }
 

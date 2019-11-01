@@ -40,6 +40,10 @@ func CreateStream(mpq MPQ, blockTableEntry BlockTableEntry, fileName string) *St
 	}
 	result.BlockSize = 0x200 << result.MPQData.Data.BlockSize
 
+	if result.BlockTableEntry.HasFlag(FilePatchFile) {
+		log.Fatal("Patching is not supported")
+	}
+
 	if (result.BlockTableEntry.HasFlag(FileCompress) || result.BlockTableEntry.HasFlag(FileImplode)) && !result.BlockTableEntry.HasFlag(FileSingleUnit) {
 		result.loadBlockOffsets()
 	}
