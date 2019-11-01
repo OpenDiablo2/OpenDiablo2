@@ -116,3 +116,23 @@ table tbody tr td {
 	border-bottom: dashed 1px #444;
 	padding: 6px 0;
 }
+
+a.btnMedium {
+	background-image: url("ButtonMedium.png");
+	min-width: 128px;
+	min-height:3px;
+	display:inline-block;
+	padding: 9px 0 10px 0;
+	margin: 0;
+	border: none;
+	font-family:'Diablo Heavy';
+	color: #000;
+	text-align: center;
+	vertical-align: middle;
+	font-size: 0.8em;
+	text-shadow: #fff 0 0 5px;
+}
+a.btnMedium:hover{
+	text-decoration: none;
+	cursor:pointer;
+}
