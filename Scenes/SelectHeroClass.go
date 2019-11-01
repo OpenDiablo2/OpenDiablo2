@@ -107,6 +107,7 @@ func (v *SelectHeroClass) Load() []func() {
 			v.campfire = v.fileProvider.LoadSprite(ResourcePaths.CharacterSelectCampfire, Palettes.Fechar)
 			v.campfire.MoveTo(380, 335)
 			v.campfire.Animate = true
+			v.campfire.Blend = true
 		},
 		func() {
 			v.exitButton = UI.CreateButton(UI.ButtonTypeMedium, v.fileProvider, Common.TranslateString("#970"))

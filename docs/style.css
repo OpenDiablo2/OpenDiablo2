@@ -8,11 +8,23 @@ src: local('Diablo Heavy'), url('diablo.woff') format('woff');
 }
 
 body {
-	font-family:'Diablo Heavy';
+	font-family: 'Lato', sans-serif;
 	background-color: #111;
 	color: #fff;
 	text-align:center;
-	text-shadow: 0px 0px 6px #000;
+	text-shadow: 0 0 6px #000;
+}
+
+code {
+	background-color: #ccc;
+	color: #000;
+	border-radius: 3px;
+	text-shadow: none;
+	padding: 0 3px;
+
+	font-family: monospace;
+	font-weight: bold;
+	border: solid 1px #000;
 }
 
 hr {
@@ -23,17 +35,20 @@ hr {
 }
 
 h1 {
+	font-family:'Diablo Heavy';
 	font-size: 5em;
 	text-shadow: 0px 0px 6px #c00;
 }
 
 h1 span {
+	font-family:'Diablo Heavy';
 	font-size: 0.2em;
 	display: block;
 	margin: 8px 0;
 }
 
 h2 {
+	font-family:'Diablo Heavy';
 	font-size: 2.5em;
 	text-shadow: 0px 0px 4px #c00;
 }
@@ -42,27 +57,32 @@ img.imgFrame {
 	display: inline-block;
 	clear: bloth;
 	border-radius: 6px;
-	box-shadow: 0px 0px 8px #000;
-	margin: 6px 0px;
+	box-shadow: 0 0 8px #000;
+	margin: 6px;
+
 }
 
 div.paragraph {
-	text-align: left;
 	max-width: 1000px;
 	margin-left: auto;
 	margin-right: auto;
 	display: block;
 	font-size: 1.2em;
 	margin-bottom: 24px;
+	word-wrap: break-word;
+	text-align: justify;
 }
 
 div.paragraph span {
 	display: block;
 	padding: 12px 0;
+	color: #eaeaea;
 }
 
+
 div.paragraph span::first-letter {
-	font-size: 1.5em;
+	font-size: 1.3em;
+	color: #fff;
 }
 
 a {
@@ -73,4 +93,26 @@ a {
 a:hover {
 	text-decoration: underline;
 	color: #faa;
+}
+
+table {
+	width: 100%;
+	border-spacing: 0;
+}
+table tr {
+	vertical-align: top;
+	border-spacing: 1px;
+	border-bottom: dashed 1px #444;
+}
+table thead tr th {
+	color: #FFFF00;
+	padding-right:24px;
+	border-bottom: solid 1px #aaa;
+	min-width: 200px;
+}
+table tbody tr td {
+	text-align: justify;
+	border-spacing: 1px;
+	border-bottom: dashed 1px #444;
+	padding: 6px 0;
 }

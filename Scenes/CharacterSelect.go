@@ -45,19 +45,19 @@ func (v *CharacterSelect) Load() []func() {
 			v.background.MoveTo(0, 0)
 		},
 		func() {
-			v.newCharButton = UI.CreateButton(UI.ButtonTypeTall, v.fileProvider, Common.CombineStrings(Common.SplitIntoLinesWithMaxWidth(Common.TranslateString("#831"), 13)))
+			v.newCharButton = UI.CreateButton(UI.ButtonTypeTall, v.fileProvider, Common.CombineStrings(Common.SplitIntoLinesWithMaxWidth(Common.TranslateString("#831"), 15)))
 			v.newCharButton.MoveTo(33, 468)
 			v.newCharButton.OnActivated(func() { v.onNewCharButtonClicked() })
 			v.uiManager.AddWidget(v.newCharButton)
 		},
 		func() {
-			v.convertCharButton = UI.CreateButton(UI.ButtonTypeTall, v.fileProvider, Common.CombineStrings(Common.SplitIntoLinesWithMaxWidth(Common.TranslateString("#825"), 13)))
+			v.convertCharButton = UI.CreateButton(UI.ButtonTypeTall, v.fileProvider, Common.CombineStrings(Common.SplitIntoLinesWithMaxWidth(Common.TranslateString("#825"), 15)))
 			v.convertCharButton.MoveTo(233, 468)
 			v.convertCharButton.SetEnabled(false)
 			v.uiManager.AddWidget(v.convertCharButton)
 		},
 		func() {
-			v.deleteCharButton = UI.CreateButton(UI.ButtonTypeTall, v.fileProvider, Common.CombineStrings(Common.SplitIntoLinesWithMaxWidth(Common.TranslateString("#832"), 13)))
+			v.deleteCharButton = UI.CreateButton(UI.ButtonTypeTall, v.fileProvider, Common.CombineStrings(Common.SplitIntoLinesWithMaxWidth(Common.TranslateString("#832"), 15)))
 			v.deleteCharButton.MoveTo(433, 468)
 			v.deleteCharButton.SetEnabled(false)
 			v.uiManager.AddWidget(v.deleteCharButton)
