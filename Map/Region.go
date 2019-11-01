@@ -1,7 +1,6 @@
 package Map
 
 import (
-	"log"
 	"math"
 	"math/rand"
 	"strconv"
@@ -21,7 +20,7 @@ type TileCacheRecord struct {
 
 type Region struct {
 	levelType   Common.LevelTypeRecord
-	levelPreset Common.LevelPresetRecord
+	levelPreset *Common.LevelPresetRecord
 	TileWidth   int32
 	TileHeight  int32
 	Tiles       []Tile
@@ -40,41 +39,41 @@ const (
 type RegionIdType int
 
 const (
-	RegionNoneRegionAct1Town              = 1
-	RegionAct1Wilderness     RegionIdType = 2
-	RegionAct1Cave           RegionIdType = 3
-	RegionAct1Crypt          RegionIdType = 4
-	RegionAct1Monestary      RegionIdType = 5
-	RegionAct1Courtyard      RegionIdType = 6
-	RegionAct1Barracks       RegionIdType = 7
-	RegionAct1Jail           RegionIdType = 8
-	RegionAct1Cathedral      RegionIdType = 9
-	RegionAct1Catacombs      RegionIdType = 10
-	RegionAct1Tristram       RegionIdType = 11
-	RegionAct2Town           RegionIdType = 12
-	RegionAct2Sewer          RegionIdType = 13
-	RegionAct2Harem          RegionIdType = 14
-	RegionAct2Basement       RegionIdType = 15
-	RegionAct2Desert         RegionIdType = 16
-	RegionAct2Tomb           RegionIdType = 17
-	RegionAct2Lair           RegionIdType = 18
-	RegionAct2Arcane         RegionIdType = 19
-	RegionAct3Town           RegionIdType = 20
-	RegionAct3Jungle         RegionIdType = 21
-	RegionAct3Kurast         RegionIdType = 22
-	RegionAct3Spider         RegionIdType = 23
-	RegionAct3Dungeon        RegionIdType = 24
-	RegionAct3Sewer          RegionIdType = 25
-	RegionAct4Town           RegionIdType = 26
-	RegionAct4Mesa           RegionIdType = 27
-	RegionAct4Lava           RegionIdType = 28
-	RegonAct5Town            RegionIdType = 29
-	RegionAct5Siege          RegionIdType = 30
-	RegionAct5Barricade      RegionIdType = 31
-	RegionAct5Temple         RegionIdType = 32
-	RegionAct5IceCaves       RegionIdType = 33
-	RegionAct5Baal           RegionIdType = 34
-	RegionAct5Lava           RegionIdType = 35
+	RegionAct1Town       RegionIdType = 1
+	RegionAct1Wilderness RegionIdType = 2
+	RegionAct1Cave       RegionIdType = 3
+	RegionAct1Crypt      RegionIdType = 4
+	RegionAct1Monestary  RegionIdType = 5
+	RegionAct1Courtyard  RegionIdType = 6
+	RegionAct1Barracks   RegionIdType = 7
+	RegionAct1Jail       RegionIdType = 8
+	RegionAct1Cathedral  RegionIdType = 9
+	RegionAct1Catacombs  RegionIdType = 10
+	RegionAct1Tristram   RegionIdType = 11
+	RegionAct2Town       RegionIdType = 12
+	RegionAct2Sewer      RegionIdType = 13
+	RegionAct2Harem      RegionIdType = 14
+	RegionAct2Basement   RegionIdType = 15
+	RegionAct2Desert     RegionIdType = 16
+	RegionAct2Tomb       RegionIdType = 17
+	RegionAct2Lair       RegionIdType = 18
+	RegionAct2Arcane     RegionIdType = 19
+	RegionAct3Town       RegionIdType = 20
+	RegionAct3Jungle     RegionIdType = 21
+	RegionAct3Kurast     RegionIdType = 22
+	RegionAct3Spider     RegionIdType = 23
+	RegionAct3Dungeon    RegionIdType = 24
+	RegionAct3Sewer      RegionIdType = 25
+	RegionAct4Town       RegionIdType = 26
+	RegionAct4Mesa       RegionIdType = 27
+	RegionAct4Lava       RegionIdType = 28
+	RegonAct5Town        RegionIdType = 29
+	RegionAct5Siege      RegionIdType = 30
+	RegionAct5Barricade  RegionIdType = 31
+	RegionAct5Temple     RegionIdType = 32
+	RegionAct5IceCaves   RegionIdType = 33
+	RegionAct5Baal       RegionIdType = 34
+	RegionAct5Lava       RegionIdType = 35
 )
 
 func LoadRegion(seed rand.Source, levelType RegionIdType, levelPreset int, fileProvider Common.FileProvider) *Region {
@@ -85,13 +84,15 @@ func LoadRegion(seed rand.Source, levelType RegionIdType, levelPreset int, fileP
 		TileCache:   make(map[uint32]*TileCacheRecord),
 	}
 	result.Palette = Common.Palettes[PaletteDefs.PaletteType("act"+strconv.Itoa(int(result.levelType.Act)))]
-	bm := result.levelPreset.Dt1Mask
+	//\bm := result.levelPreset.Dt1Mask
 	for _, levelTypeDt1 := range result.levelType.Files {
-		if bm&1 == 0 {
+		/*
+			if bm&1 == 0 {
+				bm >>= 1
+				continue
+			}
 			bm >>= 1
-			continue
-		}
-		bm >>= 1
+		*/
 		if len(levelTypeDt1) == 0 || levelTypeDt1 == "" || levelTypeDt1 == "0" {
 			continue
 		}
@@ -124,23 +125,51 @@ func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType Region
 	}
 }
 
-func (v *Region) getTile(mainIndex, subIndex, orientation int32) Tile {
+func (v *Region) getTile(mainIndex, subIndex, orientation int32) *Tile {
 	// TODO: Need to support randomly grabbing tile based on x/y as there can be multiple matches for same main/sub index
 	for _, tile := range v.Tiles {
 		if tile.MainIndex != mainIndex || tile.SubIndex != subIndex || tile.Orientation != orientation {
 			continue
 		}
-		return tile
+		return &tile
 	}
-	log.Fatalf("Unknown tile ID [%d %d %d]", mainIndex, subIndex, orientation)
-	return Tile{}
+	//log.Fatalf("Unknown tile ID [%d %d %d]", mainIndex, subIndex, orientation)
+	return nil
 }
 
 func (v *Region) renderFloor(tile FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image) {
+	if tile.Hidden {
+		return
+	}
 	tileCacheIndex := (uint32(tile.MainIndex) << 16) + (uint32(tile.SubIndex) << 8)
 	tileCache := v.TileCache[tileCacheIndex]
 	if tileCache == nil {
 		v.TileCache[tileCacheIndex] = v.generateFloorCache(tile)
+		tileCache = v.TileCache[tileCacheIndex]
+	}
+	if tileCache == nil {
+		return
+	}
+	opts := &ebiten.DrawImageOptions{}
+	opts.GeoM.Translate(float64(offsetX+tileCache.XOffset), float64(offsetY+tileCache.YOffset))
+	target.DrawImage(tileCache.Image, opts)
+}
+
+func (v *Region) renderWall(tile WallRecord, offsetX, offsetY int, target *ebiten.Image) {
+	if tile.Hidden {
+		return
+	}
+	if tile.Prop1 == 0 {
+		return
+	}
+	tileCacheIndex := (uint32(tile.MainIndex) << 16) + (uint32(tile.SubIndex) << 8) + (uint32(tile.Orientation))
+	tileCache := v.TileCache[tileCacheIndex]
+	if tileCache == nil {
+		v.TileCache[tileCacheIndex] = v.generateWallCache(tile)
+		// TODO: Temporary hack
+		if v.TileCache[tileCacheIndex] == nil {
+			return
+		}
 		tileCache = v.TileCache[tileCacheIndex]
 	}
 	opts := &ebiten.DrawImageOptions{}
@@ -148,21 +177,8 @@ func (v *Region) renderFloor(tile FloorShadowRecord, offsetX, offsetY int, targe
 	target.DrawImage(tileCache.Image, opts)
 }
 
-func (v *Region) generateFloorCache(tile FloorShadowRecord) *TileCacheRecord {
-	var pixels []byte
-
-	tileData := v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), 0)
-	tileYMinimum := int32(0)
-	for _, block := range tileData.Blocks {
-		tileYMinimum = Common.MinInt32(tileYMinimum, int32(block.Y))
-	}
-	tileYOffset := Common.AbsInt32(tileYMinimum)
-
-	tileHeight := Common.AbsInt32(tileData.Height)
-	image, _ := ebiten.NewImage(int(tileData.Width), int(tileHeight), ebiten.FilterNearest)
-	special := false
-	pixels = make([]byte, 4*tileData.Width*tileHeight)
-	for _, block := range tileData.Blocks {
+func (v *Region) decodeFloorData(blocks []Block, pixels []byte, tileYOffset int32, tileWidth int32) {
+	for _, block := range blocks {
 		// TODO: Move this to a less stupid place
 		if block.Format == BlockFormatIsometric {
 			// 3D isometric decoding
@@ -182,12 +198,12 @@ func (v *Region) generateFloorCache(tile FloorShadowRecord) *TileCacheRecord {
 					colorIndex := block.EncodedData[idx]
 					if colorIndex != 0 {
 						pixelColor := v.Palette.Colors[colorIndex]
-						pixels[(4 * (((blockY + y) * tileData.Width) + (blockX + x)))] = pixelColor.R
-						pixels[(4*(((blockY+y)*tileData.Width)+(blockX+x)))+1] = pixelColor.G
-						pixels[(4*(((blockY+y)*tileData.Width)+(blockX+x)))+2] = pixelColor.B
-						pixels[(4*(((blockY+y)*tileData.Width)+(blockX+x)))+3] = 255
+						pixels[(4 * (((blockY + y) * tileWidth) + (blockX + x)))] = pixelColor.R
+						pixels[(4*(((blockY+y)*tileWidth)+(blockX+x)))+1] = pixelColor.G
+						pixels[(4*(((blockY+y)*tileWidth)+(blockX+x)))+2] = pixelColor.B
+						pixels[(4*(((blockY+y)*tileWidth)+(blockX+x)))+3] = 255
 					} else {
-						pixels[(4*(((blockY+y)*tileData.Width)+(blockX+x)))+3] = 0
+						pixels[(4*(((blockY+y)*tileWidth)+(blockX+x)))+3] = 0
 					}
 					x++
 					n--
@@ -197,7 +213,6 @@ func (v *Region) generateFloorCache(tile FloorShadowRecord) *TileCacheRecord {
 			}
 		} else {
 			// RLE Encoding
-			special = true
 			blockX := int32(block.X)
 			blockY := int32(block.Y)
 			x := int32(0)
@@ -220,12 +235,12 @@ func (v *Region) generateFloorCache(tile FloorShadowRecord) *TileCacheRecord {
 					colorIndex := block.EncodedData[idx]
 					if colorIndex != 0 {
 						pixelColor := v.Palette.Colors[colorIndex]
-						pixels[(4 * (((blockY + y + tileYOffset) * tileData.Width) + (blockX + x)))] = pixelColor.R
-						pixels[(4*(((blockY+y+tileYOffset)*tileData.Width)+(blockX+x)))+1] = pixelColor.G
-						pixels[(4*(((blockY+y+tileYOffset)*tileData.Width)+(blockX+x)))+2] = pixelColor.B
-						pixels[(4*(((blockY+y+tileYOffset)*tileData.Width)+(blockX+x)))+3] = 255
+						pixels[(4 * (((blockY + y + tileYOffset) * tileWidth) + (blockX + x)))] = pixelColor.R
+						pixels[(4*(((blockY+y+tileYOffset)*tileWidth)+(blockX+x)))+1] = pixelColor.G
+						pixels[(4*(((blockY+y+tileYOffset)*tileWidth)+(blockX+x)))+2] = pixelColor.B
+						pixels[(4*(((blockY+y+tileYOffset)*tileWidth)+(blockX+x)))+3] = 255
 					} else {
-						pixels[(4*(((blockY+y+tileYOffset)*tileData.Width)+(blockX+x)))+3] = 0
+						pixels[(4*(((blockY+y+tileYOffset)*tileWidth)+(blockX+x)))+3] = 0
 					}
 					idx++
 					x++
@@ -234,18 +249,55 @@ func (v *Region) generateFloorCache(tile FloorShadowRecord) *TileCacheRecord {
 			}
 		}
 	}
+}
+
+func (v *Region) generateFloorCache(tile FloorShadowRecord) *TileCacheRecord {
+	tileData := v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), 0)
+	if tileData == nil {
+		return nil
+	}
+	tileYMinimum := int32(0)
+	for _, block := range tileData.Blocks {
+		tileYMinimum = Common.MinInt32(tileYMinimum, int32(block.Y))
+	}
+	tileYOffset := Common.AbsInt32(tileYMinimum)
+	tileHeight := Common.AbsInt32(tileData.Height)
+	image, _ := ebiten.NewImage(int(tileData.Width), int(tileHeight), ebiten.FilterNearest)
+	pixels := make([]byte, 4*tileData.Width*tileHeight)
+	v.decodeFloorData(tileData.Blocks, pixels, tileYOffset, tileData.Width)
 	image.ReplacePixels(pixels)
-	yOffset := 0
-	if special {
-		yOffset = int(128 + tileData.Height)
+	return &TileCacheRecord{image, 0, 0}
+}
+
+func (v *Region) generateWallCache(tile WallRecord) *TileCacheRecord {
+	tileData := v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), int32(tile.Orientation))
+	if tileData == nil {
+		return nil
+	}
+	tileYMinimum := int32(0)
+	for _, block := range tileData.Blocks {
+		tileYMinimum = Common.MinInt32(tileYMinimum, int32(block.Y))
+	}
+	tileYOffset := -tileYMinimum
+	tileHeight := Common.AbsInt32(tileData.Height)
+	image, _ := ebiten.NewImage(int(tileData.Width), int(tileHeight), ebiten.FilterNearest)
+	pixels := make([]byte, 4*tileData.Width*tileHeight)
+	v.decodeFloorData(tileData.Blocks, pixels, tileYOffset, tileData.Width)
+	image.ReplacePixels(pixels)
+	yAdjust := 0
+	if tile.Orientation == 15 {
+		// Roof
+		yAdjust = -int(tileData.RoofHeight)
+	} else if tile.Orientation > 15 {
+		// Lower walls
+		yAdjust = int(tileYMinimum) + 80
+	} else {
+		// Upper Walls
+		yAdjust = int(tileYMinimum) + 80
 	}
 	return &TileCacheRecord{
 		image,
-		int(tileData.Width),
-		yOffset,
+		0,
+		yAdjust,
 	}
-}
-
-func (v *Region) renderWall(tile WallRecord, offsetX, offsetY int, target *ebiten.Image) {
-
 }

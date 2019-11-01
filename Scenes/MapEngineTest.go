@@ -40,7 +40,21 @@ func (v *MapEngineTest) Load() []func() {
 	return []func(){
 		func() {
 			v.mapEngine = Map.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider)
-			v.mapEngine.GenerateMap(Map.RegionAct1Tristram, 300)
+			//v.mapEngine.GenerateMap(Map.RegionAct2Harem, 353)
+			v.mapEngine.GenerateMap(Map.RegionAct1Town, 1)
+			//v.mapEngine.GenerateMap(Map.RegionAct1Tristram, 300)
+
+			//v.mapEngine.GenerateMap(Map.RegionAct3Town, 529)
+			//v.mapEngine.GenerateMap(Map.RegionAct1Cathedral, 257)
+			//v.mapEngine.GenerateMap(Map.RegionAct5IceCaves, 1038)
+			//v.mapEngine.GenerateMap(Map.RegionAct3Jungle, 574)
+
+			// Completely broken ----------------------------------------------
+			//v.mapEngine.GenerateMap(Map.RegonAct5Town, 863) // CRASHES
+			// v.mapEngine.GenerateMap(Map.RegionAct5Siege, 879) // CRASHES
+			//v.mapEngine.GenerateMap(Map.RegionAct5Lava, 1057) // PALETTE ISSUE
+			// v.mapEngine.GenerateMap(Map.RegionAct2Town, 301) // Really broken rendering
+
 		},
 	}
 }

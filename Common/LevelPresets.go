@@ -26,15 +26,17 @@ type LevelPresetRecord struct {
 	Dt1Mask      uint32
 }
 
-var LevelPresets []LevelPresetRecord
+var LevelPresets map[int]*LevelPresetRecord
 
 func LoadLevelPresets(fileProvider FileProvider) {
 	levelTypesData := fileProvider.LoadFile(ResourcePaths.LevelPreset)
 	sr := CreateStreamReader(levelTypesData)
-	numRecords := sr.GetInt32()
-	LevelPresets = make([]LevelPresetRecord, numRecords)
-	for i := range LevelPresets {
-		LevelPresets[i].DefinitionId = sr.GetInt32()
+	sr.SkipBytes(4) // Count
+	LevelPresets = make(map[int]*LevelPresetRecord)
+	for !sr.Eof() {
+		i := int(sr.GetInt32())
+		LevelPresets[i] = &LevelPresetRecord{}
+		LevelPresets[i].DefinitionId = int32(i)
 		LevelPresets[i].LevelId = sr.GetInt32()
 		LevelPresets[i].Populate = sr.GetInt32() != 0
 		LevelPresets[i].Logicals = sr.GetInt32() != 0

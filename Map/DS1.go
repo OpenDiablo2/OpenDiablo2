@@ -33,7 +33,7 @@ type FloorShadowRecord struct {
 	Unknown1  byte
 	MainIndex byte
 	Unknown2  byte
-	Hidden    byte
+	Hidden    bool
 }
 
 type WallRecord struct {
@@ -44,7 +44,7 @@ type WallRecord struct {
 	Unknown1    byte
 	MainIndex   byte
 	Unknown2    byte
-	Hidden      byte
+	Hidden      bool
 }
 
 type SubstitutionRecord struct {
@@ -199,7 +199,7 @@ func LoadDS1(path string, fileProvider Common.FileProvider) *DS1 {
 					ds1.Tiles[y][x].Walls[wallIndex].Unknown1 = byte((dw & 0x000FC000) >> 14)
 					ds1.Tiles[y][x].Walls[wallIndex].MainIndex = byte((dw & 0x03F00000) >> 20)
 					ds1.Tiles[y][x].Walls[wallIndex].Unknown2 = byte((dw & 0x7C000000) >> 26)
-					ds1.Tiles[y][x].Walls[wallIndex].Hidden = byte((dw & 0x80000000) >> 31)
+					ds1.Tiles[y][x].Walls[wallIndex].Hidden = byte((dw&0x80000000)>>31) > 0
 				case LayerStreamOrientation1:
 					fallthrough
 				case LayerStreamOrientation2:
@@ -225,14 +225,14 @@ func LoadDS1(path string, fileProvider Common.FileProvider) *DS1 {
 					ds1.Tiles[y][x].Floors[floorIndex].Unknown1 = byte((dw & 0x000FC000) >> 14)
 					ds1.Tiles[y][x].Floors[floorIndex].MainIndex = byte((dw & 0x03F00000) >> 20)
 					ds1.Tiles[y][x].Floors[floorIndex].Unknown2 = byte((dw & 0x7C000000) >> 26)
-					ds1.Tiles[y][x].Floors[floorIndex].Hidden = byte((dw & 0x80000000) >> 31)
+					ds1.Tiles[y][x].Floors[floorIndex].Hidden = byte((dw&0x80000000)>>31) > 0
 				case LayerStreamShadow:
 					ds1.Tiles[y][x].Shadows[0].Prop1 = byte(dw & 0x000000FF)
 					ds1.Tiles[y][x].Shadows[0].SubIndex = byte((dw & 0x00003F00) >> 8)
 					ds1.Tiles[y][x].Shadows[0].Unknown1 = byte((dw & 0x000FC000) >> 14)
 					ds1.Tiles[y][x].Shadows[0].MainIndex = byte((dw & 0x03F00000) >> 20)
 					ds1.Tiles[y][x].Shadows[0].Unknown2 = byte((dw & 0x7C000000) >> 26)
-					ds1.Tiles[y][x].Shadows[0].Hidden = byte((dw & 0x80000000) >> 31)
+					ds1.Tiles[y][x].Shadows[0].Hidden = byte((dw&0x80000000)>>31) > 0
 				case LayerStreamSubstitute:
 					ds1.Tiles[y][x].Substitutions[0].Unknown = dw
 				}

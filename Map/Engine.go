@@ -49,7 +49,24 @@ func (v *Engine) Render(target *ebiten.Image) {
 		offX := -(y * 80)
 		offY := y * 40
 		for x := 0; x < int(v.regions[0].Region.TileWidth); x++ {
-			v.regions[0].Region.RenderTile(400+offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, RegionLayerTypeFloors, 0, target)
+			tile := v.regions[0].Region.DS1.Tiles[y][x]
+			for i := range tile.Floors {
+				v.regions[0].Region.RenderTile(400+offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, RegionLayerTypeFloors, i, target)
+			}
+			offX += 80
+			offY += 40
+		}
+	}
+
+	for y := 0; y < int(v.regions[0].Region.TileHeight); y++ {
+		offX := -(y * 80)
+		offY := y * 40
+		for x := 0; x < int(v.regions[0].Region.TileWidth); x++ {
+			tile := v.regions[0].Region.DS1.Tiles[y][x]
+			for i := range tile.Walls {
+				// TODO: render back walls, then character, then fore walls
+				v.regions[0].Region.RenderTile(400+offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, RegionLayerTypeWalls, i, target)
+			}
 			offX += 80
 			offY += 40
 		}
