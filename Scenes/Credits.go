@@ -56,7 +56,7 @@ func (v *Credits) Load() []func() {
 			v.creditsBackground.MoveTo(0, 0)
 		},
 		func() {
-			v.exitButton = UI.CreateButton(UI.ButtonTypeMedium, v.fileProvider, "EXIT")
+			v.exitButton = UI.CreateButton(UI.ButtonTypeMedium, v.fileProvider, Common.TranslateString("#970"))
 			v.exitButton.MoveTo(30, 550)
 			v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 			v.uiManager.AddWidget(v.exitButton)

@@ -109,7 +109,7 @@ func (v *SelectHeroClass) Load() []func() {
 			v.campfire.Animate = true
 		},
 		func() {
-			v.exitButton = UI.CreateButton(UI.ButtonTypeMedium, v.fileProvider, "EXIT")
+			v.exitButton = UI.CreateButton(UI.ButtonTypeMedium, v.fileProvider, Common.TranslateString("#970"))
 			v.exitButton.MoveTo(33, 537)
 			v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 			v.uiManager.AddWidget(v.exitButton)

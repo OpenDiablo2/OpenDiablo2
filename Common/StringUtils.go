@@ -65,6 +65,10 @@ func Utf16BytesToString(b []byte) (string, error) {
 	return ret.String(), nil
 }
 
+func CombineStrings(input []string) string {
+	return strings.Join(input, "\n")
+}
+
 func SplitIntoLinesWithMaxWidth(fullSentence string, maxChars int) []string {
 	lines := make([]string, 0)
 	line := ""

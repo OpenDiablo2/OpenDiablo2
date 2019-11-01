@@ -94,5 +94,5 @@ func LoadSounds(fileProvider FileProvider) {
 			}
 		*/
 	}
-	log.Println("Loaded %d sound definitions", len(Sounds))
+	log.Printf("Loaded %d sound definitions", len(Sounds))
 }
