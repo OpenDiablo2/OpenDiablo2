@@ -8,12 +8,12 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/PaletteDefs"
-	"github.com/essial/OpenDiablo2/Sound"
-	"github.com/essial/OpenDiablo2/UI"
+	"github.com/OpenDiablo2/OpenDiablo2/Common"
+	"github.com/OpenDiablo2/OpenDiablo2/PaletteDefs"
+	"github.com/OpenDiablo2/OpenDiablo2/Sound"
+	"github.com/OpenDiablo2/OpenDiablo2/UI"
 
-	"github.com/essial/OpenDiablo2/ResourcePaths"
+	"github.com/OpenDiablo2/OpenDiablo2/ResourcePaths"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -199,7 +199,7 @@ func (v *MainMenu) onSinglePlayerClicked() {
 }
 
 func (v *MainMenu) onGithubButtonClicked() {
-	openbrowser("https://www.github.com/essial/OpenDiablo2")
+	openbrowser("https://www.github.com/OpenDiablo2/OpenDiablo2")
 }
 
 func (v *MainMenu) onExitButtonClicked() {

@@ -1,7 +1,7 @@
 package UI
 
 import (
-	"github.com/essial/OpenDiablo2/Common"
+	"github.com/OpenDiablo2/OpenDiablo2/Common"
 )
 
 // Widget defines an object that is a UI widget

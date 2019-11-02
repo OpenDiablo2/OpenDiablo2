@@ -10,15 +10,15 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/essial/OpenDiablo2/PaletteDefs"
+	"github.com/OpenDiablo2/OpenDiablo2/PaletteDefs"
 
-	"github.com/essial/OpenDiablo2/Sound"
+	"github.com/OpenDiablo2/OpenDiablo2/Sound"
 
-	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/MPQ"
-	"github.com/essial/OpenDiablo2/ResourcePaths"
-	"github.com/essial/OpenDiablo2/Scenes"
-	"github.com/essial/OpenDiablo2/UI"
+	"github.com/OpenDiablo2/OpenDiablo2/Common"
+	"github.com/OpenDiablo2/OpenDiablo2/MPQ"
+	"github.com/OpenDiablo2/OpenDiablo2/ResourcePaths"
+	"github.com/OpenDiablo2/OpenDiablo2/Scenes"
+	"github.com/OpenDiablo2/OpenDiablo2/UI"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/mitchellh/go-homedir"

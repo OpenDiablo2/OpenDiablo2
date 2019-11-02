@@ -8,7 +8,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/essial/OpenDiablo2/ResourcePaths"
+	"github.com/OpenDiablo2/OpenDiablo2/ResourcePaths"
 )
 
 // MPQ represents an MPQ archive

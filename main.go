@@ -6,10 +6,10 @@ import (
 
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 
-	"github.com/essial/OpenDiablo2/Common"
+	"github.com/OpenDiablo2/OpenDiablo2/Common"
 
-	"github.com/essial/OpenDiablo2/Core"
-	"github.com/essial/OpenDiablo2/MPQ"
+	"github.com/OpenDiablo2/OpenDiablo2/Core"
+	"github.com/OpenDiablo2/OpenDiablo2/MPQ"
 	"github.com/hajimehoshi/ebiten"
 )
 

@@ -1,7 +1,7 @@
 package Compression
 
 import (
-	"github.com/essial/OpenDiablo2/Common"
+	"github.com/OpenDiablo2/OpenDiablo2/Common"
 )
 
 var sLookup = []int{

@@ -4,8 +4,8 @@ import (
 	"image"
 	"math/rand"
 
-	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/Sound"
+	"github.com/OpenDiablo2/OpenDiablo2/Common"
+	"github.com/OpenDiablo2/OpenDiablo2/Sound"
 	"github.com/hajimehoshi/ebiten"
 )
 

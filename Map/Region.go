@@ -7,11 +7,11 @@ import (
 	"math/rand"
 	"strconv"
 
-	"github.com/essial/OpenDiablo2/PaletteDefs"
+	"github.com/OpenDiablo2/OpenDiablo2/PaletteDefs"
 
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/essial/OpenDiablo2/Common"
+	"github.com/OpenDiablo2/OpenDiablo2/Common"
 )
 
 type TileCacheRecord struct {

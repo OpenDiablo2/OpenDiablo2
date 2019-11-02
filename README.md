@@ -1,4 +1,4 @@
-# OpenDiablo2 [![Build Status](https://travis-ci.org/essial/OpenDiablo2.svg?branch=dev)](https://travis-ci.org/essial/OpenDiablo2)
+# OpenDiablo2 [![Build Status](https://travis-ci.org/OpenDiablo2/OpenDiablo2.svg?branch=master)](https://travis-ci.org/OpenDiablo2/OpenDiablo2)
 
 [Join us on Discord!](https://discord.gg/pRy8tdc)\
 [Development Live stream](https://www.twitch.tv/essial/)
@@ -19,9 +19,9 @@ ALL OTHER TRADEMARKS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS.
 
 ## Building
 
-To pull the project down, run `go get https://github.com/essial/OpenDiablo2`
+To pull the project down, run `go get https://github.com/OpenDiablo2/OpenDiablo2`
 
-On windows this folder will most likely be in `C:\\users\\(you)\\go\\src\\github.com\\essial\\OpenDiablo2`
+On windows this folder will most likely be in `C:\users\(you)\go\src\github.com\essial\OpenDiablo2`
 
 In the root folder, run `go get -d` to pull down all dependencies.
 
@@ -31,10 +31,10 @@ You can also open the root folder in VSCode. Make sure you have the `ms-vscode.g
 
 ## Contributing
 
-The imports for this project utilize `github.com/essial/OpenDiablo2`. This means that even if you clone the repo, changes will not be taken as it will
+The imports for this project utilize `github.com/OpenDiablo2/OpenDiablo2`. This means that even if you clone the repo, changes will not be taken as it will
 still pull from the main repo's files. In order to use your local version, add the following to `go.mod` in the base folder:
 ```
-    replace github.com/essial/OpenDiablo2 => /your/forked/import/path
+    replace github.com/OpenDiablo2/OpenDiablo2 => /your/forked/import/path
 ```
 This will tell go to use your local path instead of the official repo. Be sure to exclude this change from your pull requests!
 
