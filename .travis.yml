@@ -15,11 +15,13 @@ addons:
       - libgles2-mesa-dev
       - libasound2-dev
 script:
-  - mkdir -p ./build_artifacts
+  - mkdir -p ./build_artifacts/opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
+  - mkdir -p ./build_artifacts/out
   - go get
   - go build .
-  - if [ "$TRAVIS_OS_NAME" = "win" ]; then cp ./OpenDiablo2.exe ./build_artifacts ; else cp ./OpenDiablo2 ./build_artifacts; fi
-  - cp ./config.json ./build_artifacts
+  - if [ "$TRAVIS_OS_NAME" = "win" ]; then cp ./OpenDiablo2.exe ./build_artifacts/opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME ; else cp ./OpenDiablo2 ./build_artifacts/opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME; fi
+  - cp ./config.json ./build_artifacts/opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
+  - tar -cvzf opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.tar.gz ./build_artifacts/$TRAIVS_OS_NAME
 git:
   depth: 1
 notifications:
@@ -28,8 +30,7 @@ deploy:
   provider: releases
   api_key:
     secure: "$GithubApi"
-  file_glob: true
-  file: build_artifacts/*
+  file: opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.tar.gz
   skip_cleanup: true
   name: "OpenDiablo Git Latest ($TRAVIS_OS_NAME)"
   on:
