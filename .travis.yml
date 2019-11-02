@@ -27,7 +27,6 @@ git:
 notifications:
   email: false
 deploy:
-  if: tag IS present
   provider: releases
   api_key:
     secure: "$GithubApi"

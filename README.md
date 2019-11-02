@@ -11,8 +11,6 @@ OpenDiablo2 is an ARPG game engine in the same vein of the 2000's games, and sup
 
 Currently we are working on features necessary to play Diablo 2 in its entireity, but will then expand with tools and plugin support to allow modding, as well as writing completely new games with the engine.
 
-We are in the process of moving to a go based engine. We are taking good bits from the original C# base and migrating it over to the new engine code.
-
 Please note that **this game is neither developed by, nor endorsed by Blizzard or its parent company Activision**.
 
 Diablo 2 and its content is ©2000 Blizzard Entertainment, Inc. All rights reserved. Diablo and Blizzard Entertainment are trademarks or registered trademarks of Blizzard Entertainment, Inc. in the U.S. and/or other countries.
@@ -40,6 +38,12 @@ still pull from the main repo's files. In order to use your local version, add t
 ```
 This will tell go to use your local path instead of the official repo. Be sure to exclude this change from your pull requests!
 
+If you find something you'd like to fix thats obviously broken, create a branch, commit your code, and submit a pull request. If it's a new or missing feature you'd like to see, add an issue, and be descriptive!
+ 
+If you'd like to help out and are not quite sure how, you can look through any open issues and tasks, or ask
+for tasks on our discord server.
+
+
 ## VS Code Extensions
 
 The following extensions are recommended for working with this project:
@@ -54,8 +58,3 @@ then clicking on `Edit in settings.json`. Just paste that section where appropri
 The engine is configured via the `config.json` file. By default, the configuration assumes that you have installed Diablo 2 and the
 expansion via the official Blizzard Diablo2 installers using the default file paths. If you are not on Windows, or have installed
 the game in a different location, the base path may have to be adjusted.
-
-
-## Contributing
-If you find something you'd like to fix thats obviously broken, create a branch, commit your code, and submit a pull request. If it's a new or missing feature you'd like to see, add an issue, and be descriptive! 
-If you'd like to help out and are not quite sure how, you can look through any open issues and tasks.
