@@ -16,8 +16,6 @@ addons:
 script:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then choco install 7zip.portable ; fi
   - mkdir -p ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
-  - rm -rf ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
-  - mkdir -p ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
   - go get
   - go build .
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then cp ./OpenDiablo2.exe ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME ; else cp ./OpenDiablo2 ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME; fi

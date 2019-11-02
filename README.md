@@ -31,6 +31,15 @@ To run the project, run `go run .` from the root folder.
 
 You can also open the root folder in VSCode. Make sure you have the `ms-vscode.go` plugin installed.
 
+## Contributing
+
+The imports for this project utilize `github.com/essial/OpenDiablo2`. This means that even if you clone the repo, changes will not be taken as it will
+still pull from the main repo's files. In order to use your local version, add the following to `go.mod` in the base folder:
+```
+    replace github.com/essial/OpenDiablo2 => /your/forked/import/path
+```
+This will tell go to use your local path instead of the official repo. Be sure to exclude this change from your pull requests!
+
 ## VS Code Extensions
 
 The following extensions are recommended for working with this project:
