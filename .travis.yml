@@ -14,20 +14,19 @@ addons:
       - libgles2-mesa-dev
       - libasound2-dev
 script:
-  - go get
-  - go build .
-git:
-  depth: 1
-notifications:
-  email: false
-before_deploy:
   - git config --local user.name "$GitUser"
   - git config --local user.email "$GitEmail"
   - git tag Build-Master-$TRAVIS_OS_NAME
   - git commit -m "Update build version file with $TRAVIS_BUILD_NUMBER"
   - mkdir -p ./build_artifacts
+  - go get
+  - go build .
   - if [ "$TRAVIS_OS_NAME" = "win" ]; then cp ./OpenDiablo2.exe ./build_artifacts ; else cp ./OpenDiablo2 ./build_artifacts fi
   - cp ./config.json ./build_artifacts
+git:
+  depth: 1
+notifications:
+  email: false
 deploy:
   provider: releases
   api_key:
