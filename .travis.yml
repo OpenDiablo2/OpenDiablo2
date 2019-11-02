@@ -18,7 +18,7 @@ script:
   - mkdir -p ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
   - go get
   - go build -ldflags "-X main.GitCommit=$TRAVIS_COMMIT -X main.GitBranch=$TRAVIS_TAG"
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then ./ResourceHacker.exe -open OpenDiablo2.exe -save OpenDiablo2.exe -action addskip -res d2logo.ico -mask ICONGROUP,MAIN, ; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then ./rh.exe -open OpenDiablo2.exe -save OpenDiablo2.exe -action addskip -res d2logo.ico -mask ICONGROUP,MAIN, ; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then cp ./OpenDiablo2.exe ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME ; else cp ./OpenDiablo2 ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME; fi
   - cp ./d2logo.png ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
   - cp ./config.json ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
