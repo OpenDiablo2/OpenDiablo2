@@ -18,9 +18,9 @@ script:
   - mkdir -p ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
   - go get
   - go build .
-  - if [ "$TRAVIS_OS_NAME" = "win" ]; then cp ./OpenDiablo2.exe ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME ; else cp ./OpenDiablo2 ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then cp ./OpenDiablo2.exe ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME ; else cp ./OpenDiablo2 ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME; fi
   - cp ./config.json ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
-  - if [ "$TRAVIS_OS_NAME" = "win" ]; then zip -r opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.zip ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME ; else tar -cvzf opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.tar.gz ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME ; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then zip -r opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.zip ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME ; else tar -cvzf opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.tar.gz ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME ; fi
 git:
   depth: 1
 notifications:
