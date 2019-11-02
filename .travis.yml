@@ -1,4 +1,3 @@
-if: tag IS present
 language: go
 os:
   - linux
@@ -16,7 +15,8 @@ addons:
       - libasound2-dev
 script:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then choco install 7zip.portable ; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then OUTEXT=.zip ; else OUTEXT=.tar.gz ; fi
+  - mkdir -p ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
+  - rm -rf ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
   - mkdir -p ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
   - go get
   - go build .
@@ -24,14 +24,17 @@ script:
   - cp ./config.json ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then 7z a -r opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.zip ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME ; else tar -cvzf opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.tar.gz ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME ; fi
 git:
+  quiet: true
   depth: 1
 notifications:
   email: false
 deploy:
+  if: tag IS present AND TRAVIS_PULL_REQUEST=false
   provider: releases
   api_key:
     secure: "$GithubApi"
-  file: opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.$OUTEXT
+  file_glob: true
+  file: opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.*
   skip_cleanup: true
   overwrite: true
   name: "OpenDiablo Unstable (Build $TRAVIS_BUILD_NUMBER)"
