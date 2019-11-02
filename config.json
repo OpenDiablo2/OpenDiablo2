@@ -2,7 +2,7 @@
     "Language": "ENG",
     "FullScreen": false,
     "Scale": 1,
-    "TicksPerSecond": 60,
+    "TicksPerSecond": 25,
     "RunInBackground": true,
     "VsyncEnabled": true,
     "SfxVolume": 1.0,

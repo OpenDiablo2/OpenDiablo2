@@ -52,3 +52,9 @@ func BytesToInt32(b []byte) int32 {
 	// equivalnt of return int32(binary.LittleEndian.Uint32(b))
 	return int32(uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16 | uint32(b[3])<<24)
 }
+
+func IsoToScreen(isoX, isoY, modX, modY int) (int, int) {
+	screenX := (isoX - isoY) * 80
+	screenY := (isoX + isoY) * 40
+	return screenX + modX, screenY + modY
+}

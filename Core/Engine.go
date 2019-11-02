@@ -31,6 +31,7 @@ type EngineConfig struct {
 	Scale           float64
 	RunInBackground bool
 	TicksPerSecond  int
+	FpsCap          int
 	VsyncEnabled    bool
 	MpqPath         string
 	MpqLoadOrder    []string
