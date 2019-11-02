@@ -1,6 +1,6 @@
 package Common
 
-import "github.com/essial/OpenDiablo2/PaletteDefs"
+import "github.com/OpenDiablo2/OpenDiablo2/PaletteDefs"
 
 // FileProvider is an instance that can provide different types of files
 type FileProvider interface {

@@ -1,4 +1,4 @@
-module github.com/essial/OpenDiablo2
+module github.com/OpenDiablo2/OpenDiablo2
 
 go 1.13
 

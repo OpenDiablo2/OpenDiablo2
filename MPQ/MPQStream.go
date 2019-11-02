@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/JoshVarga/blast"
-	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/Compression"
+	"github.com/OpenDiablo2/OpenDiablo2/Common"
+	"github.com/OpenDiablo2/OpenDiablo2/Compression"
 )
 
 // Stream represents a stream of data in an MPQ archive

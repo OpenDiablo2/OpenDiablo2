@@ -5,7 +5,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/audio/wav"
 
-	"github.com/essial/OpenDiablo2/Common"
+	"github.com/OpenDiablo2/OpenDiablo2/Common"
 
 	"github.com/hajimehoshi/ebiten/audio"
 )

@@ -3,7 +3,7 @@ package Map
 import (
 	"log"
 
-	"github.com/essial/OpenDiablo2/Common"
+	"github.com/OpenDiablo2/OpenDiablo2/Common"
 )
 
 // https://d2mods.info/forum/viewtopic.php?t=65163

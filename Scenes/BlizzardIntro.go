@@ -1,8 +1,8 @@
 package Scenes
 
 import (
-	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/Video"
+	"github.com/OpenDiablo2/OpenDiablo2/Common"
+	"github.com/OpenDiablo2/OpenDiablo2/Video"
 	"github.com/hajimehoshi/ebiten"
 )
 

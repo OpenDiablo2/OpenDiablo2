@@ -4,11 +4,11 @@ import (
 	"image/color"
 	"strings"
 
-	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/PaletteDefs"
-	"github.com/essial/OpenDiablo2/ResourcePaths"
-	"github.com/essial/OpenDiablo2/Sound"
-	"github.com/essial/OpenDiablo2/UI"
+	"github.com/OpenDiablo2/OpenDiablo2/Common"
+	"github.com/OpenDiablo2/OpenDiablo2/PaletteDefs"
+	"github.com/OpenDiablo2/OpenDiablo2/ResourcePaths"
+	"github.com/OpenDiablo2/OpenDiablo2/Sound"
+	"github.com/OpenDiablo2/OpenDiablo2/UI"
 	"github.com/hajimehoshi/ebiten"
 )
 

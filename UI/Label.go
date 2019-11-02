@@ -3,8 +3,8 @@ package UI
 import (
 	"image/color"
 
-	"github.com/essial/OpenDiablo2/Common"
-	"github.com/essial/OpenDiablo2/PaletteDefs"
+	"github.com/OpenDiablo2/OpenDiablo2/Common"
+	"github.com/OpenDiablo2/OpenDiablo2/PaletteDefs"
 	"github.com/hajimehoshi/ebiten"
 )
 

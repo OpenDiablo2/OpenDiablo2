@@ -1,7 +1,7 @@
 package Map
 
 import (
-	"github.com/essial/OpenDiablo2/Common"
+	"github.com/OpenDiablo2/OpenDiablo2/Common"
 )
 
 var dirLookup = []int32{

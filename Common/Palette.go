@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/essial/OpenDiablo2/PaletteDefs"
+	"github.com/OpenDiablo2/OpenDiablo2/PaletteDefs"
 )
 
 // PaletteRGB represents a color in a palette
