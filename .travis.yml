@@ -15,7 +15,7 @@ addons:
       - libgles2-mesa-dev
       - libasound2-dev
 script:
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; choco install 7zip.portable ; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then choco install 7zip.portable ; fi
   - mkdir -p ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
   - go get
   - go build .
