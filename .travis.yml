@@ -1,3 +1,4 @@
+if: tag IS present
 language: go
 os:
   - linux
