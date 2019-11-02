@@ -16,6 +16,7 @@ addons:
       - libasound2-dev
 script:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then choco install 7zip.portable ; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then SET OUTEXT=.zip ; else SET OUTEXT=.tar.gz ; fi
   - mkdir -p ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
   - go get
   - go build .
@@ -30,9 +31,7 @@ deploy:
   provider: releases
   api_key:
     secure: "$GithubApi"
-  file_glob: true
-
-  file: opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.*
+  file: opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.$OUTEXT
   skip_cleanup: true
   overwrite: true
   name: "OpenDiablo Unstable (Build $TRAVIS_BUILD_NUMBER)"
