@@ -14,9 +14,6 @@ addons:
       - libgles2-mesa-dev
       - libasound2-dev
 script:
-  - git config --local user.name "$GitUser"
-  - git config --local user.email "$GitEmail"
-  - git tag Build-Master-$TRAVIS_OS_NAME -m "Update build version file with $TRAVIS_BUILD_NUMBER"
   - mkdir -p ./build_artifacts
   - go get
   - go build .
