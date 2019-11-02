@@ -32,7 +32,8 @@ deploy:
   file_glob: true
   file: opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.*
   skip_cleanup: true
-  name: "OpenDiablo Unstable"
+  overwrite: true
+  name: "OpenDiablo Unstable (Build $TRAVIS_BUILD_NUMBER)"
   prerelease: true
   on:
     tags: true
