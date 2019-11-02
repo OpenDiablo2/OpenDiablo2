@@ -1,4 +1,4 @@
-# OpenDiablo2 [![Build Status](https://travis-ci.org/essial/OpenDiablo2.svg?branch=dev)](https://travis-ci.org/essial/OpenDiablo2)
+# OpenDiablo2 [![Build Status](https://travis-ci.org/OpenDiablo2/OpenDiablo2.svg?branch=master)](https://travis-ci.org/OpenDiablo2/OpenDiablo2)
 
 [Join us on Discord!](https://discord.gg/pRy8tdc)\
 [Development Live stream](https://www.twitch.tv/essial/)
