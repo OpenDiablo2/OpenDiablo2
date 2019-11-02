@@ -32,6 +32,7 @@ deploy:
     secure: "$GithubApi"
   file: opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.tar.gz
   skip_cleanup: true
-  name: "OpenDiablo Git Latest ($TRAVIS_OS_NAME)"
+  name: "OpenDiablo Unstable"
+  prerelease: true
   on:
     tags: true
