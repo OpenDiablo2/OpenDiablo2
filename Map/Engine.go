@@ -44,7 +44,6 @@ func (v *Engine) GenerateMap(regionType RegionIdType, levelPreset int) {
 }
 
 func (v *Engine) Render(target *ebiten.Image) {
-	// TODO: Temporary hack for testing
 	for y := 0; y < int(v.regions[0].Region.TileHeight); y++ {
 		offX := -(y * 80)
 		offY := y * 40
@@ -84,15 +83,12 @@ func (v *Engine) Render(target *ebiten.Image) {
 		offX := -(y * 80)
 		offY := y * 40
 		for x := 0; x < int(v.regions[0].Region.TileWidth); x++ {
-			sx, sy := Common.IsoToScreen(x, y, int(v.OffsetX), int(v.OffsetY))
-			if sx > -160 && sy > -160 && sx <= 800 && sy <= 1000 {
-				tile := v.regions[0].Region.DS1.Tiles[y][x]
-				for i := range tile.Walls {
-					if tile.Walls[i].Hidden || tile.Walls[i].Orientation == 15 || tile.Walls[i].Orientation == 10 || tile.Walls[i].Orientation == 11 || tile.Walls[i].Orientation == 0 {
-						continue
-					}
-					v.regions[0].Region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, RegionLayerTypeWalls, i, target)
+			tile := v.regions[0].Region.DS1.Tiles[y][x]
+			for i := range tile.Walls {
+				if tile.Walls[i].Hidden || tile.Walls[i].Orientation == 15 || tile.Walls[i].Orientation == 10 || tile.Walls[i].Orientation == 11 || tile.Walls[i].Orientation == 0 {
+					continue
 				}
+				v.regions[0].Region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, RegionLayerTypeWalls, i, target)
 			}
 			offX += 80
 			offY += 40
@@ -102,15 +98,12 @@ func (v *Engine) Render(target *ebiten.Image) {
 		offX := -(y * 80)
 		offY := y * 40
 		for x := 0; x < int(v.regions[0].Region.TileWidth); x++ {
-			sx, sy := Common.IsoToScreen(x, y, int(v.OffsetX), int(v.OffsetY))
-			if sx > -160 && sy > -160 && sx <= 800 && sy <= 1000 {
-				tile := v.regions[0].Region.DS1.Tiles[y][x]
-				for i := range tile.Walls {
-					if tile.Walls[i].Hidden || tile.Walls[i].Orientation != 15 {
-						continue
-					}
-					v.regions[0].Region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, RegionLayerTypeWalls, i, target)
+			tile := v.regions[0].Region.DS1.Tiles[y][x]
+			for i := range tile.Walls {
+				if tile.Walls[i].Hidden || tile.Walls[i].Orientation != 15 {
+					continue
 				}
+				v.regions[0].Region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, RegionLayerTypeWalls, i, target)
 			}
 			offX += 80
 			offY += 40

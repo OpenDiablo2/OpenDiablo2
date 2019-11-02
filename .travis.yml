@@ -1,10 +1,32 @@
 language: go
+os:
+  - linux
+  - osx
+  - windows
 go:
   - 1.13.3
-before_install:
-  - sudo apt-get -y install libx11-dev  mesa-common-dev libglfw3-dev libgles2-mesa-dev libasound2-dev
-script: go get && go build .
+addons:
+  apt:
+    packages:
+      - libx11-dev
+      - mesa-common-dev
+      - libglfw3-dev
+      - libgles2-mesa-dev
+      - libasound2-dev
+script:
+  - go get
+  - go build .
 git:
   depth: 1
 notifications:
   email: false
+deploy:
+  provider: releases
+  api_key:
+    secure: "$GithubApi"
+  file_glob: true
+  file: build_artifacts/*
+  skip_cleanup: true
+  name: "OpenDiablo Git Latest ($TRAVIS_OS_NAME)"
+  on:
+    tags: true

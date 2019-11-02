@@ -47,6 +47,7 @@ func (v *MapEngineTest) Load() []func() {
 			//v.mapEngine.GenerateMap(Map.RegionAct2Harem, 353)
 			//v.mapEngine.GenerateMap(Map.RegionAct3Town, 529)
 			//v.mapEngine.GenerateMap(Map.RegionAct3Jungle, 574)
+			//v.mapEngine.GenerateMap(Map.RegionAct4Town, 797)
 			//v.mapEngine.GenerateMap(Map.RegonAct5Town, 863)
 			//v.mapEngine.GenerateMap(Map.RegionAct5IceCaves, 1038)
 			//v.mapEngine.GenerateMap(Map.RegionAct5Siege, 879)

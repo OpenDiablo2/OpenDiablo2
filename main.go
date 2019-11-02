@@ -2,9 +2,6 @@ package main
 
 import (
 	"log"
-	"strconv"
-
-	"github.com/hajimehoshi/ebiten/ebitenutil"
 
 	"github.com/essial/OpenDiablo2/Core"
 	"github.com/essial/OpenDiablo2/MPQ"
@@ -14,6 +11,7 @@ import (
 var d2Engine *Core.Engine
 
 func main() {
+	log.SetFlags(log.Ldate | log.LUTC | log.Lmicroseconds | log.Llongfile)
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
 	MPQ.InitializeCryptoBuffer()
 	d2Engine = Core.CreateEngine()
@@ -33,6 +31,6 @@ func update(screen *ebiten.Image) error {
 		return nil
 	}
 	d2Engine.Draw(screen)
-	ebitenutil.DebugPrint(screen, "FPS:"+strconv.Itoa(int(ebiten.CurrentFPS())))
+	//ebitenutil.DebugPrint(screen, "FPS:"+strconv.Itoa(int(ebiten.CurrentFPS())))
 	return nil
 }
