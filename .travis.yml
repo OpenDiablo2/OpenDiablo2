@@ -20,7 +20,7 @@ script:
   - mkdir -p ./build_artifacts
   - go get
   - go build .
-  - if [ "$TRAVIS_OS_NAME" = "win" ]; then cp ./OpenDiablo2.exe ./build_artifacts ; else cp ./OpenDiablo2 ./build_artifacts fi
+  - if [ "$TRAVIS_OS_NAME" = "win" ]; then cp ./OpenDiablo2.exe ./build_artifacts ; else cp ./OpenDiablo2 ./build_artifacts; fi
   - cp ./config.json ./build_artifacts
 git:
   depth: 1
