@@ -3,7 +3,7 @@
 [Join us on Discord!](https://discord.gg/pRy8tdc)\
 [Development Live stream](https://www.twitch.tv/essial/)
 
-![Main Menu](docs/MainMenuSS.png)
+![Logo](d2logo.png)
 
 ## About this project
 
@@ -58,3 +58,17 @@ then clicking on `Edit in settings.json`. Just paste that section where appropri
 The engine is configured via the `config.json` file. By default, the configuration assumes that you have installed Diablo 2 and the
 expansion via the official Blizzard Diablo2 installers using the default file paths. If you are not on Windows, or have installed
 the game in a different location, the base path may have to be adjusted.
+
+## Screenshots
+
+![Main Menu](docs/MainMenuSS.png)
+
+![Select Hero](docs/SelectHeroSS.png)
+
+## Additional Credits
+- Diablo2 Logo
+  - Jose Pardilla (th3-prophetman)
+- DT1 File Specifications
+  - Paul SIRAMY (http://paul.siramy.free.fr/_divers/dt1_doc/)
+- Other Specifications and general info
+  - Various users on [Phrozen Keep](https://d2mods.info/home.php) 

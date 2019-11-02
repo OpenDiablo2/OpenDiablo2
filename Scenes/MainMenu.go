@@ -38,6 +38,8 @@ type MainMenu struct {
 	copyrightLabel      *UI.Label
 	copyrightLabel2     *UI.Label
 	openDiabloLabel     *UI.Label
+	versionLabel        *UI.Label
+	commitLabel         *UI.Label
 
 	ShowTrademarkScreen bool
 	leftButtonHeld      bool
@@ -60,6 +62,20 @@ func CreateMainMenu(fileProvider Common.FileProvider, sceneProvider SceneProvide
 func (v *MainMenu) Load() []func() {
 	v.soundManager.PlayBGM(ResourcePaths.BGMTitle)
 	return []func(){
+		func() {
+			v.versionLabel = UI.CreateLabel(v.fileProvider, ResourcePaths.FontFormal12, PaletteDefs.Static)
+			v.versionLabel.Alignment = UI.LabelAlignRight
+			v.versionLabel.SetText("OpenDiablo2 - " + Common.BuildInfo.Branch)
+			v.versionLabel.Color = color.RGBA{255, 255, 255, 255}
+			v.versionLabel.MoveTo(795, -10)
+		},
+		func() {
+			v.commitLabel = UI.CreateLabel(v.fileProvider, ResourcePaths.FontFormal10, PaletteDefs.Static)
+			v.commitLabel.Alignment = UI.LabelAlignLeft
+			v.commitLabel.SetText(Common.BuildInfo.Commit)
+			v.commitLabel.Color = color.RGBA{255, 255, 255, 255}
+			v.commitLabel.MoveTo(2, 2)
+		},
 		func() {
 			v.copyrightLabel = UI.CreateLabel(v.fileProvider, ResourcePaths.FontFormal12, PaletteDefs.Static)
 			v.copyrightLabel.Alignment = UI.LabelAlignCenter
@@ -216,6 +232,8 @@ func (v *MainMenu) Render(screen *ebiten.Image) {
 		v.copyrightLabel2.Draw(screen)
 	} else {
 		v.openDiabloLabel.Draw(screen)
+		v.versionLabel.Draw(screen)
+		v.commitLabel.Draw(screen)
 	}
 }
 

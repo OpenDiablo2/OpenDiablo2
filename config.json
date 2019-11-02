@@ -1,6 +1,6 @@
 {
     "Language": "ENG",
-    "FullScreen": false,
+    "FullScreen": true,
     "Scale": 1,
     "TicksPerSecond": -1,
     "RunInBackground": true,
