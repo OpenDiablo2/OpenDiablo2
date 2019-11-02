@@ -24,6 +24,14 @@ func MaxInt32(a, b int32) int32 {
 	return b
 }
 
+func NextPow2(x int32) int32 {
+	result := int32(1)
+	for result < x {
+		result *= 2
+	}
+	return result
+}
+
 func AbsInt32(a int32) int32 {
 	if a < 0 {
 		return -a
