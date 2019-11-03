@@ -1,0 +1,24 @@
+{
+    "Language": "ENG",
+    "FullScreen": true,
+    "Scale": 1,
+    "TicksPerSecond": -1,
+    "RunInBackground": true,
+    "VsyncEnabled": true,
+    "SfxVolume": 1.0,
+    "BgmVolume": 0.3,
+    "MpqPath": "C:/Program Files (x86)/Diablo II",
+    "MpqLoadOrder": [
+        "Patch_D2.mpq",
+        "d2exp.mpq",
+        "d2xmusic.mpq",
+        "d2xtalk.mpq",
+        "d2xvideo.mpq",
+        "d2data.mpq",
+        "d2char.mpq",
+        "d2music.mpq",
+        "d2sfx.mpq",
+        "d2video.mpq",
+        "d2speech.mpq"
+    ]    
+}

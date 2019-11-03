@@ -1,13 +1,124 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>OpenDiablo 2</title>
-  <meta name="description" content="">
-  <meta name="author" content="">
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-151296679-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-151296679-1');
+	</script>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<title>OpenDiablo 2</title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<link rel="stylesheet" type="text/css" href="style.css" />
+	<link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet">
 </head>
 
 <body>
-   We need a website.
+	<h1>
+		OPENDIABLO 2
+		<span>An open-source implementation of Diablo2</span>
+		<span>
+			<a href="https://www.github.com/OpenDiablo2" target="_blank">Github Organization Page</a>
+		</span>
+	</h1>
+	<div class="paragraph">
+		<span>
+			<a class="btnMedium" href="#config">Config</a>
+			<a class="btnMedium" href="#screenshots">Screens</a>
+		</span>
+		<span>
+			OpenDiablo2 is an ARPG game engine in the same vein of the 2000's games, and supports playing Diablo 2. The engine is written in golang and is cross platform. However, please note that this project does not ship with the assets or content required to play Diablo 2. You must have a legally purchased copy of Diablo 2 and its expansion Lord of Destruction installed on your computer in order to run that game on this engine. If you have an original copy of the disks, those files should work fine as well.
+		</span>
+		<span>
+			Currently we are working on features necessary to play Diablo 2 in its entireity, but will then expand with tools and plugin support to allow modding, as well as writing completely new games with the engine.
+		</span>
+		<span>
+			We are in the process of moving to a go based engine. We are taking good bits from the original C# base and migrating it over to the new engine code.
+		</span>
+		<span>
+			Please note that this game is neither developed by, nor endorsed by Blizzard or its parent company Activision.
+		</span>
+		<span>
+			Diablo 2 and its content is ©2000 Blizzard Entertainment, Inc. All rights reserved. Diablo and Blizzard Entertainment are trademarks or registered trademarks of Blizzard Entertainment, Inc. in the U.S. and/or other countries.
+		</span>
+		<span>
+			ALL OTHER TRADEMARKS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS.
+		</span>
+	</div>
+	<hr />
+	<h2 id="config">Configuration</h2>
+	<div class="paragraph">
+	<span>There is a configuration file (config.json) that should be located in the root folder. The following table describes the different options and what they mean.</span>
+		<table>
+			<thead>
+			<tr>
+				<th>Setting Name</th>
+				<th>Description</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td>Language</td>
+				<td>
+					Defines the locale the game is running in. For english this should be set to <code>ENG</code>. Other values include
+					(but are not limited to) <code>CHI</code>, <code>DEU</code>, <code>ESP</code>, <code>FRA</code>, <code>ITA</code>,
+					<code>JPN</code>, etc.
+				</td>
+			</tr>
+			<tr>
+				<td>FullScreen</td>
+				<td>Determines if the client is initially full screen or not. Do note that fullscreen mode can be toggled at any time
+					with <code>ALT</code>+<code>ENTER</code>.</td>
+			</tr>
+			<tr>
+				<td>Scale</td>
+				<td>Defines the graphical scale of the game. this value is a decimal number representing the direct scale of the game.
+				For example, a scale of 1.25 will increase the size of the game to 1 1/4 the original size. Note that full screen will
+				always scale to match the proper aspect ratio.</td>
+			</tr>
+			<tr>
+				<td>TicksPerSecond</td>
+				<td>Determines how often the engine updates. Please note that the core will always run game-level updates at exactly 25FPS
+				to match the original engine.</td>
+			</tr>
+			<tr>
+				<td>RunInBackground</td>
+				<td>If true, the game will continue running when the window is not focused. If false, the game will stop running when the
+				window looses focus.</td>
+			</tr>
+			<tr>
+				<td>VsyncEnabled</td>
+				<td>Determines if screen updates are synchronized on the (real or virtual) vblank of your display.</td>
+			</tr>
+			<tr>
+				<td>SfxVolume</td>
+				<td>A decimal value between <code>0.0</code> and <code>1.0</code> representing how loud sound effects should be.</td>
+			</tr>
+			<tr>
+				<td>BgmVolume</td>
+				<td>A decimal value between <code>0.0</code> and <code>1.0</code> representing how loud background music should be.</td>
+			</tr>
+			<tr>
+				<td>MpqPath</td>
+				<td>The base path of where the MPQ files are located. If you install Diablo2+LOD on linux with wine using the default settings,
+				OpenDiablo 2 will automatically check the wine prefix for the path if it is still set to the windows path.</td>
+			</tr>
+			<tr>
+				<td>MpqLoadOrder</td>
+				<td>This is the list of MPQs to load. In the event that the same file is in multiple MPQs, the first MPQ (highest on the list)
+				will be the one from which the file will be loaded.</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+	<hr />
+	<h2 id="screenshots">Screenshots</h2>
+	<img class="imgFrame" src="MainMenuSS.png" alt="Main Menu"/>
+	<img class="imgFrame" src="SelectHeroSS.png" alt="Select Hero"/>
 </body>
 </html>
