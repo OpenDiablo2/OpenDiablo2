@@ -163,6 +163,7 @@ const (
 	PatchStringTable     = "/data/local/lng/{LANG}/patchstring.tbl"
 	LevelPreset          = "/data/global/excel/LvlPrest.bin"
 	LevelType            = "/data/global/excel/LvlTypes.bin"
+	LevelWarp            = "/data/global/excel/LvlWarp.bin"
 	LevelDetails         = "/data/global/excel/Levels.bin"
 	ObjectDetails        = "/data/global/excel/Objects.bin"
 	SoundSettings        = "/data/global/excel/Sounds.txt"
