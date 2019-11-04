@@ -162,7 +162,7 @@ const (
 	StringTable          = "/data/local/lng/{LANG}/string.tbl"
 	PatchStringTable     = "/data/local/lng/{LANG}/patchstring.tbl"
 	LevelPreset          = "/data/global/excel/LvlPrest.txt"
-	LevelType            = "/data/global/excel/LvlTypes.bin"
+	LevelType            = "/data/global/excel/LvlTypes.txt"
 	ObjectType           = "/data/global/excel/objtype.bin"
 	LevelWarp            = "/data/global/excel/LvlWarp.bin"
 	LevelDetails         = "/data/global/excel/Levels.bin"
