@@ -8,30 +8,44 @@ import (
 )
 
 type LevelTypeRecord struct {
-	Files [32]string
-	Act   int32
+	Name      string
+	Id        int
+	Files     [32]string
+	Beta      bool
+	Act       int
+	Expansion bool
 }
 
 var LevelTypes []LevelTypeRecord
 
 func LoadLevelTypes(fileProvider FileProvider) {
-	levelTypesData := fileProvider.LoadFile(ResourcePaths.LevelType)
-	sr := CreateStreamReader(levelTypesData)
-	numRecords := sr.GetInt32()
-	LevelTypes = make([]LevelTypeRecord, numRecords)
-	for i := range LevelTypes {
-		for fileIdx := 0; fileIdx < 32; fileIdx++ {
-			strData, _ := sr.ReadBytes(60)
-			s := strings.Trim(string(strData), string(0))
-			if s == "0" {
+	data := strings.Split(string(fileProvider.LoadFile(ResourcePaths.LevelType)), "\r\n")[1:]
+	LevelTypes = make([]LevelTypeRecord, len(data))
+	for i, line := range data {
+		idx := -1
+		inc := func() int {
+			idx++
+			return idx
+		}
+		if len(line) == 0 {
+			continue
+		}
+		parts := strings.Split(line, "\t")
+		if parts[0] == "Expansion" {
+			continue
+		}
+		LevelTypes[i].Name = parts[inc()]
+		LevelTypes[i].Id = StringToInt(parts[inc()])
+		for fileIdx := range LevelTypes[i].Files {
+			LevelTypes[i].Files[fileIdx] = parts[inc()]
+			if LevelTypes[i].Files[fileIdx] == "0" {
 				LevelTypes[i].Files[fileIdx] = ""
-			} else {
-				LevelTypes[i].Files[fileIdx] = s
 			}
 
 		}
-		LevelTypes[i].Act = int32(sr.GetByte())
-
+		LevelTypes[i].Beta = parts[inc()] != "1"
+		LevelTypes[i].Act = StringToInt(parts[inc()])
+		LevelTypes[i].Expansion = parts[inc()] != "1"
 	}
-	log.Printf("Loaded %d LevelType records", numRecords)
+	log.Printf("Loaded %d LevelType records", len(LevelTypes))
 }
