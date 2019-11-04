@@ -161,7 +161,7 @@ const (
 	ExpansionStringTable = "/data/local/lng/{LANG}/expansionstring.tbl"
 	StringTable          = "/data/local/lng/{LANG}/string.tbl"
 	PatchStringTable     = "/data/local/lng/{LANG}/patchstring.tbl"
-	LevelPreset          = "/data/global/excel/LvlPrest.bin"
+	LevelPreset          = "/data/global/excel/LvlPrest.txt"
 	LevelType            = "/data/global/excel/LvlTypes.bin"
 	ObjectType           = "/data/global/excel/objtype.bin"
 	LevelWarp            = "/data/global/excel/LvlWarp.bin"
@@ -228,21 +228,21 @@ const (
 
 	// --- Sound Effects ---
 
-	SFXButtonClick         = "ESOUND_CURSOR_BUTTON_CLICK"
-	SFXAmazonDeselect      = "ESOUND_CURSOR_AMAZON_DESELECT"
-	SFXAmazonSelect        = "ESOUND_CURSOR_AMAZON_SELECT"
+	SFXButtonClick         = "cursor_button_click"
+	SFXAmazonDeselect      = "cursor_amazon_deselect"
+	SFXAmazonSelect        = "cursor_amazon_select"
 	SFXAssassinDeselect    = "/data/global/sfx/Cursor/intro/assassin deselect.wav"
 	SFXAssassinSelect      = "/data/global/sfx/Cursor/intro/assassin select.wav"
-	SFXBarbarianDeselect   = "ESOUND_CURSOR_BARBARIAN_DESELECT"
-	SFXBarbarianSelect     = "ESOUND_CURSOR_BARBARIAN_SELECT"
+	SFXBarbarianDeselect   = "cursor_barbarian_deselect"
+	SFXBarbarianSelect     = "cursor_barbarian_select"
 	SFXDruidDeselect       = "/data/global/sfx/Cursor/intro/druid deselect.wav"
 	SFXDruidSelect         = "/data/global/sfx/Cursor/intro/druid select.wav"
-	SFXNecromancerDeselect = "ESOUND_CURSOR_NECROMANCER_DESELECT"
-	SFXNecromancerSelect   = "ESOUND_CURSOR_NECROMANCER_SELECT"
-	SFXPaladinDeselect     = "ESOUND_CURSOR_PALADIN_DESELECT"
-	SFXPaladinSelect       = "ESOUND_CURSOR_PALADIN_SELECT"
-	SFXSorceressDeselect   = "ESOUND_CURSOR_SORCERESS_DESELECT"
-	SFXSorceressSelect     = "ESOUND_CURSOR_SORCERESS_SELECT"
+	SFXNecromancerDeselect = "cursor_necromancer_deselect"
+	SFXNecromancerSelect   = "cursor_necromancer_select"
+	SFXPaladinDeselect     = "cursor_paladin_deselect"
+	SFXPaladinSelect       = "cursor_paladin_select"
+	SFXSorceressDeselect   = "cursor_sorceress_deselect"
+	SFXSorceressSelect     = "cursor_sorceress_select"
 
 	// --- Enemy Data ---
 
@@ -250,5 +250,5 @@ const (
 
 	// --- Skill Data ---
 
-	Missiles = "/data//global//excel//missiles.txt"
+	Missiles = "/data/global/excel/Missiles.txt"
 )

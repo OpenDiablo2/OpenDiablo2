@@ -120,8 +120,7 @@ type ObjectRecord struct {
 }
 
 // CreateObjectRecord parses a row from objects.txt into an object record
-func createObjectRecord(line string) ObjectRecord {
-	props := strings.Split(line, "\t")
+func createObjectRecord(props []string) ObjectRecord {
 	i := -1
 	inc := func() int {
 		i++
@@ -343,7 +342,11 @@ func LoadObjects(fileProvider FileProvider) {
 		if len(line) == 0 {
 			continue
 		}
-		rec := createObjectRecord(line)
+		props := strings.Split(line, "\t")
+		if props[2] == "" {
+			continue // skip a line that doesn't have an id
+		}
+		rec := createObjectRecord(props)
 		Objects[rec.Id] = &rec
 	}
 	log.Printf("Loaded %d objects", len(Objects))
