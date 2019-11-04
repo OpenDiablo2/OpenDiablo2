@@ -67,6 +67,15 @@ func StringToInt8(text string) int8 {
 	return int8(result)
 }
 
+// StringToFloat64 converts a string to a float64
+func StringToFloat64(text string) float64 {
+	result, err := strconv.ParseFloat(text, 64)
+	if err != nil {
+		panic(err)
+	}
+	return float64(result)
+}
+
 func Utf16BytesToString(b []byte) (string, error) {
 
 	if len(b)%2 != 0 {
