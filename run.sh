@@ -30,18 +30,18 @@ echo "Install Go for OpenDiablo 2 ($distribution)"
   if ! command -v go &> /dev/null; then
 
     if [[ "$distribution" = CentOS || "$distribution" = CentOS || "$distribution" = Red\ Hat || "$distribution" = Suse || "$distribution" = Oracle ]]; then
-      yum install -y go &> /dev/null
+      sudo yum install -y go &> /dev/null
 
       compile_od2 || exit
       
     elif [[ "$distribution" = Fedora ]]; then
-      dnf install -y go &> /dev/null
+      sudo dnf install -y go &> /dev/null
     
       compile_od2 || exit
     
     elif [[ "$distribution" = Debian || "$distribution" = Ubuntu || "$distribution" = Deepin ]]; then
-      apt-get update &> /dev/null
-      apt-get install -y go --force-yes &> /dev/null
+      sudo apt-get update &> /dev/null
+      sudo apt-get install -y go --force-yes &> /dev/null
     
       compile_od2 || exit
       
