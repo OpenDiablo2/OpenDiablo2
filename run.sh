@@ -6,7 +6,7 @@
 
 version="0.0.1"
 
-echo "Welcome on OpenDiablo 2 Build Script $version"
+echo "OpenDiablo 2 Build Script $version"
 
 
 #=================================================
@@ -20,7 +20,7 @@ compile_od2(){
       go get
 	  go build
 	  chmod +x OpenDiablo2
-	  echo "Build Finish please edit config.json before run OpenDiablo2"
+	  echo "Build finished. Please edit config.json before running OpenDiablo2"
       }
 
 go_run(){
