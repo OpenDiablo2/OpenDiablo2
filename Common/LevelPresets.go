@@ -8,62 +8,82 @@ import (
 )
 
 type LevelPresetRecord struct {
-	DefinitionId int32
-	LevelId      int32
+	Name	     string
+	DefinitionId int
+	LevelId      int
 	Populate     bool
 	Logicals     bool
 	Outdoors     bool
 	Animate      bool
 	KillEdge     bool
 	FillBlanks   bool
-	SizeX        int32
-	SizeY        int32
+	SizeX        int
+	SizeY        int
 	AutoMap      bool
 	Scan         bool
-	Pops         int32
-	PopPad       int32
+	Pops         int
+	PopPad       int
+	FileCount    int
 	Files        [6]string
-	Dt1Mask      uint32
+	Dt1Mask      uint
+	Beta		 bool
+	Expansion    bool
+}
+
+// CreateLevelPresetRecord parses a row from lvlprest.txt into a LevelPresetRecord
+func createLevelPresetRecord(props []string) LevelPresetRecord {
+	i := -1
+	inc := func() int {
+		i++
+		return i
+	}
+	result := LevelPresetRecord{
+		Name: props[inc()],
+		DefinitionId: StringToInt(props[inc()]),
+		LevelId: StringToInt(props[inc()]),
+		Populate: StringToUint8(props[inc()]) == 1,
+		Logicals: StringToUint8(props[inc()]) == 1,
+		Outdoors: StringToUint8(props[inc()]) == 1,
+		Animate: StringToUint8(props[inc()]) == 1,
+		KillEdge: StringToUint8(props[inc()]) == 1,
+		FillBlanks: StringToUint8(props[inc()]) == 1,
+		SizeX: StringToInt(props[inc()]),
+		SizeY: StringToInt(props[inc()]),
+		AutoMap: StringToUint8(props[inc()]) == 1,
+		Scan: StringToUint8(props[inc()]) == 1,
+		Pops: StringToInt(props[inc()]),
+		PopPad: StringToInt(props[inc()]),
+		FileCount: StringToInt(props[inc()]),
+		Files: [6]string{
+			props[inc()],
+			props[inc()],
+			props[inc()],
+			props[inc()],
+			props[inc()],
+			props[inc()],
+		},
+		Dt1Mask: StringToUint(props[inc()]),
+		Beta: StringToUint8(props[inc()]) == 1,
+		Expansion: StringToUint8(props[inc()]) == 1,
+	}
+	return result
 }
 
 var LevelPresets map[int]*LevelPresetRecord
 
 func LoadLevelPresets(fileProvider FileProvider) {
-	levelTypesData := fileProvider.LoadFile(ResourcePaths.LevelPreset)
-	sr := CreateStreamReader(levelTypesData)
-	sr.SkipBytes(4) // Count
 	LevelPresets = make(map[int]*LevelPresetRecord)
-	for !sr.Eof() {
-		i := int(sr.GetInt32())
-		LevelPresets[i] = &LevelPresetRecord{}
-		LevelPresets[i].DefinitionId = int32(i)
-		LevelPresets[i].LevelId = sr.GetInt32()
-		LevelPresets[i].Populate = sr.GetInt32() != 0
-		LevelPresets[i].Logicals = sr.GetInt32() != 0
-		LevelPresets[i].Outdoors = sr.GetInt32() != 0
-		LevelPresets[i].Animate = sr.GetInt32() != 0
-		LevelPresets[i].KillEdge = sr.GetInt32() != 0
-		LevelPresets[i].FillBlanks = sr.GetInt32() != 0
-		sr.GetInt32() // What is this field?
-		LevelPresets[i].SizeX = sr.GetInt32()
-		LevelPresets[i].SizeY = sr.GetInt32()
-		LevelPresets[i].AutoMap = sr.GetInt32() != 0
-		LevelPresets[i].Scan = sr.GetInt32() != 0
-		LevelPresets[i].Pops = sr.GetInt32()
-		LevelPresets[i].PopPad = sr.GetInt32()
-		sr.GetUInt32() // Most likely NumFiles
-		for fileIdx := 0; fileIdx < 6; fileIdx++ {
-			strData, _ := sr.ReadBytes(60)
-			s := strings.Trim(string(strData), string(0))
-			if s == "0" {
-				LevelPresets[i].Files[fileIdx] = ""
-			} else {
-				LevelPresets[i].Files[fileIdx] = s
-			}
-
+	data := strings.Split(string(fileProvider.LoadFile(ResourcePaths.LevelPreset)), "\r\n")[1:]
+	for _, line := range data {
+		if len(line) == 0 {
+			continue
 		}
-		LevelPresets[i].Dt1Mask = sr.GetUInt32()
-
+		props := strings.Split(line, "\t")
+		if(props[1] == "") {
+			continue // any line without a definition id is skipped (e.g. the "Expansion" line)
+		}
+		rec := createLevelPresetRecord(props)
+		LevelPresets[rec.DefinitionId] = &rec
 	}
-	log.Printf("Loaded %d LevelPreset records", len(LevelPresets))
+	log.Printf("Loaded %d level presets", len(LevelPresets))
 }

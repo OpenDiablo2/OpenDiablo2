@@ -9,6 +9,22 @@ import (
 	"unicode/utf8"
 )
 
+// AsterToEmpty converts strings beginning with "*" to "", for use when handling columns where an asterix can be used to comment out entries
+func AsterToEmpty(text string) string {
+	if strings.HasPrefix(text, "*") {
+		return ""
+	}
+	return text
+}
+
+// EmptyToZero converts empty strings to "0" and leaves non-empty strings as is, for use before converting numerical data which equates empty to zero
+func EmptyToZero(text string) string {
+	if text == "" || text == " " {
+		return "0"
+	}
+	return text
+}
+
 // StringToInt converts a string to an integer
 func StringToInt(text string) int {
 	result, err := strconv.Atoi(text)
@@ -18,6 +34,15 @@ func StringToInt(text string) int {
 	return result
 }
 
+// StringToUint converts a string to a uint32
+func StringToUint(text string) uint {
+	result, err := strconv.ParseUint(text, 10, 32)
+	if err != nil {
+		panic(err)
+	}
+	return uint(result)
+}
+
 // StringToUint8 converts a string to an uint8
 func StringToUint8(text string) uint8 {
 	result, err := strconv.Atoi(text)
@@ -25,7 +50,7 @@ func StringToUint8(text string) uint8 {
 		panic(err)
 	}
 	if result < 0 || result > 255 {
-		panic("value out of range of byte")
+		panic(fmt.Sprintf("value %d out of range of byte", result))
 	}
 	return uint8(result)
 }
@@ -37,7 +62,7 @@ func StringToInt8(text string) int8 {
 		panic(err)
 	}
 	if result < -128 || result > 122 {
-		panic("value out of range of a signed byte")
+		panic(fmt.Sprintf("value %d out of range of a signed byte", result))
 	}
 	return int8(result)
 }

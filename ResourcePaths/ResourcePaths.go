@@ -161,7 +161,7 @@ const (
 	ExpansionStringTable = "/data/local/lng/{LANG}/expansionstring.tbl"
 	StringTable          = "/data/local/lng/{LANG}/string.tbl"
 	PatchStringTable     = "/data/local/lng/{LANG}/patchstring.tbl"
-	LevelPreset          = "/data/global/excel/LvlPrest.bin"
+	LevelPreset          = "/data/global/excel/LvlPrest.txt"
 	LevelType            = "/data/global/excel/LvlTypes.bin"
 	ObjectType           = "/data/global/excel/objtype.bin"
 	LevelWarp            = "/data/global/excel/LvlWarp.bin"
@@ -250,5 +250,5 @@ const (
 
 	// --- Skill Data ---
 
-	Missiles = "/data//global//excel//missiles.txt"
+	Missiles = "/data/global/excel/Missiles.txt"
 )
