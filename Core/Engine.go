@@ -71,6 +71,7 @@ func CreateEngine() *Engine {
 	Common.LoadLevelWarps(result)
 	Common.LoadObjectTypes(result)
 	Common.LoadObjects(result)
+	Common.LoadWeapons(result)
 	Common.LoadMissiles(result)
 	Common.LoadSounds(result)
 	result.SoundManager = Sound.CreateManager(result)
