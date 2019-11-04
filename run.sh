@@ -16,10 +16,11 @@ echo "Welcome on OpenDiablo 2 Build Script $version"
 distribution=$(cat /etc/*release | grep "PRETTY_NAME" | sed 's/PRETTY_NAME=//g' | sed 's/["]//g' | awk '{print $1}')
 
 compile_od2(){
+	  echo "Build OpenDiablo 2"
       go get
 	  go build
 	  chmod +x OpenDiablo2
-	  ./OpenDiablo2
+	  echo "Build Finish please edit config.json before run OpenDiablo2"
       }
 
 go_run(){
