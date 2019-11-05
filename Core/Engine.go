@@ -2,6 +2,7 @@ package Core
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"math"
@@ -9,7 +10,6 @@ import (
 	"path"
 	"strings"
 	"sync"
-	"fmt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/PaletteDefs"
 
@@ -44,7 +44,7 @@ type EngineConfig struct {
 type Engine struct {
 	Settings        *EngineConfig                    // Engine configuration settings from json file
 	Files           map[string]*Common.MpqFileRecord // Map that defines which files are in which MPQs
-	CheckedPatch    map[string]bool					 // First time we check a file, we'll check if it's in the patch. This notes that we've already checked that.
+	CheckedPatch    map[string]bool                  // First time we check a file, we'll check if it's in the patch. This notes that we've already checked that.
 	LoadingSprite   *Common.Sprite                   // The sprite shown when loading stuff
 	loadingProgress float64                          // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
 	stepLoadingSize float64                          // The size for each loading step
@@ -132,7 +132,7 @@ func (v *Engine) mapMpqFiles() {
 		fileList := strings.Split(string(fileListText), "\r\n")
 
 		for _, filePath := range fileList {
-			transFilePath := `/`+strings.ReplaceAll(strings.ToLower(filePath), `\`, `/`)
+			transFilePath := `/` + strings.ReplaceAll(strings.ToLower(filePath), `\`, `/`)
 			if _, exists := v.Files[transFilePath]; exists {
 				if v.Files[transFilePath].IsPatch {
 					v.Files[transFilePath].UnpatchedMpqFile = mpqPath
@@ -153,12 +153,12 @@ func (v *Engine) LoadFile(fileName string) []byte {
 	fileName = strings.ReplaceAll(fileName, "{LANG}", ResourcePaths.LanguageCode)
 	fileName = strings.ReplaceAll(fileName, `\`, `/`)
 	var mpqLookupFileName string
-	if strings.HasPrefix(fileName, "/") || strings.HasPrefix(fileName,"\\") {
+	if strings.HasPrefix(fileName, "/") || strings.HasPrefix(fileName, "\\") {
 		mpqLookupFileName = strings.ReplaceAll(fileName, `/`, `\`)[1:]
 	} else {
 		mpqLookupFileName = strings.ReplaceAll(fileName, `/`, `\`)
 	}
-	
+
 	mutex.Lock()
 	// TODO: May want to cache some things if performance becomes an issue
 	mpqFile := v.Files[strings.ToLower(fileName)]
@@ -183,7 +183,7 @@ func (v *Engine) LoadFile(fileName string) []byte {
 		}
 		v.CheckedPatch[strings.ToLower(fileName)] = true
 	}
-	
+
 	if patchLoaded {
 		// if we already loaded the correct mpq from the patch check, don't bother reloading it
 	} else if mpqFile == nil {
@@ -195,7 +195,7 @@ func (v *Engine) LoadFile(fileName string) []byte {
 			if err != nil {
 				continue
 			}
-			if !mpq.FileExists(fileName) {
+			if !mpq.FileExists(strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(fileName, "/data", "data"), "/", `\`))) {
 				continue
 			}
 			// We found the super-secret file!
