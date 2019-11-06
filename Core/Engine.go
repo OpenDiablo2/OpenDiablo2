@@ -75,6 +75,7 @@ func CreateEngine() *Engine {
 	Common.LoadMissiles(result)
 	Common.LoadSounds(result)
 	Common.LoadObjectLookups()
+	Common.LoadAnimationData(result)
 	result.SoundManager = Sound.CreateManager(result)
 	result.SoundManager.SetVolumes(result.Settings.BgmVolume, result.Settings.SfxVolume)
 	result.UIManager = UI.CreateManager(result, *result.SoundManager)

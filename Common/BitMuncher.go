@@ -23,7 +23,7 @@ func CopyBitMuncher(source *BitMuncher) *BitMuncher {
 }
 
 func (v *BitMuncher) GetBit() uint32 {
-	result := uint32(v.data[v.Offset/8]>>(v.Offset%8)) & 0x01
+	result := uint32(v.data[v.Offset/8]>>uint(v.Offset%8)) & 0x01
 	v.Offset++
 	v.BitsRead++
 	return result
@@ -51,7 +51,7 @@ func (v *BitMuncher) GetBits(bits int) uint32 {
 	}
 	result := uint32(0)
 	for i := 0; i < bits; i++ {
-		result |= v.GetBit() << i
+		result |= v.GetBit() << uint(i)
 	}
 	return result
 }
@@ -68,14 +68,14 @@ func (v *BitMuncher) MakeSigned(value uint32, bits int) int32 {
 		return -int32(value)
 	}
 	// If there is no sign bit, return the value as is
-	if (value & (1 << (bits - 1))) == 0 {
+	if (value & (1 << uint(bits-1))) == 0 {
 		return int32(value)
 	}
 	// We need to extend the signed bit out so that the negative value  representation still works with the 2s compliment rule.
 	result := uint32(4294967295)
 	for i := byte(0); i < byte(bits); i++ {
-		if ((value >> i) & 1) == 0 {
-			result -= uint32(1 << i)
+		if ((value >> uint(i)) & 1) == 0 {
+			result -= uint32(1 << uint(i))
 		}
 	}
 	return int32(result) // Force casting to a signed value
