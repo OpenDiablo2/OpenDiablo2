@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"strconv"
+	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/PaletteDefs"
 
@@ -119,7 +120,18 @@ func LoadRegion(seed rand.Source, levelType RegionIdType, levelPreset int, fileP
 	result.DS1 = LoadDS1("/data/global/tiles/"+levelFile, fileProvider)
 	result.TileWidth = result.DS1.Width
 	result.TileHeight = result.DS1.Height
-
+	for _, object := range result.DS1.Objects {
+		switch object.Lookup.Type {
+		case Common.ObjectTypeCharacter:
+		case Common.ObjectTypeItem:
+			if object.Lookup.Base == "" {
+				continue
+			}
+			objPath := strings.ToLower(object.Lookup.Base + "/" + object.Lookup.Token + "/tr/" + object.Lookup.Token + "tr" + object.Lookup.TR +
+				object.Lookup.Mode + object.Lookup.Class + ".dcc")
+			_ = Common.LoadDCC(objPath, fileProvider) // This is where the magic will happen
+		}
+	}
 	return result
 }
 

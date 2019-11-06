@@ -34,6 +34,15 @@ func StringToInt(text string) int {
 	return result
 }
 
+// SafeStringToInt converts a string to an integer, or returns -1 on falure
+func SafeStringToInt(text string) int {
+	result, err := strconv.Atoi(text)
+	if err != nil {
+		return -1
+	}
+	return result
+}
+
 // StringToUint converts a string to a uint32
 func StringToUint(text string) uint {
 	result, err := strconv.ParseUint(text, 10, 32)

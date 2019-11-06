@@ -73,12 +73,13 @@ type Path struct {
 }
 
 type Object struct {
-	Type  int32
-	Id    int32
-	X     int32
-	Y     int32
-	Flags int32
-	Paths []Path
+	Type   int32
+	Id     int32
+	X      int32
+	Y      int32
+	Flags  int32
+	Paths  []Path
+	Lookup *Common.ObjectLookupRecord
 }
 
 type DS1 struct {
@@ -249,6 +250,7 @@ func LoadDS1(path string, fileProvider Common.FileProvider) *DS1 {
 			newObject.X = br.GetInt32()
 			newObject.Y = br.GetInt32()
 			newObject.Flags = br.GetInt32()
+			newObject.Lookup = Common.LookupObject(int(ds1.Act), int(newObject.Type), int(newObject.Id))
 			ds1.Objects = append(ds1.Objects, newObject)
 		}
 	}
