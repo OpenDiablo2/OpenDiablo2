@@ -423,7 +423,7 @@ func (v *DCCDirection) FillPixelBuffer(pcd, ec, pm, et, rp *BitMuncher) {
 				newEntry := v.PixelBuffer[pbIndex]
 				curIdx := decodedPixel - 1
 				for i := 0; i < 4; i++ {
-					if (pixelMask & (1 << i)) != 0 {
+					if (pixelMask & (1 << uint(i))) != 0 {
 						if curIdx >= 0 {
 							newEntry.Value[i] = byte(pixelStack[curIdx])
 							curIdx--
