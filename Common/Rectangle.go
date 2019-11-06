@@ -14,3 +14,7 @@ func (v *Rectangle) Bottom() int {
 func (v *Rectangle) Right() int {
 	return v.Left + v.Width
 }
+
+func (v *Rectangle) IsInRect(x, y int) bool {
+	return x >= v.Left && x < v.Left+v.Width && y >= v.Top && y < v.Top+v.Height
+}

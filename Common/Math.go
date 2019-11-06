@@ -58,3 +58,9 @@ func IsoToScreen(isoX, isoY, modX, modY int) (int, int) {
 	screenY := (isoX + isoY) * 40
 	return screenX + modX, screenY + modY
 }
+
+func ScreenToIso(sx, sy float64) (float64, float64) {
+	x := (sx/80 + sy/40) / 2
+	y := (sy/40 - (sx / 80)) / 2
+	return x, y
+}

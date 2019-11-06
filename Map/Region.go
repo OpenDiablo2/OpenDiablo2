@@ -6,7 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"strconv"
-	"strings"
+	"sync"
 
 	"github.com/OpenDiablo2/OpenDiablo2/PaletteDefs"
 
@@ -22,16 +22,17 @@ type TileCacheRecord struct {
 }
 
 type Region struct {
-	levelType   Common.LevelTypeRecord
-	levelPreset *Common.LevelPresetRecord
-	TileWidth   int32
-	TileHeight  int32
-	Tiles       []Tile
-	DS1         *DS1
-	Palette     Common.PaletteRec
-	FloorCache  map[uint32]*TileCacheRecord
-	ShadowCache map[uint32]*TileCacheRecord
-	WallCache   map[uint32]*TileCacheRecord
+	LevelType         Common.LevelTypeRecord
+	levelPreset       *Common.LevelPresetRecord
+	TileWidth         int32
+	TileHeight        int32
+	Tiles             []Tile
+	DS1               *DS1
+	Palette           Common.PaletteRec
+	FloorCache        map[uint32]*TileCacheRecord
+	ShadowCache       map[uint32]*TileCacheRecord
+	WallCache         map[uint32]*TileCacheRecord
+	AnimationEntities []*Common.AnimatedEntity
 }
 
 type RegionLayerType int
@@ -84,16 +85,16 @@ const (
 
 func LoadRegion(seed rand.Source, levelType RegionIdType, levelPreset int, fileProvider Common.FileProvider) *Region {
 	result := &Region{
-		levelType:   Common.LevelTypes[levelType],
+		LevelType:   Common.LevelTypes[levelType],
 		levelPreset: Common.LevelPresets[levelPreset],
 		Tiles:       make([]Tile, 0),
 		FloorCache:  make(map[uint32]*TileCacheRecord),
 		ShadowCache: make(map[uint32]*TileCacheRecord),
 		WallCache:   make(map[uint32]*TileCacheRecord),
 	}
-	result.Palette = Common.Palettes[PaletteDefs.PaletteType("act"+strconv.Itoa(int(result.levelType.Act)))]
+	result.Palette = Common.Palettes[PaletteDefs.PaletteType("act"+strconv.Itoa(int(result.LevelType.Act)))]
 	//\bm := result.levelPreset.Dt1Mask
-	for _, levelTypeDt1 := range result.levelType.Files {
+	for _, levelTypeDt1 := range result.LevelType.Files {
 		/*
 			if bm&1 == 0 {
 				bm >>= 1
@@ -120,22 +121,32 @@ func LoadRegion(seed rand.Source, levelType RegionIdType, levelPreset int, fileP
 	result.DS1 = LoadDS1("/data/global/tiles/"+levelFile, fileProvider)
 	result.TileWidth = result.DS1.Width
 	result.TileHeight = result.DS1.Height
+	var wg sync.WaitGroup
+	wg.Add(len(result.DS1.Objects))
+	result.AnimationEntities = make([]*Common.AnimatedEntity, 0)
 	for _, object := range result.DS1.Objects {
-		switch object.Lookup.Type {
-		case Common.ObjectTypeCharacter:
-		case Common.ObjectTypeItem:
-			if object.Lookup.Base == "" {
-				continue
+		go func(object Object) {
+			defer wg.Done()
+			switch object.Lookup.Type {
+			case Common.ObjectTypeCharacter:
+			case Common.ObjectTypeItem:
+				if object.Lookup.Base == "" || object.Lookup.Token == "" || object.Lookup.TR == "" {
+					return
+				}
+				animEntity := Common.CreateAnimatedEntity(object.Lookup.Base, object.Lookup.Token, object.Lookup.TR, PaletteDefs.Units)
+				animEntity.SetMode(object.Lookup.Mode, object.Lookup.Class, 0, fileProvider)
+				animEntity.LocationX = math.Floor(float64(object.X) / 5)
+				animEntity.LocationY = math.Floor(float64(object.Y) / 5)
+				result.AnimationEntities = append(result.AnimationEntities, animEntity)
 			}
-			objPath := strings.ToLower(object.Lookup.Base + "/" + object.Lookup.Token + "/tr/" + object.Lookup.Token + "tr" + object.Lookup.TR +
-				object.Lookup.Mode + object.Lookup.Class + ".dcc")
-			_ = Common.LoadDCC(objPath, fileProvider) // This is where the magic will happen
-		}
+		}(object)
 	}
+	wg.Wait()
 	return result
 }
 
 func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType RegionLayerType, layerIndex int, target *ebiten.Image) {
+	offsetX -= 80
 	switch layerType {
 	case RegionLayerTypeFloors:
 		v.renderFloor(v.DS1.Tiles[tileY][tileX].Floors[layerIndex], offsetX, offsetY, target)
