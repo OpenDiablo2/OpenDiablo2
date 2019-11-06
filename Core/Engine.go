@@ -2,7 +2,6 @@ package Core
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"math"
@@ -11,12 +10,13 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/OpenDiablo2/OpenDiablo2/MPQ"
+
 	"github.com/OpenDiablo2/OpenDiablo2/PaletteDefs"
 
 	"github.com/OpenDiablo2/OpenDiablo2/Sound"
 
 	"github.com/OpenDiablo2/OpenDiablo2/Common"
-	"github.com/OpenDiablo2/OpenDiablo2/MPQ"
 	"github.com/OpenDiablo2/OpenDiablo2/ResourcePaths"
 	"github.com/OpenDiablo2/OpenDiablo2/Scenes"
 	"github.com/OpenDiablo2/OpenDiablo2/UI"
@@ -42,17 +42,17 @@ type EngineConfig struct {
 
 // Engine is the core OpenDiablo2 engine
 type Engine struct {
-	Settings        *EngineConfig                    // Engine configuration settings from json file
-	Files           map[string]*Common.MpqFileRecord // Map that defines which files are in which MPQs
-	CheckedPatch    map[string]bool                  // First time we check a file, we'll check if it's in the patch. This notes that we've already checked that.
-	LoadingSprite   *Common.Sprite                   // The sprite shown when loading stuff
-	loadingProgress float64                          // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
-	stepLoadingSize float64                          // The size for each loading step
-	CurrentScene    Scenes.Scene                     // The current scene being rendered
-	UIManager       *UI.Manager                      // The UI manager
-	SoundManager    *Sound.Manager                   // The sound manager
-	nextScene       Scenes.Scene                     // The next scene to be loaded at the end of the game loop
-	fullscreenKey   bool                             // When true, the fullscreen toggle is still being pressed
+	Settings        *EngineConfig     // Engine configuration settings from json file
+	Files           map[string]string // Map that defines which files are in which MPQs
+	CheckedPatch    map[string]bool   // First time we check a file, we'll check if it's in the patch. This notes that we've already checked that.
+	LoadingSprite   *Common.Sprite    // The sprite shown when loading stuff
+	loadingProgress float64           // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
+	stepLoadingSize float64           // The size for each loading step
+	CurrentScene    Scenes.Scene      // The current scene being rendered
+	UIManager       *UI.Manager       // The UI manager
+	SoundManager    *Sound.Manager    // The sound manager
+	nextScene       Scenes.Scene      // The next scene to be loaded at the end of the game loop
+	fullscreenKey   bool              // When true, the fullscreen toggle is still being pressed
 }
 
 // CreateEngine creates and instance of the OpenDiablo2 engine
@@ -115,6 +115,11 @@ func (v *Engine) loadConfigurationFile() {
 	}
 }
 
+func (v *Engine) mapMpqFiles() {
+	v.Files = make(map[string]string)
+}
+
+/*
 func (v *Engine) mapMpqFiles() {
 	log.Println("mapping mpq file structure")
 	v.Files = make(map[string]*Common.MpqFileRecord)
@@ -228,6 +233,37 @@ func (v *Engine) LoadFile(fileName string) []byte {
 	mpqStream.Read(result, 0, blockTableEntry.UncompressedFileSize)
 	mutex.Unlock()
 	return result
+}
+*/
+var mutex sync.Mutex
+
+func (v *Engine) LoadFile(fileName string) []byte {
+	fileName = strings.ReplaceAll(fileName, "{LANG}", ResourcePaths.LanguageCode)
+	fileName = strings.ToLower(fileName)
+	fileName = strings.ReplaceAll(fileName, `/`, "\\")
+	if fileName[0] == '\\' {
+		fileName = fileName[1:]
+	}
+	mutex.Lock()
+	defer mutex.Unlock()
+	// TODO: May want to cache some things if performance becomes an issue
+	cachedMpqFile, cacheExists := v.Files[fileName]
+	if cacheExists {
+		mpq, _ := MPQ.Load(cachedMpqFile)
+		result, _ := mpq.ReadFile(fileName)
+		return result
+	}
+	for _, mpqFile := range v.Settings.MpqLoadOrder {
+		mpq, _ := MPQ.Load(path.Join(v.Settings.MpqPath, mpqFile))
+		if !mpq.FileExists(fileName) {
+			continue
+		}
+		v.Files[fileName] = path.Join(v.Settings.MpqPath, mpqFile)
+		result, _ := mpq.ReadFile(fileName)
+		return result
+	}
+	log.Fatalf("Could not load %s from MPQs", fileName)
+	return []byte{}
 }
 
 // IsLoading returns true if the engine is currently in a loading state

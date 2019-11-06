@@ -513,5 +513,6 @@ func LoadDCC(path string, fileProvider FileProvider) *DCC {
 	for i := 0; i < result.NumberOfDirections; i++ {
 		result.Directions[i] = CreateDCCDirection(CreateBitMuncher(fileData, directionOffsets[i]*8), result)
 	}
+
 	return result
 }
