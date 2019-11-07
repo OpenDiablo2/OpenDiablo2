@@ -22,6 +22,7 @@ type TileCacheRecord struct {
 }
 
 type Region struct {
+	RegionPath        string
 	LevelType         Common.LevelTypeRecord
 	levelPreset       *Common.LevelPresetRecord
 	TileWidth         int32
@@ -118,6 +119,7 @@ func LoadRegion(seed rand.Source, levelType RegionIdType, levelPreset int, fileP
 	random := rand.New(seed)
 	levelIndex := int(math.Round(float64(len(levelFilesToPick)-1) * random.Float64()))
 	levelFile := levelFilesToPick[levelIndex]
+	result.RegionPath = levelFile
 	result.DS1 = LoadDS1("/data/global/tiles/"+levelFile, fileProvider)
 	result.TileWidth = result.DS1.Width
 	result.TileHeight = result.DS1.Height
