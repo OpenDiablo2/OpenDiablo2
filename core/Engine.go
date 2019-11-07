@@ -123,7 +123,7 @@ func (v *Engine) mapMpqFiles() {
 /*
 func (v *Engine) mapMpqFiles() {
 	log.Println("mapping mpq file structure")
-	v.Files = make(map[string]*Common.MpqFileRecord)
+	v.Files = make(map[string]*common.MpqFileRecord)
 	v.CheckedPatch = make(map[string]bool)
 	for _, mpqFileName := range v.Settings.MpqLoadOrder {
 		mpqPath := path.Join(v.Settings.MpqPath, mpqFileName)
@@ -147,7 +147,7 @@ func (v *Engine) mapMpqFiles() {
 				}
 				continue
 			}
-			v.Files[transFilePath] = &Common.MpqFileRecord{
+			v.Files[transFilePath] = &common.MpqFileRecord{
 				mpqPath, false, ""}
 			v.CheckedPatch[transFilePath] = false
 		}
@@ -185,7 +185,7 @@ func (v *Engine) LoadFile(fileName string) []byte {
 			if fileInPatch {
 				patchLoaded = true
 				// set the path to the patch so it will be loaded there in the future
-				mpqFile = &Common.MpqFileRecord{patchMpqFilePath, false, ""}
+				mpqFile = &common.MpqFileRecord{patchMpqFilePath, false, ""}
 				v.Files[strings.ToLower(fileName)] = mpqFile
 			}
 		}
@@ -208,7 +208,7 @@ func (v *Engine) LoadFile(fileName string) []byte {
 			}
 			// We found the super-secret file!
 			found = true
-			v.Files[strings.ToLower(fileName)] = &Common.MpqFileRecord{mpqFilePath, false, ""}
+			v.Files[strings.ToLower(fileName)] = &common.MpqFileRecord{mpqFilePath, false, ""}
 			break
 		}
 		if !found {
