@@ -1,6 +1,7 @@
 package mpq
 
 import (
+	"bufio"
 	"encoding/binary"
 	"errors"
 	"log"
@@ -286,6 +287,12 @@ func (v MPQ) GetFileList() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("File Contents:\n%s", strings.TrimRight(string(data), "\x00"))
-	return []string{""}, nil
+	raw := strings.TrimRight(string(data), "\x00")
+	s := bufio.NewScanner(strings.NewReader(raw))
+	var filePaths []string
+	for s.Scan() {
+		filePath := s.Text()
+		filePaths = append(filePaths, filePath)
+	}
+	return filePaths, nil
 }
