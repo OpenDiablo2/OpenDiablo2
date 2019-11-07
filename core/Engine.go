@@ -259,8 +259,11 @@ func (v *Engine) LoadFile(fileName string) []byte {
 		if !mpq.FileExists(fileName) {
 			continue
 		}
-		v.Files[fileName] = path.Join(v.Settings.MpqPath, mpqFile)
 		result, _ := mpq.ReadFile(fileName)
+		if len(result) == 0 {
+			continue
+		}
+		v.Files[fileName] = path.Join(v.Settings.MpqPath, mpqFile)
 		return result
 	}
 	log.Fatalf("Could not load %s from MPQs", fileName)
