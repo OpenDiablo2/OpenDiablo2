@@ -227,7 +227,7 @@ func (v MPQ) getFileHashEntry(fileName string) (HashTableEntry, error) {
 func (v MPQ) GetFileBlockData(fileName string) (BlockTableEntry, error) {
 	fileName = strings.ReplaceAll(fileName, "{LANG}", resourcepaths.LanguageCode)
 	fileEntry, err := v.getFileHashEntry(fileName)
-	if err != nil {
+	if err != nil || fileEntry.BlockIndex >= uint32(len(v.BlockTableEntries)) {
 		return BlockTableEntry{}, err
 	}
 	return v.BlockTableEntries[fileEntry.BlockIndex], nil
