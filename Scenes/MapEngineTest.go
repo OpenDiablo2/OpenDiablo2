@@ -44,7 +44,7 @@ func (v *MapEngineTest) Load() []func() {
 		func() {
 			v.mapEngine = Map.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider)
 
-			v.mapEngine.GenerateMap(Map.RegionAct1Town, 1)
+			v.mapEngine.GenerateAct1Overworld()
 			//v.mapEngine.GenerateMap(Map.RegionAct1Tristram, 300)
 			//v.mapEngine.GenerateMap(Map.RegionAct1Cathedral, 257)
 			//v.mapEngine.GenerateMap(Map.RegionAct2Town, 301)
@@ -73,13 +73,21 @@ func (v *MapEngineTest) Render(screen *ebiten.Image) {
 	tileX, tileY := Common.ScreenToIso(actualX, actualY)
 	subtileX := int(math.Ceil(math.Mod((tileX*10), 10))) / 2
 	subtileY := int(math.Ceil(math.Mod((tileY*10), 10))) / 2
-	line := fmt.Sprintf("%d, %d (Tile %d.%d, %d.%d)", int(math.Ceil(actualX)), int(math.Ceil(actualY)), int(math.Ceil(tileX)), subtileX, int(math.Ceil(tileY)), subtileY)
-	ebitenutil.DebugPrintAt(screen, line, 5, 5)
 	curRegion := v.mapEngine.GetRegionAt(int(tileX), int(tileY))
 	if curRegion == nil {
 		return
 	}
-	ebitenutil.DebugPrintAt(screen, "Map: "+curRegion.LevelType.Name, 5, 17)
+	line := fmt.Sprintf("%d, %d (Tile %d.%d, %d.%d)",
+		int(math.Ceil(actualX)),
+		int(math.Ceil(actualY)),
+		int(math.Ceil(tileX))-curRegion.Rect.Left,
+		subtileX,
+		int(math.Ceil(tileY))-curRegion.Rect.Top,
+		subtileY,
+	)
+	ebitenutil.DebugPrintAt(screen, line, 5, 5)
+	ebitenutil.DebugPrintAt(screen, "Map: "+curRegion.Region.LevelType.Name, 5, 17)
+	ebitenutil.DebugPrintAt(screen, curRegion.Region.RegionPath, 5, 29)
 }
 
 func (v *MapEngineTest) Update(tickTime float64) {
