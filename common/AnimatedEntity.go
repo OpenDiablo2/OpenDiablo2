@@ -76,7 +76,7 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 
 func (v *AnimatedEntity) cacheFrames() {
 	animationData := AnimationData[strings.ToLower(v.token+v.animationMode+v.weaponClass)][v.direction]
-	v.animationSpeed = int((float64(animationData.AnimationSpeed) / 255.0) * 0.04 * 1000.0)
+	v.animationSpeed = int(1000.0 / ((float64(animationData.AnimationSpeed) * 25.0) / 256.0))
 	v.framesToAnimate = animationData.FramesPerDirection
 	v.lastFrameTime = time.Now()
 	minX := int32(2147483647)
