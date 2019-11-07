@@ -8,7 +8,7 @@ import (
 )
 
 type LevelPresetRecord struct {
-	Name	     string
+	Name         string
 	DefinitionId int
 	LevelId      int
 	Populate     bool
@@ -26,7 +26,7 @@ type LevelPresetRecord struct {
 	FileCount    int
 	Files        [6]string
 	Dt1Mask      uint
-	Beta		 bool
+	Beta         bool
 	Expansion    bool
 }
 
@@ -38,22 +38,22 @@ func createLevelPresetRecord(props []string) LevelPresetRecord {
 		return i
 	}
 	result := LevelPresetRecord{
-		Name: props[inc()],
+		Name:         props[inc()],
 		DefinitionId: StringToInt(props[inc()]),
-		LevelId: StringToInt(props[inc()]),
-		Populate: StringToUint8(props[inc()]) == 1,
-		Logicals: StringToUint8(props[inc()]) == 1,
-		Outdoors: StringToUint8(props[inc()]) == 1,
-		Animate: StringToUint8(props[inc()]) == 1,
-		KillEdge: StringToUint8(props[inc()]) == 1,
-		FillBlanks: StringToUint8(props[inc()]) == 1,
-		SizeX: StringToInt(props[inc()]),
-		SizeY: StringToInt(props[inc()]),
-		AutoMap: StringToUint8(props[inc()]) == 1,
-		Scan: StringToUint8(props[inc()]) == 1,
-		Pops: StringToInt(props[inc()]),
-		PopPad: StringToInt(props[inc()]),
-		FileCount: StringToInt(props[inc()]),
+		LevelId:      StringToInt(props[inc()]),
+		Populate:     StringToUint8(props[inc()]) == 1,
+		Logicals:     StringToUint8(props[inc()]) == 1,
+		Outdoors:     StringToUint8(props[inc()]) == 1,
+		Animate:      StringToUint8(props[inc()]) == 1,
+		KillEdge:     StringToUint8(props[inc()]) == 1,
+		FillBlanks:   StringToUint8(props[inc()]) == 1,
+		SizeX:        StringToInt(props[inc()]),
+		SizeY:        StringToInt(props[inc()]),
+		AutoMap:      StringToUint8(props[inc()]) == 1,
+		Scan:         StringToUint8(props[inc()]) == 1,
+		Pops:         StringToInt(props[inc()]),
+		PopPad:       StringToInt(props[inc()]),
+		FileCount:    StringToInt(props[inc()]),
 		Files: [6]string{
 			props[inc()],
 			props[inc()],
@@ -62,8 +62,8 @@ func createLevelPresetRecord(props []string) LevelPresetRecord {
 			props[inc()],
 			props[inc()],
 		},
-		Dt1Mask: StringToUint(props[inc()]),
-		Beta: StringToUint8(props[inc()]) == 1,
+		Dt1Mask:   StringToUint(props[inc()]),
+		Beta:      StringToUint8(props[inc()]) == 1,
 		Expansion: StringToUint8(props[inc()]) == 1,
 	}
 	return result
@@ -79,7 +79,7 @@ func LoadLevelPresets(fileProvider FileProvider) {
 			continue
 		}
 		props := strings.Split(line, "\t")
-		if(props[1] == "") {
+		if props[1] == "" {
 			continue // any line without a definition id is skipped (e.g. the "Expansion" line)
 		}
 		rec := createLevelPresetRecord(props)

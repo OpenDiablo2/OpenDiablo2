@@ -2,7 +2,6 @@ package Common
 
 import (
 	"log"
-	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/PaletteDefs"
 )
@@ -34,15 +33,15 @@ func CreatePalette(name PaletteDefs.PaletteType, data []byte) PaletteRec {
 	return result
 }
 
-func LoadPalettes(mpqFiles map[string]*MpqFileRecord, fileProvider FileProvider) {
+func LoadPalettes(mpqFiles map[string]string, fileProvider FileProvider) {
 	Palettes = make(map[PaletteDefs.PaletteType]PaletteRec)
-	for file := range mpqFiles {
-		if strings.Index(file, "/data/global/palette/") != 0 || strings.Index(file, ".dat") != len(file)-4 {
-			continue
-		}
-		nameParts := strings.Split(file, `/`)
-		paletteName := PaletteDefs.PaletteType(nameParts[len(nameParts)-2])
-		palette := CreatePalette(paletteName, fileProvider.LoadFile(file))
+	for _, pal := range []string{
+		"act1", "act2", "act3", "act4", "act5", "endgame", "endgame2", "fechar", "loading",
+		"menu0", "menu1", "menu2", "menu3", "menu4", "sky", "static", "trademark", "units",
+	} {
+		filePath := `data\global\palette\` + pal + `\pal.dat`
+		paletteName := PaletteDefs.PaletteType(pal)
+		palette := CreatePalette(paletteName, fileProvider.LoadFile(filePath))
 		Palettes[paletteName] = palette
 	}
 	log.Printf("Loaded %d palettes", len(Palettes))

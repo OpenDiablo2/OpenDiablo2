@@ -242,7 +242,6 @@ func (v *MPQ) Close() {
 }
 
 func (v MPQ) FileExists(fileName string) bool {
-	fileName = strings.ReplaceAll(fileName, "{LANG}", ResourcePaths.LanguageCode)
 	_, err := v.getFileHashEntry(fileName)
 	return err == nil
 }

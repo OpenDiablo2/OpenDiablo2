@@ -1,11 +1,15 @@
 package Scenes
 
 import (
+	"fmt"
+	"math"
+
 	"github.com/OpenDiablo2/OpenDiablo2/Common"
 	"github.com/OpenDiablo2/OpenDiablo2/Map"
 	"github.com/OpenDiablo2/OpenDiablo2/Sound"
 	"github.com/OpenDiablo2/OpenDiablo2/UI"
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
 type MapEngineTest struct {
@@ -43,16 +47,16 @@ func (v *MapEngineTest) Load() []func() {
 			v.mapEngine.GenerateMap(Map.RegionAct1Town, 1)
 			//v.mapEngine.GenerateMap(Map.RegionAct1Tristram, 300)
 			//v.mapEngine.GenerateMap(Map.RegionAct1Cathedral, 257)
-			//v.mapEngine.GenerateMap(Map.RegionAct2Town, 301) // Broken rendering
-			//v.mapEngine.GenerateMap(Map.RegionAct2Harem, 353)
+			//v.mapEngine.GenerateMap(Map.RegionAct2Town, 301)
+			//v.mapEngine.GenerateMap(Map.RegionAct2Harem, 353) // Crashes on dcc load
 			//v.mapEngine.GenerateMap(Map.RegionAct3Town, 529)
 			//v.mapEngine.GenerateMap(Map.RegionAct3Jungle, 574)
-			//v.mapEngine.GenerateMap(Map.RegionAct4Town, 797)
-			//v.mapEngine.GenerateMap(Map.RegonAct5Town, 863)
-			//v.mapEngine.GenerateMap(Map.RegionAct5IceCaves, 1038)
-			//v.mapEngine.GenerateMap(Map.RegionAct5Siege, 879)
-			//v.mapEngine.GenerateMap(Map.RegionAct5Lava, 1057) // PALETTE ISSUE
-			//v.mapEngine.GenerateMap(Map.RegionAct5Barricade, 880)
+			//v.mapEngine.GenerateMap(Map.RegionAct4Town, 797) // Broken height of large objects
+			//v.mapEngine.GenerateMap(Map.RegonAct5Town, 863) // Completely broken!!
+			//v.mapEngine.GenerateMap(Map.RegionAct5IceCaves, 1038) // Completely broken!
+			//v.mapEngine.GenerateMap(Map.RegionAct5Siege, 879) // Completely broken!
+			//v.mapEngine.GenerateMap(Map.RegionAct5Lava, 1057) // Broken
+			//v.mapEngine.GenerateMap(Map.RegionAct5Barricade, 880) // Broken
 
 		},
 	}
@@ -64,6 +68,18 @@ func (v *MapEngineTest) Unload() {
 
 func (v *MapEngineTest) Render(screen *ebiten.Image) {
 	v.mapEngine.Render(screen)
+	actualX := float64(v.uiManager.CursorX) - v.mapEngine.OffsetX
+	actualY := float64(v.uiManager.CursorY) - v.mapEngine.OffsetY
+	tileX, tileY := Common.ScreenToIso(actualX, actualY)
+	subtileX := int(math.Ceil(math.Mod((tileX*10), 10))) / 2
+	subtileY := int(math.Ceil(math.Mod((tileY*10), 10))) / 2
+	line := fmt.Sprintf("%d, %d (Tile %d.%d, %d.%d)", int(math.Ceil(actualX)), int(math.Ceil(actualY)), int(math.Ceil(tileX)), subtileX, int(math.Ceil(tileY)), subtileY)
+	ebitenutil.DebugPrintAt(screen, line, 5, 5)
+	curRegion := v.mapEngine.GetRegionAt(int(tileX), int(tileY))
+	if curRegion == nil {
+		return
+	}
+	ebitenutil.DebugPrintAt(screen, "Map: "+curRegion.LevelType.Name, 5, 17)
 }
 
 func (v *MapEngineTest) Update(tickTime float64) {
