@@ -177,9 +177,10 @@ const (
 
 	// --- Inventory Data ---
 
-	Weapons = "/data/global/excel/weapons.txt"
-	Armor   = "/data/global/excel/armor.txt"
-	Misc    = "/data/global/excel/misc.txt"
+	Weapons     = "/data/global/excel/weapons.txt"
+	Armor       = "/data/global/excel/armor.txt"
+	Misc        = "/data/global/excel/misc.txt"
+	UniqueItems = "/data/global/excel/UniqueItems.txt"
 
 	// --- Character Data ---
 
