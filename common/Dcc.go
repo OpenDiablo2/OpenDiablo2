@@ -2,6 +2,7 @@ package common
 
 import (
 	"log"
+	"sync"
 )
 
 type DCCPixelBufferEntry struct {
@@ -337,10 +338,12 @@ func (v *DCCDirection) GenerateFrames(pcd *BitMuncher) {
 	}
 	v.Cells = nil
 	v.PixelData = nil
+	v.PixelBuffer = nil
 }
 
 func (v *DCCDirection) FillPixelBuffer(pcd, ec, pm, et, rp *BitMuncher) {
 	lastPixel := uint32(0)
+	pixelStack := make([]uint32, 4)
 	maxCellX := 0
 	maxCellY := 0
 	for _, frame := range v.Frames {
@@ -389,7 +392,6 @@ func (v *DCCDirection) FillPixelBuffer(pcd, ec, pm, et, rp *BitMuncher) {
 					continue
 				}
 				// Decode the pixels
-				pixelStack := make([]uint32, 4)
 				lastPixel = 0
 				numberOfPixelBits := pixelMaskLookup[pixelMask]
 				encodingType := 0
@@ -512,9 +514,15 @@ func LoadDCC(path string, fileProvider FileProvider) *DCC {
 		directionOffsets[i] = int(bm.GetInt32())
 	}
 	result.Directions = make([]*DCCDirection, result.NumberOfDirections)
+	var wg sync.WaitGroup
+	wg.Add(result.NumberOfDirections)
 	for i := 0; i < result.NumberOfDirections; i++ {
-		result.Directions[i] = CreateDCCDirection(CreateBitMuncher(fileData, directionOffsets[i]*8), result)
+		go func(i int) {
+			defer wg.Done()
+			result.Directions[i] = CreateDCCDirection(CreateBitMuncher(fileData, directionOffsets[i]*8), result)
+		}(i)
 	}
+	wg.Wait()
 
 	return result
 }

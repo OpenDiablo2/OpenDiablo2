@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"image"
 	"math"
 	"strings"
 	"time"
@@ -107,7 +108,7 @@ func (v *AnimatedEntity) cacheFrames() {
 			}
 			direction := v.dcc.Directions[v.direction]
 			frame := direction.Frames[frameIndex]
-			pixelData := make([]byte, 4*frameW*frameH)
+			img := image.NewRGBA(image.Rect(0, 0, int(frameW), int(frameH)))
 			for y := 0; y < direction.Box.Height; y++ {
 				for x := 0; x < direction.Box.Width; x++ {
 					paletteIndex := frame.PixelData[x+(y*direction.Box.Width)]
@@ -118,13 +119,15 @@ func (v *AnimatedEntity) cacheFrames() {
 					color := Palettes[v.palette].Colors[paletteIndex]
 					actualX := x + direction.Box.Left - int(minX)
 					actualY := y + direction.Box.Top - int(minY)
-					pixelData[(actualX*4)+(actualY*int(frameW)*4)] = color.R
-					pixelData[(actualX*4)+(actualY*int(frameW)*4)+1] = color.G
-					pixelData[(actualX*4)+(actualY*int(frameW)*4)+2] = color.B
-					pixelData[(actualX*4)+(actualY*int(frameW)*4)+3] = 255
+					img.Pix[(actualX*4)+(actualY*int(frameW)*4)] = color.R
+					img.Pix[(actualX*4)+(actualY*int(frameW)*4)+1] = color.G
+					img.Pix[(actualX*4)+(actualY*int(frameW)*4)+2] = color.B
+					img.Pix[(actualX*4)+(actualY*int(frameW)*4)+3] = 255
 				}
 			}
-			v.frames[frameIndex].ReplacePixels(pixelData)
+			newImage, _ := ebiten.NewImageFromImage(img, ebiten.FilterNearest)
+			img = nil
+			v.frames[frameIndex] = newImage
 			v.frameLocations[frameIndex] = Rectangle{
 				Left:   int(minX),
 				Top:    int(minY),

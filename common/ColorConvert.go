@@ -3,7 +3,6 @@ package common
 import (
 	"image/color"
 	"math"
-	"sync"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -16,7 +15,6 @@ type colorMCacheEntry struct {
 }
 
 var (
-	textM          sync.Mutex
 	colorMCache    = map[colorMCacheKey]*colorMCacheEntry{}
 	emptyColorM    ebiten.ColorM
 	monotonicClock int64

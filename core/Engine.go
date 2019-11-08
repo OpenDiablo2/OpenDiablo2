@@ -28,6 +28,8 @@ type Engine struct {
 	CheckedPatch    map[string]bool       // First time we check a file, we'll check if it's in the patch. This notes that we've already checked that.
 	LoadingSprite   *common.Sprite        // The sprite shown when loading stuff
 	loadingProgress float64               // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
+	loadingIndex    int                   // Determines which load function is currently being called
+	thingsToLoad    []func()              // The load functions for the next scene
 	stepLoadingSize float64               // The size for each loading step
 	CurrentScene    scenes.Scene          // The current scene being rendered
 	UIManager       *ui.Manager           // The UI manager
@@ -129,6 +131,19 @@ func (v *Engine) LoadSprite(fileName string, palette palettedefs.PaletteType) *c
 // updateScene handles the scene maintenance for the engine
 func (v *Engine) updateScene() {
 	if v.nextScene == nil {
+		if v.thingsToLoad != nil {
+			if v.loadingIndex < len(v.thingsToLoad) {
+				v.thingsToLoad[v.loadingIndex]()
+				v.loadingIndex++
+				if v.loadingIndex < len(v.thingsToLoad) {
+					v.StepLoading()
+				} else {
+					v.FinishLoading()
+					v.thingsToLoad = nil
+				}
+				return
+			}
+		}
 		return
 	}
 	if v.CurrentScene != nil {
@@ -137,16 +152,10 @@ func (v *Engine) updateScene() {
 	v.CurrentScene = v.nextScene
 	v.nextScene = nil
 	v.UIManager.Reset()
-	thingsToLoad := v.CurrentScene.Load()
-	v.SetLoadingStepSize(1.0 / float64(len(thingsToLoad)))
+	v.thingsToLoad = v.CurrentScene.Load()
+	v.loadingIndex = 0
+	v.SetLoadingStepSize(1.0 / float64(len(v.thingsToLoad)))
 	v.ResetLoading()
-	go func() {
-		for _, f := range thingsToLoad {
-			f()
-			v.StepLoading()
-		}
-		v.FinishLoading()
-	}()
 }
 
 // Update updates the internal state of the engine
