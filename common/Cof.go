@@ -2,101 +2,61 @@ package common
 
 import "strings"
 
+// Tools used for go:generate.
+//
+//    go get golang.org/x/tools/cmd/stringer
+//    go get github.com/mewspring/tools/cmd/string2enum
+
+//go:generate stringer -linecomment -type AnimationMode
+
 type AnimationMode int
 
 const (
-	AnimationModePlayerDeath       AnimationMode = 0
-	AnimationModePlayerNeutral     AnimationMode = 1
-	AnimationModePlayerWalk        AnimationMode = 2
-	AnimationModePlayerRun         AnimationMode = 3
-	AnimationModePlayerGetHit      AnimationMode = 4
-	AnimationModePlayerTownNeutral AnimationMode = 5
-	AnimationModePlayerTownWalk    AnimationMode = 6
-	AnimationModePlayerAttack1     AnimationMode = 7
-	AnimationModePlayerAttack2     AnimationMode = 8
-	AnimationModePlayerBlock       AnimationMode = 9
-	AnimationModePlayerCast        AnimationMode = 10
-	AnimationModePlayerThrow       AnimationMode = 11
-	AnimationModePlayerKick        AnimationMode = 12
-	AnimationModePlayerSkill1      AnimationMode = 13
-	AnimationModePlayerSkill2      AnimationMode = 14
-	AnimationModePlayerSkill3      AnimationMode = 15
-	AnimationModePlayerSkill4      AnimationMode = 16
-	AnimationModePlayerDead        AnimationMode = 17
-	AnimationModePlayerSequence    AnimationMode = 18
-	AnimationModePlayerKnockBack   AnimationMode = 19
-	AnimationModeMonsterDeath      AnimationMode = 20
-	AnimationModeMonsterNeutral    AnimationMode = 21
-	AnimationModeMonsterWalk       AnimationMode = 22
-	AnimationModeMonsterGetHit     AnimationMode = 23
-	AnimationModeMonsterAttack1    AnimationMode = 24
-	AnimationModeMonsterAttack2    AnimationMode = 25
-	AnimationModeMonsterBlock      AnimationMode = 26
-	AnimationModeMonsterCast       AnimationMode = 27
-	AnimationModeMonsterSkill1     AnimationMode = 28
-	AnimationModeMonsterSkill2     AnimationMode = 29
-	AnimationModeMonsterSkill3     AnimationMode = 30
-	AnimationModeMonsterSkill4     AnimationMode = 31
-	AnimationModeMonsterDead       AnimationMode = 32
-	AnimationModeMonsterKnockback  AnimationMode = 33
-	AnimationModeMonsterSequence   AnimationMode = 34
-	AnimationModeMonsterRun        AnimationMode = 35
-	AnimationModeObjectNeutral     AnimationMode = 36
-	AnimationModeObjectOperating   AnimationMode = 37
-	AnimationModeObjectOpened      AnimationMode = 38
-	AnimationModeObjectSpecial1    AnimationMode = 39
-	AnimationModeObjectSpecial2    AnimationMode = 40
-	AnimationModeObjectSpecial3    AnimationMode = 41
-	AnimationModeObjectSpecial4    AnimationMode = 42
-	AnimationModeObjectSpecial5    AnimationMode = 43
+	AnimationModePlayerDeath       AnimationMode = 0 // DT
+	AnimationModePlayerNeutral     AnimationMode = 1 // NU
+	AnimationModePlayerWalk        AnimationMode = 2 // WL
+	AnimationModePlayerRun         AnimationMode = 3 // RN
+	AnimationModePlayerGetHit      AnimationMode = 4 // GH
+	AnimationModePlayerTownNeutral AnimationMode = 5 // TN
+	AnimationModePlayerTownWalk    AnimationMode = 6 // TW
+	AnimationModePlayerAttack1     AnimationMode = 7 // A1
+	AnimationModePlayerAttack2     AnimationMode = 8 // A2
+	AnimationModePlayerBlock       AnimationMode = 9 // BL
+	AnimationModePlayerCast        AnimationMode = 10 // SC
+	AnimationModePlayerThrow       AnimationMode = 11 // TH
+	AnimationModePlayerKick        AnimationMode = 12 // KK
+	AnimationModePlayerSkill1      AnimationMode = 13 // S1
+	AnimationModePlayerSkill2      AnimationMode = 14 // S2
+	AnimationModePlayerSkill3      AnimationMode = 15 // S3
+	AnimationModePlayerSkill4      AnimationMode = 16 // S4
+	AnimationModePlayerDead        AnimationMode = 17 // DD
+	AnimationModePlayerSequence    AnimationMode = 18 // GH
+	AnimationModePlayerKnockBack   AnimationMode = 19 // GH
+	AnimationModeMonsterDeath      AnimationMode = 20 // DT
+	AnimationModeMonsterNeutral    AnimationMode = 21 // NU
+	AnimationModeMonsterWalk       AnimationMode = 22 // WL
+	AnimationModeMonsterGetHit     AnimationMode = 23 // GH
+	AnimationModeMonsterAttack1    AnimationMode = 24 // A1
+	AnimationModeMonsterAttack2    AnimationMode = 25 // A2
+	AnimationModeMonsterBlock      AnimationMode = 26 // BL
+	AnimationModeMonsterCast       AnimationMode = 27 // SC
+	AnimationModeMonsterSkill1     AnimationMode = 28 // S1
+	AnimationModeMonsterSkill2     AnimationMode = 29 // S2
+	AnimationModeMonsterSkill3     AnimationMode = 30 // S3
+	AnimationModeMonsterSkill4     AnimationMode = 31 // S4
+	AnimationModeMonsterDead       AnimationMode = 32 // DD
+	AnimationModeMonsterKnockback  AnimationMode = 33 // GH
+	AnimationModeMonsterSequence   AnimationMode = 34 // xx
+	AnimationModeMonsterRun        AnimationMode = 35 // RN
+	AnimationModeObjectNeutral     AnimationMode = 36 // NU
+	AnimationModeObjectOperating   AnimationMode = 37 // OP
+	AnimationModeObjectOpened      AnimationMode = 38 // ON
+	AnimationModeObjectSpecial1    AnimationMode = 39 // S1
+	AnimationModeObjectSpecial2    AnimationMode = 40 // S2
+	AnimationModeObjectSpecial3    AnimationMode = 41 // S3
+	AnimationModeObjectSpecial4    AnimationMode = 42 // S4
+	AnimationModeObjectSpecial5    AnimationMode = 43 // S5
 )
-
-var AnimationModeStr = map[AnimationMode]string{
-	AnimationModePlayerDeath:       "DT",
-	AnimationModePlayerNeutral:     "NU",
-	AnimationModePlayerWalk:        "WL",
-	AnimationModePlayerRun:         "RN",
-	AnimationModePlayerGetHit:      "GH",
-	AnimationModePlayerTownNeutral: "TN",
-	AnimationModePlayerTownWalk:    "TW",
-	AnimationModePlayerAttack1:     "A1",
-	AnimationModePlayerAttack2:     "A2",
-	AnimationModePlayerBlock:       "BL",
-	AnimationModePlayerCast:        "SC",
-	AnimationModePlayerThrow:       "TH",
-	AnimationModePlayerKick:        "KK",
-	AnimationModePlayerSkill1:      "S1",
-	AnimationModePlayerSkill2:      "S2",
-	AnimationModePlayerSkill3:      "S3",
-	AnimationModePlayerSkill4:      "S4",
-	AnimationModePlayerDead:        "DD",
-	AnimationModePlayerSequence:    "GH",
-	AnimationModePlayerKnockBack:   "GH",
-	AnimationModeMonsterDeath:      "DT",
-	AnimationModeMonsterNeutral:    "NU",
-	AnimationModeMonsterWalk:       "WL",
-	AnimationModeMonsterGetHit:     "GH",
-	AnimationModeMonsterAttack1:    "A1",
-	AnimationModeMonsterAttack2:    "A2",
-	AnimationModeMonsterBlock:      "BL",
-	AnimationModeMonsterCast:       "SC",
-	AnimationModeMonsterSkill1:     "S1",
-	AnimationModeMonsterSkill2:     "S2",
-	AnimationModeMonsterSkill3:     "S3",
-	AnimationModeMonsterSkill4:     "S4",
-	AnimationModeMonsterDead:       "DD",
-	AnimationModeMonsterKnockback:  "GH",
-	AnimationModeMonsterSequence:   "xx",
-	AnimationModeMonsterRun:        "RN",
-	AnimationModeObjectNeutral:     "NU",
-	AnimationModeObjectOperating:   "OP",
-	AnimationModeObjectOpened:      "ON",
-	AnimationModeObjectSpecial1:    "S1",
-	AnimationModeObjectSpecial2:    "S2",
-	AnimationModeObjectSpecial3:    "S3",
-	AnimationModeObjectSpecial4:    "S4",
-	AnimationModeObjectSpecial5:    "S5",
-}
 
 type CompositeType int
 
@@ -131,53 +91,28 @@ const (
 	DrawEffectBringAlphaBlending = 5 //bright alpha blending (colormaps 1457-1712 in a .pl2)
 )
 
+//go:generate stringer -linecomment -type WeaponClass
+//go:generate string2enum -samepkg -linecomment -type WeaponClass
+
 type WeaponClass int
 
 const (
-	WeaponClassNone                 WeaponClass = 0
-	WeaponClassHandToHand           WeaponClass = 1
-	WeaponClassBow                  WeaponClass = 2
-	WeaponClassOneHandSwing         WeaponClass = 3
-	WeaponClassOneHandThrust        WeaponClass = 4
-	WeaponClassStaff                WeaponClass = 5
-	WeaponClassTwoHandSwing         WeaponClass = 6
-	WeaponClassTwoHandThrust        WeaponClass = 7
-	WeaponClassCrossbow             WeaponClass = 8
-	WeaponClassLeftJabRightSwing    WeaponClass = 9
-	WeaponClassLeftJabRightThrust   WeaponClass = 10
-	WeaponClassLeftSwingRightSwing  WeaponClass = 11
-	WeaponClassLeftSwingRightThrust WeaponClass = 12
-	WeaponClassOneHandToHand        WeaponClass = 13
-	WeaponClassTwoHandToHand        WeaponClass = 14
+	WeaponClassNone                 WeaponClass = 0 //
+	WeaponClassHandToHand           WeaponClass = 1 // hth
+	WeaponClassBow                  WeaponClass = 2 // bow
+	WeaponClassOneHandSwing         WeaponClass = 3 // 1hs
+	WeaponClassOneHandThrust        WeaponClass = 4 // 1ht
+	WeaponClassStaff                WeaponClass = 5 // stf
+	WeaponClassTwoHandSwing         WeaponClass = 6 // 2hs
+	WeaponClassTwoHandThrust        WeaponClass = 7 // 2ht
+	WeaponClassCrossbow             WeaponClass = 8 // xbw
+	WeaponClassLeftJabRightSwing    WeaponClass = 9 // 1js
+	WeaponClassLeftJabRightThrust   WeaponClass = 10 // 1jt
+	WeaponClassLeftSwingRightSwing  WeaponClass = 11 // 1ss
+	WeaponClassLeftSwingRightThrust WeaponClass = 12 // 1st
+	WeaponClassOneHandToHand        WeaponClass = 13 // ht1
+	WeaponClassTwoHandToHand        WeaponClass = 14 // ht2
 )
-
-var WeaponClassStr = map[WeaponClass]string{
-	WeaponClassNone:                 "",
-	WeaponClassHandToHand:           "hth",
-	WeaponClassBow:                  "bow",
-	WeaponClassOneHandSwing:         "1hs",
-	WeaponClassOneHandThrust:        "1ht",
-	WeaponClassStaff:                "stf",
-	WeaponClassTwoHandSwing:         "2hs",
-	WeaponClassTwoHandThrust:        "2ht",
-	WeaponClassCrossbow:             "xbw",
-	WeaponClassLeftJabRightSwing:    "1js",
-	WeaponClassLeftJabRightThrust:   "1jt",
-	WeaponClassLeftSwingRightSwing:  "1ss",
-	WeaponClassLeftSwingRightThrust: "1st",
-	WeaponClassOneHandToHand:        "ht1",
-	WeaponClassTwoHandToHand:        "ht2",
-}
-
-func GetWeaponClass(val string) WeaponClass {
-	for weaponClass, weaponStr := range WeaponClassStr {
-		if val != weaponStr {
-			continue
-		}
-		return weaponClass
-	}
-	return WeaponClassNone
-}
 
 type AnimationFrame int
 
@@ -225,7 +160,7 @@ func LoadCof(fileName string, fileProvider FileProvider) *Cof {
 		layer.Transparent = streamReader.GetByte() != 0
 		layer.DrawEffect = DrawEffect(streamReader.GetByte())
 		weaponClassStr, _ := streamReader.ReadBytes(4)
-		layer.WeaponClass = GetWeaponClass(strings.TrimSpace(strings.ReplaceAll(string(weaponClassStr), string(0), "")))
+		layer.WeaponClass = WeaponClassFromString(strings.TrimSpace(strings.ReplaceAll(string(weaponClassStr), string(0), "")))
 		result.CofLayers = append(result.CofLayers, layer)
 		result.CompositeLayers[layer.Type] = i
 	}
