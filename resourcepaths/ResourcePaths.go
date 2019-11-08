@@ -247,7 +247,7 @@ const (
 
 	// --- Enemy Data ---
 
-	MonStats = "/data//global//excel//monstats.txt"
+	MonStats = "/data/global/excel/monstats.txt"
 
 	// --- Skill Data ---
 
