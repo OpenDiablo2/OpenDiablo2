@@ -19,7 +19,7 @@ ALL OTHER TRADEMARKS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS.
 
 ## Building
 
-To pull the project down, run `go get https://github.com/OpenDiablo2/OpenDiablo2`
+To pull the project down, run `go get github.com/OpenDiablo2/OpenDiablo2`
 
 On windows this folder will most likely be in `C:\users\(you)\go\src\github.com\essial\OpenDiablo2`
 
@@ -34,12 +34,12 @@ You can also open the root folder in VSCode. Make sure you have the `ms-vscode.g
 The imports for this project utilize `github.com/OpenDiablo2/OpenDiablo2`. This means that even if you clone the repo, changes will not be taken as it will
 still pull from the main repo's files. In order to use your local version, add the following to `go.mod` in the base folder:
 ```
-    replace github.com/OpenDiablo2/OpenDiablo2 => /your/forked/import/path
+replace github.com/OpenDiablo2/OpenDiablo2 => /your/forked/import/path
 ```
 This will tell go to use your local path instead of the official repo. Be sure to exclude this change from your pull requests!
 
 If you find something you'd like to fix thats obviously broken, create a branch, commit your code, and submit a pull request. If it's a new or missing feature you'd like to see, add an issue, and be descriptive!
- 
+
 If you'd like to help out and are not quite sure how, you can look through any open issues and tasks, or ask
 for tasks on our discord server.
 
@@ -71,4 +71,4 @@ the game in a different location, the base path may have to be adjusted.
 - DT1 File Specifications
   - Paul SIRAMY (http://paul.siramy.free.fr/_divers/dt1_doc/)
 - Other Specifications and general info
-  - Various users on [Phrozen Keep](https://d2mods.info/home.php) 
+  - Various users on [Phrozen Keep](https://d2mods.info/home.php)
