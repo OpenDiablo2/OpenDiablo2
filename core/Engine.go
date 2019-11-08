@@ -128,12 +128,12 @@ func (v *Engine) mapMpqFiles() {
 	v.CheckedPatch = make(map[string]bool)
 	for _, mpqFileName := range v.Settings.MpqLoadOrder {
 		mpqPath := path.Join(v.Settings.MpqPath, mpqFileName)
-		mpq, err := MPQ.Load(mpqPath)
+		archive, err := mpq.Load(mpqPath)
 
 		if err != nil {
 			log.Fatal(err)
 		}
-		fileListText, err := mpq.ReadFile("(listfile)")
+		fileListText, err := archive.ReadFile("(listfile)")
 		if err != nil || fileListText == nil {
 			// Super secret patch file activate!
 			continue
@@ -171,7 +171,7 @@ func (v *Engine) LoadFile(fileName string) []byte {
 	mutex.Lock()
 	// TODO: May want to cache some things if performance becomes an issue
 	mpqFile := v.Files[strings.ToLower(fileName)]
-	var mpq MPQ.MPQ
+	var archive mpq.MPQ
 	var err error
 
 	// always try to load from patch first
@@ -179,10 +179,10 @@ func (v *Engine) LoadFile(fileName string) []byte {
 	patchLoaded := false
 	if !checked || !checkok {
 		patchMpqFilePath := path.Join(v.Settings.MpqPath, v.Settings.MpqLoadOrder[0])
-		mpq, err = MPQ.Load(patchMpqFilePath)
+		archive, err = mpq.Load(patchMpqFilePath)
 		if err == nil {
 			// loaded patch mpq. check if this file exists in it
-			fileInPatch := mpq.FileExists(mpqLookupFileName)
+			fileInPatch := archive.FileExists(mpqLookupFileName)
 			if fileInPatch {
 				patchLoaded = true
 				// set the path to the patch so it will be loaded there in the future
@@ -200,11 +200,11 @@ func (v *Engine) LoadFile(fileName string) []byte {
 		found := false
 		for _, mpqFile := range v.Settings.MpqLoadOrder {
 			mpqFilePath := path.Join(v.Settings.MpqPath, mpqFile)
-			mpq, err = MPQ.Load(mpqFilePath)
+			archive, err = mpq.Load(mpqFilePath)
 			if err != nil {
 				continue
 			}
-			if !mpq.FileExists(strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(fileName, "/data", "data"), "/", `\`))) {
+			if !archive.FileExists(strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(fileName, "/data", "data"), "/", `\`))) {
 				continue
 			}
 			// We found the super-secret file!
@@ -218,19 +218,19 @@ func (v *Engine) LoadFile(fileName string) []byte {
 	} else if mpqFile.IsPatch {
 		log.Fatal("Tried to load a patchfile")
 	} else {
-		mpq, err = MPQ.Load(mpqFile.MpqFile)
+		archive, err = mpq.Load(mpqFile.MpqFile)
 		if err != nil {
 			log.Printf("Error loading file '%s'", fileName)
 			log.Fatal(err)
 		}
 	}
 
-	blockTableEntry, err := mpq.GetFileBlockData(mpqLookupFileName)
+	blockTableEntry, err := archive.GetFileBlockData(mpqLookupFileName)
 	if err != nil {
-		log.Printf("Error locating block data entry for '%s' in mpq file '%s'", mpqLookupFileName, mpq.FileName)
+		log.Printf("Error locating block data entry for '%s' in mpq file '%s'", mpqLookupFileName, archive.FileName)
 		log.Fatal(err)
 	}
-	mpqStream := MPQ.CreateStream(mpq, blockTableEntry, mpqLookupFileName)
+	mpqStream := mpq.CreateStream(mpq, blockTableEntry, mpqLookupFileName)
 	result := make([]byte, blockTableEntry.UncompressedFileSize)
 	mpqStream.Read(result, 0, blockTableEntry.UncompressedFileSize)
 	mutex.Unlock()
@@ -251,16 +251,16 @@ func (v *Engine) LoadFile(fileName string) []byte {
 	// TODO: May want to cache some things if performance becomes an issue
 	cachedMpqFile, cacheExists := v.Files[fileName]
 	if cacheExists {
-		mpq, _ := mpq.Load(cachedMpqFile)
-		result, _ := mpq.ReadFile(fileName)
+		archive, _ := mpq.Load(cachedMpqFile)
+		result, _ := archive.ReadFile(fileName)
 		return result
 	}
 	for _, mpqFile := range v.Settings.MpqLoadOrder {
-		mpq, _ := mpq.Load(path.Join(v.Settings.MpqPath, mpqFile))
-		if !mpq.FileExists(fileName) {
+		archive, _ := mpq.Load(path.Join(v.Settings.MpqPath, mpqFile))
+		if !archive.FileExists(fileName) {
 			continue
 		}
-		result, _ := mpq.ReadFile(fileName)
+		result, _ := archive.ReadFile(fileName)
 		if len(result) == 0 {
 			continue
 		}
