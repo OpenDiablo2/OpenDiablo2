@@ -21,7 +21,7 @@ var lookupTable map[string]string
 func TranslateString(key string) string {
 	result, ok := lookupTable[key]
 	if !ok {
-		log.Panic("Could not find a string for the key '%s'", key)
+		log.Panicf("Could not find a string for the key '%s'", key)
 	}
 	return result
 }

@@ -230,6 +230,7 @@ func CreateDCCDirection(bm *BitMuncher, file *DCC) *DCCDirection {
 	result.FillPixelBuffer(pixelCodeandDisplacement, equalCellsBitstream, pixelMaskBitstream, encodingTypeBitsream, rawPixelCodesBitstream)
 	// Generate the actual frame pixel data
 	result.GenerateFrames(pixelCodeandDisplacement)
+	result.PixelBuffer = nil
 	// Verify that everything we expected to read was actually read (sanity check)...
 	if equalCellsBitstream.BitsRead != result.EqualCellsBitstreamSize {
 		log.Panic("Did not read the correct number of bits!")
@@ -440,6 +441,7 @@ func (v *DCCDirection) FillPixelBuffer(pcd, ec, pm, et, rp *BitMuncher) {
 			}
 		}
 	}
+	cellBuffer = nil
 	// Convert the palette entry index into actual palette entries
 	for i := 0; i <= pbIndex; i++ {
 		for x := 0; x < 4; x++ {
