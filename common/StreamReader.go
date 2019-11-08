@@ -1,10 +1,7 @@
 package common
 
 import (
-	"bytes"
-	"encoding/binary"
 	"io"
-	"log"
 )
 
 // StreamReader allows you to read data from a byte array in various formats
@@ -49,11 +46,7 @@ func (v *StreamReader) GetUInt16() uint16 {
 
 // GetInt16 returns a int16 word from the stream
 func (v *StreamReader) GetInt16() int16 {
-	var result int16
-	err := binary.Read(bytes.NewReader([]byte{v.data[v.position], v.data[v.position+1]}), binary.LittleEndian, &result)
-	if err != nil {
-		log.Panic(err)
-	}
+	result := (int16(v.data[v.position+1]) << uint(8)) + int16(v.data[v.position])
 	v.position += 2
 	return result
 }
@@ -64,34 +57,14 @@ func (v *StreamReader) SetPosition(newPosition uint64) {
 
 // GetUInt32 returns a uint32 word from the stream
 func (v *StreamReader) GetUInt32() uint32 {
-	var result uint32
-	err := binary.Read(bytes.NewReader(
-		[]byte{
-			v.data[v.position],
-			v.data[v.position+1],
-			v.data[v.position+2],
-			v.data[v.position+3],
-		}), binary.LittleEndian, &result)
-	if err != nil {
-		log.Panic(err)
-	}
+	result := (uint32(v.data[v.position+3]) << uint(24)) + (uint32(v.data[v.position+2]) << uint(16)) + (uint32(v.data[v.position+1]) << uint(8)) + uint32(v.data[v.position])
 	v.position += 4
 	return result
 }
 
 // GetInt32 returns an int32 word from the stream
 func (v *StreamReader) GetInt32() int32 {
-	var result int32
-	err := binary.Read(bytes.NewReader(
-		[]byte{
-			v.data[v.position],
-			v.data[v.position+1],
-			v.data[v.position+2],
-			v.data[v.position+3],
-		}), binary.LittleEndian, &result)
-	if err != nil {
-		log.Panic(err)
-	}
+	result := (int32(v.data[v.position+3]) << uint(24)) + (int32(v.data[v.position+2]) << uint(16)) + (int32(v.data[v.position+1]) << uint(8)) + int32(v.data[v.position])
 	v.position += 4
 	return result
 }
