@@ -96,7 +96,7 @@ type WeaponRecord struct {
 	GemOffset         int // unknown
 	BitField1         int // 1 = leather item, 3 = metal
 
-	Vendors map[string]*WeaponVendorParams // controls vendor settings
+	Vendors map[string]*ItemVendorParams // controls vendor settings
 
 	SourceArt               string // unused?
 	GameArt                 string // unused?
@@ -111,7 +111,7 @@ type WeaponRecord struct {
 	PermStoreItem bool // if true, vendor will always sell this
 }
 
-type WeaponVendorParams struct {
+type ItemVendorParams struct {
 	Min        int // minimum of this item they can stock
 	Max        int // max they can stock
 	MagicMin   int
@@ -230,8 +230,7 @@ func createWeaponRecord(line string) WeaponRecord {
 	return result
 }
 
-func createWeaponVendorParams(r *[]string, inc func() int) map[string]*WeaponVendorParams {
-	result := make(map[string]*WeaponVendorParams)
+func createWeaponVendorParams(r *[]string, inc func() int) map[string]*ItemVendorParams {
 	vs := make([]string, 17)
 	vs[0] = "Charsi"
 	vs[1] = "Gheed"
@@ -251,8 +250,14 @@ func createWeaponVendorParams(r *[]string, inc func() int) map[string]*WeaponVen
 	vs[15] = "Drehya"
 	vs[16] = "Malah"
 
+	return CreateItemVendorParams(r, inc, vs)
+}
+
+func CreateItemVendorParams(r *[]string, inc func() int, vs []string) map[string]*ItemVendorParams {
+	result := make(map[string]*ItemVendorParams)
+	
 	for _, name := range vs {
-		wvp := WeaponVendorParams{
+		wvp := ItemVendorParams{
 			Min:        StringToInt(EmptyToZero((*r)[inc()])),
 			Max:        StringToInt(EmptyToZero((*r)[inc()])),
 			MagicMin:   StringToInt(EmptyToZero((*r)[inc()])),
