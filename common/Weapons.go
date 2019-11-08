@@ -255,7 +255,7 @@ func createWeaponVendorParams(r *[]string, inc func() int) map[string]*ItemVendo
 
 func CreateItemVendorParams(r *[]string, inc func() int, vs []string) map[string]*ItemVendorParams {
 	result := make(map[string]*ItemVendorParams)
-	
+
 	for _, name := range vs {
 		wvp := ItemVendorParams{
 			Min:        StringToInt(EmptyToZero((*r)[inc()])),

@@ -15,6 +15,7 @@ import (
 func TestMapGenerationPerformance(t *testing.T) {
 	mpq.InitializeCryptoBuffer()
 	common.ConfigBasePath = "../"
+
 	engine := core.CreateEngine()
 	gameState := common.CreateGameState()
 	mapEngine := _map.CreateMapEngine(gameState, engine.SoundManager, engine)

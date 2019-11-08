@@ -2,7 +2,9 @@ package common
 
 import (
 	"encoding/binary"
+	"image"
 	"image/color"
+	"sync"
 	"time"
 
 	"github.com/hajimehoshi/ebiten"
@@ -36,7 +38,6 @@ type SpriteFrame struct {
 	Length    uint32
 	ImageData []int16
 	Image     *ebiten.Image
-	Loaded    bool
 }
 
 // CreateSprite creates an instance of a sprite
@@ -63,33 +64,36 @@ func CreateSprite(data []byte, palette PaletteRec) *Sprite {
 		dataPointer += 4
 	}
 	result.Frames = make([]*SpriteFrame, totalFrames)
+	var wg sync.WaitGroup
+	wg.Add(int(totalFrames))
 	for i := uint32(0); i < totalFrames; i++ {
-		dataPointer = framePointers[i]
-		result.Frames[i] = &SpriteFrame{Loaded: false}
-		result.Frames[i].Flip = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
-		dataPointer += 4
-		result.Frames[i].Width = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
-		dataPointer += 4
-		result.Frames[i].Height = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
-		dataPointer += 4
-		result.Frames[i].OffsetX = BytesToInt32(data[dataPointer : dataPointer+4])
-		dataPointer += 4
-		result.Frames[i].OffsetY = BytesToInt32(data[dataPointer : dataPointer+4])
-		dataPointer += 4
-		result.Frames[i].Unknown = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
-		dataPointer += 4
-		result.Frames[i].NextBlock = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
-		dataPointer += 4
-		result.Frames[i].Length = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
-		dataPointer += 4
-		result.Frames[i].ImageData = make([]int16, result.Frames[i].Width*result.Frames[i].Height)
-		for fi := range result.Frames[i].ImageData {
-			result.Frames[i].ImageData[fi] = -1
-		}
+		go func(i uint32) {
+			defer wg.Done()
+			dataPointer := framePointers[i]
+			result.Frames[i] = &SpriteFrame{}
+			result.Frames[i].Flip = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
+			dataPointer += 4
+			result.Frames[i].Width = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
+			dataPointer += 4
+			result.Frames[i].Height = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
+			dataPointer += 4
+			result.Frames[i].OffsetX = BytesToInt32(data[dataPointer : dataPointer+4])
+			dataPointer += 4
+			result.Frames[i].OffsetY = BytesToInt32(data[dataPointer : dataPointer+4])
+			dataPointer += 4
+			result.Frames[i].Unknown = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
+			dataPointer += 4
+			result.Frames[i].NextBlock = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
+			dataPointer += 4
+			result.Frames[i].Length = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
+			dataPointer += 4
+			result.Frames[i].ImageData = make([]int16, result.Frames[i].Width*result.Frames[i].Height)
+			for fi := range result.Frames[i].ImageData {
+				result.Frames[i].ImageData[fi] = -1
+			}
 
-		x := uint32(0)
-		y := uint32(result.Frames[i].Height - 1)
-		go func(ix, dataPointer uint32) {
+			x := uint32(0)
+			y := uint32(result.Frames[i].Height - 1)
 			for true {
 				b := data[dataPointer]
 				dataPointer++
@@ -102,41 +106,39 @@ func CreateSprite(data []byte, palette PaletteRec) *Sprite {
 				} else if (b & 0x80) > 0 {
 					transparentPixels := b & 0x7F
 					for ti := byte(0); ti < transparentPixels; ti++ {
-						result.Frames[ix].ImageData[x+(y*result.Frames[ix].Width)+uint32(ti)] = -1
+						result.Frames[i].ImageData[x+(y*result.Frames[i].Width)+uint32(ti)] = -1
 					}
 					x += uint32(transparentPixels)
 				} else {
 					for bi := 0; bi < int(b); bi++ {
-						result.Frames[ix].ImageData[x+(y*result.Frames[ix].Width)+uint32(bi)] = int16(data[dataPointer])
+						result.Frames[i].ImageData[x+(y*result.Frames[i].Width)+uint32(bi)] = int16(data[dataPointer])
 						dataPointer++
 					}
 					x += uint32(b)
 				}
 			}
-			result.Frames[ix].Image, _ = ebiten.NewImage(int(result.Frames[ix].Width), int(result.Frames[ix].Height), ebiten.FilterNearest)
-			newData := make([]byte, result.Frames[ix].Width*result.Frames[ix].Height*4)
-			for ii := uint32(0); ii < result.Frames[ix].Width*result.Frames[ix].Height; ii++ {
-				if result.Frames[ix].ImageData[ii] < 1 { // TODO: Is this == -1 or < 1?
+			var img = image.NewRGBA(image.Rect(0, 0, int(result.Frames[i].Width), int(result.Frames[i].Height)))
+			for ii := uint32(0); ii < result.Frames[i].Width*result.Frames[i].Height; ii++ {
+				if result.Frames[i].ImageData[ii] < 1 { // TODO: Is this == -1 or < 1?
 					continue
 				}
-				newData[ii*4] = palette.Colors[result.Frames[ix].ImageData[ii]].R
-				newData[(ii*4)+1] = palette.Colors[result.Frames[ix].ImageData[ii]].G
-				newData[(ii*4)+2] = palette.Colors[result.Frames[ix].ImageData[ii]].B
-				newData[(ii*4)+3] = 0xFF
+				img.Pix[ii*4] = palette.Colors[result.Frames[i].ImageData[ii]].R
+				img.Pix[(ii*4)+1] = palette.Colors[result.Frames[i].ImageData[ii]].G
+				img.Pix[(ii*4)+2] = palette.Colors[result.Frames[i].ImageData[ii]].B
+				img.Pix[(ii*4)+3] = 0xFF
 			}
-			result.Frames[ix].Image.ReplacePixels(newData)
-			result.Frames[ix].Loaded = true
-		}(i, dataPointer)
+			newImage, _ := ebiten.NewImageFromImage(img, ebiten.FilterNearest)
+			result.Frames[i].Image = newImage
+			img = nil
+		}(i)
 	}
+	wg.Wait()
 	return result
 }
 
 // GetSize returns the size of the sprite
 func (v *Sprite) GetSize() (uint32, uint32) {
 	frame := v.Frames[uint32(v.Frame)+(uint32(v.Direction)*v.FramesPerDirection)]
-	for frame.Loaded == false {
-		time.Sleep(time.Millisecond * 5)
-	}
 	return frame.Width, frame.Height
 }
 
@@ -175,9 +177,6 @@ func (v *Sprite) OnLastFrame() bool {
 
 // GetFrameSize returns the size of the specific frame
 func (v *Sprite) GetFrameSize(frame int) (width, height uint32) {
-	for v.Frames[frame].Loaded == false {
-		time.Sleep(time.Millisecond)
-	}
 	width = v.Frames[frame].Width
 	height = v.Frames[frame].Height
 	return
@@ -193,9 +192,6 @@ func (v *Sprite) Draw(target *ebiten.Image) {
 	v.updateAnimation()
 	opts := &ebiten.DrawImageOptions{}
 	frame := v.Frames[uint32(v.Frame)+(uint32(v.Direction)*v.FramesPerDirection)]
-	for frame.Loaded == false {
-		time.Sleep(time.Millisecond)
-	}
 	opts.GeoM.Translate(
 		float64(int32(v.X)+frame.OffsetX),
 		float64((int32(v.Y) - int32(frame.Height) + frame.OffsetY)),
@@ -232,9 +228,6 @@ func (v *Sprite) DrawSegments(target *ebiten.Image, xSegments, ySegments, offset
 			}
 			if v.ColorMod != nil {
 				opts.ColorM = ColorToColorM(v.ColorMod)
-			}
-			for frame.Loaded == false {
-				time.Sleep(time.Millisecond * 5)
 			}
 			target.DrawImage(frame.Image, opts)
 			xOffset += int32(frame.Width)

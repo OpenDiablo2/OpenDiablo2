@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync"
 
 	"github.com/OpenDiablo2/OpenDiablo2/resourcepaths"
 )
@@ -19,6 +20,7 @@ type MPQ struct {
 	HashTableEntries  []HashTableEntry
 	BlockTableEntries []BlockTableEntry
 	Data              Data
+	fileCache         map[string][]byte
 }
 
 // Data Represents a MPQ file
@@ -92,21 +94,31 @@ func (v BlockTableEntry) HasFlag(flag FileFlag) bool {
 	return (v.Flags & flag) != 0
 }
 
+var mpqMutex = sync.Mutex{}
+var mpqCache = make(map[string]*MPQ)
+
 // Load loads an MPQ file and returns a MPQ structure
-func Load(fileName string) (MPQ, error) {
-	result := MPQ{
-		FileName: fileName,
+func Load(fileName string) (*MPQ, error) {
+	mpqMutex.Lock()
+	defer mpqMutex.Unlock()
+	cached := mpqCache[fileName]
+	if cached != nil {
+		return cached, nil
+	}
+	result := &MPQ{
+		FileName:  fileName,
+		fileCache: make(map[string][]byte),
 	}
 	file, err := os.Open(fileName)
 	if err != nil {
-		return MPQ{}, err
+		return nil, err
 	}
 	result.File = file
 	err = result.readHeader()
 	if err != nil {
-		return MPQ{}, err
+		return nil, err
 	}
-
+	mpqCache[fileName] = result
 	return result, nil
 }
 
@@ -225,7 +237,7 @@ func (v MPQ) getFileHashEntry(fileName string) (HashTableEntry, error) {
 }
 
 // GetFileBlockData gets a block table entry
-func (v MPQ) GetFileBlockData(fileName string) (BlockTableEntry, error) {
+func (v MPQ) getFileBlockData(fileName string) (BlockTableEntry, error) {
 	fileName = strings.ReplaceAll(fileName, "{LANG}", resourcepaths.LanguageCode)
 	fileEntry, err := v.getFileHashEntry(fileName)
 	if err != nil || fileEntry.BlockIndex >= uint32(len(v.BlockTableEntries)) {
@@ -249,8 +261,12 @@ func (v MPQ) FileExists(fileName string) bool {
 
 // ReadFile reads a file from the MPQ and returns a memory stream
 func (v MPQ) ReadFile(fileName string) ([]byte, error) {
+	cached := v.fileCache[fileName]
+	if cached != nil {
+		return cached, nil
+	}
 	fileName = strings.ReplaceAll(fileName, "{LANG}", resourcepaths.LanguageCode)
-	fileBlockData, err := v.GetFileBlockData(fileName)
+	fileBlockData, err := v.getFileBlockData(fileName)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -259,6 +275,7 @@ func (v MPQ) ReadFile(fileName string) ([]byte, error) {
 	mpqStream := CreateStream(v, fileBlockData, fileName)
 	buffer := make([]byte, fileBlockData.UncompressedFileSize)
 	mpqStream.Read(buffer, 0, fileBlockData.UncompressedFileSize)
+	v.fileCache[fileName] = buffer
 	return buffer, nil
 }
 
