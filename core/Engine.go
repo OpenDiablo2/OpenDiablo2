@@ -72,6 +72,7 @@ func CreateEngine() *Engine {
 	common.LoadObjectTypes(result)
 	common.LoadObjects(result)
 	common.LoadWeapons(result)
+	common.LoadArmors(result)
 	common.LoadUniqueItems(result)
 	common.LoadMissiles(result)
 	common.LoadSounds(result)
