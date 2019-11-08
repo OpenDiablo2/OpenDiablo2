@@ -37,6 +37,7 @@ type SpriteFrame struct {
 	NextBlock uint32
 	Length    uint32
 	ImageData []int16
+	FrameData []byte
 	Image     *ebiten.Image
 }
 
@@ -117,22 +118,62 @@ func CreateSprite(data []byte, palette PaletteRec) *Sprite {
 					x += uint32(b)
 				}
 			}
-			var img = image.NewRGBA(image.Rect(0, 0, int(result.Frames[i].Width), int(result.Frames[i].Height)))
+			result.Frames[i].FrameData = make([]byte, result.Frames[i].Width*result.Frames[i].Height*4)
 			for ii := uint32(0); ii < result.Frames[i].Width*result.Frames[i].Height; ii++ {
 				if result.Frames[i].ImageData[ii] < 1 { // TODO: Is this == -1 or < 1?
 					continue
 				}
-				img.Pix[ii*4] = palette.Colors[result.Frames[i].ImageData[ii]].R
-				img.Pix[(ii*4)+1] = palette.Colors[result.Frames[i].ImageData[ii]].G
-				img.Pix[(ii*4)+2] = palette.Colors[result.Frames[i].ImageData[ii]].B
-				img.Pix[(ii*4)+3] = 0xFF
+				result.Frames[i].FrameData[ii*4] = palette.Colors[result.Frames[i].ImageData[ii]].R
+				result.Frames[i].FrameData[(ii*4)+1] = palette.Colors[result.Frames[i].ImageData[ii]].G
+				result.Frames[i].FrameData[(ii*4)+2] = palette.Colors[result.Frames[i].ImageData[ii]].B
+				result.Frames[i].FrameData[(ii*4)+3] = 0xFF
 			}
-			newImage, _ := ebiten.NewImageFromImage(img, ebiten.FilterNearest)
-			result.Frames[i].Image = newImage
-			img = nil
+			//newImage, _ := ebiten.NewImageFromImage(img, ebiten.FilterNearest)
+			//result.Frames[i].Image = newImage
+			//img = nil
 		}(i)
 	}
 	wg.Wait()
+
+	totalWidth := 0
+	totalHeight := 0
+	frame := 0
+	for d := 0; d < int(result.Directions); d++ {
+		curMaxHeight := 0
+		for f := 0; f < int(result.FramesPerDirection); f++ {
+			totalWidth += int(result.Frames[frame].Width)
+			curMaxHeight = int(Max(uint32(curMaxHeight), result.Frames[frame].Height))
+			frame++
+		}
+		totalHeight += curMaxHeight
+	}
+	atlas, _ := ebiten.NewImage(totalWidth, totalHeight, ebiten.FilterNearest)
+	frame = 0
+	curX := 0
+	curY := 0
+	for d := 0; d < int(result.Directions); d++ {
+		curMaxHeight := 0
+		for f := 0; f < int(result.FramesPerDirection); f++ {
+			curMaxHeight = int(Max(uint32(curMaxHeight), result.Frames[frame].Height))
+			result.Frames[frame].Image = atlas.SubImage(image.Rect(curX, curY, curX+int(result.Frames[frame].Width), curY+int(result.Frames[frame].Height))).(*ebiten.Image)
+			for y := 0; y < int(result.Frames[frame].Height); y++ {
+				for x := 0; x < int(result.Frames[frame].Width); x++ {
+					pix := (x + (y * int(result.Frames[frame].Width))) * 4
+					atlas.Set(curX+x, curY+y, color.RGBA{
+						R: result.Frames[frame].FrameData[pix],
+						G: result.Frames[frame].FrameData[pix+1],
+						B: result.Frames[frame].FrameData[pix+2],
+						A: result.Frames[frame].FrameData[pix+3],
+					})
+				}
+			}
+			//result.Frames[frame].Image.ReplacePixels(result.Frames[frame].FrameData)
+			curX += int(result.Frames[frame].Width)
+			frame++
+		}
+		curY += curMaxHeight
+		curX = 0
+	}
 	return result
 }
 
