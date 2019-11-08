@@ -39,32 +39,37 @@ type SoundEntry struct {
 // CreateSoundEntry creates a sound entry based on a sound row on sounds.txt
 func createSoundEntry(soundLine string) SoundEntry {
 	props := strings.Split(soundLine, "\t")
+	i := -1
+	inc := func() int {
+		i++
+		return i
+	}
 	result := SoundEntry{
-		Handle:    props[0],
-		Index:     StringToInt(props[1]),
-		FileName:  props[2],
-		Volume:    StringToUint8(props[3]),
-		GroupSize: StringToUint8(props[4]),
-		Loop:      StringToUint8(props[5]) == 1,
-		FadeIn:    StringToUint8(props[6]),
-		FadeOut:   StringToUint8(props[7]),
-		DeferInst: StringToUint8(props[8]),
-		StopInst:  StringToUint8(props[9]),
-		Duration:  StringToUint8(props[10]),
-		Compound:  StringToInt8(props[11]),
-		Reverb:    StringToUint8(props[12]) == 1,
-		Falloff:   StringToUint8(props[13]),
-		Cache:     StringToUint8(props[14]),
-		AsyncOnly: StringToUint8(props[15]) == 1,
-		Priority:  StringToUint8(props[16]),
-		Stream:    StringToUint8(props[17]),
-		Stereo:    StringToUint8(props[18]),
-		Tracking:  StringToUint8(props[19]),
-		Solo:      StringToUint8(props[20]),
-		MusicVol:  StringToUint8(props[21]),
-		Block1:    StringToInt(props[22]),
-		Block2:    StringToInt(props[23]),
-		Block3:    StringToInt(props[24]),
+		Handle:    props[inc()],
+		Index:     StringToInt(props[inc()]),
+		FileName:  props[inc()],
+		Volume:    StringToUint8(props[inc()]),
+		GroupSize: StringToUint8(props[inc()]),
+		Loop:      StringToUint8(props[inc()]) == 1,
+		FadeIn:    StringToUint8(props[inc()]),
+		FadeOut:   StringToUint8(props[inc()]),
+		DeferInst: StringToUint8(props[inc()]),
+		StopInst:  StringToUint8(props[inc()]),
+		Duration:  StringToUint8(props[inc()]),
+		Compound:  StringToInt8(props[inc()]),
+		Reverb:    StringToUint8(props[inc()]) == 1,
+		Falloff:   StringToUint8(props[inc()]),
+		Cache:     StringToUint8(props[inc()]),
+		AsyncOnly: StringToUint8(props[inc()]) == 1,
+		Priority:  StringToUint8(props[inc()]),
+		Stream:    StringToUint8(props[inc()]),
+		Stereo:    StringToUint8(props[inc()]),
+		Tracking:  StringToUint8(props[inc()]),
+		Solo:      StringToUint8(props[inc()]),
+		MusicVol:  StringToUint8(props[inc()]),
+		Block1:    StringToInt(props[inc()]),
+		Block2:    StringToInt(props[inc()]),
+		Block3:    StringToInt(props[inc()]),
 	}
 	return result
 }
