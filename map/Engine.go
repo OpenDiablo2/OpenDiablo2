@@ -64,6 +64,10 @@ func (v *Engine) GenerateAct1Overworld() {
 			Region: region2,
 		})
 	}
+
+	sx, sy := common.IsoToScreen(int(region.StartX), int(region.StartY), 0, 0)
+	v.OffsetX = float64(sx) - 400
+	v.OffsetY = float64(sy) - 300
 }
 
 func (v *Engine) GetRegionAt(x, y int) *EngineRegion {
@@ -123,6 +127,11 @@ func (v *Engine) RenderTile(region *Region, offX, offY, x, y int, target *ebiten
 	for _, obj := range region.AnimationEntities {
 		if int(math.Floor(obj.LocationX)) == x && int(math.Floor(obj.LocationY)) == y {
 			obj.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
+		}
+	}
+	for _, npc := range region.NPCs {
+		if int(math.Floor(npc.AnimatedEntity.LocationX)) == x && int(math.Floor(npc.AnimatedEntity.LocationY)) == y {
+			npc.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
 		}
 	}
 	for i := range tile.Walls {

@@ -34,6 +34,9 @@ type Region struct {
 	ShadowCache       map[uint32]*TileCacheRecord
 	WallCache         map[uint32]*TileCacheRecord
 	AnimationEntities []*common.AnimatedEntity
+	NPCs              []*common.NPC
+	StartX            float64
+	StartY            float64
 }
 
 type RegionLayerType int
@@ -123,28 +126,37 @@ func LoadRegion(seed rand.Source, levelType RegionIdType, levelPreset int, fileP
 	result.DS1 = LoadDS1("/data/global/tiles/"+levelFile, fileProvider)
 	result.TileWidth = result.DS1.Width
 	result.TileHeight = result.DS1.Height
+	result.loadObjects(fileProvider)
+	return result
+}
+
+func (v *Region) loadObjects(fileProvider common.FileProvider) {
 	var wg sync.WaitGroup
-	wg.Add(len(result.DS1.Objects))
-	result.AnimationEntities = make([]*common.AnimatedEntity, 0)
-	for _, object := range result.DS1.Objects {
-		go func(object Object) {
+	wg.Add(len(v.DS1.Objects))
+	v.AnimationEntities = make([]*common.AnimatedEntity, 0)
+	v.NPCs = make([]*common.NPC, 0)
+	for _, object := range v.DS1.Objects {
+		go func(object common.Object) {
 			defer wg.Done()
 			switch object.Lookup.Type {
 			case common.ObjectTypeCharacter:
-			case common.ObjectTypeItem:
+				// Temp code, maybe..
 				if object.Lookup.Base == "" || object.Lookup.Token == "" || object.Lookup.TR == "" {
 					return
 				}
-				animEntity := common.CreateAnimatedEntity(object.Lookup.Base, object.Lookup.Token, object.Lookup.TR, palettedefs.Units)
-				animEntity.SetMode(object.Lookup.Mode, object.Lookup.Class, 0, fileProvider)
-				animEntity.LocationX = math.Floor(float64(object.X) / 5)
-				animEntity.LocationY = math.Floor(float64(object.Y) / 5)
-				result.AnimationEntities = append(result.AnimationEntities, animEntity)
+				npc := common.CreateNPC(object, fileProvider)
+				v.NPCs = append(v.NPCs, npc)
+			case common.ObjectTypeItem:
+				if object.ObjectInfo == nil || !object.ObjectInfo.Draw || object.Lookup.Base == "" || object.Lookup.Token == "" || object.Lookup.TR == "" {
+					return
+				}
+				entity := common.CreateAnimatedEntity(object, fileProvider, palettedefs.Units)
+				entity.SetMode(object.Lookup.Mode, object.Lookup.Class, 0, fileProvider)
+				v.AnimationEntities = append(v.AnimationEntities, entity)
 			}
 		}(object)
 	}
 	wg.Wait()
-	return result
 }
 
 func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType RegionLayerType, layerIndex int, target *ebiten.Image) {

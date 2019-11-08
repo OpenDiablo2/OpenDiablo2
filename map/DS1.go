@@ -66,35 +66,19 @@ type SubstitutionGroup struct {
 	Unknown       int32
 }
 
-type Path struct {
-	X      int32
-	Y      int32
-	Action int32
-}
-
-type Object struct {
-	Type   int32
-	Id     int32
-	X      int32
-	Y      int32
-	Flags  int32
-	Paths  []Path
-	Lookup *common.ObjectLookupRecord
-}
-
 type DS1 struct {
-	Version                    int32    // The version of the DS1
-	Width                      int32    // Width of map, in # of tiles
-	Height                     int32    // Height of map, in # of tiles
-	Act                        int32    // Act, from 1 to 5. This tells which act table to use for the Objects list
-	SubstitutionType           int32    // SubstitutionType (layer type): 0 if no layer, else type 1 or type 2
-	Files                      []string // FilePtr table of file string pointers
-	NumberOfWalls              int32    // WallNum number of wall & orientation layers used
-	NumberOfFloors             int32    // number of floor layers used
-	NumberOfShadowLayers       int32    // ShadowNum number of shadow layer used
-	NumberOfSubstitutionLayers int32    // SubstitutionNum number of substitution layer used
-	SubstitutionGroupsNum      int32    // SubstitutionGroupsNum number of substitution groups, datas between objects & NPC paths
-	Objects                    []Object // Objects
+	Version                    int32           // The version of the DS1
+	Width                      int32           // Width of map, in # of tiles
+	Height                     int32           // Height of map, in # of tiles
+	Act                        int32           // Act, from 1 to 5. This tells which act table to use for the Objects list
+	SubstitutionType           int32           // SubstitutionType (layer type): 0 if no layer, else type 1 or type 2
+	Files                      []string        // FilePtr table of file string pointers
+	NumberOfWalls              int32           // WallNum number of wall & orientation layers used
+	NumberOfFloors             int32           // number of floor layers used
+	NumberOfShadowLayers       int32           // ShadowNum number of shadow layer used
+	NumberOfSubstitutionLayers int32           // SubstitutionNum number of substitution layer used
+	SubstitutionGroupsNum      int32           // SubstitutionGroupsNum number of substitution groups, datas between objects & NPC paths
+	Objects                    []common.Object // Objects
 	Tiles                      [][]TileRecord
 	SubstitutionGroups         []SubstitutionGroup
 }
@@ -240,17 +224,20 @@ func LoadDS1(path string, fileProvider common.FileProvider) *DS1 {
 			}
 		}
 	}
-	ds1.Objects = make([]Object, 0)
+	ds1.Objects = make([]common.Object, 0)
 	if ds1.Version >= 2 {
 		numberOfObjects := br.GetInt32()
 		for objIdx := 0; objIdx < int(numberOfObjects); objIdx++ {
-			newObject := Object{}
+			newObject := common.Object{}
 			newObject.Type = br.GetInt32()
 			newObject.Id = br.GetInt32()
 			newObject.X = br.GetInt32()
 			newObject.Y = br.GetInt32()
 			newObject.Flags = br.GetInt32()
 			newObject.Lookup = common.LookupObject(int(ds1.Act), int(newObject.Type), int(newObject.Id))
+			if newObject.Lookup != nil && newObject.Lookup.ObjectsTxtId != -1 {
+				newObject.ObjectInfo = common.Objects[newObject.Lookup.ObjectsTxtId]
+			}
 			ds1.Objects = append(ds1.Objects, newObject)
 		}
 	}
@@ -286,10 +273,10 @@ func LoadDS1(path string, fileProvider common.FileProvider) *DS1 {
 			}
 			if objIdx > -1 {
 				if ds1.Objects[objIdx].Paths == nil {
-					ds1.Objects[objIdx].Paths = make([]Path, numPaths)
+					ds1.Objects[objIdx].Paths = make([]common.Path, numPaths)
 				}
 				for pathIdx := 0; pathIdx < int(numPaths); pathIdx++ {
-					newPath := Path{}
+					newPath := common.Path{}
 					newPath.X = br.GetInt32()
 					newPath.Y = br.GetInt32()
 					if ds1.Version >= 15 {

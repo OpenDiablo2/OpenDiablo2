@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -34,13 +35,15 @@ type AnimatedEntity struct {
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
-func CreateAnimatedEntity(base, token, tr string, palette palettedefs.PaletteType) *AnimatedEntity {
+func CreateAnimatedEntity(object Object, fileProvider FileProvider, palette palettedefs.PaletteType) *AnimatedEntity {
 	result := &AnimatedEntity{
-		base:    base,
-		token:   token,
-		tr:      tr,
+		base:    object.Lookup.Base,
+		token:   object.Lookup.Token,
+		tr:      object.Lookup.TR,
 		palette: palette,
 	}
+	result.LocationX = math.Floor(float64(object.X) / 5)
+	result.LocationY = math.Floor(float64(object.Y) / 5)
 	return result
 }
 
@@ -75,7 +78,8 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 }
 
 func (v *AnimatedEntity) cacheFrames() {
-	animationData := AnimationData[strings.ToLower(v.token+v.animationMode+v.weaponClass)][v.direction]
+	v.currentFrame = 0
+	animationData := AnimationData[strings.ToLower(v.token+v.animationMode+v.weaponClass)][0]
 	v.animationSpeed = int(1000.0 / ((float64(animationData.AnimationSpeed) * 25.0) / 256.0))
 	v.framesToAnimate = animationData.FramesPerDirection
 	v.lastFrameTime = time.Now()
