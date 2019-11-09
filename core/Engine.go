@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/mpq"
 
@@ -37,6 +38,7 @@ type Engine struct {
 	SoundManager    *sound.Manager        // The sound manager
 	nextScene       scenes.Scene          // The next scene to be loaded at the end of the game loop
 	fullscreenKey   bool                  // When true, the fullscreen toggle is still being pressed
+	lastTime        float64               // Last time we updated the scene
 }
 
 // CreateEngine creates and instance of the OpenDiablo2 engine
@@ -180,7 +182,12 @@ func (v *Engine) Update() {
 		return
 	}
 
-	v.CurrentScene.Update(float64(1) / ebiten.CurrentTPS())
+	currentTime := float64(time.Now().UnixNano()) / float64(time.Second)
+
+	deltaTime := math.Min((currentTime - v.lastTime), 0.1)
+	v.lastTime = currentTime
+
+	v.CurrentScene.Update(deltaTime)
 	v.UIManager.Update()
 }
 

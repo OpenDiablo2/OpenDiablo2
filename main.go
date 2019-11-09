@@ -3,6 +3,7 @@ package main
 import (
 	"image"
 	"log"
+	"strconv"
 
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 
@@ -52,6 +53,6 @@ func update(screen *ebiten.Image) error {
 		return nil
 	}
 	d2Engine.Draw(screen)
-	//ebitenutil.DebugPrint(screen, "FPS:"+strconv.Itoa(int(ebiten.CurrentFPS())))
+	ebitenutil.DebugPrintAt(screen, "vsync:"+strconv.FormatBool(ebiten.IsVsyncEnabled())+"\nFPS:"+strconv.Itoa(int(ebiten.CurrentFPS())), 5, 565)
 	return nil
 }
