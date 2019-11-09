@@ -238,7 +238,6 @@ func (v MPQ) getFileHashEntry(fileName string) (HashTableEntry, error) {
 
 // GetFileBlockData gets a block table entry
 func (v MPQ) getFileBlockData(fileName string) (BlockTableEntry, error) {
-	fileName = strings.ReplaceAll(fileName, "{LANG}", resourcepaths.LanguageCode)
 	fileEntry, err := v.getFileHashEntry(fileName)
 	if err != nil || fileEntry.BlockIndex >= uint32(len(v.BlockTableEntries)) {
 		return BlockTableEntry{}, err
@@ -261,11 +260,13 @@ func (v MPQ) FileExists(fileName string) bool {
 
 // ReadFile reads a file from the MPQ and returns a memory stream
 func (v MPQ) ReadFile(fileName string) ([]byte, error) {
+	fileName = strings.ReplaceAll(fileName, "{LANG}", resourcepaths.LanguageCode)
+	fileName = strings.ToLower(fileName)
+	fileName = strings.ReplaceAll(fileName, `/`, "\\")
 	cached := v.fileCache[fileName]
 	if cached != nil {
 		return cached, nil
 	}
-	fileName = strings.ReplaceAll(fileName, "{LANG}", resourcepaths.LanguageCode)
 	fileBlockData, err := v.getFileBlockData(fileName)
 	if err != nil {
 		return []byte{}, err
@@ -281,7 +282,6 @@ func (v MPQ) ReadFile(fileName string) ([]byte, error) {
 
 // ReadTextFile reads a file and returns it as a string
 func (v MPQ) ReadTextFile(fileName string) (string, error) {
-	fileName = strings.ReplaceAll(fileName, "{LANG}", resourcepaths.LanguageCode)
 	data, err := v.ReadFile(fileName)
 	if err != nil {
 		return "", err
