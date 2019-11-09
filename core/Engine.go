@@ -4,6 +4,7 @@ import (
 	"log"
 	"math"
 	"path"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -148,6 +149,7 @@ func (v *Engine) updateScene() {
 	}
 	if v.CurrentScene != nil {
 		v.CurrentScene.Unload()
+		runtime.GC()
 	}
 	v.CurrentScene = v.nextScene
 	v.nextScene = nil
