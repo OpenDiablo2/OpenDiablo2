@@ -109,6 +109,9 @@ func (v *Engine) LoadFile(fileName string) []byte {
 	}
 	for _, mpqFile := range v.Settings.MpqLoadOrder {
 		archive, _ := mpq.Load(path.Join(v.Settings.MpqPath, mpqFile))
+		if archive == nil {
+			log.Fatalf("Failed to load specified MPQ file: %s", mpqFile)
+		}
 		if !archive.FileExists(fileName) {
 			continue
 		}
