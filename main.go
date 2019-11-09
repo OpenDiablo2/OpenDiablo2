@@ -21,6 +21,8 @@ var GitCommit string
 var d2Engine *core.Engine
 
 func main() {
+	//runtime.LockOSThread()
+	//defer runtime.UnlockOSThread()
 	if len(GitBranch) == 0 {
 		GitBranch = "Local Build"
 		GitCommit = ""
