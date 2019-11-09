@@ -14,6 +14,8 @@ import (
 type Sprite struct {
 	Directions         uint32
 	FramesPerDirection uint32
+	atlas              *ebiten.Image
+	atlasBytes         []byte
 	Frames             []*SpriteFrame
 	SpecialFrameTime   int
 	StopOnLastFrame    bool
@@ -39,6 +41,7 @@ type SpriteFrame struct {
 	ImageData []int16
 	FrameData []byte
 	Image     *ebiten.Image
+	cached    bool
 }
 
 // CreateSprite creates an instance of a sprite
@@ -65,7 +68,7 @@ func CreateSprite(data []byte, palette PaletteRec) *Sprite {
 		dataPointer += 4
 	}
 	result.Frames = make([]*SpriteFrame, totalFrames)
-	var wg sync.WaitGroup
+	wg := sync.WaitGroup{}
 	wg.Add(int(totalFrames))
 	for i := uint32(0); i < totalFrames; i++ {
 		go func(i uint32) {
@@ -94,7 +97,7 @@ func CreateSprite(data []byte, palette PaletteRec) *Sprite {
 			}
 
 			x := uint32(0)
-			y := uint32(result.Frames[i].Height - 1)
+			y := result.Frames[i].Height - 1
 			for true {
 				b := data[dataPointer]
 				dataPointer++
@@ -134,7 +137,6 @@ func CreateSprite(data []byte, palette PaletteRec) *Sprite {
 		}(i)
 	}
 	wg.Wait()
-
 	totalWidth := 0
 	totalHeight := 0
 	frame := 0
@@ -147,7 +149,8 @@ func CreateSprite(data []byte, palette PaletteRec) *Sprite {
 		}
 		totalHeight += curMaxHeight
 	}
-	atlas, _ := ebiten.NewImage(totalWidth, totalHeight, ebiten.FilterNearest)
+	result.atlas, _ = ebiten.NewImage(totalWidth, totalHeight, ebiten.FilterNearest)
+	result.atlasBytes = make([]byte, totalWidth*totalHeight*4)
 	frame = 0
 	curX := 0
 	curY := 0
@@ -155,19 +158,7 @@ func CreateSprite(data []byte, palette PaletteRec) *Sprite {
 		curMaxHeight := 0
 		for f := 0; f < int(result.FramesPerDirection); f++ {
 			curMaxHeight = int(Max(uint32(curMaxHeight), result.Frames[frame].Height))
-			result.Frames[frame].Image = atlas.SubImage(image.Rect(curX, curY, curX+int(result.Frames[frame].Width), curY+int(result.Frames[frame].Height))).(*ebiten.Image)
-			for y := 0; y < int(result.Frames[frame].Height); y++ {
-				for x := 0; x < int(result.Frames[frame].Width); x++ {
-					pix := (x + (y * int(result.Frames[frame].Width))) * 4
-					atlas.Set(curX+x, curY+y, color.RGBA{
-						R: result.Frames[frame].FrameData[pix],
-						G: result.Frames[frame].FrameData[pix+1],
-						B: result.Frames[frame].FrameData[pix+2],
-						A: result.Frames[frame].FrameData[pix+3],
-					})
-				}
-			}
-			//result.Frames[frame].Image.ReplacePixels(result.Frames[frame].FrameData)
+			result.Frames[frame].Image = result.atlas.SubImage(image.Rect(curX, curY, curX+int(result.Frames[frame].Width), curY+int(result.Frames[frame].Height))).(*ebiten.Image)
 			curX += int(result.Frames[frame].Width)
 			frame++
 		}
@@ -175,6 +166,29 @@ func CreateSprite(data []byte, palette PaletteRec) *Sprite {
 		curX = 0
 	}
 	return result
+}
+
+func (v *Sprite) cacheFrame(frame int) {
+	if v.Frames[frame].cached {
+		return
+	}
+
+	r := v.Frames[frame].Image.Bounds().Min
+	curX := r.X
+	curY := r.Y
+	totalWidth := v.atlas.Bounds().Max.X
+	for y := 0; y < int(v.Frames[frame].Height); y++ {
+		for x := 0; x < int(v.Frames[frame].Width); x++ {
+			pix := (x + (y * int(v.Frames[frame].Width))) * 4
+			idx := (curX + x + ((curY + y) * totalWidth)) * 4
+			v.atlasBytes[idx] = v.Frames[frame].FrameData[pix]
+			v.atlasBytes[idx+1] = v.Frames[frame].FrameData[pix+1]
+			v.atlasBytes[idx+2] = v.Frames[frame].FrameData[pix+2]
+			v.atlasBytes[idx+3] = v.Frames[frame].FrameData[pix+3]
+		}
+	}
+	v.atlas.ReplacePixels(v.atlasBytes)
+	v.Frames[frame].cached = true
 }
 
 // GetSize returns the size of the sprite
@@ -233,6 +247,9 @@ func (v *Sprite) Draw(target *ebiten.Image) {
 	v.updateAnimation()
 	opts := &ebiten.DrawImageOptions{}
 	frame := v.Frames[uint32(v.Frame)+(uint32(v.Direction)*v.FramesPerDirection)]
+	if !frame.cached {
+		v.cacheFrame(int(v.Frame) + (int(v.Direction) * int(v.FramesPerDirection)))
+	}
 	opts.GeoM.Translate(
 		float64(int32(v.X)+frame.OffsetX),
 		float64((int32(v.Y) - int32(frame.Height) + frame.OffsetY)),
@@ -257,6 +274,9 @@ func (v *Sprite) DrawSegments(target *ebiten.Image, xSegments, ySegments, offset
 		biggestYOffset := int32(0)
 		for x := 0; x < xSegments; x++ {
 			frame := v.Frames[uint32(x+(y*xSegments)+(offset*xSegments*ySegments))]
+			if !frame.cached {
+				v.cacheFrame(x + (y * xSegments) + (offset * xSegments * ySegments))
+			}
 			opts := &ebiten.DrawImageOptions{}
 			opts.GeoM.Translate(
 				float64(int32(v.X)+frame.OffsetX+xOffset),

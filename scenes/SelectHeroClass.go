@@ -363,7 +363,7 @@ func (v *SelectHeroClass) Load() []func() {
 }
 
 func (v *SelectHeroClass) Unload() {
-
+	v.heroRenderInfo = nil
 }
 
 func (v *SelectHeroClass) onExitButtonClicked() {
