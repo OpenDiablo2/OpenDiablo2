@@ -5,6 +5,7 @@ import (
 	"math"
 	"path"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -21,6 +22,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/ui"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
+	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
 // Engine is the core OpenDiablo2 engine
@@ -39,6 +42,7 @@ type Engine struct {
 	nextScene       scenes.Scene          // The next scene to be loaded at the end of the game loop
 	fullscreenKey   bool                  // When true, the fullscreen toggle is still being pressed
 	lastTime        float64               // Last time we updated the scene
+	showFPS         bool
 }
 
 // CreateEngine creates and instance of the OpenDiablo2 engine
@@ -173,6 +177,14 @@ func (v *Engine) Update() {
 		v.fullscreenKey = false
 	}
 
+	if inpututil.IsKeyJustPressed(ebiten.KeyF6) {
+		v.showFPS = !v.showFPS
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyF8) {
+		ebiten.SetVsyncEnabled(!ebiten.IsVsyncEnabled())
+	}
+
 	v.updateScene()
 	if v.CurrentScene == nil {
 		log.Fatal("no scene loaded")
@@ -202,6 +214,9 @@ func (v *Engine) Draw(screen *ebiten.Image) {
 		}
 		v.CurrentScene.Render(screen)
 		v.UIManager.Draw(screen)
+	}
+	if v.showFPS == true {
+		ebitenutil.DebugPrintAt(screen, "vsync:"+strconv.FormatBool(ebiten.IsVsyncEnabled())+"\nFPS:"+strconv.Itoa(int(ebiten.CurrentFPS())), 5, 565)
 	}
 }
 
