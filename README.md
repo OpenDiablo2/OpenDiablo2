@@ -17,17 +17,14 @@ Diablo 2 and its content is ©2000 Blizzard Entertainment, Inc. All rights reser
 
 ALL OTHER TRADEMARKS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS.
 
-## Building
+## Building from source
 
-To pull the project down, run `go get github.com/OpenDiablo2/OpenDiablo2`
+Assuming you have Diablo II installed in the default directoy and a working [Go](https://golang.org/doc/install) environment
 
-On windows this folder will most likely be in `C:\users\(you)\go\src\github.com\essial\OpenDiablo2`
-
-In the root folder, run `go get -d` to pull down all dependencies.
-
-To run the project, run `go run .` from the root folder.
-
-You can also open the root folder in VSCode. Make sure you have the `ms-vscode.go` plugin installed.
+```
+go install github.com/OpenDiablo2/OpenDiablo2
+OpenDiablo2
+```
 
 ## Contributing
 

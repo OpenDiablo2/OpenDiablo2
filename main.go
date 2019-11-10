@@ -42,8 +42,8 @@ func main() {
 	d2Engine.SetNextScene(d2scene.CreateMainMenu(&d2Engine, &d2Engine, d2Engine.UIManager, d2Engine.SoundManager))
 	ebiten.SetCursorVisible(false)
 	ebiten.SetFullscreen(d2Engine.Settings.FullScreen)
-	ebiten.SetRunnableInBackground(d2Engine.Settings.RunInBackground)
-	ebiten.SetVsyncEnabled(d2Engine.Settings.VsyncEnabled)
+	ebiten.SetRunnableInBackground(!d2Engine.Settings.PauseInBackground)
+	ebiten.SetVsyncEnabled(!d2Engine.Settings.VsyncDisabled)
 	ebiten.SetMaxTPS(d2Engine.Settings.TicksPerSecond)
 	if err := ebiten.Run(update, 800, 600, d2Engine.Settings.Scale, "OpenDiablo 2 ("+GitBranch+")"); err != nil {
 		log.Fatal(err)

@@ -90,7 +90,12 @@ func CreateEngine() Engine {
 
 func (v *Engine) loadConfigurationFile() {
 	log.Println("Loading configuration file")
-	v.Settings = d2common.LoadConfiguration()
+	settings, err := d2common.LoadConfiguration()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	v.Settings = settings
 }
 
 func (v *Engine) mapMpqFiles() {
@@ -116,9 +121,9 @@ func (v *Engine) LoadFile(fileName string) []byte {
 		return result
 	}
 	for _, mpqFile := range v.Settings.MpqLoadOrder {
-		archive, _ := d2mpq.Load(path.Join(v.Settings.MpqPath, mpqFile))
+		archive, err := d2mpq.Load(path.Join(v.Settings.MpqPath, mpqFile))
 		if archive == nil {
-			log.Fatalf("Failed to load specified MPQ file: %s", mpqFile)
+			log.Fatalf("Failed to load specified MPQ file: %s, err: %v", mpqFile, err)
 		}
 		if !archive.FileExists(fileName) {
 			continue
