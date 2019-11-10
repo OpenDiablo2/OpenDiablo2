@@ -2,7 +2,6 @@ package d2render
 
 import (
 	"encoding/binary"
-	"image"
 	"image/color"
 	"log"
 	"sync"
@@ -19,9 +18,7 @@ import (
 type Sprite struct {
 	Directions         uint32
 	FramesPerDirection uint32
-	atlas              *ebiten.Image
-	atlasBytes         []byte
-	Frames             []SpriteFrame
+	Frames             []*SpriteFrame
 	SpecialFrameTime   int
 	StopOnLastFrame    bool
 	X, Y               int
@@ -73,14 +70,14 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
 		framePointers[i] = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
 		dataPointer += 4
 	}
-	result.Frames = make([]SpriteFrame, totalFrames)
+	result.Frames = make([]*SpriteFrame, totalFrames)
 	wg := sync.WaitGroup{}
 	wg.Add(int(totalFrames))
 	for i := uint32(0); i < totalFrames; i++ {
 		go func(i uint32) {
 			defer wg.Done()
 			dataPointer := framePointers[i]
-			result.Frames[i] = SpriteFrame{}
+			result.Frames[i] = &SpriteFrame{}
 			result.Frames[i].Flip = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
 			dataPointer += 4
 			result.Frames[i].Width = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
@@ -155,22 +152,6 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
 		}
 		totalWidth += curMaxWidth
 	}
-	result.atlas, _ = ebiten.NewImage(totalWidth, totalHeight, ebiten.FilterNearest)
-	result.atlasBytes = make([]byte, totalWidth*totalHeight*4)
-	frame = 0
-	curX := 0
-	curY := 0
-	for d := 0; d < int(result.Directions); d++ {
-		curMaxWidth := 0
-		for f := 0; f < int(result.FramesPerDirection); f++ {
-			curMaxWidth = int(d2helper.Max(uint32(curMaxWidth), result.Frames[frame].Width))
-			result.Frames[frame].Image = result.atlas.SubImage(image.Rect(curX, curY, curX+int(result.Frames[frame].Width), curY+int(result.Frames[frame].Height))).(*ebiten.Image)
-			curY += int(result.Frames[frame].Height)
-			frame++
-		}
-		curX += curMaxWidth
-		curY = 0
-	}
 	result.valid = true
 	return result
 }
@@ -183,22 +164,9 @@ func (v *Sprite) cacheFrame(frame int) {
 	if v.Frames[frame].cached {
 		return
 	}
-	r := v.Frames[frame].Image.Bounds().Min
-	curX := r.X
-	curY := r.Y
-	totalWidth := v.atlas.Bounds().Max.X
-	for y := 0; y < int(v.Frames[frame].Height); y++ {
-		for x := 0; x < int(v.Frames[frame].Width); x++ {
-			pix := (x + (y * int(v.Frames[frame].Width))) * 4
-			idx := (curX + x + ((curY + y) * totalWidth)) * 4
-			v.atlasBytes[idx] = v.Frames[frame].FrameData[pix]
-			v.atlasBytes[idx+1] = v.Frames[frame].FrameData[pix+1]
-			v.atlasBytes[idx+2] = v.Frames[frame].FrameData[pix+2]
-			v.atlasBytes[idx+3] = v.Frames[frame].FrameData[pix+3]
-		}
-	}
-	if err := v.atlas.ReplacePixels(v.atlasBytes); err != nil {
-		log.Panic(err.Error())
+	v.Frames[frame].Image, _ = ebiten.NewImage(int(v.Frames[frame].Width), int(v.Frames[frame].Height), ebiten.FilterNearest)
+	if err := v.Frames[frame].Image.ReplacePixels(v.Frames[frame].FrameData); err != nil {
+		log.Panicf(err.Error())
 	}
 	v.Frames[frame].cached = true
 }
