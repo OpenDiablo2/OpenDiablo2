@@ -2,7 +2,6 @@ package common
 
 import (
 	"log"
-	"sync"
 )
 
 type DCCPixelBufferEntry struct {
@@ -52,7 +51,7 @@ type DCCDirection struct {
 	EncodingTypeBitsreamSize   int
 	RawPixelCodesBitstreamSize int
 	Frames                     []*DCCDirectionFrame
-	PaletteEntries             []byte
+	PaletteEntries             [256]byte
 	Box                        Rectangle
 	Cells                      []*DCCCell
 	PixelData                  []byte
@@ -71,6 +70,11 @@ type DCC struct {
 
 var crazyBitTable = []byte{0, 1, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 26, 28, 30, 32}
 var pixelMaskLookup = []int{0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4}
+var dccDir4 = []byte{0, 1, 2, 3}
+var dccDir8 = []byte{4, 0, 5, 1, 6, 2, 7, 3}
+var dccDir16 = []byte{4, 8, 0, 9, 5, 10, 1, 11, 6, 12, 2, 13, 7, 14, 3, 15}
+var dccDir32 = []byte{4, 16, 8, 17, 0, 18, 9, 19, 5, 20, 10, 21, 1, 22, 11, 23,
+	6, 24, 12, 25, 2, 26, 13, 27, 7, 28, 14, 29, 3, 30, 15, 31}
 
 func CreateDCCDirectionFrame(bits *BitMuncher, direction *DCCDirection) *DCCDirectionFrame {
 	result := &DCCDirectionFrame{}
@@ -82,11 +86,15 @@ func CreateDCCDirectionFrame(bits *BitMuncher, direction *DCCDirection) *DCCDire
 	result.NumberOfOptionalBytes = int(bits.GetBits(direction.OptionalDataBits))
 	result.NumberOfCodedBytes = int(bits.GetBits(direction.CodedBytesBits))
 	result.FrameIsBottomUp = bits.GetBit() == 1
-	result.Box = Rectangle{
-		result.XOffset,
-		result.YOffset - result.Height - 1,
-		result.Width,
-		result.Height,
+	if result.FrameIsBottomUp {
+		log.Panic("Bottom up frames are not implemented.")
+	} else {
+		result.Box = Rectangle{
+			result.XOffset,
+			result.YOffset - result.Height + 1,
+			result.Width,
+			result.Height,
+		}
 	}
 	return result
 }
@@ -164,10 +172,10 @@ func CreateDCCDirection(bm *BitMuncher, file *DCC) *DCCDirection {
 	result.OptionalDataBits = int(crazyBitTable[bm.GetBits(4)])
 	result.CodedBytesBits = int(crazyBitTable[bm.GetBits(4)])
 	result.Frames = make([]*DCCDirectionFrame, file.FramesPerDirection)
-	minx := 9223372036854775807
-	miny := 9223372036854775807
-	maxx := -9223372036854775808
-	maxy := -9223372036854775808
+	minx := 100000
+	miny := 100000
+	maxx := -100000
+	maxy := -100000
 	// Load the frame headers
 	for frameIdx := 0; frameIdx < file.FramesPerDirection; frameIdx++ {
 		result.Frames[frameIdx] = CreateDCCDirectionFrame(bm, result)
@@ -176,7 +184,7 @@ func CreateDCCDirection(bm *BitMuncher, file *DCC) *DCCDirection {
 		maxx = int(MaxInt32(int32(result.Frames[frameIdx].Box.Right()), int32(maxx)))
 		maxy = int(MaxInt32(int32(result.Frames[frameIdx].Box.Bottom()), int32(maxy)))
 	}
-	result.Box = Rectangle{minx, miny, maxx - minx, maxy - miny}
+	result.Box = Rectangle{minx, miny, (maxx - minx), (maxy - miny)}
 	if result.OptionalDataBits > 0 {
 		log.Panic("Optional bits in DCC data is not currently supported.")
 	}
@@ -189,23 +197,13 @@ func CreateDCCDirection(bm *BitMuncher, file *DCC) *DCCDirection {
 		result.RawPixelCodesBitstreamSize = int(bm.GetBits(20))
 	}
 	// PixelValuesKey
-	paletteEntries := make([]bool, 0)
 	paletteEntryCount := 0
 	for i := 0; i < 256; i++ {
 		valid := bm.GetBit() != 0
-		paletteEntries = append(paletteEntries, valid)
 		if valid {
+			result.PaletteEntries[paletteEntryCount] = byte(i)
 			paletteEntryCount++
 		}
-	}
-	result.PaletteEntries = make([]byte, paletteEntryCount)
-	paletteOffset := 0
-	for i := 0; i < 256; i++ {
-		if !paletteEntries[i] {
-			continue
-		}
-		result.PaletteEntries[paletteOffset] = byte(i)
-		paletteOffset++
 	}
 	// HERE BE GIANTS:
 	// Because of the way this thing mashes bits together, BIT offset matters
@@ -343,10 +341,12 @@ func (v *DCCDirection) GenerateFrames(pcd *BitMuncher) {
 
 func (v *DCCDirection) FillPixelBuffer(pcd, ec, pm, et, rp *BitMuncher) {
 	lastPixel := uint32(0)
-	pixelStack := make([]uint32, 4)
 	maxCellX := 0
 	maxCellY := 0
 	for _, frame := range v.Frames {
+		if frame == nil {
+			continue
+		}
 		maxCellX += frame.HorizontalCellCount
 		maxCellY += frame.VerticalCellCount
 	}
@@ -366,11 +366,9 @@ func (v *DCCDirection) FillPixelBuffer(pcd, ec, pm, et, rp *BitMuncher) {
 		frameIndex++
 		originCellX := (frame.Box.Left - v.Box.Left) / 4
 		originCellY := (frame.Box.Top - v.Box.Top) / 4
-		frameCellIndex := 0
 		for cellY := 0; cellY < frame.VerticalCellCount; cellY++ {
 			currentCellY := cellY + originCellY
 			for cellX := 0; cellX < frame.HorizontalCellCount; cellX++ {
-				frameCellIndex++
 				currentCell := originCellX + cellX + (currentCellY * v.HorizontalCellCount)
 				nextCell := false
 				tmp := 0
@@ -392,6 +390,7 @@ func (v *DCCDirection) FillPixelBuffer(pcd, ec, pm, et, rp *BitMuncher) {
 					continue
 				}
 				// Decode the pixels
+				var pixelStack [4]uint32
 				lastPixel = 0
 				numberOfPixelBits := pixelMaskLookup[pixelMask]
 				encodingType := 0
@@ -415,7 +414,7 @@ func (v *DCCDirection) FillPixelBuffer(pcd, ec, pm, et, rp *BitMuncher) {
 					}
 					if pixelStack[i] == lastPixel {
 						pixelStack[i] = 0
-						i = numberOfPixelBits // Just break here....
+						break
 					} else {
 						lastPixel = pixelStack[i]
 						decodedPixel++
@@ -514,15 +513,22 @@ func LoadDCC(path string, fileProvider FileProvider) *DCC {
 		directionOffsets[i] = int(bm.GetInt32())
 	}
 	result.Directions = make([]*DCCDirection, result.NumberOfDirections)
-	var wg sync.WaitGroup
-	wg.Add(result.NumberOfDirections)
 	for i := 0; i < result.NumberOfDirections; i++ {
-		go func(i int) {
-			defer wg.Done()
-			result.Directions[i] = CreateDCCDirection(CreateBitMuncher(fileData, directionOffsets[i]*8), result)
-		}(i)
+		dir := byte(0)
+		switch result.NumberOfDirections {
+		case 1:
+			dir = 0
+		case 4:
+			dir = dccDir4[i]
+		case 8:
+			dir = dccDir8[i]
+		case 16:
+			dir = dccDir16[i]
+		case 32:
+			dir = dccDir32[i]
+		}
+		result.Directions[dir] = CreateDCCDirection(CreateBitMuncher(fileData, directionOffsets[i]*8), result)
 	}
-	wg.Wait()
 
 	return result
 }

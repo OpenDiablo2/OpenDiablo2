@@ -147,7 +147,7 @@ func (v *Region) loadObjects(fileProvider common.FileProvider) {
 				npc := common.CreateNPC(object, fileProvider)
 				v.NPCs = append(v.NPCs, npc)
 			case common.ObjectTypeItem:
-				if object.ObjectInfo == nil || !object.ObjectInfo.Draw || object.Lookup.Base == "" || object.Lookup.Token == "" || object.Lookup.TR == "" {
+				if object.ObjectInfo == nil || !object.ObjectInfo.Draw || object.Lookup.Base == "" || object.Lookup.Token == "" {
 					return
 				}
 				entity := common.CreateAnimatedEntity(object, fileProvider, palettedefs.Units)

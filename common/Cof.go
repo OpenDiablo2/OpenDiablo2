@@ -204,7 +204,7 @@ type Cof struct {
 	CofLayers          []*CofLayer
 	CompositeLayers    map[CompositeType]int
 	AnimationFrames    []AnimationFrame
-	Priority           []CompositeType
+	Priority           [][][]CompositeType
 }
 
 func LoadCof(fileName string, fileProvider FileProvider) *Cof {
@@ -235,10 +235,16 @@ func LoadCof(fileName string, fileProvider FileProvider) *Cof {
 		result.AnimationFrames[i] = AnimationFrame(animationFrameBytes[i])
 	}
 	priorityLen := result.FramesPerDirection * result.NumberOfDirections * result.NumberOfLayers
-	result.Priority = make([]CompositeType, priorityLen)
+	result.Priority = make([][][]CompositeType, result.NumberOfDirections)
 	priorityBytes, _ := streamReader.ReadBytes(priorityLen)
-	for i := range priorityBytes {
-		result.Priority[i] = CompositeType(priorityBytes[i])
+	for direction := 0; direction < result.NumberOfDirections; direction++ {
+		result.Priority[direction] = make([][]CompositeType, result.FramesPerDirection)
+		for frame := 0; frame < result.FramesPerDirection; frame++ {
+			result.Priority[direction][frame] = make([]CompositeType, result.NumberOfLayers)
+			for i := 0; i < result.NumberOfLayers; i++ {
+				result.Priority[direction][frame][i] = CompositeType(priorityBytes[i])
+			}
+		}
 	}
 	return result
 }
