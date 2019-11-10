@@ -11,7 +11,7 @@ import (
 
 type Checkbox struct {
 	x, y          int
-	pressed       bool
+	checkState    bool
 	visible       bool
 	width, height uint32
 	Image         *ebiten.Image
@@ -20,13 +20,13 @@ type Checkbox struct {
 	enabled       bool
 }
 
-func CreateCheckbox(fileProvider d2interface.FileProvider, toggleState bool) Checkbox {
+func CreateCheckbox(fileProvider d2interface.FileProvider, checkState bool) Checkbox {
 	result := Checkbox{
-		pressed: toggleState,
-		visible: true,
-		width:   0,
-		height:  0,
-		enabled: true,
+		checkState: checkState,
+		visible:    true,
+		width:      0,
+		height:     0,
+		enabled:    true,
 	}
 	checkboxSprite := d2render.CreateSprite(fileProvider.LoadFile(d2resource.Checkbox), d2datadict.Palettes[d2enum.Fechar])
 	result.width, result.height = checkboxSprite.GetFrameSize(0)
@@ -46,7 +46,7 @@ func (v Checkbox) Draw(target *ebiten.Image) {
 		Filter:        ebiten.FilterNearest,
 	}
 	opts.GeoM.Translate(float64(v.x), float64(v.y))
-	if v.pressed == false {
+	if v.checkState == false {
 		target.DrawImage(v.Image, opts)
 	} else {
 		target.DrawImage(v.checkedImage, opts)
@@ -60,12 +60,19 @@ func (v *Checkbox) SetEnabled(enabled bool) {
 	v.enabled = enabled
 }
 
-func (v *Checkbox) SetPressed(pressed bool) {
-	v.pressed = pressed
+func (v Checkbox) SetPressed(pressed bool) {
+}
+
+func (v *Checkbox) SetCheckState(checkState bool) {
+	v.checkState = checkState
+}
+
+func (v Checkbox) GetCheckState() bool {
+	return v.checkState
 }
 
 func (v Checkbox) GetPressed() bool {
-	return v.pressed
+	return v.checkState
 }
 
 func (v *Checkbox) OnActivated(callback func()) {
@@ -73,7 +80,7 @@ func (v *Checkbox) OnActivated(callback func()) {
 }
 
 func (v *Checkbox) Activate() {
-	v.pressed = !v.pressed
+	v.checkState = !v.checkState
 	if v.onClick == nil {
 		return
 	}
