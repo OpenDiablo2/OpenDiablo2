@@ -3,6 +3,7 @@ package d2render
 import (
 	"fmt"
 	"image"
+	"log"
 	"strings"
 	"time"
 
@@ -156,7 +157,9 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 		opts := &ebiten.DrawImageOptions{}
 		opts.GeoM.Translate(float64(v.frameLocations[frameName][v.currentFrame].Left+offsetX),
 			float64(v.frameLocations[frameName][v.currentFrame].Top+offsetY+40))
-		target.DrawImage(v.frames[frameName][v.currentFrame], opts)
+		if err := target.DrawImage(v.frames[frameName][v.currentFrame], opts); err != nil {
+			log.Panic(err.Error())
+		}
 	}
 }
 

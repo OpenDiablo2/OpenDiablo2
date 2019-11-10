@@ -19,11 +19,11 @@ type CharacterSelect struct {
 	fileProvider      d2interface.FileProvider
 	sceneProvider     d2interface.SceneProvider
 	background        d2render.Sprite
-	newCharButton     *d2ui.Button
-	convertCharButton *d2ui.Button
-	deleteCharButton  *d2ui.Button
-	exitButton        *d2ui.Button
-	okButton          *d2ui.Button
+	newCharButton     d2ui.Button
+	convertCharButton d2ui.Button
+	deleteCharButton  d2ui.Button
+	exitButton        d2ui.Button
+	okButton          d2ui.Button
 }
 
 func CreateCharacterSelect(
@@ -52,31 +52,31 @@ func (v *CharacterSelect) Load() []func() {
 			v.newCharButton = d2ui.CreateButton(d2ui.ButtonTypeTall, v.fileProvider, dh.CombineStrings(dh.SplitIntoLinesWithMaxWidth(d2common.TranslateString("#831"), 15)))
 			v.newCharButton.MoveTo(33, 468)
 			v.newCharButton.OnActivated(func() { v.onNewCharButtonClicked() })
-			v.uiManager.AddWidget(v.newCharButton)
+			v.uiManager.AddWidget(&v.newCharButton)
 		},
 		func() {
 			v.convertCharButton = d2ui.CreateButton(d2ui.ButtonTypeTall, v.fileProvider, dh.CombineStrings(dh.SplitIntoLinesWithMaxWidth(d2common.TranslateString("#825"), 15)))
 			v.convertCharButton.MoveTo(233, 468)
 			v.convertCharButton.SetEnabled(false)
-			v.uiManager.AddWidget(v.convertCharButton)
+			v.uiManager.AddWidget(&v.convertCharButton)
 		},
 		func() {
 			v.deleteCharButton = d2ui.CreateButton(d2ui.ButtonTypeTall, v.fileProvider, dh.CombineStrings(dh.SplitIntoLinesWithMaxWidth(d2common.TranslateString("#832"), 15)))
 			v.deleteCharButton.MoveTo(433, 468)
 			v.deleteCharButton.SetEnabled(false)
-			v.uiManager.AddWidget(v.deleteCharButton)
+			v.uiManager.AddWidget(&v.deleteCharButton)
 		},
 		func() {
 			v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, v.fileProvider, d2common.TranslateString("#970"))
 			v.exitButton.MoveTo(33, 537)
 			v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
-			v.uiManager.AddWidget(v.exitButton)
+			v.uiManager.AddWidget(&v.exitButton)
 		},
 		func() {
 			v.okButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, v.fileProvider, d2common.TranslateString("#971"))
 			v.okButton.MoveTo(625, 537)
 			v.okButton.SetEnabled(false)
-			v.uiManager.AddWidget(v.okButton)
+			v.uiManager.AddWidget(&v.okButton)
 		},
 	}
 }
