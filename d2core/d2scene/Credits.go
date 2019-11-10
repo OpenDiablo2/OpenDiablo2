@@ -22,7 +22,7 @@ import (
 )
 
 type labelItem struct {
-	Label     *d2ui.Label
+	Label     d2ui.Label
 	IsHeading bool
 	Available bool
 }
@@ -34,7 +34,7 @@ type Credits struct {
 	fileProvider       d2interface.FileProvider
 	sceneProvider      d2interface.SceneProvider
 	creditsBackground  d2render.Sprite
-	exitButton         *d2ui.Button
+	exitButton         d2ui.Button
 	creditsText        []string
 	labels             []*labelItem
 	cycleTime          float64
@@ -68,7 +68,7 @@ func (v *Credits) Load() []func() {
 			v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, v.fileProvider, d2common.TranslateString("#970"))
 			v.exitButton.MoveTo(30, 550)
 			v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
-			v.uiManager.AddWidget(v.exitButton)
+			v.uiManager.AddWidget(&v.exitButton)
 		},
 		func() {
 			fileData, _ := dh.Utf16BytesToString(v.fileProvider.LoadFile(d2resource.CreditsText)[2:])
@@ -192,7 +192,7 @@ func (v *Credits) getNewFontLabel(isHeading bool) *d2ui.Label {
 			} else {
 				label.Label.Color = color.RGBA{198, 178, 150, 255}
 			}
-			return label.Label
+			return &label.Label
 		}
 	}
 
@@ -210,5 +210,5 @@ func (v *Credits) getNewFontLabel(isHeading bool) *d2ui.Label {
 	}
 
 	v.labels = append(v.labels, newLabelItem)
-	return newLabelItem.Label
+	return &newLabelItem.Label
 }

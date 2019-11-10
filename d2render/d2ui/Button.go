@@ -108,8 +108,8 @@ type Button struct {
 }
 
 // CreateButton creates an instance of Button
-func CreateButton(buttonType ButtonType, fileProvider d2interface.FileProvider, text string) *Button {
-	result := &Button{
+func CreateButton(buttonType ButtonType, fileProvider d2interface.FileProvider, text string) Button {
+	result := Button{
 		fileProvider: fileProvider,
 		width:        0,
 		height:       0,
@@ -159,7 +159,7 @@ func CreateButton(buttonType ButtonType, fileProvider d2interface.FileProvider, 
 		if buttonLayout.DisabledFrame != -1 {
 			result.disabledImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
 			buttonSprite.DrawSegments(result.disabledImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.DisabledFrame)
-			font.Draw(0, textY-1, text, color.RGBA{100, 100, 100, 255}, result.disabledImage)
+			font.Draw(0, textY, text, color.RGBA{100, 100, 100, 255}, result.disabledImage)
 		}
 	}
 	return result
@@ -171,7 +171,7 @@ func (v *Button) OnActivated(callback func()) {
 }
 
 // Activate calls the on activated callback handler, if any
-func (v *Button) Activate() {
+func (v Button) Activate() {
 	if v.onClick == nil {
 		return
 	}
@@ -179,7 +179,7 @@ func (v *Button) Activate() {
 }
 
 // Draw renders the button
-func (v *Button) Draw(target *ebiten.Image) {
+func (v Button) Draw(target *ebiten.Image) {
 	opts := &ebiten.DrawImageOptions{
 		CompositeMode: ebiten.CompositeModeSourceAtop,
 		Filter:        ebiten.FilterNearest,
@@ -202,7 +202,7 @@ func (v *Button) Draw(target *ebiten.Image) {
 }
 
 // GetEnabled returns the enabled state
-func (v *Button) GetEnabled() bool {
+func (v Button) GetEnabled() bool {
 	return v.enabled
 }
 
@@ -212,7 +212,7 @@ func (v *Button) SetEnabled(enabled bool) {
 }
 
 // GetSize returns the size of the button
-func (v *Button) GetSize() (uint32, uint32) {
+func (v Button) GetSize() (uint32, uint32) {
 	return v.width, v.height
 }
 
@@ -223,12 +223,12 @@ func (v *Button) MoveTo(x, y int) {
 }
 
 // GetLocation returns the location of the button
-func (v *Button) GetLocation() (x, y int) {
+func (v Button) GetLocation() (x, y int) {
 	return v.x, v.y
 }
 
 // GetVisible returns the visibility of the button
-func (v *Button) GetVisible() bool {
+func (v Button) GetVisible() bool {
 	return v.visible
 }
 
@@ -238,7 +238,7 @@ func (v *Button) SetVisible(visible bool) {
 }
 
 // GetPressed returns the pressed state of the button
-func (v *Button) GetPressed() bool {
+func (v Button) GetPressed() bool {
 	return v.pressed
 }
 

@@ -36,13 +36,12 @@ type Label struct {
 }
 
 // CreateLabel creates a new instance of a UI label
-func CreateLabel(provider d2interface.FileProvider, font string, palette d2enum.PaletteType) *Label {
-	result := &Label{
+func CreateLabel(provider d2interface.FileProvider, font string, palette d2enum.PaletteType) Label {
+	result := Label{
 		Alignment: LabelAlignLeft,
 		Color:     color.White,
 		font:      GetFont(font, palette, provider),
 	}
-
 	return result
 }
 
@@ -72,6 +71,10 @@ func (v *Label) MoveTo(x, y int) {
 	v.Y = y
 }
 
+func (v *Label) GetTextMetrics(text string) (width, height uint32) {
+	return v.font.GetTextMetrics(text)
+}
+
 func (v *Label) cacheImage() {
 	if v.imageData != nil {
 		return
@@ -93,7 +96,7 @@ func (v *Label) SetText(newText string) {
 }
 
 // GetSize returns the size of the label
-func (v *Label) GetSize() (width, height uint32) {
+func (v Label) GetSize() (width, height uint32) {
 	v.cacheImage()
 	width = v.Width
 	height = v.Height

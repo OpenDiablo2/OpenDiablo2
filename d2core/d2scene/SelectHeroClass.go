@@ -2,6 +2,7 @@ package d2scene
 
 import (
 	"image"
+	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
@@ -35,20 +36,23 @@ type HeroRenderInfo struct {
 }
 
 type SelectHeroClass struct {
-	uiManager      *d2ui.Manager
-	soundManager   *d2audio.Manager
-	fileProvider   d2interface.FileProvider
-	sceneProvider  d2interface.SceneProvider
-	bgImage        d2render.Sprite
-	campfire       d2render.Sprite
-	headingLabel   *d2ui.Label
-	heroClassLabel *d2ui.Label
-	heroDesc1Label *d2ui.Label
-	heroDesc2Label *d2ui.Label
-	heroDesc3Label *d2ui.Label
-	heroRenderInfo map[d2enum.Hero]*HeroRenderInfo
-	selectedHero   d2enum.Hero
-	exitButton     *d2ui.Button
+	uiManager       *d2ui.Manager
+	soundManager    *d2audio.Manager
+	fileProvider    d2interface.FileProvider
+	sceneProvider   d2interface.SceneProvider
+	bgImage         d2render.Sprite
+	campfire        d2render.Sprite
+	headingLabel    d2ui.Label
+	heroClassLabel  d2ui.Label
+	heroDesc1Label  d2ui.Label
+	heroDesc2Label  d2ui.Label
+	heroDesc3Label  d2ui.Label
+	heroNameTextbox d2ui.TextBox
+	heroNameLabel   d2ui.Label
+	heroRenderInfo  map[d2enum.Hero]*HeroRenderInfo
+	selectedHero    d2enum.Hero
+	exitButton      d2ui.Button
+	okButton        d2ui.Button
 }
 
 func CreateSelectHeroClass(
@@ -115,7 +119,28 @@ func (v *SelectHeroClass) Load() []func() {
 			v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, v.fileProvider, d2common.TranslateString("#970"))
 			v.exitButton.MoveTo(33, 537)
 			v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
-			v.uiManager.AddWidget(v.exitButton)
+			v.uiManager.AddWidget(&v.exitButton)
+		},
+		func() {
+			v.okButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, v.fileProvider, d2common.TranslateString("#971"))
+			v.okButton.MoveTo(630, 537)
+			v.okButton.OnActivated(func() { v.onOkButtonClicked() })
+			v.okButton.SetVisible(false)
+			v.okButton.SetEnabled(false)
+			v.uiManager.AddWidget(&v.okButton)
+		},
+		func() {
+			v.heroNameLabel = d2ui.CreateLabel(v.fileProvider, d2resource.Font16, d2enum.Units)
+			v.heroNameLabel.Alignment = d2ui.LabelAlignLeft
+			v.heroNameLabel.Color = color.RGBA{216, 196, 128, 255}
+			v.heroNameLabel.SetText(d2common.TranslateString("#1694"))
+			v.heroNameLabel.MoveTo(321, 475)
+		},
+		func() {
+			v.heroNameTextbox = d2ui.CreateTextbox(v.fileProvider)
+			v.heroNameTextbox.MoveTo(318, 493)
+			v.heroNameTextbox.SetVisible(false)
+			v.uiManager.AddWidget(&v.heroNameTextbox)
 		},
 		func() {
 			v.heroRenderInfo[d2enum.HeroBarbarian] = &HeroRenderInfo{
@@ -368,8 +393,12 @@ func (v *SelectHeroClass) Unload() {
 	v.heroRenderInfo = nil
 }
 
-func (v *SelectHeroClass) onExitButtonClicked() {
+func (v SelectHeroClass) onExitButtonClicked() {
 	v.sceneProvider.SetNextScene(CreateCharacterSelect(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager))
+}
+
+func (v SelectHeroClass) onOkButtonClicked() {
+	// TODO: Start the game
 }
 
 func (v *SelectHeroClass) Render(screen *ebiten.Image) {
@@ -392,6 +421,9 @@ func (v *SelectHeroClass) Render(screen *ebiten.Image) {
 		}
 	}
 	v.campfire.Draw(screen)
+	if v.heroNameTextbox.GetVisible() {
+		v.heroNameLabel.Draw(screen)
+	}
 }
 
 func (v *SelectHeroClass) Update(tickTime float64) {
@@ -412,6 +444,8 @@ func (v *SelectHeroClass) Update(tickTime float64) {
 	if v.selectedHero != d2enum.HeroNone && allIdle {
 		v.selectedHero = d2enum.HeroNone
 	}
+	v.heroNameTextbox.Update()
+	v.okButton.SetEnabled(len(v.heroNameTextbox.GetText()) >= 2)
 }
 
 func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect bool) {
@@ -444,7 +478,8 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 	b := renderInfo.SelectionBounds
 	mouseHover := (mouseX >= b.Min.X) && (mouseX <= b.Min.X+b.Max.X) && (mouseY >= b.Min.Y) && (mouseY <= b.Min.Y+b.Max.Y)
 	if mouseHover && v.uiManager.CursorButtonPressed(d2ui.CursorButtonLeft) {
-		// showEntryUi = true;
+		v.heroNameTextbox.SetVisible(true)
+		v.okButton.SetVisible(true)
 		renderInfo.Stance = d2enum.HeroStanceApproaching
 		renderInfo.ForwardWalkSprite.ResetAnimation()
 		if renderInfo.ForwardWalkSpriteOverlay.IsValid() {

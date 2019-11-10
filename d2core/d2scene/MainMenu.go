@@ -37,17 +37,17 @@ type MainMenu struct {
 	diabloLogoRight     d2render.Sprite
 	diabloLogoLeftBack  d2render.Sprite
 	diabloLogoRightBack d2render.Sprite
-	singlePlayerButton  *d2ui.Button
-	githubButton        *d2ui.Button
-	exitDiabloButton    *d2ui.Button
-	creditsButton       *d2ui.Button
-	cinematicsButton    *d2ui.Button
-	mapTestButton       *d2ui.Button
-	copyrightLabel      *d2ui.Label
-	copyrightLabel2     *d2ui.Label
-	openDiabloLabel     *d2ui.Label
-	versionLabel        *d2ui.Label
-	commitLabel         *d2ui.Label
+	singlePlayerButton  d2ui.Button
+	githubButton        d2ui.Button
+	exitDiabloButton    d2ui.Button
+	creditsButton       d2ui.Button
+	cinematicsButton    d2ui.Button
+	mapTestButton       d2ui.Button
+	copyrightLabel      d2ui.Label
+	copyrightLabel2     d2ui.Label
+	openDiabloLabel     d2ui.Label
+	versionLabel        d2ui.Label
+	commitLabel         d2ui.Label
 
 	ShowTrademarkScreen bool
 	leftButtonHeld      bool
@@ -138,41 +138,41 @@ func (v *MainMenu) Load() []func() {
 			v.exitDiabloButton.MoveTo(264, 535)
 			v.exitDiabloButton.SetVisible(!v.ShowTrademarkScreen)
 			v.exitDiabloButton.OnActivated(func() { v.onExitButtonClicked() })
-			v.uiManager.AddWidget(v.exitDiabloButton)
+			v.uiManager.AddWidget(&v.exitDiabloButton)
 		},
 		func() {
 			v.creditsButton = d2ui.CreateButton(d2ui.ButtonTypeShort, v.fileProvider, d2common.TranslateString("#1627"))
 			v.creditsButton.MoveTo(264, 505)
 			v.creditsButton.SetVisible(!v.ShowTrademarkScreen)
 			v.creditsButton.OnActivated(func() { v.onCreditsButtonClicked() })
-			v.uiManager.AddWidget(v.creditsButton)
+			v.uiManager.AddWidget(&v.creditsButton)
 		},
 		func() {
 			v.cinematicsButton = d2ui.CreateButton(d2ui.ButtonTypeShort, v.fileProvider, d2common.TranslateString("#1639"))
 			v.cinematicsButton.MoveTo(401, 505)
 			v.cinematicsButton.SetVisible(!v.ShowTrademarkScreen)
-			v.uiManager.AddWidget(v.cinematicsButton)
+			v.uiManager.AddWidget(&v.cinematicsButton)
 		},
 		func() {
 			v.singlePlayerButton = d2ui.CreateButton(d2ui.ButtonTypeWide, v.fileProvider, d2common.TranslateString("#1620"))
 			v.singlePlayerButton.MoveTo(264, 290)
 			v.singlePlayerButton.SetVisible(!v.ShowTrademarkScreen)
 			v.singlePlayerButton.OnActivated(func() { v.onSinglePlayerClicked() })
-			v.uiManager.AddWidget(v.singlePlayerButton)
+			v.uiManager.AddWidget(&v.singlePlayerButton)
 		},
 		func() {
 			v.githubButton = d2ui.CreateButton(d2ui.ButtonTypeWide, v.fileProvider, "PROJECT WEBSITE")
 			v.githubButton.MoveTo(264, 330)
 			v.githubButton.SetVisible(!v.ShowTrademarkScreen)
 			v.githubButton.OnActivated(func() { v.onGithubButtonClicked() })
-			v.uiManager.AddWidget(v.githubButton)
+			v.uiManager.AddWidget(&v.githubButton)
 		},
 		func() {
 			v.mapTestButton = d2ui.CreateButton(d2ui.ButtonTypeWide, v.fileProvider, "MAP ENGINE TEST")
 			v.mapTestButton.MoveTo(264, 450)
 			v.mapTestButton.SetVisible(!v.ShowTrademarkScreen)
 			v.mapTestButton.OnActivated(func() { v.onMapTestClicked() })
-			v.uiManager.AddWidget(v.mapTestButton)
+			v.uiManager.AddWidget(&v.mapTestButton)
 		},
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"image"
 	"image/color"
+	"log"
 	"sync"
 	"time"
 
@@ -29,7 +30,6 @@ type Sprite struct {
 	LastFrameTime      time.Time
 	Animate            bool
 	ColorMod           color.Color
-	visible            bool
 	valid              bool
 }
 
@@ -104,7 +104,7 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
 
 			x := uint32(0)
 			y := result.Frames[i].Height - 1
-			for true {
+			for {
 				b := data[dataPointer]
 				dataPointer++
 				if b == 0x80 {
@@ -197,7 +197,9 @@ func (v *Sprite) cacheFrame(frame int) {
 			v.atlasBytes[idx+3] = v.Frames[frame].FrameData[pix+3]
 		}
 	}
-	v.atlas.ReplacePixels(v.atlasBytes)
+	if err := v.atlas.ReplacePixels(v.atlasBytes); err != nil {
+		log.Panic(err.Error())
+	}
 	v.Frames[frame].cached = true
 }
 
@@ -218,7 +220,7 @@ func (v *Sprite) updateAnimation() {
 	} else {
 		timePerFrame = time.Duration(float64(time.Second) * (1.0 / float64(len(v.Frames))))
 	}
-	for time.Now().Sub(v.LastFrameTime) >= timePerFrame {
+	for time.Since(v.LastFrameTime) >= timePerFrame {
 		v.LastFrameTime = v.LastFrameTime.Add(timePerFrame)
 		v.Frame++
 		if v.Frame >= uint8(v.FramesPerDirection) {
@@ -272,7 +274,9 @@ func (v *Sprite) Draw(target *ebiten.Image) {
 	if v.ColorMod != nil {
 		opts.ColorM = d2helper.ColorToColorM(v.ColorMod)
 	}
-	target.DrawImage(frame.Image, opts)
+	if err := target.DrawImage(frame.Image, opts); err != nil {
+		log.Panic(err.Error())
+	}
 }
 
 // DrawSegments draws the sprite via a grid of segments
@@ -300,7 +304,9 @@ func (v *Sprite) DrawSegments(target *ebiten.Image, xSegments, ySegments, offset
 			if v.ColorMod != nil {
 				opts.ColorM = d2helper.ColorToColorM(v.ColorMod)
 			}
-			target.DrawImage(frame.Image, opts)
+			if err := target.DrawImage(frame.Image, opts); err != nil {
+				log.Panic(err.Error())
+			}
 			xOffset += int32(frame.Width)
 			biggestYOffset = d2helper.MaxInt32(biggestYOffset, int32(frame.Height))
 		}
