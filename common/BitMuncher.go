@@ -31,6 +31,7 @@ func (v *BitMuncher) GetBit() uint32 {
 
 func (v *BitMuncher) SkipBits(bits int) {
 	v.Offset += bits
+	v.BitsRead += bits
 }
 
 func (v *BitMuncher) GetByte() byte {

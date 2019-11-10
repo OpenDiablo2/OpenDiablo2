@@ -15,8 +15,7 @@ func CreateNPC(object Object, fileProvider FileProvider) *NPC {
 		AnimatedEntity: CreateAnimatedEntity(object, fileProvider, palettedefs.Units),
 		Paths:          object.Paths,
 	}
-	result.AnimatedEntity.SetMode(object.Lookup.Mode, object.Lookup.Class, 0, fileProvider)
-
+	result.AnimatedEntity.SetMode(object.Lookup.Mode, object.Lookup.Class, 1, fileProvider)
 	return result
 }
 

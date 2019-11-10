@@ -3,7 +3,6 @@ package common
 import (
 	"fmt"
 	"image"
-	"math"
 	"strings"
 	"time"
 
@@ -12,18 +11,19 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
+var DccLayerNames = []string{"HD", "TR", "LG", "RA", "LA", "RH", "LH", "SH", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"}
+
 // AnimatedEntity represents an entity on the map that can be animated
 type AnimatedEntity struct {
 	// LocationX represents the tile X position of the entity
 	LocationX float64
 	// LocationY represents the tile Y position of the entity
 	LocationY       float64
-	dcc             *DCC
-	cof             *Cof
+	dccLayers       map[string]*DCC
+	Cof             *Cof
 	palette         palettedefs.PaletteType
 	base            string
 	token           string
-	tr              string
 	animationMode   string
 	weaponClass     string
 	lastFrameTime   time.Time
@@ -31,8 +31,9 @@ type AnimatedEntity struct {
 	animationSpeed  int
 	direction       int
 	currentFrame    int
-	frames          []*ebiten.Image
-	frameLocations  []Rectangle
+	frames          map[string][]*ebiten.Image
+	frameLocations  map[string][]Rectangle
+	object          Object
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
@@ -40,11 +41,12 @@ func CreateAnimatedEntity(object Object, fileProvider FileProvider, palette pale
 	result := &AnimatedEntity{
 		base:    object.Lookup.Base,
 		token:   object.Lookup.Token,
-		tr:      object.Lookup.TR,
+		object:  object,
 		palette: palette,
 	}
-	result.LocationX = math.Floor(float64(object.X) / 5)
-	result.LocationY = math.Floor(float64(object.Y) / 5)
+	result.dccLayers = make(map[string]*DCC)
+	result.LocationX = float64(object.X) / 5
+	result.LocationY = float64(object.Y) / 5
 	return result
 }
 
@@ -53,14 +55,69 @@ var DirectionLookup = []int{3, 15, 4, 8, 0, 9, 5, 10, 1, 11, 6, 12, 2, 13, 7, 14
 
 // SetMode changes the graphical mode of this animated entity
 func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction int, provider FileProvider) {
-	dccPath := fmt.Sprintf("%s/%s/tr/%str%s%s%s.dcc", v.base, v.token, v.token, v.tr, animationMode, weaponClass)
-	v.dcc = LoadDCC(dccPath, provider)
-	cofPath := fmt.Sprintf("%s/%s/cof/%s%s%s.cof", v.base, v.token, v.token, animationMode, weaponClass)
-	v.cof = LoadCof(cofPath, provider)
+	cofPath := fmt.Sprintf("%s/%s/Cof/%s%s%s.Cof", v.base, v.token, v.token, animationMode, weaponClass)
+	v.Cof = LoadCof(cofPath, provider)
 	v.animationMode = animationMode
 	v.weaponClass = weaponClass
 	v.direction = direction
-	v.cacheFrames()
+	if v.direction >= v.Cof.NumberOfDirections {
+		v.direction = v.Cof.NumberOfDirections - 1
+	}
+	v.frames = make(map[string][]*ebiten.Image)
+	v.frameLocations = make(map[string][]Rectangle)
+	v.dccLayers = make(map[string]*DCC)
+	for _, cofLayer := range v.Cof.CofLayers {
+		layerName := DccLayerNames[cofLayer.Type]
+		v.dccLayers[layerName] = v.LoadLayer(layerName, provider)
+		if v.dccLayers[layerName] == nil {
+			continue
+		}
+		v.cacheFrames(layerName)
+	}
+
+}
+
+func (v *AnimatedEntity) LoadLayer(layer string, fileProvider FileProvider) *DCC {
+	layerName := "tr"
+	switch strings.ToUpper(layer) {
+	case "HD": // Head
+		layerName = v.object.Lookup.HD
+	case "TR": // Torso
+		layerName = v.object.Lookup.TR
+	case "LG": // Legs
+		layerName = v.object.Lookup.LG
+	case "RA": // RightArm
+		layerName = v.object.Lookup.RA
+	case "LA": // LeftArm
+		layerName = v.object.Lookup.LA
+	case "RH": // RightHand
+		layerName = v.object.Lookup.RH
+	case "LH": // LeftHand
+		layerName = v.object.Lookup.LH
+	case "SH": // Shield
+		layerName = v.object.Lookup.SH
+	case "S1": // Special1
+		layerName = v.object.Lookup.S1
+	case "S2": // Special2
+		layerName = v.object.Lookup.S2
+	case "S3": // Special3
+		layerName = v.object.Lookup.S3
+	case "S4": // Special4
+		layerName = v.object.Lookup.S4
+	case "S5": // Special5
+		layerName = v.object.Lookup.S5
+	case "S6": // Special6
+		layerName = v.object.Lookup.S6
+	case "S7": // Special7
+		layerName = v.object.Lookup.S7
+	case "S8": // Special8
+		layerName = v.object.Lookup.S8
+	}
+	if len(layerName) == 0 {
+		return nil
+	}
+	dccPath := fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dcc", v.base, v.token, layer, v.token, layer, layerName, v.animationMode, v.weaponClass)
+	return LoadDCC(dccPath, fileProvider)
 }
 
 // Render draws this animated entity onto the target
@@ -72,23 +129,35 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 			v.currentFrame = 0
 		}
 	}
-
-	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(float64(v.frameLocations[v.currentFrame].Left+offsetX), float64(v.frameLocations[v.currentFrame].Top+offsetY+40))
-	target.DrawImage(v.frames[v.currentFrame], opts)
+	for idx := 0; idx < v.Cof.NumberOfLayers; idx++ {
+		priority := v.Cof.Priority[v.direction][v.currentFrame][idx]
+		if int(priority) >= len(DccLayerNames) {
+			continue
+		}
+		frameName := DccLayerNames[priority]
+		if v.frames[frameName] == nil {
+			continue
+		}
+		// TODO: Transparency op maybe, but it'l murder batch calls
+		opts := &ebiten.DrawImageOptions{}
+		opts.GeoM.Translate(float64(v.frameLocations[frameName][v.currentFrame].Left+offsetX),
+			float64(v.frameLocations[frameName][v.currentFrame].Top+offsetY+40))
+		target.DrawImage(v.frames[frameName][v.currentFrame], opts)
+	}
 }
 
-func (v *AnimatedEntity) cacheFrames() {
+func (v *AnimatedEntity) cacheFrames(layerName string) {
+	dcc := v.dccLayers[layerName]
 	v.currentFrame = 0
 	animationData := AnimationData[strings.ToLower(v.token+v.animationMode+v.weaponClass)][0]
 	v.animationSpeed = int(1000.0 / ((float64(animationData.AnimationSpeed) * 25.0) / 256.0))
 	v.framesToAnimate = animationData.FramesPerDirection
 	v.lastFrameTime = time.Now()
-	minX := int32(2147483647)
-	minY := int32(2147483647)
-	maxX := int32(-2147483648)
-	maxY := int32(-2147483648)
-	for _, layer := range v.dcc.Directions {
+	minX := int32(10000)
+	minY := int32(10000)
+	maxX := int32(-10000)
+	maxY := int32(-10000)
+	for _, layer := range dcc.Directions {
 		minX = MinInt32(minX, int32(layer.Box.Left))
 		minY = MinInt32(minY, int32(layer.Box.Top))
 		maxX = MaxInt32(maxX, int32(layer.Box.Right()))
@@ -96,17 +165,17 @@ func (v *AnimatedEntity) cacheFrames() {
 	}
 	frameW := maxX - minX
 	frameH := maxY - minY
-	v.frames = make([]*ebiten.Image, v.framesToAnimate)
-	v.frameLocations = make([]Rectangle, v.framesToAnimate)
-	for frameIndex := range v.frames {
-		v.frames[frameIndex], _ = ebiten.NewImage(int(frameW), int(frameH), ebiten.FilterNearest)
-		priorityBase := (v.direction * animationData.FramesPerDirection * v.cof.NumberOfLayers) + (frameIndex * v.cof.NumberOfLayers)
-		for layerIdx := 0; layerIdx < v.cof.NumberOfLayers; layerIdx++ {
-			comp := v.cof.Priority[priorityBase+layerIdx]
-			if _, found := v.cof.CompositeLayers[comp]; !found {
-				continue
+	v.frames[layerName] = make([]*ebiten.Image, v.framesToAnimate)
+	v.frameLocations[layerName] = make([]Rectangle, v.framesToAnimate)
+	for frameIndex := range v.frames[layerName] {
+		v.frames[layerName][frameIndex], _ = ebiten.NewImage(int(frameW), int(frameH), ebiten.FilterNearest)
+		for layerIdx := 0; layerIdx < v.Cof.NumberOfLayers; layerIdx++ {
+			transparency := byte(255)
+			if v.Cof.CofLayers[layerIdx].Transparent {
+				transparency = byte(128)
 			}
-			direction := v.dcc.Directions[v.direction]
+
+			direction := dcc.Directions[v.direction]
 			frame := direction.Frames[frameIndex]
 			img := image.NewRGBA(image.Rect(0, 0, int(frameW), int(frameH)))
 			for y := 0; y < direction.Box.Height; y++ {
@@ -122,13 +191,13 @@ func (v *AnimatedEntity) cacheFrames() {
 					img.Pix[(actualX*4)+(actualY*int(frameW)*4)] = color.R
 					img.Pix[(actualX*4)+(actualY*int(frameW)*4)+1] = color.G
 					img.Pix[(actualX*4)+(actualY*int(frameW)*4)+2] = color.B
-					img.Pix[(actualX*4)+(actualY*int(frameW)*4)+3] = 255
+					img.Pix[(actualX*4)+(actualY*int(frameW)*4)+3] = transparency
 				}
 			}
 			newImage, _ := ebiten.NewImageFromImage(img, ebiten.FilterNearest)
 			img = nil
-			v.frames[frameIndex] = newImage
-			v.frameLocations[frameIndex] = Rectangle{
+			v.frames[layerName][frameIndex] = newImage
+			v.frameLocations[layerName][frameIndex] = Rectangle{
 				Left:   int(minX),
 				Top:    int(minY),
 				Width:  int(frameW),
