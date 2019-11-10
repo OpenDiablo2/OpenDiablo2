@@ -31,12 +31,12 @@ type MainMenu struct {
 	soundManager        *d2audio.Manager
 	fileProvider        d2interface.FileProvider
 	sceneProvider       d2interface.SceneProvider
-	trademarkBackground *d2render.Sprite
-	background          *d2render.Sprite
-	diabloLogoLeft      *d2render.Sprite
-	diabloLogoRight     *d2render.Sprite
-	diabloLogoLeftBack  *d2render.Sprite
-	diabloLogoRightBack *d2render.Sprite
+	trademarkBackground d2render.Sprite
+	background          d2render.Sprite
+	diabloLogoLeft      d2render.Sprite
+	diabloLogoRight     d2render.Sprite
+	diabloLogoLeftBack  d2render.Sprite
+	diabloLogoRightBack d2render.Sprite
 	singlePlayerButton  *d2ui.Button
 	githubButton        *d2ui.Button
 	exitDiabloButton    *d2ui.Button

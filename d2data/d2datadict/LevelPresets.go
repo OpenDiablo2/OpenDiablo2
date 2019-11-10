@@ -73,10 +73,10 @@ func createLevelPresetRecord(props []string) LevelPresetRecord {
 	return result
 }
 
-var LevelPresets map[int]*LevelPresetRecord
+var LevelPresets map[int]LevelPresetRecord
 
 func LoadLevelPresets(fileProvider d2interface.FileProvider) {
-	LevelPresets = make(map[int]*LevelPresetRecord)
+	LevelPresets = make(map[int]LevelPresetRecord)
 	data := strings.Split(string(fileProvider.LoadFile(d2resource.LevelPreset)), "\r\n")[1:]
 	for _, line := range data {
 		if len(line) == 0 {
@@ -87,7 +87,7 @@ func LoadLevelPresets(fileProvider d2interface.FileProvider) {
 			continue // any line without a definition id is skipped (e.g. the "Expansion" line)
 		}
 		rec := createLevelPresetRecord(props)
-		LevelPresets[rec.DefinitionId] = &rec
+		LevelPresets[rec.DefinitionId] = rec
 	}
 	log.Printf("Loaded %d level presets", len(LevelPresets))
 }

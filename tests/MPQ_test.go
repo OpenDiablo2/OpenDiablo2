@@ -6,7 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2cof"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2dcc"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 
@@ -36,12 +38,12 @@ func TestMPQScanPerformance(t *testing.T) {
 			parts := strings.Split(archiveFile, ".")
 			switch strings.ToLower(parts[len(parts)-1]) {
 			case "coff":
-				_ = d2data.LoadCof(archiveFile, engine)
+				_ = d2cof.LoadCOF(archiveFile, engine)
 			case "dcc":
 				if strings.ContainsAny(archiveFile, "common") {
 					continue
 				}
-				_ = d2data.LoadDCC(archiveFile, engine)
+				_ = d2dcc.LoadDCC(archiveFile, engine)
 			}
 
 			_, _ = archive.ReadFile(archiveFile)

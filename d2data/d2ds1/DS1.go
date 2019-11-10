@@ -1,93 +1,33 @@
-package d2data
+package d2ds1
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
 )
 
-var dirLookup = []int32{
-	0x00, 0x01, 0x02, 0x01, 0x02, 0x03, 0x03, 0x05, 0x05, 0x06,
-	0x06, 0x07, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
-	0x0F, 0x10, 0x11, 0x12, 0x14,
-}
-
-type LayerStreamType int
-
-const (
-	LayerStreamWall1        LayerStreamType = 0
-	LayerStreamWall2        LayerStreamType = 1
-	LayerStreamWall3        LayerStreamType = 2
-	LayerStreamWall4        LayerStreamType = 3
-	LayerStreamOrientation1 LayerStreamType = 4
-	LayerStreamOrientation2 LayerStreamType = 5
-	LayerStreamOrientation3 LayerStreamType = 6
-	LayerStreamOrientation4 LayerStreamType = 7
-	LayerStreamFloor1       LayerStreamType = 8
-	LayerStreamFloor2       LayerStreamType = 9
-	LayerStreamShadow       LayerStreamType = 10
-	LayerStreamSubstitute   LayerStreamType = 11
-)
-
-type FloorShadowRecord struct {
-	Prop1     byte
-	SubIndex  byte
-	Unknown1  byte
-	MainIndex byte
-	Unknown2  byte
-	Hidden    bool
-}
-
-type WallRecord struct {
-	Orientation byte
-	Zero        byte
-	Prop1       byte
-	SubIndex    byte
-	Unknown1    byte
-	MainIndex   byte
-	Unknown2    byte
-	Hidden      bool
-}
-
-type SubstitutionRecord struct {
-	Unknown uint32
-}
-
-type TileRecord struct {
-	Floors        []FloorShadowRecord
-	Walls         []WallRecord
-	Shadows       []FloorShadowRecord
-	Substitutions []SubstitutionRecord
-}
-
-type SubstitutionGroup struct {
-	TileX         int32
-	TileY         int32
-	WidthInTiles  int32
-	HeightInTiles int32
-	Unknown       int32
-}
-
 type DS1 struct {
-	Version                    int32    // The version of the DS1
-	Width                      int32    // Width of map, in # of tiles
-	Height                     int32    // Height of map, in # of tiles
-	Act                        int32    // Act, from 1 to 5. This tells which act table to use for the Objects list
-	SubstitutionType           int32    // SubstitutionType (layer type): 0 if no layer, else type 1 or type 2
-	Files                      []string // FilePtr table of file string pointers
-	NumberOfWalls              int32    // WallNum number of wall & orientation layers used
-	NumberOfFloors             int32    // number of floor layers used
-	NumberOfShadowLayers       int32    // ShadowNum number of shadow layer used
-	NumberOfSubstitutionLayers int32    // SubstitutionNum number of substitution layer used
-	SubstitutionGroupsNum      int32    // SubstitutionGroupsNum number of substitution groups, datas between objects & NPC paths
-	Objects                    []Object // Objects
+	Version                    int32           // The version of the DS1
+	Width                      int32           // Width of map, in # of tiles
+	Height                     int32           // Height of map, in # of tiles
+	Act                        int32           // Act, from 1 to 5. This tells which act table to use for the Objects list
+	SubstitutionType           int32           // SubstitutionType (layer type): 0 if no layer, else type 1 or type 2
+	Files                      []string        // FilePtr table of file string pointers
+	NumberOfWalls              int32           // WallNum number of wall & orientation layers used
+	NumberOfFloors             int32           // number of floor layers used
+	NumberOfShadowLayers       int32           // ShadowNum number of shadow layer used
+	NumberOfSubstitutionLayers int32           // SubstitutionNum number of substitution layer used
+	SubstitutionGroupsNum      int32           // SubstitutionGroupsNum number of substitution groups, datas between objects & NPC paths
+	Objects                    []d2data.Object // Objects
 	Tiles                      [][]TileRecord
 	SubstitutionGroups         []SubstitutionGroup
 }
 
-func LoadDS1(path string, fileProvider d2interface.FileProvider) *DS1 {
-	ds1 := &DS1{
+func LoadDS1(path string, fileProvider d2interface.FileProvider) DS1 {
+	ds1 := DS1{
 		NumberOfFloors:             1,
 		NumberOfWalls:              1,
 		NumberOfShadowLayers:       1,
@@ -134,29 +74,34 @@ func LoadDS1(path string, fileProvider d2interface.FileProvider) *DS1 {
 			ds1.NumberOfFloors = 1
 		}
 	}
-	var layerStream []LayerStreamType
+	var layerStream []d2enum.LayerStreamType
 	if ds1.Version < 4 {
-		layerStream = []LayerStreamType{
-			LayerStreamWall1,
-			LayerStreamFloor1,
-			LayerStreamOrientation1,
-			LayerStreamSubstitute,
-			LayerStreamShadow,
+		layerStream = []d2enum.LayerStreamType{
+			d2enum.LayerStreamWall1,
+			d2enum.LayerStreamFloor1,
+			d2enum.LayerStreamOrientation1,
+			d2enum.LayerStreamSubstitute,
+			d2enum.LayerStreamShadow,
 		}
 	} else {
-		layerStream = make([]LayerStreamType, 0)
+		layerStream = make([]d2enum.LayerStreamType, (ds1.NumberOfWalls*2)+ds1.NumberOfFloors+ds1.NumberOfShadowLayers+ds1.NumberOfSubstitutionLayers)
+		layerIdx := 0
 		for i := 0; i < int(ds1.NumberOfWalls); i++ {
-			layerStream = append(layerStream, LayerStreamType(int(LayerStreamWall1)+i))
-			layerStream = append(layerStream, LayerStreamType(int(LayerStreamOrientation1)+i))
+			layerStream[layerIdx] = d2enum.LayerStreamType(int(d2enum.LayerStreamWall1) + i)
+			layerStream[layerIdx+1] = d2enum.LayerStreamType(int(d2enum.LayerStreamOrientation1) + i)
+			layerIdx += 2
 		}
 		for i := 0; i < int(ds1.NumberOfFloors); i++ {
-			layerStream = append(layerStream, LayerStreamType(int(LayerStreamFloor1)+i))
+			layerStream[layerIdx] = d2enum.LayerStreamType(int(d2enum.LayerStreamFloor1) + i)
+			layerIdx++
 		}
 		if ds1.NumberOfShadowLayers > 0 {
-			layerStream = append(layerStream, LayerStreamShadow)
+			layerStream[layerIdx] = d2enum.LayerStreamShadow
+			layerIdx++
 		}
 		if ds1.NumberOfSubstitutionLayers > 0 {
-			layerStream = append(layerStream, LayerStreamSubstitute)
+			layerStream[layerIdx] = d2enum.LayerStreamSubstitute
+			layerIdx++
 		}
 	}
 	ds1.Tiles = make([][]TileRecord, ds1.Height)
@@ -174,28 +119,28 @@ func LoadDS1(path string, fileProvider d2interface.FileProvider) *DS1 {
 			for x := 0; x < int(ds1.Width); x++ {
 				dw := br.GetUInt32()
 				switch layerStreamType {
-				case LayerStreamWall1:
+				case d2enum.LayerStreamWall1:
 					fallthrough
-				case LayerStreamWall2:
+				case d2enum.LayerStreamWall2:
 					fallthrough
-				case LayerStreamWall3:
+				case d2enum.LayerStreamWall3:
 					fallthrough
-				case LayerStreamWall4:
-					wallIndex := int(layerStreamType) - int(LayerStreamWall1)
+				case d2enum.LayerStreamWall4:
+					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamWall1)
 					ds1.Tiles[y][x].Walls[wallIndex].Prop1 = byte(dw & 0x000000FF)
 					ds1.Tiles[y][x].Walls[wallIndex].SubIndex = byte((dw & 0x00003F00) >> 8)
 					ds1.Tiles[y][x].Walls[wallIndex].Unknown1 = byte((dw & 0x000FC000) >> 14)
 					ds1.Tiles[y][x].Walls[wallIndex].MainIndex = byte((dw & 0x03F00000) >> 20)
 					ds1.Tiles[y][x].Walls[wallIndex].Unknown2 = byte((dw & 0x7C000000) >> 26)
 					ds1.Tiles[y][x].Walls[wallIndex].Hidden = byte((dw&0x80000000)>>31) > 0
-				case LayerStreamOrientation1:
+				case d2enum.LayerStreamOrientation1:
 					fallthrough
-				case LayerStreamOrientation2:
+				case d2enum.LayerStreamOrientation2:
 					fallthrough
-				case LayerStreamOrientation3:
+				case d2enum.LayerStreamOrientation3:
 					fallthrough
-				case LayerStreamOrientation4:
-					wallIndex := int(layerStreamType) - int(LayerStreamOrientation1)
+				case d2enum.LayerStreamOrientation4:
+					wallIndex := int(layerStreamType) - int(d2enum.LayerStreamOrientation1)
 					c := int32(dw & 0x000000FF)
 					if ds1.Version < 7 {
 						if c < 25 {
@@ -204,34 +149,34 @@ func LoadDS1(path string, fileProvider d2interface.FileProvider) *DS1 {
 					}
 					ds1.Tiles[y][x].Walls[wallIndex].Orientation = byte(c)
 					ds1.Tiles[y][x].Walls[wallIndex].Zero = byte((dw & 0xFFFFFF00) >> 8)
-				case LayerStreamFloor1:
+				case d2enum.LayerStreamFloor1:
 					fallthrough
-				case LayerStreamFloor2:
-					floorIndex := int(layerStreamType) - int(LayerStreamFloor1)
+				case d2enum.LayerStreamFloor2:
+					floorIndex := int(layerStreamType) - int(d2enum.LayerStreamFloor1)
 					ds1.Tiles[y][x].Floors[floorIndex].Prop1 = byte(dw & 0x000000FF)
 					ds1.Tiles[y][x].Floors[floorIndex].SubIndex = byte((dw & 0x00003F00) >> 8)
 					ds1.Tiles[y][x].Floors[floorIndex].Unknown1 = byte((dw & 0x000FC000) >> 14)
 					ds1.Tiles[y][x].Floors[floorIndex].MainIndex = byte((dw & 0x03F00000) >> 20)
 					ds1.Tiles[y][x].Floors[floorIndex].Unknown2 = byte((dw & 0x7C000000) >> 26)
 					ds1.Tiles[y][x].Floors[floorIndex].Hidden = byte((dw&0x80000000)>>31) > 0
-				case LayerStreamShadow:
+				case d2enum.LayerStreamShadow:
 					ds1.Tiles[y][x].Shadows[0].Prop1 = byte(dw & 0x000000FF)
 					ds1.Tiles[y][x].Shadows[0].SubIndex = byte((dw & 0x00003F00) >> 8)
 					ds1.Tiles[y][x].Shadows[0].Unknown1 = byte((dw & 0x000FC000) >> 14)
 					ds1.Tiles[y][x].Shadows[0].MainIndex = byte((dw & 0x03F00000) >> 20)
 					ds1.Tiles[y][x].Shadows[0].Unknown2 = byte((dw & 0x7C000000) >> 26)
 					ds1.Tiles[y][x].Shadows[0].Hidden = byte((dw&0x80000000)>>31) > 0
-				case LayerStreamSubstitute:
+				case d2enum.LayerStreamSubstitute:
 					ds1.Tiles[y][x].Substitutions[0].Unknown = dw
 				}
 			}
 		}
 	}
-	ds1.Objects = make([]Object, 0)
 	if ds1.Version >= 2 {
 		numberOfObjects := br.GetInt32()
+		ds1.Objects = make([]d2data.Object, numberOfObjects)
 		for objIdx := 0; objIdx < int(numberOfObjects); objIdx++ {
-			newObject := Object{}
+			newObject := d2data.Object{}
 			newObject.Type = br.GetInt32()
 			newObject.Id = br.GetInt32()
 			newObject.X = br.GetInt32()
@@ -241,15 +186,17 @@ func LoadDS1(path string, fileProvider d2interface.FileProvider) *DS1 {
 			if newObject.Lookup != nil && newObject.Lookup.ObjectsTxtId != -1 {
 				newObject.ObjectInfo = d2datadict.Objects[newObject.Lookup.ObjectsTxtId]
 			}
-			ds1.Objects = append(ds1.Objects, newObject)
+			ds1.Objects[objIdx] = newObject
 		}
+	} else {
+		ds1.Objects = make([]d2data.Object, 0)
 	}
-	ds1.SubstitutionGroups = make([]SubstitutionGroup, 0)
 	if ds1.Version >= 12 && (ds1.SubstitutionType == 1 || ds1.SubstitutionType == 2) {
 		if ds1.Version >= 18 {
 			br.GetUInt32()
 		}
 		numberOfSubGroups := br.GetInt32()
+		ds1.SubstitutionGroups = make([]SubstitutionGroup, numberOfSubGroups)
 		for subIdx := 0; subIdx < int(numberOfSubGroups); subIdx++ {
 			newSub := SubstitutionGroup{}
 			newSub.TileX = br.GetInt32()
@@ -258,8 +205,10 @@ func LoadDS1(path string, fileProvider d2interface.FileProvider) *DS1 {
 			newSub.HeightInTiles = br.GetInt32()
 			newSub.Unknown = br.GetInt32()
 
-			ds1.SubstitutionGroups = append(ds1.SubstitutionGroups, newSub)
+			ds1.SubstitutionGroups[subIdx] = newSub
 		}
+	} else {
+		ds1.SubstitutionGroups = make([]SubstitutionGroup, 0)
 	}
 	if ds1.Version >= 14 {
 		numberOfNpcs := br.GetInt32()

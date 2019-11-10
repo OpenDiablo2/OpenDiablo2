@@ -20,7 +20,7 @@ type Sprite struct {
 	FramesPerDirection uint32
 	atlas              *ebiten.Image
 	atlasBytes         []byte
-	Frames             []*SpriteFrame
+	Frames             []SpriteFrame
 	SpecialFrameTime   int
 	StopOnLastFrame    bool
 	X, Y               int
@@ -30,6 +30,7 @@ type Sprite struct {
 	Animate            bool
 	ColorMod           color.Color
 	visible            bool
+	valid              bool
 }
 
 // SpriteFrame represents a single frame of a sprite
@@ -49,8 +50,8 @@ type SpriteFrame struct {
 }
 
 // CreateSprite creates an instance of a sprite
-func CreateSprite(data []byte, palette d2datadict.PaletteRec) *Sprite {
-	result := &Sprite{
+func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
+	result := Sprite{
 		X:                  50,
 		Y:                  50,
 		Frame:              0,
@@ -63,6 +64,7 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) *Sprite {
 		LastFrameTime:      time.Now(),
 		SpecialFrameTime:   -1,
 		StopOnLastFrame:    false,
+		valid:              false,
 	}
 	dataPointer := uint32(24)
 	totalFrames := result.Directions * result.FramesPerDirection
@@ -71,14 +73,14 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) *Sprite {
 		framePointers[i] = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
 		dataPointer += 4
 	}
-	result.Frames = make([]*SpriteFrame, totalFrames)
+	result.Frames = make([]SpriteFrame, totalFrames)
 	wg := sync.WaitGroup{}
 	wg.Add(int(totalFrames))
 	for i := uint32(0); i < totalFrames; i++ {
 		go func(i uint32) {
 			defer wg.Done()
 			dataPointer := framePointers[i]
-			result.Frames[i] = &SpriteFrame{}
+			result.Frames[i] = SpriteFrame{}
 			result.Frames[i].Flip = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
 			dataPointer += 4
 			result.Frames[i].Width = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
@@ -169,14 +171,18 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) *Sprite {
 		curX += curMaxWidth
 		curY = 0
 	}
+	result.valid = true
 	return result
+}
+
+func (v Sprite) IsValid() bool {
+	return v.valid
 }
 
 func (v *Sprite) cacheFrame(frame int) {
 	if v.Frames[frame].cached {
 		return
 	}
-
 	r := v.Frames[frame].Image.Bounds().Min
 	curX := r.X
 	curY := r.Y
@@ -196,7 +202,7 @@ func (v *Sprite) cacheFrame(frame int) {
 }
 
 // GetSize returns the size of the sprite
-func (v *Sprite) GetSize() (uint32, uint32) {
+func (v Sprite) GetSize() (uint32, uint32) {
 	frame := v.Frames[uint32(v.Frame)+(uint32(v.Direction)*v.FramesPerDirection)]
 	return frame.Width, frame.Height
 }
@@ -230,19 +236,19 @@ func (v *Sprite) ResetAnimation() {
 	v.Frame = 0
 }
 
-func (v *Sprite) OnLastFrame() bool {
+func (v Sprite) OnLastFrame() bool {
 	return v.Frame == uint8(v.FramesPerDirection-1)
 }
 
 // GetFrameSize returns the size of the specific frame
-func (v *Sprite) GetFrameSize(frame int) (width, height uint32) {
+func (v Sprite) GetFrameSize(frame int) (width, height uint32) {
 	width = v.Frames[frame].Width
 	height = v.Frames[frame].Height
 	return
 }
 
 // GetTotalFrames returns the number of frames in this sprite (for all directions)
-func (v *Sprite) GetTotalFrames() int {
+func (v Sprite) GetTotalFrames() int {
 	return len(v.Frames)
 }
 
@@ -309,6 +315,6 @@ func (v *Sprite) MoveTo(x, y int) {
 }
 
 // GetLocation returns the location of the sprite
-func (v *Sprite) GetLocation() (int, int) {
+func (v Sprite) GetLocation() (int, int) {
 	return v.X, v.Y
 }

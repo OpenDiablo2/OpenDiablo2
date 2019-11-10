@@ -41,7 +41,7 @@ type Engine struct {
 	Settings        *d2common.Configuration // Engine configuration settings from json file
 	Files           map[string]string       // Map that defines which files are in which MPQs
 	CheckedPatch    map[string]bool         // First time we check a file, we'll check if it's in the patch. This notes that we've already checked that.
-	LoadingSprite   *d2render.Sprite        // The sprite shown when loading stuff
+	LoadingSprite   d2render.Sprite         // The sprite shown when loading stuff
 	loadingProgress float64                 // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
 	loadingIndex    int                     // Determines which load function is currently being called
 	thingsToLoad    []func()                // The load functions for the next scene
@@ -56,31 +56,31 @@ type Engine struct {
 }
 
 // CreateEngine creates and instance of the OpenDiablo2 engine
-func CreateEngine() *Engine {
-	result := &Engine{
+func CreateEngine() Engine {
+	result := Engine{
 		CurrentScene: nil,
 		nextScene:    nil,
 	}
 	result.loadConfigurationFile()
 	d2resource.LanguageCode = result.Settings.Language
 	result.mapMpqFiles()
-	d2datadict.LoadPalettes(result.Files, result)
-	d2common.LoadTextDictionary(result)
-	d2datadict.LoadLevelTypes(result)
-	d2datadict.LoadLevelPresets(result)
-	d2datadict.LoadLevelWarps(result)
-	d2datadict.LoadObjectTypes(result)
-	d2datadict.LoadObjects(result)
-	d2datadict.LoadWeapons(result)
-	d2datadict.LoadArmors(result)
-	d2datadict.LoadUniqueItems(result)
-	d2datadict.LoadMissiles(result)
-	d2datadict.LoadSounds(result)
-	d2data.LoadAnimationData(result)
-	d2datadict.LoadMonStats(result)
-	result.SoundManager = d2audio.CreateManager(result)
+	d2datadict.LoadPalettes(result.Files, &result)
+	d2common.LoadTextDictionary(&result)
+	d2datadict.LoadLevelTypes(&result)
+	d2datadict.LoadLevelPresets(&result)
+	d2datadict.LoadLevelWarps(&result)
+	d2datadict.LoadObjectTypes(&result)
+	d2datadict.LoadObjects(&result)
+	d2datadict.LoadWeapons(&result)
+	d2datadict.LoadArmors(&result)
+	d2datadict.LoadUniqueItems(&result)
+	d2datadict.LoadMissiles(&result)
+	d2datadict.LoadSounds(&result)
+	d2data.LoadAnimationData(&result)
+	d2datadict.LoadMonStats(&result)
+	result.SoundManager = d2audio.CreateManager(&result)
 	result.SoundManager.SetVolumes(result.Settings.BgmVolume, result.Settings.SfxVolume)
-	result.UIManager = d2ui.CreateManager(result, *result.SoundManager)
+	result.UIManager = d2ui.CreateManager(&result, *result.SoundManager)
 	result.LoadingSprite = result.LoadSprite(d2resource.LoadingScreen, d2enum.Loading)
 	loadingSpriteSizeX, loadingSpriteSizeY := result.LoadingSprite.GetSize()
 	result.LoadingSprite.MoveTo(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
@@ -135,12 +135,12 @@ func (v *Engine) LoadFile(fileName string) []byte {
 }
 
 // IsLoading returns true if the engine is currently in a loading state
-func (v *Engine) IsLoading() bool {
+func (v Engine) IsLoading() bool {
 	return v.loadingProgress < 1.0
 }
 
 // LoadSprite loads a sprite from the game's data files
-func (v *Engine) LoadSprite(fileName string, palette d2enum.PaletteType) *d2render.Sprite {
+func (v Engine) LoadSprite(fileName string, palette d2enum.PaletteType) d2render.Sprite {
 	data := v.LoadFile(fileName)
 	sprite := d2render.CreateSprite(data, d2datadict.Palettes[palette])
 	return sprite
@@ -215,7 +215,7 @@ func (v *Engine) Update() {
 }
 
 // Draw draws the game
-func (v *Engine) Draw(screen *ebiten.Image) {
+func (v Engine) Draw(screen *ebiten.Image) {
 	if v.loadingProgress < 1.0 {
 		v.LoadingSprite.Frame = uint8(d2helper.Max(0, d2helper.Min(uint32(len(v.LoadingSprite.Frames)-1), uint32(float64(len(v.LoadingSprite.Frames)-1)*v.loadingProgress))))
 		v.LoadingSprite.Draw(screen)

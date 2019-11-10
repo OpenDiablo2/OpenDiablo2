@@ -10,7 +10,7 @@ import (
 )
 
 type NPC struct {
-	AnimatedEntity *d2render.AnimatedEntity
+	AnimatedEntity d2render.AnimatedEntity
 	Paths          []d2common.Path
 }
 

@@ -18,7 +18,7 @@ type CharacterSelect struct {
 	soundManager      *d2audio.Manager
 	fileProvider      d2interface.FileProvider
 	sceneProvider     d2interface.SceneProvider
-	background        *d2render.Sprite
+	background        d2render.Sprite
 	newCharButton     *d2ui.Button
 	convertCharButton *d2ui.Button
 	deleteCharButton  *d2ui.Button

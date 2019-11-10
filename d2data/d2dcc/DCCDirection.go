@@ -1,46 +1,11 @@
-package d2data
+package d2dcc
 
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
 )
-
-type DCCPixelBufferEntry struct {
-	Value          []byte
-	Frame          int
-	FrameCellIndex int
-}
-
-type DCCCell struct {
-	Width       int
-	Height      int
-	XOffset     int
-	YOffset     int
-	LastWidth   int
-	LastHeight  int
-	LastXOffset int
-	LastYOffset int
-}
-
-type DCCDirectionFrame struct {
-	Width                 int
-	Height                int
-	XOffset               int
-	YOffset               int
-	NumberOfOptionalBytes int
-	NumberOfCodedBytes    int
-	FrameIsBottomUp       bool
-	Box                   d2common.Rectangle
-	Cells                 []DCCCell
-	PixelData             []byte
-	HorizontalCellCount   int
-	VerticalCellCount     int
-}
 
 type DCCDirection struct {
 	OutSizeCoded               int
@@ -66,108 +31,8 @@ type DCCDirection struct {
 	PixelBuffer                []*DCCPixelBufferEntry
 }
 
-type DCC struct {
-	Signature          int
-	Version            int
-	NumberOfDirections int
-	FramesPerDirection int
-	Directions         []*DCCDirection
-}
-
-var crazyBitTable = []byte{0, 1, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 26, 28, 30, 32}
-var pixelMaskLookup = []int{0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4}
-var dccDir4 = []byte{0, 1, 2, 3}
-var dccDir8 = []byte{4, 0, 5, 1, 6, 2, 7, 3}
-var dccDir16 = []byte{4, 8, 0, 9, 5, 10, 1, 11, 6, 12, 2, 13, 7, 14, 3, 15}
-var dccDir32 = []byte{4, 16, 8, 17, 0, 18, 9, 19, 5, 20, 10, 21, 1, 22, 11, 23,
-	6, 24, 12, 25, 2, 26, 13, 27, 7, 28, 14, 29, 3, 30, 15, 31}
-
-func CreateDCCDirectionFrame(bits *d2common.BitMuncher, direction *DCCDirection) *DCCDirectionFrame {
-	result := &DCCDirectionFrame{}
-	bits.GetBits(direction.Variable0Bits) // Variable0
-	result.Width = int(bits.GetBits(direction.WidthBits))
-	result.Height = int(bits.GetBits(direction.HeightBits))
-	result.XOffset = bits.GetSignedBits(direction.XOffsetBits)
-	result.YOffset = bits.GetSignedBits(direction.YOffsetBits)
-	result.NumberOfOptionalBytes = int(bits.GetBits(direction.OptionalDataBits))
-	result.NumberOfCodedBytes = int(bits.GetBits(direction.CodedBytesBits))
-	result.FrameIsBottomUp = bits.GetBit() == 1
-	if result.FrameIsBottomUp {
-		log.Panic("Bottom up frames are not implemented.")
-	} else {
-		result.Box = d2common.Rectangle{
-			result.XOffset,
-			result.YOffset - result.Height + 1,
-			result.Width,
-			result.Height,
-		}
-	}
-	return result
-}
-
-func (v *DCCDirectionFrame) CalculateCells(direction *DCCDirection) {
-	var w = 4 - ((v.Box.Left - direction.Box.Left) % 4) // Width of the first column (in pixels)
-	if (v.Width - w) <= 1 {
-		v.HorizontalCellCount = 1
-	} else {
-		tmp := v.Width - w - 1
-		v.HorizontalCellCount = 2 + (tmp / 4)
-		if (tmp % 4) == 0 {
-			v.HorizontalCellCount--
-		}
-	}
-	h := 4 - ((v.Box.Top - direction.Box.Top) % 4) // Height of the first column (in pixels)
-	if (v.Height - h) <= 1 {
-		v.VerticalCellCount = 1
-	} else {
-		tmp := v.Height - h - 1
-		v.VerticalCellCount = 2 + (tmp / 4)
-		if (tmp % 4) == 0 {
-			v.VerticalCellCount--
-		}
-	}
-	// Calculate the cell widths and heights
-	cellWidths := make([]int, v.HorizontalCellCount)
-	if v.HorizontalCellCount == 1 {
-		cellWidths[0] = v.Width
-	} else {
-		cellWidths[0] = w
-		for i := 1; i < (v.HorizontalCellCount - 1); i++ {
-			cellWidths[i] = 4
-		}
-		cellWidths[v.HorizontalCellCount-1] = v.Width - w - (4 * (v.HorizontalCellCount - 2))
-	}
-
-	cellHeights := make([]int, v.VerticalCellCount)
-	if v.VerticalCellCount == 1 {
-		cellHeights[0] = v.Height
-	} else {
-		cellHeights[0] = h
-		for i := 1; i < (v.VerticalCellCount - 1); i++ {
-			cellHeights[i] = 4
-		}
-		cellHeights[v.VerticalCellCount-1] = v.Height - h - (4 * (v.VerticalCellCount - 2))
-	}
-
-	v.Cells = make([]DCCCell, v.HorizontalCellCount*v.VerticalCellCount)
-	offsetY := v.Box.Top - direction.Box.Top
-	for y := 0; y < v.VerticalCellCount; y++ {
-		offsetX := v.Box.Left - direction.Box.Left
-		for x := 0; x < v.HorizontalCellCount; x++ {
-			v.Cells[x+(y*v.HorizontalCellCount)] = DCCCell{
-				XOffset: offsetX,
-				YOffset: offsetY,
-				Width:   cellWidths[x],
-				Height:  cellHeights[y],
-			}
-			offsetX += cellWidths[x]
-		}
-		offsetY += cellHeights[y]
-	}
-}
-
-func CreateDCCDirection(bm *d2common.BitMuncher, file *DCC) *DCCDirection {
-	result := &DCCDirection{}
+func CreateDCCDirection(bm *d2common.BitMuncher, file DCC) DCCDirection {
+	result := DCCDirection{}
 	result.OutSizeCoded = int(bm.GetUInt32())
 	result.CompressionFlags = int(bm.GetBits(2))
 	result.Variable0Bits = int(crazyBitTable[bm.GetBits(4)])
@@ -497,44 +362,4 @@ func (v *DCCDirection) CalculateCells() {
 		}
 		yOffset += 4
 	}
-}
-
-func LoadDCC(path string, fileProvider d2interface.FileProvider) *DCC {
-	result := &DCC{}
-	fileData := fileProvider.LoadFile(path)
-	var bm = d2common.CreateBitMuncher(fileData, 0)
-	result.Signature = int(bm.GetByte())
-	if result.Signature != 0x74 {
-		log.Fatal("Signature expected to be 0x74 but it is not.")
-	}
-	result.Version = int(bm.GetByte())
-	result.NumberOfDirections = int(bm.GetByte())
-	result.FramesPerDirection = int(bm.GetInt32())
-	if bm.GetInt32() != 1 {
-		log.Fatal("This value isn't 1. It has to be 1.")
-	}
-	bm.GetInt32() // TotalSizeCoded
-	directionOffsets := make([]int, result.NumberOfDirections)
-	for i := 0; i < result.NumberOfDirections; i++ {
-		directionOffsets[i] = int(bm.GetInt32())
-	}
-	result.Directions = make([]*DCCDirection, result.NumberOfDirections)
-	for i := 0; i < result.NumberOfDirections; i++ {
-		dir := byte(0)
-		switch result.NumberOfDirections {
-		case 1:
-			dir = 0
-		case 4:
-			dir = dccDir4[i]
-		case 8:
-			dir = dccDir8[i]
-		case 16:
-			dir = dccDir16[i]
-		case 32:
-			dir = dccDir32[i]
-		}
-		result.Directions[dir] = CreateDCCDirection(d2common.CreateBitMuncher(fileData, directionOffsets[i]*8), result)
-	}
-
-	return result
 }

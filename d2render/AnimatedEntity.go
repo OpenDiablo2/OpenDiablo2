@@ -6,6 +6,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2cof"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2dcc"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -29,8 +33,8 @@ type AnimatedEntity struct {
 	LocationX float64
 	// LocationY represents the tile Y position of the entity
 	LocationY       float64
-	dccLayers       map[string]*d2data.DCC
-	Cof             *d2data.Cof
+	dccLayers       map[string]d2dcc.DCC
+	Cof             *d2cof.COF
 	palette         d2enum.PaletteType
 	base            string
 	token           string
@@ -47,14 +51,14 @@ type AnimatedEntity struct {
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
-func CreateAnimatedEntity(object d2data.Object, fileProvider d2interface.FileProvider, palette d2enum.PaletteType) *AnimatedEntity {
-	result := &AnimatedEntity{
+func CreateAnimatedEntity(object d2data.Object, fileProvider d2interface.FileProvider, palette d2enum.PaletteType) AnimatedEntity {
+	result := AnimatedEntity{
 		base:    object.Lookup.Base,
 		token:   object.Lookup.Token,
 		object:  object,
 		palette: palette,
 	}
-	result.dccLayers = make(map[string]*d2data.DCC)
+	result.dccLayers = make(map[string]d2dcc.DCC)
 	result.LocationX = float64(object.X) / 5
 	result.LocationY = float64(object.Y) / 5
 	return result
@@ -65,8 +69,8 @@ var DirectionLookup = []int{3, 15, 4, 8, 0, 9, 5, 10, 1, 11, 6, 12, 2, 13, 7, 14
 
 // SetMode changes the graphical mode of this animated entity
 func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction int, provider d2interface.FileProvider) {
-	cofPath := fmt.Sprintf("%s/%s/Cof/%s%s%s.Cof", v.base, v.token, v.token, animationMode, weaponClass)
-	v.Cof = d2data.LoadCof(cofPath, provider)
+	cofPath := fmt.Sprintf("%s/%s/COF/%s%s%s.COF", v.base, v.token, v.token, animationMode, weaponClass)
+	v.Cof = d2cof.LoadCOF(cofPath, provider)
 	v.animationMode = animationMode
 	v.weaponClass = weaponClass
 	v.direction = direction
@@ -75,11 +79,11 @@ func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction in
 	}
 	v.frames = make(map[string][]*ebiten.Image)
 	v.frameLocations = make(map[string][]d2common.Rectangle)
-	v.dccLayers = make(map[string]*d2data.DCC)
+	v.dccLayers = make(map[string]d2dcc.DCC)
 	for _, cofLayer := range v.Cof.CofLayers {
 		layerName := DccLayerNames[cofLayer.Type]
 		v.dccLayers[layerName] = v.LoadLayer(layerName, provider)
-		if v.dccLayers[layerName] == nil {
+		if !v.dccLayers[layerName].IsValid() {
 			continue
 		}
 		v.cacheFrames(layerName)
@@ -87,7 +91,7 @@ func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction in
 
 }
 
-func (v *AnimatedEntity) LoadLayer(layer string, fileProvider d2interface.FileProvider) *d2data.DCC {
+func (v *AnimatedEntity) LoadLayer(layer string, fileProvider d2interface.FileProvider) d2dcc.DCC {
 	layerName := "tr"
 	switch strings.ToUpper(layer) {
 	case "HD": // Head
@@ -124,10 +128,10 @@ func (v *AnimatedEntity) LoadLayer(layer string, fileProvider d2interface.FilePr
 		layerName = v.object.Lookup.S8
 	}
 	if len(layerName) == 0 {
-		return nil
+		return d2dcc.DCC{}
 	}
 	dccPath := fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dcc", v.base, v.token, layer, v.token, layer, layerName, v.animationMode, v.weaponClass)
-	return d2data.LoadDCC(dccPath, fileProvider)
+	return d2dcc.LoadDCC(dccPath, fileProvider)
 }
 
 // Render draws this animated entity onto the target
