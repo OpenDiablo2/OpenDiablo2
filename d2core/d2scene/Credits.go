@@ -33,7 +33,7 @@ type Credits struct {
 	soundManager       *d2audio.Manager
 	fileProvider       d2interface.FileProvider
 	sceneProvider      d2interface.SceneProvider
-	creditsBackground  *d2render.Sprite
+	creditsBackground  d2render.Sprite
 	exitButton         *d2ui.Button
 	creditsText        []string
 	labels             []*labelItem

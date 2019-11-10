@@ -1,4 +1,4 @@
-package d2data
+package d2dt1
 
 import (
 	"log"
@@ -9,34 +9,6 @@ import (
 )
 
 // https://d2mods.info/forum/viewtopic.php?t=65163
-
-type Block struct {
-	X           int16
-	Y           int16
-	GridX       byte
-	GridY       byte
-	Format      BlockDataFormat
-	EncodedData []byte
-	Length      int32
-	FileOffset  int32
-}
-
-type Tile struct {
-	Direction          int32
-	RoofHeight         int16
-	SoundIndex         byte
-	Animated           bool
-	Height             int32
-	Width              int32
-	Orientation        int32
-	MainIndex          int32
-	SubIndex           int32
-	RarityFrameIndex   int32
-	SubTileFlags       [25]byte
-	blockHeaderPointer int32
-	blockHeaderSize    int32
-	Blocks             []Block
-}
 
 type DT1 struct {
 	Tiles []Tile
@@ -49,8 +21,8 @@ const (
 	BlockFormatIsometric BlockDataFormat = 1
 )
 
-func LoadDT1(path string, fileProvider d2interface.FileProvider) *DT1 {
-	result := &DT1{}
+func LoadDT1(path string, fileProvider d2interface.FileProvider) DT1 {
+	result := DT1{}
 	fileData := fileProvider.LoadFile(path)
 	br := d2common.CreateStreamReader(fileData)
 	ver1 := br.GetInt32()

@@ -1,4 +1,4 @@
-package d2data
+package d2cof
 
 import (
 	"strings"
@@ -10,36 +10,28 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
-type CofLayer struct {
-	Type        d2enum.CompositeType
-	Shadow      byte
-	Transparent bool
-	DrawEffect  d2enum.DrawEffect
-	WeaponClass d2enum.WeaponClass
-}
-
-type Cof struct {
+type COF struct {
 	NumberOfDirections int
 	FramesPerDirection int
 	NumberOfLayers     int
-	CofLayers          []*CofLayer
+	CofLayers          []CofLayer
 	CompositeLayers    map[d2enum.CompositeType]int
 	AnimationFrames    []d2enum.AnimationFrame
 	Priority           [][][]d2enum.CompositeType
 }
 
-func LoadCof(fileName string, fileProvider d2interface.FileProvider) *Cof {
-	result := &Cof{}
+func LoadCOF(fileName string, fileProvider d2interface.FileProvider) *COF {
+	result := &COF{}
 	fileData := fileProvider.LoadFile(fileName)
 	streamReader := d2common.CreateStreamReader(fileData)
 	result.NumberOfLayers = int(streamReader.GetByte())
 	result.FramesPerDirection = int(streamReader.GetByte())
 	result.NumberOfDirections = int(streamReader.GetByte())
 	streamReader.SkipBytes(25) // Skip 25 unknown bytes...
-	result.CofLayers = make([]*CofLayer, 0)
+	result.CofLayers = make([]CofLayer, result.NumberOfLayers)
 	result.CompositeLayers = make(map[d2enum.CompositeType]int, 0)
 	for i := 0; i < result.NumberOfLayers; i++ {
-		layer := &CofLayer{}
+		layer := CofLayer{}
 		layer.Type = d2enum.CompositeType(streamReader.GetByte())
 		layer.Shadow = streamReader.GetByte()
 		streamReader.SkipBytes(1) // Unknown
@@ -47,7 +39,7 @@ func LoadCof(fileName string, fileProvider d2interface.FileProvider) *Cof {
 		layer.DrawEffect = d2enum.DrawEffect(streamReader.GetByte())
 		weaponClassStr, _ := streamReader.ReadBytes(4)
 		layer.WeaponClass = d2enum.WeaponClassFromString(strings.TrimSpace(strings.ReplaceAll(string(weaponClassStr), string(0), "")))
-		result.CofLayers = append(result.CofLayers, layer)
+		result.CofLayers[i] = layer
 		result.CompositeLayers[layer.Type] = i
 	}
 	animationFrameBytes, _ := streamReader.ReadBytes(result.FramesPerDirection)

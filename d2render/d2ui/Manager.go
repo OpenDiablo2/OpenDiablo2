@@ -23,7 +23,7 @@ const (
 // Manager represents the UI manager
 type Manager struct {
 	widgets            []Widget
-	cursorSprite       *d2render.Sprite
+	cursorSprite       d2render.Sprite
 	cursorButtons      CursorButton
 	pressedIndex       int
 	CursorX            int

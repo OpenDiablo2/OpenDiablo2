@@ -20,7 +20,7 @@ var GitBranch string
 
 // GitCommit is set by the CI build process to the commit hash
 var GitCommit string
-var d2Engine *d2core.Engine
+var d2Engine d2core.Engine
 
 func main() {
 	//defer profile.Start(profile.CPUProfile).Stop()
@@ -39,7 +39,7 @@ func main() {
 	}
 	d2mpq.InitializeCryptoBuffer()
 	d2Engine = d2core.CreateEngine()
-	d2Engine.SetNextScene(d2scene.CreateMainMenu(d2Engine, d2Engine, d2Engine.UIManager, d2Engine.SoundManager))
+	d2Engine.SetNextScene(d2scene.CreateMainMenu(&d2Engine, &d2Engine, d2Engine.UIManager, d2Engine.SoundManager))
 	ebiten.SetCursorVisible(false)
 	ebiten.SetFullscreen(d2Engine.Settings.FullScreen)
 	ebiten.SetRunnableInBackground(d2Engine.Settings.RunInBackground)

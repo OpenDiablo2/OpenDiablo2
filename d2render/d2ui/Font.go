@@ -27,7 +27,7 @@ type FontSize struct {
 
 // Font represents a font
 type Font struct {
-	fontSprite *d2render.Sprite
+	fontSprite d2render.Sprite
 	metrics    map[uint8]FontSize
 }
 

@@ -8,6 +8,10 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2dt1"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2ds1"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
@@ -34,16 +38,16 @@ type TileCacheRecord struct {
 type Region struct {
 	RegionPath        string
 	LevelType         d2datadict.LevelTypeRecord
-	levelPreset       *d2datadict.LevelPresetRecord
+	levelPreset       d2datadict.LevelPresetRecord
 	TileWidth         int32
 	TileHeight        int32
-	Tiles             []d2data.Tile
-	DS1               *d2data.DS1
+	Tiles             []d2dt1.Tile
+	DS1               d2ds1.DS1
 	Palette           d2datadict.PaletteRec
 	FloorCache        map[uint32]*TileCacheRecord
 	ShadowCache       map[uint32]*TileCacheRecord
 	WallCache         map[uint32]*TileCacheRecord
-	AnimationEntities []*d2render.AnimatedEntity
+	AnimationEntities []d2render.AnimatedEntity
 	NPCs              []*d2core.NPC
 	StartX            float64
 	StartY            float64
@@ -101,7 +105,7 @@ func LoadRegion(seed rand.Source, levelType RegionIdType, levelPreset int, fileP
 	result := &Region{
 		LevelType:   d2datadict.LevelTypes[levelType],
 		levelPreset: d2datadict.LevelPresets[levelPreset],
-		Tiles:       make([]d2data.Tile, 0),
+		Tiles:       make([]d2dt1.Tile, 0),
 		FloorCache:  make(map[uint32]*TileCacheRecord),
 		ShadowCache: make(map[uint32]*TileCacheRecord),
 		WallCache:   make(map[uint32]*TileCacheRecord),
@@ -119,7 +123,7 @@ func LoadRegion(seed rand.Source, levelType RegionIdType, levelPreset int, fileP
 		if len(levelTypeDt1) == 0 || levelTypeDt1 == "" || levelTypeDt1 == "0" {
 			continue
 		}
-		dt1 := d2data.LoadDT1("/data/global/tiles/"+levelTypeDt1, fileProvider)
+		dt1 := d2dt1.LoadDT1("/data/global/tiles/"+levelTypeDt1, fileProvider)
 		result.Tiles = append(result.Tiles, dt1.Tiles...)
 	}
 	levelFilesToPick := make([]string, 0)
@@ -133,7 +137,7 @@ func LoadRegion(seed rand.Source, levelType RegionIdType, levelPreset int, fileP
 	levelIndex := int(math.Round(float64(len(levelFilesToPick)-1) * random.Float64()))
 	levelFile := levelFilesToPick[levelIndex]
 	result.RegionPath = levelFile
-	result.DS1 = d2data.LoadDS1("/data/global/tiles/"+levelFile, fileProvider)
+	result.DS1 = d2ds1.LoadDS1("/data/global/tiles/"+levelFile, fileProvider)
 	result.TileWidth = result.DS1.Width
 	result.TileHeight = result.DS1.Height
 	result.loadObjects(fileProvider)
@@ -143,7 +147,7 @@ func LoadRegion(seed rand.Source, levelType RegionIdType, levelPreset int, fileP
 func (v *Region) loadObjects(fileProvider d2interface.FileProvider) {
 	var wg sync.WaitGroup
 	wg.Add(len(v.DS1.Objects))
-	v.AnimationEntities = make([]*d2render.AnimatedEntity, 0)
+	v.AnimationEntities = make([]d2render.AnimatedEntity, 0)
 	v.NPCs = make([]*d2core.NPC, 0)
 	for _, object := range v.DS1.Objects {
 		go func(object d2data.Object) {
@@ -181,7 +185,7 @@ func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType Region
 	}
 }
 
-func (v *Region) getTile(mainIndex, subIndex, orientation int32) *d2data.Tile {
+func (v *Region) getTile(mainIndex, subIndex, orientation int32) *d2dt1.Tile {
 	// TODO: Need to support randomly grabbing tile based on x/y as there can be multiple matches for same main/sub index
 	for _, tile := range v.Tiles {
 		if tile.MainIndex != mainIndex || tile.SubIndex != subIndex || tile.Orientation != orientation {
@@ -193,7 +197,7 @@ func (v *Region) getTile(mainIndex, subIndex, orientation int32) *d2data.Tile {
 	return nil
 }
 
-func (v *Region) renderFloor(tile d2data.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image) {
+func (v *Region) renderFloor(tile d2ds1.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image) {
 	tileCacheIndex := (uint32(tile.MainIndex) << 16) | (uint32(tile.SubIndex) << 8)
 	tileCache, exists := v.FloorCache[tileCacheIndex]
 	if !exists {
@@ -208,7 +212,7 @@ func (v *Region) renderFloor(tile d2data.FloorShadowRecord, offsetX, offsetY int
 	target.DrawImage(tileCache.Image, opts)
 }
 
-func (v *Region) renderWall(tile d2data.WallRecord, offsetX, offsetY int, target *ebiten.Image) {
+func (v *Region) renderWall(tile d2ds1.WallRecord, offsetX, offsetY int, target *ebiten.Image) {
 	tileCacheIndex := (uint32(tile.MainIndex) << 16) | (uint32(tile.SubIndex) << 8) | (uint32(tile.Orientation))
 	tileCache, exists := v.WallCache[tileCacheIndex]
 	if !exists {
@@ -223,7 +227,7 @@ func (v *Region) renderWall(tile d2data.WallRecord, offsetX, offsetY int, target
 	target.DrawImage(tileCache.Image, opts)
 }
 
-func (v *Region) renderShadow(tile d2data.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image) {
+func (v *Region) renderShadow(tile d2ds1.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image) {
 	tileCacheIndex := (uint32(tile.MainIndex) << 16) + (uint32(tile.SubIndex) << 8) + 0
 	tileCache, exists := v.ShadowCache[tileCacheIndex]
 	if !exists {
@@ -239,9 +243,9 @@ func (v *Region) renderShadow(tile d2data.FloorShadowRecord, offsetX, offsetY in
 	target.DrawImage(tileCache.Image, opts)
 }
 
-func (v *Region) decodeTileGfxData(blocks []d2data.Block, pixels []byte, tileYOffset int32, tileWidth int32) {
+func (v *Region) decodeTileGfxData(blocks []d2dt1.Block, pixels []byte, tileYOffset int32, tileWidth int32) {
 	for _, block := range blocks {
-		if block.Format == d2data.BlockFormatIsometric {
+		if block.Format == d2dt1.BlockFormatIsometric {
 			// 3D isometric decoding
 			xjump := []int32{14, 12, 10, 8, 6, 4, 2, 0, 2, 4, 6, 8, 10, 12, 14}
 			nbpix := []int32{4, 8, 12, 16, 20, 24, 28, 32, 28, 24, 20, 16, 12, 8, 4}
@@ -311,7 +315,7 @@ func (v *Region) decodeTileGfxData(blocks []d2data.Block, pixels []byte, tileYOf
 	}
 }
 
-func (v *Region) generateFloorCache(tile d2data.FloorShadowRecord) *TileCacheRecord {
+func (v *Region) generateFloorCache(tile d2ds1.FloorShadowRecord) *TileCacheRecord {
 	tileData := v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), 0)
 	if tileData == nil {
 		log.Fatalf("Could not locate tile Idx:%d, Sub: %d, Ori: %d", tile.MainIndex, tile.SubIndex, 0)
@@ -329,7 +333,7 @@ func (v *Region) generateFloorCache(tile d2data.FloorShadowRecord) *TileCacheRec
 	return &TileCacheRecord{image, 0, 0}
 }
 
-func (v *Region) generateShadowCache(tile d2data.FloorShadowRecord) *TileCacheRecord {
+func (v *Region) generateShadowCache(tile d2ds1.FloorShadowRecord) *TileCacheRecord {
 	tileData := v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), 13)
 	if tileData == nil {
 		return nil
@@ -349,12 +353,12 @@ func (v *Region) generateShadowCache(tile d2data.FloorShadowRecord) *TileCacheRe
 	return &TileCacheRecord{image, 0, int(tileMinY) + 80}
 }
 
-func (v *Region) generateWallCache(tile d2data.WallRecord) *TileCacheRecord {
+func (v *Region) generateWallCache(tile d2ds1.WallRecord) *TileCacheRecord {
 	tileData := v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), int32(tile.Orientation))
 	if tileData == nil {
 		return nil
 	}
-	var newTileData *d2data.Tile = nil
+	var newTileData *d2dt1.Tile = nil
 	if tile.Orientation == 3 {
 		newTileData = v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), int32(4))
 	}

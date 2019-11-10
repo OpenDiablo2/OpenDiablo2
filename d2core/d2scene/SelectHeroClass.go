@@ -21,14 +21,14 @@ import (
 
 type HeroRenderInfo struct {
 	Stance                   d2enum.HeroStance
-	IdleSprite               *d2render.Sprite
-	IdleSelectedSprite       *d2render.Sprite
-	ForwardWalkSprite        *d2render.Sprite
-	ForwardWalkSpriteOverlay *d2render.Sprite
-	SelectedSprite           *d2render.Sprite
-	SelectedSpriteOverlay    *d2render.Sprite
-	BackWalkSprite           *d2render.Sprite
-	BackWalkSpriteOverlay    *d2render.Sprite
+	IdleSprite               d2render.Sprite
+	IdleSelectedSprite       d2render.Sprite
+	ForwardWalkSprite        d2render.Sprite
+	ForwardWalkSpriteOverlay d2render.Sprite
+	SelectedSprite           d2render.Sprite
+	SelectedSpriteOverlay    d2render.Sprite
+	BackWalkSprite           d2render.Sprite
+	BackWalkSpriteOverlay    d2render.Sprite
 	SelectionBounds          image.Rectangle
 	SelectSfx                *d2audio.SoundEffect
 	DeselectSfx              *d2audio.SoundEffect
@@ -39,8 +39,8 @@ type SelectHeroClass struct {
 	soundManager   *d2audio.Manager
 	fileProvider   d2interface.FileProvider
 	sceneProvider  d2interface.SceneProvider
-	bgImage        *d2render.Sprite
-	campfire       *d2render.Sprite
+	bgImage        d2render.Sprite
+	campfire       d2render.Sprite
 	headingLabel   *d2ui.Label
 	heroClassLabel *d2ui.Label
 	heroDesc1Label *d2ui.Label
@@ -67,7 +67,7 @@ func CreateSelectHeroClass(
 	return result
 }
 
-func (v *SelectHeroClass) loadSprite(path string, palette d2enum.PaletteType) *d2render.Sprite {
+func (v *SelectHeroClass) loadSprite(path string, palette d2enum.PaletteType) d2render.Sprite {
 	return d2render.CreateSprite(v.fileProvider.LoadFile(path), d2datadict.Palettes[palette])
 }
 
@@ -125,9 +125,9 @@ func (v *SelectHeroClass) Load() []func() {
 				v.loadSprite(d2resource.CharacterSelectBarbarianForwardWalk, d2enum.Fechar),
 				v.loadSprite(d2resource.CharacterSelectBarbarianForwardWalkOverlay, d2enum.Fechar),
 				v.loadSprite(d2resource.CharacterSelectBarbarianSelected, d2enum.Fechar),
-				nil,
+				d2render.Sprite{},
 				v.loadSprite(d2resource.CharacterSelectBarbarianBackWalk, d2enum.Fechar),
-				nil,
+				d2render.Sprite{},
 				image.Rectangle{Min: image.Point{364, 201}, Max: image.Point{90, 170}},
 				v.soundManager.LoadSoundEffect(d2resource.SFXBarbarianSelect),
 				v.soundManager.LoadSoundEffect(d2resource.SFXBarbarianDeselect),
@@ -245,9 +245,9 @@ func (v *SelectHeroClass) Load() []func() {
 				v.loadSprite(d2resource.CharacterSelecPaladinForwardWalk, d2enum.Fechar),
 				v.loadSprite(d2resource.CharacterSelecPaladinForwardWalkOverlay, d2enum.Fechar),
 				v.loadSprite(d2resource.CharacterSelecPaladinSelected, d2enum.Fechar),
-				nil,
+				d2render.Sprite{},
 				v.loadSprite(d2resource.CharacterSelecPaladinBackWalk, d2enum.Fechar),
-				nil,
+				d2render.Sprite{},
 				image.Rectangle{Min: image.Point{490, 210}, Max: image.Point{65, 180}},
 				v.soundManager.LoadSoundEffect(d2resource.SFXPaladinSelect),
 				v.soundManager.LoadSoundEffect(d2resource.SFXPaladinDeselect),
@@ -277,11 +277,11 @@ func (v *SelectHeroClass) Load() []func() {
 				v.loadSprite(d2resource.CharacterSelectAmazonUnselected, d2enum.Fechar),
 				v.loadSprite(d2resource.CharacterSelectAmazonUnselectedH, d2enum.Fechar),
 				v.loadSprite(d2resource.CharacterSelecAmazonForwardWalk, d2enum.Fechar),
-				nil,
+				d2render.Sprite{},
 				v.loadSprite(d2resource.CharacterSelecAmazonSelected, d2enum.Fechar),
-				nil,
+				d2render.Sprite{},
 				v.loadSprite(d2resource.CharacterSelecAmazonBackWalk, d2enum.Fechar),
-				nil,
+				d2render.Sprite{},
 				image.Rectangle{Min: image.Point{70, 220}, Max: image.Point{55, 200}},
 				v.soundManager.LoadSoundEffect(d2resource.SFXAmazonSelect),
 				v.soundManager.LoadSoundEffect(d2resource.SFXAmazonDeselect),
@@ -307,11 +307,11 @@ func (v *SelectHeroClass) Load() []func() {
 				v.loadSprite(d2resource.CharacterSelectAssassinUnselected, d2enum.Fechar),
 				v.loadSprite(d2resource.CharacterSelectAssassinUnselectedH, d2enum.Fechar),
 				v.loadSprite(d2resource.CharacterSelectAssassinForwardWalk, d2enum.Fechar),
-				nil,
+				d2render.Sprite{},
 				v.loadSprite(d2resource.CharacterSelectAssassinSelected, d2enum.Fechar),
-				nil,
+				d2render.Sprite{},
 				v.loadSprite(d2resource.CharacterSelectAssassinBackWalk, d2enum.Fechar),
-				nil,
+				d2render.Sprite{},
 				image.Rectangle{Min: image.Point{175, 235}, Max: image.Point{50, 180}},
 				v.soundManager.LoadSoundEffect(d2resource.SFXAssassinSelect),
 				v.soundManager.LoadSoundEffect(d2resource.SFXAssassinDeselect),
@@ -337,11 +337,11 @@ func (v *SelectHeroClass) Load() []func() {
 				v.loadSprite(d2resource.CharacterSelectDruidUnselected, d2enum.Fechar),
 				v.loadSprite(d2resource.CharacterSelectDruidUnselectedH, d2enum.Fechar),
 				v.loadSprite(d2resource.CharacterSelectDruidForwardWalk, d2enum.Fechar),
-				nil,
+				d2render.Sprite{},
 				v.loadSprite(d2resource.CharacterSelectDruidSelected, d2enum.Fechar),
-				nil,
+				d2render.Sprite{},
 				v.loadSprite(d2resource.CharacterSelectDruidBackWalk, d2enum.Fechar),
-				nil,
+				d2render.Sprite{},
 				image.Rectangle{Min: image.Point{680, 220}, Max: image.Point{70, 195}},
 				v.soundManager.LoadSoundEffect(d2resource.SFXDruidSelect),
 				v.soundManager.LoadSoundEffect(d2resource.SFXDruidDeselect),
@@ -421,7 +421,7 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 		if renderInfo.ForwardWalkSprite.OnLastFrame() {
 			renderInfo.Stance = d2enum.HeroStanceSelected
 			renderInfo.SelectedSprite.ResetAnimation()
-			if renderInfo.SelectedSpriteOverlay != nil {
+			if renderInfo.SelectedSpriteOverlay.IsValid() {
 				renderInfo.SelectedSpriteOverlay.ResetAnimation()
 			}
 		}
@@ -447,7 +447,7 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 		// showEntryUi = true;
 		renderInfo.Stance = d2enum.HeroStanceApproaching
 		renderInfo.ForwardWalkSprite.ResetAnimation()
-		if renderInfo.ForwardWalkSpriteOverlay != nil {
+		if renderInfo.ForwardWalkSpriteOverlay.IsValid() {
 			renderInfo.ForwardWalkSpriteOverlay.ResetAnimation()
 		}
 		for _, heroInfo := range v.heroRenderInfo {
@@ -458,7 +458,7 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 			heroInfo.DeselectSfx.Play()
 			heroInfo.Stance = d2enum.HeroStanceRetreating
 			heroInfo.BackWalkSprite.ResetAnimation()
-			if heroInfo.BackWalkSpriteOverlay != nil {
+			if heroInfo.BackWalkSpriteOverlay.IsValid() {
 				heroInfo.BackWalkSpriteOverlay.ResetAnimation()
 			}
 		}
@@ -491,17 +491,17 @@ func (v *SelectHeroClass) renderHero(screen *ebiten.Image, hero d2enum.Hero) {
 		renderInfo.IdleSelectedSprite.Draw(screen)
 	case d2enum.HeroStanceApproaching:
 		renderInfo.ForwardWalkSprite.Draw(screen)
-		if renderInfo.ForwardWalkSpriteOverlay != nil {
+		if renderInfo.ForwardWalkSpriteOverlay.IsValid() {
 			renderInfo.ForwardWalkSpriteOverlay.Draw(screen)
 		}
 	case d2enum.HeroStanceSelected:
 		renderInfo.SelectedSprite.Draw(screen)
-		if renderInfo.SelectedSpriteOverlay != nil {
+		if renderInfo.SelectedSpriteOverlay.IsValid() {
 			renderInfo.SelectedSpriteOverlay.Draw(screen)
 		}
 	case d2enum.HeroStanceRetreating:
 		renderInfo.BackWalkSprite.Draw(screen)
-		if renderInfo.BackWalkSpriteOverlay != nil {
+		if renderInfo.BackWalkSpriteOverlay.IsValid() {
 			renderInfo.BackWalkSpriteOverlay.Draw(screen)
 		}
 	}
