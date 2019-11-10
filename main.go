@@ -4,12 +4,14 @@ import (
 	"image"
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/scenes"
+
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 
-	"github.com/OpenDiablo2/OpenDiablo2/common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 
-	"github.com/OpenDiablo2/OpenDiablo2/core"
-	"github.com/OpenDiablo2/OpenDiablo2/mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/mpq"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -18,16 +20,17 @@ var GitBranch string
 
 // GitCommit is set by the CI build process to the commit hash
 var GitCommit string
-var d2Engine *core.Engine
+var d2Engine *d2core.Engine
 
 func main() {
+	//defer profile.Start(profile.CPUProfile).Stop()
 	//runtime.LockOSThread()
 	//defer runtime.UnlockOSThread()
 	if len(GitBranch) == 0 {
 		GitBranch = "Local Build"
 		GitCommit = ""
 	}
-	common.SetBuildInfo(GitBranch, GitCommit)
+	d2common.SetBuildInfo(GitBranch, GitCommit)
 	log.SetFlags(log.Ldate | log.LUTC | log.Lmicroseconds | log.Llongfile)
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
 	_, iconImage, err := ebitenutil.NewImageFromFile("d2logo.png", ebiten.FilterLinear)
@@ -35,7 +38,8 @@ func main() {
 		ebiten.SetWindowIcon([]image.Image{iconImage})
 	}
 	mpq.InitializeCryptoBuffer()
-	d2Engine = core.CreateEngine()
+	d2Engine = d2core.CreateEngine()
+	d2Engine.SetNextScene(scenes.CreateMainMenu(d2Engine, d2Engine, d2Engine.UIManager, d2Engine.SoundManager))
 	ebiten.SetCursorVisible(false)
 	ebiten.SetFullscreen(d2Engine.Settings.FullScreen)
 	ebiten.SetRunnableInBackground(d2Engine.Settings.RunInBackground)
