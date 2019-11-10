@@ -5,15 +5,15 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
-	_map "github.com/OpenDiablo2/OpenDiablo2/d2render/mapengine"
+	_map "github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2mpq"
 )
 
 func TestMapGenerationPerformance(t *testing.T) {
-	mpq.InitializeCryptoBuffer()
+	d2mpq.InitializeCryptoBuffer()
 	d2common.ConfigBasePath = "../"
 
 	engine := d2core.CreateEngine()

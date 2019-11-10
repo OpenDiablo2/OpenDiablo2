@@ -65,7 +65,8 @@ func (v *BitMuncher) MakeSigned(value uint32, bits int) int32 {
 	if bits == 0 {
 		return 0
 	}
-	if bits == 1 { // If its a single bit, a value of 1 is -1 automagically
+	// If its a single bit, a value of 1 is -1 automagically
+	if bits == 1 {
 		return -int32(value)
 	}
 	// If there is no sign bit, return the value as is
@@ -79,5 +80,6 @@ func (v *BitMuncher) MakeSigned(value uint32, bits int) int32 {
 			result -= uint32(1 << uint(i))
 		}
 	}
-	return int32(result) // Force casting to a signed value
+	// Force casting to a signed value
+	return int32(result)
 }

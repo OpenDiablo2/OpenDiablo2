@@ -4,14 +4,14 @@ import (
 	"image"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/scenes"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
 
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2mpq"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -37,9 +37,9 @@ func main() {
 	if err == nil {
 		ebiten.SetWindowIcon([]image.Image{iconImage})
 	}
-	mpq.InitializeCryptoBuffer()
+	d2mpq.InitializeCryptoBuffer()
 	d2Engine = d2core.CreateEngine()
-	d2Engine.SetNextScene(scenes.CreateMainMenu(d2Engine, d2Engine, d2Engine.UIManager, d2Engine.SoundManager))
+	d2Engine.SetNextScene(d2scene.CreateMainMenu(d2Engine, d2Engine, d2Engine.UIManager, d2Engine.SoundManager))
 	ebiten.SetCursorVisible(false)
 	ebiten.SetFullscreen(d2Engine.Settings.FullScreen)
 	ebiten.SetRunnableInBackground(d2Engine.Settings.RunInBackground)

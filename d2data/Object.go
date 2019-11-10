@@ -2,7 +2,7 @@ package d2data
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
 )
 
 type Object struct {
@@ -12,6 +12,6 @@ type Object struct {
 	Y          int32
 	Flags      int32
 	Paths      []d2common.Path
-	Lookup     *datadict.ObjectLookupRecord
-	ObjectInfo *datadict.ObjectRecord
+	Lookup     *d2datadict.ObjectLookupRecord
+	ObjectInfo *d2datadict.ObjectRecord
 }

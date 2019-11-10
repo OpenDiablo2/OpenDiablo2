@@ -9,7 +9,7 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -49,7 +49,7 @@ type SpriteFrame struct {
 }
 
 // CreateSprite creates an instance of a sprite
-func CreateSprite(data []byte, palette datadict.PaletteRec) *Sprite {
+func CreateSprite(data []byte, palette d2datadict.PaletteRec) *Sprite {
 	result := &Sprite{
 		X:                  50,
 		Y:                  50,

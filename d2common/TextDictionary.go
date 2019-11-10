@@ -4,6 +4,8 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
@@ -28,20 +30,25 @@ func TranslateString(key string) string {
 
 func LoadTextDictionary(fileProvider d2interface.FileProvider) {
 	lookupTable = make(map[string]string)
-
-	loadDictionary(fileProvider, PatchStringTable)
-	loadDictionary(fileProvider, ExpansionStringTable)
-	loadDictionary(fileProvider, StringTable)
+	loadDictionary(fileProvider, d2resource.PatchStringTable)
+	loadDictionary(fileProvider, d2resource.ExpansionStringTable)
+	loadDictionary(fileProvider, d2resource.StringTable)
 	log.Printf("Loaded %d entries from the string table", len(lookupTable))
 }
 
 func loadDictionary(fileProvider d2interface.FileProvider, dictionaryName string) {
 	dictionaryData := fileProvider.LoadFile(dictionaryName)
 	br := CreateStreamReader(dictionaryData)
-	br.ReadBytes(2) // CRC
+	// CRC
+	if _, err := br.ReadBytes(2); err != nil {
+		log.Fatal("Error reading CRC")
+	}
 	numberOfElements := br.GetUInt16()
 	hashTableSize := br.GetUInt32()
-	br.ReadByte()  // Version (always 0)
+	// Version (always 0)
+	if _, err := br.ReadByte(); err != nil {
+		log.Fatal("Error reading Version record")
+	}
 	br.GetUInt32() // StringOffset
 	br.GetUInt32() // When the number of times you have missed a match with a hash key equals this value, you give up because it is not there.
 	br.GetUInt32() // FileSize
@@ -72,7 +79,7 @@ func loadDictionary(fileProvider d2interface.FileProvider, dictionaryName string
 		value := string(nameVal)
 		br.SetPosition(uint64(hashEntry.IndexString))
 		key := ""
-		for true {
+		for {
 			b := br.GetByte()
 			if b == 0 {
 				break

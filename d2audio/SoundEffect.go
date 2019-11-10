@@ -5,7 +5,7 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
 
 	"github.com/hajimehoshi/ebiten/audio/wav"
 
@@ -19,8 +19,8 @@ type SoundEffect struct {
 func CreateSoundEffect(sfx string, fileProvider d2interface.FileProvider, context *audio.Context, volume float64) *SoundEffect {
 	result := &SoundEffect{}
 	var soundFile string
-	if _, exists := datadict.Sounds[sfx]; exists {
-		soundEntry := datadict.Sounds[sfx]
+	if _, exists := d2datadict.Sounds[sfx]; exists {
+		soundEntry := d2datadict.Sounds[sfx]
 		soundFile = soundEntry.FileName
 	} else {
 		soundFile = sfx
