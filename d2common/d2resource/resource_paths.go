@@ -118,6 +118,7 @@ const (
 	ShortButtonBlank  = "/data/global/ui/CharSelect/ShortButtonBlank.dc6"
 	TextBox2          = "/data/global/ui/FrontEnd/textbox2.dc6"
 	TallButtonBlank   = "/data/global/ui/CharSelect/TallButtonBlank.dc6"
+	Checkbox          = "/data/global/ui/FrontEnd/clickbox.dc6"
 
 	// --- GAME UI ---
 

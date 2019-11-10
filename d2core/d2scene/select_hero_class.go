@@ -36,23 +36,27 @@ type HeroRenderInfo struct {
 }
 
 type SelectHeroClass struct {
-	uiManager       *d2ui.Manager
-	soundManager    *d2audio.Manager
-	fileProvider    d2interface.FileProvider
-	sceneProvider   d2interface.SceneProvider
-	bgImage         d2render.Sprite
-	campfire        d2render.Sprite
-	headingLabel    d2ui.Label
-	heroClassLabel  d2ui.Label
-	heroDesc1Label  d2ui.Label
-	heroDesc2Label  d2ui.Label
-	heroDesc3Label  d2ui.Label
-	heroNameTextbox d2ui.TextBox
-	heroNameLabel   d2ui.Label
-	heroRenderInfo  map[d2enum.Hero]*HeroRenderInfo
-	selectedHero    d2enum.Hero
-	exitButton      d2ui.Button
-	okButton        d2ui.Button
+	uiManager          *d2ui.Manager
+	soundManager       *d2audio.Manager
+	fileProvider       d2interface.FileProvider
+	sceneProvider      d2interface.SceneProvider
+	bgImage            d2render.Sprite
+	campfire           d2render.Sprite
+	headingLabel       d2ui.Label
+	heroClassLabel     d2ui.Label
+	heroDesc1Label     d2ui.Label
+	heroDesc2Label     d2ui.Label
+	heroDesc3Label     d2ui.Label
+	heroNameTextbox    d2ui.TextBox
+	heroNameLabel      d2ui.Label
+	heroRenderInfo     map[d2enum.Hero]*HeroRenderInfo
+	selectedHero       d2enum.Hero
+	exitButton         d2ui.Button
+	okButton           d2ui.Button
+	expansionCheckbox  d2ui.Checkbox
+	expansionCharLabel d2ui.Label
+	hardcoreCheckbox   d2ui.Checkbox
+	hardcoreCharLabel  d2ui.Label
 }
 
 func CreateSelectHeroClass(
@@ -141,6 +145,32 @@ func (v *SelectHeroClass) Load() []func() {
 			v.heroNameTextbox.MoveTo(318, 493)
 			v.heroNameTextbox.SetVisible(false)
 			v.uiManager.AddWidget(&v.heroNameTextbox)
+		},
+		func() {
+			v.expansionCheckbox = d2ui.CreateCheckbox(v.fileProvider, true)
+			v.expansionCheckbox.MoveTo(318, 526)
+			v.expansionCheckbox.SetVisible(false)
+			v.uiManager.AddWidget(&v.expansionCheckbox)
+		},
+		func() {
+			v.expansionCharLabel = d2ui.CreateLabel(v.fileProvider, d2resource.Font16, d2enum.Units)
+			v.expansionCharLabel.Alignment = d2ui.LabelAlignLeft
+			v.expansionCharLabel.Color = color.RGBA{216, 196, 128, 255}
+			v.expansionCharLabel.SetText(d2common.TranslateString("#803"))
+			v.expansionCharLabel.MoveTo(339, 526)
+		},
+		func() {
+			v.hardcoreCheckbox = d2ui.CreateCheckbox(v.fileProvider, false)
+			v.hardcoreCheckbox.MoveTo(318, 548)
+			v.hardcoreCheckbox.SetVisible(false)
+			v.uiManager.AddWidget(&v.hardcoreCheckbox)
+		},
+		func() {
+			v.hardcoreCharLabel = d2ui.CreateLabel(v.fileProvider, d2resource.Font16, d2enum.Units)
+			v.hardcoreCharLabel.Alignment = d2ui.LabelAlignLeft
+			v.hardcoreCharLabel.Color = color.RGBA{216, 196, 128, 255}
+			v.hardcoreCharLabel.SetText(d2common.TranslateString("#1696"))
+			v.hardcoreCharLabel.MoveTo(339, 548)
 		},
 		func() {
 			v.heroRenderInfo[d2enum.HeroBarbarian] = &HeroRenderInfo{
@@ -423,6 +453,8 @@ func (v *SelectHeroClass) Render(screen *ebiten.Image) {
 	v.campfire.Draw(screen)
 	if v.heroNameTextbox.GetVisible() {
 		v.heroNameLabel.Draw(screen)
+		v.expansionCharLabel.Draw(screen)
+		v.hardcoreCharLabel.Draw(screen)
 	}
 }
 
@@ -480,6 +512,8 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 	if mouseHover && v.uiManager.CursorButtonPressed(d2ui.CursorButtonLeft) {
 		v.heroNameTextbox.SetVisible(true)
 		v.okButton.SetVisible(true)
+		v.expansionCheckbox.SetVisible(true)
+		v.hardcoreCheckbox.SetVisible(true)
 		renderInfo.Stance = d2enum.HeroStanceApproaching
 		renderInfo.ForwardWalkSprite.ResetAnimation()
 		if renderInfo.ForwardWalkSpriteOverlay.IsValid() {
