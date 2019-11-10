@@ -141,13 +141,13 @@ func CreateSprite(data []byte, palette PaletteRec) *Sprite {
 	totalHeight := 0
 	frame := 0
 	for d := 0; d < int(result.Directions); d++ {
-		curMaxHeight := 0
+		curMaxWidth := 0
 		for f := 0; f < int(result.FramesPerDirection); f++ {
-			totalWidth += int(result.Frames[frame].Width)
-			curMaxHeight = int(Max(uint32(curMaxHeight), result.Frames[frame].Height))
+			curMaxWidth = int(Max(uint32(curMaxWidth), result.Frames[frame].Width))
+			totalHeight += int(result.Frames[frame].Height)
 			frame++
 		}
-		totalHeight += curMaxHeight
+		totalWidth += curMaxWidth
 	}
 	result.atlas, _ = ebiten.NewImage(totalWidth, totalHeight, ebiten.FilterNearest)
 	result.atlasBytes = make([]byte, totalWidth*totalHeight*4)
@@ -155,15 +155,15 @@ func CreateSprite(data []byte, palette PaletteRec) *Sprite {
 	curX := 0
 	curY := 0
 	for d := 0; d < int(result.Directions); d++ {
-		curMaxHeight := 0
+		curMaxWidth := 0
 		for f := 0; f < int(result.FramesPerDirection); f++ {
-			curMaxHeight = int(Max(uint32(curMaxHeight), result.Frames[frame].Height))
+			curMaxWidth = int(Max(uint32(curMaxWidth), result.Frames[frame].Width))
 			result.Frames[frame].Image = result.atlas.SubImage(image.Rect(curX, curY, curX+int(result.Frames[frame].Width), curY+int(result.Frames[frame].Height))).(*ebiten.Image)
-			curX += int(result.Frames[frame].Width)
+			curY += int(result.Frames[frame].Height)
 			frame++
 		}
-		curY += curMaxHeight
-		curX = 0
+		curX += curMaxWidth
+		curY = 0
 	}
 	return result
 }
