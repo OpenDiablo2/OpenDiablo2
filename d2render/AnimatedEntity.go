@@ -16,7 +16,7 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2data"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -195,7 +195,7 @@ func (v *AnimatedEntity) cacheFrames(layerName string) {
 					if paletteIndex == 0 {
 						continue
 					}
-					color := datadict.Palettes[v.palette].Colors[paletteIndex]
+					color := d2datadict.Palettes[v.palette].Colors[paletteIndex]
 					actualX := x + direction.Box.Left - int(minX)
 					actualY := y + direction.Box.Top - int(minY)
 					img.Pix[(actualX*4)+(actualY*int(frameW)*4)] = color.R

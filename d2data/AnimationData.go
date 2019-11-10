@@ -4,6 +4,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -27,7 +29,7 @@ var AnimationData map[string][]*AnimationDataRecord
 // LoadAnimationData loads the animation data table into the global AnimationData dictionary
 func LoadAnimationData(fileProvider d2interface.FileProvider) {
 	AnimationData = make(map[string][]*AnimationDataRecord)
-	rawData := fileProvider.LoadFile(d2common.AnimationData)
+	rawData := fileProvider.LoadFile(d2resource.AnimationData)
 	streamReader := d2common.CreateStreamReader(rawData)
 	for !streamReader.Eof() {
 		dataCount := int(streamReader.GetInt32())

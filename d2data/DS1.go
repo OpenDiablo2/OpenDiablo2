@@ -3,7 +3,7 @@ package d2data
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
 )
 
@@ -237,9 +237,9 @@ func LoadDS1(path string, fileProvider d2interface.FileProvider) *DS1 {
 			newObject.X = br.GetInt32()
 			newObject.Y = br.GetInt32()
 			newObject.Flags = br.GetInt32()
-			newObject.Lookup = datadict.LookupObject(int(ds1.Act), int(newObject.Type), int(newObject.Id))
+			newObject.Lookup = d2datadict.LookupObject(int(ds1.Act), int(newObject.Type), int(newObject.Id))
 			if newObject.Lookup != nil && newObject.Lookup.ObjectsTxtId != -1 {
-				newObject.ObjectInfo = datadict.Objects[newObject.Lookup.ObjectsTxtId]
+				newObject.ObjectInfo = d2datadict.Objects[newObject.Lookup.ObjectsTxtId]
 			}
 			ds1.Objects = append(ds1.Objects, newObject)
 		}

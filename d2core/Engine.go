@@ -10,6 +10,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -20,14 +22,14 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2data"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2mpq"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2render/ui"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
@@ -45,7 +47,7 @@ type Engine struct {
 	thingsToLoad    []func()                // The load functions for the next scene
 	stepLoadingSize float64                 // The size for each loading step
 	CurrentScene    d2interface.Scene       // The current scene being rendered
-	UIManager       *ui.Manager             // The UI manager
+	UIManager       *d2ui.Manager           // The UI manager
 	SoundManager    *d2audio.Manager        // The sound manager
 	nextScene       d2interface.Scene       // The next scene to be loaded at the end of the game loop
 	fullscreenKey   bool                    // When true, the fullscreen toggle is still being pressed
@@ -60,26 +62,26 @@ func CreateEngine() *Engine {
 		nextScene:    nil,
 	}
 	result.loadConfigurationFile()
-	d2common.LanguageCode = result.Settings.Language
+	d2resource.LanguageCode = result.Settings.Language
 	result.mapMpqFiles()
-	datadict.LoadPalettes(result.Files, result)
+	d2datadict.LoadPalettes(result.Files, result)
 	d2common.LoadTextDictionary(result)
-	datadict.LoadLevelTypes(result)
-	datadict.LoadLevelPresets(result)
-	datadict.LoadLevelWarps(result)
-	datadict.LoadObjectTypes(result)
-	datadict.LoadObjects(result)
-	datadict.LoadWeapons(result)
-	datadict.LoadArmors(result)
-	datadict.LoadUniqueItems(result)
-	datadict.LoadMissiles(result)
-	datadict.LoadSounds(result)
+	d2datadict.LoadLevelTypes(result)
+	d2datadict.LoadLevelPresets(result)
+	d2datadict.LoadLevelWarps(result)
+	d2datadict.LoadObjectTypes(result)
+	d2datadict.LoadObjects(result)
+	d2datadict.LoadWeapons(result)
+	d2datadict.LoadArmors(result)
+	d2datadict.LoadUniqueItems(result)
+	d2datadict.LoadMissiles(result)
+	d2datadict.LoadSounds(result)
 	d2data.LoadAnimationData(result)
-	datadict.LoadMonStats(result)
+	d2datadict.LoadMonStats(result)
 	result.SoundManager = d2audio.CreateManager(result)
 	result.SoundManager.SetVolumes(result.Settings.BgmVolume, result.Settings.SfxVolume)
-	result.UIManager = ui.CreateManager(result, *result.SoundManager)
-	result.LoadingSprite = result.LoadSprite(d2common.LoadingScreen, d2enum.Loading)
+	result.UIManager = d2ui.CreateManager(result, *result.SoundManager)
+	result.LoadingSprite = result.LoadSprite(d2resource.LoadingScreen, d2enum.Loading)
 	loadingSpriteSizeX, loadingSpriteSizeY := result.LoadingSprite.GetSize()
 	result.LoadingSprite.MoveTo(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
 	//result.SetNextScene(Scenes.CreateBlizzardIntro(result, result))
@@ -98,7 +100,7 @@ func (v *Engine) mapMpqFiles() {
 var mutex sync.Mutex
 
 func (v *Engine) LoadFile(fileName string) []byte {
-	fileName = strings.ReplaceAll(fileName, "{LANG}", d2common.LanguageCode)
+	fileName = strings.ReplaceAll(fileName, "{LANG}", d2resource.LanguageCode)
 	fileName = strings.ToLower(fileName)
 	fileName = strings.ReplaceAll(fileName, `/`, "\\")
 	if fileName[0] == '\\' {
@@ -109,12 +111,12 @@ func (v *Engine) LoadFile(fileName string) []byte {
 	// TODO: May want to cache some things if performance becomes an issue
 	cachedMpqFile, cacheExists := v.Files[fileName]
 	if cacheExists {
-		archive, _ := mpq.Load(cachedMpqFile)
+		archive, _ := d2mpq.Load(cachedMpqFile)
 		result, _ := archive.ReadFile(fileName)
 		return result
 	}
 	for _, mpqFile := range v.Settings.MpqLoadOrder {
-		archive, _ := mpq.Load(path.Join(v.Settings.MpqPath, mpqFile))
+		archive, _ := d2mpq.Load(path.Join(v.Settings.MpqPath, mpqFile))
 		if archive == nil {
 			log.Fatalf("Failed to load specified MPQ file: %s", mpqFile)
 		}
@@ -140,7 +142,7 @@ func (v *Engine) IsLoading() bool {
 // LoadSprite loads a sprite from the game's data files
 func (v *Engine) LoadSprite(fileName string, palette d2enum.PaletteType) *d2render.Sprite {
 	data := v.LoadFile(fileName)
-	sprite := d2render.CreateSprite(data, datadict.Palettes[palette])
+	sprite := d2render.CreateSprite(data, d2datadict.Palettes[palette])
 	return sprite
 }
 

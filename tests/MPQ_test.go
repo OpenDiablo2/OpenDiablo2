@@ -10,20 +10,20 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2mpq"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 func TestMPQScanPerformance(t *testing.T) {
 	log.SetFlags(log.Ldate | log.LUTC | log.Lmicroseconds | log.Llongfile)
-	mpq.InitializeCryptoBuffer()
+	d2mpq.InitializeCryptoBuffer()
 	d2common.ConfigBasePath = "../"
 	config := d2common.LoadConfiguration()
 	engine := d2core.CreateEngine()
 	for _, fileName := range config.MpqLoadOrder {
 		mpqFile := path.Join(config.MpqPath, fileName)
-		archive, _ := mpq.Load(mpqFile)
+		archive, _ := d2mpq.Load(mpqFile)
 		files, err := archive.GetFileList()
 		if err != nil {
 			continue
