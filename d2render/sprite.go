@@ -20,7 +20,6 @@ type Sprite struct {
 	Directions         uint32
 	FramesPerDirection uint32
 	atlas              *ebiten.Image
-	atlasBytes         []byte
 	Frames             []SpriteFrame
 	SpecialFrameTime   int
 	StopOnLastFrame    bool
@@ -46,7 +45,6 @@ type SpriteFrame struct {
 	ImageData []int16
 	FrameData []byte
 	Image     *ebiten.Image
-	cached    bool
 	atlasX    int
 	atlasY    int
 }
@@ -182,16 +180,33 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
 	}
 	atlasHeight = p2
 	result.atlas, _ = ebiten.NewImage(atlasWidth, atlasHeight, ebiten.FilterNearest)
-	result.atlasBytes = make([]byte, atlasWidth*atlasHeight*4)
+	atlasBytes := make([]byte, atlasWidth*atlasHeight*4)
 	frame = 0
 	for d := 0; d < int(result.Directions); d++ {
 		for f := 0; f < int(result.FramesPerDirection); f++ {
 			f := &result.Frames[frame]
 			f.Image = result.atlas.SubImage(image.Rect(f.atlasX, f.atlasY, f.atlasX+int(f.Width), f.atlasY+int(f.Height))).(*ebiten.Image)
+			ox := f.atlasX
+			oy := f.atlasY
+			for y := 0; y < int(f.Height); y++ {
+				for x := 0; x < int(f.Width); x++ {
+					pix := (x + (y * int(f.Width))) * 4
+					idx := (ox + x + ((oy + y) * atlasWidth)) * 4
+					atlasBytes[idx] = f.FrameData[pix]
+					atlasBytes[idx+1] = f.FrameData[pix+1]
+					atlasBytes[idx+2] = f.FrameData[pix+2]
+					atlasBytes[idx+3] = f.FrameData[pix+3]
+				}
+			}
+
 			curY += int(result.Frames[frame].Height)
 			frame++
 		}
 	}
+	if err := result.atlas.ReplacePixels(atlasBytes); err != nil {
+		log.Panic(err.Error())
+	}
+	atlasBytes = []byte{}
 	result.valid = true
 	return result
 
@@ -199,30 +214,6 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
 
 func (v Sprite) IsValid() bool {
 	return v.valid
-}
-
-func (v *Sprite) cacheFrame(frame int) {
-	if v.Frames[frame].cached {
-		return
-	}
-	totalWidth := v.atlas.Bounds().Max.X
-	ox := v.Frames[frame].atlasX
-	oy := v.Frames[frame].atlasY
-	for y := 0; y < int(v.Frames[frame].Height); y++ {
-		for x := 0; x < int(v.Frames[frame].Width); x++ {
-			pix := (x + (y * int(v.Frames[frame].Width))) * 4
-			idx := (ox + x + ((oy + y) * totalWidth)) * 4
-			v.atlasBytes[idx] = v.Frames[frame].FrameData[pix]
-			v.atlasBytes[idx+1] = v.Frames[frame].FrameData[pix+1]
-			v.atlasBytes[idx+2] = v.Frames[frame].FrameData[pix+2]
-			v.atlasBytes[idx+3] = v.Frames[frame].FrameData[pix+3]
-		}
-	}
-	if err := v.atlas.ReplacePixels(v.atlasBytes); err != nil {
-		log.Panic(err.Error())
-	}
-	v.Frames[frame].cached = true
-	v.Frames[frame].FrameData = []byte{}
 }
 
 // GetSize returns the size of the sprite
@@ -281,12 +272,9 @@ func (v *Sprite) Draw(target *ebiten.Image) {
 	v.updateAnimation()
 	opts := &ebiten.DrawImageOptions{}
 	frame := v.Frames[uint32(v.Frame)+(uint32(v.Direction)*v.FramesPerDirection)]
-	if !frame.cached {
-		v.cacheFrame(int(v.Frame) + (int(v.Direction) * int(v.FramesPerDirection)))
-	}
 	opts.GeoM.Translate(
 		float64(int32(v.X)+frame.OffsetX),
-		float64((int32(v.Y) - int32(frame.Height) + frame.OffsetY)),
+		float64(int32(v.Y)-int32(frame.Height)+frame.OffsetY),
 	)
 	if v.Blend {
 		opts.CompositeMode = ebiten.CompositeModeLighter
@@ -310,9 +298,6 @@ func (v *Sprite) DrawSegments(target *ebiten.Image, xSegments, ySegments, offset
 		biggestYOffset := int32(0)
 		for x := 0; x < xSegments; x++ {
 			frame := v.Frames[uint32(x+(y*xSegments)+(offset*xSegments*ySegments))]
-			if !frame.cached {
-				v.cacheFrame(x + (y * xSegments) + (offset * xSegments * ySegments))
-			}
 			opts := &ebiten.DrawImageOptions{}
 			opts.GeoM.Translate(
 				float64(int32(v.X)+frame.OffsetX+xOffset),
