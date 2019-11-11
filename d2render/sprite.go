@@ -47,6 +47,8 @@ type SpriteFrame struct {
 	FrameData []byte
 	Image     *ebiten.Image
 	cached    bool
+	atlasX    int
+	atlasY    int
 }
 
 // CreateSprite creates an instance of a sprite
@@ -143,36 +145,56 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
 		}(i)
 	}
 	wg.Wait()
-	totalWidth := 0
-	totalHeight := 0
 	frame := 0
-	for d := 0; d < int(result.Directions); d++ {
-		curMaxWidth := 0
-		for f := 0; f < int(result.FramesPerDirection); f++ {
-			curMaxWidth = int(d2helper.Max(uint32(curMaxWidth), result.Frames[frame].Width))
-			totalHeight += int(result.Frames[frame].Height)
-			frame++
-		}
-		totalWidth += curMaxWidth
-	}
-	result.atlas, _ = ebiten.NewImage(totalWidth, totalHeight, ebiten.FilterNearest)
-	result.atlasBytes = make([]byte, totalWidth*totalHeight*4)
-	frame = 0
+	curMaxWidth := 0
+	atlasWidth := 0
+	atlasHeight := 0
 	curX := 0
 	curY := 0
+	const maxHeight = 8192
 	for d := 0; d < int(result.Directions); d++ {
-		curMaxWidth := 0
 		for f := 0; f < int(result.FramesPerDirection); f++ {
+			if curY+int(result.Frames[frame].Height) >= maxHeight {
+				curX += curMaxWidth
+				curY = 0
+				curMaxWidth = 0
+				if curX >= maxHeight {
+					log.Fatal("Ran out of texture atlas space!")
+				}
+			}
+			result.Frames[frame].atlasX = curX
+			result.Frames[frame].atlasY = curY
 			curMaxWidth = int(d2helper.Max(uint32(curMaxWidth), result.Frames[frame].Width))
-			result.Frames[frame].Image = result.atlas.SubImage(image.Rect(curX, curY, curX+int(result.Frames[frame].Width), curY+int(result.Frames[frame].Height))).(*ebiten.Image)
+			atlasWidth = int(d2helper.Max(uint32(atlasWidth), uint32(curX)+result.Frames[frame].Width))
+			atlasHeight = int(d2helper.Max(uint32(atlasHeight), uint32(curY)+result.Frames[frame].Height))
 			curY += int(result.Frames[frame].Height)
 			frame++
 		}
-		curX += curMaxWidth
-		curY = 0
+	}
+	p2 := 1
+	for p2 < atlasWidth {
+		p2 <<= 1
+	}
+	atlasWidth = p2
+	p2 = 1
+	for p2 < atlasHeight {
+		p2 <<= 1
+	}
+	atlasHeight = p2
+	result.atlas, _ = ebiten.NewImage(atlasWidth, atlasHeight, ebiten.FilterNearest)
+	result.atlasBytes = make([]byte, atlasWidth*atlasHeight*4)
+	frame = 0
+	for d := 0; d < int(result.Directions); d++ {
+		for f := 0; f < int(result.FramesPerDirection); f++ {
+			f := &result.Frames[frame]
+			f.Image = result.atlas.SubImage(image.Rect(f.atlasX, f.atlasY, f.atlasX+int(f.Width), f.atlasY+int(f.Height))).(*ebiten.Image)
+			curY += int(result.Frames[frame].Height)
+			frame++
+		}
 	}
 	result.valid = true
 	return result
+
 }
 
 func (v Sprite) IsValid() bool {
@@ -183,14 +205,13 @@ func (v *Sprite) cacheFrame(frame int) {
 	if v.Frames[frame].cached {
 		return
 	}
-	r := v.Frames[frame].Image.Bounds().Min
-	curX := r.X
-	curY := r.Y
 	totalWidth := v.atlas.Bounds().Max.X
+	ox := v.Frames[frame].atlasX
+	oy := v.Frames[frame].atlasY
 	for y := 0; y < int(v.Frames[frame].Height); y++ {
 		for x := 0; x < int(v.Frames[frame].Width); x++ {
 			pix := (x + (y * int(v.Frames[frame].Width))) * 4
-			idx := (curX + x + ((curY + y) * totalWidth)) * 4
+			idx := (ox + x + ((oy + y) * totalWidth)) * 4
 			v.atlasBytes[idx] = v.Frames[frame].FrameData[pix]
 			v.atlasBytes[idx+1] = v.Frames[frame].FrameData[pix+1]
 			v.atlasBytes[idx+2] = v.Frames[frame].FrameData[pix+2]
@@ -201,6 +222,7 @@ func (v *Sprite) cacheFrame(frame int) {
 		log.Panic(err.Error())
 	}
 	v.Frames[frame].cached = true
+	v.Frames[frame].FrameData = []byte{}
 }
 
 // GetSize returns the size of the sprite
