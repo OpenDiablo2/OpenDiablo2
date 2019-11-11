@@ -228,7 +228,14 @@ func (v Engine) Draw(screen *ebiten.Image) {
 	}
 	if v.showFPS == true {
 		ebitenutil.DebugPrintAt(screen, "vsync:"+strconv.FormatBool(ebiten.IsVsyncEnabled())+"\nFPS:"+strconv.Itoa(int(ebiten.CurrentFPS())), 5, 565)
+		var m runtime.MemStats
+		runtime.ReadMemStats(&m)
+		ebitenutil.DebugPrintAt(screen, "Alloc   "+strconv.FormatInt(int64(m.Alloc)/1024/1024, 10), 700, 0)
+		ebitenutil.DebugPrintAt(screen, "Pause   "+strconv.FormatInt(int64(m.PauseTotalNs/1024/1024), 10), 700, 10)
+		ebitenutil.DebugPrintAt(screen, "HeapSys "+strconv.FormatInt(int64(m.HeapSys/1024/1024), 10), 700, 20)
+		ebitenutil.DebugPrintAt(screen, "NumGC   "+strconv.FormatInt(int64(m.NumGC), 10), 700, 30)
 	}
+
 }
 
 // SetNextScene tells the engine what scene to load on the next update cycle
