@@ -51,5 +51,4 @@ fi
 echo "Build OpenDiablo 2"
 go get
 go build
-chmod u+x OpenDiablo2
 echo "Build finished. Please edit config.json before running OpenDiablo2"
