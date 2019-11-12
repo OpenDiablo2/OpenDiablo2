@@ -121,7 +121,7 @@ func getGameBaseSavePath() string {
 		log.Panicf(err.Error())
 	}
 	basePath := path.Join(homeDir, ".OpenDiablo2", "Saves")
-	if err := os.MkdirAll(basePath, os.ModeDir); err != nil {
+	if err := os.MkdirAll(basePath, 0755); err != nil {
 		log.Panicf(err.Error())
 	}
 	// TODO: Is mac supposed to have a super special place for the save games?
