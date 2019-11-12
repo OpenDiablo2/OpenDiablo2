@@ -226,7 +226,7 @@ func (v Engine) Draw(screen *ebiten.Image) {
 		v.CurrentScene.Render(screen)
 		v.UIManager.Draw(screen)
 	}
-	if v.showFPS == true {
+	if v.showFPS {
 		ebitenutil.DebugPrintAt(screen, "vsync:"+strconv.FormatBool(ebiten.IsVsyncEnabled())+"\nFPS:"+strconv.Itoa(int(ebiten.CurrentFPS())), 5, 565)
 		var m runtime.MemStats
 		runtime.ReadMemStats(&m)

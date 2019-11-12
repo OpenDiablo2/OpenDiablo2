@@ -39,7 +39,7 @@ func WavDecompress(data []byte, channelCount int) []byte {
 	for i := 0; i < channelCount; i++ {
 		temp := input.GetInt16()
 		Array2[i] = int(temp)
-		output.PushSWord(temp)
+		output.PushInt16(temp)
 	}
 
 	channel := channelCount - 1
@@ -56,7 +56,7 @@ func WavDecompress(data []byte, channelCount int) []byte {
 				if Array1[channel] != 0 {
 					Array1[channel]--
 				}
-				output.PushSWord(int16(Array2[channel]))
+				output.PushInt16(int16(Array2[channel]))
 				break
 			case 1:
 				Array1[channel] += 8
@@ -115,7 +115,7 @@ func WavDecompress(data []byte, channelCount int) []byte {
 				}
 			}
 			Array2[channel] = temp3
-			output.PushSWord(int16(temp3))
+			output.PushInt16(int16(temp3))
 			Array1[channel] += sLookup2[value&0x1f]
 
 			if Array1[channel] < 0 {

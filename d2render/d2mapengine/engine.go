@@ -5,6 +5,8 @@ import (
 	"math/rand"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -40,7 +42,7 @@ func CreateMapEngine(gameState *d2core.GameState, soundManager *d2audio.Manager,
 	return result
 }
 
-func (v *Engine) GenerateMap(regionType RegionIdType, levelPreset int) {
+func (v *Engine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int) {
 	randomSource := rand.NewSource(v.gameState.Seed)
 	region := LoadRegion(randomSource, regionType, levelPreset, v.fileProvider)
 	v.regions = append(v.regions, EngineRegion{
@@ -52,19 +54,19 @@ func (v *Engine) GenerateMap(regionType RegionIdType, levelPreset int) {
 func (v *Engine) GenerateAct1Overworld() {
 	v.soundManager.PlayBGM("/data/global/music/Act1/town1.wav") // TODO: Temp stuff here
 	randomSource := rand.NewSource(v.gameState.Seed)
-	region := LoadRegion(randomSource, RegionAct1Town, 1, v.fileProvider)
+	region := LoadRegion(randomSource, d2enum.RegionAct1Town, 1, v.fileProvider)
 	v.regions = append(v.regions, EngineRegion{
 		Rect:   d2common.Rectangle{0, 0, int(region.TileWidth), int(region.TileHeight)},
 		Region: region,
 	})
 	if strings.Contains(region.RegionPath, "E1") {
-		region2 := LoadRegion(randomSource, RegionAct1Town, 2, v.fileProvider)
+		region2 := LoadRegion(randomSource, d2enum.RegionAct1Town, 2, v.fileProvider)
 		v.regions = append(v.regions, EngineRegion{
 			Rect:   d2common.Rectangle{int(region.TileWidth - 1), 0, int(region2.TileWidth), int(region2.TileHeight)},
 			Region: region2,
 		})
 	} else if strings.Contains(region.RegionPath, "S1") {
-		region2 := LoadRegion(randomSource, RegionAct1Town, 3, v.fileProvider)
+		region2 := LoadRegion(randomSource, d2enum.RegionAct1Town, 3, v.fileProvider)
 		v.regions = append(v.regions, EngineRegion{
 			Rect:   d2common.Rectangle{0, int(region.TileHeight - 1), int(region2.TileWidth), int(region2.TileHeight)},
 			Region: region2,
@@ -116,19 +118,19 @@ func (v *Engine) RenderTile(region *Region, offX, offY, x, y int, target *ebiten
 		if tile.Floors[i].Hidden || tile.Floors[i].Prop1 == 0 {
 			continue
 		}
-		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, RegionLayerTypeFloors, i, target)
+		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeFloors, i, target)
 	}
 	for i := range tile.Shadows {
 		if tile.Shadows[i].Hidden || tile.Shadows[i].Prop1 == 0 {
 			continue
 		}
-		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, RegionLayerTypeShadows, i, target)
+		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeShadows, i, target)
 	}
 	for i := range tile.Walls {
 		if tile.Walls[i].Hidden || tile.Walls[i].Orientation == 15 || tile.Walls[i].Orientation == 10 || tile.Walls[i].Orientation == 11 || tile.Walls[i].Orientation == 0 {
 			continue
 		}
-		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, RegionLayerTypeWalls, i, target)
+		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
 	}
 	for _, obj := range region.AnimationEntities {
 		if int(math.Floor(obj.LocationX)) == x && int(math.Floor(obj.LocationY)) == y {
@@ -144,6 +146,6 @@ func (v *Engine) RenderTile(region *Region, offX, offY, x, y int, target *ebiten
 		if tile.Walls[i].Hidden || tile.Walls[i].Orientation != 15 {
 			continue
 		}
-		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, RegionLayerTypeWalls, i, target)
+		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
 	}
 }
