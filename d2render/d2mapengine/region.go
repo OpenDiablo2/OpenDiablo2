@@ -29,12 +29,6 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
-type TileCacheRecord struct {
-	Image   *ebiten.Image
-	XOffset int
-	YOffset int
-}
-
 type Region struct {
 	RegionPath        string
 	LevelType         d2datadict.LevelTypeRecord
@@ -53,55 +47,7 @@ type Region struct {
 	StartY            float64
 }
 
-type RegionLayerType int
-
-const (
-	RegionLayerTypeFloors  RegionLayerType = 0
-	RegionLayerTypeWalls   RegionLayerType = 1
-	RegionLayerTypeShadows RegionLayerType = 2
-)
-
-type RegionIdType int
-
-const (
-	RegionAct1Town       RegionIdType = 1
-	RegionAct1Wilderness RegionIdType = 2
-	RegionAct1Cave       RegionIdType = 3
-	RegionAct1Crypt      RegionIdType = 4
-	RegionAct1Monestary  RegionIdType = 5
-	RegionAct1Courtyard  RegionIdType = 6
-	RegionAct1Barracks   RegionIdType = 7
-	RegionAct1Jail       RegionIdType = 8
-	RegionAct1Cathedral  RegionIdType = 9
-	RegionAct1Catacombs  RegionIdType = 10
-	RegionAct1Tristram   RegionIdType = 11
-	RegionAct2Town       RegionIdType = 12
-	RegionAct2Sewer      RegionIdType = 13
-	RegionAct2Harem      RegionIdType = 14
-	RegionAct2Basement   RegionIdType = 15
-	RegionAct2Desert     RegionIdType = 16
-	RegionAct2Tomb       RegionIdType = 17
-	RegionAct2Lair       RegionIdType = 18
-	RegionAct2Arcane     RegionIdType = 19
-	RegionAct3Town       RegionIdType = 20
-	RegionAct3Jungle     RegionIdType = 21
-	RegionAct3Kurast     RegionIdType = 22
-	RegionAct3Spider     RegionIdType = 23
-	RegionAct3Dungeon    RegionIdType = 24
-	RegionAct3Sewer      RegionIdType = 25
-	RegionAct4Town       RegionIdType = 26
-	RegionAct4Mesa       RegionIdType = 27
-	RegionAct4Lava       RegionIdType = 28
-	RegonAct5Town        RegionIdType = 29
-	RegionAct5Siege      RegionIdType = 30
-	RegionAct5Barricade  RegionIdType = 31
-	RegionAct5Temple     RegionIdType = 32
-	RegionAct5IceCaves   RegionIdType = 33
-	RegionAct5Baal       RegionIdType = 34
-	RegionAct5Lava       RegionIdType = 35
-)
-
-func LoadRegion(seed rand.Source, levelType RegionIdType, levelPreset int, fileProvider d2interface.FileProvider) *Region {
+func LoadRegion(seed rand.Source, levelType d2enum.RegionIdType, levelPreset int, fileProvider d2interface.FileProvider) *Region {
 	result := &Region{
 		LevelType:   d2datadict.LevelTypes[levelType],
 		levelPreset: d2datadict.LevelPresets[levelPreset],
@@ -111,7 +57,7 @@ func LoadRegion(seed rand.Source, levelType RegionIdType, levelPreset int, fileP
 		WallCache:   make(map[uint32]*TileCacheRecord),
 	}
 	result.Palette = d2datadict.Palettes[d2enum.PaletteType("act"+strconv.Itoa(int(result.LevelType.Act)))]
-	//\bm := result.levelPreset.Dt1Mask
+	//bm := result.levelPreset.Dt1Mask
 	for _, levelTypeDt1 := range result.LevelType.Files {
 		/*
 			if bm&1 == 0 {
@@ -158,13 +104,14 @@ func (v *Region) loadObjects(fileProvider d2interface.FileProvider) {
 				if object.Lookup.Base == "" || object.Lookup.Token == "" || object.Lookup.TR == "" {
 					return
 				}
-				npc := d2core.CreateNPC(object, fileProvider)
+				npc := d2core.CreateNPC(object.X, object.Y, object.Lookup, fileProvider, 1)
+				npc.SetPaths(object.Paths)
 				v.NPCs = append(v.NPCs, npc)
 			case d2datadict.ObjectTypeItem:
 				if object.ObjectInfo == nil || !object.ObjectInfo.Draw || object.Lookup.Base == "" || object.Lookup.Token == "" {
 					return
 				}
-				entity := d2render.CreateAnimatedEntity(object, fileProvider, d2enum.Units)
+				entity := d2render.CreateAnimatedEntity(object.X, object.Y, object.Lookup, fileProvider, d2enum.Units)
 				entity.SetMode(object.Lookup.Mode, object.Lookup.Class, 0, fileProvider)
 				v.AnimationEntities = append(v.AnimationEntities, entity)
 			}
@@ -173,14 +120,14 @@ func (v *Region) loadObjects(fileProvider d2interface.FileProvider) {
 	wg.Wait()
 }
 
-func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType RegionLayerType, layerIndex int, target *ebiten.Image) {
+func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType d2enum.RegionLayerType, layerIndex int, target *ebiten.Image) {
 	offsetX -= 80
 	switch layerType {
-	case RegionLayerTypeFloors:
+	case d2enum.RegionLayerTypeFloors:
 		v.renderFloor(v.DS1.Tiles[tileY][tileX].Floors[layerIndex], offsetX, offsetY, target)
-	case RegionLayerTypeWalls:
+	case d2enum.RegionLayerTypeWalls:
 		v.renderWall(v.DS1.Tiles[tileY][tileX].Walls[layerIndex], offsetX, offsetY, target)
-	case RegionLayerTypeShadows:
+	case d2enum.RegionLayerTypeShadows:
 		v.renderShadow(v.DS1.Tiles[tileY][tileX].Shadows[layerIndex], offsetX, offsetY, target)
 	}
 }
@@ -394,7 +341,10 @@ func (v *Region) generateWallCache(tile d2ds1.WallRecord) *TileCacheRecord {
 		yAdjust = int(tileMinY) + 80
 	}
 
-	image.ReplacePixels(pixels)
+	// TODO: This may also need to be an atlas, but could get pretty large...
+	if err := image.ReplacePixels(pixels); err != nil {
+		log.Panicf(err.Error())
+	}
 	return &TileCacheRecord{
 		image,
 		0,

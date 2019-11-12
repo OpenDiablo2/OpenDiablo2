@@ -21,8 +21,8 @@ func TestStreamWriterByte(t *testing.T) {
 func TestStreamWriterWord(t *testing.T) {
 	sr := CreateStreamWriter()
 	data := []byte{0x12, 0x34, 0x56, 0x78}
-	sr.PushWord(0x3412)
-	sr.PushWord(0x7856)
+	sr.PushUint16(0x3412)
+	sr.PushUint16(0x7856)
 	output := sr.GetBytes()
 	for i, d := range data {
 		if output[i] != d {
@@ -34,7 +34,7 @@ func TestStreamWriterWord(t *testing.T) {
 func TestStreamWriterDword(t *testing.T) {
 	sr := CreateStreamWriter()
 	data := []byte{0x12, 0x34, 0x56, 0x78}
-	sr.PushDword(0x78563412)
+	sr.PushUint32(0x78563412)
 	output := sr.GetBytes()
 	for i, d := range data {
 		if output[i] != d {

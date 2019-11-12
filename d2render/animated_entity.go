@@ -48,20 +48,20 @@ type AnimatedEntity struct {
 	currentFrame    int
 	frames          map[string][]*ebiten.Image
 	frameLocations  map[string][]d2common.Rectangle
-	object          d2data.Object
+	object          *d2datadict.ObjectLookupRecord
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
-func CreateAnimatedEntity(object d2data.Object, fileProvider d2interface.FileProvider, palette d2enum.PaletteType) AnimatedEntity {
+func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fileProvider d2interface.FileProvider, palette d2enum.PaletteType) AnimatedEntity {
 	result := AnimatedEntity{
-		base:    object.Lookup.Base,
-		token:   object.Lookup.Token,
+		base:    object.Base,
+		token:   object.Token,
 		object:  object,
 		palette: palette,
 	}
 	result.dccLayers = make(map[string]d2dcc.DCC)
-	result.LocationX = float64(object.X) / 5
-	result.LocationY = float64(object.Y) / 5
+	result.LocationX = float64(x) / 5
+	result.LocationY = float64(y) / 5
 	return result
 }
 
@@ -96,37 +96,37 @@ func (v *AnimatedEntity) LoadLayer(layer string, fileProvider d2interface.FilePr
 	layerName := "tr"
 	switch strings.ToUpper(layer) {
 	case "HD": // Head
-		layerName = v.object.Lookup.HD
+		layerName = v.object.HD
 	case "TR": // Torso
-		layerName = v.object.Lookup.TR
+		layerName = v.object.TR
 	case "LG": // Legs
-		layerName = v.object.Lookup.LG
+		layerName = v.object.LG
 	case "RA": // RightArm
-		layerName = v.object.Lookup.RA
+		layerName = v.object.RA
 	case "LA": // LeftArm
-		layerName = v.object.Lookup.LA
+		layerName = v.object.LA
 	case "RH": // RightHand
-		layerName = v.object.Lookup.RH
+		layerName = v.object.RH
 	case "LH": // LeftHand
-		layerName = v.object.Lookup.LH
+		layerName = v.object.LH
 	case "SH": // Shield
-		layerName = v.object.Lookup.SH
+		layerName = v.object.SH
 	case "S1": // Special1
-		layerName = v.object.Lookup.S1
+		layerName = v.object.S1
 	case "S2": // Special2
-		layerName = v.object.Lookup.S2
+		layerName = v.object.S2
 	case "S3": // Special3
-		layerName = v.object.Lookup.S3
+		layerName = v.object.S3
 	case "S4": // Special4
-		layerName = v.object.Lookup.S4
+		layerName = v.object.S4
 	case "S5": // Special5
-		layerName = v.object.Lookup.S5
+		layerName = v.object.S5
 	case "S6": // Special6
-		layerName = v.object.Lookup.S6
+		layerName = v.object.S6
 	case "S7": // Special7
-		layerName = v.object.Lookup.S7
+		layerName = v.object.S7
 	case "S8": // Special8
-		layerName = v.object.Lookup.S8
+		layerName = v.object.S8
 	}
 	if len(layerName) == 0 {
 		return d2dcc.DCC{}

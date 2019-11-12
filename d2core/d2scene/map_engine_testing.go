@@ -37,7 +37,7 @@ func CreateMapEngineTest(
 		soundManager:  soundManager,
 		sceneProvider: sceneProvider,
 	}
-	result.gameState = d2core.CreateGameState()
+	result.gameState = d2core.CreateTestGameState()
 	return result
 }
 

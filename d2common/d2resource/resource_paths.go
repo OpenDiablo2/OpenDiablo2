@@ -80,6 +80,8 @@ const (
 	// -- Character Selection
 
 	CharacterSelectionBackground = "/data/global/ui/CharSelect/characterselectscreenEXP.dc6"
+	CharacterSelectionSelectBox  = "/data/global/ui/CharSelect/charselectbox.dc6"
+	PopUpOkCancel                = "/data/global/ui/FrontEnd/PopUpOKCancel.dc6"
 
 	// --- Game ---
 
@@ -101,6 +103,7 @@ const (
 	Font16         = "/data/local/font/latin/font16"
 	Font24         = "/data/local/font/latin/font24"
 	Font30         = "/data/local/font/latin/font30"
+	Font42         = "/data/local/font/latin/font42"
 	FontFormal12   = "/data/local/font/latin/fontformal12"
 	FontFormal11   = "/data/local/font/latin/fontformal11"
 	FontFormal10   = "/data/local/font/latin/fontformal10"

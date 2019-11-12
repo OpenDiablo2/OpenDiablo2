@@ -17,7 +17,7 @@ func TestMapGenerationPerformance(t *testing.T) {
 	d2common.ConfigBasePath = "../"
 
 	engine := d2core.CreateEngine()
-	gameState := d2core.CreateGameState()
+	gameState := d2core.CreateTestGameState()
 	mapEngine := _map.CreateMapEngine(gameState, engine.SoundManager, engine)
 	mapEngine.GenerateAct1Overworld()
 	surface, _ := ebiten.NewImage(800, 600, ebiten.FilterNearest)

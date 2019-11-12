@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
@@ -202,6 +204,10 @@ func openbrowser(url string) {
 
 func (v *MainMenu) onSinglePlayerClicked() {
 	// Go here only if existing characters are available to select
+	if d2core.HasGameStates() {
+		v.sceneProvider.SetNextScene(CreateCharacterSelect(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager))
+		return
+	}
 	v.sceneProvider.SetNextScene(CreateSelectHeroClass(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager))
 }
 

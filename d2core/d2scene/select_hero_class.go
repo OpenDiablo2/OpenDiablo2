@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
@@ -420,6 +422,10 @@ func (v *SelectHeroClass) Load() []func() {
 }
 
 func (v *SelectHeroClass) Unload() {
+	for i := range v.heroRenderInfo {
+		v.heroRenderInfo[i].SelectSfx.Stop()
+		v.heroRenderInfo[i].DeselectSfx.Stop()
+	}
 	v.heroRenderInfo = nil
 }
 
@@ -428,7 +434,8 @@ func (v SelectHeroClass) onExitButtonClicked() {
 }
 
 func (v SelectHeroClass) onOkButtonClicked() {
-	// TODO: Start the game
+	gameState := d2core.CreateGameState(v.heroNameTextbox.GetText(), v.selectedHero, v.hardcoreCheckbox.GetCheckState())
+	v.sceneProvider.SetNextScene(CreateGame(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager, gameState))
 }
 
 func (v *SelectHeroClass) Render(screen *ebiten.Image) {
