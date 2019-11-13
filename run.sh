@@ -33,7 +33,7 @@ go_install(){
       echo "Clean unless files"
 	  rm go*.linux-amd64.tar.gz
       echo "Install libraries"
-	  sudo yum install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel &> /dev/null
+	  sudo yum install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel alsa-lib-devel libXi-devel &> /dev/null
       
     elif [[ "$distribution" = Fedora ]]; then
       echo "Downloading Go"
