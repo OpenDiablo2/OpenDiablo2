@@ -9,13 +9,14 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-
     - name: Set up Go 1.13
       uses: actions/setup-go@v1
       with:
         go-version: 1.13
       id: go
 
+    - name: Install dependencies
+      run: sudo apt-get install build-essential libx11-dev mesa-common-dev libglfw3-dev libgles2-mesa-dev libasound2-dev
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
 
