@@ -81,6 +81,7 @@ func LoadGameState(path string) *GameState {
 	if err != nil {
 		log.Panicf(err.Error())
 	}
+	defer f.Close()
 	sr := d2common.CreateStreamReader(bytes)
 	if sr.GetUInt32() > GameStateVersion {
 		// Unknown game version
