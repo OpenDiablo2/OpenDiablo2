@@ -26,11 +26,14 @@ go_install(){
 	[ "$choice" != y ] && [ "$choice" != Y ] && exit
 
     if [[ "$distribution" = CentOS || "$distribution" = CentOS || "$distribution" = Red\ Hat || "$distribution" = Suse || "$distribution" = Oracle ]]; then
-      wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz
-	  sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz
+      echo "Downloading Go"
+      wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz &> /dev/null
+      echo "Install Go"
+	  sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz &> /dev/null
+      echo "Clean unless files"
 	  rm go*.linux-amd64.tar.gz
-	  export PATH=$PATH:/usr/local/go/bin
-	  sudo dnf install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel
+      echo "Install libraries"
+	  sudo yum install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel &> /dev/null
       
     elif [[ "$distribution" = Fedora ]]; then
       echo "Downloading Go"
@@ -43,8 +46,14 @@ go_install(){
 	  sudo dnf install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel &> /dev/null
     
     elif [[ "$distribution" = Debian || "$distribution" = Ubuntu || "$distribution" = Deepin ]]; then
-      apt-get update
-      apt-get install -y make autoconf automake gcc libc6 libmcrypt-dev libssl-dev openssl packagekit --force-yes
+      echo "Downloading Go"
+      wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz &> /dev/null
+      echo "Install Go"
+	  sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz &> /dev/null
+      echo "Clean unless files"
+	  rm go*.linux-amd64.tar.gz
+      echo "Install libraries"
+	  sudo apt-get install -y  &> /dev/null
       
     elif [[ "$distribution" = Gentoo ]]; then
       sudo emerge --ask n go
