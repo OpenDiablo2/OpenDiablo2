@@ -11,6 +11,7 @@ echo "OpenDiablo 2 Build Script $version"
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST AND VAR
 #=================================================
+export PATH=$PATH:/usr/local/go/bin
 
 distribution=$(cat /etc/*release | grep "PRETTY_NAME" | sed 's/PRETTY_NAME=//g' | sed 's/["]//g' | awk '{print $1}')
 
@@ -38,7 +39,6 @@ go_install(){
 	  sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz &> /dev/null
       echo "Clean unless files"
 	  rm go*.linux-amd64.tar.gz
-	  export PATH=$PATH:/usr/local/go/bin
       echo "Install libraries"
 	  sudo dnf install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel &> /dev/null
     
