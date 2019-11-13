@@ -56,7 +56,7 @@ go_install(){
 	    sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev > /dev/null 2>&1
       
     elif [ "$distribution" = "Gentoo" ]; then
-      sudo emerge --ask n go
+      sudo emerge --ask n go libXcursor libXrandr libXinerama libXi libGLw libglvnd libsdl2 alsa-lib
       
     elif [ "$distribution" = "Manjaro" ] || [ "$distribution" = "Arch\ Linux" ]; then
       sudo pacman -S go --noconfirm
