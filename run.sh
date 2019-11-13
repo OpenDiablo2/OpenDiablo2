@@ -3,6 +3,7 @@
 # About: Build OpenDiablo 2 automatically
 # Author: liberodark
 # License: GNU GPLv3
+set -eu
 
 version="0.0.4"
 
@@ -19,46 +20,46 @@ distribution=$(cat /etc/*release | grep "PRETTY_NAME" | sed 's/PRETTY_NAME=//g' 
 go_install(){
   # Check OS & go
 
-  if ! command -v go &> /dev/null; then
+  if ! command -v go > /dev/null 2>&1; then
 
   	echo "Install Go for OpenDiablo 2 ($distribution)? y/n"
 	read -r choice
 	[ "$choice" != y ] && [ "$choice" != Y ] && exit
 
-    if [[ "$distribution" = CentOS || "$distribution" = CentOS || "$distribution" = Red\ Hat || "$distribution" = Suse || "$distribution" = Oracle ]]; then
+    if [ "$distribution" = "CentOS" ] || [ "$distribution" = "Red\ Hat" ] || [ "$distribution" = "Suse" ] || [ "$distribution" = "Oracle" ]; then
       echo "Downloading Go"
-      wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz &> /dev/null
+      wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Install Go"
-	  sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz &> /dev/null
+	  sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Clean unless files"
 	  rm go*.linux-amd64.tar.gz
       echo "Install libraries"
-	  sudo yum install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel alsa-lib-devel libXi-devel &> /dev/null
+	  sudo yum install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel alsa-lib-devel libXi-devel > /dev/null 2>&1
       
-    elif [[ "$distribution" = Fedora ]]; then
+    elif [ "$distribution" = "Fedora" ]; then
       echo "Downloading Go"
-      wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz &> /dev/null
+      wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Install Go"
-	  sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz &> /dev/null
+	  sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Clean unless files"
 	  rm go*.linux-amd64.tar.gz
       echo "Install libraries"
-	  sudo dnf install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel alsa-lib-devel libXi-devel &> /dev/null
+	  sudo dnf install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel alsa-lib-devel libXi-devel > /dev/null 2>&1
     
-    elif [[ "$distribution" = Debian || "$distribution" = Ubuntu || "$distribution" = Deepin ]]; then
+    elif [ "$distribution" = "Debian" ] || [ "$distribution" = "Ubuntu" ] || [ "$distribution" = "Deepin" ]; then
       echo "Downloading Go"
-      wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz &> /dev/null
+      wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Install Go"
-	  sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz &> /dev/null
+	  sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Clean unless files"
 	  rm go*.linux-amd64.tar.gz
       echo "Install libraries"
-	  sudo apt-get install -y  &> /dev/null
+	  sudo apt-get install -y  > /dev/null 2>&1
       
-    elif [[ "$distribution" = Gentoo ]]; then
+    elif [ "$distribution" = "Gentoo" ]; then
       sudo emerge --ask n go
       
-    elif [[ "$distribution" = Manjaro || "$distribution" = Arch\ Linux ]]; then
+    elif [ "$distribution" = "Manjaro" ] || [ "$distribution" = "Arch\ Linux" ]; then
       sudo pacman -S go --noconfirm
 
     fi
