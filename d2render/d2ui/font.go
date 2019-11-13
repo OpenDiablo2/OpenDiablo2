@@ -107,7 +107,7 @@ func (v *Font) Draw(x, y int, text string, color color.Color, target *ebiten.Ima
 		for _, ch := range line {
 			char := uint8(ch)
 			metric := v.metrics[char]
-			v.fontSprite.Frame = char
+			v.fontSprite.Frame = int16(char)
 			v.fontSprite.MoveTo(xPos, y+int(v.fontSprite.Frames[char].Height))
 			v.fontSprite.Draw(target)
 			xPos += int(metric.Width)

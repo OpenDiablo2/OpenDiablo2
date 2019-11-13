@@ -217,7 +217,7 @@ func (v *Engine) Update() {
 // Draw draws the game
 func (v Engine) Draw(screen *ebiten.Image) {
 	if v.loadingProgress < 1.0 {
-		v.LoadingSprite.Frame = uint8(d2helper.Max(0, d2helper.Min(uint32(len(v.LoadingSprite.Frames)-1), uint32(float64(len(v.LoadingSprite.Frames)-1)*v.loadingProgress))))
+		v.LoadingSprite.Frame = int16(d2helper.Max(0, d2helper.Min(uint32(len(v.LoadingSprite.Frames)-1), uint32(float64(len(v.LoadingSprite.Frames)-1)*v.loadingProgress))))
 		v.LoadingSprite.Draw(screen)
 	} else {
 		if v.CurrentScene == nil {

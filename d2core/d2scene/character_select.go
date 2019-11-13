@@ -113,6 +113,7 @@ func (v *CharacterSelect) Load() []func() {
 		func() {
 			v.okButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, v.fileProvider, d2common.TranslateString("#971"))
 			v.okButton.MoveTo(625, 537)
+			v.okButton.OnActivated(func() { v.onOkButtonClicked() })
 			v.uiManager.AddWidget(&v.okButton)
 		},
 		func() {
@@ -301,4 +302,8 @@ func (v *CharacterSelect) refreshGameStates() {
 	}
 	v.moveSelectionBox()
 
+}
+
+func (v *CharacterSelect) onOkButtonClicked() {
+	v.sceneProvider.SetNextScene(CreateGame(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager, v.gameStates[v.selectedCharacter]))
 }

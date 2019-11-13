@@ -22,9 +22,10 @@ type Sprite struct {
 	atlas              *ebiten.Image
 	Frames             []SpriteFrame
 	SpecialFrameTime   int
+	AnimateBackwards   bool // Because why not
 	StopOnLastFrame    bool
 	X, Y               int
-	Frame, Direction   uint8
+	Frame, Direction   int16
 	Blend              bool
 	LastFrameTime      time.Time
 	Animate            bool
@@ -65,6 +66,7 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
 		SpecialFrameTime:   -1,
 		StopOnLastFrame:    false,
 		valid:              false,
+		AnimateBackwards:   false,
 	}
 	dataPointer := uint32(24)
 	totalFrames := result.Directions * result.FramesPerDirection
@@ -235,12 +237,23 @@ func (v *Sprite) updateAnimation() {
 	}
 	for time.Since(v.LastFrameTime) >= timePerFrame {
 		v.LastFrameTime = v.LastFrameTime.Add(timePerFrame)
-		v.Frame++
-		if v.Frame >= uint8(v.FramesPerDirection) {
+		if !v.AnimateBackwards {
+			v.Frame++
+			if v.Frame >= int16(v.FramesPerDirection) {
+				if v.StopOnLastFrame {
+					v.Frame = int16(v.FramesPerDirection) - 1
+				} else {
+					v.Frame = 0
+				}
+			}
+			continue
+		}
+		v.Frame--
+		if v.Frame < 0 {
 			if v.StopOnLastFrame {
-				v.Frame = uint8(v.FramesPerDirection) - 1
-			} else {
 				v.Frame = 0
+			} else {
+				v.Frame = int16(v.FramesPerDirection) - 1
 			}
 		}
 	}
@@ -252,7 +265,7 @@ func (v *Sprite) ResetAnimation() {
 }
 
 func (v Sprite) OnLastFrame() bool {
-	return v.Frame == uint8(v.FramesPerDirection-1)
+	return v.Frame == int16(v.FramesPerDirection-1)
 }
 
 // GetFrameSize returns the size of the specific frame
