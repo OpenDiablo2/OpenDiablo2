@@ -122,6 +122,7 @@ const (
 	TextBox2          = "/data/global/ui/FrontEnd/textbox2.dc6"
 	TallButtonBlank   = "/data/global/ui/CharSelect/TallButtonBlank.dc6"
 	Checkbox          = "/data/global/ui/FrontEnd/clickbox.dc6"
+	Scrollbar         = "/data/global/ui/PANEL/scrollbar.dc6"
 
 	// --- GAME UI ---
 

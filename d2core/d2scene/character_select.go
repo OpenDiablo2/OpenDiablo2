@@ -2,6 +2,7 @@ package d2scene
 
 import (
 	"image/color"
+	"math"
 	"os"
 	"strings"
 
@@ -37,12 +38,12 @@ type CharacterSelect struct {
 	okCancelBox            d2render.Sprite
 	d2HeroTitle            d2ui.Label
 	deleteCharConfirmLabel d2ui.Label
+	charScrollbar          d2ui.Scrollbar
 	characterNameLabel     [8]d2ui.Label
 	characterStatsLabel    [8]d2ui.Label
 	characterExpLabel      [8]d2ui.Label
 	characterImage         [8]*d2core.NPC
 	gameStates             []*d2core.GameState
-	scrollOffset           int
 	selectedCharacter      int
 	mouseButtonPressed     bool
 	showDeleteConfirmation bool
@@ -135,6 +136,11 @@ func (v *CharacterSelect) Load() []func() {
 			v.okCancelBox.MoveTo(270, 175)
 		},
 		func() {
+			v.charScrollbar = d2ui.CreateScrollbar(v.fileProvider, 586, 87, 369)
+			v.charScrollbar.OnActivated(func() { v.onScrollUpdate() })
+			v.uiManager.AddWidget(&v.charScrollbar)
+		},
+		func() {
 			for i := 0; i < 8; i++ {
 				xOffset := 115
 				if i&1 > 0 {
@@ -154,10 +160,15 @@ func (v *CharacterSelect) Load() []func() {
 	}
 }
 
+func (v *CharacterSelect) onScrollUpdate() {
+	v.moveSelectionBox()
+	v.updateCharacterBoxes()
+}
+
 func (v *CharacterSelect) updateCharacterBoxes() {
 	expText := d2common.TranslateString("expansionchar2x")
 	for i := 0; i < 8; i++ {
-		idx := i + (v.scrollOffset * 2)
+		idx := i + (v.charScrollbar.GetCurrentOffset() * 2)
 		if idx >= len(v.gameStates) {
 			v.characterNameLabel[i].SetText("")
 			v.characterStatsLabel[i].SetText("")
@@ -189,18 +200,18 @@ func (v *CharacterSelect) Unload() {
 func (v *CharacterSelect) Render(screen *ebiten.Image) {
 	v.background.DrawSegments(screen, 4, 3, 0)
 	v.d2HeroTitle.Draw(screen)
-	if v.selectedCharacter > -1 {
+	actualSelectionIndex := v.selectedCharacter - (v.charScrollbar.GetCurrentOffset() * 2)
+	if v.selectedCharacter > -1 && actualSelectionIndex >= 0 && actualSelectionIndex < 8 {
 		v.selectionBox.DrawSegments(screen, 2, 1, 0)
 	}
 	for i := 0; i < 8; i++ {
-		idx := i + (v.scrollOffset * 2)
+		idx := i + (v.charScrollbar.GetCurrentOffset() * 2)
 		if idx >= len(v.gameStates) {
 			continue
 		}
 		v.characterNameLabel[i].Draw(screen)
 		v.characterStatsLabel[i].Draw(screen)
 		v.characterExpLabel[i].Draw(screen)
-
 		v.characterImage[i].Render(screen, v.characterNameLabel[i].X-40, v.characterNameLabel[i].Y+30)
 	}
 	if v.showDeleteConfirmation {
@@ -211,9 +222,13 @@ func (v *CharacterSelect) Render(screen *ebiten.Image) {
 }
 
 func (v *CharacterSelect) moveSelectionBox() {
+	if v.selectedCharacter == -1 {
+		v.d2HeroTitle.SetText("")
+		return
+	}
 	bw := 272
 	bh := 92
-	selectedIndex := v.selectedCharacter - (v.scrollOffset * 2)
+	selectedIndex := v.selectedCharacter - (v.charScrollbar.GetCurrentOffset() * 2)
 	v.selectionBox.MoveTo(37+((selectedIndex&1)*int(bw)), 86+(int(bh)*(selectedIndex/2)))
 	v.d2HeroTitle.SetText(v.gameStates[v.selectedCharacter].HeroName)
 }
@@ -234,8 +249,8 @@ func (v *CharacterSelect) Update(tickTime float64) {
 					if localMouseX > int(bw) {
 						selectedIndex += 1
 					}
-					if (v.scrollOffset*2)+selectedIndex < len(v.gameStates) {
-						v.selectedCharacter = (v.scrollOffset * 2) + selectedIndex
+					if (v.charScrollbar.GetCurrentOffset()*2)+selectedIndex < len(v.gameStates) {
+						v.selectedCharacter = (v.charScrollbar.GetCurrentOffset() * 2) + selectedIndex
 						v.moveSelectionBox()
 					}
 				}
@@ -252,9 +267,11 @@ func (v *CharacterSelect) onDeleteCharButtonClicked() {
 
 func (v *CharacterSelect) onDeleteCharacterConfirmClicked() {
 	_ = os.Remove(v.gameStates[v.selectedCharacter].FilePath)
-	v.selectedCharacter = -1
+	v.charScrollbar.SetCurrentOffset(0)
 	v.refreshGameStates()
 	v.toggleDeleteCharacterDialog(false)
+	v.deleteCharButton.SetEnabled(len(v.gameStates) > 0)
+	v.okButton.SetEnabled(len(v.gameStates) > 0)
 }
 
 func (v *CharacterSelect) onDeleteCharacterCancelClicked() {
@@ -277,11 +294,11 @@ func (v *CharacterSelect) refreshGameStates() {
 	if len(v.gameStates) > 0 {
 		v.selectedCharacter = 0
 		v.d2HeroTitle.SetText(v.gameStates[0].HeroName)
+		v.charScrollbar.SetMaxOffset(int(math.Ceil(float64(len(v.gameStates)-8) / float64(2))))
 	} else {
 		v.selectedCharacter = -1
+		v.charScrollbar.SetMaxOffset(0)
 	}
-	v.deleteCharButton.SetEnabled(v.selectedCharacter > -1)
-	v.okButton.SetEnabled(v.selectedCharacter > -1)
 	v.moveSelectionBox()
 
 }
