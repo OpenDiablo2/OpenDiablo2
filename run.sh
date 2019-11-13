@@ -53,7 +53,7 @@ go_install(){
       echo "Clean unless files"
 	    rm go*.linux-amd64.tar.gz
       echo "Install libraries"
-	    sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev > /dev/null 2>&1
+	    sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev > /dev/null 2>&1
       
     elif [ "$distribution" = "Gentoo" ]; then
       sudo emerge --ask n go
