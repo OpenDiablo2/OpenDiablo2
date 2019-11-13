@@ -137,11 +137,13 @@ func (v *AnimatedEntity) LoadLayer(layer string, fileProvider d2interface.FilePr
 
 // Render draws this animated entity onto the target
 func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
-	for v.lastFrameTime.Add(time.Millisecond * time.Duration(v.animationSpeed)).Before(time.Now()) {
-		v.lastFrameTime = v.lastFrameTime.Add(time.Millisecond * time.Duration(v.animationSpeed))
-		v.currentFrame++
-		if v.currentFrame >= v.framesToAnimate {
-			v.currentFrame = 0
+	if v.animationSpeed > 0 {
+		for v.lastFrameTime.Add(time.Millisecond * time.Duration(v.animationSpeed)).Before(time.Now()) {
+			v.lastFrameTime = v.lastFrameTime.Add(time.Millisecond * time.Duration(v.animationSpeed))
+			v.currentFrame++
+			if v.currentFrame >= v.framesToAnimate {
+				v.currentFrame = 0
+			}
 		}
 	}
 	for idx := 0; idx < v.Cof.NumberOfLayers; idx++ {
