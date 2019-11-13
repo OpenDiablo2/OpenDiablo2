@@ -27,17 +27,17 @@ go_install(){
 
     if [ "$distribution" = "CentOS" ] || [ "$distribution" = "Red\ Hat" ] || [ "$distribution" = "Suse" ] || [ "$distribution" = "Oracle" ]; then
       echo "Downloading Go"
-      wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz > /dev/null 2>&1
+      	wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Install Go"
-	    sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
+	  	sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Clean unless files"
-	    rm go*.linux-amd64.tar.gz
+	  	rm go*.linux-amd64.tar.gz
       echo "Install libraries"
 	    sudo yum install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel alsa-lib-devel libXi-devel > /dev/null 2>&1
       
     elif [ "$distribution" = "Fedora" ]; then
       echo "Downloading Go"
-      wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz > /dev/null 2>&1
+      	wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Install Go"
 	    sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Clean unless files"
@@ -47,7 +47,7 @@ go_install(){
     
     elif [ "$distribution" = "Debian" ] || [ "$distribution" = "Ubuntu" ] || [ "$distribution" = "Deepin" ]; then
       echo "Downloading Go"
-      wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz > /dev/null 2>&1
+      	wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Install Go"
 	    sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Clean unless files"
