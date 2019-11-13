@@ -18,7 +18,7 @@ distribution=$(cat /etc/*release | grep "PRETTY_NAME" | sed 's/PRETTY_NAME=//g' 
 go_install(){
   # Check OS & go
 
-  if ! command -v go; then
+  if ! command -v go &> /dev/null; then
 
   	echo "Install Go for OpenDiablo 2 ($distribution)? y/n"
 	read -r choice
@@ -32,11 +32,15 @@ go_install(){
 	  sudo dnf install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel
       
     elif [[ "$distribution" = Fedora ]]; then
-      wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz
-	  sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz
+      echo "Downloading Go"
+      wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz &> /dev/null
+      echo "Install Go"
+	  sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz &> /dev/null
+      echo "Clean unless files"
 	  rm go*.linux-amd64.tar.gz
 	  export PATH=$PATH:/usr/local/go/bin
-	  sudo dnf install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel
+      echo "Install libraries"
+	  sudo dnf install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel &> /dev/null
     
     elif [[ "$distribution" = Debian || "$distribution" = Ubuntu || "$distribution" = Deepin ]]; then
       apt-get update
