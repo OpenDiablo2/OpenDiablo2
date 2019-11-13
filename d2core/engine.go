@@ -128,9 +128,10 @@ func (v *Engine) LoadFile(fileName string) []byte {
 			continue
 		}
 		v.Files[fileName] = path.Join(v.Settings.MpqPath, mpqFile)
+		// log.Printf("%v in %v", fileName, mpqFile)
 		return result
 	}
-	log.Fatalf("Could not load %s from MPQs", fileName)
+	log.Printf("Could not load %s from MPQs\n", fileName)
 	return []byte{}
 }
 
