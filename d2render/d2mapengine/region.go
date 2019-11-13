@@ -151,8 +151,13 @@ func (v *Region) renderFloor(tile d2ds1.FloorShadowRecord, offsetX, offsetY int,
 		v.FloorCache[tileCacheIndex] = v.generateFloorCache(tile)
 		tileCache = v.FloorCache[tileCacheIndex]
 		if tileCache == nil {
-			log.Fatal("Could not load floor tile")
+			log.Println("Could not load floor tile")
+			return
 		}
+	}
+	if tileCache == nil {
+		log.Println("Nil tile cache")
+		return
 	}
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(float64(offsetX+tileCache.XOffset), float64(offsetY+tileCache.YOffset))
@@ -165,9 +170,14 @@ func (v *Region) renderWall(tile d2ds1.WallRecord, offsetX, offsetY int, target 
 	if !exists {
 		v.WallCache[tileCacheIndex] = v.generateWallCache(tile)
 		if v.WallCache[tileCacheIndex] == nil {
-			log.Fatal("Could not generate wall")
+			log.Println("Could not generate wall")
+			return
 		}
 		tileCache = v.WallCache[tileCacheIndex]
+	}
+	if tileCache == nil {
+		log.Println("Nil tile cache")
+		return
 	}
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(float64(offsetX+tileCache.XOffset), float64(offsetY+tileCache.YOffset))
@@ -181,8 +191,13 @@ func (v *Region) renderShadow(tile d2ds1.FloorShadowRecord, offsetX, offsetY int
 		v.ShadowCache[tileCacheIndex] = v.generateShadowCache(tile)
 		tileCache = v.ShadowCache[tileCacheIndex]
 		if tileCache == nil {
-			log.Fatal("Could not load shadow tile")
+			log.Println("Could not load shadow tile")
+			return
 		}
+	}
+	if tileCache == nil {
+		log.Println("Nil tile cache")
+		return
 	}
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(float64(offsetX+tileCache.XOffset), float64(offsetY+tileCache.YOffset))
@@ -265,7 +280,10 @@ func (v *Region) decodeTileGfxData(blocks []d2dt1.Block, pixels []byte, tileYOff
 func (v *Region) generateFloorCache(tile d2ds1.FloorShadowRecord) *TileCacheRecord {
 	tileData := v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), 0)
 	if tileData == nil {
-		log.Fatalf("Could not locate tile Idx:%d, Sub: %d, Ori: %d", tile.MainIndex, tile.SubIndex, 0)
+		log.Printf("Could not locate tile Idx:%d, Sub: %d, Ori: %d\n", tile.MainIndex, tile.SubIndex, 0)
+		tileData = &d2dt1.Tile{}
+		tileData.Width = 10
+		tileData.Height = 10
 	}
 	tileYMinimum := int32(0)
 	for _, block := range tileData.Blocks {

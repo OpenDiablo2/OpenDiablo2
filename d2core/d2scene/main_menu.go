@@ -180,7 +180,7 @@ func (v *MainMenu) Load() []func() {
 }
 
 func (v *MainMenu) onMapTestClicked() {
-	v.sceneProvider.SetNextScene(CreateMapEngineTest(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager))
+	v.sceneProvider.SetNextScene(CreateMapEngineTest(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager, 0))
 }
 
 func openbrowser(url string) {
