@@ -4,7 +4,7 @@
 # Author: liberodark
 # License: GNU GPLv3
 
-version="0.0.5"
+version="0.0.6"
 
 echo "OpenDiablo 2 Build Script $version"
 
@@ -59,7 +59,7 @@ go_install(){
       sudo emerge --ask n go libXcursor libXrandr libXinerama libXi libGLw libglvnd libsdl2 alsa-lib
       
     elif [ "$distribution" = "Manjaro" ] || [ "$distribution" = "Arch\ Linux" ]; then
-      sudo pacman -S go --noconfirm
+      sudo pacman -S go libxcursor libxrandr libxinerama libxi mesa libglvnd sdl2 sdl2_mixer sdl2_net alsa-lib --noconfirm
 
     fi
 fi
