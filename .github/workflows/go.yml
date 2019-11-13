@@ -1,4 +1,4 @@
-name: Go
+name: Pull Request Checker
 on:
   pull_request:
     branches: 
