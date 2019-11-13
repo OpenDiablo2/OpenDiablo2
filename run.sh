@@ -53,7 +53,7 @@ go_install(){
       echo "Clean unless files"
 	  rm go*.linux-amd64.tar.gz
       echo "Install libraries"
-	  sudo apt-get install -y  > /dev/null 2>&1
+	  sudo apt-get install -y libgl1-mesa-dev > /dev/null 2>&1
       
     elif [ "$distribution" = "Gentoo" ]; then
       sudo emerge --ask n go
