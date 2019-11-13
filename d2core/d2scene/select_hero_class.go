@@ -563,9 +563,13 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 		return
 	}
 
-	if mouseHover {
+	if mouseHover && renderInfo.Stance != d2enum.HeroStanceIdleSelected {
+		renderInfo.IdleSelectedSprite.LastFrameTime = renderInfo.IdleSprite.LastFrameTime
+		renderInfo.IdleSelectedSprite.Frame = renderInfo.IdleSprite.Frame
 		renderInfo.Stance = d2enum.HeroStanceIdleSelected
-	} else {
+	} else if !mouseHover && renderInfo.Stance != d2enum.HeroStanceIdle {
+		renderInfo.IdleSprite.LastFrameTime = renderInfo.IdleSelectedSprite.LastFrameTime
+		renderInfo.IdleSprite.Frame = renderInfo.IdleSelectedSprite.Frame
 		renderInfo.Stance = d2enum.HeroStanceIdle
 	}
 
