@@ -43,7 +43,7 @@ go_install(){
       echo "Clean unless files"
 	  rm go*.linux-amd64.tar.gz
       echo "Install libraries"
-	  sudo dnf install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel &> /dev/null
+	  sudo dnf install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel alsa-lib-devel lxi-tools  &> /dev/null
     
     elif [[ "$distribution" = Debian || "$distribution" = Ubuntu || "$distribution" = Deepin ]]; then
       echo "Downloading Go"
