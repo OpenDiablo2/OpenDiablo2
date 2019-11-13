@@ -3,9 +3,8 @@
 # About: Build OpenDiablo 2 automatically
 # Author: liberodark
 # License: GNU GPLv3
-set -eu
 
-version="0.0.4"
+version="0.0.5"
 
 echo "OpenDiablo 2 Build Script $version"
 
