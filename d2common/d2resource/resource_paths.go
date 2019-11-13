@@ -126,6 +126,7 @@ const (
 
 	// --- GAME UI ---
 
+	PentSpin        = "/data/global/ui/CURSOR/pentspin.DC6"
 	MinipanelSmall  = "/data/global/ui/PANEL/minipanel_s.dc6"
 	MinipanelButton = "/data/global/ui/PANEL/minipanelbtn.DC6"
 
