@@ -225,8 +225,10 @@ func (v *SelectHeroClass) Load() []func() {
 			}
 			v.heroRenderInfo[d2enum.HeroSorceress].IdleSprite.MoveTo(626, 352)
 			v.heroRenderInfo[d2enum.HeroSorceress].IdleSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroSorceress].IdleSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroSorceress].IdleSelectedSprite.MoveTo(626, 352)
 			v.heroRenderInfo[d2enum.HeroSorceress].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroSorceress].IdleSelectedSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroSorceress].ForwardWalkSprite.MoveTo(626, 352)
 			v.heroRenderInfo[d2enum.HeroSorceress].ForwardWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroSorceress].ForwardWalkSprite.SpecialFrameTime = 2300
@@ -238,9 +240,11 @@ func (v *SelectHeroClass) Load() []func() {
 			v.heroRenderInfo[d2enum.HeroSorceress].ForwardWalkSpriteOverlay.StopOnLastFrame = true
 			v.heroRenderInfo[d2enum.HeroSorceress].SelectedSprite.MoveTo(626, 352)
 			v.heroRenderInfo[d2enum.HeroSorceress].SelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroSorceress].SelectedSprite.SpecialFrameTime = 450
 			v.heroRenderInfo[d2enum.HeroSorceress].SelectedSpriteOverlay.Blend = true
 			v.heroRenderInfo[d2enum.HeroSorceress].SelectedSpriteOverlay.MoveTo(626, 352)
 			v.heroRenderInfo[d2enum.HeroSorceress].SelectedSpriteOverlay.Animate = true
+			v.heroRenderInfo[d2enum.HeroSorceress].SelectedSpriteOverlay.SpecialFrameTime = 450
 			v.heroRenderInfo[d2enum.HeroSorceress].BackWalkSprite.MoveTo(626, 352)
 			v.heroRenderInfo[d2enum.HeroSorceress].BackWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroSorceress].BackWalkSprite.SpecialFrameTime = 1200
@@ -268,8 +272,10 @@ func (v *SelectHeroClass) Load() []func() {
 			}
 			v.heroRenderInfo[d2enum.HeroNecromancer].IdleSprite.MoveTo(300, 335)
 			v.heroRenderInfo[d2enum.HeroNecromancer].IdleSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroNecromancer].IdleSprite.SpecialFrameTime = 1200
 			v.heroRenderInfo[d2enum.HeroNecromancer].IdleSelectedSprite.MoveTo(300, 335)
 			v.heroRenderInfo[d2enum.HeroNecromancer].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroNecromancer].IdleSelectedSprite.SpecialFrameTime = 1200
 			v.heroRenderInfo[d2enum.HeroNecromancer].ForwardWalkSprite.MoveTo(300, 335)
 			v.heroRenderInfo[d2enum.HeroNecromancer].ForwardWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroNecromancer].ForwardWalkSprite.SpecialFrameTime = 2000
@@ -311,8 +317,10 @@ func (v *SelectHeroClass) Load() []func() {
 			}
 			v.heroRenderInfo[d2enum.HeroPaladin].IdleSprite.MoveTo(521, 338)
 			v.heroRenderInfo[d2enum.HeroPaladin].IdleSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroPaladin].IdleSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroPaladin].IdleSelectedSprite.MoveTo(521, 338)
 			v.heroRenderInfo[d2enum.HeroPaladin].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroPaladin].IdleSelectedSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroPaladin].ForwardWalkSprite.MoveTo(521, 338)
 			v.heroRenderInfo[d2enum.HeroPaladin].ForwardWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroPaladin].ForwardWalkSprite.SpecialFrameTime = 3400
@@ -323,6 +331,7 @@ func (v *SelectHeroClass) Load() []func() {
 			v.heroRenderInfo[d2enum.HeroPaladin].ForwardWalkSpriteOverlay.StopOnLastFrame = true
 			v.heroRenderInfo[d2enum.HeroPaladin].SelectedSprite.MoveTo(521, 338)
 			v.heroRenderInfo[d2enum.HeroPaladin].SelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroPaladin].SelectedSprite.SpecialFrameTime = 650
 			v.heroRenderInfo[d2enum.HeroPaladin].BackWalkSprite.MoveTo(521, 338)
 			v.heroRenderInfo[d2enum.HeroPaladin].BackWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroPaladin].BackWalkSprite.SpecialFrameTime = 1300
@@ -345,14 +354,17 @@ func (v *SelectHeroClass) Load() []func() {
 			}
 			v.heroRenderInfo[d2enum.HeroAmazon].IdleSprite.MoveTo(100, 339)
 			v.heroRenderInfo[d2enum.HeroAmazon].IdleSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroAmazon].IdleSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroAmazon].IdleSelectedSprite.MoveTo(100, 339)
 			v.heroRenderInfo[d2enum.HeroAmazon].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroAmazon].IdleSelectedSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroAmazon].ForwardWalkSprite.MoveTo(100, 339)
 			v.heroRenderInfo[d2enum.HeroAmazon].ForwardWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroAmazon].ForwardWalkSprite.SpecialFrameTime = 2200
 			v.heroRenderInfo[d2enum.HeroAmazon].ForwardWalkSprite.StopOnLastFrame = true
 			v.heroRenderInfo[d2enum.HeroAmazon].SelectedSprite.MoveTo(100, 339)
 			v.heroRenderInfo[d2enum.HeroAmazon].SelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroAmazon].SelectedSprite.SpecialFrameTime = 1350
 			v.heroRenderInfo[d2enum.HeroAmazon].BackWalkSprite.MoveTo(100, 339)
 			v.heroRenderInfo[d2enum.HeroAmazon].BackWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroAmazon].BackWalkSprite.SpecialFrameTime = 1500
@@ -375,14 +387,17 @@ func (v *SelectHeroClass) Load() []func() {
 			}
 			v.heroRenderInfo[d2enum.HeroAssassin].IdleSprite.MoveTo(231, 365)
 			v.heroRenderInfo[d2enum.HeroAssassin].IdleSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroAssassin].IdleSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroAssassin].IdleSelectedSprite.MoveTo(231, 365)
 			v.heroRenderInfo[d2enum.HeroAssassin].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroAssassin].IdleSelectedSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroAssassin].ForwardWalkSprite.MoveTo(231, 365)
 			v.heroRenderInfo[d2enum.HeroAssassin].ForwardWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroAssassin].ForwardWalkSprite.SpecialFrameTime = 3800
 			v.heroRenderInfo[d2enum.HeroAssassin].ForwardWalkSprite.StopOnLastFrame = true
 			v.heroRenderInfo[d2enum.HeroAssassin].SelectedSprite.MoveTo(231, 365)
 			v.heroRenderInfo[d2enum.HeroAssassin].SelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroAssassin].SelectedSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroAssassin].BackWalkSprite.MoveTo(231, 365)
 			v.heroRenderInfo[d2enum.HeroAssassin].BackWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroAssassin].BackWalkSprite.SpecialFrameTime = 1500
@@ -405,14 +420,17 @@ func (v *SelectHeroClass) Load() []func() {
 			}
 			v.heroRenderInfo[d2enum.HeroDruid].IdleSprite.MoveTo(720, 370)
 			v.heroRenderInfo[d2enum.HeroDruid].IdleSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroDruid].IdleSprite.SpecialFrameTime = 1500
 			v.heroRenderInfo[d2enum.HeroDruid].IdleSelectedSprite.MoveTo(720, 370)
 			v.heroRenderInfo[d2enum.HeroDruid].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroDruid].IdleSelectedSprite.SpecialFrameTime = 1500
 			v.heroRenderInfo[d2enum.HeroDruid].ForwardWalkSprite.MoveTo(720, 370)
 			v.heroRenderInfo[d2enum.HeroDruid].ForwardWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroDruid].ForwardWalkSprite.SpecialFrameTime = 4800
 			v.heroRenderInfo[d2enum.HeroDruid].ForwardWalkSprite.StopOnLastFrame = true
 			v.heroRenderInfo[d2enum.HeroDruid].SelectedSprite.MoveTo(720, 370)
 			v.heroRenderInfo[d2enum.HeroDruid].SelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroDruid].SelectedSprite.SpecialFrameTime = 1500
 			v.heroRenderInfo[d2enum.HeroDruid].BackWalkSprite.MoveTo(720, 370)
 			v.heroRenderInfo[d2enum.HeroDruid].BackWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroDruid].BackWalkSprite.SpecialFrameTime = 1500
