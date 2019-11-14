@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"math"
 	"strings"
 	"time"
 
@@ -33,22 +34,23 @@ type AnimatedEntity struct {
 	// LocationX represents the tile X position of the entity
 	LocationX float64
 	// LocationY represents the tile Y position of the entity
-	LocationY       float64
-	dccLayers       map[string]d2dcc.DCC
-	Cof             *d2cof.COF
-	palette         d2enum.PaletteType
-	base            string
-	token           string
-	animationMode   string
-	weaponClass     string
-	lastFrameTime   time.Time
-	framesToAnimate int
-	animationSpeed  int
-	direction       int
-	currentFrame    int
-	frames          map[string][]*ebiten.Image
-	frameLocations  map[string][]d2common.Rectangle
-	object          *d2datadict.ObjectLookupRecord
+	subcellX, subcellY float64 // Subcell coordinates within the current tile
+	LocationY          float64
+	dccLayers          map[string]d2dcc.DCC
+	Cof                *d2cof.COF
+	palette            d2enum.PaletteType
+	base               string
+	token              string
+	animationMode      string
+	weaponClass        string
+	lastFrameTime      time.Time
+	framesToAnimate    int
+	animationSpeed     int
+	direction          int
+	currentFrame       int
+	frames             map[string][]*ebiten.Image
+	frameLocations     map[string][]d2common.Rectangle
+	object             *d2datadict.ObjectLookupRecord
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
@@ -62,6 +64,10 @@ func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fil
 	result.dccLayers = make(map[string]d2dcc.DCC)
 	result.LocationX = float64(x) / 5
 	result.LocationY = float64(y) / 5
+
+	result.subcellX = 1 + math.Mod(float64(x), 5)
+	result.subcellY = 1 + math.Mod(float64(y), 5)
+
 	return result
 }
 
@@ -155,10 +161,16 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 		if v.frames[frameName] == nil {
 			continue
 		}
+
+		// TODO: Probably not pixel perfect, should render from center of sub-tile?
+		// Location within the current tile
+		localX := (v.subcellX - v.subcellY) * 16
+		localY := (v.subcellX + v.subcellY) * 8
+
 		// TODO: Transparency op maybe, but it'l murder batch calls
 		opts := &ebiten.DrawImageOptions{}
-		opts.GeoM.Translate(float64(v.frameLocations[frameName][v.currentFrame].Left+offsetX),
-			float64(v.frameLocations[frameName][v.currentFrame].Top+offsetY+40))
+		opts.GeoM.Translate(float64(v.frameLocations[frameName][v.currentFrame].Left+offsetX)+localX,
+			float64(v.frameLocations[frameName][v.currentFrame].Top+offsetY)+localY)
 		if err := target.DrawImage(v.frames[frameName][v.currentFrame], opts); err != nil {
 			log.Panic(err.Error())
 		}
