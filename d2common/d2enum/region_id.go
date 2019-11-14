@@ -34,8 +34,8 @@ const (
 	RegonAct5Town        RegionIdType = 29
 	RegionAct5Siege      RegionIdType = 30
 	RegionAct5Barricade  RegionIdType = 31
-	RegionAct5IceCaves   RegionIdType = 32
-	RegionAct5Temple     RegionIdType = 33
+	RegionAct5Temple     RegionIdType = 32
+	RegionAct5IceCaves   RegionIdType = 33
 	RegionAct5Baal       RegionIdType = 34
 	RegionAct5Lava       RegionIdType = 35
 )
