@@ -1,6 +1,8 @@
 package d2mapengine
 
 import (
+	"fmt"
+	"image/color"
 	"math"
 	"math/rand"
 	"strings"
@@ -16,6 +18,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
 type EngineRegion struct {
@@ -30,6 +33,7 @@ type Engine struct {
 	regions      []EngineRegion
 	OffsetX      float64
 	OffsetY      float64
+	ShowTiles    bool
 }
 
 func CreateMapEngine(gameState *d2core.GameState, soundManager *d2audio.Manager, fileProvider d2interface.FileProvider) *Engine {
@@ -147,5 +151,12 @@ func (v *Engine) RenderTile(region *Region, offX, offY, x, y int, target *ebiten
 			continue
 		}
 		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
+	}
+
+	if v.ShowTiles {
+		ebitenutil.DrawLine(target, float64(offX)+v.OffsetX, float64(offY)+v.OffsetY, float64(offX)+v.OffsetX+80, float64(offY)+v.OffsetY+40, color.White)
+		ebitenutil.DrawLine(target, float64(offX)+v.OffsetX, float64(offY)+v.OffsetY, float64(offX)+v.OffsetX-80, float64(offY)+v.OffsetY+40, color.White)
+		coords := fmt.Sprintf("%v,%v", x, y)
+		ebitenutil.DebugPrintAt(target, coords, offX+int(v.OffsetX)-10, offY+int(v.OffsetY)+10)
 	}
 }

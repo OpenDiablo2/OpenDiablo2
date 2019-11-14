@@ -3,6 +3,7 @@ package d2scene
 import (
 	"fmt"
 	"math"
+	"os"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
 
@@ -16,7 +17,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
-	"os"
+	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
 type MapEngineTest struct {
@@ -150,6 +151,11 @@ func (v *MapEngineTest) Update(tickTime float64) {
 	if v.uiManager.KeyPressed(ebiten.KeyRight) {
 		v.mapEngine.OffsetX -= tickTime * 800
 	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyF7) {
+		v.mapEngine.ShowTiles = !v.mapEngine.ShowTiles
+	}
+
 	if v.uiManager.KeyPressed(ebiten.KeyEscape) {
 		os.Exit(0)
 	}
