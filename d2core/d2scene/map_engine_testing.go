@@ -19,6 +19,68 @@ import (
 	"os"
 )
 
+type RegionSpec struct {
+	regionType       d2enum.RegionIdType
+	startPresetIndex int
+	endPresetIndex   int
+	extra            []int
+}
+
+var regions []RegionSpec = []RegionSpec{
+	//Act I
+	{d2enum.RegionAct1Town, 1, 3, []int{}},
+	{d2enum.RegionAct1Wilderness, 4, 52, []int{
+		108,
+		160, 161, 162, 163, 164,
+	}},
+	{d2enum.RegionAct1Cave, 53, 107, []int{}},
+	{d2enum.RegionAct1Crypt, 109, 159, []int{}},
+	{d2enum.RegionAct1Monestary, 165, 165, []int{}},
+	{d2enum.RegionAct1Courtyard, 166, 166, []int{256}},
+	{d2enum.RegionAct1Barracks, 167, 205, []int{}},
+	{d2enum.RegionAct1Jail, 206, 255, []int{}},
+	{d2enum.RegionAct1Cathedral, 257, 257, []int{}},
+	{d2enum.RegionAct1Catacombs, 258, 299, []int{}},
+	{d2enum.RegionAct1Tristram, 300, 300, []int{}},
+
+	//Act II
+	{d2enum.RegionAct2Town, 301, 301, []int{}},
+	{d2enum.RegionAct2Sewer, 302, 352, []int{}},
+	{d2enum.RegionAct2Harem, 353, 357, []int{}},
+	{d2enum.RegionAct2Basement, 358, 361, []int{}},
+	{d2enum.RegionAct2Desert, 362, 413, []int{}},
+	{d2enum.RegionAct2Tomb, 414, 481, []int{}},
+	{d2enum.RegionAct2Lair, 482, 509, []int{}},
+	{d2enum.RegionAct2Arcane, 510, 528, []int{}},
+
+	//Act III
+	{d2enum.RegionAct3Town, 529, 529, []int{}},
+	{d2enum.RegionAct3Jungle, 530, 604, []int{}},
+	{d2enum.RegionAct3Kurast, 605, 658, []int{
+		748, 749, 750, 751, 752, 753, 754,
+		755, 756, 757, 758, 759, 760, 761, 762, 763, 764, 765, 766, 767, 768, 769, 770, 771, 772, 773, 774, 775, 776, 777, 778, 779, 780, 781, 782, 783, 784, 785, 786, 787, 788, 789, 790, 791, 792, 793, 794, 795, 796,
+		//yeah, i know =(
+	}},
+	{d2enum.RegionAct3Spider, 659, 664, []int{}},
+	{d2enum.RegionAct3Dungeon, 665, 704, []int{}},
+	{d2enum.RegionAct3Sewer, 705, 747, []int{}},
+
+	//Act IV
+	{d2enum.RegionAct4Town, 797, 798, []int{}},
+	{d2enum.RegionAct4Mesa, 799, 835, []int{}},
+	{d2enum.RegionAct4Lava, 836, 862, []int{}},
+
+	//Act V -- broken or wrong order
+	{d2enum.RegonAct5Town, 863, 864, []int{}},
+	{d2enum.RegionAct5Siege, 865, 879, []int{}},
+	{d2enum.RegionAct5Barricade, 880, 1002, []int{}},
+	{d2enum.RegionAct5IceCaves, 1003, 1041, []int{}},
+	{d2enum.RegionAct5Temple, 1042, 1052, []int{}},
+	{d2enum.RegionAct5Baal, 1059, 1090, []int{}},
+	{d2enum.RegionAct5Lava, 1053, 1058, []int{}},
+
+}
+
 type MapEngineTest struct {
 	uiManager     *d2ui.Manager
 	soundManager  *d2audio.Manager
@@ -27,9 +89,10 @@ type MapEngineTest struct {
 	gameState     *d2core.GameState
 	mapEngine     *_map.Engine
 	currentRegion int
-	levelPreset int
-	fileIndex int
+	levelPreset   int
+	fileIndex     int
 	keyLocked     bool
+	regionSpec    RegionSpec
 }
 
 func CreateMapEngineTest(
@@ -44,25 +107,47 @@ func CreateMapEngineTest(
 		soundManager:  soundManager,
 		sceneProvider: sceneProvider,
 		currentRegion: currentRegion,
-		levelPreset: levelPreset,
-		fileIndex: -1,
+		levelPreset:   levelPreset,
+		fileIndex:     -1,
 		keyLocked:     false,
+		regionSpec:    RegionSpec{},
 	}
 	result.gameState = d2core.CreateTestGameState()
 	return result
 }
 
 func (v *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
+	for _, spec := range regions {
+		if spec.regionType == d2enum.RegionIdType(n) {
+			v.regionSpec = spec
+			inExtra := false
+			for _, e := range spec.extra {
+				if e == levelPreset {
+					inExtra = true
+					break
+				}
+			}
+			if !inExtra {
+				if levelPreset < spec.startPresetIndex {
+					levelPreset = spec.startPresetIndex
+				}
+
+				if levelPreset > spec.endPresetIndex {
+					levelPreset = spec.endPresetIndex
+				}
+			}
+			v.levelPreset = levelPreset
+		}
+	}
+
 	if n == 0 {
 		v.mapEngine.GenerateAct1Overworld()
 		return
 	}
-	// region := regions[n-1]
 
 	v.mapEngine = _map.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider) // necessary for map name update
 	v.mapEngine.OffsetY = 0
 	v.mapEngine.OffsetX = 0
-	// v.mapEngine.GenerateMap(region.regionType, region.levelPreset)
 	v.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 }
 
@@ -137,7 +222,7 @@ func (v *MapEngineTest) Update(tickTime float64) {
 
 	if v.uiManager.KeyPressed(ebiten.KeyN) && !v.keyLocked && v.uiManager.KeyPressed(ebiten.KeyControl) {
 		v.fileIndex++
-		if v.fileIndex == 1091 {
+		if v.fileIndex == 10 {
 			v.fileIndex = 0
 		}
 		v.keyLocked = true
@@ -148,7 +233,7 @@ func (v *MapEngineTest) Update(tickTime float64) {
 	if v.uiManager.KeyPressed(ebiten.KeyP) && !v.keyLocked && v.uiManager.KeyPressed(ebiten.KeyControl) {
 		v.fileIndex--
 		if v.fileIndex == 0 {
-			v.fileIndex = 1090
+			v.fileIndex = 10
 		}
 		v.keyLocked = true
 		v.sceneProvider.SetNextScene(v)
@@ -157,8 +242,8 @@ func (v *MapEngineTest) Update(tickTime float64) {
 
 	if v.uiManager.KeyPressed(ebiten.KeyN) && !v.keyLocked && v.uiManager.KeyPressed(ebiten.KeyShift) {
 		v.levelPreset++
-		if v.levelPreset == 1091 {
-			v.levelPreset = 0
+		if v.levelPreset > v.regionSpec.endPresetIndex {
+			v.levelPreset = v.regionSpec.startPresetIndex
 		}
 		v.keyLocked = true
 		v.sceneProvider.SetNextScene(v)
@@ -167,8 +252,8 @@ func (v *MapEngineTest) Update(tickTime float64) {
 
 	if v.uiManager.KeyPressed(ebiten.KeyP) && !v.keyLocked && v.uiManager.KeyPressed(ebiten.KeyShift) {
 		v.levelPreset--
-		if v.levelPreset == 0 {
-			v.levelPreset = 1090
+		if v.levelPreset < v.regionSpec.startPresetIndex {
+			v.levelPreset = v.regionSpec.endPresetIndex
 		}
 		v.keyLocked = true
 		v.sceneProvider.SetNextScene(v)
@@ -177,7 +262,6 @@ func (v *MapEngineTest) Update(tickTime float64) {
 
 	if v.uiManager.KeyPressed(ebiten.KeyN) && !v.keyLocked {
 		v.currentRegion++
-		v.levelPreset++
 		if v.currentRegion == 36 {
 			v.currentRegion = 0
 		}
@@ -189,7 +273,6 @@ func (v *MapEngineTest) Update(tickTime float64) {
 
 	if v.uiManager.KeyPressed(ebiten.KeyP) && !v.keyLocked {
 		v.currentRegion--
-		v.levelPreset--
 		if v.currentRegion == -1 {
 			v.currentRegion = 35
 		}
