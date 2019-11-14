@@ -162,10 +162,9 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 			continue
 		}
 
-		// TODO: Probably not pixel perfect, should render from center of sub-tile?
 		// Location within the current tile
-		localX := (v.subcellX - v.subcellY) * 16
-		localY := (v.subcellX + v.subcellY) * 8
+		localX := ((v.subcellX - v.subcellY) * 16)
+		localY := ((v.subcellX + v.subcellY) * 8) - 4
 
 		// TODO: Transparency op maybe, but it'l murder batch calls
 		opts := &ebiten.DrawImageOptions{}
