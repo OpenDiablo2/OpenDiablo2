@@ -35,7 +35,7 @@ import (
 type Region struct {
 	RegionPath        string
 	LevelType         d2datadict.LevelTypeRecord
-	levelPreset       d2datadict.LevelPresetRecord
+	LevelPreset       d2datadict.LevelPresetRecord
 	TileWidth         int32
 	TileHeight        int32
 	Tiles             []d2dt1.Tile
@@ -50,10 +50,10 @@ type Region struct {
 	StartY            float64
 }
 
-func LoadRegion(seed rand.Source, levelType d2enum.RegionIdType, levelPreset int, fileProvider d2interface.FileProvider) *Region {
+func LoadRegion(seed rand.Source, levelType d2enum.RegionIdType, levelPreset int, fileProvider d2interface.FileProvider, fileIndex int) *Region {
 	result := &Region{
 		LevelType:   d2datadict.LevelTypes[levelType],
-		levelPreset: d2datadict.LevelPresets[levelPreset],
+		LevelPreset: d2datadict.LevelPresets[levelPreset],
 		Tiles:       make([]d2dt1.Tile, 0),
 		FloorCache:  make(map[string]*TileCacheRecord),
 		ShadowCache: make(map[string]*TileCacheRecord),
@@ -76,7 +76,7 @@ func LoadRegion(seed rand.Source, levelType d2enum.RegionIdType, levelPreset int
 		result.Tiles = append(result.Tiles, dt1.Tiles...)
 	}
 	levelFilesToPick := make([]string, 0)
-	for _, fileRecord := range result.levelPreset.Files {
+	for _, fileRecord := range result.LevelPreset.Files {
 		if len(fileRecord) == 0 || fileRecord == "" || fileRecord == "0" {
 			continue
 		}
@@ -84,6 +84,9 @@ func LoadRegion(seed rand.Source, levelType d2enum.RegionIdType, levelPreset int
 	}
 	random := rand.New(seed)
 	levelIndex := int(math.Round(float64(len(levelFilesToPick)-1) * random.Float64()))
+	if fileIndex >= 0 && fileIndex < len(levelFilesToPick) {
+		levelIndex = fileIndex
+	}
 	levelFile := levelFilesToPick[levelIndex]
 	result.RegionPath = levelFile
 	result.DS1 = d2ds1.LoadDS1("/data/global/tiles/"+levelFile, fileProvider)
