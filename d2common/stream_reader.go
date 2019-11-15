@@ -55,18 +55,46 @@ func (v *StreamReader) SetPosition(newPosition uint64) {
 	v.position = newPosition
 }
 
-// GetUInt32 returns a uint32 word from the stream
+// GetUInt32 returns a uint32 dword from the stream
 func (v *StreamReader) GetUInt32() uint32 {
 	result := (uint32(v.data[v.position+3]) << uint(24)) + (uint32(v.data[v.position+2]) << uint(16)) + (uint32(v.data[v.position+1]) << uint(8)) + uint32(v.data[v.position])
 	v.position += 4
 	return result
 }
 
-// GetInt32 returns an int32 word from the stream
+// GetInt32 returns an int32 dword from the stream
 func (v *StreamReader) GetInt32() int32 {
 	result := (int32(v.data[v.position+3]) << uint(24)) + (int32(v.data[v.position+2]) << uint(16)) + (int32(v.data[v.position+1]) << uint(8)) + int32(v.data[v.position])
 	v.position += 4
 	return result
+}
+
+// GetUint64 returns a uint64 qword from the stream
+func (v *StreamReader) GetUint64() uint64 {
+	result := (uint64(v.data[v.position+7]) << uint(56)) +
+		(uint64(v.data[v.position+6]) << uint(48)) +
+		(uint64(v.data[v.position+5]) << uint(40)) +
+		(uint64(v.data[v.position+4]) << uint(32)) +
+		(uint64(v.data[v.position+3]) << uint(24)) +
+		(uint64(v.data[v.position+2]) << uint(16)) +
+		(uint64(v.data[v.position+1]) << uint(8)) +
+		uint64(v.data[v.position])
+	v.position += 8
+	return result
+}
+
+// GetInt64 returns a uint64 qword from the stream
+func (v *StreamReader) GetInt64() int64 {
+	result := (uint64(v.data[v.position+7]) << uint(56)) +
+		(uint64(v.data[v.position+6]) << uint(48)) +
+		(uint64(v.data[v.position+5]) << uint(40)) +
+		(uint64(v.data[v.position+4]) << uint(32)) +
+		(uint64(v.data[v.position+3]) << uint(24)) +
+		(uint64(v.data[v.position+2]) << uint(16)) +
+		(uint64(v.data[v.position+1]) << uint(8)) +
+		uint64(v.data[v.position])
+	v.position += 8
+	return int64(result)
 }
 
 // ReadByte implements io.ByteReader

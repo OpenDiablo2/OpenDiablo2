@@ -1,7 +1,11 @@
 package d2scene
 
 import (
+	"bufio"
 	"image/color"
+	"log"
+	"os"
+	"path"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -57,6 +61,23 @@ func CreateCredits(fileProvider d2interface.FileProvider, sceneProvider d2interf
 	return result
 }
 
+// Load is called to load the contributors data from file
+// TODO: use markdown for file and convert it to the suitable format
+func (v *Credits) LoadContributors() []string {
+	contributors := []string{}
+	file, err := os.Open(path.Join("./", "CONTRIBUTORS"))
+	if err != nil {
+		log.Print("CONTRIBUTORS file is missing")
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		contributors = append(contributors, strings.Trim(scanner.Text(), " "))
+	}
+	return contributors
+}
+
 // Load is called to load the resources for the credits scene
 func (v *Credits) Load() []func() {
 	return []func(){
@@ -76,6 +97,7 @@ func (v *Credits) Load() []func() {
 			for i := range v.creditsText {
 				v.creditsText[i] = strings.Trim(v.creditsText[i], " ")
 			}
+			v.creditsText = append(v.LoadContributors(), v.creditsText...)
 		},
 	}
 }

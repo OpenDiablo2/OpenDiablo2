@@ -22,12 +22,13 @@ import (
 type ButtonType int
 
 const (
-	ButtonTypeWide   ButtonType = 1
-	ButtonTypeMedium ButtonType = 2
-	ButtonTypeNarrow ButtonType = 3
-	ButtonTypeCancel ButtonType = 4
-	ButtonTypeTall   ButtonType = 5
-	ButtonTypeShort  ButtonType = 6
+	ButtonTypeWide     ButtonType = 1
+	ButtonTypeMedium   ButtonType = 2
+	ButtonTypeNarrow   ButtonType = 3
+	ButtonTypeCancel   ButtonType = 4
+	ButtonTypeTall     ButtonType = 5
+	ButtonTypeShort    ButtonType = 6
+	ButtonTypeOkCancel ButtonType = 7
 
 	// Game UI
 
@@ -63,10 +64,11 @@ type ButtonLayout struct {
 
 // ButtonLayouts define the type of buttons you can have
 var ButtonLayouts = map[ButtonType]ButtonLayout{
-	ButtonTypeWide:   {2, 1, d2resource.WideButtonBlank, d2enum.Units, false, 0, -1, d2resource.FontExocet10, nil, true, 1},
-	ButtonTypeShort:  {1, 1, d2resource.ShortButtonBlank, d2enum.Units, false, 0, -1, d2resource.FontRediculous, nil, true, -1},
-	ButtonTypeMedium: {1, 1, d2resource.MediumButtonBlank, d2enum.Units, false, 0, 0, d2resource.FontExocet10, nil, true, 0},
-	ButtonTypeTall:   {1, 1, d2resource.TallButtonBlank, d2enum.Units, false, 0, 0, d2resource.FontExocet10, nil, true, 5},
+	ButtonTypeWide:     {2, 1, d2resource.WideButtonBlank, d2enum.Units, false, 0, -1, d2resource.FontExocet10, nil, true, 1},
+	ButtonTypeShort:    {1, 1, d2resource.ShortButtonBlank, d2enum.Units, false, 0, -1, d2resource.FontRediculous, nil, true, -1},
+	ButtonTypeMedium:   {1, 1, d2resource.MediumButtonBlank, d2enum.Units, false, 0, 0, d2resource.FontExocet10, nil, true, 0},
+	ButtonTypeTall:     {1, 1, d2resource.TallButtonBlank, d2enum.Units, false, 0, 0, d2resource.FontExocet10, nil, true, 5},
+	ButtonTypeOkCancel: {1, 1, d2resource.CancelButton, d2enum.Units, false, 0, -1, d2resource.FontRediculous, nil, true, 0},
 	/*
 		{eButtonType.Wide,  new ButtonLayout { XSegments = 2, ResourceName = ResourcePaths.WideButtonBlank, PaletteName = PaletteDefs.Units } },
 		{eButtonType.Narrow, new ButtonLayout { ResourceName = ResourcePaths.NarrowButtonBlank, PaletteName = PaletteDefs.Units } },
@@ -171,7 +173,7 @@ func (v *Button) OnActivated(callback func()) {
 }
 
 // Activate calls the on activated callback handler, if any
-func (v Button) Activate() {
+func (v *Button) Activate() {
 	if v.onClick == nil {
 		return
 	}

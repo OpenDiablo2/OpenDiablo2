@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
@@ -36,23 +38,27 @@ type HeroRenderInfo struct {
 }
 
 type SelectHeroClass struct {
-	uiManager       *d2ui.Manager
-	soundManager    *d2audio.Manager
-	fileProvider    d2interface.FileProvider
-	sceneProvider   d2interface.SceneProvider
-	bgImage         d2render.Sprite
-	campfire        d2render.Sprite
-	headingLabel    d2ui.Label
-	heroClassLabel  d2ui.Label
-	heroDesc1Label  d2ui.Label
-	heroDesc2Label  d2ui.Label
-	heroDesc3Label  d2ui.Label
-	heroNameTextbox d2ui.TextBox
-	heroNameLabel   d2ui.Label
-	heroRenderInfo  map[d2enum.Hero]*HeroRenderInfo
-	selectedHero    d2enum.Hero
-	exitButton      d2ui.Button
-	okButton        d2ui.Button
+	uiManager          *d2ui.Manager
+	soundManager       *d2audio.Manager
+	fileProvider       d2interface.FileProvider
+	sceneProvider      d2interface.SceneProvider
+	bgImage            d2render.Sprite
+	campfire           d2render.Sprite
+	headingLabel       d2ui.Label
+	heroClassLabel     d2ui.Label
+	heroDesc1Label     d2ui.Label
+	heroDesc2Label     d2ui.Label
+	heroDesc3Label     d2ui.Label
+	heroNameTextbox    d2ui.TextBox
+	heroNameLabel      d2ui.Label
+	heroRenderInfo     map[d2enum.Hero]*HeroRenderInfo
+	selectedHero       d2enum.Hero
+	exitButton         d2ui.Button
+	okButton           d2ui.Button
+	expansionCheckbox  d2ui.Checkbox
+	expansionCharLabel d2ui.Label
+	hardcoreCheckbox   d2ui.Checkbox
+	hardcoreCharLabel  d2ui.Label
 }
 
 func CreateSelectHeroClass(
@@ -143,6 +149,32 @@ func (v *SelectHeroClass) Load() []func() {
 			v.uiManager.AddWidget(&v.heroNameTextbox)
 		},
 		func() {
+			v.expansionCheckbox = d2ui.CreateCheckbox(v.fileProvider, true)
+			v.expansionCheckbox.MoveTo(318, 526)
+			v.expansionCheckbox.SetVisible(false)
+			v.uiManager.AddWidget(&v.expansionCheckbox)
+		},
+		func() {
+			v.expansionCharLabel = d2ui.CreateLabel(v.fileProvider, d2resource.Font16, d2enum.Units)
+			v.expansionCharLabel.Alignment = d2ui.LabelAlignLeft
+			v.expansionCharLabel.Color = color.RGBA{216, 196, 128, 255}
+			v.expansionCharLabel.SetText(d2common.TranslateString("#803"))
+			v.expansionCharLabel.MoveTo(339, 526)
+		},
+		func() {
+			v.hardcoreCheckbox = d2ui.CreateCheckbox(v.fileProvider, false)
+			v.hardcoreCheckbox.MoveTo(318, 548)
+			v.hardcoreCheckbox.SetVisible(false)
+			v.uiManager.AddWidget(&v.hardcoreCheckbox)
+		},
+		func() {
+			v.hardcoreCharLabel = d2ui.CreateLabel(v.fileProvider, d2resource.Font16, d2enum.Units)
+			v.hardcoreCharLabel.Alignment = d2ui.LabelAlignLeft
+			v.hardcoreCharLabel.Color = color.RGBA{216, 196, 128, 255}
+			v.hardcoreCharLabel.SetText(d2common.TranslateString("#1696"))
+			v.hardcoreCharLabel.MoveTo(339, 548)
+		},
+		func() {
 			v.heroRenderInfo[d2enum.HeroBarbarian] = &HeroRenderInfo{
 				d2enum.HeroStanceIdle,
 				v.loadSprite(d2resource.CharacterSelectBarbarianUnselected, d2enum.Fechar),
@@ -193,8 +225,10 @@ func (v *SelectHeroClass) Load() []func() {
 			}
 			v.heroRenderInfo[d2enum.HeroSorceress].IdleSprite.MoveTo(626, 352)
 			v.heroRenderInfo[d2enum.HeroSorceress].IdleSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroSorceress].IdleSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroSorceress].IdleSelectedSprite.MoveTo(626, 352)
 			v.heroRenderInfo[d2enum.HeroSorceress].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroSorceress].IdleSelectedSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroSorceress].ForwardWalkSprite.MoveTo(626, 352)
 			v.heroRenderInfo[d2enum.HeroSorceress].ForwardWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroSorceress].ForwardWalkSprite.SpecialFrameTime = 2300
@@ -206,9 +240,11 @@ func (v *SelectHeroClass) Load() []func() {
 			v.heroRenderInfo[d2enum.HeroSorceress].ForwardWalkSpriteOverlay.StopOnLastFrame = true
 			v.heroRenderInfo[d2enum.HeroSorceress].SelectedSprite.MoveTo(626, 352)
 			v.heroRenderInfo[d2enum.HeroSorceress].SelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroSorceress].SelectedSprite.SpecialFrameTime = 450
 			v.heroRenderInfo[d2enum.HeroSorceress].SelectedSpriteOverlay.Blend = true
 			v.heroRenderInfo[d2enum.HeroSorceress].SelectedSpriteOverlay.MoveTo(626, 352)
 			v.heroRenderInfo[d2enum.HeroSorceress].SelectedSpriteOverlay.Animate = true
+			v.heroRenderInfo[d2enum.HeroSorceress].SelectedSpriteOverlay.SpecialFrameTime = 450
 			v.heroRenderInfo[d2enum.HeroSorceress].BackWalkSprite.MoveTo(626, 352)
 			v.heroRenderInfo[d2enum.HeroSorceress].BackWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroSorceress].BackWalkSprite.SpecialFrameTime = 1200
@@ -236,8 +272,10 @@ func (v *SelectHeroClass) Load() []func() {
 			}
 			v.heroRenderInfo[d2enum.HeroNecromancer].IdleSprite.MoveTo(300, 335)
 			v.heroRenderInfo[d2enum.HeroNecromancer].IdleSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroNecromancer].IdleSprite.SpecialFrameTime = 1200
 			v.heroRenderInfo[d2enum.HeroNecromancer].IdleSelectedSprite.MoveTo(300, 335)
 			v.heroRenderInfo[d2enum.HeroNecromancer].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroNecromancer].IdleSelectedSprite.SpecialFrameTime = 1200
 			v.heroRenderInfo[d2enum.HeroNecromancer].ForwardWalkSprite.MoveTo(300, 335)
 			v.heroRenderInfo[d2enum.HeroNecromancer].ForwardWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroNecromancer].ForwardWalkSprite.SpecialFrameTime = 2000
@@ -279,8 +317,10 @@ func (v *SelectHeroClass) Load() []func() {
 			}
 			v.heroRenderInfo[d2enum.HeroPaladin].IdleSprite.MoveTo(521, 338)
 			v.heroRenderInfo[d2enum.HeroPaladin].IdleSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroPaladin].IdleSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroPaladin].IdleSelectedSprite.MoveTo(521, 338)
 			v.heroRenderInfo[d2enum.HeroPaladin].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroPaladin].IdleSelectedSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroPaladin].ForwardWalkSprite.MoveTo(521, 338)
 			v.heroRenderInfo[d2enum.HeroPaladin].ForwardWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroPaladin].ForwardWalkSprite.SpecialFrameTime = 3400
@@ -291,6 +331,7 @@ func (v *SelectHeroClass) Load() []func() {
 			v.heroRenderInfo[d2enum.HeroPaladin].ForwardWalkSpriteOverlay.StopOnLastFrame = true
 			v.heroRenderInfo[d2enum.HeroPaladin].SelectedSprite.MoveTo(521, 338)
 			v.heroRenderInfo[d2enum.HeroPaladin].SelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroPaladin].SelectedSprite.SpecialFrameTime = 650
 			v.heroRenderInfo[d2enum.HeroPaladin].BackWalkSprite.MoveTo(521, 338)
 			v.heroRenderInfo[d2enum.HeroPaladin].BackWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroPaladin].BackWalkSprite.SpecialFrameTime = 1300
@@ -313,14 +354,17 @@ func (v *SelectHeroClass) Load() []func() {
 			}
 			v.heroRenderInfo[d2enum.HeroAmazon].IdleSprite.MoveTo(100, 339)
 			v.heroRenderInfo[d2enum.HeroAmazon].IdleSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroAmazon].IdleSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroAmazon].IdleSelectedSprite.MoveTo(100, 339)
 			v.heroRenderInfo[d2enum.HeroAmazon].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroAmazon].IdleSelectedSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroAmazon].ForwardWalkSprite.MoveTo(100, 339)
 			v.heroRenderInfo[d2enum.HeroAmazon].ForwardWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroAmazon].ForwardWalkSprite.SpecialFrameTime = 2200
 			v.heroRenderInfo[d2enum.HeroAmazon].ForwardWalkSprite.StopOnLastFrame = true
 			v.heroRenderInfo[d2enum.HeroAmazon].SelectedSprite.MoveTo(100, 339)
 			v.heroRenderInfo[d2enum.HeroAmazon].SelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroAmazon].SelectedSprite.SpecialFrameTime = 1350
 			v.heroRenderInfo[d2enum.HeroAmazon].BackWalkSprite.MoveTo(100, 339)
 			v.heroRenderInfo[d2enum.HeroAmazon].BackWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroAmazon].BackWalkSprite.SpecialFrameTime = 1500
@@ -343,14 +387,17 @@ func (v *SelectHeroClass) Load() []func() {
 			}
 			v.heroRenderInfo[d2enum.HeroAssassin].IdleSprite.MoveTo(231, 365)
 			v.heroRenderInfo[d2enum.HeroAssassin].IdleSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroAssassin].IdleSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroAssassin].IdleSelectedSprite.MoveTo(231, 365)
 			v.heroRenderInfo[d2enum.HeroAssassin].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroAssassin].IdleSelectedSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroAssassin].ForwardWalkSprite.MoveTo(231, 365)
 			v.heroRenderInfo[d2enum.HeroAssassin].ForwardWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroAssassin].ForwardWalkSprite.SpecialFrameTime = 3800
 			v.heroRenderInfo[d2enum.HeroAssassin].ForwardWalkSprite.StopOnLastFrame = true
 			v.heroRenderInfo[d2enum.HeroAssassin].SelectedSprite.MoveTo(231, 365)
 			v.heroRenderInfo[d2enum.HeroAssassin].SelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroAssassin].SelectedSprite.SpecialFrameTime = 2500
 			v.heroRenderInfo[d2enum.HeroAssassin].BackWalkSprite.MoveTo(231, 365)
 			v.heroRenderInfo[d2enum.HeroAssassin].BackWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroAssassin].BackWalkSprite.SpecialFrameTime = 1500
@@ -373,14 +420,17 @@ func (v *SelectHeroClass) Load() []func() {
 			}
 			v.heroRenderInfo[d2enum.HeroDruid].IdleSprite.MoveTo(720, 370)
 			v.heroRenderInfo[d2enum.HeroDruid].IdleSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroDruid].IdleSprite.SpecialFrameTime = 1500
 			v.heroRenderInfo[d2enum.HeroDruid].IdleSelectedSprite.MoveTo(720, 370)
 			v.heroRenderInfo[d2enum.HeroDruid].IdleSelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroDruid].IdleSelectedSprite.SpecialFrameTime = 1500
 			v.heroRenderInfo[d2enum.HeroDruid].ForwardWalkSprite.MoveTo(720, 370)
 			v.heroRenderInfo[d2enum.HeroDruid].ForwardWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroDruid].ForwardWalkSprite.SpecialFrameTime = 4800
 			v.heroRenderInfo[d2enum.HeroDruid].ForwardWalkSprite.StopOnLastFrame = true
 			v.heroRenderInfo[d2enum.HeroDruid].SelectedSprite.MoveTo(720, 370)
 			v.heroRenderInfo[d2enum.HeroDruid].SelectedSprite.Animate = true
+			v.heroRenderInfo[d2enum.HeroDruid].SelectedSprite.SpecialFrameTime = 1500
 			v.heroRenderInfo[d2enum.HeroDruid].BackWalkSprite.MoveTo(720, 370)
 			v.heroRenderInfo[d2enum.HeroDruid].BackWalkSprite.Animate = true
 			v.heroRenderInfo[d2enum.HeroDruid].BackWalkSprite.SpecialFrameTime = 1500
@@ -390,6 +440,10 @@ func (v *SelectHeroClass) Load() []func() {
 }
 
 func (v *SelectHeroClass) Unload() {
+	for i := range v.heroRenderInfo {
+		v.heroRenderInfo[i].SelectSfx.Stop()
+		v.heroRenderInfo[i].DeselectSfx.Stop()
+	}
 	v.heroRenderInfo = nil
 }
 
@@ -398,7 +452,8 @@ func (v SelectHeroClass) onExitButtonClicked() {
 }
 
 func (v SelectHeroClass) onOkButtonClicked() {
-	// TODO: Start the game
+	gameState := d2core.CreateGameState(v.heroNameTextbox.GetText(), v.selectedHero, v.hardcoreCheckbox.GetCheckState())
+	v.sceneProvider.SetNextScene(CreateGame(v.fileProvider, v.sceneProvider, v.uiManager, v.soundManager, gameState))
 }
 
 func (v *SelectHeroClass) Render(screen *ebiten.Image) {
@@ -423,6 +478,8 @@ func (v *SelectHeroClass) Render(screen *ebiten.Image) {
 	v.campfire.Draw(screen)
 	if v.heroNameTextbox.GetVisible() {
 		v.heroNameLabel.Draw(screen)
+		v.expansionCharLabel.Draw(screen)
+		v.hardcoreCharLabel.Draw(screen)
 	}
 }
 
@@ -480,6 +537,8 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 	if mouseHover && v.uiManager.CursorButtonPressed(d2ui.CursorButtonLeft) {
 		v.heroNameTextbox.SetVisible(true)
 		v.okButton.SetVisible(true)
+		v.expansionCheckbox.SetVisible(true)
+		v.hardcoreCheckbox.SetVisible(true)
 		renderInfo.Stance = d2enum.HeroStanceApproaching
 		renderInfo.ForwardWalkSprite.ResetAnimation()
 		if renderInfo.ForwardWalkSpriteOverlay.IsValid() {
@@ -504,9 +563,13 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 		return
 	}
 
-	if mouseHover {
+	if mouseHover && renderInfo.Stance != d2enum.HeroStanceIdleSelected {
+		renderInfo.IdleSelectedSprite.LastFrameTime = renderInfo.IdleSprite.LastFrameTime
+		renderInfo.IdleSelectedSprite.Frame = renderInfo.IdleSprite.Frame
 		renderInfo.Stance = d2enum.HeroStanceIdleSelected
-	} else {
+	} else if !mouseHover && renderInfo.Stance != d2enum.HeroStanceIdle {
+		renderInfo.IdleSprite.LastFrameTime = renderInfo.IdleSelectedSprite.LastFrameTime
+		renderInfo.IdleSprite.Frame = renderInfo.IdleSelectedSprite.Frame
 		renderInfo.Stance = d2enum.HeroStanceIdle
 	}
 

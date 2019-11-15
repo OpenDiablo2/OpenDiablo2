@@ -24,6 +24,11 @@ func (v DCC) IsValid() bool {
 func LoadDCC(path string, fileProvider d2interface.FileProvider) DCC {
 	result := DCC{}
 	fileData := fileProvider.LoadFile(path)
+	if len(fileData) == 0 {
+		ret := DCC{}
+		ret.valid = false
+		return ret
+	}
 	var bm = d2common.CreateBitMuncher(fileData, 0)
 	result.Signature = int(bm.GetByte())
 	if result.Signature != 0x74 {

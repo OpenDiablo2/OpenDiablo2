@@ -80,6 +80,8 @@ const (
 	// -- Character Selection
 
 	CharacterSelectionBackground = "/data/global/ui/CharSelect/characterselectscreenEXP.dc6"
+	CharacterSelectionSelectBox  = "/data/global/ui/CharSelect/charselectbox.dc6"
+	PopUpOkCancel                = "/data/global/ui/FrontEnd/PopUpOKCancel.dc6"
 
 	// --- Game ---
 
@@ -101,6 +103,7 @@ const (
 	Font16         = "/data/local/font/latin/font16"
 	Font24         = "/data/local/font/latin/font24"
 	Font30         = "/data/local/font/latin/font30"
+	Font42         = "/data/local/font/latin/font42"
 	FontFormal12   = "/data/local/font/latin/fontformal12"
 	FontFormal11   = "/data/local/font/latin/fontformal11"
 	FontFormal10   = "/data/local/font/latin/fontformal10"
@@ -118,9 +121,12 @@ const (
 	ShortButtonBlank  = "/data/global/ui/CharSelect/ShortButtonBlank.dc6"
 	TextBox2          = "/data/global/ui/FrontEnd/textbox2.dc6"
 	TallButtonBlank   = "/data/global/ui/CharSelect/TallButtonBlank.dc6"
+	Checkbox          = "/data/global/ui/FrontEnd/clickbox.dc6"
+	Scrollbar         = "/data/global/ui/PANEL/scrollbar.dc6"
 
 	// --- GAME UI ---
 
+	PentSpin        = "/data/global/ui/CURSOR/pentspin.DC6"
 	MinipanelSmall  = "/data/global/ui/PANEL/minipanel_s.dc6"
 	MinipanelButton = "/data/global/ui/PANEL/minipanelbtn.DC6"
 

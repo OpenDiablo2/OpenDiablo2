@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"math"
 	"strings"
 	"time"
 
@@ -30,38 +31,45 @@ var DccLayerNames = []string{"HD", "TR", "LG", "RA", "LA", "RH", "LH", "SH", "S1
 
 // AnimatedEntity represents an entity on the map that can be animated
 type AnimatedEntity struct {
+	fileProvider d2interface.FileProvider
 	// LocationX represents the tile X position of the entity
 	LocationX float64
 	// LocationY represents the tile Y position of the entity
-	LocationY       float64
-	dccLayers       map[string]d2dcc.DCC
-	Cof             *d2cof.COF
-	palette         d2enum.PaletteType
-	base            string
-	token           string
-	animationMode   string
-	weaponClass     string
-	lastFrameTime   time.Time
-	framesToAnimate int
-	animationSpeed  int
-	direction       int
-	currentFrame    int
-	frames          map[string][]*ebiten.Image
-	frameLocations  map[string][]d2common.Rectangle
-	object          d2data.Object
+	subcellX, subcellY float64 // Subcell coordinates within the current tile
+	LocationY          float64
+	dccLayers          map[string]d2dcc.DCC
+	Cof                *d2cof.COF
+	palette            d2enum.PaletteType
+	base               string
+	token              string
+	animationMode      string
+	weaponClass        string
+	lastFrameTime      time.Time
+	framesToAnimate    int
+	animationSpeed     int
+	direction          int
+	currentFrame       int
+	frames             map[string][]*ebiten.Image
+	frameLocations     map[string][]d2common.Rectangle
+	object             *d2datadict.ObjectLookupRecord
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
-func CreateAnimatedEntity(object d2data.Object, fileProvider d2interface.FileProvider, palette d2enum.PaletteType) AnimatedEntity {
+func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fileProvider d2interface.FileProvider, palette d2enum.PaletteType) AnimatedEntity {
 	result := AnimatedEntity{
-		base:    object.Lookup.Base,
-		token:   object.Lookup.Token,
-		object:  object,
-		palette: palette,
+		fileProvider: fileProvider,
+		base:         object.Base,
+		token:        object.Token,
+		object:       object,
+		palette:      palette,
 	}
 	result.dccLayers = make(map[string]d2dcc.DCC)
-	result.LocationX = float64(object.X) / 5
-	result.LocationY = float64(object.Y) / 5
+	result.LocationX = float64(x) / 5
+	result.LocationY = float64(y) / 5
+
+	result.subcellX = 1 + math.Mod(float64(x), 5)
+	result.subcellY = 1 + math.Mod(float64(y), 5)
+
 	return result
 }
 
@@ -69,9 +77,9 @@ func CreateAnimatedEntity(object d2data.Object, fileProvider d2interface.FilePro
 var DirectionLookup = []int{3, 15, 4, 8, 0, 9, 5, 10, 1, 11, 6, 12, 2, 13, 7, 14}
 
 // SetMode changes the graphical mode of this animated entity
-func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction int, provider d2interface.FileProvider) {
+func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction int) {
 	cofPath := fmt.Sprintf("%s/%s/COF/%s%s%s.COF", v.base, v.token, v.token, animationMode, weaponClass)
-	v.Cof = d2cof.LoadCOF(cofPath, provider)
+	v.Cof = d2cof.LoadCOF(cofPath, v.fileProvider)
 	v.animationMode = animationMode
 	v.weaponClass = weaponClass
 	v.direction = direction
@@ -83,7 +91,7 @@ func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction in
 	v.dccLayers = make(map[string]d2dcc.DCC)
 	for _, cofLayer := range v.Cof.CofLayers {
 		layerName := DccLayerNames[cofLayer.Type]
-		v.dccLayers[layerName] = v.LoadLayer(layerName, provider)
+		v.dccLayers[layerName] = v.LoadLayer(layerName, v.fileProvider)
 		if !v.dccLayers[layerName].IsValid() {
 			continue
 		}
@@ -93,55 +101,62 @@ func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction in
 }
 
 func (v *AnimatedEntity) LoadLayer(layer string, fileProvider d2interface.FileProvider) d2dcc.DCC {
-	layerName := "tr"
+	layerName := "TR"
 	switch strings.ToUpper(layer) {
 	case "HD": // Head
-		layerName = v.object.Lookup.HD
+		layerName = v.object.HD
 	case "TR": // Torso
-		layerName = v.object.Lookup.TR
+		layerName = v.object.TR
 	case "LG": // Legs
-		layerName = v.object.Lookup.LG
+		layerName = v.object.LG
 	case "RA": // RightArm
-		layerName = v.object.Lookup.RA
+		layerName = v.object.RA
 	case "LA": // LeftArm
-		layerName = v.object.Lookup.LA
+		layerName = v.object.LA
 	case "RH": // RightHand
-		layerName = v.object.Lookup.RH
+		layerName = v.object.RH
 	case "LH": // LeftHand
-		layerName = v.object.Lookup.LH
+		layerName = v.object.LH
 	case "SH": // Shield
-		layerName = v.object.Lookup.SH
+		layerName = v.object.SH
 	case "S1": // Special1
-		layerName = v.object.Lookup.S1
+		layerName = v.object.S1
 	case "S2": // Special2
-		layerName = v.object.Lookup.S2
+		layerName = v.object.S2
 	case "S3": // Special3
-		layerName = v.object.Lookup.S3
+		layerName = v.object.S3
 	case "S4": // Special4
-		layerName = v.object.Lookup.S4
+		layerName = v.object.S4
 	case "S5": // Special5
-		layerName = v.object.Lookup.S5
+		layerName = v.object.S5
 	case "S6": // Special6
-		layerName = v.object.Lookup.S6
+		layerName = v.object.S6
 	case "S7": // Special7
-		layerName = v.object.Lookup.S7
+		layerName = v.object.S7
 	case "S8": // Special8
-		layerName = v.object.Lookup.S8
+		layerName = v.object.S8
 	}
 	if len(layerName) == 0 {
 		return d2dcc.DCC{}
 	}
 	dccPath := fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dcc", v.base, v.token, layer, v.token, layer, layerName, v.animationMode, v.weaponClass)
-	return d2dcc.LoadDCC(dccPath, fileProvider)
+	result := d2dcc.LoadDCC(dccPath, fileProvider)
+	if !result.IsValid() {
+		dccPath = fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dcc", v.base, v.token, layer, v.token, layer, layerName, v.animationMode, "HTH")
+		result = d2dcc.LoadDCC(dccPath, fileProvider)
+	}
+	return result
 }
 
 // Render draws this animated entity onto the target
 func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
-	for v.lastFrameTime.Add(time.Millisecond * time.Duration(v.animationSpeed)).Before(time.Now()) {
-		v.lastFrameTime = v.lastFrameTime.Add(time.Millisecond * time.Duration(v.animationSpeed))
-		v.currentFrame++
-		if v.currentFrame >= v.framesToAnimate {
-			v.currentFrame = 0
+	if v.animationSpeed > 0 {
+		for v.lastFrameTime.Add(time.Millisecond * time.Duration(v.animationSpeed)).Before(time.Now()) {
+			v.lastFrameTime = v.lastFrameTime.Add(time.Millisecond * time.Duration(v.animationSpeed))
+			v.currentFrame++
+			if v.currentFrame >= v.framesToAnimate {
+				v.currentFrame = 0
+			}
 		}
 	}
 	for idx := 0; idx < v.Cof.NumberOfLayers; idx++ {
@@ -153,10 +168,15 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 		if v.frames[frameName] == nil {
 			continue
 		}
+
+		// Location within the current tile
+		localX := ((v.subcellX - v.subcellY) * 16)
+		localY := ((v.subcellX + v.subcellY) * 8) - 4
+
 		// TODO: Transparency op maybe, but it'l murder batch calls
 		opts := &ebiten.DrawImageOptions{}
-		opts.GeoM.Translate(float64(v.frameLocations[frameName][v.currentFrame].Left+offsetX),
-			float64(v.frameLocations[frameName][v.currentFrame].Top+offsetY+40))
+		opts.GeoM.Translate(float64(v.frameLocations[frameName][v.currentFrame].Left+offsetX)+localX,
+			float64(v.frameLocations[frameName][v.currentFrame].Top+offsetY)+localY)
 		if err := target.DrawImage(v.frames[frameName][v.currentFrame], opts); err != nil {
 			log.Panic(err.Error())
 		}

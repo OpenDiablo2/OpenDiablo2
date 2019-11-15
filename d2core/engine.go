@@ -78,6 +78,7 @@ func CreateEngine() Engine {
 	d2datadict.LoadSounds(&result)
 	d2data.LoadAnimationData(&result)
 	d2datadict.LoadMonStats(&result)
+	LoadHeroObjects()
 	result.SoundManager = d2audio.CreateManager(&result)
 	result.SoundManager.SetVolumes(result.Settings.BgmVolume, result.Settings.SfxVolume)
 	result.UIManager = d2ui.CreateManager(&result, *result.SoundManager)
@@ -133,9 +134,10 @@ func (v *Engine) LoadFile(fileName string) []byte {
 			continue
 		}
 		v.Files[fileName] = path.Join(v.Settings.MpqPath, mpqFile)
+		// log.Printf("%v in %v", fileName, mpqFile)
 		return result
 	}
-	log.Fatalf("Could not load %s from MPQs", fileName)
+	log.Printf("Could not load %s from MPQs\n", fileName)
 	return []byte{}
 }
 
@@ -222,7 +224,7 @@ func (v *Engine) Update() {
 // Draw draws the game
 func (v Engine) Draw(screen *ebiten.Image) {
 	if v.loadingProgress < 1.0 {
-		v.LoadingSprite.Frame = uint8(d2helper.Max(0, d2helper.Min(uint32(len(v.LoadingSprite.Frames)-1), uint32(float64(len(v.LoadingSprite.Frames)-1)*v.loadingProgress))))
+		v.LoadingSprite.Frame = int16(d2helper.Max(0, d2helper.Min(uint32(len(v.LoadingSprite.Frames)-1), uint32(float64(len(v.LoadingSprite.Frames)-1)*v.loadingProgress))))
 		v.LoadingSprite.Draw(screen)
 	} else {
 		if v.CurrentScene == nil {
@@ -231,9 +233,16 @@ func (v Engine) Draw(screen *ebiten.Image) {
 		v.CurrentScene.Render(screen)
 		v.UIManager.Draw(screen)
 	}
-	if v.showFPS == true {
+	if v.showFPS {
 		ebitenutil.DebugPrintAt(screen, "vsync:"+strconv.FormatBool(ebiten.IsVsyncEnabled())+"\nFPS:"+strconv.Itoa(int(ebiten.CurrentFPS())), 5, 565)
+		var m runtime.MemStats
+		runtime.ReadMemStats(&m)
+		ebitenutil.DebugPrintAt(screen, "Alloc   "+strconv.FormatInt(int64(m.Alloc)/1024/1024, 10), 700, 0)
+		ebitenutil.DebugPrintAt(screen, "Pause   "+strconv.FormatInt(int64(m.PauseTotalNs/1024/1024), 10), 700, 10)
+		ebitenutil.DebugPrintAt(screen, "HeapSys "+strconv.FormatInt(int64(m.HeapSys/1024/1024), 10), 700, 20)
+		ebitenutil.DebugPrintAt(screen, "NumGC   "+strconv.FormatInt(int64(m.NumGC), 10), 700, 30)
 	}
+
 }
 
 // SetNextScene tells the engine what scene to load on the next update cycle
