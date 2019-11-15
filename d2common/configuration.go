@@ -26,10 +26,10 @@ type Configuration struct {
 	MuteSound         bool
 }
 
-const configPath = "config.json"
+const ConfigBasePath = "config.json"
 
 var defaultLoadOrder = []string{
-	"Patch_D2.mpq",
+	"patch_d2.mpq",
 	"d2exp.mpq",
 	"d2xmusic.mpq",
 	"d2xtalk.mpq",
@@ -43,28 +43,28 @@ var defaultLoadOrder = []string{
 }
 
 var darwinLoadOrder = []string{
-	"Diablo II Patch",
-	"Diablo II Expansion Data",
-	"Diablo II Expansion Music",
-	"Diablo II Expansion Speech",
-	"Diablo II Expansion Movies",
-	"Diablo II Game Data",
-	"Diablo II Speech",
-	"Diablo II Music",
-	"Diablo II Sounds",
-	"Diablo II Movies",
-	"Diablo II Speech",
+	"Diablo II Patch",            // "patch_d2.mpq"
+	"Diablo II Expansion Data",   // "d2exp.mpq"
+	"Diablo II Expansion Music",  // "d2xmusic.mpq"
+	"Diablo II Expansion Speech", // "d2xtalk.mpq"
+	"Diablo II Expansion Movies", // "d2xvideo.mpq"
+	"Diablo II Game Data",        // "d2data.mpq"
+	// "d2char.mpq",                 // ?
+	"Diablo II Music",            // "d2music.mpq"
+	"Diablo II Sounds",           // "d2sfx.mpq"
+	"Diablo II Movies",           // "d2video.mpq"
+	"Diablo II Speech",           // "d2speech.mpq"
 }
 
 func LoadConfiguration() (*Configuration, error) {
 	var config Configuration
 
-	f, err := os.Open(configPath)
+	f, err := os.Open(ConfigBasePath)
 	if err == nil {
 		defer f.Close()
 
 		if err := json.NewDecoder(f).Decode(&config); err != nil {
-			return nil, fmt.Errorf("failed to parse %s: %w", configPath, err)
+			return nil, fmt.Errorf("failed to parse %s: %w", ConfigBasePath, err)
 		}
 	}
 
@@ -101,7 +101,7 @@ func LoadConfiguration() (*Configuration, error) {
 		}
 
 		if _, err := os.Stat(mpqPath); err != nil {
-			return nil, fmt.Errorf("could not find Diablo 2 assets. Install Diablo 2 or provide asset path in %s", configPath)
+			return nil, fmt.Errorf("could not find Diablo 2 assets, Diablo II and Diablo II Lord of Destruction must be installed")
 		}
 
 		config.MpqPath = mpqPath
@@ -131,6 +131,6 @@ func inferMpqPath() (string, error) {
 	case "darwin":
 		return "/Applications/Diablo II", nil
 	default:
-		return "", fmt.Errorf("could not infer mpq path; must be provided in %s", configPath)
+		return "", fmt.Errorf("could not infer mpq path; must be provided in %s", ConfigBasePath)
 	}
 }

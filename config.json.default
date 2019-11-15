@@ -10,7 +10,7 @@
     "BgmVolume": 0.3,
     "MpqPath": "C:/Program Files (x86)/Diablo II",
     "MpqLoadOrder": [
-        "Patch_D2.mpq",
+        "patch_d2.mpq",
         "d2exp.mpq",
         "d2xmusic.mpq",
         "d2xtalk.mpq",
