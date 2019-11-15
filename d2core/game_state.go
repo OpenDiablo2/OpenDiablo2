@@ -21,6 +21,7 @@ import (
 	UINT32 GameState Version
 	INT64  Game Seed
     BYTE   Hero Type
+	BYTE   Hero Level
     BYTE   Act
     BYTE   Hero Name Length
     BYTE[] Hero Name
@@ -28,14 +29,16 @@ import (
 */
 
 type GameState struct {
-	Seed     int64
-	HeroName string
-	HeroType d2enum.Hero
-	Act      int
-	FilePath string
+	Seed      int64
+	HeroName  string
+	HeroType  d2enum.Hero
+	HeroLevel int
+	Act       int
+	FilePath  string
+	Equipment CharacterEquipment
 }
 
-const GameStateVersion = uint32(1) // Update this when you make breaking changes
+const GameStateVersion = uint32(2) // Update this when you make breaking changes
 
 func HasGameStates() bool {
 	files, _ := ioutil.ReadDir(getGameBaseSavePath())
@@ -83,12 +86,13 @@ func LoadGameState(path string) *GameState {
 	}
 	defer f.Close()
 	sr := d2common.CreateStreamReader(bytes)
-	if sr.GetUInt32() > GameStateVersion {
+	if sr.GetUInt32() != GameStateVersion {
 		// Unknown game version
 		return nil
 	}
 	result.Seed = sr.GetInt64()
 	result.HeroType = d2enum.Hero(sr.GetByte())
+	result.HeroLevel = int(sr.GetByte())
 	result.Act = int(sr.GetByte())
 	heroNameLen := sr.GetByte()
 	heroName, _ := sr.ReadBytes(int(heroNameLen))
@@ -129,7 +133,7 @@ func getGameBaseSavePath() string {
 	return basePath
 }
 
-func getFirstFreefileName() string {
+func getFirstFreeFileName() string {
 	i := 0
 	basePath := getGameBaseSavePath()
 	for {
@@ -143,7 +147,7 @@ func getFirstFreefileName() string {
 
 func (v *GameState) Save() {
 	if v.FilePath == "" {
-		v.FilePath = getFirstFreefileName()
+		v.FilePath = getFirstFreeFileName()
 	}
 	f, err := os.Create(v.FilePath)
 	if err != nil {
@@ -154,6 +158,7 @@ func (v *GameState) Save() {
 	sr.PushUint32(GameStateVersion)
 	sr.PushInt64(v.Seed)
 	sr.PushByte(byte(v.HeroType))
+	sr.PushByte(byte(v.HeroLevel))
 	sr.PushByte(byte(v.Act))
 	sr.PushByte(byte(len(v.HeroName)))
 	for _, ch := range v.HeroName {

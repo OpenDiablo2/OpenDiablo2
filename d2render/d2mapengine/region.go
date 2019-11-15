@@ -118,7 +118,7 @@ func (v *Region) loadObjects(fileProvider d2interface.FileProvider) {
 					return
 				}
 				entity := d2render.CreateAnimatedEntity(object.X, object.Y, object.Lookup, fileProvider, d2enum.Units)
-				entity.SetMode(object.Lookup.Mode, object.Lookup.Class, 0, fileProvider)
+				entity.SetMode(object.Lookup.Mode, object.Lookup.Class, 0)
 				v.AnimationEntities = append(v.AnimationEntities, entity)
 			}
 		}(object)

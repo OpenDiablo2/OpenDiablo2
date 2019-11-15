@@ -18,7 +18,7 @@ func CreateNPC(x, y int32, object *d2datadict.ObjectLookupRecord, fileProvider d
 	result := &NPC{
 		AnimatedEntity: d2render.CreateAnimatedEntity(x, y, object, fileProvider, d2enum.Units),
 	}
-	result.AnimatedEntity.SetMode(object.Mode, object.Class, direction, fileProvider)
+	result.AnimatedEntity.SetMode(object.Mode, object.Class, direction)
 	return result
 }
 
