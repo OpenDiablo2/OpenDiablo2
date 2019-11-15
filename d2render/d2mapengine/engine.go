@@ -134,22 +134,18 @@ func (v *Engine) GenTiles(region *EngineRegion) {
 }
 
 func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
-	tilesToRender := make([]RegionTile, len(region.Tiles))
+	//tilesToRender := make([]RegionTile, len(region.Tiles))
 
-	for i, tile := range region.Tiles {
-		sx, sy := d2helper.IsoToScreen(tile.tileX+region.Rect.Left, tile.tileY+region.Rect.Top, int(v.OffsetX), int(v.OffsetY))
+	for tileIdx := range region.Tiles {
+		sx, sy := d2helper.IsoToScreen(region.Tiles[tileIdx].tileX+region.Rect.Left, region.Tiles[tileIdx].tileY+region.Rect.Top, int(v.OffsetX), int(v.OffsetY))
 		if sx > -160 && sy > -160 && sx <= 880 && sy <= 1000 {
-			tilesToRender[i] = tile
+			v.RenderTile(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
 		}
 	}
 
-	for _, tile := range tilesToRender {
-		v.RenderTile(region.Region, tile.offX, tile.offY, tile.tileX, tile.tileY, target)
-	}
-
-	for _, tile := range tilesToRender {
-		v.RenderTileObjects(region.Region, tile.offX, tile.offY, tile.tileX, tile.tileY, target)
-	}
+	//for _, tile := range tilesToRender {
+	//	v.RenderTileObjects(region.Region, tile.offX, tile.offY, tile.tileX, tile.tileY, target)
+	//}
 }
 
 func (v *Engine) RenderTileObjects(region *Region, offX, offY, x, y int, target *ebiten.Image) {
@@ -209,10 +205,31 @@ func (v *Engine) RenderTile(region *Region, offX, offY, x, y int, target *ebiten
 		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeShadows, i, target)
 	}
 	for i := range tile.Walls {
+		if tile.Walls[i].Orientation >= 15 {
+			// Upper walls only
+			continue
+		}
 		if tile.Walls[i].Hidden || tile.Walls[i].Orientation == 15 || tile.Walls[i].Orientation == 10 || tile.Walls[i].Orientation == 11 || tile.Walls[i].Orientation == 0 {
 			continue
 		}
 		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
 	}
-
+	v.RenderTileObjects(region, offX, offY, x, y, target)
+	for i := range tile.Walls {
+		if tile.Walls[i].Orientation <= 15 {
+			// Lower walls only
+			continue
+		}
+		if tile.Walls[i].Hidden || tile.Walls[i].Orientation == 15 || tile.Walls[i].Orientation == 10 || tile.Walls[i].Orientation == 11 || tile.Walls[i].Orientation == 0 {
+			continue
+		}
+		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
+	}
+	for i := range tile.Walls {
+		if tile.Walls[i].Orientation != 15 {
+			// Ceiling only
+			continue
+		}
+		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
+	}
 }
