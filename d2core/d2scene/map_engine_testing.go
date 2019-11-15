@@ -79,7 +79,6 @@ var regions []RegionSpec = []RegionSpec{
 	{d2enum.RegionAct5Temple, 1042, 1052, []int{}},
 	{d2enum.RegionAct5Baal, 1059, 1090, []int{}},
 	{d2enum.RegionAct5Lava, 1053, 1058, []int{}},
-
 }
 
 type MapEngineTest struct {
@@ -89,11 +88,15 @@ type MapEngineTest struct {
 	sceneProvider d2interface.SceneProvider
 	gameState     *d2core.GameState
 	mapEngine     *_map.Engine
+
+	//TODO: this is region specific properties, should be refactored for multi-region rendering
 	currentRegion int
 	levelPreset   int
 	fileIndex     int
-	keyLocked     bool
 	regionSpec    RegionSpec
+	filesCount    int
+
+	keyLocked bool
 }
 
 func CreateMapEngineTest(
@@ -110,8 +113,9 @@ func CreateMapEngineTest(
 		currentRegion: currentRegion,
 		levelPreset:   levelPreset,
 		fileIndex:     -1,
-		keyLocked:     false,
 		regionSpec:    RegionSpec{},
+		filesCount:    0,
+		keyLocked:     false,
 	}
 	result.gameState = d2core.CreateTestGameState()
 	return result
@@ -190,21 +194,32 @@ func (v *MapEngineTest) Render(screen *ebiten.Image) {
 	)
 
 	levelFilesToPick := make([]string, 0)
-	for _, fileRecord := range curRegion.Region.LevelPreset.Files {
+	fileIndex := v.fileIndex
+	for n, fileRecord := range curRegion.Region.LevelPreset.Files {
 		if len(fileRecord) == 0 || fileRecord == "" || fileRecord == "0" {
 			continue
 		}
 		levelFilesToPick = append(levelFilesToPick, fileRecord)
+		if fileRecord == curRegion.Region.RegionPath {
+			fileIndex = n
+		}
 	}
+	if v.fileIndex == -1 {
+		v.fileIndex = fileIndex
+	}
+	v.filesCount = len(levelFilesToPick)
 	ebitenutil.DebugPrintAt(screen, line, 5, 5)
 	ebitenutil.DebugPrintAt(screen, "Map: "+curRegion.Region.LevelType.Name, 5, 17)
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%v: %v/%v [%v, %v]", curRegion.Region.RegionPath, v.fileIndex, len(levelFilesToPick), v.currentRegion, v.levelPreset), 5, 29)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%v: %v/%v [%v, %v]", curRegion.Region.RegionPath, fileIndex+1, v.filesCount, v.currentRegion, v.levelPreset), 5, 29)
 	ebitenutil.DebugPrintAt(screen, "N - next region, P - previous region", 5, 41)
 	ebitenutil.DebugPrintAt(screen, "Shift+N - next preset, Shift+P - previous preset", 5, 53)
 	ebitenutil.DebugPrintAt(screen, "Ctrl+N - next file, Ctrl+P - previous file", 5, 65)
 }
 
 func (v *MapEngineTest) Update(tickTime float64) {
+	ctrlPressed := v.uiManager.KeyPressed(ebiten.KeyControl)
+	shiftPressed := v.uiManager.KeyPressed(ebiten.KeyShift)
+
 	if v.uiManager.KeyPressed(ebiten.KeyDown) {
 		v.mapEngine.OffsetY -= tickTime * 800
 	}
@@ -230,70 +245,69 @@ func (v *MapEngineTest) Update(tickTime float64) {
 		os.Exit(0)
 	}
 
-	if v.uiManager.KeyPressed(ebiten.KeyN) && !v.keyLocked && v.uiManager.KeyPressed(ebiten.KeyControl) {
-		v.fileIndex++
-		if v.fileIndex == 10 {
-			v.fileIndex = 0
-		}
-		v.keyLocked = true
-		v.sceneProvider.SetNextScene(v)
-		return
-	}
+	if !v.keyLocked {
 
-	if v.uiManager.KeyPressed(ebiten.KeyP) && !v.keyLocked && v.uiManager.KeyPressed(ebiten.KeyControl) {
-		v.fileIndex--
-		if v.fileIndex == 0 {
-			v.fileIndex = 10
+		if v.uiManager.KeyPressed(ebiten.KeyN) && ctrlPressed {
+			v.fileIndex = increment(v.fileIndex, 0, v.filesCount-1)
+			v.keyLocked = true
+			v.sceneProvider.SetNextScene(v)
+			return
 		}
-		v.keyLocked = true
-		v.sceneProvider.SetNextScene(v)
-		return
-	}
 
-	if v.uiManager.KeyPressed(ebiten.KeyN) && !v.keyLocked && v.uiManager.KeyPressed(ebiten.KeyShift) {
-		v.levelPreset++
-		if v.levelPreset > v.regionSpec.endPresetIndex {
-			v.levelPreset = v.regionSpec.startPresetIndex
+		if v.uiManager.KeyPressed(ebiten.KeyP) && ctrlPressed {
+			v.fileIndex = decrement(v.fileIndex, 0, v.filesCount-1)
+			v.keyLocked = true
+			v.sceneProvider.SetNextScene(v)
+			return
 		}
-		v.keyLocked = true
-		v.sceneProvider.SetNextScene(v)
-		return
-	}
 
-	if v.uiManager.KeyPressed(ebiten.KeyP) && !v.keyLocked && v.uiManager.KeyPressed(ebiten.KeyShift) {
-		v.levelPreset--
-		if v.levelPreset < v.regionSpec.startPresetIndex {
-			v.levelPreset = v.regionSpec.endPresetIndex
+		if v.uiManager.KeyPressed(ebiten.KeyN) && shiftPressed {
+			v.levelPreset = increment(v.levelPreset, v.regionSpec.startPresetIndex, v.regionSpec.endPresetIndex)
+			v.keyLocked = true
+			v.sceneProvider.SetNextScene(v)
+			return
 		}
-		v.keyLocked = true
-		v.sceneProvider.SetNextScene(v)
-		return
-	}
 
-	if v.uiManager.KeyPressed(ebiten.KeyN) && !v.keyLocked {
-		v.currentRegion++
-		if v.currentRegion == 36 {
-			v.currentRegion = 0
+		if v.uiManager.KeyPressed(ebiten.KeyP) && shiftPressed {
+			v.levelPreset = decrement(v.levelPreset, v.regionSpec.startPresetIndex, v.regionSpec.endPresetIndex)
+			v.keyLocked = true
+			v.sceneProvider.SetNextScene(v)
+			return
 		}
-		v.keyLocked = true
-		fmt.Println("---")
-		v.sceneProvider.SetNextScene(v)
-		return
-	}
 
-	if v.uiManager.KeyPressed(ebiten.KeyP) && !v.keyLocked {
-		v.currentRegion--
-		if v.currentRegion == -1 {
-			v.currentRegion = 35
+		if v.uiManager.KeyPressed(ebiten.KeyN) {
+			v.currentRegion = increment(v.currentRegion, 0, len(regions))
+			v.keyLocked = true
+			v.sceneProvider.SetNextScene(v)
+			return
 		}
-		v.keyLocked = true
-		fmt.Println("---")
-		v.sceneProvider.SetNextScene(v)
-		return
+
+		if v.uiManager.KeyPressed(ebiten.KeyP) {
+			v.currentRegion = decrement(v.currentRegion, 0, len(regions))
+			v.keyLocked = true
+			v.sceneProvider.SetNextScene(v)
+			return
+		}
 	}
 
 	//FIXME: do it better
 	if !v.uiManager.KeyPressed(ebiten.KeyP) && !v.uiManager.KeyPressed(ebiten.KeyN) {
 		v.keyLocked = false
 	}
+}
+
+func increment(v, min, max int) int {
+	v++
+	if v > max {
+		return min
+	}
+	return v
+}
+
+func decrement(v, min, max int) int {
+	v--
+	if v < min {
+		return max
+	}
+	return v
 }
