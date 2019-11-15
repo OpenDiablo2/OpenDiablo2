@@ -11,5 +11,3 @@ require (
 	golang.org/x/mobile v0.0.0-20191115022231-f0c40035f2ba // indirect
 	golang.org/x/sys v0.0.0-20191115151921-52ab43148777 // indirect
 )
-
-replace github.com/OpenDiablo2/OpenDiablo2 => C:/Users/lunat/Documents/GitHub/OpenDiablo2
