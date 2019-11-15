@@ -235,7 +235,7 @@ func (v *Sprite) updateAnimation() {
 		timePerFrame = 1.0 / float64(len(v.Frames))
 	}
 	now := d2helper.Now()
-	if v.LastFrameTime+timePerFrame < now {
+	for v.LastFrameTime+timePerFrame < now {
 		v.LastFrameTime += timePerFrame
 		if !v.AnimateBackwards {
 			v.Frame++
@@ -246,7 +246,7 @@ func (v *Sprite) updateAnimation() {
 					v.Frame = 0
 				}
 			}
-			return
+			continue
 		}
 		v.Frame--
 		if v.Frame < 0 {
