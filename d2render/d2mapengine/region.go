@@ -32,6 +32,14 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
+
+//TODO: move to corresponding file
+type ByRarity []d2dt1.Tile
+
+func (a ByRarity) Len() int           { return len(a) }
+func (a ByRarity) Less(i, j int) bool { return a[i].RarityFrameIndex < a[j].RarityFrameIndex }
+func (a ByRarity) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+
 type Region struct {
 	RegionPath        string
 	LevelType         d2datadict.LevelTypeRecord
@@ -137,21 +145,6 @@ func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType d2enum
 		v.renderShadow(v.DS1.Tiles[tileY][tileX].Shadows[layerIndex], offsetX, offsetY, target, tileX, tileY)
 	}
 }
-
-type ByRarity []d2dt1.Tile
-
-func (a ByRarity) Len() int           { return len(a) }
-func (a ByRarity) Less(i, j int) bool { return a[i].RarityFrameIndex < a[j].RarityFrameIndex }
-func (a ByRarity) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-
-// int sum = prob.get(id, 0);
-// int random = sum == 0 ? 0 : MathUtils.random(sum - 1);
-// for (DT1.Tile tile : tiles) {
-//   random -= tile.rarity;
-//   if (random <= 0) {
-//     return tile;
-//   }
-// }
 
 func (v *Region) getRandomTile(tiles []d2dt1.Tile) *d2dt1.Tile {
 	if len(tiles) == 1 {
