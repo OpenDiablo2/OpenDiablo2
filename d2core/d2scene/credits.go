@@ -67,7 +67,7 @@ func (v *Credits) LoadContributors() []string {
 	contributors := []string{}
 	file, err := os.Open(path.Join("./", "CONTRIBUTORS"))
 	if err != nil {
-		log.Fatal("CONTRIBUTORS file is missing")
+		log.Print("CONTRIBUTORS file is missing")
 	}
 	defer file.Close()
 

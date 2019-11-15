@@ -42,7 +42,7 @@ type CharacterSelect struct {
 	characterNameLabel     [8]d2ui.Label
 	characterStatsLabel    [8]d2ui.Label
 	characterExpLabel      [8]d2ui.Label
-	characterImage         [8]*d2core.NPC
+	characterImage         [8]*d2core.Hero
 	gameStates             []*d2core.GameState
 	selectedCharacter      int
 	mouseButtonPressed     bool
@@ -167,7 +167,7 @@ func (v *CharacterSelect) onScrollUpdate() {
 }
 
 func (v *CharacterSelect) updateCharacterBoxes() {
-	expText := d2common.TranslateString("expansionchar2x")
+	expText := d2common.TranslateString("#803")
 	for i := 0; i < 8; i++ {
 		idx := i + (v.charScrollbar.GetCurrentOffset() * 2)
 		if idx >= len(v.gameStates) {
@@ -181,7 +181,14 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		v.characterStatsLabel[i].SetText("Level 1 " + v.gameStates[idx].HeroType.String())
 		v.characterExpLabel[i].SetText(expText)
 		// TODO: Generate or load the object from the actual player data...
-		v.characterImage[i] = d2core.CreateNPC(0, 0, d2datadict.HeroObjects[v.gameStates[idx].HeroType], v.fileProvider, 5)
+		v.characterImage[i] = d2core.CreateHero(
+			0,
+			0,
+			5,
+			v.gameStates[idx].HeroType,
+			d2core.HeroObjects[v.gameStates[idx].HeroType],
+			v.fileProvider,
+		)
 	}
 }
 
@@ -213,7 +220,7 @@ func (v *CharacterSelect) Render(screen *ebiten.Image) {
 		v.characterNameLabel[i].Draw(screen)
 		v.characterStatsLabel[i].Draw(screen)
 		v.characterExpLabel[i].Draw(screen)
-		v.characterImage[i].Render(screen, v.characterNameLabel[i].X-40, v.characterNameLabel[i].Y+30)
+		v.characterImage[i].Render(screen, v.characterNameLabel[i].X-40, v.characterNameLabel[i].Y+50)
 	}
 	if v.showDeleteConfirmation {
 		ebitenutil.DrawRect(screen, 0.0, 0.0, 800.0, 600.0, color.RGBA{0, 0, 0, 128})

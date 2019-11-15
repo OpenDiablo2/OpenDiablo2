@@ -31,6 +31,7 @@ var DccLayerNames = []string{"HD", "TR", "LG", "RA", "LA", "RH", "LH", "SH", "S1
 
 // AnimatedEntity represents an entity on the map that can be animated
 type AnimatedEntity struct {
+	fileProvider d2interface.FileProvider
 	// LocationX represents the tile X position of the entity
 	LocationX float64
 	// LocationY represents the tile Y position of the entity
@@ -56,10 +57,11 @@ type AnimatedEntity struct {
 // CreateAnimatedEntity creates an instance of AnimatedEntity
 func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fileProvider d2interface.FileProvider, palette d2enum.PaletteType) AnimatedEntity {
 	result := AnimatedEntity{
-		base:    object.Base,
-		token:   object.Token,
-		object:  object,
-		palette: palette,
+		fileProvider: fileProvider,
+		base:         object.Base,
+		token:        object.Token,
+		object:       object,
+		palette:      palette,
 	}
 	result.dccLayers = make(map[string]d2dcc.DCC)
 	result.LocationX = float64(x) / 5
@@ -75,9 +77,9 @@ func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fil
 var DirectionLookup = []int{3, 15, 4, 8, 0, 9, 5, 10, 1, 11, 6, 12, 2, 13, 7, 14}
 
 // SetMode changes the graphical mode of this animated entity
-func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction int, provider d2interface.FileProvider) {
+func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction int) {
 	cofPath := fmt.Sprintf("%s/%s/COF/%s%s%s.COF", v.base, v.token, v.token, animationMode, weaponClass)
-	v.Cof = d2cof.LoadCOF(cofPath, provider)
+	v.Cof = d2cof.LoadCOF(cofPath, v.fileProvider)
 	v.animationMode = animationMode
 	v.weaponClass = weaponClass
 	v.direction = direction
@@ -89,7 +91,7 @@ func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction in
 	v.dccLayers = make(map[string]d2dcc.DCC)
 	for _, cofLayer := range v.Cof.CofLayers {
 		layerName := DccLayerNames[cofLayer.Type]
-		v.dccLayers[layerName] = v.LoadLayer(layerName, provider)
+		v.dccLayers[layerName] = v.LoadLayer(layerName, v.fileProvider)
 		if !v.dccLayers[layerName].IsValid() {
 			continue
 		}
@@ -99,7 +101,7 @@ func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction in
 }
 
 func (v *AnimatedEntity) LoadLayer(layer string, fileProvider d2interface.FileProvider) d2dcc.DCC {
-	layerName := "tr"
+	layerName := "TR"
 	switch strings.ToUpper(layer) {
 	case "HD": // Head
 		layerName = v.object.HD
@@ -138,7 +140,12 @@ func (v *AnimatedEntity) LoadLayer(layer string, fileProvider d2interface.FilePr
 		return d2dcc.DCC{}
 	}
 	dccPath := fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dcc", v.base, v.token, layer, v.token, layer, layerName, v.animationMode, v.weaponClass)
-	return d2dcc.LoadDCC(dccPath, fileProvider)
+	result := d2dcc.LoadDCC(dccPath, fileProvider)
+	if !result.IsValid() {
+		dccPath = fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dcc", v.base, v.token, layer, v.token, layer, layerName, v.animationMode, "HTH")
+		result = d2dcc.LoadDCC(dccPath, fileProvider)
+	}
+	return result
 }
 
 // Render draws this animated entity onto the target
