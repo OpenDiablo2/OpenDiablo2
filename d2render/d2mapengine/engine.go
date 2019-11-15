@@ -59,6 +59,10 @@ func (v *Engine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int) {
 		Rect:   d2common.Rectangle{0, 0, int(region.TileWidth), int(region.TileHeight)},
 		Region: region,
 	})
+
+	for i, _ := range v.regions {
+		v.GenTiles(&v.regions[i])
+	}
 }
 
 func (v *Engine) GenerateAct1Overworld() {
