@@ -23,6 +23,7 @@ type Configuration struct {
 	MpqLoadOrder      []string
 	SfxVolume         float64
 	BgmVolume         float64
+	MuteSound         bool
 }
 
 const configPath = "config.json"
@@ -79,12 +80,17 @@ func LoadConfiguration() (*Configuration, error) {
 		config.TicksPerSecond = -1
 	}
 
-	if config.SfxVolume <= 0 {
-		config.SfxVolume = 1.0
-	}
+	if config.MuteSound {
+		config.SfxVolume = 0.0
+		config.BgmVolume = 0.0
+	} else {
+		if config.SfxVolume <= 0 {
+			config.SfxVolume = 1.0
+		}
 
-	if config.BgmVolume <= 0 {
-		config.BgmVolume = 0.3
+		if config.BgmVolume <= 0 {
+			config.BgmVolume = 0.3
+		}
 	}
 
 	// Try to infer mpq path if not set explicitly

@@ -5,6 +5,7 @@
     "TicksPerSecond": -1,
     "PauseInBackground": false,
     "VsyncDisabled": false,
+    "MuteSound": false,
     "SfxVolume": 1.0,
     "BgmVolume": 0.3,
     "MpqPath": "C:/Program Files (x86)/Diablo II",
