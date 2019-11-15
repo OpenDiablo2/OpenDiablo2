@@ -6,4 +6,5 @@
 .vs/**/*
 /OpenDiablo2.exe
 /OpenDiablo2
+/config.json
 **/*.pprof
