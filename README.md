@@ -24,8 +24,7 @@ Assuming you have Diablo II installed in the default directoy and a working [Go]
 ```
 git clone https://github.com/OpenDiablo2/OpenDiablo2
 cd OpenDiablo2
-go build
-./OpenDiablo
+go run main.go
 ```
 
 ## Contributing
