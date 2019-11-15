@@ -153,7 +153,11 @@ func (v *MapEngineTest) Update(tickTime float64) {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF7) {
-		v.mapEngine.ShowTiles = !v.mapEngine.ShowTiles
+		if v.mapEngine.ShowTiles < 2 {
+			v.mapEngine.ShowTiles++
+		} else {
+			v.mapEngine.ShowTiles = 0
+		}
 	}
 
 	if v.uiManager.KeyPressed(ebiten.KeyEscape) {

@@ -33,7 +33,7 @@ type Engine struct {
 	regions      []EngineRegion
 	OffsetX      float64
 	OffsetY      float64
-	ShowTiles    bool
+	ShowTiles    int
 }
 
 func CreateMapEngine(gameState *d2core.GameState, soundManager *d2audio.Manager, fileProvider d2interface.FileProvider) *Engine {
@@ -153,10 +153,25 @@ func (v *Engine) RenderTile(region *Region, offX, offY, x, y int, target *ebiten
 		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
 	}
 
-	if v.ShowTiles {
-		ebitenutil.DrawLine(target, float64(offX)+v.OffsetX, float64(offY)+v.OffsetY, float64(offX)+v.OffsetX+80, float64(offY)+v.OffsetY+40, color.White)
-		ebitenutil.DrawLine(target, float64(offX)+v.OffsetX, float64(offY)+v.OffsetY, float64(offX)+v.OffsetX-80, float64(offY)+v.OffsetY+40, color.White)
+	if v.ShowTiles > 0 {
+		subtileColor := color.RGBA{255, 100, 100, 140}
+		tileColor := color.RGBA{255, 255, 255, 255}
+
+		ebitenutil.DrawLine(target, float64(offX)+v.OffsetX, float64(offY)+v.OffsetY, float64(offX)+v.OffsetX+80, float64(offY)+v.OffsetY+40, tileColor)
+		ebitenutil.DrawLine(target, float64(offX)+v.OffsetX, float64(offY)+v.OffsetY, float64(offX)+v.OffsetX-80, float64(offY)+v.OffsetY+40, tileColor)
+
 		coords := fmt.Sprintf("%v,%v", x, y)
 		ebitenutil.DebugPrintAt(target, coords, offX+int(v.OffsetX)-10, offY+int(v.OffsetY)+10)
+
+		if v.ShowTiles > 1 {
+			for i := 1; i <= 4; i++ {
+				x := (16 * i)
+				y := (8 * i)
+				ebitenutil.DrawLine(target, float64(offX-x)+v.OffsetX, float64(offY+y)+v.OffsetY,
+					float64(offX-x)+v.OffsetX+80, float64(offY+y)+v.OffsetY+40, subtileColor)
+				ebitenutil.DrawLine(target, float64(offX+x)+v.OffsetX, float64(offY+y)+v.OffsetY,
+					float64(offX+x)+v.OffsetX-80, float64(offY+y)+v.OffsetY+40, subtileColor)
+			}
+		}
 	}
 }
