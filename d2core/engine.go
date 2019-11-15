@@ -90,10 +90,9 @@ func CreateEngine() Engine {
 }
 
 func (v *Engine) loadConfigurationFile() {
-	log.Println("Loading configuration file")
 	settings, err := d2common.LoadConfiguration()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
 	v.Settings = settings

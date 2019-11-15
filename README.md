@@ -22,8 +22,10 @@ ALL OTHER TRADEMARKS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS.
 Assuming you have Diablo II installed in the default directoy and a working [Go](https://golang.org/doc/install) environment
 
 ```
-go install github.com/OpenDiablo2/OpenDiablo2
-OpenDiablo2
+git clone https://github.com/OpenDiablo2/OpenDiablo2
+cd OpenDiablo2
+go build
+./OpenDiablo
 ```
 
 ## Contributing
