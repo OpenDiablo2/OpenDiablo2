@@ -78,6 +78,7 @@ func CreateEngine() Engine {
 	d2datadict.LoadSounds(&result)
 	d2data.LoadAnimationData(&result)
 	d2datadict.LoadMonStats(&result)
+	LoadHeroObjects()
 	result.SoundManager = d2audio.CreateManager(&result)
 	result.SoundManager.SetVolumes(result.Settings.BgmVolume, result.Settings.SfxVolume)
 	result.UIManager = d2ui.CreateManager(&result, *result.SoundManager)
