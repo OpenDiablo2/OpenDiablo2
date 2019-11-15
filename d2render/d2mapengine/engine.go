@@ -130,12 +130,12 @@ func (v *Engine) GenTiles(region *EngineRegion) {
 }
 
 func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
-	var tilesToRender []RegionTile
+	tilesToRender := make([]RegionTile, len(region.Tiles))
 
-	for _, tile := range region.Tiles {
+	for i, tile := range region.Tiles {
 		sx, sy := d2helper.IsoToScreen(tile.tileX+region.Rect.Left, tile.tileY+region.Rect.Top, int(v.OffsetX), int(v.OffsetY))
 		if sx > -160 && sy > -160 && sx <= 880 && sy <= 1000 {
-			tilesToRender = append(tilesToRender, *tile)
+			tilesToRender[i] = *tile
 		}
 	}
 
