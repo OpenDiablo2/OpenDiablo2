@@ -6,10 +6,10 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"sort"
 	"strconv"
 	"sync"
 	"time"
-	"sort"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2dt1"
 
@@ -31,7 +31,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 )
-
 
 //TODO: move to corresponding file
 type ByRarity []d2dt1.Tile
@@ -184,7 +183,7 @@ func (v *Region) getTile(mainIndex, subIndex, orientation int32) *d2dt1.Tile {
 	return v.getRandomTile(tiles)
 }
 
-func (v *Region) renderFloor(tile d2ds1.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image, tileX, tileY int){
+func (v *Region) renderFloor(tile d2ds1.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image, tileX, tileY int) {
 	tileCacheIndex := fmt.Sprintf("%v-%v-%v-%v", tileY, tileX, tile.MainIndex, tile.SubIndex)
 	tileCache, exists := v.FloorCache[tileCacheIndex]
 	if !exists {

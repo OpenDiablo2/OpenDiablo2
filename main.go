@@ -23,8 +23,8 @@ var GitBranch string
 var GitCommit string
 var d2Engine d2core.Engine
 
-var region    = kingpin.Arg("region", "Region type id").Int()
-var preset    = kingpin.Arg("preset", "Level preset").Int()
+var region = kingpin.Arg("region", "Region type id").Int()
+var preset = kingpin.Arg("preset", "Level preset").Int()
 
 func main() {
 	//defer profile.Start(profile.CPUProfile).Stop()
@@ -44,7 +44,7 @@ func main() {
 	d2mpq.InitializeCryptoBuffer()
 	d2Engine = d2core.CreateEngine()
 	kingpin.Parse()
-	if (*region == 0) {
+	if *region == 0 {
 		d2Engine.SetNextScene(d2scene.CreateMainMenu(&d2Engine, &d2Engine, d2Engine.UIManager, d2Engine.SoundManager))
 	} else {
 		d2Engine.SetNextScene(d2scene.CreateMapEngineTest(&d2Engine, &d2Engine, d2Engine.UIManager, d2Engine.SoundManager, *region, *preset))
