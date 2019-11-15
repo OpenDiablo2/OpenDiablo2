@@ -21,15 +21,9 @@ import (
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
-type RegionTile struct {
-	tileX, tileY int // tile coordinates
-	offX, offY   int // world space coordinates of tile origin
-}
-
 type EngineRegion struct {
 	Rect   d2common.Rectangle
 	Region *Region
-	Tiles  []RegionTile
 }
 
 type Engine struct {
@@ -83,10 +77,6 @@ func (v *Engine) GenerateAct1Overworld() {
 		})
 	}
 
-	for i, _ := range v.regions {
-		v.GenTiles(&v.regions[i])
-	}
-
 	sx, sy := d2helper.IsoToScreen(int(region.StartX), int(region.StartY), 0, 0)
 	v.OffsetX = float64(sx) - 400
 	v.OffsetY = float64(sy) - 300
@@ -111,45 +101,41 @@ func (v *Engine) Render(target *ebiten.Image) {
 	}
 }
 
-func (v *Engine) GenTiles(region *EngineRegion) {
+func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
 	for y := 0; y < int(region.Region.TileHeight); y++ {
 		offX := -((y + region.Rect.Top) * 80) + (region.Rect.Left * 80)
 		offY := ((y + region.Rect.Top) * 40) + (region.Rect.Left * 40)
 		for x := 0; x < int(region.Region.TileWidth); x++ {
-			region.Tiles = append(region.Tiles, RegionTile{
-				tileX: x,
-				tileY: y,
-				offX:  offX,
-				offY:  offY,
-			})
-
+			sx, sy := d2helper.IsoToScreen(x+region.Rect.Left, y+region.Rect.Top, int(v.OffsetX), int(v.OffsetY))
+			if sx > -160 && sy > -160 && sx <= 880 && sy <= 1000 {
+				v.RenderTile(region.Region, offX, offY, x, y, target)
+			}
 			offX += 80
 			offY += 40
 		}
 	}
 }
 
-func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
-	tilesToRender := make([]RegionTile, len(region.Tiles))
-
-	for i, tile := range region.Tiles {
-		sx, sy := d2helper.IsoToScreen(tile.tileX+region.Rect.Left, tile.tileY+region.Rect.Top, int(v.OffsetX), int(v.OffsetY))
-		if sx > -160 && sy > -160 && sx <= 880 && sy <= 1000 {
-			tilesToRender[i] = tile
-		}
-	}
-
-	for _, tile := range tilesToRender {
-		v.RenderTile(region.Region, tile.offX, tile.offY, tile.tileX, tile.tileY, target)
-	}
-
-	for _, tile := range tilesToRender {
-		v.RenderTileObjects(region.Region, tile.offX, tile.offY, tile.tileX, tile.tileY, target)
-	}
-}
-
-func (v *Engine) RenderTileObjects(region *Region, offX, offY, x, y int, target *ebiten.Image) {
+func (v *Engine) RenderTile(region *Region, offX, offY, x, y int, target *ebiten.Image) {
 	tile := region.DS1.Tiles[y][x]
+	for i := range tile.Floors {
+		if tile.Floors[i].Hidden || tile.Floors[i].Prop1 == 0 {
+			continue
+		}
+		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeFloors, i, target)
+	}
+	for i := range tile.Shadows {
+		if tile.Shadows[i].Hidden || tile.Shadows[i].Prop1 == 0 {
+			continue
+		}
+		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeShadows, i, target)
+	}
+	for i := range tile.Walls {
+		if tile.Walls[i].Hidden || tile.Walls[i].Orientation == 15 || tile.Walls[i].Orientation == 10 || tile.Walls[i].Orientation == 11 || tile.Walls[i].Orientation == 0 {
+			continue
+		}
+		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
+	}
 	for _, obj := range region.AnimationEntities {
 		if int(math.Floor(obj.LocationX)) == x && int(math.Floor(obj.LocationY)) == y {
 			obj.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
@@ -188,27 +174,4 @@ func (v *Engine) RenderTileObjects(region *Region, offX, offY, x, y int, target 
 			}
 		}
 	}
-}
-
-func (v *Engine) RenderTile(region *Region, offX, offY, x, y int, target *ebiten.Image) {
-	tile := region.DS1.Tiles[y][x]
-	for i := range tile.Floors {
-		if tile.Floors[i].Hidden || tile.Floors[i].Prop1 == 0 {
-			continue
-		}
-		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeFloors, i, target)
-	}
-	for i := range tile.Shadows {
-		if tile.Shadows[i].Hidden || tile.Shadows[i].Prop1 == 0 {
-			continue
-		}
-		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeShadows, i, target)
-	}
-	for i := range tile.Walls {
-		if tile.Walls[i].Hidden || tile.Walls[i].Orientation == 15 || tile.Walls[i].Orientation == 10 || tile.Walls[i].Orientation == 11 || tile.Walls[i].Orientation == 0 {
-			continue
-		}
-		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
-	}
-
 }
