@@ -28,7 +28,7 @@ type DCCDirection struct {
 	PixelData                  []byte
 	HorizontalCellCount        int
 	VerticalCellCount          int
-	PixelBuffer                []*DCCPixelBufferEntry
+	PixelBuffer                []DCCPixelBufferEntry
 }
 
 func CreateDCCDirection(bm *d2common.BitMuncher, file DCC) DCCDirection {
@@ -221,13 +221,10 @@ func (v *DCCDirection) FillPixelBuffer(pcd, ec, pm, et, rp *d2common.BitMuncher)
 		maxCellX += frame.HorizontalCellCount
 		maxCellY += frame.VerticalCellCount
 	}
-	v.PixelBuffer = make([]*DCCPixelBufferEntry, maxCellX*maxCellY)
+	v.PixelBuffer = make([]DCCPixelBufferEntry, maxCellX*maxCellY)
 	for i := 0; i < maxCellX*maxCellY; i++ {
-		v.PixelBuffer[i] = &DCCPixelBufferEntry{
-			Value:          make([]byte, 4),
-			Frame:          -1,
-			FrameCellIndex: -1,
-		}
+		v.PixelBuffer[i].Frame = -1
+		v.PixelBuffer[i].FrameCellIndex = -1
 	}
 	cellBuffer := make([]*DCCPixelBufferEntry, v.HorizontalCellCount*v.VerticalCellCount)
 	frameIndex := -1
@@ -293,23 +290,22 @@ func (v *DCCDirection) FillPixelBuffer(pcd, ec, pm, et, rp *d2common.BitMuncher)
 				}
 				oldEntry := cellBuffer[currentCell]
 				pbIndex++
-				newEntry := v.PixelBuffer[pbIndex]
 				curIdx := decodedPixel - 1
 				for i := 0; i < 4; i++ {
 					if (pixelMask & (1 << uint(i))) != 0 {
 						if curIdx >= 0 {
-							newEntry.Value[i] = byte(pixelStack[curIdx])
+							v.PixelBuffer[pbIndex].Value[i] = byte(pixelStack[curIdx])
 							curIdx--
 						} else {
-							newEntry.Value[i] = 0
+							v.PixelBuffer[pbIndex].Value[i] = 0
 						}
 					} else {
-						newEntry.Value[i] = oldEntry.Value[i]
+						v.PixelBuffer[pbIndex].Value[i] = oldEntry.Value[i]
 					}
 				}
-				cellBuffer[currentCell] = newEntry
-				newEntry.Frame = frameIndex
-				newEntry.FrameCellIndex = cellX + (cellY * frame.HorizontalCellCount)
+				cellBuffer[currentCell] = &v.PixelBuffer[pbIndex]
+				v.PixelBuffer[pbIndex].Frame = frameIndex
+				v.PixelBuffer[pbIndex].FrameCellIndex = cellX + (cellY * frame.HorizontalCellCount)
 			}
 		}
 	}
