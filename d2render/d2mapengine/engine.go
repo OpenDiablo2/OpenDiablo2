@@ -29,14 +29,14 @@ type RegionTile struct {
 type EngineRegion struct {
 	Rect   d2common.Rectangle
 	Region *Region
-	Tiles  []*RegionTile
+	Tiles  []RegionTile
 }
 
 type Engine struct {
 	soundManager *d2audio.Manager
 	gameState    *d2core.GameState
 	fileProvider d2interface.FileProvider
-	regions      []*EngineRegion
+	regions      []EngineRegion
 	OffsetX      float64
 	OffsetY      float64
 	ShowTiles    int
@@ -47,7 +47,7 @@ func CreateMapEngine(gameState *d2core.GameState, soundManager *d2audio.Manager,
 		gameState:    gameState,
 		soundManager: soundManager,
 		fileProvider: fileProvider,
-		regions:      make([]*EngineRegion, 0),
+		regions:      make([]EngineRegion, 0),
 	}
 	return result
 }
@@ -55,7 +55,7 @@ func CreateMapEngine(gameState *d2core.GameState, soundManager *d2audio.Manager,
 func (v *Engine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int) {
 	randomSource := rand.NewSource(v.gameState.Seed)
 	region := LoadRegion(randomSource, regionType, levelPreset, v.fileProvider)
-	v.regions = append(v.regions, &EngineRegion{
+	v.regions = append(v.regions, EngineRegion{
 		Rect:   d2common.Rectangle{0, 0, int(region.TileWidth), int(region.TileHeight)},
 		Region: region,
 	})
@@ -65,26 +65,26 @@ func (v *Engine) GenerateAct1Overworld() {
 	v.soundManager.PlayBGM("/data/global/music/Act1/town1.wav") // TODO: Temp stuff here
 	randomSource := rand.NewSource(v.gameState.Seed)
 	region := LoadRegion(randomSource, d2enum.RegionAct1Town, 1, v.fileProvider)
-	v.regions = append(v.regions, &EngineRegion{
+	v.regions = append(v.regions, EngineRegion{
 		Rect:   d2common.Rectangle{0, 0, int(region.TileWidth), int(region.TileHeight)},
 		Region: region,
 	})
 	if strings.Contains(region.RegionPath, "E1") {
 		region2 := LoadRegion(randomSource, d2enum.RegionAct1Town, 2, v.fileProvider)
-		v.regions = append(v.regions, &EngineRegion{
+		v.regions = append(v.regions, EngineRegion{
 			Rect:   d2common.Rectangle{int(region.TileWidth - 1), 0, int(region2.TileWidth), int(region2.TileHeight)},
 			Region: region2,
 		})
 	} else if strings.Contains(region.RegionPath, "S1") {
 		region2 := LoadRegion(randomSource, d2enum.RegionAct1Town, 3, v.fileProvider)
-		v.regions = append(v.regions, &EngineRegion{
+		v.regions = append(v.regions, EngineRegion{
 			Rect:   d2common.Rectangle{0, int(region.TileHeight - 1), int(region2.TileWidth), int(region2.TileHeight)},
 			Region: region2,
 		})
 	}
 
-	for _, region := range v.regions {
-		v.GenTiles(region)
+	for i, _ := range v.regions {
+		v.GenTiles(&v.regions[i])
 	}
 
 	sx, sy := d2helper.IsoToScreen(int(region.StartX), int(region.StartY), 0, 0)
@@ -100,14 +100,14 @@ func (v *Engine) GetRegionAt(x, y int) *EngineRegion {
 		if !region.Rect.IsInRect(x, y) {
 			continue
 		}
-		return region
+		return &region
 	}
 	return nil
 }
 
 func (v *Engine) Render(target *ebiten.Image) {
 	for _, region := range v.regions {
-		v.RenderRegion(*region, target)
+		v.RenderRegion(region, target)
 	}
 }
 
@@ -116,7 +116,7 @@ func (v *Engine) GenTiles(region *EngineRegion) {
 		offX := -((y + region.Rect.Top) * 80) + (region.Rect.Left * 80)
 		offY := ((y + region.Rect.Top) * 40) + (region.Rect.Left * 40)
 		for x := 0; x < int(region.Region.TileWidth); x++ {
-			region.Tiles = append(region.Tiles, &RegionTile{
+			region.Tiles = append(region.Tiles, RegionTile{
 				tileX: x,
 				tileY: y,
 				offX:  offX,
@@ -135,7 +135,7 @@ func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
 	for i, tile := range region.Tiles {
 		sx, sy := d2helper.IsoToScreen(tile.tileX+region.Rect.Left, tile.tileY+region.Rect.Top, int(v.OffsetX), int(v.OffsetY))
 		if sx > -160 && sy > -160 && sx <= 880 && sy <= 1000 {
-			tilesToRender[i] = *tile
+			tilesToRender[i] = tile
 		}
 	}
 
