@@ -6,10 +6,10 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"sort"
 	"strconv"
 	"sync"
 	"time"
-	"sort"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2dt1"
 
@@ -31,6 +31,13 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 )
+
+//TODO: move to corresponding file
+type ByRarity []d2dt1.Tile
+
+func (a ByRarity) Len() int           { return len(a) }
+func (a ByRarity) Less(i, j int) bool { return a[i].RarityFrameIndex < a[j].RarityFrameIndex }
+func (a ByRarity) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 type Region struct {
 	RegionPath        string
@@ -138,21 +145,6 @@ func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType d2enum
 	}
 }
 
-type ByRarity []d2dt1.Tile
-
-func (a ByRarity) Len() int           { return len(a) }
-func (a ByRarity) Less(i, j int) bool { return a[i].RarityFrameIndex < a[j].RarityFrameIndex }
-func (a ByRarity) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-
-// int sum = prob.get(id, 0);
-// int random = sum == 0 ? 0 : MathUtils.random(sum - 1);
-// for (DT1.Tile tile : tiles) {
-//   random -= tile.rarity;
-//   if (random <= 0) {
-//     return tile;
-//   }
-// }
-
 func (v *Region) getRandomTile(tiles []d2dt1.Tile) *d2dt1.Tile {
 	if len(tiles) == 1 {
 		return &tiles[0]
@@ -191,7 +183,7 @@ func (v *Region) getTile(mainIndex, subIndex, orientation int32) *d2dt1.Tile {
 	return v.getRandomTile(tiles)
 }
 
-func (v *Region) renderFloor(tile d2ds1.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image, tileX, tileY int){
+func (v *Region) renderFloor(tile d2ds1.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image, tileX, tileY int) {
 	tileCacheIndex := fmt.Sprintf("%v-%v-%v-%v", tileY, tileX, tile.MainIndex, tile.SubIndex)
 	tileCache, exists := v.FloorCache[tileCacheIndex]
 	if !exists {
