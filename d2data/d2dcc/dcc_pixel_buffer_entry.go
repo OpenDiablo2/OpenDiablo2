@@ -1,7 +1,7 @@
 package d2dcc
 
 type DCCPixelBufferEntry struct {
-	Value          []byte
+	Value          [4]byte
 	Frame          int
 	FrameCellIndex int
 }
