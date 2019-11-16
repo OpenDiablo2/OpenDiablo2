@@ -8,29 +8,20 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2render"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2data"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2mpq"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
-
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"github.com/hajimehoshi/ebiten/inpututil"
@@ -38,27 +29,26 @@ import (
 
 // Engine is the core OpenDiablo2 engine
 type Engine struct {
-	Settings        *d2common.Configuration // Engine configuration settings from json file
-	Files           map[string]string       // Map that defines which files are in which MPQs
-	CheckedPatch    map[string]bool         // First time we check a file, we'll check if it's in the patch. This notes that we've already checked that.
-	LoadingSprite   d2render.Sprite         // The sprite shown when loading stuff
-	loadingProgress float64                 // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
-	loadingIndex    int                     // Determines which load function is currently being called
-	thingsToLoad    []func()                // The load functions for the next scene
-	stepLoadingSize float64                 // The size for each loading step
-	CurrentScene    d2interface.Scene       // The current scene being rendered
-	UIManager       *d2ui.Manager           // The UI manager
-	SoundManager    *d2audio.Manager        // The sound manager
-	nextScene       d2interface.Scene       // The next scene to be loaded at the end of the game loop
-	fullscreenKey   bool                    // When true, the fullscreen toggle is still being pressed
-	lastTime        float64                 // Last time we updated the scene
-	showFPS         bool
+	Settings      *d2common.Configuration // Engine configuration settings from json file
+	Files         map[string]string       // Map that defines which files are in which MPQs
+	CheckedPatch  map[string]bool         // First time we check a file, we'll check if it's in the patch. This notes that we've already checked that.
+	currentScene  d2interface.Scene       // The current scene being rendered
+	UIManager     *d2ui.Manager           // The UI manager
+	SoundManager  *d2audio.Manager        // The sound manager
+	nextScene     d2interface.Scene       // The next scene to be loaded at the end of the game loop
+	fullscreenKey bool                    // When true, the fullscreen toggle is still being pressed
+	lastTime      float64                 // Last time we updated the scene
+	showFPS       bool
+
+	LoadingSprite  d2render.Sprite // The sprite shown when loading stuff
+	loadingTotal   int32
+	loadingCurrent int32
 }
 
 // CreateEngine creates and instance of the OpenDiablo2 engine
 func CreateEngine() Engine {
 	result := Engine{
-		CurrentScene: nil,
+		currentScene: nil,
 		nextScene:    nil,
 	}
 	result.loadConfigurationFile()
@@ -136,47 +126,11 @@ func (v *Engine) LoadFile(fileName string) []byte {
 	return []byte{}
 }
 
-// IsLoading returns true if the engine is currently in a loading state
-func (v Engine) IsLoading() bool {
-	return v.loadingProgress < 1.0
-}
-
 // LoadSprite loads a sprite from the game's data files
 func (v Engine) LoadSprite(fileName string, palette d2enum.PaletteType) d2render.Sprite {
 	data := v.LoadFile(fileName)
 	sprite := d2render.CreateSprite(data, d2datadict.Palettes[palette])
 	return sprite
-}
-
-// updateScene handles the scene maintenance for the engine
-func (v *Engine) updateScene() {
-	if v.nextScene == nil {
-		if v.thingsToLoad != nil {
-			if v.loadingIndex < len(v.thingsToLoad) {
-				v.thingsToLoad[v.loadingIndex]()
-				v.loadingIndex++
-				if v.loadingIndex < len(v.thingsToLoad) {
-					v.StepLoading()
-				} else {
-					v.FinishLoading()
-					v.thingsToLoad = nil
-				}
-				return
-			}
-		}
-		return
-	}
-	if v.CurrentScene != nil {
-		v.CurrentScene.Unload()
-		runtime.GC()
-	}
-	v.CurrentScene = v.nextScene
-	v.nextScene = nil
-	v.UIManager.Reset()
-	v.thingsToLoad = v.CurrentScene.Load()
-	v.loadingIndex = 0
-	v.SetLoadingStepSize(1.0 / float64(len(v.thingsToLoad)))
-	v.ResetLoading()
 }
 
 // Update updates the internal state of the engine
@@ -198,12 +152,35 @@ func (v *Engine) Update() {
 		ebiten.SetVsyncEnabled(!ebiten.IsVsyncEnabled())
 	}
 
-	v.updateScene()
-	if v.CurrentScene == nil {
-		log.Fatal("no scene loaded")
-	}
+	// Load new scene if enqueud
+	if v.nextScene != nil {
+		if v.currentScene != nil {
+			v.currentScene.Unload()
+			runtime.GC()
+		}
+		v.currentScene, v.nextScene = v.nextScene, nil
 
-	if v.IsLoading() {
+		v.UIManager.Reset()
+		thingsToLoad := v.currentScene.Load()
+
+		v.loadingTotal = int32(len(thingsToLoad))
+		v.loadingCurrent = 0
+
+		start := time.Now()
+		for _, thingToLoad := range thingsToLoad {
+			// Spins up one goroutine for everything that has to be loaded. It may be efficient to
+			// have a limited number of goroutines loaded assets.
+			go func(thingToLoad func()) {
+				thingToLoad()
+				loadingCurrent := atomic.AddInt32(&v.loadingCurrent, 1)
+
+				if loadingCurrent == v.loadingTotal {
+					log.Printf("loaded scene in %v", time.Since(start))
+				}
+			}(thingToLoad)
+		}
+	} else if _, loading := v.isLoading(); loading {
+		// Return early if loading a scene
 		return
 	}
 
@@ -212,23 +189,29 @@ func (v *Engine) Update() {
 	deltaTime := math.Min((currentTime - v.lastTime), 0.1)
 	v.lastTime = currentTime
 
-	v.CurrentScene.Update(deltaTime)
+	v.currentScene.Update(deltaTime)
 	v.UIManager.Update()
 }
 
+func (v *Engine) isLoading() (int32, bool) {
+	loadingCurrent := atomic.LoadInt32(&v.loadingCurrent)
+	return loadingCurrent, loadingCurrent < v.loadingTotal
+}
+
 // Draw draws the game
-func (v Engine) Draw(screen *ebiten.Image) {
-	if v.loadingProgress < 1.0 {
-		v.LoadingSprite.Frame = int16(d2helper.Max(0, d2helper.Min(uint32(len(v.LoadingSprite.Frames)-1), uint32(float64(len(v.LoadingSprite.Frames)-1)*v.loadingProgress))))
+func (v *Engine) Draw(screen *ebiten.Image) {
+	if loadingCurrent, loading := v.isLoading(); loading {
+		v.LoadingSprite.Frame = int16(d2helper.Max(0, d2helper.Min(uint32(len(v.LoadingSprite.Frames)-1), uint32(float64(len(v.LoadingSprite.Frames)-1)*float64(loadingCurrent)/float64(v.loadingTotal)))))
 		v.LoadingSprite.Draw(screen)
 	} else {
-		if v.CurrentScene == nil {
+		if v.currentScene == nil {
 			log.Fatal("no scene loaded")
 		}
-		v.CurrentScene.Render(screen)
+		v.currentScene.Render(screen)
 		v.UIManager.Draw(screen)
 	}
-	if v.showFPS {
+	// if v.showFPS {
+	if true {
 		ebitenutil.DebugPrintAt(screen, "vsync:"+strconv.FormatBool(ebiten.IsVsyncEnabled())+"\nFPS:"+strconv.Itoa(int(ebiten.CurrentFPS())), 5, 565)
 		var m runtime.MemStats
 		runtime.ReadMemStats(&m)
@@ -237,30 +220,9 @@ func (v Engine) Draw(screen *ebiten.Image) {
 		ebitenutil.DebugPrintAt(screen, "HeapSys "+strconv.FormatInt(int64(m.HeapSys/1024/1024), 10), 700, 20)
 		ebitenutil.DebugPrintAt(screen, "NumGC   "+strconv.FormatInt(int64(m.NumGC), 10), 700, 30)
 	}
-
 }
 
 // SetNextScene tells the engine what scene to load on the next update cycle
 func (v *Engine) SetNextScene(nextScene d2interface.Scene) {
 	v.nextScene = nextScene
-}
-
-// SetLoadingStepSize sets the size of the loading step
-func (v *Engine) SetLoadingStepSize(size float64) {
-	v.stepLoadingSize = size
-}
-
-// ResetLoading resets the loading progress
-func (v *Engine) ResetLoading() {
-	v.loadingProgress = 0.0
-}
-
-// StepLoading increments the loading progress
-func (v *Engine) StepLoading() {
-	v.loadingProgress = math.Min(1.0, v.loadingProgress+v.stepLoadingSize)
-}
-
-// FinishLoading terminates the loading phase
-func (v *Engine) FinishLoading() {
-	v.loadingProgress = 1.0
 }
