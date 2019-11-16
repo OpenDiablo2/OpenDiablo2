@@ -172,7 +172,7 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 
 		// Location within the current tile
 		localX := (v.subcellX - v.subcellY) * 16
-		localY := ((v.subcellX + v.subcellY) * 8) - 4
+		localY := ((v.subcellX + v.subcellY) * 8) - 5
 
 		// TODO: Transparency op maybe, but it'l murder batch calls
 		opts := &ebiten.DrawImageOptions{}
