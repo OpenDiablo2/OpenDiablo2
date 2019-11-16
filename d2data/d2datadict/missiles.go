@@ -4,6 +4,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -17,7 +19,7 @@ type MissileCalcParam struct {
 }
 
 type MissileCalc struct {
-	Calc   string
+	Calc   d2common.CalcString
 	Desc   string
 	Params []MissileCalcParam
 }
@@ -64,7 +66,7 @@ type MissileDamage struct {
 	MinLevelDamage [5]int // additional damage per missile level
 	// [0]: lvs 2-8, [1]: lvs 9-16, [2]: lvs 17-22, [3]: lvs 23-28, [4]: lv 29+
 	MaxLevelDamage       [5]int // see above
-	DamageSynergyPerCalc string // works like synergy in skills.txt, not clear
+	DamageSynergyPerCalc d2common.CalcString // works like synergy in skills.txt, not clear
 }
 
 type MissileElementalDamage struct {
@@ -318,7 +320,7 @@ func loadMissileCalcParam(r *[]string, inc func() int) MissileCalcParam {
 
 func loadMissileCalc(r *[]string, inc func() int, params int) MissileCalc {
 	result := MissileCalc{
-		Calc: (*r)[inc()],
+		Calc: d2common.CalcString((*r)[inc()]),
 		Desc: (*r)[inc()],
 	}
 	result.Params = make([]MissileCalcParam, params)
@@ -389,7 +391,7 @@ func loadMissileDamage(r *[]string, inc func() int) MissileDamage {
 			dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
 			dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
 		},
-		DamageSynergyPerCalc: (*r)[inc()],
+		DamageSynergyPerCalc: d2common.CalcString((*r)[inc()]),
 	}
 	return result
 }

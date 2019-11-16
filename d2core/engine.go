@@ -73,6 +73,7 @@ func CreateEngine() Engine {
 	d2datadict.LoadObjects(&result)
 	d2datadict.LoadWeapons(&result)
 	d2datadict.LoadArmors(&result)
+	d2datadict.LoadMiscItems(&result)
 	d2datadict.LoadUniqueItems(&result)
 	d2datadict.LoadMissiles(&result)
 	d2datadict.LoadSounds(&result)

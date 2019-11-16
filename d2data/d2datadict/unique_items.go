@@ -4,6 +4,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -47,7 +49,7 @@ type UniqueItemRecord struct {
 
 type UniqueItemProperty struct {
 	Property  string
-	Parameter string // depending on the property, this may be an int (usually), or a string
+	Parameter d2common.CalcString // depending on the property, this may be an int (usually), or a string
 	Min       int
 	Max       int
 }
@@ -109,7 +111,7 @@ func createUniqueItemRecord(r []string) UniqueItemRecord {
 func createUniqueItemProperty(r *[]string, inc func() int) UniqueItemProperty {
 	result := UniqueItemProperty{
 		Property:  (*r)[inc()],
-		Parameter: (*r)[inc()],
+		Parameter: d2common.CalcString((*r)[inc()]),
 		Min:       dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
 		Max:       dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
 	}
