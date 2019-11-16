@@ -67,7 +67,7 @@ func (v *Credits) LoadContributors() []string {
 	contributors := []string{}
 	file, err := os.Open(path.Join("./", "CONTRIBUTORS"))
 	if err != nil {
-		log.Fatal("CONTRIBUTORS file is missing")
+		log.Print("CONTRIBUTORS file is missing")
 	}
 	defer file.Close()
 
@@ -87,7 +87,7 @@ func (v *Credits) Load() []func() {
 		},
 		func() {
 			v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, v.fileProvider, d2common.TranslateString("#970"))
-			v.exitButton.MoveTo(30, 550)
+			v.exitButton.MoveTo(33, 543)
 			v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 			v.uiManager.AddWidget(&v.exitButton)
 		},
@@ -157,8 +157,11 @@ func (v *Credits) addNextItem() {
 
 	text := v.creditsText[0]
 	v.creditsText = v.creditsText[1:]
-	if len(text) == 0 {
-		v.cyclesTillNextLine = 18
+	if len(text) == 0 && v.creditsText[0][0] != '*' {
+		v.cyclesTillNextLine = 19
+		return
+	} else if len(text) == 0 && v.creditsText[0][0] == '*' {
+		v.cyclesTillNextLine = 38
 		return
 	}
 	isHeading := text[0] == '*'
@@ -176,7 +179,7 @@ func (v *Credits) addNextItem() {
 		isDoubled = true
 
 		// Gotta go side by side
-		label.MoveTo(390-int(width), 605)
+		label.MoveTo(400-int(width), 605)
 
 		text2 := v.creditsText[0]
 		v.creditsText = v.creditsText[1:]
@@ -187,21 +190,21 @@ func (v *Credits) addNextItem() {
 
 		label2.MoveTo(410, 605)
 	} else {
-		label.MoveTo(400-int(width/2), 605)
+		label.MoveTo(405-int(width/2), 605)
 	}
 
 	if isHeading && isNextHeading {
-		v.cyclesTillNextLine = 40
+		v.cyclesTillNextLine = 38
 	} else if isNextHeading {
 		if isDoubled {
-			v.cyclesTillNextLine = 40
+			v.cyclesTillNextLine = 38
 		} else {
-			v.cyclesTillNextLine = 70
+			v.cyclesTillNextLine = 57
 		}
 	} else if isHeading {
-		v.cyclesTillNextLine = 40
+		v.cyclesTillNextLine = 38
 	} else {
-		v.cyclesTillNextLine = 18
+		v.cyclesTillNextLine = 19
 	}
 }
 

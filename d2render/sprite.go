@@ -6,7 +6,6 @@ import (
 	"image/color"
 	"log"
 	"sync"
-	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
 
@@ -27,7 +26,7 @@ type Sprite struct {
 	X, Y               int
 	Frame, Direction   int16
 	Blend              bool
-	LastFrameTime      time.Time
+	LastFrameTime      float64
 	Animate            bool
 	ColorMod           color.Color
 	valid              bool
@@ -62,7 +61,7 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
 		Directions:         binary.LittleEndian.Uint32(data[16:20]),
 		FramesPerDirection: binary.LittleEndian.Uint32(data[20:24]),
 		Animate:            false,
-		LastFrameTime:      time.Now(),
+		LastFrameTime:      d2helper.Now(),
 		SpecialFrameTime:   -1,
 		StopOnLastFrame:    false,
 		valid:              false,
@@ -228,15 +227,16 @@ func (v *Sprite) updateAnimation() {
 	if !v.Animate {
 		return
 	}
-	var timePerFrame time.Duration
+	var timePerFrame float64
 
 	if v.SpecialFrameTime >= 0 {
-		timePerFrame = time.Duration(float64(time.Millisecond) * (float64(v.SpecialFrameTime) / float64(len(v.Frames))))
+		timePerFrame = (float64(v.SpecialFrameTime) / float64(len(v.Frames))) / 1000.0
 	} else {
-		timePerFrame = time.Duration(float64(time.Second) * (1.0 / float64(len(v.Frames))))
+		timePerFrame = 1.0 / float64(len(v.Frames))
 	}
-	for time.Since(v.LastFrameTime) >= timePerFrame {
-		v.LastFrameTime = v.LastFrameTime.Add(timePerFrame)
+	now := d2helper.Now()
+	for v.LastFrameTime+timePerFrame < now {
+		v.LastFrameTime += timePerFrame
 		if !v.AnimateBackwards {
 			v.Frame++
 			if v.Frame >= int16(v.FramesPerDirection) {
@@ -260,7 +260,7 @@ func (v *Sprite) updateAnimation() {
 }
 
 func (v *Sprite) ResetAnimation() {
-	v.LastFrameTime = time.Now()
+	v.LastFrameTime = d2helper.Now()
 	v.Frame = 0
 }
 

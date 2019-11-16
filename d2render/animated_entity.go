@@ -6,7 +6,6 @@ import (
 	"log"
 	"math"
 	"strings"
-	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2cof"
 
@@ -44,9 +43,9 @@ type AnimatedEntity struct {
 	token              string
 	animationMode      string
 	weaponClass        string
-	lastFrameTime      time.Time
+	lastFrameTime      float64
 	framesToAnimate    int
-	animationSpeed     int
+	animationSpeed     float64
 	direction          int
 	currentFrame       int
 	frames             map[string][]*ebiten.Image
@@ -151,11 +150,13 @@ func (v *AnimatedEntity) LoadLayer(layer string, fileProvider d2interface.FilePr
 // Render draws this animated entity onto the target
 func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 	if v.animationSpeed > 0 {
-		for v.lastFrameTime.Add(time.Millisecond * time.Duration(v.animationSpeed)).Before(time.Now()) {
-			v.lastFrameTime = v.lastFrameTime.Add(time.Millisecond * time.Duration(v.animationSpeed))
-			v.currentFrame++
-			if v.currentFrame >= v.framesToAnimate {
-				v.currentFrame = 0
+		now := d2helper.Now()
+		framesToAdd := math.Floor((now - v.lastFrameTime) / v.animationSpeed)
+		if framesToAdd > 0 {
+			v.lastFrameTime += v.animationSpeed * framesToAdd
+			v.currentFrame += int(math.Floor(framesToAdd))
+			for v.currentFrame >= v.framesToAnimate {
+				v.currentFrame -= v.framesToAnimate
 			}
 		}
 	}
@@ -170,8 +171,8 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 		}
 
 		// Location within the current tile
-		localX := ((v.subcellX - v.subcellY) * 16)
-		localY := ((v.subcellX + v.subcellY) * 8) - 4
+		localX := (v.subcellX - v.subcellY) * 16
+		localY := ((v.subcellX + v.subcellY) * 8) - 5
 
 		// TODO: Transparency op maybe, but it'l murder batch calls
 		opts := &ebiten.DrawImageOptions{}
@@ -187,9 +188,9 @@ func (v *AnimatedEntity) cacheFrames(layerName string) {
 	dcc := v.dccLayers[layerName]
 	v.currentFrame = 0
 	animationData := d2data.AnimationData[strings.ToLower(v.token+v.animationMode+v.weaponClass)][0]
-	v.animationSpeed = int(1000.0 / ((float64(animationData.AnimationSpeed) * 25.0) / 256.0))
+	v.animationSpeed = 1.0 / ((float64(animationData.AnimationSpeed) * 25.0) / 256.0)
 	v.framesToAnimate = animationData.FramesPerDirection
-	v.lastFrameTime = time.Now()
+	v.lastFrameTime = d2helper.Now()
 	minX := int32(10000)
 	minY := int32(10000)
 	maxX := int32(-10000)
