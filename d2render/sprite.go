@@ -7,9 +7,10 @@ import (
 	"log"
 	"sync"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
+	"github.com/OpenDiablo2/D2Shared/d2helper"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corehelper"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -295,7 +296,7 @@ func (v *Sprite) Draw(target *ebiten.Image) {
 		opts.CompositeMode = ebiten.CompositeModeSourceOver
 	}
 	if v.ColorMod != nil {
-		opts.ColorM = d2helper.ColorToColorM(v.ColorMod)
+		opts.ColorM = d2corehelper.ColorToColorM(v.ColorMod)
 	}
 	if err := target.DrawImage(frame.Image, opts); err != nil {
 		log.Panic(err.Error())
@@ -322,7 +323,7 @@ func (v *Sprite) DrawSegments(target *ebiten.Image, xSegments, ySegments, offset
 				opts.CompositeMode = ebiten.CompositeModeSourceOver
 			}
 			if v.ColorMod != nil {
-				opts.ColorM = d2helper.ColorToColorM(v.ColorMod)
+				opts.ColorM = d2corehelper.ColorToColorM(v.ColorMod)
 			}
 			if err := target.DrawImage(frame.Image, opts); err != nil {
 				log.Panic(err.Error())
