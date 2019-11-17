@@ -204,6 +204,17 @@ func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
 
 func (v *Engine) RenderPass1(region *Region, offX, offY, x, y int, target *ebiten.Image) {
 	tile := region.DS1.Tiles[y][x]
+	// Draw lower walls
+	for i := range tile.Walls {
+		if tile.Walls[i].Orientation <= 15 {
+			continue
+		}
+		if tile.Walls[i].Hidden || tile.Walls[i].Orientation == 10 || tile.Walls[i].Orientation == 11 || tile.Walls[i].Orientation == 0 {
+			continue
+		}
+		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
+	}
+
 	for i := range tile.Floors {
 		if tile.Floors[i].Hidden || tile.Floors[i].Prop1 == 0 {
 			continue
@@ -217,16 +228,6 @@ func (v *Engine) RenderPass1(region *Region, offX, offY, x, y int, target *ebite
 		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeShadows, i, target)
 	}
 
-	// Draw lower walls
-	for i := range tile.Walls {
-		if tile.Walls[i].Orientation <= 15 {
-			continue
-		}
-		if tile.Walls[i].Hidden || tile.Walls[i].Orientation == 10 || tile.Walls[i].Orientation == 11 || tile.Walls[i].Orientation == 0 {
-			continue
-		}
-		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
-	}
 }
 
 func (v *Engine) RenderPass2(region *Region, offX, offY, x, y int, target *ebiten.Image) {

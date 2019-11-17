@@ -224,10 +224,7 @@ func (v *Region) renderWall(tile d2ds1.WallRecord, offsetX, offsetY int, target 
 	}
 
 	yAdjust := 0
-	if tile.Orientation > 15 {
-		// Lower Walls
-		yAdjust = 80
-	} else if tile.Orientation == 15 {
+	if tile.Orientation == 15 {
 		// Roof
 		yAdjust = -int(tileData.RoofHeight)
 	} else {
