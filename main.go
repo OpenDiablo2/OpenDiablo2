@@ -11,10 +11,10 @@ import (
 
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/D2Shared/d2common"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2mpq"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2mpq"
 	"github.com/hajimehoshi/ebiten"
 )
 

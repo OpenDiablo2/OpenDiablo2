@@ -1,4 +1,4 @@
-package d2interface
+package d2coreinterface
 
 import "github.com/hajimehoshi/ebiten"
 

@@ -5,16 +5,16 @@ import (
 	"math"
 	"os"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
+	"github.com/OpenDiablo2/D2Shared/d2helper"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
+	_map "github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
@@ -25,7 +25,7 @@ type MapEngineTest struct {
 	uiManager     *d2ui.Manager
 	soundManager  *d2audio.Manager
 	fileProvider  d2interface.FileProvider
-	sceneProvider d2interface.SceneProvider
+	sceneProvider d2coreinterface.SceneProvider
 	gameState     *d2core.GameState
 	mapEngine     *d2mapengine.Engine
 	currentRegion int
@@ -34,7 +34,7 @@ type MapEngineTest struct {
 
 func CreateMapEngineTest(
 	fileProvider d2interface.FileProvider,
-	sceneProvider d2interface.SceneProvider,
+	sceneProvider d2coreinterface.SceneProvider,
 	uiManager *d2ui.Manager,
 	soundManager *d2audio.Manager,
 	currentRegion int) *MapEngineTest {
