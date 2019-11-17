@@ -145,12 +145,13 @@ func (v *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 
 	if n == 0 {
 		v.mapEngine.GenerateAct1Overworld()
-		return
+	} else {
+		v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider) // necessary for map name update
+		v.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 	}
-	v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider) // necessary for map name update
-	v.mapEngine.OffsetY = 0
-	v.mapEngine.OffsetX = 0
-	v.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
+	isox, isoy := d2helper.IsoToScreen(v.mapEngine.GetRegion(0).Rect.Width/2,
+		v.mapEngine.GetRegion(0).Rect.Height/2, 0, 0)
+	v.mapEngine.CenterCameraOn(float64(isox), float64(isoy))
 }
 
 func (v *MapEngineTest) Load() []func() {
@@ -160,7 +161,6 @@ func (v *MapEngineTest) Load() []func() {
 	return []func(){
 		func() {
 			v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider)
-
 			v.LoadRegionByIndex(v.currentRegion, v.levelPreset, v.fileIndex)
 		},
 	}
