@@ -2,7 +2,6 @@ package d2scene
 
 import (
 	"image/color"
-	"log"
 
 	"github.com/OpenDiablo2/D2Shared/d2helper"
 
@@ -113,7 +112,6 @@ func (v *Game) Update(tickTime float64) {
 		newDirection := d2render.DirectionLookup[directionIndex]
 		if newDirection != v.mapEngine.Hero.AnimatedEntity.GetDirection() {
 			v.mapEngine.Hero.AnimatedEntity.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), v.mapEngine.Hero.Equipment.RightHand.GetWeaponClass(), newDirection)
-			log.Printf("Angle: %d -> %d", directionIndex, newDirection)
 		}
 	}
 

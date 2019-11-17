@@ -73,7 +73,7 @@ func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fil
 }
 
 // DirectionLookup is used to decode the direction offset indexes
-var DirectionLookup = []int{9, 15, 5, 6, 4, 10, 2, 8, 0, 0, 0, 0, 0, 0, 0, 0}
+var DirectionLookup = []int{9, 15, 5, 6, 4, 12, 10, 2, 8, 13, 1, 7, 0, 14, 11, 3}
 
 func (v AnimatedEntity) GetDirection() int {
 	return v.direction
