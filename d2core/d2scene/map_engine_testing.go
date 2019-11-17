@@ -113,7 +113,7 @@ func CreateMapEngineTest(
 		sceneProvider: sceneProvider,
 		currentRegion: currentRegion,
 		levelPreset:   levelPreset,
-		fileIndex:     -1,
+		fileIndex:     0,
 		regionSpec:    RegionSpec{},
 		filesCount:    0,
 		keyLocked:     false,
@@ -233,19 +233,19 @@ func (v *MapEngineTest) Update(tickTime float64) {
 		v.mapEngine.OffsetX -= tickTime * 800
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyF7) {
-		if v.mapEngine.ShowTiles < 2 {
-			v.mapEngine.ShowTiles++
-		} else {
-			v.mapEngine.ShowTiles = 0
-		}
-	}
-
 	if v.uiManager.KeyPressed(ebiten.KeyEscape) {
 		os.Exit(0)
 	}
 
 	if !v.keyLocked {
+
+		if inpututil.IsKeyJustPressed(ebiten.KeyF7) {
+			if v.mapEngine.ShowTiles < 2 {
+				v.mapEngine.ShowTiles++
+			} else {
+				v.mapEngine.ShowTiles = 0
+			}
+		}
 
 		if v.uiManager.KeyPressed(ebiten.KeyN) && ctrlPressed {
 			v.fileIndex = increment(v.fileIndex, 0, v.filesCount-1)
