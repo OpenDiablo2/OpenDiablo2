@@ -3,9 +3,6 @@ package main
 import (
 	"image"
 	"log"
-	"runtime"
-
-	"github.com/pkg/profile"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
 
@@ -13,8 +10,8 @@ import (
 
 	"github.com/OpenDiablo2/D2Shared/d2common"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 	"github.com/hajimehoshi/ebiten"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -30,11 +27,11 @@ var region = kingpin.Arg("region", "Region type id").Int()
 var preset = kingpin.Arg("preset", "Level preset").Int()
 
 func main() {
-	procs := runtime.GOMAXPROCS(16)
-	log.Printf("Setting gomaxprocs to 16, it was previously set to %d", procs)
+	//procs := runtime.GOMAXPROCS(16)
+	//log.Printf("Setting gomaxprocs to 16, it was previously set to %d", procs)
 	//runtime.LockOSThread()
-	defer runtime.UnlockOSThread()
-	defer profile.Start(profile.ProfilePath(".")).Stop()
+	//defer runtime.UnlockOSThread()
+	//defer profile.Start(profile.ProfilePath(".")).Stop()
 	if len(GitBranch) == 0 {
 		GitBranch = "Local Build"
 		GitCommit = ""
