@@ -1,18 +1,19 @@
 package d2scene
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2video"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2video"
 	"github.com/hajimehoshi/ebiten"
 )
 
 type BlizzardIntro struct {
 	fileProvider  d2interface.FileProvider
-	sceneProvider d2interface.SceneProvider
+	sceneProvider d2coreinterface.SceneProvider
 	videoDecoder  *d2video.BinkDecoder
 }
 
-func CreateBlizzardIntro(fileProvider d2interface.FileProvider, sceneProvider d2interface.SceneProvider) *BlizzardIntro {
+func CreateBlizzardIntro(fileProvider d2interface.FileProvider, sceneProvider d2coreinterface.SceneProvider) *BlizzardIntro {
 	result := &BlizzardIntro{
 		fileProvider:  fileProvider,
 		sceneProvider: sceneProvider,

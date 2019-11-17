@@ -1,4 +1,4 @@
-package d2helper
+package d2corehelper
 
 import (
 	"image/color"

@@ -3,9 +3,9 @@ package d2ui
 import (
 	"image/color"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 
 	"github.com/hajimehoshi/ebiten"
 )

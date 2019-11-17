@@ -8,19 +8,20 @@ import (
 	"path"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2helper"
+	"github.com/OpenDiablo2/D2Shared/d2common"
+	dh "github.com/OpenDiablo2/D2Shared/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 	"github.com/hajimehoshi/ebiten"
 )
@@ -36,7 +37,7 @@ type Credits struct {
 	uiManager          *d2ui.Manager
 	soundManager       *d2audio.Manager
 	fileProvider       d2interface.FileProvider
-	sceneProvider      d2interface.SceneProvider
+	sceneProvider      d2coreinterface.SceneProvider
 	creditsBackground  d2render.Sprite
 	exitButton         d2ui.Button
 	creditsText        []string
@@ -47,7 +48,7 @@ type Credits struct {
 }
 
 // CreateCredits creates an instance of the credits scene
-func CreateCredits(fileProvider d2interface.FileProvider, sceneProvider d2interface.SceneProvider, uiManager *d2ui.Manager, soundManager *d2audio.Manager) *Credits {
+func CreateCredits(fileProvider d2interface.FileProvider, sceneProvider d2coreinterface.SceneProvider, uiManager *d2ui.Manager, soundManager *d2audio.Manager) *Credits {
 	result := &Credits{
 		fileProvider:       fileProvider,
 		uiManager:          uiManager,

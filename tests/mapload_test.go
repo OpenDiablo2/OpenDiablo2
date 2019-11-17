@@ -7,9 +7,9 @@ import (
 
 	_map "github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/D2Shared/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2mpq"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2mpq"
 )
 
 func TestMapGenerationPerformance(t *testing.T) {
