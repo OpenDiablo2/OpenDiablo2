@@ -11,23 +11,24 @@ import (
 	"sync"
 	"time"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2dt1"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dt1"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2ds1"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2ds1"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
+	"github.com/OpenDiablo2/D2Shared/d2helper"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corehelper"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data"
+	"github.com/OpenDiablo2/D2Shared/d2data"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -241,7 +242,7 @@ func (v *Region) renderShadow(tile d2ds1.FloorShadowRecord, offsetX, offsetY int
 	}
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(float64(offsetX+tileCache.XOffset), float64(offsetY+tileCache.YOffset))
-	opts.ColorM = d2helper.ColorToColorM(color.RGBA{255, 255, 255, 160})
+	opts.ColorM = d2corehelper.ColorToColorM(color.RGBA{255, 255, 255, 160})
 	target.DrawImage(tileCache.Image, opts)
 }
 

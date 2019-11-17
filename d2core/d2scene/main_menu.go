@@ -10,18 +10,19 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/D2Shared/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 
 	"github.com/hajimehoshi/ebiten"
@@ -32,7 +33,7 @@ type MainMenu struct {
 	uiManager           *d2ui.Manager
 	soundManager        *d2audio.Manager
 	fileProvider        d2interface.FileProvider
-	sceneProvider       d2interface.SceneProvider
+	sceneProvider       d2coreinterface.SceneProvider
 	trademarkBackground d2render.Sprite
 	background          d2render.Sprite
 	diabloLogoLeft      d2render.Sprite
@@ -56,7 +57,7 @@ type MainMenu struct {
 }
 
 // CreateMainMenu creates an instance of MainMenu
-func CreateMainMenu(fileProvider d2interface.FileProvider, sceneProvider d2interface.SceneProvider, uiManager *d2ui.Manager, soundManager *d2audio.Manager) *MainMenu {
+func CreateMainMenu(fileProvider d2interface.FileProvider, sceneProvider d2coreinterface.SceneProvider, uiManager *d2ui.Manager, soundManager *d2audio.Manager) *MainMenu {
 	result := &MainMenu{
 		fileProvider:        fileProvider,
 		uiManager:           uiManager,

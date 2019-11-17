@@ -8,19 +8,20 @@ import (
 	"path"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2helper"
+	"github.com/OpenDiablo2/D2Shared/d2common"
+	dh "github.com/OpenDiablo2/D2Shared/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 	"github.com/hajimehoshi/ebiten"
 )
@@ -36,7 +37,7 @@ type Credits struct {
 	uiManager          *d2ui.Manager
 	soundManager       *d2audio.Manager
 	fileProvider       d2interface.FileProvider
-	sceneProvider      d2interface.SceneProvider
+	sceneProvider      d2coreinterface.SceneProvider
 	creditsBackground  d2render.Sprite
 	exitButton         d2ui.Button
 	creditsText        []string
@@ -47,7 +48,7 @@ type Credits struct {
 }
 
 // CreateCredits creates an instance of the credits scene
-func CreateCredits(fileProvider d2interface.FileProvider, sceneProvider d2interface.SceneProvider, uiManager *d2ui.Manager, soundManager *d2audio.Manager) *Credits {
+func CreateCredits(fileProvider d2interface.FileProvider, sceneProvider d2coreinterface.SceneProvider, uiManager *d2ui.Manager, soundManager *d2audio.Manager) *Credits {
 	result := &Credits{
 		fileProvider:       fileProvider,
 		uiManager:          uiManager,
@@ -87,7 +88,7 @@ func (v *Credits) Load() []func() {
 		},
 		func() {
 			v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, v.fileProvider, d2common.TranslateString("#970"))
-			v.exitButton.MoveTo(30, 550)
+			v.exitButton.MoveTo(33, 543)
 			v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 			v.uiManager.AddWidget(&v.exitButton)
 		},
@@ -157,8 +158,11 @@ func (v *Credits) addNextItem() {
 
 	text := v.creditsText[0]
 	v.creditsText = v.creditsText[1:]
-	if len(text) == 0 {
-		v.cyclesTillNextLine = 18
+	if len(text) == 0 && v.creditsText[0][0] != '*' {
+		v.cyclesTillNextLine = 19
+		return
+	} else if len(text) == 0 && v.creditsText[0][0] == '*' {
+		v.cyclesTillNextLine = 38
 		return
 	}
 	isHeading := text[0] == '*'
@@ -176,7 +180,7 @@ func (v *Credits) addNextItem() {
 		isDoubled = true
 
 		// Gotta go side by side
-		label.MoveTo(390-int(width), 605)
+		label.MoveTo(400-int(width), 605)
 
 		text2 := v.creditsText[0]
 		v.creditsText = v.creditsText[1:]
@@ -187,21 +191,21 @@ func (v *Credits) addNextItem() {
 
 		label2.MoveTo(410, 605)
 	} else {
-		label.MoveTo(400-int(width/2), 605)
+		label.MoveTo(405-int(width/2), 605)
 	}
 
 	if isHeading && isNextHeading {
-		v.cyclesTillNextLine = 40
+		v.cyclesTillNextLine = 38
 	} else if isNextHeading {
 		if isDoubled {
-			v.cyclesTillNextLine = 40
+			v.cyclesTillNextLine = 38
 		} else {
-			v.cyclesTillNextLine = 70
+			v.cyclesTillNextLine = 57
 		}
 	} else if isHeading {
-		v.cyclesTillNextLine = 40
+		v.cyclesTillNextLine = 38
 	} else {
-		v.cyclesTillNextLine = 18
+		v.cyclesTillNextLine = 19
 	}
 }
 

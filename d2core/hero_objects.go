@@ -1,7 +1,7 @@
 package d2core
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 )
 
 var HeroObjects map[d2enum.Hero]CharacterEquipment

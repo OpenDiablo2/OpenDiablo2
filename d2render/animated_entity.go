@@ -7,21 +7,21 @@ import (
 	"math"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2cof"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2cof"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2dcc"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dcc"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
+	"github.com/OpenDiablo2/D2Shared/d2helper"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/D2Shared/d2common"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data"
+	"github.com/OpenDiablo2/D2Shared/d2data"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -172,7 +172,7 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 
 		// Location within the current tile
 		localX := (v.subcellX - v.subcellY) * 16
-		localY := ((v.subcellX + v.subcellY) * 8) - 4
+		localY := ((v.subcellX + v.subcellY) * 8) - 5
 
 		// TODO: Transparency op maybe, but it'l murder batch calls
 		opts := &ebiten.DrawImageOptions{}
