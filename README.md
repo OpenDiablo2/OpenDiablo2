@@ -29,13 +29,20 @@ To run the project, run `go run .` from the root folder.
 
 You can also open the root folder in VSCode. Make sure you have the `ms-vscode.go` plugin installed.
 
+### Linux
+
+There are several dependencies which need to be installed additionally.
+To install them you can use `run.sh` in the project root folder - this script takes care of the installation for you.
+
 ## Contributing
 
 The imports for this project utilize `github.com/OpenDiablo2/OpenDiablo2`. This means that even if you clone the repo, changes will not be taken as it will
 still pull from the main repo's files. In order to use your local version, add the following to `go.mod` in the base folder:
+
 ```
 replace github.com/OpenDiablo2/OpenDiablo2 => /your/forked/import/path
 ```
+
 This will tell go to use your local path instead of the official repo. Be sure to exclude this change from your pull requests!
 
 If you find something you'd like to fix thats obviously broken, create a branch, commit your code, and submit a pull request. If it's a new or missing feature you'd like to see, add an issue, and be descriptive!
@@ -43,14 +50,16 @@ If you find something you'd like to fix thats obviously broken, create a branch,
 If you'd like to help out and are not quite sure how, you can look through any open issues and tasks, or ask
 for tasks on our discord server.
 
-
 ## VS Code Extensions
 
 The following extensions are recommended for working with this project:
- * ms-vscode.go
- * defaltd.go-coverage-viewer
 
-You can get to it by going to settings <kbd>Ctrl+,</kbd>, expanding `Extensions` and selecting `Go configuration`,
+-   ms-vscode.go
+-   defaltd.go-coverage-viewer
+
+When you open the workspace for the first time, Visual Studio Code will automatically suggest these extensions for installation.
+
+Alternatively you can get to it by going to settings <kbd>Ctrl+,</kbd>, expanding `Extensions` and selecting `Go configuration`,
 then clicking on `Edit in settings.json`. Just paste that section where appropriate.
 
 ## Configuration
@@ -66,9 +75,10 @@ the game in a different location, the base path may have to be adjusted.
 ![Select Hero](docs/SelectHeroSS.png)
 
 ## Additional Credits
-- Diablo2 Logo
-  - Jose Pardilla (th3-prophetman)
-- DT1 File Specifications
-  - Paul SIRAMY (http://paul.siramy.free.fr/_divers/dt1_doc/)
-- Other Specifications and general info
-  - Various users on [Phrozen Keep](https://d2mods.info/home.php)
+
+-   Diablo2 Logo
+    -   Jose Pardilla (th3-prophetman)
+-   DT1 File Specifications
+    -   Paul SIRAMY (http://paul.siramy.free.fr/_divers/dt1_doc/)
+-   Other Specifications and general info
+    -   Various users on [Phrozen Keep](https://d2mods.info/home.php)

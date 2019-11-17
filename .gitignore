@@ -1,5 +1,6 @@
 **/*__debug_bin
 .vscode/**/*
+!.vscode/extensions.json
 **/Client.exe
 **/Client
 .idea/**/*
