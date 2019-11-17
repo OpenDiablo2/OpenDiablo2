@@ -6,7 +6,6 @@ import (
 
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 
-	"github.com/OpenDiablo2/D2Shared/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corehelper"
 
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"

@@ -14,7 +14,6 @@ import (
 
 	"github.com/OpenDiablo2/D2Shared/d2helper"
 
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
@@ -94,7 +93,7 @@ func CreateEngine() Engine {
 
 func (v *Engine) loadConfigurationFile() {
 	log.Println("Loading configuration file")
-	v.Settings = d2common.LoadConfiguration()
+	v.Settings = d2corecommon.LoadConfiguration()
 }
 
 func (v *Engine) mapMpqFiles() {
