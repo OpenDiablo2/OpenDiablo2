@@ -40,6 +40,7 @@ type Engine struct {
 	OffsetX      float64
 	OffsetY      float64
 	ShowTiles    int
+	Hero         *d2core.Hero
 }
 
 func CreateMapEngine(gameState *d2core.GameState, soundManager *d2audio.Manager, fileProvider d2interface.FileProvider) *Engine {
@@ -50,6 +51,15 @@ func CreateMapEngine(gameState *d2core.GameState, soundManager *d2audio.Manager,
 		regions:      make([]EngineRegion, 0),
 	}
 	return result
+}
+
+func (v *Engine) GetRegion(regionIndex int) *EngineRegion {
+	return &v.regions[regionIndex]
+}
+
+func (v *Engine) CenterCameraOn(x, y float64) {
+	v.OffsetX = -(x - 400)
+	v.OffsetY = -(y - 300)
 }
 
 func (v *Engine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) {
@@ -208,6 +218,9 @@ func (v *Engine) RenderPass2(region *Region, offX, offY, x, y int, target *ebite
 		if int(math.Floor(npc.AnimatedEntity.LocationX)) == x && int(math.Floor(npc.AnimatedEntity.LocationY)) == y {
 			npc.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
 		}
+	}
+	if v.Hero != nil && int(v.Hero.AnimatedEntity.LocationX) == x && int(v.Hero.AnimatedEntity.LocationY) == y {
+		v.Hero.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
 	}
 }
 

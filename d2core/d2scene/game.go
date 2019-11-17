@@ -2,14 +2,19 @@ package d2scene
 
 import (
 	"image/color"
+	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
+	"github.com/OpenDiablo2/D2Shared/d2helper"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
+
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 	"github.com/hajimehoshi/ebiten"
@@ -24,6 +29,7 @@ type Game struct {
 	pentSpinLeft  d2render.Sprite
 	pentSpinRight d2render.Sprite
 	testLabel     d2ui.Label
+	mapEngine     *d2mapengine.Engine
 }
 
 func CreateGame(
@@ -64,6 +70,21 @@ func (v *Game) Load() []func() {
 			v.testLabel.SetText("Soon :tm:")
 			v.testLabel.MoveTo(400, 250)
 		},
+		func() {
+			v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider)
+			// TODO: This needs to be different depending on the act of the player
+			v.mapEngine.GenerateMap(d2enum.RegionAct1Town, 1, 0)
+			region := v.mapEngine.GetRegion(0)
+			rx, ry := d2helper.IsoToScreen(int(region.Region.StartX), int(region.Region.StartY), 0, 0)
+			v.mapEngine.CenterCameraOn(float64(rx), float64(ry))
+			v.mapEngine.Hero = d2core.CreateHero(
+				int32((region.Region.StartX*5)+3),
+				int32((region.Region.StartY*5)+3),
+				0,
+				v.gameState.HeroType,
+				v.gameState.Equipment,
+				v.fileProvider)
+		},
 	}
 }
 
@@ -73,11 +94,29 @@ func (v *Game) Unload() {
 
 func (v Game) Render(screen *ebiten.Image) {
 	screen.Fill(color.Black)
-	v.pentSpinLeft.Draw(screen)
-	v.pentSpinRight.Draw(screen)
-	v.testLabel.Draw(screen)
+	v.mapEngine.Render(screen)
 }
 
 func (v *Game) Update(tickTime float64) {
+	// TODO: Pathfinding
+	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		mx, my := ebiten.CursorPosition()
+		px, py := d2helper.ScreenToIso(float64(mx)-v.mapEngine.OffsetX, float64(my)-v.mapEngine.OffsetY)
+		angle := 359 - d2helper.GetAngleBetween(
+			v.mapEngine.Hero.AnimatedEntity.LocationX,
+			v.mapEngine.Hero.AnimatedEntity.LocationY,
+			px,
+			py,
+		)
 
+		directionIndex := int((float64(angle) / 360.0) * 16.0)
+		newDirection := d2render.DirectionLookup[directionIndex]
+		if newDirection != v.mapEngine.Hero.AnimatedEntity.GetDirection() {
+			v.mapEngine.Hero.AnimatedEntity.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), v.mapEngine.Hero.Equipment.RightHand.GetWeaponClass(), newDirection)
+			log.Printf("Angle: %d -> %d", directionIndex, newDirection)
+		}
+	}
+
+	rx, ry := d2helper.IsoToScreen(int(v.mapEngine.Hero.AnimatedEntity.LocationX), int(v.mapEngine.Hero.AnimatedEntity.LocationY), 0, 0)
+	v.mapEngine.CenterCameraOn(float64(rx), float64(ry))
 }
