@@ -290,13 +290,6 @@ func (v *MapEngineTest) Update(tickTime float64) {
 		}
 	}
 
-			v.currentRegion = decrement(v.currentRegion, 0, len(regions))
-			v.keyLocked = true
-			v.sceneProvider.SetNextScene(v)
-			return
-		}
-	}
-
 	//FIXME: do it better
 	if !v.uiManager.KeyPressed(ebiten.KeyP) && !v.uiManager.KeyPressed(ebiten.KeyN) {
 		v.keyLocked = false

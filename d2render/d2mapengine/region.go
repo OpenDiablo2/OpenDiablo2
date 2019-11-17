@@ -187,29 +187,6 @@ func (v *Region) getRandomTile(tiles []d2dt1.Tile) *d2dt1.Tile {
 	return &tiles[0]
 }
 
-func (v *Region) getRandomTile(tiles []d2dt1.Tile) *d2dt1.Tile {
-	if len(tiles) == 1 {
-		return &tiles[0]
-	}
-	sort.Sort(ByRarity(tiles))
-	s := 0
-	for _, t := range tiles {
-		s += int(t.RarityFrameIndex)
-	}
-	rand.Seed(time.Now().UnixNano())
-	r := 0
-	if s != 0 {
-		r = rand.Intn(s) + 1
-	}
-	for _, t := range tiles {
-		r -= int(t.RarityFrameIndex)
-		if r <= 0 {
-			return &t
-		}
-	}
-	return &tiles[0]
-}
-
 func (v *Region) getTile(mainIndex, subIndex, orientation int32) *d2dt1.Tile {
 	tiles := []d2dt1.Tile{}
 	for _, tile := range v.Tiles {
