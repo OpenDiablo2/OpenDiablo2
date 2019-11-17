@@ -122,14 +122,14 @@ func (v *Region) loadObjects(fileProvider d2interface.FileProvider) {
 		case d2datadict.ObjectTypeCharacter:
 			// Temp code, maybe..
 			if object.Lookup.Base == "" || object.Lookup.Token == "" || object.Lookup.TR == "" {
-				return
+				continue
 			}
 			npc := d2core.CreateNPC(object.X, object.Y, object.Lookup, fileProvider, 1)
 			npc.SetPaths(object.Paths)
 			v.NPCs = append(v.NPCs, npc)
 		case d2datadict.ObjectTypeItem:
 			if object.ObjectInfo == nil || !object.ObjectInfo.Draw || object.Lookup.Base == "" || object.Lookup.Token == "" {
-				return
+				continue
 			}
 			entity := d2render.CreateAnimatedEntity(object.X, object.Y, object.Lookup, fileProvider, d2enum.Units)
 			entity.SetMode(object.Lookup.Mode, object.Lookup.Class, 0)
@@ -428,7 +428,6 @@ func (v *Region) GetImageCacheRecord(mainIndex, subIndex, orientation byte) *ebi
 }
 
 func (v *Region) SetImageCacheRecord(mainIndex, subIndex, orientation byte, image *ebiten.Image) {
-	log.Printf("Set tile cache for %d:%d:%d", mainIndex, subIndex, orientation)
 	lookupIndex := uint32(mainIndex)<<16 | uint32(subIndex)<<8 | uint32(orientation)
 	v.imageCacheRecords[lookupIndex] = image
 }
