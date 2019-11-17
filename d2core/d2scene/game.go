@@ -4,17 +4,17 @@ import (
 	"image/color"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
+	"github.com/OpenDiablo2/D2Shared/d2helper"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 	"github.com/hajimehoshi/ebiten"
@@ -73,7 +73,7 @@ func (v *Game) Load() []func() {
 		func() {
 			v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider)
 			// TODO: This needs to be different depending on the act of the player
-			v.mapEngine.GenerateMap(d2enum.RegionAct1Town, 1)
+			v.mapEngine.GenerateMap(d2enum.RegionAct1Town, 1, 0)
 			region := v.mapEngine.GetRegion(0)
 			rx, ry := d2helper.IsoToScreen(int(region.Region.StartX), int(region.Region.StartY), 0, 0)
 			v.mapEngine.CenterCameraOn(float64(rx), float64(ry))
