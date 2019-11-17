@@ -149,14 +149,13 @@ func (v *Engine) GenTiles(region *EngineRegion) {
 func (v *Engine) GenTilesCache(region *EngineRegion) {
 	n := 0
 	for _, t := range region.Tiles {
-		if t.tileX < len(region.Region.DS1.Tiles) && t.tileY < len(region.Region.DS1.Tiles[t.tileX]) {
-			tile := region.Region.DS1.Tiles[t.tileX][t.tileY]
+		if t.tileY < len(region.Region.DS1.Tiles) && t.tileX < len(region.Region.DS1.Tiles[t.tileY]) {
+			tile := region.Region.DS1.Tiles[t.tileY][t.tileX]
 			for i := range tile.Floors {
 				if tile.Floors[i].Hidden || tile.Floors[i].Prop1 == 0 {
 					continue
 				}
 				tileCacheIndex := fmt.Sprintf("%v-%v-%v-%v", t.tileY, t.tileX, tile.Floors[i].MainIndex, tile.Floors[i].SubIndex)
-				fmt.Println(tileCacheIndex)
 				region.Region.FloorCache[tileCacheIndex] = region.Region.generateFloorCache(tile.Floors[i])
 				n++
 			}
@@ -294,10 +293,12 @@ func (v *Engine) DrawTileLines(region *Region, offX, offY, x, y int, target *ebi
 			}
 
 			tile := region.DS1.Tiles[y][x]
-			floorSpec := fmt.Sprintf("f: %v-%v", tile.Floors[0].MainIndex, tile.Floors[0].SubIndex)
-			ebitenutil.DebugPrintAt(target, floorSpec, offX+int(v.OffsetX)-20, offY+int(v.OffsetY)+24)
-			wallSpec := fmt.Sprintf("w: %v-%v", tile.Walls[0].MainIndex, tile.Walls[0].SubIndex)
-			ebitenutil.DebugPrintAt(target, wallSpec, offX+int(v.OffsetX)-20, offY+int(v.OffsetY)+34)
+			for i := range tile.Floors {
+				floorSpec := fmt.Sprintf("f: %v-%v", tile.Floors[i].MainIndex, tile.Floors[i].SubIndex)
+				ebitenutil.DebugPrintAt(target, floorSpec, offX+int(v.OffsetX)-20, offY+int(v.OffsetY)+10+((i+1)*14))
+			}
+			// wallSpec := fmt.Sprintf("w: %v-%v", tile.Walls[0].MainIndex, tile.Walls[0].SubIndex)
+			// ebitenutil.DebugPrintAt(target, wallSpec, offX+int(v.OffsetX)-20, offY+int(v.OffsetY)+34)
 		}
 	}
 }
