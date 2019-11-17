@@ -27,6 +27,8 @@ github.com/hajimehoshi/ebiten v1.11.0-alpha.0.20191116200143-acc933b7c399 h1:Uey
 github.com/hajimehoshi/ebiten v1.11.0-alpha.0.20191116200143-acc933b7c399/go.mod h1:52cGPFR+BqkkBap9Ue4BEKkfvICkvXoONeWCYPEFTPo=
 github.com/hajimehoshi/ebiten v1.11.0-alpha.0.20191117051038-800b98a0c66d h1:dJL9ygMUE9U5WOEwgQ+D33t0dDRm3VkwNi2lzaoGQ6A=
 github.com/hajimehoshi/ebiten v1.11.0-alpha.0.20191117051038-800b98a0c66d/go.mod h1:6ax6p5ui8fuQ/+00sQ79oTy4OfrythHfDEYV4yni5So=
+github.com/hajimehoshi/ebiten v1.11.0-alpha.0.20191117152313-63f9ac2ccc2a h1:EoW3KYFBekMCBuCxnmseVGV0wh6pgmkZGJP7pRWK4ek=
+github.com/hajimehoshi/ebiten v1.11.0-alpha.0.20191117152313-63f9ac2ccc2a/go.mod h1:6ax6p5ui8fuQ/+00sQ79oTy4OfrythHfDEYV4yni5So=
 github.com/hajimehoshi/go-mp3 v0.2.1/go.mod h1:Rr+2P46iH6PwTPVgSsEwBkon0CK5DxCAeX/Rp65DCTE=
 github.com/hajimehoshi/oto v0.3.4/go.mod h1:PgjqsBJff0efqL2nlMJidJgVJywLn6M4y8PI4TfeWfA=
 github.com/hajimehoshi/oto v0.5.2 h1:5FEPlejAsR2PVRqiW7h2PIwp9UWR+8zxj2And102YU4=

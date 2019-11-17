@@ -2,7 +2,6 @@ package d2render
 
 import (
 	"encoding/binary"
-	"image"
 	"image/color"
 	"log"
 	"sync"
@@ -126,17 +125,18 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
 					x += uint32(b)
 				}
 			}
-			var img = image.NewRGBA(image.Rect(0, 0, int(result.Frames[i].Width), int(result.Frames[i].Height)))
+			var img = make([]byte, int(result.Frames[i].Width)*int(result.Frames[i].Height)*4)
 			for ii := uint32(0); ii < result.Frames[i].Width*result.Frames[i].Height; ii++ {
 				if result.Frames[i].ImageData[ii] < 1 { // TODO: Is this == -1 or < 1?
 					continue
 				}
-				img.Pix[ii*4] = palette.Colors[result.Frames[i].ImageData[ii]].R
-				img.Pix[(ii*4)+1] = palette.Colors[result.Frames[i].ImageData[ii]].G
-				img.Pix[(ii*4)+2] = palette.Colors[result.Frames[i].ImageData[ii]].B
-				img.Pix[(ii*4)+3] = 0xFF
+				img[ii*4] = palette.Colors[result.Frames[i].ImageData[ii]].R
+				img[(ii*4)+1] = palette.Colors[result.Frames[i].ImageData[ii]].G
+				img[(ii*4)+2] = palette.Colors[result.Frames[i].ImageData[ii]].B
+				img[(ii*4)+3] = 0xFF
 			}
-			newImage, _ := ebiten.NewImageFromImage(img, ebiten.FilterNearest)
+			newImage, _ := ebiten.NewImage(int(result.Frames[i].Width), int(result.Frames[i].Height), ebiten.FilterNearest)
+			newImage.ReplacePixels(img)
 			result.Frames[i].Image = newImage
 			img = nil
 		}(i)
