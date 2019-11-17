@@ -134,63 +134,26 @@ func (v *Engine) GenTiles(region *EngineRegion) {
 }
 
 func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
-	//tilesToRender := make([]RegionTile, len(region.Tiles))
 
 	for tileIdx := range region.Tiles {
 		sx, sy := d2helper.IsoToScreen(region.Tiles[tileIdx].tileX+region.Rect.Left, region.Tiles[tileIdx].tileY+region.Rect.Top, int(v.OffsetX), int(v.OffsetY))
 		if sx > -160 && sy > -160 && sx <= 880 && sy <= 1000 {
-			v.RenderTile(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
+			v.Pass1(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
 		}
 	}
-
-	//for _, tile := range tilesToRender {
-	//	v.RenderTileObjects(region.Region, tile.offX, tile.offY, tile.tileX, tile.tileY, target)
-	//}
-}
-
-func (v *Engine) RenderTileObjects(region *Region, offX, offY, x, y int, target *ebiten.Image) {
-	tile := region.DS1.Tiles[y][x]
-	for _, obj := range region.AnimationEntities {
-		if int(math.Floor(obj.LocationX)) == x && int(math.Floor(obj.LocationY)) == y {
-			obj.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
-		}
-	}
-	for _, npc := range region.NPCs {
-		if int(math.Floor(npc.AnimatedEntity.LocationX)) == x && int(math.Floor(npc.AnimatedEntity.LocationY)) == y {
-			npc.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
-		}
-	}
-	for i := range tile.Walls {
-		if tile.Walls[i].Hidden || tile.Walls[i].Orientation != 15 {
-			continue
-		}
-		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
-	}
-
-	if v.ShowTiles > 0 {
-		subtileColor := color.RGBA{255, 100, 100, 140}
-		tileColor := color.RGBA{255, 255, 255, 255}
-
-		ebitenutil.DrawLine(target, float64(offX)+v.OffsetX, float64(offY)+v.OffsetY, float64(offX)+v.OffsetX+80, float64(offY)+v.OffsetY+40, tileColor)
-		ebitenutil.DrawLine(target, float64(offX)+v.OffsetX, float64(offY)+v.OffsetY, float64(offX)+v.OffsetX-80, float64(offY)+v.OffsetY+40, tileColor)
-
-		coords := fmt.Sprintf("%v,%v", x, y)
-		ebitenutil.DebugPrintAt(target, coords, offX+int(v.OffsetX)-10, offY+int(v.OffsetY)+10)
-
-		if v.ShowTiles > 1 {
-			for i := 1; i <= 4; i++ {
-				x := (16 * i)
-				y := (8 * i)
-				ebitenutil.DrawLine(target, float64(offX-x)+v.OffsetX, float64(offY+y)+v.OffsetY,
-					float64(offX-x)+v.OffsetX+80, float64(offY+y)+v.OffsetY+40, subtileColor)
-				ebitenutil.DrawLine(target, float64(offX+x)+v.OffsetX, float64(offY+y)+v.OffsetY,
-					float64(offX+x)+v.OffsetX-80, float64(offY+y)+v.OffsetY+40, subtileColor)
+	for tileIdx := range region.Tiles {
+		sx, sy := d2helper.IsoToScreen(region.Tiles[tileIdx].tileX+region.Rect.Left, region.Tiles[tileIdx].tileY+region.Rect.Top, int(v.OffsetX), int(v.OffsetY))
+		if sx > -160 && sy > -160 && sx <= 880 && sy <= 1000 {
+			v.Pass2(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
+			if v.ShowTiles > 0 {
+				v.DrawTileLines(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
 			}
+
 		}
 	}
 }
 
-func (v *Engine) RenderTile(region *Region, offX, offY, x, y int, target *ebiten.Image) {
+func (v *Engine) Pass1(region *Region, offX, offY, x, y int, target *ebiten.Image) {
 	tile := region.DS1.Tiles[y][x]
 	for i := range tile.Floors {
 		if tile.Floors[i].Hidden || tile.Floors[i].Prop1 == 0 {
@@ -214,7 +177,27 @@ func (v *Engine) RenderTile(region *Region, offX, offY, x, y int, target *ebiten
 		}
 		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
 	}
-	v.RenderTileObjects(region, offX, offY, x, y, target)
+}
+
+func (v *Engine) Pass2(region *Region, offX, offY, x, y int, target *ebiten.Image) {
+	tile := region.DS1.Tiles[y][x]
+	for _, obj := range region.AnimationEntities {
+		if int(math.Floor(obj.LocationX)) == x && int(math.Floor(obj.LocationY)) == y {
+			obj.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
+		}
+	}
+	for _, npc := range region.NPCs {
+		if int(math.Floor(npc.AnimatedEntity.LocationX)) == x && int(math.Floor(npc.AnimatedEntity.LocationY)) == y {
+			npc.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
+		}
+	}
+	for i := range tile.Walls {
+		if tile.Walls[i].Hidden || tile.Walls[i].Orientation != 15 {
+			continue
+		}
+		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
+	}
+
 	for i := range tile.Walls {
 		if tile.Walls[i].Orientation <= 15 {
 			// Lower walls only
@@ -231,5 +214,29 @@ func (v *Engine) RenderTile(region *Region, offX, offY, x, y int, target *ebiten
 			continue
 		}
 		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
+	}
+}
+
+func (v *Engine) DrawTileLines(region *Region, offX, offY, x, y int, target *ebiten.Image) {
+	if v.ShowTiles > 0 {
+		subtileColor := color.RGBA{255, 100, 100, 140}
+		tileColor := color.RGBA{255, 255, 255, 255}
+
+		ebitenutil.DrawLine(target, float64(offX)+v.OffsetX, float64(offY)+v.OffsetY, float64(offX)+v.OffsetX+80, float64(offY)+v.OffsetY+40, tileColor)
+		ebitenutil.DrawLine(target, float64(offX)+v.OffsetX, float64(offY)+v.OffsetY, float64(offX)+v.OffsetX-80, float64(offY)+v.OffsetY+40, tileColor)
+
+		coords := fmt.Sprintf("%v,%v", x, y)
+		ebitenutil.DebugPrintAt(target, coords, offX+int(v.OffsetX)-10, offY+int(v.OffsetY)+10)
+
+		if v.ShowTiles > 1 {
+			for i := 1; i <= 4; i++ {
+				x := (16 * i)
+				y := (8 * i)
+				ebitenutil.DrawLine(target, float64(offX-x)+v.OffsetX, float64(offY+y)+v.OffsetY,
+					float64(offX-x)+v.OffsetX+80, float64(offY+y)+v.OffsetY+40, subtileColor)
+				ebitenutil.DrawLine(target, float64(offX+x)+v.OffsetX, float64(offY+y)+v.OffsetY,
+					float64(offX+x)+v.OffsetX-80, float64(offY+y)+v.OffsetY+40, subtileColor)
+			}
+		}
 	}
 }
