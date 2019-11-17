@@ -206,6 +206,7 @@ func (v *Region) renderFloor(tile d2ds1.FloorShadowRecord, offsetX, offsetY int,
 	tileCacheIndex := fmt.Sprintf("%v-%v-%v-%v", tileY, tileX, tile.MainIndex, tile.SubIndex)
 	tileCache, exists := v.FloorCache[tileCacheIndex]
 	if !exists {
+		log.Printf("floor cache missed: %v of %v", tileCacheIndex, len(v.FloorCache))
 		v.FloorCache[tileCacheIndex] = v.generateFloorCache(tile)
 		tileCache = v.FloorCache[tileCacheIndex]
 		if tileCache == nil {
@@ -227,6 +228,7 @@ func (v *Region) renderWall(tile d2ds1.WallRecord, offsetX, offsetY int, target 
 	tileCacheIndex := fmt.Sprintf("%v-%v-%v-%v-%v", tileY, tileX, tile.MainIndex, tile.SubIndex, tile.Orientation)
 	tileCache, exists := v.WallCache[tileCacheIndex]
 	if !exists {
+		log.Println("wall cache missed")
 		v.WallCache[tileCacheIndex] = v.generateWallCache(tile)
 		if v.WallCache[tileCacheIndex] == nil {
 			log.Println("Could not generate wall: " + tileCacheIndex)
@@ -247,6 +249,7 @@ func (v *Region) renderShadow(tile d2ds1.FloorShadowRecord, offsetX, offsetY int
 	tileCacheIndex := fmt.Sprintf("%v-%v-%v-%v", tileY, tileX, tile.MainIndex, tile.SubIndex)
 	tileCache, exists := v.ShadowCache[tileCacheIndex]
 	if !exists {
+		log.Println("shadow cache missed")
 		v.ShadowCache[tileCacheIndex] = v.generateShadowCache(tile)
 		tileCache = v.ShadowCache[tileCacheIndex]
 		if tileCache == nil {

@@ -15,8 +15,8 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/OpenDiablo2/D2Shared/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
@@ -73,6 +73,7 @@ func (v *Engine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fi
 
 	for i, _ := range v.regions {
 		v.GenTiles(&v.regions[i])
+		v.GenTilesCache(&v.regions[i])
 	}
 }
 
@@ -100,6 +101,7 @@ func (v *Engine) GenerateAct1Overworld() {
 
 	for i, _ := range v.regions {
 		v.GenTiles(&v.regions[i])
+		v.GenTilesCache(&v.regions[i])
 	}
 
 	sx, sy := d2helper.IsoToScreen(int(region.StartX), int(region.StartY), 0, 0)
@@ -142,6 +144,41 @@ func (v *Engine) GenTiles(region *EngineRegion) {
 			offY += 40
 		}
 	}
+}
+
+func (v *Engine) GenTilesCache(region *EngineRegion) {
+	n := 0
+	for _, t := range region.Tiles {
+		if t.tileX < len(region.Region.DS1.Tiles) && t.tileY < len(region.Region.DS1.Tiles[t.tileX]) {
+			tile := region.Region.DS1.Tiles[t.tileX][t.tileY]
+			for i := range tile.Floors {
+				if tile.Floors[i].Hidden || tile.Floors[i].Prop1 == 0 {
+					continue
+				}
+				tileCacheIndex := fmt.Sprintf("%v-%v-%v-%v", t.tileY, t.tileX, tile.Floors[i].MainIndex, tile.Floors[i].SubIndex)
+				fmt.Println(tileCacheIndex)
+				region.Region.FloorCache[tileCacheIndex] = region.Region.generateFloorCache(tile.Floors[i])
+				n++
+			}
+			for i, shadow := range tile.Shadows {
+				if tile.Shadows[i].Hidden || tile.Shadows[i].Prop1 == 0 {
+					continue
+				}
+				tileCacheIndex := fmt.Sprintf("%v-%v-%v-%v", t.tileY, t.tileX, shadow.MainIndex, shadow.SubIndex)
+				region.Region.ShadowCache[tileCacheIndex] = region.Region.generateShadowCache(shadow)
+				n++
+			}
+			for i, wall := range tile.Walls {
+				if tile.Walls[i].Hidden {
+					continue
+				}
+				tileCacheIndex := fmt.Sprintf("%v-%v-%v-%v-%v", t.tileY, t.tileX, wall.MainIndex, wall.SubIndex, wall.Orientation)
+				region.Region.WallCache[tileCacheIndex] = region.Region.generateWallCache(wall)
+				n++
+			}
+		}
+	}
+	fmt.Printf("generated: %v cached tiles\n", n)
 }
 
 func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
@@ -237,7 +274,7 @@ func (v *Engine) RenderPass3(region *Region, offX, offY, x, y int, target *ebite
 
 func (v *Engine) DrawTileLines(region *Region, offX, offY, x, y int, target *ebiten.Image) {
 	if v.ShowTiles > 0 {
-		subtileColor := color.RGBA{255, 100, 100, 140}
+		subtileColor := color.RGBA{80, 80, 255, 100}
 		tileColor := color.RGBA{255, 255, 255, 255}
 
 		ebitenutil.DrawLine(target, float64(offX)+v.OffsetX, float64(offY)+v.OffsetY, float64(offX)+v.OffsetX+80, float64(offY)+v.OffsetY+40, tileColor)
@@ -255,6 +292,12 @@ func (v *Engine) DrawTileLines(region *Region, offX, offY, x, y int, target *ebi
 				ebitenutil.DrawLine(target, float64(offX+x)+v.OffsetX, float64(offY+y)+v.OffsetY,
 					float64(offX+x)+v.OffsetX-80, float64(offY+y)+v.OffsetY+40, subtileColor)
 			}
+
+			tile := region.DS1.Tiles[y][x]
+			floorSpec := fmt.Sprintf("f: %v-%v", tile.Floors[0].MainIndex, tile.Floors[0].SubIndex)
+			ebitenutil.DebugPrintAt(target, floorSpec, offX+int(v.OffsetX)-20, offY+int(v.OffsetY)+24)
+			wallSpec := fmt.Sprintf("w: %v-%v", tile.Walls[0].MainIndex, tile.Walls[0].SubIndex)
+			ebitenutil.DebugPrintAt(target, wallSpec, offX+int(v.OffsetX)-20, offY+int(v.OffsetY)+34)
 		}
 	}
 }
