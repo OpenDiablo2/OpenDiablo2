@@ -21,7 +21,7 @@ ALL OTHER TRADEMARKS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS.
 
 To pull the project down, run `go get github.com/OpenDiablo2/OpenDiablo2`
 
-On windows this folder will most likely be in `C:\users\(you)\go\src\github.com\essial\OpenDiablo2`
+On windows this folder will most likely be in `C:\users\(you)\go\src\github.com\OpenDiablo2\OpenDiablo2`
 
 In the root folder, run `go get -d` to pull down all dependencies.
 
