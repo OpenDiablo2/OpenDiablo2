@@ -87,7 +87,25 @@ func LoadRegion(seed rand.Source, levelType d2enum.RegionIdType, levelPreset int
 	result.TileWidth = result.DS1.Width
 	result.TileHeight = result.DS1.Height
 	result.loadObjects(fileProvider)
+	result.loadSpecials()
 	return result
+}
+
+func (v *Region) loadSpecials() {
+	for y := range v.DS1.Tiles {
+		for x := range v.DS1.Tiles[y] {
+			for _, wall := range v.DS1.Tiles[y][x].Walls {
+				if wall.Orientation != 10 {
+					continue
+				}
+				if wall.MainIndex == 30 && wall.SubIndex == 0 {
+					v.StartX = float64(x) + 0.5
+					v.StartY = float64(y) + 0.5
+					log.Printf("Starting location: %d, %d", x, y)
+				}
+			}
+		}
+	}
 }
 
 func (v *Region) loadObjects(fileProvider d2interface.FileProvider) {

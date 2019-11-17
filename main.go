@@ -3,6 +3,9 @@ package main
 import (
 	"image"
 	"log"
+	"runtime"
+
+	"github.com/pkg/profile"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
 
@@ -23,9 +26,11 @@ var GitCommit string
 var d2Engine d2core.Engine
 
 func main() {
-	//defer profile.Start(profile.CPUProfile).Stop()
+	procs := runtime.GOMAXPROCS(16)
+	log.Printf("Setting gomaxprocs to 16, it was previously set to %d", procs)
 	//runtime.LockOSThread()
-	//defer runtime.UnlockOSThread()
+	defer runtime.UnlockOSThread()
+	defer profile.Start(profile.ProfilePath(".")).Stop()
 	if len(GitBranch) == 0 {
 		GitBranch = "Local Build"
 		GitCommit = ""

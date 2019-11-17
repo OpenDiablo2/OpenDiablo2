@@ -1,5 +1,7 @@
 package d2helper
 
+import "math"
+
 // Min returns the lower of two values
 func Min(a, b uint32) uint32 {
 	if a < b {
@@ -63,4 +65,19 @@ func ScreenToIso(sx, sy float64) (float64, float64) {
 	x := (sx/80 + sy/40) / 2
 	y := (sy/40 - (sx / 80)) / 2
 	return x, y
+}
+
+func GetAngleBetween(p1X, p1Y, p2X, p2Y float64) int {
+	deltaY := p1Y - p2Y
+	deltaX := p2X - p1X
+
+	result := math.Atan2(deltaY, deltaX) * (180 / math.Pi)
+	iResult := int(result)
+	for iResult < 0 {
+		iResult += 360
+	}
+	for iResult >= 360 {
+		iResult -= 360
+	}
+	return iResult
 }

@@ -5,6 +5,8 @@ import (
 	"math"
 	"os"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
@@ -13,7 +15,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	_map "github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
@@ -26,7 +27,7 @@ type MapEngineTest struct {
 	fileProvider  d2interface.FileProvider
 	sceneProvider d2interface.SceneProvider
 	gameState     *d2core.GameState
-	mapEngine     *_map.Engine
+	mapEngine     *d2mapengine.Engine
 	currentRegion int
 	keyLocked     bool
 }
@@ -76,7 +77,7 @@ func (v *MapEngineTest) LoadRegionByIndex(n int) {
 	}
 	region := regions[n-1]
 
-	v.mapEngine = _map.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider) // necessary for map name update
+	v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider) // necessary for map name update
 	v.mapEngine.OffsetY = 0
 	v.mapEngine.OffsetX = 0
 	v.mapEngine.GenerateMap(region.regionType, region.levelPreset)
@@ -88,7 +89,7 @@ func (v *MapEngineTest) Load() []func() {
 	v.soundManager.PlayBGM("")
 	return []func(){
 		func() {
-			v.mapEngine = _map.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider)
+			v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider)
 
 			v.LoadRegionByIndex(v.currentRegion)
 			// v.mapEngine.GenerateAct1Overworld()
