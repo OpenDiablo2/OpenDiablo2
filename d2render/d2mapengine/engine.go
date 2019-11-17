@@ -182,6 +182,10 @@ func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
 		sx, sy := d2helper.IsoToScreen(region.Tiles[tileIdx].tileX+region.Rect.Left, region.Tiles[tileIdx].tileY+region.Rect.Top, int(v.OffsetX), int(v.OffsetY))
 		if sx > -160 && sy > -160 && sx <= 880 && sy <= 1000 {
 			v.RenderPass1(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
+			if v.ShowTiles > 0 {
+				v.DrawTileLines(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
+			}
+
 		}
 	}
 	for tileIdx := range region.Tiles {
@@ -194,9 +198,6 @@ func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
 		sx, sy := d2helper.IsoToScreen(region.Tiles[tileIdx].tileX+region.Rect.Left, region.Tiles[tileIdx].tileY+region.Rect.Top, int(v.OffsetX), int(v.OffsetY))
 		if sx > -160 && sy > -160 && sx <= 880 && sy <= 1000 {
 			v.RenderPass3(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
-			if v.ShowTiles > 0 {
-				v.DrawTileLines(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
-			}
 		}
 	}
 }

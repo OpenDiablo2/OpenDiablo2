@@ -409,6 +409,10 @@ func (v *Region) generateWallCache(tile d2ds1.WallRecord) *ebiten.Image {
 	if cachedImage != nil {
 		return cachedImage //, 0, yAdjust}
 	}
+	if realHeight == 0 {
+		log.Printf("Invalid 0 height for wall tile")
+		return nil
+	}
 	image, _ := ebiten.NewImage(160, int(realHeight), ebiten.FilterNearest)
 	pixels := make([]byte, 4*160*realHeight)
 	v.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, 160)
