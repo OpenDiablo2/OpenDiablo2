@@ -21,15 +21,83 @@ import (
 	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
+type RegionSpec struct {
+	regionType       d2enum.RegionIdType
+	startPresetIndex int
+	endPresetIndex   int
+	extra            []int
+}
+
+var regions []RegionSpec = []RegionSpec{
+	//Act I
+	{d2enum.RegionAct1Town, 1, 3, []int{}},
+	{d2enum.RegionAct1Wilderness, 4, 52, []int{
+		108,
+		160, 161, 162, 163, 164,
+	}},
+	{d2enum.RegionAct1Cave, 53, 107, []int{}},
+	{d2enum.RegionAct1Crypt, 109, 159, []int{}},
+	{d2enum.RegionAct1Monestary, 165, 165, []int{}},
+	{d2enum.RegionAct1Courtyard, 166, 166, []int{256}},
+	{d2enum.RegionAct1Barracks, 167, 205, []int{}},
+	{d2enum.RegionAct1Jail, 206, 255, []int{}},
+	{d2enum.RegionAct1Cathedral, 257, 257, []int{}},
+	{d2enum.RegionAct1Catacombs, 258, 299, []int{}},
+	{d2enum.RegionAct1Tristram, 300, 300, []int{}},
+
+	//Act II
+	{d2enum.RegionAct2Town, 301, 301, []int{}},
+	{d2enum.RegionAct2Sewer, 302, 352, []int{}},
+	{d2enum.RegionAct2Harem, 353, 357, []int{}},
+	{d2enum.RegionAct2Basement, 358, 361, []int{}},
+	{d2enum.RegionAct2Desert, 362, 413, []int{}},
+	{d2enum.RegionAct2Tomb, 414, 481, []int{}},
+	{d2enum.RegionAct2Lair, 482, 509, []int{}},
+	{d2enum.RegionAct2Arcane, 510, 528, []int{}},
+
+	//Act III
+	{d2enum.RegionAct3Town, 529, 529, []int{}},
+	{d2enum.RegionAct3Jungle, 530, 604, []int{}},
+	{d2enum.RegionAct3Kurast, 605, 658, []int{
+		748, 749, 750, 751, 752, 753, 754,
+		755, 756, 757, 758, 759, 760, 761, 762, 763, 764, 765, 766, 767, 768, 769, 770, 771, 772, 773, 774, 775, 776, 777, 778, 779, 780, 781, 782, 783, 784, 785, 786, 787, 788, 789, 790, 791, 792, 793, 794, 795, 796,
+		//yeah, i know =(
+	}},
+	{d2enum.RegionAct3Spider, 659, 664, []int{}},
+	{d2enum.RegionAct3Dungeon, 665, 704, []int{}},
+	{d2enum.RegionAct3Sewer, 705, 747, []int{}},
+
+	//Act IV
+	{d2enum.RegionAct4Town, 797, 798, []int{}},
+	{d2enum.RegionAct4Mesa, 799, 835, []int{}},
+	{d2enum.RegionAct4Lava, 836, 862, []int{}},
+
+	//Act V -- broken or wrong order
+	{d2enum.RegonAct5Town, 863, 864, []int{}},
+	{d2enum.RegionAct5Siege, 865, 879, []int{}},
+	{d2enum.RegionAct5Barricade, 880, 1002, []int{}},
+	{d2enum.RegionAct5IceCaves, 1003, 1041, []int{}},
+	{d2enum.RegionAct5Temple, 1042, 1052, []int{}},
+	{d2enum.RegionAct5Baal, 1059, 1090, []int{}},
+	{d2enum.RegionAct5Lava, 1053, 1058, []int{}},
+}
+
 type MapEngineTest struct {
 	uiManager     *d2ui.Manager
 	soundManager  *d2audio.Manager
 	fileProvider  d2interface.FileProvider
 	sceneProvider d2coreinterface.SceneProvider
 	gameState     *d2core.GameState
-	mapEngine     *d2mapengine.Engine
+	mapEngine     *_map.Engine
+
+	//TODO: this is region specific properties, should be refactored for multi-region rendering
 	currentRegion int
-	keyLocked     bool
+	levelPreset   int
+	fileIndex     int
+	regionSpec    RegionSpec
+	filesCount    int
+
+	keyLocked bool
 }
 
 func CreateMapEngineTest(
@@ -37,50 +105,56 @@ func CreateMapEngineTest(
 	sceneProvider d2coreinterface.SceneProvider,
 	uiManager *d2ui.Manager,
 	soundManager *d2audio.Manager,
-	currentRegion int) *MapEngineTest {
+	currentRegion int, levelPreset int) *MapEngineTest {
 	result := &MapEngineTest{
 		fileProvider:  fileProvider,
 		uiManager:     uiManager,
 		soundManager:  soundManager,
 		sceneProvider: sceneProvider,
 		currentRegion: currentRegion,
+		levelPreset:   levelPreset,
+		fileIndex:     -1,
+		regionSpec:    RegionSpec{},
+		filesCount:    0,
 		keyLocked:     false,
 	}
 	result.gameState = d2core.CreateTestGameState()
 	return result
 }
 
-type RegionSpec struct {
-	regionType  d2enum.RegionIdType
-	levelPreset int
-}
+func (v *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
+	for _, spec := range regions {
+		if spec.regionType == d2enum.RegionIdType(n) {
+			v.regionSpec = spec
+			inExtra := false
+			for _, e := range spec.extra {
+				if e == levelPreset {
+					inExtra = true
+					break
+				}
+			}
+			if !inExtra {
+				if levelPreset < spec.startPresetIndex {
+					levelPreset = spec.startPresetIndex
+				}
 
-var regions []RegionSpec = []RegionSpec{
-	{d2enum.RegionAct1Tristram, 300},
-	{d2enum.RegionAct1Cathedral, 257},
-	{d2enum.RegionAct2Town, 301},
-	// {d2enum.RegionAct2Harem, 353},
-	{d2enum.RegionAct3Town, 529},
-	{d2enum.RegionAct3Jungle, 574},
-	{d2enum.RegionAct4Town, 797},
-	{d2enum.RegonAct5Town, 863},
-	{d2enum.RegionAct5IceCaves, 1038},
-	{d2enum.RegionAct5Siege, 879},
-	{d2enum.RegionAct5Lava, 105},
-	{d2enum.RegionAct5Barricade, 880},
-}
+				if levelPreset > spec.endPresetIndex {
+					levelPreset = spec.endPresetIndex
+				}
+			}
+			v.levelPreset = levelPreset
+		}
+	}
 
-func (v *MapEngineTest) LoadRegionByIndex(n int) {
 	if n == 0 {
 		v.mapEngine.GenerateAct1Overworld()
 		return
 	}
-	region := regions[n-1]
 
 	v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider) // necessary for map name update
 	v.mapEngine.OffsetY = 0
 	v.mapEngine.OffsetX = 0
-	v.mapEngine.GenerateMap(region.regionType, region.levelPreset)
+	v.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 }
 
 func (v *MapEngineTest) Load() []func() {
@@ -91,21 +165,7 @@ func (v *MapEngineTest) Load() []func() {
 		func() {
 			v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider)
 
-			v.LoadRegionByIndex(v.currentRegion)
-			// v.mapEngine.GenerateAct1Overworld()
-			// v.mapEngine.GenerateMap(d2enum.RegionAct1Tristram, 300)
-			// v.mapEngine.GenerateMap(d2enum.RegionAct1Cathedral, 257)
-			//v.mapEngine.GenerateMap(d2enum.RegionAct2Town, 301)
-			//v.mapEngine.GenerateMap(d2enum.RegionAct2Harem, 353) // Crashes on dcc load
-			//v.mapEngine.GenerateMap(d2enum.RegionAct3Town, 529)
-			//v.mapEngine.GenerateMap(d2enum.RegionAct3Jungle, 574)
-			//v.mapEngine.GenerateMap(d2enum.RegionAct4Town, 797) // Broken height of large objects
-			//v.mapEngine.GenerateMap(d2enum.RegonAct5Town, 863) // Completely broken!!
-			//v.mapEngine.GenerateMap(d2enum.RegionAct5IceCaves, 1038) // Completely broken!
-			//v.mapEngine.GenerateMap(d2enum.RegionAct5Siege, 879) // Completely broken!
-			//v.mapEngine.GenerateMap(d2enum.RegionAct5Lava, 1057) // Broken
-			//v.mapEngine.GenerateMap(d2enum.RegionAct5Barricade, 880) // Broken
-
+			v.LoadRegionByIndex(v.currentRegion, v.levelPreset, v.fileIndex)
 		},
 	}
 }
@@ -133,13 +193,34 @@ func (v *MapEngineTest) Render(screen *ebiten.Image) {
 		int(math.Ceil(tileY))-curRegion.Rect.Top,
 		subtileY,
 	)
+
+	levelFilesToPick := make([]string, 0)
+	fileIndex := v.fileIndex
+	for n, fileRecord := range curRegion.Region.LevelPreset.Files {
+		if len(fileRecord) == 0 || fileRecord == "" || fileRecord == "0" {
+			continue
+		}
+		levelFilesToPick = append(levelFilesToPick, fileRecord)
+		if fileRecord == curRegion.Region.RegionPath {
+			fileIndex = n
+		}
+	}
+	if v.fileIndex == -1 {
+		v.fileIndex = fileIndex
+	}
+	v.filesCount = len(levelFilesToPick)
 	ebitenutil.DebugPrintAt(screen, line, 5, 5)
 	ebitenutil.DebugPrintAt(screen, "Map: "+curRegion.Region.LevelType.Name, 5, 17)
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%v [%v]", curRegion.Region.RegionPath, v.currentRegion), 5, 29)
-	ebitenutil.DebugPrintAt(screen, "N - next map, P - previous map", 5, 41)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%v: %v/%v [%v, %v]", curRegion.Region.RegionPath, fileIndex+1, v.filesCount, v.currentRegion, v.levelPreset), 5, 29)
+	ebitenutil.DebugPrintAt(screen, "N - next region, P - previous region", 5, 41)
+	ebitenutil.DebugPrintAt(screen, "Shift+N - next preset, Shift+P - previous preset", 5, 53)
+	ebitenutil.DebugPrintAt(screen, "Ctrl+N - next file, Ctrl+P - previous file", 5, 65)
 }
 
 func (v *MapEngineTest) Update(tickTime float64) {
+	ctrlPressed := v.uiManager.KeyPressed(ebiten.KeyControl)
+	shiftPressed := v.uiManager.KeyPressed(ebiten.KeyShift)
+
 	if v.uiManager.KeyPressed(ebiten.KeyDown) {
 		v.mapEngine.OffsetY -= tickTime * 800
 	}
@@ -164,30 +245,70 @@ func (v *MapEngineTest) Update(tickTime float64) {
 	if v.uiManager.KeyPressed(ebiten.KeyEscape) {
 		os.Exit(0)
 	}
-	if v.uiManager.KeyPressed(ebiten.KeyN) && !v.keyLocked {
-		v.currentRegion++
-		if v.currentRegion == len(regions) {
-			v.currentRegion = 0
-		}
-		v.keyLocked = true
-		fmt.Println("---")
-		v.sceneProvider.SetNextScene(v)
-		return
-	}
 
-	if v.uiManager.KeyPressed(ebiten.KeyP) && !v.keyLocked {
-		v.currentRegion--
-		if v.currentRegion == -1 {
-			v.currentRegion = len(regions) - 1
+	if !v.keyLocked {
+
+		if v.uiManager.KeyPressed(ebiten.KeyN) && ctrlPressed {
+			v.fileIndex = increment(v.fileIndex, 0, v.filesCount-1)
+			v.keyLocked = true
+			v.sceneProvider.SetNextScene(v)
+			return
 		}
-		v.keyLocked = true
-		fmt.Println("---")
-		v.sceneProvider.SetNextScene(v)
-		return
+
+		if v.uiManager.KeyPressed(ebiten.KeyP) && ctrlPressed {
+			v.fileIndex = decrement(v.fileIndex, 0, v.filesCount-1)
+			v.keyLocked = true
+			v.sceneProvider.SetNextScene(v)
+			return
+		}
+
+		if v.uiManager.KeyPressed(ebiten.KeyN) && shiftPressed {
+			v.levelPreset = increment(v.levelPreset, v.regionSpec.startPresetIndex, v.regionSpec.endPresetIndex)
+			v.keyLocked = true
+			v.sceneProvider.SetNextScene(v)
+			return
+		}
+
+		if v.uiManager.KeyPressed(ebiten.KeyP) && shiftPressed {
+			v.levelPreset = decrement(v.levelPreset, v.regionSpec.startPresetIndex, v.regionSpec.endPresetIndex)
+			v.keyLocked = true
+			v.sceneProvider.SetNextScene(v)
+			return
+		}
+
+		if v.uiManager.KeyPressed(ebiten.KeyN) {
+			v.currentRegion = increment(v.currentRegion, 0, len(regions))
+			v.keyLocked = true
+			v.sceneProvider.SetNextScene(v)
+			return
+		}
+
+		if v.uiManager.KeyPressed(ebiten.KeyP) {
+			v.currentRegion = decrement(v.currentRegion, 0, len(regions))
+			v.keyLocked = true
+			v.sceneProvider.SetNextScene(v)
+			return
+		}
 	}
 
 	//FIXME: do it better
 	if !v.uiManager.KeyPressed(ebiten.KeyP) && !v.uiManager.KeyPressed(ebiten.KeyN) {
 		v.keyLocked = false
 	}
+}
+
+func increment(v, min, max int) int {
+	v++
+	if v > max {
+		return min
+	}
+	return v
+}
+
+func decrement(v, min, max int) int {
+	v--
+	if v < min {
+		return max
+	}
+	return v
 }

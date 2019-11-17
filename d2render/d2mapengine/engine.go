@@ -62,9 +62,10 @@ func (v *Engine) CenterCameraOn(x, y float64) {
 	v.OffsetY = -(y - 300)
 }
 
-func (v *Engine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int) {
+func (v *Engine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) {
 	randomSource := rand.NewSource(v.gameState.Seed)
-	region := LoadRegion(randomSource, regionType, levelPreset, v.fileProvider)
+	region := LoadRegion(randomSource, regionType, levelPreset, v.fileProvider, fileIndex)
+	fmt.Printf("Loading region: %v\n", region.RegionPath)
 	v.regions = append(v.regions, EngineRegion{
 		Rect:   d2common.Rectangle{0, 0, int(region.TileWidth), int(region.TileHeight)},
 		Region: region,
@@ -78,19 +79,19 @@ func (v *Engine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int) {
 func (v *Engine) GenerateAct1Overworld() {
 	v.soundManager.PlayBGM("/data/global/music/Act1/town1.wav") // TODO: Temp stuff here
 	randomSource := rand.NewSource(v.gameState.Seed)
-	region := LoadRegion(randomSource, d2enum.RegionAct1Town, 1, v.fileProvider)
+	region := LoadRegion(randomSource, d2enum.RegionAct1Town, 1, v.fileProvider, -1)
 	v.regions = append(v.regions, EngineRegion{
 		Rect:   d2common.Rectangle{0, 0, int(region.TileWidth), int(region.TileHeight)},
 		Region: region,
 	})
 	if strings.Contains(region.RegionPath, "E1") {
-		region2 := LoadRegion(randomSource, d2enum.RegionAct1Town, 2, v.fileProvider)
+		region2 := LoadRegion(randomSource, d2enum.RegionAct1Town, 2, v.fileProvider, -1)
 		v.regions = append(v.regions, EngineRegion{
 			Rect:   d2common.Rectangle{int(region.TileWidth - 1), 0, int(region2.TileWidth), int(region2.TileHeight)},
 			Region: region2,
 		})
 	} else if strings.Contains(region.RegionPath, "S1") {
-		region2 := LoadRegion(randomSource, d2enum.RegionAct1Town, 3, v.fileProvider)
+		region2 := LoadRegion(randomSource, d2enum.RegionAct1Town, 3, v.fileProvider, -1)
 		v.regions = append(v.regions, EngineRegion{
 			Rect:   d2common.Rectangle{0, int(region.TileHeight - 1), int(region2.TileWidth), int(region2.TileHeight)},
 			Region: region2,

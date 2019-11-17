@@ -218,6 +218,9 @@ func (v *AnimatedEntity) cacheFrames(layerName string) {
 			}
 
 			direction := dcc.Directions[v.direction]
+			if frameIndex >= len(direction.Frames) {
+				continue
+			}
 			frame := direction.Frames[frameIndex]
 			img := image.NewRGBA(image.Rect(0, 0, int(frameW), int(frameH)))
 			for y := 0; y < direction.Box.Height; y++ {
