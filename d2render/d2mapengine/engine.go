@@ -148,36 +148,33 @@ func (v *Engine) GenTiles(region *EngineRegion) {
 
 func (v *Engine) GenTilesCache(region *EngineRegion) {
 	n := 0
-	for _, t := range region.Tiles {
+	for tileIdx := range region.Tiles {
+		t := &region.Tiles[tileIdx]
 		if t.tileY < len(region.Region.DS1.Tiles) && t.tileX < len(region.Region.DS1.Tiles[t.tileY]) {
 			tile := region.Region.DS1.Tiles[t.tileY][t.tileX]
 			for i := range tile.Floors {
 				if tile.Floors[i].Hidden || tile.Floors[i].Prop1 == 0 {
 					continue
 				}
-				tileCacheIndex := fmt.Sprintf("%v-%v-%v-%v", t.tileY, t.tileX, tile.Floors[i].MainIndex, tile.Floors[i].SubIndex)
-				region.Region.FloorCache[tileCacheIndex] = region.Region.generateFloorCache(tile.Floors[i])
+				region.Region.generateFloorCache(tile.Floors[i])
 				n++
 			}
 			for i, shadow := range tile.Shadows {
 				if tile.Shadows[i].Hidden || tile.Shadows[i].Prop1 == 0 {
 					continue
 				}
-				tileCacheIndex := fmt.Sprintf("%v-%v-%v-%v", t.tileY, t.tileX, shadow.MainIndex, shadow.SubIndex)
-				region.Region.ShadowCache[tileCacheIndex] = region.Region.generateShadowCache(shadow)
+				region.Region.generateShadowCache(shadow)
 				n++
 			}
 			for i, wall := range tile.Walls {
 				if tile.Walls[i].Hidden {
 					continue
 				}
-				tileCacheIndex := fmt.Sprintf("%v-%v-%v-%v-%v", t.tileY, t.tileX, wall.MainIndex, wall.SubIndex, wall.Orientation)
-				region.Region.WallCache[tileCacheIndex] = region.Region.generateWallCache(wall)
+				region.Region.generateWallCache(wall)
 				n++
 			}
 		}
 	}
-	fmt.Printf("generated: %v cached tiles\n", n)
 }
 
 func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
