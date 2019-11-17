@@ -6,18 +6,19 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2helper"
+	"github.com/OpenDiablo2/D2Shared/d2common"
+	dh "github.com/OpenDiablo2/D2Shared/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 	"github.com/hajimehoshi/ebiten"
 )
@@ -41,7 +42,7 @@ type SelectHeroClass struct {
 	uiManager          *d2ui.Manager
 	soundManager       *d2audio.Manager
 	fileProvider       d2interface.FileProvider
-	sceneProvider      d2interface.SceneProvider
+	sceneProvider      d2coreinterface.SceneProvider
 	bgImage            d2render.Sprite
 	campfire           d2render.Sprite
 	headingLabel       d2ui.Label
@@ -63,7 +64,7 @@ type SelectHeroClass struct {
 
 func CreateSelectHeroClass(
 	fileProvider d2interface.FileProvider,
-	sceneProvider d2interface.SceneProvider,
+	sceneProvider d2coreinterface.SceneProvider,
 	uiManager *d2ui.Manager, soundManager *d2audio.Manager,
 ) *SelectHeroClass {
 	result := &SelectHeroClass{

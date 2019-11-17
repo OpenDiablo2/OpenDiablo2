@@ -11,23 +11,24 @@ import (
 	"sync"
 	"time"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2dt1"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dt1"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2ds1"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2ds1"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
+	"github.com/OpenDiablo2/D2Shared/d2helper"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corehelper"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data"
+	"github.com/OpenDiablo2/D2Shared/d2data"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -100,7 +101,25 @@ func LoadRegion(seed rand.Source, levelType d2enum.RegionIdType, levelPreset int
 	result.TileWidth = result.DS1.Width
 	result.TileHeight = result.DS1.Height
 	result.loadObjects(fileProvider)
+	result.loadSpecials()
 	return result
+}
+
+func (v *Region) loadSpecials() {
+	for y := range v.DS1.Tiles {
+		for x := range v.DS1.Tiles[y] {
+			for _, wall := range v.DS1.Tiles[y][x].Walls {
+				if wall.Orientation != 10 {
+					continue
+				}
+				if wall.MainIndex == 30 && wall.SubIndex == 0 {
+					v.StartX = float64(x) + 0.5
+					v.StartY = float64(y) + 0.5
+					log.Printf("Starting location: %d, %d", x, y)
+				}
+			}
+		}
+	}
 }
 
 func (v *Region) loadObjects(fileProvider d2interface.FileProvider) {
@@ -143,6 +162,29 @@ func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType d2enum
 	case d2enum.RegionLayerTypeShadows:
 		v.renderShadow(v.DS1.Tiles[tileY][tileX].Shadows[layerIndex], offsetX, offsetY, target, tileX, tileY)
 	}
+}
+
+func (v *Region) getRandomTile(tiles []d2dt1.Tile) *d2dt1.Tile {
+	if len(tiles) == 1 {
+		return &tiles[0]
+	}
+	sort.Sort(ByRarity(tiles))
+	s := 0
+	for _, t := range tiles {
+		s += int(t.RarityFrameIndex)
+	}
+	rand.Seed(time.Now().UnixNano())
+	r := 0
+	if s != 0 {
+		r = rand.Intn(s) + 1
+	}
+	for _, t := range tiles {
+		r -= int(t.RarityFrameIndex)
+		if r <= 0 {
+			return &t
+		}
+	}
+	return &tiles[0]
 }
 
 func (v *Region) getRandomTile(tiles []d2dt1.Tile) *d2dt1.Tile {
@@ -241,7 +283,7 @@ func (v *Region) renderShadow(tile d2ds1.FloorShadowRecord, offsetX, offsetY int
 	}
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(float64(offsetX+tileCache.XOffset), float64(offsetY+tileCache.YOffset))
-	opts.ColorM = d2helper.ColorToColorM(color.RGBA{255, 255, 255, 160})
+	opts.ColorM = d2corehelper.ColorToColorM(color.RGBA{255, 255, 255, 160})
 	target.DrawImage(tileCache.Image, opts)
 }
 

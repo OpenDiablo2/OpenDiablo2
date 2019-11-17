@@ -10,25 +10,26 @@ import (
 	"sync"
 	"time"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
+	"github.com/OpenDiablo2/D2Shared/d2helper"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data"
+	"github.com/OpenDiablo2/D2Shared/d2data"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2mpq"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2mpq"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/D2Shared/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 
 	"github.com/hajimehoshi/ebiten"
@@ -38,7 +39,7 @@ import (
 
 // Engine is the core OpenDiablo2 engine
 type Engine struct {
-	Settings        *d2common.Configuration // Engine configuration settings from json file
+	Settings        *d2corecommon.Configuration // Engine configuration settings from json file
 	Files           map[string]string       // Map that defines which files are in which MPQs
 	CheckedPatch    map[string]bool         // First time we check a file, we'll check if it's in the patch. This notes that we've already checked that.
 	LoadingSprite   d2render.Sprite         // The sprite shown when loading stuff
@@ -46,10 +47,10 @@ type Engine struct {
 	loadingIndex    int                     // Determines which load function is currently being called
 	thingsToLoad    []func()                // The load functions for the next scene
 	stepLoadingSize float64                 // The size for each loading step
-	CurrentScene    d2interface.Scene       // The current scene being rendered
+	CurrentScene    d2coreinterface.Scene       // The current scene being rendered
 	UIManager       *d2ui.Manager           // The UI manager
 	SoundManager    *d2audio.Manager        // The sound manager
-	nextScene       d2interface.Scene       // The next scene to be loaded at the end of the game loop
+	nextScene       d2coreinterface.Scene       // The next scene to be loaded at the end of the game loop
 	fullscreenKey   bool                    // When true, the fullscreen toggle is still being pressed
 	lastTime        float64                 // Last time we updated the scene
 	showFPS         bool
@@ -73,6 +74,7 @@ func CreateEngine() Engine {
 	d2datadict.LoadObjects(&result)
 	d2datadict.LoadWeapons(&result)
 	d2datadict.LoadArmors(&result)
+	d2datadict.LoadMiscItems(&result)
 	d2datadict.LoadUniqueItems(&result)
 	d2datadict.LoadMissiles(&result)
 	d2datadict.LoadSounds(&result)
@@ -91,7 +93,7 @@ func CreateEngine() Engine {
 
 func (v *Engine) loadConfigurationFile() {
 	log.Println("Loading configuration file")
-	v.Settings = d2common.LoadConfiguration()
+	v.Settings = d2corecommon.LoadConfiguration()
 }
 
 func (v *Engine) mapMpqFiles() {
@@ -241,7 +243,7 @@ func (v Engine) Draw(screen *ebiten.Image) {
 }
 
 // SetNextScene tells the engine what scene to load on the next update cycle
-func (v *Engine) SetNextScene(nextScene d2interface.Scene) {
+func (v *Engine) SetNextScene(nextScene d2coreinterface.Scene) {
 	v.nextScene = nextScene
 }
 

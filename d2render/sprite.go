@@ -7,9 +7,10 @@ import (
 	"log"
 	"sync"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
+	"github.com/OpenDiablo2/D2Shared/d2helper"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corehelper"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -18,7 +19,6 @@ import (
 type Sprite struct {
 	Directions         uint32
 	FramesPerDirection uint32
-	atlas              *ebiten.Image
 	Frames             []SpriteFrame
 	SpecialFrameTime   int
 	AnimateBackwards   bool // Because why not
@@ -45,8 +45,6 @@ type SpriteFrame struct {
 	ImageData []int16
 	FrameData []byte
 	Image     *ebiten.Image
-	atlasX    int
-	atlasY    int
 }
 
 // CreateSprite creates an instance of a sprite
@@ -128,86 +126,22 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
 					x += uint32(b)
 				}
 			}
-			result.Frames[i].FrameData = make([]byte, result.Frames[i].Width*result.Frames[i].Height*4)
+			var img = image.NewRGBA(image.Rect(0, 0, int(result.Frames[i].Width), int(result.Frames[i].Height)))
 			for ii := uint32(0); ii < result.Frames[i].Width*result.Frames[i].Height; ii++ {
 				if result.Frames[i].ImageData[ii] < 1 { // TODO: Is this == -1 or < 1?
 					continue
 				}
-				result.Frames[i].FrameData[ii*4] = palette.Colors[result.Frames[i].ImageData[ii]].R
-				result.Frames[i].FrameData[(ii*4)+1] = palette.Colors[result.Frames[i].ImageData[ii]].G
-				result.Frames[i].FrameData[(ii*4)+2] = palette.Colors[result.Frames[i].ImageData[ii]].B
-				result.Frames[i].FrameData[(ii*4)+3] = 0xFF
+				img.Pix[ii*4] = palette.Colors[result.Frames[i].ImageData[ii]].R
+				img.Pix[(ii*4)+1] = palette.Colors[result.Frames[i].ImageData[ii]].G
+				img.Pix[(ii*4)+2] = palette.Colors[result.Frames[i].ImageData[ii]].B
+				img.Pix[(ii*4)+3] = 0xFF
 			}
-			//newImage, _ := ebiten.NewImageFromImage(img, ebiten.FilterNearest)
-			//result.Frames[i].Image = newImage
-			//img = nil
+			newImage, _ := ebiten.NewImageFromImage(img, ebiten.FilterNearest)
+			result.Frames[i].Image = newImage
+			img = nil
 		}(i)
 	}
 	wg.Wait()
-	frame := 0
-	curMaxWidth := 0
-	atlasWidth := 0
-	atlasHeight := 0
-	curX := 0
-	curY := 0
-	const maxHeight = 8192
-	for d := 0; d < int(result.Directions); d++ {
-		for f := 0; f < int(result.FramesPerDirection); f++ {
-			if curY+int(result.Frames[frame].Height) >= maxHeight {
-				curX += curMaxWidth
-				curY = 0
-				curMaxWidth = 0
-				if curX >= maxHeight {
-					log.Fatal("Ran out of texture atlas space!")
-				}
-			}
-			result.Frames[frame].atlasX = curX
-			result.Frames[frame].atlasY = curY
-			curMaxWidth = int(d2helper.Max(uint32(curMaxWidth), result.Frames[frame].Width))
-			atlasWidth = int(d2helper.Max(uint32(atlasWidth), uint32(curX)+result.Frames[frame].Width))
-			atlasHeight = int(d2helper.Max(uint32(atlasHeight), uint32(curY)+result.Frames[frame].Height))
-			curY += int(result.Frames[frame].Height)
-			frame++
-		}
-	}
-	p2 := 1
-	for p2 < atlasWidth {
-		p2 <<= 1
-	}
-	atlasWidth = p2
-	p2 = 1
-	for p2 < atlasHeight {
-		p2 <<= 1
-	}
-	atlasHeight = p2
-	result.atlas, _ = ebiten.NewImage(atlasWidth, atlasHeight, ebiten.FilterNearest)
-	atlasBytes := make([]byte, atlasWidth*atlasHeight*4)
-	frame = 0
-	for d := 0; d < int(result.Directions); d++ {
-		for f := 0; f < int(result.FramesPerDirection); f++ {
-			f := &result.Frames[frame]
-			f.Image = result.atlas.SubImage(image.Rect(f.atlasX, f.atlasY, f.atlasX+int(f.Width), f.atlasY+int(f.Height))).(*ebiten.Image)
-			ox := f.atlasX
-			oy := f.atlasY
-			for y := 0; y < int(f.Height); y++ {
-				for x := 0; x < int(f.Width); x++ {
-					pix := (x + (y * int(f.Width))) * 4
-					idx := (ox + x + ((oy + y) * atlasWidth)) * 4
-					atlasBytes[idx] = f.FrameData[pix]
-					atlasBytes[idx+1] = f.FrameData[pix+1]
-					atlasBytes[idx+2] = f.FrameData[pix+2]
-					atlasBytes[idx+3] = f.FrameData[pix+3]
-				}
-			}
-
-			curY += int(result.Frames[frame].Height)
-			frame++
-		}
-	}
-	if err := result.atlas.ReplacePixels(atlasBytes); err != nil {
-		log.Panic(err.Error())
-	}
-	atlasBytes = []byte{}
 	result.valid = true
 	return result
 
@@ -295,7 +229,7 @@ func (v *Sprite) Draw(target *ebiten.Image) {
 		opts.CompositeMode = ebiten.CompositeModeSourceOver
 	}
 	if v.ColorMod != nil {
-		opts.ColorM = d2helper.ColorToColorM(v.ColorMod)
+		opts.ColorM = d2corehelper.ColorToColorM(v.ColorMod)
 	}
 	if err := target.DrawImage(frame.Image, opts); err != nil {
 		log.Panic(err.Error())
@@ -322,7 +256,7 @@ func (v *Sprite) DrawSegments(target *ebiten.Image, xSegments, ySegments, offset
 				opts.CompositeMode = ebiten.CompositeModeSourceOver
 			}
 			if v.ColorMod != nil {
-				opts.ColorM = d2helper.ColorToColorM(v.ColorMod)
+				opts.ColorM = d2corehelper.ColorToColorM(v.ColorMod)
 			}
 			if err := target.DrawImage(frame.Image, opts); err != nil {
 				log.Panic(err.Error())
