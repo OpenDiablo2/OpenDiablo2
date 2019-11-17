@@ -13,6 +13,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2mpq"
 	"github.com/hajimehoshi/ebiten"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 // GitBranch is set by the CI build process to the name of the branch
@@ -21,6 +22,9 @@ var GitBranch string
 // GitCommit is set by the CI build process to the commit hash
 var GitCommit string
 var d2Engine d2core.Engine
+
+var region = kingpin.Arg("region", "Region type id").Int()
+var preset = kingpin.Arg("preset", "Level preset").Int()
 
 func main() {
 	//defer profile.Start(profile.CPUProfile).Stop()
@@ -39,7 +43,12 @@ func main() {
 	}
 	d2mpq.InitializeCryptoBuffer()
 	d2Engine = d2core.CreateEngine()
-	d2Engine.SetNextScene(d2scene.CreateMainMenu(&d2Engine, &d2Engine, d2Engine.UIManager, d2Engine.SoundManager))
+	kingpin.Parse()
+	if *region == 0 {
+		d2Engine.SetNextScene(d2scene.CreateMainMenu(&d2Engine, &d2Engine, d2Engine.UIManager, d2Engine.SoundManager))
+	} else {
+		d2Engine.SetNextScene(d2scene.CreateMapEngineTest(&d2Engine, &d2Engine, d2Engine.UIManager, d2Engine.SoundManager, *region, *preset))
+	}
 	ebiten.SetCursorVisible(false)
 	ebiten.SetFullscreen(d2Engine.Settings.FullScreen)
 	ebiten.SetRunnableInBackground(d2Engine.Settings.RunInBackground)
