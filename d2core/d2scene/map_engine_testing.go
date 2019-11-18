@@ -218,16 +218,32 @@ func (v *MapEngineTest) Update(tickTime float64) {
 	shiftPressed := v.uiManager.KeyPressed(ebiten.KeyShift)
 
 	if v.uiManager.KeyPressed(ebiten.KeyDown) {
-		v.mapEngine.OffsetY -= tickTime * 800
+		if v.uiManager.KeyPressed(ebiten.KeyShift) {
+			v.mapEngine.OffsetY -= tickTime * 200
+		} else {
+			v.mapEngine.OffsetY -= tickTime * 800
+		}
 	}
 	if v.uiManager.KeyPressed(ebiten.KeyUp) {
-		v.mapEngine.OffsetY += tickTime * 800
+		if v.uiManager.KeyPressed(ebiten.KeyShift) {
+			v.mapEngine.OffsetY += tickTime * 200
+		} else {
+			v.mapEngine.OffsetY += tickTime * 800
+		}
 	}
 	if v.uiManager.KeyPressed(ebiten.KeyLeft) {
-		v.mapEngine.OffsetX += tickTime * 800
+		if v.uiManager.KeyPressed(ebiten.KeyShift) {
+			v.mapEngine.OffsetX += tickTime * 200
+		} else {
+			v.mapEngine.OffsetX += tickTime * 800
+		}
 	}
 	if v.uiManager.KeyPressed(ebiten.KeyRight) {
-		v.mapEngine.OffsetX -= tickTime * 800
+		if v.uiManager.KeyPressed(ebiten.KeyShift) {
+			v.mapEngine.OffsetX -= tickTime * 200
+		} else {
+			v.mapEngine.OffsetX -= tickTime * 800
+		}
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF7) {
