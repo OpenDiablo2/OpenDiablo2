@@ -161,7 +161,7 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 			}
 		}
 	}
-	if v.currentFrame < 0 || v.frames == nil || v.currentFrame > len(v.frames) || v.frames[v.currentFrame] == nil {
+	if v.currentFrame < 0 || v.frames == nil || v.currentFrame >= len(v.frames) || v.frames[v.currentFrame] == nil {
 		return
 	}
 	localX := (v.subcellX - v.subcellY) * 16
@@ -248,7 +248,7 @@ func (v *AnimatedEntity) updateFrameCache() {
 			if v.Cof.CofLayers[cofLayerIdx].Transparent {
 				transparency = byte(128)
 			}
-			if animationIdx > len(dccLayer.Directions[v.direction].Frames) {
+			if animationIdx >= len(dccLayer.Directions[v.direction].Frames) {
 				log.Printf("Invalid animation index of %d for animated entity", animationIdx)
 				continue
 			}
