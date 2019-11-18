@@ -1,3 +1,4 @@
+[![Board Status](https://dev.azure.com/continue1/9f868e66-8c82-421d-8d92-3c767dc43f41/754eba53-fc3b-436a-b4a9-287bcf801cfa/_apis/work/boardbadge/b8cc6396-c70f-460a-9bce-e8474c19fbbd)](https://dev.azure.com/continue1/9f868e66-8c82-421d-8d92-3c767dc43f41/_boards/board/t/754eba53-fc3b-436a-b4a9-287bcf801cfa/Microsoft.RequirementCategory)
 # OpenDiablo2 [![Build Status](https://travis-ci.org/OpenDiablo2/OpenDiablo2.svg?branch=master)](https://travis-ci.org/OpenDiablo2/OpenDiablo2)
 
 [Join us on Discord!](https://discord.gg/pRy8tdc)\
