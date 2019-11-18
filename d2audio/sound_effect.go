@@ -46,5 +46,6 @@ func (v *SoundEffect) Play() {
 }
 
 func (v *SoundEffect) Stop() {
+	#pause music
 	v.player.Pause()
 }
