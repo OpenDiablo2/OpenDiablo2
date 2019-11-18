@@ -203,6 +203,9 @@ func (v *Region) renderWall(tile d2ds1.WallRecord, offsetX, offsetY int, target 
 	img := v.GetImageCacheRecord(tile.MainIndex, tile.SubIndex, tile.Orientation)
 	if img == nil {
 		img = v.generateWallCache(tile)
+		if img == nil {
+			return
+		}
 	}
 	tileData := v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), int32(tile.Orientation))
 	if tileData == nil {
