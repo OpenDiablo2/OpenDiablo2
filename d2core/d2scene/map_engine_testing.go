@@ -184,9 +184,9 @@ func (v *MapEngineTest) Render(screen *ebiten.Image) {
 	line := fmt.Sprintf("%d, %d (Tile %d.%d, %d.%d)",
 		int(math.Ceil(actualX)),
 		int(math.Ceil(actualY)),
-		int(math.Ceil(tileX))-curRegion.Rect.Left,
+		int(math.Floor(tileX))-curRegion.Rect.Left,
 		subtileX,
-		int(math.Ceil(tileY))-curRegion.Rect.Top,
+		int(math.Floor(tileY))-curRegion.Rect.Top,
 		subtileY,
 	)
 
