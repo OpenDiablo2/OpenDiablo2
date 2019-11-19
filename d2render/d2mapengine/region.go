@@ -7,7 +7,6 @@ import (
 	"math/rand"
 	"sort"
 	"strconv"
-	"time"
 
 	"github.com/OpenDiablo2/D2Shared/d2data/d2dt1"
 
@@ -50,9 +49,10 @@ type Region struct {
 	StartX            float64
 	StartY            float64
 	imageCacheRecords map[uint32]*ebiten.Image
+	tileSource        *rand.Rand
 }
 
-func LoadRegion(seed rand.Source, levelType d2enum.RegionIdType, levelPreset int, fileProvider d2interface.FileProvider, fileIndex int) *Region {
+func LoadRegion(seed int64, levelType d2enum.RegionIdType, levelPreset int, fileProvider d2interface.FileProvider, fileIndex int) *Region {
 	result := &Region{
 		LevelType:         d2datadict.LevelTypes[levelType],
 		LevelPreset:       d2datadict.LevelPresets[levelPreset],
@@ -82,12 +82,14 @@ func LoadRegion(seed rand.Source, levelType d2enum.RegionIdType, levelPreset int
 		}
 		levelFilesToPick = append(levelFilesToPick, fileRecord)
 	}
-	random := rand.New(seed)
+	randomSource := rand.NewSource(seed)
+	random := rand.New(randomSource)
 	levelIndex := int(math.Round(float64(len(levelFilesToPick)-1) * random.Float64()))
 	if fileIndex >= 0 && fileIndex < len(levelFilesToPick) {
 		levelIndex = fileIndex
 	}
 	levelFile := levelFilesToPick[levelIndex]
+	result.tileSource = rand.New(rand.NewSource(seed))
 	result.RegionPath = levelFile
 	result.DS1 = d2ds1.LoadDS1("/data/global/tiles/"+levelFile, fileProvider)
 	result.TileWidth = result.DS1.Width
@@ -159,10 +161,9 @@ func (v *Region) getRandomTile(tiles []d2dt1.Tile) *d2dt1.Tile {
 	for _, t := range tiles {
 		s += int(t.RarityFrameIndex)
 	}
-	rand.Seed(time.Now().UnixNano())
 	r := 0
 	if s != 0 {
-		r = rand.Intn(s) + 1
+		r = v.tileSource.Intn(s) + 1
 	}
 	for _, t := range tiles {
 		r -= int(t.RarityFrameIndex)
