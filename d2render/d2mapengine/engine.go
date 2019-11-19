@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image/color"
 	"math"
-	"math/rand"
 	"strings"
 
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
@@ -63,8 +62,7 @@ func (v *Engine) CenterCameraOn(x, y float64) {
 }
 
 func (v *Engine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) {
-	randomSource := rand.NewSource(v.gameState.Seed)
-	region := LoadRegion(randomSource, regionType, levelPreset, v.fileProvider, fileIndex)
+	region := LoadRegion(v.gameState.Seed, regionType, levelPreset, v.fileProvider, fileIndex)
 	fmt.Printf("Loading region: %v\n", region.RegionPath)
 	v.regions = append(v.regions, EngineRegion{
 		Rect:   d2common.Rectangle{0, 0, int(region.TileWidth), int(region.TileHeight)},
@@ -79,20 +77,19 @@ func (v *Engine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fi
 
 func (v *Engine) GenerateAct1Overworld() {
 	v.soundManager.PlayBGM("/data/global/music/Act1/town1.wav") // TODO: Temp stuff here
-	randomSource := rand.NewSource(v.gameState.Seed)
-	region := LoadRegion(randomSource, d2enum.RegionAct1Town, 1, v.fileProvider, -1)
+	region := LoadRegion(v.gameState.Seed, d2enum.RegionAct1Town, 1, v.fileProvider, -1)
 	v.regions = append(v.regions, EngineRegion{
 		Rect:   d2common.Rectangle{0, 0, int(region.TileWidth), int(region.TileHeight)},
 		Region: region,
 	})
 	if strings.Contains(region.RegionPath, "E1") {
-		region2 := LoadRegion(randomSource, d2enum.RegionAct1Town, 2, v.fileProvider, -1)
+		region2 := LoadRegion(v.gameState.Seed, d2enum.RegionAct1Town, 2, v.fileProvider, -1)
 		v.regions = append(v.regions, EngineRegion{
 			Rect:   d2common.Rectangle{int(region.TileWidth - 1), 0, int(region2.TileWidth), int(region2.TileHeight)},
 			Region: region2,
 		})
 	} else if strings.Contains(region.RegionPath, "S1") {
-		region2 := LoadRegion(randomSource, d2enum.RegionAct1Town, 3, v.fileProvider, -1)
+		region2 := LoadRegion(v.gameState.Seed, d2enum.RegionAct1Town, 3, v.fileProvider, -1)
 		v.regions = append(v.regions, EngineRegion{
 			Rect:   d2common.Rectangle{0, int(region.TileHeight - 1), int(region2.TileWidth), int(region2.TileHeight)},
 			Region: region2,
@@ -152,25 +149,26 @@ func (v *Engine) GenTilesCache(region *EngineRegion) {
 		t := &region.Tiles[tileIdx]
 		if t.tileY < len(region.Region.DS1.Tiles) && t.tileX < len(region.Region.DS1.Tiles[t.tileY]) {
 			tile := region.Region.DS1.Tiles[t.tileY][t.tileX]
+			location := byte((t.tileX + 1) * (t.tileY + 1) % 255)
 			for i := range tile.Floors {
 				if tile.Floors[i].Hidden || tile.Floors[i].Prop1 == 0 {
 					continue
 				}
-				region.Region.generateFloorCache(tile.Floors[i])
+				region.Region.generateFloorCache(tile.Floors[i], location)
 				n++
 			}
 			for i, shadow := range tile.Shadows {
 				if tile.Shadows[i].Hidden || tile.Shadows[i].Prop1 == 0 {
 					continue
 				}
-				region.Region.generateShadowCache(shadow)
+				region.Region.generateShadowCache(shadow, location)
 				n++
 			}
 			for i, wall := range tile.Walls {
 				if tile.Walls[i].Hidden {
 					continue
 				}
-				region.Region.generateWallCache(wall)
+				region.Region.generateWallCache(wall, location)
 				n++
 			}
 		}
