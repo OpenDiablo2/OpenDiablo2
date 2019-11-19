@@ -4,10 +4,10 @@ go 1.12
 
 require (
 	github.com/JoshVarga/blast v0.0.0-20180421040937-681c804fb9f0
-	github.com/OpenDiablo2/D2Shared v0.0.0-20191119053321-f24eee9fc5d7
+	github.com/OpenDiablo2/D2Shared v0.0.0-20191119200215-b4d6d042eb13
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
-	github.com/hajimehoshi/ebiten v1.11.0-alpha.0.20191117152313-63f9ac2ccc2a
+	github.com/hajimehoshi/ebiten v1.11.0-alpha.0.20191119174134-52f6be26392b
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/profile v1.3.0
 	golang.org/x/exp v0.0.0-20191030013958-a1ab85dbe136 // indirect
