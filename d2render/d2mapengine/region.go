@@ -49,6 +49,7 @@ type Region struct {
 	StartX            float64
 	StartY            float64
 	imageCacheRecords map[uint32]*ebiten.Image
+	seed              int64
 	tileSource        *rand.Rand
 }
 
@@ -58,6 +59,7 @@ func LoadRegion(seed int64, levelType d2enum.RegionIdType, levelPreset int, file
 		LevelPreset:       d2datadict.LevelPresets[levelPreset],
 		Tiles:             make([]d2dt1.Tile, 0),
 		imageCacheRecords: map[uint32]*ebiten.Image{},
+		seed:              seed,
 	}
 	result.Palette = d2datadict.Palettes[d2enum.PaletteType("act"+strconv.Itoa(int(result.LevelType.Act)))]
 	//bm := result.levelPreset.Dt1Mask
@@ -190,7 +192,7 @@ func (v *Region) getTile(mainIndex, subIndex, orientation int32) *d2dt1.Tile {
 }
 
 func (v *Region) renderFloor(tile d2ds1.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image, tileX, tileY int) {
-	location := byte((tileX + 1) * (tileY + 1) % 255)
+	location := byte((int(v.seed) + tileX + 1) * (tileY + 1) % 255)
 	opts := &ebiten.DrawImageOptions{}
 	img := v.GetImageCacheRecord(tile.MainIndex, tile.SubIndex, 0, location)
 	if img == nil {
@@ -202,7 +204,7 @@ func (v *Region) renderFloor(tile d2ds1.FloorShadowRecord, offsetX, offsetY int,
 }
 
 func (v *Region) renderWall(tile d2ds1.WallRecord, offsetX, offsetY int, target *ebiten.Image, tileX, tileY int) {
-	location := byte((tileX + 1) * (tileY + 1) % 255)
+	location := byte((int(v.seed) + tileX + 1) * (tileY + 1) % 255)
 	img := v.GetImageCacheRecord(tile.MainIndex, tile.SubIndex, tile.Orientation, location)
 	if img == nil {
 		img = v.generateWallCache(tile, location)
@@ -243,7 +245,7 @@ func (v *Region) renderWall(tile d2ds1.WallRecord, offsetX, offsetY int, target 
 }
 
 func (v *Region) renderShadow(tile d2ds1.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image, tileX, tileY int) {
-	location := byte((tileX + 1) * (tileY + 1) % 255)
+	location := byte((int(v.seed) + tileX + 1) * (tileY + 1) % 255)
 	img := v.GetImageCacheRecord(tile.MainIndex, tile.SubIndex, 13, location)
 	if img == nil {
 		img = v.generateShadowCache(tile, location)
