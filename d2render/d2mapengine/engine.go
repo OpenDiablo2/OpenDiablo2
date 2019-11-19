@@ -149,26 +149,25 @@ func (v *Engine) GenTilesCache(region *EngineRegion) {
 		t := &region.Tiles[tileIdx]
 		if t.tileY < len(region.Region.DS1.Tiles) && t.tileX < len(region.Region.DS1.Tiles[t.tileY]) {
 			tile := region.Region.DS1.Tiles[t.tileY][t.tileX]
-			location := byte((t.tileX + 1) * (t.tileY + 1) % 255)
 			for i := range tile.Floors {
 				if tile.Floors[i].Hidden || tile.Floors[i].Prop1 == 0 {
 					continue
 				}
-				region.Region.generateFloorCache(tile.Floors[i], location)
+				region.Region.generateFloorCache(&tile.Floors[i], t.tileX, t.tileY)
 				n++
 			}
 			for i, shadow := range tile.Shadows {
 				if tile.Shadows[i].Hidden || tile.Shadows[i].Prop1 == 0 {
 					continue
 				}
-				region.Region.generateShadowCache(shadow, location)
+				region.Region.generateShadowCache(&shadow, t.tileX, t.tileY)
 				n++
 			}
 			for i, wall := range tile.Walls {
 				if tile.Walls[i].Hidden {
 					continue
 				}
-				region.Region.generateWallCache(wall, location)
+				region.Region.generateWallCache(&wall, t.tileX, t.tileY)
 				n++
 			}
 		}
