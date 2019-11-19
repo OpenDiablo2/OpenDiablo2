@@ -1,6 +1,7 @@
 package d2core
 
 import (
+	"io/ioutil"
 	"log"
 	"math"
 	"path"
@@ -40,19 +41,19 @@ import (
 // Engine is the core OpenDiablo2 engine
 type Engine struct {
 	Settings        *d2corecommon.Configuration // Engine configuration settings from json file
-	Files           map[string]string       // Map that defines which files are in which MPQs
-	CheckedPatch    map[string]bool         // First time we check a file, we'll check if it's in the patch. This notes that we've already checked that.
-	LoadingSprite   d2render.Sprite         // The sprite shown when loading stuff
-	loadingProgress float64                 // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
-	loadingIndex    int                     // Determines which load function is currently being called
-	thingsToLoad    []func()                // The load functions for the next scene
-	stepLoadingSize float64                 // The size for each loading step
+	Files           map[string]string           // Map that defines which files are in which MPQs
+	CheckedPatch    map[string]bool             // First time we check a file, we'll check if it's in the patch. This notes that we've already checked that.
+	LoadingSprite   d2render.Sprite             // The sprite shown when loading stuff
+	loadingProgress float64                     // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
+	loadingIndex    int                         // Determines which load function is currently being called
+	thingsToLoad    []func()                    // The load functions for the next scene
+	stepLoadingSize float64                     // The size for each loading step
 	CurrentScene    d2coreinterface.Scene       // The current scene being rendered
-	UIManager       *d2ui.Manager           // The UI manager
-	SoundManager    *d2audio.Manager        // The sound manager
+	UIManager       *d2ui.Manager               // The UI manager
+	SoundManager    *d2audio.Manager            // The sound manager
 	nextScene       d2coreinterface.Scene       // The next scene to be loaded at the end of the game loop
-	fullscreenKey   bool                    // When true, the fullscreen toggle is still being pressed
-	lastTime        float64                 // Last time we updated the scene
+	fullscreenKey   bool                        // When true, the fullscreen toggle is still being pressed
+	lastTime        float64                     // Last time we updated the scene
 	showFPS         bool
 }
 
@@ -119,9 +120,17 @@ func (v *Engine) LoadFile(fileName string) []byte {
 		return result
 	}
 	for _, mpqFile := range v.Settings.MpqLoadOrder {
-		archive, _ := d2mpq.Load(path.Join(v.Settings.MpqPath, mpqFile))
-		if archive == nil {
-			log.Fatalf("Failed to load specified MPQ file: %s", mpqFile)
+		var archive *d2mpq.MPQ
+		var err error
+
+		if runtime.GOOS == "linux" {
+			archive, err = v.loadIgnoreCase(v.Settings.MpqPath, mpqFile)
+		} else {
+			archive, err = d2mpq.Load(path.Join(v.Settings.MpqPath, mpqFile))
+		}
+
+		if err != nil {
+			log.Fatalf("Failed to load specified MPQ file: %s with error: %v", mpqFile, err)
 		}
 		if !archive.FileExists(fileName) {
 			continue
@@ -136,6 +145,23 @@ func (v *Engine) LoadFile(fileName string) []byte {
 	}
 	log.Printf("Could not load %s from MPQs\n", fileName)
 	return []byte{}
+}
+
+func (v Engine) loadIgnoreCase(MpqPath, filename string) (*d2mpq.MPQ, error) {
+	files, err := ioutil.ReadDir(MpqPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, file := range files {
+		if strings.EqualFold(file.Name(), filename) {
+			filename = file.Name()
+			break
+		}
+	}
+
+	archive, err := d2mpq.Load(path.Join(MpqPath, filename))
+	return archive, err
 }
 
 // IsLoading returns true if the engine is currently in a loading state
