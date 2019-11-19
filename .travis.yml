@@ -33,7 +33,8 @@ before_deploy:
   - git tag $TRAVIS_TAG
 deploy:
   provider: releases
-  edge: true
+  api_key:
+    secure: "$GithubApi"
   file_glob: true
   file: opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.*
   skip_cleanup: true
