@@ -5,6 +5,7 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"sort"
 	"strconv"
 
 	"github.com/OpenDiablo2/D2Shared/d2data/d2dt1"
@@ -48,6 +49,7 @@ type Region struct {
 	StartX            float64
 	StartY            float64
 	imageCacheRecords map[uint32]*ebiten.Image
+	tileSource        *rand.Rand
 	seed              int64
 }
 
@@ -87,6 +89,9 @@ func LoadRegion(seed int64, levelType d2enum.RegionIdType, levelPreset int, file
 		levelIndex = fileIndex
 	}
 	levelFile := levelFilesToPick[levelIndex]
+
+	randsource := rand.NewSource(seed)
+	result.tileSource = rand.New(randsource)
 	result.RegionPath = levelFile
 	result.DS1 = d2ds1.LoadDS1("/data/global/tiles/"+levelFile, fileProvider)
 	result.TileWidth = result.DS1.Width
@@ -150,7 +155,30 @@ func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType d2enum
 }
 
 func (v *Region) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) (*d2dt1.Tile, byte) {
-	// Temporary hack...
+	/* This should be fixed, we end up with very poor results
+	 * by picking index zero out of the sorted sequence, the original order matters */
+	var tileSeed int64
+	tileSeed = seed + int64(x)
+	tileSeed *= int64(y) + int64(v.LevelType.Id)
+	v.tileSource.Seed(tileSeed)
+
+	sort.Sort(ByRarity(tiles))
+
+	var s int
+	for _, tile := range tiles {
+		s += int(tile.RarityFrameIndex)
+	}
+	var r int
+	if s != 0 {
+		r = v.tileSource.Intn(s + 1)
+	}
+	for i, tile := range tiles {
+		r -= int(tile.RarityFrameIndex)
+		if r <= 0 {
+			return &tile, byte(i)
+		}
+	}
+
 	return &tiles[0], 0
 }
 
