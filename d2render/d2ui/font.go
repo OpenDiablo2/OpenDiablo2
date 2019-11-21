@@ -15,6 +15,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 
 	"github.com/hajimehoshi/ebiten"
+
+	"encoding/binary"
+
+	"unicode"
 )
 
 var fontCache = map[string]*Font{}
@@ -28,7 +32,8 @@ type FontSize struct {
 // Font represents a font
 type Font struct {
 	fontSprite d2render.Sprite
-	metrics    map[uint8]FontSize
+	fontTable  map[uint16]uint16
+	metrics    map[uint16]FontSize
 }
 
 // GetFont creates or loads an existing font
@@ -45,21 +50,39 @@ func GetFont(font string, palette d2enum.PaletteType, fileProvider d2interface.F
 // CreateFont creates an instance of a MPQ Font
 func CreateFont(font string, palette d2enum.PaletteType, fileProvider d2interface.FileProvider) *Font {
 	result := &Font{
-		metrics: make(map[uint8]FontSize),
+		fontTable: make(map[uint16]uint16),
+		metrics:   make(map[uint16]FontSize),
 	}
+	// bug: performance issue when using CJK fonts, because ten thousand frames will be rendered PER font
 	result.fontSprite = d2render.CreateSprite(fileProvider.LoadFile(font+".dc6"), d2datadict.Palettes[palette])
 	woo := "Woo!\x01"
 	fontData := fileProvider.LoadFile(font + ".tbl")
 	if string(fontData[0:5]) != woo {
 		panic("No woo :(")
 	}
+
+	containsCjk := false
 	for i := 12; i < len(fontData); i += 14 {
-		fontSize := FontSize{
-			Width:  fontData[i+3],
-			Height: fontData[i+4],
+		// font mappings, map unicode code points to array indics
+		unicodeCode := binary.LittleEndian.Uint16(fontData[i : i+2])
+		fontIndex := binary.LittleEndian.Uint16(fontData[i+8 : i+10])
+		result.fontTable[unicodeCode] = fontIndex
+
+		if unicodeCode < unicode.MaxLatin1 {
+			result.metrics[unicodeCode] = FontSize{
+				Width:  fontData[i+3],
+				Height: fontData[i+4],
+			}
+		} else if !containsCjk {
+			// CJK characters are all in the same size
+			result.metrics[unicode.MaxLatin1] = FontSize{
+				Width:  fontData[i+3],
+				Height: fontData[i+4],
+			}
+			containsCjk = true
 		}
-		result.metrics[fontData[i+8]] = fontSize
 	}
+
 	return result
 }
 
@@ -69,19 +92,19 @@ func (v *Font) GetTextMetrics(text string) (width, height uint32) {
 	curWidth := uint32(0)
 	height = uint32(0)
 	maxCharHeight := uint32(0)
+	// todo: it can be saved as a struct member, since it only depends on `.Frames`
 	for _, m := range v.fontSprite.Frames {
 		maxCharHeight = d2helper.Max(maxCharHeight, uint32(m.Height))
 	}
-	for i := 0; i < len(text); i++ {
-		ch := text[i]
+	for _, ch := range text {
 		if ch == '\n' {
 			width = d2helper.Max(width, curWidth)
 			curWidth = 0
 			height += maxCharHeight + 6
 			continue
 		}
-		metric := v.metrics[uint8(ch)]
-		curWidth += uint32(metric.Width)
+
+		curWidth += v.getCharWidth(ch)
 	}
 	width = d2helper.Max(width, curWidth)
 	height += maxCharHeight
@@ -105,12 +128,12 @@ func (v *Font) Draw(x, y int, text string, color color.Color, target *ebiten.Ima
 		xPos := x + ((targetWidth / 2) - int(lineWidth/2))
 
 		for _, ch := range line {
-			char := uint8(ch)
-			metric := v.metrics[char]
-			v.fontSprite.Frame = int16(char)
-			v.fontSprite.MoveTo(xPos, y+int(v.fontSprite.Frames[char].Height))
+			width := v.getCharWidth(ch)
+			index := v.fontTable[uint16(ch)]
+			v.fontSprite.Frame = int16(index)
+			v.fontSprite.MoveTo(xPos, y+int(v.fontSprite.Frames[index].Height))
 			v.fontSprite.Draw(target)
-			xPos += int(metric.Width)
+			xPos += int(width)
 		}
 
 		if lineIdx >= len(lines)-1 {
@@ -120,4 +143,11 @@ func (v *Font) Draw(x, y int, text string, color color.Color, target *ebiten.Ima
 		xPos = x
 		y += int(maxCharHeight + 6)
 	}
+}
+
+func (v *Font) getCharWidth(char rune) (width uint32) {
+	if char < unicode.MaxLatin1 {
+		return uint32(v.metrics[uint16(char)].Width)
+	}
+	return uint32(v.metrics[unicode.MaxLatin1].Width)
 }
