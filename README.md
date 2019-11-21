@@ -74,6 +74,8 @@ the game in a different location, the base path may have to be adjusted.
 
 ![Select Hero](docs/SelectHeroSS.png)
 
+![Select Hero](docs/areas.gif)
+
 ## Additional Credits
 
 -   Diablo2 Logo
