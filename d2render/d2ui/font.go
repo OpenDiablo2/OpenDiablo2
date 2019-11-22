@@ -54,7 +54,7 @@ func CreateFont(font string, palette d2enum.PaletteType, fileProvider d2interfac
 		metrics:   make(map[uint16]FontSize),
 	}
 	// bug: performance issue when using CJK fonts, because ten thousand frames will be rendered PER font
-	result.fontSprite = d2render.CreateSprite(fileProvider.LoadFile(font+".dc6"), d2datadict.Palettes[palette])
+	result.fontSprite = d2render.CreateLazySprite(fileProvider.LoadFile(font+".dc6"), d2datadict.Palettes[palette])
 	woo := "Woo!\x01"
 	fontData := fileProvider.LoadFile(font + ".tbl")
 	if string(fontData[0:5]) != woo {
@@ -92,10 +92,13 @@ func (v *Font) GetTextMetrics(text string) (width, height uint32) {
 	curWidth := uint32(0)
 	height = uint32(0)
 	maxCharHeight := uint32(0)
-	// todo: it can be saved as a struct member, since it only depends on `.Frames`
-	for _, m := range v.fontSprite.Frames {
-		maxCharHeight = d2helper.Max(maxCharHeight, uint32(m.Height))
+	for _, ch := range text {
+		index := v.fontTable[uint16(ch)]
+		maxCharHeight = d2helper.Max(maxCharHeight, v.fontSprite.Frames[index].Height)
+		// only draw the font that we needs
+		_ = v.fontSprite.DrawFrameImage(int16(index))
 	}
+
 	for _, ch := range text {
 		if ch == '\n' {
 			width = d2helper.Max(width, curWidth)

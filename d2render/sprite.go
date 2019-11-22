@@ -28,6 +28,7 @@ type Sprite struct {
 	LastFrameTime      float64
 	Animate            bool
 	ColorMod           color.Color
+	Palette            d2datadict.PaletteRec
 	valid              bool
 }
 
@@ -48,6 +49,16 @@ type SpriteFrame struct {
 
 // CreateSprite creates an instance of a sprite
 func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
+	return CreateSpriteWithOption(data, palette, false)
+}
+
+// CreateLazySprite creates an instance of a sprite, but not render to image until `.DrawFrameImage` called
+func CreateLazySprite(data []byte, palette d2datadict.PaletteRec) Sprite {
+	return CreateSpriteWithOption(data, palette, true)
+}
+
+// CreateSpriteWithOption creates an instance of a sprite with additional options
+func CreateSpriteWithOption(data []byte, palette d2datadict.PaletteRec, isLazy bool) Sprite {
 	result := Sprite{
 		X:                  50,
 		Y:                  50,
@@ -55,6 +66,7 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
 		Direction:          0,
 		Blend:              false,
 		ColorMod:           nil,
+		Palette:            palette,
 		Directions:         binary.LittleEndian.Uint32(data[16:20]),
 		FramesPerDirection: binary.LittleEndian.Uint32(data[20:24]),
 		Animate:            false,
@@ -125,26 +137,40 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
 					x += uint32(b)
 				}
 			}
-			var img = make([]byte, int(result.Frames[i].Width)*int(result.Frames[i].Height)*4)
-			for ii := uint32(0); ii < result.Frames[i].Width*result.Frames[i].Height; ii++ {
-				if result.Frames[i].ImageData[ii] < 1 { // TODO: Is this == -1 or < 1?
-					continue
-				}
-				img[ii*4] = palette.Colors[result.Frames[i].ImageData[ii]].R
-				img[(ii*4)+1] = palette.Colors[result.Frames[i].ImageData[ii]].G
-				img[(ii*4)+2] = palette.Colors[result.Frames[i].ImageData[ii]].B
-				img[(ii*4)+3] = 0xFF
+
+			if !isLazy {
+				_ = result.DrawFrameImage(int16(i))
 			}
-			newImage, _ := ebiten.NewImage(int(result.Frames[i].Width), int(result.Frames[i].Height), ebiten.FilterNearest)
-			newImage.ReplacePixels(img)
-			result.Frames[i].Image = newImage
-			img = nil
 		}(i)
 	}
 	wg.Wait()
 	result.valid = true
 	return result
 
+}
+
+// DrawFrameImage will render the frame finally
+func (v *Sprite) DrawFrameImage(i int16) error {
+	if v.Frames[i].Image == nil {
+		var img = make([]byte, int(v.Frames[i].Width)*int(v.Frames[i].Height)*4)
+		for ii := uint32(0); ii < v.Frames[i].Width*v.Frames[i].Height; ii++ {
+			if v.Frames[i].ImageData[ii] < 1 { // TODO: Is this == -1 or < 1?
+				continue
+			}
+			img[ii*4] = v.Palette.Colors[v.Frames[i].ImageData[ii]].R
+			img[(ii*4)+1] = v.Palette.Colors[v.Frames[i].ImageData[ii]].G
+			img[(ii*4)+2] = v.Palette.Colors[v.Frames[i].ImageData[ii]].B
+			img[(ii*4)+3] = 0xFF
+		}
+
+		newImage, _ := ebiten.NewImage(int(v.Frames[i].Width), int(v.Frames[i].Height), ebiten.FilterNearest)
+		if err := newImage.ReplacePixels(img); err != nil {
+			return err
+		}
+		v.Frames[i].Image = newImage
+		img = nil
+	}
+	return nil
 }
 
 func (v Sprite) IsValid() bool {
