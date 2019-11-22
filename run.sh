@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # About: Build OpenDiablo 2 automatically
 # Author: liberodark
