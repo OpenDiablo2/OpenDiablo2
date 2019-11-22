@@ -419,12 +419,12 @@ func (v *Region) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int) *eb
 	return image
 }
 
-func (v *Region) GetImageCacheRecord(style, sequence, tileType, randomIndex byte) *ebiten.Image {
+func (v *Region) GetImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte) *ebiten.Image {
 	lookupIndex := uint32(style)<<24 | uint32(sequence)<<16 | uint32(tileType)<<8 | uint32(randomIndex)
 	return v.imageCacheRecords[lookupIndex]
 }
 
-func (v *Region) SetImageCacheRecord(style, sequence, tileType, randomIndex byte, image *ebiten.Image) {
+func (v *Region) SetImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte, image *ebiten.Image) {
 	lookupIndex := uint32(style)<<24 | uint32(sequence)<<16 | uint32(tileType)<<8 | uint32(randomIndex)
 	v.imageCacheRecords[lookupIndex] = image
 }

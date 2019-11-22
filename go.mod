@@ -3,7 +3,7 @@ module github.com/OpenDiablo2/OpenDiablo2
 go 1.12
 
 require (
-	github.com/OpenDiablo2/D2Shared v0.0.0-20191121164327-8f10634564d8
+	github.com/OpenDiablo2/D2Shared v0.0.0-20191122232312-038ad62ce93d
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/hajimehoshi/ebiten v1.11.0-alpha.0.20191121152720-3df198f68eea
