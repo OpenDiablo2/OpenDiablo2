@@ -28,6 +28,8 @@ git:
   depth: 1
 notifications:
   email: false
+before_deploy:
+  - git tag dev
 deploy:
   provider: releases
   api_key:
@@ -39,4 +41,4 @@ deploy:
   name: "OpenDiablo Unstable (Build $TRAVIS_BUILD_NUMBER)"
   prerelease: true
   on:
-    tags: true
+    branch: master
