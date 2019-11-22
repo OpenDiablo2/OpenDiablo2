@@ -40,19 +40,19 @@ import (
 // Engine is the core OpenDiablo2 engine
 type Engine struct {
 	Settings        *d2corecommon.Configuration // Engine configuration settings from json file
-	Files           map[string]string       // Map that defines which files are in which MPQs
-	CheckedPatch    map[string]bool         // First time we check a file, we'll check if it's in the patch. This notes that we've already checked that.
-	LoadingSprite   d2render.Sprite         // The sprite shown when loading stuff
-	loadingProgress float64                 // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
-	loadingIndex    int                     // Determines which load function is currently being called
-	thingsToLoad    []func()                // The load functions for the next scene
-	stepLoadingSize float64                 // The size for each loading step
+	Files           map[string]string           // Map that defines which files are in which MPQs
+	CheckedPatch    map[string]bool             // First time we check a file, we'll check if it's in the patch. This notes that we've already checked that.
+	LoadingSprite   d2render.Sprite             // The sprite shown when loading stuff
+	loadingProgress float64                     // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
+	loadingIndex    int                         // Determines which load function is currently being called
+	thingsToLoad    []func()                    // The load functions for the next scene
+	stepLoadingSize float64                     // The size for each loading step
 	CurrentScene    d2coreinterface.Scene       // The current scene being rendered
-	UIManager       *d2ui.Manager           // The UI manager
-	SoundManager    *d2audio.Manager        // The sound manager
+	UIManager       *d2ui.Manager               // The UI manager
+	SoundManager    *d2audio.Manager            // The sound manager
 	nextScene       d2coreinterface.Scene       // The next scene to be loaded at the end of the game loop
-	fullscreenKey   bool                    // When true, the fullscreen toggle is still being pressed
-	lastTime        float64                 // Last time we updated the scene
+	fullscreenKey   bool                        // When true, the fullscreen toggle is still being pressed
+	lastTime        float64                     // Last time we updated the scene
 	showFPS         bool
 }
 
@@ -104,11 +104,18 @@ var mutex sync.Mutex
 
 func (v *Engine) LoadFile(fileName string) []byte {
 	fileName = strings.ReplaceAll(fileName, "{LANG}", d2resource.LanguageCode)
+	// todo: separate CJK and latin characters from LanguageCode
+	if "CHI" == strings.ToUpper(d2resource.LanguageCode) {
+		fileName = strings.ReplaceAll(fileName, "{LANG_FONT}", d2resource.LanguageCode)
+	} else {
+		fileName = strings.ReplaceAll(fileName, "{LANG_FONT}", "latin")
+	}
 	fileName = strings.ToLower(fileName)
 	fileName = strings.ReplaceAll(fileName, `/`, "\\")
 	if fileName[0] == '\\' {
 		fileName = fileName[1:]
 	}
+
 	mutex.Lock()
 	defer mutex.Unlock()
 	// TODO: May want to cache some things if performance becomes an issue
