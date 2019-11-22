@@ -144,31 +144,27 @@ func (v *Engine) GenTiles(region *EngineRegion) {
 }
 
 func (v *Engine) GenTilesCache(region *EngineRegion) {
-	n := 0
 	for tileIdx := range region.Tiles {
 		t := &region.Tiles[tileIdx]
 		if t.tileY < len(region.Region.DS1.Tiles) && t.tileX < len(region.Region.DS1.Tiles[t.tileY]) {
-			tile := region.Region.DS1.Tiles[t.tileY][t.tileX]
+			tile := &region.Region.DS1.Tiles[t.tileY][t.tileX]
 			for i := range tile.Floors {
 				if tile.Floors[i].Hidden || tile.Floors[i].Prop1 == 0 {
 					continue
 				}
 				region.Region.generateFloorCache(&tile.Floors[i], t.tileX, t.tileY)
-				n++
 			}
-			for i, shadow := range tile.Shadows {
+			for i := range tile.Shadows {
 				if tile.Shadows[i].Hidden || tile.Shadows[i].Prop1 == 0 {
 					continue
 				}
-				region.Region.generateShadowCache(&shadow, t.tileX, t.tileY)
-				n++
+				region.Region.generateShadowCache(&tile.Shadows[i], t.tileX, t.tileY)
 			}
-			for i, wall := range tile.Walls {
-				if tile.Walls[i].Hidden {
+			for i := range tile.Walls {
+				if tile.Walls[i].Hidden || tile.Walls[i].Prop1 == 0 {
 					continue
 				}
-				region.Region.generateWallCache(&wall, t.tileX, t.tileY)
-				n++
+				region.Region.generateWallCache(&tile.Walls[i], t.tileX, t.tileY)
 			}
 		}
 	}
@@ -203,7 +199,7 @@ func (v *Engine) RenderPass1(region *Region, offX, offY, x, y int, target *ebite
 	tile := region.DS1.Tiles[y][x]
 	// Draw lower walls
 	for i := range tile.Walls {
-		if tile.Walls[i].Orientation <= 15 {
+		if tile.Walls[i].Orientation <= 15 || tile.Walls[i].Prop1 == 0 {
 			continue
 		}
 		if tile.Walls[i].Hidden || tile.Walls[i].Orientation == 10 || tile.Walls[i].Orientation == 11 || tile.Walls[i].Orientation == 0 {
