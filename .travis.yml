@@ -29,7 +29,7 @@ git:
 notifications:
   email: false
 before_deploy:
-	- git tag dev-latest
+  - git tag dev
 deploy:
   provider: releases
   api_key:
