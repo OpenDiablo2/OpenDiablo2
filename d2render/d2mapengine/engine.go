@@ -144,31 +144,27 @@ func (v *Engine) GenTiles(region *EngineRegion) {
 }
 
 func (v *Engine) GenTilesCache(region *EngineRegion) {
-	n := 0
 	for tileIdx := range region.Tiles {
 		t := &region.Tiles[tileIdx]
 		if t.tileY < len(region.Region.DS1.Tiles) && t.tileX < len(region.Region.DS1.Tiles[t.tileY]) {
-			tile := region.Region.DS1.Tiles[t.tileY][t.tileX]
+			tile := &region.Region.DS1.Tiles[t.tileY][t.tileX]
 			for i := range tile.Floors {
 				if tile.Floors[i].Hidden || tile.Floors[i].Prop1 == 0 {
 					continue
 				}
 				region.Region.generateFloorCache(&tile.Floors[i], t.tileX, t.tileY)
-				n++
 			}
-			for i, shadow := range tile.Shadows {
+			for i := range tile.Shadows {
 				if tile.Shadows[i].Hidden || tile.Shadows[i].Prop1 == 0 {
 					continue
 				}
-				region.Region.generateShadowCache(&shadow, t.tileX, t.tileY)
-				n++
+				region.Region.generateShadowCache(&tile.Shadows[i], t.tileX, t.tileY)
 			}
-			for i, wall := range tile.Walls {
-				if tile.Walls[i].Hidden {
+			for i := range tile.Walls {
+				if tile.Walls[i].Hidden || tile.Walls[i].Prop1 == 0 {
 					continue
 				}
-				region.Region.generateWallCache(&wall, t.tileX, t.tileY)
-				n++
+				region.Region.generateWallCache(&tile.Walls[i], t.tileX, t.tileY)
 			}
 		}
 	}
@@ -203,10 +199,10 @@ func (v *Engine) RenderPass1(region *Region, offX, offY, x, y int, target *ebite
 	tile := region.DS1.Tiles[y][x]
 	// Draw lower walls
 	for i := range tile.Walls {
-		if tile.Walls[i].Orientation <= 15 {
+		if tile.Walls[i].Type <= 15 || tile.Walls[i].Prop1 == 0 {
 			continue
 		}
-		if tile.Walls[i].Hidden || tile.Walls[i].Orientation == 10 || tile.Walls[i].Orientation == 11 || tile.Walls[i].Orientation == 0 {
+		if tile.Walls[i].Hidden || tile.Walls[i].Type == 10 || tile.Walls[i].Type == 11 || tile.Walls[i].Type == 0 {
 			continue
 		}
 		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
@@ -232,10 +228,10 @@ func (v *Engine) RenderPass2(region *Region, offX, offY, x, y int, target *ebite
 
 	// Draw upper walls
 	for i := range tile.Walls {
-		if tile.Walls[i].Orientation >= 15 {
+		if tile.Walls[i].Type >= 15 {
 			continue
 		}
-		if tile.Walls[i].Hidden || tile.Walls[i].Orientation == 10 || tile.Walls[i].Orientation == 11 || tile.Walls[i].Orientation == 0 {
+		if tile.Walls[i].Hidden || tile.Walls[i].Type == 10 || tile.Walls[i].Type == 11 || tile.Walls[i].Type == 0 {
 			continue
 		}
 		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
@@ -260,7 +256,7 @@ func (v *Engine) RenderPass3(region *Region, offX, offY, x, y int, target *ebite
 	tile := region.DS1.Tiles[y][x]
 	// Draw ceilings
 	for i := range tile.Walls {
-		if tile.Walls[i].Orientation != 15 {
+		if tile.Walls[i].Type != 15 {
 			continue
 		}
 		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
@@ -290,10 +286,10 @@ func (v *Engine) DrawTileLines(region *Region, offX, offY, x, y int, target *ebi
 
 			tile := region.DS1.Tiles[y][x]
 			for i := range tile.Floors {
-				floorSpec := fmt.Sprintf("f: %v-%v", tile.Floors[i].MainIndex, tile.Floors[i].SubIndex)
+				floorSpec := fmt.Sprintf("f: %v-%v", tile.Floors[i].Style, tile.Floors[i].Sequence)
 				ebitenutil.DebugPrintAt(target, floorSpec, offX+int(v.OffsetX)-20, offY+int(v.OffsetY)+10+((i+1)*14))
 			}
-			// wallSpec := fmt.Sprintf("w: %v-%v", tile.Walls[0].MainIndex, tile.Walls[0].SubIndex)
+			// wallSpec := fmt.Sprintf("w: %v-%v", tile.Walls[0].Style, tile.Walls[0].Sequence)
 			// ebitenutil.DebugPrintAt(target, wallSpec, offX+int(v.OffsetX)-20, offY+int(v.OffsetY)+34)
 		}
 	}

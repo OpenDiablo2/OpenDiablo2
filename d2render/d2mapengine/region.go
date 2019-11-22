@@ -27,13 +27,6 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
-//TODO: move to corresponding file
-type ByRarity []d2dt1.Tile
-
-func (a ByRarity) Len() int           { return len(a) }
-func (a ByRarity) Less(i, j int) bool { return a[i].RarityFrameIndex < a[j].RarityFrameIndex }
-func (a ByRarity) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-
 type Region struct {
 	RegionPath        string
 	LevelType         d2datadict.LevelTypeRecord
@@ -48,7 +41,6 @@ type Region struct {
 	StartX            float64
 	StartY            float64
 	imageCacheRecords map[uint32]*ebiten.Image
-	tileSource        *rand.Rand
 	seed              int64
 }
 
@@ -83,14 +75,12 @@ func LoadRegion(seed int64, levelType d2enum.RegionIdType, levelPreset int, file
 		}
 		levelFilesToPick = append(levelFilesToPick, fileRecord)
 	}
-	randomSource := rand.NewSource(seed)
-	random := rand.New(randomSource)
-	levelIndex := int(math.Round(float64(len(levelFilesToPick)-1) * random.Float64()))
+	levelIndex := int(math.Round(float64(len(levelFilesToPick)-1) * rand.Float64()))
 	if fileIndex >= 0 && fileIndex < len(levelFilesToPick) {
 		levelIndex = fileIndex
 	}
 	levelFile := levelFilesToPick[levelIndex]
-	result.tileSource = rand.New(rand.NewSource(seed))
+
 	result.RegionPath = levelFile
 	result.DS1 = d2ds1.LoadDS1("/data/global/tiles/"+levelFile, fileProvider)
 	result.TileWidth = result.DS1.Width
@@ -104,10 +94,10 @@ func (v *Region) loadSpecials() {
 	for y := range v.DS1.Tiles {
 		for x := range v.DS1.Tiles[y] {
 			for _, wall := range v.DS1.Tiles[y][x].Walls {
-				if wall.Orientation != 10 {
+				if wall.Type != 10 {
 					continue
 				}
-				if wall.MainIndex == 30 && wall.SubIndex == 0 {
+				if wall.Style == 30 && wall.Sequence == 0 {
 					v.StartX = float64(x) + 0.5
 					v.StartY = float64(y) + 0.5
 					log.Printf("Starting location: %d, %d", x, y)
@@ -154,91 +144,86 @@ func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType d2enum
 }
 
 func (v *Region) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) (*d2dt1.Tile, byte) {
-	// Temporary hack...
+	/* Walker's Alias Method for weighted random selection
+	 * with xorshifting for random numbers */
+
+	var tileSeed uint64
+	tileSeed = uint64(seed) + uint64(x)
+	tileSeed *= uint64(y) + uint64(v.LevelType.Id)
+
+	tileSeed ^= tileSeed << 13
+	tileSeed ^= tileSeed >> 17
+	tileSeed ^= tileSeed << 5
+
+	weightSum := 0
+	for _, tile := range tiles {
+		weightSum += int(tile.RarityFrameIndex)
+	}
+
+	if weightSum == 0 {
+		return &tiles[0], 0
+	}
+
+	random := (tileSeed % uint64(weightSum))
+
+	sum := 0
+	for i, tile := range tiles {
+		sum += int(tile.RarityFrameIndex)
+		if sum >= int(random) {
+			return &tiles[i], byte(i)
+		}
+	}
+
+	// This return shouldn't be hit
 	return &tiles[0], 0
 }
 
-func (v *Region) getTile(mainIndex, subIndex, orientation int32, x, y int, seed int64) (*d2dt1.Tile, byte) {
+func (v *Region) getTile(style, sequence, tileType int32, x, y int, seed int64) (*d2dt1.Tile, byte) {
 	var tiles []d2dt1.Tile
 	for _, tile := range v.Tiles {
-		if tile.MainIndex != mainIndex || tile.SubIndex != subIndex || tile.Orientation != orientation {
+		if tile.Style != style || tile.Sequence != sequence || tile.Type != tileType {
 			continue
 		}
 		tiles = append(tiles, tile)
 	}
 	if len(tiles) == 0 {
-		log.Printf("Unknown tile ID [%d %d %d]\n", mainIndex, subIndex, orientation)
+		log.Printf("Unknown tile ID [%d %d %d]\n", style, sequence, tileType)
 		return nil, 0
 	}
 	return v.getRandomTile(tiles, x, y, seed)
 }
 
 func (v *Region) renderFloor(tile d2ds1.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image, tileX, tileY int) {
-	opts := &ebiten.DrawImageOptions{}
-	img := v.GetImageCacheRecord(tile.MainIndex, tile.SubIndex, 0, tile.RandomIndex)
+	img := v.GetImageCacheRecord(tile.Style, tile.Sequence, 0, tile.RandomIndex)
 	if img == nil {
-		img = v.generateFloorCache(&tile, tileX, tileY)
+		log.Printf("Render called on uncached floor {%v,%v}", tile.Style, tile.Sequence)
+		return
 	}
+	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(float64(offsetX), float64(offsetY))
 	_ = target.DrawImage(img, opts)
 	return
 }
 
 func (v *Region) renderWall(tile d2ds1.WallRecord, offsetX, offsetY int, target *ebiten.Image, tileX, tileY int) {
-	img := v.GetImageCacheRecord(tile.MainIndex, tile.SubIndex, tile.Orientation, tile.RandomIndex)
+	img := v.GetImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tile.RandomIndex)
 	if img == nil {
-		img = v.generateWallCache(&tile, tileX, tileY)
-		if img == nil {
-			return
-		}
-	}
-	tileData, _ := v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), int32(tile.Orientation), tileX, tileY, v.seed)
-	if tileData == nil {
+		log.Printf("Render called on uncached wall {%v,%v,%v}", tile.Style, tile.Sequence, tile.Type)
 		return
 	}
-	var newTileData *d2dt1.Tile = nil
-	if tile.Orientation == 3 {
-		newTileData, _ = v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), int32(4), tileX, tileY, v.seed)
-	}
-	tileMinY := int32(0)
-	tileMaxY := int32(0)
-	targetTileData := tileData
-	if newTileData != nil && newTileData.Height < tileData.Height {
-		targetTileData = newTileData
-	}
-	for _, block := range targetTileData.Blocks {
-		tileMinY = d2helper.MinInt32(tileMinY, int32(block.Y))
-		tileMaxY = d2helper.MaxInt32(tileMaxY, int32(block.Y+32))
-	}
-
-	yAdjust := 0
-	if tile.Orientation == 15 {
-		// Roof
-		yAdjust = -int(tileData.RoofHeight)
-	} else {
-		// Upper Walls, Special Tiles
-		yAdjust = int(tileMinY) + 80
-	}
 	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(float64(offsetX), float64(offsetY+yAdjust))
+	opts.GeoM.Translate(float64(offsetX), float64(offsetY+tile.YAdjust))
 	target.DrawImage(img, opts)
 }
 
 func (v *Region) renderShadow(tile d2ds1.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image, tileX, tileY int) {
-	img := v.GetImageCacheRecord(tile.MainIndex, tile.SubIndex, 13, tile.RandomIndex)
+	img := v.GetImageCacheRecord(tile.Style, tile.Sequence, 13, tile.RandomIndex)
 	if img == nil {
-		img = v.generateShadowCache(&tile, tileX, tileY)
-	}
-	tileData, _ := v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), 13, tileX, tileY, v.seed)
-	if tileData == nil {
+		log.Printf("Render called on uncached shadow {%v,%v}", tile.Style, tile.Sequence)
 		return
 	}
-	tileMinY := int32(0)
-	for _, block := range tileData.Blocks {
-		tileMinY = d2helper.MinInt32(tileMinY, int32(block.Y))
-	}
 	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(float64(offsetX), float64(offsetY+int(tileMinY)+80))
+	opts.GeoM.Translate(float64(offsetX), float64(offsetY+tile.YAdjust))
 	opts.ColorM = d2corehelper.ColorToColorM(color.RGBA{255, 255, 255, 160})
 	target.DrawImage(img, opts)
 }
@@ -316,18 +301,18 @@ func (v *Region) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, tileYOf
 }
 
 func (v *Region) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) *ebiten.Image {
-	tileData, tileIndex := v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), 0, tileX, tileY, v.seed)
+	tileData, tileIndex := v.getTile(int32(tile.Style), int32(tile.Sequence), 0, tileX, tileY, v.seed)
 	if tileData == nil {
-		log.Printf("Could not locate tile Idx:%d, Sub: %d, Ori: %d\n", tile.MainIndex, tile.SubIndex, 0)
+		log.Printf("Could not locate tile Style:%d, Seq: %d, Type: %d\n", tile.Style, tile.Sequence, 0)
 		tileData = &d2dt1.Tile{}
 		tileData.Width = 10
 		tileData.Height = 10
 	}
-	cachedImage := v.GetImageCacheRecord(tile.MainIndex, tile.SubIndex, 0, tileIndex)
+	tile.RandomIndex = tileIndex
+	cachedImage := v.GetImageCacheRecord(tile.Style, tile.Sequence, 0, tileIndex)
 	if cachedImage != nil {
 		return cachedImage
 	}
-	tile.RandomIndex = tileIndex
 	tileYMinimum := int32(0)
 	for _, block := range tileData.Blocks {
 		tileYMinimum = d2helper.MinInt32(tileYMinimum, int32(block.Y))
@@ -338,20 +323,16 @@ func (v *Region) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, tileY 
 	pixels := make([]byte, 4*tileData.Width*tileHeight)
 	v.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, tileData.Width)
 	image.ReplacePixels(pixels)
-	v.SetImageCacheRecord(tile.MainIndex, tile.SubIndex, 0, tileIndex, image)
+	v.SetImageCacheRecord(tile.Style, tile.Sequence, 0, tileIndex, image)
 	return image
 }
 
 func (v *Region) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) *ebiten.Image {
-	tileData, tileIndex := v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), 13, tileX, tileY, v.seed)
+	tileData, tileIndex := v.getTile(int32(tile.Style), int32(tile.Sequence), 13, tileX, tileY, v.seed)
 	if tileData == nil {
 		return nil
 	}
 	tile.RandomIndex = tileIndex
-	cachedImage := v.GetImageCacheRecord(tile.MainIndex, tile.SubIndex, 13, tileIndex)
-	if cachedImage != nil {
-		return cachedImage
-	}
 	tileMinY := int32(0)
 	tileMaxY := int32(0)
 	for _, block := range tileData.Blocks {
@@ -360,66 +341,90 @@ func (v *Region) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, tileY
 	}
 	tileYOffset := -tileMinY
 	tileHeight := int(tileMaxY - tileMinY)
+	tile.YAdjust = int(tileMinY + 80)
+
+	cachedImage := v.GetImageCacheRecord(tile.Style, tile.Sequence, 13, tileIndex)
+	if cachedImage != nil {
+		return cachedImage
+	}
+
 	image, _ := ebiten.NewImage(int(tileData.Width), int(tileHeight), ebiten.FilterNearest)
 	pixels := make([]byte, 4*tileData.Width*int32(tileHeight))
 	v.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, tileData.Width)
 	image.ReplacePixels(pixels)
-	v.SetImageCacheRecord(tile.MainIndex, tile.SubIndex, 13, tileIndex, image)
+	v.SetImageCacheRecord(tile.Style, tile.Sequence, 13, tileIndex, image)
 	return image
 }
 
 func (v *Region) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int) *ebiten.Image {
-	tileData, tileIndex := v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), int32(tile.Orientation), tileX, tileY, v.seed)
+	tileData, tileIndex := v.getTile(int32(tile.Style), int32(tile.Sequence), int32(tile.Type), tileX, tileY, v.seed)
 	if tileData == nil {
 		return nil
 	}
+
 	tile.RandomIndex = tileIndex
 	var newTileData *d2dt1.Tile = nil
-	if tile.Orientation == 3 {
-		newTileData, _ = v.getTile(int32(tile.MainIndex), int32(tile.SubIndex), int32(4), tileX, tileY, v.seed)
+
+	if tile.Type == 3 {
+		newTileData, _ = v.getTile(int32(tile.Style), int32(tile.Sequence), int32(4), tileX, tileY, v.seed)
 	}
 
 	tileMinY := int32(0)
 	tileMaxY := int32(0)
+
 	target := tileData
+
 	if newTileData != nil && newTileData.Height < tileData.Height {
 		target = newTileData
 	}
+
 	for _, block := range target.Blocks {
 		tileMinY = d2helper.MinInt32(tileMinY, int32(block.Y))
 		tileMaxY = d2helper.MaxInt32(tileMaxY, int32(block.Y+32))
 	}
+
 	realHeight := d2helper.MaxInt32(d2helper.AbsInt32(tileData.Height), tileMaxY-tileMinY)
 	tileYOffset := -tileMinY
 	//tileHeight := int(tileMaxY - tileMinY)
 
-	cachedImage := v.GetImageCacheRecord(tile.MainIndex, tile.SubIndex, tile.Orientation, tileIndex)
-	if cachedImage != nil {
-		return cachedImage //, 0, yAdjust}
+	if tile.Type == 15 {
+		tile.YAdjust = -int(tileData.RoofHeight)
+	} else {
+		tile.YAdjust = int(tileMinY) + 80
 	}
+
+	cachedImage := v.GetImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tileIndex)
+	if cachedImage != nil {
+		return cachedImage
+	}
+
 	if realHeight == 0 {
 		log.Printf("Invalid 0 height for wall tile")
 		return nil
 	}
+
 	image, _ := ebiten.NewImage(160, int(realHeight), ebiten.FilterNearest)
 	pixels := make([]byte, 4*160*realHeight)
 	v.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, 160)
+
 	if newTileData != nil {
 		v.decodeTileGfxData(newTileData.Blocks, &pixels, tileYOffset, 160)
 	}
+
 	if err := image.ReplacePixels(pixels); err != nil {
 		log.Panicf(err.Error())
 	}
-	v.SetImageCacheRecord(tile.MainIndex, tile.SubIndex, tile.Orientation, tileIndex, image)
-	return image //,0,yAdjust,
+
+	v.SetImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tileIndex, image)
+	return image
 }
 
-func (v *Region) GetImageCacheRecord(mainIndex, subIndex, orientation, randomIndex byte) *ebiten.Image {
-	lookupIndex := uint32(mainIndex)<<24 | uint32(subIndex)<<16 | uint32(orientation)<<8 | uint32(randomIndex)
+func (v *Region) GetImageCacheRecord(style, sequence, tileType, randomIndex byte) *ebiten.Image {
+	lookupIndex := uint32(style)<<24 | uint32(sequence)<<16 | uint32(tileType)<<8 | uint32(randomIndex)
 	return v.imageCacheRecords[lookupIndex]
 }
 
-func (v *Region) SetImageCacheRecord(mainIndex, subIndex, orientation, randomIndex byte, image *ebiten.Image) {
-	lookupIndex := uint32(mainIndex)<<24 | uint32(subIndex)<<16 | uint32(orientation)<<8 | uint32(randomIndex)
+func (v *Region) SetImageCacheRecord(style, sequence, tileType, randomIndex byte, image *ebiten.Image) {
+	lookupIndex := uint32(style)<<24 | uint32(sequence)<<16 | uint32(tileType)<<8 | uint32(randomIndex)
 	v.imageCacheRecords[lookupIndex] = image
 }
