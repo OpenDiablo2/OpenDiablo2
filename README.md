@@ -32,7 +32,7 @@ You can also open the root folder in VSCode. Make sure you have the `ms-vscode.g
 ### Linux
 
 There are several dependencies which need to be installed additionally.
-To install them you can use `run.sh` in the project root folder - this script takes care of the installation for you.
+To install them you can use `./run.sh` in the project root folder - this script takes care of the installation for you.
 
 ## Contributing
 
