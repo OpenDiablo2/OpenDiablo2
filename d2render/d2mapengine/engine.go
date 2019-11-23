@@ -121,7 +121,18 @@ func (v *Engine) GetRegionAt(x, y int) *EngineRegion {
 
 func (v *Engine) Render(target *ebiten.Image) {
 	for _, region := range v.regions {
-		v.RenderRegion(region, target)
+		// X position of leftmost point of region
+		left := (region.Rect.Left - region.Rect.Bottom()) * 80
+		// Y position of top of region
+		top := (region.Rect.Left + region.Rect.Top) * 40
+		// X of right
+		right := (region.Rect.Right() - region.Rect.Top) * 80
+		// Y of bottom
+		bottom := (region.Rect.Right() + region.Rect.Bottom()) * 40
+
+		if -v.OffsetX+800 > float64(left) && -v.OffsetX < float64(right) && -v.OffsetY+600 > float64(top) && -v.OffsetY < float64(bottom) {
+			v.RenderRegion(region, target)
+		}
 	}
 }
 
