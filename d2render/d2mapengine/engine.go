@@ -199,10 +199,7 @@ func (v *Engine) RenderPass1(region *Region, offX, offY, x, y int, target *ebite
 	tile := region.DS1.Tiles[y][x]
 	// Draw lower walls
 	for i := range tile.Walls {
-		if tile.Walls[i].Type <= 15 || tile.Walls[i].Prop1 == 0 {
-			continue
-		}
-		if tile.Walls[i].Hidden || tile.Walls[i].Type == 10 || tile.Walls[i].Type == 11 || tile.Walls[i].Type == 0 {
+		if !tile.Walls[i].Type.LowerWall() || tile.Walls[i].Prop1 == 0 || tile.Walls[i].Hidden {
 			continue
 		}
 		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
@@ -228,10 +225,7 @@ func (v *Engine) RenderPass2(region *Region, offX, offY, x, y int, target *ebite
 
 	// Draw upper walls
 	for i := range tile.Walls {
-		if tile.Walls[i].Type >= 15 {
-			continue
-		}
-		if tile.Walls[i].Hidden || tile.Walls[i].Type == 10 || tile.Walls[i].Type == 11 || tile.Walls[i].Type == 0 {
+		if !tile.Walls[i].Type.UpperWall() || tile.Walls[i].Hidden {
 			continue
 		}
 		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
@@ -256,7 +250,7 @@ func (v *Engine) RenderPass3(region *Region, offX, offY, x, y int, target *ebite
 	tile := region.DS1.Tiles[y][x]
 	// Draw ceilings
 	for i := range tile.Walls {
-		if tile.Walls[i].Type != 15 {
+		if tile.Walls[i].Type != d2enum.Roof {
 			continue
 		}
 		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
