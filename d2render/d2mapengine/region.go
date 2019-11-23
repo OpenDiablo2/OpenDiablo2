@@ -53,6 +53,10 @@ func LoadRegion(seed int64, levelType d2enum.RegionIdType, levelPreset int, file
 		seed:              seed,
 	}
 	result.Palette = d2datadict.Palettes[d2enum.PaletteType("act"+strconv.Itoa(int(result.LevelType.Act)))]
+	// Temp hack
+	if levelType == d2enum.RegionAct5Lava {
+		result.Palette = d2datadict.Palettes[d2enum.PaletteType("act4")]
+	}
 	//bm := result.levelPreset.Dt1Mask
 	for _, levelTypeDt1 := range result.LevelType.Files {
 		/*
