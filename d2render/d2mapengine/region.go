@@ -42,6 +42,8 @@ type Region struct {
 	StartY            float64
 	imageCacheRecords map[uint32]*ebiten.Image
 	seed              int64
+	currentFrame      byte
+	lastFrameTime     float64
 }
 
 func LoadRegion(seed int64, levelType d2enum.RegionIdType, levelPreset int, fileProvider d2interface.FileProvider, fileIndex int) *Region {
@@ -135,6 +137,18 @@ func (v *Region) loadObjects(fileProvider d2interface.FileProvider) {
 	}
 }
 
+func (v *Region) UpdateAnimations() {
+	now := d2helper.Now()
+	framesToAdd := math.Floor((now - v.lastFrameTime) / 0.1)
+	if framesToAdd > 0 {
+		v.lastFrameTime += 0.1 * framesToAdd
+		v.currentFrame -= byte(math.Floor(framesToAdd))
+		for v.currentFrame <= 0 {
+			v.currentFrame = 9
+		}
+	}
+}
+
 func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType d2enum.RegionLayerType, layerIndex int, target *ebiten.Image) {
 	offsetX -= 80
 	switch layerType {
@@ -200,7 +214,12 @@ func (v *Region) getTiles(style, sequence, tileType int32, x, y int, seed int64)
 }
 
 func (v *Region) renderFloor(tile d2ds1.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image, tileX, tileY int) {
-	img := v.GetImageCacheRecord(tile.Style, tile.Sequence, 0, tile.RandomIndex)
+	var img *ebiten.Image
+	if !tile.Animated {
+		img = v.GetImageCacheRecord(tile.Style, tile.Sequence, 0, tile.RandomIndex)
+	} else {
+		img = v.GetImageCacheRecord(tile.Style, tile.Sequence, 0, v.currentFrame)
+	}
 	if img == nil {
 		log.Printf("Render called on uncached floor {%v,%v}", tile.Style, tile.Sequence)
 		return
@@ -321,6 +340,7 @@ func (v *Region) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, tileY 
 			tileIndex = v.getRandomTile(tileOptions, tileX, tileY, v.seed)
 			tileData = append(tileData, &tileOptions[tileIndex])
 		} else {
+			tile.Animated = true
 			for i := range tileOptions {
 				tileData = append(tileData, &tileOptions[i])
 			}
