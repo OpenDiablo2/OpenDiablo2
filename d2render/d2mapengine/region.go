@@ -91,6 +91,7 @@ func LoadRegion(seed int64, levelType d2enum.RegionIdType, levelPreset int, file
 	result.DS1 = d2ds1.LoadDS1("/data/global/tiles/"+levelFile, fileProvider)
 	result.TileWidth = result.DS1.Width
 	result.TileHeight = result.DS1.Height
+	result.currentFrame = 0
 	result.loadObjects(fileProvider)
 	result.loadSpecials()
 	return result
@@ -142,11 +143,12 @@ func (v *Region) UpdateAnimations() {
 	framesToAdd := math.Floor((now - v.lastFrameTime) / 0.1)
 	if framesToAdd > 0 {
 		v.lastFrameTime += 0.1 * framesToAdd
-		v.currentFrame -= byte(math.Floor(framesToAdd))
-		for v.currentFrame <= 0 {
-			v.currentFrame = 9
+		v.currentFrame += byte(math.Floor(framesToAdd))
+		if v.currentFrame > 9 {
+			v.currentFrame = 0
 		}
 	}
+	log.Printf("current frame %v", v.currentFrame)
 }
 
 func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType d2enum.RegionLayerType, layerIndex int, target *ebiten.Image) {
@@ -208,8 +210,6 @@ func (v *Region) getTiles(style, sequence, tileType int32, x, y int, seed int64)
 		log.Printf("Unknown tile ID [%d %d %d]\n", style, sequence, tileType)
 		return nil
 	}
-	//	index := v.getRandomTile(tiles, x, y, seed)
-	//	return &tiles[index], index
 	return tiles
 }
 
@@ -332,7 +332,7 @@ func (v *Region) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, tileY 
 
 	if tileOptions == nil {
 		log.Printf("Could not locate tile Style:%d, Seq: %d, Type: %d\n", tile.Style, tile.Sequence, 0)
-		tileData[0] = &d2dt1.Tile{}
+		tileData = append(tileData, &d2dt1.Tile{})
 		tileData[0].Width = 10
 		tileData[0].Height = 10
 	} else {
