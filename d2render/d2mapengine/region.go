@@ -147,7 +147,7 @@ func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType d2enum
 	}
 }
 
-func (v *Region) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) (*d2dt1.Tile, byte) {
+func (v *Region) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) byte {
 	/* Walker's Alias Method for weighted random selection
 	 * with xorshifting for random numbers */
 
@@ -165,7 +165,7 @@ func (v *Region) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) (*d2dt1
 	}
 
 	if weightSum == 0 {
-		return &tiles[0], 0
+		return 0
 	}
 
 	random := (tileSeed % uint64(weightSum))
@@ -174,15 +174,15 @@ func (v *Region) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) (*d2dt1
 	for i, tile := range tiles {
 		sum += int(tile.RarityFrameIndex)
 		if sum >= int(random) {
-			return &tiles[i], byte(i)
+			return byte(i)
 		}
 	}
 
 	// This return shouldn't be hit
-	return &tiles[0], 0
+	return 0
 }
 
-func (v *Region) getTile(style, sequence, tileType int32, x, y int, seed int64) (*d2dt1.Tile, byte) {
+func (v *Region) getTiles(style, sequence, tileType int32, x, y int, seed int64) []d2dt1.Tile {
 	var tiles []d2dt1.Tile
 	for _, tile := range v.Tiles {
 		if tile.Style != style || tile.Sequence != sequence || tile.Type != tileType {
@@ -192,9 +192,11 @@ func (v *Region) getTile(style, sequence, tileType int32, x, y int, seed int64) 
 	}
 	if len(tiles) == 0 {
 		log.Printf("Unknown tile ID [%d %d %d]\n", style, sequence, tileType)
-		return nil, 0
+		return nil
 	}
-	return v.getRandomTile(tiles, x, y, seed)
+	//	index := v.getRandomTile(tiles, x, y, seed)
+	//	return &tiles[index], index
+	return tiles
 }
 
 func (v *Region) renderFloor(tile d2ds1.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image, tileX, tileY int) {
@@ -305,7 +307,10 @@ func (v *Region) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, tileYOf
 }
 
 func (v *Region) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) *ebiten.Image {
-	tileData, tileIndex := v.getTile(int32(tile.Style), int32(tile.Sequence), 0, tileX, tileY, v.seed)
+	tileOptions := v.getTiles(int32(tile.Style), int32(tile.Sequence), 0, tileX, tileY, v.seed)
+	tileIndex := v.getRandomTile(tileOptions, tileX, tileY, v.seed)
+	tileData := &tileOptions[tileIndex]
+
 	if tileData == nil {
 		log.Printf("Could not locate tile Style:%d, Seq: %d, Type: %d\n", tile.Style, tile.Sequence, 0)
 		tileData = &d2dt1.Tile{}
@@ -332,7 +337,10 @@ func (v *Region) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, tileY 
 }
 
 func (v *Region) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) *ebiten.Image {
-	tileData, tileIndex := v.getTile(int32(tile.Style), int32(tile.Sequence), 13, tileX, tileY, v.seed)
+	tileOptions := v.getTiles(int32(tile.Style), int32(tile.Sequence), 13, tileX, tileY, v.seed)
+	tileIndex := v.getRandomTile(tileOptions, tileX, tileY, v.seed)
+	tileData := &tileOptions[tileIndex]
+
 	if tileData == nil {
 		return nil
 	}
@@ -361,7 +369,9 @@ func (v *Region) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, tileY
 }
 
 func (v *Region) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int) *ebiten.Image {
-	tileData, tileIndex := v.getTile(int32(tile.Style), int32(tile.Sequence), int32(tile.Type), tileX, tileY, v.seed)
+	tileOptions := v.getTiles(int32(tile.Style), int32(tile.Sequence), int32(tile.Type), tileX, tileY, v.seed)
+	tileIndex := v.getRandomTile(tileOptions, tileX, tileY, v.seed)
+	tileData := &tileOptions[tileIndex]
 	if tileData == nil {
 		return nil
 	}
@@ -370,7 +380,9 @@ func (v *Region) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int) *eb
 	var newTileData *d2dt1.Tile = nil
 
 	if tile.Type == 3 {
-		newTileData, _ = v.getTile(int32(tile.Style), int32(tile.Sequence), int32(4), tileX, tileY, v.seed)
+		newTileOptions := v.getTiles(int32(tile.Style), int32(tile.Sequence), int32(4), tileX, tileY, v.seed)
+		newTileIndex := v.getRandomTile(newTileOptions, tileX, tileY, v.seed)
+		newTileData = &newTileOptions[newTileIndex]
 	}
 
 	tileMinY := int32(0)
