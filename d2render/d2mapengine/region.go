@@ -148,7 +148,6 @@ func (v *Region) UpdateAnimations() {
 			v.currentFrame = 0
 		}
 	}
-	log.Printf("current frame %v", v.currentFrame)
 }
 
 func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType d2enum.RegionLayerType, layerIndex int, target *ebiten.Image) {
