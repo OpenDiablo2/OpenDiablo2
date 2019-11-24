@@ -1,6 +1,7 @@
 package d2scene
 
 import (
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"image"
 	"image/color"
 
@@ -79,7 +80,8 @@ func CreateSelectHeroClass(
 }
 
 func (v *SelectHeroClass) loadSprite(path string, palette d2enum.PaletteType) d2render.Sprite {
-	return d2render.CreateSprite(v.fileProvider.LoadFile(path), d2datadict.Palettes[palette])
+	dc6, _ := d2dc6.LoadDC6(v.fileProvider.LoadFile(path), d2datadict.Palettes[palette])
+	return d2render.CreateSpriteFromDC6(dc6)
 }
 
 func (v *SelectHeroClass) Load() []func() {

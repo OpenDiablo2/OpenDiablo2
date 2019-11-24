@@ -2,6 +2,7 @@ package d2scene
 
 import (
 	"bufio"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"image/color"
 	"log"
 	"os"
@@ -83,7 +84,8 @@ func (v *Credits) LoadContributors() []string {
 func (v *Credits) Load() []func() {
 	return []func(){
 		func() {
-			v.creditsBackground = d2render.CreateSprite(v.fileProvider.LoadFile(d2resource.CreditsBackground), d2datadict.Palettes[d2enum.Sky])
+			dc6, _ := d2dc6.LoadDC6(v.fileProvider.LoadFile(d2resource.CreditsBackground), d2datadict.Palettes[d2enum.Sky])
+			v.creditsBackground = d2render.CreateSpriteFromDC6(dc6)
 			v.creditsBackground.MoveTo(0, 0)
 		},
 		func() {

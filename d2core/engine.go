@@ -1,6 +1,7 @@
 package d2core
 
 import (
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"log"
 	"math"
 	"path"
@@ -152,8 +153,8 @@ func (v Engine) IsLoading() bool {
 
 // LoadSprite loads a sprite from the game's data files
 func (v Engine) LoadSprite(fileName string, palette d2enum.PaletteType) d2render.Sprite {
-	data := v.LoadFile(fileName)
-	sprite := d2render.CreateSprite(data, d2datadict.Palettes[palette])
+	dc6, _ := d2dc6.LoadDC6(v.LoadFile(fileName), d2datadict.Palettes[palette])
+	sprite := d2render.CreateSpriteFromDC6(dc6)
 	return sprite
 }
 

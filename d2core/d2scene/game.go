@@ -1,6 +1,7 @@
 package d2scene
 
 import (
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"image/color"
 
 	"github.com/OpenDiablo2/D2Shared/d2helper"
@@ -51,14 +52,16 @@ func CreateGame(
 func (v *Game) Load() []func() {
 	return []func(){
 		func() {
-			v.pentSpinLeft = d2render.CreateSprite(v.fileProvider.LoadFile(d2resource.PentSpin), d2datadict.Palettes[d2enum.Sky])
+			dc6, _ := d2dc6.LoadDC6(v.fileProvider.LoadFile(d2resource.PentSpin), d2datadict.Palettes[d2enum.Sky])
+			v.pentSpinLeft = d2render.CreateSpriteFromDC6(dc6)
 			v.pentSpinLeft.Animate = true
 			v.pentSpinLeft.AnimateBackwards = true
 			v.pentSpinLeft.SpecialFrameTime = 475
 			v.pentSpinLeft.MoveTo(100, 300)
 		},
 		func() {
-			v.pentSpinRight = d2render.CreateSprite(v.fileProvider.LoadFile(d2resource.PentSpin), d2datadict.Palettes[d2enum.Sky])
+			dc6, _ := d2dc6.LoadDC6(v.fileProvider.LoadFile(d2resource.PentSpin), d2datadict.Palettes[d2enum.Sky])
+			v.pentSpinRight = d2render.CreateSpriteFromDC6(dc6)
 			v.pentSpinRight.Animate = true
 			v.pentSpinRight.SpecialFrameTime = 475
 			v.pentSpinRight.MoveTo(650, 300)

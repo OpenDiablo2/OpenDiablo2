@@ -2,6 +2,7 @@ package d2scene
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"image/color"
 	"log"
 	"os"
@@ -109,31 +110,37 @@ func (v *MainMenu) Load() []func() {
 			v.openDiabloLabel.MoveTo(400, 580)
 		},
 		func() {
-			v.background = d2render.CreateSprite(v.fileProvider.LoadFile(d2resource.GameSelectScreen), d2datadict.Palettes[d2enum.Sky])
+			dc6, _ := d2dc6.LoadDC6(v.fileProvider.LoadFile(d2resource.GameSelectScreen), d2datadict.Palettes[d2enum.Sky])
+			v.background = d2render.CreateSpriteFromDC6(dc6)
 			v.background.MoveTo(0, 0)
 		},
 		func() {
-			v.trademarkBackground = d2render.CreateSprite(v.fileProvider.LoadFile(d2resource.TrademarkScreen), d2datadict.Palettes[d2enum.Sky])
+			dc6, _ := d2dc6.LoadDC6(v.fileProvider.LoadFile(d2resource.TrademarkScreen), d2datadict.Palettes[d2enum.Sky])
+			v.trademarkBackground = d2render.CreateSpriteFromDC6(dc6)
 			v.trademarkBackground.MoveTo(0, 0)
 		},
 		func() {
-			v.diabloLogoLeft = d2render.CreateSprite(v.fileProvider.LoadFile(d2resource.Diablo2LogoFireLeft), d2datadict.Palettes[d2enum.Units])
+			dc6, _ := d2dc6.LoadDC6(v.fileProvider.LoadFile(d2resource.Diablo2LogoFireLeft), d2datadict.Palettes[d2enum.Units])
+			v.diabloLogoLeft = d2render.CreateSpriteFromDC6(dc6)
 			v.diabloLogoLeft.Blend = true
 			v.diabloLogoLeft.Animate = true
 			v.diabloLogoLeft.MoveTo(400, 120)
 		},
 		func() {
-			v.diabloLogoRight = d2render.CreateSprite(v.fileProvider.LoadFile(d2resource.Diablo2LogoFireRight), d2datadict.Palettes[d2enum.Units])
+			dc6, _ := d2dc6.LoadDC6(v.fileProvider.LoadFile(d2resource.Diablo2LogoFireRight), d2datadict.Palettes[d2enum.Units])
+			v.diabloLogoRight = d2render.CreateSpriteFromDC6(dc6)
 			v.diabloLogoRight.Blend = true
 			v.diabloLogoRight.Animate = true
 			v.diabloLogoRight.MoveTo(400, 120)
 		},
 		func() {
-			v.diabloLogoLeftBack = d2render.CreateSprite(v.fileProvider.LoadFile(d2resource.Diablo2LogoBlackLeft), d2datadict.Palettes[d2enum.Units])
+			dc6, _ := d2dc6.LoadDC6(v.fileProvider.LoadFile(d2resource.Diablo2LogoBlackLeft), d2datadict.Palettes[d2enum.Units])
+			v.diabloLogoLeftBack = d2render.CreateSpriteFromDC6(dc6)
 			v.diabloLogoLeftBack.MoveTo(400, 120)
 		},
 		func() {
-			v.diabloLogoRightBack = d2render.CreateSprite(v.fileProvider.LoadFile(d2resource.Diablo2LogoBlackRight), d2datadict.Palettes[d2enum.Units])
+			dc6, _ := d2dc6.LoadDC6(v.fileProvider.LoadFile(d2resource.Diablo2LogoBlackRight), d2datadict.Palettes[d2enum.Units])
+			v.diabloLogoRightBack = d2render.CreateSpriteFromDC6(dc6)
 			v.diabloLogoRightBack.MoveTo(400, 120)
 		},
 		func() {

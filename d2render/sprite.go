@@ -1,15 +1,13 @@
 package d2render
 
 import (
-	"encoding/binary"
 	"image/color"
 	"log"
 	"sync"
 
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"github.com/OpenDiablo2/D2Shared/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corehelper"
-
-	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -46,8 +44,7 @@ type SpriteFrame struct {
 	Image     *ebiten.Image
 }
 
-// CreateSprite creates an instance of a sprite
-func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
+func CreateSpriteFromDC6(dc6 d2dc6.DC6File) Sprite {
 	result := Sprite{
 		X:                  50,
 		Y:                  50,
@@ -55,96 +52,39 @@ func CreateSprite(data []byte, palette d2datadict.PaletteRec) Sprite {
 		Direction:          0,
 		Blend:              false,
 		ColorMod:           nil,
-		Directions:         binary.LittleEndian.Uint32(data[16:20]),
-		FramesPerDirection: binary.LittleEndian.Uint32(data[20:24]),
+		Directions:         dc6.Directions,
+		FramesPerDirection: dc6.FramesPerDirection,
 		Animate:            false,
 		LastFrameTime:      d2helper.Now(),
 		SpecialFrameTime:   -1,
 		StopOnLastFrame:    false,
-		valid:              false,
+		valid:              true,
 		AnimateBackwards:   false,
 	}
-	dataPointer := uint32(24)
-	totalFrames := result.Directions * result.FramesPerDirection
-	framePointers := make([]uint32, totalFrames)
-	for i := uint32(0); i < totalFrames; i++ {
-		framePointers[i] = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
-		dataPointer += 4
-	}
-	result.Frames = make([]SpriteFrame, totalFrames)
-	wg := sync.WaitGroup{}
-	wg.Add(int(totalFrames))
-	for i := uint32(0); i < totalFrames; i++ {
-		go func(i uint32) {
-			defer wg.Done()
-			dataPointer := framePointers[i]
-			result.Frames[i] = SpriteFrame{}
-			result.Frames[i].Flip = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
-			dataPointer += 4
-			result.Frames[i].Width = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
-			dataPointer += 4
-			result.Frames[i].Height = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
-			dataPointer += 4
-			result.Frames[i].OffsetX = d2helper.BytesToInt32(data[dataPointer : dataPointer+4])
-			dataPointer += 4
-			result.Frames[i].OffsetY = d2helper.BytesToInt32(data[dataPointer : dataPointer+4])
-			dataPointer += 4
-			result.Frames[i].Unknown = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
-			dataPointer += 4
-			result.Frames[i].NextBlock = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
-			dataPointer += 4
-			result.Frames[i].Length = binary.LittleEndian.Uint32(data[dataPointer : dataPointer+4])
-			dataPointer += 4
-			result.Frames[i].ImageData = make([]int16, result.Frames[i].Width*result.Frames[i].Height)
-			for fi := range result.Frames[i].ImageData {
-				result.Frames[i].ImageData[fi] = -1
-			}
 
-			x := uint32(0)
-			y := result.Frames[i].Height - 1
-			for {
-				b := data[dataPointer]
-				dataPointer++
-				if b == 0x80 {
-					if y == 0 {
-						break
-					}
-					y--
-					x = 0
-				} else if (b & 0x80) > 0 {
-					transparentPixels := b & 0x7F
-					for ti := byte(0); ti < transparentPixels; ti++ {
-						result.Frames[i].ImageData[x+(y*result.Frames[i].Width)+uint32(ti)] = -1
-					}
-					x += uint32(transparentPixels)
-				} else {
-					for bi := 0; bi < int(b); bi++ {
-						result.Frames[i].ImageData[x+(y*result.Frames[i].Width)+uint32(bi)] = int16(data[dataPointer])
-						dataPointer++
-					}
-					x += uint32(b)
-				}
+	result.Frames = make([]SpriteFrame, len(dc6.Frames))
+	wg := sync.WaitGroup{}
+	wg.Add(len(dc6.Frames))
+	for i, f := range dc6.Frames {
+		go func(i int, frame *d2dc6.DC6Frame) {
+			defer wg.Done()
+			result.Frames[i] = SpriteFrame{
+				Flip:      frame.Flipped,
+				Width:     frame.Width,
+				Height:    frame.Height,
+				OffsetX:   frame.OffsetX,
+				OffsetY:   frame.OffsetY,
+				Unknown:   frame.Unknown,
+				NextBlock: frame.NextBlock,
+				Length:    frame.Length,
+				ImageData: frame.ImageData(),
+				//FrameData: frame.FrameData, // TODO: Is the field needed?
+				Image: frame.Image(),
 			}
-			var img = make([]byte, int(result.Frames[i].Width)*int(result.Frames[i].Height)*4)
-			for ii := uint32(0); ii < result.Frames[i].Width*result.Frames[i].Height; ii++ {
-				if result.Frames[i].ImageData[ii] < 1 { // TODO: Is this == -1 or < 1?
-					continue
-				}
-				img[ii*4] = palette.Colors[result.Frames[i].ImageData[ii]].R
-				img[(ii*4)+1] = palette.Colors[result.Frames[i].ImageData[ii]].G
-				img[(ii*4)+2] = palette.Colors[result.Frames[i].ImageData[ii]].B
-				img[(ii*4)+3] = 0xFF
-			}
-			newImage, _ := ebiten.NewImage(int(result.Frames[i].Width), int(result.Frames[i].Height), ebiten.FilterNearest)
-			newImage.ReplacePixels(img)
-			result.Frames[i].Image = newImage
-			img = nil
-		}(i)
+		}(i, f)
 	}
 	wg.Wait()
-	result.valid = true
 	return result
-
 }
 
 func (v Sprite) IsValid() bool {

@@ -5,6 +5,7 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/hajimehoshi/ebiten"
 )
@@ -28,7 +29,8 @@ func CreateCheckbox(fileProvider d2interface.FileProvider, checkState bool) Chec
 		height:     0,
 		enabled:    true,
 	}
-	checkboxSprite := d2render.CreateSprite(fileProvider.LoadFile(d2resource.Checkbox), d2datadict.Palettes[d2enum.Fechar])
+	dc6, _ := d2dc6.LoadDC6(fileProvider.LoadFile(d2resource.Checkbox), d2datadict.Palettes[d2enum.Fechar])
+	checkboxSprite := d2render.CreateSpriteFromDC6(dc6)
 	result.width, result.height = checkboxSprite.GetFrameSize(0)
 	checkboxSprite.MoveTo(0, 0)
 

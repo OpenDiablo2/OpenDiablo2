@@ -1,6 +1,7 @@
 package d2ui
 
 import (
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"strings"
 	"time"
 
@@ -27,8 +28,9 @@ type TextBox struct {
 }
 
 func CreateTextbox(fileProvider d2interface.FileProvider) TextBox {
+	dc6, _ := d2dc6.LoadDC6(fileProvider.LoadFile(d2resource.TextBox2), d2datadict.Palettes[d2enum.Units])
 	result := TextBox{
-		bgSprite:  d2render.CreateSprite(fileProvider.LoadFile(d2resource.TextBox2), d2datadict.Palettes[d2enum.Units]),
+		bgSprite:  d2render.CreateSpriteFromDC6(dc6),
 		textLabel: CreateLabel(fileProvider, d2resource.FontFormal11, d2enum.Units),
 		lineBar:   CreateLabel(fileProvider, d2resource.FontFormal11, d2enum.Units),
 		enabled:   true,

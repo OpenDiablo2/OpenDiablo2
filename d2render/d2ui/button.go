@@ -1,6 +1,7 @@
 package d2ui
 
 import (
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"image"
 	"image/color"
 
@@ -123,7 +124,8 @@ func CreateButton(buttonType ButtonType, fileProvider d2interface.FileProvider, 
 	result.buttonLayout = buttonLayout
 	font := GetFont(buttonLayout.FontPath, d2enum.Units, fileProvider)
 
-	buttonSprite := d2render.CreateSprite(fileProvider.LoadFile(buttonLayout.ResourceName), d2datadict.Palettes[buttonLayout.PaletteName])
+	dc6, _ := d2dc6.LoadDC6(fileProvider.LoadFile(buttonLayout.ResourceName), d2datadict.Palettes[buttonLayout.PaletteName])
+	buttonSprite := d2render.CreateSpriteFromDC6(dc6)
 	totalButtonTypes := buttonSprite.GetTotalFrames() / (buttonLayout.XSegments * buttonLayout.YSegments)
 	for i := 0; i < buttonLayout.XSegments; i++ {
 		w, _ := buttonSprite.GetFrameSize(i)
