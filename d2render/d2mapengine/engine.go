@@ -185,6 +185,7 @@ func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
 	for tileIdx := range region.Tiles {
 		sx, sy := d2helper.IsoToScreen(region.Tiles[tileIdx].tileX+region.Rect.Left, region.Tiles[tileIdx].tileY+region.Rect.Top, int(v.OffsetX), int(v.OffsetY))
 		if sx > -160 && sy > -380 && sx <= 880 && sy <= 1240 {
+			region.Region.UpdateAnimations()
 			v.RenderPass1(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
 			if v.ShowTiles > 0 {
 				v.DrawTileLines(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
