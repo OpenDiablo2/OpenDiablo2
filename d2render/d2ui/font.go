@@ -1,6 +1,7 @@
 package d2ui
 
 import (
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"image/color"
 	"strings"
 
@@ -54,7 +55,8 @@ func CreateFont(font string, palette d2enum.PaletteType, fileProvider d2interfac
 		metrics:   make(map[uint16]FontSize),
 	}
 	// bug: performance issue when using CJK fonts, because ten thousand frames will be rendered PER font
-	result.fontSprite = d2render.CreateSprite(fileProvider.LoadFile(font+".dc6"), d2datadict.Palettes[palette])
+	dc6, _ := d2dc6.LoadDC6(fileProvider.LoadFile(font+".dc6"), d2datadict.Palettes[palette])
+	result.fontSprite = d2render.CreateSpriteFromDC6(dc6)
 	woo := "Woo!\x01"
 	fontData := fileProvider.LoadFile(font + ".tbl")
 	if string(fontData[0:5]) != woo {

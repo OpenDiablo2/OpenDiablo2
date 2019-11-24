@@ -1,6 +1,7 @@
 package d2ui
 
 import (
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
@@ -34,10 +35,11 @@ type Manager struct {
 
 // CreateManager creates a new instance of a UI manager
 func CreateManager(fileProvider d2interface.FileProvider, soundManager d2audio.Manager) *Manager {
+	dc6, _ := d2dc6.LoadDC6(fileProvider.LoadFile(d2resource.CursorDefault), d2datadict.Palettes[d2enum.Units])
 	result := &Manager{
 		pressedIndex:       -1,
 		widgets:            make([]Widget, 0),
-		cursorSprite:       d2render.CreateSprite(fileProvider.LoadFile(d2resource.CursorDefault), d2datadict.Palettes[d2enum.Units]),
+		cursorSprite:       d2render.CreateSpriteFromDC6(dc6),
 		clickSfx:           soundManager.LoadSoundEffect(d2resource.SFXButtonClick),
 		waitForLeftMouseUp: false,
 	}

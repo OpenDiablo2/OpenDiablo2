@@ -5,6 +5,7 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/hajimehoshi/ebiten"
 )
@@ -21,13 +22,14 @@ type Scrollbar struct {
 }
 
 func CreateScrollbar(fileProvider d2interface.FileProvider, x, y, height int) Scrollbar {
+	dc6, _ := d2dc6.LoadDC6(fileProvider.LoadFile(d2resource.Scrollbar), d2datadict.Palettes[d2enum.Sky])
 	result := Scrollbar{
 		visible:         true,
 		enabled:         true,
 		x:               x,
 		y:               y,
 		height:          height,
-		scrollbarSprite: d2render.CreateSprite(fileProvider.LoadFile(d2resource.Scrollbar), d2datadict.Palettes[d2enum.Sky]),
+		scrollbarSprite: d2render.CreateSpriteFromDC6(dc6),
 	}
 	return result
 }
