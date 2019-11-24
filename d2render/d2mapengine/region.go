@@ -308,41 +308,60 @@ func (v *Region) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, tileYOf
 
 func (v *Region) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) {
 	tileOptions := v.getTiles(int32(tile.Style), int32(tile.Sequence), 0, tileX, tileY, v.seed)
-	tileIndex := v.getRandomTile(tileOptions, tileX, tileY, v.seed)
-	tileData := &tileOptions[tileIndex]
+	var tileData []*d2dt1.Tile
+	var tileIndex byte
 
-	if tileData == nil {
+	if tileOptions == nil {
 		log.Printf("Could not locate tile Style:%d, Seq: %d, Type: %d\n", tile.Style, tile.Sequence, 0)
-		tileData = &d2dt1.Tile{}
-		tileData.Width = 10
-		tileData.Height = 10
+		tileData[0] = &d2dt1.Tile{}
+		tileData[0].Width = 10
+		tileData[0].Height = 10
+	} else {
+		if !tileOptions[0].MaterialFlags.Animated {
+			tileIndex = v.getRandomTile(tileOptions, tileX, tileY, v.seed)
+			tileData = append(tileData, &tileOptions[tileIndex])
+		} else {
+			for i := range tileOptions {
+				tileData = append(tileData, &tileOptions[i])
+			}
+		}
 	}
-	tile.RandomIndex = tileIndex
-	cachedImage := v.GetImageCacheRecord(tile.Style, tile.Sequence, 0, tileIndex)
-	if cachedImage != nil {
-		return
+
+	for i := range tileData {
+		if !tileData[i].MaterialFlags.Animated {
+			tile.RandomIndex = tileIndex
+		} else {
+			tileIndex = byte(tileData[i].RarityFrameIndex)
+		}
+		cachedImage := v.GetImageCacheRecord(tile.Style, tile.Sequence, 0, tileIndex)
+		if cachedImage != nil {
+			return
+		}
+		tileYMinimum := int32(0)
+		for _, block := range tileData[i].Blocks {
+			tileYMinimum = d2helper.MinInt32(tileYMinimum, int32(block.Y))
+		}
+		tileYOffset := d2helper.AbsInt32(tileYMinimum)
+		tileHeight := d2helper.AbsInt32(tileData[i].Height)
+		image, _ := ebiten.NewImage(int(tileData[i].Width), int(tileHeight), ebiten.FilterNearest)
+		pixels := make([]byte, 4*tileData[i].Width*tileHeight)
+		v.decodeTileGfxData(tileData[i].Blocks, &pixels, tileYOffset, tileData[i].Width)
+		image.ReplacePixels(pixels)
+		v.SetImageCacheRecord(tile.Style, tile.Sequence, 0, tileIndex, image)
 	}
-	tileYMinimum := int32(0)
-	for _, block := range tileData.Blocks {
-		tileYMinimum = d2helper.MinInt32(tileYMinimum, int32(block.Y))
-	}
-	tileYOffset := d2helper.AbsInt32(tileYMinimum)
-	tileHeight := d2helper.AbsInt32(tileData.Height)
-	image, _ := ebiten.NewImage(int(tileData.Width), int(tileHeight), ebiten.FilterNearest)
-	pixels := make([]byte, 4*tileData.Width*tileHeight)
-	v.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, tileData.Width)
-	image.ReplacePixels(pixels)
-	v.SetImageCacheRecord(tile.Style, tile.Sequence, 0, tileIndex, image)
 }
 
 func (v *Region) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) {
 	tileOptions := v.getTiles(int32(tile.Style), int32(tile.Sequence), 13, tileX, tileY, v.seed)
-	tileIndex := v.getRandomTile(tileOptions, tileX, tileY, v.seed)
-	tileData := &tileOptions[tileIndex]
-
-	if tileData == nil {
+	var tileIndex byte
+	var tileData *d2dt1.Tile
+	if tileOptions == nil {
 		return
+	} else {
+		tileIndex = v.getRandomTile(tileOptions, tileX, tileY, v.seed)
+		tileData = &tileOptions[tileIndex]
 	}
+
 	tile.RandomIndex = tileIndex
 	tileMinY := int32(0)
 	tileMaxY := int32(0)
@@ -368,10 +387,13 @@ func (v *Region) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, tileY
 
 func (v *Region) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int) {
 	tileOptions := v.getTiles(int32(tile.Style), int32(tile.Sequence), int32(tile.Type), tileX, tileY, v.seed)
-	tileIndex := v.getRandomTile(tileOptions, tileX, tileY, v.seed)
-	tileData := &tileOptions[tileIndex]
-	if tileData == nil {
+	var tileIndex byte
+	var tileData *d2dt1.Tile
+	if tileOptions == nil {
 		return
+	} else {
+		tileIndex = v.getRandomTile(tileOptions, tileX, tileY, v.seed)
+		tileData = &tileOptions[tileIndex]
 	}
 
 	tile.RandomIndex = tileIndex
