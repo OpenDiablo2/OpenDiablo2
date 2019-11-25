@@ -58,6 +58,7 @@ type AnimatedEntity struct {
 	//frameLocations     []d2common.Rectangle
 	object     *d2datadict.ObjectLookupRecord
 	layerCache []LayerCacheEntry
+	drawOrder  [][]d2enum.CompositeType
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
@@ -68,6 +69,7 @@ func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fil
 		token:        object.Token,
 		object:       object,
 		palette:      palette,
+		layerCache:   make([]LayerCacheEntry, d2enum.CompositeTypeMax),
 		//frameLocations: []d2common.Rectangle{},
 	}
 	result.dccLayers = make(map[string]d2dcc.DCC)
@@ -166,9 +168,9 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 	localX := (v.subcellX - v.subcellY) * 16
 	localY := ((v.subcellX + v.subcellY) * 8) - 5
 
-	for layerIdx := range v.layerCache {
+	for _, layerIdx := range v.drawOrder[v.currentFrame] {
 		if v.currentFrame < 0 || v.layerCache[layerIdx].frames == nil || v.currentFrame >= len(v.layerCache[layerIdx].frames) || v.layerCache[layerIdx].frames[v.currentFrame] == nil {
-			return
+			continue
 		}
 		opts := &ebiten.DrawImageOptions{}
 		x := float64(v.offsetX) + float64(offsetX) + localX + float64(v.layerCache[layerIdx].offsetX)
@@ -193,17 +195,19 @@ func (v *AnimatedEntity) updateFrameCache() {
 	v.framesToAnimate = animationData.FramesPerDirection
 	v.lastFrameTime = d2helper.Now()
 
-	v.layerCache = make([]LayerCacheEntry, len(v.Cof.CofLayers))
-	for layerIdx := range v.layerCache {
-		v.layerCache[layerIdx].frames = make([]*ebiten.Image, v.framesToAnimate)
+	v.drawOrder = make([][]d2enum.CompositeType, v.framesToAnimate)
+	for frame := 0; frame < v.framesToAnimate; frame++ {
+		v.drawOrder[frame] = v.Cof.Priority[v.direction][frame]
 	}
 
 	for cofLayerIdx := range v.Cof.CofLayers {
-		layerName := DccLayerNames[v.Cof.CofLayers[cofLayerIdx].Type]
+		layerType := v.Cof.CofLayers[cofLayerIdx].Type
+		layerName := DccLayerNames[layerType]
 		dccLayer := v.dccLayers[layerName]
 		if !dccLayer.IsValid() {
 			continue
 		}
+		v.layerCache[layerType].frames = make([]*ebiten.Image, v.framesToAnimate)
 
 		minX := int32(10000)
 		minY := int32(10000)
@@ -216,8 +220,8 @@ func (v *AnimatedEntity) updateFrameCache() {
 			maxY = d2helper.MaxInt32(maxY, int32(dccLayer.Directions[v.direction].Frames[frameIdx].Box.Bottom()))
 		}
 
-		v.layerCache[cofLayerIdx].offsetX = minX
-		v.layerCache[cofLayerIdx].offsetY = minY
+		v.layerCache[layerType].offsetX = minX
+		v.layerCache[layerType].offsetY = minY
 		actualWidth := maxX - minX
 		actualHeight := maxY - minY
 
@@ -237,7 +241,7 @@ func (v *AnimatedEntity) updateFrameCache() {
 			case d2enum.DrawEffectPctTransparency75:
 				transparency = byte(192)
 			case d2enum.DrawEffectModulate:
-				v.layerCache[cofLayerIdx].compositeMode = ebiten.CompositeModeLighter
+				v.layerCache[layerType].compositeMode = ebiten.CompositeModeLighter
 			case d2enum.DrawEffectBurn:
 				// Flies in tal rasha's tomb use this
 			case d2enum.DrawEffectNormal:
@@ -271,8 +275,8 @@ func (v *AnimatedEntity) updateFrameCache() {
 					pixels[(actualX*4)+(actualY*int(actualWidth)*4)+3] = transparency
 				}
 			}
-			v.layerCache[cofLayerIdx].frames[animationIdx], _ = ebiten.NewImage(int(actualWidth), int(actualHeight), ebiten.FilterNearest)
-			_ = v.layerCache[cofLayerIdx].frames[animationIdx].ReplacePixels(pixels)
+			v.layerCache[layerType].frames[animationIdx], _ = ebiten.NewImage(int(actualWidth), int(actualHeight), ebiten.FilterNearest)
+			_ = v.layerCache[layerType].frames[animationIdx].ReplacePixels(pixels)
 		}
 	}
 }
