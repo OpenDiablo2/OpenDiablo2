@@ -1,8 +1,9 @@
 package d2scene
 
 import (
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"image/color"
+
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 
 	"github.com/OpenDiablo2/D2Shared/d2helper"
 
@@ -111,8 +112,7 @@ func (v *Game) Update(tickTime float64) {
 			py,
 		)
 
-		directionIndex := int((float64(angle) / 360.0) * 16.0)
-		newDirection := d2render.DirectionLookup[directionIndex]
+		newDirection := int((float64(angle) / 360.0) * 16.0)
 		if newDirection != v.mapEngine.Hero.AnimatedEntity.GetDirection() {
 			v.mapEngine.Hero.AnimatedEntity.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), v.mapEngine.Hero.Equipment.RightHand.GetWeaponClass(), newDirection)
 		}

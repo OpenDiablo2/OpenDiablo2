@@ -1,23 +1,24 @@
 package d2scene
 
 import (
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"image/color"
 	"math"
 	"os"
 	"strings"
 
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
+
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/OpenDiablo2/D2Shared/d2common"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 	dh "github.com/OpenDiablo2/D2Shared/d2helper"
+	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 	"github.com/hajimehoshi/ebiten"
@@ -189,7 +190,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		v.characterImage[i] = d2core.CreateHero(
 			0,
 			0,
-			5,
+			0,
 			v.gameStates[idx].HeroType,
 			d2core.HeroObjects[v.gameStates[idx].HeroType],
 			v.fileProvider,

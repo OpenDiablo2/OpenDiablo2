@@ -25,9 +25,6 @@ import (
 
 var DccLayerNames = []string{"HD", "TR", "LG", "RA", "LA", "RH", "LH", "SH", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"}
 
-// DirectionLookup is used to decode the direction offset indexes
-var DirectionLookup = []int{9, 15, 5, 6, 4, 12, 10, 2, 8, 13, 1, 7, 0, 14, 11, 3}
-
 type LayerCacheEntry struct {
 	frames           []*ebiten.Image
 	compositeMode    ebiten.CompositeMode
@@ -58,6 +55,7 @@ type AnimatedEntity struct {
 	//frameLocations     []d2common.Rectangle
 	object     *d2datadict.ObjectLookupRecord
 	layerCache []LayerCacheEntry
+	drawOrder  [][]d2enum.CompositeType
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
@@ -68,6 +66,7 @@ func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fil
 		token:        object.Token,
 		object:       object,
 		palette:      palette,
+		layerCache:   make([]LayerCacheEntry, d2enum.CompositeTypeMax),
 		//frameLocations: []d2common.Rectangle{},
 	}
 	result.dccLayers = make(map[string]d2dcc.DCC)
@@ -84,6 +83,9 @@ func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fil
 func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction int) {
 	cofPath := fmt.Sprintf("%s/%s/COF/%s%s%s.COF", v.base, v.token, v.token, animationMode, weaponClass)
 	v.Cof = d2cof.LoadCOF(cofPath, v.fileProvider)
+	if v.Cof.NumberOfDirections == 0 || v.Cof.NumberOfLayers == 0 || v.Cof.FramesPerDirection == 0 {
+		return
+	}
 	v.animationMode = animationMode
 	v.weaponClass = weaponClass
 	v.direction = direction
@@ -163,12 +165,16 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 			}
 		}
 	}
+
 	localX := (v.subcellX - v.subcellY) * 16
 	localY := ((v.subcellX + v.subcellY) * 8) - 5
 
-	for layerIdx := range v.layerCache {
+	if v.drawOrder == nil {
+		return
+	}
+	for _, layerIdx := range v.drawOrder[v.currentFrame] {
 		if v.currentFrame < 0 || v.layerCache[layerIdx].frames == nil || v.currentFrame >= len(v.layerCache[layerIdx].frames) || v.layerCache[layerIdx].frames[v.currentFrame] == nil {
-			return
+			continue
 		}
 		opts := &ebiten.DrawImageOptions{}
 		x := float64(v.offsetX) + float64(offsetX) + localX + float64(v.layerCache[layerIdx].offsetX)
@@ -193,31 +199,48 @@ func (v *AnimatedEntity) updateFrameCache() {
 	v.framesToAnimate = animationData.FramesPerDirection
 	v.lastFrameTime = d2helper.Now()
 
-	v.layerCache = make([]LayerCacheEntry, len(v.Cof.CofLayers))
-	for layerIdx := range v.layerCache {
-		v.layerCache[layerIdx].frames = make([]*ebiten.Image, v.framesToAnimate)
+	v.drawOrder = make([][]d2enum.CompositeType, v.framesToAnimate)
+
+	var dccDirection int
+	switch v.Cof.NumberOfDirections {
+	case 4:
+		dccDirection = d2dcc.CofToDir4[v.direction]
+	case 8:
+		dccDirection = d2dcc.CofToDir8[v.direction]
+	case 16:
+		dccDirection = d2dcc.CofToDir16[v.direction]
+	case 32:
+		dccDirection = d2dcc.CofToDir32[v.direction]
+	default:
+		dccDirection = 0
+	}
+
+	for frame := 0; frame < v.framesToAnimate; frame++ {
+		v.drawOrder[frame] = v.Cof.Priority[v.direction][frame]
 	}
 
 	for cofLayerIdx := range v.Cof.CofLayers {
-		layerName := DccLayerNames[v.Cof.CofLayers[cofLayerIdx].Type]
+		layerType := v.Cof.CofLayers[cofLayerIdx].Type
+		layerName := DccLayerNames[layerType]
 		dccLayer := v.dccLayers[layerName]
 		if !dccLayer.IsValid() {
 			continue
 		}
+		v.layerCache[layerType].frames = make([]*ebiten.Image, v.framesToAnimate)
 
 		minX := int32(10000)
 		minY := int32(10000)
 		maxX := int32(-10000)
 		maxY := int32(-10000)
-		for frameIdx := range dccLayer.Directions[v.direction].Frames {
-			minX = d2helper.MinInt32(minX, int32(dccLayer.Directions[v.direction].Frames[frameIdx].Box.Left))
-			minY = d2helper.MinInt32(minY, int32(dccLayer.Directions[v.direction].Frames[frameIdx].Box.Top))
-			maxX = d2helper.MaxInt32(maxX, int32(dccLayer.Directions[v.direction].Frames[frameIdx].Box.Right()))
-			maxY = d2helper.MaxInt32(maxY, int32(dccLayer.Directions[v.direction].Frames[frameIdx].Box.Bottom()))
+		for frameIdx := range dccLayer.Directions[dccDirection].Frames {
+			minX = d2helper.MinInt32(minX, int32(dccLayer.Directions[dccDirection].Frames[frameIdx].Box.Left))
+			minY = d2helper.MinInt32(minY, int32(dccLayer.Directions[dccDirection].Frames[frameIdx].Box.Top))
+			maxX = d2helper.MaxInt32(maxX, int32(dccLayer.Directions[dccDirection].Frames[frameIdx].Box.Right()))
+			maxY = d2helper.MaxInt32(maxY, int32(dccLayer.Directions[dccDirection].Frames[frameIdx].Box.Bottom()))
 		}
 
-		v.layerCache[cofLayerIdx].offsetX = minX
-		v.layerCache[cofLayerIdx].offsetY = minY
+		v.layerCache[layerType].offsetX = minX
+		v.layerCache[layerType].offsetY = minY
 		actualWidth := maxX - minX
 		actualHeight := maxY - minY
 
@@ -237,7 +260,7 @@ func (v *AnimatedEntity) updateFrameCache() {
 			case d2enum.DrawEffectPctTransparency75:
 				transparency = byte(192)
 			case d2enum.DrawEffectModulate:
-				v.layerCache[cofLayerIdx].compositeMode = ebiten.CompositeModeLighter
+				v.layerCache[layerType].compositeMode = ebiten.CompositeModeLighter
 			case d2enum.DrawEffectBurn:
 				// Flies in tal rasha's tomb use this
 			case d2enum.DrawEffectNormal:
@@ -250,29 +273,29 @@ func (v *AnimatedEntity) updateFrameCache() {
 			for i := 0; i < int(actualWidth*actualHeight); i++ {
 				pixels[(i*4)+3] = 0
 			}
-			if animationIdx >= len(dccLayer.Directions[v.direction].Frames) {
+			if animationIdx >= len(dccLayer.Directions[dccDirection].Frames) {
 				log.Printf("Invalid animation index of %d for animated entity", animationIdx)
 				continue
 			}
 
-			frame := dccLayer.Directions[v.direction].Frames[animationIdx]
-			for y := 0; y < dccLayer.Directions[v.direction].Box.Height; y++ {
-				for x := 0; x < dccLayer.Directions[v.direction].Box.Width; x++ {
-					paletteIndex := frame.PixelData[x+(y*dccLayer.Directions[v.direction].Box.Width)]
+			frame := dccLayer.Directions[dccDirection].Frames[animationIdx]
+			for y := 0; y < dccLayer.Directions[dccDirection].Box.Height; y++ {
+				for x := 0; x < dccLayer.Directions[dccDirection].Box.Width; x++ {
+					paletteIndex := frame.PixelData[x+(y*dccLayer.Directions[dccDirection].Box.Width)]
 					if paletteIndex == 0 {
 						continue
 					}
 					color := d2datadict.Palettes[v.palette].Colors[paletteIndex]
-					actualX := (x + dccLayer.Directions[v.direction].Box.Left) - int(minX)
-					actualY := (y + dccLayer.Directions[v.direction].Box.Top) - int(minY)
+					actualX := (x + dccLayer.Directions[dccDirection].Box.Left) - int(minX)
+					actualY := (y + dccLayer.Directions[dccDirection].Box.Top) - int(minY)
 					pixels[(actualX*4)+(actualY*int(actualWidth)*4)] = color.R
 					pixels[(actualX*4)+(actualY*int(actualWidth)*4)+1] = color.G
 					pixels[(actualX*4)+(actualY*int(actualWidth)*4)+2] = color.B
 					pixels[(actualX*4)+(actualY*int(actualWidth)*4)+3] = transparency
 				}
 			}
-			v.layerCache[cofLayerIdx].frames[animationIdx], _ = ebiten.NewImage(int(actualWidth), int(actualHeight), ebiten.FilterNearest)
-			_ = v.layerCache[cofLayerIdx].frames[animationIdx].ReplacePixels(pixels)
+			v.layerCache[layerType].frames[animationIdx], _ = ebiten.NewImage(int(actualWidth), int(actualHeight), ebiten.FilterNearest)
+			_ = v.layerCache[layerType].frames[animationIdx].ReplacePixels(pixels)
 		}
 	}
 }
