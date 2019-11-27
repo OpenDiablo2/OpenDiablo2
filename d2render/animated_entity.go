@@ -25,9 +25,6 @@ import (
 
 var DccLayerNames = []string{"HD", "TR", "LG", "RA", "LA", "RH", "LH", "SH", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"}
 
-// DirectionLookup is used to decode the direction offset indexes
-var DirectionLookup = []int{9, 15, 5, 6, 4, 12, 10, 2, 8, 13, 1, 7, 0, 14, 11, 3}
-
 type LayerCacheEntry struct {
 	frames           []*ebiten.Image
 	compositeMode    ebiten.CompositeMode
@@ -168,6 +165,7 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 			}
 		}
 	}
+
 	localX := (v.subcellX - v.subcellY) * 16
 	localY := ((v.subcellX + v.subcellY) * 8) - 5
 
@@ -202,9 +200,23 @@ func (v *AnimatedEntity) updateFrameCache() {
 	v.lastFrameTime = d2helper.Now()
 
 	v.drawOrder = make([][]d2enum.CompositeType, v.framesToAnimate)
-	// TODO/HACK: Get draw order from direction 0 until we get a handle on directions.
+
+	var dccDirection int
+	switch v.Cof.NumberOfDirections {
+	case 4:
+		dccDirection = d2dcc.CofToDir4[v.direction]
+	case 8:
+		dccDirection = d2dcc.CofToDir8[v.direction]
+	case 16:
+		dccDirection = d2dcc.CofToDir16[v.direction]
+	case 32:
+		dccDirection = d2dcc.CofToDir32[v.direction]
+	default:
+		dccDirection = 0
+	}
+
 	for frame := 0; frame < v.framesToAnimate; frame++ {
-		v.drawOrder[frame] = v.Cof.Priority[0][frame]
+		v.drawOrder[frame] = v.Cof.Priority[v.direction][frame]
 	}
 
 	for cofLayerIdx := range v.Cof.CofLayers {
@@ -220,11 +232,11 @@ func (v *AnimatedEntity) updateFrameCache() {
 		minY := int32(10000)
 		maxX := int32(-10000)
 		maxY := int32(-10000)
-		for frameIdx := range dccLayer.Directions[v.direction].Frames {
-			minX = d2helper.MinInt32(minX, int32(dccLayer.Directions[v.direction].Frames[frameIdx].Box.Left))
-			minY = d2helper.MinInt32(minY, int32(dccLayer.Directions[v.direction].Frames[frameIdx].Box.Top))
-			maxX = d2helper.MaxInt32(maxX, int32(dccLayer.Directions[v.direction].Frames[frameIdx].Box.Right()))
-			maxY = d2helper.MaxInt32(maxY, int32(dccLayer.Directions[v.direction].Frames[frameIdx].Box.Bottom()))
+		for frameIdx := range dccLayer.Directions[dccDirection].Frames {
+			minX = d2helper.MinInt32(minX, int32(dccLayer.Directions[dccDirection].Frames[frameIdx].Box.Left))
+			minY = d2helper.MinInt32(minY, int32(dccLayer.Directions[dccDirection].Frames[frameIdx].Box.Top))
+			maxX = d2helper.MaxInt32(maxX, int32(dccLayer.Directions[dccDirection].Frames[frameIdx].Box.Right()))
+			maxY = d2helper.MaxInt32(maxY, int32(dccLayer.Directions[dccDirection].Frames[frameIdx].Box.Bottom()))
 		}
 
 		v.layerCache[layerType].offsetX = minX
@@ -261,21 +273,21 @@ func (v *AnimatedEntity) updateFrameCache() {
 			for i := 0; i < int(actualWidth*actualHeight); i++ {
 				pixels[(i*4)+3] = 0
 			}
-			if animationIdx >= len(dccLayer.Directions[v.direction].Frames) {
+			if animationIdx >= len(dccLayer.Directions[dccDirection].Frames) {
 				log.Printf("Invalid animation index of %d for animated entity", animationIdx)
 				continue
 			}
 
-			frame := dccLayer.Directions[v.direction].Frames[animationIdx]
-			for y := 0; y < dccLayer.Directions[v.direction].Box.Height; y++ {
-				for x := 0; x < dccLayer.Directions[v.direction].Box.Width; x++ {
-					paletteIndex := frame.PixelData[x+(y*dccLayer.Directions[v.direction].Box.Width)]
+			frame := dccLayer.Directions[dccDirection].Frames[animationIdx]
+			for y := 0; y < dccLayer.Directions[dccDirection].Box.Height; y++ {
+				for x := 0; x < dccLayer.Directions[dccDirection].Box.Width; x++ {
+					paletteIndex := frame.PixelData[x+(y*dccLayer.Directions[dccDirection].Box.Width)]
 					if paletteIndex == 0 {
 						continue
 					}
 					color := d2datadict.Palettes[v.palette].Colors[paletteIndex]
-					actualX := (x + dccLayer.Directions[v.direction].Box.Left) - int(minX)
-					actualY := (y + dccLayer.Directions[v.direction].Box.Top) - int(minY)
+					actualX := (x + dccLayer.Directions[dccDirection].Box.Left) - int(minX)
+					actualY := (y + dccLayer.Directions[dccDirection].Box.Top) - int(minY)
 					pixels[(actualX*4)+(actualY*int(actualWidth)*4)] = color.R
 					pixels[(actualX*4)+(actualY*int(actualWidth)*4)+1] = color.G
 					pixels[(actualX*4)+(actualY*int(actualWidth)*4)+2] = color.B
