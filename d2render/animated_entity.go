@@ -56,6 +56,8 @@ type AnimatedEntity struct {
 	object     *d2datadict.ObjectLookupRecord
 	layerCache []LayerCacheEntry
 	drawOrder  [][]d2enum.CompositeType
+	TargetX    float64
+	TargetY    float64
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
@@ -302,4 +304,55 @@ func (v *AnimatedEntity) updateFrameCache() {
 
 func (v AnimatedEntity) GetDirection() int {
 	return v.direction
+}
+
+// StepToTarget moves one step closer to the target
+func (v *AnimatedEntity) StepToTarget() {
+	velocity := 0.05
+	angle := 359 - d2helper.GetAngleBetween(
+		v.LocationX,
+		v.LocationY,
+		v.TargetX,
+		v.TargetY,
+	)
+	radians := (math.Pi / 180.0) * float64(angle)
+	v.LocationX = (v.LocationX + (velocity * math.Cos(radians)))
+	v.LocationY = (v.LocationY + (velocity * math.Sin(radians)))
+}
+
+func (v AnimatedEntity) IsCloseToTarget() bool {
+	threshhold := 0.1
+	return (d2helper.AlmostEqual(v.LocationX, v.TargetX, threshhold) && d2helper.AlmostEqual(v.LocationY, v.TargetY, threshhold))
+}
+
+func (v *AnimatedEntity) Step() {
+	if v.IsCloseToTarget() {
+		if v.animationMode != d2enum.AnimationModePlayerTownNeutral.String() {
+			v.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), v.weaponClass, v.direction)
+		}
+	} else {
+		v.StepToTarget()
+	}
+}
+
+// SetTarget sets target coordinates and changes animation based on proximity and direction
+func (v *AnimatedEntity) SetTarget(tx, ty float64) {
+	angle := 359 - d2helper.GetAngleBetween(
+		v.LocationX,
+		v.LocationY,
+		tx,
+		ty,
+	)
+	v.TargetX, v.TargetY = tx, ty
+
+	var newAnimationMode string
+	if v.IsCloseToTarget() {
+		newAnimationMode = d2enum.AnimationModePlayerTownNeutral.String()
+	} else {
+		newAnimationMode = d2enum.AnimationModePlayerTownWalk.String()
+	}
+	newDirection := int((float64(angle) / 360.0) * 16.0)
+	if newDirection != v.GetDirection() || newAnimationMode != v.animationMode {
+		v.SetMode(newAnimationMode, v.weaponClass, newDirection)
+	}
 }

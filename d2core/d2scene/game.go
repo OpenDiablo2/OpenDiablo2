@@ -87,6 +87,8 @@ func (v *Game) Load() []func() {
 				v.gameState.HeroType,
 				v.gameState.Equipment,
 				v.fileProvider)
+			v.mapEngine.Hero.AnimatedEntity.TargetX = v.mapEngine.Hero.AnimatedEntity.LocationX
+			v.mapEngine.Hero.AnimatedEntity.TargetY = v.mapEngine.Hero.AnimatedEntity.LocationY
 		},
 	}
 }
@@ -102,20 +104,13 @@ func (v Game) Render(screen *ebiten.Image) {
 
 func (v *Game) Update(tickTime float64) {
 	// TODO: Pathfinding
+	v.mapEngine.Hero.AnimatedEntity.Step()
+
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		mx, my := ebiten.CursorPosition()
 		px, py := d2helper.ScreenToIso(float64(mx)-v.mapEngine.OffsetX, float64(my)-v.mapEngine.OffsetY)
-		angle := 359 - d2helper.GetAngleBetween(
-			v.mapEngine.Hero.AnimatedEntity.LocationX,
-			v.mapEngine.Hero.AnimatedEntity.LocationY,
-			px,
-			py,
-		)
 
-		newDirection := int((float64(angle) / 360.0) * 16.0)
-		if newDirection != v.mapEngine.Hero.AnimatedEntity.GetDirection() {
-			v.mapEngine.Hero.AnimatedEntity.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), v.mapEngine.Hero.Equipment.RightHand.GetWeaponClass(), newDirection)
-		}
+		v.mapEngine.Hero.AnimatedEntity.SetTarget(px, py)
 	}
 
 	rx, ry := d2helper.IsoToScreen(int(v.mapEngine.Hero.AnimatedEntity.LocationX), int(v.mapEngine.Hero.AnimatedEntity.LocationY), 0, 0)
