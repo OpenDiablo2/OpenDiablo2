@@ -87,8 +87,6 @@ func (v *Game) Load() []func() {
 				v.gameState.HeroType,
 				v.gameState.Equipment,
 				v.fileProvider)
-			v.mapEngine.Hero.AnimatedEntity.TargetX = v.mapEngine.Hero.AnimatedEntity.LocationX
-			v.mapEngine.Hero.AnimatedEntity.TargetY = v.mapEngine.Hero.AnimatedEntity.LocationY
 		},
 	}
 }
@@ -104,7 +102,11 @@ func (v Game) Render(screen *ebiten.Image) {
 
 func (v *Game) Update(tickTime float64) {
 	// TODO: Pathfinding
-	v.mapEngine.Hero.AnimatedEntity.Step()
+
+	if v.mapEngine.Hero.AnimatedEntity.LocationX != v.mapEngine.Hero.AnimatedEntity.TargetX &&
+		v.mapEngine.Hero.AnimatedEntity.LocationY != v.mapEngine.Hero.AnimatedEntity.TargetY {
+		v.mapEngine.Hero.AnimatedEntity.Step(tickTime)
+	}
 
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		mx, my := ebiten.CursorPosition()

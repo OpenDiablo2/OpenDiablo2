@@ -74,6 +74,8 @@ func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fil
 	result.dccLayers = make(map[string]d2dcc.DCC)
 	result.LocationX = float64(x) / 5
 	result.LocationY = float64(y) / 5
+	result.TargetX   = result.LocationX
+	result.TargetY   = result.LocationY
 
 	result.subcellX = 1 + math.Mod(float64(x), 5)
 	result.subcellY = 1 + math.Mod(float64(y), 5)
@@ -306,9 +308,10 @@ func (v AnimatedEntity) GetDirection() int {
 	return v.direction
 }
 
-// StepToTarget moves one step closer to the target
-func (v *AnimatedEntity) StepToTarget() {
-	velocity := 0.05
+func (v *AnimatedEntity) getStepLength(tickTime float64) (float64, float64) {
+	speed := 2.5
+	length := tickTime * speed
+
 	angle := 359 - d2helper.GetAngleBetween(
 		v.LocationX,
 		v.LocationY,
@@ -316,22 +319,28 @@ func (v *AnimatedEntity) StepToTarget() {
 		v.TargetY,
 	)
 	radians := (math.Pi / 180.0) * float64(angle)
-	v.LocationX = (v.LocationX + (velocity * math.Cos(radians)))
-	v.LocationY = (v.LocationY + (velocity * math.Sin(radians)))
+	oneStepX := length * math.Cos(radians)
+	oneStepY := length * math.Sin(radians)
+	return oneStepX, oneStepY
 }
 
-func (v AnimatedEntity) IsCloseToTarget() bool {
-	threshhold := 0.1
-	return (d2helper.AlmostEqual(v.LocationX, v.TargetX, threshhold) && d2helper.AlmostEqual(v.LocationY, v.TargetY, threshhold))
+func (v AnimatedEntity) isOneStepAway(stepX, stepY float64) bool {
+	return (d2helper.AlmostEqual(v.LocationX, v.TargetX, stepX) && d2helper.AlmostEqual(v.LocationY, v.TargetY, stepY))
 }
 
-func (v *AnimatedEntity) Step() {
-	if v.IsCloseToTarget() {
+func (v *AnimatedEntity) Step(tickTime float64) {
+	stepX, stepY := v.getStepLength(tickTime)
+
+	if v.isOneStepAway(stepX, stepY) {
+		v.LocationX = v.TargetX
+		v.LocationY = v.TargetY
+
 		if v.animationMode != d2enum.AnimationModePlayerTownNeutral.String() {
 			v.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), v.weaponClass, v.direction)
 		}
 	} else {
-		v.StepToTarget()
+		v.LocationX += stepX
+		v.LocationY += stepY
 	}
 }
 
@@ -343,12 +352,9 @@ func (v *AnimatedEntity) SetTarget(tx, ty float64) {
 		tx,
 		ty,
 	)
-	v.TargetX, v.TargetY = tx, ty
-
-	var newAnimationMode string
-	if v.IsCloseToTarget() {
-		newAnimationMode = d2enum.AnimationModePlayerTownNeutral.String()
-	} else {
+	newAnimationMode := d2enum.AnimationModePlayerTownNeutral.String()
+	if tx != v.LocationX || ty != v.LocationY {
+		v.TargetX, v.TargetY = tx, ty
 		newAnimationMode = d2enum.AnimationModePlayerTownWalk.String()
 	}
 	newDirection := int((float64(angle) / 360.0) * 16.0)
