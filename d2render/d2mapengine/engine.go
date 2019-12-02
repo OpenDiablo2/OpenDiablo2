@@ -199,9 +199,6 @@ func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
 			v.RenderPass2(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
 		}
 	}
-	if v.Hero != nil {
-		v.Hero.Render(target, 400, 300)
-	}
 	for tileIdx := range region.Tiles {
 		sx, sy := d2helper.IsoToScreen(float64(region.Tiles[tileIdx].tileX+region.Rect.Left), float64(region.Tiles[tileIdx].tileY+region.Rect.Top), v.OffsetX, v.OffsetY)
 		if sx > -160 && sy > -380 && sx <= 880 && sy <= 1240 {
@@ -255,6 +252,9 @@ func (v *Engine) RenderPass2(region *Region, offX, offY, x, y int, target *ebite
 		if int(math.Floor(npc.AnimatedEntity.LocationX)) == x && int(math.Floor(npc.AnimatedEntity.LocationY)) == y {
 			npc.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
 		}
+	}
+	if v.Hero != nil && int(v.Hero.AnimatedEntity.LocationX) == x && int(v.Hero.AnimatedEntity.LocationY) == y {
+		v.Hero.Render(target, 400, 300)
 	}
 }
 
