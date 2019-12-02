@@ -4,7 +4,7 @@
 # Author: liberodark
 # License: GNU GPLv3
 
-version="0.0.6"
+version="0.0.7"
 
 echo "OpenDiablo 2 Build Script $version"
 
@@ -25,7 +25,7 @@ go_install(){
 	    read -r choice
 	    [ "$choice" != y ] && [ "$choice" != Y ] && exit
 
-    if [ "$distribution" = "CentOS" ] || [ "$distribution" = "Red\ Hat" ] || [ "$distribution" = "Suse" ] || [ "$distribution" = "Oracle" ]; then
+    if [ "$distribution" = "CentOS" ] || [ "$distribution" = "Red\ Hat" ] || [ "$distribution" = "Oracle" ]; then
       echo "Downloading Go"
       	wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Install Go"
@@ -60,6 +60,16 @@ go_install(){
       
     elif [ "$distribution" = "Manjaro" ] || [ "$distribution" = "Arch\ Linux" ]; then
       sudo pacman -S go libxcursor libxrandr libxinerama libxi mesa libglvnd sdl2 sdl2_mixer sdl2_net alsa-lib --noconfirm
+	  
+	elif [ "$distribution" = "OpenSUSE" ] || [ "$distribution" = "SUSE" ]; then
+	  echo "Downloading Go"
+      	wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz > /dev/null 2>&1
+      echo "Install Go"
+	    sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
+      echo "Clean unless files"
+	    rm go*.linux-amd64.tar.gz
+      echo "Install libraries"
+      sudo zypper install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel Mesa-libGL-devel alsa-lib-devel libXi-devel > /dev/null 2>&1
 
     fi
 fi
