@@ -149,9 +149,9 @@ func (v *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 		v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider) // necessary for map name update
 		v.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 	}
-	isox, isoy := d2helper.IsoToScreen(v.mapEngine.GetRegion(0).Rect.Width/2,
-		v.mapEngine.GetRegion(0).Rect.Height/2, 0, 0)
-	v.mapEngine.CenterCameraOn(float64(isox), float64(isoy))
+	isox, isoy := d2helper.IsoToScreen(float64(v.mapEngine.GetRegion(0).Rect.Width)/2,
+		float64(v.mapEngine.GetRegion(0).Rect.Height)/2, 0, 0)
+	v.mapEngine.CenterCameraOn(isox, isoy)
 }
 
 func (v *MapEngineTest) Load() []func() {

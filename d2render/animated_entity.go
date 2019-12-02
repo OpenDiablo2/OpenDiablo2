@@ -74,8 +74,8 @@ func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fil
 	result.dccLayers = make(map[string]d2dcc.DCC)
 	result.LocationX = float64(x) / 5
 	result.LocationY = float64(y) / 5
-	result.TargetX   = result.LocationX
-	result.TargetY   = result.LocationY
+	result.TargetX = result.LocationX
+	result.TargetY = result.LocationY
 
 	result.subcellX = 1 + math.Mod(float64(x), 5)
 	result.subcellY = 1 + math.Mod(float64(y), 5)
@@ -157,7 +157,7 @@ func (v *AnimatedEntity) LoadLayer(layer string, fileProvider d2interface.FilePr
 }
 
 // Render draws this animated entity onto the target
-func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
+func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY float64) {
 	if v.animationSpeed > 0 {
 		now := d2helper.Now()
 		framesToAdd := math.Floor((now - v.lastFrameTime) / v.animationSpeed)

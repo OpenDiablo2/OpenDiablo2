@@ -78,8 +78,8 @@ func (v *Game) Load() []func() {
 			// TODO: This needs to be different depending on the act of the player
 			v.mapEngine.GenerateMap(d2enum.RegionAct1Town, 1, 0)
 			region := v.mapEngine.GetRegion(0)
-			rx, ry := d2helper.IsoToScreen(int(region.Region.StartX), int(region.Region.StartY), 0, 0)
-			v.mapEngine.CenterCameraOn(float64(rx), float64(ry))
+			rx, ry := d2helper.IsoToScreen(region.Region.StartX, region.Region.StartY, 0, 0)
+			v.mapEngine.CenterCameraOn(rx, ry)
 			v.mapEngine.Hero = d2core.CreateHero(
 				int32((region.Region.StartX*5)+3),
 				int32((region.Region.StartY*5)+3),
@@ -115,6 +115,6 @@ func (v *Game) Update(tickTime float64) {
 		v.mapEngine.Hero.AnimatedEntity.SetTarget(px, py)
 	}
 
-	rx, ry := d2helper.IsoToScreen(int(v.mapEngine.Hero.AnimatedEntity.LocationX), int(v.mapEngine.Hero.AnimatedEntity.LocationY), 0, 0)
+	rx, ry := d2helper.IsoToScreen(v.mapEngine.Hero.AnimatedEntity.LocationX, v.mapEngine.Hero.AnimatedEntity.LocationY, 0, 0)
 	v.mapEngine.CenterCameraOn(float64(rx), float64(ry))
 }

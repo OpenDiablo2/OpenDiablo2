@@ -226,7 +226,7 @@ func (v *CharacterSelect) Render(screen *ebiten.Image) {
 		v.characterNameLabel[i].Draw(screen)
 		v.characterStatsLabel[i].Draw(screen)
 		v.characterExpLabel[i].Draw(screen)
-		v.characterImage[i].Render(screen, v.characterNameLabel[i].X-40, v.characterNameLabel[i].Y+50)
+		v.characterImage[i].Render(screen, float64(v.characterNameLabel[i].X-40), float64(v.characterNameLabel[i].Y+50))
 	}
 	if v.showDeleteConfirmation {
 		ebitenutil.DrawRect(screen, 0.0, 0.0, 800.0, 600.0, color.RGBA{0, 0, 0, 128})
