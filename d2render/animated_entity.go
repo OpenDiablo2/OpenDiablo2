@@ -324,23 +324,25 @@ func (v *AnimatedEntity) getStepLength(tickTime float64) (float64, float64) {
 	return oneStepX, oneStepY
 }
 
-func (v AnimatedEntity) isOneStepAway(stepX, stepY float64) bool {
-	return (d2helper.AlmostEqual(v.LocationX, v.TargetX, stepX) && d2helper.AlmostEqual(v.LocationY, v.TargetY, stepY))
-}
-
 func (v *AnimatedEntity) Step(tickTime float64) {
 	stepX, stepY := v.getStepLength(tickTime)
 
-	if v.isOneStepAway(stepX, stepY) {
+	if d2helper.AlmostEqual(v.LocationX, v.TargetX, stepX) {
 		v.LocationX = v.TargetX
+	}
+	if d2helper.AlmostEqual(v.LocationY, v.TargetY, stepY) {
 		v.LocationY = v.TargetY
-
+	}
+	if v.LocationX != v.TargetX {
+		v.LocationX += stepX
+	}
+	if v.LocationY != v.TargetY {
+		v.LocationY += stepY
+	}
+	if v.LocationX == v.TargetX && v.LocationY == v.TargetY {
 		if v.animationMode != d2enum.AnimationModePlayerTownNeutral.String() {
 			v.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), v.weaponClass, v.direction)
 		}
-	} else {
-		v.LocationX += stepX
-		v.LocationY += stepY
 	}
 }
 
