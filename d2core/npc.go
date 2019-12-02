@@ -26,6 +26,6 @@ func (v *NPC) SetPaths(paths []d2common.Path) {
 	v.Paths = paths
 }
 
-func (v *NPC) Render(target *ebiten.Image, offsetX, offsetY float64) {
+func (v *NPC) Render(target *ebiten.Image, offsetX, offsetY int) {
 	v.AnimatedEntity.Render(target, offsetX, offsetY)
 }

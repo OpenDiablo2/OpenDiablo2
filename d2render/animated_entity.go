@@ -157,7 +157,7 @@ func (v *AnimatedEntity) LoadLayer(layer string, fileProvider d2interface.FilePr
 }
 
 // Render draws this animated entity onto the target
-func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY float64) {
+func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 	if v.animationSpeed > 0 {
 		now := d2helper.Now()
 		framesToAdd := math.Floor((now - v.lastFrameTime) / v.animationSpeed)

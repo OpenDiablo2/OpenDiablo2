@@ -248,15 +248,14 @@ func (v *Engine) RenderPass2(region *Region, offX, offY, x, y int, target *ebite
 
 	for _, obj := range region.AnimationEntities {
 		if int(math.Floor(obj.LocationX)) == x && int(math.Floor(obj.LocationY)) == y {
-			obj.Render(target, float64(offX)+v.OffsetX, float64(offY)+v.OffsetY)
+			obj.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
 		}
 	}
 	for _, npc := range region.NPCs {
 		if int(math.Floor(npc.AnimatedEntity.LocationX)) == x && int(math.Floor(npc.AnimatedEntity.LocationY)) == y {
-			npc.Render(target, float64(offX)+v.OffsetX, float64(offY)+v.OffsetY)
+			npc.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
 		}
 	}
-
 }
 
 func (v *Engine) RenderPass3(region *Region, offX, offY, x, y int, target *ebiten.Image) {

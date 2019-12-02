@@ -43,6 +43,6 @@ func CreateHero(x, y int32, direction int, heroType d2enum.Hero, equipment Chara
 	return result
 }
 
-func (v *Hero) Render(target *ebiten.Image, offsetX, offsetY float64) {
+func (v *Hero) Render(target *ebiten.Image, offsetX, offsetY int) {
 	v.AnimatedEntity.Render(target, offsetX, offsetY)
 }
