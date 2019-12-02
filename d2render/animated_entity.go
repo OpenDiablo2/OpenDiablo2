@@ -56,6 +56,8 @@ type AnimatedEntity struct {
 	object     *d2datadict.ObjectLookupRecord
 	layerCache []LayerCacheEntry
 	drawOrder  [][]d2enum.CompositeType
+	TargetX    float64
+	TargetY    float64
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
@@ -72,6 +74,8 @@ func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fil
 	result.dccLayers = make(map[string]d2dcc.DCC)
 	result.LocationX = float64(x) / 5
 	result.LocationY = float64(y) / 5
+	result.TargetX = result.LocationX
+	result.TargetY = result.LocationY
 
 	result.subcellX = 1 + math.Mod(float64(x), 5)
 	result.subcellY = 1 + math.Mod(float64(y), 5)
@@ -302,4 +306,61 @@ func (v *AnimatedEntity) updateFrameCache() {
 
 func (v AnimatedEntity) GetDirection() int {
 	return v.direction
+}
+
+func (v *AnimatedEntity) getStepLength(tickTime float64) (float64, float64) {
+	speed := 2.5
+	length := tickTime * speed
+
+	angle := 359 - d2helper.GetAngleBetween(
+		v.LocationX,
+		v.LocationY,
+		v.TargetX,
+		v.TargetY,
+	)
+	radians := (math.Pi / 180.0) * float64(angle)
+	oneStepX := length * math.Cos(radians)
+	oneStepY := length * math.Sin(radians)
+	return oneStepX, oneStepY
+}
+
+func (v *AnimatedEntity) Step(tickTime float64) {
+	stepX, stepY := v.getStepLength(tickTime)
+
+	if d2helper.AlmostEqual(v.LocationX, v.TargetX, stepX) {
+		v.LocationX = v.TargetX
+	}
+	if d2helper.AlmostEqual(v.LocationY, v.TargetY, stepY) {
+		v.LocationY = v.TargetY
+	}
+	if v.LocationX != v.TargetX {
+		v.LocationX += stepX
+	}
+	if v.LocationY != v.TargetY {
+		v.LocationY += stepY
+	}
+	if v.LocationX == v.TargetX && v.LocationY == v.TargetY {
+		if v.animationMode != d2enum.AnimationModePlayerTownNeutral.String() {
+			v.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), v.weaponClass, v.direction)
+		}
+	}
+}
+
+// SetTarget sets target coordinates and changes animation based on proximity and direction
+func (v *AnimatedEntity) SetTarget(tx, ty float64) {
+	angle := 359 - d2helper.GetAngleBetween(
+		v.LocationX,
+		v.LocationY,
+		tx,
+		ty,
+	)
+	newAnimationMode := d2enum.AnimationModePlayerTownNeutral.String()
+	if tx != v.LocationX || ty != v.LocationY {
+		v.TargetX, v.TargetY = tx, ty
+		newAnimationMode = d2enum.AnimationModePlayerTownWalk.String()
+	}
+	newDirection := int((float64(angle) / 360.0) * 16.0)
+	if newDirection != v.GetDirection() || newAnimationMode != v.animationMode {
+		v.SetMode(newAnimationMode, v.weaponClass, newDirection)
+	}
 }

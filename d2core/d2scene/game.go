@@ -78,8 +78,8 @@ func (v *Game) Load() []func() {
 			// TODO: This needs to be different depending on the act of the player
 			v.mapEngine.GenerateMap(d2enum.RegionAct1Town, 1, 0)
 			region := v.mapEngine.GetRegion(0)
-			rx, ry := d2helper.IsoToScreen(int(region.Region.StartX), int(region.Region.StartY), 0, 0)
-			v.mapEngine.CenterCameraOn(float64(rx), float64(ry))
+			rx, ry := d2helper.IsoToScreen(region.Region.StartX, region.Region.StartY, 0, 0)
+			v.mapEngine.CenterCameraOn(rx, ry)
 			v.mapEngine.Hero = d2core.CreateHero(
 				int32((region.Region.StartX*5)+3),
 				int32((region.Region.StartY*5)+3),
@@ -102,22 +102,19 @@ func (v Game) Render(screen *ebiten.Image) {
 
 func (v *Game) Update(tickTime float64) {
 	// TODO: Pathfinding
+
+	if v.mapEngine.Hero.AnimatedEntity.LocationX != v.mapEngine.Hero.AnimatedEntity.TargetX ||
+		v.mapEngine.Hero.AnimatedEntity.LocationY != v.mapEngine.Hero.AnimatedEntity.TargetY {
+		v.mapEngine.Hero.AnimatedEntity.Step(tickTime)
+	}
+
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		mx, my := ebiten.CursorPosition()
 		px, py := d2helper.ScreenToIso(float64(mx)-v.mapEngine.OffsetX, float64(my)-v.mapEngine.OffsetY)
-		angle := 359 - d2helper.GetAngleBetween(
-			v.mapEngine.Hero.AnimatedEntity.LocationX,
-			v.mapEngine.Hero.AnimatedEntity.LocationY,
-			px,
-			py,
-		)
 
-		newDirection := int((float64(angle) / 360.0) * 16.0)
-		if newDirection != v.mapEngine.Hero.AnimatedEntity.GetDirection() {
-			v.mapEngine.Hero.AnimatedEntity.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), v.mapEngine.Hero.Equipment.RightHand.GetWeaponClass(), newDirection)
-		}
+		v.mapEngine.Hero.AnimatedEntity.SetTarget(px, py)
 	}
 
-	rx, ry := d2helper.IsoToScreen(int(v.mapEngine.Hero.AnimatedEntity.LocationX), int(v.mapEngine.Hero.AnimatedEntity.LocationY), 0, 0)
+	rx, ry := d2helper.IsoToScreen(v.mapEngine.Hero.AnimatedEntity.LocationX, v.mapEngine.Hero.AnimatedEntity.LocationY, 0, 0)
 	v.mapEngine.CenterCameraOn(float64(rx), float64(ry))
 }
