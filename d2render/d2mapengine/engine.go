@@ -200,7 +200,7 @@ func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
 		}
 	}
 	if v.Hero != nil {
-		v.Hero.Render(target, v.Hero.AnimatedEntity.LocationX+400, v.Hero.AnimatedEntity.LocationY+300)
+		v.Hero.Render(target, 400, 300)
 	}
 	for tileIdx := range region.Tiles {
 		sx, sy := d2helper.IsoToScreen(float64(region.Tiles[tileIdx].tileX+region.Rect.Left), float64(region.Tiles[tileIdx].tileY+region.Rect.Top), v.OffsetX, v.OffsetY)
