@@ -4,6 +4,8 @@ github.com/JoshVarga/blast v0.0.0-20180421040937-681c804fb9f0 h1:tDnuU0igiBiQFjs
 github.com/JoshVarga/blast v0.0.0-20180421040937-681c804fb9f0/go.mod h1:h/5OEGj4G+fpYxluLjSMZbFY011ZxAntO98nCl8mrCs=
 github.com/OpenDiablo2/D2Shared v0.0.0-20191127010353-6abef1f4c7ae h1:yoY87JVtJIEtCRjQm8tnvL24n7aXbhz7seKkAJfhKU4=
 github.com/OpenDiablo2/D2Shared v0.0.0-20191127010353-6abef1f4c7ae/go.mod h1:fG8OQsAulB/t/RC9QeUjYAAEXZWY5kHvgWXmMgLhRwI=
+github.com/OpenDiablo2/D2Shared v0.0.0-20191202215623-87b9a8992eaa h1:pGzeFUoQMtrJXvdZNC9qyG2Ltk6mQAdJ9ndmSWPkYaY=
+github.com/OpenDiablo2/D2Shared v0.0.0-20191202215623-87b9a8992eaa/go.mod h1:fG8OQsAulB/t/RC9QeUjYAAEXZWY5kHvgWXmMgLhRwI=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 h1:JYp7IbQjafoB+tBA3gMyHYHrpOtNuDiK/uB5uXxq5wM=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d h1:UQZhZ2O0vMHr2cI+DC1Mbh0TJxzA3RcLoMsFw+aXw7E=
