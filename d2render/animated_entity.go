@@ -33,12 +33,11 @@ type LayerCacheEntry struct {
 
 // AnimatedEntity represents an entity on the map that can be animated
 type AnimatedEntity struct {
-	fileProvider d2interface.FileProvider
-	// LocationX represents the tile X position of the entity
-	LocationX float64
-	// LocationY represents the tile Y position of the entity
-	subcellX, subcellY float64 // Subcell coordinates within the current tile
+	fileProvider       d2interface.FileProvider
+	LocationX          float64
 	LocationY          float64
+	TileX, TileY       int     // Coordinates of the tile the unit is within
+	subcellX, subcellY float64 // Subcell coordinates within the current tile
 	dccLayers          map[string]d2dcc.DCC
 	Cof                *d2cof.COF
 	palette            d2enum.PaletteType
@@ -72,13 +71,15 @@ func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fil
 		//frameLocations: []d2common.Rectangle{},
 	}
 	result.dccLayers = make(map[string]d2dcc.DCC)
-	result.LocationX = float64(x) / 5
-	result.LocationY = float64(y) / 5
+	result.LocationX = float64(x)
+	result.LocationY = float64(y)
 	result.TargetX = result.LocationX
 	result.TargetY = result.LocationY
 
-	result.subcellX = 1 + math.Mod(float64(x), 5)
-	result.subcellY = 1 + math.Mod(float64(y), 5)
+	result.TileX = int(result.LocationX / 5)
+	result.TileY = int(result.LocationY / 5)
+	result.subcellX = 1 + math.Mod(result.LocationX, 5)
+	result.subcellY = 1 + math.Mod(result.LocationY, 5)
 
 	return result
 }
@@ -309,7 +310,7 @@ func (v AnimatedEntity) GetDirection() int {
 }
 
 func (v *AnimatedEntity) getStepLength(tickTime float64) (float64, float64) {
-	speed := 2.5
+	speed := 6.0
 	length := tickTime * speed
 
 	angle := 359 - d2helper.GetAngleBetween(
@@ -318,7 +319,7 @@ func (v *AnimatedEntity) getStepLength(tickTime float64) (float64, float64) {
 		v.TargetX,
 		v.TargetY,
 	)
-	radians := (math.Pi / 180.0) * float64(angle)
+	radians := (math.Pi / 180.0) * angle
 	oneStepX := length * math.Cos(radians)
 	oneStepY := length * math.Sin(radians)
 	return oneStepX, oneStepY
@@ -339,9 +340,15 @@ func (v *AnimatedEntity) Step(tickTime float64) {
 	if v.LocationY != v.TargetY {
 		v.LocationY += stepY
 	}
+
+	v.subcellX = 1 + math.Mod(v.LocationX, 5)
+	v.subcellY = 1 + math.Mod(v.LocationY, 5)
+	v.TileX = int(v.LocationX / 5)
+	v.TileY = int(v.LocationY / 5)
+
 	if v.LocationX == v.TargetX && v.LocationY == v.TargetY {
-		if v.animationMode != d2enum.AnimationModePlayerTownNeutral.String() {
-			v.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), v.weaponClass, v.direction)
+		if v.animationMode != d2enum.AnimationModeObjectNeutral.String() {
+			v.SetMode(d2enum.AnimationModeObjectNeutral.String(), v.weaponClass, v.direction)
 		}
 	}
 }
@@ -354,13 +361,28 @@ func (v *AnimatedEntity) SetTarget(tx, ty float64) {
 		tx,
 		ty,
 	)
-	newAnimationMode := d2enum.AnimationModePlayerTownNeutral.String()
+	// TODO: Check if is in town and if is player.
+	newAnimationMode := d2enum.AnimationModeMonsterWalk.String()
 	if tx != v.LocationX || ty != v.LocationY {
 		v.TargetX, v.TargetY = tx, ty
-		newAnimationMode = d2enum.AnimationModePlayerTownWalk.String()
+		newAnimationMode = d2enum.AnimationModeMonsterWalk.String()
 	}
-	newDirection := int((float64(angle) / 360.0) * 16.0)
+
+	newDirection := angleToDirection(angle, v.Cof.NumberOfDirections)
 	if newDirection != v.GetDirection() || newAnimationMode != v.animationMode {
 		v.SetMode(newAnimationMode, v.weaponClass, newDirection)
 	}
+}
+
+func angleToDirection(angle float64, numberOfDirections int) int {
+	degreesPerDirection := 360.0 / float64(numberOfDirections)
+	offset := 45.0 - (degreesPerDirection / 2)
+	newDirection := int((angle - offset) / degreesPerDirection)
+	if newDirection >= numberOfDirections {
+		newDirection = newDirection - numberOfDirections
+	} else if newDirection < 0 {
+		newDirection = numberOfDirections + newDirection
+	}
+
+	return newDirection
 }

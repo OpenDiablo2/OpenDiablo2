@@ -77,7 +77,8 @@ func (v *Game) Load() []func() {
 			v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider)
 			// TODO: This needs to be different depending on the act of the player
 			v.mapEngine.GenerateMap(d2enum.RegionAct1Town, 1, 0)
-			region := v.mapEngine.GetRegion(0)
+			v.mapEngine.SetRegion(0)
+			region := v.mapEngine.Region()
 			rx, ry := d2helper.IsoToScreen(region.Region.StartX, region.Region.StartY, 0, 0)
 			v.mapEngine.CenterCameraOn(rx, ry)
 			v.mapEngine.Hero = d2core.CreateHero(
@@ -108,13 +109,34 @@ func (v *Game) Update(tickTime float64) {
 		v.mapEngine.Hero.AnimatedEntity.Step(tickTime)
 	}
 
+	for _, npc := range v.mapEngine.Region().Region.NPCs {
+
+		if npc.HasPaths &&
+			npc.AnimatedEntity.LocationX == npc.AnimatedEntity.TargetX &&
+			npc.AnimatedEntity.LocationY == npc.AnimatedEntity.TargetY {
+			// If at the target, set target to the next path.
+			// TODO: pause at target, figure out how to use Path.Action
+			path := npc.NextPath()
+			npc.AnimatedEntity.SetTarget(
+				float64(path.X),
+				float64(path.Y),
+			)
+		}
+
+		if npc.AnimatedEntity.LocationX != npc.AnimatedEntity.TargetX ||
+			npc.AnimatedEntity.LocationY != npc.AnimatedEntity.TargetY {
+			npc.AnimatedEntity.Step(tickTime)
+		}
+
+	}
+
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		mx, my := ebiten.CursorPosition()
 		px, py := d2helper.ScreenToIso(float64(mx)-v.mapEngine.OffsetX, float64(my)-v.mapEngine.OffsetY)
 
-		v.mapEngine.Hero.AnimatedEntity.SetTarget(px, py)
+		v.mapEngine.Hero.AnimatedEntity.SetTarget(px*5, py*5)
 	}
 
-	rx, ry := d2helper.IsoToScreen(v.mapEngine.Hero.AnimatedEntity.LocationX, v.mapEngine.Hero.AnimatedEntity.LocationY, 0, 0)
-	v.mapEngine.CenterCameraOn(float64(rx), float64(ry))
+	rx, ry := d2helper.IsoToScreen(v.mapEngine.Hero.AnimatedEntity.LocationX/5, v.mapEngine.Hero.AnimatedEntity.LocationY/5, 0, 0)
+	v.mapEngine.CenterCameraOn(rx, ry)
 }

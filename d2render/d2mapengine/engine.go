@@ -3,7 +3,6 @@ package d2mapengine
 import (
 	"fmt"
 	"image/color"
-	"math"
 	"strings"
 
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
@@ -35,6 +34,7 @@ type Engine struct {
 	soundManager *d2audio.Manager
 	gameState    *d2core.GameState
 	fileProvider d2interface.FileProvider
+	region       int
 	regions      []EngineRegion
 	OffsetX      float64
 	OffsetY      float64
@@ -50,6 +50,14 @@ func CreateMapEngine(gameState *d2core.GameState, soundManager *d2audio.Manager,
 		regions:      make([]EngineRegion, 0),
 	}
 	return result
+}
+
+func (v *Engine) Region() *EngineRegion {
+	return &v.regions[v.region]
+}
+
+func (v *Engine) SetRegion(region int)  {
+	v.region = region
 }
 
 func (v *Engine) GetRegion(regionIndex int) *EngineRegion {
@@ -244,17 +252,17 @@ func (v *Engine) RenderPass2(region *Region, offX, offY, x, y int, target *ebite
 	}
 
 	for _, obj := range region.AnimationEntities {
-		if int(math.Floor(obj.LocationX)) == x && int(math.Floor(obj.LocationY)) == y {
+		if obj.TileX == x && obj.TileY == y {
 			obj.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
 		}
 	}
 	for _, npc := range region.NPCs {
-		if int(math.Floor(npc.AnimatedEntity.LocationX)) == x && int(math.Floor(npc.AnimatedEntity.LocationY)) == y {
+		if npc.AnimatedEntity.TileX == x && npc.AnimatedEntity.TileY == y {
 			npc.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
 		}
 	}
-	if v.Hero != nil && int(v.Hero.AnimatedEntity.LocationX) == x && int(v.Hero.AnimatedEntity.LocationY) == y {
-		v.Hero.Render(target, 400, 300)
+	if v.Hero != nil && v.Hero.AnimatedEntity.TileX == x && v.Hero.AnimatedEntity.TileY == y {
+		v.Hero.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
 	}
 }
 
