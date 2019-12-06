@@ -319,7 +319,7 @@ func (v *AnimatedEntity) getStepLength(tickTime float64) (float64, float64) {
 		v.TargetX,
 		v.TargetY,
 	)
-	radians := (math.Pi / 180.0) * angle
+	radians := (math.Pi / 180.0) * float64(angle)
 	oneStepX := length * math.Cos(radians)
 	oneStepY := length * math.Sin(radians)
 	return oneStepX, oneStepY
@@ -368,7 +368,7 @@ func (v *AnimatedEntity) SetTarget(tx, ty float64) {
 		newAnimationMode = d2enum.AnimationModeMonsterWalk.String()
 	}
 
-	newDirection := angleToDirection(angle, v.Cof.NumberOfDirections)
+	newDirection := angleToDirection(float64(angle), v.Cof.NumberOfDirections)
 	if newDirection != v.GetDirection() || newAnimationMode != v.animationMode {
 		v.SetMode(newAnimationMode, v.weaponClass, newDirection)
 	}
