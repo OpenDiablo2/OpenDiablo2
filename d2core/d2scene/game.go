@@ -1,24 +1,20 @@
 package d2scene
 
 import (
-	"image/color"
-
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
-
-	"github.com/OpenDiablo2/D2Shared/d2helper"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
-
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
+	"github.com/OpenDiablo2/D2Shared/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 	"github.com/hajimehoshi/ebiten"
+	"image/color"
 )
 
 type Game struct {
@@ -113,13 +109,14 @@ func (v *Game) Update(tickTime float64) {
 
 		if npc.HasPaths &&
 			npc.AnimatedEntity.LocationX == npc.AnimatedEntity.TargetX &&
-			npc.AnimatedEntity.LocationY == npc.AnimatedEntity.TargetY {
+			npc.AnimatedEntity.LocationY == npc.AnimatedEntity.TargetY &&
+			npc.AnimatedEntity.Wait() {
 			// If at the target, set target to the next path.
-			// TODO: pause at target, figure out how to use Path.Action
 			path := npc.NextPath()
 			npc.AnimatedEntity.SetTarget(
 				float64(path.X),
 				float64(path.Y),
+				path.Action,
 			)
 		}
 
@@ -134,7 +131,7 @@ func (v *Game) Update(tickTime float64) {
 		mx, my := ebiten.CursorPosition()
 		px, py := d2helper.ScreenToIso(float64(mx)-v.mapEngine.OffsetX, float64(my)-v.mapEngine.OffsetY)
 
-		v.mapEngine.Hero.AnimatedEntity.SetTarget(px*5, py*5)
+		v.mapEngine.Hero.AnimatedEntity.SetTarget(px*5, py*5, 1)
 	}
 
 	rx, ry := d2helper.IsoToScreen(v.mapEngine.Hero.AnimatedEntity.LocationX/5, v.mapEngine.Hero.AnimatedEntity.LocationY/5, 0, 0)
