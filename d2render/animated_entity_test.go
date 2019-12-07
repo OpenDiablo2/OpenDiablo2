@@ -52,3 +52,20 @@ func TestAngleToDirection_8Directions(t *testing.T) {
 	}
 
 }
+
+func TestAngleToDirection_1Direction(t *testing.T) {
+	angle := 0.0
+	for i := 0; i < 120; i++ {
+		assert.Equal(t, 0, angleToDirection(angle, 1))
+		angle += 3
+	}
+}
+
+
+func TestAngleToDirection_0Directions(t *testing.T) {
+	angle := 0.0
+	for i := 0; i < 120; i++ {
+		assert.Equal(t, 0, angleToDirection(angle, 0))
+		angle += 3
+	}
+}

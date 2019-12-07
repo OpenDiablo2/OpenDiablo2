@@ -2,25 +2,18 @@ package d2render
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
+	"github.com/OpenDiablo2/D2Shared/d2data"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2cof"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dcc"
+	"github.com/OpenDiablo2/D2Shared/d2helper"
+	"github.com/hajimehoshi/ebiten"
 	"log"
 	"math"
+	"math/rand"
 	"strings"
-
-	"github.com/OpenDiablo2/D2Shared/d2data"
-
-	"github.com/OpenDiablo2/D2Shared/d2data/d2cof"
-
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dcc"
-
-	"github.com/OpenDiablo2/D2Shared/d2helper"
-
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
-
-	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-
-	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
-
-	"github.com/hajimehoshi/ebiten"
 )
 
 var DccLayerNames = []string{"HD", "TR", "LG", "RA", "LA", "RH", "LH", "SH", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"}
@@ -52,11 +45,13 @@ type AnimatedEntity struct {
 	currentFrame       int
 	offsetX, offsetY   int32
 	//frameLocations     []d2common.Rectangle
-	object     *d2datadict.ObjectLookupRecord
-	layerCache []LayerCacheEntry
-	drawOrder  [][]d2enum.CompositeType
-	TargetX    float64
-	TargetY    float64
+	object      *d2datadict.ObjectLookupRecord
+	layerCache  []LayerCacheEntry
+	drawOrder   [][]d2enum.CompositeType
+	TargetX     float64
+	TargetY     float64
+	action      int32
+	repetitions int32
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
@@ -157,6 +152,14 @@ func (v *AnimatedEntity) LoadLayer(layer string, fileProvider d2interface.FilePr
 	return result
 }
 
+// If an npc has a path to pause at each location.
+// Waits for animation to end and all repetitions to be exhausted.
+func (v AnimatedEntity) Wait() bool {
+	// currentFrame might skip the final frame if framesToAdd doesn't match up,
+	// bail immediately after the last repetition if that happens.
+	return v.repetitions < 0 || (v.repetitions == 0 && v.currentFrame >= v.framesToAnimate-1)
+}
+
 // Render draws this animated entity onto the target
 func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 	if v.animationSpeed > 0 {
@@ -167,6 +170,7 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 			v.currentFrame += int(math.Floor(framesToAdd))
 			for v.currentFrame >= v.framesToAnimate {
 				v.currentFrame -= v.framesToAnimate
+				v.repetitions = d2helper.MinInt32(-1, v.repetitions-1)
 			}
 		}
 	}
@@ -347,20 +351,39 @@ func (v *AnimatedEntity) Step(tickTime float64) {
 	v.TileY = int(v.LocationY / 5)
 
 	if v.LocationX == v.TargetX && v.LocationY == v.TargetY {
-		if v.animationMode != d2enum.AnimationModeObjectNeutral.String() {
-			v.SetMode(d2enum.AnimationModeObjectNeutral.String(), v.weaponClass, v.direction)
+
+		v.repetitions = 3 + rand.Int31n(5)
+		newAnimationMode := d2enum.AnimationModeObjectNeutral
+		// TODO: Figure out what 1-3 are for, 4 is correct.
+		switch v.action {
+		case 1:
+			newAnimationMode = d2enum.AnimationModeMonsterNeutral
+		case 2:
+			newAnimationMode = d2enum.AnimationModeMonsterNeutral
+		case 3:
+			newAnimationMode = d2enum.AnimationModeMonsterNeutral
+		case 4:
+			newAnimationMode = d2enum.AnimationModeMonsterSkill1
+			v.repetitions = 0
 		}
+
+		if v.animationMode != newAnimationMode.String() {
+			v.SetMode(newAnimationMode.String(), v.weaponClass, v.direction)
+		}
+
 	}
 }
 
 // SetTarget sets target coordinates and changes animation based on proximity and direction
-func (v *AnimatedEntity) SetTarget(tx, ty float64) {
+func (v *AnimatedEntity) SetTarget(tx, ty float64, action int32) {
 	angle := 359 - d2helper.GetAngleBetween(
 		v.LocationX,
 		v.LocationY,
 		tx,
 		ty,
 	)
+
+	v.action = action
 	// TODO: Check if is in town and if is player.
 	newAnimationMode := d2enum.AnimationModeMonsterWalk.String()
 	if tx != v.LocationX || ty != v.LocationY {
@@ -375,6 +398,10 @@ func (v *AnimatedEntity) SetTarget(tx, ty float64) {
 }
 
 func angleToDirection(angle float64, numberOfDirections int) int {
+	if numberOfDirections == 0 {
+		return 0
+	}
+
 	degreesPerDirection := 360.0 / float64(numberOfDirections)
 	offset := 45.0 - (degreesPerDirection / 2)
 	newDirection := int((angle - offset) / degreesPerDirection)
