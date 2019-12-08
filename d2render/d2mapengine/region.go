@@ -12,9 +12,9 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2data/d2ds1"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
+	"github.com/OpenDiablo2/OpenDiablo2/d2corehelper"
 
 	"github.com/OpenDiablo2/D2Shared/d2helper"
-	"github.com/OpenDiablo2/OpenDiablo2/d2corehelper"
 
 	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 
@@ -150,15 +150,14 @@ func (v *Region) UpdateAnimations() {
 	}
 }
 
-func (v *Region) RenderTile(offsetX, offsetY, tileX, tileY int, layerType d2enum.RegionLayerType, layerIndex int, target *ebiten.Image) {
-	offsetX -= 80
+func (v *Region) RenderTile(viewport *Viewport, tileX, tileY int, layerType d2enum.RegionLayerType, layerIndex int, target *ebiten.Image) {
 	switch layerType {
 	case d2enum.RegionLayerTypeFloors:
-		v.renderFloor(v.DS1.Tiles[tileY][tileX].Floors[layerIndex], offsetX, offsetY, target, tileX, tileY)
+		v.renderFloor(v.DS1.Tiles[tileY][tileX].Floors[layerIndex], viewport, target, tileX, tileY)
 	case d2enum.RegionLayerTypeWalls:
-		v.renderWall(v.DS1.Tiles[tileY][tileX].Walls[layerIndex], offsetX, offsetY, target, tileX, tileY)
+		v.renderWall(v.DS1.Tiles[tileY][tileX].Walls[layerIndex], viewport, target, tileX, tileY)
 	case d2enum.RegionLayerTypeShadows:
-		v.renderShadow(v.DS1.Tiles[tileY][tileX].Shadows[layerIndex], offsetX, offsetY, target, tileX, tileY)
+		v.renderShadow(v.DS1.Tiles[tileY][tileX].Shadows[layerIndex], viewport, target, tileX, tileY)
 	}
 }
 
@@ -212,7 +211,7 @@ func (v *Region) getTiles(style, sequence, tileType int32, x, y int, seed int64)
 	return tiles
 }
 
-func (v *Region) renderFloor(tile d2ds1.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image, tileX, tileY int) {
+func (v *Region) renderFloor(tile d2ds1.FloorShadowRecord, viewport *Viewport, target *ebiten.Image, tileX, tileY int) {
 	var img *ebiten.Image
 	if !tile.Animated {
 		img = v.GetImageCacheRecord(tile.Style, tile.Sequence, 0, tile.RandomIndex)
@@ -223,33 +222,44 @@ func (v *Region) renderFloor(tile d2ds1.FloorShadowRecord, offsetX, offsetY int,
 		log.Printf("Render called on uncached floor {%v,%v}", tile.Style, tile.Sequence)
 		return
 	}
+
+	viewport.PushTranslation(-80, float64(tile.YAdjust))
+	screenX, screenY := viewport.WorldToScreen(viewport.GetTranslation())
 	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(float64(offsetX), float64(offsetY))
-	_ = target.DrawImage(img, opts)
-	return
+	opts.GeoM.Translate(float64(screenX), float64(screenY))
+	target.DrawImage(img, opts)
+	viewport.PopTranslation()
 }
 
-func (v *Region) renderWall(tile d2ds1.WallRecord, offsetX, offsetY int, target *ebiten.Image, tileX, tileY int) {
+func (v *Region) renderWall(tile d2ds1.WallRecord, viewport *Viewport, target *ebiten.Image, tileX, tileY int) {
 	img := v.GetImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tile.RandomIndex)
 	if img == nil {
 		log.Printf("Render called on uncached wall {%v,%v,%v}", tile.Style, tile.Sequence, tile.Type)
 		return
 	}
+
+	viewport.PushTranslation(-80, float64(tile.YAdjust))
+	screenX, screenY := viewport.WorldToScreen(viewport.GetTranslation())
 	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(float64(offsetX), float64(offsetY+tile.YAdjust))
+	opts.GeoM.Translate(float64(screenX), float64(screenY))
 	target.DrawImage(img, opts)
+	viewport.PopTranslation()
 }
 
-func (v *Region) renderShadow(tile d2ds1.FloorShadowRecord, offsetX, offsetY int, target *ebiten.Image, tileX, tileY int) {
+func (v *Region) renderShadow(tile d2ds1.FloorShadowRecord, viewport *Viewport, target *ebiten.Image, tileX, tileY int) {
 	img := v.GetImageCacheRecord(tile.Style, tile.Sequence, 13, tile.RandomIndex)
 	if img == nil {
 		log.Printf("Render called on uncached shadow {%v,%v}", tile.Style, tile.Sequence)
 		return
 	}
+
+	viewport.PushTranslation(-80, float64(tile.YAdjust))
+	screenX, screenY := viewport.WorldToScreen(viewport.GetTranslation())
 	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(float64(offsetX), float64(offsetY+tile.YAdjust))
+	opts.GeoM.Translate(float64(screenX), float64(screenY))
 	opts.ColorM = d2corehelper.ColorToColorM(color.RGBA{255, 255, 255, 160})
 	target.DrawImage(img, opts)
+	viewport.PopTranslation()
 }
 
 func (v *Region) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, tileYOffset int32, tileWidth int32) {

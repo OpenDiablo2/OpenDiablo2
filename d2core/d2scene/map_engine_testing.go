@@ -172,9 +172,9 @@ func (v *MapEngineTest) Unload() {
 
 func (v *MapEngineTest) Render(screen *ebiten.Image) {
 	v.mapEngine.Render(screen)
-	actualX := float64(v.uiManager.CursorX) - v.mapEngine.OffsetX
-	actualY := float64(v.uiManager.CursorY) - v.mapEngine.OffsetY
-	tileX, tileY := d2helper.ScreenToIso(actualX, actualY)
+	actualX := v.uiManager.CursorX
+	actualY := v.uiManager.CursorY
+	tileX, tileY := v.mapEngine.ScreenToIso(actualX, actualY)
 	subtileX := int(math.Ceil(math.Mod((tileX*10), 10))) / 2
 	subtileY := int(math.Ceil(math.Mod((tileY*10), 10))) / 2
 	curRegion := v.mapEngine.GetRegionAt(int(tileX), int(tileY))
@@ -182,8 +182,8 @@ func (v *MapEngineTest) Render(screen *ebiten.Image) {
 		return
 	}
 	line := fmt.Sprintf("%d, %d (Tile %d.%d, %d.%d)",
-		int(math.Ceil(actualX)),
-		int(math.Ceil(actualY)),
+		actualX,
+		actualY,
 		int(math.Floor(tileX))-curRegion.Rect.Left,
 		subtileX,
 		int(math.Floor(tileY))-curRegion.Rect.Top,
@@ -217,33 +217,22 @@ func (v *MapEngineTest) Update(tickTime float64) {
 	ctrlPressed := v.uiManager.KeyPressed(ebiten.KeyControl)
 	shiftPressed := v.uiManager.KeyPressed(ebiten.KeyShift)
 
+	var moveSpeed float64 = 800
+	if v.uiManager.KeyPressed(ebiten.KeyShift) {
+		moveSpeed = 200
+	}
+
 	if v.uiManager.KeyPressed(ebiten.KeyDown) {
-		if v.uiManager.KeyPressed(ebiten.KeyShift) {
-			v.mapEngine.OffsetY -= tickTime * 200
-		} else {
-			v.mapEngine.OffsetY -= tickTime * 800
-		}
+		v.mapEngine.MoveCameraBy(0, moveSpeed*tickTime)
 	}
 	if v.uiManager.KeyPressed(ebiten.KeyUp) {
-		if v.uiManager.KeyPressed(ebiten.KeyShift) {
-			v.mapEngine.OffsetY += tickTime * 200
-		} else {
-			v.mapEngine.OffsetY += tickTime * 800
-		}
+		v.mapEngine.MoveCameraBy(0, -moveSpeed*tickTime)
 	}
 	if v.uiManager.KeyPressed(ebiten.KeyLeft) {
-		if v.uiManager.KeyPressed(ebiten.KeyShift) {
-			v.mapEngine.OffsetX += tickTime * 200
-		} else {
-			v.mapEngine.OffsetX += tickTime * 800
-		}
+		v.mapEngine.MoveCameraBy(-moveSpeed*tickTime, 0)
 	}
 	if v.uiManager.KeyPressed(ebiten.KeyRight) {
-		if v.uiManager.KeyPressed(ebiten.KeyShift) {
-			v.mapEngine.OffsetX -= tickTime * 200
-		} else {
-			v.mapEngine.OffsetX -= tickTime * 800
-		}
+		v.mapEngine.MoveCameraBy(moveSpeed*tickTime, 0)
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF7) {
