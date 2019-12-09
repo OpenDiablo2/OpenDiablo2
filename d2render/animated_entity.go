@@ -86,6 +86,7 @@ func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction in
 	if v.Cof.NumberOfDirections == 0 || v.Cof.NumberOfLayers == 0 || v.Cof.FramesPerDirection == 0 {
 		return
 	}
+	resetAnimation := v.animationMode != animationMode || v.weaponClass != weaponClass
 	v.animationMode = animationMode
 	v.weaponClass = weaponClass
 	v.direction = direction
@@ -101,7 +102,7 @@ func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction in
 		}
 	}
 
-	v.updateFrameCache()
+	v.updateFrameCache(resetAnimation)
 }
 
 func (v *AnimatedEntity) LoadLayer(layer string, fileProvider d2interface.FileProvider) d2dcc.DCC {
@@ -196,8 +197,10 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 	}
 }
 
-func (v *AnimatedEntity) updateFrameCache() {
-	v.currentFrame = 0
+func (v *AnimatedEntity) updateFrameCache(resetAnimation bool) {
+	if resetAnimation {
+		v.currentFrame = 0
+	}
 	// TODO: This animation data madness is incorrect, yet tasty
 	animDataTemp := d2data.AnimationData[strings.ToLower(v.token+v.animationMode+v.weaponClass)]
 	if animDataTemp == nil {
