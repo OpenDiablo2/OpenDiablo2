@@ -7,8 +7,6 @@ import (
 
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 
-	"github.com/OpenDiablo2/D2Shared/d2helper"
-
 	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
@@ -36,27 +34,31 @@ type Engine struct {
 	fileProvider d2interface.FileProvider
 	region       int
 	regions      []EngineRegion
-	OffsetX      float64
-	OffsetY      float64
 	ShowTiles    int
 	Hero         *d2core.Hero
+
+	viewport *Viewport
+	camera   Camera
 }
 
 func CreateMapEngine(gameState *d2core.GameState, soundManager *d2audio.Manager, fileProvider d2interface.FileProvider) *Engine {
-	result := &Engine{
+	engine := &Engine{
 		gameState:    gameState,
 		soundManager: soundManager,
 		fileProvider: fileProvider,
 		regions:      make([]EngineRegion, 0),
+		viewport:     NewViewport(0, 0, 800, 600),
 	}
-	return result
+
+	engine.viewport.SetCamera(&engine.camera)
+	return engine
 }
 
 func (v *Engine) Region() *EngineRegion {
 	return &v.regions[v.region]
 }
 
-func (v *Engine) SetRegion(region int)  {
+func (v *Engine) SetRegion(region int) {
 	v.region = region
 }
 
@@ -65,8 +67,19 @@ func (v *Engine) GetRegion(regionIndex int) *EngineRegion {
 }
 
 func (v *Engine) CenterCameraOn(x, y float64) {
-	v.OffsetX = -(x - 400)
-	v.OffsetY = -(y - 300)
+	v.camera.MoveTo(x, y)
+}
+
+func (v *Engine) MoveCameraBy(x, y float64) {
+	v.camera.MoveBy(x, y)
+}
+
+func (v *Engine) ScreenToIso(x, y int) (float64, float64) {
+	return v.viewport.ScreenToIso(x, y)
+}
+
+func (v *Engine) ScreenToWorld(x, y int) (float64, float64) {
+	return v.viewport.ScreenToWorld(x, y)
 }
 
 func (v *Engine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) {
@@ -109,36 +122,31 @@ func (v *Engine) GenerateAct1Overworld() {
 		v.GenTilesCache(&v.regions[i])
 	}
 
-	sx, sy := d2helper.IsoToScreen(region.StartX, region.StartY, 0, 0)
-	v.OffsetX = sx - 400
-	v.OffsetY = sy - 300
+	v.camera.MoveTo(v.viewport.IsoToWorld(region.StartX, region.StartY))
 }
 
 func (v *Engine) GetRegionAt(x, y int) *EngineRegion {
-	if v.regions == nil {
-		return nil
-	}
 	for _, region := range v.regions {
-		if !region.Rect.IsInRect(x, y) {
-			continue
+		if region.Rect.IsInRect(x, y) {
+			return &region
 		}
-		return &region
 	}
+
 	return nil
 }
 
 func (v *Engine) Render(target *ebiten.Image) {
 	for _, region := range v.regions {
 		// X position of leftmost point of region
-		left := (region.Rect.Left - region.Rect.Bottom()) * 80
+		left := float64((region.Rect.Left - region.Rect.Bottom()) * 80)
 		// Y position of top of region
-		top := (region.Rect.Left + region.Rect.Top) * 40
+		top := float64((region.Rect.Left + region.Rect.Top) * 40)
 		// X of right
-		right := (region.Rect.Right() - region.Rect.Top) * 80
+		right := float64((region.Rect.Right() - region.Rect.Top) * 80)
 		// Y of bottom
-		bottom := (region.Rect.Right() + region.Rect.Bottom()) * 40
+		bottom := float64((region.Rect.Right() + region.Rect.Bottom()) * 40)
 
-		if -v.OffsetX+800 > float64(left) && -v.OffsetX < float64(right) && -v.OffsetY+600 > float64(top) && -v.OffsetY < float64(bottom) {
+		if v.viewport.IsWorldRectVisible(left, top, right, bottom) {
 			v.RenderRegion(region, target)
 		}
 	}
@@ -191,56 +199,61 @@ func (v *Engine) GenTilesCache(region *EngineRegion) {
 
 func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
 	for tileIdx := range region.Tiles {
-		sx, sy := d2helper.IsoToScreen(float64(region.Tiles[tileIdx].tileX+region.Rect.Left), float64(region.Tiles[tileIdx].tileY+region.Rect.Top), v.OffsetX, v.OffsetY)
-		if sx > -160 && sy > -380 && sx <= 880 && sy <= 1240 {
+		if v.viewport.IsWorldTileVisbile(float64(region.Tiles[tileIdx].tileX+region.Rect.Left), float64(region.Tiles[tileIdx].tileY+region.Rect.Top)) {
 			region.Region.UpdateAnimations()
-			v.RenderPass1(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
-			if v.ShowTiles > 0 {
-				v.DrawTileLines(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
-			}
 
+			v.viewport.PushTranslation(float64(region.Tiles[tileIdx].offX), float64(region.Tiles[tileIdx].offY))
+			v.RenderPass1(region.Region, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
+			v.DrawTileLines(region.Region, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
+			v.viewport.PopTranslation()
 		}
 	}
+
 	for tileIdx := range region.Tiles {
-		sx, sy := d2helper.IsoToScreen(float64(region.Tiles[tileIdx].tileX+region.Rect.Left), float64(region.Tiles[tileIdx].tileY+region.Rect.Top), v.OffsetX, v.OffsetY)
-		if sx > -160 && sy > -380 && sx <= 880 && sy <= 1240 {
-			v.RenderPass2(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
+		if v.viewport.IsWorldTileVisbile(float64(region.Tiles[tileIdx].tileX+region.Rect.Left), float64(region.Tiles[tileIdx].tileY+region.Rect.Top)) {
+			v.viewport.PushTranslation(float64(region.Tiles[tileIdx].offX), float64(region.Tiles[tileIdx].offY))
+			v.RenderPass2(region.Region, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
+			v.viewport.PopTranslation()
 		}
 	}
+
 	for tileIdx := range region.Tiles {
-		sx, sy := d2helper.IsoToScreen(float64(region.Tiles[tileIdx].tileX+region.Rect.Left), float64(region.Tiles[tileIdx].tileY+region.Rect.Top), v.OffsetX, v.OffsetY)
-		if sx > -160 && sy > -380 && sx <= 880 && sy <= 1240 {
-			v.RenderPass3(region.Region, region.Tiles[tileIdx].offX, region.Tiles[tileIdx].offY, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
+		if v.viewport.IsWorldTileVisbile(float64(region.Tiles[tileIdx].tileX+region.Rect.Left), float64(region.Tiles[tileIdx].tileY+region.Rect.Top)) {
+			v.viewport.PushTranslation(float64(region.Tiles[tileIdx].offX), float64(region.Tiles[tileIdx].offY))
+			v.RenderPass3(region.Region, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
+			v.viewport.PopTranslation()
 		}
 	}
 }
 
-func (v *Engine) RenderPass1(region *Region, offX, offY, x, y int, target *ebiten.Image) {
+func (v *Engine) RenderPass1(region *Region, x, y int, target *ebiten.Image) {
 	tile := region.DS1.Tiles[y][x]
 	// Draw lower walls
 	for i := range tile.Walls {
 		if !tile.Walls[i].Type.LowerWall() || tile.Walls[i].Prop1 == 0 || tile.Walls[i].Hidden {
 			continue
 		}
-		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
+
+		region.RenderTile(v.viewport, x, y, d2enum.RegionLayerTypeWalls, i, target)
 	}
 
 	for i := range tile.Floors {
 		if tile.Floors[i].Hidden || tile.Floors[i].Prop1 == 0 {
 			continue
 		}
-		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeFloors, i, target)
+
+		region.RenderTile(v.viewport, x, y, d2enum.RegionLayerTypeFloors, i, target)
 	}
 	for i := range tile.Shadows {
 		if tile.Shadows[i].Hidden || tile.Shadows[i].Prop1 == 0 {
 			continue
 		}
-		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeShadows, i, target)
-	}
 
+		region.RenderTile(v.viewport, x, y, d2enum.RegionLayerTypeShadows, i, target)
+	}
 }
 
-func (v *Engine) RenderPass2(region *Region, offX, offY, x, y int, target *ebiten.Image) {
+func (v *Engine) RenderPass2(region *Region, x, y int, target *ebiten.Image) {
 	tile := region.DS1.Tiles[y][x]
 
 	// Draw upper walls
@@ -248,63 +261,108 @@ func (v *Engine) RenderPass2(region *Region, offX, offY, x, y int, target *ebite
 		if !tile.Walls[i].Type.UpperWall() || tile.Walls[i].Hidden {
 			continue
 		}
-		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
+
+		region.RenderTile(v.viewport, x, y, d2enum.RegionLayerTypeWalls, i, target)
 	}
+
+	screenX, screenY := v.viewport.WorldToScreen(v.viewport.GetTranslation())
 
 	for _, obj := range region.AnimationEntities {
 		if obj.TileX == x && obj.TileY == y {
-			obj.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
+			obj.Render(target, screenX, screenY)
 		}
 	}
+
 	for _, npc := range region.NPCs {
 		if npc.AnimatedEntity.TileX == x && npc.AnimatedEntity.TileY == y {
-			npc.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
+			npc.Render(target, screenX, screenY)
 		}
 	}
+
 	if v.Hero != nil && v.Hero.AnimatedEntity.TileX == x && v.Hero.AnimatedEntity.TileY == y {
-		v.Hero.Render(target, offX+int(v.OffsetX), offY+int(v.OffsetY))
+		v.Hero.Render(target, screenX, screenY)
 	}
 }
 
-func (v *Engine) RenderPass3(region *Region, offX, offY, x, y int, target *ebiten.Image) {
+func (v *Engine) RenderPass3(region *Region, x, y int, target *ebiten.Image) {
 	tile := region.DS1.Tiles[y][x]
 	// Draw ceilings
 	for i := range tile.Walls {
 		if tile.Walls[i].Type != d2enum.Roof {
 			continue
 		}
-		region.RenderTile(offX+int(v.OffsetX), offY+int(v.OffsetY), x, y, d2enum.RegionLayerTypeWalls, i, target)
+
+		region.RenderTile(v.viewport, x, y, d2enum.RegionLayerTypeWalls, i, target)
 	}
 }
 
-func (v *Engine) DrawTileLines(region *Region, offX, offY, x, y int, target *ebiten.Image) {
+func (v *Engine) DrawTileLines(region *Region, x, y int, target *ebiten.Image) {
 	if v.ShowTiles > 0 {
 		subtileColor := color.RGBA{80, 80, 255, 100}
 		tileColor := color.RGBA{255, 255, 255, 255}
 
-		ebitenutil.DrawLine(target, float64(offX)+v.OffsetX, float64(offY)+v.OffsetY, float64(offX)+v.OffsetX+80, float64(offY)+v.OffsetY+40, tileColor)
-		ebitenutil.DrawLine(target, float64(offX)+v.OffsetX, float64(offY)+v.OffsetY, float64(offX)+v.OffsetX-80, float64(offY)+v.OffsetY+40, tileColor)
+		screenX1, screenY1 := v.viewport.IsoToScreen(float64(x), float64(y))
+		screenX2, screenY2 := v.viewport.IsoToScreen(float64(x+1), float64(y))
+		screenX3, screenY3 := v.viewport.IsoToScreen(float64(x), float64(y+1))
 
-		coords := fmt.Sprintf("%v,%v", x, y)
-		ebitenutil.DebugPrintAt(target, coords, offX+int(v.OffsetX)-10, offY+int(v.OffsetY)+10)
+		ebitenutil.DrawLine(
+			target,
+			float64(screenX1),
+			float64(screenY1),
+			float64(screenX2),
+			float64(screenY2),
+			tileColor,
+		)
+
+		ebitenutil.DrawLine(
+			target,
+			float64(screenX1),
+			float64(screenY1),
+			float64(screenX3),
+			float64(screenY3),
+			tileColor,
+		)
+
+		ebitenutil.DebugPrintAt(
+			target,
+			fmt.Sprintf("%v,%v", x, y),
+			screenX1-10,
+			screenY1+10,
+		)
 
 		if v.ShowTiles > 1 {
 			for i := 1; i <= 4; i++ {
-				x := (16 * i)
-				y := (8 * i)
-				ebitenutil.DrawLine(target, float64(offX-x)+v.OffsetX, float64(offY+y)+v.OffsetY,
-					float64(offX-x)+v.OffsetX+80, float64(offY+y)+v.OffsetY+40, subtileColor)
-				ebitenutil.DrawLine(target, float64(offX+x)+v.OffsetX, float64(offY+y)+v.OffsetY,
-					float64(offX+x)+v.OffsetX-80, float64(offY+y)+v.OffsetY+40, subtileColor)
+				x := i * 16
+				y := i * 8
+
+				ebitenutil.DrawLine(
+					target,
+					float64(screenX1-x),
+					float64(screenY1+y),
+					float64(screenX1-x+80),
+					float64(screenY1+y+40),
+					subtileColor,
+				)
+
+				ebitenutil.DrawLine(
+					target,
+					float64(screenX1+x),
+					float64(screenY1+y),
+					float64(screenX1+x-80),
+					float64(screenY1+y+40),
+					subtileColor,
+				)
 			}
 
 			tile := region.DS1.Tiles[y][x]
 			for i := range tile.Floors {
-				floorSpec := fmt.Sprintf("f: %v-%v", tile.Floors[i].Style, tile.Floors[i].Sequence)
-				ebitenutil.DebugPrintAt(target, floorSpec, offX+int(v.OffsetX)-20, offY+int(v.OffsetY)+10+((i+1)*14))
+				ebitenutil.DebugPrintAt(
+					target,
+					fmt.Sprintf("f: %v-%v", tile.Floors[i].Style, tile.Floors[i].Sequence),
+					screenX1-20,
+					screenY1+10+(i+1)*14,
+				)
 			}
-			// wallSpec := fmt.Sprintf("w: %v-%v", tile.Walls[0].Style, tile.Walls[0].Sequence)
-			// ebitenutil.DebugPrintAt(target, wallSpec, offX+int(v.OffsetX)-20, offY+int(v.OffsetY)+34)
 		}
 	}
 }

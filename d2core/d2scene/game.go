@@ -1,6 +1,8 @@
 package d2scene
 
 import (
+	"image/color"
+
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
@@ -14,7 +16,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 	"github.com/hajimehoshi/ebiten"
-	"image/color"
 )
 
 type Game struct {
@@ -128,9 +129,7 @@ func (v *Game) Update(tickTime float64) {
 	}
 
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		mx, my := ebiten.CursorPosition()
-		px, py := d2helper.ScreenToIso(float64(mx)-v.mapEngine.OffsetX, float64(my)-v.mapEngine.OffsetY)
-
+		px, py := v.mapEngine.ScreenToIso(ebiten.CursorPosition())
 		v.mapEngine.Hero.AnimatedEntity.SetTarget(px*5, py*5, 1)
 	}
 
