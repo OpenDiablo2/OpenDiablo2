@@ -46,3 +46,27 @@ func (v *NPC) SetPaths(paths []d2common.Path) {
 func (v *NPC) Render(target *ebiten.Image, offsetX, offsetY int) {
 	v.AnimatedEntity.Render(target, offsetX, offsetY)
 }
+
+func (v *NPC) GetTilePosition() (float64, float64) {
+	return v.AnimatedEntity.GetTilePosition()
+}
+
+func (v *NPC) Advance(tickTime float64) {
+	if v.HasPaths &&
+		v.AnimatedEntity.LocationX == v.AnimatedEntity.TargetX &&
+		v.AnimatedEntity.LocationY == v.AnimatedEntity.TargetY &&
+		v.AnimatedEntity.Wait() {
+		// If at the target, set target to the next path.
+		path := v.NextPath()
+		v.AnimatedEntity.SetTarget(
+			float64(path.X),
+			float64(path.Y),
+			path.Action,
+		)
+	}
+
+	if v.AnimatedEntity.LocationX != v.AnimatedEntity.TargetX ||
+		v.AnimatedEntity.LocationY != v.AnimatedEntity.TargetY {
+		v.AnimatedEntity.Step(tickTime)
+	}
+}

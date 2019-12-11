@@ -43,6 +43,18 @@ func CreateHero(x, y int32, direction int, heroType d2enum.Hero, equipment Chara
 	return result
 }
 
+func (v *Hero) Advance(tickTime float64) {
+	// TODO: Pathfinding
+	if v.AnimatedEntity.LocationX != v.AnimatedEntity.TargetX ||
+		v.AnimatedEntity.LocationY != v.AnimatedEntity.TargetY {
+		v.AnimatedEntity.Step(tickTime)
+	}
+}
+
 func (v *Hero) Render(target *ebiten.Image, offsetX, offsetY int) {
 	v.AnimatedEntity.Render(target, offsetX, offsetY)
+}
+
+func (v *Hero) GetTilePosition() (float64, float64) {
+	return v.AnimatedEntity.GetTilePosition()
 }
