@@ -80,47 +80,48 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 		Height: int(region.ds1.Height),
 	}
 
+	entities := region.loadEntities(fileProvider)
 	region.loadSpecials()
 	region.generateTileCache()
 
-	return region, region.loadEntities(fileProvider)
+	return region, entities
 }
 
-func (v *MapRegion) GetTileRect() d2common.Rectangle {
-	return v.tileRect
+func (mr *MapRegion) GetTileRect() d2common.Rectangle {
+	return mr.tileRect
 }
 
-func (v *MapRegion) GetLevelPreset() d2datadict.LevelPresetRecord {
-	return v.levelPreset
+func (mr *MapRegion) GetLevelPreset() d2datadict.LevelPresetRecord {
+	return mr.levelPreset
 }
 
-func (v *MapRegion) GetLevelType() d2datadict.LevelTypeRecord {
-	return v.levelType
+func (mr *MapRegion) GetLevelType() d2datadict.LevelTypeRecord {
+	return mr.levelType
 }
 
-func (v *MapRegion) GetPath() string {
-	return v.regionPath
+func (mr *MapRegion) GetPath() string {
+	return mr.regionPath
 }
 
-func (v *MapRegion) loadSpecials() {
-	for y := range v.ds1.Tiles {
-		for x := range v.ds1.Tiles[y] {
-			for _, wall := range v.ds1.Tiles[y][x].Walls {
+func (mr *MapRegion) loadSpecials() {
+	for tileY := range mr.ds1.Tiles {
+		for tileX := range mr.ds1.Tiles[tileY] {
+			for _, wall := range mr.ds1.Tiles[tileY][tileX].Walls {
 				if wall.Type == 10 && wall.Style == 30 && wall.Sequence == 0 {
-					v.startX = float64(x) + 0.5
-					v.startY = float64(y) + 0.5
-					log.Println("found start", v.startX, v.startY)
+					mr.startX = float64(tileX) + 0.5
+					mr.startY = float64(tileY) + 0.5
+					return
 				}
 			}
 		}
 	}
 }
 
-func (r *MapRegion) loadEntities(fileProvider d2interface.FileProvider) []MapEntity {
+func (mr *MapRegion) loadEntities(fileProvider d2interface.FileProvider) []MapEntity {
 	var entities []MapEntity
 
-	for _, object := range r.ds1.Objects {
-		tileX, tileY := object.X+int32(r.tileRect.Left), object.Y+int32(r.tileRect.Top)
+	for _, object := range mr.ds1.Objects {
+		tileX, tileY := object.X+int32(mr.tileRect.Left), object.Y+int32(mr.tileRect.Top)
 
 		switch object.Lookup.Type {
 		case d2datadict.ObjectTypeCharacter:
@@ -141,29 +142,29 @@ func (r *MapRegion) loadEntities(fileProvider d2interface.FileProvider) []MapEnt
 	return entities
 }
 
-func (r *MapRegion) updateAnimations() {
+func (mr *MapRegion) updateAnimations() {
 	now := d2helper.Now()
-	framesToAdd := math.Floor((now - r.lastFrameTime) / 0.1)
+	framesToAdd := math.Floor((now - mr.lastFrameTime) / 0.1)
 	if framesToAdd > 0 {
-		r.lastFrameTime += 0.1 * framesToAdd
-		r.currentFrame += byte(math.Floor(framesToAdd))
-		if r.currentFrame > 9 {
-			r.currentFrame = 0
+		mr.lastFrameTime += 0.1 * framesToAdd
+		mr.currentFrame += byte(math.Floor(framesToAdd))
+		if mr.currentFrame > 9 {
+			mr.currentFrame = 0
 		}
 	}
 }
 
-func (r *MapRegion) getStartTilePosition() (float64, float64) {
-	return float64(r.tileRect.Left) + r.startX, float64(r.tileRect.Top) + r.startY
+func (mr *MapRegion) getStartTilePosition() (float64, float64) {
+	return float64(mr.tileRect.Left) + mr.startX, float64(mr.tileRect.Top) + mr.startY
 }
 
-func (r *MapRegion) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) byte {
+func (mr *MapRegion) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) byte {
 	/* Walker's Alias Method for weighted random selection
 	 * with xorshifting for random numbers */
 
 	var tileSeed uint64
 	tileSeed = uint64(seed) + uint64(x)
-	tileSeed *= uint64(y) + uint64(r.levelType.Id)
+	tileSeed *= uint64(y) + uint64(mr.levelType.Id)
 
 	tileSeed ^= tileSeed << 13
 	tileSeed ^= tileSeed >> 17
@@ -192,9 +193,9 @@ func (r *MapRegion) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) byte
 	return 0
 }
 
-func (r *MapRegion) getTiles(style, sequence, tileType int32, x, y int, seed int64) []d2dt1.Tile {
+func (mr *MapRegion) getTiles(style, sequence, tileType int32, x, y int, seed int64) []d2dt1.Tile {
 	var tiles []d2dt1.Tile
-	for _, tile := range r.tiles {
+	for _, tile := range mr.tiles {
 		if tile.Style != style || tile.Sequence != sequence || tile.Type != tileType {
 			continue
 		}
@@ -207,105 +208,105 @@ func (r *MapRegion) getTiles(style, sequence, tileType int32, x, y int, seed int
 	return tiles
 }
 
-func (r *MapRegion) isVisbile(viewport *Viewport) bool {
+func (mr *MapRegion) isVisbile(viewport *Viewport) bool {
 	var (
-		left   = float64((r.tileRect.Left - r.tileRect.Bottom()) * 80)
-		top    = float64((r.tileRect.Left + r.tileRect.Top) * 40)
-		right  = float64((r.tileRect.Right() - r.tileRect.Top) * 80)
-		bottom = float64((r.tileRect.Right() + r.tileRect.Bottom()) * 40)
+		left   = float64((mr.tileRect.Left - mr.tileRect.Bottom()) * 80)
+		top    = float64((mr.tileRect.Left + mr.tileRect.Top) * 40)
+		right  = float64((mr.tileRect.Right() - mr.tileRect.Top) * 80)
+		bottom = float64((mr.tileRect.Right() + mr.tileRect.Bottom()) * 40)
 	)
 
 	return viewport.IsWorldRectVisible(left, top, right, bottom)
 }
 
-func (r *MapRegion) advance(tickTime float64) {
-	r.updateAnimations()
+func (mr *MapRegion) advance(tickTime float64) {
+	mr.updateAnimations()
 }
 
-func (r *MapRegion) renderPass1(viewport *Viewport, target *ebiten.Image) {
-	for tileY := range r.ds1.Tiles {
-		for tileX := range r.ds1.Tiles[tileY] {
+func (mr *MapRegion) renderPass1(viewport *Viewport, target *ebiten.Image) {
+	for tileY := range mr.ds1.Tiles {
+		for tileX := range mr.ds1.Tiles[tileY] {
 			if viewport.IsWorldTileVisbile(float64(tileX), float64(tileY)) {
-				viewport.PushTranslation(viewport.IsoToWorld(float64(r.tileRect.Left+tileX), float64(r.tileRect.Top+tileY)))
-				r.renderTilePass1(tileX, tileY, viewport, target)
+				viewport.PushTranslation(viewport.IsoToWorld(float64(mr.tileRect.Left+tileX), float64(mr.tileRect.Top+tileY)))
+				mr.renderTilePass1(tileX, tileY, viewport, target)
 				viewport.PopTranslation()
 			}
 		}
 	}
 }
 
-func (r *MapRegion) renderPass2(viewport *Viewport, target *ebiten.Image) {
-	for tileY := range r.ds1.Tiles {
-		for tileX := range r.ds1.Tiles[tileY] {
+func (mr *MapRegion) renderPass2(viewport *Viewport, target *ebiten.Image) {
+	for tileY := range mr.ds1.Tiles {
+		for tileX := range mr.ds1.Tiles[tileY] {
 			if viewport.IsWorldTileVisbile(float64(tileX), float64(tileY)) {
-				viewport.PushTranslation(viewport.IsoToWorld(float64(r.tileRect.Left+tileX), float64(r.tileRect.Top+tileY)))
-				r.renderTilePass2(tileX, tileY, viewport, target)
+				viewport.PushTranslation(viewport.IsoToWorld(float64(mr.tileRect.Left+tileX), float64(mr.tileRect.Top+tileY)))
+				mr.renderTilePass2(tileX, tileY, viewport, target)
 				viewport.PopTranslation()
 			}
 		}
 	}
 }
 
-func (r *MapRegion) renderPass3(viewport *Viewport, target *ebiten.Image) {
-	for tileY := range r.ds1.Tiles {
-		for tileX := range r.ds1.Tiles[tileY] {
+func (mr *MapRegion) renderPass3(viewport *Viewport, target *ebiten.Image) {
+	for tileY := range mr.ds1.Tiles {
+		for tileX := range mr.ds1.Tiles[tileY] {
 			if viewport.IsWorldTileVisbile(float64(tileX), float64(tileY)) {
-				viewport.PushTranslation(viewport.IsoToWorld(float64(r.tileRect.Left+tileX), float64(r.tileRect.Top+tileY)))
-				r.renderTilePass3(tileX, tileY, viewport, target)
+				viewport.PushTranslation(viewport.IsoToWorld(float64(mr.tileRect.Left+tileX), float64(mr.tileRect.Top+tileY)))
+				mr.renderTilePass3(tileX, tileY, viewport, target)
 				viewport.PopTranslation()
 			}
 		}
 	}
 }
 
-func (r *MapRegion) renderTilePass1(tileX, tileY int, viewport *Viewport, target *ebiten.Image) {
-	tile := r.ds1.Tiles[tileY][tileX]
+func (mr *MapRegion) renderTilePass1(tileX, tileY int, viewport *Viewport, target *ebiten.Image) {
+	tile := mr.ds1.Tiles[tileY][tileX]
 
 	for _, wall := range tile.Walls {
 		if !wall.Hidden && wall.Prop1 != 0 && wall.Type.LowerWall() {
-			r.renderWall(wall, viewport, target)
+			mr.renderWall(wall, viewport, target)
 		}
 	}
 
 	for _, floor := range tile.Floors {
 		if !floor.Hidden && floor.Prop1 != 0 {
-			r.renderFloor(floor, viewport, target)
+			mr.renderFloor(floor, viewport, target)
 		}
 	}
 
 	for _, shadow := range tile.Shadows {
 		if !shadow.Hidden && shadow.Prop1 != 0 {
-			r.renderShadow(shadow, viewport, target)
+			mr.renderShadow(shadow, viewport, target)
 		}
 	}
 }
 
-func (r *MapRegion) renderTilePass2(tileX, tileY int, viewport *Viewport, target *ebiten.Image) {
-	tile := r.ds1.Tiles[tileY][tileX]
+func (mr *MapRegion) renderTilePass2(tileX, tileY int, viewport *Viewport, target *ebiten.Image) {
+	tile := mr.ds1.Tiles[tileY][tileX]
 
 	for _, wall := range tile.Walls {
 		if !wall.Hidden && wall.Type.UpperWall() {
-			r.renderWall(wall, viewport, target)
+			mr.renderWall(wall, viewport, target)
 		}
 	}
 }
 
-func (r *MapRegion) renderTilePass3(tileX, tileY int, viewport *Viewport, target *ebiten.Image) {
-	tile := r.ds1.Tiles[tileY][tileX]
+func (mr *MapRegion) renderTilePass3(tileX, tileY int, viewport *Viewport, target *ebiten.Image) {
+	tile := mr.ds1.Tiles[tileY][tileX]
 
 	for _, wall := range tile.Walls {
 		if wall.Type == d2enum.Roof {
-			r.renderWall(wall, viewport, target)
+			mr.renderWall(wall, viewport, target)
 		}
 	}
 }
 
-func (v *MapRegion) renderFloor(tile d2ds1.FloorShadowRecord, viewport *Viewport, target *ebiten.Image) {
+func (mr *MapRegion) renderFloor(tile d2ds1.FloorShadowRecord, viewport *Viewport, target *ebiten.Image) {
 	var img *ebiten.Image
 	if !tile.Animated {
-		img = v.getImageCacheRecord(tile.Style, tile.Sequence, 0, tile.RandomIndex)
+		img = mr.getImageCacheRecord(tile.Style, tile.Sequence, 0, tile.RandomIndex)
 	} else {
-		img = v.getImageCacheRecord(tile.Style, tile.Sequence, 0, v.currentFrame)
+		img = mr.getImageCacheRecord(tile.Style, tile.Sequence, 0, mr.currentFrame)
 	}
 	if img == nil {
 		log.Printf("Render called on uncached floor {%v,%v}", tile.Style, tile.Sequence)
@@ -320,8 +321,8 @@ func (v *MapRegion) renderFloor(tile d2ds1.FloorShadowRecord, viewport *Viewport
 	viewport.PopTranslation()
 }
 
-func (v *MapRegion) renderWall(tile d2ds1.WallRecord, viewport *Viewport, target *ebiten.Image) {
-	img := v.getImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tile.RandomIndex)
+func (mr *MapRegion) renderWall(tile d2ds1.WallRecord, viewport *Viewport, target *ebiten.Image) {
+	img := mr.getImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tile.RandomIndex)
 	if img == nil {
 		log.Printf("Render called on uncached wall {%v,%v,%v}", tile.Style, tile.Sequence, tile.Type)
 		return
@@ -335,8 +336,8 @@ func (v *MapRegion) renderWall(tile d2ds1.WallRecord, viewport *Viewport, target
 	viewport.PopTranslation()
 }
 
-func (v *MapRegion) renderShadow(tile d2ds1.FloorShadowRecord, viewport *Viewport, target *ebiten.Image) {
-	img := v.getImageCacheRecord(tile.Style, tile.Sequence, 13, tile.RandomIndex)
+func (mr *MapRegion) renderShadow(tile d2ds1.FloorShadowRecord, viewport *Viewport, target *ebiten.Image) {
+	img := mr.getImageCacheRecord(tile.Style, tile.Sequence, 13, tile.RandomIndex)
 	if img == nil {
 		log.Printf("Render called on uncached shadow {%v,%v}", tile.Style, tile.Sequence)
 		return
@@ -351,17 +352,17 @@ func (v *MapRegion) renderShadow(tile d2ds1.FloorShadowRecord, viewport *Viewpor
 	viewport.PopTranslation()
 }
 
-func (r *MapRegion) renderDebug(debugVisLevel int, viewport *Viewport, target *ebiten.Image) {
-	for tileY := range r.ds1.Tiles {
-		for tileX := range r.ds1.Tiles[tileY] {
+func (mr *MapRegion) renderDebug(debugVisLevel int, viewport *Viewport, target *ebiten.Image) {
+	for tileY := range mr.ds1.Tiles {
+		for tileX := range mr.ds1.Tiles[tileY] {
 			if viewport.IsWorldTileVisbile(float64(tileX), float64(tileY)) {
-				r.renderTileDebug(tileX+r.tileRect.Left, tileY+r.tileRect.Top, debugVisLevel, viewport, target)
+				mr.renderTileDebug(tileX+mr.tileRect.Left, tileY+mr.tileRect.Top, debugVisLevel, viewport, target)
 			}
 		}
 	}
 }
 
-func (r *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *Viewport, target *ebiten.Image) {
+func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *Viewport, target *ebiten.Image) {
 	if debugVisLevel > 0 {
 		subtileColor := color.RGBA{80, 80, 255, 100}
 		tileColor := color.RGBA{255, 255, 255, 255}
@@ -383,7 +384,7 @@ func (r *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *Viewp
 				ebitenutil.DrawLine(target, float64(screenX1+x), float64(screenY1+y), float64(screenX1+x-80), float64(screenY1+y+40), subtileColor)
 			}
 
-			tile := r.ds1.Tiles[y][x]
+			tile := mr.ds1.Tiles[y][x]
 			for i := range tile.Floors {
 				ebitenutil.DebugPrintAt(target, fmt.Sprintf("f: %v-%v", tile.Floors[i].Style, tile.Floors[i].Sequence), screenX1-20, screenY1+10+(i+1)*14)
 			}
@@ -391,44 +392,44 @@ func (r *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *Viewp
 	}
 }
 
-func (r *MapRegion) generateTileCache() {
-	for tileY := range r.ds1.Tiles {
-		for tileX := range r.ds1.Tiles[tileY] {
-			tile := r.ds1.Tiles[tileY][tileX]
+func (mr *MapRegion) generateTileCache() {
+	for tileY := range mr.ds1.Tiles {
+		for tileX := range mr.ds1.Tiles[tileY] {
+			tile := mr.ds1.Tiles[tileY][tileX]
 
 			for i := range tile.Floors {
 				if !tile.Floors[i].Hidden && tile.Floors[i].Prop1 != 0 {
-					r.generateFloorCache(&tile.Floors[i], tileX, tileY)
+					mr.generateFloorCache(&tile.Floors[i], tileX, tileY)
 				}
 			}
 
 			for i := range tile.Shadows {
 				if !tile.Shadows[i].Hidden && tile.Shadows[i].Prop1 != 0 {
-					r.generateShadowCache(&tile.Shadows[i], tileX, tileY)
+					mr.generateShadowCache(&tile.Shadows[i], tileX, tileY)
 				}
 			}
 
 			for i := range tile.Walls {
 				if !tile.Walls[i].Hidden && tile.Walls[i].Prop1 != 0 {
-					r.generateWallCache(&tile.Walls[i], tileX, tileY)
+					mr.generateWallCache(&tile.Walls[i], tileX, tileY)
 				}
 			}
 		}
 	}
 }
 
-func (r *MapRegion) getImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte) *ebiten.Image {
+func (mr *MapRegion) getImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte) *ebiten.Image {
 	lookupIndex := uint32(style)<<24 | uint32(sequence)<<16 | uint32(tileType)<<8 | uint32(randomIndex)
-	return r.imageCacheRecords[lookupIndex]
+	return mr.imageCacheRecords[lookupIndex]
 }
 
-func (r *MapRegion) setImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte, image *ebiten.Image) {
+func (mr *MapRegion) setImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte, image *ebiten.Image) {
 	lookupIndex := uint32(style)<<24 | uint32(sequence)<<16 | uint32(tileType)<<8 | uint32(randomIndex)
-	r.imageCacheRecords[lookupIndex] = image
+	mr.imageCacheRecords[lookupIndex] = image
 }
 
-func (r *MapRegion) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) {
-	tileOptions := r.getTiles(int32(tile.Style), int32(tile.Sequence), 0, tileX, tileY, r.seed)
+func (mr *MapRegion) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) {
+	tileOptions := mr.getTiles(int32(tile.Style), int32(tile.Sequence), 0, tileX, tileY, mr.seed)
 	var tileData []*d2dt1.Tile
 	var tileIndex byte
 
@@ -439,7 +440,7 @@ func (r *MapRegion) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, til
 		tileData[0].Height = 10
 	} else {
 		if !tileOptions[0].MaterialFlags.Animated {
-			tileIndex = r.getRandomTile(tileOptions, tileX, tileY, r.seed)
+			tileIndex = mr.getRandomTile(tileOptions, tileX, tileY, mr.seed)
 			tileData = append(tileData, &tileOptions[tileIndex])
 		} else {
 			tile.Animated = true
@@ -455,7 +456,7 @@ func (r *MapRegion) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, til
 		} else {
 			tileIndex = byte(tileData[i].RarityFrameIndex)
 		}
-		cachedImage := r.getImageCacheRecord(tile.Style, tile.Sequence, 0, tileIndex)
+		cachedImage := mr.getImageCacheRecord(tile.Style, tile.Sequence, 0, tileIndex)
 		if cachedImage != nil {
 			return
 		}
@@ -467,20 +468,20 @@ func (r *MapRegion) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, til
 		tileHeight := d2helper.AbsInt32(tileData[i].Height)
 		image, _ := ebiten.NewImage(int(tileData[i].Width), int(tileHeight), ebiten.FilterNearest)
 		pixels := make([]byte, 4*tileData[i].Width*tileHeight)
-		r.decodeTileGfxData(tileData[i].Blocks, &pixels, tileYOffset, tileData[i].Width)
+		mr.decodeTileGfxData(tileData[i].Blocks, &pixels, tileYOffset, tileData[i].Width)
 		image.ReplacePixels(pixels)
-		r.setImageCacheRecord(tile.Style, tile.Sequence, 0, tileIndex, image)
+		mr.setImageCacheRecord(tile.Style, tile.Sequence, 0, tileIndex, image)
 	}
 }
 
-func (r *MapRegion) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) {
-	tileOptions := r.getTiles(int32(tile.Style), int32(tile.Sequence), 13, tileX, tileY, r.seed)
+func (mr *MapRegion) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) {
+	tileOptions := mr.getTiles(int32(tile.Style), int32(tile.Sequence), 13, tileX, tileY, mr.seed)
 	var tileIndex byte
 	var tileData *d2dt1.Tile
 	if tileOptions == nil {
 		return
 	} else {
-		tileIndex = r.getRandomTile(tileOptions, tileX, tileY, r.seed)
+		tileIndex = mr.getRandomTile(tileOptions, tileX, tileY, mr.seed)
 		tileData = &tileOptions[tileIndex]
 	}
 
@@ -495,26 +496,26 @@ func (r *MapRegion) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, ti
 	tileHeight := int(tileMaxY - tileMinY)
 	tile.YAdjust = int(tileMinY + 80)
 
-	cachedImage := r.getImageCacheRecord(tile.Style, tile.Sequence, 13, tileIndex)
+	cachedImage := mr.getImageCacheRecord(tile.Style, tile.Sequence, 13, tileIndex)
 	if cachedImage != nil {
 		return
 	}
 
 	image, _ := ebiten.NewImage(int(tileData.Width), int(tileHeight), ebiten.FilterNearest)
 	pixels := make([]byte, 4*tileData.Width*int32(tileHeight))
-	r.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, tileData.Width)
+	mr.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, tileData.Width)
 	image.ReplacePixels(pixels)
-	r.setImageCacheRecord(tile.Style, tile.Sequence, 13, tileIndex, image)
+	mr.setImageCacheRecord(tile.Style, tile.Sequence, 13, tileIndex, image)
 }
 
-func (r *MapRegion) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int) {
-	tileOptions := r.getTiles(int32(tile.Style), int32(tile.Sequence), int32(tile.Type), tileX, tileY, r.seed)
+func (mr *MapRegion) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int) {
+	tileOptions := mr.getTiles(int32(tile.Style), int32(tile.Sequence), int32(tile.Type), tileX, tileY, mr.seed)
 	var tileIndex byte
 	var tileData *d2dt1.Tile
 	if tileOptions == nil {
 		return
 	} else {
-		tileIndex = r.getRandomTile(tileOptions, tileX, tileY, r.seed)
+		tileIndex = mr.getRandomTile(tileOptions, tileX, tileY, mr.seed)
 		tileData = &tileOptions[tileIndex]
 	}
 
@@ -522,8 +523,8 @@ func (r *MapRegion) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int) 
 	var newTileData *d2dt1.Tile = nil
 
 	if tile.Type == 3 {
-		newTileOptions := r.getTiles(int32(tile.Style), int32(tile.Sequence), int32(4), tileX, tileY, r.seed)
-		newTileIndex := r.getRandomTile(newTileOptions, tileX, tileY, r.seed)
+		newTileOptions := mr.getTiles(int32(tile.Style), int32(tile.Sequence), int32(4), tileX, tileY, mr.seed)
+		newTileIndex := mr.getRandomTile(newTileOptions, tileX, tileY, mr.seed)
 		newTileData = &newTileOptions[newTileIndex]
 	}
 
@@ -551,7 +552,7 @@ func (r *MapRegion) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int) 
 		tile.YAdjust = int(tileMinY) + 80
 	}
 
-	cachedImage := r.getImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tileIndex)
+	cachedImage := mr.getImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tileIndex)
 	if cachedImage != nil {
 		return
 	}
@@ -563,20 +564,20 @@ func (r *MapRegion) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int) 
 
 	image, _ := ebiten.NewImage(160, int(realHeight), ebiten.FilterNearest)
 	pixels := make([]byte, 4*160*realHeight)
-	r.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, 160)
+	mr.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, 160)
 
 	if newTileData != nil {
-		r.decodeTileGfxData(newTileData.Blocks, &pixels, tileYOffset, 160)
+		mr.decodeTileGfxData(newTileData.Blocks, &pixels, tileYOffset, 160)
 	}
 
 	if err := image.ReplacePixels(pixels); err != nil {
 		log.Panicf(err.Error())
 	}
 
-	r.setImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tileIndex, image)
+	mr.setImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tileIndex, image)
 }
 
-func (r *MapRegion) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, tileYOffset int32, tileWidth int32) {
+func (mr *MapRegion) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, tileYOffset int32, tileWidth int32) {
 	for _, block := range blocks {
 		if block.Format == d2dt1.BlockFormatIsometric {
 			// 3D isometric decoding
@@ -595,7 +596,7 @@ func (r *MapRegion) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, tile
 				for n > 0 {
 					colorIndex := block.EncodedData[idx]
 					if colorIndex != 0 {
-						pixelColor := r.palette.Colors[colorIndex]
+						pixelColor := mr.palette.Colors[colorIndex]
 						offset := 4 * (((blockY + y + tileYOffset) * tileWidth) + (blockX + x))
 						(*pixels)[offset] = pixelColor.R
 						(*pixels)[offset+1] = pixelColor.G
@@ -631,7 +632,7 @@ func (r *MapRegion) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, tile
 				for b2 > 0 {
 					colorIndex := block.EncodedData[idx]
 					if colorIndex != 0 {
-						pixelColor := r.palette.Colors[colorIndex]
+						pixelColor := mr.palette.Colors[colorIndex]
 						offset := 4 * (((blockY + y + tileYOffset) * tileWidth) + (blockX + x))
 						(*pixels)[offset] = pixelColor.R
 						(*pixels)[offset+1] = pixelColor.G

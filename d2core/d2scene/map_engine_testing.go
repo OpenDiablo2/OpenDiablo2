@@ -149,7 +149,7 @@ func (v *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 		v.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 	}
 
-	v.mapEngine.MoveCameraTo(v.mapEngine.IsoToWorld(v.mapEngine.GetStartTilePosition()))
+	v.mapEngine.MoveCameraTo(v.mapEngine.IsoToWorld(v.mapEngine.GetCenterTilePosition()))
 }
 
 func (v *MapEngineTest) Load() []func() {
@@ -175,7 +175,7 @@ func (v *MapEngineTest) Render(screen *ebiten.Image) {
 	tileX, tileY := v.mapEngine.ScreenToIso(actualX, actualY)
 	subtileX := int(math.Ceil(math.Mod((tileX*10), 10))) / 2
 	subtileY := int(math.Ceil(math.Mod((tileY*10), 10))) / 2
-	curRegion := v.mapEngine.GetRegionAt(int(tileX), int(tileY))
+	curRegion := v.mapEngine.GetRegionAtTile(int(tileX), int(tileY))
 	if curRegion == nil {
 		return
 	}

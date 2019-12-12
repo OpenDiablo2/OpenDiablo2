@@ -42,66 +42,77 @@ func CreateMapEngine(gameState *d2core.GameState, soundManager *d2audio.Manager,
 	return engine
 }
 
-func (e *MapEngine) GetStartTilePosition() (float64, float64) {
+func (me *MapEngine) GetStartTilePosition() (float64, float64) {
 	var startX, startY float64
-	if len(e.regions) > 0 {
-		region := e.regions[0]
+	if len(me.regions) > 0 {
+		region := me.regions[0]
 		startX, startY = region.getStartTilePosition()
 	}
 
 	return startX, startY
 }
 
-func (e *MapEngine) MoveCameraTo(x, y float64) {
-	e.camera.MoveTo(x, y)
+func (me *MapEngine) GetCenterTilePosition() (float64, float64) {
+	var centerX, centerY float64
+	if len(me.regions) > 0 {
+		region := me.regions[0]
+		centerX = float64(region.tileRect.Left) + float64(region.tileRect.Width)/2
+		centerY = float64(region.tileRect.Top) + float64(region.tileRect.Height)/2
+	}
+
+	return centerX, centerY
 }
 
-func (e *MapEngine) MoveCameraBy(x, y float64) {
-	e.camera.MoveBy(x, y)
+func (me *MapEngine) MoveCameraTo(x, y float64) {
+	me.camera.MoveTo(x, y)
 }
 
-func (e *MapEngine) ScreenToIso(x, y int) (float64, float64) {
-	return e.viewport.ScreenToIso(x, y)
+func (me *MapEngine) MoveCameraBy(x, y float64) {
+	me.camera.MoveBy(x, y)
 }
 
-func (e *MapEngine) ScreenToWorld(x, y int) (float64, float64) {
-	return e.viewport.ScreenToWorld(x, y)
+func (me *MapEngine) ScreenToIso(x, y int) (float64, float64) {
+	return me.viewport.ScreenToIso(x, y)
 }
 
-func (e *MapEngine) IsoToWorld(x, y float64) (float64, float64) {
-	return e.viewport.IsoToWorld(x, y)
+func (me *MapEngine) ScreenToWorld(x, y int) (float64, float64) {
+	return me.viewport.ScreenToWorld(x, y)
 }
 
-func (e *MapEngine) SetDebugVisLevel(debugVisLevel int) {
-	e.debugVisLevel = debugVisLevel
+func (me *MapEngine) IsoToWorld(x, y float64) (float64, float64) {
+	return me.viewport.IsoToWorld(x, y)
 }
 
-func (e *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) {
-	region, entities := loadRegion(e.gameState.Seed, 0, 0, regionType, levelPreset, e.fileProvider, fileIndex)
-	e.regions = append(e.regions, region)
-	e.entities = append(e.entities, entities...)
+func (me *MapEngine) SetDebugVisLevel(debugVisLevel int) {
+	me.debugVisLevel = debugVisLevel
 }
 
-func (e *MapEngine) GenerateAct1Overworld() {
-	e.soundManager.PlayBGM("/data/global/music/Act1/town1.wav") // TODO: Temp stuff here
+func (me *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) {
+	region, entities := loadRegion(me.gameState.Seed, 0, 0, regionType, levelPreset, me.fileProvider, fileIndex)
+	me.regions = append(me.regions, region)
+	me.entities = append(me.entities, entities...)
+}
 
-	region, entities := loadRegion(e.gameState.Seed, 0, 0, d2enum.RegionAct1Town, 1, e.fileProvider, -1)
-	e.regions = append(e.regions, region)
-	e.entities = append(e.entities, entities...)
+func (me *MapEngine) GenerateAct1Overworld() {
+	me.soundManager.PlayBGM("/data/global/music/Act1/town1.wav") // TODO: Temp stuff here
+
+	region, entities := loadRegion(me.gameState.Seed, 0, 0, d2enum.RegionAct1Town, 1, me.fileProvider, -1)
+	me.regions = append(me.regions, region)
+	me.entities = append(me.entities, entities...)
 
 	if strings.Contains(region.regionPath, "E1") {
-		region, entities := loadRegion(e.gameState.Seed, int(region.tileRect.Width-1), 0, d2enum.RegionAct1Town, 2, e.fileProvider, -1)
-		e.regions = append(e.regions, region)
-		e.entities = append(e.entities, entities...)
+		region, entities := loadRegion(me.gameState.Seed, int(region.tileRect.Width-1), 0, d2enum.RegionAct1Town, 2, me.fileProvider, -1)
+		me.regions = append(me.regions, region)
+		me.entities = append(me.entities, entities...)
 	} else if strings.Contains(region.regionPath, "S1") {
-		region, entities := loadRegion(e.gameState.Seed, 0, int(region.tileRect.Height-1), d2enum.RegionAct1Town, 3, e.fileProvider, -1)
-		e.regions = append(e.regions, region)
-		e.entities = append(e.entities, entities...)
+		region, entities := loadRegion(me.gameState.Seed, 0, int(region.tileRect.Height-1), d2enum.RegionAct1Town, 3, me.fileProvider, -1)
+		me.regions = append(me.regions, region)
+		me.entities = append(me.entities, entities...)
 	}
 }
 
-func (e *MapEngine) GetRegionAt(x, y int) *MapRegion {
-	for _, region := range e.regions {
+func (me *MapEngine) GetRegionAtTile(x, y int) *MapRegion {
+	for _, region := range me.regions {
 		if region.tileRect.IsInRect(x, y) {
 			return region
 		}
@@ -110,45 +121,45 @@ func (e *MapEngine) GetRegionAt(x, y int) *MapRegion {
 	return nil
 }
 
-func (e *MapEngine) AddEntity(entity MapEntity) {
-	e.entities = append(e.entities, entity)
+func (me *MapEngine) AddEntity(entity MapEntity) {
+	me.entities = append(me.entities, entity)
 }
 
-func (e *MapEngine) Advance(tickTime float64) {
-	for _, region := range e.regions {
-		if region.isVisbile(e.viewport) {
+func (me *MapEngine) Advance(tickTime float64) {
+	for _, region := range me.regions {
+		if region.isVisbile(me.viewport) {
 			region.advance(tickTime)
 		}
 	}
 
-	for _, entity := range e.entities {
+	for _, entity := range me.entities {
 		entity.Advance(tickTime)
 	}
 }
 
-func (e *MapEngine) Render(target *ebiten.Image) {
-	for _, region := range e.regions {
-		region.renderPass1(e.viewport, target)
-		e.renderDebug(target)
-		region.renderPass2(e.viewport, target)
-		e.renderEntities(target)
-		region.renderPass3(e.viewport, target)
+func (me *MapEngine) Render(target *ebiten.Image) {
+	for _, region := range me.regions {
+		region.renderPass1(me.viewport, target)
+		me.renderDebug(target)
+		region.renderPass2(me.viewport, target)
+		me.renderEntities(target)
+		region.renderPass3(me.viewport, target)
 	}
 }
 
-func (e *MapEngine) renderEntities(target *ebiten.Image) {
-	for _, entity := range e.entities {
-		e.viewport.PushTranslation(e.viewport.IsoToWorld(entity.GetTilePosition()))
-		screenX, screenY := e.viewport.WorldToScreen(e.viewport.GetTranslation())
+func (me *MapEngine) renderEntities(target *ebiten.Image) {
+	for _, entity := range me.entities {
+		me.viewport.PushTranslation(me.viewport.IsoToWorld(entity.GetTilePosition()))
+		screenX, screenY := me.viewport.WorldToScreen(me.viewport.GetTranslation())
 		entity.Render(target, screenX, screenY)
-		e.viewport.PopTranslation()
+		me.viewport.PopTranslation()
 	}
 }
 
-func (e *MapEngine) renderDebug(target *ebiten.Image) {
-	for _, region := range e.regions {
-		if region.isVisbile(e.viewport) {
-			region.renderDebug(e.debugVisLevel, e.viewport, target)
+func (me *MapEngine) renderDebug(target *ebiten.Image) {
+	for _, region := range me.regions {
+		if region.isVisbile(me.viewport) {
+			region.renderDebug(me.debugVisLevel, me.viewport, target)
 		}
 	}
 }
