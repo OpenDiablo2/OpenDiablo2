@@ -235,12 +235,24 @@ func (mr *MapRegion) renderPass1(viewport *Viewport, target *ebiten.Image) {
 	}
 }
 
-func (mr *MapRegion) renderPass2(viewport *Viewport, target *ebiten.Image) {
+func (mr *MapRegion) renderPass2(entities []MapEntity, viewport *Viewport, target *ebiten.Image) {
 	for tileY := range mr.ds1.Tiles {
 		for tileX := range mr.ds1.Tiles[tileY] {
 			if viewport.IsWorldTileVisbile(float64(tileX), float64(tileY)) {
 				viewport.PushTranslation(viewport.IsoToWorld(float64(mr.tileRect.Left+tileX), float64(mr.tileRect.Top+tileY)))
 				mr.renderTilePass2(tileX, tileY, viewport, target)
+
+				absTileX := float64(tileX - mr.tileRect.Left)
+				absTileY := float64(tileY - mr.tileRect.Top)
+
+				for _, entity := range entities {
+					entityX, entityY := entity.GetTilePosition()
+					if entityX == absTileX && entityY == absTileY {
+						screenX, screenY := viewport.WorldToScreen(viewport.GetTranslation())
+						entity.Render(target, screenX, screenY)
+					}
+				}
+
 				viewport.PopTranslation()
 			}
 		}

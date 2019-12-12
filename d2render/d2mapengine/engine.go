@@ -141,18 +141,8 @@ func (me *MapEngine) Render(target *ebiten.Image) {
 	for _, region := range me.regions {
 		region.renderPass1(me.viewport, target)
 		me.renderDebug(target)
-		region.renderPass2(me.viewport, target)
-		me.renderEntities(target)
+		region.renderPass2(me.entities, me.viewport, target)
 		region.renderPass3(me.viewport, target)
-	}
-}
-
-func (me *MapEngine) renderEntities(target *ebiten.Image) {
-	for _, entity := range me.entities {
-		me.viewport.PushTranslation(me.viewport.IsoToWorld(entity.GetTilePosition()))
-		screenX, screenY := me.viewport.WorldToScreen(me.viewport.GetTranslation())
-		entity.Render(target, screenX, screenY)
-		me.viewport.PopTranslation()
 	}
 }
 
