@@ -33,65 +33,80 @@ func (v *Viewport) SetCamera(camera *Camera) {
 	v.camera = camera
 }
 
-func (v *Viewport) IsoToScreen(x, y float64) (int, int) {
-	return v.WorldToScreen(v.IsoToWorld(x, y))
-}
-
-func (v *Viewport) ScreenToIso(x, y int) (float64, float64) {
-	return v.WorldToIso(v.ScreenToWorld(x, y))
-}
-
-func (v *Viewport) WorldToIso(x, y float64) (float64, float64) {
-	isoX := (x/80 + y/40) / 2
-	isoY := (y/40 - x/80) / 2
-	return isoX, isoY
-}
-
-func (v *Viewport) IsoToWorld(x, y float64) (float64, float64) {
-	worldX := (x - y) * 80
-	worldY := (x + y) * 40
-	return worldX, worldY
+func (v *Viewport) WorldToScreen(x, y float64) (int, int) {
+	return v.OrthoToScreen(v.WorldToOrtho(x, y))
 }
 
 func (v *Viewport) ScreenToWorld(x, y int) (float64, float64) {
+	return v.OrthoToWorld(v.ScreenToOrtho(x, y))
+}
+
+func (v *Viewport) OrthoToWorld(x, y float64) (float64, float64) {
+	worldX := (x/80 + y/40) / 2
+	worldY := (y/40 - x/80) / 2
+	return worldX, worldY
+}
+
+func (v *Viewport) WorldToOrtho(x, y float64) (float64, float64) {
+	orthoX := (x - y) * 80
+	orthoY := (x + y) * 40
+	return orthoX, orthoY
+}
+
+func (v *Viewport) ScreenToOrtho(x, y int) (float64, float64) {
 	camX, camY := v.getCameraOffset()
 	screenX := float64(x) + camX - float64(v.screenRect.Left)
 	screenY := float64(y) + camY - float64(v.screenRect.Top)
 	return screenX, screenY
 }
 
-func (v *Viewport) WorldToScreen(x, y float64) (int, int) {
-	camX, camY := v.getCameraOffset()
-	worldX := int(math.Floor(x - camX + float64(v.screenRect.Left)))
-	worldY := int(math.Floor(y - camY + float64(v.screenRect.Top)))
-	return worldX, worldY
+func (v *Viewport) OrthoToScreen(x, y float64) (int, int) {
+	camOrthoX, camOrthoY := v.getCameraOffset()
+	orthoX := int(math.Floor(x - camOrthoX + float64(v.screenRect.Left)))
+	orthoY := int(math.Floor(y - camOrthoY + float64(v.screenRect.Top)))
+	return orthoX, orthoY
 }
 
-func (v *Viewport) IsWorldTileVisbile(x, y float64) bool {
-	worldX1, worldY1 := v.IsoToWorld(x-2, y)
-	worldX2, worldY2 := v.IsoToWorld(x+2, y)
-	return v.IsWorldRectVisible(worldX1, worldY1, worldX2, worldY2)
+func (v *Viewport) IsTileVisible(x, y float64) bool {
+	orthoX1, orthoY1 := v.WorldToOrtho(x-3, y)
+	orthoX2, orthoY2 := v.WorldToOrtho(x+3, y)
+	return v.IsOrthoRectVisible(orthoX1, orthoY1, orthoX2, orthoY2)
 }
 
-func (v *Viewport) IsWorldPointVisible(x, y float64) bool {
-	screenX, screenY := v.WorldToScreen(x, y)
-	return screenX >= 0 && screenX < v.screenRect.Width && screenY >= 0 && screenY < v.screenRect.Height
+func (v *Viewport) IsTileRectVisible(rect d2common.Rectangle) bool {
+	left := float64((rect.Left - rect.Bottom()) * 80)
+	top := float64((rect.Left + rect.Top) * 40)
+	right := float64((rect.Right() - rect.Top) * 80)
+	bottom := float64((rect.Right() + rect.Bottom()) * 40)
+	return v.IsOrthoRectVisible(left, top, right, bottom)
 }
 
-func (v *Viewport) IsWorldRectVisible(x1, y1, x2, y2 float64) bool {
-	screenX1, screenY1 := v.WorldToScreen(x1, y1)
-	screenX2, screenY2 := v.WorldToScreen(x2, y2)
+func (v *Viewport) IsOrthoRectVisible(x1, y1, x2, y2 float64) bool {
+	screenX1, screenY1 := v.OrthoToScreen(x1, y1)
+	screenX2, screenY2 := v.OrthoToScreen(x2, y2)
 	return !(screenX1 >= v.screenRect.Width || screenX2 < 0 || screenY1 >= v.screenRect.Height || screenY2 < 0)
 }
 
-func (v *Viewport) GetTranslation() (float64, float64) {
+func (v *Viewport) GetTranslationOrtho() (float64, float64) {
 	return v.transCurrent.x, v.transCurrent.y
 }
 
-func (v *Viewport) PushTranslation(x, y float64) {
+func (v *Viewport) GetTranslationScreen() (int, int) {
+	return v.OrthoToScreen(v.transCurrent.x, v.transCurrent.y)
+}
+
+func (v *Viewport) PushTranslationOrtho(x, y float64) {
 	v.transStack = append(v.transStack, v.transCurrent)
 	v.transCurrent.x += x
 	v.transCurrent.y += y
+}
+
+func (v *Viewport) PushTranslationWorld(x, y float64) {
+	v.PushTranslationOrtho(v.WorldToOrtho(x, y))
+}
+
+func (v *Viewport) PushTranslationScreen(x, y int) {
+	v.PushTranslationOrtho(v.ScreenToOrtho(x, y))
 }
 
 func (v *Viewport) PopTranslation() {

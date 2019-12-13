@@ -47,8 +47,8 @@ func (v *NPC) Render(target *ebiten.Image, offsetX, offsetY int) {
 	v.AnimatedEntity.Render(target, offsetX, offsetY)
 }
 
-func (v *NPC) GetTilePosition() (float64, float64) {
-	return v.AnimatedEntity.GetTilePosition()
+func (v *NPC) GetPosition() (float64, float64) {
+	return v.AnimatedEntity.GetPosition()
 }
 
 func (v *NPC) Advance(tickTime float64) {

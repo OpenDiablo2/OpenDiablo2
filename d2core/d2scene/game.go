@@ -74,7 +74,7 @@ func (v *Game) Load() []func() {
 			v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider)
 			v.mapEngine.GenerateMap(d2enum.RegionAct1Town, 1, 0)
 
-			startX, startY := v.mapEngine.GetStartTilePosition()
+			startX, startY := v.mapEngine.GetStartPosition()
 			v.hero = d2core.CreateHero(
 				int32(startX*5)+3,
 				int32(startY*5)+3,
@@ -99,11 +99,11 @@ func (v Game) Render(screen *ebiten.Image) {
 func (v *Game) Update(tickTime float64) {
 	v.mapEngine.Advance(tickTime)
 
-	rx, ry := v.mapEngine.IsoToWorld(v.hero.AnimatedEntity.LocationX/5, v.hero.AnimatedEntity.LocationY/5)
+	rx, ry := v.mapEngine.WorldToOrtho(v.hero.AnimatedEntity.LocationX/5, v.hero.AnimatedEntity.LocationY/5)
 	v.mapEngine.MoveCameraTo(rx, ry)
 
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		px, py := v.mapEngine.ScreenToIso(ebiten.CursorPosition())
+		px, py := v.mapEngine.ScreenToWorld(ebiten.CursorPosition())
 		v.hero.AnimatedEntity.SetTarget(px*5, py*5, 1)
 	}
 }

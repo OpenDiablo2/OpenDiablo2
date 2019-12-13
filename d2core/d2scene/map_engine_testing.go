@@ -149,7 +149,7 @@ func (v *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 		v.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 	}
 
-	v.mapEngine.MoveCameraTo(v.mapEngine.IsoToWorld(v.mapEngine.GetCenterTilePosition()))
+	v.mapEngine.MoveCameraTo(v.mapEngine.WorldToOrtho(v.mapEngine.GetCenterPosition()))
 }
 
 func (v *MapEngineTest) Load() []func() {
@@ -170,23 +170,23 @@ func (v *MapEngineTest) Unload() {
 
 func (v *MapEngineTest) Render(screen *ebiten.Image) {
 	v.mapEngine.Render(screen)
-	actualX := v.uiManager.CursorX
-	actualY := v.uiManager.CursorY
-	tileX, tileY := v.mapEngine.ScreenToIso(actualX, actualY)
-	subtileX := int(math.Ceil(math.Mod((tileX*10), 10))) / 2
-	subtileY := int(math.Ceil(math.Mod((tileY*10), 10))) / 2
-	curRegion := v.mapEngine.GetRegionAtTile(int(tileX), int(tileY))
+	screenX := v.uiManager.CursorX
+	screenY := v.uiManager.CursorY
+	worldX, worldY := v.mapEngine.ScreenToWorld(screenX, screenY)
+	subtileX := int(math.Ceil(math.Mod((worldX*10), 10))) / 2
+	subtileY := int(math.Ceil(math.Mod((worldY*10), 10))) / 2
+	curRegion := v.mapEngine.GetRegionAtTile(int(worldX), int(worldY))
 	if curRegion == nil {
 		return
 	}
 
 	tileRect := curRegion.GetTileRect()
 	line := fmt.Sprintf("%d, %d (Tile %d.%d, %d.%d)",
-		actualX,
-		actualY,
-		int(math.Floor(tileX))-tileRect.Left,
+		screenX,
+		screenY,
+		int(math.Floor(worldX))-tileRect.Left,
 		subtileX,
-		int(math.Floor(tileY))-tileRect.Top,
+		int(math.Floor(worldY))-tileRect.Top,
 		subtileY,
 	)
 

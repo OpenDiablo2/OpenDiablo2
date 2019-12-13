@@ -108,8 +108,9 @@ func (mr *MapRegion) loadSpecials() {
 		for tileX := range mr.ds1.Tiles[tileY] {
 			for _, wall := range mr.ds1.Tiles[tileY][tileX].Walls {
 				if wall.Type == 10 && wall.Style == 30 && wall.Sequence == 0 {
-					mr.startX = float64(tileX) + 0.5
-					mr.startY = float64(tileY) + 0.5
+					mr.startX, mr.startY = mr.getTileWorldPosition(tileX, tileY)
+					mr.startX += 0.5
+					mr.startY += 0.5
 					return
 				}
 			}
@@ -121,18 +122,18 @@ func (mr *MapRegion) loadEntities(fileProvider d2interface.FileProvider) []MapEn
 	var entities []MapEntity
 
 	for _, object := range mr.ds1.Objects {
-		tileX, tileY := object.X+int32(mr.tileRect.Left), object.Y+int32(mr.tileRect.Top)
+		worldX, worldY := mr.getTileWorldPosition(int(object.X), int(object.Y))
 
 		switch object.Lookup.Type {
 		case d2datadict.ObjectTypeCharacter:
 			if object.Lookup.Base != "" && object.Lookup.Token != "" && object.Lookup.TR != "" {
-				npc := d2core.CreateNPC(tileX, tileY, object.Lookup, fileProvider, 0)
+				npc := d2core.CreateNPC(int32(worldX), int32(worldY), object.Lookup, fileProvider, 0)
 				npc.SetPaths(object.Paths)
 				entities = append(entities, npc)
 			}
 		case d2datadict.ObjectTypeItem:
 			if object.ObjectInfo != nil && object.ObjectInfo.Draw && object.Lookup.Base != "" && object.Lookup.Token != "" {
-				entity := d2render.CreateAnimatedEntity(tileX, tileY, object.Lookup, fileProvider, d2enum.Units)
+				entity := d2render.CreateAnimatedEntity(int32(worldX), int32(worldY), object.Lookup, fileProvider, d2enum.Units)
 				entity.SetMode(object.Lookup.Mode, object.Lookup.Class, 0)
 				entities = append(entities, &entity)
 			}
@@ -209,26 +210,24 @@ func (mr *MapRegion) getTiles(style, sequence, tileType int32, x, y int, seed in
 }
 
 func (mr *MapRegion) isVisbile(viewport *Viewport) bool {
-	var (
-		left   = float64((mr.tileRect.Left - mr.tileRect.Bottom()) * 80)
-		top    = float64((mr.tileRect.Left + mr.tileRect.Top) * 40)
-		right  = float64((mr.tileRect.Right() - mr.tileRect.Top) * 80)
-		bottom = float64((mr.tileRect.Right() + mr.tileRect.Bottom()) * 40)
-	)
-
-	return viewport.IsWorldRectVisible(left, top, right, bottom)
+	return viewport.IsTileRectVisible(mr.tileRect)
 }
 
 func (mr *MapRegion) advance(tickTime float64) {
 	mr.updateAnimations()
 }
 
+func (mr *MapRegion) getTileWorldPosition(tileX, tileY int) (float64, float64) {
+	return float64(tileX + mr.tileRect.Left), float64(tileY + mr.tileRect.Top)
+}
+
 func (mr *MapRegion) renderPass1(viewport *Viewport, target *ebiten.Image) {
 	for tileY := range mr.ds1.Tiles {
-		for tileX := range mr.ds1.Tiles[tileY] {
-			if viewport.IsWorldTileVisbile(float64(tileX), float64(tileY)) {
-				viewport.PushTranslation(viewport.IsoToWorld(float64(mr.tileRect.Left+tileX), float64(mr.tileRect.Top+tileY)))
-				mr.renderTilePass1(tileX, tileY, viewport, target)
+		for tileX, tile := range mr.ds1.Tiles[tileY] {
+			worldX, worldY := mr.getTileWorldPosition(tileX, tileY)
+			if viewport.IsTileVisible(worldX, worldY) {
+				viewport.PushTranslationWorld(worldX, worldY)
+				mr.renderTilePass1(tile, viewport, target)
 				viewport.PopTranslation()
 			}
 		}
@@ -237,18 +236,16 @@ func (mr *MapRegion) renderPass1(viewport *Viewport, target *ebiten.Image) {
 
 func (mr *MapRegion) renderPass2(entities []MapEntity, viewport *Viewport, target *ebiten.Image) {
 	for tileY := range mr.ds1.Tiles {
-		for tileX := range mr.ds1.Tiles[tileY] {
-			if viewport.IsWorldTileVisbile(float64(tileX), float64(tileY)) {
-				viewport.PushTranslation(viewport.IsoToWorld(float64(mr.tileRect.Left+tileX), float64(mr.tileRect.Top+tileY)))
-				mr.renderTilePass2(tileX, tileY, viewport, target)
-
-				absTileX := float64(tileX - mr.tileRect.Left)
-				absTileY := float64(tileY - mr.tileRect.Top)
+		for tileX, tile := range mr.ds1.Tiles[tileY] {
+			worldX, worldY := mr.getTileWorldPosition(tileX, tileY)
+			if viewport.IsTileVisible(worldX, worldY) {
+				viewport.PushTranslationWorld(worldX, worldY)
+				mr.renderTilePass2(tile, viewport, target)
 
 				for _, entity := range entities {
-					entityX, entityY := entity.GetTilePosition()
-					if entityX == absTileX && entityY == absTileY {
-						screenX, screenY := viewport.WorldToScreen(viewport.GetTranslation())
+					entWorldX, entWorldY := entity.GetPosition()
+					if entWorldX == worldX && entWorldY == worldY {
+						screenX, screenY := viewport.GetTranslationScreen()
 						entity.Render(target, screenX, screenY)
 					}
 				}
@@ -261,19 +258,18 @@ func (mr *MapRegion) renderPass2(entities []MapEntity, viewport *Viewport, targe
 
 func (mr *MapRegion) renderPass3(viewport *Viewport, target *ebiten.Image) {
 	for tileY := range mr.ds1.Tiles {
-		for tileX := range mr.ds1.Tiles[tileY] {
-			if viewport.IsWorldTileVisbile(float64(tileX), float64(tileY)) {
-				viewport.PushTranslation(viewport.IsoToWorld(float64(mr.tileRect.Left+tileX), float64(mr.tileRect.Top+tileY)))
-				mr.renderTilePass3(tileX, tileY, viewport, target)
+		for tileX, tile := range mr.ds1.Tiles[tileY] {
+			worldX, worldY := mr.getTileWorldPosition(tileX, tileY)
+			if viewport.IsTileVisible(worldX, worldY) {
+				viewport.PushTranslationWorld(worldX, worldY)
+				mr.renderTilePass3(tile, viewport, target)
 				viewport.PopTranslation()
 			}
 		}
 	}
 }
 
-func (mr *MapRegion) renderTilePass1(tileX, tileY int, viewport *Viewport, target *ebiten.Image) {
-	tile := mr.ds1.Tiles[tileY][tileX]
-
+func (mr *MapRegion) renderTilePass1(tile d2ds1.TileRecord, viewport *Viewport, target *ebiten.Image) {
 	for _, wall := range tile.Walls {
 		if !wall.Hidden && wall.Prop1 != 0 && wall.Type.LowerWall() {
 			mr.renderWall(wall, viewport, target)
@@ -293,9 +289,7 @@ func (mr *MapRegion) renderTilePass1(tileX, tileY int, viewport *Viewport, targe
 	}
 }
 
-func (mr *MapRegion) renderTilePass2(tileX, tileY int, viewport *Viewport, target *ebiten.Image) {
-	tile := mr.ds1.Tiles[tileY][tileX]
-
+func (mr *MapRegion) renderTilePass2(tile d2ds1.TileRecord, viewport *Viewport, target *ebiten.Image) {
 	for _, wall := range tile.Walls {
 		if !wall.Hidden && wall.Type.UpperWall() {
 			mr.renderWall(wall, viewport, target)
@@ -303,9 +297,7 @@ func (mr *MapRegion) renderTilePass2(tileX, tileY int, viewport *Viewport, targe
 	}
 }
 
-func (mr *MapRegion) renderTilePass3(tileX, tileY int, viewport *Viewport, target *ebiten.Image) {
-	tile := mr.ds1.Tiles[tileY][tileX]
-
+func (mr *MapRegion) renderTilePass3(tile d2ds1.TileRecord, viewport *Viewport, target *ebiten.Image) {
 	for _, wall := range tile.Walls {
 		if wall.Type == d2enum.Roof {
 			mr.renderWall(wall, viewport, target)
@@ -325,8 +317,8 @@ func (mr *MapRegion) renderFloor(tile d2ds1.FloorShadowRecord, viewport *Viewpor
 		return
 	}
 
-	viewport.PushTranslation(-80, float64(tile.YAdjust))
-	screenX, screenY := viewport.WorldToScreen(viewport.GetTranslation())
+	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust))
+	screenX, screenY := viewport.GetTranslationScreen()
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(float64(screenX), float64(screenY))
 	target.DrawImage(img, opts)
@@ -340,8 +332,8 @@ func (mr *MapRegion) renderWall(tile d2ds1.WallRecord, viewport *Viewport, targe
 		return
 	}
 
-	viewport.PushTranslation(-80, float64(tile.YAdjust))
-	screenX, screenY := viewport.WorldToScreen(viewport.GetTranslation())
+	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust))
+	screenX, screenY := viewport.GetTranslationScreen()
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(float64(screenX), float64(screenY))
 	target.DrawImage(img, opts)
@@ -355,8 +347,8 @@ func (mr *MapRegion) renderShadow(tile d2ds1.FloorShadowRecord, viewport *Viewpo
 		return
 	}
 
-	viewport.PushTranslation(-80, float64(tile.YAdjust))
-	screenX, screenY := viewport.WorldToScreen(viewport.GetTranslation())
+	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust))
+	screenX, screenY := viewport.GetTranslationScreen()
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(float64(screenX), float64(screenY))
 	opts.ColorM = d2corehelper.ColorToColorM(color.RGBA{255, 255, 255, 160})
@@ -367,8 +359,9 @@ func (mr *MapRegion) renderShadow(tile d2ds1.FloorShadowRecord, viewport *Viewpo
 func (mr *MapRegion) renderDebug(debugVisLevel int, viewport *Viewport, target *ebiten.Image) {
 	for tileY := range mr.ds1.Tiles {
 		for tileX := range mr.ds1.Tiles[tileY] {
-			if viewport.IsWorldTileVisbile(float64(tileX), float64(tileY)) {
-				mr.renderTileDebug(tileX+mr.tileRect.Left, tileY+mr.tileRect.Top, debugVisLevel, viewport, target)
+			worldX, worldY := mr.getTileWorldPosition(tileX, tileY)
+			if viewport.IsTileVisible(worldX, worldY) {
+				mr.renderTileDebug(int(worldX), int(worldY), debugVisLevel, viewport, target)
 			}
 		}
 	}
@@ -379,9 +372,9 @@ func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *View
 		subtileColor := color.RGBA{80, 80, 255, 100}
 		tileColor := color.RGBA{255, 255, 255, 255}
 
-		screenX1, screenY1 := viewport.IsoToScreen(float64(x), float64(y))
-		screenX2, screenY2 := viewport.IsoToScreen(float64(x+1), float64(y))
-		screenX3, screenY3 := viewport.IsoToScreen(float64(x), float64(y+1))
+		screenX1, screenY1 := viewport.WorldToScreen(float64(x), float64(y))
+		screenX2, screenY2 := viewport.WorldToScreen(float64(x+1), float64(y))
+		screenX3, screenY3 := viewport.WorldToScreen(float64(x), float64(y+1))
 
 		ebitenutil.DrawLine(target, float64(screenX1), float64(screenY1), float64(screenX2), float64(screenY2), tileColor)
 		ebitenutil.DrawLine(target, float64(screenX1), float64(screenY1), float64(screenX3), float64(screenY3), tileColor)

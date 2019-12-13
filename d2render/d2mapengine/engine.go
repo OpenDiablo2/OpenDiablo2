@@ -13,7 +13,7 @@ import (
 
 type MapEntity interface {
 	Render(target *ebiten.Image, screenX, screenY int)
-	GetTilePosition() (float64, float64)
+	GetPosition() (float64, float64)
 	Advance(tickTime float64)
 }
 
@@ -42,7 +42,7 @@ func CreateMapEngine(gameState *d2core.GameState, soundManager *d2audio.Manager,
 	return engine
 }
 
-func (me *MapEngine) GetStartTilePosition() (float64, float64) {
+func (me *MapEngine) GetStartPosition() (float64, float64) {
 	var startX, startY float64
 	if len(me.regions) > 0 {
 		region := me.regions[0]
@@ -52,7 +52,7 @@ func (me *MapEngine) GetStartTilePosition() (float64, float64) {
 	return startX, startY
 }
 
-func (me *MapEngine) GetCenterTilePosition() (float64, float64) {
+func (me *MapEngine) GetCenterPosition() (float64, float64) {
 	var centerX, centerY float64
 	if len(me.regions) > 0 {
 		region := me.regions[0]
@@ -71,16 +71,16 @@ func (me *MapEngine) MoveCameraBy(x, y float64) {
 	me.camera.MoveBy(x, y)
 }
 
-func (me *MapEngine) ScreenToIso(x, y int) (float64, float64) {
-	return me.viewport.ScreenToIso(x, y)
-}
-
 func (me *MapEngine) ScreenToWorld(x, y int) (float64, float64) {
 	return me.viewport.ScreenToWorld(x, y)
 }
 
-func (me *MapEngine) IsoToWorld(x, y float64) (float64, float64) {
-	return me.viewport.IsoToWorld(x, y)
+func (me *MapEngine) ScreenToOrtho(x, y int) (float64, float64) {
+	return me.viewport.ScreenToOrtho(x, y)
+}
+
+func (me *MapEngine) WorldToOrtho(x, y float64) (float64, float64) {
+	return me.viewport.WorldToOrtho(x, y)
 }
 
 func (me *MapEngine) SetDebugVisLevel(debugVisLevel int) {
@@ -139,10 +139,12 @@ func (me *MapEngine) Advance(tickTime float64) {
 
 func (me *MapEngine) Render(target *ebiten.Image) {
 	for _, region := range me.regions {
-		region.renderPass1(me.viewport, target)
-		me.renderDebug(target)
-		region.renderPass2(me.entities, me.viewport, target)
-		region.renderPass3(me.viewport, target)
+		if region.isVisbile(me.viewport) {
+			region.renderPass1(me.viewport, target)
+			me.renderDebug(target)
+			region.renderPass2(me.entities, me.viewport, target)
+			region.renderPass3(me.viewport, target)
+		}
 	}
 }
 

@@ -419,6 +419,6 @@ func (v *AnimatedEntity) Advance(tickTime float64) {
 
 }
 
-func (v *AnimatedEntity) GetTilePosition() (float64, float64) {
+func (v *AnimatedEntity) GetPosition() (float64, float64) {
 	return float64(v.TileX), float64(v.TileY)
 }
