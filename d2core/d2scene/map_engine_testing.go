@@ -5,8 +5,6 @@ import (
 	"math"
 	"os"
 
-	"github.com/OpenDiablo2/D2Shared/d2helper"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 
 	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
@@ -88,7 +86,7 @@ type MapEngineTest struct {
 	fileProvider  d2interface.FileProvider
 	sceneProvider d2coreinterface.SceneProvider
 	gameState     *d2core.GameState
-	mapEngine     *d2mapengine.Engine
+	mapEngine     *d2mapengine.MapEngine
 
 	//TODO: this is region specific properties, should be refactored for multi-region rendering
 	currentRegion int
@@ -96,6 +94,7 @@ type MapEngineTest struct {
 	fileIndex     int
 	regionSpec    RegionSpec
 	filesCount    int
+	debugVisLevel int
 }
 
 func CreateMapEngineTest(
@@ -149,9 +148,8 @@ func (v *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 		v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider) // necessary for map name update
 		v.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 	}
-	isox, isoy := d2helper.IsoToScreen(float64(v.mapEngine.GetRegion(0).Rect.Width)/2,
-		float64(v.mapEngine.GetRegion(0).Rect.Height)/2, 0, 0)
-	v.mapEngine.CenterCameraOn(isox, isoy)
+
+	v.mapEngine.MoveCameraTo(v.mapEngine.WorldToOrtho(v.mapEngine.GetCenterPosition()))
 }
 
 func (v *MapEngineTest) Load() []func() {
@@ -172,32 +170,36 @@ func (v *MapEngineTest) Unload() {
 
 func (v *MapEngineTest) Render(screen *ebiten.Image) {
 	v.mapEngine.Render(screen)
-	actualX := v.uiManager.CursorX
-	actualY := v.uiManager.CursorY
-	tileX, tileY := v.mapEngine.ScreenToIso(actualX, actualY)
-	subtileX := int(math.Ceil(math.Mod((tileX*10), 10))) / 2
-	subtileY := int(math.Ceil(math.Mod((tileY*10), 10))) / 2
-	curRegion := v.mapEngine.GetRegionAt(int(tileX), int(tileY))
+	screenX := v.uiManager.CursorX
+	screenY := v.uiManager.CursorY
+	worldX, worldY := v.mapEngine.ScreenToWorld(screenX, screenY)
+	subtileX := int(math.Ceil(math.Mod((worldX*10), 10))) / 2
+	subtileY := int(math.Ceil(math.Mod((worldY*10), 10))) / 2
+	curRegion := v.mapEngine.GetRegionAtTile(int(worldX), int(worldY))
 	if curRegion == nil {
 		return
 	}
+
+	tileRect := curRegion.GetTileRect()
 	line := fmt.Sprintf("%d, %d (Tile %d.%d, %d.%d)",
-		actualX,
-		actualY,
-		int(math.Floor(tileX))-curRegion.Rect.Left,
+		screenX,
+		screenY,
+		int(math.Floor(worldX))-tileRect.Left,
 		subtileX,
-		int(math.Floor(tileY))-curRegion.Rect.Top,
+		int(math.Floor(worldY))-tileRect.Top,
 		subtileY,
 	)
 
 	levelFilesToPick := make([]string, 0)
 	fileIndex := v.fileIndex
-	for n, fileRecord := range curRegion.Region.LevelPreset.Files {
+	levelPreset := curRegion.GetLevelPreset()
+	regionPath := curRegion.GetPath()
+	for n, fileRecord := range levelPreset.Files {
 		if len(fileRecord) == 0 || fileRecord == "" || fileRecord == "0" {
 			continue
 		}
 		levelFilesToPick = append(levelFilesToPick, fileRecord)
-		if fileRecord == curRegion.Region.RegionPath {
+		if fileRecord == regionPath {
 			fileIndex = n
 		}
 	}
@@ -206,14 +208,16 @@ func (v *MapEngineTest) Render(screen *ebiten.Image) {
 	}
 	v.filesCount = len(levelFilesToPick)
 	ebitenutil.DebugPrintAt(screen, line, 5, 5)
-	ebitenutil.DebugPrintAt(screen, "Map: "+curRegion.Region.LevelType.Name, 5, 17)
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%v: %v/%v [%v, %v]", curRegion.Region.RegionPath, fileIndex+1, v.filesCount, v.currentRegion, v.levelPreset), 5, 29)
+	ebitenutil.DebugPrintAt(screen, "Map: "+curRegion.GetLevelType().Name, 5, 17)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%v: %v/%v [%v, %v]", regionPath, fileIndex+1, v.filesCount, v.currentRegion, v.levelPreset), 5, 29)
 	ebitenutil.DebugPrintAt(screen, "N - next region, P - previous region", 5, 41)
 	ebitenutil.DebugPrintAt(screen, "Shift+N - next preset, Shift+P - previous preset", 5, 53)
 	ebitenutil.DebugPrintAt(screen, "Ctrl+N - next file, Ctrl+P - previous file", 5, 65)
 }
 
 func (v *MapEngineTest) Update(tickTime float64) {
+	v.mapEngine.Advance(tickTime)
+
 	ctrlPressed := v.uiManager.KeyPressed(ebiten.KeyControl)
 	shiftPressed := v.uiManager.KeyPressed(ebiten.KeyShift)
 
@@ -236,11 +240,13 @@ func (v *MapEngineTest) Update(tickTime float64) {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF7) {
-		if v.mapEngine.ShowTiles < 2 {
-			v.mapEngine.ShowTiles++
+		if v.debugVisLevel < 2 {
+			v.debugVisLevel++
 		} else {
-			v.mapEngine.ShowTiles = 0
+			v.debugVisLevel = 0
 		}
+
+		v.mapEngine.SetDebugVisLevel(v.debugVisLevel)
 	}
 
 	if v.uiManager.KeyPressed(ebiten.KeyEscape) {

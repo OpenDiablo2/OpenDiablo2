@@ -2,6 +2,11 @@ package d2render
 
 import (
 	"fmt"
+	"log"
+	"math"
+	"math/rand"
+	"strings"
+
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/D2Shared/d2data"
@@ -10,10 +15,6 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2data/d2dcc"
 	"github.com/OpenDiablo2/D2Shared/d2helper"
 	"github.com/hajimehoshi/ebiten"
-	"log"
-	"math"
-	"math/rand"
-	"strings"
 )
 
 var DccLayerNames = []string{"HD", "TR", "LG", "RA", "LA", "RH", "LH", "SH", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"}
@@ -415,4 +416,12 @@ func angleToDirection(angle float64, numberOfDirections int) int {
 	}
 
 	return newDirection
+}
+
+func (v *AnimatedEntity) Advance(tickTime float64) {
+
+}
+
+func (v *AnimatedEntity) GetPosition() (float64, float64) {
+	return float64(v.TileX), float64(v.TileY)
 }

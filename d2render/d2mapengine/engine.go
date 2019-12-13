@@ -1,52 +1,40 @@
 package d2mapengine
 
 import (
-	"fmt"
-	"image/color"
 	"strings"
 
-	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core"
-
-	"github.com/OpenDiablo2/D2Shared/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
+
+	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 )
 
-type RegionTile struct {
-	tileX, tileY int // tile coordinates
-	offX, offY   int // world space coordinates of tile origin
+type MapEntity interface {
+	Render(target *ebiten.Image, screenX, screenY int)
+	GetPosition() (float64, float64)
+	Advance(tickTime float64)
 }
 
-type EngineRegion struct {
-	Rect   d2common.Rectangle
-	Region *Region
-	Tiles  []RegionTile
-}
-
-type Engine struct {
+type MapEngine struct {
 	soundManager *d2audio.Manager
 	gameState    *d2core.GameState
 	fileProvider d2interface.FileProvider
-	region       int
-	regions      []EngineRegion
-	ShowTiles    int
-	Hero         *d2core.Hero
 
+	debugVisLevel int
+
+	regions  []*MapRegion
+	entities []MapEntity
 	viewport *Viewport
 	camera   Camera
 }
 
-func CreateMapEngine(gameState *d2core.GameState, soundManager *d2audio.Manager, fileProvider d2interface.FileProvider) *Engine {
-	engine := &Engine{
+func CreateMapEngine(gameState *d2core.GameState, soundManager *d2audio.Manager, fileProvider d2interface.FileProvider) *MapEngine {
+	engine := &MapEngine{
 		gameState:    gameState,
 		soundManager: soundManager,
 		fileProvider: fileProvider,
-		regions:      make([]EngineRegion, 0),
 		viewport:     NewViewport(0, 0, 800, 600),
 	}
 
@@ -54,315 +42,108 @@ func CreateMapEngine(gameState *d2core.GameState, soundManager *d2audio.Manager,
 	return engine
 }
 
-func (v *Engine) Region() *EngineRegion {
-	return &v.regions[v.region]
+func (me *MapEngine) GetStartPosition() (float64, float64) {
+	var startX, startY float64
+	if len(me.regions) > 0 {
+		region := me.regions[0]
+		startX, startY = region.getStartTilePosition()
+	}
+
+	return startX, startY
 }
 
-func (v *Engine) SetRegion(region int) {
-	v.region = region
+func (me *MapEngine) GetCenterPosition() (float64, float64) {
+	var centerX, centerY float64
+	if len(me.regions) > 0 {
+		region := me.regions[0]
+		centerX = float64(region.tileRect.Left) + float64(region.tileRect.Width)/2
+		centerY = float64(region.tileRect.Top) + float64(region.tileRect.Height)/2
+	}
+
+	return centerX, centerY
 }
 
-func (v *Engine) GetRegion(regionIndex int) *EngineRegion {
-	return &v.regions[regionIndex]
+func (me *MapEngine) MoveCameraTo(x, y float64) {
+	me.camera.MoveTo(x, y)
 }
 
-func (v *Engine) CenterCameraOn(x, y float64) {
-	v.camera.MoveTo(x, y)
+func (me *MapEngine) MoveCameraBy(x, y float64) {
+	me.camera.MoveBy(x, y)
 }
 
-func (v *Engine) MoveCameraBy(x, y float64) {
-	v.camera.MoveBy(x, y)
+func (me *MapEngine) ScreenToWorld(x, y int) (float64, float64) {
+	return me.viewport.ScreenToWorld(x, y)
 }
 
-func (v *Engine) ScreenToIso(x, y int) (float64, float64) {
-	return v.viewport.ScreenToIso(x, y)
+func (me *MapEngine) ScreenToOrtho(x, y int) (float64, float64) {
+	return me.viewport.ScreenToOrtho(x, y)
 }
 
-func (v *Engine) ScreenToWorld(x, y int) (float64, float64) {
-	return v.viewport.ScreenToWorld(x, y)
+func (me *MapEngine) WorldToOrtho(x, y float64) (float64, float64) {
+	return me.viewport.WorldToOrtho(x, y)
 }
 
-func (v *Engine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) {
-	region := LoadRegion(v.gameState.Seed, regionType, levelPreset, v.fileProvider, fileIndex)
-	fmt.Printf("Loading region: %v\n", region.RegionPath)
-	v.regions = append(v.regions, EngineRegion{
-		Rect:   d2common.Rectangle{0, 0, int(region.TileWidth), int(region.TileHeight)},
-		Region: region,
-	})
+func (me *MapEngine) SetDebugVisLevel(debugVisLevel int) {
+	me.debugVisLevel = debugVisLevel
+}
 
-	for i, _ := range v.regions {
-		v.GenTiles(&v.regions[i])
-		v.GenTilesCache(&v.regions[i])
+func (me *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) {
+	region, entities := loadRegion(me.gameState.Seed, 0, 0, regionType, levelPreset, me.fileProvider, fileIndex)
+	me.regions = append(me.regions, region)
+	me.entities = append(me.entities, entities...)
+}
+
+func (me *MapEngine) GenerateAct1Overworld() {
+	me.soundManager.PlayBGM("/data/global/music/Act1/town1.wav") // TODO: Temp stuff here
+
+	region, entities := loadRegion(me.gameState.Seed, 0, 0, d2enum.RegionAct1Town, 1, me.fileProvider, -1)
+	me.regions = append(me.regions, region)
+	me.entities = append(me.entities, entities...)
+
+	if strings.Contains(region.regionPath, "E1") {
+		region, entities := loadRegion(me.gameState.Seed, int(region.tileRect.Width-1), 0, d2enum.RegionAct1Town, 2, me.fileProvider, -1)
+		me.regions = append(me.regions, region)
+		me.entities = append(me.entities, entities...)
+	} else if strings.Contains(region.regionPath, "S1") {
+		region, entities := loadRegion(me.gameState.Seed, 0, int(region.tileRect.Height-1), d2enum.RegionAct1Town, 3, me.fileProvider, -1)
+		me.regions = append(me.regions, region)
+		me.entities = append(me.entities, entities...)
 	}
 }
 
-func (v *Engine) GenerateAct1Overworld() {
-	v.soundManager.PlayBGM("/data/global/music/Act1/town1.wav") // TODO: Temp stuff here
-	region := LoadRegion(v.gameState.Seed, d2enum.RegionAct1Town, 1, v.fileProvider, -1)
-	v.regions = append(v.regions, EngineRegion{
-		Rect:   d2common.Rectangle{0, 0, int(region.TileWidth), int(region.TileHeight)},
-		Region: region,
-	})
-	if strings.Contains(region.RegionPath, "E1") {
-		region2 := LoadRegion(v.gameState.Seed, d2enum.RegionAct1Town, 2, v.fileProvider, -1)
-		v.regions = append(v.regions, EngineRegion{
-			Rect:   d2common.Rectangle{int(region.TileWidth - 1), 0, int(region2.TileWidth), int(region2.TileHeight)},
-			Region: region2,
-		})
-	} else if strings.Contains(region.RegionPath, "S1") {
-		region2 := LoadRegion(v.gameState.Seed, d2enum.RegionAct1Town, 3, v.fileProvider, -1)
-		v.regions = append(v.regions, EngineRegion{
-			Rect:   d2common.Rectangle{0, int(region.TileHeight - 1), int(region2.TileWidth), int(region2.TileHeight)},
-			Region: region2,
-		})
-	}
-
-	for i, _ := range v.regions {
-		v.GenTiles(&v.regions[i])
-		v.GenTilesCache(&v.regions[i])
-	}
-
-	v.camera.MoveTo(v.viewport.IsoToWorld(region.StartX, region.StartY))
-}
-
-func (v *Engine) GetRegionAt(x, y int) *EngineRegion {
-	for _, region := range v.regions {
-		if region.Rect.IsInRect(x, y) {
-			return &region
+func (me *MapEngine) GetRegionAtTile(x, y int) *MapRegion {
+	for _, region := range me.regions {
+		if region.tileRect.IsInRect(x, y) {
+			return region
 		}
 	}
 
 	return nil
 }
 
-func (v *Engine) Render(target *ebiten.Image) {
-	for _, region := range v.regions {
-		// X position of leftmost point of region
-		left := float64((region.Rect.Left - region.Rect.Bottom()) * 80)
-		// Y position of top of region
-		top := float64((region.Rect.Left + region.Rect.Top) * 40)
-		// X of right
-		right := float64((region.Rect.Right() - region.Rect.Top) * 80)
-		// Y of bottom
-		bottom := float64((region.Rect.Right() + region.Rect.Bottom()) * 40)
+func (me *MapEngine) AddEntity(entity MapEntity) {
+	me.entities = append(me.entities, entity)
+}
 
-		if v.viewport.IsWorldRectVisible(left, top, right, bottom) {
-			v.RenderRegion(region, target)
+func (me *MapEngine) Advance(tickTime float64) {
+	for _, region := range me.regions {
+		if region.isVisbile(me.viewport) {
+			region.advance(tickTime)
 		}
+	}
+
+	for _, entity := range me.entities {
+		entity.Advance(tickTime)
 	}
 }
 
-func (v *Engine) GenTiles(region *EngineRegion) {
-	for y := 0; y < int(region.Region.TileHeight); y++ {
-		offX := -((y + region.Rect.Top) * 80) + (region.Rect.Left * 80)
-		offY := ((y + region.Rect.Top) * 40) + (region.Rect.Left * 40)
-		for x := 0; x < int(region.Region.TileWidth); x++ {
-			region.Tiles = append(region.Tiles, RegionTile{
-				tileX: x,
-				tileY: y,
-				offX:  offX,
-				offY:  offY,
-			})
-
-			offX += 80
-			offY += 40
-		}
-	}
-}
-
-func (v *Engine) GenTilesCache(region *EngineRegion) {
-	for tileIdx := range region.Tiles {
-		t := &region.Tiles[tileIdx]
-		if t.tileY < len(region.Region.DS1.Tiles) && t.tileX < len(region.Region.DS1.Tiles[t.tileY]) {
-			tile := &region.Region.DS1.Tiles[t.tileY][t.tileX]
-			for i := range tile.Floors {
-				if tile.Floors[i].Hidden || tile.Floors[i].Prop1 == 0 {
-					continue
-				}
-				region.Region.generateFloorCache(&tile.Floors[i], t.tileX, t.tileY)
-			}
-			for i := range tile.Shadows {
-				if tile.Shadows[i].Hidden || tile.Shadows[i].Prop1 == 0 {
-					continue
-				}
-				region.Region.generateShadowCache(&tile.Shadows[i], t.tileX, t.tileY)
-			}
-			for i := range tile.Walls {
-				if tile.Walls[i].Hidden || tile.Walls[i].Prop1 == 0 {
-					continue
-				}
-				region.Region.generateWallCache(&tile.Walls[i], t.tileX, t.tileY)
-			}
-		}
-	}
-}
-
-func (v *Engine) RenderRegion(region EngineRegion, target *ebiten.Image) {
-	for tileIdx := range region.Tiles {
-		if v.viewport.IsWorldTileVisbile(float64(region.Tiles[tileIdx].tileX+region.Rect.Left), float64(region.Tiles[tileIdx].tileY+region.Rect.Top)) {
-			region.Region.UpdateAnimations()
-
-			v.viewport.PushTranslation(float64(region.Tiles[tileIdx].offX), float64(region.Tiles[tileIdx].offY))
-			v.RenderPass1(region.Region, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
-			v.DrawTileLines(region.Region, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
-			v.viewport.PopTranslation()
-		}
-	}
-
-	for tileIdx := range region.Tiles {
-		if v.viewport.IsWorldTileVisbile(float64(region.Tiles[tileIdx].tileX+region.Rect.Left), float64(region.Tiles[tileIdx].tileY+region.Rect.Top)) {
-			v.viewport.PushTranslation(float64(region.Tiles[tileIdx].offX), float64(region.Tiles[tileIdx].offY))
-			v.RenderPass2(region.Region, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
-			v.viewport.PopTranslation()
-		}
-	}
-
-	for tileIdx := range region.Tiles {
-		if v.viewport.IsWorldTileVisbile(float64(region.Tiles[tileIdx].tileX+region.Rect.Left), float64(region.Tiles[tileIdx].tileY+region.Rect.Top)) {
-			v.viewport.PushTranslation(float64(region.Tiles[tileIdx].offX), float64(region.Tiles[tileIdx].offY))
-			v.RenderPass3(region.Region, region.Tiles[tileIdx].tileX, region.Tiles[tileIdx].tileY, target)
-			v.viewport.PopTranslation()
-		}
-	}
-}
-
-func (v *Engine) RenderPass1(region *Region, x, y int, target *ebiten.Image) {
-	tile := region.DS1.Tiles[y][x]
-	// Draw lower walls
-	for i := range tile.Walls {
-		if !tile.Walls[i].Type.LowerWall() || tile.Walls[i].Prop1 == 0 || tile.Walls[i].Hidden {
-			continue
-		}
-
-		region.RenderTile(v.viewport, x, y, d2enum.RegionLayerTypeWalls, i, target)
-	}
-
-	for i := range tile.Floors {
-		if tile.Floors[i].Hidden || tile.Floors[i].Prop1 == 0 {
-			continue
-		}
-
-		region.RenderTile(v.viewport, x, y, d2enum.RegionLayerTypeFloors, i, target)
-	}
-	for i := range tile.Shadows {
-		if tile.Shadows[i].Hidden || tile.Shadows[i].Prop1 == 0 {
-			continue
-		}
-
-		region.RenderTile(v.viewport, x, y, d2enum.RegionLayerTypeShadows, i, target)
-	}
-}
-
-func (v *Engine) RenderPass2(region *Region, x, y int, target *ebiten.Image) {
-	tile := region.DS1.Tiles[y][x]
-
-	// Draw upper walls
-	for i := range tile.Walls {
-		if !tile.Walls[i].Type.UpperWall() || tile.Walls[i].Hidden {
-			continue
-		}
-
-		region.RenderTile(v.viewport, x, y, d2enum.RegionLayerTypeWalls, i, target)
-	}
-
-	screenX, screenY := v.viewport.WorldToScreen(v.viewport.GetTranslation())
-
-	for _, obj := range region.AnimationEntities {
-		if obj.TileX == x && obj.TileY == y {
-			obj.Render(target, screenX, screenY)
-		}
-	}
-
-	for _, npc := range region.NPCs {
-		if npc.AnimatedEntity.TileX == x && npc.AnimatedEntity.TileY == y {
-			npc.Render(target, screenX, screenY)
-		}
-	}
-
-	if v.Hero != nil && v.Hero.AnimatedEntity.TileX == x && v.Hero.AnimatedEntity.TileY == y {
-		v.Hero.Render(target, screenX, screenY)
-	}
-}
-
-func (v *Engine) RenderPass3(region *Region, x, y int, target *ebiten.Image) {
-	tile := region.DS1.Tiles[y][x]
-	// Draw ceilings
-	for i := range tile.Walls {
-		if tile.Walls[i].Type != d2enum.Roof {
-			continue
-		}
-
-		region.RenderTile(v.viewport, x, y, d2enum.RegionLayerTypeWalls, i, target)
-	}
-}
-
-func (v *Engine) DrawTileLines(region *Region, x, y int, target *ebiten.Image) {
-	if v.ShowTiles > 0 {
-		subtileColor := color.RGBA{80, 80, 255, 100}
-		tileColor := color.RGBA{255, 255, 255, 255}
-
-		screenX1, screenY1 := v.viewport.IsoToScreen(float64(x), float64(y))
-		screenX2, screenY2 := v.viewport.IsoToScreen(float64(x+1), float64(y))
-		screenX3, screenY3 := v.viewport.IsoToScreen(float64(x), float64(y+1))
-
-		ebitenutil.DrawLine(
-			target,
-			float64(screenX1),
-			float64(screenY1),
-			float64(screenX2),
-			float64(screenY2),
-			tileColor,
-		)
-
-		ebitenutil.DrawLine(
-			target,
-			float64(screenX1),
-			float64(screenY1),
-			float64(screenX3),
-			float64(screenY3),
-			tileColor,
-		)
-
-		ebitenutil.DebugPrintAt(
-			target,
-			fmt.Sprintf("%v,%v", x, y),
-			screenX1-10,
-			screenY1+10,
-		)
-
-		if v.ShowTiles > 1 {
-			for i := 1; i <= 4; i++ {
-				x := i * 16
-				y := i * 8
-
-				ebitenutil.DrawLine(
-					target,
-					float64(screenX1-x),
-					float64(screenY1+y),
-					float64(screenX1-x+80),
-					float64(screenY1+y+40),
-					subtileColor,
-				)
-
-				ebitenutil.DrawLine(
-					target,
-					float64(screenX1+x),
-					float64(screenY1+y),
-					float64(screenX1+x-80),
-					float64(screenY1+y+40),
-					subtileColor,
-				)
-			}
-
-			tile := region.DS1.Tiles[y][x]
-			for i := range tile.Floors {
-				ebitenutil.DebugPrintAt(
-					target,
-					fmt.Sprintf("f: %v-%v", tile.Floors[i].Style, tile.Floors[i].Sequence),
-					screenX1-20,
-					screenY1+10+(i+1)*14,
-				)
-			}
+func (me *MapEngine) Render(target *ebiten.Image) {
+	for _, region := range me.regions {
+		if region.isVisbile(me.viewport) {
+			region.renderPass1(me.viewport, target)
+			region.renderDebug(me.debugVisLevel, me.viewport, target)
+			region.renderPass2(me.entities, me.viewport, target)
+			region.renderPass3(me.viewport, target)
 		}
 	}
 }
