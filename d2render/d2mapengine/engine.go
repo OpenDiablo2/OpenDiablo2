@@ -141,17 +141,9 @@ func (me *MapEngine) Render(target *ebiten.Image) {
 	for _, region := range me.regions {
 		if region.isVisbile(me.viewport) {
 			region.renderPass1(me.viewport, target)
-			me.renderDebug(target)
+			region.renderDebug(me.debugVisLevel, me.viewport, target)
 			region.renderPass2(me.entities, me.viewport, target)
 			region.renderPass3(me.viewport, target)
-		}
-	}
-}
-
-func (me *MapEngine) renderDebug(target *ebiten.Image) {
-	for _, region := range me.regions {
-		if region.isVisbile(me.viewport) {
-			region.renderDebug(me.debugVisLevel, me.viewport, target)
 		}
 	}
 }
