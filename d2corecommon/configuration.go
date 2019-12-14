@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"runtime"
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
@@ -22,6 +23,7 @@ type Configuration struct {
 	VsyncEnabled    bool
 	MpqPath         string
 	MpqLoadOrder    []string
+	MpqMacLoadOrder []string
 	SfxVolume       float64
 	BgmVolume       float64
 }
@@ -39,17 +41,26 @@ func LoadConfiguration() *Configuration {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Path fixup for wine-installed diablo 2 in linux
-	if config.MpqPath[0] != '/' {
-		if _, err := os.Stat(config.MpqPath); os.IsNotExist(err) {
-			homeDir, _ := homedir.Dir()
-			newPath := strings.ReplaceAll(config.MpqPath, `C:\`, homeDir+"/.wine/drive_c/")
-			newPath = strings.ReplaceAll(newPath, "C:/", homeDir+"/.wine/drive_c/")
-			newPath = strings.ReplaceAll(newPath, `\`, "/")
-			if _, err := os.Stat(newPath); !os.IsNotExist(err) {
-				config.MpqPath = newPath
+	if runtime.GOOS == "darwin" {
+		if config.MpqPath[0] != '/' {
+			config.MpqPath = "/Applications/Diablo II/"
+		}
+		config.MpqLoadOrder = config.MpqMacLoadOrder
+	} else {
+		// Path fixup for wine-installed diablo 2 in linux
+		if config.MpqPath[0] != '/' {
+			if _, err := os.Stat(config.MpqPath); os.IsNotExist(err) {
+				homeDir, _ := homedir.Dir()
+				newPath := strings.ReplaceAll(config.MpqPath, `C:\`, homeDir+"/.wine/drive_c/")
+				newPath = strings.ReplaceAll(newPath, "C:/", homeDir+"/.wine/drive_c/")
+				newPath = strings.ReplaceAll(newPath, `\`, "/")
+				if _, err := os.Stat(newPath); !os.IsNotExist(err) {
+					config.MpqPath = newPath
+				}
 			}
 		}
 	}
 	return &config
 }
+
+

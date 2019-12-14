@@ -20,5 +20,18 @@
         "d2sfx.mpq",
         "d2video.mpq",
         "d2speech.mpq"
-    ]    
+    ],
+	"MpqMacLoadOrder": [
+		"Diablo II Patch",
+		"Diablo II Expansion Data",
+		"Diablo II Expansion Movies",
+		"Diablo II Expansion Music",
+		"Diablo II Expansion Speech",
+		"Diablo II Game Data",
+		"Diablo II Graphics",
+		"Diablo II Movies",
+		"Diablo II Music",
+		"Diablo II Sounds",
+		"Diablo II Speech"
+	]
 }
