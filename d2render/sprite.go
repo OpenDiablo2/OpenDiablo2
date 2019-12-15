@@ -39,7 +39,6 @@ type SpriteFrame struct {
 	Unknown   uint32
 	NextBlock uint32
 	Length    uint32
-	ImageData []int16
 	FrameData []byte
 	Image     *ebiten.Image
 }
@@ -68,6 +67,15 @@ func CreateSpriteFromDC6(dc6 d2dc6.DC6File) Sprite {
 	for i, f := range dc6.Frames {
 		go func(i int, frame *d2dc6.DC6Frame) {
 			defer wg.Done()
+
+			image, err := ebiten.NewImage(int(frame.Width), int(frame.Height), ebiten.FilterNearest)
+			if err != nil {
+				log.Printf("failed to create new image: %v", err)
+			}
+			if err := image.ReplacePixels(frame.ColorData()); err != nil {
+				log.Printf("failed to replace pixels: %v", err)
+			}
+
 			result.Frames[i] = SpriteFrame{
 				Flip:      frame.Flipped,
 				Width:     frame.Width,
@@ -77,9 +85,7 @@ func CreateSpriteFromDC6(dc6 d2dc6.DC6File) Sprite {
 				Unknown:   frame.Unknown,
 				NextBlock: frame.NextBlock,
 				Length:    frame.Length,
-				ImageData: frame.ImageData(),
-				//FrameData: frame.FrameData, // TODO: Is the field needed?
-				Image: frame.Image(),
+				Image:     image,
 			}
 		}(i, f)
 	}
