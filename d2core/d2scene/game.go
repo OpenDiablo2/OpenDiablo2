@@ -1,8 +1,6 @@
 package d2scene
 
 import (
-	"image/color"
-
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
@@ -11,10 +9,12 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 	"github.com/hajimehoshi/ebiten"
+	"image/color"
 )
 
 type Game struct {
@@ -28,6 +28,7 @@ type Game struct {
 	testLabel     d2ui.Label
 	mapEngine     *d2mapengine.MapEngine
 	hero          *d2core.Hero
+	gameControls  *d2player.GameControls
 }
 
 func CreateGame(
@@ -85,6 +86,10 @@ func (v *Game) Load() []func() {
 			)
 			v.mapEngine.AddEntity(v.hero)
 		},
+		func() {
+			v.gameControls = d2player.NewGameControls(v.fileProvider, v.hero, v.mapEngine)
+			v.gameControls.Load()
+		},
 	}
 }
 
@@ -94,6 +99,7 @@ func (v *Game) Unload() {
 func (v Game) Render(screen *ebiten.Image) {
 	screen.Fill(color.Black)
 	v.mapEngine.Render(screen)
+	v.gameControls.Render(screen)
 }
 
 func (v *Game) Update(tickTime float64) {
@@ -102,8 +108,5 @@ func (v *Game) Update(tickTime float64) {
 	rx, ry := v.mapEngine.WorldToOrtho(v.hero.AnimatedEntity.LocationX/5, v.hero.AnimatedEntity.LocationY/5)
 	v.mapEngine.MoveCameraTo(rx, ry)
 
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		px, py := v.mapEngine.ScreenToWorld(ebiten.CursorPosition())
-		v.hero.AnimatedEntity.SetTarget(px*5, py*5, 1)
-	}
+	v.gameControls.Move(tickTime)
 }
