@@ -109,30 +109,6 @@ func (am *assetManager) loadArchive(archivePath string, cache bool) (*d2mpq.MPQ,
 	return archive, nil
 }
 
-func (am *assetManager) loadArchive(archivePath string, cache bool) (*d2mpq.MPQ, error) {
-	if archive, found := am.archiveCache.retrieve(archivePath); found {
-		return archive.(*d2mpq.MPQ), nil
-	}
-
-	archive, err := d2mpq.Load(archivePath)
-	if err != nil {
-		return nil, err
-	}
-
-	if cache {
-		stat, err := os.Stat(archivePath)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := am.archiveCache.insert(archivePath, archive, int(stat.Size())); err != nil {
-			return nil, err
-		}
-	}
-
-	return archive, nil
-}
-
 func (am *assetManager) fixupFilePath(filePath string) string {
 	filePath = strings.ReplaceAll(filePath, "{LANG}", am.config.Language)
 	if strings.ToUpper(d2resource.LanguageCode) == "CHI" {
