@@ -2,6 +2,7 @@ package d2render
 
 import (
 	"fmt"
+	"image"
 	"log"
 	"math"
 	"math/rand"
@@ -20,7 +21,9 @@ import (
 var DccLayerNames = []string{"HD", "TR", "LG", "RA", "LA", "RH", "LH", "SH", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"}
 
 type LayerCacheEntry struct {
-	frames           []*ebiten.Image
+	frameSheet       *ebiten.Image
+	frameWidth       int
+	frameHeight      int
 	compositeMode    ebiten.CompositeMode
 	offsetX, offsetY int32
 }
@@ -45,14 +48,13 @@ type AnimatedEntity struct {
 	direction          int
 	currentFrame       int
 	offsetX, offsetY   int32
-	//frameLocations     []d2common.Rectangle
-	object      *d2datadict.ObjectLookupRecord
-	layerCache  []LayerCacheEntry
-	drawOrder   [][]d2enum.CompositeType
-	TargetX     float64
-	TargetY     float64
-	action      int32
-	repetitions int32
+	object             *d2datadict.ObjectLookupRecord
+	layerCache         []LayerCacheEntry
+	drawOrder          [][]d2enum.CompositeType
+	TargetX            float64
+	TargetY            float64
+	action             int32
+	repetitions        int32
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
@@ -64,7 +66,6 @@ func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fil
 		object:       object,
 		palette:      palette,
 		layerCache:   make([]LayerCacheEntry, d2enum.CompositeTypeMax),
-		//frameLocations: []d2common.Rectangle{},
 	}
 	result.dccLayers = make(map[string]d2dcc.DCC)
 	result.LocationX = float64(x)
@@ -184,15 +185,18 @@ func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
 		return
 	}
 	for _, layerIdx := range v.drawOrder[v.currentFrame] {
-		if v.currentFrame < 0 || v.layerCache[layerIdx].frames == nil || v.currentFrame >= len(v.layerCache[layerIdx].frames) || v.layerCache[layerIdx].frames[v.currentFrame] == nil {
+		if v.currentFrame < 0 || v.layerCache[layerIdx].frameSheet == nil || v.currentFrame >= v.framesToAnimate {
 			continue
 		}
 		opts := &ebiten.DrawImageOptions{}
+		layer := v.layerCache[layerIdx]
 		x := float64(v.offsetX) + float64(offsetX) + localX + float64(v.layerCache[layerIdx].offsetX)
 		y := float64(v.offsetY) + float64(offsetY) + localY + float64(v.layerCache[layerIdx].offsetY)
 		opts.GeoM.Translate(x, y)
 		opts.CompositeMode = v.layerCache[layerIdx].compositeMode
-		if err := target.DrawImage(v.layerCache[layerIdx].frames[v.currentFrame], opts); err != nil {
+		xOffset := layer.frameWidth * v.currentFrame
+		sheetIndex := image.Rect(xOffset, 0, xOffset+layer.frameWidth, layer.frameHeight)
+		if err := target.DrawImage(layer.frameSheet.SubImage(sheetIndex).(*ebiten.Image), opts); err != nil {
 			log.Panic(err.Error())
 		}
 	}
@@ -239,7 +243,6 @@ func (v *AnimatedEntity) updateFrameCache(resetAnimation bool) {
 		if !dccLayer.IsValid() {
 			continue
 		}
-		v.layerCache[layerType].frames = make([]*ebiten.Image, v.framesToAnimate)
 
 		minX := int32(10000)
 		minY := int32(10000)
@@ -280,16 +283,15 @@ func (v *AnimatedEntity) updateFrameCache(resetAnimation bool) {
 			}
 		}
 
-		pixels := make([]byte, actualWidth*actualHeight*4)
+		pixels := make([]byte, int32(v.framesToAnimate)*(actualWidth*actualHeight*4))
 
 		for animationIdx := 0; animationIdx < v.framesToAnimate; animationIdx++ {
-			for i := 0; i < int(actualWidth*actualHeight); i++ {
-				pixels[(i*4)+3] = 0
-			}
 			if animationIdx >= len(dccLayer.Directions[dccDirection].Frames) {
 				log.Printf("Invalid animation index of %d for animated entity", animationIdx)
 				continue
 			}
+			sheetOffset := int(actualWidth) * animationIdx
+			combinedWidth := int(actualWidth) * v.framesToAnimate
 
 			frame := dccLayer.Directions[dccDirection].Frames[animationIdx]
 			for y := 0; y < dccLayer.Directions[dccDirection].Box.Height; y++ {
@@ -301,15 +303,18 @@ func (v *AnimatedEntity) updateFrameCache(resetAnimation bool) {
 					color := d2datadict.Palettes[v.palette].Colors[paletteIndex]
 					actualX := (x + dccLayer.Directions[dccDirection].Box.Left) - int(minX)
 					actualY := (y + dccLayer.Directions[dccDirection].Box.Top) - int(minY)
-					pixels[(actualX*4)+(actualY*int(actualWidth)*4)] = color.R
-					pixels[(actualX*4)+(actualY*int(actualWidth)*4)+1] = color.G
-					pixels[(actualX*4)+(actualY*int(actualWidth)*4)+2] = color.B
-					pixels[(actualX*4)+(actualY*int(actualWidth)*4)+3] = transparency
+					idx := (sheetOffset + actualX + ((actualY) * combinedWidth)) * 4
+					pixels[idx] = color.R
+					pixels[idx+1] = color.G
+					pixels[idx+2] = color.B
+					pixels[idx+3] = transparency
 				}
 			}
-			v.layerCache[layerType].frames[animationIdx], _ = ebiten.NewImage(int(actualWidth), int(actualHeight), ebiten.FilterNearest)
-			_ = v.layerCache[layerType].frames[animationIdx].ReplacePixels(pixels)
 		}
+		v.layerCache[layerType].frameSheet, _ = ebiten.NewImage(int(actualWidth)*v.framesToAnimate, int(actualHeight), ebiten.FilterNearest)
+		_ = v.layerCache[layerType].frameSheet.ReplacePixels(pixels)
+		v.layerCache[layerType].frameWidth = int(actualWidth)
+		v.layerCache[layerType].frameHeight = int(actualHeight)
 	}
 }
 
