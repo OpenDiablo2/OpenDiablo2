@@ -13,20 +13,24 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon"
 )
 
+type archiveEntry struct {
+	archivePath  string
+	hashEntryMap d2mpq.HashEntryMap
+}
+
 type assetManager struct {
-	fileCache     *cache
-	archiveCache  *cache
-	archiveLookup map[string]string
-	config        *d2corecommon.Configuration
-	mutex         sync.Mutex
+	fileCache      *cache
+	archiveCache   *cache
+	archiveEntries []archiveEntry
+	config         *d2corecommon.Configuration
+	mutex          sync.Mutex
 }
 
 func createAssetManager(config *d2corecommon.Configuration) *assetManager {
 	return &assetManager{
-		fileCache:     createCache(1024 * 1024 * 32),
-		archiveCache:  createCache(1024 * 1024 * 512),
-		archiveLookup: make(map[string]string),
-		config:        config,
+		fileCache:    createCache(1024 * 1024 * 32),
+		archiveCache: createCache(1024 * 1024 * 128),
+		config:       config,
 	}
 }
 
@@ -44,7 +48,7 @@ func (am *assetManager) loadFile(filePath string) ([]byte, error) {
 		return value.([]byte), nil
 	}
 
-	archive, err := am.findArchiveForFilePath(filePath)
+	archive, err := am.loadArchiveForFilePath(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -61,31 +65,24 @@ func (am *assetManager) loadFile(filePath string) ([]byte, error) {
 	return data, nil
 }
 
-func (am *assetManager) findArchiveForFilePath(filePath string) (*d2mpq.MPQ, error) {
+func (am *assetManager) loadArchiveForFilePath(filePath string) (*d2mpq.MPQ, error) {
 	am.mutex.Lock()
 	defer am.mutex.Unlock()
 
-	if archivePath, found := am.archiveLookup[filePath]; found {
-		return am.loadArchive(archivePath, true)
+	if err := am.cacheArchiveEntries(); err != nil {
+		return nil, err
 	}
 
-	for _, archiveName := range am.config.MpqLoadOrder {
-		archivePath := path.Join(am.config.MpqPath, archiveName)
-		archive, err := am.loadArchive(archivePath, false)
-		if err != nil {
-			return nil, err
-		}
-
-		if archive.FileExists(filePath) {
-			am.archiveLookup[filePath] = archivePath
-			return archive, nil
+	for _, archiveEntry := range am.archiveEntries {
+		if archiveEntry.hashEntryMap.Contains(filePath) {
+			return am.loadArchive(archiveEntry.archivePath)
 		}
 	}
 
 	return nil, fmt.Errorf("file not found: %s", filePath)
 }
 
-func (am *assetManager) loadArchive(archivePath string, cache bool) (*d2mpq.MPQ, error) {
+func (am *assetManager) loadArchive(archivePath string) (*d2mpq.MPQ, error) {
 	if archive, found := am.archiveCache.retrieve(archivePath); found {
 		return archive.(*d2mpq.MPQ), nil
 	}
@@ -95,18 +92,39 @@ func (am *assetManager) loadArchive(archivePath string, cache bool) (*d2mpq.MPQ,
 		return nil, err
 	}
 
-	if cache {
-		stat, err := os.Stat(archivePath)
-		if err != nil {
-			return nil, err
-		}
+	stat, err := os.Stat(archivePath)
+	if err != nil {
+		return nil, err
+	}
 
-		if err := am.archiveCache.insert(archivePath, archive, int(stat.Size())); err != nil {
-			return nil, err
-		}
+	if err := am.archiveCache.insert(archivePath, archive, int(stat.Size())); err != nil {
+		return nil, err
 	}
 
 	return archive, nil
+}
+
+func (am *assetManager) cacheArchiveEntries() error {
+	if len(am.archiveEntries) == len(am.config.MpqLoadOrder) {
+		return nil
+	}
+
+	am.archiveEntries = nil
+
+	for _, archiveName := range am.config.MpqLoadOrder {
+		archivePath := path.Join(am.config.MpqPath, archiveName)
+		archive, err := am.loadArchive(archivePath)
+		if err != nil {
+			return err
+		}
+
+		am.archiveEntries = append(
+			am.archiveEntries,
+			archiveEntry{archivePath, archive.HashEntryMap},
+		)
+	}
+
+	return nil
 }
 
 func (am *assetManager) fixupFilePath(filePath string) string {
