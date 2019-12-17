@@ -1,15 +1,13 @@
 package d2core
 
 import (
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"log"
 	"math"
-	"path"
 	"runtime"
 	"strconv"
-	"strings"
-	"sync"
 	"time"
+
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 
@@ -25,8 +23,6 @@ import (
 
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 
-	"github.com/OpenDiablo2/D2Shared/d2data/d2mpq"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 
 	"github.com/OpenDiablo2/D2Shared/d2common"
@@ -41,7 +37,6 @@ import (
 // Engine is the core OpenDiablo2 engine
 type Engine struct {
 	Settings        *d2corecommon.Configuration // Engine configuration settings from json file
-	Files           map[string]string           // Map that defines which files are in which MPQs
 	CheckedPatch    map[string]bool             // First time we check a file, we'll check if it's in the patch. This notes that we've already checked that.
 	LoadingSprite   d2render.Sprite             // The sprite shown when loading stuff
 	loadingProgress float64                     // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
@@ -55,18 +50,16 @@ type Engine struct {
 	fullscreenKey   bool                        // When true, the fullscreen toggle is still being pressed
 	lastTime        float64                     // Last time we updated the scene
 	showFPS         bool
+	assetManager    *assetManager
 }
 
 // CreateEngine creates and instance of the OpenDiablo2 engine
 func CreateEngine() Engine {
-	result := Engine{
-		CurrentScene: nil,
-		nextScene:    nil,
-	}
+	var result Engine
 	result.loadConfigurationFile()
+	result.assetManager = createAssetManager(result.Settings)
 	d2resource.LanguageCode = result.Settings.Language
-	result.mapMpqFiles()
-	d2datadict.LoadPalettes(result.Files, &result)
+	d2datadict.LoadPalettes(nil, &result)
 	d2common.LoadTextDictionary(&result)
 	d2datadict.LoadLevelTypes(&result)
 	d2datadict.LoadLevelPresets(&result)
@@ -88,7 +81,6 @@ func CreateEngine() Engine {
 	result.LoadingSprite = result.LoadSprite(d2resource.LoadingScreen, d2enum.Loading)
 	loadingSpriteSizeX, loadingSpriteSizeY := result.LoadingSprite.GetSize()
 	result.LoadingSprite.MoveTo(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
-	//result.SetNextScene(Scenes.CreateBlizzardIntro(result, result))
 	return result
 }
 
@@ -97,53 +89,8 @@ func (v *Engine) loadConfigurationFile() {
 	v.Settings = d2corecommon.LoadConfiguration()
 }
 
-func (v *Engine) mapMpqFiles() {
-	v.Files = make(map[string]string)
-}
-
-var mutex sync.Mutex
-
 func (v *Engine) LoadFile(fileName string) []byte {
-	fileName = strings.ReplaceAll(fileName, "{LANG}", d2resource.LanguageCode)
-	// todo: separate CJK and latin characters from LanguageCode
-	if "CHI" == strings.ToUpper(d2resource.LanguageCode) {
-		fileName = strings.ReplaceAll(fileName, "{LANG_FONT}", d2resource.LanguageCode)
-	} else {
-		fileName = strings.ReplaceAll(fileName, "{LANG_FONT}", "latin")
-	}
-	fileName = strings.ToLower(fileName)
-	fileName = strings.ReplaceAll(fileName, `/`, "\\")
-	if fileName[0] == '\\' {
-		fileName = fileName[1:]
-	}
-
-	mutex.Lock()
-	defer mutex.Unlock()
-	// TODO: May want to cache some things if performance becomes an issue
-	cachedMpqFile, cacheExists := v.Files[fileName]
-	if cacheExists {
-		archive, _ := d2mpq.Load(cachedMpqFile)
-		result, _ := archive.ReadFile(fileName)
-		return result
-	}
-	for _, mpqFile := range v.Settings.MpqLoadOrder {
-		archive, _ := d2mpq.Load(path.Join(v.Settings.MpqPath, mpqFile))
-		if archive == nil {
-			log.Fatalf("Failed to load specified MPQ file: %s", mpqFile)
-		}
-		if !archive.FileExists(fileName) {
-			continue
-		}
-		result, _ := archive.ReadFile(fileName)
-		if len(result) == 0 {
-			continue
-		}
-		v.Files[fileName] = path.Join(v.Settings.MpqPath, mpqFile)
-		// log.Printf("%v in %v", fileName, mpqFile)
-		return result
-	}
-	log.Printf("Could not load %s from MPQs\n", fileName)
-	return []byte{}
+	return v.assetManager.LoadFile(fileName)
 }
 
 // IsLoading returns true if the engine is currently in a loading state
