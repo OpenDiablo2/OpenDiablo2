@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -41,13 +40,14 @@ type GameState struct {
 const GameStateVersion = uint32(2) // Update this when you make breaking changes
 
 func HasGameStates() bool {
-	files, _ := ioutil.ReadDir(getGameBaseSavePath())
+	basePath, _ := getGameBaseSavePath()
+	files, _ := ioutil.ReadDir(basePath)
 	return len(files) > 0
 }
 
 func GetAllGameStates() []*GameState {
 	// TODO: Make this not crash tf out on bad files
-	basePath := getGameBaseSavePath()
+	basePath, _ := getGameBaseSavePath()
 	files, _ := ioutil.ReadDir(basePath)
 	result := make([]*GameState, 0)
 	for _, file := range files {
@@ -112,30 +112,18 @@ func CreateGameState(heroName string, hero d2enum.Hero, hardcore bool) *GameStat
 	return result
 }
 
-func getGameBaseSavePath() string {
-	if runtime.GOOS == "windows" {
-		appDataPath := os.Getenv("APPDATA")
-		basePath := path.Join(appDataPath, "OpenDiablo2", "Saves")
-		if err := os.MkdirAll(basePath, os.ModeDir); err != nil {
-			log.Panicf(err.Error())
-		}
-		return basePath
-	}
-	homeDir, err := os.UserHomeDir()
+func getGameBaseSavePath() (string, error) {
+	configDir, err := os.UserConfigDir()
 	if err != nil {
-		log.Panicf(err.Error())
+		return "", err
 	}
-	basePath := path.Join(homeDir, ".OpenDiablo2", "Saves")
-	if err := os.MkdirAll(basePath, 0755); err != nil {
-		log.Panicf(err.Error())
-	}
-	// TODO: Is mac supposed to have a super special place for the save games?
-	return basePath
+
+	return path.Join(configDir, "OpenDiablo2/Saves"), nil
 }
 
 func getFirstFreeFileName() string {
 	i := 0
-	basePath := getGameBaseSavePath()
+	basePath, _ := getGameBaseSavePath()
 	for {
 		filePath := path.Join(basePath, strconv.Itoa(i)+".od2")
 		if _, err := os.Stat(filePath); os.IsNotExist(err) {
@@ -148,6 +136,9 @@ func getFirstFreeFileName() string {
 func (v *GameState) Save() {
 	if v.FilePath == "" {
 		v.FilePath = getFirstFreeFileName()
+	}
+	if err := os.MkdirAll(path.Dir(v.FilePath), 0755); err != nil {
+		log.Panic(err.Error())
 	}
 	f, err := os.Create(v.FilePath)
 	if err != nil {
