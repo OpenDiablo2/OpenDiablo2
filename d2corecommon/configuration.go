@@ -2,6 +2,7 @@ package d2corecommon
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 	"os/user"
 	"path"
@@ -30,7 +31,9 @@ func LoadConfiguration() *Configuration {
 	}
 
 	configDir = path.Join(configDir, "OpenDiablo2")
-	configFile, err := os.Open(path.Join(configDir, "config.json"))
+	configPath := path.Join(configDir, "config.json")
+	log.Printf("loading configuration file from %s...", configPath)
+	configFile, err := os.Open(configPath)
 	defer configFile.Close()
 
 	if err == nil {
@@ -55,7 +58,9 @@ func (c *Configuration) Save() error {
 		return err
 	}
 
-	configFile, err := os.Create(path.Join(configDir, "config.json"))
+	configPath := path.Join(configDir, "config.json")
+	log.Printf("saving configuration file to %s...", configPath)
+	configFile, err := os.Create(configPath)
 	if err != nil {
 		return err
 	}
