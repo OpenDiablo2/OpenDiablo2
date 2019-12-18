@@ -91,7 +91,6 @@ func (am *assetManager) loadArchive(archivePath string) (*d2mpq.MPQ, error) {
 		return nil, err
 	}
 
-	log.Println(archive.Data.ArchiveSize)
 	if err := am.archiveCache.insert(archivePath, archive, int(archive.Data.ArchiveSize)); err != nil {
 		return nil, err
 	}
