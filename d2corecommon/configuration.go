@@ -24,7 +24,13 @@ type Configuration struct {
 }
 
 func LoadConfiguration() *Configuration {
-	configFile, err := os.Open("config.json")
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return getDefaultConfiguration()
+	}
+
+	configDir = path.Join(configDir, "OpenDiablo2")
+	configFile, err := os.Open(path.Join(configDir, "config.json"))
 	defer configFile.Close()
 
 	if err == nil {
@@ -39,7 +45,17 @@ func LoadConfiguration() *Configuration {
 }
 
 func (c *Configuration) Save() error {
-	configFile, err := os.Create("config.json")
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return err
+	}
+
+	configDir = path.Join(configDir, "OpenDiablo2")
+	if err := os.MkdirAll(configDir, 0755); err != nil {
+		return err
+	}
+
+	configFile, err := os.Create(path.Join(configDir, "config.json"))
 	if err != nil {
 		return err
 	}
@@ -51,6 +67,15 @@ func (c *Configuration) Save() error {
 	}
 
 	return nil
+}
+
+func getConfigurationPath() string {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return "config.json"
+	}
+
+	return path.Join(configDir, "OpenDiablo2/config.json")
 }
 
 func getDefaultConfiguration() *Configuration {
