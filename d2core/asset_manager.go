@@ -3,7 +3,6 @@ package d2core
 import (
 	"fmt"
 	"log"
-	"os"
 	"path"
 	"strings"
 	"sync"
@@ -92,12 +91,7 @@ func (am *assetManager) loadArchive(archivePath string) (*d2mpq.MPQ, error) {
 		return nil, err
 	}
 
-	stat, err := os.Stat(archivePath)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := am.archiveCache.insert(archivePath, archive, int(stat.Size())); err != nil {
+	if err := am.archiveCache.insert(archivePath, archive, int(archive.Data.ArchiveSize)); err != nil {
 		return nil, err
 	}
 
