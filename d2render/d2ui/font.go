@@ -1,18 +1,12 @@
 package d2ui
 
 import (
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"image/color"
 	"strings"
 
 	"github.com/OpenDiablo2/D2Shared/d2helper"
 
-	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
-
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
-
-	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-
+	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 
 	"github.com/hajimehoshi/ebiten"
@@ -32,33 +26,32 @@ type FontSize struct {
 
 // Font represents a font
 type Font struct {
-	fontSprite d2render.Sprite
+	fontSprite *d2render.Sprite
 	fontTable  map[uint16]uint16
 	metrics    map[uint16]FontSize
 }
 
 // GetFont creates or loads an existing font
-func GetFont(font string, palette d2enum.PaletteType, fileProvider d2interface.FileProvider) *Font {
-	cacheItem, exists := fontCache[font+"_"+string(palette)]
+func GetFont(fontPath string, palettePath string) *Font {
+	cacheItem, exists := fontCache[fontPath+"_"+palettePath]
 	if exists {
 		return cacheItem
 	}
-	newFont := CreateFont(font, palette, fileProvider)
-	fontCache[font+"_"+string(palette)] = newFont
+	newFont := CreateFont(fontPath, palettePath)
+	fontCache[fontPath+"_"+palettePath] = newFont
 	return newFont
 }
 
 // CreateFont creates an instance of a MPQ Font
-func CreateFont(font string, palette d2enum.PaletteType, fileProvider d2interface.FileProvider) *Font {
+func CreateFont(font string, palettePath string) *Font {
 	result := &Font{
 		fontTable: make(map[uint16]uint16),
 		metrics:   make(map[uint16]FontSize),
 	}
 	// bug: performance issue when using CJK fonts, because ten thousand frames will be rendered PER font
-	dc6, _ := d2dc6.LoadDC6(fileProvider.LoadFile(font+".dc6"), d2datadict.Palettes[palette])
-	result.fontSprite = d2render.CreateSpriteFromDC6(dc6)
+	result.fontSprite, _ = d2render.LoadSprite(font+".dc6", palettePath)
 	woo := "Woo!\x01"
-	fontData := fileProvider.LoadFile(font + ".tbl")
+	fontData := d2asset.MustLoadFile(font + ".tbl")
 	if string(fontData[0:5]) != woo {
 		panic("No woo :(")
 	}
@@ -89,18 +82,14 @@ func CreateFont(font string, palette d2enum.PaletteType, fileProvider d2interfac
 }
 
 // GetTextMetrics returns the size of the specified text
-func (v *Font) GetTextMetrics(text string) (width, height uint32) {
-	width = uint32(0)
-	curWidth := uint32(0)
-	height = uint32(0)
-	maxCharHeight := uint32(0)
-	// todo: it can be saved as a struct member, since it only depends on `.Frames`
-	for _, m := range v.fontSprite.Frames {
-		maxCharHeight = d2helper.Max(maxCharHeight, uint32(m.Height))
-	}
+func (v *Font) GetTextMetrics(text string) (width, height int) {
+	width = int(0)
+	curWidth := int(0)
+	height = int(0)
+	_, maxCharHeight := v.fontSprite.GetFrameBounds()
 	for _, ch := range text {
 		if ch == '\n' {
-			width = d2helper.Max(width, curWidth)
+			width = d2helper.MaxInt(width, curWidth)
 			curWidth = 0
 			height += maxCharHeight + 6
 			continue
@@ -108,15 +97,15 @@ func (v *Font) GetTextMetrics(text string) (width, height uint32) {
 
 		curWidth += v.getCharWidth(ch)
 	}
-	width = d2helper.Max(width, curWidth)
+	width = d2helper.MaxInt(width, curWidth)
 	height += maxCharHeight
 	return
 }
 
-// Draw draws the font on the target surface
-func (v *Font) Draw(x, y int, text string, color color.Color, target *ebiten.Image) {
-	v.fontSprite.ColorMod = color
-	v.fontSprite.Blend = false
+// Render draws the font on the target surface
+func (v *Font) Render(x, y int, text string, color color.Color, target *ebiten.Image) {
+	v.fontSprite.SetColorMod(color)
+	v.fontSprite.SetBlend(false)
 
 	maxCharHeight := uint32(0)
 	for _, m := range v.metrics {
@@ -132,9 +121,10 @@ func (v *Font) Draw(x, y int, text string, color color.Color, target *ebiten.Ima
 		for _, ch := range line {
 			width := v.getCharWidth(ch)
 			index := v.fontTable[uint16(ch)]
-			v.fontSprite.Frame = int16(index)
-			v.fontSprite.MoveTo(xPos, y+int(v.fontSprite.Frames[index].Height))
-			v.fontSprite.Draw(target)
+			v.fontSprite.SetCurrentFrame(int(index))
+			_, height := v.fontSprite.GetCurrentFrameSize()
+			v.fontSprite.SetPosition(xPos, y+int(height))
+			v.fontSprite.Render(target)
 			xPos += int(width)
 		}
 
@@ -147,9 +137,9 @@ func (v *Font) Draw(x, y int, text string, color color.Color, target *ebiten.Ima
 	}
 }
 
-func (v *Font) getCharWidth(char rune) (width uint32) {
+func (v *Font) getCharWidth(char rune) (width int) {
 	if char < unicode.MaxLatin1 {
-		return uint32(v.metrics[uint16(char)].Width)
+		return int(v.metrics[uint16(char)].Width)
 	}
-	return uint32(v.metrics[unicode.MaxLatin1].Width)
+	return int(v.metrics[unicode.MaxLatin1].Width)
 }

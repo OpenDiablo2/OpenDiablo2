@@ -1,16 +1,12 @@
 package d2ui
 
 import (
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"strings"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/inpututil"
 
-	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/hajimehoshi/ebiten"
 )
@@ -22,17 +18,17 @@ type TextBox struct {
 	y         int
 	visible   bool
 	enabled   bool
-	bgSprite  d2render.Sprite
+	bgSprite  *d2render.Sprite
 	textLabel Label
 	lineBar   Label
 }
 
-func CreateTextbox(fileProvider d2interface.FileProvider) TextBox {
-	dc6, _ := d2dc6.LoadDC6(fileProvider.LoadFile(d2resource.TextBox2), d2datadict.Palettes[d2enum.Units])
+func CreateTextbox() TextBox {
+	bgSprite, _ := d2render.LoadSprite(d2resource.TextBox2, d2resource.PaletteUnits)
 	result := TextBox{
-		bgSprite:  d2render.CreateSpriteFromDC6(dc6),
-		textLabel: CreateLabel(fileProvider, d2resource.FontFormal11, d2enum.Units),
-		lineBar:   CreateLabel(fileProvider, d2resource.FontFormal11, d2enum.Units),
+		bgSprite:  bgSprite,
+		textLabel: CreateLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
+		lineBar:   CreateLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
 		enabled:   true,
 		visible:   true,
 	}
@@ -55,14 +51,14 @@ func repeatingKeyPressed(key ebiten.Key) bool {
 	return false
 }
 
-func (v TextBox) Draw(target *ebiten.Image) {
+func (v TextBox) Render(target *ebiten.Image) {
 	if !v.visible {
 		return
 	}
-	v.bgSprite.Draw(target)
-	v.textLabel.Draw(target)
+	v.bgSprite.Render(target)
+	v.textLabel.Render(target)
 	if (time.Now().UnixNano()/1e6)&(1<<8) > 0 {
-		v.lineBar.Draw(target)
+		v.lineBar.Render(target)
 	}
 }
 
@@ -105,25 +101,25 @@ func (v *TextBox) SetText(newText string) {
 			result = result[1:]
 			continue
 		}
-		v.lineBar.MoveTo(v.x+6+int(tw), v.y+3)
+		v.lineBar.SetPosition(v.x+6+int(tw), v.y+3)
 		v.textLabel.SetText(result)
 		break
 	}
 }
 
-func (v TextBox) GetSize() (width, height uint32) {
-	return v.bgSprite.GetSize()
+func (v TextBox) GetSize() (width, height int) {
+	return v.bgSprite.GetCurrentFrameSize()
 }
 
-func (v *TextBox) MoveTo(x, y int) {
+func (v *TextBox) SetPosition(x, y int) {
 	v.x = x
 	v.y = y
-	v.textLabel.MoveTo(v.x+6, v.y+3)
-	v.lineBar.MoveTo(v.x+6+int(v.textLabel.Width), v.y+3)
-	v.bgSprite.MoveTo(v.x, v.y+26)
+	v.textLabel.SetPosition(v.x+6, v.y+3)
+	v.lineBar.SetPosition(v.x+6+int(v.textLabel.Width), v.y+3)
+	v.bgSprite.SetPosition(v.x, v.y+26)
 }
 
-func (v TextBox) GetLocation() (x, y int) {
+func (v TextBox) GetPosition() (x, y int) {
 	return v.x, v.y
 }
 

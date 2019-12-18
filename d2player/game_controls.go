@@ -1,22 +1,16 @@
 package d2player
 
 import (
-	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
 	"github.com/hajimehoshi/ebiten"
-	"log"
 )
 
 type GameControls struct {
-	fileProvider d2interface.FileProvider
-	hero         *d2core.Hero
-	mapEngine    *d2mapengine.MapEngine
+	hero      *d2core.Hero
+	mapEngine *d2mapengine.MapEngine
 
 	// UI
 	globeSprite *d2render.Sprite
@@ -25,11 +19,10 @@ type GameControls struct {
 	skillIcon   *d2render.Sprite
 }
 
-func NewGameControls(fileProvider d2interface.FileProvider, hero *d2core.Hero, mapEngine *d2mapengine.MapEngine) *GameControls {
+func NewGameControls(hero *d2core.Hero, mapEngine *d2mapengine.MapEngine) *GameControls {
 	return &GameControls{
-		fileProvider: fileProvider,
-		hero:         hero,
-		mapEngine:    mapEngine,
+		hero:      hero,
+		mapEngine: mapEngine,
 	}
 }
 
@@ -67,111 +60,86 @@ func (g *GameControls) Move(tickTime float64) {
 }
 
 func (g *GameControls) Load() {
-	dc6, err := d2dc6.LoadDC6(g.fileProvider.LoadFile(d2resource.GameGlobeOverlap), d2datadict.Palettes[d2enum.Sky])
-	if err != nil {
-		log.Panicf("failed to load %s: %v", d2resource.GameGlobeOverlap, err)
-	}
-	globeSprite := d2render.CreateSpriteFromDC6(dc6)
-	g.globeSprite = &globeSprite
-
-	dc6, err = d2dc6.LoadDC6(g.fileProvider.LoadFile(d2resource.GamePanels), d2datadict.Palettes[d2enum.Sky])
-	if err != nil {
-		log.Panicf("failed to load %s: %v", d2resource.GamePanels, err)
-	}
-	mainPanel := d2render.CreateSpriteFromDC6(dc6)
-	g.mainPanel = &mainPanel
-
-	dc6, err = d2dc6.LoadDC6(g.fileProvider.LoadFile(d2resource.MenuButton), d2datadict.Palettes[d2enum.Sky])
-	if err != nil {
-		log.Panicf("failed to load %s: %v", d2resource.MenuButton, err)
-	}
-	menuButton := d2render.CreateSpriteFromDC6(dc6)
-	g.menuButton = &menuButton
-
-	dc6, err = d2dc6.LoadDC6(g.fileProvider.LoadFile(d2resource.GenericSkills), d2datadict.Palettes[d2enum.Sky])
-	if err != nil {
-		log.Panicf("failed to load %s: %v", d2resource.GenericSkills, err)
-	}
-	skillIcon := d2render.CreateSpriteFromDC6(dc6)
-	g.skillIcon = &skillIcon
-
+	g.globeSprite, _ = d2render.LoadSprite(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
+	g.mainPanel, _ = d2render.LoadSprite(d2resource.GamePanels, d2resource.PaletteSky)
+	g.menuButton, _ = d2render.LoadSprite(d2resource.MenuButton, d2resource.PaletteSky)
+	g.skillIcon, _ = d2render.LoadSprite(d2resource.GenericSkills, d2resource.PaletteSky)
 }
-
 
 // TODO: consider caching the panels to single image that is reused.
 func (g *GameControls) Render(target *ebiten.Image) {
 	width, height := target.Size()
-	offset := uint32(0)
+	offset := int(0)
 
 	// Left globe holder
-	g.mainPanel.Frame = 0
-	w, _ := g.mainPanel.GetSize()
-	g.mainPanel.MoveTo(int(offset), height)
-	g.mainPanel.Draw(target)
+	g.mainPanel.SetCurrentFrame(0)
+	w, _ := g.mainPanel.GetCurrentFrameSize()
+	g.mainPanel.SetPosition(int(offset), height)
+	g.mainPanel.Render(target)
 
 	// Left globe
-	g.globeSprite.Frame = 0
-	g.globeSprite.MoveTo(int(offset+28), height - 5)
-	g.globeSprite.Draw(target)
+	g.globeSprite.SetCurrentFrame(0)
+	g.globeSprite.SetPosition(int(offset+28), height-5)
+	g.globeSprite.Render(target)
 	offset += w
 
 	// Left skill
-	g.skillIcon.Frame = 2
-	w, _ = g.skillIcon.GetSize()
-	g.skillIcon.MoveTo(int(offset), height)
-	g.skillIcon.Draw(target)
+	g.skillIcon.SetCurrentFrame(2)
+	w, _ = g.skillIcon.GetCurrentFrameSize()
+	g.skillIcon.SetPosition(int(offset), height)
+	g.skillIcon.Render(target)
 	offset += w
 
 	// Left skill selector
-	g.mainPanel.Frame = 1
-	w, _ = g.mainPanel.GetSize()
-	g.mainPanel.MoveTo(int(offset), height)
-	g.mainPanel.Draw(target)
+	g.mainPanel.SetCurrentFrame(1)
+	w, _ = g.mainPanel.GetCurrentFrameSize()
+	g.mainPanel.SetPosition(int(offset), height)
+	g.mainPanel.Render(target)
 	offset += w
 
 	// Stamina
-	g.mainPanel.Frame = 2
-	w, _ = g.mainPanel.GetSize()
-	g.mainPanel.MoveTo(int(offset), height)
-	g.mainPanel.Draw(target)
+	g.mainPanel.SetCurrentFrame(2)
+	w, _ = g.mainPanel.GetCurrentFrameSize()
+	g.mainPanel.SetPosition(int(offset), height)
+	g.mainPanel.Render(target)
 	offset += w
 
 	// Center menu button
-	g.menuButton.Frame = 0
-	w, _ = g.mainPanel.GetSize()
-	g.menuButton.MoveTo((width / 2) - 8 , height - 16)
-	g.menuButton.Draw(target)
+	g.menuButton.SetCurrentFrame(0)
+	w, _ = g.mainPanel.GetCurrentFrameSize()
+	g.menuButton.SetPosition((width/2)-8, height-16)
+	g.menuButton.Render(target)
 
 	// Potions
-	g.mainPanel.Frame = 3
-	w, _ = g.mainPanel.GetSize()
-	g.mainPanel.MoveTo(int(offset), height)
-	g.mainPanel.Draw(target)
+	g.mainPanel.SetCurrentFrame(3)
+	w, _ = g.mainPanel.GetCurrentFrameSize()
+	g.mainPanel.SetPosition(int(offset), height)
+	g.mainPanel.Render(target)
 	offset += w
 
 	// Right skill selector
-	g.mainPanel.Frame = 4
-	w, _ = g.mainPanel.GetSize()
-	g.mainPanel.MoveTo(int(offset), height)
-	g.mainPanel.Draw(target)
+	g.mainPanel.SetCurrentFrame(4)
+	w, _ = g.mainPanel.GetCurrentFrameSize()
+	g.mainPanel.SetPosition(int(offset), height)
+	g.mainPanel.Render(target)
 	offset += w
 
 	// Right skill
-	g.skillIcon.Frame = 10
-	w, _ = g.skillIcon.GetSize()
-	g.skillIcon.MoveTo(int(offset), height)
-	g.skillIcon.Draw(target)
+	g.skillIcon.SetCurrentFrame(10)
+	w, _ = g.skillIcon.GetCurrentFrameSize()
+	g.skillIcon.SetPosition(int(offset), height)
+	g.skillIcon.Render(target)
 	offset += w
 
 	// Right globe holder
-	g.mainPanel.Frame = 5
-	w, _ = g.mainPanel.GetSize()
-	g.mainPanel.MoveTo(int(offset), height)
-	g.mainPanel.Draw(target)
+	g.mainPanel.SetCurrentFrame(5)
+	w, _ = g.mainPanel.GetCurrentFrameSize()
+	g.mainPanel.SetPosition(int(offset), height)
+	g.mainPanel.Render(target)
 
 	// Right globe
-	g.globeSprite.Frame = 1
-	g.globeSprite.MoveTo(int(offset) + 8, height - 8)
-	g.globeSprite.Draw(target)
+	g.globeSprite.SetCurrentFrame(1)
+	g.globeSprite.SetPosition(int(offset)+8, height-8)
+	g.globeSprite.Render(target)
 
 }

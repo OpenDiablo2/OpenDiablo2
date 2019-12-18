@@ -13,11 +13,11 @@ import (
 
 	"github.com/OpenDiablo2/D2Shared/d2common"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2ds1"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2dt1"
 	"github.com/OpenDiablo2/D2Shared/d2helper"
+	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corehelper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
@@ -39,7 +39,7 @@ type MapRegion struct {
 	lastFrameTime     float64
 }
 
-func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.RegionIdType, levelPreset int, fileProvider d2interface.FileProvider, fileIndex int) (*MapRegion, []MapEntity) {
+func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.RegionIdType, levelPreset int, fileIndex int) (*MapRegion, []MapEntity) {
 	region := &MapRegion{
 		levelType:         d2datadict.LevelTypes[levelType],
 		levelPreset:       d2datadict.LevelPresets[levelPreset],
@@ -54,7 +54,7 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 
 	for _, levelTypeDt1 := range region.levelType.Files {
 		if len(levelTypeDt1) != 0 && levelTypeDt1 != "" && levelTypeDt1 != "0" {
-			dt1 := d2dt1.LoadDT1("/data/global/tiles/"+levelTypeDt1, fileProvider)
+			dt1 := d2dt1.LoadDT1(d2asset.MustLoadFile("/data/global/tiles/" + levelTypeDt1))
 			region.tiles = append(region.tiles, dt1.Tiles...)
 		}
 	}
@@ -72,7 +72,7 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 	}
 
 	region.regionPath = levelFilesToPick[levelIndex]
-	region.ds1 = d2ds1.LoadDS1("/data/global/tiles/"+region.regionPath, fileProvider)
+	region.ds1 = d2ds1.LoadDS1(d2asset.MustLoadFile("/data/global/tiles/" + region.regionPath))
 	region.tileRect = d2common.Rectangle{
 		Left:   tileOffsetX,
 		Top:    tileOffsetY,
@@ -80,7 +80,7 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 		Height: int(region.ds1.Height),
 	}
 
-	entities := region.loadEntities(fileProvider)
+	entities := region.loadEntities()
 	region.loadSpecials()
 	region.generateTileCache()
 
@@ -118,7 +118,7 @@ func (mr *MapRegion) loadSpecials() {
 	}
 }
 
-func (mr *MapRegion) loadEntities(fileProvider d2interface.FileProvider) []MapEntity {
+func (mr *MapRegion) loadEntities() []MapEntity {
 	var entities []MapEntity
 
 	for _, object := range mr.ds1.Objects {
@@ -127,13 +127,13 @@ func (mr *MapRegion) loadEntities(fileProvider d2interface.FileProvider) []MapEn
 		switch object.Lookup.Type {
 		case d2datadict.ObjectTypeCharacter:
 			if object.Lookup.Base != "" && object.Lookup.Token != "" && object.Lookup.TR != "" {
-				npc := d2core.CreateNPC(int32(worldX), int32(worldY), object.Lookup, fileProvider, 0)
+				npc := d2core.CreateNPC(int32(worldX), int32(worldY), object.Lookup, 0)
 				npc.SetPaths(object.Paths)
 				entities = append(entities, npc)
 			}
 		case d2datadict.ObjectTypeItem:
 			if object.ObjectInfo != nil && object.ObjectInfo.Draw && object.Lookup.Base != "" && object.Lookup.Token != "" {
-				entity := d2render.CreateAnimatedEntity(int32(worldX), int32(worldY), object.Lookup, fileProvider, d2enum.Units)
+				entity := d2render.CreateAnimatedEntity(int32(worldX), int32(worldY), object.Lookup, d2enum.Units)
 				entity.SetMode(object.Lookup.Mode, object.Lookup.Class, 0)
 				entities = append(entities, &entity)
 			}

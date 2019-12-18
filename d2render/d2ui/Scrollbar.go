@@ -1,11 +1,7 @@
 package d2ui
 
 import (
-	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/hajimehoshi/ebiten"
 )
@@ -18,18 +14,18 @@ type Scrollbar struct {
 	maxOffset       int
 	lastDirChange   int
 	onActivate      func()
-	scrollbarSprite d2render.Sprite
+	scrollbarSprite *d2render.Sprite
 }
 
-func CreateScrollbar(fileProvider d2interface.FileProvider, x, y, height int) Scrollbar {
-	dc6, _ := d2dc6.LoadDC6(fileProvider.LoadFile(d2resource.Scrollbar), d2datadict.Palettes[d2enum.Sky])
+func CreateScrollbar(x, y, height int) Scrollbar {
+	scrollbarSprite, _ := d2render.LoadSprite(d2resource.Scrollbar, d2resource.PaletteSky)
 	result := Scrollbar{
 		visible:         true,
 		enabled:         true,
 		x:               x,
 		y:               y,
 		height:          height,
-		scrollbarSprite: d2render.CreateSpriteFromDC6(dc6),
+		scrollbarSprite: scrollbarSprite,
 	}
 	return result
 }
@@ -76,7 +72,7 @@ func (v Scrollbar) GetLastDirChange() int {
 	return v.lastDirChange
 }
 
-func (v *Scrollbar) Draw(target *ebiten.Image) {
+func (v *Scrollbar) Render(target *ebiten.Image) {
 	if !v.visible || v.maxOffset == 0 {
 		return
 	}
@@ -84,31 +80,31 @@ func (v *Scrollbar) Draw(target *ebiten.Image) {
 	if !v.enabled {
 		offset = 2
 	}
-	v.scrollbarSprite.MoveTo(v.x, v.y)
-	v.scrollbarSprite.DrawSegments(target, 1, 1, 0+offset)
-	v.scrollbarSprite.MoveTo(v.x, v.y+v.height-10)
-	v.scrollbarSprite.DrawSegments(target, 1, 1, 1+offset)
+	v.scrollbarSprite.SetPosition(v.x, v.y)
+	v.scrollbarSprite.RenderSegmented(target, 1, 1, 0+offset)
+	v.scrollbarSprite.SetPosition(v.x, v.y+v.height-10)
+	v.scrollbarSprite.RenderSegmented(target, 1, 1, 1+offset)
 	if v.maxOffset == 0 || v.currentOffset < 0 || v.currentOffset > v.maxOffset {
 		return
 	}
-	v.scrollbarSprite.MoveTo(v.x, v.y+10+v.getBarPosition())
+	v.scrollbarSprite.SetPosition(v.x, v.y+10+v.getBarPosition())
 	offset = 0
 	if !v.enabled {
 		offset = 1
 	}
-	v.scrollbarSprite.DrawSegments(target, 1, 1, 4+offset)
+	v.scrollbarSprite.RenderSegmented(target, 1, 1, 4+offset)
 }
 
-func (v *Scrollbar) GetSize() (width, height uint32) {
-	return 10, uint32(v.height)
+func (v *Scrollbar) GetSize() (width, height int) {
+	return 10, int(v.height)
 }
 
-func (v *Scrollbar) MoveTo(x, y int) {
+func (v *Scrollbar) SetPosition(x, y int) {
 	v.x = x
 	v.y = y
 }
 
-func (v *Scrollbar) GetLocation() (x, y int) {
+func (v *Scrollbar) GetPosition() (x, y int) {
 	return v.x, v.y
 }
 

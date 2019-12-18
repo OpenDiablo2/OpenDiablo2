@@ -2,7 +2,6 @@ package d2core
 
 import (
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/hajimehoshi/ebiten"
@@ -15,7 +14,7 @@ type Hero struct {
 	direction      int
 }
 
-func CreateHero(x, y int32, direction int, heroType d2enum.Hero, equipment CharacterEquipment, fileProvider d2interface.FileProvider) *Hero {
+func CreateHero(x, y int32, direction int, heroType d2enum.Hero, equipment CharacterEquipment) *Hero {
 	result := &Hero{
 		AnimatedEntity: d2render.CreateAnimatedEntity(x, y, &d2datadict.ObjectLookupRecord{
 			Mode:  d2enum.AnimationModePlayerNeutral.String(),
@@ -32,7 +31,6 @@ func CreateHero(x, y int32, direction int, heroType d2enum.Hero, equipment Chara
 			RH: equipment.RightHand.GetItemCode(),
 			LH: equipment.LeftHand.GetItemCode(),
 		},
-			fileProvider,
 			d2enum.Units,
 		),
 		Equipment: equipment,

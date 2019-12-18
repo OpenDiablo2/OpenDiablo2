@@ -3,7 +3,6 @@ package d2core
 import (
 	"github.com/OpenDiablo2/D2Shared/d2common"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/hajimehoshi/ebiten"
@@ -16,9 +15,9 @@ type NPC struct {
 	path           int
 }
 
-func CreateNPC(x, y int32, object *d2datadict.ObjectLookupRecord, fileProvider d2interface.FileProvider, direction int) *NPC {
+func CreateNPC(x, y int32, object *d2datadict.ObjectLookupRecord, direction int) *NPC {
 	result := &NPC{
-		AnimatedEntity: d2render.CreateAnimatedEntity(x, y, object, fileProvider, d2enum.Units),
+		AnimatedEntity: d2render.CreateAnimatedEntity(x, y, object, d2enum.Units),
 		HasPaths:       false,
 	}
 	result.AnimatedEntity.SetMode(object.Mode, object.Class, direction)

@@ -7,15 +7,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
-
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 
 	"github.com/OpenDiablo2/D2Shared/d2helper"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
-
-	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 
@@ -26,6 +22,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 
 	"github.com/OpenDiablo2/D2Shared/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 
@@ -38,7 +35,7 @@ import (
 type Engine struct {
 	Settings        *d2corecommon.Configuration // Engine configuration settings from json file
 	CheckedPatch    map[string]bool             // First time we check a file, we'll check if it's in the patch. This notes that we've already checked that.
-	LoadingSprite   d2render.Sprite             // The sprite shown when loading stuff
+	LoadingSprite   *d2render.Sprite            // The sprite shown when loading stuff
 	loadingProgress float64                     // LoadingProcess is a range between 0.0 and 1.0. If set, loading screen displays.
 	loadingIndex    int                         // Determines which load function is currently being called
 	thingsToLoad    []func()                    // The load functions for the next scene
@@ -50,7 +47,6 @@ type Engine struct {
 	fullscreenKey   bool                        // When true, the fullscreen toggle is still being pressed
 	lastTime        float64                     // Last time we updated the scene
 	showFPS         bool
-	assetManager    *assetManager
 }
 
 // CreateEngine creates and instance of the OpenDiablo2 engine
@@ -62,7 +58,8 @@ func CreateEngine() Engine {
 		log.Printf("could not load settings: %v", err)
 	}
 
-	result.assetManager = createAssetManager(result.Settings)
+	d2asset.Initialize(result.Settings)
+
 	d2resource.LanguageCode = result.Settings.Language
 	d2datadict.LoadPalettes(nil, &result)
 	d2common.LoadTextDictionary(&result)
@@ -80,29 +77,23 @@ func CreateEngine() Engine {
 	d2data.LoadAnimationData(&result)
 	d2datadict.LoadMonStats(&result)
 	LoadHeroObjects()
-	result.SoundManager = d2audio.CreateManager(&result)
+	result.SoundManager = d2audio.CreateManager()
 	result.SoundManager.SetVolumes(result.Settings.BgmVolume, result.Settings.SfxVolume)
-	result.UIManager = d2ui.CreateManager(&result, *result.SoundManager)
-	result.LoadingSprite = result.LoadSprite(d2resource.LoadingScreen, d2enum.Loading)
-	loadingSpriteSizeX, loadingSpriteSizeY := result.LoadingSprite.GetSize()
-	result.LoadingSprite.MoveTo(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
+	result.UIManager = d2ui.CreateManager(*result.SoundManager)
+	result.LoadingSprite, _ = d2render.LoadSprite(d2resource.LoadingScreen, d2resource.PaletteLoading)
+	loadingSpriteSizeX, loadingSpriteSizeY := result.LoadingSprite.GetCurrentFrameSize()
+	result.LoadingSprite.SetPosition(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
 	return result
 }
 
 func (v *Engine) LoadFile(fileName string) []byte {
-	return v.assetManager.LoadFile(fileName)
+	data, _ := d2asset.LoadFile(fileName)
+	return data
 }
 
 // IsLoading returns true if the engine is currently in a loading state
 func (v Engine) IsLoading() bool {
 	return v.loadingProgress < 1.0
-}
-
-// LoadSprite loads a sprite from the game's data files
-func (v Engine) LoadSprite(fileName string, palette d2enum.PaletteType) d2render.Sprite {
-	dc6, _ := d2dc6.LoadDC6(v.LoadFile(fileName), d2datadict.Palettes[palette])
-	sprite := d2render.CreateSpriteFromDC6(dc6)
-	return sprite
 }
 
 // updateScene handles the scene maintenance for the engine
@@ -176,14 +167,14 @@ func (v *Engine) Update() {
 // Draw draws the game
 func (v Engine) Draw(screen *ebiten.Image) {
 	if v.loadingProgress < 1.0 {
-		v.LoadingSprite.Frame = int16(d2helper.Max(0, d2helper.Min(uint32(len(v.LoadingSprite.Frames)-1), uint32(float64(len(v.LoadingSprite.Frames)-1)*v.loadingProgress))))
-		v.LoadingSprite.Draw(screen)
+		v.LoadingSprite.SetCurrentFrame(int(d2helper.Max(0, d2helper.Min(uint32(v.LoadingSprite.GetFrameCount()-1), uint32(float64(v.LoadingSprite.GetFrameCount()-1)*v.loadingProgress)))))
+		v.LoadingSprite.Render(screen)
 	} else {
 		if v.CurrentScene == nil {
 			log.Fatal("no scene loaded")
 		}
 		v.CurrentScene.Render(screen)
-		v.UIManager.Draw(screen)
+		v.UIManager.Render(screen)
 	}
 	if v.showFPS {
 		ebitenutil.DebugPrintAt(screen, "vsync:"+strconv.FormatBool(ebiten.IsVsyncEnabled())+"\nFPS:"+strconv.Itoa(int(ebiten.CurrentFPS())), 5, 565)

@@ -47,9 +47,9 @@ func main() {
 	d2Engine = d2core.CreateEngine()
 	kingpin.Parse()
 	if *region == 0 {
-		d2Engine.SetNextScene(d2scene.CreateMainMenu(&d2Engine, &d2Engine, d2Engine.UIManager, d2Engine.SoundManager))
+		d2Engine.SetNextScene(d2scene.CreateMainMenu(&d2Engine, d2Engine.UIManager, d2Engine.SoundManager))
 	} else {
-		d2Engine.SetNextScene(d2scene.CreateMapEngineTest(&d2Engine, &d2Engine, d2Engine.UIManager, d2Engine.SoundManager, *region, *preset))
+		d2Engine.SetNextScene(d2scene.CreateMapEngineTest(&d2Engine, d2Engine.UIManager, d2Engine.SoundManager, *region, *preset))
 	}
 	ebiten.SetCursorVisible(false)
 	ebiten.SetFullscreen(d2Engine.Settings.FullScreen)
