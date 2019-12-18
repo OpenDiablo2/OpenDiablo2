@@ -56,7 +56,12 @@ type Engine struct {
 // CreateEngine creates and instance of the OpenDiablo2 engine
 func CreateEngine() Engine {
 	var result Engine
-	result.loadConfigurationFile()
+
+	result.Settings = d2corecommon.LoadConfiguration()
+	if err := result.Settings.Save(); err != nil {
+		log.Printf("could not load settings: %v", err)
+	}
+
 	result.assetManager = createAssetManager(result.Settings)
 	d2resource.LanguageCode = result.Settings.Language
 	d2datadict.LoadPalettes(nil, &result)
@@ -82,11 +87,6 @@ func CreateEngine() Engine {
 	loadingSpriteSizeX, loadingSpriteSizeY := result.LoadingSprite.GetSize()
 	result.LoadingSprite.MoveTo(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
 	return result
-}
-
-func (v *Engine) loadConfigurationFile() {
-	log.Println("Loading configuration file")
-	v.Settings = d2corecommon.LoadConfiguration()
 }
 
 func (v *Engine) LoadFile(fileName string) []byte {
@@ -194,7 +194,7 @@ func (v Engine) Draw(screen *ebiten.Image) {
 		ebitenutil.DebugPrintAt(screen, "HeapSys "+strconv.FormatInt(int64(m.HeapSys/1024/1024), 10), 680, 20)
 		ebitenutil.DebugPrintAt(screen, "NumGC   "+strconv.FormatInt(int64(m.NumGC), 10), 680, 30)
 		cx, cy := ebiten.CursorPosition()
-		ebitenutil.DebugPrintAt(screen, "Coords  "+strconv.FormatInt(int64(cx), 10) + ","+strconv.FormatInt(int64(cy), 10), 680, 40)
+		ebitenutil.DebugPrintAt(screen, "Coords  "+strconv.FormatInt(int64(cx), 10)+","+strconv.FormatInt(int64(cy), 10), 680, 40)
 	}
 
 }
