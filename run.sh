@@ -4,7 +4,7 @@
 # Author: liberodark
 # License: GNU GPLv3
 
-version="0.0.7"
+version="0.0.8"
 
 echo "OpenDiablo 2 Build Script $version"
 
@@ -27,7 +27,7 @@ go_install(){
 
     if [ "$distribution" = "CentOS" ] || [ "$distribution" = "Red\ Hat" ] || [ "$distribution" = "Oracle" ]; then
       echo "Downloading Go"
-      	wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz > /dev/null 2>&1
+      	wget https://dl.google.com/go/go1.13.5.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Install Go"
 	  	sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Clean unless files"
@@ -37,7 +37,7 @@ go_install(){
       
     elif [ "$distribution" = "Fedora" ]; then
       echo "Downloading Go"
-      	wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz > /dev/null 2>&1
+      	wget https://dl.google.com/go/go1.13.5.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Install Go"
 	    sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Clean unless files"
@@ -47,7 +47,7 @@ go_install(){
     
     elif [ "$distribution" = "Debian" ] || [ "$distribution" = "Ubuntu" ] || [ "$distribution" = "Deepin" ]; then
       echo "Downloading Go"
-      	wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz > /dev/null 2>&1
+      	wget https://dl.google.com/go/go1.13.5.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Install Go"
 	    sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Clean unless files"
@@ -63,7 +63,7 @@ go_install(){
 	  
 	elif [ "$distribution" = "OpenSUSE" ] || [ "$distribution" = "SUSE" ]; then
 	  echo "Downloading Go"
-      	wget https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz > /dev/null 2>&1
+      	wget https://dl.google.com/go/go1.13.5.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Install Go"
 	    sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Clean unless files"
