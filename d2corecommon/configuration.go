@@ -56,7 +56,7 @@ func (c *Configuration) Save() error {
 func getDefaultConfiguration() *Configuration {
 	config := &Configuration{
 		Language:        "ENG",
-		FullScreen:      false,
+		FullScreen:      true,
 		Scale:           1,
 		TicksPerSecond:  -1,
 		RunInBackground: true,
