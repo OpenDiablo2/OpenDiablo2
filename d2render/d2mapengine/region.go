@@ -444,7 +444,7 @@ func (mr *MapRegion) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, ti
 		tileData[0].Width = 10
 		tileData[0].Height = 10
 	} else {
-		if !tileOptions[0].MaterialFlags.Animated {
+		if !tileOptions[0].MaterialFlags.Lava {
 			tileIndex = mr.getRandomTile(tileOptions, tileX, tileY, mr.seed)
 			tileData = append(tileData, &tileOptions[tileIndex])
 		} else {
@@ -456,7 +456,7 @@ func (mr *MapRegion) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, ti
 	}
 
 	for i := range tileData {
-		if !tileData[i].MaterialFlags.Animated {
+		if !tileData[i].MaterialFlags.Lava {
 			tile.RandomIndex = tileIndex
 		} else {
 			tileIndex = byte(tileData[i].RarityFrameIndex)
