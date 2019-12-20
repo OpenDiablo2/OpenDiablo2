@@ -21,7 +21,6 @@ script:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then ./rh.exe -open OpenDiablo2.exe -save OpenDiablo2.exe -action addskip -res d2logo.ico -mask ICONGROUP,MAIN, ; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then cp ./OpenDiablo2.exe ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME ; else cp ./OpenDiablo2 ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME; fi
   - cp ./d2logo.png ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
-  - cp ./config.json ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then 7z a -r opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.zip ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME ; else tar -cvzf opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME.tar.gz ./opendiablo2-$TRAVIS_TAG-$TRAVIS_OS_NAME ; fi
 git:
   quiet: true
