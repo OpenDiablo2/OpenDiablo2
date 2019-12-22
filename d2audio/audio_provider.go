@@ -3,15 +3,13 @@ package d2audio
 import (
 	"log"
 
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
-
+	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
 	"github.com/hajimehoshi/ebiten/audio"
 	"github.com/hajimehoshi/ebiten/audio/wav"
 )
 
 // Manager provides sound
 type Manager struct {
-	fileProvider d2interface.FileProvider
 	audioContext *audio.Context // The Audio context
 	bgmAudio     *audio.Player  // The audio player
 	lastBgm      string
@@ -20,10 +18,8 @@ type Manager struct {
 }
 
 // CreateManager creates a sound provider
-func CreateManager(fileProvider d2interface.FileProvider) *Manager {
-	result := &Manager{
-		fileProvider: fileProvider,
-	}
+func CreateManager() *Manager {
+	result := &Manager{}
 	audioContext, err := audio.NewContext(44100)
 	if err != nil {
 		log.Fatal(err)
@@ -49,7 +45,7 @@ func (v *Manager) PlayBGM(song string) {
 				log.Panic(err)
 			}
 		}
-		audioData := v.fileProvider.LoadFile(song)
+		audioData := d2asset.MustLoadFile(song)
 		d, err := wav.Decode(v.audioContext, audio.BytesReadSeekCloser(audioData))
 		if err != nil {
 			log.Fatal(err)
@@ -73,7 +69,7 @@ func (v *Manager) PlayBGM(song string) {
 }
 
 func (v *Manager) LoadSoundEffect(sfx string) *SoundEffect {
-	result := CreateSoundEffect(sfx, v.fileProvider, v.audioContext, v.sfxVolume)
+	result := CreateSoundEffect(sfx, v.audioContext, v.sfxVolume)
 	return result
 }
 

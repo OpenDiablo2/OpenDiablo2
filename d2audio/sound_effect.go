@@ -3,9 +3,8 @@ package d2audio
 import (
 	"log"
 
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
-
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
 
 	"github.com/hajimehoshi/ebiten/audio/wav"
 
@@ -16,7 +15,7 @@ type SoundEffect struct {
 	player *audio.Player
 }
 
-func CreateSoundEffect(sfx string, fileProvider d2interface.FileProvider, context *audio.Context, volume float64) *SoundEffect {
+func CreateSoundEffect(sfx string, context *audio.Context, volume float64) *SoundEffect {
 	result := &SoundEffect{}
 	var soundFile string
 	if _, exists := d2datadict.Sounds[sfx]; exists {
@@ -25,7 +24,7 @@ func CreateSoundEffect(sfx string, fileProvider d2interface.FileProvider, contex
 	} else {
 		soundFile = sfx
 	}
-	audioData := fileProvider.LoadFile(soundFile)
+	audioData := d2asset.MustLoadFile(soundFile)
 	d, err := wav.Decode(context, audio.BytesReadSeekCloser(audioData))
 	if err != nil {
 		log.Fatal(err)

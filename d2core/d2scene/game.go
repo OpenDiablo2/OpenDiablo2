@@ -1,11 +1,10 @@
 package d2scene
 
 import (
+	"image/color"
+
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
@@ -14,17 +13,15 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 	"github.com/hajimehoshi/ebiten"
-	"image/color"
 )
 
 type Game struct {
 	gameState     *d2core.GameState
 	uiManager     *d2ui.Manager
 	soundManager  *d2audio.Manager
-	fileProvider  d2interface.FileProvider
 	sceneProvider d2coreinterface.SceneProvider
-	pentSpinLeft  d2render.Sprite
-	pentSpinRight d2render.Sprite
+	pentSpinLeft  *d2render.Sprite
+	pentSpinRight *d2render.Sprite
 	testLabel     d2ui.Label
 	mapEngine     *d2mapengine.MapEngine
 	hero          *d2core.Hero
@@ -32,7 +29,6 @@ type Game struct {
 }
 
 func CreateGame(
-	fileProvider d2interface.FileProvider,
 	sceneProvider d2coreinterface.SceneProvider,
 	uiManager *d2ui.Manager,
 	soundManager *d2audio.Manager,
@@ -40,7 +36,6 @@ func CreateGame(
 ) *Game {
 	result := &Game{
 		gameState:     gameState,
-		fileProvider:  fileProvider,
 		uiManager:     uiManager,
 		soundManager:  soundManager,
 		sceneProvider: sceneProvider,
@@ -51,28 +46,25 @@ func CreateGame(
 func (v *Game) Load() []func() {
 	return []func(){
 		func() {
-			dc6, _ := d2dc6.LoadDC6(v.fileProvider.LoadFile(d2resource.PentSpin), d2datadict.Palettes[d2enum.Sky])
-			v.pentSpinLeft = d2render.CreateSpriteFromDC6(dc6)
-			v.pentSpinLeft.Animate = true
-			v.pentSpinLeft.AnimateBackwards = true
-			v.pentSpinLeft.SpecialFrameTime = 475
-			v.pentSpinLeft.MoveTo(100, 300)
+			v.pentSpinLeft, _ = d2render.LoadSprite(d2resource.PentSpin, d2resource.PaletteSky)
+			v.pentSpinLeft.PlayBackward()
+			v.pentSpinLeft.SetPlayLengthMs(475)
+			v.pentSpinLeft.SetPosition(100, 300)
 		},
 		func() {
-			dc6, _ := d2dc6.LoadDC6(v.fileProvider.LoadFile(d2resource.PentSpin), d2datadict.Palettes[d2enum.Sky])
-			v.pentSpinRight = d2render.CreateSpriteFromDC6(dc6)
-			v.pentSpinRight.Animate = true
-			v.pentSpinRight.SpecialFrameTime = 475
-			v.pentSpinRight.MoveTo(650, 300)
+			v.pentSpinRight, _ = d2render.LoadSprite(d2resource.PentSpin, d2resource.PaletteSky)
+			v.pentSpinRight.PlayForward()
+			v.pentSpinRight.SetPlayLengthMs(475)
+			v.pentSpinRight.SetPosition(650, 300)
 		},
 		func() {
-			v.testLabel = d2ui.CreateLabel(v.fileProvider, d2resource.Font42, d2enum.Units)
+			v.testLabel = d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
 			v.testLabel.Alignment = d2ui.LabelAlignCenter
 			v.testLabel.SetText("Soon :tm:")
-			v.testLabel.MoveTo(400, 250)
+			v.testLabel.SetPosition(400, 250)
 		},
 		func() {
-			v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider)
+			v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager)
 			v.mapEngine.GenerateMap(d2enum.RegionAct1Town, 1, 0)
 
 			startX, startY := v.mapEngine.GetStartPosition()
@@ -82,12 +74,11 @@ func (v *Game) Load() []func() {
 				0,
 				v.gameState.HeroType,
 				v.gameState.Equipment,
-				v.fileProvider,
 			)
 			v.mapEngine.AddEntity(v.hero)
 		},
 		func() {
-			v.gameControls = d2player.NewGameControls(v.fileProvider, v.hero, v.mapEngine)
+			v.gameControls = d2player.NewGameControls(v.hero, v.mapEngine)
 			v.gameControls.Load()
 		},
 	}

@@ -1,4 +1,4 @@
-package d2core
+package d2asset
 
 import (
 	"errors"

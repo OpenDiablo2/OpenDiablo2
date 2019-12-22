@@ -3,10 +3,6 @@ package d2ui
 import (
 	"image/color"
 
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
-
-	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -27,8 +23,8 @@ type Label struct {
 	text      string
 	X         int
 	Y         int
-	Width     uint32
-	Height    uint32
+	Width     int
+	Height    int
 	Alignment LabelAlignment
 	font      *Font
 	imageData *ebiten.Image
@@ -36,17 +32,17 @@ type Label struct {
 }
 
 // CreateLabel creates a new instance of a UI label
-func CreateLabel(provider d2interface.FileProvider, font string, palette d2enum.PaletteType) Label {
+func CreateLabel(fontPath, palettePath string) Label {
 	result := Label{
 		Alignment: LabelAlignLeft,
 		Color:     color.White,
-		font:      GetFont(font, palette, provider),
+		font:      GetFont(fontPath, palettePath),
 	}
 	return result
 }
 
-// Draw draws the label on the screen
-func (v *Label) Draw(target *ebiten.Image) {
+// Render draws the label on the screen
+func (v *Label) Render(target *ebiten.Image) {
 	if len(v.text) == 0 {
 		return
 	}
@@ -65,13 +61,13 @@ func (v *Label) Draw(target *ebiten.Image) {
 	target.DrawImage(v.imageData, opts)
 }
 
-// MoveTo moves the label to the specified location
-func (v *Label) MoveTo(x, y int) {
+// SetPosition moves the label to the specified location
+func (v *Label) SetPosition(x, y int) {
 	v.X = x
 	v.Y = y
 }
 
-func (v *Label) GetTextMetrics(text string) (width, height uint32) {
+func (v *Label) GetTextMetrics(text string) (width, height int) {
 	return v.font.GetTextMetrics(text)
 }
 
@@ -83,7 +79,7 @@ func (v *Label) cacheImage() {
 	v.Width = width
 	v.Height = height
 	v.imageData, _ = ebiten.NewImage(int(width), int(height), ebiten.FilterNearest)
-	v.font.Draw(0, 0, v.text, v.Color, v.imageData)
+	v.font.Render(0, 0, v.text, v.Color, v.imageData)
 }
 
 // SetText sets the label's text
@@ -96,7 +92,7 @@ func (v *Label) SetText(newText string) {
 }
 
 // GetSize returns the size of the label
-func (v Label) GetSize() (width, height uint32) {
+func (v Label) GetSize() (width, height int) {
 	v.cacheImage()
 	width = v.Width
 	height = v.Height

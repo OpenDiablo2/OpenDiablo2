@@ -7,7 +7,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
@@ -83,7 +82,6 @@ var regions []RegionSpec = []RegionSpec{
 type MapEngineTest struct {
 	uiManager     *d2ui.Manager
 	soundManager  *d2audio.Manager
-	fileProvider  d2interface.FileProvider
 	sceneProvider d2coreinterface.SceneProvider
 	gameState     *d2core.GameState
 	mapEngine     *d2mapengine.MapEngine
@@ -97,14 +95,8 @@ type MapEngineTest struct {
 	debugVisLevel int
 }
 
-func CreateMapEngineTest(
-	fileProvider d2interface.FileProvider,
-	sceneProvider d2coreinterface.SceneProvider,
-	uiManager *d2ui.Manager,
-	soundManager *d2audio.Manager,
-	currentRegion int, levelPreset int) *MapEngineTest {
+func CreateMapEngineTest(sceneProvider d2coreinterface.SceneProvider, uiManager *d2ui.Manager, soundManager *d2audio.Manager, currentRegion int, levelPreset int) *MapEngineTest {
 	result := &MapEngineTest{
-		fileProvider:  fileProvider,
 		uiManager:     uiManager,
 		soundManager:  soundManager,
 		sceneProvider: sceneProvider,
@@ -145,7 +137,7 @@ func (v *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 	if n == 0 {
 		v.mapEngine.GenerateAct1Overworld()
 	} else {
-		v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider) // necessary for map name update
+		v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager) // necessary for map name update
 		v.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 	}
 
@@ -158,7 +150,7 @@ func (v *MapEngineTest) Load() []func() {
 	v.soundManager.PlayBGM("")
 	return []func(){
 		func() {
-			v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager, v.fileProvider)
+			v.mapEngine = d2mapengine.CreateMapEngine(v.gameState, v.soundManager)
 			v.LoadRegionByIndex(v.currentRegion, v.levelPreset, v.fileIndex)
 		},
 	}

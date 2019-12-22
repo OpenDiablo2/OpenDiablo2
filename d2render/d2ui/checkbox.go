@@ -1,11 +1,7 @@
 package d2ui
 
 import (
-	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/hajimehoshi/ebiten"
 )
@@ -14,14 +10,14 @@ type Checkbox struct {
 	x, y          int
 	checkState    bool
 	visible       bool
-	width, height uint32
+	width, height int
 	Image         *ebiten.Image
 	checkedImage  *ebiten.Image
 	onClick       func()
 	enabled       bool
 }
 
-func CreateCheckbox(fileProvider d2interface.FileProvider, checkState bool) Checkbox {
+func CreateCheckbox(checkState bool) Checkbox {
 	result := Checkbox{
 		checkState: checkState,
 		visible:    true,
@@ -29,20 +25,19 @@ func CreateCheckbox(fileProvider d2interface.FileProvider, checkState bool) Chec
 		height:     0,
 		enabled:    true,
 	}
-	dc6, _ := d2dc6.LoadDC6(fileProvider.LoadFile(d2resource.Checkbox), d2datadict.Palettes[d2enum.Fechar])
-	checkboxSprite := d2render.CreateSpriteFromDC6(dc6)
-	result.width, result.height = checkboxSprite.GetFrameSize(0)
-	checkboxSprite.MoveTo(0, 0)
+	checkboxSprite, _ := d2render.LoadSprite(d2resource.Checkbox, d2resource.PaletteFechar)
+	result.width, result.height, _ = checkboxSprite.GetFrameSize(0)
+	checkboxSprite.SetPosition(0, 0)
 
 	result.Image, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
-	checkboxSprite.DrawSegments(result.Image, 1, 1, 0)
+	checkboxSprite.RenderSegmented(result.Image, 1, 1, 0)
 
 	result.checkedImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
-	checkboxSprite.DrawSegments(result.checkedImage, 1, 1, 1)
+	checkboxSprite.RenderSegmented(result.checkedImage, 1, 1, 1)
 	return result
 }
 
-func (v Checkbox) Draw(target *ebiten.Image) {
+func (v Checkbox) Render(target *ebiten.Image) {
 	opts := &ebiten.DrawImageOptions{
 		CompositeMode: ebiten.CompositeModeSourceAtop,
 		Filter:        ebiten.FilterNearest,
@@ -89,11 +84,11 @@ func (v *Checkbox) Activate() {
 	v.onClick()
 }
 
-func (v Checkbox) GetLocation() (int, int) {
+func (v Checkbox) GetPosition() (int, int) {
 	return v.x, v.y
 }
 
-func (v Checkbox) GetSize() (uint32, uint32) {
+func (v Checkbox) GetSize() (int, int) {
 	return v.width, v.height
 }
 
@@ -101,7 +96,7 @@ func (v Checkbox) GetVisible() bool {
 	return v.visible
 }
 
-func (v *Checkbox) MoveTo(x int, y int) {
+func (v *Checkbox) SetPosition(x int, y int) {
 	v.x = x
 	v.y = y
 }

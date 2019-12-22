@@ -4,10 +4,10 @@ import "github.com/hajimehoshi/ebiten"
 
 // Drawable represents an instance that can be drawn
 type Drawable interface {
-	Draw(target *ebiten.Image)
-	GetSize() (width, height uint32)
-	MoveTo(x, y int)
-	GetLocation() (x, y int)
+	Render(target *ebiten.Image)
+	GetSize() (width, height int)
+	SetPosition(x, y int)
+	GetPosition() (x, y int)
 	GetVisible() bool
 	SetVisible(visible bool)
 }

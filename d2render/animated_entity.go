@@ -1,6 +1,7 @@
 package d2render
 
 import (
+	"errors"
 	"fmt"
 	"image"
 	"log"
@@ -9,12 +10,12 @@ import (
 	"strings"
 
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-	"github.com/OpenDiablo2/D2Shared/d2common/d2interface"
 	"github.com/OpenDiablo2/D2Shared/d2data"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2cof"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2dcc"
 	"github.com/OpenDiablo2/D2Shared/d2helper"
+	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -30,12 +31,11 @@ type LayerCacheEntry struct {
 
 // AnimatedEntity represents an entity on the map that can be animated
 type AnimatedEntity struct {
-	fileProvider       d2interface.FileProvider
 	LocationX          float64
 	LocationY          float64
 	TileX, TileY       int     // Coordinates of the tile the unit is within
 	subcellX, subcellY float64 // Subcell coordinates within the current tile
-	dccLayers          map[string]d2dcc.DCC
+	dccLayers          map[string]*d2dcc.DCC
 	Cof                *d2cof.COF
 	palette            d2enum.PaletteType
 	base               string
@@ -58,16 +58,15 @@ type AnimatedEntity struct {
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
-func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fileProvider d2interface.FileProvider, palette d2enum.PaletteType) AnimatedEntity {
+func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, palette d2enum.PaletteType) AnimatedEntity {
 	result := AnimatedEntity{
-		fileProvider: fileProvider,
-		base:         object.Base,
-		token:        object.Token,
-		object:       object,
-		palette:      palette,
-		layerCache:   make([]LayerCacheEntry, d2enum.CompositeTypeMax),
+		base:       object.Base,
+		token:      object.Token,
+		object:     object,
+		palette:    palette,
+		layerCache: make([]LayerCacheEntry, d2enum.CompositeTypeMax),
 	}
-	result.dccLayers = make(map[string]d2dcc.DCC)
+	result.dccLayers = make(map[string]*d2dcc.DCC)
 	result.LocationX = float64(x)
 	result.LocationY = float64(y)
 	result.TargetX = result.LocationX
@@ -84,7 +83,10 @@ func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, fil
 // SetMode changes the graphical mode of this animated entity
 func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction int) {
 	cofPath := fmt.Sprintf("%s/%s/COF/%s%s%s.COF", v.base, v.token, v.token, animationMode, weaponClass)
-	v.Cof = d2cof.LoadCOF(cofPath, v.fileProvider)
+	var err error
+	if v.Cof, err = d2asset.LoadCOF(cofPath); err != nil {
+		return
+	}
 	if v.Cof.NumberOfDirections == 0 || v.Cof.NumberOfLayers == 0 || v.Cof.FramesPerDirection == 0 {
 		return
 	}
@@ -95,11 +97,10 @@ func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction in
 	if v.direction >= v.Cof.NumberOfDirections {
 		v.direction = v.Cof.NumberOfDirections - 1
 	}
-	v.dccLayers = make(map[string]d2dcc.DCC)
+	v.dccLayers = make(map[string]*d2dcc.DCC)
 	for _, cofLayer := range v.Cof.CofLayers {
 		layerName := DccLayerNames[cofLayer.Type]
-		v.dccLayers[layerName] = v.LoadLayer(layerName, v.fileProvider)
-		if !v.dccLayers[layerName].IsValid() {
+		if v.dccLayers[layerName], err = v.LoadLayer(layerName); err != nil {
 			continue
 		}
 	}
@@ -107,7 +108,7 @@ func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction in
 	v.updateFrameCache(resetAnimation)
 }
 
-func (v *AnimatedEntity) LoadLayer(layer string, fileProvider d2interface.FileProvider) d2dcc.DCC {
+func (v *AnimatedEntity) LoadLayer(layer string) (*d2dcc.DCC, error) {
 	layerName := "TR"
 	switch strings.ToUpper(layer) {
 	case "HD": // Head
@@ -144,15 +145,19 @@ func (v *AnimatedEntity) LoadLayer(layer string, fileProvider d2interface.FilePr
 		layerName = v.object.S8
 	}
 	if len(layerName) == 0 {
-		return d2dcc.DCC{}
+		return nil, errors.New("invalid layer")
 	}
 	dccPath := fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dcc", v.base, v.token, layer, v.token, layer, layerName, v.animationMode, v.weaponClass)
-	result := d2dcc.LoadDCC(dccPath, fileProvider)
-	if !result.IsValid() {
+	result, err := d2asset.LoadDCC(dccPath)
+	if err != nil {
 		dccPath = fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dcc", v.base, v.token, layer, v.token, layer, layerName, v.animationMode, "HTH")
-		result = d2dcc.LoadDCC(dccPath, fileProvider)
+		result, err = d2asset.LoadDCC(dccPath)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return result
+
+	return result, nil
 }
 
 // If an npc has a path to pause at each location.
@@ -240,7 +245,7 @@ func (v *AnimatedEntity) updateFrameCache(resetAnimation bool) {
 		layerType := v.Cof.CofLayers[cofLayerIdx].Type
 		layerName := DccLayerNames[layerType]
 		dccLayer := v.dccLayers[layerName]
-		if !dccLayer.IsValid() {
+		if dccLayer == nil {
 			continue
 		}
 
