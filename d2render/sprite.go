@@ -62,7 +62,7 @@ func (s *Sprite) RenderSegmented(target *ebiten.Image, segmentsX, segmentsY, fra
 				return err
 			}
 
-			if err := s.animation.Render(target, currentX, currentY); err != nil {
+			if err := s.animation.Render(target, s.x+currentX, s.y+currentY); err != nil {
 				return err
 			}
 
