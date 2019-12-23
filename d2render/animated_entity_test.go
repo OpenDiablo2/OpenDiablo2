@@ -1,8 +1,9 @@
 package d2render
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAngleToDirection_16Directions(t *testing.T) {
@@ -60,7 +61,6 @@ func TestAngleToDirection_1Direction(t *testing.T) {
 		angle += 3
 	}
 }
-
 
 func TestAngleToDirection_0Directions(t *testing.T) {
 	angle := 0.0

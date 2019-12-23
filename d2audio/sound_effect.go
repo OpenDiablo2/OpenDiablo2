@@ -24,7 +24,12 @@ func CreateSoundEffect(sfx string, context *audio.Context, volume float64) *Soun
 	} else {
 		soundFile = sfx
 	}
-	audioData := d2asset.MustLoadFile(soundFile)
+
+	audioData, err := d2asset.LoadFile(soundFile)
+	if err != nil {
+		panic(err)
+	}
+
 	d, err := wav.Decode(context, audio.BytesReadSeekCloser(audioData))
 	if err != nil {
 		log.Fatal(err)

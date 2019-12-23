@@ -2,24 +2,26 @@ package d2core
 
 import (
 	"github.com/OpenDiablo2/D2Shared/d2common"
-	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/hajimehoshi/ebiten"
 )
 
 type NPC struct {
-	AnimatedEntity d2render.AnimatedEntity
+	AnimatedEntity *d2render.AnimatedEntity
 	HasPaths       bool
 	Paths          []d2common.Path
 	path           int
 }
 
 func CreateNPC(x, y int32, object *d2datadict.ObjectLookupRecord, direction int) *NPC {
-	result := &NPC{
-		AnimatedEntity: d2render.CreateAnimatedEntity(x, y, object, d2enum.Units),
-		HasPaths:       false,
+	entity, err := d2render.CreateAnimatedEntity(x, y, object, d2resource.PaletteUnits)
+	if err != nil {
+		panic(err)
 	}
+
+	result := &NPC{AnimatedEntity: entity, HasPaths: false}
 	result.AnimatedEntity.SetMode(object.Mode, object.Class, direction)
 	return result
 }
@@ -68,4 +70,6 @@ func (v *NPC) Advance(tickTime float64) {
 		v.AnimatedEntity.LocationY != v.AnimatedEntity.TargetY {
 		v.AnimatedEntity.Step(tickTime)
 	}
+
+	v.AnimatedEntity.Advance(tickTime)
 }

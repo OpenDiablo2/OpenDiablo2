@@ -1,33 +1,15 @@
 package d2render
 
 import (
-	"errors"
-	"fmt"
-	"image"
-	"log"
 	"math"
 	"math/rand"
-	"strings"
 
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-	"github.com/OpenDiablo2/D2Shared/d2data"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2cof"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dcc"
 	"github.com/OpenDiablo2/D2Shared/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
 	"github.com/hajimehoshi/ebiten"
 )
-
-var DccLayerNames = []string{"HD", "TR", "LG", "RA", "LA", "RH", "LH", "SH", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"}
-
-type LayerCacheEntry struct {
-	frameSheet       *ebiten.Image
-	frameWidth       int
-	frameHeight      int
-	compositeMode    ebiten.CompositeMode
-	offsetX, offsetY int32
-}
 
 // AnimatedEntity represents an entity on the map that can be animated
 type AnimatedEntity struct {
@@ -35,292 +17,67 @@ type AnimatedEntity struct {
 	LocationY          float64
 	TileX, TileY       int     // Coordinates of the tile the unit is within
 	subcellX, subcellY float64 // Subcell coordinates within the current tile
-	dccLayers          map[string]*d2dcc.DCC
-	Cof                *d2cof.COF
-	palette            d2enum.PaletteType
-	base               string
-	token              string
 	animationMode      string
 	weaponClass        string
-	lastFrameTime      float64
-	framesToAnimate    int
-	animationSpeed     float64
 	direction          int
-	currentFrame       int
 	offsetX, offsetY   int32
-	object             *d2datadict.ObjectLookupRecord
-	layerCache         []LayerCacheEntry
-	drawOrder          [][]d2enum.CompositeType
 	TargetX            float64
 	TargetY            float64
 	action             int32
-	repetitions        int32
+	repetitions        int
+
+	composite *d2asset.Composite
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
-func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, palette d2enum.PaletteType) AnimatedEntity {
-	result := AnimatedEntity{
-		base:       object.Base,
-		token:      object.Token,
-		object:     object,
-		palette:    palette,
-		layerCache: make([]LayerCacheEntry, d2enum.CompositeTypeMax),
+func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, palettePath string) (*AnimatedEntity, error) {
+	composite, err := d2asset.LoadComposite(object, palettePath)
+	if err != nil {
+		return nil, err
 	}
-	result.dccLayers = make(map[string]*d2dcc.DCC)
-	result.LocationX = float64(x)
-	result.LocationY = float64(y)
-	result.TargetX = result.LocationX
-	result.TargetY = result.LocationY
 
-	result.TileX = int(result.LocationX / 5)
-	result.TileY = int(result.LocationY / 5)
-	result.subcellX = 1 + math.Mod(result.LocationX, 5)
-	result.subcellY = 1 + math.Mod(result.LocationY, 5)
+	entity := &AnimatedEntity{composite: composite}
+	entity.LocationX = float64(x)
+	entity.LocationY = float64(y)
+	entity.TargetX = entity.LocationX
+	entity.TargetY = entity.LocationY
 
-	return result
+	entity.TileX = int(entity.LocationX / 5)
+	entity.TileY = int(entity.LocationY / 5)
+	entity.subcellX = 1 + math.Mod(entity.LocationX, 5)
+	entity.subcellY = 1 + math.Mod(entity.LocationY, 5)
+
+	return entity, nil
 }
 
 // SetMode changes the graphical mode of this animated entity
-func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction int) {
-	cofPath := fmt.Sprintf("%s/%s/COF/%s%s%s.COF", v.base, v.token, v.token, animationMode, weaponClass)
-	var err error
-	if v.Cof, err = d2asset.LoadCOF(cofPath); err != nil {
-		return
-	}
-	if v.Cof.NumberOfDirections == 0 || v.Cof.NumberOfLayers == 0 || v.Cof.FramesPerDirection == 0 {
-		return
-	}
-	resetAnimation := v.animationMode != animationMode || v.weaponClass != weaponClass
+func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction int) error {
 	v.animationMode = animationMode
-	v.weaponClass = weaponClass
 	v.direction = direction
-	if v.direction >= v.Cof.NumberOfDirections {
-		v.direction = v.Cof.NumberOfDirections - 1
-	}
-	v.dccLayers = make(map[string]*d2dcc.DCC)
-	for _, cofLayer := range v.Cof.CofLayers {
-		layerName := DccLayerNames[cofLayer.Type]
-		if v.dccLayers[layerName], err = v.LoadLayer(layerName); err != nil {
-			continue
-		}
-	}
 
-	v.updateFrameCache(resetAnimation)
-}
-
-func (v *AnimatedEntity) LoadLayer(layer string) (*d2dcc.DCC, error) {
-	layerName := "TR"
-	switch strings.ToUpper(layer) {
-	case "HD": // Head
-		layerName = v.object.HD
-	case "TR": // Torso
-		layerName = v.object.TR
-	case "LG": // Legs
-		layerName = v.object.LG
-	case "RA": // RightArm
-		layerName = v.object.RA
-	case "LA": // LeftArm
-		layerName = v.object.LA
-	case "RH": // RightHand
-		layerName = v.object.RH
-	case "LH": // LeftHand
-		layerName = v.object.LH
-	case "SH": // Shield
-		layerName = v.object.SH
-	case "S1": // Special1
-		layerName = v.object.S1
-	case "S2": // Special2
-		layerName = v.object.S2
-	case "S3": // Special3
-		layerName = v.object.S3
-	case "S4": // Special4
-		layerName = v.object.S4
-	case "S5": // Special5
-		layerName = v.object.S5
-	case "S6": // Special6
-		layerName = v.object.S6
-	case "S7": // Special7
-		layerName = v.object.S7
-	case "S8": // Special8
-		layerName = v.object.S8
-	}
-	if len(layerName) == 0 {
-		return nil, errors.New("invalid layer")
-	}
-	dccPath := fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dcc", v.base, v.token, layer, v.token, layer, layerName, v.animationMode, v.weaponClass)
-	result, err := d2asset.LoadDCC(dccPath)
+	err := v.composite.SetMode(animationMode, weaponClass, direction)
 	if err != nil {
-		dccPath = fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dcc", v.base, v.token, layer, v.token, layer, layerName, v.animationMode, "HTH")
-		result, err = d2asset.LoadDCC(dccPath)
-		if err != nil {
-			return nil, err
-		}
+		err = v.composite.SetMode(animationMode, "HTH", direction)
 	}
 
-	return result, nil
+	return err
 }
 
 // If an npc has a path to pause at each location.
 // Waits for animation to end and all repetitions to be exhausted.
 func (v AnimatedEntity) Wait() bool {
-	// currentFrame might skip the final frame if framesToAdd doesn't match up,
-	// bail immediately after the last repetition if that happens.
-	return v.repetitions < 0 || (v.repetitions == 0 && v.currentFrame >= v.framesToAnimate-1)
+	return v.composite.GetPlayedCount() > v.repetitions
 }
 
 // Render draws this animated entity onto the target
 func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
-	if v.animationSpeed > 0 {
-		now := d2helper.Now()
-		framesToAdd := math.Floor((now - v.lastFrameTime) / v.animationSpeed)
-		if framesToAdd > 0 {
-			v.lastFrameTime += v.animationSpeed * framesToAdd
-			v.currentFrame += int(math.Floor(framesToAdd))
-			for v.currentFrame >= v.framesToAnimate {
-				v.currentFrame -= v.framesToAnimate
-				v.repetitions = d2helper.MinInt32(-1, v.repetitions-1)
-			}
-		}
-	}
-
 	localX := (v.subcellX - v.subcellY) * 16
 	localY := ((v.subcellX + v.subcellY) * 8) - 5
-
-	if v.drawOrder == nil {
-		return
-	}
-	for _, layerIdx := range v.drawOrder[v.currentFrame] {
-		if v.currentFrame < 0 || v.layerCache[layerIdx].frameSheet == nil || v.currentFrame >= v.framesToAnimate {
-			continue
-		}
-		opts := &ebiten.DrawImageOptions{}
-		layer := v.layerCache[layerIdx]
-		x := float64(v.offsetX) + float64(offsetX) + localX + float64(v.layerCache[layerIdx].offsetX)
-		y := float64(v.offsetY) + float64(offsetY) + localY + float64(v.layerCache[layerIdx].offsetY)
-		opts.GeoM.Translate(x, y)
-		opts.CompositeMode = v.layerCache[layerIdx].compositeMode
-		xOffset := layer.frameWidth * v.currentFrame
-		sheetIndex := image.Rect(xOffset, 0, xOffset+layer.frameWidth, layer.frameHeight)
-		if err := target.DrawImage(layer.frameSheet.SubImage(sheetIndex).(*ebiten.Image), opts); err != nil {
-			log.Panic(err.Error())
-		}
-	}
-}
-
-func (v *AnimatedEntity) updateFrameCache(resetAnimation bool) {
-	if resetAnimation {
-		v.currentFrame = 0
-	}
-	// TODO: This animation data madness is incorrect, yet tasty
-	animDataTemp := d2data.AnimationData[strings.ToLower(v.token+v.animationMode+v.weaponClass)]
-	if animDataTemp == nil {
-		return
-	}
-	animationData := animDataTemp[0]
-	v.animationSpeed = 1.0 / ((float64(animationData.AnimationSpeed) * 25.0) / 256.0)
-	v.framesToAnimate = animationData.FramesPerDirection
-	v.lastFrameTime = d2helper.Now()
-
-	v.drawOrder = make([][]d2enum.CompositeType, v.framesToAnimate)
-
-	var dccDirection int
-	switch v.Cof.NumberOfDirections {
-	case 4:
-		dccDirection = d2dcc.CofToDir4[v.direction]
-	case 8:
-		dccDirection = d2dcc.CofToDir8[v.direction]
-	case 16:
-		dccDirection = d2dcc.CofToDir16[v.direction]
-	case 32:
-		dccDirection = d2dcc.CofToDir32[v.direction]
-	default:
-		dccDirection = 0
-	}
-
-	for frame := 0; frame < v.framesToAnimate; frame++ {
-		v.drawOrder[frame] = v.Cof.Priority[v.direction][frame]
-	}
-
-	for cofLayerIdx := range v.Cof.CofLayers {
-		layerType := v.Cof.CofLayers[cofLayerIdx].Type
-		layerName := DccLayerNames[layerType]
-		dccLayer := v.dccLayers[layerName]
-		if dccLayer == nil {
-			continue
-		}
-
-		minX := int32(10000)
-		minY := int32(10000)
-		maxX := int32(-10000)
-		maxY := int32(-10000)
-		for frameIdx := range dccLayer.Directions[dccDirection].Frames {
-			minX = d2helper.MinInt32(minX, int32(dccLayer.Directions[dccDirection].Frames[frameIdx].Box.Left))
-			minY = d2helper.MinInt32(minY, int32(dccLayer.Directions[dccDirection].Frames[frameIdx].Box.Top))
-			maxX = d2helper.MaxInt32(maxX, int32(dccLayer.Directions[dccDirection].Frames[frameIdx].Box.Right()))
-			maxY = d2helper.MaxInt32(maxY, int32(dccLayer.Directions[dccDirection].Frames[frameIdx].Box.Bottom()))
-		}
-
-		v.layerCache[layerType].offsetX = minX
-		v.layerCache[layerType].offsetY = minY
-		actualWidth := maxX - minX
-		actualHeight := maxY - minY
-
-		if (actualWidth <= 0) || (actualHeight < 0) {
-			log.Printf("Animated entity created with an invalid size of (%d, %d)", actualWidth, actualHeight)
-			return
-		}
-
-		transparency := byte(255)
-		if v.Cof.CofLayers[cofLayerIdx].Transparent {
-			switch v.Cof.CofLayers[cofLayerIdx].DrawEffect {
-			//Lets pick whatever we have that's closest.
-			case d2enum.DrawEffectPctTransparency25:
-				transparency = byte(64)
-			case d2enum.DrawEffectPctTransparency50:
-				transparency = byte(128)
-			case d2enum.DrawEffectPctTransparency75:
-				transparency = byte(192)
-			case d2enum.DrawEffectModulate:
-				v.layerCache[layerType].compositeMode = ebiten.CompositeModeLighter
-			case d2enum.DrawEffectBurn:
-				// Flies in tal rasha's tomb use this
-			case d2enum.DrawEffectNormal:
-			}
-		}
-
-		pixels := make([]byte, int32(v.framesToAnimate)*(actualWidth*actualHeight*4))
-
-		for animationIdx := 0; animationIdx < v.framesToAnimate; animationIdx++ {
-			if animationIdx >= len(dccLayer.Directions[dccDirection].Frames) {
-				log.Printf("Invalid animation index of %d for animated entity", animationIdx)
-				continue
-			}
-			sheetOffset := int(actualWidth) * animationIdx
-			combinedWidth := int(actualWidth) * v.framesToAnimate
-
-			frame := dccLayer.Directions[dccDirection].Frames[animationIdx]
-			for y := 0; y < dccLayer.Directions[dccDirection].Box.Height; y++ {
-				for x := 0; x < dccLayer.Directions[dccDirection].Box.Width; x++ {
-					paletteIndex := frame.PixelData[x+(y*dccLayer.Directions[dccDirection].Box.Width)]
-					if paletteIndex == 0 {
-						continue
-					}
-					color := d2datadict.Palettes[v.palette].Colors[paletteIndex]
-					actualX := (x + dccLayer.Directions[dccDirection].Box.Left) - int(minX)
-					actualY := (y + dccLayer.Directions[dccDirection].Box.Top) - int(minY)
-					idx := (sheetOffset + actualX + ((actualY) * combinedWidth)) * 4
-					pixels[idx] = color.R
-					pixels[idx+1] = color.G
-					pixels[idx+2] = color.B
-					pixels[idx+3] = transparency
-				}
-			}
-		}
-		v.layerCache[layerType].frameSheet, _ = ebiten.NewImage(int(actualWidth)*v.framesToAnimate, int(actualHeight), ebiten.FilterNearest)
-		_ = v.layerCache[layerType].frameSheet.ReplacePixels(pixels)
-		v.layerCache[layerType].frameWidth = int(actualWidth)
-		v.layerCache[layerType].frameHeight = int(actualHeight)
-	}
+	v.composite.Render(
+		target,
+		int(v.offsetX)+offsetX+int(localX),
+		int(v.offsetY)+offsetY+int(localY),
+	)
 }
 
 func (v AnimatedEntity) GetDirection() int {
@@ -365,8 +122,7 @@ func (v *AnimatedEntity) Step(tickTime float64) {
 	v.TileY = int(v.LocationY / 5)
 
 	if v.LocationX == v.TargetX && v.LocationY == v.TargetY {
-
-		v.repetitions = 3 + rand.Int31n(5)
+		v.repetitions = 3 + rand.Intn(5)
 		newAnimationMode := d2enum.AnimationModeObjectNeutral
 		// TODO: Figure out what 1-3 are for, 4 is correct.
 		switch v.action {
@@ -381,10 +137,10 @@ func (v *AnimatedEntity) Step(tickTime float64) {
 			v.repetitions = 0
 		}
 
+		v.composite.ResetPlayedCount()
 		if v.animationMode != newAnimationMode.String() {
 			v.SetMode(newAnimationMode.String(), v.weaponClass, v.direction)
 		}
-
 	}
 }
 
@@ -405,7 +161,7 @@ func (v *AnimatedEntity) SetTarget(tx, ty float64, action int32) {
 		newAnimationMode = d2enum.AnimationModeMonsterWalk.String()
 	}
 
-	newDirection := angleToDirection(float64(angle), v.Cof.NumberOfDirections)
+	newDirection := angleToDirection(float64(angle), v.composite.GetDirectionCount())
 	if newDirection != v.GetDirection() || newAnimationMode != v.animationMode {
 		v.SetMode(newAnimationMode, v.weaponClass, newDirection)
 	}
@@ -428,8 +184,8 @@ func angleToDirection(angle float64, numberOfDirections int) int {
 	return newDirection
 }
 
-func (v *AnimatedEntity) Advance(tickTime float64) {
-
+func (v *AnimatedEntity) Advance(elapsed float64) {
+	v.composite.Advance(elapsed)
 }
 
 func (v *AnimatedEntity) GetPosition() (float64, float64) {

@@ -51,7 +51,10 @@ func CreateFont(font string, palettePath string) *Font {
 	// bug: performance issue when using CJK fonts, because ten thousand frames will be rendered PER font
 	result.fontSprite, _ = d2render.LoadSprite(font+".dc6", palettePath)
 	woo := "Woo!\x01"
-	fontData := d2asset.MustLoadFile(font + ".tbl")
+	fontData, err := d2asset.LoadFile(font + ".tbl")
+	if err != nil {
+		panic(err)
+	}
 	if string(fontData[0:5]) != woo {
 		panic("No woo :(")
 	}

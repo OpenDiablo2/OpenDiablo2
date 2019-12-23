@@ -13,6 +13,7 @@ import (
 
 	"github.com/OpenDiablo2/D2Shared/d2common"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
+	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2ds1"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2dt1"
@@ -54,7 +55,12 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 
 	for _, levelTypeDt1 := range region.levelType.Files {
 		if len(levelTypeDt1) != 0 && levelTypeDt1 != "" && levelTypeDt1 != "0" {
-			dt1 := d2dt1.LoadDT1(d2asset.MustLoadFile("/data/global/tiles/" + levelTypeDt1))
+			fileData, err := d2asset.LoadFile("/data/global/tiles/" + levelTypeDt1)
+			if err != nil {
+				panic(err)
+			}
+
+			dt1 := d2dt1.LoadDT1(fileData)
 			region.tiles = append(region.tiles, dt1.Tiles...)
 		}
 	}
@@ -72,7 +78,11 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 	}
 
 	region.regionPath = levelFilesToPick[levelIndex]
-	region.ds1 = d2ds1.LoadDS1(d2asset.MustLoadFile("/data/global/tiles/" + region.regionPath))
+	fileData, err := d2asset.LoadFile("/data/global/tiles/" + region.regionPath)
+	if err != nil {
+		panic(err)
+	}
+	region.ds1 = d2ds1.LoadDS1(fileData)
 	region.tileRect = d2common.Rectangle{
 		Left:   tileOffsetX,
 		Top:    tileOffsetY,
@@ -133,9 +143,12 @@ func (mr *MapRegion) loadEntities() []MapEntity {
 			}
 		case d2datadict.ObjectTypeItem:
 			if object.ObjectInfo != nil && object.ObjectInfo.Draw && object.Lookup.Base != "" && object.Lookup.Token != "" {
-				entity := d2render.CreateAnimatedEntity(int32(worldX), int32(worldY), object.Lookup, d2enum.Units)
+				entity, err := d2render.CreateAnimatedEntity(int32(worldX), int32(worldY), object.Lookup, d2resource.PaletteUnits)
+				if err != nil {
+					panic(err)
+				}
 				entity.SetMode(object.Lookup.Mode, object.Lookup.Class, 0)
-				entities = append(entities, &entity)
+				entities = append(entities, entity)
 			}
 		}
 	}

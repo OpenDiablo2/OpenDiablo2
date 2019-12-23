@@ -3,8 +3,11 @@ package d2asset
 import (
 	"errors"
 	"image/color"
+	"math"
 
+	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2dcc"
 	"github.com/OpenDiablo2/D2Shared/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corehelper"
 
@@ -37,6 +40,7 @@ type Animation struct {
 	frameIndex     int
 	directionIndex int
 	lastFrameTime  float64
+	playedCount    int
 
 	compositeMode ebiten.CompositeMode
 	colorMod      color.Color
@@ -46,19 +50,81 @@ type Animation struct {
 	playLoop   bool
 }
 
+func createAnimationFromDCC(dcc *d2dcc.DCC, palette *d2datadict.PaletteRec, transparency int) (*Animation, error) {
+	animation := &Animation{
+		playLength: 1.0,
+		playLoop:   true,
+	}
+
+	for directionIndex, dccDirection := range dcc.Directions {
+		for _, dccFrame := range dccDirection.Frames {
+			minX, minY := math.MaxInt32, math.MaxInt32
+			maxX, maxY := math.MinInt32, math.MinInt32
+			for _, dccFrame := range dccDirection.Frames {
+				minX = d2helper.MinInt(minX, dccFrame.Box.Left)
+				minY = d2helper.MinInt(minY, dccFrame.Box.Top)
+				maxX = d2helper.MaxInt(maxX, dccFrame.Box.Right())
+				maxY = d2helper.MaxInt(maxY, dccFrame.Box.Bottom())
+			}
+
+			frameWidth := maxX - minX
+			frameHeight := maxY - minY
+
+			pixels := make([]byte, frameWidth*frameHeight*4)
+			for y := 0; y < frameHeight; y++ {
+				for x := 0; x < frameWidth; x++ {
+					if paletteIndex := dccFrame.PixelData[y*frameWidth+x]; paletteIndex != 0 {
+						color := palette.Colors[paletteIndex]
+						offset := (x + y*frameWidth) * 4
+						pixels[offset] = color.R
+						pixels[offset+1] = color.G
+						pixels[offset+2] = color.B
+						pixels[offset+3] = byte(transparency)
+					}
+				}
+			}
+
+			image, err := ebiten.NewImage(frameWidth, frameHeight, ebiten.FilterNearest)
+			if err != nil {
+				return nil, err
+			}
+
+			if err := image.ReplacePixels(pixels); err != nil {
+				return nil, err
+			}
+
+			if directionIndex >= len(animation.directions) {
+				animation.directions = append(animation.directions, new(animationDirection))
+			}
+
+			direction := animation.directions[directionIndex]
+			direction.frames = append(direction.frames, &animationFrame{
+				width:   int(dccFrame.Width),
+				height:  int(dccFrame.Height),
+				offsetX: minX,
+				offsetY: minY,
+				image:   image,
+			})
+
+		}
+	}
+
+	return animation, nil
+}
+
 func createAnimationFromDC6(dc6 *d2dc6.DC6File) (*Animation, error) {
 	animation := &Animation{
 		playLength: 1.0,
 		playLoop:   true,
 	}
 
-	for frameIndex, frame := range dc6.Frames {
-		image, err := ebiten.NewImage(int(frame.Width), int(frame.Height), ebiten.FilterNearest)
+	for frameIndex, dc6Frame := range dc6.Frames {
+		image, err := ebiten.NewImage(int(dc6Frame.Width), int(dc6Frame.Height), ebiten.FilterNearest)
 		if err != nil {
 			return nil, err
 		}
 
-		if err := image.ReplacePixels(frame.ColorData()); err != nil {
+		if err := image.ReplacePixels(dc6Frame.ColorData()); err != nil {
 			return nil, err
 		}
 
@@ -69,10 +135,10 @@ func createAnimationFromDC6(dc6 *d2dc6.DC6File) (*Animation, error) {
 
 		direction := animation.directions[directionIndex]
 		direction.frames = append(direction.frames, &animationFrame{
-			width:   int(frame.Width),
-			height:  int(frame.Height),
-			offsetX: int(frame.OffsetX),
-			offsetY: int(frame.OffsetY),
+			width:   int(dc6Frame.Width),
+			height:  int(dc6Frame.Height),
+			offsetX: int(dc6Frame.OffsetX),
+			offsetY: int(dc6Frame.OffsetY),
 			image:   image,
 		})
 	}
@@ -101,6 +167,7 @@ func (a *Animation) Advance(elapsed float64) error {
 		case playModeForward:
 			a.frameIndex++
 			if a.frameIndex >= frameCount {
+				a.playedCount++
 				if a.playLoop {
 					a.frameIndex = 0
 				} else {
@@ -111,6 +178,7 @@ func (a *Animation) Advance(elapsed float64) error {
 		case playModeBackward:
 			a.frameIndex--
 			if a.frameIndex < 0 {
+				a.playedCount++
 				if a.playLoop {
 					a.frameIndex = frameCount - 1
 				} else {
@@ -233,6 +301,10 @@ func (a *Animation) SetPlayLoop(loop bool) {
 	a.playLoop = true
 }
 
+func (a *Animation) SetPlaySpeed(playSpeed float64) {
+	a.SetPlayLength(playSpeed * float64(a.GetFrameCount()))
+}
+
 func (a *Animation) SetPlayLength(playLength float64) {
 	a.playLength = playLength
 	a.lastFrameTime = 0
@@ -244,6 +316,14 @@ func (a *Animation) SetPlayLengthMs(playLengthMs int) {
 
 func (a *Animation) SetColorMod(color color.Color) {
 	a.colorMod = color
+}
+
+func (a *Animation) GetPlayedCount() int {
+	return a.playedCount
+}
+
+func (a *Animation) ResetPlayedCount() {
+	a.playedCount = 0
 }
 
 func (a *Animation) SetBlend(blend bool) {

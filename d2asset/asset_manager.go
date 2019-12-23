@@ -18,7 +18,6 @@ const (
 
 	// In counts
 	PaletteBudget   = 64
-	PaperdollBudget = 64
 	AnimationBudget = 64
 )
 
@@ -31,7 +30,6 @@ type assetManager struct {
 	archiveManager   *archiveManager
 	fileManager      *fileManager
 	paletteManager   *paletteManager
-	paperdollManager *paperdollManager
 	animationManager *animationManager
 }
 
@@ -46,7 +44,6 @@ func Initialize(config *d2corecommon.Configuration) error {
 		archiveManager   = createArchiveManager(config)
 		fileManager      = createFileManager(config, archiveManager)
 		paletteManager   = createPaletteManager()
-		paperdollManager = createPaperdollManager()
 		animationManager = createAnimationManager()
 	)
 
@@ -54,7 +51,6 @@ func Initialize(config *d2corecommon.Configuration) error {
 		archiveManager,
 		fileManager,
 		paletteManager,
-		paperdollManager,
 		animationManager,
 	}
 
@@ -78,29 +74,19 @@ func LoadFile(filePath string) ([]byte, error) {
 }
 
 func LoadAnimation(animationPath, palettePath string) (*Animation, error) {
+	return LoadAnimationWithTransparency(animationPath, palettePath, 255)
+}
+
+func LoadAnimationWithTransparency(animationPath, palettePath string, transparency int) (*Animation, error) {
 	if singleton == nil {
 		return nil, ErrNoInit
 	}
 
-	return singleton.animationManager.loadAnimation(animationPath, palettePath)
+	return singleton.animationManager.loadAnimation(animationPath, palettePath, transparency)
 }
 
-func LoadPaperdoll(object *d2datadict.ObjectLookupRecord, palettePath string) (*Paperdoll, error) {
-	if singleton == nil {
-		return nil, ErrNoInit
-	}
-
-	return singleton.paperdollManager.loadPaperdoll(object, palettePath)
-}
-
-// TODO: remove transitional usage pattern
-func MustLoadFile(filePath string) []byte {
-	data, err := LoadFile(filePath)
-	if err != nil {
-		return []byte{}
-	}
-
-	return data
+func LoadComposite(object *d2datadict.ObjectLookupRecord, palettePath string) (*Composite, error) {
+	return createComposite(object, palettePath), nil
 }
 
 func loadPalette(palettePath string) (*d2datadict.PaletteRec, error) {
@@ -130,7 +116,7 @@ func loadDC6(dc6Path, palettePath string) (*d2dc6.DC6File, error) {
 	return &dc6, nil
 }
 
-func LoadDCC(dccPath string) (*d2dcc.DCC, error) {
+func loadDCC(dccPath string) (*d2dcc.DCC, error) {
 	dccData, err := LoadFile(dccPath)
 	if err != nil {
 		return nil, err
@@ -139,7 +125,7 @@ func LoadDCC(dccPath string) (*d2dcc.DCC, error) {
 	return d2dcc.LoadDCC(dccData)
 }
 
-func LoadCOF(cofPath string) (*d2cof.COF, error) {
+func loadCOF(cofPath string) (*d2cof.COF, error) {
 	cofData, err := LoadFile(cofPath)
 	if err != nil {
 		return nil, err
