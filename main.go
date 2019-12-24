@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
+	"github.com/OpenDiablo2/OpenDiablo2/d2term"
 
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 
@@ -27,6 +28,9 @@ var region = kingpin.Arg("region", "Region type id").Int()
 var preset = kingpin.Arg("preset", "Level preset").Int()
 
 func main() {
+	d2term.Initialize()
+	d2term.BindLogger()
+
 	//procs := runtime.GOMAXPROCS(16)
 	//log.Printf("Setting gomaxprocs to 16, it was previously set to %d", procs)
 	//runtime.LockOSThread()
@@ -37,7 +41,7 @@ func main() {
 		GitCommit = ""
 	}
 	d2common.SetBuildInfo(GitBranch, GitCommit)
-	log.SetFlags(log.Ldate | log.LUTC | log.Lmicroseconds | log.Llongfile)
+	log.SetFlags(log.Lshortfile)
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
 	_, iconImage, err := ebitenutil.NewImageFromFile("d2logo.png", ebiten.FilterLinear)
 	if err == nil {

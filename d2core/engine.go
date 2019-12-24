@@ -12,6 +12,7 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2helper"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2term"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 
@@ -24,6 +25,7 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 
 	"github.com/hajimehoshi/ebiten"
@@ -59,7 +61,6 @@ func CreateEngine() Engine {
 	}
 
 	d2asset.Initialize(result.Settings)
-
 	d2resource.LanguageCode = result.Settings.Language
 	d2datadict.LoadPalettes(nil, &result)
 	d2common.LoadTextDictionary(&result)
@@ -162,6 +163,7 @@ func (v *Engine) Update() {
 
 	v.CurrentScene.Update(deltaTime)
 	v.UIManager.Update()
+	d2term.Advance(deltaTime)
 }
 
 // Draw draws the game
@@ -188,6 +190,7 @@ func (v Engine) Draw(screen *ebiten.Image) {
 		ebitenutil.DebugPrintAt(screen, "Coords  "+strconv.FormatInt(int64(cx), 10)+","+strconv.FormatInt(int64(cy), 10), 680, 40)
 	}
 
+	d2term.Render(d2surface.CreateSurface(screen))
 }
 
 // SetNextScene tells the engine what scene to load on the next update cycle

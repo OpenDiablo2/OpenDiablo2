@@ -95,3 +95,13 @@ func (c *cache) retrieve(key string) (interface{}, bool) {
 
 	return node.value, true
 }
+
+func (c *cache) clear() {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.head = nil
+	c.tail = nil
+	c.lookup = make(map[string]*cacheNode)
+	c.weight = 0
+}

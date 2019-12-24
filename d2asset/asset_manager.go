@@ -9,6 +9,7 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2data/d2dcc"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2mpq"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon"
+	"github.com/OpenDiablo2/OpenDiablo2/d2term"
 )
 
 const (
@@ -54,7 +55,25 @@ func Initialize(config *d2corecommon.Configuration) error {
 		animationManager,
 	}
 
+	d2term.BindAction("assetstat", "display asset manager cache statistics", func() {
+		d2term.OutputInfo("archive cache: %f%%", float64(archiveManager.cache.weight)/float64(archiveManager.cache.budget)*100.0)
+		d2term.OutputInfo("file cache: %f%%", float64(fileManager.cache.weight)/float64(fileManager.cache.budget)*100.0)
+		d2term.OutputInfo("palette cache: %f%%", float64(paletteManager.cache.weight)/float64(paletteManager.cache.budget)*100.0)
+		d2term.OutputInfo("animation cache: %f%%", float64(animationManager.cache.weight)/float64(animationManager.cache.budget)*100.0)
+	})
+
+	d2term.BindAction("assetclear", "clear asset manager cache", func() {
+		archiveManager.cache.clear()
+		fileManager.cache.clear()
+		paletteManager.cache.clear()
+		animationManager.cache.clear()
+	})
+
 	return nil
+}
+
+func Shutdown() {
+	singleton = nil
 }
 
 func LoadArchive(archivePath string) (*d2mpq.MPQ, error) {
