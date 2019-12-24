@@ -87,8 +87,12 @@ func (v *Credits) Load() []func() {
 			v.uiManager.AddWidget(&v.exitButton)
 		},
 		func() {
-			fileData, _ := dh.Utf16BytesToString(d2asset.MustLoadFile(d2resource.CreditsText)[2:])
-			v.creditsText = strings.Split(fileData, "\r\n")
+			fileData, err := d2asset.LoadFile(d2resource.CreditsText)
+			if err != nil {
+				panic(err)
+			}
+			creditData, _ := dh.Utf16BytesToString(fileData[2:])
+			v.creditsText = strings.Split(creditData, "\r\n")
 			for i := range v.creditsText {
 				v.creditsText[i] = strings.Trim(v.creditsText[i], " ")
 			}

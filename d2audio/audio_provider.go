@@ -45,7 +45,10 @@ func (v *Manager) PlayBGM(song string) {
 				log.Panic(err)
 			}
 		}
-		audioData := d2asset.MustLoadFile(song)
+		audioData, err := d2asset.LoadFile(song)
+		if err != nil {
+			panic(err)
+		}
 		d, err := wav.Decode(v.audioContext, audio.BytesReadSeekCloser(audioData))
 		if err != nil {
 			log.Fatal(err)

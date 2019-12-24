@@ -21,7 +21,10 @@ func CreateBlizzardIntro(sceneProvider d2coreinterface.SceneProvider) *BlizzardI
 func (v *BlizzardIntro) Load() []func() {
 	return []func(){
 		func() {
-			videoBytes := d2asset.MustLoadFile("/data/local/video/BlizNorth640x480.bik")
+			videoBytes, err := d2asset.LoadFile("/data/local/video/BlizNorth640x480.bik")
+			if err != nil {
+				panic(err)
+			}
 			v.videoDecoder = d2video.CreateBinkDecoder(videoBytes)
 		},
 	}
