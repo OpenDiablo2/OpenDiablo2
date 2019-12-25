@@ -189,6 +189,7 @@ func (t *terminal) advance(elapsed float64) error {
 
 		t.commandHistory = append(commandHistory, t.command)
 
+		t.output(t.command)
 		if err := t.execute(t.command); err != nil {
 			t.outputError(err.Error())
 		}
