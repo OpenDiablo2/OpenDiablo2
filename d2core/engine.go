@@ -5,7 +5,6 @@ import (
 	"math"
 	"runtime"
 	"strconv"
-	"time"
 
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 
@@ -49,11 +48,12 @@ type Engine struct {
 	fullscreenKey   bool                        // When true, the fullscreen toggle is still being pressed
 	lastTime        float64                     // Last time we updated the scene
 	showFPS         bool
+	timeScale       float64
 }
 
 // CreateEngine creates and instance of the OpenDiablo2 engine
-func CreateEngine() Engine {
-	var result Engine
+func CreateEngine() *Engine {
+	result := &Engine{timeScale: 1.0}
 
 	result.Settings = d2corecommon.LoadConfiguration()
 	if err := result.Settings.Save(); err != nil {
@@ -62,21 +62,21 @@ func CreateEngine() Engine {
 
 	d2asset.Initialize(result.Settings)
 	d2resource.LanguageCode = result.Settings.Language
-	d2datadict.LoadPalettes(nil, &result)
-	d2common.LoadTextDictionary(&result)
-	d2datadict.LoadLevelTypes(&result)
-	d2datadict.LoadLevelPresets(&result)
-	d2datadict.LoadLevelWarps(&result)
-	d2datadict.LoadObjectTypes(&result)
-	d2datadict.LoadObjects(&result)
-	d2datadict.LoadWeapons(&result)
-	d2datadict.LoadArmors(&result)
-	d2datadict.LoadMiscItems(&result)
-	d2datadict.LoadUniqueItems(&result)
-	d2datadict.LoadMissiles(&result)
-	d2datadict.LoadSounds(&result)
-	d2data.LoadAnimationData(&result)
-	d2datadict.LoadMonStats(&result)
+	d2datadict.LoadPalettes(nil, result)
+	d2common.LoadTextDictionary(result)
+	d2datadict.LoadLevelTypes(result)
+	d2datadict.LoadLevelPresets(result)
+	d2datadict.LoadLevelWarps(result)
+	d2datadict.LoadObjectTypes(result)
+	d2datadict.LoadObjects(result)
+	d2datadict.LoadWeapons(result)
+	d2datadict.LoadArmors(result)
+	d2datadict.LoadMiscItems(result)
+	d2datadict.LoadUniqueItems(result)
+	d2datadict.LoadMissiles(result)
+	d2datadict.LoadSounds(result)
+	d2data.LoadAnimationData(result)
+	d2datadict.LoadMonStats(result)
 	LoadHeroObjects()
 	result.SoundManager = d2audio.CreateManager()
 	result.SoundManager.SetVolumes(result.Settings.BgmVolume, result.Settings.SfxVolume)
@@ -84,6 +84,16 @@ func CreateEngine() Engine {
 	result.LoadingSprite, _ = d2render.LoadSprite(d2resource.LoadingScreen, d2resource.PaletteLoading)
 	loadingSpriteSizeX, loadingSpriteSizeY := result.LoadingSprite.GetCurrentFrameSize()
 	result.LoadingSprite.SetPosition(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
+
+	d2term.BindAction("timescale", "set scalar for elapsed time", func(scale float64) {
+		if scale <= 0 {
+			d2term.OutputError("invalid time scale value")
+		} else {
+			d2term.OutputInfo("timescale changed from %f to %f", result.timeScale, scale)
+			result.timeScale = scale
+		}
+	})
+
 	return result
 }
 
@@ -156,9 +166,8 @@ func (v *Engine) Update() {
 		return
 	}
 
-	currentTime := float64(time.Now().UnixNano()) / float64(time.Second)
-
-	deltaTime := math.Min((currentTime - v.lastTime), 0.1)
+	currentTime := d2helper.Now()
+	deltaTime := (currentTime - v.lastTime) * v.timeScale
 	v.lastTime = currentTime
 
 	v.CurrentScene.Update(deltaTime)

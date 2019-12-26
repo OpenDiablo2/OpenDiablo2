@@ -22,7 +22,7 @@ var GitBranch string
 
 // GitCommit is set by the CI build process to the commit hash
 var GitCommit string
-var d2Engine d2core.Engine
+var d2Engine *d2core.Engine
 
 var region = kingpin.Arg("region", "Region type id").Int()
 var preset = kingpin.Arg("preset", "Level preset").Int()
@@ -51,9 +51,9 @@ func main() {
 	d2Engine = d2core.CreateEngine()
 	kingpin.Parse()
 	if *region == 0 {
-		d2Engine.SetNextScene(d2scene.CreateMainMenu(&d2Engine, d2Engine.UIManager, d2Engine.SoundManager))
+		d2Engine.SetNextScene(d2scene.CreateMainMenu(d2Engine, d2Engine.UIManager, d2Engine.SoundManager))
 	} else {
-		d2Engine.SetNextScene(d2scene.CreateMapEngineTest(&d2Engine, d2Engine.UIManager, d2Engine.SoundManager, *region, *preset))
+		d2Engine.SetNextScene(d2scene.CreateMapEngineTest(d2Engine, d2Engine.UIManager, d2Engine.SoundManager, *region, *preset))
 	}
 	ebiten.SetCursorVisible(false)
 	ebiten.SetFullscreen(d2Engine.Settings.FullScreen)
