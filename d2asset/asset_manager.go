@@ -55,6 +55,19 @@ func Initialize(config *d2corecommon.Configuration) error {
 		animationManager,
 	}
 
+	d2term.BindAction("assetverbose", "display verbose asset manager logs", func(verbose bool) {
+		if verbose {
+			d2term.OutputInfo("asset manager verbose logging enabled")
+		} else {
+			d2term.OutputInfo("asset manager verbose logging disabled")
+		}
+
+		archiveManager.cache.verbose = verbose
+		fileManager.cache.verbose = verbose
+		paletteManager.cache.verbose = verbose
+		animationManager.cache.verbose = verbose
+	})
+
 	d2term.BindAction("assetstat", "display asset manager cache statistics", func() {
 		d2term.OutputInfo("archive cache: %f%%", float64(archiveManager.cache.weight)/float64(archiveManager.cache.budget)*100.0)
 		d2term.OutputInfo("file cache: %f%%", float64(fileManager.cache.weight)/float64(fileManager.cache.budget)*100.0)

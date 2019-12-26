@@ -2,6 +2,7 @@ package d2asset
 
 import (
 	"errors"
+	"log"
 	"sync"
 )
 
@@ -14,12 +15,13 @@ type cacheNode struct {
 }
 
 type cache struct {
-	head   *cacheNode
-	tail   *cacheNode
-	lookup map[string]*cacheNode
-	weight int
-	budget int
-	mutex  sync.Mutex
+	head    *cacheNode
+	tail    *cacheNode
+	lookup  map[string]*cacheNode
+	weight  int
+	budget  int
+	verbose bool
+	mutex   sync.Mutex
 }
 
 func createCache(budget int) *cache {
@@ -56,6 +58,11 @@ func (c *cache) insert(key string, value interface{}, weight int) error {
 	for ; c.tail != nil && c.tail != c.head && c.weight > c.budget; c.tail = c.tail.prev {
 		c.weight -= c.tail.weight
 		c.tail.prev.next = nil
+
+		if c.verbose {
+			log.Printf("warning, cache evicting %s (%d) for %s (%d)", c.tail.key, c.tail.weight, key, weight)
+		}
+
 		delete(c.lookup, c.tail.key)
 	}
 
