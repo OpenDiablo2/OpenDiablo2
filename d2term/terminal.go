@@ -21,11 +21,12 @@ import (
 )
 
 const (
-	termCharWidth    = 6
-	termCharHeight   = 16
-	termLineCount    = 24
-	termLineCountMax = 32
-	termAnimLength   = 0.5
+	termCharWidth   = 6
+	termCharHeight  = 16
+	termRowCount    = 24
+	termRowCountMax = 32
+	termColCountMax = 128
+	termAnimLength  = 0.5
 )
 
 type termCategory int
@@ -81,7 +82,7 @@ type terminal struct {
 
 func createTerminal() (*terminal, error) {
 	terminal := &terminal{
-		lineCount: termLineCount,
+		lineCount: termRowCount,
 		actions:   make(map[string]termActionEntry),
 	}
 
@@ -158,6 +159,10 @@ func (t *terminal) advance(elapsed float64) error {
 		}
 	}
 
+	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+		t.command = ""
+	}
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
 		if ebiten.IsKeyPressed(ebiten.KeyControl) {
 			t.lineCount = d2helper.MaxInt(0, t.lineCount-1)
@@ -172,7 +177,7 @@ func (t *terminal) advance(elapsed float64) error {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyDown) && ebiten.IsKeyPressed(ebiten.KeyControl) {
-		t.lineCount = d2helper.MinInt(t.lineCount+1, termLineCountMax)
+		t.lineCount = d2helper.MinInt(t.lineCount+1, termRowCountMax)
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) && len(t.command) > 0 {
@@ -324,7 +329,24 @@ func (t *terminal) execute(command string) error {
 }
 
 func (t *terminal) outputRaw(text string, category termCategory) {
-	t.outputHistory = append(t.outputHistory, termHistroyEntry{text, category})
+	var line string
+	for _, word := range strings.Split(text, " ") {
+		if len(line) > 0 {
+			line += " "
+		}
+
+		lineLength := len(line)
+		wordLength := len(word)
+
+		if lineLength+wordLength >= termColCountMax {
+			t.outputHistory = append(t.outputHistory, termHistroyEntry{line, category})
+			line = word
+		} else {
+			line += word
+		}
+	}
+
+	t.outputHistory = append(t.outputHistory, termHistroyEntry{line, category})
 }
 
 func (t *terminal) output(format string, params ...interface{}) {

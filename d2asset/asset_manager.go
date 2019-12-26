@@ -55,7 +55,7 @@ func Initialize(config *d2corecommon.Configuration) error {
 		animationManager,
 	}
 
-	d2term.BindAction("assetverbose", "display verbose asset manager logs", func(verbose bool) {
+	d2term.BindAction("assetspam", "display verbose asset manager logs", func(verbose bool) {
 		if verbose {
 			d2term.OutputInfo("asset manager verbose logging enabled")
 		} else {

@@ -60,7 +60,14 @@ func (c *cache) insert(key string, value interface{}, weight int) error {
 		c.tail.prev.next = nil
 
 		if c.verbose {
-			log.Printf("warning, cache evicting %s (%d) for %s (%d)", c.tail.key, c.tail.weight, key, weight)
+			log.Printf(
+				"warning -- cache is evicting %s (%d) for %s (%d); spare weight is now %d",
+				c.tail.key,
+				c.tail.weight,
+				key,
+				weight,
+				c.budget-c.weight,
+			)
 		}
 
 		delete(c.lookup, c.tail.key)
