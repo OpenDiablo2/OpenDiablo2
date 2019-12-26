@@ -257,6 +257,11 @@ func (v *CharacterSelect) Update(tickTime float64) {
 			v.mouseButtonPressed = false
 		}
 	}
+	for _, hero := range v.characterImage {
+		if hero != nil {
+			hero.AnimatedEntity.Advance(tickTime)
+		}
+	}
 }
 
 func (v *CharacterSelect) onDeleteCharButtonClicked() {
