@@ -11,8 +11,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
-	"github.com/hajimehoshi/ebiten"
 )
 
 type Game struct {
@@ -87,8 +87,8 @@ func (v *Game) Load() []func() {
 func (v *Game) Unload() {
 }
 
-func (v Game) Render(screen *ebiten.Image) {
-	screen.Fill(color.Black)
+func (v Game) Render(screen *d2surface.Surface) {
+	screen.Clear(color.Black)
 	v.mapEngine.Render(screen)
 	v.gameControls.Render(screen)
 }

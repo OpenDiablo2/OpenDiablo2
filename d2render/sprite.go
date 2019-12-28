@@ -5,8 +5,7 @@ import (
 
 	"github.com/OpenDiablo2/D2Shared/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
-
-	"github.com/hajimehoshi/ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 )
 
 type Sprite struct {
@@ -34,21 +33,19 @@ func MustLoadSprite(animationPath, palettePath string) *Sprite {
 	return sprite
 }
 
-func (s *Sprite) Render(target *ebiten.Image) error {
+func (s *Sprite) Render(target *d2surface.Surface) error {
 	if err := s.advance(); err != nil {
 		return err
 	}
 
 	_, frameHeight := s.animation.GetCurrentFrameSize()
 
-	if err := s.animation.Render(target, s.x, s.y-frameHeight); err != nil {
-		return err
-	}
-
-	return nil
+	target.PushTranslation(s.x, s.y-frameHeight)
+	defer target.Pop()
+	return s.animation.Render(target)
 }
 
-func (s *Sprite) RenderSegmented(target *ebiten.Image, segmentsX, segmentsY, frameOffset int) error {
+func (s *Sprite) RenderSegmented(target *d2surface.Surface, segmentsX, segmentsY, frameOffset int) error {
 	if err := s.advance(); err != nil {
 		return err
 	}
@@ -62,7 +59,10 @@ func (s *Sprite) RenderSegmented(target *ebiten.Image, segmentsX, segmentsY, fra
 				return err
 			}
 
-			if err := s.animation.Render(target, s.x+currentX, s.y+currentY); err != nil {
+			target.PushTranslation(s.x+currentX, s.y+currentY)
+			err := s.animation.Render(target)
+			target.Pop()
+			if err != nil {
 				return err
 			}
 

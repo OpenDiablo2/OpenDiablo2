@@ -16,8 +16,8 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2common"
 	dh "github.com/OpenDiablo2/D2Shared/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
-	"github.com/hajimehoshi/ebiten"
 )
 
 type HeroRenderInfo struct {
@@ -444,7 +444,7 @@ func (v SelectHeroClass) onOkButtonClicked() {
 	v.sceneProvider.SetNextScene(CreateGame(v.sceneProvider, v.uiManager, v.soundManager, gameState))
 }
 
-func (v *SelectHeroClass) Render(screen *ebiten.Image) {
+func (v *SelectHeroClass) Render(screen *d2surface.Surface) {
 	v.bgImage.RenderSegmented(screen, 4, 3, 0)
 	v.headingLabel.Render(screen)
 	if v.selectedHero != d2enum.HeroNone {
@@ -560,7 +560,7 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 
 }
 
-func (v *SelectHeroClass) renderHero(screen *ebiten.Image, hero d2enum.Hero) {
+func (v *SelectHeroClass) renderHero(screen *d2surface.Surface, hero d2enum.Hero) {
 	renderInfo := v.heroRenderInfo[hero]
 	switch renderInfo.Stance {
 	case d2enum.HeroStanceIdle:
@@ -647,7 +647,7 @@ func setSpriteToFirstFrame(sprite *d2render.Sprite) {
 	}
 }
 
-func drawSprite(sprite *d2render.Sprite, target *ebiten.Image) {
+func drawSprite(sprite *d2render.Sprite, target *d2surface.Surface) {
 	if sprite != nil {
 		sprite.Render(target)
 	}

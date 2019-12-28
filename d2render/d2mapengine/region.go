@@ -1,7 +1,6 @@
 package d2mapengine
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 	"math"
@@ -9,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
 
 	"github.com/OpenDiablo2/D2Shared/d2common"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
@@ -20,8 +18,8 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
-	"github.com/OpenDiablo2/OpenDiablo2/d2corehelper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 )
 
 type MapRegion struct {
@@ -234,7 +232,7 @@ func (mr *MapRegion) getTileWorldPosition(tileX, tileY int) (float64, float64) {
 	return float64(tileX + mr.tileRect.Left), float64(tileY + mr.tileRect.Top)
 }
 
-func (mr *MapRegion) renderPass1(viewport *Viewport, target *ebiten.Image) {
+func (mr *MapRegion) renderPass1(viewport *Viewport, target *d2surface.Surface) {
 	for tileY := range mr.ds1.Tiles {
 		for tileX, tile := range mr.ds1.Tiles[tileY] {
 			worldX, worldY := mr.getTileWorldPosition(tileX, tileY)
@@ -247,7 +245,7 @@ func (mr *MapRegion) renderPass1(viewport *Viewport, target *ebiten.Image) {
 	}
 }
 
-func (mr *MapRegion) renderPass2(entities []MapEntity, viewport *Viewport, target *ebiten.Image) {
+func (mr *MapRegion) renderPass2(entities []MapEntity, viewport *Viewport, target *d2surface.Surface) {
 	for tileY := range mr.ds1.Tiles {
 		for tileX, tile := range mr.ds1.Tiles[tileY] {
 			worldX, worldY := mr.getTileWorldPosition(tileX, tileY)
@@ -258,8 +256,9 @@ func (mr *MapRegion) renderPass2(entities []MapEntity, viewport *Viewport, targe
 				for _, entity := range entities {
 					entWorldX, entWorldY := entity.GetPosition()
 					if entWorldX == worldX && entWorldY == worldY {
-						screenX, screenY := viewport.GetTranslationScreen()
-						entity.Render(target, screenX, screenY)
+						target.PushTranslation(viewport.GetTranslationScreen())
+						entity.Render(target)
+						target.Pop()
 					}
 				}
 
@@ -269,7 +268,7 @@ func (mr *MapRegion) renderPass2(entities []MapEntity, viewport *Viewport, targe
 	}
 }
 
-func (mr *MapRegion) renderPass3(viewport *Viewport, target *ebiten.Image) {
+func (mr *MapRegion) renderPass3(viewport *Viewport, target *d2surface.Surface) {
 	for tileY := range mr.ds1.Tiles {
 		for tileX, tile := range mr.ds1.Tiles[tileY] {
 			worldX, worldY := mr.getTileWorldPosition(tileX, tileY)
@@ -282,7 +281,7 @@ func (mr *MapRegion) renderPass3(viewport *Viewport, target *ebiten.Image) {
 	}
 }
 
-func (mr *MapRegion) renderTilePass1(tile d2ds1.TileRecord, viewport *Viewport, target *ebiten.Image) {
+func (mr *MapRegion) renderTilePass1(tile d2ds1.TileRecord, viewport *Viewport, target *d2surface.Surface) {
 	for _, wall := range tile.Walls {
 		if !wall.Hidden && wall.Prop1 != 0 && wall.Type.LowerWall() {
 			mr.renderWall(wall, viewport, target)
@@ -302,7 +301,7 @@ func (mr *MapRegion) renderTilePass1(tile d2ds1.TileRecord, viewport *Viewport, 
 	}
 }
 
-func (mr *MapRegion) renderTilePass2(tile d2ds1.TileRecord, viewport *Viewport, target *ebiten.Image) {
+func (mr *MapRegion) renderTilePass2(tile d2ds1.TileRecord, viewport *Viewport, target *d2surface.Surface) {
 	for _, wall := range tile.Walls {
 		if !wall.Hidden && wall.Type.UpperWall() {
 			mr.renderWall(wall, viewport, target)
@@ -310,7 +309,7 @@ func (mr *MapRegion) renderTilePass2(tile d2ds1.TileRecord, viewport *Viewport, 
 	}
 }
 
-func (mr *MapRegion) renderTilePass3(tile d2ds1.TileRecord, viewport *Viewport, target *ebiten.Image) {
+func (mr *MapRegion) renderTilePass3(tile d2ds1.TileRecord, viewport *Viewport, target *d2surface.Surface) {
 	for _, wall := range tile.Walls {
 		if wall.Type == d2enum.Roof {
 			mr.renderWall(wall, viewport, target)
@@ -318,7 +317,7 @@ func (mr *MapRegion) renderTilePass3(tile d2ds1.TileRecord, viewport *Viewport, 
 	}
 }
 
-func (mr *MapRegion) renderFloor(tile d2ds1.FloorShadowRecord, viewport *Viewport, target *ebiten.Image) {
+func (mr *MapRegion) renderFloor(tile d2ds1.FloorShadowRecord, viewport *Viewport, target *d2surface.Surface) {
 	var img *ebiten.Image
 	if !tile.Animated {
 		img = mr.getImageCacheRecord(tile.Style, tile.Sequence, 0, tile.RandomIndex)
@@ -331,14 +330,15 @@ func (mr *MapRegion) renderFloor(tile d2ds1.FloorShadowRecord, viewport *Viewpor
 	}
 
 	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust))
-	screenX, screenY := viewport.GetTranslationScreen()
-	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(float64(screenX), float64(screenY))
-	target.DrawImage(img, opts)
-	viewport.PopTranslation()
+	defer viewport.PopTranslation()
+
+	target.PushTranslation(viewport.GetTranslationScreen())
+	defer target.Pop()
+
+	target.Render(img)
 }
 
-func (mr *MapRegion) renderWall(tile d2ds1.WallRecord, viewport *Viewport, target *ebiten.Image) {
+func (mr *MapRegion) renderWall(tile d2ds1.WallRecord, viewport *Viewport, target *d2surface.Surface) {
 	img := mr.getImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tile.RandomIndex)
 	if img == nil {
 		log.Printf("Render called on uncached wall {%v,%v,%v}", tile.Style, tile.Sequence, tile.Type)
@@ -346,14 +346,15 @@ func (mr *MapRegion) renderWall(tile d2ds1.WallRecord, viewport *Viewport, targe
 	}
 
 	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust))
-	screenX, screenY := viewport.GetTranslationScreen()
-	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(float64(screenX), float64(screenY))
-	target.DrawImage(img, opts)
-	viewport.PopTranslation()
+	defer viewport.PopTranslation()
+
+	target.PushTranslation(viewport.GetTranslationScreen())
+	defer target.Pop()
+
+	target.Render(img)
 }
 
-func (mr *MapRegion) renderShadow(tile d2ds1.FloorShadowRecord, viewport *Viewport, target *ebiten.Image) {
+func (mr *MapRegion) renderShadow(tile d2ds1.FloorShadowRecord, viewport *Viewport, target *d2surface.Surface) {
 	img := mr.getImageCacheRecord(tile.Style, tile.Sequence, 13, tile.RandomIndex)
 	if img == nil {
 		log.Printf("Render called on uncached shadow {%v,%v}", tile.Style, tile.Sequence)
@@ -361,15 +362,16 @@ func (mr *MapRegion) renderShadow(tile d2ds1.FloorShadowRecord, viewport *Viewpo
 	}
 
 	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust))
-	screenX, screenY := viewport.GetTranslationScreen()
-	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(float64(screenX), float64(screenY))
-	opts.ColorM = d2corehelper.ColorToColorM(color.RGBA{255, 255, 255, 160})
-	target.DrawImage(img, opts)
-	viewport.PopTranslation()
+	defer viewport.PopTranslation()
+
+	target.PushTranslation(viewport.GetTranslationScreen())
+	target.PushColor(color.RGBA{255, 255, 255, 160})
+	defer target.PopN(2)
+
+	target.Render(img)
 }
 
-func (mr *MapRegion) renderDebug(debugVisLevel int, viewport *Viewport, target *ebiten.Image) {
+func (mr *MapRegion) renderDebug(debugVisLevel int, viewport *Viewport, target *d2surface.Surface) {
 	for tileY := range mr.ds1.Tiles {
 		for tileX := range mr.ds1.Tiles[tileY] {
 			worldX, worldY := mr.getTileWorldPosition(tileX, tileY)
@@ -380,7 +382,7 @@ func (mr *MapRegion) renderDebug(debugVisLevel int, viewport *Viewport, target *
 	}
 }
 
-func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *Viewport, target *ebiten.Image) {
+func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *Viewport, target *d2surface.Surface) {
 	if debugVisLevel > 0 {
 		subtileColor := color.RGBA{80, 80, 255, 100}
 		tileColor := color.RGBA{255, 255, 255, 255}
@@ -389,22 +391,34 @@ func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *View
 		screenX2, screenY2 := viewport.WorldToScreen(float64(x+1), float64(y))
 		screenX3, screenY3 := viewport.WorldToScreen(float64(x), float64(y+1))
 
-		ebitenutil.DrawLine(target, float64(screenX1), float64(screenY1), float64(screenX2), float64(screenY2), tileColor)
-		ebitenutil.DrawLine(target, float64(screenX1), float64(screenY1), float64(screenX3), float64(screenY3), tileColor)
-		ebitenutil.DebugPrintAt(target, fmt.Sprintf("%v,%v", x, y), screenX1-10, screenY1+10)
+		target.PushTranslation(screenX1, screenY1)
+		defer target.Pop()
+
+		target.DrawLine(screenX2-screenX1, screenY2-screenY1, tileColor)
+		target.DrawLine(screenX3-screenX1, screenY3-screenY1, tileColor)
+		target.PushTranslation(-10, 10)
+		target.DrawText("%v, %v", x, y)
+		target.Pop()
 
 		if debugVisLevel > 1 {
 			for i := 1; i <= 4; i++ {
 				x := i * 16
 				y := i * 8
 
-				ebitenutil.DrawLine(target, float64(screenX1-x), float64(screenY1+y), float64(screenX1-x+80), float64(screenY1+y+40), subtileColor)
-				ebitenutil.DrawLine(target, float64(screenX1+x), float64(screenY1+y), float64(screenX1+x-80), float64(screenY1+y+40), subtileColor)
+				target.PushTranslation(-x, y)
+				target.DrawLine(80, 40, subtileColor)
+				target.Pop()
+
+				target.PushTranslation(x, y)
+				target.DrawLine(-80, 40, subtileColor)
+				target.Pop()
 			}
 
 			tile := mr.ds1.Tiles[y][x]
-			for i := range tile.Floors {
-				ebitenutil.DebugPrintAt(target, fmt.Sprintf("f: %v-%v", tile.Floors[i].Style, tile.Floors[i].Sequence), screenX1-20, screenY1+10+(i+1)*14)
+			for i, floor := range tile.Floors {
+				target.PushTranslation(-20, 10+(i+1)*14)
+				target.DrawText("f: %v-%v", floor.Style, floor.Sequence)
+				target.Pop()
 			}
 		}
 	}

@@ -9,7 +9,7 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2dcc"
 	"github.com/OpenDiablo2/D2Shared/d2helper"
-	"github.com/OpenDiablo2/OpenDiablo2/d2corehelper"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -192,18 +192,15 @@ func (a *Animation) Advance(elapsed float64) error {
 	return nil
 }
 
-func (a *Animation) Render(target *ebiten.Image, offsetX, offsetY int) error {
+func (a *Animation) Render(target *d2surface.Surface) error {
 	direction := a.directions[a.directionIndex]
 	frame := direction.frames[a.frameIndex]
 
-	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(float64(frame.offsetX+offsetX), float64(frame.offsetY+offsetY))
-	opts.CompositeMode = a.compositeMode
-	if a.colorMod != nil {
-		opts.ColorM = d2corehelper.ColorToColorM(a.colorMod)
-	}
-
-	return target.DrawImage(frame.image, opts)
+	target.PushTranslation(frame.offsetX, frame.offsetY)
+	target.PushCompositeMode(a.compositeMode)
+	target.PushColor(a.colorMod)
+	defer target.PopN(3)
+	return target.Render(frame.image)
 }
 
 func (a *Animation) GetFrameSize(frameIndex int) (int, int, error) {

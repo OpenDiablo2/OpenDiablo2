@@ -5,6 +5,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -67,8 +68,8 @@ func (g *GameControls) Load() {
 }
 
 // TODO: consider caching the panels to single image that is reused.
-func (g *GameControls) Render(target *ebiten.Image) {
-	width, height := target.Size()
+func (g *GameControls) Render(target *d2surface.Surface) {
+	width, height := target.GetSize()
 	offset := int(0)
 
 	// Left globe holder

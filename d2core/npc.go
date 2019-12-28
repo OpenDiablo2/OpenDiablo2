@@ -5,7 +5,7 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
-	"github.com/hajimehoshi/ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 )
 
 type NPC struct {
@@ -44,8 +44,8 @@ func (v *NPC) SetPaths(paths []d2common.Path) {
 	v.HasPaths = len(paths) > 0
 }
 
-func (v *NPC) Render(target *ebiten.Image, offsetX, offsetY int) {
-	v.AnimatedEntity.Render(target, offsetX, offsetY)
+func (v *NPC) Render(target *d2surface.Surface) {
+	v.AnimatedEntity.Render(target)
 }
 
 func (v *NPC) GetPosition() (float64, float64) {

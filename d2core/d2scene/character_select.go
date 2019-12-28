@@ -6,8 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hajimehoshi/ebiten/ebitenutil"
-
 	"github.com/OpenDiablo2/D2Shared/d2common"
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 	dh "github.com/OpenDiablo2/D2Shared/d2helper"
@@ -15,6 +13,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 	"github.com/hajimehoshi/ebiten"
 )
@@ -195,7 +194,7 @@ func (v *CharacterSelect) onExitButtonClicked() {
 func (v *CharacterSelect) Unload() {
 }
 
-func (v *CharacterSelect) Render(screen *ebiten.Image) {
+func (v *CharacterSelect) Render(screen *d2surface.Surface) {
 	v.background.RenderSegmented(screen, 4, 3, 0)
 	v.d2HeroTitle.Render(screen)
 	actualSelectionIndex := v.selectedCharacter - (v.charScrollbar.GetCurrentOffset() * 2)
@@ -210,10 +209,12 @@ func (v *CharacterSelect) Render(screen *ebiten.Image) {
 		v.characterNameLabel[i].Render(screen)
 		v.characterStatsLabel[i].Render(screen)
 		v.characterExpLabel[i].Render(screen)
-		v.characterImage[i].Render(screen, v.characterNameLabel[i].X-40, v.characterNameLabel[i].Y+50)
+		screen.PushTranslation(v.characterNameLabel[i].X-40, v.characterNameLabel[i].Y+50)
+		v.characterImage[i].Render(screen)
+		screen.Pop()
 	}
 	if v.showDeleteConfirmation {
-		ebitenutil.DrawRect(screen, 0.0, 0.0, 800.0, 600.0, color.RGBA{0, 0, 0, 128})
+		screen.DrawRect(800, 600, color.RGBA{0, 0, 0, 128})
 		v.okCancelBox.RenderSegmented(screen, 2, 1, 0)
 		v.deleteCharConfirmLabel.Render(screen)
 	}

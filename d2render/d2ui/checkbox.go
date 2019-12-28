@@ -3,6 +3,7 @@ package d2ui
 import (
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -30,23 +31,25 @@ func CreateCheckbox(checkState bool) Checkbox {
 	checkboxSprite.SetPosition(0, 0)
 
 	result.Image, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
-	checkboxSprite.RenderSegmented(result.Image, 1, 1, 0)
+	surface := d2surface.CreateSurface(result.Image)
+	checkboxSprite.RenderSegmented(surface, 1, 1, 0)
 
 	result.checkedImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
-	checkboxSprite.RenderSegmented(result.checkedImage, 1, 1, 1)
+	checkedSurface := d2surface.CreateSurface(result.checkedImage)
+	checkboxSprite.RenderSegmented(checkedSurface, 1, 1, 1)
 	return result
 }
 
-func (v Checkbox) Render(target *ebiten.Image) {
-	opts := &ebiten.DrawImageOptions{
-		CompositeMode: ebiten.CompositeModeSourceAtop,
-		Filter:        ebiten.FilterNearest,
-	}
-	opts.GeoM.Translate(float64(v.x), float64(v.y))
-	if v.checkState == false {
-		target.DrawImage(v.Image, opts)
+func (v Checkbox) Render(target *d2surface.Surface) {
+	target.PushCompositeMode(ebiten.CompositeModeSourceAtop)
+	target.PushTranslation(v.x, v.y)
+	target.PushFilter(ebiten.FilterNearest)
+	defer target.PopN(3)
+
+	if v.checkState {
+		target.Render(v.checkedImage)
 	} else {
-		target.DrawImage(v.checkedImage, opts)
+		target.Render(v.Image)
 	}
 }
 func (v Checkbox) GetEnabled() bool {

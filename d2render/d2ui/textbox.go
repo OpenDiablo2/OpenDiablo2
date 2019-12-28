@@ -8,6 +8,7 @@ import (
 
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -51,7 +52,7 @@ func repeatingKeyPressed(key ebiten.Key) bool {
 	return false
 }
 
-func (v TextBox) Render(target *ebiten.Image) {
+func (v TextBox) Render(target *d2surface.Surface) {
 	if !v.visible {
 		return
 	}

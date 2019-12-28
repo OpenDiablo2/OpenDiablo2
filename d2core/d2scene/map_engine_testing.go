@@ -1,7 +1,6 @@
 package d2scene
 
 import (
-	"fmt"
 	"math"
 	"os"
 
@@ -12,9 +11,9 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
@@ -160,7 +159,7 @@ func (v *MapEngineTest) Unload() {
 
 }
 
-func (v *MapEngineTest) Render(screen *ebiten.Image) {
+func (v *MapEngineTest) Render(screen *d2surface.Surface) {
 	v.mapEngine.Render(screen)
 	screenX := v.uiManager.CursorX
 	screenY := v.uiManager.CursorY
@@ -173,14 +172,6 @@ func (v *MapEngineTest) Render(screen *ebiten.Image) {
 	}
 
 	tileRect := curRegion.GetTileRect()
-	line := fmt.Sprintf("%d, %d (Tile %d.%d, %d.%d)",
-		screenX,
-		screenY,
-		int(math.Floor(worldX))-tileRect.Left,
-		subtileX,
-		int(math.Floor(worldY))-tileRect.Top,
-		subtileY,
-	)
 
 	levelFilesToPick := make([]string, 0)
 	fileIndex := v.fileIndex
@@ -199,12 +190,20 @@ func (v *MapEngineTest) Render(screen *ebiten.Image) {
 		v.fileIndex = fileIndex
 	}
 	v.filesCount = len(levelFilesToPick)
-	ebitenutil.DebugPrintAt(screen, line, 5, 5)
-	ebitenutil.DebugPrintAt(screen, "Map: "+curRegion.GetLevelType().Name, 5, 17)
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%v: %v/%v [%v, %v]", regionPath, fileIndex+1, v.filesCount, v.currentRegion, v.levelPreset), 5, 29)
-	ebitenutil.DebugPrintAt(screen, "N - next region, P - previous region", 5, 41)
-	ebitenutil.DebugPrintAt(screen, "Shift+N - next preset, Shift+P - previous preset", 5, 53)
-	ebitenutil.DebugPrintAt(screen, "Ctrl+N - next file, Ctrl+P - previous file", 5, 65)
+
+	screen.PushTranslation(5, 5)
+	screen.DrawText("%d, %d (Tile %d.%d, %d.%d)", screenX, screenY, int(math.Floor(worldX))-tileRect.Left, subtileX, int(math.Floor(worldY))-tileRect.Top, subtileY)
+	screen.PushTranslation(0, 16)
+	screen.DrawText("Map: "+curRegion.GetLevelType().Name, 5, 17)
+	screen.PushTranslation(0, 16)
+	screen.DrawText("%v: %v/%v [%v, %v]", regionPath, fileIndex+1, v.filesCount, v.currentRegion, v.levelPreset)
+	screen.PushTranslation(0, 16)
+	screen.DrawText("N - next region, P - previous region")
+	screen.PushTranslation(0, 16)
+	screen.DrawText("Shift+N - next preset, Shift+P - previous preset")
+	screen.PushTranslation(0, 16)
+	screen.DrawText("Ctrl+N - next file, Ctrl+P - previous file")
+	screen.PopN(6)
 }
 
 func (v *MapEngineTest) Update(tickTime float64) {

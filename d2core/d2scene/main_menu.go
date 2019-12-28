@@ -18,9 +18,8 @@ import (
 
 	"github.com/OpenDiablo2/D2Shared/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
-
-	"github.com/hajimehoshi/ebiten"
 )
 
 // MainMenu represents the main menu
@@ -223,7 +222,7 @@ func (v *MainMenu) Unload() {
 }
 
 // Render renders the main menu
-func (v *MainMenu) Render(screen *ebiten.Image) {
+func (v *MainMenu) Render(screen *d2surface.Surface) {
 	if v.ShowTrademarkScreen {
 		v.trademarkBackground.RenderSegmented(screen, 4, 3, 0)
 	} else {

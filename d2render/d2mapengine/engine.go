@@ -3,17 +3,16 @@ package d2mapengine
 import (
 	"strings"
 
-	"github.com/hajimehoshi/ebiten"
-
 	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 )
 
 type MapEntity interface {
-	Render(target *ebiten.Image, screenX, screenY int)
-	GetPosition() (float64, float64)
+	Render(target *d2surface.Surface)
 	Advance(tickTime float64)
+	GetPosition() (float64, float64)
 }
 
 type MapEngine struct {
@@ -134,7 +133,7 @@ func (me *MapEngine) Advance(tickTime float64) {
 	}
 }
 
-func (me *MapEngine) Render(target *ebiten.Image) {
+func (me *MapEngine) Render(target *d2surface.Surface) {
 	for _, region := range me.regions {
 		if region.isVisbile(me.viewport) {
 			region.renderPass1(me.viewport, target)

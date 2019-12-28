@@ -9,7 +9,7 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2data"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2dcc"
-	"github.com/hajimehoshi/ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 )
 
 type Composite struct {
@@ -45,7 +45,7 @@ func (c *Composite) Advance(elapsed float64) error {
 	return nil
 }
 
-func (c *Composite) Render(target *ebiten.Image, offsetX, offsetY int) error {
+func (c *Composite) Render(target *d2surface.Surface) error {
 	if c.mode == nil {
 		return nil
 	}
@@ -53,7 +53,7 @@ func (c *Composite) Render(target *ebiten.Image, offsetX, offsetY int) error {
 	for _, layerIndex := range c.mode.drawOrder[c.mode.frameIndex] {
 		layer := c.mode.layers[layerIndex]
 		if layer != nil {
-			if err := layer.Render(target, offsetX, offsetY); err != nil {
+			if err := layer.Render(target); err != nil {
 				return err
 			}
 		}

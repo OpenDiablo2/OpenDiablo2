@@ -6,8 +6,8 @@ import (
 
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2corehelper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -127,33 +127,38 @@ func CreateButton(buttonType ButtonType, text string) Button {
 	}
 
 	result.normalImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
+	normalSurface := d2surface.CreateSurface(result.normalImage)
 	_, fontHeight := font.GetTextMetrics(text)
 	textY := int((result.height/2)-(int(fontHeight)/2)) + buttonLayout.TextOffset
 
 	buttonSprite.SetPosition(0, 0)
 	buttonSprite.SetBlend(true)
-	buttonSprite.RenderSegmented(result.normalImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame)
-	font.Render(0, textY, text, color.RGBA{100, 100, 100, 255}, result.normalImage)
+	buttonSprite.RenderSegmented(normalSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame)
+	font.Render(0, textY, text, color.RGBA{100, 100, 100, 255}, normalSurface)
 	if buttonLayout.AllowFrameChange {
 		if totalButtonTypes > 1 {
 			result.pressedImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
-			buttonSprite.RenderSegmented(result.pressedImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+1)
-			font.Render(-2, textY+2, text, color.RGBA{100, 100, 100, 255}, result.pressedImage)
+			pressedSurface := d2surface.CreateSurface(result.pressedImage)
+			buttonSprite.RenderSegmented(pressedSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+1)
+			font.Render(-2, textY+2, text, color.RGBA{100, 100, 100, 255}, pressedSurface)
 		}
 		if totalButtonTypes > 2 {
 			result.toggledImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
-			buttonSprite.RenderSegmented(result.toggledImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+2)
-			font.Render(0, textY, text, color.RGBA{100, 100, 100, 255}, result.toggledImage)
+			toggledSurface := d2surface.CreateSurface(result.toggledImage)
+			buttonSprite.RenderSegmented(toggledSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+2)
+			font.Render(0, textY, text, color.RGBA{100, 100, 100, 255}, toggledSurface)
 		}
 		if totalButtonTypes > 3 {
 			result.pressedToggledImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
-			buttonSprite.RenderSegmented(result.pressedToggledImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+3)
-			font.Render(0, textY, text, color.RGBA{100, 100, 100, 255}, result.pressedToggledImage)
+			pressedToggledSurface := d2surface.CreateSurface(result.pressedToggledImage)
+			buttonSprite.RenderSegmented(pressedToggledSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+3)
+			font.Render(0, textY, text, color.RGBA{100, 100, 100, 255}, pressedToggledSurface)
 		}
 		if buttonLayout.DisabledFrame != -1 {
 			result.disabledImage, _ = ebiten.NewImage(int(result.width), int(result.height), ebiten.FilterNearest)
-			buttonSprite.RenderSegmented(result.disabledImage, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.DisabledFrame)
-			font.Render(0, textY, text, color.RGBA{100, 100, 100, 255}, result.disabledImage)
+			disabledSurface := d2surface.CreateSurface(result.disabledImage)
+			buttonSprite.RenderSegmented(disabledSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.DisabledFrame)
+			font.Render(0, textY, text, color.RGBA{100, 100, 100, 255}, disabledSurface)
 		}
 	}
 	return result
@@ -173,25 +178,24 @@ func (v *Button) Activate() {
 }
 
 // Render renders the button
-func (v Button) Render(target *ebiten.Image) {
-	opts := &ebiten.DrawImageOptions{
-		CompositeMode: ebiten.CompositeModeSourceAtop,
-		Filter:        ebiten.FilterNearest,
-	}
-	opts.GeoM.Translate(float64(v.x), float64(v.y))
+func (v Button) Render(target *d2surface.Surface) {
+	target.PushCompositeMode(ebiten.CompositeModeSourceAtop)
+	target.PushFilter(ebiten.FilterNearest)
+	target.PushTranslation(v.x, v.y)
+	defer target.PopN(3)
 
 	if !v.enabled {
-		//opts.CompositeMode = ebiten.CompositeModeLighter
-		opts.ColorM = d2corehelper.ColorToColorM(color.RGBA{128, 128, 128, 195})
-		target.DrawImage(v.disabledImage, opts)
+		target.PushColor(color.RGBA{128, 128, 128, 195})
+		defer target.Pop()
+		target.Render(v.disabledImage)
 	} else if v.toggled && v.pressed {
-		target.DrawImage(v.pressedToggledImage, opts)
+		target.Render(v.pressedToggledImage)
 	} else if v.pressed {
-		target.DrawImage(v.pressedImage, opts)
+		target.Render(v.pressedImage)
 	} else if v.toggled {
-		target.DrawImage(v.toggledImage, opts)
+		target.Render(v.toggledImage)
 	} else {
-		target.DrawImage(v.normalImage, opts)
+		target.Render(v.normalImage)
 	}
 }
 
