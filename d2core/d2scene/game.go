@@ -99,5 +99,5 @@ func (v *Game) Update(tickTime float64) {
 	rx, ry := v.mapEngine.WorldToOrtho(v.hero.AnimatedEntity.LocationX/5, v.hero.AnimatedEntity.LocationY/5)
 	v.mapEngine.MoveCameraTo(rx, ry)
 
-	v.gameControls.Move(tickTime)
+	v.gameControls.Update(tickTime)
 }

@@ -10,17 +10,19 @@ import (
 type InventoryItemArmor struct {
 	inventorySizeX int
 	inventorySizeY int
+	inventorySlotX int
+	inventorySlotY int
 	itemName       string
 	itemCode       string
 	armorClass     string
 }
 
-func GetArmorItemByCode(code string) InventoryItemArmor {
+func GetArmorItemByCode(code string) *InventoryItemArmor {
 	result := d2datadict.Armors[code]
 	if result == nil {
 		log.Fatalf("Could not find armor entry for code '%s'", code)
 	}
-	return InventoryItemArmor{
+	return &InventoryItemArmor{
 		inventorySizeX: result.InventoryWidth,
 		inventorySizeY: result.InventoryHeight,
 		itemName:       result.Name,
@@ -29,29 +31,45 @@ func GetArmorItemByCode(code string) InventoryItemArmor {
 	}
 }
 
-func (v InventoryItemArmor) GetArmorClass() string {
-	if v.itemCode == "" {
+func (v *InventoryItemArmor) ArmorClass() string {
+	if v == nil || v.itemCode == "" {
 		return "lit"
 	}
 	return v.armorClass
 }
 
-func (v InventoryItemArmor) GetInventoryItemName() string {
+func (v *InventoryItemArmor) InventoryItemName() string {
+	if v == nil {
+		return ""
+	}
+
 	return v.itemName
 }
 
-func (v InventoryItemArmor) GetInventoryItemType() d2enum.InventoryItemType {
+func (v *InventoryItemArmor) InventoryItemType() d2enum.InventoryItemType {
 	return d2enum.InventoryItemTypeArmor
 }
 
-func (v InventoryItemArmor) GetInventoryGridSize() (int, int) {
+func (v *InventoryItemArmor) InventoryGridSize() (int, int) {
 	return v.inventorySizeX, v.inventorySizeY
 }
 
-func (v InventoryItemArmor) Serialize() []byte {
+func (v *InventoryItemArmor) InventoryGridSlot() (int, int) {
+	return v.inventorySlotX, v.inventorySlotY
+}
+
+func (v *InventoryItemArmor) SetInventoryGridSlot(x int, y int) {
+	v.inventorySlotX, v.inventorySlotY = x, y
+}
+
+func (v *InventoryItemArmor) Serialize() []byte {
 	return []byte{}
 }
 
-func (v InventoryItemArmor) GetItemCode() string {
+func (v *InventoryItemArmor) ItemCode() string {
+	if v == nil {
+		return ""
+	}
+
 	return v.itemCode
 }

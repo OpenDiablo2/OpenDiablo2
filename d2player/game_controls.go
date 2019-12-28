@@ -7,11 +7,20 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/inpututil"
 )
+
+type Panel interface {
+	IsOpen() bool
+	Toggle()
+	Open()
+	Close()
+}
 
 type GameControls struct {
 	hero      *d2core.Hero
 	mapEngine *d2mapengine.MapEngine
+	inventory *Inventory
 
 	// UI
 	globeSprite *d2render.Sprite
@@ -24,10 +33,11 @@ func NewGameControls(hero *d2core.Hero, mapEngine *d2mapengine.MapEngine) *GameC
 	return &GameControls{
 		hero:      hero,
 		mapEngine: mapEngine,
+		inventory: NewInventory(),
 	}
 }
 
-func (g *GameControls) Move(tickTime float64) {
+func (g *GameControls) Update(tickTime float64) {
 
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		px, py := g.mapEngine.ScreenToWorld(ebiten.CursorPosition())
@@ -58,6 +68,10 @@ func (g *GameControls) Move(tickTime float64) {
 		g.hero.AnimatedEntity.SetTarget(g.hero.AnimatedEntity.LocationX+moveX, g.hero.AnimatedEntity.LocationY+moveY, 1)
 	}
 
+	if inpututil.IsKeyJustPressed(ebiten.KeyI) {
+		g.inventory.Toggle()
+	}
+
 }
 
 func (g *GameControls) Load() {
@@ -65,43 +79,46 @@ func (g *GameControls) Load() {
 	g.mainPanel, _ = d2render.LoadSprite(d2resource.GamePanels, d2resource.PaletteSky)
 	g.menuButton, _ = d2render.LoadSprite(d2resource.MenuButton, d2resource.PaletteSky)
 	g.skillIcon, _ = d2render.LoadSprite(d2resource.GenericSkills, d2resource.PaletteSky)
+	g.inventory.Load()
 }
 
 // TODO: consider caching the panels to single image that is reused.
 func (g *GameControls) Render(target *d2surface.Surface) {
+	g.inventory.Render(target)
+
 	width, height := target.GetSize()
 	offset := int(0)
 
 	// Left globe holder
 	g.mainPanel.SetCurrentFrame(0)
 	w, _ := g.mainPanel.GetCurrentFrameSize()
-	g.mainPanel.SetPosition(int(offset), height)
+	g.mainPanel.SetPosition(offset, height)
 	g.mainPanel.Render(target)
 
 	// Left globe
 	g.globeSprite.SetCurrentFrame(0)
-	g.globeSprite.SetPosition(int(offset+28), height-5)
+	g.globeSprite.SetPosition(offset+28, height-5)
 	g.globeSprite.Render(target)
 	offset += w
 
 	// Left skill
 	g.skillIcon.SetCurrentFrame(2)
 	w, _ = g.skillIcon.GetCurrentFrameSize()
-	g.skillIcon.SetPosition(int(offset), height)
+	g.skillIcon.SetPosition(offset, height)
 	g.skillIcon.Render(target)
 	offset += w
 
 	// Left skill selector
 	g.mainPanel.SetCurrentFrame(1)
 	w, _ = g.mainPanel.GetCurrentFrameSize()
-	g.mainPanel.SetPosition(int(offset), height)
+	g.mainPanel.SetPosition(offset, height)
 	g.mainPanel.Render(target)
 	offset += w
 
 	// Stamina
 	g.mainPanel.SetCurrentFrame(2)
 	w, _ = g.mainPanel.GetCurrentFrameSize()
-	g.mainPanel.SetPosition(int(offset), height)
+	g.mainPanel.SetPosition(offset, height)
 	g.mainPanel.Render(target)
 	offset += w
 
@@ -114,33 +131,33 @@ func (g *GameControls) Render(target *d2surface.Surface) {
 	// Potions
 	g.mainPanel.SetCurrentFrame(3)
 	w, _ = g.mainPanel.GetCurrentFrameSize()
-	g.mainPanel.SetPosition(int(offset), height)
+	g.mainPanel.SetPosition(offset, height)
 	g.mainPanel.Render(target)
 	offset += w
 
 	// Right skill selector
 	g.mainPanel.SetCurrentFrame(4)
 	w, _ = g.mainPanel.GetCurrentFrameSize()
-	g.mainPanel.SetPosition(int(offset), height)
+	g.mainPanel.SetPosition(offset, height)
 	g.mainPanel.Render(target)
 	offset += w
 
 	// Right skill
 	g.skillIcon.SetCurrentFrame(10)
 	w, _ = g.skillIcon.GetCurrentFrameSize()
-	g.skillIcon.SetPosition(int(offset), height)
+	g.skillIcon.SetPosition(offset, height)
 	g.skillIcon.Render(target)
 	offset += w
 
 	// Right globe holder
 	g.mainPanel.SetCurrentFrame(5)
 	w, _ = g.mainPanel.GetCurrentFrameSize()
-	g.mainPanel.SetPosition(int(offset), height)
+	g.mainPanel.SetPosition(offset, height)
 	g.mainPanel.Render(target)
 
 	// Right globe
 	g.globeSprite.SetCurrentFrame(1)
-	g.globeSprite.SetPosition(int(offset)+8, height-8)
+	g.globeSprite.SetPosition(offset+8, height-8)
 	g.globeSprite.Render(target)
 
 }
