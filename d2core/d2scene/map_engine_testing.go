@@ -194,7 +194,7 @@ func (v *MapEngineTest) Render(screen *d2surface.Surface) {
 	screen.PushTranslation(5, 5)
 	screen.DrawText("%d, %d (Tile %d.%d, %d.%d)", screenX, screenY, int(math.Floor(worldX))-tileRect.Left, subtileX, int(math.Floor(worldY))-tileRect.Top, subtileY)
 	screen.PushTranslation(0, 16)
-	screen.DrawText("Map: "+curRegion.GetLevelType().Name, 5, 17)
+	screen.DrawText("Map: " + curRegion.GetLevelType().Name)
 	screen.PushTranslation(0, 16)
 	screen.DrawText("%v: %v/%v [%v, %v]", regionPath, fileIndex+1, v.filesCount, v.currentRegion, v.levelPreset)
 	screen.PushTranslation(0, 16)
