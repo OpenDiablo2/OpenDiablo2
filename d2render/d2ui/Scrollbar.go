@@ -3,6 +3,7 @@ package d2ui
 import (
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -72,7 +73,7 @@ func (v Scrollbar) GetLastDirChange() int {
 	return v.lastDirChange
 }
 
-func (v *Scrollbar) Render(target *ebiten.Image) {
+func (v *Scrollbar) Render(target *d2surface.Surface) {
 	if !v.visible || v.maxOffset == 0 {
 		return
 	}

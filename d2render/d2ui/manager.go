@@ -4,6 +4,7 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -58,17 +59,16 @@ func (v *Manager) WaitForMouseRelease() {
 }
 
 // Render renders all of the UI elements
-func (v *Manager) Render(screen *ebiten.Image) {
+func (v *Manager) Render(target *d2surface.Surface) {
 	for _, widget := range v.widgets {
-		if !widget.GetVisible() {
-			continue
+		if widget.GetVisible() {
+			widget.Render(target)
 		}
-		widget.Render(screen)
 	}
 
 	cx, cy := ebiten.CursorPosition()
 	v.cursorSprite.SetPosition(cx, cy)
-	v.cursorSprite.Render(screen)
+	v.cursorSprite.Render(target)
 }
 
 // Update updates all of the UI elements

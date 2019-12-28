@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2term"
 
 	"github.com/hajimehoshi/ebiten/ebitenutil"
@@ -67,9 +68,13 @@ func main() {
 
 func update(screen *ebiten.Image) error {
 	d2Engine.Update()
-	if ebiten.IsDrawingSkipped() {
-		return nil
+	if !ebiten.IsDrawingSkipped() {
+		surface := d2surface.CreateSurface(screen)
+		d2Engine.Draw(surface)
+		if surface.GetDepth() > 0 {
+			panic("detected surface stack leak")
+		}
 	}
-	d2Engine.Draw(screen)
+
 	return nil
 }

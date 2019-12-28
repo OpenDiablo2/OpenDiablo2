@@ -28,7 +28,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
@@ -176,30 +175,41 @@ func (v *Engine) Update() {
 }
 
 // Draw draws the game
-func (v Engine) Draw(screen *ebiten.Image) {
+func (v Engine) Draw(target *d2surface.Surface) {
 	if v.loadingProgress < 1.0 {
 		v.LoadingSprite.SetCurrentFrame(int(d2helper.Max(0, d2helper.Min(uint32(v.LoadingSprite.GetFrameCount()-1), uint32(float64(v.LoadingSprite.GetFrameCount()-1)*v.loadingProgress)))))
-		v.LoadingSprite.Render(screen)
+		v.LoadingSprite.Render(target)
 	} else {
 		if v.CurrentScene == nil {
 			log.Fatal("no scene loaded")
 		}
-		v.CurrentScene.Render(screen)
-		v.UIManager.Render(screen)
+		v.CurrentScene.Render(target)
+		v.UIManager.Render(target)
 	}
 	if v.showFPS {
-		ebitenutil.DebugPrintAt(screen, "vsync:"+strconv.FormatBool(ebiten.IsVsyncEnabled())+"\nFPS:"+strconv.Itoa(int(ebiten.CurrentFPS())), 5, 565)
+		target.PushTranslation(5, 565)
+		target.DrawText("vsync:" + strconv.FormatBool(ebiten.IsVsyncEnabled()) + "\nFPS:" + strconv.Itoa(int(ebiten.CurrentFPS())))
+		target.Pop()
+
+		cx, cy := ebiten.CursorPosition()
+
 		var m runtime.MemStats
 		runtime.ReadMemStats(&m)
-		ebitenutil.DebugPrintAt(screen, "Alloc   "+strconv.FormatInt(int64(m.Alloc)/1024/1024, 10), 680, 0)
-		ebitenutil.DebugPrintAt(screen, "Pause   "+strconv.FormatInt(int64(m.PauseTotalNs/1024/1024), 10), 680, 10)
-		ebitenutil.DebugPrintAt(screen, "HeapSys "+strconv.FormatInt(int64(m.HeapSys/1024/1024), 10), 680, 20)
-		ebitenutil.DebugPrintAt(screen, "NumGC   "+strconv.FormatInt(int64(m.NumGC), 10), 680, 30)
-		cx, cy := ebiten.CursorPosition()
-		ebitenutil.DebugPrintAt(screen, "Coords  "+strconv.FormatInt(int64(cx), 10)+","+strconv.FormatInt(int64(cy), 10), 680, 40)
+
+		target.PushTranslation(680, 0)
+		target.DrawText("Alloc   " + strconv.FormatInt(int64(m.Alloc)/1024/1024, 10))
+		target.PushTranslation(0, 16)
+		target.DrawText("Pause   " + strconv.FormatInt(int64(m.PauseTotalNs/1024/1024), 10))
+		target.PushTranslation(0, 16)
+		target.DrawText("HeapSys " + strconv.FormatInt(int64(m.HeapSys/1024/1024), 10))
+		target.PushTranslation(0, 16)
+		target.DrawText("NumGC   " + strconv.FormatInt(int64(m.NumGC), 10))
+		target.PushTranslation(0, 16)
+		target.DrawText("Coords  " + strconv.FormatInt(int64(cx), 10) + "," + strconv.FormatInt(int64(cy), 10))
+		target.PopN(5)
 	}
 
-	d2term.Render(d2surface.CreateSurface(screen))
+	d2term.Render(target)
 }
 
 // SetNextScene tells the engine what scene to load on the next update cycle

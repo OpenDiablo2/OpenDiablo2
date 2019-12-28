@@ -5,7 +5,7 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
-	"github.com/hajimehoshi/ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 )
 
 type Hero struct {
@@ -52,8 +52,8 @@ func (v *Hero) Advance(tickTime float64) {
 	v.AnimatedEntity.Advance(tickTime)
 }
 
-func (v *Hero) Render(target *ebiten.Image, offsetX, offsetY int) {
-	v.AnimatedEntity.Render(target, offsetX, offsetY)
+func (v *Hero) Render(target *d2surface.Surface) {
+	v.AnimatedEntity.Render(target)
 }
 
 func (v *Hero) GetPosition() (float64, float64) {

@@ -18,8 +18,8 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2common"
 	dh "github.com/OpenDiablo2/D2Shared/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
-	"github.com/hajimehoshi/ebiten"
 )
 
 type labelItem struct {
@@ -107,7 +107,7 @@ func (v *Credits) Unload() {
 }
 
 // Render renders the credits scene
-func (v *Credits) Render(screen *ebiten.Image) {
+func (v *Credits) Render(screen *d2surface.Surface) {
 	v.creditsBackground.RenderSegmented(screen, 4, 3, 0)
 	for _, label := range v.labels {
 		if label.Available {

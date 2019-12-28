@@ -8,8 +8,7 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
-
-	"github.com/hajimehoshi/ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 
 	"encoding/binary"
 
@@ -106,7 +105,7 @@ func (v *Font) GetTextMetrics(text string) (width, height int) {
 }
 
 // Render draws the font on the target surface
-func (v *Font) Render(x, y int, text string, color color.Color, target *ebiten.Image) {
+func (v *Font) Render(x, y int, text string, color color.Color, target *d2surface.Surface) {
 	v.fontSprite.SetColorMod(color)
 	v.fontSprite.SetBlend(false)
 
@@ -115,7 +114,7 @@ func (v *Font) Render(x, y int, text string, color color.Color, target *ebiten.I
 		maxCharHeight = d2helper.Max(maxCharHeight, uint32(m.Height))
 	}
 
-	targetWidth, _ := target.Size()
+	targetWidth, _ := target.GetSize()
 	lines := strings.Split(text, "\n")
 	for lineIdx, line := range lines {
 		lineWidth, _ := v.GetTextMetrics(line)

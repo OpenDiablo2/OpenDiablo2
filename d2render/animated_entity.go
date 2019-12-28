@@ -8,7 +8,7 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 	"github.com/OpenDiablo2/D2Shared/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
-	"github.com/hajimehoshi/ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 )
 
 // AnimatedEntity represents an entity on the map that can be animated
@@ -70,14 +70,13 @@ func (v AnimatedEntity) Wait() bool {
 }
 
 // Render draws this animated entity onto the target
-func (v *AnimatedEntity) Render(target *ebiten.Image, offsetX, offsetY int) {
-	localX := (v.subcellX - v.subcellY) * 16
-	localY := ((v.subcellX + v.subcellY) * 8) - 5
-	v.composite.Render(
-		target,
-		int(v.offsetX)+offsetX+int(localX),
-		int(v.offsetY)+offsetY+int(localY),
+func (v *AnimatedEntity) Render(target *d2surface.Surface) {
+	target.PushTranslation(
+		int(v.offsetX)+int((v.subcellX-v.subcellY)*16),
+		int(v.offsetY)+int(((v.subcellX+v.subcellY)*8)-5),
 	)
+	defer target.Pop()
+	v.composite.Render(target)
 }
 
 func (v AnimatedEntity) GetDirection() int {
