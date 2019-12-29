@@ -34,7 +34,7 @@ type MapRegion struct {
 	startY            float64
 	imageCacheRecords map[uint32]*ebiten.Image
 	seed              int64
-	currentFrame      byte
+	currentFrame      int
 	lastFrameTime     float64
 }
 
@@ -154,18 +154,6 @@ func (mr *MapRegion) loadEntities() []MapEntity {
 	return entities
 }
 
-func (mr *MapRegion) updateAnimations() {
-	now := d2helper.Now()
-	framesToAdd := math.Floor((now - mr.lastFrameTime) / 0.1)
-	if framesToAdd > 0 {
-		mr.lastFrameTime += 0.1 * framesToAdd
-		mr.currentFrame += byte(math.Floor(framesToAdd))
-		if mr.currentFrame > 9 {
-			mr.currentFrame = 0
-		}
-	}
-}
-
 func (mr *MapRegion) getStartTilePosition() (float64, float64) {
 	return float64(mr.tileRect.Left) + mr.startX, float64(mr.tileRect.Top) + mr.startY
 }
@@ -224,8 +212,17 @@ func (mr *MapRegion) isVisbile(viewport *Viewport) bool {
 	return viewport.IsTileRectVisible(mr.tileRect)
 }
 
-func (mr *MapRegion) advance(tickTime float64) {
-	mr.updateAnimations()
+func (mr *MapRegion) advance(elapsed float64) {
+	frameLength := 0.1
+
+	mr.lastFrameTime += elapsed
+	framesAdvanced := int(mr.lastFrameTime / frameLength)
+	mr.lastFrameTime -= float64(framesAdvanced) * frameLength
+
+	mr.currentFrame += framesAdvanced
+	if mr.currentFrame > 9 {
+		mr.currentFrame = 0
+	}
 }
 
 func (mr *MapRegion) getTileWorldPosition(tileX, tileY int) (float64, float64) {
@@ -322,7 +319,7 @@ func (mr *MapRegion) renderFloor(tile d2ds1.FloorShadowRecord, viewport *Viewpor
 	if !tile.Animated {
 		img = mr.getImageCacheRecord(tile.Style, tile.Sequence, 0, tile.RandomIndex)
 	} else {
-		img = mr.getImageCacheRecord(tile.Style, tile.Sequence, 0, mr.currentFrame)
+		img = mr.getImageCacheRecord(tile.Style, tile.Sequence, 0, byte(mr.currentFrame))
 	}
 	if img == nil {
 		log.Printf("Render called on uncached floor {%v,%v}", tile.Style, tile.Sequence)
