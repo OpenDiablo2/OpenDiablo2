@@ -2,6 +2,7 @@ package d2asset
 
 import (
 	"errors"
+	"log"
 
 	"github.com/OpenDiablo2/D2Shared/d2data/d2cof"
 	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
@@ -102,7 +103,20 @@ func LoadFile(filePath string) ([]byte, error) {
 		return nil, ErrNoInit
 	}
 
-	return singleton.fileManager.loadFile(filePath)
+	data, err := singleton.fileManager.loadFile(filePath)
+	if err != nil {
+		log.Printf("error loading file %s (%v)", filePath, err.Error())
+	}
+
+	return data, err
+}
+
+func FileExists(filePath string) (bool, error) {
+	if singleton == nil {
+		return false, ErrNoInit
+	}
+
+	return singleton.fileManager.fileExists(filePath)
 }
 
 func LoadAnimation(animationPath, palettePath string) (*Animation, error) {

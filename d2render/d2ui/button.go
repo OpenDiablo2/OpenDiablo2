@@ -178,7 +178,7 @@ func (v *Button) Activate() {
 }
 
 // Render renders the button
-func (v Button) Render(target *d2surface.Surface) {
+func (v *Button) Render(target *d2surface.Surface) {
 	target.PushCompositeMode(ebiten.CompositeModeSourceAtop)
 	target.PushFilter(ebiten.FilterNearest)
 	target.PushTranslation(v.x, v.y)
@@ -199,8 +199,12 @@ func (v Button) Render(target *d2surface.Surface) {
 	}
 }
 
+func (v *Button) Advance(elapsed float64) {
+
+}
+
 // GetEnabled returns the enabled state
-func (v Button) GetEnabled() bool {
+func (v *Button) GetEnabled() bool {
 	return v.enabled
 }
 
@@ -210,7 +214,7 @@ func (v *Button) SetEnabled(enabled bool) {
 }
 
 // GetSize returns the size of the button
-func (v Button) GetSize() (int, int) {
+func (v *Button) GetSize() (int, int) {
 	return v.width, v.height
 }
 
@@ -221,12 +225,12 @@ func (v *Button) SetPosition(x, y int) {
 }
 
 // GetPosition returns the location of the button
-func (v Button) GetPosition() (x, y int) {
+func (v *Button) GetPosition() (x, y int) {
 	return v.x, v.y
 }
 
 // GetVisible returns the visibility of the button
-func (v Button) GetVisible() bool {
+func (v *Button) GetVisible() bool {
 	return v.visible
 }
 
@@ -236,7 +240,7 @@ func (v *Button) SetVisible(visible bool) {
 }
 
 // GetPressed returns the pressed state of the button
-func (v Button) GetPressed() bool {
+func (v *Button) GetPressed() bool {
 	return v.pressed
 }
 

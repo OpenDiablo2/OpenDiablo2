@@ -72,7 +72,13 @@ func (v *Manager) Render(target *d2surface.Surface) {
 }
 
 // Update updates all of the UI elements
-func (v *Manager) Update() {
+func (v *Manager) Advance(elapsed float64) {
+	for _, widget := range v.widgets {
+		if widget.GetVisible() {
+			widget.Advance(elapsed)
+		}
+	}
+
 	v.cursorButtons = 0
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		if !v.waitForLeftMouseUp {

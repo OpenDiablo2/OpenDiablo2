@@ -67,10 +67,10 @@ func main() {
 }
 
 func update(screen *ebiten.Image) error {
-	d2Engine.Update()
+	d2Engine.Advance()
 	if !ebiten.IsDrawingSkipped() {
 		surface := d2surface.CreateSurface(screen)
-		d2Engine.Draw(surface)
+		d2Engine.Render(surface)
 		if surface.GetDepth() > 0 {
 			panic("detected surface stack leak")
 		}

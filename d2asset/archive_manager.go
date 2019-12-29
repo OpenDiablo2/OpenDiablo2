@@ -1,7 +1,7 @@
 package d2asset
 
 import (
-	"fmt"
+	"errors"
 	"path"
 	"sync"
 
@@ -25,7 +25,7 @@ func createArchiveManager(config *d2corecommon.Configuration) *archiveManager {
 	return &archiveManager{cache: createCache(ArchiveBudget), config: config}
 }
 
-func (am *archiveManager) loadArchiveForFilePath(filePath string) (*d2mpq.MPQ, error) {
+func (am *archiveManager) loadArchiveForFile(filePath string) (*d2mpq.MPQ, error) {
 	am.mutex.Lock()
 	defer am.mutex.Unlock()
 
@@ -39,7 +39,24 @@ func (am *archiveManager) loadArchiveForFilePath(filePath string) (*d2mpq.MPQ, e
 		}
 	}
 
-	return nil, fmt.Errorf("file not found: %s", filePath)
+	return nil, errors.New("file not found")
+}
+
+func (am *archiveManager) fileExistsInArchive(filePath string) (bool, error) {
+	am.mutex.Lock()
+	defer am.mutex.Unlock()
+
+	if err := am.cacheArchiveEntries(); err != nil {
+		return false, err
+	}
+
+	for _, archiveEntry := range am.entries {
+		if archiveEntry.hashEntryMap.Contains(filePath) {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func (am *archiveManager) loadArchive(archivePath string) (*d2mpq.MPQ, error) {

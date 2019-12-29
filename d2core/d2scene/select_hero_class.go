@@ -35,6 +35,17 @@ type HeroRenderInfo struct {
 	DeselectSfx              *d2audio.SoundEffect
 }
 
+func (hri *HeroRenderInfo) Advance(elapsed float64) {
+	advanceSprite(hri.IdleSprite, elapsed)
+	advanceSprite(hri.IdleSelectedSprite, elapsed)
+	advanceSprite(hri.ForwardWalkSprite, elapsed)
+	advanceSprite(hri.ForwardWalkSpriteOverlay, elapsed)
+	advanceSprite(hri.SelectedSprite, elapsed)
+	advanceSprite(hri.SelectedSpriteOverlay, elapsed)
+	advanceSprite(hri.BackWalkSprite, elapsed)
+	advanceSprite(hri.BackWalkSpriteOverlay, elapsed)
+}
+
 type SelectHeroClass struct {
 	uiManager          *d2ui.Manager
 	soundManager       *d2audio.Manager
@@ -471,12 +482,12 @@ func (v *SelectHeroClass) Render(screen *d2surface.Surface) {
 	}
 }
 
-func (v *SelectHeroClass) Update(tickTime float64) {
+func (v *SelectHeroClass) Advance(tickTime float64) {
 	canSelect := true
 	for _, info := range v.heroRenderInfo {
+		info.Advance(tickTime)
 		if info.Stance != d2enum.HeroStanceIdle && info.Stance != d2enum.HeroStanceIdleSelected && info.Stance != d2enum.HeroStanceSelected {
 			canSelect = false
-			break
 		}
 	}
 	allIdle := true
@@ -650,5 +661,11 @@ func setSpriteToFirstFrame(sprite *d2render.Sprite) {
 func drawSprite(sprite *d2render.Sprite, target *d2surface.Surface) {
 	if sprite != nil {
 		sprite.Render(target)
+	}
+}
+
+func advanceSprite(sprite *d2render.Sprite, elapsed float64) {
+	if sprite != nil {
+		sprite.Advance(elapsed)
 	}
 }

@@ -93,7 +93,7 @@ func (v Game) Render(screen *d2surface.Surface) {
 	v.gameControls.Render(screen)
 }
 
-func (v *Game) Update(tickTime float64) {
+func (v *Game) Advance(tickTime float64) {
 	v.mapEngine.Advance(tickTime)
 
 	rx, ry := v.mapEngine.WorldToOrtho(v.hero.AnimatedEntity.LocationX/5, v.hero.AnimatedEntity.LocationY/5)

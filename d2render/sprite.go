@@ -9,10 +9,9 @@ import (
 )
 
 type Sprite struct {
-	x             int
-	y             int
-	lastFrameTime float64
-	animation     *d2asset.Animation
+	x         int
+	y         int
+	animation *d2asset.Animation
 }
 
 func LoadSprite(animationPath, palettePath string) (*Sprite, error) {
@@ -21,7 +20,7 @@ func LoadSprite(animationPath, palettePath string) (*Sprite, error) {
 		return nil, err
 	}
 
-	return &Sprite{lastFrameTime: d2helper.Now(), animation: animation}, nil
+	return &Sprite{animation: animation}, nil
 }
 
 func MustLoadSprite(animationPath, palettePath string) *Sprite {
@@ -34,10 +33,6 @@ func MustLoadSprite(animationPath, palettePath string) *Sprite {
 }
 
 func (s *Sprite) Render(target *d2surface.Surface) error {
-	if err := s.advance(); err != nil {
-		return err
-	}
-
 	_, frameHeight := s.animation.GetCurrentFrameSize()
 
 	target.PushTranslation(s.x, s.y-frameHeight)
@@ -46,10 +41,6 @@ func (s *Sprite) Render(target *d2surface.Surface) error {
 }
 
 func (s *Sprite) RenderSegmented(target *d2surface.Surface, segmentsX, segmentsY, frameOffset int) error {
-	if err := s.advance(); err != nil {
-		return err
-	}
-
 	var currentY int
 	for y := 0; y < segmentsY; y++ {
 		var currentX int
@@ -127,22 +118,18 @@ func (s *Sprite) GetDirection() int {
 }
 
 func (s *Sprite) SetCurrentFrame(frameIndex int) error {
-	s.lastFrameTime = d2helper.Now()
 	return s.animation.SetCurrentFrame(frameIndex)
 }
 
 func (s *Sprite) Rewind() {
-	s.lastFrameTime = d2helper.Now()
 	s.animation.SetCurrentFrame(0)
 }
 
 func (s *Sprite) PlayForward() {
-	s.lastFrameTime = d2helper.Now()
 	s.animation.PlayForward()
 }
 
 func (s *Sprite) PlayBackward() {
-	s.lastFrameTime = d2helper.Now()
 	s.animation.PlayBackward()
 }
 
@@ -170,11 +157,6 @@ func (s *Sprite) SetBlend(blend bool) {
 	s.animation.SetBlend(blend)
 }
 
-func (s *Sprite) advance() error {
-	lastFrameTime := d2helper.Now()
-	if err := s.animation.Advance(lastFrameTime - s.lastFrameTime); err != nil {
-		return err
-	}
-	s.lastFrameTime = lastFrameTime
-	return nil
+func (s *Sprite) Advance(elapsed float64) error {
+	return s.animation.Advance(elapsed)
 }

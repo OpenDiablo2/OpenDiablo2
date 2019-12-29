@@ -23,7 +23,7 @@ func (fm *fileManager) loadFile(filePath string) ([]byte, error) {
 		return value.([]byte), nil
 	}
 
-	archive, err := fm.archiveManager.loadArchiveForFilePath(filePath)
+	archive, err := fm.archiveManager.loadArchiveForFile(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -38,6 +38,11 @@ func (fm *fileManager) loadFile(filePath string) ([]byte, error) {
 	}
 
 	return data, nil
+}
+
+func (fm *fileManager) fileExists(filePath string) (bool, error) {
+	filePath = fm.fixupFilePath(filePath)
+	return fm.archiveManager.fileExistsInArchive(filePath)
 }
 
 func (fm *fileManager) fixupFilePath(filePath string) string {
