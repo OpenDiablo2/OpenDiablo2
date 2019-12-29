@@ -160,9 +160,14 @@ func (v *AnimatedEntity) SetTarget(tx, ty float64, action int32) {
 		newAnimationMode = d2enum.AnimationModeMonsterWalk.String()
 	}
 
+	if newAnimationMode != v.animationMode {
+		v.SetMode(newAnimationMode, v.weaponClass, v.direction)
+	}
+
 	newDirection := angleToDirection(float64(angle), v.composite.GetDirectionCount())
-	if newDirection != v.GetDirection() || newAnimationMode != v.animationMode {
-		v.SetMode(newAnimationMode, v.weaponClass, newDirection)
+
+	if newDirection != v.GetDirection() {
+		v.SetMode(v.animationMode, v.weaponClass, newDirection)
 	}
 }
 
