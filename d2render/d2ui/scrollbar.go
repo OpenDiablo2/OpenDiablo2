@@ -69,7 +69,7 @@ func (v *Scrollbar) Activate() {
 	}
 }
 
-func (v Scrollbar) GetLastDirChange() int {
+func (v *Scrollbar) GetLastDirChange() int {
 	return v.lastDirChange
 }
 
@@ -94,6 +94,10 @@ func (v *Scrollbar) Render(target *d2surface.Surface) {
 		offset = 1
 	}
 	v.scrollbarSprite.RenderSegmented(target, 1, 1, 4+offset)
+}
+
+func (v *Scrollbar) Advance(elapsed float64) {
+	v.scrollbarSprite.Advance(elapsed)
 }
 
 func (v *Scrollbar) GetSize() (width, height int) {
@@ -134,10 +138,10 @@ func (v *Scrollbar) SetCurrentOffset(currentOffset int) {
 	v.currentOffset = currentOffset
 }
 
-func (v Scrollbar) GetMaxOffset() int {
+func (v *Scrollbar) GetMaxOffset() int {
 	return v.maxOffset
 }
 
-func (v Scrollbar) GetCurrentOffset() int {
+func (v *Scrollbar) GetCurrentOffset() int {
 	return v.currentOffset
 }

@@ -232,7 +232,7 @@ func (v *CharacterSelect) moveSelectionBox() {
 	v.d2HeroTitle.SetText(v.gameStates[v.selectedCharacter].HeroName)
 }
 
-func (v *CharacterSelect) Update(tickTime float64) {
+func (v *CharacterSelect) Advance(tickTime float64) {
 	if !v.showDeleteConfirmation {
 		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 			if !v.mouseButtonPressed {

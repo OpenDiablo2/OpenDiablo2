@@ -120,7 +120,7 @@ func (v *Credits) Render(screen *d2surface.Surface) {
 const secondsPerCycle = float64(0.02)
 
 // Update runs the update logic on the credits scene
-func (v *Credits) Update(tickTime float64) {
+func (v *Credits) Advance(tickTime float64) {
 	v.cycleTime += tickTime
 	for v.cycleTime >= secondsPerCycle {
 		v.cycleTime -= secondsPerCycle

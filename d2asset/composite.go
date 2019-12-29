@@ -115,7 +115,12 @@ type compositeMode struct {
 }
 
 func (c *Composite) createMode(animationMode, weaponClass string, direction int) (*compositeMode, error) {
-	cof, err := loadCOF(fmt.Sprintf("%s/%s/COF/%s%s%s.COF", c.object.Base, c.object.Token, c.object.Token, animationMode, weaponClass))
+	cofPath := fmt.Sprintf("%s/%s/COF/%s%s%s.COF", c.object.Base, c.object.Token, c.object.Token, animationMode, weaponClass)
+	if exists, _ := FileExists(cofPath); !exists {
+		return nil, errors.New("composite not found")
+	}
+
+	cof, err := loadCOF(cofPath)
 	if err != nil {
 		return nil, err
 	}
@@ -249,9 +254,11 @@ func loadCompositeLayer(object *d2datadict.ObjectLookupRecord, layerKey, layerVa
 	}
 
 	for _, animationPath := range animationPaths {
-		animation, err := LoadAnimationWithTransparency(animationPath, palettePath, transparency)
-		if err == nil {
-			return animation, nil
+		if exists, _ := FileExists(animationPath); exists {
+			animation, err := LoadAnimationWithTransparency(animationPath, palettePath, transparency)
+			if err == nil {
+				return animation, nil
+			}
 		}
 	}
 

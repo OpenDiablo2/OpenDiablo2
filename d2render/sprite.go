@@ -34,10 +34,6 @@ func MustLoadSprite(animationPath, palettePath string) *Sprite {
 }
 
 func (s *Sprite) Render(target *d2surface.Surface) error {
-	if err := s.advance(); err != nil {
-		return err
-	}
-
 	_, frameHeight := s.animation.GetCurrentFrameSize()
 
 	target.PushTranslation(s.x, s.y-frameHeight)
@@ -46,10 +42,6 @@ func (s *Sprite) Render(target *d2surface.Surface) error {
 }
 
 func (s *Sprite) RenderSegmented(target *d2surface.Surface, segmentsX, segmentsY, frameOffset int) error {
-	if err := s.advance(); err != nil {
-		return err
-	}
-
 	var currentY int
 	for y := 0; y < segmentsY; y++ {
 		var currentX int
@@ -170,11 +162,6 @@ func (s *Sprite) SetBlend(blend bool) {
 	s.animation.SetBlend(blend)
 }
 
-func (s *Sprite) advance() error {
-	lastFrameTime := d2helper.Now()
-	if err := s.animation.Advance(lastFrameTime - s.lastFrameTime); err != nil {
-		return err
-	}
-	s.lastFrameTime = lastFrameTime
-	return nil
+func (s *Sprite) Advance(elapsed float64) error {
+	return s.animation.Advance(elapsed)
 }

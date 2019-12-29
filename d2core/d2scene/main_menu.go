@@ -244,7 +244,12 @@ func (v *MainMenu) Render(screen *d2surface.Surface) {
 }
 
 // Update runs the update logic on the main menu
-func (v *MainMenu) Update(tickTime float64) {
+func (v *MainMenu) Advance(tickTime float64) {
+	v.diabloLogoLeftBack.Advance(tickTime)
+	v.diabloLogoRightBack.Advance(tickTime)
+	v.diabloLogoLeft.Advance(tickTime)
+	v.diabloLogoRight.Advance(tickTime)
+
 	if v.ShowTrademarkScreen {
 		if v.uiManager.CursorButtonPressed(d2ui.CursorButtonLeft) {
 			if v.leftButtonHeld {

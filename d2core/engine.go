@@ -52,7 +52,10 @@ type Engine struct {
 
 // CreateEngine creates and instance of the OpenDiablo2 engine
 func CreateEngine() *Engine {
-	result := &Engine{timeScale: 1.0}
+	result := &Engine{
+		lastTime:  d2helper.Now(),
+		timeScale: 1.0,
+	}
 
 	result.Settings = d2corecommon.LoadConfiguration()
 	if err := result.Settings.Save(); err != nil {
@@ -137,8 +140,8 @@ func (v *Engine) updateScene() {
 	v.ResetLoading()
 }
 
-// Update updates the internal state of the engine
-func (v *Engine) Update() {
+// Advance updates the internal state of the engine
+func (v *Engine) Advance() {
 	if ebiten.IsKeyPressed(ebiten.KeyAlt) && ebiten.IsKeyPressed(ebiten.KeyEnter) {
 		if !v.fullscreenKey {
 			ebiten.SetFullscreen(!ebiten.IsFullscreen())
@@ -169,13 +172,13 @@ func (v *Engine) Update() {
 	deltaTime := (currentTime - v.lastTime) * v.timeScale
 	v.lastTime = currentTime
 
-	v.CurrentScene.Update(deltaTime)
-	v.UIManager.Update()
+	v.CurrentScene.Advance(deltaTime)
+	v.UIManager.Advance(deltaTime)
 	d2term.Advance(deltaTime)
 }
 
 // Draw draws the game
-func (v Engine) Draw(target *d2surface.Surface) {
+func (v Engine) Render(target *d2surface.Surface) {
 	if v.loadingProgress < 1.0 {
 		v.LoadingSprite.SetCurrentFrame(int(d2helper.Max(0, d2helper.Min(uint32(v.LoadingSprite.GetFrameCount()-1), uint32(float64(v.LoadingSprite.GetFrameCount()-1)*v.loadingProgress)))))
 		v.LoadingSprite.Render(target)

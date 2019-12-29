@@ -40,7 +40,7 @@ func CreateCheckbox(checkState bool) Checkbox {
 	return result
 }
 
-func (v Checkbox) Render(target *d2surface.Surface) {
+func (v *Checkbox) Render(target *d2surface.Surface) {
 	target.PushCompositeMode(ebiten.CompositeModeSourceAtop)
 	target.PushTranslation(v.x, v.y)
 	target.PushFilter(ebiten.FilterNearest)
@@ -52,7 +52,12 @@ func (v Checkbox) Render(target *d2surface.Surface) {
 		target.Render(v.Image)
 	}
 }
-func (v Checkbox) GetEnabled() bool {
+
+func (v *Checkbox) Advance(elapsed float64) {
+
+}
+
+func (v *Checkbox) GetEnabled() bool {
 	return v.enabled
 }
 
@@ -60,18 +65,18 @@ func (v *Checkbox) SetEnabled(enabled bool) {
 	v.enabled = enabled
 }
 
-func (v Checkbox) SetPressed(pressed bool) {
+func (v *Checkbox) SetPressed(pressed bool) {
 }
 
 func (v *Checkbox) SetCheckState(checkState bool) {
 	v.checkState = checkState
 }
 
-func (v Checkbox) GetCheckState() bool {
+func (v *Checkbox) GetCheckState() bool {
 	return v.checkState
 }
 
-func (v Checkbox) GetPressed() bool {
+func (v *Checkbox) GetPressed() bool {
 	return v.checkState
 }
 
@@ -87,15 +92,15 @@ func (v *Checkbox) Activate() {
 	v.onClick()
 }
 
-func (v Checkbox) GetPosition() (int, int) {
+func (v *Checkbox) GetPosition() (int, int) {
 	return v.x, v.y
 }
 
-func (v Checkbox) GetSize() (int, int) {
+func (v *Checkbox) GetSize() (int, int) {
 	return v.width, v.height
 }
 
-func (v Checkbox) GetVisible() bool {
+func (v *Checkbox) GetVisible() bool {
 	return v.visible
 }
 

@@ -7,5 +7,5 @@ type Scene interface {
 	Load() []func()
 	Unload()
 	Render(target *d2surface.Surface)
-	Update(tickTime float64)
+	Advance(tickTime float64)
 }

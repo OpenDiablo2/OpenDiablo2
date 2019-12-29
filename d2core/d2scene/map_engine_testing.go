@@ -206,7 +206,7 @@ func (v *MapEngineTest) Render(screen *d2surface.Surface) {
 	screen.PopN(6)
 }
 
-func (v *MapEngineTest) Update(tickTime float64) {
+func (v *MapEngineTest) Advance(tickTime float64) {
 	v.mapEngine.Advance(tickTime)
 
 	ctrlPressed := v.uiManager.KeyPressed(ebiten.KeyControl)
