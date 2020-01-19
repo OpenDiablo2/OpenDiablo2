@@ -110,6 +110,11 @@ func getDefaultConfiguration() *Configuration {
 	}
 
 	switch runtime.GOOS {
+	case "windows":
+		switch runtime.GOARCH {
+		case "386":
+			config.MpqPath = "C:/Program Files/Diablo II"
+		}
 	case "darwin":
 		config.MpqPath = "/Applications/Diablo II/"
 		config.MpqLoadOrder = []string{
