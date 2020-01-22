@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"image/color"
 	"io"
-	"log"
 	"math"
 	"reflect"
 	"sort"
@@ -15,9 +14,8 @@ import (
 	"strings"
 
 	"github.com/OpenDiablo2/D2Shared/d2helper"
+	"github.com/OpenDiablo2/OpenDiablo2/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
 const (
@@ -111,15 +109,6 @@ func createTerminal() (*terminal, error) {
 }
 
 func (t *terminal) advance(elapsed float64) error {
-	if inpututil.IsKeyJustPressed(ebiten.KeyGraveAccent) {
-		switch t.visState {
-		case termVisShowing, termVisShown:
-			t.hide()
-		case termVisHiding, termVisHidden:
-			t.show()
-		}
-	}
-
 	switch t.visState {
 	case termVisShowing:
 		t.visAnim = math.Min(1.0, t.visAnim+elapsed/termAnimLength)
@@ -137,34 +126,56 @@ func (t *terminal) advance(elapsed float64) error {
 		return nil
 	}
 
+	return nil
+}
+
+func (t *terminal) OnKeyDown(event d2input.KeyEvent) bool {
 	maxOutputIndex := d2helper.MaxInt(0, len(t.outputHistory)-t.lineCount)
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyHome) {
+	if event.Key == d2input.KeyGraveAccent {
+		switch t.visState {
+		case termVisShowing, termVisShown:
+			t.hide()
+		case termVisHiding, termVisHidden:
+			t.show()
+		}
+
+		return true
+	}
+
+	if event.Key == d2input.KeyEscape {
+		t.command = ""
+		return true
+	}
+
+	if event.Key == d2input.KeyHome {
 		t.outputIndex = maxOutputIndex
+		return true
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyEnd) {
+	if event.Key == d2input.KeyEnd {
 		t.outputIndex = 0
+		return true
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyPageUp) {
+	if event.Key == d2input.KeyPageUp {
 		if t.outputIndex += t.lineCount; t.outputIndex >= maxOutputIndex {
 			t.outputIndex = maxOutputIndex
 		}
+
+		return true
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyPageDown) {
+	if event.Key == d2input.KeyPageDown {
 		if t.outputIndex -= t.lineCount; t.outputIndex < 0 {
 			t.outputIndex = 0
 		}
+
+		return true
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
-		t.command = ""
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
-		if ebiten.IsKeyPressed(ebiten.KeyControl) {
+	if event.Key == d2input.KeyUp {
+		if event.KeyMod == d2input.KeyModControl {
 			t.lineCount = d2helper.MaxInt(0, t.lineCount-1)
 		} else if len(t.commandHistory) > 0 {
 			t.command = t.commandHistory[t.commandIndex]
@@ -174,17 +185,16 @@ func (t *terminal) advance(elapsed float64) error {
 				t.commandIndex--
 			}
 		}
+
+		return true
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyDown) && ebiten.IsKeyPressed(ebiten.KeyControl) {
+	if event.Key == d2input.KeyDown && event.KeyMod == d2input.KeyModControl {
 		t.lineCount = d2helper.MinInt(t.lineCount+1, termRowCountMax)
+		return true
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) && len(t.command) > 0 {
-		t.command = t.command[:len(t.command)-1]
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) && len(t.command) > 0 {
+	if event.Key == d2input.KeyEnter && len(t.command) > 0 {
 		var commandHistory []string
 		for _, command := range t.commandHistory {
 			if command != t.command {
@@ -201,15 +211,28 @@ func (t *terminal) advance(elapsed float64) error {
 
 		t.commandIndex = len(t.commandHistory) - 1
 		t.command = ""
+
+		return true
 	}
 
-	for _, c := range ebiten.InputChars() {
+	if event.Key == d2input.KeyBackspace && len(t.command) > 0 {
+		t.command = t.command[:len(t.command)-1]
+		return true
+	}
+
+	return false
+}
+
+func (t *terminal) OnKeyChars(event d2input.KeyCharsEvent) bool {
+	var handled bool
+	for _, c := range event.Chars {
 		if c != '`' {
 			t.command += string(c)
+			handled = true
 		}
 	}
 
-	return nil
+	return handled
 }
 
 func (t *terminal) render(surface *d2surface.Surface) error {
@@ -328,7 +351,7 @@ func (t *terminal) execute(command string) error {
 	return nil
 }
 
-func (t *terminal) outputRaw(text string, category termCategory) {
+func (t *terminal) outputRaw(text string, category termCategory) error {
 	var line string
 	for _, word := range strings.Split(text, " ") {
 		if len(line) > 0 {
@@ -347,22 +370,23 @@ func (t *terminal) outputRaw(text string, category termCategory) {
 	}
 
 	t.outputHistory = append(t.outputHistory, termHistroyEntry{line, category})
+	return nil
 }
 
-func (t *terminal) output(format string, params ...interface{}) {
-	t.outputRaw(fmt.Sprintf(format, params...), termCategoryNone)
+func (t *terminal) output(format string, params ...interface{}) error {
+	return t.outputRaw(fmt.Sprintf(format, params...), termCategoryNone)
 }
 
-func (t *terminal) outputInfo(format string, params ...interface{}) {
-	t.outputRaw(fmt.Sprintf(format, params...), termCategoryInfo)
+func (t *terminal) outputInfo(format string, params ...interface{}) error {
+	return t.outputRaw(fmt.Sprintf(format, params...), termCategoryInfo)
 }
 
-func (t *terminal) outputWarning(format string, params ...interface{}) {
-	t.outputRaw(fmt.Sprintf(format, params...), termCategoryWarning)
+func (t *terminal) outputWarning(format string, params ...interface{}) error {
+	return t.outputRaw(fmt.Sprintf(format, params...), termCategoryWarning)
 }
 
-func (t *terminal) outputError(format string, params ...interface{}) {
-	t.outputRaw(fmt.Sprintf(format, params...), termCategoryError)
+func (t *terminal) outputError(format string, params ...interface{}) error {
+	return t.outputRaw(fmt.Sprintf(format, params...), termCategoryError)
 }
 
 func (t *terminal) outputClear() {
@@ -409,71 +433,8 @@ func (t *terminal) bindAction(name, description string, action interface{}) erro
 	return nil
 }
 
-func (t *terminal) unbindAction(name string) {
+func (t *terminal) unbindAction(name string) error {
 	delete(t.actions, name)
-}
-
-var singleton *terminal
-
-func Initialize() error {
-	if singleton != nil {
-		return errors.New("terminal system is already initialized")
-	}
-
-	var err error
-	singleton, err = createTerminal()
-	return err
-}
-
-func Advance(elapsed float64) error {
-	if singleton != nil {
-		return singleton.advance(elapsed)
-	}
-
-	return nil
-}
-
-func Output(format string, params ...interface{}) {
-	if singleton != nil {
-		singleton.output(format, params...)
-	}
-}
-
-func OutputInfo(format string, params ...interface{}) {
-	if singleton != nil {
-		singleton.outputInfo(format, params...)
-	}
-}
-
-func OutputWarning(format string, params ...interface{}) {
-	if singleton != nil {
-		singleton.outputWarning(format, params...)
-	}
-}
-
-func OutputError(format string, params ...interface{}) {
-	if singleton != nil {
-		singleton.outputError(format, params...)
-	}
-}
-
-func BindAction(name, description string, action interface{}) {
-	if singleton != nil {
-		singleton.bindAction(name, description, action)
-	}
-}
-
-func UnbindAction(name string) {
-	if singleton != nil {
-		singleton.unbindAction(name)
-	}
-}
-
-func Render(surface *d2surface.Surface) error {
-	if singleton != nil {
-		return singleton.render(surface)
-	}
-
 	return nil
 }
 
@@ -506,10 +467,6 @@ func (t *terminalLogger) Write(p []byte) (int, error) {
 	}
 
 	return t.writer.Write(p)
-}
-
-func BindLogger() {
-	log.SetOutput(&terminalLogger{writer: log.Writer()})
 }
 
 func easeInOut(t float64) float64 {

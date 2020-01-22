@@ -8,6 +8,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
@@ -80,11 +81,13 @@ func (v *Game) Load() []func() {
 		func() {
 			v.gameControls = d2player.NewGameControls(v.hero, v.mapEngine)
 			v.gameControls.Load()
+			d2input.BindHandler(v.gameControls)
 		},
 	}
 }
 
 func (v *Game) Unload() {
+	d2input.UnbindHandler(v.gameControls)
 }
 
 func (v Game) Render(screen *d2surface.Surface) {
@@ -98,6 +101,4 @@ func (v *Game) Advance(tickTime float64) {
 
 	rx, ry := v.mapEngine.WorldToOrtho(v.hero.AnimatedEntity.LocationX/5, v.hero.AnimatedEntity.LocationY/5)
 	v.mapEngine.MoveCameraTo(rx, ry)
-
-	v.gameControls.Update(tickTime)
 }
