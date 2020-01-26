@@ -3,11 +3,10 @@ package d2player
 import (
 	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
+	"github.com/OpenDiablo2/OpenDiablo2/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
 type Panel interface {
@@ -37,41 +36,23 @@ func NewGameControls(hero *d2core.Hero, mapEngine *d2mapengine.MapEngine) *GameC
 	}
 }
 
-func (g *GameControls) Update(tickTime float64) {
-
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		px, py := g.mapEngine.ScreenToWorld(ebiten.CursorPosition())
-		g.hero.AnimatedEntity.SetTarget(px*5, py*5, 1)
-	}
-
-	arrowDistance := 1.0
-	moveX := 0.0
-	moveY := 0.0
-	if ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeyUp) {
-		moveY -= arrowDistance
-		moveX -= arrowDistance
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyS) || ebiten.IsKeyPressed(ebiten.KeyDown) {
-		moveY += arrowDistance
-		moveX += arrowDistance
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		moveY += arrowDistance
-		moveX -= arrowDistance
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyD) || ebiten.IsKeyPressed(ebiten.KeyRight) {
-		moveY -= arrowDistance
-		moveX += arrowDistance
-	}
-
-	if moveY != 0 || moveX != 0 {
-		g.hero.AnimatedEntity.SetTarget(g.hero.AnimatedEntity.LocationX+moveX, g.hero.AnimatedEntity.LocationY+moveY, 1)
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyI) {
+func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
+	if event.Key == d2input.KeyI {
 		g.inventory.Toggle()
+		return true
 	}
 
+	return false
+}
+
+func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
+	if event.Button == d2input.MouseButtonLeft {
+		px, py := g.mapEngine.ScreenToWorld(event.X, event.Y)
+		g.hero.AnimatedEntity.SetTarget(px*5, py*5, 1)
+		return true
+	}
+
+	return false
 }
 
 func (g *GameControls) Load() {

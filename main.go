@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
+	"github.com/OpenDiablo2/OpenDiablo2/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2term"
 
@@ -29,6 +30,7 @@ var region = kingpin.Arg("region", "Region type id").Int()
 var preset = kingpin.Arg("preset", "Level preset").Int()
 
 func main() {
+	d2input.Initialize()
 	d2term.Initialize()
 	d2term.BindLogger()
 

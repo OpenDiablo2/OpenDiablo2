@@ -11,6 +11,7 @@ import (
 	"github.com/OpenDiablo2/D2Shared/d2helper"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2term"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
@@ -28,7 +29,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
 // Engine is the core OpenDiablo2 engine
@@ -44,7 +44,6 @@ type Engine struct {
 	UIManager       *d2ui.Manager               // The UI manager
 	SoundManager    *d2audio.Manager            // The sound manager
 	nextScene       d2coreinterface.Scene       // The next scene to be loaded at the end of the game loop
-	fullscreenKey   bool                        // When true, the fullscreen toggle is still being pressed
 	lastTime        float64                     // Last time we updated the scene
 	showFPS         bool
 	timeScale       float64
@@ -96,6 +95,8 @@ func CreateEngine() *Engine {
 		}
 	})
 
+	d2input.BindHandler(result)
+
 	return result
 }
 
@@ -140,25 +141,27 @@ func (v *Engine) updateScene() {
 	v.ResetLoading()
 }
 
+func (e *Engine) OnKeyDown(event d2input.KeyEvent) bool {
+	if event.Key == d2input.KeyEnter && event.KeyMod == d2input.KeyModAlt {
+		ebiten.SetFullscreen(!ebiten.IsFullscreen())
+		return true
+	}
+
+	if event.Key == d2input.KeyF6 {
+		e.showFPS = !e.showFPS
+		return true
+	}
+
+	if event.Key == d2input.KeyF8 {
+		ebiten.SetVsyncEnabled(!ebiten.IsVsyncEnabled())
+		return true
+	}
+
+	return false
+}
+
 // Advance updates the internal state of the engine
 func (v *Engine) Advance() {
-	if ebiten.IsKeyPressed(ebiten.KeyAlt) && ebiten.IsKeyPressed(ebiten.KeyEnter) {
-		if !v.fullscreenKey {
-			ebiten.SetFullscreen(!ebiten.IsFullscreen())
-		}
-		v.fullscreenKey = true
-	} else {
-		v.fullscreenKey = false
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyF6) {
-		v.showFPS = !v.showFPS
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyF8) {
-		ebiten.SetVsyncEnabled(!ebiten.IsVsyncEnabled())
-	}
-
 	v.updateScene()
 	if v.CurrentScene == nil {
 		log.Fatal("no scene loaded")
@@ -174,7 +177,9 @@ func (v *Engine) Advance() {
 
 	v.CurrentScene.Advance(deltaTime)
 	v.UIManager.Advance(deltaTime)
+
 	d2term.Advance(deltaTime)
+	d2input.Advance(deltaTime)
 }
 
 // Draw draws the game

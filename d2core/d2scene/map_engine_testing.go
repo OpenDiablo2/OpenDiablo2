@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
+	"github.com/OpenDiablo2/OpenDiablo2/d2input"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 
@@ -13,8 +14,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
 type RegionSpec struct {
@@ -145,7 +144,7 @@ func (v *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 
 func (v *MapEngineTest) Load() []func() {
 	// TODO: Game seed comes from the game state object
-
+	d2input.BindHandler(v)
 	v.soundManager.PlayBGM("")
 	return []func(){
 		func() {
@@ -156,7 +155,7 @@ func (v *MapEngineTest) Load() []func() {
 }
 
 func (v *MapEngineTest) Unload() {
-
+	d2input.UnbindHandler(v)
 }
 
 func (v *MapEngineTest) Render(screen *d2surface.Surface) {
@@ -208,77 +207,85 @@ func (v *MapEngineTest) Render(screen *d2surface.Surface) {
 
 func (v *MapEngineTest) Advance(tickTime float64) {
 	v.mapEngine.Advance(tickTime)
+}
 
-	ctrlPressed := v.uiManager.KeyPressed(ebiten.KeyControl)
-	shiftPressed := v.uiManager.KeyPressed(ebiten.KeyShift)
-
-	var moveSpeed float64 = 800
-	if v.uiManager.KeyPressed(ebiten.KeyShift) {
-		moveSpeed = 200
-	}
-
-	if v.uiManager.KeyPressed(ebiten.KeyDown) {
-		v.mapEngine.MoveCameraBy(0, moveSpeed*tickTime)
-	}
-	if v.uiManager.KeyPressed(ebiten.KeyUp) {
-		v.mapEngine.MoveCameraBy(0, -moveSpeed*tickTime)
-	}
-	if v.uiManager.KeyPressed(ebiten.KeyLeft) {
-		v.mapEngine.MoveCameraBy(-moveSpeed*tickTime, 0)
-	}
-	if v.uiManager.KeyPressed(ebiten.KeyRight) {
-		v.mapEngine.MoveCameraBy(moveSpeed*tickTime, 0)
+func (met *MapEngineTest) OnKeyRepeat(event d2input.KeyEvent) bool {
+	var moveSpeed float64 = 8
+	if event.KeyMod == d2input.KeyModShift {
+		moveSpeed *= 2
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyF7) {
-		if v.debugVisLevel < 2 {
-			v.debugVisLevel++
+	if event.Key == d2input.KeyDown {
+		met.mapEngine.MoveCameraBy(0, moveSpeed)
+		return true
+	}
+
+	if event.Key == d2input.KeyUp {
+		met.mapEngine.MoveCameraBy(0, -moveSpeed)
+		return true
+	}
+
+	if event.Key == d2input.KeyRight {
+		met.mapEngine.MoveCameraBy(moveSpeed, 0)
+		return true
+	}
+
+	if event.Key == d2input.KeyLeft {
+		met.mapEngine.MoveCameraBy(-moveSpeed, 0)
+		return true
+	}
+
+	return false
+}
+
+func (met *MapEngineTest) OnKeyDown(event d2input.KeyEvent) bool {
+	if event.Key == d2input.KeyEscape {
+		os.Exit(0)
+		return true
+	}
+
+	if event.Key == d2input.KeyN {
+		if event.KeyMod == d2input.KeyModControl {
+			met.fileIndex = increment(met.fileIndex, 0, met.filesCount-1)
+			met.sceneProvider.SetNextScene(met)
+		} else if event.KeyMod == d2input.KeyModShift {
+			met.levelPreset = increment(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
+			met.sceneProvider.SetNextScene(met)
 		} else {
-			v.debugVisLevel = 0
+			met.currentRegion = increment(met.currentRegion, 0, len(regions))
+			met.sceneProvider.SetNextScene(met)
 		}
 
-		v.mapEngine.SetDebugVisLevel(v.debugVisLevel)
+		return true
 	}
 
-	if v.uiManager.KeyPressed(ebiten.KeyEscape) {
-		os.Exit(0)
+	if event.Key == d2input.KeyP {
+		if event.KeyMod == d2input.KeyModControl {
+			met.fileIndex = decrement(met.fileIndex, 0, met.filesCount-1)
+			met.sceneProvider.SetNextScene(met)
+		} else if event.KeyMod == d2input.KeyModShift {
+			met.levelPreset = decrement(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
+			met.sceneProvider.SetNextScene(met)
+		} else {
+			met.currentRegion = decrement(met.currentRegion, 0, len(regions))
+			met.sceneProvider.SetNextScene(met)
+		}
+
+		return true
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyN) && ctrlPressed {
-		v.fileIndex = increment(v.fileIndex, 0, v.filesCount-1)
-		v.sceneProvider.SetNextScene(v)
-		return
+	if event.Key == d2input.KeyF7 {
+		if met.debugVisLevel < 2 {
+			met.debugVisLevel++
+		} else {
+			met.debugVisLevel = 0
+		}
+
+		met.mapEngine.SetDebugVisLevel(met.debugVisLevel)
+		return true
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyP) && ctrlPressed {
-		v.fileIndex = decrement(v.fileIndex, 0, v.filesCount-1)
-		v.sceneProvider.SetNextScene(v)
-		return
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyN) && shiftPressed {
-		v.levelPreset = increment(v.levelPreset, v.regionSpec.startPresetIndex, v.regionSpec.endPresetIndex)
-		v.sceneProvider.SetNextScene(v)
-		return
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyP) && shiftPressed {
-		v.levelPreset = decrement(v.levelPreset, v.regionSpec.startPresetIndex, v.regionSpec.endPresetIndex)
-		v.sceneProvider.SetNextScene(v)
-		return
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyN) {
-		v.currentRegion = increment(v.currentRegion, 0, len(regions))
-		v.sceneProvider.SetNextScene(v)
-		return
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
-		v.currentRegion = decrement(v.currentRegion, 0, len(regions))
-		v.sceneProvider.SetNextScene(v)
-		return
-	}
+	return false
 }
 
 func increment(v, min, max int) int {
