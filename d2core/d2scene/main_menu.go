@@ -10,14 +10,14 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 
-	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 
-	"github.com/OpenDiablo2/D2Shared/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2ui"
 )

@@ -3,8 +3,8 @@ package d2audio
 import (
 	"log"
 
-	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
 
 	"github.com/hajimehoshi/ebiten/audio/wav"
 

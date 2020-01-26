@@ -3,7 +3,7 @@ package d2player
 import (
 	"errors"
 	"fmt"
-	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 	"log"

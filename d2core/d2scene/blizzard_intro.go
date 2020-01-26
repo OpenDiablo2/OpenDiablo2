@@ -1,9 +1,9 @@
 package d2scene
 
 import (
-	"github.com/OpenDiablo2/D2Shared/d2data/d2video"
 	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2video"
 	"github.com/hajimehoshi/ebiten"
 )
 

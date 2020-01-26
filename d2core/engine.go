@@ -6,9 +6,9 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
-	"github.com/OpenDiablo2/D2Shared/d2helper"
+	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon/d2coreinterface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2input"
@@ -16,13 +16,14 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 
-	"github.com/OpenDiablo2/D2Shared/d2data"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data"
 
-	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 
-	"github.com/OpenDiablo2/D2Shared/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"

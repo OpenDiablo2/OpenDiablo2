@@ -5,8 +5,8 @@ import (
 	"path"
 	"sync"
 
-	"github.com/OpenDiablo2/D2Shared/d2data/d2mpq"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2mpq"
 )
 
 type archiveEntry struct {
