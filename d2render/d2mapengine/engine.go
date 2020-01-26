@@ -3,7 +3,7 @@ package d2mapengine
 import (
 	"strings"
 
-	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"

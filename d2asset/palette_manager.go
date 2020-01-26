@@ -1,7 +1,7 @@
 package d2asset
 
 import (
-	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
 )
 
 type paletteManager struct {

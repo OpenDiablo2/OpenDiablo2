@@ -1,9 +1,9 @@
 package d2core
 
 import (
-	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-	"github.com/OpenDiablo2/D2Shared/d2common/d2resource"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 )

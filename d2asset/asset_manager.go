@@ -4,12 +4,12 @@ import (
 	"errors"
 	"log"
 
-	"github.com/OpenDiablo2/D2Shared/d2data/d2cof"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dcc"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2mpq"
 	"github.com/OpenDiablo2/OpenDiablo2/d2corecommon"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2cof"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2dc6"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2dcc"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2mpq"
 	"github.com/OpenDiablo2/OpenDiablo2/d2term"
 )
 

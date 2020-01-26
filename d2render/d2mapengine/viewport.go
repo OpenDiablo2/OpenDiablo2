@@ -3,7 +3,7 @@ package d2mapengine
 import (
 	"math"
 
-	"github.com/OpenDiablo2/D2Shared/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 type worldTrans struct {

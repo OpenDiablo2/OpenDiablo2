@@ -100,7 +100,7 @@ func getDefaultConfiguration() *Configuration {
 			"d2xmusic.mpq",
 			"d2xtalk.mpq",
 			"d2xvideo.mpq",
-			"d2data.mpq",
+			"github.com/OpenDiablo2/OpenDiablo2/d2data.mpq",
 			"d2char.mpq",
 			"d2music.mpq",
 			"d2sfx.mpq",

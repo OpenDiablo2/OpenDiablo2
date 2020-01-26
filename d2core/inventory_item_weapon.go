@@ -3,8 +3,8 @@ package d2core
 import (
 	"log"
 
-	"github.com/OpenDiablo2/D2Shared/d2common/d2enum"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
 )
 
 type InventoryItemWeapon struct {

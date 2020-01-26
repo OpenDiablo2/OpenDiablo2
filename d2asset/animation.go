@@ -5,10 +5,11 @@ import (
 	"image/color"
 	"math"
 
-	"github.com/OpenDiablo2/D2Shared/d2data/d2datadict"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dc6"
-	"github.com/OpenDiablo2/D2Shared/d2data/d2dcc"
-	"github.com/OpenDiablo2/D2Shared/d2helper"
+	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2dc6"
+	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2dcc"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render/d2surface"
 
 	"github.com/hajimehoshi/ebiten"

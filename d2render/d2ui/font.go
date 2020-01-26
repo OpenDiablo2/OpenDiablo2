@@ -4,7 +4,7 @@ import (
 	"image/color"
 	"strings"
 
-	"github.com/OpenDiablo2/D2Shared/d2helper"
+	"github.com/OpenDiablo2/OpenDiablo2/d2helper"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2render"
