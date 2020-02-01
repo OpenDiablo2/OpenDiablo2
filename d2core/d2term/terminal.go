@@ -133,14 +133,18 @@ func (t *terminal) advance(elapsed float64) error {
 func (t *terminal) OnKeyDown(event d2input.KeyEvent) bool {
 	maxOutputIndex := d2helper.MaxInt(0, len(t.outputHistory)-t.lineCount)
 
-	if event.Key == d2input.KeyGraveAccent {
-		switch t.visState {
-		case termVisShowing, termVisShown:
-			t.hide()
-		case termVisHiding, termVisHidden:
+	if t.visState == termVisHiding || t.visState == termVisHidden {
+		if event.Key == d2input.KeyGraveAccent {
 			t.show()
+			return true
 		}
 
+		// When terminal is not visible, only d2input.KeyGraveAccent is consumed.
+		return false
+	}
+
+	if event.Key == d2input.KeyGraveAccent {
+		t.hide()
 		return true
 	}
 
@@ -221,7 +225,8 @@ func (t *terminal) OnKeyDown(event d2input.KeyEvent) bool {
 		return true
 	}
 
-	return false
+	// When terminal is visible, all keys are consumed.
+	return true
 }
 
 func (t *terminal) OnKeyChars(event d2input.KeyCharsEvent) bool {
