@@ -3,10 +3,6 @@ package d2common
 import (
 	"log"
 	"strconv"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
 type textDictionaryHashEntry struct {
@@ -28,16 +24,17 @@ func TranslateString(key string) string {
 	return result
 }
 
-func LoadTextDictionary(fileProvider d2interface.FileProvider) {
-	lookupTable = make(map[string]string)
-	loadDictionary(fileProvider, d2resource.PatchStringTable)
-	loadDictionary(fileProvider, d2resource.ExpansionStringTable)
-	loadDictionary(fileProvider, d2resource.StringTable)
-	log.Printf("Loaded %d entries from the string table", len(lookupTable))
+func GetDictionaryEntryCount() int {
+	if lookupTable == nil {
+		return 0
+	}
+	return len(lookupTable)
 }
 
-func loadDictionary(fileProvider d2interface.FileProvider, dictionaryName string) {
-	dictionaryData := fileProvider.LoadFile(dictionaryName)
+func LoadDictionary(dictionaryData []byte) {
+	if lookupTable == nil {
+		lookupTable = make(map[string]string)
+	}
 	br := CreateStreamReader(dictionaryData)
 	// CRC
 	if _, err := br.ReadBytes(2); err != nil {
