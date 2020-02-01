@@ -27,6 +27,7 @@ type Cache struct {
 func CreateCache(budget int) *Cache {
 	return &Cache{lookup: make(map[string]*cacheNode), budget: budget}
 }
+
 func (c *Cache) SetVerbose(verbose bool) {
 	c.verbose = verbose
 }
