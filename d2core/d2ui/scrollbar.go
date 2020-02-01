@@ -3,8 +3,7 @@ package d2ui
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2assetmanager"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -16,12 +15,12 @@ type Scrollbar struct {
 	maxOffset       int
 	lastDirChange   int
 	onActivate      func()
-	scrollbarSprite *d2render.Sprite
+	scrollbarSprite *Sprite
 }
 
 func CreateScrollbar(x, y, height int) Scrollbar {
-	animation, _ := d2assetmanager.LoadAnimation(d2resource.Scrollbar, d2resource.PaletteSky)
-	scrollbarSprite, _ := d2render.LoadSprite(animation)
+	animation, _ := d2asset.LoadAnimation(d2resource.Scrollbar, d2resource.PaletteSky)
+	scrollbarSprite, _ := LoadSprite(animation)
 	result := Scrollbar{
 		visible:         true,
 		enabled:         true,

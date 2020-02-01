@@ -3,38 +3,28 @@ package main
 import (
 	"log"
 
-	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2assetmanager"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scenemanager"
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2scene"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2game"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2config"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
+	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2config"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescene"
 
-	"gopkg.in/alecthomas/kingpin.v2"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
+	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2game"
 )
 
 // GitBranch is set by the CI build process to the name of the branch
@@ -48,9 +38,9 @@ var preset = kingpin.Arg("preset", "Level preset").Int()
 
 func main() {
 	if len(GitBranch) == 0 {
-        GitBranch = "Local Build"
-        GitCommit = ""
-    }
+		GitBranch = "Local Build"
+		GitCommit = ""
+	}
 	d2common.SetBuildInfo(GitBranch, GitCommit)
 	log.SetFlags(log.Lshortfile)
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
@@ -67,9 +57,9 @@ func main() {
 
 	kingpin.Parse()
 	if *region == 0 {
-		d2scenemanager.SetNextScene(d2scene.CreateMainMenu())
+		d2scene.SetNextScene(d2gamescene.CreateMainMenu())
 	} else {
-		d2scenemanager.SetNextScene(d2scene.CreateMapEngineTest(*region, *preset))
+		d2scene.SetNextScene(d2gamescene.CreateMapEngineTest(*region, *preset))
 	}
 	err = d2game.Run(GitBranch)
 	if err != nil {
@@ -89,7 +79,7 @@ func loadTextDictionary() bool {
 	}
 
 	for _, item := range toLoad {
-		fileData, err = d2assetmanager.LoadFile(item)
+		fileData, err = d2asset.LoadFile(item)
 		if err != nil {
 			log.Fatal(err)
 			return false
@@ -107,7 +97,7 @@ func loadPalettes() bool {
 	} {
 		filePath := `data\global\palette\` + pal + `\pal.dat`
 		paletteType := d2enum.PaletteType(pal)
-		file, _ := d2assetmanager.LoadFile(filePath)
+		file, _ := d2asset.LoadFile(filePath)
 		d2datadict.LoadPalette(paletteType, file)
 	}
 	log.Printf("Loaded %d palettes", len(d2datadict.Palettes))
@@ -143,7 +133,7 @@ func initializeEverything() error {
 	}
 	d2term.BindLogger()
 
-	d2assetmanager.Initialize()
+	d2asset.Initialize()
 
 	err = d2render.SetWindowIcon("d2logo.png")
 	if err != nil {
@@ -172,86 +162,86 @@ func initializeEverything() error {
 
 	loadTextDictionary()
 
-	file, err = d2assetmanager.LoadFile(d2resource.LevelType)
+	file, err = d2asset.LoadFile(d2resource.LevelType)
 	if err != nil {
 		return err
 	}
 	d2datadict.LoadLevelTypes(file)
 
-	file, err = d2assetmanager.LoadFile(d2resource.LevelPreset)
+	file, err = d2asset.LoadFile(d2resource.LevelPreset)
 	if err != nil {
 		return err
 	}
 	d2datadict.LoadLevelPresets(file)
 
-	file, err = d2assetmanager.LoadFile(d2resource.LevelWarp)
+	file, err = d2asset.LoadFile(d2resource.LevelWarp)
 	if err != nil {
 		return err
 	}
 	d2datadict.LoadLevelWarps(file)
 
-	file, err = d2assetmanager.LoadFile(d2resource.ObjectType)
+	file, err = d2asset.LoadFile(d2resource.ObjectType)
 	if err != nil {
 		return err
 	}
 	d2datadict.LoadObjectTypes(file)
 
-	file, err = d2assetmanager.LoadFile(d2resource.ObjectDetails)
+	file, err = d2asset.LoadFile(d2resource.ObjectDetails)
 	if err != nil {
 		return err
 	}
 	d2datadict.LoadObjects(file)
 
-	file, err = d2assetmanager.LoadFile(d2resource.Weapons)
+	file, err = d2asset.LoadFile(d2resource.Weapons)
 	if err != nil {
 		return err
 	}
 	d2datadict.LoadWeapons(file)
 
-	file, err = d2assetmanager.LoadFile(d2resource.Armor)
+	file, err = d2asset.LoadFile(d2resource.Armor)
 	if err != nil {
 		return err
 	}
 	d2datadict.LoadArmors(file)
 
-	file, err = d2assetmanager.LoadFile(d2resource.Misc)
+	file, err = d2asset.LoadFile(d2resource.Misc)
 	if err != nil {
 		return err
 	}
 	d2datadict.LoadMiscItems(file)
 
-	file, err = d2assetmanager.LoadFile(d2resource.UniqueItems)
+	file, err = d2asset.LoadFile(d2resource.UniqueItems)
 	if err != nil {
 		return err
 	}
 	d2datadict.LoadUniqueItems(file)
 
-	file, err = d2assetmanager.LoadFile(d2resource.Missiles)
+	file, err = d2asset.LoadFile(d2resource.Missiles)
 	if err != nil {
 		return err
 	}
 	d2datadict.LoadMissiles(file)
 
-	file, err = d2assetmanager.LoadFile(d2resource.SoundSettings)
+	file, err = d2asset.LoadFile(d2resource.SoundSettings)
 	if err != nil {
 		return err
 	}
 	d2datadict.LoadSounds(file)
 
-	file, err = d2assetmanager.LoadFile(d2resource.AnimationData)
+	file, err = d2asset.LoadFile(d2resource.AnimationData)
 	if err != nil {
 		return err
 	}
 	d2data.LoadAnimationData(file)
 
-	file, err = d2assetmanager.LoadFile(d2resource.MonStats)
+	file, err = d2asset.LoadFile(d2resource.MonStats)
 	if err != nil {
 		return err
 	}
 	d2datadict.LoadMonStats(file)
 
-	animation, _ := d2assetmanager.LoadAnimation(d2resource.LoadingScreen, d2resource.PaletteLoading)
-	loadingSprite, _ := d2render.LoadSprite(animation)
+	animation, _ := d2asset.LoadAnimation(d2resource.LoadingScreen, d2resource.PaletteLoading)
+	loadingSprite, _ := d2ui.LoadSprite(animation)
 	loadingSpriteSizeX, loadingSpriteSizeY := loadingSprite.GetCurrentFrameSize()
 	loadingSprite.SetPosition(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
 	err = d2game.Initialize(loadingSprite)
@@ -259,8 +249,8 @@ func initializeEverything() error {
 		return err
 	}
 
-	animation, _ = d2assetmanager.LoadAnimation(d2resource.CursorDefault, d2resource.PaletteUnits)
-	cursorSprite, _ := d2render.LoadSprite(animation)
+	animation, _ = d2asset.LoadAnimation(d2resource.CursorDefault, d2resource.PaletteUnits)
+	cursorSprite, _ := d2ui.LoadSprite(animation)
 	d2ui.Initialize(cursorSprite)
 
 	d2term.BindAction("timescale", "set scalar for elapsed time", func(scale float64) {

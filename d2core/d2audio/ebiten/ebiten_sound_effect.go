@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2assetmanager"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/hajimehoshi/ebiten/audio"
 	"github.com/hajimehoshi/ebiten/audio/wav"
 )
@@ -23,7 +23,7 @@ func CreateSoundEffect(sfx string, context *audio.Context, volume float64) *Ebit
 		soundFile = sfx
 	}
 
-	audioData, err := d2assetmanager.LoadFile(soundFile)
+	audioData, err := d2asset.LoadFile(soundFile)
 	if err != nil {
 		panic(err)
 	}

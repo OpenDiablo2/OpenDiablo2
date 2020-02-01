@@ -4,13 +4,11 @@ import (
 	"image/color"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2assetmanager"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 
 	"encoding/binary"
 
@@ -27,7 +25,7 @@ type FontSize struct {
 
 // Font represents a font
 type Font struct {
-	fontSprite *d2render.Sprite
+	fontSprite *Sprite
 	fontTable  map[uint16]uint16
 	metrics    map[uint16]FontSize
 }
@@ -50,10 +48,10 @@ func CreateFont(font string, palettePath string) *Font {
 		metrics:   make(map[uint16]FontSize),
 	}
 	// bug: performance issue when using CJK fonts, because ten thousand frames will be rendered PER font
-	animation, _ := d2assetmanager.LoadAnimation(font+".dc6", palettePath)
-	result.fontSprite, _ = d2render.LoadSprite(animation)
+	animation, _ := d2asset.LoadAnimation(font+".dc6", palettePath)
+	result.fontSprite, _ = LoadSprite(animation)
 	woo := "Woo!\x01"
-	fontData, err := d2assetmanager.LoadFile(font + ".tbl")
+	fontData, err := d2asset.LoadFile(font + ".tbl")
 	if err != nil {
 		panic(err)
 	}

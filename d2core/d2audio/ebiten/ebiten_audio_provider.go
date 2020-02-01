@@ -5,7 +5,7 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2assetmanager"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/hajimehoshi/ebiten/audio/wav"
 
 	"github.com/hajimehoshi/ebiten/audio"
@@ -46,7 +46,7 @@ func (eap *EbitenAudioProvider) PlayBGM(song string) {
 				log.Panic(err)
 			}
 		}
-		audioData, err := d2assetmanager.LoadFile(song)
+		audioData, err := d2asset.LoadFile(song)
 		if err != nil {
 			panic(err)
 		}

@@ -4,7 +4,7 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2assetmanager"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 
@@ -116,8 +116,8 @@ func CreateButton(buttonType ButtonType, text string) Button {
 	result.buttonLayout = buttonLayout
 	font := GetFont(buttonLayout.FontPath, d2resource.PaletteUnits)
 
-	animation, _ := d2assetmanager.LoadAnimation(buttonLayout.ResourceName, buttonLayout.PaletteName)
-	buttonSprite, _ := d2render.LoadSprite(animation)
+	animation, _ := d2asset.LoadAnimation(buttonLayout.ResourceName, buttonLayout.PaletteName)
+	buttonSprite, _ := LoadSprite(animation)
 	totalButtonTypes := buttonSprite.GetFrameCount() / (buttonLayout.XSegments * buttonLayout.YSegments)
 	for i := 0; i < buttonLayout.XSegments; i++ {
 		w, _, _ := buttonSprite.GetFrameSize(i)

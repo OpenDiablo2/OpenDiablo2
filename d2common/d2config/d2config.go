@@ -13,6 +13,21 @@ var (
 	ErrHasInit = errors.New("configuration has already been initialized")
 )
 
+// Configuration defines the configuration for the engine, loaded from config.json
+type Configuration struct {
+	Language        string
+	FullScreen      bool
+	Scale           float64
+	RunInBackground bool
+	TicksPerSecond  int
+	FpsCap          int
+	VsyncEnabled    bool
+	MpqPath         string
+	MpqLoadOrder    []string
+	SfxVolume       float64
+	BgmVolume       float64
+}
+
 var singleton *Configuration
 
 func Initialize() error {
