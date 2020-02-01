@@ -5,7 +5,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -20,7 +19,7 @@ const (
 )
 
 var widgets []Widget
-var cursorSprite *d2render.Sprite
+var cursorSprite *Sprite
 var cursorButtons CursorButton
 var pressedIndex int
 var CursorX int
@@ -28,7 +27,7 @@ var CursorY int
 var clickSfx d2interface.SoundEffect
 var waitForLeftMouseUp bool
 
-func Initialize(curSprite *d2render.Sprite) {
+func Initialize(curSprite *Sprite) {
 	cursorSprite = curSprite
 	pressedIndex = -1
 	clickSfx, _ = d2audio.LoadSoundEffect(d2resource.SFXButtonClick)
@@ -145,6 +144,6 @@ func KeyPressed(key ebiten.Key) bool {
 	return ebiten.IsKeyPressed(key)
 }
 
-func GetCursorSprite() *d2render.Sprite {
+func GetCursorSprite() *Sprite {
 	return cursorSprite
 }

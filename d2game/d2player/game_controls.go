@@ -3,11 +3,10 @@ package d2player
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2assetmanager"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/d2mapengine"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
 type Panel interface {
@@ -18,18 +17,18 @@ type Panel interface {
 }
 
 type GameControls struct {
-	hero      *d2hero.Hero
-	mapEngine *d2mapengine.MapEngine
+	hero      *d2map.Hero
+	mapEngine *d2map.MapEngine
 	inventory *Inventory
 
 	// UI
-	globeSprite *d2render.Sprite
-	mainPanel   *d2render.Sprite
-	menuButton  *d2render.Sprite
-	skillIcon   *d2render.Sprite
+	globeSprite *d2ui.Sprite
+	mainPanel   *d2ui.Sprite
+	menuButton  *d2ui.Sprite
+	skillIcon   *d2ui.Sprite
 }
 
-func NewGameControls(hero *d2hero.Hero, mapEngine *d2mapengine.MapEngine) *GameControls {
+func NewGameControls(hero *d2map.Hero, mapEngine *d2map.MapEngine) *GameControls {
 	return &GameControls{
 		hero:      hero,
 		mapEngine: mapEngine,
@@ -57,17 +56,17 @@ func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
 }
 
 func (g *GameControls) Load() {
-	animation, _ := d2assetmanager.LoadAnimation(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
-	g.globeSprite, _ = d2render.LoadSprite(animation)
+	animation, _ := d2asset.LoadAnimation(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
+	g.globeSprite, _ = d2ui.LoadSprite(animation)
 
-	animation, _ = d2assetmanager.LoadAnimation(d2resource.GamePanels, d2resource.PaletteSky)
-	g.mainPanel, _ = d2render.LoadSprite(animation)
+	animation, _ = d2asset.LoadAnimation(d2resource.GamePanels, d2resource.PaletteSky)
+	g.mainPanel, _ = d2ui.LoadSprite(animation)
 
-	animation, _ = d2assetmanager.LoadAnimation(d2resource.MenuButton, d2resource.PaletteSky)
-	g.menuButton, _ = d2render.LoadSprite(animation)
+	animation, _ = d2asset.LoadAnimation(d2resource.MenuButton, d2resource.PaletteSky)
+	g.menuButton, _ = d2ui.LoadSprite(animation)
 
-	animation, _ = d2assetmanager.LoadAnimation(d2resource.GenericSkills, d2resource.PaletteSky)
-	g.skillIcon, _ = d2render.LoadSprite(animation)
+	animation, _ = d2asset.LoadAnimation(d2resource.GenericSkills, d2resource.PaletteSky)
+	g.skillIcon, _ = d2ui.LoadSprite(animation)
 
 	g.inventory.Load()
 }

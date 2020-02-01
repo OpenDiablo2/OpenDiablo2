@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2assetmanager"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type InventoryItem interface {
@@ -30,7 +30,7 @@ type ItemGrid struct {
 	height   int
 	originX  int
 	originY  int
-	sprites  map[string]*d2render.Sprite
+	sprites  map[string]*d2ui.Sprite
 	slotSize int
 }
 
@@ -41,7 +41,7 @@ func NewItemGrid(width int, height int, originX int, originY int) *ItemGrid {
 		originX:  originX,
 		originY:  originY,
 		slotSize: 29,
-		sprites:  make(map[string]*d2render.Sprite),
+		sprites:  make(map[string]*d2ui.Sprite),
 	}
 }
 
@@ -92,7 +92,7 @@ func (g *ItemGrid) Add(items ...InventoryItem) (int, error) {
 
 // Load reads the inventory sprites for items into local cache for rendering.
 func (g *ItemGrid) Load(items ...InventoryItem) {
-	var itemSprite *d2render.Sprite
+	var itemSprite *d2ui.Sprite
 
 	for _, item := range items {
 		if _, exists := g.sprites[item.ItemCode()]; exists {
@@ -101,7 +101,7 @@ func (g *ItemGrid) Load(items ...InventoryItem) {
 		}
 
 		// TODO: Put the pattern into D2Shared
-		animation, err := d2assetmanager.LoadAnimation(
+		animation, err := d2asset.LoadAnimation(
 			fmt.Sprintf("/data/global/items/inv%s.dc6", item.ItemCode()),
 			d2resource.PaletteSky,
 		)
@@ -109,7 +109,7 @@ func (g *ItemGrid) Load(items ...InventoryItem) {
 			log.Printf("failed to load sprite for item (%s): %v", item.ItemCode(), err)
 			continue
 		}
-		itemSprite, err = d2render.LoadSprite(animation)
+		itemSprite, err = d2ui.LoadSprite(animation)
 
 		g.sprites[item.ItemCode()] = itemSprite
 	}

@@ -3,14 +3,14 @@ package d2player
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2assetmanager"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
 type Inventory struct {
-	frame   *d2render.Sprite
-	panel   *d2render.Sprite
+	frame   *d2ui.Sprite
+	panel   *d2ui.Sprite
 	grid    *ItemGrid
 	originX int
 	originY int
@@ -44,18 +44,18 @@ func (g *Inventory) Close() {
 }
 
 func (g *Inventory) Load() {
-	animation, _ := d2assetmanager.LoadAnimation(d2resource.Frame, d2resource.PaletteSky)
-	g.frame, _ = d2render.LoadSprite(animation)
+	animation, _ := d2asset.LoadAnimation(d2resource.Frame, d2resource.PaletteSky)
+	g.frame, _ = d2ui.LoadSprite(animation)
 
-	animation, _ = d2assetmanager.LoadAnimation(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
-	g.panel, _ = d2render.LoadSprite(animation)
+	animation, _ = d2asset.LoadAnimation(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
+	g.panel, _ = d2ui.LoadSprite(animation)
 
 	items := []InventoryItem{
-		d2hero.GetWeaponItemByCode("wnd"),
-		d2hero.GetWeaponItemByCode("sst"),
-		d2hero.GetWeaponItemByCode("jav"),
-		d2hero.GetArmorItemByCode("buc"),
-		d2hero.GetWeaponItemByCode("clb"),
+		d2inventory.GetWeaponItemByCode("wnd"),
+		d2inventory.GetWeaponItemByCode("sst"),
+		d2inventory.GetWeaponItemByCode("jav"),
+		d2inventory.GetArmorItemByCode("buc"),
+		d2inventory.GetWeaponItemByCode("clb"),
 	}
 	g.grid.Add(items...)
 }

@@ -3,7 +3,7 @@ package d2ui
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2assetmanager"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
@@ -27,8 +27,8 @@ func CreateCheckbox(checkState bool) Checkbox {
 		enabled:    true,
 	}
 
-	animation, _ := d2assetmanager.LoadAnimation(d2resource.Checkbox, d2resource.PaletteFechar)
-	checkboxSprite, _ := d2render.LoadSprite(animation)
+	animation, _ := d2asset.LoadAnimation(d2resource.Checkbox, d2resource.PaletteFechar)
+	checkboxSprite, _ := LoadSprite(animation)
 	result.width, result.height, _ = checkboxSprite.GetFrameSize(0)
 	checkboxSprite.SetPosition(0, 0)
 

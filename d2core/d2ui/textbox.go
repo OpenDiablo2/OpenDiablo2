@@ -4,14 +4,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2assetmanager"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 
 	"github.com/hajimehoshi/ebiten/inpututil"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -22,14 +21,14 @@ type TextBox struct {
 	y         int
 	visible   bool
 	enabled   bool
-	bgSprite  *d2render.Sprite
+	bgSprite  *Sprite
 	textLabel Label
 	lineBar   Label
 }
 
 func CreateTextbox() TextBox {
-	animation, _ := d2assetmanager.LoadAnimation(d2resource.TextBox2, d2resource.PaletteUnits)
-	bgSprite, _ := d2render.LoadSprite(animation)
+	animation, _ := d2asset.LoadAnimation(d2resource.TextBox2, d2resource.PaletteUnits)
+	bgSprite, _ := LoadSprite(animation)
 	result := TextBox{
 		bgSprite:  bgSprite,
 		textLabel: CreateLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
