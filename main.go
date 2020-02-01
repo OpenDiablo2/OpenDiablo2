@@ -47,6 +47,10 @@ var region = kingpin.Arg("region", "Region type id").Int()
 var preset = kingpin.Arg("preset", "Level preset").Int()
 
 func main() {
+	if len(GitBranch) == 0 {
+        GitBranch = "Local Build"
+        GitCommit = ""
+    }
 	d2common.SetBuildInfo(GitBranch, GitCommit)
 	log.SetFlags(log.Lshortfile)
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
