@@ -1,0 +1,83 @@
+package ebiten
+
+import (
+	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2assetmanager"
+	"github.com/hajimehoshi/ebiten/audio/wav"
+
+	"github.com/hajimehoshi/ebiten/audio"
+)
+
+type EbitenAudioProvider struct {
+	audioContext *audio.Context // The Audio context
+	bgmAudio     *audio.Player  // The audio player
+	lastBgm      string
+	sfxVolume    float64
+	bgmVolume    float64
+}
+
+func CreateAudio() (*EbitenAudioProvider, error) {
+	result := &EbitenAudioProvider{}
+	var err error
+	result.audioContext, err = audio.NewContext(44100)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+	return result, nil
+}
+
+func (eap *EbitenAudioProvider) PlayBGM(song string) {
+	if eap.lastBgm == song {
+		return
+	}
+	eap.lastBgm = song
+	if song == "" && eap.bgmAudio != nil && eap.bgmAudio.IsPlaying() {
+		_ = eap.bgmAudio.Pause()
+		return
+	}
+	go func() {
+		if eap.bgmAudio != nil {
+			err := eap.bgmAudio.Close()
+			if err != nil {
+				log.Panic(err)
+			}
+		}
+		audioData, err := d2assetmanager.LoadFile(song)
+		if err != nil {
+			panic(err)
+		}
+		d, err := wav.Decode(eap.audioContext, audio.BytesReadSeekCloser(audioData))
+		if err != nil {
+			log.Fatal(err)
+		}
+		s := audio.NewInfiniteLoop(d, d.Length())
+		eap.bgmAudio, err = audio.NewPlayer(eap.audioContext, s)
+		if err != nil {
+			log.Fatal(err)
+		}
+		eap.bgmAudio.SetVolume(eap.bgmVolume)
+		// Play the infinite-length stream. This never ends.
+		err = eap.bgmAudio.Rewind()
+		if err != nil {
+			panic(err)
+		}
+		err = eap.bgmAudio.Play()
+		if err != nil {
+			panic(err)
+		}
+	}()
+}
+
+func (eap *EbitenAudioProvider) LoadSoundEffect(sfx string) (d2interface.SoundEffect, error) {
+	result := CreateSoundEffect(sfx, eap.audioContext, eap.sfxVolume) // TODO: Split
+	return result, nil
+}
+
+func (eap *EbitenAudioProvider) SetVolumes(bgmVolume, sfxVolume float64) {
+	eap.sfxVolume = sfxVolume
+	eap.bgmVolume = bgmVolume
+}
