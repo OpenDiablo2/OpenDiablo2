@@ -43,9 +43,9 @@ func CreateHero(x, y int32, direction int, heroType d2enum.Hero, equipment d2inv
 }
 
 func (v *Hero) Advance(tickTime float64) {
-	// TODO: Pathfinding
 	if v.AnimatedEntity.LocationX != v.AnimatedEntity.TargetX ||
-		v.AnimatedEntity.LocationY != v.AnimatedEntity.TargetY {
+		v.AnimatedEntity.LocationY != v.AnimatedEntity.TargetY ||
+		v.AnimatedEntity.HasPathFinding(){
 		v.AnimatedEntity.Step(tickTime)
 	}
 

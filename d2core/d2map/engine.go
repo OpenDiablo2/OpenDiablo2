@@ -1,6 +1,8 @@
 package d2map
 
 import (
+	"github.com/beefsack/go-astar"
+	"math"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
@@ -98,13 +100,18 @@ func (m *MapEngine) GenerateAct1Overworld() {
 
 	if strings.Contains(region.regionPath, "E1") {
 		region, entities := loadRegion(m.gameState.Seed, region.tileRect.Width-1, 0, d2enum.RegionAct1Town, 2, -1)
-		m.regions = append(m.regions, region)
+		m.AppendRegion(region)
 		m.entities = append(m.entities, entities...)
 	} else if strings.Contains(region.regionPath, "S1") {
 		region, entities := loadRegion(m.gameState.Seed, 0, region.tileRect.Height-1, d2enum.RegionAct1Town, 3, -1)
-		m.regions = append(m.regions, region)
+		m.AppendRegion(region)
 		m.entities = append(m.entities, entities...)
 	}
+}
+
+func (m *MapEngine) AppendRegion(region *MapRegion) {
+	// TODO: Stitch together region.walkableArea
+	m.regions = append(m.regions, region)
 }
 
 func (m *MapEngine) GetRegionAtTile(x, y int) *MapRegion {
@@ -142,4 +149,26 @@ func (m *MapEngine) Render(target d2render.Surface) {
 			region.renderPass3(m.viewport, target)
 		}
 	}
+}
+
+func (m *MapEngine) PathFind(startX, startY, endX, endY float64) (path []astar.Pather, distance float64, found bool){
+	startTileX := int(math.Floor(startX))
+	startTileY := int(math.Floor(startY))
+	startSubtileX := int((startX - float64(int(startX))) * 5)
+	startSubtileY := int((startY - float64(int(startY))) * 5)
+	startRegion := m.GetRegionAtTile(startTileX, startTileY)
+	startNode := &startRegion.walkableArea[startSubtileY + ((startTileY - startRegion.tileRect.Top) * 5)][startSubtileX + ((startTileX - startRegion.tileRect.Left) * 5)]
+
+	endTileX := int(math.Floor(endX))
+	endTileY := int(math.Floor(endY))
+	endSubtileX := int((endX - float64(int(endX))) * 5)
+	endSubtileY := int((endY - float64(int(endY))) * 5)
+	endRegion := m.GetRegionAtTile(endTileX, endTileY)
+	endNode := &endRegion.walkableArea[endSubtileY + ((endTileY - endRegion.tileRect.Top) * 5)][endSubtileX + ((endTileX - endRegion.tileRect.Left) * 5)]
+
+	path, distance, found = astar.Path(endNode, startNode)
+	if path != nil {
+		path = path[1:]
+	}
+	return
 }
