@@ -3,12 +3,12 @@ package d2map
 import (
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 )
 
 type MapEntity interface {
@@ -33,6 +33,10 @@ func CreateMapEngine(gameState *d2gamestate.GameState) *MapEngine {
 		gameState: gameState,
 		viewport:  NewViewport(0, 0, 800, 600),
 	}
+
+	d2term.BindAction("mapdebugvis", "set map debug visualization level", func(level int) {
+		engine.debugVisLevel = level
+	})
 
 	engine.viewport.SetCamera(&engine.camera)
 	return engine
@@ -77,10 +81,6 @@ func (m *MapEngine) ScreenToOrtho(x, y int) (float64, float64) {
 
 func (m *MapEngine) WorldToOrtho(x, y float64) (float64, float64) {
 	return m.viewport.WorldToOrtho(x, y)
-}
-
-func (m *MapEngine) SetDebugVisLevel(debugVisLevel int) {
-	m.debugVisLevel = debugVisLevel
 }
 
 func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) {

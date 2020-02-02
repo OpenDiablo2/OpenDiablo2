@@ -270,17 +270,6 @@ func (met *MapEngineTest) OnKeyDown(event d2input.KeyEvent) bool {
 		return true
 	}
 
-	if event.Key == d2input.KeyF7 {
-		if met.debugVisLevel < 2 {
-			met.debugVisLevel++
-		} else {
-			met.debugVisLevel = 0
-		}
-
-		met.mapEngine.SetDebugVisLevel(met.debugVisLevel)
-		return true
-	}
-
 	return false
 }
 
