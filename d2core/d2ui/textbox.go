@@ -5,8 +5,7 @@ import (
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 
 	"github.com/hajimehoshi/ebiten/inpututil"
 
@@ -55,7 +54,7 @@ func repeatingKeyPressed(key ebiten.Key) bool {
 	return false
 }
 
-func (v *TextBox) Render(target d2common.Surface) {
+func (v *TextBox) Render(target d2render.Surface) {
 	if !v.visible {
 		return
 	}

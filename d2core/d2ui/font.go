@@ -5,8 +5,7 @@ import (
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
 
@@ -106,7 +105,7 @@ func (v *Font) GetTextMetrics(text string) (width, height int) {
 }
 
 // Render draws the font on the target surface
-func (v *Font) Render(x, y int, text string, color color.Color, target d2common.Surface) {
+func (v *Font) Render(x, y int, text string, color color.Color, target d2render.Surface) {
 	v.fontSprite.SetColorMod(color)
 	v.fontSprite.SetBlend(false)
 

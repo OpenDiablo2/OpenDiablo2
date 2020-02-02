@@ -1,9 +1,9 @@
 package d2ui
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -74,7 +74,7 @@ func (v *Scrollbar) GetLastDirChange() int {
 	return v.lastDirChange
 }
 
-func (v *Scrollbar) Render(target d2common.Surface) {
+func (v *Scrollbar) Render(target d2render.Surface) {
 	if !v.visible || v.maxOffset == 0 {
 		return
 	}

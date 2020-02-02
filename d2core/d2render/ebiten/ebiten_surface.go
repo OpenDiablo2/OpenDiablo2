@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
@@ -22,12 +22,12 @@ func (s *ebitenSurface) PushTranslation(x, y int) {
 	s.stateCurrent.y += y
 }
 
-func (s *ebitenSurface) PushCompositeMode(mode d2common.CompositeMode) {
+func (s *ebitenSurface) PushCompositeMode(mode d2render.CompositeMode) {
 	s.stateStack = append(s.stateStack, s.stateCurrent)
 	s.stateCurrent.mode = d2ToEbitenCompositeMode(mode)
 }
 
-func (s *ebitenSurface) PushFilter(filter d2common.Filter) {
+func (s *ebitenSurface) PushFilter(filter d2render.Filter) {
 	s.stateStack = append(s.stateStack, s.stateCurrent)
 	s.stateCurrent.filter = d2ToEbitenFilter(filter)
 }
@@ -53,7 +53,7 @@ func (s *ebitenSurface) PopN(n int) {
 	}
 }
 
-func (s *ebitenSurface) Render(sfc d2common.Surface) error {
+func (s *ebitenSurface) Render(sfc d2render.Surface) error {
 	opts := &ebiten.DrawImageOptions{CompositeMode: s.stateCurrent.mode}
 	opts.GeoM.Translate(float64(s.stateCurrent.x), float64(s.stateCurrent.y))
 	opts.Filter = s.stateCurrent.filter

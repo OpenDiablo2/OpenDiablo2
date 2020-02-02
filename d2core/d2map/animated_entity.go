@@ -4,11 +4,11 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 // AnimatedEntity represents an entity on the map that can be animated
@@ -70,7 +70,7 @@ func (v AnimatedEntity) Wait() bool {
 }
 
 // Render draws this animated entity onto the target
-func (v *AnimatedEntity) Render(target d2common.Surface) {
+func (v *AnimatedEntity) Render(target d2render.Surface) {
 	target.PushTranslation(
 		int(v.offsetX)+int((v.subcellX-v.subcellY)*16),
 		int(v.offsetY)+int(((v.subcellX+v.subcellY)*8)-5),

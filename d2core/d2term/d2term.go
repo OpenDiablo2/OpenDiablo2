@@ -4,9 +4,8 @@ import (
 	"errors"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 var (
@@ -102,7 +101,7 @@ func UnbindAction(name string) error {
 	return singleton.unbindAction(name)
 }
 
-func Render(surface d2common.Surface) error {
+func Render(surface d2render.Surface) error {
 	if singleton == nil {
 		return ErrNotInit
 	}

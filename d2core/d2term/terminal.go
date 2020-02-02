@@ -13,10 +13,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 const (
@@ -241,7 +240,7 @@ func (t *terminal) OnKeyChars(event d2input.KeyCharsEvent) bool {
 	return handled
 }
 
-func (t *terminal) render(surface d2common.Surface) error {
+func (t *terminal) render(surface d2render.Surface) error {
 	if !t.isVisible() {
 		return nil
 	}

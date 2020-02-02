@@ -31,7 +31,7 @@ type MapRegion struct {
 	palette           d2datadict.PaletteRec
 	startX            float64
 	startY            float64
-	imageCacheRecords map[uint32]d2common.Surface
+	imageCacheRecords map[uint32]d2render.Surface
 	seed              int64
 	currentFrame      int
 	lastFrameTime     float64
@@ -41,7 +41,7 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 	region := &MapRegion{
 		levelType:         d2datadict.LevelTypes[levelType],
 		levelPreset:       d2datadict.LevelPresets[levelPreset],
-		imageCacheRecords: map[uint32]d2common.Surface{},
+		imageCacheRecords: map[uint32]d2render.Surface{},
 		seed:              seed,
 	}
 
@@ -228,7 +228,7 @@ func (mr *MapRegion) getTileWorldPosition(tileX, tileY int) (float64, float64) {
 	return float64(tileX + mr.tileRect.Left), float64(tileY + mr.tileRect.Top)
 }
 
-func (mr *MapRegion) renderPass1(viewport *Viewport, target d2common.Surface) {
+func (mr *MapRegion) renderPass1(viewport *Viewport, target d2render.Surface) {
 	for tileY := range mr.ds1.Tiles {
 		for tileX, tile := range mr.ds1.Tiles[tileY] {
 			worldX, worldY := mr.getTileWorldPosition(tileX, tileY)
@@ -241,7 +241,7 @@ func (mr *MapRegion) renderPass1(viewport *Viewport, target d2common.Surface) {
 	}
 }
 
-func (mr *MapRegion) renderPass2(entities []MapEntity, viewport *Viewport, target d2common.Surface) {
+func (mr *MapRegion) renderPass2(entities []MapEntity, viewport *Viewport, target d2render.Surface) {
 	for tileY := range mr.ds1.Tiles {
 		for tileX, tile := range mr.ds1.Tiles[tileY] {
 			worldX, worldY := mr.getTileWorldPosition(tileX, tileY)
@@ -264,7 +264,7 @@ func (mr *MapRegion) renderPass2(entities []MapEntity, viewport *Viewport, targe
 	}
 }
 
-func (mr *MapRegion) renderPass3(viewport *Viewport, target d2common.Surface) {
+func (mr *MapRegion) renderPass3(viewport *Viewport, target d2render.Surface) {
 	for tileY := range mr.ds1.Tiles {
 		for tileX, tile := range mr.ds1.Tiles[tileY] {
 			worldX, worldY := mr.getTileWorldPosition(tileX, tileY)
@@ -277,7 +277,7 @@ func (mr *MapRegion) renderPass3(viewport *Viewport, target d2common.Surface) {
 	}
 }
 
-func (mr *MapRegion) renderTilePass1(tile d2ds1.TileRecord, viewport *Viewport, target d2common.Surface) {
+func (mr *MapRegion) renderTilePass1(tile d2ds1.TileRecord, viewport *Viewport, target d2render.Surface) {
 	for _, wall := range tile.Walls {
 		if !wall.Hidden && wall.Prop1 != 0 && wall.Type.LowerWall() {
 			mr.renderWall(wall, viewport, target)
@@ -297,7 +297,7 @@ func (mr *MapRegion) renderTilePass1(tile d2ds1.TileRecord, viewport *Viewport, 
 	}
 }
 
-func (mr *MapRegion) renderTilePass2(tile d2ds1.TileRecord, viewport *Viewport, target d2common.Surface) {
+func (mr *MapRegion) renderTilePass2(tile d2ds1.TileRecord, viewport *Viewport, target d2render.Surface) {
 	for _, wall := range tile.Walls {
 		if !wall.Hidden && wall.Type.UpperWall() {
 			mr.renderWall(wall, viewport, target)
@@ -305,7 +305,7 @@ func (mr *MapRegion) renderTilePass2(tile d2ds1.TileRecord, viewport *Viewport, 
 	}
 }
 
-func (mr *MapRegion) renderTilePass3(tile d2ds1.TileRecord, viewport *Viewport, target d2common.Surface) {
+func (mr *MapRegion) renderTilePass3(tile d2ds1.TileRecord, viewport *Viewport, target d2render.Surface) {
 	for _, wall := range tile.Walls {
 		if wall.Type == d2enum.Roof {
 			mr.renderWall(wall, viewport, target)
@@ -313,8 +313,8 @@ func (mr *MapRegion) renderTilePass3(tile d2ds1.TileRecord, viewport *Viewport, 
 	}
 }
 
-func (mr *MapRegion) renderFloor(tile d2ds1.FloorShadowRecord, viewport *Viewport, target d2common.Surface) {
-	var img d2common.Surface
+func (mr *MapRegion) renderFloor(tile d2ds1.FloorShadowRecord, viewport *Viewport, target d2render.Surface) {
+	var img d2render.Surface
 	if !tile.Animated {
 		img = mr.getImageCacheRecord(tile.Style, tile.Sequence, 0, tile.RandomIndex)
 	} else {
@@ -334,7 +334,7 @@ func (mr *MapRegion) renderFloor(tile d2ds1.FloorShadowRecord, viewport *Viewpor
 	target.Render(img)
 }
 
-func (mr *MapRegion) renderWall(tile d2ds1.WallRecord, viewport *Viewport, target d2common.Surface) {
+func (mr *MapRegion) renderWall(tile d2ds1.WallRecord, viewport *Viewport, target d2render.Surface) {
 	img := mr.getImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tile.RandomIndex)
 	if img == nil {
 		log.Printf("Render called on uncached wall {%v,%v,%v}", tile.Style, tile.Sequence, tile.Type)
@@ -350,7 +350,7 @@ func (mr *MapRegion) renderWall(tile d2ds1.WallRecord, viewport *Viewport, targe
 	target.Render(img)
 }
 
-func (mr *MapRegion) renderShadow(tile d2ds1.FloorShadowRecord, viewport *Viewport, target d2common.Surface) {
+func (mr *MapRegion) renderShadow(tile d2ds1.FloorShadowRecord, viewport *Viewport, target d2render.Surface) {
 	img := mr.getImageCacheRecord(tile.Style, tile.Sequence, 13, tile.RandomIndex)
 	if img == nil {
 		log.Printf("Render called on uncached shadow {%v,%v}", tile.Style, tile.Sequence)
@@ -367,7 +367,7 @@ func (mr *MapRegion) renderShadow(tile d2ds1.FloorShadowRecord, viewport *Viewpo
 	target.Render(img)
 }
 
-func (mr *MapRegion) renderDebug(debugVisLevel int, viewport *Viewport, target d2common.Surface) {
+func (mr *MapRegion) renderDebug(debugVisLevel int, viewport *Viewport, target d2render.Surface) {
 	for tileY := range mr.ds1.Tiles {
 		for tileX := range mr.ds1.Tiles[tileY] {
 			worldX, worldY := mr.getTileWorldPosition(tileX, tileY)
@@ -378,7 +378,7 @@ func (mr *MapRegion) renderDebug(debugVisLevel int, viewport *Viewport, target d
 	}
 }
 
-func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *Viewport, target d2common.Surface) {
+func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *Viewport, target d2render.Surface) {
 	if debugVisLevel > 0 {
 		subtileColor := color.RGBA{80, 80, 255, 100}
 		tileColor := color.RGBA{255, 255, 255, 255}
@@ -446,12 +446,12 @@ func (mr *MapRegion) generateTileCache() {
 	}
 }
 
-func (mr *MapRegion) getImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte) d2common.Surface {
+func (mr *MapRegion) getImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte) d2render.Surface {
 	lookupIndex := uint32(style)<<24 | uint32(sequence)<<16 | uint32(tileType)<<8 | uint32(randomIndex)
 	return mr.imageCacheRecords[lookupIndex]
 }
 
-func (mr *MapRegion) setImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte, image d2common.Surface) {
+func (mr *MapRegion) setImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte, image d2render.Surface) {
 	lookupIndex := uint32(style)<<24 | uint32(sequence)<<16 | uint32(tileType)<<8 | uint32(randomIndex)
 	mr.imageCacheRecords[lookupIndex] = image
 }
@@ -494,7 +494,7 @@ func (mr *MapRegion) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, ti
 		}
 		tileYOffset := d2helper.AbsInt32(tileYMinimum)
 		tileHeight := d2helper.AbsInt32(tileData[i].Height)
-		_, image := d2render.NewSurface(int(tileData[i].Width), int(tileHeight), d2common.FilterNearest)
+		_, image := d2render.NewSurface(int(tileData[i].Width), int(tileHeight), d2render.FilterNearest)
 		pixels := make([]byte, 4*tileData[i].Width*tileHeight)
 		mr.decodeTileGfxData(tileData[i].Blocks, &pixels, tileYOffset, tileData[i].Width)
 		image.ReplacePixels(pixels)
@@ -529,7 +529,7 @@ func (mr *MapRegion) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, t
 		return
 	}
 
-	_, image := d2render.NewSurface(int(tileData.Width), int(tileHeight), d2common.FilterNearest)
+	_, image := d2render.NewSurface(int(tileData.Width), int(tileHeight), d2render.FilterNearest)
 	pixels := make([]byte, 4*tileData.Width*int32(tileHeight))
 	mr.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, tileData.Width)
 	image.ReplacePixels(pixels)
@@ -590,7 +590,7 @@ func (mr *MapRegion) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int)
 		return
 	}
 
-	_, image := d2render.NewSurface(160, int(realHeight), d2common.FilterNearest)
+	_, image := d2render.NewSurface(160, int(realHeight), d2render.FilterNearest)
 	pixels := make([]byte, 4*160*realHeight)
 	mr.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, 160)
 

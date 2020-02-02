@@ -5,7 +5,6 @@ import (
 	"image/color"
 	"math"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
@@ -28,7 +27,7 @@ type animationFrame struct {
 	offsetX int
 	offsetY int
 
-	image d2common.Surface
+	image d2render.Surface
 }
 
 type animationDirection struct {
@@ -42,7 +41,7 @@ type Animation struct {
 	lastFrameTime  float64
 	playedCount    int
 
-	compositeMode d2common.CompositeMode
+	compositeMode d2render.CompositeMode
 	colorMod      color.Color
 
 	playMode   playMode
@@ -84,7 +83,7 @@ func createAnimationFromDCC(dcc *d2dcc.DCC, palette *d2datadict.PaletteRec, tran
 				}
 			}
 
-			err, image := d2render.NewSurface(frameWidth, frameHeight, d2common.FilterNearest)
+			err, image := d2render.NewSurface(frameWidth, frameHeight, d2render.FilterNearest)
 			if err != nil {
 				return nil, err
 			}
@@ -119,7 +118,7 @@ func createAnimationFromDC6(dc6 *d2dc6.DC6File) (*Animation, error) {
 	}
 
 	for frameIndex, dc6Frame := range dc6.Frames {
-		err, image := d2render.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height), d2common.FilterNearest)
+		err, image := d2render.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height), d2render.FilterNearest)
 		if err != nil {
 			return nil, err
 		}
@@ -192,7 +191,7 @@ func (a *Animation) Advance(elapsed float64) error {
 	return nil
 }
 
-func (a *Animation) Render(target d2common.Surface) error {
+func (a *Animation) Render(target d2render.Surface) error {
 	direction := a.directions[a.directionIndex]
 	frame := direction.frames[a.frameIndex]
 
@@ -325,8 +324,8 @@ func (a *Animation) ResetPlayedCount() {
 
 func (a *Animation) SetBlend(blend bool) {
 	if blend {
-		a.compositeMode = d2common.CompositeModeLighter
+		a.compositeMode = d2render.CompositeModeLighter
 	} else {
-		a.compositeMode = d2common.CompositeModeSourceOver
+		a.compositeMode = d2render.CompositeModeSourceOver
 	}
 }

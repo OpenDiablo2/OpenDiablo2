@@ -5,8 +5,6 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
@@ -96,7 +94,7 @@ func Advance() {
 }
 
 // Draw draws the game
-func render(target d2common.Surface) {
+func render(target d2render.Surface) {
 	if d2scene.GetLoadingProgress() < 1.0 {
 		loadingSprite.SetCurrentFrame(int(d2helper.Max(0,
 			d2helper.Min(uint32(loadingSprite.GetFrameCount()-1),
@@ -137,7 +135,7 @@ func render(target d2common.Surface) {
 	d2term.Render(target)
 }
 
-func update(screen d2common.Surface) error {
+func update(screen d2render.Surface) error {
 	Advance()
 	err, drawingSkipped := d2render.IsDrawingSkipped()
 	if err != nil {

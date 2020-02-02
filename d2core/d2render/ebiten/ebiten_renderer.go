@@ -4,7 +4,7 @@ import (
 	"image"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2config"
 
@@ -49,7 +49,7 @@ func (r *EbitenRenderer) IsDrawingSkipped() bool {
 	return ebiten.IsDrawingSkipped()
 }
 
-func (r *EbitenRenderer) Run(f func(surface d2common.Surface) error, width, height int, title string) error {
+func (r *EbitenRenderer) Run(f func(surface d2render.Surface) error, width, height int, title string) error {
 	config, err := d2config.Get()
 	if err != nil {
 		log.Fatal(err)
@@ -65,7 +65,7 @@ func (r *EbitenRenderer) Run(f func(surface d2common.Surface) error, width, heig
 	}, width, height, config.Scale, title)
 }
 
-func (r *EbitenRenderer) CreateSurface(surface d2common.Surface) (error, d2common.Surface) {
+func (r *EbitenRenderer) CreateSurface(surface d2render.Surface) (error, d2render.Surface) {
 	result := &ebitenSurface{
 		image: surface.(*ebitenSurface).image,
 		stateCurrent: surfaceState{
@@ -76,7 +76,7 @@ func (r *EbitenRenderer) CreateSurface(surface d2common.Surface) (error, d2commo
 	return nil, result
 }
 
-func (r *EbitenRenderer) NewSurface(width, height int, filter d2common.Filter) (error, d2common.Surface) {
+func (r *EbitenRenderer) NewSurface(width, height int, filter d2render.Filter) (error, d2render.Surface) {
 	ebitenFilter := d2ToEbitenFilter(filter)
 	img, err := ebiten.NewImage(width, height, ebitenFilter)
 	if err != nil {
