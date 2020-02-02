@@ -16,7 +16,63 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/beefsack/go-astar"
 )
+
+type PathTile struct {
+	Walkable bool
+	Up, Down, Left, Right, UpLeft, UpRight, DownLeft, DownRight *PathTile
+	X, Y float64
+}
+
+func (t *PathTile) PathNeighbors() []astar.Pather {
+	result := make([]astar.Pather, 0)
+	if t.Up != nil {
+		result = append(result, t.Up)
+	}
+	if t.Right != nil {
+		result = append(result, t.Right)
+	}
+	if t.Down != nil {
+		result = append(result, t.Down)
+	}
+	if t.Left != nil {
+		result = append(result, t.Left)
+	}
+	if t.UpLeft != nil {
+		result = append(result, t.UpLeft)
+	}
+	if t.UpRight != nil {
+		result = append(result, t.UpRight)
+	}
+	if t.DownLeft != nil {
+		result = append(result, t.DownLeft)
+	}
+	if t.DownRight != nil {
+		result = append(result, t.DownRight)
+	}
+
+	return result
+}
+
+func (t *PathTile) PathNeighborCost(to astar.Pather) float64 {
+	return 1 // No cost specifics currently...
+}
+
+func (t *PathTile) PathEstimatedCost(to astar.Pather) float64 {
+	toT := to.(*PathTile)
+	absX := toT.X - t.X
+	if absX < 0 {
+		absX = -absX
+	}
+	absY := toT.Y - t.Y
+	if absY < 0 {
+		absY = -absY
+	}
+	r := absX + absY
+
+	return r
+}
 
 type MapRegion struct {
 	tileRect          d2common.Rectangle
@@ -32,6 +88,7 @@ type MapRegion struct {
 	seed              int64
 	currentFrame      int
 	lastFrameTime     float64
+	walkableArea      [][]PathTile
 }
 
 func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.RegionIdType, levelPreset int, fileIndex int) (*MapRegion, []MapEntity) {
@@ -91,8 +148,66 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 	entities := region.loadEntities()
 	region.loadSpecials()
 	region.generateTileCache()
-
+	region.generateWalkableMatrix()
 	return region, entities
+}
+
+func (mr *MapRegion) generateWalkableMatrix() {
+	mr.walkableArea = make([][]PathTile, mr.tileRect.Height * 5)
+	for y := 0; y < mr.tileRect.Height * 5; y++ {
+		mr.walkableArea[y] = make([]PathTile, mr.tileRect.Width * 5)
+		ty := int(float64(y) / 5.0)
+		for x := 0; x < mr.tileRect.Width * 5; x++ {
+			tx := int(float64(x) / 5.0)
+			tile := mr.GetTile(tx, ty)
+			isBlocked := false
+			for _, floor := range tile.Floors {
+				tileData := mr.GetTileData(int32(floor.Style), int32(floor.Sequence), d2enum.Floor)
+				tileSubAttrs := &d2dt1.SubTileFlags{}
+				if tileData != nil {
+					tileSubAttrs = tileData.GetSubTileFlags(x % 5, 4 - (y % 5))
+				}
+				isBlocked = isBlocked || tileSubAttrs.BlockWalk
+				if isBlocked {
+					break
+				}
+			}
+			if !isBlocked {
+				for _, wall := range tile.Walls {
+					tileData := mr.GetTileData(int32(wall.Style), int32(wall.Sequence), d2enum.Floor)
+					tileSubAttrs := &d2dt1.SubTileFlags{}
+					if tileData != nil {
+						tileSubAttrs = tileData.GetSubTileFlags(x % 5, 4 - (y % 5))
+					}
+					isBlocked = isBlocked || tileSubAttrs.BlockPlayerWalk
+					if isBlocked {
+						break
+					}
+				}
+			}
+			mr.walkableArea[y][x] = PathTile{
+				Walkable: !isBlocked,
+				X: float64(x) / 5.0,
+				Y: float64(y) / 5.0,
+			}
+			if !isBlocked &&  y > 0 && mr.walkableArea[y-1][x].Walkable {
+				mr.walkableArea[y][x].Up = &mr.walkableArea[y-1][x]
+				mr.walkableArea[y-1][x].Down = &mr.walkableArea[y][x]
+			}
+			if !isBlocked && x > 0 && mr.walkableArea[y][x-1].Walkable {
+				mr.walkableArea[y][x].Left = &mr.walkableArea[y][x-1]
+				mr.walkableArea[y][x-1].Right = &mr.walkableArea[y][x]
+			}
+			if !isBlocked && x > 0 && y > 0 && mr.walkableArea[y-1][x-1].Walkable {
+				mr.walkableArea[y][x].UpLeft = &mr.walkableArea[y-1][x-1]
+				mr.walkableArea[y-1][x-1].DownRight = &mr.walkableArea[y][x]
+			}
+			if !isBlocked && y > 0 &&  x < (mr.tileRect.Width * 5) && mr.walkableArea[y-1][x+1].Walkable {
+				mr.walkableArea[y][x].UpRight = &mr.walkableArea[y-1][x+1]
+				mr.walkableArea[y-1][x+1].DownLeft = &mr.walkableArea[y][x]
+			}
+		}
+	}
 }
 
 func (mr *MapRegion) GetTileRect() d2common.Rectangle {
@@ -406,6 +521,7 @@ func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *View
 		}
 		subTileColor := color.RGBA{R: 80, G: 80, B: 255, A: 50}
 		tileColor := color.RGBA{R: 255, G: 255, B: 255, A: 100}
+		tileCollisionColor := color.RGBA{R: 128, G:0, B:0, A:100}
 
 		screenX1, screenY1 := viewport.WorldToScreen(float64(x), float64(y))
 		screenX2, screenY2 := viewport.WorldToScreen(float64(x+1), float64(y))
@@ -439,6 +555,19 @@ func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *View
 				target.PushTranslation(-20, 10+(i+1)*14)
 				target.DrawText("f: %v-%v", floor.Style, floor.Sequence)
 				target.Pop()
+			}
+
+			for yy := 0; yy < 5; yy++ {
+				for xx := 0; xx < 5; xx++ {
+					isoX := (xx - yy) * 16
+					isoY := (xx + yy) * 8
+					target.PushTranslation(isoX-3, isoY+4)
+					var walkableArea = mr.walkableArea[yy + (ay * 5)][xx + (ax * 5)]
+					if !walkableArea.Walkable {
+						target.DrawRect(5, 5, tileCollisionColor)
+					}
+					target.Pop()
+				}
 			}
 		}
 	}

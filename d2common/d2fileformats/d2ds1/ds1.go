@@ -179,6 +179,7 @@ func LoadDS1(fileData []byte) DS1 {
 			newObject.X = br.GetInt32()
 			newObject.Y = br.GetInt32()
 			newObject.Flags = br.GetInt32()
+			//TODO: There's a crash here, we aren't loading this data right....
 			newObject.Lookup = d2datadict.LookupObject(int(ds1.Act), int(newObject.Type), int(newObject.Id))
 			if newObject.Lookup != nil && newObject.Lookup.ObjectsTxtId != -1 {
 				newObject.ObjectInfo = d2datadict.Objects[newObject.Lookup.ObjectsTxtId]
