@@ -1,0 +1,11 @@
+version: 2
+jobs:
+    build:
+        docker:
+            - image: circleci/golang:1.13
+        working_directory: /go/src/github.com/OpenDiablo2/OpenDiablo2
+        steps:
+            - checkout
+            - run: go get -v -t -d ./...
+            - run: go test -v ./...
+            - run: go build .
