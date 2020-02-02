@@ -1,4 +1,4 @@
-package d2helper
+package d2common
 
 import (
 	"bytes"
@@ -141,7 +141,7 @@ func SplitIntoLinesWithMaxWidth(fullSentence string, maxChars int) []string {
 }
 
 func splitCjkIntoChunks(str string, chars int) []string {
-	chunks := make([]string, chars / len(str))
+	chunks := make([]string, chars/len(str))
 	i, count := 0, 0
 	for j, ch := range str {
 		if ch < unicode.MaxLatin1 {

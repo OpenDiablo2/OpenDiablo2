@@ -4,9 +4,9 @@ import (
 	"math"
 	"math/rand"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
@@ -87,7 +87,7 @@ func (v *AnimatedEntity) getStepLength(tickTime float64) (float64, float64) {
 	speed := 6.0
 	length := tickTime * speed
 
-	angle := 359 - d2helper.GetAngleBetween(
+	angle := 359 - d2common.GetAngleBetween(
 		v.LocationX,
 		v.LocationY,
 		v.TargetX,
@@ -102,10 +102,10 @@ func (v *AnimatedEntity) getStepLength(tickTime float64) (float64, float64) {
 func (v *AnimatedEntity) Step(tickTime float64) {
 	stepX, stepY := v.getStepLength(tickTime)
 
-	if d2helper.AlmostEqual(v.LocationX, v.TargetX, stepX) {
+	if d2common.AlmostEqual(v.LocationX, v.TargetX, stepX) {
 		v.LocationX = v.TargetX
 	}
-	if d2helper.AlmostEqual(v.LocationY, v.TargetY, stepY) {
+	if d2common.AlmostEqual(v.LocationY, v.TargetY, stepY) {
 		v.LocationY = v.TargetY
 	}
 	if v.LocationX != v.TargetX {
@@ -145,7 +145,7 @@ func (v *AnimatedEntity) Step(tickTime float64) {
 
 // SetTarget sets target coordinates and changes animation based on proximity and direction
 func (v *AnimatedEntity) SetTarget(tx, ty float64, action int32) {
-	angle := 359 - d2helper.GetAngleBetween(
+	angle := 359 - d2common.GetAngleBetween(
 		v.LocationX,
 		v.LocationY,
 		tx,

@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
+	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 type LevelPresetRecord struct {

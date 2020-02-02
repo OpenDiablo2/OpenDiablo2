@@ -4,10 +4,9 @@ import (
 	"errors"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
 )
 
 type Sprite struct {
@@ -53,7 +52,7 @@ func (s *Sprite) RenderSegmented(target d2render.Surface, segmentsX, segmentsY, 
 			}
 
 			frameWidth, frameHeight := s.GetCurrentFrameSize()
-			maxFrameHeight = d2helper.MaxInt(maxFrameHeight, frameHeight)
+			maxFrameHeight = d2common.MaxInt(maxFrameHeight, frameHeight)
 			currentX += frameWidth
 		}
 

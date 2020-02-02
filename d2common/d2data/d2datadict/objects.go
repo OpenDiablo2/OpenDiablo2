@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
+	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // An ObjectRecord represents the settings for one type of object from objects.txt

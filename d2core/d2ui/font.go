@@ -1,17 +1,14 @@
 package d2ui
 
 import (
+	"encoding/binary"
 	"image/color"
 	"strings"
+	"unicode"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
-
-	"encoding/binary"
-
-	"unicode"
 )
 
 var fontCache = map[string]*Font{}
@@ -91,7 +88,7 @@ func (v *Font) GetTextMetrics(text string) (width, height int) {
 	_, maxCharHeight := v.fontSprite.GetFrameBounds()
 	for _, ch := range text {
 		if ch == '\n' {
-			width = d2helper.MaxInt(width, curWidth)
+			width = d2common.MaxInt(width, curWidth)
 			curWidth = 0
 			height += maxCharHeight + 6
 			continue
@@ -99,7 +96,7 @@ func (v *Font) GetTextMetrics(text string) (width, height int) {
 
 		curWidth += v.getCharWidth(ch)
 	}
-	width = d2helper.MaxInt(width, curWidth)
+	width = d2common.MaxInt(width, curWidth)
 	height += maxCharHeight
 	return
 }
@@ -111,7 +108,7 @@ func (v *Font) Render(x, y int, text string, color color.Color, target d2render.
 
 	maxCharHeight := uint32(0)
 	for _, m := range v.metrics {
-		maxCharHeight = d2helper.Max(maxCharHeight, uint32(m.Height))
+		maxCharHeight = d2common.Max(maxCharHeight, uint32(m.Height))
 	}
 
 	targetWidth, _ := target.GetSize()

@@ -6,21 +6,20 @@ import (
 	"os"
 	"strings"
 
+	"github.com/hajimehoshi/ebiten"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-	"github.com/hajimehoshi/ebiten"
 )
 
 type CharacterSelect struct {
@@ -63,19 +62,19 @@ func (v *CharacterSelect) Load() []func() {
 			v.background.SetPosition(0, 0)
 		},
 		func() {
-			v.newCharButton = d2ui.CreateButton(d2ui.ButtonTypeTall, dh.CombineStrings(dh.SplitIntoLinesWithMaxWidth(d2common.TranslateString("#831"), 15)))
+			v.newCharButton = d2ui.CreateButton(d2ui.ButtonTypeTall, d2common.CombineStrings(dh.SplitIntoLinesWithMaxWidth(d2common.TranslateString("#831"), 15)))
 			v.newCharButton.SetPosition(33, 468)
 			v.newCharButton.OnActivated(func() { v.onNewCharButtonClicked() })
 			d2ui.AddWidget(&v.newCharButton)
 		},
 		func() {
-			v.convertCharButton = d2ui.CreateButton(d2ui.ButtonTypeTall, dh.CombineStrings(dh.SplitIntoLinesWithMaxWidth(d2common.TranslateString("#825"), 15)))
+			v.convertCharButton = d2ui.CreateButton(d2ui.ButtonTypeTall, d2common.CombineStrings(dh.SplitIntoLinesWithMaxWidth(d2common.TranslateString("#825"), 15)))
 			v.convertCharButton.SetPosition(233, 468)
 			v.convertCharButton.SetEnabled(false)
 			d2ui.AddWidget(&v.convertCharButton)
 		},
 		func() {
-			v.deleteCharButton = d2ui.CreateButton(d2ui.ButtonTypeTall, dh.CombineStrings(dh.SplitIntoLinesWithMaxWidth(d2common.TranslateString("#832"), 15)))
+			v.deleteCharButton = d2ui.CreateButton(d2ui.ButtonTypeTall, d2common.CombineStrings(dh.SplitIntoLinesWithMaxWidth(d2common.TranslateString("#832"), 15)))
 			v.deleteCharButton.OnActivated(func() { v.onDeleteCharButtonClicked() })
 			v.deleteCharButton.SetPosition(433, 468)
 			d2ui.AddWidget(&v.deleteCharButton)

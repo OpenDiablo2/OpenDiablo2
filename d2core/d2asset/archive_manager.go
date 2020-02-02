@@ -6,8 +6,8 @@ import (
 	"sync"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
 type archiveEntry struct {

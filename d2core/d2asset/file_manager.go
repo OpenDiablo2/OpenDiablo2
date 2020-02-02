@@ -4,8 +4,9 @@ import (
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
 const (

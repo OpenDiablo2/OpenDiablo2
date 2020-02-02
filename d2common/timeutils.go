@@ -1,4 +1,4 @@
-package d2helper
+package d2common
 
 import "time"
 
