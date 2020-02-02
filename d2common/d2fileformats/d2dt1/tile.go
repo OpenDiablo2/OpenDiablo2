@@ -15,3 +15,10 @@ type Tile struct {
 	blockHeaderSize    int32
 	Blocks             []Block
 }
+
+func (t *Tile) GetSubTileFlags(x, y int) *SubTileFlags {
+	if x < 0 || x > 4 || y < 0 || y > 4 {
+		return &SubTileFlags{}
+	}
+	return &t.SubTileFlags[x + (y * 5)]
+}

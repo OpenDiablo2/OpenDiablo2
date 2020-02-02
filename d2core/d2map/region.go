@@ -126,6 +126,23 @@ func (mr *MapRegion) loadSpecials() {
 	}
 }
 
+func (mr *MapRegion) GetTile(x, y int) *d2ds1.TileRecord {
+	return &mr.ds1.Tiles[y][x]
+}
+
+func (mr *MapRegion) GetTileData(style int32, sequence int32, tileType d2enum.TileType) *d2dt1.Tile {
+	for _, tile := range mr.tiles {
+		if tile.Style == style && tile.Sequence == sequence && tile.Type == int32(tileType) {
+			return &tile
+		}
+	}
+	return nil
+}
+
+func (mr *MapRegion) GetTileSize() (int, int) {
+	return mr.tileRect.Width, mr.tileRect.Height
+}
+
 func (mr *MapRegion) loadEntities() []MapEntity {
 	var entities []MapEntity
 
@@ -193,7 +210,7 @@ func (mr *MapRegion) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) byt
 	return 0
 }
 
-func (mr *MapRegion) getTiles(style, sequence, tileType int32, x, y int, seed int64) []d2dt1.Tile {
+func (mr *MapRegion) getTiles(style, sequence, tileType int32) []d2dt1.Tile {
 	var tiles []d2dt1.Tile
 	for _, tile := range mr.tiles {
 		if tile.Style != style || tile.Sequence != sequence || tile.Type != tileType {
@@ -342,7 +359,7 @@ func (mr *MapRegion) renderWall(tile d2ds1.WallRecord, viewport *Viewport, targe
 		return
 	}
 
-	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust))
+	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust) - 16)
 	defer viewport.PopTranslation()
 
 	target.PushTranslation(viewport.GetTranslationScreen())
@@ -380,9 +397,15 @@ func (mr *MapRegion) renderDebug(debugVisLevel int, viewport *Viewport, target d
 }
 
 func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *Viewport, target d2render.Surface) {
+	ax := x - mr.tileRect.Left
+	ay := y - mr.tileRect.Top
+
 	if debugVisLevel > 0 {
-		subtileColor := color.RGBA{R: 80, G: 80, B: 255, A: 100}
-		tileColor := color.RGBA{R: 255, G: 255, B: 255, A: 255}
+		if ay < 0 || ax < 0 || ay >= len(mr.ds1.Tiles) || x >= len(mr.ds1.Tiles[ay]) {
+			return
+		}
+		subTileColor := color.RGBA{R: 80, G: 80, B: 255, A: 50}
+		tileColor := color.RGBA{R: 255, G: 255, B: 255, A: 100}
 
 		screenX1, screenY1 := viewport.WorldToScreen(float64(x), float64(y))
 		screenX2, screenY2 := viewport.WorldToScreen(float64(x+1), float64(y))
@@ -399,19 +422,19 @@ func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *View
 
 		if debugVisLevel > 1 {
 			for i := 1; i <= 4; i++ {
-				x := i * 16
-				y := i * 8
+				x2 := i * 16
+				y2 := i * 8
 
-				target.PushTranslation(-x, y)
-				target.DrawLine(80, 40, subtileColor)
+				target.PushTranslation(-x2, y2)
+				target.DrawLine(80, 40, subTileColor)
 				target.Pop()
 
-				target.PushTranslation(x, y)
-				target.DrawLine(-80, 40, subtileColor)
+				target.PushTranslation(x2, y2)
+				target.DrawLine(-80, 40, subTileColor)
 				target.Pop()
 			}
 
-			tile := mr.ds1.Tiles[y][x]
+			tile := mr.ds1.Tiles[ay][ax]
 			for i, floor := range tile.Floors {
 				target.PushTranslation(-20, 10+(i+1)*14)
 				target.DrawText("f: %v-%v", floor.Style, floor.Sequence)
@@ -458,7 +481,7 @@ func (mr *MapRegion) setImageCacheRecord(style, sequence byte, tileType d2enum.T
 }
 
 func (mr *MapRegion) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) {
-	tileOptions := mr.getTiles(int32(tile.Style), int32(tile.Sequence), 0, tileX, tileY, mr.seed)
+	tileOptions := mr.getTiles(int32(tile.Style), int32(tile.Sequence), 0)
 	var tileData []*d2dt1.Tile
 	var tileIndex byte
 
@@ -504,7 +527,7 @@ func (mr *MapRegion) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, ti
 }
 
 func (mr *MapRegion) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) {
-	tileOptions := mr.getTiles(int32(tile.Style), int32(tile.Sequence), 13, tileX, tileY, mr.seed)
+	tileOptions := mr.getTiles(int32(tile.Style), int32(tile.Sequence), 13)
 	var tileIndex byte
 	var tileData *d2dt1.Tile
 	if tileOptions == nil {
@@ -538,7 +561,7 @@ func (mr *MapRegion) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, t
 }
 
 func (mr *MapRegion) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int) {
-	tileOptions := mr.getTiles(int32(tile.Style), int32(tile.Sequence), int32(tile.Type), tileX, tileY, mr.seed)
+	tileOptions := mr.getTiles(int32(tile.Style), int32(tile.Sequence), int32(tile.Type))
 	var tileIndex byte
 	var tileData *d2dt1.Tile
 	if tileOptions == nil {
@@ -552,7 +575,7 @@ func (mr *MapRegion) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int)
 	var newTileData *d2dt1.Tile = nil
 
 	if tile.Type == 3 {
-		newTileOptions := mr.getTiles(int32(tile.Style), int32(tile.Sequence), int32(4), tileX, tileY, mr.seed)
+		newTileOptions := mr.getTiles(int32(tile.Style), int32(tile.Sequence), int32(4))
 		newTileIndex := mr.getRandomTile(newTileOptions, tileX, tileY, mr.seed)
 		newTileData = &newTileOptions[newTileIndex]
 	}
