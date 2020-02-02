@@ -2,19 +2,28 @@ package d2audio
 
 import (
 	"errors"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
-var singleton d2interface.AudioProvider
+var singleton AudioProvider
 
 var (
 	ErrHasInit error = errors.New("audio system is already initialized")
 	ErrNotInit error = errors.New("audio system has not been initialized")
 )
 
+type SoundEffect interface {
+	Play()
+	Stop()
+}
+
+type AudioProvider interface {
+	PlayBGM(song string)
+	LoadSoundEffect(sfx string) (SoundEffect, error)
+	SetVolumes(bgmVolume, sfxVolume float64)
+}
+
 // CreateManager creates a sound provider
-func Initialize(audioProvider d2interface.AudioProvider) error {
+func Initialize(audioProvider AudioProvider) error {
 	if singleton != nil {
 		return ErrHasInit
 	}
@@ -31,7 +40,7 @@ func PlayBGM(song string) error {
 	return nil
 }
 
-func LoadSoundEffect(sfx string) (d2interface.SoundEffect, error) {
+func LoadSoundEffect(sfx string) (SoundEffect, error) {
 	if singleton == nil {
 		return nil, ErrNotInit
 	}

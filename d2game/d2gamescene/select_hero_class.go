@@ -4,8 +4,6 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 
@@ -35,8 +33,8 @@ type HeroRenderInfo struct {
 	BackWalkSprite           *d2ui.Sprite
 	BackWalkSpriteOverlay    *d2ui.Sprite
 	SelectionBounds          image.Rectangle
-	SelectSfx                d2interface.SoundEffect
-	DeselectSfx              d2interface.SoundEffect
+	SelectSfx                d2audio.SoundEffect
+	DeselectSfx              d2audio.SoundEffect
 }
 
 func (hri *HeroRenderInfo) Advance(elapsed float64) {
@@ -675,7 +673,7 @@ func loadSprite(animationPath, palettePath string) *d2ui.Sprite {
 	return sprite
 }
 
-func loadSoundEffect(sfx string) d2interface.SoundEffect {
+func loadSoundEffect(sfx string) d2audio.SoundEffect {
 	result, _ := d2audio.LoadSoundEffect(sfx)
 	return result
 }
