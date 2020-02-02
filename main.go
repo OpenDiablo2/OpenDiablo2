@@ -272,24 +272,5 @@ func initializeEverything() error {
 	cursorSprite, _ := d2ui.LoadSprite(animation)
 	d2ui.Initialize(cursorSprite)
 
-	err = d2term.BindAction("timescale", "set scalar for elapsed time", func(scale float64) {
-		if scale <= 0 {
-			err2 := d2term.OutputError("invalid time scale value")
-			if err != nil {
-				log.Fatal(err2)
-			}
-		} else {
-			err2 := d2term.OutputInfo("timescale changed from %f to %f", d2game.GetTimeScale(), scale)
-			if err != nil {
-				log.Fatal(err2)
-			}
-			d2game.SetTimeScale(scale)
-		}
-	})
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-
 	return nil
 }

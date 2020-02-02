@@ -14,22 +14,49 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
-var loadingSprite *d2ui.Sprite // The sprite shown when loading stuff
-var lastTime float64           // Last time we updated the scene
-var showFPS bool
-var timeScale float64
-
-type bsForInputHanding struct {
+var singleton struct {
+	loadingSprite *d2ui.Sprite // The sprite shown when loading stuff
+	lastTime      float64      // Last time we updated the scene
+	showFPS       bool
+	timeScale     float64
 }
 
-var bsHandler *bsForInputHanding
-
 func Initialize(loadingSpr *d2ui.Sprite) error {
-	bsHandler = &bsForInputHanding{}
-	loadingSprite = loadingSpr
-	timeScale = 1.0
-	lastTime = d2common.Now()
-	d2input.BindHandler(bsHandler)
+	singleton.loadingSprite = loadingSpr
+	singleton.timeScale = 1.0
+	singleton.lastTime = d2common.Now()
+
+	d2term.BindAction("fullscreen", "toggles fullscreen", func() {
+		fullscreen, err := d2render.IsFullScreen()
+		if err == nil {
+			fullscreen = !fullscreen
+			d2render.SetFullScreen(fullscreen)
+			d2term.OutputInfo("fullscreen is now: %v", fullscreen)
+		} else {
+			d2term.OutputError(err.Error())
+		}
+	})
+	d2term.BindAction("vsync", "toggles vsync", func() {
+		vsync, err := d2render.GetVSyncEnabled()
+		if err == nil {
+			vsync = !vsync
+			d2render.SetVSyncEnabled(vsync)
+			d2term.OutputInfo("vsync is now: %v", vsync)
+		} else {
+			d2term.OutputError(err.Error())
+		}
+	})
+	d2term.BindAction("fps", "toggle fps counter", func() {
+		singleton.showFPS = !singleton.showFPS
+		d2term.OutputInfo("fps counter is now: %v", singleton.showFPS)
+	})
+	d2term.BindAction("timescale", "set scalar for elapsed time", func(timeScale float64) {
+		if timeScale <= 0 {
+			d2term.OutputError("invalid time scale value")
+		} else {
+			d2term.OutputInfo("timescale changed from %f to %f", singleton.timeScale, timeScale)
+		}
+	})
 
 	return nil
 }
@@ -39,35 +66,6 @@ func Run(gitBranch string) error {
 		log.Fatal(err)
 	}
 	return nil
-}
-
-func SetTimeScale(scale float64) {
-	timeScale = scale
-}
-
-func GetTimeScale() float64 {
-	return timeScale
-}
-
-func (bs *bsForInputHanding) OnKeyDown(event d2input.KeyEvent) bool {
-	if event.Key == d2input.KeyEnter && event.KeyMod == d2input.KeyModAlt {
-		isFullScreen, _ := d2render.IsFullScreen()
-		d2render.SetFullScreen(!isFullScreen)
-		return true
-	}
-
-	if event.Key == d2input.KeyF6 {
-		showFPS = !showFPS
-		return true
-	}
-
-	if event.Key == d2input.KeyF8 {
-		enabled, _ := d2render.GetVSyncEnabled()
-		d2render.SetVSyncEnabled(!enabled)
-		return true
-	}
-
-	return false
 }
 
 // Advance updates the internal state of the engine
@@ -82,8 +80,8 @@ func Advance() {
 	}
 
 	currentTime := d2common.Now()
-	deltaTime := (currentTime - lastTime) * timeScale
-	lastTime = currentTime
+	deltaTime := (currentTime - singleton.lastTime) * singleton.timeScale
+	singleton.lastTime = currentTime
 
 	d2scene.Advance(deltaTime)
 	d2ui.Advance(deltaTime)
@@ -94,10 +92,13 @@ func Advance() {
 // Draw draws the game
 func render(target d2render.Surface) {
 	if d2scene.GetLoadingProgress() < 1.0 {
-		loadingSprite.SetCurrentFrame(int(d2common.Max(0,
-			d2common.Min(uint32(loadingSprite.GetFrameCount()-1),
-				uint32(float64(loadingSprite.GetFrameCount()-1)*d2scene.GetLoadingProgress())))))
-		loadingSprite.Render(target)
+		singleton.loadingSprite.SetCurrentFrame(
+			int(d2common.Max(0, d2common.Min(
+				uint32(singleton.loadingSprite.GetFrameCount()-1),
+				uint32(float64(singleton.loadingSprite.GetFrameCount()-1)*d2scene.GetLoadingProgress()),
+			))),
+		)
+		singleton.loadingSprite.Render(target)
 	} else {
 		if d2scene.GetCurrentScene() == nil {
 			log.Fatal("no scene loaded")
@@ -105,7 +106,7 @@ func render(target d2render.Surface) {
 		d2scene.Render(target)
 		d2ui.Render(target)
 	}
-	if showFPS {
+	if singleton.showFPS {
 		target.PushTranslation(5, 565)
 		vsyncEnabled, _ := d2render.GetVSyncEnabled()
 		fps, _ := d2render.CurrentFPS()
