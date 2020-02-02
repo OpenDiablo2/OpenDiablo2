@@ -23,7 +23,7 @@ func getDefaultConfiguration() *Configuration {
 			"d2xmusic.mpq",
 			"d2xtalk.mpq",
 			"d2xvideo.mpq",
-			"d2datadict.mpq",
+			"d2data.mpq",
 			"d2char.mpq",
 			"d2music.mpq",
 			"d2sfx.mpq",
