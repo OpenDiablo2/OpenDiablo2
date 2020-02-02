@@ -191,8 +191,9 @@ func (met *MapEngineTest) Render(screen d2render.Surface) {
 
 	tileX := int(math.Floor(worldX)) - tileRect.Left
 	tileY := int(math.Floor(worldY)) - tileRect.Top
+
 	subtileX := int((worldX - float64(int(worldX))) * 5)
-	subtileY := 4 - int((worldY-float64(int(worldY)))*5)
+	subtileY := int((worldY - float64(int(worldY))) * 5)
 
 	regionWidth, regionHeight := curRegion.GetTileSize()
 	if tileX >= 0 && tileY >= 0 && tileX < regionWidth && tileY < regionHeight {
