@@ -6,7 +6,6 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -17,6 +16,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"

@@ -4,12 +4,11 @@ import (
 	"image"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2config"
-
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type EbitenRenderer struct {

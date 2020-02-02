@@ -3,10 +3,10 @@ package d2asset
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 )
 

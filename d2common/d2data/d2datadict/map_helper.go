@@ -3,7 +3,7 @@ package d2datadict
 import (
 	"strings"
 
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
+	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 func MapHeaders(line string) map[string]int {

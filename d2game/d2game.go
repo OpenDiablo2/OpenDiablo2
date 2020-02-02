@@ -5,15 +5,13 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
 var loadingSprite *d2ui.Sprite // The sprite shown when loading stuff
@@ -30,7 +28,7 @@ func Initialize(loadingSpr *d2ui.Sprite) error {
 	bsHandler = &bsForInputHanding{}
 	loadingSprite = loadingSpr
 	timeScale = 1.0
-	lastTime = d2helper.Now()
+	lastTime = d2common.Now()
 	d2input.BindHandler(bsHandler)
 
 	return nil
@@ -83,7 +81,7 @@ func Advance() {
 		return
 	}
 
-	currentTime := d2helper.Now()
+	currentTime := d2common.Now()
 	deltaTime := (currentTime - lastTime) * timeScale
 	lastTime = currentTime
 
@@ -96,8 +94,8 @@ func Advance() {
 // Draw draws the game
 func render(target d2render.Surface) {
 	if d2scene.GetLoadingProgress() < 1.0 {
-		loadingSprite.SetCurrentFrame(int(d2helper.Max(0,
-			d2helper.Min(uint32(loadingSprite.GetFrameCount()-1),
+		loadingSprite.SetCurrentFrame(int(d2common.Max(0,
+			d2common.Min(uint32(loadingSprite.GetFrameCount()-1),
 				uint32(float64(loadingSprite.GetFrameCount()-1)*d2scene.GetLoadingProgress())))))
 		loadingSprite.Render(target)
 	} else {

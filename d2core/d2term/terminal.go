@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
@@ -130,7 +130,7 @@ func (t *terminal) advance(elapsed float64) error {
 }
 
 func (t *terminal) OnKeyDown(event d2input.KeyEvent) bool {
-	maxOutputIndex := d2helper.MaxInt(0, len(t.outputHistory)-t.lineCount)
+	maxOutputIndex := d2common.MaxInt(0, len(t.outputHistory)-t.lineCount)
 
 	if t.visState == termVisHiding || t.visState == termVisHidden {
 		if event.Key == d2input.KeyGraveAccent {
@@ -180,7 +180,7 @@ func (t *terminal) OnKeyDown(event d2input.KeyEvent) bool {
 
 	if event.Key == d2input.KeyUp {
 		if event.KeyMod == d2input.KeyModControl {
-			t.lineCount = d2helper.MaxInt(0, t.lineCount-1)
+			t.lineCount = d2common.MaxInt(0, t.lineCount-1)
 		} else if len(t.commandHistory) > 0 {
 			t.command = t.commandHistory[t.commandIndex]
 			if t.commandIndex == 0 {
@@ -194,7 +194,7 @@ func (t *terminal) OnKeyDown(event d2input.KeyEvent) bool {
 	}
 
 	if event.Key == d2input.KeyDown && event.KeyMod == d2input.KeyModControl {
-		t.lineCount = d2helper.MinInt(t.lineCount+1, termRowCountMax)
+		t.lineCount = d2common.MinInt(t.lineCount+1, termRowCountMax)
 		return true
 	}
 

@@ -5,10 +5,10 @@ import (
 	"image/color"
 	"math"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
@@ -60,10 +60,10 @@ func createAnimationFromDCC(dcc *d2dcc.DCC, palette *d2datadict.PaletteRec, tran
 			minX, minY := math.MaxInt32, math.MaxInt32
 			maxX, maxY := math.MinInt32, math.MinInt32
 			for _, dccFrame := range dccDirection.Frames {
-				minX = d2helper.MinInt(minX, dccFrame.Box.Left)
-				minY = d2helper.MinInt(minY, dccFrame.Box.Top)
-				maxX = d2helper.MaxInt(maxX, dccFrame.Box.Right())
-				maxY = d2helper.MaxInt(maxY, dccFrame.Box.Bottom())
+				minX = d2common.MinInt(minX, dccFrame.Box.Left)
+				minY = d2common.MinInt(minY, dccFrame.Box.Top)
+				maxX = d2common.MaxInt(maxX, dccFrame.Box.Right())
+				maxY = d2common.MaxInt(maxY, dccFrame.Box.Bottom())
 			}
 
 			frameWidth := maxX - minX
@@ -222,8 +222,8 @@ func (a *Animation) GetFrameBounds() (int, int) {
 
 	direction := a.directions[a.directionIndex]
 	for _, frame := range direction.frames {
-		maxWidth = d2helper.MaxInt(maxWidth, frame.width)
-		maxHeight = d2helper.MaxInt(maxHeight, frame.height)
+		maxWidth = d2common.MaxInt(maxWidth, frame.width)
+		maxHeight = d2common.MaxInt(maxHeight, frame.height)
 	}
 
 	return maxWidth, maxHeight

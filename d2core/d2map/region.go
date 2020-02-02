@@ -7,17 +7,14 @@ import (
 	"math/rand"
 	"strconv"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
@@ -490,10 +487,10 @@ func (mr *MapRegion) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, ti
 		}
 		tileYMinimum := int32(0)
 		for _, block := range tileData[i].Blocks {
-			tileYMinimum = d2helper.MinInt32(tileYMinimum, int32(block.Y))
+			tileYMinimum = d2common.MinInt32(tileYMinimum, int32(block.Y))
 		}
-		tileYOffset := d2helper.AbsInt32(tileYMinimum)
-		tileHeight := d2helper.AbsInt32(tileData[i].Height)
+		tileYOffset := d2common.AbsInt32(tileYMinimum)
+		tileHeight := d2common.AbsInt32(tileData[i].Height)
 		_, image := d2render.NewSurface(int(tileData[i].Width), int(tileHeight), d2render.FilterNearest)
 		pixels := make([]byte, 4*tileData[i].Width*tileHeight)
 		mr.decodeTileGfxData(tileData[i].Blocks, &pixels, tileYOffset, tileData[i].Width)
@@ -517,8 +514,8 @@ func (mr *MapRegion) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, t
 	tileMinY := int32(0)
 	tileMaxY := int32(0)
 	for _, block := range tileData.Blocks {
-		tileMinY = d2helper.MinInt32(tileMinY, int32(block.Y))
-		tileMaxY = d2helper.MaxInt32(tileMaxY, int32(block.Y+32))
+		tileMinY = d2common.MinInt32(tileMinY, int32(block.Y))
+		tileMaxY = d2common.MaxInt32(tileMaxY, int32(block.Y+32))
 	}
 	tileYOffset := -tileMinY
 	tileHeight := int(tileMaxY - tileMinY)
@@ -566,11 +563,11 @@ func (mr *MapRegion) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int)
 	}
 
 	for _, block := range target.Blocks {
-		tileMinY = d2helper.MinInt32(tileMinY, int32(block.Y))
-		tileMaxY = d2helper.MaxInt32(tileMaxY, int32(block.Y+32))
+		tileMinY = d2common.MinInt32(tileMinY, int32(block.Y))
+		tileMaxY = d2common.MaxInt32(tileMaxY, int32(block.Y+32))
 	}
 
-	realHeight := d2helper.MaxInt32(d2helper.AbsInt32(tileData.Height), tileMaxY-tileMinY)
+	realHeight := d2common.MaxInt32(d2common.AbsInt32(tileData.Height), tileMaxY-tileMinY)
 	tileYOffset := -tileMinY
 	//tileHeight := int(tileMaxY - tileMinY)
 

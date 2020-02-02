@@ -5,7 +5,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2helper"
 )
 
 type DS1 struct {
@@ -37,7 +36,7 @@ func LoadDS1(fileData []byte) DS1 {
 	ds1.Width = br.GetInt32() + 1
 	ds1.Height = br.GetInt32() + 1
 	if ds1.Version >= 8 {
-		ds1.Act = d2helper.MinInt32(5, br.GetInt32()+1)
+		ds1.Act = d2common.MinInt32(5, br.GetInt32()+1)
 	}
 	if ds1.Version >= 10 {
 		ds1.SubstitutionType = br.GetInt32()
