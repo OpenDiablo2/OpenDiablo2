@@ -174,7 +174,7 @@ func (mr *MapRegion) generateWalkableMatrix() {
 			}
 			if !isBlocked {
 				for _, wall := range tile.Walls {
-					tileData := mr.GetTileData(int32(wall.Style), int32(wall.Sequence), d2enum.Floor)
+					tileData := mr.GetTileData(int32(wall.Style), int32(wall.Sequence), d2enum.TileType(wall.Type))
 					tileSubAttrs := &d2dt1.SubTileFlags{}
 					if tileData != nil {
 						tileSubAttrs = tileData.GetSubTileFlags(x%5, y%5)
