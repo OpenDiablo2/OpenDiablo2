@@ -6,9 +6,8 @@ import (
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 )
@@ -184,7 +183,7 @@ func (g *ItemGrid) Remove(item InventoryItem) {
 	g.items = g.items[:n]
 }
 
-func (g *ItemGrid) Render(target d2common.Surface) {
+func (g *ItemGrid) Render(target d2render.Surface) {
 	for _, item := range g.items {
 		if item == nil {
 			continue

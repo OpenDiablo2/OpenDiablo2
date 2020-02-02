@@ -4,6 +4,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type NPC struct {
@@ -42,7 +43,7 @@ func (v *NPC) SetPaths(paths []d2common.Path) {
 	v.HasPaths = len(paths) > 0
 }
 
-func (v *NPC) Render(target d2common.Surface) {
+func (v *NPC) Render(target d2render.Surface) {
 	v.AnimatedEntity.Render(target)
 }
 

@@ -9,6 +9,7 @@ import (
 	"runtime"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 
@@ -222,7 +223,7 @@ func (v *MainMenu) Unload() {
 }
 
 // Render renders the main menu
-func (v *MainMenu) Render(screen d2common.Surface) {
+func (v *MainMenu) Render(screen d2render.Surface) {
 	if v.ShowTrademarkScreen {
 		v.trademarkBackground.RenderSegmented(screen, 4, 3, 0)
 	} else {

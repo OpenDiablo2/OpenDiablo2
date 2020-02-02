@@ -4,9 +4,8 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 
@@ -34,8 +33,8 @@ type HeroRenderInfo struct {
 	BackWalkSprite           *d2ui.Sprite
 	BackWalkSpriteOverlay    *d2ui.Sprite
 	SelectionBounds          image.Rectangle
-	SelectSfx                d2interface.SoundEffect
-	DeselectSfx              d2interface.SoundEffect
+	SelectSfx                d2audio.SoundEffect
+	DeselectSfx              d2audio.SoundEffect
 }
 
 func (hri *HeroRenderInfo) Advance(elapsed float64) {
@@ -452,7 +451,7 @@ func (v SelectHeroClass) onOkButtonClicked() {
 	d2scene.SetNextScene(CreateGame(gameState))
 }
 
-func (v *SelectHeroClass) Render(screen d2common.Surface) {
+func (v *SelectHeroClass) Render(screen d2render.Surface) {
 	v.bgImage.RenderSegmented(screen, 4, 3, 0)
 	v.headingLabel.Render(screen)
 	if v.selectedHero != d2enum.HeroNone {
@@ -569,7 +568,7 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 
 }
 
-func (v *SelectHeroClass) renderHero(screen d2common.Surface, hero d2enum.Hero) {
+func (v *SelectHeroClass) renderHero(screen d2render.Surface, hero d2enum.Hero) {
 	renderInfo := v.heroRenderInfo[hero]
 	switch renderInfo.Stance {
 	case d2enum.HeroStanceIdle:
@@ -656,7 +655,7 @@ func setSpriteToFirstFrame(sprite *d2ui.Sprite) {
 	}
 }
 
-func drawSprite(sprite *d2ui.Sprite, target d2common.Surface) {
+func drawSprite(sprite *d2ui.Sprite, target d2render.Surface) {
 	if sprite != nil {
 		sprite.Render(target)
 	}
@@ -674,7 +673,7 @@ func loadSprite(animationPath, palettePath string) *d2ui.Sprite {
 	return sprite
 }
 
-func loadSoundEffect(sfx string) d2interface.SoundEffect {
+func loadSoundEffect(sfx string) d2audio.SoundEffect {
 	result, _ := d2audio.LoadSoundEffect(sfx)
 	return result
 }

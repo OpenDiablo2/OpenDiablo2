@@ -10,6 +10,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
@@ -195,7 +196,7 @@ func (v *CharacterSelect) onExitButtonClicked() {
 func (v *CharacterSelect) Unload() {
 }
 
-func (v *CharacterSelect) Render(screen d2common.Surface) {
+func (v *CharacterSelect) Render(screen d2render.Surface) {
 	v.background.RenderSegmented(screen, 4, 3, 0)
 	v.d2HeroTitle.Render(screen)
 	actualSelectionIndex := v.selectedCharacter - (v.charScrollbar.GetCurrentOffset() * 2)

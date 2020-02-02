@@ -1,4 +1,4 @@
-package d2common
+package d2render
 
 // Filter represents the type of texture filter to be used when an image is maginified or minified.
 type Filter int

@@ -1,11 +1,11 @@
 package d2map
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type Hero struct {
@@ -52,7 +52,7 @@ func (v *Hero) Advance(tickTime float64) {
 	v.AnimatedEntity.Advance(tickTime)
 }
 
-func (v *Hero) Render(target d2common.Surface) {
+func (v *Hero) Render(target d2render.Surface) {
 	v.AnimatedEntity.Render(target)
 }
 

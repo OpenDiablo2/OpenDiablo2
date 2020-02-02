@@ -1,11 +1,11 @@
 package d2player
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -72,7 +72,7 @@ func (g *GameControls) Load() {
 }
 
 // TODO: consider caching the panels to single image that is reused.
-func (g *GameControls) Render(target d2common.Surface) {
+func (g *GameControls) Render(target d2render.Surface) {
 	g.inventory.Render(target)
 
 	width, height := target.GetSize()

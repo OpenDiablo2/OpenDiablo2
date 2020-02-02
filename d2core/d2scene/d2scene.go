@@ -4,16 +4,15 @@ import (
 	"math"
 	"runtime"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // Scene defines the function necessary for scene management
 type Scene interface {
 	Load() []func()
 	Unload()
-	Render(target d2common.Surface)
+	Render(target d2render.Surface)
 	Advance(tickTime float64)
 }
 
@@ -71,7 +70,7 @@ func Advance(time float64) {
 	currentScene.Advance(time)
 }
 
-func Render(surface d2common.Surface) {
+func Render(surface d2render.Surface) {
 	if currentScene == nil {
 		return
 	}

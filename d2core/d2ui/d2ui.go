@@ -1,10 +1,9 @@
 package d2ui
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -24,7 +23,7 @@ var cursorButtons CursorButton
 var pressedIndex int
 var CursorX int
 var CursorY int
-var clickSfx d2interface.SoundEffect
+var clickSfx d2audio.SoundEffect
 var waitForLeftMouseUp bool
 
 func Initialize(curSprite *Sprite) {
@@ -51,7 +50,7 @@ func WaitForMouseRelease() {
 }
 
 // Render renders all of the UI elements
-func Render(target d2common.Surface) {
+func Render(target d2render.Surface) {
 	for _, widget := range widgets {
 		if widget.GetVisible() {
 			widget.Render(target)

@@ -4,10 +4,6 @@ import (
 	"errors"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 )
 
@@ -17,9 +13,9 @@ var (
 	ErrInvalidRenderer error = errors.New("invalid rendering system specified")
 )
 
-var singleton d2interface.Renderer
+var singleton Renderer
 
-func Initialize(rend d2interface.Renderer) error {
+func Initialize(rend Renderer) error {
 	if singleton != nil {
 		return d2input.ErrHasInit
 	}
@@ -36,7 +32,7 @@ func SetWindowIcon(fileName string) error {
 	return nil
 }
 
-func Run(f func(d2common.Surface) error, width, height int, title string) error {
+func Run(f func(Surface) error, width, height int, title string) error {
 	if singleton == nil {
 		return ErrNotInit
 	}
@@ -51,14 +47,14 @@ func IsDrawingSkipped() (error, bool) {
 	return nil, singleton.IsDrawingSkipped()
 }
 
-func CreateSurface(surface d2common.Surface) (error, d2common.Surface) {
+func CreateSurface(surface Surface) (error, Surface) {
 	if singleton == nil {
 		return ErrNotInit, nil
 	}
 	return singleton.CreateSurface(surface)
 }
 
-func NewSurface(width, height int, filter d2common.Filter) (error, d2common.Surface) {
+func NewSurface(width, height int, filter Filter) (error, Surface) {
 	if singleton == nil {
 		return ErrNotInit, nil
 	}

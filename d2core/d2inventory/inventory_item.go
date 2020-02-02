@@ -1,4 +1,4 @@
-package d2interface
+package d2inventory
 
 import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 

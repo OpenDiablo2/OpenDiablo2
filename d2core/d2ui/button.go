@@ -6,8 +6,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
@@ -94,11 +92,11 @@ type Button struct {
 	visible               bool
 	pressed               bool
 	toggled               bool
-	normalSurface         d2common.Surface
-	pressedSurface        d2common.Surface
-	toggledSurface        d2common.Surface
-	pressedToggledSurface d2common.Surface
-	disabledSurface       d2common.Surface
+	normalSurface         d2render.Surface
+	pressedSurface        d2render.Surface
+	toggledSurface        d2render.Surface
+	pressedToggledSurface d2render.Surface
+	disabledSurface       d2render.Surface
 	buttonLayout          ButtonLayout
 	onClick               func()
 }
@@ -128,7 +126,7 @@ func CreateButton(buttonType ButtonType, text string) Button {
 		result.height += h
 	}
 
-	_, result.normalSurface = d2render.NewSurface(int(result.width), int(result.height), d2common.FilterNearest)
+	_, result.normalSurface = d2render.NewSurface(int(result.width), int(result.height), d2render.FilterNearest)
 	_, fontHeight := font.GetTextMetrics(text)
 	textY := int((result.height/2)-(int(fontHeight)/2)) + buttonLayout.TextOffset
 
@@ -138,22 +136,22 @@ func CreateButton(buttonType ButtonType, text string) Button {
 	font.Render(0, textY, text, color.RGBA{100, 100, 100, 255}, result.normalSurface)
 	if buttonLayout.AllowFrameChange {
 		if totalButtonTypes > 1 {
-			_, result.pressedSurface = d2render.NewSurface(int(result.width), int(result.height), d2common.FilterNearest)
+			_, result.pressedSurface = d2render.NewSurface(int(result.width), int(result.height), d2render.FilterNearest)
 			buttonSprite.RenderSegmented(result.pressedSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+1)
 			font.Render(-2, textY+2, text, color.RGBA{100, 100, 100, 255}, result.pressedSurface)
 		}
 		if totalButtonTypes > 2 {
-			_, result.toggledSurface = d2render.NewSurface(int(result.width), int(result.height), d2common.FilterNearest)
+			_, result.toggledSurface = d2render.NewSurface(int(result.width), int(result.height), d2render.FilterNearest)
 			buttonSprite.RenderSegmented(result.toggledSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+2)
 			font.Render(0, textY, text, color.RGBA{100, 100, 100, 255}, result.toggledSurface)
 		}
 		if totalButtonTypes > 3 {
-			_, result.pressedToggledSurface = d2render.NewSurface(int(result.width), int(result.height), d2common.FilterNearest)
+			_, result.pressedToggledSurface = d2render.NewSurface(int(result.width), int(result.height), d2render.FilterNearest)
 			buttonSprite.RenderSegmented(result.pressedToggledSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+3)
 			font.Render(0, textY, text, color.RGBA{100, 100, 100, 255}, result.pressedToggledSurface)
 		}
 		if buttonLayout.DisabledFrame != -1 {
-			_, result.disabledSurface = d2render.NewSurface(int(result.width), int(result.height), d2common.FilterNearest)
+			_, result.disabledSurface = d2render.NewSurface(int(result.width), int(result.height), d2render.FilterNearest)
 			buttonSprite.RenderSegmented(result.disabledSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.DisabledFrame)
 			font.Render(0, textY, text, color.RGBA{100, 100, 100, 255}, result.disabledSurface)
 		}
@@ -175,9 +173,9 @@ func (v *Button) Activate() {
 }
 
 // Render renders the button
-func (v *Button) Render(target d2common.Surface) {
-	target.PushCompositeMode(d2common.CompositeModeSourceAtop)
-	target.PushFilter(d2common.FilterNearest)
+func (v *Button) Render(target d2render.Surface) {
+	target.PushCompositeMode(d2render.CompositeModeSourceAtop)
+	target.PushFilter(d2render.FilterNearest)
 	target.PushTranslation(v.x, v.y)
 	defer target.PopN(3)
 

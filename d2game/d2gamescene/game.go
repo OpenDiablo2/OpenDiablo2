@@ -3,7 +3,6 @@ package d2gamescene
 import (
 	"image/color"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
@@ -83,7 +83,7 @@ func (v *Game) Unload() {
 	d2input.UnbindHandler(v.gameControls)
 }
 
-func (v Game) Render(screen d2common.Surface) {
+func (v Game) Render(screen d2render.Surface) {
 	screen.Clear(color.Black)
 	v.mapEngine.Render(screen)
 	v.gameControls.Render(screen)

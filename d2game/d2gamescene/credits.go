@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
 
@@ -100,7 +101,7 @@ func (v *Credits) Unload() {
 }
 
 // Render renders the credits scene
-func (v *Credits) Render(screen d2common.Surface) {
+func (v *Credits) Render(screen d2render.Surface) {
 	v.creditsBackground.RenderSegmented(screen, 4, 3, 0)
 	for _, label := range v.labels {
 		if label.Available {

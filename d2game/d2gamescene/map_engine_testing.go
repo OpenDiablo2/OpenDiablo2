@@ -6,8 +6,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
@@ -156,7 +154,7 @@ func (v *MapEngineTest) Unload() {
 	d2input.UnbindHandler(v)
 }
 
-func (v *MapEngineTest) Render(screen d2common.Surface) {
+func (v *MapEngineTest) Render(screen d2render.Surface) {
 	v.mapEngine.Render(screen)
 
 	screenX, screenY, _ := d2render.GetCursorPos()

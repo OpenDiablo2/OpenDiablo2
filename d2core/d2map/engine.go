@@ -4,8 +4,7 @@ import (
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 
@@ -13,7 +12,7 @@ import (
 )
 
 type MapEntity interface {
-	Render(target d2common.Surface)
+	Render(target d2render.Surface)
 	Advance(tickTime float64)
 	GetPosition() (float64, float64)
 }
@@ -134,7 +133,7 @@ func (me *MapEngine) Advance(tickTime float64) {
 	}
 }
 
-func (me *MapEngine) Render(target d2common.Surface) {
+func (me *MapEngine) Render(target d2render.Surface) {
 	for _, region := range me.regions {
 		if region.isVisbile(me.viewport) {
 			region.renderPass1(me.viewport, target)
