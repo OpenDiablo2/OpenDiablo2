@@ -33,244 +33,226 @@ var GitBranch string
 // GitCommit is set by the CI build process to the commit hash
 var GitCommit string
 
-var region = kingpin.Arg("region", "Region type id").Int()
-var preset = kingpin.Arg("preset", "Level preset").Int()
-
 func main() {
 	if len(GitBranch) == 0 {
-		GitBranch = "Local Build"
-		GitCommit = ""
+		d2common.SetBuildInfo("Local Build", "")
+	} else {
+		d2common.SetBuildInfo(GitBranch, GitCommit)
 	}
-	d2common.SetBuildInfo(GitBranch, GitCommit)
+
+	region := kingpin.Arg("region", "Region type id").Int()
+	preset := kingpin.Arg("preset", "Level preset").Int()
+	kingpin.Parse()
+
 	log.SetFlags(log.Lshortfile)
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
-	if len(GitBranch) == 0 {
-		GitBranch = "Local Build"
-		GitCommit = ""
-	}
 
-	err := initializeEverything()
-	if err != nil {
+	if err := initializeEverything(); err != nil {
 		log.Fatal(err)
-		return
 	}
 
-	kingpin.Parse()
 	if *region == 0 {
 		d2scene.SetNextScene(d2gamescene.CreateMainMenu())
 	} else {
 		d2scene.SetNextScene(d2gamescene.CreateMapEngineTest(*region, *preset))
 	}
-	err = d2game.Run(GitBranch)
-	if err != nil {
+
+	if err := d2game.Run(GitBranch); err != nil {
 		log.Fatal(err)
-		return
 	}
 }
 
-func loadTextDictionary() bool {
-	var fileData []byte
-	var err error
-
-	toLoad := []string{
+func loadStrings() error {
+	tablePaths := []string{
 		d2resource.PatchStringTable,
 		d2resource.ExpansionStringTable,
 		d2resource.StringTable,
 	}
 
-	for _, item := range toLoad {
-		fileData, err = d2asset.LoadFile(item)
+	for _, tablePath := range tablePaths {
+		data, err := d2asset.LoadFile(tablePath)
 		if err != nil {
-			log.Fatal(err)
-			return false
+			return err
 		}
-		d2common.LoadDictionary(fileData)
+
+		d2common.LoadDictionary(data)
 	}
+
 	log.Printf("Loaded %d entries from the string table", d2common.GetDictionaryEntryCount())
-	return true
+	return nil
 }
 
-func loadPalettes() bool {
-	for _, pal := range []string{
-		"act1", "act2", "act3", "act4", "act5", "endgame", "endgame2", "fechar", "loading",
-		"menu0", "menu1", "menu2", "menu3", "menu4", "sky", "static", "trademark", "units",
-	} {
-		filePath := `data\global\palette\` + pal + `\pal.dat`
-		paletteType := d2enum.PaletteType(pal)
-		file, _ := d2asset.LoadFile(filePath)
-		d2datadict.LoadPalette(paletteType, file)
+func loadPalettes() error {
+	palNames := []string{
+		"act1",
+		"act2",
+		"act3",
+		"act4",
+		"act5",
+		"endgame",
+		"endgame2",
+		"fechar",
+		"loading",
+		"menu0",
+		"menu1",
+		"menu2",
+		"menu3",
+		"menu4",
+		"sky",
+		"static",
+		"trademark",
+		"units",
 	}
+
+	for _, pal := range palNames {
+		file, err := d2asset.LoadFile(`data\global\palette\` + pal + `\pal.dat`)
+		if err != nil {
+			return err
+		}
+
+		d2datadict.LoadPalette(d2enum.PaletteType(pal), file)
+	}
+
 	log.Printf("Loaded %d palettes", len(d2datadict.Palettes))
-	return true
+	return nil
+}
+
+func loadDataDict() error {
+	entries := []struct {
+		path   string
+		loader func(data []byte)
+	}{
+		{d2resource.LevelType, d2datadict.LoadLevelTypes},
+		{d2resource.LevelPreset, d2datadict.LoadLevelPresets},
+		{d2resource.LevelWarp, d2datadict.LoadLevelWarps},
+		{d2resource.ObjectType, d2datadict.LoadObjectTypes},
+		{d2resource.ObjectDetails, d2datadict.LoadObjects},
+		{d2resource.Weapons, d2datadict.LoadWeapons},
+		{d2resource.Armor, d2datadict.LoadArmors},
+		{d2resource.Misc, d2datadict.LoadMiscItems},
+		{d2resource.UniqueItems, d2datadict.LoadUniqueItems},
+		{d2resource.Missiles, d2datadict.LoadMissiles},
+		{d2resource.SoundSettings, d2datadict.LoadSounds},
+		{d2resource.AnimationData, d2data.LoadAnimationData},
+		{d2resource.MonStats, d2datadict.LoadMonStats},
+	}
+
+	for _, entry := range entries {
+		data, err := d2asset.LoadFile(entry.path)
+		if err != nil {
+			return err
+		}
+
+		entry.loader(data)
+	}
+
+	return nil
+}
+
+func loadLoadingSprite() (*d2ui.Sprite, error) {
+	animation, err := d2asset.LoadAnimation(d2resource.LoadingScreen, d2resource.PaletteLoading)
+	if err != nil {
+		return nil, err
+	}
+
+	loadingSprite, err := d2ui.LoadSprite(animation)
+	if err != nil {
+		return nil, err
+	}
+
+	loadingSpriteSizeX, loadingSpriteSizeY := loadingSprite.GetCurrentFrameSize()
+	loadingSprite.SetPosition(400-(loadingSpriteSizeX/2), 300+(loadingSpriteSizeY/2))
+	return loadingSprite, nil
+}
+
+func loadCursorSprite() (*d2ui.Sprite, error) {
+	animation, err := d2asset.LoadAnimation(d2resource.CursorDefault, d2resource.PaletteUnits)
+	if err != nil {
+		return nil, err
+	}
+
+	cursorSprite, err := d2ui.LoadSprite(animation)
+	if err != nil {
+		return nil, err
+	}
+
+	return cursorSprite, nil
 }
 
 func initializeEverything() error {
-	var err error
-
-	err = d2config.Initialize()
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-
-	renderer, err := ebiten.CreateRenderer()
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-
-	err = d2render.Initialize(renderer)
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-
-	err = d2input.Initialize()
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-
-	err = d2term.Initialize()
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	d2term.BindLogger()
-
-	err = d2asset.Initialize()
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-
-	err = d2render.SetWindowIcon("d2logo.png")
-	if err != nil {
-		log.Fatal(err)
+	if err := d2config.Initialize(); err != nil {
 		return err
 	}
 
 	config, err := d2config.Get()
 	if err != nil {
-		log.Fatal(err)
+		return err
+	}
+	d2resource.LanguageCode = config.Language
+
+	renderer, err := ebiten.CreateRenderer()
+	if err != nil {
 		return err
 	}
 
-	var audioProvider *ebiten2.AudioProvider
-	audioProvider, err = ebiten2.CreateAudio()
-	err = d2audio.Initialize(audioProvider)
-	if err != nil {
-		log.Fatal(err)
+	if err := d2render.Initialize(renderer); err != nil {
 		return err
 	}
 
-	err = d2audio.SetVolumes(config.BgmVolume, config.SfxVolume)
-	if err != nil {
-		log.Fatal(err)
+	if err := d2render.SetWindowIcon("d2logo.png"); err != nil {
 		return err
 	}
+
+	if err := d2input.Initialize(); err != nil {
+		return err
+	}
+
+	if err := d2term.Initialize(); err != nil {
+		return err
+	}
+	d2term.BindLogger()
 
 	d2mpq.InitializeCryptoBuffer()
-
-	settings, _ := d2config.Get()
-	d2resource.LanguageCode = settings.Language
-
-	var file []byte
-
-	loadPalettes()
-
-	loadTextDictionary()
-
-	file, err = d2asset.LoadFile(d2resource.LevelType)
-	if err != nil {
+	if err := d2asset.Initialize(); err != nil {
 		return err
 	}
-	d2datadict.LoadLevelTypes(file)
 
-	file, err = d2asset.LoadFile(d2resource.LevelPreset)
-	if err != nil {
-		return err
-	}
-	d2datadict.LoadLevelPresets(file)
-
-	file, err = d2asset.LoadFile(d2resource.LevelWarp)
-	if err != nil {
-		return err
-	}
-	d2datadict.LoadLevelWarps(file)
-
-	file, err = d2asset.LoadFile(d2resource.ObjectType)
-	if err != nil {
-		return err
-	}
-	d2datadict.LoadObjectTypes(file)
-
-	file, err = d2asset.LoadFile(d2resource.ObjectDetails)
-	if err != nil {
-		return err
-	}
-	d2datadict.LoadObjects(file)
-
-	file, err = d2asset.LoadFile(d2resource.Weapons)
-	if err != nil {
-		return err
-	}
-	d2datadict.LoadWeapons(file)
-
-	file, err = d2asset.LoadFile(d2resource.Armor)
-	if err != nil {
-		return err
-	}
-	d2datadict.LoadArmors(file)
-
-	file, err = d2asset.LoadFile(d2resource.Misc)
-	if err != nil {
-		return err
-	}
-	d2datadict.LoadMiscItems(file)
-
-	file, err = d2asset.LoadFile(d2resource.UniqueItems)
-	if err != nil {
-		return err
-	}
-	d2datadict.LoadUniqueItems(file)
-
-	file, err = d2asset.LoadFile(d2resource.Missiles)
-	if err != nil {
-		return err
-	}
-	d2datadict.LoadMissiles(file)
-
-	file, err = d2asset.LoadFile(d2resource.SoundSettings)
-	if err != nil {
-		return err
-	}
-	d2datadict.LoadSounds(file)
-
-	file, err = d2asset.LoadFile(d2resource.AnimationData)
-	if err != nil {
-		return err
-	}
-	d2data.LoadAnimationData(file)
-
-	file, err = d2asset.LoadFile(d2resource.MonStats)
-	if err != nil {
-		return err
-	}
-	d2datadict.LoadMonStats(file)
-
-	animation, _ := d2asset.LoadAnimation(d2resource.LoadingScreen, d2resource.PaletteLoading)
-	loadingSprite, _ := d2ui.LoadSprite(animation)
-	loadingSpriteSizeX, loadingSpriteSizeY := loadingSprite.GetCurrentFrameSize()
-	loadingSprite.SetPosition(400-(loadingSpriteSizeX/2), 300+(loadingSpriteSizeY/2))
-	err = d2game.Initialize(loadingSprite)
+	audioProvider, err := ebiten2.CreateAudio()
 	if err != nil {
 		return err
 	}
 
-	animation, _ = d2asset.LoadAnimation(d2resource.CursorDefault, d2resource.PaletteUnits)
-	cursorSprite, _ := d2ui.LoadSprite(animation)
+	if err := d2audio.Initialize(audioProvider); err != nil {
+		return err
+	}
+
+	if err := d2audio.SetVolumes(config.BgmVolume, config.SfxVolume); err != nil {
+		return err
+	}
+
+	if err := loadDataDict(); err != nil {
+		return err
+	}
+
+	if err := loadPalettes(); err != nil {
+		return err
+	}
+
+	if err := loadStrings(); err != nil {
+		return err
+	}
+
+	cursorSprite, err := loadCursorSprite()
+	if err != nil {
+		return err
+	}
 	d2ui.Initialize(cursorSprite)
+
+	loadingSprite, err := loadLoadingSprite()
+	if err != nil {
+		return err
+	}
+	d2game.Initialize(loadingSprite)
 
 	return nil
 }

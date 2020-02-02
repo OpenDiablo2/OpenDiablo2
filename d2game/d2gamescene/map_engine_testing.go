@@ -1,9 +1,10 @@
 package d2gamescene
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
 	"math"
 	"os"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 
@@ -137,7 +138,6 @@ func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 	}
 
 	met.mapEngine.MoveCameraTo(met.mapEngine.WorldToOrtho(met.mapEngine.GetCenterPosition()))
-	met.mapEngine.SetDebugVisLevel(met.debugVisLevel)
 }
 
 func (met *MapEngineTest) Load() []func() {
@@ -189,10 +189,10 @@ func (met *MapEngineTest) Render(screen d2render.Surface) {
 	}
 	met.filesCount = len(levelFilesToPick)
 
-	tileX := int(math.Floor(worldX))-tileRect.Left
-	tileY := int(math.Floor(worldY))-tileRect.Top
+	tileX := int(math.Floor(worldX)) - tileRect.Left
+	tileY := int(math.Floor(worldY)) - tileRect.Top
 	subtileX := int((worldX - float64(int(worldX))) * 5)
-	subtileY := 4 - int((worldY - float64(int(worldY))) * 5)
+	subtileY := 4 - int((worldY-float64(int(worldY)))*5)
 
 	regionWidth, regionHeight := curRegion.GetTileSize()
 	if tileX >= 0 && tileY >= 0 && tileX < regionWidth && tileY < regionHeight {
