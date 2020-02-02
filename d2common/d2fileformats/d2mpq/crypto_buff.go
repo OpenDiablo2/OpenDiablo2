@@ -12,7 +12,7 @@ func InitializeCryptoBuffer() {
 			seed = (seed*125 + 3) % 0x2AAAAB
 			temp1 := (seed & 0xFFFF) << 0x10
 			seed = (seed*125 + 3) % 0x2AAAAB
-			temp2 := (seed & 0xFFFF)
+			temp2 := seed & 0xFFFF
 			CryptoBuffer[index2] = temp1 | temp2
 			index2 += 0x100
 		}

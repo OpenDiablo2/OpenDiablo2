@@ -50,9 +50,9 @@ func (v *Label) Render(target d2render.Surface) {
 
 	x, y := v.X, v.Y
 	if v.Alignment == LabelAlignCenter {
-		x, y = v.X-int(v.Width/2), v.Y
+		x, y = v.X-v.Width/2, v.Y
 	} else if v.Alignment == LabelAlignRight {
-		x, y = v.X-int(v.Width), v.Y
+		x, y = v.X-v.Width, v.Y
 	}
 
 	target.PushFilter(d2render.FilterNearest)
@@ -80,7 +80,7 @@ func (v *Label) cacheImage() {
 	width, height := v.font.GetTextMetrics(v.text)
 	v.Width = width
 	v.Height = height
-	_, v.imageData = d2render.NewSurface(int(width), int(height), d2render.FilterNearest)
+	_, v.imageData = d2render.NewSurface(width, height, d2render.FilterNearest)
 	_, surface := d2render.CreateSurface(v.imageData)
 	v.font.Render(0, 0, v.text, v.Color, surface)
 }

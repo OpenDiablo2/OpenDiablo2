@@ -86,7 +86,7 @@ func (v *SelectHeroClass) Load() []func() {
 		func() {
 			v.headingLabel = d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
 			fontWidth, _ := v.headingLabel.GetSize()
-			v.headingLabel.SetPosition(400-int(fontWidth/2), 17)
+			v.headingLabel.SetPosition(400-fontWidth/2, 17)
 			v.headingLabel.SetText("Select Hero Class")
 			v.headingLabel.Alignment = d2ui.LabelAlignCenter
 		},
@@ -133,7 +133,7 @@ func (v *SelectHeroClass) Load() []func() {
 		func() {
 			v.heroNameLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 			v.heroNameLabel.Alignment = d2ui.LabelAlignLeft
-			v.heroNameLabel.Color = color.RGBA{216, 196, 128, 255}
+			v.heroNameLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
 			v.heroNameLabel.SetText(d2common.TranslateString("#1694"))
 			v.heroNameLabel.SetPosition(321, 475)
 		},
@@ -152,7 +152,7 @@ func (v *SelectHeroClass) Load() []func() {
 		func() {
 			v.expansionCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 			v.expansionCharLabel.Alignment = d2ui.LabelAlignLeft
-			v.expansionCharLabel.Color = color.RGBA{216, 196, 128, 255}
+			v.expansionCharLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
 			v.expansionCharLabel.SetText(d2common.TranslateString("#803"))
 			v.expansionCharLabel.SetPosition(339, 526)
 		},
@@ -165,7 +165,7 @@ func (v *SelectHeroClass) Load() []func() {
 		func() {
 			v.hardcoreCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 			v.hardcoreCharLabel.Alignment = d2ui.LabelAlignLeft
-			v.hardcoreCharLabel.Color = color.RGBA{216, 196, 128, 255}
+			v.hardcoreCharLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
 			v.hardcoreCharLabel.SetText(d2common.TranslateString("#1696"))
 			v.hardcoreCharLabel.SetPosition(339, 548)
 		},
@@ -180,7 +180,7 @@ func (v *SelectHeroClass) Load() []func() {
 				nil,
 				loadSprite(d2resource.CharacterSelectBarbarianBackWalk, d2resource.PaletteFechar),
 				nil,
-				image.Rectangle{Min: image.Point{364, 201}, Max: image.Point{90, 170}},
+				image.Rectangle{Min: image.Point{X: 364, Y: 201}, Max: image.Point{X: 90, Y: 170}},
 				loadSoundEffect(d2resource.SFXBarbarianSelect),
 				loadSoundEffect(d2resource.SFXBarbarianDeselect),
 			}
@@ -214,7 +214,7 @@ func (v *SelectHeroClass) Load() []func() {
 				loadSprite(d2resource.CharacterSelecSorceressSelectedOverlay, d2resource.PaletteFechar),
 				loadSprite(d2resource.CharacterSelecSorceressBackWalk, d2resource.PaletteFechar),
 				loadSprite(d2resource.CharacterSelecSorceressBackWalkOverlay, d2resource.PaletteFechar),
-				image.Rectangle{Min: image.Point{580, 240}, Max: image.Point{65, 160}},
+				image.Rectangle{Min: image.Point{X: 580, Y: 240}, Max: image.Point{X: 65, Y: 160}},
 				loadSoundEffect(d2resource.SFXSorceressSelect),
 				loadSoundEffect(d2resource.SFXSorceressDeselect),
 			}
@@ -261,7 +261,7 @@ func (v *SelectHeroClass) Load() []func() {
 				loadSprite(d2resource.CharacterSelecNecromancerSelectedOverlay, d2resource.PaletteFechar),
 				loadSprite(d2resource.CharacterSelecNecromancerBackWalk, d2resource.PaletteFechar),
 				loadSprite(d2resource.CharacterSelecNecromancerBackWalkOverlay, d2resource.PaletteFechar),
-				image.Rectangle{Min: image.Point{265, 220}, Max: image.Point{55, 175}},
+				image.Rectangle{Min: image.Point{X: 265, Y: 220}, Max: image.Point{X: 55, Y: 175}},
 				loadSoundEffect(d2resource.SFXNecromancerSelect),
 				loadSoundEffect(d2resource.SFXNecromancerDeselect),
 			}
@@ -306,7 +306,7 @@ func (v *SelectHeroClass) Load() []func() {
 				nil,
 				loadSprite(d2resource.CharacterSelecPaladinBackWalk, d2resource.PaletteFechar),
 				nil,
-				image.Rectangle{Min: image.Point{490, 210}, Max: image.Point{65, 180}},
+				image.Rectangle{Min: image.Point{X: 490, Y: 210}, Max: image.Point{X: 65, Y: 180}},
 				loadSoundEffect(d2resource.SFXPaladinSelect),
 				loadSoundEffect(d2resource.SFXPaladinDeselect),
 			}
@@ -343,7 +343,7 @@ func (v *SelectHeroClass) Load() []func() {
 				nil,
 				loadSprite(d2resource.CharacterSelecAmazonBackWalk, d2resource.PaletteFechar),
 				nil,
-				image.Rectangle{Min: image.Point{70, 220}, Max: image.Point{55, 200}},
+				image.Rectangle{Min: image.Point{X: 70, Y: 220}, Max: image.Point{X: 55, Y: 200}},
 				loadSoundEffect(d2resource.SFXAmazonSelect),
 				loadSoundEffect(d2resource.SFXAmazonDeselect),
 			}
@@ -376,7 +376,7 @@ func (v *SelectHeroClass) Load() []func() {
 				nil,
 				loadSprite(d2resource.CharacterSelectAssassinBackWalk, d2resource.PaletteFechar),
 				nil,
-				image.Rectangle{Min: image.Point{175, 235}, Max: image.Point{50, 180}},
+				image.Rectangle{Min: image.Point{X: 175, Y: 235}, Max: image.Point{X: 50, Y: 180}},
 				loadSoundEffect(d2resource.SFXAssassinSelect),
 				loadSoundEffect(d2resource.SFXAssassinDeselect),
 			}
@@ -409,7 +409,7 @@ func (v *SelectHeroClass) Load() []func() {
 				nil,
 				loadSprite(d2resource.CharacterSelectDruidBackWalk, d2resource.PaletteFechar),
 				nil,
-				image.Rectangle{Min: image.Point{680, 220}, Max: image.Point{70, 195}},
+				image.Rectangle{Min: image.Point{X: 680, Y: 220}, Max: image.Point{X: 70, Y: 195}},
 				loadSoundEffect(d2resource.SFXDruidSelect),
 				loadSoundEffect(d2resource.SFXDruidDeselect),
 			}

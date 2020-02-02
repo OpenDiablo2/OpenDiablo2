@@ -82,9 +82,9 @@ func CreateFont(font string, palettePath string) *Font {
 
 // GetTextMetrics returns the size of the specified text
 func (v *Font) GetTextMetrics(text string) (width, height int) {
-	width = int(0)
-	curWidth := int(0)
-	height = int(0)
+	width = 0
+	curWidth := 0
+	height = 0
 	_, maxCharHeight := v.fontSprite.GetFrameBounds()
 	for _, ch := range text {
 		if ch == '\n' {
@@ -115,16 +115,16 @@ func (v *Font) Render(x, y int, text string, color color.Color, target d2render.
 	lines := strings.Split(text, "\n")
 	for lineIdx, line := range lines {
 		lineWidth, _ := v.GetTextMetrics(line)
-		xPos := x + ((targetWidth / 2) - int(lineWidth/2))
+		xPos := x + ((targetWidth / 2) - lineWidth/2)
 
 		for _, ch := range line {
 			width := v.getCharWidth(ch)
 			index := v.fontTable[uint16(ch)]
 			v.fontSprite.SetCurrentFrame(int(index))
 			_, height := v.fontSprite.GetCurrentFrameSize()
-			v.fontSprite.SetPosition(xPos, y+int(height))
+			v.fontSprite.SetPosition(xPos, y+height)
 			v.fontSprite.Render(target)
-			xPos += int(width)
+			xPos += width
 		}
 
 		if lineIdx >= len(lines)-1 {

@@ -73,11 +73,11 @@ func createAnimationFromDCC(dcc *d2dcc.DCC, palette *d2datadict.PaletteRec, tran
 			for y := 0; y < frameHeight; y++ {
 				for x := 0; x < frameWidth; x++ {
 					if paletteIndex := dccFrame.PixelData[y*frameWidth+x]; paletteIndex != 0 {
-						color := palette.Colors[paletteIndex]
+						palColor := palette.Colors[paletteIndex]
 						offset := (x + y*frameWidth) * 4
-						pixels[offset] = color.R
-						pixels[offset+1] = color.G
-						pixels[offset+2] = color.B
+						pixels[offset] = palColor.R
+						pixels[offset+1] = palColor.G
+						pixels[offset+2] = palColor.B
 						pixels[offset+3] = byte(transparency)
 					}
 				}
@@ -98,8 +98,8 @@ func createAnimationFromDCC(dcc *d2dcc.DCC, palette *d2datadict.PaletteRec, tran
 
 			direction := animation.directions[directionIndex]
 			direction.frames = append(direction.frames, &animationFrame{
-				width:   int(dccFrame.Width),
-				height:  int(dccFrame.Height),
+				width:   dccFrame.Width,
+				height:  dccFrame.Height,
 				offsetX: minX,
 				offsetY: minY,
 				image:   image,
@@ -294,7 +294,7 @@ func (a *Animation) Pause() {
 }
 
 func (a *Animation) SetPlayLoop(loop bool) {
-	a.playLoop = true
+	a.playLoop = loop
 }
 
 func (a *Animation) SetPlaySpeed(playSpeed float64) {

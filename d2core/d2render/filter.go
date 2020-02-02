@@ -8,8 +8,8 @@ const (
 	FilterDefault Filter = 0
 
 	// FilterNearest represents nearest (crisp-edged) filter
-	FilterNearest Filter = Filter(1)
+	FilterNearest = Filter(1)
 
 	// FilterLinear represents linear filter
-	FilterLinear Filter = Filter(2)
+	FilterLinear = Filter(2)
 )

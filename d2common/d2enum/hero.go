@@ -15,8 +15,8 @@ const (
 	HeroDruid       Hero = 7 // Druid
 )
 
-func (v Hero) GetToken() string {
-	switch v {
+func (h Hero) GetToken() string {
+	switch h {
 	case HeroBarbarian:
 		return "BA"
 	case HeroNecromancer:
@@ -32,7 +32,7 @@ func (v Hero) GetToken() string {
 	case HeroDruid:
 		return "DZ"
 	default:
-		log.Fatalf("Unknown hero token: %d", v)
+		log.Fatalf("Unknown hero token: %d", h)
 	}
 	return ""
 }

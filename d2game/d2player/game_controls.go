@@ -76,7 +76,7 @@ func (g *GameControls) Render(target d2render.Surface) {
 	g.inventory.Render(target)
 
 	width, height := target.GetSize()
-	offset := int(0)
+	offset := 0
 
 	// Left globe holder
 	g.mainPanel.SetCurrentFrame(0)

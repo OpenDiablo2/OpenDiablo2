@@ -52,10 +52,11 @@ func CreateCredits() *Credits {
 // Load is called to load the contributors data from file
 // TODO: use markdown for file and convert it to the suitable format
 func (v *Credits) LoadContributors() []string {
-	contributors := []string{}
+	var contributors []string
 	file, err := os.Open(path.Join("./", "CONTRIBUTORS"))
-	if err != nil {
+	if err != nil || file == nil {
 		log.Print("CONTRIBUTORS file is missing")
+		return []string{ "MISSING CONTRIBUTOR FILES!" }
 	}
 	defer file.Close()
 
@@ -172,7 +173,7 @@ func (v *Credits) addNextItem() {
 		isDoubled = true
 
 		// Gotta go side by side
-		label.SetPosition(400-int(width), 605)
+		label.SetPosition(400-width, 605)
 
 		text2 := v.creditsText[0]
 		v.creditsText = v.creditsText[1:]
@@ -183,7 +184,7 @@ func (v *Credits) addNextItem() {
 
 		label2.SetPosition(410, 605)
 	} else {
-		label.SetPosition(405-int(width/2), 605)
+		label.SetPosition(405-width/2, 605)
 	}
 
 	if isHeading && isNextHeading {
@@ -206,9 +207,9 @@ func (v *Credits) getNewFontLabel(isHeading bool) *d2ui.Label {
 		if label.Available {
 			label.Available = false
 			if isHeading {
-				label.Label.Color = color.RGBA{255, 88, 82, 255}
+				label.Label.Color = color.RGBA{R: 255, G: 88, B: 82, A: 255}
 			} else {
-				label.Label.Color = color.RGBA{198, 178, 150, 255}
+				label.Label.Color = color.RGBA{R: 198, G: 178, B: 150, A: 255}
 			}
 			return &label.Label
 		}
@@ -221,9 +222,9 @@ func (v *Credits) getNewFontLabel(isHeading bool) *d2ui.Label {
 	}
 
 	if isHeading {
-		newLabelItem.Label.Color = color.RGBA{255, 88, 82, 255}
+		newLabelItem.Label.Color = color.RGBA{R: 255, G: 88, B: 82, A: 255}
 	} else {
-		newLabelItem.Label.Color = color.RGBA{198, 178, 150, 255}
+		newLabelItem.Label.Color = color.RGBA{R: 198, G: 178, B: 150, A: 255}
 
 	}
 

@@ -19,13 +19,13 @@ func LoadDCC(fileData []byte) (*DCC, error) {
 	var bm = d2common.CreateBitMuncher(fileData, 0)
 	result.Signature = int(bm.GetByte())
 	if result.Signature != 0x74 {
-		return nil, errors.New("Signature expected to be 0x74 but it is not.")
+		return nil, errors.New("signature expected to be 0x74 but it is not")
 	}
 	result.Version = int(bm.GetByte())
 	result.NumberOfDirections = int(bm.GetByte())
 	result.FramesPerDirection = int(bm.GetInt32())
 	if bm.GetInt32() != 1 {
-		return nil, errors.New("This value isn't 1. It has to be 1.")
+		return nil, errors.New("this value isn't 1. It has to be 1")
 	}
 	bm.GetInt32() // TotalSizeCoded
 	directionOffsets := make([]int, result.NumberOfDirections)

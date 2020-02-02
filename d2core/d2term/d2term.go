@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	ErrHasInit error = errors.New("terminal system is already initialized")
-	ErrNotInit error = errors.New("terminal system is not initialized")
+	ErrHasInit = errors.New("terminal system is already initialized")
+	ErrNotInit = errors.New("terminal system is not initialized")
 )
 
 var singleton *terminal

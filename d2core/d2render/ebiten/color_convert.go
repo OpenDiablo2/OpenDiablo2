@@ -41,7 +41,7 @@ func ColorToColorM(clr color.Color) ebiten.ColorM {
 	if ca == 0 {
 		return emptyColorM
 	}
-	key := colorMCacheKey(uint32(cr) | (uint32(cg) << 8) | (uint32(cb) << 16) | (uint32(ca) << 24))
+	key := colorMCacheKey(cr | (cg << 8) | (cb << 16) | (ca << 24))
 	e, ok := colorMCache[key]
 	if ok {
 		e.atime = now()

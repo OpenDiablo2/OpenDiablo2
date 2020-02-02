@@ -36,13 +36,6 @@ func StringToInt(text string) int {
 }
 
 // SafeStringToInt converts a string to an integer, or returns -1 on falure
-func SafeStringToInt(text string) int {
-	result, err := strconv.Atoi(text)
-	if err != nil {
-		return -1
-	}
-	return result
-}
 
 // StringToUint converts a string to a uint32
 func StringToUint(text string) uint {
@@ -78,18 +71,11 @@ func StringToInt8(text string) int8 {
 }
 
 // StringToFloat64 converts a string to a float64
-func StringToFloat64(text string) float64 {
-	result, err := strconv.ParseFloat(text, 64)
-	if err != nil {
-		panic(err)
-	}
-	return float64(result)
-}
 
 func Utf16BytesToString(b []byte) (string, error) {
 
 	if len(b)%2 != 0 {
-		return "", fmt.Errorf("Must have even length byte slice")
+		return "", fmt.Errorf("must have even length byte slice")
 	}
 
 	u16s := make([]uint16, 1)

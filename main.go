@@ -156,7 +156,7 @@ func initializeEverything() error {
 		return err
 	}
 
-	var audioProvider *ebiten2.EbitenAudioProvider
+	var audioProvider *ebiten2.AudioProvider
 	audioProvider, err = ebiten2.CreateAudio()
 	err = d2audio.Initialize(audioProvider)
 	if err != nil {

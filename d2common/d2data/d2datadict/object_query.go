@@ -65,7 +65,7 @@ func init() {
 func indexObjects(objects []ObjectLookupRecord) [][][]*ObjectLookupRecord {
 	// Allocating 6 to allow Acts 1-5 without requiring a -1 at every read.
 	indexedObjects = make([][][]*ObjectLookupRecord, 6)
-	for i, _ := range objects {
+	for i := range objects {
 		record := &objects[i]
 		if indexedObjects[record.Act] == nil {
 			// Likewise allocating 3 so a -1 isn't necessary.

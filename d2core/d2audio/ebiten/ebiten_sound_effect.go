@@ -9,12 +9,12 @@ import (
 	"github.com/hajimehoshi/ebiten/audio/wav"
 )
 
-type EbitenSoundEffect struct {
+type SoundEffect struct {
 	player *audio.Player
 }
 
-func CreateSoundEffect(sfx string, context *audio.Context, volume float64) *EbitenSoundEffect {
-	result := &EbitenSoundEffect{}
+func CreateSoundEffect(sfx string, context *audio.Context, volume float64) *SoundEffect {
+	result := &SoundEffect{}
 	var soundFile string
 	if _, exists := d2datadict.Sounds[sfx]; exists {
 		soundEntry := d2datadict.Sounds[sfx]
@@ -42,11 +42,11 @@ func CreateSoundEffect(sfx string, context *audio.Context, volume float64) *Ebit
 	return result
 }
 
-func (v *EbitenSoundEffect) Play() {
+func (v *SoundEffect) Play() {
 	v.player.Rewind()
 	v.player.Play()
 }
 
-func (v *EbitenSoundEffect) Stop() {
+func (v *SoundEffect) Stop() {
 	v.player.Pause()
 }

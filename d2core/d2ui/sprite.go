@@ -16,7 +16,7 @@ type Sprite struct {
 }
 
 var (
-	ErrNoAnimation error = errors.New("No animation was specified")
+	ErrNoAnimation = errors.New("no animation was specified")
 )
 
 func LoadSprite(animation *d2asset.Animation) (*Sprite, error) {

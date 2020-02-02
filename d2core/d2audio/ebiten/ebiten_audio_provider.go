@@ -10,7 +10,7 @@ import (
 	"github.com/hajimehoshi/ebiten/audio"
 )
 
-type EbitenAudioProvider struct {
+type AudioProvider struct {
 	audioContext *audio.Context // The Audio context
 	bgmAudio     *audio.Player  // The audio player
 	lastBgm      string
@@ -18,8 +18,8 @@ type EbitenAudioProvider struct {
 	bgmVolume    float64
 }
 
-func CreateAudio() (*EbitenAudioProvider, error) {
-	result := &EbitenAudioProvider{}
+func CreateAudio() (*AudioProvider, error) {
+	result := &AudioProvider{}
 	var err error
 	result.audioContext, err = audio.NewContext(44100)
 	if err != nil {
@@ -29,7 +29,7 @@ func CreateAudio() (*EbitenAudioProvider, error) {
 	return result, nil
 }
 
-func (eap *EbitenAudioProvider) PlayBGM(song string) {
+func (eap *AudioProvider) PlayBGM(song string) {
 	if eap.lastBgm == song {
 		return
 	}
@@ -71,12 +71,12 @@ func (eap *EbitenAudioProvider) PlayBGM(song string) {
 	}()
 }
 
-func (eap *EbitenAudioProvider) LoadSoundEffect(sfx string) (d2audio.SoundEffect, error) {
+func (eap *AudioProvider) LoadSoundEffect(sfx string) (d2audio.SoundEffect, error) {
 	result := CreateSoundEffect(sfx, eap.audioContext, eap.sfxVolume) // TODO: Split
 	return result, nil
 }
 
-func (eap *EbitenAudioProvider) SetVolumes(bgmVolume, sfxVolume float64) {
+func (eap *AudioProvider) SetVolumes(bgmVolume, sfxVolume float64) {
 	eap.sfxVolume = sfxVolume
 	eap.bgmVolume = bgmVolume
 }

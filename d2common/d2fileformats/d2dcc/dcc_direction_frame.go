@@ -36,10 +36,10 @@ func CreateDCCDirectionFrame(bits *d2common.BitMuncher, direction DCCDirection) 
 		log.Panic("Bottom up frames are not implemented.")
 	} else {
 		result.Box = d2common.Rectangle{
-			result.XOffset,
-			result.YOffset - result.Height + 1,
-			result.Width,
-			result.Height,
+			Left:   result.XOffset,
+			Top:    result.YOffset - result.Height + 1,
+			Width:  result.Width,
+			Height: result.Height,
 		}
 	}
 	result.valid = true
