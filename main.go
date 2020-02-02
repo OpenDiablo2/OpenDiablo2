@@ -109,34 +109,44 @@ func initializeEverything() error {
 
 	err = d2config.Initialize()
 	if err != nil {
+		log.Fatal(err)
 		return err
 	}
 
 	renderer, err := ebiten.CreateRenderer()
 	if err != nil {
+		log.Fatal(err)
 		return err
 	}
 
 	err = d2render.Initialize(renderer)
 	if err != nil {
+		log.Fatal(err)
 		return err
 	}
 
 	err = d2input.Initialize()
 	if err != nil {
+		log.Fatal(err)
 		return err
 	}
 
 	err = d2term.Initialize()
 	if err != nil {
+		log.Fatal(err)
 		return err
 	}
 	d2term.BindLogger()
 
-	d2asset.Initialize()
+	err = d2asset.Initialize()
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
 
 	err = d2render.SetWindowIcon("d2logo.png")
 	if err != nil {
+		log.Fatal(err)
 		return err
 	}
 
@@ -148,8 +158,17 @@ func initializeEverything() error {
 
 	var audioProvider *ebiten2.EbitenAudioProvider
 	audioProvider, err = ebiten2.CreateAudio()
-	d2audio.Initialize(audioProvider)
-	d2audio.SetVolumes(config.BgmVolume, config.SfxVolume)
+	err = d2audio.Initialize(audioProvider)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	err = d2audio.SetVolumes(config.BgmVolume, config.SfxVolume)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
 
 	d2mpq.InitializeCryptoBuffer()
 
@@ -243,7 +262,7 @@ func initializeEverything() error {
 	animation, _ := d2asset.LoadAnimation(d2resource.LoadingScreen, d2resource.PaletteLoading)
 	loadingSprite, _ := d2ui.LoadSprite(animation)
 	loadingSpriteSizeX, loadingSpriteSizeY := loadingSprite.GetCurrentFrameSize()
-	loadingSprite.SetPosition(int(400-(loadingSpriteSizeX/2)), int(300+(loadingSpriteSizeY/2)))
+	loadingSprite.SetPosition(400-(loadingSpriteSizeX/2), 300+(loadingSpriteSizeY/2))
 	err = d2game.Initialize(loadingSprite)
 	if err != nil {
 		return err
@@ -253,14 +272,24 @@ func initializeEverything() error {
 	cursorSprite, _ := d2ui.LoadSprite(animation)
 	d2ui.Initialize(cursorSprite)
 
-	d2term.BindAction("timescale", "set scalar for elapsed time", func(scale float64) {
+	err = d2term.BindAction("timescale", "set scalar for elapsed time", func(scale float64) {
 		if scale <= 0 {
-			d2term.OutputError("invalid time scale value")
+			err2 := d2term.OutputError("invalid time scale value")
+			if err != nil {
+				log.Fatal(err2)
+			}
 		} else {
-			d2term.OutputInfo("timescale changed from %f to %f", d2game.GetTimeScale(), scale)
+			err2 := d2term.OutputInfo("timescale changed from %f to %f", d2game.GetTimeScale(), scale)
+			if err != nil {
+				log.Fatal(err2)
+			}
 			d2game.SetTimeScale(scale)
 		}
 	})
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
 
 	return nil
 }
