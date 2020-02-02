@@ -11,6 +11,35 @@ type SubTileFlags struct {
 	Unknown3 bool
 }
 
+func (s* SubTileFlags) DebugString() string {
+	result := ""
+	if s.BlockWalk {
+		result += "BlockWalk "
+	}
+	if s.BlockLOS {
+		result += "BlockLOS "
+	}
+	if s.BlockJump {
+		result += "BlockJump "
+	}
+	if s.BlockPlayerWalk {
+		result += "BlockPlayerWalk "
+	}
+	if s.Unknown1 {
+		result += "Unknown1 "
+	}
+	if s.BlockLight {
+		result += "BlockLight "
+	}
+	if s.Unknown2 {
+		result += "Unknown2 "
+	}
+	if s.Unknown3 {
+		result += "Unknown3 "
+	}
+	return result
+}
+
 func NewSubTileFlags(data byte) SubTileFlags {
 	return SubTileFlags{
 		BlockWalk:       data & 1 == 1,
