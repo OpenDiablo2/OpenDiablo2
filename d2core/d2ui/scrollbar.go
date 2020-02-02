@@ -102,7 +102,7 @@ func (v *Scrollbar) Advance(elapsed float64) {
 }
 
 func (v *Scrollbar) GetSize() (width, height int) {
-	return 10, int(v.height)
+	return 10, v.height
 }
 
 func (v *Scrollbar) SetPosition(x, y int) {

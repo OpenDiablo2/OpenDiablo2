@@ -40,14 +40,6 @@ func MaxInt32(a, b int32) int32 {
 	return b
 }
 
-func NextPow2(x int32) int32 {
-	result := int32(1)
-	for result < x {
-		result *= 2
-	}
-	return result
-}
-
 func AbsInt32(a int32) int32 {
 	if a < 0 {
 		return -a
@@ -64,24 +56,10 @@ func MinInt32(a, b int32) int32 {
 }
 
 // BytesToInt32 converts 4 bytes to int32
-func BytesToInt32(b []byte) int32 {
-	// equivalnt of return int32(binary.LittleEndian.Uint32(b))
-	return int32(uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16 | uint32(b[3])<<24)
-}
 
 // IsoToScreen converts isometric coordinates to screenspace coordinates
-func IsoToScreen(isoX, isoY, modX, modY float64) (float64, float64) {
-	screenX := (isoX - isoY) * 80
-	screenY := (isoX + isoY) * 40
-	return screenX + modX, screenY + modY
-}
 
 // ScreenToIso converts screenspace coordinates to isometric coordinates
-func ScreenToIso(sx, sy float64) (float64, float64) {
-	x := (sx/80 + sy/40) / 2
-	y := (sy/40 - (sx / 80)) / 2
-	return x, y
-}
 
 // GetAngleBetween returns the angle between two points. 0deg is facing to the right.
 func GetAngleBetween(p1X, p1Y, p2X, p2Y float64) int {

@@ -108,7 +108,7 @@ func (v *TextBox) SetText(newText string) {
 			result = result[1:]
 			continue
 		}
-		v.lineBar.SetPosition(v.x+6+int(tw), v.y+3)
+		v.lineBar.SetPosition(v.x+6+tw, v.y+3)
 		v.textLabel.SetText(result)
 		break
 	}
@@ -122,7 +122,7 @@ func (v *TextBox) SetPosition(x, y int) {
 	v.x = x
 	v.y = y
 	v.textLabel.SetPosition(v.x+6, v.y+3)
-	v.lineBar.SetPosition(v.x+6+int(v.textLabel.Width), v.y+3)
+	v.lineBar.SetPosition(v.x+6+v.textLabel.Width, v.y+3)
 	v.bgSprite.SetPosition(v.x, v.y+26)
 }
 

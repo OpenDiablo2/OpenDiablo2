@@ -11,11 +11,11 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
-type EbitenRenderer struct {
+type Renderer struct {
 }
 
-func CreateRenderer() (*EbitenRenderer, error) {
-	result := &EbitenRenderer{}
+func CreateRenderer() (*Renderer, error) {
+	result := &Renderer{}
 
 	config, err := d2config.Get()
 	if err != nil {
@@ -32,11 +32,11 @@ func CreateRenderer() (*EbitenRenderer, error) {
 	return result, nil
 }
 
-func (*EbitenRenderer) GetRendererName() string {
+func (*Renderer) GetRendererName() string {
 	return "Ebiten"
 }
 
-func (*EbitenRenderer) SetWindowIcon(fileName string) {
+func (*Renderer) SetWindowIcon(fileName string) {
 	_, iconImage, err := ebitenutil.NewImageFromFile(fileName, ebiten.FilterLinear)
 	if err == nil {
 		ebiten.SetWindowIcon([]image.Image{iconImage})
@@ -44,11 +44,11 @@ func (*EbitenRenderer) SetWindowIcon(fileName string) {
 
 }
 
-func (r *EbitenRenderer) IsDrawingSkipped() bool {
+func (r *Renderer) IsDrawingSkipped() bool {
 	return ebiten.IsDrawingSkipped()
 }
 
-func (r *EbitenRenderer) Run(f func(surface d2render.Surface) error, width, height int, title string) error {
+func (r *Renderer) Run(f func(surface d2render.Surface) error, width, height int, title string) error {
 	config, err := d2config.Get()
 	if err != nil {
 		log.Fatal(err)
@@ -64,7 +64,7 @@ func (r *EbitenRenderer) Run(f func(surface d2render.Surface) error, width, heig
 	}, width, height, config.Scale, title)
 }
 
-func (r *EbitenRenderer) CreateSurface(surface d2render.Surface) (error, d2render.Surface) {
+func (r *Renderer) CreateSurface(surface d2render.Surface) (error, d2render.Surface) {
 	result := &ebitenSurface{
 		image: surface.(*ebitenSurface).image,
 		stateCurrent: surfaceState{
@@ -75,7 +75,7 @@ func (r *EbitenRenderer) CreateSurface(surface d2render.Surface) (error, d2rende
 	return nil, result
 }
 
-func (r *EbitenRenderer) NewSurface(width, height int, filter d2render.Filter) (error, d2render.Surface) {
+func (r *Renderer) NewSurface(width, height int, filter d2render.Filter) (error, d2render.Surface) {
 	ebitenFilter := d2ToEbitenFilter(filter)
 	img, err := ebiten.NewImage(width, height, ebitenFilter)
 	if err != nil {
@@ -87,29 +87,29 @@ func (r *EbitenRenderer) NewSurface(width, height int, filter d2render.Filter) (
 	return nil, result
 }
 
-func (r *EbitenRenderer) IsFullScreen() (bool, error) {
+func (r *Renderer) IsFullScreen() (bool, error) {
 	return ebiten.IsFullscreen(), nil
 }
 
-func (r *EbitenRenderer) SetFullScreen(fullScreen bool) error {
+func (r *Renderer) SetFullScreen(fullScreen bool) error {
 	ebiten.SetFullscreen(fullScreen)
 	return nil
 }
 
-func (r *EbitenRenderer) SetVSyncEnabled(vsync bool) error {
+func (r *Renderer) SetVSyncEnabled(vsync bool) error {
 	ebiten.SetVsyncEnabled(vsync)
 	return nil
 }
 
-func (r *EbitenRenderer) GetVSyncEnabled() (bool, error) {
+func (r *Renderer) GetVSyncEnabled() (bool, error) {
 	return ebiten.IsVsyncEnabled(), nil
 }
 
-func (r *EbitenRenderer) GetCursorPos() (int, int, error) {
+func (r *Renderer) GetCursorPos() (int, int, error) {
 	cx, cy := ebiten.CursorPosition()
 	return cx, cy, nil
 }
 
-func (r *EbitenRenderer) CurrentFPS() float64 {
+func (r *Renderer) CurrentFPS() float64 {
 	return ebiten.CurrentFPS()
 }

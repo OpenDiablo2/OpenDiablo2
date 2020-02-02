@@ -25,7 +25,7 @@ type RegionSpec struct {
 	extra            []int
 }
 
-var regions []RegionSpec = []RegionSpec{
+var regions = []RegionSpec{
 	//Act I
 	{d2enum.RegionAct1Town, 1, 3, []int{}},
 	{d2enum.RegionAct1Wilderness, 4, 52, []int{
@@ -104,10 +104,10 @@ func CreateMapEngineTest(currentRegion int, levelPreset int) *MapEngineTest {
 	return result
 }
 
-func (v *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
+func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 	for _, spec := range regions {
 		if spec.regionType == d2enum.RegionIdType(n) {
-			v.regionSpec = spec
+			met.regionSpec = spec
 			inExtra := false
 			for _, e := range spec.extra {
 				if e == levelPreset {
@@ -124,44 +124,44 @@ func (v *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 					levelPreset = spec.endPresetIndex
 				}
 			}
-			v.levelPreset = levelPreset
+			met.levelPreset = levelPreset
 		}
 	}
 
 	if n == 0 {
-		v.mapEngine.GenerateAct1Overworld()
+		met.mapEngine.GenerateAct1Overworld()
 	} else {
-		v.mapEngine = d2map.CreateMapEngine(v.gameState) // necessary for map name update
-		v.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
+		met.mapEngine = d2map.CreateMapEngine(met.gameState) // necessary for map name update
+		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 	}
 
-	v.mapEngine.MoveCameraTo(v.mapEngine.WorldToOrtho(v.mapEngine.GetCenterPosition()))
+	met.mapEngine.MoveCameraTo(met.mapEngine.WorldToOrtho(met.mapEngine.GetCenterPosition()))
 }
 
-func (v *MapEngineTest) Load() []func() {
+func (met *MapEngineTest) Load() []func() {
 	// TODO: Game seed comes from the game state object
-	d2input.BindHandler(v)
+	d2input.BindHandler(met)
 	d2audio.PlayBGM("")
 	return []func(){
 		func() {
-			v.mapEngine = d2map.CreateMapEngine(v.gameState)
-			v.LoadRegionByIndex(v.currentRegion, v.levelPreset, v.fileIndex)
+			met.mapEngine = d2map.CreateMapEngine(met.gameState)
+			met.LoadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
 		},
 	}
 }
 
-func (v *MapEngineTest) Unload() {
-	d2input.UnbindHandler(v)
+func (met *MapEngineTest) Unload() {
+	d2input.UnbindHandler(met)
 }
 
-func (v *MapEngineTest) Render(screen d2render.Surface) {
-	v.mapEngine.Render(screen)
+func (met *MapEngineTest) Render(screen d2render.Surface) {
+	met.mapEngine.Render(screen)
 
 	screenX, screenY, _ := d2render.GetCursorPos()
-	worldX, worldY := v.mapEngine.ScreenToWorld(screenX, screenY)
-	subtileX := int(math.Ceil(math.Mod((worldX*10), 10))) / 2
-	subtileY := int(math.Ceil(math.Mod((worldY*10), 10))) / 2
-	curRegion := v.mapEngine.GetRegionAtTile(int(worldX), int(worldY))
+	worldX, worldY := met.mapEngine.ScreenToWorld(screenX, screenY)
+	subtileX := int(math.Ceil(math.Mod(worldX*10, 10))) / 2
+	subtileY := int(math.Ceil(math.Mod(worldY*10, 10))) / 2
+	curRegion := met.mapEngine.GetRegionAtTile(int(worldX), int(worldY))
 	if curRegion == nil {
 		return
 	}
@@ -169,7 +169,7 @@ func (v *MapEngineTest) Render(screen d2render.Surface) {
 	tileRect := curRegion.GetTileRect()
 
 	levelFilesToPick := make([]string, 0)
-	fileIndex := v.fileIndex
+	fileIndex := met.fileIndex
 	levelPreset := curRegion.GetLevelPreset()
 	regionPath := curRegion.GetPath()
 	for n, fileRecord := range levelPreset.Files {
@@ -181,17 +181,17 @@ func (v *MapEngineTest) Render(screen d2render.Surface) {
 			fileIndex = n
 		}
 	}
-	if v.fileIndex == -1 {
-		v.fileIndex = fileIndex
+	if met.fileIndex == -1 {
+		met.fileIndex = fileIndex
 	}
-	v.filesCount = len(levelFilesToPick)
+	met.filesCount = len(levelFilesToPick)
 
 	screen.PushTranslation(5, 5)
 	screen.DrawText("%d, %d (Tile %d.%d, %d.%d)", screenX, screenY, int(math.Floor(worldX))-tileRect.Left, subtileX, int(math.Floor(worldY))-tileRect.Top, subtileY)
 	screen.PushTranslation(0, 16)
 	screen.DrawText("Map: " + curRegion.GetLevelType().Name)
 	screen.PushTranslation(0, 16)
-	screen.DrawText("%v: %v/%v [%v, %v]", regionPath, fileIndex+1, v.filesCount, v.currentRegion, v.levelPreset)
+	screen.DrawText("%met: %met/%met [%met, %met]", regionPath, fileIndex+1, met.filesCount, met.currentRegion, met.levelPreset)
 	screen.PushTranslation(0, 16)
 	screen.DrawText("N - next region, P - previous region")
 	screen.PushTranslation(0, 16)
@@ -201,8 +201,8 @@ func (v *MapEngineTest) Render(screen d2render.Surface) {
 	screen.PopN(6)
 }
 
-func (v *MapEngineTest) Advance(tickTime float64) {
-	v.mapEngine.Advance(tickTime)
+func (met *MapEngineTest) Advance(tickTime float64) {
+	met.mapEngine.Advance(tickTime)
 }
 
 func (met *MapEngineTest) OnKeyRepeat(event d2input.KeyEvent) bool {

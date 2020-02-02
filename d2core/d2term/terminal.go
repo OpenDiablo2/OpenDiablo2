@@ -46,11 +46,11 @@ const (
 )
 
 var (
-	termBgColor      = color.RGBA{0x2e, 0x34, 0x36, 0xb0}
-	termFgColor      = color.RGBA{0x55, 0x57, 0x53, 0xb0}
-	termInfoColor    = color.RGBA{0x34, 0x65, 0xa4, 0xb0}
-	termWarningColor = color.RGBA{0xfc, 0xe9, 0x4f, 0xb0}
-	termErrorColor   = color.RGBA{0xcc, 0x00, 0x00, 0xb0}
+	termBgColor      = color.RGBA{R: 0x2e, G: 0x34, B: 0x36, A: 0xb0}
+	termFgColor      = color.RGBA{R: 0x55, G: 0x57, B: 0x53, A: 0xb0}
+	termInfoColor    = color.RGBA{R: 0x34, G: 0x65, B: 0xa4, A: 0xb0}
+	termWarningColor = color.RGBA{R: 0xfc, G: 0xe9, B: 0x4f, A: 0xb0}
+	termErrorColor   = color.RGBA{R: 0xcc, A: 0xb0}
 )
 
 type termHistroyEntry struct {
@@ -89,7 +89,7 @@ func createTerminal() (*terminal, error) {
 
 	terminal.bindAction("ls", "list available actions", func() {
 		var names []string
-		for name, _ := range terminal.actions {
+		for name := range terminal.actions {
 			names = append(names, name)
 		}
 
@@ -455,12 +455,12 @@ func (t *terminalLogger) Write(p []byte) (int, error) {
 	}
 
 	reader := bufio.NewReader(&t.buffer)
-	bytes, _, err := reader.ReadLine()
+	termBytes, _, err := reader.ReadLine()
 	if err != nil {
 		return n, err
 	}
 
-	line := string(bytes[:])
+	line := string(termBytes[:])
 	lineLower := strings.ToLower(line)
 
 	if strings.Index(lineLower, "error") > 0 {

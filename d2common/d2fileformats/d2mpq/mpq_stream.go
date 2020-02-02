@@ -59,11 +59,11 @@ func (v *Stream) loadBlockOffsets() error {
 	v.BlockPositions = make([]uint32, blockPositionCount)
 	v.MPQData.File.Seek(int64(v.BlockTableEntry.FilePosition), 0)
 	reader := bufio.NewReader(v.MPQData.File)
-	bytes := make([]byte, blockPositionCount*4)
-	reader.Read(bytes)
+	mpqBytes := make([]byte, blockPositionCount*4)
+	reader.Read(mpqBytes)
 	for i := range v.BlockPositions {
 		idx := i * 4
-		v.BlockPositions[i] = binary.LittleEndian.Uint32(bytes[idx : idx+4])
+		v.BlockPositions[i] = binary.LittleEndian.Uint32(mpqBytes[idx : idx+4])
 	}
 	//binary.Read(v.MPQData.File, binary.LittleEndian, &v.BlockPositions)
 	blockPosSize := blockPositionCount << 2
@@ -71,11 +71,11 @@ func (v *Stream) loadBlockOffsets() error {
 		decrypt(v.BlockPositions, v.EncryptionSeed-1)
 		if v.BlockPositions[0] != blockPosSize {
 			log.Println("Decryption of MPQ failed!")
-			return errors.New("Decryption of MPQ failed!")
+			return errors.New("decryption of MPQ failed")
 		}
 		if v.BlockPositions[1] > v.BlockSize+blockPosSize {
 			log.Println("Decryption of MPQ failed!")
-			return errors.New("Decryption of MPQ failed!")
+			return errors.New("decryption of MPQ failed")
 		}
 	}
 	return nil
@@ -123,7 +123,7 @@ func (v *Stream) readInternal(buffer []byte, offset, count uint32) uint32 {
 }
 
 func (v *Stream) bufferData() {
-	requiredBlock := uint32(v.CurrentPosition / v.BlockSize)
+	requiredBlock := v.CurrentPosition / v.BlockSize
 	if requiredBlock == v.CurrentBlockIndex {
 		return
 	}

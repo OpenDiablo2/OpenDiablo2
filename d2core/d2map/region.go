@@ -42,7 +42,7 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 		seed:              seed,
 	}
 
-	region.palette = d2datadict.Palettes[d2enum.PaletteType("act"+strconv.Itoa(int(region.levelType.Act)))]
+	region.palette = d2datadict.Palettes[d2enum.PaletteType("act"+strconv.Itoa(region.levelType.Act))]
 	if levelType == d2enum.RegionAct5Lava {
 		region.palette = d2datadict.Palettes[d2enum.PaletteType("act4")]
 	}
@@ -69,6 +69,10 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 	levelIndex := int(math.Round(float64(len(levelFilesToPick)-1) * rand.Float64()))
 	if fileIndex >= 0 && fileIndex < len(levelFilesToPick) {
 		levelIndex = fileIndex
+	}
+
+	if levelFilesToPick == nil {
+		panic("no level files to pick from")
 	}
 
 	region.regionPath = levelFilesToPick[levelIndex]
@@ -175,7 +179,7 @@ func (mr *MapRegion) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) byt
 		return 0
 	}
 
-	random := (tileSeed % uint64(weightSum))
+	random := tileSeed % uint64(weightSum)
 
 	sum := 0
 	for i, tile := range tiles {
@@ -358,7 +362,7 @@ func (mr *MapRegion) renderShadow(tile d2ds1.FloorShadowRecord, viewport *Viewpo
 	defer viewport.PopTranslation()
 
 	target.PushTranslation(viewport.GetTranslationScreen())
-	target.PushColor(color.RGBA{255, 255, 255, 160})
+	target.PushColor(color.RGBA{R: 255, G: 255, B: 255, A: 160})
 	defer target.PopN(2)
 
 	target.Render(img)
@@ -377,8 +381,8 @@ func (mr *MapRegion) renderDebug(debugVisLevel int, viewport *Viewport, target d
 
 func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *Viewport, target d2render.Surface) {
 	if debugVisLevel > 0 {
-		subtileColor := color.RGBA{80, 80, 255, 100}
-		tileColor := color.RGBA{255, 255, 255, 255}
+		subtileColor := color.RGBA{R: 80, G: 80, B: 255, A: 100}
+		tileColor := color.RGBA{R: 255, G: 255, B: 255, A: 255}
 
 		screenX1, screenY1 := viewport.WorldToScreen(float64(x), float64(y))
 		screenX2, screenY2 := viewport.WorldToScreen(float64(x+1), float64(y))
@@ -526,7 +530,7 @@ func (mr *MapRegion) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, t
 		return
 	}
 
-	_, image := d2render.NewSurface(int(tileData.Width), int(tileHeight), d2render.FilterNearest)
+	_, image := d2render.NewSurface(int(tileData.Width), tileHeight, d2render.FilterNearest)
 	pixels := make([]byte, 4*tileData.Width*int32(tileHeight))
 	mr.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, tileData.Width)
 	image.ReplacePixels(pixels)

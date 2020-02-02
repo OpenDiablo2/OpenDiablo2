@@ -38,20 +38,20 @@ func CreateMapEngine(gameState *d2gamestate.GameState) *MapEngine {
 	return engine
 }
 
-func (me *MapEngine) GetStartPosition() (float64, float64) {
+func (m *MapEngine) GetStartPosition() (float64, float64) {
 	var startX, startY float64
-	if len(me.regions) > 0 {
-		region := me.regions[0]
+	if len(m.regions) > 0 {
+		region := m.regions[0]
 		startX, startY = region.getStartTilePosition()
 	}
 
 	return startX, startY
 }
 
-func (me *MapEngine) GetCenterPosition() (float64, float64) {
+func (m *MapEngine) GetCenterPosition() (float64, float64) {
 	var centerX, centerY float64
-	if len(me.regions) > 0 {
-		region := me.regions[0]
+	if len(m.regions) > 0 {
+		region := m.regions[0]
 		centerX = float64(region.tileRect.Left) + float64(region.tileRect.Width)/2
 		centerY = float64(region.tileRect.Top) + float64(region.tileRect.Height)/2
 	}
@@ -59,56 +59,56 @@ func (me *MapEngine) GetCenterPosition() (float64, float64) {
 	return centerX, centerY
 }
 
-func (me *MapEngine) MoveCameraTo(x, y float64) {
-	me.camera.MoveTo(x, y)
+func (m *MapEngine) MoveCameraTo(x, y float64) {
+	m.camera.MoveTo(x, y)
 }
 
-func (me *MapEngine) MoveCameraBy(x, y float64) {
-	me.camera.MoveBy(x, y)
+func (m *MapEngine) MoveCameraBy(x, y float64) {
+	m.camera.MoveBy(x, y)
 }
 
-func (me *MapEngine) ScreenToWorld(x, y int) (float64, float64) {
-	return me.viewport.ScreenToWorld(x, y)
+func (m *MapEngine) ScreenToWorld(x, y int) (float64, float64) {
+	return m.viewport.ScreenToWorld(x, y)
 }
 
-func (me *MapEngine) ScreenToOrtho(x, y int) (float64, float64) {
-	return me.viewport.ScreenToOrtho(x, y)
+func (m *MapEngine) ScreenToOrtho(x, y int) (float64, float64) {
+	return m.viewport.ScreenToOrtho(x, y)
 }
 
-func (me *MapEngine) WorldToOrtho(x, y float64) (float64, float64) {
-	return me.viewport.WorldToOrtho(x, y)
+func (m *MapEngine) WorldToOrtho(x, y float64) (float64, float64) {
+	return m.viewport.WorldToOrtho(x, y)
 }
 
-func (me *MapEngine) SetDebugVisLevel(debugVisLevel int) {
-	me.debugVisLevel = debugVisLevel
+func (m *MapEngine) SetDebugVisLevel(debugVisLevel int) {
+	m.debugVisLevel = debugVisLevel
 }
 
-func (me *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) {
-	region, entities := loadRegion(me.gameState.Seed, 0, 0, regionType, levelPreset, fileIndex)
-	me.regions = append(me.regions, region)
-	me.entities = append(me.entities, entities...)
+func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) {
+	region, entities := loadRegion(m.gameState.Seed, 0, 0, regionType, levelPreset, fileIndex)
+	m.regions = append(m.regions, region)
+	m.entities = append(m.entities, entities...)
 }
 
-func (me *MapEngine) GenerateAct1Overworld() {
+func (m *MapEngine) GenerateAct1Overworld() {
 	d2audio.PlayBGM("/data/global/music/Act1/town1.wav") // TODO: Temp stuff here
 
-	region, entities := loadRegion(me.gameState.Seed, 0, 0, d2enum.RegionAct1Town, 1, -1)
-	me.regions = append(me.regions, region)
-	me.entities = append(me.entities, entities...)
+	region, entities := loadRegion(m.gameState.Seed, 0, 0, d2enum.RegionAct1Town, 1, -1)
+	m.regions = append(m.regions, region)
+	m.entities = append(m.entities, entities...)
 
 	if strings.Contains(region.regionPath, "E1") {
-		region, entities := loadRegion(me.gameState.Seed, int(region.tileRect.Width-1), 0, d2enum.RegionAct1Town, 2, -1)
-		me.regions = append(me.regions, region)
-		me.entities = append(me.entities, entities...)
+		region, entities := loadRegion(m.gameState.Seed, region.tileRect.Width-1, 0, d2enum.RegionAct1Town, 2, -1)
+		m.regions = append(m.regions, region)
+		m.entities = append(m.entities, entities...)
 	} else if strings.Contains(region.regionPath, "S1") {
-		region, entities := loadRegion(me.gameState.Seed, 0, int(region.tileRect.Height-1), d2enum.RegionAct1Town, 3, -1)
-		me.regions = append(me.regions, region)
-		me.entities = append(me.entities, entities...)
+		region, entities := loadRegion(m.gameState.Seed, 0, region.tileRect.Height-1, d2enum.RegionAct1Town, 3, -1)
+		m.regions = append(m.regions, region)
+		m.entities = append(m.entities, entities...)
 	}
 }
 
-func (me *MapEngine) GetRegionAtTile(x, y int) *MapRegion {
-	for _, region := range me.regions {
+func (m *MapEngine) GetRegionAtTile(x, y int) *MapRegion {
+	for _, region := range m.regions {
 		if region.tileRect.IsInRect(x, y) {
 			return region
 		}
@@ -117,29 +117,29 @@ func (me *MapEngine) GetRegionAtTile(x, y int) *MapRegion {
 	return nil
 }
 
-func (me *MapEngine) AddEntity(entity MapEntity) {
-	me.entities = append(me.entities, entity)
+func (m *MapEngine) AddEntity(entity MapEntity) {
+	m.entities = append(m.entities, entity)
 }
 
-func (me *MapEngine) Advance(tickTime float64) {
-	for _, region := range me.regions {
-		if region.isVisbile(me.viewport) {
+func (m *MapEngine) Advance(tickTime float64) {
+	for _, region := range m.regions {
+		if region.isVisbile(m.viewport) {
 			region.advance(tickTime)
 		}
 	}
 
-	for _, entity := range me.entities {
+	for _, entity := range m.entities {
 		entity.Advance(tickTime)
 	}
 }
 
-func (me *MapEngine) Render(target d2render.Surface) {
-	for _, region := range me.regions {
-		if region.isVisbile(me.viewport) {
-			region.renderPass1(me.viewport, target)
-			region.renderDebug(me.debugVisLevel, me.viewport, target)
-			region.renderPass2(me.entities, me.viewport, target)
-			region.renderPass3(me.viewport, target)
+func (m *MapEngine) Render(target d2render.Surface) {
+	for _, region := range m.regions {
+		if region.isVisbile(m.viewport) {
+			region.renderPass1(m.viewport, target)
+			region.renderDebug(m.debugVisLevel, m.viewport, target)
+			region.renderPass2(m.entities, m.viewport, target)
+			region.renderPass3(m.viewport, target)
 		}
 	}
 }

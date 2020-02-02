@@ -59,6 +59,7 @@ func (v *BitStream) EnsureBits(bitCount int) bool {
 
 // WasteBits dry-reads the specified number of bits
 func (v *BitStream) WasteBits(bitCount int) {
+	//noinspection GoRedundantConversion
 	v.current >>= uint(bitCount)
 	v.bitCount -= bitCount
 }

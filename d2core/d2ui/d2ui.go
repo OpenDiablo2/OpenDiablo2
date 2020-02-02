@@ -92,7 +92,7 @@ func Advance(elapsed float64) {
 			}
 			wx, wy := widget.GetPosition()
 			ww, wh := widget.GetSize()
-			if CursorX >= wx && CursorX <= wx+int(ww) && CursorY >= wy && CursorY <= wy+int(wh) {
+			if CursorX >= wx && CursorX <= wx+ww && CursorY >= wy && CursorY <= wy+wh {
 				widget.SetPressed(true)
 				if pressedIndex == -1 {
 					found = true
@@ -119,7 +119,7 @@ func Advance(elapsed float64) {
 			widget := widgets[pressedIndex]
 			wx, wy := widget.GetPosition()
 			ww, wh := widget.GetSize()
-			if CursorX >= wx && CursorX <= wx+int(ww) && CursorY >= wy && CursorY <= wy+int(wh) {
+			if CursorX >= wx && CursorX <= wx+ww && CursorY >= wy && CursorY <= wy+wh {
 				widget.Activate()
 			}
 		} else {

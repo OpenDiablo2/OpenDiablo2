@@ -5,42 +5,42 @@ type CompositeMode int
 const (
 	// Regular alpha blending
 	// c_out = c_src + c_dst × (1 - α_src)
-	CompositeModeSourceOver CompositeMode = CompositeMode(1)
+	CompositeModeSourceOver = CompositeMode(1)
 
 	// c_out = 0
-	CompositeModeClear CompositeMode = CompositeMode(2)
+	CompositeModeClear = CompositeMode(2)
 
 	// c_out = c_src
-	CompositeModeCopy CompositeMode = CompositeMode(3)
+	CompositeModeCopy = CompositeMode(3)
 
 	// c_out = c_dst
-	CompositeModeDestination CompositeMode = CompositeMode(4)
+	CompositeModeDestination = CompositeMode(4)
 
 	// c_out = c_src × (1 - α_dst) + c_dst
-	CompositeModeDestinationOver CompositeMode = CompositeMode(5)
+	CompositeModeDestinationOver = CompositeMode(5)
 
 	// c_out = c_src × α_dst
-	CompositeModeSourceIn CompositeMode = CompositeMode(6)
+	CompositeModeSourceIn = CompositeMode(6)
 
 	// c_out = c_dst × α_src
-	CompositeModeDestinationIn CompositeMode = CompositeMode(7)
+	CompositeModeDestinationIn = CompositeMode(7)
 
 	// c_out = c_src × (1 - α_dst)
-	CompositeModeSourceOut CompositeMode = CompositeMode(8)
+	CompositeModeSourceOut = CompositeMode(8)
 
 	// c_out = c_dst × (1 - α_src)
-	CompositeModeDestinationOut CompositeMode = CompositeMode(9)
+	CompositeModeDestinationOut = CompositeMode(9)
 
 	// c_out = c_src × α_dst + c_dst × (1 - α_src)
-	CompositeModeSourceAtop CompositeMode = CompositeMode(10)
+	CompositeModeSourceAtop = CompositeMode(10)
 
 	// c_out = c_src × (1 - α_dst) + c_dst × α_src
-	CompositeModeDestinationAtop CompositeMode = CompositeMode(11)
+	CompositeModeDestinationAtop = CompositeMode(11)
 
 	// c_out = c_src × (1 - α_dst) + c_dst × (1 - α_src)
-	CompositeModeXor CompositeMode = CompositeMode(12)
+	CompositeModeXor = CompositeMode(12)
 
 	// Sum of source and destination (a.k.a. 'plus' or 'additive')
 	// c_out = c_src + c_dst
-	CompositeModeLighter CompositeMode = CompositeMode(13)
+	CompositeModeLighter = CompositeMode(13)
 )

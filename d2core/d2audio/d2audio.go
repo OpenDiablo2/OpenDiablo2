@@ -7,8 +7,8 @@ import (
 var singleton AudioProvider
 
 var (
-	ErrHasInit error = errors.New("audio system is already initialized")
-	ErrNotInit error = errors.New("audio system has not been initialized")
+	ErrHasInit = errors.New("audio system is already initialized")
+	ErrNotInit = errors.New("audio system has not been initialized")
 )
 
 type SoundEffect interface {

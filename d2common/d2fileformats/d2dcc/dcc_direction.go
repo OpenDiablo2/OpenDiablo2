@@ -54,7 +54,7 @@ func CreateDCCDirection(bm *d2common.BitMuncher, file DCC) DCCDirection {
 		maxx = int(d2common.MaxInt32(int32(result.Frames[frameIdx].Box.Right()), int32(maxx)))
 		maxy = int(d2common.MaxInt32(int32(result.Frames[frameIdx].Box.Bottom()), int32(maxy)))
 	}
-	result.Box = d2common.Rectangle{minx, miny, (maxx - minx), (maxy - miny)}
+	result.Box = d2common.Rectangle{Left: minx, Top: miny, Width: maxx - minx, Height: maxy - miny}
 	if result.OptionalDataBits > 0 {
 		log.Panic("Optional bits in DCC data is not currently supported.")
 	}

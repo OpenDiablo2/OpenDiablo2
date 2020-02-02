@@ -139,12 +139,12 @@ func (v *CharacterSelect) Load() []func() {
 					xOffset = 385
 				}
 				v.characterNameLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
-				v.characterNameLabel[i].Color = color.RGBA{188, 168, 140, 255}
+				v.characterNameLabel[i].Color = color.RGBA{R: 188, G: 168, B: 140, A: 255}
 				v.characterNameLabel[i].SetPosition(xOffset, 100+((i/2)*95))
 				v.characterStatsLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 				v.characterStatsLabel[i].SetPosition(xOffset, 115+((i/2)*95))
 				v.characterExpLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteStatic)
-				v.characterExpLabel[i].Color = color.RGBA{24, 255, 0, 255}
+				v.characterExpLabel[i].Color = color.RGBA{R: 24, G: 255, A: 255}
 				v.characterExpLabel[i].SetPosition(xOffset, 130+((i/2)*95))
 			}
 			v.refreshGameStates()
@@ -215,7 +215,7 @@ func (v *CharacterSelect) Render(screen d2render.Surface) {
 		screen.Pop()
 	}
 	if v.showDeleteConfirmation {
-		screen.DrawRect(800, 600, color.RGBA{0, 0, 0, 128})
+		screen.DrawRect(800, 600, color.RGBA{A: 128})
 		v.okCancelBox.RenderSegmented(screen, 2, 1, 0)
 		v.deleteCharConfirmLabel.Render(screen)
 	}
@@ -229,7 +229,7 @@ func (v *CharacterSelect) moveSelectionBox() {
 	bw := 272
 	bh := 92
 	selectedIndex := v.selectedCharacter - (v.charScrollbar.GetCurrentOffset() * 2)
-	v.selectionBox.SetPosition(37+((selectedIndex&1)*int(bw)), 86+(int(bh)*(selectedIndex/2)))
+	v.selectionBox.SetPosition(37+((selectedIndex&1)*bw), 86+(bh*(selectedIndex/2)))
 	v.d2HeroTitle.SetText(v.gameStates[v.selectedCharacter].HeroName)
 }
 
@@ -243,10 +243,10 @@ func (v *CharacterSelect) Advance(tickTime float64) {
 				bh := 92
 				localMouseX := mx - 37
 				localMouseY := my - 86
-				if localMouseX > 0 && localMouseX < int(bw*2) && localMouseY >= 0 && localMouseY < int(bh*4) {
-					adjustY := localMouseY / int(bh)
+				if localMouseX > 0 && localMouseX < bw*2 && localMouseY >= 0 && localMouseY < bh*4 {
+					adjustY := localMouseY / bh
 					selectedIndex := adjustY * 2
-					if localMouseX > int(bw) {
+					if localMouseX > bw {
 						selectedIndex += 1
 					}
 					if (v.charScrollbar.GetCurrentOffset()*2)+selectedIndex < len(v.gameStates) {

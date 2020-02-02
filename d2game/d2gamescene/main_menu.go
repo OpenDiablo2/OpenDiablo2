@@ -64,35 +64,35 @@ func (v *MainMenu) Load() []func() {
 			v.versionLabel = d2ui.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 			v.versionLabel.Alignment = d2ui.LabelAlignRight
 			v.versionLabel.SetText("OpenDiablo2 - " + d2common.BuildInfo.Branch)
-			v.versionLabel.Color = color.RGBA{255, 255, 255, 255}
+			v.versionLabel.Color = color.RGBA{R: 255, G: 255, B: 255, A: 255}
 			v.versionLabel.SetPosition(795, -10)
 		},
 		func() {
 			v.commitLabel = d2ui.CreateLabel(d2resource.FontFormal10, d2resource.PaletteStatic)
 			v.commitLabel.Alignment = d2ui.LabelAlignLeft
 			v.commitLabel.SetText(d2common.BuildInfo.Commit)
-			v.commitLabel.Color = color.RGBA{255, 255, 255, 255}
+			v.commitLabel.Color = color.RGBA{R: 255, G: 255, B: 255, A: 255}
 			v.commitLabel.SetPosition(2, 2)
 		},
 		func() {
 			v.copyrightLabel = d2ui.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 			v.copyrightLabel.Alignment = d2ui.LabelAlignCenter
 			v.copyrightLabel.SetText("Diablo 2 is © Copyright 2000-2016 Blizzard Entertainment")
-			v.copyrightLabel.Color = color.RGBA{188, 168, 140, 255}
+			v.copyrightLabel.Color = color.RGBA{R: 188, G: 168, B: 140, A: 255}
 			v.copyrightLabel.SetPosition(400, 500)
 		},
 		func() {
 			v.copyrightLabel2 = d2ui.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 			v.copyrightLabel2.Alignment = d2ui.LabelAlignCenter
 			v.copyrightLabel2.SetText(d2common.TranslateString("#1614"))
-			v.copyrightLabel2.Color = color.RGBA{188, 168, 140, 255}
+			v.copyrightLabel2.Color = color.RGBA{R: 188, G: 168, B: 140, A: 255}
 			v.copyrightLabel2.SetPosition(400, 525)
 		},
 		func() {
 			v.openDiabloLabel = d2ui.CreateLabel(d2resource.FontFormal10, d2resource.PaletteStatic)
 			v.openDiabloLabel.Alignment = d2ui.LabelAlignCenter
 			v.openDiabloLabel.SetText("OpenDiablo2 is neither developed by, nor endorsed by Blizzard or its parent company Activision")
-			v.openDiabloLabel.Color = color.RGBA{255, 255, 140, 255}
+			v.openDiabloLabel.Color = color.RGBA{R: 255, G: 255, B: 140, A: 255}
 			v.openDiabloLabel.SetPosition(400, 580)
 		},
 		func() {

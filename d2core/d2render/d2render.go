@@ -8,9 +8,9 @@ import (
 )
 
 var (
-	ErrHasInit         error = errors.New("rendering system is already initialized")
-	ErrNotInit         error = errors.New("rendering system has not been initialized")
-	ErrInvalidRenderer error = errors.New("invalid rendering system specified")
+	ErrHasInit         = errors.New("rendering system is already initialized")
+	ErrNotInit         = errors.New("rendering system has not been initialized")
+	ErrInvalidRenderer = errors.New("invalid rendering system specified")
 )
 
 var singleton Renderer

@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	ErrHasInit error = errors.New("asset system is already initialized")
-	ErrNoInit  error = errors.New("asset system is not initialized")
+	ErrHasInit = errors.New("asset system is already initialized")
+	ErrNoInit  = errors.New("asset system is not initialized")
 )
 
 type assetManager struct {

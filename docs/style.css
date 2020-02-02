@@ -55,7 +55,7 @@ h2 {
 
 img.imgFrame {
 	display: inline-block;
-	clear: bloth;
+	clear: both;
 	border-radius: 6px;
 	box-shadow: 0 0 8px #000;
 	margin: 6px;
