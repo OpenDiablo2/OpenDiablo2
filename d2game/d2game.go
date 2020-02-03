@@ -54,6 +54,7 @@ func Initialize(loadingSpr *d2ui.Sprite) error {
 		if timeScale <= 0 {
 			d2term.OutputError("invalid time scale value")
 		} else {
+			singleton.timeScale = timeScale
 			d2term.OutputInfo("timescale changed from %f to %f", singleton.timeScale, timeScale)
 		}
 	})
