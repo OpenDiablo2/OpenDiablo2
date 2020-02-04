@@ -8,16 +8,13 @@ import (
 	"path"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
-
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -56,7 +53,7 @@ func (v *Credits) LoadContributors() []string {
 	file, err := os.Open(path.Join("./", "CONTRIBUTORS"))
 	if err != nil || file == nil {
 		log.Print("CONTRIBUTORS file is missing")
-		return []string{ "MISSING CONTRIBUTOR FILES!" }
+		return []string{"MISSING CONTRIBUTOR FILES!"}
 	}
 	defer file.Close()
 
@@ -68,41 +65,31 @@ func (v *Credits) LoadContributors() []string {
 }
 
 // Load is called to load the resources for the credits scene
-func (v *Credits) Load() []func() {
-	return []func(){
-		func() {
-			animation, _ := d2asset.LoadAnimation(d2resource.CreditsBackground, d2resource.PaletteSky)
-			v.creditsBackground, _ = d2ui.LoadSprite(animation)
-			v.creditsBackground.SetPosition(0, 0)
-		},
-		func() {
-			v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, d2common.TranslateString("#970"))
-			v.exitButton.SetPosition(33, 543)
-			v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
-			d2ui.AddWidget(&v.exitButton)
-		},
-		func() {
-			fileData, err := d2asset.LoadFile(d2resource.CreditsText)
-			if err != nil {
-				panic(err)
-			}
-			creditData, _ := dh.Utf16BytesToString(fileData[2:])
-			v.creditsText = strings.Split(creditData, "\r\n")
-			for i := range v.creditsText {
-				v.creditsText[i] = strings.Trim(v.creditsText[i], " ")
-			}
-			v.creditsText = append(v.LoadContributors(), v.creditsText...)
-		},
+func (v *Credits) OnLoad() error {
+	animation, _ := d2asset.LoadAnimation(d2resource.CreditsBackground, d2resource.PaletteSky)
+	v.creditsBackground, _ = d2ui.LoadSprite(animation)
+	v.creditsBackground.SetPosition(0, 0)
+
+	v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, d2common.TranslateString("#970"))
+	v.exitButton.SetPosition(33, 543)
+	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
+	d2ui.AddWidget(&v.exitButton)
+
+	fileData, err := d2asset.LoadFile(d2resource.CreditsText)
+	if err != nil {
+		return err
 	}
-}
-
-// Unload unloads the data for the credits scene
-func (v *Credits) Unload() {
-
+	creditData, _ := dh.Utf16BytesToString(fileData[2:])
+	v.creditsText = strings.Split(creditData, "\r\n")
+	for i := range v.creditsText {
+		v.creditsText[i] = strings.Trim(v.creditsText[i], " ")
+	}
+	v.creditsText = append(v.LoadContributors(), v.creditsText...)
+	return nil
 }
 
 // Render renders the credits scene
-func (v *Credits) Render(screen d2render.Surface) {
+func (v *Credits) Render(screen d2render.Surface) error {
 	v.creditsBackground.RenderSegmented(screen, 4, 3, 0)
 	for _, label := range v.labels {
 		if label.Available {
@@ -110,12 +97,14 @@ func (v *Credits) Render(screen d2render.Surface) {
 		}
 		label.Label.Render(screen)
 	}
+
+	return nil
 }
 
 const secondsPerCycle = float64(0.02)
 
 // Update runs the update logic on the credits scene
-func (v *Credits) Advance(tickTime float64) {
+func (v *Credits) Advance(tickTime float64) error {
 	v.cycleTime += tickTime
 	for v.cycleTime >= secondsPerCycle {
 		v.cycleTime -= secondsPerCycle
@@ -135,6 +124,8 @@ func (v *Credits) Advance(tickTime float64) {
 			label.Label.Y--
 		}
 	}
+
+	return nil
 }
 
 func (v *Credits) onExitButtonClicked() {

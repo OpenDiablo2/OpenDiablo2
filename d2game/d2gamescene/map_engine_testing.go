@@ -4,20 +4,14 @@ import (
 	"math"
 	"os"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
 )
 
 type RegionSpec struct {
@@ -140,23 +134,22 @@ func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 	met.mapEngine.MoveCameraTo(met.mapEngine.WorldToOrtho(met.mapEngine.GetCenterPosition()))
 }
 
-func (met *MapEngineTest) Load() []func() {
+func (met *MapEngineTest) OnLoad() error {
 	// TODO: Game seed comes from the game state object
 	d2input.BindHandler(met)
-	d2audio.PlayBGM("")
-	return []func(){
-		func() {
-			met.mapEngine = d2map.CreateMapEngine(met.gameState)
-			met.LoadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
-		},
-	}
+
+	met.mapEngine = d2map.CreateMapEngine(met.gameState)
+	met.LoadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
+
+	return nil
 }
 
-func (met *MapEngineTest) Unload() {
+func (met *MapEngineTest) OnUnload() error {
 	d2input.UnbindHandler(met)
+	return nil
 }
 
-func (met *MapEngineTest) Render(screen d2render.Surface) {
+func (met *MapEngineTest) Render(screen d2render.Surface) error {
 	met.mapEngine.Render(screen)
 
 	screenX, screenY, _ := d2render.GetCursorPos()
@@ -166,7 +159,7 @@ func (met *MapEngineTest) Render(screen d2render.Surface) {
 
 	curRegion := met.mapEngine.GetRegionAtTile(int(worldX), int(worldY))
 	if curRegion == nil {
-		return
+		return nil
 	}
 
 	tileRect := curRegion.GetTileRect()
@@ -268,10 +261,13 @@ func (met *MapEngineTest) Render(screen d2render.Surface) {
 		}
 		screen.PopN(popN)
 	}
+
+	return nil
 }
 
-func (met *MapEngineTest) Advance(tickTime float64) {
+func (met *MapEngineTest) Advance(tickTime float64) error {
 	met.mapEngine.Advance(tickTime)
+	return nil
 }
 
 func (met *MapEngineTest) OnKeyRepeat(event d2input.KeyEvent) bool {
