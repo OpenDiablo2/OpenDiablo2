@@ -47,18 +47,29 @@ func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 
 func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	if event.Button == d2input.MouseButtonLeft {
-		px, py := g.mapEngine.ScreenToWorld(event.X, event.Y)
-		px = float64(int(px * 10)) / 10.0
-		py = float64(int(py * 10)) / 10.0
-		heroPosX := g.hero.AnimatedEntity.LocationX / 5.0
-		heroPosY := g.hero.AnimatedEntity.LocationY / 5.0
-		path, _, found := g.mapEngine.PathFind(heroPosX, heroPosY, px, py)
-		if found {
-			g.hero.AnimatedEntity.SetPath(path)
-		}
-		return true
+		return g.moveHero(event.X, event.Y)
 	}
 	return false
+}
+
+func (g *GameControls) OnMouseMove(event d2input.MouseMoveEvent) bool {
+	if event.ButtonMod == d2input.MouseButtonModLeft {
+		return g.moveHero(event.X, event.Y)
+	}
+	return false
+}
+
+func (g *GameControls) moveHero(x, y int) bool {
+	px, py := g.mapEngine.ScreenToWorld(x, y)
+	px = float64(int(px*10)) / 10.0
+	py = float64(int(py*10)) / 10.0
+	heroPosX := g.hero.AnimatedEntity.LocationX / 5.0
+	heroPosY := g.hero.AnimatedEntity.LocationY / 5.0
+	path, _, found := g.mapEngine.PathFind(heroPosX, heroPosY, px, py)
+	if found {
+		g.hero.AnimatedEntity.SetPath(path)
+	}
+	return true
 }
 
 func (g *GameControls) Load() {
