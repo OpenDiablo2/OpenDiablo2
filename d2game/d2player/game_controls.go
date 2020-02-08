@@ -20,6 +20,7 @@ type GameControls struct {
 	hero      *d2map.Hero
 	mapEngine *d2map.MapEngine
 	inventory *Inventory
+	heroStats *HeroStats
 
 	// UI
 	globeSprite *d2ui.Sprite
@@ -33,12 +34,17 @@ func NewGameControls(hero *d2map.Hero, mapEngine *d2map.MapEngine) *GameControls
 		hero:      hero,
 		mapEngine: mapEngine,
 		inventory: NewInventory(),
+		heroStats: NewHeroStats(),
 	}
 }
 
 func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 	if event.Key == d2input.KeyI {
 		g.inventory.Toggle()
+		return true
+	}
+	if event.Key == d2input.KeyC {
+		g.heroStats.Toggle()
 		return true
 	}
 
@@ -48,8 +54,8 @@ func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	if event.Button == d2input.MouseButtonLeft {
 		px, py := g.mapEngine.ScreenToWorld(event.X, event.Y)
-		px = float64(int(px * 10)) / 10.0
-		py = float64(int(py * 10)) / 10.0
+		px = float64(int(px*10)) / 10.0
+		py = float64(int(py*10)) / 10.0
 		heroPosX := g.hero.AnimatedEntity.LocationX / 5.0
 		heroPosY := g.hero.AnimatedEntity.LocationY / 5.0
 		path, _, found := g.mapEngine.PathFind(heroPosX, heroPosY, px, py)
@@ -75,11 +81,13 @@ func (g *GameControls) Load() {
 	g.skillIcon, _ = d2ui.LoadSprite(animation)
 
 	g.inventory.Load()
+	g.heroStats.Load()
 }
 
 // TODO: consider caching the panels to single image that is reused.
 func (g *GameControls) Render(target d2render.Surface) {
 	g.inventory.Render(target)
+	g.heroStats.Render(target)
 
 	width, height := target.GetSize()
 	offset := 0
