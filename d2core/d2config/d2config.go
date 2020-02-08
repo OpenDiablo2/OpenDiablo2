@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 )
 
 var (
@@ -52,6 +53,17 @@ func Initialize() error {
 		if err := decoder.Decode(&config); err == nil {
 			singleton = &config
 			return nil
+		}
+	} else {
+		log.Printf("configuration file not found, writing default")
+		os.MkdirAll(filepath.Dir(configPath), os.ModePerm)
+		configFile, err := os.Create(configPath)
+		if err == nil {
+			encoder := json.NewEncoder(configFile)
+			defer configFile.Close()
+			encoder.Encode(getDefaultConfiguration())
+		} else {
+			log.Printf("failed to write default configuration (%s)", err)
 		}
 	}
 
