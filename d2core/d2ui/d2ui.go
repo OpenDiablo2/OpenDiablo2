@@ -18,7 +18,6 @@ const (
 )
 
 var widgets []Widget
-var cursorSprite *Sprite
 var cursorButtons CursorButton
 var pressedIndex int
 var CursorX int
@@ -26,8 +25,7 @@ var CursorY int
 var clickSfx d2audio.SoundEffect
 var waitForLeftMouseUp bool
 
-func Initialize(curSprite *Sprite) {
-	cursorSprite = curSprite
+func Initialize() {
 	pressedIndex = -1
 	clickSfx, _ = d2audio.LoadSoundEffect(d2resource.SFXButtonClick)
 	waitForLeftMouseUp = false
@@ -56,10 +54,6 @@ func Render(target d2render.Surface) {
 			widget.Render(target)
 		}
 	}
-
-	cx, cy := ebiten.CursorPosition()
-	cursorSprite.SetPosition(cx, cy)
-	cursorSprite.Render(target)
 }
 
 // Update updates all of the UI elements
@@ -141,8 +135,4 @@ func CursorButtonPressed(button CursorButton) bool {
 
 func KeyPressed(key ebiten.Key) bool {
 	return ebiten.IsKeyPressed(key)
-}
-
-func GetCursorSprite() *Sprite {
-	return cursorSprite
 }

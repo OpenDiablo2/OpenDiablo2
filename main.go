@@ -1,7 +1,12 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"log"
+	"os"
+	"runtime"
+	"strconv"
 
 	"gopkg.in/alecthomas/kingpin.v2"
 
@@ -9,7 +14,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescene"
 
@@ -17,14 +21,13 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2game"
 )
 
 // GitBranch is set by the CI build process to the name of the branch
@@ -33,12 +36,18 @@ var GitBranch string
 // GitCommit is set by the CI build process to the commit hash
 var GitCommit string
 
+var singleton struct {
+	lastTime  float64
+	showFPS   bool
+	timeScale float64
+}
+
 func main() {
 	if len(GitBranch) == 0 {
-		d2common.SetBuildInfo("Local Build", "")
-	} else {
-		d2common.SetBuildInfo(GitBranch, GitCommit)
+		GitBranch = "Local Build"
 	}
+
+	d2common.SetBuildInfo(GitBranch, GitCommit)
 
 	region := kingpin.Arg("region", "Region type id").Int()
 	preset := kingpin.Arg("preset", "Level preset").Int()
@@ -47,7 +56,7 @@ func main() {
 	log.SetFlags(log.Lshortfile)
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
 
-	if err := initializeEverything(); err != nil {
+	if err := initialize(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -57,28 +66,222 @@ func main() {
 		d2scene.SetNextScene(d2gamescene.CreateMapEngineTest(*region, *preset))
 	}
 
-	if err := d2game.Run(GitBranch); err != nil {
+	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", GitBranch)
+	if err := d2render.Run(update, 800, 600, windowTitle); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func loadStrings() error {
-	tablePaths := []string{
-		d2resource.PatchStringTable,
-		d2resource.ExpansionStringTable,
-		d2resource.StringTable,
+func initialize() error {
+	singleton.timeScale = 1.0
+	singleton.lastTime = d2common.Now()
+
+	if err := d2config.Initialize(); err != nil {
+		return err
 	}
 
-	for _, tablePath := range tablePaths {
-		data, err := d2asset.LoadFile(tablePath)
+	config, err := d2config.Get()
+	if err != nil {
+		return err
+	}
+	d2resource.LanguageCode = config.Language
+
+	renderer, err := ebiten.CreateRenderer()
+	if err != nil {
+		return err
+	}
+
+	if err := d2render.Initialize(renderer); err != nil {
+		return err
+	}
+
+	if err := d2render.SetWindowIcon("d2logo.png"); err != nil {
+		return err
+	}
+
+	if err := d2asset.Initialize(); err != nil {
+		return err
+	}
+
+	if err := d2input.Initialize(); err != nil {
+		return err
+	}
+
+	if err := d2gui.Initialize(); err != nil {
+		return err
+	}
+
+	if err := d2term.Initialize(); err != nil {
+		return err
+	}
+
+	d2term.BindLogger()
+	d2term.BindAction("fullscreen", "toggles fullscreen", func() {
+		fullscreen, err := d2render.IsFullScreen()
+		if err == nil {
+			fullscreen = !fullscreen
+			d2render.SetFullScreen(fullscreen)
+			d2term.OutputInfo("fullscreen is now: %v", fullscreen)
+		} else {
+			d2term.OutputError(err.Error())
+		}
+	})
+	d2term.BindAction("vsync", "toggles vsync", func() {
+		vsync, err := d2render.GetVSyncEnabled()
+		if err == nil {
+			vsync = !vsync
+			d2render.SetVSyncEnabled(vsync)
+			d2term.OutputInfo("vsync is now: %v", vsync)
+		} else {
+			d2term.OutputError(err.Error())
+		}
+	})
+	d2term.BindAction("fps", "toggle fps counter", func() {
+		singleton.showFPS = !singleton.showFPS
+		d2term.OutputInfo("fps counter is now: %v", singleton.showFPS)
+	})
+	d2term.BindAction("timescale", "set scalar for elapsed time", func(timeScale float64) {
+		if timeScale <= 0 {
+			d2term.OutputError("invalid time scale value")
+		} else {
+			d2term.OutputInfo("timescale changed from %f to %f", singleton.timeScale, timeScale)
+			singleton.timeScale = timeScale
+		}
+	})
+	d2term.BindAction("quit", "exits the game", func() {
+		os.Exit(0)
+	})
+
+	audioProvider, err := ebiten2.CreateAudio()
+	if err != nil {
+		return err
+	}
+
+	if err := d2audio.Initialize(audioProvider); err != nil {
+		return err
+	}
+
+	if err := d2audio.SetVolumes(config.BgmVolume, config.SfxVolume); err != nil {
+		return err
+	}
+
+	if err := loadDataDict(); err != nil {
+		return err
+	}
+
+	if err := loadPalettes(); err != nil {
+		return err
+	}
+
+	if err := loadStrings(); err != nil {
+		return err
+	}
+
+	d2ui.Initialize()
+
+	return nil
+}
+
+func update(target d2render.Surface) error {
+	currentTime := d2common.Now()
+	elapsedTime := (currentTime - singleton.lastTime) * singleton.timeScale
+	singleton.lastTime = currentTime
+
+	if err := advance(elapsedTime); err != nil {
+		return err
+	}
+
+	if err := render(target); err != nil {
+		return err
+	}
+
+	if target.GetDepth() > 0 {
+		return errors.New("detected surface stack leak")
+	}
+
+	return nil
+}
+
+func advance(elapsed float64) error {
+	if err := d2scene.Advance(elapsed); err != nil {
+		return err
+	}
+
+	d2ui.Advance(elapsed)
+
+	if err := d2input.Advance(elapsed); err != nil {
+		return err
+	}
+
+	if err := d2gui.Advance(elapsed); err != nil {
+		return err
+	}
+
+	if err := d2term.Advance(elapsed); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func render(target d2render.Surface) error {
+	if err := d2scene.Render(target); err != nil {
+		return err
+	}
+
+	d2ui.Render(target)
+
+	if err := d2gui.Render(target); err != nil {
+		return err
+	}
+
+	if err := d2term.Render(target); err != nil {
+		return err
+	}
+
+	if err := renderDebug(target); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func renderDebug(target d2render.Surface) error {
+	if singleton.showFPS {
+		vsyncEnabled, err := d2render.GetVSyncEnabled()
 		if err != nil {
 			return err
 		}
 
-		d2common.LoadDictionary(data)
+		fps, err := d2render.CurrentFPS()
+		if err != nil {
+			return err
+		}
+
+		target.PushTranslation(5, 565)
+		target.DrawText("vsync:" + strconv.FormatBool(vsyncEnabled) + "\nFPS:" + strconv.Itoa(int(fps)))
+		target.Pop()
+
+		cx, cy, err := d2render.GetCursorPos()
+		if err != nil {
+			return err
+		}
+
+		var m runtime.MemStats
+		runtime.ReadMemStats(&m)
+		target.PushTranslation(680, 0)
+		target.DrawText("Alloc   " + strconv.FormatInt(int64(m.Alloc)/1024/1024, 10))
+		target.PushTranslation(0, 16)
+		target.DrawText("Pause   " + strconv.FormatInt(int64(m.PauseTotalNs/1024/1024), 10))
+		target.PushTranslation(0, 16)
+		target.DrawText("HeapSys " + strconv.FormatInt(int64(m.HeapSys/1024/1024), 10))
+		target.PushTranslation(0, 16)
+		target.DrawText("NumGC   " + strconv.FormatInt(int64(m.NumGC), 10))
+		target.PushTranslation(0, 16)
+		target.DrawText("Coords  " + strconv.FormatInt(int64(cx), 10) + "," + strconv.FormatInt(int64(cy), 10))
+		target.PopN(5)
 	}
 
-	log.Printf("Loaded %d entries from the string table", d2common.GetDictionaryEntryCount())
 	return nil
 }
 
@@ -149,110 +352,21 @@ func loadDataDict() error {
 	return nil
 }
 
-func loadLoadingSprite() (*d2ui.Sprite, error) {
-	animation, err := d2asset.LoadAnimation(d2resource.LoadingScreen, d2resource.PaletteLoading)
-	if err != nil {
-		return nil, err
+func loadStrings() error {
+	tablePaths := []string{
+		d2resource.PatchStringTable,
+		d2resource.ExpansionStringTable,
+		d2resource.StringTable,
 	}
 
-	loadingSprite, err := d2ui.LoadSprite(animation)
-	if err != nil {
-		return nil, err
+	for _, tablePath := range tablePaths {
+		data, err := d2asset.LoadFile(tablePath)
+		if err != nil {
+			return err
+		}
+
+		d2common.LoadDictionary(data)
 	}
-
-	loadingSpriteSizeX, loadingSpriteSizeY := loadingSprite.GetCurrentFrameSize()
-	loadingSprite.SetPosition(400-(loadingSpriteSizeX/2), 300+(loadingSpriteSizeY/2))
-	return loadingSprite, nil
-}
-
-func loadCursorSprite() (*d2ui.Sprite, error) {
-	animation, err := d2asset.LoadAnimation(d2resource.CursorDefault, d2resource.PaletteUnits)
-	if err != nil {
-		return nil, err
-	}
-
-	cursorSprite, err := d2ui.LoadSprite(animation)
-	if err != nil {
-		return nil, err
-	}
-
-	return cursorSprite, nil
-}
-
-func initializeEverything() error {
-	if err := d2config.Initialize(); err != nil {
-		return err
-	}
-
-	config, err := d2config.Get()
-	if err != nil {
-		return err
-	}
-	d2resource.LanguageCode = config.Language
-
-	renderer, err := ebiten.CreateRenderer()
-	if err != nil {
-		return err
-	}
-
-	if err := d2render.Initialize(renderer); err != nil {
-		return err
-	}
-
-	if err := d2render.SetWindowIcon("d2logo.png"); err != nil {
-		return err
-	}
-
-	if err := d2input.Initialize(); err != nil {
-		return err
-	}
-
-	if err := d2term.Initialize(); err != nil {
-		return err
-	}
-	d2term.BindLogger()
-
-	d2mpq.InitializeCryptoBuffer()
-	if err := d2asset.Initialize(); err != nil {
-		return err
-	}
-
-	audioProvider, err := ebiten2.CreateAudio()
-	if err != nil {
-		return err
-	}
-
-	if err := d2audio.Initialize(audioProvider); err != nil {
-		return err
-	}
-
-	if err := d2audio.SetVolumes(config.BgmVolume, config.SfxVolume); err != nil {
-		return err
-	}
-
-	if err := loadDataDict(); err != nil {
-		return err
-	}
-
-	if err := loadPalettes(); err != nil {
-		return err
-	}
-
-	if err := loadStrings(); err != nil {
-		return err
-	}
-
-	cursorSprite, err := loadCursorSprite()
-	if err != nil {
-		return err
-	}
-	d2ui.Initialize(cursorSprite)
-
-	loadingSprite, err := loadLoadingSprite()
-	if err != nil {
-		return err
-	}
-	d2game.Initialize(loadingSprite)
 
 	return nil
 }

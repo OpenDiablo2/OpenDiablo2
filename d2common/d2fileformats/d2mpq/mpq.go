@@ -202,7 +202,7 @@ func decrypt(data []uint32, seed uint32) {
 	seed2 := uint32(0xeeeeeeee)
 
 	for i := 0; i < len(data); i++ {
-		seed2 += CryptoBuffer[0x400+(seed&0xff)]
+		seed2 += cryptoLookup(0x400 + (seed & 0xff))
 		result := data[i]
 		result ^= seed + seed2
 
@@ -215,7 +215,7 @@ func decrypt(data []uint32, seed uint32) {
 func decryptBytes(data []byte, seed uint32) {
 	seed2 := uint32(0xEEEEEEEE)
 	for i := 0; i < len(data)-3; i += 4 {
-		seed2 += CryptoBuffer[0x400+(seed&0xFF)]
+		seed2 += cryptoLookup(0x400 + (seed & 0xFF))
 		result := binary.LittleEndian.Uint32(data[i : i+4])
 		result ^= seed + seed2
 		seed = ((^seed << 21) + 0x11111111) | (seed >> 11)
@@ -235,7 +235,7 @@ func hashString(key string, hashType uint32) uint32 {
 
 	/* prepare seeds. */
 	for _, char := range strings.ToUpper(key) {
-		seed1 = CryptoBuffer[(hashType*0x100)+uint32(char)] ^ (seed1 + seed2)
+		seed1 = cryptoLookup((hashType*0x100)+uint32(char)) ^ (seed1 + seed2)
 		seed2 = uint32(char) + seed1 + seed2 + (seed2 << 5) + 3
 	}
 	return seed1
