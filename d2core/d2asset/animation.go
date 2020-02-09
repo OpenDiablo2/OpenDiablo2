@@ -83,7 +83,7 @@ func createAnimationFromDCC(dcc *d2dcc.DCC, palette *d2datadict.PaletteRec, tran
 				}
 			}
 
-			err, image := d2render.NewSurface(frameWidth, frameHeight, d2render.FilterNearest)
+			image, err := d2render.NewSurface(frameWidth, frameHeight, d2render.FilterNearest)
 			if err != nil {
 				return nil, err
 			}
@@ -118,7 +118,7 @@ func createAnimationFromDC6(dc6 *d2dc6.DC6File) (*Animation, error) {
 	}
 
 	for frameIndex, dc6Frame := range dc6.Frames {
-		err, image := d2render.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height), d2render.FilterNearest)
+		image, err := d2render.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height), d2render.FilterNearest)
 		if err != nil {
 			return nil, err
 		}

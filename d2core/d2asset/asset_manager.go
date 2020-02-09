@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	ErrHasInit = errors.New("asset system is already initialized")
-	ErrNoInit  = errors.New("asset system is not initialized")
+	ErrWasInit = errors.New("asset system is already initialized")
+	ErrNotInit = errors.New("asset system is not initialized")
 )
 
 type assetManager struct {
@@ -22,10 +22,7 @@ type assetManager struct {
 }
 
 func loadPalette(palettePath string) (*d2datadict.PaletteRec, error) {
-	if singleton == nil {
-		return nil, ErrNoInit
-	}
-
+	verifyWasInit()
 	return singleton.paletteManager.loadPalette(palettePath)
 }
 

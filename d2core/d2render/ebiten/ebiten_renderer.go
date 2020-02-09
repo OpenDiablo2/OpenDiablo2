@@ -2,7 +2,6 @@ package ebiten
 
 import (
 	"image"
-	"log"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
@@ -11,17 +10,12 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
-type Renderer struct {
-}
+type Renderer struct{}
 
 func CreateRenderer() (*Renderer, error) {
 	result := &Renderer{}
 
-	config, err := d2config.Get()
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
+	config := d2config.Get()
 
 	ebiten.SetCursorVisible(false)
 	ebiten.SetFullscreen(config.FullScreen)
@@ -41,7 +35,6 @@ func (*Renderer) SetWindowIcon(fileName string) {
 	if err == nil {
 		ebiten.SetWindowIcon([]image.Image{iconImage})
 	}
-
 }
 
 func (r *Renderer) IsDrawingSkipped() bool {
@@ -49,11 +42,7 @@ func (r *Renderer) IsDrawingSkipped() bool {
 }
 
 func (r *Renderer) Run(f func(surface d2render.Surface) error, width, height int, title string) error {
-	config, err := d2config.Get()
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
+	config := d2config.Get()
 
 	return ebiten.Run(func(img *ebiten.Image) error {
 		err := f(&ebitenSurface{image: img})
@@ -64,7 +53,7 @@ func (r *Renderer) Run(f func(surface d2render.Surface) error, width, height int
 	}, width, height, config.Scale, title)
 }
 
-func (r *Renderer) CreateSurface(surface d2render.Surface) (error, d2render.Surface) {
+func (r *Renderer) CreateSurface(surface d2render.Surface) (d2render.Surface, error) {
 	result := &ebitenSurface{
 		image: surface.(*ebitenSurface).image,
 		stateCurrent: surfaceState{
@@ -72,42 +61,37 @@ func (r *Renderer) CreateSurface(surface d2render.Surface) (error, d2render.Surf
 			mode:   ebiten.CompositeModeSourceOver,
 		},
 	}
-	return nil, result
+	return result, nil
 }
 
-func (r *Renderer) NewSurface(width, height int, filter d2render.Filter) (error, d2render.Surface) {
+func (r *Renderer) NewSurface(width, height int, filter d2render.Filter) (d2render.Surface, error) {
 	ebitenFilter := d2ToEbitenFilter(filter)
 	img, err := ebiten.NewImage(width, height, ebitenFilter)
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
-	result := &ebitenSurface{
-		image: img,
-	}
-	return nil, result
+	result := &ebitenSurface{image: img}
+	return result, nil
 }
 
-func (r *Renderer) IsFullScreen() (bool, error) {
-	return ebiten.IsFullscreen(), nil
+func (r *Renderer) IsFullScreen() bool {
+	return ebiten.IsFullscreen()
 }
 
-func (r *Renderer) SetFullScreen(fullScreen bool) error {
+func (r *Renderer) SetFullScreen(fullScreen bool) {
 	ebiten.SetFullscreen(fullScreen)
-	return nil
 }
 
-func (r *Renderer) SetVSyncEnabled(vsync bool) error {
+func (r *Renderer) SetVSyncEnabled(vsync bool) {
 	ebiten.SetVsyncEnabled(vsync)
-	return nil
 }
 
-func (r *Renderer) GetVSyncEnabled() (bool, error) {
-	return ebiten.IsVsyncEnabled(), nil
+func (r *Renderer) GetVSyncEnabled() bool {
+	return ebiten.IsVsyncEnabled()
 }
 
-func (r *Renderer) GetCursorPos() (int, int, error) {
-	cx, cy := ebiten.CursorPosition()
-	return cx, cy, nil
+func (r *Renderer) GetCursorPos() (int, int) {
+	return ebiten.CursorPosition()
 }
 
 func (r *Renderer) CurrentFPS() float64 {

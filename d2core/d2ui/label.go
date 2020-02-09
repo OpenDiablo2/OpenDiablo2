@@ -80,8 +80,8 @@ func (v *Label) cacheImage() {
 	width, height := v.font.GetTextMetrics(v.text)
 	v.Width = width
 	v.Height = height
-	_, v.imageData = d2render.NewSurface(width, height, d2render.FilterNearest)
-	_, surface := d2render.CreateSurface(v.imageData)
+	v.imageData, _ = d2render.NewSurface(width, height, d2render.FilterNearest)
+	surface, _ := d2render.CreateSurface(v.imageData)
 	v.font.Render(0, 0, v.text, v.Color, surface)
 }
 

@@ -358,7 +358,7 @@ func (t *terminal) execute(command string) error {
 	return nil
 }
 
-func (t *terminal) outputRaw(text string, category termCategory) error {
+func (t *terminal) outputRaw(text string, category termCategory) {
 	var line string
 	for _, word := range strings.Split(text, " ") {
 		if len(line) > 0 {
@@ -377,23 +377,22 @@ func (t *terminal) outputRaw(text string, category termCategory) error {
 	}
 
 	t.outputHistory = append(t.outputHistory, termHistroyEntry{line, category})
-	return nil
 }
 
-func (t *terminal) output(format string, params ...interface{}) error {
-	return t.outputRaw(fmt.Sprintf(format, params...), termCategoryNone)
+func (t *terminal) output(format string, params ...interface{}) {
+	t.outputRaw(fmt.Sprintf(format, params...), termCategoryNone)
 }
 
-func (t *terminal) outputInfo(format string, params ...interface{}) error {
-	return t.outputRaw(fmt.Sprintf(format, params...), termCategoryInfo)
+func (t *terminal) outputInfo(format string, params ...interface{}) {
+	t.outputRaw(fmt.Sprintf(format, params...), termCategoryInfo)
 }
 
-func (t *terminal) outputWarning(format string, params ...interface{}) error {
-	return t.outputRaw(fmt.Sprintf(format, params...), termCategoryWarning)
+func (t *terminal) outputWarning(format string, params ...interface{}) {
+	t.outputRaw(fmt.Sprintf(format, params...), termCategoryWarning)
 }
 
-func (t *terminal) outputError(format string, params ...interface{}) error {
-	return t.outputRaw(fmt.Sprintf(format, params...), termCategoryError)
+func (t *terminal) outputError(format string, params ...interface{}) {
+	t.outputRaw(fmt.Sprintf(format, params...), termCategoryError)
 }
 
 func (t *terminal) outputClear() {

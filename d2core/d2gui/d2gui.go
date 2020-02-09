@@ -14,7 +14,7 @@ var (
 var singleton *guiManager
 
 func Initialize() error {
-	assertNotInit()
+	verifyNotInit()
 
 	var err error
 	if singleton, err = createGuiManager(); err != nil {
@@ -24,52 +24,48 @@ func Initialize() error {
 	return nil
 }
 
-func Shutdown() {
-	singleton = nil
-}
-
 func Render(target d2render.Surface) error {
-	assertWasInit()
+	verifyWasInit()
 	return singleton.render(target)
 }
 
 func Advance(elapsed float64) error {
-	assertWasInit()
+	verifyWasInit()
 	return singleton.advance(elapsed)
 }
 
 func Clear() {
-	assertWasInit()
+	verifyWasInit()
 	singleton.clear()
 }
 
 func ShowLoadScreen(progress float64) {
-	assertWasInit()
+	verifyWasInit()
 	singleton.showLoadScreen(progress)
 }
 
 func HideLoadScreen() {
-	assertWasInit()
+	verifyWasInit()
 	singleton.hideLoadScreen()
 }
 
 func ShowCursor() {
-	assertWasInit()
+	verifyWasInit()
 	singleton.showCursor()
 }
 
 func HideCursor() {
-	assertWasInit()
+	verifyWasInit()
 	singleton.hideCursor()
 }
 
-func assertWasInit() {
+func verifyWasInit() {
 	if singleton == nil {
 		panic(ErrNotInit)
 	}
 }
 
-func assertNotInit() {
+func verifyNotInit() {
 	if singleton != nil {
 		panic(ErrWasInit)
 	}

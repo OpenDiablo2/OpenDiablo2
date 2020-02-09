@@ -152,7 +152,7 @@ func (met *MapEngineTest) OnUnload() error {
 func (met *MapEngineTest) Render(screen d2render.Surface) error {
 	met.mapEngine.Render(screen)
 
-	screenX, screenY, _ := d2render.GetCursorPos()
+	screenX, screenY := d2render.GetCursorPos()
 	worldX, worldY := met.mapEngine.ScreenToWorld(screenX, screenY)
 	//subtileX := int(math.Ceil(math.Mod(worldX*10, 10))) / 2
 	//subtileY := int(math.Ceil(math.Mod(worldY*10, 10))) / 2
