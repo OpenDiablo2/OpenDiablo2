@@ -80,10 +80,7 @@ func initialize() error {
 		return err
 	}
 
-	config, err := d2config.Get()
-	if err != nil {
-		return err
-	}
+	config := d2config.Get()
 	d2resource.LanguageCode = config.Language
 
 	renderer, err := ebiten.CreateRenderer()
@@ -94,22 +91,7 @@ func initialize() error {
 	if err := d2render.Initialize(renderer); err != nil {
 		return err
 	}
-
-	if err := d2render.SetWindowIcon("d2logo.png"); err != nil {
-		return err
-	}
-
-	if err := d2asset.Initialize(); err != nil {
-		return err
-	}
-
-	if err := d2input.Initialize(); err != nil {
-		return err
-	}
-
-	if err := d2gui.Initialize(); err != nil {
-		return err
-	}
+	d2render.SetWindowIcon("d2logo.png")
 
 	if err := d2term.Initialize(); err != nil {
 		return err
@@ -117,24 +99,14 @@ func initialize() error {
 
 	d2term.BindLogger()
 	d2term.BindAction("fullscreen", "toggles fullscreen", func() {
-		fullscreen, err := d2render.IsFullScreen()
-		if err == nil {
-			fullscreen = !fullscreen
-			d2render.SetFullScreen(fullscreen)
-			d2term.OutputInfo("fullscreen is now: %v", fullscreen)
-		} else {
-			d2term.OutputError(err.Error())
-		}
+		fullscreen := !d2render.IsFullScreen()
+		d2render.SetFullScreen(fullscreen)
+		d2term.OutputInfo("fullscreen is now: %v", fullscreen)
 	})
 	d2term.BindAction("vsync", "toggles vsync", func() {
-		vsync, err := d2render.GetVSyncEnabled()
-		if err == nil {
-			vsync = !vsync
-			d2render.SetVSyncEnabled(vsync)
-			d2term.OutputInfo("vsync is now: %v", vsync)
-		} else {
-			d2term.OutputError(err.Error())
-		}
+		vsync := !d2render.GetVSyncEnabled()
+		d2render.SetVSyncEnabled(vsync)
+		d2term.OutputInfo("vsync is now: %v", vsync)
 	})
 	d2term.BindAction("fps", "toggle fps counter", func() {
 		singleton.showFPS = !singleton.showFPS
@@ -152,6 +124,14 @@ func initialize() error {
 		os.Exit(0)
 	})
 
+	if err := d2asset.Initialize(); err != nil {
+		return err
+	}
+
+	if err := d2gui.Initialize(); err != nil {
+		return err
+	}
+
 	audioProvider, err := ebiten2.CreateAudio()
 	if err != nil {
 		return err
@@ -160,10 +140,7 @@ func initialize() error {
 	if err := d2audio.Initialize(audioProvider); err != nil {
 		return err
 	}
-
-	if err := d2audio.SetVolumes(config.BgmVolume, config.SfxVolume); err != nil {
-		return err
-	}
+	d2audio.SetVolumes(config.BgmVolume, config.SfxVolume)
 
 	if err := loadDataDict(); err != nil {
 		return err
@@ -248,24 +225,13 @@ func render(target d2render.Surface) error {
 
 func renderDebug(target d2render.Surface) error {
 	if singleton.showFPS {
-		vsyncEnabled, err := d2render.GetVSyncEnabled()
-		if err != nil {
-			return err
-		}
-
-		fps, err := d2render.CurrentFPS()
-		if err != nil {
-			return err
-		}
+		vsyncEnabled := d2render.GetVSyncEnabled()
+		fps := d2render.CurrentFPS()
+		cx, cy := d2render.GetCursorPos()
 
 		target.PushTranslation(5, 565)
 		target.DrawText("vsync:" + strconv.FormatBool(vsyncEnabled) + "\nFPS:" + strconv.Itoa(int(fps)))
 		target.Pop()
-
-		cx, cy, err := d2render.GetCursorPos()
-		if err != nil {
-			return err
-		}
 
 		var m runtime.MemStats
 		runtime.ReadMemStats(&m)

@@ -31,10 +31,10 @@ func CreateCheckbox(checkState bool) Checkbox {
 	result.width, result.height, _ = checkboxSprite.GetFrameSize(0)
 	checkboxSprite.SetPosition(0, 0)
 
-	_, result.Image = d2render.NewSurface(result.width, result.height, d2render.FilterNearest)
+	result.Image, _ = d2render.NewSurface(result.width, result.height, d2render.FilterNearest)
 	checkboxSprite.RenderSegmented(result.Image, 1, 1, 0)
 
-	_, result.checkedImage = d2render.NewSurface(result.width, result.height, d2render.FilterNearest)
+	result.checkedImage, _ = d2render.NewSurface(result.width, result.height, d2render.FilterNearest)
 	checkboxSprite.RenderSegmented(result.checkedImage, 1, 1, 1)
 	return result
 }

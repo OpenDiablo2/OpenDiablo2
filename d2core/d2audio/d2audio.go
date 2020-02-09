@@ -7,7 +7,7 @@ import (
 var singleton AudioProvider
 
 var (
-	ErrHasInit = errors.New("audio system is already initialized")
+	ErrWasInit = errors.New("audio system is already initialized")
 	ErrNotInit = errors.New("audio system has not been initialized")
 )
 
@@ -24,33 +24,36 @@ type AudioProvider interface {
 
 // CreateManager creates a sound provider
 func Initialize(audioProvider AudioProvider) error {
-	if singleton != nil {
-		return ErrHasInit
-	}
+	verifyNotInit()
 	singleton = audioProvider
 	return nil
 }
 
 // PlayBGM plays an infinitely looping background track
 func PlayBGM(song string) error {
-	if singleton == nil {
-		return ErrNotInit
-	}
+	verifyWasInit()
 	singleton.PlayBGM(song)
 	return nil
 }
 
 func LoadSoundEffect(sfx string) (SoundEffect, error) {
-	if singleton == nil {
-		return nil, ErrNotInit
-	}
+	verifyWasInit()
 	return singleton.LoadSoundEffect(sfx)
 }
 
-func SetVolumes(bgmVolume, sfxVolume float64) error {
-	if singleton == nil {
-		return ErrNotInit
-	}
+func SetVolumes(bgmVolume, sfxVolume float64) {
+	verifyWasInit()
 	singleton.SetVolumes(bgmVolume, sfxVolume)
-	return nil
+}
+
+func verifyWasInit() {
+	if singleton == nil {
+		panic(ErrNotInit)
+	}
+}
+
+func verifyNotInit() {
+	if singleton != nil {
+		panic(ErrWasInit)
+	}
 }

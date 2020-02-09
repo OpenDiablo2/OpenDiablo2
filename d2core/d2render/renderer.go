@@ -5,12 +5,12 @@ type Renderer interface {
 	SetWindowIcon(fileName string)
 	Run(f func(Surface) error, width, height int, title string) error
 	IsDrawingSkipped() bool
-	CreateSurface(surface Surface) (error, Surface)
-	NewSurface(width, height int, filter Filter) (error, Surface)
-	IsFullScreen() (bool, error)
-	SetFullScreen(fullScreen bool) error
-	SetVSyncEnabled(vsync bool) error
-	GetVSyncEnabled() (bool, error)
-	GetCursorPos() (int, int, error)
+	CreateSurface(surface Surface) (Surface, error)
+	NewSurface(width, height int, filter Filter) (Surface, error)
+	IsFullScreen() bool
+	SetFullScreen(fullScreen bool)
+	SetVSyncEnabled(vsync bool)
+	GetVSyncEnabled() bool
+	GetCursorPos() (int, int)
 	CurrentFPS() float64
 }

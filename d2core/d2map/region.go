@@ -154,7 +154,7 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 
 func (mr *MapRegion) generateWalkableMatrix() {
 	mr.walkableArea = make([][]PathTile, mr.tileRect.Height*5)
-	for y := 0; y < (mr.tileRect.Height - 1)*5; y++ {
+	for y := 0; y < (mr.tileRect.Height-1)*5; y++ {
 		mr.walkableArea[y] = make([]PathTile, mr.tileRect.Width*5)
 		ty := int(float64(y) / 5.0)
 		for x := 0; x < (mr.tileRect.Width-1)*5; x++ {
@@ -648,7 +648,7 @@ func (mr *MapRegion) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, ti
 		}
 		tileYOffset := d2common.AbsInt32(tileYMinimum)
 		tileHeight := d2common.AbsInt32(tileData[i].Height)
-		_, image := d2render.NewSurface(int(tileData[i].Width), int(tileHeight), d2render.FilterNearest)
+		image, _ := d2render.NewSurface(int(tileData[i].Width), int(tileHeight), d2render.FilterNearest)
 		pixels := make([]byte, 4*tileData[i].Width*tileHeight)
 		mr.decodeTileGfxData(tileData[i].Blocks, &pixels, tileYOffset, tileData[i].Width)
 		image.ReplacePixels(pixels)
@@ -683,7 +683,7 @@ func (mr *MapRegion) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, t
 		return
 	}
 
-	_, image := d2render.NewSurface(int(tileData.Width), tileHeight, d2render.FilterNearest)
+	image, _ := d2render.NewSurface(int(tileData.Width), tileHeight, d2render.FilterNearest)
 	pixels := make([]byte, 4*tileData.Width*int32(tileHeight))
 	mr.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, tileData.Width)
 	image.ReplacePixels(pixels)
@@ -744,7 +744,7 @@ func (mr *MapRegion) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int)
 		return
 	}
 
-	_, image := d2render.NewSurface(160, int(realHeight), d2render.FilterNearest)
+	image, _ := d2render.NewSurface(160, int(realHeight), d2render.FilterNearest)
 	pixels := make([]byte, 4*160*realHeight)
 	mr.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, 160)
 

@@ -13,16 +13,10 @@ import (
 var singleton *assetManager
 
 func Initialize() error {
-	if singleton != nil {
-		return ErrHasInit
-	}
-
-	config, err := d2config.Get()
-	if err != nil {
-		return err
-	}
+	verifyNotInit()
 
 	var (
+		config           = d2config.Get()
 		archiveManager   = createArchiveManager(config)
 		fileManager      = createFileManager(config, archiveManager)
 		paletteManager   = createPaletteManager()
@@ -71,17 +65,12 @@ func Shutdown() {
 }
 
 func LoadArchive(archivePath string) (*d2mpq.MPQ, error) {
-	if singleton == nil {
-		return nil, ErrNoInit
-	}
-
+	verifyWasInit()
 	return singleton.archiveManager.loadArchive(archivePath)
 }
 
 func LoadFile(filePath string) ([]byte, error) {
-	if singleton == nil {
-		return nil, ErrNoInit
-	}
+	verifyWasInit()
 
 	data, err := singleton.fileManager.loadFile(filePath)
 	if err != nil {
@@ -92,10 +81,7 @@ func LoadFile(filePath string) ([]byte, error) {
 }
 
 func FileExists(filePath string) (bool, error) {
-	if singleton == nil {
-		return false, ErrNoInit
-	}
-
+	verifyWasInit()
 	return singleton.fileManager.fileExists(filePath)
 }
 
@@ -104,13 +90,22 @@ func LoadAnimation(animationPath, palettePath string) (*Animation, error) {
 }
 
 func LoadAnimationWithTransparency(animationPath, palettePath string, transparency int) (*Animation, error) {
-	if singleton == nil {
-		return nil, ErrNoInit
-	}
-
+	verifyWasInit()
 	return singleton.animationManager.loadAnimation(animationPath, palettePath, transparency)
 }
 
 func LoadComposite(object *d2datadict.ObjectLookupRecord, palettePath string) (*Composite, error) {
 	return CreateComposite(object, palettePath), nil
+}
+
+func verifyWasInit() {
+	if singleton == nil {
+		panic(ErrNotInit)
+	}
+}
+
+func verifyNotInit() {
+	if singleton != nil {
+		panic(ErrWasInit)
+	}
 }

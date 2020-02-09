@@ -11,7 +11,7 @@ import (
 
 var (
 	ErrNotInit = errors.New("configuration is not initialized")
-	ErrHasInit = errors.New("configuration has already been initialized")
+	ErrWasInit = errors.New("configuration has already been initialized")
 )
 
 // Configuration defines the configuration for the engine, loaded from config.json
@@ -32,9 +32,8 @@ type Configuration struct {
 var singleton *Configuration
 
 func Initialize() error {
-	if singleton != nil {
-		return ErrHasInit
-	}
+	verifyNotInit()
+
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		singleton = getDefaultConfiguration()
@@ -72,9 +71,8 @@ func Initialize() error {
 }
 
 func Save() error {
-	if singleton == nil {
-		return ErrNotInit
-	}
+	verifyWasInit()
+
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return err
@@ -101,9 +99,19 @@ func Save() error {
 	return nil
 }
 
-func Get() (*Configuration, error) {
+func Get() *Configuration {
+	verifyWasInit()
+	return singleton
+}
+
+func verifyWasInit() {
 	if singleton == nil {
-		return nil, ErrNotInit
+		panic(ErrNotInit)
 	}
-	return singleton, nil
+}
+
+func verifyNotInit() {
+	if singleton != nil {
+		panic(ErrWasInit)
+	}
 }

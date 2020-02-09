@@ -9,16 +9,14 @@ import (
 )
 
 var (
-	ErrHasInit = errors.New("terminal system is already initialized")
+	ErrWasInit = errors.New("terminal system is already initialized")
 	ErrNotInit = errors.New("terminal system is not initialized")
 )
 
 var singleton *terminal
 
 func Initialize() error {
-	if singleton != nil {
-		return ErrHasInit
-	}
+	verifyNotInit()
 
 	terminal, err := createTerminal()
 	if err != nil {
@@ -26,7 +24,6 @@ func Initialize() error {
 	}
 
 	if err := d2input.BindHandlerWithPriority(terminal, d2input.PriorityHigh); err != nil {
-		log.Println(err)
 		return err
 	}
 
@@ -34,81 +31,58 @@ func Initialize() error {
 	return nil
 }
 
-func Shutdown() {
-	if singleton != nil {
-		d2input.UnbindHandler(singleton)
-		singleton = nil
-	}
-}
-
 func Advance(elapsed float64) error {
-	if singleton == nil {
-		return ErrNotInit
-	}
-
-	if singleton != nil {
-		return singleton.advance(elapsed)
-	}
-
-	return ErrNotInit
+	verifyWasInit()
+	return singleton.advance(elapsed)
 }
 
-func Output(format string, params ...interface{}) error {
-	if singleton == nil {
-		return ErrNotInit
-	}
-
-	return singleton.output(format, params...)
+func Output(format string, params ...interface{}) {
+	verifyWasInit()
+	singleton.output(format, params...)
 }
 
-func OutputInfo(format string, params ...interface{}) error {
-	if singleton == nil {
-		return ErrNotInit
-	}
-
-	return singleton.outputInfo(format, params...)
+func OutputInfo(format string, params ...interface{}) {
+	verifyWasInit()
+	singleton.outputInfo(format, params...)
 }
 
-func OutputWarning(format string, params ...interface{}) error {
-	if singleton == nil {
-		return ErrNotInit
-	}
-
-	return singleton.outputWarning(format, params...)
+func OutputWarning(format string, params ...interface{}) {
+	verifyWasInit()
+	singleton.outputWarning(format, params...)
 }
 
-func OutputError(format string, params ...interface{}) error {
-	if singleton == nil {
-		return ErrNotInit
-	}
-
-	return singleton.outputError(format, params...)
+func OutputError(format string, params ...interface{}) {
+	verifyWasInit()
+	singleton.outputError(format, params...)
 }
 
 func BindAction(name, description string, action interface{}) error {
-	if singleton == nil {
-		return ErrNotInit
-	}
-
+	verifyWasInit()
 	return singleton.bindAction(name, description, action)
 }
 
 func UnbindAction(name string) error {
-	if singleton == nil {
-		return ErrNotInit
-	}
-
+	verifyWasInit()
 	return singleton.unbindAction(name)
 }
 
 func Render(surface d2render.Surface) error {
-	if singleton == nil {
-		return ErrNotInit
-	}
-
+	verifyWasInit()
 	return singleton.render(surface)
 }
 
 func BindLogger() {
 	log.SetOutput(&terminalLogger{writer: log.Writer()})
+}
+
+func verifyWasInit() {
+	if singleton == nil {
+		panic(ErrNotInit)
+	}
+}
+
+func verifyNotInit() {
+	if singleton != nil {
+		panic(ErrWasInit)
+	}
 }
