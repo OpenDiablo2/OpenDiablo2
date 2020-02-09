@@ -154,10 +154,10 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 
 func (mr *MapRegion) generateWalkableMatrix() {
 	mr.walkableArea = make([][]PathTile, mr.tileRect.Height*5)
-	for y := 0; y < mr.tileRect.Height*5; y++ {
+	for y := 0; y < (mr.tileRect.Height - 1)*5; y++ {
 		mr.walkableArea[y] = make([]PathTile, mr.tileRect.Width*5)
 		ty := int(float64(y) / 5.0)
-		for x := 0; x < mr.tileRect.Width*5; x++ {
+		for x := 0; x < (mr.tileRect.Width-1)*5; x++ {
 			tx := int(float64(x) / 5.0)
 			tile := mr.GetTile(tx, ty)
 			isBlocked := false
