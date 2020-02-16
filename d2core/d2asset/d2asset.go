@@ -21,6 +21,7 @@ func Initialize() error {
 		fileManager      = createFileManager(config, archiveManager)
 		paletteManager   = createPaletteManager()
 		animationManager = createAnimationManager()
+		fontManager      = createFontManager()
 	)
 
 	singleton = &assetManager{
@@ -28,6 +29,7 @@ func Initialize() error {
 		fileManager,
 		paletteManager,
 		animationManager,
+		fontManager,
 	}
 
 	d2term.BindAction("assetspam", "display verbose asset manager logs", func(verbose bool) {
@@ -44,10 +46,11 @@ func Initialize() error {
 	})
 
 	d2term.BindAction("assetstat", "display asset manager cache statistics", func() {
-		d2term.OutputInfo("archive cache: %f%%", float64(archiveManager.cache.GetWeight())/float64(archiveManager.cache.GetBudget())*100.0)
-		d2term.OutputInfo("file cache: %f%%", float64(fileManager.cache.GetWeight())/float64(fileManager.cache.GetBudget())*100.0)
-		d2term.OutputInfo("palette cache: %f%%", float64(paletteManager.cache.GetWeight())/float64(paletteManager.cache.GetBudget())*100.0)
-		d2term.OutputInfo("animation cache: %f%%", float64(animationManager.cache.GetWeight())/float64(animationManager.cache.GetBudget())*100.0)
+		d2term.OutputInfo("archive cache: %f", float64(archiveManager.cache.GetWeight())/float64(archiveManager.cache.GetBudget())*100.0)
+		d2term.OutputInfo("file cache: %f", float64(fileManager.cache.GetWeight())/float64(fileManager.cache.GetBudget())*100.0)
+		d2term.OutputInfo("palette cache: %f", float64(paletteManager.cache.GetWeight())/float64(paletteManager.cache.GetBudget())*100.0)
+		d2term.OutputInfo("animation cache: %f", float64(animationManager.cache.GetWeight())/float64(animationManager.cache.GetBudget())*100.0)
+		d2term.OutputInfo("font cache: %f", float64(fontManager.cache.GetWeight())/float64(fontManager.cache.GetBudget())*100.0)
 	})
 
 	d2term.BindAction("assetclear", "clear asset manager cache", func() {
@@ -55,6 +58,7 @@ func Initialize() error {
 		fileManager.cache.Clear()
 		paletteManager.cache.Clear()
 		animationManager.cache.Clear()
+		fontManager.cache.Clear()
 	})
 
 	return nil
@@ -86,6 +90,7 @@ func FileExists(filePath string) (bool, error) {
 }
 
 func LoadAnimation(animationPath, palettePath string) (*Animation, error) {
+	verifyWasInit()
 	return LoadAnimationWithTransparency(animationPath, palettePath, 255)
 }
 
@@ -95,7 +100,13 @@ func LoadAnimationWithTransparency(animationPath, palettePath string, transparen
 }
 
 func LoadComposite(object *d2datadict.ObjectLookupRecord, palettePath string) (*Composite, error) {
+	verifyWasInit()
 	return CreateComposite(object, palettePath), nil
+}
+
+func LoadFont(tablePath, spritePath, palettePath string) (*Font, error) {
+	verifyWasInit()
+	return singleton.fontManager.loadFont(tablePath, spritePath, palettePath)
 }
 
 func verifyWasInit() {

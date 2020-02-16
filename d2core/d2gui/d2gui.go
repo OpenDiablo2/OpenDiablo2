@@ -11,7 +11,7 @@ var (
 	ErrNotInit = errors.New("gui system is not initialized")
 )
 
-var singleton *guiManager
+var singleton *manager
 
 func Initialize() error {
 	verifyNotInit()
@@ -32,6 +32,18 @@ func Render(target d2render.Surface) error {
 func Advance(elapsed float64) error {
 	verifyWasInit()
 	return singleton.advance(elapsed)
+}
+
+func AddLayout() *Layout {
+	return singleton.addLayout()
+}
+
+func AddSprite(imagePath, palettePath string) *Sprite {
+	return singleton.addSprite(imagePath, palettePath)
+}
+
+func AddLabel(text string, fontStyle FontStyle) *Label {
+	return singleton.addLabel(text, fontStyle)
 }
 
 func Clear() {

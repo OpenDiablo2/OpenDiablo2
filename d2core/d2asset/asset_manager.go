@@ -19,6 +19,7 @@ type assetManager struct {
 	fileManager      *fileManager
 	paletteManager   *paletteManager
 	animationManager *animationManager
+	fontManager      *fontManager
 }
 
 func loadPalette(palettePath string) (*d2datadict.PaletteRec, error) {
