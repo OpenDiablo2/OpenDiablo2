@@ -88,6 +88,10 @@ func initialize() error {
 		return err
 	}
 
+	if err := d2input.Initialize(d2input.Ebiten); err != nil {
+		return err
+	}
+
 	if err := d2render.Initialize(renderer); err != nil {
 		return err
 	}

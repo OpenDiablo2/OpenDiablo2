@@ -2,13 +2,17 @@ package d2input
 
 import (
 	"errors"
-
-	"github.com/hajimehoshi/ebiten"
 )
 
 var (
 	ErrHasReg = errors.New("input system already has provided handler")
 	ErrNotReg = errors.New("input system does not have provided handler")
+)
+
+type InputBackend int
+
+const (
+	Ebiten InputBackend = iota
 )
 
 type Priority int
@@ -21,114 +25,113 @@ const (
 
 type Key int
 
-//noinspection GoUnusedConst
 const (
-	Key0            = Key(ebiten.Key0)
-	Key1            = Key(ebiten.Key1)
-	Key2            = Key(ebiten.Key2)
-	Key3            = Key(ebiten.Key3)
-	Key4            = Key(ebiten.Key4)
-	Key5            = Key(ebiten.Key5)
-	Key6            = Key(ebiten.Key6)
-	Key7            = Key(ebiten.Key7)
-	Key8            = Key(ebiten.Key8)
-	Key9            = Key(ebiten.Key9)
-	KeyA            = Key(ebiten.KeyA)
-	KeyB            = Key(ebiten.KeyB)
-	KeyC            = Key(ebiten.KeyC)
-	KeyD            = Key(ebiten.KeyD)
-	KeyE            = Key(ebiten.KeyE)
-	KeyF            = Key(ebiten.KeyF)
-	KeyG            = Key(ebiten.KeyG)
-	KeyH            = Key(ebiten.KeyH)
-	KeyI            = Key(ebiten.KeyI)
-	KeyJ            = Key(ebiten.KeyJ)
-	KeyK            = Key(ebiten.KeyK)
-	KeyL            = Key(ebiten.KeyL)
-	KeyM            = Key(ebiten.KeyM)
-	KeyN            = Key(ebiten.KeyN)
-	KeyO            = Key(ebiten.KeyO)
-	KeyP            = Key(ebiten.KeyP)
-	KeyQ            = Key(ebiten.KeyQ)
-	KeyR            = Key(ebiten.KeyR)
-	KeyS            = Key(ebiten.KeyS)
-	KeyT            = Key(ebiten.KeyT)
-	KeyU            = Key(ebiten.KeyU)
-	KeyV            = Key(ebiten.KeyV)
-	KeyW            = Key(ebiten.KeyW)
-	KeyX            = Key(ebiten.KeyX)
-	KeyY            = Key(ebiten.KeyY)
-	KeyZ            = Key(ebiten.KeyZ)
-	KeyApostrophe   = Key(ebiten.KeyApostrophe)
-	KeyBackslash    = Key(ebiten.KeyBackslash)
-	KeyBackspace    = Key(ebiten.KeyBackspace)
-	KeyCapsLock     = Key(ebiten.KeyCapsLock)
-	KeyComma        = Key(ebiten.KeyComma)
-	KeyDelete       = Key(ebiten.KeyDelete)
-	KeyDown         = Key(ebiten.KeyDown)
-	KeyEnd          = Key(ebiten.KeyEnd)
-	KeyEnter        = Key(ebiten.KeyEnter)
-	KeyEqual        = Key(ebiten.KeyEqual)
-	KeyEscape       = Key(ebiten.KeyEscape)
-	KeyF1           = Key(ebiten.KeyF1)
-	KeyF2           = Key(ebiten.KeyF2)
-	KeyF3           = Key(ebiten.KeyF3)
-	KeyF4           = Key(ebiten.KeyF4)
-	KeyF5           = Key(ebiten.KeyF5)
-	KeyF6           = Key(ebiten.KeyF6)
-	KeyF7           = Key(ebiten.KeyF7)
-	KeyF8           = Key(ebiten.KeyF8)
-	KeyF9           = Key(ebiten.KeyF9)
-	KeyF10          = Key(ebiten.KeyF10)
-	KeyF11          = Key(ebiten.KeyF11)
-	KeyF12          = Key(ebiten.KeyF12)
-	KeyGraveAccent  = Key(ebiten.KeyGraveAccent)
-	KeyHome         = Key(ebiten.KeyHome)
-	KeyInsert       = Key(ebiten.KeyInsert)
-	KeyKP0          = Key(ebiten.KeyKP0)
-	KeyKP1          = Key(ebiten.KeyKP1)
-	KeyKP2          = Key(ebiten.KeyKP2)
-	KeyKP3          = Key(ebiten.KeyKP3)
-	KeyKP4          = Key(ebiten.KeyKP4)
-	KeyKP5          = Key(ebiten.KeyKP5)
-	KeyKP6          = Key(ebiten.KeyKP6)
-	KeyKP7          = Key(ebiten.KeyKP7)
-	KeyKP8          = Key(ebiten.KeyKP8)
-	KeyKP9          = Key(ebiten.KeyKP9)
-	KeyKPAdd        = Key(ebiten.KeyKPAdd)
-	KeyKPDecimal    = Key(ebiten.KeyKPDecimal)
-	KeyKPDivide     = Key(ebiten.KeyKPDivide)
-	KeyKPEnter      = Key(ebiten.KeyKPEnter)
-	KeyKPEqual      = Key(ebiten.KeyKPEqual)
-	KeyKPMultiply   = Key(ebiten.KeyKPMultiply)
-	KeyKPSubtract   = Key(ebiten.KeyKPSubtract)
-	KeyLeft         = Key(ebiten.KeyLeft)
-	KeyLeftBracket  = Key(ebiten.KeyLeftBracket)
-	KeyMenu         = Key(ebiten.KeyMenu)
-	KeyMinus        = Key(ebiten.KeyMinus)
-	KeyNumLock      = Key(ebiten.KeyNumLock)
-	KeyPageDown     = Key(ebiten.KeyPageDown)
-	KeyPageUp       = Key(ebiten.KeyPageUp)
-	KeyPause        = Key(ebiten.KeyPause)
-	KeyPeriod       = Key(ebiten.KeyPeriod)
-	KeyPrintScreen  = Key(ebiten.KeyPrintScreen)
-	KeyRight        = Key(ebiten.KeyRight)
-	KeyRightBracket = Key(ebiten.KeyRightBracket)
-	KeyScrollLock   = Key(ebiten.KeyScrollLock)
-	KeySemicolon    = Key(ebiten.KeySemicolon)
-	KeySlash        = Key(ebiten.KeySlash)
-	KeySpace        = Key(ebiten.KeySpace)
-	KeyTab          = Key(ebiten.KeyTab)
-	KeyUp           = Key(ebiten.KeyUp)
-	KeyAlt          = Key(ebiten.KeyAlt)
-	KeyControl      = Key(ebiten.KeyControl)
-	KeyShift        = Key(ebiten.KeyShift)
+	Key0			Key = iota
+	Key1
+	Key2
+	Key3
+	Key4
+	Key5
+	Key6
+	Key7
+	Key8
+	Key9
+	KeyA
+	KeyB
+	KeyC
+	KeyD
+	KeyE
+	KeyF
+	KeyG
+	KeyH
+	KeyI
+	KeyJ
+	KeyK
+	KeyL
+	KeyM
+	KeyN
+	KeyO
+	KeyP
+	KeyQ
+	KeyR
+	KeyS
+	KeyT
+	KeyU
+	KeyV
+	KeyW
+	KeyX
+	KeyY
+	KeyZ
+	KeyApostrophe
+	KeyBackslash
+	KeyBackspace
+	KeyCapsLock
+	KeyComma
+	KeyDelete
+	KeyDown
+	KeyEnd
+	KeyEnter
+	KeyEqual
+	KeyEscape
+	KeyF1
+	KeyF2
+	KeyF3
+	KeyF4
+	KeyF5
+	KeyF6
+	KeyF7
+	KeyF8
+	KeyF9
+	KeyF10
+	KeyF11
+	KeyF12
+	KeyGraveAccent
+	KeyHome
+	KeyInsert
+	KeyKP0
+	KeyKP1
+	KeyKP2
+	KeyKP3
+	KeyKP4
+	KeyKP5
+	KeyKP6
+	KeyKP7
+	KeyKP8
+	KeyKP9
+	KeyKPAdd
+	KeyKPDecimal
+	KeyKPDivide
+	KeyKPEnter
+	KeyKPEqual
+	KeyKPMultiply
+	KeyKPSubtract
+	KeyLeft
+	KeyLeftBracket
+	KeyMenu
+	KeyMinus
+	KeyNumLock
+	KeyPageDown
+	KeyPageUp
+	KeyPause
+	KeyPeriod
+	KeyPrintScreen
+	KeyRight
+	KeyRightBracket
+	KeyScrollLock
+	KeySemicolon
+	KeySlash
+	KeySpace
+	KeyTab
+	KeyUp
+	KeyAlt
+	KeyControl
+	KeyShift
 )
 
 type KeyMod int
 
 const (
-	KeyModAlt = 1 << iota
+	KeyModAlt KeyMod = 1 << iota
 	KeyModControl
 	KeyModShift
 )
@@ -136,9 +139,9 @@ const (
 type MouseButton int
 
 const (
-	MouseButtonLeft   = MouseButton(ebiten.MouseButtonLeft)
-	MouseButtonMiddle = MouseButton(ebiten.MouseButtonMiddle)
-	MouseButtonRight  = MouseButton(ebiten.MouseButtonRight)
+	MouseButtonLeft MouseButton = iota
+	MouseButtonMiddle
+	MouseButtonRight
 )
 
 type MouseButtonMod int
@@ -206,6 +209,18 @@ type MouseMoveHandler interface {
 }
 
 var singleton inputManager
+
+func Initialize(backend InputBackend) error {
+	singleton.key = make(map[Key]int)
+	singleton.mouseButton = make(map[MouseButton]int)
+
+	if backend == Ebiten {
+		if err := ebitenInput(&singleton); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 func Advance(elapsed float64) error {
 	return singleton.advance(elapsed)
