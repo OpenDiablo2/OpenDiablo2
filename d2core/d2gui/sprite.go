@@ -7,29 +7,20 @@ import (
 )
 
 type Sprite struct {
-	x int
-	y int
+	widgetBase
 
 	segmentsX   int
 	segmentsY   int
 	frameOffset int
 
-	visible   bool
 	animation *d2asset.Animation
 }
 
-func CreateSprite(imagePath, palettePath string) (*Sprite, error) {
-	animation, err := d2asset.LoadAnimation(imagePath, palettePath)
-	if err != nil {
-		return nil, err
-	}
-
-	sprite := &Sprite{
-		animation: animation,
-		visible:   true,
-	}
-
-	return sprite, nil
+func createSprite(imagePath, palettePath string) *Sprite {
+	sprite := new(Sprite)
+	sprite.animation, _ = d2asset.LoadAnimation(imagePath, palettePath)
+	sprite.visible = true
+	return sprite
 }
 
 func (s *Sprite) SetSegmented(segmentsX, segmentsY, frameOffset int) {
@@ -38,34 +29,13 @@ func (s *Sprite) SetSegmented(segmentsX, segmentsY, frameOffset int) {
 	s.frameOffset = frameOffset
 }
 
-func (s *Sprite) SetPosition(x, y int) {
-	s.x = x
-	s.y = y
-}
-
-func (s *Sprite) Show() {
-	s.visible = true
-}
-
-func (s *Sprite) Hide() {
-	s.visible = false
-}
-
-func (s *Sprite) getPosition() (int, int) {
-	return s.x, s.y
-}
-
-func (s *Sprite) getSize() (int, int) {
-	return s.animation.GetCurrentFrameSize()
-}
-
 func (s *Sprite) render(target d2render.Surface) error {
-	if !s.visible {
+	if s.animation == nil {
 		return nil
 	}
 
 	_, height := s.animation.GetCurrentFrameSize()
-	target.PushTranslation(s.x, s.y-height)
+	target.PushTranslation(0, -height)
 	defer target.Pop()
 
 	if s.segmentsX == 0 && s.segmentsY == 0 {
@@ -100,5 +70,17 @@ func (s *Sprite) render(target d2render.Surface) error {
 }
 
 func (s *Sprite) advance(elapsed float64) error {
+	if s.animation == nil {
+		return nil
+	}
+
 	return s.animation.Advance(elapsed)
+}
+
+func (s *Sprite) getSize() (int, int) {
+	if s.animation == nil {
+		return 0, 0
+	}
+
+	return s.animation.GetCurrentFrameSize()
 }
