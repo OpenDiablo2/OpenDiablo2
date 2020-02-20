@@ -76,7 +76,7 @@ func initialize() error {
 	singleton.timeScale = 1.0
 	singleton.lastTime = d2common.Now()
 
-	if err := d2config.Initialize(); err != nil {
+	if err := d2config.Load(); err != nil {
 		return err
 	}
 

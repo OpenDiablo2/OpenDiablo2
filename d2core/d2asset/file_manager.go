@@ -16,10 +16,10 @@ const (
 type fileManager struct {
 	cache          *d2common.Cache
 	archiveManager *archiveManager
-	config         *d2config.Configuration
+	config         d2config.Configuration
 }
 
-func createFileManager(config *d2config.Configuration, archiveManager *archiveManager) *fileManager {
+func createFileManager(config d2config.Configuration, archiveManager *archiveManager) *fileManager {
 	return &fileManager{d2common.CreateCache(fileBudget), archiveManager, config}
 }
 
