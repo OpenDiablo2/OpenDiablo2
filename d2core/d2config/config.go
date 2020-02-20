@@ -1,12 +1,15 @@
 package d2config
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"os"
 	"os/user"
 	"path"
 	"runtime"
 )
 
-func getDefaultConfiguration() *Configuration {
+func getDefaultConfig() *Configuration {
 	config := &Configuration{
 		Language:        "ENG",
 		FullScreen:      false,
@@ -60,4 +63,60 @@ func getDefaultConfiguration() *Configuration {
 	}
 
 	return config
+}
+
+func getDefaultConfigPath() string {
+	if configDir, err := os.UserConfigDir(); err == nil {
+		return path.Join(configDir, "OpenDiablo2", "config.json")
+	}
+
+	return getLocalConfigPath()
+}
+
+func getLocalConfigPath() string {
+	return path.Join(path.Dir(os.Args[0]), "config.json")
+}
+
+func load(configPath string) error {
+	configFile, err := os.Open(configPath)
+	defer configFile.Close()
+
+	if err != nil {
+		return err
+	}
+
+	data, err := ioutil.ReadAll(configFile)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(data, &singleton); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func save(configPath string) error {
+	configDir := path.Dir(configPath)
+	if err := os.MkdirAll(configDir, 0755); err != nil {
+		return err
+	}
+
+	configFile, err := os.Create(configPath)
+	defer configFile.Close()
+	if err != nil {
+		return err
+	}
+
+	data, err := json.MarshalIndent(singleton, "", "    ")
+	if err != nil {
+		return err
+	}
+
+	if _, err := configFile.Write(data); err != nil {
+		return err
+	}
+
+	return nil
 }

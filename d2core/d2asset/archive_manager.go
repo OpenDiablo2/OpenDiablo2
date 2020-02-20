@@ -17,7 +17,7 @@ type archiveEntry struct {
 
 type archiveManager struct {
 	cache   *d2common.Cache
-	config  *d2config.Configuration
+	config  d2config.Configuration
 	entries []archiveEntry
 	mutex   sync.Mutex
 }
@@ -26,7 +26,7 @@ const (
 	archiveBudget = 1024 * 1024 * 512
 )
 
-func createArchiveManager(config *d2config.Configuration) *archiveManager {
+func createArchiveManager(config d2config.Configuration) *archiveManager {
 	return &archiveManager{cache: d2common.CreateCache(archiveBudget), config: config}
 }
 
