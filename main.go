@@ -76,7 +76,10 @@ func initialize() error {
 	singleton.timeScale = 1.0
 	singleton.lastTime = d2common.Now()
 
-	d2config.Load()
+	if err := d2config.Load(); err != nil {
+		return err
+	}
+
 	config := d2config.Get()
 	d2resource.LanguageCode = config.Language
 
