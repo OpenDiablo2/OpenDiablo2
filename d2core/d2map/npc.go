@@ -8,14 +8,14 @@ import (
 )
 
 type NPC struct {
-	AnimatedEntity *AnimatedEntity
+	AnimatedEntity *AnimatedComposite
 	HasPaths       bool
 	Paths          []d2common.Path
 	path           int
 }
 
 func CreateNPC(x, y int32, object *d2datadict.ObjectLookupRecord, direction int) *NPC {
-	entity, err := CreateAnimatedEntity(x, y, object, d2resource.PaletteUnits)
+	entity, err := CreateAnimatedComposite(x, y, object, d2resource.PaletteUnits)
 	if err != nil {
 		panic(err)
 	}

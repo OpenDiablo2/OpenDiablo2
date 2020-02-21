@@ -128,6 +128,20 @@ func (m *MapEngine) AddEntity(entity MapEntity) {
 	m.entities = append(m.entities, entity)
 }
 
+func (m *MapEngine) RemoveEntity(entity MapEntity) {
+	if entity == nil {
+		return
+	}
+
+	filtered := m.entities[:0]
+	for _, check := range m.entities {
+		if check != entity {
+			filtered = append(filtered, check)
+		}
+	}
+	m.entities = filtered
+}
+
 func (m *MapEngine) Advance(tickTime float64) {
 	for _, region := range m.regions {
 		if region.isVisbile(m.viewport) {
@@ -151,20 +165,20 @@ func (m *MapEngine) Render(target d2render.Surface) {
 	}
 }
 
-func (m *MapEngine) PathFind(startX, startY, endX, endY float64) (path []astar.Pather, distance float64, found bool){
+func (m *MapEngine) PathFind(startX, startY, endX, endY float64) (path []astar.Pather, distance float64, found bool) {
 	startTileX := int(math.Floor(startX))
 	startTileY := int(math.Floor(startY))
 	startSubtileX := int((startX - float64(int(startX))) * 5)
 	startSubtileY := int((startY - float64(int(startY))) * 5)
 	startRegion := m.GetRegionAtTile(startTileX, startTileY)
-	startNode := &startRegion.walkableArea[startSubtileY + ((startTileY - startRegion.tileRect.Top) * 5)][startSubtileX + ((startTileX - startRegion.tileRect.Left) * 5)]
+	startNode := &startRegion.walkableArea[startSubtileY+((startTileY-startRegion.tileRect.Top)*5)][startSubtileX+((startTileX-startRegion.tileRect.Left)*5)]
 
 	endTileX := int(math.Floor(endX))
 	endTileY := int(math.Floor(endY))
 	endSubtileX := int((endX - float64(int(endX))) * 5)
 	endSubtileY := int((endY - float64(int(endY))) * 5)
 	endRegion := m.GetRegionAtTile(endTileX, endTileY)
-	endNode := &endRegion.walkableArea[endSubtileY + ((endTileY - endRegion.tileRect.Top) * 5)][endSubtileX + ((endTileX - endRegion.tileRect.Left) * 5)]
+	endNode := &endRegion.walkableArea[endSubtileY+((endTileY-endRegion.tileRect.Top)*5)][endSubtileX+((endTileX-endRegion.tileRect.Left)*5)]
 
 	path, distance, found = astar.Path(endNode, startNode)
 	if path != nil {

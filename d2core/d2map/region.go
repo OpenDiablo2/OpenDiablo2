@@ -273,7 +273,7 @@ func (mr *MapRegion) loadEntities() []MapEntity {
 			}
 		case d2datadict.ObjectTypeItem:
 			if object.ObjectInfo != nil && object.ObjectInfo.Draw && object.Lookup.Base != "" && object.Lookup.Token != "" {
-				entity, err := CreateAnimatedEntity(int32(worldX), int32(worldY), object.Lookup, d2resource.PaletteUnits)
+				entity, err := CreateAnimatedComposite(int32(worldX), int32(worldY), object.Lookup, d2resource.PaletteUnits)
 				if err != nil {
 					panic(err)
 				}

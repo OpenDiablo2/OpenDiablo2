@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
@@ -52,18 +53,34 @@ func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 }
 
 func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
+	px, py := g.mapEngine.ScreenToWorld(event.X, event.Y)
+	px = float64(int(px*10)) / 10.0
+	py = float64(int(py*10)) / 10.0
+	heroPosX := g.hero.AnimatedEntity.LocationX / 5.0
+	heroPosY := g.hero.AnimatedEntity.LocationY / 5.0
+
 	if event.Button == d2input.MouseButtonLeft {
-		px, py := g.mapEngine.ScreenToWorld(event.X, event.Y)
-		px = float64(int(px*10)) / 10.0
-		py = float64(int(py*10)) / 10.0
-		heroPosX := g.hero.AnimatedEntity.LocationX / 5.0
-		heroPosY := g.hero.AnimatedEntity.LocationY / 5.0
 		path, _, found := g.mapEngine.PathFind(heroPosX, heroPosY, px, py)
 		if found {
 			g.hero.AnimatedEntity.SetPath(path)
 		}
 		return true
 	}
+
+	if event.Button == d2input.MouseButtonRight {
+		missile := d2map.CreateMissile(
+			int32(g.hero.AnimatedEntity.LocationX),
+			int32(g.hero.AnimatedEntity.LocationY),
+			px*5, py*5,
+			d2datadict.Missiles[59],
+		)
+		missile.SetDone(func() {
+			g.mapEngine.RemoveEntity(missile)
+		})
+		g.mapEngine.AddEntity(missile)
+		return true
+	}
+
 	return false
 }
 

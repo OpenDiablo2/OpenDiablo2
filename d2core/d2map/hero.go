@@ -9,7 +9,7 @@ import (
 )
 
 type Hero struct {
-	AnimatedEntity *AnimatedEntity
+	AnimatedEntity *AnimatedComposite
 	Equipment      d2inventory.CharacterEquipment
 	mode           d2enum.AnimationMode
 	direction      int
@@ -32,7 +32,7 @@ func CreateHero(x, y int32, direction int, heroType d2enum.Hero, equipment d2inv
 		LH: equipment.LeftHand.ItemCode(),
 	}
 
-	entity, err := CreateAnimatedEntity(x, y, object, d2resource.PaletteUnits)
+	entity, err := CreateAnimatedComposite(x, y, object, d2resource.PaletteUnits)
 	if err != nil {
 		panic(err)
 	}

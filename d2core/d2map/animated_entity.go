@@ -1,15 +1,11 @@
 package d2map
 
 import (
-	"github.com/beefsack/go-astar"
-	"math"
-	"math/rand"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/beefsack/go-astar"
+	"math"
 )
 
 // AnimatedEntity represents an entity on the map that can be animated
@@ -18,7 +14,6 @@ type AnimatedEntity struct {
 	LocationY          float64
 	TileX, TileY       int     // Coordinates of the tile the unit is within
 	subcellX, subcellY float64 // Subcell coordinates within the current tile
-	animationMode      string
 	weaponClass        string
 	direction          int
 	offsetX, offsetY   int32
@@ -28,17 +23,12 @@ type AnimatedEntity struct {
 	repetitions        int
 	path               []astar.Pather
 
-	composite *d2asset.Composite
+	animation *d2asset.Animation
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
-func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, palettePath string) (*AnimatedEntity, error) {
-	composite, err := d2asset.LoadComposite(object, palettePath)
-	if err != nil {
-		return nil, err
-	}
-
-	entity := &AnimatedEntity{composite: composite}
+func CreateAnimatedEntity(x, y int32, animation *d2asset.Animation) (*AnimatedEntity, error) {
+	entity := &AnimatedEntity{animation: animation}
 	entity.LocationX = float64(x)
 	entity.LocationY = float64(y)
 	entity.TargetX = entity.LocationX
@@ -53,28 +43,10 @@ func CreateAnimatedEntity(x, y int32, object *d2datadict.ObjectLookupRecord, pal
 	return entity, nil
 }
 
-// SetMode changes the graphical mode of this animated entity
-func (v *AnimatedEntity) SetMode(animationMode, weaponClass string, direction int) error {
-	v.animationMode = animationMode
-	v.direction = direction
-
-	err := v.composite.SetMode(animationMode, weaponClass, direction)
-	if err != nil {
-		err = v.composite.SetMode(animationMode, "HTH", direction)
-	}
-
-	return err
-}
-
-// If an npc has a path to pause at each location.
-// Waits for animation to end and all repetitions to be exhausted.
-func (v AnimatedEntity) Wait() bool {
-	return v.composite.GetPlayedCount() > v.repetitions
-}
-
 func (v *AnimatedEntity) SetPath(path []astar.Pather) {
 	v.path = path
 }
+
 // Render draws this animated entity onto the target
 func (v *AnimatedEntity) Render(target d2render.Surface) {
 	target.PushTranslation(
@@ -82,7 +54,7 @@ func (v *AnimatedEntity) Render(target d2render.Surface) {
 		int(v.offsetY)+int(((v.subcellX+v.subcellY)*8)-5),
 	)
 	defer target.Pop()
-	v.composite.Render(target)
+	v.animation.Render(target)
 }
 
 func (v AnimatedEntity) GetDirection() int {
@@ -131,7 +103,7 @@ func (v *AnimatedEntity) Step(tickTime float64) {
 	}
 
 	if len(v.path) > 0 {
-		v.SetTarget(v.path[0].(*PathTile).X * 5, v.path[0].(*PathTile).Y * 5, 1)
+		v.SetTarget(v.path[0].(*PathTile).X*5, v.path[0].(*PathTile).Y*5)
 
 		if len(v.path) > 1 {
 			v.path = v.path[1:]
@@ -141,25 +113,6 @@ func (v *AnimatedEntity) Step(tickTime float64) {
 		return
 	}
 
-	v.repetitions = 3 + rand.Intn(5)
-	newAnimationMode := d2enum.AnimationModeObjectNeutral
-	// TODO: Figure out what 1-3 are for, 4 is correct.
-	switch v.action {
-	case 1:
-		newAnimationMode = d2enum.AnimationModeMonsterNeutral
-	case 2:
-		newAnimationMode = d2enum.AnimationModeMonsterNeutral
-	case 3:
-		newAnimationMode = d2enum.AnimationModeMonsterNeutral
-	case 4:
-		newAnimationMode = d2enum.AnimationModeMonsterSkill1
-		v.repetitions = 0
-	}
-
-	v.composite.ResetPlayedCount()
-	if v.animationMode != newAnimationMode.String() {
-		v.SetMode(newAnimationMode.String(), v.weaponClass, v.direction)
-	}
 }
 
 func (v *AnimatedEntity) HasPathFinding() bool {
@@ -167,7 +120,7 @@ func (v *AnimatedEntity) HasPathFinding() bool {
 }
 
 // SetTarget sets target coordinates and changes animation based on proximity and direction
-func (v *AnimatedEntity) SetTarget(tx, ty float64, action int32) {
+func (v *AnimatedEntity) SetTarget(tx, ty float64) {
 	angle := 359 - d2common.GetAngleBetween(
 		v.LocationX,
 		v.LocationY,
@@ -175,23 +128,10 @@ func (v *AnimatedEntity) SetTarget(tx, ty float64, action int32) {
 		ty,
 	)
 
-	v.action = action
-	// TODO: Check if is in town and if is player.
-	newAnimationMode := d2enum.AnimationModeMonsterWalk.String()
-	if tx != v.LocationX || ty != v.LocationY {
-		v.TargetX, v.TargetY = tx, ty
-		newAnimationMode = d2enum.AnimationModeMonsterWalk.String()
-	}
+	v.TargetX, v.TargetY = tx, ty
+	v.direction = angleToDirection(float64(angle), v.animation.GetDirectionCount())
+	v.animation.SetDirection(v.direction)
 
-	if newAnimationMode != v.animationMode {
-		v.SetMode(newAnimationMode, v.weaponClass, v.direction)
-	}
-
-	newDirection := angleToDirection(float64(angle), v.composite.GetDirectionCount())
-
-	if newDirection != v.GetDirection() {
-		v.SetMode(v.animationMode, v.weaponClass, newDirection)
-	}
 }
 
 func angleToDirection(angle float64, numberOfDirections int) int {
@@ -212,7 +152,7 @@ func angleToDirection(angle float64, numberOfDirections int) int {
 }
 
 func (v *AnimatedEntity) Advance(elapsed float64) {
-	v.composite.Advance(elapsed)
+	v.animation.Advance(elapsed)
 }
 
 func (v *AnimatedEntity) GetPosition() (float64, float64) {
