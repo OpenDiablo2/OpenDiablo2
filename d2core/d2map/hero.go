@@ -9,10 +9,10 @@ import (
 )
 
 type Hero struct {
-	AnimatedEntity *AnimatedComposite
-	Equipment      d2inventory.CharacterEquipment
-	mode           d2enum.AnimationMode
-	direction      int
+	*AnimatedComposite
+	Equipment         d2inventory.CharacterEquipment
+	mode              d2enum.AnimationMode
+	direction         int
 }
 
 func CreateHero(x, y int32, direction int, heroType d2enum.Hero, equipment d2inventory.CharacterEquipment) *Hero {
@@ -37,25 +37,25 @@ func CreateHero(x, y int32, direction int, heroType d2enum.Hero, equipment d2inv
 		panic(err)
 	}
 
-	result := &Hero{AnimatedEntity: entity, Equipment: equipment, mode: d2enum.AnimationModePlayerTownNeutral, direction: direction}
-	result.AnimatedEntity.SetMode(result.mode.String(), equipment.RightHand.WeaponClass(), direction)
+	result := &Hero{
+		AnimatedComposite: entity,
+		Equipment:         equipment,
+		mode:              d2enum.AnimationModePlayerTownNeutral,
+		direction:         direction,
+	}
+	result.SetMode(result.mode.String(), equipment.RightHand.WeaponClass(), direction)
 	return result
 }
 
 func (v *Hero) Advance(tickTime float64) {
-	if v.AnimatedEntity.LocationX != v.AnimatedEntity.TargetX ||
-		v.AnimatedEntity.LocationY != v.AnimatedEntity.TargetY ||
-		v.AnimatedEntity.HasPathFinding(){
-		v.AnimatedEntity.Step(tickTime)
-	}
-
-	v.AnimatedEntity.Advance(tickTime)
+	v.Step(tickTime)
+	v.AnimatedComposite.Advance(tickTime)
 }
 
 func (v *Hero) Render(target d2render.Surface) {
-	v.AnimatedEntity.Render(target)
+	v.AnimatedComposite.Render(target)
 }
 
 func (v *Hero) GetPosition() (float64, float64) {
-	return v.AnimatedEntity.GetPosition()
+	return v.AnimatedComposite.GetPosition()
 }

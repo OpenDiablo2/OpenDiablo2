@@ -72,6 +72,7 @@ func (c *Composite) SetMode(animationMode, weaponClass string, direction int) er
 		return err
 	}
 
+	c.ResetPlayedCount()
 	c.mode = mode
 	return nil
 }

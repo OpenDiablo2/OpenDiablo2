@@ -243,7 +243,7 @@ func (v *CharacterSelect) Advance(tickTime float64) error {
 	}
 	for _, hero := range v.characterImage {
 		if hero != nil {
-			hero.AnimatedEntity.Advance(tickTime)
+			hero.AnimatedComposite.Advance(tickTime)
 		}
 	}
 
