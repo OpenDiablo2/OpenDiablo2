@@ -43,7 +43,7 @@ func Advance(elapsed float64) error {
 		}
 
 		d2ui.Reset()
-		d2gui.Clear()
+		d2gui.SetLayout(nil)
 
 		if _, ok := singleton.nextScene.(SceneLoadHandler); ok {
 			d2gui.ShowLoadScreen(0)
