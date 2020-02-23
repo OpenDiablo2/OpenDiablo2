@@ -2,6 +2,7 @@ package ebiten
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
@@ -105,4 +106,18 @@ func (s *ebitenSurface) GetDepth() int {
 
 func (s *ebitenSurface) ReplacePixels(pixels []byte) error {
 	return s.image.ReplacePixels(pixels)
+}
+
+func (s *ebitenSurface) Screenshot() *image.RGBA {
+	width, height := s.GetSize()
+	bounds := image.Rectangle{image.Point{0, 0}, image.Point{width, height}}
+	image := image.NewRGBA(bounds)
+
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			image.Set(x, y, s.image.At(x, y))
+		}
+	}
+
+	return image
 }

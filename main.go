@@ -1,12 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"image"
+	"image/gif"
+	"image/png"
 	"log"
 	"os"
 	"runtime"
 	"strconv"
+	"sync"
 
 	"gopkg.in/alecthomas/kingpin.v2"
 
@@ -36,10 +41,22 @@ var GitBranch string
 // GitCommit is set by the CI build process to the commit hash
 var GitCommit string
 
+type captureState int
+
+const (
+	captureStateNone captureState = iota
+	captureStateFrame
+	captureStateGif
+)
+
 var singleton struct {
 	lastTime  float64
 	showFPS   bool
 	timeScale float64
+
+	captureState  captureState
+	capturePath   string
+	captureFrames []*image.RGBA
 }
 
 func main() {
@@ -102,6 +119,19 @@ func initialize() error {
 		fullscreen := !d2render.IsFullScreen()
 		d2render.SetFullScreen(fullscreen)
 		d2term.OutputInfo("fullscreen is now: %v", fullscreen)
+	})
+	d2term.BindAction("capframe", "captures a still frame", func(path string) {
+		singleton.captureState = captureStateFrame
+		singleton.capturePath = path
+		singleton.captureFrames = nil
+	})
+	d2term.BindAction("capgifstart", "captures an animation (start)", func(path string) {
+		singleton.captureState = captureStateGif
+		singleton.capturePath = path
+		singleton.captureFrames = nil
+	})
+	d2term.BindAction("capgifstop", "captures an animation (stop)", func() {
+		singleton.captureState = captureStateNone
 	})
 	d2term.BindAction("vsync", "toggles vsync", func() {
 		vsync := !d2render.GetVSyncEnabled()
@@ -212,14 +242,100 @@ func render(target d2render.Surface) error {
 		return err
 	}
 
-	if err := d2term.Render(target); err != nil {
-		return err
-	}
-
 	if err := renderDebug(target); err != nil {
 		return err
 	}
 
+	if err := renderCapture(target); err != nil {
+		return err
+	}
+
+	if err := d2term.Render(target); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func renderCapture(target d2render.Surface) error {
+	cleanupCapture := func() {
+		singleton.captureState = captureStateNone
+		singleton.capturePath = ""
+		singleton.captureFrames = nil
+	}
+
+	switch singleton.captureState {
+	case captureStateFrame:
+		defer cleanupCapture()
+
+		fp, err := os.Create(singleton.capturePath)
+		if err != nil {
+			return err
+		}
+
+		defer fp.Close()
+
+		screenshot := target.Screenshot()
+		if err := png.Encode(fp, screenshot); err != nil {
+			return err
+		}
+
+		log.Printf("saved frame to %s", singleton.capturePath)
+		break
+	case captureStateGif:
+		screenshot := target.Screenshot()
+		singleton.captureFrames = append(singleton.captureFrames, screenshot)
+		break
+	case captureStateNone:
+		if len(singleton.captureFrames) > 0 {
+			defer cleanupCapture()
+
+			fp, err := os.Create(singleton.capturePath)
+			if err != nil {
+				return err
+			}
+
+			defer fp.Close()
+
+			var (
+				framesTotal  = len(singleton.captureFrames)
+				framesPal    = make([]*image.Paletted, framesTotal)
+				frameDelays  = make([]int, framesTotal)
+				framesPerCpu = framesTotal / runtime.NumCPU()
+			)
+
+			var waitGroup sync.WaitGroup
+			for i := 0; i < framesTotal; i += framesPerCpu {
+				waitGroup.Add(1)
+				go func(start, end int) {
+					defer waitGroup.Done()
+
+					for j := start; j < end; j++ {
+						var buffer bytes.Buffer
+						if err := gif.Encode(&buffer, singleton.captureFrames[j], nil); err != nil {
+							panic(err)
+						}
+
+						framePal, err := gif.Decode(&buffer)
+						if err != nil {
+							panic(err)
+						}
+
+						framesPal[j] = framePal.(*image.Paletted)
+						frameDelays[j] = 5
+					}
+				}(i, d2common.MinInt(i+framesPerCpu, framesTotal))
+			}
+
+			waitGroup.Wait()
+
+			if err := gif.EncodeAll(fp, &gif.GIF{Image: framesPal, Delay: frameDelays}); err != nil {
+				return err
+			}
+
+			log.Printf("saved animation to %s", singleton.capturePath)
+		}
+	}
 	return nil
 }
 
