@@ -133,13 +133,15 @@ func (m *MapEngine) RemoveEntity(entity MapEntity) {
 		return
 	}
 
-	filtered := m.entities[:0]
+	// In-place filter to remove the given entity.
+	n := 0
 	for _, check := range m.entities {
 		if check != entity {
-			filtered = append(filtered, check)
+			m.entities[n] = check
+			n++
 		}
 	}
-	m.entities = filtered
+	m.entities = m.entities[:n]
 }
 
 func (m *MapEngine) Advance(tickTime float64) {

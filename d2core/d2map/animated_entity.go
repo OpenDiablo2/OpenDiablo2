@@ -10,55 +10,55 @@ import (
 type AnimatedEntity struct {
 	mapEntity
 	direction   int
-	action      int32
+	action      int
 	repetitions int
 
 	animation *d2asset.Animation
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
-func CreateAnimatedEntity(x, y int32, animation *d2asset.Animation) *AnimatedEntity {
+func CreateAnimatedEntity(x, y int, animation *d2asset.Animation) *AnimatedEntity {
 	entity := &AnimatedEntity{
 		mapEntity: createMapEntity(x, y),
 		animation: animation,
 	}
-	entity.mapEntity.directioner = entity.setDirection
+	entity.mapEntity.directioner = entity.rotate
 	return entity
 }
 
 // Render draws this animated entity onto the target
-func (v *AnimatedEntity) Render(target d2render.Surface) {
+func (ae *AnimatedEntity) Render(target d2render.Surface) {
 	target.PushTranslation(
-		int(v.offsetX)+int((v.subcellX-v.subcellY)*16),
-		int(v.offsetY)+int(((v.subcellX+v.subcellY)*8)-5),
+		ae.offsetX+int((ae.subcellX-ae.subcellY)*16),
+		ae.offsetY+int(((ae.subcellX+ae.subcellY)*8)-5),
 	)
 	defer target.Pop()
-	v.animation.Render(target)
+	ae.animation.Render(target)
 }
 
-func (v AnimatedEntity) GetDirection() int {
-	return v.direction
+func (ae AnimatedEntity) GetDirection() int {
+	return ae.direction
 }
 
-// SetTarget sets target coordinates and changes animation based on proximity and direction
-func (v *AnimatedEntity) setDirection(angle float64) {
-	v.direction = angleToDirection(angle, v.animation.GetDirectionCount())
+// rotate sets direction and changes animation
+func (ae *AnimatedEntity) rotate(angle float64) {
+	ae.direction = angleToDirection(angle, ae.animation.GetDirectionCount())
 
 	var layerDirection int
-	switch v.animation.GetDirectionCount() {
+	switch ae.animation.GetDirectionCount() {
 	case 4:
-		layerDirection = d2dcc.CofToDir4[v.direction]
+		layerDirection = d2dcc.CofToDir4[ae.direction]
 	case 8:
-		layerDirection = d2dcc.CofToDir8[v.direction]
+		layerDirection = d2dcc.CofToDir8[ae.direction]
 	case 16:
-		layerDirection = d2dcc.CofToDir16[v.direction]
+		layerDirection = d2dcc.CofToDir16[ae.direction]
 	case 32:
-		layerDirection = d2dcc.CofToDir32[v.direction]
+		layerDirection = d2dcc.CofToDir32[ae.direction]
 	}
 
-	v.animation.SetDirection(layerDirection)
+	ae.animation.SetDirection(layerDirection)
 }
 
-func (v *AnimatedEntity) Advance(elapsed float64) {
-	v.animation.Advance(elapsed)
+func (ae *AnimatedEntity) Advance(elapsed float64) {
+	ae.animation.Advance(elapsed)
 }

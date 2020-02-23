@@ -52,8 +52,8 @@ func (v *Game) OnLoad() error {
 
 	startX, startY := v.mapEngine.GetStartPosition()
 	v.hero = d2map.CreateHero(
-		int32(startX*5)+3,
-		int32(startY*5)+3,
+		int(startX*5)+3,
+		int(startY*5)+3,
 		0,
 		v.gameState.HeroType,
 		v.gameState.Equipment,

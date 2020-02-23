@@ -15,7 +15,7 @@ type Hero struct {
 	direction         int
 }
 
-func CreateHero(x, y int32, direction int, heroType d2enum.Hero, equipment d2inventory.CharacterEquipment) *Hero {
+func CreateHero(x, y int, direction int, heroType d2enum.Hero, equipment d2inventory.CharacterEquipment) *Hero {
 	object := &d2datadict.ObjectLookupRecord{
 		Mode:  d2enum.AnimationModePlayerNeutral.String(),
 		Base:  "/data/global/chars",

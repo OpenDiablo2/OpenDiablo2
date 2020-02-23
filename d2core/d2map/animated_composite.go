@@ -16,7 +16,7 @@ type AnimatedComposite struct {
 }
 
 // CreateAnimatedComposite creates an instance of AnimatedComposite
-func CreateAnimatedComposite(x, y int32, object *d2datadict.ObjectLookupRecord, palettePath string) (*AnimatedComposite, error) {
+func CreateAnimatedComposite(x, y int, object *d2datadict.ObjectLookupRecord, palettePath string) (*AnimatedComposite, error) {
 	composite, err := d2asset.LoadComposite(object, palettePath)
 	if err != nil {
 		return nil, err
@@ -26,57 +26,56 @@ func CreateAnimatedComposite(x, y int32, object *d2datadict.ObjectLookupRecord, 
 		mapEntity: createMapEntity(x, y),
 		composite: composite,
 	}
-	entity.mapEntity.directioner = entity.setDirection
+	entity.mapEntity.directioner = entity.rotate
 	return entity, nil
 }
 
-func (v *AnimatedComposite) SetAnimationMode(animationMode string) error {
-	v.animationMode = animationMode
-	return v.composite.SetMode(animationMode, v.weaponClass, v.direction)
+func (ac *AnimatedComposite) SetAnimationMode(animationMode string) error {
+	return ac.composite.SetMode(animationMode, ac.weaponClass, ac.direction)
 }
 
 // SetMode changes the graphical mode of this animated entity
-func (v *AnimatedComposite) SetMode(animationMode, weaponClass string, direction int) error {
-	v.animationMode = animationMode
-	v.direction = direction
+func (ac *AnimatedComposite) SetMode(animationMode, weaponClass string, direction int) error {
+	ac.animationMode = animationMode
+	ac.direction = direction
 
-	err := v.composite.SetMode(animationMode, weaponClass, direction)
+	err := ac.composite.SetMode(animationMode, weaponClass, direction)
 	if err != nil {
-		err = v.composite.SetMode(animationMode, "HTH", direction)
-		v.weaponClass = "HTH"
+		err = ac.composite.SetMode(animationMode, "HTH", direction)
+		ac.weaponClass = "HTH"
 	}
 
 	return err
 }
 
 // Render draws this animated entity onto the target
-func (v *AnimatedComposite) Render(target d2render.Surface) {
+func (ac *AnimatedComposite) Render(target d2render.Surface) {
 	target.PushTranslation(
-		int(v.offsetX)+int((v.subcellX-v.subcellY)*16),
-		int(v.offsetY)+int(((v.subcellX+v.subcellY)*8)-5),
+		ac.offsetX+int((ac.subcellX-ac.subcellY)*16),
+		ac.offsetY+int(((ac.subcellX+ac.subcellY)*8)-5),
 	)
 	defer target.Pop()
-	v.composite.Render(target)
+	ac.composite.Render(target)
 }
 
-// setDirection changes animation based on proximity and direction
-func (v *AnimatedComposite) setDirection(angle float64) {
+// rotate sets direction and changes animation
+func (ac *AnimatedComposite) rotate(angle float64) {
 	// TODO: Check if is in town and if is player.
-	newAnimationMode := v.animationMode
-	if !v.IsAtTarget() {
+	newAnimationMode := ac.animationMode
+	if !ac.IsAtTarget() {
 		newAnimationMode = d2enum.AnimationModeMonsterWalk.String()
 	}
 
-	if newAnimationMode != v.animationMode {
-		v.SetMode(newAnimationMode, v.weaponClass, v.direction)
+	if newAnimationMode != ac.animationMode {
+		ac.SetMode(newAnimationMode, ac.weaponClass, ac.direction)
 	}
 
-	newDirection := angleToDirection(angle, v.composite.GetDirectionCount())
-	if newDirection != v.direction {
-		v.SetMode(v.animationMode, v.weaponClass, newDirection)
+	newDirection := angleToDirection(angle, ac.composite.GetDirectionCount())
+	if newDirection != ac.direction {
+		ac.SetMode(ac.animationMode, ac.weaponClass, newDirection)
 	}
 }
 
-func (v *AnimatedComposite) Advance(elapsed float64) {
-	v.composite.Advance(elapsed)
+func (ac *AnimatedComposite) Advance(elapsed float64) {
+	ac.composite.Advance(elapsed)
 }

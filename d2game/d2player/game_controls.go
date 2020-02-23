@@ -8,6 +8,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -17,6 +18,9 @@ type Panel interface {
 	Open()
 	Close()
 }
+
+// ID of missile to create when user right clicks.
+var missileID = 59
 
 type GameControls struct {
 	hero      *d2map.Hero
@@ -32,6 +36,10 @@ type GameControls struct {
 }
 
 func NewGameControls(hero *d2map.Hero, mapEngine *d2map.MapEngine) *GameControls {
+	d2term.BindAction("setmissile", "set missile id to summon on right click", func(id int) {
+		missileID = id
+	})
+
 	return &GameControls{
 		hero:      hero,
 		mapEngine: mapEngine,
@@ -74,9 +82,9 @@ func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
 
 	if event.Button == d2input.MouseButtonRight {
 		missile, err := d2map.CreateMissile(
-			int32(g.hero.AnimatedComposite.LocationX),
-			int32(g.hero.AnimatedComposite.LocationY),
-			d2datadict.Missiles[59],
+			int(g.hero.AnimatedComposite.LocationX),
+			int(g.hero.AnimatedComposite.LocationY),
+			d2datadict.Missiles[missileID],
 		)
 		if err != nil {
 			return false

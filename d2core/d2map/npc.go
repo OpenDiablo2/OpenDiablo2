@@ -10,7 +10,7 @@ import (
 
 type NPC struct {
 	*AnimatedComposite
-	action      int32
+	action      int
 	HasPaths    bool
 	Paths       []d2common.Path
 	path        int
@@ -18,7 +18,7 @@ type NPC struct {
 	repetitions int
 }
 
-func CreateNPC(x, y int32, object *d2datadict.ObjectLookupRecord, direction int) *NPC {
+func CreateNPC(x, y int, object *d2datadict.ObjectLookupRecord, direction int) *NPC {
 	entity, err := CreateAnimatedComposite(x, y, object, d2resource.PaletteUnits)
 	if err != nil {
 		panic(err)

@@ -13,7 +13,7 @@ type mapEntity struct {
 	TileX, TileY       int     // Coordinates of the tile the unit is within
 	subcellX, subcellY float64 // Subcell coordinates within the current tile
 	weaponClass        string
-	offsetX, offsetY   int32
+	offsetX, offsetY   int
 	TargetX            float64
 	TargetY            float64
 	Speed              float64
@@ -24,15 +24,15 @@ type mapEntity struct {
 }
 
 // createMapEntity creates an instance of mapEntity
-func createMapEntity(x, y int32) mapEntity {
+func createMapEntity(x, y int) mapEntity {
 	locX, locY := float64(x), float64(y)
 	return mapEntity{
 		LocationX: locX,
 		LocationY: locY,
 		TargetX:   locX,
 		TargetY:   locY,
-		TileX:     int(locX / 5),
-		TileY:     int(locY / 5),
+		TileX:     x / 5,
+		TileY:     y / 5,
 		subcellX:  1 + math.Mod(locX, 5),
 		subcellY:  1 + math.Mod(locY, 5),
 		Speed:     6,
@@ -40,19 +40,19 @@ func createMapEntity(x, y int32) mapEntity {
 	}
 }
 
-func (v *mapEntity) SetPath(path []astar.Pather, done func()) {
-	v.path = path
-	v.done = done
+func (m *mapEntity) SetPath(path []astar.Pather, done func()) {
+	m.path = path
+	m.done = done
 }
 
-func (v *mapEntity) getStepLength(tickTime float64) (float64, float64) {
-	length := tickTime * v.Speed
+func (m *mapEntity) getStepLength(tickTime float64) (float64, float64) {
+	length := tickTime * m.Speed
 
 	angle := 359 - d2common.GetAngleBetween(
-		v.LocationX,
-		v.LocationY,
-		v.TargetX,
-		v.TargetY,
+		m.LocationX,
+		m.LocationY,
+		m.TargetX,
+		m.TargetY,
 	)
 	radians := (math.Pi / 180.0) * float64(angle)
 	oneStepX := length * math.Cos(radians)
@@ -60,73 +60,73 @@ func (v *mapEntity) getStepLength(tickTime float64) (float64, float64) {
 	return oneStepX, oneStepY
 }
 
-func (v *mapEntity) IsAtTarget() bool {
-	return v.LocationX == v.TargetX && v.LocationY == v.TargetY && !v.HasPathFinding()
+func (m *mapEntity) IsAtTarget() bool {
+	return m.LocationX == m.TargetX && m.LocationY == m.TargetY && !m.HasPathFinding()
 }
 
-func (v *mapEntity) Step(tickTime float64) {
-	if v.IsAtTarget() {
-		if v.done != nil {
-			v.done()
-			v.done = nil
+func (m *mapEntity) Step(tickTime float64) {
+	if m.IsAtTarget() {
+		if m.done != nil {
+			m.done()
+			m.done = nil
 		}
 		return
 	}
 
-	stepX, stepY := v.getStepLength(tickTime)
+	stepX, stepY := m.getStepLength(tickTime)
 
-	if d2common.AlmostEqual(v.LocationX, v.TargetX, stepX) {
-		v.LocationX = v.TargetX
+	if d2common.AlmostEqual(m.LocationX, m.TargetX, stepX) {
+		m.LocationX = m.TargetX
 	}
-	if d2common.AlmostEqual(v.LocationY, v.TargetY, stepY) {
-		v.LocationY = v.TargetY
+	if d2common.AlmostEqual(m.LocationY, m.TargetY, stepY) {
+		m.LocationY = m.TargetY
 	}
-	if v.LocationX != v.TargetX {
-		v.LocationX += stepX
+	if m.LocationX != m.TargetX {
+		m.LocationX += stepX
 	}
-	if v.LocationY != v.TargetY {
-		v.LocationY += stepY
+	if m.LocationY != m.TargetY {
+		m.LocationY += stepY
 	}
 
-	v.subcellX = 1 + math.Mod(v.LocationX, 5)
-	v.subcellY = 1 + math.Mod(v.LocationY, 5)
-	v.TileX = int(v.LocationX / 5)
-	v.TileY = int(v.LocationY / 5)
+	m.subcellX = 1 + math.Mod(m.LocationX, 5)
+	m.subcellY = 1 + math.Mod(m.LocationY, 5)
+	m.TileX = int(m.LocationX / 5)
+	m.TileY = int(m.LocationY / 5)
 
-	if (v.LocationX != v.TargetX) || (v.LocationY != v.TargetY) {
+	if (m.LocationX != m.TargetX) || (m.LocationY != m.TargetY) {
 		return
 	}
 
-	if len(v.path) > 0 {
-		v.SetTarget(v.path[0].(*PathTile).X*5, v.path[0].(*PathTile).Y*5, v.done)
+	if len(m.path) > 0 {
+		m.SetTarget(m.path[0].(*PathTile).X*5, m.path[0].(*PathTile).Y*5, m.done)
 
-		if len(v.path) > 1 {
-			v.path = v.path[1:]
+		if len(m.path) > 1 {
+			m.path = m.path[1:]
 		} else {
-			v.path = []astar.Pather{}
+			m.path = []astar.Pather{}
 		}
 		return
 	}
 
 }
 
-func (v *mapEntity) HasPathFinding() bool {
-	return len(v.path) > 0
+func (m *mapEntity) HasPathFinding() bool {
+	return len(m.path) > 0
 }
 
 // SetTarget sets target coordinates and changes animation based on proximity and direction
-func (v *mapEntity) SetTarget(tx, ty float64, done func()) {
-	v.TargetX, v.TargetY = tx, ty
-	v.done = done
+func (m *mapEntity) SetTarget(tx, ty float64, done func()) {
+	m.TargetX, m.TargetY = tx, ty
+	m.done = done
 
-	if v.directioner != nil {
+	if m.directioner != nil {
 		angle := 359 - d2common.GetAngleBetween(
-			v.LocationX,
-			v.LocationY,
+			m.LocationX,
+			m.LocationY,
 			tx,
 			ty,
 		)
-		v.directioner(float64(angle))
+		m.directioner(float64(angle))
 	}
 }
 
@@ -147,6 +147,6 @@ func angleToDirection(angle float64, numberOfDirections int) int {
 	return newDirection
 }
 
-func (v *mapEntity) GetPosition() (float64, float64) {
-	return float64(v.TileX), float64(v.TileY)
+func (m *mapEntity) GetPosition() (float64, float64) {
+	return float64(m.TileX), float64(m.TileY)
 }

@@ -174,11 +174,11 @@ func LoadDS1(fileData []byte) DS1 {
 		ds1.Objects = make([]d2data.Object, numberOfObjects)
 		for objIdx := 0; objIdx < int(numberOfObjects); objIdx++ {
 			newObject := d2data.Object{}
-			newObject.Type = br.GetInt32()
-			newObject.Id = br.GetInt32()
-			newObject.X = br.GetInt32()
-			newObject.Y = br.GetInt32()
-			newObject.Flags = br.GetInt32()
+			newObject.Type = int(br.GetInt32())
+			newObject.Id = int(br.GetInt32())
+			newObject.X = int(br.GetInt32())
+			newObject.Y = int(br.GetInt32())
+			newObject.Flags = int(br.GetInt32())
 			//TODO: There's a crash here, we aren't loading this data right....
 			newObject.Lookup = d2datadict.LookupObject(int(ds1.Act), int(newObject.Type), int(newObject.Id))
 			if newObject.Lookup != nil && newObject.Lookup.ObjectsTxtId != -1 {
@@ -212,8 +212,8 @@ func LoadDS1(fileData []byte) DS1 {
 		numberOfNpcs := br.GetInt32()
 		for npcIdx := 0; npcIdx < int(numberOfNpcs); npcIdx++ {
 			numPaths := br.GetInt32()
-			npcX := br.GetInt32()
-			npcY := br.GetInt32()
+			npcX := int(br.GetInt32())
+			npcY := int(br.GetInt32())
 			objIdx := -1
 			for idx, ds1Obj := range ds1.Objects {
 				if ds1Obj.X == npcX && ds1Obj.Y == npcY {
@@ -227,10 +227,10 @@ func LoadDS1(fileData []byte) DS1 {
 				}
 				for pathIdx := 0; pathIdx < int(numPaths); pathIdx++ {
 					newPath := d2common.Path{}
-					newPath.X = br.GetInt32()
-					newPath.Y = br.GetInt32()
+					newPath.X = int(br.GetInt32())
+					newPath.Y = int(br.GetInt32())
 					if ds1.Version >= 15 {
-						newPath.Action = br.GetInt32()
+						newPath.Action = int(br.GetInt32())
 					}
 					ds1.Objects[objIdx].Paths[pathIdx] = newPath
 				}
