@@ -1,7 +1,6 @@
 package d2map
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
@@ -42,21 +41,9 @@ func (ae AnimatedEntity) GetDirection() int {
 
 // rotate sets direction and changes animation
 func (ae *AnimatedEntity) rotate(angle float64) {
-	ae.direction = angleToDirection(angle, ae.animation.GetDirectionCount())
+	ae.direction = angleToDirection(angle)
 
-	var layerDirection int
-	switch ae.animation.GetDirectionCount() {
-	case 4:
-		layerDirection = d2dcc.CofToDir4[ae.direction]
-	case 8:
-		layerDirection = d2dcc.CofToDir8[ae.direction]
-	case 16:
-		layerDirection = d2dcc.CofToDir16[ae.direction]
-	case 32:
-		layerDirection = d2dcc.CofToDir32[ae.direction]
-	}
-
-	ae.animation.SetDirection(layerDirection)
+	ae.animation.SetDirection(ae.direction)
 }
 
 func (ae *AnimatedEntity) Advance(elapsed float64) {
