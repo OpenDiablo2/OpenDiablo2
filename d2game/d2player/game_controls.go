@@ -1,11 +1,14 @@
 package d2player
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -15,6 +18,9 @@ type Panel interface {
 	Open()
 	Close()
 }
+
+// ID of missile to create when user right clicks.
+var missileID = 59
 
 type GameControls struct {
 	hero      *d2map.Hero
@@ -30,6 +36,10 @@ type GameControls struct {
 }
 
 func NewGameControls(hero *d2map.Hero, mapEngine *d2map.MapEngine) *GameControls {
+	d2term.BindAction("setmissile", "set missile id to summon on right click", func(id int) {
+		missileID = id
+	})
+
 	return &GameControls{
 		hero:      hero,
 		mapEngine: mapEngine,
@@ -52,18 +62,42 @@ func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 }
 
 func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
+	px, py := g.mapEngine.ScreenToWorld(event.X, event.Y)
+	px = float64(int(px*10)) / 10.0
+	py = float64(int(py*10)) / 10.0
+	heroPosX := g.hero.AnimatedComposite.LocationX / 5.0
+	heroPosY := g.hero.AnimatedComposite.LocationY / 5.0
+
 	if event.Button == d2input.MouseButtonLeft {
-		px, py := g.mapEngine.ScreenToWorld(event.X, event.Y)
-		px = float64(int(px*10)) / 10.0
-		py = float64(int(py*10)) / 10.0
-		heroPosX := g.hero.AnimatedEntity.LocationX / 5.0
-		heroPosY := g.hero.AnimatedEntity.LocationY / 5.0
 		path, _, found := g.mapEngine.PathFind(heroPosX, heroPosY, px, py)
 		if found {
-			g.hero.AnimatedEntity.SetPath(path)
+			g.hero.AnimatedComposite.SetPath(path, func() {
+				g.hero.AnimatedComposite.SetAnimationMode(
+					d2enum.AnimationModeObjectNeutral.String(),
+				)
+			})
 		}
 		return true
 	}
+
+	if event.Button == d2input.MouseButtonRight {
+		missile, err := d2map.CreateMissile(
+			int(g.hero.AnimatedComposite.LocationX),
+			int(g.hero.AnimatedComposite.LocationY),
+			d2datadict.Missiles[missileID],
+		)
+		if err != nil {
+			return false
+		}
+
+		missile.SetTarget(px*5, py*5, func() {
+			g.mapEngine.RemoveEntity(missile)
+		})
+
+		g.mapEngine.AddEntity(missile)
+		return true
+	}
+
 	return false
 }
 

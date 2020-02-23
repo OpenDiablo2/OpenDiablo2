@@ -180,6 +180,7 @@ const (
 	ObjectData          = "/data/global/objects"
 	AnimationData       = "/data/global/animdata.d2"
 	PlayerAnimationBase = "/data/global/CHARS"
+	MissileData         = "/data/global/missiles"
 
 	// --- Inventory Data ---
 
