@@ -251,12 +251,9 @@ func (a *Animation) GetDirectionCount() int {
 }
 
 func (a *Animation) SetDirection(directionIndex int) error {
-	if directionIndex >= len(a.directions) {
-		return errors.New("invalid direction index")
-	}
-
-	a.directionIndex = directionIndex
+	a.directionIndex = d2dcc.Dir64ToDcc(directionIndex, len(a.directions))
 	a.frameIndex = 0
+
 	return nil
 }
 

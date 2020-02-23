@@ -1,7 +1,6 @@
 package d2map
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
@@ -44,7 +43,7 @@ func (ae AnimatedEntity) GetDirection() int {
 func (ae *AnimatedEntity) rotate(angle float64) {
 	ae.direction = angleToDirection(angle)
 
-	ae.animation.SetDirection(d2dcc.Dir64ToDcc(ae.direction, ae.animation.GetDirectionCount()))
+	ae.animation.SetDirection(ae.direction)
 }
 
 func (ae *AnimatedEntity) Advance(elapsed float64) {
