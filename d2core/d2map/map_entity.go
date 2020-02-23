@@ -1,9 +1,10 @@
 package d2map
 
 import (
+	"math"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/beefsack/go-astar"
-	"math"
 )
 
 // mapEntity represents an entity on the map that can be animated
@@ -130,18 +131,16 @@ func (m *mapEntity) SetTarget(tx, ty float64, done func()) {
 	}
 }
 
-func angleToDirection(angle float64, numberOfDirections int) int {
-	if numberOfDirections == 0 {
-		return 0
-	}
-
-	degreesPerDirection := 360.0 / float64(numberOfDirections)
+func angleToDirection(angle float64) int {
+	degreesPerDirection := 360.0 / 64.0
 	offset := 45.0 - (degreesPerDirection / 2)
+
 	newDirection := int((angle - offset) / degreesPerDirection)
-	if newDirection >= numberOfDirections {
-		newDirection = newDirection - numberOfDirections
+
+	if newDirection >= 64 {
+		newDirection = newDirection - 64
 	} else if newDirection < 0 {
-		newDirection = numberOfDirections + newDirection
+		newDirection = 64 + newDirection
 	}
 
 	return newDirection

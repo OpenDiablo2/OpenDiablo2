@@ -42,21 +42,9 @@ func (ae AnimatedEntity) GetDirection() int {
 
 // rotate sets direction and changes animation
 func (ae *AnimatedEntity) rotate(angle float64) {
-	ae.direction = angleToDirection(angle, ae.animation.GetDirectionCount())
+	ae.direction = angleToDirection(angle)
 
-	var layerDirection int
-	switch ae.animation.GetDirectionCount() {
-	case 4:
-		layerDirection = d2dcc.CofToDir4[ae.direction]
-	case 8:
-		layerDirection = d2dcc.CofToDir8[ae.direction]
-	case 16:
-		layerDirection = d2dcc.CofToDir16[ae.direction]
-	case 32:
-		layerDirection = d2dcc.CofToDir32[ae.direction]
-	}
-
-	ae.animation.SetDirection(layerDirection)
+	ae.animation.SetDirection(d2dcc.Dir64ToDcc(ae.direction, ae.animation.GetDirectionCount()))
 }
 
 func (ae *AnimatedEntity) Advance(elapsed float64) {

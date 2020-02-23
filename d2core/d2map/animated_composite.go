@@ -70,7 +70,7 @@ func (ac *AnimatedComposite) rotate(angle float64) {
 		ac.SetMode(newAnimationMode, ac.weaponClass, ac.direction)
 	}
 
-	newDirection := angleToDirection(angle, ac.composite.GetDirectionCount())
+	newDirection := angleToDirection(angle)
 	if newDirection != ac.direction {
 		ac.SetMode(ac.animationMode, ac.weaponClass, newDirection)
 	}

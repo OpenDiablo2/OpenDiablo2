@@ -3,6 +3,7 @@ package d2asset
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
@@ -126,8 +127,12 @@ func (c *Composite) createMode(animationMode, weaponClass string, direction int)
 		return nil, err
 	}
 
-	if direction >= cof.NumberOfDirections {
-		return nil, errors.New("invalid direction")
+	// oh god how do i math
+	offset := (64 / cof.NumberOfDirections) / 2
+	entityDirection := int(math.Trunc((float64(direction+offset)-64.0)*(-float64(cof.NumberOfDirections)/-64.0) + float64(cof.NumberOfDirections)))
+
+	if entityDirection >= cof.NumberOfDirections {
+		entityDirection = 0
 	}
 
 	animationKey := strings.ToLower(c.object.Token + animationMode + weaponClass)
@@ -139,7 +144,7 @@ func (c *Composite) createMode(animationMode, weaponClass string, direction int)
 	mode := &compositeMode{
 		animationMode:  animationMode,
 		weaponClass:    weaponClass,
-		direction:      direction,
+		direction:      entityDirection,
 		directionCount: cof.NumberOfDirections,
 		layers:         make([]*Animation, d2enum.CompositeTypeMax),
 		frameCount:     animationData[0].FramesPerDirection,
@@ -148,19 +153,7 @@ func (c *Composite) createMode(animationMode, weaponClass string, direction int)
 
 	mode.drawOrder = make([][]d2enum.CompositeType, mode.frameCount)
 	for frame := 0; frame < mode.frameCount; frame++ {
-		mode.drawOrder[frame] = cof.Priority[direction][frame]
-	}
-
-	var layerDirection int
-	switch cof.NumberOfDirections {
-	case 4:
-		layerDirection = d2dcc.CofToDir4[mode.direction]
-	case 8:
-		layerDirection = d2dcc.CofToDir8[mode.direction]
-	case 16:
-		layerDirection = d2dcc.CofToDir16[mode.direction]
-	case 32:
-		layerDirection = d2dcc.CofToDir32[mode.direction]
+		mode.drawOrder[frame] = cof.Priority[mode.direction][frame]
 	}
 
 	for _, cofLayer := range cof.CofLayers {
@@ -233,12 +226,14 @@ func (c *Composite) createMode(animationMode, weaponClass string, direction int)
 			}
 		}
 
+		assetDirection := d2dcc.Dir64ToDcc(direction, cof.NumberOfDirections)
+
 		layer, err := loadCompositeLayer(c.object, layerKey, layerValue, animationMode, weaponClass, c.palettePath, transparency)
 		if err == nil {
 			layer.SetPlaySpeed(mode.animationSpeed)
 			layer.PlayForward()
 			layer.SetBlend(blend)
-			layer.SetDirection(layerDirection)
+			layer.SetDirection(assetDirection)
 			mode.layers[cofLayer.Type] = layer
 		}
 	}
