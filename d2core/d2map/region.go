@@ -262,18 +262,18 @@ func (mr *MapRegion) loadEntities() []MapEntity {
 	var entities []MapEntity
 
 	for _, object := range mr.ds1.Objects {
-		worldX, worldY := mr.getTileWorldPosition(int(object.X), int(object.Y))
+		worldX, worldY := mr.getTileWorldPosition(object.X, object.Y)
 
 		switch object.Lookup.Type {
 		case d2datadict.ObjectTypeCharacter:
 			if object.Lookup.Base != "" && object.Lookup.Token != "" && object.Lookup.TR != "" {
-				npc := CreateNPC(int32(worldX), int32(worldY), object.Lookup, 0)
+				npc := CreateNPC(int(worldX), int(worldY), object.Lookup, 0)
 				npc.SetPaths(object.Paths)
 				entities = append(entities, npc)
 			}
 		case d2datadict.ObjectTypeItem:
 			if object.ObjectInfo != nil && object.ObjectInfo.Draw && object.Lookup.Base != "" && object.Lookup.Token != "" {
-				entity, err := CreateAnimatedEntity(int32(worldX), int32(worldY), object.Lookup, d2resource.PaletteUnits)
+				entity, err := CreateAnimatedComposite(int(worldX), int(worldY), object.Lookup, d2resource.PaletteUnits)
 				if err != nil {
 					panic(err)
 				}

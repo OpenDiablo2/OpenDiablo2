@@ -3,25 +3,29 @@ package d2map
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"math/rand"
 )
 
 type NPC struct {
-	AnimatedEntity *AnimatedEntity
-	HasPaths       bool
-	Paths          []d2common.Path
-	path           int
+	*AnimatedComposite
+	action      int
+	HasPaths    bool
+	Paths       []d2common.Path
+	path        int
+	isDone      bool
+	repetitions int
 }
 
-func CreateNPC(x, y int32, object *d2datadict.ObjectLookupRecord, direction int) *NPC {
-	entity, err := CreateAnimatedEntity(x, y, object, d2resource.PaletteUnits)
+func CreateNPC(x, y int, object *d2datadict.ObjectLookupRecord, direction int) *NPC {
+	entity, err := CreateAnimatedComposite(x, y, object, d2resource.PaletteUnits)
 	if err != nil {
 		panic(err)
 	}
 
-	result := &NPC{AnimatedEntity: entity, HasPaths: false}
-	result.AnimatedEntity.SetMode(object.Mode, object.Class, direction)
+	result := &NPC{AnimatedComposite: entity, HasPaths: false}
+	result.SetMode(object.Mode, object.Class, direction)
 	return result
 }
 
@@ -41,34 +45,52 @@ func (v *NPC) NextPath() d2common.Path {
 func (v *NPC) SetPaths(paths []d2common.Path) {
 	v.Paths = paths
 	v.HasPaths = len(paths) > 0
-}
-
-func (v *NPC) Render(target d2render.Surface) {
-	v.AnimatedEntity.Render(target)
-}
-
-func (v *NPC) GetPosition() (float64, float64) {
-	return v.AnimatedEntity.GetPosition()
+	v.isDone = true
 }
 
 func (v *NPC) Advance(tickTime float64) {
-	if v.HasPaths &&
-		v.AnimatedEntity.LocationX == v.AnimatedEntity.TargetX &&
-		v.AnimatedEntity.LocationY == v.AnimatedEntity.TargetY &&
-		v.AnimatedEntity.Wait() {
+	v.Step(tickTime)
+	v.AnimatedComposite.Advance(tickTime)
+
+	if v.HasPaths && v.wait() {
 		// If at the target, set target to the next path.
+		v.isDone = false
 		path := v.NextPath()
-		v.AnimatedEntity.SetTarget(
+		v.SetTarget(
 			float64(path.X),
 			float64(path.Y),
-			path.Action,
+			v.next,
 		)
+		v.action = path.Action
+	}
+}
+
+// If an npc has a path to pause at each location.
+// Waits for animation to end and all repetitions to be exhausted.
+func (v *NPC) wait() bool {
+	return v.isDone && v.composite.GetPlayedCount() > v.repetitions
+}
+
+func (v *NPC) next() {
+	v.isDone = true
+	v.repetitions = 3 + rand.Intn(5)
+	newAnimationMode := d2enum.AnimationModeObjectNeutral
+	// TODO: Figure out what 1-3 are for, 4 is correct.
+	switch v.action {
+	case 1:
+		newAnimationMode = d2enum.AnimationModeMonsterNeutral
+	case 2:
+		newAnimationMode = d2enum.AnimationModeMonsterNeutral
+	case 3:
+		newAnimationMode = d2enum.AnimationModeMonsterNeutral
+	case 4:
+		newAnimationMode = d2enum.AnimationModeMonsterSkill1
+		v.repetitions = 0
+	default:
+		v.repetitions = 0
 	}
 
-	if v.AnimatedEntity.LocationX != v.AnimatedEntity.TargetX ||
-		v.AnimatedEntity.LocationY != v.AnimatedEntity.TargetY {
-		v.AnimatedEntity.Step(tickTime)
+	if v.animationMode != newAnimationMode.String() {
+		v.SetMode(newAnimationMode.String(), v.weaponClass, v.direction)
 	}
-
-	v.AnimatedEntity.Advance(tickTime)
 }

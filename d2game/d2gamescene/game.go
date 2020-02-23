@@ -52,8 +52,8 @@ func (v *Game) OnLoad() error {
 
 	startX, startY := v.mapEngine.GetStartPosition()
 	v.hero = d2map.CreateHero(
-		int32(startX*5)+3,
-		int32(startY*5)+3,
+		int(startX*5)+3,
+		int(startY*5)+3,
 		0,
 		v.gameState.HeroType,
 		v.gameState.Equipment,
@@ -82,7 +82,7 @@ func (v *Game) Render(screen d2render.Surface) error {
 func (v *Game) Advance(tickTime float64) error {
 	v.mapEngine.Advance(tickTime)
 
-	rx, ry := v.mapEngine.WorldToOrtho(v.hero.AnimatedEntity.LocationX/5, v.hero.AnimatedEntity.LocationY/5)
+	rx, ry := v.mapEngine.WorldToOrtho(v.hero.AnimatedComposite.LocationX/5, v.hero.AnimatedComposite.LocationY/5)
 	v.mapEngine.MoveCameraTo(rx, ry)
 	return nil
 }

@@ -1,7 +1,6 @@
 package d2asset
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -28,7 +27,8 @@ func (am *animationManager) loadAnimation(animationPath, palettePath string, tra
 	}
 
 	var animation *Animation
-	switch strings.ToLower(filepath.Ext(animationPath)) {
+	ext := strings.ToLower(filepath.Ext(animationPath))
+	switch ext {
 	case ".dc6":
 		dc6, err := loadDC6(animationPath, palettePath)
 		if err != nil {
@@ -54,9 +54,8 @@ func (am *animationManager) loadAnimation(animationPath, palettePath string, tra
 		if err != nil {
 			return nil, err
 		}
-
 	default:
-		return nil, errors.New("unknown animation format")
+		return nil, fmt.Errorf("unknown animation format: %s", ext)
 	}
 
 	if err := am.cache.Insert(cachePath, animation.Clone(), 1); err != nil {

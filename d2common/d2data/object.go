@@ -6,11 +6,11 @@ import (
 )
 
 type Object struct {
-	Type       int32
-	Id         int32
-	X          int32
-	Y          int32
-	Flags      int32
+	Type       int
+	Id         int
+	X          int
+	Y          int
+	Flags      int
 	Paths      []d2common.Path
 	Lookup     *d2datadict.ObjectLookupRecord
 	ObjectInfo *d2datadict.ObjectRecord
