@@ -1,6 +1,7 @@
 package d2render
 
 import (
+	"image"
 	"image/color"
 )
 
@@ -19,4 +20,5 @@ type Surface interface {
 	PushTranslation(x, y int)
 	Render(surface Surface) error
 	ReplacePixels(pixels []byte) error
+	Screenshot() *image.RGBA
 }
