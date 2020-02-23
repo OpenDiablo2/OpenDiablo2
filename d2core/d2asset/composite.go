@@ -9,7 +9,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
@@ -226,14 +225,12 @@ func (c *Composite) createMode(animationMode, weaponClass string, direction int)
 			}
 		}
 
-		assetDirection := d2dcc.Dir64ToDcc(direction, cof.NumberOfDirections)
-
 		layer, err := loadCompositeLayer(c.object, layerKey, layerValue, animationMode, weaponClass, c.palettePath, transparency)
 		if err == nil {
 			layer.SetPlaySpeed(mode.animationSpeed)
 			layer.PlayForward()
 			layer.SetBlend(blend)
-			layer.SetDirection(assetDirection)
+			layer.SetDirection(direction)
 			mode.layers[cofLayer.Type] = layer
 		}
 	}
