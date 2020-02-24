@@ -22,6 +22,7 @@ import (
 	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2event"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
@@ -73,6 +74,10 @@ func main() {
 }
 
 func initialize() error {
+	if err := d2event.Initialize(); err != nil {
+		return err
+	}
+
 	singleton.timeScale = 1.0
 	singleton.lastTime = d2common.Now()
 
