@@ -60,6 +60,7 @@ func Initialize() error {
 		if err == nil {
 			encoder := json.NewEncoder(configFile)
 			defer configFile.Close()
+			encoder.SetIndent("", "    ")
 			encoder.Encode(getDefaultConfiguration())
 		} else {
 			log.Printf("failed to write default configuration (%s)", err)
