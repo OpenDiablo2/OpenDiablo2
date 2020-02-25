@@ -41,8 +41,9 @@ type Animation struct {
 	lastFrameTime  float64
 	playedCount    int
 
-	compositeMode d2render.CompositeMode
-	colorMod      color.Color
+	compositeMode  d2render.CompositeMode
+	colorMod       color.Color
+	originAtBottom bool
 
 	playMode         playMode
 	playLength       float64
@@ -116,8 +117,9 @@ func createAnimationFromDCC(dcc *d2dcc.DCC, palette *d2datadict.PaletteRec, tran
 
 func createAnimationFromDC6(dc6 *d2dc6.DC6File) (*Animation, error) {
 	animation := &Animation{
-		playLength: 1.0,
-		playLoop:   true,
+		playLength:     1.0,
+		playLoop:       true,
+		originAtBottom: true,
 	}
 
 	for frameIndex, dc6Frame := range dc6.Frames {
@@ -216,6 +218,17 @@ func (a *Animation) Render(target d2render.Surface) error {
 	target.PushColor(a.colorMod)
 	defer target.PopN(3)
 	return target.Render(frame.image)
+}
+
+func (a *Animation) RenderFromOrigin(target d2render.Surface) error {
+	if a.originAtBottom {
+		direction := a.directions[a.directionIndex]
+		frame := direction.frames[a.frameIndex]
+		target.PushTranslation(0, -frame.height)
+		defer target.Pop()
+	}
+
+	return a.Render(target)
 }
 
 func (a *Animation) GetFrameSize(frameIndex int) (int, int, error) {
