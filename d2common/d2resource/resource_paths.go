@@ -298,6 +298,5 @@ const (
 	PaletteTransformMenu3     = "/data/global/palette/menu3/Pal.pl2"
 	PaletteTransformMenu4     = "/data/global/palette/menu4/Pal.pl2"
 	PaletteTransformSky       = "/data/global/palette/sky/Pal.pl2"
-	PaletteTransformStatic    = "/data/global/palette/static/Pal.pl2"
 	PaletteTransformTrademark = "/data/global/palette/trademark/Pal.pl2"
 )
