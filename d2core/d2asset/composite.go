@@ -53,7 +53,7 @@ func (c *Composite) Render(target d2render.Surface) error {
 	for _, layerIndex := range c.mode.drawOrder[c.mode.frameIndex] {
 		layer := c.mode.layers[layerIndex]
 		if layer != nil {
-			if err := layer.Render(target); err != nil {
+			if err := layer.RenderFromOrigin(target); err != nil {
 				return err
 			}
 		}
