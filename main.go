@@ -180,6 +180,10 @@ func initialize() error {
 		return err
 	}
 
+	if err := loadPaletteTransforms(); err != nil {
+		return err
+	}
+
 	if err := loadStrings(); err != nil {
 		return err
 	}
@@ -402,7 +406,7 @@ func loadPalettes() error {
 	return nil
 }
 
-func loadPaletteTransformTransforms() error {
+func loadPaletteTransforms() error {
 	palNames := []string{
 		"act1",
 		"act2",
@@ -419,7 +423,6 @@ func loadPaletteTransformTransforms() error {
 		"menu3",
 		"menu4",
 		"sky",
-		"static",
 		"trademark",
 	}
 
@@ -432,7 +435,7 @@ func loadPaletteTransformTransforms() error {
 		d2datadict.LoadPaletteTransform(d2enum.PaletteTransformType(pal), file)
 	}
 
-	log.Printf("Loaded %d paletteTransforms", len(d2datadict.PaletteTransforms))
+	log.Printf("Loaded %d palette transforms", len(d2datadict.PaletteTransforms))
 	return nil
 }
 
