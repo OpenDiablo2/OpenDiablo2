@@ -402,6 +402,40 @@ func loadPalettes() error {
 	return nil
 }
 
+func loadPaletteTransformTransforms() error {
+	palNames := []string{
+		"act1",
+		"act2",
+		"act3",
+		"act4",
+		"act5",
+		"endgame",
+		"endgame2",
+		"fechar",
+		"loading",
+		"menu0",
+		"menu1",
+		"menu2",
+		"menu3",
+		"menu4",
+		"sky",
+		"static",
+		"trademark",
+	}
+
+	for _, pal := range palNames {
+		file, err := d2asset.LoadFile(`data\global\palette\` + pal + `\Pal.pl2`)
+		if err != nil {
+			return err
+		}
+
+		d2datadict.LoadPaletteTransform(d2enum.PaletteTransformType(pal), file)
+	}
+
+	log.Printf("Loaded %d paletteTransforms", len(d2datadict.PaletteTransforms))
+	return nil
+}
+
 func loadDataDict() error {
 	entries := []struct {
 		path   string
