@@ -15,16 +15,22 @@ var (
 )
 
 type assetManager struct {
-	archiveManager   *archiveManager
-	fileManager      *fileManager
-	paletteManager   *paletteManager
-	animationManager *animationManager
-	fontManager      *fontManager
+	archiveManager			*archiveManager
+	fileManager				*fileManager
+	paletteManager			*paletteManager
+	paletteTransformManager	*paletteTransformManager
+	animationManager		*animationManager
+	fontManager				*fontManager
 }
 
 func loadPalette(palettePath string) (*d2datadict.PaletteRec, error) {
 	verifyWasInit()
 	return singleton.paletteManager.loadPalette(palettePath)
+}
+
+func loadPL2(pl2Path string) (*d2datadict.PaletteTransformRec, error) {
+	verifyWasInit()
+	return singleton.paletteTransformManager.loadPaletteTransform(pl2Path)
 }
 
 func loadDC6(dc6Path, palettePath string) (*d2dc6.DC6File, error) {
