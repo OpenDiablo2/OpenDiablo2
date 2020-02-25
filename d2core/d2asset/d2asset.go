@@ -8,6 +8,7 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2pl2"
 )
 
 var singleton *assetManager
@@ -66,10 +67,6 @@ func Initialize() error {
 		fontManager.cache.Clear()
 	})
 
-	d2term.BindAction("load_pl2", "manually load PL2 file", func(path string) {
-		paletteTransformManager.loadPaletteTransform(path)
-	})
-
 	return nil
 }
 
@@ -103,7 +100,7 @@ func LoadAnimation(animationPath, palettePath string) (*Animation, error) {
 	return LoadAnimationWithTransparency(animationPath, palettePath, 255)
 }
 
-func LoadPaletteTransform(pl2Path string) (*d2datadict.PaletteTransformRec, error) {
+func LoadPaletteTransform(pl2Path string) (*d2pl2.PL2File, error) {
 	verifyWasInit()
 	return singleton.paletteTransformManager.loadPaletteTransform(pl2Path)
 }
