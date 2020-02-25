@@ -60,6 +60,10 @@ func loadFont(tablePath, spritePath, palettePath string) (*Font, error) {
 	return font, nil
 }
 
+func (f *Font) SetColor(color color.Color) {
+	f.color = color
+}
+
 func (f *Font) GetTextMetrics(text string) (int, int) {
 	var (
 		lineWidth   int
