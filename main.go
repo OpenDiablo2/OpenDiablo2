@@ -153,6 +153,9 @@ func initialize() error {
 	d2term.BindAction("quit", "exits the game", func() {
 		os.Exit(0)
 	})
+	d2term.BindAction("scene-gui", "enters the gui playground scene", func() {
+		d2scene.SetNextScene(d2gamescene.CreateGuiTestMain())
+	})
 
 	if err := d2asset.Initialize(); err != nil {
 		return err

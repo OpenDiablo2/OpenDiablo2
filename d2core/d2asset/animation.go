@@ -44,9 +44,12 @@ type Animation struct {
 	compositeMode d2render.CompositeMode
 	colorMod      color.Color
 
-	playMode   playMode
-	playLength float64
-	playLoop   bool
+	playMode         playMode
+	playLength       float64
+	playLoop         bool
+	hasSubLoop       bool // runs after first animation ends
+	subStartingFrame int
+	subEndingFrame   int
 }
 
 func createAnimationFromDCC(dcc *d2dcc.DCC, palette *d2datadict.PaletteRec, transparency int) (*Animation, error) {
@@ -150,6 +153,12 @@ func (a *Animation) Clone() *Animation {
 	return &animation
 }
 
+func (a *Animation) SetSubLoop(startFrame, EndFrame int) {
+	a.subStartingFrame = startFrame
+	a.subEndingFrame = EndFrame
+	a.hasSubLoop = true
+}
+
 func (a *Animation) Advance(elapsed float64) error {
 	if a.playMode == playModePause {
 		return nil
@@ -162,26 +171,33 @@ func (a *Animation) Advance(elapsed float64) error {
 	a.lastFrameTime -= float64(framesAdvanced) * frameLength
 
 	for i := 0; i < framesAdvanced; i++ {
+		startIndex := 0
+		endIndex := frameCount
+		if a.hasSubLoop && a.playedCount > 0 {
+			startIndex = a.subStartingFrame
+			endIndex = a.subEndingFrame
+		}
+
 		switch a.playMode {
 		case playModeForward:
 			a.frameIndex++
-			if a.frameIndex >= frameCount {
+			if a.frameIndex >= endIndex {
 				a.playedCount++
 				if a.playLoop {
-					a.frameIndex = 0
+					a.frameIndex = startIndex
 				} else {
-					a.frameIndex = frameCount - 1
+					a.frameIndex = endIndex - 1
 					break
 				}
 			}
 		case playModeBackward:
 			a.frameIndex--
-			if a.frameIndex < 0 {
+			if a.frameIndex < startIndex {
 				a.playedCount++
 				if a.playLoop {
-					a.frameIndex = frameCount - 1
+					a.frameIndex = endIndex - 1
 				} else {
-					a.frameIndex = 0
+					a.frameIndex = startIndex
 					break
 				}
 			}

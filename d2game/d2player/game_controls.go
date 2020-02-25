@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -90,7 +91,13 @@ func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
 			return false
 		}
 
-		missile.SetTarget(px*5, py*5, func() {
+		rads := d2common.GetRadiansBetween(
+			g.hero.AnimatedComposite.LocationX,
+			g.hero.AnimatedComposite.LocationY,
+			px*5,
+			py*5,
+		)
+		missile.SetRadians(rads, func() {
 			g.mapEngine.RemoveEntity(missile)
 		})
 

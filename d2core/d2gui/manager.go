@@ -11,7 +11,7 @@ import (
 )
 
 type manager struct {
-	Layout
+	layout *Layout
 
 	cursorAnim    *d2asset.Animation
 	cursorX       int
@@ -46,19 +46,35 @@ func createGuiManager() (*manager, error) {
 	return manager, nil
 }
 
+func (m *manager) SetLayout(layout *Layout) {
+	m.layout = layout
+}
+
 func (m *manager) OnMouseButtonDown(event d2input.MouseEvent) bool {
-	return m.Layout.onMouseButtonDown(event)
+	if m.layout == nil {
+		return false
+	}
+
+	return m.layout.onMouseButtonDown(event)
 }
 
 func (m *manager) OnMouseButtonUp(event d2input.MouseEvent) bool {
-	return m.Layout.onMouseButtonUp(event)
+	if m.layout == nil {
+		return false
+	}
+
+	return m.layout.onMouseButtonUp(event)
 }
 
 func (m *manager) OnMouseMove(event d2input.MouseMoveEvent) bool {
 	m.cursorX = event.X
 	m.cursorY = event.Y
 
-	return m.Layout.onMouseMove(event)
+	if m.layout == nil {
+		return false
+	}
+
+	return m.layout.onMouseMove(event)
 }
 
 func (m *manager) render(target d2render.Surface) error {
@@ -66,8 +82,9 @@ func (m *manager) render(target d2render.Surface) error {
 		if err := m.renderLoadScreen(target); err != nil {
 			return err
 		}
-	} else {
-		if err := m.Layout.render(target); err != nil {
+	} else if m.layout != nil {
+		m.layout.SetSize(target.GetSize())
+		if err := m.layout.render(target); err != nil {
 			return err
 		}
 	}
@@ -103,8 +120,8 @@ func (m *manager) renderCursor(target d2render.Surface) error {
 }
 
 func (m *manager) advance(elapsed float64) error {
-	if !m.loading {
-		if err := m.Layout.advance(elapsed); err != nil {
+	if !m.loading && m.layout != nil {
+		if err := m.layout.advance(elapsed); err != nil {
 			return err
 		}
 	}
@@ -136,6 +153,6 @@ func (m *manager) hideCursor() {
 }
 
 func (m *manager) clear() {
-	m.Layout.clear()
+	m.SetLayout(nil)
 	m.hideLoadScreen()
 }

@@ -34,21 +34,14 @@ func Advance(elapsed float64) error {
 	return singleton.advance(elapsed)
 }
 
-func AddLayout() *Layout {
-	return singleton.addLayout()
-}
-
-func AddSprite(imagePath, palettePath string) *Sprite {
-	return singleton.addSprite(imagePath, palettePath)
-}
-
-func AddLabel(text string, fontStyle FontStyle) *Label {
-	return singleton.addLabel(text, fontStyle)
-}
-
-func Clear() {
+func CreateLayout(positionType PositionType) *Layout {
 	verifyWasInit()
-	singleton.clear()
+	return createLayout(positionType)
+}
+
+func SetLayout(layout *Layout) {
+	verifyWasInit()
+	singleton.SetLayout(layout)
 }
 
 func ShowLoadScreen(progress float64) {
