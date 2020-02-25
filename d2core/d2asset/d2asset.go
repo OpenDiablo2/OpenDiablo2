@@ -66,6 +66,10 @@ func Initialize() error {
 		fontManager.cache.Clear()
 	})
 
+	d2term.BindAction("load_pl2", "manually load PL2 file", func(path string) {
+		paletteTransformManager.loadPaletteTransform(path)
+	})
+
 	return nil
 }
 
@@ -97,6 +101,11 @@ func FileExists(filePath string) (bool, error) {
 func LoadAnimation(animationPath, palettePath string) (*Animation, error) {
 	verifyWasInit()
 	return LoadAnimationWithTransparency(animationPath, palettePath, 255)
+}
+
+func LoadPaletteTransform(pl2Path string) (*d2datadict.PaletteTransformRec, error) {
+	verifyWasInit()
+	return singleton.paletteTransformManager.loadPaletteTransform(pl2Path)
 }
 
 func LoadAnimationWithTransparency(animationPath, palettePath string, transparency int) (*Animation, error) {
