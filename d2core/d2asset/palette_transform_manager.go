@@ -22,14 +22,16 @@ func (pm *paletteTransformManager) loadPaletteTransform(path string) (*d2pl2.PL2
 		return pl2.(*d2pl2.PL2File), nil
 	}
 
-	if data, err := LoadFile(path); err != nil {
+	data, err := LoadFile(path); 
+	if err != nil {
 		return nil, err
-	} else {
-		pl2, err := d2pl2.LoadPL2(data)
-		if err != nil {
-			return nil, err
-		}
-		pm.cache.Insert(path, &pl2, 1)
-		return &pl2, nil
 	}
+
+	pl2, err := d2pl2.LoadPL2(data)
+	if err != nil {
+		return nil, err
+	}
+
+	pm.cache.Insert(path, pl2, 1)
+	return pl2, nil
 }

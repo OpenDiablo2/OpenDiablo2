@@ -49,11 +49,15 @@ type PL2PaletteTransform struct {
 }
 
 // uses restruct to read the binary dc6 data into structs
-func LoadPL2(data []byte) (PL2File, error) {
+func LoadPL2(data []byte) (*PL2File, error) {
 	result := &PL2File{}
 
 	restruct.EnableExprBeta()
-	err := restruct.Unpack(data, binary.LittleEndian, &result)
 
-	return *result, err
+	err := restruct.Unpack(data, binary.LittleEndian, &result)
+	if err != nil {
+	  return nil, err
+	}
+
+	return result, nil
 }

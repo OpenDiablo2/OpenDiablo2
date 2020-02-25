@@ -7,7 +7,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2pl2"
 )
 
 var (
@@ -27,11 +26,6 @@ type assetManager struct {
 func loadPalette(palettePath string) (*d2datadict.PaletteRec, error) {
 	verifyWasInit()
 	return singleton.paletteManager.loadPalette(palettePath)
-}
-
-func loadPL2(pl2Path string) (*d2pl2.PL2File, error) {
-	verifyWasInit()
-	return singleton.paletteTransformManager.loadPaletteTransform(pl2Path)
 }
 
 func loadDC6(dc6Path, palettePath string) (*d2dc6.DC6File, error) {
