@@ -1,7 +1,7 @@
 package d2dt1
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
@@ -19,13 +19,13 @@ const (
 	BlockFormatIsometric BlockDataFormat = 1
 )
 
-func LoadDT1(fileData []byte) DT1 {
-	result := DT1{}
+func LoadDT1(fileData []byte) (*DT1, error) {
+	result := &DT1{}
 	br := d2common.CreateStreamReader(fileData)
 	ver1 := br.GetInt32()
 	ver2 := br.GetInt32()
 	if ver1 != 7 || ver2 != 6 {
-		log.Panicf("Expected to have a version of 7.6, but got %d.%d instead", ver1, ver2)
+		return nil, fmt.Errorf("Expected to have a version of 7.6, but got %d.%d instead", ver1, ver2)
 	}
 	br.SkipBytes(260)
 	numberOfTiles := br.GetInt32()
@@ -79,5 +79,5 @@ func LoadDT1(fileData []byte) DT1 {
 		}
 
 	}
-	return result
+	return result, nil
 }
