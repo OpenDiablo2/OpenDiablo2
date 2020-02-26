@@ -6,7 +6,7 @@ import (
 	"math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 
@@ -53,7 +53,7 @@ type Animation struct {
 	subEndingFrame   int
 }
 
-func createAnimationFromDCC(dcc *d2dcc.DCC, palette *d2datadict.PaletteRec, transparency int) (*Animation, error) {
+func createAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transparency int) (*Animation, error) {
 	animation := &Animation{
 		playLength: 1.0,
 		playLoop:   true,
@@ -115,7 +115,7 @@ func createAnimationFromDCC(dcc *d2dcc.DCC, palette *d2datadict.PaletteRec, tran
 	return animation, nil
 }
 
-func createAnimationFromDC6(dc6 *d2dc6.DC6File, palette *d2datadict.PaletteRec) (*Animation, error) {
+func createAnimationFromDC6(dc6 *d2dc6.DC6File, palette *d2dat.DATPalette) (*Animation, error) {
 	animation := &Animation{
 		playLength:     1.0,
 		playLoop:       true,

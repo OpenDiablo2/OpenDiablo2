@@ -2,7 +2,7 @@ package d2asset
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 )
 
 type paletteManager struct {
@@ -17,9 +17,9 @@ func createPaletteManager() *paletteManager {
 	return &paletteManager{d2common.CreateCache(paletteBudget)}
 }
 
-func (pm *paletteManager) loadPalette(palettePath string) (*d2datadict.PaletteRec, error) {
+func (pm *paletteManager) loadPalette(palettePath string) (*d2dat.DATPalette, error) {
 	if palette, found := pm.cache.Retrieve(palettePath); found {
-		return palette.(*d2datadict.PaletteRec), nil
+		return palette.(*d2dat.DATPalette), nil
 	}
 
 	paletteData, err := LoadFile(palettePath)
@@ -27,7 +27,11 @@ func (pm *paletteManager) loadPalette(palettePath string) (*d2datadict.PaletteRe
 		return nil, err
 	}
 
-	palette := d2datadict.CreatePalette("", paletteData)
-	pm.cache.Insert(palettePath, &palette, 1)
-	return &palette, nil
+	palette, err := d2dat.LoadDAT(paletteData)
+	if err != nil {
+		return nil, err
+	}
+
+	pm.cache.Insert(palettePath, palette, 1)
+	return palette, nil
 }

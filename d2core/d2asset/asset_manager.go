@@ -3,8 +3,8 @@ package d2asset
 import (
 	"errors"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 )
@@ -22,7 +22,7 @@ type assetManager struct {
 	fontManager      *fontManager
 }
 
-func loadPalette(palettePath string) (*d2datadict.PaletteRec, error) {
+func loadPalette(palettePath string) (*d2dat.DATPalette, error) {
 	verifyWasInit()
 	return singleton.paletteManager.loadPalette(palettePath)
 }
