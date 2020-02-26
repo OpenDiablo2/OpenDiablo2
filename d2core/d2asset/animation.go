@@ -115,7 +115,7 @@ func createAnimationFromDCC(dcc *d2dcc.DCC, palette *d2datadict.PaletteRec, tran
 	return animation, nil
 }
 
-func createAnimationFromDC6(dc6 *d2dc6.DC6File) (*Animation, error) {
+func createAnimationFromDC6(dc6 *d2dc6.DC6File, palette *d2datadict.PaletteRec) (*Animation, error) {
 	animation := &Animation{
 		playLength:     1.0,
 		playLoop:       true,
@@ -128,7 +128,52 @@ func createAnimationFromDC6(dc6 *d2dc6.DC6File) (*Animation, error) {
 			return nil, err
 		}
 
-		if err := image.ReplacePixels(dc6Frame.ColorData()); err != nil {
+		indexData := make([]int, dc6Frame.Width*dc6Frame.Height)
+		for i := range indexData {
+			indexData[i] = -1
+		}
+
+		x := 0
+		y := int(dc6Frame.Height) - 1
+		offset := 0
+
+		for {
+			b := int(dc6Frame.FrameData[offset])
+			offset++
+
+			if b == 0x80 {
+				if y == 0 {
+					break
+				}
+				y--
+				x = 0
+			} else if b&0x80 > 0 {
+				transparentPixels := b & 0x7f
+				for i := 0; i < transparentPixels; i++ {
+					indexData[x+y*int(dc6Frame.Width)+i] = -1
+				}
+				x += transparentPixels
+			} else {
+				for i := 0; i < b; i++ {
+					indexData[x+y*int(dc6Frame.Width)+i] = int(dc6Frame.FrameData[offset])
+					offset++
+				}
+				x += b
+			}
+		}
+
+		colorData := make([]byte, dc6Frame.Width*dc6Frame.Height*4)
+		for i := 0; i < int(dc6Frame.Width*dc6Frame.Height); i++ {
+			if indexData[i] < 1 { // TODO: Is this == -1 or < 1?
+				continue
+			}
+			colorData[i*4] = palette.Colors[indexData[i]].R
+			colorData[i*4+1] = palette.Colors[indexData[i]].G
+			colorData[i*4+2] = palette.Colors[indexData[i]].B
+			colorData[i*4+3] = 0xff
+		}
+
+		if err := image.ReplacePixels(colorData); err != nil {
 			return nil, err
 		}
 

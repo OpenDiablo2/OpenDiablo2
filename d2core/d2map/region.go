@@ -80,7 +80,7 @@ type MapRegion struct {
 	levelType         d2datadict.LevelTypeRecord
 	levelPreset       d2datadict.LevelPresetRecord
 	tiles             []d2dt1.Tile
-	ds1               d2ds1.DS1
+	ds1               *d2ds1.DS1
 	palette           d2datadict.PaletteRec
 	startX            float64
 	startY            float64
@@ -111,7 +111,7 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 				panic(err)
 			}
 
-			dt1 := d2dt1.LoadDT1(fileData)
+			dt1, _ := d2dt1.LoadDT1(fileData)
 			region.tiles = append(region.tiles, dt1.Tiles...)
 		}
 	}
@@ -137,7 +137,7 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 	if err != nil {
 		panic(err)
 	}
-	region.ds1 = d2ds1.LoadDS1(fileData)
+	region.ds1, _ = d2ds1.LoadDS1(fileData)
 	region.tileRect = d2common.Rectangle{
 		Left:   tileOffsetX,
 		Top:    tileOffsetY,
