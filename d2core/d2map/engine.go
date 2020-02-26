@@ -25,7 +25,7 @@ type MapEngine struct {
 	debugVisLevel int
 
 	regions  []*MapRegion
-	entities []MapEntity
+	entities MapEntitiesSearcher
 	viewport *Viewport
 	camera   Camera
 }
@@ -34,6 +34,7 @@ func CreateMapEngine(gameState *d2gamestate.GameState) *MapEngine {
 	engine := &MapEngine{
 		gameState: gameState,
 		viewport:  NewViewport(0, 0, 800, 600),
+		entities:  NewRangeSearcher(),
 	}
 
 	d2term.BindAction("mapdebugvis", "set map debug visualization level", func(level int) {
@@ -88,7 +89,7 @@ func (m *MapEngine) WorldToOrtho(x, y float64) (float64, float64) {
 func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) {
 	region, entities := loadRegion(m.gameState.Seed, 0, 0, regionType, levelPreset, fileIndex)
 	m.regions = append(m.regions, region)
-	m.entities = append(m.entities, entities...)
+	m.entities.Add(entities...)
 }
 
 func (m *MapEngine) GenerateAct1Overworld() {
@@ -96,16 +97,16 @@ func (m *MapEngine) GenerateAct1Overworld() {
 
 	region, entities := loadRegion(m.gameState.Seed, 0, 0, d2enum.RegionAct1Town, 1, -1)
 	m.regions = append(m.regions, region)
-	m.entities = append(m.entities, entities...)
+	m.entities.Add(entities...)
 
 	if strings.Contains(region.regionPath, "E1") {
 		region, entities := loadRegion(m.gameState.Seed, region.tileRect.Width-1, 0, d2enum.RegionAct1Town, 2, -1)
 		m.AppendRegion(region)
-		m.entities = append(m.entities, entities...)
+		m.entities.Add(entities...)
 	} else if strings.Contains(region.regionPath, "S1") {
 		region, entities := loadRegion(m.gameState.Seed, 0, region.tileRect.Height-1, d2enum.RegionAct1Town, 3, -1)
 		m.AppendRegion(region)
-		m.entities = append(m.entities, entities...)
+		m.entities.Add(entities...)
 	}
 }
 
@@ -125,7 +126,7 @@ func (m *MapEngine) GetRegionAtTile(x, y int) *MapRegion {
 }
 
 func (m *MapEngine) AddEntity(entity MapEntity) {
-	m.entities = append(m.entities, entity)
+	m.entities.Add(entity)
 }
 
 func (m *MapEngine) RemoveEntity(entity MapEntity) {
@@ -133,15 +134,7 @@ func (m *MapEngine) RemoveEntity(entity MapEntity) {
 		return
 	}
 
-	// In-place filter to remove the given entity.
-	n := 0
-	for _, check := range m.entities {
-		if check != entity {
-			m.entities[n] = check
-			n++
-		}
-	}
-	m.entities = m.entities[:n]
+	m.entities.Remove(entity)
 }
 
 func (m *MapEngine) Advance(tickTime float64) {
@@ -151,9 +144,11 @@ func (m *MapEngine) Advance(tickTime float64) {
 		}
 	}
 
-	for _, entity := range m.entities {
+	for _, entity := range m.entities.All() {
 		entity.Advance(tickTime)
 	}
+
+	m.entities.Update()
 }
 
 func (m *MapEngine) Render(target d2render.Surface) {

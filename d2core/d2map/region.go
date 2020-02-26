@@ -374,7 +374,10 @@ func (mr *MapRegion) renderPass1(viewport *Viewport, target d2render.Surface) {
 	}
 }
 
-func (mr *MapRegion) renderPass2(entities []MapEntity, viewport *Viewport, target d2render.Surface) {
+func (mr *MapRegion) renderPass2(entities MapEntitiesSearcher, viewport *Viewport, target d2render.Surface) {
+	tileEntities := entities.SearchByRect(mr.tileRect)
+	nextIndex := 0
+
 	for tileY := range mr.ds1.Tiles {
 		for tileX, tile := range mr.ds1.Tiles[tileY] {
 			worldX, worldY := mr.getTileWorldPosition(tileX, tileY)
@@ -382,12 +385,17 @@ func (mr *MapRegion) renderPass2(entities []MapEntity, viewport *Viewport, targe
 				viewport.PushTranslationWorld(worldX, worldY)
 				mr.renderTilePass2(tile, viewport, target)
 
-				for _, entity := range entities {
-					entWorldX, entWorldY := entity.GetPosition()
-					if entWorldX == worldX && entWorldY == worldY {
+				for nextIndex < len(tileEntities) {
+					nextX, nextY := tileEntities[nextIndex].GetPosition()
+					if nextX == worldX && nextY == worldY {
 						target.PushTranslation(viewport.GetTranslationScreen())
-						entity.Render(target)
+						tileEntities[nextIndex].Render(target)
 						target.Pop()
+						nextIndex++
+					} else if (nextY == worldY && nextX < worldX) || nextY < worldY {
+						nextIndex++
+					} else {
+						break
 					}
 				}
 
