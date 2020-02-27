@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
@@ -107,6 +108,11 @@ func LoadComposite(object *d2datadict.ObjectLookupRecord, palettePath string) (*
 func LoadFont(tablePath, spritePath, palettePath string) (*Font, error) {
 	verifyWasInit()
 	return singleton.fontManager.loadFont(tablePath, spritePath, palettePath)
+}
+
+func LoadPalette(palettePath string) (*d2dat.DATPalette, error) {
+	verifyWasInit()
+	return singleton.paletteManager.loadPalette(palettePath)
 }
 
 func verifyWasInit() {

@@ -18,7 +18,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescene"
 
@@ -176,10 +175,6 @@ func initialize() error {
 	d2audio.SetVolumes(config.BgmVolume, config.SfxVolume)
 
 	if err := loadDataDict(); err != nil {
-		return err
-	}
-
-	if err := loadPalettes(); err != nil {
 		return err
 	}
 
@@ -367,41 +362,6 @@ func renderDebug(target d2render.Surface) error {
 		target.PopN(5)
 	}
 
-	return nil
-}
-
-func loadPalettes() error {
-	palNames := []string{
-		"act1",
-		"act2",
-		"act3",
-		"act4",
-		"act5",
-		"endgame",
-		"endgame2",
-		"fechar",
-		"loading",
-		"menu0",
-		"menu1",
-		"menu2",
-		"menu3",
-		"menu4",
-		"sky",
-		"static",
-		"trademark",
-		"units",
-	}
-
-	for _, pal := range palNames {
-		file, err := d2asset.LoadFile(`data\global\palette\` + pal + `\pal.dat`)
-		if err != nil {
-			return err
-		}
-
-		d2datadict.LoadPalette(d2enum.PaletteType(pal), file)
-	}
-
-	log.Printf("Loaded %d palettes", len(d2datadict.Palettes))
 	return nil
 }
 
