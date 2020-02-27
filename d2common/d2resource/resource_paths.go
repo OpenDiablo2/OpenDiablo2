@@ -280,4 +280,23 @@ const (
 	PaletteStatic    = "/data/global/palette/static/pal.dat"
 	PaletteTrademark = "/data/global/palette/trademark/pal.dat"
 	PaletteUnits     = "/data/global/palette/units/pal.dat"
+
+	// --- Palette Transforms ---
+
+	PaletteTransformAct1      = "/data/global/palette/act1/Pal.pl2"
+	PaletteTransformAct2      = "/data/global/palette/act2/Pal.pl2"
+	PaletteTransformAct3      = "/data/global/palette/act3/Pal.pl2"
+	PaletteTransformAct4      = "/data/global/palette/act4/Pal.pl2"
+	PaletteTransformAct5      = "/data/global/palette/act5/Pal.pl2"
+	PaletteTransformEndGame   = "/data/global/palette/endgame/Pal.pl2"
+	PaletteTransformEndGame2  = "/data/global/palette/endgame2/Pal.pl2"
+	PaletteTransformFechar    = "/data/global/palette/fechar/Pal.pl2"
+	PaletteTransformLoading   = "/data/global/palette/loading/Pal.pl2"
+	PaletteTransformMenu0     = "/data/global/palette/menu0/Pal.pl2"
+	PaletteTransformMenu1     = "/data/global/palette/menu1/Pal.pl2"
+	PaletteTransformMenu2     = "/data/global/palette/menu2/Pal.pl2"
+	PaletteTransformMenu3     = "/data/global/palette/menu3/Pal.pl2"
+	PaletteTransformMenu4     = "/data/global/palette/menu4/Pal.pl2"
+	PaletteTransformSky       = "/data/global/palette/sky/Pal.pl2"
+	PaletteTransformTrademark = "/data/global/palette/trademark/Pal.pl2"
 )

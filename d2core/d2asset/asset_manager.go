@@ -14,11 +14,12 @@ var (
 )
 
 type assetManager struct {
-	archiveManager   *archiveManager
-	fileManager      *fileManager
-	paletteManager   *paletteManager
-	animationManager *animationManager
-	fontManager      *fontManager
+	archiveManager			*archiveManager
+	fileManager				*fileManager
+	paletteManager			*paletteManager
+	paletteTransformManager	*paletteTransformManager
+	animationManager		*animationManager
+	fontManager				*fontManager
 }
 
 func loadDC6(dc6Path string) (*d2dc6.DC6File, error) {
