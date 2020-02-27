@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 )
@@ -20,11 +19,6 @@ type assetManager struct {
 	paletteManager   *paletteManager
 	animationManager *animationManager
 	fontManager      *fontManager
-}
-
-func loadPalette(palettePath string) (*d2dat.DATPalette, error) {
-	verifyWasInit()
-	return singleton.paletteManager.loadPalette(palettePath)
 }
 
 func loadDC6(dc6Path string) (*d2dc6.DC6File, error) {

@@ -1,15 +1,16 @@
 package d2map
 
 import (
+	"errors"
 	"image/color"
 	"log"
 	"math"
 	"math/rand"
-	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -81,7 +82,7 @@ type MapRegion struct {
 	levelPreset       d2datadict.LevelPresetRecord
 	tiles             []d2dt1.Tile
 	ds1               *d2ds1.DS1
-	palette           d2datadict.PaletteRec
+	palette           *d2dat.DATPalette
 	startX            float64
 	startY            float64
 	imageCacheRecords map[uint32]d2render.Surface
@@ -99,10 +100,7 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 		seed:              seed,
 	}
 
-	region.palette = d2datadict.Palettes[d2enum.PaletteType("act"+strconv.Itoa(region.levelType.Act))]
-	if levelType == d2enum.RegionAct5Lava {
-		region.palette = d2datadict.Palettes[d2enum.PaletteType("act4")]
-	}
+	region.palette, _ = loadPaletteForAct(levelType)
 
 	for _, levelTypeDt1 := range region.levelType.Files {
 		if len(levelTypeDt1) != 0 && levelTypeDt1 != "" && levelTypeDt1 != "0" {
@@ -823,6 +821,7 @@ func (mr *MapRegion) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, til
 					colorIndex := block.EncodedData[idx]
 					if colorIndex != 0 {
 						pixelColor := mr.palette.Colors[colorIndex]
+
 						offset := 4 * (((blockY + y + tileYOffset) * tileWidth) + (blockX + x))
 						(*pixels)[offset] = pixelColor.R
 						(*pixels)[offset+1] = pixelColor.G
@@ -837,4 +836,34 @@ func (mr *MapRegion) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, til
 			}
 		}
 	}
+}
+
+func loadPaletteForAct(levelType d2enum.RegionIdType) (*d2dat.DATPalette, error) {
+	var palettePath string
+	switch levelType {
+	case d2enum.RegionAct1Town, d2enum.RegionAct1Wilderness, d2enum.RegionAct1Cave, d2enum.RegionAct1Crypt,
+		d2enum.RegionAct1Monestary, d2enum.RegionAct1Courtyard, d2enum.RegionAct1Barracks,
+		d2enum.RegionAct1Jail, d2enum.RegionAct1Cathedral, d2enum.RegionAct1Catacombs, d2enum.RegionAct1Tristram:
+		palettePath = d2resource.PaletteAct1
+		break
+	case d2enum.RegionAct2Town, d2enum.RegionAct2Sewer, d2enum.RegionAct2Harem, d2enum.RegionAct2Basement,
+		d2enum.RegionAct2Desert, d2enum.RegionAct2Tomb, d2enum.RegionAct2Lair, d2enum.RegionAct2Arcane:
+		palettePath = d2resource.PaletteAct2
+		break
+	case d2enum.RegionAct3Town, d2enum.RegionAct3Jungle, d2enum.RegionAct3Kurast, d2enum.RegionAct3Spider,
+		d2enum.RegionAct3Dungeon, d2enum.RegionAct3Sewer:
+		palettePath = d2resource.PaletteAct3
+		break
+	case d2enum.RegionAct4Town, d2enum.RegionAct4Mesa, d2enum.RegionAct4Lava, d2enum.RegionAct5Lava:
+		palettePath = d2resource.PaletteAct4
+		break
+	case d2enum.RegonAct5Town, d2enum.RegionAct5Siege, d2enum.RegionAct5Barricade, d2enum.RegionAct5Temple,
+		d2enum.RegionAct5IceCaves, d2enum.RegionAct5Baal:
+		palettePath = d2resource.PaletteAct5
+		break
+	default:
+		return nil, errors.New("failed to find palette for region")
+	}
+
+	return d2asset.LoadPalette(palettePath)
 }

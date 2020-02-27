@@ -35,7 +35,7 @@ func (am *animationManager) loadAnimation(animationPath, palettePath string, tra
 			return nil, err
 		}
 
-		palette, err := loadPalette(palettePath)
+		palette, err := LoadPalette(palettePath)
 		if err != nil {
 			return nil, err
 		}
@@ -50,7 +50,7 @@ func (am *animationManager) loadAnimation(animationPath, palettePath string, tra
 			return nil, err
 		}
 
-		palette, err := loadPalette(palettePath)
+		palette, err := LoadPalette(palettePath)
 		if err != nil {
 			return nil, err
 		}
