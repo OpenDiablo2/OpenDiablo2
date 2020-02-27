@@ -24,8 +24,8 @@ type DS1 struct {
 	SubstitutionGroups         []SubstitutionGroup
 }
 
-func LoadDS1(fileData []byte) DS1 {
-	ds1 := DS1{
+func LoadDS1(fileData []byte) (*DS1, error) {
+	ds1 := &DS1{
 		NumberOfFloors:             1,
 		NumberOfWalls:              1,
 		NumberOfShadowLayers:       1,
@@ -243,5 +243,5 @@ func LoadDS1(fileData []byte) DS1 {
 			}
 		}
 	}
-	return ds1
+	return ds1, nil
 }

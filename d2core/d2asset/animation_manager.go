@@ -30,12 +30,17 @@ func (am *animationManager) loadAnimation(animationPath, palettePath string, tra
 	ext := strings.ToLower(filepath.Ext(animationPath))
 	switch ext {
 	case ".dc6":
-		dc6, err := loadDC6(animationPath, palettePath)
+		dc6, err := loadDC6(animationPath)
 		if err != nil {
 			return nil, err
 		}
 
-		animation, err = createAnimationFromDC6(dc6)
+		palette, err := loadPalette(palettePath)
+		if err != nil {
+			return nil, err
+		}
+
+		animation, err = createAnimationFromDC6(dc6, palette)
 		if err != nil {
 			return nil, err
 		}

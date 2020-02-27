@@ -80,7 +80,7 @@ type MapRegion struct {
 	levelType         d2datadict.LevelTypeRecord
 	levelPreset       d2datadict.LevelPresetRecord
 	tiles             []d2dt1.Tile
-	ds1               d2ds1.DS1
+	ds1               *d2ds1.DS1
 	palette           d2datadict.PaletteRec
 	startX            float64
 	startY            float64
@@ -111,7 +111,7 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 				panic(err)
 			}
 
-			dt1 := d2dt1.LoadDT1(fileData)
+			dt1, _ := d2dt1.LoadDT1(fileData)
 			region.tiles = append(region.tiles, dt1.Tiles...)
 		}
 	}
@@ -137,7 +137,7 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 	if err != nil {
 		panic(err)
 	}
-	region.ds1 = d2ds1.LoadDS1(fileData)
+	region.ds1, _ = d2ds1.LoadDS1(fileData)
 	region.tileRect = d2common.Rectangle{
 		Left:   tileOffsetX,
 		Top:    tileOffsetY,
@@ -374,7 +374,10 @@ func (mr *MapRegion) renderPass1(viewport *Viewport, target d2render.Surface) {
 	}
 }
 
-func (mr *MapRegion) renderPass2(entities []MapEntity, viewport *Viewport, target d2render.Surface) {
+func (mr *MapRegion) renderPass2(entities MapEntitiesSearcher, viewport *Viewport, target d2render.Surface) {
+	tileEntities := entities.SearchByRect(mr.tileRect)
+	nextIndex := 0
+
 	for tileY := range mr.ds1.Tiles {
 		for tileX, tile := range mr.ds1.Tiles[tileY] {
 			worldX, worldY := mr.getTileWorldPosition(tileX, tileY)
@@ -382,12 +385,17 @@ func (mr *MapRegion) renderPass2(entities []MapEntity, viewport *Viewport, targe
 				viewport.PushTranslationWorld(worldX, worldY)
 				mr.renderTilePass2(tile, viewport, target)
 
-				for _, entity := range entities {
-					entWorldX, entWorldY := entity.GetPosition()
-					if entWorldX == worldX && entWorldY == worldY {
+				for nextIndex < len(tileEntities) {
+					nextX, nextY := tileEntities[nextIndex].GetPosition()
+					if nextX == worldX && nextY == worldY {
 						target.PushTranslation(viewport.GetTranslationScreen())
-						entity.Render(target)
+						tileEntities[nextIndex].Render(target)
 						target.Pop()
+						nextIndex++
+					} else if (nextY == worldY && nextX < worldX) || nextY < worldY {
+						nextIndex++
+					} else {
+						break
 					}
 				}
 
