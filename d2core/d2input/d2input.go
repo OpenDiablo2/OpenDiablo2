@@ -17,7 +17,7 @@ var (
 type BackendType int
 
 const (
-	Ebiten = iota
+	Ebiten = BackendType(iota)
 )
 
 type Priority int
