@@ -19,9 +19,8 @@ type mapEntity struct {
 	TargetY            float64
 	Speed              float64
 	path               []astar.Pather
-
-	done        func()
-	directioner func(angle float64)
+	done               func()
+	directioner        func(angle float64)
 }
 
 // createMapEntity creates an instance of mapEntity

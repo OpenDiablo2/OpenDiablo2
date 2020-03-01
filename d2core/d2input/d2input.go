@@ -3,12 +3,21 @@ package d2input
 import (
 	"errors"
 
-	"github.com/hajimehoshi/ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/d2input_ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/keyboard"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/mouse"
 )
 
 var (
-	ErrHasReg = errors.New("input system already has provided handler")
-	ErrNotReg = errors.New("input system does not have provided handler")
+	ErrHasReg         = errors.New("input system already has provided handler")
+	ErrNotReg         = errors.New("input system does not have provided handler")
+	ErrInvalidBackend = errors.New("invalid input system backend specified")
+)
+
+type BackendType int
+
+const (
+	Ebiten = iota
 )
 
 type Priority int
@@ -19,132 +28,18 @@ const (
 	PriorityHigh
 )
 
-type Key int
-
-//noinspection GoUnusedConst
-const (
-	Key0            = Key(ebiten.Key0)
-	Key1            = Key(ebiten.Key1)
-	Key2            = Key(ebiten.Key2)
-	Key3            = Key(ebiten.Key3)
-	Key4            = Key(ebiten.Key4)
-	Key5            = Key(ebiten.Key5)
-	Key6            = Key(ebiten.Key6)
-	Key7            = Key(ebiten.Key7)
-	Key8            = Key(ebiten.Key8)
-	Key9            = Key(ebiten.Key9)
-	KeyA            = Key(ebiten.KeyA)
-	KeyB            = Key(ebiten.KeyB)
-	KeyC            = Key(ebiten.KeyC)
-	KeyD            = Key(ebiten.KeyD)
-	KeyE            = Key(ebiten.KeyE)
-	KeyF            = Key(ebiten.KeyF)
-	KeyG            = Key(ebiten.KeyG)
-	KeyH            = Key(ebiten.KeyH)
-	KeyI            = Key(ebiten.KeyI)
-	KeyJ            = Key(ebiten.KeyJ)
-	KeyK            = Key(ebiten.KeyK)
-	KeyL            = Key(ebiten.KeyL)
-	KeyM            = Key(ebiten.KeyM)
-	KeyN            = Key(ebiten.KeyN)
-	KeyO            = Key(ebiten.KeyO)
-	KeyP            = Key(ebiten.KeyP)
-	KeyQ            = Key(ebiten.KeyQ)
-	KeyR            = Key(ebiten.KeyR)
-	KeyS            = Key(ebiten.KeyS)
-	KeyT            = Key(ebiten.KeyT)
-	KeyU            = Key(ebiten.KeyU)
-	KeyV            = Key(ebiten.KeyV)
-	KeyW            = Key(ebiten.KeyW)
-	KeyX            = Key(ebiten.KeyX)
-	KeyY            = Key(ebiten.KeyY)
-	KeyZ            = Key(ebiten.KeyZ)
-	KeyApostrophe   = Key(ebiten.KeyApostrophe)
-	KeyBackslash    = Key(ebiten.KeyBackslash)
-	KeyBackspace    = Key(ebiten.KeyBackspace)
-	KeyCapsLock     = Key(ebiten.KeyCapsLock)
-	KeyComma        = Key(ebiten.KeyComma)
-	KeyDelete       = Key(ebiten.KeyDelete)
-	KeyDown         = Key(ebiten.KeyDown)
-	KeyEnd          = Key(ebiten.KeyEnd)
-	KeyEnter        = Key(ebiten.KeyEnter)
-	KeyEqual        = Key(ebiten.KeyEqual)
-	KeyEscape       = Key(ebiten.KeyEscape)
-	KeyF1           = Key(ebiten.KeyF1)
-	KeyF2           = Key(ebiten.KeyF2)
-	KeyF3           = Key(ebiten.KeyF3)
-	KeyF4           = Key(ebiten.KeyF4)
-	KeyF5           = Key(ebiten.KeyF5)
-	KeyF6           = Key(ebiten.KeyF6)
-	KeyF7           = Key(ebiten.KeyF7)
-	KeyF8           = Key(ebiten.KeyF8)
-	KeyF9           = Key(ebiten.KeyF9)
-	KeyF10          = Key(ebiten.KeyF10)
-	KeyF11          = Key(ebiten.KeyF11)
-	KeyF12          = Key(ebiten.KeyF12)
-	KeyGraveAccent  = Key(ebiten.KeyGraveAccent)
-	KeyHome         = Key(ebiten.KeyHome)
-	KeyInsert       = Key(ebiten.KeyInsert)
-	KeyKP0          = Key(ebiten.KeyKP0)
-	KeyKP1          = Key(ebiten.KeyKP1)
-	KeyKP2          = Key(ebiten.KeyKP2)
-	KeyKP3          = Key(ebiten.KeyKP3)
-	KeyKP4          = Key(ebiten.KeyKP4)
-	KeyKP5          = Key(ebiten.KeyKP5)
-	KeyKP6          = Key(ebiten.KeyKP6)
-	KeyKP7          = Key(ebiten.KeyKP7)
-	KeyKP8          = Key(ebiten.KeyKP8)
-	KeyKP9          = Key(ebiten.KeyKP9)
-	KeyKPAdd        = Key(ebiten.KeyKPAdd)
-	KeyKPDecimal    = Key(ebiten.KeyKPDecimal)
-	KeyKPDivide     = Key(ebiten.KeyKPDivide)
-	KeyKPEnter      = Key(ebiten.KeyKPEnter)
-	KeyKPEqual      = Key(ebiten.KeyKPEqual)
-	KeyKPMultiply   = Key(ebiten.KeyKPMultiply)
-	KeyKPSubtract   = Key(ebiten.KeyKPSubtract)
-	KeyLeft         = Key(ebiten.KeyLeft)
-	KeyLeftBracket  = Key(ebiten.KeyLeftBracket)
-	KeyMenu         = Key(ebiten.KeyMenu)
-	KeyMinus        = Key(ebiten.KeyMinus)
-	KeyNumLock      = Key(ebiten.KeyNumLock)
-	KeyPageDown     = Key(ebiten.KeyPageDown)
-	KeyPageUp       = Key(ebiten.KeyPageUp)
-	KeyPause        = Key(ebiten.KeyPause)
-	KeyPeriod       = Key(ebiten.KeyPeriod)
-	KeyPrintScreen  = Key(ebiten.KeyPrintScreen)
-	KeyRight        = Key(ebiten.KeyRight)
-	KeyRightBracket = Key(ebiten.KeyRightBracket)
-	KeyScrollLock   = Key(ebiten.KeyScrollLock)
-	KeySemicolon    = Key(ebiten.KeySemicolon)
-	KeySlash        = Key(ebiten.KeySlash)
-	KeySpace        = Key(ebiten.KeySpace)
-	KeyTab          = Key(ebiten.KeyTab)
-	KeyUp           = Key(ebiten.KeyUp)
-	KeyAlt          = Key(ebiten.KeyAlt)
-	KeyControl      = Key(ebiten.KeyControl)
-	KeyShift        = Key(ebiten.KeyShift)
-)
-
 type KeyMod int
 
 const (
-	KeyModAlt = 1 << iota
+	KeyModAlt = KeyMod(1 << iota)
 	KeyModControl
 	KeyModShift
-)
-
-type MouseButton int
-
-const (
-	MouseButtonLeft   = MouseButton(ebiten.MouseButtonLeft)
-	MouseButtonMiddle = MouseButton(ebiten.MouseButtonMiddle)
-	MouseButtonRight  = MouseButton(ebiten.MouseButtonRight)
 )
 
 type MouseButtonMod int
 
 const (
-	MouseButtonModLeft MouseButtonMod = 1 << iota
+	MouseButtonModLeft = MouseButtonMod(1 << iota)
 	MouseButtonModMiddle
 	MouseButtonModRight
 )
@@ -158,7 +53,7 @@ type HandlerEvent struct {
 
 type KeyEvent struct {
 	HandlerEvent
-	Key Key
+	Key keyboard.Key
 }
 
 type KeyCharsEvent struct {
@@ -168,7 +63,7 @@ type KeyCharsEvent struct {
 
 type MouseEvent struct {
 	HandlerEvent
-	Button MouseButton
+	Button mouse.MouseButton
 }
 
 type MouseMoveEvent struct {
@@ -207,6 +102,16 @@ type MouseMoveHandler interface {
 
 var singleton inputManager
 
+func Initialize(t BackendType) error {
+	switch t {
+	case Ebiten:
+		singleton.backend = &d2input_ebiten.Backend{}
+	default:
+		return ErrInvalidBackend
+	}
+	return nil
+}
+
 func Advance(elapsed float64) error {
 	return singleton.advance(elapsed)
 }
@@ -222,3 +127,109 @@ func BindHandler(handler Handler) error {
 func UnbindHandler(handler Handler) error {
 	return singleton.unbindHandler(handler)
 }
+
+const (
+	MouseButtonLeft   = mouse.ButtonLeft
+	MouseButtonMiddle = mouse.ButtonMiddle
+	MouseButtonRight  = mouse.ButtonRight
+	Key0              = keyboard.Key0
+	Key1              = keyboard.Key1
+	Key2              = keyboard.Key2
+	Key3              = keyboard.Key3
+	Key4              = keyboard.Key4
+	Key5              = keyboard.Key5
+	Key6              = keyboard.Key6
+	Key7              = keyboard.Key7
+	Key8              = keyboard.Key8
+	Key9              = keyboard.Key9
+	KeyA              = keyboard.KeyA
+	KeyB              = keyboard.KeyB
+	KeyC              = keyboard.KeyC
+	KeyD              = keyboard.KeyD
+	KeyE              = keyboard.KeyE
+	KeyF              = keyboard.KeyF
+	KeyG              = keyboard.KeyG
+	KeyH              = keyboard.KeyH
+	KeyI              = keyboard.KeyI
+	KeyJ              = keyboard.KeyJ
+	KeyK              = keyboard.KeyK
+	KeyL              = keyboard.KeyL
+	KeyM              = keyboard.KeyM
+	KeyN              = keyboard.KeyN
+	KeyO              = keyboard.KeyO
+	KeyP              = keyboard.KeyP
+	KeyQ              = keyboard.KeyQ
+	KeyR              = keyboard.KeyR
+	KeyS              = keyboard.KeyS
+	KeyT              = keyboard.KeyT
+	KeyU              = keyboard.KeyU
+	KeyV              = keyboard.KeyV
+	KeyW              = keyboard.KeyW
+	KeyX              = keyboard.KeyX
+	KeyY              = keyboard.KeyY
+	KeyZ              = keyboard.KeyZ
+	KeyApostrophe     = keyboard.KeyApostrophe
+	KeyBackslash      = keyboard.KeyBackslash
+	KeyBackspace      = keyboard.KeyBackspace
+	KeyCapsLock       = keyboard.KeyCapsLock
+	KeyComma          = keyboard.KeyComma
+	KeyDelete         = keyboard.KeyDelete
+	KeyDown           = keyboard.KeyDown
+	KeyEnd            = keyboard.KeyEnd
+	KeyEnter          = keyboard.KeyEnter
+	KeyEqual          = keyboard.KeyEqual
+	KeyEscape         = keyboard.KeyEscape
+	KeyF1             = keyboard.KeyF1
+	KeyF2             = keyboard.KeyF2
+	KeyF3             = keyboard.KeyF3
+	KeyF4             = keyboard.KeyF4
+	KeyF5             = keyboard.KeyF5
+	KeyF6             = keyboard.KeyF6
+	KeyF7             = keyboard.KeyF7
+	KeyF8             = keyboard.KeyF8
+	KeyF9             = keyboard.KeyF9
+	KeyF10            = keyboard.KeyF10
+	KeyF11            = keyboard.KeyF11
+	KeyF12            = keyboard.KeyF12
+	KeyGraveAccent    = keyboard.KeyGraveAccent
+	KeyHome           = keyboard.KeyHome
+	KeyInsert         = keyboard.KeyInsert
+	KeyKP0            = keyboard.KeyKP0
+	KeyKP1            = keyboard.KeyKP1
+	KeyKP2            = keyboard.KeyKP2
+	KeyKP3            = keyboard.KeyKP3
+	KeyKP4            = keyboard.KeyKP4
+	KeyKP5            = keyboard.KeyKP5
+	KeyKP6            = keyboard.KeyKP6
+	KeyKP7            = keyboard.KeyKP7
+	KeyKP8            = keyboard.KeyKP8
+	KeyKP9            = keyboard.KeyKP9
+	KeyKPAdd          = keyboard.KeyKPAdd
+	KeyKPDecimal      = keyboard.KeyKPDecimal
+	KeyKPDivide       = keyboard.KeyKPDivide
+	KeyKPEnter        = keyboard.KeyKPEnter
+	KeyKPEqual        = keyboard.KeyKPEqual
+	KeyKPMultiply     = keyboard.KeyKPMultiply
+	KeyKPSubtract     = keyboard.KeyKPSubtract
+	KeyLeft           = keyboard.KeyLeft
+	KeyLeftBracket    = keyboard.KeyLeftBracket
+	KeyMenu           = keyboard.KeyMenu
+	KeyMinus          = keyboard.KeyMinus
+	KeyNumLock        = keyboard.KeyNumLock
+	KeyPageDown       = keyboard.KeyPageDown
+	KeyPageUp         = keyboard.KeyPageUp
+	KeyPause          = keyboard.KeyPause
+	KeyPeriod         = keyboard.KeyPeriod
+	KeyPrintScreen    = keyboard.KeyPrintScreen
+	KeyRight          = keyboard.KeyRight
+	KeyRightBracket   = keyboard.KeyRightBracket
+	KeyScrollLock     = keyboard.KeyScrollLock
+	KeySemicolon      = keyboard.KeySemicolon
+	KeySlash          = keyboard.KeySlash
+	KeySpace          = keyboard.KeySpace
+	KeyTab            = keyboard.KeyTab
+	KeyUp             = keyboard.KeyUp
+	KeyAlt            = keyboard.KeyAlt
+	KeyControl        = keyboard.KeyControl
+	KeyShift          = keyboard.KeyShift
+)

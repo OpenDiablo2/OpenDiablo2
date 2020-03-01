@@ -3,9 +3,23 @@ package d2input
 import (
 	"sort"
 
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/inpututil"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/keyboard"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/mouse"
 )
+
+type InputBackend interface {
+	CursorPosition() (int, int)
+
+	IsKeyPressed(keyboard.Key) bool
+	IsKeyJustPressed(keyboard.Key) bool
+	IsKeyJustReleased(keyboard.Key) bool
+
+	IsMouseButtonPressed(mouse.MouseButton) bool
+	IsMouseButtonJustPressed(mouse.MouseButton) bool
+	IsMouseButtonJustReleased(mouse.MouseButton) bool
+
+	InputChars() []rune
+}
 
 type handlerEntry struct {
 	handler  Handler
@@ -34,30 +48,32 @@ type inputManager struct {
 	keyMod    KeyMod
 
 	entries handlerEntryList
+
+	backend InputBackend
 }
 
 func (im *inputManager) advance(elapsed float64) error {
-	cursorX, cursorY := ebiten.CursorPosition()
+	cursorX, cursorY := im.backend.CursorPosition()
 
 	im.keyMod = 0
-	if ebiten.IsKeyPressed(ebiten.KeyAlt) {
+	if im.backend.IsKeyPressed(keyboard.KeyAlt) {
 		im.keyMod |= KeyModAlt
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyControl) {
+	if im.backend.IsKeyPressed(keyboard.KeyControl) {
 		im.keyMod |= KeyModControl
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyShift) {
+	if im.backend.IsKeyPressed(keyboard.KeyShift) {
 		im.keyMod |= KeyModShift
 	}
 
 	im.buttonMod = 0
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+	if im.backend.IsMouseButtonPressed(mouse.ButtonLeft) {
 		im.buttonMod |= MouseButtonModLeft
 	}
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonMiddle) {
+	if im.backend.IsMouseButtonPressed(mouse.ButtonMiddle) {
 		im.buttonMod |= MouseButtonModMiddle
 	}
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
+	if im.backend.IsMouseButtonPressed(mouse.ButtonRight) {
 		im.buttonMod |= MouseButtonModRight
 	}
 
@@ -68,9 +84,9 @@ func (im *inputManager) advance(elapsed float64) error {
 		cursorY,
 	}
 
-	for key := ebiten.Key0; key < ebiten.KeyMax; key++ {
-		if inpututil.IsKeyJustPressed(key) {
-			event := KeyEvent{eventBase, Key(key)}
+	for _, key := range keyboard.Keys {
+		if im.backend.IsKeyJustPressed(key) {
+			event := KeyEvent{eventBase, key}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(KeyDownHandler); ok {
 					return l.OnKeyDown(event)
@@ -80,8 +96,8 @@ func (im *inputManager) advance(elapsed float64) error {
 			})
 		}
 
-		if ebiten.IsKeyPressed(key) {
-			event := KeyEvent{eventBase, Key(key)}
+		if im.backend.IsKeyPressed(key) {
+			event := KeyEvent{eventBase, key}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(KeyRepeatHandler); ok {
 					return l.OnKeyRepeat(event)
@@ -91,8 +107,8 @@ func (im *inputManager) advance(elapsed float64) error {
 			})
 		}
 
-		if inpututil.IsKeyJustReleased(key) {
-			event := KeyEvent{eventBase, Key(key)}
+		if im.backend.IsKeyJustReleased(key) {
+			event := KeyEvent{eventBase, key}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(KeyUpHandler); ok {
 					return l.OnKeyUp(event)
@@ -103,7 +119,7 @@ func (im *inputManager) advance(elapsed float64) error {
 		}
 	}
 
-	if chars := ebiten.InputChars(); len(chars) > 0 {
+	if chars := im.backend.InputChars(); len(chars) > 0 {
 		event := KeyCharsEvent{eventBase, chars}
 		im.propagate(func(handler Handler) bool {
 			if l, ok := handler.(KeyCharsHandler); ok {
@@ -114,9 +130,9 @@ func (im *inputManager) advance(elapsed float64) error {
 		})
 	}
 
-	for button := ebiten.MouseButtonLeft; button < ebiten.MouseButtonMiddle; button++ {
-		if inpututil.IsMouseButtonJustPressed(button) {
-			event := MouseEvent{eventBase, MouseButton(button)}
+	for _, button := range mouse.MouseButtons {
+		if im.backend.IsMouseButtonJustPressed(button) {
+			event := MouseEvent{eventBase, button}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(MouseButtonDownHandler); ok {
 					return l.OnMouseButtonDown(event)
@@ -126,8 +142,8 @@ func (im *inputManager) advance(elapsed float64) error {
 			})
 		}
 
-		if inpututil.IsMouseButtonJustReleased(button) {
-			event := MouseEvent{eventBase, MouseButton(button)}
+		if im.backend.IsMouseButtonJustReleased(button) {
+			event := MouseEvent{eventBase, button}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(MouseButtonUpHandler); ok {
 					return l.OnMouseButtonUp(event)
