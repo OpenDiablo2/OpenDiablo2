@@ -10,6 +10,7 @@ require (
 	github.com/go-restruct/restruct v0.0.0-20191227155143-5734170a48a1
 	github.com/hajimehoshi/ebiten v1.11.0-alpha.2.0.20200102072751-e66f1fb71e2e
 	github.com/stretchr/testify v1.4.0
+	github.com/xlab/portmidi v0.0.0-20170905165248-a2cf51204aff
 	golang.org/x/exp v0.0.0-20191030013958-a1ab85dbe136 // indirect
 	golang.org/x/mobile v0.0.0-20191115022231-f0c40035f2ba // indirect
 	golang.org/x/sys v0.0.0-20191115151921-52ab43148777 // indirect
