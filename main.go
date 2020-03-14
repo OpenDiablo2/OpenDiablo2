@@ -104,7 +104,8 @@ func initialize() error {
 		return err
 	}
 
-	if err := d2input.Initialize(d2input.Ebiten); err != nil {
+	input := d2input.BackendType(config.Input)
+	if err := d2input.Initialize(input); err != nil {
 		return err
 	}
 

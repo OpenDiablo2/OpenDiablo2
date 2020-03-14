@@ -17,6 +17,7 @@ type Configuration struct {
 	MpqLoadOrder    []string
 	SfxVolume       float64
 	BgmVolume       float64
+	Input           string
 }
 
 var singleton *Configuration = getDefaultConfig()

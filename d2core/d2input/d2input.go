@@ -14,10 +14,11 @@ var (
 	ErrInvalidBackend = errors.New("invalid input system backend specified")
 )
 
-type BackendType int
+type BackendType string
 
 const (
-	Ebiten = BackendType(iota)
+	ebiten = "ebiten"
+	midi   = "midi"
 )
 
 type Priority int
@@ -104,10 +105,15 @@ var singleton inputManager
 
 func Initialize(t BackendType) error {
 	switch t {
-	case Ebiten:
+	case ebiten:
 		singleton.backend = &d2input_ebiten.Backend{}
+	case midi:
+		singleton.backend = &d2input_midi.Backend{}
 	default:
 		return ErrInvalidBackend
+	}
+	if err := singleton.backend.Initialize(); err != nil {
+		return err
 	}
 	return nil
 }

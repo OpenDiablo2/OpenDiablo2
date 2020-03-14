@@ -33,6 +33,7 @@ func getDefaultConfig() *Configuration {
 			"d2video.mpq",
 			"d2speech.mpq",
 		},
+		Input: "ebiten",
 	}
 
 	switch runtime.GOOS {
