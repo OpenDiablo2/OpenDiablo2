@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/d2input_ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/d2input_midi"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/keyboard"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/mouse"
 )

@@ -231,7 +231,6 @@ func (v *MainMenu) Advance(tickTime float64) error {
 			if v.leftButtonHeld {
 				return nil
 			}
-			d2ui.WaitForMouseRelease()
 			v.leftButtonHeld = true
 			v.ShowTrademarkScreen = false
 			v.exitDiabloButton.SetVisible(true)

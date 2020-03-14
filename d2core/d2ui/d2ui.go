@@ -3,48 +3,81 @@ package d2ui
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/keyboard"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/mouse"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/hajimehoshi/ebiten"
 )
-
-// CursorButton represents a mouse button
-type CursorButton uint8
 
 const (
 	// CursorButtonLeft represents the left mouse button
-	CursorButtonLeft CursorButton = 1
+	CursorButtonLeft = mouse.ButtonLeft
 	// CursorButtonRight represents the right mouse button
-	CursorButtonRight CursorButton = 2
+	CursorButtonRight = mouse.ButtonRight
 )
 
 var widgets []Widget
-var cursorButtons CursorButton
+var cursorButtons mouse.MouseButton
 var pressedIndex int
 var CursorX int
 var CursorY int
 var clickSfx d2audio.SoundEffect
-var waitForLeftMouseUp bool
+var keyState map[keyboard.Key]bool
+var mouseState map[mouse.MouseButton]bool
 
-func Initialize() {
+type uiInstance struct{}
+
+func (ui *uiInstance) OnMouseButtonDown(event d2input.MouseEvent) bool {
+	mouseState[event.Button] = true
+	if event.Button == mouse.ButtonLeft {
+		handleLeftMousePress()
+		return true
+	}
+	if event.Button == mouse.ButtonRight {
+		handleRightMousePress()
+		return true
+	}
+	return false
+}
+
+func (ui *uiInstance) OnMouseButtonUp(event d2input.MouseEvent) bool {
+	mouseState[event.Button] = false
+	if event.Button == mouse.ButtonLeft {
+		handleLeftMouseRelease()
+		return true
+	}
+	return false
+}
+
+func (ui *uiInstance) OnMouseMove(event d2input.MouseMoveEvent) bool {
+	CursorX = event.X
+	CursorY = event.Y
+	return true
+}
+
+func Initialize() error {
+	keyState = make(map[keyboard.Key]bool)
+	mouseState = make(map[mouse.MouseButton]bool)
+
+	ui := &uiInstance{}
+	if err := d2input.BindHandler(ui); err != nil {
+		return err
+	}
+
 	pressedIndex = -1
 	clickSfx, _ = d2audio.LoadSoundEffect(d2resource.SFXButtonClick)
-	waitForLeftMouseUp = false
+	return nil
 }
 
 // Reset resets the state of the UI manager. Typically called for new scenes
 func Reset() {
 	widgets = make([]Widget, 0)
 	pressedIndex = -1
-	waitForLeftMouseUp = true
 }
 
 // AddWidget adds a widget to the UI manager
 func AddWidget(widget Widget) {
 	widgets = append(widgets, widget)
-}
-
-func WaitForMouseRelease() {
-	waitForLeftMouseUp = true
 }
 
 // Render renders all of the UI elements
@@ -64,75 +97,75 @@ func Advance(elapsed float64) {
 		}
 	}
 
-	cursorButtons = 0
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		if !waitForLeftMouseUp {
-			cursorButtons |= CursorButtonLeft
+}
+
+func handleLeftMousePress() {
+	found := false
+	for i, widget := range widgets {
+		if !widget.GetVisible() || !widget.GetEnabled() {
+			continue
+		}
+		wx, wy := widget.GetPosition()
+		ww, wh := widget.GetSize()
+		if CursorX >= wx && CursorX <= wx+ww && CursorY >= wy && CursorY <= wy+wh {
+			widget.SetPressed(true)
+			if pressedIndex == -1 {
+				found = true
+				pressedIndex = i
+				clickSfx.Play()
+			} else if pressedIndex > -1 && pressedIndex != i {
+				widgets[i].SetPressed(false)
+			} else {
+				found = true
+			}
+		} else {
+			widget.SetPressed(false)
+		}
+	}
+	if !found {
+		if pressedIndex > -1 {
+			widgets[pressedIndex].SetPressed(false)
+		} else {
+			pressedIndex = -2
+		}
+	}
+}
+
+func handleLeftMouseRelease() {
+	if pressedIndex > -1 {
+		widget := widgets[pressedIndex]
+		wx, wy := widget.GetPosition()
+		ww, wh := widget.GetSize()
+		if CursorX >= wx && CursorX <= wx+ww && CursorY >= wy && CursorY <= wy+wh {
+			widget.Activate()
 		}
 	} else {
-		if waitForLeftMouseUp {
-			waitForLeftMouseUp = false
-		}
-	}
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
-		cursorButtons |= CursorButtonRight
-	}
-	CursorX, CursorY = ebiten.CursorPosition()
-	if CursorButtonPressed(CursorButtonLeft) {
-		found := false
-		for i, widget := range widgets {
+		for _, widget := range widgets {
 			if !widget.GetVisible() || !widget.GetEnabled() {
 				continue
 			}
-			wx, wy := widget.GetPosition()
-			ww, wh := widget.GetSize()
-			if CursorX >= wx && CursorX <= wx+ww && CursorY >= wy && CursorY <= wy+wh {
-				widget.SetPressed(true)
-				if pressedIndex == -1 {
-					found = true
-					pressedIndex = i
-					clickSfx.Play()
-				} else if pressedIndex > -1 && pressedIndex != i {
-					widgets[i].SetPressed(false)
-				} else {
-					found = true
-				}
-			} else {
-				widget.SetPressed(false)
-			}
+			widget.SetPressed(false)
 		}
-		if !found {
-			if pressedIndex > -1 {
-				widgets[pressedIndex].SetPressed(false)
-			} else {
-				pressedIndex = -2
-			}
-		}
-	} else {
-		if pressedIndex > -1 {
-			widget := widgets[pressedIndex]
-			wx, wy := widget.GetPosition()
-			ww, wh := widget.GetSize()
-			if CursorX >= wx && CursorX <= wx+ww && CursorY >= wy && CursorY <= wy+wh {
-				widget.Activate()
-			}
-		} else {
-			for _, widget := range widgets {
-				if !widget.GetVisible() || !widget.GetEnabled() {
-					continue
-				}
-				widget.SetPressed(false)
-			}
-		}
-		pressedIndex = -1
 	}
+	pressedIndex = -1
 }
 
-// CursorButtonPressed determines if the specified button has been pressed
-func CursorButtonPressed(button CursorButton) bool {
-	return cursorButtons&button > 0
+func handleRightMousePress() {
+	cursorButtons |= CursorButtonRight
 }
 
-func KeyPressed(key ebiten.Key) bool {
-	return ebiten.IsKeyPressed(key)
+func CursorButtonPressed(button mouse.MouseButton) bool {
+	if val, found := mouseState[button]; found {
+		return val
+	}
+	mouseState[button] = false
+	return false
+}
+
+func KeyPressed(key keyboard.Key) bool {
+	if val, found := keyState[key]; found {
+		return val
+	}
+	keyState[key] = false
+	return false
 }

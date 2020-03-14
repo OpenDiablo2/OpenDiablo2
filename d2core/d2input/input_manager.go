@@ -8,6 +8,9 @@ import (
 )
 
 type InputBackend interface {
+	Initialize() error
+	Advance(float64) error
+
 	CursorPosition() (int, int)
 
 	IsKeyPressed(keyboard.Key) bool
@@ -53,6 +56,10 @@ type inputManager struct {
 }
 
 func (im *inputManager) advance(elapsed float64) error {
+	if err := im.backend.Advance(elapsed); err != nil {
+		return err
+	}
+
 	cursorX, cursorY := im.backend.CursorPosition()
 
 	im.keyMod = 0
@@ -84,7 +91,8 @@ func (im *inputManager) advance(elapsed float64) error {
 		cursorY,
 	}
 
-	for _, key := range keyboard.Keys {
+	keys := keyboard.GetKeys()
+	for _, key := range keys {
 		if im.backend.IsKeyJustPressed(key) {
 			event := KeyEvent{eventBase, key}
 			im.propagate(func(handler Handler) bool {
