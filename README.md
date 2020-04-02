@@ -1,5 +1,6 @@
 # OpenDiablo2
 [![CircleCI](https://circleci.com/gh/OpenDiablo2/OpenDiablo2/tree/master.svg?style=svg)](https://circleci.com/gh/OpenDiablo2/OpenDiablo2/tree/master)
+[![Code Status](https://www.codefactor.io/repository/github/liberodark/OpenDiablo2/badge)](https://www.codefactor.io/repository/github/liberodark/OpenDiablo2)
 
 [Join us on Discord!](https://discord.gg/pRy8tdc)\
 [Development Live stream](https://www.twitch.tv/essial/)
