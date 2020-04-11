@@ -1,9 +1,10 @@
 package d2map
 
 import (
-	"github.com/beefsack/go-astar"
 	"math"
 	"strings"
+
+	"github.com/beefsack/go-astar"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 

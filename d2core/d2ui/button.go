@@ -42,7 +42,7 @@ const (
 
 // ButtonLayout defines the type of buttons
 type ButtonLayout struct {
-	XSegments        int              //1
+	XSegments        int              // 1
 	YSegments        int              // 1
 	ResourceName     string           // Font Name
 	PaletteName      string           // PaletteType
