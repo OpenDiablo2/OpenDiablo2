@@ -1,8 +1,9 @@
 package d2datadict
 
 import (
-	testify "github.com/stretchr/testify/assert"
 	"testing"
+
+	testify "github.com/stretchr/testify/assert"
 )
 
 // Verify the lookup returns the right object after indexing.

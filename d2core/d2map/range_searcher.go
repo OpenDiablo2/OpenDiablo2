@@ -1,9 +1,10 @@
 package d2map
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"math"
 	"sort"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 type MapEntitiesSearcher interface {

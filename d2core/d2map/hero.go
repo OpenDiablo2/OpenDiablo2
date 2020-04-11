@@ -10,9 +10,9 @@ import (
 
 type Hero struct {
 	*AnimatedComposite
-	Equipment         d2inventory.CharacterEquipment
-	mode              d2enum.AnimationMode
-	direction         int
+	Equipment d2inventory.CharacterEquipment
+	mode      d2enum.AnimationMode
+	direction int
 }
 
 func CreateHero(x, y int, direction int, heroType d2enum.Hero, equipment d2inventory.CharacterEquipment) *Hero {

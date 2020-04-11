@@ -105,7 +105,7 @@ func SplitIntoLinesWithMaxWidth(fullSentence string, maxChars int) []string {
 	totalLength := 0
 	words := strings.Split(fullSentence, " ")
 	if len(words[0]) > maxChars {
-		// mostly happend within CJK characters (no whitespace)
+		// mostly happened within CJK characters (no whitespace)
 		return splitCjkIntoChunks(fullSentence, maxChars)
 	}
 	for _, word := range words {

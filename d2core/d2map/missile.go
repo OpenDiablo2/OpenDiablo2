@@ -2,10 +2,11 @@ package d2map
 
 import (
 	"fmt"
+	"math"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"math"
 )
 
 type Missile struct {
