@@ -1,7 +1,6 @@
 package d2common
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -32,7 +31,6 @@ func LoadDataDictionary(text string) *DataDictionary {
 		}
 		result.Data = append(result.Data, values)
 	}
-	fmt.Println(result)
 	return result
 }
 

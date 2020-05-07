@@ -1,16 +1,16 @@
 package d2enum
 
-type AffixSuperType int
-type AffixSubType int
+type ItemAffixSuperType int
+type ItemAffixSubType int
 
 const (
-	AffixPrefix AffixSuperType = iota
-	AffixSuffix
+	ItemAffixPrefix ItemAffixSuperType = iota
+	ItemAffixSuffix
 )
 
 const (
-	AffixCommon AffixSubType = iota
-	AffixMagic
-	AffixRare
-	AffixUnique
+	ItemAffixCommon ItemAffixSubType = iota
+	ItemAffixMagic
+	ItemAffixRare
+	ItemAffixUnique
 )

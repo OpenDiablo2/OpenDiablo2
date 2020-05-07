@@ -1,10 +1,9 @@
 package d2datadict
 
 import (
+	"fmt"
 	"log"
-)
 
-import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
@@ -31,14 +30,14 @@ var superType d2enum.ItemAffixSuperType
 var subType d2enum.ItemAffixSubType
 
 func LoadMagicPrefix(file []byte) {
-	superType = d2enum.AffixPrefix
-	subType = d2enum.AffixMagic
+	superType = d2enum.ItemAffixPrefix
+	subType = d2enum.ItemAffixMagic
 	loadDictionary(file, MagicPrefixDictionary, superType, subType)
 }
 
 func LoadMagicSuffix(file []byte) {
-	superType = d2enum.AffixSuffix
-	subType = d2enum.AffixMagic
+	superType = d2enum.ItemAffixSuffix
+	subType = d2enum.ItemAffixMagic
 	loadDictionary(file, MagicSuffixDictionary, superType, subType)
 }
 
@@ -46,18 +45,18 @@ func getAffixString(t1 d2enum.ItemAffixSuperType, t2 d2enum.ItemAffixSubType) st
 	var name string = ""
 
 	switch t2 {
-	case d2enum.AffixMagic:
+	case d2enum.ItemAffixMagic:
 		name = "Magic"
-	case d2enum.AffixRare:
+	case d2enum.ItemAffixRare:
 		name = "Rare"
-	case d2enum.AffixUnique:
+	case d2enum.ItemAffixUnique:
 		name = "Unique"
 	}
 
 	switch t1 {
-	case d2enum.AffixPrefix:
+	case d2enum.ItemAffixPrefix:
 		name += "Prefix"
-	case d2enum.AffixSuffix:
+	case d2enum.ItemAffixSuffix:
 		name += "Suffix"
 	}
 
@@ -76,6 +75,7 @@ func loadDictionary(
 
 	createItemAffixRecords(dict, records, superType, subType)
 	name := getAffixString(superType, subType)
+	log.Printf("Loaded %d %s records", len(dict.Data), name)
 }
 
 // --- column names from d2exp.mpq:/data/globa/excel/MagicPrefix.txt
@@ -133,8 +133,8 @@ func createItemAffixRecords(
 			Name:           d.GetString("Name", index),
 			Version:        d.GetNumber("version", index),
 			Type:           subType,
-			IsPrefix:       superType == d2enum.AffixPrefix,
-			IsSuffix:       superType == d2enum.AffixSuffix,
+			IsPrefix:       superType == d2enum.ItemAffixPrefix,
+			IsSuffix:       superType == d2enum.ItemAffixSuffix,
 			Spawnable:      d.GetNumber("spawnable", index) == 1,
 			Rare:           d.GetNumber("rare", index) == 1,
 			Level:          d.GetNumber("level", index),
