@@ -1,7 +1,6 @@
 package d2datadict
 
 import (
-	"fmt"
 	"log"
 )
 
@@ -77,7 +76,6 @@ func loadDictionary(
 
 	createItemAffixRecords(dict, records, superType, subType)
 	name := getAffixString(superType, subType)
-	log.Printf("Loaded %d %s records", len(dict.Data), name)
 }
 
 // --- column names from d2exp.mpq:/data/globa/excel/MagicPrefix.txt
