@@ -20,7 +20,7 @@ func LoadDataDictionary(text string) *DataDictionary {
 	for i, fieldName := range fileNames {
 		result.FieldNameLookup[fieldName] = i
 	}
-	result.Data = make([][]string, len(lines)-1)
+	result.Data = make([][]string, len(lines)-2)
 	for i, line := range lines[1:] {
 		if len(strings.TrimSpace(line)) == 0 {
 			continue
@@ -39,7 +39,9 @@ func (v *DataDictionary) GetString(fieldName string, index int) string {
 }
 
 func (v *DataDictionary) GetNumber(fieldName string, index int) int {
-	result, err := strconv.Atoi(v.GetString(fieldName, index))
+	str := v.GetString(fieldName, index)
+	str = EmptyToZero(AsterToEmpty(str))
+	result, err := strconv.Atoi(str)
 	if err != nil {
 		log.Panic(err)
 	}
