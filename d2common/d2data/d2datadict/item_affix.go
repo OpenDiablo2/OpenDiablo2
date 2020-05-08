@@ -10,17 +10,9 @@ import (
 
 var MagicPrefixDictionary *d2common.DataDictionary
 var MagicSuffixDictionary *d2common.DataDictionary
-var RarePrefixDictionary *d2common.DataDictionary
-var RareSuffixDictionary *d2common.DataDictionary
-var UniquePrefixDictionary *d2common.DataDictionary
-var UniqueSuffixDictionary *d2common.DataDictionary
 
-var MagicPrefixRecords []ItemAffixCommonRecord
-var MagicSuffixRecords []ItemAffixCommonRecord
-var RarePrefixRecords []ItemAffixCommonRecord
-var RareSuffixRecords []ItemAffixCommonRecord
-var UniquePrefixRecords []ItemAffixCommonRecord
-var UniqueSuffixRecords []ItemAffixCommonRecord
+var MagicPrefixRecords []*ItemAffixCommonRecord
+var MagicSuffixRecords []*ItemAffixCommonRecord
 
 var AffixMagicGroups []*ItemAffixCommonGroup
 var AffixRareGroups []*ItemAffixCommonGroup
@@ -47,10 +39,6 @@ func getAffixString(t1 d2enum.ItemAffixSuperType, t2 d2enum.ItemAffixSubType) st
 	switch t2 {
 	case d2enum.ItemAffixMagic:
 		name = "Magic"
-	case d2enum.ItemAffixRare:
-		name = "Rare"
-	case d2enum.ItemAffixUnique:
-		name = "Unique"
 	}
 
 	switch t1 {
