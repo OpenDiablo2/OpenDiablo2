@@ -11,6 +11,4 @@ const (
 const (
 	ItemAffixCommon ItemAffixSubType = iota
 	ItemAffixMagic
-	ItemAffixRare
-	ItemAffixUnique
 )
