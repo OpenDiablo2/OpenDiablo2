@@ -20,8 +20,8 @@ func LoadDataDictionary(text string) *DataDictionary {
 	for i, fieldName := range fileNames {
 		result.FieldNameLookup[fieldName] = i
 	}
-	result.Data = make([][]string, 0)
-	for _, line := range lines[1:] {
+	result.Data = make([][]string, len(lines)-2)
+	for i, line := range lines[1:] {
 		if len(strings.TrimSpace(line)) == 0 {
 			continue
 		}
@@ -29,7 +29,7 @@ func LoadDataDictionary(text string) *DataDictionary {
 		if len(values) != len(result.FieldNameLookup) {
 			continue
 		}
-		result.Data = append(result.Data, values)
+		result.Data[i] = values
 	}
 	return result
 }
