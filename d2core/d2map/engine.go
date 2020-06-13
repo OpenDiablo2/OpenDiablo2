@@ -1,6 +1,7 @@
 package d2map
 
 import (
+	"log"
 	"math"
 	"strings"
 
@@ -8,8 +9,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 )
@@ -21,7 +20,7 @@ type MapEntity interface {
 }
 
 type MapEngine struct {
-	gameState *d2gamestate.GameState
+	seed int64
 
 	debugVisLevel int
 
@@ -31,11 +30,11 @@ type MapEngine struct {
 	camera   Camera
 }
 
-func CreateMapEngine(gameState *d2gamestate.GameState) *MapEngine {
+func CreateMapEngine() *MapEngine {
 	engine := &MapEngine{
-		gameState: gameState,
-		viewport:  NewViewport(0, 0, 800, 600),
-		entities:  NewRangeSearcher(),
+		seed:     0,
+		viewport: NewViewport(0, 0, 800, 600),
+		entities: NewRangeSearcher(),
 	}
 
 	d2term.BindAction("mapdebugvis", "set map debug visualization level", func(level int) {
@@ -44,6 +43,11 @@ func CreateMapEngine(gameState *d2gamestate.GameState) *MapEngine {
 
 	engine.viewport.SetCamera(&engine.camera)
 	return engine
+}
+
+func (m *MapEngine) SetSeed(seed int64) {
+	log.Printf("Setting map engine seed to %d", seed)
+	m.seed = seed
 }
 
 func (m *MapEngine) GetStartPosition() (float64, float64) {
@@ -88,24 +92,24 @@ func (m *MapEngine) WorldToOrtho(x, y float64) (float64, float64) {
 }
 
 func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) {
-	region, entities := loadRegion(m.gameState.Seed, 0, 0, regionType, levelPreset, fileIndex)
+	region, entities := loadRegion(m.seed, 0, 0, regionType, levelPreset, fileIndex)
 	m.regions = append(m.regions, region)
 	m.entities.Add(entities...)
 }
 
 func (m *MapEngine) GenerateAct1Overworld() {
-	d2audio.PlayBGM("/data/global/music/Act1/town1.wav") // TODO: Temp stuff here
+	//d2audio.PlayBGM("/data/global/music/Act1/town1.wav") // TODO: Temp stuff here
 
-	region, entities := loadRegion(m.gameState.Seed, 0, 0, d2enum.RegionAct1Town, 1, -1)
+	region, entities := loadRegion(m.seed, 0, 0, d2enum.RegionAct1Town, 1, -1)
 	m.regions = append(m.regions, region)
 	m.entities.Add(entities...)
 
 	if strings.Contains(region.regionPath, "E1") {
-		region, entities := loadRegion(m.gameState.Seed, region.tileRect.Width-1, 0, d2enum.RegionAct1Town, 2, -1)
+		region, entities := loadRegion(m.seed, region.tileRect.Width-1, 0, d2enum.RegionAct1Town, 2, -1)
 		m.AppendRegion(region)
 		m.entities.Add(entities...)
 	} else if strings.Contains(region.regionPath, "S1") {
-		region, entities := loadRegion(m.gameState.Seed, 0, region.tileRect.Height-1, d2enum.RegionAct1Town, 3, -1)
+		region, entities := loadRegion(m.seed, 0, region.tileRect.Height-1, d2enum.RegionAct1Town, 3, -1)
 		m.AppendRegion(region)
 		m.entities.Add(entities...)
 	}

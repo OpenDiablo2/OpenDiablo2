@@ -1,5 +1,8 @@
 package d2netpacket
 
+import "github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
+
 type NetPacket struct {
-	messageType uint32
+	PacketType d2netpackettype.NetPacketType `json:"packetType"`
+	PacketData interface{}                   `json:"packetData"`
 }

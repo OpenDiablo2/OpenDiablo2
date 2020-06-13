@@ -17,7 +17,7 @@ func (t *TestItem) InventoryGridSize() (int, int) {
 	return t.width, t.height
 }
 
-func (t *TestItem) ItemCode() string {
+func (t *TestItem) GetItemCode() string {
 	return ""
 }
 

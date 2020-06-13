@@ -2,8 +2,6 @@ package d2gamestate
 
 import (
 	"encoding/json"
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"io/ioutil"
 	"log"
 	"os"
@@ -18,14 +16,13 @@ import (
 )
 
 type GameState struct {
-	Seed      int64                          `json:"seed"`
+	Seed      int64                          `json:"seed"` // TODO: Seed needs to be regenerated every time the game starts
 	HeroName  string                         `json:"heroName"`
 	HeroType  d2enum.Hero                    `json:"heroType"`
 	HeroLevel int                            `json:"heroLevel"`
 	Act       int                            `json:"act"`
 	FilePath  string                         `json:"-"`
 	Equipment d2inventory.CharacterEquipment `json:"equipment"`
-	gameClient * d2client.GameClient         `json:"-"`
 }
 
 const GameStateVersion = uint32(2) // Update this when you make breaking changes
@@ -59,8 +56,6 @@ func CreateTestGameState() *GameState {
 	result := &GameState{
 		Seed: time.Now().UnixNano(),
 	}
-	result.gameClient, _ = d2client.Create(d2clientconnectiontype.Local)
-	result.gameClient.Open("")
 	return result
 }
 
@@ -82,15 +77,14 @@ func LoadGameState(path string) *GameState {
 
 func CreateGameState(heroName string, hero d2enum.Hero, hardcore bool) *GameState {
 	result := &GameState{
-		HeroName: heroName,
-		HeroType: hero,
-		Act:      1,
-		Seed:     time.Now().UnixNano(),
-		FilePath: "",
+		HeroName:  heroName,
+		HeroType:  hero,
+		Act:       1,
+		Seed:      time.Now().UnixNano(),
+		Equipment: d2inventory.HeroObjects[hero],
+		FilePath:  "",
 	}
 
-	result.gameClient, _ = d2client.Create(d2clientconnectiontype.Local)
-	result.gameClient.Open("")
 	result.Save()
 	return result
 }

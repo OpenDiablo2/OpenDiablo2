@@ -127,7 +127,7 @@ func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 	if n == 0 {
 		met.mapEngine.GenerateAct1Overworld()
 	} else {
-		met.mapEngine = d2map.CreateMapEngine(met.gameState) // necessary for map name update
+		met.mapEngine = d2map.CreateMapEngine() // necessary for map name update
 		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 	}
 
@@ -138,7 +138,7 @@ func (met *MapEngineTest) OnLoad() error {
 	// TODO: Game seed comes from the game state object
 	d2input.BindHandler(met)
 
-	met.mapEngine = d2map.CreateMapEngine(met.gameState)
+	met.mapEngine = d2map.CreateMapEngine()
 	met.LoadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
 
 	return nil

@@ -24,7 +24,7 @@ type Panel interface {
 var missileID = 59
 
 type GameControls struct {
-	hero      *d2map.Hero
+	hero      *d2map.Player
 	mapEngine *d2map.MapEngine
 	inventory *Inventory
 	heroStats *HeroStats
@@ -36,7 +36,7 @@ type GameControls struct {
 	skillIcon   *d2ui.Sprite
 }
 
-func NewGameControls(hero *d2map.Hero, mapEngine *d2map.MapEngine) *GameControls {
+func NewGameControls(hero *d2map.Player, mapEngine *d2map.MapEngine) *GameControls {
 	d2term.BindAction("setmissile", "set missile id to summon on right click", func(id int) {
 		missileID = id
 	})

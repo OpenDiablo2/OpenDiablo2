@@ -3,30 +3,25 @@ package d2gamescene
 import (
 	"image/color"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 )
 
 type Game struct {
-	gameState     *d2gamestate.GameState
 	pentSpinLeft  *d2ui.Sprite
 	pentSpinRight *d2ui.Sprite
 	testLabel     d2ui.Label
-	mapEngine     *d2map.MapEngine
-	hero          *d2map.Hero
-	gameControls  *d2player.GameControls
+	gameClient    *d2client.GameClient
 }
 
-func CreateGame(gameState *d2gamestate.GameState) *Game {
-	return &Game{gameState: gameState}
+func CreateGame(gameClient *d2client.GameClient) *Game {
+	return &Game{gameClient: gameClient}
 }
 
 func (v *Game) OnLoad() error {
@@ -47,42 +42,40 @@ func (v *Game) OnLoad() error {
 	v.testLabel.SetText("Soon :tm:")
 	v.testLabel.SetPosition(400, 250)
 
-	v.mapEngine = d2map.CreateMapEngine(v.gameState)
-	v.mapEngine.GenerateMap(d2enum.RegionAct1Town, 1, 0)
+	/*
+		startX, startY := v.mapEngine.GetStartPosition()
+		v.hero = d2map.CreateHero(
+			int(startX*5)+3,
+			int(startY*5)+3,
+			0,
+			v.gameState.HeroType,
+			v.gameState.Equipment,
+		)
+		v.mapEngine.AddEntity(v.hero)
 
-	startX, startY := v.mapEngine.GetStartPosition()
-	v.hero = d2map.CreateHero(
-		int(startX*5)+3,
-		int(startY*5)+3,
-		0,
-		v.gameState.HeroType,
-		v.gameState.Equipment,
-	)
-	v.mapEngine.AddEntity(v.hero)
-
-	v.gameControls = d2player.NewGameControls(v.hero, v.mapEngine)
-	v.gameControls.Load()
-	d2input.BindHandler(v.gameControls)
+		v.gameControls = d2player.NewGameControls(v.hero, v.mapEngine)
+		v.gameControls.Load()
+		d2input.BindHandler(v.gameControls)
+	*/
 
 	return nil
 }
 
 func (v *Game) OnUnload() error {
-	d2input.UnbindHandler(v.gameControls)
+	d2input.UnbindHandler(v.gameClient.GameControls) // TODO: hack
 	return nil
 }
 
 func (v *Game) Render(screen d2render.Surface) error {
 	screen.Clear(color.Black)
-	v.mapEngine.Render(screen)
-	v.gameControls.Render(screen)
+	v.gameClient.MapEngine.Render(screen)
+	v.gameClient.GameControls.Render(screen)
+
 	return nil
 }
 
 func (v *Game) Advance(tickTime float64) error {
-	v.mapEngine.Advance(tickTime)
+	v.gameClient.MapEngine.Advance(tickTime)
 
-	rx, ry := v.mapEngine.WorldToOrtho(v.hero.AnimatedComposite.LocationX/5, v.hero.AnimatedComposite.LocationY/5)
-	v.mapEngine.MoveCameraTo(rx, ry)
 	return nil
 }
