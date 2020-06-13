@@ -2,6 +2,8 @@ package d2gamestate
 
 import (
 	"encoding/json"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"io/ioutil"
 	"log"
 	"os"
@@ -23,6 +25,7 @@ type GameState struct {
 	Act       int                            `json:"act"`
 	FilePath  string                         `json:"-"`
 	Equipment d2inventory.CharacterEquipment `json:"equipment"`
+	gameClient * d2client.GameClient         `json:"-"`
 }
 
 const GameStateVersion = uint32(2) // Update this when you make breaking changes
@@ -56,6 +59,8 @@ func CreateTestGameState() *GameState {
 	result := &GameState{
 		Seed: time.Now().UnixNano(),
 	}
+	result.gameClient, _ = d2client.Create(d2clientconnectiontype.Local)
+	result.gameClient.Open("")
 	return result
 }
 
@@ -83,6 +88,9 @@ func CreateGameState(heroName string, hero d2enum.Hero, hardcore bool) *GameStat
 		Seed:     time.Now().UnixNano(),
 		FilePath: "",
 	}
+
+	result.gameClient, _ = d2client.Create(d2clientconnectiontype.Local)
+	result.gameClient.Open("")
 	result.Save()
 	return result
 }
