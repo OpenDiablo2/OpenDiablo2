@@ -8,4 +8,6 @@
 /OpenDiablo2.exe
 /OpenDiablo2
 **/*.pprof
+*.swp
+.*.swp
 tags
