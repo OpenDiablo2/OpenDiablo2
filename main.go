@@ -383,6 +383,8 @@ func loadDataDict() error {
 		{d2resource.SoundSettings, d2datadict.LoadSounds},
 		{d2resource.AnimationData, d2data.LoadAnimationData},
 		{d2resource.MonStats, d2datadict.LoadMonStats},
+		{d2resource.MagicPrefix, d2datadict.LoadMagicPrefix},
+		{d2resource.MagicSuffix, d2datadict.LoadMagicSuffix},
 	}
 
 	for _, entry := range entries {
