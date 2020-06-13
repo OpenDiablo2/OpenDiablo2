@@ -3,6 +3,8 @@ package d2server
 import (
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -12,6 +14,7 @@ import (
 type GameServer struct {
 	gameState         *d2gamestate.GameState
 	clientConnections map[string]ClientConnection
+	mapEngines        []*d2map.MapEngine
 }
 
 var singletonServer *GameServer
@@ -24,9 +27,13 @@ func Create(gameStatePath string) {
 
 	singletonServer = &GameServer{
 		clientConnections: make(map[string]ClientConnection),
+		mapEngines:        make([]*d2map.MapEngine, 0),
 		gameState:         d2gamestate.LoadGameState(gameStatePath),
 	}
 
+	mapEngine := d2map.CreateMapEngine()
+	mapEngine.GenerateMap(d2enum.RegionAct1Town, 1, 0, false)
+	singletonServer.mapEngines = append(singletonServer.mapEngines, mapEngine)
 }
 
 func Run() {
@@ -52,7 +59,8 @@ func OnClientConnected(client ClientConnection) {
 	client.SendPacketToClient(d2netpacket.CreateGenerateMapPacket(d2enum.RegionAct1Town, 1, 0))
 
 	// TODO: This needs to use a real method of loading characters instead of cloning the 'save file character'
-	createPlayerPacket := d2netpacket.CreateAddPlayerPacket(client.GetUniqueId(), 8, 8,
+	sx, sy := singletonServer.mapEngines[0].GetStartPosition() // TODO: Another temporary hack
+	createPlayerPacket := d2netpacket.CreateAddPlayerPacket(client.GetUniqueId(), int(sx*5)+3, int(sy*5)+3,
 		singletonServer.gameState.HeroType, singletonServer.gameState.Equipment)
 	for _, connection := range singletonServer.clientConnections {
 		connection.SendPacketToClient(createPlayerPacket)
