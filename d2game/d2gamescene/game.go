@@ -93,7 +93,7 @@ func (v *Game) Advance(tickTime float64) error {
 				continue
 			}
 			v.localPlayer = player
-			v.gameControls = d2player.NewGameControls(player, v.gameClient.MapEngine, v.mapRenderer)
+			v.gameControls = d2player.NewGameControls(player, v.gameClient.MapEngine, v.mapRenderer, v.gameClient)
 			v.gameControls.Load()
 			d2input.BindHandler(v.gameControls)
 

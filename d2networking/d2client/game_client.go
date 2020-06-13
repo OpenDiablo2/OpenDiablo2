@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
@@ -68,6 +70,18 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		newPlayer := d2map.CreatePlayer(player.Id, player.X, player.Y, 0, player.HeroType, player.Equipment)
 		g.Players[newPlayer.Id] = newPlayer
 		g.MapEngine.AddEntity(newPlayer)
+		break
+	case d2netpackettype.MovePlayer:
+		movePlayer := packet.PacketData.(d2netpacket.MovePlayerPacket)
+		player := g.Players[movePlayer.PlayerId]
+		path, _, found := g.MapEngine.PathFind(movePlayer.StartX, movePlayer.StartY, movePlayer.DestX, movePlayer.DestY)
+		if found {
+			player.AnimatedComposite.SetPath(path, func() {
+				player.AnimatedComposite.SetAnimationMode(
+					d2enum.AnimationModeObjectNeutral.String(),
+				)
+			})
+		}
 		break
 	default:
 		log.Fatalf("Invalid packet type: %d", packet.PacketType)

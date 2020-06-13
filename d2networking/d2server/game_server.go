@@ -3,6 +3,8 @@ package d2server
 import (
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
@@ -74,5 +76,13 @@ func OnClientDisconnected(client ClientConnection) {
 }
 
 func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) error {
+	switch packet.PacketType {
+	case d2netpackettype.MovePlayer:
+		// TODO: This needs to be verified on the server (here) before sending to other clients....
+		for _, player := range singletonServer.clientConnections {
+			player.SendPacketToClient(packet)
+		}
+		break
+	}
 	return nil
 }

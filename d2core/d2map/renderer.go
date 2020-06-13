@@ -24,6 +24,10 @@ func CreateMapRenderer(mapEngine *MapEngine) *MapRenderer {
 	return result
 }
 
+func (m *MapRenderer) SetMapEngine(mapEngine *MapEngine) {
+	m.mapEngine = mapEngine
+}
+
 func (m *MapRenderer) Render(target d2render.Surface) {
 	for _, region := range m.mapEngine.regions {
 		if region.isVisbile(m.viewport) {

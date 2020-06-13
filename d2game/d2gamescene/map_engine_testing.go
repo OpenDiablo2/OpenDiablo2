@@ -130,6 +130,7 @@ func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 	} else {
 		met.mapEngine = d2map.CreateMapEngine() // necessary for map name update
 		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex, true)
+		met.mapRenderer.SetMapEngine(met.mapEngine)
 	}
 
 	met.mapRenderer.MoveCameraTo(met.mapRenderer.WorldToOrtho(met.mapEngine.GetCenterPosition()))
