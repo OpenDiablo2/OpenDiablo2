@@ -76,8 +76,9 @@ var regions = []RegionSpec{
 }
 
 type MapEngineTest struct {
-	gameState *d2gamestate.GameState
-	mapEngine *d2map.MapEngine
+	gameState   *d2gamestate.GameState
+	mapEngine   *d2map.MapEngine
+	mapRenderer *d2map.MapRenderer
 
 	//TODO: this is region specific properties, should be refactored for multi-region rendering
 	currentRegion int
@@ -125,20 +126,22 @@ func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 	}
 
 	if n == 0 {
-		met.mapEngine.GenerateAct1Overworld()
+		met.mapEngine.GenerateAct1Overworld(true)
 	} else {
-		met.mapEngine = d2map.CreateMapEngine(met.gameState) // necessary for map name update
-		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
+		met.mapEngine = d2map.CreateMapEngine() // necessary for map name update
+		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex, true)
+		met.mapRenderer.SetMapEngine(met.mapEngine)
 	}
 
-	met.mapEngine.MoveCameraTo(met.mapEngine.WorldToOrtho(met.mapEngine.GetCenterPosition()))
+	met.mapRenderer.MoveCameraTo(met.mapRenderer.WorldToOrtho(met.mapEngine.GetCenterPosition()))
 }
 
 func (met *MapEngineTest) OnLoad() error {
 	// TODO: Game seed comes from the game state object
 	d2input.BindHandler(met)
 
-	met.mapEngine = d2map.CreateMapEngine(met.gameState)
+	met.mapEngine = d2map.CreateMapEngine()
+	met.mapRenderer = d2map.CreateMapRenderer(met.mapEngine)
 	met.LoadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
 
 	return nil
@@ -150,10 +153,10 @@ func (met *MapEngineTest) OnUnload() error {
 }
 
 func (met *MapEngineTest) Render(screen d2render.Surface) error {
-	met.mapEngine.Render(screen)
+	met.mapRenderer.Render(screen)
 
 	screenX, screenY := d2render.GetCursorPos()
-	worldX, worldY := met.mapEngine.ScreenToWorld(screenX, screenY)
+	worldX, worldY := met.mapRenderer.ScreenToWorld(screenX, screenY)
 	//subtileX := int(math.Ceil(math.Mod(worldX*10, 10))) / 2
 	//subtileY := int(math.Ceil(math.Mod(worldY*10, 10))) / 2
 
@@ -277,22 +280,22 @@ func (met *MapEngineTest) OnKeyRepeat(event d2input.KeyEvent) bool {
 	}
 
 	if event.Key == d2input.KeyDown {
-		met.mapEngine.MoveCameraBy(0, moveSpeed)
+		met.mapRenderer.MoveCameraBy(0, moveSpeed)
 		return true
 	}
 
 	if event.Key == d2input.KeyUp {
-		met.mapEngine.MoveCameraBy(0, -moveSpeed)
+		met.mapRenderer.MoveCameraBy(0, -moveSpeed)
 		return true
 	}
 
 	if event.Key == d2input.KeyRight {
-		met.mapEngine.MoveCameraBy(moveSpeed, 0)
+		met.mapRenderer.MoveCameraBy(moveSpeed, 0)
 		return true
 	}
 
 	if event.Key == d2input.KeyLeft {
-		met.mapEngine.MoveCameraBy(-moveSpeed, 0)
+		met.mapRenderer.MoveCameraBy(-moveSpeed, 0)
 		return true
 	}
 

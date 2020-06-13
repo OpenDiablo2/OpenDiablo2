@@ -13,6 +13,8 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
+
 	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -181,6 +183,8 @@ func initialize() error {
 	if err := loadStrings(); err != nil {
 		return err
 	}
+
+	d2inventory.LoadHeroObjects()
 
 	d2ui.Initialize()
 

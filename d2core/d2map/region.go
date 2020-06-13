@@ -92,7 +92,7 @@ type MapRegion struct {
 	walkableArea      [][]PathTile
 }
 
-func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.RegionIdType, levelPreset int, fileIndex int) (*MapRegion, []MapEntity) {
+func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.RegionIdType, levelPreset int, fileIndex int, cacheTiles bool) (*MapRegion, []MapEntity) {
 	region := &MapRegion{
 		levelType:         d2datadict.LevelTypes[levelType],
 		levelPreset:       d2datadict.LevelPresets[levelPreset],
@@ -145,8 +145,11 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 
 	entities := region.loadEntities()
 	region.loadSpecials()
-	region.generateTileCache()
 	region.generateWalkableMatrix()
+
+	if cacheTiles {
+		region.generateTileCache()
+	}
 	return region, entities
 }
 

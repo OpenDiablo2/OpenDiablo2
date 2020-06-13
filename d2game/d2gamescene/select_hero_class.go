@@ -4,6 +4,9 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -422,7 +425,9 @@ func (v SelectHeroClass) onExitButtonClicked() {
 
 func (v SelectHeroClass) onOkButtonClicked() {
 	gameState := d2gamestate.CreateGameState(v.heroNameTextbox.GetText(), v.selectedHero, v.hardcoreCheckbox.GetCheckState())
-	d2scene.SetNextScene(CreateGame(gameState))
+	gameClient, _ := d2client.Create(d2clientconnectiontype.Local)
+	gameClient.Open(gameState.FilePath)
+	d2scene.SetNextScene(CreateGame(gameClient))
 }
 
 func (v *SelectHeroClass) Render(screen d2render.Surface) error {
