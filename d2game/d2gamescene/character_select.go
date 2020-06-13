@@ -6,6 +6,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
+
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -39,7 +42,7 @@ type CharacterSelect struct {
 	characterNameLabel     [8]d2ui.Label
 	characterStatsLabel    [8]d2ui.Label
 	characterExpLabel      [8]d2ui.Label
-	characterImage         [8]*d2map.Hero
+	characterImage         [8]*d2map.Player
 	gameStates             []*d2gamestate.GameState
 	selectedCharacter      int
 	mouseButtonPressed     bool
@@ -155,10 +158,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		v.characterStatsLabel[i].SetText("Level 1 " + v.gameStates[idx].HeroType.String())
 		v.characterExpLabel[i].SetText(expText)
 		// TODO: Generate or load the object from the actual player data...
-		v.characterImage[i] = d2map.CreateHero(
-			0,
-			0,
-			0,
+		v.characterImage[i] = d2map.CreatePlayer("", 0, 0, 0,
 			v.gameStates[idx].HeroType,
 			d2inventory.HeroObjects[v.gameStates[idx].HeroType],
 		)
@@ -293,5 +293,7 @@ func (v *CharacterSelect) refreshGameStates() {
 }
 
 func (v *CharacterSelect) onOkButtonClicked() {
-	d2scene.SetNextScene(CreateGame(v.gameStates[v.selectedCharacter]))
+	gameClient, _ := d2client.Create(d2clientconnectiontype.Local)
+	gameClient.Open(v.gameStates[v.selectedCharacter].FilePath)
+	d2scene.SetNextScene(CreateGame(gameClient))
 }

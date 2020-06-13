@@ -14,7 +14,7 @@ import (
 
 type InventoryItem interface {
 	InventoryGridSize() (width int, height int)
-	ItemCode() string
+	GetItemCode() string
 	InventoryGridSlot() (x int, y int)
 	SetInventoryGridSlot(x int, y int)
 }
@@ -94,23 +94,23 @@ func (g *ItemGrid) Load(items ...InventoryItem) {
 	var itemSprite *d2ui.Sprite
 
 	for _, item := range items {
-		if _, exists := g.sprites[item.ItemCode()]; exists {
+		if _, exists := g.sprites[item.GetItemCode()]; exists {
 			// Already loaded, don't reload.
 			continue
 		}
 
 		// TODO: Put the pattern into D2Shared
 		animation, err := d2asset.LoadAnimation(
-			fmt.Sprintf("/data/global/items/inv%s.dc6", item.ItemCode()),
+			fmt.Sprintf("/data/global/items/inv%s.dc6", item.GetItemCode()),
 			d2resource.PaletteSky,
 		)
 		if err != nil {
-			log.Printf("failed to load sprite for item (%s): %v", item.ItemCode(), err)
+			log.Printf("failed to load sprite for item (%s): %v", item.GetItemCode(), err)
 			continue
 		}
 		itemSprite, err = d2ui.LoadSprite(animation)
 
-		g.sprites[item.ItemCode()] = itemSprite
+		g.sprites[item.GetItemCode()] = itemSprite
 	}
 
 }
@@ -156,7 +156,7 @@ func (g *ItemGrid) canFit(x int, y int, item InventoryItem) bool {
 
 func (g *ItemGrid) Set(x int, y int, item InventoryItem) error {
 	if !g.canFit(x, y, item) {
-		return fmt.Errorf("can not set item (%s) to position (%v, %v)", item.ItemCode(), x, y)
+		return fmt.Errorf("can not set item (%s) to position (%v, %v)", item.GetItemCode(), x, y)
 	}
 	g.set(x, y, item)
 	return nil
@@ -189,7 +189,7 @@ func (g *ItemGrid) Render(target d2render.Surface) {
 			continue
 		}
 
-		itemSprite := g.sprites[item.ItemCode()]
+		itemSprite := g.sprites[item.GetItemCode()]
 		if itemSprite == nil {
 			// In case it failed to load.
 			// TODO: fallback to something

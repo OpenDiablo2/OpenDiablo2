@@ -1,6 +1,7 @@
 package d2gamestate
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"os"
@@ -9,33 +10,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
-/*
-	File Spec
-	--------------------------------------------
-	UINT32 GameState Version
-	INT64  Game Seed
-    BYTE   Hero Type
-	BYTE   Hero Level
-    BYTE   Act
-    BYTE   Hero Name Length
-    BYTE[] Hero Name
-	--------------------------------------------
-*/
-
 type GameState struct {
-	Seed      int64
-	HeroName  string
-	HeroType  d2enum.Hero
-	HeroLevel int
-	Act       int
-	FilePath  string
-	Equipment d2inventory.CharacterEquipment
+	Seed      int64                          `json:"seed"` // TODO: Seed needs to be regenerated every time the game starts
+	HeroName  string                         `json:"heroName"`
+	HeroType  d2enum.Hero                    `json:"heroType"`
+	HeroLevel int                            `json:"heroLevel"`
+	Act       int                            `json:"act"`
+	FilePath  string                         `json:"-"`
+	Equipment d2inventory.CharacterEquipment `json:"equipment"`
 }
 
 const GameStateVersion = uint32(2) // Update this when you make breaking changes
@@ -47,7 +34,6 @@ func HasGameStates() bool {
 }
 
 func GetAllGameStates() []*GameState {
-	// TODO: Make this not crash tf out on bad files
 	basePath, _ := getGameBaseSavePath()
 	files, _ := ioutil.ReadDir(basePath)
 	result := make([]*GameState, 0)
@@ -74,41 +60,31 @@ func CreateTestGameState() *GameState {
 }
 
 func LoadGameState(path string) *GameState {
+	strData, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+
 	result := &GameState{
 		FilePath: path,
 	}
-	f, err := os.Open(path)
+	err = json.Unmarshal(strData, result)
 	if err != nil {
-		log.Panicf(err.Error())
-	}
-	bytes, err := ioutil.ReadAll(f)
-	if err != nil {
-		log.Panicf(err.Error())
-	}
-	defer f.Close()
-	sr := d2common.CreateStreamReader(bytes)
-	if sr.GetUInt32() != GameStateVersion {
-		// Unknown game version
 		return nil
 	}
-	result.Seed = sr.GetInt64()
-	result.HeroType = d2enum.Hero(sr.GetByte())
-	result.HeroLevel = int(sr.GetByte())
-	result.Act = int(sr.GetByte())
-	heroNameLen := sr.GetByte()
-	heroName, _ := sr.ReadBytes(int(heroNameLen))
-	result.HeroName = string(heroName)
 	return result
 }
 
 func CreateGameState(heroName string, hero d2enum.Hero, hardcore bool) *GameState {
 	result := &GameState{
-		HeroName: heroName,
-		HeroType: hero,
-		Act:      1,
-		Seed:     time.Now().UnixNano(),
-		FilePath: "",
+		HeroName:  heroName,
+		HeroType:  hero,
+		Act:       1,
+		Seed:      time.Now().UnixNano(),
+		Equipment: d2inventory.HeroObjects[hero],
+		FilePath:  "",
 	}
+
 	result.Save()
 	return result
 }
@@ -141,22 +117,6 @@ func (v *GameState) Save() {
 	if err := os.MkdirAll(path.Dir(v.FilePath), 0755); err != nil {
 		log.Panic(err.Error())
 	}
-	f, err := os.Create(v.FilePath)
-	if err != nil {
-		log.Panicf(err.Error())
-	}
-	defer f.Close()
-	sr := d2common.CreateStreamWriter()
-	sr.PushUint32(GameStateVersion)
-	sr.PushInt64(v.Seed)
-	sr.PushByte(byte(v.HeroType))
-	sr.PushByte(byte(v.HeroLevel))
-	sr.PushByte(byte(v.Act))
-	sr.PushByte(byte(len(v.HeroName)))
-	for _, ch := range v.HeroName {
-		sr.PushByte(byte(ch))
-	}
-	if _, err := f.Write(sr.GetBytes()); err != nil {
-		log.Panicf(err.Error())
-	}
+	fileJson, _ := json.MarshalIndent(v, "", "   ")
+	ioutil.WriteFile(v.FilePath, fileJson, 0644)
 }

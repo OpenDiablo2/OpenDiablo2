@@ -8,28 +8,29 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
-type Hero struct {
+type Player struct {
 	*AnimatedComposite
-	Equipment         d2inventory.CharacterEquipment
-	mode              d2enum.AnimationMode
-	direction         int
+	Equipment d2inventory.CharacterEquipment
+	Id        string
+	mode      d2enum.AnimationMode
+	direction int
 }
 
-func CreateHero(x, y int, direction int, heroType d2enum.Hero, equipment d2inventory.CharacterEquipment) *Hero {
+func CreatePlayer(id string, x, y int, direction int, heroType d2enum.Hero, equipment d2inventory.CharacterEquipment) *Player {
 	object := &d2datadict.ObjectLookupRecord{
 		Mode:  d2enum.AnimationModePlayerNeutral.String(),
 		Base:  "/data/global/chars",
 		Token: heroType.GetToken(),
-		Class: equipment.RightHand.WeaponClass(),
-		SH:    equipment.Shield.ItemCode(),
+		Class: equipment.RightHand.GetWeaponClass(),
+		SH:    equipment.Shield.GetItemCode(),
 		// TODO: Offhand class?
-		HD: equipment.Head.ArmorClass(),
-		TR: equipment.Torso.ArmorClass(),
-		LG: equipment.Legs.ArmorClass(),
-		RA: equipment.RightArm.ArmorClass(),
-		LA: equipment.LeftArm.ArmorClass(),
-		RH: equipment.RightHand.ItemCode(),
-		LH: equipment.LeftHand.ItemCode(),
+		HD: equipment.Head.GetArmorClass(),
+		TR: equipment.Torso.GetArmorClass(),
+		LG: equipment.Legs.GetArmorClass(),
+		RA: equipment.RightArm.GetArmorClass(),
+		LA: equipment.LeftArm.GetArmorClass(),
+		RH: equipment.RightHand.GetItemCode(),
+		LH: equipment.LeftHand.GetItemCode(),
 	}
 
 	entity, err := CreateAnimatedComposite(x, y, object, d2resource.PaletteUnits)
@@ -37,25 +38,26 @@ func CreateHero(x, y int, direction int, heroType d2enum.Hero, equipment d2inven
 		panic(err)
 	}
 
-	result := &Hero{
+	result := &Player{
+		Id:                id,
 		AnimatedComposite: entity,
 		Equipment:         equipment,
 		mode:              d2enum.AnimationModePlayerTownNeutral,
 		direction:         direction,
 	}
-	result.SetMode(result.mode.String(), equipment.RightHand.WeaponClass(), direction)
+	result.SetMode(result.mode.String(), equipment.RightHand.GetWeaponClass(), direction)
 	return result
 }
 
-func (v *Hero) Advance(tickTime float64) {
+func (v *Player) Advance(tickTime float64) {
 	v.Step(tickTime)
 	v.AnimatedComposite.Advance(tickTime)
 }
 
-func (v *Hero) Render(target d2render.Surface) {
+func (v *Player) Render(target d2render.Surface) {
 	v.AnimatedComposite.Render(target)
 }
 
-func (v *Hero) GetPosition() (float64, float64) {
+func (v *Player) GetPosition() (float64, float64) {
 	return v.AnimatedComposite.GetPosition()
 }

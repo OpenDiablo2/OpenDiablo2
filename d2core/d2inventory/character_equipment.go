@@ -1,13 +1,13 @@
 package d2inventory
 
 type CharacterEquipment struct {
-	Head      *InventoryItemArmor  // Head
-	Torso     *InventoryItemArmor  // TR
-	Legs      *InventoryItemArmor  // Legs
-	RightArm  *InventoryItemArmor  // RA
-	LeftArm   *InventoryItemArmor  // LA
-	LeftHand  *InventoryItemWeapon // LH
-	RightHand *InventoryItemWeapon // RH
-	Shield    *InventoryItemArmor  // SH
+	Head      *InventoryItemArmor  `json:"head"`      // Head
+	Torso     *InventoryItemArmor  `json:"torso"`     // TR
+	Legs      *InventoryItemArmor  `json:"legs"`      // Legs
+	RightArm  *InventoryItemArmor  `json:"rightArm"`  // RA
+	LeftArm   *InventoryItemArmor  `json:"leftArm"`   // LA
+	LeftHand  *InventoryItemWeapon `json:"leftHand"`  // LH
+	RightHand *InventoryItemWeapon `json:"rightHand"` // RH
+	Shield    *InventoryItemArmor  `json:"shield"`    // SH
 	// S1-S8?
 }

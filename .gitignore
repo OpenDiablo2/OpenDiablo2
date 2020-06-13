@@ -10,3 +10,4 @@
 **/*.pprof
 *.swp
 .*.swp
+tags
