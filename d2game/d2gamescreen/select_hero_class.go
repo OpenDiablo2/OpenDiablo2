@@ -1,4 +1,4 @@
-package d2gamescene
+package d2gamescreen
 
 import (
 	"image"
@@ -16,7 +16,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -420,14 +420,14 @@ func (v *SelectHeroClass) OnUnload() error {
 }
 
 func (v SelectHeroClass) onExitButtonClicked() {
-	d2scene.SetNextScene(CreateCharacterSelect())
+	d2screen.SetNextScreen(CreateCharacterSelect())
 }
 
 func (v SelectHeroClass) onOkButtonClicked() {
 	gameState := d2gamestate.CreateGameState(v.heroNameTextbox.GetText(), v.selectedHero, v.hardcoreCheckbox.GetCheckState())
 	gameClient, _ := d2client.Create(d2clientconnectiontype.Local)
 	gameClient.Open(gameState.FilePath)
-	d2scene.SetNextScene(CreateGame(gameClient))
+	d2screen.SetNextScreen(CreateGame(gameClient))
 }
 
 func (v *SelectHeroClass) Render(screen d2render.Surface) error {

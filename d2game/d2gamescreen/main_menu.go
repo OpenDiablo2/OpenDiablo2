@@ -1,4 +1,4 @@
-package d2gamescene
+package d2gamescreen
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -152,7 +152,7 @@ func (v *MainMenu) OnLoad() error {
 }
 
 func (v *MainMenu) onMapTestClicked() {
-	d2scene.SetNextScene(CreateMapEngineTest(0, 1))
+	d2screen.SetNextScreen(CreateMapEngineTest(0, 1))
 }
 
 func openbrowser(url string) {
@@ -177,10 +177,10 @@ func openbrowser(url string) {
 func (v *MainMenu) onSinglePlayerClicked() {
 	// Go here only if existing characters are available to select
 	if d2gamestate.HasGameStates() {
-		d2scene.SetNextScene(CreateCharacterSelect())
+		d2screen.SetNextScreen(CreateCharacterSelect())
 		return
 	}
-	d2scene.SetNextScene(CreateSelectHeroClass())
+	d2screen.SetNextScreen(CreateSelectHeroClass())
 }
 
 func (v *MainMenu) onGithubButtonClicked() {
@@ -192,7 +192,7 @@ func (v *MainMenu) onExitButtonClicked() {
 }
 
 func (v *MainMenu) onCreditsButtonClicked() {
-	d2scene.SetNextScene(CreateCredits())
+	d2screen.SetNextScreen(CreateCredits())
 }
 
 // Render renders the main menu
