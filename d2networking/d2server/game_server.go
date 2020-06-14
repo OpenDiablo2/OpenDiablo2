@@ -1,7 +1,12 @@
 package d2server
 
 import (
+	"fmt"
 	"log"
+
+	"github.com/robertkrimen/otto"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 
@@ -17,6 +22,7 @@ type GameServer struct {
 	gameState         *d2gamestate.GameState
 	clientConnections map[string]ClientConnection
 	mapEngines        []*d2map.MapEngine
+	scriptEngine      *d2script.ScriptEngine
 }
 
 var singletonServer *GameServer
@@ -31,15 +37,25 @@ func Create(gameStatePath string) {
 		clientConnections: make(map[string]ClientConnection),
 		mapEngines:        make([]*d2map.MapEngine, 0),
 		gameState:         d2gamestate.LoadGameState(gameStatePath),
+		scriptEngine:      d2script.CreateScriptEngine(),
 	}
 
 	mapEngine := d2map.CreateMapEngine()
 	mapEngine.GenerateMap(d2enum.RegionAct1Town, 1, 0, false)
 	singletonServer.mapEngines = append(singletonServer.mapEngines, mapEngine)
+
+	singletonServer.scriptEngine.AddFunction("getMapEngines", func(call otto.FunctionCall) otto.Value {
+		val, err := singletonServer.scriptEngine.ToValue(singletonServer.mapEngines)
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+		return val
+	})
 }
 
 func Run() {
 	log.Print("Starting GameServer")
+	singletonServer.scriptEngine.RunScript("scripts/server/server.js")
 }
 
 func Stop() {

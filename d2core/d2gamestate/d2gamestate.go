@@ -16,7 +16,7 @@ import (
 )
 
 type GameState struct {
-	Seed      int64                          `json:"seed"` // TODO: Seed needs to be regenerated every time the game starts
+	Seed      int64                          `json:"seed"` // TODO: seed needs to be regenerated every time the game starts
 	HeroName  string                         `json:"heroName"`
 	HeroType  d2enum.Hero                    `json:"heroType"`
 	HeroLevel int                            `json:"heroLevel"`

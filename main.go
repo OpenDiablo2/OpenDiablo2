@@ -13,6 +13,8 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen"
@@ -189,6 +191,8 @@ func initialize() error {
 	d2inventory.LoadHeroObjects()
 
 	d2ui.Initialize()
+
+	d2script.CreateScriptEngine()
 
 	return nil
 }
