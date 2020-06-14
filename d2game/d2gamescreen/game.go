@@ -1,4 +1,4 @@
-package d2gamescene
+package d2gamescreen
 
 import (
 	"image/color"

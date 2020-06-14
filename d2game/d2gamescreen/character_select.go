@@ -1,4 +1,4 @@
-package d2gamescene
+package d2gamescreen
 
 import (
 	"image/color"
@@ -21,7 +21,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -166,13 +166,13 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 }
 
 func (v *CharacterSelect) onNewCharButtonClicked() {
-	d2scene.SetNextScene(CreateSelectHeroClass())
+	d2screen.SetNextScreen(CreateSelectHeroClass())
 }
 
 func (v *CharacterSelect) onExitButtonClicked() {
 	mainMenu := CreateMainMenu()
 	mainMenu.ShowTrademarkScreen = false
-	d2scene.SetNextScene(mainMenu)
+	d2screen.SetNextScreen(mainMenu)
 }
 
 func (v *CharacterSelect) Render(screen d2render.Surface) error {
@@ -295,5 +295,5 @@ func (v *CharacterSelect) refreshGameStates() {
 func (v *CharacterSelect) onOkButtonClicked() {
 	gameClient, _ := d2client.Create(d2clientconnectiontype.Local)
 	gameClient.Open(v.gameStates[v.selectedCharacter].FilePath)
-	d2scene.SetNextScene(CreateGame(gameClient))
+	d2screen.SetNextScreen(CreateGame(gameClient))
 }
