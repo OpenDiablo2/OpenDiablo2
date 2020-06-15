@@ -45,7 +45,10 @@ func CreatePlayer(id string, x, y int, direction int, heroType d2enum.Hero, equi
 		mode:              d2enum.AnimationModePlayerTownNeutral,
 		direction:         direction,
 	}
-	result.SetMode(result.mode.String(), equipment.RightHand.GetWeaponClass(), direction)
+	err = result.SetMode(result.mode.String(), equipment.RightHand.GetWeaponClass(), direction)
+	if err != nil {
+		panic(err)
+	}
 	return result
 }
 

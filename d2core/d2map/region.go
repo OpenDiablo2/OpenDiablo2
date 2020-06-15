@@ -676,6 +676,10 @@ func (mr *MapRegion) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, t
 		tileData = &tileOptions[tileIndex]
 	}
 
+	if tileData.Width == 0 || tileData.Height == 0 {
+		return
+	}
+
 	tile.RandomIndex = tileIndex
 	tileMinY := int32(0)
 	tileMaxY := int32(0)

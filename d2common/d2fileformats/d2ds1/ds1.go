@@ -26,8 +26,9 @@ type DS1 struct {
 
 func LoadDS1(fileData []byte) (*DS1, error) {
 	ds1 := &DS1{
-		NumberOfFloors:             1,
-		NumberOfWalls:              1,
+		Act:                        1,
+		NumberOfFloors:             0,
+		NumberOfWalls:              0,
 		NumberOfShadowLayers:       1,
 		NumberOfSubstitutionLayers: 0,
 	}
@@ -61,7 +62,7 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 	}
 	if ds1.Version >= 9 && ds1.Version <= 13 {
 		// Skipping two dwords because they are "meaningless"?
-		br.SkipBytes(16)
+		br.SkipBytes(8)
 	}
 	if ds1.Version >= 4 {
 		ds1.NumberOfWalls = br.GetInt32()
@@ -179,8 +180,7 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 			newObject.X = int(br.GetInt32())
 			newObject.Y = int(br.GetInt32())
 			newObject.Flags = int(br.GetInt32())
-			//TODO: There's a crash here, we aren't loading this data right....
-			newObject.Lookup = d2datadict.LookupObject(int(ds1.Act), int(newObject.Type), int(newObject.Id))
+			newObject.Lookup = d2datadict.LookupObject(int(ds1.Act), newObject.Type, newObject.Id)
 			if newObject.Lookup != nil && newObject.Lookup.ObjectsTxtId != -1 {
 				newObject.ObjectInfo = d2datadict.Objects[newObject.Lookup.ObjectsTxtId]
 			}
