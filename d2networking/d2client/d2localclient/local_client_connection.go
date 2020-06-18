@@ -1,6 +1,7 @@
 package d2localclient
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server"
@@ -11,6 +12,7 @@ type LocalClientConnection struct {
 	clientListener    d2networking.ClientListener
 	uniqueId          string
 	openNetworkServer bool
+	playerState       *d2player.PlayerState
 }
 
 func (l LocalClientConnection) GetUniqueId() string {
@@ -35,7 +37,8 @@ func Create(openNetworkServer bool) *LocalClientConnection {
 }
 
 func (l *LocalClientConnection) Open(connectionString string, saveFilePath string) error {
-	d2server.Create(saveFilePath, l.openNetworkServer)
+	l.SetPlayerState(d2player.LoadPlayerState(saveFilePath))
+	d2server.Create(l.openNetworkServer)
 	go d2server.Run()
 	d2server.OnClientConnected(l)
 	return nil
@@ -54,4 +57,12 @@ func (l *LocalClientConnection) SendPacketToServer(packet d2netpacket.NetPacket)
 
 func (l *LocalClientConnection) SetClientListener(listener d2networking.ClientListener) {
 	l.clientListener = listener
+}
+
+func (l *LocalClientConnection) GetPlayerState() *d2player.PlayerState {
+	return l.playerState
+}
+
+func (l *LocalClientConnection) SetPlayerState(playerState *d2player.PlayerState) {
+	l.playerState = playerState
 }

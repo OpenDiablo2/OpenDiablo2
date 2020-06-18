@@ -4,10 +4,11 @@ import (
 	"math"
 	"os"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
@@ -76,7 +77,7 @@ var regions = []RegionSpec{
 }
 
 type MapEngineTest struct {
-	gameState   *d2gamestate.GameState
+	gameState   *d2player.PlayerState
 	mapEngine   *d2map.MapEngine
 	mapRenderer *d2map.MapRenderer
 
@@ -97,7 +98,7 @@ func CreateMapEngineTest(currentRegion int, levelPreset int) *MapEngineTest {
 		regionSpec:    RegionSpec{},
 		filesCount:    0,
 	}
-	result.gameState = d2gamestate.CreateTestGameState()
+	result.gameState = d2player.CreateTestGameState()
 	return result
 }
 

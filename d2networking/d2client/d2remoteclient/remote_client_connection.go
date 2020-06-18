@@ -10,12 +10,11 @@ import (
 	"net"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -69,7 +68,7 @@ func (l *RemoteClientConnection) Open(connectionString string, saveFilePath stri
 	go l.serverListener()
 
 	log.Printf("Connected to server at %s", l.udpConnection.RemoteAddr().String())
-	gameState := d2gamestate.LoadGameState(saveFilePath)
+	gameState := d2player.LoadPlayerState(saveFilePath)
 	l.SendPacketToServer(d2netpacket.CreatePlayerConnectionRequestPacket(l.GetUniqueId(), gameState))
 
 	return nil

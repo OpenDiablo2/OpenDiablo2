@@ -3,6 +3,8 @@ package d2gamescreen
 import (
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
@@ -60,7 +62,7 @@ func (v *Game) Advance(tickTime float64) error {
 				continue
 			}
 			v.localPlayer = player
-			v.gameControls = d2player.NewGameControls(player, v.gameClient.MapEngine, v.mapRenderer, v.gameClient)
+			v.gameControls = d2player.NewGameControls(player, v.gameClient.MapEngine, v.mapRenderer, v)
 			v.gameControls.Load()
 			d2input.BindHandler(v.gameControls)
 
@@ -74,4 +76,10 @@ func (v *Game) Advance(tickTime float64) error {
 		v.mapRenderer.MoveCameraTo(rx, ry)
 	}
 	return nil
+}
+
+func (v *Game) OnPlayerMove(x, y float64) {
+	heroPosX := v.localPlayer.AnimatedComposite.LocationX / 5.0
+	heroPosY := v.localPlayer.AnimatedComposite.LocationY / 5.0
+	v.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(v.gameClient.PlayerId, heroPosX, heroPosY, x, y))
 }

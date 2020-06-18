@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 
@@ -17,7 +19,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
@@ -43,7 +44,7 @@ type CharacterSelect struct {
 	characterStatsLabel    [8]d2ui.Label
 	characterExpLabel      [8]d2ui.Label
 	characterImage         [8]*d2map.Player
-	gameStates             []*d2gamestate.GameState
+	gameStates             []*d2player.PlayerState
 	selectedCharacter      int
 	mouseButtonPressed     bool
 	showDeleteConfirmation bool
@@ -284,7 +285,7 @@ func (v *CharacterSelect) toggleDeleteCharacterDialog(showDialog bool) {
 }
 
 func (v *CharacterSelect) refreshGameStates() {
-	v.gameStates = d2gamestate.GetAllGameStates()
+	v.gameStates = d2player.GetAllPlayerStates()
 	v.updateCharacterBoxes()
 	if len(v.gameStates) > 0 {
 		v.selectedCharacter = 0

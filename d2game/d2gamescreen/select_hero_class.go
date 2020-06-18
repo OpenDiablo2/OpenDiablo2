@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 
@@ -14,7 +16,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -428,7 +429,7 @@ func (v SelectHeroClass) onExitButtonClicked() {
 }
 
 func (v SelectHeroClass) onOkButtonClicked() {
-	gameState := d2gamestate.CreateGameState(v.heroNameTextbox.GetText(), v.selectedHero, v.hardcoreCheckbox.GetCheckState())
+	gameState := d2player.CreatePlayerState(v.heroNameTextbox.GetText(), v.selectedHero, v.hardcoreCheckbox.GetCheckState())
 	gameClient, _ := d2client.Create(d2clientconnectiontype.Local)
 	gameClient.Open(v.connectionHost, gameState.FilePath)
 	d2screen.SetNextScreen(CreateGame(gameClient))

@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -15,7 +17,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -265,7 +266,7 @@ func openbrowser(url string) {
 
 func (v *MainMenu) onSinglePlayerClicked() {
 	// Go here only if existing characters are available to select
-	if d2gamestate.HasGameStates() {
+	if d2player.HasGameStates() {
 		d2screen.SetNextScreen(CreateCharacterSelect(d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText()))
 		return
 	}

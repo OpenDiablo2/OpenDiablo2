@@ -4,16 +4,13 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2remoteclient"
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2localclient"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2remoteclient"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
@@ -21,7 +18,7 @@ import (
 type GameClient struct {
 	clientConnection ClientConnection
 	connectionType   d2clientconnectiontype.ClientConnectionType
-	GameState        *d2gamestate.GameState
+	GameState        *d2player.PlayerState
 	MapEngine        *d2map.MapEngine
 	PlayerId         string
 	Players          map[string]*d2map.Player
