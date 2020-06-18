@@ -74,14 +74,14 @@ func (l *RemoteClientConnection) Close() error {
 }
 
 func (l *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket) error {
-	data, err := json.Marshal(packet)
+	data, err := json.Marshal(packet.PacketData)
 	if err != nil {
 		return err
 	}
 	var buff bytes.Buffer
+	buff.WriteByte(byte(packet.PacketType))
 	writer, _ := gzip.NewWriterLevel(&buff, gzip.BestCompression)
 	writer.Write(data)
-	writer.Flush()
 	writer.Close()
 	if _, err = l.udpConnection.Write(buff.Bytes()); err != nil {
 		return err

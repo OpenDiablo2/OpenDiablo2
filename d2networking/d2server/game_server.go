@@ -3,6 +3,7 @@ package d2server
 import (
 	"bytes"
 	"compress/gzip"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -80,17 +81,29 @@ func createNetworkServer() {
 func runNetworkServer() {
 	buffer := make([]byte, 4096)
 	for singletonServer.running {
-		n, addr, err := singletonServer.udpConnection.ReadFromUDP(buffer)
+		_, _ /*addr*/, err := singletonServer.udpConnection.ReadFromUDP(buffer)
 		if err != nil {
 			fmt.Printf("Socket error: %s\n", err)
 			continue
 		}
 		buff := bytes.NewBuffer(buffer)
+		packetTypeId, err := buff.ReadByte()
+		packetType := d2netpackettype.NetPacketType(packetTypeId)
 		reader, err := gzip.NewReader(buff)
 		sb := new(strings.Builder)
 		io.Copy(sb, reader)
 		stringData := sb.String()
-		fmt.Printf("%d.. %s: %s", n, addr.IP.String(), stringData)
+		switch packetType {
+		case d2netpackettype.PlayerConnectionRequest:
+			packetData := d2netpacket.PlayerConnectionRequestPacket{}
+			json.Unmarshal([]byte(stringData), &packetData)
+			data := d2netpacket.NetPacket{
+				PacketType: d2netpackettype.PlayerConnectionRequest,
+				PacketData: packetData,
+			}
+			fmt.Printf("%d", data.PacketType)
+		}
+
 	}
 }
 
@@ -98,7 +111,9 @@ func Run() {
 	log.Print("Starting GameServer")
 	singletonServer.running = true
 	singletonServer.scriptEngine.RunScript("scripts/server/server.js")
-	go runNetworkServer()
+	if singletonServer.udpConnection != nil {
+		go runNetworkServer()
+	}
 	log.Print("Network server has been started")
 }
 
