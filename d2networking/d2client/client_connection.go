@@ -6,7 +6,7 @@ import (
 )
 
 type ClientConnection interface {
-	Open(connectionString string) error
+	Open(connectionString string, saveFilePath string) error
 	Close() error
 	SendPacketToServer(packet d2netpacket.NetPacket) error
 	SetClientListener(listener d2networking.ClientListener)
