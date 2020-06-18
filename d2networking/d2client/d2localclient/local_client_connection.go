@@ -34,8 +34,8 @@ func Create(openNetworkServer bool) *LocalClientConnection {
 	return result
 }
 
-func (l *LocalClientConnection) Open(gameStatePath string) error {
-	d2server.Create(gameStatePath, l.openNetworkServer)
+func (l *LocalClientConnection) Open(connectionString string, saveFilePath string) error {
+	d2server.Create(saveFilePath, l.openNetworkServer)
 	go d2server.Run()
 	d2server.OnClientConnected(l)
 	return nil

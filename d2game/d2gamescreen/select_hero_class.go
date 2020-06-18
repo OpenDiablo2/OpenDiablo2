@@ -65,13 +65,15 @@ type SelectHeroClass struct {
 	hardcoreCheckbox   d2ui.Checkbox
 	hardcoreCharLabel  d2ui.Label
 	connectionType     d2clientconnectiontype.ClientConnectionType
+	connectionHost     string
 }
 
-func CreateSelectHeroClass(connectionType d2clientconnectiontype.ClientConnectionType) *SelectHeroClass {
+func CreateSelectHeroClass(connectionType d2clientconnectiontype.ClientConnectionType, connectionHost string) *SelectHeroClass {
 	result := &SelectHeroClass{
 		heroRenderInfo: make(map[d2enum.Hero]*HeroRenderInfo),
 		selectedHero:   d2enum.HeroNone,
 		connectionType: connectionType,
+		connectionHost: connectionHost,
 	}
 	return result
 }
@@ -422,13 +424,13 @@ func (v *SelectHeroClass) OnUnload() error {
 }
 
 func (v SelectHeroClass) onExitButtonClicked() {
-	d2screen.SetNextScreen(CreateCharacterSelect(v.connectionType))
+	d2screen.SetNextScreen(CreateCharacterSelect(v.connectionType, v.connectionHost))
 }
 
 func (v SelectHeroClass) onOkButtonClicked() {
 	gameState := d2gamestate.CreateGameState(v.heroNameTextbox.GetText(), v.selectedHero, v.hardcoreCheckbox.GetCheckState())
 	gameClient, _ := d2client.Create(d2clientconnectiontype.Local)
-	gameClient.Open(gameState.FilePath)
+	gameClient.Open(v.connectionHost, gameState.FilePath)
 	d2screen.SetNextScreen(CreateGame(gameClient))
 }
 

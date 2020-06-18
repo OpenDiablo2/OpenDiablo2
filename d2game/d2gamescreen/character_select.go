@@ -48,12 +48,14 @@ type CharacterSelect struct {
 	mouseButtonPressed     bool
 	showDeleteConfirmation bool
 	connectionType         d2clientconnectiontype.ClientConnectionType
+	connectionHost         string
 }
 
-func CreateCharacterSelect(connectionType d2clientconnectiontype.ClientConnectionType) *CharacterSelect {
+func CreateCharacterSelect(connectionType d2clientconnectiontype.ClientConnectionType, connectionHost string) *CharacterSelect {
 	return &CharacterSelect{
 		selectedCharacter: -1,
 		connectionType:    connectionType,
+		connectionHost:    connectionHost,
 	}
 }
 
@@ -170,7 +172,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 }
 
 func (v *CharacterSelect) onNewCharButtonClicked() {
-	d2screen.SetNextScreen(CreateSelectHeroClass(v.connectionType))
+	d2screen.SetNextScreen(CreateSelectHeroClass(v.connectionType, v.connectionHost))
 }
 
 func (v *CharacterSelect) onExitButtonClicked() {
@@ -298,6 +300,12 @@ func (v *CharacterSelect) refreshGameStates() {
 
 func (v *CharacterSelect) onOkButtonClicked() {
 	gameClient, _ := d2client.Create(v.connectionType)
-	gameClient.Open(v.gameStates[v.selectedCharacter].FilePath)
+	switch v.connectionType {
+	case d2clientconnectiontype.LANClient:
+		gameClient.Open(v.connectionHost, v.gameStates[v.selectedCharacter].FilePath)
+	default:
+		gameClient.Open("", v.gameStates[v.selectedCharacter].FilePath)
+	}
+
 	d2screen.SetNextScreen(CreateGame(gameClient))
 }

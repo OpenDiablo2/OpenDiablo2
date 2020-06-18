@@ -48,8 +48,8 @@ func Create(connectionType d2clientconnectiontype.ClientConnectionType) (*GameCl
 	return result, nil
 }
 
-func (g *GameClient) Open(connectionString string) error {
-	return g.clientConnection.Open(connectionString)
+func (g *GameClient) Open(connectionString string, saveFilePath string) error {
+	return g.clientConnection.Open(connectionString, saveFilePath)
 }
 
 func (g *GameClient) Close() error {

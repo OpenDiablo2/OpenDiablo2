@@ -1,9 +1,13 @@
 package d2server
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"strings"
 
 	"github.com/robertkrimen/otto"
 
@@ -70,9 +74,7 @@ func createNetworkServer() {
 	if err != nil {
 		panic(err)
 	}
-
-	go runNetworkServer()
-	log.Print("Network server has been started")
+	singletonServer.udpConnection.SetReadBuffer(4096)
 }
 
 func runNetworkServer() {
@@ -80,9 +82,15 @@ func runNetworkServer() {
 	for singletonServer.running {
 		n, addr, err := singletonServer.udpConnection.ReadFromUDP(buffer)
 		if err != nil {
+			fmt.Printf("Socket error: %s\n", err)
 			continue
 		}
-		fmt.Printf("%s: %s", addr.IP.String(), string(buffer[0:n-1]))
+		buff := bytes.NewBuffer(buffer)
+		reader, err := gzip.NewReader(buff)
+		sb := new(strings.Builder)
+		io.Copy(sb, reader)
+		stringData := sb.String()
+		fmt.Printf("%d.. %s: %s", n, addr.IP.String(), stringData)
 	}
 }
 
@@ -90,6 +98,8 @@ func Run() {
 	log.Print("Starting GameServer")
 	singletonServer.running = true
 	singletonServer.scriptEngine.RunScript("scripts/server/server.js")
+	go runNetworkServer()
+	log.Print("Network server has been started")
 }
 
 func Stop() {

@@ -219,7 +219,7 @@ func (v *MainMenu) OnLoad() error {
 
 	v.tcpJoinGameEntry = d2ui.CreateTextbox()
 	v.tcpJoinGameEntry.SetPosition(318, 245)
-	v.tcpJoinGameEntry.SetFilter("1234567890.")
+	v.tcpJoinGameEntry.SetFilter("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890._:")
 	d2ui.AddWidget(&v.tcpJoinGameEntry)
 
 	v.btnServerIpCancel = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, d2common.TranslateString("#1612"))
@@ -229,7 +229,7 @@ func (v *MainMenu) OnLoad() error {
 
 	v.btnServerIpOk = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, d2common.TranslateString("#971"))
 	v.btnServerIpOk.SetPosition(420, 305)
-	v.btnServerIpOk.OnActivated(func() { v.onBtnTcpIpCancelClicked() })
+	v.btnServerIpOk.OnActivated(func() { v.onBtnTcpIpOkClicked() })
 	d2ui.AddWidget(&v.btnServerIpOk)
 
 	if v.screenMode == ScreenModeUnknown {
@@ -266,10 +266,10 @@ func openbrowser(url string) {
 func (v *MainMenu) onSinglePlayerClicked() {
 	// Go here only if existing characters are available to select
 	if d2gamestate.HasGameStates() {
-		d2screen.SetNextScreen(CreateCharacterSelect(d2clientconnectiontype.Local))
+		d2screen.SetNextScreen(CreateCharacterSelect(d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText()))
 		return
 	}
-	d2screen.SetNextScreen(CreateSelectHeroClass(d2clientconnectiontype.Local))
+	d2screen.SetNextScreen(CreateSelectHeroClass(d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText()))
 }
 
 func (v *MainMenu) onGithubButtonClicked() {
@@ -402,7 +402,7 @@ func (v *MainMenu) onTcpIpCancelClicked() {
 }
 
 func (v *MainMenu) onTcpIpHostGameClicked() {
-	d2screen.SetNextScreen(CreateCharacterSelect(d2clientconnectiontype.LANServer))
+	d2screen.SetNextScreen(CreateCharacterSelect(d2clientconnectiontype.LANServer, ""))
 }
 
 func (v *MainMenu) onTcpIpJoinGameClicked() {
@@ -411,4 +411,8 @@ func (v *MainMenu) onTcpIpJoinGameClicked() {
 
 func (v *MainMenu) onBtnTcpIpCancelClicked() {
 	v.SetScreenMode(ScreenModeTcpIp)
+}
+
+func (v *MainMenu) onBtnTcpIpOkClicked() {
+	d2screen.SetNextScreen(CreateCharacterSelect(d2clientconnectiontype.LANClient, v.tcpJoinGameEntry.GetText()))
 }
