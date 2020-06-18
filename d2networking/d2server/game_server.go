@@ -3,6 +3,7 @@ package d2server
 import (
 	"fmt"
 	"log"
+	"net"
 
 	"github.com/robertkrimen/otto"
 
@@ -23,11 +24,13 @@ type GameServer struct {
 	clientConnections map[string]ClientConnection
 	mapEngines        []*d2map.MapEngine
 	scriptEngine      *d2script.ScriptEngine
+	udpConnection     *net.UDPConn
+	running           bool
 }
 
 var singletonServer *GameServer
 
-func Create(gameStatePath string) {
+func Create(gameStatePath string, openNetworkServer bool) {
 	log.Print("Creating GameServer")
 	if singletonServer != nil {
 		return
@@ -51,15 +54,50 @@ func Create(gameStatePath string) {
 		}
 		return val
 	})
+
+	if openNetworkServer {
+		createNetworkServer()
+	}
+}
+
+func createNetworkServer() {
+	s, err := net.ResolveUDPAddr("udp4", "0.0.0.0:6669")
+	if err != nil {
+		panic(err)
+	}
+
+	singletonServer.udpConnection, err = net.ListenUDP("udp4", s)
+	if err != nil {
+		panic(err)
+	}
+
+	go runNetworkServer()
+	log.Print("Network server has been started")
+}
+
+func runNetworkServer() {
+	buffer := make([]byte, 4096)
+	for singletonServer.running {
+		n, addr, err := singletonServer.udpConnection.ReadFromUDP(buffer)
+		if err != nil {
+			continue
+		}
+		fmt.Printf("%s: %s", addr.IP.String(), string(buffer[0:n-1]))
+	}
 }
 
 func Run() {
 	log.Print("Starting GameServer")
+	singletonServer.running = true
 	singletonServer.scriptEngine.RunScript("scripts/server/server.js")
 }
 
 func Stop() {
 	log.Print("Stopping GameServer")
+	singletonServer.running = false
+	if singletonServer.udpConnection != nil {
+		singletonServer.udpConnection.Close()
+	}
 }
 
 func Destroy() {

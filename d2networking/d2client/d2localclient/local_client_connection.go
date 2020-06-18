@@ -8,8 +8,9 @@ import (
 )
 
 type LocalClientConnection struct {
-	clientListener d2networking.ClientListener
-	uniqueId       string
+	clientListener    d2networking.ClientListener
+	uniqueId          string
+	openNetworkServer bool
 }
 
 func (l LocalClientConnection) GetUniqueId() string {
@@ -24,16 +25,17 @@ func (l *LocalClientConnection) SendPacketToClient(packet d2netpacket.NetPacket)
 	return l.clientListener.OnPacketReceived(packet)
 }
 
-func Create() *LocalClientConnection {
+func Create(openNetworkServer bool) *LocalClientConnection {
 	result := &LocalClientConnection{
-		uniqueId: uuid.NewV4().String(),
+		uniqueId:          uuid.NewV4().String(),
+		openNetworkServer: openNetworkServer,
 	}
 
 	return result
 }
 
 func (l *LocalClientConnection) Open(gameStatePath string) error {
-	d2server.Create(gameStatePath)
+	d2server.Create(gameStatePath, l.openNetworkServer)
 	go d2server.Run()
 	d2server.OnClientConnected(l)
 	return nil

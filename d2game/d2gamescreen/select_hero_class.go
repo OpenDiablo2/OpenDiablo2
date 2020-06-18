@@ -64,12 +64,14 @@ type SelectHeroClass struct {
 	expansionCharLabel d2ui.Label
 	hardcoreCheckbox   d2ui.Checkbox
 	hardcoreCharLabel  d2ui.Label
+	connectionType     d2clientconnectiontype.ClientConnectionType
 }
 
-func CreateSelectHeroClass() *SelectHeroClass {
+func CreateSelectHeroClass(connectionType d2clientconnectiontype.ClientConnectionType) *SelectHeroClass {
 	result := &SelectHeroClass{
 		heroRenderInfo: make(map[d2enum.Hero]*HeroRenderInfo),
 		selectedHero:   d2enum.HeroNone,
+		connectionType: connectionType,
 	}
 	return result
 }
@@ -420,7 +422,7 @@ func (v *SelectHeroClass) OnUnload() error {
 }
 
 func (v SelectHeroClass) onExitButtonClicked() {
-	d2screen.SetNextScreen(CreateCharacterSelect())
+	d2screen.SetNextScreen(CreateCharacterSelect(v.connectionType))
 }
 
 func (v SelectHeroClass) onOkButtonClicked() {

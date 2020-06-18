@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2remoteclient"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
@@ -18,6 +20,7 @@ import (
 
 type GameClient struct {
 	clientConnection ClientConnection
+	connectionType   d2clientconnectiontype.ClientConnectionType
 	GameState        *d2gamestate.GameState
 	MapEngine        *d2map.MapEngine
 	PlayerId         string
@@ -26,18 +29,22 @@ type GameClient struct {
 
 func Create(connectionType d2clientconnectiontype.ClientConnectionType) (*GameClient, error) {
 	result := &GameClient{
-		MapEngine: d2map.CreateMapEngine(),
-		Players:   make(map[string]*d2map.Player, 0),
+		MapEngine:      d2map.CreateMapEngine(),
+		Players:        make(map[string]*d2map.Player, 0),
+		connectionType: connectionType,
 	}
 
 	switch connectionType {
+	case d2clientconnectiontype.LANClient:
+		result.clientConnection = d2remoteclient.Create()
+	case d2clientconnectiontype.LANServer:
+		result.clientConnection = d2localclient.Create(true)
 	case d2clientconnectiontype.Local:
-		result.clientConnection = d2localclient.Create()
-		result.clientConnection.SetClientListener(result)
+		result.clientConnection = d2localclient.Create(false)
 	default:
 		return nil, fmt.Errorf("unknown client connection type specified: %d", connectionType)
 	}
-
+	result.clientConnection.SetClientListener(result)
 	return result, nil
 }
 

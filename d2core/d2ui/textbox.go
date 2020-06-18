@@ -23,12 +23,14 @@ type TextBox struct {
 	bgSprite  *Sprite
 	textLabel Label
 	lineBar   Label
+	filter    string
 }
 
 func CreateTextbox() TextBox {
 	animation, _ := d2asset.LoadAnimation(d2resource.TextBox2, d2resource.PaletteUnits)
 	bgSprite, _ := LoadSprite(animation)
 	result := TextBox{
+		filter:    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
 		bgSprite:  bgSprite,
 		textLabel: CreateLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
 		lineBar:   CreateLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
@@ -37,6 +39,10 @@ func CreateTextbox() TextBox {
 	}
 	result.lineBar.SetText("_")
 	return result
+}
+
+func (v *TextBox) SetFilter(filter string) {
+	v.filter = filter
 }
 
 func repeatingKeyPressed(key ebiten.Key) bool {
@@ -93,7 +99,7 @@ func (v *TextBox) GetText() string {
 func (v *TextBox) SetText(newText string) {
 	result := ""
 	for _, c := range newText {
-		if !strings.Contains("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", string(c)) {
+		if !strings.Contains(v.filter, string(c)) {
 			continue
 		}
 		result += string(c)
