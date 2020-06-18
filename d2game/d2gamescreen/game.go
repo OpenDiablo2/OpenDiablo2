@@ -33,39 +33,6 @@ func CreateGame(gameClient *d2client.GameClient) *Game {
 }
 
 func (v *Game) OnLoad() error {
-	//animation, _ := d2asset.LoadAnimation(d2resource.PentSpin, d2resource.PaletteSky)
-	//v.pentSpinLeft, _ = d2ui.LoadSprite(animation)
-	//v.pentSpinLeft.PlayBackward()
-	//v.pentSpinLeft.SetPlayLengthMs(475)
-	//v.pentSpinLeft.SetPosition(100, 300)
-	//
-	//animation, _ = d2asset.LoadAnimation(d2resource.PentSpin, d2resource.PaletteSky)
-	//v.pentSpinRight, _ = d2ui.LoadSprite(animation)
-	//v.pentSpinRight.PlayForward()
-	//v.pentSpinRight.SetPlayLengthMs(475)
-	//v.pentSpinRight.SetPosition(650, 300)
-	//
-	//v.testLabel = d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
-	//v.testLabel.Alignment = d2ui.LabelAlignCenter
-	//v.testLabel.SetText("Soon :tm:")
-	//v.testLabel.SetPosition(400, 250)
-
-	/*
-		startX, startY := v.mapEngine.GetStartPosition()
-		v.hero = d2map.CreateHero(
-			int(startX*5)+3,
-			int(startY*5)+3,
-			0,
-			v.gameState.HeroType,
-			v.gameState.Equipment,
-		)
-		v.mapEngine.AddEntity(v.hero)
-
-		v.gameControls = d2player.NewGameControls(v.hero, v.mapEngine)
-		v.gameControls.Load()
-		d2input.BindHandler(v.gameControls)
-	*/
-
 	return nil
 }
 

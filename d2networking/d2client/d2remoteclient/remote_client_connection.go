@@ -4,9 +4,13 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net"
 	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 
@@ -19,6 +23,7 @@ type RemoteClientConnection struct {
 	clientListener d2networking.ClientListener
 	uniqueId       string
 	udpConnection  *net.UDPConn
+	active         bool
 }
 
 func (l RemoteClientConnection) GetUniqueId() string {
@@ -30,8 +35,7 @@ func (l RemoteClientConnection) GetConnectionType() string {
 }
 
 func (l *RemoteClientConnection) SendPacketToClient(packet d2netpacket.NetPacket) error { // WHAT IS THIS
-	//return l.clientListener.OnPacketReceived(packet)
-	return nil
+	return l.clientListener.OnPacketReceived(packet)
 }
 
 func Create() *RemoteClientConnection {
@@ -61,6 +65,9 @@ func (l *RemoteClientConnection) Open(connectionString string, saveFilePath stri
 		return err
 	}
 
+	l.active = true
+	go l.serverListener()
+
 	log.Printf("Connected to server at %s", l.udpConnection.RemoteAddr().String())
 	gameState := d2gamestate.LoadGameState(saveFilePath)
 	l.SendPacketToServer(d2netpacket.CreatePlayerConnectionRequestPacket(l.GetUniqueId(), gameState))
@@ -69,6 +76,7 @@ func (l *RemoteClientConnection) Open(connectionString string, saveFilePath stri
 }
 
 func (l *RemoteClientConnection) Close() error {
+	l.active = false
 	// TODO: Disconnect from the server - send a disconnect packet
 	return nil
 }
@@ -91,4 +99,58 @@ func (l *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket
 
 func (l *RemoteClientConnection) SetClientListener(listener d2networking.ClientListener) {
 	l.clientListener = listener
+}
+
+func (l *RemoteClientConnection) serverListener() {
+	buffer := make([]byte, 4096)
+	for l.active {
+		n, _, err := l.udpConnection.ReadFromUDP(buffer)
+		if err != nil {
+			fmt.Printf("Socket error: %s\n", err)
+			continue
+		}
+		if n <= 0 {
+			continue
+		}
+		buff := bytes.NewBuffer(buffer)
+		packetTypeId, err := buff.ReadByte()
+		packetType := d2netpackettype.NetPacketType(packetTypeId)
+		reader, err := gzip.NewReader(buff)
+		sb := new(strings.Builder)
+		io.Copy(sb, reader)
+		stringData := sb.String()
+		switch packetType {
+		case d2netpackettype.GenerateMap:
+			var packet d2netpacket.GenerateMapPacket
+			json.Unmarshal([]byte(stringData), &packet)
+			l.SendPacketToClient(d2netpacket.NetPacket{
+				PacketType: packetType,
+				PacketData: packet,
+			})
+		case d2netpackettype.MovePlayer:
+			var packet d2netpacket.MovePlayerPacket
+			json.Unmarshal([]byte(stringData), &packet)
+			l.SendPacketToClient(d2netpacket.NetPacket{
+				PacketType: packetType,
+				PacketData: packet,
+			})
+		case d2netpackettype.UpdateServerInfo:
+			var packet d2netpacket.UpdateServerInfoPacket
+			json.Unmarshal([]byte(stringData), &packet)
+			l.SendPacketToClient(d2netpacket.NetPacket{
+				PacketType: packetType,
+				PacketData: packet,
+			})
+		case d2netpackettype.AddPlayer:
+			var packet d2netpacket.AddPlayerPacket
+			json.Unmarshal([]byte(stringData), &packet)
+			l.SendPacketToClient(d2netpacket.NetPacket{
+				PacketType: packetType,
+				PacketData: packet,
+			})
+		default:
+			fmt.Printf("Unknown packet type %d\n", packetType)
+		}
+
+	}
 }

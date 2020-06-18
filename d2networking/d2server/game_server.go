@@ -10,6 +10,8 @@ import (
 	"net"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server/d2udpclientconnection"
+
 	"github.com/robertkrimen/otto"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2script"
@@ -81,7 +83,7 @@ func createNetworkServer() {
 func runNetworkServer() {
 	buffer := make([]byte, 4096)
 	for singletonServer.running {
-		_, _ /*addr*/, err := singletonServer.udpConnection.ReadFromUDP(buffer)
+		_, addr, err := singletonServer.udpConnection.ReadFromUDP(buffer)
 		if err != nil {
 			fmt.Printf("Socket error: %s\n", err)
 			continue
@@ -97,11 +99,18 @@ func runNetworkServer() {
 		case d2netpackettype.PlayerConnectionRequest:
 			packetData := d2netpacket.PlayerConnectionRequestPacket{}
 			json.Unmarshal([]byte(stringData), &packetData)
-			data := d2netpacket.NetPacket{
-				PacketType: d2netpackettype.PlayerConnectionRequest,
+			clientConnection := d2udpclientconnection.CreateUDPClientConnection(singletonServer.udpConnection, packetData.Id, addr)
+			OnClientConnected(clientConnection)
+		case d2netpackettype.MovePlayer:
+			packetData := d2netpacket.MovePlayerPacket{}
+			json.Unmarshal([]byte(stringData), &packetData)
+			netPacket := d2netpacket.NetPacket{
+				PacketType: packetType,
 				PacketData: packetData,
 			}
-			fmt.Printf("%d", data.PacketType)
+			for _, player := range singletonServer.clientConnections {
+				player.SendPacketToClient(netPacket)
+			}
 		}
 
 	}
@@ -145,6 +154,12 @@ func OnClientConnected(client ClientConnection) {
 		singletonServer.gameState.HeroType, singletonServer.gameState.Equipment)
 	for _, connection := range singletonServer.clientConnections {
 		connection.SendPacketToClient(createPlayerPacket)
+		if connection.GetUniqueId() == client.GetUniqueId() {
+			continue
+		}
+
+		//client.SendPacketToClient(d2netpacket.CreateAddPlayerPacket(
+		//	connection.GetUniqueId(), ))
 	}
 
 }

@@ -77,14 +77,6 @@ func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
 
 	if event.Button == d2input.MouseButtonLeft {
 		g.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(g.gameClient.PlayerId, heroPosX, heroPosY, px, py))
-		//path, _, found := g.mapEngine.PathFind(heroPosX, heroPosY, px, py)
-		//if found {
-		//	g.hero.AnimatedComposite.SetPath(path, func() {
-		//		g.hero.AnimatedComposite.SetAnimationMode(
-		//			d2enum.AnimationModeObjectNeutral.String(),
-		//		)
-		//	})
-		//}
 		return true
 	}
 
