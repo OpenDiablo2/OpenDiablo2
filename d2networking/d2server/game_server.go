@@ -104,12 +104,6 @@ func runNetworkServer() {
 				PacketType: packetType,
 				PacketData: packetData,
 			}
-			// TODO: Hacky, this should be updated in realtime ----------------
-			// TODO: Verify player id
-			playerState := singletonServer.clientConnections[packetData.PlayerId].GetPlayerState()
-			playerState.X = packetData.DestX
-			playerState.Y = packetData.DestY
-			// ----------------------------------------------------------------
 
 			for _, player := range singletonServer.clientConnections {
 				player.SendPacketToClient(netPacket)
@@ -148,8 +142,9 @@ func Destroy() {
 func OnClientConnected(client ClientConnection) {
 	// Temporary position hack --------------------------------------------
 	sx, sy := singletonServer.mapEngines[0].GetStartPosition() // TODO: Another temporary hack
-	client.GetPlayerState().X = sx
-	client.GetPlayerState().Y = sy
+	clientPlayerState := client.GetPlayerState()
+	clientPlayerState.X = sx
+	clientPlayerState.Y = sy
 	// --------------------------------------------------------------------
 
 	log.Printf("Client connected with an id of %s", client.GetUniqueId())
@@ -158,7 +153,8 @@ func OnClientConnected(client ClientConnection) {
 	client.SendPacketToClient(d2netpacket.CreateGenerateMapPacket(d2enum.RegionAct1Town, 1, 0))
 
 	playerState := client.GetPlayerState()
-	createPlayerPacket := d2netpacket.CreateAddPlayerPacket(client.GetUniqueId(), int(sx*5)+3, int(sy*5)+3, playerState.HeroType, playerState.Equipment)
+	createPlayerPacket := d2netpacket.CreateAddPlayerPacket(client.GetUniqueId(), playerState.HeroName, int(sx*5)+3, int(sy*5)+3,
+		playerState.HeroType, playerState.Equipment)
 	for _, connection := range singletonServer.clientConnections {
 		connection.SendPacketToClient(createPlayerPacket)
 		if connection.GetUniqueId() == client.GetUniqueId() {
@@ -166,8 +162,8 @@ func OnClientConnected(client ClientConnection) {
 		}
 
 		conPlayerState := connection.GetPlayerState()
-		client.SendPacketToClient(d2netpacket.CreateAddPlayerPacket(connection.GetUniqueId(), int(conPlayerState.X*5), int(conPlayerState.Y*5),
-			conPlayerState.HeroType, conPlayerState.Equipment))
+		client.SendPacketToClient(d2netpacket.CreateAddPlayerPacket(connection.GetUniqueId(), conPlayerState.HeroName,
+			int(conPlayerState.X*5)+3, int(conPlayerState.Y*5)+3, conPlayerState.HeroType, conPlayerState.Equipment))
 	}
 
 }
@@ -181,6 +177,12 @@ func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) err
 	switch packet.PacketType {
 	case d2netpackettype.MovePlayer:
 		// TODO: This needs to be verified on the server (here) before sending to other clients....
+		// TODO: Hacky, this should be updated in realtime ----------------
+		// TODO: Verify player id
+		playerState := singletonServer.clientConnections[client.GetUniqueId()].GetPlayerState()
+		playerState.X = packet.PacketData.(d2netpacket.MovePlayerPacket).DestX
+		playerState.Y = packet.PacketData.(d2netpacket.MovePlayerPacket).DestY
+		// ----------------------------------------------------------------
 		for _, player := range singletonServer.clientConnections {
 			player.SendPacketToClient(packet)
 		}

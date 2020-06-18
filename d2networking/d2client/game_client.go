@@ -71,7 +71,7 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		break
 	case d2netpackettype.AddPlayer:
 		player := packet.PacketData.(d2netpacket.AddPlayerPacket)
-		newPlayer := d2map.CreatePlayer(player.Id, player.X, player.Y, 0, player.HeroType, player.Equipment)
+		newPlayer := d2map.CreatePlayer(player.Id, player.Name, player.X, player.Y, 0, player.HeroType, player.Equipment)
 		g.Players[newPlayer.Id] = newPlayer
 		g.MapEngine.AddEntity(newPlayer)
 		break

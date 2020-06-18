@@ -165,7 +165,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		v.characterStatsLabel[i].SetText("Level 1 " + v.gameStates[idx].HeroType.String())
 		v.characterExpLabel[i].SetText(expText)
 		// TODO: Generate or load the object from the actual player data...
-		v.characterImage[i] = d2map.CreatePlayer("", 0, 0, 0,
+		v.characterImage[i] = d2map.CreatePlayer("", "", 0, 0, 0,
 			v.gameStates[idx].HeroType,
 			d2inventory.HeroObjects[v.gameStates[idx].HeroType],
 		)
