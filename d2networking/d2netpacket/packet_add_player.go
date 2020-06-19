@@ -8,17 +8,19 @@ import (
 
 type AddPlayerPacket struct {
 	Id        string                         `json:"id"`
+	Name      string                         `json:"name"`
 	X         int                            `json:"x"`
 	Y         int                            `json:"y"`
 	HeroType  d2enum.Hero                    `json:"hero"`
 	Equipment d2inventory.CharacterEquipment `json:"equipment"`
 }
 
-func CreateAddPlayerPacket(id string, x, y int, heroType d2enum.Hero, equipment d2inventory.CharacterEquipment) NetPacket {
+func CreateAddPlayerPacket(id, name string, x, y int, heroType d2enum.Hero, equipment d2inventory.CharacterEquipment) NetPacket {
 	return NetPacket{
 		PacketType: d2netpackettype.AddPlayer,
 		PacketData: AddPlayerPacket{
 			Id:        id,
+			Name:      name,
 			X:         x,
 			Y:         y,
 			HeroType:  heroType,

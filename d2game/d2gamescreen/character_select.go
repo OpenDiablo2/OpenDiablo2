@@ -1,10 +1,12 @@
-package d2gamescene
+package d2gamescreen
 
 import (
 	"image/color"
 	"math"
 	"os"
 	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
@@ -17,11 +19,10 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -43,14 +44,20 @@ type CharacterSelect struct {
 	characterStatsLabel    [8]d2ui.Label
 	characterExpLabel      [8]d2ui.Label
 	characterImage         [8]*d2map.Player
-	gameStates             []*d2gamestate.GameState
+	gameStates             []*d2player.PlayerState
 	selectedCharacter      int
 	mouseButtonPressed     bool
 	showDeleteConfirmation bool
+	connectionType         d2clientconnectiontype.ClientConnectionType
+	connectionHost         string
 }
 
-func CreateCharacterSelect() *CharacterSelect {
-	return &CharacterSelect{selectedCharacter: -1}
+func CreateCharacterSelect(connectionType d2clientconnectiontype.ClientConnectionType, connectionHost string) *CharacterSelect {
+	return &CharacterSelect{
+		selectedCharacter: -1,
+		connectionType:    connectionType,
+		connectionHost:    connectionHost,
+	}
 }
 
 func (v *CharacterSelect) OnLoad() error {
@@ -158,7 +165,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		v.characterStatsLabel[i].SetText("Level 1 " + v.gameStates[idx].HeroType.String())
 		v.characterExpLabel[i].SetText(expText)
 		// TODO: Generate or load the object from the actual player data...
-		v.characterImage[i] = d2map.CreatePlayer("", 0, 0, 0,
+		v.characterImage[i] = d2map.CreatePlayer("", "", 0, 0, 0,
 			v.gameStates[idx].HeroType,
 			d2inventory.HeroObjects[v.gameStates[idx].HeroType],
 		)
@@ -166,13 +173,13 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 }
 
 func (v *CharacterSelect) onNewCharButtonClicked() {
-	d2scene.SetNextScene(CreateSelectHeroClass())
+	d2screen.SetNextScreen(CreateSelectHeroClass(v.connectionType, v.connectionHost))
 }
 
 func (v *CharacterSelect) onExitButtonClicked() {
 	mainMenu := CreateMainMenu()
-	mainMenu.ShowTrademarkScreen = false
-	d2scene.SetNextScene(mainMenu)
+	mainMenu.SetScreenMode(ScreenModeMainMenu)
+	d2screen.SetNextScreen(mainMenu)
 }
 
 func (v *CharacterSelect) Render(screen d2render.Surface) error {
@@ -278,7 +285,7 @@ func (v *CharacterSelect) toggleDeleteCharacterDialog(showDialog bool) {
 }
 
 func (v *CharacterSelect) refreshGameStates() {
-	v.gameStates = d2gamestate.GetAllGameStates()
+	v.gameStates = d2player.GetAllPlayerStates()
 	v.updateCharacterBoxes()
 	if len(v.gameStates) > 0 {
 		v.selectedCharacter = 0
@@ -293,7 +300,13 @@ func (v *CharacterSelect) refreshGameStates() {
 }
 
 func (v *CharacterSelect) onOkButtonClicked() {
-	gameClient, _ := d2client.Create(d2clientconnectiontype.Local)
-	gameClient.Open(v.gameStates[v.selectedCharacter].FilePath)
-	d2scene.SetNextScene(CreateGame(gameClient))
+	gameClient, _ := d2client.Create(v.connectionType)
+	switch v.connectionType {
+	case d2clientconnectiontype.LANClient:
+		gameClient.Open(v.connectionHost, v.gameStates[v.selectedCharacter].FilePath)
+	default:
+		gameClient.Open("", v.gameStates[v.selectedCharacter].FilePath)
+	}
+
+	d2screen.SetNextScreen(CreateGame(gameClient))
 }

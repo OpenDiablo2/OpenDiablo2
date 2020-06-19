@@ -18,12 +18,14 @@ type MapEntity interface {
 	GetPosition() (float64, float64)
 }
 
+// Represents the map data for a specific location
 type MapEngine struct {
 	seed     int64
 	regions  []*MapRegion
 	entities MapEntitiesSearcher
 }
 
+// Creates a new instance of the map engine
 func CreateMapEngine() *MapEngine {
 	engine := &MapEngine{
 		seed:     0,
@@ -48,6 +50,7 @@ func (m *MapEngine) GetStartPosition() (float64, float64) {
 	return startX, startY
 }
 
+// Returns the center of the map
 func (m *MapEngine) GetCenterPosition() (float64, float64) {
 	var centerX, centerY float64
 	if len(m.regions) > 0 {
@@ -83,11 +86,14 @@ func (m *MapEngine) GenerateAct1Overworld(cacheTiles bool) {
 	}
 }
 
+// Appends a region to the map
 func (m *MapEngine) AppendRegion(region *MapRegion) {
 	// TODO: Stitch together region.walkableArea
+	log.Printf("Warning: Walkable areas are not currently implemented")
 	m.regions = append(m.regions, region)
 }
 
+// Returns the region located at the specified tile location
 func (m *MapEngine) GetRegionAtTile(x, y int) *MapRegion {
 	for _, region := range m.regions {
 		if region.tileRect.IsInRect(x, y) {

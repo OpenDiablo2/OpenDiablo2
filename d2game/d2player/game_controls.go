@@ -10,8 +10,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 )
 
 type Panel interface {
@@ -25,12 +23,12 @@ type Panel interface {
 var missileID = 59
 
 type GameControls struct {
-	hero        *d2map.Player
-	mapEngine   *d2map.MapEngine
-	mapRenderer *d2map.MapRenderer
-	inventory   *Inventory
-	heroStats   *HeroStats
-	gameClient  *d2client.GameClient
+	hero          *d2map.Player
+	mapEngine     *d2map.MapEngine
+	mapRenderer   *d2map.MapRenderer
+	inventory     *Inventory
+	heroStats     *HeroStats
+	inputListener InputCallbackListener
 
 	// UI
 	globeSprite *d2ui.Sprite
@@ -39,19 +37,18 @@ type GameControls struct {
 	skillIcon   *d2ui.Sprite
 }
 
-func NewGameControls(hero *d2map.Player, mapEngine *d2map.MapEngine, mapRenderer *d2map.MapRenderer,
-	gameClient *d2client.GameClient) *GameControls {
+func NewGameControls(hero *d2map.Player, mapEngine *d2map.MapEngine, mapRenderer *d2map.MapRenderer, inputListener InputCallbackListener) *GameControls {
 	d2term.BindAction("setmissile", "set missile id to summon on right click", func(id int) {
 		missileID = id
 	})
 
 	return &GameControls{
-		hero:        hero,
-		mapEngine:   mapEngine,
-		gameClient:  gameClient,
-		mapRenderer: mapRenderer,
-		inventory:   NewInventory(),
-		heroStats:   NewHeroStats(),
+		hero:          hero,
+		mapEngine:     mapEngine,
+		inputListener: inputListener,
+		mapRenderer:   mapRenderer,
+		inventory:     NewInventory(),
+		heroStats:     NewHeroStats(),
 	}
 }
 
@@ -72,19 +69,9 @@ func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	px, py := g.mapRenderer.ScreenToWorld(event.X, event.Y)
 	px = float64(int(px*10)) / 10.0
 	py = float64(int(py*10)) / 10.0
-	heroPosX := g.hero.AnimatedComposite.LocationX / 5.0
-	heroPosY := g.hero.AnimatedComposite.LocationY / 5.0
 
 	if event.Button == d2input.MouseButtonLeft {
-		g.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(g.gameClient.PlayerId, heroPosX, heroPosY, px, py))
-		//path, _, found := g.mapEngine.PathFind(heroPosX, heroPosY, px, py)
-		//if found {
-		//	g.hero.AnimatedComposite.SetPath(path, func() {
-		//		g.hero.AnimatedComposite.SetAnimationMode(
-		//			d2enum.AnimationModeObjectNeutral.String(),
-		//		)
-		//	})
-		//}
+		g.inputListener.OnPlayerMove(px, py)
 		return true
 	}
 

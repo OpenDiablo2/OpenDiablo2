@@ -11,10 +11,12 @@ require (
 	github.com/hajimehoshi/ebiten v1.11.0-alpha.2.0.20200102072751-e66f1fb71e2e
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/pebbe/zmq4 v1.2.1 // indirect
+	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
 	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/exp v0.0.0-20191030013958-a1ab85dbe136 // indirect
 	golang.org/x/mobile v0.0.0-20191115022231-f0c40035f2ba // indirect
 	golang.org/x/sys v0.0.0-20191115151921-52ab43148777 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
+	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 )

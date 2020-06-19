@@ -1,4 +1,4 @@
-package d2gamescene
+package d2gamescreen
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
