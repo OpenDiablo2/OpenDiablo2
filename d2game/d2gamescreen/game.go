@@ -1,12 +1,14 @@
 package d2gamescreen
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
@@ -19,22 +21,27 @@ type Game struct {
 	//pentSpinLeft  *d2ui.Sprite
 	//pentSpinRight *d2ui.Sprite
 	//testLabel     d2ui.Label
-	gameClient   *d2client.GameClient
-	mapRenderer  *d2map.MapRenderer
-	gameControls *d2player.GameControls // TODO: Hack
-	localPlayer  *d2map.Player
+	gameClient           *d2client.GameClient
+	mapRenderer          *d2map.MapRenderer
+	gameControls         *d2player.GameControls // TODO: Hack
+	localPlayer          *d2map.Player
+	lastLevelType        int
+	ticksSinceLevelCheck float64
 }
 
 func CreateGame(gameClient *d2client.GameClient) *Game {
 	return &Game{
-		gameClient:   gameClient,
-		gameControls: nil,
-		localPlayer:  nil,
-		mapRenderer:  d2map.CreateMapRenderer(gameClient.MapEngine),
+		gameClient:           gameClient,
+		gameControls:         nil,
+		localPlayer:          nil,
+		lastLevelType:        -1,
+		ticksSinceLevelCheck: 0,
+		mapRenderer:          d2map.CreateMapRenderer(gameClient.MapEngine),
 	}
 }
 
 func (v *Game) OnLoad() error {
+	d2audio.PlayBGM("")
 	return nil
 }
 
@@ -54,6 +61,27 @@ func (v *Game) Render(screen d2render.Surface) error {
 
 func (v *Game) Advance(tickTime float64) error {
 	v.gameClient.MapEngine.Advance(tickTime) // TODO: Hack
+
+	v.ticksSinceLevelCheck += tickTime
+	if v.ticksSinceLevelCheck > 2.0 {
+		v.ticksSinceLevelCheck = 0
+		if v.localPlayer != nil {
+			region := v.gameClient.MapEngine.GetRegionAtTile(v.localPlayer.TileX, v.localPlayer.TileY)
+			if region != nil {
+				levelType := region.GetLevelType().Id
+				fmt.Printf("Level checked: %d (%s)\t%d, %d\n", levelType, region.GetLevelType().Name, v.localPlayer.TileX, v.localPlayer.TileY)
+				if levelType != v.lastLevelType {
+					v.lastLevelType = levelType
+					switch levelType {
+					case 1: // Rogue encampent
+						d2audio.PlayBGM("/data/global/music/Act1/town1.wav")
+					case 2: // Blood Moore
+						d2audio.PlayBGM("/data/global/music/Act1/wild.wav")
+					}
+				}
+			}
+		}
+	}
 
 	// Bind the game controls to the player once it exists
 	if v.gameControls == nil {
