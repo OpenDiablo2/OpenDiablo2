@@ -3,7 +3,8 @@
 [![Code Status](https://www.codefactor.io/repository/github/OpenDiablo2/OpenDiablo2/badge)](https://www.codefactor.io/repository/github/OpenDiablo2/OpenDiablo2)
 
 [Join us on Discord!](https://discord.gg/pRy8tdc)\
-[Development Live stream](https://www.twitch.tv/essial/)
+[Development Live stream](https://www.twitch.tv/essial/)\
+[Support us on patreon](https://www.patreon.com/bePatron?u=37261055)
 
 ![Logo](d2logo.png)
 
