@@ -241,9 +241,9 @@ stuff
 var ItemStatCosts map[string]*ItemStatCostRecord
 
 func LoadItemStatCosts(file []byte) {
-	ItemStatCosts = make(map[string]*ItemStatCostRecord, 0)
 	d := d2common.LoadDataDictionary(string(file))
-	r := make([]*ItemStatCostRecord, 0)
+	numRecords := len(d.Data)
+	ItemStatCosts = make(map[string]*ItemStatCostRecord, numRecords)
 
 	for idx, _ := range d.Data {
 		record := &ItemStatCostRecord{
@@ -314,7 +314,7 @@ func LoadItemStatCosts(file []byte) {
 			Stuff: d.GetString("stuff", idx),
 		}
 
-		r = append(r, record)
+		ItemStatCosts[record.Name] = record
 	}
-	log.Printf("Loaded %d ItemStatCost records", len(r))
+	log.Printf("Loaded %d ItemStatCost records", len(ItemStatCosts))
 }
