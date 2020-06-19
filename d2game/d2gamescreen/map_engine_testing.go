@@ -2,7 +2,9 @@ package d2gamescreen
 
 import (
 	"math"
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 
@@ -127,9 +129,10 @@ func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 	}
 
 	if n == 0 {
+		rand.Seed(time.Now().UnixNano())
 		met.mapEngine.GenerateAct1Overworld(true)
 	} else {
-		met.mapEngine = d2map.CreateMapEngine() // necessary for map name update
+		met.mapEngine = d2map.CreateMapEngine(0) // necessary for map name update
 		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex, true)
 		met.mapRenderer.SetMapEngine(met.mapEngine)
 	}
@@ -138,10 +141,8 @@ func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 }
 
 func (met *MapEngineTest) OnLoad() error {
-	// TODO: Game seed comes from the game state object
 	d2input.BindHandler(met)
-
-	met.mapEngine = d2map.CreateMapEngine()
+	met.mapEngine = d2map.CreateMapEngine(0)
 	met.mapRenderer = d2map.CreateMapRenderer(met.mapEngine)
 	met.LoadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
 

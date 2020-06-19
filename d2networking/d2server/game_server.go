@@ -9,7 +9,6 @@ import (
 	"log"
 	"net"
 	"strings"
-	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
@@ -40,13 +39,12 @@ func Create(openNetworkServer bool) {
 	singletonServer = &GameServer{
 		clientConnections: make(map[string]ClientConnection),
 		mapEngines:        make([]*d2map.MapEngine, 0),
-		//gameState:         d2player.LoadPlayerState(gameStatePath),
-		scriptEngine: d2script.CreateScriptEngine(),
-		seed:         time.Now().UnixNano(),
+		scriptEngine:      d2script.CreateScriptEngine(),
+		seed:              1592539977884044000, //time.Now().UnixNano(),
 	}
 
-	mapEngine := d2map.CreateMapEngine()
-	mapEngine.GenerateMap(d2enum.RegionAct1Town, 1, 0, false)
+	mapEngine := d2map.CreateMapEngine(singletonServer.seed)
+	mapEngine.GenerateAct1Overworld(true)
 	singletonServer.mapEngines = append(singletonServer.mapEngines, mapEngine)
 
 	singletonServer.scriptEngine.AddFunction("getMapEngines", func(call otto.FunctionCall) otto.Value {
@@ -150,7 +148,7 @@ func OnClientConnected(client ClientConnection) {
 	log.Printf("Client connected with an id of %s", client.GetUniqueId())
 	singletonServer.clientConnections[client.GetUniqueId()] = client
 	client.SendPacketToClient(d2netpacket.CreateUpdateServerInfoPacket(singletonServer.seed, client.GetUniqueId()))
-	client.SendPacketToClient(d2netpacket.CreateGenerateMapPacket(d2enum.RegionAct1Town, 1, 0))
+	client.SendPacketToClient(d2netpacket.CreateGenerateMapPacket(d2enum.RegionAct1Town))
 
 	playerState := client.GetPlayerState()
 	createPlayerPacket := d2netpacket.CreateAddPlayerPacket(client.GetUniqueId(), playerState.HeroName, int(sx*5)+3, int(sy*5)+3,

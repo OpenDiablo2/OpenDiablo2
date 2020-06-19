@@ -22,11 +22,12 @@ type GameClient struct {
 	MapEngine        *d2map.MapEngine
 	PlayerId         string
 	Players          map[string]*d2map.Player
+	Seed             int64
 }
 
 func Create(connectionType d2clientconnectiontype.ClientConnectionType) (*GameClient, error) {
 	result := &GameClient{
-		MapEngine:      d2map.CreateMapEngine(),
+		MapEngine:      d2map.CreateMapEngine(0),
 		Players:        make(map[string]*d2map.Player, 0),
 		connectionType: connectionType,
 	}
@@ -61,12 +62,16 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 	switch packet.PacketType {
 	case d2netpackettype.GenerateMap:
 		mapData := packet.PacketData.(d2netpacket.GenerateMapPacket)
-		g.MapEngine.GenerateMap(mapData.RegionType, mapData.LevelPreset, mapData.FileIndex, true)
+		switch mapData.RegionType {
+		case d2enum.RegionAct1Town:
+			g.MapEngine.GenerateAct1Overworld(true)
+		}
 		break
 	case d2netpackettype.UpdateServerInfo:
 		serverInfo := packet.PacketData.(d2netpacket.UpdateServerInfoPacket)
 		g.MapEngine.SetSeed(serverInfo.Seed)
 		g.PlayerId = serverInfo.PlayerId
+		g.Seed = serverInfo.Seed
 		log.Printf("Player id set to %s", serverInfo.PlayerId)
 		break
 	case d2netpackettype.AddPlayer:
