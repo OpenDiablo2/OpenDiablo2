@@ -263,7 +263,7 @@ func adjustTree(newNode *linkedNode) {
 			continue
 		}
 
-		// The following code basicly swaps insertpoint with current
+		// The following code basically swaps insertpoint with current
 
 		// remove insert point
 		if insertpoint.Prev != nil {

@@ -1,8 +1,13 @@
-package d2gamescene
+package d2gamescreen
 
 import (
 	"image"
 	"image/color"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -11,9 +16,8 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -61,12 +65,16 @@ type SelectHeroClass struct {
 	expansionCharLabel d2ui.Label
 	hardcoreCheckbox   d2ui.Checkbox
 	hardcoreCharLabel  d2ui.Label
+	connectionType     d2clientconnectiontype.ClientConnectionType
+	connectionHost     string
 }
 
-func CreateSelectHeroClass() *SelectHeroClass {
+func CreateSelectHeroClass(connectionType d2clientconnectiontype.ClientConnectionType, connectionHost string) *SelectHeroClass {
 	result := &SelectHeroClass{
 		heroRenderInfo: make(map[d2enum.Hero]*HeroRenderInfo),
 		selectedHero:   d2enum.HeroNone,
+		connectionType: connectionType,
+		connectionHost: connectionHost,
 	}
 	return result
 }
@@ -417,12 +425,14 @@ func (v *SelectHeroClass) OnUnload() error {
 }
 
 func (v SelectHeroClass) onExitButtonClicked() {
-	d2scene.SetNextScene(CreateCharacterSelect())
+	d2screen.SetNextScreen(CreateCharacterSelect(v.connectionType, v.connectionHost))
 }
 
 func (v SelectHeroClass) onOkButtonClicked() {
-	gameState := d2gamestate.CreateGameState(v.heroNameTextbox.GetText(), v.selectedHero, v.hardcoreCheckbox.GetCheckState())
-	d2scene.SetNextScene(CreateGame(gameState))
+	gameState := d2player.CreatePlayerState(v.heroNameTextbox.GetText(), v.selectedHero, v.hardcoreCheckbox.GetCheckState())
+	gameClient, _ := d2client.Create(d2clientconnectiontype.Local)
+	gameClient.Open(v.connectionHost, gameState.FilePath)
+	d2screen.SetNextScreen(CreateGame(gameClient))
 }
 
 func (v *SelectHeroClass) Render(screen d2render.Surface) error {

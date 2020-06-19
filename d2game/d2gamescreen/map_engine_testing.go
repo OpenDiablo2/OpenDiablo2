@@ -1,17 +1,18 @@
-package d2gamescene
+package d2gamescreen
 
 import (
 	"math"
 	"os"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 )
 
 type RegionSpec struct {
@@ -76,8 +77,9 @@ var regions = []RegionSpec{
 }
 
 type MapEngineTest struct {
-	gameState *d2gamestate.GameState
-	mapEngine *d2map.MapEngine
+	gameState   *d2player.PlayerState
+	mapEngine   *d2map.MapEngine
+	mapRenderer *d2map.MapRenderer
 
 	//TODO: this is region specific properties, should be refactored for multi-region rendering
 	currentRegion int
@@ -96,7 +98,7 @@ func CreateMapEngineTest(currentRegion int, levelPreset int) *MapEngineTest {
 		regionSpec:    RegionSpec{},
 		filesCount:    0,
 	}
-	result.gameState = d2gamestate.CreateTestGameState()
+	result.gameState = d2player.CreateTestGameState()
 	return result
 }
 
@@ -125,20 +127,22 @@ func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 	}
 
 	if n == 0 {
-		met.mapEngine.GenerateAct1Overworld()
+		met.mapEngine.GenerateAct1Overworld(true)
 	} else {
-		met.mapEngine = d2map.CreateMapEngine(met.gameState) // necessary for map name update
-		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
+		met.mapEngine = d2map.CreateMapEngine() // necessary for map name update
+		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex, true)
+		met.mapRenderer.SetMapEngine(met.mapEngine)
 	}
 
-	met.mapEngine.MoveCameraTo(met.mapEngine.WorldToOrtho(met.mapEngine.GetCenterPosition()))
+	met.mapRenderer.MoveCameraTo(met.mapRenderer.WorldToOrtho(met.mapEngine.GetCenterPosition()))
 }
 
 func (met *MapEngineTest) OnLoad() error {
 	// TODO: Game seed comes from the game state object
 	d2input.BindHandler(met)
 
-	met.mapEngine = d2map.CreateMapEngine(met.gameState)
+	met.mapEngine = d2map.CreateMapEngine()
+	met.mapRenderer = d2map.CreateMapRenderer(met.mapEngine)
 	met.LoadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
 
 	return nil
@@ -150,10 +154,10 @@ func (met *MapEngineTest) OnUnload() error {
 }
 
 func (met *MapEngineTest) Render(screen d2render.Surface) error {
-	met.mapEngine.Render(screen)
+	met.mapRenderer.Render(screen)
 
 	screenX, screenY := d2render.GetCursorPos()
-	worldX, worldY := met.mapEngine.ScreenToWorld(screenX, screenY)
+	worldX, worldY := met.mapRenderer.ScreenToWorld(screenX, screenY)
 	//subtileX := int(math.Ceil(math.Mod(worldX*10, 10))) / 2
 	//subtileY := int(math.Ceil(math.Mod(worldY*10, 10))) / 2
 
@@ -277,22 +281,22 @@ func (met *MapEngineTest) OnKeyRepeat(event d2input.KeyEvent) bool {
 	}
 
 	if event.Key == d2input.KeyDown {
-		met.mapEngine.MoveCameraBy(0, moveSpeed)
+		met.mapRenderer.MoveCameraBy(0, moveSpeed)
 		return true
 	}
 
 	if event.Key == d2input.KeyUp {
-		met.mapEngine.MoveCameraBy(0, -moveSpeed)
+		met.mapRenderer.MoveCameraBy(0, -moveSpeed)
 		return true
 	}
 
 	if event.Key == d2input.KeyRight {
-		met.mapEngine.MoveCameraBy(moveSpeed, 0)
+		met.mapRenderer.MoveCameraBy(moveSpeed, 0)
 		return true
 	}
 
 	if event.Key == d2input.KeyLeft {
-		met.mapEngine.MoveCameraBy(-moveSpeed, 0)
+		met.mapRenderer.MoveCameraBy(-moveSpeed, 0)
 		return true
 	}
 
@@ -308,13 +312,13 @@ func (met *MapEngineTest) OnKeyDown(event d2input.KeyEvent) bool {
 	if event.Key == d2input.KeyN {
 		if event.KeyMod == d2input.KeyModControl {
 			met.fileIndex = increment(met.fileIndex, 0, met.filesCount-1)
-			d2scene.SetNextScene(met)
+			d2screen.SetNextScreen(met)
 		} else if event.KeyMod == d2input.KeyModShift {
 			met.levelPreset = increment(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
-			d2scene.SetNextScene(met)
+			d2screen.SetNextScreen(met)
 		} else {
 			met.currentRegion = increment(met.currentRegion, 0, len(regions))
-			d2scene.SetNextScene(met)
+			d2screen.SetNextScreen(met)
 		}
 
 		return true
@@ -323,13 +327,13 @@ func (met *MapEngineTest) OnKeyDown(event d2input.KeyEvent) bool {
 	if event.Key == d2input.KeyP {
 		if event.KeyMod == d2input.KeyModControl {
 			met.fileIndex = decrement(met.fileIndex, 0, met.filesCount-1)
-			d2scene.SetNextScene(met)
+			d2screen.SetNextScreen(met)
 		} else if event.KeyMod == d2input.KeyModShift {
 			met.levelPreset = decrement(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
-			d2scene.SetNextScene(met)
+			d2screen.SetNextScreen(met)
 		} else {
 			met.currentRegion = decrement(met.currentRegion, 0, len(regions))
-			d2scene.SetNextScene(met)
+			d2screen.SetNextScreen(met)
 		}
 
 		return true

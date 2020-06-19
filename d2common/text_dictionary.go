@@ -92,16 +92,16 @@ func LoadDictionary(dictionaryData []byte) {
 
 		}
 		// Use the following code to write out the values
-		/*
-			f, err := os.OpenFile(`C:\Users\lunat\Desktop\D2\langdict.txt`,
-				os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-			if err != nil {
-				log.Println(err)
-			}
-			defer f.Close()
-			if _, err := f.WriteString("\n[" + key + "] " + value); err != nil {
-				log.Println(err)
-			}
+		/*=
+		f, err := os.OpenFile(`C:\Users\lunat\Desktop\D2\langdict.txt`,
+			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Println(err)
+		}
+		defer f.Close()
+		if _, err := f.WriteString("\n[" + key + "] " + value); err != nil {
+			log.Println(err)
+		}
 		*/
 	}
 }

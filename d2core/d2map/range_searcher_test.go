@@ -1,10 +1,11 @@
 package d2map
 
 import (
+	"testing"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 type mockEntity struct {

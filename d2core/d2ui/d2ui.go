@@ -31,7 +31,7 @@ func Initialize() {
 	waitForLeftMouseUp = false
 }
 
-// Reset resets the state of the UI manager. Typically called for new scenes
+// Reset resets the state of the UI manager. Typically called for new screens
 func Reset() {
 	widgets = make([]Widget, 0)
 	pressedIndex = -1

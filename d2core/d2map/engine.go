@@ -1,16 +1,15 @@
 package d2map
 
 import (
-	"github.com/beefsack/go-astar"
+	"log"
 	"math"
 	"strings"
 
+	"github.com/beefsack/go-astar"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 )
 
 type MapEntity interface {
@@ -19,30 +18,26 @@ type MapEntity interface {
 	GetPosition() (float64, float64)
 }
 
+// Represents the map data for a specific location
 type MapEngine struct {
-	gameState *d2gamestate.GameState
-
-	debugVisLevel int
-
+	seed     int64
 	regions  []*MapRegion
 	entities MapEntitiesSearcher
-	viewport *Viewport
-	camera   Camera
 }
 
-func CreateMapEngine(gameState *d2gamestate.GameState) *MapEngine {
+// Creates a new instance of the map engine
+func CreateMapEngine() *MapEngine {
 	engine := &MapEngine{
-		gameState: gameState,
-		viewport:  NewViewport(0, 0, 800, 600),
-		entities:  NewRangeSearcher(),
+		seed:     0,
+		entities: NewRangeSearcher(),
 	}
 
-	d2term.BindAction("mapdebugvis", "set map debug visualization level", func(level int) {
-		engine.debugVisLevel = level
-	})
-
-	engine.viewport.SetCamera(&engine.camera)
 	return engine
+}
+
+func (m *MapEngine) SetSeed(seed int64) {
+	log.Printf("Setting map engine seed to %d", seed)
+	m.seed = seed
 }
 
 func (m *MapEngine) GetStartPosition() (float64, float64) {
@@ -55,6 +50,7 @@ func (m *MapEngine) GetStartPosition() (float64, float64) {
 	return startX, startY
 }
 
+// Returns the center of the map
 func (m *MapEngine) GetCenterPosition() (float64, float64) {
 	var centerX, centerY float64
 	if len(m.regions) > 0 {
@@ -66,55 +62,38 @@ func (m *MapEngine) GetCenterPosition() (float64, float64) {
 	return centerX, centerY
 }
 
-func (m *MapEngine) MoveCameraTo(x, y float64) {
-	m.camera.MoveTo(x, y)
-}
-
-func (m *MapEngine) MoveCameraBy(x, y float64) {
-	m.camera.MoveBy(x, y)
-}
-
-func (m *MapEngine) ScreenToWorld(x, y int) (float64, float64) {
-	return m.viewport.ScreenToWorld(x, y)
-}
-
-func (m *MapEngine) ScreenToOrtho(x, y int) (float64, float64) {
-	return m.viewport.ScreenToOrtho(x, y)
-}
-
-func (m *MapEngine) WorldToOrtho(x, y float64) (float64, float64) {
-	return m.viewport.WorldToOrtho(x, y)
-}
-
-func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) {
-	region, entities := loadRegion(m.gameState.Seed, 0, 0, regionType, levelPreset, fileIndex)
+func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int, cacheTiles bool) {
+	region, entities := loadRegion(m.seed, 0, 0, regionType, levelPreset, fileIndex, cacheTiles)
 	m.regions = append(m.regions, region)
 	m.entities.Add(entities...)
 }
 
-func (m *MapEngine) GenerateAct1Overworld() {
-	d2audio.PlayBGM("/data/global/music/Act1/town1.wav") // TODO: Temp stuff here
+func (m *MapEngine) GenerateAct1Overworld(cacheTiles bool) {
+	//d2audio.PlayBGM("/data/global/music/Act1/town1.wav") // TODO: Temp stuff here
 
-	region, entities := loadRegion(m.gameState.Seed, 0, 0, d2enum.RegionAct1Town, 1, -1)
+	region, entities := loadRegion(m.seed, 0, 0, d2enum.RegionAct1Town, 1, -1, cacheTiles)
 	m.regions = append(m.regions, region)
 	m.entities.Add(entities...)
 
 	if strings.Contains(region.regionPath, "E1") {
-		region, entities := loadRegion(m.gameState.Seed, region.tileRect.Width-1, 0, d2enum.RegionAct1Town, 2, -1)
+		region, entities := loadRegion(m.seed, region.tileRect.Width-1, 0, d2enum.RegionAct1Town, 2, -1, cacheTiles)
 		m.AppendRegion(region)
 		m.entities.Add(entities...)
 	} else if strings.Contains(region.regionPath, "S1") {
-		region, entities := loadRegion(m.gameState.Seed, 0, region.tileRect.Height-1, d2enum.RegionAct1Town, 3, -1)
+		region, entities := loadRegion(m.seed, 0, region.tileRect.Height-1, d2enum.RegionAct1Town, 3, -1, cacheTiles)
 		m.AppendRegion(region)
 		m.entities.Add(entities...)
 	}
 }
 
+// Appends a region to the map
 func (m *MapEngine) AppendRegion(region *MapRegion) {
 	// TODO: Stitch together region.walkableArea
+	log.Printf("Warning: Walkable areas are not currently implemented")
 	m.regions = append(m.regions, region)
 }
 
+// Returns the region located at the specified tile location
 func (m *MapEngine) GetRegionAtTile(x, y int) *MapRegion {
 	for _, region := range m.regions {
 		if region.tileRect.IsInRect(x, y) {
@@ -139,9 +118,9 @@ func (m *MapEngine) RemoveEntity(entity MapEntity) {
 
 func (m *MapEngine) Advance(tickTime float64) {
 	for _, region := range m.regions {
-		if region.isVisbile(m.viewport) {
-			region.advance(tickTime)
-		}
+		//if region.isVisbile(m.viewport) {
+		region.advance(tickTime)
+		//}
 	}
 
 	for _, entity := range m.entities.All() {
@@ -149,17 +128,6 @@ func (m *MapEngine) Advance(tickTime float64) {
 	}
 
 	m.entities.Update()
-}
-
-func (m *MapEngine) Render(target d2render.Surface) {
-	for _, region := range m.regions {
-		if region.isVisbile(m.viewport) {
-			region.renderPass1(m.viewport, target)
-			region.renderDebug(m.debugVisLevel, m.viewport, target)
-			region.renderPass2(m.entities, m.viewport, target)
-			region.renderPass3(m.viewport, target)
-		}
-	}
 }
 
 func (m *MapEngine) PathFind(startX, startY, endX, endY float64) (path []astar.Pather, distance float64, found bool) {

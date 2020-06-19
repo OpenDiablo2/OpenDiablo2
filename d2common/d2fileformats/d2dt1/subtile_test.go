@@ -1,8 +1,9 @@
 package d2dt1
 
 import (
-	testify "github.com/stretchr/testify/assert"
 	"testing"
+
+	testify "github.com/stretchr/testify/assert"
 )
 
 func TestNewSubTile(t *testing.T) {

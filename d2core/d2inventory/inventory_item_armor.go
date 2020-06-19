@@ -8,13 +8,13 @@ import (
 )
 
 type InventoryItemArmor struct {
-	inventorySizeX int
-	inventorySizeY int
-	inventorySlotX int
-	inventorySlotY int
-	itemName       string
-	itemCode       string
-	armorClass     string
+	InventorySizeX int    `json:"inventorySizeX"`
+	InventorySizeY int    `json:"inventorySizeY"`
+	InventorySlotX int    `json:"inventorySlotX"`
+	InventorySlotY int    `json:"inventorySlotY"`
+	ItemName       string `json:"itemName"`
+	ItemCode       string `json:"itemCode"`
+	ArmorClass     string `json:"armorClass"`
 }
 
 func GetArmorItemByCode(code string) *InventoryItemArmor {
@@ -23,19 +23,19 @@ func GetArmorItemByCode(code string) *InventoryItemArmor {
 		log.Fatalf("Could not find armor entry for code '%s'", code)
 	}
 	return &InventoryItemArmor{
-		inventorySizeX: result.InventoryWidth,
-		inventorySizeY: result.InventoryHeight,
-		itemName:       result.Name,
-		itemCode:       result.Code,
-		armorClass:     "lit", // TODO: Where does this come from?
+		InventorySizeX: result.InventoryWidth,
+		InventorySizeY: result.InventoryHeight,
+		ItemName:       result.Name,
+		ItemCode:       result.Code,
+		ArmorClass:     "lit", // TODO: Where does this come from?
 	}
 }
 
-func (v *InventoryItemArmor) ArmorClass() string {
-	if v == nil || v.itemCode == "" {
+func (v *InventoryItemArmor) GetArmorClass() string {
+	if v == nil || v.ItemCode == "" {
 		return "lit"
 	}
-	return v.armorClass
+	return v.ArmorClass
 }
 
 func (v *InventoryItemArmor) InventoryItemName() string {
@@ -43,7 +43,7 @@ func (v *InventoryItemArmor) InventoryItemName() string {
 		return ""
 	}
 
-	return v.itemName
+	return v.ItemName
 }
 
 func (v *InventoryItemArmor) InventoryItemType() d2enum.InventoryItemType {
@@ -51,25 +51,25 @@ func (v *InventoryItemArmor) InventoryItemType() d2enum.InventoryItemType {
 }
 
 func (v *InventoryItemArmor) InventoryGridSize() (int, int) {
-	return v.inventorySizeX, v.inventorySizeY
+	return v.InventorySizeX, v.InventorySizeY
 }
 
 func (v *InventoryItemArmor) InventoryGridSlot() (int, int) {
-	return v.inventorySlotX, v.inventorySlotY
+	return v.InventorySlotX, v.InventorySlotY
 }
 
 func (v *InventoryItemArmor) SetInventoryGridSlot(x int, y int) {
-	v.inventorySlotX, v.inventorySlotY = x, y
+	v.InventorySlotX, v.InventorySlotY = x, y
 }
 
 func (v *InventoryItemArmor) Serialize() []byte {
 	return []byte{}
 }
 
-func (v *InventoryItemArmor) ItemCode() string {
+func (v *InventoryItemArmor) GetItemCode() string {
 	if v == nil {
 		return ""
 	}
 
-	return v.itemCode
+	return v.ItemCode
 }

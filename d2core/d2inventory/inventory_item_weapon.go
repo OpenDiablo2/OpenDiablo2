@@ -8,14 +8,14 @@ import (
 )
 
 type InventoryItemWeapon struct {
-	inventorySizeX     int
-	inventorySizeY     int
-	inventorySlotX     int
-	inventorySlotY     int
-	itemName           string
-	itemCode           string
-	weaponClass        string
-	weaponClassOffHand string
+	InventorySizeX     int    `json:"inventorySizeX"`
+	InventorySizeY     int    `json:"inventorySizeY"`
+	InventorySlotX     int    `json:"inventorySlotX"`
+	InventorySlotY     int    `json:"inventorySlotY"`
+	ItemName           string `json:"itemName"`
+	ItemCode           string `json:"itemCode"`
+	WeaponClass        string `json:"weaponClass"`
+	WeaponClassOffHand string `json:"weaponClassOffHand"`
 }
 
 func GetWeaponItemByCode(code string) *InventoryItemWeapon {
@@ -25,34 +25,34 @@ func GetWeaponItemByCode(code string) *InventoryItemWeapon {
 		log.Fatalf("Could not find weapon entry for code '%s'", code)
 	}
 	return &InventoryItemWeapon{
-		inventorySizeX:     result.InventoryWidth,
-		inventorySizeY:     result.InventoryHeight,
-		itemName:           result.Name,
-		itemCode:           result.Code,
-		weaponClass:        result.WeaponClass,
-		weaponClassOffHand: result.WeaponClass2Hand,
+		InventorySizeX:     result.InventoryWidth,
+		InventorySizeY:     result.InventoryHeight,
+		ItemName:           result.Name,
+		ItemCode:           result.Code,
+		WeaponClass:        result.WeaponClass,
+		WeaponClassOffHand: result.WeaponClass2Hand,
 	}
 }
 
-func (v *InventoryItemWeapon) WeaponClass() string {
-	if v == nil || v.itemCode == "" {
+func (v *InventoryItemWeapon) GetWeaponClass() string {
+	if v == nil || v.ItemCode == "" {
 		return "hth"
 	}
-	return v.weaponClass
+	return v.WeaponClass
 }
 
-func (v *InventoryItemWeapon) WeaponClassOffHand() string {
-	if v == nil || v.itemCode == "" {
+func (v *InventoryItemWeapon) GetWeaponClassOffHand() string {
+	if v == nil || v.ItemCode == "" {
 		return ""
 	}
-	return v.weaponClassOffHand
+	return v.WeaponClassOffHand
 }
 
 func (v *InventoryItemWeapon) InventoryItemName() string {
 	if v == nil {
 		return ""
 	}
-	return v.itemName
+	return v.ItemName
 }
 
 func (v *InventoryItemWeapon) InventoryItemType() d2enum.InventoryItemType {
@@ -60,24 +60,24 @@ func (v *InventoryItemWeapon) InventoryItemType() d2enum.InventoryItemType {
 }
 
 func (v *InventoryItemWeapon) InventoryGridSize() (int, int) {
-	return v.inventorySizeX, v.inventorySizeY
+	return v.InventorySizeX, v.InventorySizeY
 }
 
 func (v *InventoryItemWeapon) InventoryGridSlot() (int, int) {
-	return v.inventorySlotX, v.inventorySlotY
+	return v.InventorySlotX, v.InventorySlotY
 }
 
 func (v *InventoryItemWeapon) SetInventoryGridSlot(x int, y int) {
-	v.inventorySlotX, v.inventorySlotY = x, y
+	v.InventorySlotX, v.InventorySlotY = x, y
 }
 
 func (v *InventoryItemWeapon) Serialize() []byte {
 	return []byte{}
 }
 
-func (v *InventoryItemWeapon) ItemCode() string {
+func (v *InventoryItemWeapon) GetItemCode() string {
 	if v == nil {
 		return ""
 	}
-	return v.itemCode
+	return v.ItemCode
 }
