@@ -397,6 +397,7 @@ func loadDataDict() error {
 		{d2resource.MagicSuffix, d2datadict.LoadMagicSuffix},
 		{d2resource.ItemStatCost, d2datadict.LoadItemStatCosts},
 		{d2resource.CharStats, d2datadict.LoadCharStats},
+		{d2resource.MonStats, d2datadict.LoadMonStats},
 	}
 
 	for _, entry := range entries {
