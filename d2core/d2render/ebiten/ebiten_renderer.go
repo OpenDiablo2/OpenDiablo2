@@ -10,7 +10,21 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
-type Renderer struct{}
+type Renderer struct {
+	renderCallback func(surface d2render.Surface) error
+}
+
+func (r *Renderer) Update(screen *ebiten.Image) error {
+	err := r.renderCallback(&ebitenSurface{image: screen})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *Renderer) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return 800, 600
+}
 
 func CreateRenderer() (*Renderer, error) {
 	result := &Renderer{}
@@ -42,15 +56,11 @@ func (r *Renderer) IsDrawingSkipped() bool {
 }
 
 func (r *Renderer) Run(f func(surface d2render.Surface) error, width, height int, title string) error {
-	config := d2config.Get()
-
-	return ebiten.Run(func(img *ebiten.Image) error {
-		err := f(&ebitenSurface{image: img})
-		if err != nil {
-			return err
-		}
-		return nil
-	}, width, height, config.Scale, title)
+	r.renderCallback = f
+	ebiten.SetWindowTitle(title)
+	ebiten.SetWindowResizable(true)
+	ebiten.SetWindowSize(width, height)
+	return ebiten.RunGame(r)
 }
 
 func (r *Renderer) CreateSurface(surface d2render.Surface) (d2render.Surface, error) {

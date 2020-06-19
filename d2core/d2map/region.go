@@ -139,8 +139,8 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 	region.tileRect = d2common.Rectangle{
 		Left:   tileOffsetX,
 		Top:    tileOffsetY,
-		Width:  int(region.ds1.Width),
-		Height: int(region.ds1.Height),
+		Width:  int(region.ds1.Width - 1),
+		Height: int(region.ds1.Height - 1),
 	}
 
 	entities := region.loadEntities()
@@ -155,10 +155,10 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 
 func (mr *MapRegion) generateWalkableMatrix() {
 	mr.walkableArea = make([][]PathTile, mr.tileRect.Height*5)
-	for y := 0; y < (mr.tileRect.Height-1)*5; y++ {
+	for y := 0; y < mr.tileRect.Height*5; y++ {
 		mr.walkableArea[y] = make([]PathTile, mr.tileRect.Width*5)
 		ty := int(float64(y) / 5.0)
-		for x := 0; x < (mr.tileRect.Width-1)*5; x++ {
+		for x := 0; x < mr.tileRect.Width*5; x++ {
 			tx := int(float64(x) / 5.0)
 			tile := mr.GetTile(tx, ty)
 			isBlocked := false
@@ -188,8 +188,8 @@ func (mr *MapRegion) generateWalkableMatrix() {
 			}
 			mr.walkableArea[y][x] = PathTile{
 				Walkable: !isBlocked,
-				X:        float64(x) / 5.0,
-				Y:        float64(y) / 5.0,
+				X:        (float64(x) / 5.0) + float64(mr.tileRect.Left),
+				Y:        (float64(y) / 5.0) + float64(mr.tileRect.Top),
 			}
 			if !isBlocked && y > 0 && mr.walkableArea[y-1][x].Walkable {
 				mr.walkableArea[y][x].Up = &mr.walkableArea[y-1][x]
@@ -203,7 +203,7 @@ func (mr *MapRegion) generateWalkableMatrix() {
 				mr.walkableArea[y][x].UpLeft = &mr.walkableArea[y-1][x-1]
 				mr.walkableArea[y-1][x-1].DownRight = &mr.walkableArea[y][x]
 			}
-			if !isBlocked && y > 0 && x < (mr.tileRect.Width*5) && mr.walkableArea[y-1][x+1].Walkable {
+			if !isBlocked && y > 0 && x < (mr.tileRect.Width*5)-1 && mr.walkableArea[y-1][x+1].Walkable {
 				mr.walkableArea[y][x].UpRight = &mr.walkableArea[y-1][x+1]
 				mr.walkableArea[y-1][x+1].DownLeft = &mr.walkableArea[y][x]
 			}
@@ -231,7 +231,7 @@ func (mr *MapRegion) loadSpecials() {
 	for tileY := range mr.ds1.Tiles {
 		for tileX := range mr.ds1.Tiles[tileY] {
 			for _, wall := range mr.ds1.Tiles[tileY][tileX].Walls {
-				if wall.Type == 10 && wall.Style == 30 && wall.Sequence == 0 {
+				if wall.Type == 10 && wall.Style == 30 && wall.Sequence == 0 && mr.startX == 0 && mr.startY == 0 {
 					mr.startX, mr.startY = mr.getTileWorldPosition(tileX, tileY)
 					mr.startX += 0.5
 					mr.startY += 0.5

@@ -6,18 +6,14 @@ import (
 )
 
 type GenerateMapPacket struct {
-	RegionType  d2enum.RegionIdType `json:"regionType"`
-	LevelPreset int                 `json:"levelPreset"`
-	FileIndex   int                 `json:"fileIndex"`
+	RegionType d2enum.RegionIdType `json:"regionType"`
 }
 
-func CreateGenerateMapPacket(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) NetPacket {
+func CreateGenerateMapPacket(regionType d2enum.RegionIdType) NetPacket {
 	return NetPacket{
 		PacketType: d2netpackettype.GenerateMap,
 		PacketData: GenerateMapPacket{
-			RegionType:  regionType,
-			LevelPreset: levelPreset,
-			FileIndex:   fileIndex,
+			RegionType: regionType,
 		},
 	}
 
