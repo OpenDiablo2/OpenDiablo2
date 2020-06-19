@@ -1,17 +1,18 @@
-package d2gamescene
+package d2gamescreen
 
 import (
 	"math"
 	"os"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 )
 
 type RegionSpec struct {
@@ -76,7 +77,7 @@ var regions = []RegionSpec{
 }
 
 type MapEngineTest struct {
-	gameState   *d2gamestate.GameState
+	gameState   *d2player.PlayerState
 	mapEngine   *d2map.MapEngine
 	mapRenderer *d2map.MapRenderer
 
@@ -97,7 +98,7 @@ func CreateMapEngineTest(currentRegion int, levelPreset int) *MapEngineTest {
 		regionSpec:    RegionSpec{},
 		filesCount:    0,
 	}
-	result.gameState = d2gamestate.CreateTestGameState()
+	result.gameState = d2player.CreateTestGameState()
 	return result
 }
 
@@ -311,13 +312,13 @@ func (met *MapEngineTest) OnKeyDown(event d2input.KeyEvent) bool {
 	if event.Key == d2input.KeyN {
 		if event.KeyMod == d2input.KeyModControl {
 			met.fileIndex = increment(met.fileIndex, 0, met.filesCount-1)
-			d2scene.SetNextScene(met)
+			d2screen.SetNextScreen(met)
 		} else if event.KeyMod == d2input.KeyModShift {
 			met.levelPreset = increment(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
-			d2scene.SetNextScene(met)
+			d2screen.SetNextScreen(met)
 		} else {
 			met.currentRegion = increment(met.currentRegion, 0, len(regions))
-			d2scene.SetNextScene(met)
+			d2screen.SetNextScreen(met)
 		}
 
 		return true
@@ -326,13 +327,13 @@ func (met *MapEngineTest) OnKeyDown(event d2input.KeyEvent) bool {
 	if event.Key == d2input.KeyP {
 		if event.KeyMod == d2input.KeyModControl {
 			met.fileIndex = decrement(met.fileIndex, 0, met.filesCount-1)
-			d2scene.SetNextScene(met)
+			d2screen.SetNextScreen(met)
 		} else if event.KeyMod == d2input.KeyModShift {
 			met.levelPreset = decrement(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
-			d2scene.SetNextScene(met)
+			d2screen.SetNextScreen(met)
 		} else {
 			met.currentRegion = decrement(met.currentRegion, 0, len(regions))
-			d2scene.SetNextScene(met)
+			d2screen.SetNextScreen(met)
 		}
 
 		return true
