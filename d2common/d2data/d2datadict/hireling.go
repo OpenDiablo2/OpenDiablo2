@@ -1,6 +1,9 @@
 package d2datadict
 
-import "github.com/OpenDiablo2/OpenDiablo2/d2common"
+import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"log"
+)
 
 type HirelingRecord struct {
 	Hireling        string
@@ -79,7 +82,7 @@ type HirelingRecord struct {
 
 func LoadHireling(file []byte) {
 	d := d2common.LoadDataDictionary(string(file))
-	var hirelings []*HirelingRecord
+	var Hirelings []*HirelingRecord
 	for idx, _ := range d.Data {
 		hireling := &HirelingRecord{
 			Hireling:        d.GetString("Hireling", idx),
@@ -155,6 +158,7 @@ func LoadHireling(file []byte) {
 			Weapon:          d.GetNumber("Weapon", idx),
 			Shield:          d.GetNumber("Shield", idx),
 		}
-		hirelings = append(hirelings, hireling)
+		Hirelings = append(Hirelings, hireling)
 	}
+	log.Printf("Loaded %d Hireling records", len(Hirelings))
 }
