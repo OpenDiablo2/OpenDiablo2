@@ -176,6 +176,7 @@ const (
 	ObjectDetails        = "/data/global/excel/Objects.txt"
 	SoundSettings        = "/data/global/excel/Sounds.txt"
 	ItemStatCost         = "/data/global/excel/ItemStatCost.txt"
+	AutoMap              = "/data/global/excel/AutoMap.txt"
 
 	// --- Animations ---
 
