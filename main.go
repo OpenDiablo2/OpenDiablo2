@@ -401,6 +401,7 @@ func loadDataDict() error {
 		{d2resource.Hireling, d2datadict.LoadHireling},
 		{d2resource.Experience, d2datadict.LoadExperienceBreakpoints},
 		{d2resource.Gems, d2datadict.LoadGems},
+		{d2resource.DifficultyLevels, d2datadict.LoadDifficultyLevels},
 	}
 
 	for _, entry := range entries {
