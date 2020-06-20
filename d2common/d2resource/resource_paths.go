@@ -178,6 +178,7 @@ const (
 	ItemStatCost         = "/data/global/excel/ItemStatCost.txt"
 	Hireling             = "/data/global/excel/hireling.txt"
 	DifficultyLevels     = "/data/global/excel/difficultylevels.txt"
+	AutoMap              = "/data/global/excel/AutoMap.txt"
 
 	// --- Animations ---
 
