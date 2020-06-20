@@ -112,12 +112,12 @@ func (v *SelectHeroClass) OnLoad() error {
 	v.campfire.PlayForward()
 	v.campfire.SetBlend(true)
 
-	v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, d2common.TranslateString("#970"))
+	v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, "EXIT")
 	v.exitButton.SetPosition(33, 537)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 	d2ui.AddWidget(&v.exitButton)
 
-	v.okButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, d2common.TranslateString("#971"))
+	v.okButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, "OK")
 	v.okButton.SetPosition(630, 537)
 	v.okButton.OnActivated(func() { v.onOkButtonClicked() })
 	v.okButton.SetVisible(false)
@@ -127,7 +127,7 @@ func (v *SelectHeroClass) OnLoad() error {
 	v.heroNameLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroNameLabel.Alignment = d2ui.LabelAlignLeft
 	v.heroNameLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
-	v.heroNameLabel.SetText(d2common.TranslateString("#1694"))
+	v.heroNameLabel.SetText("Character Name")
 	v.heroNameLabel.SetPosition(321, 475)
 
 	v.heroNameTextbox = d2ui.CreateTextbox()
@@ -143,7 +143,7 @@ func (v *SelectHeroClass) OnLoad() error {
 	v.expansionCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.expansionCharLabel.Alignment = d2ui.LabelAlignLeft
 	v.expansionCharLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
-	v.expansionCharLabel.SetText(d2common.TranslateString("#803"))
+	v.expansionCharLabel.SetText("EXPANSION CHARACTER")
 	v.expansionCharLabel.SetPosition(339, 526)
 
 	v.hardcoreCheckbox = d2ui.CreateCheckbox(false)
@@ -154,7 +154,7 @@ func (v *SelectHeroClass) OnLoad() error {
 	v.hardcoreCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.hardcoreCharLabel.Alignment = d2ui.LabelAlignLeft
 	v.hardcoreCharLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
-	v.hardcoreCharLabel.SetText(d2common.TranslateString("#1696"))
+	v.hardcoreCharLabel.SetText("Hardcore")
 	v.hardcoreCharLabel.SetPosition(339, 548)
 
 	v.heroRenderInfo[d2enum.HeroBarbarian] = &HeroRenderInfo{
@@ -575,30 +575,31 @@ func (v *SelectHeroClass) renderHero(screen d2render.Surface, hero d2enum.Hero) 
 }
 
 func (v *SelectHeroClass) updateHeroText() {
+	// v.setDescLabels("") really takes a string translation key, but temporarily disabled.
 	switch v.selectedHero {
 	case d2enum.HeroNone:
 		return
 	case d2enum.HeroBarbarian:
 		v.heroClassLabel.SetText(d2common.TranslateString("partycharbar"))
-		v.setDescLabels("#1709")
+		v.setDescLabels("He is unequaled in close-quarters combat and mastery of weapons.")
 	case d2enum.HeroNecromancer:
 		v.heroClassLabel.SetText(d2common.TranslateString("partycharnec"))
-		v.setDescLabels("#1704")
+		v.setDescLabels("Summoning undead minions and cursing his enemies are his specialties.")
 	case d2enum.HeroPaladin:
 		v.heroClassLabel.SetText(d2common.TranslateString("partycharpal"))
-		v.setDescLabels("#1711")
+		v.setDescLabels("He is a natural party leader, holy man, and blessed warrior.")
 	case d2enum.HeroAssassin:
 		v.heroClassLabel.SetText(d2common.TranslateString("partycharass"))
-		v.setDescLabels("#305")
+		v.setDescLabels("Schooled in the Martial Arts, her mind and body are deadly weapons.")
 	case d2enum.HeroSorceress:
 		v.heroClassLabel.SetText(d2common.TranslateString("partycharsor"))
-		v.setDescLabels("#1710")
+		v.setDescLabels("She has mastered the elemental magicks -- fire, lightning, and ice.")
 	case d2enum.HeroAmazon:
 		v.heroClassLabel.SetText(d2common.TranslateString("partycharama"))
-		v.setDescLabels("#1698")
+		v.setDescLabels("Skilled with the spear and the bow, she is a very versatile fighter.")
 	case d2enum.HeroDruid:
 		v.heroClassLabel.SetText(d2common.TranslateString("partychardru"))
-		v.setDescLabels("#304")
+		v.setDescLabels("Commanding the forces of nature, he summons wild beasts and raging storms to his side.")
 	}
 	/*
 	   if (selectedHero == null)
