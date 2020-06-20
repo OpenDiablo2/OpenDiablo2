@@ -108,19 +108,14 @@ func AdjustWithRemainder(sourceValue, adjustment, targetvalue float64) (newValue
 	finalValue := sourceValue + adjustment
 	if !adjustNegative {
 		if finalValue > targetvalue {
-			diff := finalValue - targetvalue //  RoundToDecial(finalValue-targetvalue, 6)
+			diff := finalValue - targetvalue
 			return targetvalue, diff
 		}
 		return finalValue, 0
 	}
 
 	if finalValue < targetvalue {
-		return targetvalue, RoundToDecial(finalValue-targetvalue, 6)
+		return targetvalue, finalValue - targetvalue
 	}
 	return finalValue, 0
-}
-
-func RoundToDecial(f float64, d int) float64 {
-	digits := float64(math.Pow10(d))
-	return math.Trunc(f*digits) / digits
 }
