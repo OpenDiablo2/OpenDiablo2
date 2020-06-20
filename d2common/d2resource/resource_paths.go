@@ -191,6 +191,7 @@ const (
 	Armor       = "/data/global/excel/armor.txt"
 	Misc        = "/data/global/excel/misc.txt"
 	UniqueItems = "/data/global/excel/UniqueItems.txt"
+	Gems        = "/data/global/excel/gems.txt"
 
 	// --- Affixes ---
 
