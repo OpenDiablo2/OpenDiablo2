@@ -13,17 +13,19 @@ import (
 
 type Player struct {
 	*AnimatedComposite
-	Equipment d2inventory.CharacterEquipment
-	Id        string
-	mode      d2enum.AnimationMode
-	direction int
-	Name      string
-	nameLabel d2ui.Label
+	Equipment     d2inventory.CharacterEquipment
+	Id            string
+	direction     int
+	Name          string
+	nameLabel     d2ui.Label
+	lastPathSize  int
+	isInTown      bool
+	animationMode string
 }
 
 func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero, equipment d2inventory.CharacterEquipment) *Player {
 	object := &d2datadict.ObjectLookupRecord{
-		Mode:  d2enum.AnimationModePlayerNeutral.String(),
+		Mode:  d2enum.AnimationModePlayerTownNeutral.String(),
 		Base:  "/data/global/chars",
 		Token: heroType.GetToken(),
 		Class: equipment.RightHand.GetWeaponClass(),
@@ -47,7 +49,6 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 		Id:                id,
 		AnimatedComposite: entity,
 		Equipment:         equipment,
-		mode:              d2enum.AnimationModePlayerTownNeutral,
 		direction:         direction,
 		Name:              name,
 		nameLabel:         d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
@@ -55,17 +56,32 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 	result.nameLabel.Alignment = d2ui.LabelAlignCenter
 	result.nameLabel.SetText(name)
 	result.nameLabel.Color = color.White
-	err = result.SetMode(result.mode.String(), equipment.RightHand.GetWeaponClass(), direction)
+	result.SetPlayer(result)
+	err = result.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), equipment.RightHand.GetWeaponClass(), direction)
 	if err != nil {
 		panic(err)
 	}
 	return result
 }
 
+func (p *Player) SetIsInTown(isInTown bool) {
+	p.isInTown = isInTown
+}
+
+func (p Player) IsInTown() bool {
+	return p.isInTown
+}
+
 func (v *Player) Advance(tickTime float64) {
 	v.Step(tickTime)
 	v.AnimatedComposite.Advance(tickTime)
+	if v.lastPathSize != len(v.path) {
+		v.lastPathSize = len(v.path)
+	}
 
+	if v.AnimatedComposite.composite.GetAnimationMode() != v.animationMode {
+		v.animationMode = v.AnimatedComposite.composite.GetAnimationMode()
+	}
 }
 
 func (v *Player) Render(target d2render.Surface) {

@@ -483,7 +483,7 @@ func (mr *MapRegion) renderWall(tile d2ds1.WallRecord, viewport *Viewport, targe
 		return
 	}
 
-	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust))
+	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust)-8)
 	defer viewport.PopTranslation()
 
 	target.PushTranslation(viewport.GetTranslationScreen())
@@ -571,12 +571,15 @@ func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *View
 				for xx := 0; xx < 5; xx++ {
 					isoX := (xx - yy) * 16
 					isoY := (xx + yy) * 8
-					target.PushTranslation(isoX-3, isoY+4)
-					var walkableArea = mr.walkableArea[yy+(ay*5)][xx+(ax*5)]
-					if !walkableArea.Walkable {
-						target.DrawRect(5, 5, tileCollisionColor)
+					if !((len(mr.walkableArea) <= yy+(ay*5)) || (len(mr.walkableArea[yy+(ay*5)]) <= xx+(ax*5))) {
+						var walkableArea = mr.walkableArea[yy+(ay*5)][xx+(ax*5)]
+						if !walkableArea.Walkable {
+							target.PushTranslation(isoX-3, isoY+4)
+							target.DrawRect(5, 5, tileCollisionColor)
+							target.Pop()
+						}
 					}
-					target.Pop()
+
 				}
 			}
 		}

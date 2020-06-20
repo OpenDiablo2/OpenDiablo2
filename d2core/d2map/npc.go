@@ -91,7 +91,7 @@ func (v *NPC) next() {
 		v.repetitions = 0
 	}
 
-	if v.animationMode != newAnimationMode.String() {
+	if v.composite.GetAnimationMode() != newAnimationMode.String() {
 		v.SetMode(newAnimationMode.String(), v.weaponClass, v.direction)
 	}
 }

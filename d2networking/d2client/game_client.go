@@ -86,9 +86,11 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		path, _, found := g.MapEngine.PathFind(movePlayer.StartX, movePlayer.StartY, movePlayer.DestX, movePlayer.DestY)
 		if found {
 			player.AnimatedComposite.SetPath(path, func() {
-				player.AnimatedComposite.SetAnimationMode(
-					d2enum.AnimationModeObjectNeutral.String(),
-				)
+				if g.MapEngine.GetRegionAtTile(player.TileX, player.TileY).GetLevelType().Id == int(d2enum.RegionAct1Town) {
+					player.AnimatedComposite.SetAnimationMode(d2enum.AnimationModePlayerTownNeutral.String())
+				} else {
+					player.AnimatedComposite.SetAnimationMode(d2enum.AnimationModePlayerNeutral.String())
+				}
 			})
 		}
 		break
