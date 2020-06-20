@@ -139,8 +139,8 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 	region.tileRect = d2common.Rectangle{
 		Left:   tileOffsetX,
 		Top:    tileOffsetY,
-		Width:  int(region.ds1.Width - 1),
-		Height: int(region.ds1.Height - 1),
+		Width:  int(region.ds1.Width),
+		Height: int(region.ds1.Height),
 	}
 
 	entities := region.loadEntities()
@@ -525,7 +525,7 @@ func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *View
 	ay := y - mr.tileRect.Top
 
 	if debugVisLevel > 0 {
-		if ay < 0 || ax < 0 || ay >= len(mr.ds1.Tiles) || x >= len(mr.ds1.Tiles[ay]) {
+		if ay < 0 || ax < 0 || ay >= len(mr.ds1.Tiles) || ax >= len(mr.ds1.Tiles[ay]) {
 			return
 		}
 		subTileColor := color.RGBA{R: 80, G: 80, B: 255, A: 50}
@@ -579,7 +579,6 @@ func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *View
 							target.Pop()
 						}
 					}
-
 				}
 			}
 		}

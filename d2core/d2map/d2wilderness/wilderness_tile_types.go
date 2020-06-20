@@ -26,28 +26,28 @@ const (
 	WaterBorderEast
 	WaterBorderWest
 	WaterBridgeEast
-	DirtSquareWithRocks
-	FourDirtSquaresWithRocks
-	FenceMaze
+	StoneFill1
+	StoneFill2
+	CorralFill
 	RandomTreesAndWallBoxLarge
 	TreeBoxNorthSouth
 	ShrineWithFenceAndTrees
 	RandomTreesAndWallBoxSmall
 	TreeBoxWestEastWithNorthSouthPath
 	TreeBoxNorthSouthWithEastWestPath
-	GrassPatch1
-	GrassPatch2
-	EnemyFeature1
-	EnemyFeature2
-	EnemyFeature3
-	EnemyFeature4
-	EnemyFeature5
-	EnemyFeature6
+	SwampFill1
+	SwampFill2
+	TreeFill
+	Ruin
+	FallenCamp1
+	FallenCamp2
+	FallenCampBishbosh
+	Camp
 	Pond
-	House1
-	House2
-	BurnedHouse
-	NotTheCowLevel
-	UndergroundCavern
-	DenOfEvil
+	Cottages1
+	Cottages2
+	Cottages3
+	Bivouac
+	CaveEntrance
+	DenOfEvilEntrance
 )
