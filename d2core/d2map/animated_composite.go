@@ -10,9 +10,11 @@ import (
 // AnimatedComposite represents a composite of animations that can be projected onto the map.
 type AnimatedComposite struct {
 	mapEntity
-	animationMode string
-	composite     *d2asset.Composite
-	direction     int
+	//animationMode string
+	composite    *d2asset.Composite
+	direction    int
+	player       *Player
+	objectLookup *d2datadict.ObjectLookupRecord
 }
 
 // CreateAnimatedComposite creates an instance of AnimatedComposite
@@ -23,11 +25,16 @@ func CreateAnimatedComposite(x, y int, object *d2datadict.ObjectLookupRecord, pa
 	}
 
 	entity := &AnimatedComposite{
-		mapEntity: createMapEntity(x, y),
-		composite: composite,
+		mapEntity:    createMapEntity(x, y),
+		composite:    composite,
+		objectLookup: object,
 	}
 	entity.mapEntity.directioner = entity.rotate
 	return entity, nil
+}
+
+func (ac *AnimatedComposite) SetPlayer(player *Player) {
+	ac.player = player
 }
 
 func (ac *AnimatedComposite) SetAnimationMode(animationMode string) error {
@@ -36,8 +43,9 @@ func (ac *AnimatedComposite) SetAnimationMode(animationMode string) error {
 
 // SetMode changes the graphical mode of this animated entity
 func (ac *AnimatedComposite) SetMode(animationMode, weaponClass string, direction int) error {
-	ac.animationMode = animationMode
+	ac.composite.SetMode(animationMode, weaponClass, direction)
 	ac.direction = direction
+	ac.weaponClass = weaponClass
 
 	err := ac.composite.SetMode(animationMode, weaponClass, direction)
 	if err != nil {
@@ -61,19 +69,24 @@ func (ac *AnimatedComposite) Render(target d2render.Surface) {
 // rotate sets direction and changes animation
 func (ac *AnimatedComposite) rotate(angle float64) {
 	// TODO: Check if is in town and if is player.
-	newAnimationMode := ac.animationMode
+	newAnimationMode := ac.composite.GetAnimationMode()
 	if !ac.IsAtTarget() {
-		newAnimationMode = d2enum.AnimationModeMonsterWalk.String()
-	}
-
-	if newAnimationMode != ac.animationMode {
-		ac.SetMode(newAnimationMode, ac.weaponClass, ac.direction)
+		if ac.player != nil {
+			if ac.player.IsInTown() {
+				newAnimationMode = d2enum.AnimationModePlayerTownWalk.String()
+			} else {
+				newAnimationMode = d2enum.AnimationModePlayerWalk.String()
+			}
+		} else {
+			newAnimationMode = d2enum.AnimationModeMonsterWalk.String()
+		}
 	}
 
 	newDirection := angleToDirection(angle)
-	if newDirection != ac.direction {
-		ac.SetMode(ac.animationMode, ac.weaponClass, newDirection)
+	if newAnimationMode != ac.composite.GetAnimationMode() || newDirection != ac.direction {
+		ac.SetMode(newAnimationMode, ac.weaponClass, newDirection)
 	}
+
 }
 
 func (ac *AnimatedComposite) Advance(elapsed float64) {
