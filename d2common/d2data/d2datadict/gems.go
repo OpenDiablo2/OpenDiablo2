@@ -2,6 +2,7 @@ package d2datadict
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"log"
 )
 
 type GemsRecord struct {
@@ -103,4 +104,5 @@ func LoadGems(file []byte) {
 			Gems = append(Gems, gem)
 		}
 	}
+	log.Printf("Loaded %d Gems records", len(Gems))
 }
