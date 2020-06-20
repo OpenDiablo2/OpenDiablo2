@@ -54,8 +54,8 @@ func LoadGems(file []byte) {
 	for idx, _ := range d.Data {
 		if d.GetString("name", idx) != "Expansion" {
 			/*
-					"Expansion" is the only field in line 36 of /data/global/excel/gems.txt and is only used to visually
-				   	separate base-game gems and expansion runes.
+				"Expansion" is the only field in line 36 of /data/global/excel/gems.txt and is only used to visually
+				separate base-game gems and expansion runes.
 			*/
 			gem := &GemsRecord{
 				Name:            d.GetString("name", idx),
