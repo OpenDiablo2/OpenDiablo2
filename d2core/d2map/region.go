@@ -139,8 +139,8 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 	region.tileRect = d2common.Rectangle{
 		Left:   tileOffsetX,
 		Top:    tileOffsetY,
-		Width:  int(region.ds1.Width - 1),
-		Height: int(region.ds1.Height - 1),
+		Width:  int(region.ds1.Width),
+		Height: int(region.ds1.Height),
 	}
 
 	entities := region.loadEntities()
@@ -483,7 +483,7 @@ func (mr *MapRegion) renderWall(tile d2ds1.WallRecord, viewport *Viewport, targe
 		return
 	}
 
-	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust))
+	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust)-8)
 	defer viewport.PopTranslation()
 
 	target.PushTranslation(viewport.GetTranslationScreen())
@@ -525,7 +525,7 @@ func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *View
 	ay := y - mr.tileRect.Top
 
 	if debugVisLevel > 0 {
-		if ay < 0 || ax < 0 || ay >= len(mr.ds1.Tiles) || x >= len(mr.ds1.Tiles[ay]) {
+		if ay < 0 || ax < 0 || ay >= len(mr.ds1.Tiles) || ax >= len(mr.ds1.Tiles[ay]) {
 			return
 		}
 		subTileColor := color.RGBA{R: 80, G: 80, B: 255, A: 50}
@@ -571,12 +571,14 @@ func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *View
 				for xx := 0; xx < 5; xx++ {
 					isoX := (xx - yy) * 16
 					isoY := (xx + yy) * 8
-					target.PushTranslation(isoX-3, isoY+4)
-					var walkableArea = mr.walkableArea[yy+(ay*5)][xx+(ax*5)]
-					if !walkableArea.Walkable {
-						target.DrawRect(5, 5, tileCollisionColor)
+					if !((len(mr.walkableArea) <= yy+(ay*5)) || (len(mr.walkableArea[yy+(ay*5)]) <= xx+(ax*5))) {
+						var walkableArea = mr.walkableArea[yy+(ay*5)][xx+(ax*5)]
+						if !walkableArea.Walkable {
+							target.PushTranslation(isoX-3, isoY+4)
+							target.DrawRect(5, 5, tileCollisionColor)
+							target.Pop()
+						}
 					}
-					target.Pop()
 				}
 			}
 		}

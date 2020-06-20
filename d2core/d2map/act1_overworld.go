@@ -19,14 +19,29 @@ func (m *MapEngine) GenerateAct1Overworld(cacheTiles bool) {
 		m.AppendRegion(region)
 		m.entities.Add(entities...)
 	} else if strings.Contains(region.regionPath, "S1") {
+		region.tileRect.Height -= 1 // For some reason, this has a duplciate wall tile strip...
+		mapWidthTiles := ((region.tileRect.Width - 18) / 9)
 		yOffset := region.tileRect.Height
-		waterXOffset := region.tileRect.Width - 16
+		waterXOffset := region.tileRect.Width - 17
 		region, entities := loadRegion(m.seed, 0, yOffset, d2enum.RegionAct1Town, 3, -1, cacheTiles)
 		m.AppendRegion(region)
 		m.entities.Add(entities...)
 		yOffset += region.tileRect.Height
 
-		for i := 0; i < 8; i++ {
+		var choices = [...]int{
+			d2wilderness.StoneFill1,
+			d2wilderness.StoneFill2,
+			d2wilderness.SwampFill1,
+			d2wilderness.Cottages1,
+			d2wilderness.Cottages2,
+			d2wilderness.Cottages3,
+			d2wilderness.CorralFill,
+			d2wilderness.FallenCamp1,
+			d2wilderness.FallenCamp2,
+			d2wilderness.Pond,
+		}
+
+		for i := 0; i < 6; i++ {
 			// West Border
 			region, entities = loadRegion(m.seed, 0, yOffset, d2enum.RegionAct1Wilderness, d2wilderness.TreeBorderWest, 0, cacheTiles)
 			m.AppendRegion(region)
@@ -37,7 +52,14 @@ func (m *MapEngine) GenerateAct1Overworld(cacheTiles bool) {
 			m.AppendRegion(region)
 			m.entities.Add(entities...)
 
-			yOffset += region.tileRect.Height
+			// Grass
+			for ix := 0; ix < mapWidthTiles; ix++ {
+				region, entities = loadRegion(m.seed, ((ix)*9)+7, yOffset, d2enum.RegionAct1Wilderness, choices[rand.Intn(len(choices))], 0, cacheTiles)
+				m.AppendRegion(region)
+				m.entities.Add(entities...)
+			}
+
+			yOffset += 9
 		}
 
 	}

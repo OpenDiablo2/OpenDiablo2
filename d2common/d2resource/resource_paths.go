@@ -176,6 +176,7 @@ const (
 	ObjectDetails        = "/data/global/excel/Objects.txt"
 	SoundSettings        = "/data/global/excel/Sounds.txt"
 	ItemStatCost         = "/data/global/excel/ItemStatCost.txt"
+	Hireling             = "/data/global/excel/hireling.txt"
 
 	// --- Animations ---
 
@@ -190,6 +191,7 @@ const (
 	Armor       = "/data/global/excel/armor.txt"
 	Misc        = "/data/global/excel/misc.txt"
 	UniqueItems = "/data/global/excel/UniqueItems.txt"
+	Gems        = "/data/global/excel/gems.txt"
 
 	// --- Affixes ---
 
