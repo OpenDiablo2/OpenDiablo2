@@ -399,6 +399,7 @@ func loadDataDict() error {
 		{d2resource.CharStats, d2datadict.LoadCharStats},
 		{d2resource.MonStats, d2datadict.LoadMonStats},
 		{d2resource.Experience, d2datadict.LoadExperienceBreakpoints},
+		{d2resource.Gems, d2datadict.LoadGems},
 	}
 
 	for _, entry := range entries {
