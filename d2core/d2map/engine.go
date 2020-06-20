@@ -74,12 +74,14 @@ func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int,
 func (m *MapEngine) AppendRegion(region *MapRegion) {
 	m.regions = append(m.regions, region)
 	// Stitch together the walk map
+
+	// Top/Bottom
 	for x := 0; x < region.tileRect.Width*5; x++ {
 		otherRegion := m.GetRegionAtTile(region.tileRect.Left+(x/5), region.tileRect.Top-1)
 		if otherRegion == nil {
 			continue
 		}
-		xDiff := region.tileRect.Left - otherRegion.tileRect.Left
+		xDiff := (region.tileRect.Left - otherRegion.tileRect.Left) * 5
 
 		sourceSubtile := &region.walkableArea[0][x]
 		if !sourceSubtile.Walkable {
@@ -112,16 +114,56 @@ func (m *MapEngine) AppendRegion(region *MapRegion) {
 		sourceSubtile.UpRight = &otherRegion.walkableArea[otherY][x+xDiff]
 	}
 
+	// West/East
+	for y := 0; y < region.tileRect.Height*5; y++ {
+		otherRegion := m.GetRegionAtTile(region.tileRect.Left-1, region.tileRect.Top+(y/5))
+		if otherRegion == nil {
+			continue
+		}
+		yDiff := (region.tileRect.Top - otherRegion.tileRect.Top) * 5
+
+		sourceSubtile := &region.walkableArea[y][0]
+		if !sourceSubtile.Walkable {
+			continue
+		}
+
+		// North West
+		otherX := (otherRegion.tileRect.Width * 5) - 1
+		otherY := y + yDiff - 1
+		if otherY < 0 || otherY >= len(otherRegion.walkableArea) {
+			continue
+		}
+		otherRegion.walkableArea[y+yDiff][otherX].DownRight = sourceSubtile
+		sourceSubtile.UpLeft = &otherRegion.walkableArea[y+yDiff][otherX]
+
+		// West
+		otherY++
+		if otherY < 0 || otherY >= len(otherRegion.walkableArea) {
+			continue
+		}
+		otherRegion.walkableArea[y+yDiff][otherX].Right = sourceSubtile
+		sourceSubtile.Left = &otherRegion.walkableArea[y+yDiff][otherX]
+
+		// South East
+		otherY++
+		if otherY < 0 || otherY >= len(otherRegion.walkableArea) {
+			continue
+		}
+		otherRegion.walkableArea[y+yDiff][otherX].UpRight = sourceSubtile
+		sourceSubtile.DownLeft = &otherRegion.walkableArea[y+yDiff][otherX]
+	}
+
 }
 
 // Returns the region located at the specified tile location
 func (m *MapEngine) GetRegionAtTile(x, y int) *MapRegion {
-	for _, region := range m.regions {
+	// Read in reverse order as tiles can be placed over other tiles, and we prioritize the top level tiles
+	for i := len(m.regions) - 1; i >= 0; i-- {
+		region := m.regions[i]
 		if region.tileRect.IsInRect(x, y) {
 			return region
 		}
 	}
-
 	return nil
 }
 
