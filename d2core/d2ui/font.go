@@ -6,9 +6,10 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 var fontCache = map[string]*Font{}
@@ -102,7 +103,7 @@ func (v *Font) GetTextMetrics(text string) (width, height int) {
 }
 
 // Render draws the font on the target surface
-func (v *Font) Render(x, y int, text string, color color.Color, target d2render.Surface) {
+func (v *Font) Render(x, y int, text string, color color.Color, target d2interface.Surface) {
 	v.fontSprite.SetColorMod(color)
 	v.fontSprite.SetBlend(false)
 

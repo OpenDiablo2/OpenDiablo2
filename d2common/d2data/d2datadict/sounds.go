@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // SoundEntry represents a sound entry
@@ -46,46 +46,54 @@ func createSoundEntry(soundLine string) SoundEntry {
 	}
 	result := SoundEntry{
 		Handle:    props[inc()],
-		Index:     dh.StringToInt(props[inc()]),
+		Index:     d2common.StringToInt(props[inc()]),
 		FileName:  props[inc()],
-		Volume:    dh.StringToUint8(props[inc()]),
-		GroupSize: dh.StringToUint8(props[inc()]),
-		Loop:      dh.StringToUint8(props[inc()]) == 1,
-		FadeIn:    dh.StringToUint8(props[inc()]),
-		FadeOut:   dh.StringToUint8(props[inc()]),
-		DeferInst: dh.StringToUint8(props[inc()]),
-		StopInst:  dh.StringToUint8(props[inc()]),
-		Duration:  dh.StringToUint8(props[inc()]),
-		Compound:  dh.StringToInt8(props[inc()]),
-		Reverb:    dh.StringToUint8(props[inc()]) == 1,
-		Falloff:   dh.StringToUint8(props[inc()]),
-		Cache:     dh.StringToUint8(props[inc()]),
-		AsyncOnly: dh.StringToUint8(props[inc()]) == 1,
-		Priority:  dh.StringToUint8(props[inc()]),
-		Stream:    dh.StringToUint8(props[inc()]),
-		Stereo:    dh.StringToUint8(props[inc()]),
-		Tracking:  dh.StringToUint8(props[inc()]),
-		Solo:      dh.StringToUint8(props[inc()]),
-		MusicVol:  dh.StringToUint8(props[inc()]),
-		Block1:    dh.StringToInt(props[inc()]),
-		Block2:    dh.StringToInt(props[inc()]),
-		Block3:    dh.StringToInt(props[inc()]),
+		Volume:    d2common.StringToUint8(props[inc()]),
+		GroupSize: d2common.StringToUint8(props[inc()]),
+		Loop:      d2common.StringToUint8(props[inc()]) == 1,
+		FadeIn:    d2common.StringToUint8(props[inc()]),
+		FadeOut:   d2common.StringToUint8(props[inc()]),
+		DeferInst: d2common.StringToUint8(props[inc()]),
+		StopInst:  d2common.StringToUint8(props[inc()]),
+		Duration:  d2common.StringToUint8(props[inc()]),
+		Compound:  d2common.StringToInt8(props[inc()]),
+		Reverb:    d2common.StringToUint8(props[inc()]) == 1,
+		Falloff:   d2common.StringToUint8(props[inc()]),
+		Cache:     d2common.StringToUint8(props[inc()]),
+		AsyncOnly: d2common.StringToUint8(props[inc()]) == 1,
+		Priority:  d2common.StringToUint8(props[inc()]),
+		Stream:    d2common.StringToUint8(props[inc()]),
+		Stereo:    d2common.StringToUint8(props[inc()]),
+		Tracking:  d2common.StringToUint8(props[inc()]),
+		Solo:      d2common.StringToUint8(props[inc()]),
+		MusicVol:  d2common.StringToUint8(props[inc()]),
+		Block1:    d2common.StringToInt(props[inc()]),
+		Block2:    d2common.StringToInt(props[inc()]),
+		Block3:    d2common.StringToInt(props[inc()]),
 	}
+
 	return result
 }
 
+// Sounds stores all of the SoundEntries
+//nolint:gochecknoglobals // Currently global by design, only written once
 var Sounds map[string]SoundEntry
 
+// LoadSounds loads SoundEntries from sounds.txt
 func LoadSounds(file []byte) {
 	Sounds = make(map[string]SoundEntry)
 	soundData := strings.Split(string(file), "\r\n")[1:]
+
 	for _, line := range soundData {
-		if len(line) == 0 {
+		if line == "" {
 			continue
 		}
+
 		soundEntry := createSoundEntry(line)
 		soundEntry.FileName = "/data/global/sfx/" + strings.ReplaceAll(soundEntry.FileName, `\`, "/")
 		Sounds[soundEntry.Handle] = soundEntry
+
+		//nolint:gocritic // Debug util code
 		/*
 			// Use the following code to write out the values
 			f, err := os.OpenFile(`C:\Users\lunat\Desktop\D2\sounds.txt`,
@@ -98,6 +106,7 @@ func LoadSounds(file []byte) {
 				log.Println(err)
 			}
 		*/
-	}
+	} //nolint:wsl // Debug util code
+
 	log.Printf("Loaded %d sound definitions", len(Sounds))
 }

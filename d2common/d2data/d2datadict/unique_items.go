@@ -5,10 +5,9 @@ import (
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// UniqueItemRecord is a representation of a row from uniqueitems.txt
 type UniqueItemRecord struct {
 	Name    string
 	Version int  // 0 = classic pre 1.07, 1 = 1.07-1.11, 100 = expansion
@@ -43,6 +42,7 @@ type UniqueItemRecord struct {
 	Properties [12]UniqueItemProperty
 }
 
+// UniqueItemProperty is describes a property of a unique item
 type UniqueItemProperty struct {
 	Property  string
 	Parameter d2common.CalcString // depending on the property, this may be an int (usually), or a string
@@ -58,22 +58,22 @@ func createUniqueItemRecord(r []string) UniqueItemRecord {
 	}
 	result := UniqueItemRecord{
 		Name:    r[inc()],
-		Version: dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		Enabled: dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
+		Version: d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		Enabled: d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
 
-		Ladder:  dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		Rarity:  dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		NoLimit: dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
+		Ladder:  d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		Rarity:  d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		NoLimit: d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
 
-		Level:         dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		RequiredLevel: dh.StringToInt(dh.EmptyToZero(r[inc()])),
+		Level:         d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		RequiredLevel: d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
 		Code:          r[inc()],
 
 		TypeDescription: r[inc()],
 		UberDescription: r[inc()],
-		SingleCopy:      dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		CostMultiplier:  dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		CostAdd:         dh.StringToInt(dh.EmptyToZero(r[inc()])),
+		SingleCopy:      d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		CostMultiplier:  d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		CostAdd:         d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
 
 		CharacterGfxTransform: r[inc()],
 		InventoryGfxTransform: r[inc()],
@@ -81,7 +81,7 @@ func createUniqueItemRecord(r []string) UniqueItemRecord {
 		InventoryFile:         r[inc()],
 
 		DropSound:    r[inc()],
-		DropSfxFrame: dh.StringToInt(dh.EmptyToZero(r[inc()])),
+		DropSfxFrame: d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
 		UseSound:     r[inc()],
 
 		Properties: [12]UniqueItemProperty{
@@ -101,6 +101,7 @@ func createUniqueItemRecord(r []string) UniqueItemRecord {
 			createUniqueItemProperty(&r, inc),
 		},
 	}
+
 	return result
 }
 
@@ -108,28 +109,36 @@ func createUniqueItemProperty(r *[]string, inc func() int) UniqueItemProperty {
 	result := UniqueItemProperty{
 		Property:  (*r)[inc()],
 		Parameter: d2common.CalcString((*r)[inc()]),
-		Min:       dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-		Max:       dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
+		Min:       d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+		Max:       d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 	}
+
 	return result
 }
 
+// UniqueItems stores all of the UniqueItemRecords
+//nolint:gochecknoglobals // Currently global by design
 var UniqueItems map[string]*UniqueItemRecord
 
+// LoadUniqueItems loadsUniqueItemRecords fro uniqueitems.txt
 func LoadUniqueItems(file []byte) {
 	UniqueItems = make(map[string]*UniqueItemRecord)
 	data := strings.Split(string(file), "\r\n")[1:]
+
 	for _, line := range data {
-		if len(line) == 0 {
+		if line == "" {
 			continue
 		}
+
 		r := strings.Split(line, "\t")
 		// skip rows that are not enabled
 		if r[2] != "1" {
 			continue
 		}
+
 		rec := createUniqueItemRecord(r)
 		UniqueItems[rec.Code] = &rec
 	}
+
 	log.Printf("Loaded %d unique items", len(UniqueItems))
 }

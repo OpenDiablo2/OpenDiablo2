@@ -2,11 +2,15 @@
 [![CircleCI](https://circleci.com/gh/OpenDiablo2/OpenDiablo2/tree/master.svg?style=svg)](https://circleci.com/gh/OpenDiablo2/OpenDiablo2/tree/master)
 [![Code Status](https://www.codefactor.io/repository/github/OpenDiablo2/OpenDiablo2/badge)](https://www.codefactor.io/repository/github/OpenDiablo2/OpenDiablo2)
 
+![Logo](d2logo.png)
+
 [Join us on Discord!](https://discord.gg/pRy8tdc)\
 [Development Live stream](https://www.twitch.tv/essial/)\
-[Support us on patreon](https://www.patreon.com/bePatron?u=37261055)
+[Support us on Patreon](https://www.patreon.com/bePatron?u=37261055)
 
-![Logo](d2logo.png)
+We are also working on a toolset:\
+[https://github.com/OpenDiablo2/HellSpawner](https://github.com/OpenDiablo2/HellSpawner)\
+Please consider helping out with this project as well!
 
 ## About this project
 
@@ -35,7 +39,7 @@ You can also open the root folder in VSCode. Make sure you have the `ms-vscode.g
 ### Linux
 
 There are several dependencies which need to be installed additionally.
-To install them you can use `./run.sh` in the project root folder - this script takes care of the installation for you.
+To install them you can use `./build.sh` in the project root folder - this script takes care of the installation for you.
 
 ## Contributing
 
@@ -70,6 +74,22 @@ then clicking on `Edit in settings.json`. Just paste that section where appropri
 The engine is configured via the `config.json` file. By default, the configuration assumes that you have installed Diablo 2 and the
 expansion via the official Blizzard Diablo2 installers using the default file paths. If you are not on Windows, or have installed
 the game in a different location, the base path may have to be adjusted.
+
+## Profiling
+
+There are many profiler options to debug performance issues. These can be enabled by suppling the following command-line option and are saved in the `pprof` directory:
+
+`go run . --profile=cpu`
+
+Available profilers:\
+`cpu` `mem` `block` `goroutine` `trace` `thread` `mutex`
+
+You can export the profiler output with the following command:\
+`go tool pprof --pdf ./OpenDiablo2 pprof/profiler.pprof > file.pdf`
+
+Ingame you can create a heap dump by pressing `~` and typing `dumpheap`. A heap.pprof is written to the `pprof` directory.
+
+You may need to install [Graphviz](http://www.graphviz.org/download/) in order to convert the profiler output.
 
 ## Roadmap
 

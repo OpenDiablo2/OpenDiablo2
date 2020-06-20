@@ -17,9 +17,9 @@ func createPaletteTransformManager() *paletteTransformManager {
 	return &paletteTransformManager{d2common.CreateCache(paletteTransformBudget)}
 }
 
-func (pm *paletteTransformManager) loadPaletteTransform(path string) (*d2pl2.PL2File, error) {
+func (pm *paletteTransformManager) loadPaletteTransform(path string) (*d2pl2.PL2, error) {
 	if pl2, found := pm.cache.Retrieve(path); found {
-		return pl2.(*d2pl2.PL2File), nil
+		return pl2.(*d2pl2.PL2), nil
 	}
 
 	data, err := LoadFile(path)
@@ -27,11 +27,14 @@ func (pm *paletteTransformManager) loadPaletteTransform(path string) (*d2pl2.PL2
 		return nil, err
 	}
 
-	pl2, err := d2pl2.LoadPL2(data)
+	pl2, err := d2pl2.Load(data)
 	if err != nil {
 		return nil, err
 	}
 
-	pm.cache.Insert(path, pl2, 1)
+	if err := pm.cache.Insert(path, pl2, 1); err != nil {
+		return nil, err
+	}
+
 	return pl2, nil
 }

@@ -6,8 +6,9 @@ import (
 	"image/color"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type fontGlyph struct {
@@ -16,6 +17,7 @@ type fontGlyph struct {
 	height int
 }
 
+// Font represents a displayable font
 type Font struct {
 	sheet  *Animation
 	glyphs map[rune]fontGlyph
@@ -46,7 +48,7 @@ func loadFont(tablePath, spritePath, palettePath string) (*Font, error) {
 		var glyph fontGlyph
 		glyph.frame = int(binary.LittleEndian.Uint16(data[i+8 : i+10]))
 		glyph.width = int(data[i+3])
-		glyph.height = maxCharHeight // int(data[i+4])
+		glyph.height = maxCharHeight
 
 		glyphs[code] = glyph
 	}
@@ -60,11 +62,12 @@ func loadFont(tablePath, spritePath, palettePath string) (*Font, error) {
 	return font, nil
 }
 
-func (f *Font) SetColor(color color.Color) {
-	f.color = color
+func (f *Font) SetColor(c color.Color) {
+	f.color = c
 }
 
-func (f *Font) GetTextMetrics(text string) (int, int) {
+// GetTextMetrics returns the dimensions of the Font element in pixels
+func (f *Font) GetTextMetrics(text string) (width, height int) {
 	var (
 		lineWidth   int
 		lineHeight  int
@@ -90,6 +93,7 @@ func (f *Font) GetTextMetrics(text string) (int, int) {
 	return totalWidth, totalHeight
 }
 
+// Clone creates a shallow copy of the Font
 func (f *Font) Clone() *Font {
 	return &Font{
 		sheet:  f.sheet,
@@ -98,7 +102,8 @@ func (f *Font) Clone() *Font {
 	}
 }
 
-func (f *Font) RenderText(text string, target d2render.Surface) error {
+// RenderText draws a string of text in a style described by Font onto the d2interface.Surface
+func (f *Font) RenderText(text string, target d2interface.Surface) error {
 	f.sheet.SetColorMod(f.color)
 	f.sheet.SetBlend(false)
 
@@ -111,13 +116,23 @@ func (f *Font) RenderText(text string, target d2render.Surface) error {
 		)
 
 		for _, c := range line {
-			if glyph, ok := f.glyphs[c]; ok {
-				f.sheet.SetCurrentFrame(glyph.frame)
-				f.sheet.Render(target)
-				lineHeight = d2common.MaxInt(lineHeight, glyph.height)
-				target.PushTranslation(glyph.width, 0)
-				lineLength++
+			glyph, ok := f.glyphs[c]
+			if !ok {
+				continue
 			}
+
+			if err := f.sheet.SetCurrentFrame(glyph.frame); err != nil {
+				return err
+			}
+
+			if err := f.sheet.Render(target); err != nil {
+				return err
+			}
+
+			lineHeight = d2common.MaxInt(lineHeight, glyph.height)
+			lineLength++
+
+			target.PushTranslation(glyph.width, 0)
 		}
 
 		target.PopN(lineLength)

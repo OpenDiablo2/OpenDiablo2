@@ -1,3 +1,4 @@
+// Package d2mpq contains the functions for handling MPQ files.
 package d2mpq
 
 import (
@@ -44,6 +45,7 @@ type HashTableEntry struct { // 16 bytes
 	BlockIndex uint32
 }
 
+// PatchInfo represents patch info for the MPQ.
 type PatchInfo struct {
 	Length   uint32   // Length of patch info header, in bytes
 	Flags    uint32   // Flags. 0x80000000 = MD5 (?)
@@ -101,7 +103,7 @@ func Load(fileName string) (*MPQ, error) {
 	if runtime.GOOS == "linux" {
 		result.File, err = openIgnoreCase(fileName)
 	} else {
-		result.File, err = os.Open(fileName)
+		result.File, err = os.Open(fileName) //nolint:gosec Will fix later
 	}
 
 	if err != nil {
@@ -117,7 +119,7 @@ func Load(fileName string) (*MPQ, error) {
 
 func openIgnoreCase(mpqPath string) (*os.File, error) {
 	// First see if file exists with specified case
-	mpqFile, err := os.Open(mpqPath)
+	mpqFile, err := os.Open(mpqPath) //nolint:gosec Will fix later
 	if err == nil {
 		return mpqFile, err
 	}
@@ -137,20 +139,25 @@ func openIgnoreCase(mpqPath string) (*os.File, error) {
 		}
 	}
 
-	file, err := os.Open(path.Join(mpqDir, mpqName))
+	file, err := os.Open(path.Join(mpqDir, mpqName)) //nolint:gosec Will fix later
+
 	return file, err
 }
 
 func (v *MPQ) readHeader() error {
 	err := binary.Read(v.File, binary.LittleEndian, &v.Data)
+
 	if err != nil {
 		return err
 	}
+
 	if string(v.Data.Magic[:]) != "MPQ\x1A" {
 		return errors.New("invalid mpq header")
 	}
+
 	v.loadHashTable()
 	v.loadBlockTable()
+
 	return nil
 }
 
@@ -159,19 +166,24 @@ func (v *MPQ) loadHashTable() {
 	if err != nil {
 		log.Panic(err)
 	}
-	hashData := make([]uint32, v.Data.HashTableEntries*4)
-	err = binary.Read(v.File, binary.LittleEndian, &hashData)
-	if err != nil {
-		log.Panic(err)
+
+	hashData := make([]uint32, v.Data.HashTableEntries*4) //nolint:gomnd Decryption magic
+	hash := make([]byte, 4)
+
+	for i := range hashData {
+		_, _ = v.File.Read(hash)
+		hashData[i] = binary.LittleEndian.Uint32(hash)
 	}
+
 	decrypt(hashData, hashString("(hash table)", 3))
+
 	for i := uint32(0); i < v.Data.HashTableEntries; i++ {
 		v.HashEntryMap.Insert(&HashTableEntry{
 			NamePartA: hashData[i*4],
 			NamePartB: hashData[(i*4)+1],
-			// TODO: Verify that we're grabbing the right high/lo word for the vars below
-			Locale:     uint16(hashData[(i*4)+2] >> 16),
-			Platform:   uint16(hashData[(i*4)+2] & 0xFFFF),
+			//nolint:godox    // TODO: Verify that we're grabbing the right high/lo word for the vars below
+			Locale:     uint16(hashData[(i*4)+2] >> 16),    //nolint:gomnd binary data
+			Platform:   uint16(hashData[(i*4)+2] & 0xFFFF), //nolint:gomnd binary data
 			BlockIndex: hashData[(i*4)+3],
 		})
 	}
@@ -182,12 +194,17 @@ func (v *MPQ) loadBlockTable() {
 	if err != nil {
 		log.Panic(err)
 	}
-	blockData := make([]uint32, v.Data.BlockTableEntries*4)
-	err = binary.Read(v.File, binary.LittleEndian, &blockData)
-	if err != nil {
-		log.Panic(err)
+
+	blockData := make([]uint32, v.Data.BlockTableEntries*4) //nolint:gomnd binary data
+	hash := make([]byte, 4)
+
+	for i := range blockData {
+		_, _ = v.File.Read(hash[:]) //nolint:errcheck Will fix later
+		blockData[i] = binary.LittleEndian.Uint32(hash)
 	}
+
 	decrypt(blockData, hashString("(block table)", 3))
+
 	for i := uint32(0); i < v.Data.BlockTableEntries; i++ {
 		v.BlockTableEntries = append(v.BlockTableEntries, BlockTableEntry{
 			FilePosition:         blockData[(i * 4)],
@@ -199,54 +216,56 @@ func (v *MPQ) loadBlockTable() {
 }
 
 func decrypt(data []uint32, seed uint32) {
-	seed2 := uint32(0xeeeeeeee)
+	seed2 := uint32(0xeeeeeeee) //nolint:gomnd Decryption magic
 
 	for i := 0; i < len(data); i++ {
-		seed2 += cryptoLookup(0x400 + (seed & 0xff))
+		seed2 += cryptoLookup(0x400 + (seed & 0xff)) //nolint:gomnd Decryption magic
 		result := data[i]
 		result ^= seed + seed2
 
 		seed = ((^seed << 21) + 0x11111111) | (seed >> 11)
-		seed2 = result + seed2 + (seed2 << 5) + 3
+		seed2 = result + seed2 + (seed2 << 5) + 3 //nolint:gomnd Decryption magic
 		data[i] = result
 	}
 }
 
 func decryptBytes(data []byte, seed uint32) {
-	seed2 := uint32(0xEEEEEEEE)
+	seed2 := uint32(0xEEEEEEEE) //nolint:gomnd Decryption magic
 	for i := 0; i < len(data)-3; i += 4 {
-		seed2 += cryptoLookup(0x400 + (seed & 0xFF))
+		seed2 += cryptoLookup(0x400 + (seed & 0xFF)) //nolint:gomnd Decryption magic
 		result := binary.LittleEndian.Uint32(data[i : i+4])
 		result ^= seed + seed2
 		seed = ((^seed << 21) + 0x11111111) | (seed >> 11)
-		seed2 = result + seed2 + (seed2 << 5) + 3
+		seed2 = result + seed2 + (seed2 << 5) + 3 //nolint:gomnd Decryption magic
 
-		data[i+0] = uint8(result & 0xff)
-		data[i+1] = uint8((result >> 8) & 0xff)
-		data[i+2] = uint8((result >> 16) & 0xff)
-		data[i+3] = uint8((result >> 24) & 0xff)
+		data[i+0] = uint8(result & 0xff)         //nolint:gomnd Decryption magic
+		data[i+1] = uint8((result >> 8) & 0xff)  //nolint:gomnd Decryption magic
+		data[i+2] = uint8((result >> 16) & 0xff) //nolint:gomnd Decryption magic
+		data[i+3] = uint8((result >> 24) & 0xff) //nolint:gomnd Decryption magic
 	}
 }
 
 func hashString(key string, hashType uint32) uint32 {
-
-	seed1 := uint32(0x7FED7FED)
-	seed2 := uint32(0xEEEEEEEE)
+	seed1 := uint32(0x7FED7FED) //nolint:gomnd Decryption magic
+	seed2 := uint32(0xEEEEEEEE) //nolint:gomnd Decryption magic
 
 	/* prepare seeds. */
 	for _, char := range strings.ToUpper(key) {
 		seed1 = cryptoLookup((hashType*0x100)+uint32(char)) ^ (seed1 + seed2)
-		seed2 = uint32(char) + seed1 + seed2 + (seed2 << 5) + 3
+		seed2 = uint32(char) + seed1 + seed2 + (seed2 << 5) + 3 //nolint:gomnd Decryption magic
 	}
+
 	return seed1
 }
 
 // GetFileBlockData gets a block table entry
-func (v MPQ) getFileBlockData(fileName string) (BlockTableEntry, error) {
+func (v *MPQ) getFileBlockData(fileName string) (BlockTableEntry, error) {
 	fileEntry, found := v.HashEntryMap.Find(fileName)
+
 	if !found || fileEntry.BlockIndex >= uint32(len(v.BlockTableEntries)) {
 		return BlockTableEntry{}, errors.New("file not found")
 	}
+
 	return v.BlockTableEntries[fileEntry.BlockIndex], nil
 }
 
@@ -258,57 +277,91 @@ func (v *MPQ) Close() {
 	}
 }
 
-func (v MPQ) FileExists(fileName string) bool {
+// FileExists checks the mpq to see if the file exists
+func (v *MPQ) FileExists(fileName string) bool {
 	return v.HashEntryMap.Contains(fileName)
 }
 
 // ReadFile reads a file from the MPQ and returns a memory stream
-func (v MPQ) ReadFile(fileName string) ([]byte, error) {
+func (v *MPQ) ReadFile(fileName string) ([]byte, error) {
 	fileBlockData, err := v.getFileBlockData(fileName)
 	if err != nil {
 		return []byte{}, err
 	}
+
 	fileBlockData.FileName = strings.ToLower(fileName)
+
 	fileBlockData.calculateEncryptionSeed()
 	mpqStream, err := CreateStream(v, fileBlockData, fileName)
+
 	if err != nil {
 		return []byte{}, err
 	}
+
 	buffer := make([]byte, fileBlockData.UncompressedFileSize)
 	mpqStream.Read(buffer, 0, fileBlockData.UncompressedFileSize)
+
 	return buffer, nil
 }
 
+// ReadFileStream reads the mpq file data and returns a stream
+func (v *MPQ) ReadFileStream(fileName string) (*MpqDataStream, error) {
+	fileBlockData, err := v.getFileBlockData(fileName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	fileBlockData.FileName = strings.ToLower(fileName)
+	fileBlockData.calculateEncryptionSeed()
+
+	mpqStream, err := CreateStream(v, fileBlockData, fileName)
+	if err != nil {
+		return nil, err
+	}
+
+	return &MpqDataStream{stream: mpqStream}, nil
+}
+
 // ReadTextFile reads a file and returns it as a string
-func (v MPQ) ReadTextFile(fileName string) (string, error) {
+func (v *MPQ) ReadTextFile(fileName string) (string, error) {
 	data, err := v.ReadFile(fileName)
+
 	if err != nil {
 		return "", err
 	}
+
 	return string(data), nil
 }
 
 func (v *BlockTableEntry) calculateEncryptionSeed() {
 	fileName := path.Base(v.FileName)
 	v.EncryptionSeed = hashString(fileName, 3)
+
 	if !v.HasFlag(FileFixKey) {
 		return
 	}
+
 	v.EncryptionSeed = (v.EncryptionSeed + v.FilePosition) ^ v.UncompressedFileSize
 }
 
 // GetFileList returns the list of files in this MPQ
-func (v MPQ) GetFileList() ([]string, error) {
+func (v *MPQ) GetFileList() ([]string, error) {
 	data, err := v.ReadFile("(listfile)")
+
 	if err != nil {
 		return nil, err
 	}
+
 	raw := strings.TrimRight(string(data), "\x00")
 	s := bufio.NewScanner(strings.NewReader(raw))
+
 	var filePaths []string
+
 	for s.Scan() {
 		filePath := s.Text()
 		filePaths = append(filePaths, filePath)
 	}
+
 	return filePaths, nil
 }

@@ -3,6 +3,10 @@ package d2ui
 import (
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
@@ -27,7 +31,7 @@ type Label struct {
 	Height    int
 	Alignment LabelAlignment
 	font      *Font
-	imageData d2render.Surface
+	imageData map[string]d2interface.Surface
 	Color     color.Color
 }
 
@@ -37,12 +41,14 @@ func CreateLabel(fontPath, palettePath string) Label {
 		Alignment: LabelAlignLeft,
 		Color:     color.White,
 		font:      GetFont(fontPath, palettePath),
+		imageData: make(map[string]d2interface.Surface),
 	}
+
 	return result
 }
 
 // Render draws the label on the screen
-func (v *Label) Render(target d2render.Surface) {
+func (v *Label) Render(target d2interface.Surface) {
 	if len(v.text) == 0 {
 		return
 	}
@@ -55,12 +61,12 @@ func (v *Label) Render(target d2render.Surface) {
 		x, y = v.X-v.Width, v.Y
 	}
 
-	target.PushFilter(d2render.FilterNearest)
-	target.PushCompositeMode(d2render.CompositeModeSourceAtop)
+	target.PushFilter(d2interface.FilterNearest)
+	target.PushCompositeMode(d2enum.CompositeModeSourceAtop)
 	target.PushTranslation(x, y)
 	defer target.PopN(3)
 
-	target.Render(v.imageData)
+	target.Render(v.imageData[v.text])
 }
 
 // SetPosition moves the label to the specified location
@@ -74,14 +80,14 @@ func (v *Label) GetTextMetrics(text string) (width, height int) {
 }
 
 func (v *Label) cacheImage() {
-	if v.imageData != nil {
+	if v.imageData[v.text] != nil {
 		return
 	}
 	width, height := v.font.GetTextMetrics(v.text)
 	v.Width = width
 	v.Height = height
-	v.imageData, _ = d2render.NewSurface(width, height, d2render.FilterNearest)
-	surface, _ := d2render.CreateSurface(v.imageData)
+	v.imageData[v.text], _ = d2render.NewSurface(width, height, d2interface.FilterNearest)
+	surface, _ := d2render.CreateSurface(v.imageData[v.text])
 	v.font.Render(0, 0, v.text, v.Color, surface)
 }
 
@@ -91,10 +97,9 @@ func (v *Label) SetText(newText string) {
 		return
 	}
 	v.text = newText
-	v.imageData = nil
 }
 
-// GetSize returns the size of the label
+// Size returns the size of the label
 func (v Label) GetSize() (width, height int) {
 	v.cacheImage()
 	width = v.Width

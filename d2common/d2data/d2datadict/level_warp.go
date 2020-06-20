@@ -6,8 +6,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// LevelWarpRecord is a representation of a row from lvlwarp.txt
+// it describes the warp graphics offsets and dimensions for levels
 type LevelWarpRecord struct {
-	Id         int32
+	ID         int32
 	SelectX    int32
 	SelectY    int32
 	SelectDX   int32
@@ -21,16 +23,20 @@ type LevelWarpRecord struct {
 	Direction  string
 }
 
+// LevelWarps loaded from txt records
+//nolint:gochecknoglobals // Currently global by design, only written once
 var LevelWarps map[int]*LevelWarpRecord
 
+// LoadLevelWarps loads LevelWarpRecord's from text file data
 func LoadLevelWarps(levelWarpData []byte) {
 	LevelWarps = make(map[int]*LevelWarpRecord)
 	streamReader := d2common.CreateStreamReader(levelWarpData)
 	numRecords := int(streamReader.GetInt32())
+
 	for i := 0; i < numRecords; i++ {
 		id := int(streamReader.GetInt32())
 		LevelWarps[id] = &LevelWarpRecord{}
-		LevelWarps[id].Id = int32(id)
+		LevelWarps[id].ID = int32(id)
 		LevelWarps[id].SelectX = streamReader.GetInt32()
 		LevelWarps[id].SelectY = streamReader.GetInt32()
 		LevelWarps[id].SelectDX = streamReader.GetInt32()
@@ -44,5 +50,6 @@ func LoadLevelWarps(levelWarpData []byte) {
 		LevelWarps[id].Direction = string(streamReader.GetByte())
 		streamReader.SkipBytes(3)
 	}
+
 	log.Printf("Loaded %d level warps", len(LevelWarps))
 }

@@ -3,25 +3,28 @@ package d2asset
 import (
 	"errors"
 	"fmt"
-	"math"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
+// Composite is a composite entity animation
 type Composite struct {
 	object      *d2datadict.ObjectLookupRecord
 	palettePath string
 	mode        *compositeMode
 }
 
+// CreateComposite creates a Composite from a given ObjectLookupRecord and palettePath.
 func CreateComposite(object *d2datadict.ObjectLookupRecord, palettePath string) *Composite {
 	return &Composite{object: object, palettePath: palettePath}
 }
 
+// Advance moves the composite animation forward for a given elapsed time in nanoseconds.
 func (c *Composite) Advance(elapsed float64) error {
 	if c.mode == nil {
 		return nil
@@ -45,7 +48,8 @@ func (c *Composite) Advance(elapsed float64) error {
 	return nil
 }
 
-func (c *Composite) Render(target d2render.Surface) error {
+// Render performs drawing of the Composite on the rendered d2interface.Surface.
+func (c *Composite) Render(target d2interface.Surface) error {
 	if c.mode == nil {
 		return nil
 	}
@@ -62,12 +66,14 @@ func (c *Composite) Render(target d2render.Surface) error {
 	return nil
 }
 
+// GetAnimationMode returns the animation mode the Composite should render with.
 func (c Composite) GetAnimationMode() string {
 	return c.mode.animationMode
 }
 
+// SetMode sets the Composite's animation mode weapon class and direction
 func (c *Composite) SetMode(animationMode, weaponClass string, direction int) error {
-	if c.mode != nil && c.mode.animationMode == animationMode && c.mode.weaponClass == weaponClass && c.mode.direction == direction {
+	if c.mode != nil && c.mode.animationMode == animationMode && c.mode.weaponClass == weaponClass && c.mode.cofDirection == direction {
 		return nil
 	}
 
@@ -76,11 +82,24 @@ func (c *Composite) SetMode(animationMode, weaponClass string, direction int) er
 		return err
 	}
 
-	c.ResetPlayedCount()
+	c.resetPlayedCount()
 	c.mode = mode
+
 	return nil
 }
 
+// SetSpeed sets the speed at which the Composite's animation should advance through its frames
+func (c *Composite) SetSpeed(speed int) {
+	c.mode.animationSpeed = 1.0 / ((float64(speed) * 25.0) / 256.0)
+	for layerIdx := range c.mode.layers {
+		layer := c.mode.layers[layerIdx]
+		if layer != nil {
+			layer.SetPlaySpeed(c.mode.animationSpeed)
+		}
+	}
+}
+
+// GetDirectionCount returns the Composites number of available animated directions
 func (c *Composite) GetDirectionCount() int {
 	if c.mode == nil {
 		return 0
@@ -89,6 +108,7 @@ func (c *Composite) GetDirectionCount() int {
 	return c.mode.directionCount
 }
 
+// GetPlayedCount returns the number of times the current animation mode has completed all its distinct frames
 func (c *Composite) GetPlayedCount() int {
 	if c.mode == nil {
 		return 0
@@ -97,7 +117,7 @@ func (c *Composite) GetPlayedCount() int {
 	return c.mode.playedCount
 }
 
-func (c *Composite) ResetPlayedCount() {
+func (c *Composite) resetPlayedCount() {
 	if c.mode != nil {
 		c.mode.playedCount = 0
 	}
@@ -106,7 +126,7 @@ func (c *Composite) ResetPlayedCount() {
 type compositeMode struct {
 	animationMode  string
 	weaponClass    string
-	direction      int
+	cofDirection   int
 	directionCount int
 	playedCount    int
 
@@ -130,15 +150,8 @@ func (c *Composite) createMode(animationMode, weaponClass string, direction int)
 		return nil, err
 	}
 
-	// oh god how do i math
-	offset := (64 / cof.NumberOfDirections) / 2
-	entityDirection := int(math.Trunc((float64(direction+offset)-64.0)*(-float64(cof.NumberOfDirections)/-64.0) + float64(cof.NumberOfDirections)))
-
-	if entityDirection >= cof.NumberOfDirections {
-		entityDirection = 0
-	}
-
 	animationKey := strings.ToLower(c.object.Token + animationMode + weaponClass)
+
 	animationData := d2data.AnimationData[animationKey]
 	if len(animationData) == 0 {
 		return nil, errors.New("could not find animation data")
@@ -147,8 +160,8 @@ func (c *Composite) createMode(animationMode, weaponClass string, direction int)
 	mode := &compositeMode{
 		animationMode:  animationMode,
 		weaponClass:    weaponClass,
-		direction:      entityDirection,
 		directionCount: cof.NumberOfDirections,
+		cofDirection:   d2cof.Dir64ToCof(direction, cof.NumberOfDirections),
 		layers:         make([]*Animation, d2enum.CompositeTypeMax),
 		frameCount:     animationData[0].FramesPerDirection,
 		animationSpeed: 1.0 / ((float64(animationData[0].AnimationSpeed) * 25.0) / 256.0),
@@ -156,59 +169,44 @@ func (c *Composite) createMode(animationMode, weaponClass string, direction int)
 
 	mode.drawOrder = make([][]d2enum.CompositeType, mode.frameCount)
 	for frame := 0; frame < mode.frameCount; frame++ {
-		mode.drawOrder[frame] = cof.Priority[mode.direction][frame]
+		mode.drawOrder[frame] = cof.Priority[mode.cofDirection][frame]
 	}
 
 	for _, cofLayer := range cof.CofLayers {
-		var layerKey, layerValue string
+		var layerValue string
+
 		switch cofLayer.Type {
 		case d2enum.CompositeTypeHead:
-			layerKey = "HD"
 			layerValue = c.object.HD
 		case d2enum.CompositeTypeTorso:
-			layerKey = "TR"
 			layerValue = c.object.TR
 		case d2enum.CompositeTypeLegs:
-			layerKey = "LG"
 			layerValue = c.object.LG
 		case d2enum.CompositeTypeRightArm:
-			layerKey = "RA"
 			layerValue = c.object.RA
 		case d2enum.CompositeTypeLeftArm:
-			layerKey = "LA"
 			layerValue = c.object.LA
 		case d2enum.CompositeTypeRightHand:
-			layerKey = "RH"
 			layerValue = c.object.RH
 		case d2enum.CompositeTypeLeftHand:
-			layerKey = "LH"
 			layerValue = c.object.LH
 		case d2enum.CompositeTypeShield:
-			layerKey = "SH"
 			layerValue = c.object.SH
 		case d2enum.CompositeTypeSpecial1:
-			layerKey = "S1"
 			layerValue = c.object.S1
 		case d2enum.CompositeTypeSpecial2:
-			layerKey = "S2"
 			layerValue = c.object.S2
 		case d2enum.CompositeTypeSpecial3:
-			layerKey = "S3"
 			layerValue = c.object.S3
 		case d2enum.CompositeTypeSpecial4:
-			layerKey = "S4"
 			layerValue = c.object.S4
 		case d2enum.CompositeTypeSpecial5:
-			layerKey = "S5"
 			layerValue = c.object.S5
 		case d2enum.CompositeTypeSpecial6:
-			layerKey = "S6"
 			layerValue = c.object.S6
 		case d2enum.CompositeTypeSpecial7:
-			layerKey = "S7"
 			layerValue = c.object.S7
 		case d2enum.CompositeTypeSpecial8:
-			layerKey = "S8"
 			layerValue = c.object.S8
 		default:
 			return nil, errors.New("unknown layer type")
@@ -229,12 +227,14 @@ func (c *Composite) createMode(animationMode, weaponClass string, direction int)
 			}
 		}
 
-		layer, err := loadCompositeLayer(c.object, layerKey, layerValue, animationMode, weaponClass, c.palettePath, transparency)
+		layer, err := loadCompositeLayer(c.object, cofLayer.Type.String(), layerValue, animationMode, weaponClass, c.palettePath, transparency)
 		if err == nil {
 			layer.SetPlaySpeed(mode.animationSpeed)
 			layer.PlayForward()
 			layer.SetBlend(blend)
-			layer.SetDirection(direction)
+			if err := layer.SetDirection(direction); err != nil {
+				return nil, err
+			}
 			mode.layers[cofLayer.Type] = layer
 		}
 	}

@@ -8,12 +8,12 @@ import (
 	"path"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -33,15 +33,18 @@ type Credits struct {
 	cycleTime          float64
 	cyclesTillNextLine int
 	doneWithCredits    bool
+	audioProvider      d2interface.AudioProvider
+	terminal           d2interface.Terminal
 }
 
 // CreateCredits creates an instance of the credits screen
-func CreateCredits() *Credits {
+func CreateCredits(audioProvider d2interface.AudioProvider) *Credits {
 	result := &Credits{
 		labels:             make([]*labelItem, 0),
 		cycleTime:          0,
 		doneWithCredits:    false,
 		cyclesTillNextLine: 0,
+		audioProvider:      audioProvider,
 	}
 	return result
 }
@@ -64,32 +67,38 @@ func (v *Credits) LoadContributors() []string {
 	return contributors
 }
 
-// Load is called to load the resources for the credits screen
-func (v *Credits) OnLoad() error {
+// OnLoad is called to load the resources for the credits screen
+func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 	animation, _ := d2asset.LoadAnimation(d2resource.CreditsBackground, d2resource.PaletteSky)
 	v.creditsBackground, _ = d2ui.LoadSprite(animation)
 	v.creditsBackground.SetPosition(0, 0)
+	loading.Progress(0.2)
 
-	v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, d2common.TranslateString("#970"))
+	v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, "EXIT")
 	v.exitButton.SetPosition(33, 543)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 	d2ui.AddWidget(&v.exitButton)
+	loading.Progress(0.4)
 
 	fileData, err := d2asset.LoadFile(d2resource.CreditsText)
 	if err != nil {
-		return err
+		loading.Error(err)
+		return
 	}
-	creditData, _ := dh.Utf16BytesToString(fileData[2:])
+	loading.Progress(0.6)
+
+	creditData, _ := d2common.Utf16BytesToString(fileData[2:])
 	v.creditsText = strings.Split(creditData, "\r\n")
 	for i := range v.creditsText {
 		v.creditsText[i] = strings.Trim(v.creditsText[i], " ")
 	}
+	loading.Progress(0.8)
+
 	v.creditsText = append(v.LoadContributors(), v.creditsText...)
-	return nil
 }
 
 // Render renders the credits screen
-func (v *Credits) Render(screen d2render.Surface) error {
+func (v *Credits) Render(screen d2interface.Surface) error {
 	v.creditsBackground.RenderSegmented(screen, 4, 3, 0)
 	for _, label := range v.labels {
 		if label.Available {
@@ -129,7 +138,7 @@ func (v *Credits) Advance(tickTime float64) error {
 }
 
 func (v *Credits) onExitButtonClicked() {
-	mainMenu := CreateMainMenu()
+	mainMenu := CreateMainMenu(v.audioProvider, v.terminal)
 	mainMenu.SetScreenMode(ScreenModeMainMenu)
 	d2screen.SetNextScreen(mainMenu)
 }

@@ -27,11 +27,14 @@ func (pm *paletteManager) loadPalette(palettePath string) (*d2dat.DATPalette, er
 		return nil, err
 	}
 
-	palette, err := d2dat.LoadDAT(paletteData)
+	palette, err := d2dat.Load(paletteData)
 	if err != nil {
 		return nil, err
 	}
 
-	pm.cache.Insert(palettePath, palette, 1)
+	if err := pm.cache.Insert(palettePath, palette, 1); err != nil {
+		return nil, err
+	}
+
 	return palette, nil
 }

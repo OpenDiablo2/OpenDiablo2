@@ -4,19 +4,26 @@ import (
 	"log"
 	"strings"
 
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // An ObjectRecord represents the settings for one type of object from objects.txt
 type ObjectRecord struct {
+	FrameCount    [8]int // how many frames does this mode have, 0 = skip
+	FrameDelta    [8]int // what rate is the animation played at (256 = 100% speed)
+	LightDiameter [8]int
+
+	StartFrame [8]int
+
+	OrderFlag   [8]int //  0 = object, 1 = floor, 2 = wall
+	Parm        [8]int // unknown
 	Name        string
 	Description string
-	Id          int
 	Token       string // refers to what graphics this object uses
 
-	SpawnMax        int     // unused?
-	Selectable      [8]bool // is this mode selectable
-	TrapProbability int     // unused
+	Id              int //nolint:golint it's ok that it's called Id
+	SpawnMax        int // unused?
+	TrapProbability int // unused
 
 	SizeX int
 	SizeY int
@@ -26,42 +33,11 @@ type ObjectRecord struct {
 	NTgtBX int // unknown
 	NTgtBY int // unknown
 
-	FrameCount     [8]int  // how many frames does this mode have, 0 = skip
-	FrameDelta     [8]int  // what rate is the animation played at (256 = 100% speed)
-	CycleAnimation [8]bool // probably whether animation loops
-	LightDiameter  [8]int
-	BlocksLight    [8]bool
-	HasCollision   [8]bool
-	IsAttackable   bool // do we kick it when interacting
-	StartFrame     [8]int
-
-	EnvEffect       bool // unknown
-	IsDoor          bool
-	BlockVisibility bool // only works with IsDoor
-	Orientation     int  // unknown (1=sw, 2=nw, 3=se, 4=ne)
-	Trans           int  // controls palette mapping
-
-	OrderFlag        [8]int  //  0 = object, 1 = floor, 2 = wall
-	PreOperate       bool    // unknown
-	HasAnimationMode [8]bool // 'Mode' in source, true if this mode is used
+	Orientation int // unknown (1=sw, 2=nw, 3=se, 4=ne)
+	Trans       int // controls palette mapping
 
 	XOffset int // in pixels offset
 	YOffset int
-	Draw    bool // if false, object isn't drawn (shadow is still drawn and player can still select though)
-
-	LightRed   byte // if lightdiameter is set, rgb of the light
-	LightGreen byte
-	LightBlue  byte
-
-	SelHD bool // whether these DCC components are selectable
-	SelTR bool
-	SelLG bool
-	SelRA bool
-	SelLA bool
-	SelRH bool
-	SelLH bool
-	SelSH bool
-	SelS  [8]bool
 
 	TotalPieces int // selectable DCC components count
 	SubClass    int // subclass of object:
@@ -79,21 +55,12 @@ type ObjectRecord struct {
 
 	NameOffset int // pixels to offset the name from the animation pivot
 
-	MonsterOk      bool // unknown
-	OperateRange   int  // distance object can be used from, might be unused
-	ShrineFunction int  // unused
-	Restore        bool // if true, object is stored in memory and will be retained if you leave and re-enter the area
+	OperateRange   int // distance object can be used from, might be unused
+	ShrineFunction int // unused
 
-	Parm           [8]int // unknown
-	Act            int    // what acts this object can appear in (15 = all three)
-	Lockable       bool
-	Gore           bool // unknown, something with corpses
-	Sync           bool // unknown
-	Flicker        bool // light flickers if true
-	Damage         int  // amount of damage done by this (used depending on operatefn)
-	Beta           bool // if true, appeared in the beta?
-	Overlay        bool // unknown
-	CollisionSubst bool // unknown, controls some kind of special collision checking?
+	Act int // what acts this object can appear in (15 = all three)
+
+	Damage int // amount of damage done by this (used depending on operatefn)
 
 	Left   int // unknown, clickable bounding box?
 	Top    int
@@ -110,15 +77,50 @@ type ObjectRecord struct {
 	ClientFn int // controls special audio-visual functions
 	// (see above todo)
 
-	RestoreVirgins bool // if true, only restores unused objects (see Restore)
-	BlockMissile   bool // if true, missiles collide with this
-	DrawUnder      bool // if true, drawn as a floor tile is
-	OpenWarp       bool // needs clarification, controls whether highlighting shows
 	// 'To ...' or 'trap door' when highlighting, not sure which is T/F
 	AutoMap int // controls how this object appears on the map
 	// 0 = it doesn't, rest of modes need to be analyzed
+
+	CycleAnimation   [8]bool // probably whether animation loops
+	Selectable       [8]bool // is this mode selectable
+	BlocksLight      [8]bool
+	HasCollision     [8]bool
+	HasAnimationMode [8]bool // 'Mode' in source, true if this mode is used
+	SelS             [8]bool
+	IsAttackable     bool // do we kick it when interacting
+	EnvEffect        bool // unknown
+	IsDoor           bool
+	BlockVisibility  bool // only works with IsDoor
+	PreOperate       bool // unknown
+	Draw             bool // if false, object isn't drawn (shadow is still drawn and player can still select though)
+	SelHD            bool // whether these DCC components are selectable
+	SelTR            bool
+	SelLG            bool
+	SelRA            bool
+	SelLA            bool
+	SelRH            bool
+	SelLH            bool
+	SelSH            bool
+	MonsterOk        bool // unknown
+	Restore          bool // if true, object is stored in memory and will be retained if you leave and re-enter the area
+	Lockable         bool
+	Gore             bool // unknown, something with corpses
+	Sync             bool // unknown
+	Flicker          bool // light flickers if true
+	Beta             bool // if true, appeared in the beta?
+	Overlay          bool // unknown
+	CollisionSubst   bool // unknown, controls some kind of special collision checking?
+	RestoreVirgins   bool // if true, only restores unused objects (see Restore)
+	BlockMissile     bool // if true, missiles collide with this
+	DrawUnder        bool // if true, drawn as a floor tile is
+	OpenWarp         bool // needs clarification, controls whether highlighting shows
+
+	LightRed   byte // if lightdiameter is set, rgb of the light
+	LightGreen byte
+	LightBlue  byte
 }
 
+//nolint:funlen // Makes no sense to split
 // CreateObjectRecord parses a row from objects.txt into an object record
 func createObjectRecord(props []string) ObjectRecord {
 	i := -1
@@ -129,225 +131,234 @@ func createObjectRecord(props []string) ObjectRecord {
 	result := ObjectRecord{
 		Name:        props[inc()],
 		Description: props[inc()],
-		Id:          dh.StringToInt(props[inc()]),
+		Id:          d2common.StringToInt(props[inc()]),
 		Token:       props[inc()],
 
-		SpawnMax: dh.StringToInt(props[inc()]),
+		SpawnMax: d2common.StringToInt(props[inc()]),
 		Selectable: [8]bool{
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
 		},
-		TrapProbability: dh.StringToInt(props[inc()]),
+		TrapProbability: d2common.StringToInt(props[inc()]),
 
-		SizeX: dh.StringToInt(props[inc()]),
-		SizeY: dh.StringToInt(props[inc()]),
+		SizeX: d2common.StringToInt(props[inc()]),
+		SizeY: d2common.StringToInt(props[inc()]),
 
-		NTgtFX: dh.StringToInt(props[inc()]),
-		NTgtFY: dh.StringToInt(props[inc()]),
-		NTgtBX: dh.StringToInt(props[inc()]),
-		NTgtBY: dh.StringToInt(props[inc()]),
+		NTgtFX: d2common.StringToInt(props[inc()]),
+		NTgtFY: d2common.StringToInt(props[inc()]),
+		NTgtBX: d2common.StringToInt(props[inc()]),
+		NTgtBY: d2common.StringToInt(props[inc()]),
 
 		FrameCount: [8]int{
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
 		},
 		FrameDelta: [8]int{
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
 		},
 		CycleAnimation: [8]bool{
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
 		},
 		LightDiameter: [8]int{
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
 		},
 		BlocksLight: [8]bool{
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
 		},
 		HasCollision: [8]bool{
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
 		},
-		IsAttackable: dh.StringToUint8(props[inc()]) == 1,
+		IsAttackable: d2common.StringToUint8(props[inc()]) == 1,
 		StartFrame: [8]int{
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
 		},
 
-		EnvEffect:       dh.StringToUint8(props[inc()]) == 1,
-		IsDoor:          dh.StringToUint8(props[inc()]) == 1,
-		BlockVisibility: dh.StringToUint8(props[inc()]) == 1,
-		Orientation:     dh.StringToInt(props[inc()]),
-		Trans:           dh.StringToInt(props[inc()]),
+		EnvEffect:       d2common.StringToUint8(props[inc()]) == 1,
+		IsDoor:          d2common.StringToUint8(props[inc()]) == 1,
+		BlockVisibility: d2common.StringToUint8(props[inc()]) == 1,
+		Orientation:     d2common.StringToInt(props[inc()]),
+		Trans:           d2common.StringToInt(props[inc()]),
 
 		OrderFlag: [8]int{
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
 		},
-		PreOperate: dh.StringToUint8(props[inc()]) == 1,
+		PreOperate: d2common.StringToUint8(props[inc()]) == 1,
 		HasAnimationMode: [8]bool{
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
 		},
 
-		XOffset: dh.StringToInt(props[inc()]),
-		YOffset: dh.StringToInt(props[inc()]),
-		Draw:    dh.StringToUint8(props[inc()]) == 1,
+		XOffset: d2common.StringToInt(props[inc()]),
+		YOffset: d2common.StringToInt(props[inc()]),
+		Draw:    d2common.StringToUint8(props[inc()]) == 1,
 
-		LightRed:   dh.StringToUint8(props[inc()]),
-		LightGreen: dh.StringToUint8(props[inc()]),
-		LightBlue:  dh.StringToUint8(props[inc()]),
+		LightRed:   d2common.StringToUint8(props[inc()]),
+		LightGreen: d2common.StringToUint8(props[inc()]),
+		LightBlue:  d2common.StringToUint8(props[inc()]),
 
-		SelHD: dh.StringToUint8(props[inc()]) == 1,
-		SelTR: dh.StringToUint8(props[inc()]) == 1,
-		SelLG: dh.StringToUint8(props[inc()]) == 1,
-		SelRA: dh.StringToUint8(props[inc()]) == 1,
-		SelLA: dh.StringToUint8(props[inc()]) == 1,
-		SelRH: dh.StringToUint8(props[inc()]) == 1,
-		SelLH: dh.StringToUint8(props[inc()]) == 1,
-		SelSH: dh.StringToUint8(props[inc()]) == 1,
+		SelHD: d2common.StringToUint8(props[inc()]) == 1,
+		SelTR: d2common.StringToUint8(props[inc()]) == 1,
+		SelLG: d2common.StringToUint8(props[inc()]) == 1,
+		SelRA: d2common.StringToUint8(props[inc()]) == 1,
+		SelLA: d2common.StringToUint8(props[inc()]) == 1,
+		SelRH: d2common.StringToUint8(props[inc()]) == 1,
+		SelLH: d2common.StringToUint8(props[inc()]) == 1,
+		SelSH: d2common.StringToUint8(props[inc()]) == 1,
 		SelS: [8]bool{
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
-			dh.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
+			d2common.StringToUint8(props[inc()]) == 1,
 		},
 
-		TotalPieces: dh.StringToInt(props[inc()]),
-		SubClass:    dh.StringToInt(props[inc()]),
+		TotalPieces: d2common.StringToInt(props[inc()]),
+		SubClass:    d2common.StringToInt(props[inc()]),
 
-		XSpace: dh.StringToInt(props[inc()]),
-		YSpace: dh.StringToInt(props[inc()]),
+		XSpace: d2common.StringToInt(props[inc()]),
+		YSpace: d2common.StringToInt(props[inc()]),
 
-		NameOffset: dh.StringToInt(props[inc()]),
+		NameOffset: d2common.StringToInt(props[inc()]),
 
-		MonsterOk:      dh.StringToUint8(props[inc()]) == 1,
-		OperateRange:   dh.StringToInt(props[inc()]),
-		ShrineFunction: dh.StringToInt(props[inc()]),
-		Restore:        dh.StringToUint8(props[inc()]) == 1,
+		MonsterOk:      d2common.StringToUint8(props[inc()]) == 1,
+		OperateRange:   d2common.StringToInt(props[inc()]),
+		ShrineFunction: d2common.StringToInt(props[inc()]),
+		Restore:        d2common.StringToUint8(props[inc()]) == 1,
 
 		Parm: [8]int{
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
-			dh.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
+			d2common.StringToInt(props[inc()]),
 		},
-		Act:            dh.StringToInt(props[inc()]),
-		Lockable:       dh.StringToUint8(props[inc()]) == 1,
-		Gore:           dh.StringToUint8(props[inc()]) == 1,
-		Sync:           dh.StringToUint8(props[inc()]) == 1,
-		Flicker:        dh.StringToUint8(props[inc()]) == 1,
-		Damage:         dh.StringToInt(props[inc()]),
-		Beta:           dh.StringToUint8(props[inc()]) == 1,
-		Overlay:        dh.StringToUint8(props[inc()]) == 1,
-		CollisionSubst: dh.StringToUint8(props[inc()]) == 1,
+		Act:            d2common.StringToInt(props[inc()]),
+		Lockable:       d2common.StringToUint8(props[inc()]) == 1,
+		Gore:           d2common.StringToUint8(props[inc()]) == 1,
+		Sync:           d2common.StringToUint8(props[inc()]) == 1,
+		Flicker:        d2common.StringToUint8(props[inc()]) == 1,
+		Damage:         d2common.StringToInt(props[inc()]),
+		Beta:           d2common.StringToUint8(props[inc()]) == 1,
+		Overlay:        d2common.StringToUint8(props[inc()]) == 1,
+		CollisionSubst: d2common.StringToUint8(props[inc()]) == 1,
 
-		Left:   dh.StringToInt(props[inc()]),
-		Top:    dh.StringToInt(props[inc()]),
-		Width:  dh.StringToInt(props[inc()]),
-		Height: dh.StringToInt(props[inc()]),
+		Left:   d2common.StringToInt(props[inc()]),
+		Top:    d2common.StringToInt(props[inc()]),
+		Width:  d2common.StringToInt(props[inc()]),
+		Height: d2common.StringToInt(props[inc()]),
 
-		OperateFn:  dh.StringToInt(props[inc()]),
-		PopulateFn: dh.StringToInt(props[inc()]),
-		InitFn:     dh.StringToInt(props[inc()]),
-		ClientFn:   dh.StringToInt(props[inc()]),
+		OperateFn:  d2common.StringToInt(props[inc()]),
+		PopulateFn: d2common.StringToInt(props[inc()]),
+		InitFn:     d2common.StringToInt(props[inc()]),
+		ClientFn:   d2common.StringToInt(props[inc()]),
 
-		RestoreVirgins: dh.StringToUint8(props[inc()]) == 1,
-		BlockMissile:   dh.StringToUint8(props[inc()]) == 1,
-		DrawUnder:      dh.StringToUint8(props[inc()]) == 1,
-		OpenWarp:       dh.StringToUint8(props[inc()]) == 1,
+		RestoreVirgins: d2common.StringToUint8(props[inc()]) == 1,
+		BlockMissile:   d2common.StringToUint8(props[inc()]) == 1,
+		DrawUnder:      d2common.StringToUint8(props[inc()]) == 1,
+		OpenWarp:       d2common.StringToUint8(props[inc()]) == 1,
 
-		AutoMap: dh.StringToInt(props[inc()]),
+		AutoMap: d2common.StringToInt(props[inc()]),
 	}
+
 	return result
 }
 
+// Objects stores all of the ObjectRecords
+//nolint:gochecknoglobals // Currently global by design, only written once
 var Objects map[int]*ObjectRecord
 
+// LoadObjects loads all objects from objects.txt
 func LoadObjects(file []byte) {
 	Objects = make(map[int]*ObjectRecord)
 	data := strings.Split(string(file), "\r\n")[1:]
+
 	for _, line := range data {
-		if len(line) == 0 {
+		if line == "" {
 			continue
 		}
+
 		props := strings.Split(line, "\t")
+
 		if props[2] == "" {
 			continue // skip a line that doesn't have an id
 		}
+
 		rec := createObjectRecord(props)
 		Objects[rec.Id] = &rec
 	}
+
 	log.Printf("Loaded %d objects", len(Objects))
 }

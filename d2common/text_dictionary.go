@@ -19,7 +19,9 @@ var lookupTable map[string]string
 func TranslateString(key string) string {
 	result, ok := lookupTable[key]
 	if !ok {
-		log.Panicf("Could not find a string for the key '%s'", key)
+		// Fix to allow v.setDescLabels("#123") to be bypassed for a patch in issue #360. Reenable later.
+		// log.Panicf("Could not find a string for the key '%s'", key)
+		return key
 	}
 	return result
 }
@@ -31,15 +33,17 @@ func GetDictionaryEntryCount() int {
 	return len(lookupTable)
 }
 
-func LoadDictionary(dictionaryData []byte) {
+func GetTranslationMap() map[string]string {
+	return lookupTable
+}
+
+func LoadTextDictionary(dictionaryData []byte) {
 	if lookupTable == nil {
 		lookupTable = make(map[string]string)
 	}
 	br := CreateStreamReader(dictionaryData)
 	// CRC
-	if _, err := br.ReadBytes(2); err != nil {
-		log.Fatal("Error reading CRC")
-	}
+	br.ReadBytes(2)
 	numberOfElements := br.GetUInt16()
 	hashTableSize := br.GetUInt32()
 	// Version (always 0)
@@ -72,7 +76,7 @@ func LoadDictionary(dictionaryData []byte) {
 			continue
 		}
 		br.SetPosition(uint64(hashEntry.NameString))
-		nameVal, _ := br.ReadBytes(int(hashEntry.NameLength - 1))
+		nameVal := br.ReadBytes(int(hashEntry.NameLength - 1))
 		value := string(nameVal)
 		br.SetPosition(uint64(hashEntry.IndexString))
 		key := ""

@@ -1,6 +1,8 @@
 package d2ui
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
@@ -11,8 +13,8 @@ type Checkbox struct {
 	checkState    bool
 	visible       bool
 	width, height int
-	Image         d2render.Surface
-	checkedImage  d2render.Surface
+	Image         d2interface.Surface
+	checkedImage  d2interface.Surface
 	onClick       func()
 	enabled       bool
 }
@@ -31,18 +33,18 @@ func CreateCheckbox(checkState bool) Checkbox {
 	result.width, result.height, _ = checkboxSprite.GetFrameSize(0)
 	checkboxSprite.SetPosition(0, 0)
 
-	result.Image, _ = d2render.NewSurface(result.width, result.height, d2render.FilterNearest)
+	result.Image, _ = d2render.NewSurface(result.width, result.height, d2interface.FilterNearest)
 	checkboxSprite.RenderSegmented(result.Image, 1, 1, 0)
 
-	result.checkedImage, _ = d2render.NewSurface(result.width, result.height, d2render.FilterNearest)
+	result.checkedImage, _ = d2render.NewSurface(result.width, result.height, d2interface.FilterNearest)
 	checkboxSprite.RenderSegmented(result.checkedImage, 1, 1, 1)
 	return result
 }
 
-func (v *Checkbox) Render(target d2render.Surface) {
-	target.PushCompositeMode(d2render.CompositeModeSourceAtop)
+func (v *Checkbox) Render(target d2interface.Surface) {
+	target.PushCompositeMode(d2enum.CompositeModeSourceAtop)
 	target.PushTranslation(v.x, v.y)
-	target.PushFilter(d2render.FilterNearest)
+	target.PushFilter(d2interface.FilterNearest)
 	defer target.PopN(3)
 
 	if v.checkState {

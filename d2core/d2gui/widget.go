@@ -1,15 +1,15 @@
 package d2gui
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type MouseHandler func(d2input.MouseEvent)
 type MouseMoveHandler func(d2input.MouseMoveEvent)
 
 type widget interface {
-	render(target d2render.Surface) error
+	render(target d2interface.Surface) error
 	advance(elapsed float64) error
 
 	onMouseMove(event d2input.MouseMoveEvent) bool
@@ -21,6 +21,7 @@ type widget interface {
 	onMouseButtonClick(event d2input.MouseEvent) bool
 
 	getPosition() (int, int)
+	setOffset(x, y int)
 	getSize() (int, int)
 	getLayer() int
 	isVisible() bool
@@ -34,6 +35,9 @@ type widgetBase struct {
 	visible   bool
 	expanding bool
 
+	offsetX int
+	offsetY int
+
 	mouseEnterHandler MouseMoveHandler
 	mouseLeaveHandler MouseMoveHandler
 	mouseClickHandler MouseHandler
@@ -42,6 +46,19 @@ type widgetBase struct {
 func (w *widgetBase) SetPosition(x, y int) {
 	w.x = x
 	w.y = y
+}
+
+func (w *widgetBase) GetPosition() (int, int) {
+	return w.x, w.y
+}
+
+func (w *widgetBase) GetOffset() (int, int) {
+	return w.offsetX, w.offsetY
+}
+
+func (w *widgetBase) setOffset(x, y int) {
+	w.offsetX = x
+	w.offsetY = y
 }
 
 func (w *widgetBase) SetLayer(layer int) {
@@ -88,7 +105,7 @@ func (w *widgetBase) isExpanding() bool {
 	return w.expanding
 }
 
-func (w *widgetBase) render(target d2render.Surface) error {
+func (w *widgetBase) render(target d2interface.Surface) error {
 	return nil
 }
 

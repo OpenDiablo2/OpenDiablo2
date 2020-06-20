@@ -17,7 +17,7 @@ type archiveEntry struct {
 
 type archiveManager struct {
 	cache   *d2common.Cache
-	config  d2config.Configuration
+	config  *d2config.Configuration
 	entries []archiveEntry
 	mutex   sync.Mutex
 }
@@ -26,7 +26,7 @@ const (
 	archiveBudget = 1024 * 1024 * 512
 )
 
-func createArchiveManager(config d2config.Configuration) *archiveManager {
+func createArchiveManager(config *d2config.Configuration) *archiveManager {
 	return &archiveManager{cache: d2common.CreateCache(archiveBudget), config: config}
 }
 
@@ -40,7 +40,10 @@ func (am *archiveManager) loadArchiveForFile(filePath string) (*d2mpq.MPQ, error
 
 	for _, archiveEntry := range am.entries {
 		if archiveEntry.hashEntryMap.Contains(filePath) {
-			return am.loadArchive(archiveEntry.archivePath)
+			result, ok := am.loadArchive(archiveEntry.archivePath)
+			if ok == nil {
+				return result, nil
+			}
 		}
 	}
 
@@ -90,6 +93,7 @@ func (am *archiveManager) cacheArchiveEntries() error {
 
 	for _, archiveName := range am.config.MpqLoadOrder {
 		archivePath := path.Join(am.config.MpqPath, archiveName)
+
 		archive, err := am.loadArchive(archivePath)
 		if err != nil {
 			return err

@@ -1,6 +1,6 @@
 package d2dt1
 
-// Lots of unknowns for now
+// MaterialFlags represents the material flags. Lots of unknowns for now...
 type MaterialFlags struct {
 	Other        bool
 	Water        bool
@@ -14,6 +14,8 @@ type MaterialFlags struct {
 	Snow         bool
 }
 
+// NewMaterialFlags  represents the material flags
+// nolint:gomnd Binary values
 func NewMaterialFlags(data uint16) MaterialFlags {
 	return MaterialFlags{
 		Other:        data&0x0001 == 0x0001,

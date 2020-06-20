@@ -9,6 +9,6 @@ import (
 var Weapons map[string]*ItemCommonRecord
 
 func LoadWeapons(file []byte) {
-	Weapons = *LoadCommonItems(file, d2enum.InventoryItemTypeWeapon)
+	Weapons = LoadCommonItems(file, d2enum.InventoryItemTypeWeapon)
 	log.Printf("Loaded %d weapons", len(Weapons))
 }

@@ -3,28 +3,34 @@ package d2dcc
 import (
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// DCCDirectionFrame represents a direction frame for a DCC.
 type DCCDirectionFrame struct {
+	Box                   d2common.Rectangle
+	Cells                 []DCCCell
+	PixelData             []byte
 	Width                 int
 	Height                int
 	XOffset               int
 	YOffset               int
 	NumberOfOptionalBytes int
 	NumberOfCodedBytes    int
-	FrameIsBottomUp       bool
-	Box                   d2common.Rectangle
-	Cells                 []DCCCell
-	PixelData             []byte
 	HorizontalCellCount   int
 	VerticalCellCount     int
+	FrameIsBottomUp       bool
 	valid                 bool
 }
 
-func CreateDCCDirectionFrame(bits *d2common.BitMuncher, direction DCCDirection) *DCCDirectionFrame {
+// CreateDCCDirectionFrame Creates a DCCDirectionFrame for a DCC.
+func CreateDCCDirectionFrame(bits d2interface.BitMuncher, direction *DCCDirection) *DCCDirectionFrame {
 	result := &DCCDirectionFrame{}
+
 	bits.GetBits(direction.Variable0Bits) // Variable0
+
 	result.Width = int(bits.GetBits(direction.WidthBits))
 	result.Height = int(bits.GetBits(direction.HeightBits))
 	result.XOffset = bits.GetSignedBits(direction.XOffsetBits)
@@ -32,6 +38,7 @@ func CreateDCCDirectionFrame(bits *d2common.BitMuncher, direction DCCDirection) 
 	result.NumberOfOptionalBytes = int(bits.GetBits(direction.OptionalDataBits))
 	result.NumberOfCodedBytes = int(bits.GetBits(direction.CodedBytesBits))
 	result.FrameIsBottomUp = bits.GetBit() == 1
+
 	if result.FrameIsBottomUp {
 		log.Panic("Bottom up frames are not implemented.")
 	} else {
@@ -42,27 +49,33 @@ func CreateDCCDirectionFrame(bits *d2common.BitMuncher, direction DCCDirection) 
 			Height: result.Height,
 		}
 	}
+
 	result.valid = true
+
 	return result
 }
 
-func (v *DCCDirectionFrame) CalculateCells(direction DCCDirection) {
+func (v *DCCDirectionFrame) recalculateCells(direction *DCCDirection) {
 	var w = 4 - ((v.Box.Left - direction.Box.Left) % 4) // Width of the first column (in pixels)
+
 	if (v.Width - w) <= 1 {
 		v.HorizontalCellCount = 1
 	} else {
 		tmp := v.Width - w - 1
-		v.HorizontalCellCount = 2 + (tmp / 4)
+		v.HorizontalCellCount = 2 + (tmp / 4) //nolint:gomnd magic math
 		if (tmp % 4) == 0 {
 			v.HorizontalCellCount--
 		}
 	}
-	h := 4 - ((v.Box.Top - direction.Box.Top) % 4) // Height of the first column (in pixels)
+
+	// Height of the first column (in pixels)
+	h := 4 - ((v.Box.Top - direction.Box.Top) % 4) //nolint:gomnd data decode
+
 	if (v.Height - h) <= 1 {
 		v.VerticalCellCount = 1
 	} else {
 		tmp := v.Height - h - 1
-		v.VerticalCellCount = 2 + (tmp / 4)
+		v.VerticalCellCount = 2 + (tmp / 4) //nolint:gomnd data decode
 		if (tmp % 4) == 0 {
 			v.VerticalCellCount--
 		}
@@ -92,8 +105,10 @@ func (v *DCCDirectionFrame) CalculateCells(direction DCCDirection) {
 
 	v.Cells = make([]DCCCell, v.HorizontalCellCount*v.VerticalCellCount)
 	offsetY := v.Box.Top - direction.Box.Top
+
 	for y := 0; y < v.VerticalCellCount; y++ {
 		offsetX := v.Box.Left - direction.Box.Left
+
 		for x := 0; x < v.HorizontalCellCount; x++ {
 			v.Cells[x+(y*v.HorizontalCellCount)] = DCCCell{
 				XOffset: offsetX,
@@ -101,8 +116,10 @@ func (v *DCCDirectionFrame) CalculateCells(direction DCCDirection) {
 				Width:   cellWidths[x],
 				Height:  cellHeights[y],
 			}
+
 			offsetX += cellWidths[x]
 		}
+
 		offsetY += cellHeights[y]
 	}
 }

@@ -8,34 +8,32 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
-var MagicPrefixDictionary *d2common.DataDictionary
-var MagicSuffixDictionary *d2common.DataDictionary
+// MagicPrefix + MagicSuffix store item affix records
+var MagicPrefix []*ItemAffixCommonRecord //nolint:gochecknoglobals // Currently global by design
+var MagicSuffix []*ItemAffixCommonRecord //nolint:gochecknoglobals // Currently global by design
 
-var MagicPrefixRecords []*ItemAffixCommonRecord
-var MagicSuffixRecords []*ItemAffixCommonRecord
-
-var AffixMagicGroups []*ItemAffixCommonGroup
-
-var superType d2enum.ItemAffixSuperType
-var subType d2enum.ItemAffixSubType
-
+// LoadMagicPrefix loads MagicPrefix.txt
 func LoadMagicPrefix(file []byte) {
-	superType = d2enum.ItemAffixPrefix
-	subType = d2enum.ItemAffixMagic
-	loadDictionary(file, MagicPrefixDictionary, superType, subType)
+	superType := d2enum.ItemAffixPrefix
+
+	subType := d2enum.ItemAffixMagic
+
+	MagicPrefix = loadDictionary(file, superType, subType)
 }
 
+// LoadMagicSuffix loads MagicSuffix.txt
 func LoadMagicSuffix(file []byte) {
-	superType = d2enum.ItemAffixSuffix
-	subType = d2enum.ItemAffixMagic
-	loadDictionary(file, MagicSuffixDictionary, superType, subType)
+	superType := d2enum.ItemAffixSuffix
+
+	subType := d2enum.ItemAffixMagic
+
+	MagicSuffix = loadDictionary(file, superType, subType)
 }
 
 func getAffixString(t1 d2enum.ItemAffixSuperType, t2 d2enum.ItemAffixSubType) string {
-	var name string = ""
+	var name = ""
 
-	switch t2 {
-	case d2enum.ItemAffixMagic:
+	if t2 == d2enum.ItemAffixMagic {
 		name = "Magic"
 	}
 
@@ -47,74 +45,29 @@ func getAffixString(t1 d2enum.ItemAffixSuperType, t2 d2enum.ItemAffixSubType) st
 	}
 
 	return name
-
 }
 
 func loadDictionary(
 	file []byte,
-	dict *d2common.DataDictionary,
 	superType d2enum.ItemAffixSuperType,
 	subType d2enum.ItemAffixSubType,
-) {
-	dict = d2common.LoadDataDictionary(string(file))
-	records := make([]*ItemAffixCommonRecord, 0)
-
-	createItemAffixRecords(dict, records, superType, subType)
+) []*ItemAffixCommonRecord {
+	dict := d2common.LoadDataDictionary(string(file))
+	records := createItemAffixRecords(dict, superType, subType)
 	name := getAffixString(superType, subType)
 	log.Printf("Loaded %d %s records", len(dict.Data), name)
-}
 
-// --- column names from d2exp.mpq:/data/globa/excel/MagicPrefix.txt
-// Name
-// version
-// spawnable
-// rare
-// level
-// maxlevel
-// levelreq
-// classspecific
-// class
-// classlevelreq
-// frequency
-// group
-// mod1code
-// mod1param
-// mod1min
-// mod1max
-// mod2code
-// mod2param
-// mod2min
-// mod2max
-// mod3code
-// mod3param
-// mod3min
-// mod3max
-// transform
-// transformcolor
-// itype1
-// itype2
-// itype3
-// itype4
-// itype5
-// itype6
-// itype7
-// etype1
-// etype2
-// etype3
-// etype4
-// etype5
-// divide
-// multiply
-// add
+	return records
+}
 
 func createItemAffixRecords(
 	d *d2common.DataDictionary,
-	r []*ItemAffixCommonRecord,
 	superType d2enum.ItemAffixSuperType,
 	subType d2enum.ItemAffixSubType,
-) {
-	for index, _ := range d.Data {
+) []*ItemAffixCommonRecord {
+	records := make([]*ItemAffixCommonRecord, 0)
 
+	for index := range d.Data {
 		affix := &ItemAffixCommonRecord{
 			Name:           d.GetString("Name", index),
 			Version:        d.GetNumber("version", index),
@@ -177,34 +130,44 @@ func createItemAffixRecords(
 		}
 
 		group := ItemAffixGroups[affix.GroupID]
-		group.AddMember(affix)
+		group.addMember(affix)
 
-		r = append(r, affix)
+		records = append(records, affix)
 	}
+
+	return records
 }
 
-var ItemAffixGroups map[int]*ItemAffixCommonGroup
+// ItemAffixGroups are groups of MagicPrefix/Suffixes
+var ItemAffixGroups map[int]*ItemAffixCommonGroup //nolint:gochecknoglobals // Currently global by design
 
+// ItemAffixCommonGroup is a grouping that is common between prefix/suffix
 type ItemAffixCommonGroup struct {
 	ID      int
 	Members map[string]*ItemAffixCommonRecord
 }
 
-func (g *ItemAffixCommonGroup) AddMember(a *ItemAffixCommonRecord) {
+func (g *ItemAffixCommonGroup) addMember(a *ItemAffixCommonRecord) {
 	if g.Members == nil {
 		g.Members = make(map[string]*ItemAffixCommonRecord)
 	}
+
 	g.Members[a.Name] = a
 }
 
-func (g *ItemAffixCommonGroup) GetTotalFrequency() int {
+func (g *ItemAffixCommonGroup) getTotalFrequency() int {
 	total := 0
+
 	for _, affix := range g.Members {
 		total += affix.Frequency
 	}
+
 	return total
 }
 
+// ItemAffixCommonModifier is the generic modifier form that prefix/suffix shares
+// modifiers are like dynamic properties, they have a key that points to a property
+// a parameter for the property, and a min/max value
 type ItemAffixCommonModifier struct {
 	Code      string
 	Parameter int
@@ -212,44 +175,49 @@ type ItemAffixCommonModifier struct {
 	Max       int
 }
 
+// ItemAffixCommonRecord is a common definition that both prefix and suffix use
 type ItemAffixCommonRecord struct {
-	Name    string
+	Group     *ItemAffixCommonGroup
+	Modifiers []*ItemAffixCommonModifier
+
+	ItemInclude []string
+	ItemExclude []string
+
+	Name           string
+	Class          string
+	TransformColor string
+
 	Version int
 	Type    d2enum.ItemAffixSubType
+
+	Level    int
+	MaxLevel int
+
+	LevelReq      int
+	ClassLevelReq int
+
+	Frequency int
+	GroupID   int
+
+	PriceAdd   int
+	PriceScale int
 
 	IsPrefix bool
 	IsSuffix bool
 
 	Spawnable bool
 	Rare      bool
-
-	Level    int
-	MaxLevel int
-
-	LevelReq      int
-	Class         string
-	ClassLevelReq int
-
-	Frequency int
-	GroupID   int
-	Group     *ItemAffixCommonGroup
-
-	Modifiers []*ItemAffixCommonModifier
-
-	Transform      bool
-	TransformColor string
-
-	ItemInclude []string
-	ItemExclude []string
-
-	PriceAdd   int
-	PriceScale int
+	Transform bool
 }
 
+// ProbabilityToSpawn returns the chance of the affix spawning on an
+// item with a given quality level
 func (a *ItemAffixCommonRecord) ProbabilityToSpawn(qlvl int) float64 {
 	if (qlvl > a.MaxLevel) || (qlvl < a.Level) {
 		return 0.0
 	}
-	p := (float64)(a.Frequency) / (float64)(a.Group.GetTotalFrequency())
+
+	p := float64(a.Frequency) / float64(a.Group.getTotalFrequency())
+
 	return p
 }

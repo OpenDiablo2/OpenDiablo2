@@ -1,11 +1,11 @@
 package d2asset
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
@@ -16,11 +16,22 @@ const (
 type fileManager struct {
 	cache          *d2common.Cache
 	archiveManager *archiveManager
-	config         d2config.Configuration
+	config         *d2config.Configuration
 }
 
-func createFileManager(config d2config.Configuration, archiveManager *archiveManager) *fileManager {
+func createFileManager(config *d2config.Configuration, archiveManager *archiveManager) *fileManager {
 	return &fileManager{d2common.CreateCache(fileBudget), archiveManager, config}
+}
+
+func (fm *fileManager) loadFileStream(filePath string) (*d2mpq.MpqDataStream, error) {
+	filePath = fm.fixupFilePath(filePath)
+
+	archive, err := fm.archiveManager.loadArchiveForFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	return archive.ReadFileStream(filePath)
 }
 
 func (fm *fileManager) loadFile(filePath string) ([]byte, error) {
@@ -52,16 +63,22 @@ func (fm *fileManager) fileExists(filePath string) (bool, error) {
 }
 
 func (fm *fileManager) fixupFilePath(filePath string) string {
-	filePath = strings.ReplaceAll(filePath, "{LANG}", fm.config.Language)
-	if strings.ToUpper(d2resource.LanguageCode) == "CHI" {
-		filePath = strings.ReplaceAll(filePath, "{LANG_FONT}", fm.config.Language)
-	} else {
-		filePath = strings.ReplaceAll(filePath, "{LANG_FONT}", "latin")
-	}
-
+	filePath = fm.removeLocaleTokens(filePath)
 	filePath = strings.ToLower(filePath)
 	filePath = strings.ReplaceAll(filePath, `/`, "\\")
 	filePath = strings.TrimPrefix(filePath, "\\")
+
+	return filePath
+}
+
+func (fm *fileManager) removeLocaleTokens(filePath string) string {
+	tableToken := d2resource.LanguageTableToken
+	fontToken := d2resource.LanguageFontToken
+
+	filePath = strings.ReplaceAll(filePath, tableToken, fm.config.Language)
+
+	// fixme: not all languages==latin
+	filePath = strings.ReplaceAll(filePath, fontToken, "latin")
 
 	return filePath
 }

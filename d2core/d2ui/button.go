@@ -4,6 +4,10 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -62,6 +66,7 @@ var ButtonLayouts = map[ButtonType]ButtonLayout{
 	ButtonTypeMedium:   {1, 1, d2resource.MediumButtonBlank, d2resource.PaletteUnits, false, 0, 0, d2resource.FontExocet10, nil, true, 0},
 	ButtonTypeTall:     {1, 1, d2resource.TallButtonBlank, d2resource.PaletteUnits, false, 0, 0, d2resource.FontExocet10, nil, true, 5},
 	ButtonTypeOkCancel: {1, 1, d2resource.CancelButton, d2resource.PaletteUnits, false, 0, -1, d2resource.FontRediculous, nil, true, 0},
+	ButtonTypeRun:      {1, 1, d2resource.RunButton, d2resource.PaletteSky, true, 0, -1, d2resource.FontRediculous, nil, true, 0},
 	/*
 		{eButtonType.Wide,  new ButtonLayout { XSegments = 2, ResourceName = ResourcePaths.WideButtonBlank, PaletteName = PaletteDefs.Units } },
 		{eButtonType.Narrow, new ButtonLayout { ResourceName = ResourcePaths.NarrowButtonBlank, PaletteName = PaletteDefs.Units } },
@@ -92,11 +97,11 @@ type Button struct {
 	visible               bool
 	pressed               bool
 	toggled               bool
-	normalSurface         d2render.Surface
-	pressedSurface        d2render.Surface
-	toggledSurface        d2render.Surface
-	pressedToggledSurface d2render.Surface
-	disabledSurface       d2render.Surface
+	normalSurface         d2interface.Surface
+	pressedSurface        d2interface.Surface
+	toggledSurface        d2interface.Surface
+	pressedToggledSurface d2interface.Surface
+	disabledSurface       d2interface.Surface
 	buttonLayout          ButtonLayout
 	onClick               func()
 }
@@ -126,7 +131,7 @@ func CreateButton(buttonType ButtonType, text string) Button {
 		result.height += h
 	}
 
-	result.normalSurface, _ = d2render.NewSurface(result.width, result.height, d2render.FilterNearest)
+	result.normalSurface, _ = d2render.NewSurface(result.width, result.height, d2interface.FilterNearest)
 	_, fontHeight := font.GetTextMetrics(text)
 	textY := (result.height / 2) - (fontHeight / 2) + buttonLayout.TextOffset
 
@@ -136,22 +141,22 @@ func CreateButton(buttonType ButtonType, text string) Button {
 	font.Render(0, textY, text, color.RGBA{R: 100, G: 100, B: 100, A: 255}, result.normalSurface)
 	if buttonLayout.AllowFrameChange {
 		if totalButtonTypes > 1 {
-			result.pressedSurface, _ = d2render.NewSurface(result.width, result.height, d2render.FilterNearest)
+			result.pressedSurface, _ = d2render.NewSurface(result.width, result.height, d2interface.FilterNearest)
 			buttonSprite.RenderSegmented(result.pressedSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+1)
 			font.Render(-2, textY+2, text, color.RGBA{R: 100, G: 100, B: 100, A: 255}, result.pressedSurface)
 		}
 		if totalButtonTypes > 2 {
-			result.toggledSurface, _ = d2render.NewSurface(result.width, result.height, d2render.FilterNearest)
+			result.toggledSurface, _ = d2render.NewSurface(result.width, result.height, d2interface.FilterNearest)
 			buttonSprite.RenderSegmented(result.toggledSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+2)
 			font.Render(0, textY, text, color.RGBA{R: 100, G: 100, B: 100, A: 255}, result.toggledSurface)
 		}
 		if totalButtonTypes > 3 {
-			result.pressedToggledSurface, _ = d2render.NewSurface(result.width, result.height, d2render.FilterNearest)
+			result.pressedToggledSurface, _ = d2render.NewSurface(result.width, result.height, d2interface.FilterNearest)
 			buttonSprite.RenderSegmented(result.pressedToggledSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+3)
 			font.Render(0, textY, text, color.RGBA{R: 100, G: 100, B: 100, A: 255}, result.pressedToggledSurface)
 		}
 		if buttonLayout.DisabledFrame != -1 {
-			result.disabledSurface, _ = d2render.NewSurface(result.width, result.height, d2render.FilterNearest)
+			result.disabledSurface, _ = d2render.NewSurface(result.width, result.height, d2interface.FilterNearest)
 			buttonSprite.RenderSegmented(result.disabledSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.DisabledFrame)
 			font.Render(0, textY, text, color.RGBA{R: 100, G: 100, B: 100, A: 255}, result.disabledSurface)
 		}
@@ -173,9 +178,9 @@ func (v *Button) Activate() {
 }
 
 // Render renders the button
-func (v *Button) Render(target d2render.Surface) {
-	target.PushCompositeMode(d2render.CompositeModeSourceAtop)
-	target.PushFilter(d2render.FilterNearest)
+func (v *Button) Render(target d2interface.Surface) {
+	target.PushCompositeMode(d2enum.CompositeModeSourceAtop)
+	target.PushFilter(d2interface.FilterNearest)
 	target.PushTranslation(v.x, v.y)
 	defer target.PopN(3)
 
@@ -194,6 +199,10 @@ func (v *Button) Render(target d2render.Surface) {
 	}
 }
 
+func (v *Button) Toggle() {
+	v.toggled = !v.toggled
+}
+
 func (v *Button) Advance(elapsed float64) {
 
 }
@@ -208,7 +217,7 @@ func (v *Button) SetEnabled(enabled bool) {
 	v.enabled = enabled
 }
 
-// GetSize returns the size of the button
+// Size returns the size of the button
 func (v *Button) GetSize() (int, int) {
 	return v.width, v.height
 }

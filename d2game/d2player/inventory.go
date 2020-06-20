@@ -1,10 +1,11 @@
 package d2player
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -49,18 +50,29 @@ func (g *Inventory) Load() {
 
 	animation, _ = d2asset.LoadAnimation(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 	g.panel, _ = d2ui.LoadSprite(animation)
-
 	items := []InventoryItem{
 		d2inventory.GetWeaponItemByCode("wnd"),
 		d2inventory.GetWeaponItemByCode("sst"),
 		d2inventory.GetWeaponItemByCode("jav"),
 		d2inventory.GetArmorItemByCode("buc"),
 		d2inventory.GetWeaponItemByCode("clb"),
+		// TODO: Load the player's actual items
 	}
+	g.grid.ChangeEquippedSlot(d2enum.LeftArm, d2inventory.GetWeaponItemByCode("wnd"))
+	g.grid.ChangeEquippedSlot(d2enum.RightArm, d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot(d2enum.Head, d2inventory.GetArmorItemByCode("crn"))
+	g.grid.ChangeEquippedSlot(d2enum.Torso, d2inventory.GetArmorItemByCode("plt"))
+	g.grid.ChangeEquippedSlot(d2enum.Legs, d2inventory.GetArmorItemByCode("vbt"))
+	g.grid.ChangeEquippedSlot(d2enum.Belt, d2inventory.GetArmorItemByCode("vbl"))
+	g.grid.ChangeEquippedSlot(d2enum.Gloves, d2inventory.GetArmorItemByCode("lgl"))
+	g.grid.ChangeEquippedSlot(d2enum.LeftHand, d2inventory.GetMiscItemByCode("rin"))
+	g.grid.ChangeEquippedSlot(d2enum.RightHand, d2inventory.GetMiscItemByCode("rin"))
+	g.grid.ChangeEquippedSlot(d2enum.Neck, d2inventory.GetMiscItemByCode("amu"))
+	// TODO: Load the player's actual items
 	g.grid.Add(items...)
 }
 
-func (g *Inventory) Render(target d2render.Surface) {
+func (g *Inventory) Render(target d2interface.Surface) {
 	if !g.isOpen {
 		return
 	}

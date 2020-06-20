@@ -21,5 +21,4 @@ func TestNewSubTile(t *testing.T) {
 		assert.Equal(i == 6, tile.Unknown2)
 		assert.Equal(i == 7, tile.Unknown3)
 	}
-
 }

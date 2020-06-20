@@ -1,5 +1,6 @@
 package d2inventory
 
+// CharacterEquipment stores equipments of a character
 type CharacterEquipment struct {
 	Head      *InventoryItemArmor  `json:"head"`      // Head
 	Torso     *InventoryItemArmor  `json:"torso"`     // TR
