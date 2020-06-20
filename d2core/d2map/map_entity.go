@@ -75,9 +75,7 @@ func (m *mapEntity) Step(tickTime float64) {
 	}
 
 	stepX, stepY := m.getStepLength(tickTime)
-	looped := false
 	for {
-		looped = looped
 		if d2common.AlmostEqual(m.LocationX-m.TargetX, 0, 0.0001) {
 			stepX = 0
 		}
@@ -114,7 +112,6 @@ func (m *mapEntity) Step(tickTime float64) {
 		if stepX == 0 && stepY == 0 {
 			break
 		}
-		looped = true
 
 	}
 }
