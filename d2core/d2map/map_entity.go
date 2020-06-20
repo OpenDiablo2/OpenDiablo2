@@ -62,7 +62,7 @@ func (m *mapEntity) getStepLength(tickTime float64) (float64, float64) {
 }
 
 func (m *mapEntity) IsAtTarget() bool {
-	return m.LocationX == m.TargetX && m.LocationY == m.TargetY && !m.HasPathFinding()
+	return math.Abs(m.LocationX-m.TargetX) < 0.0001 && math.Abs(m.LocationY-m.TargetY) < 0.0001 && !m.HasPathFinding()
 }
 
 func (m *mapEntity) Step(tickTime float64) {
@@ -75,40 +75,48 @@ func (m *mapEntity) Step(tickTime float64) {
 	}
 
 	stepX, stepY := m.getStepLength(tickTime)
-
-	if d2common.AlmostEqual(m.LocationX, m.TargetX, stepX) {
-		m.LocationX = m.TargetX
-	}
-	if d2common.AlmostEqual(m.LocationY, m.TargetY, stepY) {
-		m.LocationY = m.TargetY
-	}
-	if m.LocationX != m.TargetX {
-		m.LocationX += stepX
-	}
-	if m.LocationY != m.TargetY {
-		m.LocationY += stepY
-	}
-
-	m.subcellX = 1 + math.Mod(m.LocationX, 5)
-	m.subcellY = 1 + math.Mod(m.LocationY, 5)
-	m.TileX = int(m.LocationX / 5)
-	m.TileY = int(m.LocationY / 5)
-
-	if (m.LocationX != m.TargetX) || (m.LocationY != m.TargetY) {
-		return
-	}
-
-	if len(m.path) > 0 {
-		m.SetTarget(m.path[0].(*PathTile).X*5, m.path[0].(*PathTile).Y*5, m.done)
-
-		if len(m.path) > 1 {
-			m.path = m.path[1:]
-		} else {
-			m.path = []astar.Pather{}
+	looped := false
+	for {
+		looped = looped
+		if d2common.AlmostEqual(m.LocationX-m.TargetX, 0, 0.0001) {
+			stepX = 0
 		}
-		return
-	}
+		if d2common.AlmostEqual(m.LocationY-m.TargetY, 0, 0.0001) {
+			stepY = 0
+		}
+		m.LocationX, stepX = d2common.AdjustWithRemainder(m.LocationX, stepX, m.TargetX)
+		m.LocationY, stepY = d2common.AdjustWithRemainder(m.LocationY, stepY, m.TargetY)
 
+		m.subcellX = 1 + math.Mod(m.LocationX, 5)
+		m.subcellY = 1 + math.Mod(m.LocationY, 5)
+		m.TileX = int(m.LocationX / 5)
+		m.TileY = int(m.LocationY / 5)
+
+		if d2common.AlmostEqual(m.LocationX, m.TargetX, 0.01) && d2common.AlmostEqual(m.LocationY, m.TargetY, 0.01) {
+			if len(m.path) > 0 {
+				m.SetTarget(m.path[0].(*PathTile).X*5, m.path[0].(*PathTile).Y*5, m.done)
+
+				if len(m.path) > 1 {
+					m.path = m.path[1:]
+				} else {
+					m.path = []astar.Pather{}
+				}
+			} else {
+				m.LocationX = m.TargetX
+				m.LocationY = m.TargetY
+				m.subcellX = 1 + math.Mod(m.LocationX, 5)
+				m.subcellY = 1 + math.Mod(m.LocationY, 5)
+				m.TileX = int(m.LocationX / 5)
+				m.TileY = int(m.LocationY / 5)
+			}
+		}
+
+		if stepX == 0 && stepY == 0 {
+			break
+		}
+		looped = true
+
+	}
 }
 
 func (m *mapEntity) HasPathFinding() bool {

@@ -1,7 +1,6 @@
 package d2gamescreen
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
@@ -63,19 +62,20 @@ func (v *Game) Advance(tickTime float64) error {
 	v.gameClient.MapEngine.Advance(tickTime) // TODO: Hack
 
 	v.ticksSinceLevelCheck += tickTime
-	if v.ticksSinceLevelCheck > 2.0 {
+	if v.ticksSinceLevelCheck > 1.0 {
 		v.ticksSinceLevelCheck = 0
 		if v.localPlayer != nil {
 			region := v.gameClient.MapEngine.GetRegionAtTile(v.localPlayer.TileX, v.localPlayer.TileY)
 			if region != nil {
 				levelType := region.GetLevelType().Id
-				fmt.Printf("Level checked: %d (%s)\t%d, %d\n", levelType, region.GetLevelType().Name, v.localPlayer.TileX, v.localPlayer.TileY)
 				if levelType != v.lastLevelType {
 					v.lastLevelType = levelType
 					switch levelType {
 					case 1: // Rogue encampent
+						v.localPlayer.SetIsInTown(true)
 						d2audio.PlayBGM("/data/global/music/Act1/town1.wav")
 					case 2: // Blood Moore
+						v.localPlayer.SetIsInTown(false)
 						d2audio.PlayBGM("/data/global/music/Act1/wild.wav")
 					}
 				}
