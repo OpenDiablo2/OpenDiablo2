@@ -1,4 +1,4 @@
-package d2map
+package d2maprenderer
 
 type Camera struct {
 	x float64

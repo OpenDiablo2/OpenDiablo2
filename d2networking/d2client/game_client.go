@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2localclient"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2remoteclient"
@@ -19,16 +22,17 @@ type GameClient struct {
 	clientConnection ClientConnection
 	connectionType   d2clientconnectiontype.ClientConnectionType
 	GameState        *d2player.PlayerState
-	MapEngine        *d2map.MapEngine
+	MapEngine        *d2mapengine.MapEngine
 	PlayerId         string
-	Players          map[string]*d2map.Player
+	Players          map[string]*d2mapentity.Player
 	Seed             int64
+	RegenMap         bool
 }
 
 func Create(connectionType d2clientconnectiontype.ClientConnectionType) (*GameClient, error) {
 	result := &GameClient{
-		MapEngine:      d2map.CreateMapEngine(0),
-		Players:        make(map[string]*d2map.Player, 0),
+		MapEngine:      d2mapengine.CreateMapEngine(), // TODO: Mapgen - Needs levels.txt stuff
+		Players:        make(map[string]*d2mapentity.Player, 0),
 		connectionType: connectionType,
 	}
 
@@ -64,8 +68,9 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		mapData := packet.PacketData.(d2netpacket.GenerateMapPacket)
 		switch mapData.RegionType {
 		case d2enum.RegionAct1Town:
-			g.MapEngine.GenerateAct1Overworld(true)
+			d2mapgen.GenerateAct1Overworld(g.MapEngine)
 		}
+		g.RegenMap = true
 		break
 	case d2netpackettype.UpdateServerInfo:
 		serverInfo := packet.PacketData.(d2netpacket.UpdateServerInfoPacket)
@@ -76,7 +81,7 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		break
 	case d2netpackettype.AddPlayer:
 		player := packet.PacketData.(d2netpacket.AddPlayerPacket)
-		newPlayer := d2map.CreatePlayer(player.Id, player.Name, player.X, player.Y, 0, player.HeroType, player.Equipment)
+		newPlayer := d2mapentity.CreatePlayer(player.Id, player.Name, player.X, player.Y, 0, player.HeroType, player.Equipment)
 		g.Players[newPlayer.Id] = newPlayer
 		g.MapEngine.AddEntity(newPlayer)
 		break
@@ -86,7 +91,13 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		path, _, found := g.MapEngine.PathFind(movePlayer.StartX, movePlayer.StartY, movePlayer.DestX, movePlayer.DestY)
 		if found {
 			player.AnimatedComposite.SetPath(path, func() {
-				if g.MapEngine.GetRegionAtTile(player.TileX, player.TileY).GetLevelType().Id == int(d2enum.RegionAct1Town) {
+				tile := g.MapEngine.TileAt(player.TileX, player.TileY)
+				if tile == nil {
+					return
+				}
+
+				regionType := tile.RegionType
+				if regionType == d2enum.RegionAct1Town {
 					player.AnimatedComposite.SetAnimationMode(d2enum.AnimationModePlayerTownNeutral.String())
 				} else {
 					player.AnimatedComposite.SetAnimationMode(d2enum.AnimationModePlayerNeutral.String())

@@ -7,7 +7,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
-type LevelDetails struct {
+type LevelDetailsRecord struct {
 
 	// This column has no function, it only serves as a comment field to make it
 	// easier to identify the Level name
@@ -375,15 +375,15 @@ type LevelDetails struct {
 	// Beta
 }
 
-var Levels map[int]*LevelDetails
+var LevelDetails map[int]*LevelDetailsRecord
 
 func LoadLevelDetails(file []byte) {
 	dict := d2common.LoadDataDictionary(string(file))
 	numRecords := len(dict.Data)
-	Levels = make(map[int]*LevelDetails, numRecords)
+	LevelDetails = make(map[int]*LevelDetailsRecord, numRecords)
 
 	for idx, _ := range dict.Data {
-		record := &LevelDetails{
+		record := &LevelDetailsRecord{
 			Name:                       dict.GetString("Name ", idx),
 			Id:                         dict.GetNumber("Id", idx),
 			Palette:                    dict.GetNumber("Pal", idx),
@@ -530,7 +530,7 @@ func LoadLevelDetails(file []byte) {
 			ObjectGroupSpawnChance6:    dict.GetNumber("ObjPrb6", idx),
 			ObjectGroupSpawnChance7:    dict.GetNumber("ObjPrb7", idx),
 		}
-		Levels[idx] = record
+		LevelDetails[idx] = record
 	}
-	log.Printf("Loaded %d Level records", len(Levels))
+	log.Printf("Loaded %d LevelDetails records", len(LevelDetails))
 }

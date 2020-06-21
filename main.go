@@ -413,6 +413,7 @@ func loadDataDict() error {
 		{d2resource.AutoMap, d2datadict.LoadAutoMaps},
 		{d2resource.LevelDetails, d2datadict.LoadLevelDetails},
 		{d2resource.LevelMaze, d2datadict.LoadLevelMazeDetails},
+		{d2resource.LevelSubstitutions, d2datadict.LoadLevelSubstitutions},
 	}
 
 	for _, entry := range entries {
