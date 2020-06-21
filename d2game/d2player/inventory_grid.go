@@ -214,35 +214,28 @@ func (g *ItemGrid) Remove(item InventoryItem) {
 	g.items = g.items[:n]
 }
 
+func (g *ItemGrid) renderItem(item InventoryItem, target d2render.Surface, x int, y int) {
+	if item == nil {
+		return
+	}
+	itemSprite := g.sprites[item.GetItemCode()]
+	if itemSprite == nil {
+		return
+	}
+	itemSprite.SetPosition(x, y)
+	itemSprite.GetCurrentFrameSize()
+	_ = itemSprite.Render(target)
+}
+
 func (g *ItemGrid) Render(target d2render.Surface) {
 	for _, item := range g.items {
-		if item == nil {
-			continue
-		}
-
 		itemSprite := g.sprites[item.GetItemCode()]
-		if itemSprite == nil {
-			// In case it failed to load.
-			// TODO: fallback to something
-			continue
-		}
-
 		slotX, slotY := g.SlotToScreen(item.InventoryGridSlot())
 		_, h := itemSprite.GetCurrentFrameSize()
-		itemSprite.SetPosition(slotX, slotY+h)
-		_ = itemSprite.Render(target)
-
+		slotY = slotY + h
+		g.renderItem(item, target, slotX, slotY)
 	}
 	for _, eq := range g.equipmentSlots {
-		if eq.item == nil {
-			continue
-		}
-		itemSprite := g.sprites[eq.item.GetItemCode()]
-		if itemSprite == nil {
-			continue
-		}
-		itemSprite.SetPosition(eq.x, eq.y)
-		itemSprite.GetCurrentFrameSize()
-		_ = itemSprite.Render(target)
+		g.renderItem(eq.item, target, eq.x, eq.y)
 	}
 }
