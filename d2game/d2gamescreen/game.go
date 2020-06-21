@@ -62,7 +62,13 @@ func (v *Game) Render(screen d2render.Surface) error {
 var hideZoneTextAfterSeconds = 2.0
 
 func (v *Game) Advance(tickTime float64) error {
-	v.gameClient.MapEngine.Advance(tickTime) // TODO: Hack
+	if !v.gameControls.InEscapeMenu() || len(v.gameClient.Players) != 1 {
+		v.gameClient.MapEngine.Advance(tickTime) // TODO: Hack
+	}
+
+	if v.gameControls != nil {
+		v.gameControls.Advance(tickTime)
+	}
 
 	v.ticksSinceLevelCheck += tickTime
 	if v.ticksSinceLevelCheck > 1.0 {

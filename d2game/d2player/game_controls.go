@@ -31,6 +31,7 @@ type GameControls struct {
 	mapRenderer   *d2map.MapRenderer
 	inventory     *Inventory
 	heroStats     *HeroStats
+	escapeMenu    *EscapeMenu
 	inputListener InputCallbackListener
 
 	// UI
@@ -52,25 +53,28 @@ func NewGameControls(hero *d2map.Player, mapEngine *d2map.MapEngine, mapRenderer
 	label.Alignment = d2ui.LabelAlignCenter
 
 	return &GameControls{
-		hero:           hero,
-		mapEngine:      mapEngine,
-		inputListener:  inputListener,
-		mapRenderer:    mapRenderer,
-		inventory:      NewInventory(),
-		heroStats:      NewHeroStats(),
+		hero:          hero,
+		mapEngine:     mapEngine,
+		inputListener: inputListener,
+		mapRenderer:   mapRenderer,
+		inventory:     NewInventory(),
+		heroStats:     NewHeroStats(),
+		escapeMenu:    NewEscapeMenu(),
 		zoneChangeText: &label,
 	}
 }
 
 func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
+	if event.Key == d2input.KeyEscape {
+		g.escapeMenu.Toggle()
+		return true
+	}
 	if event.Key == d2input.KeyI {
 		g.inventory.Toggle()
-		g.updateLayout()
 		return true
 	}
 	if event.Key == d2input.KeyC {
 		g.heroStats.Toggle()
-		g.updateLayout()
 		return true
 	}
 	if event.Key == d2input.KeyR {
@@ -112,24 +116,16 @@ func (g *GameControls) OnMouseButtonRepeat(event d2input.MouseEvent) bool {
 	return false
 }
 
-func (g *GameControls) updateLayout() {
-	isRightPanelOpen := false
-	isLeftPanelOpen := false
-
-	// todo : add same logic when adding quest log and skill tree
-	isRightPanelOpen = g.inventory.isOpen || isRightPanelOpen
-	isLeftPanelOpen = g.heroStats.isOpen || isLeftPanelOpen
-
-	if isRightPanelOpen == isLeftPanelOpen {
-		g.mapRenderer.ViewportDefault()
-	} else if isRightPanelOpen == true {
-		g.mapRenderer.ViewportToLeft()
-	} else {
-		g.mapRenderer.ViewportToRight()
-	}
+func (g *GameControls) OnMouseMove(event d2input.MouseMoveEvent) bool {
+	g.escapeMenu.OnMouseMove(event)
+	return false
 }
 
 func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
+	if g.escapeMenu.IsOpen() {
+		return g.escapeMenu.OnMouseButtonDown(event)
+	}
+
 	px, py := g.mapRenderer.ScreenToWorld(event.X, event.Y)
 	px = float64(int(px*10)) / 10.0
 	py = float64(int(py*10)) / 10.0
@@ -187,12 +183,20 @@ func (g *GameControls) Load() {
 
 	g.inventory.Load()
 	g.heroStats.Load()
+	g.escapeMenu.OnLoad()
+}
+
+// ScreenAdvanceHandler
+func (g *GameControls) Advance(elapsed float64) error {
+	g.escapeMenu.Advance(elapsed)
+	return nil
 }
 
 // TODO: consider caching the panels to single image that is reused.
 func (g *GameControls) Render(target d2render.Surface) {
 	g.inventory.Render(target)
 	g.heroStats.Render(target)
+	g.escapeMenu.Render(target)
 
 	width, height := target.GetSize()
 	offset := 0
@@ -286,4 +290,8 @@ func (g *GameControls) HideZoneChangeTextAfter(delay float64) {
 	time.AfterFunc(time.Duration(delay)*time.Second, func() {
 		g.isZoneTextShown = false
 	})
+}
+
+func (g *GameControls) InEscapeMenu() bool {
+	return g != nil && g.escapeMenu != nil && g.escapeMenu.IsOpen()
 }
