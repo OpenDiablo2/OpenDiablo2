@@ -3,6 +3,7 @@ package d2player
 import (
 	"errors"
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -25,7 +26,7 @@ var ErrorInventoryFull = errors.New("inventory full")
 // Handles layout and rendering item icons based on code.
 type ItemGrid struct {
 	items          []InventoryItem
-	equipmentSlots map[string]EquipmentSlot
+	equipmentSlots map[d2enum.EquippedSlotType]EquipmentSlot
 	width          int
 	height         int
 	originX        int
@@ -71,7 +72,7 @@ func (g *ItemGrid) GetSlot(x int, y int) InventoryItem {
 	return nil
 }
 
-func (g *ItemGrid) ChangeEquippedSlot(slot string, item InventoryItem) {
+func (g *ItemGrid) ChangeEquippedSlot(slot d2enum.EquippedSlotType, item InventoryItem) {
 	var curItem = g.equipmentSlots[slot]
 	curItem.item = item
 	g.equipmentSlots[slot] = curItem
