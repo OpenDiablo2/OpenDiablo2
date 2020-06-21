@@ -121,6 +121,28 @@ func (g *ItemGrid) Load(items ...InventoryItem) {
 
 		g.sprites[item.GetItemCode()] = itemSprite
 	}
+	for _, eq := range g.equipmentSlots {
+		var curItem = eq.item
+		if curItem != nil {
+			if _, exists := g.sprites[curItem.GetItemCode()]; exists {
+				// Already loaded, don't reload.
+				continue
+			}
+
+			// TODO: Put the pattern into D2Shared
+			animation, err := d2asset.LoadAnimation(
+				fmt.Sprintf("/data/global/items/inv%s.dc6", curItem.GetItemCode()),
+				d2resource.PaletteSky,
+			)
+			if err != nil {
+				log.Printf("failed to load sprite for curItem (%s): %v", curItem.GetItemCode(), err)
+				continue
+			}
+			itemSprite, err = d2ui.LoadSprite(animation)
+
+			g.sprites[curItem.GetItemCode()] = itemSprite
+		}
+	}
 
 }
 
@@ -211,7 +233,6 @@ func (g *ItemGrid) Render(target d2render.Surface) {
 		_ = itemSprite.Render(target)
 
 	}
-
 	for _, eq := range g.equipmentSlots {
 		if eq.item == nil {
 			continue
@@ -221,6 +242,7 @@ func (g *ItemGrid) Render(target d2render.Surface) {
 			continue
 		}
 		itemSprite.SetPosition(eq.x, eq.y)
+		itemSprite.GetCurrentFrameSize()
 		_ = itemSprite.Render(target)
 	}
 }

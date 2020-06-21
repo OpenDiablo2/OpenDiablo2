@@ -50,7 +50,6 @@ func (g *Inventory) Load() {
 
 	animation, _ = d2asset.LoadAnimation(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 	g.panel, _ = d2ui.LoadSprite(animation)
-
 	items := []InventoryItem{
 		d2inventory.GetWeaponItemByCode("wnd"),
 		d2inventory.GetWeaponItemByCode("sst"),
@@ -59,16 +58,16 @@ func (g *Inventory) Load() {
 		d2inventory.GetWeaponItemByCode("clb"),
 		// TODO: Load the player's actual items
 	}
-	g.grid.Add(items...)
 	g.grid.ChangeEquippedSlot(d2enum.LeftArm, d2inventory.GetWeaponItemByCode("wnd"))
 	g.grid.ChangeEquippedSlot(d2enum.RightArm, d2inventory.GetWeaponItemByCode("wnd"))
-	g.grid.ChangeEquippedSlot(d2enum.Head, d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot(d2enum.Head, d2inventory.GetArmorItemByCode("sml"))
 	g.grid.ChangeEquippedSlot(d2enum.Torso, d2inventory.GetArmorItemByCode("buc"))
 	g.grid.ChangeEquippedSlot(d2enum.Legs, d2inventory.GetArmorItemByCode("buc"))
 	g.grid.ChangeEquippedSlot(d2enum.Belt, d2inventory.GetArmorItemByCode("buc"))
 	g.grid.ChangeEquippedSlot(d2enum.Gloves, d2inventory.GetArmorItemByCode("buc"))
 	g.grid.ChangeEquippedSlot(d2enum.LeftHand, d2inventory.GetArmorItemByCode("buc"))
 	g.grid.ChangeEquippedSlot(d2enum.RightHand, d2inventory.GetArmorItemByCode("buc"))
+	g.grid.Add(items...)
 }
 
 func (g *Inventory) Render(target d2render.Surface) {
