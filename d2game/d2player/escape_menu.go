@@ -131,7 +131,45 @@ func (m *EscapeMenu) IsOpen() bool {
 }
 
 func (m *EscapeMenu) Toggle() {
+	m.reset()
 	m.isOpen = !m.isOpen
+}
+
+func (m *EscapeMenu) reset() {
+	m.current = EscapeOptions
+}
+
+func (m *EscapeMenu) OnUpKey() {
+	switch m.current {
+	case EscapeSaveExit:
+		m.current = EscapeOptions
+	case EscapeReturn:
+		m.current = EscapeSaveExit
+	}
+}
+
+func (m *EscapeMenu) OnDownKey() {
+	switch m.current {
+	case EscapeOptions:
+		m.current = EscapeSaveExit
+	case EscapeSaveExit:
+		m.current = EscapeReturn
+	}
+}
+
+func (m *EscapeMenu) OnEnterKey() {
+	m.triggerCurrentSelection()
+}
+
+func (m *EscapeMenu) triggerCurrentSelection() {
+	switch m.current {
+	case EscapeOptions:
+		m.onOptions()
+	case EscapeSaveExit:
+		m.onSaveAndExit()
+	case EscapeReturn:
+		m.onReturnToGame()
+	}
 }
 
 func (m *EscapeMenu) Open() {
@@ -170,19 +208,22 @@ func (m *EscapeMenu) OnMouseButtonDown(event d2input.MouseEvent) bool {
 
 	lbl := &m.labels[EscapeOptions]
 	if m.toMouseRegion(event.HandlerEvent, lbl) == regIn {
-		m.onOptions()
+		m.current = EscapeOptions
+		m.triggerCurrentSelection()
 		return false
 	}
 
 	lbl = &m.labels[EscapeSaveExit]
 	if m.toMouseRegion(event.HandlerEvent, lbl) == regIn {
-		m.onSaveAndExit()
+		m.current = EscapeSaveExit
+		m.triggerCurrentSelection()
 		return false
 	}
 
 	lbl = &m.labels[EscapeReturn]
 	if m.toMouseRegion(event.HandlerEvent, lbl) == regIn {
-		m.onReturnToGame()
+		m.current = EscapeReturn
+		m.triggerCurrentSelection()
 		return false
 	}
 

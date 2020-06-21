@@ -59,6 +59,18 @@ func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 		g.escapeMenu.Toggle()
 		return true
 	}
+	if event.Key == d2input.KeyDown {
+		g.escapeMenu.OnDownKey()
+		return true
+	}
+	if event.Key == d2input.KeyUp {
+		g.escapeMenu.OnUpKey()
+		return true
+	}
+	if event.Key == d2input.KeyEnter {
+		g.escapeMenu.OnEnterKey()
+		return true
+	}
 	if event.Key == d2input.KeyI {
 		g.inventory.Toggle()
 		return true
