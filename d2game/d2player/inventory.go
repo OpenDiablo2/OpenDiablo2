@@ -61,7 +61,14 @@ func (g *Inventory) Load() {
 	g.grid.Add(items...)
 	g.grid.ChangeEquippedSlot("LeftHand", d2inventory.GetWeaponItemByCode("wnd"))
 	g.grid.ChangeEquippedSlot("RightHand", d2inventory.GetWeaponItemByCode("wnd"))
-	g.grid.ChangeEquippedSlot("Chest", d2inventory.GetWeaponItemByCode("wnd"))
+	g.grid.ChangeEquippedSlot("Helmet", d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot("Chest", d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot("Shoes", d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot("Belt", d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot("Gloves", d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot("LeftRing", d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot("RightRing", d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot("Amulet", d2inventory.GetArmorItemByCode("buc"))
 }
 
 func (g *Inventory) Render(target d2render.Surface) {
