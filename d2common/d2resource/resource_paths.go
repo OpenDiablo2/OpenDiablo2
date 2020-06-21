@@ -253,6 +253,7 @@ const (
 
 	// --- Sound Effects ---
 
+	SFXCursorSelect        = "cursor_select"
 	SFXButtonClick         = "cursor_button_click"
 	SFXAmazonDeselect      = "cursor_amazon_deselect"
 	SFXAmazonSelect        = "cursor_amazon_select"

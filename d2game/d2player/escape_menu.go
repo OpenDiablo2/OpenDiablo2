@@ -5,6 +5,7 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -34,6 +35,8 @@ type EscapeMenu struct {
 	pentLeft  *d2ui.Sprite
 	pentRight *d2ui.Sprite
 
+	selectSound d2audio.SoundEffect
+
 	// pre-computations
 	pentWidth  int
 	pentHeight int
@@ -49,7 +52,6 @@ func NewEscapeMenu() *EscapeMenu {
 
 // ScreenLoadHandler
 func (m *EscapeMenu) OnLoad() error {
-
 	m.labels = []d2ui.Label{
 		d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky),
 		d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky),
@@ -75,6 +77,8 @@ func (m *EscapeMenu) OnLoad() error {
 
 	m.pentWidth, m.pentHeight = m.pentLeft.GetFrameBounds()
 	_, m.textHeight = m.labels[EscapeOptions].GetSize()
+
+	m.selectSound, _ = d2audio.LoadSoundEffect(d2resource.SFXCursorSelect)
 
 	return nil
 }
@@ -158,17 +162,20 @@ func (m *EscapeMenu) OnDownKey() {
 }
 
 func (m *EscapeMenu) OnEnterKey() {
-	m.triggerCurrentSelection()
+	m.selectCurrent()
 }
 
-func (m *EscapeMenu) triggerCurrentSelection() {
+func (m *EscapeMenu) selectCurrent() {
 	switch m.current {
 	case EscapeOptions:
 		m.onOptions()
+		m.selectSound.Play()
 	case EscapeSaveExit:
 		m.onSaveAndExit()
+		m.selectSound.Play()
 	case EscapeReturn:
 		m.onReturnToGame()
+		m.selectSound.Play()
 	}
 }
 
@@ -209,21 +216,21 @@ func (m *EscapeMenu) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	lbl := &m.labels[EscapeOptions]
 	if m.toMouseRegion(event.HandlerEvent, lbl) == regIn {
 		m.current = EscapeOptions
-		m.triggerCurrentSelection()
+		m.selectCurrent()
 		return false
 	}
 
 	lbl = &m.labels[EscapeSaveExit]
 	if m.toMouseRegion(event.HandlerEvent, lbl) == regIn {
 		m.current = EscapeSaveExit
-		m.triggerCurrentSelection()
+		m.selectCurrent()
 		return false
 	}
 
 	lbl = &m.labels[EscapeReturn]
 	if m.toMouseRegion(event.HandlerEvent, lbl) == regIn {
 		m.current = EscapeReturn
-		m.triggerCurrentSelection()
+		m.selectCurrent()
 		return false
 	}
 
