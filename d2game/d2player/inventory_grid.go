@@ -31,7 +31,7 @@ var ErrorInventoryFull = errors.New("inventory full")
 // Handles layout and rendering item icons based on code.
 type ItemGrid struct {
 	items          []InventoryItem
-	equipmentSlots map[string]*EquipmentSlot
+	equipmentSlots map[string]EquipmentSlot
 	width          int
 	height         int
 	originX        int
@@ -42,13 +42,19 @@ type ItemGrid struct {
 
 func NewItemGrid(width int, height int, originX int, originY int) *ItemGrid {
 	return &ItemGrid{
-		width:          width,
-		height:         height,
-		originX:        originX,
-		originY:        originY,
-		slotSize:       29,
-		sprites:        make(map[string]*d2ui.Sprite),
-		equipmentSlots: make(map[string]*EquipmentSlot),
+		width:    width,
+		height:   height,
+		originX:  originX,
+		originY:  originY,
+		slotSize: 29,
+		sprites:  make(map[string]*d2ui.Sprite),
+		equipmentSlots: map[string]EquipmentSlot{
+			"LeftHand": {
+				item: nil,
+				x:    100,
+				y:    200,
+			},
+		},
 	}
 }
 
@@ -209,5 +215,20 @@ func (g *ItemGrid) Render(target d2render.Surface) {
 		itemSprite.SetPosition(slotX, slotY+h)
 		_ = itemSprite.Render(target)
 
+	}
+
+	for _, eq := range g.equipmentSlots {
+		if eq.item == nil {
+			continue
+		}
+		itemSprite := g.sprites[eq.item.GetItemCode()]
+		if itemSprite == nil {
+			continue
+		}
+
+		slotX, slotY := g.SlotToScreen(eq.item.InventoryGridSlot())
+		_, h := itemSprite.GetCurrentFrameSize()
+		itemSprite.SetPosition(slotX, slotY+h)
+		_ = itemSprite.Render(target)
 	}
 }
