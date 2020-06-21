@@ -173,7 +173,9 @@ const (
 	ObjectType           = "/data/global/excel/objtype.bin"
 	LevelWarp            = "/data/global/excel/LvlWarp.bin"
 	LevelDetails         = "/data/global/excel/Levels.txt"
+	LevelMaze            = "/data/global/excel/LvlMaze.txt"
 	LevelSubstitutions   = "/data/global/excel/LvlSub.txt"
+
 	ObjectDetails        = "/data/global/excel/Objects.txt"
 	SoundSettings        = "/data/global/excel/Sounds.txt"
 	ItemStatCost         = "/data/global/excel/ItemStatCost.txt"
