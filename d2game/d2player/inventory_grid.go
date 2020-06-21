@@ -99,25 +99,24 @@ func (g *ItemGrid) Add(items ...InventoryItem) (int, error) {
 }
 
 func (g *ItemGrid) loadItem(item InventoryItem) {
-	var itemSprite *d2ui.Sprite
-	if _, exists := g.sprites[item.GetItemCode()]; exists {
-		// Already loaded, don't reload.
-		return
+	if _, exists := g.sprites[item.GetItemCode()]; !exists {
+		var itemSprite *d2ui.Sprite
+
+		// TODO: Put the pattern into D2Shared
+		animation, err := d2asset.LoadAnimation(
+			fmt.Sprintf("/data/global/items/inv%s.dc6", item.GetItemCode()),
+			d2resource.PaletteSky,
+		)
+		if err != nil {
+			log.Printf("failed to load sprite for item (%s): %v", item.GetItemCode(), err)
+			return
+		}
+		itemSprite, err = d2ui.LoadSprite(animation)
+		if err != nil {
+			log.Printf("Failed to load sprite, error: " + err.Error())
+		}
+		g.sprites[item.GetItemCode()] = itemSprite
 	}
-	// TODO: Put the pattern into D2Shared
-	animation, err := d2asset.LoadAnimation(
-		fmt.Sprintf("/data/global/items/inv%s.dc6", item.GetItemCode()),
-		d2resource.PaletteSky,
-	)
-	if err != nil {
-		log.Printf("failed to load sprite for item (%s): %v", item.GetItemCode(), err)
-		return
-	}
-	itemSprite, err = d2ui.LoadSprite(animation)
-	if err != nil {
-		log.Printf("Failed to load sprite, error: " + err.Error())
-	}
-	g.sprites[item.GetItemCode()] = itemSprite
 }
 
 // Load reads the inventory sprites for items into local cache for rendering.
