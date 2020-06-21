@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
@@ -59,6 +60,16 @@ func (g *Inventory) Load() {
 		// TODO: Load the player's actual items
 	}
 	g.grid.Add(items...)
+	g.grid.ChangeEquippedSlot(d2enum.LeftArm, d2inventory.GetWeaponItemByCode("wnd"))
+	g.grid.ChangeEquippedSlot(d2enum.RightArm, d2inventory.GetWeaponItemByCode("wnd"))
+	g.grid.ChangeEquippedSlot(d2enum.Head, d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot(d2enum.Torso, d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot(d2enum.Legs, d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot(d2enum.Belt, d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot(d2enum.Gloves, d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot(d2enum.LeftHand, d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot(d2enum.RightHand, d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot(d2enum.Neck, d2inventory.GetArmorItemByCode("buc"))
 }
 
 func (g *Inventory) Render(target d2render.Surface) {
