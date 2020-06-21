@@ -20,6 +20,8 @@ import (
 	"github.com/beefsack/go-astar"
 )
 
+var imageCacheRecords map[uint32]d2render.Surface
+
 type PathTile struct {
 	Walkable                                                    bool
 	Up, Down, Left, Right, UpLeft, UpRight, DownLeft, DownRight *PathTile
@@ -76,28 +78,31 @@ func (t *PathTile) PathEstimatedCost(to astar.Pather) float64 {
 }
 
 type MapRegion struct {
-	tileRect          d2common.Rectangle
-	regionPath        string
-	levelType         d2datadict.LevelTypeRecord
-	levelPreset       d2datadict.LevelPresetRecord
-	tiles             []d2dt1.Tile
-	ds1               *d2ds1.DS1
-	palette           *d2dat.DATPalette
-	startX            float64
-	startY            float64
-	imageCacheRecords map[uint32]d2render.Surface
-	seed              int64
-	currentFrame      int
-	lastFrameTime     float64
-	walkableArea      [][]PathTile
+	tileRect      d2common.Rectangle
+	regionPath    string
+	levelType     d2datadict.LevelTypeRecord
+	levelPreset   d2datadict.LevelPresetRecord
+	tiles         []d2dt1.Tile
+	ds1           *d2ds1.DS1
+	palette       *d2dat.DATPalette
+	startX        float64
+	startY        float64
+	seed          int64
+	currentFrame  int
+	lastFrameTime float64
+	walkableArea  [][]PathTile
+}
+
+// Invalidates the global region image cache. Call this when you are changing regions
+func InvalidateImageCache() {
+	imageCacheRecords = nil
 }
 
 func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.RegionIdType, levelPreset int, fileIndex int, cacheTiles bool) (*MapRegion, []MapEntity) {
 	region := &MapRegion{
-		levelType:         d2datadict.LevelTypes[levelType],
-		levelPreset:       d2datadict.LevelPresets[levelPreset],
-		imageCacheRecords: map[uint32]d2render.Surface{},
-		seed:              seed,
+		levelType:   d2datadict.LevelTypes[levelType],
+		levelPreset: d2datadict.LevelPresets[levelPreset],
+		seed:        seed,
 	}
 
 	region.palette, _ = loadPaletteForAct(levelType)
@@ -613,12 +618,15 @@ func (mr *MapRegion) generateTileCache() {
 
 func (mr *MapRegion) getImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte) d2render.Surface {
 	lookupIndex := uint32(style)<<24 | uint32(sequence)<<16 | uint32(tileType)<<8 | uint32(randomIndex)
-	return mr.imageCacheRecords[lookupIndex]
+	return imageCacheRecords[lookupIndex]
 }
 
 func (mr *MapRegion) setImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte, image d2render.Surface) {
 	lookupIndex := uint32(style)<<24 | uint32(sequence)<<16 | uint32(tileType)<<8 | uint32(randomIndex)
-	mr.imageCacheRecords[lookupIndex] = image
+	if imageCacheRecords == nil {
+		imageCacheRecords = make(map[uint32]d2render.Surface)
+	}
+	imageCacheRecords[lookupIndex] = image
 }
 
 func (mr *MapRegion) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) {

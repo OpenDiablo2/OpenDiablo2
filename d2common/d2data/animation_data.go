@@ -29,13 +29,14 @@ func LoadAnimationData(rawData []byte) {
 	for !streamReader.Eof() {
 		dataCount := int(streamReader.GetInt32())
 		for i := 0; i < dataCount; i++ {
-			cofNameBytes, _ := streamReader.ReadBytes(8)
+			cofNameBytes := streamReader.ReadBytes(8)
 			data := &AnimationDataRecord{
 				COFName:            strings.ReplaceAll(string(cofNameBytes), string(0), ""),
 				FramesPerDirection: int(streamReader.GetInt32()),
 				AnimationSpeed:     int(streamReader.GetInt32()),
 			}
-			data.Flags, _ = streamReader.ReadBytes(144)
+			flagData := streamReader.ReadBytes(144)
+			data.Flags = flagData
 			cofIndex := strings.ToLower(data.COFName)
 			if _, found := AnimationData[cofIndex]; !found {
 				AnimationData[cofIndex] = make([]*AnimationDataRecord, 0)

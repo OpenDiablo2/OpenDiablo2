@@ -70,7 +70,7 @@ func (v *BinkDecoder) GetNextFrame() {
 
 func (v *BinkDecoder) loadHeaderInformation() {
 	v.streamReader.SetPosition(0)
-	headerBytes, _ := v.streamReader.ReadBytes(3)
+	headerBytes := v.streamReader.ReadBytes(3)
 	if string(headerBytes) != "BIK" {
 		log.Fatal("Invalid header for bink video")
 	}
