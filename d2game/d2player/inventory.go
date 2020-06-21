@@ -60,7 +60,7 @@ func (g *Inventory) Load() {
 	}
 	g.grid.ChangeEquippedSlot(d2enum.LeftArm, d2inventory.GetWeaponItemByCode("wnd"))
 	g.grid.ChangeEquippedSlot(d2enum.RightArm, d2inventory.GetArmorItemByCode("buc"))
-	g.grid.ChangeEquippedSlot(d2enum.Head, d2inventory.GetArmorItemByCode("cap"))
+	g.grid.ChangeEquippedSlot(d2enum.Head, d2inventory.GetArmorItemByCode("crn"))
 	g.grid.ChangeEquippedSlot(d2enum.Torso, d2inventory.GetArmorItemByCode("plt"))
 	g.grid.ChangeEquippedSlot(d2enum.Legs, d2inventory.GetArmorItemByCode("vbt"))
 	g.grid.ChangeEquippedSlot(d2enum.Belt, d2inventory.GetArmorItemByCode("vbl"))
