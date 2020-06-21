@@ -98,52 +98,38 @@ func (g *ItemGrid) Add(items ...InventoryItem) (int, error) {
 	return added, err
 }
 
+func (g *ItemGrid) loadItem(item InventoryItem) {
+	var itemSprite *d2ui.Sprite
+	if _, exists := g.sprites[item.GetItemCode()]; exists {
+		// Already loaded, don't reload.
+		return
+	}
+	// TODO: Put the pattern into D2Shared
+	animation, err := d2asset.LoadAnimation(
+		fmt.Sprintf("/data/global/items/inv%s.dc6", item.GetItemCode()),
+		d2resource.PaletteSky,
+	)
+	if err != nil {
+		log.Printf("failed to load sprite for item (%s): %v", item.GetItemCode(), err)
+		return
+	}
+	itemSprite, err = d2ui.LoadSprite(animation)
+	if err != nil {
+		log.Printf("Failed to load sprite, error: " + err.Error())
+	}
+	g.sprites[item.GetItemCode()] = itemSprite
+}
+
 // Load reads the inventory sprites for items into local cache for rendering.
 func (g *ItemGrid) Load(items ...InventoryItem) {
-	var itemSprite *d2ui.Sprite
-
 	for _, item := range items {
-		if _, exists := g.sprites[item.GetItemCode()]; exists {
-			// Already loaded, don't reload.
-			continue
-		}
-
-		// TODO: Put the pattern into D2Shared
-		animation, err := d2asset.LoadAnimation(
-			fmt.Sprintf("/data/global/items/inv%s.dc6", item.GetItemCode()),
-			d2resource.PaletteSky,
-		)
-		if err != nil {
-			log.Printf("failed to load sprite for item (%s): %v", item.GetItemCode(), err)
-			continue
-		}
-		itemSprite, err = d2ui.LoadSprite(animation)
-
-		g.sprites[item.GetItemCode()] = itemSprite
+		g.loadItem(item)
 	}
 	for _, eq := range g.equipmentSlots {
-		var curItem = eq.item
-		if curItem != nil {
-			if _, exists := g.sprites[curItem.GetItemCode()]; exists {
-				// Already loaded, don't reload.
-				continue
-			}
-
-			// TODO: Put the pattern into D2Shared
-			animation, err := d2asset.LoadAnimation(
-				fmt.Sprintf("/data/global/items/inv%s.dc6", curItem.GetItemCode()),
-				d2resource.PaletteSky,
-			)
-			if err != nil {
-				log.Printf("failed to load sprite for curItem (%s): %v", curItem.GetItemCode(), err)
-				continue
-			}
-			itemSprite, err = d2ui.LoadSprite(animation)
-
-			g.sprites[curItem.GetItemCode()] = itemSprite
+		if eq.item != nil {
+			g.loadItem(eq.item)
 		}
 	}
-
 }
 
 // Walk from top left to bottom right until a position large enough to hold the item is found.
