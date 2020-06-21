@@ -44,7 +44,7 @@ func Create(openNetworkServer bool) {
 	}
 
 	mapEngine := d2map.CreateMapEngine(singletonServer.seed)
-	mapEngine.GenerateAct1Overworld(true)
+	mapEngine.GenerateAct1Overworld(false)
 	singletonServer.mapEngines = append(singletonServer.mapEngines, mapEngine)
 
 	singletonServer.scriptEngine.AddFunction("getMapEngines", func(call otto.FunctionCall) otto.Value {

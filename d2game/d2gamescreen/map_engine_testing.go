@@ -105,6 +105,7 @@ func CreateMapEngineTest(currentRegion int, levelPreset int) *MapEngineTest {
 }
 
 func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
+	d2map.InvalidateImageCache()
 	for _, spec := range regions {
 		if spec.regionType == d2enum.RegionIdType(n) {
 			met.regionSpec = spec

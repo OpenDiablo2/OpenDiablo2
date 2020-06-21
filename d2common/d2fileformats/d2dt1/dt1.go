@@ -74,7 +74,7 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 		}
 		for blockIndex, block := range tile.Blocks {
 			br.SetPosition(uint64(tile.blockHeaderPointer + block.FileOffset))
-			encodedData, _ := br.ReadBytes(int(block.Length))
+			encodedData := br.ReadBytes(int(block.Length))
 			tile.Blocks[blockIndex].EncodedData = encodedData
 		}
 

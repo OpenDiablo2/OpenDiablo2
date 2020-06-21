@@ -9,7 +9,9 @@ import (
 	"image/png"
 	"log"
 	"os"
+	"os/exec"
 	"runtime"
+	"runtime/pprof"
 	"strconv"
 	"sync"
 
@@ -120,6 +122,12 @@ func initialize() error {
 	}
 
 	d2term.BindLogger()
+	d2term.BindAction("dumpheap", "dumps the heap to heap.out", func() {
+		fileOut, _ := os.Create("heap.out")
+		pprof.WriteHeapProfile(fileOut)
+		fileOut.Close()
+		exec.Command("go", "tool", "pprof", "--pdf", "./OpenDiablo2", "./heap.out", ">", "./memprofile.pdf")
+	})
 	d2term.BindAction("fullscreen", "toggles fullscreen", func() {
 		fullscreen := !d2render.IsFullScreen()
 		d2render.SetFullScreen(fullscreen)
