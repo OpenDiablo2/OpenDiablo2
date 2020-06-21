@@ -87,10 +87,11 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		if found {
 			player.AnimatedComposite.SetPath(path, func() {
 				if g.MapEngine.GetRegionAtTile(player.TileX, player.TileY).GetLevelType().Id == int(d2enum.RegionAct1Town) {
-					player.AnimatedComposite.SetAnimationMode(d2enum.AnimationModePlayerTownNeutral.String())
+					player.SetIsInTown(true)
 				} else {
-					player.AnimatedComposite.SetAnimationMode(d2enum.AnimationModePlayerNeutral.String())
+					player.SetIsInTown(false)
 				}
+				player.AnimatedComposite.SetAnimationMode(player.GetAnimationMode().String())
 			})
 		}
 		break

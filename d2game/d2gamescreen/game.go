@@ -1,6 +1,7 @@
 package d2gamescreen
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
@@ -58,6 +59,8 @@ func (v *Game) Render(screen d2render.Surface) error {
 	return nil
 }
 
+var hideZoneTextAfterSeconds = 2.0
+
 func (v *Game) Advance(tickTime float64) error {
 	v.gameClient.MapEngine.Advance(tickTime) // TODO: Hack
 
@@ -68,8 +71,8 @@ func (v *Game) Advance(tickTime float64) error {
 			region := v.gameClient.MapEngine.GetRegionAtTile(v.localPlayer.TileX, v.localPlayer.TileY)
 			if region != nil {
 				levelType := region.GetLevelType().Id
+
 				if levelType != v.lastLevelType {
-					v.lastLevelType = levelType
 					switch levelType {
 					case 1: // Rogue encampent
 						v.localPlayer.SetIsInTown(true)
@@ -78,6 +81,15 @@ func (v *Game) Advance(tickTime float64) error {
 						v.localPlayer.SetIsInTown(false)
 						d2audio.PlayBGM("/data/global/music/Act1/wild.wav")
 					}
+
+					// skip showing zone change text the first time we enter the world
+					if v.lastLevelType != -1 {
+						v.gameControls.SetZoneChangeText(fmt.Sprintf("Entering The %s", region.GetLevelDetails().LevelName))
+						v.gameControls.ShowZoneChangeText()
+						v.gameControls.HideZoneChangeTextAfter(hideZoneTextAfterSeconds)
+					}
+
+					v.lastLevelType = levelType
 				}
 			}
 		}

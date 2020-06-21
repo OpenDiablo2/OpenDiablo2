@@ -21,7 +21,13 @@ type Player struct {
 	lastPathSize  int
 	isInTown      bool
 	animationMode string
+	isRunToggled  bool
+	isRunning     bool
 }
+
+// run speed should be walkspeed * 1.5, since in the original game it is 6 yards walk and 9 yards run.
+var baseWalkSpeed = 6.0
+var baseRunSpeed = 9.0
 
 func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero, equipment d2inventory.CharacterEquipment) *Player {
 	object := &d2datadict.ObjectLookupRecord{
@@ -44,6 +50,7 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 	if err != nil {
 		panic(err)
 	}
+	entity.SetSpeed(baseRunSpeed)
 
 	result := &Player{
 		Id:                id,
@@ -52,6 +59,9 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 		direction:         direction,
 		Name:              name,
 		nameLabel:         d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
+		isRunToggled:      true,
+		isInTown:          true,
+		isRunning:         true,
 	}
 	result.nameLabel.Alignment = d2ui.LabelAlignCenter
 	result.nameLabel.SetText(name)
@@ -66,6 +76,28 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 
 func (p *Player) SetIsInTown(isInTown bool) {
 	p.isInTown = isInTown
+}
+
+func (p *Player) ToggleIsRunning() {
+	p.isRunToggled = !p.isRunToggled
+}
+
+func (p *Player) IsRunToggled() bool {
+	return p.isRunToggled
+}
+
+func (p *Player) IsRunning() bool {
+	return p.isRunning
+}
+
+func (p *Player) SetIsRunning(isRunning bool) {
+	p.isRunning = isRunning
+
+	if isRunning {
+		p.SetSpeed(baseRunSpeed)
+	} else {
+		p.SetSpeed(baseWalkSpeed)
+	}
 }
 
 func (p Player) IsInTown() bool {

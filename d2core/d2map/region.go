@@ -82,6 +82,7 @@ type MapRegion struct {
 	regionPath    string
 	levelType     d2datadict.LevelTypeRecord
 	levelPreset   d2datadict.LevelPresetRecord
+	levelDetails  d2datadict.LevelDetailsRecord
 	tiles         []d2dt1.Tile
 	ds1           *d2ds1.DS1
 	palette       *d2dat.DATPalette
@@ -102,6 +103,7 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 	region := &MapRegion{
 		levelType:   d2datadict.LevelTypes[levelType],
 		levelPreset: d2datadict.LevelPresets[levelPreset],
+		levelDetails: d2datadict.LevelDetails[levelType],
 		seed:        seed,
 	}
 
@@ -226,6 +228,10 @@ func (mr *MapRegion) GetLevelPreset() d2datadict.LevelPresetRecord {
 
 func (mr *MapRegion) GetLevelType() d2datadict.LevelTypeRecord {
 	return mr.levelType
+}
+
+func (mr *MapRegion) GetLevelDetails() d2datadict.LevelDetailsRecord {
+	return mr.levelDetails
 }
 
 func (mr *MapRegion) GetPath() string {

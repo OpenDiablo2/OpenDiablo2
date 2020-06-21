@@ -197,6 +197,10 @@ type MouseButtonDownHandler interface {
 	OnMouseButtonDown(event MouseEvent) bool
 }
 
+type MouseButtonRepeatHandler interface {
+	OnMouseButtonRepeat(event MouseEvent) bool
+}
+
 type MouseButtonUpHandler interface {
 	OnMouseButtonUp(event MouseEvent) bool
 }
