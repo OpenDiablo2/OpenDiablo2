@@ -19,6 +19,12 @@ type InventoryItem interface {
 	SetInventoryGridSlot(x int, y int)
 }
 
+type EquipmentSlot struct {
+	item InventoryItem
+	x    int
+	y    int
+}
+
 var ErrorInventoryFull = errors.New("inventory full")
 
 // Reusable grid for use with player and merchant inventory.
