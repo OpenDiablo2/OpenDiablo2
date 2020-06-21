@@ -1,7 +1,5 @@
 module github.com/OpenDiablo2/OpenDiablo2
 
-replace github.com/OpenDiablo2/OpenDiablo2 => /home/haashi/go/src/github.com/Haashi/OpenDiablo2
-
 go 1.12
 
 require (
