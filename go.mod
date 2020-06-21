@@ -1,5 +1,7 @@
 module github.com/OpenDiablo2/OpenDiablo2
 
+replace github.com/OpenDiablo2/OpenDiablo2 => /home/haashi/go/src/github.com/Haashi/OpenDiablo2
+
 go 1.12
 
 require (
@@ -15,3 +17,4 @@ require (
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 )
+
