@@ -225,10 +225,7 @@ func (g *ItemGrid) Render(target d2render.Surface) {
 		if itemSprite == nil {
 			continue
 		}
-
-		slotX, slotY := g.SlotToScreen(eq.item.InventoryGridSlot())
-		_, h := itemSprite.GetCurrentFrameSize()
-		itemSprite.SetPosition(slotX, slotY+h)
+		itemSprite.SetPosition(eq.x, eq.y)
 		_ = itemSprite.Render(target)
 	}
 }

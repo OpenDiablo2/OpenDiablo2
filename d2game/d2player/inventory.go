@@ -56,8 +56,14 @@ func (g *Inventory) Load() {
 		d2inventory.GetWeaponItemByCode("jav"),
 		d2inventory.GetArmorItemByCode("buc"),
 		d2inventory.GetWeaponItemByCode("clb"),
+		// TODO: Load the player's actual items
 	}
 	g.grid.Add(items...)
+	g.grid.equipmentSlots["LeftHand"] = EquipmentSlot{
+		item: d2inventory.GetWeaponItemByCode("wnd"),
+		x:    100,
+		y:    200,
+	}
 }
 
 func (g *Inventory) Render(target d2render.Surface) {
