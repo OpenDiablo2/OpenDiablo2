@@ -29,12 +29,11 @@ const (
 
 // EscapeMenu is the overlay menu shown in-game when pressing Escape
 type EscapeMenu struct {
-	current   EscapeOption
-	isOpen    bool
-	labels    []d2ui.Label
-	pentLeft  *d2ui.Sprite
-	pentRight *d2ui.Sprite
-
+	current     EscapeOption
+	isOpen      bool
+	labels      []d2ui.Label
+	pentLeft    *d2ui.Sprite
+	pentRight   *d2ui.Sprite
 	selectSound d2audio.SoundEffect
 
 	// pre-computations
