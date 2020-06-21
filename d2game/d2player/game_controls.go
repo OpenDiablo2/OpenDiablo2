@@ -55,14 +55,33 @@ func NewGameControls(hero *d2map.Player, mapEngine *d2map.MapEngine, mapRenderer
 func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 	if event.Key == d2input.KeyI {
 		g.inventory.Toggle()
+		g.updateLayout()
 		return true
 	}
 	if event.Key == d2input.KeyC {
 		g.heroStats.Toggle()
+		g.updateLayout()
 		return true
 	}
 
 	return false
+}
+
+func (g *GameControls) updateLayout() {
+	isRightPanelOpen := false
+	isLeftPanelOpen := false
+
+	// todo : add same logic when adding quest log and skill tree
+	isRightPanelOpen = g.inventory.isOpen || isRightPanelOpen
+	isLeftPanelOpen = g.heroStats.isOpen || isLeftPanelOpen
+
+	if isRightPanelOpen == isLeftPanelOpen {
+		g.mapRenderer.ViewportDefault()
+	} else if isRightPanelOpen == true {
+		g.mapRenderer.ViewportToLeft()
+	} else {
+		g.mapRenderer.ViewportToRight()
+	}
 }
 
 func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
