@@ -363,8 +363,8 @@ func (mr *MapRegion) advance(elapsed float64) {
 	}
 }
 
-func (mr *MapRegion) getSubTileWorldPosition(subTileX, subtileY int) (float64, float64) {
-	return float64(subTileX + (mr.tileRect.Left * 5)), float64(subtileY + (mr.tileRect.Top * 5))
+func (mr *MapRegion) getSubTileWorldPosition(subTileX, subTileY int) (float64, float64) {
+	return float64(subTileX + (mr.tileRect.Left * 5)), float64(subTileY + (mr.tileRect.Top * 5))
 }
 
 func (mr *MapRegion) getTileWorldPosition(tileX, tileY int) (float64, float64) {
