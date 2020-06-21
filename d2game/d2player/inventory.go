@@ -69,7 +69,6 @@ func (g *Inventory) Load() {
 	g.grid.ChangeEquippedSlot(d2enum.Gloves, d2inventory.GetArmorItemByCode("buc"))
 	g.grid.ChangeEquippedSlot(d2enum.LeftHand, d2inventory.GetArmorItemByCode("buc"))
 	g.grid.ChangeEquippedSlot(d2enum.RightHand, d2inventory.GetArmorItemByCode("buc"))
-	g.grid.ChangeEquippedSlot(d2enum.Neck, d2inventory.GetArmorItemByCode("buc"))
 }
 
 func (g *Inventory) Render(target d2render.Surface) {
