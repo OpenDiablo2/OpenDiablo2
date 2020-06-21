@@ -98,7 +98,7 @@ func (v *Viewport) IsTileRectVisible(rect d2common.Rectangle) bool {
 func (v *Viewport) IsOrthoRectVisible(x1, y1, x2, y2 float64) bool {
 	screenX1, screenY1 := v.OrthoToScreen(x1, y1)
 	screenX2, screenY2 := v.OrthoToScreen(x2, y2)
-	return !(screenX1 >= v.screenRect.Width || screenX2 < 0 || screenY1 >= v.screenRect.Height || screenY2 < 0)
+	return !(screenX1 >= v.defaultScreenRect.Width || screenX2 < 0 || screenY1 >= v.defaultScreenRect.Height || screenY2 < 0)
 }
 
 func (v *Viewport) GetTranslationOrtho() (float64, float64) {
@@ -150,6 +150,7 @@ func (v *Viewport) toLeft() {
 		return
 	}
 	v.screenRect.Width = v.defaultScreenRect.Width / 2
+	v.align = left
 }
 
 func (v *Viewport) toRight() {
@@ -158,6 +159,7 @@ func (v *Viewport) toRight() {
 	}
 	v.screenRect.Width = v.defaultScreenRect.Width / 2
 	v.screenRect.Left = v.defaultScreenRect.Left + v.defaultScreenRect.Width/2
+	v.align = right
 }
 
 func (v *Viewport) resetAlign() {
@@ -166,4 +168,5 @@ func (v *Viewport) resetAlign() {
 	}
 	v.screenRect.Width = v.defaultScreenRect.Width
 	v.screenRect.Left = v.defaultScreenRect.Left
+	v.align = center
 }
