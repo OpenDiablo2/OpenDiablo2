@@ -1,0 +1,1 @@
+debugPrint('Server script initialized.')

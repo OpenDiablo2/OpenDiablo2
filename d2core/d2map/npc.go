@@ -1,11 +1,12 @@
 package d2map
 
 import (
+	"math/rand"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"math/rand"
 )
 
 type NPC struct {
@@ -90,7 +91,7 @@ func (v *NPC) next() {
 		v.repetitions = 0
 	}
 
-	if v.animationMode != newAnimationMode.String() {
+	if v.composite.GetAnimationMode() != newAnimationMode.String() {
 		v.SetMode(newAnimationMode.String(), v.weaponClass, v.direction)
 	}
 }

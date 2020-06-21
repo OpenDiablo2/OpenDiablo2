@@ -1,10 +1,15 @@
-package d2gamescene
+package d2gamescreen
 
 import (
 	"image/color"
 	"math"
 	"os"
 	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 
 	"github.com/hajimehoshi/ebiten"
 
@@ -14,11 +19,10 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -39,15 +43,21 @@ type CharacterSelect struct {
 	characterNameLabel     [8]d2ui.Label
 	characterStatsLabel    [8]d2ui.Label
 	characterExpLabel      [8]d2ui.Label
-	characterImage         [8]*d2map.Hero
-	gameStates             []*d2gamestate.GameState
+	characterImage         [8]*d2map.Player
+	gameStates             []*d2player.PlayerState
 	selectedCharacter      int
 	mouseButtonPressed     bool
 	showDeleteConfirmation bool
+	connectionType         d2clientconnectiontype.ClientConnectionType
+	connectionHost         string
 }
 
-func CreateCharacterSelect() *CharacterSelect {
-	return &CharacterSelect{selectedCharacter: -1}
+func CreateCharacterSelect(connectionType d2clientconnectiontype.ClientConnectionType, connectionHost string) *CharacterSelect {
+	return &CharacterSelect{
+		selectedCharacter: -1,
+		connectionType:    connectionType,
+		connectionHost:    connectionHost,
+	}
 }
 
 func (v *CharacterSelect) OnLoad() error {
@@ -57,39 +67,39 @@ func (v *CharacterSelect) OnLoad() error {
 	v.background, _ = d2ui.LoadSprite(animation)
 	v.background.SetPosition(0, 0)
 
-	v.newCharButton = d2ui.CreateButton(d2ui.ButtonTypeTall, d2common.CombineStrings(dh.SplitIntoLinesWithMaxWidth(d2common.TranslateString("#831"), 15)))
+	v.newCharButton = d2ui.CreateButton(d2ui.ButtonTypeTall, d2common.CombineStrings(dh.SplitIntoLinesWithMaxWidth("CREATE NEW CHARACTER", 15)))
 	v.newCharButton.SetPosition(33, 468)
 	v.newCharButton.OnActivated(func() { v.onNewCharButtonClicked() })
 	d2ui.AddWidget(&v.newCharButton)
 
-	v.convertCharButton = d2ui.CreateButton(d2ui.ButtonTypeTall, d2common.CombineStrings(dh.SplitIntoLinesWithMaxWidth(d2common.TranslateString("#825"), 15)))
+	v.convertCharButton = d2ui.CreateButton(d2ui.ButtonTypeTall, d2common.CombineStrings(dh.SplitIntoLinesWithMaxWidth("CONVERT TO EXPANSION", 15)))
 	v.convertCharButton.SetPosition(233, 468)
 	v.convertCharButton.SetEnabled(false)
 	d2ui.AddWidget(&v.convertCharButton)
 
-	v.deleteCharButton = d2ui.CreateButton(d2ui.ButtonTypeTall, d2common.CombineStrings(dh.SplitIntoLinesWithMaxWidth(d2common.TranslateString("#832"), 15)))
+	v.deleteCharButton = d2ui.CreateButton(d2ui.ButtonTypeTall, d2common.CombineStrings(dh.SplitIntoLinesWithMaxWidth("DELETE CHARACTER", 15)))
 	v.deleteCharButton.OnActivated(func() { v.onDeleteCharButtonClicked() })
 	v.deleteCharButton.SetPosition(433, 468)
 	d2ui.AddWidget(&v.deleteCharButton)
 
-	v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, d2common.TranslateString("#970"))
+	v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, "EXIT")
 	v.exitButton.SetPosition(33, 537)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 	d2ui.AddWidget(&v.exitButton)
 
-	v.deleteCharCancelButton = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, d2common.TranslateString("#4231"))
+	v.deleteCharCancelButton = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "NO")
 	v.deleteCharCancelButton.SetPosition(282, 308)
 	v.deleteCharCancelButton.SetVisible(false)
 	v.deleteCharCancelButton.OnActivated(func() { v.onDeleteCharacterCancelClicked() })
 	d2ui.AddWidget(&v.deleteCharCancelButton)
 
-	v.deleteCharOkButton = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, d2common.TranslateString("#4227"))
+	v.deleteCharOkButton = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "YES")
 	v.deleteCharOkButton.SetPosition(422, 308)
 	v.deleteCharOkButton.SetVisible(false)
 	v.deleteCharOkButton.OnActivated(func() { v.onDeleteCharacterConfirmClicked() })
 	d2ui.AddWidget(&v.deleteCharOkButton)
 
-	v.okButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, d2common.TranslateString("#971"))
+	v.okButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, "OK")
 	v.okButton.SetPosition(625, 537)
 	v.okButton.OnActivated(func() { v.onOkButtonClicked() })
 	d2ui.AddWidget(&v.okButton)
@@ -99,7 +109,7 @@ func (v *CharacterSelect) OnLoad() error {
 	v.d2HeroTitle.Alignment = d2ui.LabelAlignCenter
 
 	v.deleteCharConfirmLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
-	lines := dh.SplitIntoLinesWithMaxWidth(d2common.TranslateString("#1878"), 29)
+	lines := dh.SplitIntoLinesWithMaxWidth("Are you sure that you want to delete this character? Take note: this will delete all versions of this Character.", 29)
 	v.deleteCharConfirmLabel.SetText(strings.Join(lines, "\n"))
 	v.deleteCharConfirmLabel.Alignment = d2ui.LabelAlignCenter
 	v.deleteCharConfirmLabel.SetPosition(400, 185)
@@ -141,7 +151,7 @@ func (v *CharacterSelect) onScrollUpdate() {
 }
 
 func (v *CharacterSelect) updateCharacterBoxes() {
-	expText := d2common.TranslateString("#803")
+	expText := "EXPANSION CHARACTER"
 	for i := 0; i < 8; i++ {
 		idx := i + (v.charScrollbar.GetCurrentOffset() * 2)
 		if idx >= len(v.gameStates) {
@@ -155,10 +165,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		v.characterStatsLabel[i].SetText("Level 1 " + v.gameStates[idx].HeroType.String())
 		v.characterExpLabel[i].SetText(expText)
 		// TODO: Generate or load the object from the actual player data...
-		v.characterImage[i] = d2map.CreateHero(
-			0,
-			0,
-			0,
+		v.characterImage[i] = d2map.CreatePlayer("", "", 0, 0, 0,
 			v.gameStates[idx].HeroType,
 			d2inventory.HeroObjects[v.gameStates[idx].HeroType],
 		)
@@ -166,13 +173,13 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 }
 
 func (v *CharacterSelect) onNewCharButtonClicked() {
-	d2scene.SetNextScene(CreateSelectHeroClass())
+	d2screen.SetNextScreen(CreateSelectHeroClass(v.connectionType, v.connectionHost))
 }
 
 func (v *CharacterSelect) onExitButtonClicked() {
 	mainMenu := CreateMainMenu()
-	mainMenu.ShowTrademarkScreen = false
-	d2scene.SetNextScene(mainMenu)
+	mainMenu.SetScreenMode(ScreenModeMainMenu)
+	d2screen.SetNextScreen(mainMenu)
 }
 
 func (v *CharacterSelect) Render(screen d2render.Surface) error {
@@ -278,7 +285,7 @@ func (v *CharacterSelect) toggleDeleteCharacterDialog(showDialog bool) {
 }
 
 func (v *CharacterSelect) refreshGameStates() {
-	v.gameStates = d2gamestate.GetAllGameStates()
+	v.gameStates = d2player.GetAllPlayerStates()
 	v.updateCharacterBoxes()
 	if len(v.gameStates) > 0 {
 		v.selectedCharacter = 0
@@ -293,5 +300,13 @@ func (v *CharacterSelect) refreshGameStates() {
 }
 
 func (v *CharacterSelect) onOkButtonClicked() {
-	d2scene.SetNextScene(CreateGame(v.gameStates[v.selectedCharacter]))
+	gameClient, _ := d2client.Create(v.connectionType)
+	switch v.connectionType {
+	case d2clientconnectiontype.LANClient:
+		gameClient.Open(v.connectionHost, v.gameStates[v.selectedCharacter].FilePath)
+	default:
+		gameClient.Open("", v.gameStates[v.selectedCharacter].FilePath)
+	}
+
+	d2screen.SetNextScreen(CreateGame(gameClient))
 }

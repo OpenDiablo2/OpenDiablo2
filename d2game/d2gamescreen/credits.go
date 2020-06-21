@@ -1,4 +1,4 @@
-package d2gamescene
+package d2gamescreen
 
 import (
 	"bufio"
@@ -8,13 +8,12 @@ import (
 	"path"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -24,7 +23,7 @@ type labelItem struct {
 	Available bool
 }
 
-// Credits represents the credits scene
+// Credits represents the credits screen
 type Credits struct {
 	creditsBackground  *d2ui.Sprite
 	exitButton         d2ui.Button
@@ -35,7 +34,7 @@ type Credits struct {
 	doneWithCredits    bool
 }
 
-// CreateCredits creates an instance of the credits scene
+// CreateCredits creates an instance of the credits screen
 func CreateCredits() *Credits {
 	result := &Credits{
 		labels:             make([]*labelItem, 0),
@@ -64,13 +63,13 @@ func (v *Credits) LoadContributors() []string {
 	return contributors
 }
 
-// Load is called to load the resources for the credits scene
+// Load is called to load the resources for the credits screen
 func (v *Credits) OnLoad() error {
 	animation, _ := d2asset.LoadAnimation(d2resource.CreditsBackground, d2resource.PaletteSky)
 	v.creditsBackground, _ = d2ui.LoadSprite(animation)
 	v.creditsBackground.SetPosition(0, 0)
 
-	v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, d2common.TranslateString("#970"))
+	v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, "EXIT")
 	v.exitButton.SetPosition(33, 543)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 	d2ui.AddWidget(&v.exitButton)
@@ -88,7 +87,7 @@ func (v *Credits) OnLoad() error {
 	return nil
 }
 
-// Render renders the credits scene
+// Render renders the credits screen
 func (v *Credits) Render(screen d2render.Surface) error {
 	v.creditsBackground.RenderSegmented(screen, 4, 3, 0)
 	for _, label := range v.labels {
@@ -103,7 +102,7 @@ func (v *Credits) Render(screen d2render.Surface) error {
 
 const secondsPerCycle = float64(0.02)
 
-// Update runs the update logic on the credits scene
+// Update runs the update logic on the credits screen
 func (v *Credits) Advance(tickTime float64) error {
 	v.cycleTime += tickTime
 	for v.cycleTime >= secondsPerCycle {
@@ -130,8 +129,8 @@ func (v *Credits) Advance(tickTime float64) error {
 
 func (v *Credits) onExitButtonClicked() {
 	mainMenu := CreateMainMenu()
-	mainMenu.ShowTrademarkScreen = false
-	d2scene.SetNextScene(mainMenu)
+	mainMenu.SetScreenMode(ScreenModeMainMenu)
+	d2screen.SetNextScreen(mainMenu)
 }
 
 func (v *Credits) addNextItem() {

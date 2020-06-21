@@ -8,3 +8,8 @@
 /OpenDiablo2.exe
 /OpenDiablo2
 **/*.pprof
+*.swp
+.*.swp
+tags
+heap.out
+heap.pdf

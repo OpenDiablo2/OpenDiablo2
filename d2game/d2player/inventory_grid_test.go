@@ -1,8 +1,9 @@
 package d2player
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type TestItem struct {
@@ -16,7 +17,7 @@ func (t *TestItem) InventoryGridSize() (int, int) {
 	return t.width, t.height
 }
 
-func (t *TestItem) ItemCode() string {
+func (t *TestItem) GetItemCode() string {
 	return ""
 }
 

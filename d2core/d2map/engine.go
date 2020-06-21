@@ -1,16 +1,14 @@
 package d2map
 
 import (
-	"github.com/beefsack/go-astar"
+	"log"
 	"math"
-	"strings"
+
+	"github.com/beefsack/go-astar"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gamestate"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 )
 
 type MapEntity interface {
@@ -19,34 +17,33 @@ type MapEntity interface {
 	GetPosition() (float64, float64)
 }
 
+// Represents the map data for a specific location
 type MapEngine struct {
-	gameState *d2gamestate.GameState
-
-	debugVisLevel int
-
+	seed     int64
 	regions  []*MapRegion
 	entities MapEntitiesSearcher
-	viewport *Viewport
-	camera   Camera
 }
 
-func CreateMapEngine(gameState *d2gamestate.GameState) *MapEngine {
+// Creates a new instance of the map engine
+func CreateMapEngine(seed int64) *MapEngine {
 	engine := &MapEngine{
-		gameState: gameState,
-		viewport:  NewViewport(0, 0, 800, 600),
-		entities:  NewRangeSearcher(),
+		seed:     seed,
+		entities: NewRangeSearcher(),
 	}
 
-	d2term.BindAction("mapdebugvis", "set map debug visualization level", func(level int) {
-		engine.debugVisLevel = level
-	})
-
-	engine.viewport.SetCamera(&engine.camera)
 	return engine
+}
+
+// Sets the seed of the map for generation
+func (m *MapEngine) SetSeed(seed int64) {
+	log.Printf("Setting map engine seed to %d", seed)
+	m.seed = seed
 }
 
 func (m *MapEngine) GetStartPosition() (float64, float64) {
 	var startX, startY float64
+
+	// TODO: Temporary code, only works for starting map
 	if len(m.regions) > 0 {
 		region := m.regions[0]
 		startX, startY = region.getStartTilePosition()
@@ -55,6 +52,7 @@ func (m *MapEngine) GetStartPosition() (float64, float64) {
 	return startX, startY
 }
 
+// Returns the center of the map
 func (m *MapEngine) GetCenterPosition() (float64, float64) {
 	var centerX, centerY float64
 	if len(m.regions) > 0 {
@@ -66,69 +64,115 @@ func (m *MapEngine) GetCenterPosition() (float64, float64) {
 	return centerX, centerY
 }
 
-func (m *MapEngine) MoveCameraTo(x, y float64) {
-	m.camera.MoveTo(x, y)
-}
-
-func (m *MapEngine) MoveCameraBy(x, y float64) {
-	m.camera.MoveBy(x, y)
-}
-
-func (m *MapEngine) ScreenToWorld(x, y int) (float64, float64) {
-	return m.viewport.ScreenToWorld(x, y)
-}
-
-func (m *MapEngine) ScreenToOrtho(x, y int) (float64, float64) {
-	return m.viewport.ScreenToOrtho(x, y)
-}
-
-func (m *MapEngine) WorldToOrtho(x, y float64) (float64, float64) {
-	return m.viewport.WorldToOrtho(x, y)
-}
-
-func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int) {
-	region, entities := loadRegion(m.gameState.Seed, 0, 0, regionType, levelPreset, fileIndex)
+func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int, cacheTiles bool) {
+	region, entities := loadRegion(m.seed, 0, 0, regionType, levelPreset, fileIndex, cacheTiles)
 	m.regions = append(m.regions, region)
 	m.entities.Add(entities...)
 }
 
-func (m *MapEngine) GenerateAct1Overworld() {
-	d2audio.PlayBGM("/data/global/music/Act1/town1.wav") // TODO: Temp stuff here
-
-	region, entities := loadRegion(m.gameState.Seed, 0, 0, d2enum.RegionAct1Town, 1, -1)
-	m.regions = append(m.regions, region)
-	m.entities.Add(entities...)
-
-	if strings.Contains(region.regionPath, "E1") {
-		region, entities := loadRegion(m.gameState.Seed, region.tileRect.Width-1, 0, d2enum.RegionAct1Town, 2, -1)
-		m.AppendRegion(region)
-		m.entities.Add(entities...)
-	} else if strings.Contains(region.regionPath, "S1") {
-		region, entities := loadRegion(m.gameState.Seed, 0, region.tileRect.Height-1, d2enum.RegionAct1Town, 3, -1)
-		m.AppendRegion(region)
-		m.entities.Add(entities...)
-	}
-}
-
+// Appends a region to the map
 func (m *MapEngine) AppendRegion(region *MapRegion) {
-	// TODO: Stitch together region.walkableArea
 	m.regions = append(m.regions, region)
+	// Stitch together the walk map
+
+	// Top/Bottom
+	for x := 0; x < region.tileRect.Width*5; x++ {
+		otherRegion := m.GetRegionAtTile(region.tileRect.Left+(x/5), region.tileRect.Top-1)
+		if otherRegion == nil {
+			continue
+		}
+		xDiff := (region.tileRect.Left - otherRegion.tileRect.Left) * 5
+
+		sourceSubtile := &region.walkableArea[0][x]
+		if !sourceSubtile.Walkable {
+			continue
+		}
+
+		// North West
+		otherX := x + xDiff - 1
+		otherY := (otherRegion.tileRect.Height * 5) - 1
+		if otherX < 0 || otherX >= len(otherRegion.walkableArea[otherY]) {
+			continue
+		}
+		otherRegion.walkableArea[otherY][x+xDiff].DownRight = sourceSubtile
+		sourceSubtile.UpLeft = &otherRegion.walkableArea[otherY][x+xDiff]
+
+		// North
+		otherX++
+		if otherX < 0 || otherX >= len(otherRegion.walkableArea[otherY]) {
+			continue
+		}
+		otherRegion.walkableArea[otherY][x+xDiff].Down = sourceSubtile
+		sourceSubtile.Up = &otherRegion.walkableArea[otherY][x+xDiff]
+
+		// NorthEast
+		otherX++
+		if otherX < 0 || otherX >= len(otherRegion.walkableArea[otherY]) {
+			continue
+		}
+		otherRegion.walkableArea[otherY][x+xDiff].DownLeft = sourceSubtile
+		sourceSubtile.UpRight = &otherRegion.walkableArea[otherY][x+xDiff]
+	}
+
+	// West/East
+	for y := 0; y < region.tileRect.Height*5; y++ {
+		otherRegion := m.GetRegionAtTile(region.tileRect.Left-1, region.tileRect.Top+(y/5))
+		if otherRegion == nil {
+			continue
+		}
+		yDiff := (region.tileRect.Top - otherRegion.tileRect.Top) * 5
+
+		sourceSubtile := &region.walkableArea[y][0]
+		if !sourceSubtile.Walkable {
+			continue
+		}
+
+		// North West
+		otherX := (otherRegion.tileRect.Width * 5) - 1
+		otherY := y + yDiff - 1
+		if otherY < 0 || otherY >= len(otherRegion.walkableArea) {
+			continue
+		}
+		otherRegion.walkableArea[y+yDiff][otherX].DownRight = sourceSubtile
+		sourceSubtile.UpLeft = &otherRegion.walkableArea[y+yDiff][otherX]
+
+		// West
+		otherY++
+		if otherY < 0 || otherY >= len(otherRegion.walkableArea) {
+			continue
+		}
+		otherRegion.walkableArea[y+yDiff][otherX].Right = sourceSubtile
+		sourceSubtile.Left = &otherRegion.walkableArea[y+yDiff][otherX]
+
+		// South East
+		otherY++
+		if otherY < 0 || otherY >= len(otherRegion.walkableArea) {
+			continue
+		}
+		otherRegion.walkableArea[y+yDiff][otherX].UpRight = sourceSubtile
+		sourceSubtile.DownLeft = &otherRegion.walkableArea[y+yDiff][otherX]
+	}
+
 }
 
+// Returns the region located at the specified tile location
 func (m *MapEngine) GetRegionAtTile(x, y int) *MapRegion {
-	for _, region := range m.regions {
+	// Read in reverse order as tiles can be placed over other tiles, and we prioritize the top level tiles
+	for i := len(m.regions) - 1; i >= 0; i-- {
+		region := m.regions[i]
 		if region.tileRect.IsInRect(x, y) {
 			return region
 		}
 	}
-
 	return nil
 }
 
+// Adds an entity to the map engine
 func (m *MapEngine) AddEntity(entity MapEntity) {
 	m.entities.Add(entity)
 }
 
+// Removes an entity from the map engine
 func (m *MapEngine) RemoveEntity(entity MapEntity) {
 	if entity == nil {
 		return
@@ -137,11 +181,12 @@ func (m *MapEngine) RemoveEntity(entity MapEntity) {
 	m.entities.Remove(entity)
 }
 
+// Advances time on the map engine
 func (m *MapEngine) Advance(tickTime float64) {
 	for _, region := range m.regions {
-		if region.isVisbile(m.viewport) {
-			region.advance(tickTime)
-		}
+		//if region.isVisbile(m.viewport) {
+		region.advance(tickTime)
+		//}
 	}
 
 	for _, entity := range m.entities.All() {
@@ -151,23 +196,16 @@ func (m *MapEngine) Advance(tickTime float64) {
 	m.entities.Update()
 }
 
-func (m *MapEngine) Render(target d2render.Surface) {
-	for _, region := range m.regions {
-		if region.isVisbile(m.viewport) {
-			region.renderPass1(m.viewport, target)
-			region.renderDebug(m.debugVisLevel, m.viewport, target)
-			region.renderPass2(m.entities, m.viewport, target)
-			region.renderPass3(m.viewport, target)
-		}
-	}
-}
-
+// Finds a walkable path between two points
 func (m *MapEngine) PathFind(startX, startY, endX, endY float64) (path []astar.Pather, distance float64, found bool) {
 	startTileX := int(math.Floor(startX))
 	startTileY := int(math.Floor(startY))
 	startSubtileX := int((startX - float64(int(startX))) * 5)
 	startSubtileY := int((startY - float64(int(startY))) * 5)
 	startRegion := m.GetRegionAtTile(startTileX, startTileY)
+	if startRegion == nil {
+		return
+	}
 	startNode := &startRegion.walkableArea[startSubtileY+((startTileY-startRegion.tileRect.Top)*5)][startSubtileX+((startTileX-startRegion.tileRect.Left)*5)]
 
 	endTileX := int(math.Floor(endX))
@@ -175,7 +213,18 @@ func (m *MapEngine) PathFind(startX, startY, endX, endY float64) (path []astar.P
 	endSubtileX := int((endX - float64(int(endX))) * 5)
 	endSubtileY := int((endY - float64(int(endY))) * 5)
 	endRegion := m.GetRegionAtTile(endTileX, endTileY)
-	endNode := &endRegion.walkableArea[endSubtileY+((endTileY-endRegion.tileRect.Top)*5)][endSubtileX+((endTileX-endRegion.tileRect.Left)*5)]
+	if endRegion == nil {
+		return
+	}
+	endNodeY := endSubtileY + ((endTileY - endRegion.tileRect.Top) * 5)
+	endNodeX := endSubtileX + ((endTileX - endRegion.tileRect.Left) * 5)
+	if endNodeY < 0 || endNodeY >= len(endRegion.walkableArea) {
+		return
+	}
+	if endNodeX < 0 || endNodeX >= len(endRegion.walkableArea[endNodeY]) {
+		return
+	}
+	endNode := &endRegion.walkableArea[endNodeY][endNodeX]
 
 	path, distance, found = astar.Path(endNode, startNode)
 	if path != nil {

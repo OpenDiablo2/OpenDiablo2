@@ -62,6 +62,10 @@ func (c *Composite) Render(target d2render.Surface) error {
 	return nil
 }
 
+func (c Composite) GetAnimationMode() string {
+	return c.mode.animationMode
+}
+
 func (c *Composite) SetMode(animationMode, weaponClass string, direction int) error {
 	if c.mode != nil && c.mode.animationMode == animationMode && c.mode.weaponClass == weaponClass && c.mode.direction == direction {
 		return nil

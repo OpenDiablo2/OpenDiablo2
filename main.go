@@ -9,9 +9,19 @@ import (
 	"image/png"
 	"log"
 	"os"
+	"os/exec"
 	"runtime"
+	"runtime/pprof"
 	"strconv"
 	"sync"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 
 	"gopkg.in/alecthomas/kingpin.v2"
 
@@ -19,7 +29,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescene"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
@@ -29,7 +38,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2scene"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -77,9 +85,9 @@ func main() {
 	}
 
 	if *region == 0 {
-		d2scene.SetNextScene(d2gamescene.CreateMainMenu())
+		d2screen.SetNextScreen(d2gamescreen.CreateMainMenu())
 	} else {
-		d2scene.SetNextScene(d2gamescene.CreateMapEngineTest(*region, *preset))
+		d2screen.SetNextScreen(d2gamescreen.CreateMapEngineTest(*region, *preset))
 	}
 
 	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", GitBranch)
@@ -114,6 +122,12 @@ func initialize() error {
 	}
 
 	d2term.BindLogger()
+	d2term.BindAction("dumpheap", "dumps the heap to heap.out", func() {
+		fileOut, _ := os.Create("heap.out")
+		pprof.WriteHeapProfile(fileOut)
+		fileOut.Close()
+		exec.Command("go", "tool", "pprof", "--pdf", "./OpenDiablo2", "./heap.out", ">", "./memprofile.pdf")
+	})
 	d2term.BindAction("fullscreen", "toggles fullscreen", func() {
 		fullscreen := !d2render.IsFullScreen()
 		d2render.SetFullScreen(fullscreen)
@@ -152,8 +166,8 @@ func initialize() error {
 	d2term.BindAction("quit", "exits the game", func() {
 		os.Exit(0)
 	})
-	d2term.BindAction("scene-gui", "enters the gui playground scene", func() {
-		d2scene.SetNextScene(d2gamescene.CreateGuiTestMain())
+	d2term.BindAction("screen-gui", "enters the gui playground screen", func() {
+		d2screen.SetNextScreen(d2gamescreen.CreateGuiTestMain())
 	})
 
 	if err := d2asset.Initialize(); err != nil {
@@ -182,7 +196,11 @@ func initialize() error {
 		return err
 	}
 
+	d2inventory.LoadHeroObjects()
+
 	d2ui.Initialize()
+
+	d2script.CreateScriptEngine()
 
 	return nil
 }
@@ -208,7 +226,7 @@ func update(target d2render.Surface) error {
 }
 
 func advance(elapsed float64) error {
-	if err := d2scene.Advance(elapsed); err != nil {
+	if err := d2screen.Advance(elapsed); err != nil {
 		return err
 	}
 
@@ -230,7 +248,7 @@ func advance(elapsed float64) error {
 }
 
 func render(target d2render.Surface) error {
-	if err := d2scene.Render(target); err != nil {
+	if err := d2screen.Render(target); err != nil {
 		return err
 	}
 
@@ -385,6 +403,14 @@ func loadDataDict() error {
 		{d2resource.MonStats, d2datadict.LoadMonStats},
 		{d2resource.MagicPrefix, d2datadict.LoadMagicPrefix},
 		{d2resource.MagicSuffix, d2datadict.LoadMagicSuffix},
+		{d2resource.ItemStatCost, d2datadict.LoadItemStatCosts},
+		{d2resource.CharStats, d2datadict.LoadCharStats},
+		{d2resource.MonStats, d2datadict.LoadMonStats},
+		{d2resource.Hireling, d2datadict.LoadHireling},
+		{d2resource.Experience, d2datadict.LoadExperienceBreakpoints},
+		{d2resource.Gems, d2datadict.LoadGems},
+		{d2resource.DifficultyLevels, d2datadict.LoadDifficultyLevels},
+		{d2resource.AutoMap, d2datadict.LoadAutoMaps},
 	}
 
 	for _, entry := range entries {

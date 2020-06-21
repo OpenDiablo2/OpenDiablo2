@@ -13,7 +13,6 @@ func getDefaultConfig() *Configuration {
 	config := &Configuration{
 		Language:        "ENG",
 		FullScreen:      false,
-		Scale:           1,
 		TicksPerSecond:  -1,
 		RunInBackground: true,
 		VsyncEnabled:    true,

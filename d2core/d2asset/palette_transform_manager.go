@@ -22,7 +22,7 @@ func (pm *paletteTransformManager) loadPaletteTransform(path string) (*d2pl2.PL2
 		return pl2.(*d2pl2.PL2File), nil
 	}
 
-	data, err := LoadFile(path); 
+	data, err := LoadFile(path)
 	if err != nil {
 		return nil, err
 	}

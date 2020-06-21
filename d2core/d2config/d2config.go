@@ -8,7 +8,6 @@ import (
 type Configuration struct {
 	Language        string
 	FullScreen      bool
-	Scale           float64
 	RunInBackground bool
 	TicksPerSecond  int
 	FpsCap          int

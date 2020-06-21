@@ -11,6 +11,7 @@ const (
 
 	TrademarkScreen       = "/data/global/ui/FrontEnd/trademarkscreenEXP.dc6"
 	GameSelectScreen      = "/data/global/ui/FrontEnd/gameselectscreenEXP.dc6"
+	TcpIpBackground       = "/data/global/ui/FrontEnd/TCPIPscreen.dc6"
 	Diablo2LogoFireLeft   = "/data/global/ui/FrontEnd/D2logoFireLeft.DC6"
 	Diablo2LogoFireRight  = "/data/global/ui/FrontEnd/D2logoFireRight.DC6"
 	Diablo2LogoBlackLeft  = "/data/global/ui/FrontEnd/D2logoBlackLeft.DC6"
@@ -174,6 +175,10 @@ const (
 	LevelDetails         = "/data/global/excel/Levels.bin"
 	ObjectDetails        = "/data/global/excel/Objects.txt"
 	SoundSettings        = "/data/global/excel/Sounds.txt"
+	ItemStatCost         = "/data/global/excel/ItemStatCost.txt"
+	Hireling             = "/data/global/excel/hireling.txt"
+	DifficultyLevels     = "/data/global/excel/difficultylevels.txt"
+	AutoMap              = "/data/global/excel/AutoMap.txt"
 
 	// --- Animations ---
 
@@ -188,6 +193,18 @@ const (
 	Armor       = "/data/global/excel/armor.txt"
 	Misc        = "/data/global/excel/misc.txt"
 	UniqueItems = "/data/global/excel/UniqueItems.txt"
+	Gems        = "/data/global/excel/gems.txt"
+
+	// --- Affixes ---
+
+	MagicPrefix = "/data/global/excel/MagicPrefix.txt"
+	MagicSuffix = "/data/global/excel/MagicSuffix.txt"
+
+	// --- Monster Prefix/Suffixes (?) ---
+	RarePrefix   = "/data/global/excel/RarePrefix.txt"
+	RareSuffix   = "/data/global/excel/RareSuffix.txt"
+	UniquePrefix = "/data/global/excel/UniquePrefix.txt"
+	UniqueSuffix = "/data/global/excel/UniqueSuffix.txt"
 
 	// --- Affixes ---
 

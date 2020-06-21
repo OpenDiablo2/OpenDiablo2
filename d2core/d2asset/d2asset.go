@@ -7,9 +7,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2pl2"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2pl2"
 )
 
 var singleton *assetManager
@@ -18,13 +18,13 @@ func Initialize() error {
 	verifyNotInit()
 
 	var (
-		config					= d2config.Get()
-		archiveManager			= createArchiveManager(config)
-		fileManager				= createFileManager(config, archiveManager)
-		paletteManager			= createPaletteManager()
-		paletteTransformManager	= createPaletteTransformManager()
-		animationManager		= createAnimationManager()
-		fontManager				= createFontManager()
+		config                  = d2config.Get()
+		archiveManager          = createArchiveManager(config)
+		fileManager             = createFileManager(config, archiveManager)
+		paletteManager          = createPaletteManager()
+		paletteTransformManager = createPaletteTransformManager()
+		animationManager        = createAnimationManager()
+		fontManager             = createFontManager()
 	)
 
 	singleton = &assetManager{

@@ -103,12 +103,10 @@ func (v *StreamReader) ReadByte() (byte, error) {
 }
 
 // ReadBytes reads multiple bytes
-func (v *StreamReader) ReadBytes(count int) ([]byte, error) {
-	result := make([]byte, count)
-	for i := 0; i < count; i++ {
-		result[i] = v.GetByte()
-	}
-	return result, nil
+func (v *StreamReader) ReadBytes(count int) []byte {
+	result := v.data[v.position : v.position+uint64(count)]
+	v.position += uint64(count)
+	return result
 }
 
 func (v *StreamReader) SkipBytes(count int) {

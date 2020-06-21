@@ -19,7 +19,9 @@ var lookupTable map[string]string
 func TranslateString(key string) string {
 	result, ok := lookupTable[key]
 	if !ok {
-		log.Panicf("Could not find a string for the key '%s'", key)
+		// Fix to allow v.setDescLabels("#123") to be bypassed for a patch in issue #360. Reenable later.
+		// log.Panicf("Could not find a string for the key '%s'", key)
+		return key
 	}
 	return result
 }
@@ -37,9 +39,7 @@ func LoadDictionary(dictionaryData []byte) {
 	}
 	br := CreateStreamReader(dictionaryData)
 	// CRC
-	if _, err := br.ReadBytes(2); err != nil {
-		log.Fatal("Error reading CRC")
-	}
+	br.ReadBytes(2)
 	numberOfElements := br.GetUInt16()
 	hashTableSize := br.GetUInt32()
 	// Version (always 0)
@@ -72,7 +72,7 @@ func LoadDictionary(dictionaryData []byte) {
 			continue
 		}
 		br.SetPosition(uint64(hashEntry.NameString))
-		nameVal, _ := br.ReadBytes(int(hashEntry.NameLength - 1))
+		nameVal := br.ReadBytes(int(hashEntry.NameLength - 1))
 		value := string(nameVal)
 		br.SetPosition(uint64(hashEntry.IndexString))
 		key := ""
@@ -92,16 +92,16 @@ func LoadDictionary(dictionaryData []byte) {
 
 		}
 		// Use the following code to write out the values
-		/*
-			f, err := os.OpenFile(`C:\Users\lunat\Desktop\D2\langdict.txt`,
-				os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-			if err != nil {
-				log.Println(err)
-			}
-			defer f.Close()
-			if _, err := f.WriteString("\n[" + key + "] " + value); err != nil {
-				log.Println(err)
-			}
+		/*=
+		f, err := os.OpenFile(`C:\Users\lunat\Desktop\D2\langdict.txt`,
+			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Println(err)
+		}
+		defer f.Close()
+		if _, err := f.WriteString("\n[" + key + "] " + value); err != nil {
+			log.Println(err)
+		}
 		*/
 	}
 }

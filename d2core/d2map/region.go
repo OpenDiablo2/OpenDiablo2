@@ -20,6 +20,8 @@ import (
 	"github.com/beefsack/go-astar"
 )
 
+var imageCacheRecords map[uint32]d2render.Surface
+
 type PathTile struct {
 	Walkable                                                    bool
 	Up, Down, Left, Right, UpLeft, UpRight, DownLeft, DownRight *PathTile
@@ -76,28 +78,31 @@ func (t *PathTile) PathEstimatedCost(to astar.Pather) float64 {
 }
 
 type MapRegion struct {
-	tileRect          d2common.Rectangle
-	regionPath        string
-	levelType         d2datadict.LevelTypeRecord
-	levelPreset       d2datadict.LevelPresetRecord
-	tiles             []d2dt1.Tile
-	ds1               *d2ds1.DS1
-	palette           *d2dat.DATPalette
-	startX            float64
-	startY            float64
-	imageCacheRecords map[uint32]d2render.Surface
-	seed              int64
-	currentFrame      int
-	lastFrameTime     float64
-	walkableArea      [][]PathTile
+	tileRect      d2common.Rectangle
+	regionPath    string
+	levelType     d2datadict.LevelTypeRecord
+	levelPreset   d2datadict.LevelPresetRecord
+	tiles         []d2dt1.Tile
+	ds1           *d2ds1.DS1
+	palette       *d2dat.DATPalette
+	startX        float64
+	startY        float64
+	seed          int64
+	currentFrame  int
+	lastFrameTime float64
+	walkableArea  [][]PathTile
 }
 
-func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.RegionIdType, levelPreset int, fileIndex int) (*MapRegion, []MapEntity) {
+// Invalidates the global region image cache. Call this when you are changing regions
+func InvalidateImageCache() {
+	imageCacheRecords = nil
+}
+
+func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.RegionIdType, levelPreset int, fileIndex int, cacheTiles bool) (*MapRegion, []MapEntity) {
 	region := &MapRegion{
-		levelType:         d2datadict.LevelTypes[levelType],
-		levelPreset:       d2datadict.LevelPresets[levelPreset],
-		imageCacheRecords: map[uint32]d2render.Surface{},
-		seed:              seed,
+		levelType:   d2datadict.LevelTypes[levelType],
+		levelPreset: d2datadict.LevelPresets[levelPreset],
+		seed:        seed,
 	}
 
 	region.palette, _ = loadPaletteForAct(levelType)
@@ -145,17 +150,20 @@ func loadRegion(seed int64, tileOffsetX, tileOffsetY int, levelType d2enum.Regio
 
 	entities := region.loadEntities()
 	region.loadSpecials()
-	region.generateTileCache()
 	region.generateWalkableMatrix()
+
+	if cacheTiles {
+		region.generateTileCache()
+	}
 	return region, entities
 }
 
 func (mr *MapRegion) generateWalkableMatrix() {
 	mr.walkableArea = make([][]PathTile, mr.tileRect.Height*5)
-	for y := 0; y < (mr.tileRect.Height-1)*5; y++ {
+	for y := 0; y < mr.tileRect.Height*5; y++ {
 		mr.walkableArea[y] = make([]PathTile, mr.tileRect.Width*5)
 		ty := int(float64(y) / 5.0)
-		for x := 0; x < (mr.tileRect.Width-1)*5; x++ {
+		for x := 0; x < mr.tileRect.Width*5; x++ {
 			tx := int(float64(x) / 5.0)
 			tile := mr.GetTile(tx, ty)
 			isBlocked := false
@@ -185,8 +193,8 @@ func (mr *MapRegion) generateWalkableMatrix() {
 			}
 			mr.walkableArea[y][x] = PathTile{
 				Walkable: !isBlocked,
-				X:        float64(x) / 5.0,
-				Y:        float64(y) / 5.0,
+				X:        (float64(x) / 5.0) + float64(mr.tileRect.Left),
+				Y:        (float64(y) / 5.0) + float64(mr.tileRect.Top),
 			}
 			if !isBlocked && y > 0 && mr.walkableArea[y-1][x].Walkable {
 				mr.walkableArea[y][x].Up = &mr.walkableArea[y-1][x]
@@ -200,7 +208,7 @@ func (mr *MapRegion) generateWalkableMatrix() {
 				mr.walkableArea[y][x].UpLeft = &mr.walkableArea[y-1][x-1]
 				mr.walkableArea[y-1][x-1].DownRight = &mr.walkableArea[y][x]
 			}
-			if !isBlocked && y > 0 && x < (mr.tileRect.Width*5) && mr.walkableArea[y-1][x+1].Walkable {
+			if !isBlocked && y > 0 && x < (mr.tileRect.Width*5)-1 && mr.walkableArea[y-1][x+1].Walkable {
 				mr.walkableArea[y][x].UpRight = &mr.walkableArea[y-1][x+1]
 				mr.walkableArea[y-1][x+1].DownLeft = &mr.walkableArea[y][x]
 			}
@@ -228,7 +236,7 @@ func (mr *MapRegion) loadSpecials() {
 	for tileY := range mr.ds1.Tiles {
 		for tileX := range mr.ds1.Tiles[tileY] {
 			for _, wall := range mr.ds1.Tiles[tileY][tileX].Walls {
-				if wall.Type == 10 && wall.Style == 30 && wall.Sequence == 0 {
+				if wall.Type == 10 && wall.Style == 30 && wall.Sequence == 0 && mr.startX == 0 && mr.startY == 0 {
 					mr.startX, mr.startY = mr.getTileWorldPosition(tileX, tileY)
 					mr.startX += 0.5
 					mr.startY += 0.5
@@ -480,7 +488,7 @@ func (mr *MapRegion) renderWall(tile d2ds1.WallRecord, viewport *Viewport, targe
 		return
 	}
 
-	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust))
+	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust)-8)
 	defer viewport.PopTranslation()
 
 	target.PushTranslation(viewport.GetTranslationScreen())
@@ -522,7 +530,7 @@ func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *View
 	ay := y - mr.tileRect.Top
 
 	if debugVisLevel > 0 {
-		if ay < 0 || ax < 0 || ay >= len(mr.ds1.Tiles) || x >= len(mr.ds1.Tiles[ay]) {
+		if ay < 0 || ax < 0 || ay >= len(mr.ds1.Tiles) || ax >= len(mr.ds1.Tiles[ay]) {
 			return
 		}
 		subTileColor := color.RGBA{R: 80, G: 80, B: 255, A: 50}
@@ -568,12 +576,14 @@ func (mr *MapRegion) renderTileDebug(x, y int, debugVisLevel int, viewport *View
 				for xx := 0; xx < 5; xx++ {
 					isoX := (xx - yy) * 16
 					isoY := (xx + yy) * 8
-					target.PushTranslation(isoX-3, isoY+4)
-					var walkableArea = mr.walkableArea[yy+(ay*5)][xx+(ax*5)]
-					if !walkableArea.Walkable {
-						target.DrawRect(5, 5, tileCollisionColor)
+					if !((len(mr.walkableArea) <= yy+(ay*5)) || (len(mr.walkableArea[yy+(ay*5)]) <= xx+(ax*5))) {
+						var walkableArea = mr.walkableArea[yy+(ay*5)][xx+(ax*5)]
+						if !walkableArea.Walkable {
+							target.PushTranslation(isoX-3, isoY+4)
+							target.DrawRect(5, 5, tileCollisionColor)
+							target.Pop()
+						}
 					}
-					target.Pop()
 				}
 			}
 		}
@@ -608,12 +618,15 @@ func (mr *MapRegion) generateTileCache() {
 
 func (mr *MapRegion) getImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte) d2render.Surface {
 	lookupIndex := uint32(style)<<24 | uint32(sequence)<<16 | uint32(tileType)<<8 | uint32(randomIndex)
-	return mr.imageCacheRecords[lookupIndex]
+	return imageCacheRecords[lookupIndex]
 }
 
 func (mr *MapRegion) setImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte, image d2render.Surface) {
 	lookupIndex := uint32(style)<<24 | uint32(sequence)<<16 | uint32(tileType)<<8 | uint32(randomIndex)
-	mr.imageCacheRecords[lookupIndex] = image
+	if imageCacheRecords == nil {
+		imageCacheRecords = make(map[uint32]d2render.Surface)
+	}
+	imageCacheRecords[lookupIndex] = image
 }
 
 func (mr *MapRegion) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) {
@@ -671,6 +684,10 @@ func (mr *MapRegion) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, t
 	} else {
 		tileIndex = mr.getRandomTile(tileOptions, tileX, tileY, mr.seed)
 		tileData = &tileOptions[tileIndex]
+	}
+
+	if tileData.Width == 0 || tileData.Height == 0 {
+		return
 	}
 
 	tile.RandomIndex = tileIndex
