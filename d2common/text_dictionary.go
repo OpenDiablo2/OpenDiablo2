@@ -39,9 +39,7 @@ func LoadDictionary(dictionaryData []byte) {
 	}
 	br := CreateStreamReader(dictionaryData)
 	// CRC
-	if _, err := br.ReadBytes(2); err != nil {
-		log.Fatal("Error reading CRC")
-	}
+	br.ReadBytes(2)
 	numberOfElements := br.GetUInt16()
 	hashTableSize := br.GetUInt32()
 	// Version (always 0)
@@ -74,7 +72,7 @@ func LoadDictionary(dictionaryData []byte) {
 			continue
 		}
 		br.SetPosition(uint64(hashEntry.NameString))
-		nameVal, _ := br.ReadBytes(int(hashEntry.NameLength - 1))
+		nameVal := br.ReadBytes(int(hashEntry.NameLength - 1))
 		value := string(nameVal)
 		br.SetPosition(uint64(hashEntry.IndexString))
 		key := ""

@@ -11,3 +11,5 @@
 *.swp
 .*.swp
 tags
+heap.out
+heap.pdf

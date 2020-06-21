@@ -63,5 +63,4 @@ func (m *MapEngine) GenerateAct1Overworld(cacheTiles bool) {
 		}
 
 	}
-
 }
