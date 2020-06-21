@@ -58,3 +58,15 @@ func (m *MapRenderer) ScreenToOrtho(x, y int) (float64, float64) {
 func (m *MapRenderer) WorldToOrtho(x, y float64) (float64, float64) {
 	return m.viewport.WorldToOrtho(x, y)
 }
+
+func (m *MapRenderer) ViewportToLeft() {
+	m.viewport.toLeft()
+}
+
+func (m *MapRenderer) ViewportToRight() {
+	m.viewport.toRight()
+}
+
+func (m *MapRenderer) ViewportDefault() {
+	m.viewport.resetAlign()
+}

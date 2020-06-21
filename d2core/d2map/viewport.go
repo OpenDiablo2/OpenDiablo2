@@ -11,16 +11,30 @@ type worldTrans struct {
 	y float64
 }
 
+const (
+	center = 0
+	left   = 1
+	right  = 2
+)
+
 type Viewport struct {
-	screenRect   d2common.Rectangle
-	transStack   []worldTrans
-	transCurrent worldTrans
-	camera       *Camera
+	defaultScreenRect d2common.Rectangle
+	screenRect        d2common.Rectangle
+	transStack        []worldTrans
+	transCurrent      worldTrans
+	camera            *Camera
+	align             int
 }
 
 func NewViewport(x, y, width, height int) *Viewport {
 	return &Viewport{
 		screenRect: d2common.Rectangle{
+			Left:   x,
+			Top:    y,
+			Width:  width,
+			Height: height,
+		},
+		defaultScreenRect: d2common.Rectangle{
 			Left:   x,
 			Top:    y,
 			Width:  width,
@@ -129,4 +143,27 @@ func (v *Viewport) getCameraOffset() (float64, float64) {
 	camY -= float64(v.screenRect.Height / 2)
 
 	return camX, camY
+}
+
+func (v *Viewport) toLeft() {
+	if v.align == left {
+		return
+	}
+	v.screenRect.Width = v.defaultScreenRect.Width / 2
+}
+
+func (v *Viewport) toRight() {
+	if v.align == right {
+		return
+	}
+	v.screenRect.Width = v.defaultScreenRect.Width / 2
+	v.screenRect.Left = v.defaultScreenRect.Left + v.defaultScreenRect.Width/2
+}
+
+func (v *Viewport) resetAlign() {
+	if v.align == center {
+		return
+	}
+	v.screenRect.Width = v.defaultScreenRect.Width
+	v.screenRect.Left = v.defaultScreenRect.Left
 }
