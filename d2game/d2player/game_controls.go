@@ -55,32 +55,24 @@ func NewGameControls(hero *d2map.Player, mapEngine *d2map.MapEngine, mapRenderer
 }
 
 func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
-	if event.Key == d2input.KeyEscape {
+	switch event.Key {
+	case d2input.KeyEscape:
 		g.escapeMenu.Toggle()
-		return true
-	}
-	if event.Key == d2input.KeyUp {
+	case d2input.KeyUp:
 		g.escapeMenu.OnUpKey()
-		return true
-	}
-	if event.Key == d2input.KeyDown {
+	case d2input.KeyDown:
 		g.escapeMenu.OnDownKey()
-		return true
-	}
-	if event.Key == d2input.KeyEnter {
+	case d2input.KeyEnter:
 		g.escapeMenu.OnEnterKey()
-		return true
-	}
-	if event.Key == d2input.KeyI {
+	case d2input.KeyI:
 		g.inventory.Toggle()
-		return true
-	}
-	if event.Key == d2input.KeyC {
+	case d2input.KeyC:
 		g.heroStats.Toggle()
-		return true
+	default:
+		return false
 	}
 
-	return false
+	return true
 }
 
 func (g *GameControls) OnMouseMove(event d2input.MouseMoveEvent) bool {
