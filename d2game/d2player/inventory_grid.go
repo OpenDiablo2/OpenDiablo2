@@ -20,7 +20,7 @@ type InventoryItem interface {
 }
 
 type EquipmentSlot struct {
-	item InventoryItem
+	Item InventoryItem
 	x    int
 	y    int
 }
@@ -28,7 +28,7 @@ type EquipmentSlot struct {
 var ErrorInventoryFull = errors.New("inventory full")
 
 // Reusable grid for use with player and merchant inventory.
-// Handles layout and rendering item icons based on code.
+// Handles layout and rendering Item icons based on code.
 type ItemGrid struct {
 	items          []InventoryItem
 	equipmentSlots map[string]EquipmentSlot
@@ -50,8 +50,8 @@ func NewItemGrid(width int, height int, originX int, originY int) *ItemGrid {
 		sprites:  make(map[string]*d2ui.Sprite),
 		equipmentSlots: map[string]EquipmentSlot{
 			"LeftHand": {
-				item: nil,
-				x:    100,
+				Item: nil,
+				x:    400,
 				y:    200,
 			},
 		},
@@ -81,6 +81,12 @@ func (g *ItemGrid) GetSlot(x int, y int) InventoryItem {
 	}
 
 	return nil
+}
+
+func (g *ItemGrid) ChangeEquippedSlot(slot string, item InventoryItem) {
+	var curItem = g.equipmentSlots[slot]
+	curItem.Item = item
+	g.equipmentSlots[slot] = curItem
 }
 
 // Add places a given set of items into the first available slots.
@@ -119,7 +125,7 @@ func (g *ItemGrid) Load(items ...InventoryItem) {
 			d2resource.PaletteSky,
 		)
 		if err != nil {
-			log.Printf("failed to load sprite for item (%s): %v", item.GetItemCode(), err)
+			log.Printf("failed to load sprite for Item (%s): %v", item.GetItemCode(), err)
 			continue
 		}
 		itemSprite, err = d2ui.LoadSprite(animation)
@@ -129,7 +135,7 @@ func (g *ItemGrid) Load(items ...InventoryItem) {
 
 }
 
-// Walk from top left to bottom right until a position large enough to hold the item is found.
+// Walk from top left to bottom right until a position large enough to hold the Item is found.
 // This is inefficient but simplifies the storage.  At most a hundred or so cells will be looped, so impact is minimal.
 func (g *ItemGrid) add(item InventoryItem) bool {
 	for y := 0; y < g.height; y++ {
@@ -170,7 +176,7 @@ func (g *ItemGrid) canFit(x int, y int, item InventoryItem) bool {
 
 func (g *ItemGrid) Set(x int, y int, item InventoryItem) error {
 	if !g.canFit(x, y, item) {
-		return fmt.Errorf("can not set item (%s) to position (%v, %v)", item.GetItemCode(), x, y)
+		return fmt.Errorf("can not set Item (%s) to position (%v, %v)", item.GetItemCode(), x, y)
 	}
 	g.set(x, y, item)
 	return nil
@@ -218,10 +224,10 @@ func (g *ItemGrid) Render(target d2render.Surface) {
 	}
 
 	for _, eq := range g.equipmentSlots {
-		if eq.item == nil {
+		if eq.Item == nil {
 			continue
 		}
-		itemSprite := g.sprites[eq.item.GetItemCode()]
+		itemSprite := g.sprites[eq.Item.GetItemCode()]
 		if itemSprite == nil {
 			continue
 		}
