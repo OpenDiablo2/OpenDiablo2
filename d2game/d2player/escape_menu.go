@@ -83,11 +83,6 @@ func (m *EscapeMenu) OnLoad() error {
 	return nil
 }
 
-// ScreenUnloadHandler
-func (m *EscapeMenu) OnUnload() error {
-	return nil
-}
-
 // ScreenRenderHandler
 func (m *EscapeMenu) Render(target d2render.Surface) error {
 	if !m.isOpen {
@@ -135,7 +130,9 @@ func (m *EscapeMenu) IsOpen() bool {
 }
 
 func (m *EscapeMenu) Toggle() {
-	m.reset()
+	if !m.isOpen {
+		m.reset()
+	}
 	m.isOpen = !m.isOpen
 }
 
@@ -163,28 +160,6 @@ func (m *EscapeMenu) OnDownKey() {
 
 func (m *EscapeMenu) OnEnterKey() {
 	m.selectCurrent()
-}
-
-func (m *EscapeMenu) selectCurrent() {
-	switch m.current {
-	case EscapeOptions:
-		m.onOptions()
-		m.selectSound.Play()
-	case EscapeSaveExit:
-		m.onSaveAndExit()
-		m.selectSound.Play()
-	case EscapeReturn:
-		m.onReturnToGame()
-		m.selectSound.Play()
-	}
-}
-
-func (m *EscapeMenu) Open() {
-	m.isOpen = true
-}
-
-func (m *EscapeMenu) Close() {
-	m.isOpen = false
 }
 
 // Moves current selection marker to closes option to mouse.
@@ -235,6 +210,20 @@ func (m *EscapeMenu) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	}
 
 	return false
+}
+
+func (m *EscapeMenu) selectCurrent() {
+	switch m.current {
+	case EscapeOptions:
+		m.onOptions()
+		m.selectSound.Play()
+	case EscapeSaveExit:
+		m.onSaveAndExit()
+		m.selectSound.Play()
+	case EscapeReturn:
+		m.onReturnToGame()
+		m.selectSound.Play()
+	}
 }
 
 // User clicked on "OPTIONS"
