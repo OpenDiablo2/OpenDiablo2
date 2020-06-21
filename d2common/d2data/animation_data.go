@@ -35,8 +35,7 @@ func LoadAnimationData(rawData []byte) {
 				FramesPerDirection: int(streamReader.GetInt32()),
 				AnimationSpeed:     int(streamReader.GetInt32()),
 			}
-			flagData := streamReader.ReadBytes(144)
-			data.Flags = flagData
+			data.Flags = streamReader.ReadBytes(144)
 			cofIndex := strings.ToLower(data.COFName)
 			if _, found := AnimationData[cofIndex]; !found {
 				AnimationData[cofIndex] = make([]*AnimationDataRecord, 0)
