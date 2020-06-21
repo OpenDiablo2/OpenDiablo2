@@ -62,7 +62,7 @@ func NewItemGrid(width int, height int, originX int, originY int) *ItemGrid {
 			"Helmet": {
 				Item: nil,
 				x:    549,
-				y:    83,
+				y:    133,
 			},
 			"Amulet": {
 				Item: nil,
@@ -72,7 +72,7 @@ func NewItemGrid(width int, height int, originX int, originY int) *ItemGrid {
 			"Chest": {
 				Item: nil,
 				x:    546,
-				y:    155,
+				y:    205,
 			},
 			"Belt": {
 				Item: nil,

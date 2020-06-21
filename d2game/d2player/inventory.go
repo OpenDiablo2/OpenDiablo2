@@ -60,6 +60,8 @@ func (g *Inventory) Load() {
 	}
 	g.grid.Add(items...)
 	g.grid.ChangeEquippedSlot("LeftHand", d2inventory.GetWeaponItemByCode("wnd"))
+	g.grid.ChangeEquippedSlot("RightHand", d2inventory.GetWeaponItemByCode("wnd"))
+	g.grid.ChangeEquippedSlot("Chest", d2inventory.GetWeaponItemByCode("wnd"))
 }
 
 func (g *Inventory) Render(target d2render.Surface) {
