@@ -208,7 +208,7 @@ func (v *Button) SetEnabled(enabled bool) {
 	v.enabled = enabled
 }
 
-// GetSize returns the size of the button
+// Size returns the size of the button
 func (v *Button) GetSize() (int, int) {
 	return v.width, v.height
 }

@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
@@ -20,7 +22,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -43,7 +44,7 @@ type CharacterSelect struct {
 	characterNameLabel     [8]d2ui.Label
 	characterStatsLabel    [8]d2ui.Label
 	characterExpLabel      [8]d2ui.Label
-	characterImage         [8]*d2map.Player
+	characterImage         [8]*d2mapentity.Player
 	gameStates             []*d2player.PlayerState
 	selectedCharacter      int
 	mouseButtonPressed     bool
@@ -165,7 +166,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		v.characterStatsLabel[i].SetText("Level 1 " + v.gameStates[idx].HeroType.String())
 		v.characterExpLabel[i].SetText(expText)
 		// TODO: Generate or load the object from the actual player data...
-		v.characterImage[i] = d2map.CreatePlayer("", "", 0, 0, 0,
+		v.characterImage[i] = d2mapentity.CreatePlayer("", "", 0, 0, 0,
 			v.gameStates[idx].HeroType,
 			d2inventory.HeroObjects[v.gameStates[idx].HeroType],
 		)
