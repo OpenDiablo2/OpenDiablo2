@@ -57,6 +57,11 @@ func NewGameControls(hero *d2map.Player, mapEngine *d2map.MapEngine, mapRenderer
 func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 	switch event.Key {
 	case d2input.KeyEscape:
+		if g.inventory.IsOpen() || g.heroStats.IsOpen() {
+			g.inventory.Close()
+			g.heroStats.Close()
+			break
+		}
 		g.escapeMenu.Toggle()
 	case d2input.KeyUp:
 		g.escapeMenu.OnUpKey()
