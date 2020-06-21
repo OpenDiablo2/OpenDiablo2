@@ -22,7 +22,7 @@ type InventoryItem interface {
 var ErrorInventoryFull = errors.New("inventory full")
 
 // Reusable grid for use with player and merchant inventory.
-// Handles layout and rendering Item icons based on code.
+// Handles layout and rendering item icons based on code.
 type ItemGrid struct {
 	items          []InventoryItem
 	equipmentSlots map[string]EquipmentSlot
@@ -73,7 +73,7 @@ func (g *ItemGrid) GetSlot(x int, y int) InventoryItem {
 
 func (g *ItemGrid) ChangeEquippedSlot(slot string, item InventoryItem) {
 	var curItem = g.equipmentSlots[slot]
-	curItem.Item = item
+	curItem.item = item
 	g.equipmentSlots[slot] = curItem
 }
 
@@ -113,7 +113,7 @@ func (g *ItemGrid) Load(items ...InventoryItem) {
 			d2resource.PaletteSky,
 		)
 		if err != nil {
-			log.Printf("failed to load sprite for Item (%s): %v", item.GetItemCode(), err)
+			log.Printf("failed to load sprite for item (%s): %v", item.GetItemCode(), err)
 			continue
 		}
 		itemSprite, err = d2ui.LoadSprite(animation)
@@ -123,7 +123,7 @@ func (g *ItemGrid) Load(items ...InventoryItem) {
 
 }
 
-// Walk from top left to bottom right until a position large enough to hold the Item is found.
+// Walk from top left to bottom right until a position large enough to hold the item is found.
 // This is inefficient but simplifies the storage.  At most a hundred or so cells will be looped, so impact is minimal.
 func (g *ItemGrid) add(item InventoryItem) bool {
 	for y := 0; y < g.height; y++ {
@@ -164,7 +164,7 @@ func (g *ItemGrid) canFit(x int, y int, item InventoryItem) bool {
 
 func (g *ItemGrid) Set(x int, y int, item InventoryItem) error {
 	if !g.canFit(x, y, item) {
-		return fmt.Errorf("can not set Item (%s) to position (%v, %v)", item.GetItemCode(), x, y)
+		return fmt.Errorf("can not set item (%s) to position (%v, %v)", item.GetItemCode(), x, y)
 	}
 	g.set(x, y, item)
 	return nil
@@ -212,10 +212,10 @@ func (g *ItemGrid) Render(target d2render.Surface) {
 	}
 
 	for _, eq := range g.equipmentSlots {
-		if eq.Item == nil {
+		if eq.item == nil {
 			continue
 		}
-		itemSprite := g.sprites[eq.Item.GetItemCode()]
+		itemSprite := g.sprites[eq.item.GetItemCode()]
 		if itemSprite == nil {
 			continue
 		}
