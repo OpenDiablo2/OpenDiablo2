@@ -268,7 +268,7 @@ func (mr *MapRegion) loadEntities() []MapEntity {
 	var entities []MapEntity
 
 	for _, object := range mr.ds1.Objects {
-		worldX, worldY := mr.getTileWorldPosition(object.X, object.Y)
+		worldX, worldY := mr.getSubTileWorldPosition(object.X, object.Y)
 
 		switch object.Lookup.Type {
 		case d2datadict.ObjectTypeCharacter:
@@ -361,6 +361,10 @@ func (mr *MapRegion) advance(elapsed float64) {
 	if mr.currentFrame > 9 {
 		mr.currentFrame = 0
 	}
+}
+
+func (mr *MapRegion) getSubTileWorldPosition(subTileX, subtileY int) (float64, float64) {
+	return float64(subTileX + (mr.tileRect.Left * 5)), float64(subtileY + (mr.tileRect.Top * 5))
 }
 
 func (mr *MapRegion) getTileWorldPosition(tileX, tileY int) (float64, float64) {
