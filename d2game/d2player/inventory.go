@@ -59,14 +59,12 @@ func (g *Inventory) Load() {
 		// TODO: Load the player's actual items
 	}
 	g.grid.ChangeEquippedSlot(d2enum.LeftArm, d2inventory.GetWeaponItemByCode("wnd"))
-	g.grid.ChangeEquippedSlot(d2enum.RightArm, d2inventory.GetWeaponItemByCode("wnd"))
-	g.grid.ChangeEquippedSlot(d2enum.Head, d2inventory.GetArmorItemByCode("sml"))
-	g.grid.ChangeEquippedSlot(d2enum.Torso, d2inventory.GetArmorItemByCode("buc"))
-	g.grid.ChangeEquippedSlot(d2enum.Legs, d2inventory.GetArmorItemByCode("buc"))
-	g.grid.ChangeEquippedSlot(d2enum.Belt, d2inventory.GetArmorItemByCode("buc"))
-	g.grid.ChangeEquippedSlot(d2enum.Gloves, d2inventory.GetArmorItemByCode("buc"))
-	g.grid.ChangeEquippedSlot(d2enum.LeftHand, d2inventory.GetArmorItemByCode("buc"))
-	g.grid.ChangeEquippedSlot(d2enum.RightHand, d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot(d2enum.RightArm, d2inventory.GetArmorItemByCode("buc"))
+	g.grid.ChangeEquippedSlot(d2enum.Head, d2inventory.GetArmorItemByCode("cap"))
+	g.grid.ChangeEquippedSlot(d2enum.Torso, d2inventory.GetArmorItemByCode("plt"))
+	g.grid.ChangeEquippedSlot(d2enum.Legs, d2inventory.GetArmorItemByCode("vbt"))
+	g.grid.ChangeEquippedSlot(d2enum.Belt, d2inventory.GetArmorItemByCode("vbl"))
+	g.grid.ChangeEquippedSlot(d2enum.Gloves, d2inventory.GetArmorItemByCode("lgl"))
 	g.grid.Add(items...)
 }
 
