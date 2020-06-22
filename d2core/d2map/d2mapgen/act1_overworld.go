@@ -1,6 +1,7 @@
 package d2mapgen
 
 import (
+	"log"
 	"math/rand"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -9,10 +10,11 @@ import (
 )
 
 func GenerateAct1Overworld(mapEngine *d2mapengine.MapEngine) {
+	log.Printf("Map seed: %d", mapEngine.Seed())
 	rand.Seed(mapEngine.Seed())
 	townStamp := d2mapstamp.LoadStamp(mapEngine.Seed(), d2enum.RegionAct1Town, 1, -1)
 	townSize := townStamp.Size()
-	mapEngine.ResetMap(0, d2enum.RegionAct1Town, townSize.Width, townSize.Height) // TODO: Mapgen - Needs levels.txt stuff
+	mapEngine.ResetMap(d2enum.RegionAct1Town, townSize.Width, townSize.Height) // TODO: Mapgen - Needs levels.txt stuff
 	mapEngine.PlaceStamp(townStamp, 0, 0)
 
 	mapEngine.RegenerateWalkPaths()

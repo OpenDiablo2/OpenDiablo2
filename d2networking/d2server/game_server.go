@@ -48,7 +48,8 @@ func Create(openNetworkServer bool) {
 	}
 
 	mapEngine := d2mapengine.CreateMapEngine()
-	mapEngine.ResetMap(0, d2enum.RegionAct1Town, 100, 100) // TODO: Mapgen - Needs levels.txt stuff
+	mapEngine.SetSeed(singletonServer.seed)
+	mapEngine.ResetMap(d2enum.RegionAct1Town, 100, 100) // TODO: Mapgen - Needs levels.txt stuff
 	d2mapgen.GenerateAct1Overworld(mapEngine)
 	singletonServer.mapEngines = append(singletonServer.mapEngines, mapEngine)
 
