@@ -64,6 +64,7 @@ func (m *MapEngine) ResetMap(levelType d2enum.RegionIdType, width, height int) {
 		dt1, _ := d2dt1.LoadDT1(fileData)
 		m.dt1TileData = append(m.dt1TileData, dt1.Tiles...)
 	}
+
 }
 
 func (m *MapEngine) FindTile(style, sequence, tileType int32) d2dt1.Tile {
@@ -106,13 +107,13 @@ func (m *MapEngine) PlaceStamp(stamp *d2mapstamp.Stamp, tileOffsetX, tileOffsetY
 	// Copy over the map tile data
 	for y := 0; y < stampSize.Height; y++ {
 		for x := 0; x < stampSize.Width; x++ {
-			mapTileIdx := x + tileOffsetX + ((y + tileOffsetY) * stampSize.Width)
+			mapTileIdx := x + tileOffsetX + ((y + tileOffsetY) * m.size.Width)
 			m.tiles[mapTileIdx] = *stamp.Tile(x, y)
 		}
 	}
 
 	// Copy over the entities
-	m.entities = append(m.entities, stamp.Entities()...)
+	m.entities = append(m.entities, stamp.Entities(tileOffsetX, tileOffsetY)...)
 }
 
 // Returns a reference to a map tile based on the specified tile X and Y coordinate
@@ -199,7 +200,7 @@ func (m *MapEngine) TileExists(tileX, tileY int) bool {
 }
 
 func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int, cacheTiles bool) {
-	region := d2mapstamp.LoadStamp(m.seed, regionType, levelPreset, fileIndex)
+	region := d2mapstamp.LoadStamp(regionType, levelPreset, fileIndex)
 	regionSize := region.Size()
 	m.ResetMap(regionType, regionSize.Width, regionSize.Height)
 	m.PlaceStamp(region, 0, 0)
