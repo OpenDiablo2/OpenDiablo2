@@ -101,6 +101,8 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 				}
 			})
 		}
+	case d2netpackettype.Ping:
+		g.clientConnection.SendPacketToServer(d2netpacket.CreatePongPacket(g.PlayerId))
 	default:
 		log.Fatalf("Invalid packet type: %d", packet.PacketType)
 	}
