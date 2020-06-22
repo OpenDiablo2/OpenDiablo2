@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 type LevelPresetRecord struct {
@@ -39,21 +39,21 @@ func createLevelPresetRecord(props []string) LevelPresetRecord {
 	}
 	result := LevelPresetRecord{
 		Name:         props[inc()],
-		DefinitionId: dh.StringToInt(props[inc()]),
-		LevelId:      dh.StringToInt(props[inc()]),
-		Populate:     dh.StringToUint8(props[inc()]) == 1,
-		Logicals:     dh.StringToUint8(props[inc()]) == 1,
-		Outdoors:     dh.StringToUint8(props[inc()]) == 1,
-		Animate:      dh.StringToUint8(props[inc()]) == 1,
-		KillEdge:     dh.StringToUint8(props[inc()]) == 1,
-		FillBlanks:   dh.StringToUint8(props[inc()]) == 1,
-		SizeX:        dh.StringToInt(props[inc()]),
-		SizeY:        dh.StringToInt(props[inc()]),
-		AutoMap:      dh.StringToUint8(props[inc()]) == 1,
-		Scan:         dh.StringToUint8(props[inc()]) == 1,
-		Pops:         dh.StringToInt(props[inc()]),
-		PopPad:       dh.StringToInt(props[inc()]),
-		FileCount:    dh.StringToInt(props[inc()]),
+		DefinitionId: d2common.StringToInt(props[inc()]),
+		LevelId:      d2common.StringToInt(props[inc()]),
+		Populate:     d2common.StringToUint8(props[inc()]) == 1,
+		Logicals:     d2common.StringToUint8(props[inc()]) == 1,
+		Outdoors:     d2common.StringToUint8(props[inc()]) == 1,
+		Animate:      d2common.StringToUint8(props[inc()]) == 1,
+		KillEdge:     d2common.StringToUint8(props[inc()]) == 1,
+		FillBlanks:   d2common.StringToUint8(props[inc()]) == 1,
+		SizeX:        d2common.StringToInt(props[inc()]),
+		SizeY:        d2common.StringToInt(props[inc()]),
+		AutoMap:      d2common.StringToUint8(props[inc()]) == 1,
+		Scan:         d2common.StringToUint8(props[inc()]) == 1,
+		Pops:         d2common.StringToInt(props[inc()]),
+		PopPad:       d2common.StringToInt(props[inc()]),
+		FileCount:    d2common.StringToInt(props[inc()]),
 		Files: [6]string{
 			props[inc()],
 			props[inc()],
@@ -62,9 +62,9 @@ func createLevelPresetRecord(props []string) LevelPresetRecord {
 			props[inc()],
 			props[inc()],
 		},
-		Dt1Mask:   dh.StringToUint(props[inc()]),
-		Beta:      dh.StringToUint8(props[inc()]) == 1,
-		Expansion: dh.StringToUint8(props[inc()]) == 1,
+		Dt1Mask:   d2common.StringToUint(props[inc()]),
+		Beta:      d2common.StringToUint8(props[inc()]) == 1,
+		Expansion: d2common.StringToUint8(props[inc()]) == 1,
 	}
 	return result
 }
