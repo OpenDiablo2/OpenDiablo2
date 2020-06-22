@@ -9,7 +9,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -26,13 +28,14 @@ type Panel interface {
 var missileID = 59
 
 type GameControls struct {
-	hero          *d2map.Player
-	mapEngine     *d2map.MapEngine
-	mapRenderer   *d2map.MapRenderer
+	hero          *d2mapentity.Player
+	mapEngine     *d2mapengine.MapEngine
+	mapRenderer   *d2maprenderer.MapRenderer
 	inventory     *Inventory
 	heroStats     *HeroStats
 	escapeMenu    *EscapeMenu
 	inputListener InputCallbackListener
+	FreeCam       bool
 
 	// UI
 	globeSprite     *d2ui.Sprite
@@ -43,7 +46,7 @@ type GameControls struct {
 	isZoneTextShown bool
 }
 
-func NewGameControls(hero *d2map.Player, mapEngine *d2map.MapEngine, mapRenderer *d2map.MapRenderer, inputListener InputCallbackListener) *GameControls {
+func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine, mapRenderer *d2maprenderer.MapRenderer, inputListener InputCallbackListener) *GameControls {
 	d2term.BindAction("setmissile", "set missile id to summon on right click", func(id int) {
 		missileID = id
 	})
@@ -52,42 +55,80 @@ func NewGameControls(hero *d2map.Player, mapEngine *d2map.MapEngine, mapRenderer
 	label.Color = color.RGBA{R: 255, G: 88, B: 82, A: 255}
 	label.Alignment = d2ui.LabelAlignCenter
 
-	return &GameControls{
-		hero:          hero,
-		mapEngine:     mapEngine,
-		inputListener: inputListener,
-		mapRenderer:   mapRenderer,
-		inventory:     NewInventory(),
-		heroStats:     NewHeroStats(),
-		escapeMenu:    NewEscapeMenu(),
+	gc := &GameControls{
+		hero:           hero,
+		inputListener:  inputListener,
+		mapRenderer:    mapRenderer,
+		inventory:      NewInventory(),
+		heroStats:      NewHeroStats(),
+		escapeMenu:     NewEscapeMenu(),
 		zoneChangeText: &label,
 	}
+
+	d2term.BindAction("freecam", "toggle free camera movement", func() {
+		gc.FreeCam = !gc.FreeCam
+	})
+
+	return gc
+}
+
+func (g *GameControls) OnKeyRepeat(event d2input.KeyEvent) bool {
+	if g.FreeCam {
+		var moveSpeed float64 = 8
+		if event.KeyMod == d2input.KeyModShift {
+			moveSpeed *= 2
+		}
+
+		if event.Key == d2input.KeyDown {
+			g.mapRenderer.MoveCameraBy(0, moveSpeed)
+			return true
+		}
+
+		if event.Key == d2input.KeyUp {
+			g.mapRenderer.MoveCameraBy(0, -moveSpeed)
+			return true
+		}
+
+		if event.Key == d2input.KeyRight {
+			g.mapRenderer.MoveCameraBy(moveSpeed, 0)
+			return true
+		}
+
+		if event.Key == d2input.KeyLeft {
+			g.mapRenderer.MoveCameraBy(-moveSpeed, 0)
+			return true
+		}
+	}
+
+	return false
 }
 
 func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
-	if event.Key == d2input.KeyEscape {
-		g.escapeMenu.Toggle()
-		return true
-	}
-	if event.Key == d2input.KeyI {
-		g.inventory.Toggle()
-		return true
-	}
-	if event.Key == d2input.KeyC {
-		g.heroStats.Toggle()
-		return true
-	}
-	if event.Key == d2input.KeyR {
-		g.hero.ToggleIsRunning()
-		// TODO: change the running menu icon
-		if g.hero.IsRunToggled() {
-			g.hero.SetIsRunning(true)
-		} else {
-			g.hero.SetIsRunning(false)
+	switch event.Key {
+	case d2input.KeyEscape:
+		if g.inventory.IsOpen() || g.heroStats.IsOpen() {
+			g.inventory.Close()
+			g.heroStats.Close()
+			break
 		}
-		return true
+		g.escapeMenu.Toggle()
+	case d2input.KeyUp:
+		g.escapeMenu.OnUpKey()
+	case d2input.KeyDown:
+		g.escapeMenu.OnDownKey()
+	case d2input.KeyEnter:
+		g.escapeMenu.OnEnterKey()
+	case d2input.KeyI:
+		g.inventory.Toggle()
+	case d2input.KeyC:
+		g.heroStats.Toggle()
+	case d2input.KeyR:
+		g.hero.ToggleRunWalk()
+		// TODO: change the running menu icon
+		g.hero.SetIsRunning(g.hero.IsRunToggled())
+	default:
+		return false
 	}
-
 	return false
 }
 
@@ -113,7 +154,7 @@ func (g *GameControls) OnMouseButtonRepeat(event d2input.MouseEvent) bool {
 		return true
 	}
 
-	return false
+	return true
 }
 
 func (g *GameControls) OnMouseMove(event d2input.MouseMoveEvent) bool {
@@ -137,6 +178,7 @@ func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	}
 
 	if event.Button == d2input.MouseButtonRight {
+		lastRightBtnActionTime = d2common.Now()
 		return g.ShootMissile(px, py)
 	}
 
@@ -144,7 +186,7 @@ func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
 }
 
 func (g *GameControls) ShootMissile(px float64, py float64) bool {
-	missile, err := d2map.CreateMissile(
+	missile, err := d2mapentity.CreateMissile(
 		int(g.hero.AnimatedComposite.LocationX),
 		int(g.hero.AnimatedComposite.LocationY),
 		d2datadict.Missiles[missileID],
@@ -159,12 +201,12 @@ func (g *GameControls) ShootMissile(px float64, py float64) bool {
 		px*5,
 		py*5,
 	)
+
 	missile.SetRadians(rads, func() {
 		g.mapEngine.RemoveEntity(missile)
 	})
 
 	g.mapEngine.AddEntity(missile)
-
 	return true
 }
 
@@ -273,7 +315,7 @@ func (g *GameControls) Render(target d2render.Surface) {
 	g.globeSprite.Render(target)
 
 	if g.isZoneTextShown {
-		g.zoneChangeText.SetPosition(width / 2, height/4)
+		g.zoneChangeText.SetPosition(width/2, height/4)
 		g.zoneChangeText.Render(target)
 	}
 }

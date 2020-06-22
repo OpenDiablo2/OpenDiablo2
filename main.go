@@ -57,9 +57,10 @@ const (
 )
 
 var singleton struct {
-	lastTime  float64
-	showFPS   bool
-	timeScale float64
+	lastTime          float64
+	lastScreenAdvance float64
+	showFPS           bool
+	timeScale         float64
 
 	captureState  captureState
 	capturePath   string
@@ -99,6 +100,7 @@ func main() {
 func initialize() error {
 	singleton.timeScale = 1.0
 	singleton.lastTime = d2common.Now()
+	singleton.lastScreenAdvance = singleton.lastTime
 
 	if err := d2config.Load(); err != nil {
 		return err
@@ -210,7 +212,7 @@ func update(target d2render.Surface) error {
 	elapsedTime := (currentTime - singleton.lastTime) * singleton.timeScale
 	singleton.lastTime = currentTime
 
-	if err := advance(elapsedTime); err != nil {
+	if err := advance(elapsedTime, currentTime); err != nil {
 		return err
 	}
 
@@ -225,9 +227,16 @@ func update(target d2render.Surface) error {
 	return nil
 }
 
-func advance(elapsed float64) error {
-	if err := d2screen.Advance(elapsed); err != nil {
-		return err
+const FPS_25 = 0.04 // 1/25
+
+func advance(elapsed, current float64) error {
+	elapsedLastScreenAdvance := (current - singleton.lastScreenAdvance) * singleton.timeScale
+
+	if elapsedLastScreenAdvance > FPS_25 {
+		singleton.lastScreenAdvance = current
+		if err := d2screen.Advance(elapsedLastScreenAdvance); err != nil {
+			return err
+		}
 	}
 
 	d2ui.Advance(elapsed)
@@ -413,6 +422,8 @@ func loadDataDict() error {
 		{d2resource.DifficultyLevels, d2datadict.LoadDifficultyLevels},
 		{d2resource.AutoMap, d2datadict.LoadAutoMaps},
 		{d2resource.LevelDetails, d2datadict.LoadLevelDetails},
+		{d2resource.LevelMaze, d2datadict.LoadLevelMazeDetails},
+		{d2resource.LevelSubstitutions, d2datadict.LoadLevelSubstitutions},
 	}
 
 	for _, entry := range entries {

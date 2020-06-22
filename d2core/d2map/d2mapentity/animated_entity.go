@@ -1,4 +1,4 @@
-package d2map
+package d2mapentity
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"

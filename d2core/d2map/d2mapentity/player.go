@@ -1,4 +1,4 @@
-package d2map
+package d2mapentity
 
 import (
 	"image/color"
@@ -78,7 +78,7 @@ func (p *Player) SetIsInTown(isInTown bool) {
 	p.isInTown = isInTown
 }
 
-func (p *Player) ToggleIsRunning() {
+func (p *Player) ToggleRunWalk() {
 	p.isRunToggled = !p.isRunToggled
 }
 

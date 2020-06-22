@@ -15,4 +15,3 @@ require (
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 )
-

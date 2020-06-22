@@ -5,6 +5,7 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -28,11 +29,12 @@ const (
 
 // EscapeMenu is the overlay menu shown in-game when pressing Escape
 type EscapeMenu struct {
-	current   EscapeOption
-	isOpen    bool
-	labels    []d2ui.Label
-	pentLeft  *d2ui.Sprite
-	pentRight *d2ui.Sprite
+	current     EscapeOption
+	isOpen      bool
+	labels      []d2ui.Label
+	pentLeft    *d2ui.Sprite
+	pentRight   *d2ui.Sprite
+	selectSound d2audio.SoundEffect
 
 	// pre-computations
 	pentWidth  int
@@ -49,7 +51,6 @@ func NewEscapeMenu() *EscapeMenu {
 
 // ScreenLoadHandler
 func (m *EscapeMenu) OnLoad() error {
-
 	m.labels = []d2ui.Label{
 		d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky),
 		d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky),
@@ -76,11 +77,8 @@ func (m *EscapeMenu) OnLoad() error {
 	m.pentWidth, m.pentHeight = m.pentLeft.GetFrameBounds()
 	_, m.textHeight = m.labels[EscapeOptions].GetSize()
 
-	return nil
-}
+	m.selectSound, _ = d2audio.LoadSoundEffect(d2resource.SFXCursorSelect)
 
-// ScreenUnloadHandler
-func (m *EscapeMenu) OnUnload() error {
 	return nil
 }
 
@@ -131,15 +129,36 @@ func (m *EscapeMenu) IsOpen() bool {
 }
 
 func (m *EscapeMenu) Toggle() {
+	if !m.isOpen {
+		m.reset()
+	}
 	m.isOpen = !m.isOpen
 }
 
-func (m *EscapeMenu) Open() {
-	m.isOpen = true
+func (m *EscapeMenu) reset() {
+	m.current = EscapeOptions
 }
 
-func (m *EscapeMenu) Close() {
-	m.isOpen = false
+func (m *EscapeMenu) OnUpKey() {
+	switch m.current {
+	case EscapeSaveExit:
+		m.current = EscapeOptions
+	case EscapeReturn:
+		m.current = EscapeSaveExit
+	}
+}
+
+func (m *EscapeMenu) OnDownKey() {
+	switch m.current {
+	case EscapeOptions:
+		m.current = EscapeSaveExit
+	case EscapeSaveExit:
+		m.current = EscapeReturn
+	}
+}
+
+func (m *EscapeMenu) OnEnterKey() {
+	m.selectCurrent()
 }
 
 // Moves current selection marker to closes option to mouse.
@@ -170,23 +189,40 @@ func (m *EscapeMenu) OnMouseButtonDown(event d2input.MouseEvent) bool {
 
 	lbl := &m.labels[EscapeOptions]
 	if m.toMouseRegion(event.HandlerEvent, lbl) == regIn {
-		m.onOptions()
+		m.current = EscapeOptions
+		m.selectCurrent()
 		return false
 	}
 
 	lbl = &m.labels[EscapeSaveExit]
 	if m.toMouseRegion(event.HandlerEvent, lbl) == regIn {
-		m.onSaveAndExit()
+		m.current = EscapeSaveExit
+		m.selectCurrent()
 		return false
 	}
 
 	lbl = &m.labels[EscapeReturn]
 	if m.toMouseRegion(event.HandlerEvent, lbl) == regIn {
-		m.onReturnToGame()
+		m.current = EscapeReturn
+		m.selectCurrent()
 		return false
 	}
 
 	return false
+}
+
+func (m *EscapeMenu) selectCurrent() {
+	switch m.current {
+	case EscapeOptions:
+		m.onOptions()
+		m.selectSound.Play()
+	case EscapeSaveExit:
+		m.onSaveAndExit()
+		m.selectSound.Play()
+	case EscapeReturn:
+		m.onReturnToGame()
+		m.selectSound.Play()
+	}
 }
 
 // User clicked on "OPTIONS"

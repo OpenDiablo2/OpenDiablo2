@@ -1,11 +1,18 @@
-package d2map
+package d2mapentity
 
 import (
 	"math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/beefsack/go-astar"
 )
+
+type MapEntity interface {
+	Render(target d2render.Surface)
+	Advance(tickTime float64)
+	GetPosition() (float64, float64)
+}
 
 // mapEntity represents an entity on the map that can be animated
 type mapEntity struct {
@@ -100,7 +107,7 @@ func (m *mapEntity) Step(tickTime float64) {
 
 		if d2common.AlmostEqual(m.LocationX, m.TargetX, 0.01) && d2common.AlmostEqual(m.LocationY, m.TargetY, 0.01) {
 			if len(m.path) > 0 {
-				m.SetTarget(m.path[0].(*PathTile).X*5, m.path[0].(*PathTile).Y*5, m.done)
+				m.SetTarget(m.path[0].(*d2common.PathTile).X*5, m.path[0].(*d2common.PathTile).Y*5, m.done)
 
 				if len(m.path) > 1 {
 					m.path = m.path[1:]
