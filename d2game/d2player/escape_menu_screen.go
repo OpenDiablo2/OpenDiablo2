@@ -40,7 +40,7 @@ type Screen interface {
 	OnDownKey()
 	OnEnterKey()
 	OnMouseMove(event d2input.MouseMoveEvent) bool
-	OnLeftClick(x, y int) bool
+	OnLeftClick(event d2input.MouseEvent) bool
 	Reset()
 }
 
@@ -190,6 +190,21 @@ func newOptionsScreen(switchScreenFn func(screenID)) *optionsScreen {
 }
 
 func (s *optionsScreen) OnEnterKey() {
+	s.selectItem(s.current)
+}
+
+func (s *optionsScreen) OnLeftClick(event d2input.MouseEvent) bool {
+	for i, label := range s.labels {
+		reg := s.toMouseRegion(event.HandlerEvent, label)
+		if reg != regIn {
+			continue
+		}
+		s.selectItem(itemID(i))
+	}
+	return true
+}
+
+func (s *optionsScreen) selectItem(opt itemID) {
 	s.selectSound.Play()
 	switch s.current {
 	case itemSoundOptions:
@@ -203,11 +218,6 @@ func (s *optionsScreen) OnEnterKey() {
 	case itemPreviousMenu:
 		s.switchScreenFn(mainScreenID)
 	}
-}
-
-func (s *optionsScreen) OnLeftClick(x, y int) bool {
-	s.OnEnterKey()
-	return true
 }
 
 type mainScreen struct {
@@ -242,6 +252,21 @@ func newMainScreen(switchScreenFn func(screenID)) *mainScreen {
 }
 
 func (s *mainScreen) OnEnterKey() {
+	s.selectItem(s.current)
+}
+
+func (s *mainScreen) OnLeftClick(event d2input.MouseEvent) bool {
+	for i, label := range s.labels {
+		reg := s.toMouseRegion(event.HandlerEvent, label)
+		if reg != regIn {
+			continue
+		}
+		s.selectItem(itemID(i))
+	}
+	return true
+}
+
+func (s *mainScreen) selectItem(opt itemID) {
 	s.selectSound.Play()
 	switch s.current {
 	case itemOptions:
@@ -251,9 +276,4 @@ func (s *mainScreen) OnEnterKey() {
 	case itemReturnToGame:
 		s.switchScreenFn(exitScreenID)
 	}
-}
-
-func (s *mainScreen) OnLeftClick(x, y int) bool {
-	s.OnEnterKey()
-	return true
 }

@@ -132,7 +132,7 @@ func (m *EscapeMenu) OnMouseButtonDown(event d2input.MouseEvent) bool {
 		return false
 	}
 	if event.Button == d2input.MouseButtonLeft {
-		return m.screens[m.activeScreen].OnLeftClick(event.HandlerEvent.X, event.HandlerEvent.Y)
+		return m.screens[m.activeScreen].OnLeftClick(event)
 	}
 	return false
 }
