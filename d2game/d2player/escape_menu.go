@@ -9,15 +9,15 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
-type screenID int
-
 const (
-	mainScreenID screenID = iota
+	exitScreenID    screenID = -1
+	mainScreenID             = 0
+	optionsScreenID          = 1
 )
 
 type EscapeMenu struct {
 	screens      []Screen
-	activeScreen Screen
+	activeScreen screenID
 
 	isOpen bool
 
@@ -26,34 +26,34 @@ type EscapeMenu struct {
 	selectSound d2audio.SoundEffect
 }
 
+type screenID int
+
 func NewEscapeMenu() *EscapeMenu {
-	mainScreen := newMainScreen()
-
-	screens := []Screen{
-		mainScreenID: mainScreen,
+	m := &EscapeMenu{}
+	m.screens = []Screen{
+		mainScreenID:    newMainScreen(m.switchScreen),
+		optionsScreenID: newOptionsScreen(m.switchScreen),
 	}
-
-	return &EscapeMenu{
-		screens:      screens,
-		activeScreen: screens[mainScreenID],
-	}
+	m.activeScreen = mainScreenID
+	return m
 }
 
 func (m *EscapeMenu) OnLoad() {
+	pentLeftAnim, _ := d2asset.LoadAnimation(d2resource.PentSpin, d2resource.PaletteUnits)
+	pentLeft, _ := d2ui.LoadSprite(pentLeftAnim)
+	pentLeft.SetBlend(false)
+	pentLeft.PlayBackward()
+
+	pentRightAnim, _ := d2asset.LoadAnimation(d2resource.PentSpin, d2resource.PaletteUnits)
+	pentRight, _ := d2ui.LoadSprite(pentRightAnim)
+	pentRight.SetBlend(false)
+	pentRight.PlayForward()
+
+	selectSound, _ := d2audio.LoadSoundEffect(d2resource.SFXCursorSelect)
+
 	for _, screen := range m.screens {
-		screen.OnLoad()
+		screen.Load(pentLeft, pentRight, selectSound)
 	}
-
-	animation, _ := d2asset.LoadAnimation(d2resource.PentSpin, d2resource.PaletteUnits)
-	m.pentLeft, _ = d2ui.LoadSprite(animation)
-	m.pentLeft.SetBlend(false)
-	m.pentLeft.PlayBackward()
-
-	m.pentRight, _ = d2ui.LoadSprite(animation)
-	m.pentRight.SetBlend(false)
-	m.pentRight.PlayForward()
-
-	m.selectSound, _ = d2audio.LoadSoundEffect(d2resource.SFXCursorSelect)
 }
 
 func (m *EscapeMenu) OnEscKey() {
@@ -63,8 +63,9 @@ func (m *EscapeMenu) OnEscKey() {
 		return
 	}
 
-	if m.activeScreen.PrevScreen() != nil {
-		m.activeScreen = m.activeScreen.PrevScreen()
+	switch m.activeScreen {
+	case optionsScreenID:
+		m.switchScreen(mainScreenID)
 		return
 	}
 
@@ -72,7 +73,7 @@ func (m *EscapeMenu) OnEscKey() {
 }
 
 func (m *EscapeMenu) reset() {
-	m.activeScreen = m.screens[0]
+	m.activeScreen = mainScreenID
 	for _, screen := range m.screens {
 		screen.Reset()
 	}
@@ -82,14 +83,14 @@ func (m *EscapeMenu) Render(target d2render.Surface) {
 	if !m.isOpen {
 		return
 	}
-	m.activeScreen.Render(target)
+	m.screens[m.activeScreen].Render(target)
 }
 
 func (m *EscapeMenu) Advance(elapsed float64) error {
 	if !m.isOpen {
 		return nil
 	}
-	return m.activeScreen.Advance(elapsed)
+	return m.screens[m.activeScreen].Advance(elapsed)
 }
 
 func (m *EscapeMenu) Toggle() {
@@ -104,33 +105,44 @@ func (m *EscapeMenu) OnUpKey() {
 	if !m.isOpen {
 		return
 	}
-	m.activeScreen.OnUpKey()
+	m.screens[m.activeScreen].OnUpKey()
 }
 
 func (m *EscapeMenu) OnDownKey() {
 	if !m.isOpen {
 		return
 	}
-	m.activeScreen.OnDownKey()
+	m.screens[m.activeScreen].OnDownKey()
 }
 
 func (m *EscapeMenu) OnEnterKey() {
 	if !m.isOpen {
 		return
 	}
-	m.activeScreen.OnEnterKey()
+	m.screens[m.activeScreen].OnEnterKey()
 }
 
 func (m *EscapeMenu) OnMouseMove(event d2input.MouseMoveEvent) bool {
 	if !m.isOpen {
 		return false
 	}
-	return m.activeScreen.OnMouseMove(event)
+	return m.screens[m.activeScreen].OnMouseMove(event)
 }
 
 func (m *EscapeMenu) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	if !m.isOpen {
 		return false
 	}
-	return m.activeScreen.OnMouseButtonDown(event)
+	return m.screens[m.activeScreen].OnMouseButtonDown(event)
+}
+
+func (m *EscapeMenu) switchScreen(screenID screenID) {
+	if screenID == exitScreenID {
+		m.Toggle()
+		return
+	}
+	// Prevent visual glitches
+	prev := m.activeScreen
+	m.activeScreen = screenID
+	m.screens[prev].Reset()
 }
