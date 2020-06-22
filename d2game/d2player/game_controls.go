@@ -103,7 +103,7 @@ func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 			g.updateLayout()
 			break
 		}
-		g.escapeMenu.Toggle()
+		g.escapeMenu.OnEscKey()
 	case d2input.KeyUp:
 		g.escapeMenu.OnUpKey()
 	case d2input.KeyDown:
