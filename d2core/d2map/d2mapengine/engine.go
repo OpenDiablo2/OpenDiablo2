@@ -160,7 +160,7 @@ func (m *MapEngine) GetStartPosition() (float64, float64) {
 		for tileX := 0; tileX < m.size.Width; tileX++ {
 			tile := m.tiles[tileX+(tileY*m.size.Width)]
 			for _, wall := range tile.Walls {
-				if wall.Type == 10 && (wall.Style == 10 || wall.Style == 31) {
+				if wall.Type.Special() && wall.Style == 30 {
 					return float64(tileX) + 0.5, float64(tileY) + 0.5
 				}
 			}
