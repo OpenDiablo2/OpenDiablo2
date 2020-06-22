@@ -1,8 +1,9 @@
 package d2datadict
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // https://d2mods.info/forum/kb/viewarticle?a=360
@@ -796,7 +797,7 @@ func LoadMonStats(file []byte) {
 	dict := d2common.LoadDataDictionary(string(file))
 	numRecords := len(dict.Data)
 	MonStats = make(map[string]*MonStatsRecord, numRecords)
-	for idx, _ := range dict.Data {
+	for idx := range dict.Data {
 		record := &MonStatsRecord{
 			Key:                            dict.GetString("Id", idx),
 			Id:                             dict.GetString("hcIdx", idx),

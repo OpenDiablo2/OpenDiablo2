@@ -246,7 +246,7 @@ func adjustTree(newNode *linkedNode) {
 		var prev *linkedNode
 		// Go backwards thru the list looking for the insertion point
 		insertpoint = current
-		for true {
+		for {
 			prev = insertpoint.Prev
 			if prev == nil {
 				break
@@ -347,23 +347,19 @@ func HuffmanDecompress(data []byte) []byte {
 	outputstream := d2common.CreateStreamWriter()
 	bitstream := d2common.CreateBitStream(data[1:])
 	var decoded int
-	for true {
+Loop:
+	for {
 		node := decode(bitstream, head)
 		decoded = node.DecompressedValue
 		switch decoded {
 		case 256:
-			break
+			break Loop
 		case 257:
 			newvalue := bitstream.ReadBits(8)
 			outputstream.PushByte(byte(newvalue))
 			tail = insertNode(tail, newvalue)
-			break
 		default:
 			outputstream.PushByte(byte(decoded))
-			break
-		}
-		if decoded == 256 {
-			break
 		}
 	}
 

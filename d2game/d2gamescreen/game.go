@@ -1,13 +1,15 @@
 package d2gamescreen
 
 import (
+	"fmt"
 	"image/color"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
-
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
@@ -22,7 +24,7 @@ type Game struct {
 	mapRenderer          *d2maprenderer.MapRenderer
 	gameControls         *d2player.GameControls // TODO: Hack
 	localPlayer          *d2mapentity.Player
-	lastLevelType        int
+	lastRegionType       d2enum.RegionIdType
 	ticksSinceLevelCheck float64
 }
 
@@ -31,7 +33,7 @@ func CreateGame(gameClient *d2client.GameClient) *Game {
 		gameClient:           gameClient,
 		gameControls:         nil,
 		localPlayer:          nil,
-		lastLevelType:        -1,
+		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
 		mapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine),
 	}
@@ -61,6 +63,8 @@ func (v *Game) Render(screen d2render.Surface) error {
 	return nil
 }
 
+var hideZoneTextAfterSeconds = 2.0
+
 func (v *Game) Advance(tickTime float64) error {
 	if !v.gameControls.InEscapeMenu() || len(v.gameClient.Players) != 1 {
 		v.gameClient.MapEngine.Advance(tickTime) // TODO: Hack
@@ -77,13 +81,22 @@ func (v *Game) Advance(tickTime float64) error {
 			tile := v.gameClient.MapEngine.TileAt(v.localPlayer.TileX, v.localPlayer.TileY)
 			if tile != nil {
 				switch tile.RegionType {
-				case 1: // Rogue encampent
+				case d2enum.RegionAct1Town: // Rogue encampent
 					v.localPlayer.SetIsInTown(true)
 					d2audio.PlayBGM("/data/global/music/Act1/town1.wav")
-				case 2: // Blood Moore
+				case d2enum.RegionAct1Wilderness: // Blood Moore
 					v.localPlayer.SetIsInTown(false)
 					d2audio.PlayBGM("/data/global/music/Act1/wild.wav")
 				}
+
+				// skip showing zone change text the first time we enter the world
+				if v.lastRegionType != d2enum.RegionNone && v.lastRegionType != tile.RegionType {
+					//TODO: Should not be using RegionType as an index - this will return incorrect LevelDetails record for most of the zones.
+					v.gameControls.SetZoneChangeText(fmt.Sprintf("Entering The %s", d2datadict.LevelDetails[int(tile.RegionType)].LevelDisplayName))
+					v.gameControls.ShowZoneChangeText()
+					v.gameControls.HideZoneChangeTextAfter(hideZoneTextAfterSeconds)
+				}
+				v.lastRegionType = tile.RegionType
 			}
 		}
 	}

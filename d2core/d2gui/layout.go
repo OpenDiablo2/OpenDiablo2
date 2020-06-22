@@ -205,15 +205,12 @@ func (l *Layout) getContentSize() (int, int) {
 		case PositionTypeVertical:
 			width = d2common.MaxInt(width, w)
 			height += h
-			break
 		case PositionTypeHorizontal:
 			width += w
 			height = d2common.MaxInt(height, h)
-			break
 		case PositionTypeAbsolute:
 			width = d2common.MaxInt(width, x+w)
 			height = d2common.MaxInt(height, y+h)
-			break
 		}
 	}
 
@@ -304,10 +301,8 @@ func (l *Layout) adjustEntryPlacement() {
 		switch l.positionType {
 		case PositionTypeVertical:
 			expanderHeight = (height - contentHeight) / expanderCount
-			break
 		case PositionTypeHorizontal:
 			expanderWidth = (width - contentWidth) / expanderCount
-			break
 		}
 
 		expanderWidth = d2common.MaxInt(0, expanderWidth)
@@ -333,33 +328,24 @@ func (l *Layout) adjustEntryPlacement() {
 			switch l.horizontalAlign {
 			case HorizontalAlignLeft:
 				entry.x = 0
-				break
 			case HorizontalAlignCenter:
 				entry.x = width/2 - entry.width/2
-				break
 			case HorizontalAlignRight:
 				entry.x = width - entry.width
-				break
 			}
-			break
 		case PositionTypeHorizontal:
 			entry.x = offsetX
 			offsetX += entry.width
 			switch l.verticalAlign {
 			case VerticalAlignTop:
 				entry.y = 0
-				break
 			case VerticalAlignMiddle:
 				entry.y = height/2 - entry.height/2
-				break
 			case VerticalAlignBottom:
 				entry.y = height - entry.height
-				break
 			}
-			break
 		case PositionTypeAbsolute:
 			entry.x, entry.y = entry.widget.getPosition()
-			break
 		}
 	}
 }

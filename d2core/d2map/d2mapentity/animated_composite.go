@@ -68,25 +68,51 @@ func (ac *AnimatedComposite) Render(target d2render.Surface) {
 
 // rotate sets direction and changes animation
 func (ac *AnimatedComposite) rotate(angle float64) {
-	// TODO: Check if is in town and if is player.
-	newAnimationMode := ac.composite.GetAnimationMode()
-	if !ac.IsAtTarget() {
-		if ac.player != nil {
-			if ac.player.IsInTown() {
-				newAnimationMode = d2enum.AnimationModePlayerTownWalk.String()
-			} else {
-				newAnimationMode = d2enum.AnimationModePlayerWalk.String()
-			}
-		} else {
-			newAnimationMode = d2enum.AnimationModeMonsterWalk.String()
-		}
-	}
-
+	newAnimationMode := ac.GetAnimationMode().String()
 	newDirection := angleToDirection(angle)
+
 	if newAnimationMode != ac.composite.GetAnimationMode() || newDirection != ac.direction {
 		ac.SetMode(newAnimationMode, ac.weaponClass, newDirection)
 	}
+}
 
+func (ac *AnimatedComposite) GetAnimationMode() d2enum.AnimationMode {
+	var newAnimationMode d2enum.AnimationMode
+	if ac.player != nil {
+		newAnimationMode = ac.GetPlayerAnimationMode()
+	} else {
+		newAnimationMode = ac.GetMonsterAnimationMode()
+	}
+
+	return newAnimationMode
+}
+
+func (ac *AnimatedComposite) GetPlayerAnimationMode() d2enum.AnimationMode {
+	if ac.player.IsRunning() && !ac.IsAtTarget(){
+		return d2enum.AnimationModePlayerRun
+	}
+
+	if ac.player.IsInTown() {
+		if !ac.IsAtTarget() {
+			return d2enum.AnimationModePlayerTownWalk
+		}
+
+		return d2enum.AnimationModePlayerTownNeutral
+	}
+
+	if !ac.IsAtTarget() {
+		return d2enum.AnimationModePlayerWalk
+	}
+
+	return d2enum.AnimationModePlayerNeutral
+}
+
+func (ac *AnimatedComposite) GetMonsterAnimationMode() d2enum.AnimationMode {
+	if !ac.IsAtTarget() {
+		return d2enum.AnimationModeMonsterWalk
+	}
+
+	return d2enum.AnimationModeMonsterNeutral
 }
 
 func (ac *AnimatedComposite) Advance(elapsed float64) {

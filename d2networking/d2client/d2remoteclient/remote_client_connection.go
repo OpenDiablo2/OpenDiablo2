@@ -46,7 +46,7 @@ func Create() *RemoteClientConnection {
 }
 
 func (l *RemoteClientConnection) Open(connectionString string, saveFilePath string) error {
-	if strings.Index(connectionString, ":") == -1 {
+	if !strings.Contains(connectionString, ":") {
 		connectionString += ":6669"
 	}
 

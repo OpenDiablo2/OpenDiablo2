@@ -9,10 +9,10 @@ require (
 	github.com/beefsack/go-astar v0.0.0-20171024231011-f324bbb0d6f7
 	github.com/go-restruct/restruct v0.0.0-20191227155143-5734170a48a1
 	github.com/hajimehoshi/ebiten v1.11.2
+	github.com/pkg/profile v1.5.0
 	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
 	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.4.0
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 )
-

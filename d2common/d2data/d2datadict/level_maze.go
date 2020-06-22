@@ -40,7 +40,7 @@ func LoadLevelMazeDetails(file []byte) {
 	dict := d2common.LoadDataDictionary(string(file))
 	numRecords := len(dict.Data)
 	LevelMazeDetails = make(map[int]*LevelMazeDetailsRecord, numRecords)
-	for idx, _ := range dict.Data {
+	for idx := range dict.Data {
 		record := &LevelMazeDetailsRecord{
 			Name:              dict.GetString("Name", idx),
 			LevelId:           dict.GetNumber("Level", idx),

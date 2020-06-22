@@ -68,7 +68,7 @@ func LoadLevelSubstitutions(file []byte) {
 	numRecords := len(dict.Data)
 	LevelSubstitutions = make(map[int]*LevelSubstitutionRecord, numRecords)
 
-	for idx, _ := range dict.Data {
+	for idx := range dict.Data {
 
 		record := &LevelSubstitutionRecord{
 			Name:         dict.GetString("Name", idx),
