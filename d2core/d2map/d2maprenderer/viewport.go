@@ -32,7 +32,7 @@ func NewViewport(x, y, width, height int) *Viewport {
 			Left:   x,
 			Top:    y,
 			Width:  width,
-			Height: height + 200, // TODO: Temporary hack to prevent clipping
+			Height: height,
 		},
 		defaultScreenRect: d2common.Rectangle{
 			Left:   x,
