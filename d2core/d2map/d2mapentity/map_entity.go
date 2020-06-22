@@ -53,6 +53,14 @@ func (m *mapEntity) SetPath(path []astar.Pather, done func()) {
 	m.done = done
 }
 
+func (m *mapEntity) SetSpeed(speed float64) {
+	m.Speed = speed
+}
+
+func (m *mapEntity) GetSpeed() float64 {
+	return m.Speed
+}
+
 func (m *mapEntity) getStepLength(tickTime float64) (float64, float64) {
 	length := tickTime * m.Speed
 

@@ -126,6 +126,19 @@ func (im *inputManager) advance(elapsed float64) error {
 			})
 		}
 
+	for button := ebiten.MouseButtonLeft; button < ebiten.MouseButtonMiddle; button++ {
+		if ebiten.IsMouseButtonPressed(button) {
+			event := MouseEvent{eventBase, MouseButton(button)}
+			im.propagate(func(handler Handler) bool {
+				if l, ok := handler.(MouseButtonRepeatHandler); ok {
+					return l.OnMouseButtonRepeat(event)
+				}
+
+				return false
+			})
+		}
+	}
+
 		if inpututil.IsMouseButtonJustReleased(button) {
 			event := MouseEvent{eventBase, MouseButton(button)}
 			im.propagate(func(handler Handler) bool {

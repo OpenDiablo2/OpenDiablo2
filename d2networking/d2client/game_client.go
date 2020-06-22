@@ -95,10 +95,11 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 
 				regionType := tile.RegionType
 				if regionType == d2enum.RegionAct1Town {
-					player.AnimatedComposite.SetAnimationMode(d2enum.AnimationModePlayerTownNeutral.String())
+					player.SetIsInTown(true)
 				} else {
-					player.AnimatedComposite.SetAnimationMode(d2enum.AnimationModePlayerNeutral.String())
+					player.SetIsInTown(false)
 				}
+				player.AnimatedComposite.SetAnimationMode(player.GetAnimationMode().String())
 			})
 		}
 	default:
