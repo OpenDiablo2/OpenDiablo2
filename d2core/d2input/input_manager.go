@@ -2,9 +2,6 @@ package d2input
 
 import (
 	"sort"
-
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
 type handlerEntry struct {
@@ -26,7 +23,19 @@ func (lel handlerEntryList) Less(i, j int) bool {
 	return lel[i].priority > lel[j].priority
 }
 
+type InputService interface {
+	CursorPosition() (x int, y int)
+	InputChars() []rune
+	IsKeyPressed(key Key) bool
+	IsKeyJustPressed(key Key) bool
+	IsKeyJustReleased(key Key) bool
+	IsMouseButtonPressed(button MouseButton) bool
+	IsMouseButtonJustPressed(button MouseButton) bool
+	IsMouseButtonJustReleased(button MouseButton) bool
+}
+
 type inputManager struct {
+	in      InputService
 	cursorX int
 	cursorY int
 
@@ -36,28 +45,28 @@ type inputManager struct {
 	entries handlerEntryList
 }
 
-func (im *inputManager) advance(elapsed float64) error {
-	cursorX, cursorY := ebiten.CursorPosition()
+func (im *inputManager) advance(_ float64) error {
+	cursorX, cursorY := im.in.CursorPosition()
 
 	im.keyMod = 0
-	if ebiten.IsKeyPressed(ebiten.KeyAlt) {
+	if im.in.IsKeyPressed(KeyAlt) {
 		im.keyMod |= KeyModAlt
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyControl) {
+	if im.in.IsKeyPressed(KeyControl) {
 		im.keyMod |= KeyModControl
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyShift) {
+	if im.in.IsKeyPressed(KeyShift) {
 		im.keyMod |= KeyModShift
 	}
 
 	im.buttonMod = 0
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+	if im.in.IsMouseButtonPressed(MouseButtonLeft) {
 		im.buttonMod |= MouseButtonModLeft
 	}
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonMiddle) {
+	if im.in.IsMouseButtonPressed(MouseButtonMiddle) {
 		im.buttonMod |= MouseButtonModMiddle
 	}
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
+	if im.in.IsMouseButtonPressed(MouseButtonRight) {
 		im.buttonMod |= MouseButtonModRight
 	}
 
@@ -68,9 +77,9 @@ func (im *inputManager) advance(elapsed float64) error {
 		cursorY,
 	}
 
-	for key := ebiten.Key0; key < ebiten.KeyMax; key++ {
-		if inpututil.IsKeyJustPressed(key) {
-			event := KeyEvent{eventBase, Key(key)}
+	for key := keyMin; key < keyMax; key++ {
+		if im.in.IsKeyJustPressed(key) {
+			event := KeyEvent{eventBase, key}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(KeyDownHandler); ok {
 					return l.OnKeyDown(event)
@@ -80,7 +89,7 @@ func (im *inputManager) advance(elapsed float64) error {
 			})
 		}
 
-		if ebiten.IsKeyPressed(key) {
+		if im.in.IsKeyPressed(key) {
 			event := KeyEvent{eventBase, Key(key)}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(KeyRepeatHandler); ok {
@@ -91,7 +100,7 @@ func (im *inputManager) advance(elapsed float64) error {
 			})
 		}
 
-		if inpututil.IsKeyJustReleased(key) {
+		if im.in.IsKeyJustReleased(key) {
 			event := KeyEvent{eventBase, Key(key)}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(KeyUpHandler); ok {
@@ -103,7 +112,7 @@ func (im *inputManager) advance(elapsed float64) error {
 		}
 	}
 
-	if chars := ebiten.InputChars(); len(chars) > 0 {
+	if chars := im.in.InputChars(); len(chars) > 0 {
 		event := KeyCharsEvent{eventBase, chars}
 		im.propagate(func(handler Handler) bool {
 			if l, ok := handler.(KeyCharsHandler); ok {
@@ -114,8 +123,8 @@ func (im *inputManager) advance(elapsed float64) error {
 		})
 	}
 
-	for button := ebiten.MouseButtonLeft; button < ebiten.MouseButtonMiddle; button++ {
-		if inpututil.IsMouseButtonJustPressed(button) {
+	for button := mouseButtonMin; button < mouseButtonMax; button++ {
+		if im.in.IsMouseButtonJustPressed(button) {
 			event := MouseEvent{eventBase, MouseButton(button)}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(MouseButtonDownHandler); ok {
@@ -126,24 +135,21 @@ func (im *inputManager) advance(elapsed float64) error {
 			})
 		}
 
-	for button := ebiten.MouseButtonLeft; button < ebiten.MouseButtonMiddle; button++ {
-		if ebiten.IsMouseButtonPressed(button) {
+		if im.in.IsMouseButtonJustReleased(button) {
 			event := MouseEvent{eventBase, MouseButton(button)}
 			im.propagate(func(handler Handler) bool {
-				if l, ok := handler.(MouseButtonRepeatHandler); ok {
-					return l.OnMouseButtonRepeat(event)
+				if l, ok := handler.(MouseButtonUpHandler); ok {
+					return l.OnMouseButtonUp(event)
 				}
 
 				return false
 			})
 		}
-	}
-
-		if inpututil.IsMouseButtonJustReleased(button) {
+		if im.in.IsMouseButtonPressed(button) {
 			event := MouseEvent{eventBase, MouseButton(button)}
 			im.propagate(func(handler Handler) bool {
-				if l, ok := handler.(MouseButtonUpHandler); ok {
-					return l.OnMouseButtonUp(event)
+				if l, ok := handler.(MouseButtonRepeatHandler); ok {
+					return l.OnMouseButtonRepeat(event)
 				}
 
 				return false
