@@ -220,7 +220,7 @@ func (v *CharacterSelect) moveSelectionBox() {
 
 func (v *CharacterSelect) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	if !v.showDeleteConfirmation {
-		if event.Button == d2input.MouseButtonRight {
+		if event.Button == d2input.MouseButtonLeft {
 			mx, my := event.X, event.Y
 			bw := 272
 			bh := 92
