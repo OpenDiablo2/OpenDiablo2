@@ -45,7 +45,7 @@ func (fm *fileManager) loadFile(filePath string) ([]byte, error) {
 	return data, nil
 }
 
-func (fm *fileManager) fileExists(filePath string) (bool, error) {
+func (fm *fileManager) FileExists(filePath string) (bool, error) {
 	filePath = fm.fixupFilePath(filePath)
 	return fm.archiveManager.fileExistsInArchive(filePath)
 }
