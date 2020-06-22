@@ -114,7 +114,6 @@ func (s *baseScreen) OnDownKey() {
 func (s *baseScreen) OnMouseMove(event d2input.MouseMoveEvent) bool {
 	for i, label := range s.labels {
 		region := s.toMouseRegion(event.HandlerEvent, label)
-		fmt.Println(label.Y)
 		if region == regIn {
 			s.current = itemID(i)
 			return true
