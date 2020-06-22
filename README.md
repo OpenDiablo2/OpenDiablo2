@@ -71,6 +71,21 @@ The engine is configured via the `config.json` file. By default, the configurati
 expansion via the official Blizzard Diablo2 installers using the default file paths. If you are not on Windows, or have installed
 the game in a different location, the base path may have to be adjusted.
 
+## Profiling
+
+There are many profiler options to debug performance issues. These can be enabled by suppling the following command-line option:
+
+`go run . --profile=cpu,mem`
+
+Available profilers:\
+`cpu` `mem` `block` `goroutine` `trace` `thread` `mutex`
+
+You can export the profiler output with the following command:\
+`go tool pprof --pdf ./OpenDiablo2 /var/path/to/profiler.pprof > file.pdf`
+
+You may need to install [Graphviz](http://www.graphviz.org/download/) in order to convert the profiler output.
+
+
 ## Roadmap
 
 There is an in-progress [project roadmap](https://docs.google.com/document/d/156sWiuk-XBfomVxZ3MD-ijxnwM1X66KTHo2AcWIy8bE/edit?usp=sharing),
