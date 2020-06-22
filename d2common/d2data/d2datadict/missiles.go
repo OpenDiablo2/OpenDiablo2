@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 type MissileCalcParam struct {
@@ -197,16 +196,16 @@ func createMissileRecord(line string) MissileRecord {
 		return i
 	}
 	// note: in this file, empties are equivalent to zero, so all numerical conversions should
-	//       be wrapped in an dh.EmptyToZero transform
+	//       be wrapped in an d2common.EmptyToZero transform
 	result := MissileRecord{
 		Name: r[inc()],
-		Id:   dh.StringToInt(dh.EmptyToZero(r[inc()])),
+		Id:   d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
 
-		ClientMovementFunc:  dh.StringToInt(dh.EmptyToZero(dh.AsterToEmpty(r[inc()]))),
-		ClientCollisionFunc: dh.StringToInt(dh.EmptyToZero(dh.AsterToEmpty(r[inc()]))),
-		ServerMovementFunc:  dh.StringToInt(dh.EmptyToZero(dh.AsterToEmpty(r[inc()]))),
-		ServerCollisionFunc: dh.StringToInt(dh.EmptyToZero(dh.AsterToEmpty(r[inc()]))),
-		ServerDamageFunc:    dh.StringToInt(dh.EmptyToZero(dh.AsterToEmpty(r[inc()]))),
+		ClientMovementFunc:  d2common.StringToInt(d2common.EmptyToZero(d2common.AsterToEmpty(r[inc()]))),
+		ClientCollisionFunc: d2common.StringToInt(d2common.EmptyToZero(d2common.AsterToEmpty(r[inc()]))),
+		ServerMovementFunc:  d2common.StringToInt(d2common.EmptyToZero(d2common.AsterToEmpty(r[inc()]))),
+		ServerCollisionFunc: d2common.StringToInt(d2common.EmptyToZero(d2common.AsterToEmpty(r[inc()]))),
+		ServerDamageFunc:    d2common.StringToInt(d2common.EmptyToZero(d2common.AsterToEmpty(r[inc()]))),
 
 		ServerMovementCalc:  loadMissileCalc(&r, inc, 5),
 		ClientMovementCalc:  loadMissileCalc(&r, inc, 5),
@@ -214,12 +213,12 @@ func createMissileRecord(line string) MissileRecord {
 		ClientCollisionCalc: loadMissileCalc(&r, inc, 3),
 		ServerDamageCalc:    loadMissileCalc(&r, inc, 2),
 
-		Velocity:           dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		MaxVelocity:        dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		LevelVelocityBonus: dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		Accel:              dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		Range:              dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		LevelRangeBonus:    dh.StringToInt(dh.EmptyToZero(r[inc()])),
+		Velocity:           d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		MaxVelocity:        d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		LevelVelocityBonus: d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		Accel:              d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		Range:              d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		LevelRangeBonus:    d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
 
 		Light: loadMissileLight(&r, inc),
 
@@ -227,54 +226,54 @@ func createMissileRecord(line string) MissileRecord {
 
 		Collision: loadMissileCollision(&r, inc),
 
-		XOffset: dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		YOffset: dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		ZOffset: dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		Size:    dh.StringToInt(dh.EmptyToZero(r[inc()])),
+		XOffset: d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		YOffset: d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		ZOffset: d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		Size:    d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
 
-		DestroyedByTP:      dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		DestroyedByTPFrame: dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		CanDestroy:         dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
+		DestroyedByTP:      d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		DestroyedByTPFrame: d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		CanDestroy:         d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
 
-		UseAttackRating: dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		AlwaysExplode:   dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
+		UseAttackRating: d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		AlwaysExplode:   d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
 
-		ClientExplosion:     dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		TownSafe:            dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		IgnoreBossModifiers: dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		IgnoreMultishot:     dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		HolyFilterType:      dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		CanBeSlowed:         dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		TriggersHitEvents:   dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		TriggersGetHit:      dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		SoftHit:             dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		KnockbackPercent:    dh.StringToInt(dh.EmptyToZero(r[inc()])),
+		ClientExplosion:     d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		TownSafe:            d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		IgnoreBossModifiers: d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		IgnoreMultishot:     d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		HolyFilterType:      d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		CanBeSlowed:         d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		TriggersHitEvents:   d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		TriggersGetHit:      d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		SoftHit:             d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		KnockbackPercent:    d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
 
-		TransparencyMode: dh.StringToInt(dh.EmptyToZero(r[inc()])),
+		TransparencyMode: d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
 
-		UseQuantity:      dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		AffectedByPierce: dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		SpecialSetup:     dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
+		UseQuantity:      d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		AffectedByPierce: d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		SpecialSetup:     d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
 
-		MissileSkill: dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
+		MissileSkill: d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
 		SkillName:    r[inc()],
 
-		ResultFlags: dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		HitFlags:    dh.StringToInt(dh.EmptyToZero(r[inc()])),
+		ResultFlags: d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		HitFlags:    d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
 
-		HitShift:               dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		ApplyMastery:           dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		SourceDamage:           dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		HalfDamageForTwoHander: dh.StringToInt(dh.EmptyToZero(r[inc()])) == 1,
-		SourceMissDamage:       dh.StringToInt(dh.EmptyToZero(r[inc()])),
+		HitShift:               d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		ApplyMastery:           d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		SourceDamage:           d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		HalfDamageForTwoHander: d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		SourceMissDamage:       d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
 
 		Damage:          loadMissileDamage(&r, inc),
 		ElementalDamage: loadMissileElementalDamage(&r, inc),
 
-		HitClass:            dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		NumDirections:       dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		LocalBlood:          dh.StringToInt(dh.EmptyToZero(r[inc()])),
-		DamageReductionRate: dh.StringToInt(dh.EmptyToZero(r[inc()])),
+		HitClass:            d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		NumDirections:       d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		LocalBlood:          d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		DamageReductionRate: d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
 
 		TravelSound:      r[inc()],
 		HitSound:         r[inc()],
@@ -307,7 +306,7 @@ func LoadMissiles(file []byte) {
 
 func loadMissileCalcParam(r *[]string, inc func() int) MissileCalcParam {
 	result := MissileCalcParam{
-		Param: dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
+		Param: d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 		Desc:  (*r)[inc()],
 	}
 	return result
@@ -327,64 +326,64 @@ func loadMissileCalc(r *[]string, inc func() int, params int) MissileCalc {
 
 func loadMissileLight(r *[]string, inc func() int) MissileLight {
 	result := MissileLight{
-		Diameter: dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-		Flicker:  dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-		Red:      dh.StringToUint8(dh.EmptyToZero((*r)[inc()])),
-		Green:    dh.StringToUint8(dh.EmptyToZero((*r)[inc()])),
-		Blue:     dh.StringToUint8(dh.EmptyToZero((*r)[inc()])),
+		Diameter: d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+		Flicker:  d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+		Red:      d2common.StringToUint8(d2common.EmptyToZero((*r)[inc()])),
+		Green:    d2common.StringToUint8(d2common.EmptyToZero((*r)[inc()])),
+		Blue:     d2common.StringToUint8(d2common.EmptyToZero((*r)[inc()])),
 	}
 	return result
 }
 
 func loadMissileAnimation(r *[]string, inc func() int) MissileAnimation {
 	result := MissileAnimation{
-		StepsBeforeVisible: dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-		StepsBeforeActive:  dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-		LoopAnimation:      dh.StringToInt(dh.EmptyToZero((*r)[inc()])) == 1,
+		StepsBeforeVisible: d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+		StepsBeforeActive:  d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+		LoopAnimation:      d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])) == 1,
 		CelFileName:        (*r)[inc()],
-		AnimationRate:      dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-		AnimationLength:    dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-		AnimationSpeed:     dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-		StartingFrame:      dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-		HasSubLoop:         dh.StringToInt(dh.EmptyToZero((*r)[inc()])) == 1,
-		SubStartingFrame:   dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-		SubEndingFrame:     dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
+		AnimationRate:      d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+		AnimationLength:    d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+		AnimationSpeed:     d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+		StartingFrame:      d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+		HasSubLoop:         d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])) == 1,
+		SubStartingFrame:   d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+		SubEndingFrame:     d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 	}
 	return result
 }
 
 func loadMissileCollision(r *[]string, inc func() int) MissileCollision {
 	result := MissileCollision{
-		CollisionType:          dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-		DestroyedUponCollision: dh.StringToInt(dh.EmptyToZero((*r)[inc()])) == 1,
-		FriendlyFire:           dh.StringToInt(dh.EmptyToZero((*r)[inc()])) == 1,
-		LastCollide:            dh.StringToInt(dh.EmptyToZero((*r)[inc()])) == 1,
-		Collision:              dh.StringToInt(dh.EmptyToZero((*r)[inc()])) == 1,
-		ClientCollision:        dh.StringToInt(dh.EmptyToZero((*r)[inc()])) == 1,
-		ClientSend:             dh.StringToInt(dh.EmptyToZero((*r)[inc()])) == 1,
-		UseCollisionTimer:      dh.StringToInt(dh.EmptyToZero((*r)[inc()])) == 1,
-		TimerFrames:            dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
+		CollisionType:          d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+		DestroyedUponCollision: d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])) == 1,
+		FriendlyFire:           d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])) == 1,
+		LastCollide:            d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])) == 1,
+		Collision:              d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])) == 1,
+		ClientCollision:        d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])) == 1,
+		ClientSend:             d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])) == 1,
+		UseCollisionTimer:      d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])) == 1,
+		TimerFrames:            d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 	}
 	return result
 }
 
 func loadMissileDamage(r *[]string, inc func() int) MissileDamage {
 	result := MissileDamage{
-		MinDamage: dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
+		MinDamage: d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 		MinLevelDamage: [5]int{
-			dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-			dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-			dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-			dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-			dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
+			d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+			d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+			d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+			d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+			d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 		},
-		MaxDamage: dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
+		MaxDamage: d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 		MaxLevelDamage: [5]int{
-			dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-			dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-			dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-			dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-			dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
+			d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+			d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+			d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+			d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+			d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 		},
 		DamageSynergyPerCalc: d2common.CalcString((*r)[inc()]),
 	}
@@ -395,11 +394,11 @@ func loadMissileElementalDamage(r *[]string, inc func() int) MissileElementalDam
 	result := MissileElementalDamage{
 		ElementType: (*r)[inc()],
 		Damage:      loadMissileDamage(r, inc),
-		Duration:    dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
+		Duration:    d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 		LevelDuration: [3]int{
-			dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-			dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
-			dh.StringToInt(dh.EmptyToZero((*r)[inc()])),
+			d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+			d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+			d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 		},
 	}
 	return result

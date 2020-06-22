@@ -13,33 +13,29 @@ import (
 	"runtime"
 	"runtime/pprof"
 	"strconv"
+	"strings"
 	"sync"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2script"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
-
-	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen"
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
+	"github.com/pkg/profile"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 // GitBranch is set by the CI build process to the name of the branch
@@ -76,6 +72,8 @@ func main() {
 
 	region := kingpin.Arg("region", "Region type id").Int()
 	preset := kingpin.Arg("preset", "Level preset").Int()
+	profileOptions := kingpin.Flag("profile", "Profiles the program (cpu, mem, block, goroutine, trace, thread, mutex)").String()
+
 	kingpin.Parse()
 
 	log.SetFlags(log.Lshortfile)
@@ -83,6 +81,37 @@ func main() {
 
 	if err := initialize(); err != nil {
 		log.Fatal(err)
+	}
+
+	var profilers []func(*profile.Profile)
+	for _, profileOption := range strings.Split(*profileOptions, ",") {
+		switch strings.ToLower(strings.Trim(profileOption, " ")) {
+		case "cpu":
+			log.Printf("CPU profiling is enabled.")
+			profilers = append(profilers, profile.CPUProfile)
+		case "mem":
+			log.Printf("Memory profiling is enabled.")
+			profilers = append(profilers, profile.MemProfile)
+		case "block":
+			log.Printf("Block profiling is enabled.")
+			profilers = append(profilers, profile.BlockProfile)
+		case "goroutine":
+			log.Printf("Goroutine profiling is enabled.")
+			profilers = append(profilers, profile.GoroutineProfile)
+		case "trace":
+			log.Printf("Trace profiling is enabled.")
+			profilers = append(profilers, profile.TraceProfile)
+		case "thread":
+			log.Printf("Thread creation profiling is enabled.")
+			profilers = append(profilers, profile.ThreadcreationProfile)
+		case "mutex":
+			log.Printf("Mutex profiling is enabled.")
+			profilers = append(profilers, profile.MutexProfile)
+		}
+	}
+
+	if len(profilers) > 0 {
+		defer profile.Start(profilers...).Stop()
 	}
 
 	if *region == 0 {
@@ -306,11 +335,9 @@ func renderCapture(target d2render.Surface) error {
 		}
 
 		log.Printf("saved frame to %s", singleton.capturePath)
-		break
 	case captureStateGif:
 		screenshot := target.Screenshot()
 		singleton.captureFrames = append(singleton.captureFrames, screenshot)
-		break
 	case captureStateNone:
 		if len(singleton.captureFrames) > 0 {
 			defer cleanupCapture()

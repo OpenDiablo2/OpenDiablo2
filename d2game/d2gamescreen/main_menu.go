@@ -357,7 +357,6 @@ func (v *MainMenu) Advance(tickTime float64) error {
 		} else {
 			v.leftButtonHeld = false
 		}
-		break
 	}
 
 	return nil

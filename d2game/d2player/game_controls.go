@@ -57,6 +57,7 @@ func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
 
 	gc := &GameControls{
 		hero:           hero,
+		mapEngine:     mapEngine,
 		inputListener:  inputListener,
 		mapRenderer:    mapRenderer,
 		inventory:      NewInventory(),
@@ -109,6 +110,7 @@ func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 		if g.inventory.IsOpen() || g.heroStats.IsOpen() {
 			g.inventory.Close()
 			g.heroStats.Close()
+			g.updateLayout()
 			break
 		}
 		g.escapeMenu.Toggle()
@@ -120,8 +122,10 @@ func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 		g.escapeMenu.OnEnterKey()
 	case d2input.KeyI:
 		g.inventory.Toggle()
+		g.updateLayout()
 	case d2input.KeyC:
 		g.heroStats.Toggle()
+		g.updateLayout()
 	case d2input.KeyR:
 		g.hero.ToggleRunWalk()
 		// TODO: change the running menu icon
@@ -232,6 +236,23 @@ func (g *GameControls) Load() {
 func (g *GameControls) Advance(elapsed float64) error {
 	g.escapeMenu.Advance(elapsed)
 	return nil
+}
+
+func (g *GameControls) updateLayout() {
+	isRightPanelOpen := false
+	isLeftPanelOpen := false
+
+	// todo : add same logic when adding quest log and skill tree
+	isRightPanelOpen = g.inventory.isOpen || isRightPanelOpen
+	isLeftPanelOpen = g.heroStats.isOpen || isLeftPanelOpen
+
+	if isRightPanelOpen == isLeftPanelOpen {
+		g.mapRenderer.ViewportDefault()
+	} else if isRightPanelOpen == true {
+		g.mapRenderer.ViewportToLeft()
+	} else {
+		g.mapRenderer.ViewportToRight()
+	}
 }
 
 // TODO: consider caching the panels to single image that is reused.

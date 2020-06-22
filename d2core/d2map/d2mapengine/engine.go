@@ -1,7 +1,6 @@
 package d2mapengine
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -137,7 +136,6 @@ func (m *MapEngine) Seed() int64 {
 
 // Adds an entity to the map engine
 func (m *MapEngine) AddEntity(entity d2mapentity.MapEntity) {
-	fmt.Println(entity)
 	m.entities = append(m.entities, entity)
 }
 

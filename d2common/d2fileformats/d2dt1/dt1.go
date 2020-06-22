@@ -25,7 +25,7 @@ func LoadDT1(fileData []byte) (*DT1, error) {
 	ver1 := br.GetInt32()
 	ver2 := br.GetInt32()
 	if ver1 != 7 || ver2 != 6 {
-		return nil, fmt.Errorf("Expected to have a version of 7.6, but got %d.%d instead", ver1, ver2)
+		return nil, fmt.Errorf("expected to have a version of 7.6, but got %d.%d instead", ver1, ver2)
 	}
 	br.SkipBytes(260)
 	numberOfTiles := br.GetInt32()

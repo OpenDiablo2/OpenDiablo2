@@ -1,8 +1,9 @@
 package d2datadict
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 type GemsRecord struct {
@@ -52,7 +53,7 @@ type GemsRecord struct {
 func LoadGems(file []byte) {
 	d := d2common.LoadDataDictionary(string(file))
 	var Gems []*GemsRecord
-	for idx, _ := range d.Data {
+	for idx := range d.Data {
 		if d.GetString("name", idx) != "Expansion" {
 			/*
 				"Expansion" is the only field in line 36 of /data/global/excel/gems.txt and is only used to visually
