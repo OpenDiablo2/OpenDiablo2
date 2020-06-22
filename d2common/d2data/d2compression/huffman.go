@@ -246,7 +246,7 @@ func adjustTree(newNode *linkedNode) {
 		var prev *linkedNode
 		// Go backwards thru the list looking for the insertion point
 		insertpoint = current
-		for true {
+		for {
 			prev = insertpoint.Prev
 			if prev == nil {
 				break

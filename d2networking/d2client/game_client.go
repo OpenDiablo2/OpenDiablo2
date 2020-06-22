@@ -32,7 +32,7 @@ type GameClient struct {
 func Create(connectionType d2clientconnectiontype.ClientConnectionType) (*GameClient, error) {
 	result := &GameClient{
 		MapEngine:      d2mapengine.CreateMapEngine(), // TODO: Mapgen - Needs levels.txt stuff
-		Players:        make(map[string]*d2mapentity.Player, 0),
+		Players:        make(map[string]*d2mapentity.Player),
 		connectionType: connectionType,
 	}
 
