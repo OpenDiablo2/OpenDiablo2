@@ -32,6 +32,7 @@ type GameControls struct {
 	heroStats     *HeroStats
 	escapeMenu    *EscapeMenu
 	inputListener InputCallbackListener
+	FreeCam       bool
 
 	// UI
 	globeSprite *d2ui.Sprite
@@ -45,7 +46,7 @@ func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
 		missileID = id
 	})
 
-	return &GameControls{
+	gc := &GameControls{
 		hero:          hero,
 		mapEngine:     mapEngine,
 		inputListener: inputListener,
@@ -54,6 +55,43 @@ func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
 		heroStats:     NewHeroStats(),
 		escapeMenu:    NewEscapeMenu(),
 	}
+
+	d2term.BindAction("freecam", "toggle free camera movement", func() {
+		gc.FreeCam = !gc.FreeCam
+	})
+
+	return gc
+}
+
+func (g *GameControls) OnKeyRepeat(event d2input.KeyEvent) bool {
+	if g.FreeCam {
+		var moveSpeed float64 = 8
+		if event.KeyMod == d2input.KeyModShift {
+			moveSpeed *= 2
+		}
+
+		if event.Key == d2input.KeyDown {
+			g.mapRenderer.MoveCameraBy(0, moveSpeed)
+			return true
+		}
+
+		if event.Key == d2input.KeyUp {
+			g.mapRenderer.MoveCameraBy(0, -moveSpeed)
+			return true
+		}
+
+		if event.Key == d2input.KeyRight {
+			g.mapRenderer.MoveCameraBy(moveSpeed, 0)
+			return true
+		}
+
+		if event.Key == d2input.KeyLeft {
+			g.mapRenderer.MoveCameraBy(-moveSpeed, 0)
+			return true
+		}
+	}
+
+	return false
 }
 
 func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {

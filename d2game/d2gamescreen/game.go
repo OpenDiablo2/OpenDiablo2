@@ -104,7 +104,7 @@ func (v *Game) Advance(tickTime float64) error {
 	}
 
 	// Update the camera to focus on the player
-	if v.localPlayer != nil {
+	if v.localPlayer != nil && !v.gameControls.FreeCam {
 		rx, ry := v.mapRenderer.WorldToOrtho(v.localPlayer.AnimatedComposite.LocationX/5, v.localPlayer.AnimatedComposite.LocationY/5)
 		v.mapRenderer.MoveCameraTo(rx, ry)
 	}
