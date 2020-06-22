@@ -9,6 +9,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
+type screenID int
+
 const (
 	exitScreenID    screenID = -1
 	mainScreenID             = 0
@@ -18,15 +20,11 @@ const (
 type EscapeMenu struct {
 	screens      []Screen
 	activeScreen screenID
-
-	isOpen bool
-
-	pentLeft    *d2ui.Sprite
-	pentRight   *d2ui.Sprite
-	selectSound d2audio.SoundEffect
+	isOpen       bool
+	pentLeft     *d2ui.Sprite
+	pentRight    *d2ui.Sprite
+	selectSound  d2audio.SoundEffect
 }
-
-type screenID int
 
 func NewEscapeMenu() *EscapeMenu {
 	m := &EscapeMenu{}
@@ -133,7 +131,10 @@ func (m *EscapeMenu) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	if !m.isOpen {
 		return false
 	}
-	return m.screens[m.activeScreen].OnMouseButtonDown(event)
+	if event.Button == d2input.MouseButtonLeft {
+		return m.screens[m.activeScreen].OnLeftClick(event.HandlerEvent.X, event.HandlerEvent.Y)
+	}
+	return false
 }
 
 func (m *EscapeMenu) switchScreen(screenID screenID) {

@@ -24,6 +24,14 @@ const (
 	itemPreviousMenu             = 4
 )
 
+type mouseRegion int
+
+const (
+	regAbove mouseRegion = 0
+	regIn                = 1
+	regBelow             = 2
+)
+
 type Screen interface {
 	Load(pentLeft, pentRight *d2ui.Sprite, selectSound d2audio.SoundEffect)
 	Render(target d2render.Surface)
@@ -32,13 +40,13 @@ type Screen interface {
 	OnDownKey()
 	OnEnterKey()
 	OnMouseMove(event d2input.MouseMoveEvent) bool
-	OnMouseButtonDown(event d2input.MouseEvent) bool
+	OnLeftClick(x, y int) bool
 	Reset()
 }
 
 type baseScreen struct {
 	totalHeight    int
-	labels         []d2ui.Label
+	labels         []*d2ui.Label
 	current        itemID
 	defaultItem    itemID
 	pentLeft       *d2ui.Sprite
@@ -72,9 +80,7 @@ func (s *baseScreen) Render(target d2render.Surface) {
 
 func (s *baseScreen) Load(pentLeft, pentRight *d2ui.Sprite, selectSound d2audio.SoundEffect) {
 	s.pentLeft = pentLeft
-	s.pentLeft.PlayForward()
 	s.pentRight = pentRight
-	s.pentRight.PlayBackward()
 	s.selectSound = selectSound
 
 	totalHeight := 0
@@ -106,11 +112,37 @@ func (s *baseScreen) OnDownKey() {
 }
 
 func (s *baseScreen) OnMouseMove(event d2input.MouseMoveEvent) bool {
+	for i, label := range s.labels {
+		region := s.toMouseRegion(event.HandlerEvent, label)
+		fmt.Println(label.Y)
+		if region == regIn {
+			s.current = itemID(i)
+			return true
+		}
+		if i == 0 && region == regAbove {
+			s.current = 0
+			return true
+		}
+		if i == len(s.labels)-1 && region == regBelow {
+			s.current = itemID(len(s.labels) - 1)
+			return true
+		}
+	}
 	return false
 }
 
-func (s *baseScreen) OnMouseButtonDown(event d2input.MouseEvent) bool {
-	return false
+func (s *baseScreen) toMouseRegion(event d2input.HandlerEvent, lbl *d2ui.Label) mouseRegion {
+	_, h := lbl.GetSize()
+	y := lbl.Y
+	my := event.Y
+
+	if my < y {
+		return regAbove
+	}
+	if my > (y + h) {
+		return regBelow
+	}
+	return regIn
 }
 
 func (s *baseScreen) Reset() {
@@ -122,23 +154,32 @@ type optionsScreen struct {
 }
 
 func newOptionsScreen(switchScreenFn func(screenID)) *optionsScreen {
-	labels := []d2ui.Label{
-		itemSoundOptions:      d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky),
-		itemVideoOptions:      d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky),
-		itemAutomapOptions:    d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky),
-		itemConfigureControls: d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky),
-		itemPreviousMenu:      d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky),
-	}
-	labels[itemSoundOptions].SetText("sound options")
-	labels[itemSoundOptions].Alignment = d2ui.LabelAlignCenter
-	labels[itemVideoOptions].SetText("video options")
-	labels[itemVideoOptions].Alignment = d2ui.LabelAlignCenter
-	labels[itemAutomapOptions].SetText("automap options")
-	labels[itemAutomapOptions].Alignment = d2ui.LabelAlignCenter
-	labels[itemConfigureControls].SetText("configure controls")
-	labels[itemConfigureControls].Alignment = d2ui.LabelAlignCenter
-	labels[itemPreviousMenu].SetText("previous menu")
-	labels[itemPreviousMenu].Alignment = d2ui.LabelAlignCenter
+	labels := make([]*d2ui.Label, 5)
+
+	labelSound := d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky)
+	labelSound.SetText("sound options")
+	labelSound.Alignment = d2ui.LabelAlignCenter
+	labels[itemSoundOptions] = &labelSound
+
+	labelVideo := d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky)
+	labelVideo.SetText("video options")
+	labelVideo.Alignment = d2ui.LabelAlignCenter
+	labels[itemVideoOptions] = &labelVideo
+
+	labelAutomap := d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky)
+	labelAutomap.SetText("automap options")
+	labelAutomap.Alignment = d2ui.LabelAlignCenter
+	labels[itemAutomapOptions] = &labelAutomap
+
+	labelConfigureOpts := d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky)
+	labelConfigureOpts.SetText("configure controls")
+	labelConfigureOpts.Alignment = d2ui.LabelAlignCenter
+	labels[itemConfigureControls] = &labelConfigureOpts
+
+	labelPrevMenu := d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky)
+	labelPrevMenu.SetText("previous menu")
+	labelPrevMenu.Alignment = d2ui.LabelAlignCenter
+	labels[itemPreviousMenu] = &labelPrevMenu
 
 	return &optionsScreen{
 		baseScreen: &baseScreen{
@@ -165,22 +206,32 @@ func (s *optionsScreen) OnEnterKey() {
 	}
 }
 
+func (s *optionsScreen) OnLeftClick(x, y int) bool {
+	s.OnEnterKey()
+	return true
+}
+
 type mainScreen struct {
 	*baseScreen
 }
 
 func newMainScreen(switchScreenFn func(screenID)) *mainScreen {
-	labels := []d2ui.Label{
-		itemOptions:      d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky),
-		itemSaveAndExit:  d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky),
-		itemReturnToGame: d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky),
-	}
-	labels[itemOptions].SetText("options")
-	labels[itemOptions].Alignment = d2ui.LabelAlignCenter
-	labels[itemSaveAndExit].SetText("save and exit game")
-	labels[itemSaveAndExit].Alignment = d2ui.LabelAlignCenter
-	labels[itemReturnToGame].SetText("return to game")
-	labels[itemReturnToGame].Alignment = d2ui.LabelAlignCenter
+	labels := make([]*d2ui.Label, 3)
+
+	labelOptions := d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky)
+	labelOptions.SetText("options")
+	labelOptions.Alignment = d2ui.LabelAlignCenter
+	labels[itemOptions] = &labelOptions
+
+	labelSaveExit := d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky)
+	labelSaveExit.SetText("save and exit game")
+	labelSaveExit.Alignment = d2ui.LabelAlignCenter
+	labels[itemSaveAndExit] = &labelSaveExit
+
+	labelReturn := d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky)
+	labelReturn.SetText("return to game")
+	labelReturn.Alignment = d2ui.LabelAlignCenter
+	labels[itemReturnToGame] = &labelReturn
 
 	return &mainScreen{
 		baseScreen: &baseScreen{
@@ -201,4 +252,9 @@ func (s *mainScreen) OnEnterKey() {
 	case itemReturnToGame:
 		s.switchScreenFn(exitScreenID)
 	}
+}
+
+func (s *mainScreen) OnLeftClick(x, y int) bool {
+	s.OnEnterKey()
+	return true
 }
