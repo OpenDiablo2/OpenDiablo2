@@ -509,8 +509,7 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 	if renderInfo.Stance == d2enum.HeroStanceSelected {
 		return
 	}
-	mouseX := d2ui.CursorX
-	mouseY := d2ui.CursorY
+	mouseX, mouseY := d2ui.CursorPosition()
 	b := renderInfo.SelectionBounds
 	mouseHover := (mouseX >= b.Min.X) && (mouseX <= b.Min.X+b.Max.X) && (mouseY >= b.Min.Y) && (mouseY <= b.Min.Y+b.Max.Y)
 	if mouseHover && d2ui.CursorButtonPressed(d2ui.CursorButtonLeft) {

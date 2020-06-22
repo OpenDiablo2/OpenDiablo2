@@ -4,12 +4,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-
-	"github.com/hajimehoshi/ebiten/inpututil"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/hajimehoshi/ebiten/inpututil"
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -29,7 +28,7 @@ type TextBox struct {
 func CreateTextbox() TextBox {
 	animation, _ := d2asset.LoadAnimation(d2resource.TextBox2, d2resource.PaletteUnits)
 	bgSprite, _ := LoadSprite(animation)
-	result := TextBox{
+	tb := TextBox{
 		filter:    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
 		bgSprite:  bgSprite,
 		textLabel: CreateLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
@@ -37,8 +36,11 @@ func CreateTextbox() TextBox {
 		enabled:   true,
 		visible:   true,
 	}
-	result.lineBar.SetText("_")
-	return result
+	tb.lineBar.SetText("_")
+
+	d2input.BindHandler(tb) // TODO should it bind here or by the caller
+
+	return tb
 }
 
 func (v *TextBox) SetFilter(filter string) {
