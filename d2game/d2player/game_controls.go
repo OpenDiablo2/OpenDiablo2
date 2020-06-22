@@ -6,7 +6,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -23,12 +25,14 @@ type Panel interface {
 var missileID = 59
 
 type GameControls struct {
-	hero          *d2map.Player
-	mapEngine     *d2map.MapEngine
-	mapRenderer   *d2map.MapRenderer
+	hero          *d2mapentity.Player
+	mapEngine     *d2mapengine.MapEngine
+	mapRenderer   *d2maprenderer.MapRenderer
 	inventory     *Inventory
 	heroStats     *HeroStats
+	escapeMenu    *EscapeMenu
 	inputListener InputCallbackListener
+	FreeCam       bool
 
 	// UI
 	globeSprite *d2ui.Sprite
@@ -37,54 +41,95 @@ type GameControls struct {
 	skillIcon   *d2ui.Sprite
 }
 
-func NewGameControls(hero *d2map.Player, mapEngine *d2map.MapEngine, mapRenderer *d2map.MapRenderer, inputListener InputCallbackListener) *GameControls {
+func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine, mapRenderer *d2maprenderer.MapRenderer, inputListener InputCallbackListener) *GameControls {
 	d2term.BindAction("setmissile", "set missile id to summon on right click", func(id int) {
 		missileID = id
 	})
 
-	return &GameControls{
+	gc := &GameControls{
 		hero:          hero,
 		mapEngine:     mapEngine,
 		inputListener: inputListener,
 		mapRenderer:   mapRenderer,
 		inventory:     NewInventory(),
 		heroStats:     NewHeroStats(),
+		escapeMenu:    NewEscapeMenu(),
 	}
+
+	d2term.BindAction("freecam", "toggle free camera movement", func() {
+		gc.FreeCam = !gc.FreeCam
+	})
+
+	return gc
 }
 
-func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
-	if event.Key == d2input.KeyI {
-		g.inventory.Toggle()
-		g.updateLayout()
-		return true
-	}
-	if event.Key == d2input.KeyC {
-		g.heroStats.Toggle()
-		g.updateLayout()
-		return true
+func (g *GameControls) OnKeyRepeat(event d2input.KeyEvent) bool {
+	if g.FreeCam {
+		var moveSpeed float64 = 8
+		if event.KeyMod == d2input.KeyModShift {
+			moveSpeed *= 2
+		}
+
+		if event.Key == d2input.KeyDown {
+			g.mapRenderer.MoveCameraBy(0, moveSpeed)
+			return true
+		}
+
+		if event.Key == d2input.KeyUp {
+			g.mapRenderer.MoveCameraBy(0, -moveSpeed)
+			return true
+		}
+
+		if event.Key == d2input.KeyRight {
+			g.mapRenderer.MoveCameraBy(moveSpeed, 0)
+			return true
+		}
+
+		if event.Key == d2input.KeyLeft {
+			g.mapRenderer.MoveCameraBy(-moveSpeed, 0)
+			return true
+		}
 	}
 
 	return false
 }
 
-func (g *GameControls) updateLayout() {
-	isRightPanelOpen := false
-	isLeftPanelOpen := false
-
-	// todo : add same logic when adding quest log and skill tree
-	isRightPanelOpen = g.inventory.isOpen || isRightPanelOpen
-	isLeftPanelOpen = g.heroStats.isOpen || isLeftPanelOpen
-
-	if isRightPanelOpen == isLeftPanelOpen {
-		g.mapRenderer.ViewportDefault()
-	} else if isRightPanelOpen == true {
-		g.mapRenderer.ViewportToLeft()
-	} else {
-		g.mapRenderer.ViewportToRight()
+func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
+	switch event.Key {
+	case d2input.KeyEscape:
+		if g.inventory.IsOpen() || g.heroStats.IsOpen() {
+			g.inventory.Close()
+			g.heroStats.Close()
+			break
+		}
+		g.escapeMenu.Toggle()
+	case d2input.KeyUp:
+		g.escapeMenu.OnUpKey()
+	case d2input.KeyDown:
+		g.escapeMenu.OnDownKey()
+	case d2input.KeyEnter:
+		g.escapeMenu.OnEnterKey()
+	case d2input.KeyI:
+		g.inventory.Toggle()
+	case d2input.KeyC:
+		g.heroStats.Toggle()
+	default:
+		return false
 	}
+
+	return true
+}
+
+func (g *GameControls) OnMouseMove(event d2input.MouseMoveEvent) bool {
+	g.escapeMenu.OnMouseMove(event)
+	return false
 }
 
 func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
+	if g.escapeMenu.IsOpen() {
+		return g.escapeMenu.OnMouseButtonDown(event)
+	}
+
 	px, py := g.mapRenderer.ScreenToWorld(event.X, event.Y)
 	px = float64(int(px*10)) / 10.0
 	py = float64(int(py*10)) / 10.0
@@ -95,7 +140,7 @@ func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	}
 
 	if event.Button == d2input.MouseButtonRight {
-		missile, err := d2map.CreateMissile(
+		missile, err := d2mapentity.CreateMissile(
 			int(g.hero.AnimatedComposite.LocationX),
 			int(g.hero.AnimatedComposite.LocationY),
 			d2datadict.Missiles[missileID],
@@ -136,12 +181,20 @@ func (g *GameControls) Load() {
 
 	g.inventory.Load()
 	g.heroStats.Load()
+	g.escapeMenu.OnLoad()
+}
+
+// ScreenAdvanceHandler
+func (g *GameControls) Advance(elapsed float64) error {
+	g.escapeMenu.Advance(elapsed)
+	return nil
 }
 
 // TODO: consider caching the panels to single image that is reused.
 func (g *GameControls) Render(target d2render.Surface) {
 	g.inventory.Render(target)
 	g.heroStats.Render(target)
+	g.escapeMenu.Render(target)
 
 	width, height := target.GetSize()
 	offset := 0
@@ -217,4 +270,8 @@ func (g *GameControls) Render(target d2render.Surface) {
 	g.globeSprite.SetPosition(offset+8, height-8)
 	g.globeSprite.Render(target)
 
+}
+
+func (g *GameControls) InEscapeMenu() bool {
+	return g != nil && g.escapeMenu != nil && g.escapeMenu.IsOpen()
 }

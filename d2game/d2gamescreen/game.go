@@ -3,17 +3,15 @@ package d2gamescreen
 import (
 	"image/color"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 )
 
 type Game struct {
@@ -21,22 +19,23 @@ type Game struct {
 	//pentSpinRight *d2ui.Sprite
 	//testLabel     d2ui.Label
 	gameClient           *d2client.GameClient
-	mapRenderer          *d2map.MapRenderer
+	mapRenderer          *d2maprenderer.MapRenderer
 	gameControls         *d2player.GameControls // TODO: Hack
-	localPlayer          *d2map.Player
+	localPlayer          *d2mapentity.Player
 	lastLevelType        int
 	ticksSinceLevelCheck float64
 }
 
 func CreateGame(gameClient *d2client.GameClient) *Game {
-	return &Game{
+	result := &Game{
 		gameClient:           gameClient,
 		gameControls:         nil,
 		localPlayer:          nil,
 		lastLevelType:        -1,
 		ticksSinceLevelCheck: 0,
-		mapRenderer:          d2map.CreateMapRenderer(gameClient.MapEngine),
+		mapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine),
 	}
+	return result
 }
 
 func (v *Game) OnLoad() error {
@@ -50,6 +49,10 @@ func (v *Game) OnUnload() error {
 }
 
 func (v *Game) Render(screen d2render.Surface) error {
+	if v.gameClient.RegenMap {
+		v.gameClient.RegenMap = false
+		v.mapRenderer.RegenerateTileCache()
+	}
 	screen.Clear(color.Black)
 	v.mapRenderer.Render(screen)
 	if v.gameControls != nil {
@@ -59,25 +62,27 @@ func (v *Game) Render(screen d2render.Surface) error {
 }
 
 func (v *Game) Advance(tickTime float64) error {
-	v.gameClient.MapEngine.Advance(tickTime) // TODO: Hack
+	if !v.gameControls.InEscapeMenu() || len(v.gameClient.Players) != 1 {
+		v.gameClient.MapEngine.Advance(tickTime) // TODO: Hack
+	}
+
+	if v.gameControls != nil {
+		v.gameControls.Advance(tickTime)
+	}
 
 	v.ticksSinceLevelCheck += tickTime
 	if v.ticksSinceLevelCheck > 1.0 {
 		v.ticksSinceLevelCheck = 0
 		if v.localPlayer != nil {
-			region := v.gameClient.MapEngine.GetRegionAtTile(v.localPlayer.TileX, v.localPlayer.TileY)
-			if region != nil {
-				levelType := region.GetLevelType().Id
-				if levelType != v.lastLevelType {
-					v.lastLevelType = levelType
-					switch levelType {
-					case 1: // Rogue encampent
-						v.localPlayer.SetIsInTown(true)
-						d2audio.PlayBGM("/data/global/music/Act1/town1.wav")
-					case 2: // Blood Moore
-						v.localPlayer.SetIsInTown(false)
-						d2audio.PlayBGM("/data/global/music/Act1/wild.wav")
-					}
+			tile := v.gameClient.MapEngine.TileAt(v.localPlayer.TileX, v.localPlayer.TileY)
+			if tile != nil {
+				switch tile.RegionType {
+				case 1: // Rogue encampent
+					v.localPlayer.SetIsInTown(true)
+					d2audio.PlayBGM("/data/global/music/Act1/town1.wav")
+				case 2: // Blood Moore
+					v.localPlayer.SetIsInTown(false)
+					d2audio.PlayBGM("/data/global/music/Act1/wild.wav")
 				}
 			}
 		}
@@ -99,7 +104,7 @@ func (v *Game) Advance(tickTime float64) error {
 	}
 
 	// Update the camera to focus on the player
-	if v.localPlayer != nil {
+	if v.localPlayer != nil && !v.gameControls.FreeCam {
 		rx, ry := v.mapRenderer.WorldToOrtho(v.localPlayer.AnimatedComposite.LocationX/5, v.localPlayer.AnimatedComposite.LocationY/5)
 		v.mapRenderer.MoveCameraTo(rx, ry)
 	}

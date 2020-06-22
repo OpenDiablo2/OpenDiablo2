@@ -1,4 +1,4 @@
-package d2map
+package d2maprenderer
 
 import (
 	"math"
@@ -109,10 +109,11 @@ func (v *Viewport) GetTranslationScreen() (int, int) {
 	return v.OrthoToScreen(v.transCurrent.x, v.transCurrent.y)
 }
 
-func (v *Viewport) PushTranslationOrtho(x, y float64) {
+func (v *Viewport) PushTranslationOrtho(x, y float64) *Viewport {
 	v.transStack = append(v.transStack, v.transCurrent)
 	v.transCurrent.x += x
 	v.transCurrent.y += y
+	return v
 }
 
 func (v *Viewport) PushTranslationWorld(x, y float64) {

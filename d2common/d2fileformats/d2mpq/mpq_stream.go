@@ -1,7 +1,6 @@
 package d2mpq
 
 import (
-	"bufio"
 	"bytes"
 	"compress/zlib"
 	"encoding/binary"
@@ -58,9 +57,8 @@ func (v *Stream) loadBlockOffsets() error {
 	blockPositionCount := ((v.BlockTableEntry.UncompressedFileSize + v.BlockSize - 1) / v.BlockSize) + 1
 	v.BlockPositions = make([]uint32, blockPositionCount)
 	v.MPQData.File.Seek(int64(v.BlockTableEntry.FilePosition), 0)
-	reader := bufio.NewReader(v.MPQData.File)
 	mpqBytes := make([]byte, blockPositionCount*4)
-	reader.Read(mpqBytes)
+	v.MPQData.File.Read(mpqBytes)
 	for i := range v.BlockPositions {
 		idx := i * 4
 		v.BlockPositions[i] = binary.LittleEndian.Uint32(mpqBytes[idx : idx+4])
@@ -135,9 +133,7 @@ func (v *Stream) bufferData() {
 func (v *Stream) loadSingleUnit() {
 	fileData := make([]byte, v.BlockSize)
 	v.MPQData.File.Seek(int64(v.MPQData.Data.HeaderSize), 0)
-	//binary.Read(v.MPQData.File, binary.LittleEndian, &fileData)
-	reader := bufio.NewReader(v.MPQData.File)
-	reader.Read(fileData)
+	v.MPQData.File.Read(fileData)
 	if v.BlockSize == v.BlockTableEntry.UncompressedFileSize {
 		v.CurrentData = fileData
 		return
@@ -160,9 +156,7 @@ func (v *Stream) loadBlock(blockIndex, expectedLength uint32) []byte {
 	offset += v.BlockTableEntry.FilePosition
 	data := make([]byte, toRead)
 	v.MPQData.File.Seek(int64(offset), 0)
-	//binary.Read(v.MPQData.File, binary.LittleEndian, &data)
-	reader := bufio.NewReader(v.MPQData.File)
-	reader.Read(data)
+	v.MPQData.File.Read(data)
 	if v.BlockTableEntry.HasFlag(FileEncrypted) && v.BlockTableEntry.UncompressedFileSize > 3 {
 		if v.EncryptionSeed == 0 {
 			panic("Unable to determine encryption key")
