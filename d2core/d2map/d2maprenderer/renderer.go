@@ -352,3 +352,15 @@ func loadPaletteForAct(levelType d2enum.RegionIdType) (*d2dat.DATPalette, error)
 
 	return d2asset.LoadPalette(palettePath)
 }
+
+func (mr *MapRenderer) ViewportToLeft() {
+	mr.viewport.toLeft()
+}
+
+func (mr *MapRenderer) ViewportToRight() {
+	mr.viewport.toRight()
+}
+
+func (mr *MapRenderer) ViewportDefault() {
+	mr.viewport.resetAlign()
+}
