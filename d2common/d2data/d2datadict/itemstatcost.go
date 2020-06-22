@@ -1,9 +1,10 @@
 package d2datadict
 
 import (
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"log"
 )
 
 // refer to https://d2mods.info/forum/kb/viewarticle?a=448
@@ -245,7 +246,7 @@ func LoadItemStatCosts(file []byte) {
 	numRecords := len(d.Data)
 	ItemStatCosts = make(map[string]*ItemStatCostRecord, numRecords)
 
-	for idx, _ := range d.Data {
+	for idx := range d.Data {
 		record := &ItemStatCostRecord{
 			Name:  d.GetString("Stat", idx),
 			Index: d.GetNumber("ID", idx),

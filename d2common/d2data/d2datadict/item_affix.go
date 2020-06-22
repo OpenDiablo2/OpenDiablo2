@@ -22,13 +22,13 @@ var subType d2enum.ItemAffixSubType
 func LoadMagicPrefix(file []byte) {
 	superType = d2enum.ItemAffixPrefix
 	subType = d2enum.ItemAffixMagic
-	loadDictionary(file, MagicPrefixDictionary, superType, subType)
+	MagicPrefixDictionary, MagicPrefixRecords = loadDictionary(file, superType, subType)
 }
 
 func LoadMagicSuffix(file []byte) {
 	superType = d2enum.ItemAffixSuffix
 	subType = d2enum.ItemAffixMagic
-	loadDictionary(file, MagicSuffixDictionary, superType, subType)
+	MagicSuffixDictionary, MagicSuffixRecords = loadDictionary(file, superType, subType)
 }
 
 func getAffixString(t1 d2enum.ItemAffixSuperType, t2 d2enum.ItemAffixSubType) string {
@@ -52,16 +52,14 @@ func getAffixString(t1 d2enum.ItemAffixSuperType, t2 d2enum.ItemAffixSubType) st
 
 func loadDictionary(
 	file []byte,
-	dict *d2common.DataDictionary,
 	superType d2enum.ItemAffixSuperType,
 	subType d2enum.ItemAffixSubType,
-) {
-	dict = d2common.LoadDataDictionary(string(file))
-	records := make([]*ItemAffixCommonRecord, 0)
-
-	createItemAffixRecords(dict, records, superType, subType)
+) (*d2common.DataDictionary, []*ItemAffixCommonRecord) {
+	dict := d2common.LoadDataDictionary(string(file))
+	records := createItemAffixRecords(dict, superType, subType)
 	name := getAffixString(superType, subType)
 	log.Printf("Loaded %d %s records", len(dict.Data), name)
+	return dict, records
 }
 
 // --- column names from d2exp.mpq:/data/globa/excel/MagicPrefix.txt
@@ -109,11 +107,11 @@ func loadDictionary(
 
 func createItemAffixRecords(
 	d *d2common.DataDictionary,
-	r []*ItemAffixCommonRecord,
 	superType d2enum.ItemAffixSuperType,
 	subType d2enum.ItemAffixSubType,
-) {
-	for index, _ := range d.Data {
+) []*ItemAffixCommonRecord {
+	records := make([]*ItemAffixCommonRecord, 0)
+	for index := range d.Data {
 
 		affix := &ItemAffixCommonRecord{
 			Name:           d.GetString("Name", index),
@@ -179,8 +177,9 @@ func createItemAffixRecords(
 		group := ItemAffixGroups[affix.GroupID]
 		group.AddMember(affix)
 
-		r = append(r, affix)
+		records = append(records, affix)
 	}
+	return records
 }
 
 var ItemAffixGroups map[int]*ItemAffixCommonGroup

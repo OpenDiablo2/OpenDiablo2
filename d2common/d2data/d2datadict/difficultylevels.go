@@ -95,7 +95,7 @@ func LoadDifficultyLevels(file []byte) {
 
 	DifficultyLevels = make(map[string]*DifficultyLevelRecord, numRows)
 
-	for idx, _ := range dict.Data {
+	for idx := range dict.Data {
 		record := &DifficultyLevelRecord{
 			Name:                   dict.GetString("Name", idx),
 			ResistancePenalty:      dict.GetNumber("ResistPenalty", idx),
