@@ -306,11 +306,9 @@ func renderCapture(target d2render.Surface) error {
 		}
 
 		log.Printf("saved frame to %s", singleton.capturePath)
-		break
 	case captureStateGif:
 		screenshot := target.Screenshot()
 		singleton.captureFrames = append(singleton.captureFrames, screenshot)
-		break
 	case captureStateNone:
 		if len(singleton.captureFrames) > 0 {
 			defer cleanupCapture()

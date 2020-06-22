@@ -190,7 +190,6 @@ func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) err
 		for _, player := range singletonServer.clientConnections {
 			player.SendPacketToClient(packet)
 		}
-		break
 	}
 	return nil
 }

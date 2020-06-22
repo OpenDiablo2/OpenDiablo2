@@ -71,20 +71,17 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 			d2mapgen.GenerateAct1Overworld(g.MapEngine)
 		}
 		g.RegenMap = true
-		break
 	case d2netpackettype.UpdateServerInfo:
 		serverInfo := packet.PacketData.(d2netpacket.UpdateServerInfoPacket)
 		g.MapEngine.SetSeed(serverInfo.Seed)
 		g.PlayerId = serverInfo.PlayerId
 		g.Seed = serverInfo.Seed
 		log.Printf("Player id set to %s", serverInfo.PlayerId)
-		break
 	case d2netpackettype.AddPlayer:
 		player := packet.PacketData.(d2netpacket.AddPlayerPacket)
 		newPlayer := d2mapentity.CreatePlayer(player.Id, player.Name, player.X, player.Y, 0, player.HeroType, player.Equipment)
 		g.Players[newPlayer.Id] = newPlayer
 		g.MapEngine.AddEntity(newPlayer)
-		break
 	case d2netpackettype.MovePlayer:
 		movePlayer := packet.PacketData.(d2netpacket.MovePlayerPacket)
 		player := g.Players[movePlayer.PlayerId]
@@ -104,7 +101,6 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 				}
 			})
 		}
-		break
 	default:
 		log.Fatalf("Invalid packet type: %d", packet.PacketType)
 	}

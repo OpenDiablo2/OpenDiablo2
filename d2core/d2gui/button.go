@@ -87,7 +87,6 @@ func createButton(text string, buttonStyle ButtonStyle) (*Button, error) {
 		case buttonStatePressed, buttonStatePressedToggled:
 			textOffsetX = -2
 			textOffsetY = 2
-			break
 		}
 
 		surface.PushTranslation(textX+textOffsetX, textY+textOffsetY)
