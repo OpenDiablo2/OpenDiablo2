@@ -121,12 +121,13 @@ func runNetworkServer() {
 			packetData := d2netpacket.PlayerConnectionRequestPacket{}
 			json.Unmarshal([]byte(stringData), &packetData)
 			singletonServer.manager.Recv(packetData.Id)
+		case d2netpackettype.ServerClosed:
+			singletonServer.manager.Shutdown()
 		case d2netpackettype.PlayerDisconnectionNotification:
 			var packet d2netpacket.PlayerDisconnectRequestPacket
 			json.Unmarshal([]byte(stringData), &packet)
 			log.Printf("Received disconnect: %s", packet.Id)
 		}
-
 	}
 }
 

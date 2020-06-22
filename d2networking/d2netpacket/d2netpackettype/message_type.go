@@ -13,6 +13,7 @@ const (
 	MovePlayer                                    // Sent to the client or server to indicate player movement
 	PlayerConnectionRequest                       // Client sends to server to request a connection
 	PlayerDisconnectionNotification               // Client notifies the server that it is disconnecting
-	Ping
-	Pong
+	Ping                                          // Ping message type
+	Pong                                          // Pong message type
+	ServerClosed                                  // Local host has closed the server
 )

@@ -46,6 +46,7 @@ func (l *LocalClientConnection) Open(connectionString string, saveFilePath strin
 }
 
 func (l *LocalClientConnection) Close() error {
+	l.SendPacketToServer(d2netpacket.CreateServerClosedPacket())
 	d2server.OnClientDisconnected(l)
 	d2server.Destroy()
 	return nil
