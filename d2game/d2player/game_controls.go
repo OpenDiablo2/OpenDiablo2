@@ -57,7 +57,7 @@ func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
 
 	gc := &GameControls{
 		hero:           hero,
-		mapEngine:     mapEngine,
+		mapEngine:      mapEngine,
 		inputListener:  inputListener,
 		mapRenderer:    mapRenderer,
 		inventory:      NewInventory(),

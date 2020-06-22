@@ -81,16 +81,17 @@ func (v *Game) Advance(tickTime float64) error {
 			tile := v.gameClient.MapEngine.TileAt(v.localPlayer.TileX, v.localPlayer.TileY)
 			if tile != nil && v.lastRegionType != tile.RegionType {
 				switch tile.RegionType {
-				case 1: // Rogue encampent
+				case d2enum.RegionAct1Town: // Rogue encampent
 					v.localPlayer.SetIsInTown(true)
 					d2audio.PlayBGM("/data/global/music/Act1/town1.wav")
-				case 2: // Blood Moore
+				case d2enum.RegionAct1Wilderness: // Blood Moore
 					v.localPlayer.SetIsInTown(false)
 					d2audio.PlayBGM("/data/global/music/Act1/wild.wav")
 				}
 
 				// skip showing zone change text the first time we enter the world
 				if v.lastRegionType != d2enum.RegionNone  {
+					//TODO: Should not be using RegionType as an index - this will return incorrect LevelDetails record for most of the zones.
 					v.gameControls.SetZoneChangeText(fmt.Sprintf("Entering The %s", d2datadict.LevelDetails[int(tile.RegionType)].LevelDisplayName))
 					v.gameControls.ShowZoneChangeText()
 					v.gameControls.HideZoneChangeTextAfter(hideZoneTextAfterSeconds)

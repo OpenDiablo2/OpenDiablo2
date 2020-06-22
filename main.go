@@ -426,7 +426,6 @@ func loadDataDict() error {
 	}{
 		{d2resource.LevelType, d2datadict.LoadLevelTypes},
 		{d2resource.LevelPreset, d2datadict.LoadLevelPresets},
-		{d2resource.LevelDetails, d2datadict.LoadLevelDetails},
 		{d2resource.LevelWarp, d2datadict.LoadLevelWarps},
 		{d2resource.ObjectType, d2datadict.LoadObjectTypes},
 		{d2resource.ObjectDetails, d2datadict.LoadObjects},
