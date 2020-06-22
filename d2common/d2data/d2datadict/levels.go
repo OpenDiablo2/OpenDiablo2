@@ -382,7 +382,7 @@ func LoadLevelDetails(file []byte) {
 	numRecords := len(dict.Data)
 	LevelDetails = make(map[int]*LevelDetailsRecord, numRecords)
 
-	for idx, _ := range dict.Data {
+	for idx := range dict.Data {
 		record := &LevelDetailsRecord{
 			Name:                       dict.GetString("Name ", idx),
 			Id:                         dict.GetNumber("Id", idx),
