@@ -45,8 +45,7 @@ func (m *MapEngine) GetStartingPosition() (int, int) {
 	return m.startSubTileX, m.startSubTileY
 }
 
-func (m *MapEngine) ResetMap(seed int64, levelType d2enum.RegionIdType, width, height int) {
-	m.seed = seed
+func (m *MapEngine) ResetMap(levelType d2enum.RegionIdType, width, height int) {
 	m.entities = make([]d2mapentity.MapEntity, 0)
 	m.levelType = d2datadict.LevelTypes[levelType]
 	m.size = d2common.Size{Width: width, Height: height}
@@ -65,6 +64,15 @@ func (m *MapEngine) ResetMap(seed int64, levelType d2enum.RegionIdType, width, h
 		dt1, _ := d2dt1.LoadDT1(fileData)
 		m.dt1TileData = append(m.dt1TileData, dt1.Tiles...)
 	}
+}
+
+func (m *MapEngine) FindTile(style, sequence, tileType int32) d2dt1.Tile {
+	for _, tile := range m.dt1TileData {
+		if tile.Style == style && tile.Sequence == sequence && tile.Type == tileType {
+			return tile
+		}
+	}
+	panic("Could not find the requested tile!")
 }
 
 // Returns the level type of this map
@@ -193,7 +201,7 @@ func (m *MapEngine) TileExists(tileX, tileY int) bool {
 func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int, cacheTiles bool) {
 	region := d2mapstamp.LoadStamp(m.seed, regionType, levelPreset, fileIndex)
 	regionSize := region.Size()
-	m.ResetMap(0, regionType, regionSize.Width, regionSize.Height)
+	m.ResetMap(regionType, regionSize.Width, regionSize.Height)
 	m.PlaceStamp(region, 0, 0)
 }
 

@@ -1,7 +1,6 @@
 package d2gamescreen
 
 import (
-	"math/rand"
 	"os"
 	"time"
 
@@ -130,10 +129,11 @@ func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 	}
 
 	if n == 0 {
-		rand.Seed(time.Now().UnixNano())
+		met.mapEngine.SetSeed(time.Now().UnixNano())
 		d2mapgen.GenerateAct1Overworld(met.mapEngine)
 	} else {
 		met.mapEngine = d2mapengine.CreateMapEngine() // necessary for map name update
+		met.mapEngine.SetSeed(time.Now().UnixNano())
 		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex, true)
 		met.mapEngine.RegenerateWalkPaths()
 	}
