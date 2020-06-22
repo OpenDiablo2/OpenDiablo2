@@ -281,10 +281,18 @@ func (mr *MapRenderer) renderTileDebug(ax, ay int, debugVisLevel int, target d2r
 
 		tile := mr.mapEngine.TileAt(ax, ay)
 
-		for i, floor := range tile.Floors {
-			target.PushTranslation(-20, 10+(i+1)*14)
-			target.DrawText("f: %v-%v", floor.Style, floor.Sequence)
-			target.Pop()
+		//for i, floor := range tile.Floors {
+		//	target.PushTranslation(-20, 10+(i+1)*14)
+		//	target.DrawText("f: %v-%v", floor.Style, floor.Sequence)
+		//	target.Pop()
+		//}
+
+		for i, wall := range tile.Walls {
+			if wall.Type.Special() {
+				target.PushTranslation(-20, 10+(i+1)*14)
+				target.DrawText("s: %v-%v", wall.Style, wall.Sequence)
+				target.Pop()
+			}
 		}
 
 		for yy := 0; yy < 5; yy++ {
