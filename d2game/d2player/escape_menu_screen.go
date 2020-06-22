@@ -46,6 +46,7 @@ type Screen interface {
 
 type baseScreen struct {
 	totalHeight    int
+	title          *d2ui.Label
 	labels         []*d2ui.Label
 	current        itemID
 	defaultItem    itemID
@@ -59,6 +60,12 @@ func (s *baseScreen) Render(target d2render.Surface) {
 	tw, th := target.GetSize()
 	midX := tw / 2
 	startY := (th - s.totalHeight) / 2
+
+	if s.title != nil {
+		s.title.SetPosition(midX, startY)
+		s.title.Render(target)
+		startY = startY + s.title.Height
+	}
 
 	for i, label := range s.labels {
 		_, lh := label.GetSize()
@@ -84,9 +91,14 @@ func (s *baseScreen) Load(pentLeft, pentRight *d2ui.Sprite, selectSound d2audio.
 	s.selectSound = selectSound
 
 	totalHeight := 0
-	for _, item := range s.labels {
-		_, ih := item.GetSize()
-		totalHeight += ih
+	if s.title != nil {
+		_, th := s.title.GetSize()
+		totalHeight += th
+	}
+
+	for _, label := range s.labels {
+		_, lh := label.GetSize()
+		totalHeight += lh
 	}
 	s.totalHeight = totalHeight
 }
@@ -153,29 +165,33 @@ type optionsScreen struct {
 }
 
 func newOptionsScreen(switchScreenFn func(screenID)) *optionsScreen {
+	title := d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky)
+	title.SetText("Options")
+	title.Alignment = d2ui.LabelAlignCenter
+
 	labels := make([]*d2ui.Label, 5)
 
-	labelSound := d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky)
+	labelSound := d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteSky)
 	labelSound.SetText("sound options")
 	labelSound.Alignment = d2ui.LabelAlignCenter
 	labels[itemSoundOptions] = &labelSound
 
-	labelVideo := d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky)
+	labelVideo := d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteSky)
 	labelVideo.SetText("video options")
 	labelVideo.Alignment = d2ui.LabelAlignCenter
 	labels[itemVideoOptions] = &labelVideo
 
-	labelAutomap := d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky)
+	labelAutomap := d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteSky)
 	labelAutomap.SetText("automap options")
 	labelAutomap.Alignment = d2ui.LabelAlignCenter
 	labels[itemAutomapOptions] = &labelAutomap
 
-	labelConfigureOpts := d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky)
+	labelConfigureOpts := d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteSky)
 	labelConfigureOpts.SetText("configure controls")
 	labelConfigureOpts.Alignment = d2ui.LabelAlignCenter
 	labels[itemConfigureControls] = &labelConfigureOpts
 
-	labelPrevMenu := d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky)
+	labelPrevMenu := d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteSky)
 	labelPrevMenu.SetText("previous menu")
 	labelPrevMenu.Alignment = d2ui.LabelAlignCenter
 	labels[itemPreviousMenu] = &labelPrevMenu
@@ -183,6 +199,7 @@ func newOptionsScreen(switchScreenFn func(screenID)) *optionsScreen {
 	return &optionsScreen{
 		baseScreen: &baseScreen{
 			defaultItem:    itemSoundOptions,
+			title:          &title,
 			labels:         labels,
 			switchScreenFn: switchScreenFn,
 		},
