@@ -160,11 +160,13 @@ func (v *MPQ) loadHashTable() {
 		log.Panic(err)
 	}
 	hashData := make([]uint32, v.Data.HashTableEntries*4)
-	err = binary.Read(v.File, binary.LittleEndian, &hashData)
-	if err != nil {
-		log.Panic(err)
+	hash := make([]byte, 4)
+	for i := range hashData {
+		v.File.Read(hash[:])
+		hashData[i] = binary.LittleEndian.Uint32(hash)
 	}
 	decrypt(hashData, hashString("(hash table)", 3))
+
 	for i := uint32(0); i < v.Data.HashTableEntries; i++ {
 		v.HashEntryMap.Insert(&HashTableEntry{
 			NamePartA: hashData[i*4],
@@ -182,12 +184,15 @@ func (v *MPQ) loadBlockTable() {
 	if err != nil {
 		log.Panic(err)
 	}
+
 	blockData := make([]uint32, v.Data.BlockTableEntries*4)
-	err = binary.Read(v.File, binary.LittleEndian, &blockData)
-	if err != nil {
-		log.Panic(err)
+	hash := make([]byte, 4)
+	for i := range blockData {
+		v.File.Read(hash[:])
+		blockData[i] = binary.LittleEndian.Uint32(hash)
 	}
 	decrypt(blockData, hashString("(block table)", 3))
+
 	for i := uint32(0); i < v.Data.BlockTableEntries; i++ {
 		v.BlockTableEntries = append(v.BlockTableEntries, BlockTableEntry{
 			FilePosition:         blockData[(i * 4)],
