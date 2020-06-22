@@ -85,8 +85,7 @@ func LoadFile(filePath string) ([]byte, error) {
 
 	data, err := singleton.fileManager.loadFile(filePath)
 	if err != nil {
-		attemptedPath := singleton.fileManager.fixupFilePath(filePath)
-		log.Printf("error loading file %s (%v)", attemptedPath, err.Error())
+		log.Printf("error loading file %s (%v)", filePath, err.Error())
 	}
 
 	return data, err

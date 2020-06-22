@@ -477,7 +477,7 @@ func loadStrings() error {
 			return err
 		}
 
-		d2common.LoadDictionary(data)
+		d2common.LoadTextDictionary(data)
 	}
 
 	return nil
