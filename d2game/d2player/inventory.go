@@ -65,6 +65,7 @@ func (g *Inventory) Load() {
 	g.grid.ChangeEquippedSlot(d2enum.Legs, d2inventory.GetArmorItemByCode("vbt"))
 	g.grid.ChangeEquippedSlot(d2enum.Belt, d2inventory.GetArmorItemByCode("vbl"))
 	g.grid.ChangeEquippedSlot(d2enum.Gloves, d2inventory.GetArmorItemByCode("lgl"))
+	// TODO: Load the player's actual items
 	g.grid.Add(items...)
 }
 
