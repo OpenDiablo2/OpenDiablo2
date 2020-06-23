@@ -4,7 +4,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/hajimehoshi/ebiten"
 )
 
 type Scrollbar struct {
@@ -52,7 +51,7 @@ func (v Scrollbar) getBarPosition() int {
 }
 
 func (v *Scrollbar) Activate() {
-	_, my := ebiten.CursorPosition()
+	_, my := CursorPosition()
 	barPosition := v.getBarPosition()
 	if my <= v.y+barPosition+15 {
 		if v.currentOffset > 0 {
@@ -65,6 +64,7 @@ func (v *Scrollbar) Activate() {
 			v.lastDirChange = 1
 		}
 	}
+
 	if v.onActivate != nil {
 		v.onActivate()
 	}

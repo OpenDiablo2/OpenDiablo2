@@ -25,6 +25,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+	ebiten_input "github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
@@ -112,6 +113,8 @@ func initialize() error {
 
 	config := d2config.Get()
 	d2resource.LanguageCode = config.Language
+
+	d2input.Initialize(ebiten_input.InputService{})
 
 	renderer, err := ebiten.CreateRenderer()
 	if err != nil {

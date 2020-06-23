@@ -6,24 +6,20 @@ import (
 	"os"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
-
-	"github.com/hajimehoshi/ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 )
 
 type CharacterSelect struct {
@@ -46,7 +42,6 @@ type CharacterSelect struct {
 	characterImage         [8]*d2mapentity.Player
 	gameStates             []*d2player.PlayerState
 	selectedCharacter      int
-	mouseButtonPressed     bool
 	showDeleteConfirmation bool
 	connectionType         d2clientconnectiontype.ClientConnectionType
 	connectionHost         string
@@ -62,6 +57,7 @@ func CreateCharacterSelect(connectionType d2clientconnectiontype.ClientConnectio
 
 func (v *CharacterSelect) OnLoad() error {
 	d2audio.PlayBGM(d2resource.BGMTitle)
+	d2input.BindHandler(v)
 
 	animation, _ := d2asset.LoadAnimation(d2resource.CharacterSelectionBackground, d2resource.PaletteSky)
 	v.background, _ = d2ui.LoadSprite(animation)
@@ -222,32 +218,32 @@ func (v *CharacterSelect) moveSelectionBox() {
 	v.d2HeroTitle.SetText(v.gameStates[v.selectedCharacter].HeroName)
 }
 
-func (v *CharacterSelect) Advance(tickTime float64) error {
+func (v *CharacterSelect) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	if !v.showDeleteConfirmation {
-		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-			if !v.mouseButtonPressed {
-				v.mouseButtonPressed = true
-				mx, my := ebiten.CursorPosition()
-				bw := 272
-				bh := 92
-				localMouseX := mx - 37
-				localMouseY := my - 86
-				if localMouseX > 0 && localMouseX < bw*2 && localMouseY >= 0 && localMouseY < bh*4 {
-					adjustY := localMouseY / bh
-					selectedIndex := adjustY * 2
-					if localMouseX > bw {
-						selectedIndex += 1
-					}
-					if (v.charScrollbar.GetCurrentOffset()*2)+selectedIndex < len(v.gameStates) {
-						v.selectedCharacter = (v.charScrollbar.GetCurrentOffset() * 2) + selectedIndex
-						v.moveSelectionBox()
-					}
+		if event.Button == d2input.MouseButtonLeft {
+			mx, my := event.X, event.Y
+			bw := 272
+			bh := 92
+			localMouseX := mx - 37
+			localMouseY := my - 86
+			if localMouseX > 0 && localMouseX < bw*2 && localMouseY >= 0 && localMouseY < bh*4 {
+				adjustY := localMouseY / bh
+				selectedIndex := adjustY * 2
+				if localMouseX > bw {
+					selectedIndex += 1
+				}
+				if (v.charScrollbar.GetCurrentOffset()*2)+selectedIndex < len(v.gameStates) {
+					v.selectedCharacter = (v.charScrollbar.GetCurrentOffset() * 2) + selectedIndex
+					v.moveSelectionBox()
 				}
 			}
-		} else {
-			v.mouseButtonPressed = false
+			return true
 		}
 	}
+	return false
+}
+
+func (v *CharacterSelect) Advance(tickTime float64) error {
 	for _, hero := range v.characterImage {
 		if hero != nil {
 			hero.AnimatedComposite.Advance(tickTime)
