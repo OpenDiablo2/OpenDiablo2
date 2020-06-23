@@ -4,14 +4,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-
-	"github.com/hajimehoshi/ebiten/inpututil"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/hajimehoshi/ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
+
+// TextBox with cursor focus
+var focusedTextBox *TextBox
 
 // TextBox represents a text input box
 type TextBox struct {
@@ -29,7 +29,7 @@ type TextBox struct {
 func CreateTextbox() TextBox {
 	animation, _ := d2asset.LoadAnimation(d2resource.TextBox2, d2resource.PaletteUnits)
 	bgSprite, _ := LoadSprite(animation)
-	result := TextBox{
+	tb := TextBox{
 		filter:    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
 		bgSprite:  bgSprite,
 		textLabel: CreateLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
@@ -37,27 +37,13 @@ func CreateTextbox() TextBox {
 		enabled:   true,
 		visible:   true,
 	}
-	result.lineBar.SetText("_")
-	return result
+	tb.lineBar.SetText("_")
+
+	return tb
 }
 
 func (v *TextBox) SetFilter(filter string) {
 	v.filter = filter
-}
-
-func repeatingKeyPressed(key ebiten.Key) bool {
-	const (
-		delay    = 30
-		interval = 3
-	)
-	d := inpututil.KeyPressDuration(key)
-	if d == 1 {
-		return true
-	}
-	if d >= delay && (d-delay)%interval == 0 {
-		return true
-	}
-	return false
 }
 
 func (v *TextBox) Render(target d2render.Surface) {
@@ -71,20 +57,46 @@ func (v *TextBox) Render(target d2render.Surface) {
 	}
 }
 
-func (v *TextBox) Advance(elapsed float64) {
-	if !v.visible || !v.enabled {
-		return
+func (v *TextBox) OnKeyChars(event d2input.KeyCharsEvent) bool {
+	if !(focusedTextBox == v) || !v.visible || !v.enabled {
+		return false
 	}
-	newText := string(ebiten.InputChars())
+	newText := string(event.Chars)
 	if len(newText) > 0 {
 		v.text += newText
 		v.SetText(v.text)
+		return true
 	}
-	if repeatingKeyPressed(ebiten.KeyBackspace) {
+	return false
+}
+
+func (v *TextBox) OnKeyRepeat(event d2input.KeyEvent) bool {
+	if event.Key == d2input.KeyBackspace && debounceEvents(event.Duration) {
 		if len(v.text) >= 1 {
 			v.text = v.text[:len(v.text)-1]
 		}
 		v.SetText(v.text)
+	}
+	return false
+}
+
+func debounceEvents(numFrames int) bool {
+	const (
+		delay    = 30
+		interval = 3
+	)
+	if numFrames == 1 {
+		return true
+	}
+	if numFrames >= delay && (numFrames-delay)%interval == 0 {
+		return true
+	}
+	return false
+}
+
+func (v *TextBox) Advance(_ float64) {
+	if !v.visible || !v.enabled {
+		return
 	}
 }
 
@@ -164,5 +176,5 @@ func (v *TextBox) OnActivated(callback func()) {
 }
 
 func (v *TextBox) Activate() {
-	//no op
+	focusedTextBox = v
 }

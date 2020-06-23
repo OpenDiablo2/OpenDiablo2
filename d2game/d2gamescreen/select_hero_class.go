@@ -472,17 +472,10 @@ func (v *SelectHeroClass) Advance(tickTime float64) error {
 			canSelect = false
 		}
 	}
-	allIdle := true
-	for heroType, data := range v.heroRenderInfo {
-		if allIdle && data.Stance != d2enum.HeroStanceIdle {
-			allIdle = false
-		}
+	for heroType, _ := range v.heroRenderInfo {
 		v.updateHeroSelectionHover(heroType, canSelect)
 	}
-	if v.selectedHero != d2enum.HeroNone && allIdle {
-		v.selectedHero = d2enum.HeroNone
-	}
-	v.okButton.SetEnabled(len(v.heroNameTextbox.GetText()) >= 2)
+	v.okButton.SetEnabled(len(v.heroNameTextbox.GetText()) >= 2 && v.selectedHero != d2enum.HeroNone)
 	return nil
 }
 
@@ -509,12 +502,12 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 	if renderInfo.Stance == d2enum.HeroStanceSelected {
 		return
 	}
-	mouseX := d2ui.CursorX
-	mouseY := d2ui.CursorY
+	mouseX, mouseY := d2ui.CursorPosition()
 	b := renderInfo.SelectionBounds
 	mouseHover := (mouseX >= b.Min.X) && (mouseX <= b.Min.X+b.Max.X) && (mouseY >= b.Min.Y) && (mouseY <= b.Min.Y+b.Max.Y)
 	if mouseHover && d2ui.CursorButtonPressed(d2ui.CursorButtonLeft) {
 		v.heroNameTextbox.SetVisible(true)
+		v.heroNameTextbox.Activate()
 		v.okButton.SetVisible(true)
 		v.expansionCheckbox.SetVisible(true)
 		v.hardcoreCheckbox.SetVisible(true)

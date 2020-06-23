@@ -1,10 +1,12 @@
 package d2ui
 
 import (
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/hajimehoshi/ebiten"
 )
 
 // CursorButton represents a mouse button
@@ -17,122 +19,106 @@ const (
 	CursorButtonRight CursorButton = 2
 )
 
-var widgets []Widget
-var cursorButtons CursorButton
-var pressedIndex int
-var CursorX int
-var CursorY int
+type UI struct {
+	widgets       []Widget
+	cursorButtons CursorButton // TODO (carrelld) convert dependent code and remove
+	CursorX       int          // TODO (carrelld) convert dependent code and remove
+	CursorY       int          // TODO (carrelld) convert dependent code and remove
+	pressedWidget Widget
+}
+
+var singleton UI
 var clickSfx d2audio.SoundEffect
-var waitForLeftMouseUp bool
 
 func Initialize() {
-	pressedIndex = -1
-	clickSfx, _ = d2audio.LoadSoundEffect(d2resource.SFXButtonClick)
-	waitForLeftMouseUp = false
+	sfx, err := d2audio.LoadSoundEffect(d2resource.SFXButtonClick)
+	if err != nil {
+		log.Fatalf("failed to initialize ui: %v", err)
+	}
+	clickSfx = sfx
+
+	d2input.BindHandler(&singleton)
 }
 
 // Reset resets the state of the UI manager. Typically called for new screens
 func Reset() {
-	widgets = make([]Widget, 0)
-	pressedIndex = -1
-	waitForLeftMouseUp = true
+	singleton.widgets = nil
+	singleton.pressedWidget = nil
 }
 
 // AddWidget adds a widget to the UI manager
 func AddWidget(widget Widget) {
-	widgets = append(widgets, widget)
+	d2input.BindHandler(widget)
+	singleton.widgets = append(singleton.widgets, widget)
 }
 
-func WaitForMouseRelease() {
-	waitForLeftMouseUp = true
+func (u *UI) OnMouseButtonUp(event d2input.MouseEvent) bool {
+	singleton.CursorX, singleton.CursorY = event.X, event.Y
+	if event.Button == d2input.MouseButtonLeft {
+		singleton.cursorButtons |= CursorButtonLeft
+		// activate previously pressed widget if cursor is still hovering
+		w := singleton.pressedWidget
+		if w != nil && contains(w, singleton.CursorX, singleton.CursorY) && w.GetVisible() && w.GetEnabled() {
+			w.Activate()
+		}
+		// unpress all widgets that are pressed
+		for _, w := range singleton.widgets {
+			w.SetPressed(false)
+		}
+	}
+	return false
+}
+
+func (u *UI) OnMouseButtonDown(event d2input.MouseEvent) bool {
+	singleton.CursorX, singleton.CursorY = event.X, event.Y
+	if event.Button == d2input.MouseButtonLeft {
+		// find and press a widget on screen
+		singleton.pressedWidget = nil
+		for _, w := range singleton.widgets {
+			if contains(w, singleton.CursorX, singleton.CursorY) && w.GetVisible() && w.GetEnabled() {
+				w.SetPressed(true)
+				singleton.pressedWidget = w
+				clickSfx.Play()
+				break
+			}
+		}
+	}
+	if event.Button == d2input.MouseButtonRight {
+		singleton.cursorButtons |= CursorButtonRight
+	}
+	return false
 }
 
 // Render renders all of the UI elements
 func Render(target d2render.Surface) {
-	for _, widget := range widgets {
+	for _, widget := range singleton.widgets {
 		if widget.GetVisible() {
 			widget.Render(target)
 		}
 	}
 }
 
+// contains determines whether a given x,y coordinate lands within a Widget
+func contains(w Widget, x, y int) bool {
+	wx, wy := w.GetPosition()
+	ww, wh := w.GetSize()
+	return x >= wx && x <= wx+ww && y >= wy && y <= wy+wh
+}
+
 // Update updates all of the UI elements
 func Advance(elapsed float64) {
-	for _, widget := range widgets {
+	for _, widget := range singleton.widgets {
 		if widget.GetVisible() {
 			widget.Advance(elapsed)
 		}
-	}
-
-	cursorButtons = 0
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		if !waitForLeftMouseUp {
-			cursorButtons |= CursorButtonLeft
-		}
-	} else {
-		if waitForLeftMouseUp {
-			waitForLeftMouseUp = false
-		}
-	}
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
-		cursorButtons |= CursorButtonRight
-	}
-	CursorX, CursorY = ebiten.CursorPosition()
-	if CursorButtonPressed(CursorButtonLeft) {
-		found := false
-		for i, widget := range widgets {
-			if !widget.GetVisible() || !widget.GetEnabled() {
-				continue
-			}
-			wx, wy := widget.GetPosition()
-			ww, wh := widget.GetSize()
-			if CursorX >= wx && CursorX <= wx+ww && CursorY >= wy && CursorY <= wy+wh {
-				widget.SetPressed(true)
-				if pressedIndex == -1 {
-					found = true
-					pressedIndex = i
-					clickSfx.Play()
-				} else if pressedIndex > -1 && pressedIndex != i {
-					widgets[i].SetPressed(false)
-				} else {
-					found = true
-				}
-			} else {
-				widget.SetPressed(false)
-			}
-		}
-		if !found {
-			if pressedIndex > -1 {
-				widgets[pressedIndex].SetPressed(false)
-			} else {
-				pressedIndex = -2
-			}
-		}
-	} else {
-		if pressedIndex > -1 {
-			widget := widgets[pressedIndex]
-			wx, wy := widget.GetPosition()
-			ww, wh := widget.GetSize()
-			if CursorX >= wx && CursorX <= wx+ww && CursorY >= wy && CursorY <= wy+wh {
-				widget.Activate()
-			}
-		} else {
-			for _, widget := range widgets {
-				if !widget.GetVisible() || !widget.GetEnabled() {
-					continue
-				}
-				widget.SetPressed(false)
-			}
-		}
-		pressedIndex = -1
 	}
 }
 
 // CursorButtonPressed determines if the specified button has been pressed
 func CursorButtonPressed(button CursorButton) bool {
-	return cursorButtons&button > 0
+	return singleton.cursorButtons&button > 0
 }
 
-func KeyPressed(key ebiten.Key) bool {
-	return ebiten.IsKeyPressed(key)
+func CursorPosition() (x, y int) {
+	return singleton.CursorX, singleton.CursorY
 }
