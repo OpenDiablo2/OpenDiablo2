@@ -2,6 +2,7 @@ package d2mapengine
 
 import (
 	"log"
+	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
@@ -28,6 +29,7 @@ type MapEngine struct {
 	walkMesh      []d2common.PathTile        // The walk mesh
 	startSubTileX int                        // The starting X position
 	startSubTileY int                        // The starting Y position
+	dt1Files      []string                   // The list of DS1 strings
 }
 
 // Creates a new instance of the map engine
@@ -52,19 +54,53 @@ func (m *MapEngine) ResetMap(levelType d2enum.RegionIdType, width, height int) {
 	m.tiles = make([]d2ds1.TileRecord, width*height)
 	m.dt1TileData = make([]d2dt1.Tile, 0)
 	m.walkMesh = make([]d2common.PathTile, width*height*25)
+	m.dt1Files = make([]string, 0)
 
 	for _, dtFileName := range m.levelType.Files {
-		if len(dtFileName) == 0 || dtFileName == "0" {
-			continue
-		}
-		fileData, err := d2asset.LoadFile("/data/global/tiles/" + dtFileName)
-		if err != nil {
-			panic(err)
-		}
-		dt1, _ := d2dt1.LoadDT1(fileData)
-		m.dt1TileData = append(m.dt1TileData, dt1.Tiles...)
+		m.addDT1(dtFileName)
 	}
 
+}
+
+func (m *MapEngine) addDT1(fileName string) {
+	if len(fileName) == 0 || fileName == "0" {
+		return
+	}
+	fileName = strings.ToLower(fileName)
+	for i := 0; i < len(m.dt1Files); i++ {
+		if m.dt1Files[i] == fileName {
+			return
+		}
+	}
+
+	fileData, err := d2asset.LoadFile("/data/global/tiles/" + fileName)
+	if err != nil {
+		panic(err)
+	}
+	dt1, _ := d2dt1.LoadDT1(fileData)
+	m.dt1TileData = append(m.dt1TileData, dt1.Tiles...)
+	m.dt1Files = append(m.dt1Files, fileName)
+}
+
+func (m *MapEngine) AddDS1(fileName string) {
+	if len(fileName) == 0 || fileName == "0" {
+		return
+	}
+
+	fileData, err := d2asset.LoadFile("/data/global/tiles/" + fileName)
+	if err != nil {
+		panic(err)
+	}
+	ds1, _ := d2ds1.LoadDS1(fileData)
+	for _, dt1File := range ds1.Files {
+		dt1File := strings.ToLower(dt1File)
+		if strings.Contains(dt1File, ".tg1") {
+			continue
+		}
+		dt1File = strings.Replace(dt1File, "c:", "", -1) // Yes they did...
+		dt1File = strings.Replace(dt1File, "\\d2\\data\\global\\tiles\\", "", -1)
+		m.addDT1(strings.Replace(dt1File, "\\", "/", -1))
+	}
 }
 
 func (m *MapEngine) FindTile(style, sequence, tileType int32) d2dt1.Tile {
