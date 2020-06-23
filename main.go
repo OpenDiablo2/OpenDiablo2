@@ -83,7 +83,10 @@ func main() {
 	}
 
 	if len(*profileOption) > 0 {
-		enableProfiler(*profileOption)
+		profiler := enableProfiler(*profileOption)
+		if profiler != nil {
+			defer profiler.Stop()
+		}
 	}
 
 	if *region == 0 {
@@ -457,7 +460,7 @@ func loadStrings() error {
 	return nil
 }
 
-func enableProfiler(profileOption string) {
+func enableProfiler(profileOption string) interface{ Stop() } {
 	var options []func(*profile.Profile)
 	switch strings.ToLower(strings.Trim(profileOption, " ")) {
 	case "cpu":
@@ -485,6 +488,7 @@ func enableProfiler(profileOption string) {
 	options = append(options, profile.ProfilePath("./pprof/"))
 
 	if len(options) > 1 {
-		defer profile.Start(options...).Stop()
+		return profile.Start(options...)
 	}
+	return nil
 }
