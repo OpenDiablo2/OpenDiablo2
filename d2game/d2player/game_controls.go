@@ -39,28 +39,28 @@ type GameControls struct {
 	FreeCam       bool
 
 	// UI
-	globeSprite     *d2ui.Sprite
-	mainPanel       *d2ui.Sprite
-	menuButton      *d2ui.Sprite
-	skillIcon       *d2ui.Sprite
-	zoneChangeText  *d2ui.Label
-	isZoneTextShown bool
-	actionables     []ActionableRegion
+	globeSprite       *d2ui.Sprite
+	mainPanel         *d2ui.Sprite
+	menuButton        *d2ui.Sprite
+	skillIcon         *d2ui.Sprite
+	zoneChangeText    *d2ui.Label
+	isZoneTextShown   bool
+	actionableRegions []ActionableRegion
 }
 
-type Actionable int
-type ActionableRegion struct { AType Actionable; Rect d2common.Rectangle }
+type ActionableType int
+type ActionableRegion struct { ActionableTypeId ActionableType; Rect d2common.Rectangle }
 
 const (
 	// Since they require special handling, not considering (1) globes, (2) content of the mini panel, (3) belt
-	leftSkill  = Actionable(iota)
-	leftSelec  = Actionable(iota)
-	xp         = Actionable(iota)
-	walkRun    = Actionable(iota)
-	stamina    = Actionable(iota)
-	miniPanel  = Actionable(iota)
-	rightSelec = Actionable(iota)
-	rightSkill = Actionable(iota)
+	leftSkill  = ActionableType(iota)
+	leftSelec  = ActionableType(iota)
+	xp         = ActionableType(iota)
+	walkRun    = ActionableType(iota)
+	stamina    = ActionableType(iota)
+	miniPanel  = ActionableType(iota)
+	rightSelec = ActionableType(iota)
+	rightSkill = ActionableType(iota)
 )
 
 func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine, mapRenderer *d2maprenderer.MapRenderer, inputListener InputCallbackListener) *GameControls {
@@ -81,7 +81,7 @@ func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
 		heroStats:      NewHeroStats(),
 		escapeMenu:     NewEscapeMenu(),
 		zoneChangeText: &label,
-		actionables: []ActionableRegion {
+		actionableRegions: []ActionableRegion {
 			{leftSkill, d2common.Rectangle{Left:115, Top:550, Width:50, Height:50 }},
 			{leftSelec, d2common.Rectangle{Left:206, Top:563, Width:30, Height:30 }},
 			{xp,        d2common.Rectangle{Left:253, Top:560, Width:125, Height:5 }},
@@ -195,10 +195,10 @@ func (g *GameControls) OnMouseMove(event d2input.MouseMoveEvent) bool {
 	}
 
 	mx, my := event.X, event.Y
-	for i := range g.actionables {
+	for i := range g.actionableRegions {
 		// Mouse over a game control element
-		if g.actionables[i].Rect.IsInRect(mx, my) {
-			g.onHoverActionable(g.actionables[i].AType)
+		if g.actionableRegions[i].Rect.IsInRect(mx, my) {
+			g.onHoverActionable(g.actionableRegions[i].ActionableTypeId)
 		}
 	}
 
@@ -211,10 +211,10 @@ func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	}
 
 	mx, my := event.X, event.Y
-	for i := range g.actionables {
+	for i := range g.actionableRegions {
 		// If click is on a game control element
-		if g.actionables[i].Rect.IsInRect(mx, my) {
-			g.onClickActionable(g.actionables[i].AType)
+		if g.actionableRegions[i].Rect.IsInRect(mx, my) {
+			g.onClickActionable(g.actionableRegions[i].ActionableTypeId)
 			return false
 		}
 	}
@@ -408,7 +408,7 @@ func (g *GameControls) InEscapeMenu() bool {
 }
 
 // Handles what to do when an actionable is hovered
-func (g *GameControls) onHoverActionable(item Actionable) {
+func (g *GameControls) onHoverActionable(item ActionableType) {
 	switch item {
 	case leftSkill:
 		return
@@ -427,12 +427,12 @@ func (g *GameControls) onHoverActionable(item Actionable) {
 	case rightSkill:
 		return
 	default:
-		log.Printf("Unrecognized Actionable(%d) being hovered\n", item)
+		log.Printf("Unrecognized ActionableType(%d) being hovered\n", item)
 	}
 }
 
 // Handles what to do when an actionable is clicked
-func (g *GameControls) onClickActionable(item Actionable) {
+func (g *GameControls) onClickActionable(item ActionableType) {
 	switch item {
 	case leftSkill: log.Println("Left Skill Action Pressed")
 	case leftSelec: log.Println("Left Skill Selector Action Pressed")
@@ -443,6 +443,6 @@ func (g *GameControls) onClickActionable(item Actionable) {
 	case rightSelec: log.Println("Right Skill Selector Action Pressed")
 	case rightSkill: log.Println("Right Skill Action Pressed")
 	default:
-		log.Printf("Unrecognized Actionable(%d) being clicked\n", item)
+		log.Printf("Unrecognized ActionableType(%d) being clicked\n", item)
 	}
 }
