@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"io"
 	"log"
 	"net"
@@ -29,8 +30,8 @@ func (l RemoteClientConnection) GetUniqueId() string {
 	return l.uniqueId
 }
 
-func (l RemoteClientConnection) GetConnectionType() string {
-	return "Remote Client"
+func (l RemoteClientConnection) GetConnectionType() d2clientconnectiontype.ClientConnectionType {
+	return d2clientconnectiontype.LANClient
 }
 
 func (l *RemoteClientConnection) SendPacketToClient(packet d2netpacket.NetPacket) error { // WHAT IS THIS
@@ -76,7 +77,8 @@ func (l *RemoteClientConnection) Open(connectionString string, saveFilePath stri
 
 func (l *RemoteClientConnection) Close() error {
 	l.active = false
-	// TODO: Disconnect from the server - send a disconnect packet
+	l.SendPacketToServer(d2netpacket.CreatePlayerDisconnectRequestPacket(l.GetUniqueId()))
+
 	return nil
 }
 
@@ -147,6 +149,12 @@ func (l *RemoteClientConnection) serverListener() {
 				PacketType: packetType,
 				PacketData: packet,
 			})
+		case d2netpackettype.Ping:
+			l.SendPacketToServer(d2netpacket.CreatePongPacket(l.uniqueId))
+		case d2netpackettype.PlayerDisconnectionNotification:
+			var packet d2netpacket.PlayerDisconnectRequestPacket
+			json.Unmarshal([]byte(stringData), &packet)
+			log.Printf("Received disconnect: %s", packet.Id)
 		default:
 			fmt.Printf("Unknown packet type %d\n", packetType)
 		}
