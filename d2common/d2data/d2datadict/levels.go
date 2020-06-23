@@ -377,6 +377,16 @@ type LevelDetailsRecord struct {
 
 var LevelDetails map[int]*LevelDetailsRecord
 
+func GetLevelDetails(id int) *LevelDetailsRecord {
+	for i := 0; i < len(LevelDetails); i++ {
+		if LevelDetails[i].Id == id {
+			return LevelDetails[i]
+		}
+	}
+
+	return nil
+}
+
 func LoadLevelDetails(file []byte) {
 	dict := d2common.LoadDataDictionary(string(file))
 	numRecords := len(dict.Data)
