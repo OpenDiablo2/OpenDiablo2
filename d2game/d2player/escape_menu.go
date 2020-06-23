@@ -99,7 +99,7 @@ func newSoundOptionsLayout(cfg *layoutCfg) *d2gui.Layout {
 }
 
 func addTitle(layout *d2gui.Layout, text string) {
-	layout.AddLabel("sound options", d2gui.FontStyle42Units)
+	layout.AddLabel(text, d2gui.FontStyle42Units)
 	layout.AddSpacerStatic(10, labelGutter)
 }
 
