@@ -482,7 +482,6 @@ func (v *SelectHeroClass) Advance(tickTime float64) error {
 	if v.selectedHero != d2enum.HeroNone && allIdle {
 		v.selectedHero = d2enum.HeroNone
 	}
-	v.heroNameTextbox.Update()
 	v.okButton.SetEnabled(len(v.heroNameTextbox.GetText()) >= 2)
 	return nil
 }
