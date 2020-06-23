@@ -4,8 +4,8 @@ import (
 	"math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2astar"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/beefsack/go-astar"
 )
 
 func (m *MapEngine) RegenerateWalkPaths() {
@@ -69,7 +69,7 @@ func (m *MapEngine) RegenerateWalkPaths() {
 }
 
 // Finds a walkable path between two points
-func (m *MapEngine) PathFind(startX, startY, endX, endY float64) (path []astar.Pather, distance float64, found bool) {
+func (m *MapEngine) PathFind(startX, startY, endX, endY float64) (path []d2astar.Pather, distance float64, found bool) {
 	startTileX := int(math.Floor(startX))
 	startTileY := int(math.Floor(startY))
 	if !m.TileExists(startTileX, startTileY) {
@@ -97,7 +97,7 @@ func (m *MapEngine) PathFind(startX, startY, endX, endY float64) (path []astar.P
 	}
 	endNode := &m.walkMesh[endNodeIndex]
 
-	path, distance, found = astar.Path(endNode, startNode)
+	path, distance, found = d2astar.Path(endNode, startNode, 80)
 	if path != nil {
 		path = path[1:]
 	}

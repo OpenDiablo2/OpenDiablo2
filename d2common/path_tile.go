@@ -1,6 +1,6 @@
 package d2common
 
-import "github.com/beefsack/go-astar"
+import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2astar"
 
 type PathTile struct {
 	Walkable                                                    bool
@@ -8,8 +8,8 @@ type PathTile struct {
 	X, Y                                                        float64
 }
 
-func (t *PathTile) PathNeighbors() []astar.Pather {
-	result := make([]astar.Pather, 0)
+func (t *PathTile) PathNeighbors() []d2astar.Pather {
+	result := make([]d2astar.Pather, 0, 8)
 	if t.Up != nil {
 		result = append(result, t.Up)
 	}
@@ -38,11 +38,11 @@ func (t *PathTile) PathNeighbors() []astar.Pather {
 	return result
 }
 
-func (t *PathTile) PathNeighborCost(to astar.Pather) float64 {
+func (t *PathTile) PathNeighborCost(to d2astar.Pather) float64 {
 	return 1 // No cost specifics currently...
 }
 
-func (t *PathTile) PathEstimatedCost(to astar.Pather) float64 {
+func (t *PathTile) PathEstimatedCost(to d2astar.Pather) float64 {
 	toT := to.(*PathTile)
 	absX := toT.X - t.X
 	if absX < 0 {

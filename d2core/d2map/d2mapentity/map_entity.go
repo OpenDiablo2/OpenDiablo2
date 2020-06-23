@@ -4,8 +4,8 @@ import (
 	"math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2astar"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/beefsack/go-astar"
 )
 
 type MapEntity interface {
@@ -25,7 +25,7 @@ type mapEntity struct {
 	TargetX            float64
 	TargetY            float64
 	Speed              float64
-	path               []astar.Pather
+	path               []d2astar.Pather
 
 	done        func()
 	directioner func(angle float64)
@@ -44,11 +44,11 @@ func createMapEntity(x, y int) mapEntity {
 		subcellX:  1 + math.Mod(locX, 5),
 		subcellY:  1 + math.Mod(locY, 5),
 		Speed:     6,
-		path:      []astar.Pather{},
+		path:      []d2astar.Pather{},
 	}
 }
 
-func (m *mapEntity) SetPath(path []astar.Pather, done func()) {
+func (m *mapEntity) SetPath(path []d2astar.Pather, done func()) {
 	m.path = path
 	m.done = done
 }
@@ -112,7 +112,7 @@ func (m *mapEntity) Step(tickTime float64) {
 				if len(m.path) > 1 {
 					m.path = m.path[1:]
 				} else {
-					m.path = []astar.Pather{}
+					m.path = []d2astar.Pather{}
 				}
 			} else {
 				m.LocationX = m.TargetX
