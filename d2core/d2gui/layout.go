@@ -18,6 +18,8 @@ type layoutEntry struct {
 
 	mouseOver bool
 	mouseDown [3]bool
+
+	foo string
 }
 
 type VerticalAlign int
@@ -77,7 +79,7 @@ func (l *Layout) SetHorizontalAlign(horizontalAlign HorizontalAlign) {
 
 func (l *Layout) AddLayout(positionType PositionType) *Layout {
 	layout := createLayout(positionType)
-	l.entries = append(l.entries, &layoutEntry{widget: layout})
+	l.entries = append(l.entries, &layoutEntry{widget: layout, foo: "layout"})
 	return layout
 }
 
@@ -109,7 +111,7 @@ func (l *Layout) AddLabel(text string, fontStyle FontStyle) (*Label, error) {
 		return nil, err
 	}
 
-	l.entries = append(l.entries, &layoutEntry{widget: label})
+	l.entries = append(l.entries, &layoutEntry{widget: label, foo: "label"})
 	return label, nil
 }
 

@@ -24,6 +24,14 @@ func Initialize() error {
 	return nil
 }
 
+func RenderL(l *Layout, target d2render.Surface) error {
+	return l.render(target)
+}
+
+func AdvanceL(l *Layout, elapsed float64) error {
+	return l.advance(elapsed)
+}
+
 func Render(target d2render.Surface) error {
 	verifyWasInit()
 	return singleton.render(target)

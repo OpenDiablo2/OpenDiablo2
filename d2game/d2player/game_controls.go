@@ -104,16 +104,18 @@ func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 			break
 		}
 		g.escapeMenu.OnEscKey()
-	case d2input.KeyUp:
-		g.escapeMenu.OnUpKey()
-	case d2input.KeyDown:
-		g.escapeMenu.OnDownKey()
-	case d2input.KeyEnter:
-		g.escapeMenu.OnEnterKey()
+	//case d2input.KeyUp:
+	//	g.escapeMenu.OnUpKey()
+	//case d2input.KeyDown:
+	//	g.escapeMenu.OnDownKey()
+	//case d2input.KeyEnter:
+	//	g.escapeMenu.OnEnterKey()
 	case d2input.KeyI:
+		g.escapeMenu.Close()
 		g.inventory.Toggle()
 		g.updateLayout()
 	case d2input.KeyC:
+		g.escapeMenu.Close()
 		g.heroStats.Toggle()
 		g.updateLayout()
 	default:
@@ -124,14 +126,14 @@ func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 }
 
 func (g *GameControls) OnMouseMove(event d2input.MouseMoveEvent) bool {
-	g.escapeMenu.OnMouseMove(event)
+	//g.escapeMenu.OnMouseMove(event)
 	return false
 }
 
 func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
-	if g.escapeMenu.IsOpen() {
-		return g.escapeMenu.OnMouseButtonDown(event)
-	}
+	//if g.escapeMenu.IsOpen() {
+	//	return g.escapeMenu.OnMouseButtonDown(event)
+	//}
 
 	px, py := g.mapRenderer.ScreenToWorld(event.X, event.Y)
 	px = float64(int(px*10)) / 10.0
@@ -189,7 +191,7 @@ func (g *GameControls) Load() {
 
 // ScreenAdvanceHandler
 func (g *GameControls) Advance(elapsed float64) error {
-	g.escapeMenu.Advance(elapsed)
+	//g.escapeMenu.Advance(elapsed)
 	return nil
 }
 
@@ -214,7 +216,7 @@ func (g *GameControls) updateLayout() {
 func (g *GameControls) Render(target d2render.Surface) {
 	g.inventory.Render(target)
 	g.heroStats.Render(target)
-	g.escapeMenu.Render(target)
+	//g.escapeMenu.Render(target)
 
 	width, height := target.GetSize()
 	offset := 0
