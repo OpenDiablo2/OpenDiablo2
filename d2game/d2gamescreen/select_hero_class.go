@@ -472,17 +472,10 @@ func (v *SelectHeroClass) Advance(tickTime float64) error {
 			canSelect = false
 		}
 	}
-	allIdle := true
-	for heroType, data := range v.heroRenderInfo {
-		if allIdle && data.Stance != d2enum.HeroStanceIdle {
-			allIdle = false
-		}
+	for heroType, _ := range v.heroRenderInfo {
 		v.updateHeroSelectionHover(heroType, canSelect)
 	}
-	if v.selectedHero != d2enum.HeroNone && allIdle {
-		v.selectedHero = d2enum.HeroNone
-	}
-	v.okButton.SetEnabled(len(v.heroNameTextbox.GetText()) >= 2)
+	v.okButton.SetEnabled(len(v.heroNameTextbox.GetText()) >= 2 && v.selectedHero != d2enum.HeroNone)
 	return nil
 }
 
