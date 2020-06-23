@@ -16,13 +16,13 @@ const (
 	mainLayoutID                  = 0
 	optionsLayoutID               = 1
 	soundOptionsLayoutID          = 2
+
+	labelGutter = 2
 )
 
 type EscapeMenu struct {
-	isOpen bool
-
-	selectSound d2audio.SoundEffect
-
+	isOpen        bool
+	selectSound   d2audio.SoundEffect
 	currentLayout layoutID
 	layouts       []*d2gui.Layout
 }
@@ -78,15 +78,9 @@ func newMainLayout(showLayoutFn func(layoutID)) *d2gui.Layout {
 	center.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
 	center.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	center.AddSpacerDynamic()
-	optLabel, _ := center.AddLabel("options", d2gui.FontStyle42Units)
-	optLabel.SetMouseClickHandler(func(_ d2input.MouseEvent) {
-		showLayoutFn(optionsLayoutID)
-	})
-	center.AddLabel("save and exit game", d2gui.FontStyle42Units)
-	returnLabel, _ := center.AddLabel("return to game", d2gui.FontStyle42Units)
-	returnLabel.SetMouseClickHandler(func(_ d2input.MouseEvent) {
-		showLayoutFn(noLayoutID)
-	})
+	addBigSelectionLabel(center, showLayoutFn, "options", optionsLayoutID)
+	addBigSelectionLabel(center, showLayoutFn, "save and exit game", noLayoutID)
+	addBigSelectionLabel(center, showLayoutFn, "return to game", noLayoutID)
 	center.AddSpacerDynamic()
 
 	right := mainLayout.AddLayout(d2gui.PositionTypeVertical)
@@ -108,14 +102,11 @@ func newOptionsLayout(showLayoutFn func(layoutID)) *d2gui.Layout {
 	center.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
 	center.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	center.AddSpacerDynamic()
-	addSelectionLabel(center, showLayoutFn, "sound options", soundOptionsLayoutID)
-	center.AddLabel("video options", d2gui.FontStyle42Units)
-	center.AddLabel("automap options", d2gui.FontStyle42Units)
-	center.AddLabel("configure controls", d2gui.FontStyle42Units)
-	prevLabel, _ := center.AddLabel("previous menu", d2gui.FontStyle42Units)
-	prevLabel.SetMouseClickHandler(func(_ d2input.MouseEvent) {
-		showLayoutFn(mainLayoutID)
-	})
+	addBigSelectionLabel(center, showLayoutFn, "sound options", soundOptionsLayoutID)
+	addBigSelectionLabel(center, showLayoutFn, "video options", soundOptionsLayoutID)
+	addBigSelectionLabel(center, showLayoutFn, "automap options", soundOptionsLayoutID)
+	addBigSelectionLabel(center, showLayoutFn, "configure controls", soundOptionsLayoutID)
+	addBigSelectionLabel(center, showLayoutFn, "previous menu", mainLayoutID)
 	center.AddSpacerDynamic()
 
 	right := mainLayout.AddLayout(d2gui.PositionTypeVertical)
@@ -137,15 +128,10 @@ func newSoundOptionsLayout(showLayoutFn func(layoutID)) *d2gui.Layout {
 	center.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
 	center.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	center.AddSpacerDynamic()
-
 	addTitle(center, "sound options")
 	addOnOffLabel(center, "3d sound")
 	addOnOffLabel(center, "environmental effects")
-
-	prevLabel, _ := center.AddLabel("previous menu", d2gui.FontStyle30Units)
-	prevLabel.SetMouseClickHandler(func(_ d2input.MouseEvent) {
-		showLayoutFn(optionsLayoutID)
-	})
+	addSmallSelectionLabel(center, showLayoutFn, "previous menu", optionsLayoutID)
 	center.AddSpacerDynamic()
 
 	right := mainLayout.AddLayout(d2gui.PositionTypeVertical)
@@ -157,13 +143,23 @@ func newSoundOptionsLayout(showLayoutFn func(layoutID)) *d2gui.Layout {
 
 func addTitle(layout *d2gui.Layout, text string) {
 	layout.AddLabel("sound options", d2gui.FontStyle42Units)
+	layout.AddSpacerStatic(10, labelGutter)
 }
 
-func addSelectionLabel(layout *d2gui.Layout, showLayoutFn func(layoutID), text string, targetLayout layoutID) {
+func addSmallSelectionLabel(layout *d2gui.Layout, showLayoutFn func(layoutID), text string, targetLayout layoutID) {
+	label, _ := layout.AddLabel(text, d2gui.FontStyle30Units)
+	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
+		showLayoutFn(targetLayout)
+	})
+	layout.AddSpacerStatic(10, labelGutter)
+}
+
+func addBigSelectionLabel(layout *d2gui.Layout, showLayoutFn func(layoutID), text string, targetLayout layoutID) {
 	label, _ := layout.AddLabel(text, d2gui.FontStyle42Units)
 	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
 		showLayoutFn(targetLayout)
 	})
+	layout.AddSpacerStatic(10, labelGutter)
 }
 
 func addOnOffLabel(layout *d2gui.Layout, text string) {
@@ -178,6 +174,7 @@ func addOnOffLabel(layout *d2gui.Layout, text string) {
 		}
 		lbl.SetText("on")
 	})
+	layout.AddSpacerStatic(10, labelGutter)
 }
 
 func (m *EscapeMenu) OnLoad() {
