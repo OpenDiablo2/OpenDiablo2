@@ -138,8 +138,7 @@ func newSoundOptionsLayout(showLayoutFn func(layoutID)) *d2gui.Layout {
 	center.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	center.AddSpacerDynamic()
 
-	center.AddLabel("sound options", d2gui.FontStyle42Units)
-
+	addTitle(center, "sound options")
 	addOnOffLabel(center, "3d sound")
 	addOnOffLabel(center, "environmental effects")
 
@@ -154,6 +153,10 @@ func newSoundOptionsLayout(showLayoutFn func(layoutID)) *d2gui.Layout {
 
 	mainLayout.AddSpacerDynamic()
 	return mainLayout
+}
+
+func addTitle(layout *d2gui.Layout, text string) {
+	layout.AddLabel("sound options", d2gui.FontStyle42Units)
 }
 
 func addSelectionLabel(layout *d2gui.Layout, showLayoutFn func(layoutID), text string, targetLayout layoutID) {
