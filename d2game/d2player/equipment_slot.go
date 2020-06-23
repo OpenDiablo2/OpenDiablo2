@@ -57,14 +57,14 @@ func genEquipmentSlotsMap() map[d2enum.EquippedSlotType]EquipmentSlot {
 		d2enum.LeftHand: {
 			item:   nil,
 			x:      491,
-			y:      268,
+			y:      270,
 			width:  32,
 			height: 32,
 		},
 		d2enum.RightHand: {
 			item:   nil,
 			x:      606,
-			y:      268,
+			y:      270,
 			width:  32,
 			height: 32,
 		},
