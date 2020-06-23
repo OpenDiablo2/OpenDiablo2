@@ -3,6 +3,7 @@ package d2player
 import (
 	"errors"
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -24,23 +25,25 @@ var ErrorInventoryFull = errors.New("inventory full")
 // Reusable grid for use with player and merchant inventory.
 // Handles layout and rendering item icons based on code.
 type ItemGrid struct {
-	items    []InventoryItem
-	width    int
-	height   int
-	originX  int
-	originY  int
-	sprites  map[string]*d2ui.Sprite
-	slotSize int
+	items          []InventoryItem
+	equipmentSlots map[d2enum.EquippedSlotType]EquipmentSlot
+	width          int
+	height         int
+	originX        int
+	originY        int
+	sprites        map[string]*d2ui.Sprite
+	slotSize       int
 }
 
 func NewItemGrid(width int, height int, originX int, originY int) *ItemGrid {
 	return &ItemGrid{
-		width:    width,
-		height:   height,
-		originX:  originX,
-		originY:  originY,
-		slotSize: 29,
-		sprites:  make(map[string]*d2ui.Sprite),
+		width:          width,
+		height:         height,
+		originX:        originX,
+		originY:        originY,
+		slotSize:       29,
+		sprites:        make(map[string]*d2ui.Sprite),
+		equipmentSlots: genEquipmentSlotsMap(),
 	}
 }
 
@@ -69,6 +72,12 @@ func (g *ItemGrid) GetSlot(x int, y int) InventoryItem {
 	return nil
 }
 
+func (g *ItemGrid) ChangeEquippedSlot(slot d2enum.EquippedSlotType, item InventoryItem) {
+	var curItem = g.equipmentSlots[slot]
+	curItem.item = item
+	g.equipmentSlots[slot] = curItem
+}
+
 // Add places a given set of items into the first available slots.
 // Returns a count of the number of items which could be inserted.
 func (g *ItemGrid) Add(items ...InventoryItem) (int, error) {
@@ -89,15 +98,9 @@ func (g *ItemGrid) Add(items ...InventoryItem) (int, error) {
 	return added, err
 }
 
-// Load reads the inventory sprites for items into local cache for rendering.
-func (g *ItemGrid) Load(items ...InventoryItem) {
-	var itemSprite *d2ui.Sprite
-
-	for _, item := range items {
-		if _, exists := g.sprites[item.GetItemCode()]; exists {
-			// Already loaded, don't reload.
-			continue
-		}
+func (g *ItemGrid) loadItem(item InventoryItem) {
+	if _, exists := g.sprites[item.GetItemCode()]; !exists {
+		var itemSprite *d2ui.Sprite
 
 		// TODO: Put the pattern into D2Shared
 		animation, err := d2asset.LoadAnimation(
@@ -106,13 +109,26 @@ func (g *ItemGrid) Load(items ...InventoryItem) {
 		)
 		if err != nil {
 			log.Printf("failed to load sprite for item (%s): %v", item.GetItemCode(), err)
-			continue
+			return
 		}
 		itemSprite, err = d2ui.LoadSprite(animation)
-
+		if err != nil {
+			log.Printf("Failed to load sprite, error: " + err.Error())
+		}
 		g.sprites[item.GetItemCode()] = itemSprite
 	}
+}
 
+// Load reads the inventory sprites for items into local cache for rendering.
+func (g *ItemGrid) Load(items ...InventoryItem) {
+	for _, item := range items {
+		g.loadItem(item)
+	}
+	for _, eq := range g.equipmentSlots {
+		if eq.item != nil {
+			g.loadItem(eq.item)
+		}
+	}
 }
 
 // Walk from top left to bottom right until a position large enough to hold the item is found.
@@ -183,23 +199,38 @@ func (g *ItemGrid) Remove(item InventoryItem) {
 	g.items = g.items[:n]
 }
 
+func (g *ItemGrid) renderItem(item InventoryItem, target d2render.Surface, x int, y int) {
+	itemSprite := g.sprites[item.GetItemCode()]
+	if itemSprite != nil {
+		itemSprite.SetPosition(x, y)
+		itemSprite.GetCurrentFrameSize()
+		_ = itemSprite.Render(target)
+	}
+}
+
 func (g *ItemGrid) Render(target d2render.Surface) {
+	g.renderInventoryItems(target)
+	g.renderEquippedItems(target)
+}
+
+func (g *ItemGrid) renderInventoryItems(target d2render.Surface) {
 	for _, item := range g.items {
-		if item == nil {
-			continue
-		}
-
 		itemSprite := g.sprites[item.GetItemCode()]
-		if itemSprite == nil {
-			// In case it failed to load.
-			// TODO: fallback to something
-			continue
-		}
-
 		slotX, slotY := g.SlotToScreen(item.InventoryGridSlot())
 		_, h := itemSprite.GetCurrentFrameSize()
-		itemSprite.SetPosition(slotX, slotY+h)
-		_ = itemSprite.Render(target)
+		slotY = slotY + h
+		g.renderItem(item, target, slotX, slotY)
+	}
+}
 
+func (g *ItemGrid) renderEquippedItems(target d2render.Surface) {
+	for _, eq := range g.equipmentSlots {
+		if eq.item != nil {
+			itemSprite := g.sprites[eq.item.GetItemCode()]
+			itemWidth, itemHeight := itemSprite.GetCurrentFrameSize()
+			var x = eq.x + ((eq.width - itemWidth) / 2)
+			var y = eq.y - ((eq.height - itemHeight) / 2)
+			g.renderItem(eq.item, target, x, y)
+		}
 	}
 }
