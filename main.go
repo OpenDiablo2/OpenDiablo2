@@ -411,6 +411,7 @@ func loadDataDict() error {
 		{d2resource.Gems, d2datadict.LoadGems},
 		{d2resource.DifficultyLevels, d2datadict.LoadDifficultyLevels},
 		{d2resource.AutoMap, d2datadict.LoadAutoMaps},
+		{d2resource.CubeRecipes, d2datadict.LoadCubeRecipes},
 	}
 
 	for _, entry := range entries {
