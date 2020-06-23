@@ -83,7 +83,7 @@ var singleton inputManager
 
 func Initialize(inputService InputService) {
 	singleton = inputManager{
-		in: inputService,
+		inputService: inputService,
 	}
 }
 

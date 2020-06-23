@@ -37,17 +37,18 @@ func Initialize() {
 	}
 	clickSfx = sfx
 
-	d2input.BindHandler(&singleton) // TODO bind here or at the calling code
+	d2input.BindHandler(&singleton)
 }
 
 // Reset resets the state of the UI manager. Typically called for new screens
 func Reset() {
-	singleton = UI{}
+	singleton.widgets = nil
+	singleton.pressedWidget = nil
 }
 
 // AddWidget adds a widget to the UI manager
 func AddWidget(widget Widget) {
-	d2input.BindHandler(widget) // TODO this seems like an iffy place to put this
+	d2input.BindHandler(widget)
 	singleton.widgets = append(singleton.widgets, widget)
 }
 

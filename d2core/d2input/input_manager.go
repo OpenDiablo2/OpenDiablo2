@@ -36,9 +36,9 @@ type InputService interface {
 }
 
 type inputManager struct {
-	in      InputService
-	cursorX int
-	cursorY int
+	inputService InputService
+	cursorX      int
+	cursorY      int
 
 	buttonMod MouseButtonMod
 	keyMod    KeyMod
@@ -47,27 +47,27 @@ type inputManager struct {
 }
 
 func (im *inputManager) advance(_ float64) error {
-	cursorX, cursorY := im.in.CursorPosition()
+	cursorX, cursorY := im.inputService.CursorPosition()
 
 	im.keyMod = 0
-	if im.in.IsKeyPressed(KeyAlt) {
+	if im.inputService.IsKeyPressed(KeyAlt) {
 		im.keyMod |= KeyModAlt
 	}
-	if im.in.IsKeyPressed(KeyControl) {
+	if im.inputService.IsKeyPressed(KeyControl) {
 		im.keyMod |= KeyModControl
 	}
-	if im.in.IsKeyPressed(KeyShift) {
+	if im.inputService.IsKeyPressed(KeyShift) {
 		im.keyMod |= KeyModShift
 	}
 
 	im.buttonMod = 0
-	if im.in.IsMouseButtonPressed(MouseButtonLeft) {
+	if im.inputService.IsMouseButtonPressed(MouseButtonLeft) {
 		im.buttonMod |= MouseButtonModLeft
 	}
-	if im.in.IsMouseButtonPressed(MouseButtonMiddle) {
+	if im.inputService.IsMouseButtonPressed(MouseButtonMiddle) {
 		im.buttonMod |= MouseButtonModMiddle
 	}
-	if im.in.IsMouseButtonPressed(MouseButtonRight) {
+	if im.inputService.IsMouseButtonPressed(MouseButtonRight) {
 		im.buttonMod |= MouseButtonModRight
 	}
 
@@ -79,7 +79,7 @@ func (im *inputManager) advance(_ float64) error {
 	}
 
 	for key := keyMin; key < keyMax; key++ {
-		if im.in.IsKeyJustPressed(key) {
+		if im.inputService.IsKeyJustPressed(key) {
 			event := KeyEvent{HandlerEvent: eventBase, Key: key}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(KeyDownHandler); ok {
@@ -90,8 +90,8 @@ func (im *inputManager) advance(_ float64) error {
 			})
 		}
 
-		if im.in.IsKeyPressed(key) {
-			event := KeyEvent{HandlerEvent: eventBase, Key: key, Duration: im.in.KeyPressDuration(key)}
+		if im.inputService.IsKeyPressed(key) {
+			event := KeyEvent{HandlerEvent: eventBase, Key: key, Duration: im.inputService.KeyPressDuration(key)}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(KeyRepeatHandler); ok {
 					return l.OnKeyRepeat(event)
@@ -101,7 +101,7 @@ func (im *inputManager) advance(_ float64) error {
 			})
 		}
 
-		if im.in.IsKeyJustReleased(key) {
+		if im.inputService.IsKeyJustReleased(key) {
 			event := KeyEvent{HandlerEvent: eventBase, Key: key}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(KeyUpHandler); ok {
@@ -113,7 +113,7 @@ func (im *inputManager) advance(_ float64) error {
 		}
 	}
 
-	if chars := im.in.InputChars(); len(chars) > 0 {
+	if chars := im.inputService.InputChars(); len(chars) > 0 {
 		event := KeyCharsEvent{eventBase, chars}
 		im.propagate(func(handler Handler) bool {
 			if l, ok := handler.(KeyCharsHandler); ok {
@@ -125,7 +125,7 @@ func (im *inputManager) advance(_ float64) error {
 	}
 
 	for button := mouseButtonMin; button < mouseButtonMax; button++ {
-		if im.in.IsMouseButtonJustPressed(button) {
+		if im.inputService.IsMouseButtonJustPressed(button) {
 			event := MouseEvent{eventBase, MouseButton(button)}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(MouseButtonDownHandler); ok {
@@ -136,7 +136,7 @@ func (im *inputManager) advance(_ float64) error {
 			})
 		}
 
-		if im.in.IsMouseButtonJustReleased(button) {
+		if im.inputService.IsMouseButtonJustReleased(button) {
 			event := MouseEvent{eventBase, MouseButton(button)}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(MouseButtonUpHandler); ok {
@@ -146,7 +146,7 @@ func (im *inputManager) advance(_ float64) error {
 				return false
 			})
 		}
-		if im.in.IsMouseButtonPressed(button) {
+		if im.inputService.IsMouseButtonPressed(button) {
 			event := MouseEvent{eventBase, MouseButton(button)}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(MouseButtonRepeatHandler); ok {

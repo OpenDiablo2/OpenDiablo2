@@ -11,7 +11,7 @@ import (
 )
 
 // TextBox with cursor focus
-var focusedTextBox *TextBox // TODO not sure why I needed to add this... but it seems like the chars were being captured by another text box somewhere if I didn't have this
+var focusedTextBox *TextBox
 
 // TextBox represents a text input box
 type TextBox struct {
