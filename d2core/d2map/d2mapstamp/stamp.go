@@ -31,9 +31,6 @@ func LoadStamp(levelType d2enum.RegionIdType, levelPreset int, fileIndex int) *S
 		levelType:   d2datadict.LevelTypes[levelType],
 		levelPreset: d2datadict.LevelPresets[levelPreset],
 	}
-
-	//stamp.palette, _ = loadPaletteForAct(levelType)
-
 	for _, levelTypeDt1 := range stamp.levelType.Files {
 		if len(levelTypeDt1) != 0 && levelTypeDt1 != "" && levelTypeDt1 != "0" {
 			fileData, err := d2asset.LoadFile("/data/global/tiles/" + levelTypeDt1)
