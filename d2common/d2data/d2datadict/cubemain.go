@@ -216,7 +216,7 @@ func LoadCubeRecipes(file []byte) {
 
 	}
 
-	log.Printf( /*"Loaded %d CubeMainRecord records"*/ "LoadCubeRecipes ran - %d", len(CubeRecipes))
+	log.Printf("Loaded %d CubeMainRecord records", len(CubeRecipes))
 }
 
 // newCubeRecipeItem constructs a CubeRecipeItem from a string of
