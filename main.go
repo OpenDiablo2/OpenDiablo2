@@ -423,6 +423,7 @@ func loadDataDict() error {
 		{d2resource.LevelMaze, d2datadict.LoadLevelMazeDetails},
 		{d2resource.LevelSubstitutions, d2datadict.LoadLevelSubstitutions},
 		{d2resource.CubeRecipes, d2datadict.LoadCubeRecipes},
+		{d2resource.SuperUniques, d2datadict.LoadSuperUniques},
 	}
 
 	for _, entry := range entries {

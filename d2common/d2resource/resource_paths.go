@@ -279,6 +279,7 @@ const (
 	// --- Enemy Data ---
 
 	MonStats = "/data/global/excel/monstats.txt"
+	SuperUniques = "/data/global/excel/SuperUniques.txt"
 
 	// --- Skill Data ---
 
