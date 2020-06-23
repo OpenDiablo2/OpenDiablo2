@@ -200,16 +200,12 @@ func (g *ItemGrid) Remove(item InventoryItem) {
 }
 
 func (g *ItemGrid) renderItem(item InventoryItem, target d2render.Surface, x int, y int) {
-	if item == nil {
-		return
-	}
 	itemSprite := g.sprites[item.GetItemCode()]
-	if itemSprite == nil {
-		return
+	if itemSprite != nil {
+		itemSprite.SetPosition(x, y)
+		itemSprite.GetCurrentFrameSize()
+		_ = itemSprite.Render(target)
 	}
-	itemSprite.SetPosition(x, y)
-	itemSprite.GetCurrentFrameSize()
-	_ = itemSprite.Render(target)
 }
 
 func (g *ItemGrid) Render(target d2render.Surface) {
