@@ -101,7 +101,7 @@ func (v *MainMenu) OnLoad() error {
 
 	v.copyrightLabel2 = d2ui.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.copyrightLabel2.Alignment = d2ui.LabelAlignCenter
-	v.copyrightLabel2.SetText(d2common.TranslateString("#1614"))
+	v.copyrightLabel2.SetText("All Rights Reserved.")
 	v.copyrightLabel2.Color = color.RGBA{R: 188, G: 168, B: 140, A: 255}
 	v.copyrightLabel2.SetPosition(400, 525)
 
@@ -143,21 +143,21 @@ func (v *MainMenu) OnLoad() error {
 	v.diabloLogoRightBack, _ = d2ui.LoadSprite(animation)
 	v.diabloLogoRightBack.SetPosition(400, 120)
 
-	v.exitDiabloButton = d2ui.CreateButton(d2ui.ButtonTypeWide, d2common.TranslateString("#1625"))
+	v.exitDiabloButton = d2ui.CreateButton(d2ui.ButtonTypeWide, "EXIT DIABLO II")
 	v.exitDiabloButton.SetPosition(264, 535)
 	v.exitDiabloButton.OnActivated(func() { v.onExitButtonClicked() })
 	d2ui.AddWidget(&v.exitDiabloButton)
 
-	v.creditsButton = d2ui.CreateButton(d2ui.ButtonTypeShort, d2common.TranslateString("#1627"))
+	v.creditsButton = d2ui.CreateButton(d2ui.ButtonTypeShort, "CREDITS")
 	v.creditsButton.SetPosition(264, 505)
 	v.creditsButton.OnActivated(func() { v.onCreditsButtonClicked() })
 	d2ui.AddWidget(&v.creditsButton)
 
-	v.cinematicsButton = d2ui.CreateButton(d2ui.ButtonTypeShort, d2common.TranslateString("#1639"))
+	v.cinematicsButton = d2ui.CreateButton(d2ui.ButtonTypeShort, "CINEMATICS")
 	v.cinematicsButton.SetPosition(401, 505)
 	d2ui.AddWidget(&v.cinematicsButton)
 
-	v.singlePlayerButton = d2ui.CreateButton(d2ui.ButtonTypeWide, d2common.TranslateString("#1620"))
+	v.singlePlayerButton = d2ui.CreateButton(d2ui.ButtonTypeWide, "SINGLE PLAYER")
 	v.singlePlayerButton.SetPosition(264, 290)
 	v.singlePlayerButton.OnActivated(func() { v.onSinglePlayerClicked() })
 	d2ui.AddWidget(&v.singlePlayerButton)
@@ -177,7 +177,7 @@ func (v *MainMenu) OnLoad() error {
 	v.mapTestButton.OnActivated(func() { v.onMapTestClicked() })
 	d2ui.AddWidget(&v.mapTestButton)
 
-	v.networkTcpIpButton = d2ui.CreateButton(d2ui.ButtonTypeWide, d2common.TranslateString("#1666"))
+	v.networkTcpIpButton = d2ui.CreateButton(d2ui.ButtonTypeWide, "TCP/IP GAME")
 	v.networkTcpIpButton.SetPosition(264, 280)
 	v.networkTcpIpButton.OnActivated(func() { v.onNetworkTcpIpClicked() })
 	d2ui.AddWidget(&v.networkTcpIpButton)
@@ -192,12 +192,12 @@ func (v *MainMenu) OnLoad() error {
 	v.btnTcpIpCancel.OnActivated(func() { v.onTcpIpCancelClicked() })
 	d2ui.AddWidget(&v.btnTcpIpCancel)
 
-	v.btnTcpIpHostGame = d2ui.CreateButton(d2ui.ButtonTypeWide, d2common.TranslateString("#1675"))
+	v.btnTcpIpHostGame = d2ui.CreateButton(d2ui.ButtonTypeWide, "HOST GAME")
 	v.btnTcpIpHostGame.SetPosition(264, 280)
 	v.btnTcpIpHostGame.OnActivated(func() { v.onTcpIpHostGameClicked() })
 	d2ui.AddWidget(&v.btnTcpIpHostGame)
 
-	v.btnTcpIpJoinGame = d2ui.CreateButton(d2ui.ButtonTypeWide, d2common.TranslateString("#1676"))
+	v.btnTcpIpJoinGame = d2ui.CreateButton(d2ui.ButtonTypeWide, "JOIN GAME")
 	v.btnTcpIpJoinGame.SetPosition(264, 320)
 	v.btnTcpIpJoinGame.OnActivated(func() { v.onTcpIpJoinGameClicked() })
 	d2ui.AddWidget(&v.btnTcpIpJoinGame)
@@ -205,7 +205,7 @@ func (v *MainMenu) OnLoad() error {
 	v.tcpIpOptionsLabel = d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
 	v.tcpIpOptionsLabel.SetPosition(400, 23)
 	v.tcpIpOptionsLabel.Alignment = d2ui.LabelAlignCenter
-	v.tcpIpOptionsLabel.SetText(d2common.TranslateString("#1667"))
+	v.tcpIpOptionsLabel.SetText("TCP/IP Options")
 
 	animation, _ = d2asset.LoadAnimation(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
 	v.serverIpBackground, _ = d2ui.LoadSprite(animation)
@@ -214,7 +214,7 @@ func (v *MainMenu) OnLoad() error {
 	v.tcpJoinGameLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.tcpJoinGameLabel.Alignment = d2ui.LabelAlignCenter
 	v.tcpJoinGameLabel.SetText(d2common.CombineStrings(d2common.
-		SplitIntoLinesWithMaxWidth(d2common.TranslateString("#327"), 23)))
+		SplitIntoLinesWithMaxWidth("Enter Host IP Address to Join Game", 23)))
 	v.tcpJoinGameLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
 	v.tcpJoinGameLabel.SetPosition(400, 190)
 
@@ -223,12 +223,12 @@ func (v *MainMenu) OnLoad() error {
 	v.tcpJoinGameEntry.SetFilter("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890._:")
 	d2ui.AddWidget(&v.tcpJoinGameEntry)
 
-	v.btnServerIpCancel = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, d2common.TranslateString("#1612"))
+	v.btnServerIpCancel = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "CANCEL")
 	v.btnServerIpCancel.SetPosition(285, 305)
 	v.btnServerIpCancel.OnActivated(func() { v.onBtnTcpIpCancelClicked() })
 	d2ui.AddWidget(&v.btnServerIpCancel)
 
-	v.btnServerIpOk = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, d2common.TranslateString("#971"))
+	v.btnServerIpOk = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "OK")
 	v.btnServerIpOk.SetPosition(420, 305)
 	v.btnServerIpOk.OnActivated(func() { v.onBtnTcpIpOkClicked() })
 	d2ui.AddWidget(&v.btnServerIpOk)
@@ -341,8 +341,6 @@ func (v *MainMenu) Advance(tickTime float64) error {
 		v.diabloLogoRightBack.Advance(tickTime)
 		v.diabloLogoLeft.Advance(tickTime)
 		v.diabloLogoRight.Advance(tickTime)
-	case ScreenModeServerIp:
-		v.tcpJoinGameEntry.Update()
 	}
 
 	switch v.screenMode {
@@ -357,7 +355,6 @@ func (v *MainMenu) Advance(tickTime float64) error {
 		} else {
 			v.leftButtonHeld = false
 		}
-		break
 	}
 
 	return nil

@@ -40,7 +40,10 @@ func (am *archiveManager) loadArchiveForFile(filePath string) (*d2mpq.MPQ, error
 
 	for _, archiveEntry := range am.entries {
 		if archiveEntry.hashEntryMap.Contains(filePath) {
-			return am.loadArchive(archiveEntry.archivePath)
+			result, ok := am.loadArchive(archiveEntry.archivePath)
+			if ok == nil {
+				return result, nil
+			}
 		}
 	}
 

@@ -1,8 +1,9 @@
 package d2datadict
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 type HirelingRecord struct {
@@ -83,7 +84,7 @@ type HirelingRecord struct {
 func LoadHireling(file []byte) {
 	d := d2common.LoadDataDictionary(string(file))
 	var Hirelings []*HirelingRecord
-	for idx, _ := range d.Data {
+	for idx := range d.Data {
 		hireling := &HirelingRecord{
 			Hireling:        d.GetString("Hireling", idx),
 			SubType:         d.GetString("SubType", idx),

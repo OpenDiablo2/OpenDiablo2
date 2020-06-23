@@ -29,7 +29,7 @@ func LoadCOF(fileData []byte) (*COF, error) {
 	result.Speed = int(streamReader.GetByte())
 	streamReader.SkipBytes(3)
 	result.CofLayers = make([]CofLayer, result.NumberOfLayers)
-	result.CompositeLayers = make(map[d2enum.CompositeType]int, 0)
+	result.CompositeLayers = make(map[d2enum.CompositeType]int)
 	for i := 0; i < result.NumberOfLayers; i++ {
 		layer := CofLayer{}
 		layer.Type = d2enum.CompositeType(streamReader.GetByte())
@@ -37,19 +37,19 @@ func LoadCOF(fileData []byte) (*COF, error) {
 		layer.Selectable = streamReader.GetByte() != 0
 		layer.Transparent = streamReader.GetByte() != 0
 		layer.DrawEffect = d2enum.DrawEffect(streamReader.GetByte())
-		weaponClassStr, _ := streamReader.ReadBytes(4)
+		weaponClassStr := streamReader.ReadBytes(4)
 		layer.WeaponClass = d2enum.WeaponClassFromString(strings.TrimSpace(strings.ReplaceAll(string(weaponClassStr), string(0), "")))
 		result.CofLayers[i] = layer
 		result.CompositeLayers[layer.Type] = i
 	}
-	animationFrameBytes, _ := streamReader.ReadBytes(result.FramesPerDirection)
+	animationFrameBytes := streamReader.ReadBytes(result.FramesPerDirection)
 	result.AnimationFrames = make([]d2enum.AnimationFrame, result.FramesPerDirection)
 	for i := range animationFrameBytes {
 		result.AnimationFrames[i] = d2enum.AnimationFrame(animationFrameBytes[i])
 	}
 	priorityLen := result.FramesPerDirection * result.NumberOfDirections * result.NumberOfLayers
 	result.Priority = make([][][]d2enum.CompositeType, result.NumberOfDirections)
-	priorityBytes, _ := streamReader.ReadBytes(priorityLen)
+	priorityBytes := streamReader.ReadBytes(priorityLen)
 	priorityIndex := 0
 	for direction := 0; direction < result.NumberOfDirections; direction++ {
 		result.Priority[direction] = make([][]d2enum.CompositeType, result.FramesPerDirection)

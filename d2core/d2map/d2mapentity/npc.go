@@ -1,4 +1,4 @@
-package d2map
+package d2mapentity
 
 import (
 	"math/rand"

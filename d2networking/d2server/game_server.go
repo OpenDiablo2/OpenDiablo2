@@ -9,9 +9,14 @@ import (
 	"log"
 	"net"
 	"strings"
+	"sync"
+	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server/d2udpclientconnection"
@@ -20,8 +25,10 @@ import (
 )
 
 type GameServer struct {
+	sync.RWMutex
 	clientConnections map[string]ClientConnection
-	mapEngines        []*d2map.MapEngine
+	manager           *ConnectionManager
+	mapEngines        []*d2mapengine.MapEngine
 	scriptEngine      *d2script.ScriptEngine
 	udpConnection     *net.UDPConn
 	seed              int64
@@ -38,13 +45,17 @@ func Create(openNetworkServer bool) {
 
 	singletonServer = &GameServer{
 		clientConnections: make(map[string]ClientConnection),
-		mapEngines:        make([]*d2map.MapEngine, 0),
+		mapEngines:        make([]*d2mapengine.MapEngine, 0),
 		scriptEngine:      d2script.CreateScriptEngine(),
-		seed:              1592539977884044000, //time.Now().UnixNano(),
+		seed:              time.Now().UnixNano(),
 	}
 
-	mapEngine := d2map.CreateMapEngine(singletonServer.seed)
-	mapEngine.GenerateAct1Overworld(true)
+	singletonServer.manager = CreateConnectionManager(singletonServer)
+
+	mapEngine := d2mapengine.CreateMapEngine()
+	mapEngine.SetSeed(singletonServer.seed)
+	mapEngine.ResetMap(d2enum.RegionAct1Town, 100, 100) // TODO: Mapgen - Needs levels.txt stuff
+	d2mapgen.GenerateAct1Overworld(mapEngine)
 	singletonServer.mapEngines = append(singletonServer.mapEngines, mapEngine)
 
 	singletonServer.scriptEngine.AddFunction("getMapEngines", func(call otto.FunctionCall) otto.Value {
@@ -106,8 +117,17 @@ func runNetworkServer() {
 			for _, player := range singletonServer.clientConnections {
 				player.SendPacketToClient(netPacket)
 			}
+		case d2netpackettype.Pong:
+			packetData := d2netpacket.PlayerConnectionRequestPacket{}
+			json.Unmarshal([]byte(stringData), &packetData)
+			singletonServer.manager.Recv(packetData.Id)
+		case d2netpackettype.ServerClosed:
+			singletonServer.manager.Shutdown()
+		case d2netpackettype.PlayerDisconnectionNotification:
+			var packet d2netpacket.PlayerDisconnectRequestPacket
+			json.Unmarshal([]byte(stringData), &packet)
+			log.Printf("Received disconnect: %s", packet.Id)
 		}
-
 	}
 }
 
@@ -184,7 +204,6 @@ func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) err
 		for _, player := range singletonServer.clientConnections {
 			player.SendPacketToClient(packet)
 		}
-		break
 	}
 	return nil
 }
