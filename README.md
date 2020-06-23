@@ -83,8 +83,9 @@ Available profilers:\
 You can export the profiler output with the following command:\
 `go tool pprof --pdf ./OpenDiablo2 pprof/profiler.pprof > file.pdf`
 
-You may need to install [Graphviz](http://www.graphviz.org/download/) in order to convert the profiler output.
+Ingame you can create a heap dump by pressing `~` and typing `dumpheap`. A heap.pprof is written to the `pprof` directory.
 
+You may need to install [Graphviz](http://www.graphviz.org/download/) in order to convert the profiler output.
 
 ## Roadmap
 
