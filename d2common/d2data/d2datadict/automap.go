@@ -7,6 +7,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+var frameFields = []string{"Cel1", "Cel2", "Cel3", "Cel4"}
+
 // AutoMapRecord represents one row from d2data.mpq/AutoMap.txt.
 // Based on the information here https://d2mods.info/forum/kb/viewarticle?a=419
 type AutoMapRecord struct {
@@ -42,17 +44,17 @@ type AutoMapRecord struct {
 	Type3 string
 	Type4 string
 
-	// Cel values contain numbers which determine the frame
-	// of the MaxiMap(s).dc6 that will be applied to the
-	// specified tiles.
+	// Frames determine the frame of the MaxiMap(s).dc6 that
+	// will be applied to the specified tiles. The frames
+	// are in rows, if each row holds 20 images (when you
+	// re-extract the chart with Dc6Table, you can specify
+	// how many graphics a line can hold), line 1 includes
+	// icons 0-19, line 2 from 20 to 39 etc.
 	//
 	// Multiple values exist for Cel (and Type) to enable
-	// variation. The game will choose randomly between any
-	// of the 4 values which are not set to -1.
-	Cel1 int
-	Cel2 int
-	Cel3 int
-	Cel4 int
+	// variation. Presumably game chooses randomly between
+	// any of the 4 values which are not set to -1.
+	Frames []int
 }
 
 // AutoMaps contains all data in AutoMap.txt.
@@ -87,11 +89,11 @@ func LoadAutoMaps(file []byte) {
 			Type2: d.GetString("Type2", idx),
 			Type3: d.GetString("Type3", idx),
 			Type4: d.GetString("Type4", idx),
+		}
 
-			Cel1: d.GetNumber("Cel1", idx),
-			Cel2: d.GetNumber("Cel2", idx),
-			Cel3: d.GetNumber("Cel3", idx),
-			Cel4: d.GetNumber("Cel4", idx),
+		AutoMaps[idx].Frames = make([]int, len(frameFields))
+		for i := range frameFields {
+			AutoMaps[idx].Frames[i] = d.GetNumber(frameFields[i], idx)
 		}
 	}
 
