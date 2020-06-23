@@ -1,12 +1,15 @@
 package d2gui
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type Label struct {
 	widgetBase
 
+	text    string
+	font    *d2asset.Font
 	surface d2render.Surface
 }
 
@@ -16,17 +19,8 @@ func createLabel(text string, fontStyle FontStyle) (*Label, error) {
 		return nil, err
 	}
 
-	width, height := font.GetTextMetrics(text)
-	surface, err := d2render.NewSurface(width, height, d2render.FilterNearest)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := font.RenderText(text, surface); err != nil {
-		return nil, err
-	}
-
-	label := &Label{surface: surface}
+	label := &Label{font: font}
+	label.setText(text)
 	label.SetVisible(true)
 
 	return label, nil
@@ -38,4 +32,26 @@ func (l *Label) render(target d2render.Surface) error {
 
 func (l *Label) getSize() (int, int) {
 	return l.surface.GetSize()
+}
+
+func (l *Label) GetText() string {
+	return l.text
+}
+
+func (l *Label) SetText(text string) error {
+	return l.setText(text)
+}
+
+func (l *Label) setText(text string) error {
+	width, height := l.font.GetTextMetrics(text)
+	surface, err := d2render.NewSurface(width, height, d2render.FilterNearest)
+	if err != nil {
+		return err
+	}
+	if err := l.font.RenderText(text, surface); err != nil {
+		return err
+	}
+	l.surface = surface
+	l.text = text
+	return nil
 }

@@ -7,21 +7,20 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
 type layoutID int
 
 const (
-	noLayoutID      layoutID = -1
-	mainLayoutID             = 0
-	optionsLayoutID          = 1
+	noLayoutID           layoutID = -1
+	mainLayoutID                  = 0
+	optionsLayoutID               = 1
+	soundOptionsLayoutID          = 2
 )
 
 type EscapeMenu struct {
-	isOpen      bool
-	pentLeft    *d2ui.Sprite
-	pentRight   *d2ui.Sprite
+	isOpen bool
+
 	selectSound d2audio.SoundEffect
 
 	currentLayout layoutID
@@ -31,8 +30,9 @@ type EscapeMenu struct {
 func NewEscapeMenu() *EscapeMenu {
 	m := &EscapeMenu{}
 	m.layouts = []*d2gui.Layout{
-		mainLayoutID:    newMainLayout(m.showLayout),
-		optionsLayoutID: newOptionsLayout(m.showLayout),
+		mainLayoutID:         newMainLayout(m.showLayout),
+		optionsLayoutID:      newOptionsLayout(m.showLayout),
+		soundOptionsLayoutID: newSoundOptionsLayout(m.showLayout),
 	}
 	return m
 }
@@ -108,12 +108,12 @@ func newOptionsLayout(showLayoutFn func(layoutID)) *d2gui.Layout {
 	center.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
 	center.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	center.AddSpacerDynamic()
-	center.AddLabel("sound options", d2gui.FontStyle42Units)
+	addSelectionLabel(center, showLayoutFn, "sound options", soundOptionsLayoutID)
 	center.AddLabel("video options", d2gui.FontStyle42Units)
 	center.AddLabel("automap options", d2gui.FontStyle42Units)
 	center.AddLabel("configure controls", d2gui.FontStyle42Units)
-	optLabel, _ := center.AddLabel("previous menu", d2gui.FontStyle42Units)
-	optLabel.SetMouseClickHandler(func(_ d2input.MouseEvent) {
+	prevLabel, _ := center.AddLabel("previous menu", d2gui.FontStyle42Units)
+	prevLabel.SetMouseClickHandler(func(_ d2input.MouseEvent) {
 		showLayoutFn(mainLayoutID)
 	})
 	center.AddSpacerDynamic()
@@ -125,17 +125,59 @@ func newOptionsLayout(showLayoutFn func(layoutID)) *d2gui.Layout {
 	return mainLayout
 }
 
-func (m *EscapeMenu) OnLoad() {
-	//pentLeftAnim, _ := d2asset.LoadAnimation(d2resource.PentSpin, d2resource.PaletteUnits)
-	//pentLeft, _ := d2ui.LoadSprite(pentLeftAnim)
-	//pentLeft.SetBlend(false)
-	//pentLeft.PlayBackward()
-	//
-	//pentRightAnim, _ := d2asset.LoadAnimation(d2resource.PentSpin, d2resource.PaletteUnits)
-	//pentRight, _ := d2ui.LoadSprite(pentRightAnim)
-	//pentRight.SetBlend(false)
-	//pentRight.PlayForward()
+func newSoundOptionsLayout(showLayoutFn func(layoutID)) *d2gui.Layout {
+	mainLayout := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
+	mainLayout.SetVerticalAlign(d2gui.VerticalAlignMiddle)
+	mainLayout.AddSpacerDynamic()
 
+	left := mainLayout.AddLayout(d2gui.PositionTypeVertical)
+	left.AddSprite(d2resource.PentSpin, d2resource.PaletteUnits)
+
+	center := mainLayout.AddLayout(d2gui.PositionTypeVertical)
+	center.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
+	center.SetVerticalAlign(d2gui.VerticalAlignMiddle)
+	center.AddSpacerDynamic()
+
+	center.AddLabel("sound options", d2gui.FontStyle42Units)
+
+	addOnOffLabel(center, "3d sound")
+	addOnOffLabel(center, "environmental effects")
+
+	prevLabel, _ := center.AddLabel("previous menu", d2gui.FontStyle30Units)
+	prevLabel.SetMouseClickHandler(func(_ d2input.MouseEvent) {
+		showLayoutFn(optionsLayoutID)
+	})
+	center.AddSpacerDynamic()
+
+	right := mainLayout.AddLayout(d2gui.PositionTypeVertical)
+	right.AddSprite(d2resource.PentSpin, d2resource.PaletteUnits)
+
+	mainLayout.AddSpacerDynamic()
+	return mainLayout
+}
+
+func addSelectionLabel(layout *d2gui.Layout, showLayoutFn func(layoutID), text string, targetLayout layoutID) {
+	label, _ := layout.AddLabel(text, d2gui.FontStyle42Units)
+	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
+		showLayoutFn(targetLayout)
+	})
+}
+
+func addOnOffLabel(layout *d2gui.Layout, text string) {
+	l := layout.AddLayout(d2gui.PositionTypeHorizontal)
+	l.AddLabel(text, d2gui.FontStyle30Units)
+	l.AddSpacerDynamic()
+	lbl, _ := l.AddLabel("on", d2gui.FontStyle30Units)
+	l.SetMouseClickHandler(func(_ d2input.MouseEvent) {
+		if lbl.GetText() == "on" {
+			lbl.SetText("off")
+			return
+		}
+		lbl.SetText("on")
+	})
+}
+
+func (m *EscapeMenu) OnLoad() {
 	m.selectSound, _ = d2audio.LoadSoundEffect(d2resource.SFXCursorSelect)
 }
 
@@ -148,6 +190,9 @@ func (m *EscapeMenu) OnEscKey() {
 	switch m.currentLayout {
 	case optionsLayoutID:
 		m.setLayout(mainLayoutID)
+		return
+	case soundOptionsLayoutID:
+		m.setLayout(optionsLayoutID)
 		return
 	}
 
