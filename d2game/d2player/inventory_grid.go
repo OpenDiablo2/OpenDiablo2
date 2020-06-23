@@ -223,11 +223,9 @@ func (g *ItemGrid) Render(target d2render.Surface) {
 	for _, eq := range g.equipmentSlots {
 		if eq.item != nil {
 			itemSprite := g.sprites[eq.item.GetItemCode()]
-			w, h := itemSprite.GetCurrentFrameSize()
-			var x = eq.x + ((eq.width - w) / 2)
-			var y = eq.y - ((eq.height - h) / 2)
-			// Y: Current Y of slot - (Total height - Item height) / 2
-			// X: Current X of slot + (Total width - Item width) / 2
+			itemWidth, itemHeight := itemSprite.GetCurrentFrameSize()
+			var x = eq.x + ((eq.width - itemWidth) / 2)
+			var y = eq.y - ((eq.height - itemHeight) / 2)
 			g.renderItem(eq.item, target, x, y)
 		}
 	}
