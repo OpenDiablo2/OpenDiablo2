@@ -15,25 +15,30 @@ const (
 	optionsLayoutID               = 1
 	soundOptionsLayoutID          = 2
 
-	labelGutter = 2
-	menuSize    = 500
+	labelGutter    = 2
+	sidePanelsSize = 52
+	menuSize       = 500
 )
 
 type EscapeMenu struct {
 	isOpen        bool
 	selectSound   d2audio.SoundEffect
 	currentLayout layoutID
-	layouts       []*d2gui.Layout
+
+	layouts []*d2gui.Layout
 }
 
 type layoutCfg struct {
 	showLayoutFn func(id layoutID)
+	wrapLayoutFn func(func(*d2gui.Layout)) *d2gui.Layout
+	hoverLabelFn func(label *d2gui.Label)
 }
 
 func NewEscapeMenu() *EscapeMenu {
 	m := &EscapeMenu{}
 	cfg := &layoutCfg{
 		showLayoutFn: m.showLayout,
+		wrapLayoutFn: m.layoutWrapper,
 	}
 	m.layouts = []*d2gui.Layout{
 		mainLayoutID:         newMainLayout(cfg),
@@ -43,13 +48,13 @@ func NewEscapeMenu() *EscapeMenu {
 	return m
 }
 
-func wrapLayout(fn func(base *d2gui.Layout)) *d2gui.Layout {
+func (m *EscapeMenu) layoutWrapper(fn func(*d2gui.Layout)) *d2gui.Layout {
 	base := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
 	base.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	base.AddSpacerDynamic()
 
 	left := base.AddLayout(d2gui.PositionTypeVertical)
-	left.SetSize(52, 52)
+	left.SetSize(sidePanelsSize, 0)
 	left.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionForward)
 
 	center := base.AddLayout(d2gui.PositionTypeVertical)
@@ -57,22 +62,19 @@ func wrapLayout(fn func(base *d2gui.Layout)) *d2gui.Layout {
 	center.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
 	center.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	center.AddSpacerDynamic()
-
 	fn(center)
-
 	center.AddSpacerDynamic()
 
 	right := base.AddLayout(d2gui.PositionTypeVertical)
-	right.SetSize(52, 52)
+	right.SetSize(sidePanelsSize, 0)
 	right.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionBackward)
 
 	base.AddSpacerDynamic()
-
 	return base
 }
 
 func newMainLayout(cfg *layoutCfg) *d2gui.Layout {
-	return wrapLayout(func(base *d2gui.Layout) {
+	return cfg.wrapLayoutFn(func(base *d2gui.Layout) {
 		addBigSelectionLabel(base, cfg, "options", optionsLayoutID)
 		addBigSelectionLabel(base, cfg, "save and exit game", noLayoutID)
 		addBigSelectionLabel(base, cfg, "return to game", noLayoutID)
@@ -80,7 +82,7 @@ func newMainLayout(cfg *layoutCfg) *d2gui.Layout {
 }
 
 func newOptionsLayout(cfg *layoutCfg) *d2gui.Layout {
-	return wrapLayout(func(base *d2gui.Layout) {
+	return cfg.wrapLayoutFn(func(base *d2gui.Layout) {
 		addBigSelectionLabel(base, cfg, "sound options", soundOptionsLayoutID)
 		addBigSelectionLabel(base, cfg, "video options", soundOptionsLayoutID)
 		addBigSelectionLabel(base, cfg, "automap options", soundOptionsLayoutID)
@@ -90,7 +92,7 @@ func newOptionsLayout(cfg *layoutCfg) *d2gui.Layout {
 }
 
 func newSoundOptionsLayout(cfg *layoutCfg) *d2gui.Layout {
-	return wrapLayout(func(base *d2gui.Layout) {
+	return cfg.wrapLayoutFn(func(base *d2gui.Layout) {
 		addTitle(base, "sound options")
 		addOnOffLabel(base, "3d sound")
 		addOnOffLabel(base, "environmental effects")
@@ -180,6 +182,11 @@ func (m *EscapeMenu) showLayout(id layoutID) {
 	}
 
 	m.setLayout(id)
+}
+
+func (m *EscapeMenu) hoverLayoutFn(label *d2gui.Label) {
+
+	return
 }
 
 func (m *EscapeMenu) setLayout(id layoutID) {
