@@ -47,6 +47,7 @@ func Reset() {
 
 // AddWidget adds a widget to the UI manager
 func AddWidget(widget Widget) {
+	d2input.BindHandler(widget) // TODO this seems like an iffy place to put this
 	singleton.widgets = append(singleton.widgets, widget)
 }
 
@@ -56,7 +57,7 @@ func (u *UI) OnMouseButtonUp(event d2input.MouseEvent) bool {
 		singleton.cursorButtons |= CursorButtonLeft
 		// activate previously pressed widget if cursor is still hovering
 		w := singleton.pressedWidget
-		if w != nil && contains(w, singleton.CursorX, singleton.CursorY) && w.GetVisible() && w.GetEnabled() && w.GetPressed() {
+		if w != nil && contains(w, singleton.CursorX, singleton.CursorY) && w.GetVisible() && w.GetEnabled() {
 			w.Activate()
 		}
 		// unpress all widgets that are pressed
@@ -71,6 +72,7 @@ func (u *UI) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	singleton.CursorX, singleton.CursorY = event.X, event.Y
 	if event.Button == d2input.MouseButtonLeft {
 		// find and press a widget on screen
+		singleton.pressedWidget = nil
 		for _, w := range singleton.widgets {
 			if contains(w, singleton.CursorX, singleton.CursorY) && w.GetVisible() && w.GetEnabled() {
 				w.SetPressed(true)

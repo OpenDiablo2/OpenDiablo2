@@ -514,6 +514,7 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 	mouseHover := (mouseX >= b.Min.X) && (mouseX <= b.Min.X+b.Max.X) && (mouseY >= b.Min.Y) && (mouseY <= b.Min.Y+b.Max.Y)
 	if mouseHover && d2ui.CursorButtonPressed(d2ui.CursorButtonLeft) {
 		v.heroNameTextbox.SetVisible(true)
+		v.heroNameTextbox.Activate()
 		v.okButton.SetVisible(true)
 		v.expansionCheckbox.SetVisible(true)
 		v.hardcoreCheckbox.SetVisible(true)

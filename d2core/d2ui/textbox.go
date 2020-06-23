@@ -8,9 +8,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/hajimehoshi/ebiten/inpututil"
-	"github.com/hajimehoshi/ebiten"
 )
+
+// TextBox with cursor focus
+var focusedTextBox *TextBox // TODO not sure why I needed to add this... but it seems like the chars were being captured by another text box somewhere if I didn't have this
 
 // TextBox represents a text input box
 type TextBox struct {
@@ -38,28 +39,11 @@ func CreateTextbox() TextBox {
 	}
 	tb.lineBar.SetText("_")
 
-	d2input.BindHandler(tb) // TODO should it bind here or by the caller
-
 	return tb
 }
 
 func (v *TextBox) SetFilter(filter string) {
 	v.filter = filter
-}
-
-func repeatingKeyPressed(key ebiten.Key) bool {
-	const (
-		delay    = 30
-		interval = 3
-	)
-	d := inpututil.KeyPressDuration(key)
-	if d == 1 {
-		return true
-	}
-	if d >= delay && (d-delay)%interval == 0 {
-		return true
-	}
-	return false
 }
 
 func (v *TextBox) Render(target d2render.Surface) {
@@ -73,20 +57,46 @@ func (v *TextBox) Render(target d2render.Surface) {
 	}
 }
 
-func (v *TextBox) Advance(elapsed float64) {
-	if !v.visible || !v.enabled {
-		return
+func (v *TextBox) OnKeyChars(event d2input.KeyCharsEvent) bool {
+	if !(focusedTextBox == v) || !v.visible || !v.enabled {
+		return false
 	}
-	newText := string(ebiten.InputChars())
+	newText := string(event.Chars)
 	if len(newText) > 0 {
 		v.text += newText
 		v.SetText(v.text)
+		return true
 	}
-	if repeatingKeyPressed(ebiten.KeyBackspace) {
+	return false
+}
+
+func (v *TextBox) OnKeyRepeat(event d2input.KeyEvent) bool {
+	if event.Key == d2input.KeyBackspace && debounceEvents(event.Duration) {
 		if len(v.text) >= 1 {
 			v.text = v.text[:len(v.text)-1]
 		}
 		v.SetText(v.text)
+	}
+	return false
+}
+
+func debounceEvents(numFrames int) bool {
+	const (
+		delay    = 30
+		interval = 3
+	)
+	if numFrames == 1 {
+		return true
+	}
+	if numFrames >= delay && (numFrames-delay)%interval == 0 {
+		return true
+	}
+	return false
+}
+
+func (v *TextBox) Advance(_ float64) {
+	if !v.visible || !v.enabled {
+		return
 	}
 }
 
@@ -166,5 +176,5 @@ func (v *TextBox) OnActivated(callback func()) {
 }
 
 func (v *TextBox) Activate() {
-	//no op
+	focusedTextBox = v
 }

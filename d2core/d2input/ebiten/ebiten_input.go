@@ -150,3 +150,7 @@ func (is InputService) IsMouseButtonJustPressed(button d2input.MouseButton) bool
 func (is InputService) IsMouseButtonJustReleased(button d2input.MouseButton) bool {
 	return inpututil.IsMouseButtonJustReleased(mouseButtonToEbiten[button])
 }
+
+func (is InputService) KeyPressDuration(key d2input.Key) int {
+	return inpututil.KeyPressDuration(keyToEbiten[key])
+}

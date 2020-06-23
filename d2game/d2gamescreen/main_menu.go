@@ -378,6 +378,9 @@ func (v *MainMenu) SetScreenMode(screenMode MainMenuScreenMode) {
 	v.btnTcpIpHostGame.SetVisible(isTcpIp)
 	v.btnTcpIpJoinGame.SetVisible(isTcpIp)
 	v.tcpJoinGameEntry.SetVisible(isServerIp)
+	if isServerIp {
+		v.tcpJoinGameEntry.Activate()
+	}
 	v.btnServerIpOk.SetVisible(isServerIp)
 	v.btnServerIpCancel.SetVisible(isServerIp)
 }

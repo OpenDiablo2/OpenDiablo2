@@ -27,6 +27,8 @@ type HandlerEvent struct {
 type KeyEvent struct {
 	HandlerEvent
 	Key Key
+	// Duration represents the number of frames this key has been pressed for
+	Duration int
 }
 
 type KeyCharsEvent struct {

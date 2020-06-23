@@ -32,6 +32,7 @@ type InputService interface {
 	IsMouseButtonPressed(button MouseButton) bool
 	IsMouseButtonJustPressed(button MouseButton) bool
 	IsMouseButtonJustReleased(button MouseButton) bool
+	KeyPressDuration(key Key) int
 }
 
 type inputManager struct {
@@ -79,7 +80,7 @@ func (im *inputManager) advance(_ float64) error {
 
 	for key := keyMin; key < keyMax; key++ {
 		if im.in.IsKeyJustPressed(key) {
-			event := KeyEvent{eventBase, key}
+			event := KeyEvent{HandlerEvent: eventBase, Key: key}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(KeyDownHandler); ok {
 					return l.OnKeyDown(event)
@@ -90,7 +91,7 @@ func (im *inputManager) advance(_ float64) error {
 		}
 
 		if im.in.IsKeyPressed(key) {
-			event := KeyEvent{eventBase, Key(key)}
+			event := KeyEvent{HandlerEvent: eventBase, Key: key, Duration: im.in.KeyPressDuration(key)}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(KeyRepeatHandler); ok {
 					return l.OnKeyRepeat(event)
@@ -101,7 +102,7 @@ func (im *inputManager) advance(_ float64) error {
 		}
 
 		if im.in.IsKeyJustReleased(key) {
-			event := KeyEvent{eventBase, Key(key)}
+			event := KeyEvent{HandlerEvent: eventBase, Key: key}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(KeyUpHandler); ok {
 					return l.OnKeyUp(event)
