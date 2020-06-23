@@ -209,6 +209,11 @@ func (g *ItemGrid) renderItem(item InventoryItem, target d2render.Surface, x int
 }
 
 func (g *ItemGrid) Render(target d2render.Surface) {
+	g.renderInventoryItems(target)
+	g.renderEquippedItems(target)
+}
+
+func (g *ItemGrid) renderInventoryItems(target d2render.Surface) {
 	for _, item := range g.items {
 		itemSprite := g.sprites[item.GetItemCode()]
 		slotX, slotY := g.SlotToScreen(item.InventoryGridSlot())
@@ -216,6 +221,9 @@ func (g *ItemGrid) Render(target d2render.Surface) {
 		slotY = slotY + h
 		g.renderItem(item, target, slotX, slotY)
 	}
+}
+
+func (g *ItemGrid) renderEquippedItems(target d2render.Surface) {
 	for _, eq := range g.equipmentSlots {
 		if eq.item != nil {
 			itemSprite := g.sprites[eq.item.GetItemCode()]
