@@ -25,7 +25,8 @@ type EscapeMenu struct {
 	selectSound   d2audio.SoundEffect
 	currentLayout layoutID
 
-	layouts []*d2gui.Layout
+	leftPent *d2gui.AnimatedSprite
+	layouts  []*d2gui.Layout
 }
 
 type layoutCfg struct {
@@ -37,8 +38,9 @@ type layoutCfg struct {
 func NewEscapeMenu() *EscapeMenu {
 	m := &EscapeMenu{}
 	cfg := &layoutCfg{
-		showLayoutFn: m.showLayout,
-		wrapLayoutFn: m.layoutWrapper,
+		showLayoutFn: m.showLayoutFn,
+		wrapLayoutFn: m.wrapLayoutFn,
+		hoverLabelFn: m.hoverLayoutFn,
 	}
 	m.layouts = []*d2gui.Layout{
 		mainLayoutID:         newMainLayout(cfg),
@@ -48,14 +50,15 @@ func NewEscapeMenu() *EscapeMenu {
 	return m
 }
 
-func (m *EscapeMenu) layoutWrapper(fn func(*d2gui.Layout)) *d2gui.Layout {
+func (m *EscapeMenu) wrapLayoutFn(fn func(*d2gui.Layout)) *d2gui.Layout {
 	base := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
 	base.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	base.AddSpacerDynamic()
 
 	left := base.AddLayout(d2gui.PositionTypeVertical)
-	left.SetSize(sidePanelsSize, 0)
-	left.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionForward)
+	left.SetSize(sidePanelsSize, 500)
+	s, _ := left.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionForward)
+	m.leftPent = s
 
 	center := base.AddLayout(d2gui.PositionTypeVertical)
 	center.SetSize(menuSize, 0)
@@ -66,7 +69,7 @@ func (m *EscapeMenu) layoutWrapper(fn func(*d2gui.Layout)) *d2gui.Layout {
 	center.AddSpacerDynamic()
 
 	right := base.AddLayout(d2gui.PositionTypeVertical)
-	right.SetSize(sidePanelsSize, 0)
+	right.SetSize(sidePanelsSize, 500)
 	right.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionBackward)
 
 	base.AddSpacerDynamic()
@@ -110,6 +113,9 @@ func addSmallSelectionLabel(layout *d2gui.Layout, cfg *layoutCfg, text string, t
 	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
 		cfg.showLayoutFn(targetLayout)
 	})
+	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
+		cfg.hoverLabelFn(label)
+	})
 	layout.AddSpacerStatic(10, labelGutter)
 }
 
@@ -117,6 +123,9 @@ func addBigSelectionLabel(layout *d2gui.Layout, cfg *layoutCfg, text string, tar
 	label, _ := layout.AddLabel(text, d2gui.FontStyle42Units)
 	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
 		cfg.showLayoutFn(targetLayout)
+	})
+	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
+		cfg.hoverLabelFn(label)
 	})
 	layout.AddSpacerStatic(10, labelGutter)
 }
@@ -173,7 +182,7 @@ func (m *EscapeMenu) Open() {
 	m.setLayout(mainLayoutID)
 }
 
-func (m *EscapeMenu) showLayout(id layoutID) {
+func (m *EscapeMenu) showLayoutFn(id layoutID) {
 	m.selectSound.Play()
 
 	if id == noLayoutID {
@@ -185,7 +194,7 @@ func (m *EscapeMenu) showLayout(id layoutID) {
 }
 
 func (m *EscapeMenu) hoverLayoutFn(label *d2gui.Label) {
-
+	//m.leftPent.SetPosition()
 	return
 }
 
