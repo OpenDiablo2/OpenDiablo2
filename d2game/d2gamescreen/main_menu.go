@@ -341,8 +341,6 @@ func (v *MainMenu) Advance(tickTime float64) error {
 		v.diabloLogoRightBack.Advance(tickTime)
 		v.diabloLogoLeft.Advance(tickTime)
 		v.diabloLogoRight.Advance(tickTime)
-	case ScreenModeServerIp:
-		v.tcpJoinGameEntry.Update()
 	}
 
 	switch v.screenMode {

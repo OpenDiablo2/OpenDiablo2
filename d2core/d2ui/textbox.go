@@ -72,10 +72,6 @@ func (v *TextBox) Render(target d2render.Surface) {
 }
 
 func (v *TextBox) Advance(elapsed float64) {
-
-}
-
-func (v *TextBox) Update() {
 	if !v.visible || !v.enabled {
 		return
 	}
@@ -90,6 +86,9 @@ func (v *TextBox) Update() {
 		}
 		v.SetText(v.text)
 	}
+}
+
+func (v *TextBox) Update() {
 }
 
 func (v *TextBox) GetText() string {
