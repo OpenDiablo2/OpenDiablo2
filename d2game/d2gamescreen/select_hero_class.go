@@ -10,7 +10,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
@@ -483,7 +482,6 @@ func (v *SelectHeroClass) Advance(tickTime float64) error {
 	if v.selectedHero != d2enum.HeroNone && allIdle {
 		v.selectedHero = d2enum.HeroNone
 	}
-	v.heroNameTextbox.Update()
 	v.okButton.SetEnabled(len(v.heroNameTextbox.GetText()) >= 2)
 	return nil
 }
@@ -619,7 +617,7 @@ func (v *SelectHeroClass) updateHeroText() {
 
 func (v *SelectHeroClass) setDescLabels(descKey string) {
 	heroDesc := d2common.TranslateString(descKey)
-	parts := dh.SplitIntoLinesWithMaxWidth(heroDesc, 37)
+	parts := d2common.SplitIntoLinesWithMaxWidth(heroDesc, 37)
 	if len(parts) > 1 {
 		v.heroDesc1Label.SetText(parts[0])
 	} else {

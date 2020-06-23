@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	dh "github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 type LevelTypeRecord struct {
@@ -36,7 +36,7 @@ func LoadLevelTypes(file []byte) {
 			continue
 		}
 		LevelTypes[j].Name = parts[inc()]
-		LevelTypes[j].Id = dh.StringToInt(parts[inc()])
+		LevelTypes[j].Id = d2common.StringToInt(parts[inc()])
 		for fileIdx := range LevelTypes[i].Files {
 			LevelTypes[j].Files[fileIdx] = parts[inc()]
 			if LevelTypes[j].Files[fileIdx] == "0" {
@@ -45,7 +45,7 @@ func LoadLevelTypes(file []byte) {
 
 		}
 		LevelTypes[j].Beta = parts[inc()] != "1"
-		LevelTypes[j].Act = dh.StringToInt(parts[inc()])
+		LevelTypes[j].Act = d2common.StringToInt(parts[inc()])
 		LevelTypes[j].Expansion = parts[inc()] != "1"
 	}
 	log.Printf("Loaded %d LevelType records", len(LevelTypes))

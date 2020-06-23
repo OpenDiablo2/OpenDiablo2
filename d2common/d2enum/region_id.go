@@ -3,6 +3,7 @@ package d2enum
 type RegionIdType int
 
 const (
+	RegionNone           RegionIdType = 0
 	RegionAct1Town       RegionIdType = 1
 	RegionAct1Wilderness RegionIdType = 2
 	RegionAct1Cave       RegionIdType = 3

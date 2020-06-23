@@ -77,7 +77,7 @@ func LoadExperienceBreakpoints(file []byte) {
 	// we skip the second row because that describes max level of char classes
 	ExperienceBreakpoints = make([]*ExperienceBreakpointsRecord, len(d.Data)-1)
 
-	for idx, _ := range d.Data {
+	for idx := range d.Data {
 		if idx == 0 {
 			// max levels are a special case
 			maxLevels = map[d2enum.Hero]int{

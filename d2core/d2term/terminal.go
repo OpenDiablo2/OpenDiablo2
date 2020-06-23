@@ -429,7 +429,6 @@ func (t *terminal) bindAction(name, description string, action interface{}) erro
 		case reflect.Uint:
 		case reflect.Float64:
 		case reflect.Bool:
-			break
 		default:
 			return errors.New("action has unsupported arguments")
 		}

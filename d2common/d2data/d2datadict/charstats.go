@@ -92,7 +92,7 @@ func LoadCharStats(file []byte) {
 	d := d2common.LoadDataDictionary(string(file))
 	CharStats = make(map[d2enum.Hero]*CharStatsRecord, len(d.Data))
 
-	for idx, _ := range d.Data {
+	for idx := range d.Data {
 		record := &CharStatsRecord{
 			Class: charStringMap[d.GetString("class", idx)],
 

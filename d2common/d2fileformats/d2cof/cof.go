@@ -29,7 +29,7 @@ func LoadCOF(fileData []byte) (*COF, error) {
 	result.Speed = int(streamReader.GetByte())
 	streamReader.SkipBytes(3)
 	result.CofLayers = make([]CofLayer, result.NumberOfLayers)
-	result.CompositeLayers = make(map[d2enum.CompositeType]int, 0)
+	result.CompositeLayers = make(map[d2enum.CompositeType]int)
 	for i := 0; i < result.NumberOfLayers; i++ {
 		layer := CofLayer{}
 		layer.Type = d2enum.CompositeType(streamReader.GetByte())
