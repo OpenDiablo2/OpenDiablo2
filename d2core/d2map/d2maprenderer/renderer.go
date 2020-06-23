@@ -4,6 +4,7 @@ import (
 	"errors"
 	"image/color"
 	"log"
+	"math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 
@@ -58,12 +59,20 @@ func (mr *MapRenderer) SetMapEngine(mapEngine *d2mapengine.MapEngine) {
 }
 
 func (mr *MapRenderer) Render(target d2render.Surface) {
-	mr.renderPass1(mr.viewport, target)
+	mapSize := mr.mapEngine.Size()
+	stxf, styf := mr.viewport.ScreenToWorld(400, -200)
+	etxf, etyf := mr.viewport.ScreenToWorld(400, 1050)
+	startX := int(math.Max(0, math.Floor(stxf)))
+	startY := int(math.Max(0, math.Floor(styf)))
+	endX := int(math.Min(float64(mapSize.Width), math.Ceil(etxf)))
+	endY := int(math.Min(float64(mapSize.Height), math.Ceil(etyf)))
+
+	mr.renderPass1(target, startX, startY, endX, endY)
 	if mr.debugVisLevel > 0 {
-		mr.renderDebug(mr.debugVisLevel, mr.viewport, target)
+		mr.renderDebug(mr.debugVisLevel, target, startX, startY, endX, endY)
 	}
-	mr.renderPass2(mr.viewport, target)
-	mr.renderPass3(mr.viewport, target)
+	mr.renderPass2(target, startX, startY, endX, endY)
+	mr.renderPass3(target, startX, startY, endX, endY)
 }
 
 func (mr *MapRenderer) MoveCameraTo(x, y float64) {
@@ -86,59 +95,47 @@ func (mr *MapRenderer) WorldToOrtho(x, y float64) (float64, float64) {
 	return mr.viewport.WorldToOrtho(x, y)
 }
 
-func (mr *MapRenderer) renderPass1(viewport *Viewport, target d2render.Surface) {
-	mapSize := mr.mapEngine.Size()
-	// TODO: Render based on visible area
-	for tileY := 0; tileY < mapSize.Height; tileY++ {
-		for tileX := 0; tileX < mapSize.Width; tileX++ {
+func (mr *MapRenderer) renderPass1(target d2render.Surface, startX, startY, endX, endY int) {
+	for tileY := startY; tileY < endY; tileY++ {
+		for tileX := startX; tileX < endX; tileX++ {
 			tile := mr.mapEngine.TileAt(tileX, tileY)
-			if viewport.IsTileVisible(float64(tileX), float64(tileY)) {
-				viewport.PushTranslationWorld(float64(tileX), float64(tileY))
-				mr.renderTilePass1(tile, target)
-				viewport.PopTranslation()
-			}
+			mr.viewport.PushTranslationWorld(float64(tileX), float64(tileY))
+			mr.renderTilePass1(tile, target)
+			mr.viewport.PopTranslation()
 		}
 	}
 }
 
-func (mr *MapRenderer) renderPass2(viewport *Viewport, target d2render.Surface) {
-	mapSize := mr.mapEngine.Size()
-
-	// TODO: Render based on visible area
-	for tileY := 0; tileY < mapSize.Height; tileY++ {
-		for tileX := 0; tileX < mapSize.Width; tileX++ {
+func (mr *MapRenderer) renderPass2(target d2render.Surface, startX, startY, endX, endY int) {
+	for tileY := startY; tileY < endY; tileY++ {
+		for tileX := startX; tileX < endX; tileX++ {
 			tile := mr.mapEngine.TileAt(tileX, tileY)
-			if viewport.IsTileVisible(float64(tileX), float64(tileY)) {
-				viewport.PushTranslationWorld(float64(tileX), float64(tileY))
-				mr.renderTilePass2(tile, target)
+			mr.viewport.PushTranslationWorld(float64(tileX), float64(tileY))
+			mr.renderTilePass2(tile, target)
 
-				// TODO: Do not loop over every entity every frame
-				for _, mapEntity := range *mr.mapEngine.Entities() {
-					entityX, entityY := mapEntity.GetPosition()
-					if (int(entityX) != tileX) || (int(entityY) != tileY) {
-						continue
-					}
-					target.PushTranslation(viewport.GetTranslationScreen())
-					mapEntity.Render(target)
-					target.Pop()
+			// TODO: Do not loop over every entity every frame
+			for _, mapEntity := range *mr.mapEngine.Entities() {
+				entityX, entityY := mapEntity.GetPosition()
+				if (int(entityX) != tileX) || (int(entityY) != tileY) {
+					continue
 				}
-				viewport.PopTranslation()
+				target.PushTranslation(mr.viewport.GetTranslationScreen())
+				mapEntity.Render(target)
+				target.Pop()
 			}
+			mr.viewport.PopTranslation()
 		}
 	}
 }
 
-func (mr *MapRenderer) renderPass3(viewport *Viewport, target d2render.Surface) {
-	mapSize := mr.mapEngine.Size()
-	// TODO: Render based on visible area
-	for tileY := 0; tileY < mapSize.Height; tileY++ {
-		for tileX := 0; tileX < mapSize.Width; tileX++ {
+func (mr *MapRenderer) renderPass3(target d2render.Surface, startX, startY, endX, endY int) {
+	for tileY := startY; tileY < endY; tileY++ {
+		for tileX := startX; tileX < endX; tileX++ {
 			tile := mr.mapEngine.TileAt(tileX, tileY)
-			if viewport.IsTileVisible(float64(tileX), float64(tileY)) {
-				viewport.PushTranslationWorld(float64(tileX), float64(tileY))
-				mr.renderTilePass3(tile, target)
-				viewport.PopTranslation()
-			}
+			mr.viewport.PushTranslationWorld(float64(tileX), float64(tileY))
+			mr.renderTilePass3(tile, target)
+			mr.viewport.PopTranslation()
+
 		}
 	}
 
@@ -233,16 +230,12 @@ func (mr *MapRenderer) renderShadow(tile d2ds1.FloorShadowRecord, target d2rende
 	target.Render(img)
 }
 
-func (mr *MapRenderer) renderDebug(debugVisLevel int, viewport *Viewport, target d2render.Surface) {
-	mapSize := mr.mapEngine.Size()
-	// TODO: Render based on visible area
-	for tileY := 0; tileY < mapSize.Height; tileY++ {
-		for tileX := 0; tileX < mapSize.Width; tileX++ {
-			if viewport.IsTileVisible(float64(tileX), float64(tileY)) {
-				viewport.PushTranslationWorld(float64(tileX), float64(tileY))
-				mr.renderTileDebug(tileX, tileY, debugVisLevel, target)
-				viewport.PopTranslation()
-			}
+func (mr *MapRenderer) renderDebug(debugVisLevel int, target d2render.Surface, startX, startY, endX, endY int) {
+	for tileY := startY; tileY < endY; tileY++ {
+		for tileX := startX; tileX < endX; tileX++ {
+			mr.viewport.PushTranslationWorld(float64(tileX), float64(tileY))
+			mr.renderTileDebug(tileX, tileY, debugVisLevel, target)
+			mr.viewport.PopTranslation()
 		}
 	}
 }
