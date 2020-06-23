@@ -97,21 +97,26 @@ const (
 
 	CursorDefault = "/data/global/ui/CURSOR/ohand.DC6"
 
-	// --- Fonts ---
+	// --- Fonts & Locale (strings) ---
 
-	Font6          = "/data/local/font/{LANG_FONT}/font6"
-	Font8          = "/data/local/font/{LANG_FONT}/font8"
-	Font16         = "/data/local/font/{LANG_FONT}/font16"
-	Font24         = "/data/local/font/{LANG_FONT}/font24"
-	Font30         = "/data/local/font/{LANG_FONT}/font30"
-	Font42         = "/data/local/font/{LANG_FONT}/font42"
-	FontFormal12   = "/data/local/font/{LANG_FONT}/fontformal12"
-	FontFormal11   = "/data/local/font/{LANG_FONT}/fontformal11"
-	FontFormal10   = "/data/local/font/{LANG_FONT}/fontformal10"
-	FontExocet10   = "/data/local/font/{LANG_FONT}/fontexocet10"
-	FontExocet8    = "/data/local/font/{LANG_FONT}/fontexocet8"
-	FontSucker     = "/data/local/font/{LANG_FONT}/ReallyTheLastSucker"
-	FontRediculous = "/data/local/font/{LANG_FONT}/fontridiculous"
+	LanguageFontToken    = "{LANG_FONT}"
+	LanguageTableToken   = "{LANG}"
+	Font6                = "/data/local/FONT/" + LanguageFontToken + "/font6"
+	Font8                = "/data/local/FONT/" + LanguageFontToken + "/font8"
+	Font16               = "/data/local/FONT/" + LanguageFontToken + "/font16"
+	Font24               = "/data/local/FONT/" + LanguageFontToken + "/font24"
+	Font30               = "/data/local/FONT/" + LanguageFontToken + "/font30"
+	Font42               = "/data/local/FONT/" + LanguageFontToken + "/font42"
+	FontFormal12         = "/data/local/FONT/" + LanguageFontToken + "/fontformal12"
+	FontFormal11         = "/data/local/FONT/" + LanguageFontToken + "/fontformal11"
+	FontFormal10         = "/data/local/FONT/" + LanguageFontToken + "/fontformal10"
+	FontExocet10         = "/data/local/FONT/" + LanguageFontToken + "/fontexocet10"
+	FontExocet8          = "/data/local/FONT/" + LanguageFontToken + "/fontexocet8"
+	FontSucker           = "/data/local/FONT/" + LanguageFontToken + "/ReallyTheLastSucker"
+	FontRediculous       = "/data/local/FONT/" + LanguageFontToken + "/fontridiculous"
+	ExpansionStringTable = "/data/local/lng/" + LanguageTableToken + "/expansionstring.tbl"
+	StringTable          = "/data/local/lng/" + LanguageTableToken + "/string.tbl"
+	PatchStringTable     = "/data/local/lng/" + LanguageTableToken + "/patchstring.tbl"
 
 	// --- UI ---
 
@@ -165,20 +170,21 @@ const (
 
 	// --- Data ---
 
-	ExpansionStringTable = "/data/local/lng/{LANG}/expansionstring.tbl"
-	StringTable          = "/data/local/lng/{LANG}/string.tbl"
-	PatchStringTable     = "/data/local/lng/{LANG}/patchstring.tbl"
-	LevelPreset          = "/data/global/excel/LvlPrest.txt"
-	LevelType            = "/data/global/excel/LvlTypes.txt"
-	ObjectType           = "/data/global/excel/objtype.bin"
-	LevelWarp            = "/data/global/excel/LvlWarp.bin"
-	LevelDetails         = "/data/global/excel/Levels.bin"
-	ObjectDetails        = "/data/global/excel/Objects.txt"
-	SoundSettings        = "/data/global/excel/Sounds.txt"
-	ItemStatCost         = "/data/global/excel/ItemStatCost.txt"
-	Hireling             = "/data/global/excel/hireling.txt"
-	DifficultyLevels     = "/data/global/excel/difficultylevels.txt"
-	AutoMap              = "/data/global/excel/AutoMap.txt"
+	LevelPreset        = "/data/global/excel/LvlPrest.txt"
+	LevelType          = "/data/global/excel/LvlTypes.txt"
+	ObjectType         = "/data/global/excel/objtype.bin"
+	LevelWarp          = "/data/global/excel/LvlWarp.bin"
+	LevelDetails       = "/data/global/excel/Levels.txt"
+	LevelMaze          = "/data/global/excel/LvlMaze.txt"
+	LevelSubstitutions = "/data/global/excel/LvlSub.txt"
+
+	ObjectDetails    = "/data/global/excel/Objects.txt"
+	SoundSettings    = "/data/global/excel/Sounds.txt"
+	ItemStatCost     = "/data/global/excel/ItemStatCost.txt"
+	Hireling         = "/data/global/excel/hireling.txt"
+	DifficultyLevels = "/data/global/excel/difficultylevels.txt"
+	AutoMap          = "/data/global/excel/AutoMap.txt"
+	CubeRecipes      = "/data/global/excel/cubemain.txt"
 
 	// --- Animations ---
 
@@ -253,6 +259,7 @@ const (
 
 	// --- Sound Effects ---
 
+	SFXCursorSelect        = "cursor_select"
 	SFXButtonClick         = "cursor_button_click"
 	SFXAmazonDeselect      = "cursor_amazon_deselect"
 	SFXAmazonSelect        = "cursor_amazon_select"
@@ -272,6 +279,7 @@ const (
 	// --- Enemy Data ---
 
 	MonStats = "/data/global/excel/monstats.txt"
+	SuperUniques = "/data/global/excel/SuperUniques.txt"
 
 	// --- Skill Data ---
 

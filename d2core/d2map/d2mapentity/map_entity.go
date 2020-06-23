@@ -1,11 +1,18 @@
-package d2map
+package d2mapentity
 
 import (
 	"math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/beefsack/go-astar"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2astar"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
+
+type MapEntity interface {
+	Render(target d2render.Surface)
+	Advance(tickTime float64)
+	GetPosition() (float64, float64)
+}
 
 // mapEntity represents an entity on the map that can be animated
 type mapEntity struct {
@@ -18,7 +25,7 @@ type mapEntity struct {
 	TargetX            float64
 	TargetY            float64
 	Speed              float64
-	path               []astar.Pather
+	path               []d2astar.Pather
 
 	done        func()
 	directioner func(angle float64)
@@ -37,13 +44,21 @@ func createMapEntity(x, y int) mapEntity {
 		subcellX:  1 + math.Mod(locX, 5),
 		subcellY:  1 + math.Mod(locY, 5),
 		Speed:     6,
-		path:      []astar.Pather{},
+		path:      []d2astar.Pather{},
 	}
 }
 
-func (m *mapEntity) SetPath(path []astar.Pather, done func()) {
+func (m *mapEntity) SetPath(path []d2astar.Pather, done func()) {
 	m.path = path
 	m.done = done
+}
+
+func (m *mapEntity) SetSpeed(speed float64) {
+	m.Speed = speed
+}
+
+func (m *mapEntity) GetSpeed() float64 {
+	return m.Speed
 }
 
 func (m *mapEntity) getStepLength(tickTime float64) (float64, float64) {
@@ -92,12 +107,12 @@ func (m *mapEntity) Step(tickTime float64) {
 
 		if d2common.AlmostEqual(m.LocationX, m.TargetX, 0.01) && d2common.AlmostEqual(m.LocationY, m.TargetY, 0.01) {
 			if len(m.path) > 0 {
-				m.SetTarget(m.path[0].(*PathTile).X*5, m.path[0].(*PathTile).Y*5, m.done)
+				m.SetTarget(m.path[0].(*d2common.PathTile).X*5, m.path[0].(*d2common.PathTile).Y*5, m.done)
 
 				if len(m.path) > 1 {
 					m.path = m.path[1:]
 				} else {
-					m.path = []astar.Pather{}
+					m.path = []d2astar.Pather{}
 				}
 			} else {
 				m.LocationX = m.TargetX

@@ -78,12 +78,10 @@ func getLocalConfigPath() string {
 
 func load(configPath string) error {
 	configFile, err := os.Open(configPath)
-	defer configFile.Close()
-
 	if err != nil {
 		return err
 	}
-
+	defer configFile.Close()
 	data, err := ioutil.ReadAll(configFile)
 	if err != nil {
 		return err
@@ -103,10 +101,10 @@ func save(configPath string) error {
 	}
 
 	configFile, err := os.Create(configPath)
-	defer configFile.Close()
 	if err != nil {
 		return err
 	}
+	defer configFile.Close()
 
 	data, err := json.MarshalIndent(singleton, "", "    ")
 	if err != nil {

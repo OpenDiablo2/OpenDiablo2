@@ -9,37 +9,32 @@ import (
 	"image/png"
 	"log"
 	"os"
-	"os/exec"
 	"runtime"
 	"runtime/pprof"
 	"strconv"
+	"strings"
 	"sync"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2script"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
-
-	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen"
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
+	"github.com/pkg/profile"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 // GitBranch is set by the CI build process to the name of the branch
@@ -57,9 +52,10 @@ const (
 )
 
 var singleton struct {
-	lastTime  float64
-	showFPS   bool
-	timeScale float64
+	lastTime          float64
+	lastScreenAdvance float64
+	showFPS           bool
+	timeScale         float64
 
 	captureState  captureState
 	capturePath   string
@@ -75,6 +71,8 @@ func main() {
 
 	region := kingpin.Arg("region", "Region type id").Int()
 	preset := kingpin.Arg("preset", "Level preset").Int()
+	profileOption := kingpin.Flag("profile", "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)").String()
+
 	kingpin.Parse()
 
 	log.SetFlags(log.Lshortfile)
@@ -82,6 +80,10 @@ func main() {
 
 	if err := initialize(); err != nil {
 		log.Fatal(err)
+	}
+
+	if len(*profileOption) > 0 {
+		enableProfiler(*profileOption)
 	}
 
 	if *region == 0 {
@@ -99,6 +101,7 @@ func main() {
 func initialize() error {
 	singleton.timeScale = 1.0
 	singleton.lastTime = d2common.Now()
+	singleton.lastScreenAdvance = singleton.lastTime
 
 	if err := d2config.Load(); err != nil {
 		return err
@@ -122,11 +125,11 @@ func initialize() error {
 	}
 
 	d2term.BindLogger()
-	d2term.BindAction("dumpheap", "dumps the heap to heap.out", func() {
-		fileOut, _ := os.Create("heap.out")
+	d2term.BindAction("dumpheap", "dumps the heap to pprof/heap.pprof", func() {
+		os.Mkdir("./pprof/", 0755)
+		fileOut, _ := os.Create("./pprof/heap.pprof")
 		pprof.WriteHeapProfile(fileOut)
 		fileOut.Close()
-		exec.Command("go", "tool", "pprof", "--pdf", "./OpenDiablo2", "./heap.out", ">", "./memprofile.pdf")
 	})
 	d2term.BindAction("fullscreen", "toggles fullscreen", func() {
 		fullscreen := !d2render.IsFullScreen()
@@ -210,7 +213,7 @@ func update(target d2render.Surface) error {
 	elapsedTime := (currentTime - singleton.lastTime) * singleton.timeScale
 	singleton.lastTime = currentTime
 
-	if err := advance(elapsedTime); err != nil {
+	if err := advance(elapsedTime, currentTime); err != nil {
 		return err
 	}
 
@@ -225,9 +228,16 @@ func update(target d2render.Surface) error {
 	return nil
 }
 
-func advance(elapsed float64) error {
-	if err := d2screen.Advance(elapsed); err != nil {
-		return err
+const FPS_25 = 0.04 // 1/25
+
+func advance(elapsed, current float64) error {
+	elapsedLastScreenAdvance := (current - singleton.lastScreenAdvance) * singleton.timeScale
+
+	if elapsedLastScreenAdvance > FPS_25 {
+		singleton.lastScreenAdvance = current
+		if err := d2screen.Advance(elapsedLastScreenAdvance); err != nil {
+			return err
+		}
 	}
 
 	d2ui.Advance(elapsed)
@@ -297,11 +307,9 @@ func renderCapture(target d2render.Surface) error {
 		}
 
 		log.Printf("saved frame to %s", singleton.capturePath)
-		break
 	case captureStateGif:
 		screenshot := target.Screenshot()
 		singleton.captureFrames = append(singleton.captureFrames, screenshot)
-		break
 	case captureStateNone:
 		if len(singleton.captureFrames) > 0 {
 			defer cleanupCapture()
@@ -411,6 +419,11 @@ func loadDataDict() error {
 		{d2resource.Gems, d2datadict.LoadGems},
 		{d2resource.DifficultyLevels, d2datadict.LoadDifficultyLevels},
 		{d2resource.AutoMap, d2datadict.LoadAutoMaps},
+		{d2resource.LevelDetails, d2datadict.LoadLevelDetails},
+		{d2resource.LevelMaze, d2datadict.LoadLevelMazeDetails},
+		{d2resource.LevelSubstitutions, d2datadict.LoadLevelSubstitutions},
+		{d2resource.CubeRecipes, d2datadict.LoadCubeRecipes},
+		{d2resource.SuperUniques, d2datadict.LoadSuperUniques},
 	}
 
 	for _, entry := range entries {
@@ -438,8 +451,40 @@ func loadStrings() error {
 			return err
 		}
 
-		d2common.LoadDictionary(data)
+		d2common.LoadTextDictionary(data)
 	}
 
 	return nil
+}
+
+func enableProfiler(profileOption string) {
+	var options []func(*profile.Profile)
+	switch strings.ToLower(strings.Trim(profileOption, " ")) {
+	case "cpu":
+		log.Printf("CPU profiling is enabled.")
+		options = append(options, profile.CPUProfile)
+	case "mem":
+		log.Printf("Memory profiling is enabled.")
+		options = append(options, profile.MemProfile)
+	case "block":
+		log.Printf("Block profiling is enabled.")
+		options = append(options, profile.BlockProfile)
+	case "goroutine":
+		log.Printf("Goroutine profiling is enabled.")
+		options = append(options, profile.GoroutineProfile)
+	case "trace":
+		log.Printf("Trace profiling is enabled.")
+		options = append(options, profile.TraceProfile)
+	case "thread":
+		log.Printf("Thread creation profiling is enabled.")
+		options = append(options, profile.ThreadcreationProfile)
+	case "mutex":
+		log.Printf("Mutex profiling is enabled.")
+		options = append(options, profile.MutexProfile)
+	}
+	options = append(options, profile.ProfilePath("./pprof/"))
+
+	if len(options) > 1 {
+		defer profile.Start(options...).Stop()
+	}
 }

@@ -42,3 +42,12 @@ func (tile TileType) UpperWall() bool {
 		return false
 	}
 }
+
+func (tile TileType) Special() bool {
+	switch tile {
+	case 10, 11:
+		return true
+	default:
+		return false
+	}
+}
