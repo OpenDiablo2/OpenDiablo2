@@ -39,10 +39,10 @@ type AutoMapRecord struct {
 	// whatever you like..."
 	// The values seem functional but naming conventions
 	// vary between LevelNames.
-	Type1 string
-	Type2 string
-	Type3 string
-	Type4 string
+	//Type1 string
+	//Type2 string
+	//Type3 string
+	//Type4 string // Note: I commented these out for now because they supposedly aren't useful see the LoadAutoMaps function.
 
 	// Frames determine the frame of the MaxiMap(s).dc6 that
 	// will be applied to the specified tiles. The frames
@@ -85,10 +85,10 @@ func LoadAutoMaps(file []byte) {
 			StartSequence: d.GetNumber("StartSequence", idx),
 			EndSequence:   d.GetNumber("EndSequence", idx),
 
-			Type1: d.GetString("Type1", idx),
-			Type2: d.GetString("Type2", idx),
-			Type3: d.GetString("Type3", idx),
-			Type4: d.GetString("Type4", idx),
+			//Type1: d.GetString("Type1", idx),
+			//Type2: d.GetString("Type2", idx),
+			//Type3: d.GetString("Type3", idx),
+			//Type4: d.GetString("Type4", idx), // Note: I commented these out for now because they supposedly aren't useful see the AutoMapRecord struct.
 		}
 
 		AutoMaps[idx].Frames = make([]int, len(frameFields))
