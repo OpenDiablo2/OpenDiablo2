@@ -3,6 +3,7 @@ package d2client
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
 
@@ -102,6 +103,12 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 				player.AnimatedComposite.SetAnimationMode(player.GetAnimationMode().String())
 			})
 		}
+	case d2netpackettype.Ping:
+		g.clientConnection.SendPacketToServer(d2netpacket.CreatePongPacket(g.PlayerId))
+	case d2netpackettype.ServerClosed:
+		// TODO: Need to be tied into a character save and exit
+		log.Print("Server has been closed")
+		os.Exit(0)
 	default:
 		log.Fatalf("Invalid packet type: %d", packet.PacketType)
 	}
