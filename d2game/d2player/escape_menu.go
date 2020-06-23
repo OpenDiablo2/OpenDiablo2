@@ -1,8 +1,6 @@
 package d2player
 
 import (
-	"fmt"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
@@ -18,6 +16,7 @@ const (
 	soundOptionsLayoutID          = 2
 
 	labelGutter = 2
+	menuSize    = 500
 )
 
 type EscapeMenu struct {
@@ -29,6 +28,7 @@ type EscapeMenu struct {
 
 func NewEscapeMenu() *EscapeMenu {
 	m := &EscapeMenu{}
+
 	m.layouts = []*d2gui.Layout{
 		mainLayoutID:         newMainLayout(m.showLayout),
 		optionsLayoutID:      newOptionsLayout(m.showLayout),
@@ -63,82 +63,59 @@ func (m *EscapeMenu) setLayout(id layoutID) {
 	m.currentLayout = id
 }
 
-func newMainLayout(showLayoutFn func(layoutID)) *d2gui.Layout {
-	mainLayout := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
-	mainLayout.SetVerticalAlign(d2gui.VerticalAlignMiddle)
-	mainLayout.AddSpacerDynamic()
-	mainLayout.SetMouseClickHandler(func(_ d2input.MouseEvent) {
-		fmt.Println("click main layout")
-	})
+func wrapLayout(fn func(base *d2gui.Layout)) *d2gui.Layout {
+	base := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
+	base.SetVerticalAlign(d2gui.VerticalAlignMiddle)
+	base.AddSpacerDynamic()
 
-	left := mainLayout.AddLayout(d2gui.PositionTypeVertical)
-	left.AddSprite(d2resource.PentSpin, d2resource.PaletteUnits)
+	left := base.AddLayout(d2gui.PositionTypeVertical)
+	left.SetSize(52, 0)
+	left.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionForward)
 
-	center := mainLayout.AddLayout(d2gui.PositionTypeVertical)
+	center := base.AddLayout(d2gui.PositionTypeVertical)
+	center.SetSize(menuSize, 0)
 	center.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
 	center.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	center.AddSpacerDynamic()
-	addBigSelectionLabel(center, showLayoutFn, "options", optionsLayoutID)
-	addBigSelectionLabel(center, showLayoutFn, "save and exit game", noLayoutID)
-	addBigSelectionLabel(center, showLayoutFn, "return to game", noLayoutID)
+
+	fn(center)
+
 	center.AddSpacerDynamic()
 
-	right := mainLayout.AddLayout(d2gui.PositionTypeVertical)
-	right.AddSprite(d2resource.PentSpin, d2resource.PaletteUnits)
+	right := base.AddLayout(d2gui.PositionTypeVertical)
+	right.SetSize(52, 0)
+	right.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionBackward)
 
-	mainLayout.AddSpacerDynamic()
-	return mainLayout
+	base.AddSpacerDynamic()
+
+	return base
+}
+
+func newMainLayout(showLayoutFn func(layoutID)) *d2gui.Layout {
+	return wrapLayout(func(base *d2gui.Layout) {
+		addBigSelectionLabel(base, showLayoutFn, "options", optionsLayoutID)
+		addBigSelectionLabel(base, showLayoutFn, "save and exit game", noLayoutID)
+		addBigSelectionLabel(base, showLayoutFn, "return to game", noLayoutID)
+	})
 }
 
 func newOptionsLayout(showLayoutFn func(layoutID)) *d2gui.Layout {
-	mainLayout := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
-	mainLayout.SetVerticalAlign(d2gui.VerticalAlignMiddle)
-	mainLayout.AddSpacerDynamic()
-
-	left := mainLayout.AddLayout(d2gui.PositionTypeVertical)
-	left.AddSprite(d2resource.PentSpin, d2resource.PaletteUnits)
-
-	center := mainLayout.AddLayout(d2gui.PositionTypeVertical)
-	center.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
-	center.SetVerticalAlign(d2gui.VerticalAlignMiddle)
-	center.AddSpacerDynamic()
-	addBigSelectionLabel(center, showLayoutFn, "sound options", soundOptionsLayoutID)
-	addBigSelectionLabel(center, showLayoutFn, "video options", soundOptionsLayoutID)
-	addBigSelectionLabel(center, showLayoutFn, "automap options", soundOptionsLayoutID)
-	addBigSelectionLabel(center, showLayoutFn, "configure controls", soundOptionsLayoutID)
-	addBigSelectionLabel(center, showLayoutFn, "previous menu", mainLayoutID)
-	center.AddSpacerDynamic()
-
-	right := mainLayout.AddLayout(d2gui.PositionTypeVertical)
-	right.AddSprite(d2resource.PentSpin, d2resource.PaletteUnits)
-
-	mainLayout.AddSpacerDynamic()
-	return mainLayout
+	return wrapLayout(func(base *d2gui.Layout) {
+		addBigSelectionLabel(base, showLayoutFn, "sound options", soundOptionsLayoutID)
+		addBigSelectionLabel(base, showLayoutFn, "video options", soundOptionsLayoutID)
+		addBigSelectionLabel(base, showLayoutFn, "automap options", soundOptionsLayoutID)
+		addBigSelectionLabel(base, showLayoutFn, "configure controls", soundOptionsLayoutID)
+		addBigSelectionLabel(base, showLayoutFn, "previous menu", mainLayoutID)
+	})
 }
 
 func newSoundOptionsLayout(showLayoutFn func(layoutID)) *d2gui.Layout {
-	mainLayout := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
-	mainLayout.SetVerticalAlign(d2gui.VerticalAlignMiddle)
-	mainLayout.AddSpacerDynamic()
-
-	left := mainLayout.AddLayout(d2gui.PositionTypeVertical)
-	left.AddSprite(d2resource.PentSpin, d2resource.PaletteUnits)
-
-	center := mainLayout.AddLayout(d2gui.PositionTypeVertical)
-	center.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
-	center.SetVerticalAlign(d2gui.VerticalAlignMiddle)
-	center.AddSpacerDynamic()
-	addTitle(center, "sound options")
-	addOnOffLabel(center, "3d sound")
-	addOnOffLabel(center, "environmental effects")
-	addSmallSelectionLabel(center, showLayoutFn, "previous menu", optionsLayoutID)
-	center.AddSpacerDynamic()
-
-	right := mainLayout.AddLayout(d2gui.PositionTypeVertical)
-	right.AddSprite(d2resource.PentSpin, d2resource.PaletteUnits)
-
-	mainLayout.AddSpacerDynamic()
-	return mainLayout
+	return wrapLayout(func(base *d2gui.Layout) {
+		addTitle(base, "sound options")
+		addOnOffLabel(base, "3d sound")
+		addOnOffLabel(base, "environmental effects")
+		addSmallSelectionLabel(base, showLayoutFn, "previous menu", optionsLayoutID)
+	})
 }
 
 func addTitle(layout *d2gui.Layout, text string) {
@@ -164,6 +141,7 @@ func addBigSelectionLabel(layout *d2gui.Layout, showLayoutFn func(layoutID), tex
 
 func addOnOffLabel(layout *d2gui.Layout, text string) {
 	l := layout.AddLayout(d2gui.PositionTypeHorizontal)
+	l.SetSize(menuSize, 0)
 	l.AddLabel(text, d2gui.FontStyle30Units)
 	l.AddSpacerDynamic()
 	lbl, _ := l.AddLabel("on", d2gui.FontStyle30Units)

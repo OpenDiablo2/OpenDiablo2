@@ -105,6 +105,16 @@ func (l *Layout) AddSprite(imagePath, palettePath string) (*Sprite, error) {
 	return sprite, nil
 }
 
+func (l *Layout) AddAnimatedSprite(imagePath, palettePath string, direction AnimationDirection) (*AnimatedSprite, error) {
+	sprite, err := createAnimatedSprite(imagePath, palettePath, direction)
+	if err != nil {
+		return nil, err
+	}
+
+	l.entries = append(l.entries, &layoutEntry{widget: sprite})
+	return sprite, nil
+}
+
 func (l *Layout) AddLabel(text string, fontStyle FontStyle) (*Label, error) {
 	label, err := createLabel(text, fontStyle)
 	if err != nil {
