@@ -191,11 +191,8 @@ func decompressMulti(data []byte, expectedLength uint32) []byte {
 		panic("bzip2 decompression not supported")
 	case 0x80: // IMA ADPCM Stereo
 		return d2compression.WavDecompress(data[1:], 2)
-		//return MpqWavCompression.Decompress(sinput, 2);
-		//panic("ima adpcm sterio decompression not supported")
 	case 0x40: // IMA ADPCM Mono
-		//return MpqWavCompression.Decompress(sinput, 1)
-		panic("mpq wav decompression not supported")
+		return d2compression.WavDecompress(data[1:], 1)
 	case 0x12:
 		panic("lzma decompression not supported")
 	// Combos
