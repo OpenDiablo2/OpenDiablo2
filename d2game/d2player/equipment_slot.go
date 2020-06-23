@@ -3,9 +3,11 @@ package d2player
 import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 type EquipmentSlot struct {
-	item InventoryItem
-	x    int
-	y    int
+	item   InventoryItem
+	x      int
+	y      int
+	width  int
+	height int
 }
 
 func genEquipmentSlotsMap() map[d2enum.EquippedSlotType]EquipmentSlot {
