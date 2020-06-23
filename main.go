@@ -72,7 +72,7 @@ func main() {
 
 	region := kingpin.Arg("region", "Region type id").Int()
 	preset := kingpin.Arg("preset", "Level preset").Int()
-	profileOptions := kingpin.Flag("profile", "Profiles the program (cpu, mem, block, goroutine, trace, thread, mutex)").String()
+	profileOption := kingpin.Flag("profile", "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)").String()
 
 	kingpin.Parse()
 
@@ -83,35 +83,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var profilers []func(*profile.Profile)
-	for _, profileOption := range strings.Split(*profileOptions, ",") {
-		switch strings.ToLower(strings.Trim(profileOption, " ")) {
-		case "cpu":
-			log.Printf("CPU profiling is enabled.")
-			profilers = append(profilers, profile.CPUProfile)
-		case "mem":
-			log.Printf("Memory profiling is enabled.")
-			profilers = append(profilers, profile.MemProfile)
-		case "block":
-			log.Printf("Block profiling is enabled.")
-			profilers = append(profilers, profile.BlockProfile)
-		case "goroutine":
-			log.Printf("Goroutine profiling is enabled.")
-			profilers = append(profilers, profile.GoroutineProfile)
-		case "trace":
-			log.Printf("Trace profiling is enabled.")
-			profilers = append(profilers, profile.TraceProfile)
-		case "thread":
-			log.Printf("Thread creation profiling is enabled.")
-			profilers = append(profilers, profile.ThreadcreationProfile)
-		case "mutex":
-			log.Printf("Mutex profiling is enabled.")
-			profilers = append(profilers, profile.MutexProfile)
-		}
-	}
-
-	if len(profilers) > 0 {
-		defer profile.Start(profilers...).Stop()
+	if len(*profileOption) > 0 {
+		enableProfiler(*profileOption)
 	}
 
 	if *region == 0 {
@@ -481,4 +454,36 @@ func loadStrings() error {
 	}
 
 	return nil
+}
+
+func enableProfiler(profileOption string) {
+	var options []func(*profile.Profile)
+	switch strings.ToLower(strings.Trim(profileOption, " ")) {
+	case "cpu":
+		log.Printf("CPU profiling is enabled.")
+		options = append(options, profile.CPUProfile)
+	case "mem":
+		log.Printf("Memory profiling is enabled.")
+		options = append(options, profile.MemProfile)
+	case "block":
+		log.Printf("Block profiling is enabled.")
+		options = append(options, profile.BlockProfile)
+	case "goroutine":
+		log.Printf("Goroutine profiling is enabled.")
+		options = append(options, profile.GoroutineProfile)
+	case "trace":
+		log.Printf("Trace profiling is enabled.")
+		options = append(options, profile.TraceProfile)
+	case "thread":
+		log.Printf("Thread creation profiling is enabled.")
+		options = append(options, profile.ThreadcreationProfile)
+	case "mutex":
+		log.Printf("Mutex profiling is enabled.")
+		options = append(options, profile.MutexProfile)
+	}
+	options = append(options, profile.ProfilePath("./pprof/"))
+
+	if len(options) > 1 {
+		defer profile.Start(options...).Stop()
+	}
 }
