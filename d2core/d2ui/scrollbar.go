@@ -3,7 +3,6 @@ package d2ui
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
@@ -51,8 +50,8 @@ func (v Scrollbar) getBarPosition() int {
 	return int((float32(v.currentOffset) / float32(v.maxOffset)) * float32(v.height-30))
 }
 
-func (v *Scrollbar) OnMouseMove(event d2input.MouseMoveEvent) bool {
-	my := event.Y
+func (v *Scrollbar) Activate() {
+	_, my := CursorPosition()
 	barPosition := v.getBarPosition()
 	if my <= v.y+barPosition+15 {
 		if v.currentOffset > 0 {
@@ -65,10 +64,7 @@ func (v *Scrollbar) OnMouseMove(event d2input.MouseMoveEvent) bool {
 			v.lastDirChange = 1
 		}
 	}
-	return true
-}
 
-func (v *Scrollbar) Activate() {
 	if v.onActivate != nil {
 		v.onActivate()
 	}
