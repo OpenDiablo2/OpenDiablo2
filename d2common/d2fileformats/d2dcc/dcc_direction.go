@@ -30,8 +30,8 @@ type DCCDirection struct {
 	PixelBuffer                []DCCPixelBufferEntry
 }
 
-func CreateDCCDirection(bm *d2common.BitMuncher, file DCC) DCCDirection {
-	result := DCCDirection{}
+func CreateDCCDirection(bm *d2common.BitMuncher, file DCC) *DCCDirection {
+	result := &DCCDirection{}
 	result.OutSizeCoded = int(bm.GetUInt32())
 	result.CompressionFlags = int(bm.GetBits(2))
 	result.Variable0Bits = int(crazyBitTable[bm.GetBits(4)])

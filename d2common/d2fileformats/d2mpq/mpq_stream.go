@@ -17,19 +17,19 @@ import (
 
 // Stream represents a stream of data in an MPQ archive
 type Stream struct {
-	MPQData           MPQ
 	BlockTableEntry   BlockTableEntry
-	FileName          string
-	EncryptionSeed    uint32
 	BlockPositions    []uint32
-	CurrentPosition   uint32
 	CurrentData       []byte
+	FileName          string
+	MPQData           *MPQ
+	EncryptionSeed    uint32
+	CurrentPosition   uint32
 	CurrentBlockIndex uint32
 	BlockSize         uint32
 }
 
 // CreateStream creates an MPQ stream
-func CreateStream(mpq MPQ, blockTableEntry BlockTableEntry, fileName string) (*Stream, error) {
+func CreateStream(mpq *MPQ, blockTableEntry BlockTableEntry, fileName string) (*Stream, error) {
 	result := &Stream{
 		MPQData:           mpq,
 		BlockTableEntry:   blockTableEntry,

@@ -22,7 +22,7 @@ type DCCDirectionFrame struct {
 	valid                 bool
 }
 
-func CreateDCCDirectionFrame(bits *d2common.BitMuncher, direction DCCDirection) *DCCDirectionFrame {
+func CreateDCCDirectionFrame(bits *d2common.BitMuncher, direction *DCCDirection) *DCCDirectionFrame {
 	result := &DCCDirectionFrame{}
 	bits.GetBits(direction.Variable0Bits) // Variable0
 	result.Width = int(bits.GetBits(direction.WidthBits))
@@ -46,7 +46,7 @@ func CreateDCCDirectionFrame(bits *d2common.BitMuncher, direction DCCDirection) 
 	return result
 }
 
-func (v *DCCDirectionFrame) CalculateCells(direction DCCDirection) {
+func (v *DCCDirectionFrame) CalculateCells(direction *DCCDirection) {
 	var w = 4 - ((v.Box.Left - direction.Box.Left) % 4) // Width of the first column (in pixels)
 	if (v.Width - w) <= 1 {
 		v.HorizontalCellCount = 1

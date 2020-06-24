@@ -11,15 +11,13 @@ import (
 )
 
 type manager struct {
-	layout *Layout
-
+	layout        *Layout
 	cursorAnim    *d2asset.Animation
 	cursorX       int
 	cursorY       int
+	loadingAnim   *d2asset.Animation
 	cursorVisible bool
-
-	loadingAnim *d2asset.Animation
-	loading     bool
+	loading       bool
 }
 
 func createGuiManager() (*manager, error) {
