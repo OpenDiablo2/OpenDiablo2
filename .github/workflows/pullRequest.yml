@@ -5,6 +5,7 @@ jobs:
     build:
         name: Build
         runs-on: ubuntu-latest
+        continue-on-error: true
         steps:
             -   name: Set up Go 1.14
                 uses: actions/setup-go@v1
@@ -21,6 +22,7 @@ jobs:
                     sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev > /dev/null 2>&1
 
             -   name: Run golangci-lint
+                continue-on-error: true
                 uses: golangci/golangci-lint-action@v1.2.1
                 with:
                     version: v1.27
