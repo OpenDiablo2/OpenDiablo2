@@ -49,7 +49,6 @@ func NewEscapeMenu() *EscapeMenu {
 	}
 }
 
-// ScreenLoadHandler
 func (m *EscapeMenu) OnLoad() error {
 	m.labels = []d2ui.Label{
 		d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky),
@@ -82,7 +81,6 @@ func (m *EscapeMenu) OnLoad() error {
 	return nil
 }
 
-// ScreenRenderHandler
 func (m *EscapeMenu) Render(target d2render.Surface) error {
 	if !m.isOpen {
 		return nil
@@ -113,7 +111,6 @@ func (m *EscapeMenu) Render(target d2render.Surface) error {
 	return nil
 }
 
-// ScreenAdvanceHandler
 func (m *EscapeMenu) Advance(elapsed float64) error {
 	if !m.isOpen {
 		return nil
