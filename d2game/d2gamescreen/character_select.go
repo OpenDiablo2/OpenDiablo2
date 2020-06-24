@@ -246,7 +246,7 @@ func (v *CharacterSelect) OnMouseButtonDown(event d2input.MouseEvent) bool {
 func (v *CharacterSelect) Advance(tickTime float64) error {
 	for _, hero := range v.characterImage {
 		if hero != nil {
-			hero.AnimatedComposite.Advance(tickTime)
+			hero.Advance(tickTime)
 		}
 	}
 

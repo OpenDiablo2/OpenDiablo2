@@ -28,7 +28,7 @@ type mapEntity struct {
 	path               []d2astar.Pather
 
 	done        func()
-	directioner func(angle float64)
+	directioner func(direction int)
 }
 
 // createMapEntity creates an instance of mapEntity
@@ -147,7 +147,7 @@ func (m *mapEntity) SetTarget(tx, ty float64, done func()) {
 			tx,
 			ty,
 		)
-		m.directioner(float64(angle))
+		m.directioner(angleToDirection(float64(angle)))
 	}
 }
 

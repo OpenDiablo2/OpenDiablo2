@@ -88,7 +88,7 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		player := g.Players[movePlayer.PlayerId]
 		path, _, _ := g.MapEngine.PathFind(movePlayer.StartX, movePlayer.StartY, movePlayer.DestX, movePlayer.DestY)
 		if len(path) > 0 {
-			player.AnimatedComposite.SetPath(path, func() {
+			player.SetPath(path, func() {
 				tile := g.MapEngine.TileAt(player.TileX, player.TileY)
 				if tile == nil {
 					return
@@ -100,7 +100,7 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 				} else {
 					player.SetIsInTown(false)
 				}
-				player.AnimatedComposite.SetAnimationMode(player.GetAnimationMode().String())
+				player.SetAnimationMode(player.GetAnimationMode().String())
 			})
 		}
 	case d2netpackettype.Ping:

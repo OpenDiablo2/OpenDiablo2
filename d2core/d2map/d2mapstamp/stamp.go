@@ -126,7 +126,7 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2mapentity.MapEntity 
 			}
 		case d2datadict.ObjectTypeItem:
 			if object.ObjectInfo != nil && object.ObjectInfo.Draw && object.Lookup.Base != "" && object.Lookup.Token != "" {
-				entity, err := d2mapentity.CreateAnimatedComposite((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, object.Lookup, d2resource.PaletteUnits)
+				entity, err := d2mapentity.CreateObject((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, object.Lookup, d2resource.PaletteUnits)
 				if err != nil {
 					panic(err)
 				}
