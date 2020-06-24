@@ -43,10 +43,13 @@ func GenerateAct1Overworld(mapEngine *d2mapengine.MapEngine) {
 	if strings.Contains(townStamp.RegionPath(), "E1") {
 		// East Exit
 		mapEngine.PlaceStamp(townStamp, 0, 0)
+		generateWilderness1TownEast(mapEngine, townSize.Width, 0)
 
 	} else if strings.Contains(townStamp.RegionPath(), "S1") {
 		// South Exit
 		mapEngine.PlaceStamp(townStamp, mapWidth-townSize.Width, 0)
+
+		// Generate the river running along the edge of the map
 		rightWaterBorderStamp := loadPreset(mapEngine, d2wilderness.WaterBorderEast, 0)
 		rightWaterBorderStamp2 := loadPreset(mapEngine, d2wilderness.WaterBorderWest, 0)
 		// Place the water on the right side of the map
@@ -66,6 +69,69 @@ func GenerateAct1Overworld(mapEngine *d2mapengine.MapEngine) {
 	}
 
 	mapEngine.RegenerateWalkPaths()
+}
+
+func generateWilderness1TownEast(mapEngine *d2mapengine.MapEngine, startX, startY int) {
+	levelDetails := d2datadict.GetLevelDetails(2)
+
+	fenceNorthStamp := []*d2mapstamp.Stamp{
+		loadPreset(mapEngine, d2wilderness.TreeBorderNorth, 0),
+		loadPreset(mapEngine, d2wilderness.TreeBorderNorth, 1),
+		loadPreset(mapEngine, d2wilderness.TreeBorderNorth, 2),
+	}
+
+	fenceSouthStamp := []*d2mapstamp.Stamp{
+		loadPreset(mapEngine, d2wilderness.TreeBorderSouth, 0),
+		loadPreset(mapEngine, d2wilderness.TreeBorderSouth, 1),
+		loadPreset(mapEngine, d2wilderness.TreeBorderSouth, 2),
+	}
+
+	fenceWestStamp := []*d2mapstamp.Stamp{
+		loadPreset(mapEngine, d2wilderness.TreeBorderWest, 0),
+		loadPreset(mapEngine, d2wilderness.TreeBorderWest, 1),
+		loadPreset(mapEngine, d2wilderness.TreeBorderWest, 2),
+	}
+
+	fenceEastStamp := []*d2mapstamp.Stamp{
+		loadPreset(mapEngine, d2wilderness.TreeBorderEast, 0),
+		loadPreset(mapEngine, d2wilderness.TreeBorderEast, 1),
+		loadPreset(mapEngine, d2wilderness.TreeBorderEast, 2),
+	}
+
+	fenceSouthWestStamp := loadPreset(mapEngine, d2wilderness.TreeBorderSouthWest, 0)
+	fenceNorthEastStamp := loadPreset(mapEngine, d2wilderness.TreeBorderNorthEast, 0)
+	fenceSouthEastStamp := loadPreset(mapEngine, d2wilderness.TreeBorderSouthEast, 0)
+	fenceWestEdge := loadPreset(mapEngine, d2wilderness.TreeBoxNorthEast, 0)
+
+	areaRect := d2common.Rectangle{
+		Left:   startX,
+		Top:    startY+9,
+		Width:  levelDetails.SizeXNormal,
+		Height: levelDetails.SizeYNormal-3,
+	}
+	generateWilderness1Contents(mapEngine, areaRect)
+
+	// Draw the north and south fence
+	for i := 0; i < 9; i++ {
+		mapEngine.PlaceStamp(fenceNorthStamp[rand.Intn(3)], startX+(i*9), startY)
+		mapEngine.PlaceStamp(fenceSouthStamp[rand.Intn(3)], startX+(i*9), startY + (levelDetails.SizeYNormal +6))
+	}
+
+	// West fence
+	for i := 1; i < 6; i++ {
+		mapEngine.PlaceStamp(fenceWestStamp[rand.Intn(3)], startX, startY+ (levelDetails.SizeYNormal+6) - (i * 9))
+	}
+
+	// East Fence
+	for i := 1; i < 10; i++ {
+		mapEngine.PlaceStamp(fenceEastStamp[rand.Intn(3)], startX + levelDetails.SizeXNormal, startY+(i*9))
+	}
+
+	mapEngine.PlaceStamp(fenceSouthWestStamp, startX, startY+ levelDetails.SizeYNormal+6)
+	mapEngine.PlaceStamp(fenceWestEdge, startX, startY+ (levelDetails.SizeYNormal-3) - 45)
+	mapEngine.PlaceStamp(fenceNorthEastStamp, startX+levelDetails.SizeXNormal, startY)
+	mapEngine.PlaceStamp(fenceSouthEastStamp, startX+levelDetails.SizeXNormal, startY+levelDetails.SizeYNormal+6)
+
 }
 
 func generateWilderness1TownSouth(mapEngine *d2mapengine.MapEngine, startX, startY int) {
@@ -102,7 +168,6 @@ func generateWilderness1TownSouth(mapEngine *d2mapengine.MapEngine, startX, star
 	generateWilderness1Contents(mapEngine, areaRect)
 
 	// Draw the north fence
-
 	for i := 0; i < 4; i++ {
 		mapEngine.PlaceStamp(fenceNorthStamp[rand.Intn(3)], startX+(i*9)+5, startY-6)
 	}
