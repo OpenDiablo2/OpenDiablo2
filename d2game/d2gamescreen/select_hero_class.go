@@ -78,8 +78,9 @@ func CreateSelectHeroClass(connectionType d2clientconnectiontype.ClientConnectio
 	return result
 }
 
-func (v *SelectHeroClass) OnLoad() error {
+func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 	d2audio.PlayBGM(d2resource.BGMTitle)
+	loading.Progress(0.1)
 
 	v.bgImage = loadSprite(d2resource.CharacterSelectBackground, d2resource.PaletteFechar)
 	v.bgImage.SetPosition(0, 0)
@@ -97,6 +98,7 @@ func (v *SelectHeroClass) OnLoad() error {
 	v.heroDesc1Label = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroDesc1Label.Alignment = d2ui.LabelAlignCenter
 	v.heroDesc1Label.SetPosition(400, 100)
+	loading.Progress(0.3)
 
 	v.heroDesc2Label = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroDesc2Label.Alignment = d2ui.LabelAlignCenter
@@ -128,6 +130,7 @@ func (v *SelectHeroClass) OnLoad() error {
 	v.heroNameLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
 	v.heroNameLabel.SetText("Character Name")
 	v.heroNameLabel.SetPosition(321, 475)
+	loading.Progress(0.4)
 
 	v.heroNameTextbox = d2ui.CreateTextbox()
 	v.heroNameTextbox.SetPosition(318, 493)
@@ -155,6 +158,7 @@ func (v *SelectHeroClass) OnLoad() error {
 	v.hardcoreCharLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
 	v.hardcoreCharLabel.SetText("Hardcore")
 	v.hardcoreCharLabel.SetPosition(339, 548)
+	loading.Progress(0.5)
 
 	v.heroRenderInfo[d2enum.HeroBarbarian] = &HeroRenderInfo{
 		d2enum.HeroStanceIdle,
@@ -234,6 +238,7 @@ func (v *SelectHeroClass) OnLoad() error {
 	v.heroRenderInfo[d2enum.HeroSorceress].BackWalkSpriteOverlay.PlayForward()
 	v.heroRenderInfo[d2enum.HeroSorceress].BackWalkSpriteOverlay.SetPlayLengthMs(1200)
 	v.heroRenderInfo[d2enum.HeroSorceress].BackWalkSpriteOverlay.SetPlayLoop(false)
+	loading.Progress(0.6)
 
 	v.heroRenderInfo[d2enum.HeroNecromancer] = &HeroRenderInfo{
 		d2enum.HeroStanceIdle,
@@ -314,6 +319,7 @@ func (v *SelectHeroClass) OnLoad() error {
 	v.heroRenderInfo[d2enum.HeroPaladin].BackWalkSprite.PlayForward()
 	v.heroRenderInfo[d2enum.HeroPaladin].BackWalkSprite.SetPlayLengthMs(1300)
 	v.heroRenderInfo[d2enum.HeroPaladin].BackWalkSprite.SetPlayLoop(false)
+	loading.Progress(0.7)
 
 	v.heroRenderInfo[d2enum.HeroAmazon] = &HeroRenderInfo{
 		d2enum.HeroStanceIdle,
@@ -378,6 +384,7 @@ func (v *SelectHeroClass) OnLoad() error {
 	v.heroRenderInfo[d2enum.HeroAssassin].BackWalkSprite.PlayForward()
 	v.heroRenderInfo[d2enum.HeroAssassin].BackWalkSprite.SetPlayLengthMs(1500)
 	v.heroRenderInfo[d2enum.HeroAssassin].BackWalkSprite.SetPlayLoop(false)
+	loading.Progress(0.8)
 
 	v.heroRenderInfo[d2enum.HeroDruid] = &HeroRenderInfo{
 		d2enum.HeroStanceIdle,
@@ -411,7 +418,7 @@ func (v *SelectHeroClass) OnLoad() error {
 	v.heroRenderInfo[d2enum.HeroDruid].BackWalkSprite.SetPlayLengthMs(1500)
 	v.heroRenderInfo[d2enum.HeroDruid].BackWalkSprite.SetPlayLoop(false)
 
-	return nil
+	loading.Done()
 }
 
 func (v *SelectHeroClass) OnUnload() error {

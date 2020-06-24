@@ -55,9 +55,10 @@ func CreateCharacterSelect(connectionType d2clientconnectiontype.ClientConnectio
 	}
 }
 
-func (v *CharacterSelect) OnLoad() error {
+func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	d2audio.PlayBGM(d2resource.BGMTitle)
 	d2input.BindHandler(v)
+	loading.Progress(0.1)
 
 	animation, _ := d2asset.LoadAnimation(d2resource.CharacterSelectionBackground, d2resource.PaletteSky)
 	v.background, _ = d2ui.LoadSprite(animation)
@@ -82,6 +83,7 @@ func (v *CharacterSelect) OnLoad() error {
 	v.exitButton.SetPosition(33, 537)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 	d2ui.AddWidget(&v.exitButton)
+	loading.Progress(0.2)
 
 	v.deleteCharCancelButton = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "NO")
 	v.deleteCharCancelButton.SetPosition(282, 308)
@@ -103,6 +105,7 @@ func (v *CharacterSelect) OnLoad() error {
 	v.d2HeroTitle = d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
 	v.d2HeroTitle.SetPosition(320, 23)
 	v.d2HeroTitle.Alignment = d2ui.LabelAlignCenter
+	loading.Progress(0.3)
 
 	v.deleteCharConfirmLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	lines := d2common.SplitIntoLinesWithMaxWidth("Are you sure that you want to delete this character? Take note: this will delete all versions of this Character.", 29)
@@ -121,6 +124,7 @@ func (v *CharacterSelect) OnLoad() error {
 	v.charScrollbar = d2ui.CreateScrollbar(586, 87, 369)
 	v.charScrollbar.OnActivated(func() { v.onScrollUpdate() })
 	d2ui.AddWidget(&v.charScrollbar)
+	loading.Progress(0.5)
 
 	for i := 0; i < 8; i++ {
 		xOffset := 115
@@ -138,7 +142,7 @@ func (v *CharacterSelect) OnLoad() error {
 	}
 	v.refreshGameStates()
 
-	return nil
+	loading.Done()
 }
 
 func (v *CharacterSelect) onScrollUpdate() {

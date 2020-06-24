@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
@@ -40,9 +42,9 @@ func CreateGame(gameClient *d2client.GameClient) *Game {
 	return result
 }
 
-func (v *Game) OnLoad() error {
+func (v *Game) OnLoad(loading d2screen.LoadingState) {
 	d2audio.PlayBGM("")
-	return nil
+	loading.Done()
 }
 
 func (v *Game) OnUnload() error {
