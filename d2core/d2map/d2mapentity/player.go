@@ -145,7 +145,7 @@ func (v *Player) SetMode(animationMode, weaponClass string, direction int) error
 	return err
 }
 
-func (v *Player) GetAnimationMode() d2enum.AnimationMode {
+func (v *Player) GetAnimationMode() d2enum.PlayerAnimationMode {
 	if v.IsRunning() && !v.IsAtTarget() {
 		return d2enum.AnimationModePlayerRun
 	}

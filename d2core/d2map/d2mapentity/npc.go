@@ -96,7 +96,7 @@ func (v *NPC) wait() bool {
 func (v *NPC) next() {
 	v.isDone = true
 	v.repetitions = 3 + rand.Intn(5)
-	newAnimationMode := d2enum.AnimationModeObjectNeutral
+	newAnimationMode := d2enum.AnimationModeMonsterNeutral
 	// TODO: Figure out what 1-3 are for, 4 is correct.
 	switch v.action {
 	case 1:
@@ -119,7 +119,7 @@ func (v *NPC) next() {
 
 // rotate sets direction and changes animation
 func (v *NPC) rotate(direction int) {
-	var newMode d2enum.AnimationMode
+	var newMode d2enum.MonsterAnimationMode
 	if !v.IsAtTarget() {
 		newMode = d2enum.AnimationModeMonsterWalk
 	} else {
