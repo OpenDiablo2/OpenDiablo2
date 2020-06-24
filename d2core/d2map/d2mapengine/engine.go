@@ -75,7 +75,9 @@ func (m *MapEngine) addDT1(fileName string) {
 
 	fileData, err := d2asset.LoadFile("/data/global/tiles/" + fileName)
 	if err != nil {
-		panic(err)
+		log.Printf("Could not load /data/global/tiles/%s", fileName)
+		return
+		//panic(err)
 	}
 	dt1, _ := d2dt1.LoadDT1(fileData)
 	m.dt1TileData = append(m.dt1TileData, dt1.Tiles...)
@@ -94,10 +96,8 @@ func (m *MapEngine) AddDS1(fileName string) {
 	ds1, _ := d2ds1.LoadDS1(fileData)
 	for _, dt1File := range ds1.Files {
 		dt1File := strings.ToLower(dt1File)
-		if strings.Contains(dt1File, ".tg1") {
-			continue
-		}
-		dt1File = strings.Replace(dt1File, "c:", "", -1) // Yes they did...
+		dt1File = strings.Replace(dt1File, "c:", "", -1)       // Yes they did...
+		dt1File = strings.Replace(dt1File, ".tg1", ".dt1", -1) // Yes they did...
 		dt1File = strings.Replace(dt1File, "\\d2\\data\\global\\tiles\\", "", -1)
 		m.addDT1(strings.Replace(dt1File, "\\", "/", -1))
 	}
@@ -126,6 +126,10 @@ func (m *MapEngine) SetSeed(seed int64) {
 // Returns the size of the map (in sub-tiles)
 func (m *MapEngine) Size() d2common.Size {
 	return m.size
+}
+
+func (m *MapEngine) Tile(x, y int) *d2ds1.TileRecord {
+	return &m.tiles[x+(y*m.size.Width)]
 }
 
 // Returns the map's tiles
