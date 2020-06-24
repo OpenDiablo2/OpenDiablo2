@@ -1,19 +1,27 @@
 package d2player
 
 import (
+	"fmt"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 )
 
-type layoutID int
+type (
+	layoutID int
+	optionID int
+)
 
 const (
 	noLayoutID           layoutID = -1
 	mainLayoutID                  = 0
 	optionsLayoutID               = 1
 	soundOptionsLayoutID          = 2
+
+	opt3dSound    optionID = 0
+	optEnvEffects          = 1
 
 	labelGutter    = 2
 	sidePanelsSize = 100
@@ -31,6 +39,13 @@ type EscapeMenu struct {
 	layouts   []*layout
 }
 
+type enumLabel struct {
+	*d2gui.Label
+	optionID optionID
+	values   []string
+	current  int
+}
+
 type hoverableElement interface {
 	GetOffset() (int, int)
 }
@@ -44,19 +59,22 @@ type layout struct {
 }
 
 type layoutCfg struct {
-	showLayoutFn   func(id layoutID)
-	wrapLayoutFn   func(func(*d2gui.Layout)) *layout
-	hoverElementFn func(el hoverableElement)
+	playSound    func()
+	showLayout   func(id layoutID)
+	wrapLayout   func(func(*d2gui.Layout)) *layout
+	hoverElement func(el hoverableElement)
+	updateValue  func(optID optionID, value string)
 }
 
 func NewEscapeMenu() *EscapeMenu {
 	m := &EscapeMenu{}
 	cfg := &layoutCfg{
-		showLayoutFn:   m.showLayoutFn,
-		wrapLayoutFn:   m.wrapLayoutFn,
-		hoverElementFn: m.hoverElementFn,
+		playSound:    m.playSound,
+		showLayout:   m.showLayout,
+		wrapLayout:   m.wrapLayout,
+		hoverElement: m.onHoverElement,
+		updateValue:  m.onUpdateValue,
 	}
-
 	m.layouts = []*layout{
 		mainLayoutID:         newMainLayout(cfg),
 		optionsLayoutID:      newOptionsLayout(cfg),
@@ -65,7 +83,7 @@ func NewEscapeMenu() *EscapeMenu {
 	return m
 }
 
-func (m *EscapeMenu) wrapLayoutFn(fn func(*d2gui.Layout)) *layout {
+func (m *EscapeMenu) wrapLayout(fn func(*d2gui.Layout)) *layout {
 	base := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
 	base.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	base.AddSpacerDynamic()
@@ -100,7 +118,7 @@ func (m *EscapeMenu) wrapLayoutFn(fn func(*d2gui.Layout)) *layout {
 }
 
 func newMainLayout(cfg *layoutCfg) *layout {
-	return cfg.wrapLayoutFn(func(base *d2gui.Layout) {
+	return cfg.wrapLayout(func(base *d2gui.Layout) {
 		addBigSelectionLabel(base, cfg, "options", optionsLayoutID)
 		addBigSelectionLabel(base, cfg, "save and exit game", noLayoutID)
 		addBigSelectionLabel(base, cfg, "return to game", noLayoutID)
@@ -108,7 +126,7 @@ func newMainLayout(cfg *layoutCfg) *layout {
 }
 
 func newOptionsLayout(cfg *layoutCfg) *layout {
-	return cfg.wrapLayoutFn(func(base *d2gui.Layout) {
+	return cfg.wrapLayout(func(base *d2gui.Layout) {
 		addBigSelectionLabel(base, cfg, "sound options", soundOptionsLayoutID)
 		addBigSelectionLabel(base, cfg, "video options", soundOptionsLayoutID)
 		addBigSelectionLabel(base, cfg, "automap options", soundOptionsLayoutID)
@@ -118,10 +136,10 @@ func newOptionsLayout(cfg *layoutCfg) *layout {
 }
 
 func newSoundOptionsLayout(cfg *layoutCfg) *layout {
-	return cfg.wrapLayoutFn(func(base *d2gui.Layout) {
+	return cfg.wrapLayout(func(base *d2gui.Layout) {
 		addTitle(base, "sound options")
-		addOnOffLabel(base, cfg, "3d sound")
-		addOnOffLabel(base, cfg, "environmental effects")
+		addEnumLabel(base, cfg, opt3dSound, "3d sound", []string{"on", "off"})
+		addEnumLabel(base, cfg, optEnvEffects, "environmental effects", []string{"on", "off"})
 		addSmallSelectionLabel(base, cfg, "previous menu", optionsLayoutID)
 	})
 }
@@ -134,10 +152,10 @@ func addTitle(layout *d2gui.Layout, text string) {
 func addSmallSelectionLabel(layout *d2gui.Layout, cfg *layoutCfg, text string, targetLayout layoutID) {
 	label, _ := layout.AddLabel(text, d2gui.FontStyle30Units)
 	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
-		cfg.showLayoutFn(targetLayout)
+		cfg.showLayout(targetLayout)
 	})
 	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
-		cfg.hoverElementFn(label)
+		cfg.hoverElement(label)
 	})
 	layout.AddSpacerStatic(10, labelGutter)
 }
@@ -145,29 +163,35 @@ func addSmallSelectionLabel(layout *d2gui.Layout, cfg *layoutCfg, text string, t
 func addBigSelectionLabel(layout *d2gui.Layout, cfg *layoutCfg, text string, targetLayout layoutID) {
 	label, _ := layout.AddLabel(text, d2gui.FontStyle42Units)
 	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
-		cfg.showLayoutFn(targetLayout)
+		cfg.showLayout(targetLayout)
 	})
 	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
-		cfg.hoverElementFn(label)
+		cfg.hoverElement(label)
 	})
 	layout.AddSpacerStatic(10, labelGutter)
 }
 
-func addOnOffLabel(layout *d2gui.Layout, cfg *layoutCfg, text string) {
+func addEnumLabel(layout *d2gui.Layout, cfg *layoutCfg, optID optionID, text string, values []string) {
 	l := layout.AddLayout(d2gui.PositionTypeHorizontal)
 	l.SetSize(menuSize, 0)
 	l.AddLabel(text, d2gui.FontStyle30Units)
 	l.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
-		cfg.hoverElementFn(l)
+		cfg.hoverElement(l)
 	})
 	l.AddSpacerDynamic()
-	lbl, _ := l.AddLabel("on", d2gui.FontStyle30Units)
+	guiLabel, _ := l.AddLabel(values[0], d2gui.FontStyle30Units)
+	label := &enumLabel{
+		Label:    guiLabel,
+		optionID: optID,
+		values:   values,
+		current:  0,
+	}
 	l.SetMouseClickHandler(func(_ d2input.MouseEvent) {
-		if lbl.GetText() == "on" {
-			lbl.SetText("off")
-			return
-		}
-		lbl.SetText("on")
+		cfg.playSound()
+		next := (label.current + 1) % len(label.values)
+		label.current = next
+		label.Label.SetText(label.values[label.current])
+		cfg.updateValue(label.optionID, label.values[label.current])
 	})
 	layout.AddSpacerStatic(10, labelGutter)
 }
@@ -208,8 +232,12 @@ func (m *EscapeMenu) Open() {
 	m.setLayout(mainLayoutID)
 }
 
-func (m *EscapeMenu) showLayoutFn(id layoutID) {
+func (m *EscapeMenu) playSound() {
 	m.selectSound.Play()
+}
+
+func (m *EscapeMenu) showLayout(id layoutID) {
+	m.playSound()
 
 	if id == noLayoutID {
 		m.Close()
@@ -219,7 +247,7 @@ func (m *EscapeMenu) showLayoutFn(id layoutID) {
 	m.setLayout(id)
 }
 
-func (m *EscapeMenu) hoverElementFn(el hoverableElement) {
+func (m *EscapeMenu) onHoverElement(el hoverableElement) {
 	_, y := el.GetOffset()
 
 	x, _ := m.leftPent.GetPosition()
@@ -228,6 +256,10 @@ func (m *EscapeMenu) hoverElementFn(el hoverableElement) {
 	x, _ = m.rightPent.GetPosition()
 	m.rightPent.SetPosition(x, y+10)
 	return
+}
+
+func (m *EscapeMenu) onUpdateValue(optID optionID, value string) {
+	fmt.Println(fmt.Sprintf("updating value %s to %s", optID, value))
 }
 
 func (m *EscapeMenu) setLayout(id layoutID) {
