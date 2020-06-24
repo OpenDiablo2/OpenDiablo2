@@ -49,7 +49,10 @@ type GameControls struct {
 }
 
 type ActionableType int
-type ActionableRegion struct { ActionableTypeId ActionableType; Rect d2common.Rectangle }
+type ActionableRegion struct {
+	ActionableTypeId ActionableType
+	Rect             d2common.Rectangle
+}
 
 const (
 	// Since they require special handling, not considering (1) globes, (2) content of the mini panel, (3) belt
@@ -81,15 +84,15 @@ func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
 		heroStats:      NewHeroStats(),
 		escapeMenu:     NewEscapeMenu(),
 		zoneChangeText: &label,
-		actionableRegions: []ActionableRegion {
-			{leftSkill, d2common.Rectangle{Left:115, Top:550, Width:50, Height:50 }},
-			{leftSelec, d2common.Rectangle{Left:206, Top:563, Width:30, Height:30 }},
-			{xp,        d2common.Rectangle{Left:253, Top:560, Width:125, Height:5 }},
-			{walkRun,   d2common.Rectangle{Left:255, Top:573, Width:17, Height:20 }},
-			{stamina,   d2common.Rectangle{Left:273, Top:573, Width:105, Height:20 }},
-			{miniPanel, d2common.Rectangle{Left:393, Top:563, Width:12, Height:23 }},
-			{rightSelec,d2common.Rectangle{Left:562, Top:563, Width:30, Height:30 }},
-			{rightSkill,d2common.Rectangle{Left:634, Top:550, Width:50, Height:50 }},
+		actionableRegions: []ActionableRegion{
+			{leftSkill, d2common.Rectangle{Left: 115, Top: 550, Width: 50, Height: 50}},
+			{leftSelec, d2common.Rectangle{Left: 206, Top: 563, Width: 30, Height: 30}},
+			{xp, d2common.Rectangle{Left: 253, Top: 560, Width: 125, Height: 5}},
+			{walkRun, d2common.Rectangle{Left: 255, Top: 573, Width: 17, Height: 20}},
+			{stamina, d2common.Rectangle{Left: 273, Top: 573, Width: 105, Height: 20}},
+			{miniPanel, d2common.Rectangle{Left: 393, Top: 563, Width: 12, Height: 23}},
+			{rightSelec, d2common.Rectangle{Left: 562, Top: 563, Width: 30, Height: 30}},
+			{rightSkill, d2common.Rectangle{Left: 634, Top: 550, Width: 50, Height: 50}},
 		},
 	}
 
@@ -239,8 +242,8 @@ func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
 
 func (g *GameControls) ShootMissile(px float64, py float64) bool {
 	missile, err := d2mapentity.CreateMissile(
-		int(g.hero.AnimatedComposite.LocationX),
-		int(g.hero.AnimatedComposite.LocationY),
+		int(g.hero.LocationX),
+		int(g.hero.LocationY),
 		d2datadict.Missiles[missileID],
 	)
 	if err != nil {
@@ -248,8 +251,8 @@ func (g *GameControls) ShootMissile(px float64, py float64) bool {
 	}
 
 	rads := d2common.GetRadiansBetween(
-		g.hero.AnimatedComposite.LocationX,
-		g.hero.AnimatedComposite.LocationY,
+		g.hero.LocationX,
+		g.hero.LocationY,
 		px*5,
 		py*5,
 	)
@@ -434,14 +437,22 @@ func (g *GameControls) onHoverActionable(item ActionableType) {
 // Handles what to do when an actionable is clicked
 func (g *GameControls) onClickActionable(item ActionableType) {
 	switch item {
-	case leftSkill: log.Println("Left Skill Action Pressed")
-	case leftSelec: log.Println("Left Skill Selector Action Pressed")
-	case xp: log.Println("XP Action Pressed")
-	case walkRun: log.Println("Walk/Run Action Pressed")
-	case stamina: log.Println("Stamina Action Pressed")
-	case miniPanel: log.Println("Mini Panel Action Pressed")
-	case rightSelec: log.Println("Right Skill Selector Action Pressed")
-	case rightSkill: log.Println("Right Skill Action Pressed")
+	case leftSkill:
+		log.Println("Left Skill Action Pressed")
+	case leftSelec:
+		log.Println("Left Skill Selector Action Pressed")
+	case xp:
+		log.Println("XP Action Pressed")
+	case walkRun:
+		log.Println("Walk/Run Action Pressed")
+	case stamina:
+		log.Println("Stamina Action Pressed")
+	case miniPanel:
+		log.Println("Mini Panel Action Pressed")
+	case rightSelec:
+		log.Println("Right Skill Selector Action Pressed")
+	case rightSkill:
+		log.Println("Right Skill Action Pressed")
 	default:
 		log.Printf("Unrecognized ActionableType(%d) being clicked\n", item)
 	}

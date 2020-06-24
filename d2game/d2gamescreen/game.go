@@ -118,14 +118,14 @@ func (v *Game) Advance(tickTime float64) error {
 
 	// Update the camera to focus on the player
 	if v.localPlayer != nil && !v.gameControls.FreeCam {
-		rx, ry := v.mapRenderer.WorldToOrtho(v.localPlayer.AnimatedComposite.LocationX/5, v.localPlayer.AnimatedComposite.LocationY/5)
+		rx, ry := v.mapRenderer.WorldToOrtho(v.localPlayer.LocationX/5, v.localPlayer.LocationY/5)
 		v.mapRenderer.MoveCameraTo(rx, ry)
 	}
 	return nil
 }
 
 func (v *Game) OnPlayerMove(x, y float64) {
-	heroPosX := v.localPlayer.AnimatedComposite.LocationX / 5.0
-	heroPosY := v.localPlayer.AnimatedComposite.LocationY / 5.0
+	heroPosX := v.localPlayer.LocationX / 5.0
+	heroPosY := v.localPlayer.LocationY / 5.0
 	v.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(v.gameClient.PlayerId, heroPosX, heroPosY, x, y))
 }
