@@ -20,7 +20,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-            sudo apt-get install -y \
+            apt-get install -y \
               libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev \
               > /dev/null 2>&1
 
