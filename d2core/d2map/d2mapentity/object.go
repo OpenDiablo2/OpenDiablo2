@@ -11,6 +11,7 @@ type Object struct {
 	mapEntity
 	composite    *d2asset.Composite
 	direction    int
+	objectRecord *d2datadict.ObjectRecord
 	objectLookup *d2datadict.ObjectLookupRecord
 }
 
@@ -27,6 +28,7 @@ func CreateObject(x, y int, object *d2datadict.ObjectLookupRecord, palettePath s
 		objectLookup: object,
 	}
 	entity.mapEntity.directioner = entity.rotate
+	entity.objectRecord = d2datadict.Objects[object.ObjectsTxtId]
 	return entity, nil
 }
 
