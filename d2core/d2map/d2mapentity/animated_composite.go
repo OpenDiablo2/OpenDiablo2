@@ -2,7 +2,6 @@ package d2mapentity
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
@@ -10,7 +9,6 @@ import (
 // AnimatedComposite represents a composite of animations that can be projected onto the map.
 type AnimatedComposite struct {
 	mapEntity
-	//animationMode string
 	composite    *d2asset.Composite
 	direction    int
 	player       *Player
@@ -31,14 +29,6 @@ func CreateAnimatedComposite(x, y int, object *d2datadict.ObjectLookupRecord, pa
 	}
 	entity.mapEntity.directioner = entity.rotate
 	return entity, nil
-}
-
-func (ac *AnimatedComposite) SetPlayer(player *Player) {
-	ac.player = player
-}
-
-func (ac *AnimatedComposite) SetAnimationMode(animationMode string) error {
-	return ac.composite.SetMode(animationMode, ac.weaponClass, ac.direction)
 }
 
 // SetMode changes the graphical mode of this animated entity
@@ -68,50 +58,6 @@ func (ac *AnimatedComposite) Render(target d2render.Surface) {
 
 // rotate sets direction and changes animation
 func (ac *AnimatedComposite) rotate(direction int) {
-	newAnimationMode := ac.GetAnimationMode().String()
-
-	if newAnimationMode != ac.composite.GetAnimationMode() || direction != ac.direction {
-		ac.SetMode(newAnimationMode, ac.weaponClass, direction)
-	}
-}
-
-func (ac *AnimatedComposite) GetAnimationMode() d2enum.AnimationMode {
-	var newAnimationMode d2enum.AnimationMode
-	if ac.player != nil {
-		newAnimationMode = ac.GetPlayerAnimationMode()
-	} else {
-		newAnimationMode = ac.GetMonsterAnimationMode()
-	}
-
-	return newAnimationMode
-}
-
-func (ac *AnimatedComposite) GetPlayerAnimationMode() d2enum.AnimationMode {
-	if ac.player.IsRunning() && !ac.IsAtTarget() {
-		return d2enum.AnimationModePlayerRun
-	}
-
-	if ac.player.IsInTown() {
-		if !ac.IsAtTarget() {
-			return d2enum.AnimationModePlayerTownWalk
-		}
-
-		return d2enum.AnimationModePlayerTownNeutral
-	}
-
-	if !ac.IsAtTarget() {
-		return d2enum.AnimationModePlayerWalk
-	}
-
-	return d2enum.AnimationModePlayerNeutral
-}
-
-func (ac *AnimatedComposite) GetMonsterAnimationMode() d2enum.AnimationMode {
-	if !ac.IsAtTarget() {
-		return d2enum.AnimationModeMonsterWalk
-	}
-
-	return d2enum.AnimationModeMonsterNeutral
 }
 
 func (ac *AnimatedComposite) Advance(elapsed float64) {
