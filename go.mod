@@ -1,7 +1,5 @@
 module github.com/OpenDiablo2/OpenDiablo2
 
-replace github.com/OpenDiablo2/OpenDiablo2 => /Users/gurkankaymak/development/openSource/OpenDiablo2/OpenDiablo2
-
 go 1.12
 
 require (
