@@ -97,8 +97,14 @@ func (m *MapEngine) PathFind(startX, startY, endX, endY float64) (path []d2astar
 	}
 	endNode := &m.walkMesh[endNodeIndex]
 
-	path, distance, found = d2astar.Path(endNode, startNode, 80)
+	path, distance, found = d2astar.Path(startNode, endNode, 80)
 	if path != nil {
+		// Reverse the path to fit what the game expects.
+		for i := len(path)/2-1; i >= 0; i-- {
+			opp := len(path)-1-i
+			path[i], path[opp] = path[opp], path[i]
+		}
+
 		path = path[1:]
 	}
 	return

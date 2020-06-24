@@ -7,9 +7,9 @@ D2 A*
 
 Changes
 -------
-* Used [sync.Pool](https://golang.org/pkg/sync/#Pool) to reuse objects created during pathfinding.  This improves performance by roughly 30% by reducing allocations.
-* Added a check on the target for neighbors to identify if the user clicked an inaccessible area.
+* Used [sync.Pool](https://golang.org/pkg/sync/#Pool) to reuse objects created during path-finding.  This improves performance by roughly 30% by reducing allocations.
 * Added a max cost to prevent searching the entire region for a path.
+* If there is no path the target within the max cost, the path found that gets closest to target will be returned.  This allows the player to click in inaccessible areas causing the character to run along the edge.
 
 TODO
 ------

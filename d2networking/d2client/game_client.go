@@ -86,8 +86,8 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 	case d2netpackettype.MovePlayer:
 		movePlayer := packet.PacketData.(d2netpacket.MovePlayerPacket)
 		player := g.Players[movePlayer.PlayerId]
-		path, _, found := g.MapEngine.PathFind(movePlayer.StartX, movePlayer.StartY, movePlayer.DestX, movePlayer.DestY)
-		if found {
+		path, _, _ := g.MapEngine.PathFind(movePlayer.StartX, movePlayer.StartY, movePlayer.DestX, movePlayer.DestY)
+		if len(path) > 0 {
 			player.AnimatedComposite.SetPath(path, func() {
 				tile := g.MapEngine.TileAt(player.TileX, player.TileY)
 				if tile == nil {
