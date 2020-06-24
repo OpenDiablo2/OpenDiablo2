@@ -44,6 +44,7 @@ type GameControls struct {
 	menuButton        *d2ui.Sprite
 	skillIcon         *d2ui.Sprite
 	zoneChangeText    *d2ui.Label
+	runButton         d2ui.Button
 	isZoneTextShown   bool
 	actionableRegions []ActionableRegion
 }
@@ -157,9 +158,7 @@ func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 		g.heroStats.Toggle()
 		g.updateLayout()
 	case d2input.KeyR:
-		g.hero.ToggleRunWalk()
-		// TODO: change the running menu icon
-		g.hero.SetIsRunning(g.hero.IsRunToggled())
+		g.onToggleRunButton()
 	default:
 		return false
 	}
@@ -278,9 +277,29 @@ func (g *GameControls) Load() {
 	animation, _ = d2asset.LoadAnimation(d2resource.GenericSkills, d2resource.PaletteSky)
 	g.skillIcon, _ = d2ui.LoadSprite(animation)
 
+	g.loadUIButtons()
+
 	g.inventory.Load()
 	g.heroStats.Load()
 	g.escapeMenu.OnLoad()
+}
+
+func (g *GameControls) loadUIButtons() {
+	// Run button
+	g.runButton = d2ui.CreateButton(d2ui.ButtonTypeRun, "")
+	g.runButton.SetPosition(255, 570)
+	g.runButton.OnActivated(func() { g.onToggleRunButton() })
+	if g.hero.IsRunToggled() {
+		g.runButton.Toggle()
+	}
+	d2ui.AddWidget(&g.runButton)
+}
+
+func (g *GameControls) onToggleRunButton() {
+	g.runButton.Toggle()
+	g.hero.ToggleRunWalk()
+	// TODO: change the running menu icon
+	g.hero.SetIsRunning(g.hero.IsRunToggled())
 }
 
 // ScreenAdvanceHandler
