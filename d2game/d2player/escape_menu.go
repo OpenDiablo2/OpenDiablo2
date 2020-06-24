@@ -322,7 +322,7 @@ func (m *EscapeMenu) onHoverElement(el hoverableElement) {
 }
 
 func (m *EscapeMenu) onUpdateValue(optID optionID, value string) {
-	fmt.Println(fmt.Sprintf("updating value %s to %s", optID, value))
+	fmt.Println(fmt.Sprintf("updating value %d to %s", int(optID), value))
 }
 
 func (m *EscapeMenu) setLayout(id layoutID) {
