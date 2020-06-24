@@ -62,6 +62,7 @@ var ButtonLayouts = map[ButtonType]ButtonLayout{
 	ButtonTypeMedium:   {1, 1, d2resource.MediumButtonBlank, d2resource.PaletteUnits, false, 0, 0, d2resource.FontExocet10, nil, true, 0},
 	ButtonTypeTall:     {1, 1, d2resource.TallButtonBlank, d2resource.PaletteUnits, false, 0, 0, d2resource.FontExocet10, nil, true, 5},
 	ButtonTypeOkCancel: {1, 1, d2resource.CancelButton, d2resource.PaletteUnits, false, 0, -1, d2resource.FontRediculous, nil, true, 0},
+	ButtonTypeRun:      {1, 1, d2resource.RunButton, d2resource.PaletteSky, true, 0, -1, d2resource.FontRediculous, nil, true, 0},
 	/*
 		{eButtonType.Wide,  new ButtonLayout { XSegments = 2, ResourceName = ResourcePaths.WideButtonBlank, PaletteName = PaletteDefs.Units } },
 		{eButtonType.Narrow, new ButtonLayout { ResourceName = ResourcePaths.NarrowButtonBlank, PaletteName = PaletteDefs.Units } },
@@ -192,6 +193,10 @@ func (v *Button) Render(target d2render.Surface) {
 	} else {
 		target.Render(v.normalSurface)
 	}
+}
+
+func (v *Button) Toggle() {
+	v.toggled = !v.toggled
 }
 
 func (v *Button) Advance(elapsed float64) {
