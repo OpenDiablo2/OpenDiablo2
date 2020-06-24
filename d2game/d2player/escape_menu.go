@@ -15,18 +15,39 @@ type (
 )
 
 const (
-	noLayoutID           layoutID = -1
-	mainLayoutID                  = 0
-	optionsLayoutID               = 1
-	soundOptionsLayoutID          = 2
-
-	opt3dSound    optionID = 0
-	optEnvEffects          = 1
-
+	// UI
 	labelGutter    = 2
 	sidePanelsSize = 100
 	pentSize       = 52
 	menuSize       = 400
+
+	// layouts
+	noLayoutID                layoutID = -1
+	mainLayoutID                       = 0
+	optionsLayoutID                    = 1
+	soundOptionsLayoutID               = 2
+	videoOptionsLayoutID               = 3
+	automapOptionsLayoutID             = 4
+	configureControlsLayoutID          = 5
+
+	// options
+	optAudioSoundVolume          optionID = 0 // audio
+	optAudioMusicVolume                   = 1
+	optAudio3dSound                       = 2
+	optAudioHardwareAcceleration          = 3
+	optAudioEnvEffects                    = 4
+	optAudioNpcSpeech                     = 5
+	optVideoResolution                    = 6 // video
+	optVideoLightingQuality               = 7
+	optVideoBlendedShadows                = 8
+	optVideoPerspective                   = 9
+	optVideoGamma                         = 10
+	optVideoContrast                      = 11
+	optAutomapSize                        = 12 // automap
+	optAutomapFade                        = 13
+	optAutomapCenterWhenCleared           = 14
+	optAutomapShowParty                   = 15
+	optAutomapShowNames                   = 16
 )
 
 type EscapeMenu struct {
@@ -76,9 +97,12 @@ func NewEscapeMenu() *EscapeMenu {
 		updateValue:  m.onUpdateValue,
 	}
 	m.layouts = []*layout{
-		mainLayoutID:         newMainLayout(cfg),
-		optionsLayoutID:      newOptionsLayout(cfg),
-		soundOptionsLayoutID: newSoundOptionsLayout(cfg),
+		mainLayoutID:              newMainLayout(cfg),
+		optionsLayoutID:           newOptionsLayout(cfg),
+		soundOptionsLayoutID:      newSoundOptionsLayout(cfg),
+		videoOptionsLayoutID:      newVideoOptionsLayout(cfg),
+		automapOptionsLayoutID:    newAutomapOptionsLayout(cfg),
+		configureControlsLayoutID: newConfigureControlsLayout(cfg),
 	}
 	return m
 }
@@ -128,9 +152,9 @@ func newMainLayout(cfg *layoutCfg) *layout {
 func newOptionsLayout(cfg *layoutCfg) *layout {
 	return cfg.wrapLayout(func(base *d2gui.Layout) {
 		addBigSelectionLabel(base, cfg, "sound options", soundOptionsLayoutID)
-		addBigSelectionLabel(base, cfg, "video options", soundOptionsLayoutID)
-		addBigSelectionLabel(base, cfg, "automap options", soundOptionsLayoutID)
-		addBigSelectionLabel(base, cfg, "configure controls", soundOptionsLayoutID)
+		addBigSelectionLabel(base, cfg, "video options", videoOptionsLayoutID)
+		addBigSelectionLabel(base, cfg, "automap options", automapOptionsLayoutID)
+		addBigSelectionLabel(base, cfg, "configure controls", configureControlsLayoutID)
 		addBigSelectionLabel(base, cfg, "previous menu", mainLayoutID)
 	})
 }
@@ -138,8 +162,44 @@ func newOptionsLayout(cfg *layoutCfg) *layout {
 func newSoundOptionsLayout(cfg *layoutCfg) *layout {
 	return cfg.wrapLayout(func(base *d2gui.Layout) {
 		addTitle(base, "sound options")
-		addEnumLabel(base, cfg, opt3dSound, "3d sound", []string{"on", "off"})
-		addEnumLabel(base, cfg, optEnvEffects, "environmental effects", []string{"on", "off"})
+		addEnumLabel(base, cfg, optAudioSoundVolume, "sound volume", []string{"TODO"})
+		addEnumLabel(base, cfg, optAudioMusicVolume, "music volume", []string{"TODO"})
+		addEnumLabel(base, cfg, optAudio3dSound, "3d bias", []string{"TODO"})
+		addEnumLabel(base, cfg, optAudioHardwareAcceleration, "hardware acceleration", []string{"on", "off"})
+		addEnumLabel(base, cfg, optAudioEnvEffects, "environmental effects", []string{"on", "off"})
+		addEnumLabel(base, cfg, optAudioNpcSpeech, "npc speech", []string{"audio and text", "audio only", "text only"})
+		addSmallSelectionLabel(base, cfg, "previous menu", optionsLayoutID)
+	})
+}
+
+func newVideoOptionsLayout(cfg *layoutCfg) *layout {
+	return cfg.wrapLayout(func(base *d2gui.Layout) {
+		addTitle(base, "video options")
+		addEnumLabel(base, cfg, optVideoResolution, "video resolution", []string{"800x600", "1024x768"})
+		addEnumLabel(base, cfg, optVideoLightingQuality, "lighting quality", []string{"low", "high"})
+		addEnumLabel(base, cfg, optVideoBlendedShadows, "blended shadows", []string{"on", "off"})
+		addEnumLabel(base, cfg, optVideoPerspective, "perspective", []string{"on", "off"})
+		addEnumLabel(base, cfg, optVideoGamma, "gamma", []string{"TODO"})
+		addEnumLabel(base, cfg, optVideoContrast, "contrast", []string{"TODO"})
+		addSmallSelectionLabel(base, cfg, "previous menu", optionsLayoutID)
+	})
+}
+
+func newAutomapOptionsLayout(cfg *layoutCfg) *layout {
+	return cfg.wrapLayout(func(base *d2gui.Layout) {
+		addTitle(base, "automap options")
+		addEnumLabel(base, cfg, optAutomapSize, "automap size", []string{"full screen"})
+		addEnumLabel(base, cfg, optAutomapFade, "fade", []string{"yes", "no"})
+		addEnumLabel(base, cfg, optAutomapCenterWhenCleared, "center when cleared", []string{"yes", "no"})
+		addEnumLabel(base, cfg, optAutomapShowParty, "show party", []string{"yes", "no"})
+		addEnumLabel(base, cfg, optAutomapShowNames, "show names", []string{"yes", "no"})
+		addSmallSelectionLabel(base, cfg, "previous menu", optionsLayoutID)
+	})
+}
+
+func newConfigureControlsLayout(cfg *layoutCfg) *layout {
+	return cfg.wrapLayout(func(base *d2gui.Layout) {
+		addTitle(base, "configure controls")
 		addSmallSelectionLabel(base, cfg, "previous menu", optionsLayoutID)
 	})
 }
@@ -210,7 +270,10 @@ func (m *EscapeMenu) OnEscKey() {
 	case optionsLayoutID:
 		m.setLayout(mainLayoutID)
 		return
-	case soundOptionsLayoutID:
+	case soundOptionsLayoutID,
+		videoOptionsLayoutID,
+		automapOptionsLayoutID,
+		configureControlsLayoutID:
 		m.setLayout(optionsLayoutID)
 		return
 	}
