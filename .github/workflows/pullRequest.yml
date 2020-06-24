@@ -16,10 +16,7 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Install dependencies
-        run: |
-          apt-get install -y \
-            libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev \
-            > /dev/null 2>&1
+        run: apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev > /dev/null 2>&1
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v1.2.1
