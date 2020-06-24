@@ -64,12 +64,6 @@ var singleton struct {
 }
 
 func main() {
-	if len(GitBranch) == 0 {
-		GitBranch = "Local Build"
-	}
-
-	d2common.SetBuildInfo(GitBranch, GitCommit)
-
 	region := kingpin.Arg("region", "Region type id").Int()
 	preset := kingpin.Arg("preset", "Level preset").Int()
 	profileOption := kingpin.Flag("profile", "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)").String()
@@ -80,6 +74,9 @@ func main() {
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
 
 	if err := initialize(); err != nil {
+		if os.IsNotExist(err) {
+			run(updateInitError)
+		}
 		log.Fatal(err)
 	}
 
@@ -96,10 +93,7 @@ func main() {
 		d2screen.SetNextScreen(d2gamescreen.CreateMapEngineTest(*region, *preset))
 	}
 
-	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", GitBranch)
-	if err := d2render.Run(update, 800, 600, windowTitle); err != nil {
-		log.Fatal(err)
-	}
+	run(update)
 }
 
 func initialize() error {
@@ -214,6 +208,17 @@ func initialize() error {
 	return nil
 }
 
+func run(updateFunc func(d2render.Surface) error) {
+	if len(GitBranch) == 0 {
+		GitBranch = "Local Build"
+	}
+	d2common.SetBuildInfo(GitBranch, GitCommit)
+	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", GitBranch)
+	if err := d2render.Run(updateFunc, 800, 600, windowTitle); err != nil {
+		log.Fatal(err)
+	}
+}
+
 func update(target d2render.Surface) error {
 	currentTime := d2common.Now()
 	elapsedTime := (currentTime - singleton.lastTime) * singleton.timeScale
@@ -231,6 +236,13 @@ func update(target d2render.Surface) error {
 		return errors.New("detected surface stack leak")
 	}
 
+	return nil
+}
+
+func updateInitError(target d2render.Surface) error {
+	width, height := target.GetSize()
+	target.PushTranslation(width/5, height/2)
+	target.DrawText("Could not find the MPQ files in the directory: %s\nPlease put the files and re-run the game.", d2config.Get().MpqPath)
 	return nil
 }
 
