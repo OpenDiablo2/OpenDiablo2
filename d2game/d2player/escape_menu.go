@@ -16,10 +16,10 @@ type (
 
 const (
 	// UI
-	labelGutter    = 2
-	sidePanelsSize = 100
+	labelGutter    = 10
+	sidePanelsSize = 80
 	pentSize       = 52
-	menuSize       = 400
+	menuSize       = 500
 
 	// layouts
 	noLayoutID                layoutID = -1
@@ -73,9 +73,8 @@ type hoverableElement interface {
 
 type layout struct {
 	*d2gui.Layout
-	leftPent  *d2gui.AnimatedSprite
-	rightPent *d2gui.AnimatedSprite
-
+	leftPent          *d2gui.AnimatedSprite
+	rightPent         *d2gui.AnimatedSprite
 	hoverableElements []hoverableElement
 }
 
@@ -108,11 +107,11 @@ func NewEscapeMenu() *EscapeMenu {
 }
 
 func (m *EscapeMenu) wrapLayout(fn func(*d2gui.Layout)) *layout {
-	base := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
-	base.SetVerticalAlign(d2gui.VerticalAlignMiddle)
-	base.AddSpacerDynamic()
+	wrapper := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
+	wrapper.SetVerticalAlign(d2gui.VerticalAlignMiddle)
+	wrapper.AddSpacerDynamic()
 
-	center := base.AddLayout(d2gui.PositionTypeHorizontal)
+	center := wrapper.AddLayout(d2gui.PositionTypeHorizontal)
 	center.SetSize(menuSize, 0)
 
 	left := center.AddLayout(d2gui.PositionTypeHorizontal)
@@ -120,11 +119,9 @@ func (m *EscapeMenu) wrapLayout(fn func(*d2gui.Layout)) *layout {
 	leftPent, _ := left.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionForward)
 	m.leftPent = leftPent
 
-	f := center.AddLayout(d2gui.PositionTypeVertical)
-	f.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
-	f.AddSpacerDynamic()
-	fn(f)
-	f.AddSpacerDynamic()
+	base := center.AddLayout(d2gui.PositionTypeVertical)
+	base.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
+	fn(base)
 
 	right := center.AddLayout(d2gui.PositionTypeHorizontal)
 	// For some reason, aligning the panel to the right won't align the pentagram, so we need to add a static spacer.
@@ -133,9 +130,9 @@ func (m *EscapeMenu) wrapLayout(fn func(*d2gui.Layout)) *layout {
 	rightPent, _ := right.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionBackward)
 	m.rightPent = rightPent
 
-	base.AddSpacerDynamic()
+	wrapper.AddSpacerDynamic()
 	return &layout{
-		Layout:    base,
+		Layout:    wrapper,
 		leftPent:  leftPent,
 		rightPent: rightPent,
 	}
@@ -143,80 +140,69 @@ func (m *EscapeMenu) wrapLayout(fn func(*d2gui.Layout)) *layout {
 
 func newMainLayout(cfg *layoutCfg) *layout {
 	return cfg.wrapLayout(func(base *d2gui.Layout) {
-		addBigSelectionLabel(base, cfg, "options", optionsLayoutID)
-		addBigSelectionLabel(base, cfg, "save and exit game", noLayoutID)
-		addBigSelectionLabel(base, cfg, "return to game", noLayoutID)
+		addBigSelectionLabel(base, cfg, "OPTIONS", optionsLayoutID)
+		addBigSelectionLabel(base, cfg, "SAVE AND EXIT GAME", noLayoutID)
+		addBigSelectionLabel(base, cfg, "RETURN TO GAME", noLayoutID)
 	})
 }
 
 func newOptionsLayout(cfg *layoutCfg) *layout {
 	return cfg.wrapLayout(func(base *d2gui.Layout) {
-		addBigSelectionLabel(base, cfg, "sound options", soundOptionsLayoutID)
-		addBigSelectionLabel(base, cfg, "video options", videoOptionsLayoutID)
-		addBigSelectionLabel(base, cfg, "automap options", automapOptionsLayoutID)
-		addBigSelectionLabel(base, cfg, "configure controls", configureControlsLayoutID)
-		addBigSelectionLabel(base, cfg, "previous menu", mainLayoutID)
+		addBigSelectionLabel(base, cfg, "SOUND OPTIONS", soundOptionsLayoutID)
+		addBigSelectionLabel(base, cfg, "VIDEO OPTIONS", videoOptionsLayoutID)
+		addBigSelectionLabel(base, cfg, "AUTOMAP OPTIONS", automapOptionsLayoutID)
+		addBigSelectionLabel(base, cfg, "CONFIGURE CONTROLS", configureControlsLayoutID)
+		addBigSelectionLabel(base, cfg, "PREVIOUS MENU", mainLayoutID)
 	})
 }
 
 func newSoundOptionsLayout(cfg *layoutCfg) *layout {
 	return cfg.wrapLayout(func(base *d2gui.Layout) {
-		addTitle(base, "sound options")
-		addEnumLabel(base, cfg, optAudioSoundVolume, "sound volume", []string{"TODO"})
-		addEnumLabel(base, cfg, optAudioMusicVolume, "music volume", []string{"TODO"})
-		addEnumLabel(base, cfg, optAudio3dSound, "3d bias", []string{"TODO"})
-		addEnumLabel(base, cfg, optAudioHardwareAcceleration, "hardware acceleration", []string{"on", "off"})
-		addEnumLabel(base, cfg, optAudioEnvEffects, "environmental effects", []string{"on", "off"})
-		addEnumLabel(base, cfg, optAudioNpcSpeech, "npc speech", []string{"audio and text", "audio only", "text only"})
-		addSmallSelectionLabel(base, cfg, "previous menu", optionsLayoutID)
+		addTitle(base, "SOUND OPTIONS")
+		addEnumLabel(base, cfg, optAudioSoundVolume, "SOUND VOLUME", []string{"TODO"})
+		addEnumLabel(base, cfg, optAudioMusicVolume, "MUSIC VOLUME", []string{"TODO"})
+		addEnumLabel(base, cfg, optAudio3dSound, "3D BIAS", []string{"TODO"})
+		addEnumLabel(base, cfg, optAudioHardwareAcceleration, "HARDWARE ACCELERATION", []string{"ON", "OFF"})
+		addEnumLabel(base, cfg, optAudioEnvEffects, "ENVIRONMENTAL EFFECTS", []string{"ON", "OFF"})
+		addEnumLabel(base, cfg, optAudioNpcSpeech, "NPC SPEECH", []string{"AUDIO AND TEXT", "AUDIO ONLY", "TEXT ONLY"})
+		addPreviousMenuLabel(base, cfg, optionsLayoutID)
 	})
 }
 
 func newVideoOptionsLayout(cfg *layoutCfg) *layout {
 	return cfg.wrapLayout(func(base *d2gui.Layout) {
-		addTitle(base, "video options")
-		addEnumLabel(base, cfg, optVideoResolution, "video resolution", []string{"800x600", "1024x768"})
-		addEnumLabel(base, cfg, optVideoLightingQuality, "lighting quality", []string{"low", "high"})
-		addEnumLabel(base, cfg, optVideoBlendedShadows, "blended shadows", []string{"on", "off"})
-		addEnumLabel(base, cfg, optVideoPerspective, "perspective", []string{"on", "off"})
-		addEnumLabel(base, cfg, optVideoGamma, "gamma", []string{"TODO"})
-		addEnumLabel(base, cfg, optVideoContrast, "contrast", []string{"TODO"})
-		addSmallSelectionLabel(base, cfg, "previous menu", optionsLayoutID)
+		addTitle(base, "VIDEO OPTIONS")
+		addEnumLabel(base, cfg, optVideoResolution, "VIDEO RESOLUTION", []string{"800X600", "1024X768"})
+		addEnumLabel(base, cfg, optVideoLightingQuality, "LIGHTING QUALITY", []string{"LOW", "HIGH"})
+		addEnumLabel(base, cfg, optVideoBlendedShadows, "BLENDED SHADOWS", []string{"ON", "OFF"})
+		addEnumLabel(base, cfg, optVideoPerspective, "PERSPECTIVE", []string{"ON", "OFF"})
+		addEnumLabel(base, cfg, optVideoGamma, "GAMME", []string{"TODO"})
+		addEnumLabel(base, cfg, optVideoContrast, "CONTRAST", []string{"TODO"})
+		addPreviousMenuLabel(base, cfg, optionsLayoutID)
 	})
 }
 
 func newAutomapOptionsLayout(cfg *layoutCfg) *layout {
 	return cfg.wrapLayout(func(base *d2gui.Layout) {
-		addTitle(base, "automap options")
-		addEnumLabel(base, cfg, optAutomapSize, "automap size", []string{"full screen"})
-		addEnumLabel(base, cfg, optAutomapFade, "fade", []string{"yes", "no"})
-		addEnumLabel(base, cfg, optAutomapCenterWhenCleared, "center when cleared", []string{"yes", "no"})
-		addEnumLabel(base, cfg, optAutomapShowParty, "show party", []string{"yes", "no"})
-		addEnumLabel(base, cfg, optAutomapShowNames, "show names", []string{"yes", "no"})
-		addSmallSelectionLabel(base, cfg, "previous menu", optionsLayoutID)
+		addTitle(base, "AUTOMAP OPTIONS")
+		addEnumLabel(base, cfg, optAutomapSize, "AUTOMAP SIZE", []string{"FULL SCREEN"})
+		addEnumLabel(base, cfg, optAutomapFade, "FADE", []string{"YES", "NO"})
+		addEnumLabel(base, cfg, optAutomapCenterWhenCleared, "CENTER WHEN CLEARED", []string{"YES", "NO"})
+		addEnumLabel(base, cfg, optAutomapShowParty, "SHOW PARTY", []string{"YES", "NO"})
+		addEnumLabel(base, cfg, optAutomapShowNames, "SHOW NAMES", []string{"YES", "NO"})
+		addPreviousMenuLabel(base, cfg, optionsLayoutID)
 	})
 }
 
 func newConfigureControlsLayout(cfg *layoutCfg) *layout {
 	return cfg.wrapLayout(func(base *d2gui.Layout) {
-		addTitle(base, "configure controls")
-		addSmallSelectionLabel(base, cfg, "previous menu", optionsLayoutID)
+		addTitle(base, "CONFIGURE CONTROLS")
+		addPreviousMenuLabel(base, cfg, optionsLayoutID)
 	})
 }
 
 func addTitle(layout *d2gui.Layout, text string) {
 	layout.AddLabel(text, d2gui.FontStyle42Units)
-	layout.AddSpacerStatic(10, labelGutter)
-}
-
-func addSmallSelectionLabel(layout *d2gui.Layout, cfg *layoutCfg, text string, targetLayout layoutID) {
-	label, _ := layout.AddLabel(text, d2gui.FontStyle30Units)
-	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
-		cfg.showLayout(targetLayout)
-	})
-	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
-		cfg.hoverElement(label)
-	})
 	layout.AddSpacerStatic(10, labelGutter)
 }
 
@@ -229,6 +215,17 @@ func addBigSelectionLabel(layout *d2gui.Layout, cfg *layoutCfg, text string, tar
 		cfg.hoverElement(label)
 	})
 	layout.AddSpacerStatic(10, labelGutter)
+}
+
+func addPreviousMenuLabel(layout *d2gui.Layout, cfg *layoutCfg, targetLayout layoutID) {
+	layout.AddSpacerStatic(10, labelGutter)
+	label, _ := layout.AddLabel("PREVIOUS MENU", d2gui.FontStyle30Units)
+	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
+		cfg.showLayout(targetLayout)
+	})
+	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
+		cfg.hoverElement(label)
+	})
 }
 
 func addEnumLabel(layout *d2gui.Layout, cfg *layoutCfg, optID optionID, text string, values []string) {
