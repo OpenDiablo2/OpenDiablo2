@@ -16,8 +16,9 @@ const (
 	soundOptionsLayoutID          = 2
 
 	labelGutter    = 2
-	sidePanelsSize = 52
-	menuSize       = 500
+	sidePanelsSize = 100
+	pentSize       = 52
+	menuSize       = 400
 )
 
 type EscapeMenu struct {
@@ -25,24 +26,38 @@ type EscapeMenu struct {
 	selectSound   d2audio.SoundEffect
 	currentLayout layoutID
 
-	leftPent *d2gui.AnimatedSprite
-	layouts  []*d2gui.Layout
+	leftPent  *d2gui.AnimatedSprite
+	rightPent *d2gui.AnimatedSprite
+	layouts   []*layout
+}
+
+type hoverableElement interface {
+	GetOffset() (int, int)
+}
+
+type layout struct {
+	*d2gui.Layout
+	leftPent  *d2gui.AnimatedSprite
+	rightPent *d2gui.AnimatedSprite
+
+	hoverableElements []hoverableElement
 }
 
 type layoutCfg struct {
-	showLayoutFn func(id layoutID)
-	wrapLayoutFn func(func(*d2gui.Layout)) *d2gui.Layout
-	hoverLabelFn func(label *d2gui.Label)
+	showLayoutFn   func(id layoutID)
+	wrapLayoutFn   func(func(*d2gui.Layout)) *layout
+	hoverElementFn func(el hoverableElement)
 }
 
 func NewEscapeMenu() *EscapeMenu {
 	m := &EscapeMenu{}
 	cfg := &layoutCfg{
-		showLayoutFn: m.showLayoutFn,
-		wrapLayoutFn: m.wrapLayoutFn,
-		hoverLabelFn: m.hoverLayoutFn,
+		showLayoutFn:   m.showLayoutFn,
+		wrapLayoutFn:   m.wrapLayoutFn,
+		hoverElementFn: m.hoverElementFn,
 	}
-	m.layouts = []*d2gui.Layout{
+
+	m.layouts = []*layout{
 		mainLayoutID:         newMainLayout(cfg),
 		optionsLayoutID:      newOptionsLayout(cfg),
 		soundOptionsLayoutID: newSoundOptionsLayout(cfg),
@@ -50,33 +65,41 @@ func NewEscapeMenu() *EscapeMenu {
 	return m
 }
 
-func (m *EscapeMenu) wrapLayoutFn(fn func(*d2gui.Layout)) *d2gui.Layout {
+func (m *EscapeMenu) wrapLayoutFn(fn func(*d2gui.Layout)) *layout {
 	base := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
 	base.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	base.AddSpacerDynamic()
 
-	left := base.AddLayout(d2gui.PositionTypeVertical)
-	left.SetSize(sidePanelsSize, 500)
-	s, _ := left.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionForward)
-	m.leftPent = s
-
-	center := base.AddLayout(d2gui.PositionTypeVertical)
+	center := base.AddLayout(d2gui.PositionTypeHorizontal)
 	center.SetSize(menuSize, 0)
-	center.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
-	center.SetVerticalAlign(d2gui.VerticalAlignMiddle)
-	center.AddSpacerDynamic()
-	fn(center)
-	center.AddSpacerDynamic()
 
-	right := base.AddLayout(d2gui.PositionTypeVertical)
-	right.SetSize(sidePanelsSize, 500)
-	right.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionBackward)
+	left := center.AddLayout(d2gui.PositionTypeHorizontal)
+	left.SetSize(sidePanelsSize, 0)
+	leftPent, _ := left.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionForward)
+	m.leftPent = leftPent
+
+	f := center.AddLayout(d2gui.PositionTypeVertical)
+	f.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
+	f.AddSpacerDynamic()
+	fn(f)
+	f.AddSpacerDynamic()
+
+	right := center.AddLayout(d2gui.PositionTypeHorizontal)
+	// For some reason, aligning the panel to the right won't align the pentagram, so we need to add a static spacer.
+	right.AddSpacerStatic(sidePanelsSize-pentSize, 0)
+	right.SetSize(sidePanelsSize, 0)
+	rightPent, _ := right.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionBackward)
+	m.rightPent = rightPent
 
 	base.AddSpacerDynamic()
-	return base
+	return &layout{
+		Layout:    base,
+		leftPent:  leftPent,
+		rightPent: rightPent,
+	}
 }
 
-func newMainLayout(cfg *layoutCfg) *d2gui.Layout {
+func newMainLayout(cfg *layoutCfg) *layout {
 	return cfg.wrapLayoutFn(func(base *d2gui.Layout) {
 		addBigSelectionLabel(base, cfg, "options", optionsLayoutID)
 		addBigSelectionLabel(base, cfg, "save and exit game", noLayoutID)
@@ -84,7 +107,7 @@ func newMainLayout(cfg *layoutCfg) *d2gui.Layout {
 	})
 }
 
-func newOptionsLayout(cfg *layoutCfg) *d2gui.Layout {
+func newOptionsLayout(cfg *layoutCfg) *layout {
 	return cfg.wrapLayoutFn(func(base *d2gui.Layout) {
 		addBigSelectionLabel(base, cfg, "sound options", soundOptionsLayoutID)
 		addBigSelectionLabel(base, cfg, "video options", soundOptionsLayoutID)
@@ -94,11 +117,11 @@ func newOptionsLayout(cfg *layoutCfg) *d2gui.Layout {
 	})
 }
 
-func newSoundOptionsLayout(cfg *layoutCfg) *d2gui.Layout {
+func newSoundOptionsLayout(cfg *layoutCfg) *layout {
 	return cfg.wrapLayoutFn(func(base *d2gui.Layout) {
 		addTitle(base, "sound options")
-		addOnOffLabel(base, "3d sound")
-		addOnOffLabel(base, "environmental effects")
+		addOnOffLabel(base, cfg, "3d sound")
+		addOnOffLabel(base, cfg, "environmental effects")
 		addSmallSelectionLabel(base, cfg, "previous menu", optionsLayoutID)
 	})
 }
@@ -114,7 +137,7 @@ func addSmallSelectionLabel(layout *d2gui.Layout, cfg *layoutCfg, text string, t
 		cfg.showLayoutFn(targetLayout)
 	})
 	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
-		cfg.hoverLabelFn(label)
+		cfg.hoverElementFn(label)
 	})
 	layout.AddSpacerStatic(10, labelGutter)
 }
@@ -125,15 +148,18 @@ func addBigSelectionLabel(layout *d2gui.Layout, cfg *layoutCfg, text string, tar
 		cfg.showLayoutFn(targetLayout)
 	})
 	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
-		cfg.hoverLabelFn(label)
+		cfg.hoverElementFn(label)
 	})
 	layout.AddSpacerStatic(10, labelGutter)
 }
 
-func addOnOffLabel(layout *d2gui.Layout, text string) {
+func addOnOffLabel(layout *d2gui.Layout, cfg *layoutCfg, text string) {
 	l := layout.AddLayout(d2gui.PositionTypeHorizontal)
 	l.SetSize(menuSize, 0)
 	l.AddLabel(text, d2gui.FontStyle30Units)
+	l.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
+		cfg.hoverElementFn(l)
+	})
 	l.AddSpacerDynamic()
 	lbl, _ := l.AddLabel("on", d2gui.FontStyle30Units)
 	l.SetMouseClickHandler(func(_ d2input.MouseEvent) {
@@ -193,12 +219,20 @@ func (m *EscapeMenu) showLayoutFn(id layoutID) {
 	m.setLayout(id)
 }
 
-func (m *EscapeMenu) hoverLayoutFn(label *d2gui.Label) {
-	//m.leftPent.SetPosition()
+func (m *EscapeMenu) hoverElementFn(el hoverableElement) {
+	_, y := el.GetOffset()
+
+	x, _ := m.leftPent.GetPosition()
+	m.leftPent.SetPosition(x, y+10)
+
+	x, _ = m.rightPent.GetPosition()
+	m.rightPent.SetPosition(x, y+10)
 	return
 }
 
 func (m *EscapeMenu) setLayout(id layoutID) {
-	d2gui.SetLayout(m.layouts[id])
+	m.leftPent = m.layouts[id].leftPent
+	m.rightPent = m.layouts[id].rightPent
+	d2gui.SetLayout(m.layouts[id].Layout)
 	m.currentLayout = id
 }
