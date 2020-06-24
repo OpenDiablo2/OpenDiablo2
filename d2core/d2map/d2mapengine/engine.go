@@ -56,8 +56,8 @@ func (m *MapEngine) ResetMap(levelType d2enum.RegionIdType, width, height int) {
 	m.walkMesh = make([]d2common.PathTile, width*height*25)
 	m.dt1Files = make([]string, 0)
 
-	for _, dtFileName := range m.levelType.Files {
-		m.addDT1(dtFileName)
+	for idx := range m.levelType.Files {
+		m.addDT1(m.levelType.Files[idx])
 	}
 
 }
@@ -94,8 +94,9 @@ func (m *MapEngine) AddDS1(fileName string) {
 		panic(err)
 	}
 	ds1, _ := d2ds1.LoadDS1(fileData)
-	for _, dt1File := range ds1.Files {
-		dt1File := strings.ToLower(dt1File)
+	for idx := range ds1.Files {
+		dt1File := ds1.Files[idx]
+		dt1File = strings.ToLower(dt1File)
 		dt1File = strings.Replace(dt1File, "c:", "", -1)       // Yes they did...
 		dt1File = strings.Replace(dt1File, ".tg1", ".dt1", -1) // Yes they did...
 		dt1File = strings.Replace(dt1File, "\\d2\\data\\global\\tiles\\", "", -1)
@@ -104,9 +105,9 @@ func (m *MapEngine) AddDS1(fileName string) {
 }
 
 func (m *MapEngine) FindTile(style, sequence, tileType int32) d2dt1.Tile {
-	for _, tile := range m.dt1TileData {
-		if tile.Style == style && tile.Sequence == sequence && tile.Type == tileType {
-			return tile
+	for idx := range m.dt1TileData {
+		if m.dt1TileData[idx].Style == style && m.dt1TileData[idx].Sequence == sequence && m.dt1TileData[idx].Type == tileType {
+			return m.dt1TileData[idx]
 		}
 	}
 	panic("Could not find the requested tile!")
@@ -171,7 +172,7 @@ func (m *MapEngine) PlaceStamp(stamp *d2mapstamp.Stamp, tileOffsetX, tileOffsetY
 
 // converts x,y tile coordinate into index in MapEngine.tiles
 func (m *MapEngine) tileCoordinateToIndex(x, y int) int {
-	return x + (y * m.size.Height)
+	return x + (y * m.size.Width)
 }
 
 // converts tile index from MapEngine.tiles to x,y coordinate
@@ -214,11 +215,11 @@ func (m *MapEngine) RemoveEntity(entity d2mapentity.MapEntity) {
 
 func (m *MapEngine) GetTiles(style, sequence, tileType int32) []d2dt1.Tile {
 	var tiles []d2dt1.Tile
-	for _, tile := range m.dt1TileData {
-		if tile.Style != style || tile.Sequence != sequence || tile.Type != tileType {
+	for idx := range m.dt1TileData {
+		if m.dt1TileData[idx].Style != style || m.dt1TileData[idx].Sequence != sequence || m.dt1TileData[idx].Type != tileType {
 			continue
 		}
-		tiles = append(tiles, tile)
+		tiles = append(tiles, m.dt1TileData[idx])
 	}
 	if len(tiles) == 0 {
 		log.Printf("Unknown tile ID [%d %d %d]\n", style, sequence, tileType)
@@ -231,8 +232,8 @@ func (m *MapEngine) GetStartPosition() (float64, float64) {
 	for tileY := 0; tileY < m.size.Height; tileY++ {
 		for tileX := 0; tileX < m.size.Width; tileX++ {
 			tile := m.tiles[tileX+(tileY*m.size.Width)]
-			for _, wall := range tile.Walls {
-				if wall.Type.Special() && wall.Style == 30 {
+			for idx := range tile.Walls {
+				if tile.Walls[idx].Type.Special() && tile.Walls[idx].Style == 30 {
 					return float64(tileX) + 0.5, float64(tileY) + 0.5
 				}
 			}
@@ -249,8 +250,8 @@ func (m *MapEngine) GetCenterPosition() (float64, float64) {
 
 // Advances time on the map engine
 func (m *MapEngine) Advance(tickTime float64) {
-	for _, entity := range m.entities {
-		entity.Advance(tickTime)
+	for idx := range m.entities {
+		m.entities[idx].Advance(tickTime)
 	}
 }
 
@@ -276,9 +277,9 @@ func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int,
 }
 
 func (m *MapEngine) GetTileData(style int32, sequence int32, tileType d2enum.TileType) *d2dt1.Tile {
-	for _, tile := range m.dt1TileData {
-		if tile.Style == style && tile.Sequence == sequence && tile.Type == int32(tileType) {
-			return &tile
+	for idx := range m.dt1TileData {
+		if m.dt1TileData[idx].Style == style && m.dt1TileData[idx].Sequence == sequence && m.dt1TileData[idx].Type == int32(tileType) {
+			return &m.dt1TileData[idx]
 		}
 	}
 	return nil
