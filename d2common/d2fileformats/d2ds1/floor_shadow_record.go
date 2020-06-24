@@ -1,5 +1,6 @@
 package d2ds1
 
+// FloorShadowRecord represents a floor or shadow record in a DS1 file.
 type FloorShadowRecord struct {
 	Prop1       byte
 	Sequence    byte

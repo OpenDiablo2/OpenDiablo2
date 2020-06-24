@@ -1,5 +1,6 @@
 package d2ds1
 
+// SubstitutionGroup represents a substitution group in a DS1 file.
 type SubstitutionGroup struct {
 	TileX         int32
 	TileY         int32

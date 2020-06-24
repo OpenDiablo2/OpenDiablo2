@@ -35,7 +35,7 @@ func (ae *AnimatedEntity) Render(target d2render.Surface) {
 	ae.animation.Render(target)
 }
 
-func (ae AnimatedEntity) GetDirection() int {
+func (ae *AnimatedEntity) GetDirection() int {
 	return ae.direction
 }
 
