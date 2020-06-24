@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
@@ -24,7 +25,9 @@ import (
 )
 
 type GameServer struct {
+	sync.RWMutex
 	clientConnections map[string]ClientConnection
+	manager           *ConnectionManager
 	mapEngines        []*d2mapengine.MapEngine
 	scriptEngine      *d2script.ScriptEngine
 	udpConnection     *net.UDPConn
@@ -46,6 +49,8 @@ func Create(openNetworkServer bool) {
 		scriptEngine:      d2script.CreateScriptEngine(),
 		seed:              time.Now().UnixNano(),
 	}
+
+	singletonServer.manager = CreateConnectionManager(singletonServer)
 
 	mapEngine := d2mapengine.CreateMapEngine()
 	mapEngine.SetSeed(singletonServer.seed)
@@ -112,8 +117,17 @@ func runNetworkServer() {
 			for _, player := range singletonServer.clientConnections {
 				player.SendPacketToClient(netPacket)
 			}
+		case d2netpackettype.Pong:
+			packetData := d2netpacket.PlayerConnectionRequestPacket{}
+			json.Unmarshal([]byte(stringData), &packetData)
+			singletonServer.manager.Recv(packetData.Id)
+		case d2netpackettype.ServerClosed:
+			singletonServer.manager.Shutdown()
+		case d2netpackettype.PlayerDisconnectionNotification:
+			var packet d2netpacket.PlayerDisconnectRequestPacket
+			json.Unmarshal([]byte(stringData), &packet)
+			log.Printf("Received disconnect: %s", packet.Id)
 		}
-
 	}
 }
 

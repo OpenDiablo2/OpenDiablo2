@@ -87,3 +87,12 @@ func LoadLevelPresets(file []byte) {
 	}
 	log.Printf("Loaded %d level presets", len(LevelPresets))
 }
+
+func LevelPreset(id int) LevelPresetRecord {
+	for i := 0; i < len(LevelPresets); i++ {
+		if LevelPresets[i].DefinitionId == id {
+			return LevelPresets[i]
+		}
+	}
+	panic("Unknown level preset")
+}

@@ -1,6 +1,7 @@
 package d2gamescreen
 
 import (
+	"log"
 	"os"
 	"time"
 
@@ -104,6 +105,7 @@ func CreateMapEngineTest(currentRegion int, levelPreset int) *MapEngineTest {
 }
 
 func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
+	log.Printf("Loaded region: Type(%d) LevelPreset(%d) FileIndex(%d)", n, levelPreset, fileIndex)
 	d2maprenderer.InvalidateImageCache()
 	for _, spec := range regions {
 		if spec.regionType == d2enum.RegionIdType(n) {
@@ -158,8 +160,6 @@ func (met *MapEngineTest) OnUnload() error {
 func (met *MapEngineTest) Render(screen d2render.Surface) error {
 	met.mapRenderer.Render(screen)
 
-	//screenX, screenY := d2render.GetCursorPos()
-	//worldX, worldY := met.mapRenderer.ScreenToWorld(screenX, screenY)
 	//
 	//levelFilesToPick := make([]string, 0)
 	//fileIndex := met.fileIndex
@@ -179,11 +179,6 @@ func (met *MapEngineTest) Render(screen d2render.Surface) error {
 	//}
 	//met.filesCount = len(levelFilesToPick)
 	//
-	//tileX := int(math.Floor(worldX))
-	//tileY := int(math.Floor(worldY))
-	//
-	//subtileX := int((worldX - float64(int(worldX))) * 5)
-	//subtileY := int((worldY - float64(int(worldY))) * 5)
 	//
 	//regionWidth, regionHeight := curRegion.GetTileSize()
 	//if tileX >= 0 && tileY >= 0 && tileX < regionWidth && tileY < regionHeight {
@@ -305,7 +300,8 @@ func (met *MapEngineTest) OnKeyDown(event d2input.KeyEvent) bool {
 
 	if event.Key == d2input.KeyN {
 		if event.KeyMod == d2input.KeyModControl {
-			met.fileIndex = increment(met.fileIndex, 0, met.filesCount-1)
+			//met.fileIndex = increment(met.fileIndex, 0, met.filesCount-1)
+			met.fileIndex++
 			d2screen.SetNextScreen(met)
 		} else if event.KeyMod == d2input.KeyModShift {
 			met.levelPreset = increment(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
@@ -320,7 +316,8 @@ func (met *MapEngineTest) OnKeyDown(event d2input.KeyEvent) bool {
 
 	if event.Key == d2input.KeyP {
 		if event.KeyMod == d2input.KeyModControl {
-			met.fileIndex = decrement(met.fileIndex, 0, met.filesCount-1)
+			//met.fileIndex = decrement(met.fileIndex, 0, met.filesCount-1)
+			met.fileIndex--
 			d2screen.SetNextScreen(met)
 		} else if event.KeyMod == d2input.KeyModShift {
 			met.levelPreset = decrement(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)

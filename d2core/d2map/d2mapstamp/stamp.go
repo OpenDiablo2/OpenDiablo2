@@ -26,14 +26,11 @@ type Stamp struct {
 }
 
 // Loads a stamp based on the supplied parameters
-func LoadStamp(seed int64, levelType d2enum.RegionIdType, levelPreset int, fileIndex int) *Stamp {
+func LoadStamp(levelType d2enum.RegionIdType, levelPreset int, fileIndex int) *Stamp {
 	stamp := &Stamp{
 		levelType:   d2datadict.LevelTypes[levelType],
 		levelPreset: d2datadict.LevelPresets[levelPreset],
 	}
-
-	//stamp.palette, _ = loadPaletteForAct(levelType)
-
 	for _, levelTypeDt1 := range stamp.levelType.Files {
 		if len(levelTypeDt1) != 0 && levelTypeDt1 != "" && levelTypeDt1 != "0" {
 			fileData, err := d2asset.LoadFile("/data/global/tiles/" + levelTypeDt1)
@@ -77,9 +74,6 @@ func LoadStamp(seed int64, levelType d2enum.RegionIdType, levelPreset int, fileI
 		}
 	}
 
-	//entities := stamp.loadEntities()
-	//stamp.loadSpecials()
-
 	return stamp
 }
 
@@ -118,7 +112,7 @@ func (mr *Stamp) TileData(style int32, sequence int32, tileType d2enum.TileType)
 	return nil
 }
 
-func (mr *Stamp) Entities() []d2mapentity.MapEntity {
+func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2mapentity.MapEntity {
 	entities := make([]d2mapentity.MapEntity, 0)
 
 	for _, object := range mr.ds1.Objects {
@@ -126,13 +120,13 @@ func (mr *Stamp) Entities() []d2mapentity.MapEntity {
 		switch object.Lookup.Type {
 		case d2datadict.ObjectTypeCharacter:
 			if object.Lookup.Base != "" && object.Lookup.Token != "" && object.Lookup.TR != "" {
-				npc := d2mapentity.CreateNPC(object.X, object.Y, object.Lookup, 0)
-				npc.SetPaths(object.Paths)
+				npc := d2mapentity.CreateNPC((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, object.Lookup, 0)
+				npc.SetPaths(convertPaths(tileOffsetX, tileOffsetY, object.Paths))
 				entities = append(entities, npc)
 			}
 		case d2datadict.ObjectTypeItem:
 			if object.ObjectInfo != nil && object.ObjectInfo.Draw && object.Lookup.Base != "" && object.Lookup.Token != "" {
-				entity, err := d2mapentity.CreateAnimatedComposite(object.X, object.Y, object.Lookup, d2resource.PaletteUnits)
+				entity, err := d2mapentity.CreateAnimatedComposite((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, object.Lookup, d2resource.PaletteUnits)
 				if err != nil {
 					panic(err)
 				}
@@ -145,19 +139,13 @@ func (mr *Stamp) Entities() []d2mapentity.MapEntity {
 	return entities
 }
 
-//
-//func (mr *Stamp) loadSpecials() {
-//	for tileY := range mr.ds1.Tiles {
-//		for tileX := range mr.ds1.Tiles[tileY] {
-//			for _, wall := range mr.ds1.Tiles[tileY][tileX].Walls {
-//				if wall.Type == 10 && wall.Style == 30 && wall.Sequence == 0 && mr.startX == 0 && mr.startY == 0 {
-//					mr.startX, mr.startY = mr.getTileWorldPosition(tileX, tileY)
-//					mr.startX += 0.5
-//					mr.startY += 0.5
-//					return
-//				}
-//			}
-//		}
-//	}
-//}
-//
+func convertPaths(tileOffsetX, tileOffsetY int, paths []d2common.Path) []d2common.Path {
+	result := make([]d2common.Path, len(paths))
+	for i := 0; i < len(paths); i++ {
+		result[i].Action = paths[i].Action
+		result[i].X = paths[i].X + (tileOffsetX * 5)
+		result[i].Y = paths[i].Y + (tileOffsetY * 5)
+	}
+
+	return result
+}

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
@@ -50,37 +51,22 @@ func (fm *fileManager) fileExists(filePath string) (bool, error) {
 }
 
 func (fm *fileManager) fixupFilePath(filePath string) string {
-	filePath = strings.ReplaceAll(filePath, "{LANG}", fm.config.Language)
-	if fm.config.Language != "ENG" {
-		filePath = strings.ReplaceAll(filePath, "expansionstring", "string")
-	}
-	// hack, no string table entries present in d2exp, set to english instead
-	if fm.config.Language == "RUS" {
-		filePath = strings.ReplaceAll(filePath, "RUS", "ENG")
-	}
-	// hack, POR doesn't have string.tbl
-	if fm.config.Language == "POR" {
-		toReplace := "POR/string.tbl"
-		fallback := "ENG/string.tbl"
-		filePath = strings.ReplaceAll(filePath, toReplace, fallback)
-	}
-	// hack, POL doesn't have string.tbl
-	if fm.config.Language == "POL" {
-		toReplace := "POL/string.tbl"
-		fallback := "ENG/string.tbl"
-		filePath = strings.ReplaceAll(filePath, toReplace, fallback)
-	}
-
-	// hack, CHI doesn't have the fonts in the mpq
-	// if strings.ToUpper(d2resource.LanguageCode) == "CHI" {
-	//	filePath = strings.ReplaceAll(filePath, "{LANG_FONT}", fm.config.Language)
-	// } else {
-	filePath = strings.ReplaceAll(filePath, "{LANG_FONT}", "latin")
-	// }
-
+	filePath = fm.removeLocaleTokens(filePath)
 	filePath = strings.ToLower(filePath)
 	filePath = strings.ReplaceAll(filePath, `/`, "\\")
 	filePath = strings.TrimPrefix(filePath, "\\")
+
+	return filePath
+}
+
+func (fm *fileManager) removeLocaleTokens(filePath string) string {
+	tableToken := d2resource.LanguageTableToken
+	fontToken := d2resource.LanguageFontToken
+
+	filePath = strings.ReplaceAll(filePath, tableToken, fm.config.Language)
+
+	// fixme: not all languages==latin
+	filePath = strings.ReplaceAll(filePath, fontToken, "latin")
 
 	return filePath
 }

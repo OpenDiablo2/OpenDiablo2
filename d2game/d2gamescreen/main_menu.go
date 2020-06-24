@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
@@ -238,6 +240,9 @@ func (v *MainMenu) OnLoad() error {
 	} else {
 		v.SetScreenMode(ScreenModeMainMenu)
 	}
+
+	d2input.BindHandler(v)
+
 	return nil
 }
 
@@ -341,25 +346,17 @@ func (v *MainMenu) Advance(tickTime float64) error {
 		v.diabloLogoRightBack.Advance(tickTime)
 		v.diabloLogoLeft.Advance(tickTime)
 		v.diabloLogoRight.Advance(tickTime)
-	case ScreenModeServerIp:
-		v.tcpJoinGameEntry.Update()
-	}
-
-	switch v.screenMode {
-	case ScreenModeTrademark:
-		if d2ui.CursorButtonPressed(d2ui.CursorButtonLeft) {
-			if v.leftButtonHeld {
-				return nil
-			}
-			d2ui.WaitForMouseRelease()
-			v.SetScreenMode(ScreenModeMainMenu)
-			v.leftButtonHeld = true
-		} else {
-			v.leftButtonHeld = false
-		}
 	}
 
 	return nil
+}
+
+func (v *MainMenu) OnMouseButtonDown(event d2input.MouseEvent) bool {
+	if v.screenMode == ScreenModeTrademark && event.Button == d2input.MouseButtonLeft {
+		v.SetScreenMode(ScreenModeMainMenu)
+		return true
+	}
+	return false
 }
 
 func (v *MainMenu) SetScreenMode(screenMode MainMenuScreenMode) {
@@ -381,6 +378,9 @@ func (v *MainMenu) SetScreenMode(screenMode MainMenuScreenMode) {
 	v.btnTcpIpHostGame.SetVisible(isTcpIp)
 	v.btnTcpIpJoinGame.SetVisible(isTcpIp)
 	v.tcpJoinGameEntry.SetVisible(isServerIp)
+	if isServerIp {
+		v.tcpJoinGameEntry.Activate()
+	}
 	v.btnServerIpOk.SetVisible(isServerIp)
 	v.btnServerIpCancel.SetVisible(isServerIp)
 }
