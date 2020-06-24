@@ -67,12 +67,11 @@ func (ac *AnimatedComposite) Render(target d2render.Surface) {
 }
 
 // rotate sets direction and changes animation
-func (ac *AnimatedComposite) rotate(angle float64) {
+func (ac *AnimatedComposite) rotate(direction int) {
 	newAnimationMode := ac.GetAnimationMode().String()
-	newDirection := angleToDirection(angle)
 
-	if newAnimationMode != ac.composite.GetAnimationMode() || newDirection != ac.direction {
-		ac.SetMode(newAnimationMode, ac.weaponClass, newDirection)
+	if newAnimationMode != ac.composite.GetAnimationMode() || direction != ac.direction {
+		ac.SetMode(newAnimationMode, ac.weaponClass, direction)
 	}
 }
 
@@ -88,7 +87,7 @@ func (ac *AnimatedComposite) GetAnimationMode() d2enum.AnimationMode {
 }
 
 func (ac *AnimatedComposite) GetPlayerAnimationMode() d2enum.AnimationMode {
-	if ac.player.IsRunning() && !ac.IsAtTarget(){
+	if ac.player.IsRunning() && !ac.IsAtTarget() {
 		return d2enum.AnimationModePlayerRun
 	}
 

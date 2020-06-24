@@ -40,8 +40,8 @@ func (ae *AnimatedEntity) GetDirection() int {
 }
 
 // rotate sets direction and changes animation
-func (ae *AnimatedEntity) rotate(angle float64) {
-	ae.direction = angleToDirection(angle)
+func (ae *AnimatedEntity) rotate(direction int) {
+	ae.direction = direction
 
 	ae.animation.SetDirection(ae.direction)
 }
