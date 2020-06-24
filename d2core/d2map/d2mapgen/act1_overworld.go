@@ -6,15 +6,11 @@ import (
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen/d2wilderness"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen/d2wilderness"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapstamp"
 )
 
@@ -132,7 +128,6 @@ func generateWilderness1TownEast(mapEngine *d2mapengine.MapEngine, startX, start
 	mapEngine.PlaceStamp(fenceWestEdge, startX, startY+ (levelDetails.SizeYNormal-3) - 45)
 	mapEngine.PlaceStamp(fenceNorthEastStamp, startX+levelDetails.SizeXNormal, startY)
 	mapEngine.PlaceStamp(fenceSouthEastStamp, startX+levelDetails.SizeXNormal, startY+levelDetails.SizeYNormal+6)
-
 }
 
 func generateWilderness1TownSouth(mapEngine *d2mapengine.MapEngine, startX, startY int) {
