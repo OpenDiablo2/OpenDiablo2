@@ -32,8 +32,6 @@ go_install(){
 	  	sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Clean unless files"
 	  	rm go*.linux-amd64.tar.gz
-      echo "Install libraries"
-	    sudo yum install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel alsa-lib-devel libXi-devel > /dev/null 2>&1
       
     elif [ "$distribution" = "Fedora" ]; then
       echo "Downloading Go"
@@ -42,8 +40,6 @@ go_install(){
 	    sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Clean unless files"
 	    rm go*.linux-amd64.tar.gz
-      echo "Install libraries"
-	    sudo dnf install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel alsa-lib-devel libXi-devel > /dev/null 2>&1
     
     elif [ "$distribution" = "Debian" ] || [ "$distribution" = "Ubuntu" ] || [ "$distribution" = "Deepin" ]; then
       echo "Downloading Go"
@@ -52,14 +48,12 @@ go_install(){
 	    sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Clean unless files"
 	    rm go*.linux-amd64.tar.gz
-      echo "Install libraries"
-	    sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev > /dev/null 2>&1
       
     elif [ "$distribution" = "Gentoo" ]; then
-      sudo emerge --ask n go libXcursor libXrandr libXinerama libXi libGLw libglvnd libsdl2 alsa-lib
+      sudo emerge --ask n go
       
     elif [ "$distribution" = "Manjaro" ] || [ "$distribution" = "Arch\ Linux" ]; then
-      sudo pacman -S go libxcursor libxrandr libxinerama libxi mesa libglvnd sdl2 sdl2_mixer sdl2_net alsa-lib --noconfirm
+      sudo pacman -S go --noconfirm
 	  
 	elif [ "$distribution" = "OpenSUSE" ] || [ "$distribution" = "SUSE" ]; then
 	  echo "Downloading Go"
@@ -68,16 +62,38 @@ go_install(){
 	    sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
       echo "Clean unless files"
 	    rm go*.linux-amd64.tar.gz
-      echo "Install libraries"
-      sudo zypper install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel Mesa-libGL-devel alsa-lib-devel libXi-devel > /dev/null 2>&1
 
     fi
 fi
 }
 
+dep_install(){
+	if [ "$distribution" = "CentOS" ] || [ "$distribution" = "Red\ Hat" ] || [ "$distribution" = "Oracle" ]; then
+	    sudo yum install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel alsa-lib-devel libXi-devel > /dev/null 2>&1
+		
+    elif [ "$distribution" = "Fedora" ]; then
+	    sudo dnf install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel alsa-lib-devel libXi-devel > /dev/null 2>&1
+		
+    elif [ "$distribution" = "Debian" ] || [ "$distribution" = "Ubuntu" ] || [ "$distribution" = "Deepin" ]; then
+	    sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev > /dev/null 2>&1
+		
+    elif [ "$distribution" = "Gentoo" ]; then
+		sudo emerge --ask n libXcursor libXrandr libXinerama libXi libGLw libglvnd libsdl2 alsa-lib
+		
+    elif [ "$distribution" = "Manjaro" ] || [ "$distribution" = "Arch\ Linux" ]; then
+		sudo pacman -S libxcursor libxrandr libxinerama libxi mesa libglvnd sdl2 sdl2_mixer sdl2_net alsa-lib --noconfirm
+		
+	elif [ "$distribution" = "OpenSUSE" ] || [ "$distribution" = "SUSE" ]; then
+		sudo zypper install -y libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel Mesa-libGL-devel alsa-lib-devel libXi-devel > /dev/null 2>&1
+
+    fi
+}
+
 # Build
 echo "Check Go"
 go_install
+echo "Install libraries"
+dep_install
 echo "Build OpenDiablo 2"
 go get
 go build
