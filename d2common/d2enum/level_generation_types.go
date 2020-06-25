@@ -11,7 +11,8 @@ package d2enum
 type LevelGenerationType int
 
 const (
-	LevelTypeRandomMaze LevelGenerationType = iota
+	LevelTypeNone LevelGenerationType = iota
+	LevelTypeRandomMaze
 	LevelTypePreset
 	LevelTypeWilderness
 )

@@ -15,11 +15,12 @@ type MapLevel struct {
 	substitutions *d2datadict.LevelSubstitutionRecord
 	generator     MapGenerator
 	engine        *MapEngine
+	isInit        bool
 	isGenerated   bool
 }
 
 func (level *MapLevel) isActive() bool {
-	return true // todo determine where players are
+	return false // todo determine where players are
 }
 
 func (level *MapLevel) Advance(elapsed float64) {
@@ -29,15 +30,21 @@ func (level *MapLevel) Advance(elapsed float64) {
 	level.engine.Advance(elapsed)
 }
 
-func (level *MapLevel) Init(act *MapAct, levelId int) {
+func (level *MapLevel) Init(act *MapAct, levelId int, engine *MapEngine) {
+	if level.isInit {
+		return
+	}
 	level.act = act
 	level.details = d2datadict.GetLevelDetailsByLevelId(levelId)
 	level.presets = d2datadict.GetLevelPresetsByLevelId(levelId)
 	level.warps = d2datadict.GetLevelWarpsByLevelId(levelId)
 	level.substitutions = d2datadict.LevelSubstitutions[level.details.SubType]
+	level.isInit = true
+	level.engine = engine
 
-	log.Printf("Initializing Level: %s", level.details.Name)
 	switch level.details.LevelGenerationType {
+	case d2enum.LevelTypeNone:
+		level.generator = nil
 	case d2enum.LevelTypeRandomMaze:
 		level.generator = &MapGeneratorMaze{}
 	case d2enum.LevelTypeWilderness:
@@ -47,7 +54,10 @@ func (level *MapLevel) Init(act *MapAct, levelId int) {
 	}
 
 	seed := act.realm.seed
-	level.generator.init(seed, level, level.engine)
+	if level.generator != nil {
+		log.Printf("Initializing Level: %s", level.details.Name)
+		level.generator.init(seed, level, engine)
+	}
 }
 
 func (level *MapLevel) GenerateMap() {
@@ -56,4 +66,5 @@ func (level *MapLevel) GenerateMap() {
 	}
 	log.Printf("Generating Level: %s", level.details.Name)
 	level.generator.generate()
+	level.isGenerated = true
 }

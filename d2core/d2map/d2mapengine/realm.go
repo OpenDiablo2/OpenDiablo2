@@ -89,6 +89,7 @@ func (realm *MapRealm) Init(seed int64, engine *MapEngine) {
 
 	log.Printf("Initializing Realm...")
 	realm.seed = seed
+	engine.SetSeed(seed)
 	actIds := d2datadict.GetActIds()
 	realm.acts = make(map[int]*MapAct)
 

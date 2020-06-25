@@ -42,7 +42,7 @@ func (act *MapAct) Init(realm *MapRealm, actIndex int, engine *MapEngine) {
 	for _, record := range actLevelRecords {
 		level := &MapLevel{}
 		levelId := record.Id
-		level.Init(act, levelId)
+		level.Init(act, levelId, engine)
 		act.levels[levelId] = level
 	}
 }
