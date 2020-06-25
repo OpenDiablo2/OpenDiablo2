@@ -22,7 +22,7 @@ type PlayerState struct {
 	Act       int                            `json:"act"`
 	FilePath  string                         `json:"-"`
 	Equipment d2inventory.CharacterEquipment `json:"equipment"`
-	Stats     d2hero.HeroStatsState          `json:"stats"`
+	Stats     *d2hero.HeroStatsState          `json:"stats"`
 	X         float64                        `json:"x"`
 	Y         float64                        `json:"y"`
 }
@@ -45,7 +45,13 @@ func GetAllPlayerStates() []*PlayerState {
 		gameState := LoadPlayerState(path.Join(basePath, file.Name()))
 		if gameState == nil {
 			continue
+		// temporarily loading default class stats if the character was created before saving stats was introduced
+		// to be removed in the future
+		} else if gameState.Stats == nil {
+			gameState.Stats = d2hero.CreateHeroStatsState(gameState.HeroType, *d2datadict.CharStats[gameState.HeroType], 1, 0)
+			gameState.Save()
 		}
+
 		result = append(result, gameState)
 	}
 	return result
@@ -78,31 +84,10 @@ func CreatePlayerState(heroName string, hero d2enum.Hero, classStats d2datadict.
 		HeroName:  heroName,
 		HeroType:  hero,
 		Act:       1,
+		Stats: d2hero.CreateHeroStatsState(hero, classStats, 1, 0),
 		Equipment: d2inventory.HeroObjects[hero],
-		Stats: d2hero.HeroStatsState{
-			Level: 1,
-			Experience:0,
-			NextLevelExp: d2datadict.GetExperienceBreakpoint(hero, 1),
-			Strength: classStats.InitStr,
-			Dexterity: classStats.InitDex,
-			Vitality: classStats.InitVit,
-			Energy: classStats.InitEne,
-			//TODO: proper formula for calculating health and mana
-			Health: classStats.InitVit * classStats.LifePerVit / 4,
-			MaxHealth: classStats.InitVit * classStats.LifePerVit / 4,
-			Mana: classStats.InitEne * classStats.ManaPerEne / 4,
-			MaxMana: classStats.InitEne * classStats.ManaPerEne / 4,
-			Stamina: classStats.InitStamina,
-			MaxStamina: classStats.InitStamina,
-			//TODO chance to hit, defense rating
-		},
 		FilePath:  "",
 	}
-
-	//TODO: those are added only for demonstration purposes(to show that hp mana exp status bars and character stats panel get updated depending on current stats)
-	result.Stats.Health /= 2
-	result.Stats.Mana /= 4
-	result.Stats.Experience = result.Stats.NextLevelExp / 3
 
 	result.Save()
 	return result
