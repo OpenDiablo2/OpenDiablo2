@@ -3,17 +3,14 @@ package d2gamescreen
 import (
 	"fmt"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 )
 
-/*
-	TODO: fix pentagram
-*/
+// TODO: fix pentagram
 
 type (
 	layoutID int
@@ -126,42 +123,6 @@ func NewEscapeMenu() *EscapeMenu {
 	return m
 }
 
-func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
-	wrapper := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
-	wrapper.SetVerticalAlign(d2gui.VerticalAlignMiddle)
-	wrapper.AddSpacerDynamic()
-
-	center := wrapper.AddLayout(d2gui.PositionTypeHorizontal)
-	center.SetSize(menuSize, 0)
-
-	left := center.AddLayout(d2gui.PositionTypeHorizontal)
-	left.SetSize(sidePanelsSize, 0)
-	leftPent, _ := left.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionForward)
-	m.leftPent = leftPent
-
-	// wrap the base layout so we can pass values around more easily
-	base := &layout{}
-	baseLayout := center.AddLayout(d2gui.PositionTypeVertical)
-	baseLayout.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
-	base.Layout = baseLayout
-	fn(base)
-
-	right := center.AddLayout(d2gui.PositionTypeHorizontal)
-	// For some reason, aligning the panel to the right won't align the pentagram, so we need to add a static spacer.
-	right.AddSpacerStatic(sidePanelsSize-pentSize, 0)
-	right.SetSize(sidePanelsSize, 0)
-	rightPent, _ := right.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionBackward)
-	m.rightPent = rightPent
-
-	wrapper.AddSpacerDynamic()
-	return &layout{
-		Layout:            wrapper,
-		leftPent:          leftPent,
-		rightPent:         rightPent,
-		hoverableElements: base.hoverableElements,
-	}
-}
-
 func (m *EscapeMenu) newMainLayout() *layout {
 	return m.wrapLayout(func(l *layout) {
 		m.addBigSelectionLabel(l, "OPTIONS", optionsLayoutID)
@@ -223,6 +184,42 @@ func (m *EscapeMenu) newConfigureControlsLayout() *layout {
 		m.addTitle(l, "CONFIGURE CONTROLS")
 		m.addPreviousMenuLabel(l, optionsLayoutID)
 	})
+}
+
+func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
+	wrapper := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
+	wrapper.SetVerticalAlign(d2gui.VerticalAlignMiddle)
+	wrapper.AddSpacerDynamic()
+
+	center := wrapper.AddLayout(d2gui.PositionTypeHorizontal)
+	center.SetSize(menuSize, 0)
+
+	left := center.AddLayout(d2gui.PositionTypeHorizontal)
+	left.SetSize(sidePanelsSize, 0)
+	leftPent, _ := left.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionForward)
+	m.leftPent = leftPent
+
+	// wrap the base layout so we can pass values around more easily
+	base := &layout{}
+	baseLayout := center.AddLayout(d2gui.PositionTypeVertical)
+	baseLayout.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
+	base.Layout = baseLayout
+	fn(base)
+
+	right := center.AddLayout(d2gui.PositionTypeHorizontal)
+	// For some reason, aligning the panel to the right won't align the pentagram, so we need to add a static spacer.
+	right.AddSpacerStatic(sidePanelsSize-pentSize, 0)
+	right.SetSize(sidePanelsSize, 0)
+	rightPent, _ := right.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionBackward)
+	m.rightPent = rightPent
+
+	wrapper.AddSpacerDynamic()
+	return &layout{
+		Layout:            wrapper,
+		leftPent:          leftPent,
+		rightPent:         rightPent,
+		hoverableElements: base.hoverableElements,
+	}
 }
 
 func (m *EscapeMenu) addTitle(l *layout, text string) {
