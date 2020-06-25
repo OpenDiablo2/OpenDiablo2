@@ -1,6 +1,8 @@
 package d2gui
 
 import (
+	"fmt"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
@@ -55,6 +57,10 @@ func (w *widgetBase) GetPosition() (int, int) {
 
 func (w *widgetBase) GetOffset() (int, int) {
 	return w.offsetX, w.offsetY
+}
+
+func (w *widgetBase) Trigger() {
+	fmt.Println("remove me")
 }
 
 func (w *widgetBase) getOffset() (int, int) {

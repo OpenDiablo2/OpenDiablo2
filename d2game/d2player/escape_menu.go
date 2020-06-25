@@ -1,8 +1,6 @@
 package d2player
 
 import (
-	"fmt"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
@@ -68,15 +66,37 @@ type layout struct {
 	hoverableElements []hoverableElement
 }
 
-type enumLabel struct {
+type showLayoutLabel struct {
 	*d2gui.Label
-	optionID optionID
-	values   []string
-	current  int
+	target     layoutID
+	showLayout func(id layoutID)
+}
+
+func (l *showLayoutLabel) Trigger() {
+	l.showLayout(l.target)
+}
+
+type enumLabel struct {
+	*d2gui.Layout
+	label       *d2gui.Label
+	optionID    optionID
+	values      []string
+	current     int
+	playSound   func()
+	updateValue func(optID optionID, value string)
+}
+
+func (l *enumLabel) Trigger() {
+	l.playSound()
+	next := (l.current + 1) % len(l.values)
+	l.current = next
+	l.label.SetText(l.values[l.current])
+	l.updateValue(l.optionID, l.values[l.current])
 }
 
 type hoverableElement interface {
 	GetOffset() (int, int)
+	Trigger()
 }
 
 type layoutCfg struct {
@@ -212,7 +232,8 @@ func addTitle(layout *layout, text string) {
 }
 
 func addBigSelectionLabel(layout *layout, cfg *layoutCfg, text string, targetLayout layoutID) {
-	label, _ := layout.AddLabel(text, d2gui.FontStyle42Units)
+	guiLabel, _ := layout.AddLabel(text, d2gui.FontStyle42Units)
+	label := &showLayoutLabel{Label: guiLabel, target: targetLayout, showLayout: cfg.showLayout}
 	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
 		cfg.showLayout(targetLayout)
 	})
@@ -225,8 +246,10 @@ func addBigSelectionLabel(layout *layout, cfg *layoutCfg, text string, targetLay
 
 func addPreviousMenuLabel(layout *layout, cfg *layoutCfg, targetLayout layoutID) {
 	layout.AddSpacerStatic(10, labelGutter)
-	label, _ := layout.AddLabel("PREVIOUS MENU", d2gui.FontStyle30Units)
+	guiLabel, _ := layout.AddLabel("PREVIOUS MENU", d2gui.FontStyle30Units)
+	label := &showLayoutLabel{Label: guiLabel, target: targetLayout, showLayout: cfg.showLayout}
 	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
+		label.Trigger()
 		cfg.showLayout(targetLayout)
 	})
 	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
@@ -245,20 +268,19 @@ func addEnumLabel(layout *layout, cfg *layoutCfg, optID optionID, text string, v
 	l.AddSpacerDynamic()
 	guiLabel, _ := l.AddLabel(values[0], d2gui.FontStyle30Units)
 	label := &enumLabel{
-		Label:    guiLabel,
-		optionID: optID,
-		values:   values,
-		current:  0,
+		Layout:      l,
+		label:       guiLabel,
+		optionID:    optID,
+		values:      values,
+		current:     0,
+		playSound:   cfg.playSound,
+		updateValue: cfg.updateValue,
 	}
 	l.SetMouseClickHandler(func(_ d2input.MouseEvent) {
-		cfg.playSound()
-		next := (label.current + 1) % len(label.values)
-		label.current = next
-		label.Label.SetText(label.values[label.current])
-		cfg.updateValue(label.optionID, label.values[label.current])
+		label.Trigger()
 	})
 	layout.AddSpacerStatic(10, labelGutter)
-	layout.hoverableElements = append(layout.hoverableElements, l)
+	layout.hoverableElements = append(layout.hoverableElements, label)
 }
 
 func (m *EscapeMenu) OnLoad() {
@@ -323,12 +345,10 @@ func (m *EscapeMenu) onHoverElement(el hoverableElement) {
 
 	x, _ = m.rightPent.GetPosition()
 	m.rightPent.SetPosition(x, y+10)
-	fmt.Println("hover", x, y)
 	return
 }
 
 func (m *EscapeMenu) onUpdateValue(optID optionID, value string) {
-	fmt.Println(fmt.Sprintf("updating value %d to %s", int(optID), value))
 }
 
 func (m *EscapeMenu) setLayout(id layoutID) {
@@ -343,13 +363,10 @@ func (m *EscapeMenu) OnUpKey() {
 	if !m.isOpen {
 		return
 	}
-	fmt.Println("before up", m.layouts[m.currentLayout].current, len(m.layouts[m.currentLayout].hoverableElements))
 	if m.layouts[m.currentLayout].current == 0 {
-		fmt.Println("return")
 		return
 	}
 	m.layouts[m.currentLayout].current--
-	fmt.Println("down", m.layouts[m.currentLayout].current)
 	m.onHoverElement(m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].current])
 }
 
@@ -357,12 +374,9 @@ func (m *EscapeMenu) OnDownKey() {
 	if !m.isOpen {
 		return
 	}
-	fmt.Println("before down", m.layouts[m.currentLayout].current, len(m.layouts[m.currentLayout].hoverableElements))
 	if m.layouts[m.currentLayout].current == len(m.layouts[m.currentLayout].hoverableElements)-1 {
-		fmt.Println("return")
 		return
 	}
-	fmt.Println("down", m.layouts[m.currentLayout].current)
 	m.layouts[m.currentLayout].current++
 	m.onHoverElement(m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].current])
 }
@@ -371,5 +385,5 @@ func (m *EscapeMenu) OnEnterKey() {
 	if !m.isOpen {
 		return
 	}
-	//m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].current]
+	m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].current].Trigger()
 }
