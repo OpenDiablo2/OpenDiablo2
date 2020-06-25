@@ -39,6 +39,9 @@ func (l *Label) GetText() string {
 }
 
 func (l *Label) SetText(text string) error {
+	if text == l.text {
+		return nil
+	}
 	return l.setText(text)
 }
 
