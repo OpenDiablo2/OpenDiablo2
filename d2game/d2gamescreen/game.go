@@ -44,7 +44,6 @@ func CreateGame(gameClient *d2client.GameClient) *Game {
 
 func (v *Game) OnLoad(loading d2screen.LoadingState) {
 	d2audio.PlayBGM("")
-	loading.Done()
 }
 
 func (v *Game) OnUnload() error {

@@ -23,6 +23,4 @@ func (v *BlizzardIntro) OnLoad(loading d2screen.LoadingState) {
 	loading.Progress(0.5)
 
 	v.videoDecoder = d2video.CreateBinkDecoder(videoBytes)
-	loading.Done()
-	return
 }

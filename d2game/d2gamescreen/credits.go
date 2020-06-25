@@ -91,7 +91,6 @@ func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 	loading.Progress(0.8)
 
 	v.creditsText = append(v.LoadContributors(), v.creditsText...)
-	loading.Done()
 }
 
 // Render renders the credits screen

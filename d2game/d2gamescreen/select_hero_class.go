@@ -417,8 +417,6 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 	v.heroRenderInfo[d2enum.HeroDruid].BackWalkSprite.PlayForward()
 	v.heroRenderInfo[d2enum.HeroDruid].BackWalkSprite.SetPlayLengthMs(1500)
 	v.heroRenderInfo[d2enum.HeroDruid].BackWalkSprite.SetPlayLoop(false)
-
-	loading.Done()
 }
 
 func (v *SelectHeroClass) OnUnload() error {
