@@ -67,10 +67,10 @@ type EscapeMenu struct {
 
 type layout struct {
 	*d2gui.Layout
-	leftPent          *d2gui.AnimatedSprite
-	rightPent         *d2gui.AnimatedSprite
-	currentEl         int
-	hoverableElements []hoverableElement
+	leftPent           *d2gui.AnimatedSprite
+	rightPent          *d2gui.AnimatedSprite
+	currentEl          int
+	actionableElements []actionableElement
 }
 
 func (l *layout) Trigger() {
@@ -105,7 +105,7 @@ func (l *enumLabel) Trigger() {
 	l.updateValue(l.optionID, l.values[l.current])
 }
 
-type hoverableElement interface {
+type actionableElement interface {
 	GetOffset() (int, int)
 	Trigger()
 }
@@ -215,10 +215,10 @@ func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
 
 	wrapper.AddSpacerDynamic()
 	return &layout{
-		Layout:            wrapper,
-		leftPent:          leftPent,
-		rightPent:         rightPent,
-		hoverableElements: base.hoverableElements,
+		Layout:             wrapper,
+		leftPent:           leftPent,
+		rightPent:          rightPent,
+		actionableElements: base.actionableElements,
 	}
 }
 
@@ -233,12 +233,12 @@ func (m *EscapeMenu) addBigSelectionLabel(l *layout, text string, targetLayout l
 	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
 		label.Trigger()
 	})
-	elID := len(l.hoverableElements)
+	elID := len(l.actionableElements)
 	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
 		m.onHoverElement(elID)
 	})
 	l.AddSpacerStatic(10, labelGutter)
-	l.hoverableElements = append(l.hoverableElements, label)
+	l.actionableElements = append(l.actionableElements, label)
 }
 
 func (m *EscapeMenu) addPreviousMenuLabel(l *layout, targetLayout layoutID) {
@@ -248,11 +248,11 @@ func (m *EscapeMenu) addPreviousMenuLabel(l *layout, targetLayout layoutID) {
 	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
 		label.Trigger()
 	})
-	elID := len(l.hoverableElements)
+	elID := len(l.actionableElements)
 	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
 		m.onHoverElement(elID)
 	})
-	l.hoverableElements = append(l.hoverableElements, label)
+	l.actionableElements = append(l.actionableElements, label)
 }
 
 func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values []string) {
@@ -260,7 +260,7 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 	layout := &layout{Layout: guiLayout}
 	layout.SetSize(menuSize, 0)
 	layout.AddLabel(text, d2gui.FontStyle30Units)
-	elID := len(l.hoverableElements)
+	elID := len(l.actionableElements)
 	layout.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
 		m.onHoverElement(elID)
 	})
@@ -279,7 +279,7 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 		label.Trigger()
 	})
 	l.AddSpacerStatic(10, labelGutter)
-	l.hoverableElements = append(l.hoverableElements, label)
+	l.actionableElements = append(l.actionableElements, label)
 }
 
 func (m *EscapeMenu) OnLoad() {
@@ -343,7 +343,7 @@ func (m *EscapeMenu) showLayout(id layoutID) {
 }
 
 func (m *EscapeMenu) onHoverElement(id int) {
-	_, y := m.layouts[m.currentLayout].hoverableElements[id].GetOffset()
+	_, y := m.layouts[m.currentLayout].actionableElements[id].GetOffset()
 	m.layouts[m.currentLayout].currentEl = id
 
 	x, _ := m.leftPent.GetPosition()
@@ -381,7 +381,7 @@ func (m *EscapeMenu) onDownKey() {
 	if !m.isOpen {
 		return
 	}
-	if m.layouts[m.currentLayout].currentEl == len(m.layouts[m.currentLayout].hoverableElements)-1 {
+	if m.layouts[m.currentLayout].currentEl == len(m.layouts[m.currentLayout].actionableElements)-1 {
 		return
 	}
 	m.layouts[m.currentLayout].currentEl++
@@ -392,7 +392,7 @@ func (m *EscapeMenu) onEnterKey() {
 	if !m.isOpen {
 		return
 	}
-	m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].currentEl].Trigger()
+	m.layouts[m.currentLayout].actionableElements[m.layouts[m.currentLayout].currentEl].Trigger()
 }
 
 func (m *EscapeMenu) OnKeyDown(event d2input.KeyEvent) bool {
