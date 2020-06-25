@@ -2,11 +2,15 @@
 [![CircleCI](https://circleci.com/gh/OpenDiablo2/OpenDiablo2/tree/master.svg?style=svg)](https://circleci.com/gh/OpenDiablo2/OpenDiablo2/tree/master)
 [![Code Status](https://www.codefactor.io/repository/github/OpenDiablo2/OpenDiablo2/badge)](https://www.codefactor.io/repository/github/OpenDiablo2/OpenDiablo2)
 
+![Logo](d2logo.png)
+
 [Join us on Discord!](https://discord.gg/pRy8tdc)\
 [Development Live stream](https://www.twitch.tv/essial/)\
 [Support us on Patreon](https://www.patreon.com/bePatron?u=37261055)
 
-![Logo](d2logo.png)
+We are also working on a toolset:\
+[https://github.com/OpenDiablo2/HellSpawner](https://github.com/OpenDiablo2/HellSpawner)\
+Please consider helping out with this project as well!
 
 ## About this project
 
