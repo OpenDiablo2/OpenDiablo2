@@ -206,10 +206,6 @@ func (g *GameControls) OnMouseMove(event d2input.MouseMoveEvent) bool {
 }
 
 func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
-	//if g.escapeMenu.IsOpen() {
-	//	return g.escapeMenu.OnMouseButtonDown(event)
-	//}
-
 	mx, my := event.X, event.Y
 	for i := range g.actionableRegions {
 		// If click is on a game control element
@@ -282,7 +278,6 @@ func (g *GameControls) Load() {
 
 // ScreenAdvanceHandler
 func (g *GameControls) Advance(elapsed float64) error {
-	//g.escapeMenu.Advance(elapsed)
 	return nil
 }
 
@@ -307,7 +302,6 @@ func (g *GameControls) updateLayout() {
 func (g *GameControls) Render(target d2render.Surface) {
 	g.inventory.Render(target)
 	g.heroStats.Render(target)
-	//g.escapeMenu.Render(target)
 
 	width, height := target.GetSize()
 	offset := 0

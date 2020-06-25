@@ -175,7 +175,6 @@ func (l *Layout) renderEntry(entry *layoutEntry, target d2render.Surface) error 
 }
 
 func (l *Layout) renderEntryDebug(entry *layoutEntry, target d2render.Surface) error {
-	return nil
 	target.PushTranslation(entry.x, entry.y)
 	defer target.Pop()
 
@@ -325,7 +324,6 @@ func (l *Layout) adjustEntryPlacement() {
 		if !entry.widget.isVisible() {
 			continue
 		}
-		//fmt.Println(entry.foo, offsetY)
 
 		if entry.widget.isExpanding() {
 			entry.width, entry.height = expanderWidth, expanderHeight

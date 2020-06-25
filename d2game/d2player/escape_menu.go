@@ -9,6 +9,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 )
 
+/*
+	TODO: fix pentagram
+*/
+
 type (
 	layoutID int
 	optionID int
@@ -229,8 +233,9 @@ func (m *EscapeMenu) addBigSelectionLabel(l *layout, text string, targetLayout l
 	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
 		label.Trigger()
 	})
+	elID := len(l.hoverableElements)
 	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
-		m.onHoverElement(label)
+		m.onHoverElement(elID)
 	})
 	l.AddSpacerStatic(10, labelGutter)
 	l.hoverableElements = append(l.hoverableElements, label)
@@ -243,8 +248,9 @@ func (m *EscapeMenu) addPreviousMenuLabel(l *layout, targetLayout layoutID) {
 	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
 		label.Trigger()
 	})
+	elID := len(l.hoverableElements)
 	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
-		m.onHoverElement(label)
+		m.onHoverElement(elID)
 	})
 	l.hoverableElements = append(l.hoverableElements, label)
 }
@@ -254,8 +260,9 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 	layout := &layout{Layout: guiLayout}
 	layout.SetSize(menuSize, 0)
 	layout.AddLabel(text, d2gui.FontStyle30Units)
+	elID := len(l.hoverableElements)
 	layout.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
-		m.onHoverElement(layout)
+		m.onHoverElement(elID)
 	})
 	layout.AddSpacerDynamic()
 	guiLabel, _ := layout.AddLabel(values[0], d2gui.FontStyle30Units)
@@ -329,8 +336,9 @@ func (m *EscapeMenu) showLayout(id layoutID) {
 	m.setLayout(id)
 }
 
-func (m *EscapeMenu) onHoverElement(el hoverableElement) {
-	_, y := el.GetOffset()
+func (m *EscapeMenu) onHoverElement(id int) {
+	_, y := m.layouts[m.currentLayout].hoverableElements[id].GetOffset()
+	m.layouts[m.currentLayout].currentEl = id
 
 	x, _ := m.leftPent.GetPosition()
 	m.leftPent.SetPosition(x, y+10)
@@ -360,7 +368,7 @@ func (m *EscapeMenu) OnUpKey() {
 		return
 	}
 	m.layouts[m.currentLayout].currentEl--
-	m.onHoverElement(m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].currentEl])
+	m.onHoverElement(m.layouts[m.currentLayout].currentEl)
 }
 
 func (m *EscapeMenu) OnDownKey() {
@@ -371,7 +379,7 @@ func (m *EscapeMenu) OnDownKey() {
 		return
 	}
 	m.layouts[m.currentLayout].currentEl++
-	m.onHoverElement(m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].currentEl])
+	m.onHoverElement(m.layouts[m.currentLayout].currentEl)
 }
 
 func (m *EscapeMenu) OnEnterKey() {
