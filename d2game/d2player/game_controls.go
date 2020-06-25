@@ -28,29 +28,37 @@ type Panel interface {
 
 // ID of missile to create when user right clicks.
 var missileID = 59
+var expBarWidth = 120.0
+var staminaBarWidth = 102.0
+var globeHeight = 80
+var globeWidth = 80
 
 type GameControls struct {
-	hero        *d2mapentity.Player
-	mapEngine   *d2mapengine.MapEngine
-	mapRenderer *d2maprenderer.MapRenderer
-	inventory   *Inventory
-	heroStats   *HeroStats
-
-	inputListener InputCallbackListener
-	FreeCam       bool
-	lastMouseX    int
-	lastMouseY    int
+	hero              *d2mapentity.Player
+	mapEngine         *d2mapengine.MapEngine
+	mapRenderer       *d2maprenderer.MapRenderer
+	inventory         *Inventory
+	heroStatsPanel    *HeroStatsPanel
+	inputListener     InputCallbackListener
+	FreeCam           bool
+	lastMouseX        int
+	lastMouseY        int
+	lastHealthPercent float64
+	lastManaPercent   float64
 
 	// UI
-	globeSprite       *d2ui.Sprite
-	mainPanel         *d2ui.Sprite
-	menuButton        *d2ui.Sprite
-	skillIcon         *d2ui.Sprite
-	zoneChangeText    *d2ui.Label
-	nameLabel         *d2ui.Label
-	runButton         d2ui.Button
-	isZoneTextShown   bool
-	actionableRegions []ActionableRegion
+	globeSprite        *d2ui.Sprite
+	hpManaStatusSprite *d2ui.Sprite
+	hpStatusBar        d2render.Surface
+	manaStatusBar      d2render.Surface
+	mainPanel          *d2ui.Sprite
+	menuButton         *d2ui.Sprite
+	skillIcon          *d2ui.Sprite
+	zoneChangeText     *d2ui.Label
+	nameLabel          *d2ui.Label
+	runButton          d2ui.Button
+	isZoneTextShown    bool
+	actionableRegions  []ActionableRegion
 }
 
 type ActionableType int
@@ -76,9 +84,9 @@ func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
 		missileID = id
 	})
 
-	label := d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
-	label.Color = color.RGBA{R: 255, G: 88, B: 82, A: 255}
-	label.Alignment = d2ui.LabelAlignCenter
+	zoneLabel := d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
+	zoneLabel.Color = color.RGBA{R: 255, G: 88, B: 82, A: 255}
+	zoneLabel.Alignment = d2ui.LabelAlignCenter
 
 	nameLabel := d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
 	nameLabel.Alignment = d2ui.LabelAlignCenter
@@ -91,9 +99,9 @@ func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
 		inputListener:  inputListener,
 		mapRenderer:    mapRenderer,
 		inventory:      NewInventory(),
-		heroStats:      NewHeroStats(),
+		heroStatsPanel: NewHeroStatsPanel(hero.Name(), hero.Class, hero.Stats),
 		nameLabel:      &nameLabel,
-		zoneChangeText: &label,
+		zoneChangeText: &zoneLabel,
 		actionableRegions: []ActionableRegion{
 			{leftSkill, d2common.Rectangle{Left: 115, Top: 550, Width: 50, Height: 50}},
 			{leftSelec, d2common.Rectangle{Left: 206, Top: 563, Width: 30, Height: 30}},
@@ -147,9 +155,9 @@ func (g *GameControls) OnKeyRepeat(event d2input.KeyEvent) bool {
 func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 	switch event.Key {
 	case d2input.KeyEscape:
-		if g.inventory.IsOpen() || g.heroStats.IsOpen() {
+		if g.inventory.IsOpen() || g.heroStatsPanel.IsOpen() {
 			g.inventory.Close()
-			g.heroStats.Close()
+			g.heroStatsPanel.Close()
 			g.updateLayout()
 			break
 		}
@@ -157,7 +165,7 @@ func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 		g.inventory.Toggle()
 		g.updateLayout()
 	case d2input.KeyC:
-		g.heroStats.Toggle()
+		g.heroStatsPanel.Toggle()
 		g.updateLayout()
 	case d2input.KeyR:
 		g.onToggleRunButton()
@@ -265,6 +273,11 @@ func (g *GameControls) Load() {
 	animation, _ := d2asset.LoadAnimation(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
 	g.globeSprite, _ = d2ui.LoadSprite(animation)
 
+	animation, _ = d2asset.LoadAnimation(d2resource.HealthManaIndicator, d2resource.PaletteSky)
+	g.hpManaStatusSprite, _ = d2ui.LoadSprite(animation)
+
+	g.hpStatusBar, _ = d2render.NewSurface(globeWidth, globeHeight, d2render.FilterNearest)
+
 	animation, _ = d2asset.LoadAnimation(d2resource.GamePanels, d2resource.PaletteSky)
 	g.mainPanel, _ = d2ui.LoadSprite(animation)
 
@@ -277,7 +290,7 @@ func (g *GameControls) Load() {
 	g.loadUIButtons()
 
 	g.inventory.Load()
-	g.heroStats.Load()
+	g.heroStatsPanel.Load()
 }
 
 func (g *GameControls) loadUIButtons() {
@@ -309,7 +322,7 @@ func (g *GameControls) updateLayout() {
 
 	// todo : add same logic when adding quest log and skill tree
 	isRightPanelOpen = g.inventory.isOpen || isRightPanelOpen
-	isLeftPanelOpen = g.heroStats.isOpen || isLeftPanelOpen
+	isLeftPanelOpen = g.heroStatsPanel.isOpen || isLeftPanelOpen
 
 	if isRightPanelOpen == isLeftPanelOpen {
 		g.mapRenderer.ViewportDefault()
@@ -342,7 +355,7 @@ func (g *GameControls) Render(target d2render.Surface) {
 	}
 
 	g.inventory.Render(target)
-	g.heroStats.Render(target)
+	g.heroStatsPanel.Render(target)
 
 	width, height := target.GetSize()
 	offset := 0
@@ -357,6 +370,24 @@ func (g *GameControls) Render(target d2render.Surface) {
 	g.globeSprite.SetCurrentFrame(0)
 	g.globeSprite.SetPosition(offset+28, height-5)
 	g.globeSprite.Render(target)
+
+	// Health status bar
+	healthPercent := float64(g.hero.Stats.Health) / float64(g.hero.Stats.MaxHealth)
+	hpBarHeight := int(healthPercent * float64(globeHeight))
+	if g.lastHealthPercent != healthPercent {
+		g.hpStatusBar, _ = d2render.NewSurface(globeWidth, hpBarHeight, d2render.FilterNearest)
+		g.hpManaStatusSprite.SetCurrentFrame(0)
+		g.hpStatusBar.PushTranslation(0, hpBarHeight)
+
+		g.hpManaStatusSprite.Render(g.hpStatusBar)
+		g.hpStatusBar.Pop()
+		g.lastHealthPercent = healthPercent
+	}
+
+	target.PushTranslation(30, 508+(globeHeight-hpBarHeight))
+	target.Render(g.hpStatusBar)
+	target.Pop()
+
 	offset += w
 
 	// Left skill
@@ -380,6 +411,19 @@ func (g *GameControls) Render(target d2render.Surface) {
 	g.mainPanel.Render(target)
 	offset += w
 
+	// Stamina status bar
+	target.PushTranslation(273, 572)
+	target.PushCompositeMode(d2render.CompositeModeLighter)
+	staminaPercent := float64(g.hero.Stats.Stamina) / float64(g.hero.Stats.MaxStamina)
+	target.DrawRect(int(staminaPercent*staminaBarWidth), 19, color.RGBA{R: 175, G: 136, B: 72, A: 200})
+	target.PopN(2)
+
+	// Experience status bar
+	target.PushTranslation(256, 561)
+	expPercent := float64(g.hero.Stats.Experience) / float64(g.hero.Stats.NextLevelExp)
+	target.DrawRect(int(expPercent*expBarWidth), 2, color.RGBA{R: 255, G: 255, B: 255, A: 255})
+	target.Pop()
+
 	// Center menu button
 	g.menuButton.SetCurrentFrame(0)
 	w, _ = g.mainPanel.GetCurrentFrameSize()
@@ -401,7 +445,7 @@ func (g *GameControls) Render(target d2render.Surface) {
 	offset += w
 
 	// Right skill
-	g.skillIcon.SetCurrentFrame(10)
+	g.skillIcon.SetCurrentFrame(2)
 	w, _ = g.skillIcon.GetCurrentFrameSize()
 	g.skillIcon.SetPosition(offset, height)
 	g.skillIcon.Render(target)
@@ -417,11 +461,30 @@ func (g *GameControls) Render(target d2render.Surface) {
 	g.globeSprite.SetCurrentFrame(1)
 	g.globeSprite.SetPosition(offset+8, height-8)
 	g.globeSprite.Render(target)
+	g.globeSprite.Render(target)
+
+	// Mana status bar
+	manaPercent := float64(g.hero.Stats.Mana) / float64(g.hero.Stats.MaxMana)
+	manaBarHeight := int(manaPercent * float64(globeHeight))
+	if manaPercent != g.lastManaPercent {
+		g.manaStatusBar, _ = d2render.NewSurface(globeWidth, manaBarHeight, d2render.FilterNearest)
+		g.hpManaStatusSprite.SetCurrentFrame(1)
+
+		g.manaStatusBar.PushTranslation(0, manaBarHeight)
+		g.hpManaStatusSprite.Render(g.manaStatusBar)
+		g.manaStatusBar.Pop()
+
+		g.lastManaPercent = manaPercent
+	}
+	target.PushTranslation(offset+8, 508+(globeHeight-manaBarHeight))
+	target.Render(g.manaStatusBar)
+	target.Pop()
 
 	if g.isZoneTextShown {
 		g.zoneChangeText.SetPosition(width/2, height/4)
 		g.zoneChangeText.Render(target)
 	}
+
 }
 
 func (g *GameControls) SetZoneChangeText(text string) {

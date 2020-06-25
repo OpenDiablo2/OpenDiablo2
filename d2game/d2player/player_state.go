@@ -9,7 +9,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 )
 
@@ -20,6 +22,7 @@ type PlayerState struct {
 	Act       int                            `json:"act"`
 	FilePath  string                         `json:"-"`
 	Equipment d2inventory.CharacterEquipment `json:"equipment"`
+	Stats     d2hero.HeroStatsState          `json:"stats"`
 	X         float64                        `json:"x"`
 	Y         float64                        `json:"y"`
 }
@@ -70,14 +73,36 @@ func LoadPlayerState(path string) *PlayerState {
 	return result
 }
 
-func CreatePlayerState(heroName string, hero d2enum.Hero, hardcore bool) *PlayerState {
+func CreatePlayerState(heroName string, hero d2enum.Hero, classStats d2datadict.CharStatsRecord, hardcore bool) *PlayerState {
 	result := &PlayerState{
 		HeroName:  heroName,
 		HeroType:  hero,
 		Act:       1,
 		Equipment: d2inventory.HeroObjects[hero],
+		Stats: d2hero.HeroStatsState{
+			Level: 1,
+			Experience:0,
+			NextLevelExp: d2datadict.GetExperienceBreakpoint(hero, 1),
+			Strength: classStats.InitStr,
+			Dexterity: classStats.InitDex,
+			Vitality: classStats.InitVit,
+			Energy: classStats.InitEne,
+			//TODO: proper formula for calculating health and mana
+			Health: classStats.InitVit * classStats.LifePerVit / 4,
+			MaxHealth: classStats.InitVit * classStats.LifePerVit / 4,
+			Mana: classStats.InitEne * classStats.ManaPerEne / 4,
+			MaxMana: classStats.InitEne * classStats.ManaPerEne / 4,
+			Stamina: classStats.InitStamina,
+			MaxStamina: classStats.InitStamina,
+			//TODO chance to hit, defense rating
+		},
 		FilePath:  "",
 	}
+
+	//TODO: those are added only for demonstration purposes(to show that hp mana exp status bars and character stats panel get updated depending on current stats)
+	result.Stats.Health /= 2
+	result.Stats.Mana /= 4
+	result.Stats.Experience = result.Stats.NextLevelExp / 3
 
 	result.Save()
 	return result
