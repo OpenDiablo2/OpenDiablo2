@@ -30,12 +30,12 @@ type Panel interface {
 var missileID = 59
 
 type GameControls struct {
-	hero          *d2mapentity.Player
-	mapEngine     *d2mapengine.MapEngine
-	mapRenderer   *d2maprenderer.MapRenderer
-	inventory     *Inventory
-	heroStats     *HeroStats
-	escapeMenu    *EscapeMenu
+	hero        *d2mapentity.Player
+	mapEngine   *d2mapengine.MapEngine
+	mapRenderer *d2maprenderer.MapRenderer
+	inventory   *Inventory
+	heroStats   *HeroStats
+
 	inputListener InputCallbackListener
 	FreeCam       bool
 	lastMouseX    int
@@ -92,7 +92,6 @@ func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
 		mapRenderer:    mapRenderer,
 		inventory:      NewInventory(),
 		heroStats:      NewHeroStats(),
-		escapeMenu:     NewEscapeMenu(),
 		nameLabel:      &nameLabel,
 		zoneChangeText: &label,
 		actionableRegions: []ActionableRegion{
@@ -154,13 +153,6 @@ func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 			g.updateLayout()
 			break
 		}
-		g.escapeMenu.Toggle()
-	case d2input.KeyUp:
-		g.escapeMenu.OnUpKey()
-	case d2input.KeyDown:
-		g.escapeMenu.OnDownKey()
-	case d2input.KeyEnter:
-		g.escapeMenu.OnEnterKey()
 	case d2input.KeyI:
 		g.inventory.Toggle()
 		g.updateLayout()
@@ -205,11 +197,6 @@ func (g *GameControls) OnMouseMove(event d2input.MouseMoveEvent) bool {
 	g.lastMouseX = mx
 	g.lastMouseY = my
 
-	if g.escapeMenu.IsOpen() {
-		g.escapeMenu.OnMouseMove(event)
-		return false
-	}
-
 	for i := range g.actionableRegions {
 		// Mouse over a game control element
 		if g.actionableRegions[i].Rect.IsInRect(mx, my) {
@@ -221,9 +208,6 @@ func (g *GameControls) OnMouseMove(event d2input.MouseMoveEvent) bool {
 }
 
 func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
-	if g.escapeMenu.IsOpen() {
-		return g.escapeMenu.OnMouseButtonDown(event)
-	}
 
 	mx, my := event.X, event.Y
 	for i := range g.actionableRegions {
@@ -294,7 +278,6 @@ func (g *GameControls) Load() {
 
 	g.inventory.Load()
 	g.heroStats.Load()
-	g.escapeMenu.OnLoad()
 }
 
 func (g *GameControls) loadUIButtons() {
@@ -317,7 +300,6 @@ func (g *GameControls) onToggleRunButton() {
 
 // ScreenAdvanceHandler
 func (g *GameControls) Advance(elapsed float64) error {
-	g.escapeMenu.Advance(elapsed)
 	return nil
 }
 
@@ -350,19 +332,17 @@ func (g *GameControls) Render(target d2render.Surface) {
 		entScreenX := int(math.Floor(entScreenXf))
 		entScreenY := int(math.Floor(entScreenYf))
 
-		if ((entScreenX-20) <= g.lastMouseX) && ((entScreenX+20) >= g.lastMouseX) &&
-			((entScreenY-80) <= g.lastMouseY) && (entScreenY>= g.lastMouseY) {
+		if ((entScreenX - 20) <= g.lastMouseX) && ((entScreenX + 20) >= g.lastMouseX) &&
+			((entScreenY - 80) <= g.lastMouseY) && (entScreenY >= g.lastMouseY) {
 			g.nameLabel.SetText(entity.Name())
-			g.nameLabel.SetPosition(entScreenX, entScreenY - 100)
+			g.nameLabel.SetPosition(entScreenX, entScreenY-100)
 			g.nameLabel.Render(target)
 			break
 		}
 	}
 
-
 	g.inventory.Render(target)
 	g.heroStats.Render(target)
-	g.escapeMenu.Render(target)
 
 	width, height := target.GetSize()
 	offset := 0
@@ -458,9 +438,9 @@ func (g *GameControls) HideZoneChangeTextAfter(delay float64) {
 	})
 }
 
-func (g *GameControls) InEscapeMenu() bool {
-	return g != nil && g.escapeMenu != nil && g.escapeMenu.IsOpen()
-}
+// func (g *GameControls) InEscapeMenu() bool {
+// 	return g != nil && g.escapeMenu != nil && g.escapeMenu.IsOpen()
+// }
 
 // Handles what to do when an actionable is hovered
 func (g *GameControls) onHoverActionable(item ActionableType) {
