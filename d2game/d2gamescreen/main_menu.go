@@ -249,8 +249,6 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	}
 
 	d2input.BindHandler(v)
-
-	loading.Done()
 }
 
 func (v *MainMenu) onMapTestClicked() {

@@ -40,8 +40,6 @@ func (g *GuiTestMain) OnLoad(loading d2screen.LoadingState) {
 
 	layout.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	d2gui.SetLayout(layout)
-
-	loading.Done()
 }
 
 func (g *GuiTestMain) Render(screen d2render.Surface) error {

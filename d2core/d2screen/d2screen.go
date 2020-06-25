@@ -73,7 +73,10 @@ func Advance(elapsed float64) error {
 			d2gui.ShowLoadScreen(0)
 			d2gui.HideCursor()
 			singleton.loadingState = LoadingState{updates: make(chan loadingUpdate)}
-			go handler.OnLoad(singleton.loadingState)
+			go func() {
+				handler.OnLoad(singleton.loadingState)
+				singleton.loadingState.Done()
+			}()
 			singleton.currentScreen = nil
 			singleton.loadingScreen = singleton.nextScreen
 		} else {

@@ -151,8 +151,6 @@ func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.mapEngine)
 	loading.Progress(0.7)
 	met.LoadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
-
-	loading.Done()
 }
 
 func (met *MapEngineTest) OnUnload() error {

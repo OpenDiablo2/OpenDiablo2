@@ -141,8 +141,6 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 		v.characterExpLabel[i].SetPosition(xOffset, 130+((i/2)*95))
 	}
 	v.refreshGameStates()
-
-	loading.Done()
 }
 
 func (v *CharacterSelect) onScrollUpdate() {
