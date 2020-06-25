@@ -1,6 +1,8 @@
 package d2player
 
 import (
+	"fmt"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
@@ -65,6 +67,10 @@ type layout struct {
 	rightPent         *d2gui.AnimatedSprite
 	currentEl         int
 	hoverableElements []hoverableElement
+}
+
+func (l *layout) Trigger() {
+	// noop
 }
 
 type showLayoutLabel struct {
@@ -244,7 +250,8 @@ func (m *EscapeMenu) addPreviousMenuLabel(l *layout, targetLayout layoutID) {
 }
 
 func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values []string) {
-	layout := l.AddLayout(d2gui.PositionTypeHorizontal)
+	guiLayout := l.AddLayout(d2gui.PositionTypeHorizontal)
+	layout := &layout{Layout: guiLayout}
 	layout.SetSize(menuSize, 0)
 	layout.AddLabel(text, d2gui.FontStyle30Units)
 	layout.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
@@ -253,7 +260,7 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 	layout.AddSpacerDynamic()
 	guiLabel, _ := layout.AddLabel(values[0], d2gui.FontStyle30Units)
 	label := &enumLabel{
-		Layout:            layout,
+		Layout:            guiLayout,
 		textChangingLabel: guiLabel,
 		optionID:          optID,
 		values:            values,
@@ -334,6 +341,7 @@ func (m *EscapeMenu) onHoverElement(el hoverableElement) {
 }
 
 func (m *EscapeMenu) onUpdateValue(optID optionID, value string) {
+	fmt.Println(fmt.Sprintf("updating value %d with %s", optID, value))
 }
 
 func (m *EscapeMenu) setLayout(id layoutID) {
