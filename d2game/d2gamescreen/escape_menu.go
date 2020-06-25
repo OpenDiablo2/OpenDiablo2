@@ -1,4 +1,4 @@
-package d2player
+package d2gamescreen
 
 import (
 	"log"
@@ -8,6 +8,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -49,7 +50,24 @@ func NewEscapeMenu() *EscapeMenu {
 	}
 }
 
+func (m *EscapeMenu) OnKeyDown(event d2input.KeyEvent) bool {
+	switch event.Key {
+	case d2input.KeyEscape:
+		m.Toggle()
+	case d2input.KeyUp:
+		m.OnUpKey()
+	case d2input.KeyDown:
+		m.OnDownKey()
+	case d2input.KeyEnter:
+		m.OnEnterKey()
+	default:
+		return false
+	}
+	return false
+}
+
 func (m *EscapeMenu) OnLoad() error {
+	d2input.BindHandler(m)
 	m.labels = []d2ui.Label{
 		d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky),
 		d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteSky),
@@ -231,6 +249,9 @@ func (m *EscapeMenu) onOptions() error {
 // User clicked on "SAVE AND EXIT"
 func (m *EscapeMenu) onSaveAndExit() error {
 	log.Println("SAVE AND EXIT GAME Clicked from Escape Menu")
+	mainMenu := CreateMainMenu()
+	mainMenu.SetScreenMode(ScreenModeMainMenu)
+	d2screen.SetNextScreen(mainMenu)
 	return nil
 }
 

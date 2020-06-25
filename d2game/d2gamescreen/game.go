@@ -28,6 +28,7 @@ type Game struct {
 	localPlayer          *d2mapentity.Player
 	lastRegionType       d2enum.RegionIdType
 	ticksSinceLevelCheck float64
+	escapeMenu           *EscapeMenu
 }
 
 func CreateGame(gameClient *d2client.GameClient) *Game {
@@ -38,6 +39,7 @@ func CreateGame(gameClient *d2client.GameClient) *Game {
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
 		mapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine),
+		escapeMenu:           NewEscapeMenu(),
 	}
 	return result
 }
@@ -64,13 +66,17 @@ func (v *Game) Render(screen d2render.Surface) error {
 		v.gameControls.Render(screen)
 	}
 
+	if v.escapeMenu.IsOpen() {
+		v.escapeMenu.Render(screen)
+	}
+
 	return nil
 }
 
 var hideZoneTextAfterSeconds = 2.0
 
 func (v *Game) Advance(tickTime float64) error {
-	if !v.gameControls.InEscapeMenu() || len(v.gameClient.Players) != 1 {
+	if !v.escapeMenu.IsOpen() || len(v.gameClient.Players) != 1 {
 		v.gameClient.MapEngine.Advance(tickTime) // TODO: Hack
 	}
 
