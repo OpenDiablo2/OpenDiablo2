@@ -3,6 +3,8 @@ package d2gamescreen
 import (
 	"fmt"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
@@ -26,7 +28,8 @@ const (
 	menuSize       = 500
 
 	// layouts
-	noLayoutID                layoutID = -1
+	noLayoutID                layoutID = -2
+	saveLayoutID                       = -1
 	mainLayoutID                       = 0
 	optionsLayoutID                    = 1
 	soundOptionsLayoutID               = 2
@@ -162,7 +165,7 @@ func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
 func (m *EscapeMenu) newMainLayout() *layout {
 	return m.wrapLayout(func(l *layout) {
 		m.addBigSelectionLabel(l, "OPTIONS", optionsLayoutID)
-		m.addBigSelectionLabel(l, "SAVE AND EXIT GAME", noLayoutID)
+		m.addBigSelectionLabel(l, "SAVE AND EXIT GAME", saveLayoutID)
 		m.addBigSelectionLabel(l, "RETURN TO GAME", noLayoutID)
 	})
 }
@@ -330,6 +333,12 @@ func (m *EscapeMenu) showLayout(id layoutID) {
 
 	if id == noLayoutID {
 		m.Close()
+		return
+	}
+
+	if id == saveLayoutID {
+		mainMenu := CreateMainMenu()
+		d2screen.SetNextScreen(mainMenu)
 		return
 	}
 

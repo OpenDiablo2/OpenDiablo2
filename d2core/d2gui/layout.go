@@ -149,9 +149,10 @@ func (l *Layout) render(target d2render.Surface) error {
 			return err
 		}
 
-		if err := l.renderEntryDebug(entry, target); err != nil {
-			return err
-		}
+		// uncomment to see debug boxes
+		//if err := l.renderEntryDebug(entry, target); err != nil {
+		//	return err
+		//}
 	}
 
 	return nil
