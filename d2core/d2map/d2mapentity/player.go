@@ -7,6 +7,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -16,6 +17,8 @@ type Player struct {
 	mapEntity
 	composite     *d2asset.Composite
 	Equipment     d2inventory.CharacterEquipment
+	Stats         d2hero.HeroStatsState
+	Class         d2enum.Hero
 	Id            string
 	direction     int
 	name          string
@@ -31,7 +34,7 @@ type Player struct {
 var baseWalkSpeed = 6.0
 var baseRunSpeed = 9.0
 
-func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero, equipment d2inventory.CharacterEquipment) *Player {
+func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero, stats d2hero.HeroStatsState, equipment d2inventory.CharacterEquipment) *Player {
 	object := &d2datadict.ObjectLookupRecord{
 		Mode:  d2enum.AnimationModePlayerTownNeutral.String(),
 		Base:  "/data/global/chars",
@@ -53,13 +56,18 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 		panic(err)
 	}
 
+	stats.NextLevelExp = d2datadict.GetExperienceBreakpoint(heroType, stats.Level)
+	stats.Stamina = stats.MaxStamina
+
 	result := &Player{
 		Id:           id,
 		mapEntity:    createMapEntity(x, y),
 		composite:    composite,
 		Equipment:    equipment,
+		Stats:        stats,
 		direction:    direction,
 		name:         name,
+		Class:        heroType,
 		nameLabel:    d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
 		isRunToggled: true,
 		isInTown:     true,

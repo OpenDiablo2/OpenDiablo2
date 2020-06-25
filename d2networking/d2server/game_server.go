@@ -172,7 +172,7 @@ func OnClientConnected(client ClientConnection) {
 
 	playerState := client.GetPlayerState()
 	createPlayerPacket := d2netpacket.CreateAddPlayerPacket(client.GetUniqueId(), playerState.HeroName, int(sx*5)+3, int(sy*5)+3,
-		playerState.HeroType, playerState.Equipment)
+		playerState.HeroType, *playerState.Stats, playerState.Equipment)
 	for _, connection := range singletonServer.clientConnections {
 		connection.SendPacketToClient(createPlayerPacket)
 		if connection.GetUniqueId() == client.GetUniqueId() {
@@ -181,7 +181,7 @@ func OnClientConnected(client ClientConnection) {
 
 		conPlayerState := connection.GetPlayerState()
 		client.SendPacketToClient(d2netpacket.CreateAddPlayerPacket(connection.GetUniqueId(), conPlayerState.HeroName,
-			int(conPlayerState.X*5)+3, int(conPlayerState.Y*5)+3, conPlayerState.HeroType, conPlayerState.Equipment))
+			int(conPlayerState.X*5)+3, int(conPlayerState.Y*5)+3, conPlayerState.HeroType, *conPlayerState.Stats, conPlayerState.Equipment))
 	}
 
 }

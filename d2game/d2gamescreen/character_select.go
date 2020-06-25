@@ -165,6 +165,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		// TODO: Generate or load the object from the actual player data...
 		v.characterImage[i] = d2mapentity.CreatePlayer("", "", 0, 0, 0,
 			v.gameStates[idx].HeroType,
+			*v.gameStates[idx].Stats,
 			d2inventory.HeroObjects[v.gameStates[idx].HeroType],
 		)
 	}

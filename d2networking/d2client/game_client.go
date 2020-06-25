@@ -80,7 +80,7 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		log.Printf("Player id set to %s", serverInfo.PlayerId)
 	case d2netpackettype.AddPlayer:
 		player := packet.PacketData.(d2netpacket.AddPlayerPacket)
-		newPlayer := d2mapentity.CreatePlayer(player.Id, player.Name, player.X, player.Y, 0, player.HeroType, player.Equipment)
+		newPlayer := d2mapentity.CreatePlayer(player.Id, player.Name, player.X, player.Y, 0, player.HeroType, player.Stats, player.Equipment)
 		g.Players[newPlayer.Id] = newPlayer
 		g.MapEngine.AddEntity(newPlayer)
 	case d2netpackettype.MovePlayer:
