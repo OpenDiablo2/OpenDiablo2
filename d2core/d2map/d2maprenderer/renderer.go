@@ -240,6 +240,14 @@ func (mr *MapRenderer) renderDebug(debugVisLevel int, target d2render.Surface, s
 	}
 }
 
+func (mr *MapRenderer) WorldToScreen(x, y float64) (int, int) {
+	return mr.viewport.WorldToScreen(x, y)
+}
+
+func (mr *MapRenderer) WorldToScreenF(x, y float64) (float64, float64) {
+	return mr.viewport.WorldToScreenF(x, y)
+}
+
 func (mr *MapRenderer) renderTileDebug(ax, ay int, debugVisLevel int, target d2render.Surface) {
 	subTileColor := color.RGBA{R: 80, G: 80, B: 255, A: 50}
 	tileColor := color.RGBA{R: 255, G: 255, B: 255, A: 100}

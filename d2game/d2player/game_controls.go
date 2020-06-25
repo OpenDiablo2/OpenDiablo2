@@ -3,6 +3,7 @@ package d2player
 import (
 	"image/color"
 	"log"
+	"math"
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -37,6 +38,8 @@ type GameControls struct {
 	escapeMenu    *EscapeMenu
 	inputListener InputCallbackListener
 	FreeCam       bool
+	lastMouseX    int
+	lastMouseY    int
 
 	// UI
 	globeSprite       *d2ui.Sprite
@@ -44,6 +47,7 @@ type GameControls struct {
 	menuButton        *d2ui.Sprite
 	skillIcon         *d2ui.Sprite
 	zoneChangeText    *d2ui.Label
+	nameLabel         *d2ui.Label
 	runButton         d2ui.Button
 	isZoneTextShown   bool
 	actionableRegions []ActionableRegion
@@ -76,6 +80,11 @@ func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
 	label.Color = color.RGBA{R: 255, G: 88, B: 82, A: 255}
 	label.Alignment = d2ui.LabelAlignCenter
 
+	nameLabel := d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
+	nameLabel.Alignment = d2ui.LabelAlignCenter
+	nameLabel.SetText("")
+	nameLabel.Color = color.White
+
 	gc := &GameControls{
 		hero:           hero,
 		mapEngine:      mapEngine,
@@ -84,6 +93,7 @@ func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
 		inventory:      NewInventory(),
 		heroStats:      NewHeroStats(),
 		escapeMenu:     NewEscapeMenu(),
+		nameLabel:      &nameLabel,
 		zoneChangeText: &label,
 		actionableRegions: []ActionableRegion{
 			{leftSkill, d2common.Rectangle{Left: 115, Top: 550, Width: 50, Height: 50}},
@@ -191,12 +201,15 @@ func (g *GameControls) OnMouseButtonRepeat(event d2input.MouseEvent) bool {
 }
 
 func (g *GameControls) OnMouseMove(event d2input.MouseMoveEvent) bool {
+	mx, my := event.X, event.Y
+	g.lastMouseX = mx
+	g.lastMouseY = my
+
 	if g.escapeMenu.IsOpen() {
 		g.escapeMenu.OnMouseMove(event)
 		return false
 	}
 
-	mx, my := event.X, event.Y
 	for i := range g.actionableRegions {
 		// Mouse over a game control element
 		if g.actionableRegions[i].Rect.IsInRect(mx, my) {
@@ -327,6 +340,26 @@ func (g *GameControls) updateLayout() {
 
 // TODO: consider caching the panels to single image that is reused.
 func (g *GameControls) Render(target d2render.Surface) {
+	for entityIdx := range *g.mapEngine.Entities() {
+		entity := (*g.mapEngine.Entities())[entityIdx]
+		if entity.Name() == "" {
+			continue
+		}
+
+		entScreenXf, entScreenYf := g.mapRenderer.WorldToScreenF(entity.GetPositionF())
+		entScreenX := int(math.Floor(entScreenXf))
+		entScreenY := int(math.Floor(entScreenYf))
+
+		if ((entScreenX-20) <= g.lastMouseX) && ((entScreenX+20) >= g.lastMouseX) &&
+			((entScreenY-80) <= g.lastMouseY) && (entScreenY>= g.lastMouseY) {
+			g.nameLabel.SetText(entity.Name())
+			g.nameLabel.SetPosition(entScreenX, entScreenY - 100)
+			g.nameLabel.Render(target)
+			break
+		}
+	}
+
+
 	g.inventory.Render(target)
 	g.heroStats.Render(target)
 	g.escapeMenu.Render(target)

@@ -18,7 +18,7 @@ type Player struct {
 	Equipment     d2inventory.CharacterEquipment
 	Id            string
 	direction     int
-	Name          string
+	name          string
 	nameLabel     d2ui.Label
 	lastPathSize  int
 	isInTown      bool
@@ -59,7 +59,7 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 		composite:    composite,
 		Equipment:    equipment,
 		direction:    direction,
-		Name:         name,
+		name:         name,
 		nameLabel:    d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
 		isRunToggled: true,
 		isInTown:     true,
@@ -126,9 +126,9 @@ func (v *Player) Render(target d2render.Surface) {
 	)
 	defer target.Pop()
 	v.composite.Render(target)
-	v.nameLabel.X = v.offsetX
-	v.nameLabel.Y = v.offsetY - 100
-	v.nameLabel.Render(target)
+	//v.nameLabel.X = v.offsetX
+	//v.nameLabel.Y = v.offsetY - 100
+	//v.nameLabel.Render(target)
 }
 
 func (v *Player) SetMode(animationMode, weaponClass string, direction int) error {
@@ -176,4 +176,8 @@ func (v *Player) rotate(direction int) {
 	if newAnimationMode != v.composite.GetAnimationMode() || direction != v.direction {
 		v.SetMode(newAnimationMode, v.weaponClass, direction)
 	}
+}
+
+func (v *Player) Name() string {
+	return v.name
 }
