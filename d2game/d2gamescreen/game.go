@@ -41,6 +41,8 @@ func CreateGame(gameClient *d2client.GameClient) *Game {
 		mapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine),
 		escapeMenu:           NewEscapeMenu(),
 	}
+	result.escapeMenu.OnLoad()
+	d2input.BindHandler(result.escapeMenu)
 	return result
 }
 
@@ -66,7 +68,7 @@ func (v *Game) Render(screen d2render.Surface) error {
 		v.gameControls.Render(screen)
 	}
 
-	if v.escapeMenu.IsOpen() {
+	if v.escapeMenu != nil {
 		v.escapeMenu.Render(screen)
 	}
 
@@ -76,7 +78,7 @@ func (v *Game) Render(screen d2render.Surface) error {
 var hideZoneTextAfterSeconds = 2.0
 
 func (v *Game) Advance(tickTime float64) error {
-	if !v.escapeMenu.IsOpen() || len(v.gameClient.Players) != 1 {
+	if (v.escapeMenu != nil && !v.escapeMenu.IsOpen()) || len(v.gameClient.Players) != 1 {
 		v.gameClient.MapEngine.Advance(tickTime) // TODO: Hack
 	}
 
@@ -124,6 +126,10 @@ func (v *Game) Advance(tickTime float64) error {
 
 			break
 		}
+	}
+
+	if v.escapeMenu.IsOpen() {
+		v.escapeMenu.Advance(tickTime)
 	}
 
 	// Update the camera to focus on the player
