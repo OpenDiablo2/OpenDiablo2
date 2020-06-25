@@ -314,7 +314,7 @@ func areaEmpty(mapEngine *d2mapengine.MapEngine, rect d2common.Rectangle) bool {
 	mapHeight := mapEngine.Size().Height
 	mapWidth := mapEngine.Size().Width
 
-	if rect.Bottom() >= mapHeight || rect.Right() >= mapWidth {
+	if rect.Top < 0 || rect.Left < 0 || rect.Bottom() >= mapHeight || rect.Right() >= mapWidth {
 		return false
 	}
 
