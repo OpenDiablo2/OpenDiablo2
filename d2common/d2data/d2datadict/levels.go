@@ -38,7 +38,7 @@ type LevelDetailsRecord struct {
 	AutomapIndex int // Layer
 
 	// sizeX - SizeY in each difficuly. If this is a preset area this sets the
-	// X size for the area. Othervise use the same value here that are used in
+	// X size for the area. Otherwise use the same value here that are used in
 	// lvlprest.txt to set the size for the .ds1 file.
 	SizeXNormal int // SizeX
 	SizeYNormal int // SizeY
@@ -141,28 +141,14 @@ type LevelDetailsRecord struct {
 	// linked with, but the actuall number of Vis ( 0 - 7 ) is determined by
 	// your actual map (the .ds1 fle).
 	// Example: Normally Cave levels are only using vis 0-3 and wilderness areas 4-7 .
-	LevelLinkId0 int // Vis0
-	LevelLinkId1 int // Vis1
-	LevelLinkId2 int // Vis2
-	LevelLinkId3 int // Vis3
-	LevelLinkId4 int // Vis4
-	LevelLinkId5 int // Vis5
-	LevelLinkId6 int // Vis6
-	LevelLinkId7 int // Vis7
+	WarpLevelId []int // Vis0 -- Vis7
 
 	// This controls the visual graphics then you move the mouse pointer over
 	// an entrance. To show the graphics you use an ID from lvlwarp.txt and the
 	// behavior on the graphics is controlled by lvlwarp.txt. Your Warps must
 	// match your Vis.
 	// Example: If your level uses Vis 3,5,7 then you must also use Warp 3,5,7 .
-	WarpGraphicsId0 int // Warp0
-	WarpGraphicsId1 int // Warp1
-	WarpGraphicsId2 int // Warp2
-	WarpGraphicsId3 int // Warp3
-	WarpGraphicsId4 int // Warp4
-	WarpGraphicsId5 int // Warp5
-	WarpGraphicsId6 int // Warp6
-	WarpGraphicsId7 int // Warp7
+	WarpGraphicsId []int // Warp0 -- Warp7
 
 	// These settings handle the light intensity as well as its RGB components
 	LightIntensity int // Intensity
@@ -377,7 +363,7 @@ type LevelDetailsRecord struct {
 
 var LevelDetails map[int]*LevelDetailsRecord
 
-func GetLevelDetails(id int) *LevelDetailsRecord {
+func GetLevelDetailsByLevelId(id int) *LevelDetailsRecord {
 	for i := 0; i < len(LevelDetails); i++ {
 		if LevelDetails[i].Id == id {
 			return LevelDetails[i]
@@ -387,60 +373,108 @@ func GetLevelDetails(id int) *LevelDetailsRecord {
 	return nil
 }
 
+func GetLevelDetailsByActId(act int) []*LevelDetailsRecord {
+	result := make([]*LevelDetailsRecord, 0)
+	for _, record := range LevelDetails {
+		if act == record.Act {
+			result = append(result, record)
+		}
+	}
+	return result
+}
+
+var actIds []int
+
+func GetNumberOfActs() int {
+	return len(actIds)
+}
+
+func GetActIds() []int {
+	return actIds
+}
+
+func GetLevelWarpsByLevelId(id int) []*LevelWarpRecord {
+	result := make([]*LevelWarpRecord, 0)
+	level := LevelDetails[id]
+	for _, warpId := range level.WarpLevelId {
+		if warpId < 0 {
+			continue // there are -1 values for empty entries in the table
+		}
+		result = append(result, LevelWarps[warpId])
+	}
+	return result
+}
+
+func GetLevelPresetsByLevelId(id int) []*LevelPresetRecord {
+	result := make([]*LevelPresetRecord, 0)
+	for _, record := range LevelPresets {
+		if id == record.LevelId {
+			result = append(result, record)
+		}
+	}
+	return result
+}
+
 func LoadLevelDetails(file []byte) {
 	dict := d2common.LoadDataDictionary(string(file))
 	numRecords := len(dict.Data)
 	LevelDetails = make(map[int]*LevelDetailsRecord, numRecords)
 
+	actIds = make([]int, 0)
+
 	for idx := range dict.Data {
 		record := &LevelDetailsRecord{
-			Name:                       dict.GetString("Name ", idx),
-			Id:                         dict.GetNumber("Id", idx),
-			Palette:                    dict.GetNumber("Pal", idx),
-			Act:                        dict.GetNumber("Act", idx),
-			QuestFlag:                  dict.GetNumber("QuestFlag", idx),
-			QuestFlagExpansion:         dict.GetNumber("QuestFlagEx", idx),
-			AutomapIndex:               dict.GetNumber("Layer", idx),
-			SizeXNormal:                dict.GetNumber("SizeX", idx),
-			SizeYNormal:                dict.GetNumber("SizeY", idx),
-			SizeXNightmare:             dict.GetNumber("SizeX(N)", idx),
-			SizeYNightmare:             dict.GetNumber("SizeY(N)", idx),
-			SizeXHell:                  dict.GetNumber("SizeX(H)", idx),
-			SizeYHell:                  dict.GetNumber("SizeY(H)", idx),
-			WorldOffsetX:               dict.GetNumber("OffsetX", idx),
-			WorldOffsetY:               dict.GetNumber("OffsetY", idx),
-			DependantLevelID:           dict.GetNumber("Depend", idx),
-			TeleportFlag:               d2enum.TeleportFlag(dict.GetNumber("Teleport", idx)),
-			EnableRain:                 dict.GetNumber("Rain", idx) > 0,
-			EnableMud:                  dict.GetNumber("Mud", idx) > 0,
-			EnablePerspective:          dict.GetNumber("NoPer", idx) > 0,
-			EnableLineOfSightDraw:      dict.GetNumber("LOSDraw", idx) > 0,
-			EnableFloorFliter:          dict.GetNumber("FloorFilter", idx) > 0,
-			EnableBlankScreen:          dict.GetNumber("BlankScreen", idx) > 0,
-			EnableDrawEdges:            dict.GetNumber("DrawEdges", idx) > 0,
-			IsInside:                   dict.GetNumber("IsInside", idx) > 0,
-			LevelGenerationType:        d2enum.LevelGenerationType(dict.GetNumber("DrlgType", idx)),
-			LevelType:                  dict.GetNumber("LevelType", idx),
-			SubType:                    dict.GetNumber("SubType", idx),
-			SubTheme:                   dict.GetNumber("SubTheme", idx),
-			SubWaypoint:                dict.GetNumber("SubWaypoint", idx),
-			SubShrine:                  dict.GetNumber("SubShrine", idx),
-			LevelLinkId0:               dict.GetNumber("Vis0", idx),
-			LevelLinkId1:               dict.GetNumber("Vis1", idx),
-			LevelLinkId2:               dict.GetNumber("Vis2", idx),
-			LevelLinkId3:               dict.GetNumber("Vis3", idx),
-			LevelLinkId4:               dict.GetNumber("Vis4", idx),
-			LevelLinkId5:               dict.GetNumber("Vis5", idx),
-			LevelLinkId6:               dict.GetNumber("Vis6", idx),
-			LevelLinkId7:               dict.GetNumber("Vis7", idx),
-			WarpGraphicsId0:            dict.GetNumber("Warp0", idx),
-			WarpGraphicsId1:            dict.GetNumber("Warp1", idx),
-			WarpGraphicsId2:            dict.GetNumber("Warp2", idx),
-			WarpGraphicsId3:            dict.GetNumber("Warp3", idx),
-			WarpGraphicsId4:            dict.GetNumber("Warp4", idx),
-			WarpGraphicsId5:            dict.GetNumber("Warp5", idx),
-			WarpGraphicsId6:            dict.GetNumber("Warp6", idx),
-			WarpGraphicsId7:            dict.GetNumber("Warp7", idx),
+			Name:                  dict.GetString("Name ", idx),
+			Id:                    dict.GetNumber("Id", idx),
+			Palette:               dict.GetNumber("Pal", idx),
+			Act:                   dict.GetNumber("Act", idx),
+			QuestFlag:             dict.GetNumber("QuestFlag", idx),
+			QuestFlagExpansion:    dict.GetNumber("QuestFlagEx", idx),
+			AutomapIndex:          dict.GetNumber("Layer", idx),
+			SizeXNormal:           dict.GetNumber("SizeX", idx),
+			SizeYNormal:           dict.GetNumber("SizeY", idx),
+			SizeXNightmare:        dict.GetNumber("SizeX(N)", idx),
+			SizeYNightmare:        dict.GetNumber("SizeY(N)", idx),
+			SizeXHell:             dict.GetNumber("SizeX(H)", idx),
+			SizeYHell:             dict.GetNumber("SizeY(H)", idx),
+			WorldOffsetX:          dict.GetNumber("OffsetX", idx),
+			WorldOffsetY:          dict.GetNumber("OffsetY", idx),
+			DependantLevelID:      dict.GetNumber("Depend", idx),
+			TeleportFlag:          d2enum.TeleportFlag(dict.GetNumber("Teleport", idx)),
+			EnableRain:            dict.GetNumber("Rain", idx) > 0,
+			EnableMud:             dict.GetNumber("Mud", idx) > 0,
+			EnablePerspective:     dict.GetNumber("NoPer", idx) > 0,
+			EnableLineOfSightDraw: dict.GetNumber("LOSDraw", idx) > 0,
+			EnableFloorFliter:     dict.GetNumber("FloorFilter", idx) > 0,
+			EnableBlankScreen:     dict.GetNumber("BlankScreen", idx) > 0,
+			EnableDrawEdges:       dict.GetNumber("DrawEdges", idx) > 0,
+			IsInside:              dict.GetNumber("IsInside", idx) > 0,
+			LevelGenerationType:   d2enum.LevelGenerationType(dict.GetNumber("DrlgType", idx)),
+			LevelType:             dict.GetNumber("LevelType", idx),
+			SubType:               dict.GetNumber("SubType", idx),
+			SubTheme:              dict.GetNumber("SubTheme", idx),
+			SubWaypoint:           dict.GetNumber("SubWaypoint", idx),
+			SubShrine:             dict.GetNumber("SubShrine", idx),
+			WarpLevelId: []int{
+				dict.GetNumber("Vis0", idx),
+				dict.GetNumber("Vis1", idx),
+				dict.GetNumber("Vis2", idx),
+				dict.GetNumber("Vis3", idx),
+				dict.GetNumber("Vis4", idx),
+				dict.GetNumber("Vis5", idx),
+				dict.GetNumber("Vis6", idx),
+				dict.GetNumber("Vis7", idx),
+			},
+			WarpGraphicsId: []int{
+				dict.GetNumber("Vis0", idx),
+				dict.GetNumber("Vis1", idx),
+				dict.GetNumber("Vis2", idx),
+				dict.GetNumber("Vis3", idx),
+				dict.GetNumber("Vis4", idx),
+				dict.GetNumber("Vis5", idx),
+				dict.GetNumber("Vis6", idx),
+				dict.GetNumber("Vis7", idx),
+			},
 			LightIntensity:             dict.GetNumber("Intensity", idx),
 			Red:                        dict.GetNumber("Red", idx),
 			Green:                      dict.GetNumber("Green", idx),
@@ -540,6 +574,7 @@ func LoadLevelDetails(file []byte) {
 			ObjectGroupSpawnChance6:    dict.GetNumber("ObjPrb6", idx),
 			ObjectGroupSpawnChance7:    dict.GetNumber("ObjPrb7", idx),
 		}
+		actIds = append(actIds, record.Act)
 		LevelDetails[idx] = record
 	}
 	log.Printf("Loaded %d LevelDetails records", len(LevelDetails))

@@ -5,6 +5,8 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"io"
 	"log"
 	"net"
@@ -12,30 +14,40 @@ import (
 	"sync"
 	"time"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
+	// "github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server/d2udpclientconnection"
+	packet "github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
+	packettype "github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
+	d2udp "github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server/d2udpclientconnection"
 	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 	"github.com/robertkrimen/otto"
 )
 
 type GameServer struct {
 	sync.RWMutex
+	version           string
 	clientConnections map[string]ClientConnection
 	manager           *ConnectionManager
-	mapEngines        []*d2mapengine.MapEngine
+	realm             *d2mapengine.MapRealm
 	scriptEngine      *d2script.ScriptEngine
 	udpConnection     *net.UDPConn
 	seed              int64
 	running           bool
+	maxClients        int
+	lastAdvance       float64
 }
 
 var singletonServer *GameServer
+
+func advance() {
+	now := d2common.Now()
+	elapsed := now - singletonServer.lastAdvance
+	singletonServer.realm.Advance(elapsed)
+	singletonServer.lastAdvance = now
+}
 
 func Create(openNetworkServer bool) {
 	log.Print("Creating GameServer")
@@ -43,32 +55,45 @@ func Create(openNetworkServer bool) {
 		return
 	}
 
+	config := d2config.Get()
+	maxConnections := config.MaxConnections
+	seed := time.Now().UnixNano()
+
 	singletonServer = &GameServer{
 		clientConnections: make(map[string]ClientConnection),
-		mapEngines:        make([]*d2mapengine.MapEngine, 0),
+		realm:             &d2mapengine.MapRealm{},
 		scriptEngine:      d2script.CreateScriptEngine(),
-		seed:              time.Now().UnixNano(),
+		seed:              seed,
+		maxClients:        maxConnections,
+		lastAdvance:       d2common.Now(),
 	}
 
+	singletonServer.realm.Init(seed)
 	singletonServer.manager = CreateConnectionManager(singletonServer)
 
-	mapEngine := d2mapengine.CreateMapEngine()
-	mapEngine.SetSeed(singletonServer.seed)
-	mapEngine.ResetMap(d2enum.RegionAct1Town, 100, 100) // TODO: Mapgen - Needs levels.txt stuff
-	d2mapgen.GenerateAct1Overworld(mapEngine)
-	singletonServer.mapEngines = append(singletonServer.mapEngines, mapEngine)
+	// mapEngine := d2mapengine.CreateMapEngine()
+	// mapEngine.SetSeed(singletonServer.seed)
+	// mapEngine.ResetMap(d2enum.RegionAct1Town, 100, 100) // TODO: Mapgen - Needs levels.txt stuff
+	// d2mapgen.GenerateAct1Overworld(mapEngine)
+	// singletonServer.mapEngines = append(singletonServer.mapEngines, mapEngine)
 
-	singletonServer.scriptEngine.AddFunction("getMapEngines", func(call otto.FunctionCall) otto.Value {
-		val, err := singletonServer.scriptEngine.ToValue(singletonServer.mapEngines)
-		if err != nil {
-			fmt.Print(err.Error())
-		}
-		return val
-	})
+	addScriptEngineFunctions()
 
 	if openNetworkServer {
 		createNetworkServer()
 	}
+}
+
+func addScriptEngineFunctions() {
+	singletonServer.scriptEngine.AddFunction("getMapEngines", ottoTestFunc)
+}
+
+func ottoTestFunc(call otto.FunctionCall) otto.Value {
+	val, err := singletonServer.scriptEngine.ToValue(singletonServer.realm)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+	return val
 }
 
 func createNetworkServer() {
@@ -87,6 +112,7 @@ func createNetworkServer() {
 func runNetworkServer() {
 	buffer := make([]byte, 4096)
 	for singletonServer.running {
+		advance()
 		_, addr, err := singletonServer.udpConnection.ReadFromUDP(buffer)
 		if err != nil {
 			fmt.Printf("Socket error: %s\n", err)
@@ -94,22 +120,29 @@ func runNetworkServer() {
 		}
 		buff := bytes.NewBuffer(buffer)
 		packetTypeId, err := buff.ReadByte()
-		packetType := d2netpackettype.NetPacketType(packetTypeId)
+		packetType := packettype.NetPacketType(packetTypeId)
 		reader, err := gzip.NewReader(buff)
 		sb := new(strings.Builder)
 		io.Copy(sb, reader)
 		stringData := sb.String()
+
 		switch packetType {
-		case d2netpackettype.PlayerConnectionRequest:
-			packetData := d2netpacket.PlayerConnectionRequestPacket{}
-			json.Unmarshal([]byte(stringData), &packetData)
-			clientConnection := d2udpclientconnection.CreateUDPClientConnection(singletonServer.udpConnection, packetData.Id, addr)
-			clientConnection.SetPlayerState(packetData.PlayerState)
-			OnClientConnected(clientConnection)
-		case d2netpackettype.MovePlayer:
-			packetData := d2netpacket.MovePlayerPacket{}
-			json.Unmarshal([]byte(stringData), &packetData)
-			netPacket := d2netpacket.NetPacket{
+		case packettype.PlayerConnectionRequest:
+			packetData := &packet.PlayerConnectionRequestPacket{}
+			json.Unmarshal([]byte(stringData), packetData)
+
+			srvCon := singletonServer.udpConnection
+			packetId := packetData.Id
+			clientCon := d2udp.CreateUDPClientConnection(srvCon, packetId, addr)
+
+			state := packetData.PlayerState
+			clientCon.SetPlayerState(state)
+			OnClientConnected(clientCon)
+		case packettype.MovePlayer:
+			packetData := &packet.MovePlayerPacket{}
+			json.Unmarshal([]byte(stringData), packetData)
+
+			netPacket := packet.NetPacket{
 				PacketType: packetType,
 				PacketData: packetData,
 			}
@@ -117,14 +150,14 @@ func runNetworkServer() {
 			for _, player := range singletonServer.clientConnections {
 				player.SendPacketToClient(netPacket)
 			}
-		case d2netpackettype.Pong:
-			packetData := d2netpacket.PlayerConnectionRequestPacket{}
+		case packettype.Pong:
+			packetData := packet.PlayerConnectionRequestPacket{}
 			json.Unmarshal([]byte(stringData), &packetData)
 			singletonServer.manager.Recv(packetData.Id)
-		case d2netpackettype.ServerClosed:
+		case packettype.ServerClosed:
 			singletonServer.manager.Shutdown()
-		case d2netpackettype.PlayerDisconnectionNotification:
-			var packet d2netpacket.PlayerDisconnectRequestPacket
+		case packettype.PlayerDisconnectionNotification:
+			var packet packet.PlayerDisconnectRequestPacket
 			json.Unmarshal([]byte(stringData), &packet)
 			log.Printf("Received disconnect: %s", packet.Id)
 		}
@@ -158,51 +191,74 @@ func Destroy() {
 }
 
 func OnClientConnected(client ClientConnection) {
-	// Temporary position hack --------------------------------------------
-	sx, sy := singletonServer.mapEngines[0].GetStartPosition() // TODO: Another temporary hack
-	clientPlayerState := client.GetPlayerState()
-	clientPlayerState.X = sx
-	clientPlayerState.Y = sy
-	// --------------------------------------------------------------------
+	srv := singletonServer
+	realm := srv.realm
+	seed := srv.seed
 
-	log.Printf("Client connected with an id of %s", client.GetUniqueId())
-	singletonServer.clientConnections[client.GetUniqueId()] = client
-	client.SendPacketToClient(d2netpacket.CreateUpdateServerInfoPacket(singletonServer.seed, client.GetUniqueId()))
-	client.SendPacketToClient(d2netpacket.CreateGenerateMapPacket(d2enum.RegionAct1Town))
+	// params for AddPlayer packet, of new player
+	id := client.GetUniqueId()
+	state := client.GetPlayerState()
+	name := state.HeroName
+	hero := state.HeroType
+	equip := state.Equipment
+	x, y := 0.0, 0.0
+	state.X = x
+	state.Y = y
 
-	playerState := client.GetPlayerState()
-	createPlayerPacket := d2netpacket.CreateAddPlayerPacket(client.GetUniqueId(), playerState.HeroName, int(sx*5)+3, int(sy*5)+3,
-		playerState.HeroType, playerState.Equipment)
-	for _, connection := range singletonServer.clientConnections {
-		connection.SendPacketToClient(createPlayerPacket)
-		if connection.GetUniqueId() == client.GetUniqueId() {
+	infoPacket := packet.CreateUpdateServerInfoPacket(seed, id)
+	mapgenPacket := packet.CreateGenerateMapPacket(d2enum.RegionAct1Town)
+	addNew := packet.CreateAddPlayerPacket(id, name, int(x), int(y), hero, equip)
+
+	srv.clientConnections[id] = client
+
+	client.SendPacketToClient(infoPacket)
+	client.SendPacketToClient(mapgenPacket)
+
+	log.Printf("Client connected with an id of %s", id)
+	realm.AddPlayer(id, state.Act)
+
+	// for each connection, send the AddPlayer packet for the new player
+	for _, connection := range srv.clientConnections {
+		conId := connection.GetUniqueId()
+		connection.SendPacketToClient(addNew)
+
+		if conId == id {
 			continue
 		}
 
-		conPlayerState := connection.GetPlayerState()
-		client.SendPacketToClient(d2netpacket.CreateAddPlayerPacket(connection.GetUniqueId(), conPlayerState.HeroName,
-			int(conPlayerState.X*5)+3, int(conPlayerState.Y*5)+3, conPlayerState.HeroType, conPlayerState.Equipment))
+		// send an AddPlayer for existing connections to the new player
+		cId := connection.GetUniqueId()
+		cState := connection.GetPlayerState()
+		cName := cState.HeroName
+		cHero := cState.HeroType
+		cEquip := cState.Equipment
+		cX, cY := 0, 0
+
+		addExisting := packet.CreateAddPlayerPacket(cId, cName, cX, cY, cHero, cEquip)
+		client.SendPacketToClient(addExisting)
 	}
 
 }
 
 func OnClientDisconnected(client ClientConnection) {
 	log.Printf("Client disconnected with an id of %s", client.GetUniqueId())
-	delete(singletonServer.clientConnections, client.GetUniqueId())
+	clientId := client.GetUniqueId()
+	delete(singletonServer.clientConnections, clientId)
+	singletonServer.realm.RemovePlayer(clientId)
 }
 
-func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) error {
-	switch packet.PacketType {
-	case d2netpackettype.MovePlayer:
+func OnPacketReceived(client ClientConnection, p packet.NetPacket) error {
+	switch p.PacketType {
+	case packettype.MovePlayer:
 		// TODO: This needs to be verified on the server (here) before sending to other clients....
 		// TODO: Hacky, this should be updated in realtime ----------------
 		// TODO: Verify player id
 		playerState := singletonServer.clientConnections[client.GetUniqueId()].GetPlayerState()
-		playerState.X = packet.PacketData.(d2netpacket.MovePlayerPacket).DestX
-		playerState.Y = packet.PacketData.(d2netpacket.MovePlayerPacket).DestY
+		playerState.X = p.PacketData.(packet.MovePlayerPacket).DestX
+		playerState.Y = p.PacketData.(packet.MovePlayerPacket).DestY
 		// ----------------------------------------------------------------
 		for _, player := range singletonServer.clientConnections {
-			player.SendPacketToClient(packet)
+			player.SendPacketToClient(p)
 		}
 	}
 	return nil

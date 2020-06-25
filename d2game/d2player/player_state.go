@@ -18,6 +18,7 @@ type PlayerState struct {
 	HeroType  d2enum.Hero                    `json:"heroType"`
 	HeroLevel int                            `json:"heroLevel"`
 	Act       int                            `json:"act"`
+	ActLevel  int                            `json:"actLevel"`
 	FilePath  string                         `json:"-"`
 	Equipment d2inventory.CharacterEquipment `json:"equipment"`
 	X         float64                        `json:"x"`
