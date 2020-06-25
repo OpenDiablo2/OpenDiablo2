@@ -415,6 +415,23 @@ func GetLevelPresetsByLevelId(id int) []*LevelPresetRecord {
 	return result
 }
 
+func GetFirstLevelIdByActId(actId int) int {
+	recordsForAct := GetLevelDetailsByActId(actId)
+	if len(recordsForAct) > 0 {
+		return recordsForAct[0].Id
+	}
+	return 0
+}
+
+func AppendIfMissing(slice []int, i int) []int {
+	for _, ele := range slice {
+		if ele == i {
+			return slice
+		}
+	}
+	return append(slice, i)
+}
+
 func LoadLevelDetails(file []byte) {
 	dict := d2common.LoadDataDictionary(string(file))
 	numRecords := len(dict.Data)
@@ -574,7 +591,7 @@ func LoadLevelDetails(file []byte) {
 			ObjectGroupSpawnChance6:    dict.GetNumber("ObjPrb6", idx),
 			ObjectGroupSpawnChance7:    dict.GetNumber("ObjPrb7", idx),
 		}
-		actIds = append(actIds, record.Act)
+		actIds = AppendIfMissing(actIds, record.Act)
 		LevelDetails[idx] = record
 	}
 	log.Printf("Loaded %d LevelDetails records", len(LevelDetails))

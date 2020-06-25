@@ -13,7 +13,7 @@ type MapLevel struct {
 	presets       []*d2datadict.LevelPresetRecord
 	warps         []*d2datadict.LevelWarpRecord
 	substitutions *d2datadict.LevelSubstitutionRecord
-	generator     *MapGenerator
+	generator     MapGenerator
 	engine        *MapEngine
 	isGenerated   bool
 }
@@ -48,4 +48,12 @@ func (level *MapLevel) Init(act *MapAct, levelId int) {
 
 	seed := act.realm.seed
 	level.generator.init(seed, level, level.engine)
+}
+
+func (level *MapLevel) GenerateMap() {
+	if level.isGenerated {
+		return
+	}
+	log.Printf("Generating Level: %s", level.details.Name)
+	level.generator.generate()
 }

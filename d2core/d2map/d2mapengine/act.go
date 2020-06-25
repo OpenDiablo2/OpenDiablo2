@@ -31,7 +31,7 @@ func (act *MapAct) Advance(elapsed float64) {
 	}
 }
 
-func (act *MapAct) Init(realm *MapRealm, actIndex int) {
+func (act *MapAct) Init(realm *MapRealm, actIndex int, engine *MapEngine) {
 	act.realm = realm
 	act.levels = make(map[int]*MapLevel)
 	act.id = actIndex
@@ -45,5 +45,9 @@ func (act *MapAct) Init(realm *MapRealm, actIndex int) {
 		level.Init(act, levelId)
 		act.levels[levelId] = level
 	}
+}
 
+func (act *MapAct) GenerateMap(levelId int) {
+	log.Printf("Generating map in Act %d", act.id)
+	act.levels[levelId].GenerateMap()
 }

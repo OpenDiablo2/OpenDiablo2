@@ -18,7 +18,8 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	// "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	packet "github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 	packettype "github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 	d2udp "github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server/d2udpclientconnection"
@@ -32,6 +33,7 @@ type GameServer struct {
 	clientConnections map[string]ClientConnection
 	manager           *ConnectionManager
 	realm             *d2mapengine.MapRealm
+	mapEngine         *d2mapengine.MapEngine
 	scriptEngine      *d2script.ScriptEngine
 	udpConnection     *net.UDPConn
 	seed              int64
@@ -58,17 +60,19 @@ func Create(openNetworkServer bool) {
 	config := d2config.Get()
 	maxConnections := config.MaxConnections
 	seed := time.Now().UnixNano()
+	mapEngine := d2mapengine.CreateMapEngine()
 
 	singletonServer = &GameServer{
 		clientConnections: make(map[string]ClientConnection),
 		realm:             &d2mapengine.MapRealm{},
+		mapEngine:         mapEngine,
 		scriptEngine:      d2script.CreateScriptEngine(),
 		seed:              seed,
 		maxClients:        maxConnections,
 		lastAdvance:       d2common.Now(),
 	}
 
-	singletonServer.realm.Init(seed)
+	singletonServer.realm.Init(seed, mapEngine)
 	singletonServer.manager = CreateConnectionManager(singletonServer)
 
 	// mapEngine := d2mapengine.CreateMapEngine()
@@ -198,6 +202,8 @@ func OnClientConnected(client ClientConnection) {
 	// params for AddPlayer packet, of new player
 	id := client.GetUniqueId()
 	state := client.GetPlayerState()
+	actId := state.Act
+	levelId := d2datadict.GetFirstLevelIdByActId(actId)
 	name := state.HeroName
 	hero := state.HeroType
 	equip := state.Equipment
@@ -206,7 +212,7 @@ func OnClientConnected(client ClientConnection) {
 	state.Y = y
 
 	infoPacket := packet.CreateUpdateServerInfoPacket(seed, id)
-	mapgenPacket := packet.CreateGenerateMapPacket(d2enum.RegionAct1Town)
+	mapgenPacket := packet.CreateGenerateMapPacket(actId, levelId)
 	addNew := packet.CreateAddPlayerPacket(id, name, int(x), int(y), hero, equip)
 
 	srv.clientConnections[id] = client
