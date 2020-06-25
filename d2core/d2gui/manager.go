@@ -46,6 +46,9 @@ func createGuiManager() (*manager, error) {
 
 func (m *manager) SetLayout(layout *Layout) {
 	m.layout = layout
+	if m.layout != nil {
+		m.layout.AdjustEntryPlacement()
+	}
 }
 
 func (m *manager) OnMouseButtonDown(event d2input.MouseEvent) bool {

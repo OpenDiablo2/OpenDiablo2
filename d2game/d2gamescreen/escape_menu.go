@@ -364,6 +364,7 @@ func (m *EscapeMenu) setLayout(id layoutID) {
 	m.currentLayout = id
 	m.layouts[id].currentEl = 0
 	d2gui.SetLayout(m.layouts[id].Layout)
+	m.onHoverElement(0)
 }
 
 func (m *EscapeMenu) onUpKey() {
