@@ -52,6 +52,7 @@ func (v *Game) OnLoad(loading d2screen.LoadingState) {
 
 func (v *Game) OnUnload() error {
 	d2input.UnbindHandler(v.gameControls) // TODO: hack
+	v.gameClient.Close()
 	return nil
 }
 
