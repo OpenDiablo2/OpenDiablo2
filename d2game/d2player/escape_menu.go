@@ -342,9 +342,9 @@ func (m *EscapeMenu) onHoverElement(id int) {
 
 	x, _ := m.leftPent.GetPosition()
 	m.leftPent.SetPosition(x, y+10)
-
 	x, _ = m.rightPent.GetPosition()
 	m.rightPent.SetPosition(x, y+10)
+
 	return
 }
 
