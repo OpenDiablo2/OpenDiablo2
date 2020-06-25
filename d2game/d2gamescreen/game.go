@@ -19,9 +19,6 @@ import (
 )
 
 type Game struct {
-	//pentSpinLeft  *d2ui.Sprite
-	//pentSpinRight *d2ui.Sprite
-	//testLabel     d2ui.Label
 	gameClient           *d2client.GameClient
 	mapRenderer          *d2maprenderer.MapRenderer
 	gameControls         *d2player.GameControls // TODO: Hack
@@ -67,10 +64,6 @@ func (v *Game) Render(screen d2render.Surface) error {
 
 	if v.gameControls != nil {
 		v.gameControls.Render(screen)
-	}
-
-	if v.escapeMenu != nil {
-		v.escapeMenu.Render(screen)
 	}
 
 	return nil
@@ -127,10 +120,6 @@ func (v *Game) Advance(tickTime float64) error {
 
 			break
 		}
-	}
-
-	if v.escapeMenu.IsOpen() {
-		v.escapeMenu.Advance(tickTime)
 	}
 
 	// Update the camera to focus on the player

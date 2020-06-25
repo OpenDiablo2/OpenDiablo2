@@ -103,6 +103,16 @@ func (l *Layout) AddSprite(imagePath, palettePath string) (*Sprite, error) {
 	return sprite, nil
 }
 
+func (l *Layout) AddAnimatedSprite(imagePath, palettePath string, direction AnimationDirection) (*AnimatedSprite, error) {
+	sprite, err := createAnimatedSprite(imagePath, palettePath, direction)
+	if err != nil {
+		return nil, err
+	}
+
+	l.entries = append(l.entries, &layoutEntry{widget: sprite})
+	return sprite, nil
+}
+
 func (l *Layout) AddLabel(text string, fontStyle FontStyle) (*Label, error) {
 	label, err := createLabel(text, fontStyle)
 	if err != nil {
@@ -139,9 +149,10 @@ func (l *Layout) render(target d2render.Surface) error {
 			return err
 		}
 
-		if err := l.renderEntryDebug(entry, target); err != nil {
-			return err
-		}
+		// uncomment to see debug boxes
+		//if err := l.renderEntryDebug(entry, target); err != nil {
+		//	return err
+		//}
 	}
 
 	return nil
@@ -347,5 +358,7 @@ func (l *Layout) adjustEntryPlacement() {
 		case PositionTypeAbsolute:
 			entry.x, entry.y = entry.widget.getPosition()
 		}
+
+		entry.widget.setOffset(offsetX, offsetY)
 	}
 }

@@ -216,7 +216,6 @@ func (g *GameControls) OnMouseMove(event d2input.MouseMoveEvent) bool {
 }
 
 func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
-
 	mx, my := event.X, event.Y
 	for i := range g.actionableRegions {
 		// If click is on a game control element
@@ -500,10 +499,6 @@ func (g *GameControls) HideZoneChangeTextAfter(delay float64) {
 		g.isZoneTextShown = false
 	})
 }
-
-// func (g *GameControls) InEscapeMenu() bool {
-// 	return g != nil && g.escapeMenu != nil && g.escapeMenu.IsOpen()
-// }
 
 // Handles what to do when an actionable is hovered
 func (g *GameControls) onHoverActionable(item ActionableType) {
