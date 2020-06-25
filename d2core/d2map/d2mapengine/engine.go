@@ -209,7 +209,7 @@ func (m *MapEngine) RemoveEntity(entity d2mapentity.MapEntity) {
 	if entity == nil {
 		return
 	}
-	panic("Removing entities is not currently implemented")
+	//panic("Removing entities is not currently implemented")
 	//m.entities.Remove(entity)
 }
 

@@ -204,6 +204,10 @@ func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) err
 		for _, player := range singletonServer.clientConnections {
 			player.SendPacketToClient(packet)
 		}
+	case d2netpackettype.PlayerCast:
+		for _, player := range singletonServer.clientConnections {
+			player.SendPacketToClient(packet)
+		}
 	}
 	return nil
 }
