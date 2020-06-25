@@ -53,6 +53,7 @@ type EscapeMenu struct {
 	selectSound   d2audio.SoundEffect
 	currentLayout layoutID
 
+	// leftPent and rightPent are generated once and shared between the layouts
 	leftPent  *d2gui.AnimatedSprite
 	rightPent *d2gui.AnimatedSprite
 	layouts   []*layout
@@ -62,7 +63,7 @@ type layout struct {
 	*d2gui.Layout
 	leftPent          *d2gui.AnimatedSprite
 	rightPent         *d2gui.AnimatedSprite
-	current           int
+	currentEl         int
 	hoverableElements []hoverableElement
 }
 
@@ -339,7 +340,7 @@ func (m *EscapeMenu) setLayout(id layoutID) {
 	m.leftPent = m.layouts[id].leftPent
 	m.rightPent = m.layouts[id].rightPent
 	m.currentLayout = id
-	m.layouts[id].current = 0
+	m.layouts[id].currentEl = 0
 	d2gui.SetLayout(m.layouts[id].Layout)
 }
 
@@ -347,27 +348,27 @@ func (m *EscapeMenu) OnUpKey() {
 	if !m.isOpen {
 		return
 	}
-	if m.layouts[m.currentLayout].current == 0 {
+	if m.layouts[m.currentLayout].currentEl == 0 {
 		return
 	}
-	m.layouts[m.currentLayout].current--
-	m.onHoverElement(m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].current])
+	m.layouts[m.currentLayout].currentEl--
+	m.onHoverElement(m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].currentEl])
 }
 
 func (m *EscapeMenu) OnDownKey() {
 	if !m.isOpen {
 		return
 	}
-	if m.layouts[m.currentLayout].current == len(m.layouts[m.currentLayout].hoverableElements)-1 {
+	if m.layouts[m.currentLayout].currentEl == len(m.layouts[m.currentLayout].hoverableElements)-1 {
 		return
 	}
-	m.layouts[m.currentLayout].current++
-	m.onHoverElement(m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].current])
+	m.layouts[m.currentLayout].currentEl++
+	m.onHoverElement(m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].currentEl])
 }
 
 func (m *EscapeMenu) OnEnterKey() {
 	if !m.isOpen {
 		return
 	}
-	m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].current].Trigger()
+	m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].currentEl].Trigger()
 }
