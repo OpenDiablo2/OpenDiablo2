@@ -78,19 +78,19 @@ func (l *showLayoutLabel) Trigger() {
 
 type enumLabel struct {
 	*d2gui.Layout
-	label       *d2gui.Label
-	optionID    optionID
-	values      []string
-	current     int
-	playSound   func()
-	updateValue func(optID optionID, value string)
+	textChangingLabel *d2gui.Label
+	optionID          optionID
+	values            []string
+	current           int
+	playSound         func()
+	updateValue       func(optID optionID, value string)
 }
 
 func (l *enumLabel) Trigger() {
 	l.playSound()
 	next := (l.current + 1) % len(l.values)
 	l.current = next
-	l.label.SetText(l.values[l.current])
+	l.textChangingLabel.SetText(l.values[l.current])
 	l.updateValue(l.optionID, l.values[l.current])
 }
 
@@ -99,30 +99,15 @@ type hoverableElement interface {
 	Trigger()
 }
 
-type layoutCfg struct {
-	playSound    func()
-	showLayout   func(id layoutID)
-	wrapLayout   func(func(*layout)) *layout
-	hoverElement func(el hoverableElement)
-	updateValue  func(optID optionID, value string)
-}
-
 func NewEscapeMenu() *EscapeMenu {
 	m := &EscapeMenu{}
-	cfg := &layoutCfg{
-		playSound:    m.playSound,
-		showLayout:   m.showLayout,
-		wrapLayout:   m.wrapLayout,
-		hoverElement: m.onHoverElement,
-		updateValue:  m.onUpdateValue,
-	}
 	m.layouts = []*layout{
-		mainLayoutID:              newMainLayout(cfg),
-		optionsLayoutID:           newOptionsLayout(cfg),
-		soundOptionsLayoutID:      newSoundOptionsLayout(cfg),
-		videoOptionsLayoutID:      newVideoOptionsLayout(cfg),
-		automapOptionsLayoutID:    newAutomapOptionsLayout(cfg),
-		configureControlsLayoutID: newConfigureControlsLayout(cfg),
+		mainLayoutID:              m.newMainLayout(),
+		optionsLayoutID:           m.newOptionsLayout(),
+		soundOptionsLayoutID:      m.newSoundOptionsLayout(),
+		videoOptionsLayoutID:      m.newVideoOptionsLayout(),
+		automapOptionsLayoutID:    m.newAutomapOptionsLayout(),
+		configureControlsLayoutID: m.newConfigureControlsLayout(),
 	}
 	return m
 }
@@ -163,124 +148,123 @@ func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
 	}
 }
 
-func newMainLayout(cfg *layoutCfg) *layout {
-	return cfg.wrapLayout(func(base *layout) {
-		base.addBigSelectionLabel(cfg, "OPTIONS", optionsLayoutID)
-		base.addBigSelectionLabel(cfg, "SAVE AND EXIT GAME", noLayoutID)
-		base.addBigSelectionLabel(cfg, "RETURN TO GAME", noLayoutID)
+func (m *EscapeMenu) newMainLayout() *layout {
+	return m.wrapLayout(func(l *layout) {
+		m.addBigSelectionLabel(l, "OPTIONS", optionsLayoutID)
+		m.addBigSelectionLabel(l, "SAVE AND EXIT GAME", noLayoutID)
+		m.addBigSelectionLabel(l, "RETURN TO GAME", noLayoutID)
 	})
 }
 
-func newOptionsLayout(cfg *layoutCfg) *layout {
-	return cfg.wrapLayout(func(base *layout) {
-		base.addBigSelectionLabel(cfg, "SOUND OPTIONS", soundOptionsLayoutID)
-		base.addBigSelectionLabel(cfg, "VIDEO OPTIONS", videoOptionsLayoutID)
-		base.addBigSelectionLabel(cfg, "AUTOMAP OPTIONS", automapOptionsLayoutID)
-		base.addBigSelectionLabel(cfg, "CONFIGURE CONTROLS", configureControlsLayoutID)
-		base.addBigSelectionLabel(cfg, "PREVIOUS MENU", mainLayoutID)
+func (m *EscapeMenu) newOptionsLayout() *layout {
+	return m.wrapLayout(func(l *layout) {
+		m.addBigSelectionLabel(l, "SOUND OPTIONS", soundOptionsLayoutID)
+		m.addBigSelectionLabel(l, "VIDEO OPTIONS", videoOptionsLayoutID)
+		m.addBigSelectionLabel(l, "AUTOMAP OPTIONS", automapOptionsLayoutID)
+		m.addBigSelectionLabel(l, "CONFIGURE CONTROLS", configureControlsLayoutID)
+		m.addBigSelectionLabel(l, "PREVIOUS MENU", mainLayoutID)
 	})
 }
 
-func newSoundOptionsLayout(cfg *layoutCfg) *layout {
-	return cfg.wrapLayout(func(base *layout) {
-		base.addTitle("SOUND OPTIONS")
-		base.addEnumLabel(cfg, optAudioSoundVolume, "SOUND VOLUME", []string{"TODO"})
-		base.addEnumLabel(cfg, optAudioMusicVolume, "MUSIC VOLUME", []string{"TODO"})
-		base.addEnumLabel(cfg, optAudio3dSound, "3D BIAS", []string{"TODO"})
-		base.addEnumLabel(cfg, optAudioHardwareAcceleration, "HARDWARE ACCELERATION", []string{"ON", "OFF"})
-		base.addEnumLabel(cfg, optAudioEnvEffects, "ENVIRONMENTAL EFFECTS", []string{"ON", "OFF"})
-		base.addEnumLabel(cfg, optAudioNpcSpeech, "NPC SPEECH", []string{"AUDIO AND TEXT", "AUDIO ONLY", "TEXT ONLY"})
-		base.addPreviousMenuLabel(cfg, optionsLayoutID)
+func (m *EscapeMenu) newSoundOptionsLayout() *layout {
+	return m.wrapLayout(func(l *layout) {
+		m.addTitle(l, "SOUND OPTIONS")
+		m.addEnumLabel(l, optAudioSoundVolume, "SOUND VOLUME", []string{"TODO"})
+		m.addEnumLabel(l, optAudioMusicVolume, "MUSIC VOLUME", []string{"TODO"})
+		m.addEnumLabel(l, optAudio3dSound, "3D BIAS", []string{"TODO"})
+		m.addEnumLabel(l, optAudioHardwareAcceleration, "HARDWARE ACCELERATION", []string{"ON", "OFF"})
+		m.addEnumLabel(l, optAudioEnvEffects, "ENVIRONMENTAL EFFECTS", []string{"ON", "OFF"})
+		m.addEnumLabel(l, optAudioNpcSpeech, "NPC SPEECH", []string{"AUDIO AND TEXT", "AUDIO ONLY", "TEXT ONLY"})
+		m.addPreviousMenuLabel(l, optionsLayoutID)
 	})
 }
 
-func newVideoOptionsLayout(cfg *layoutCfg) *layout {
-	return cfg.wrapLayout(func(base *layout) {
-		base.addTitle("VIDEO OPTIONS")
-		base.addEnumLabel(cfg, optVideoResolution, "VIDEO RESOLUTION", []string{"800X600", "1024X768"})
-		base.addEnumLabel(cfg, optVideoLightingQuality, "LIGHTING QUALITY", []string{"LOW", "HIGH"})
-		base.addEnumLabel(cfg, optVideoBlendedShadows, "BLENDED SHADOWS", []string{"ON", "OFF"})
-		base.addEnumLabel(cfg, optVideoPerspective, "PERSPECTIVE", []string{"ON", "OFF"})
-		base.addEnumLabel(cfg, optVideoGamma, "GAMMA", []string{"TODO"})
-		base.addEnumLabel(cfg, optVideoContrast, "CONTRAST", []string{"TODO"})
-		base.addPreviousMenuLabel(cfg, optionsLayoutID)
+func (m *EscapeMenu) newVideoOptionsLayout() *layout {
+	return m.wrapLayout(func(l *layout) {
+		m.addTitle(l, "VIDEO OPTIONS")
+		m.addEnumLabel(l, optVideoResolution, "VIDEO RESOLUTION", []string{"800X600", "1024X768"})
+		m.addEnumLabel(l, optVideoLightingQuality, "LIGHTING QUALITY", []string{"LOW", "HIGH"})
+		m.addEnumLabel(l, optVideoBlendedShadows, "BLENDED SHADOWS", []string{"ON", "OFF"})
+		m.addEnumLabel(l, optVideoPerspective, "PERSPECTIVE", []string{"ON", "OFF"})
+		m.addEnumLabel(l, optVideoGamma, "GAMMA", []string{"TODO"})
+		m.addEnumLabel(l, optVideoContrast, "CONTRAST", []string{"TODO"})
+		m.addPreviousMenuLabel(l, optionsLayoutID)
 	})
 }
 
-func newAutomapOptionsLayout(cfg *layoutCfg) *layout {
-	return cfg.wrapLayout(func(base *layout) {
-		base.addTitle("AUTOMAP OPTIONS")
-		base.addEnumLabel(cfg, optAutomapSize, "AUTOMAP SIZE", []string{"FULL SCREEN"})
-		base.addEnumLabel(cfg, optAutomapFade, "FADE", []string{"YES", "NO"})
-		base.addEnumLabel(cfg, optAutomapCenterWhenCleared, "CENTER WHEN CLEARED", []string{"YES", "NO"})
-		base.addEnumLabel(cfg, optAutomapShowParty, "SHOW PARTY", []string{"YES", "NO"})
-		base.addEnumLabel(cfg, optAutomapShowNames, "SHOW NAMES", []string{"YES", "NO"})
-		base.addPreviousMenuLabel(cfg, optionsLayoutID)
+func (m *EscapeMenu) newAutomapOptionsLayout() *layout {
+	return m.wrapLayout(func(l *layout) {
+		m.addTitle(l, "AUTOMAP OPTIONS")
+		m.addEnumLabel(l, optAutomapSize, "AUTOMAP SIZE", []string{"FULL SCREEN"})
+		m.addEnumLabel(l, optAutomapFade, "FADE", []string{"YES", "NO"})
+		m.addEnumLabel(l, optAutomapCenterWhenCleared, "CENTER WHEN CLEARED", []string{"YES", "NO"})
+		m.addEnumLabel(l, optAutomapShowParty, "SHOW PARTY", []string{"YES", "NO"})
+		m.addEnumLabel(l, optAutomapShowNames, "SHOW NAMES", []string{"YES", "NO"})
+		m.addPreviousMenuLabel(l, optionsLayoutID)
 	})
 }
 
-func newConfigureControlsLayout(cfg *layoutCfg) *layout {
-	return cfg.wrapLayout(func(base *layout) {
-		base.addTitle("CONFIGURE CONTROLS")
-		base.addPreviousMenuLabel(cfg, optionsLayoutID)
+func (m *EscapeMenu) newConfigureControlsLayout() *layout {
+	return m.wrapLayout(func(l *layout) {
+		m.addTitle(l, "CONFIGURE CONTROLS")
+		m.addPreviousMenuLabel(l, optionsLayoutID)
 	})
 }
 
-func (layout *layout) addTitle(text string) {
-	layout.AddLabel(text, d2gui.FontStyle42Units)
-	layout.AddSpacerStatic(10, labelGutter)
+func (m *EscapeMenu) addTitle(l *layout, text string) {
+	l.AddLabel(text, d2gui.FontStyle42Units)
+	l.AddSpacerStatic(10, labelGutter)
 }
 
-func (layout *layout) addBigSelectionLabel(cfg *layoutCfg, text string, targetLayout layoutID) {
-	guiLabel, _ := layout.AddLabel(text, d2gui.FontStyle42Units)
-	label := &showLayoutLabel{Label: guiLabel, target: targetLayout, showLayout: cfg.showLayout}
-	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
-		cfg.showLayout(targetLayout)
-	})
-	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
-		cfg.hoverElement(label)
-	})
-	layout.AddSpacerStatic(10, labelGutter)
-	layout.hoverableElements = append(layout.hoverableElements, label)
-}
-
-func (layout *layout) addPreviousMenuLabel(cfg *layoutCfg, targetLayout layoutID) {
-	layout.AddSpacerStatic(10, labelGutter)
-	guiLabel, _ := layout.AddLabel("PREVIOUS MENU", d2gui.FontStyle30Units)
-	label := &showLayoutLabel{Label: guiLabel, target: targetLayout, showLayout: cfg.showLayout}
+func (m *EscapeMenu) addBigSelectionLabel(l *layout, text string, targetLayout layoutID) {
+	guiLabel, _ := l.AddLabel(text, d2gui.FontStyle42Units)
+	label := &showLayoutLabel{Label: guiLabel, target: targetLayout, showLayout: m.showLayout}
 	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
 		label.Trigger()
-		cfg.showLayout(targetLayout)
 	})
 	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
-		cfg.hoverElement(label)
+		m.onHoverElement(label)
 	})
-	layout.hoverableElements = append(layout.hoverableElements, label)
+	l.AddSpacerStatic(10, labelGutter)
+	l.hoverableElements = append(l.hoverableElements, label)
 }
 
-func (layout *layout) addEnumLabel(cfg *layoutCfg, optID optionID, text string, values []string) {
-	l := layout.AddLayout(d2gui.PositionTypeHorizontal)
-	l.SetSize(menuSize, 0)
-	l.AddLabel(text, d2gui.FontStyle30Units)
-	l.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
-		cfg.hoverElement(l)
+func (m *EscapeMenu) addPreviousMenuLabel(l *layout, targetLayout layoutID) {
+	l.AddSpacerStatic(10, labelGutter)
+	guiLabel, _ := l.AddLabel("PREVIOUS MENU", d2gui.FontStyle30Units)
+	label := &showLayoutLabel{Label: guiLabel, target: targetLayout, showLayout: m.showLayout}
+	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
+		label.Trigger()
 	})
-	l.AddSpacerDynamic()
-	guiLabel, _ := l.AddLabel(values[0], d2gui.FontStyle30Units)
+	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
+		m.onHoverElement(label)
+	})
+	l.hoverableElements = append(l.hoverableElements, label)
+}
+
+func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values []string) {
+	layout := l.AddLayout(d2gui.PositionTypeHorizontal)
+	layout.SetSize(menuSize, 0)
+	layout.AddLabel(text, d2gui.FontStyle30Units)
+	layout.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
+		m.onHoverElement(layout)
+	})
+	layout.AddSpacerDynamic()
+	guiLabel, _ := layout.AddLabel(values[0], d2gui.FontStyle30Units)
 	label := &enumLabel{
-		Layout:      l,
-		label:       guiLabel,
-		optionID:    optID,
-		values:      values,
-		current:     0,
-		playSound:   cfg.playSound,
-		updateValue: cfg.updateValue,
+		Layout:            layout,
+		textChangingLabel: guiLabel,
+		optionID:          optID,
+		values:            values,
+		current:           0,
+		playSound:         m.playSound,
+		updateValue:       m.onUpdateValue,
 	}
-	l.SetMouseClickHandler(func(_ d2input.MouseEvent) {
+	layout.SetMouseClickHandler(func(_ d2input.MouseEvent) {
 		label.Trigger()
 	})
-	layout.AddSpacerStatic(10, labelGutter)
-	layout.hoverableElements = append(layout.hoverableElements, label)
+	l.AddSpacerStatic(10, labelGutter)
+	l.hoverableElements = append(l.hoverableElements, label)
 }
 
 func (m *EscapeMenu) OnLoad() {
