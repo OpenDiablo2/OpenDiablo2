@@ -1,4 +1,4 @@
-package d2player
+package d2gamescreen
 
 import (
 	"fmt"
@@ -360,7 +360,7 @@ func (m *EscapeMenu) setLayout(id layoutID) {
 	d2gui.SetLayout(m.layouts[id].Layout)
 }
 
-func (m *EscapeMenu) OnUpKey() {
+func (m *EscapeMenu) onUpKey() {
 	if !m.isOpen {
 		return
 	}
@@ -371,7 +371,7 @@ func (m *EscapeMenu) OnUpKey() {
 	m.onHoverElement(m.layouts[m.currentLayout].currentEl)
 }
 
-func (m *EscapeMenu) OnDownKey() {
+func (m *EscapeMenu) onDownKey() {
 	if !m.isOpen {
 		return
 	}
@@ -382,9 +382,25 @@ func (m *EscapeMenu) OnDownKey() {
 	m.onHoverElement(m.layouts[m.currentLayout].currentEl)
 }
 
-func (m *EscapeMenu) OnEnterKey() {
+func (m *EscapeMenu) onEnterKey() {
 	if !m.isOpen {
 		return
 	}
 	m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].currentEl].Trigger()
+}
+
+func (m *EscapeMenu) OnKeyDown(event d2input.KeyEvent) bool {
+	switch event.Key {
+	case d2input.KeyEscape:
+		m.OnEscKey()
+	case d2input.KeyUp:
+		m.onUpKey()
+	case d2input.KeyDown:
+		m.onDownKey()
+	case d2input.KeyEnter:
+		m.onEnterKey()
+	default:
+		return false
+	}
+	return false
 }

@@ -51,6 +51,10 @@ func (v *Viewport) WorldToScreen(x, y float64) (int, int) {
 	return v.OrthoToScreen(v.WorldToOrtho(x, y))
 }
 
+func (v *Viewport) WorldToScreenF(x, y float64) (float64, float64) {
+	return v.OrthoToScreenF(v.WorldToOrtho(x, y))
+}
+
 func (v *Viewport) ScreenToWorld(x, y int) (float64, float64) {
 	return v.OrthoToWorld(v.ScreenToOrtho(x, y))
 }
@@ -78,6 +82,13 @@ func (v *Viewport) OrthoToScreen(x, y float64) (int, int) {
 	camOrthoX, camOrthoY := v.getCameraOffset()
 	orthoX := int(math.Floor(x - camOrthoX + float64(v.screenRect.Left)))
 	orthoY := int(math.Floor(y - camOrthoY + float64(v.screenRect.Top)))
+	return orthoX, orthoY
+}
+
+func (v *Viewport) OrthoToScreenF(x, y float64) (float64, float64) {
+	camOrthoX, camOrthoY := v.getCameraOffset()
+	orthoX := x - camOrthoX + float64(v.screenRect.Left)
+	orthoY := y - camOrthoY + float64(v.screenRect.Top)
 	return orthoX, orthoY
 }
 

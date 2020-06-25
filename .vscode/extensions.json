@@ -1,6 +1,6 @@
 {
     "recommendations": [
         "golang.go",
-        "defaltd.go-coverage-viewer"
+        "soren.go-coverage-viewer"
     ]
 }

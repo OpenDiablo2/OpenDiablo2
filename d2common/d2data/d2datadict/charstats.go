@@ -98,8 +98,8 @@ func LoadCharStats(file []byte) {
 
 			InitStr:     d.GetNumber("str", idx),
 			InitDex:     d.GetNumber("dex", idx),
-			InitVit:     d.GetNumber("int", idx),
-			InitEne:     d.GetNumber("vit", idx),
+			InitVit:     d.GetNumber("vit", idx),
+			InitEne:     d.GetNumber("int", idx),
 			InitStamina: d.GetNumber("stamina", idx),
 
 			ManaRegen:   d.GetNumber("ManaRegen", idx),

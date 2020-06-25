@@ -44,6 +44,7 @@ func SetLayout(layout *Layout) {
 	singleton.SetLayout(layout)
 }
 
+// ShowLoadScreen renders the loading progress screen. The provided progress argument defines the loading animation's state in the range `[0, 1]`, where `0` is initial frame and `1` is the final frame
 func ShowLoadScreen(progress float64) {
 	verifyWasInit()
 	singleton.showLoadScreen(progress)

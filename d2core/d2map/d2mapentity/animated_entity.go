@@ -35,13 +35,13 @@ func (ae *AnimatedEntity) Render(target d2render.Surface) {
 	ae.animation.Render(target)
 }
 
-func (ae AnimatedEntity) GetDirection() int {
+func (ae *AnimatedEntity) GetDirection() int {
 	return ae.direction
 }
 
 // rotate sets direction and changes animation
-func (ae *AnimatedEntity) rotate(angle float64) {
-	ae.direction = angleToDirection(angle)
+func (ae *AnimatedEntity) rotate(direction int) {
+	ae.direction = direction
 
 	ae.animation.SetDirection(ae.direction)
 }

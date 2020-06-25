@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
@@ -26,6 +28,7 @@ type Game struct {
 	localPlayer          *d2mapentity.Player
 	lastRegionType       d2enum.RegionIdType
 	ticksSinceLevelCheck float64
+	escapeMenu           *EscapeMenu
 }
 
 func CreateGame(gameClient *d2client.GameClient) *Game {
@@ -36,17 +39,20 @@ func CreateGame(gameClient *d2client.GameClient) *Game {
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
 		mapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine),
+		escapeMenu:           NewEscapeMenu(),
 	}
+	result.escapeMenu.OnLoad()
+	d2input.BindHandler(result.escapeMenu)
 	return result
 }
 
-func (v *Game) OnLoad() error {
+func (v *Game) OnLoad(loading d2screen.LoadingState) {
 	d2audio.PlayBGM("")
-	return nil
 }
 
 func (v *Game) OnUnload() error {
 	d2input.UnbindHandler(v.gameControls) // TODO: hack
+	v.gameClient.Close()
 	return nil
 }
 
@@ -55,18 +61,25 @@ func (v *Game) Render(screen d2render.Surface) error {
 		v.gameClient.RegenMap = false
 		v.mapRenderer.RegenerateTileCache()
 	}
+
 	screen.Clear(color.Black)
 	v.mapRenderer.Render(screen)
+
 	if v.gameControls != nil {
 		v.gameControls.Render(screen)
 	}
+
+	//if v.escapeMenu != nil {
+	//	v.escapeMenu.Render(screen)
+	//}
+
 	return nil
 }
 
 var hideZoneTextAfterSeconds = 2.0
 
 func (v *Game) Advance(tickTime float64) error {
-	if !v.gameControls.InEscapeMenu() || len(v.gameClient.Players) != 1 {
+	if (v.escapeMenu != nil && !v.escapeMenu.IsOpen()) || len(v.gameClient.Players) != 1 {
 		v.gameClient.MapEngine.Advance(tickTime) // TODO: Hack
 	}
 
@@ -116,16 +129,20 @@ func (v *Game) Advance(tickTime float64) error {
 		}
 	}
 
+	//if v.escapeMenu.IsOpen() {
+	//	v.escapeMenu.Advance(tickTime)
+	//}
+
 	// Update the camera to focus on the player
 	if v.localPlayer != nil && !v.gameControls.FreeCam {
-		rx, ry := v.mapRenderer.WorldToOrtho(v.localPlayer.AnimatedComposite.LocationX/5, v.localPlayer.AnimatedComposite.LocationY/5)
+		rx, ry := v.mapRenderer.WorldToOrtho(v.localPlayer.LocationX/5, v.localPlayer.LocationY/5)
 		v.mapRenderer.MoveCameraTo(rx, ry)
 	}
 	return nil
 }
 
 func (v *Game) OnPlayerMove(x, y float64) {
-	heroPosX := v.localPlayer.AnimatedComposite.LocationX / 5.0
-	heroPosY := v.localPlayer.AnimatedComposite.LocationY / 5.0
+	heroPosX := v.localPlayer.LocationX / 5.0
+	heroPosY := v.localPlayer.LocationY / 5.0
 	v.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(v.gameClient.PlayerId, heroPosX, heroPosY, x, y))
 }

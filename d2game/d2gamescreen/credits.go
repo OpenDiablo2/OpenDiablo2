@@ -63,28 +63,34 @@ func (v *Credits) LoadContributors() []string {
 	return contributors
 }
 
-// Load is called to load the resources for the credits screen
-func (v *Credits) OnLoad() error {
+// OnLoad is called to load the resources for the credits screen
+func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 	animation, _ := d2asset.LoadAnimation(d2resource.CreditsBackground, d2resource.PaletteSky)
 	v.creditsBackground, _ = d2ui.LoadSprite(animation)
 	v.creditsBackground.SetPosition(0, 0)
+	loading.Progress(0.2)
 
 	v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, "EXIT")
 	v.exitButton.SetPosition(33, 543)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 	d2ui.AddWidget(&v.exitButton)
+	loading.Progress(0.4)
 
 	fileData, err := d2asset.LoadFile(d2resource.CreditsText)
 	if err != nil {
-		return err
+		loading.Error(err)
+		return
 	}
+	loading.Progress(0.6)
+
 	creditData, _ := d2common.Utf16BytesToString(fileData[2:])
 	v.creditsText = strings.Split(creditData, "\r\n")
 	for i := range v.creditsText {
 		v.creditsText[i] = strings.Trim(v.creditsText[i], " ")
 	}
+	loading.Progress(0.8)
+
 	v.creditsText = append(v.LoadContributors(), v.creditsText...)
-	return nil
 }
 
 // Render renders the credits screen

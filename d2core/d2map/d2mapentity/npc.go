@@ -7,27 +7,69 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type NPC struct {
-	*AnimatedComposite
-	action      int
-	HasPaths    bool
-	Paths       []d2common.Path
-	path        int
-	isDone      bool
-	repetitions int
+	mapEntity
+	composite    *d2asset.Composite
+	action       int
+	HasPaths     bool
+	Paths        []d2common.Path
+	path         int
+	isDone       bool
+	repetitions  int
+	direction    int
+	objectLookup *d2datadict.ObjectLookupRecord
+	name string
 }
 
 func CreateNPC(x, y int, object *d2datadict.ObjectLookupRecord, direction int) *NPC {
-	entity, err := CreateAnimatedComposite(x, y, object, d2resource.PaletteUnits)
+	composite, err := d2asset.LoadComposite(object, d2resource.PaletteUnits)
 	if err != nil {
 		panic(err)
 	}
 
-	result := &NPC{AnimatedComposite: entity, HasPaths: false}
+	result := &NPC{
+		mapEntity:    createMapEntity(x, y),
+		composite:    composite,
+		objectLookup: object,
+		HasPaths:     false,
+	}
 	result.SetMode(object.Mode, object.Class, direction)
+	result.mapEntity.directioner = result.rotate
+
+	switch object.Act {
+	case 1:
+		switch object.Id {
+		case 0:
+			result.name = "Gheed"
+		case 1:
+			result.name = "Cain"
+		case 2:
+			result.name = "Akara"
+		case 5:
+			result.name = "Kashya"
+		case 7:
+			result.name = "Warriv"
+		case 8:
+			result.name = "Charsi"
+		case 9:
+			result.name = "Andariel"
+		}
+	}
+
 	return result
+}
+
+func (v *NPC) Render(target d2render.Surface) {
+	target.PushTranslation(
+		v.offsetX+int((v.subcellX-v.subcellY)*16),
+		v.offsetY+int(((v.subcellX+v.subcellY)*8)-5),
+	)
+	defer target.Pop()
+	v.composite.Render(target)
 }
 
 func (v *NPC) Path() d2common.Path {
@@ -51,7 +93,7 @@ func (v *NPC) SetPaths(paths []d2common.Path) {
 
 func (v *NPC) Advance(tickTime float64) {
 	v.Step(tickTime)
-	v.AnimatedComposite.Advance(tickTime)
+	v.composite.Advance(tickTime)
 
 	if v.HasPaths && v.wait() {
 		// If at the target, set target to the next path.
@@ -75,7 +117,7 @@ func (v *NPC) wait() bool {
 func (v *NPC) next() {
 	v.isDone = true
 	v.repetitions = 3 + rand.Intn(5)
-	newAnimationMode := d2enum.AnimationModeObjectNeutral
+	newAnimationMode := d2enum.AnimationModeMonsterNeutral
 	// TODO: Figure out what 1-3 are for, 4 is correct.
 	switch v.action {
 	case 1:
@@ -94,4 +136,35 @@ func (v *NPC) next() {
 	if v.composite.GetAnimationMode() != newAnimationMode.String() {
 		v.SetMode(newAnimationMode.String(), v.weaponClass, v.direction)
 	}
+}
+
+// rotate sets direction and changes animation
+func (v *NPC) rotate(direction int) {
+	var newMode d2enum.MonsterAnimationMode
+	if !v.IsAtTarget() {
+		newMode = d2enum.AnimationModeMonsterWalk
+	} else {
+		newMode = d2enum.AnimationModeMonsterNeutral
+	}
+	if newMode.String() != v.composite.GetAnimationMode() || direction != v.direction {
+		v.SetMode(newMode.String(), v.weaponClass, direction)
+	}
+}
+
+// SetMode changes the graphical mode of this animated entity
+func (v *NPC) SetMode(animationMode, weaponClass string, direction int) error {
+	v.direction = direction
+	v.weaponClass = weaponClass
+
+	err := v.composite.SetMode(animationMode, weaponClass, direction)
+	if err != nil {
+		err = v.composite.SetMode(animationMode, "HTH", direction)
+		v.weaponClass = "HTH"
+	}
+
+	return err
+}
+
+func (m *NPC) Name() string {
+	return m.name
 }

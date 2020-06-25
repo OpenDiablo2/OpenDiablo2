@@ -80,7 +80,7 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		log.Printf("Player id set to %s", serverInfo.PlayerId)
 	case d2netpackettype.AddPlayer:
 		player := packet.PacketData.(d2netpacket.AddPlayerPacket)
-		newPlayer := d2mapentity.CreatePlayer(player.Id, player.Name, player.X, player.Y, 0, player.HeroType, player.Equipment)
+		newPlayer := d2mapentity.CreatePlayer(player.Id, player.Name, player.X, player.Y, 0, player.HeroType, player.Stats, player.Equipment)
 		g.Players[newPlayer.Id] = newPlayer
 		g.MapEngine.AddEntity(newPlayer)
 	case d2netpackettype.MovePlayer:
@@ -88,7 +88,7 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		player := g.Players[movePlayer.PlayerId]
 		path, _, _ := g.MapEngine.PathFind(movePlayer.StartX, movePlayer.StartY, movePlayer.DestX, movePlayer.DestY)
 		if len(path) > 0 {
-			player.AnimatedComposite.SetPath(path, func() {
+			player.SetPath(path, func() {
 				tile := g.MapEngine.TileAt(player.TileX, player.TileY)
 				if tile == nil {
 					return
@@ -100,7 +100,7 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 				} else {
 					player.SetIsInTown(false)
 				}
-				player.AnimatedComposite.SetAnimationMode(player.GetAnimationMode().String())
+				player.SetAnimationMode(player.GetAnimationMode().String())
 			})
 		}
 	case d2netpackettype.Ping:

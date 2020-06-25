@@ -247,7 +247,7 @@ func hashString(key string, hashType uint32) uint32 {
 }
 
 // GetFileBlockData gets a block table entry
-func (v MPQ) getFileBlockData(fileName string) (BlockTableEntry, error) {
+func (v *MPQ) getFileBlockData(fileName string) (BlockTableEntry, error) {
 	fileEntry, found := v.HashEntryMap.Find(fileName)
 	if !found || fileEntry.BlockIndex >= uint32(len(v.BlockTableEntries)) {
 		return BlockTableEntry{}, errors.New("file not found")
@@ -263,12 +263,12 @@ func (v *MPQ) Close() {
 	}
 }
 
-func (v MPQ) FileExists(fileName string) bool {
+func (v *MPQ) FileExists(fileName string) bool {
 	return v.HashEntryMap.Contains(fileName)
 }
 
 // ReadFile reads a file from the MPQ and returns a memory stream
-func (v MPQ) ReadFile(fileName string) ([]byte, error) {
+func (v *MPQ) ReadFile(fileName string) ([]byte, error) {
 	fileBlockData, err := v.getFileBlockData(fileName)
 	if err != nil {
 		return []byte{}, err
@@ -285,7 +285,7 @@ func (v MPQ) ReadFile(fileName string) ([]byte, error) {
 }
 
 // ReadTextFile reads a file and returns it as a string
-func (v MPQ) ReadTextFile(fileName string) (string, error) {
+func (v *MPQ) ReadTextFile(fileName string) (string, error) {
 	data, err := v.ReadFile(fileName)
 	if err != nil {
 		return "", err
@@ -303,7 +303,7 @@ func (v *BlockTableEntry) calculateEncryptionSeed() {
 }
 
 // GetFileList returns the list of files in this MPQ
-func (v MPQ) GetFileList() ([]string, error) {
+func (v * MPQ) GetFileList() ([]string, error) {
 	data, err := v.ReadFile("(listfile)")
 	if err != nil {
 		return nil, err
