@@ -33,6 +33,10 @@ var staminaBarWidth = 102.0
 var globeHeight = 80
 var globeWidth = 80
 
+var leftMenuRect = d2common.Rectangle{Left: 0, Top: 0, Width: 400, Height: 600}
+var rightMenuRect = d2common.Rectangle{Left: 400, Top: 0, Width: 400, Height: 600}
+var bottomMenuRect = d2common.Rectangle{Left: 0, Top: 550, Width: 800, Height: 50}
+
 type GameControls struct {
 	hero              *d2mapentity.Player
 	mapEngine         *d2mapengine.MapEngine
@@ -185,13 +189,13 @@ func (g *GameControls) OnMouseButtonRepeat(event d2input.MouseEvent) bool {
 	py = float64(int(py*10)) / 10.0
 
 	now := d2common.Now()
-	if event.Button == d2input.MouseButtonLeft && now-lastLeftBtnActionTime >= mouseBtnActionsTreshhold {
+	if event.Button == d2input.MouseButtonLeft && now-lastLeftBtnActionTime >= mouseBtnActionsTreshhold && !g.isInActiveMenusRect(event.X, event.Y) {
 		lastLeftBtnActionTime = now
 		g.inputListener.OnPlayerMove(px, py)
 		return true
 	}
 
-	if event.Button == d2input.MouseButtonRight && now-lastRightBtnActionTime >= mouseBtnActionsTreshhold {
+	if event.Button == d2input.MouseButtonRight && now-lastRightBtnActionTime >= mouseBtnActionsTreshhold && !g.isInActiveMenusRect(event.X, event.Y) {
 		lastRightBtnActionTime = now
 		g.ShootMissile(px, py)
 		return true
@@ -229,13 +233,13 @@ func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	px = float64(int(px*10)) / 10.0
 	py = float64(int(py*10)) / 10.0
 
-	if event.Button == d2input.MouseButtonLeft {
+	if event.Button == d2input.MouseButtonLeft && !g.isInActiveMenusRect(mx, my) {
 		lastLeftBtnActionTime = d2common.Now()
 		g.inputListener.OnPlayerMove(px, py)
 		return true
 	}
 
-	if event.Button == d2input.MouseButtonRight {
+	if event.Button == d2input.MouseButtonRight && !g.isInActiveMenusRect(mx, my) {
 		lastRightBtnActionTime = d2common.Now()
 		return g.ShootMissile(px, py)
 	}
@@ -316,20 +320,42 @@ func (g *GameControls) Advance(elapsed float64) error {
 }
 
 func (g *GameControls) updateLayout() {
-	isRightPanelOpen := false
-	isLeftPanelOpen := false
-
-	// todo : add same logic when adding quest log and skill tree
-	isRightPanelOpen = g.inventory.isOpen || isRightPanelOpen
-	isLeftPanelOpen = g.heroStatsPanel.isOpen || isLeftPanelOpen
+	isRightPanelOpen := g.isLeftPanelOpen()
+	isLeftPanelOpen := g.isRightPanelOpen()
 
 	if isRightPanelOpen == isLeftPanelOpen {
 		g.mapRenderer.ViewportDefault()
-	} else if isRightPanelOpen == true {
+	} else if isRightPanelOpen {
 		g.mapRenderer.ViewportToLeft()
 	} else {
 		g.mapRenderer.ViewportToRight()
 	}
+}
+
+func (g *GameControls) isLeftPanelOpen() bool {
+	// TODO: add quest log panel
+	return g.heroStatsPanel.IsOpen()
+}
+
+func (g *GameControls) isRightPanelOpen() bool {
+	// TODO: add skills tree panel
+	return g.inventory.IsOpen()
+}
+
+func (g *GameControls) isInActiveMenusRect(px int, py int) bool {
+	if bottomMenuRect.IsInRect(px, py) {
+		return true
+	}
+
+	if g.isLeftPanelOpen() && leftMenuRect.IsInRect(px, py) {
+		return true
+	}
+
+	if g.isRightPanelOpen() && rightMenuRect.IsInRect(px, py) {
+		return true
+	}
+
+	return false
 }
 
 // TODO: consider caching the panels to single image that is reused.
