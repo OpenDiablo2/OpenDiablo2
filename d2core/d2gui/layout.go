@@ -18,8 +18,6 @@ type layoutEntry struct {
 
 	mouseOver bool
 	mouseDown [3]bool
-
-	foo string
 }
 
 type VerticalAlign int
@@ -121,7 +119,7 @@ func (l *Layout) AddLabel(text string, fontStyle FontStyle) (*Label, error) {
 		return nil, err
 	}
 
-	l.entries = append(l.entries, &layoutEntry{widget: label, foo: text})
+	l.entries = append(l.entries, &layoutEntry{widget: label})
 	return label, nil
 }
 
@@ -177,7 +175,7 @@ func (l *Layout) renderEntry(entry *layoutEntry, target d2render.Surface) error 
 }
 
 func (l *Layout) renderEntryDebug(entry *layoutEntry, target d2render.Surface) error {
-	//return nil
+	return nil
 	target.PushTranslation(entry.x, entry.y)
 	defer target.Pop()
 
