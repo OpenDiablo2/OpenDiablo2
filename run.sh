@@ -95,6 +95,6 @@ go_install
 echo "Install libraries"
 dep_install
 echo "Build OpenDiablo 2"
-go get
+go get -d
 go build
 echo "Build finished. Please edit config.json before running OpenDiablo2"
