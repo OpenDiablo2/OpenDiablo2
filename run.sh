@@ -30,7 +30,7 @@ go_install(){
       	wget https://dl.google.com/go/go"$go_version".linux-amd64.tar.gz > /dev/null 2>&1
       echo "Install Go"
 	  	sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
-      echo "Clean unless files"
+      echo "Clean unneeded files"
 	  	rm go*.linux-amd64.tar.gz
       
     elif [ "$distribution" = "Fedora" ]; then
@@ -38,7 +38,7 @@ go_install(){
       	wget https://dl.google.com/go/go"$go_version".linux-amd64.tar.gz > /dev/null 2>&1
       echo "Install Go"
 	    sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
-      echo "Clean unless files"
+      echo "Clean unneeded files"
 	    rm go*.linux-amd64.tar.gz
     
     elif [ "$distribution" = "Debian" ] || [ "$distribution" = "Ubuntu" ] || [ "$distribution" = "Deepin" ]; then
@@ -46,7 +46,7 @@ go_install(){
       	wget https://dl.google.com/go/go"$go_version".linux-amd64.tar.gz > /dev/null 2>&1
       echo "Install Go"
 	    sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
-      echo "Clean unless files"
+      echo "Clean unneeded files"
 	    rm go*.linux-amd64.tar.gz
       
     elif [ "$distribution" = "Gentoo" ]; then
@@ -60,7 +60,7 @@ go_install(){
       	wget https://dl.google.com/go/go"$go_version".linux-amd64.tar.gz > /dev/null 2>&1
       echo "Install Go"
 	    sudo tar -C /usr/local -xzf go*.linux-amd64.tar.gz > /dev/null 2>&1
-      echo "Clean unless files"
+      echo "Clean unneeded files"
 	    rm go*.linux-amd64.tar.gz
 
     fi
