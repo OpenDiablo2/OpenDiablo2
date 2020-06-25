@@ -78,7 +78,7 @@ func (im *inputManager) advance(_ float64) error {
 		cursorY,
 	}
 
-	for key := keyMin; key < keyMax; key++ {
+	for key := keyMin; key <= keyMax; key++ {
 		if im.inputService.IsKeyJustPressed(key) {
 			event := KeyEvent{HandlerEvent: eventBase, Key: key}
 			im.propagate(func(handler Handler) bool {
@@ -124,7 +124,7 @@ func (im *inputManager) advance(_ float64) error {
 		})
 	}
 
-	for button := mouseButtonMin; button < mouseButtonMax; button++ {
+	for button := mouseButtonMin; button <= mouseButtonMax; button++ {
 		if im.inputService.IsMouseButtonJustPressed(button) {
 			event := MouseEvent{eventBase, MouseButton(button)}
 			im.propagate(func(handler Handler) bool {
