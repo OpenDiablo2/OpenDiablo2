@@ -21,7 +21,6 @@ type widget interface {
 	onMouseButtonClick(event d2input.MouseEvent) bool
 
 	getPosition() (int, int)
-	getOffset() (int, int)
 	setOffset(x, y int)
 	getSize() (int, int)
 	getLayer() int
@@ -54,10 +53,6 @@ func (w *widgetBase) GetPosition() (int, int) {
 }
 
 func (w *widgetBase) GetOffset() (int, int) {
-	return w.offsetX, w.offsetY
-}
-
-func (w *widgetBase) getOffset() (int, int) {
 	return w.offsetX, w.offsetY
 }
 

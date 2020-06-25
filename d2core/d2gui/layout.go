@@ -138,7 +138,7 @@ func (l *Layout) Clear() {
 }
 
 func (l *Layout) render(target d2render.Surface) error {
-	l.adjustEntryPlacement()
+	l.AdjustEntryPlacement()
 
 	for _, entry := range l.entries {
 		if !entry.widget.isVisible() {
@@ -295,7 +295,7 @@ func (l *Layout) adjustEntryEvent(entry *layoutEntry, eventX, eventY *int) bool 
 	return true
 }
 
-func (l *Layout) adjustEntryPlacement() {
+func (l *Layout) AdjustEntryPlacement() {
 	width, height := l.getSize()
 
 	var expanderCount int

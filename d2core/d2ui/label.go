@@ -27,7 +27,7 @@ type Label struct {
 	Height    int
 	Alignment LabelAlignment
 	font      *Font
-	imageData d2render.Surface
+	imageData map[string]d2render.Surface
 	Color     color.Color
 }
 
@@ -37,7 +37,9 @@ func CreateLabel(fontPath, palettePath string) Label {
 		Alignment: LabelAlignLeft,
 		Color:     color.White,
 		font:      GetFont(fontPath, palettePath),
+		imageData: make(map[string]d2render.Surface),
 	}
+
 	return result
 }
 
@@ -60,7 +62,7 @@ func (v *Label) Render(target d2render.Surface) {
 	target.PushTranslation(x, y)
 	defer target.PopN(3)
 
-	target.Render(v.imageData)
+	target.Render(v.imageData[v.text])
 }
 
 // SetPosition moves the label to the specified location
@@ -74,14 +76,14 @@ func (v *Label) GetTextMetrics(text string) (width, height int) {
 }
 
 func (v *Label) cacheImage() {
-	if v.imageData != nil {
+	if v.imageData[v.text] != nil {
 		return
 	}
 	width, height := v.font.GetTextMetrics(v.text)
 	v.Width = width
 	v.Height = height
-	v.imageData, _ = d2render.NewSurface(width, height, d2render.FilterNearest)
-	surface, _ := d2render.CreateSurface(v.imageData)
+	v.imageData[v.text], _ = d2render.NewSurface(width, height, d2render.FilterNearest)
+	surface, _ := d2render.CreateSurface(v.imageData[v.text])
 	v.font.Render(0, 0, v.text, v.Color, surface)
 }
 
@@ -91,7 +93,6 @@ func (v *Label) SetText(newText string) {
 		return
 	}
 	v.text = newText
-	v.imageData = nil
 }
 
 // Size returns the size of the label
