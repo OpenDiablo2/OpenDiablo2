@@ -267,6 +267,68 @@ func generateWilderness1Contents(mapEngine *d2mapengine.MapEngine, rect d2common
 		}
 	}
 
+	stuff := []*d2mapstamp.Stamp{
+		loadPreset(mapEngine, d2wilderness.StoneFill1, 0),
+		loadPreset(mapEngine, d2wilderness.StoneFill1, 1),
+		loadPreset(mapEngine, d2wilderness.StoneFill1, 2),
+		loadPreset(mapEngine, d2wilderness.StoneFill2, 0),
+		loadPreset(mapEngine, d2wilderness.StoneFill2, 1),
+		loadPreset(mapEngine, d2wilderness.StoneFill2, 2),
+		loadPreset(mapEngine, d2wilderness.Cottages1, 0),
+		loadPreset(mapEngine, d2wilderness.Cottages1, 1),
+		loadPreset(mapEngine, d2wilderness.Cottages1, 2),
+		loadPreset(mapEngine, d2wilderness.Cottages1, 3),
+		loadPreset(mapEngine, d2wilderness.Cottages1, 4),
+		loadPreset(mapEngine, d2wilderness.Cottages1, 5),
+		loadPreset(mapEngine, d2wilderness.FallenCamp1, 0),
+		loadPreset(mapEngine, d2wilderness.FallenCamp1, 1),
+		loadPreset(mapEngine, d2wilderness.FallenCamp1, 2),
+		loadPreset(mapEngine, d2wilderness.FallenCamp1, 3),
+		loadPreset(mapEngine, d2wilderness.Pond, 0),
+		loadPreset(mapEngine, d2wilderness.SwampFill1, 0),
+		loadPreset(mapEngine, d2wilderness.SwampFill2, 0),
+	}
+
 	mapEngine.PlaceStamp(denOfEvil, denOfEvilLoc.X, denOfEvilLoc.Y)
 
+	numPlaced := 0
+	for numPlaced < 25 {
+		stamp := stuff[rand.Intn(len(stuff))]
+
+		stampRect := d2common.Rectangle {
+			Left: rect.Left+ rand.Intn(rect.Width) - stamp.Size().Width,
+			Top: rect.Top+rand.Intn(rect.Height) - stamp.Size().Height,
+			Width: stamp.Size().Width,
+			Height: stamp.Size().Height,
+		}
+
+		if areaEmpty(mapEngine, stampRect) {
+			mapEngine.PlaceStamp(stamp, stampRect.Left, stampRect.Top)
+			numPlaced++
+		}
+	}
+
+}
+
+func areaEmpty(mapEngine *d2mapengine.MapEngine, rect d2common.Rectangle) bool {
+	mapHeight := mapEngine.Size().Height
+	mapWidth := mapEngine.Size().Width
+
+	if rect.Bottom() >= mapHeight || rect.Right() >= mapWidth {
+		return false
+	}
+
+	for y := rect.Top; y <= rect.Bottom(); y++ {
+		for x := rect.Left; x <= rect.Right(); x++ {
+			if len(mapEngine.Tile(x, y).Floors) == 0 {
+				continue
+			}
+			floor := mapEngine.Tile(x, y).Floors[0]
+			if floor.Style != 0 || floor.Sequence != 0 || floor.Prop1 != 1 {
+				return false
+			}
+		}
+	}
+
+	return true
 }

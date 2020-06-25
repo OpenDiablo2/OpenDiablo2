@@ -56,11 +56,14 @@ func (v *Game) Render(screen d2render.Surface) error {
 		v.gameClient.RegenMap = false
 		v.mapRenderer.RegenerateTileCache()
 	}
+
 	screen.Clear(color.Black)
 	v.mapRenderer.Render(screen)
+
 	if v.gameControls != nil {
 		v.gameControls.Render(screen)
 	}
+
 	return nil
 }
 

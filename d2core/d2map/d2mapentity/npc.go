@@ -22,6 +22,7 @@ type NPC struct {
 	repetitions  int
 	direction    int
 	objectLookup *d2datadict.ObjectLookupRecord
+	name string
 }
 
 func CreateNPC(x, y int, object *d2datadict.ObjectLookupRecord, direction int) *NPC {
@@ -38,6 +39,26 @@ func CreateNPC(x, y int, object *d2datadict.ObjectLookupRecord, direction int) *
 	}
 	result.SetMode(object.Mode, object.Class, direction)
 	result.mapEntity.directioner = result.rotate
+
+	switch object.Act {
+	case 1:
+		switch object.Id {
+		case 0:
+			result.name = "Gheed"
+		case 1:
+			result.name = "Cain"
+		case 2:
+			result.name = "Akara"
+		case 5:
+			result.name = "Kashya"
+		case 7:
+			result.name = "Warriv"
+		case 8:
+			result.name = "Charsi"
+		case 9:
+			result.name = "Andariel"
+		}
+	}
 
 	return result
 }
@@ -142,4 +163,8 @@ func (v *NPC) SetMode(animationMode, weaponClass string, direction int) error {
 	}
 
 	return err
+}
+
+func (m *NPC) Name() string {
+	return m.name
 }

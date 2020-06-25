@@ -12,6 +12,8 @@ type MapEntity interface {
 	Render(target d2render.Surface)
 	Advance(tickTime float64)
 	GetPosition() (float64, float64)
+	GetPositionF() (float64, float64)
+	Name() string
 }
 
 // mapEntity represents an entity on the map that can be animated
@@ -168,4 +170,12 @@ func angleToDirection(angle float64) int {
 
 func (m *mapEntity) GetPosition() (float64, float64) {
 	return float64(m.TileX), float64(m.TileY)
+}
+
+func (m *mapEntity) GetPositionF() (float64, float64) {
+	return float64(m.TileX) + (float64(m.subcellX)/5.0), float64(m.TileY) + (float64(m.subcellY)/5.0)
+}
+
+func (m *mapEntity) Name() string {
+	return ""
 }
