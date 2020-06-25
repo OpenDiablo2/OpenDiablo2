@@ -144,12 +144,12 @@ func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 			break
 		}
 		g.escapeMenu.OnEscKey()
-	//case d2input.KeyUp:
-	//	g.escapeMenu.OnUpKey()
-	//case d2input.KeyDown:
-	//	g.escapeMenu.OnDownKey()
-	//case d2input.KeyEnter:
-	//	g.escapeMenu.OnEnterKey()
+	case d2input.KeyUp:
+		g.escapeMenu.OnUpKey()
+	case d2input.KeyDown:
+		g.escapeMenu.OnDownKey()
+	case d2input.KeyEnter:
+		g.escapeMenu.OnEnterKey()
 	case d2input.KeyI:
 		g.escapeMenu.Close()
 		g.inventory.Toggle()

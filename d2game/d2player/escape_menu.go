@@ -60,6 +60,14 @@ type EscapeMenu struct {
 	layouts   []*layout
 }
 
+type layout struct {
+	*d2gui.Layout
+	leftPent          *d2gui.AnimatedSprite
+	rightPent         *d2gui.AnimatedSprite
+	current           int
+	hoverableElements []hoverableElement
+}
+
 type enumLabel struct {
 	*d2gui.Label
 	optionID optionID
@@ -71,17 +79,10 @@ type hoverableElement interface {
 	GetOffset() (int, int)
 }
 
-type layout struct {
-	*d2gui.Layout
-	leftPent          *d2gui.AnimatedSprite
-	rightPent         *d2gui.AnimatedSprite
-	hoverableElements []hoverableElement
-}
-
 type layoutCfg struct {
 	playSound    func()
 	showLayout   func(id layoutID)
-	wrapLayout   func(func(*d2gui.Layout)) *layout
+	wrapLayout   func(func(*layout)) *layout
 	hoverElement func(el hoverableElement)
 	updateValue  func(optID optionID, value string)
 }
@@ -106,7 +107,7 @@ func NewEscapeMenu() *EscapeMenu {
 	return m
 }
 
-func (m *EscapeMenu) wrapLayout(fn func(*d2gui.Layout)) *layout {
+func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
 	wrapper := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
 	wrapper.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	wrapper.AddSpacerDynamic()
@@ -119,8 +120,11 @@ func (m *EscapeMenu) wrapLayout(fn func(*d2gui.Layout)) *layout {
 	leftPent, _ := left.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionForward)
 	m.leftPent = leftPent
 
-	base := center.AddLayout(d2gui.PositionTypeVertical)
-	base.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
+	// wrap the base layout so we can pass values around more easily
+	base := &layout{}
+	baseLayout := center.AddLayout(d2gui.PositionTypeVertical)
+	baseLayout.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
+	base.Layout = baseLayout
 	fn(base)
 
 	right := center.AddLayout(d2gui.PositionTypeHorizontal)
@@ -132,14 +136,15 @@ func (m *EscapeMenu) wrapLayout(fn func(*d2gui.Layout)) *layout {
 
 	wrapper.AddSpacerDynamic()
 	return &layout{
-		Layout:    wrapper,
-		leftPent:  leftPent,
-		rightPent: rightPent,
+		Layout:            wrapper,
+		leftPent:          leftPent,
+		rightPent:         rightPent,
+		hoverableElements: base.hoverableElements,
 	}
 }
 
 func newMainLayout(cfg *layoutCfg) *layout {
-	return cfg.wrapLayout(func(base *d2gui.Layout) {
+	return cfg.wrapLayout(func(base *layout) {
 		addBigSelectionLabel(base, cfg, "OPTIONS", optionsLayoutID)
 		addBigSelectionLabel(base, cfg, "SAVE AND EXIT GAME", noLayoutID)
 		addBigSelectionLabel(base, cfg, "RETURN TO GAME", noLayoutID)
@@ -147,7 +152,7 @@ func newMainLayout(cfg *layoutCfg) *layout {
 }
 
 func newOptionsLayout(cfg *layoutCfg) *layout {
-	return cfg.wrapLayout(func(base *d2gui.Layout) {
+	return cfg.wrapLayout(func(base *layout) {
 		addBigSelectionLabel(base, cfg, "SOUND OPTIONS", soundOptionsLayoutID)
 		addBigSelectionLabel(base, cfg, "VIDEO OPTIONS", videoOptionsLayoutID)
 		addBigSelectionLabel(base, cfg, "AUTOMAP OPTIONS", automapOptionsLayoutID)
@@ -157,7 +162,7 @@ func newOptionsLayout(cfg *layoutCfg) *layout {
 }
 
 func newSoundOptionsLayout(cfg *layoutCfg) *layout {
-	return cfg.wrapLayout(func(base *d2gui.Layout) {
+	return cfg.wrapLayout(func(base *layout) {
 		addTitle(base, "SOUND OPTIONS")
 		addEnumLabel(base, cfg, optAudioSoundVolume, "SOUND VOLUME", []string{"TODO"})
 		addEnumLabel(base, cfg, optAudioMusicVolume, "MUSIC VOLUME", []string{"TODO"})
@@ -170,20 +175,20 @@ func newSoundOptionsLayout(cfg *layoutCfg) *layout {
 }
 
 func newVideoOptionsLayout(cfg *layoutCfg) *layout {
-	return cfg.wrapLayout(func(base *d2gui.Layout) {
+	return cfg.wrapLayout(func(base *layout) {
 		addTitle(base, "VIDEO OPTIONS")
 		addEnumLabel(base, cfg, optVideoResolution, "VIDEO RESOLUTION", []string{"800X600", "1024X768"})
 		addEnumLabel(base, cfg, optVideoLightingQuality, "LIGHTING QUALITY", []string{"LOW", "HIGH"})
 		addEnumLabel(base, cfg, optVideoBlendedShadows, "BLENDED SHADOWS", []string{"ON", "OFF"})
 		addEnumLabel(base, cfg, optVideoPerspective, "PERSPECTIVE", []string{"ON", "OFF"})
-		addEnumLabel(base, cfg, optVideoGamma, "GAMME", []string{"TODO"})
+		addEnumLabel(base, cfg, optVideoGamma, "GAMMA", []string{"TODO"})
 		addEnumLabel(base, cfg, optVideoContrast, "CONTRAST", []string{"TODO"})
 		addPreviousMenuLabel(base, cfg, optionsLayoutID)
 	})
 }
 
 func newAutomapOptionsLayout(cfg *layoutCfg) *layout {
-	return cfg.wrapLayout(func(base *d2gui.Layout) {
+	return cfg.wrapLayout(func(base *layout) {
 		addTitle(base, "AUTOMAP OPTIONS")
 		addEnumLabel(base, cfg, optAutomapSize, "AUTOMAP SIZE", []string{"FULL SCREEN"})
 		addEnumLabel(base, cfg, optAutomapFade, "FADE", []string{"YES", "NO"})
@@ -195,18 +200,18 @@ func newAutomapOptionsLayout(cfg *layoutCfg) *layout {
 }
 
 func newConfigureControlsLayout(cfg *layoutCfg) *layout {
-	return cfg.wrapLayout(func(base *d2gui.Layout) {
+	return cfg.wrapLayout(func(base *layout) {
 		addTitle(base, "CONFIGURE CONTROLS")
 		addPreviousMenuLabel(base, cfg, optionsLayoutID)
 	})
 }
 
-func addTitle(layout *d2gui.Layout, text string) {
+func addTitle(layout *layout, text string) {
 	layout.AddLabel(text, d2gui.FontStyle42Units)
 	layout.AddSpacerStatic(10, labelGutter)
 }
 
-func addBigSelectionLabel(layout *d2gui.Layout, cfg *layoutCfg, text string, targetLayout layoutID) {
+func addBigSelectionLabel(layout *layout, cfg *layoutCfg, text string, targetLayout layoutID) {
 	label, _ := layout.AddLabel(text, d2gui.FontStyle42Units)
 	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
 		cfg.showLayout(targetLayout)
@@ -215,9 +220,10 @@ func addBigSelectionLabel(layout *d2gui.Layout, cfg *layoutCfg, text string, tar
 		cfg.hoverElement(label)
 	})
 	layout.AddSpacerStatic(10, labelGutter)
+	layout.hoverableElements = append(layout.hoverableElements, label)
 }
 
-func addPreviousMenuLabel(layout *d2gui.Layout, cfg *layoutCfg, targetLayout layoutID) {
+func addPreviousMenuLabel(layout *layout, cfg *layoutCfg, targetLayout layoutID) {
 	layout.AddSpacerStatic(10, labelGutter)
 	label, _ := layout.AddLabel("PREVIOUS MENU", d2gui.FontStyle30Units)
 	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
@@ -226,9 +232,10 @@ func addPreviousMenuLabel(layout *d2gui.Layout, cfg *layoutCfg, targetLayout lay
 	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
 		cfg.hoverElement(label)
 	})
+	layout.hoverableElements = append(layout.hoverableElements, label)
 }
 
-func addEnumLabel(layout *d2gui.Layout, cfg *layoutCfg, optID optionID, text string, values []string) {
+func addEnumLabel(layout *layout, cfg *layoutCfg, optID optionID, text string, values []string) {
 	l := layout.AddLayout(d2gui.PositionTypeHorizontal)
 	l.SetSize(menuSize, 0)
 	l.AddLabel(text, d2gui.FontStyle30Units)
@@ -251,6 +258,7 @@ func addEnumLabel(layout *d2gui.Layout, cfg *layoutCfg, optID optionID, text str
 		cfg.updateValue(label.optionID, label.values[label.current])
 	})
 	layout.AddSpacerStatic(10, labelGutter)
+	layout.hoverableElements = append(layout.hoverableElements, l)
 }
 
 func (m *EscapeMenu) OnLoad() {
@@ -315,6 +323,7 @@ func (m *EscapeMenu) onHoverElement(el hoverableElement) {
 
 	x, _ = m.rightPent.GetPosition()
 	m.rightPent.SetPosition(x, y+10)
+	fmt.Println("hover", x, y)
 	return
 }
 
@@ -325,6 +334,42 @@ func (m *EscapeMenu) onUpdateValue(optID optionID, value string) {
 func (m *EscapeMenu) setLayout(id layoutID) {
 	m.leftPent = m.layouts[id].leftPent
 	m.rightPent = m.layouts[id].rightPent
-	d2gui.SetLayout(m.layouts[id].Layout)
 	m.currentLayout = id
+	m.layouts[id].current = 0
+	d2gui.SetLayout(m.layouts[id].Layout)
+}
+
+func (m *EscapeMenu) OnUpKey() {
+	if !m.isOpen {
+		return
+	}
+	fmt.Println("before up", m.layouts[m.currentLayout].current, len(m.layouts[m.currentLayout].hoverableElements))
+	if m.layouts[m.currentLayout].current == 0 {
+		fmt.Println("return")
+		return
+	}
+	m.layouts[m.currentLayout].current--
+	fmt.Println("down", m.layouts[m.currentLayout].current)
+	m.onHoverElement(m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].current])
+}
+
+func (m *EscapeMenu) OnDownKey() {
+	if !m.isOpen {
+		return
+	}
+	fmt.Println("before down", m.layouts[m.currentLayout].current, len(m.layouts[m.currentLayout].hoverableElements))
+	if m.layouts[m.currentLayout].current == len(m.layouts[m.currentLayout].hoverableElements)-1 {
+		fmt.Println("return")
+		return
+	}
+	fmt.Println("down", m.layouts[m.currentLayout].current)
+	m.layouts[m.currentLayout].current++
+	m.onHoverElement(m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].current])
+}
+
+func (m *EscapeMenu) OnEnterKey() {
+	if !m.isOpen {
+		return
+	}
+	//m.layouts[m.currentLayout].hoverableElements[m.layouts[m.currentLayout].current]
 }
