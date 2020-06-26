@@ -16,7 +16,6 @@ type Configuration struct {
 	FullScreen      bool
 	RunInBackground bool
 	VsyncEnabled    bool
-	MaxConnections  int
 }
 
 var singleton = getDefaultConfig()

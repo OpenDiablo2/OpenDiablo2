@@ -18,7 +18,6 @@ func getDefaultConfig() *Configuration {
 		VsyncEnabled:    true,
 		SfxVolume:       1.0,
 		BgmVolume:       0.3,
-		MaxConnections:  8,
 		MpqPath:         "C:/Program Files (x86)/Diablo II",
 		MpqLoadOrder: []string{
 			"Patch_D2.mpq",

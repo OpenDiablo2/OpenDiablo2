@@ -1,20 +1,19 @@
 package d2netpacket
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
 
 type GenerateMapPacket struct {
-	ActId   int `json:"actId"`
-	LevelId int `json:"levelId"`
+	RegionType d2enum.RegionIdType `json:"regionType"`
 }
 
-func CreateGenerateMapPacket(actId, levelId int) NetPacket {
+func CreateGenerateMapPacket(regionType d2enum.RegionIdType) NetPacket {
 	return NetPacket{
 		PacketType: d2netpackettype.GenerateMap,
 		PacketData: GenerateMapPacket{
-			ActId:   actId,
-			LevelId: levelId,
+			RegionType: regionType,
 		},
 	}
 

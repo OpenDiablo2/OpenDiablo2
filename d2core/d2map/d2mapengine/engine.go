@@ -20,16 +20,16 @@ import (
 
 // Represents the map data for a specific location
 type MapEngine struct {
-	seed          int64                       // The map seed
-	entities      []d2mapentity.MapEntity     // Entities on the map
-	tiles         []d2ds1.TileRecord          // The map tiles
-	size          d2common.Size               // The size of the map, in tiles
-	levelType     *d2datadict.LevelTypeRecord // The level type of this map
-	dt1TileData   []d2dt1.Tile                // The DT1 tile data
-	walkMesh      []d2common.PathTile         // The walk mesh
-	startSubTileX int                         // The starting X position
-	startSubTileY int                         // The starting Y position
-	dt1Files      []string                    // The list of DS1 strings
+	seed          int64                      // The map seed
+	entities      []d2mapentity.MapEntity    // Entities on the map
+	tiles         []d2ds1.TileRecord         // The map tiles
+	size          d2common.Size              // The size of the map, in tiles
+	levelType     d2datadict.LevelTypeRecord // The level type of this map
+	dt1TileData   []d2dt1.Tile               // The DT1 tile data
+	walkMesh      []d2common.PathTile        // The walk mesh
+	startSubTileX int                        // The starting X position
+	startSubTileY int                        // The starting Y position
+	dt1Files      []string                   // The list of DS1 strings
 }
 
 // Creates a new instance of the map engine
@@ -114,7 +114,7 @@ func (m *MapEngine) FindTile(style, sequence, tileType int32) d2dt1.Tile {
 }
 
 // Returns the level type of this map
-func (m *MapEngine) LevelType() *d2datadict.LevelTypeRecord {
+func (m *MapEngine) LevelType() d2datadict.LevelTypeRecord {
 	return m.levelType
 }
 

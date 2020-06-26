@@ -9,7 +9,6 @@ import (
 type LevelSubstitutionRecord struct {
 	// Description, reference only.
 	Name string // Name
-
 	// This value is used in Levels.txt, in the column 'SubType'. You'll notice
 	// that in LvlSub.txt some rows use the same value, we can say they forms
 	// groups. If you count each row of a group starting from 0, then you'll
