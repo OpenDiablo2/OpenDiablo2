@@ -16,5 +16,5 @@ const (
 	Ping                                          // Ping message type
 	Pong                                          // Pong message type
 	ServerClosed                                  // Local host has closed the server
-	PlayerCast                                    // Sent to the client or server to indicate player casting skill
+	CastSkill                                     // Sent to the client or server to indicate entity casting skill
 )

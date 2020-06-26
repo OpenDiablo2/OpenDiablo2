@@ -106,22 +106,24 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 				player.SetAnimationMode(player.GetAnimationMode().String())
 			})
 		}
-	case d2netpackettype.PlayerCast:
-		playerCast := packet.PacketData.(d2netpacket.PlayerCastPacket)
-		player := g.Players[playerCast.PlayerId]
-		player.SetAnimationMode(d2enum.AnimationModePlayerCast.String())
+	case d2netpackettype.CastSkill:
+		playerCast := packet.PacketData.(d2netpacket.CastPacket)
+		player := g.Players[playerCast.SourceEntityID]
+		player.SetCasting()
+		player.ClearPath()
+		// currently hardcoded to missile skill
 		missile, err := d2mapentity.CreateMissile(
 			int(player.LocationX),
 			int(player.LocationY),
-			d2datadict.Missiles[playerCast.SkillId],
+			d2datadict.Missiles[playerCast.SkillID],
 		)
 		if err != nil {
 			return err
 		}
 
 		rads := d2common.GetRadiansBetween(
-			playerCast.StartX,
-			playerCast.StartY,
+			player.LocationX,
+			player.LocationY,
 			playerCast.TargetX*5,
 			playerCast.TargetY*5,
 		)

@@ -28,6 +28,7 @@ type Player struct {
 	animationMode string
 	isRunToggled  bool
 	isRunning     bool
+	isCasting     bool
 }
 
 // run speed should be walkspeed * 1.5, since in the original game it is 6 yards walk and 9 yards run.
@@ -117,6 +118,10 @@ func (p Player) IsInTown() bool {
 
 func (v *Player) Advance(tickTime float64) {
 	v.Step(tickTime)
+	if v.IsCasting() && v.composite.GetPlayedCount() >= 1 {
+		v.isCasting = false
+		v.SetAnimationMode(v.GetAnimationMode().String())
+	}
 	v.composite.Advance(tickTime)
 	if v.lastPathSize != len(v.path) {
 		v.lastPathSize = len(v.path)
@@ -170,6 +175,10 @@ func (v *Player) GetAnimationMode() d2enum.PlayerAnimationMode {
 		return d2enum.AnimationModePlayerWalk
 	}
 
+	if v.IsCasting() {
+		return d2enum.AnimationModePlayerCast
+	}
+
 	return d2enum.AnimationModePlayerNeutral
 }
 
@@ -188,4 +197,13 @@ func (v *Player) rotate(direction int) {
 
 func (v *Player) Name() string {
 	return v.name
+}
+
+func (v *Player) IsCasting() bool {
+	return v.isCasting
+}
+
+func (v *Player) SetCasting() {
+	v.isCasting = true
+	v.SetAnimationMode(d2enum.AnimationModePlayerCast.String())
 }
