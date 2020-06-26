@@ -9,7 +9,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
@@ -163,27 +162,11 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		v.characterNameLabel[i].SetText(v.gameStates[idx].HeroName)
 		v.characterStatsLabel[i].SetText("Level 1 " + v.gameStates[idx].HeroType.String())
 		v.characterExpLabel[i].SetText(expText)
-
-		playerId := ""
-		playerName := ""
-		actId := d2datadict.GetActIds()[0]
-		levelId := d2datadict.GetFirstLevelIdByActId(actId)
-		x, y := 0, 0
-		dir := 0
-		heroType := v.gameStates[idx].HeroType
-		heroStats := *v.gameStates[idx].Stats
-		heroEquipment := d2inventory.HeroObjects[v.gameStates[idx].HeroType]
 		// TODO: Generate or load the object from the actual player data...
-		v.characterImage[i] = d2mapentity.CreatePlayer(
-			playerId,
-			playerName,
-			actId,
-			levelId,
-			x, y,
-			dir,
-			heroType,
-			heroStats,
-			heroEquipment,
+		v.characterImage[i] = d2mapentity.CreatePlayer("", "", 0, 0, 0,
+			v.gameStates[idx].HeroType,
+			*v.gameStates[idx].Stats,
+			d2inventory.HeroObjects[v.gameStates[idx].HeroType],
 		)
 	}
 }

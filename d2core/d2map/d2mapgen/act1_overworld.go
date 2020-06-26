@@ -26,7 +26,7 @@ func loadPreset(mapEngine *d2mapengine.MapEngine, id, index int) *d2mapstamp.Sta
 func GenerateAct1Overworld(mapEngine *d2mapengine.MapEngine) {
 
 	rand.Seed(mapEngine.Seed())
-	wilderness1Details := d2datadict.GetLevelDetailsByLevelId(2)
+	wilderness1Details := d2datadict.GetLevelDetails(2)
 	mapEngine.ResetMap(d2enum.RegionAct1Town, 150, 150)
 	mapWidth := mapEngine.Size().Width
 	mapHeight := mapEngine.Size().Height
@@ -59,7 +59,7 @@ func GenerateAct1Overworld(mapEngine *d2mapengine.MapEngine) {
 		// West Exit
 		mapEngine.PlaceStamp(townStamp, mapWidth-townSize.Width, mapHeight-townSize.Height)
 
-		generateWilderness1TownWest(mapEngine, mapWidth-townSize.Width-wilderness1Details.SizeXNormal, mapHeight-wilderness1Details.SizeYNormal)
+		generateWilderness1TownWest(mapEngine, mapWidth-townSize.Width - wilderness1Details.SizeXNormal, mapHeight-wilderness1Details.SizeYNormal)
 	} else {
 		// North Exit
 		mapEngine.PlaceStamp(townStamp, mapWidth-townSize.Width, mapHeight-townSize.Height)
@@ -69,7 +69,7 @@ func GenerateAct1Overworld(mapEngine *d2mapengine.MapEngine) {
 }
 
 func generateWilderness1TownEast(mapEngine *d2mapengine.MapEngine, startX, startY int) {
-	levelDetails := d2datadict.GetLevelDetailsByLevelId(2)
+	levelDetails := d2datadict.GetLevelDetails(2)
 
 	fenceNorthStamp := []*d2mapstamp.Stamp{
 		loadPreset(mapEngine, d2wilderness.TreeBorderNorth, 0),
@@ -102,36 +102,36 @@ func generateWilderness1TownEast(mapEngine *d2mapengine.MapEngine, startX, start
 
 	areaRect := d2common.Rectangle{
 		Left:   startX,
-		Top:    startY + 9,
+		Top:    startY+9,
 		Width:  levelDetails.SizeXNormal,
-		Height: levelDetails.SizeYNormal - 3,
+		Height: levelDetails.SizeYNormal-3,
 	}
 	generateWilderness1Contents(mapEngine, areaRect)
 
 	// Draw the north and south fence
 	for i := 0; i < 9; i++ {
 		mapEngine.PlaceStamp(fenceNorthStamp[rand.Intn(3)], startX+(i*9), startY)
-		mapEngine.PlaceStamp(fenceSouthStamp[rand.Intn(3)], startX+(i*9), startY+(levelDetails.SizeYNormal+6))
+		mapEngine.PlaceStamp(fenceSouthStamp[rand.Intn(3)], startX+(i*9), startY + (levelDetails.SizeYNormal +6))
 	}
 
 	// West fence
 	for i := 1; i < 6; i++ {
-		mapEngine.PlaceStamp(fenceWestStamp[rand.Intn(3)], startX, startY+(levelDetails.SizeYNormal+6)-(i*9))
+		mapEngine.PlaceStamp(fenceWestStamp[rand.Intn(3)], startX, startY+ (levelDetails.SizeYNormal+6) - (i * 9))
 	}
 
 	// East Fence
 	for i := 1; i < 10; i++ {
-		mapEngine.PlaceStamp(fenceEastStamp[rand.Intn(3)], startX+levelDetails.SizeXNormal, startY+(i*9))
+		mapEngine.PlaceStamp(fenceEastStamp[rand.Intn(3)], startX + levelDetails.SizeXNormal, startY+(i*9))
 	}
 
-	mapEngine.PlaceStamp(fenceSouthWestStamp, startX, startY+levelDetails.SizeYNormal+6)
-	mapEngine.PlaceStamp(fenceWestEdge, startX, startY+(levelDetails.SizeYNormal-3)-45)
+	mapEngine.PlaceStamp(fenceSouthWestStamp, startX, startY+ levelDetails.SizeYNormal+6)
+	mapEngine.PlaceStamp(fenceWestEdge, startX, startY+ (levelDetails.SizeYNormal-3) - 45)
 	mapEngine.PlaceStamp(fenceNorthEastStamp, startX+levelDetails.SizeXNormal, startY)
 	mapEngine.PlaceStamp(fenceSouthEastStamp, startX+levelDetails.SizeXNormal, startY+levelDetails.SizeYNormal+6)
 }
 
 func generateWilderness1TownSouth(mapEngine *d2mapengine.MapEngine, startX, startY int) {
-	levelDetails := d2datadict.GetLevelDetailsByLevelId(2)
+	levelDetails := d2datadict.GetLevelDetails(2)
 
 	fenceNorthStamp := []*d2mapstamp.Stamp{
 		loadPreset(mapEngine, d2wilderness.TreeBorderNorth, 0),
@@ -184,7 +184,7 @@ func generateWilderness1TownSouth(mapEngine *d2mapengine.MapEngine, startX, star
 }
 
 func generateWilderness1TownWest(mapEngine *d2mapengine.MapEngine, startX, startY int) {
-	levelDetails := d2datadict.GetLevelDetailsByLevelId(2)
+	levelDetails := d2datadict.GetLevelDetails(2)
 
 	fenceEastEdge := loadPreset(mapEngine, d2wilderness.TreeBoxSouthWest, 0)
 	fenceNorthWestStamp := loadPreset(mapEngine, d2wilderness.TreeBorderNorthWest, 0)
@@ -218,30 +218,30 @@ func generateWilderness1TownWest(mapEngine *d2mapengine.MapEngine, startX, start
 	// Draw the north and south fences
 	for i := 0; i < 9; i++ {
 		if i > 0 && i < 8 {
-			mapEngine.PlaceStamp(fenceNorthStamp[rand.Intn(3)], startX+(i*9)-1, startY-15)
+			mapEngine.PlaceStamp(fenceNorthStamp[rand.Intn(3)], startX + (i*9)-1, startY-15)
 		}
 		mapEngine.PlaceStamp(fenceSouthStamp[rand.Intn(3)], startX+(i*9)-1, startY+levelDetails.SizeYNormal-12)
 	}
 
 	// Draw the east fence
 	for i := 0; i < 6; i++ {
-		mapEngine.PlaceStamp(fenceEastStamp[rand.Intn(3)], startX+levelDetails.SizeXNormal-9, startY+(i*9)-6)
+		mapEngine.PlaceStamp(fenceEastStamp[rand.Intn(3)], startX + levelDetails.SizeXNormal-9, startY + (i*9)-6)
 	}
 
 	// Draw the west fence
 	for i := 0; i < 9; i++ {
-		mapEngine.PlaceStamp(fenceWestStamp[rand.Intn(3)], startX, startY+(i*9)-6)
+		mapEngine.PlaceStamp(fenceWestStamp[rand.Intn(3)], startX, startY + (i*9)-6)
 	}
 
 	// Draw the west fence
-	mapEngine.PlaceStamp(fenceEastEdge, startX+levelDetails.SizeXNormal-9, startY+39)
+	mapEngine.PlaceStamp(fenceEastEdge, startX + levelDetails.SizeXNormal-9, startY + 39)
 	mapEngine.PlaceStamp(fenceNorthWestStamp, startX, startY-15)
 	mapEngine.PlaceStamp(fenceSouthWestStamp, startX, startY+levelDetails.SizeYNormal-12)
 	mapEngine.PlaceStamp(fenceNorthEastStamp, startX+levelDetails.SizeXNormal-9, startY-15)
 
 	areaRect := d2common.Rectangle{
 		Left:   startX + 9,
-		Top:    startY - 10,
+		Top:    startY-10,
 		Width:  levelDetails.SizeXNormal - 9,
 		Height: levelDetails.SizeYNormal - 2,
 	}
@@ -250,7 +250,7 @@ func generateWilderness1TownWest(mapEngine *d2mapengine.MapEngine, startX, start
 }
 
 func generateWilderness1Contents(mapEngine *d2mapengine.MapEngine, rect d2common.Rectangle) {
-	levelDetails := d2datadict.GetLevelDetailsByLevelId(2)
+	levelDetails := d2datadict.GetLevelDetails(2)
 
 	denOfEvil := loadPreset(mapEngine, d2wilderness.DenOfEvilEntrance, 0)
 	denOfEvilLoc := d2common.Point{
@@ -295,10 +295,10 @@ func generateWilderness1Contents(mapEngine *d2mapengine.MapEngine, rect d2common
 	for numPlaced < 25 {
 		stamp := stuff[rand.Intn(len(stuff))]
 
-		stampRect := d2common.Rectangle{
-			Left:   rect.Left + rand.Intn(rect.Width) - stamp.Size().Width,
-			Top:    rect.Top + rand.Intn(rect.Height) - stamp.Size().Height,
-			Width:  stamp.Size().Width,
+		stampRect := d2common.Rectangle {
+			Left: rect.Left+ rand.Intn(rect.Width) - stamp.Size().Width,
+			Top: rect.Top+rand.Intn(rect.Height) - stamp.Size().Height,
+			Width: stamp.Size().Width,
 			Height: stamp.Size().Height,
 		}
 
