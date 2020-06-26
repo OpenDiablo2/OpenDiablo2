@@ -20,7 +20,7 @@ import (
 
 type Game struct {
 	gameClient           *d2client.GameClient
-	mapRenderer          *d2maprenderer.MapRenderer
+	MapRenderer          *d2maprenderer.MapRenderer
 	gameControls         *d2player.GameControls // TODO: Hack
 	localPlayer          *d2mapentity.Player
 	lastRegionType       d2enum.RegionIdType
@@ -35,8 +35,8 @@ func CreateGame(gameClient *d2client.GameClient) *Game {
 		localPlayer:          nil,
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
-		mapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine),
-		escapeMenu:           NewEscapeMenu(),
+		// mapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine),
+		escapeMenu: NewEscapeMenu(),
 	}
 	result.escapeMenu.OnLoad()
 	d2input.BindHandler(result.escapeMenu)
@@ -56,11 +56,13 @@ func (v *Game) OnUnload() error {
 func (v *Game) Render(screen d2render.Surface) error {
 	if v.gameClient.RegenMap {
 		v.gameClient.RegenMap = false
-		v.mapRenderer.RegenerateTileCache()
+		v.MapRenderer.RegenerateTileCache()
 	}
 
-	screen.Clear(color.Black)
-	v.mapRenderer.Render(screen)
+	if v.MapRenderer != nil {
+		screen.Clear(color.Black)
+		v.MapRenderer.Render(screen)
+	}
 
 	if v.gameControls != nil {
 		v.gameControls.Render(screen)
@@ -114,7 +116,7 @@ func (v *Game) Advance(tickTime float64) error {
 				continue
 			}
 			v.localPlayer = player
-			v.gameControls = d2player.NewGameControls(player, v.gameClient.MapEngine, v.mapRenderer, v)
+			v.gameControls = d2player.NewGameControls(player, v.gameClient.MapEngine, v.MapRenderer, v)
 			v.gameControls.Load()
 			d2input.BindHandler(v.gameControls)
 
@@ -124,8 +126,8 @@ func (v *Game) Advance(tickTime float64) error {
 
 	// Update the camera to focus on the player
 	if v.localPlayer != nil && !v.gameControls.FreeCam {
-		rx, ry := v.mapRenderer.WorldToOrtho(v.localPlayer.LocationX/5, v.localPlayer.LocationY/5)
-		v.mapRenderer.MoveCameraTo(rx, ry)
+		rx, ry := v.MapRenderer.WorldToOrtho(v.localPlayer.LocationX/5, v.localPlayer.LocationY/5)
+		v.MapRenderer.MoveCameraTo(rx, ry)
 	}
 	return nil
 }

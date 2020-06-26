@@ -9,6 +9,7 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
@@ -24,6 +25,7 @@ type GameClient struct {
 	connectionType   d2clientconnectiontype.ClientConnectionType
 	GameState        *d2player.PlayerState
 	MapEngine        *d2mapengine.MapEngine
+	MapRenderer      *d2maprenderer.MapRenderer
 	realm            *d2mapengine.MapRealm
 	PlayerId         string
 	Players          map[string]*d2mapentity.Player
@@ -76,12 +78,14 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		g.MapEngine.SetSeed(serverInfo.Seed)
 		g.realm.Init(serverInfo.Seed, g.MapEngine)
 		g.PlayerId = serverInfo.PlayerId
+		g.MapRenderer = d2maprenderer.CreateMapRenderer(g.MapEngine)
 		g.Seed = serverInfo.Seed
 		log.Printf("Player id set to %s", serverInfo.PlayerId)
 	case d2netpackettype.AddPlayer:
 		player := packet.PacketData.(d2netpacket.AddPlayerPacket)
 		newPlayer := d2mapentity.CreatePlayer(player.Id, player.Name, player.X, player.Y, 0, player.HeroType, player.Stats, player.Equipment)
 		g.Players[newPlayer.Id] = newPlayer
+		g.realm.AddPlayer(newPlayer.Id, 0) // hack
 		g.MapEngine.AddEntity(newPlayer)
 	case d2netpackettype.MovePlayer:
 		movePlayer := packet.PacketData.(d2netpacket.MovePlayerPacket)

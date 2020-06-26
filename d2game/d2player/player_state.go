@@ -85,6 +85,7 @@ func CreatePlayerState(heroName string, hero d2enum.Hero, classStats d2datadict.
 		HeroName:  heroName,
 		HeroType:  hero,
 		Act:       0,
+		Level:     1,
 		Stats:     d2hero.CreateHeroStatsState(hero, classStats, 1, 0),
 		Equipment: d2inventory.HeroObjects[hero],
 		FilePath:  "",

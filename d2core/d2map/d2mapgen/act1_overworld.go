@@ -295,10 +295,10 @@ func generateWilderness1Contents(mapEngine *d2mapengine.MapEngine, rect d2common
 	for numPlaced < 25 {
 		stamp := stuff[rand.Intn(len(stuff))]
 
-		stampRect := d2common.Rectangle {
-			Left: rect.Left+ rand.Intn(rect.Width) - stamp.Size().Width,
-			Top: rect.Top+rand.Intn(rect.Height) - stamp.Size().Height,
-			Width: stamp.Size().Width,
+		stampRect := d2common.Rectangle{
+			Left:   rect.Left + rand.Intn(rect.Width) - stamp.Size().Width,
+			Top:    rect.Top + rand.Intn(rect.Height) - stamp.Size().Height,
+			Width:  stamp.Size().Width,
 			Height: stamp.Size().Height,
 		}
 

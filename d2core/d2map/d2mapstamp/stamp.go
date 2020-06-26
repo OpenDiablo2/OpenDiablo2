@@ -19,7 +19,7 @@ import (
 // Represents a pre-fabricated map stamp that can be placed on a map
 type Stamp struct {
 	regionPath  string                        // The file path of the region
-	levelType   d2datadict.LevelTypeRecord    // The level type id for this stamp
+	levelType   *d2datadict.LevelTypeRecord   // The level type id for this stamp
 	levelPreset *d2datadict.LevelPresetRecord // The level preset id for this stamp
 	tiles       []d2dt1.Tile                  // The tiles contained on this stamp
 	ds1         *d2ds1.DS1                    // The backing DS1 file for this stamp
@@ -88,7 +88,7 @@ func (mr *Stamp) LevelPreset() *d2datadict.LevelPresetRecord {
 }
 
 // Returns the level type id
-func (mr *Stamp) LevelType() d2datadict.LevelTypeRecord {
+func (mr *Stamp) LevelType() *d2datadict.LevelTypeRecord {
 	return mr.levelType
 }
 

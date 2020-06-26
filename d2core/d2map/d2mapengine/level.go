@@ -10,9 +10,10 @@ import (
 type MapLevel struct {
 	act           *MapAct
 	details       *d2datadict.LevelDetailsRecord
-	presets       []*d2datadict.LevelPresetRecord
+	preset        *d2datadict.LevelPresetRecord
 	warps         []*d2datadict.LevelWarpRecord
 	substitutions *d2datadict.LevelSubstitutionRecord
+	types         *d2datadict.LevelTypeRecord
 	generator     MapGenerator
 	engine        *MapEngine
 	isInit        bool
@@ -34,9 +35,12 @@ func (level *MapLevel) Init(act *MapAct, levelId int, engine *MapEngine) {
 	if level.isInit {
 		return
 	}
+	if levelId < 1 {
+		levelId = 1 // there is a Nonetype map at index 0 in levels.txt
+	}
 	level.act = act
 	level.details = d2datadict.GetLevelDetailsByLevelId(levelId)
-	level.presets = d2datadict.GetLevelPresetsByLevelId(levelId)
+	level.preset = d2datadict.GetLevelPresetByLevelId(levelId)
 	level.warps = d2datadict.GetLevelWarpsByLevelId(levelId)
 	level.substitutions = d2datadict.LevelSubstitutions[level.details.SubType]
 	level.isInit = true
