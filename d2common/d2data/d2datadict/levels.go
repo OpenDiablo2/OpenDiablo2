@@ -405,20 +405,28 @@ func GetLevelWarpsByLevelId(id int) []*LevelWarpRecord {
 	return result
 }
 
-func GetLevelPresetsByLevelId(id int) []*LevelPresetRecord {
-	result := make([]*LevelPresetRecord, 0)
-	for _, record := range LevelPresets {
-		if id == record.LevelId {
-			result = append(result, record)
+func GetLevelPresetByLevelId(id int) *LevelPresetRecord {
+	for recordId, record := range LevelPresets {
+		if id == recordId {
+			return record
 		}
 	}
-	return result
+	panic("couldn't find a preset.")
 }
 
 func GetFirstLevelIdByActId(actId int) int {
 	recordsForAct := GetLevelDetailsByActId(actId)
+	lowest := -1
 	if len(recordsForAct) > 0 {
-		return recordsForAct[0].Id
+		for _, record := range recordsForAct {
+			if lowest == -1 {
+				lowest = record.Id
+			}
+			if record.Id < lowest {
+				lowest = record.Id
+			}
+		}
+		return lowest
 	}
 	return 0
 }
