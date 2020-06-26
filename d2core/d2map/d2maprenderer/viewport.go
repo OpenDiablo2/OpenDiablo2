@@ -162,6 +162,7 @@ func (v *Viewport) toLeft() {
 		return
 	}
 	v.screenRect.Width = v.defaultScreenRect.Width / 2
+	v.screenRect.Left = v.defaultScreenRect.Left + v.defaultScreenRect.Width/2
 	v.align = left
 }
 
@@ -170,7 +171,6 @@ func (v *Viewport) toRight() {
 		return
 	}
 	v.screenRect.Width = v.defaultScreenRect.Width / 2
-	v.screenRect.Left = v.defaultScreenRect.Left + v.defaultScreenRect.Width/2
 	v.align = right
 }
 
