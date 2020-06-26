@@ -14,7 +14,7 @@ type AddPlayerPacket struct {
 	Y         int                            `json:"y"`
 	HeroType  d2enum.Hero                    `json:"hero"`
 	Equipment d2inventory.CharacterEquipment `json:"equipment"`
-	Stats d2hero.HeroStatsState          `json:"heroStats"`
+	Stats     d2hero.HeroStatsState          `json:"heroStats"`
 }
 
 func CreateAddPlayerPacket(id, name string, x, y int, heroType d2enum.Hero, stats d2hero.HeroStatsState, equipment d2inventory.CharacterEquipment) NetPacket {
@@ -27,7 +27,7 @@ func CreateAddPlayerPacket(id, name string, x, y int, heroType d2enum.Hero, stat
 			Y:         y,
 			HeroType:  heroType,
 			Equipment: equipment,
-			Stats: stats,
+			Stats:     stats,
 		},
 	}
 }

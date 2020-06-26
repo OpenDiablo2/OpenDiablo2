@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
+	// "github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
@@ -24,6 +24,7 @@ type GameClient struct {
 	connectionType   d2clientconnectiontype.ClientConnectionType
 	GameState        *d2player.PlayerState
 	MapEngine        *d2mapengine.MapEngine
+	realm            *d2mapengine.MapRealm
 	PlayerId         string
 	Players          map[string]*d2mapentity.Player
 	Seed             int64
@@ -35,6 +36,7 @@ func Create(connectionType d2clientconnectiontype.ClientConnectionType) (*GameCl
 		MapEngine:      d2mapengine.CreateMapEngine(), // TODO: Mapgen - Needs levels.txt stuff
 		Players:        make(map[string]*d2mapentity.Player),
 		connectionType: connectionType,
+		realm:          &d2mapengine.MapRealm{},
 	}
 
 	switch connectionType {
@@ -67,14 +69,12 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 	switch packet.PacketType {
 	case d2netpackettype.GenerateMap:
 		mapData := packet.PacketData.(d2netpacket.GenerateMapPacket)
-		switch mapData.RegionType {
-		case d2enum.RegionAct1Town:
-			d2mapgen.GenerateAct1Overworld(g.MapEngine)
-		}
+		g.realm.GenerateMap(mapData.ActId, mapData.LevelId)
 		g.RegenMap = true
 	case d2netpackettype.UpdateServerInfo:
 		serverInfo := packet.PacketData.(d2netpacket.UpdateServerInfoPacket)
 		g.MapEngine.SetSeed(serverInfo.Seed)
+		g.realm.Init(serverInfo.Seed, g.MapEngine)
 		g.PlayerId = serverInfo.PlayerId
 		g.Seed = serverInfo.Seed
 		log.Printf("Player id set to %s", serverInfo.PlayerId)
