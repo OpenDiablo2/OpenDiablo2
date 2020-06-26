@@ -419,8 +419,13 @@ func GetFirstLevelIdByActId(actId int) int {
 	lowest := -1
 	if len(recordsForAct) > 0 {
 		for _, record := range recordsForAct {
-			if lowest == -1 {
+			// need to account for level ID 0 which is an empty map in act 1
+			if record.Id == 0 {
+				continue
+			}
+			if lowest < 0 {
 				lowest = record.Id
+				continue
 			}
 			if record.Id < lowest {
 				lowest = record.Id
