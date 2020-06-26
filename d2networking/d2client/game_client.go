@@ -72,13 +72,13 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 	case d2netpackettype.GenerateMap:
 		mapData := packet.PacketData.(d2netpacket.GenerateMapPacket)
 		g.realm.GenerateMap(mapData.ActId, mapData.LevelId)
+		g.MapRenderer = d2maprenderer.CreateMapRenderer(g.MapEngine)
 		g.RegenMap = true
 	case d2netpackettype.UpdateServerInfo:
 		serverInfo := packet.PacketData.(d2netpacket.UpdateServerInfoPacket)
 		g.MapEngine.SetSeed(serverInfo.Seed)
 		g.realm.Init(serverInfo.Seed, g.MapEngine)
 		g.PlayerId = serverInfo.PlayerId
-		g.MapRenderer = d2maprenderer.CreateMapRenderer(g.MapEngine)
 		g.Seed = serverInfo.Seed
 		log.Printf("Player id set to %s", serverInfo.PlayerId)
 	case d2netpackettype.AddPlayer:

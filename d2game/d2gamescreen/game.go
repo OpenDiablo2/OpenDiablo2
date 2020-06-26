@@ -35,7 +35,7 @@ func CreateGame(gameClient *d2client.GameClient) *Game {
 		localPlayer:          nil,
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
-		// mapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine),
+		MapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine),
 		escapeMenu: NewEscapeMenu(),
 	}
 	result.escapeMenu.OnLoad()

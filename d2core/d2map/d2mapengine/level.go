@@ -21,7 +21,7 @@ type MapLevel struct {
 }
 
 func (level *MapLevel) isActive() bool {
-	return false // todo determine where players are
+	return true // todo determine where players are
 }
 
 func (level *MapLevel) Advance(elapsed float64) {
@@ -43,6 +43,7 @@ func (level *MapLevel) Init(act *MapAct, levelId int, engine *MapEngine) {
 	level.preset = d2datadict.GetLevelPresetByLevelId(levelId)
 	level.warps = d2datadict.GetLevelWarpsByLevelId(levelId)
 	level.substitutions = d2datadict.LevelSubstitutions[level.details.SubType]
+	level.types = d2datadict.LevelTypes[d2enum.RegionIdType(level.details.LevelType)]
 	level.isInit = true
 	level.engine = engine
 
