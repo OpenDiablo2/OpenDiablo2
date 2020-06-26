@@ -31,7 +31,7 @@ func (act *MapAct) Advance(elapsed float64) {
 	}
 }
 
-func (act *MapAct) Init(realm *MapRealm, actIndex int, engine *MapEngine) {
+func (act *MapAct) Init(realm *MapRealm, actIndex int) {
 	act.realm = realm
 	act.levels = make(map[int]*MapLevel)
 	act.id = actIndex
@@ -42,9 +42,16 @@ func (act *MapAct) Init(realm *MapRealm, actIndex int, engine *MapEngine) {
 	for _, record := range actLevelRecords {
 		level := &MapLevel{}
 		levelId := record.Id
-		level.Init(act, levelId, engine)
+		level.Init(act, levelId)
 		act.levels[levelId] = level
 	}
+
+	act.GenerateTown() // ensures that starting point is known for first player
+}
+
+func (act *MapAct) GenerateTown() {
+	townId := d2datadict.GetFirstLevelIdByActId(act.id)
+	act.levels[townId].GenerateMap()
 }
 
 func (act *MapAct) GenerateMap(levelId int) {

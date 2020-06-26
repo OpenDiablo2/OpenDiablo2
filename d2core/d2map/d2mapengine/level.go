@@ -15,23 +15,25 @@ type MapLevel struct {
 	substitutions *d2datadict.LevelSubstitutionRecord
 	types         *d2datadict.LevelTypeRecord
 	generator     MapGenerator
-	engine        *MapEngine
+	mapEngine     *MapEngine
 	isInit        bool
 	isGenerated   bool
 }
 
 func (level *MapLevel) isActive() bool {
-	return true // todo determine where players are
+	// TODO: a level is active only if there is a player in the level
+	// or in an adjacent level
+	return true
 }
 
 func (level *MapLevel) Advance(elapsed float64) {
 	if !level.isActive() {
 		return
 	}
-	level.engine.Advance(elapsed)
+	level.mapEngine.Advance(elapsed)
 }
 
-func (level *MapLevel) Init(act *MapAct, levelId int, engine *MapEngine) {
+func (level *MapLevel) Init(act *MapAct, levelId int) {
 	if level.isInit {
 		return
 	}
@@ -45,7 +47,8 @@ func (level *MapLevel) Init(act *MapAct, levelId int, engine *MapEngine) {
 	level.substitutions = d2datadict.LevelSubstitutions[level.details.SubType]
 	level.types = d2datadict.LevelTypes[d2enum.RegionIdType(level.details.LevelType)]
 	level.isInit = true
-	level.engine = engine
+	level.mapEngine = &MapEngine{}
+	level.mapEngine.seed = level.act.realm.seed
 
 	switch level.details.LevelGenerationType {
 	case d2enum.LevelTypeNone:
@@ -61,7 +64,7 @@ func (level *MapLevel) Init(act *MapAct, levelId int, engine *MapEngine) {
 	seed := act.realm.seed
 	if level.generator != nil {
 		log.Printf("Initializing Level: %s", level.details.Name)
-		level.generator.init(seed, level, engine)
+		level.generator.init(seed, level, level.mapEngine)
 	}
 }
 
@@ -71,5 +74,6 @@ func (level *MapLevel) GenerateMap() {
 	}
 	log.Printf("Generating Level: %s", level.details.Name)
 	level.generator.generate()
+	level.mapEngine.RegenerateWalkPaths()
 	level.isGenerated = true
 }

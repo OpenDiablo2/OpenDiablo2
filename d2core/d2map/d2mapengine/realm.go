@@ -84,12 +84,11 @@ func (realm *MapRealm) RemovePlayer(id string) {
 }
 
 // Initialize the realm
-func (realm *MapRealm) Init(seed int64, engine *MapEngine) {
+func (realm *MapRealm) Init(seed int64) {
 	// realm.playerStates = make(map[string]*d2mapentitiy.Player)
 
 	log.Printf("Initializing Realm...")
 	realm.seed = seed
-	engine.SetSeed(seed)
 	actIds := d2datadict.GetActIds()
 	realm.acts = make(map[int]*MapAct)
 	realm.players = make(map[string]string)
@@ -98,10 +97,18 @@ func (realm *MapRealm) Init(seed int64, engine *MapEngine) {
 		act := &MapAct{}
 		realm.acts[actId] = act
 
-		act.Init(realm, actId, engine)
+		act.Init(realm, actId)
 	}
 }
 
 func (realm *MapRealm) GenerateMap(actId, levelId int) {
 	realm.acts[actId].GenerateMap(levelId)
+}
+
+func (realm *MapRealm) GetMapEngine(actId, levelId int) *MapEngine {
+	return realm.acts[actId].levels[levelId].mapEngine
+}
+
+func (realm *MapRealm) GetFirstActLevelId(actId int) int {
+	return d2datadict.GetFirstLevelIdByActId(actId)
 }
