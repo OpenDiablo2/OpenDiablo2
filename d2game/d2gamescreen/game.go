@@ -36,7 +36,7 @@ func CreateGame(gameClient *d2client.GameClient) *Game {
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
 		MapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine),
-		escapeMenu: NewEscapeMenu(),
+		escapeMenu:           NewEscapeMenu(),
 	}
 	result.escapeMenu.OnLoad()
 	d2input.BindHandler(result.escapeMenu)
@@ -71,7 +71,7 @@ func (v *Game) Render(screen d2render.Surface) error {
 	return nil
 }
 
-var hideZoneTextAfterSeconds = 2.0
+var zoneTextDuration = 2.0 // seconds
 
 func (v *Game) Advance(tickTime float64) error {
 	if (v.escapeMenu != nil && !v.escapeMenu.IsOpen()) || len(v.gameClient.Players) != 1 {
@@ -98,11 +98,19 @@ func (v *Game) Advance(tickTime float64) error {
 				}
 
 				// skip showing zone change text the first time we enter the world
-				if v.lastRegionType != d2enum.RegionNone && v.lastRegionType != tile.RegionType {
-					//TODO: Should not be using RegionType as an index - this will return incorrect LevelDetails record for most of the zones.
-					v.gameControls.SetZoneChangeText(fmt.Sprintf("Entering The %s", d2datadict.LevelDetails[int(tile.RegionType)].LevelDisplayName))
+				notNone := v.lastRegionType != d2enum.RegionNone
+				differentTileType := v.lastRegionType != tile.RegionType
+				if notNone && differentTileType {
+					//TODO: Should not be using RegionType as an index - this
+					// will return incorrect LevelDetails record for most of the
+					// zones.
+					levelId := int(tile.RegionType)
+					levelDetails := d2datadict.LevelDetails[levelId]
+					str := "Entering The %s"
+					name := levelDetails.LevelDisplayName
+					v.gameControls.SetZoneChangeText(fmt.Sprintf(str, name))
 					v.gameControls.ShowZoneChangeText()
-					v.gameControls.HideZoneChangeTextAfter(hideZoneTextAfterSeconds)
+					v.gameControls.HideZoneChangeTextAfter(zoneTextDuration)
 				}
 				v.lastRegionType = tile.RegionType
 			}
@@ -116,7 +124,9 @@ func (v *Game) Advance(tickTime float64) error {
 				continue
 			}
 			v.localPlayer = player
-			v.gameControls = d2player.NewGameControls(player, v.gameClient.MapEngine, v.MapRenderer, v)
+			engine := v.gameClient.MapEngine
+			renderer := v.MapRenderer
+			v.gameControls = d2player.NewGameControls(player, engine, renderer, v)
 			v.gameControls.Load()
 			d2input.BindHandler(v.gameControls)
 
@@ -126,14 +136,16 @@ func (v *Game) Advance(tickTime float64) error {
 
 	// Update the camera to focus on the player
 	if v.localPlayer != nil && !v.gameControls.FreeCam {
-		rx, ry := v.MapRenderer.WorldToOrtho(v.localPlayer.LocationX/5, v.localPlayer.LocationY/5)
+		wx, wy := v.localPlayer.LocationX/5, v.localPlayer.LocationY/5
+		rx, ry := v.MapRenderer.WorldToOrtho(wx, wy)
 		v.MapRenderer.MoveCameraTo(rx, ry)
 	}
 	return nil
 }
 
-func (v *Game) OnPlayerMove(x, y float64) {
-	heroPosX := v.localPlayer.LocationX / 5.0
-	heroPosY := v.localPlayer.LocationY / 5.0
-	v.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(v.gameClient.PlayerId, heroPosX, heroPosY, x, y))
+func (v *Game) OnPlayerMove(x2, y2 float64) {
+	id := v.gameClient.PlayerId
+	x1, y1 := v.localPlayer.LocationX/5.0, v.localPlayer.LocationY/5.0
+	movePacket := d2netpacket.CreateMovePlayerPacket(id, x1, y1, x2, y2)
+	v.gameClient.SendPacketToServer(movePacket)
 }
