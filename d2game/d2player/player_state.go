@@ -43,7 +43,7 @@ func GetAllPlayerStates() []*PlayerState {
 			continue
 		}
 		gameState := LoadPlayerState(path.Join(basePath, file.Name()))
-		if gameState == nil {
+		if gameState == nil || gameState.HeroType == d2enum.HeroNone {
 			continue
 		// temporarily loading default class stats if the character was created before saving stats was introduced
 		// to be removed in the future
