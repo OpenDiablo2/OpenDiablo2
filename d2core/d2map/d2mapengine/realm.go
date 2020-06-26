@@ -92,6 +92,7 @@ func (realm *MapRealm) Init(seed int64, engine *MapEngine) {
 	engine.SetSeed(seed)
 	actIds := d2datadict.GetActIds()
 	realm.acts = make(map[int]*MapAct)
+	realm.players = make(map[string]string)
 
 	for _, actId := range actIds {
 		act := &MapAct{}

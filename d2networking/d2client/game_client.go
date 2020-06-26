@@ -36,6 +36,7 @@ func Create(connectionType d2clientconnectiontype.ClientConnectionType) (*GameCl
 		MapEngine:      d2mapengine.CreateMapEngine(), // TODO: Mapgen - Needs levels.txt stuff
 		Players:        make(map[string]*d2mapentity.Player),
 		connectionType: connectionType,
+		realm:          &d2mapengine.MapRealm{},
 	}
 
 	switch connectionType {
@@ -73,6 +74,7 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 	case d2netpackettype.UpdateServerInfo:
 		serverInfo := packet.PacketData.(d2netpacket.UpdateServerInfoPacket)
 		g.MapEngine.SetSeed(serverInfo.Seed)
+		g.realm.Init(serverInfo.Seed, g.MapEngine)
 		g.PlayerId = serverInfo.PlayerId
 		g.Seed = serverInfo.Seed
 		log.Printf("Player id set to %s", serverInfo.PlayerId)
