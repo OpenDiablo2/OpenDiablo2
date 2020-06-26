@@ -34,7 +34,7 @@ type Player struct {
 var baseWalkSpeed = 6.0
 var baseRunSpeed = 9.0
 
-func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero, stats d2hero.HeroStatsState, equipment d2inventory.CharacterEquipment) *Player {
+func CreatePlayer(id, name string, ActId, LevelId, x, y, direction int, heroType d2enum.Hero, stats d2hero.HeroStatsState, equipment d2inventory.CharacterEquipment) *Player {
 	object := &d2datadict.ObjectLookupRecord{
 		Mode:  d2enum.AnimationModePlayerTownNeutral.String(),
 		Base:  "/data/global/chars",

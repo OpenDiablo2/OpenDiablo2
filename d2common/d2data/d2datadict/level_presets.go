@@ -31,13 +31,13 @@ type LevelPresetRecord struct {
 }
 
 // CreateLevelPresetRecord parses a row from lvlprest.txt into a LevelPresetRecord
-func createLevelPresetRecord(props []string) LevelPresetRecord {
+func createLevelPresetRecord(props []string) *LevelPresetRecord {
 	i := -1
 	inc := func() int {
 		i++
 		return i
 	}
-	result := LevelPresetRecord{
+	result := &LevelPresetRecord{
 		Name:         props[inc()],
 		DefinitionId: d2common.StringToInt(props[inc()]),
 		LevelId:      d2common.StringToInt(props[inc()]),
@@ -69,10 +69,10 @@ func createLevelPresetRecord(props []string) LevelPresetRecord {
 	return result
 }
 
-var LevelPresets map[int]LevelPresetRecord
+var LevelPresets map[int]*LevelPresetRecord
 
 func LoadLevelPresets(file []byte) {
-	LevelPresets = make(map[int]LevelPresetRecord)
+	LevelPresets = make(map[int]*LevelPresetRecord)
 	data := strings.Split(string(file), "\r\n")[1:]
 	for _, line := range data {
 		if len(line) == 0 {
@@ -88,7 +88,7 @@ func LoadLevelPresets(file []byte) {
 	log.Printf("Loaded %d level presets", len(LevelPresets))
 }
 
-func LevelPreset(id int) LevelPresetRecord {
+func LevelPreset(id int) *LevelPresetRecord {
 	for i := 0; i < len(LevelPresets); i++ {
 		if LevelPresets[i].DefinitionId == id {
 			return LevelPresets[i]
