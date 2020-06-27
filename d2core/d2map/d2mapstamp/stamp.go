@@ -31,9 +31,6 @@ func LoadStamp(levelType d2enum.RegionIdType, levelPreset int, fileIndex int) *S
 		levelType:   d2datadict.LevelTypes[levelType],
 		levelPreset: d2datadict.LevelPresets[levelPreset],
 	}
-
-	//stamp.palette, _ = loadPaletteForAct(levelType)
-
 	for _, levelTypeDt1 := range stamp.levelType.Files {
 		if len(levelTypeDt1) != 0 && levelTypeDt1 != "" && levelTypeDt1 != "0" {
 			fileData, err := d2asset.LoadFile("/data/global/tiles/" + levelTypeDt1)
@@ -129,7 +126,7 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2mapentity.MapEntity 
 			}
 		case d2datadict.ObjectTypeItem:
 			if object.ObjectInfo != nil && object.ObjectInfo.Draw && object.Lookup.Base != "" && object.Lookup.Token != "" {
-				entity, err := d2mapentity.CreateAnimatedComposite((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, object.Lookup, d2resource.PaletteUnits)
+				entity, err := d2mapentity.CreateObject((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, object.Lookup, d2resource.PaletteUnits)
 				if err != nil {
 					panic(err)
 				}

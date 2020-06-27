@@ -1,0 +1,36 @@
+---
+name: build
+"on":
+    push:
+        branches:
+            - master
+jobs:
+    build:
+        name: Build
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Set up Go 1.14
+                uses: actions/setup-go@v1
+                with:
+                    go-version: 1.14
+                id: go
+
+            -   name: Check out code
+                uses: actions/checkout@v1
+
+            -   name: Install dependencies
+                run: |
+                    sudo apt-get update
+                    sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev > /dev/null 2>&1
+
+            -   name: Run golangci-lint
+                continue-on-error: true
+                uses: golangci/golangci-lint-action@v1.2.1
+                with:
+                    version: v1.27
+
+            -   name: Run tests
+                run: go test -v -race ./...
+
+            -   name: Build binary
+                run: go build .

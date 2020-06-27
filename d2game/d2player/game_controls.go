@@ -3,10 +3,10 @@ package d2player
 import (
 	"image/color"
 	"log"
+	"math"
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
@@ -27,29 +27,48 @@ type Panel interface {
 
 // ID of missile to create when user right clicks.
 var missileID = 59
+var expBarWidth = 120.0
+var staminaBarWidth = 102.0
+var globeHeight = 80
+var globeWidth = 80
+
+var leftMenuRect = d2common.Rectangle{Left: 0, Top: 0, Width: 400, Height: 600}
+var rightMenuRect = d2common.Rectangle{Left: 400, Top: 0, Width: 400, Height: 600}
+var bottomMenuRect = d2common.Rectangle{Left: 0, Top: 550, Width: 800, Height: 50}
 
 type GameControls struct {
-	hero          *d2mapentity.Player
-	mapEngine     *d2mapengine.MapEngine
-	mapRenderer   *d2maprenderer.MapRenderer
-	inventory     *Inventory
-	heroStats     *HeroStats
-	escapeMenu    *EscapeMenu
-	inputListener InputCallbackListener
-	FreeCam       bool
+	hero              *d2mapentity.Player
+	mapEngine         *d2mapengine.MapEngine
+	mapRenderer       *d2maprenderer.MapRenderer
+	inventory         *Inventory
+	heroStatsPanel    *HeroStatsPanel
+	inputListener     InputCallbackListener
+	FreeCam           bool
+	lastMouseX        int
+	lastMouseY        int
+	lastHealthPercent float64
+	lastManaPercent   float64
 
 	// UI
-	globeSprite       *d2ui.Sprite
-	mainPanel         *d2ui.Sprite
-	menuButton        *d2ui.Sprite
-	skillIcon         *d2ui.Sprite
-	zoneChangeText    *d2ui.Label
-	isZoneTextShown   bool
-	actionableRegions []ActionableRegion
+	globeSprite        *d2ui.Sprite
+	hpManaStatusSprite *d2ui.Sprite
+	hpStatusBar        d2render.Surface
+	manaStatusBar      d2render.Surface
+	mainPanel          *d2ui.Sprite
+	menuButton         *d2ui.Sprite
+	skillIcon          *d2ui.Sprite
+	zoneChangeText     *d2ui.Label
+	nameLabel          *d2ui.Label
+	runButton          d2ui.Button
+	isZoneTextShown    bool
+	actionableRegions  []ActionableRegion
 }
 
 type ActionableType int
-type ActionableRegion struct { ActionableTypeId ActionableType; Rect d2common.Rectangle }
+type ActionableRegion struct {
+	ActionableTypeId ActionableType
+	Rect             d2common.Rectangle
+}
 
 const (
 	// Since they require special handling, not considering (1) globes, (2) content of the mini panel, (3) belt
@@ -68,9 +87,14 @@ func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
 		missileID = id
 	})
 
-	label := d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
-	label.Color = color.RGBA{R: 255, G: 88, B: 82, A: 255}
-	label.Alignment = d2ui.LabelAlignCenter
+	zoneLabel := d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
+	zoneLabel.Color = color.RGBA{R: 255, G: 88, B: 82, A: 255}
+	zoneLabel.Alignment = d2ui.LabelAlignCenter
+
+	nameLabel := d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
+	nameLabel.Alignment = d2ui.LabelAlignCenter
+	nameLabel.SetText("")
+	nameLabel.Color = color.White
 
 	gc := &GameControls{
 		hero:           hero,
@@ -78,18 +102,18 @@ func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
 		inputListener:  inputListener,
 		mapRenderer:    mapRenderer,
 		inventory:      NewInventory(),
-		heroStats:      NewHeroStats(),
-		escapeMenu:     NewEscapeMenu(),
-		zoneChangeText: &label,
-		actionableRegions: []ActionableRegion {
-			{leftSkill, d2common.Rectangle{Left:115, Top:550, Width:50, Height:50 }},
-			{leftSelec, d2common.Rectangle{Left:206, Top:563, Width:30, Height:30 }},
-			{xp,        d2common.Rectangle{Left:253, Top:560, Width:125, Height:5 }},
-			{walkRun,   d2common.Rectangle{Left:255, Top:573, Width:17, Height:20 }},
-			{stamina,   d2common.Rectangle{Left:273, Top:573, Width:105, Height:20 }},
-			{miniPanel, d2common.Rectangle{Left:393, Top:563, Width:12, Height:23 }},
-			{rightSelec,d2common.Rectangle{Left:562, Top:563, Width:30, Height:30 }},
-			{rightSkill,d2common.Rectangle{Left:634, Top:550, Width:50, Height:50 }},
+		heroStatsPanel: NewHeroStatsPanel(hero.Name(), hero.Class, hero.Stats),
+		nameLabel:      &nameLabel,
+		zoneChangeText: &zoneLabel,
+		actionableRegions: []ActionableRegion{
+			{leftSkill, d2common.Rectangle{Left: 115, Top: 550, Width: 50, Height: 50}},
+			{leftSelec, d2common.Rectangle{Left: 206, Top: 563, Width: 30, Height: 30}},
+			{xp, d2common.Rectangle{Left: 253, Top: 560, Width: 125, Height: 5}},
+			{walkRun, d2common.Rectangle{Left: 255, Top: 573, Width: 17, Height: 20}},
+			{stamina, d2common.Rectangle{Left: 273, Top: 573, Width: 105, Height: 20}},
+			{miniPanel, d2common.Rectangle{Left: 393, Top: 563, Width: 12, Height: 23}},
+			{rightSelec, d2common.Rectangle{Left: 562, Top: 563, Width: 30, Height: 30}},
+			{rightSkill, d2common.Rectangle{Left: 634, Top: 550, Width: 50, Height: 50}},
 		},
 	}
 
@@ -134,29 +158,20 @@ func (g *GameControls) OnKeyRepeat(event d2input.KeyEvent) bool {
 func (g *GameControls) OnKeyDown(event d2input.KeyEvent) bool {
 	switch event.Key {
 	case d2input.KeyEscape:
-		if g.inventory.IsOpen() || g.heroStats.IsOpen() {
+		if g.inventory.IsOpen() || g.heroStatsPanel.IsOpen() {
 			g.inventory.Close()
-			g.heroStats.Close()
+			g.heroStatsPanel.Close()
 			g.updateLayout()
 			break
 		}
-		g.escapeMenu.Toggle()
-	case d2input.KeyUp:
-		g.escapeMenu.OnUpKey()
-	case d2input.KeyDown:
-		g.escapeMenu.OnDownKey()
-	case d2input.KeyEnter:
-		g.escapeMenu.OnEnterKey()
 	case d2input.KeyI:
 		g.inventory.Toggle()
 		g.updateLayout()
 	case d2input.KeyC:
-		g.heroStats.Toggle()
+		g.heroStatsPanel.Toggle()
 		g.updateLayout()
 	case d2input.KeyR:
-		g.hero.ToggleRunWalk()
-		// TODO: change the running menu icon
-		g.hero.SetIsRunning(g.hero.IsRunToggled())
+		g.onToggleRunButton()
 	default:
 		return false
 	}
@@ -173,15 +188,15 @@ func (g *GameControls) OnMouseButtonRepeat(event d2input.MouseEvent) bool {
 	py = float64(int(py*10)) / 10.0
 
 	now := d2common.Now()
-	if event.Button == d2input.MouseButtonLeft && now-lastLeftBtnActionTime >= mouseBtnActionsTreshhold {
+	if event.Button == d2input.MouseButtonLeft && now-lastLeftBtnActionTime >= mouseBtnActionsTreshhold && !g.isInActiveMenusRect(event.X, event.Y) {
 		lastLeftBtnActionTime = now
 		g.inputListener.OnPlayerMove(px, py)
 		return true
 	}
 
-	if event.Button == d2input.MouseButtonRight && now-lastRightBtnActionTime >= mouseBtnActionsTreshhold {
+	if event.Button == d2input.MouseButtonRight && now-lastRightBtnActionTime >= mouseBtnActionsTreshhold && !g.isInActiveMenusRect(event.X, event.Y) {
 		lastRightBtnActionTime = now
-		g.ShootMissile(px, py)
+		g.inputListener.OnPlayerCast(missileID, px, py)
 		return true
 	}
 
@@ -189,12 +204,10 @@ func (g *GameControls) OnMouseButtonRepeat(event d2input.MouseEvent) bool {
 }
 
 func (g *GameControls) OnMouseMove(event d2input.MouseMoveEvent) bool {
-	if g.escapeMenu.IsOpen() {
-		g.escapeMenu.OnMouseMove(event)
-		return false
-	}
-
 	mx, my := event.X, event.Y
+	g.lastMouseX = mx
+	g.lastMouseY = my
+
 	for i := range g.actionableRegions {
 		// Mouse over a game control element
 		if g.actionableRegions[i].Rect.IsInRect(mx, my) {
@@ -206,10 +219,6 @@ func (g *GameControls) OnMouseMove(event d2input.MouseMoveEvent) bool {
 }
 
 func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
-	if g.escapeMenu.IsOpen() {
-		return g.escapeMenu.OnMouseButtonDown(event)
-	}
-
 	mx, my := event.X, event.Y
 	for i := range g.actionableRegions {
 		// If click is on a game control element
@@ -223,48 +232,29 @@ func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	px = float64(int(px*10)) / 10.0
 	py = float64(int(py*10)) / 10.0
 
-	if event.Button == d2input.MouseButtonLeft {
+	if event.Button == d2input.MouseButtonLeft && !g.isInActiveMenusRect(mx, my) {
 		lastLeftBtnActionTime = d2common.Now()
 		g.inputListener.OnPlayerMove(px, py)
 		return true
 	}
 
-	if event.Button == d2input.MouseButtonRight {
+	if event.Button == d2input.MouseButtonRight && !g.isInActiveMenusRect(mx, my) {
 		lastRightBtnActionTime = d2common.Now()
-		return g.ShootMissile(px, py)
+		g.inputListener.OnPlayerCast(missileID, px, py)
+		return true
 	}
 
 	return false
 }
 
-func (g *GameControls) ShootMissile(px float64, py float64) bool {
-	missile, err := d2mapentity.CreateMissile(
-		int(g.hero.AnimatedComposite.LocationX),
-		int(g.hero.AnimatedComposite.LocationY),
-		d2datadict.Missiles[missileID],
-	)
-	if err != nil {
-		return false
-	}
-
-	rads := d2common.GetRadiansBetween(
-		g.hero.AnimatedComposite.LocationX,
-		g.hero.AnimatedComposite.LocationY,
-		px*5,
-		py*5,
-	)
-
-	missile.SetRadians(rads, func() {
-		g.mapEngine.RemoveEntity(missile)
-	})
-
-	g.mapEngine.AddEntity(missile)
-	return true
-}
-
 func (g *GameControls) Load() {
 	animation, _ := d2asset.LoadAnimation(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
 	g.globeSprite, _ = d2ui.LoadSprite(animation)
+
+	animation, _ = d2asset.LoadAnimation(d2resource.HealthManaIndicator, d2resource.PaletteSky)
+	g.hpManaStatusSprite, _ = d2ui.LoadSprite(animation)
+
+	g.hpStatusBar, _ = d2render.NewSurface(globeWidth, globeHeight, d2render.FilterNearest)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.GamePanels, d2resource.PaletteSky)
 	g.mainPanel, _ = d2ui.LoadSprite(animation)
@@ -275,39 +265,97 @@ func (g *GameControls) Load() {
 	animation, _ = d2asset.LoadAnimation(d2resource.GenericSkills, d2resource.PaletteSky)
 	g.skillIcon, _ = d2ui.LoadSprite(animation)
 
+	g.loadUIButtons()
+
 	g.inventory.Load()
-	g.heroStats.Load()
-	g.escapeMenu.OnLoad()
+	g.heroStatsPanel.Load()
+}
+
+func (g *GameControls) loadUIButtons() {
+	// Run button
+	g.runButton = d2ui.CreateButton(d2ui.ButtonTypeRun, "")
+	g.runButton.SetPosition(255, 570)
+	g.runButton.OnActivated(func() { g.onToggleRunButton() })
+	if g.hero.IsRunToggled() {
+		g.runButton.Toggle()
+	}
+	d2ui.AddWidget(&g.runButton)
+}
+
+func (g *GameControls) onToggleRunButton() {
+	g.runButton.Toggle()
+	g.hero.ToggleRunWalk()
+	// TODO: change the running menu icon
+	g.hero.SetIsRunning(g.hero.IsRunToggled())
 }
 
 // ScreenAdvanceHandler
 func (g *GameControls) Advance(elapsed float64) error {
-	g.escapeMenu.Advance(elapsed)
 	return nil
 }
 
 func (g *GameControls) updateLayout() {
-	isRightPanelOpen := false
-	isLeftPanelOpen := false
-
-	// todo : add same logic when adding quest log and skill tree
-	isRightPanelOpen = g.inventory.isOpen || isRightPanelOpen
-	isLeftPanelOpen = g.heroStats.isOpen || isLeftPanelOpen
+	isRightPanelOpen := g.isLeftPanelOpen()
+	isLeftPanelOpen := g.isRightPanelOpen()
 
 	if isRightPanelOpen == isLeftPanelOpen {
 		g.mapRenderer.ViewportDefault()
-	} else if isRightPanelOpen == true {
+	} else if isRightPanelOpen {
 		g.mapRenderer.ViewportToLeft()
 	} else {
 		g.mapRenderer.ViewportToRight()
 	}
 }
 
+func (g *GameControls) isLeftPanelOpen() bool {
+	// TODO: add quest log panel
+	return g.heroStatsPanel.IsOpen()
+}
+
+func (g *GameControls) isRightPanelOpen() bool {
+	// TODO: add skills tree panel
+	return g.inventory.IsOpen()
+}
+
+func (g *GameControls) isInActiveMenusRect(px int, py int) bool {
+	if bottomMenuRect.IsInRect(px, py) {
+		return true
+	}
+
+	if g.isLeftPanelOpen() && leftMenuRect.IsInRect(px, py) {
+		return true
+	}
+
+	if g.isRightPanelOpen() && rightMenuRect.IsInRect(px, py) {
+		return true
+	}
+
+	return false
+}
+
 // TODO: consider caching the panels to single image that is reused.
 func (g *GameControls) Render(target d2render.Surface) {
+	for entityIdx := range *g.mapEngine.Entities() {
+		entity := (*g.mapEngine.Entities())[entityIdx]
+		if entity.Name() == "" {
+			continue
+		}
+
+		entScreenXf, entScreenYf := g.mapRenderer.WorldToScreenF(entity.GetPositionF())
+		entScreenX := int(math.Floor(entScreenXf))
+		entScreenY := int(math.Floor(entScreenYf))
+
+		if ((entScreenX - 20) <= g.lastMouseX) && ((entScreenX + 20) >= g.lastMouseX) &&
+			((entScreenY - 80) <= g.lastMouseY) && (entScreenY >= g.lastMouseY) {
+			g.nameLabel.SetText(entity.Name())
+			g.nameLabel.SetPosition(entScreenX, entScreenY-100)
+			g.nameLabel.Render(target)
+			break
+		}
+	}
+
 	g.inventory.Render(target)
-	g.heroStats.Render(target)
-	g.escapeMenu.Render(target)
+	g.heroStatsPanel.Render(target)
 
 	width, height := target.GetSize()
 	offset := 0
@@ -322,6 +370,24 @@ func (g *GameControls) Render(target d2render.Surface) {
 	g.globeSprite.SetCurrentFrame(0)
 	g.globeSprite.SetPosition(offset+28, height-5)
 	g.globeSprite.Render(target)
+
+	// Health status bar
+	healthPercent := float64(g.hero.Stats.Health) / float64(g.hero.Stats.MaxHealth)
+	hpBarHeight := int(healthPercent * float64(globeHeight))
+	if g.lastHealthPercent != healthPercent {
+		g.hpStatusBar, _ = d2render.NewSurface(globeWidth, hpBarHeight, d2render.FilterNearest)
+		g.hpManaStatusSprite.SetCurrentFrame(0)
+		g.hpStatusBar.PushTranslation(0, hpBarHeight)
+
+		g.hpManaStatusSprite.Render(g.hpStatusBar)
+		g.hpStatusBar.Pop()
+		g.lastHealthPercent = healthPercent
+	}
+
+	target.PushTranslation(30, 508+(globeHeight-hpBarHeight))
+	target.Render(g.hpStatusBar)
+	target.Pop()
+
 	offset += w
 
 	// Left skill
@@ -345,6 +411,19 @@ func (g *GameControls) Render(target d2render.Surface) {
 	g.mainPanel.Render(target)
 	offset += w
 
+	// Stamina status bar
+	target.PushTranslation(273, 572)
+	target.PushCompositeMode(d2render.CompositeModeLighter)
+	staminaPercent := float64(g.hero.Stats.Stamina) / float64(g.hero.Stats.MaxStamina)
+	target.DrawRect(int(staminaPercent*staminaBarWidth), 19, color.RGBA{R: 175, G: 136, B: 72, A: 200})
+	target.PopN(2)
+
+	// Experience status bar
+	target.PushTranslation(256, 561)
+	expPercent := float64(g.hero.Stats.Experience) / float64(g.hero.Stats.NextLevelExp)
+	target.DrawRect(int(expPercent*expBarWidth), 2, color.RGBA{R: 255, G: 255, B: 255, A: 255})
+	target.Pop()
+
 	// Center menu button
 	g.menuButton.SetCurrentFrame(0)
 	w, _ = g.mainPanel.GetCurrentFrameSize()
@@ -366,7 +445,7 @@ func (g *GameControls) Render(target d2render.Surface) {
 	offset += w
 
 	// Right skill
-	g.skillIcon.SetCurrentFrame(10)
+	g.skillIcon.SetCurrentFrame(2)
 	w, _ = g.skillIcon.GetCurrentFrameSize()
 	g.skillIcon.SetPosition(offset, height)
 	g.skillIcon.Render(target)
@@ -382,11 +461,30 @@ func (g *GameControls) Render(target d2render.Surface) {
 	g.globeSprite.SetCurrentFrame(1)
 	g.globeSprite.SetPosition(offset+8, height-8)
 	g.globeSprite.Render(target)
+	g.globeSprite.Render(target)
+
+	// Mana status bar
+	manaPercent := float64(g.hero.Stats.Mana) / float64(g.hero.Stats.MaxMana)
+	manaBarHeight := int(manaPercent * float64(globeHeight))
+	if manaPercent != g.lastManaPercent {
+		g.manaStatusBar, _ = d2render.NewSurface(globeWidth, manaBarHeight, d2render.FilterNearest)
+		g.hpManaStatusSprite.SetCurrentFrame(1)
+
+		g.manaStatusBar.PushTranslation(0, manaBarHeight)
+		g.hpManaStatusSprite.Render(g.manaStatusBar)
+		g.manaStatusBar.Pop()
+
+		g.lastManaPercent = manaPercent
+	}
+	target.PushTranslation(offset+8, 508+(globeHeight-manaBarHeight))
+	target.Render(g.manaStatusBar)
+	target.Pop()
 
 	if g.isZoneTextShown {
 		g.zoneChangeText.SetPosition(width/2, height/4)
 		g.zoneChangeText.Render(target)
 	}
+
 }
 
 func (g *GameControls) SetZoneChangeText(text string) {
@@ -401,10 +499,6 @@ func (g *GameControls) HideZoneChangeTextAfter(delay float64) {
 	time.AfterFunc(time.Duration(delay)*time.Second, func() {
 		g.isZoneTextShown = false
 	})
-}
-
-func (g *GameControls) InEscapeMenu() bool {
-	return g != nil && g.escapeMenu != nil && g.escapeMenu.IsOpen()
 }
 
 // Handles what to do when an actionable is hovered
@@ -434,14 +528,22 @@ func (g *GameControls) onHoverActionable(item ActionableType) {
 // Handles what to do when an actionable is clicked
 func (g *GameControls) onClickActionable(item ActionableType) {
 	switch item {
-	case leftSkill: log.Println("Left Skill Action Pressed")
-	case leftSelec: log.Println("Left Skill Selector Action Pressed")
-	case xp: log.Println("XP Action Pressed")
-	case walkRun: log.Println("Walk/Run Action Pressed")
-	case stamina: log.Println("Stamina Action Pressed")
-	case miniPanel: log.Println("Mini Panel Action Pressed")
-	case rightSelec: log.Println("Right Skill Selector Action Pressed")
-	case rightSkill: log.Println("Right Skill Action Pressed")
+	case leftSkill:
+		log.Println("Left Skill Action Pressed")
+	case leftSelec:
+		log.Println("Left Skill Selector Action Pressed")
+	case xp:
+		log.Println("XP Action Pressed")
+	case walkRun:
+		log.Println("Walk/Run Action Pressed")
+	case stamina:
+		log.Println("Stamina Action Pressed")
+	case miniPanel:
+		log.Println("Mini Panel Action Pressed")
+	case rightSelec:
+		log.Println("Right Skill Selector Action Pressed")
+	case rightSkill:
+		log.Println("Right Skill Action Pressed")
 	default:
 		log.Printf("Unrecognized ActionableType(%d) being clicked\n", item)
 	}

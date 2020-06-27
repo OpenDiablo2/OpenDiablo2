@@ -2,28 +2,28 @@ package d2astar
 
 import (
 	"container/heap"
-	"fmt"
 	"sync"
 )
 
 var nodePool *sync.Pool
 var nodeMapPool *sync.Pool
 var priorityQueuePool *sync.Pool
-func init()  {
-	nodePool = &sync.Pool {
-		New: func()interface{} {
+
+func init() {
+	nodePool = &sync.Pool{
+		New: func() interface{} {
 			return &node{}
 		},
 	}
 
-	nodeMapPool = &sync.Pool {
-		New: func()interface{} {
+	nodeMapPool = &sync.Pool{
+		New: func() interface{} {
 			return make(nodeMap, 128)
 		},
 	}
 
-	priorityQueuePool = &sync.Pool {
-		New: func()interface{} {
+	priorityQueuePool = &sync.Pool{
+		New: func() interface{} {
 			return priorityQueue{}
 		},
 	}
@@ -55,7 +55,7 @@ type node struct {
 	index  int
 }
 
-func (n *node) reset ()  {
+func (n *node) reset() {
 	n.pather = nil
 	n.cost = 0
 	n.rank = 0
@@ -81,14 +81,8 @@ func (nm nodeMap) get(p Pather) *node {
 
 // Path calculates a short path and the distance between the two Pather nodes.
 //
-// If no path is found, found will be false.
+// If no path is found, found will be false and path will be the closest node to the target with a valid path.
 func Path(from, to Pather, maxCost float64) (path []Pather, distance float64, found bool) {
-	// Quick escape for inaccessible areas.
-	toNeighbors := to.PathNeighbors()
-	if len(toNeighbors) == 0 {
-		return nil, 0, false
-	}
-
 	nm := nodeMapPool.Get().(nodeMap)
 	nq := priorityQueuePool.Get().(priorityQueue)
 	defer func() {
@@ -109,8 +103,8 @@ func Path(from, to Pather, maxCost float64) (path []Pather, distance float64, fo
 	heap.Push(&nq, fromNode)
 	for {
 		if nq.Len() == 0 {
-			// There's no path, return found false.
-			return
+			// There's no path, fallback to closest.
+			break
 		}
 		current := heap.Pop(&nq).(*node)
 		current.open = false
@@ -130,7 +124,7 @@ func Path(from, to Pather, maxCost float64) (path []Pather, distance float64, fo
 		for _, neighbor := range current.pather.PathNeighbors() {
 			cost := current.cost + current.pather.PathNeighborCost(neighbor)
 			if cost > maxCost {
-				fmt.Println("Canceling path")
+				// Out of range, tweak maxCost if this is cutting off too soon.
 				continue
 			}
 
@@ -151,4 +145,27 @@ func Path(from, to Pather, maxCost float64) (path []Pather, distance float64, fo
 			}
 		}
 	}
+
+	// No path found, use closest node available, with found false to indicate the path doesn't reach the target.
+	closestNode := nm.get(from)
+	closestNode.rank = closestNode.pather.PathEstimatedCost(to)
+	for _, current := range nm {
+		if current.parent == nil {
+			// This node wasn't evaluated while path finding, probably isn't a good option.
+			continue
+		}
+
+		current.rank = current.pather.PathEstimatedCost(to)
+		if current.rank < closestNode.rank {
+			closestNode = current
+		}
+	}
+
+	p := make([]Pather, 0, 16)
+	curr := closestNode
+	for curr != nil {
+		p = append(p, curr.pather)
+		curr = curr.parent
+	}
+	return p, closestNode.cost, false
 }

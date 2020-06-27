@@ -1,5 +1,6 @@
 package d2datadict
 
+//nolint // This is a data dump file.
 var objectLookups = []ObjectLookupRecord{
 	{Act: 1, Type: ObjectTypeCharacter, Id: 0, Description: "gheed-ACT 1 TABLE", ObjectsTxtId: -1, MonstatsTxtId: -1, Direction: -1, Base: "/Data/Global/Monsters", Token: "GH", Mode: "NU", Class: "HTH", TR: "LIT", Index: -1},
 	{Act: 1, Type: ObjectTypeCharacter, Id: 1, Description: "cain1-ACT 1 TABLE", ObjectsTxtId: -1, MonstatsTxtId: -1, Direction: -1, Base: "/Data/Global/Monsters", Token: "DC", Mode: "NU", Class: "HTH", TR: "LIT", Index: -1},

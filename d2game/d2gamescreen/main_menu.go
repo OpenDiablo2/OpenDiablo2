@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
@@ -78,8 +80,9 @@ func CreateMainMenu() *MainMenu {
 }
 
 // Load is called to load the resources for the main menu
-func (v *MainMenu) OnLoad() error {
+func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	d2audio.PlayBGM(d2resource.BGMTitle)
+	loading.Progress(0.2)
 
 	v.versionLabel = d2ui.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.versionLabel.Alignment = d2ui.LabelAlignRight
@@ -98,6 +101,7 @@ func (v *MainMenu) OnLoad() error {
 	v.copyrightLabel.SetText("Diablo 2 is © Copyright 2000-2016 Blizzard Entertainment")
 	v.copyrightLabel.Color = color.RGBA{R: 188, G: 168, B: 140, A: 255}
 	v.copyrightLabel.SetPosition(400, 500)
+	loading.Progress(0.3)
 
 	v.copyrightLabel2 = d2ui.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.copyrightLabel2.Alignment = d2ui.LabelAlignCenter
@@ -110,6 +114,7 @@ func (v *MainMenu) OnLoad() error {
 	v.openDiabloLabel.SetText("OpenDiablo2 is neither developed by, nor endorsed by Blizzard or its parent company Activision")
 	v.openDiabloLabel.Color = color.RGBA{R: 255, G: 255, B: 140, A: 255}
 	v.openDiabloLabel.SetPosition(400, 580)
+	loading.Progress(0.5)
 
 	animation, _ := d2asset.LoadAnimation(d2resource.GameSelectScreen, d2resource.PaletteSky)
 	v.background, _ = d2ui.LoadSprite(animation)
@@ -128,6 +133,7 @@ func (v *MainMenu) OnLoad() error {
 	v.diabloLogoLeft.SetBlend(true)
 	v.diabloLogoLeft.PlayForward()
 	v.diabloLogoLeft.SetPosition(400, 120)
+	loading.Progress(0.6)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.Diablo2LogoFireRight, d2resource.PaletteUnits)
 	v.diabloLogoRight, _ = d2ui.LoadSprite(animation)
@@ -156,6 +162,7 @@ func (v *MainMenu) OnLoad() error {
 	v.cinematicsButton = d2ui.CreateButton(d2ui.ButtonTypeShort, "CINEMATICS")
 	v.cinematicsButton.SetPosition(401, 505)
 	d2ui.AddWidget(&v.cinematicsButton)
+	loading.Progress(0.7)
 
 	v.singlePlayerButton = d2ui.CreateButton(d2ui.ButtonTypeWide, "SINGLE PLAYER")
 	v.singlePlayerButton.SetPosition(264, 290)
@@ -201,6 +208,7 @@ func (v *MainMenu) OnLoad() error {
 	v.btnTcpIpJoinGame.SetPosition(264, 320)
 	v.btnTcpIpJoinGame.OnActivated(func() { v.onTcpIpJoinGameClicked() })
 	d2ui.AddWidget(&v.btnTcpIpJoinGame)
+	loading.Progress(0.8)
 
 	v.tcpIpOptionsLabel = d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
 	v.tcpIpOptionsLabel.SetPosition(400, 23)
@@ -222,6 +230,7 @@ func (v *MainMenu) OnLoad() error {
 	v.tcpJoinGameEntry.SetPosition(318, 245)
 	v.tcpJoinGameEntry.SetFilter("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890._:")
 	d2ui.AddWidget(&v.tcpJoinGameEntry)
+	loading.Progress(0.9)
 
 	v.btnServerIpCancel = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "CANCEL")
 	v.btnServerIpCancel.SetPosition(285, 305)
@@ -238,7 +247,8 @@ func (v *MainMenu) OnLoad() error {
 	} else {
 		v.SetScreenMode(ScreenModeMainMenu)
 	}
-	return nil
+
+	d2input.BindHandler(v)
 }
 
 func (v *MainMenu) onMapTestClicked() {
@@ -343,21 +353,15 @@ func (v *MainMenu) Advance(tickTime float64) error {
 		v.diabloLogoRight.Advance(tickTime)
 	}
 
-	switch v.screenMode {
-	case ScreenModeTrademark:
-		if d2ui.CursorButtonPressed(d2ui.CursorButtonLeft) {
-			if v.leftButtonHeld {
-				return nil
-			}
-			d2ui.WaitForMouseRelease()
-			v.SetScreenMode(ScreenModeMainMenu)
-			v.leftButtonHeld = true
-		} else {
-			v.leftButtonHeld = false
-		}
-	}
-
 	return nil
+}
+
+func (v *MainMenu) OnMouseButtonDown(event d2input.MouseEvent) bool {
+	if v.screenMode == ScreenModeTrademark && event.Button == d2input.MouseButtonLeft {
+		v.SetScreenMode(ScreenModeMainMenu)
+		return true
+	}
+	return false
 }
 
 func (v *MainMenu) SetScreenMode(screenMode MainMenuScreenMode) {
@@ -379,6 +383,9 @@ func (v *MainMenu) SetScreenMode(screenMode MainMenuScreenMode) {
 	v.btnTcpIpHostGame.SetVisible(isTcpIp)
 	v.btnTcpIpJoinGame.SetVisible(isTcpIp)
 	v.tcpJoinGameEntry.SetVisible(isServerIp)
+	if isServerIp {
+		v.tcpJoinGameEntry.Activate()
+	}
 	v.btnServerIpOk.SetVisible(isServerIp)
 	v.btnServerIpCancel.SetVisible(isServerIp)
 }

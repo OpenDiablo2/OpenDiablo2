@@ -6,19 +6,19 @@ import (
 
 // Configuration defines the configuration for the engine, loaded from config.json
 type Configuration struct {
+	MpqLoadOrder    []string
 	Language        string
-	FullScreen      bool
-	RunInBackground bool
+	MpqPath         string
 	TicksPerSecond  int
 	FpsCap          int
-	VsyncEnabled    bool
-	MpqPath         string
-	MpqLoadOrder    []string
 	SfxVolume       float64
 	BgmVolume       float64
+	FullScreen      bool
+	RunInBackground bool
+	VsyncEnabled    bool
 }
 
-var singleton *Configuration = getDefaultConfig()
+var singleton = getDefaultConfig()
 
 func Load() error {
 	configPaths := []string{
@@ -55,11 +55,6 @@ func Save() error {
 	}
 
 	return err
-}
-
-func Set(config Configuration) {
-	temp := config
-	singleton = &temp
 }
 
 func Get() Configuration {

@@ -25,6 +25,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+	ebiten_input "github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
@@ -63,12 +64,6 @@ var singleton struct {
 }
 
 func main() {
-	if len(GitBranch) == 0 {
-		GitBranch = "Local Build"
-	}
-
-	d2common.SetBuildInfo(GitBranch, GitCommit)
-
 	region := kingpin.Arg("region", "Region type id").Int()
 	preset := kingpin.Arg("preset", "Level preset").Int()
 	profileOption := kingpin.Flag("profile", "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)").String()
@@ -79,11 +74,17 @@ func main() {
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
 
 	if err := initialize(); err != nil {
+		if os.IsNotExist(err) {
+			run(updateInitError)
+		}
 		log.Fatal(err)
 	}
 
 	if len(*profileOption) > 0 {
-		enableProfiler(*profileOption)
+		profiler := enableProfiler(*profileOption)
+		if profiler != nil {
+			defer profiler.Stop()
+		}
 	}
 
 	if *region == 0 {
@@ -92,10 +93,7 @@ func main() {
 		d2screen.SetNextScreen(d2gamescreen.CreateMapEngineTest(*region, *preset))
 	}
 
-	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", GitBranch)
-	if err := d2render.Run(update, 800, 600, windowTitle); err != nil {
-		log.Fatal(err)
-	}
+	run(update)
 }
 
 func initialize() error {
@@ -109,6 +107,8 @@ func initialize() error {
 
 	config := d2config.Get()
 	d2resource.LanguageCode = config.Language
+
+	d2input.Initialize(ebiten_input.InputService{})
 
 	renderer, err := ebiten.CreateRenderer()
 	if err != nil {
@@ -208,6 +208,17 @@ func initialize() error {
 	return nil
 }
 
+func run(updateFunc func(d2render.Surface) error) {
+	if len(GitBranch) == 0 {
+		GitBranch = "Local Build"
+	}
+	d2common.SetBuildInfo(GitBranch, GitCommit)
+	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", GitBranch)
+	if err := d2render.Run(updateFunc, 800, 600, windowTitle); err != nil {
+		log.Fatal(err)
+	}
+}
+
 func update(target d2render.Surface) error {
 	currentTime := d2common.Now()
 	elapsedTime := (currentTime - singleton.lastTime) * singleton.timeScale
@@ -225,6 +236,13 @@ func update(target d2render.Surface) error {
 		return errors.New("detected surface stack leak")
 	}
 
+	return nil
+}
+
+func updateInitError(target d2render.Surface) error {
+	width, height := target.GetSize()
+	target.PushTranslation(width/5, height/2)
+	target.DrawText("Could not find the MPQ files in the directory: %s\nPlease put the files and re-run the game.", d2config.Get().MpqPath)
 	return nil
 }
 
@@ -457,7 +475,7 @@ func loadStrings() error {
 	return nil
 }
 
-func enableProfiler(profileOption string) {
+func enableProfiler(profileOption string) interface{ Stop() } {
 	var options []func(*profile.Profile)
 	switch strings.ToLower(strings.Trim(profileOption, " ")) {
 	case "cpu":
@@ -485,6 +503,7 @@ func enableProfiler(profileOption string) {
 	options = append(options, profile.ProfilePath("./pprof/"))
 
 	if len(options) > 1 {
-		defer profile.Start(options...).Stop()
+		return profile.Start(options...)
 	}
+	return nil
 }

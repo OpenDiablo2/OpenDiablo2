@@ -143,13 +143,14 @@ func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 	met.mapRenderer.MoveCameraTo(met.mapRenderer.WorldToOrtho(met.mapEngine.GetCenterPosition()))
 }
 
-func (met *MapEngineTest) OnLoad() error {
+func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 	d2input.BindHandler(met)
+	loading.Progress(0.2)
 	met.mapEngine = d2mapengine.CreateMapEngine()
+	loading.Progress(0.5)
 	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.mapEngine)
+	loading.Progress(0.7)
 	met.LoadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
-
-	return nil
 }
 
 func (met *MapEngineTest) OnUnload() error {

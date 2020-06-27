@@ -11,15 +11,13 @@ import (
 )
 
 type manager struct {
-	layout *Layout
-
+	layout        *Layout
 	cursorAnim    *d2asset.Animation
 	cursorX       int
 	cursorY       int
+	loadingAnim   *d2asset.Animation
 	cursorVisible bool
-
-	loadingAnim *d2asset.Animation
-	loading     bool
+	loading       bool
 }
 
 func createGuiManager() (*manager, error) {
@@ -48,6 +46,9 @@ func createGuiManager() (*manager, error) {
 
 func (m *manager) SetLayout(layout *Layout) {
 	m.layout = layout
+	if m.layout != nil {
+		m.layout.AdjustEntryPlacement()
+	}
 }
 
 func (m *manager) OnMouseButtonDown(event d2input.MouseEvent) bool {

@@ -12,6 +12,8 @@ type MapEntity interface {
 	Render(target d2render.Surface)
 	Advance(tickTime float64)
 	GetPosition() (float64, float64)
+	GetPositionF() (float64, float64)
+	Name() string
 }
 
 // mapEntity represents an entity on the map that can be animated
@@ -28,7 +30,7 @@ type mapEntity struct {
 	path               []d2astar.Pather
 
 	done        func()
-	directioner func(angle float64)
+	directioner func(direction int)
 }
 
 // createMapEntity creates an instance of mapEntity
@@ -51,6 +53,10 @@ func createMapEntity(x, y int) mapEntity {
 func (m *mapEntity) SetPath(path []d2astar.Pather, done func()) {
 	m.path = path
 	m.done = done
+}
+
+func (m *mapEntity) ClearPath() {
+	m.path = nil
 }
 
 func (m *mapEntity) SetSpeed(speed float64) {
@@ -147,7 +153,7 @@ func (m *mapEntity) SetTarget(tx, ty float64, done func()) {
 			tx,
 			ty,
 		)
-		m.directioner(float64(angle))
+		m.directioner(angleToDirection(float64(angle)))
 	}
 }
 
@@ -168,4 +174,12 @@ func angleToDirection(angle float64) int {
 
 func (m *mapEntity) GetPosition() (float64, float64) {
 	return float64(m.TileX), float64(m.TileY)
+}
+
+func (m *mapEntity) GetPositionF() (float64, float64) {
+	return float64(m.TileX) + (float64(m.subcellX) / 5.0), float64(m.TileY) + (float64(m.subcellY) / 5.0)
+}
+
+func (m *mapEntity) Name() string {
+	return ""
 }

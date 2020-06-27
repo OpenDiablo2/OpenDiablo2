@@ -5,6 +5,9 @@ import (
 	"log"
 	"os"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
@@ -80,15 +83,15 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		log.Printf("Player id set to %s", serverInfo.PlayerId)
 	case d2netpackettype.AddPlayer:
 		player := packet.PacketData.(d2netpacket.AddPlayerPacket)
-		newPlayer := d2mapentity.CreatePlayer(player.Id, player.Name, player.X, player.Y, 0, player.HeroType, player.Equipment)
+		newPlayer := d2mapentity.CreatePlayer(player.Id, player.Name, player.X, player.Y, 0, player.HeroType, player.Stats, player.Equipment)
 		g.Players[newPlayer.Id] = newPlayer
 		g.MapEngine.AddEntity(newPlayer)
 	case d2netpackettype.MovePlayer:
 		movePlayer := packet.PacketData.(d2netpacket.MovePlayerPacket)
 		player := g.Players[movePlayer.PlayerId]
-		path, _, found := g.MapEngine.PathFind(movePlayer.StartX, movePlayer.StartY, movePlayer.DestX, movePlayer.DestY)
-		if found {
-			player.AnimatedComposite.SetPath(path, func() {
+		path, _, _ := g.MapEngine.PathFind(movePlayer.StartX, movePlayer.StartY, movePlayer.DestX, movePlayer.DestY)
+		if len(path) > 0 {
+			player.SetPath(path, func() {
 				tile := g.MapEngine.TileAt(player.TileX, player.TileY)
 				if tile == nil {
 					return
@@ -100,9 +103,36 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 				} else {
 					player.SetIsInTown(false)
 				}
-				player.AnimatedComposite.SetAnimationMode(player.GetAnimationMode().String())
+				player.SetAnimationMode(player.GetAnimationMode().String())
 			})
 		}
+	case d2netpackettype.CastSkill:
+		playerCast := packet.PacketData.(d2netpacket.CastPacket)
+		player := g.Players[playerCast.SourceEntityID]
+		player.SetCasting()
+		player.ClearPath()
+		// currently hardcoded to missile skill
+		missile, err := d2mapentity.CreateMissile(
+			int(player.LocationX),
+			int(player.LocationY),
+			d2datadict.Missiles[playerCast.SkillID],
+		)
+		if err != nil {
+			return err
+		}
+
+		rads := d2common.GetRadiansBetween(
+			player.LocationX,
+			player.LocationY,
+			playerCast.TargetX*5,
+			playerCast.TargetY*5,
+		)
+
+		missile.SetRadians(rads, func() {
+			g.MapEngine.RemoveEntity(missile)
+		})
+
+		g.MapEngine.AddEntity(missile)
 	case d2netpackettype.Ping:
 		g.clientConnection.SendPacketToServer(d2netpacket.CreatePongPacket(g.PlayerId))
 	case d2netpackettype.ServerClosed:

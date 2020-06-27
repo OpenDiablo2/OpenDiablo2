@@ -17,19 +17,19 @@ import (
 
 // Stream represents a stream of data in an MPQ archive
 type Stream struct {
-	MPQData           MPQ
 	BlockTableEntry   BlockTableEntry
-	FileName          string
-	EncryptionSeed    uint32
 	BlockPositions    []uint32
-	CurrentPosition   uint32
 	CurrentData       []byte
+	FileName          string
+	MPQData           *MPQ
+	EncryptionSeed    uint32
+	CurrentPosition   uint32
 	CurrentBlockIndex uint32
 	BlockSize         uint32
 }
 
 // CreateStream creates an MPQ stream
-func CreateStream(mpq MPQ, blockTableEntry BlockTableEntry, fileName string) (*Stream, error) {
+func CreateStream(mpq *MPQ, blockTableEntry BlockTableEntry, fileName string) (*Stream, error) {
 	result := &Stream{
 		MPQData:           mpq,
 		BlockTableEntry:   blockTableEntry,
@@ -86,7 +86,7 @@ func (v *Stream) Read(buffer []byte, offset, count uint32) uint32 {
 	toRead := count
 	readTotal := uint32(0)
 	for toRead > 0 {
-		read := v.readInternal(buffer, offset, count)
+		read := v.readInternal(buffer, offset, toRead)
 		if read == 0 {
 			break
 		}
@@ -191,11 +191,8 @@ func decompressMulti(data []byte, expectedLength uint32) []byte {
 		panic("bzip2 decompression not supported")
 	case 0x80: // IMA ADPCM Stereo
 		return d2compression.WavDecompress(data[1:], 2)
-		//return MpqWavCompression.Decompress(sinput, 2);
-		//panic("ima adpcm sterio decompression not supported")
 	case 0x40: // IMA ADPCM Mono
-		//return MpqWavCompression.Decompress(sinput, 1)
-		panic("mpq wav decompression not supported")
+		return d2compression.WavDecompress(data[1:], 1)
 	case 0x12:
 		panic("lzma decompression not supported")
 	// Combos

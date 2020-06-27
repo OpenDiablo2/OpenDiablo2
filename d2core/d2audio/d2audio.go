@@ -32,9 +32,7 @@ func Initialize(audioProvider AudioProvider) error {
 // PlayBGM plays an infinitely looping background track
 func PlayBGM(song string) error {
 	verifyWasInit()
-	go func() {
-		singleton.PlayBGM(song)
-	}()
+	singleton.PlayBGM(song)
 	return nil
 }
 

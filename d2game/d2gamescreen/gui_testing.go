@@ -3,6 +3,7 @@ package d2gamescreen
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 )
 
 type GuiTestMain struct{}
@@ -11,8 +12,9 @@ func CreateGuiTestMain() *GuiTestMain {
 	return &GuiTestMain{}
 }
 
-func (g *GuiTestMain) OnLoad() error {
+func (g *GuiTestMain) OnLoad(loading d2screen.LoadingState) {
 	layout := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
+	loading.Progress(0.3)
 	//
 	layoutLeft := layout.AddLayout(d2gui.PositionTypeVertical)
 	layoutLeft.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
@@ -23,6 +25,7 @@ func (g *GuiTestMain) OnLoad() error {
 	layoutLeft.AddLabel("FontStyleFormal10Static", d2gui.FontStyleFormal10Static)
 	layoutLeft.AddLabel("FontStyleFormal11Units", d2gui.FontStyleFormal11Units)
 	layoutLeft.AddLabel("FontStyleFormal12Static", d2gui.FontStyleFormal12Static)
+	loading.Progress(0.6)
 
 	layout.AddSpacerDynamic()
 
@@ -33,11 +36,10 @@ func (g *GuiTestMain) OnLoad() error {
 	layoutRight.AddButton("OkCancel", d2gui.ButtonStyleOkCancel)
 	layoutRight.AddButton("Short", d2gui.ButtonStyleShort)
 	layoutRight.AddButton("Wide", d2gui.ButtonStyleWide)
+	loading.Progress(0.9)
 
 	layout.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	d2gui.SetLayout(layout)
-
-	return nil
 }
 
 func (g *GuiTestMain) Render(screen d2render.Surface) error {

@@ -21,6 +21,7 @@ type widget interface {
 	onMouseButtonClick(event d2input.MouseEvent) bool
 
 	getPosition() (int, int)
+	setOffset(x, y int)
 	getSize() (int, int)
 	getLayer() int
 	isVisible() bool
@@ -34,6 +35,9 @@ type widgetBase struct {
 	visible   bool
 	expanding bool
 
+	offsetX int
+	offsetY int
+
 	mouseEnterHandler MouseMoveHandler
 	mouseLeaveHandler MouseMoveHandler
 	mouseClickHandler MouseHandler
@@ -42,6 +46,19 @@ type widgetBase struct {
 func (w *widgetBase) SetPosition(x, y int) {
 	w.x = x
 	w.y = y
+}
+
+func (w *widgetBase) GetPosition() (int, int) {
+	return w.x, w.y
+}
+
+func (w *widgetBase) GetOffset() (int, int) {
+	return w.offsetX, w.offsetY
+}
+
+func (w *widgetBase) setOffset(x, y int) {
+	w.offsetX = x
+	w.offsetY = y
 }
 
 func (w *widgetBase) SetLayer(layer int) {
