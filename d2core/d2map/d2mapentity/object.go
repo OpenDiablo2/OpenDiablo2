@@ -1,8 +1,8 @@
 package d2mapentity
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
@@ -46,8 +46,12 @@ func (ob *Object) SetMode(animationMode, weaponClass string, direction int) erro
 		ob.weaponClass = "HTH"
 	}
 	ob.mapEntity.drawLayer = ob.objectRecord.OrderFlag[d2enum.ObjectAnimationModeFromString(animationMode)]
+
 	// For objects their txt record entry overrides animationdata
-	ob.composite.SetSpeed(ob.objectRecord.FrameDelta[d2enum.ObjectAnimationModeFromString(animationMode)])
+	speed := ob.objectRecord.FrameDelta[d2enum.ObjectAnimationModeFromString(animationMode)]
+	if speed != 0 {
+		ob.composite.SetSpeed(speed)
+	}
 	return err
 }
 
