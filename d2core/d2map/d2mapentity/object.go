@@ -1,6 +1,7 @@
 package d2mapentity
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
@@ -29,6 +30,7 @@ func CreateObject(x, y int, object *d2datadict.ObjectLookupRecord, palettePath s
 	}
 	entity.mapEntity.directioner = entity.rotate
 	entity.objectRecord = d2datadict.Objects[object.ObjectsTxtId]
+	entity.drawLayer = entity.objectRecord.OrderFlag[d2enum.AnimationModeObjectNeutral]
 	return entity, nil
 }
 
@@ -43,6 +45,7 @@ func (ob *Object) SetMode(animationMode, weaponClass string, direction int) erro
 		err = ob.composite.SetMode(animationMode, "HTH", direction)
 		ob.weaponClass = "HTH"
 	}
+	ob.mapEntity.drawLayer = ob.objectRecord.OrderFlag[d2enum.ObjectAnimationModeFromString(animationMode)]
 
 	return err
 }
