@@ -58,3 +58,4 @@ const (
 //go:generate stringer -linecomment -type PlayerAnimationMode
 //go:generate stringer -linecomment -type MonsterAnimationMode
 //go:generate stringer -linecomment -type ObjectAnimationMode
+//go:generate string2enum -samepkg -linecomment -type ObjectAnimationMode

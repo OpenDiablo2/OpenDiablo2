@@ -81,6 +81,16 @@ func (c *Composite) SetMode(animationMode, weaponClass string, direction int) er
 	return nil
 }
 
+func (c *Composite) SetSpeed(speed int) {
+	c.mode.animationSpeed = 1.0 / ((float64(speed) * 25.0) / 256.0)
+	for layerIdx := range c.mode.layers {
+		layer := c.mode.layers[layerIdx]
+		if layer != nil {
+			layer.SetPlaySpeed(c.mode.animationSpeed)
+		}
+	}
+}
+
 func (c *Composite) GetDirectionCount() int {
 	if c.mode == nil {
 		return 0
