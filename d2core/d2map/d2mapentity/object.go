@@ -46,7 +46,8 @@ func (ob *Object) SetMode(animationMode, weaponClass string, direction int) erro
 		ob.weaponClass = "HTH"
 	}
 	ob.mapEntity.drawLayer = ob.objectRecord.OrderFlag[d2enum.ObjectAnimationModeFromString(animationMode)]
-
+	// For objects their txt record entry overrides animationdata
+	ob.composite.SetSpeed(ob.objectRecord.FrameDelta[d2enum.ObjectAnimationModeFromString(animationMode)])
 	return err
 }
 
