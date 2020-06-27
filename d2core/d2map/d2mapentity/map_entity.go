@@ -12,6 +12,7 @@ type MapEntity interface {
 	Render(target d2render.Surface)
 	Advance(tickTime float64)
 	GetPosition() (float64, float64)
+	GetLayer() (int)
 	GetPositionF() (float64, float64)
 	Name() string
 }
@@ -28,6 +29,7 @@ type mapEntity struct {
 	TargetY            float64
 	Speed              float64
 	path               []d2astar.Pather
+	drawLayer          int
 
 	done        func()
 	directioner func(direction int)
@@ -46,8 +48,13 @@ func createMapEntity(x, y int) mapEntity {
 		subcellX:  1 + math.Mod(locX, 5),
 		subcellY:  1 + math.Mod(locY, 5),
 		Speed:     6,
+		drawLayer: 0,
 		path:      []d2astar.Pather{},
 	}
+}
+
+func (m *mapEntity) GetLayer() int {
+	return m.drawLayer
 }
 
 func (m *mapEntity) SetPath(path []d2astar.Pather, done func()) {

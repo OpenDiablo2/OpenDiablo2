@@ -71,8 +71,8 @@ func (mr *MapRenderer) Render(target d2render.Surface) {
 	if mr.debugVisLevel > 0 {
 		mr.renderDebug(mr.debugVisLevel, target, startX, startY, endX, endY)
 	}
-	mr.renderPass2(target, startX, startY, endX, endY)
 	mr.renderPass3(target, startX, startY, endX, endY)
+	mr.renderPass4(target, startX, startY, endX, endY)
 }
 
 func (mr *MapRenderer) MoveCameraTo(x, y float64) {
@@ -95,6 +95,7 @@ func (mr *MapRenderer) WorldToOrtho(x, y float64) (float64, float64) {
 	return mr.viewport.WorldToOrtho(x, y)
 }
 
+// Lower wall tiles, tile shadews, floor tiles
 func (mr *MapRenderer) renderPass1(target d2render.Surface, startX, startY, endX, endY int) {
 	for tileY := startY; tileY < endY; tileY++ {
 		for tileX := startX; tileX < endX; tileX++ {
@@ -106,7 +107,32 @@ func (mr *MapRenderer) renderPass1(target d2render.Surface, startX, startY, endX
 	}
 }
 
+// Objects below walls
 func (mr *MapRenderer) renderPass2(target d2render.Surface, startX, startY, endX, endY int) {
+	for tileY := startY; tileY < endY; tileY++ {
+		for tileX := startX; tileX < endX; tileX++ {
+			mr.viewport.PushTranslationWorld(float64(tileX), float64(tileY))
+
+			// TODO: Do not loop over every entity every frame
+			for _, mapEntity := range *mr.mapEngine.Entities() {
+				entityX, entityY := mapEntity.GetPosition()
+				if (int(entityX) != tileX) || (int(entityY) != tileY) {
+					continue
+				}
+				if mapEntity.GetLayer() != 1 {
+					continue
+				}
+				target.PushTranslation(mr.viewport.GetTranslationScreen())
+				mapEntity.Render(target)
+				target.Pop()
+			}
+			mr.viewport.PopTranslation()
+		}
+	}
+}
+
+// Upper wall tiles, objects that are on top of walls
+func (mr *MapRenderer) renderPass3(target d2render.Surface, startX, startY, endX, endY int) {
 	for tileY := startY; tileY < endY; tileY++ {
 		for tileX := startX; tileX < endX; tileX++ {
 			tile := mr.mapEngine.TileAt(tileX, tileY)
@@ -119,6 +145,9 @@ func (mr *MapRenderer) renderPass2(target d2render.Surface, startX, startY, endX
 				if (int(entityX) != tileX) || (int(entityY) != tileY) {
 					continue
 				}
+				if mapEntity.GetLayer() == 1 {
+					continue
+				}
 				target.PushTranslation(mr.viewport.GetTranslationScreen())
 				mapEntity.Render(target)
 				target.Pop()
@@ -128,7 +157,8 @@ func (mr *MapRenderer) renderPass2(target d2render.Surface, startX, startY, endX
 	}
 }
 
-func (mr *MapRenderer) renderPass3(target d2render.Surface, startX, startY, endX, endY int) {
+// Roof tiles
+func (mr *MapRenderer) renderPass4(target d2render.Surface, startX, startY, endX, endY int) {
 	for tileY := startY; tileY < endY; tileY++ {
 		for tileX := startX; tileX < endX; tileX++ {
 			tile := mr.mapEngine.TileAt(tileX, tileY)
