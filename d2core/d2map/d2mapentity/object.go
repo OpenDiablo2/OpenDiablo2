@@ -12,6 +12,7 @@ type Object struct {
 	mapEntity
 	composite    *d2asset.Composite
 	direction    int
+	highlight    bool
 	objectRecord *d2datadict.ObjectRecord
 	objectLookup *d2datadict.ObjectLookupRecord
 }
@@ -45,14 +46,26 @@ func (ob *Object) SetMode(animationMode, weaponClass string, direction int) erro
 		err = ob.composite.SetMode(animationMode, "HTH", direction)
 		ob.weaponClass = "HTH"
 	}
-	ob.mapEntity.drawLayer = ob.objectRecord.OrderFlag[d2enum.ObjectAnimationModeFromString(animationMode)]
+
+	mode := d2enum.ObjectAnimationModeFromString(animationMode)
+	ob.mapEntity.drawLayer = ob.objectRecord.OrderFlag[mode]
 
 	// For objects their txt record entry overrides animationdata
-	speed := ob.objectRecord.FrameDelta[d2enum.ObjectAnimationModeFromString(animationMode)]
+	speed := ob.objectRecord.FrameDelta[mode]
 	if speed != 0 {
 		ob.composite.SetSpeed(speed)
 	}
+
 	return err
+}
+
+func (ob *Object) Highlight() {
+	ob.highlight = true
+}
+
+func (ob *Object) Selectable() bool {
+	mode := d2enum.ObjectAnimationModeFromString(ob.composite.GetAnimationMode())
+	return ob.objectRecord.Selectable[mode]
 }
 
 // Render draws this animated entity onto the target
@@ -61,8 +74,13 @@ func (ob *Object) Render(target d2render.Surface) {
 		ob.offsetX+int((ob.subcellX-ob.subcellY)*16),
 		ob.offsetY+int(((ob.subcellX+ob.subcellY)*8)-5),
 	)
+	if ob.highlight {
+		target.PushBrightness(2)
+		defer target.Pop()
+	}
 	defer target.Pop()
 	ob.composite.Render(target)
+	ob.highlight = false
 }
 
 // rotate sets direction and changes animation

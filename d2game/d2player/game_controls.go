@@ -337,7 +337,7 @@ func (g *GameControls) isInActiveMenusRect(px int, py int) bool {
 func (g *GameControls) Render(target d2render.Surface) {
 	for entityIdx := range *g.mapEngine.Entities() {
 		entity := (*g.mapEngine.Entities())[entityIdx]
-		if entity.Name() == "" {
+		if !entity.Selectable() {
 			continue
 		}
 
@@ -350,6 +350,7 @@ func (g *GameControls) Render(target d2render.Surface) {
 			g.nameLabel.SetText(entity.Name())
 			g.nameLabel.SetPosition(entScreenX, entScreenY-100)
 			g.nameLabel.Render(target)
+			entity.Highlight()
 			break
 		}
 	}

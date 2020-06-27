@@ -165,6 +165,14 @@ func (v *NPC) SetMode(animationMode, weaponClass string, direction int) error {
 	return err
 }
 
+func (m *NPC) Selectable() bool {
+	// is there something handy that determines selectable npc's?
+	if m.name != "" {
+		return true
+	}
+	return false
+}
+
 func (m *NPC) Name() string {
 	return m.name
 }

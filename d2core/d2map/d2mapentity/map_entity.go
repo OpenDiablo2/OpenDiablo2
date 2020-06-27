@@ -15,6 +15,8 @@ type MapEntity interface {
 	GetLayer() (int)
 	GetPositionF() (float64, float64)
 	Name() string
+	Selectable() bool
+	Highlight()
 }
 
 // mapEntity represents an entity on the map that can be animated
@@ -189,4 +191,11 @@ func (m *mapEntity) GetPositionF() (float64, float64) {
 
 func (m *mapEntity) Name() string {
 	return ""
+}
+
+func (m *mapEntity) Highlight() {
+}
+
+func (m *mapEntity) Selectable() bool {
+	return false
 }

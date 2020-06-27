@@ -207,3 +207,8 @@ func (v *Player) SetCasting() {
 	v.isCasting = true
 	v.SetAnimationMode(d2enum.AnimationModePlayerCast.String())
 }
+
+func (v *Player) Selectable() bool {
+	// Players are selectable when in town
+	return v.IsInTown()
+}
