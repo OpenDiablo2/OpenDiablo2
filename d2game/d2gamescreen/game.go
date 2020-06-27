@@ -135,3 +135,7 @@ func (v *Game) OnPlayerMove(x, y float64) {
 	heroPosY := v.localPlayer.LocationY / 5.0
 	v.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(v.gameClient.PlayerId, heroPosX, heroPosY, x, y))
 }
+
+func (v *Game) OnPlayerCast(missleID int, targetX, targetY float64) {
+	v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerId, missleID, targetX, targetY))
+}

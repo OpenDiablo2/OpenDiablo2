@@ -55,6 +55,10 @@ func (m *mapEntity) SetPath(path []d2astar.Pather, done func()) {
 	m.done = done
 }
 
+func (m *mapEntity) ClearPath() {
+	m.path = nil
+}
+
 func (m *mapEntity) SetSpeed(speed float64) {
 	m.Speed = speed
 }
@@ -173,7 +177,7 @@ func (m *mapEntity) GetPosition() (float64, float64) {
 }
 
 func (m *mapEntity) GetPositionF() (float64, float64) {
-	return float64(m.TileX) + (float64(m.subcellX)/5.0), float64(m.TileY) + (float64(m.subcellY)/5.0)
+	return float64(m.TileX) + (float64(m.subcellX) / 5.0), float64(m.TileY) + (float64(m.subcellY) / 5.0)
 }
 
 func (m *mapEntity) Name() string {

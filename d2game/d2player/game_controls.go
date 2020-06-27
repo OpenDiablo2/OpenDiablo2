@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
@@ -197,7 +196,7 @@ func (g *GameControls) OnMouseButtonRepeat(event d2input.MouseEvent) bool {
 
 	if event.Button == d2input.MouseButtonRight && now-lastRightBtnActionTime >= mouseBtnActionsTreshhold && !g.isInActiveMenusRect(event.X, event.Y) {
 		lastRightBtnActionTime = now
-		g.ShootMissile(px, py)
+		g.inputListener.OnPlayerCast(missileID, px, py)
 		return true
 	}
 
@@ -241,35 +240,11 @@ func (g *GameControls) OnMouseButtonDown(event d2input.MouseEvent) bool {
 
 	if event.Button == d2input.MouseButtonRight && !g.isInActiveMenusRect(mx, my) {
 		lastRightBtnActionTime = d2common.Now()
-		return g.ShootMissile(px, py)
+		g.inputListener.OnPlayerCast(missileID, px, py)
+		return true
 	}
 
 	return false
-}
-
-func (g *GameControls) ShootMissile(px float64, py float64) bool {
-	missile, err := d2mapentity.CreateMissile(
-		int(g.hero.LocationX),
-		int(g.hero.LocationY),
-		d2datadict.Missiles[missileID],
-	)
-	if err != nil {
-		return false
-	}
-
-	rads := d2common.GetRadiansBetween(
-		g.hero.LocationX,
-		g.hero.LocationY,
-		px*5,
-		py*5,
-	)
-
-	missile.SetRadians(rads, func() {
-		g.mapEngine.RemoveEntity(missile)
-	})
-
-	g.mapEngine.AddEntity(missile)
-	return true
 }
 
 func (g *GameControls) Load() {

@@ -5,6 +5,9 @@ import (
 	"log"
 	"os"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
@@ -103,6 +106,33 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 				player.SetAnimationMode(player.GetAnimationMode().String())
 			})
 		}
+	case d2netpackettype.CastSkill:
+		playerCast := packet.PacketData.(d2netpacket.CastPacket)
+		player := g.Players[playerCast.SourceEntityID]
+		player.SetCasting()
+		player.ClearPath()
+		// currently hardcoded to missile skill
+		missile, err := d2mapentity.CreateMissile(
+			int(player.LocationX),
+			int(player.LocationY),
+			d2datadict.Missiles[playerCast.SkillID],
+		)
+		if err != nil {
+			return err
+		}
+
+		rads := d2common.GetRadiansBetween(
+			player.LocationX,
+			player.LocationY,
+			playerCast.TargetX*5,
+			playerCast.TargetY*5,
+		)
+
+		missile.SetRadians(rads, func() {
+			g.MapEngine.RemoveEntity(missile)
+		})
+
+		g.MapEngine.AddEntity(missile)
 	case d2netpackettype.Ping:
 		g.clientConnection.SendPacketToServer(d2netpacket.CreatePongPacket(g.PlayerId))
 	case d2netpackettype.ServerClosed:

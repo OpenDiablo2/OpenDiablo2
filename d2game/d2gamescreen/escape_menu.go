@@ -335,6 +335,7 @@ func (m *EscapeMenu) showLayout(id layoutID) {
 
 	if id == saveLayoutID {
 		mainMenu := CreateMainMenu()
+		mainMenu.SetScreenMode(ScreenModeMainMenu)
 		d2screen.SetNextScreen(mainMenu)
 		return
 	}
