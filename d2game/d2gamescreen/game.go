@@ -2,6 +2,7 @@ package d2gamescreen
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
@@ -86,14 +87,9 @@ func (v *Game) Advance(tickTime float64) error {
 		if v.localPlayer != nil {
 			tile := v.gameClient.MapEngine.TileAt(v.localPlayer.TileX, v.localPlayer.TileY)
 			if tile != nil {
-				switch tile.RegionType {
-				case d2enum.RegionAct1Town: // Rogue encampent
-					v.localPlayer.SetIsInTown(true)
-					d2audio.PlayBGM("/data/global/music/Act1/town1.wav")
-				case d2enum.RegionAct1Wilderness: // Blood Moore
-					v.localPlayer.SetIsInTown(false)
-					d2audio.PlayBGM("/data/global/music/Act1/wild.wav")
-				}
+				musicInfo := d2common.GetMusicDef(tile.RegionType)
+				v.localPlayer.SetIsInTown(musicInfo.InTown)
+				d2audio.PlayBGM(musicInfo.MusicFile)
 
 				// skip showing zone change text the first time we enter the world
 				if v.lastRegionType != d2enum.RegionNone && v.lastRegionType != tile.RegionType {
