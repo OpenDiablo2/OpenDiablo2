@@ -12,4 +12,5 @@ type surfaceState struct {
 	mode   ebiten.CompositeMode
 	filter ebiten.Filter
 	color  color.Color
+	brightness float64
 }

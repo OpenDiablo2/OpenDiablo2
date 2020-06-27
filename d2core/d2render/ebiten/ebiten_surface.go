@@ -38,6 +38,11 @@ func (s *ebitenSurface) PushColor(color color.Color) {
 	s.stateCurrent.color = color
 }
 
+func (s *ebitenSurface) PushBrightness(brightness float64) {
+	s.stateStack = append(s.stateStack, s.stateCurrent)
+	s.stateCurrent.brightness = brightness
+}
+
 func (s *ebitenSurface) Pop() {
 	count := len(s.stateStack)
 	if count == 0 {
@@ -60,6 +65,9 @@ func (s *ebitenSurface) Render(sfc d2render.Surface) error {
 	opts.Filter = s.stateCurrent.filter
 	if s.stateCurrent.color != nil {
 		opts.ColorM = ColorToColorM(s.stateCurrent.color)
+	}
+	if s.stateCurrent.brightness != 0 {
+		opts.ColorM.ChangeHSV(0, 1, s.stateCurrent.brightness)
 	}
 
 	var img = sfc.(*ebitenSurface).image
