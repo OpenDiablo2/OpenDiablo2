@@ -86,7 +86,7 @@ func (v *Stream) Read(buffer []byte, offset, count uint32) uint32 {
 	toRead := count
 	readTotal := uint32(0)
 	for toRead > 0 {
-		read := v.readInternal(buffer, offset, count)
+		read := v.readInternal(buffer, offset, toRead)
 		if read == 0 {
 			break
 		}

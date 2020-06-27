@@ -45,11 +45,11 @@ func (eap *AudioProvider) PlayBGM(song string) {
 			log.Panic(err)
 		}
 	}
-	audioData, err := d2asset.LoadFile(song)
+	audioStream, err := d2asset.LoadFileStream(song)
 	if err != nil {
 		panic(err)
 	}
-	d, err := wav.Decode(eap.audioContext, audio.BytesReadSeekCloser(audioData))
+	d, err := wav.Decode(eap.audioContext, audioStream)
 	if err != nil {
 		log.Fatal(err)
 	}
