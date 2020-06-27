@@ -80,6 +80,17 @@ func LoadArchive(archivePath string) (*d2mpq.MPQ, error) {
 	return singleton.archiveManager.loadArchive(archivePath)
 }
 
+func LoadFileStream(filePath string) (*d2mpq.MpqDataStream, error) {
+	verifyWasInit()
+
+	data, err := singleton.fileManager.loadFileStream(filePath)
+	if err != nil {
+		log.Printf("error loading file stream %s (%v)", filePath, err.Error())
+	}
+
+	return data, err
+}
+
 func LoadFile(filePath string) ([]byte, error) {
 	verifyWasInit()
 

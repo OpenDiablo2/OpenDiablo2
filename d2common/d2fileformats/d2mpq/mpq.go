@@ -273,15 +273,35 @@ func (v *MPQ) ReadFile(fileName string) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
+
 	fileBlockData.FileName = strings.ToLower(fileName)
+
 	fileBlockData.calculateEncryptionSeed()
 	mpqStream, err := CreateStream(v, fileBlockData, fileName)
+
 	if err != nil {
 		return []byte{}, err
 	}
+
 	buffer := make([]byte, fileBlockData.UncompressedFileSize)
 	mpqStream.Read(buffer, 0, fileBlockData.UncompressedFileSize)
 	return buffer, nil
+}
+
+func (v *MPQ) ReadFileStream(fileName string) (*MpqDataStream, error) {
+	fileBlockData, err := v.getFileBlockData(fileName)
+	if err != nil {
+		return nil, err
+	}
+	fileBlockData.FileName = strings.ToLower(fileName)
+	fileBlockData.calculateEncryptionSeed()
+
+	mpqStream, err := CreateStream(v, fileBlockData, fileName)
+	if err != nil {
+		return nil, err
+	}
+
+	return &MpqDataStream{stream: mpqStream}, nil
 }
 
 // ReadTextFile reads a file and returns it as a string
@@ -303,7 +323,7 @@ func (v *BlockTableEntry) calculateEncryptionSeed() {
 }
 
 // GetFileList returns the list of files in this MPQ
-func (v * MPQ) GetFileList() ([]string, error) {
+func (v *MPQ) GetFileList() ([]string, error) {
 	data, err := v.ReadFile("(listfile)")
 	if err != nil {
 		return nil, err
