@@ -18,6 +18,7 @@ type Surface interface {
 	PushCompositeMode(mode CompositeMode)
 	PushFilter(filter Filter)
 	PushTranslation(x, y int)
+	PushBrightness(brightness float64)
 	Render(surface Surface) error
 	ReplacePixels(pixels []byte) error
 	Screenshot() *image.RGBA
