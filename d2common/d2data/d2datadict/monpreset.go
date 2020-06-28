@@ -6,23 +6,26 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
-type MonPresetRecord struct {
-	Act int
-	Place string
-}
-
-var MonPresets []MonPresetRecord
+var MonPresets [][]string
 
 func LoadMonPresets(file []byte) {
 	dict := d2common.LoadDataDictionary(string(file))
 	numRecords := len(dict.Data)
-	MonPresets = make([]MonPresetRecord, numRecords)
-	for idx := range dict.Data {
-		record := MonPresetRecord{
-			Act: dict.GetNumber("Act", idx),
-			Place: dict.GetString("Place", idx),
+	MonPresets = make([][]string, numRecords)
+	for idx := range MonPresets {
+		MonPresets[idx] = make([]string, numRecords)
+	}
+
+	lastAct := 0
+	placeIdx := 0
+	for dictIdx := range dict.Data {
+		act := dict.GetNumber("Act", dictIdx)
+		if act != lastAct {
+			placeIdx = 0
 		}
-		MonPresets[idx] = record
+		MonPresets[act][placeIdx] = dict.GetString("Place", dictIdx)
+		placeIdx++
+		lastAct = act
 	}
 	log.Printf("Loaded %d MonPreset records", len(MonPresets))
 }
