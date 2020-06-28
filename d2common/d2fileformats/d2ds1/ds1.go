@@ -122,6 +122,10 @@ func (ds1 *DS1) loadObjects(br *d2common.StreamReader) {
 			newObject.Flags = int(br.GetInt32())
 			newObject.Lookup = d2datadict.LookupObject(int(ds1.Act), newObject.Type, newObject.Id)
 
+			if newObject.Lookup != nil && newObject.Type == 1 {
+				newObject.Lookup.Name = d2datadict.MonPresets[ds1.Act][newObject.Id]
+			}
+
 			if newObject.Lookup != nil && newObject.Lookup.ObjectsTxtId != -1 {
 				newObject.ObjectInfo = d2datadict.Objects[newObject.Lookup.ObjectsTxtId]
 			}
