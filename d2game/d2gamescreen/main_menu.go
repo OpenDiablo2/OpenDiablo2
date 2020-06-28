@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
@@ -18,7 +20,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -69,19 +70,21 @@ type MainMenu struct {
 	tcpJoinGameEntry    d2ui.TextBox
 	screenMode          MainMenuScreenMode
 	leftButtonHeld      bool
+	audioProvider       d2interface.AudioProvider
 }
 
 // CreateMainMenu creates an instance of MainMenu
-func CreateMainMenu() *MainMenu {
+func CreateMainMenu(audioProvider d2interface.AudioProvider) *MainMenu {
 	return &MainMenu{
 		screenMode:     ScreenModeUnknown,
 		leftButtonHeld: true,
+		audioProvider:  audioProvider,
 	}
 }
 
 // Load is called to load the resources for the main menu
 func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
-	d2audio.PlayBGM(d2resource.BGMTitle)
+	v.audioProvider.PlayBGM(d2resource.BGMTitle)
 	loading.Progress(0.2)
 
 	v.versionLabel = d2ui.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
@@ -277,10 +280,10 @@ func openbrowser(url string) {
 func (v *MainMenu) onSinglePlayerClicked() {
 	// Go here only if existing characters are available to select
 	if d2player.HasGameStates() {
-		d2screen.SetNextScreen(CreateCharacterSelect(d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText()))
+		d2screen.SetNextScreen(CreateCharacterSelect(v.audioProvider, d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText()))
 		return
 	}
-	d2screen.SetNextScreen(CreateSelectHeroClass(d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText()))
+	d2screen.SetNextScreen(CreateSelectHeroClass(v.audioProvider, d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText()))
 }
 
 func (v *MainMenu) onGithubButtonClicked() {
@@ -292,7 +295,7 @@ func (v *MainMenu) onExitButtonClicked() {
 }
 
 func (v *MainMenu) onCreditsButtonClicked() {
-	d2screen.SetNextScreen(CreateCredits())
+	d2screen.SetNextScreen(CreateCredits(v.audioProvider))
 }
 
 // Render renders the main menu
@@ -407,7 +410,7 @@ func (v *MainMenu) onTcpIpCancelClicked() {
 }
 
 func (v *MainMenu) onTcpIpHostGameClicked() {
-	d2screen.SetNextScreen(CreateCharacterSelect(d2clientconnectiontype.LANServer, ""))
+	d2screen.SetNextScreen(CreateCharacterSelect(v.audioProvider, d2clientconnectiontype.LANServer, ""))
 }
 
 func (v *MainMenu) onTcpIpJoinGameClicked() {
@@ -419,5 +422,5 @@ func (v *MainMenu) onBtnTcpIpCancelClicked() {
 }
 
 func (v *MainMenu) onBtnTcpIpOkClicked() {
-	d2screen.SetNextScreen(CreateCharacterSelect(d2clientconnectiontype.LANClient, v.tcpJoinGameEntry.GetText()))
+	d2screen.SetNextScreen(CreateCharacterSelect(v.audioProvider, d2clientconnectiontype.LANClient, v.tcpJoinGameEntry.GetText()))
 }

@@ -15,13 +15,15 @@ import (
 	"strings"
 	"sync"
 
+	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
@@ -73,7 +75,13 @@ func main() {
 	log.SetFlags(log.Lshortfile)
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
 
-	if err := initialize(); err != nil {
+	// Initialize our providers
+	audioProvider, err := ebiten2.CreateAudio()
+	if err != nil {
+		panic(err)
+	}
+
+	if err := initialize(audioProvider); err != nil {
 		if os.IsNotExist(err) {
 			run(updateInitError)
 		}
@@ -88,7 +96,7 @@ func main() {
 	}
 
 	if *region == 0 {
-		d2screen.SetNextScreen(d2gamescreen.CreateMainMenu())
+		d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(audioProvider))
 	} else {
 		d2screen.SetNextScreen(d2gamescreen.CreateMapEngineTest(*region, *preset))
 	}
@@ -96,7 +104,7 @@ func main() {
 	run(update)
 }
 
-func initialize() error {
+func initialize(audioProvider d2interface.AudioProvider) error {
 	singleton.timeScale = 1.0
 	singleton.lastTime = d2common.Now()
 	singleton.lastScreenAdvance = singleton.lastTime
@@ -181,15 +189,7 @@ func initialize() error {
 		return err
 	}
 
-	audioProvider, err := ebiten2.CreateAudio()
-	if err != nil {
-		return err
-	}
-
-	if err := d2audio.Initialize(audioProvider); err != nil {
-		return err
-	}
-	d2audio.SetVolumes(config.BgmVolume, config.SfxVolume)
+	audioProvider.SetVolumes(config.BgmVolume, config.SfxVolume)
 
 	if err := loadDataDict(); err != nil {
 		return err
@@ -201,7 +201,7 @@ func initialize() error {
 
 	d2inventory.LoadHeroObjects()
 
-	d2ui.Initialize()
+	d2ui.Initialize(audioProvider)
 
 	d2script.CreateScriptEngine()
 

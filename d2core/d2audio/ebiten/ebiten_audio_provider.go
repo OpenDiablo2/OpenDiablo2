@@ -3,8 +3,9 @@ package ebiten
 import (
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/hajimehoshi/ebiten/audio/wav"
 
 	"github.com/hajimehoshi/ebiten/audio"
@@ -70,7 +71,7 @@ func (eap *AudioProvider) PlayBGM(song string) {
 	}
 }
 
-func (eap *AudioProvider) LoadSoundEffect(sfx string) (d2audio.SoundEffect, error) {
+func (eap *AudioProvider) LoadSoundEffect(sfx string) (d2interface.SoundEffect, error) {
 	result := CreateSoundEffect(sfx, eap.audioContext, eap.sfxVolume) // TODO: Split
 	return result, nil
 }

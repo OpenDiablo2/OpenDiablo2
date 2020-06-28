@@ -3,8 +3,9 @@ package d2ui
 import (
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
@@ -28,10 +29,10 @@ type UI struct {
 }
 
 var singleton UI
-var clickSfx d2audio.SoundEffect
+var clickSfx d2interface.SoundEffect
 
-func Initialize() {
-	sfx, err := d2audio.LoadSoundEffect(d2resource.SFXButtonClick)
+func Initialize(audioProvider d2interface.AudioProvider) {
+	sfx, err := audioProvider.LoadSoundEffect(d2resource.SFXButtonClick)
 	if err != nil {
 		log.Fatalf("failed to initialize ui: %v", err)
 	}

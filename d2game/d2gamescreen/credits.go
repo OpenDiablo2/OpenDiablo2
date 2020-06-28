@@ -8,6 +8,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
@@ -32,15 +34,17 @@ type Credits struct {
 	cycleTime          float64
 	cyclesTillNextLine int
 	doneWithCredits    bool
+	audioProvider      d2interface.AudioProvider
 }
 
 // CreateCredits creates an instance of the credits screen
-func CreateCredits() *Credits {
+func CreateCredits(audioProvider d2interface.AudioProvider) *Credits {
 	result := &Credits{
 		labels:             make([]*labelItem, 0),
 		cycleTime:          0,
 		doneWithCredits:    false,
 		cyclesTillNextLine: 0,
+		audioProvider:      audioProvider,
 	}
 	return result
 }
@@ -134,7 +138,7 @@ func (v *Credits) Advance(tickTime float64) error {
 }
 
 func (v *Credits) onExitButtonClicked() {
-	mainMenu := CreateMainMenu()
+	mainMenu := CreateMainMenu(v.audioProvider)
 	mainMenu.SetScreenMode(ScreenModeMainMenu)
 	d2screen.SetNextScreen(mainMenu)
 }
