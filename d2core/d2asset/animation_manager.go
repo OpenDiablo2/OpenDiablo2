@@ -40,7 +40,7 @@ func (am *animationManager) loadAnimation(animationPath, palettePath string, tra
 			return nil, err
 		}
 
-		animation, err = createAnimationFromDC6(dc6, palette)
+		animation, err = CreateAnimationFromDC6(dc6, palette)
 		if err != nil {
 			return nil, err
 		}
@@ -55,7 +55,7 @@ func (am *animationManager) loadAnimation(animationPath, palettePath string, tra
 			return nil, err
 		}
 
-		animation, err = createAnimationFromDCC(dcc, palette, transparency)
+		animation, err = CreateAnimationFromDCC(dcc, palette, transparency)
 		if err != nil {
 			return nil, err
 		}

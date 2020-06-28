@@ -53,7 +53,7 @@ type Animation struct {
 	subEndingFrame   int
 }
 
-func createAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transparency int) (*Animation, error) {
+func CreateAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transparency int) (*Animation, error) {
 	animation := &Animation{
 		playLength: 1.0,
 		playLoop:   true,
@@ -108,14 +108,13 @@ func createAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transpare
 				offsetY: minY,
 				image:   image,
 			})
-
 		}
 	}
 
 	return animation, nil
 }
 
-func createAnimationFromDC6(dc6 *d2dc6.DC6File, palette *d2dat.DATPalette) (*Animation, error) {
+func CreateAnimationFromDC6(dc6 *d2dc6.DC6File, palette *d2dat.DATPalette) (*Animation, error) {
 	animation := &Animation{
 		playLength:     1.0,
 		playLoop:       true,
