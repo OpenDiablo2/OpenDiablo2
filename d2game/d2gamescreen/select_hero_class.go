@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
@@ -15,7 +17,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -32,8 +33,8 @@ type HeroRenderInfo struct {
 	BackWalkSprite           *d2ui.Sprite
 	BackWalkSpriteOverlay    *d2ui.Sprite
 	SelectionBounds          image.Rectangle
-	SelectSfx                d2audio.SoundEffect
-	DeselectSfx              d2audio.SoundEffect
+	SelectSfx                d2interface.SoundEffect
+	DeselectSfx              d2interface.SoundEffect
 }
 
 func (hri *HeroRenderInfo) Advance(elapsed float64) {
@@ -67,20 +68,23 @@ type SelectHeroClass struct {
 	hardcoreCharLabel  d2ui.Label
 	connectionType     d2clientconnectiontype.ClientConnectionType
 	connectionHost     string
+	audioProvider      d2interface.AudioProvider
 }
 
-func CreateSelectHeroClass(connectionType d2clientconnectiontype.ClientConnectionType, connectionHost string) *SelectHeroClass {
+func CreateSelectHeroClass(audioProvider d2interface.AudioProvider,
+	connectionType d2clientconnectiontype.ClientConnectionType, connectionHost string) *SelectHeroClass {
 	result := &SelectHeroClass{
 		heroRenderInfo: make(map[d2enum.Hero]*HeroRenderInfo),
 		selectedHero:   d2enum.HeroNone,
 		connectionType: connectionType,
 		connectionHost: connectionHost,
+		audioProvider:  audioProvider,
 	}
 	return result
 }
 
 func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
-	d2audio.PlayBGM(d2resource.BGMTitle)
+	v.audioProvider.PlayBGM(d2resource.BGMTitle)
 	loading.Progress(0.1)
 
 	v.bgImage = loadSprite(d2resource.CharacterSelectBackground, d2resource.PaletteFechar)
@@ -172,8 +176,8 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 		loadSprite(d2resource.CharacterSelectBarbarianBackWalk, d2resource.PaletteFechar),
 		nil,
 		image.Rectangle{Min: image.Point{X: 364, Y: 201}, Max: image.Point{X: 90, Y: 170}},
-		loadSoundEffect(d2resource.SFXBarbarianSelect),
-		loadSoundEffect(d2resource.SFXBarbarianDeselect),
+		v.loadSoundEffect(d2resource.SFXBarbarianSelect),
+		v.loadSoundEffect(d2resource.SFXBarbarianDeselect),
 	}
 	v.heroRenderInfo[d2enum.HeroBarbarian].IdleSprite.SetPosition(400, 330)
 	v.heroRenderInfo[d2enum.HeroBarbarian].IdleSprite.PlayForward()
@@ -205,8 +209,8 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 		loadSprite(d2resource.CharacterSelecSorceressBackWalk, d2resource.PaletteFechar),
 		loadSprite(d2resource.CharacterSelecSorceressBackWalkOverlay, d2resource.PaletteFechar),
 		image.Rectangle{Min: image.Point{X: 580, Y: 240}, Max: image.Point{X: 65, Y: 160}},
-		loadSoundEffect(d2resource.SFXSorceressSelect),
-		loadSoundEffect(d2resource.SFXSorceressDeselect),
+		v.loadSoundEffect(d2resource.SFXSorceressSelect),
+		v.loadSoundEffect(d2resource.SFXSorceressDeselect),
 	}
 	v.heroRenderInfo[d2enum.HeroSorceress].IdleSprite.SetPosition(626, 352)
 	v.heroRenderInfo[d2enum.HeroSorceress].IdleSprite.PlayForward()
@@ -252,8 +256,8 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 		loadSprite(d2resource.CharacterSelecNecromancerBackWalk, d2resource.PaletteFechar),
 		loadSprite(d2resource.CharacterSelecNecromancerBackWalkOverlay, d2resource.PaletteFechar),
 		image.Rectangle{Min: image.Point{X: 265, Y: 220}, Max: image.Point{X: 55, Y: 175}},
-		loadSoundEffect(d2resource.SFXNecromancerSelect),
-		loadSoundEffect(d2resource.SFXNecromancerDeselect),
+		v.loadSoundEffect(d2resource.SFXNecromancerSelect),
+		v.loadSoundEffect(d2resource.SFXNecromancerDeselect),
 	}
 	v.heroRenderInfo[d2enum.HeroNecromancer].IdleSprite.SetPosition(300, 335)
 	v.heroRenderInfo[d2enum.HeroNecromancer].IdleSprite.PlayForward()
@@ -296,8 +300,8 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 		loadSprite(d2resource.CharacterSelecPaladinBackWalk, d2resource.PaletteFechar),
 		nil,
 		image.Rectangle{Min: image.Point{X: 490, Y: 210}, Max: image.Point{X: 65, Y: 180}},
-		loadSoundEffect(d2resource.SFXPaladinSelect),
-		loadSoundEffect(d2resource.SFXPaladinDeselect),
+		v.loadSoundEffect(d2resource.SFXPaladinSelect),
+		v.loadSoundEffect(d2resource.SFXPaladinDeselect),
 	}
 	v.heroRenderInfo[d2enum.HeroPaladin].IdleSprite.SetPosition(521, 338)
 	v.heroRenderInfo[d2enum.HeroPaladin].IdleSprite.PlayForward()
@@ -333,8 +337,8 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 		loadSprite(d2resource.CharacterSelecAmazonBackWalk, d2resource.PaletteFechar),
 		nil,
 		image.Rectangle{Min: image.Point{X: 70, Y: 220}, Max: image.Point{X: 55, Y: 200}},
-		loadSoundEffect(d2resource.SFXAmazonSelect),
-		loadSoundEffect(d2resource.SFXAmazonDeselect),
+		v.loadSoundEffect(d2resource.SFXAmazonSelect),
+		v.loadSoundEffect(d2resource.SFXAmazonDeselect),
 	}
 	v.heroRenderInfo[d2enum.HeroAmazon].IdleSprite.SetPosition(100, 339)
 	v.heroRenderInfo[d2enum.HeroAmazon].IdleSprite.PlayForward()
@@ -365,8 +369,8 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 		loadSprite(d2resource.CharacterSelectAssassinBackWalk, d2resource.PaletteFechar),
 		nil,
 		image.Rectangle{Min: image.Point{X: 175, Y: 235}, Max: image.Point{X: 50, Y: 180}},
-		loadSoundEffect(d2resource.SFXAssassinSelect),
-		loadSoundEffect(d2resource.SFXAssassinDeselect),
+		v.loadSoundEffect(d2resource.SFXAssassinSelect),
+		v.loadSoundEffect(d2resource.SFXAssassinDeselect),
 	}
 	v.heroRenderInfo[d2enum.HeroAssassin].IdleSprite.SetPosition(231, 365)
 	v.heroRenderInfo[d2enum.HeroAssassin].IdleSprite.PlayForward()
@@ -398,8 +402,8 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 		loadSprite(d2resource.CharacterSelectDruidBackWalk, d2resource.PaletteFechar),
 		nil,
 		image.Rectangle{Min: image.Point{X: 680, Y: 220}, Max: image.Point{X: 70, Y: 195}},
-		loadSoundEffect(d2resource.SFXDruidSelect),
-		loadSoundEffect(d2resource.SFXDruidDeselect),
+		v.loadSoundEffect(d2resource.SFXDruidSelect),
+		v.loadSoundEffect(d2resource.SFXDruidDeselect),
 	}
 	v.heroRenderInfo[d2enum.HeroDruid].IdleSprite.SetPosition(720, 370)
 	v.heroRenderInfo[d2enum.HeroDruid].IdleSprite.PlayForward()
@@ -429,15 +433,15 @@ func (v *SelectHeroClass) OnUnload() error {
 	return nil
 }
 
-func (v SelectHeroClass) onExitButtonClicked() {
-	d2screen.SetNextScreen(CreateCharacterSelect(v.connectionType, v.connectionHost))
+func (v *SelectHeroClass) onExitButtonClicked() {
+	d2screen.SetNextScreen(CreateCharacterSelect(v.audioProvider, v.connectionType, v.connectionHost))
 }
 
-func (v SelectHeroClass) onOkButtonClicked() {
+func (v *SelectHeroClass) onOkButtonClicked() {
 	gameState := d2player.CreatePlayerState(v.heroNameTextbox.GetText(), v.selectedHero, *d2datadict.CharStats[v.selectedHero], v.hardcoreCheckbox.GetCheckState())
 	gameClient, _ := d2client.Create(d2clientconnectiontype.Local)
 	gameClient.Open(v.connectionHost, gameState.FilePath)
-	d2screen.SetNextScreen(CreateGame(gameClient))
+	d2screen.SetNextScreen(CreateGame(v.audioProvider, gameClient))
 }
 
 func (v *SelectHeroClass) Render(screen d2render.Surface) error {
@@ -658,7 +662,7 @@ func loadSprite(animationPath, palettePath string) *d2ui.Sprite {
 	return sprite
 }
 
-func loadSoundEffect(sfx string) d2audio.SoundEffect {
-	result, _ := d2audio.LoadSoundEffect(sfx)
+func (v *SelectHeroClass) loadSoundEffect(sfx string) d2interface.SoundEffect {
+	result, _ := v.audioProvider.LoadSoundEffect(sfx)
 	return result
 }

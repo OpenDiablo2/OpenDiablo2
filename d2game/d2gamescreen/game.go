@@ -2,14 +2,15 @@ package d2gamescreen
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"image/color"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
@@ -25,11 +26,12 @@ type Game struct {
 	gameControls         *d2player.GameControls // TODO: Hack
 	localPlayer          *d2mapentity.Player
 	lastRegionType       d2enum.RegionIdType
+	audioProvider        d2interface.AudioProvider
 	ticksSinceLevelCheck float64
 	escapeMenu           *EscapeMenu
 }
 
-func CreateGame(gameClient *d2client.GameClient) *Game {
+func CreateGame(audioProvider d2interface.AudioProvider, gameClient *d2client.GameClient) *Game {
 	result := &Game{
 		gameClient:           gameClient,
 		gameControls:         nil,
@@ -37,7 +39,8 @@ func CreateGame(gameClient *d2client.GameClient) *Game {
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
 		mapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine),
-		escapeMenu:           NewEscapeMenu(),
+		escapeMenu:           NewEscapeMenu(audioProvider),
+		audioProvider:        audioProvider,
 	}
 	result.escapeMenu.OnLoad()
 	d2input.BindHandler(result.escapeMenu)
@@ -45,7 +48,7 @@ func CreateGame(gameClient *d2client.GameClient) *Game {
 }
 
 func (v *Game) OnLoad(loading d2screen.LoadingState) {
-	d2audio.PlayBGM("")
+	v.audioProvider.PlayBGM("")
 }
 
 func (v *Game) OnUnload() error {
@@ -88,7 +91,7 @@ func (v *Game) Advance(tickTime float64) error {
 			tile := v.gameClient.MapEngine.TileAt(v.localPlayer.TileX, v.localPlayer.TileY)
 			if tile != nil {
 				musicInfo := d2common.GetMusicDef(tile.RegionType)
-				d2audio.PlayBGM(musicInfo.MusicFile)
+				v.audioProvider.PlayBGM(musicInfo.MusicFile)
 
 				// skip showing zone change text the first time we enter the world
 				if v.lastRegionType != d2enum.RegionNone && v.lastRegionType != tile.RegionType {
