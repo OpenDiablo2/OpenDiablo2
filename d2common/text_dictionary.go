@@ -33,6 +33,10 @@ func GetDictionaryEntryCount() int {
 	return len(lookupTable)
 }
 
+func GetTranslationMap() map[string]string {
+	return lookupTable
+}
+
 func LoadTextDictionary(dictionaryData []byte) {
 	if lookupTable == nil {
 		lookupTable = make(map[string]string)
