@@ -88,7 +88,6 @@ func (v *Game) Advance(tickTime float64) error {
 			tile := v.gameClient.MapEngine.TileAt(v.localPlayer.TileX, v.localPlayer.TileY)
 			if tile != nil {
 				musicInfo := d2common.GetMusicDef(tile.RegionType)
-				v.localPlayer.SetIsInTown(musicInfo.InTown)
 				d2audio.PlayBGM(musicInfo.MusicFile)
 
 				// skip showing zone change text the first time we enter the world

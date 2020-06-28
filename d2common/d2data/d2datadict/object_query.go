@@ -15,6 +15,7 @@ type ObjectLookupRecord struct {
 	Act           int
 	Type          ObjectType
 	Id            int
+	Name          string
 	Description   string
 	ObjectsTxtId  int
 	MonstatsTxtId int

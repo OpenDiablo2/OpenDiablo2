@@ -13,16 +13,17 @@ import (
 
 type NPC struct {
 	mapEntity
-	composite    *d2asset.Composite
-	action       int
-	HasPaths     bool
-	Paths        []d2common.Path
-	path         int
-	isDone       bool
-	repetitions  int
-	direction    int
-	objectLookup *d2datadict.ObjectLookupRecord
-	name string
+	composite     *d2asset.Composite
+	action        int
+	HasPaths      bool
+	Paths         []d2common.Path
+	path          int
+	isDone        bool
+	repetitions   int
+	direction     int
+	objectLookup  *d2datadict.ObjectLookupRecord
+	monstatRecord *d2datadict.MonStatsRecord
+	name          string
 }
 
 func CreateNPC(x, y int, object *d2datadict.ObjectLookupRecord, direction int) *NPC {
@@ -39,25 +40,10 @@ func CreateNPC(x, y int, object *d2datadict.ObjectLookupRecord, direction int) *
 	}
 	result.SetMode(object.Mode, object.Class, direction)
 	result.mapEntity.directioner = result.rotate
+	result.monstatRecord = d2datadict.MonStats[object.Name]
 
-	switch object.Act {
-	case 1:
-		switch object.Id {
-		case 0:
-			result.name = "Gheed"
-		case 1:
-			result.name = "Cain"
-		case 2:
-			result.name = "Akara"
-		case 5:
-			result.name = "Kashya"
-		case 7:
-			result.name = "Warriv"
-		case 8:
-			result.name = "Charsi"
-		case 9:
-			result.name = "Andariel"
-		}
+	if result.monstatRecord != nil && result.monstatRecord.IsInteractable {
+		result.name = d2common.TranslateString(result.monstatRecord.NameStringTableKey)
 	}
 
 	return result
@@ -163,6 +149,14 @@ func (v *NPC) SetMode(animationMode, weaponClass string, direction int) error {
 	}
 
 	return err
+}
+
+func (m *NPC) Selectable() bool {
+	// is there something handy that determines selectable npc's?
+	if m.name != "" {
+		return true
+	}
+	return false
 }
 
 func (m *NPC) Name() string {
