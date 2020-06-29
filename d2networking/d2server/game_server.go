@@ -24,6 +24,9 @@ import (
 	"github.com/robertkrimen/otto"
 )
 
+// GameServer owns the authoritative copy of the map and entities
+// It accepts incoming connections from local (host) and remote
+// clients.
 type GameServer struct {
 	sync.RWMutex
 	clientConnections map[string]ClientConnection
@@ -37,6 +40,11 @@ type GameServer struct {
 
 var singletonServer *GameServer
 
+// Create constructs a new GameServer and assigns it as a singleton. It
+// also generates the initial map and entities for the server.
+//
+// If openNetworkServer is true, the GameServer starts listening for UDP
+// packets.
 func Create(openNetworkServer bool) {
 	log.Print("Creating GameServer")
 	if singletonServer != nil {
@@ -84,6 +92,9 @@ func createNetworkServer() {
 	singletonServer.udpConnection.SetReadBuffer(4096)
 }
 
+// runNetworkServer runs a while loop, reading from the GameServer's UDP
+// connection and processing packets based on the enum in their first
+// byte.
 func runNetworkServer() {
 	buffer := make([]byte, 4096)
 	for singletonServer.running {
@@ -131,6 +142,8 @@ func runNetworkServer() {
 	}
 }
 
+// Run sets GameServer.running to true and call runNetworkServer
+// in a goroutine.
 func Run() {
 	log.Print("Starting GameServer")
 	singletonServer.running = true
@@ -141,6 +154,8 @@ func Run() {
 	log.Print("Network server has been started")
 }
 
+// Stop sets GameServer.running to false and closes the
+// GameServer's UDP connection.
 func Stop() {
 	log.Print("Stopping GameServer")
 	singletonServer.running = false
@@ -149,6 +164,7 @@ func Stop() {
 	}
 }
 
+// Destroy calls Stop() if the server exists.
 func Destroy() {
 	if singletonServer == nil {
 		return
@@ -157,6 +173,17 @@ func Destroy() {
 	Stop()
 }
 
+// OnClientConnected initializes the given ClientConnection. It sends the
+// following packets to the newly connected client: UpdateServerInfoPacket,
+// GenerateMapPacket, AddPlayerPacket.
+//
+// It also sends one AddPlayerPacket:
+//
+// - to each of the other clients with new player entity.
+//
+// - with each other player entity to the new client.
+//
+// For more information, see d2networking.d2netpacket.
 func OnClientConnected(client ClientConnection) {
 	// Temporary position hack --------------------------------------------
 	sx, sy := singletonServer.mapEngines[0].GetStartPosition() // TODO: Another temporary hack
@@ -186,11 +213,14 @@ func OnClientConnected(client ClientConnection) {
 
 }
 
+// OnClientDisconnected removes the given client from the list
+// of client connections.
 func OnClientDisconnected(client ClientConnection) {
 	log.Printf("Client disconnected with an id of %s", client.GetUniqueId())
 	delete(singletonServer.clientConnections, client.GetUniqueId())
 }
 
+// OnPacketReceived is called by the local client to 'send' a packet to the server.
 func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) error {
 	switch packet.PacketType {
 	case d2netpackettype.MovePlayer:
