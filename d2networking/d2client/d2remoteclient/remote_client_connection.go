@@ -1,3 +1,4 @@
+// Package d2remoteclient facilitates communication between a remote client and server.
 package d2remoteclient
 
 import (
@@ -5,11 +6,12 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"io"
 	"log"
 	"net"
 	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 
@@ -19,25 +21,33 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+// RemoteClientConnection is the implementation of ClientConnection
+// for a remote client.
 type RemoteClientConnection struct {
-	clientListener d2networking.ClientListener
-	uniqueId       string
-	udpConnection  *net.UDPConn
-	active         bool
+	clientListener d2networking.ClientListener // The GameClient
+	uniqueId       string                      // Unique ID generated on construction
+	udpConnection  *net.UDPConn                // UDP connection to the server
+	active         bool                        // The connection is currently open
 }
 
+// GetUniqueId returns RemoteClientConnection.uniqueId.
 func (l RemoteClientConnection) GetUniqueId() string {
 	return l.uniqueId
 }
 
+// GetConnectionType returns an enum representing the connection type.
+// See: d2clientconnectiontype
 func (l RemoteClientConnection) GetConnectionType() d2clientconnectiontype.ClientConnectionType {
 	return d2clientconnectiontype.LANClient
 }
 
-func (l *RemoteClientConnection) SendPacketToClient(packet d2netpacket.NetPacket) error { // WHAT IS THIS
+// SendPacketToClient passes a packet to the game client for processing.
+func (l *RemoteClientConnection) SendPacketToClient(packet d2netpacket.NetPacket) error {
 	return l.clientListener.OnPacketReceived(packet)
 }
 
+// Create constructs a new RemoteClientConnection
+// and returns a pointer to it.
 func Create() *RemoteClientConnection {
 	result := &RemoteClientConnection{
 		uniqueId: uuid.NewV4().String(),
@@ -46,6 +56,8 @@ func Create() *RemoteClientConnection {
 	return result
 }
 
+// Open runs serverListener() in a goroutine to continuously read UDP packets.
+// It also sends a PlayerConnectionRequestPacket packet to the server (see d2netpacket).
 func (l *RemoteClientConnection) Open(connectionString string, saveFilePath string) error {
 	if !strings.Contains(connectionString, ":") {
 		connectionString += ":6669"
@@ -75,6 +87,8 @@ func (l *RemoteClientConnection) Open(connectionString string, saveFilePath stri
 	return nil
 }
 
+// Close informs the server that this client has disconnected and sets
+// RemoteClientConnection.active to false.
 func (l *RemoteClientConnection) Close() error {
 	l.active = false
 	l.SendPacketToServer(d2netpacket.CreatePlayerDisconnectRequestPacket(l.GetUniqueId()))
@@ -82,6 +96,8 @@ func (l *RemoteClientConnection) Close() error {
 	return nil
 }
 
+// SendPacketToServer compresses the JSON encoding of a NetPacket and
+// sends it to the server.
 func (l *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket) error {
 	data, err := json.Marshal(packet.PacketData)
 	if err != nil {
@@ -98,6 +114,7 @@ func (l *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket
 	return nil
 }
 
+// SetClientListener sets RemoteClientConnection.clientListener to the given value.
 func (l *RemoteClientConnection) SetClientListener(listener d2networking.ClientListener) {
 	l.clientListener = listener
 }
