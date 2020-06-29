@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
@@ -14,7 +15,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -82,8 +82,8 @@ const (
 	rightSkill = ActionableType(iota)
 )
 
-func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine, mapRenderer *d2maprenderer.MapRenderer, inputListener InputCallbackListener) *GameControls {
-	d2term.BindAction("setmissile", "set missile id to summon on right click", func(id int) {
+func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine, mapRenderer *d2maprenderer.MapRenderer, inputListener InputCallbackListener, term d2interface.Terminal) *GameControls {
+	term.BindAction("setmissile", "set missile id to summon on right click", func(id int) {
 		missileID = id
 	})
 
@@ -117,7 +117,7 @@ func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
 		},
 	}
 
-	d2term.BindAction("freecam", "toggle free camera movement", func() {
+	term.BindAction("freecam", "toggle free camera movement", func() {
 		gc.FreeCam = !gc.FreeCam
 	})
 

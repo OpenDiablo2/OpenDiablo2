@@ -14,8 +14,8 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 )
 
 // The map renderer, used to render the map
@@ -30,7 +30,7 @@ type MapRenderer struct {
 }
 
 // Creates an instance of the map renderer
-func CreateMapRenderer(mapEngine *d2mapengine.MapEngine) *MapRenderer {
+func CreateMapRenderer(mapEngine *d2mapengine.MapEngine, term d2interface.Terminal) *MapRenderer {
 	result := &MapRenderer{
 		mapEngine: mapEngine,
 		viewport:  NewViewport(0, 0, 800, 600),
@@ -38,7 +38,7 @@ func CreateMapRenderer(mapEngine *d2mapengine.MapEngine) *MapRenderer {
 
 	result.viewport.SetCamera(&result.camera)
 
-	d2term.BindAction("mapdebugvis", "set map debug visualization level", func(level int) {
+	term.BindAction("mapdebugvis", "set map debug visualization level", func(level int) {
 		result.debugVisLevel = level
 	})
 

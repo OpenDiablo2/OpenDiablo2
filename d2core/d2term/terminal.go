@@ -1,12 +1,10 @@
 package d2term
 
 import (
-	"bufio"
-	"bytes"
 	"errors"
 	"fmt"
 	"image/color"
-	"io"
+	"log"
 	"math"
 	"reflect"
 	"sort"
@@ -14,10 +12,20 @@ import (
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
+type TermCategory d2interface.TermCategory
+
+const (
+	TermCategoryNone    = TermCategory(d2interface.TermCategoryNone)
+	TermCategoryInfo    = TermCategory(d2interface.TermCategoryInfo)
+	TermCategoryWarning = TermCategory(d2interface.TermCategoryWarning)
+	TermCategoryError   = TermCategory(d2interface.TermCategoryError)
+)
 const (
 	termCharWidth   = 6
 	termCharHeight  = 16
@@ -25,15 +33,6 @@ const (
 	termRowCountMax = 32
 	termColCountMax = 128
 	termAnimLength  = 0.5
-)
-
-type termCategory int
-
-const (
-	termCategoryNone termCategory = iota
-	termCategoryInfo
-	termCategoryWarning
-	termCategoryError
 )
 
 type termVis int
@@ -55,7 +54,7 @@ var (
 
 type termHistroyEntry struct {
 	text     string
-	category termCategory
+	category d2interface.TermCategory
 }
 
 type termActionEntry struct {
@@ -78,37 +77,7 @@ type terminal struct {
 	actions map[string]termActionEntry
 }
 
-func createTerminal() (*terminal, error) {
-	terminal := &terminal{
-		lineCount: termRowCount,
-		actions:   make(map[string]termActionEntry),
-	}
-
-	terminal.outputInfo("::: OpenDiablo2 Terminal :::")
-	terminal.outputInfo("type \"ls\" for a list of actions")
-
-	terminal.bindAction("ls", "list available actions", func() {
-		var names []string
-		for name := range terminal.actions {
-			names = append(names, name)
-		}
-
-		sort.Strings(names)
-
-		terminal.outputInfo("available actions (%d):", len(names))
-		for _, name := range names {
-			entry := terminal.actions[name]
-			terminal.outputInfo("%s: %s; %s", name, entry.description, reflect.TypeOf(entry.action).String())
-		}
-	})
-	terminal.bindAction("clear", "clear terminal", func() {
-		terminal.outputClear()
-	})
-
-	return terminal, nil
-}
-
-func (t *terminal) advance(elapsed float64) error {
+func (t *terminal) Advance(elapsed float64) error {
 	switch t.visState {
 	case termVisShowing:
 		t.visAnim = math.Min(1.0, t.visAnim+elapsed/termAnimLength)
@@ -122,7 +91,7 @@ func (t *terminal) advance(elapsed float64) error {
 		}
 	}
 
-	if !t.isVisible() {
+	if !t.IsVisible() {
 		return nil
 	}
 
@@ -131,16 +100,16 @@ func (t *terminal) advance(elapsed float64) error {
 
 func (t *terminal) OnKeyDown(event d2input.KeyEvent) bool {
 	if t.visState == termVisHiding || t.visState == termVisHidden && event.Key == d2input.KeyGraveAccent {
-		t.show()
+		t.Show()
 		return true
 	}
 
-	if !t.isVisible() {
+	if !t.IsVisible() {
 		return false
 	}
 
 	if event.Key == d2input.KeyGraveAccent {
-		t.hide()
+		t.Hide()
 		return true
 	}
 
@@ -149,10 +118,10 @@ func (t *terminal) OnKeyDown(event d2input.KeyEvent) bool {
 		return true
 	}
 
-	maxOutputIndex := d2common.MaxInt(0, len(t.outputHistory)-t.lineCount)
+	maxoutputIndex := d2common.MaxInt(0, len(t.outputHistory)-t.lineCount)
 
 	if event.Key == d2input.KeyHome {
-		t.outputIndex = maxOutputIndex
+		t.outputIndex = maxoutputIndex
 		return true
 	}
 
@@ -162,8 +131,8 @@ func (t *terminal) OnKeyDown(event d2input.KeyEvent) bool {
 	}
 
 	if event.Key == d2input.KeyPageUp {
-		if t.outputIndex += t.lineCount; t.outputIndex >= maxOutputIndex {
-			t.outputIndex = maxOutputIndex
+		if t.outputIndex += t.lineCount; t.outputIndex >= maxoutputIndex {
+			t.outputIndex = maxoutputIndex
 		}
 
 		return true
@@ -207,9 +176,9 @@ func (t *terminal) OnKeyDown(event d2input.KeyEvent) bool {
 
 		t.commandHistory = append(commandHistory, t.command)
 
-		t.output(t.command)
-		if err := t.execute(t.command); err != nil {
-			t.outputError(err.Error())
+		t.Output(t.command)
+		if err := t.Execute(t.command); err != nil {
+			t.OutputError(err.Error())
 		}
 
 		t.commandIndex = len(t.commandHistory) - 1
@@ -227,7 +196,7 @@ func (t *terminal) OnKeyDown(event d2input.KeyEvent) bool {
 }
 
 func (t *terminal) OnKeyChars(event d2input.KeyCharsEvent) bool {
-	if !t.isVisible() {
+	if !t.IsVisible() {
 		return false
 	}
 
@@ -242,8 +211,8 @@ func (t *terminal) OnKeyChars(event d2input.KeyCharsEvent) bool {
 	return handled
 }
 
-func (t *terminal) render(surface d2render.Surface) error {
-	if !t.isVisible() {
+func (t *terminal) Render(surface d2render.Surface) error {
+	if !t.IsVisible() {
 		return nil
 	}
 
@@ -267,11 +236,11 @@ func (t *terminal) render(surface d2render.Surface) error {
 		surface.DrawText(historyEntry.text)
 		surface.PushTranslation(-termCharWidth*2, 0)
 		switch historyEntry.category {
-		case termCategoryInfo:
+		case d2interface.TermCategoryInfo:
 			surface.DrawRect(termCharWidth, termCharHeight, termInfoColor)
-		case termCategoryWarning:
+		case d2interface.TermCategoryWarning:
 			surface.DrawRect(termCharWidth, termCharHeight, termWarningColor)
-		case termCategoryError:
+		case d2interface.TermCategoryError:
 			surface.DrawRect(termCharWidth, termCharHeight, termErrorColor)
 		}
 		surface.Pop()
@@ -288,7 +257,7 @@ func (t *terminal) render(surface d2render.Surface) error {
 	return nil
 }
 
-func (t *terminal) execute(command string) error {
+func (t *terminal) Execute(command string) error {
 	params := parseCommand(command)
 	if len(params) == 0 {
 		return errors.New("invalid command")
@@ -349,16 +318,16 @@ func (t *terminal) execute(command string) error {
 	actionReturnValues := actionValue.Call(paramValues)
 
 	if actionReturnValueCount := len(actionReturnValues); actionReturnValueCount > 0 {
-		t.outputInfo("function returned %d values:", actionReturnValueCount)
+		t.OutputInfo("function returned %d values:", actionReturnValueCount)
 		for _, actionReturnValue := range actionReturnValues {
-			t.outputInfo("%v: %s", actionReturnValue.Interface(), actionReturnValue.String())
+			t.OutputInfo("%v: %s", actionReturnValue.Interface(), actionReturnValue.String())
 		}
 	}
 
 	return nil
 }
 
-func (t *terminal) outputRaw(text string, category termCategory) {
+func (t *terminal) OutputRaw(text string, category d2interface.TermCategory) {
 	var line string
 	for _, word := range strings.Split(text, " ") {
 		if len(line) > 0 {
@@ -379,44 +348,44 @@ func (t *terminal) outputRaw(text string, category termCategory) {
 	t.outputHistory = append(t.outputHistory, termHistroyEntry{line, category})
 }
 
-func (t *terminal) output(format string, params ...interface{}) {
-	t.outputRaw(fmt.Sprintf(format, params...), termCategoryNone)
+func (t *terminal) Output(format string, params ...interface{}) {
+	t.OutputRaw(fmt.Sprintf(format, params...), d2interface.TermCategoryNone)
 }
 
-func (t *terminal) outputInfo(format string, params ...interface{}) {
-	t.outputRaw(fmt.Sprintf(format, params...), termCategoryInfo)
+func (t *terminal) OutputInfo(format string, params ...interface{}) {
+	t.OutputRaw(fmt.Sprintf(format, params...), d2interface.TermCategoryInfo)
 }
 
-func (t *terminal) outputWarning(format string, params ...interface{}) {
-	t.outputRaw(fmt.Sprintf(format, params...), termCategoryWarning)
+func (t *terminal) OutputWarning(format string, params ...interface{}) {
+	t.OutputRaw(fmt.Sprintf(format, params...), d2interface.TermCategoryWarning)
 }
 
-func (t *terminal) outputError(format string, params ...interface{}) {
-	t.outputRaw(fmt.Sprintf(format, params...), termCategoryError)
+func (t *terminal) OutputError(format string, params ...interface{}) {
+	t.OutputRaw(fmt.Sprintf(format, params...), d2interface.TermCategoryError)
 }
 
-func (t *terminal) outputClear() {
+func (t *terminal) OutputClear() {
 	t.outputHistory = nil
 	t.outputIndex = 0
 }
 
-func (t *terminal) isVisible() bool {
+func (t *terminal) IsVisible() bool {
 	return t.visState != termVisHidden
 }
 
-func (t *terminal) hide() {
+func (t *terminal) Hide() {
 	if t.visState != termVisHidden {
 		t.visState = termVisHiding
 	}
 }
 
-func (t *terminal) show() {
+func (t *terminal) Show() {
 	if t.visState != termVisShown {
 		t.visState = termVisShowing
 	}
 }
 
-func (t *terminal) bindAction(name, description string, action interface{}) error {
+func (t *terminal) BindAction(name, description string, action interface{}) error {
 	actionType := reflect.TypeOf(action)
 	if actionType.Kind() != reflect.Func {
 		return errors.New("action is not a function")
@@ -438,40 +407,13 @@ func (t *terminal) bindAction(name, description string, action interface{}) erro
 	return nil
 }
 
-func (t *terminal) unbindAction(name string) error {
+func (t *terminal) BindLogger() {
+	log.SetOutput(&terminalLogger{writer: log.Writer(), terminal: t})
+}
+
+func (t *terminal) UnbindAction(name string) error {
 	delete(t.actions, name)
 	return nil
-}
-
-type terminalLogger struct {
-	buffer bytes.Buffer
-	writer io.Writer
-}
-
-func (t *terminalLogger) Write(p []byte) (int, error) {
-	n, err := t.buffer.Write(p)
-	if err != nil {
-		return n, err
-	}
-
-	reader := bufio.NewReader(&t.buffer)
-	termBytes, _, err := reader.ReadLine()
-	if err != nil {
-		return n, err
-	}
-
-	line := string(termBytes[:])
-	lineLower := strings.ToLower(line)
-
-	if strings.Index(lineLower, "error") > 0 {
-		OutputError(line)
-	} else if strings.Index(lineLower, "warning") > 0 {
-		OutputWarning(line)
-	} else {
-		Output(line)
-	}
-
-	return t.writer.Write(p)
 }
 
 func easeInOut(t float64) float64 {
@@ -525,4 +467,34 @@ func parseCommand(command string) []string {
 	}
 
 	return params
+}
+
+func createTerminal() (*terminal, error) {
+	terminal := &terminal{
+		lineCount: termRowCount,
+		actions:   make(map[string]termActionEntry),
+	}
+
+	terminal.OutputInfo("::: OpenDiablo2 Terminal :::")
+	terminal.OutputInfo("type \"ls\" for a list of actions")
+
+	terminal.BindAction("ls", "list available actions", func() {
+		var names []string
+		for name := range terminal.actions {
+			names = append(names, name)
+		}
+
+		sort.Strings(names)
+
+		terminal.OutputInfo("available actions (%d):", len(names))
+		for _, name := range names {
+			entry := terminal.actions[name]
+			terminal.OutputInfo("%s: %s; %s", name, entry.description, reflect.TypeOf(entry.action).String())
+		}
+	})
+	terminal.BindAction("clear", "clear terminal", func() {
+		terminal.OutputClear()
+	})
+
+	return terminal, nil
 }

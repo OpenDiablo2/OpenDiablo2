@@ -6,15 +6,15 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2pl2"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 )
 
 var singleton *assetManager
 
-func Initialize() error {
+func Initialize(term d2interface.Terminal) error {
 	verifyNotInit()
 
 	var (
@@ -36,11 +36,11 @@ func Initialize() error {
 		fontManager,
 	}
 
-	d2term.BindAction("assetspam", "display verbose asset manager logs", func(verbose bool) {
+	term.BindAction("assetspam", "display verbose asset manager logs", func(verbose bool) {
 		if verbose {
-			d2term.OutputInfo("asset manager verbose logging enabled")
+			term.OutputInfo("asset manager verbose logging enabled")
 		} else {
-			d2term.OutputInfo("asset manager verbose logging disabled")
+			term.OutputInfo("asset manager verbose logging disabled")
 		}
 
 		archiveManager.cache.SetVerbose(verbose)
@@ -50,16 +50,16 @@ func Initialize() error {
 		animationManager.cache.SetVerbose(verbose)
 	})
 
-	d2term.BindAction("assetstat", "display asset manager cache statistics", func() {
-		d2term.OutputInfo("archive cache: %f", float64(archiveManager.cache.GetWeight())/float64(archiveManager.cache.GetBudget())*100.0)
-		d2term.OutputInfo("file cache: %f", float64(fileManager.cache.GetWeight())/float64(fileManager.cache.GetBudget())*100.0)
-		d2term.OutputInfo("palette cache: %f", float64(paletteManager.cache.GetWeight())/float64(paletteManager.cache.GetBudget())*100.0)
-		d2term.OutputInfo("palette transform cache: %f", float64(paletteTransformManager.cache.GetWeight())/float64(paletteTransformManager.cache.GetBudget())*100.0)
-		d2term.OutputInfo("animation cache: %f", float64(animationManager.cache.GetWeight())/float64(animationManager.cache.GetBudget())*100.0)
-		d2term.OutputInfo("font cache: %f", float64(fontManager.cache.GetWeight())/float64(fontManager.cache.GetBudget())*100.0)
+	term.BindAction("assetstat", "display asset manager cache statistics", func() {
+		term.OutputInfo("archive cache: %f", float64(archiveManager.cache.GetWeight())/float64(archiveManager.cache.GetBudget())*100.0)
+		term.OutputInfo("file cache: %f", float64(fileManager.cache.GetWeight())/float64(fileManager.cache.GetBudget())*100.0)
+		term.OutputInfo("palette cache: %f", float64(paletteManager.cache.GetWeight())/float64(paletteManager.cache.GetBudget())*100.0)
+		term.OutputInfo("palette transform cache: %f", float64(paletteTransformManager.cache.GetWeight())/float64(paletteTransformManager.cache.GetBudget())*100.0)
+		term.OutputInfo("animation cache: %f", float64(animationManager.cache.GetWeight())/float64(animationManager.cache.GetBudget())*100.0)
+		term.OutputInfo("font cache: %f", float64(fontManager.cache.GetWeight())/float64(fontManager.cache.GetBudget())*100.0)
 	})
 
-	d2term.BindAction("assetclear", "clear asset manager cache", func() {
+	term.BindAction("assetclear", "clear asset manager cache", func() {
 		archiveManager.cache.Clear()
 		fileManager.cache.Clear()
 		paletteManager.cache.Clear()

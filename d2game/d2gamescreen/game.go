@@ -27,20 +27,22 @@ type Game struct {
 	localPlayer          *d2mapentity.Player
 	lastRegionType       d2enum.RegionIdType
 	audioProvider        d2interface.AudioProvider
+	terminal             d2interface.Terminal
 	ticksSinceLevelCheck float64
 	escapeMenu           *EscapeMenu
 }
 
-func CreateGame(audioProvider d2interface.AudioProvider, gameClient *d2client.GameClient) *Game {
+func CreateGame(audioProvider d2interface.AudioProvider, gameClient *d2client.GameClient, term d2interface.Terminal) *Game {
 	result := &Game{
 		gameClient:           gameClient,
 		gameControls:         nil,
 		localPlayer:          nil,
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
-		mapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine),
-		escapeMenu:           NewEscapeMenu(audioProvider),
+		mapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine, term),
+		escapeMenu:           NewEscapeMenu(audioProvider, term),
 		audioProvider:        audioProvider,
+		terminal:             term,
 	}
 	result.escapeMenu.OnLoad()
 	d2input.BindHandler(result.escapeMenu)
@@ -112,7 +114,7 @@ func (v *Game) Advance(tickTime float64) error {
 				continue
 			}
 			v.localPlayer = player
-			v.gameControls = d2player.NewGameControls(player, v.gameClient.MapEngine, v.mapRenderer, v)
+			v.gameControls = d2player.NewGameControls(player, v.gameClient.MapEngine, v.mapRenderer, v, v.terminal)
 			v.gameControls.Load()
 			d2input.BindHandler(v.gameControls)
 
