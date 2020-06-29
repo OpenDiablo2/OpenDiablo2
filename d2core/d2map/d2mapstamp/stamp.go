@@ -121,16 +121,17 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2mapentity.MapEntity 
 			// (See monpreset and monplace txts for reference)
 			if monstat != nil {
 				// Temorary use of Lookup.
-				lookup := d2datadict.LookupObject(int(mr.ds1.Act), object.Type, object.Id)
-				npc := d2mapentity.CreateNPC((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, lookup, 0)
+				npc := d2mapentity.CreateNPC((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, monstat, 0)
 				npc.SetPaths(convertPaths(tileOffsetX, tileOffsetY, object.Paths))
 				entities = append(entities, npc)
 			}
 		}
 
 		if object.Type == int(d2enum.ObjectTypeItem) {
-			// Temorary use of Lookup.
+			// For objects the DS1 ID to objectID is hardcoded in the game
+			// use the lookup table
 			lookup := d2datadict.LookupObject(int(mr.ds1.Act), object.Type, object.Id)
+
 			if lookup == nil {
 				continue
 			}
@@ -149,7 +150,7 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2mapentity.MapEntity 
 				if err != nil {
 					panic(err)
 				}
-				entity.SetMode(lookup.Mode, lookup.Class, 0)
+
 				entities = append(entities, entity)
 			}
 		}
