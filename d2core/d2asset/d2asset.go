@@ -112,7 +112,7 @@ func LoadAnimation(animationPath, palettePath string) (*Animation, error) {
 	return LoadAnimationWithTransparency(animationPath, palettePath, 255)
 }
 
-func LoadPaletteTransform(pl2Path string) (*d2pl2.PL2File, error) {
+func LoadPaletteTransform(pl2Path string) (*d2pl2.PL2, error) {
 	verifyWasInit()
 	return singleton.paletteTransformManager.loadPaletteTransform(pl2Path)
 }

@@ -33,49 +33,62 @@ func CreateStream(mpq *MPQ, blockTableEntry BlockTableEntry, fileName string) (*
 	result := &Stream{
 		MPQData:           mpq,
 		BlockTableEntry:   blockTableEntry,
-		CurrentBlockIndex: 0xFFFFFFFF,
+		CurrentBlockIndex: 0xFFFFFFFF, //nolint:gomnd MPQ magic
 	}
 	fileSegs := strings.Split(fileName, `\`)
 	result.EncryptionSeed = hashString(fileSegs[len(fileSegs)-1], 3)
+
 	if result.BlockTableEntry.HasFlag(FileFixKey) {
 		result.EncryptionSeed = (result.EncryptionSeed + result.BlockTableEntry.FilePosition) ^ result.BlockTableEntry.UncompressedFileSize
 	}
-	result.BlockSize = 0x200 << result.MPQData.Data.BlockSize
+
+	result.BlockSize = 0x200 << result.MPQData.Data.BlockSize //nolint:gomnd MPQ magic
 
 	if result.BlockTableEntry.HasFlag(FilePatchFile) {
 		log.Fatal("Patching is not supported")
 	}
 
 	var err error
-	if (result.BlockTableEntry.HasFlag(FileCompress) || result.BlockTableEntry.HasFlag(FileImplode)) && !result.BlockTableEntry.HasFlag(FileSingleUnit) {
+
+	if (result.BlockTableEntry.HasFlag(FileCompress) || result.BlockTableEntry.HasFlag(FileImplode)) &&
+		!result.BlockTableEntry.HasFlag(FileSingleUnit) {
 		err = result.loadBlockOffsets()
 	}
+
 	return result, err
 }
 
 func (v *Stream) loadBlockOffsets() error {
 	blockPositionCount := ((v.BlockTableEntry.UncompressedFileSize + v.BlockSize - 1) / v.BlockSize) + 1
 	v.BlockPositions = make([]uint32, blockPositionCount)
-	v.MPQData.File.Seek(int64(v.BlockTableEntry.FilePosition), 0)
-	mpqBytes := make([]byte, blockPositionCount*4)
-	v.MPQData.File.Read(mpqBytes)
+
+	_, _ = v.MPQData.File.Seek(int64(v.BlockTableEntry.FilePosition), 0)
+
+	mpqBytes := make([]byte, blockPositionCount*4) //nolint:gomnd MPQ magic
+
+	_, _ = v.MPQData.File.Read(mpqBytes)
+
 	for i := range v.BlockPositions {
-		idx := i * 4
+		idx := i * 4 //nolint:gomnd MPQ magic
 		v.BlockPositions[i] = binary.LittleEndian.Uint32(mpqBytes[idx : idx+4])
 	}
-	//binary.Read(v.MPQData.File, binary.LittleEndian, &v.BlockPositions)
-	blockPosSize := blockPositionCount << 2
+
+	blockPosSize := blockPositionCount << 2 //nolint:gomnd MPQ magic
+
 	if v.BlockTableEntry.HasFlag(FileEncrypted) {
 		decrypt(v.BlockPositions, v.EncryptionSeed-1)
+
 		if v.BlockPositions[0] != blockPosSize {
 			log.Println("Decryption of MPQ failed!")
 			return errors.New("decryption of MPQ failed")
 		}
+
 		if v.BlockPositions[1] > v.BlockSize+blockPosSize {
 			log.Println("Decryption of MPQ failed!")
 			return errors.New("decryption of MPQ failed")
 		}
 	}
+
 	return nil
 }
 
@@ -83,17 +96,22 @@ func (v *Stream) Read(buffer []byte, offset, count uint32) uint32 {
 	if v.BlockTableEntry.HasFlag(FileSingleUnit) {
 		return v.readInternalSingleUnit(buffer, offset, count)
 	}
+
 	toRead := count
 	readTotal := uint32(0)
+
 	for toRead > 0 {
 		read := v.readInternal(buffer, offset, toRead)
+
 		if read == 0 {
 			break
 		}
+
 		readTotal += read
 		offset += read
 		toRead -= read
 	}
+
 	return readTotal
 }
 
@@ -103,28 +121,38 @@ func (v *Stream) readInternalSingleUnit(buffer []byte, offset, count uint32) uin
 	}
 
 	bytesToCopy := d2common.Min(uint32(len(v.CurrentData))-v.CurrentPosition, count)
+
 	copy(buffer[offset:offset+bytesToCopy], v.CurrentData[v.CurrentPosition:v.CurrentPosition+bytesToCopy])
+
 	v.CurrentPosition += bytesToCopy
+
 	return bytesToCopy
 }
 
 func (v *Stream) readInternal(buffer []byte, offset, count uint32) uint32 {
 	v.bufferData()
+
 	localPosition := v.CurrentPosition % v.BlockSize
 	bytesToCopy := d2common.MinInt32(int32(len(v.CurrentData))-int32(localPosition), int32(count))
+
 	if bytesToCopy <= 0 {
 		return 0
 	}
+
 	copy(buffer[offset:offset+uint32(bytesToCopy)], v.CurrentData[localPosition:localPosition+uint32(bytesToCopy)])
+
 	v.CurrentPosition += uint32(bytesToCopy)
+
 	return uint32(bytesToCopy)
 }
 
 func (v *Stream) bufferData() {
 	requiredBlock := v.CurrentPosition / v.BlockSize
+
 	if requiredBlock == v.CurrentBlockIndex {
 		return
 	}
+
 	expectedLength := d2common.Min(v.BlockTableEntry.UncompressedFileSize-(requiredBlock*v.BlockSize), v.BlockSize)
 	v.CurrentData = v.loadBlock(requiredBlock, expectedLength)
 	v.CurrentBlockIndex = requiredBlock
@@ -132,12 +160,14 @@ func (v *Stream) bufferData() {
 
 func (v *Stream) loadSingleUnit() {
 	fileData := make([]byte, v.BlockSize)
-	v.MPQData.File.Seek(int64(v.MPQData.Data.HeaderSize), 0)
-	v.MPQData.File.Read(fileData)
+	_, _ = v.MPQData.File.Seek(int64(v.MPQData.Data.HeaderSize), 0)
+	_, _ = v.MPQData.File.Read(fileData)
+
 	if v.BlockSize == v.BlockTableEntry.UncompressedFileSize {
 		v.CurrentData = fileData
 		return
 	}
+
 	v.CurrentData = decompressMulti(fileData, v.BlockTableEntry.UncompressedFileSize)
 }
 
@@ -146,6 +176,7 @@ func (v *Stream) loadBlock(blockIndex, expectedLength uint32) []byte {
 		offset uint32
 		toRead uint32
 	)
+
 	if v.BlockTableEntry.HasFlag(FileCompress) || v.BlockTableEntry.HasFlag(FileImplode) {
 		offset = v.BlockPositions[blockIndex]
 		toRead = v.BlockPositions[blockIndex+1] - offset
@@ -153,10 +184,13 @@ func (v *Stream) loadBlock(blockIndex, expectedLength uint32) []byte {
 		offset = blockIndex * v.BlockSize
 		toRead = expectedLength
 	}
+
 	offset += v.BlockTableEntry.FilePosition
 	data := make([]byte, toRead)
-	v.MPQData.File.Seek(int64(offset), 0)
-	v.MPQData.File.Read(data)
+
+	_, _ = v.MPQData.File.Seek(int64(offset), 0)
+	_, _ = v.MPQData.File.Read(data)
+
 	if v.BlockTableEntry.HasFlag(FileEncrypted) && v.BlockTableEntry.UncompressedFileSize > 3 {
 		if v.EncryptionSeed == 0 {
 			panic("Unable to determine encryption key")
@@ -164,6 +198,7 @@ func (v *Stream) loadBlock(blockIndex, expectedLength uint32) []byte {
 
 		decryptBytes(data, blockIndex+v.EncryptionSeed)
 	}
+
 	if v.BlockTableEntry.HasFlag(FileCompress) && (toRead != expectedLength) {
 		if !v.BlockTableEntry.HasFlag(FileSingleUnit) {
 			data = decompressMulti(data, expectedLength)
@@ -171,6 +206,7 @@ func (v *Stream) loadBlock(blockIndex, expectedLength uint32) []byte {
 			data = pkDecompress(data)
 		}
 	}
+
 	if v.BlockTableEntry.HasFlag(FileImplode) && (toRead != expectedLength) {
 		data = pkDecompress(data)
 	}
@@ -178,9 +214,11 @@ func (v *Stream) loadBlock(blockIndex, expectedLength uint32) []byte {
 	return data
 }
 
-func decompressMulti(data []byte, expectedLength uint32) []byte {
-	copmressionType := data[0]
-	switch copmressionType {
+//nolint:gomnd Will fix enum values later
+func decompressMulti(data []byte /*expectedLength*/, _ uint32) []byte {
+	compressionType := data[0]
+
+	switch compressionType {
 	case 1: // Huffman
 		panic("huffman decompression not supported")
 	case 2: // ZLib/Deflate
@@ -197,16 +235,18 @@ func decompressMulti(data []byte, expectedLength uint32) []byte {
 		panic("lzma decompression not supported")
 	// Combos
 	case 0x22:
-		// TODO: sparse then zlib
+		// sparse then zlib
 		panic("sparse decompression + deflate decompression not supported")
 	case 0x30:
-		// TODO: sparse then bzip2
+		// sparse then bzip2
 		panic("sparse decompression + bzip2 decompression not supported")
 	case 0x41:
 		sinput := d2compression.HuffmanDecompress(data[1:])
 		sinput = d2compression.WavDecompress(sinput, 1)
 		tmp := make([]byte, len(sinput))
+
 		copy(tmp, sinput)
+
 		return tmp
 	case 0x48:
 		//byte[] result = PKDecompress(sinput, outputLength);
@@ -223,42 +263,54 @@ func decompressMulti(data []byte, expectedLength uint32) []byte {
 		//return MpqWavCompression.Decompress(new MemoryStream(result), 2);
 		panic("pk + wav decompression not supported")
 	default:
-		panic(fmt.Sprintf("decompression not supported for unknown compression type %X", copmressionType))
+		panic(fmt.Sprintf("decompression not supported for unknown compression type %X", compressionType))
 	}
 }
 
 func deflate(data []byte) []byte {
 	b := bytes.NewReader(data)
 	r, err := zlib.NewReader(b)
+
 	if err != nil {
 		panic(err)
 	}
+
 	buffer := new(bytes.Buffer)
 	_, err = buffer.ReadFrom(r)
+
 	if err != nil {
 		log.Panic(err)
 	}
+
 	err = r.Close()
+
 	if err != nil {
 		log.Panic(err)
 	}
+
 	return buffer.Bytes()
 }
 
 func pkDecompress(data []byte) []byte {
 	b := bytes.NewReader(data)
 	r, err := blast.NewReader(b)
+
 	if err != nil {
 		panic(err)
 	}
+
 	buffer := new(bytes.Buffer)
 	_, err = buffer.ReadFrom(r)
+
 	if err != nil {
 		panic(err)
 	}
+
 	err = r.Close()
+
 	if err != nil {
 		panic(err)
 	}
+
 	return buffer.Bytes()
 }
