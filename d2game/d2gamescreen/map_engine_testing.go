@@ -11,6 +11,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
@@ -82,6 +83,7 @@ type MapEngineTest struct {
 	gameState   *d2player.PlayerState
 	mapEngine   *d2mapengine.MapEngine
 	mapRenderer *d2maprenderer.MapRenderer
+	terminal    d2interface.Terminal
 
 	//TODO: this is region specific properties, should be refactored for multi-region rendering
 	currentRegion int
@@ -92,13 +94,14 @@ type MapEngineTest struct {
 	debugVisLevel int
 }
 
-func CreateMapEngineTest(currentRegion int, levelPreset int) *MapEngineTest {
+func CreateMapEngineTest(currentRegion int, levelPreset int, term d2interface.Terminal) *MapEngineTest {
 	result := &MapEngineTest{
 		currentRegion: currentRegion,
 		levelPreset:   levelPreset,
 		fileIndex:     0,
 		regionSpec:    RegionSpec{},
 		filesCount:    0,
+		terminal:      term,
 	}
 	result.gameState = d2player.CreateTestGameState()
 	return result
@@ -148,7 +151,7 @@ func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 	loading.Progress(0.2)
 	met.mapEngine = d2mapengine.CreateMapEngine()
 	loading.Progress(0.5)
-	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.mapEngine)
+	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.mapEngine, met.terminal)
 	loading.Progress(0.7)
 	met.LoadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
 }

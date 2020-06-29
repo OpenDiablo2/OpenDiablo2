@@ -71,14 +71,16 @@ type MainMenu struct {
 	screenMode          MainMenuScreenMode
 	leftButtonHeld      bool
 	audioProvider       d2interface.AudioProvider
+	terminal            d2interface.Terminal
 }
 
 // CreateMainMenu creates an instance of MainMenu
-func CreateMainMenu(audioProvider d2interface.AudioProvider) *MainMenu {
+func CreateMainMenu(audioProvider d2interface.AudioProvider, term d2interface.Terminal) *MainMenu {
 	return &MainMenu{
 		screenMode:     ScreenModeUnknown,
 		leftButtonHeld: true,
 		audioProvider:  audioProvider,
+		terminal:       term,
 	}
 }
 
@@ -255,7 +257,7 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 }
 
 func (v *MainMenu) onMapTestClicked() {
-	d2screen.SetNextScreen(CreateMapEngineTest(0, 1))
+	d2screen.SetNextScreen(CreateMapEngineTest(0, 1, v.terminal))
 }
 
 func openbrowser(url string) {
@@ -280,7 +282,7 @@ func openbrowser(url string) {
 func (v *MainMenu) onSinglePlayerClicked() {
 	// Go here only if existing characters are available to select
 	if d2player.HasGameStates() {
-		d2screen.SetNextScreen(CreateCharacterSelect(v.audioProvider, d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText()))
+		d2screen.SetNextScreen(CreateCharacterSelect(v.audioProvider, d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText(), v.terminal))
 		return
 	}
 	d2screen.SetNextScreen(CreateSelectHeroClass(v.audioProvider, d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText()))
@@ -410,7 +412,7 @@ func (v *MainMenu) onTcpIpCancelClicked() {
 }
 
 func (v *MainMenu) onTcpIpHostGameClicked() {
-	d2screen.SetNextScreen(CreateCharacterSelect(v.audioProvider, d2clientconnectiontype.LANServer, ""))
+	d2screen.SetNextScreen(CreateCharacterSelect(v.audioProvider, d2clientconnectiontype.LANServer, "", v.terminal))
 }
 
 func (v *MainMenu) onTcpIpJoinGameClicked() {
@@ -422,5 +424,5 @@ func (v *MainMenu) onBtnTcpIpCancelClicked() {
 }
 
 func (v *MainMenu) onBtnTcpIpOkClicked() {
-	d2screen.SetNextScreen(CreateCharacterSelect(v.audioProvider, d2clientconnectiontype.LANClient, v.tcpJoinGameEntry.GetText()))
+	d2screen.SetNextScreen(CreateCharacterSelect(v.audioProvider, d2clientconnectiontype.LANClient, v.tcpJoinGameEntry.GetText(), v.terminal))
 }

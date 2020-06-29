@@ -47,15 +47,17 @@ type CharacterSelect struct {
 	connectionType         d2clientconnectiontype.ClientConnectionType
 	connectionHost         string
 	audioProvider          d2interface.AudioProvider
+	terminal               d2interface.Terminal
 }
 
 func CreateCharacterSelect(audioProvider d2interface.AudioProvider,
-	connectionType d2clientconnectiontype.ClientConnectionType, connectionHost string) *CharacterSelect {
+	connectionType d2clientconnectiontype.ClientConnectionType, connectionHost string, term d2interface.Terminal) *CharacterSelect {
 	return &CharacterSelect{
 		selectedCharacter: -1,
 		connectionType:    connectionType,
 		connectionHost:    connectionHost,
 		audioProvider:     audioProvider,
+		terminal:          term,
 	}
 }
 
@@ -180,7 +182,7 @@ func (v *CharacterSelect) onNewCharButtonClicked() {
 }
 
 func (v *CharacterSelect) onExitButtonClicked() {
-	mainMenu := CreateMainMenu(v.audioProvider)
+	mainMenu := CreateMainMenu(v.audioProvider, v.terminal)
 	mainMenu.SetScreenMode(ScreenModeMainMenu)
 	d2screen.SetNextScreen(mainMenu)
 }
@@ -311,5 +313,5 @@ func (v *CharacterSelect) onOkButtonClicked() {
 		gameClient.Open("", v.gameStates[v.selectedCharacter].FilePath)
 	}
 
-	d2screen.SetNextScreen(CreateGame(v.audioProvider, gameClient))
+	d2screen.SetNextScreen(CreateGame(v.audioProvider, gameClient, v.terminal))
 }

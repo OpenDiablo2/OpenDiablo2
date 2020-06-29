@@ -69,6 +69,7 @@ type SelectHeroClass struct {
 	connectionType     d2clientconnectiontype.ClientConnectionType
 	connectionHost     string
 	audioProvider      d2interface.AudioProvider
+	terminal           d2interface.Terminal
 }
 
 func CreateSelectHeroClass(audioProvider d2interface.AudioProvider,
@@ -434,14 +435,14 @@ func (v *SelectHeroClass) OnUnload() error {
 }
 
 func (v *SelectHeroClass) onExitButtonClicked() {
-	d2screen.SetNextScreen(CreateCharacterSelect(v.audioProvider, v.connectionType, v.connectionHost))
+	d2screen.SetNextScreen(CreateCharacterSelect(v.audioProvider, v.connectionType, v.connectionHost, v.terminal))
 }
 
 func (v *SelectHeroClass) onOkButtonClicked() {
 	gameState := d2player.CreatePlayerState(v.heroNameTextbox.GetText(), v.selectedHero, *d2datadict.CharStats[v.selectedHero], v.hardcoreCheckbox.GetCheckState())
 	gameClient, _ := d2client.Create(d2clientconnectiontype.Local)
 	gameClient.Open(v.connectionHost, gameState.FilePath)
-	d2screen.SetNextScreen(CreateGame(v.audioProvider, gameClient))
+	d2screen.SetNextScreen(CreateGame(v.audioProvider, gameClient, v.terminal))
 }
 
 func (v *SelectHeroClass) Render(screen d2render.Surface) error {

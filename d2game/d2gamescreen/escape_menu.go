@@ -65,6 +65,7 @@ type EscapeMenu struct {
 	rightPent     *d2gui.AnimatedSprite
 	layouts       []*layout
 	audioProvider d2interface.AudioProvider
+	terminal      d2interface.Terminal
 }
 
 type layout struct {
@@ -112,9 +113,10 @@ type actionableElement interface {
 	Trigger()
 }
 
-func NewEscapeMenu(audioProvider d2interface.AudioProvider) *EscapeMenu {
+func NewEscapeMenu(audioProvider d2interface.AudioProvider, term d2interface.Terminal) *EscapeMenu {
 	m := &EscapeMenu{
 		audioProvider: audioProvider,
+		terminal:      term,
 	}
 
 	m.layouts = []*layout{
@@ -339,7 +341,7 @@ func (m *EscapeMenu) showLayout(id layoutID) {
 	}
 
 	if id == saveLayoutID {
-		mainMenu := CreateMainMenu(m.audioProvider)
+		mainMenu := CreateMainMenu(m.audioProvider, m.terminal)
 		mainMenu.SetScreenMode(ScreenModeMainMenu)
 		d2screen.SetNextScreen(mainMenu)
 		return

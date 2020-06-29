@@ -35,6 +35,7 @@ type Credits struct {
 	cyclesTillNextLine int
 	doneWithCredits    bool
 	audioProvider      d2interface.AudioProvider
+	terminal           d2interface.Terminal
 }
 
 // CreateCredits creates an instance of the credits screen
@@ -138,7 +139,7 @@ func (v *Credits) Advance(tickTime float64) error {
 }
 
 func (v *Credits) onExitButtonClicked() {
-	mainMenu := CreateMainMenu(v.audioProvider)
+	mainMenu := CreateMainMenu(v.audioProvider, v.terminal)
 	mainMenu.SetScreenMode(ScreenModeMainMenu)
 	d2screen.SetNextScreen(mainMenu)
 }
