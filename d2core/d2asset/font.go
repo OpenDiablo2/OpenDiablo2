@@ -6,8 +6,9 @@ import (
 	"image/color"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type fontGlyph struct {
@@ -98,7 +99,7 @@ func (f *Font) Clone() *Font {
 	}
 }
 
-func (f *Font) RenderText(text string, target d2render.Surface) error {
+func (f *Font) RenderText(text string, target d2interface.Surface) error {
 	f.sheet.SetColorMod(f.color)
 	f.sheet.SetBlend(false)
 

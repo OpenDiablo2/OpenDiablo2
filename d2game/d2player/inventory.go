@@ -2,10 +2,10 @@ package d2player
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -72,7 +72,7 @@ func (g *Inventory) Load() {
 	g.grid.Add(items...)
 }
 
-func (g *Inventory) Render(target d2render.Surface) {
+func (g *Inventory) Render(target d2interface.Surface) {
 	if !g.isOpen {
 		return
 	}

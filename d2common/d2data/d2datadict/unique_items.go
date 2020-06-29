@@ -99,6 +99,7 @@ func createUniqueItemRecord(r []string) UniqueItemRecord {
 			createUniqueItemProperty(&r, inc),
 		},
 	}
+
 	return result
 }
 
@@ -109,6 +110,7 @@ func createUniqueItemProperty(r *[]string, inc func() int) UniqueItemProperty {
 		Min:       d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 		Max:       d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 	}
+
 	return result
 }
 
@@ -117,17 +119,21 @@ var UniqueItems map[string]*UniqueItemRecord
 func LoadUniqueItems(file []byte) {
 	UniqueItems = make(map[string]*UniqueItemRecord)
 	data := strings.Split(string(file), "\r\n")[1:]
+
 	for _, line := range data {
-		if len(line) == 0 {
+		if line == "" {
 			continue
 		}
+
 		r := strings.Split(line, "\t")
 		// skip rows that are not enabled
 		if r[2] != "1" {
 			continue
 		}
+
 		rec := createUniqueItemRecord(r)
 		UniqueItems[rec.Code] = &rec
 	}
+
 	log.Printf("Loaded %d unique items", len(UniqueItems))
 }

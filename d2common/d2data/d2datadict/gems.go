@@ -52,7 +52,9 @@ type GemsRecord struct {
 
 func LoadGems(file []byte) {
 	d := d2common.LoadDataDictionary(string(file))
+
 	var Gems []*GemsRecord
+
 	for idx := range d.Data {
 		if d.GetString("name", idx) != "Expansion" {
 			/*
@@ -105,5 +107,6 @@ func LoadGems(file []byte) {
 			Gems = append(Gems, gem)
 		}
 	}
+
 	log.Printf("Loaded %d Gems records", len(Gems))
 }

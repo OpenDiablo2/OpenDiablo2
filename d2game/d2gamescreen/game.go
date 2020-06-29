@@ -2,18 +2,18 @@ package d2gamescreen
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"image/color"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
@@ -25,19 +25,23 @@ type Game struct {
 	gameControls         *d2player.GameControls // TODO: Hack
 	localPlayer          *d2mapentity.Player
 	lastRegionType       d2enum.RegionIdType
+	audioProvider        d2interface.AudioProvider
+	terminal             d2interface.Terminal
 	ticksSinceLevelCheck float64
 	escapeMenu           *EscapeMenu
 }
 
-func CreateGame(gameClient *d2client.GameClient) *Game {
+func CreateGame(audioProvider d2interface.AudioProvider, gameClient *d2client.GameClient, term d2interface.Terminal) *Game {
 	result := &Game{
 		gameClient:           gameClient,
 		gameControls:         nil,
 		localPlayer:          nil,
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
-		mapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine),
-		escapeMenu:           NewEscapeMenu(),
+		mapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine, term),
+		escapeMenu:           NewEscapeMenu(audioProvider, term),
+		audioProvider:        audioProvider,
+		terminal:             term,
 	}
 	result.escapeMenu.OnLoad()
 	d2input.BindHandler(result.escapeMenu)
@@ -45,7 +49,7 @@ func CreateGame(gameClient *d2client.GameClient) *Game {
 }
 
 func (v *Game) OnLoad(loading d2screen.LoadingState) {
-	d2audio.PlayBGM("")
+	v.audioProvider.PlayBGM("")
 }
 
 func (v *Game) OnUnload() error {
@@ -54,7 +58,7 @@ func (v *Game) OnUnload() error {
 	return nil
 }
 
-func (v *Game) Render(screen d2render.Surface) error {
+func (v *Game) Render(screen d2interface.Surface) error {
 	if v.gameClient.RegenMap {
 		v.gameClient.RegenMap = false
 		v.mapRenderer.RegenerateTileCache()
@@ -88,7 +92,7 @@ func (v *Game) Advance(tickTime float64) error {
 			tile := v.gameClient.MapEngine.TileAt(v.localPlayer.TileX, v.localPlayer.TileY)
 			if tile != nil {
 				musicInfo := d2common.GetMusicDef(tile.RegionType)
-				d2audio.PlayBGM(musicInfo.MusicFile)
+				v.audioProvider.PlayBGM(musicInfo.MusicFile)
 
 				// skip showing zone change text the first time we enter the world
 				if v.lastRegionType != d2enum.RegionNone && v.lastRegionType != tile.RegionType {
@@ -109,7 +113,7 @@ func (v *Game) Advance(tickTime float64) error {
 				continue
 			}
 			v.localPlayer = player
-			v.gameControls = d2player.NewGameControls(player, v.gameClient.MapEngine, v.mapRenderer, v)
+			v.gameControls = d2player.NewGameControls(player, v.gameClient.MapEngine, v.mapRenderer, v, v.terminal)
 			v.gameControls.Load()
 			d2input.BindHandler(v.gameControls)
 

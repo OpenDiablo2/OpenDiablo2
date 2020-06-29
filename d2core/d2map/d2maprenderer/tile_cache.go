@@ -3,6 +3,8 @@ package d2maprenderer
 import (
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -12,7 +14,7 @@ import (
 )
 
 func (mr *MapRenderer) generateTileCache() {
-	mr.palette, _ = loadPaletteForAct(d2enum.RegionIdType(mr.mapEngine.LevelType().Id))
+	mr.palette, _ = loadPaletteForAct(d2enum.RegionIdType(mr.mapEngine.LevelType().ID))
 	mapEngineSize := mr.mapEngine.Size()
 
 	for idx, tile := range *mr.mapEngine.Tiles() {
@@ -74,7 +76,7 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, 
 		}
 		tileYOffset := d2common.AbsInt32(tileYMinimum)
 		tileHeight := d2common.AbsInt32(tileData[i].Height)
-		image, _ := d2render.NewSurface(int(tileData[i].Width), int(tileHeight), d2render.FilterNearest)
+		image, _ := d2render.NewSurface(int(tileData[i].Width), int(tileHeight), d2interface.FilterNearest)
 		pixels := make([]byte, 4*tileData[i].Width*tileHeight)
 		mr.decodeTileGfxData(tileData[i].Blocks, &pixels, tileYOffset, tileData[i].Width)
 		image.ReplacePixels(pixels)
@@ -113,7 +115,7 @@ func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX,
 		return
 	}
 
-	image, _ := d2render.NewSurface(int(tileData.Width), tileHeight, d2render.FilterNearest)
+	image, _ := d2render.NewSurface(int(tileData.Width), tileHeight, d2interface.FilterNearest)
 	pixels := make([]byte, 4*tileData.Width*int32(tileHeight))
 	mr.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, tileData.Width)
 	image.ReplacePixels(pixels)
@@ -174,7 +176,7 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY in
 		return
 	}
 
-	image, _ := d2render.NewSurface(160, int(realHeight), d2render.FilterNearest)
+	image, _ := d2render.NewSurface(160, int(realHeight), d2interface.FilterNearest)
 	pixels := make([]byte, 4*160*realHeight)
 	mr.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, 160)
 
@@ -195,7 +197,7 @@ func (mr *MapRenderer) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) b
 
 	var tileSeed uint64
 	tileSeed = uint64(seed) + uint64(x)
-	tileSeed *= uint64(y) + uint64(mr.mapEngine.LevelType().Id)
+	tileSeed *= uint64(y) + uint64(mr.mapEngine.LevelType().ID)
 
 	tileSeed ^= tileSeed << 13
 	tileSeed ^= tileSeed >> 17

@@ -130,7 +130,7 @@ type CubeRecipeItemProperty struct {
 	// string or an integer.
 	//
 	// See: https://d2mods.info/forum/kb/viewarticle?a=345
-	//"the parameter passed on to the associated property, this is used to pass skill IDs,
+	// "the parameter passed on to the associated property, this is used to pass skill IDs,
 	// state IDs, monster IDs, montype IDs and the like on to the properties that require
 	// them, these fields support calculations."
 	Param int // for properties that use parameters
@@ -153,7 +153,6 @@ var inputFields = []string{"input 1", "input 2", "input 3", "input 4", "input 5"
 // LoadCubeRecipes populates CubeRecipes with
 // the data from CubeMain.txt.
 func LoadCubeRecipes(file []byte) {
-
 	// Load data
 	d := d2common.LoadDataDictionary(string(file))
 
@@ -188,7 +187,6 @@ func LoadCubeRecipes(file []byte) {
 		// Create outputs - output "", b, c
 		CubeRecipes[idx].Outputs = make([]CubeRecipeResult, 3)
 		for o, outLabel := range outputLabels {
-
 			CubeRecipes[idx].Outputs[o] = CubeRecipeResult{
 				Item: newCubeRecipeItem(
 					d.GetString(outputFields[o], idx)),
@@ -201,7 +199,6 @@ func LoadCubeRecipes(file []byte) {
 			// Create properties - mod 1-5
 			properties := make([]CubeRecipeItemProperty, 5)
 			for p, prop := range propLabels {
-
 				properties[p] = CubeRecipeItemProperty{
 					Code:   d.GetString(outLabel+prop, idx),
 					Chance: d.GetNumber(outLabel+prop+" chance", idx),
@@ -213,7 +210,6 @@ func LoadCubeRecipes(file []byte) {
 
 			CubeRecipes[idx].Outputs[o].Properties = properties
 		}
-
 	}
 
 	log.Printf("Loaded %d CubeMainRecord records", len(CubeRecipes))
@@ -237,21 +233,26 @@ func newCubeRecipeItem(f string) CubeRecipeItem {
 	// Find the qty parameter if it was provided,
 	// convert to int and assign to item.Count
 	for idx, arg := range args {
-		if strings.HasPrefix(arg, "qty") {
-			count, err := strconv.Atoi(strings.Split(arg, "=")[1])
-			if err != nil {
-				log.Fatal("Error parsing item count:", err)
-			}
-			item.Count = count
-
-			// Remove the qty parameter
-			if idx != len(args)-1 {
-				args[idx] = args[len(args)-1]
-			}
-			args = args[:len(args)-1]
-
-			break
+		if !strings.HasPrefix(arg, "qty") {
+			continue
 		}
+
+		count, err := strconv.Atoi(strings.Split(arg, "=")[1])
+
+		if err != nil {
+			log.Fatal("Error parsing item count:", err)
+		}
+
+		item.Count = count
+
+		// Remove the qty parameter
+		if idx != len(args)-1 {
+			args[idx] = args[len(args)-1]
+		}
+
+		args = args[:len(args)-1]
+
+		break
 	}
 
 	// No other arguments were provided
@@ -272,10 +273,12 @@ func newCubeRecipeItem(f string) CubeRecipeItem {
 func classFieldToEnum(f string) []d2enum.Hero {
 	split := splitFieldValue(f)
 	enums := make([]d2enum.Hero, len(split))
+
 	for idx, class := range split {
 		if class == "" {
 			continue
 		}
+
 		switch class {
 		case "bar":
 			enums[idx] = d2enum.HeroBarbarian
@@ -295,6 +298,7 @@ func classFieldToEnum(f string) []d2enum.Hero {
 			log.Fatalf("Unknown hero token: '%s'", class)
 		}
 	}
+
 	return enums
 }
 

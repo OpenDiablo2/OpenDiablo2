@@ -3,6 +3,8 @@ package d2render
 import (
 	"errors"
 	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
 var (
@@ -11,9 +13,9 @@ var (
 	ErrInvalidRenderer = errors.New("invalid rendering system specified")
 )
 
-var singleton Renderer
+var singleton d2interface.Renderer
 
-func Initialize(rend Renderer) error {
+func Initialize(rend d2interface.Renderer) error {
 	verifyNotInit()
 	singleton = rend
 	log.Printf("Initialized the %s renderer...", singleton.GetRendererName())
@@ -25,7 +27,7 @@ func SetWindowIcon(fileName string) {
 	singleton.SetWindowIcon(fileName)
 }
 
-func Run(f func(Surface) error, width, height int, title string) error {
+func Run(f func(d2interface.Surface) error, width, height int, title string) error {
 	verifyWasInit()
 	singleton.Run(f, width, height, title)
 	return nil
@@ -36,12 +38,12 @@ func IsDrawingSkipped() bool {
 	return singleton.IsDrawingSkipped()
 }
 
-func CreateSurface(surface Surface) (Surface, error) {
+func CreateSurface(surface d2interface.Surface) (d2interface.Surface, error) {
 	verifyWasInit()
 	return singleton.CreateSurface(surface)
 }
 
-func NewSurface(width, height int, filter Filter) (Surface, error) {
+func NewSurface(width, height int, filter d2interface.Filter) (d2interface.Surface, error) {
 	verifyWasInit()
 	return singleton.NewSurface(width, height, filter)
 }

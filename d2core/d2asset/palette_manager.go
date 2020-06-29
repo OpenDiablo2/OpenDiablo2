@@ -27,7 +27,7 @@ func (pm *paletteManager) loadPalette(palettePath string) (*d2dat.DATPalette, er
 		return nil, err
 	}
 
-	palette, err := d2dat.LoadDAT(paletteData)
+	palette, err := d2dat.Load(paletteData)
 	if err != nil {
 		return nil, err
 	}

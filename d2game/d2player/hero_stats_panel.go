@@ -3,6 +3,8 @@ package d2player
 import (
 	"strconv"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -72,7 +74,7 @@ type HeroStatsPanel struct {
 	heroState            *d2hero.HeroStatsState
 	heroName             string
 	heroClass            d2enum.Hero
-	staticMenuImageCache *d2render.Surface
+	staticMenuImageCache *d2interface.Surface
 	labels               *StatsPanelLabels
 
 	originX int
@@ -88,7 +90,7 @@ func NewHeroStatsPanel(heroName string, heroClass d2enum.Hero, heroState d2hero.
 		originX:   originX,
 		originY:   originY,
 		heroState: &heroState,
-		heroName: heroName,
+		heroName:  heroName,
 		heroClass: heroClass,
 		labels:    &StatsPanelLabels{},
 	}
@@ -118,7 +120,7 @@ func (s *HeroStatsPanel) Close() {
 	s.isOpen = false
 }
 
-func (s *HeroStatsPanel) Render(target d2render.Surface) {
+func (s *HeroStatsPanel) Render(target d2interface.Surface) {
 	if !s.isOpen {
 		return
 	}
@@ -126,7 +128,7 @@ func (s *HeroStatsPanel) Render(target d2render.Surface) {
 	if s.staticMenuImageCache == nil {
 		frameWidth, frameHeight := s.frame.GetFrameBounds()
 		framesCount := s.frame.GetFrameCount()
-		surface, err := d2render.NewSurface(frameWidth*framesCount, frameHeight*framesCount, d2render.FilterNearest)
+		surface, err := d2render.NewSurface(frameWidth*framesCount, frameHeight*framesCount, d2interface.FilterNearest)
 
 		if err != nil {
 			return
@@ -138,7 +140,7 @@ func (s *HeroStatsPanel) Render(target d2render.Surface) {
 	s.renderStatValues(target)
 }
 
-func (s *HeroStatsPanel) renderStaticMenu(target d2render.Surface) {
+func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) {
 	x, y := s.originX, s.originY
 
 	// Frame
@@ -226,7 +228,7 @@ func (s *HeroStatsPanel) initStatValueLabels() {
 	s.labels.Experience = s.createStatValueLabel(s.heroState.Experience, 200, 110)
 	s.labels.NextLevelExp = s.createStatValueLabel(s.heroState.NextLevelExp, 330, 110)
 
-	s.labels.Strength = s.createStatValueLabel(s.heroState.Strength, 175,  147)
+	s.labels.Strength = s.createStatValueLabel(s.heroState.Strength, 175, 147)
 	s.labels.Dexterity = s.createStatValueLabel(s.heroState.Dexterity, 175, 207)
 	s.labels.Vitality = s.createStatValueLabel(s.heroState.Vitality, 175, 295)
 	s.labels.Energy = s.createStatValueLabel(s.heroState.Energy, 175, 355)
@@ -241,7 +243,7 @@ func (s *HeroStatsPanel) initStatValueLabels() {
 	s.labels.Mana = s.createStatValueLabel(s.heroState.Mana, 370, 355)
 }
 
-func (s *HeroStatsPanel) renderStatValues(target d2render.Surface) {
+func (s *HeroStatsPanel) renderStatValues(target d2interface.Surface) {
 	s.renderStatValueNum(s.labels.Level, s.heroState.Level, target)
 	s.renderStatValueNum(s.labels.Experience, s.heroState.Experience, target)
 	s.renderStatValueNum(s.labels.NextLevelExp, s.heroState.NextLevelExp, target)
@@ -261,7 +263,7 @@ func (s *HeroStatsPanel) renderStatValues(target d2render.Surface) {
 	s.renderStatValueNum(s.labels.Mana, s.heroState.Mana, target)
 }
 
-func (s *HeroStatsPanel) renderStatValueNum(label d2ui.Label, value int, target d2render.Surface) {
+func (s *HeroStatsPanel) renderStatValueNum(label d2ui.Label, value int, target d2interface.Surface) {
 	label.SetText(strconv.Itoa(value))
 	label.Render(target)
 }

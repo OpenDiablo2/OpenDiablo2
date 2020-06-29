@@ -47,3 +47,15 @@ func (v *DataDictionary) GetNumber(fieldName string, index int) int {
 	}
 	return result
 }
+
+func (v *DataDictionary) GetDelimitedList(fieldName string, index int) []string {
+	return strings.Split(v.GetString(fieldName, index), ",")
+}
+
+func (v *DataDictionary) GetBool(fieldName string, index int) bool {
+	n := v.GetNumber(fieldName, index)
+	if n > 1 {
+		log.Panic("GetBool on non-bool field")
+	}
+	return n == 1
+}

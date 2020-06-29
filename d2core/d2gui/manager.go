@@ -4,10 +4,11 @@ import (
 	"image/color"
 	"math"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type manager struct {
@@ -78,7 +79,7 @@ func (m *manager) OnMouseMove(event d2input.MouseMoveEvent) bool {
 	return m.layout.onMouseMove(event)
 }
 
-func (m *manager) render(target d2render.Surface) error {
+func (m *manager) render(target d2interface.Surface) error {
 	if m.loading {
 		if err := m.renderLoadScreen(target); err != nil {
 			return err
@@ -99,7 +100,7 @@ func (m *manager) render(target d2render.Surface) error {
 	return nil
 }
 
-func (m *manager) renderLoadScreen(target d2render.Surface) error {
+func (m *manager) renderLoadScreen(target d2interface.Surface) error {
 	target.Clear(color.Black)
 
 	screenWidth, screenHeight := target.GetSize()
@@ -111,7 +112,7 @@ func (m *manager) renderLoadScreen(target d2render.Surface) error {
 	return m.loadingAnim.Render(target)
 }
 
-func (m *manager) renderCursor(target d2render.Surface) error {
+func (m *manager) renderCursor(target d2interface.Surface) error {
 	_, height := m.cursorAnim.GetCurrentFrameSize()
 	target.PushTranslation(m.cursorX, m.cursorY)
 	target.PushTranslation(0, -height)

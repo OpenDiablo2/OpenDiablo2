@@ -12,12 +12,15 @@ type ObjectTypeRecord struct {
 	Token string
 }
 
+//nolint:gochecknoglobals // Currently global by design, only written once
+// ObjectTypes contains the name and token for objects
 var ObjectTypes []ObjectTypeRecord
 
 func LoadObjectTypes(objectTypeData []byte) {
 	streamReader := d2common.CreateStreamReader(objectTypeData)
 	count := streamReader.GetInt32()
 	ObjectTypes = make([]ObjectTypeRecord, count)
+
 	for i := range ObjectTypes {
 		nameBytes := streamReader.ReadBytes(32)
 		tokenBytes := streamReader.ReadBytes(20)
@@ -26,5 +29,6 @@ func LoadObjectTypes(objectTypeData []byte) {
 			Token: strings.TrimSpace(strings.ReplaceAll(string(tokenBytes), string(0), "")),
 		}
 	}
+
 	log.Printf("Loaded %d object types", len(ObjectTypes))
 }
