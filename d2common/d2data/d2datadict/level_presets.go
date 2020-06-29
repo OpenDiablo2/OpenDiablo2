@@ -9,8 +9,8 @@ import (
 
 type LevelPresetRecord struct {
 	Name         string
-	DefinitionId int
-	LevelId      int
+	DefinitionID int
+	LevelID      int
 	Populate     bool
 	Logicals     bool
 	Outdoors     bool
@@ -39,8 +39,8 @@ func createLevelPresetRecord(props []string) LevelPresetRecord {
 	}
 	result := LevelPresetRecord{
 		Name:         props[inc()],
-		DefinitionId: d2common.StringToInt(props[inc()]),
-		LevelId:      d2common.StringToInt(props[inc()]),
+		DefinitionID: d2common.StringToInt(props[inc()]),
+		LevelID:      d2common.StringToInt(props[inc()]),
 		Populate:     d2common.StringToUint8(props[inc()]) == 1,
 		Logicals:     d2common.StringToUint8(props[inc()]) == 1,
 		Outdoors:     d2common.StringToUint8(props[inc()]) == 1,
@@ -66,31 +66,39 @@ func createLevelPresetRecord(props []string) LevelPresetRecord {
 		Beta:      d2common.StringToUint8(props[inc()]) == 1,
 		Expansion: d2common.StringToUint8(props[inc()]) == 1,
 	}
+
 	return result
 }
 
 var LevelPresets map[int]LevelPresetRecord
 
+// LoadLevelPresets loads level presets from text file
 func LoadLevelPresets(file []byte) {
 	LevelPresets = make(map[int]LevelPresetRecord)
 	data := strings.Split(string(file), "\r\n")[1:]
+
 	for _, line := range data {
-		if len(line) == 0 {
+		if line == "" {
 			continue
 		}
+
 		props := strings.Split(line, "\t")
+
 		if props[1] == "" {
 			continue // any line without a definition id is skipped (e.g. the "Expansion" line)
 		}
+
 		rec := createLevelPresetRecord(props)
-		LevelPresets[rec.DefinitionId] = rec
+		LevelPresets[rec.DefinitionID] = rec
 	}
+
 	log.Printf("Loaded %d level presets", len(LevelPresets))
 }
 
+// LevelPreset looks up a LevelPresetRecord by ID
 func LevelPreset(id int) LevelPresetRecord {
 	for i := 0; i < len(LevelPresets); i++ {
-		if LevelPresets[i].DefinitionId == id {
+		if LevelPresets[i].DefinitionID == id {
 			return LevelPresets[i]
 		}
 	}

@@ -14,7 +14,7 @@ type LevelMazeDetailsRecord struct {
 	// ID from Levels.txt
 	// NOTE: Cave 1 is the Den of Evil, its associated treasure level is quest
 	// only.
-	LevelId int // Level
+	LevelID int // Level
 
 	// the minimum number of .ds1 map sections that will make up the maze in
 	// Normal, Nightmare and Hell difficulties.
@@ -36,21 +36,24 @@ type LevelMazeDetailsRecord struct {
 
 var LevelMazeDetails map[int]*LevelMazeDetailsRecord
 
+// LoadLevelMazeDetails loads LevelMazeDetailsRecords from text file
 func LoadLevelMazeDetails(file []byte) {
 	dict := d2common.LoadDataDictionary(string(file))
 	numRecords := len(dict.Data)
 	LevelMazeDetails = make(map[int]*LevelMazeDetailsRecord, numRecords)
+
 	for idx := range dict.Data {
 		record := &LevelMazeDetailsRecord{
 			Name:              dict.GetString("Name", idx),
-			LevelId:           dict.GetNumber("Level", idx),
+			LevelID:           dict.GetNumber("Level", idx),
 			NumRoomsNormal:    dict.GetNumber("Rooms", idx),
 			NumRoomsNightmare: dict.GetNumber("Rooms(N)", idx),
 			NumRoomsHell:      dict.GetNumber("Rooms(H)", idx),
 			SizeX:             dict.GetNumber("SizeX", idx),
 			SizeY:             dict.GetNumber("SizeY", idx),
 		}
-		LevelMazeDetails[record.LevelId] = record
+		LevelMazeDetails[record.LevelID] = record
 	}
+
 	log.Printf("Loaded %d LevelMazeDetails records", len(LevelMazeDetails))
 }

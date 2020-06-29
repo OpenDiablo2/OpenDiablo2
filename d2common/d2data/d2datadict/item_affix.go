@@ -16,26 +16,28 @@ var MagicSuffixRecords []*ItemAffixCommonRecord
 
 var AffixMagicGroups []*ItemAffixCommonGroup
 
-var superType d2enum.ItemAffixSuperType
-var subType d2enum.ItemAffixSubType
-
+// LoadMagicPrefix loads MagicPrefix.txt
 func LoadMagicPrefix(file []byte) {
-	superType = d2enum.ItemAffixPrefix
-	subType = d2enum.ItemAffixMagic
+	superType := d2enum.ItemAffixPrefix
+
+	subType := d2enum.ItemAffixMagic
+
 	MagicPrefixDictionary, MagicPrefixRecords = loadDictionary(file, superType, subType)
 }
 
+// LoadMagicSuffix loads MagicSuffix.txt
 func LoadMagicSuffix(file []byte) {
-	superType = d2enum.ItemAffixSuffix
-	subType = d2enum.ItemAffixMagic
+	superType := d2enum.ItemAffixSuffix
+
+	subType := d2enum.ItemAffixMagic
+
 	MagicSuffixDictionary, MagicSuffixRecords = loadDictionary(file, superType, subType)
 }
 
 func getAffixString(t1 d2enum.ItemAffixSuperType, t2 d2enum.ItemAffixSubType) string {
 	var name string = ""
 
-	switch t2 {
-	case d2enum.ItemAffixMagic:
+	if t2 == d2enum.ItemAffixMagic {
 		name = "Magic"
 	}
 
@@ -47,7 +49,6 @@ func getAffixString(t1 d2enum.ItemAffixSuperType, t2 d2enum.ItemAffixSubType) st
 	}
 
 	return name
-
 }
 
 func loadDictionary(
@@ -59,6 +60,7 @@ func loadDictionary(
 	records := createItemAffixRecords(dict, superType, subType)
 	name := getAffixString(superType, subType)
 	log.Printf("Loaded %d %s records", len(dict.Data), name)
+
 	return dict, records
 }
 
@@ -111,8 +113,8 @@ func createItemAffixRecords(
 	subType d2enum.ItemAffixSubType,
 ) []*ItemAffixCommonRecord {
 	records := make([]*ItemAffixCommonRecord, 0)
-	for index := range d.Data {
 
+	for index := range d.Data {
 		affix := &ItemAffixCommonRecord{
 			Name:           d.GetString("Name", index),
 			Version:        d.GetNumber("version", index),
@@ -179,6 +181,7 @@ func createItemAffixRecords(
 
 		records = append(records, affix)
 	}
+
 	return records
 }
 
@@ -193,14 +196,17 @@ func (g *ItemAffixCommonGroup) AddMember(a *ItemAffixCommonRecord) {
 	if g.Members == nil {
 		g.Members = make(map[string]*ItemAffixCommonRecord)
 	}
+
 	g.Members[a.Name] = a
 }
 
 func (g *ItemAffixCommonGroup) GetTotalFrequency() int {
 	total := 0
+
 	for _, affix := range g.Members {
 		total += affix.Frequency
 	}
+
 	return total
 }
 
@@ -249,6 +255,8 @@ func (a *ItemAffixCommonRecord) ProbabilityToSpawn(qlvl int) float64 {
 	if (qlvl > a.MaxLevel) || (qlvl < a.Level) {
 		return 0.0
 	}
-	p := (float64)(a.Frequency) / (float64)(a.Group.GetTotalFrequency())
+
+	p := float64(a.Frequency) / float64(a.Group.GetTotalFrequency())
+
 	return p
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
+// Charecter stats
 type CharStatsRecord struct {
 	Class d2enum.Hero
 
@@ -59,8 +60,8 @@ var CharStats map[d2enum.Hero]*CharStatsRecord
 var charStringMap map[string]d2enum.Hero
 var weaponTokenMap map[string]d2enum.WeaponClass
 
+//nolint:funlen // Makes no sense to split
 func LoadCharStats(file []byte) {
-
 	charStringMap = map[string]d2enum.Hero{
 		"Amazon":      d2enum.HeroAmazon,
 		"Barbarian":   d2enum.HeroBarbarian,
@@ -186,5 +187,6 @@ func LoadCharStats(file []byte) {
 		}
 		CharStats[record.Class] = record
 	}
+
 	log.Printf("Loaded %d CharStats records", len(CharStats))
 }

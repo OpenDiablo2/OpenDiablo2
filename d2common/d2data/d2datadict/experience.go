@@ -89,6 +89,7 @@ func LoadExperienceBreakpoints(file []byte) {
 				d2enum.HeroPaladin:     d.GetNumber("Paladin", idx),
 				d2enum.HeroSorceress:   d.GetNumber("Sorceress", idx),
 			}
+
 			continue
 		}
 
@@ -108,5 +109,6 @@ func LoadExperienceBreakpoints(file []byte) {
 
 		ExperienceBreakpoints[record.Level] = record
 	}
+
 	log.Printf("Loaded %d ExperienceBreakpoint records", len(ExperienceBreakpoints))
 }
