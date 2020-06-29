@@ -1,3 +1,4 @@
+// Package d2dc6 contains the logic for loading and processing DC6 files.
 package d2dc6
 
 import (
@@ -6,7 +7,8 @@ import (
 	"github.com/go-restruct/restruct"
 )
 
-type DC6File struct {
+// DC6 represents a DC6 file.
+type DC6 struct {
 	// Header
 	Version            int32  `struct:"int32"`
 	Flags              uint32 `struct:"uint32"`
@@ -19,45 +21,13 @@ type DC6File struct {
 	Frames        []*DC6Frame `struct-size:"Directions*FramesPerDirection"`
 }
 
-type DC6Header struct {
-	Version            int32  `struct:"int32"`
-	Flags              uint32 `struct:"uint32"`
-	Encoding           uint32 `struct:"uint32"`
-	Termination        []byte `struct:"[4]byte"`
-	Directions         int32  `struct:"int32"`
-	FramesPerDirection int32  `struct:"int32"`
-}
-
-type DC6FrameHeader struct {
-	Flipped   int32  `struct:"int32"`
-	Width     int32  `struct:"int32"`
-	Height    int32  `struct:"int32"`
-	OffsetX   int32  `struct:"int32"`
-	OffsetY   int32  `struct:"int32"`
-	Unknown   uint32 `struct:"uint32"`
-	NextBlock uint32 `struct:"uint32"`
-	Length    uint32 `struct:"uint32"`
-}
-
-type DC6Frame struct {
-	Flipped    uint32 `struct:"uint32"`
-	Width      uint32 `struct:"uint32"`
-	Height     uint32 `struct:"uint32"`
-	OffsetX    int32  `struct:"int32"`
-	OffsetY    int32  `struct:"int32"`
-	Unknown    uint32 `struct:"uint32"`
-	NextBlock  uint32 `struct:"uint32"`
-	Length     uint32 `struct:"uint32,sizeof=FrameData"`
-	FrameData  []byte
-	Terminator []byte `struct:"[3]byte"`
-}
-
-// LoadDC6 uses restruct to read the binary dc6 data into structs then parses image data from the frame data.
-func LoadDC6(data []byte) (*DC6File, error) {
-	result := &DC6File{}
+// Load uses restruct to read the binary dc6 data into structs then parses image data from the frame data.
+func Load(data []byte) (*DC6, error) {
+	result := &DC6{}
 
 	restruct.EnableExprBeta()
 	err := restruct.Unpack(data, binary.LittleEndian, &result)
+
 	if err != nil {
 		return nil, err
 	}

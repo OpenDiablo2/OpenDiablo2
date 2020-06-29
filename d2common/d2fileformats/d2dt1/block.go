@@ -1,5 +1,6 @@
 package d2dt1
 
+// Block represents a DT1 block
 type Block struct {
 	X           int16
 	Y           int16

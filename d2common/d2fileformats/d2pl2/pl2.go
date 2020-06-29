@@ -1,3 +1,4 @@
+// Package d2pl2 handles processing of PL2 palette files.
 package d2pl2
 
 import (
@@ -6,7 +7,8 @@ import (
 	"github.com/go-restruct/restruct"
 )
 
-type PL2File struct {
+// PL2 represents a palette file.
+type PL2 struct {
 	BasePalette PL2Palette
 
 	LightLevelVariations [32]PL2PaletteTransform
@@ -27,30 +29,9 @@ type PL2File struct {
 	TextColorShifts [13]PL2PaletteTransform
 }
 
-type PL2Color struct {
-	R uint8
-	G uint8
-	B uint8
-	_ uint8
-}
-
-type PL2Color24Bits struct {
-	R uint8
-	G uint8
-	B uint8
-}
-
-type PL2Palette struct {
-	Colors [256]PL2Color
-}
-
-type PL2PaletteTransform struct {
-	Indices [256]uint8
-}
-
-// uses restruct to read the binary dc6 data into structs
-func LoadPL2(data []byte) (*PL2File, error) {
-	result := &PL2File{}
+// Load uses restruct to read the binary pl2 data into structs
+func Load(data []byte) (*PL2, error) {
+	result := &PL2{}
 
 	restruct.EnableExprBeta()
 
