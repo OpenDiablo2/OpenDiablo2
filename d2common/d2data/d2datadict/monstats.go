@@ -1,3 +1,4 @@
+// d2datadict contains loaders for the txt file data
 package d2datadict
 
 import (
