@@ -4,10 +4,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 // TextBox with cursor focus
@@ -46,7 +47,7 @@ func (v *TextBox) SetFilter(filter string) {
 	v.filter = filter
 }
 
-func (v *TextBox) Render(target d2render.Surface) {
+func (v *TextBox) Render(target d2interface.Surface) {
 	if !v.visible {
 		return
 	}

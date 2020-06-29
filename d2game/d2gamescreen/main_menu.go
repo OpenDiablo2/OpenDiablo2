@@ -20,7 +20,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -301,7 +300,7 @@ func (v *MainMenu) onCreditsButtonClicked() {
 }
 
 // Render renders the main menu
-func (v *MainMenu) Render(screen d2render.Surface) error {
+func (v *MainMenu) Render(screen d2interface.Surface) error {
 	switch v.screenMode {
 	case ScreenModeTrademark:
 		v.trademarkBackground.RenderSegmented(screen, 4, 3, 0)

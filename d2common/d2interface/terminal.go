@@ -2,7 +2,6 @@ package d2interface
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 // TermCategory applies styles to the lines in the  Terminal
@@ -35,7 +34,7 @@ type Terminal interface {
 	Advance(elapsed float64) error
 	OnKeyDown(event d2input.KeyEvent) bool
 	OnKeyChars(event d2input.KeyCharsEvent) bool
-	Render(surface d2render.Surface) error
+	Render(surface Surface) error
 	Execute(command string) error
 	OutputRaw(text string, category TermCategory)
 	Output(format string, params ...interface{})

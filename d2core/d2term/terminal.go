@@ -15,7 +15,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type TermCategory d2interface.TermCategory
@@ -211,7 +210,7 @@ func (t *terminal) OnKeyChars(event d2input.KeyCharsEvent) bool {
 	return handled
 }
 
-func (t *terminal) Render(surface d2render.Surface) error {
+func (t *terminal) Render(surface d2interface.Surface) error {
 	if !t.IsVisible() {
 		return nil
 	}

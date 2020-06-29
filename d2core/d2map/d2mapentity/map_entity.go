@@ -3,16 +3,17 @@ package d2mapentity
 import (
 	"math"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2astar"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type MapEntity interface {
-	Render(target d2render.Surface)
+	Render(target d2interface.Surface)
 	Advance(tickTime float64)
 	GetPosition() (float64, float64)
-	GetLayer() (int)
+	GetLayer() int
 	GetPositionF() (float64, float64)
 	Name() string
 	Selectable() bool

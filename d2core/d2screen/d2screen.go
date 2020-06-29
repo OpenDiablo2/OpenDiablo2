@@ -3,8 +3,9 @@ package d2screen
 import (
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -22,7 +23,7 @@ type ScreenUnloadHandler interface {
 }
 
 type ScreenRenderHandler interface {
-	Render(target d2render.Surface) error
+	Render(target d2interface.Surface) error
 }
 
 type ScreenAdvanceHandler interface {
@@ -95,7 +96,7 @@ func Advance(elapsed float64) error {
 	return nil
 }
 
-func Render(surface d2render.Surface) error {
+func Render(surface d2interface.Surface) error {
 	if handler, ok := singleton.currentScreen.(ScreenRenderHandler); ok {
 		if err := handler.Render(surface); err != nil {
 			return err

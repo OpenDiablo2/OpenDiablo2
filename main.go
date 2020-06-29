@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	ebiten_input "github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/ebiten"
 	"image"
 	"image/gif"
 	"image/png"
@@ -15,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	ebiten_input "github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/ebiten"
 
 	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 
@@ -83,7 +84,6 @@ func main() {
 		panic(err)
 	}
 
-
 	d2input.Initialize(ebiten_input.InputService{}) // TODO d2input singleton must be init before d2term
 	term, err := d2term.Initialize()
 	terminal_hack = term // needs to be used in advance, no easy way for that right now
@@ -135,7 +135,6 @@ func initialize(audioProvider d2interface.AudioProvider, term d2interface.Termin
 		return err
 	}
 	d2render.SetWindowIcon("d2logo.png")
-
 
 	term.BindLogger()
 	term.BindAction("dumpheap", "dumps the heap to pprof/heap.pprof", func() {
@@ -213,7 +212,7 @@ func initialize(audioProvider d2interface.AudioProvider, term d2interface.Termin
 	return nil
 }
 
-func run(updateFunc func(d2render.Surface) error) {
+func run(updateFunc func(d2interface.Surface) error) {
 	if len(GitBranch) == 0 {
 		GitBranch = "Local Build"
 	}
@@ -224,7 +223,7 @@ func run(updateFunc func(d2render.Surface) error) {
 	}
 }
 
-func update(target d2render.Surface) error {
+func update(target d2interface.Surface) error {
 	currentTime := d2common.Now()
 	elapsedTime := (currentTime - singleton.lastTime) * singleton.timeScale
 	singleton.lastTime = currentTime
@@ -244,7 +243,7 @@ func update(target d2render.Surface) error {
 	return nil
 }
 
-func updateInitError(target d2render.Surface) error {
+func updateInitError(target d2interface.Surface) error {
 	width, height := target.GetSize()
 	target.PushTranslation(width/5, height/2)
 	target.DrawText("Could not find the MPQ files in the directory: %s\nPlease put the files and re-run the game.", d2config.Get().MpqPath)
@@ -280,7 +279,7 @@ func advance(elapsed, current float64) error {
 	return nil
 }
 
-func render(target d2render.Surface) error {
+func render(target d2interface.Surface) error {
 	if err := d2screen.Render(target); err != nil {
 		return err
 	}
@@ -306,7 +305,7 @@ func render(target d2render.Surface) error {
 	return nil
 }
 
-func renderCapture(target d2render.Surface) error {
+func renderCapture(target d2interface.Surface) error {
 	cleanupCapture := func() {
 		singleton.captureState = captureStateNone
 		singleton.capturePath = ""
@@ -386,7 +385,7 @@ func renderCapture(target d2render.Surface) error {
 	return nil
 }
 
-func renderDebug(target d2render.Surface) error {
+func renderDebug(target d2interface.Surface) error {
 	if singleton.showFPS {
 		vsyncEnabled := d2render.GetVSyncEnabled()
 		fps := d2render.CurrentFPS()

@@ -52,8 +52,8 @@ type GameControls struct {
 	// UI
 	globeSprite        *d2ui.Sprite
 	hpManaStatusSprite *d2ui.Sprite
-	hpStatusBar        d2render.Surface
-	manaStatusBar      d2render.Surface
+	hpStatusBar        d2interface.Surface
+	manaStatusBar      d2interface.Surface
 	mainPanel          *d2ui.Sprite
 	menuButton         *d2ui.Sprite
 	skillIcon          *d2ui.Sprite
@@ -254,7 +254,7 @@ func (g *GameControls) Load() {
 	animation, _ = d2asset.LoadAnimation(d2resource.HealthManaIndicator, d2resource.PaletteSky)
 	g.hpManaStatusSprite, _ = d2ui.LoadSprite(animation)
 
-	g.hpStatusBar, _ = d2render.NewSurface(globeWidth, globeHeight, d2render.FilterNearest)
+	g.hpStatusBar, _ = d2render.NewSurface(globeWidth, globeHeight, d2interface.FilterNearest)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.GamePanels, d2resource.PaletteSky)
 	g.mainPanel, _ = d2ui.LoadSprite(animation)
@@ -334,7 +334,7 @@ func (g *GameControls) isInActiveMenusRect(px int, py int) bool {
 }
 
 // TODO: consider caching the panels to single image that is reused.
-func (g *GameControls) Render(target d2render.Surface) {
+func (g *GameControls) Render(target d2interface.Surface) {
 	for entityIdx := range *g.mapEngine.Entities() {
 		entity := (*g.mapEngine.Entities())[entityIdx]
 		if !entity.Selectable() {
@@ -376,7 +376,7 @@ func (g *GameControls) Render(target d2render.Surface) {
 	healthPercent := float64(g.hero.Stats.Health) / float64(g.hero.Stats.MaxHealth)
 	hpBarHeight := int(healthPercent * float64(globeHeight))
 	if g.lastHealthPercent != healthPercent {
-		g.hpStatusBar, _ = d2render.NewSurface(globeWidth, hpBarHeight, d2render.FilterNearest)
+		g.hpStatusBar, _ = d2render.NewSurface(globeWidth, hpBarHeight, d2interface.FilterNearest)
 		g.hpManaStatusSprite.SetCurrentFrame(0)
 		g.hpStatusBar.PushTranslation(0, hpBarHeight)
 
@@ -414,7 +414,7 @@ func (g *GameControls) Render(target d2render.Surface) {
 
 	// Stamina status bar
 	target.PushTranslation(273, 572)
-	target.PushCompositeMode(d2render.CompositeModeLighter)
+	target.PushCompositeMode(d2interface.CompositeModeLighter)
 	staminaPercent := float64(g.hero.Stats.Stamina) / float64(g.hero.Stats.MaxStamina)
 	target.DrawRect(int(staminaPercent*staminaBarWidth), 19, color.RGBA{R: 175, G: 136, B: 72, A: 200})
 	target.PopN(2)
@@ -468,7 +468,7 @@ func (g *GameControls) Render(target d2render.Surface) {
 	manaPercent := float64(g.hero.Stats.Mana) / float64(g.hero.Stats.MaxMana)
 	manaBarHeight := int(manaPercent * float64(globeHeight))
 	if manaPercent != g.lastManaPercent {
-		g.manaStatusBar, _ = d2render.NewSurface(globeWidth, manaBarHeight, d2render.FilterNearest)
+		g.manaStatusBar, _ = d2render.NewSurface(globeWidth, manaBarHeight, d2interface.FilterNearest)
 		g.hpManaStatusSprite.SetCurrentFrame(1)
 
 		g.manaStatusBar.PushTranslation(0, manaBarHeight)

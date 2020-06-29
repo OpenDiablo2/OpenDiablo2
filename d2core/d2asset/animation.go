@@ -5,6 +5,8 @@ import (
 	"image/color"
 	"math"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
@@ -27,7 +29,7 @@ type animationFrame struct {
 	offsetX int
 	offsetY int
 
-	image d2render.Surface
+	image d2interface.Surface
 }
 
 type animationDirection struct {
@@ -41,7 +43,7 @@ type Animation struct {
 	lastFrameTime  float64
 	playedCount    int
 
-	compositeMode  d2render.CompositeMode
+	compositeMode  d2interface.CompositeMode
 	colorMod       color.Color
 	originAtBottom bool
 
@@ -87,7 +89,7 @@ func CreateAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transpare
 				}
 			}
 
-			image, err := d2render.NewSurface(frameWidth, frameHeight, d2render.FilterNearest)
+			image, err := d2render.NewSurface(frameWidth, frameHeight, d2interface.FilterNearest)
 			if err != nil {
 				return nil, err
 			}
@@ -122,7 +124,7 @@ func CreateAnimationFromDC6(dc6 *d2dc6.DC6File, palette *d2dat.DATPalette) (*Ani
 	}
 
 	for frameIndex, dc6Frame := range dc6.Frames {
-		image, err := d2render.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height), d2render.FilterNearest)
+		image, err := d2render.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height), d2interface.FilterNearest)
 		if err != nil {
 			return nil, err
 		}
@@ -253,7 +255,7 @@ func (a *Animation) Advance(elapsed float64) error {
 	return nil
 }
 
-func (a *Animation) Render(target d2render.Surface) error {
+func (a *Animation) Render(target d2interface.Surface) error {
 	direction := a.directions[a.directionIndex]
 	frame := direction.frames[a.frameIndex]
 
@@ -264,7 +266,7 @@ func (a *Animation) Render(target d2render.Surface) error {
 	return target.Render(frame.image)
 }
 
-func (a *Animation) RenderFromOrigin(target d2render.Surface) error {
+func (a *Animation) RenderFromOrigin(target d2interface.Surface) error {
 	if a.originAtBottom {
 		direction := a.directions[a.directionIndex]
 		frame := direction.frames[a.frameIndex]
@@ -397,8 +399,8 @@ func (a *Animation) ResetPlayedCount() {
 
 func (a *Animation) SetBlend(blend bool) {
 	if blend {
-		a.compositeMode = d2render.CompositeModeLighter
+		a.compositeMode = d2interface.CompositeModeLighter
 	} else {
-		a.compositeMode = d2render.CompositeModeSourceOver
+		a.compositeMode = d2interface.CompositeModeSourceOver
 	}
 }
