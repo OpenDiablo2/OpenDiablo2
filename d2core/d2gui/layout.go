@@ -3,9 +3,10 @@ package d2gui
 import (
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type layoutEntry struct {
@@ -137,7 +138,7 @@ func (l *Layout) Clear() {
 	l.entries = nil
 }
 
-func (l *Layout) render(target d2render.Surface) error {
+func (l *Layout) render(target d2interface.Surface) error {
 	l.AdjustEntryPlacement()
 
 	for _, entry := range l.entries {
@@ -168,14 +169,14 @@ func (l *Layout) advance(elapsed float64) error {
 	return nil
 }
 
-func (l *Layout) renderEntry(entry *layoutEntry, target d2render.Surface) error {
+func (l *Layout) renderEntry(entry *layoutEntry, target d2interface.Surface) error {
 	target.PushTranslation(entry.x, entry.y)
 	defer target.Pop()
 
 	return entry.widget.render(target)
 }
 
-func (l *Layout) renderEntryDebug(entry *layoutEntry, target d2render.Surface) error {
+func (l *Layout) renderEntryDebug(entry *layoutEntry, target d2interface.Surface) error {
 	target.PushTranslation(entry.x, entry.y)
 	defer target.Pop()
 

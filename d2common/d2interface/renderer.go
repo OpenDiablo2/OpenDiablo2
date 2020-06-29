@@ -1,4 +1,4 @@
-package d2render
+package d2interface
 
 type Renderer interface {
 	GetRendererName() string

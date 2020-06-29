@@ -1,8 +1,8 @@
 package d2mapentity
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 // AnimatedEntity represents an animation that can be projected onto the map.
@@ -26,7 +26,7 @@ func CreateAnimatedEntity(x, y int, animation *d2asset.Animation) *AnimatedEntit
 }
 
 // Render draws this animated entity onto the target
-func (ae *AnimatedEntity) Render(target d2render.Surface) {
+func (ae *AnimatedEntity) Render(target d2interface.Surface) {
 	target.PushTranslation(
 		ae.offsetX+int((ae.subcellX-ae.subcellY)*16),
 		ae.offsetY+int(((ae.subcellX+ae.subcellY)*8)-5),

@@ -6,10 +6,11 @@ import (
 	"math"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type Composite struct {
@@ -45,7 +46,7 @@ func (c *Composite) Advance(elapsed float64) error {
 	return nil
 }
 
-func (c *Composite) Render(target d2render.Surface) error {
+func (c *Composite) Render(target d2interface.Surface) error {
 	if c.mode == nil {
 		return nil
 	}

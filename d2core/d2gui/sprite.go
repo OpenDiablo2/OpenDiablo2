@@ -1,8 +1,8 @@
 package d2gui
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type AnimationDirection int
@@ -59,7 +59,7 @@ func createAnimatedSprite(imagePath, palettePath string, direction AnimationDire
 	return sprite, nil
 }
 
-func (s *AnimatedSprite) render(target d2render.Surface) error {
+func (s *AnimatedSprite) render(target d2interface.Surface) error {
 	_, frameHeight := s.animation.GetCurrentFrameSize()
 
 	target.PushTranslation(s.x, s.y-frameHeight)
@@ -73,7 +73,7 @@ func (s *Sprite) SetSegmented(segmentsX, segmentsY, frameOffset int) {
 	s.frameOffset = frameOffset
 }
 
-func (s *Sprite) render(target d2render.Surface) error {
+func (s *Sprite) render(target d2interface.Surface) error {
 	return renderSegmented(s.animation, s.segmentsX, s.segmentsY, s.frameOffset, target)
 }
 

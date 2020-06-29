@@ -1,15 +1,15 @@
 package d2gui
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type MouseHandler func(d2input.MouseEvent)
 type MouseMoveHandler func(d2input.MouseMoveEvent)
 
 type widget interface {
-	render(target d2render.Surface) error
+	render(target d2interface.Surface) error
 	advance(elapsed float64) error
 
 	onMouseMove(event d2input.MouseMoveEvent) bool
@@ -105,7 +105,7 @@ func (w *widgetBase) isExpanding() bool {
 	return w.expanding
 }
 
-func (w *widgetBase) render(target d2render.Surface) error {
+func (w *widgetBase) render(target d2interface.Surface) error {
 	return nil
 }
 

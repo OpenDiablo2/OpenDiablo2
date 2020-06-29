@@ -3,15 +3,16 @@ package ebiten
 import (
 	"image"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type Renderer struct {
-	renderCallback func(surface d2render.Surface) error
+	renderCallback func(surface d2interface.Surface) error
 }
 
 func (r *Renderer) Update(screen *ebiten.Image) error {
@@ -55,7 +56,7 @@ func (r *Renderer) IsDrawingSkipped() bool {
 	return ebiten.IsDrawingSkipped()
 }
 
-func (r *Renderer) Run(f func(surface d2render.Surface) error, width, height int, title string) error {
+func (r *Renderer) Run(f func(surface d2interface.Surface) error, width, height int, title string) error {
 	r.renderCallback = f
 	ebiten.SetWindowTitle(title)
 	ebiten.SetWindowResizable(true)
@@ -63,7 +64,7 @@ func (r *Renderer) Run(f func(surface d2render.Surface) error, width, height int
 	return ebiten.RunGame(r)
 }
 
-func (r *Renderer) CreateSurface(surface d2render.Surface) (d2render.Surface, error) {
+func (r *Renderer) CreateSurface(surface d2interface.Surface) (d2interface.Surface, error) {
 	result := &ebitenSurface{
 		image: surface.(*ebitenSurface).image,
 		stateCurrent: surfaceState{
@@ -74,7 +75,7 @@ func (r *Renderer) CreateSurface(surface d2render.Surface) (d2render.Surface, er
 	return result, nil
 }
 
-func (r *Renderer) NewSurface(width, height int, filter d2render.Filter) (d2render.Surface, error) {
+func (r *Renderer) NewSurface(width, height int, filter d2interface.Filter) (d2interface.Surface, error) {
 	ebitenFilter := d2ToEbitenFilter(filter)
 	img, err := ebiten.NewImage(width, height, ebitenFilter)
 	if err != nil {

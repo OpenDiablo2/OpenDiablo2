@@ -7,7 +7,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 // CursorButton represents a mouse button
@@ -91,7 +90,7 @@ func (u *UI) OnMouseButtonDown(event d2input.MouseEvent) bool {
 }
 
 // Render renders all of the UI elements
-func Render(target d2render.Surface) {
+func Render(target d2interface.Surface) {
 	for _, widget := range singleton.widgets {
 		if widget.GetVisible() {
 			widget.Render(target)

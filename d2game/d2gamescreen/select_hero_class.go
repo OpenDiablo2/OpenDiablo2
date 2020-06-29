@@ -17,7 +17,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -445,7 +444,7 @@ func (v *SelectHeroClass) onOkButtonClicked() {
 	d2screen.SetNextScreen(CreateGame(v.audioProvider, gameClient, v.terminal))
 }
 
-func (v *SelectHeroClass) Render(screen d2render.Surface) error {
+func (v *SelectHeroClass) Render(screen d2interface.Surface) error {
 	v.bgImage.RenderSegmented(screen, 4, 3, 0)
 	v.headingLabel.Render(screen)
 	if v.selectedHero != d2enum.HeroNone {
@@ -557,7 +556,7 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 
 }
 
-func (v *SelectHeroClass) renderHero(screen d2render.Surface, hero d2enum.Hero) {
+func (v *SelectHeroClass) renderHero(screen d2interface.Surface, hero d2enum.Hero) {
 	renderInfo := v.heroRenderInfo[hero]
 	switch renderInfo.Stance {
 	case d2enum.HeroStanceIdle:
@@ -645,7 +644,7 @@ func setSpriteToFirstFrame(sprite *d2ui.Sprite) {
 	}
 }
 
-func drawSprite(sprite *d2ui.Sprite, target d2render.Surface) {
+func drawSprite(sprite *d2ui.Sprite, target d2interface.Surface) {
 	if sprite != nil {
 		sprite.Render(target)
 	}

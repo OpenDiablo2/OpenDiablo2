@@ -3,13 +3,14 @@ package d2mapentity
 import (
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -132,7 +133,7 @@ func (v *Player) Advance(tickTime float64) {
 	}
 }
 
-func (v *Player) Render(target d2render.Surface) {
+func (v *Player) Render(target d2interface.Surface) {
 	target.PushTranslation(
 		v.offsetX+int((v.subcellX-v.subcellY)*16),
 		v.offsetY+int(((v.subcellX+v.subcellY)*8)-5),
