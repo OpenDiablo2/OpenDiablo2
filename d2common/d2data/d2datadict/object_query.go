@@ -49,6 +49,7 @@ func LookupObject(act, typ, id int) *ObjectLookupRecord {
 	if object == nil {
 		log.Panicf("Failed to look up object Act: %d, Type: %d, Id: %d", act, typ, id)
 	}
+
 	return object
 }
 
@@ -56,6 +57,7 @@ func lookupObject(act, typ, id int, objects [][][]*ObjectLookupRecord) *ObjectLo
 	if objects[act] != nil && objects[act][typ] != nil && objects[act][typ][id] != nil {
 		return objects[act][typ][id]
 	}
+
 	return nil
 }
 
@@ -66,6 +68,7 @@ func init() {
 func indexObjects(objects []ObjectLookupRecord) [][][]*ObjectLookupRecord {
 	// Allocating 6 to allow Acts 1-5 without requiring a -1 at every read.
 	indexedObjects = make([][][]*ObjectLookupRecord, 6)
+
 	for i := range objects {
 		record := &objects[i]
 		if indexedObjects[record.Act] == nil {

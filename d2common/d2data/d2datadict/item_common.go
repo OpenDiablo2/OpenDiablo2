@@ -181,30 +181,35 @@ type ItemVendorParams struct {
 	MagicLevel uint8
 }
 
-// Loading Functions
 var CommonItems map[string]*ItemCommonRecord
 
 func LoadCommonItems(file []byte, source d2enum.InventoryItemType) *map[string]*ItemCommonRecord {
 	if CommonItems == nil {
 		CommonItems = make(map[string]*ItemCommonRecord)
 	}
+
 	items := make(map[string]*ItemCommonRecord)
 	data := strings.Split(string(file), "\r\n")
 	mapping := MapHeaders(data[0])
+
 	for lineno, line := range data {
 		if lineno == 0 {
 			continue
 		}
-		if len(line) == 0 {
+
+		if line == "" {
 			continue
 		}
+
 		rec := createCommonItemRecord(line, &mapping, source)
 		items[rec.Code] = &rec
 		CommonItems[rec.Code] = &rec
 	}
+
 	return &items
 }
 
+//nolint:funlen // Makes no sens to split
 func createCommonItemRecord(line string, mapping *map[string]int, source d2enum.InventoryItemType) ItemCommonRecord {
 	r := strings.Split(line, "\t")
 	result := ItemCommonRecord{
@@ -363,6 +368,7 @@ func createCommonItemRecord(line string, mapping *map[string]int, source d2enum.
 
 		Multibuy: MapLoadBool(&r, mapping, "multibuy"),
 	}
+
 	return result
 }
 
@@ -398,6 +404,7 @@ func createItemVendorParams(r *[]string, mapping *map[string]int) map[string]*It
 		}
 		result[name] = &wvp
 	}
+
 	return result
 }
 
@@ -407,5 +414,6 @@ func createItemUsageStats(r *[]string, mapping *map[string]int) [3]ItemUsageStat
 		result[i].Stat = MapLoadString(r, mapping, "stat"+strconv.Itoa(i))
 		result[i].Calc = d2common.CalcString(MapLoadString(r, mapping, "calc"+strconv.Itoa(i)))
 	}
+
 	return result
 }

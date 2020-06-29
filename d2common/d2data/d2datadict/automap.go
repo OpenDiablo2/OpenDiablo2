@@ -39,10 +39,10 @@ type AutoMapRecord struct {
 	// whatever you like..."
 	// The values seem functional but naming conventions
 	// vary between LevelNames.
-	//Type1 string
-	//Type2 string
-	//Type3 string
-	//Type4 string // Note: I commented these out for now because they supposedly aren't useful see the LoadAutoMaps function.
+	// Type1 string
+	// Type2 string
+	// Type3 string
+	// Type4 string // Note: I commented these out for now because they supposedly aren't useful see the LoadAutoMaps function.
 
 	// Frames determine the frame of the MaxiMap(s).dc6 that
 	// will be applied to the specified tiles. The frames
@@ -58,6 +58,7 @@ type AutoMapRecord struct {
 }
 
 // AutoMaps contains all data in AutoMap.txt.
+//nolint:gochecknoglobals // Current design is to have these global
 var AutoMaps []*AutoMapRecord
 
 // LoadAutoMaps populates AutoMaps with the data from AutoMap.txt.
@@ -71,9 +72,9 @@ func LoadAutoMaps(file []byte) {
 
 	// Construct records
 	AutoMaps = make([]*AutoMapRecord, len(d.Data))
+
 	for idx := range d.Data {
-		// Row 2603 is a separator with all empty field values
-		if idx == 2603 {
+		if d.GetString("LevelName", idx) == "Expansion" {
 			continue
 		}
 
@@ -88,7 +89,9 @@ func LoadAutoMaps(file []byte) {
 			//Type1: d.GetString("Type1", idx),
 			//Type2: d.GetString("Type2", idx),
 			//Type3: d.GetString("Type3", idx),
-			//Type4: d.GetString("Type4", idx), // Note: I commented these out for now because they supposedly aren't useful see the AutoMapRecord struct.
+			//Type4: d.GetString("Type4", idx),
+			// Note: I commented these out for now because they supposedly
+			// aren't useful see the AutoMapRecord struct.
 		}
 
 		AutoMaps[idx].Frames = make([]int, len(frameFields))

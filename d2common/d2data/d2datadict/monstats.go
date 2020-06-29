@@ -1,3 +1,4 @@
+// d2datadict contains loaders for the txt file data
 package d2datadict
 
 import (
@@ -682,6 +683,7 @@ type (
 
 var MonStats map[string]*MonStatsRecord
 
+//nolint:funlen // Makes no sense to split
 func LoadMonStats(file []byte) {
 	dict := d2common.LoadDataDictionary(string(file))
 	numRecords := len(dict.Data)
