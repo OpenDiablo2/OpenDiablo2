@@ -14,7 +14,7 @@ import (
 )
 
 func (mr *MapRenderer) generateTileCache() {
-	mr.palette, _ = loadPaletteForAct(d2enum.RegionIdType(mr.mapEngine.LevelType().Id))
+	mr.palette, _ = loadPaletteForAct(d2enum.RegionIdType(mr.mapEngine.LevelType().ID))
 	mapEngineSize := mr.mapEngine.Size()
 
 	for idx, tile := range *mr.mapEngine.Tiles() {
@@ -197,7 +197,7 @@ func (mr *MapRenderer) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) b
 
 	var tileSeed uint64
 	tileSeed = uint64(seed) + uint64(x)
-	tileSeed *= uint64(y) + uint64(mr.mapEngine.LevelType().Id)
+	tileSeed *= uint64(y) + uint64(mr.mapEngine.LevelType().ID)
 
 	tileSeed ^= tileSeed << 13
 	tileSeed ^= tileSeed >> 17

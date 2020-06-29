@@ -9,9 +9,11 @@ import (
 func MapHeaders(line string) map[string]int {
 	m := make(map[string]int)
 	r := strings.Split(line, "\t")
+
 	for index, header := range r {
 		m[header] = index
 	}
+
 	return m
 }
 
@@ -20,6 +22,7 @@ func MapLoadInt(r *[]string, mapping *map[string]int, field string) int {
 	if ok {
 		return d2common.StringToInt(d2common.EmptyToZero(d2common.AsterToEmpty((*r)[index])))
 	}
+
 	return 0
 }
 
@@ -28,6 +31,7 @@ func MapLoadString(r *[]string, mapping *map[string]int, field string) string {
 	if ok {
 		return d2common.AsterToEmpty((*r)[index])
 	}
+
 	return ""
 }
 
@@ -40,5 +44,6 @@ func MapLoadUint8(r *[]string, mapping *map[string]int, field string) uint8 {
 	if ok {
 		return d2common.StringToUint8(d2common.EmptyToZero(d2common.AsterToEmpty((*r)[index])))
 	}
+
 	return 0
 }
