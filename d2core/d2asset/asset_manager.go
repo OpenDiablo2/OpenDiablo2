@@ -22,13 +22,13 @@ type assetManager struct {
 	fontManager             *fontManager
 }
 
-func loadDC6(dc6Path string) (*d2dc6.DC6File, error) {
+func loadDC6(dc6Path string) (*d2dc6.DC6, error) {
 	dc6Data, err := LoadFile(dc6Path)
 	if err != nil {
 		return nil, err
 	}
 
-	dc6, err := d2dc6.LoadDC6(dc6Data)
+	dc6, err := d2dc6.Load(dc6Data)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func loadDCC(dccPath string) (*d2dcc.DCC, error) {
 		return nil, err
 	}
 
-	return d2dcc.LoadDCC(dccData)
+	return d2dcc.Load(dccData)
 }
 
 func loadCOF(cofPath string) (*d2cof.COF, error) {
@@ -51,5 +51,5 @@ func loadCOF(cofPath string) (*d2cof.COF, error) {
 		return nil, err
 	}
 
-	return d2cof.LoadCOF(cofData)
+	return d2cof.Load(cofData)
 }

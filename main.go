@@ -15,17 +15,20 @@ import (
 	"strings"
 	"sync"
 
+	ebiten_input "github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/ebiten"
+
+	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
-	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	ebiten_input "github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
@@ -63,6 +66,8 @@ var singleton struct {
 	captureFrames []*image.RGBA
 }
 
+var terminal_hack d2interface.Terminal // we need to make this available inside of advance/update/render
+
 func main() {
 	region := kingpin.Arg("region", "Region type id").Int()
 	preset := kingpin.Arg("preset", "Level preset").Int()
@@ -73,7 +78,20 @@ func main() {
 	log.SetFlags(log.Lshortfile)
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
 
-	if err := initialize(); err != nil {
+	// Initialize our providers
+	audioProvider, err := ebiten2.CreateAudio()
+	if err != nil {
+		panic(err)
+	}
+
+	d2input.Initialize(ebiten_input.InputService{}) // TODO d2input singleton must be init before d2term
+	term, err := d2term.Initialize()
+	terminal_hack = term // needs to be used in advance, no easy way for that right now
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := initialize(audioProvider, term); err != nil {
 		if os.IsNotExist(err) {
 			run(updateInitError)
 		}
@@ -88,15 +106,15 @@ func main() {
 	}
 
 	if *region == 0 {
-		d2screen.SetNextScreen(d2gamescreen.CreateMainMenu())
+		d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(audioProvider, term))
 	} else {
-		d2screen.SetNextScreen(d2gamescreen.CreateMapEngineTest(*region, *preset))
+		d2screen.SetNextScreen(d2gamescreen.CreateMapEngineTest(*region, *preset, term))
 	}
 
 	run(update)
 }
 
-func initialize() error {
+func initialize(audioProvider d2interface.AudioProvider, term d2interface.Terminal) error {
 	singleton.timeScale = 1.0
 	singleton.lastTime = d2common.Now()
 	singleton.lastScreenAdvance = singleton.lastTime
@@ -108,8 +126,6 @@ func initialize() error {
 	config := d2config.Get()
 	d2resource.LanguageCode = config.Language
 
-	d2input.Initialize(ebiten_input.InputService{})
-
 	renderer, err := ebiten.CreateRenderer()
 	if err != nil {
 		return err
@@ -120,60 +136,56 @@ func initialize() error {
 	}
 	d2render.SetWindowIcon("d2logo.png")
 
-	if err := d2term.Initialize(); err != nil {
-		return err
-	}
-
-	d2term.BindLogger()
-	d2term.BindAction("dumpheap", "dumps the heap to pprof/heap.pprof", func() {
+	term.BindLogger()
+	term.BindAction("dumpheap", "dumps the heap to pprof/heap.pprof", func() {
 		os.Mkdir("./pprof/", 0755)
 		fileOut, _ := os.Create("./pprof/heap.pprof")
 		pprof.WriteHeapProfile(fileOut)
 		fileOut.Close()
 	})
-	d2term.BindAction("fullscreen", "toggles fullscreen", func() {
+	term.BindAction("fullscreen", "toggles fullscreen", func() {
 		fullscreen := !d2render.IsFullScreen()
 		d2render.SetFullScreen(fullscreen)
-		d2term.OutputInfo("fullscreen is now: %v", fullscreen)
+		term.OutputInfo("fullscreen is now: %v", fullscreen)
 	})
-	d2term.BindAction("capframe", "captures a still frame", func(path string) {
+	term.BindAction("capframe", "captures a still frame", func(path string) {
 		singleton.captureState = captureStateFrame
 		singleton.capturePath = path
 		singleton.captureFrames = nil
 	})
-	d2term.BindAction("capgifstart", "captures an animation (start)", func(path string) {
+	term.BindAction("capgifstart", "captures an animation (start)", func(path string) {
 		singleton.captureState = captureStateGif
 		singleton.capturePath = path
 		singleton.captureFrames = nil
 	})
-	d2term.BindAction("capgifstop", "captures an animation (stop)", func() {
+	term.BindAction("capgifstop", "captures an animation (stop)", func() {
 		singleton.captureState = captureStateNone
 	})
-	d2term.BindAction("vsync", "toggles vsync", func() {
+	term.BindAction("vsync", "toggles vsync", func() {
 		vsync := !d2render.GetVSyncEnabled()
 		d2render.SetVSyncEnabled(vsync)
-		d2term.OutputInfo("vsync is now: %v", vsync)
+		term.OutputInfo("vsync is now: %v", vsync)
 	})
-	d2term.BindAction("fps", "toggle fps counter", func() {
+	term.BindAction("fps", "toggle fps counter", func() {
 		singleton.showFPS = !singleton.showFPS
-		d2term.OutputInfo("fps counter is now: %v", singleton.showFPS)
+		term.OutputInfo("fps counter is now: %v", singleton.showFPS)
 	})
-	d2term.BindAction("timescale", "set scalar for elapsed time", func(timeScale float64) {
+	term.BindAction("timescale", "set scalar for elapsed time", func(timeScale float64) {
 		if timeScale <= 0 {
-			d2term.OutputError("invalid time scale value")
+			term.OutputError("invalid time scale value")
 		} else {
-			d2term.OutputInfo("timescale changed from %f to %f", singleton.timeScale, timeScale)
+			term.OutputInfo("timescale changed from %f to %f", singleton.timeScale, timeScale)
 			singleton.timeScale = timeScale
 		}
 	})
-	d2term.BindAction("quit", "exits the game", func() {
+	term.BindAction("quit", "exits the game", func() {
 		os.Exit(0)
 	})
-	d2term.BindAction("screen-gui", "enters the gui playground screen", func() {
+	term.BindAction("screen-gui", "enters the gui playground screen", func() {
 		d2screen.SetNextScreen(d2gamescreen.CreateGuiTestMain())
 	})
 
-	if err := d2asset.Initialize(); err != nil {
+	if err := d2asset.Initialize(term); err != nil {
 		return err
 	}
 
@@ -181,15 +193,7 @@ func initialize() error {
 		return err
 	}
 
-	audioProvider, err := ebiten2.CreateAudio()
-	if err != nil {
-		return err
-	}
-
-	if err := d2audio.Initialize(audioProvider); err != nil {
-		return err
-	}
-	d2audio.SetVolumes(config.BgmVolume, config.SfxVolume)
+	audioProvider.SetVolumes(config.BgmVolume, config.SfxVolume)
 
 	if err := loadDataDict(); err != nil {
 		return err
@@ -201,14 +205,14 @@ func initialize() error {
 
 	d2inventory.LoadHeroObjects()
 
-	d2ui.Initialize()
+	d2ui.Initialize(audioProvider)
 
 	d2script.CreateScriptEngine()
 
 	return nil
 }
 
-func run(updateFunc func(d2render.Surface) error) {
+func run(updateFunc func(d2interface.Surface) error) {
 	if len(GitBranch) == 0 {
 		GitBranch = "Local Build"
 	}
@@ -219,7 +223,7 @@ func run(updateFunc func(d2render.Surface) error) {
 	}
 }
 
-func update(target d2render.Surface) error {
+func update(target d2interface.Surface) error {
 	currentTime := d2common.Now()
 	elapsedTime := (currentTime - singleton.lastTime) * singleton.timeScale
 	singleton.lastTime = currentTime
@@ -239,7 +243,7 @@ func update(target d2render.Surface) error {
 	return nil
 }
 
-func updateInitError(target d2render.Surface) error {
+func updateInitError(target d2interface.Surface) error {
 	width, height := target.GetSize()
 	target.PushTranslation(width/5, height/2)
 	target.DrawText("Could not find the MPQ files in the directory: %s\nPlease put the files and re-run the game.", d2config.Get().MpqPath)
@@ -268,14 +272,14 @@ func advance(elapsed, current float64) error {
 		return err
 	}
 
-	if err := d2term.Advance(elapsed); err != nil {
+	if err := terminal_hack.Advance(elapsed); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func render(target d2render.Surface) error {
+func render(target d2interface.Surface) error {
 	if err := d2screen.Render(target); err != nil {
 		return err
 	}
@@ -294,14 +298,14 @@ func render(target d2render.Surface) error {
 		return err
 	}
 
-	if err := d2term.Render(target); err != nil {
+	if err := terminal_hack.Render(target); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func renderCapture(target d2render.Surface) error {
+func renderCapture(target d2interface.Surface) error {
 	cleanupCapture := func() {
 		singleton.captureState = captureStateNone
 		singleton.capturePath = ""
@@ -381,7 +385,7 @@ func renderCapture(target d2render.Surface) error {
 	return nil
 }
 
-func renderDebug(target d2render.Surface) error {
+func renderDebug(target d2interface.Surface) error {
 	if singleton.showFPS {
 		vsyncEnabled := d2render.GetVSyncEnabled()
 		fps := d2render.CurrentFPS()

@@ -3,11 +3,12 @@ package d2player
 import (
 	"errors"
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -199,7 +200,7 @@ func (g *ItemGrid) Remove(item InventoryItem) {
 	g.items = g.items[:n]
 }
 
-func (g *ItemGrid) renderItem(item InventoryItem, target d2render.Surface, x int, y int) {
+func (g *ItemGrid) renderItem(item InventoryItem, target d2interface.Surface, x int, y int) {
 	itemSprite := g.sprites[item.GetItemCode()]
 	if itemSprite != nil {
 		itemSprite.SetPosition(x, y)
@@ -208,12 +209,12 @@ func (g *ItemGrid) renderItem(item InventoryItem, target d2render.Surface, x int
 	}
 }
 
-func (g *ItemGrid) Render(target d2render.Surface) {
+func (g *ItemGrid) Render(target d2interface.Surface) {
 	g.renderInventoryItems(target)
 	g.renderEquippedItems(target)
 }
 
-func (g *ItemGrid) renderInventoryItems(target d2render.Surface) {
+func (g *ItemGrid) renderInventoryItems(target d2interface.Surface) {
 	for _, item := range g.items {
 		itemSprite := g.sprites[item.GetItemCode()]
 		slotX, slotY := g.SlotToScreen(item.InventoryGridSlot())
@@ -223,7 +224,7 @@ func (g *ItemGrid) renderInventoryItems(target d2render.Surface) {
 	}
 }
 
-func (g *ItemGrid) renderEquippedItems(target d2render.Surface) {
+func (g *ItemGrid) renderEquippedItems(target d2interface.Surface) {
 	for _, eq := range g.equipmentSlots {
 		if eq.item != nil {
 			itemSprite := g.sprites[eq.item.GetItemCode()]

@@ -14,8 +14,7 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
 // The map renderer, used to render the map
@@ -30,7 +29,7 @@ type MapRenderer struct {
 }
 
 // Creates an instance of the map renderer
-func CreateMapRenderer(mapEngine *d2mapengine.MapEngine) *MapRenderer {
+func CreateMapRenderer(mapEngine *d2mapengine.MapEngine, term d2interface.Terminal) *MapRenderer {
 	result := &MapRenderer{
 		mapEngine: mapEngine,
 		viewport:  NewViewport(0, 0, 800, 600),
@@ -38,7 +37,7 @@ func CreateMapRenderer(mapEngine *d2mapengine.MapEngine) *MapRenderer {
 
 	result.viewport.SetCamera(&result.camera)
 
-	d2term.BindAction("mapdebugvis", "set map debug visualization level", func(level int) {
+	term.BindAction("mapdebugvis", "set map debug visualization level", func(level int) {
 		result.debugVisLevel = level
 	})
 
@@ -58,7 +57,7 @@ func (mr *MapRenderer) SetMapEngine(mapEngine *d2mapengine.MapEngine) {
 	mr.generateTileCache()
 }
 
-func (mr *MapRenderer) Render(target d2render.Surface) {
+func (mr *MapRenderer) Render(target d2interface.Surface) {
 	mapSize := mr.mapEngine.Size()
 	stxf, styf := mr.viewport.ScreenToWorld(400, -200)
 	etxf, etyf := mr.viewport.ScreenToWorld(400, 1050)
@@ -68,6 +67,7 @@ func (mr *MapRenderer) Render(target d2render.Surface) {
 	endY := int(math.Min(float64(mapSize.Height), math.Ceil(etyf)))
 
 	mr.renderPass1(target, startX, startY, endX, endY)
+	mr.renderPass2(target, startX, startY, endX, endY)
 	if mr.debugVisLevel > 0 {
 		mr.renderDebug(mr.debugVisLevel, target, startX, startY, endX, endY)
 	}
@@ -96,7 +96,7 @@ func (mr *MapRenderer) WorldToOrtho(x, y float64) (float64, float64) {
 }
 
 // Lower wall tiles, tile shadews, floor tiles
-func (mr *MapRenderer) renderPass1(target d2render.Surface, startX, startY, endX, endY int) {
+func (mr *MapRenderer) renderPass1(target d2interface.Surface, startX, startY, endX, endY int) {
 	for tileY := startY; tileY < endY; tileY++ {
 		for tileX := startX; tileX < endX; tileX++ {
 			tile := mr.mapEngine.TileAt(tileX, tileY)
@@ -108,7 +108,7 @@ func (mr *MapRenderer) renderPass1(target d2render.Surface, startX, startY, endX
 }
 
 // Objects below walls
-func (mr *MapRenderer) renderPass2(target d2render.Surface, startX, startY, endX, endY int) {
+func (mr *MapRenderer) renderPass2(target d2interface.Surface, startX, startY, endX, endY int) {
 	for tileY := startY; tileY < endY; tileY++ {
 		for tileX := startX; tileX < endX; tileX++ {
 			mr.viewport.PushTranslationWorld(float64(tileX), float64(tileY))
@@ -116,10 +116,10 @@ func (mr *MapRenderer) renderPass2(target d2render.Surface, startX, startY, endX
 			// TODO: Do not loop over every entity every frame
 			for _, mapEntity := range *mr.mapEngine.Entities() {
 				entityX, entityY := mapEntity.GetPosition()
-				if (int(entityX) != tileX) || (int(entityY) != tileY) {
+				if mapEntity.GetLayer() != 1 {
 					continue
 				}
-				if mapEntity.GetLayer() != 1 {
+				if (int(entityX) != tileX) || (int(entityY) != tileY) {
 					continue
 				}
 				target.PushTranslation(mr.viewport.GetTranslationScreen())
@@ -132,7 +132,7 @@ func (mr *MapRenderer) renderPass2(target d2render.Surface, startX, startY, endX
 }
 
 // Upper wall tiles, objects that are on top of walls
-func (mr *MapRenderer) renderPass3(target d2render.Surface, startX, startY, endX, endY int) {
+func (mr *MapRenderer) renderPass3(target d2interface.Surface, startX, startY, endX, endY int) {
 	for tileY := startY; tileY < endY; tileY++ {
 		for tileX := startX; tileX < endX; tileX++ {
 			tile := mr.mapEngine.TileAt(tileX, tileY)
@@ -142,10 +142,10 @@ func (mr *MapRenderer) renderPass3(target d2render.Surface, startX, startY, endX
 			// TODO: Do not loop over every entity every frame
 			for _, mapEntity := range *mr.mapEngine.Entities() {
 				entityX, entityY := mapEntity.GetPosition()
-				if (int(entityX) != tileX) || (int(entityY) != tileY) {
+				if mapEntity.GetLayer() == 1 {
 					continue
 				}
-				if mapEntity.GetLayer() == 1 {
+				if (int(entityX) != tileX) || (int(entityY) != tileY) {
 					continue
 				}
 				target.PushTranslation(mr.viewport.GetTranslationScreen())
@@ -158,7 +158,7 @@ func (mr *MapRenderer) renderPass3(target d2render.Surface, startX, startY, endX
 }
 
 // Roof tiles
-func (mr *MapRenderer) renderPass4(target d2render.Surface, startX, startY, endX, endY int) {
+func (mr *MapRenderer) renderPass4(target d2interface.Surface, startX, startY, endX, endY int) {
 	for tileY := startY; tileY < endY; tileY++ {
 		for tileX := startX; tileX < endX; tileX++ {
 			tile := mr.mapEngine.TileAt(tileX, tileY)
@@ -171,7 +171,7 @@ func (mr *MapRenderer) renderPass4(target d2render.Surface, startX, startY, endX
 
 }
 
-func (mr *MapRenderer) renderTilePass1(tile *d2ds1.TileRecord, target d2render.Surface) {
+func (mr *MapRenderer) renderTilePass1(tile *d2ds1.TileRecord, target d2interface.Surface) {
 	for _, wall := range tile.Walls {
 		if !wall.Hidden && wall.Prop1 != 0 && wall.Type.LowerWall() {
 			mr.renderWall(wall, mr.viewport, target)
@@ -191,7 +191,7 @@ func (mr *MapRenderer) renderTilePass1(tile *d2ds1.TileRecord, target d2render.S
 	}
 }
 
-func (mr *MapRenderer) renderTilePass2(tile *d2ds1.TileRecord, target d2render.Surface) {
+func (mr *MapRenderer) renderTilePass2(tile *d2ds1.TileRecord, target d2interface.Surface) {
 	for _, wall := range tile.Walls {
 		if !wall.Hidden && wall.Type.UpperWall() {
 			mr.renderWall(wall, mr.viewport, target)
@@ -199,7 +199,7 @@ func (mr *MapRenderer) renderTilePass2(tile *d2ds1.TileRecord, target d2render.S
 	}
 }
 
-func (mr *MapRenderer) renderTilePass3(tile *d2ds1.TileRecord, target d2render.Surface) {
+func (mr *MapRenderer) renderTilePass3(tile *d2ds1.TileRecord, target d2interface.Surface) {
 	for _, wall := range tile.Walls {
 		if wall.Type == d2enum.Roof {
 			mr.renderWall(wall, mr.viewport, target)
@@ -207,8 +207,8 @@ func (mr *MapRenderer) renderTilePass3(tile *d2ds1.TileRecord, target d2render.S
 	}
 }
 
-func (mr *MapRenderer) renderFloor(tile d2ds1.FloorShadowRecord, target d2render.Surface) {
-	var img d2render.Surface
+func (mr *MapRenderer) renderFloor(tile d2ds1.FloorShadowRecord, target d2interface.Surface) {
+	var img d2interface.Surface
 	if !tile.Animated {
 		img = mr.getImageCacheRecord(tile.Style, tile.Sequence, 0, tile.RandomIndex)
 	} else {
@@ -228,7 +228,7 @@ func (mr *MapRenderer) renderFloor(tile d2ds1.FloorShadowRecord, target d2render
 	target.Render(img)
 }
 
-func (mr *MapRenderer) renderWall(tile d2ds1.WallRecord, viewport *Viewport, target d2render.Surface) {
+func (mr *MapRenderer) renderWall(tile d2ds1.WallRecord, viewport *Viewport, target d2interface.Surface) {
 	img := mr.getImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tile.RandomIndex)
 	if img == nil {
 		log.Printf("Render called on uncached wall {%v,%v,%v}", tile.Style, tile.Sequence, tile.Type)
@@ -244,7 +244,7 @@ func (mr *MapRenderer) renderWall(tile d2ds1.WallRecord, viewport *Viewport, tar
 	target.Render(img)
 }
 
-func (mr *MapRenderer) renderShadow(tile d2ds1.FloorShadowRecord, target d2render.Surface) {
+func (mr *MapRenderer) renderShadow(tile d2ds1.FloorShadowRecord, target d2interface.Surface) {
 	img := mr.getImageCacheRecord(tile.Style, tile.Sequence, 13, tile.RandomIndex)
 	if img == nil {
 		log.Printf("Render called on uncached shadow {%v,%v}", tile.Style, tile.Sequence)
@@ -260,7 +260,7 @@ func (mr *MapRenderer) renderShadow(tile d2ds1.FloorShadowRecord, target d2rende
 	target.Render(img)
 }
 
-func (mr *MapRenderer) renderDebug(debugVisLevel int, target d2render.Surface, startX, startY, endX, endY int) {
+func (mr *MapRenderer) renderDebug(debugVisLevel int, target d2interface.Surface, startX, startY, endX, endY int) {
 	for tileY := startY; tileY < endY; tileY++ {
 		for tileX := startX; tileX < endX; tileX++ {
 			mr.viewport.PushTranslationWorld(float64(tileX), float64(tileY))
@@ -278,7 +278,7 @@ func (mr *MapRenderer) WorldToScreenF(x, y float64) (float64, float64) {
 	return mr.viewport.WorldToScreenF(x, y)
 }
 
-func (mr *MapRenderer) renderTileDebug(ax, ay int, debugVisLevel int, target d2render.Surface) {
+func (mr *MapRenderer) renderTileDebug(ax, ay int, debugVisLevel int, target d2interface.Surface) {
 	subTileColor := color.RGBA{R: 80, G: 80, B: 255, A: 50}
 	tileColor := color.RGBA{R: 255, G: 255, B: 255, A: 100}
 	tileCollisionColor := color.RGBA{R: 128, G: 0, B: 0, A: 100}

@@ -6,15 +6,15 @@ import (
 	"os"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
@@ -45,18 +45,23 @@ type CharacterSelect struct {
 	showDeleteConfirmation bool
 	connectionType         d2clientconnectiontype.ClientConnectionType
 	connectionHost         string
+	audioProvider          d2interface.AudioProvider
+	terminal               d2interface.Terminal
 }
 
-func CreateCharacterSelect(connectionType d2clientconnectiontype.ClientConnectionType, connectionHost string) *CharacterSelect {
+func CreateCharacterSelect(audioProvider d2interface.AudioProvider,
+	connectionType d2clientconnectiontype.ClientConnectionType, connectionHost string, term d2interface.Terminal) *CharacterSelect {
 	return &CharacterSelect{
 		selectedCharacter: -1,
 		connectionType:    connectionType,
 		connectionHost:    connectionHost,
+		audioProvider:     audioProvider,
+		terminal:          term,
 	}
 }
 
 func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
-	d2audio.PlayBGM(d2resource.BGMTitle)
+	v.audioProvider.PlayBGM(d2resource.BGMTitle)
 	d2input.BindHandler(v)
 	loading.Progress(0.1)
 
@@ -172,16 +177,16 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 }
 
 func (v *CharacterSelect) onNewCharButtonClicked() {
-	d2screen.SetNextScreen(CreateSelectHeroClass(v.connectionType, v.connectionHost))
+	d2screen.SetNextScreen(CreateSelectHeroClass(v.audioProvider, v.connectionType, v.connectionHost))
 }
 
 func (v *CharacterSelect) onExitButtonClicked() {
-	mainMenu := CreateMainMenu()
+	mainMenu := CreateMainMenu(v.audioProvider, v.terminal)
 	mainMenu.SetScreenMode(ScreenModeMainMenu)
 	d2screen.SetNextScreen(mainMenu)
 }
 
-func (v *CharacterSelect) Render(screen d2render.Surface) error {
+func (v *CharacterSelect) Render(screen d2interface.Surface) error {
 	v.background.RenderSegmented(screen, 4, 3, 0)
 	v.d2HeroTitle.Render(screen)
 	actualSelectionIndex := v.selectedCharacter - (v.charScrollbar.GetCurrentOffset() * 2)
@@ -307,5 +312,5 @@ func (v *CharacterSelect) onOkButtonClicked() {
 		gameClient.Open("", v.gameStates[v.selectedCharacter].FilePath)
 	}
 
-	d2screen.SetNextScreen(CreateGame(gameClient))
+	d2screen.SetNextScreen(CreateGame(v.audioProvider, gameClient, v.terminal))
 }

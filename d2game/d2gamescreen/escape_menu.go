@@ -3,8 +3,9 @@ package d2gamescreen
 import (
 	"fmt"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
@@ -56,13 +57,15 @@ const (
 
 type EscapeMenu struct {
 	isOpen        bool
-	selectSound   d2audio.SoundEffect
+	selectSound   d2interface.SoundEffect
 	currentLayout layoutID
 
 	// leftPent and rightPent are generated once and shared between the layouts
-	leftPent  *d2gui.AnimatedSprite
-	rightPent *d2gui.AnimatedSprite
-	layouts   []*layout
+	leftPent      *d2gui.AnimatedSprite
+	rightPent     *d2gui.AnimatedSprite
+	layouts       []*layout
+	audioProvider d2interface.AudioProvider
+	terminal      d2interface.Terminal
 }
 
 type layout struct {
@@ -110,8 +113,12 @@ type actionableElement interface {
 	Trigger()
 }
 
-func NewEscapeMenu() *EscapeMenu {
-	m := &EscapeMenu{}
+func NewEscapeMenu(audioProvider d2interface.AudioProvider, term d2interface.Terminal) *EscapeMenu {
+	m := &EscapeMenu{
+		audioProvider: audioProvider,
+		terminal:      term,
+	}
+
 	m.layouts = []*layout{
 		mainLayoutID:              m.newMainLayout(),
 		optionsLayoutID:           m.newOptionsLayout(),
@@ -283,7 +290,7 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 }
 
 func (m *EscapeMenu) OnLoad() {
-	m.selectSound, _ = d2audio.LoadSoundEffect(d2resource.SFXCursorSelect)
+	m.selectSound, _ = m.audioProvider.LoadSoundEffect(d2resource.SFXCursorSelect)
 }
 
 func (m *EscapeMenu) OnEscKey() {
@@ -334,7 +341,7 @@ func (m *EscapeMenu) showLayout(id layoutID) {
 	}
 
 	if id == saveLayoutID {
-		mainMenu := CreateMainMenu()
+		mainMenu := CreateMainMenu(m.audioProvider, m.terminal)
 		mainMenu.SetScreenMode(ScreenModeMainMenu)
 		d2screen.SetNextScreen(mainMenu)
 		return

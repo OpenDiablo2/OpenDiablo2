@@ -8,11 +8,12 @@ import (
 	"path"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -32,15 +33,18 @@ type Credits struct {
 	cycleTime          float64
 	cyclesTillNextLine int
 	doneWithCredits    bool
+	audioProvider      d2interface.AudioProvider
+	terminal           d2interface.Terminal
 }
 
 // CreateCredits creates an instance of the credits screen
-func CreateCredits() *Credits {
+func CreateCredits(audioProvider d2interface.AudioProvider) *Credits {
 	result := &Credits{
 		labels:             make([]*labelItem, 0),
 		cycleTime:          0,
 		doneWithCredits:    false,
 		cyclesTillNextLine: 0,
+		audioProvider:      audioProvider,
 	}
 	return result
 }
@@ -94,7 +98,7 @@ func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 }
 
 // Render renders the credits screen
-func (v *Credits) Render(screen d2render.Surface) error {
+func (v *Credits) Render(screen d2interface.Surface) error {
 	v.creditsBackground.RenderSegmented(screen, 4, 3, 0)
 	for _, label := range v.labels {
 		if label.Available {
@@ -134,7 +138,7 @@ func (v *Credits) Advance(tickTime float64) error {
 }
 
 func (v *Credits) onExitButtonClicked() {
-	mainMenu := CreateMainMenu()
+	mainMenu := CreateMainMenu(v.audioProvider, v.terminal)
 	mainMenu.SetScreenMode(ScreenModeMainMenu)
 	d2screen.SetNextScreen(mainMenu)
 }

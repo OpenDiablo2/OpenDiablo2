@@ -3,6 +3,8 @@ package d2ui
 import (
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
@@ -27,7 +29,7 @@ type Label struct {
 	Height    int
 	Alignment LabelAlignment
 	font      *Font
-	imageData map[string]d2render.Surface
+	imageData map[string]d2interface.Surface
 	Color     color.Color
 }
 
@@ -37,14 +39,14 @@ func CreateLabel(fontPath, palettePath string) Label {
 		Alignment: LabelAlignLeft,
 		Color:     color.White,
 		font:      GetFont(fontPath, palettePath),
-		imageData: make(map[string]d2render.Surface),
+		imageData: make(map[string]d2interface.Surface),
 	}
 
 	return result
 }
 
 // Render draws the label on the screen
-func (v *Label) Render(target d2render.Surface) {
+func (v *Label) Render(target d2interface.Surface) {
 	if len(v.text) == 0 {
 		return
 	}
@@ -57,8 +59,8 @@ func (v *Label) Render(target d2render.Surface) {
 		x, y = v.X-v.Width, v.Y
 	}
 
-	target.PushFilter(d2render.FilterNearest)
-	target.PushCompositeMode(d2render.CompositeModeSourceAtop)
+	target.PushFilter(d2interface.FilterNearest)
+	target.PushCompositeMode(d2interface.CompositeModeSourceAtop)
 	target.PushTranslation(x, y)
 	defer target.PopN(3)
 
@@ -82,7 +84,7 @@ func (v *Label) cacheImage() {
 	width, height := v.font.GetTextMetrics(v.text)
 	v.Width = width
 	v.Height = height
-	v.imageData[v.text], _ = d2render.NewSurface(width, height, d2render.FilterNearest)
+	v.imageData[v.text], _ = d2render.NewSurface(width, height, d2interface.FilterNearest)
 	surface, _ := d2render.CreateSurface(v.imageData[v.text])
 	v.font.Render(0, 0, v.text, v.Color, surface)
 }

@@ -3,7 +3,7 @@ package d2gui
 import (
 	"errors"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
 var (
@@ -24,7 +24,7 @@ func Initialize() error {
 	return nil
 }
 
-func Render(target d2render.Surface) error {
+func Render(target d2interface.Surface) error {
 	verifyWasInit()
 	return singleton.render(target)
 }

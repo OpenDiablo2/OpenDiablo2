@@ -3,12 +3,13 @@ package d2mapentity
 import (
 	"math/rand"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type NPC struct {
@@ -49,7 +50,7 @@ func CreateNPC(x, y int, object *d2datadict.ObjectLookupRecord, direction int) *
 	return result
 }
 
-func (v *NPC) Render(target d2render.Surface) {
+func (v *NPC) Render(target d2interface.Surface) {
 	target.PushTranslation(
 		v.offsetX+int((v.subcellX-v.subcellY)*16),
 		v.offsetY+int(((v.subcellX+v.subcellY)*8)-5),

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
@@ -24,7 +26,7 @@ type Button struct {
 	width    int
 	height   int
 	state    buttonState
-	surfaces []d2render.Surface
+	surfaces []d2interface.Surface
 }
 
 func createButton(text string, buttonStyle ButtonStyle) (*Button, error) {
@@ -69,9 +71,9 @@ func createButton(text string, buttonStyle ButtonStyle) (*Button, error) {
 	textY := buttonHeight/2 - textHeight/2 + config.textOffset
 
 	surfaceCount := animation.GetFrameCount() / (config.segmentsX * config.segmentsY)
-	surfaces := make([]d2render.Surface, surfaceCount)
+	surfaces := make([]d2interface.Surface, surfaceCount)
 	for i := 0; i < surfaceCount; i++ {
-		surface, err := d2render.NewSurface(buttonWidth, buttonHeight, d2render.FilterNearest)
+		surface, err := d2render.NewSurface(buttonWidth, buttonHeight, d2interface.FilterNearest)
 		if err != nil {
 			return nil, err
 		}
@@ -121,7 +123,7 @@ func (b *Button) onMouseLeave(event d2input.MouseMoveEvent) bool {
 	return false
 }
 
-func (b *Button) render(target d2render.Surface) error {
+func (b *Button) render(target d2interface.Surface) error {
 	return target.Render(b.surfaces[b.state])
 }
 

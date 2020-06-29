@@ -1,8 +1,8 @@
 package d2gamescreen
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 )
 
@@ -42,7 +42,7 @@ func (g *GuiTestMain) OnLoad(loading d2screen.LoadingState) {
 	d2gui.SetLayout(layout)
 }
 
-func (g *GuiTestMain) Render(screen d2render.Surface) error {
+func (g *GuiTestMain) Render(screen d2interface.Surface) error {
 	return nil
 }
 

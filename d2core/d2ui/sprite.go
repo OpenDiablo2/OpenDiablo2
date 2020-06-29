@@ -4,9 +4,10 @@ import (
 	"errors"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type Sprite struct {
@@ -26,7 +27,7 @@ func LoadSprite(animation *d2asset.Animation) (*Sprite, error) {
 	return &Sprite{animation: animation}, nil
 }
 
-func (s *Sprite) Render(target d2render.Surface) error {
+func (s *Sprite) Render(target d2interface.Surface) error {
 	_, frameHeight := s.animation.GetCurrentFrameSize()
 
 	target.PushTranslation(s.x, s.y-frameHeight)
@@ -34,7 +35,7 @@ func (s *Sprite) Render(target d2render.Surface) error {
 	return s.animation.Render(target)
 }
 
-func (s *Sprite) RenderSegmented(target d2render.Surface, segmentsX, segmentsY, frameOffset int) error {
+func (s *Sprite) RenderSegmented(target d2interface.Surface, segmentsX, segmentsY, frameOffset int) error {
 	var currentY int
 	for y := 0; y < segmentsY; y++ {
 		var currentX int
