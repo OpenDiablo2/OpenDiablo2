@@ -93,8 +93,7 @@ func createNetworkServer() {
 }
 
 // runNetworkServer runs a while loop, reading from the GameServer's UDP
-// connection and processing packets based on the enum in their first
-// byte.
+// connection.
 func runNetworkServer() {
 	buffer := make([]byte, 4096)
 	for singletonServer.running {
@@ -177,11 +176,8 @@ func Destroy() {
 // following packets to the newly connected client: UpdateServerInfoPacket,
 // GenerateMapPacket, AddPlayerPacket.
 //
-// It also sends one AddPlayerPacket:
-//
-// - to each of the other clients with new player entity.
-//
-// - with each other player entity to the new client.
+// It also sends AddPlayerPackets for each other player entity to the new
+// player and vice versa, so all player entities exist on all clients.
 //
 // For more information, see d2networking.d2netpacket.
 func OnClientConnected(client ClientConnection) {

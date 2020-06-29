@@ -13,10 +13,10 @@ import (
 // LocalClientConnection is the implementation of ClientConnection
 // for a local client.
 type LocalClientConnection struct {
-	clientListener    d2networking.ClientListener
-	uniqueId          string
-	openNetworkServer bool
-	playerState       *d2player.PlayerState
+	clientListener    d2networking.ClientListener // The game client
+	uniqueId          string                      // Unique ID generated on construction
+	openNetworkServer bool                        // True if this is a server
+	playerState       *d2player.PlayerState       // Local player state
 }
 
 // GetUniqueId returns LocalClientConnection.uniqueId.

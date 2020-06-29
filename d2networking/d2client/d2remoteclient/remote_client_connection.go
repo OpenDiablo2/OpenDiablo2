@@ -119,6 +119,8 @@ func (l *RemoteClientConnection) SetClientListener(listener d2networking.ClientL
 	l.clientListener = listener
 }
 
+// serverListener runs a while loop, reading from the GameServer's UDP
+// connection.
 func (l *RemoteClientConnection) serverListener() {
 	buffer := make([]byte, 4096)
 	for l.active {

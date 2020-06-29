@@ -1,6 +1,4 @@
-// Package d2netpackettype defines the enumerable type NetPacketType. This is
-// used as a header to inform the reciever of a packet which type the JSON
-// body represents.
+// Package d2netpackettype defines the enumerable NetPacketType.
 package d2netpackettype
 
 // NetPacketType is an enum referring to all packet types in package
