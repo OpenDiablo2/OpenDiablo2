@@ -68,6 +68,7 @@ func (mr *MapRenderer) Render(target d2render.Surface) {
 	endY := int(math.Min(float64(mapSize.Height), math.Ceil(etyf)))
 
 	mr.renderPass1(target, startX, startY, endX, endY)
+	mr.renderPass2(target, startX, startY, endX, endY)
 	if mr.debugVisLevel > 0 {
 		mr.renderDebug(mr.debugVisLevel, target, startX, startY, endX, endY)
 	}
@@ -116,10 +117,10 @@ func (mr *MapRenderer) renderPass2(target d2render.Surface, startX, startY, endX
 			// TODO: Do not loop over every entity every frame
 			for _, mapEntity := range *mr.mapEngine.Entities() {
 				entityX, entityY := mapEntity.GetPosition()
-				if (int(entityX) != tileX) || (int(entityY) != tileY) {
+				if mapEntity.GetLayer() != 1 {
 					continue
 				}
-				if mapEntity.GetLayer() != 1 {
+				if (int(entityX) != tileX) || (int(entityY) != tileY) {
 					continue
 				}
 				target.PushTranslation(mr.viewport.GetTranslationScreen())
@@ -142,10 +143,10 @@ func (mr *MapRenderer) renderPass3(target d2render.Surface, startX, startY, endX
 			// TODO: Do not loop over every entity every frame
 			for _, mapEntity := range *mr.mapEngine.Entities() {
 				entityX, entityY := mapEntity.GetPosition()
-				if (int(entityX) != tileX) || (int(entityY) != tileY) {
+				if mapEntity.GetLayer() == 1 {
 					continue
 				}
-				if mapEntity.GetLayer() == 1 {
+				if (int(entityX) != tileX) || (int(entityY) != tileY) {
 					continue
 				}
 				target.PushTranslation(mr.viewport.GetTranslationScreen())
