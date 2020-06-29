@@ -5,6 +5,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
+// TermCategory applies styles to the lines in the  Terminal
 type TermCategory int
 
 const (
@@ -14,17 +15,10 @@ const (
 	TermCategoryError
 )
 
-const (
-	termCharWidth   = 6
-	termCharHeight  = 16
-	termRowCount    = 24
-	termRowCountMax = 32
-	termColCountMax = 128
-	termAnimLength  = 0.5
-)
-
+// TermVis is an enumeration of the Terminal's visibility states
 type termVis int
 
+// Terminal visibility state
 const (
 	termVisHidden termVis = iota
 	termVisShowing
@@ -32,6 +26,9 @@ const (
 	termVisHiding
 )
 
+// Terminal is a drop-down terminal and shell
+// It is used throughout the codebase, most parts of the engine will
+// `bind` commands, which are available for use in the shell
 type Terminal interface {
 	BindLogger()
 
@@ -53,6 +50,8 @@ type Terminal interface {
 	UnbindAction(name string) error
 }
 
+// TerminalLogger is used tomake the Terminal write out
+// (eg. to the system shell or to a file)
 type TerminalLogger interface {
 	Write(p []byte) (int, error)
 }
