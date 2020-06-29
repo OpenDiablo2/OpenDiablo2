@@ -6,6 +6,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 )
 
+// ClientConnection is an interface for abstracting local and remote
+// clients.
 type ClientConnection interface {
 	GetUniqueId() string
 	GetConnectionType() d2clientconnectiontype.ClientConnectionType

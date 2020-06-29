@@ -22,17 +22,20 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
 
+// GameClient manages a connection to d2server.GameServer
+// and keeps a synchronised copy of the map and entities.
 type GameClient struct {
-	clientConnection ClientConnection
-	connectionType   d2clientconnectiontype.ClientConnectionType
-	GameState        *d2player.PlayerState
-	MapEngine        *d2mapengine.MapEngine
-	PlayerId         string
-	Players          map[string]*d2mapentity.Player
-	Seed             int64
-	RegenMap         bool
+	clientConnection ClientConnection                            // Abstract local/remote connection
+	connectionType   d2clientconnectiontype.ClientConnectionType // Type of connection (local or remote)
+	GameState        *d2player.PlayerState                       // local player state
+	MapEngine        *d2mapengine.MapEngine                      // Map and entities
+	PlayerId         string                                      // ID of the local player
+	Players          map[string]*d2mapentity.Player              // IDs of the other players
+	Seed             int64                                       // Map seed
+	RegenMap         bool                                        // Regenerate tile cache on render (map has changed)
 }
 
+// Create constructs a new GameClient and returns a pointer to it.
 func Create(connectionType d2clientconnectiontype.ClientConnectionType) (*GameClient, error) {
 	result := &GameClient{
 		MapEngine:      d2mapengine.CreateMapEngine(), // TODO: Mapgen - Needs levels.txt stuff
@@ -54,18 +57,26 @@ func Create(connectionType d2clientconnectiontype.ClientConnectionType) (*GameCl
 	return result, nil
 }
 
+// Open creates the server and connects to it if the client is local.
+// If the client is remote it sends a PlayerConnectionRequestPacket to the
+// server (see d2netpacket).
 func (g *GameClient) Open(connectionString string, saveFilePath string) error {
 	return g.clientConnection.Open(connectionString, saveFilePath)
 }
 
+// Close destroys the server if the client is local. For remote clients
+// it sends a DisconnectRequestPacket (see d2netpacket).
 func (g *GameClient) Close() error {
 	return g.clientConnection.Close()
 }
 
+// Destroy does the same thing as Close.
 func (g *GameClient) Destroy() error {
 	return g.clientConnection.Close()
 }
 
+// OnPacketReceived is called by the ClientConection and processes incoming
+// packets.
 func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 	switch packet.PacketType {
 	case d2netpackettype.GenerateMap:
@@ -145,6 +156,8 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 	return nil
 }
 
+// SendPacketToServer calls server.OnPacketReceived if the client is local.
+// If it is remote the NetPacket sent over a UDP connection to the server.
 func (g *GameClient) SendPacketToServer(packet d2netpacket.NetPacket) error {
 	return g.clientConnection.SendPacketToServer(packet)
 }
