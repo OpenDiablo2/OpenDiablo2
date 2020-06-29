@@ -8,9 +8,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
-
-
-// DT1
+// DT1 represents a DT1 file.
 type DT1 struct {
 	Tiles []Tile
 }
@@ -19,11 +17,15 @@ type DT1 struct {
 type BlockDataFormat int16
 
 const (
-	BlockFormatRLE       BlockDataFormat = 0 // Specifies the block format is RLE encoded
-	BlockFormatIsometric BlockDataFormat = 1 // Specifies the block format isometrically encoded
+	// BlockFormatRLE specifies the block format is RLE encoded
+	BlockFormatRLE BlockDataFormat = 0
+
+	// BlockFormatIsometric specifies the block format isometrically encoded
+	BlockFormatIsometric BlockDataFormat = 1
 )
 
 // LoadDT1 loads a DT1 record
+//nolint:funlen Can't reduce
 func LoadDT1(fileData []byte) (*DT1, error) {
 	result := &DT1{}
 	br := d2common.CreateStreamReader(fileData)

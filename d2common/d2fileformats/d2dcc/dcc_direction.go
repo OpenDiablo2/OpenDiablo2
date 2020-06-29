@@ -6,6 +6,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+const cellsPerRow = 4
+
+// DCCDirection represents a DCCDirection file.
 type DCCDirection struct {
 	OutSizeCoded               int
 	CompressionFlags           int
@@ -30,22 +33,26 @@ type DCCDirection struct {
 	PixelBuffer                []DCCPixelBufferEntry
 }
 
-func CreateDCCDirection(bm *d2common.BitMuncher, file DCC) *DCCDirection {
+// CreateDCCDirection creates an instance of a DCCDirection.
+func CreateDCCDirection(bm *d2common.BitMuncher, file *DCC) *DCCDirection { //nolint:funlen // Can't reduce
+	var crazyBitTable = []byte{0, 1, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 26, 28, 30, 32}
+
 	result := &DCCDirection{}
 	result.OutSizeCoded = int(bm.GetUInt32())
-	result.CompressionFlags = int(bm.GetBits(2))
-	result.Variable0Bits = int(crazyBitTable[bm.GetBits(4)])
-	result.WidthBits = int(crazyBitTable[bm.GetBits(4)])
-	result.HeightBits = int(crazyBitTable[bm.GetBits(4)])
-	result.XOffsetBits = int(crazyBitTable[bm.GetBits(4)])
-	result.YOffsetBits = int(crazyBitTable[bm.GetBits(4)])
-	result.OptionalDataBits = int(crazyBitTable[bm.GetBits(4)])
-	result.CodedBytesBits = int(crazyBitTable[bm.GetBits(4)])
+	result.CompressionFlags = int(bm.GetBits(2))                //nolint:gomnd // binary data
+	result.Variable0Bits = int(crazyBitTable[bm.GetBits(4)])    //nolint:gomnd // binary data
+	result.WidthBits = int(crazyBitTable[bm.GetBits(4)])        //nolint:gomnd // binary data
+	result.HeightBits = int(crazyBitTable[bm.GetBits(4)])       //nolint:gomnd // binary data
+	result.XOffsetBits = int(crazyBitTable[bm.GetBits(4)])      //nolint:gomnd // binary data
+	result.YOffsetBits = int(crazyBitTable[bm.GetBits(4)])      //nolint:gomnd // binary data
+	result.OptionalDataBits = int(crazyBitTable[bm.GetBits(4)]) //nolint:gomnd // binary data
+	result.CodedBytesBits = int(crazyBitTable[bm.GetBits(4)])   //nolint:gomnd // binary data
 	result.Frames = make([]*DCCDirectionFrame, file.FramesPerDirection)
 	minx := 100000
 	miny := 100000
 	maxx := -100000
 	maxy := -100000
+
 	// Load the frame headers
 	for frameIdx := 0; frameIdx < file.FramesPerDirection; frameIdx++ {
 		result.Frames[frameIdx] = CreateDCCDirectionFrame(bm, result)
@@ -54,20 +61,27 @@ func CreateDCCDirection(bm *d2common.BitMuncher, file DCC) *DCCDirection {
 		maxx = int(d2common.MaxInt32(int32(result.Frames[frameIdx].Box.Right()), int32(maxx)))
 		maxy = int(d2common.MaxInt32(int32(result.Frames[frameIdx].Box.Bottom()), int32(maxy)))
 	}
+
 	result.Box = d2common.Rectangle{Left: minx, Top: miny, Width: maxx - minx, Height: maxy - miny}
+
 	if result.OptionalDataBits > 0 {
 		log.Panic("Optional bits in DCC data is not currently supported.")
 	}
+
 	if (result.CompressionFlags & 0x2) > 0 {
-		result.EqualCellsBitstreamSize = int(bm.GetBits(20))
+		result.EqualCellsBitstreamSize = int(bm.GetBits(20)) //nolint:gomnd // binary data
 	}
-	result.PixelMaskBitstreamSize = int(bm.GetBits(20))
+
+	result.PixelMaskBitstreamSize = int(bm.GetBits(20)) //nolint:gomnd // binary data
+
 	if (result.CompressionFlags & 0x1) > 0 {
-		result.EncodingTypeBitsreamSize = int(bm.GetBits(20))
-		result.RawPixelCodesBitstreamSize = int(bm.GetBits(20))
+		result.EncodingTypeBitsreamSize = int(bm.GetBits(20))   //nolint:gomnd // binary data
+		result.RawPixelCodesBitstreamSize = int(bm.GetBits(20)) //nolint:gomnd // binary data
 	}
+
 	// PixelValuesKey
 	paletteEntryCount := 0
+
 	for i := 0; i < 256; i++ {
 		valid := bm.GetBit() != 0
 		if valid {
@@ -75,72 +89,99 @@ func CreateDCCDirection(bm *d2common.BitMuncher, file DCC) *DCCDirection {
 			paletteEntryCount++
 		}
 	}
+
 	// HERE BE GIANTS:
 	// Because of the way this thing mashes bits together, BIT offset matters
 	// here. For example, if you are on byte offset 3, bit offset 6, and
 	// the EqualCellsBitstreamSize is 20 bytes, then the next bit stream
 	// will be located at byte 23, bit offset 6!
 	equalCellsBitstream := d2common.CopyBitMuncher(bm)
+
 	bm.SkipBits(result.EqualCellsBitstreamSize)
+
 	pixelMaskBitstream := d2common.CopyBitMuncher(bm)
+
 	bm.SkipBits(result.PixelMaskBitstreamSize)
+
 	encodingTypeBitsream := d2common.CopyBitMuncher(bm)
+
 	bm.SkipBits(result.EncodingTypeBitsreamSize)
+
 	rawPixelCodesBitstream := d2common.CopyBitMuncher(bm)
+
 	bm.SkipBits(result.RawPixelCodesBitstreamSize)
+
 	pixelCodeandDisplacement := d2common.CopyBitMuncher(bm)
+
 	// Calculate the cells for the direction
-	result.CalculateCells()
+	result.calculateCells()
+
 	// Calculate the cells for each of the frames
 	for _, frame := range result.Frames {
-		frame.CalculateCells(result)
+		frame.recalculateCells(result)
 	}
+
 	// Fill in the pixel buffer
-	result.FillPixelBuffer(pixelCodeandDisplacement, equalCellsBitstream, pixelMaskBitstream, encodingTypeBitsream, rawPixelCodesBitstream)
+	result.fillPixelBuffer(pixelCodeandDisplacement, equalCellsBitstream, pixelMaskBitstream, encodingTypeBitsream, rawPixelCodesBitstream)
+
 	// Generate the actual frame pixel data
-	result.GenerateFrames(pixelCodeandDisplacement)
+	result.generateFrames(pixelCodeandDisplacement)
+
 	result.PixelBuffer = nil
+
 	// Verify that everything we expected to read was actually read (sanity check)...
 	if equalCellsBitstream.BitsRead != result.EqualCellsBitstreamSize {
 		log.Panic("Did not read the correct number of bits!")
 	}
+
 	if pixelMaskBitstream.BitsRead != result.PixelMaskBitstreamSize {
 		log.Panic("Did not read the correct number of bits!")
 	}
+
 	if encodingTypeBitsream.BitsRead != result.EncodingTypeBitsreamSize {
 		log.Panic("Did not read the correct number of bits!")
 	}
+
 	if rawPixelCodesBitstream.BitsRead != result.RawPixelCodesBitstreamSize {
 		log.Panic("Did not read the correct number of bits!")
 	}
+
 	bm.SkipBits(pixelCodeandDisplacement.BitsRead)
+
 	return result
 }
 
-func (v *DCCDirection) GenerateFrames(pcd *d2common.BitMuncher) {
+//nolint:gocognit nolint:gocyclo // Can't reduce
+func (v *DCCDirection) generateFrames(pcd *d2common.BitMuncher) {
 	pbIdx := 0
+
 	for _, cell := range v.Cells {
 		cell.LastWidth = -1
 		cell.LastHeight = -1
 	}
+
 	v.PixelData = make([]byte, v.Box.Width*v.Box.Height)
 	frameIndex := -1
+
 	for _, frame := range v.Frames {
 		frameIndex++
+
 		frame.PixelData = make([]byte, v.Box.Width*v.Box.Height)
 		c := -1
+
 		for _, cell := range frame.Cells {
 			c++
-			cellX := cell.XOffset / 4
-			cellY := cell.YOffset / 4
+
+			cellX := cell.XOffset / cellsPerRow
+			cellY := cell.YOffset / cellsPerRow
 			cellIndex := cellX + (cellY * v.HorizontalCellCount)
 			bufferCell := v.Cells[cellIndex]
 			pbe := v.PixelBuffer[pbIdx]
+
 			if (pbe.Frame != frameIndex) || (pbe.FrameCellIndex != c) {
 				// This buffer cell has an EqualCell bit set to 1, so copy the frame cell or clear it
 				if (cell.Width != bufferCell.LastWidth) || (cell.Height != bufferCell.LastHeight) {
-					// Different sizes
-					/// TODO: Clear the pixels of the frame cell
+					// Different sizes TODO: Clear the pixels of the frame cell
 					for y := 0; y < cell.Height; y++ {
 						for x := 0; x < cell.Width; x++ {
 							v.PixelData[x+cell.XOffset+((y+cell.YOffset)*v.Box.Width)] = 0
@@ -154,7 +195,8 @@ func (v *DCCDirection) GenerateFrames(pcd *d2common.BitMuncher) {
 							// Frame (buff.lastx, buff.lasty) -> Frame (cell.offx, cell.offy)
 							// Cell (0, 0,) ->
 							// blit(dir->bmp, dir->bmp, buff_cell->last_x0, buff_cell->last_y0, cell->x0, cell->y0, cell->w, cell->h );
-							v.PixelData[fx+cell.XOffset+((fy+cell.YOffset)*v.Box.Width)] = v.PixelData[fx+bufferCell.LastXOffset+((fy+bufferCell.LastYOffset)*v.Box.Width)]
+							v.PixelData[fx+cell.XOffset+((fy+cell.YOffset)*v.Box.Width)] =
+								v.PixelData[fx+bufferCell.LastXOffset+((fy+bufferCell.LastYOffset)*v.Box.Width)]
 						}
 					}
 					// Copy it again into the final frame image
@@ -168,7 +210,6 @@ func (v *DCCDirection) GenerateFrames(pcd *d2common.BitMuncher) {
 			} else {
 				if pbe.Value[0] == pbe.Value[1] {
 					// Clear the frame
-					//cell.PixelData = new byte[cell.Width * cell.Height];
 					for y := 0; y < cell.Height; y++ {
 						for x := 0; x < cell.Width; x++ {
 							v.PixelData[x+cell.XOffset+((y+cell.YOffset)*v.Box.Width)] = pbe.Value[0]
@@ -187,98 +228,124 @@ func (v *DCCDirection) GenerateFrames(pcd *d2common.BitMuncher) {
 						}
 					}
 				}
+
 				// Copy the frame cell into the frame
 				for fy := 0; fy < cell.Height; fy++ {
 					for fx := 0; fx < cell.Width; fx++ {
-						//blit(cell->bmp, frm_bmp, 0, 0, cell->x0, cell->y0, cell->w, cell->h );
+						// blit(cell->bmp, frm_bmp, 0, 0, cell->x0, cell->y0, cell->w, cell->h );
 						frame.PixelData[fx+cell.XOffset+((fy+cell.YOffset)*v.Box.Width)] = v.PixelData[fx+cell.XOffset+((fy+cell.YOffset)*v.Box.Width)]
 					}
 				}
 				pbIdx++
 			}
+
 			bufferCell.LastWidth = cell.Width
 			bufferCell.LastHeight = cell.Height
 			bufferCell.LastXOffset = cell.XOffset
 			bufferCell.LastYOffset = cell.YOffset
 		}
+
 		// Free up the stuff we no longer need
 		frame.Cells = nil
 	}
+
 	v.Cells = nil
 	v.PixelData = nil
 	v.PixelBuffer = nil
 }
 
-func (v *DCCDirection) FillPixelBuffer(pcd, ec, pm, et, rp *d2common.BitMuncher) {
+//nolint:funlen nolint:gocognit // can't reduce
+func (v *DCCDirection) fillPixelBuffer(pcd, ec, pm, et, rp *d2common.BitMuncher) {
+	var pixelMaskLookup = []int{0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4}
+
 	lastPixel := uint32(0)
 	maxCellX := 0
 	maxCellY := 0
+
 	for _, frame := range v.Frames {
 		if frame == nil {
 			continue
 		}
+
 		maxCellX += frame.HorizontalCellCount
 		maxCellY += frame.VerticalCellCount
 	}
+
 	v.PixelBuffer = make([]DCCPixelBufferEntry, maxCellX*maxCellY)
+
 	for i := 0; i < maxCellX*maxCellY; i++ {
 		v.PixelBuffer[i].Frame = -1
 		v.PixelBuffer[i].FrameCellIndex = -1
 	}
+
 	cellBuffer := make([]*DCCPixelBufferEntry, v.HorizontalCellCount*v.VerticalCellCount)
 	frameIndex := -1
 	pbIndex := -1
-	pixelMask := uint32(0x00)
+
+	var pixelMask uint32
+
 	for _, frame := range v.Frames {
 		frameIndex++
-		originCellX := (frame.Box.Left - v.Box.Left) / 4
-		originCellY := (frame.Box.Top - v.Box.Top) / 4
+
+		originCellX := (frame.Box.Left - v.Box.Left) / cellsPerRow
+		originCellY := (frame.Box.Top - v.Box.Top) / cellsPerRow
+
 		for cellY := 0; cellY < frame.VerticalCellCount; cellY++ {
 			currentCellY := cellY + originCellY
+
 			for cellX := 0; cellX < frame.HorizontalCellCount; cellX++ {
 				currentCell := originCellX + cellX + (currentCellY * v.HorizontalCellCount)
 				nextCell := false
 				tmp := 0
+
 				if cellBuffer[currentCell] != nil {
 					if v.EqualCellsBitstreamSize > 0 {
 						tmp = int(ec.GetBit())
 					} else {
 						tmp = 0
 					}
+
 					if tmp == 0 {
-						pixelMask = pm.GetBits(4)
+						pixelMask = pm.GetBits(4) //nolint:gomnd // binary data
 					} else {
 						nextCell = true
 					}
 				} else {
 					pixelMask = 0x0F
 				}
+
 				if nextCell {
 					continue
 				}
+
 				// Decode the pixels
 				var pixelStack [4]uint32
+
 				lastPixel = 0
 				numberOfPixelBits := pixelMaskLookup[pixelMask]
 				encodingType := 0
+
 				if (numberOfPixelBits != 0) && (v.EncodingTypeBitsreamSize > 0) {
 					encodingType = int(et.GetBit())
 				} else {
 					encodingType = 0
 				}
+
 				decodedPixel := 0
+
 				for i := 0; i < numberOfPixelBits; i++ {
 					if encodingType != 0 {
-						pixelStack[i] = rp.GetBits(8)
+						pixelStack[i] = rp.GetBits(8) //nolint:gomnd // binary data
 					} else {
 						pixelStack[i] = lastPixel
-						pixelDisplacement := pcd.GetBits(4)
+						pixelDisplacement := pcd.GetBits(4) //nolint:gomnd // binary data
 						pixelStack[i] += pixelDisplacement
 						for pixelDisplacement == 15 {
-							pixelDisplacement = pcd.GetBits(4)
+							pixelDisplacement = pcd.GetBits(4) //nolint:gomnd // binary data
 							pixelStack[i] += pixelDisplacement
 						}
 					}
+
 					if pixelStack[i] == lastPixel {
 						pixelStack[i] = 0
 						break
@@ -287,9 +354,13 @@ func (v *DCCDirection) FillPixelBuffer(pcd, ec, pm, et, rp *d2common.BitMuncher)
 						decodedPixel++
 					}
 				}
+
 				oldEntry := cellBuffer[currentCell]
+
 				pbIndex++
+
 				curIdx := decodedPixel - 1
+
 				for i := 0; i < 4; i++ {
 					if (pixelMask & (1 << uint(i))) != 0 {
 						if curIdx >= 0 {
@@ -302,13 +373,14 @@ func (v *DCCDirection) FillPixelBuffer(pcd, ec, pm, et, rp *d2common.BitMuncher)
 						v.PixelBuffer[pbIndex].Value[i] = oldEntry.Value[i]
 					}
 				}
+
 				cellBuffer[currentCell] = &v.PixelBuffer[pbIndex]
 				v.PixelBuffer[pbIndex].Frame = frameIndex
 				v.PixelBuffer[pbIndex].FrameCellIndex = cellX + (cellY * frame.HorizontalCellCount)
 			}
 		}
 	}
-	cellBuffer = nil
+
 	// Convert the palette entry index into actual palette entries
 	for i := 0; i <= pbIndex; i++ {
 		for x := 0; x < 4; x++ {
@@ -317,10 +389,10 @@ func (v *DCCDirection) FillPixelBuffer(pcd, ec, pm, et, rp *d2common.BitMuncher)
 	}
 }
 
-func (v *DCCDirection) CalculateCells() {
+func (v *DCCDirection) calculateCells() {
 	// Calculate the number of vertical and horizontal cells we need
-	v.HorizontalCellCount = 1 + (v.Box.Width-1)/4
-	v.VerticalCellCount = 1 + (v.Box.Height-1)/4
+	v.HorizontalCellCount = 1 + (v.Box.Width-1)/cellsPerRow
+	v.VerticalCellCount = 1 + (v.Box.Height-1)/cellsPerRow
 	// Calculate the cell widths
 	cellWidths := make([]int, v.HorizontalCellCount)
 	if v.HorizontalCellCount == 1 {
@@ -344,8 +416,10 @@ func (v *DCCDirection) CalculateCells() {
 	// Set the cell widths and heights in the cell buffer
 	v.Cells = make([]*DCCCell, v.VerticalCellCount*v.HorizontalCellCount)
 	yOffset := 0
+
 	for y := 0; y < v.VerticalCellCount; y++ {
 		xOffset := 0
+
 		for x := 0; x < v.HorizontalCellCount; x++ {
 			v.Cells[x+(y*v.HorizontalCellCount)] = &DCCCell{
 				Width:   cellWidths[x],
@@ -353,8 +427,10 @@ func (v *DCCDirection) CalculateCells() {
 				XOffset: xOffset,
 				YOffset: yOffset,
 			}
+
 			xOffset += 4
 		}
+
 		yOffset += 4
 	}
 }
