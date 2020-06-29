@@ -49,7 +49,20 @@ func (v *DataDictionary) GetNumber(fieldName string, index int) int {
 }
 
 func (v *DataDictionary) GetDelimitedList(fieldName string, index int) []string {
-	return strings.Split(v.GetString(fieldName, index), ",")
+	unsplit := v.GetString(fieldName, index)
+
+	// Commo delimited fields are quoted, not terribly pretty to do it here but...
+	s := []byte(unsplit)
+	j := 0
+
+	for i := range s {
+		if s[i] != '"' {
+			s[j] = s[i]
+			j++
+		}
+	}
+
+	return strings.Split(string(s), ",")
 }
 
 func (v *DataDictionary) GetBool(fieldName string, index int) bool {
