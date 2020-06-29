@@ -38,7 +38,7 @@ type MonStatsRecord struct {
 
 	// this is the actual internal ID of the unit (this is what the ID pointer
 	// actually points at) remember that no two units can have the same ID,
-	// this will result in lots of unpredictable behaviour and crashes so please
+	// this will result in lots of unpredictable behavior and crashes so please
 	// don’t do it. This 'HarcCodedInDeX' is used for several things, such as
 	// determining whenever the unit uses DCC or DC6 graphics (like mephisto
 	// and the death animations of Diablo, the Maggoc Queen etc.), the hcIdx
@@ -50,8 +50,8 @@ type MonStatsRecord struct {
 	// this column contains the ID pointer of the “base” unit for this specific
 	// monster type (ex. There are five types of “Fallen”; all of them have
 	// fallen1 as their “base” unit). The baseID is responsible for some
-	// hardcoded behaviours, for example moving thru walls (ghosts), knowing
-	// what units to ressurect, create etc (putrid defilers, shamans etc), the
+	// hardcoded behaviors, for example moving thru walls (ghosts), knowing
+	// what units to resurrect, create etc (putrid defilers, shamans etc), the
 	// explosion appended to suicide minions (either cold, fire or ice). Thanks
 	// to Kingpin for additional info on this column.
 	BaseKey string // BaseId
@@ -313,7 +313,7 @@ type MonStatsRecord struct {
 	// these columns control “non-skill-related” missiles used by the monster.
 	// For example if you enter a missile ID pointer (from Missiles.txt) in
 	// MissA1 then, whenever the monster uses its A1 mode, it will shoot a
-	// missile, this however will succesfully prevent it from dealing any damage
+	// missile, this however will successfully prevent it from dealing any damage
 	// with the swing of A1.
 	// NOTE: for the beginners, A1=Attack1, A2=Attack2, S1=Skill1, S2=Skill2,
 	// S3=Skill3, S4=Skill4, C=Cast, SQ=Sequence.
@@ -390,7 +390,7 @@ type MonStatsRecord struct {
 	// Boolean, 1=I can open doors, 0=I’m too damn retarded to open doors. Ever
 	// wanted to make the game more like D1 (where closing doors could actually
 	// protect you), then this column is all you need. By setting this to 0 you
-	// will succesfully lobotomize the monster, thus he will not be able to open
+	// will successfully lobotomize the monster, thus he will not be able to open
 	// doors any more.
 	CanOpenDoors bool // opendoors
 
@@ -794,10 +794,12 @@ type MonStatsRecord struct {
 
 var MonStats map[string]*MonStatsRecord
 
+//nolint:funlen // Makes no sense to split
 func LoadMonStats(file []byte) {
 	dict := d2common.LoadDataDictionary(string(file))
 	numRecords := len(dict.Data)
 	MonStats = make(map[string]*MonStatsRecord, numRecords)
+
 	for idx := range dict.Data {
 		record := &MonStatsRecord{
 			Key:                            dict.GetString("Id", idx),
@@ -1055,5 +1057,6 @@ func LoadMonStats(file []byte) {
 		}
 		MonStats[record.Key] = record
 	}
+
 	log.Printf("Loaded %d MonStats records", len(MonStats))
 }

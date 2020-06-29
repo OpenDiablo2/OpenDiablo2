@@ -14,7 +14,7 @@ type LevelSubstitutionRecord struct {
 	// groups. If you count each row of a group starting from 0, then you'll
 	// obtain what is written in Levels.txt, columns 'SubTheme', 'SubWaypoint'
 	// and 'SubShrine'. (added by Paul Siramy)
-	Id int // Type
+	ID int // Type
 
 	// What .ds1 is being used.
 	File string // File
@@ -69,10 +69,9 @@ func LoadLevelSubstitutions(file []byte) {
 	LevelSubstitutions = make(map[int]*LevelSubstitutionRecord, numRecords)
 
 	for idx := range dict.Data {
-
 		record := &LevelSubstitutionRecord{
 			Name:         dict.GetString("Name", idx),
-			Id:           dict.GetNumber("Type", idx),
+			ID:           dict.GetNumber("Type", idx),
 			File:         dict.GetString("File", idx),
 			IsExpansion:  dict.GetNumber("Expansion", idx) > 0,
 			BorderType:   dict.GetNumber("BordType", idx),
@@ -95,7 +94,8 @@ func LoadLevelSubstitutions(file []byte) {
 			GridMax4:     dict.GetNumber("Max4", idx),
 		}
 
-		LevelSubstitutions[record.Id] = record
+		LevelSubstitutions[record.ID] = record
 	}
+
 	log.Printf("Loaded %d LevelSubstitution records", len(LevelSubstitutions))
 }

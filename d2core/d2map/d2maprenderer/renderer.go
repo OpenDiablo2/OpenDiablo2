@@ -42,7 +42,7 @@ func CreateMapRenderer(mapEngine *d2mapengine.MapEngine, term d2interface.Termin
 		result.debugVisLevel = level
 	})
 
-	if mapEngine.LevelType().Id != 0 {
+	if mapEngine.LevelType().ID != 0 {
 		result.generateTileCache()
 	}
 

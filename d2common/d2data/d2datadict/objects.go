@@ -119,6 +119,7 @@ type ObjectRecord struct {
 	// 0 = it doesn't, rest of modes need to be analyzed
 }
 
+//nolint:funlen // Makes no sense to split
 // CreateObjectRecord parses a row from objects.txt into an object record
 func createObjectRecord(props []string) ObjectRecord {
 	i := -1
@@ -330,24 +331,31 @@ func createObjectRecord(props []string) ObjectRecord {
 
 		AutoMap: d2common.StringToInt(props[inc()]),
 	}
+
 	return result
 }
 
+//nolint:gochecknoglobals // Currently global by design, only written once
 var Objects map[int]*ObjectRecord
 
 func LoadObjects(file []byte) {
 	Objects = make(map[int]*ObjectRecord)
 	data := strings.Split(string(file), "\r\n")[1:]
+
 	for _, line := range data {
-		if len(line) == 0 {
+		if line == "" {
 			continue
 		}
+
 		props := strings.Split(line, "\t")
+
 		if props[2] == "" {
 			continue // skip a line that doesn't have an id
 		}
+
 		rec := createObjectRecord(props)
 		Objects[rec.Id] = &rec
 	}
+
 	log.Printf("Loaded %d objects", len(Objects))
 }

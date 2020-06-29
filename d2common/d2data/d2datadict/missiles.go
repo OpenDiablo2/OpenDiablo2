@@ -109,8 +109,10 @@ type MissileRecord struct {
 
 	UseAttackRating bool // if true, uses 'attack rating' to determine if it hits or misses
 	// if false, has a 95% chance to hit.
-	AlwaysExplode bool // if true, always calls its collision function when it is destroyed, even if it doesn't hit anything
-	// note that some collision functions (lightning fury) seem to ignore this and always explode regardless of setting (requires investigation)
+	AlwaysExplode bool // if true, always calls its collision function when it is destroyed,
+	// even if it doesn't hit anything
+	// note that some collision functions (lightning fury)
+	// seem to ignore this and always explode regardless of setting (requires investigation)
 
 	ClientExplosion bool // if true, does not really exist
 	// is only aesthetic / client side
@@ -286,21 +288,26 @@ func createMissileRecord(line string) MissileRecord {
 		ClientSubMissile:    [3]string{r[inc()], r[inc()], r[inc()]},
 		ClientHitSubMissile: [4]string{r[inc()], r[inc()], r[inc()], r[inc()]},
 	}
+
 	return result
 }
 
+//nolint:gochecknoglobals // Currently global by design, only written once
 var Missiles map[int]*MissileRecord
 
 func LoadMissiles(file []byte) {
 	Missiles = make(map[int]*MissileRecord)
 	data := strings.Split(string(file), "\r\n")[1:]
+
 	for _, line := range data {
-		if len(line) == 0 {
+		if line == "" {
 			continue
 		}
+
 		rec := createMissileRecord(line)
 		Missiles[rec.Id] = &rec
 	}
+
 	log.Printf("Loaded %d missiles", len(Missiles))
 }
 
@@ -309,6 +316,7 @@ func loadMissileCalcParam(r *[]string, inc func() int) MissileCalcParam {
 		Param: d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 		Desc:  (*r)[inc()],
 	}
+
 	return result
 }
 
@@ -318,9 +326,11 @@ func loadMissileCalc(r *[]string, inc func() int, params int) MissileCalc {
 		Desc: (*r)[inc()],
 	}
 	result.Params = make([]MissileCalcParam, params)
+
 	for p := 0; p < params; p++ {
 		result.Params[p] = loadMissileCalcParam(r, inc)
 	}
+
 	return result
 }
 
@@ -332,6 +342,7 @@ func loadMissileLight(r *[]string, inc func() int) MissileLight {
 		Green:    d2common.StringToUint8(d2common.EmptyToZero((*r)[inc()])),
 		Blue:     d2common.StringToUint8(d2common.EmptyToZero((*r)[inc()])),
 	}
+
 	return result
 }
 
@@ -349,6 +360,7 @@ func loadMissileAnimation(r *[]string, inc func() int) MissileAnimation {
 		SubStartingFrame:   d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 		SubEndingFrame:     d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 	}
+
 	return result
 }
 
@@ -364,6 +376,7 @@ func loadMissileCollision(r *[]string, inc func() int) MissileCollision {
 		UseCollisionTimer:      d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])) == 1,
 		TimerFrames:            d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 	}
+
 	return result
 }
 
@@ -387,6 +400,7 @@ func loadMissileDamage(r *[]string, inc func() int) MissileDamage {
 		},
 		DamageSynergyPerCalc: d2common.CalcString((*r)[inc()]),
 	}
+
 	return result
 }
 
@@ -401,5 +415,6 @@ func loadMissileElementalDamage(r *[]string, inc func() int) MissileElementalDam
 			d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 		},
 	}
+
 	return result
 }

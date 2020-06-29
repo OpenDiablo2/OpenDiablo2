@@ -225,6 +225,7 @@ type MonStats2Record struct {
 	ResurrectSkill string
 }
 
+//nolint:gochecknoglobals // Current design issue
 var MonStats2 map[string]MonStats2Record
 
 //nolint:funlen //just a big data loader
@@ -232,6 +233,7 @@ func LoadMonStats2(file []byte) {
 	dict := d2common.LoadDataDictionary(string(file))
 	numRecords := len(dict.Data)
 	MonStats2 = make(map[string]MonStats2Record, numRecords)
+
 	for idx := range dict.Data {
 		record := MonStats2Record{
 			Key:                dict.GetString("Id", idx),
@@ -362,5 +364,6 @@ func LoadMonStats2(file []byte) {
 		}
 		MonStats2[record.Key] = record
 	}
+
 	log.Printf("Loaded %d MonStats2 records", len(MonStats2))
 }
