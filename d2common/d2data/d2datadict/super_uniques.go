@@ -93,8 +93,10 @@ type SuperUniqueRecord struct {
 	// Boolean indicates if the game is expansion or classic
 	IsExpansion bool // named as "EClass" in the SuperUniques.txt
 
-	// This field states whether the SuperUnique will be placed within a radius from his original position(defined by the .ds1 map file), or not.
-	// false means that the boss will spawn in a random position within a large radius from its actual position in the .ds1 file,
+	// This field states whether the SuperUnique will be placed within a radius from his original
+	// position(defined by the .ds1 map file), or not.
+	// false means that the boss will spawn in a random position within a large radius from its actual
+	// position in the .ds1 file,
 	// true means it will spawn exactly where expected.
 	AutoPosition bool
 
@@ -104,7 +106,8 @@ type SuperUniqueRecord struct {
 
 	// Treasure Classes for the 3 Difficulties.
 	// These columns list the treasureclass that is valid if this boss is killed and drops something.
-	// These fields must contain the values taken from the "TreasureClass" column in TreasureClassEx.txt (Expansion) or TreasureClass (Classic).
+	// These fields must contain the values taken from the "TreasureClass" column in TreasureClassEx.txt (Expansion)
+	// or TreasureClass (Classic).
 	TreasureClassNormal    string
 	TreasureClassNightmare string
 	TreasureClassHell      string
@@ -120,6 +123,7 @@ var SuperUniques map[string]*SuperUniqueRecord
 func LoadSuperUniques(file []byte) {
 	dictionary := d2common.LoadDataDictionary(string(file))
 	SuperUniques = make(map[string]*SuperUniqueRecord, len(dictionary.Data))
+
 	for idx := range dictionary.Data {
 		record := &SuperUniqueRecord{
 			Key:      dictionary.GetString("Superunique", idx),
@@ -146,5 +150,6 @@ func LoadSuperUniques(file []byte) {
 		}
 		SuperUniques[record.Key] = record
 	}
+
 	log.Printf("Loaded %d SuperUnique records", len(SuperUniques))
 }

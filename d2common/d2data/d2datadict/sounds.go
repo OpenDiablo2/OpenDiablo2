@@ -71,21 +71,27 @@ func createSoundEntry(soundLine string) SoundEntry {
 		Block2:    d2common.StringToInt(props[inc()]),
 		Block3:    d2common.StringToInt(props[inc()]),
 	}
+
 	return result
 }
 
+//nolint:gochecknoglobals // Currently global by design, only written once
 var Sounds map[string]SoundEntry
 
 func LoadSounds(file []byte) {
 	Sounds = make(map[string]SoundEntry)
 	soundData := strings.Split(string(file), "\r\n")[1:]
+
 	for _, line := range soundData {
-		if len(line) == 0 {
+		if line == "" {
 			continue
 		}
+
 		soundEntry := createSoundEntry(line)
 		soundEntry.FileName = "/data/global/sfx/" + strings.ReplaceAll(soundEntry.FileName, `\`, "/")
 		Sounds[soundEntry.Handle] = soundEntry
+
+		//nolint:gocritic // Debug util code
 		/*
 			// Use the following code to write out the values
 			f, err := os.OpenFile(`C:\Users\lunat\Desktop\D2\sounds.txt`,
@@ -98,6 +104,7 @@ func LoadSounds(file []byte) {
 				log.Println(err)
 			}
 		*/
-	}
+	} //nolint:wsl // Debug util code
+
 	log.Printf("Loaded %d sound definitions", len(Sounds))
 }

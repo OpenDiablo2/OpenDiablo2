@@ -37,7 +37,7 @@ type LevelDetailsRecord struct {
 	// additional layers.
 	AutomapIndex int // Layer
 
-	// sizeX - SizeY in each difficuly. If this is a preset area this sets the
+	// sizeX - SizeY in each difficulty. If this is a preset area this sets the
 	// X size for the area. Othervise use the same value here that are used in
 	// lvlprest.txt to set the size for the .ds1 file.
 	SizeXNormal int // SizeX
@@ -102,7 +102,7 @@ type LevelDetailsRecord struct {
 	// cycles, because they always use the light values specified in Intensity,
 	// Red, Green, Blue. this field also controls whenever sounds will echo if
 	// you're running the game with a sound card capable of it and have
-	// enviroment sound effects set to true.
+	// environment sound effects set to true.
 	IsInside bool // IsInside
 
 	// Setting for Level Generation: You have 3 possibilities here:
@@ -141,28 +141,28 @@ type LevelDetailsRecord struct {
 	// linked with, but the actuall number of Vis ( 0 - 7 ) is determined by
 	// your actual map (the .ds1 fle).
 	// Example: Normally Cave levels are only using vis 0-3 and wilderness areas 4-7 .
-	LevelLinkId0 int // Vis0
-	LevelLinkId1 int // Vis1
-	LevelLinkId2 int // Vis2
-	LevelLinkId3 int // Vis3
-	LevelLinkId4 int // Vis4
-	LevelLinkId5 int // Vis5
-	LevelLinkId6 int // Vis6
-	LevelLinkId7 int // Vis7
+	LevelLinkID0 int // Vis0
+	LevelLinkID1 int // Vis1
+	LevelLinkID2 int // Vis2
+	LevelLinkID3 int // Vis3
+	LevelLinkID4 int // Vis4
+	LevelLinkID5 int // Vis5
+	LevelLinkID6 int // Vis6
+	LevelLinkID7 int // Vis7
 
 	// This controls the visual graphics then you move the mouse pointer over
 	// an entrance. To show the graphics you use an ID from lvlwarp.txt and the
 	// behavior on the graphics is controlled by lvlwarp.txt. Your Warps must
 	// match your Vis.
 	// Example: If your level uses Vis 3,5,7 then you must also use Warp 3,5,7 .
-	WarpGraphicsId0 int // Warp0
-	WarpGraphicsId1 int // Warp1
-	WarpGraphicsId2 int // Warp2
-	WarpGraphicsId3 int // Warp3
-	WarpGraphicsId4 int // Warp4
-	WarpGraphicsId5 int // Warp5
-	WarpGraphicsId6 int // Warp6
-	WarpGraphicsId7 int // Warp7
+	WarpGraphicsID0 int // Warp0
+	WarpGraphicsID1 int // Warp1
+	WarpGraphicsID2 int // Warp2
+	WarpGraphicsID3 int // Warp3
+	WarpGraphicsID4 int // Warp4
+	WarpGraphicsID5 int // Warp5
+	WarpGraphicsID6 int // Warp6
+	WarpGraphicsID7 int // Warp7
 
 	// These settings handle the light intensity as well as its RGB components
 	LightIntensity int // Intensity
@@ -195,7 +195,7 @@ type LevelDetailsRecord struct {
 
 	// What quest is this level related to. This is the quest id (as example the
 	// first quest Den of Evil are set to 1, since its the first quest).
-	QuestId int // Quest
+	QuestID int // Quest
 
 	// This sets the minimum distance from a VisX or WarpX location that a
 	// monster, object or tile can be spawned at. (also applies to waypoints and
@@ -247,40 +247,40 @@ type LevelDetailsRecord struct {
 	// Hell. They tell the game which monster ID taken from MonStats.txt.
 	// NOTE: you need to manually add from mon11 to mon25 and from nmon11 to
 	// nmon25 !
-	MonsterId1Normal  string // mon1
-	MonsterId2Normal  string // mon2
-	MonsterId3Normal  string // mon3
-	MonsterId4Normal  string // mon4
-	MonsterId5Normal  string // mon5
-	MonsterId6Normal  string // mon6
-	MonsterId7Normal  string // mon7
-	MonsterId8Normal  string // mon8
-	MonsterId9Normal  string // mon9
-	MonsterId10Normal string // mon10
+	MonsterID1Normal  string // mon1
+	MonsterID2Normal  string // mon2
+	MonsterID3Normal  string // mon3
+	MonsterID4Normal  string // mon4
+	MonsterID5Normal  string // mon5
+	MonsterID6Normal  string // mon6
+	MonsterID7Normal  string // mon7
+	MonsterID8Normal  string // mon8
+	MonsterID9Normal  string // mon9
+	MonsterID10Normal string // mon10
 
-	MonsterId1Nightmare  string // nmon1
-	MonsterId2Nightmare  string // nmon2
-	MonsterId3Nightmare  string // nmon3
-	MonsterId4Nightmare  string // nmon4
-	MonsterId5Nightmare  string // nmon5
-	MonsterId6Nightmare  string // nmon6
-	MonsterId7Nightmare  string // nmon7
-	MonsterId8Nightmare  string // nmon8
-	MonsterId9Nightmare  string // nmon9
-	MonsterId10Nightmare string // nmon10
+	MonsterID1Nightmare  string // nmon1
+	MonsterID2Nightmare  string // nmon2
+	MonsterID3Nightmare  string // nmon3
+	MonsterID4Nightmare  string // nmon4
+	MonsterID5Nightmare  string // nmon5
+	MonsterID6Nightmare  string // nmon6
+	MonsterID7Nightmare  string // nmon7
+	MonsterID8Nightmare  string // nmon8
+	MonsterID9Nightmare  string // nmon9
+	MonsterID10Nightmare string // nmon10
 
 	// Gravestench - adding additional fields for Hell, original txt combined
 	// the nighmare and hell ID's stringo the same field
-	MonsterId1Hell  string // nmon1
-	MonsterId2Hell  string // nmon2
-	MonsterId3Hell  string // nmon3
-	MonsterId4Hell  string // nmon4
-	MonsterId5Hell  string // nmon5
-	MonsterId6Hell  string // nmon6
-	MonsterId7Hell  string // nmon7
-	MonsterId8Hell  string // nmon8
-	MonsterId9Hell  string // nmon9
-	MonsterId10Hell string // nmon10
+	MonsterID1Hell  string // nmon1
+	MonsterID2Hell  string // nmon2
+	MonsterID3Hell  string // nmon3
+	MonsterID4Hell  string // nmon4
+	MonsterID5Hell  string // nmon5
+	MonsterID6Hell  string // nmon6
+	MonsterID7Hell  string // nmon7
+	MonsterID8Hell  string // nmon8
+	MonsterID9Hell  string // nmon9
+	MonsterID10Hell string // nmon10
 
 	//  Give preference to monsters set to ranged=1 in MonStats.txt on Nightmare
 	// and Hell difficulties when picking something to spawn.
@@ -293,24 +293,24 @@ type LevelDetailsRecord struct {
 	// NOTE: you can allow umon1-25 to also work in Nightmare and Hell by
 	// following this simple ASM edit
 	// (https://d2mods.info/forum/viewtopic.php?f=8&t=53969&p=425179&hilit=umon#p425179)
-	MonsterUniqueId1  string // umon1
-	MonsterUniqueId2  string // umon2
-	MonsterUniqueId3  string // umon3
-	MonsterUniqueId4  string // umon4
-	MonsterUniqueId5  string // umon5
-	MonsterUniqueId6  string // umon6
-	MonsterUniqueId7  string // umon7
-	MonsterUniqueId8  string // umon8
-	MonsterUniqueId9  string // umon9
-	MonsterUniqueId10 string // umon10
+	MonsterUniqueID1  string // umon1
+	MonsterUniqueID2  string // umon2
+	MonsterUniqueID3  string // umon3
+	MonsterUniqueID4  string // umon4
+	MonsterUniqueID5  string // umon5
+	MonsterUniqueID6  string // umon6
+	MonsterUniqueID7  string // umon7
+	MonsterUniqueID8  string // umon8
+	MonsterUniqueID9  string // umon9
+	MonsterUniqueID10 string // umon10
 
 	// Critter Species 1-4. Uses the Id from monstats2.txt and only monsters
 	// with critter column set to 1 can spawn here. critter column is also found
 	// in monstats2.txt. Critters are in reality only present clientside.
-	MonsterCritterId1 string // cmon1
-	MonsterCritterId2 string // cmon2
-	MonsterCritterId3 string // cmon3
-	MonsterCritterId4 string // cmon4
+	MonsterCritterID1 string // cmon1
+	MonsterCritterID2 string // cmon2
+	MonsterCritterID3 string // cmon3
+	MonsterCritterID4 string // cmon4
 
 	// Controls the chance for a critter to spawn.
 	MonsterCritter1SpawnChance int // cpct1
@@ -330,13 +330,13 @@ type LevelDetailsRecord struct {
 	// Themes
 
 	// Referes to a entry in SoundEnviron.txt (for the Levels Music)
-	SoundEnvironmentId int // SoundEnv
+	SoundEnvironmentID int // SoundEnv
 
 	// 255 means no Waipoint for this level, while others state the Waypoint' ID
 	// for the level
 	// NOTE: you can switch waypoint destinations between areas this way, not
 	// between acts however so don't even bother to try.
-	WaypointId int // Waypoint
+	WaypointID int // Waypoint
 
 	// String Code for the Display name of the Level
 	LevelDisplayName string // LevelName
@@ -351,14 +351,14 @@ type LevelDetailsRecord struct {
 
 	// this field uses the ID of the ObjectGroup you want to Spawn in this Area,
 	// taken from Objgroup.txt.
-	ObjectGroupId0 int // ObjGrp0
-	ObjectGroupId1 int // ObjGrp1
-	ObjectGroupId2 int // ObjGrp2
-	ObjectGroupId3 int // ObjGrp3
-	ObjectGroupId4 int // ObjGrp4
-	ObjectGroupId5 int // ObjGrp5
-	ObjectGroupId6 int // ObjGrp6
-	ObjectGroupId7 int // ObjGrp7
+	ObjectGroupID0 int // ObjGrp0
+	ObjectGroupID1 int // ObjGrp1
+	ObjectGroupID2 int // ObjGrp2
+	ObjectGroupID3 int // ObjGrp3
+	ObjectGroupID4 int // ObjGrp4
+	ObjectGroupID5 int // ObjGrp5
+	ObjectGroupID6 int // ObjGrp6
+	ObjectGroupID7 int // ObjGrp7
 
 	// These fields indicates the chance for each object group to spawn (if you
 	// use ObjGrp0 then set ObjPrb0 to a value below 100)
@@ -387,6 +387,7 @@ func GetLevelDetails(id int) *LevelDetailsRecord {
 	return nil
 }
 
+//nolint:funlen // Txt loader, makes no sense to split
 func LoadLevelDetails(file []byte) {
 	dict := d2common.LoadDataDictionary(string(file))
 	numRecords := len(dict.Data)
@@ -425,22 +426,22 @@ func LoadLevelDetails(file []byte) {
 			SubTheme:                   dict.GetNumber("SubTheme", idx),
 			SubWaypoint:                dict.GetNumber("SubWaypoint", idx),
 			SubShrine:                  dict.GetNumber("SubShrine", idx),
-			LevelLinkId0:               dict.GetNumber("Vis0", idx),
-			LevelLinkId1:               dict.GetNumber("Vis1", idx),
-			LevelLinkId2:               dict.GetNumber("Vis2", idx),
-			LevelLinkId3:               dict.GetNumber("Vis3", idx),
-			LevelLinkId4:               dict.GetNumber("Vis4", idx),
-			LevelLinkId5:               dict.GetNumber("Vis5", idx),
-			LevelLinkId6:               dict.GetNumber("Vis6", idx),
-			LevelLinkId7:               dict.GetNumber("Vis7", idx),
-			WarpGraphicsId0:            dict.GetNumber("Warp0", idx),
-			WarpGraphicsId1:            dict.GetNumber("Warp1", idx),
-			WarpGraphicsId2:            dict.GetNumber("Warp2", idx),
-			WarpGraphicsId3:            dict.GetNumber("Warp3", idx),
-			WarpGraphicsId4:            dict.GetNumber("Warp4", idx),
-			WarpGraphicsId5:            dict.GetNumber("Warp5", idx),
-			WarpGraphicsId6:            dict.GetNumber("Warp6", idx),
-			WarpGraphicsId7:            dict.GetNumber("Warp7", idx),
+			LevelLinkID0:               dict.GetNumber("Vis0", idx),
+			LevelLinkID1:               dict.GetNumber("Vis1", idx),
+			LevelLinkID2:               dict.GetNumber("Vis2", idx),
+			LevelLinkID3:               dict.GetNumber("Vis3", idx),
+			LevelLinkID4:               dict.GetNumber("Vis4", idx),
+			LevelLinkID5:               dict.GetNumber("Vis5", idx),
+			LevelLinkID6:               dict.GetNumber("Vis6", idx),
+			LevelLinkID7:               dict.GetNumber("Vis7", idx),
+			WarpGraphicsID0:            dict.GetNumber("Warp0", idx),
+			WarpGraphicsID1:            dict.GetNumber("Warp1", idx),
+			WarpGraphicsID2:            dict.GetNumber("Warp2", idx),
+			WarpGraphicsID3:            dict.GetNumber("Warp3", idx),
+			WarpGraphicsID4:            dict.GetNumber("Warp4", idx),
+			WarpGraphicsID5:            dict.GetNumber("Warp5", idx),
+			WarpGraphicsID6:            dict.GetNumber("Warp6", idx),
+			WarpGraphicsID7:            dict.GetNumber("Warp7", idx),
 			LightIntensity:             dict.GetNumber("Intensity", idx),
 			Red:                        dict.GetNumber("Red", idx),
 			Green:                      dict.GetNumber("Green", idx),
@@ -449,7 +450,7 @@ func LoadLevelDetails(file []byte) {
 			PortalRepositionEnable:     dict.GetNumber("Position", idx) > 0,
 			SaveMonsterStates:          dict.GetNumber("SaveMonsters", idx) > 0,
 			SaveMerchantStates:         dict.GetNumber("SaveMonsters", idx) > 0,
-			QuestId:                    dict.GetNumber("Quest", idx),
+			QuestID:                    dict.GetNumber("Quest", idx),
 			WarpClearanceDistance:      dict.GetNumber("WarpDist", idx),
 			MonsterLevelNormal:         dict.GetNumber("MonLvl1", idx),
 			MonsterLevelNightmare:      dict.GetNumber("MonLvl2", idx),
@@ -469,68 +470,68 @@ func LoadLevelDetails(file []byte) {
 			MonsterWanderEnable:        dict.GetNumber("MonWndr", idx) > 0,
 			MonsterSpecialWalk:         dict.GetNumber("MonSpcWalk", idx) > 0,
 			NumMonsterTypes:            dict.GetNumber("NumMon", idx),
-			MonsterId1Normal:           dict.GetString("mon1", idx),
-			MonsterId2Normal:           dict.GetString("mon2", idx),
-			MonsterId3Normal:           dict.GetString("mon3", idx),
-			MonsterId4Normal:           dict.GetString("mon4", idx),
-			MonsterId5Normal:           dict.GetString("mon5", idx),
-			MonsterId6Normal:           dict.GetString("mon6", idx),
-			MonsterId7Normal:           dict.GetString("mon7", idx),
-			MonsterId8Normal:           dict.GetString("mon8", idx),
-			MonsterId9Normal:           dict.GetString("mon9", idx),
-			MonsterId10Normal:          dict.GetString("mon10", idx),
-			MonsterId1Nightmare:        dict.GetString("nmon1", idx),
-			MonsterId2Nightmare:        dict.GetString("nmon2", idx),
-			MonsterId3Nightmare:        dict.GetString("nmon3", idx),
-			MonsterId4Nightmare:        dict.GetString("nmon4", idx),
-			MonsterId5Nightmare:        dict.GetString("nmon5", idx),
-			MonsterId6Nightmare:        dict.GetString("nmon6", idx),
-			MonsterId7Nightmare:        dict.GetString("nmon7", idx),
-			MonsterId8Nightmare:        dict.GetString("nmon8", idx),
-			MonsterId9Nightmare:        dict.GetString("nmon9", idx),
-			MonsterId10Nightmare:       dict.GetString("nmon10", idx),
-			MonsterId1Hell:             dict.GetString("nmon1", idx),
-			MonsterId2Hell:             dict.GetString("nmon2", idx),
-			MonsterId3Hell:             dict.GetString("nmon3", idx),
-			MonsterId4Hell:             dict.GetString("nmon4", idx),
-			MonsterId5Hell:             dict.GetString("nmon5", idx),
-			MonsterId6Hell:             dict.GetString("nmon6", idx),
-			MonsterId7Hell:             dict.GetString("nmon7", idx),
-			MonsterId8Hell:             dict.GetString("nmon8", idx),
-			MonsterId9Hell:             dict.GetString("nmon9", idx),
-			MonsterId10Hell:            dict.GetString("nmon10", idx),
+			MonsterID1Normal:           dict.GetString("mon1", idx),
+			MonsterID2Normal:           dict.GetString("mon2", idx),
+			MonsterID3Normal:           dict.GetString("mon3", idx),
+			MonsterID4Normal:           dict.GetString("mon4", idx),
+			MonsterID5Normal:           dict.GetString("mon5", idx),
+			MonsterID6Normal:           dict.GetString("mon6", idx),
+			MonsterID7Normal:           dict.GetString("mon7", idx),
+			MonsterID8Normal:           dict.GetString("mon8", idx),
+			MonsterID9Normal:           dict.GetString("mon9", idx),
+			MonsterID10Normal:          dict.GetString("mon10", idx),
+			MonsterID1Nightmare:        dict.GetString("nmon1", idx),
+			MonsterID2Nightmare:        dict.GetString("nmon2", idx),
+			MonsterID3Nightmare:        dict.GetString("nmon3", idx),
+			MonsterID4Nightmare:        dict.GetString("nmon4", idx),
+			MonsterID5Nightmare:        dict.GetString("nmon5", idx),
+			MonsterID6Nightmare:        dict.GetString("nmon6", idx),
+			MonsterID7Nightmare:        dict.GetString("nmon7", idx),
+			MonsterID8Nightmare:        dict.GetString("nmon8", idx),
+			MonsterID9Nightmare:        dict.GetString("nmon9", idx),
+			MonsterID10Nightmare:       dict.GetString("nmon10", idx),
+			MonsterID1Hell:             dict.GetString("nmon1", idx),
+			MonsterID2Hell:             dict.GetString("nmon2", idx),
+			MonsterID3Hell:             dict.GetString("nmon3", idx),
+			MonsterID4Hell:             dict.GetString("nmon4", idx),
+			MonsterID5Hell:             dict.GetString("nmon5", idx),
+			MonsterID6Hell:             dict.GetString("nmon6", idx),
+			MonsterID7Hell:             dict.GetString("nmon7", idx),
+			MonsterID8Hell:             dict.GetString("nmon8", idx),
+			MonsterID9Hell:             dict.GetString("nmon9", idx),
+			MonsterID10Hell:            dict.GetString("nmon10", idx),
 			MonsterPreferRanged:        dict.GetNumber("rangedspawn", idx) > 0,
-			MonsterUniqueId1:           dict.GetString("umon1", idx),
-			MonsterUniqueId2:           dict.GetString("umon2", idx),
-			MonsterUniqueId3:           dict.GetString("umon3", idx),
-			MonsterUniqueId4:           dict.GetString("umon4", idx),
-			MonsterUniqueId5:           dict.GetString("umon5", idx),
-			MonsterUniqueId6:           dict.GetString("umon6", idx),
-			MonsterUniqueId7:           dict.GetString("umon7", idx),
-			MonsterUniqueId8:           dict.GetString("umon8", idx),
-			MonsterUniqueId9:           dict.GetString("umon9", idx),
-			MonsterUniqueId10:          dict.GetString("umon10", idx),
-			MonsterCritterId1:          dict.GetString("cmon1", idx),
-			MonsterCritterId2:          dict.GetString("cmon2", idx),
-			MonsterCritterId3:          dict.GetString("cmon3", idx),
-			MonsterCritterId4:          dict.GetString("cmon4", idx),
+			MonsterUniqueID1:           dict.GetString("umon1", idx),
+			MonsterUniqueID2:           dict.GetString("umon2", idx),
+			MonsterUniqueID3:           dict.GetString("umon3", idx),
+			MonsterUniqueID4:           dict.GetString("umon4", idx),
+			MonsterUniqueID5:           dict.GetString("umon5", idx),
+			MonsterUniqueID6:           dict.GetString("umon6", idx),
+			MonsterUniqueID7:           dict.GetString("umon7", idx),
+			MonsterUniqueID8:           dict.GetString("umon8", idx),
+			MonsterUniqueID9:           dict.GetString("umon9", idx),
+			MonsterUniqueID10:          dict.GetString("umon10", idx),
+			MonsterCritterID1:          dict.GetString("cmon1", idx),
+			MonsterCritterID2:          dict.GetString("cmon2", idx),
+			MonsterCritterID3:          dict.GetString("cmon3", idx),
+			MonsterCritterID4:          dict.GetString("cmon4", idx),
 			MonsterCritter1SpawnChance: dict.GetNumber("cpct1", idx),
 			MonsterCritter2SpawnChance: dict.GetNumber("cpct2", idx),
 			MonsterCritter3SpawnChance: dict.GetNumber("cpct3", idx),
 			MonsterCritter4SpawnChance: dict.GetNumber("cpct4", idx),
-			SoundEnvironmentId:         dict.GetNumber("SoundEnv", idx),
-			WaypointId:                 dict.GetNumber("Waypoint", idx),
+			SoundEnvironmentID:         dict.GetNumber("SoundEnv", idx),
+			WaypointID:                 dict.GetNumber("Waypoint", idx),
 			LevelDisplayName:           dict.GetString("LevelName", idx),
 			LevelWarpName:              dict.GetString("LevelWarp", idx),
 			TitleImageName:             dict.GetString("EntryFile", idx),
-			ObjectGroupId0:             dict.GetNumber("ObjGrp0", idx),
-			ObjectGroupId1:             dict.GetNumber("ObjGrp1", idx),
-			ObjectGroupId2:             dict.GetNumber("ObjGrp2", idx),
-			ObjectGroupId3:             dict.GetNumber("ObjGrp3", idx),
-			ObjectGroupId4:             dict.GetNumber("ObjGrp4", idx),
-			ObjectGroupId5:             dict.GetNumber("ObjGrp5", idx),
-			ObjectGroupId6:             dict.GetNumber("ObjGrp6", idx),
-			ObjectGroupId7:             dict.GetNumber("ObjGrp7", idx),
+			ObjectGroupID0:             dict.GetNumber("ObjGrp0", idx),
+			ObjectGroupID1:             dict.GetNumber("ObjGrp1", idx),
+			ObjectGroupID2:             dict.GetNumber("ObjGrp2", idx),
+			ObjectGroupID3:             dict.GetNumber("ObjGrp3", idx),
+			ObjectGroupID4:             dict.GetNumber("ObjGrp4", idx),
+			ObjectGroupID5:             dict.GetNumber("ObjGrp5", idx),
+			ObjectGroupID6:             dict.GetNumber("ObjGrp6", idx),
+			ObjectGroupID7:             dict.GetNumber("ObjGrp7", idx),
 			ObjectGroupSpawnChance0:    dict.GetNumber("ObjPrb0", idx),
 			ObjectGroupSpawnChance1:    dict.GetNumber("ObjPrb1", idx),
 			ObjectGroupSpawnChance2:    dict.GetNumber("ObjPrb2", idx),
@@ -542,5 +543,6 @@ func LoadLevelDetails(file []byte) {
 		}
 		LevelDetails[idx] = record
 	}
+
 	log.Printf("Loaded %d LevelDetails records", len(LevelDetails))
 }
