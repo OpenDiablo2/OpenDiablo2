@@ -3,6 +3,8 @@ package d2dcc
 import (
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
@@ -34,7 +36,7 @@ type DCCDirection struct {
 }
 
 // CreateDCCDirection creates an instance of a DCCDirection.
-func CreateDCCDirection(bm *d2common.BitMuncher, file *DCC) *DCCDirection { //nolint:funlen // Can't reduce
+func CreateDCCDirection(bm d2interface.BitMuncher, file *DCC) *DCCDirection { //nolint:funlen // Can't reduce
 	var crazyBitTable = []byte{0, 1, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 26, 28, 30, 32}
 
 	result := &DCCDirection{}
@@ -130,29 +132,29 @@ func CreateDCCDirection(bm *d2common.BitMuncher, file *DCC) *DCCDirection { //no
 	result.PixelBuffer = nil
 
 	// Verify that everything we expected to read was actually read (sanity check)...
-	if equalCellsBitstream.BitsRead != result.EqualCellsBitstreamSize {
+	if equalCellsBitstream.BitsRead() != result.EqualCellsBitstreamSize {
 		log.Panic("Did not read the correct number of bits!")
 	}
 
-	if pixelMaskBitstream.BitsRead != result.PixelMaskBitstreamSize {
+	if pixelMaskBitstream.BitsRead() != result.PixelMaskBitstreamSize {
 		log.Panic("Did not read the correct number of bits!")
 	}
 
-	if encodingTypeBitsream.BitsRead != result.EncodingTypeBitsreamSize {
+	if encodingTypeBitsream.BitsRead() != result.EncodingTypeBitsreamSize {
 		log.Panic("Did not read the correct number of bits!")
 	}
 
-	if rawPixelCodesBitstream.BitsRead != result.RawPixelCodesBitstreamSize {
+	if rawPixelCodesBitstream.BitsRead() != result.RawPixelCodesBitstreamSize {
 		log.Panic("Did not read the correct number of bits!")
 	}
 
-	bm.SkipBits(pixelCodeandDisplacement.BitsRead)
+	bm.SkipBits(pixelCodeandDisplacement.BitsRead())
 
 	return result
 }
 
 //nolint:gocognit nolint:gocyclo // Can't reduce
-func (v *DCCDirection) generateFrames(pcd *d2common.BitMuncher) {
+func (v *DCCDirection) generateFrames(pcd d2interface.BitMuncher) {
 	pbIdx := 0
 
 	for _, cell := range v.Cells {
@@ -255,7 +257,7 @@ func (v *DCCDirection) generateFrames(pcd *d2common.BitMuncher) {
 }
 
 //nolint:funlen nolint:gocognit // can't reduce
-func (v *DCCDirection) fillPixelBuffer(pcd, ec, pm, et, rp *d2common.BitMuncher) {
+func (v *DCCDirection) fillPixelBuffer(pcd, ec, pm, et, rp d2interface.BitMuncher) {
 	var pixelMaskLookup = []int{0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4}
 
 	lastPixel := uint32(0)
