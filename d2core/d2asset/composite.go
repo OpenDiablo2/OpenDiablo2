@@ -171,55 +171,40 @@ func (c *Composite) createMode(animationMode, weaponClass string, direction int)
 	}
 
 	for _, cofLayer := range cof.CofLayers {
-		var layerKey, layerValue string
+		var layerValue string
+
 		switch cofLayer.Type {
 		case d2enum.CompositeTypeHead:
-			layerKey = "HD"
 			layerValue = c.object.HD
 		case d2enum.CompositeTypeTorso:
-			layerKey = "TR"
 			layerValue = c.object.TR
 		case d2enum.CompositeTypeLegs:
-			layerKey = "LG"
 			layerValue = c.object.LG
 		case d2enum.CompositeTypeRightArm:
-			layerKey = "RA"
 			layerValue = c.object.RA
 		case d2enum.CompositeTypeLeftArm:
-			layerKey = "LA"
 			layerValue = c.object.LA
 		case d2enum.CompositeTypeRightHand:
-			layerKey = "RH"
 			layerValue = c.object.RH
 		case d2enum.CompositeTypeLeftHand:
-			layerKey = "LH"
 			layerValue = c.object.LH
 		case d2enum.CompositeTypeShield:
-			layerKey = "SH"
 			layerValue = c.object.SH
 		case d2enum.CompositeTypeSpecial1:
-			layerKey = "S1"
 			layerValue = c.object.S1
 		case d2enum.CompositeTypeSpecial2:
-			layerKey = "S2"
 			layerValue = c.object.S2
 		case d2enum.CompositeTypeSpecial3:
-			layerKey = "S3"
 			layerValue = c.object.S3
 		case d2enum.CompositeTypeSpecial4:
-			layerKey = "S4"
 			layerValue = c.object.S4
 		case d2enum.CompositeTypeSpecial5:
-			layerKey = "S5"
 			layerValue = c.object.S5
 		case d2enum.CompositeTypeSpecial6:
-			layerKey = "S6"
 			layerValue = c.object.S6
 		case d2enum.CompositeTypeSpecial7:
-			layerKey = "S7"
 			layerValue = c.object.S7
 		case d2enum.CompositeTypeSpecial8:
-			layerKey = "S8"
 			layerValue = c.object.S8
 		default:
 			return nil, errors.New("unknown layer type")
@@ -240,7 +225,7 @@ func (c *Composite) createMode(animationMode, weaponClass string, direction int)
 			}
 		}
 
-		layer, err := loadCompositeLayer(c.object, layerKey, layerValue, animationMode, weaponClass, c.palettePath, transparency)
+		layer, err := loadCompositeLayer(c.object, cofLayer.Type.String(), layerValue, animationMode, weaponClass, c.palettePath, transparency)
 		if err == nil {
 			layer.SetPlaySpeed(mode.animationSpeed)
 			layer.PlayForward()
