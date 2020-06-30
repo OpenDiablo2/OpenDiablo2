@@ -155,7 +155,8 @@ func (l *RemoteClientConnection) serverListener() {
 		written, err := io.Copy(sb, reader)
 		if err != nil {
 			log.Printf("RemoteClientConnection: error copying bytes from %v packet: %s", packetType, err)
-			continue
+			// TODO: All packets coming from the client seem to be throwing an error
+			//continue
 		}
 		if written == 0 {
 			log.Printf("RemoteClientConnection: empty packet %v packet received", packetType)

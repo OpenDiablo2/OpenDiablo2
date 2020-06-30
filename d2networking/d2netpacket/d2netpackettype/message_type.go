@@ -1,6 +1,8 @@
 // Package d2netpackettype defines the enumerable NetPacketType.
 package d2netpackettype
 
+import "fmt"
+
 // NetPacketType is an enum referring to all packet types in package
 // d2netpacket.
 type NetPacketType uint32
@@ -26,3 +28,30 @@ const (
 	ServerClosed                                         // Sent by the local host when it has closed the server
 	CastSkill                                            // Sent by client or server, indicates entity casting skill
 )
+
+func (n NetPacketType) String() string {
+	switch n {
+	case UpdateServerInfo:
+		return "UpdateServerInfo"
+	case GenerateMap:
+		return "GenerateMap"
+	case AddPlayer:
+		return "AddPlayer"
+	case MovePlayer:
+		return "MovePlayer"
+	case PlayerConnectionRequest:
+		return "PlayerConnectionRequest"
+	case PlayerDisconnectionNotification:
+		return "PlayerDisconnectionNotification"
+	case Ping:
+		return "Ping"
+	case Pong:
+		return "Pong"
+	case ServerClosed:
+		return "ServerClosed"
+	case CastSkill:
+		return "CastSkill"
+	default:
+		panic(fmt.Sprintf("The following packet type is not implemented in d2netpackettype.NetPacketType: %s", string(n)))
+	}
+}
