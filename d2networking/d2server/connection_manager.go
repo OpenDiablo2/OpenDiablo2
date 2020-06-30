@@ -1,29 +1,29 @@
 package d2server
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 	"log"
 	"sync"
 	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 )
 
-// ConnectionManager is responsible for cleanup up connections accepted by the game server. As the server communicates over
-// UDP and is stateless we need to implement some loose state management via a ping/pong system. ConnectionManager also handles
-// communication for graceful shutdowns.
-//
-// retries: # of attempts before the dropping the client
-// interval: How long to wait before each ping/pong test
-// gameServer: The *GameServer is argument provided for the connection manager to watch over
-// status: map of inflight ping/pong requests
+// ConnectionManager is responsible for cleanup up connections accepted by the game server.
+// As the server communicates over UDP and is stateless we need to implement some loose state
+// management via a ping/pong system. ConnectionManager also handles communication for
+// graceful shutdowns.
 type ConnectionManager struct {
 	sync.RWMutex
-	retries    int
-	interval   time.Duration
-	gameServer *GameServer
-	status     map[string]int
+	retries    int            // Number of attempts before the dropping the client
+	interval   time.Duration  // How long to wait before each ping/pong test
+	gameServer *GameServer    // The GameServer with the connections being managed
+	status     map[string]int // Map of inflight ping/pong requests
 }
 
+// CreateConnectionManager constructs a new ConnectionManager and calls
+// ConnectionManager.Run() in a goroutine before retuning a pointer to
+// the new ConnectionManager.
 func CreateConnectionManager(gameServer *GameServer) *ConnectionManager {
 	manager := &ConnectionManager{
 		retries:    3,

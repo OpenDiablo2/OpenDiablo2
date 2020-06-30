@@ -226,16 +226,16 @@ type MonStats2Record struct {
 }
 
 //nolint:gochecknoglobals // Current design issue
-var MonStats2 map[string]MonStats2Record
+var MonStats2 map[string]*MonStats2Record
 
 //nolint:funlen //just a big data loader
 func LoadMonStats2(file []byte) {
 	dict := d2common.LoadDataDictionary(string(file))
 	numRecords := len(dict.Data)
-	MonStats2 = make(map[string]MonStats2Record, numRecords)
+	MonStats2 = make(map[string]*MonStats2Record, numRecords)
 
 	for idx := range dict.Data {
-		record := MonStats2Record{
+		record := &MonStats2Record{
 			Key:                dict.GetString("Id", idx),
 			Height:             dict.GetNumber("Height", idx),
 			OverlayHeight:      dict.GetNumber("OverlayHeight", idx),
@@ -251,7 +251,7 @@ func LoadMonStats2(file []byte) {
 			LGv:                dict.GetDelimitedList("LGv", idx),
 			Rav:                dict.GetDelimitedList("Rav", idx),
 			Lav:                dict.GetDelimitedList("Lav", idx),
-			RHv:                dict.GetDelimitedList("RDv", idx),
+			RHv:                dict.GetDelimitedList("RHv", idx),
 			LHv:                dict.GetDelimitedList("LHv", idx),
 			SHv:                dict.GetDelimitedList("SHv", idx),
 			S1v:                dict.GetDelimitedList("S1v", idx),
