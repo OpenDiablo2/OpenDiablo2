@@ -23,6 +23,8 @@ type Surface interface {
 	PushTranslation(x, y int)
 	PushBrightness(brightness float64)
 	Render(surface Surface) error
+	// Renders a section of the surface enclosed by bounds
+	RenderSection(surface Surface, bound image.Rectangle) error
 	ReplacePixels(pixels []byte) error
 	Screenshot() *image.RGBA
 }
