@@ -5,6 +5,8 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/hajimehoshi/ebiten"
@@ -23,7 +25,7 @@ func (s *ebitenSurface) PushTranslation(x, y int) {
 	s.stateCurrent.y += y
 }
 
-func (s *ebitenSurface) PushCompositeMode(mode d2interface.CompositeMode) {
+func (s *ebitenSurface) PushCompositeMode(mode d2enum.CompositeMode) {
 	s.stateStack = append(s.stateStack, s.stateCurrent)
 	s.stateCurrent.mode = d2ToEbitenCompositeMode(mode)
 }

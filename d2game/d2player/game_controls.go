@@ -6,6 +6,8 @@ import (
 	"math"
 	"time"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -414,7 +416,7 @@ func (g *GameControls) Render(target d2interface.Surface) {
 
 	// Stamina status bar
 	target.PushTranslation(273, 572)
-	target.PushCompositeMode(d2interface.CompositeModeLighter)
+	target.PushCompositeMode(d2enum.CompositeModeLighter)
 	staminaPercent := float64(g.hero.Stats.Stamina) / float64(g.hero.Stats.MaxStamina)
 	target.DrawRect(int(staminaPercent*staminaBarWidth), 19, color.RGBA{R: 175, G: 136, B: 72, A: 200})
 	target.PopN(2)
