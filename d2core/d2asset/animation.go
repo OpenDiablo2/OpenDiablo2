@@ -2,6 +2,7 @@ package d2asset
 
 import (
 	"errors"
+	"image"
 	"image/color"
 	"math"
 
@@ -277,6 +278,18 @@ func (a *Animation) RenderFromOrigin(target d2interface.Surface) error {
 	}
 
 	return a.Render(target)
+}
+
+// Renders the section of the animation frame enclosed by bounds
+func (a *Animation) RenderSection(sfc d2interface.Surface, bound image.Rectangle) error {
+	direction := a.directions[a.directionIndex]
+	frame := direction.frames[a.frameIndex]
+
+	sfc.PushTranslation(frame.offsetX, frame.offsetY)
+	sfc.PushCompositeMode(a.compositeMode)
+	sfc.PushColor(a.colorMod)
+	defer sfc.PopN(3)
+	return sfc.RenderSection(frame.image, bound)
 }
 
 func (a *Animation) GetFrameSize(frameIndex int) (int, int, error) {

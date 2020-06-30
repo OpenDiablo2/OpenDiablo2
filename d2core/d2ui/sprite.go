@@ -2,6 +2,7 @@ package d2ui
 
 import (
 	"errors"
+	"image"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -33,6 +34,13 @@ func (s *Sprite) Render(target d2interface.Surface) error {
 	target.PushTranslation(s.x, s.y-frameHeight)
 	defer target.Pop()
 	return s.animation.Render(target)
+}
+
+// Renders the section of the sprite enclosed by bounds
+func (s *Sprite) RenderSection(sfc d2interface.Surface, bound image.Rectangle) error {
+	sfc.PushTranslation(s.x, s.y-bound.Dy())
+	defer sfc.Pop()
+	return s.animation.RenderSection(sfc, bound)
 }
 
 func (s *Sprite) RenderSegmented(target d2interface.Surface, segmentsX, segmentsY, frameOffset int) error {
