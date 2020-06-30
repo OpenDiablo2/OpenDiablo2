@@ -65,6 +65,7 @@ var weaponTokenMap map[string]d2enum.WeaponClass //nolint:gochecknoglobals // Cu
 
 // LoadCharStats loads charstats.txt file contents into map[d2enum.Hero]*CharStatsRecord
 //nolint:funlen // Makes no sense to split
+// LoadCharStats loads charstats.txt file contents into map[d2enum.Hero]*CharStatsRecord
 func LoadCharStats(file []byte) {
 	charStringMap = map[string]d2enum.Hero{
 		"Amazon":      d2enum.HeroAmazon,

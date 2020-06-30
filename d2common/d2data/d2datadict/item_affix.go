@@ -177,37 +177,37 @@ type ItemAffixCommonModifier struct {
 
 // ItemAffixCommonRecord is a common definition that both prefix and suffix use
 type ItemAffixCommonRecord struct {
-	Name    string
+	Group     *ItemAffixCommonGroup
+	Modifiers []*ItemAffixCommonModifier
+
+	ItemInclude []string
+	ItemExclude []string
+
+	Name           string
+	Class          string
+	TransformColor string
+
 	Version int
 	Type    d2enum.ItemAffixSubType
+
+	Level    int
+	MaxLevel int
+
+	LevelReq      int
+	ClassLevelReq int
+
+	Frequency int
+	GroupID   int
+
+	PriceAdd   int
+	PriceScale int
 
 	IsPrefix bool
 	IsSuffix bool
 
 	Spawnable bool
 	Rare      bool
-
-	Level    int
-	MaxLevel int
-
-	LevelReq      int
-	Class         string
-	ClassLevelReq int
-
-	Frequency int
-	GroupID   int
-	Group     *ItemAffixCommonGroup
-
-	Modifiers []*ItemAffixCommonModifier
-
-	Transform      bool
-	TransformColor string
-
-	ItemInclude []string
-	ItemExclude []string
-
-	PriceAdd   int
-	PriceScale int
+	Transform bool
 }
 
 // ProbabilityToSpawn returns the chance of the affix spawning on an
