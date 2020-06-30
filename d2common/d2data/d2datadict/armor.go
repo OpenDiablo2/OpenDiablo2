@@ -8,6 +8,7 @@ import (
 
 var Armors map[string]*ItemCommonRecord
 
+// LoadArmors loads entries from armor.txt as ItemCommonRecords
 func LoadArmors(file []byte) {
 	Armors = *LoadCommonItems(file, d2enum.InventoryItemTypeArmor)
 	log.Printf("Loaded %d armors", len(Armors))

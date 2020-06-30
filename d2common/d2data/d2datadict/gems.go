@@ -6,6 +6,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// GemsRecord is a representation of a single row of gems.txt
+// it describes the properties of socketable items
 type GemsRecord struct {
 	Name            string
 	Letter          string
@@ -50,13 +52,16 @@ type GemsRecord struct {
 	ShieldMod3Max   int
 }
 
+var Gems map[string]*GemsRecord
+
+// LoadGems loads gem records into a map[string]*GemsRecord
 func LoadGems(file []byte) {
 	d := d2common.LoadDataDictionary(string(file))
 
-	var Gems []*GemsRecord
+	Gems = make(map[string]*GemsRecord, len(d.Data))
 
 	for idx := range d.Data {
-		if d.GetString("name", idx) != "Expansion" {
+		if d.GetString("name", idx) != expansion {
 			/*
 				"Expansion" is the only field in line 36 of /data/global/excel/gems.txt and is only used to visually
 				separate base-game gems and expansion runes.
@@ -104,7 +109,7 @@ func LoadGems(file []byte) {
 				ShieldMod3Min:   d.GetNumber("shieldMod3Min", idx),
 				ShieldMod3Max:   d.GetNumber("shieldMod3Max", idx),
 			}
-			Gems = append(Gems, gem)
+			Gems[gem.Name] = gem
 		}
 	}
 

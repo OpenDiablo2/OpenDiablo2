@@ -7,21 +7,27 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
+// LevelDetailsRecord is a representation of a row from levels.txt
+// it describes lots of things about the levels, like where they are connected,
+// what kinds of monsters spawn, the level generator type, and lots of other stuff.
 type LevelDetailsRecord struct {
 
+	// Name
 	// This column has no function, it only serves as a comment field to make it
 	// easier to identify the Level name
 	Name string // Name <-- the corresponding column name in the txt
 
+	// Id
 	// Level ID (used in columns like VIS0-7)
 	Id int // Id
 
-	// Act Palette . Reference only
+	// Palette is the Act Palette . Reference only
 	Palette int // Pal
 
-	// The Act the Level is located in (internal enumeration ranges from 0 to 4)
+	// Act that the Level is located in (internal enumeration ranges from 0 to 4)
 	Act int // Act
 
+	// QuestFlag, QuestExpansionFlag
 	// Used the first one in Classic games and the latter in Expansion games ,
 	// they set a questflag. If this flag is set, a character must have
 	// completed the quest associated with the flag to take a town portal to
@@ -37,17 +43,15 @@ type LevelDetailsRecord struct {
 	// additional layers.
 	AutomapIndex int // Layer
 
-	// sizeX - SizeY in each difficulty. If this is a preset area this sets the
+	// SizeXNormal -- SizeYHell If this is a preset area this sets the
 	// X size for the area. Othervise use the same value here that are used in
 	// lvlprest.txt to set the size for the .ds1 file.
-	SizeXNormal int // SizeX
-	SizeYNormal int // SizeY
-
+	SizeXNormal    int // SizeX
+	SizeYNormal    int // SizeY
 	SizeXNightmare int // SizeX(N)
 	SizeYNightmare int // SizeY(N)
-
-	SizeXHell int // SizeX(H)
-	SizeYHell int // SizeY(H)
+	SizeXHell      int // SizeX(H)
+	SizeYHell      int // SizeY(H)
 
 	// They set the X\Y position in the world space
 	WorldOffsetX int // OffsetX
@@ -90,7 +94,6 @@ type LevelDetailsRecord struct {
 
 	// Unknown. Probably has to do with tiles and their placement.
 	// 1 enables it, 0 disables it.
-	// TODO: needs a better name
 	EnableBlankScreen bool // BlankScreen
 
 	// for levels bordered with mountains or walls, like the act 1 wildernesses.

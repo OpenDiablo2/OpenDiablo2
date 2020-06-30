@@ -6,6 +6,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// HirelingRecord is a representation of rows in hireling.txt
+// these records describe mercenaries
 type HirelingRecord struct {
 	Hireling        string
 	SubType         string
@@ -81,9 +83,13 @@ type HirelingRecord struct {
 	Shield          int
 }
 
+var Hirelings []*HirelingRecord
+
+// LoadHireling loads hireling data into []*HirelingRecord
 func LoadHireling(file []byte) {
 	d := d2common.LoadDataDictionary(string(file))
-	var Hirelings []*HirelingRecord
+
+	Hirelings = make([]*HirelingRecord, len(d.Data))
 
 	for idx := range d.Data {
 		hireling := &HirelingRecord{

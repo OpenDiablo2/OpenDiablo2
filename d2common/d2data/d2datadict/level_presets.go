@@ -7,6 +7,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// LevelPresetsRecord is a representation of a row from lvlprest.txt
+// these records define parameters for the preset level map generator
 type LevelPresetRecord struct {
 	Name         string
 	DefinitionID int

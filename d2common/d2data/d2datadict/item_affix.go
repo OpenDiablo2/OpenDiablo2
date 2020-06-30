@@ -8,13 +8,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
-var MagicPrefixDictionary *d2common.DataDictionary
-var MagicSuffixDictionary *d2common.DataDictionary
-
-var MagicPrefixRecords []*ItemAffixCommonRecord
-var MagicSuffixRecords []*ItemAffixCommonRecord
-
-var AffixMagicGroups []*ItemAffixCommonGroup
+var MagicPrefix []*ItemAffixCommonRecord
+var MagicSuffix []*ItemAffixCommonRecord
 
 // LoadMagicPrefix loads MagicPrefix.txt
 func LoadMagicPrefix(file []byte) {
@@ -22,7 +17,7 @@ func LoadMagicPrefix(file []byte) {
 
 	subType := d2enum.ItemAffixMagic
 
-	MagicPrefixDictionary, MagicPrefixRecords = loadDictionary(file, superType, subType)
+	MagicPrefix = loadDictionary(file, superType, subType)
 }
 
 // LoadMagicSuffix loads MagicSuffix.txt
@@ -31,11 +26,11 @@ func LoadMagicSuffix(file []byte) {
 
 	subType := d2enum.ItemAffixMagic
 
-	MagicSuffixDictionary, MagicSuffixRecords = loadDictionary(file, superType, subType)
+	MagicSuffix = loadDictionary(file, superType, subType)
 }
 
 func getAffixString(t1 d2enum.ItemAffixSuperType, t2 d2enum.ItemAffixSubType) string {
-	var name string = ""
+	var name = ""
 
 	if t2 == d2enum.ItemAffixMagic {
 		name = "Magic"
@@ -55,57 +50,14 @@ func loadDictionary(
 	file []byte,
 	superType d2enum.ItemAffixSuperType,
 	subType d2enum.ItemAffixSubType,
-) (*d2common.DataDictionary, []*ItemAffixCommonRecord) {
+) []*ItemAffixCommonRecord {
 	dict := d2common.LoadDataDictionary(string(file))
 	records := createItemAffixRecords(dict, superType, subType)
 	name := getAffixString(superType, subType)
 	log.Printf("Loaded %d %s records", len(dict.Data), name)
 
-	return dict, records
+	return records
 }
-
-// --- column names from d2exp.mpq:/data/globa/excel/MagicPrefix.txt
-// Name
-// version
-// spawnable
-// rare
-// level
-// maxlevel
-// levelreq
-// classspecific
-// class
-// classlevelreq
-// frequency
-// group
-// mod1code
-// mod1param
-// mod1min
-// mod1max
-// mod2code
-// mod2param
-// mod2min
-// mod2max
-// mod3code
-// mod3param
-// mod3min
-// mod3max
-// transform
-// transformcolor
-// itype1
-// itype2
-// itype3
-// itype4
-// itype5
-// itype6
-// itype7
-// etype1
-// etype2
-// etype3
-// etype4
-// etype5
-// divide
-// multiply
-// add
 
 func createItemAffixRecords(
 	d *d2common.DataDictionary,

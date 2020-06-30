@@ -9,6 +9,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
+// ItemCommonRecord is a representation of entries from armor.txt, weapons.txt, and misc.txt
 type ItemCommonRecord struct {
 	Source d2enum.InventoryItemType
 
@@ -168,11 +169,13 @@ type ItemCommonRecord struct {
 	Multibuy bool // if true, when you buy via right click + shift it will fill your belt automatically
 }
 
+// ItemUsageStat the stat that gets applied when the item is used
 type ItemUsageStat struct {
 	Stat string              // name of the stat to add to
 	Calc d2common.CalcString // calc string representing the amount to add
 }
 
+// VendorParams are parameters that vendors use
 type ItemVendorParams struct {
 	Min        int // minimum of this item they can stock
 	Max        int // max they can stock

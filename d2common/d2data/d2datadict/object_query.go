@@ -1,19 +1,14 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"log"
 )
 
-type ObjectType int
-
-const (
-	ObjectTypeCharacter ObjectType = 1
-	ObjectTypeItem      ObjectType = 2
-)
-
+// ObjectLookupRecord is a representation of a row from objects.txt
 type ObjectLookupRecord struct {
 	Act           int
-	Type          ObjectType
+	Type          d2enum.ObjectType
 	Id            int
 	Name          string
 	Description   string
@@ -44,6 +39,7 @@ type ObjectLookupRecord struct {
 	Index         int
 }
 
+// LookupObject looks up an object record
 func LookupObject(act, typ, id int) *ObjectLookupRecord {
 	object := lookupObject(act, typ, id, indexedObjects)
 	if object == nil {
@@ -54,15 +50,15 @@ func LookupObject(act, typ, id int) *ObjectLookupRecord {
 }
 
 func lookupObject(act, typ, id int, objects [][][]*ObjectLookupRecord) *ObjectLookupRecord {
-	if objects[act] != nil && objects[act][typ] != nil && objects[act][typ][id] != nil {
+	filter1 := objects[act] != nil
+	filter2 := objects[act][typ] != nil
+	filter3 := objects[act][typ][id] != nil
+
+	if filter1 && filter2 && filter3 {
 		return objects[act][typ][id]
 	}
 
 	return nil
-}
-
-func init() {
-	indexedObjects = indexObjects(objectLookups)
 }
 
 func indexObjects(objects []ObjectLookupRecord) [][][]*ObjectLookupRecord {

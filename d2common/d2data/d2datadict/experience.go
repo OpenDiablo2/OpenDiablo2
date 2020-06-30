@@ -31,48 +31,31 @@ import (
 	10
 */
 
+// ExperienceBreakpointsRecord describes the experience points required to
+// gain a level for all character classes
 type ExperienceBreakpointsRecord struct {
 	Level           int
 	HeroBreakpoints map[d2enum.Hero]int
 	Ratio           int
 }
 
-var experienceStringMap map[string]d2enum.Hero
-var experienceHeroMap map[d2enum.Hero]string
-
 var ExperienceBreakpoints []*ExperienceBreakpointsRecord
 var maxLevels map[d2enum.Hero]int
 
+// GetMaxLevelByHero returns the highest level attainable for a hero type
 func GetMaxLevelByHero(heroType d2enum.Hero) int {
 	return maxLevels[heroType]
 }
 
+// GetExperienceBreakpoint given a hero type and a level, returns the experience required for the level
 func GetExperienceBreakpoint(heroType d2enum.Hero, level int) int {
 	return ExperienceBreakpoints[level].HeroBreakpoints[heroType]
 }
 
+// LoadExperienceBreakpoints loads experience.txt into a map
+// ExperienceBreakpoints []*ExperienceBreakpointsRecord
 func LoadExperienceBreakpoints(file []byte) {
 	d := d2common.LoadDataDictionary(string(file))
-
-	experienceStringMap = map[string]d2enum.Hero{
-		"Amazon":      d2enum.HeroAmazon,
-		"Barbarian":   d2enum.HeroBarbarian,
-		"Druid":       d2enum.HeroDruid,
-		"Assassin":    d2enum.HeroAssassin,
-		"Necromancer": d2enum.HeroNecromancer,
-		"Paladin":     d2enum.HeroPaladin,
-		"Sorceress":   d2enum.HeroSorceress,
-	}
-
-	experienceHeroMap = map[d2enum.Hero]string{
-		d2enum.HeroAmazon:      "Amazon",
-		d2enum.HeroBarbarian:   "Barbarian",
-		d2enum.HeroDruid:       "Druid",
-		d2enum.HeroAssassin:    "Assassin",
-		d2enum.HeroNecromancer: "Necromancer",
-		d2enum.HeroPaladin:     "Paladin",
-		d2enum.HeroSorceress:   "Sorceress",
-	}
 
 	// we skip the second row because that describes max level of char classes
 	ExperienceBreakpoints = make([]*ExperienceBreakpointsRecord, len(d.Data)-1)
