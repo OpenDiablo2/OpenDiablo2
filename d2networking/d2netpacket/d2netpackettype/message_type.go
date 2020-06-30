@@ -5,7 +5,7 @@ package d2netpackettype
 // d2netpacket.
 type NetPacketType uint32
 
-//(Except NetPacket which declares a NetPacketType to specify the packet body
+// (Except NetPacket which declares a NetPacketType to specify the packet body
 // type. See d2netpackettype.NetPacket.)
 //
 // Warning
@@ -27,19 +27,19 @@ const (
 	CastSkill                                            // Sent by client or server, indicates entity casting skill
 )
 
-var strings = map[NetPacketType]string{
-	UpdateServerInfo:                "UpdateServerInfo",
-	GenerateMap:                     "GenerateMap",
-	AddPlayer:                       "AddPlayer",
-	MovePlayer:                      "MovePlayer",
-	PlayerConnectionRequest:         "PlayerConnectionRequest",
-	PlayerDisconnectionNotification: "PlayerDisconnectionNotification",
-	Ping:                            "Ping",
-	Pong:                            "Pong",
-	ServerClosed:                    "ServerClosed",
-	CastSkill:                       "CastSkill",
-}
-
 func (n NetPacketType) String() string {
+	strings := map[NetPacketType]string{
+		UpdateServerInfo:                "UpdateServerInfo",
+		GenerateMap:                     "GenerateMap",
+		AddPlayer:                       "AddPlayer",
+		MovePlayer:                      "MovePlayer",
+		PlayerConnectionRequest:         "PlayerConnectionRequest",
+		PlayerDisconnectionNotification: "PlayerDisconnectionNotification",
+		Ping:                            "Ping",
+		Pong:                            "Pong",
+		ServerClosed:                    "ServerClosed",
+		CastSkill:                       "CastSkill",
+	}
+
 	return strings[n]
 }
