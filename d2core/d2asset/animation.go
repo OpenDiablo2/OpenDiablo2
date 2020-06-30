@@ -39,6 +39,7 @@ type animationDirection struct {
 	frames []*animationFrame
 }
 
+// Animation has directionality, play modes, and frame counting
 type Animation struct {
 	directions     []*animationDirection
 	frameIndex     int
@@ -68,6 +69,7 @@ func CreateAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transpare
 		for _, dccFrame := range dccDirection.Frames {
 			minX, minY := math.MaxInt32, math.MaxInt32
 			maxX, maxY := math.MinInt32, math.MinInt32
+
 			for _, dccFrame := range dccDirection.Frames {
 				minX = d2common.MinInt(minX, dccFrame.Box.Left)
 				minY = d2common.MinInt(minY, dccFrame.Box.Top)
@@ -79,8 +81,10 @@ func CreateAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transpare
 			frameHeight := maxY - minY
 
 			pixels := make([]byte, frameWidth*frameHeight*4)
+
 			for y := 0; y < frameHeight; y++ {
 				for x := 0; x < frameWidth; x++ {
+
 					if paletteIndex := dccFrame.PixelData[y*frameWidth+x]; paletteIndex != 0 {
 						palColor := palette.Colors[paletteIndex]
 						offset := (x + y*frameWidth) * 4
@@ -92,12 +96,12 @@ func CreateAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transpare
 				}
 			}
 
-			image, err := d2render.NewSurface(frameWidth, frameHeight, d2interface.FilterNearest)
+			sfc, err := d2render.NewSurface(frameWidth, frameHeight, d2interface.FilterNearest)
 			if err != nil {
 				return nil, err
 			}
 
-			if err := image.ReplacePixels(pixels); err != nil {
+			if err := sfc.ReplacePixels(pixels); err != nil {
 				return nil, err
 			}
 
@@ -111,7 +115,7 @@ func CreateAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transpare
 				height:  dccFrame.Height,
 				offsetX: minX,
 				offsetY: minY,
-				image:   image,
+				image:   sfc,
 			})
 		}
 	}
@@ -127,7 +131,7 @@ func CreateAnimationFromDC6(dc6 *d2dc6.DC6, palette *d2dat.DATPalette) (*Animati
 	}
 
 	for frameIndex, dc6Frame := range dc6.Frames {
-		image, err := d2render.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height), d2interface.FilterNearest)
+		sfc, err := d2render.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height), d2interface.FilterNearest)
 		if err != nil {
 			return nil, err
 		}
@@ -167,17 +171,19 @@ func CreateAnimationFromDC6(dc6 *d2dc6.DC6, palette *d2dat.DATPalette) (*Animati
 		}
 
 		colorData := make([]byte, dc6Frame.Width*dc6Frame.Height*4)
+
 		for i := 0; i < int(dc6Frame.Width*dc6Frame.Height); i++ {
 			if indexData[i] < 1 { // TODO: Is this == -1 or < 1?
 				continue
 			}
+
 			colorData[i*4] = palette.Colors[indexData[i]].R
 			colorData[i*4+1] = palette.Colors[indexData[i]].G
 			colorData[i*4+2] = palette.Colors[indexData[i]].B
 			colorData[i*4+3] = 0xff
 		}
 
-		if err := image.ReplacePixels(colorData); err != nil {
+		if err := sfc.ReplacePixels(colorData); err != nil {
 			return nil, err
 		}
 
@@ -192,7 +198,7 @@ func CreateAnimationFromDC6(dc6 *d2dc6.DC6, palette *d2dat.DATPalette) (*Animati
 			height:  int(dc6Frame.Height),
 			offsetX: int(dc6Frame.OffsetX),
 			offsetY: int(dc6Frame.OffsetY),
-			image:   image,
+			image:   sfc,
 		})
 	}
 
@@ -280,7 +286,7 @@ func (a *Animation) RenderFromOrigin(target d2interface.Surface) error {
 	return a.Render(target)
 }
 
-// Renders the section of the animation frame enclosed by bounds
+// RenderSection renders the section of the animation frame enclosed by bounds
 func (a *Animation) RenderSection(sfc d2interface.Surface, bound image.Rectangle) error {
 	direction := a.directions[a.directionIndex]
 	frame := direction.frames[a.frameIndex]
@@ -292,6 +298,7 @@ func (a *Animation) RenderSection(sfc d2interface.Surface, bound image.Rectangle
 	return sfc.RenderSection(frame.image, bound)
 }
 
+// GetFrameSize gets the Size(width, height) of a indexed frame.
 func (a *Animation) GetFrameSize(frameIndex int) (int, int, error) {
 	direction := a.directions[a.directionIndex]
 	if frameIndex >= len(direction.frames) {
@@ -302,11 +309,13 @@ func (a *Animation) GetFrameSize(frameIndex int) (int, int, error) {
 	return frame.width, frame.height, nil
 }
 
+// GetCurrentFrameSize gets the Size(width, height) of the current frame.
 func (a *Animation) GetCurrentFrameSize() (int, int) {
 	width, height, _ := a.GetFrameSize(a.frameIndex)
 	return width, height
 }
 
+// GetFrameBounds gets maximum Size(width, height) of all frame.
 func (a *Animation) GetFrameBounds() (int, int) {
 	maxWidth, maxHeight := 0, 0
 
@@ -319,27 +328,33 @@ func (a *Animation) GetFrameBounds() (int, int) {
 	return maxWidth, maxHeight
 }
 
+// GetCurrentFrame gets index of current frame in animation
 func (a *Animation) GetCurrentFrame() int {
 	return a.frameIndex
 }
 
+// GetFrameCount gets number of frames in animation
 func (a *Animation) GetFrameCount() int {
 	direction := a.directions[a.directionIndex]
 	return len(direction.frames)
 }
 
+// IsOnFirstFrame gets if the animation on its first frame
 func (a *Animation) IsOnFirstFrame() bool {
 	return a.frameIndex == 0
 }
 
+// IsOnLastFrame gets if the animation on its last frame
 func (a *Animation) IsOnLastFrame() bool {
 	return a.frameIndex == a.GetFrameCount()-1
 }
 
+// GetDirectionCount gets the number of animation direction
 func (a *Animation) GetDirectionCount() int {
 	return len(a.directions)
 }
 
+// SetDirection places the animation in the direction of an animation
 func (a *Animation) SetDirection(directionIndex int) error {
 	if directionIndex >= 64 {
 		return errors.New("invalid direction index")
@@ -350,10 +365,12 @@ func (a *Animation) SetDirection(directionIndex int) error {
 	return nil
 }
 
+// GetDirection get the current animation direction
 func (a *Animation) GetDirection() int {
 	return a.directionIndex
 }
 
+// SetCurrentFrame sets animation at a specific frame
 func (a *Animation) SetCurrentFrame(frameIndex int) error {
 	if frameIndex >= a.GetFrameCount() {
 		return errors.New("invalid frame index")
@@ -364,29 +381,35 @@ func (a *Animation) SetCurrentFrame(frameIndex int) error {
 	return nil
 }
 
+// Rewind animation to beginning
 func (a *Animation) Rewind() {
 	a.SetCurrentFrame(0)
 }
 
+// PlayForward plays animation forward
 func (a *Animation) PlayForward() {
 	a.playMode = playModeForward
 	a.lastFrameTime = 0
 }
 
+// PlayBackward plays animation backward
 func (a *Animation) PlayBackward() {
 	a.playMode = playModeBackward
 	a.lastFrameTime = 0
 }
 
+// Pause animation
 func (a *Animation) Pause() {
 	a.playMode = playModePause
 	a.lastFrameTime = 0
 }
 
+// SetPlayLoop sets whether to loop the animation
 func (a *Animation) SetPlayLoop(loop bool) {
 	a.playLoop = loop
 }
 
+// SetPlaySpeed sets play speed of the animation
 func (a *Animation) SetPlaySpeed(playSpeed float64) {
 	a.SetPlayLength(playSpeed * float64(a.GetFrameCount()))
 }
@@ -404,14 +427,17 @@ func (a *Animation) SetColorMod(color color.Color) {
 	a.colorMod = color
 }
 
+// GetPlayedCount gets the number of times the application played
 func (a *Animation) GetPlayedCount() int {
 	return a.playedCount
 }
 
+// ResetPlayedCount resets the play count
 func (a *Animation) ResetPlayedCount() {
 	a.playedCount = 0
 }
 
+// SetBlend sets the animation alpha blending status
 func (a *Animation) SetBlend(blend bool) {
 	if blend {
 		a.compositeMode = d2enum.CompositeModeLighter
