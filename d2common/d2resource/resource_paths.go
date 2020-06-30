@@ -1,7 +1,9 @@
+// Package d2resource stores the paths of the resources inside the mpq files.
 package d2resource
 
 var LanguageCode string
 
+// Paths of the resources inside the mpq files.
 const (
 	// --- Screens ---
 
@@ -11,7 +13,7 @@ const (
 
 	TrademarkScreen       = "/data/global/ui/FrontEnd/trademarkscreenEXP.dc6"
 	GameSelectScreen      = "/data/global/ui/FrontEnd/gameselectscreenEXP.dc6"
-	TcpIpBackground       = "/data/global/ui/FrontEnd/TCPIPscreen.dc6"
+	TCPIPBackground       = "/data/global/ui/FrontEnd/TCPIPscreen.dc6"
 	Diablo2LogoFireLeft   = "/data/global/ui/FrontEnd/D2logoFireLeft.DC6"
 	Diablo2LogoFireRight  = "/data/global/ui/FrontEnd/D2logoFireRight.DC6"
 	Diablo2LogoBlackLeft  = "/data/global/ui/FrontEnd/D2logoBlackLeft.DC6"
@@ -207,6 +209,7 @@ const (
 	MagicSuffix = "/data/global/excel/MagicSuffix.txt"
 
 	// --- Monster Prefix/Suffixes (?) ---
+
 	RarePrefix   = "/data/global/excel/RarePrefix.txt"
 	RareSuffix   = "/data/global/excel/RareSuffix.txt"
 	UniquePrefix = "/data/global/excel/UniquePrefix.txt"
@@ -278,9 +281,9 @@ const (
 
 	// --- Enemy Data ---
 
-	MonStats = "/data/global/excel/monstats.txt"
-	MonStats2 = "/data/global/excel/monstats2.txt"
-	MonPreset = "/data/global/excel/monpreset.txt"
+	MonStats     = "/data/global/excel/monstats.txt"
+	MonStats2 	 = "/data/global/excel/monstats2.txt"
+	MonPreset    = "/data/global/excel/monpreset.txt"
 	SuperUniques = "/data/global/excel/SuperUniques.txt"
 
 	// --- Skill Data ---

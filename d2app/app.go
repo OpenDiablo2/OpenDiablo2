@@ -472,7 +472,7 @@ func (p *App) dumpHeap() {
 func (p *App) toggleFullScreen() {
 	fullscreen := !d2render.IsFullScreen()
 	d2render.SetFullScreen(fullscreen)
-	p.terminal.OutputInfo("fullscreen is now: %v", fullscreen)
+	p.terminal.OutputInfof("fullscreen is now: %v", fullscreen)
 }
 
 func (p *App) captureFrame(path string) {
@@ -494,19 +494,19 @@ func (p *App) stopAnimationCapture() {
 func (p *App) toggleVsync() {
 	vsync := !d2render.GetVSyncEnabled()
 	d2render.SetVSyncEnabled(vsync)
-	p.terminal.OutputInfo("vsync is now: %v", vsync)
+	p.terminal.OutputInfof("vsync is now: %v", vsync)
 }
 
 func (p *App) toggleFpsCounter() {
 	p.showFPS = !p.showFPS
-	p.terminal.OutputInfo("fps counter is now: %v", p.showFPS)
+	p.terminal.OutputInfof("fps counter is now: %v", p.showFPS)
 }
 
 func (p *App) setTimeScale(timeScale float64) {
 	if timeScale <= 0 {
-		p.terminal.OutputError("invalid time scale value")
+		p.terminal.OutputErrorf("invalid time scale value")
 	} else {
-		p.terminal.OutputInfo("timescale changed from %f to %f", p.timeScale, timeScale)
+		p.terminal.OutputInfof("timescale changed from %f to %f", p.timeScale, timeScale)
 		p.timeScale = timeScale
 	}
 }

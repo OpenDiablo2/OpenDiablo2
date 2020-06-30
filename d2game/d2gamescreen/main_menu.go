@@ -128,7 +128,7 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	v.trademarkBackground, _ = d2ui.LoadSprite(animation)
 	v.trademarkBackground.SetPosition(0, 0)
 
-	animation, _ = d2asset.LoadAnimation(d2resource.TcpIpBackground, d2resource.PaletteSky)
+	animation, _ = d2asset.LoadAnimation(d2resource.TCPIPBackground, d2resource.PaletteSky)
 	v.tcpIpBackground, _ = d2ui.LoadSprite(animation)
 	v.tcpIpBackground.SetPosition(0, 0)
 
