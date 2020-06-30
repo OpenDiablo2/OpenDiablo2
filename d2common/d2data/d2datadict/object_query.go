@@ -10,11 +10,11 @@ import (
 type ObjectLookupRecord struct {
 	Act           int
 	Type          d2enum.ObjectType
-	Id            int
+	Id            int //nolint:golint Id is the right key
 	Name          string
 	Description   string
-	ObjectsTxtId  int
-	MonstatsTxtId int
+	ObjectsTxtId  int //nolint:golint Id is the right key
+	MonstatsTxtId int //nolint:golint Id is the right key
 	Direction     int
 	Base          string
 	Token         string
