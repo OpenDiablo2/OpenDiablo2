@@ -17,7 +17,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -49,14 +48,10 @@ type GameControls struct {
 	FreeCam           bool
 	lastMouseX        int
 	lastMouseY        int
-	lastHealthPercent float64
-	lastManaPercent   float64
 
 	// UI
 	globeSprite        *d2ui.Sprite
 	hpManaStatusSprite *d2ui.Sprite
-	hpStatusBar        d2interface.Surface
-	manaStatusBar      d2interface.Surface
 	mainPanel          *d2ui.Sprite
 	menuButton         *d2ui.Sprite
 	skillIcon          *d2ui.Sprite
@@ -256,8 +251,6 @@ func (g *GameControls) Load() {
 
 	animation, _ = d2asset.LoadAnimation(d2resource.HealthManaIndicator, d2resource.PaletteSky)
 	g.hpManaStatusSprite, _ = d2ui.LoadSprite(animation)
-
-	g.hpStatusBar, _ = d2render.NewSurface(globeWidth, globeHeight, d2interface.FilterNearest)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.GamePanels, d2resource.PaletteSky)
 	g.mainPanel, _ = d2ui.LoadSprite(animation)
