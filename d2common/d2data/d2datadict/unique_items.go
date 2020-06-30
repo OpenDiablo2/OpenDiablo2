@@ -7,6 +7,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// UniqueItemRecord is a representation of a row from uniqueitems.txt
 type UniqueItemRecord struct {
 	Name    string
 	Version int  // 0 = classic pre 1.07, 1 = 1.07-1.11, 100 = expansion
@@ -41,6 +42,7 @@ type UniqueItemRecord struct {
 	Properties [12]UniqueItemProperty
 }
 
+// UniqueItemProperty is describes a property of a unique item
 type UniqueItemProperty struct {
 	Property  string
 	Parameter d2common.CalcString // depending on the property, this may be an int (usually), or a string
@@ -114,8 +116,11 @@ func createUniqueItemProperty(r *[]string, inc func() int) UniqueItemProperty {
 	return result
 }
 
+// UniqueItems stores all of the UniqueItemRecords
+//nolint:gochecknoglobals // Currently global by design
 var UniqueItems map[string]*UniqueItemRecord
 
+// LoadUniqueItems loadsUniqueItemRecords fro uniqueitems.txt
 func LoadUniqueItems(file []byte) {
 	UniqueItems = make(map[string]*UniqueItemRecord)
 	data := strings.Split(string(file), "\r\n")[1:]

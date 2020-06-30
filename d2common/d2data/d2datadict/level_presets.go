@@ -7,25 +7,27 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// LevelPresetRecord is a representation of a row from lvlprest.txt
+// these records define parameters for the preset level map generator
 type LevelPresetRecord struct {
+	Files        [6]string
 	Name         string
 	DefinitionID int
 	LevelID      int
+	SizeX        int
+	SizeY        int
+	Pops         int
+	PopPad       int
+	FileCount    int
+	Dt1Mask      uint
 	Populate     bool
 	Logicals     bool
 	Outdoors     bool
 	Animate      bool
 	KillEdge     bool
 	FillBlanks   bool
-	SizeX        int
-	SizeY        int
 	AutoMap      bool
 	Scan         bool
-	Pops         int
-	PopPad       int
-	FileCount    int
-	Files        [6]string
-	Dt1Mask      uint
 	Beta         bool
 	Expansion    bool
 }
@@ -70,7 +72,8 @@ func createLevelPresetRecord(props []string) LevelPresetRecord {
 	return result
 }
 
-var LevelPresets map[int]LevelPresetRecord
+// LevelPresets stores all of the LevelPresetRecords
+var LevelPresets map[int]LevelPresetRecord //nolint:gochecknoglobals // Currently global by design
 
 // LoadLevelPresets loads level presets from text file
 func LoadLevelPresets(file []byte) {

@@ -118,13 +118,13 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2mapentity.MapEntity 
 	for _, object := range mr.ds1.Objects {
 
 		switch object.Lookup.Type {
-		case d2datadict.ObjectTypeCharacter:
+		case d2enum.ObjectTypeCharacter:
 			if object.Lookup.Base != "" && object.Lookup.Token != "" && object.Lookup.TR != "" {
 				npc := d2mapentity.CreateNPC((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, object.Lookup, 0)
 				npc.SetPaths(convertPaths(tileOffsetX, tileOffsetY, object.Paths))
 				entities = append(entities, npc)
 			}
-		case d2datadict.ObjectTypeItem:
+		case d2enum.ObjectTypeItem:
 			if object.ObjectInfo != nil && object.ObjectInfo.Draw && object.Lookup.Base != "" && object.Lookup.Token != "" {
 				entity, err := d2mapentity.CreateObject((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, object.Lookup, d2resource.PaletteUnits)
 				if err != nil {

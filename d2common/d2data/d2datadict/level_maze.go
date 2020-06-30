@@ -6,6 +6,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// LevelMazeDetailsRecord is a representation of a row from lvlmaze.txt
+// these records define the parameters passed to the maze level generator
 type LevelMazeDetailsRecord struct {
 	// descriptive, not loaded in game. Corresponds with Name field in
 	// Levels.txt
@@ -34,7 +36,8 @@ type LevelMazeDetailsRecord struct {
 	// Beta
 }
 
-var LevelMazeDetails map[int]*LevelMazeDetailsRecord
+// LevelMazeDetails stores all of the LevelMazeDetailsRecords
+var LevelMazeDetails map[int]*LevelMazeDetailsRecord //nolint:gochecknoglobals // Currently global by design
 
 // LoadLevelMazeDetails loads LevelMazeDetailsRecords from text file
 func LoadLevelMazeDetails(file []byte) {

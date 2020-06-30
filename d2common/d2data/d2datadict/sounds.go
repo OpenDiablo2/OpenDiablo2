@@ -75,9 +75,11 @@ func createSoundEntry(soundLine string) SoundEntry {
 	return result
 }
 
+// Sounds stores all of the SoundEntries
 //nolint:gochecknoglobals // Currently global by design, only written once
 var Sounds map[string]SoundEntry
 
+// LoadSounds loads SoundEntries from sounds.txt
 func LoadSounds(file []byte) {
 	Sounds = make(map[string]SoundEntry)
 	soundData := strings.Split(string(file), "\r\n")[1:]

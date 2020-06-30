@@ -6,9 +6,12 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// LevelSubstitutionRecord is a representation of a row from lvlsub.txt
+// these records are parameters for levels and describe substitution rules
 type LevelSubstitutionRecord struct {
 	// Description, reference only.
 	Name string // Name
+
 	// This value is used in Levels.txt, in the column 'SubType'. You'll notice
 	// that in LvlSub.txt some rows use the same value, we can say they forms
 	// groups. If you count each row of a group starting from 0, then you'll
@@ -61,8 +64,11 @@ type LevelSubstitutionRecord struct {
 	// Beta
 }
 
+// LevelSubstitutions stores all of the LevelSubstitutionRecords
+//nolint:gochecknoglobals // Currently global by design
 var LevelSubstitutions map[int]*LevelSubstitutionRecord
 
+// LoadLevelSubstitutions loads lvlsub.txt and parses into records
 func LoadLevelSubstitutions(file []byte) {
 	dict := d2common.LoadDataDictionary(string(file))
 	numRecords := len(dict.Data)

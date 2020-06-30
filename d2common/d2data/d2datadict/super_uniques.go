@@ -1,13 +1,14 @@
 package d2datadict
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // https://d2mods.info/forum/kb/viewarticle?a=162
 
-// Defines the SuperUnique monsters and their properties.
+// SuperUniqueRecord Defines the unique monsters and their properties.
 // SuperUnique monsters are boss monsters which always appear at the same places
 // and always have the same base special abilities
 // with the addition of one or two extra ones per difficulty (Nightmare provides one extra ability, Hell provides two).
@@ -118,8 +119,11 @@ type SuperUniqueRecord struct {
 	UTransHell      string
 }
 
+// SuperUniques stores all of the SuperUniqueRecords
+//nolint:gochecknoglobals // Currently global by design
 var SuperUniques map[string]*SuperUniqueRecord
 
+// LoadSuperUniques loads SuperUniqueRecords from superuniques.txt
 func LoadSuperUniques(file []byte) {
 	dictionary := d2common.LoadDataDictionary(string(file))
 	SuperUniques = make(map[string]*SuperUniqueRecord, len(dictionary.Data))
