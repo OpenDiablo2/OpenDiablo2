@@ -12,6 +12,7 @@ require (
 	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
 	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.4.0
+	golang.org/x/image v0.0.0-20200119044424-58c23975cae1
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 )
