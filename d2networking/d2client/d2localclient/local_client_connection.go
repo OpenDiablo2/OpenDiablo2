@@ -47,7 +47,7 @@ func Create(openNetworkServer bool) *LocalClientConnection {
 }
 
 // Open creates a new GameServer, runs the server and connects this client to it.
-func (l *LocalClientConnection) Open(connectionString string, saveFilePath string) error {
+func (l *LocalClientConnection) Open(_ string, saveFilePath string) error {
 	l.SetPlayerState(d2player.LoadPlayerState(saveFilePath))
 	d2server.Create(l.openNetworkServer)
 	go d2server.Run()
