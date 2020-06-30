@@ -1,3 +1,4 @@
+// Package d2screen contains the interface for screens
 package d2screen
 
 import (

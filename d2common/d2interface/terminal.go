@@ -14,17 +14,6 @@ const (
 	TermCategoryError
 )
 
-// TermVis is an enumeration of the Terminal's visibility states
-type termVis int
-
-// Terminal visibility state
-const (
-	termVisHidden termVis = iota
-	termVisShowing
-	termVisShown
-	termVisHiding
-)
-
 // Terminal is a drop-down terminal and shell
 // It is used throughout the codebase, most parts of the engine will
 // `bind` commands, which are available for use in the shell

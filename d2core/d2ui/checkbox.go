@@ -1,6 +1,7 @@
 package d2ui
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -41,7 +42,7 @@ func CreateCheckbox(checkState bool) Checkbox {
 }
 
 func (v *Checkbox) Render(target d2interface.Surface) {
-	target.PushCompositeMode(d2interface.CompositeModeSourceAtop)
+	target.PushCompositeMode(d2enum.CompositeModeSourceAtop)
 	target.PushTranslation(v.x, v.y)
 	target.PushFilter(d2interface.FilterNearest)
 	defer target.PopN(3)

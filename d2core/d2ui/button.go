@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -177,7 +179,7 @@ func (v *Button) Activate() {
 
 // Render renders the button
 func (v *Button) Render(target d2interface.Surface) {
-	target.PushCompositeMode(d2interface.CompositeModeSourceAtop)
+	target.PushCompositeMode(d2enum.CompositeModeSourceAtop)
 	target.PushFilter(d2interface.FilterNearest)
 	target.PushTranslation(v.x, v.y)
 	defer target.PopN(3)
