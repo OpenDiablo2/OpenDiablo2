@@ -3,6 +3,8 @@ package d2ui
 import (
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
@@ -60,7 +62,7 @@ func (v *Label) Render(target d2interface.Surface) {
 	}
 
 	target.PushFilter(d2interface.FilterNearest)
-	target.PushCompositeMode(d2interface.CompositeModeSourceAtop)
+	target.PushCompositeMode(d2enum.CompositeModeSourceAtop)
 	target.PushTranslation(x, y)
 	defer target.PopN(3)
 

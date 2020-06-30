@@ -5,6 +5,8 @@ import (
 	"image/color"
 	"math"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -43,7 +45,7 @@ type Animation struct {
 	lastFrameTime  float64
 	playedCount    int
 
-	compositeMode  d2interface.CompositeMode
+	compositeMode  d2enum.CompositeMode
 	colorMod       color.Color
 	originAtBottom bool
 
@@ -399,8 +401,8 @@ func (a *Animation) ResetPlayedCount() {
 
 func (a *Animation) SetBlend(blend bool) {
 	if blend {
-		a.compositeMode = d2interface.CompositeModeLighter
+		a.compositeMode = d2enum.CompositeModeLighter
 	} else {
-		a.compositeMode = d2interface.CompositeModeSourceOver
+		a.compositeMode = d2enum.CompositeModeSourceOver
 	}
 }
