@@ -5,11 +5,11 @@ type Filter int
 
 const (
 	// FilterDefault represents the default filter.
-	FilterDefault Filter = 0
+	FilterDefault Filter = iota
 
 	// FilterNearest represents nearest (crisp-edged) filter
-	FilterNearest = Filter(1)
+	FilterNearest
 
 	// FilterLinear represents linear filter
-	FilterLinear = Filter(2)
+	FilterLinear
 )
