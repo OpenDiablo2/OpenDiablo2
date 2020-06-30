@@ -114,7 +114,10 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 				} else {
 					player.SetIsInTown(false)
 				}
-				player.SetAnimationMode(player.GetAnimationMode().String())
+				err := player.SetAnimationMode(player.GetAnimationMode().String())
+				if err != nil {
+					log.Printf("GameClient: error setting animation mode for player %s: %s", player.Id, err)
+				}
 			})
 		}
 	case d2netpackettype.CastSkill:
@@ -145,7 +148,11 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 
 		g.MapEngine.AddEntity(missile)
 	case d2netpackettype.Ping:
-		g.clientConnection.SendPacketToServer(d2netpacket.CreatePongPacket(g.PlayerId))
+		err := g.clientConnection.SendPacketToServer(d2netpacket.CreatePongPacket(g.PlayerId))
+		if err != nil {
+			log.Printf("GameClient: error responding to server ping: %s", err)
+		}
+
 	case d2netpackettype.ServerClosed:
 		// TODO: Need to be tied into a character save and exit
 		log.Print("Server has been closed")

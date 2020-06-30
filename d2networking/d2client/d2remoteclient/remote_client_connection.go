@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -82,7 +83,11 @@ func (l *RemoteClientConnection) Open(connectionString string, saveFilePath stri
 
 	log.Printf("Connected to server at %s", l.udpConnection.RemoteAddr().String())
 	gameState := d2player.LoadPlayerState(saveFilePath)
-	l.SendPacketToServer(d2netpacket.CreatePlayerConnectionRequestPacket(l.GetUniqueId(), gameState))
+	err = l.SendPacketToServer(d2netpacket.CreatePlayerConnectionRequestPacket(l.GetUniqueId(), gameState))
+	if err != nil {
+		log.Print("RemoteClientConnection: error sending PlayerConnectionRequestPacket to server.")
+		return err
+	}
 
 	return nil
 }
@@ -91,7 +96,10 @@ func (l *RemoteClientConnection) Open(connectionString string, saveFilePath stri
 // RemoteClientConnection.active to false.
 func (l *RemoteClientConnection) Close() error {
 	l.active = false
-	l.SendPacketToServer(d2netpacket.CreatePlayerDisconnectRequestPacket(l.GetUniqueId()))
+	err := l.SendPacketToServer(d2netpacket.CreatePlayerDisconnectRequestPacket(l.GetUniqueId()))
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -106,8 +114,15 @@ func (l *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket
 	var buff bytes.Buffer
 	buff.WriteByte(byte(packet.PacketType))
 	writer, _ := gzip.NewWriterLevel(&buff, gzip.BestCompression)
-	writer.Write(data)
-	writer.Close()
+
+	if written, err := writer.Write(data); err != nil {
+		return err
+	} else if written == 0 {
+		return errors.New(fmt.Sprintf("RemoteClientConnection: attempted to send empty %v packet body.", packet.PacketType))
+	}
+	if err = writer.Close(); err != nil {
+		return err
+	}
 	if _, err = l.udpConnection.Write(buff.Bytes()); err != nil {
 		return err
 	}
@@ -137,42 +152,86 @@ func (l *RemoteClientConnection) serverListener() {
 		packetType := d2netpackettype.NetPacketType(packetTypeId)
 		reader, err := gzip.NewReader(buff)
 		sb := new(strings.Builder)
-		io.Copy(sb, reader)
+		written, err := io.Copy(sb, reader)
+		if err != nil {
+			log.Printf("RemoteClientConnection: error copying bytes from %v packet: %s", packetType, err)
+			continue
+		}
+		if written == 0 {
+			log.Printf("RemoteClientConnection: empty packet %v packet received", packetType)
+			continue
+		}
+
 		stringData := sb.String()
 		switch packetType {
 		case d2netpackettype.GenerateMap:
 			var packet d2netpacket.GenerateMapPacket
-			json.Unmarshal([]byte(stringData), &packet)
-			l.SendPacketToClient(d2netpacket.NetPacket{
+			err := json.Unmarshal([]byte(stringData), &packet)
+			if err != nil {
+				log.Printf("GameServer: error unmarshalling %T: %s", packet, err)
+				continue
+			}
+			err = l.SendPacketToClient(d2netpacket.NetPacket{
 				PacketType: packetType,
 				PacketData: packet,
 			})
+			if err != nil {
+				log.Printf("RemoteClientConnection: error processing packet %v: %s", packetType, err)
+			}
 		case d2netpackettype.MovePlayer:
 			var packet d2netpacket.MovePlayerPacket
-			json.Unmarshal([]byte(stringData), &packet)
-			l.SendPacketToClient(d2netpacket.NetPacket{
+			err := json.Unmarshal([]byte(stringData), &packet)
+			if err != nil {
+				log.Printf("GameServer: error unmarshalling %T: %s", packet, err)
+				continue
+			}
+			err = l.SendPacketToClient(d2netpacket.NetPacket{
 				PacketType: packetType,
 				PacketData: packet,
 			})
+			if err != nil {
+				log.Printf("RemoteClientConnection: error processing packet %v: %s", packetType, err)
+			}
 		case d2netpackettype.UpdateServerInfo:
 			var packet d2netpacket.UpdateServerInfoPacket
-			json.Unmarshal([]byte(stringData), &packet)
-			l.SendPacketToClient(d2netpacket.NetPacket{
+			err := json.Unmarshal([]byte(stringData), &packet)
+			if err != nil {
+				log.Printf("GameServer: error unmarshalling %T: %s", packet, err)
+				continue
+			}
+			err = l.SendPacketToClient(d2netpacket.NetPacket{
 				PacketType: packetType,
 				PacketData: packet,
 			})
+			if err != nil {
+				log.Printf("RemoteClientConnection: error processing packet %v: %s", packetType, err)
+			}
 		case d2netpackettype.AddPlayer:
 			var packet d2netpacket.AddPlayerPacket
-			json.Unmarshal([]byte(stringData), &packet)
-			l.SendPacketToClient(d2netpacket.NetPacket{
+			err := json.Unmarshal([]byte(stringData), &packet)
+			if err != nil {
+				log.Printf("GameServer: error unmarshalling %T: %s", packet, err)
+				continue
+			}
+			err = l.SendPacketToClient(d2netpacket.NetPacket{
 				PacketType: packetType,
 				PacketData: packet,
 			})
+			if err != nil {
+				log.Printf("RemoteClientConnection: error processing packet %v: %s", packetType, err)
+			}
 		case d2netpackettype.Ping:
-			l.SendPacketToServer(d2netpacket.CreatePongPacket(l.uniqueId))
+			err := l.SendPacketToServer(d2netpacket.CreatePongPacket(l.uniqueId))
+			if err != nil {
+				log.Printf("RemoteClientConnection: error responding to server ping: %s", err)
+			}
 		case d2netpackettype.PlayerDisconnectionNotification:
 			var packet d2netpacket.PlayerDisconnectRequestPacket
-			json.Unmarshal([]byte(stringData), &packet)
+			err := json.Unmarshal([]byte(stringData), &packet)
+			if err != nil {
+				log.Printf("GameServer: error unmarshalling %T: %s", packet, err)
+				continue
+			}
 			log.Printf("Received disconnect: %s", packet.Id)
 		default:
 			fmt.Printf("Unknown packet type %d\n", packetType)
