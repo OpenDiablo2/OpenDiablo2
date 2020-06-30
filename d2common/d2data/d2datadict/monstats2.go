@@ -7,6 +7,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
+// MonStats2Record is a representation of a row from monstats2.txt
 type MonStats2Record struct {
 	// Key, the object ID MonStatEx feild from MonStat
 	Key string
@@ -225,9 +226,11 @@ type MonStats2Record struct {
 	ResurrectSkill string
 }
 
+// MonStats2 stores all of the MonStats2Records
 //nolint:gochecknoglobals // Current design issue
 var MonStats2 map[string]*MonStats2Record
 
+// LoadMonStats2 loads MonStats2Records from monstats2.txt
 //nolint:funlen //just a big data loader
 func LoadMonStats2(file []byte) {
 	dict := d2common.LoadDataDictionary(string(file))

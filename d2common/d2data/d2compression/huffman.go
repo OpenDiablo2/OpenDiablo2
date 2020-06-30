@@ -1,5 +1,7 @@
-//
-// MpqHuffman.go based on the origina CS file
+// Package d2compression is used for decompressing WAV files.
+package d2compression
+
+// MpqHuffman.go based on the original CS file
 //
 // Authors:
 //		Foole (fooleau@gmail.com)
@@ -27,7 +29,6 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-package d2compression
 
 import (
 	"log"
@@ -37,57 +38,60 @@ import (
 
 // linkedNode is a node which is both hierachcical (parent/child) and doubly linked (next/prev)
 type linkedNode struct {
-	DecompressedValue int
-	Weight            int
-	Parent            *linkedNode
-	Child0            *linkedNode
-	Prev              *linkedNode
-	Next              *linkedNode
+	decompressedValue int
+	weight            int
+	parent            *linkedNode
+	child0            *linkedNode
+	prev              *linkedNode
+	next              *linkedNode
 }
 
-func CreateLinkedNode(decompVal, weight int) *linkedNode {
+// createLinkedNode creates a linked node
+func createLinkedNode(decompVal, weight int) *linkedNode {
 	result := &linkedNode{
-		DecompressedValue: decompVal,
-		Weight:            weight,
+		decompressedValue: decompVal,
+		weight:            weight,
 	}
+
 	return result
 }
 
-func (v *linkedNode) GetChild1() *linkedNode {
-	return v.Child0.Prev
+func (v *linkedNode) getChild1() *linkedNode {
+	return v.child0.prev
 }
 
-func (v *linkedNode) Insert(other *linkedNode) *linkedNode {
-	// 'Next' should have a lower weight we should return the lower weight
-	if other.Weight <= v.Weight {
+func (v *linkedNode) insert(other *linkedNode) *linkedNode {
+	// 'next' should have a lower weight we should return the lower weight
+	if other.weight <= v.weight {
 		// insert before
-		if v.Next != nil {
-			v.Next.Prev = other
-			other.Next = v.Next
+		if v.next != nil {
+			v.next.prev = other
+			other.next = v.next
 		}
 
-		v.Next = other
+		v.next = other
 
-		other.Prev = v
+		other.prev = v
 
 		return other
 	}
 
-	if v.Prev == nil {
-		// Insert after
-		other.Prev = nil
-		v.Prev = other
-		other.Next = v
+	if v.prev == nil {
+		// insert after
+		other.prev = nil
+		v.prev = other
+		other.next = v
 	} else {
-		v.Prev.Insert(other)
+		v.prev.insert(other)
 	}
 
 	return v
 }
 
+//nolint:funlen // Makes no sense to split
 func getPrimes() [][]byte {
 	return [][]byte{
-		{
+		{ //nolint:dupl we're not interested in duplicates here
 			// Compression type 0
 			0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -106,7 +110,7 @@ func getPrimes() [][]byte {
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
 		},
-		{
+		{ //nolint:dupl we're not interested in duplicates here
 			// Compression type 1
 			0x54, 0x16, 0x16, 0x0D, 0x0C, 0x08, 0x06, 0x05, 0x06, 0x05, 0x06, 0x03, 0x04, 0x04, 0x03, 0x05,
 			0x0E, 0x0B, 0x14, 0x13, 0x13, 0x09, 0x0B, 0x06, 0x05, 0x04, 0x03, 0x02, 0x03, 0x02, 0x02, 0x02,
@@ -125,7 +129,7 @@ func getPrimes() [][]byte {
 			0x02, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
 			0x02, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x01, 0x01, 0x02, 0x02, 0x02, 0x06, 0x4B,
 		}, {
-			// Compression type 2
+			// Compression type 2 //nolint:dupl
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x27, 0x00, 0x00, 0x23, 0x00, 0x00,
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x01, 0x01, 0x06, 0x0E, 0x10, 0x04,
@@ -134,8 +138,8 @@ func getPrimes() [][]byte {
 			0x03, 0x01, 0x03, 0x06, 0x04, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x01, 0x02, 0x01, 0x01,
 			0x01, 0x29, 0x07, 0x16, 0x12, 0x40, 0x0A, 0x0A, 0x11, 0x25, 0x01, 0x03, 0x17, 0x10, 0x26, 0x2A,
 			0x10, 0x01, 0x23, 0x23, 0x2F, 0x10, 0x06, 0x07, 0x02, 0x09, 0x01, 0x01, 0x01, 0x01, 0x01,
-		}, {
-			// Compression type 3
+		}, { //nolint:dupl we're not interested in duplicates here
+			// Compression type 3 //nolint:dupl
 			0xFF, 0x0B, 0x07, 0x05, 0x0B, 0x02, 0x02, 0x02, 0x06, 0x02, 0x02, 0x01, 0x04, 0x02, 0x01, 0x03,
 			0x09, 0x01, 0x01, 0x01, 0x03, 0x04, 0x01, 0x01, 0x02, 0x01, 0x01, 0x01, 0x02, 0x01, 0x01, 0x01,
 			0x05, 0x01, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
@@ -152,14 +156,15 @@ func getPrimes() [][]byte {
 			0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
 			0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x07, 0x01, 0x01, 0x02, 0x01, 0x01, 0x01, 0x01,
 			0x02, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x11,
-		}, { // Compression type 4
+		}, { // Compression type 4 //nolint:dupl
 			0xFF, 0xFB, 0x98, 0x9A, 0x84, 0x85, 0x63, 0x64, 0x3E, 0x3E, 0x22, 0x22, 0x13, 0x13, 0x18, 0x17,
-		}, { // Compression type 5
+		}, { // Compression type 5 //nolint:dupl
 			0xFF, 0xF1, 0x9D, 0x9E, 0x9A, 0x9B, 0x9A, 0x97, 0x93, 0x93, 0x8C, 0x8E, 0x86, 0x88, 0x80, 0x82,
 			0x7C, 0x7C, 0x72, 0x73, 0x69, 0x6B, 0x5F, 0x60, 0x55, 0x56, 0x4A, 0x4B, 0x40, 0x41, 0x37, 0x37,
 			0x2F, 0x2F, 0x27, 0x27, 0x21, 0x21, 0x1B, 0x1C, 0x17, 0x17, 0x13, 0x13, 0x10, 0x10, 0x0D, 0x0D,
 			0x0B, 0x0B, 0x09, 0x09, 0x08, 0x08, 0x07, 0x07, 0x06, 0x05, 0x05, 0x04, 0x04, 0x04, 0x19, 0x18,
-		}, { // Compression type 6
+		}, { //nolint:dupl we're not interested in duplicates here
+			// Compression type 6
 			0xC3, 0xCB, 0xF5, 0x41, 0xFF, 0x7B, 0xF7, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -169,7 +174,8 @@ func getPrimes() [][]byte {
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			0x7A, 0x46,
-		}, { // Compression type 7
+		}, { //nolint:dupl we're not interested in duplicates here
+			// Compression type 7
 			0xC3, 0xD9, 0xEF, 0x3D, 0xF9, 0x7C, 0xE9, 0x1E, 0xFD, 0xAB, 0xF1, 0x2C, 0xFC, 0x5B, 0xFE, 0x17,
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -196,30 +202,36 @@ func getPrimes() [][]byte {
 func decode(input *d2common.BitStream, head *linkedNode) *linkedNode {
 	node := head
 
-	for node.Child0 != nil {
+	for node.child0 != nil {
 		bit := input.ReadBits(1)
 		if bit == -1 {
 			log.Fatal("unexpected end of file")
 		}
 
 		if bit == 0 {
-			node = node.Child0
+			node = node.child0
 			continue
 		}
 
-		node = node.GetChild1()
+		node = node.getChild1()
 	}
 
 	return node
 }
 
+// TODO: these consts for buildList need better names
+const (
+	decompVal1 = 256
+	decompVal2 = 257
+)
+
 func buildList(primeData []byte) *linkedNode {
-	root := CreateLinkedNode(256, 1)
-	root = root.Insert(CreateLinkedNode(257, 1))
+	root := createLinkedNode(decompVal1, 1)
+	root = root.insert(createLinkedNode(decompVal2, 1))
 
 	for i := 0; i < len(primeData); i++ {
 		if primeData[i] != 0 {
-			root = root.Insert(CreateLinkedNode(i, int(primeData[i])))
+			root = root.insert(createLinkedNode(i, int(primeData[i])))
 		}
 	}
 
@@ -228,20 +240,20 @@ func buildList(primeData []byte) *linkedNode {
 
 func insertNode(tail *linkedNode, decomp int) *linkedNode {
 	parent := tail
-	result := tail.Prev // This will be the new tail after the tree is updated
+	result := tail.prev // This will be the new tail after the tree is updated
 
-	temp := CreateLinkedNode(parent.DecompressedValue, parent.Weight)
-	temp.Parent = parent
+	temp := createLinkedNode(parent.decompressedValue, parent.weight)
+	temp.parent = parent
 
-	newnode := CreateLinkedNode(decomp, 0)
-	newnode.Parent = parent
+	newnode := createLinkedNode(decomp, 0)
+	newnode.parent = parent
 
-	parent.Child0 = newnode
+	parent.child0 = newnode
 
-	tail.Next = temp
-	temp.Prev = tail
-	newnode.Prev = temp
-	temp.Next = newnode
+	tail.next = temp
+	temp.prev = tail
+	newnode.prev = temp
+	temp.next = newnode
 
 	adjustTree(newnode)
 
@@ -257,7 +269,7 @@ func adjustTree(newNode *linkedNode) {
 	current := newNode
 
 	for current != nil {
-		current.Weight++
+		current.weight++
 
 		var insertpoint *linkedNode
 
@@ -267,12 +279,12 @@ func adjustTree(newNode *linkedNode) {
 		insertpoint = current
 
 		for {
-			prev = insertpoint.Prev
+			prev = insertpoint.prev
 			if prev == nil {
 				break
 			}
 
-			if prev.Weight >= current.Weight {
+			if prev.weight >= current.weight {
 				break
 			}
 
@@ -281,60 +293,60 @@ func adjustTree(newNode *linkedNode) {
 
 		// No insertion point found
 		if insertpoint == current {
-			current = current.Parent
+			current = current.parent
 			continue
 		}
 
 		// The following code basically swaps insertpoint with current
 
 		// remove insert point
-		if insertpoint.Prev != nil {
-			insertpoint.Prev.Next = insertpoint.Next
+		if insertpoint.prev != nil {
+			insertpoint.prev.next = insertpoint.next
 		}
 
-		insertpoint.Next.Prev = insertpoint.Prev
+		insertpoint.next.prev = insertpoint.prev
 
-		// Insert insertpoint after current
-		insertpoint.Next = current.Next
-		insertpoint.Prev = current
+		// insert insertpoint after current
+		insertpoint.next = current.next
+		insertpoint.prev = current
 
-		if current.Next != nil {
-			current.Next.Prev = insertpoint
+		if current.next != nil {
+			current.next.prev = insertpoint
 		}
 
-		current.Next = insertpoint
+		current.next = insertpoint
 
 		// remove current
-		current.Prev.Next = current.Next
-		current.Next.Prev = current.Prev
+		current.prev.next = current.next
+		current.next.prev = current.prev
 
 		// insert current after prev
 		if prev == nil {
 			log.Fatal("previous frame not defined!")
 		}
 
-		temp := prev.Next
-		current.Next = temp
-		current.Prev = prev
-		temp.Prev = current
-		prev.Next = current
+		temp := prev.next
+		current.next = temp
+		current.prev = prev
+		temp.prev = current
+		prev.next = current
 
 		// Set up parent/child links
-		currentparent := current.Parent
-		insertparent := insertpoint.Parent
+		currentparent := current.parent
+		insertparent := insertpoint.parent
 
-		if currentparent.Child0 == current {
-			currentparent.Child0 = insertpoint
+		if currentparent.child0 == current {
+			currentparent.child0 = insertpoint
 		}
 
-		if currentparent != insertparent && insertparent.Child0 == insertpoint {
-			insertparent.Child0 = current
+		if currentparent != insertparent && insertparent.child0 == insertpoint {
+			insertparent.child0 = current
 		}
 
-		current.Parent = insertparent
-		insertpoint.Parent = currentparent
+		current.parent = insertparent
+		insertpoint.parent = currentparent
 
-		current = current.Parent
+		current = current.parent
 	}
 }
 
@@ -343,24 +355,25 @@ func buildTree(tail *linkedNode) *linkedNode {
 
 	for current != nil {
 		child0 := current
-		child1 := current.Prev
+		child1 := current.prev
 
 		if child1 == nil {
 			break
 		}
 
-		parent := CreateLinkedNode(0, child0.Weight+child1.Weight)
-		parent.Child0 = child0
-		child0.Parent = parent
-		child1.Parent = parent
+		parent := createLinkedNode(0, child0.weight+child1.weight)
+		parent.child0 = child0
+		child0.parent = parent
+		child1.parent = parent
 
-		current.Insert(parent)
-		current = current.Prev.Prev
+		current.insert(parent)
+		current = current.prev.prev
 	}
 
 	return current
 }
 
+// HuffmanDecompress decompresses huffman-compressed data
 func HuffmanDecompress(data []byte) []byte {
 	comptype := data[0]
 	primes := getPrimes()
@@ -380,7 +393,7 @@ func HuffmanDecompress(data []byte) []byte {
 Loop:
 	for {
 		node := decode(bitstream, head)
-		decoded = node.DecompressedValue
+		decoded = node.decompressedValue
 		switch decoded {
 		case 256:
 			break Loop

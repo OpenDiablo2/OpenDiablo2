@@ -140,21 +140,25 @@ type CubeRecipeItemProperty struct {
 }
 
 // CubeRecipes contains all rows in CubeMain.txt.
+//nolint:gochecknoglobals // Currently global by design, only written once
 var CubeRecipes []*CubeRecipeRecord
-
-// There are repeated fields and sections in this file, some
-// of which have inconsistent naming conventions. These slices
-// are a simple way to handle them.
-var outputFields = []string{"output", "output b", "output c"}
-var outputLabels = []string{"", "b ", "c "}
-var propLabels = []string{"mod 1", "mod 2", "mod 3", "mod 4", "mod 5"}
-var inputFields = []string{"input 1", "input 2", "input 3", "input 4", "input 5", "input 6", "input 7"}
 
 // LoadCubeRecipes populates CubeRecipes with
 // the data from CubeMain.txt.
 func LoadCubeRecipes(file []byte) {
 	// Load data
 	d := d2common.LoadDataDictionary(string(file))
+
+	// There are repeated fields and sections in this file, some
+	// of which have inconsistent naming conventions. These slices
+	// are a simple way to handle them.
+	var outputFields = []string{"output", "output b", "output c"}
+
+	var outputLabels = []string{"", "b ", "c "}
+
+	var propLabels = []string{"mod 1", "mod 2", "mod 3", "mod 4", "mod 5"}
+
+	var inputFields = []string{"input 1", "input 2", "input 3", "input 4", "input 5", "input 6", "input 7"}
 
 	// Create records
 	CubeRecipes = make([]*CubeRecipeRecord, len(d.Data))

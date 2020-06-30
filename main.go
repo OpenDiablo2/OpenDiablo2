@@ -449,6 +449,8 @@ func loadDataDict() error {
 		{d2resource.SuperUniques, d2datadict.LoadSuperUniques},
 	}
 
+	d2datadict.InitObjectRecords()
+
 	for _, entry := range entries {
 		data, err := d2asset.LoadFile(entry.path)
 		if err != nil {

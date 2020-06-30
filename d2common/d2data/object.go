@@ -5,9 +5,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 )
 
+// Object is a game world object
 type Object struct {
 	Type       int
-	Id         int
+	Id         int //nolint:golint Id is the right key
 	X          int
 	Y          int
 	Flags      int

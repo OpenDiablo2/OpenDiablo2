@@ -58,7 +58,7 @@ type DifficultyLevelRecord struct {
 	ManaStealDivisor int // ManaStealDivisor
 
 	// -----------------------------------------------------------------------
-	// Gravestench: The rest of these are listed on PK page, but not present in
+	// The rest of these are listed on PK page, but not present in
 	// my copy of the txt file (patch_d2/data/global/excel/difficultylevels.txt)
 	// so I am going to leave these comments
 

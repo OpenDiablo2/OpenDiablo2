@@ -8,13 +8,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
-var MagicPrefixDictionary *d2common.DataDictionary
-var MagicSuffixDictionary *d2common.DataDictionary
-
-var MagicPrefixRecords []*ItemAffixCommonRecord
-var MagicSuffixRecords []*ItemAffixCommonRecord
-
-var AffixMagicGroups []*ItemAffixCommonGroup
+// MagicPrefix + MagicSuffix store item affix records
+var MagicPrefix []*ItemAffixCommonRecord //nolint:gochecknoglobals // Currently global by design
+var MagicSuffix []*ItemAffixCommonRecord //nolint:gochecknoglobals // Currently global by design
 
 // LoadMagicPrefix loads MagicPrefix.txt
 func LoadMagicPrefix(file []byte) {
@@ -22,7 +18,7 @@ func LoadMagicPrefix(file []byte) {
 
 	subType := d2enum.ItemAffixMagic
 
-	MagicPrefixDictionary, MagicPrefixRecords = loadDictionary(file, superType, subType)
+	MagicPrefix = loadDictionary(file, superType, subType)
 }
 
 // LoadMagicSuffix loads MagicSuffix.txt
@@ -31,11 +27,11 @@ func LoadMagicSuffix(file []byte) {
 
 	subType := d2enum.ItemAffixMagic
 
-	MagicSuffixDictionary, MagicSuffixRecords = loadDictionary(file, superType, subType)
+	MagicSuffix = loadDictionary(file, superType, subType)
 }
 
 func getAffixString(t1 d2enum.ItemAffixSuperType, t2 d2enum.ItemAffixSubType) string {
-	var name string = ""
+	var name = ""
 
 	if t2 == d2enum.ItemAffixMagic {
 		name = "Magic"
@@ -55,57 +51,14 @@ func loadDictionary(
 	file []byte,
 	superType d2enum.ItemAffixSuperType,
 	subType d2enum.ItemAffixSubType,
-) (*d2common.DataDictionary, []*ItemAffixCommonRecord) {
+) []*ItemAffixCommonRecord {
 	dict := d2common.LoadDataDictionary(string(file))
 	records := createItemAffixRecords(dict, superType, subType)
 	name := getAffixString(superType, subType)
 	log.Printf("Loaded %d %s records", len(dict.Data), name)
 
-	return dict, records
+	return records
 }
-
-// --- column names from d2exp.mpq:/data/globa/excel/MagicPrefix.txt
-// Name
-// version
-// spawnable
-// rare
-// level
-// maxlevel
-// levelreq
-// classspecific
-// class
-// classlevelreq
-// frequency
-// group
-// mod1code
-// mod1param
-// mod1min
-// mod1max
-// mod2code
-// mod2param
-// mod2min
-// mod2max
-// mod3code
-// mod3param
-// mod3min
-// mod3max
-// transform
-// transformcolor
-// itype1
-// itype2
-// itype3
-// itype4
-// itype5
-// itype6
-// itype7
-// etype1
-// etype2
-// etype3
-// etype4
-// etype5
-// divide
-// multiply
-// add
 
 func createItemAffixRecords(
 	d *d2common.DataDictionary,
@@ -177,7 +130,7 @@ func createItemAffixRecords(
 		}
 
 		group := ItemAffixGroups[affix.GroupID]
-		group.AddMember(affix)
+		group.addMember(affix)
 
 		records = append(records, affix)
 	}
@@ -185,14 +138,16 @@ func createItemAffixRecords(
 	return records
 }
 
-var ItemAffixGroups map[int]*ItemAffixCommonGroup
+// ItemAffixGroups are groups of MagicPrefix/Suffixes
+var ItemAffixGroups map[int]*ItemAffixCommonGroup //nolint:gochecknoglobals // Currently global by design
 
+// ItemAffixCommonGroup is a grouping that is common between prefix/suffix
 type ItemAffixCommonGroup struct {
 	ID      int
 	Members map[string]*ItemAffixCommonRecord
 }
 
-func (g *ItemAffixCommonGroup) AddMember(a *ItemAffixCommonRecord) {
+func (g *ItemAffixCommonGroup) addMember(a *ItemAffixCommonRecord) {
 	if g.Members == nil {
 		g.Members = make(map[string]*ItemAffixCommonRecord)
 	}
@@ -200,7 +155,7 @@ func (g *ItemAffixCommonGroup) AddMember(a *ItemAffixCommonRecord) {
 	g.Members[a.Name] = a
 }
 
-func (g *ItemAffixCommonGroup) GetTotalFrequency() int {
+func (g *ItemAffixCommonGroup) getTotalFrequency() int {
 	total := 0
 
 	for _, affix := range g.Members {
@@ -210,6 +165,9 @@ func (g *ItemAffixCommonGroup) GetTotalFrequency() int {
 	return total
 }
 
+// ItemAffixCommonModifier is the generic modifier form that prefix/suffix shares
+// modifiers are like dynamic properties, they have a key that points to a property
+// a parameter for the property, and a min/max value
 type ItemAffixCommonModifier struct {
 	Code      string
 	Parameter int
@@ -217,46 +175,49 @@ type ItemAffixCommonModifier struct {
 	Max       int
 }
 
+// ItemAffixCommonRecord is a common definition that both prefix and suffix use
 type ItemAffixCommonRecord struct {
-	Name    string
+	Group     *ItemAffixCommonGroup
+	Modifiers []*ItemAffixCommonModifier
+
+	ItemInclude []string
+	ItemExclude []string
+
+	Name           string
+	Class          string
+	TransformColor string
+
 	Version int
 	Type    d2enum.ItemAffixSubType
+
+	Level    int
+	MaxLevel int
+
+	LevelReq      int
+	ClassLevelReq int
+
+	Frequency int
+	GroupID   int
+
+	PriceAdd   int
+	PriceScale int
 
 	IsPrefix bool
 	IsSuffix bool
 
 	Spawnable bool
 	Rare      bool
-
-	Level    int
-	MaxLevel int
-
-	LevelReq      int
-	Class         string
-	ClassLevelReq int
-
-	Frequency int
-	GroupID   int
-	Group     *ItemAffixCommonGroup
-
-	Modifiers []*ItemAffixCommonModifier
-
-	Transform      bool
-	TransformColor string
-
-	ItemInclude []string
-	ItemExclude []string
-
-	PriceAdd   int
-	PriceScale int
+	Transform bool
 }
 
+// ProbabilityToSpawn returns the chance of the affix spawning on an
+// item with a given quality level
 func (a *ItemAffixCommonRecord) ProbabilityToSpawn(qlvl int) float64 {
 	if (qlvl > a.MaxLevel) || (qlvl < a.Level) {
 		return 0.0
 	}
 
-	p := float64(a.Frequency) / float64(a.Group.GetTotalFrequency())
+	p := float64(a.Frequency) / float64(a.Group.getTotalFrequency())
 
 	return p
 }

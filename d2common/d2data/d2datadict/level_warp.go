@@ -6,6 +6,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// LevelWarpRecord is a representation of a row from lvlwarp.txt
+// it describes the warp graphics offsets and dimensions for levels
 type LevelWarpRecord struct {
 	ID         int32
 	SelectX    int32
@@ -21,8 +23,8 @@ type LevelWarpRecord struct {
 	Direction  string
 }
 
-//nolint:gochecknoglobals // Currently global by design, only written once
 // LevelWarps loaded from txt records
+//nolint:gochecknoglobals // Currently global by design, only written once
 var LevelWarps map[int]*LevelWarpRecord
 
 // LoadLevelWarps loads LevelWarpRecord's from text file data

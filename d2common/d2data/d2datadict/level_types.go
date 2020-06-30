@@ -7,17 +7,21 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// LevelTypeRecord is a representation of a row from lvltype.txt
+// the fields describe what ds1 files a level uses
 type LevelTypeRecord struct {
+	Files     [32]string
 	Name      string
 	ID        int
-	Files     [32]string
-	Beta      bool
 	Act       int
+	Beta      bool
 	Expansion bool
 }
 
-var LevelTypes []LevelTypeRecord
+// LevelTypes stores all of the LevelTypeRecords
+var LevelTypes []LevelTypeRecord //nolint:gochecknoglobals // Currently global by design,
 
+// LoadLevelTypes loads the LevelTypeRecords
 func LoadLevelTypes(file []byte) {
 	data := strings.Split(string(file), "\r\n")[1:]
 	LevelTypes = make([]LevelTypeRecord, len(data))
