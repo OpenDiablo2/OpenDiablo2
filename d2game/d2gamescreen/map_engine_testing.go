@@ -25,7 +25,7 @@ type RegionSpec struct {
 }
 
 var regions = []RegionSpec{
-	//Act I
+	// Act I
 	{d2enum.RegionAct1Town, 1, 3, []int{}},
 	{d2enum.RegionAct1Wilderness, 4, 52, []int{
 		108,
@@ -41,7 +41,7 @@ var regions = []RegionSpec{
 	{d2enum.RegionAct1Catacombs, 258, 299, []int{}},
 	{d2enum.RegionAct1Tristram, 300, 300, []int{}},
 
-	//Act II
+	// Act II
 	{d2enum.RegionAct2Town, 301, 301, []int{}},
 	{d2enum.RegionAct2Sewer, 302, 352, []int{}},
 	{d2enum.RegionAct2Harem, 353, 357, []int{}},
@@ -51,7 +51,7 @@ var regions = []RegionSpec{
 	{d2enum.RegionAct2Lair, 482, 509, []int{}},
 	{d2enum.RegionAct2Arcane, 510, 528, []int{}},
 
-	//Act III
+	// Act III
 	{d2enum.RegionAct3Town, 529, 529, []int{}},
 	{d2enum.RegionAct3Jungle, 530, 604, []int{}},
 	{d2enum.RegionAct3Kurast, 605, 658, []int{
@@ -63,12 +63,12 @@ var regions = []RegionSpec{
 	{d2enum.RegionAct3Dungeon, 665, 704, []int{}},
 	{d2enum.RegionAct3Sewer, 705, 747, []int{}},
 
-	//Act IV
+	// Act IV
 	{d2enum.RegionAct4Town, 797, 798, []int{}},
 	{d2enum.RegionAct4Mesa, 799, 835, []int{}},
 	{d2enum.RegionAct4Lava, 836, 862, []int{}},
 
-	//Act V -- broken or wrong order
+	// Act V -- broken or wrong order
 	{d2enum.RegonAct5Town, 863, 864, []int{}},
 	{d2enum.RegionAct5Siege, 865, 879, []int{}},
 	{d2enum.RegionAct5Barricade, 880, 1002, []int{}},
@@ -103,22 +103,26 @@ func CreateMapEngineTest(currentRegion int, levelPreset int, term d2interface.Te
 		terminal:      term,
 	}
 	result.gameState = d2player.CreateTestGameState()
+
 	return result
 }
 
 func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 	log.Printf("Loaded region: Type(%d) LevelPreset(%d) FileIndex(%d)", n, levelPreset, fileIndex)
 	d2maprenderer.InvalidateImageCache()
+
 	for _, spec := range regions {
 		if spec.regionType == d2enum.RegionIdType(n) {
 			met.regionSpec = spec
 			inExtra := false
+
 			for _, e := range spec.extra {
 				if e == levelPreset {
 					inExtra = true
 					break
 				}
 			}
+
 			if !inExtra {
 				if levelPreset < spec.startPresetIndex {
 					levelPreset = spec.startPresetIndex
@@ -128,6 +132,7 @@ func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 					levelPreset = spec.endPresetIndex
 				}
 			}
+
 			met.levelPreset = levelPreset
 		}
 	}
@@ -141,6 +146,7 @@ func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex, true)
 		met.mapEngine.RegenerateWalkPaths()
 	}
+
 	met.mapRenderer.SetMapEngine(met.mapEngine)
 	met.mapRenderer.MoveCameraTo(met.mapRenderer.WorldToOrtho(met.mapEngine.GetCenterPosition()))
 }
@@ -148,9 +154,13 @@ func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 	d2input.BindHandler(met)
 	loading.Progress(0.2)
+
 	met.mapEngine = d2mapengine.CreateMapEngine()
+
 	loading.Progress(0.5)
+
 	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.mapEngine, met.terminal)
+
 	loading.Progress(0.7)
 	met.LoadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
 }
@@ -263,6 +273,7 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 func (met *MapEngineTest) Advance(tickTime float64) error {
 	met.mapEngine.Advance(tickTime)
 	met.mapRenderer.Advance(tickTime)
+
 	return nil
 }
 
@@ -302,14 +313,15 @@ func (met *MapEngineTest) OnKeyDown(event d2input.KeyEvent) bool {
 	}
 
 	if event.Key == d2input.KeyN {
-		if event.KeyMod == d2input.KeyModControl {
+		switch event.KeyMod {
+		case d2input.KeyModControl:
 			//met.fileIndex = increment(met.fileIndex, 0, met.filesCount-1)
 			met.fileIndex++
 			d2screen.SetNextScreen(met)
-		} else if event.KeyMod == d2input.KeyModShift {
+		case d2input.KeyModShift:
 			met.levelPreset = increment(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
 			d2screen.SetNextScreen(met)
-		} else {
+		default:
 			met.currentRegion = increment(met.currentRegion, 0, len(regions))
 			d2screen.SetNextScreen(met)
 		}
@@ -318,14 +330,15 @@ func (met *MapEngineTest) OnKeyDown(event d2input.KeyEvent) bool {
 	}
 
 	if event.Key == d2input.KeyP {
-		if event.KeyMod == d2input.KeyModControl {
+		switch event.KeyMod {
+		case d2input.KeyModControl:
 			//met.fileIndex = decrement(met.fileIndex, 0, met.filesCount-1)
 			met.fileIndex--
 			d2screen.SetNextScreen(met)
-		} else if event.KeyMod == d2input.KeyModShift {
+		case d2input.KeyModShift:
 			met.levelPreset = decrement(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
 			d2screen.SetNextScreen(met)
-		} else {
+		default:
 			met.currentRegion = decrement(met.currentRegion, 0, len(regions))
 			d2screen.SetNextScreen(met)
 		}
@@ -341,6 +354,7 @@ func increment(v, min, max int) int {
 	if v > max {
 		return min
 	}
+
 	return v
 }
 
@@ -349,5 +363,6 @@ func decrement(v, min, max int) int {
 	if v < min {
 		return max
 	}
+
 	return v
 }
