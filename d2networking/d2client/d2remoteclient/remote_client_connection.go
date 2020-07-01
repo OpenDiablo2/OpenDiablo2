@@ -159,25 +159,23 @@ func (r *RemoteClientConnection) serverListener() {
 			continue
 		}
 
-		// Bytes to JSON
 		data, packetType, err := r.readPacket(buffer)
 		if err != nil {
 			log.Println("RemoteClientConnection: error", packetType, err)
 		}
 
-		// JSON to struct
 		packet, err := r.decodeToPacket(packetType, data)
 		if err != nil {
 			log.Println("RemoteClientConnection: error", packetType, err)
 		}
 
-		// Pass struct to GameClient
 		if err := r.SendPacketToClient(packet); err != nil {
 			log.Println("RemoteClientConnection: error", packetType, err)
 		}
 	}
 }
 
+// readPacket reads the packet type, decompresses the packet and returns a JSON string.
 func (r *RemoteClientConnection) readPacket(buffer []byte) (string, d2netpackettype.NetPacketType, error) {
 	buff := bytes.NewBuffer(buffer)
 
@@ -213,6 +211,8 @@ func (r *RemoteClientConnection) readPacket(buffer []byte) (string, d2netpackett
 	return sb.String(), packetType, nil
 }
 
+// decodeToPacket unmarshals the JSON string into the correct struct
+// and returns a NetPacket declaring that struct.
 func (r *RemoteClientConnection) decodeToPacket(t d2netpackettype.NetPacketType, data string) (d2netpacket.NetPacket, error) {
 	var np = d2netpacket.NetPacket{}
 
