@@ -152,7 +152,8 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		if err != nil {
 			log.Printf("GameClient: error responding to server ping: %s", err)
 		}
-
+	case d2netpackettype.PlayerDisconnectionNotification:
+		// Not implemented
 	case d2netpackettype.ServerClosed:
 		// TODO: Need to be tied into a character save and exit
 		log.Print("Server has been closed")

@@ -241,8 +241,14 @@ func (l *RemoteClientConnection) serverListener() {
 			}
 
 		case d2netpackettype.Ping:
-			err := l.SendPacketToServer(d2netpacket.CreatePongPacket(l.uniqueID))
-			if err != nil {
+			var packet d2netpacket.PingPacket
+			if err := json.Unmarshal([]byte(data), &packet); err != nil {
+				log.Printf(unmarshalErr, packetType, err)
+				continue
+			}
+
+			p := d2netpacket.NetPacket{PacketType: packetType, PacketData: packet}
+			if err := l.SendPacketToClient(p); err != nil {
 				log.Printf(sendToClientErr, packetType, err)
 			}
 
@@ -251,6 +257,11 @@ func (l *RemoteClientConnection) serverListener() {
 			if err := json.Unmarshal([]byte(data), &packet); err != nil {
 				log.Printf(unmarshalErr, packetType, err)
 				continue
+			}
+
+			p := d2netpacket.NetPacket{PacketType: packetType, PacketData: packet}
+			if err := l.SendPacketToClient(p); err != nil {
+				log.Printf(sendToClientErr, packetType, err)
 			}
 
 			log.Printf("RemoteClientConnection: received disconnect: %s", packet.Id)
