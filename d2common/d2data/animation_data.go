@@ -20,12 +20,13 @@ type AnimationDataRecord struct {
 }
 
 // AnimationData represents all of the animation data records, mapped by the COF index
-var AnimationData map[string][]*AnimationDataRecord
+var AnimationData map[string][]*AnimationDataRecord //nolint:gochecknoglobals // Currently global by design
 
 // LoadAnimationData loads the animation data table into the global AnimationData dictionary
 func LoadAnimationData(rawData []byte) {
 	AnimationData = make(map[string][]*AnimationDataRecord)
 	streamReader := d2common.CreateStreamReader(rawData)
+
 	for !streamReader.Eof() {
 		dataCount := int(streamReader.GetInt32())
 		for i := 0; i < dataCount; i++ {
@@ -37,11 +38,14 @@ func LoadAnimationData(rawData []byte) {
 			}
 			data.Flags = streamReader.ReadBytes(144)
 			cofIndex := strings.ToLower(data.COFName)
+
 			if _, found := AnimationData[cofIndex]; !found {
 				AnimationData[cofIndex] = make([]*AnimationDataRecord, 0)
 			}
+
 			AnimationData[cofIndex] = append(AnimationData[cofIndex], data)
 		}
 	}
+
 	log.Printf("Loaded %d animation data records", len(AnimationData))
 }

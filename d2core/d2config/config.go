@@ -1,3 +1,4 @@
+// Package d2config contains configuration objects and functions
 package d2config
 
 import (
@@ -9,6 +10,9 @@ import (
 	"runtime"
 )
 
+const defaultSfxVolume = 1.0
+const defaultBgmVolume = 0.3
+
 func getDefaultConfig() *Configuration {
 	config := &Configuration{
 		Language:        "ENG",
@@ -16,8 +20,8 @@ func getDefaultConfig() *Configuration {
 		TicksPerSecond:  -1,
 		RunInBackground: true,
 		VsyncEnabled:    true,
-		SfxVolume:       1.0,
-		BgmVolume:       0.3,
+		SfxVolume:       defaultSfxVolume,
+		BgmVolume:       defaultBgmVolume,
 		MpqPath:         "C:/Program Files (x86)/Diablo II",
 		MpqLoadOrder: []string{
 			"Patch_D2.mpq",
@@ -36,8 +40,7 @@ func getDefaultConfig() *Configuration {
 
 	switch runtime.GOOS {
 	case "windows":
-		switch runtime.GOARCH {
-		case "386":
+		if runtime.GOARCH == "386" {
 			config.MpqPath = "C:/Program Files/Diablo II"
 		}
 	case "darwin":
@@ -77,17 +80,25 @@ func getLocalConfigPath() string {
 }
 
 func load(configPath string) error {
-	configFile, err := os.Open(configPath)
-	if err != nil {
-		return err
-	}
-	defer configFile.Close()
-	data, err := ioutil.ReadAll(configFile)
+	configFile, err := os.Open(configPath) //nolint:gosec will fix the security error later
+
 	if err != nil {
 		return err
 	}
 
-	if err := json.Unmarshal(data, &singleton); err != nil {
+	data, err := ioutil.ReadAll(configFile)
+
+	if err != nil {
+		return err
+	}
+
+	if err = json.Unmarshal(data, &singleton); err != nil {
+		return err
+	}
+
+	err = configFile.Close()
+
+	if err != nil {
 		return err
 	}
 
@@ -96,22 +107,30 @@ func load(configPath string) error {
 
 func save(configPath string) error {
 	configDir := path.Dir(configPath)
-	if err := os.MkdirAll(configDir, 0755); err != nil {
+
+	if err := os.MkdirAll(configDir, 0750); err != nil {
 		return err
 	}
 
 	configFile, err := os.Create(configPath)
+
 	if err != nil {
 		return err
 	}
-	defer configFile.Close()
 
 	data, err := json.MarshalIndent(singleton, "", "    ")
+
 	if err != nil {
 		return err
 	}
 
 	if _, err := configFile.Write(data); err != nil {
+		return err
+	}
+
+	err = configFile.Close()
+
+	if err != nil {
 		return err
 	}
 

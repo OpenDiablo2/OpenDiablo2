@@ -7,35 +7,53 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
+// ItemStatCostRecord represents a row from itemstatcost.txt
+// these records describe the stat values and costs (in shops) of items
 // refer to https://d2mods.info/forum/kb/viewarticle?a=448
 type ItemStatCostRecord struct {
-	Name  string
-	Index int
+	Name    string
+	OpBase  string
+	OpStat1 string
+	OpStat2 string
+	OpStat3 string
 
-	Signed   bool // whether the stat is signed
-	KeepZero bool // prevent from going negative (assume only client side)
+	MaxStat         string // if Direct true, will not exceed val of MaxStat
+	DescStrPos      string // string used when val is positive
+	DescStrNeg      string
+	DescStr2        string // additional string used by some string funcs
+	DescGroupStrPos string // string used when val is positive
+	DescGroupStrNeg string
+	DescGroupStr2   string // additional string used by some string funcs
+
+	// Stuff
+	// Stay far away from this column unless you really know what you're
+	// doing and / or work for Blizzard, this column is used during bin-file
+	// creation to generate a cache regulating the op-stat stuff and other
+	// things, changing it can be futile, it works like the constants column
+	// in MonUMod.txt and has no other relation to ItemStatCost.txt, the first
+	// stat in the file simply must have this set or else you may break the
+	// entire op stuff.
+	Stuff string
+
+	DescFn      interface{} // the sprintf func
+	DescGroupFn interface{} // group sprintf func
+
+	Index int
 
 	// path_d2.mpq version doesnt have Ranged columne, excluding for now
 	// Ranged  bool // game attempts to keep stat in a range, like strength >-1
 	MinAccr int // minimum ranged value
 
-	UpdateAnimRate bool // when altered, forces speed handler to adjust speed
+	SendBits  int // #bits to send in stat update
+	SendParam int // #bits to send in stat update
 
-	SendOther bool // whether to send to other clients
-	SendBits  int  // #bits to send in stat update
-	SendParam int  // #bits to send in stat update
-
-	Saved       bool // whether this stat is saved in .d2s files
-	SavedSigned bool // whether the stat is saved as signed/unsigned
-	SavedBits   int  // #bits allocated to the value in .d2s file
+	SavedBits int // #bits allocated to the value in .d2s file
 
 	SaveBits      int // #bits saved to .d2s files, max == 2^SaveBits-1
 	SaveAdd       int // how large the negative range is (lowers max, as well)
 	SaveParamBits int // #param bits are saved (safe value is 17)
 
-	Encode EncodingType // how the stat is encoded in .d2s files
-
-	CallbackEnabled bool // whether callback fn is called if value changes
+	Encode d2enum.EncodingType // how the stat is encoded in .d2s files
 
 	// these two fields control additional cost on items
 	// cost * (1 + value * multiply / 1024)) + add (...)
@@ -48,20 +66,8 @@ type ItemStatCostRecord struct {
 	ValShift int // controls how stat is stored in .d2s
 	// so that you can save `+1` instead of `+256`
 
-	OperatorType OperatorType
+	OperatorType d2enum.OperatorType
 	OpParam      int
-	OpBase       string
-	OpStat1      string
-	OpStat2      string
-	OpStat3      string
-
-	Direct  bool   // whether is temporary or permanent
-	MaxStat string // if Direct true, will not exceed val of MaxStat
-
-	ItemSpecific bool // prevents stacking with an existing stat on item
-	// like when socketing a jewel
-
-	DamageRelated bool // prevents stacking of stats while dual wielding
 
 	EventID1     d2enum.ItemEventType
 	EventID2     d2enum.ItemEventType
@@ -70,175 +76,35 @@ type ItemStatCostRecord struct {
 
 	DescPriority int // determines order when displayed
 	DescFnID     d2enum.DescFuncID
-	DescFn       interface{} // the sprintf func
 
 	// Controls whenever and if so in what way the stat value is shown
 	// 0 = doesn't show the value of the stat
 	// 1 = shows the value of the stat infront of the description
 	// 2 = shows the value of the stat after the description.
-	DescVal    int
-	DescStrPos string // string used when val is positive
-	DescStrNeg string
-	DescStr2   string // additional string used by some string funcs
+	DescVal int
 
 	// when stats in the same group have the same value they use the
 	// group func for desc (they need to be in the same affix)
 	DescGroup       int
-	DescGroupFuncID d2enum.DescFuncID
-	DescGroupFn     interface{} // group sprintf func
 	DescGroupVal    int
-	DescGroupStrPos string // string used when val is positive
-	DescGroupStrNeg string
-	DescGroupStr2   string // additional string used by some string funcs
+	DescGroupFuncID d2enum.DescFuncID
 
-	// Stay far away from this column unless you really know what you're
-	// doing and / or work for Blizzard, this column is used during bin-file
-	// creation to generate a cache regulating the op-stat stuff and other
-	// things, changing it can be futile, it works like the constants column
-	// in MonUMod.txt and has no other relation to ItemStatCost.txt, the first
-	// stat in the file simply must have this set or else you may break the
-	// entire op stuff.
-	Stuff string // ? TODO ?
+	CallbackEnabled bool // whether callback fn is called if value changes
+	Signed          bool // whether the stat is signed
+	KeepZero        bool // prevent from going negative (assume only client side)
+	UpdateAnimRate  bool // when altered, forces speed handler to adjust speed
+	SendOther       bool // whether to send to other clients
+	Saved           bool // whether this stat is saved in .d2s files
+	SavedSigned     bool // whether the stat is saved as signed/unsigned
+	Direct          bool // whether is temporary or permanent
+	ItemSpecific    bool // prevents stacking with an existing stat on item
+	// like when socketing a jewel
+
+	DamageRelated bool // prevents stacking of stats while dual wielding
 }
 
-type EncodingType int
-
-const (
-	// TODO: determine other encoding types.
-	// didn't see anything about how this stuff is encoded, or the types...
-	EncodeDefault = EncodingType(iota)
-)
-
-type OperatorType int // for dynamic properties
-
-const (
-	// just adds the stat to the unit directly
-	OpDefault = OperatorType(iota)
-
-	// Op1 adds opstat.base * statvalue / 100 to the opstat.
-	Op1
-
-	// Op2 adds (statvalue * basevalue) / (2 ^ param) to the opstat
-	// this does not work properly with any stat other then level because of the
-	// way this is updated, it is only refreshed when you re-equip the item,
-	// your character is saved or you level up, similar to passive skills, just
-	// because it looks like it works in the item description
-	// does not mean it does, the game just recalculates the information in the
-	// description every frame, while the values remain unchanged serverside.
-	Op2
-
-	// Op3 is a percentage based version of op #2
-	// look at op #2 for information about the formula behind it, just
-	// remember the stat is increased by a percentage rather then by adding
-	// an integer.
-	Op3
-
-	// Op4 works the same way op #2 works, however the stat bonus is
-	// added to the item and not to the player (so that +defense per level
-	// properly adds the defense to the armor and not to the character
-	// directly!)
-	Op4
-
-	// Op5 works like op #4 but is percentage based, it is used for percentage
-	// based increase of stats that are found on the item itself, and not stats
-	// that are found on the character.
-	Op5
-
-	// Op6 works like for op #7, however this adds a plain bonus to the stat, and just
-	// like #7 it also doesn't work so I won't bother to explain the arithmetic
-	// behind it either.
-	Op6
-
-	// Op7 is used to increase a stat based on the current daytime of the game
-	// world by a percentage, there is no need to explain the arithmetics
-	// behind it because frankly enough it just doesn't work serverside, it
-	// only updates clientside so this op is essentially useless.
-	Op7
-
-	// Op8 hardcoded to work only with maxmana, this will apply the proper amount
-	// of mana to your character based on CharStats.txt for the amount of energy
-	// the stat added (doesn't work for non characters)
-	Op8
-
-	// Op9 hardcoded to work only with maxhp and maxstamina, this will apply the
-	// proper amount of maxhp and maxstamina to your character based on
-	// CharStats.txt for the amount of vitality the stat added (doesn't work
-	// for non characters)
-	Op9
-
-	// Op10 doesn't do anything, this has no switch case in the op function.
-	Op10
-
-	// Op11 adds opstat.base * statvalue / 100 similar to 1 and 13, the code just
-	// does a few more checks
-	Op11
-
-	// Op12 doesn't do anything, this has no switch case in the op function.
-	Op12
-
-	// Op13 adds opstat.base * statvalue / 100 to the value of opstat, this is
-	// useable only on items it will not apply the bonus to other unit types
-	// (this is why it is used for +% durability, +% level requirement,
-	// +% damage, +% defense ).
-	Op13
-)
-
-/* column names from path_d2.mpq/data/global/excel/ItemStatCost.txt
-Stat
-ID
-Send Other
-Signed
-Send Bits
-Send Param Bits
-UpdateAnimRate
-Saved
-CSvSigned
-CSvBits
-CSvParam
-fCallback
-fMin
-MinAccr
-Encode
-Add
-Multiply
-Divide
-ValShift
-1.09-Save Bits
-1.09-Save Add
-Save Bits
-Save Add
-Save Param Bits
-keepzero
-op
-op param
-op base
-op stat1
-op stat2
-op stat3
-direct
-maxstat
-itemspecific
-damagerelated
-itemevent1
-itemeventfunc1
-itemevent2
-itemeventfunc2
-descpriority
-descfunc
-descval
-descstrpos
-descstrneg
-descstr2
-dgrp
-dgrpfunc
-dgrpval
-dgrpstrpos
-dgrpstrneg
-dgrpstr2
-stuff
-*eol
-*/
-
+// ItemStatCosts stores all of the ItemStatCostRecords
+//nolint:gochecknoglobals // Currently global by design
 var ItemStatCosts map[string]*ItemStatCostRecord
 
 // LoadItemStatCosts loads ItemStatCostRecord's from text
@@ -271,7 +137,7 @@ func LoadItemStatCosts(file []byte) {
 			SaveAdd:       d.GetNumber("Save Add", idx),
 			SaveParamBits: d.GetNumber("Save Param Bits", idx),
 
-			Encode: EncodingType(d.GetNumber("Encode", idx)),
+			Encode: d2enum.EncodingType(d.GetNumber("Encode", idx)),
 
 			CallbackEnabled: d.GetNumber("fCallback", idx) > 0,
 
@@ -279,7 +145,7 @@ func LoadItemStatCosts(file []byte) {
 			CostMultiply: d.GetNumber("Multiply", idx),
 			ValShift:     d.GetNumber("ValShift", idx),
 
-			OperatorType: OperatorType(d.GetNumber("op", idx)),
+			OperatorType: d2enum.OperatorType(d.GetNumber("op", idx)),
 			OpParam:      d.GetNumber("op param", idx),
 			OpBase:       d.GetString("op base", idx),
 			OpStat1:      d.GetString("op stat1", idx),

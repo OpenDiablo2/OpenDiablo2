@@ -1,23 +1,60 @@
 package d2enum
 
+// CompositeType represents a composite type
 type CompositeType int
 
 const (
-	CompositeTypeHead      CompositeType = 0
-	CompositeTypeTorso     CompositeType = 1
-	CompositeTypeLegs      CompositeType = 2
-	CompositeTypeRightArm  CompositeType = 3
-	CompositeTypeLeftArm   CompositeType = 4
-	CompositeTypeRightHand CompositeType = 5
-	CompositeTypeLeftHand  CompositeType = 6
-	CompositeTypeShield    CompositeType = 7
-	CompositeTypeSpecial1  CompositeType = 8
-	CompositeTypeSpecial2  CompositeType = 9
-	CompositeTypeSpecial3  CompositeType = 10
-	CompositeTypeSpecial4  CompositeType = 11
-	CompositeTypeSpecial5  CompositeType = 12
-	CompositeTypeSpecial6  CompositeType = 13
-	CompositeTypeSpecial7  CompositeType = 14
-	CompositeTypeSpecial8  CompositeType = 15
-	CompositeTypeMax       CompositeType = 16
+
+	// CompositeTypeHead is a composite type for heads
+	CompositeTypeHead CompositeType = iota // HD
+
+	// CompositeTypeTorso is a composite type for torsos
+	CompositeTypeTorso // TR
+
+	// CompositeTypeLegs is a composite type for legs
+	CompositeTypeLegs // LG
+
+	// CompositeTypeRightArm is a composite type for right arms
+	CompositeTypeRightArm // RA
+
+	// CompositeTypeLeftArm is a composite type for left arms
+	CompositeTypeLeftArm // LA
+
+	// CompositeTypeRightHand is a composite type for right hands
+	CompositeTypeRightHand // RH
+
+	// CompositeTypeLeftHand is a composite type for left hands
+	CompositeTypeLeftHand // LH
+
+	// CompositeTypeShield is a composite type for shields
+	CompositeTypeShield // SH
+
+	// CompositeTypeSpecial1 is a composite type for special type 1s
+	CompositeTypeSpecial1 // S1
+
+	// CompositeTypeSpecial2 is a composite type for special type 2s
+	CompositeTypeSpecial2 // S2
+
+	// CompositeTypeSpecial3 is a composite type for special type 3s
+	CompositeTypeSpecial3 // S3
+
+	// CompositeTypeSpecial4 is a composite type for special type 4s
+	CompositeTypeSpecial4 // S4
+
+	// CompositeTypeSpecial5 is a composite type for special type 5s
+	CompositeTypeSpecial5 // S5
+
+	// CompositeTypeSpecial6 is a composite type for special type 6s
+	CompositeTypeSpecial6 // S6
+
+	// CompositeTypeSpecial7 is a composite type for special type 7s
+	CompositeTypeSpecial7 // S7
+
+	// CompositeTypeSpecial8 is a composite type for special type 8s
+	CompositeTypeSpecial8 // S8
+
+	// CompositeTypeMax is used to determine the max number of composite types
+	CompositeTypeMax
 )
+
+//go:generate stringer -linecomment -type CompositeType

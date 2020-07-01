@@ -6,13 +6,12 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
@@ -116,21 +115,42 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2mapentity.MapEntity 
 	entities := make([]d2mapentity.MapEntity, 0)
 
 	for _, object := range mr.ds1.Objects {
-
-		switch object.Lookup.Type {
-		case d2datadict.ObjectTypeCharacter:
-			if object.Lookup.Base != "" && object.Lookup.Token != "" && object.Lookup.TR != "" {
-				npc := d2mapentity.CreateNPC((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, object.Lookup, 0)
+		if object.Type == int(d2enum.ObjectTypeCharacter) {
+			monstat := d2datadict.MonStats[d2datadict.MonPresets[mr.ds1.Act][object.Id]]
+			// If monstat is nil here it is a place_ type object, idk how to handle those yet.
+			// (See monpreset and monplace txts for reference)
+			if monstat != nil {
+				// Temorary use of Lookup.
+				npc := d2mapentity.CreateNPC((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, monstat, 0)
 				npc.SetPaths(convertPaths(tileOffsetX, tileOffsetY, object.Paths))
 				entities = append(entities, npc)
 			}
-		case d2datadict.ObjectTypeItem:
-			if object.ObjectInfo != nil && object.ObjectInfo.Draw && object.Lookup.Base != "" && object.Lookup.Token != "" {
-				entity, err := d2mapentity.CreateObject((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, object.Lookup, d2resource.PaletteUnits)
+		}
+
+		if object.Type == int(d2enum.ObjectTypeItem) {
+			// For objects the DS1 ID to objectID is hardcoded in the game
+			// use the lookup table
+			lookup := d2datadict.LookupObject(int(mr.ds1.Act), object.Type, object.Id)
+
+			if lookup == nil {
+				continue
+			}
+
+			objectRecord := d2datadict.Objects[lookup.ObjectsTxtId]
+
+			if objectRecord != nil {
+				// The lookup is used deeper in for crap without checking other sources :(
+				// Bail out here for now
+				if !objectRecord.Draw || lookup.Base == "" || objectRecord.Token == "" {
+					continue
+				}
+
+				entity, err := d2mapentity.CreateObject((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, lookup, d2resource.PaletteUnits)
+
 				if err != nil {
 					panic(err)
 				}
-				entity.SetMode(object.Lookup.Mode, object.Lookup.Class, 0)
+
 				entities = append(entities, entity)
 			}
 		}

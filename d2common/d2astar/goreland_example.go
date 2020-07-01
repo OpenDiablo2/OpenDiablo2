@@ -4,28 +4,29 @@ package d2astar
 // the sake of testing.  This functionality forms the back end for
 // goreland_test.go, and serves as an example for how to use A* for a graph.
 
-
 // The Magical World of Goreland, is where Ted Stevens and Al Gore are from.
-// 
+//
 // It is composed of Big Trucks, and a Series of Tubes!
-// 
+//
 // Ok, it is basically just a Graph.
 // Nodes are called "Trucks" and they have X, Y coordinates
 // Edges are called "Tubes", they connect Trucks, and they have a cost
-// 
+//
 // The key differences between this example and the Tile world:
 // 1) There is no grid.  Trucks have arbitrary coordinates.
 // 2) Edges are not implied by the grid positions.  Instead edges are explicitly
 //    modelled as Tubes.
-// 
+//
 // The key similarities between this example and the Tile world:
 // 1) They both use Manhattan distance as their heuristic
 // 2) Both implement Pather
 
+//Goreland represents a world of trucks and tubes.
 type Goreland struct {
 	//	trucks map[int]*Truck		// not needed really
 }
 
+//Tube is an edge. They connect Trucks, and have a cost.
 type Tube struct {
 	from *Truck
 	to   *Truck
@@ -39,7 +40,7 @@ type Truck struct {
 	X, Y int
 
 	// array of tubes going to other trucks
-	out_to []Tube
+	outTo []Tube
 
 	label string
 }
@@ -49,8 +50,8 @@ func (t *Truck) PathNeighbors() []Pather {
 
 	neighbors := []Pather{}
 
-	for _, tube_element := range t.out_to {
-		neighbors = append(neighbors, Pather(tube_element.to))
+	for _, tubeElement := range t.outTo {
+		neighbors = append(neighbors, Pather(tubeElement.to))
 	}
 	return neighbors
 }
@@ -58,9 +59,9 @@ func (t *Truck) PathNeighbors() []Pather {
 // PathNeighborCost returns the cost of the tube leading to Truck.
 func (t *Truck) PathNeighborCost(to Pather) float64 {
 
-	for _, tube_element := range (t).out_to {
-		if Pather((tube_element.to)) == to {
-			return tube_element.Cost
+	for _, tubeElement := range (t).outTo {
+		if Pather((tubeElement.to)) == to {
+			return tubeElement.Cost
 		}
 	}
 	return 10000000

@@ -1,7 +1,9 @@
+// Package d2player contains the information necessary for managing players
 package d2player
 
 import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
+// EquipmentSlot represents an equipment slot for a player
 type EquipmentSlot struct {
 	item   InventoryItem
 	x      int
@@ -10,6 +12,7 @@ type EquipmentSlot struct {
 	height int
 }
 
+//nolint:gomnd Magic numbers are necessary for this file
 func genEquipmentSlotsMap() map[d2enum.EquippedSlotType]EquipmentSlot {
 	return map[d2enum.EquippedSlotType]EquipmentSlot{
 		d2enum.LeftArm: {

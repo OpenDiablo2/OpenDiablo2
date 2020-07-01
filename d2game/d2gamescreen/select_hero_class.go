@@ -438,7 +438,7 @@ func (v *SelectHeroClass) onExitButtonClicked() {
 }
 
 func (v *SelectHeroClass) onOkButtonClicked() {
-	gameState := d2player.CreatePlayerState(v.heroNameTextbox.GetText(), v.selectedHero, *d2datadict.CharStats[v.selectedHero], v.hardcoreCheckbox.GetCheckState())
+	gameState := d2player.CreatePlayerState(v.heroNameTextbox.GetText(), v.selectedHero, d2datadict.CharStats[v.selectedHero], v.hardcoreCheckbox.GetCheckState())
 	gameClient, _ := d2client.Create(d2clientconnectiontype.Local)
 	gameClient.Open(v.connectionHost, gameState.FilePath)
 	d2screen.SetNextScreen(CreateGame(v.audioProvider, gameClient, v.terminal))

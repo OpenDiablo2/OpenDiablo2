@@ -1,4 +1,3 @@
-// d2datadict contains loaders for the txt file data
 package d2datadict
 
 import (
@@ -29,7 +28,7 @@ type (
 		// column also links other hardcoded effects to the units, such as the
 		// transparency on necro summons and the name-color change on unique boss
 		// units (thanks to Kingpin for the info)
-		Id string // called `hcIdx` in monstats.txt
+		Id string // called `hcIdx` in monstats.txt //nolint:golint Id is the right key
 
 		// BaseKey is an ID pointer of the “base” unit for this specific
 		// monster type (ex. There are five types of “Fallen”; all of them have
@@ -82,9 +81,11 @@ type (
 		SpawnAnimationKey string // called `spawnmode` in monstats.txt
 
 		// MinionId1 is an Id of a minion that spawns when this monster is created
+		//nolint:golint Id is the right key
 		MinionId1 string // called `minion1` in monstats.txt
 
 		// MinionId2 is an Id of a minion that spawns when this monster is created
+		//nolint:golint Id is the right key
 		MinionId2 string // called `minion2` in monstats.txt
 
 		// SoundKeyNormal, SoundKeySpecial
@@ -114,14 +115,14 @@ type (
 		// the ID Pointer to the skill (from Skills.txt) the monster will cast when
 		// this specific slot is accessed by the AI. Which slots are used is
 		// determined by the units AI.
-		SkillId1 string // called `Skill1` in monstats.txt
-		SkillId2 string // called `Skill2` in monstats.txt
-		SkillId3 string // called `Skill3` in monstats.txt
-		SkillId4 string // called `Skill4` in monstats.txt
-		SkillId5 string // called `Skill5` in monstats.txt
-		SkillId6 string // called `Skill6` in monstats.txt
-		SkillId7 string // called `Skill7` in monstats.txt
-		SkillId8 string // called `Skill8` in monstats.txt
+		SkillId1 string // called `Skill1` in monstats.txt //nolint:golint Id is the right key
+		SkillId2 string // called `Skill2` in monstats.txt //nolint:golint Id is the right key
+		SkillId3 string // called `Skill3` in monstats.txt //nolint:golint Id is the right key
+		SkillId4 string // called `Skill4` in monstats.txt //nolint:golint Id is the right key
+		SkillId5 string // called `Skill5` in monstats.txt //nolint:golint Id is the right key
+		SkillId6 string // called `Skill6` in monstats.txt //nolint:golint Id is the right key
+		SkillId7 string // called `Skill7` in monstats.txt //nolint:golint Id is the right key
+		SkillId8 string // called `Skill8` in monstats.txt //nolint:golint Id is the right key
 
 		// SkillAnimation1 -- SkillAnimation8
 		// the graphical MODE (or SEQUENCE) this unit uses when it uses this skill.
@@ -138,6 +139,7 @@ type (
 		// ID Pointer to the skill that controls this units damage. This is used for
 		// the druids summons. IE their damage is specified solely by Skills.txt and
 		// not by MonStats.txt.
+		//nolint:golint Id is the right key
 		DamageSkillId string // called `SkillDamage` in monstats.txt
 
 		// ElementAttackMode1 -- ElementAttackMode3

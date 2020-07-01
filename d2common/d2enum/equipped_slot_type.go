@@ -1,9 +1,10 @@
 package d2enum
 
+// EquippedTypeSlot represents the type of equipment slot
 type EquippedSlotType int
 
 const (
-	Head      EquippedSlotType = 1
+	Head      EquippedSlotType = iota + 1
 	Torso     EquippedSlotType = 2
 	Legs      EquippedSlotType = 3
 	RightArm  EquippedSlotType = 4

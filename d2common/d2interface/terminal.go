@@ -7,22 +7,12 @@ import (
 // TermCategory applies styles to the lines in the  Terminal
 type TermCategory int
 
+// Terminal Category types
 const (
 	TermCategoryNone TermCategory = iota
 	TermCategoryInfo
 	TermCategoryWarning
 	TermCategoryError
-)
-
-// TermVis is an enumeration of the Terminal's visibility states
-type termVis int
-
-// Terminal visibility state
-const (
-	termVisHidden termVis = iota
-	termVisShowing
-	termVisShown
-	termVisHiding
 )
 
 // Terminal is a drop-down terminal and shell
@@ -37,10 +27,10 @@ type Terminal interface {
 	Render(surface Surface) error
 	Execute(command string) error
 	OutputRaw(text string, category TermCategory)
-	Output(format string, params ...interface{})
-	OutputInfo(format string, params ...interface{})
-	OutputWarning(format string, params ...interface{})
-	OutputError(format string, params ...interface{})
+	Outputf(format string, params ...interface{})
+	OutputInfof(format string, params ...interface{})
+	OutputWarningf(format string, params ...interface{})
+	OutputErrorf(format string, params ...interface{})
 	OutputClear()
 	IsVisible() bool
 	Hide()

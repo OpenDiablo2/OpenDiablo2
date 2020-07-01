@@ -7,15 +7,17 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// ObjectTypeRecord is a representation of a row from objtype.txt
 type ObjectTypeRecord struct {
 	Name  string
 	Token string
 }
 
-//nolint:gochecknoglobals // Currently global by design, only written once
 // ObjectTypes contains the name and token for objects
+//nolint:gochecknoglobals // Currently global by design, only written once
 var ObjectTypes []ObjectTypeRecord
 
+// LoadObjectTypes loads ObjectTypeRecords from objtype.txt
 func LoadObjectTypes(objectTypeData []byte) {
 	streamReader := d2common.CreateStreamReader(objectTypeData)
 	count := streamReader.GetInt32()

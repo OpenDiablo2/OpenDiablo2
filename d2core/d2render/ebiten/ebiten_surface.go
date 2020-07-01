@@ -5,6 +5,8 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/hajimehoshi/ebiten"
@@ -23,7 +25,7 @@ func (s *ebitenSurface) PushTranslation(x, y int) {
 	s.stateCurrent.y += y
 }
 
-func (s *ebitenSurface) PushCompositeMode(mode d2interface.CompositeMode) {
+func (s *ebitenSurface) PushCompositeMode(mode d2enum.CompositeMode) {
 	s.stateStack = append(s.stateStack, s.stateCurrent)
 	s.stateCurrent.mode = d2ToEbitenCompositeMode(mode)
 }
@@ -72,6 +74,22 @@ func (s *ebitenSurface) Render(sfc d2interface.Surface) error {
 
 	var img = sfc.(*ebitenSurface).image
 	return s.image.DrawImage(img, opts)
+}
+
+// Renders the section of the animation frame enclosed by bounds
+func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Rectangle) error {
+	opts := &ebiten.DrawImageOptions{CompositeMode: s.stateCurrent.mode}
+	opts.GeoM.Translate(float64(s.stateCurrent.x), float64(s.stateCurrent.y))
+	opts.Filter = s.stateCurrent.filter
+	if s.stateCurrent.color != nil {
+		opts.ColorM = ColorToColorM(s.stateCurrent.color)
+	}
+	if s.stateCurrent.brightness != 0 {
+		opts.ColorM.ChangeHSV(0, 1, s.stateCurrent.brightness)
+	}
+
+	var img = sfc.(*ebitenSurface).image
+	return s.image.DrawImage(img.SubImage(bound).(*ebiten.Image), opts)
 }
 
 func (s *ebitenSurface) DrawText(format string, params ...interface{}) {

@@ -1,10 +1,13 @@
 package d2player
 
 import (
+	"image"
 	"image/color"
 	"log"
 	"math"
 	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -14,7 +17,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -46,14 +48,10 @@ type GameControls struct {
 	FreeCam           bool
 	lastMouseX        int
 	lastMouseY        int
-	lastHealthPercent float64
-	lastManaPercent   float64
 
 	// UI
 	globeSprite        *d2ui.Sprite
 	hpManaStatusSprite *d2ui.Sprite
-	hpStatusBar        d2interface.Surface
-	manaStatusBar      d2interface.Surface
 	mainPanel          *d2ui.Sprite
 	menuButton         *d2ui.Sprite
 	skillIcon          *d2ui.Sprite
@@ -254,8 +252,6 @@ func (g *GameControls) Load() {
 	animation, _ = d2asset.LoadAnimation(d2resource.HealthManaIndicator, d2resource.PaletteSky)
 	g.hpManaStatusSprite, _ = d2ui.LoadSprite(animation)
 
-	g.hpStatusBar, _ = d2render.NewSurface(globeWidth, globeHeight, d2interface.FilterNearest)
-
 	animation, _ = d2asset.LoadAnimation(d2resource.GamePanels, d2resource.PaletteSky)
 	g.mainPanel, _ = d2ui.LoadSprite(animation)
 
@@ -367,27 +363,17 @@ func (g *GameControls) Render(target d2interface.Surface) {
 	g.mainPanel.SetPosition(offset, height)
 	g.mainPanel.Render(target)
 
+	// Health status bar
+	healthPercent := float64(g.hero.Stats.Health) / float64(g.hero.Stats.MaxHealth)
+	hpBarHeight := int(healthPercent * float64(globeHeight))
+	g.hpManaStatusSprite.SetCurrentFrame(0)
+	g.hpManaStatusSprite.SetPosition(offset+30, height-13)
+	g.hpManaStatusSprite.RenderSection(target, image.Rect(0, globeHeight-hpBarHeight, globeWidth, globeHeight))
+
 	// Left globe
 	g.globeSprite.SetCurrentFrame(0)
 	g.globeSprite.SetPosition(offset+28, height-5)
 	g.globeSprite.Render(target)
-
-	// Health status bar
-	healthPercent := float64(g.hero.Stats.Health) / float64(g.hero.Stats.MaxHealth)
-	hpBarHeight := int(healthPercent * float64(globeHeight))
-	if g.lastHealthPercent != healthPercent {
-		g.hpStatusBar, _ = d2render.NewSurface(globeWidth, hpBarHeight, d2interface.FilterNearest)
-		g.hpManaStatusSprite.SetCurrentFrame(0)
-		g.hpStatusBar.PushTranslation(0, hpBarHeight)
-
-		g.hpManaStatusSprite.Render(g.hpStatusBar)
-		g.hpStatusBar.Pop()
-		g.lastHealthPercent = healthPercent
-	}
-
-	target.PushTranslation(30, 508+(globeHeight-hpBarHeight))
-	target.Render(g.hpStatusBar)
-	target.Pop()
 
 	offset += w
 
@@ -414,7 +400,7 @@ func (g *GameControls) Render(target d2interface.Surface) {
 
 	// Stamina status bar
 	target.PushTranslation(273, 572)
-	target.PushCompositeMode(d2interface.CompositeModeLighter)
+	target.PushCompositeMode(d2enum.CompositeModeLighter)
 	staminaPercent := float64(g.hero.Stats.Stamina) / float64(g.hero.Stats.MaxStamina)
 	target.DrawRect(int(staminaPercent*staminaBarWidth), 19, color.RGBA{R: 175, G: 136, B: 72, A: 200})
 	target.PopN(2)
@@ -458,28 +444,18 @@ func (g *GameControls) Render(target d2interface.Surface) {
 	g.mainPanel.SetPosition(offset, height)
 	g.mainPanel.Render(target)
 
+	// Mana status bar
+	manaPercent := float64(g.hero.Stats.Mana) / float64(g.hero.Stats.MaxMana)
+	manaBarHeight := int(manaPercent * float64(globeHeight))
+	g.hpManaStatusSprite.SetCurrentFrame(1)
+	g.hpManaStatusSprite.SetPosition(offset+7, height-12)
+	g.hpManaStatusSprite.RenderSection(target, image.Rect(0, globeHeight-manaBarHeight, globeWidth, globeHeight))
+
 	// Right globe
 	g.globeSprite.SetCurrentFrame(1)
 	g.globeSprite.SetPosition(offset+8, height-8)
 	g.globeSprite.Render(target)
 	g.globeSprite.Render(target)
-
-	// Mana status bar
-	manaPercent := float64(g.hero.Stats.Mana) / float64(g.hero.Stats.MaxMana)
-	manaBarHeight := int(manaPercent * float64(globeHeight))
-	if manaPercent != g.lastManaPercent {
-		g.manaStatusBar, _ = d2render.NewSurface(globeWidth, manaBarHeight, d2interface.FilterNearest)
-		g.hpManaStatusSprite.SetCurrentFrame(1)
-
-		g.manaStatusBar.PushTranslation(0, manaBarHeight)
-		g.hpManaStatusSprite.Render(g.manaStatusBar)
-		g.manaStatusBar.Pop()
-
-		g.lastManaPercent = manaPercent
-	}
-	target.PushTranslation(offset+8, 508+(globeHeight-manaBarHeight))
-	target.Render(g.manaStatusBar)
-	target.Pop()
 
 	if g.isZoneTextShown {
 		g.zoneChangeText.SetPosition(width/2, height/4)
