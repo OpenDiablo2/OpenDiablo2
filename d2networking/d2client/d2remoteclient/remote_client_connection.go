@@ -146,9 +146,6 @@ func (l *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket
 func (l *RemoteClientConnection) serverListener() {
 	buffer := make([]byte, 4096)
 
-	unmarshalErr := "RemoteClientConnection: error unmarshalling %T: %s"
-	sendToClientErr := "RemoteClientConnection: error processing packet %v: %s"
-
 	for l.active {
 		n, _, err := l.udpConnection.ReadFromUDP(buffer)
 		if err != nil {
@@ -160,114 +157,120 @@ func (l *RemoteClientConnection) serverListener() {
 			continue
 		}
 
-		buff := bytes.NewBuffer(buffer)
-
-		packetTypeID, err := buff.ReadByte()
+		// Bytes to JSON
+		data, packetType, err := l.readPacket(buffer)
 		if err != nil {
-			log.Printf("RemoteClientConnection: error reading packet type: %s", err)
+			log.Println("RemoteClientConnection: error", packetType, err)
 		}
 
-		packetType := d2netpackettype.NetPacketType(packetTypeID)
-		reader, err := gzip.NewReader(buff)
+		// JSON to struct
+		packet, err := l.decodeToPacket(packetType, data)
 		if err != nil {
-			log.Printf("RemoteClientConnection: error reading packet type: %s", err)
+			log.Println("RemoteClientConnection: error", packetType, err)
 		}
 
-		sb := new(strings.Builder)
-
-		// This will throw errors where packets are not compressed. This doesn't
-		// break anything, so the gzip.ErrHeader error, is currently ignored to
-		// avoid noisy logging.
-		written, _ := io.Copy(sb, reader)
-
-		if err != nil && err != gzip.ErrHeader {
-			log.Printf("RemoteClientConnection: error copying bytes from %v packet: %s", packetType, err)
-		}
-
-		if written == 0 {
-			log.Printf("RemoteClientConnection: empty packet %v packet received", packetType)
-			continue
-		}
-
-		data := sb.String()
-
-		switch packetType {
-		case d2netpackettype.GenerateMap:
-			var packet d2netpacket.GenerateMapPacket
-			if err := json.Unmarshal([]byte(data), &packet); err != nil {
-				log.Printf(unmarshalErr, packetType, err)
-				continue
-			}
-
-			p := d2netpacket.NetPacket{PacketType: packetType, PacketData: packet}
-			if err := l.SendPacketToClient(p); err != nil {
-				log.Printf(sendToClientErr, packetType, err)
-			}
-
-		case d2netpackettype.MovePlayer:
-			var packet d2netpacket.MovePlayerPacket
-			if err := json.Unmarshal([]byte(data), &packet); err != nil {
-				log.Printf(unmarshalErr, packetType, err)
-				continue
-			}
-
-			p := d2netpacket.NetPacket{PacketType: packetType, PacketData: packet}
-			if err := l.SendPacketToClient(p); err != nil {
-				log.Printf(sendToClientErr, packetType, err)
-			}
-
-		case d2netpackettype.UpdateServerInfo:
-			var packet d2netpacket.UpdateServerInfoPacket
-			if err := json.Unmarshal([]byte(data), &packet); err != nil {
-				log.Printf(unmarshalErr, packetType, err)
-				continue
-			}
-
-			p := d2netpacket.NetPacket{PacketType: packetType, PacketData: packet}
-			if err := l.SendPacketToClient(p); err != nil {
-				log.Printf(sendToClientErr, packetType, err)
-			}
-
-		case d2netpackettype.AddPlayer:
-			var packet d2netpacket.AddPlayerPacket
-			if err := json.Unmarshal([]byte(data), &packet); err != nil {
-				log.Printf(unmarshalErr, packetType, err)
-				continue
-			}
-
-			p := d2netpacket.NetPacket{PacketType: packetType, PacketData: packet}
-			if err := l.SendPacketToClient(p); err != nil {
-				log.Printf(sendToClientErr, packetType, err)
-			}
-
-		case d2netpackettype.Ping:
-			var packet d2netpacket.PingPacket
-			if err := json.Unmarshal([]byte(data), &packet); err != nil {
-				log.Printf(unmarshalErr, packetType, err)
-				continue
-			}
-
-			p := d2netpacket.NetPacket{PacketType: packetType, PacketData: packet}
-			if err := l.SendPacketToClient(p); err != nil {
-				log.Printf(sendToClientErr, packetType, err)
-			}
-
-		case d2netpackettype.PlayerDisconnectionNotification:
-			var packet d2netpacket.PlayerDisconnectRequestPacket
-			if err := json.Unmarshal([]byte(data), &packet); err != nil {
-				log.Printf(unmarshalErr, packetType, err)
-				continue
-			}
-
-			p := d2netpacket.NetPacket{PacketType: packetType, PacketData: packet}
-			if err := l.SendPacketToClient(p); err != nil {
-				log.Printf(sendToClientErr, packetType, err)
-			}
-
-			log.Printf("RemoteClientConnection: received disconnect: %s", packet.Id)
-
-		default:
-			fmt.Printf("RemoteClientConnection: unknown packet type %v", packetType)
+		// Pass struct to GameClient
+		if err := l.SendPacketToClient(packet); err != nil {
+			log.Println("RemoteClientConnection: error", packetType, err)
 		}
 	}
+}
+
+func (l *RemoteClientConnection) readPacket(buffer []byte) (string, d2netpackettype.NetPacketType, error) {
+	buff := bytes.NewBuffer(buffer)
+
+	packetTypeID, err := buff.ReadByte()
+	if err != nil {
+		// The packet type here will be UpdateServerInfo. That shouldn't matter
+		// but perhaps we should have a 'None' packet type anyway.
+		return "", d2netpackettype.NetPacketType(0), fmt.Errorf("error reading packet type: %s", err)
+	}
+
+	packetType := d2netpackettype.NetPacketType(packetTypeID)
+	reader, err := gzip.NewReader(buff)
+	if err != nil {
+		return "", packetType, fmt.Errorf("error creating reader for %v packet: %s", packetType, err)
+	}
+
+	sb := new(strings.Builder)
+
+	// This will throw errors where packets are not compressed. This doesn't
+	// break anything, so the gzip.ErrHeader error, is currently ignored to
+	// avoid noisy logging.
+	written, _ := io.Copy(sb, reader)
+
+	if err != nil && err != gzip.ErrHeader {
+		return "", packetType, fmt.Errorf("error copying bytes from %v packet: %s", packetType, err)
+	}
+
+	if written == 0 {
+		return "", packetType, fmt.Errorf("empty %v packet received", packetType)
+	}
+
+	return sb.String(), packetType, nil
+}
+
+func (l *RemoteClientConnection) decodeToPacket(t d2netpackettype.NetPacketType, data string) (d2netpacket.NetPacket, error) {
+	var np = d2netpacket.NetPacket{}
+
+	var err error
+
+	switch t {
+	case d2netpackettype.GenerateMap:
+		var p d2netpacket.GenerateMapPacket
+		if err = json.Unmarshal([]byte(data), &p); err != nil {
+			break
+		}
+
+		np = d2netpacket.NetPacket{PacketType: t, PacketData: p}
+
+	case d2netpackettype.MovePlayer:
+		var p d2netpacket.MovePlayerPacket
+		if err = json.Unmarshal([]byte(data), &p); err != nil {
+			break
+		}
+
+		np = d2netpacket.NetPacket{PacketType: t, PacketData: p}
+
+	case d2netpackettype.UpdateServerInfo:
+		var p d2netpacket.UpdateServerInfoPacket
+		if err = json.Unmarshal([]byte(data), &p); err != nil {
+			break
+		}
+
+		np = d2netpacket.NetPacket{PacketType: t, PacketData: p}
+
+	case d2netpackettype.AddPlayer:
+		var p d2netpacket.AddPlayerPacket
+		if err = json.Unmarshal([]byte(data), &p); err != nil {
+			break
+		}
+
+		np = d2netpacket.NetPacket{PacketType: t, PacketData: p}
+
+	case d2netpackettype.Ping:
+		var p d2netpacket.PingPacket
+		if err = json.Unmarshal([]byte(data), &p); err != nil {
+			break
+		}
+
+		np = d2netpacket.NetPacket{PacketType: t, PacketData: p}
+
+	case d2netpackettype.PlayerDisconnectionNotification:
+		var p d2netpacket.PlayerDisconnectRequestPacket
+		if err = json.Unmarshal([]byte(data), &p); err != nil {
+			break
+		}
+
+		np = d2netpacket.NetPacket{PacketType: t, PacketData: p}
+
+	default:
+		err = fmt.Errorf("RemoteClientConnection: unrecognized packet type: %v", t)
+	}
+
+	if err != nil {
+		return np, err
+	}
+
+	return np, nil
 }

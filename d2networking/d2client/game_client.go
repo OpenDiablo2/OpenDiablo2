@@ -154,6 +154,7 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		}
 	case d2netpackettype.PlayerDisconnectionNotification:
 		// Not implemented
+		log.Printf("RemoteClientConnection: received disconnect: %s", packet.PacketData)
 	case d2netpackettype.ServerClosed:
 		// TODO: Need to be tied into a character save and exit
 		log.Print("Server has been closed")
