@@ -26,6 +26,8 @@ const (
 	playModeBackward
 )
 
+const defaultPlayLength = 1.0
+
 type animationFrame struct {
 	width   int
 	height  int
@@ -59,9 +61,10 @@ type Animation struct {
 	subEndingFrame   int
 }
 
+// CreateAnimationFromDCC creates an animation from d2dcc.DCC and d2dat.DATPalette
 func CreateAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transparency int) (*Animation, error) {
 	animation := &Animation{
-		playLength: 1.0,
+		playLength: defaultPlayLength,
 		playLoop:   true,
 	}
 
@@ -80,14 +83,14 @@ func CreateAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transpare
 			frameWidth := maxX - minX
 			frameHeight := maxY - minY
 
-			pixels := make([]byte, frameWidth*frameHeight*4)
+			const bytesPerPixel = 4
+			pixels := make([]byte, frameWidth*frameHeight*bytesPerPixel)
 
 			for y := 0; y < frameHeight; y++ {
 				for x := 0; x < frameWidth; x++ {
-
 					if paletteIndex := dccFrame.PixelData[y*frameWidth+x]; paletteIndex != 0 {
 						palColor := palette.Colors[paletteIndex]
-						offset := (x + y*frameWidth) * 4
+						offset := (x + y*frameWidth) * bytesPerPixel
 						pixels[offset] = palColor.R
 						pixels[offset+1] = palColor.G
 						pixels[offset+2] = palColor.B
@@ -123,9 +126,10 @@ func CreateAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transpare
 	return animation, nil
 }
 
+// CreateAnimationFromDC6 creates an Animation from d2dc6.DC6 and d2dat.DATPalette
 func CreateAnimationFromDC6(dc6 *d2dc6.DC6, palette *d2dat.DATPalette) (*Animation, error) {
 	animation := &Animation{
-		playLength:     1.0,
+		playLength:     defaultPlayLength,
 		playLoop:       true,
 		originAtBottom: true,
 	}
@@ -170,17 +174,18 @@ func CreateAnimationFromDC6(dc6 *d2dc6.DC6, palette *d2dat.DATPalette) (*Animati
 			}
 		}
 
-		colorData := make([]byte, dc6Frame.Width*dc6Frame.Height*4)
+		bytesPerPixel := 4
+		colorData := make([]byte, int(dc6Frame.Width)*int(dc6Frame.Height)*bytesPerPixel)
 
 		for i := 0; i < int(dc6Frame.Width*dc6Frame.Height); i++ {
 			if indexData[i] < 1 { // TODO: Is this == -1 or < 1?
 				continue
 			}
 
-			colorData[i*4] = palette.Colors[indexData[i]].R
-			colorData[i*4+1] = palette.Colors[indexData[i]].G
-			colorData[i*4+2] = palette.Colors[indexData[i]].B
-			colorData[i*4+3] = 0xff
+			colorData[i*bytesPerPixel] = palette.Colors[indexData[i]].R
+			colorData[i*bytesPerPixel+1] = palette.Colors[indexData[i]].G
+			colorData[i*bytesPerPixel+2] = palette.Colors[indexData[i]].B
+			colorData[i*bytesPerPixel+3] = 0xff
 		}
 
 		if err := sfc.ReplacePixels(colorData); err != nil {
@@ -269,9 +274,14 @@ func (a *Animation) Render(target d2interface.Surface) error {
 	frame := direction.frames[a.frameIndex]
 
 	target.PushTranslation(frame.offsetX, frame.offsetY)
+	defer target.Pop()
+
 	target.PushCompositeMode(a.compositeMode)
+	defer target.Pop()
+
 	target.PushColor(a.colorMod)
-	defer target.PopN(3)
+	defer target.Pop()
+
 	return target.Render(frame.image)
 }
 
@@ -356,9 +366,11 @@ func (a *Animation) GetDirectionCount() int {
 
 // SetDirection places the animation in the direction of an animation
 func (a *Animation) SetDirection(directionIndex int) error {
-	if directionIndex >= 64 {
+	const smallestInvalidDirectionIndex = 64
+	if directionIndex >= smallestInvalidDirectionIndex {
 		return errors.New("invalid direction index")
 	}
+
 	a.directionIndex = d2dcc.Dir64ToDcc(directionIndex, len(a.directions))
 	a.frameIndex = 0
 
@@ -378,6 +390,7 @@ func (a *Animation) SetCurrentFrame(frameIndex int) error {
 
 	a.frameIndex = frameIndex
 	a.lastFrameTime = 0
+
 	return nil
 }
 
@@ -414,17 +427,21 @@ func (a *Animation) SetPlaySpeed(playSpeed float64) {
 	a.SetPlayLength(playSpeed * float64(a.GetFrameCount()))
 }
 
-func (a *Animation) SetPlayLength(playLength float64) {
+// SetPlayLength sets the Animation's play length in seconds
+func (a *Animation) SetPlayLength(playLength float64) { // TODO refactor to use time.Duration instead of float64
 	a.playLength = playLength
 	a.lastFrameTime = 0
 }
 
-func (a *Animation) SetPlayLengthMs(playLengthMs int) {
-	a.SetPlayLength(float64(playLengthMs) / 1000.0)
+// SetPlayLengthMs sets the Animation's play length in milliseconds
+func (a *Animation) SetPlayLengthMs(playLengthMs int) { // TODO remove this method
+	const millisecondsPerSecond = 1000.0
+	a.SetPlayLength(float64(playLengthMs) / millisecondsPerSecond)
 }
 
-func (a *Animation) SetColorMod(color color.Color) {
-	a.colorMod = color
+// SetColorMod sets the Animation's color mod
+func (a *Animation) SetColorMod(colorMod color.Color) {
+	a.colorMod = colorMod
 }
 
 // GetPlayedCount gets the number of times the application played
@@ -437,7 +454,7 @@ func (a *Animation) ResetPlayedCount() {
 	a.playedCount = 0
 }
 
-// SetBlend sets the animation alpha blending status
+// SetBlend sets the Animation alpha blending status
 func (a *Animation) SetBlend(blend bool) {
 	if blend {
 		a.compositeMode = d2enum.CompositeModeLighter

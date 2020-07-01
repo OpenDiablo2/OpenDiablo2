@@ -32,6 +32,9 @@ func (pm *paletteTransformManager) loadPaletteTransform(path string) (*d2pl2.PL2
 		return nil, err
 	}
 
-	pm.cache.Insert(path, pl2, 1)
+	if err := pm.cache.Insert(path, pl2, 1); err != nil {
+		return nil, err
+	}
+
 	return pl2, nil
 }

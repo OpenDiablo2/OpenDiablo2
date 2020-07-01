@@ -1,16 +1,9 @@
 package d2asset
 
 import (
-	"errors"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
-)
-
-var (
-	ErrWasInit = errors.New("asset system is already initialized")
-	ErrNotInit = errors.New("asset system is not initialized")
 )
 
 type assetManager struct {
