@@ -366,7 +366,7 @@ func (m *EscapeMenu) showLayout(id layoutID) {
 
 	if id == saveLayoutID {
 		mainMenu := CreateMainMenu(m.audioProvider, m.terminal)
-		mainMenu.SetScreenMode(ScreenModeMainMenu)
+		mainMenu.setScreenMode(screenModeMainMenu)
 		d2screen.SetNextScreen(mainMenu)
 
 		return

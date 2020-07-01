@@ -182,7 +182,7 @@ func (v *CharacterSelect) onNewCharButtonClicked() {
 
 func (v *CharacterSelect) onExitButtonClicked() {
 	mainMenu := CreateMainMenu(v.audioProvider, v.terminal)
-	mainMenu.SetScreenMode(ScreenModeMainMenu)
+	mainMenu.setScreenMode(screenModeMainMenu)
 	d2screen.SetNextScreen(mainMenu)
 }
 

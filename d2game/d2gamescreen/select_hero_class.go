@@ -80,6 +80,7 @@ func CreateSelectHeroClass(audioProvider d2interface.AudioProvider,
 		connectionHost: connectionHost,
 		audioProvider:  audioProvider,
 	}
+
 	return result
 }
 

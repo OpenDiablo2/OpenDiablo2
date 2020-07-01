@@ -158,7 +158,7 @@ func (v *Credits) Advance(tickTime float64) error {
 
 func (v *Credits) onExitButtonClicked() {
 	mainMenu := CreateMainMenu(v.audioProvider, v.terminal)
-	mainMenu.SetScreenMode(ScreenModeMainMenu)
+	mainMenu.setScreenMode(screenModeMainMenu)
 	d2screen.SetNextScreen(mainMenu)
 }
 
