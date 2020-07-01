@@ -10,8 +10,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
+// Screen is an exported interface
 type Screen interface{}
 
+// ScreenLoadHandler is an exported interface
 type ScreenLoadHandler interface {
 	// OnLoad performs all necessary loading to prepare a screen to be shown such as loading assets, placing and binding
 	// of ui elements, etc. This loading is done asynchronously. The provided channel will allow implementations to
@@ -19,14 +21,17 @@ type ScreenLoadHandler interface {
 	OnLoad(loading LoadingState)
 }
 
+// ScreenUnloadHandler is an exported interface
 type ScreenUnloadHandler interface {
 	OnUnload() error
 }
 
+// ScreenRenderHandler is an exported interface
 type ScreenRenderHandler interface {
 	Render(target d2interface.Surface) error
 }
 
+// ScreenAdvanceHandler is an exported interface
 type ScreenAdvanceHandler interface {
 	Advance(elapsed float64) error
 }
@@ -38,10 +43,12 @@ var singleton struct {
 	currentScreen Screen
 }
 
+// SetNextScreen is about to set a given screen as next
 func SetNextScreen(screen Screen) {
 	singleton.nextScreen = screen
 }
 
+// Advance updates the UI on every frame
 func Advance(elapsed float64) error {
 	switch {
 	case singleton.loadingScreen != nil:
@@ -97,6 +104,7 @@ func Advance(elapsed float64) error {
 	return nil
 }
 
+// Render renders the UI by a given surface
 func Render(surface d2interface.Surface) error {
 	if handler, ok := singleton.currentScreen.(ScreenRenderHandler); ok {
 		if err := handler.Render(surface); err != nil {
@@ -107,6 +115,7 @@ func Render(surface d2interface.Surface) error {
 	return nil
 }
 
+// LoadingState represents the loading state
 type LoadingState struct {
 	updates chan loadingUpdate
 }
