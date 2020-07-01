@@ -43,8 +43,9 @@ func CreateGame(audioProvider d2interface.AudioProvider, gameClient *d2client.Ga
 		audioProvider:        audioProvider,
 		terminal:             term,
 	}
-	result.escapeMenu.OnLoad()
+	result.escapeMenu.onLoad()
 	d2input.BindHandler(result.escapeMenu)
+
 	return result
 }
 
@@ -55,6 +56,7 @@ func (v *Game) OnLoad(loading d2screen.LoadingState) {
 func (v *Game) OnUnload() error {
 	d2input.UnbindHandler(v.gameControls) // TODO: hack
 	v.gameClient.Close()
+
 	return nil
 }
 
@@ -77,7 +79,7 @@ func (v *Game) Render(screen d2interface.Surface) error {
 var hideZoneTextAfterSeconds = 2.0
 
 func (v *Game) Advance(tickTime float64) error {
-	if (v.escapeMenu != nil && !v.escapeMenu.IsOpen()) || len(v.gameClient.Players) != 1 {
+	if (v.escapeMenu != nil && !v.escapeMenu.isOpen) || len(v.gameClient.Players) != 1 {
 		v.gameClient.MapEngine.Advance(tickTime) // TODO: Hack
 	}
 
@@ -101,6 +103,7 @@ func (v *Game) Advance(tickTime float64) error {
 					v.gameControls.ShowZoneChangeText()
 					v.gameControls.HideZoneChangeTextAfter(hideZoneTextAfterSeconds)
 				}
+
 				v.lastRegionType = tile.RegionType
 			}
 		}
@@ -112,6 +115,7 @@ func (v *Game) Advance(tickTime float64) error {
 			if player.Id != v.gameClient.PlayerId {
 				continue
 			}
+
 			v.localPlayer = player
 			v.gameControls = d2player.NewGameControls(player, v.gameClient.MapEngine, v.mapRenderer, v, v.terminal)
 			v.gameControls.Load()
@@ -126,6 +130,7 @@ func (v *Game) Advance(tickTime float64) error {
 		rx, ry := v.mapRenderer.WorldToOrtho(v.localPlayer.LocationX/5, v.localPlayer.LocationY/5)
 		v.mapRenderer.MoveCameraTo(rx, ry)
 	}
+
 	return nil
 }
 
