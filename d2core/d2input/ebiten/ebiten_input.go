@@ -1,12 +1,15 @@
+// Package ebiten provides graphics and input API to develop a 2D game.
 package ebiten
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/inpututil"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 )
 
 var (
+	//nolint:gochecknoglobals This is a constant in all but by name, no constant map in go
 	keyToEbiten = map[d2input.Key]ebiten.Key{
 		d2input.Key0:            ebiten.Key0,
 		d2input.Key1:            ebiten.Key1,
@@ -109,6 +112,7 @@ var (
 		d2input.KeyControl:      ebiten.KeyControl,
 		d2input.KeyShift:        ebiten.KeyShift,
 	}
+	//nolint:gochecknoglobals This is a constant in all but by name, no constant map in go
 	mouseButtonToEbiten = map[d2input.MouseButton]ebiten.MouseButton{
 		d2input.MouseButtonLeft:   ebiten.MouseButtonLeft,
 		d2input.MouseButtonMiddle: ebiten.MouseButtonMiddle,
@@ -119,38 +123,47 @@ var (
 // InputService provides an abstraction on ebiten to support handling input events
 type InputService struct{}
 
-func (is InputService) CursorPosition() (x int, y int) {
+// CursorPosition returns a position of a mouse cursor relative to the game screen (window).
+func (is InputService) CursorPosition() (x, y int) {
 	return ebiten.CursorPosition()
 }
 
+// InputChars return "printable" runes read from the keyboard at the time update is called.
 func (is InputService) InputChars() []rune {
 	return ebiten.InputChars()
 }
 
+// IsKeyPressed checks if the provided key is down.
 func (is InputService) IsKeyPressed(key d2input.Key) bool {
 	return ebiten.IsKeyPressed(keyToEbiten[key])
 }
 
+// IsKeyJustPressed checks if the provided key is just transitioned from up to down.
 func (is InputService) IsKeyJustPressed(key d2input.Key) bool {
 	return inpututil.IsKeyJustPressed(keyToEbiten[key])
 }
 
+// IsKeyJustReleased checks if the provided key is just transitioned from down to up.
 func (is InputService) IsKeyJustReleased(key d2input.Key) bool {
 	return inpututil.IsKeyJustReleased(keyToEbiten[key])
 }
 
+// IsMouseButtonPressed checks if the provided mouse button is down.
 func (is InputService) IsMouseButtonPressed(button d2input.MouseButton) bool {
 	return ebiten.IsMouseButtonPressed(mouseButtonToEbiten[button])
 }
 
+// IsMouseButtonJustPressed checks if the provided mouse button is just transitioned from up to down.
 func (is InputService) IsMouseButtonJustPressed(button d2input.MouseButton) bool {
 	return inpututil.IsMouseButtonJustPressed(mouseButtonToEbiten[button])
 }
 
+// IsMouseButtonJustReleased checks if the provided mouse button is just transitioned from down to up.
 func (is InputService) IsMouseButtonJustReleased(button d2input.MouseButton) bool {
 	return inpututil.IsMouseButtonJustReleased(mouseButtonToEbiten[button])
 }
 
+// KeyPressDuration returns how long the key is pressed in frames.
 func (is InputService) KeyPressDuration(key d2input.Key) int {
 	return inpututil.KeyPressDuration(keyToEbiten[key])
 }
