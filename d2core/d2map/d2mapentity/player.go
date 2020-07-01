@@ -99,6 +99,10 @@ func (p *Player) IsRunToggled() bool {
 	return p.isRunToggled
 }
 
+func (p *Player) GetComposite() *d2asset.Composite{
+	return p.composite
+}
+
 func (p *Player) IsRunning() bool {
 	return p.isRunning
 }

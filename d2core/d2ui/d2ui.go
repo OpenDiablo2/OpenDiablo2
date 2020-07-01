@@ -57,13 +57,14 @@ func (u *UI) OnMouseButtonUp(event d2input.MouseEvent) bool {
 	if event.Button == d2input.MouseButtonLeft {
 		singleton.cursorButtons |= CursorButtonLeft
 		// activate previously pressed widget if cursor is still hovering
-		w := singleton.pressedWidget
-		if w != nil && contains(w, singleton.CursorX, singleton.CursorY) && w.GetVisible() && w.GetEnabled() {
-			w.Activate()
+		widget := singleton.pressedWidget
+		if widget != nil && contains(widget, singleton.CursorX, singleton.CursorY) && widget.GetVisible() && widget.GetEnabled() {
+			widget.Activate()
 		}
 		// unpress all widgets that are pressed
-		for _, w := range singleton.widgets {
-			w.SetPressed(false)
+		for idx := range singleton.widgets {
+			widget := singleton.widgets[idx]
+			widget.SetPressed(false)
 		}
 	}
 	return false
@@ -74,10 +75,11 @@ func (u *UI) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	if event.Button == d2input.MouseButtonLeft {
 		// find and press a widget on screen
 		singleton.pressedWidget = nil
-		for _, w := range singleton.widgets {
-			if contains(w, singleton.CursorX, singleton.CursorY) && w.GetVisible() && w.GetEnabled() {
-				w.SetPressed(true)
-				singleton.pressedWidget = w
+		for idx := range singleton.widgets {
+			widget := singleton.widgets[idx]
+			if contains(widget, singleton.CursorX, singleton.CursorY) && widget.GetVisible() && widget.GetEnabled() {
+				widget.SetPressed(true)
+				singleton.pressedWidget = widget
 				clickSfx.Play()
 				break
 			}
@@ -91,7 +93,8 @@ func (u *UI) OnMouseButtonDown(event d2input.MouseEvent) bool {
 
 // Render renders all of the UI elements
 func Render(target d2interface.Surface) {
-	for _, widget := range singleton.widgets {
+	for key := range singleton.widgets {
+		widget := singleton.widgets[key]
 		if widget.GetVisible() {
 			widget.Render(target)
 		}
@@ -107,7 +110,8 @@ func contains(w Widget, x, y int) bool {
 
 // Update updates all of the UI elements
 func Advance(elapsed float64) {
-	for _, widget := range singleton.widgets {
+	for key := range singleton.widgets {
+		widget := singleton.widgets[key]
 		if widget.GetVisible() {
 			widget.Advance(elapsed)
 		}

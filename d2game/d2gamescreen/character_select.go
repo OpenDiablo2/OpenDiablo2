@@ -148,6 +148,46 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	v.refreshGameStates()
 }
 
+func (v *CharacterSelect) OnUnload() error {
+	for key := range v.characterImage {
+		char := v.characterImage[key]
+		if char == nil {
+			continue
+		}
+
+		composite := char.GetComposite()
+
+		if key != v.selectedCharacter {
+			composite.Dispose()
+		}
+	}
+	v.background.Dispose()
+	v.newCharButton.Dispose()
+	v.convertCharButton.Dispose()
+	v.deleteCharButton.Dispose()
+	v.exitButton.Dispose()
+	v.okButton.Dispose()
+	v.deleteCharCancelButton.Dispose()
+	v.deleteCharOkButton.Dispose()
+	v.selectionBox.Dispose()
+	v.okCancelBox.Dispose()
+	v.d2HeroTitle.Dispose()
+	v.deleteCharConfirmLabel.Dispose()
+	for idx := range v.characterNameLabel {
+		v.characterNameLabel[idx].Dispose()
+	}
+
+	for idx := range v.characterStatsLabel {
+		v.characterStatsLabel[idx].Dispose()
+	}
+
+	for idx := range v.characterExpLabel {
+		v.characterExpLabel[idx].Dispose()
+	}
+
+	return nil
+}
+
 func (v *CharacterSelect) onScrollUpdate() {
 	v.moveSelectionBox()
 	v.updateCharacterBoxes()
@@ -252,7 +292,8 @@ func (v *CharacterSelect) OnMouseButtonDown(event d2input.MouseEvent) bool {
 }
 
 func (v *CharacterSelect) Advance(tickTime float64) error {
-	for _, hero := range v.characterImage {
+	for idx := range v.characterImage {
+		hero := v.characterImage[idx]
 		if hero != nil {
 			hero.Advance(tickTime)
 		}

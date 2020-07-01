@@ -171,9 +171,10 @@ func (v *Button) OnActivated(callback func()) {
 
 // Activate calls the on activated callback handler, if any
 func (v *Button) Activate() {
-	if v.onClick == nil {
+	if v.onClick == nil || !v.visible {
 		return
 	}
+
 	v.onClick()
 }
 
@@ -251,4 +252,29 @@ func (v *Button) GetPressed() bool {
 // SetPressed sets the pressed state of the button
 func (v *Button) SetPressed(pressed bool) {
 	v.pressed = pressed
+}
+
+func (v *Button) Dispose() {
+	// avoids nil pointer on render when we are removing the surfaces
+	v.visible = false
+
+	if v.pressedSurface != nil {
+		v.pressedSurface.Dispose()
+	}
+
+	if v.normalSurface != nil {
+		v.normalSurface.Dispose()
+	}
+
+	if v.pressedToggledSurface != nil {
+		v.pressedToggledSurface.Dispose()
+	}
+
+	if v.toggledSurface != nil {
+		v.toggledSurface.Dispose()
+	}
+
+	if v.disabledSurface != nil {
+		v.disabledSurface.Dispose()
+	}
 }

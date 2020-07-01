@@ -73,13 +73,14 @@ func (f *Font) GetTextMetrics(text string) (int, int) {
 		totalHeight int
 	)
 
-	for _, c := range text {
+	for idx := range text {
+		c := text[idx]
 		if c == '\n' {
 			totalWidth = d2common.MaxInt(totalWidth, lineWidth)
 			totalHeight += lineHeight
 			lineWidth = 0
 			lineHeight = 0
-		} else if glyph, ok := f.glyphs[c]; ok {
+		} else if glyph, ok := f.glyphs[rune(c)]; ok {
 			lineWidth += glyph.width
 			lineHeight = d2common.MaxInt(lineHeight, glyph.height)
 		}
@@ -105,14 +106,16 @@ func (f *Font) RenderText(text string, target d2interface.Surface) error {
 
 	lines := strings.Split(text, "\n")
 
-	for _, line := range lines {
+	for idx := range lines {
+		line := lines[idx]
 		var (
 			lineHeight int
 			lineLength int
 		)
 
-		for _, c := range line {
-			if glyph, ok := f.glyphs[c]; ok {
+		for idx := range line {
+			c := line[idx]
+			if glyph, ok := f.glyphs[rune(c)]; ok {
 				f.sheet.SetCurrentFrame(glyph.frame)
 				f.sheet.Render(target)
 				lineHeight = d2common.MaxInt(lineHeight, glyph.height)

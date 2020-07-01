@@ -344,9 +344,10 @@ var Objects map[int]*ObjectRecord
 func LoadObjects(file []byte) {
 	Objects = make(map[int]*ObjectRecord)
 	data := strings.Split(string(file), "\r\n")[1:]
+	for idx := range data {
+		line := data[idx]
 
-	for _, line := range data {
-		if line == "" {
+		if len(line) == 0 {
 			continue
 		}
 

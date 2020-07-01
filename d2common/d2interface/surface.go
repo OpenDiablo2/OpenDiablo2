@@ -27,4 +27,5 @@ type Surface interface {
 	RenderSection(surface Surface, bound image.Rectangle) error
 	ReplacePixels(pixels []byte) error
 	Screenshot() *image.RGBA
+	Dispose()
 }

@@ -141,7 +141,8 @@ func (l *Layout) Clear() {
 func (l *Layout) render(target d2interface.Surface) error {
 	l.AdjustEntryPlacement()
 
-	for _, entry := range l.entries {
+	for idx := range l.entries {
+		entry := l.entries[idx]
 		if !entry.widget.isVisible() {
 			continue
 		}
@@ -160,7 +161,8 @@ func (l *Layout) render(target d2interface.Surface) error {
 }
 
 func (l *Layout) advance(elapsed float64) error {
-	for _, entry := range l.entries {
+	for idx := range l.entries {
+		entry := l.entries[idx]
 		if err := entry.widget.advance(elapsed); err != nil {
 			return err
 		}
@@ -209,7 +211,8 @@ func (l *Layout) renderEntryDebug(entry *layoutEntry, target d2interface.Surface
 func (l *Layout) getContentSize() (int, int) {
 	var width, height int
 
-	for _, entry := range l.entries {
+	for idx := range l.entries {
+		entry := l.entries[idx]
 		x, y := entry.widget.getPosition()
 		w, h := entry.widget.getSize()
 

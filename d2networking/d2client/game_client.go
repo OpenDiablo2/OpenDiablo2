@@ -3,7 +3,6 @@ package d2client
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
@@ -53,6 +52,7 @@ func Create(connectionType d2clientconnectiontype.ClientConnectionType) (*GameCl
 	default:
 		return nil, fmt.Errorf("unknown client connection type specified: %d", connectionType)
 	}
+
 	result.clientConnection.SetClientListener(result)
 	return result, nil
 }
@@ -81,10 +81,12 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 	switch packet.PacketType {
 	case d2netpackettype.GenerateMap:
 		mapData := packet.PacketData.(d2netpacket.GenerateMapPacket)
+
 		switch mapData.RegionType {
 		case d2enum.RegionAct1Town:
 			d2mapgen.GenerateAct1Overworld(g.MapEngine)
 		}
+
 		g.RegenMap = true
 	case d2netpackettype.UpdateServerInfo:
 		serverInfo := packet.PacketData.(d2netpacket.UpdateServerInfoPacket)
@@ -154,9 +156,8 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		}
 
 	case d2netpackettype.ServerClosed:
-		// TODO: Need to be tied into a character save and exit
-		log.Print("Server has been closed")
-		os.Exit(0)
+		log.Println("ServerClosed in game client called")
+
 	default:
 		log.Fatalf("Invalid packet type: %d", packet.PacketType)
 	}

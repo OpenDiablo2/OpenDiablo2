@@ -40,6 +40,18 @@ func (c *Cache) GetBudget() int {
 	return c.budget
 }
 
+func (c *Cache) GetKeys() []string {
+	keys := make([]string, len(c.lookup))
+
+	i := 0
+	for k := range c.lookup {
+		keys[i] = k
+		i++
+	}
+
+	return keys
+}
+
 func (c *Cache) Insert(key string, value interface{}, weight int) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()

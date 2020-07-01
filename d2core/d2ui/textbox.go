@@ -110,7 +110,8 @@ func (v *TextBox) GetText() string {
 
 func (v *TextBox) SetText(newText string) {
 	result := ""
-	for _, c := range newText {
+	for idx := range newText {
+		c := newText[idx]
 		if !strings.Contains(v.filter, string(c)) {
 			continue
 		}
@@ -178,4 +179,10 @@ func (v *TextBox) OnActivated(callback func()) {
 
 func (v *TextBox) Activate() {
 	focusedTextBox = v
+}
+
+func (v *TextBox) Dispose() {
+	v.bgSprite.Dispose()
+	v.textLabel.Dispose()
+	v.lineBar.Dispose()
 }

@@ -42,7 +42,6 @@ func LoadAnimationData(rawData []byte) {
 			if _, found := AnimationData[cofIndex]; !found {
 				AnimationData[cofIndex] = make([]*AnimationDataRecord, 0)
 			}
-
 			AnimationData[cofIndex] = append(AnimationData[cofIndex], data)
 		}
 	}

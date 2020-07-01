@@ -139,7 +139,6 @@ func (met *MapEngineTest) LoadRegionByIndex(n int, levelPreset, fileIndex int) {
 		met.mapEngine = d2mapengine.CreateMapEngine() // necessary for map name update
 		met.mapEngine.SetSeed(time.Now().UnixNano())
 		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex, true)
-		met.mapEngine.RegenerateWalkPaths()
 	}
 	met.mapRenderer.SetMapEngine(met.mapEngine)
 	met.mapRenderer.MoveCameraTo(met.mapRenderer.WorldToOrtho(met.mapEngine.GetCenterPosition()))

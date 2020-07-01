@@ -87,7 +87,8 @@ func (v *Font) GetTextMetrics(text string) (width, height int) {
 	curWidth := 0
 	height = 0
 	_, maxCharHeight := v.fontSprite.GetFrameBounds()
-	for _, ch := range text {
+	for idx := range text {
+		ch := text[idx]
 		if ch == '\n' {
 			width = d2common.MaxInt(width, curWidth)
 			curWidth = 0
@@ -95,7 +96,7 @@ func (v *Font) GetTextMetrics(text string) (width, height int) {
 			continue
 		}
 
-		curWidth += v.getCharWidth(ch)
+		curWidth += v.getCharWidth(rune(ch))
 	}
 	width = d2common.MaxInt(width, curWidth)
 	height += maxCharHeight
@@ -108,18 +109,21 @@ func (v *Font) Render(x, y int, text string, color color.Color, target d2interfa
 	v.fontSprite.SetBlend(false)
 
 	maxCharHeight := uint32(0)
-	for _, m := range v.metrics {
-		maxCharHeight = d2common.Max(maxCharHeight, uint32(m.Height))
+	for idx := range v.metrics {
+		metric := v.metrics[idx]
+		maxCharHeight = d2common.Max(maxCharHeight, uint32(metric.Height))
 	}
 
 	targetWidth, _ := target.GetSize()
 	lines := strings.Split(text, "\n")
-	for lineIdx, line := range lines {
+	for lineIdx:= range lines {
+		line := lines[lineIdx]
 		lineWidth, _ := v.GetTextMetrics(line)
 		xPos := x + ((targetWidth / 2) - lineWidth/2)
 
-		for _, ch := range line {
-			width := v.getCharWidth(ch)
+		for idx := range line {
+			ch := line[idx]
+			width := v.getCharWidth(rune(ch))
 			index := v.fontTable[uint16(ch)]
 			v.fontSprite.SetCurrentFrame(int(index))
 			_, height := v.fontSprite.GetCurrentFrameSize()

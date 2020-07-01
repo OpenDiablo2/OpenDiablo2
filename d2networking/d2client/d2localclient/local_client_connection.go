@@ -2,8 +2,6 @@
 package d2localclient
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
@@ -53,18 +51,16 @@ func (l *LocalClientConnection) Open(_ string, saveFilePath string) error {
 	l.SetPlayerState(d2player.LoadPlayerState(saveFilePath))
 	d2server.Create(l.openNetworkServer)
 	go d2server.Run()
+
 	d2server.OnClientConnected(l)
+
 	return nil
 }
 
-// Close disconnects from the server and destroys it.
+// Close will shutdown the local server, which will notify other clients aswell.
+// No need to send client disconnect or server closed packets as the server already handles that
 func (l *LocalClientConnection) Close() error {
-	err := l.SendPacketToServer(d2netpacket.CreateServerClosedPacket())
-	if err != nil {
-		log.Printf("LocalClientConnection: error sending ServerClosedPacket to server: %s", err)
-	}
-	d2server.OnClientDisconnected(l)
-	d2server.Destroy()
+	d2server.Shutdown()
 	return nil
 }
 

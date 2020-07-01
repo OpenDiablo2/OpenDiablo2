@@ -255,6 +255,41 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	d2input.BindHandler(v)
 }
 
+func (v *MainMenu) OnUnload() error {
+	v.tcpIpBackground.Dispose()
+	v.trademarkBackground.Dispose()
+	v.background.Dispose()
+	v.diabloLogoLeft.Dispose()
+	v.diabloLogoRight.Dispose()
+	v.diabloLogoLeftBack.Dispose()
+	v.diabloLogoRightBack.Dispose()
+	v.serverIpBackground.Dispose()
+	v.singlePlayerButton.Dispose()
+	v.multiplayerButton.Dispose()
+	v.tcpIpOptionsLabel.Dispose()
+	v.tcpJoinGameLabel.Dispose()
+	v.tcpJoinGameEntry.Dispose()
+	v.githubButton.Dispose()
+	v.exitDiabloButton.Dispose()
+	v.creditsButton.Dispose()
+	v.cinematicsButton.Dispose()
+	v.mapTestButton.Dispose()
+	v.networkTcpIpButton.Dispose()
+	v.networkCancelButton.Dispose()
+	v.btnTcpIpCancel.Dispose()
+	v.btnTcpIpHostGame.Dispose()
+	v.btnTcpIpJoinGame.Dispose()
+	v.btnServerIpCancel.Dispose()
+	v.btnServerIpOk.Dispose()
+	v.copyrightLabel.Dispose()
+	v.copyrightLabel2.Dispose()
+	v.openDiabloLabel.Dispose()
+	v.versionLabel.Dispose()
+	v.commitLabel.Dispose()
+
+	return nil
+}
+
 func (v *MainMenu) onMapTestClicked() {
 	d2screen.SetNextScreen(CreateMapEngineTest(0, 1, v.terminal))
 }

@@ -17,14 +17,13 @@ import (
 var wildernessGrass = d2ds1.FloorShadowRecord{Prop1: 1, Style: 0, Sequence: 0}
 
 func loadPreset(mapEngine *d2mapengine.MapEngine, id, index int) *d2mapstamp.Stamp {
-	for _, file := range d2datadict.LevelPreset(id).Files {
-		mapEngine.AddDS1(file)
+	for fileIdx := range d2datadict.LevelPreset(id).Files {
+		mapEngine.AddDS1(d2datadict.LevelPreset(id).Files[fileIdx])
 	}
 	return d2mapstamp.LoadStamp(d2enum.RegionAct1Wilderness, id, index)
 }
 
 func GenerateAct1Overworld(mapEngine *d2mapengine.MapEngine) {
-
 	rand.Seed(mapEngine.Seed())
 	wilderness1Details := d2datadict.GetLevelDetails(2)
 	mapEngine.ResetMap(d2enum.RegionAct1Town, 150, 150)
@@ -64,8 +63,6 @@ func GenerateAct1Overworld(mapEngine *d2mapengine.MapEngine) {
 		// North Exit
 		mapEngine.PlaceStamp(townStamp, mapWidth-townSize.Width, mapHeight-townSize.Height)
 	}
-
-	mapEngine.RegenerateWalkPaths()
 }
 
 func generateWilderness1TownEast(mapEngine *d2mapengine.MapEngine, startX, startY int) {

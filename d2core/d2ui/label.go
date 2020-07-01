@@ -91,6 +91,15 @@ func (v *Label) cacheImage() {
 	v.font.Render(0, 0, v.text, v.Color, surface)
 }
 
+func (v *Label) Dispose() {
+	for key := range v.imageData {
+		img := v.imageData[key]
+		if img != nil {
+			img.Dispose()
+		}
+	}
+}
+
 // SetText sets the label's text
 func (v *Label) SetText(newText string) {
 	if v.text == newText {

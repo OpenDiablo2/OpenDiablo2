@@ -188,3 +188,8 @@ func (s *Sprite) SetBlend(blend bool) {
 func (s *Sprite) Advance(elapsed float64) error {
 	return s.animation.Advance(elapsed)
 }
+
+func (s *Sprite) Dispose() {
+	s.animation.Dispose()
+}
+

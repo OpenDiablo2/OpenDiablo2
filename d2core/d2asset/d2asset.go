@@ -132,6 +132,13 @@ func LoadFont(tablePath, spritePath, palettePath string) (*Font, error) {
 	return singleton.fontManager.loadFont(tablePath, spritePath, palettePath)
 }
 
+func ClearCache()  error {
+	verifyWasInit()
+	singleton.animationManager.ClearCache()
+
+	return nil
+}
+
 func LoadPalette(palettePath string) (*d2dat.DATPalette, error) {
 	verifyWasInit()
 	return singleton.paletteManager.loadPalette(palettePath)
