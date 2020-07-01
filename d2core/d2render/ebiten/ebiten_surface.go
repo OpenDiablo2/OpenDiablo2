@@ -122,6 +122,10 @@ func (s *ebitenSurface) Clear(color color.Color) error {
 	return s.image.Fill(color)
 }
 
+func (s *ebitenSurface) Dispose() {
+	s.image.Dispose()
+}
+
 func (s *ebitenSurface) GetSize() (int, int) {
 	return s.image.Size()
 }

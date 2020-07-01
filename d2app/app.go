@@ -468,8 +468,10 @@ func (p *App) allocRate(totalAlloc uint64, fps float64) float64 {
 }
 
 func (p *App) dumpHeap() {
-	if err := os.Mkdir("./pprof/", 0750); err != nil {
-		log.Fatal(err)
+	if _, err := os.Stat("./pprof/"); os.IsNotExist(err) {
+		if err := os.Mkdir("./pprof/", 0750); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	fileOut, _ := os.Create("./pprof/heap.pprof")

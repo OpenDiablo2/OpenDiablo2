@@ -105,6 +105,11 @@ func (v *Checkbox) GetVisible() bool {
 	return v.visible
 }
 
+func (v *Checkbox) Dispose() {
+	v.checkedImage.Dispose()
+	v.Image.Dispose()
+}
+
 func (v *Checkbox) SetPosition(x int, y int) {
 	v.x = x
 	v.y = y

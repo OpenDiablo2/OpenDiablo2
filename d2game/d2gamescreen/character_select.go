@@ -83,18 +83,19 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	v.deleteCharButton.OnActivated(func() { v.onDeleteCharButtonClicked() })
 	v.deleteCharButton.SetPosition(433, 468)
 	d2ui.AddWidget(&v.deleteCharButton)
+	loading.Progress(0.2)
 
 	v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, "EXIT")
 	v.exitButton.SetPosition(33, 537)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 	d2ui.AddWidget(&v.exitButton)
-	loading.Progress(0.2)
 
 	v.deleteCharCancelButton = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "NO")
 	v.deleteCharCancelButton.SetPosition(282, 308)
 	v.deleteCharCancelButton.SetVisible(false)
 	v.deleteCharCancelButton.OnActivated(func() { v.onDeleteCharacterCancelClicked() })
 	d2ui.AddWidget(&v.deleteCharCancelButton)
+	loading.Progress(0.3)
 
 	v.deleteCharOkButton = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "YES")
 	v.deleteCharOkButton.SetPosition(422, 308)
@@ -110,7 +111,6 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	v.d2HeroTitle = d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
 	v.d2HeroTitle.SetPosition(320, 23)
 	v.d2HeroTitle.Alignment = d2ui.LabelAlignCenter
-	loading.Progress(0.3)
 
 	v.deleteCharConfirmLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	lines := d2common.SplitIntoLinesWithMaxWidth("Are you sure that you want to delete this character? Take note: this will delete all versions of this Character.", 29)
@@ -129,13 +129,14 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	v.charScrollbar = d2ui.CreateScrollbar(586, 87, 369)
 	v.charScrollbar.OnActivated(func() { v.onScrollUpdate() })
 	d2ui.AddWidget(&v.charScrollbar)
-	loading.Progress(0.5)
+	loading.Progress(0.4)
 
 	for i := 0; i < 8; i++ {
 		xOffset := 115
 		if i&1 > 0 {
 			xOffset = 385
 		}
+
 		v.characterNameLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 		v.characterNameLabel[i].Color = color.RGBA{R: 188, G: 168, B: 140, A: 255}
 		v.characterNameLabel[i].SetPosition(xOffset, 100+((i/2)*95))
@@ -145,7 +146,32 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 		v.characterExpLabel[i].Color = color.RGBA{R: 24, G: 255, A: 255}
 		v.characterExpLabel[i].SetPosition(xOffset, 130+((i/2)*95))
 	}
+
+	loading.Progress(0.5)
+	// TODO: update loading progress in refreshGameStates as it takes most of the time if characters > 5
 	v.refreshGameStates()
+}
+
+// OnUnload removes all the resources created by the scene. Note that removing widgets is handled in d2screen.
+func (v *CharacterSelect) OnUnload() error {
+	d2input.UnbindHandler(v)
+	v.background.Dispose()
+	v.d2HeroTitle.Dispose()
+	v.deleteCharConfirmLabel.Dispose()
+
+	for idx := range v.characterNameLabel {
+		v.characterNameLabel[idx].Dispose()
+	}
+
+	for idx := range v.characterStatsLabel {
+		v.characterStatsLabel[idx].Dispose()
+	}
+
+	for idx := range v.characterExpLabel {
+		v.characterExpLabel[idx].Dispose()
+	}
+
+	return nil
 }
 
 func (v *CharacterSelect) onScrollUpdate() {
@@ -252,7 +278,8 @@ func (v *CharacterSelect) OnMouseButtonDown(event d2input.MouseEvent) bool {
 }
 
 func (v *CharacterSelect) Advance(tickTime float64) error {
-	for _, hero := range v.characterImage {
+	for idx := range v.characterImage {
+		hero := v.characterImage[idx]
 		if hero != nil {
 			hero.Advance(tickTime)
 		}

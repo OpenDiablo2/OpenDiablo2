@@ -255,6 +255,21 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	d2input.BindHandler(v)
 }
 
+// OnUnload removes all the resources created by the scene. Note that removing widgets is handled in d2screen.
+func (v *MainMenu) OnUnload() error {
+	d2input.UnbindHandler(v)
+	v.tcpIpBackground.Dispose()
+	v.trademarkBackground.Dispose()
+	v.background.Dispose()
+	v.diabloLogoLeft.Dispose()
+	v.diabloLogoRight.Dispose()
+	v.diabloLogoLeftBack.Dispose()
+	v.diabloLogoRightBack.Dispose()
+	v.serverIpBackground.Dispose()
+
+	return nil
+}
+
 func (v *MainMenu) onMapTestClicked() {
 	d2screen.SetNextScreen(CreateMapEngineTest(0, 1, v.terminal))
 }

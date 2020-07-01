@@ -132,7 +132,8 @@ func openIgnoreCase(mpqPath string) (*os.File, error) {
 		return nil, err
 	}
 
-	for _, file := range files {
+	for idx := range files {
+		file := files[idx]
 		if strings.EqualFold(file.Name(), mpqName) {
 			mpqName = file.Name()
 			break

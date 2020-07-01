@@ -13,4 +13,5 @@ type Drawable interface {
 	GetPosition() (x, y int)
 	GetVisible() bool
 	SetVisible(visible bool)
+	Dispose()
 }

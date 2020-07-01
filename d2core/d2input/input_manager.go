@@ -188,7 +188,8 @@ func (im *inputManager) propagate(callback func(Handler) bool) {
 	var priority Priority
 	var handled bool
 
-	for _, entry := range im.entries {
+	for idx := range im.entries {
+		entry := im.entries[idx]
 		if priority > entry.priority && handled {
 			break
 		}

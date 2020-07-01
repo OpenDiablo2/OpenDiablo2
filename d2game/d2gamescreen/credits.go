@@ -122,7 +122,8 @@ func (v *Credits) Advance(tickTime float64) error {
 			v.addNextItem()
 		}
 
-		for _, label := range v.labels {
+		for idx := range v.labels {
+			label := v.labels[idx]
 			if label.Available {
 				continue
 			}

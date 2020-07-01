@@ -430,6 +430,7 @@ func (v *SelectHeroClass) OnUnload() error {
 		v.heroRenderInfo[i].DeselectSfx.Stop()
 	}
 	v.heroRenderInfo = nil
+
 	return nil
 }
 

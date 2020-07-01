@@ -114,6 +114,10 @@ func (v *Scrollbar) GetPosition() (x, y int) {
 	return v.x, v.y
 }
 
+func (v *Scrollbar) Dispose () {
+	v.scrollbarSprite.Dispose()
+}
+
 func (v *Scrollbar) GetVisible() bool {
 	return v.visible
 }

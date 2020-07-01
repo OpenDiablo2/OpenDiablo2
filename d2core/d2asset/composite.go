@@ -37,7 +37,8 @@ func (c *Composite) Advance(elapsed float64) error {
 	c.mode.playedCount += c.mode.frameIndex / c.mode.frameCount
 	c.mode.frameIndex %= c.mode.frameCount
 
-	for _, layer := range c.mode.layers {
+	for idx := range c.mode.layers {
+		layer := c.mode.layers[idx]
 		if layer != nil {
 			if err := layer.Advance(elapsed); err != nil {
 				return err
@@ -54,7 +55,8 @@ func (c *Composite) Render(target d2interface.Surface) error {
 		return nil
 	}
 
-	for _, layerIndex := range c.mode.drawOrder[c.mode.frameIndex] {
+	for idx := range c.mode.drawOrder[c.mode.frameIndex] {
+		layerIndex := c.mode.drawOrder[c.mode.frameIndex][idx]
 		layer := c.mode.layers[layerIndex]
 		if layer != nil {
 			if err := layer.RenderFromOrigin(target); err != nil {
@@ -172,7 +174,8 @@ func (c *Composite) createMode(animationMode, weaponClass string, direction int)
 		mode.drawOrder[frame] = cof.Priority[mode.cofDirection][frame]
 	}
 
-	for _, cofLayer := range cof.CofLayers {
+	for idx := range cof.CofLayers {
+		cofLayer := cof.CofLayers[idx]
 		var layerValue string
 
 		switch cofLayer.Type {
@@ -250,7 +253,8 @@ func loadCompositeLayer(object *d2datadict.ObjectLookupRecord, layerKey, layerVa
 		fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dc6", object.Base, object.Token, layerKey, object.Token, layerKey, layerValue, animationMode, "HTH"),
 	}
 
-	for _, animationPath := range animationPaths {
+	for idx := range animationPaths {
+		animationPath := animationPaths[idx]
 		if exists, _ := FileExists(animationPath); exists {
 			animation, err := LoadAnimationWithTransparency(animationPath, palettePath, transparency)
 			if err == nil {
@@ -260,4 +264,14 @@ func loadCompositeLayer(object *d2datadict.ObjectLookupRecord, layerKey, layerVa
 	}
 
 	return nil, errors.New("animation not found")
+}
+
+func (c *Composite) Dispose() {
+	for idx := range c.mode.layers {
+		animation := c.mode.layers[idx]
+
+		if animation != nil {
+			animation.Dispose()
+		}
+	}
 }

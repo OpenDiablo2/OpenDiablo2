@@ -127,6 +127,7 @@ func NewEscapeMenu(audioProvider d2interface.AudioProvider, term d2interface.Ter
 		automapOptionsLayoutID:    m.newAutomapOptionsLayout(),
 		configureControlsLayoutID: m.newConfigureControlsLayout(),
 	}
+
 	return m
 }
 
@@ -291,6 +292,16 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 
 func (m *EscapeMenu) OnLoad() {
 	m.selectSound, _ = m.audioProvider.LoadSoundEffect(d2resource.SFXCursorSelect)
+}
+
+func(m *EscapeMenu) OnUnload() error {
+	for key := range m.layouts {
+		m.layouts[key].Clear()
+		m.leftPent.Dispose()
+		m.rightPent.Dispose()
+	}
+
+	return nil
 }
 
 func (m *EscapeMenu) OnEscKey() {

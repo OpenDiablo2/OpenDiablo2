@@ -40,7 +40,7 @@ func CreateConnectionManager(gameServer *GameServer) *ConnectionManager {
 // Run starts up any watchers for for the connection manager
 func (c *ConnectionManager) Run() {
 	log.Print("Starting connection manager...")
-	for {
+	for IsRunning() {
 		c.checkPeers()
 		time.Sleep(c.interval)
 	}
@@ -81,14 +81,15 @@ func (c *ConnectionManager) Drop(id string) {
 
 // Shutdown will notify all of the clients that the server has been shutdown.
 func (c *ConnectionManager) Shutdown() {
-	// TODO: Currently this will never actually get called as the go routines are never signaled about the application termination.
-	// Things can be done more cleanly once we have graceful exits however we still need to account for other OS Signals
+	// Called when the host of the server leaves the game
 	log.Print("Notifying clients server is shutting down...")
-	for _, connection := range c.gameServer.clientConnections {
+
+	for idx := range c.gameServer.clientConnections {
+		connection := c.gameServer.clientConnections[idx]
 		err := connection.SendPacketToClient(d2netpacket.CreateServerClosedPacket())
 		if err != nil {
 			log.Printf("ConnectionManager: error sending ServerClosedPacket to client ID %s: %s", connection.GetUniqueId(), err)
 		}
+		c.gameServer.manager.Drop(idx)
 	}
-	Stop()
 }

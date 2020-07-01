@@ -5,8 +5,10 @@ import (
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
@@ -29,6 +31,7 @@ type Game struct {
 	terminal             d2interface.Terminal
 	ticksSinceLevelCheck float64
 	escapeMenu           *EscapeMenu
+	isRunning            bool
 }
 
 func CreateGame(audioProvider d2interface.AudioProvider, gameClient *d2client.GameClient, term d2interface.Terminal) *Game {
@@ -43,6 +46,7 @@ func CreateGame(audioProvider d2interface.AudioProvider, gameClient *d2client.Ga
 		audioProvider:        audioProvider,
 		terminal:             term,
 	}
+
 	result.escapeMenu.OnLoad()
 	d2input.BindHandler(result.escapeMenu)
 	return result
@@ -55,6 +59,11 @@ func (v *Game) OnLoad(loading d2screen.LoadingState) {
 func (v *Game) OnUnload() error {
 	d2input.UnbindHandler(v.gameControls) // TODO: hack
 	v.gameClient.Close()
+	v.escapeMenu.OnUnload()
+	d2maprenderer.InvalidateImageCache()
+	d2asset.ClearCache()
+	v.mapRenderer.Destroy()
+
 	return nil
 }
 

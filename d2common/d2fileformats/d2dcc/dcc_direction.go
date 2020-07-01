@@ -264,7 +264,8 @@ func (v *DCCDirection) fillPixelBuffer(pcd, ec, pm, et, rp d2interface.BitMunche
 	maxCellX := 0
 	maxCellY := 0
 
-	for _, frame := range v.Frames {
+	for idx := range v.Frames {
+		frame := v.Frames[idx]
 		if frame == nil {
 			continue
 		}

@@ -118,6 +118,11 @@ func LoadAnimation(animationPath, palettePath string) (*Animation, error) {
 	return LoadAnimationWithTransparency(animationPath, palettePath, 255)
 }
 
+func UnloadAnimation(animationKey string) error {
+	return singleton.animationManager.cache.Delete(animationKey)
+}
+
+
 // LoadAnimationWithTransparency loads an animation by its resource path and its palette path with a given transparency value
 func LoadAnimationWithTransparency(animationPath, palettePath string, transparency int) (*Animation, error) {
 	return singleton.animationManager.loadAnimation(animationPath, palettePath, transparency)
@@ -131,6 +136,12 @@ func LoadComposite(object *d2datadict.ObjectLookupRecord, palettePath string) (*
 // LoadFont loads a font the resource files
 func LoadFont(tablePath, spritePath, palettePath string) (*Font, error) {
 	return singleton.fontManager.loadFont(tablePath, spritePath, palettePath)
+}
+
+func ClearCache()  error {
+	singleton.animationManager.ClearCache()
+
+	return nil
 }
 
 // LoadPalette loads a palette from a given palette path

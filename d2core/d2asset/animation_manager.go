@@ -20,10 +20,27 @@ func createAnimationManager() *animationManager {
 	return &animationManager{d2common.CreateCache(animationBudget)}
 }
 
+// Dispose of all the animations to prevent ebiten storing the images
+func (am *animationManager) ClearCache() {
+	keys := am.cache.GetKeys()
+	for idx := range keys {
+		key := keys[idx]
+
+		//TODO: move fonts in another cache ?
+		if strings.HasPrefix(key, "/data/local/FONT/") {
+			continue;
+		}
+		animation, _:= am.cache.Retrieve(key)
+		animation.(*Animation).Dispose()
+	}
+
+	am.cache.Clear()
+}
+
 func (am *animationManager) loadAnimation(animationPath, palettePath string, transparency int) (*Animation, error) {
 	cachePath := fmt.Sprintf("%s;%s;%d", animationPath, palettePath, transparency)
 	if animation, found := am.cache.Retrieve(cachePath); found {
-		return animation.(*Animation).Clone(), nil
+			return animation.(*Animation), nil
 	}
 
 	var animation *Animation
@@ -64,9 +81,11 @@ func (am *animationManager) loadAnimation(animationPath, palettePath string, tra
 		return nil, fmt.Errorf("unknown animation format: %s", ext)
 	}
 
-	if err := am.cache.Insert(cachePath, animation.Clone(), 1); err != nil {
+	if err := am.cache.Insert(cachePath, animation, 1); err != nil {
 		return nil, err
 	}
+
+	animation.SetKey(cachePath)
 
 	return animation, nil
 }

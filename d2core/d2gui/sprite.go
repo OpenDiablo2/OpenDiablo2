@@ -84,3 +84,7 @@ func (s *Sprite) advance(elapsed float64) error {
 func (s *Sprite) getSize() (int, int) {
 	return s.animation.GetCurrentFrameSize()
 }
+
+func (s *Sprite) Dispose() {
+	s.animation.Dispose()
+}

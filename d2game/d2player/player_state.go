@@ -37,7 +37,8 @@ func GetAllPlayerStates() []*PlayerState {
 	basePath, _ := getGameBaseSavePath()
 	files, _ := ioutil.ReadDir(basePath)
 	result := make([]*PlayerState, 0)
-	for _, file := range files {
+	for idx := range files {
+		file := files[idx]
 		fileName := file.Name()
 		if file.IsDir() || len(fileName) < 5 || strings.ToLower(fileName[len(fileName)-4:]) != ".od2" {
 			continue

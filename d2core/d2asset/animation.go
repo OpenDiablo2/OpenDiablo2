@@ -59,6 +59,7 @@ type Animation struct {
 	hasSubLoop       bool // runs after first animation ends
 	subStartingFrame int
 	subEndingFrame   int
+	key              string
 }
 
 // CreateAnimationFromDCC creates an animation from d2dcc.DCC and d2dat.DATPalette
@@ -68,12 +69,14 @@ func CreateAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transpare
 		playLoop:   true,
 	}
 
-	for directionIndex, dccDirection := range dcc.Directions {
-		for _, dccFrame := range dccDirection.Frames {
+	for directionIndex := range dcc.Directions {
+		dccDirection := dcc.Directions[directionIndex]
+		for frameIdx := range dccDirection.Frames {
+			dccFrame := dccDirection.Frames[frameIdx]
 			minX, minY := math.MaxInt32, math.MaxInt32
 			maxX, maxY := math.MinInt32, math.MinInt32
-
-			for _, dccFrame := range dccDirection.Frames {
+			for idx := range dccDirection.Frames {
+				dccFrame := dccDirection.Frames[idx]
 				minX = d2common.MinInt(minX, dccFrame.Box.Left)
 				minY = d2common.MinInt(minY, dccFrame.Box.Top)
 				maxX = d2common.MaxInt(maxX, dccFrame.Box.Right())
@@ -134,7 +137,8 @@ func CreateAnimationFromDC6(dc6 *d2dc6.DC6, palette *d2dat.DATPalette) (*Animati
 		originAtBottom: true,
 	}
 
-	for frameIndex, dc6Frame := range dc6.Frames {
+	for frameIndex := range dc6.Frames {
+		dc6Frame := dc6.Frames[frameIndex]
 		sfc, err := d2render.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height), d2interface.FilterNearest)
 		if err != nil {
 			return nil, err
@@ -330,7 +334,8 @@ func (a *Animation) GetFrameBounds() (int, int) {
 	maxWidth, maxHeight := 0, 0
 
 	direction := a.directions[a.directionIndex]
-	for _, frame := range direction.frames {
+	for idx := range direction.frames {
+		frame := direction.frames[idx]
 		maxWidth = d2common.MaxInt(maxWidth, frame.width)
 		maxHeight = d2common.MaxInt(maxHeight, frame.height)
 	}
@@ -452,6 +457,27 @@ func (a *Animation) GetPlayedCount() int {
 // ResetPlayedCount resets the play count
 func (a *Animation) ResetPlayedCount() {
 	a.playedCount = 0
+}
+
+// Dispose removes the animation to ensure we do not hold the underlying images
+func (a *Animation) Dispose() {
+	for idx := range a.directions {
+		dir := a.directions[idx]
+
+		for idx := range dir.frames {
+			dir.frames[idx].image.Dispose()
+		}
+	}
+
+	UnloadAnimation(a.key)
+}
+
+func (a *Animation) SetKey(key string) {
+	a.key = key
+}
+
+func (a *Animation) GetKey() string{
+	return a.key
 }
 
 // SetBlend sets the Animation alpha blending status

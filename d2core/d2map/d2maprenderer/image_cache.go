@@ -9,6 +9,10 @@ var imageCacheRecords map[uint32]d2interface.Surface
 
 // Invalidates the global region image cache. Call this when you are changing regions
 func InvalidateImageCache() {
+	for key := range imageCacheRecords {
+		imageCacheRecords[key].Dispose()
+	}
+	
 	imageCacheRecords = nil
 }
 
@@ -22,5 +26,6 @@ func (mr *MapRenderer) setImageCacheRecord(style, sequence byte, tileType d2enum
 	if imageCacheRecords == nil {
 		imageCacheRecords = make(map[uint32]d2interface.Surface)
 	}
+
 	imageCacheRecords[lookupIndex] = image
 }

@@ -40,22 +40,22 @@ func (mr *MapRenderer) generateTileCache() {
 
 func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) {
 	tileOptions := mr.mapEngine.GetTiles(int32(tile.Style), int32(tile.Sequence), 0)
-	var tileData []*d2dt1.Tile
+	var tileData []d2dt1.Tile
 	var tileIndex byte
 
 	if tileOptions == nil {
 		log.Printf("Could not locate tile Style:%d, Seq: %d, Type: %d\n", tile.Style, tile.Sequence, 0)
-		tileData = append(tileData, &d2dt1.Tile{})
+		tileData = append(tileData, d2dt1.Tile{})
 		tileData[0].Width = 10
 		tileData[0].Height = 10
 	} else {
 		if !tileOptions[0].MaterialFlags.Lava {
 			tileIndex = mr.getRandomTile(tileOptions, tileX, tileY, mr.mapEngine.Seed())
-			tileData = append(tileData, &tileOptions[tileIndex])
+			tileData = append(tileData, tileOptions[tileIndex])
 		} else {
 			tile.Animated = true
 			for i := range tileOptions {
-				tileData = append(tileData, &tileOptions[i])
+				tileData = append(tileData, tileOptions[i])
 			}
 		}
 	}
@@ -71,7 +71,8 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, 
 			return
 		}
 		tileYMinimum := int32(0)
-		for _, block := range tileData[i].Blocks {
+		for idx := range tileData[i].Blocks {
+			block := tileData[i].Blocks[idx]
 			tileYMinimum = d2common.MinInt32(tileYMinimum, int32(block.Y))
 		}
 		tileYOffset := d2common.AbsInt32(tileYMinimum)
@@ -102,7 +103,8 @@ func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX,
 	tile.RandomIndex = tileIndex
 	tileMinY := int32(0)
 	tileMaxY := int32(0)
-	for _, block := range tileData.Blocks {
+	for idx := range tileData.Blocks {
+		block := tileData.Blocks[idx]
 		tileMinY = d2common.MinInt32(tileMinY, int32(block.Y))
 		tileMaxY = d2common.MaxInt32(tileMaxY, int32(block.Y+32))
 	}
@@ -151,7 +153,8 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY in
 		target = newTileData
 	}
 
-	for _, block := range target.Blocks {
+	for idx  := range target.Blocks {
+		block := target.Blocks[idx]
 		tileMinY = d2common.MinInt32(tileMinY, int32(block.Y))
 		tileMaxY = d2common.MaxInt32(tileMaxY, int32(block.Y+32))
 	}
@@ -204,7 +207,8 @@ func (mr *MapRenderer) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) b
 	tileSeed ^= tileSeed << 5
 
 	weightSum := 0
-	for _, tile := range tiles {
+	for idx := range tiles {
+		tile := tiles[idx]
 		weightSum += int(tile.RarityFrameIndex)
 	}
 
