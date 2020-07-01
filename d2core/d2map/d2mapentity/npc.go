@@ -39,17 +39,16 @@ func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC
 	object := &d2datadict.ObjectLookupRecord{
 		Base:  "/Data/Global/Monsters",
 		Token: monstat.AnimationDirectoryToken,
-		//Mode:  result.monstatEx.ResurrectMode.String(),
-		Mode:  "NU",
+		Mode:  result.monstatEx.ResurrectMode.String(),
 		Class: result.monstatEx.BaseWeaponClass,
-		TR:    result.monstatEx.TRv[0],
-		LG:    result.monstatEx.LGv[0],
-		RH:    result.monstatEx.RHv[0],
-		SH:    result.monstatEx.SHv[0],
-		RA:    result.monstatEx.Rav[0],
-		LA:    result.monstatEx.Lav[0],
-		LH:    result.monstatEx.LHv[0],
-		HD:    result.monstatEx.HDv[0],
+		TR:    selectEquip(result.monstatEx.TRv),
+		LG:    selectEquip(result.monstatEx.LGv),
+		RH:    selectEquip(result.monstatEx.RHv),
+		SH:    selectEquip(result.monstatEx.SHv),
+		RA:    selectEquip(result.monstatEx.Rav),
+		LA:    selectEquip(result.monstatEx.Lav),
+		LH:    selectEquip(result.monstatEx.LHv),
+		HD:    selectEquip(result.monstatEx.HDv),
 	}
 	result.objectLookup = object
 	composite, err := d2asset.LoadComposite(object, d2resource.PaletteUnits)
@@ -68,6 +67,15 @@ func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC
 
 	return result
 }
+
+func selectEquip(slice []string) string {
+	if len(slice) != 0 {
+		return slice[rand.Intn(len(slice))]
+	}
+
+	return ""
+}
+
 
 func (v *NPC) Render(target d2interface.Surface) {
 	target.PushTranslation(
