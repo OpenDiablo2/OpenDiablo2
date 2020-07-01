@@ -70,10 +70,10 @@ const nSamplesTAlloc = 100
 // Create creates a new instance of the application
 func Create(gitBranch, gitCommit string, terminal d2interface.Terminal, audio d2interface.AudioProvider) *App {
 	result := &App{
-		gitBranch: gitBranch,
-		gitCommit: gitCommit,
-		terminal:  terminal,
-		audio:     audio,
+		gitBranch:     gitBranch,
+		gitCommit:     gitCommit,
+		terminal:      terminal,
+		audio:         audio,
 		tAllocSamples: createZeroedRing(nSamplesTAlloc),
 	}
 
@@ -82,8 +82,17 @@ func Create(gitBranch, gitCommit string, terminal d2interface.Terminal, audio d2
 
 // Run executes the application and kicks off the entire game process
 func (p *App) Run() {
-	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", p.gitBranch)
+	profileOption := kingpin.Flag("profile", "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)").String()
+	kingpin.Parse()
 
+	if len(*profileOption) > 0 {
+		profiler := enableProfiler(*profileOption)
+		if profiler != nil {
+			defer profiler.Stop()
+		}
+	}
+
+	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", p.gitBranch)
 	// If we fail to initialize, we will show the error screen
 	if err := p.initialize(p.audio, p.terminal); err != nil {
 		if gameErr := d2render.Run(updateInitError, 800, 600, windowTitle); gameErr != nil {
@@ -93,13 +102,6 @@ func (p *App) Run() {
 		log.Fatal(err)
 
 		return
-	}
-
-	if len(p.profileOption) > 0 {
-		profiler := enableProfiler(p.profileOption)
-		if profiler != nil {
-			defer profiler.Stop()
-		}
 	}
 
 	d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(p.audio, p.terminal))
@@ -116,11 +118,6 @@ func (p *App) Run() {
 }
 
 func (p *App) initialize(audioProvider d2interface.AudioProvider, term d2interface.Terminal) error {
-	profileOption := kingpin.Flag("profile", "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)").String()
-
-	kingpin.Parse()
-
-	p.profileOption = *profileOption
 	p.timeScale = 1.0
 	p.lastTime = d2common.Now()
 	p.lastScreenAdvance = p.lastTime
@@ -462,7 +459,7 @@ func (p *App) update(target d2interface.Surface) error {
 func (p *App) allocRate(totalAlloc uint64, fps float64) float64 {
 	p.tAllocSamples.Value = totalAlloc
 	p.tAllocSamples = p.tAllocSamples.Next()
-	deltaAllocPerFrame := float64(totalAlloc - p.tAllocSamples.Value.(uint64)) / nSamplesTAlloc
+	deltaAllocPerFrame := float64(totalAlloc-p.tAllocSamples.Value.(uint64)) / nSamplesTAlloc
 
 	return deltaAllocPerFrame * fps / bytesToMegabyte
 }
