@@ -3,6 +3,7 @@ package d2app
 
 import (
 	"bytes"
+	"container/ring"
 	"errors"
 	"fmt"
 	"image"
@@ -53,6 +54,7 @@ type App struct {
 	gitCommit         string
 	terminal          d2interface.Terminal
 	audio             d2interface.AudioProvider
+	tAllocSamples     *ring.Ring
 }
 
 type bindTerminalEntry struct {
@@ -63,6 +65,7 @@ type bindTerminalEntry struct {
 
 const defaultFPS = 0.04 // 1/25
 const bytesToMegabyte = 1024 * 1024
+const nSamplesTAlloc = 100
 
 // Create creates a new instance of the application
 func Create(gitBranch, gitCommit string, terminal d2interface.Terminal, audio d2interface.AudioProvider) *App {
@@ -71,6 +74,7 @@ func Create(gitBranch, gitCommit string, terminal d2interface.Terminal, audio d2
 		gitCommit: gitCommit,
 		terminal:  terminal,
 		audio:     audio,
+		tAllocSamples: createZeroedRing(nSamplesTAlloc),
 	}
 
 	return result
@@ -274,16 +278,18 @@ func (p *App) renderDebug(target d2interface.Surface) error {
 
 	runtime.ReadMemStats(&m)
 	target.PushTranslation(680, 0)
-	target.DrawText("Alloc   " + strconv.FormatInt(int64(m.Alloc)/bytesToMegabyte, 10))
+	target.DrawText("Alloc    " + strconv.FormatInt(int64(m.Alloc)/bytesToMegabyte, 10))
 	target.PushTranslation(0, 16)
-	target.DrawText("Pause   " + strconv.FormatInt(int64(m.PauseTotalNs/bytesToMegabyte), 10))
+	target.DrawText("TAlloc/s " + strconv.FormatFloat(p.allocRate(m.TotalAlloc, fps), 'f', 2, 64))
 	target.PushTranslation(0, 16)
-	target.DrawText("HeapSys " + strconv.FormatInt(int64(m.HeapSys/bytesToMegabyte), 10))
+	target.DrawText("Pause    " + strconv.FormatInt(int64(m.PauseTotalNs/bytesToMegabyte), 10))
 	target.PushTranslation(0, 16)
-	target.DrawText("NumGC   " + strconv.FormatInt(int64(m.NumGC), 10))
+	target.DrawText("HeapSys  " + strconv.FormatInt(int64(m.HeapSys/bytesToMegabyte), 10))
 	target.PushTranslation(0, 16)
-	target.DrawText("Coords  " + strconv.FormatInt(int64(cx), 10) + "," + strconv.FormatInt(int64(cy), 10))
-	target.PopN(5) //nolint:gomnd This is the number of records we have popped
+	target.DrawText("NumGC    " + strconv.FormatInt(int64(m.NumGC), 10))
+	target.PushTranslation(0, 16)
+	target.DrawText("Coords   " + strconv.FormatInt(int64(cx), 10) + "," + strconv.FormatInt(int64(cy), 10))
+	target.PopN(6) //nolint:gomnd This is the number of records we have popped
 
 	return nil
 }
@@ -453,6 +459,14 @@ func (p *App) update(target d2interface.Surface) error {
 	return nil
 }
 
+func (p *App) allocRate(totalAlloc uint64, fps float64) float64 {
+	p.tAllocSamples.Value = totalAlloc
+	p.tAllocSamples = p.tAllocSamples.Next()
+	deltaAllocPerFrame := float64(totalAlloc - p.tAllocSamples.Value.(uint64)) / nSamplesTAlloc
+
+	return deltaAllocPerFrame * fps / bytesToMegabyte
+}
+
 func (p *App) dumpHeap() {
 	if err := os.Mkdir("./pprof/", 0750); err != nil {
 		log.Fatal(err)
@@ -517,6 +531,16 @@ func (p *App) quitGame() {
 
 func (p *App) enterGuiPlayground() {
 	d2screen.SetNextScreen(d2gamescreen.CreateGuiTestMain())
+}
+
+func createZeroedRing(n int) *ring.Ring {
+	r := ring.New(n)
+	for i := 0; i < n; i++ {
+		r.Value = uint64(0)
+		r = r.Next()
+	}
+
+	return r
 }
 
 func enableProfiler(profileOption string) interface{ Stop() } {
