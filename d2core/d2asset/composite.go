@@ -3,9 +3,9 @@ package d2asset
 import (
 	"errors"
 	"fmt"
-	"math"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
@@ -68,7 +68,7 @@ func (c Composite) GetAnimationMode() string {
 }
 
 func (c *Composite) SetMode(animationMode, weaponClass string, direction int) error {
-	if c.mode != nil && c.mode.animationMode == animationMode && c.mode.weaponClass == weaponClass && c.mode.direction == direction {
+	if c.mode != nil && c.mode.animationMode == animationMode && c.mode.weaponClass == weaponClass && c.mode.cofDirection == direction {
 		return nil
 	}
 
@@ -117,7 +117,7 @@ func (c *Composite) ResetPlayedCount() {
 type compositeMode struct {
 	animationMode  string
 	weaponClass    string
-	direction      int
+	cofDirection      int
 	directionCount int
 	playedCount    int
 
@@ -141,14 +141,6 @@ func (c *Composite) createMode(animationMode, weaponClass string, direction int)
 		return nil, err
 	}
 
-	// oh god how do i math
-	offset := (64 / cof.NumberOfDirections) / 2
-	entityDirection := int(math.Trunc((float64(direction+offset)-64.0)*(-float64(cof.NumberOfDirections)/-64.0) + float64(cof.NumberOfDirections)))
-
-	if entityDirection >= cof.NumberOfDirections {
-		entityDirection = 0
-	}
-
 	animationKey := strings.ToLower(c.object.Token + animationMode + weaponClass)
 	animationData := d2data.AnimationData[animationKey]
 	if len(animationData) == 0 {
@@ -158,8 +150,8 @@ func (c *Composite) createMode(animationMode, weaponClass string, direction int)
 	mode := &compositeMode{
 		animationMode:  animationMode,
 		weaponClass:    weaponClass,
-		direction:      entityDirection,
 		directionCount: cof.NumberOfDirections,
+		cofDirection:   d2cof.Dir64ToCof(direction, cof.NumberOfDirections),
 		layers:         make([]*Animation, d2enum.CompositeTypeMax),
 		frameCount:     animationData[0].FramesPerDirection,
 		animationSpeed: 1.0 / ((float64(animationData[0].AnimationSpeed) * 25.0) / 256.0),
@@ -167,7 +159,7 @@ func (c *Composite) createMode(animationMode, weaponClass string, direction int)
 
 	mode.drawOrder = make([][]d2enum.CompositeType, mode.frameCount)
 	for frame := 0; frame < mode.frameCount; frame++ {
-		mode.drawOrder[frame] = cof.Priority[mode.direction][frame]
+		mode.drawOrder[frame] = cof.Priority[mode.cofDirection][frame]
 	}
 
 	for _, cofLayer := range cof.CofLayers {
