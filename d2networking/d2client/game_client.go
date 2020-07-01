@@ -25,7 +25,7 @@ import (
 // GameClient manages a connection to d2server.GameServer
 // and keeps a synchronised copy of the map and entities.
 type GameClient struct {
-	clientConnection ClientConnection                            // Abstract local/remote connection
+	clientConnection ServerConnection                            // Abstract local/remote connection
 	connectionType   d2clientconnectiontype.ClientConnectionType // Type of connection (local or remote)
 	GameState        *d2player.PlayerState                       // local player state
 	MapEngine        *d2mapengine.MapEngine                      // Map and entities
