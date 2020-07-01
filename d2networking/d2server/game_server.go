@@ -110,10 +110,14 @@ func runNetworkServer() {
 		packetType := d2netpackettype.NetPacketType(packetTypeId)
 		reader, err := gzip.NewReader(buff)
 		sb := new(strings.Builder)
+
+		// This will throw errors where packets are not compressed. This doesn't
+		// break anything, so the gzip.ErrHeader error, is currently ignored to
+		// avoid noisy logging.
 		written, err := io.Copy(sb, reader)
-		if err != nil {
+		if err != nil && err != gzip.ErrHeader {
 			log.Printf("GameServer: error copying bytes from %v packet: %s", packetType, err)
-			continue
+
 		}
 		if written == 0 {
 			log.Printf("GameServer: empty packet %v packet received", packetType)

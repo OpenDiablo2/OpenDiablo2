@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -59,7 +58,7 @@ func Create() *RemoteClientConnection {
 
 // Open runs serverListener() in a goroutine to continuously read UDP packets.
 // It also sends a PlayerConnectionRequestPacket packet to the server (see d2netpacket).
-func (l *RemoteClientConnection) Open(connectionString string, saveFilePath string) error {
+func (l *RemoteClientConnection) Open(connectionString, saveFilePath string) error {
 	if !strings.Contains(connectionString, ":") {
 		connectionString += ":6669"
 	}
@@ -82,8 +81,10 @@ func (l *RemoteClientConnection) Open(connectionString string, saveFilePath stri
 	go l.serverListener()
 
 	log.Printf("Connected to server at %s", l.udpConnection.RemoteAddr().String())
+
 	gameState := d2player.LoadPlayerState(saveFilePath)
 	err = l.SendPacketToServer(d2netpacket.CreatePlayerConnectionRequestPacket(l.GetUniqueId(), gameState))
+
 	if err != nil {
 		log.Print("RemoteClientConnection: error sending PlayerConnectionRequestPacket to server.")
 		return err
@@ -97,6 +98,7 @@ func (l *RemoteClientConnection) Open(connectionString string, saveFilePath stri
 func (l *RemoteClientConnection) Close() error {
 	l.active = false
 	err := l.SendPacketToServer(d2netpacket.CreatePlayerDisconnectRequestPacket(l.GetUniqueId()))
+
 	if err != nil {
 		return err
 	}
@@ -111,21 +113,25 @@ func (l *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket
 	if err != nil {
 		return err
 	}
+
 	var buff bytes.Buffer
+
 	buff.WriteByte(byte(packet.PacketType))
 	writer, _ := gzip.NewWriterLevel(&buff, gzip.BestCompression)
 
 	if written, err := writer.Write(data); err != nil {
 		return err
 	} else if written == 0 {
-		return errors.New(fmt.Sprintf("RemoteClientConnection: attempted to send empty %v packet body.", packet.PacketType))
+		return fmt.Errorf("remoteClientConnection: attempted to send empty %v packet body", packet.PacketType)
 	}
-	if err = writer.Close(); err != nil {
+	if err := writer.Close(); err != nil {
 		return err
 	}
+
 	if _, err = l.udpConnection.Write(buff.Bytes()); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -138,50 +144,62 @@ func (l *RemoteClientConnection) SetClientListener(listener d2networking.ClientL
 // connection.
 func (l *RemoteClientConnection) serverListener() {
 	buffer := make([]byte, 4096)
+
 	for l.active {
 		n, _, err := l.udpConnection.ReadFromUDP(buffer)
 		if err != nil {
 			fmt.Printf("Socket error: %s\n", err)
 			continue
 		}
+
 		if n <= 0 {
 			continue
 		}
+
 		buff := bytes.NewBuffer(buffer)
 		packetTypeId, err := buff.ReadByte()
 		packetType := d2netpackettype.NetPacketType(packetTypeId)
 		reader, err := gzip.NewReader(buff)
 		sb := new(strings.Builder)
-		written, err := io.Copy(sb, reader)
-		if err != nil {
-			log.Printf("RemoteClientConnection: error copying bytes from %v packet: %s", packetType, err)
-			// TODO: All packets coming from the client seem to be throwing an error
-			//continue
+
+		// This will throw errors where packets are not compressed. This doesn't
+		// break anything, so the gzip.ErrHeader error, is currently ignored to
+		// avoid noisy logging.
+		written, _ := io.Copy(sb, reader)
+
+		if err != nil && err != gzip.ErrHeader {
+			log.Printf("GameServer: error copying bytes from %v packet: %s", packetType, err)
 		}
+
 		if written == 0 {
 			log.Printf("RemoteClientConnection: empty packet %v packet received", packetType)
 			continue
 		}
 
 		stringData := sb.String()
+
 		switch packetType {
 		case d2netpackettype.GenerateMap:
 			var packet d2netpacket.GenerateMapPacket
 			err := json.Unmarshal([]byte(stringData), &packet)
+
 			if err != nil {
 				log.Printf("GameServer: error unmarshalling %T: %s", packet, err)
 				continue
 			}
+
 			err = l.SendPacketToClient(d2netpacket.NetPacket{
 				PacketType: packetType,
 				PacketData: packet,
 			})
+
 			if err != nil {
 				log.Printf("RemoteClientConnection: error processing packet %v: %s", packetType, err)
 			}
 		case d2netpackettype.MovePlayer:
 			var packet d2netpacket.MovePlayerPacket
 			err := json.Unmarshal([]byte(stringData), &packet)
+
 			if err != nil {
 				log.Printf("GameServer: error unmarshalling %T: %s", packet, err)
 				continue
