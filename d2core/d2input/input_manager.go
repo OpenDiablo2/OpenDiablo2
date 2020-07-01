@@ -4,36 +4,21 @@ import (
 	"sort"
 )
 
-type handlerEntry struct {
-	handler  Handler
-	priority Priority
-}
+// Priority of the event handler
+type Priority int
 
-type handlerEntryList []handlerEntry
+//noinspection GoUnusedConst
+const (
+	// PriorityLow is a low priority handler
+	PriorityLow Priority = iota
+	// PriorityDefault is a default priority handler
+	PriorityDefault
+	// PriorityHigh is a high priority handler
+	PriorityHigh
+)
 
-func (lel handlerEntryList) Len() int {
-	return len(lel)
-}
-
-func (lel handlerEntryList) Swap(i, j int) {
-	lel[i], lel[j] = lel[j], lel[i]
-}
-
-func (lel handlerEntryList) Less(i, j int) bool {
-	return lel[i].priority > lel[j].priority
-}
-
-type InputService interface {
-	CursorPosition() (x int, y int)
-	InputChars() []rune
-	IsKeyPressed(key Key) bool
-	IsKeyJustPressed(key Key) bool
-	IsKeyJustReleased(key Key) bool
-	IsMouseButtonPressed(button MouseButton) bool
-	IsMouseButtonJustPressed(button MouseButton) bool
-	IsMouseButtonJustReleased(button MouseButton) bool
-	KeyPressDuration(key Key) int
-}
+// Handler is an event handler
+type Handler interface{}
 
 type inputManager struct {
 	inputService InputService
@@ -126,7 +111,7 @@ func (im *inputManager) advance(_ float64) error {
 
 	for button := mouseButtonMin; button <= mouseButtonMax; button++ {
 		if im.inputService.IsMouseButtonJustPressed(button) {
-			event := MouseEvent{eventBase, MouseButton(button)}
+			event := MouseEvent{eventBase, button}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(MouseButtonDownHandler); ok {
 					return l.OnMouseButtonDown(event)
@@ -137,7 +122,7 @@ func (im *inputManager) advance(_ float64) error {
 		}
 
 		if im.inputService.IsMouseButtonJustReleased(button) {
-			event := MouseEvent{eventBase, MouseButton(button)}
+			event := MouseEvent{eventBase, button}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(MouseButtonUpHandler); ok {
 					return l.OnMouseButtonUp(event)
@@ -147,7 +132,7 @@ func (im *inputManager) advance(_ float64) error {
 			})
 		}
 		if im.inputService.IsMouseButtonPressed(button) {
-			event := MouseEvent{eventBase, MouseButton(button)}
+			event := MouseEvent{eventBase, button}
 			im.propagate(func(handler Handler) bool {
 				if l, ok := handler.(MouseButtonRepeatHandler); ok {
 					return l.OnMouseButtonRepeat(event)
@@ -214,4 +199,23 @@ func (im *inputManager) propagate(callback func(Handler) bool) {
 
 		priority = entry.priority
 	}
+}
+
+type handlerEntry struct {
+	handler  Handler
+	priority Priority
+}
+
+type handlerEntryList []handlerEntry
+
+func (lel handlerEntryList) Len() int {
+	return len(lel)
+}
+
+func (lel handlerEntryList) Swap(i, j int) {
+	lel[i], lel[j] = lel[j], lel[i]
+}
+
+func (lel handlerEntryList) Less(i, j int) bool {
+	return lel[i].priority > lel[j].priority
 }
