@@ -14,6 +14,7 @@ func CreateGuiTestMain() *GuiTestMain {
 
 func (g *GuiTestMain) OnLoad(loading d2screen.LoadingState) {
 	layout := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
+
 	loading.Progress(0.3)
 	//
 	layoutLeft := layout.AddLayout(d2gui.PositionTypeVertical)
