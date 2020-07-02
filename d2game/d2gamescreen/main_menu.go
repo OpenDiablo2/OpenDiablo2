@@ -106,7 +106,7 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	}
 
 	if err := d2input.BindHandler(v); err != nil {
-		fmt.Printf("failed to add main menu as event handler")
+		fmt.Println("failed to add main menu as event handler")
 	}
 }
 
