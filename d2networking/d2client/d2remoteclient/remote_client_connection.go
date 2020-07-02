@@ -106,11 +106,6 @@ func (r *RemoteClientConnection) SetClientListener(listener d2networking.ClientL
 	r.clientListener = listener
 }
 
-// SendPacketToClient passes a packet to the game client for processing.
-func (r *RemoteClientConnection) SendPacketToClient(packet d2netpacket.NetPacket) error {
-	return r.clientListener.OnPacketReceived(packet)
-}
-
 // SendPacketToServer compresses the JSON encoding of a NetPacket and
 // sends it to the server.
 func (r *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket) error {
@@ -159,24 +154,25 @@ func (r *RemoteClientConnection) serverListener() {
 			continue
 		}
 
-		data, packetType, err := r.readPacket(buffer)
+		data, packetType, err := r.bytesToJSON(buffer)
 		if err != nil {
-			log.Println("RemoteClientConnection: error", packetType, err)
+			log.Println(packetType, err)
 		}
 
 		packet, err := r.decodeToPacket(packetType, data)
 		if err != nil {
-			log.Println("RemoteClientConnection: error", packetType, err)
+			log.Println(packetType, err)
 		}
 
-		if err := r.SendPacketToClient(packet); err != nil {
-			log.Println("RemoteClientConnection: error", packetType, err)
+		err = r.clientListener.OnPacketReceived(packet)
+		if err != nil {
+			log.Println(packetType, err)
 		}
 	}
 }
 
-// readPacket reads the packet type, decompresses the packet and returns a JSON string.
-func (r *RemoteClientConnection) readPacket(buffer []byte) (string, d2netpackettype.NetPacketType, error) {
+// bytesToJSON reads the packet type, decompresses the packet and returns a JSON string.
+func (r *RemoteClientConnection) bytesToJSON(buffer []byte) (string, d2netpackettype.NetPacketType, error) {
 	buff := bytes.NewBuffer(buffer)
 
 	packetTypeID, err := buff.ReadByte()
