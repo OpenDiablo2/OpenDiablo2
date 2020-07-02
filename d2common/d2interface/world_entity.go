@@ -2,5 +2,5 @@ package d2interface
 
 type WorldEntity interface {
 	Serializer
-	Position() Vector2
+	Position() Vector
 }
