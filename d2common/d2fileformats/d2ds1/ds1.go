@@ -4,7 +4,6 @@ package d2ds1
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
@@ -120,15 +119,6 @@ func (ds1 *DS1) loadObjects(br *d2common.StreamReader) {
 			newObject.X = int(br.GetInt32())
 			newObject.Y = int(br.GetInt32())
 			newObject.Flags = int(br.GetInt32())
-			newObject.Lookup = d2datadict.LookupObject(int(ds1.Act), newObject.Type, newObject.Id)
-
-			if newObject.Lookup != nil && newObject.Type == 1 {
-				newObject.Lookup.Name = d2datadict.MonPresets[ds1.Act][newObject.Id]
-			}
-
-			if newObject.Lookup != nil && newObject.Lookup.ObjectsTxtId != -1 {
-				newObject.ObjectInfo = d2datadict.Objects[newObject.Lookup.ObjectsTxtId]
-			}
 
 			ds1.Objects[objIdx] = newObject
 		}

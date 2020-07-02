@@ -27,6 +27,7 @@ func (am *animationManager) loadAnimation(animationPath, palettePath string, tra
 	}
 
 	var animation *Animation
+
 	ext := strings.ToLower(filepath.Ext(animationPath))
 	switch ext {
 	case ".dc6":

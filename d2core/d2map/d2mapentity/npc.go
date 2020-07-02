@@ -24,24 +24,42 @@ type NPC struct {
 	direction     int
 	objectLookup  *d2datadict.ObjectLookupRecord
 	monstatRecord *d2datadict.MonStatsRecord
+	monstatEx     *d2datadict.MonStats2Record
 	name          string
 }
 
-func CreateNPC(x, y int, object *d2datadict.ObjectLookupRecord, direction int) *NPC {
+func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC {
+	result := &NPC{
+		mapEntity:     createMapEntity(x, y),
+		HasPaths:      false,
+		monstatRecord: monstat,
+		monstatEx:     d2datadict.MonStats2[monstat.ExtraDataKey],
+	}
+
+	object := &d2datadict.ObjectLookupRecord{
+		Base:  "/Data/Global/Monsters",
+		Token: monstat.AnimationDirectoryToken,
+		Mode:  result.monstatEx.ResurrectMode.String(),
+		Class: result.monstatEx.BaseWeaponClass,
+		TR:    selectEquip(result.monstatEx.TRv),
+		LG:    selectEquip(result.monstatEx.LGv),
+		RH:    selectEquip(result.monstatEx.RHv),
+		SH:    selectEquip(result.monstatEx.SHv),
+		RA:    selectEquip(result.monstatEx.Rav),
+		LA:    selectEquip(result.monstatEx.Lav),
+		LH:    selectEquip(result.monstatEx.LHv),
+		HD:    selectEquip(result.monstatEx.HDv),
+	}
+	result.objectLookup = object
 	composite, err := d2asset.LoadComposite(object, d2resource.PaletteUnits)
+	result.composite = composite
+
 	if err != nil {
 		panic(err)
 	}
 
-	result := &NPC{
-		mapEntity:    createMapEntity(x, y),
-		composite:    composite,
-		objectLookup: object,
-		HasPaths:     false,
-	}
 	result.SetMode(object.Mode, object.Class, direction)
 	result.mapEntity.directioner = result.rotate
-	result.monstatRecord = d2datadict.MonStats[object.Name]
 
 	if result.monstatRecord != nil && result.monstatRecord.IsInteractable {
 		result.name = d2common.TranslateString(result.monstatRecord.NameStringTableKey)
@@ -49,6 +67,15 @@ func CreateNPC(x, y int, object *d2datadict.ObjectLookupRecord, direction int) *
 
 	return result
 }
+
+func selectEquip(slice []string) string {
+	if len(slice) != 0 {
+		return slice[rand.Intn(len(slice))]
+	}
+
+	return ""
+}
+
 
 func (v *NPC) Render(target d2interface.Surface) {
 	target.PushTranslation(

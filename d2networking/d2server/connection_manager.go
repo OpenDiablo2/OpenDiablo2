@@ -85,7 +85,10 @@ func (c *ConnectionManager) Shutdown() {
 	// Things can be done more cleanly once we have graceful exits however we still need to account for other OS Signals
 	log.Print("Notifying clients server is shutting down...")
 	for _, connection := range c.gameServer.clientConnections {
-		connection.SendPacketToClient(d2netpacket.CreateServerClosedPacket())
+		err := connection.SendPacketToClient(d2netpacket.CreateServerClosedPacket())
+		if err != nil {
+			log.Printf("ConnectionManager: error sending ServerClosedPacket to client ID %s: %s", connection.GetUniqueId(), err)
+		}
 	}
 	Stop()
 }

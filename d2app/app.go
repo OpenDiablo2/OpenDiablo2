@@ -3,6 +3,7 @@ package d2app
 
 import (
 	"bytes"
+	"container/ring"
 	"errors"
 	"fmt"
 	"image"
@@ -53,6 +54,7 @@ type App struct {
 	gitCommit         string
 	terminal          d2interface.Terminal
 	audio             d2interface.AudioProvider
+	tAllocSamples     *ring.Ring
 }
 
 type bindTerminalEntry struct {
@@ -63,14 +65,16 @@ type bindTerminalEntry struct {
 
 const defaultFPS = 0.04 // 1/25
 const bytesToMegabyte = 1024 * 1024
+const nSamplesTAlloc = 100
 
 // Create creates a new instance of the application
 func Create(gitBranch, gitCommit string, terminal d2interface.Terminal, audio d2interface.AudioProvider) *App {
 	result := &App{
-		gitBranch: gitBranch,
-		gitCommit: gitCommit,
-		terminal:  terminal,
-		audio:     audio,
+		gitBranch:     gitBranch,
+		gitCommit:     gitCommit,
+		terminal:      terminal,
+		audio:         audio,
+		tAllocSamples: createZeroedRing(nSamplesTAlloc),
 	}
 
 	return result
@@ -78,8 +82,17 @@ func Create(gitBranch, gitCommit string, terminal d2interface.Terminal, audio d2
 
 // Run executes the application and kicks off the entire game process
 func (p *App) Run() {
-	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", p.gitBranch)
+	profileOption := kingpin.Flag("profile", "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)").String()
+	kingpin.Parse()
 
+	if len(*profileOption) > 0 {
+		profiler := enableProfiler(*profileOption)
+		if profiler != nil {
+			defer profiler.Stop()
+		}
+	}
+
+	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", p.gitBranch)
 	// If we fail to initialize, we will show the error screen
 	if err := p.initialize(p.audio, p.terminal); err != nil {
 		if gameErr := d2render.Run(updateInitError, 800, 600, windowTitle); gameErr != nil {
@@ -89,13 +102,6 @@ func (p *App) Run() {
 		log.Fatal(err)
 
 		return
-	}
-
-	if len(p.profileOption) > 0 {
-		profiler := enableProfiler(p.profileOption)
-		if profiler != nil {
-			defer profiler.Stop()
-		}
 	}
 
 	d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(p.audio, p.terminal))
@@ -112,11 +118,6 @@ func (p *App) Run() {
 }
 
 func (p *App) initialize(audioProvider d2interface.AudioProvider, term d2interface.Terminal) error {
-	profileOption := kingpin.Flag("profile", "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)").String()
-
-	kingpin.Parse()
-
-	p.profileOption = *profileOption
 	p.timeScale = 1.0
 	p.lastTime = d2common.Now()
 	p.lastScreenAdvance = p.lastTime
@@ -274,16 +275,18 @@ func (p *App) renderDebug(target d2interface.Surface) error {
 
 	runtime.ReadMemStats(&m)
 	target.PushTranslation(680, 0)
-	target.DrawText("Alloc   " + strconv.FormatInt(int64(m.Alloc)/bytesToMegabyte, 10))
+	target.DrawText("Alloc    " + strconv.FormatInt(int64(m.Alloc)/bytesToMegabyte, 10))
 	target.PushTranslation(0, 16)
-	target.DrawText("Pause   " + strconv.FormatInt(int64(m.PauseTotalNs/bytesToMegabyte), 10))
+	target.DrawText("TAlloc/s " + strconv.FormatFloat(p.allocRate(m.TotalAlloc, fps), 'f', 2, 64))
 	target.PushTranslation(0, 16)
-	target.DrawText("HeapSys " + strconv.FormatInt(int64(m.HeapSys/bytesToMegabyte), 10))
+	target.DrawText("Pause    " + strconv.FormatInt(int64(m.PauseTotalNs/bytesToMegabyte), 10))
 	target.PushTranslation(0, 16)
-	target.DrawText("NumGC   " + strconv.FormatInt(int64(m.NumGC), 10))
+	target.DrawText("HeapSys  " + strconv.FormatInt(int64(m.HeapSys/bytesToMegabyte), 10))
 	target.PushTranslation(0, 16)
-	target.DrawText("Coords  " + strconv.FormatInt(int64(cx), 10) + "," + strconv.FormatInt(int64(cy), 10))
-	target.PopN(5) //nolint:gomnd This is the number of records we have popped
+	target.DrawText("NumGC    " + strconv.FormatInt(int64(m.NumGC), 10))
+	target.PushTranslation(0, 16)
+	target.DrawText("Coords   " + strconv.FormatInt(int64(cx), 10) + "," + strconv.FormatInt(int64(cy), 10))
+	target.PopN(6) //nolint:gomnd This is the number of records we have popped
 
 	return nil
 }
@@ -453,6 +456,14 @@ func (p *App) update(target d2interface.Surface) error {
 	return nil
 }
 
+func (p *App) allocRate(totalAlloc uint64, fps float64) float64 {
+	p.tAllocSamples.Value = totalAlloc
+	p.tAllocSamples = p.tAllocSamples.Next()
+	deltaAllocPerFrame := float64(totalAlloc-p.tAllocSamples.Value.(uint64)) / nSamplesTAlloc
+
+	return deltaAllocPerFrame * fps / bytesToMegabyte
+}
+
 func (p *App) dumpHeap() {
 	if err := os.Mkdir("./pprof/", 0750); err != nil {
 		log.Fatal(err)
@@ -472,7 +483,7 @@ func (p *App) dumpHeap() {
 func (p *App) toggleFullScreen() {
 	fullscreen := !d2render.IsFullScreen()
 	d2render.SetFullScreen(fullscreen)
-	p.terminal.OutputInfo("fullscreen is now: %v", fullscreen)
+	p.terminal.OutputInfof("fullscreen is now: %v", fullscreen)
 }
 
 func (p *App) captureFrame(path string) {
@@ -494,19 +505,19 @@ func (p *App) stopAnimationCapture() {
 func (p *App) toggleVsync() {
 	vsync := !d2render.GetVSyncEnabled()
 	d2render.SetVSyncEnabled(vsync)
-	p.terminal.OutputInfo("vsync is now: %v", vsync)
+	p.terminal.OutputInfof("vsync is now: %v", vsync)
 }
 
 func (p *App) toggleFpsCounter() {
 	p.showFPS = !p.showFPS
-	p.terminal.OutputInfo("fps counter is now: %v", p.showFPS)
+	p.terminal.OutputInfof("fps counter is now: %v", p.showFPS)
 }
 
 func (p *App) setTimeScale(timeScale float64) {
 	if timeScale <= 0 {
-		p.terminal.OutputError("invalid time scale value")
+		p.terminal.OutputErrorf("invalid time scale value")
 	} else {
-		p.terminal.OutputInfo("timescale changed from %f to %f", p.timeScale, timeScale)
+		p.terminal.OutputInfof("timescale changed from %f to %f", p.timeScale, timeScale)
 		p.timeScale = timeScale
 	}
 }
@@ -517,6 +528,16 @@ func (p *App) quitGame() {
 
 func (p *App) enterGuiPlayground() {
 	d2screen.SetNextScreen(d2gamescreen.CreateGuiTestMain())
+}
+
+func createZeroedRing(n int) *ring.Ring {
+	r := ring.New(n)
+	for i := 0; i < n; i++ {
+		r.Value = uint64(0)
+		r = r.Next()
+	}
+
+	return r
 }
 
 func enableProfiler(profileOption string) interface{ Stop() } {

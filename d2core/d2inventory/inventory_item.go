@@ -2,6 +2,7 @@ package d2inventory
 
 import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
+// InventoryItem defines the functionality of an inventory item
 type InventoryItem interface {
 	// GetInventoryItemName returns the name of this inventory item
 	GetInventoryItemName() string

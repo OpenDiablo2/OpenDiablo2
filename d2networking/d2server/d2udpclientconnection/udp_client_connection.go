@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
@@ -57,10 +59,16 @@ func (u *UDPClientConnection) SendPacketToClient(packet d2netpacket.NetPacket) e
 	var buff bytes.Buffer
 	buff.WriteByte(byte(packet.PacketType))
 	writer, _ := gzip.NewWriterLevel(&buff, gzip.BestCompression)
-	writer.Write(data)
-	writer.Close()
-	_, err = u.udpConnection.WriteToUDP(buff.Bytes(), u.address)
-	if err != nil {
+
+	if written, err := writer.Write(data); err != nil {
+		return err
+	} else if written == 0 {
+		return errors.New(fmt.Sprintf("RemoteClientConnection: attempted to send empty %v packet body.", packet.PacketType))
+	}
+	if err = writer.Close(); err != nil {
+		return err
+	}
+	if _, err = u.udpConnection.WriteToUDP(buff.Bytes(), u.address); err != nil {
 		return err
 	}
 

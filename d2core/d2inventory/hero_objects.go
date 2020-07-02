@@ -4,8 +4,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
+// HeroObjects map contains the hero type to CharacterEquipments
 var HeroObjects map[d2enum.Hero]CharacterEquipment
 
+// LoadHeroObjects loads the equipment objects of the hero
 func LoadHeroObjects() {
 	//Mode:  d2enum.AnimationModePlayerNeutral.String(),
 	//Base:  "/data/global/chars",

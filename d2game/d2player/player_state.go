@@ -48,7 +48,7 @@ func GetAllPlayerStates() []*PlayerState {
 		// temporarily loading default class stats if the character was created before saving stats was introduced
 		// to be removed in the future
 		} else if gameState.Stats == nil {
-			gameState.Stats = d2hero.CreateHeroStatsState(gameState.HeroType, *d2datadict.CharStats[gameState.HeroType], 1, 0)
+			gameState.Stats = d2hero.CreateHeroStatsState(gameState.HeroType, d2datadict.CharStats[gameState.HeroType])
 			gameState.Save()
 		}
 
@@ -79,12 +79,12 @@ func LoadPlayerState(path string) *PlayerState {
 	return result
 }
 
-func CreatePlayerState(heroName string, hero d2enum.Hero, classStats d2datadict.CharStatsRecord, hardcore bool) *PlayerState {
+func CreatePlayerState(heroName string, hero d2enum.Hero, classStats *d2datadict.CharStatsRecord, hardcore bool) *PlayerState {
 	result := &PlayerState{
 		HeroName:  heroName,
 		HeroType:  hero,
 		Act:       1,
-		Stats: d2hero.CreateHeroStatsState(hero, classStats, 1, 0),
+		Stats: d2hero.CreateHeroStatsState(hero, classStats),
 		Equipment: d2inventory.HeroObjects[hero],
 		FilePath:  "",
 	}

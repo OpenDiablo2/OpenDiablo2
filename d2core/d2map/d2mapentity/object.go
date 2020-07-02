@@ -37,6 +37,8 @@ func CreateObject(x, y int, object *d2datadict.ObjectLookupRecord, palettePath s
 	entity.mapEntity.directioner = entity.rotate
 	entity.objectRecord = d2datadict.Objects[object.ObjectsTxtId]
 	entity.drawLayer = entity.objectRecord.OrderFlag[d2enum.AnimationModeObjectNeutral]
+	entity.SetMode(object.Mode, object.Class, 0)
+
 	return entity, nil
 }
 
