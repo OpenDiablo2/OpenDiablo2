@@ -88,6 +88,68 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	v.audioProvider.PlayBGM(d2resource.BGMTitle)
 	loading.Progress(0.2)
 
+	v.createLabels(loading)
+
+	animation, _ := d2asset.LoadAnimation(d2resource.GameSelectScreen, d2resource.PaletteSky)
+	v.background, _ = d2ui.LoadSprite(animation)
+	v.background.SetPosition(0, 0)
+
+	animation, _ = d2asset.LoadAnimation(d2resource.TrademarkScreen, d2resource.PaletteSky)
+	v.trademarkBackground, _ = d2ui.LoadSprite(animation)
+	v.trademarkBackground.SetPosition(0, 0)
+
+	animation, _ = d2asset.LoadAnimation(d2resource.TCPIPBackground, d2resource.PaletteSky)
+	v.tcpIPBackground, _ = d2ui.LoadSprite(animation)
+	v.tcpIPBackground.SetPosition(0, 0)
+
+	v.createLogos(loading)
+	v.createButtons(loading)
+
+	v.tcpIPOptionsLabel = d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
+	v.tcpIPOptionsLabel.SetPosition(400, 23)
+	v.tcpIPOptionsLabel.Alignment = d2ui.LabelAlignCenter
+	v.tcpIPOptionsLabel.SetText("TCP/IP Options")
+
+	animation, _ = d2asset.LoadAnimation(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
+	v.serverIPBackground, _ = d2ui.LoadSprite(animation)
+	v.serverIPBackground.SetPosition(270, 175)
+
+	v.tcpJoinGameLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.tcpJoinGameLabel.Alignment = d2ui.LabelAlignCenter
+	v.tcpJoinGameLabel.SetText(d2common.CombineStrings(d2common.
+		SplitIntoLinesWithMaxWidth("Enter Host IP Address to Join Game", 23)))
+
+	v.tcpJoinGameLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
+	v.tcpJoinGameLabel.SetPosition(400, 190)
+
+	v.tcpJoinGameEntry = d2ui.CreateTextbox()
+	v.tcpJoinGameEntry.SetPosition(318, 245)
+	v.tcpJoinGameEntry.SetFilter("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890._:")
+	d2ui.AddWidget(&v.tcpJoinGameEntry)
+	loading.Progress(0.9)
+
+	v.btnServerIPCancel = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "CANCEL")
+	v.btnServerIPCancel.SetPosition(285, 305)
+	v.btnServerIPCancel.OnActivated(func() { v.onBtnTCPIPCancelClicked() })
+	d2ui.AddWidget(&v.btnServerIPCancel)
+
+	v.btnServerIPOk = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "OK")
+	v.btnServerIPOk.SetPosition(420, 305)
+	v.btnServerIPOk.OnActivated(func() { v.onBtnTCPIPOkClicked() })
+	d2ui.AddWidget(&v.btnServerIPOk)
+
+	if v.screenMode == screenModeUnknown {
+		v.setScreenMode(screenModeTrademark)
+	} else {
+		v.setScreenMode(screenModeMainMenu)
+	}
+
+	if err := d2input.BindHandler(v); err != nil {
+		fmt.Printf("failed to add main menu as event handler")
+	}
+}
+
+func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 	v.versionLabel = d2ui.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.versionLabel.Alignment = d2ui.LabelAlignRight
 	v.versionLabel.SetText("OpenDiablo2 - " + d2common.BuildInfo.Branch)
@@ -119,20 +181,10 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	v.openDiabloLabel.Color = color.RGBA{R: 255, G: 255, B: 140, A: 255}
 	v.openDiabloLabel.SetPosition(400, 580)
 	loading.Progress(0.5)
+}
 
-	animation, _ := d2asset.LoadAnimation(d2resource.GameSelectScreen, d2resource.PaletteSky)
-	v.background, _ = d2ui.LoadSprite(animation)
-	v.background.SetPosition(0, 0)
-
-	animation, _ = d2asset.LoadAnimation(d2resource.TrademarkScreen, d2resource.PaletteSky)
-	v.trademarkBackground, _ = d2ui.LoadSprite(animation)
-	v.trademarkBackground.SetPosition(0, 0)
-
-	animation, _ = d2asset.LoadAnimation(d2resource.TCPIPBackground, d2resource.PaletteSky)
-	v.tcpIPBackground, _ = d2ui.LoadSprite(animation)
-	v.tcpIPBackground.SetPosition(0, 0)
-
-	animation, _ = d2asset.LoadAnimation(d2resource.Diablo2LogoFireLeft, d2resource.PaletteUnits)
+func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
+	animation, _ := d2asset.LoadAnimation(d2resource.Diablo2LogoFireLeft, d2resource.PaletteUnits)
 	v.diabloLogoLeft, _ = d2ui.LoadSprite(animation)
 	v.diabloLogoLeft.SetBlend(true)
 	v.diabloLogoLeft.PlayForward()
@@ -152,7 +204,9 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	animation, _ = d2asset.LoadAnimation(d2resource.Diablo2LogoBlackRight, d2resource.PaletteUnits)
 	v.diabloLogoRightBack, _ = d2ui.LoadSprite(animation)
 	v.diabloLogoRightBack.SetPosition(400, 120)
+}
 
+func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
 	v.exitDiabloButton = d2ui.CreateButton(d2ui.ButtonTypeWide, "EXIT DIABLO II")
 	v.exitDiabloButton.SetPosition(264, 535)
 	v.exitDiabloButton.OnActivated(func() { v.onExitButtonClicked() })
@@ -213,47 +267,6 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	v.btnTCPIPJoinGame.OnActivated(func() { v.onTCPIPJoinGameClicked() })
 	d2ui.AddWidget(&v.btnTCPIPJoinGame)
 	loading.Progress(0.8)
-
-	v.tcpIPOptionsLabel = d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
-	v.tcpIPOptionsLabel.SetPosition(400, 23)
-	v.tcpIPOptionsLabel.Alignment = d2ui.LabelAlignCenter
-	v.tcpIPOptionsLabel.SetText("TCP/IP Options")
-
-	animation, _ = d2asset.LoadAnimation(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
-	v.serverIPBackground, _ = d2ui.LoadSprite(animation)
-	v.serverIPBackground.SetPosition(270, 175)
-
-	v.tcpJoinGameLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
-	v.tcpJoinGameLabel.Alignment = d2ui.LabelAlignCenter
-	v.tcpJoinGameLabel.SetText(d2common.CombineStrings(d2common.
-		SplitIntoLinesWithMaxWidth("Enter Host IP Address to Join Game", 23)))
-
-	v.tcpJoinGameLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
-	v.tcpJoinGameLabel.SetPosition(400, 190)
-
-	v.tcpJoinGameEntry = d2ui.CreateTextbox()
-	v.tcpJoinGameEntry.SetPosition(318, 245)
-	v.tcpJoinGameEntry.SetFilter("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890._:")
-	d2ui.AddWidget(&v.tcpJoinGameEntry)
-	loading.Progress(0.9)
-
-	v.btnServerIPCancel = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "CANCEL")
-	v.btnServerIPCancel.SetPosition(285, 305)
-	v.btnServerIPCancel.OnActivated(func() { v.onBtnTCPIPCancelClicked() })
-	d2ui.AddWidget(&v.btnServerIPCancel)
-
-	v.btnServerIPOk = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "OK")
-	v.btnServerIPOk.SetPosition(420, 305)
-	v.btnServerIPOk.OnActivated(func() { v.onBtnTCPIPOkClicked() })
-	d2ui.AddWidget(&v.btnServerIPOk)
-
-	if v.screenMode == screenModeUnknown {
-		v.setScreenMode(screenModeTrademark)
-	} else {
-		v.setScreenMode(screenModeMainMenu)
-	}
-
-	d2input.BindHandler(v)
 }
 
 func (v *MainMenu) onMapTestClicked() {
@@ -340,15 +353,22 @@ func (v *MainMenu) Render(screen d2interface.Surface) error {
 // Advance runs the update logic on the main menu
 func (v *MainMenu) Advance(tickTime float64) error {
 	switch v.screenMode {
-	case screenModeMainMenu:
-		fallthrough
-	case screenModeTrademark:
-		fallthrough
-	case screenModeMultiplayer:
-		v.diabloLogoLeftBack.Advance(tickTime)
-		v.diabloLogoRightBack.Advance(tickTime)
-		v.diabloLogoLeft.Advance(tickTime)
-		v.diabloLogoRight.Advance(tickTime)
+	case screenModeMainMenu, screenModeTrademark, screenModeMultiplayer:
+		if err := v.diabloLogoLeftBack.Advance(tickTime); err != nil {
+			return err
+		}
+
+		if err := v.diabloLogoRightBack.Advance(tickTime); err != nil {
+			return err
+		}
+
+		if err := v.diabloLogoLeft.Advance(tickTime); err != nil {
+			return err
+		}
+
+		if err := v.diabloLogoRight.Advance(tickTime); err != nil {
+			return err
+		}
 	}
 
 	return nil
