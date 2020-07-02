@@ -89,7 +89,28 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	loading.Progress(0.2)
 
 	v.createLabels(loading)
+	v.loadBackgroundSprites()
+	v.createLogos(loading)
+	v.createButtons(loading)
 
+	v.tcpJoinGameEntry = d2ui.CreateTextbox()
+	v.tcpJoinGameEntry.SetPosition(318, 245)
+	v.tcpJoinGameEntry.SetFilter("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890._:")
+	d2ui.AddWidget(&v.tcpJoinGameEntry)
+	loading.Progress(0.9)
+
+	if v.screenMode == screenModeUnknown {
+		v.setScreenMode(screenModeTrademark)
+	} else {
+		v.setScreenMode(screenModeMainMenu)
+	}
+
+	if err := d2input.BindHandler(v); err != nil {
+		fmt.Printf("failed to add main menu as event handler")
+	}
+}
+
+func (v *MainMenu) loadBackgroundSprites() {
 	animation, _ := d2asset.LoadAnimation(d2resource.GameSelectScreen, d2resource.PaletteSky)
 	v.background, _ = d2ui.LoadSprite(animation)
 	v.background.SetPosition(0, 0)
@@ -102,51 +123,9 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	v.tcpIPBackground, _ = d2ui.LoadSprite(animation)
 	v.tcpIPBackground.SetPosition(0, 0)
 
-	v.createLogos(loading)
-	v.createButtons(loading)
-
-	v.tcpIPOptionsLabel = d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
-	v.tcpIPOptionsLabel.SetPosition(400, 23)
-	v.tcpIPOptionsLabel.Alignment = d2ui.LabelAlignCenter
-	v.tcpIPOptionsLabel.SetText("TCP/IP Options")
-
 	animation, _ = d2asset.LoadAnimation(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
 	v.serverIPBackground, _ = d2ui.LoadSprite(animation)
 	v.serverIPBackground.SetPosition(270, 175)
-
-	v.tcpJoinGameLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
-	v.tcpJoinGameLabel.Alignment = d2ui.LabelAlignCenter
-	v.tcpJoinGameLabel.SetText(d2common.CombineStrings(d2common.
-		SplitIntoLinesWithMaxWidth("Enter Host IP Address to Join Game", 23)))
-
-	v.tcpJoinGameLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
-	v.tcpJoinGameLabel.SetPosition(400, 190)
-
-	v.tcpJoinGameEntry = d2ui.CreateTextbox()
-	v.tcpJoinGameEntry.SetPosition(318, 245)
-	v.tcpJoinGameEntry.SetFilter("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890._:")
-	d2ui.AddWidget(&v.tcpJoinGameEntry)
-	loading.Progress(0.9)
-
-	v.btnServerIPCancel = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "CANCEL")
-	v.btnServerIPCancel.SetPosition(285, 305)
-	v.btnServerIPCancel.OnActivated(func() { v.onBtnTCPIPCancelClicked() })
-	d2ui.AddWidget(&v.btnServerIPCancel)
-
-	v.btnServerIPOk = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "OK")
-	v.btnServerIPOk.SetPosition(420, 305)
-	v.btnServerIPOk.OnActivated(func() { v.onBtnTCPIPOkClicked() })
-	d2ui.AddWidget(&v.btnServerIPOk)
-
-	if v.screenMode == screenModeUnknown {
-		v.setScreenMode(screenModeTrademark)
-	} else {
-		v.setScreenMode(screenModeMainMenu)
-	}
-
-	if err := d2input.BindHandler(v); err != nil {
-		fmt.Printf("failed to add main menu as event handler")
-	}
 }
 
 func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
@@ -181,6 +160,19 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 	v.openDiabloLabel.Color = color.RGBA{R: 255, G: 255, B: 140, A: 255}
 	v.openDiabloLabel.SetPosition(400, 580)
 	loading.Progress(0.5)
+
+	v.tcpIPOptionsLabel = d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
+	v.tcpIPOptionsLabel.SetPosition(400, 23)
+	v.tcpIPOptionsLabel.Alignment = d2ui.LabelAlignCenter
+	v.tcpIPOptionsLabel.SetText("TCP/IP Options")
+
+	v.tcpJoinGameLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.tcpJoinGameLabel.Alignment = d2ui.LabelAlignCenter
+	v.tcpJoinGameLabel.SetText(d2common.CombineStrings(
+		d2common.SplitIntoLinesWithMaxWidth("Enter Host IP Address to Join Game", 23)))
+
+	v.tcpJoinGameLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
+	v.tcpJoinGameLabel.SetPosition(400, 190)
 }
 
 func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
@@ -227,11 +219,6 @@ func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
 	v.singlePlayerButton.OnActivated(func() { v.onSinglePlayerClicked() })
 	d2ui.AddWidget(&v.singlePlayerButton)
 
-	v.multiplayerButton = d2ui.CreateButton(d2ui.ButtonTypeWide, "MULTIPLAYER")
-	v.multiplayerButton.SetPosition(264, 330)
-	v.multiplayerButton.OnActivated(func() { v.onMultiplayerClicked() })
-	d2ui.AddWidget(&v.multiplayerButton)
-
 	v.githubButton = d2ui.CreateButton(d2ui.ButtonTypeWide, "PROJECT WEBSITE")
 	v.githubButton.SetPosition(264, 400)
 	v.githubButton.OnActivated(func() { v.onGithubButtonClicked() })
@@ -241,6 +228,31 @@ func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
 	v.mapTestButton.SetPosition(264, 440)
 	v.mapTestButton.OnActivated(func() { v.onMapTestClicked() })
 	d2ui.AddWidget(&v.mapTestButton)
+
+	v.btnTCPIPCancel = d2ui.CreateButton(d2ui.ButtonTypeMedium, d2common.TranslateString("cancel"))
+	v.btnTCPIPCancel.SetPosition(33, 543)
+	v.btnTCPIPCancel.OnActivated(func() { v.onTCPIPCancelClicked() })
+	d2ui.AddWidget(&v.btnTCPIPCancel)
+
+	v.btnServerIPCancel = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "CANCEL")
+	v.btnServerIPCancel.SetPosition(285, 305)
+	v.btnServerIPCancel.OnActivated(func() { v.onBtnTCPIPCancelClicked() })
+	d2ui.AddWidget(&v.btnServerIPCancel)
+
+	v.btnServerIPOk = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "OK")
+	v.btnServerIPOk.SetPosition(420, 305)
+	v.btnServerIPOk.OnActivated(func() { v.onBtnTCPIPOkClicked() })
+	d2ui.AddWidget(&v.btnServerIPOk)
+
+	v.createMultiplayerMenuButtons()
+	loading.Progress(0.8)
+}
+
+func (v *MainMenu) createMultiplayerMenuButtons() {
+	v.multiplayerButton = d2ui.CreateButton(d2ui.ButtonTypeWide, "MULTIPLAYER")
+	v.multiplayerButton.SetPosition(264, 330)
+	v.multiplayerButton.OnActivated(func() { v.onMultiplayerClicked() })
+	d2ui.AddWidget(&v.multiplayerButton)
 
 	v.networkTCPIPButton = d2ui.CreateButton(d2ui.ButtonTypeWide, "TCP/IP GAME")
 	v.networkTCPIPButton.SetPosition(264, 280)
@@ -252,11 +264,6 @@ func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
 	v.networkCancelButton.OnActivated(func() { v.onNetworkCancelClicked() })
 	d2ui.AddWidget(&v.networkCancelButton)
 
-	v.btnTCPIPCancel = d2ui.CreateButton(d2ui.ButtonTypeMedium, d2common.TranslateString("cancel"))
-	v.btnTCPIPCancel.SetPosition(33, 543)
-	v.btnTCPIPCancel.OnActivated(func() { v.onTCPIPCancelClicked() })
-	d2ui.AddWidget(&v.btnTCPIPCancel)
-
 	v.btnTCPIPHostGame = d2ui.CreateButton(d2ui.ButtonTypeWide, "HOST GAME")
 	v.btnTCPIPHostGame.SetPosition(264, 280)
 	v.btnTCPIPHostGame.OnActivated(func() { v.onTCPIPHostGameClicked() })
@@ -266,7 +273,6 @@ func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
 	v.btnTCPIPJoinGame.SetPosition(264, 320)
 	v.btnTCPIPJoinGame.OnActivated(func() { v.onTCPIPJoinGameClicked() })
 	d2ui.AddWidget(&v.btnTCPIPJoinGame)
-	loading.Progress(0.8)
 }
 
 func (v *MainMenu) onMapTestClicked() {
@@ -314,27 +320,71 @@ func (v *MainMenu) onCreditsButtonClicked() {
 
 // Render renders the main menu
 func (v *MainMenu) Render(screen d2interface.Surface) error {
+	if err := v.renderBackgrounds(screen); err != nil {
+		return err
+	}
+
+	if err := v.renderLogos(screen); err != nil {
+		return err
+	}
+
+	if err := v.renderLabels(screen); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (v *MainMenu) renderBackgrounds(screen d2interface.Surface) error {
 	switch v.screenMode {
 	case screenModeTrademark:
-		v.trademarkBackground.RenderSegmented(screen, 4, 3, 0)
-	case screenModeServerIP, screenModeTCPIP:
-		v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0)
+		if err := v.trademarkBackground.RenderSegmented(screen, 4, 3, 0); err != nil {
+			return err
+		}
+	case screenModeServerIP:
+		if err := v.serverIPBackground.RenderSegmented(screen, 2, 1, 0); err != nil {
+			return err
+		}
+	case screenModeTCPIP:
+		if err := v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0); err != nil {
+			return err
+		}
 	default:
-		v.background.RenderSegmented(screen, 4, 3, 0)
+		if err := v.background.RenderSegmented(screen, 4, 3, 0); err != nil {
+			return err
+		}
 	}
 
+	return nil
+}
+
+func (v *MainMenu) renderLogos(screen d2interface.Surface) error {
 	switch v.screenMode {
 	case screenModeTrademark, screenModeMainMenu, screenModeMultiplayer:
-		v.diabloLogoLeftBack.Render(screen)
-		v.diabloLogoRightBack.Render(screen)
-		v.diabloLogoLeft.Render(screen)
-		v.diabloLogoRight.Render(screen)
+		if err := v.diabloLogoLeftBack.Render(screen); err != nil {
+			return err
+		}
+
+		if err := v.diabloLogoRightBack.Render(screen); err != nil {
+			return err
+		}
+
+		if err := v.diabloLogoLeft.Render(screen); err != nil {
+			return err
+		}
+
+		if err := v.diabloLogoRight.Render(screen); err != nil {
+			return err
+		}
 	}
 
+	return nil
+}
+
+func (v *MainMenu) renderLabels(screen d2interface.Surface) error {
 	switch v.screenMode {
 	case screenModeServerIP:
 		v.tcpIPOptionsLabel.Render(screen)
-		v.serverIPBackground.RenderSegmented(screen, 2, 1, 0)
 		v.tcpJoinGameLabel.Render(screen)
 	case screenModeTCPIP:
 		v.tcpIPOptionsLabel.Render(screen)
