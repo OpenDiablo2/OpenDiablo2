@@ -34,23 +34,19 @@ var baseWalkSpeed = 6.0
 var baseRunSpeed = 9.0
 
 func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero, stats d2hero.HeroStatsState, equipment d2inventory.CharacterEquipment) *Player {
-	object := &d2datadict.ObjectLookupRecord{
-		Mode:  d2enum.AnimationModePlayerTownNeutral.String(),
-		Base:  "/data/global/chars",
-		Token: heroType.GetToken(),
-		Class: equipment.RightHand.GetWeaponClass(),
-		SH:    equipment.Shield.GetItemCode(),
-		// TODO: Offhand class?
-		HD: equipment.Head.GetArmorClass(),
-		TR: equipment.Torso.GetArmorClass(),
-		LG: equipment.Legs.GetArmorClass(),
-		RA: equipment.RightArm.GetArmorClass(),
-		LA: equipment.LeftArm.GetArmorClass(),
-		RH: equipment.RightHand.GetItemCode(),
-		LH: equipment.LeftHand.GetItemCode(),
+	layerEquipment := &[d2enum.CompositeTypeMax]string{
+		equipment.Head.GetArmorClass(),
+		equipment.Torso.GetArmorClass(),
+		equipment.Legs.GetArmorClass(),
+		equipment.RightArm.GetArmorClass(),
+		equipment.LeftArm.GetArmorClass(),
+		equipment.RightHand.GetItemCode(),
+		equipment.LeftHand.GetItemCode(),
+		equipment.Shield.GetItemCode(),
 	}
 
-	composite, err := d2asset.LoadComposite(object, d2resource.PaletteUnits)
+	composite, err := d2asset.LoadComposite("/data/global/chars", heroType.GetToken(),
+		d2resource.PaletteUnits, layerEquipment)
 	if err != nil {
 		panic(err)
 	}
@@ -143,15 +139,16 @@ func (v *Player) Render(target d2interface.Surface) {
 }
 
 func (v *Player) SetMode(animationMode, weaponClass string, direction int) error {
-	v.composite.SetMode(animationMode, weaponClass, direction)
 	v.direction = direction
 	v.weaponClass = weaponClass
 
-	err := v.composite.SetMode(animationMode, weaponClass, direction)
+	err := v.composite.SetMode(animationMode, weaponClass)
 	if err != nil {
-		err = v.composite.SetMode(animationMode, "HTH", direction)
+		err = v.composite.SetMode(animationMode, "HTH")
 		v.weaponClass = "HTH"
 	}
+
+	v.composite.SetDirection(direction)
 
 	return err
 }
@@ -181,7 +178,7 @@ func (v *Player) GetAnimationMode() d2enum.PlayerAnimationMode {
 }
 
 func (v *Player) SetAnimationMode(animationMode string) error {
-	return v.composite.SetMode(animationMode, v.weaponClass, v.direction)
+	return v.composite.SetMode(animationMode, v.weaponClass)
 }
 
 // rotate sets direction and changes animation

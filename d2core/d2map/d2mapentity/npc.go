@@ -22,7 +22,6 @@ type NPC struct {
 	isDone        bool
 	repetitions   int
 	direction     int
-	objectLookup  *d2datadict.ObjectLookupRecord
 	monstatRecord *d2datadict.MonStatsRecord
 	monstatEx     *d2datadict.MonStats2Record
 	name          string
@@ -36,29 +35,35 @@ func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC
 		monstatEx:     d2datadict.MonStats2[monstat.ExtraDataKey],
 	}
 
-	object := &d2datadict.ObjectLookupRecord{
-		Base:  "/Data/Global/Monsters",
-		Token: monstat.AnimationDirectoryToken,
-		Mode:  result.monstatEx.ResurrectMode.String(),
-		Class: result.monstatEx.BaseWeaponClass,
-		TR:    selectEquip(result.monstatEx.TRv),
-		LG:    selectEquip(result.monstatEx.LGv),
-		RH:    selectEquip(result.monstatEx.RHv),
-		SH:    selectEquip(result.monstatEx.SHv),
-		RA:    selectEquip(result.monstatEx.Rav),
-		LA:    selectEquip(result.monstatEx.Lav),
-		LH:    selectEquip(result.monstatEx.LHv),
-		HD:    selectEquip(result.monstatEx.HDv),
+	equipment := &[d2enum.CompositeTypeMax]string{
+		selectEquip(result.monstatEx.HDv),
+		selectEquip(result.monstatEx.TRv),
+		selectEquip(result.monstatEx.LGv),
+		selectEquip(result.monstatEx.Rav),
+		selectEquip(result.monstatEx.Lav),
+		selectEquip(result.monstatEx.RHv),
+		selectEquip(result.monstatEx.LHv),
+		selectEquip(result.monstatEx.SHv),
+		selectEquip(result.monstatEx.S1v),
+		selectEquip(result.monstatEx.S2v),
+		selectEquip(result.monstatEx.S3v),
+		selectEquip(result.monstatEx.S4v),
+		selectEquip(result.monstatEx.S5v),
+		selectEquip(result.monstatEx.S6v),
+		selectEquip(result.monstatEx.S7v),
+		selectEquip(result.monstatEx.S8v),
 	}
-	result.objectLookup = object
-	composite, err := d2asset.LoadComposite(object, d2resource.PaletteUnits)
+
+	composite, err := d2asset.LoadComposite("/Data/Global/Monsters", monstat.AnimationDirectoryToken,
+		d2resource.PaletteUnits, equipment)
 	result.composite = composite
 
 	if err != nil {
 		panic(err)
 	}
 
-	result.SetMode(object.Mode, object.Class, direction)
+	result.SetMode("NU", result.monstatEx.BaseWeaponClass, 0)
+
 	result.mapEntity.directioner = result.rotate
 
 	if result.monstatRecord != nil && result.monstatRecord.IsInteractable {
@@ -75,7 +80,6 @@ func selectEquip(slice []string) string {
 
 	return ""
 }
-
 
 func (v *NPC) Render(target d2interface.Surface) {
 	target.PushTranslation(
@@ -170,11 +174,13 @@ func (v *NPC) SetMode(animationMode, weaponClass string, direction int) error {
 	v.direction = direction
 	v.weaponClass = weaponClass
 
-	err := v.composite.SetMode(animationMode, weaponClass, direction)
+	err := v.composite.SetMode(animationMode, weaponClass)
 	if err != nil {
-		err = v.composite.SetMode(animationMode, "HTH", direction)
+		err = v.composite.SetMode(animationMode, "HTH")
 		v.weaponClass = "HTH"
 	}
+
+	v.composite.SetDirection(direction)
 
 	return err
 }
