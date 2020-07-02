@@ -24,6 +24,9 @@ const (
 
 	// for convenience in negating sign
 	negative1 float64 = -1.0
+
+	// for convenience
+	zero float64 = 0.0
 )
 
 // NewVector2 creates a new Vector
@@ -78,6 +81,7 @@ func (v *Vector2) Clone() d2interface.Vector2 {
 func (v *Vector2) Copy(src d2interface.Vector2) d2interface.Vector2 {
 	v.x.Copy(src.X())
 	v.y.Copy(src.Y())
+
 	return v
 }
 
@@ -117,6 +121,7 @@ func (v *Vector2) FuzzyEquals(src d2interface.Vector2) bool {
 	smol := big.NewFloat(epsilon)
 	d := v.Distance(src)
 	d.Abs(d)
+
 	return d.Cmp(smol) < 1 || d.Cmp(smol) < 1
 }
 
@@ -205,6 +210,7 @@ func (v *Vector2) Negate() d2interface.Vector2 {
 // Distance calculate the distance between this Vector2 and the given Vector2
 func (v *Vector2) Distance(src d2interface.Vector2) *big.Float {
 	dist := v.DistanceSq(src)
+
 	return dist.Sqrt(dist)
 }
 
@@ -213,18 +219,21 @@ func (v *Vector2) Distance(src d2interface.Vector2) *big.Float {
 func (v *Vector2) DistanceSq(src d2interface.Vector2) *big.Float {
 	delta := src.Clone().Subtract(v)
 	deltaSq := delta.Multiply(delta)
-	return big.NewFloat(0.0).Add(deltaSq.X(), deltaSq.Y())
+
+	return big.NewFloat(zero).Add(deltaSq.X(), deltaSq.Y())
 }
 
 // Length returns the length of this Vector2
 func (v *Vector2) Length() *big.Float {
 	xsq, ysq := v.LengthSq()
+
 	return xsq.Add(xsq, ysq)
 }
 
 func (v *Vector2) LengthSq() (*big.Float, *big.Float) {
 	clone := v.Clone()
 	x, y := clone.X(), clone.Y()
+
 	return x.Mul(x, x), y.Mul(y, y)
 }
 
@@ -236,9 +245,8 @@ func (v *Vector2) SetLength(length *big.Float) d2interface.Vector2 {
 // Normalize Makes the vector a unit length vector (magnitude of 1) in the same
 // direction.
 func (v *Vector2) Normalize() d2interface.Vector2 {
-
 	xsq, ysq := v.LengthSq()
-	length := big.NewFloat(0.0).Add(xsq, ysq)
+	length := big.NewFloat(zero).Add(xsq, ysq)
 	one := big.NewFloat(1.0)
 
 	if length.Cmp(one) > 0 {
@@ -251,7 +259,8 @@ func (v *Vector2) Normalize() d2interface.Vector2 {
 	return v
 }
 
-// Rotate this Vector2 to its perpendicular, in the positive direction.
+// NormalizeRightHand rotate this Vector2 to its perpendicular,
+//in the positive direction.
 func (v *Vector2) NormalizeRightHand() d2interface.Vector2 {
 	x := v.x
 	v.x = v.y.Mul(v.y, big.NewFloat(negative1))
@@ -260,7 +269,8 @@ func (v *Vector2) NormalizeRightHand() d2interface.Vector2 {
 	return v
 }
 
-// Rotate this Vector2 to its perpendicular, in the negative1 direction.
+// NormalizeLeftHand rotate this Vector2 to its perpendicular,
+//in the negative1 direction.
 func (v *Vector2) NormalizeLeftHand() d2interface.Vector2 {
 	x := v.x
 	v.x = v.y
@@ -274,6 +284,7 @@ func (v *Vector2) Dot(src d2interface.Vector2) *big.Float {
 	c := v.Clone()
 	c.X().Mul(c.X(), src.X())
 	c.Y().Mul(c.Y(), src.Y())
+
 	return c.X().Add(c.X(), c.Y())
 }
 
@@ -282,6 +293,7 @@ func (v *Vector2) Cross(src d2interface.Vector2) *big.Float {
 	c := v.Clone()
 	c.X().Mul(c.X(), src.X())
 	c.Y().Mul(c.Y(), src.Y())
+
 	return c.X().Sub(c.X(), c.Y())
 }
 
@@ -300,8 +312,9 @@ func (v *Vector2) Lerp(
 
 // Reset this Vector the zero vector (0, 0).
 func (v *Vector2) Reset() d2interface.Vector2 {
-	v.x.SetFloat64(0.0)
-	v.y.SetFloat64(0.0)
+
+	v.x.SetFloat64(zero)
+	v.y.SetFloat64(zero)
 
 	return v
 }
@@ -309,6 +322,7 @@ func (v *Vector2) Reset() d2interface.Vector2 {
 // Limit the length (or magnitude) of this Vector2
 func (v *Vector2) Limit(max *big.Float) d2interface.Vector2 {
 	length := v.Length()
+
 	if max.Cmp(length) < 0 {
 		v.Scale(length.Quo(max, length))
 	}
@@ -321,7 +335,7 @@ func (v *Vector2) Reflect(normal d2interface.Vector2) d2interface.Vector2 {
 	clone := v.Clone()
 	clone.Normalize()
 
-	two := big.NewFloat(2.0)
+	two := big.NewFloat(2.0) // there's some matrix algebra magic here
 	dot := v.Clone().Dot(normal)
 	normal.Scale(two.Mul(two, dot))
 
