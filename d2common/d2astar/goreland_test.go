@@ -5,15 +5,16 @@ import (
 	"testing"
 )
 
-func AddTruck(x int, y int, label string) *Truck {
+func addTruck(x, y int, label string) *Truck {
 	t1 := new(Truck)
 	t1.X = x
 	t1.Y = y
 	t1.label = label
+
 	return t1
 }
 
-func AddTube(t1, t2 *Truck, cost float64) *Tube {
+func addTube(t1, t2 *Truck, cost float64) *Tube {
 	tube1 := new(Tube)
 	tube1.Cost = cost
 	tube1.from = t1
@@ -49,17 +50,16 @@ func AddTube(t1, t2 *Truck, cost float64) *Tube {
 //    Solver should avoid the plugged tube.
 //    Expect solution Start,Middle,End  Total cost: 2.0
 
-func createGorelandGraphPathDiagonal(t *testing.T, diagonalCost float64, expectedDist float64) {
-
+func createGorelandGraphPathDiagonal(t *testing.T, diagonalCost, expectedDist float64) {
 	world := new(Goreland)
 
-	trStart := AddTruck(0, 0, "Start")
-	trMid := AddTruck(0, 1, "Middle")
-	trEnd := AddTruck(1, 1, "End")
+	trStart := addTruck(0, 0, "Start")
+	trMid := addTruck(0, 1, "Middle")
+	trEnd := addTruck(1, 1, "End")
 
-	AddTube(trStart, trEnd, diagonalCost)
-	AddTube(trStart, trMid, 1)
-	AddTube(trMid, trEnd, 1)
+	addTube(trStart, trEnd, diagonalCost)
+	addTube(trStart, trMid, 1)
+	addTube(trMid, trEnd, 1)
 
 	t.Logf("Goreland.  Diagonal cost: %v\n\n", diagonalCost)
 
@@ -70,9 +70,11 @@ func createGorelandGraphPathDiagonal(t *testing.T, diagonalCost float64, expecte
 	} else {
 		t.Logf("Resulting path\n%s", world.RenderPath(p))
 	}
+
 	if !found && expectedDist >= 0 {
 		t.Fatal("Could not find a path")
 	}
+
 	if found && dist != expectedDist {
 		t.Fatalf("Expected dist to be %v but got %v", expectedDist, dist)
 	}

@@ -31,5 +31,6 @@ func (pq *priorityQueue) Pop() interface{} {
 	no := old[n-1]
 	no.index = -1
 	*pq = old[0 : n-1]
+
 	return no
 }
