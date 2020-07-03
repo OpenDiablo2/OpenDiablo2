@@ -25,35 +25,38 @@ const (
 	menuSize       = 500
 
 	// layouts
-	noLayoutID                layoutID = -2
-	saveLayoutID                       = -1
-	mainLayoutID                       = 0
-	optionsLayoutID                    = 1
-	soundOptionsLayoutID               = 2
-	videoOptionsLayoutID               = 3
-	automapOptionsLayoutID             = 4
-	configureControlsLayoutID          = 5
+	noLayoutID layoutID = iota - 2
+	saveLayoutID
+	mainLayoutID
+	optionsLayoutID
+	soundOptionsLayoutID
+	videoOptionsLayoutID
+	automapOptionsLayoutID
+	configureControlsLayoutID
 
-	// options
-	optAudioSoundVolume          optionID = 0 // audio
-	optAudioMusicVolume                   = 1
-	optAudio3dSound                       = 2
-	optAudioHardwareAcceleration          = 3
-	optAudioEnvEffects                    = 4
-	optAudioNpcSpeech                     = 5
-	optVideoResolution                    = 6 // video
-	optVideoLightingQuality               = 7
-	optVideoBlendedShadows                = 8
-	optVideoPerspective                   = 9
-	optVideoGamma                         = 10
-	optVideoContrast                      = 11
-	optAutomapSize                        = 12 // automap
-	optAutomapFade                        = 13
-	optAutomapCenterWhenCleared           = 14
-	optAutomapShowParty                   = 15
-	optAutomapShowNames                   = 16
+	// audio
+	optAudioSoundVolume optionID = iota
+	optAudioMusicVolume
+	optAudio3dSound
+	optAudioHardwareAcceleration
+	optAudioEnvEffects
+	optAudioNpcSpeech
+	// video
+	optVideoResolution
+	optVideoLightingQuality
+	optVideoBlendedShadows
+	optVideoPerspective
+	optVideoGamma
+	optVideoContrast
+	// automap
+	optAutomapSize
+	optAutomapFade
+	optAutomapCenterWhenCleared
+	optAutomapShowParty
+	optAutomapShowNames
 )
 
+// EscapeMenu represents the in-game menu that shows up when the esc key is pressed
 type EscapeMenu struct {
 	isOpen        bool
 	selectSound   d2interface.SoundEffect
@@ -103,8 +106,13 @@ func (l *enumLabel) Trigger() {
 	l.playSound()
 	next := (l.current + 1) % len(l.values)
 	l.current = next
-	l.textChangingLabel.SetText(l.values[l.current])
-	l.updateValue(l.optionID, l.values[l.current])
+
+	currentValue := l.values[l.current]
+	if err := l.textChangingLabel.SetText(currentValue); err != nil {
+		fmt.Printf("could not change the label text to: %s\n", currentValue)
+	}
+
+	l.updateValue(l.optionID, currentValue)
 }
 
 type actionableElement interface {
@@ -112,6 +120,7 @@ type actionableElement interface {
 	Trigger()
 }
 
+// NewEscapeMenu creates a new escape menu
 func NewEscapeMenu(audioProvider d2interface.AudioProvider, term d2interface.Terminal) *EscapeMenu {
 	m := &EscapeMenu{
 		audioProvider: audioProvider,
@@ -126,6 +135,7 @@ func NewEscapeMenu(audioProvider d2interface.AudioProvider, term d2interface.Ter
 		automapOptionsLayoutID:    m.newAutomapOptionsLayout(),
 		configureControlsLayoutID: m.newConfigureControlsLayout(),
 	}
+
 	return m
 }
 
@@ -156,7 +166,7 @@ func (m *EscapeMenu) newSoundOptionsLayout() *layout {
 		m.addEnumLabel(l, optAudioHardwareAcceleration, "HARDWARE ACCELERATION", []string{"ON", "OFF"})
 		m.addEnumLabel(l, optAudioEnvEffects, "ENVIRONMENTAL EFFECTS", []string{"ON", "OFF"})
 		m.addEnumLabel(l, optAudioNpcSpeech, "NPC SPEECH", []string{"AUDIO AND TEXT", "AUDIO ONLY", "TEXT ONLY"})
-		m.addPreviousMenuLabel(l, optionsLayoutID)
+		m.addPreviousMenuLabel(l)
 	})
 }
 
@@ -169,7 +179,7 @@ func (m *EscapeMenu) newVideoOptionsLayout() *layout {
 		m.addEnumLabel(l, optVideoPerspective, "PERSPECTIVE", []string{"ON", "OFF"})
 		m.addEnumLabel(l, optVideoGamma, "GAMMA", []string{"TODO"})
 		m.addEnumLabel(l, optVideoContrast, "CONTRAST", []string{"TODO"})
-		m.addPreviousMenuLabel(l, optionsLayoutID)
+		m.addPreviousMenuLabel(l)
 	})
 }
 
@@ -181,14 +191,14 @@ func (m *EscapeMenu) newAutomapOptionsLayout() *layout {
 		m.addEnumLabel(l, optAutomapCenterWhenCleared, "CENTER WHEN CLEARED", []string{"YES", "NO"})
 		m.addEnumLabel(l, optAutomapShowParty, "SHOW PARTY", []string{"YES", "NO"})
 		m.addEnumLabel(l, optAutomapShowNames, "SHOW NAMES", []string{"YES", "NO"})
-		m.addPreviousMenuLabel(l, optionsLayoutID)
+		m.addPreviousMenuLabel(l)
 	})
 }
 
 func (m *EscapeMenu) newConfigureControlsLayout() *layout {
 	return m.wrapLayout(func(l *layout) {
 		m.addTitle(l, "CONFIGURE CONTROLS")
-		m.addPreviousMenuLabel(l, optionsLayoutID)
+		m.addPreviousMenuLabel(l)
 	})
 }
 
@@ -220,6 +230,7 @@ func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
 	m.rightPent = rightPent
 
 	wrapper.AddSpacerDynamic()
+
 	return &layout{
 		Layout:             wrapper,
 		leftPent:           leftPent,
@@ -229,7 +240,11 @@ func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
 }
 
 func (m *EscapeMenu) addTitle(l *layout, text string) {
-	l.AddLabel(text, d2gui.FontStyle42Units)
+	_, err := l.AddLabel(text, d2gui.FontStyle42Units)
+	if err != nil {
+		fmt.Printf("could not add label: %s to the escape menu\n", text)
+	}
+
 	l.AddSpacerStatic(10, labelGutter)
 }
 
@@ -243,7 +258,8 @@ func (m *EscapeMenu) addBigSelectionLabel(l *layout, text string, targetLayout l
 
 	elID := len(l.actionableElements)
 
-	label.SetMouseEnterHandler(func(_ d2interface.MouseMoveEvent) {
+	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
+
 		m.onHoverElement(elID)
 	})
 
@@ -252,17 +268,21 @@ func (m *EscapeMenu) addBigSelectionLabel(l *layout, text string, targetLayout l
 	l.actionableElements = append(l.actionableElements, label)
 }
 
-func (m *EscapeMenu) addPreviousMenuLabel(l *layout, targetLayout layoutID) {
+func (m *EscapeMenu) addPreviousMenuLabel(l *layout) {
 	l.AddSpacerStatic(10, labelGutter)
 	guiLabel, _ := l.AddLabel("PREVIOUS MENU", d2gui.FontStyle30Units)
-	label := &showLayoutLabel{Label: guiLabel, target: targetLayout, showLayout: m.showLayout}
-	label.SetMouseClickHandler(func(_ d2interface.MouseEvent) {
+	label := &showLayoutLabel{Label: guiLabel, target: optionsLayoutID, showLayout: m.showLayout}
+	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
 		label.Trigger()
 	})
+
 	elID := len(l.actionableElements)
-	label.SetMouseEnterHandler(func(_ d2interface.MouseMoveEvent) {
+
+	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
+
 		m.onHoverElement(elID)
 	})
+
 	l.actionableElements = append(l.actionableElements, label)
 }
 
@@ -270,9 +290,15 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 	guiLayout := l.AddLayout(d2gui.PositionTypeHorizontal)
 	layout := &layout{Layout: guiLayout}
 	layout.SetSize(menuSize, 0)
-	layout.AddLabel(text, d2gui.FontStyle30Units)
+
+	_, err := layout.AddLabel(text, d2gui.FontStyle30Units)
+	if err != nil {
+		fmt.Printf("could not add label: %s to the escape menu\n", text)
+	}
+
 	elID := len(l.actionableElements)
-	layout.SetMouseEnterHandler(func(_ d2interface.MouseMoveEvent) {
+
+	layout.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
 		m.onHoverElement(elID)
 	})
 	layout.AddSpacerDynamic()
@@ -286,20 +312,21 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 		playSound:         m.playSound,
 		updateValue:       m.onUpdateValue,
 	}
-	layout.SetMouseClickHandler(func(_ d2interface.MouseEvent) {
+
+	layout.SetMouseClickHandler(func(_ d2input.MouseEvent) {
 		label.Trigger()
 	})
 	l.AddSpacerStatic(10, labelGutter)
 	l.actionableElements = append(l.actionableElements, label)
 }
 
-func (m *EscapeMenu) OnLoad() {
+func (m *EscapeMenu) onLoad() {
 	m.selectSound, _ = m.audioProvider.LoadSoundEffect(d2resource.SFXCursorSelect)
 }
 
-func (m *EscapeMenu) OnEscKey() {
+func (m *EscapeMenu) onEscKey() {
 	if !m.isOpen {
-		m.Open()
+		m.open()
 		return
 	}
 
@@ -315,19 +342,16 @@ func (m *EscapeMenu) OnEscKey() {
 		return
 	}
 
-	m.Close()
+	m.close()
 }
 
-func (m *EscapeMenu) IsOpen() bool {
-	return m.isOpen
-}
-
-func (m *EscapeMenu) Close() {
+func (m *EscapeMenu) close() {
 	m.isOpen = false
+
 	d2gui.SetLayout(nil)
 }
 
-func (m *EscapeMenu) Open() {
+func (m *EscapeMenu) open() {
 	m.isOpen = true
 	m.setLayout(mainLayoutID)
 }
@@ -340,14 +364,15 @@ func (m *EscapeMenu) showLayout(id layoutID) {
 	m.playSound()
 
 	if id == noLayoutID {
-		m.Close()
+		m.close()
 		return
 	}
 
 	if id == saveLayoutID {
 		mainMenu := CreateMainMenu(m.audioProvider, m.terminal)
-		mainMenu.SetScreenMode(ScreenModeMainMenu)
+		mainMenu.setScreenMode(screenModeMainMenu)
 		d2screen.SetNextScreen(mainMenu)
+
 		return
 	}
 
@@ -362,12 +387,10 @@ func (m *EscapeMenu) onHoverElement(id int) {
 	m.leftPent.SetPosition(x, y+10)
 	x, _ = m.rightPent.GetPosition()
 	m.rightPent.SetPosition(x, y+10)
-
-	return
 }
 
 func (m *EscapeMenu) onUpdateValue(optID optionID, value string) {
-	fmt.Println(fmt.Sprintf("updating value %d with %s", optID, value))
+	fmt.Printf("updating value %d with %s\n", optID, value)
 }
 
 func (m *EscapeMenu) setLayout(id layoutID) {
@@ -383,6 +406,7 @@ func (m *EscapeMenu) onUpKey() {
 	if !m.isOpen {
 		return
 	}
+
 	if m.layouts[m.currentLayout].currentEl == 0 {
 		return
 	}
@@ -394,6 +418,7 @@ func (m *EscapeMenu) onDownKey() {
 	if !m.isOpen {
 		return
 	}
+
 	if m.layouts[m.currentLayout].currentEl == len(m.layouts[m.currentLayout].actionableElements)-1 {
 		return
 	}
@@ -405,14 +430,16 @@ func (m *EscapeMenu) onEnterKey() {
 	if !m.isOpen {
 		return
 	}
+
 	m.layouts[m.currentLayout].actionableElements[m.layouts[m.currentLayout].currentEl].Trigger()
 }
 
-func (m *EscapeMenu) OnKeyDown(event d2interface.KeyEvent) bool {
-	switch event.Key() {
-	case d2interface.KeyEscape:
-		m.OnEscKey()
-	case d2interface.KeyUp:
+// OnKeyDown defines the actions of the Escape Menu when a key is pressed
+func (m *EscapeMenu) OnKeyDown(event d2input.KeyEvent) bool {
+	switch event.Key {
+	case d2input.KeyEscape:
+		m.onEscKey()
+	case d2input.KeyUp:
 		m.onUpKey()
 	case d2interface.KeyDown:
 		m.onDownKey()
@@ -421,5 +448,6 @@ func (m *EscapeMenu) OnKeyDown(event d2interface.KeyEvent) bool {
 	default:
 		return false
 	}
-	return false
+
+	return true
 }

@@ -9,6 +9,7 @@ import (
 
 // An ObjectRecord represents the settings for one type of object from objects.txt
 type ObjectRecord struct {
+	Index         int    // Line number in file, this is the actual index used for objects
 	FrameCount    [8]int // how many frames does this mode have, 0 = skip
 	FrameDelta    [8]int // what rate is the animation played at (256 = 100% speed)
 	LightDiameter [8]int
@@ -21,7 +22,7 @@ type ObjectRecord struct {
 	Description string
 	Token       string // refers to what graphics this object uses
 
-	Id              int //nolint:golint it's ok that it's called Id
+	Id              int //nolint:golint it's ok that it's called Id, unused indexed by line number instead
 	SpawnMax        int // unused?
 	TrapProbability int // unused
 
@@ -345,6 +346,8 @@ func LoadObjects(file []byte) {
 	Objects = make(map[int]*ObjectRecord)
 	data := strings.Split(string(file), "\r\n")[1:]
 
+	lineNumber := 0
+
 	for _, line := range data {
 		if line == "" {
 			continue
@@ -357,7 +360,9 @@ func LoadObjects(file []byte) {
 		}
 
 		rec := createObjectRecord(props)
-		Objects[rec.Id] = &rec
+		rec.Index = lineNumber
+		Objects[lineNumber] = &rec
+		lineNumber++
 	}
 
 	log.Printf("Loaded %d objects", len(Objects))

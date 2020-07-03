@@ -1,3 +1,4 @@
+// Package d2term provides a in-game terminal that allows executing custom commands for debugging
 package d2term
 
 import (
@@ -43,6 +44,11 @@ const (
 	termVisHiding
 )
 
+const (
+	maxVisAnim = 1.0
+	minVisAnim = 0.0
+)
+
 type termHistoryEntry struct {
 	text     string
 	category d2interface.TermCategory
@@ -78,13 +84,13 @@ type terminal struct {
 func (t *terminal) Advance(elapsed, _ float64) error {
 	switch t.visState {
 	case termVisShowing:
-		t.visAnim = math.Min(1.0, t.visAnim+elapsed/termAnimLength)
-		if t.visAnim == 1.0 {
+		t.visAnim = math.Min(maxVisAnim, t.visAnim+elapsed/termAnimLength)
+		if t.visAnim == maxVisAnim {
 			t.visState = termVisShown
 		}
 	case termVisHiding:
-		t.visAnim = math.Max(0.0, t.visAnim-elapsed/termAnimLength)
-		if t.visAnim == 0.0 {
+		t.visAnim = math.Max(minVisAnim, t.visAnim-elapsed/termAnimLength)
+		if t.visAnim == minVisAnim {
 			t.visState = termVisHidden
 		}
 	}
@@ -145,13 +151,9 @@ func (t *terminal) OnKeyDown(event d2interface.KeyEvent) bool {
 		if t.outputIndex -= t.lineCount; t.outputIndex < 0 {
 			t.outputIndex = 0
 		}
-	case d2interface.KeyUp:
-		t.handleKeyUp(event.KeyMod())
-	case d2interface.KeyDown:
-		if event.KeyMod() == d2interface.KeyModControl {
-			t.lineCount = d2common.MinInt(t.lineCount+1, termRowCountMax)
-		}
-	case d2interface.KeyEnter:
+	case d2input.KeyUp, d2input.KeyDown:
+		t.handleControlKey(event.Key, event.KeyMod)
+	case d2input.KeyEnter:
 		t.processCommand()
 	case d2interface.KeyBackspace:
 		if len(t.command) > 0 {
@@ -189,15 +191,22 @@ func (t *terminal) processCommand() {
 	t.command = ""
 }
 
-func (t *terminal) handleKeyUp(keyMod d2interface.KeyMod) {
-	if keyMod == d2interface.KeyModControl {
-		t.lineCount = d2common.MaxInt(0, t.lineCount-1)
-	} else if len(t.commandHistory) > 0 {
-		t.command = t.commandHistory[t.commandIndex]
-		if t.commandIndex == 0 {
-			t.commandIndex = len(t.commandHistory) - 1
-		} else {
-			t.commandIndex--
+func (t *terminal) handleControlKey(eventKey d2input.Key, keyMod d2input.KeyMod) {
+	switch eventKey {
+	case d2input.KeyUp:
+		if keyMod == d2input.KeyModControl {
+			t.lineCount = d2common.MaxInt(0, t.lineCount-1)
+		} else if len(t.commandHistory) > 0 {
+			t.command = t.commandHistory[t.commandIndex]
+			if t.commandIndex == 0 {
+				t.commandIndex = len(t.commandHistory) - 1
+			} else {
+				t.commandIndex--
+			}
+		}
+	case d2input.KeyDown:
+		if keyMod == d2input.KeyModControl {
+			t.lineCount = d2common.MinInt(t.lineCount+1, termRowCountMax)
 		}
 	}
 }
@@ -299,45 +308,9 @@ func (t *terminal) Execute(command string) error {
 		return errors.New("action requires different argument count")
 	}
 
-	var paramValues []reflect.Value
-
-	for i := 0; i < actionType.NumIn(); i++ {
-		actionParam := actionParams[i]
-
-		switch actionType.In(i).Kind() {
-		case reflect.String:
-			paramValues = append(paramValues, reflect.ValueOf(actionParam))
-		case reflect.Int:
-			value, err := strconv.ParseInt(actionParam, 10, 64)
-			if err != nil {
-				return err
-			}
-
-			paramValues = append(paramValues, reflect.ValueOf(int(value)))
-		case reflect.Uint:
-			value, err := strconv.ParseUint(actionParam, 10, 64)
-			if err != nil {
-				return err
-			}
-
-			paramValues = append(paramValues, reflect.ValueOf(uint(value)))
-		case reflect.Float64:
-			value, err := strconv.ParseFloat(actionParam, 64)
-			if err != nil {
-				return err
-			}
-
-			paramValues = append(paramValues, reflect.ValueOf(value))
-		case reflect.Bool:
-			value, err := strconv.ParseBool(actionParam)
-			if err != nil {
-				return err
-			}
-
-			paramValues = append(paramValues, reflect.ValueOf(value))
-		default:
-			return errors.New("action has unsupported arguments")
-		}
+	paramValues, err := parseActionParams(actionType, actionParams)
+	if err != nil {
+		return err
 	}
 
 	actionValue := reflect.ValueOf(actionEntry.action)
@@ -352,6 +325,51 @@ func (t *terminal) Execute(command string) error {
 	}
 
 	return nil
+}
+
+func parseActionParams(actionType reflect.Type, actionParams []string) ([]reflect.Value, error) {
+	var paramValues []reflect.Value
+
+	for i := 0; i < actionType.NumIn(); i++ {
+		actionParam := actionParams[i]
+
+		switch actionType.In(i).Kind() {
+		case reflect.String:
+			paramValues = append(paramValues, reflect.ValueOf(actionParam))
+		case reflect.Int:
+			value, err := strconv.ParseInt(actionParam, 10, 64)
+			if err != nil {
+				return nil, err
+			}
+
+			paramValues = append(paramValues, reflect.ValueOf(int(value)))
+		case reflect.Uint:
+			value, err := strconv.ParseUint(actionParam, 10, 64)
+			if err != nil {
+				return nil, err
+			}
+
+			paramValues = append(paramValues, reflect.ValueOf(uint(value)))
+		case reflect.Float64:
+			value, err := strconv.ParseFloat(actionParam, 64)
+			if err != nil {
+				return nil, err
+			}
+
+			paramValues = append(paramValues, reflect.ValueOf(value))
+		case reflect.Bool:
+			value, err := strconv.ParseBool(actionParam)
+			if err != nil {
+				return nil, err
+			}
+
+			paramValues = append(paramValues, reflect.ValueOf(value))
+		default:
+			return nil, errors.New("action has unsupported arguments")
+		}
+	}
+
+	return paramValues, nil
 }
 
 func (t *terminal) OutputRaw(text string, category d2interface.TermCategory) {
