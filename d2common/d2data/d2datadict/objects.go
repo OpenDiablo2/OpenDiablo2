@@ -20,9 +20,12 @@ type ObjectRecord struct {
 	Parm        [8]int // unknown
 	Name        string
 	Description string
-	Token       string // refers to what graphics this object uses
 
-	Id              int //nolint:golint it's ok that it's called Id, unused indexed by line number instead
+	// Don't use, get token from objtypes
+	token string // refers to what graphics this object uses
+
+	// Don't use, index by line number
+	id              int //nolint:golint it's ok that it's called Id, unused indexed by line number instead
 	SpawnMax        int // unused?
 	TrapProbability int // unused
 
@@ -132,8 +135,8 @@ func createObjectRecord(props []string) ObjectRecord {
 	result := ObjectRecord{
 		Name:        props[inc()],
 		Description: props[inc()],
-		Id:          d2common.StringToInt(props[inc()]),
-		Token:       props[inc()],
+		id:          d2common.StringToInt(props[inc()]),
+		token:       props[inc()],
 
 		SpawnMax: d2common.StringToInt(props[inc()]),
 		Selectable: [8]bool{
