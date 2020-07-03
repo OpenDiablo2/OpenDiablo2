@@ -45,19 +45,19 @@ func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath stri
 	entity.mapEntity.directioner = entity.rotate
 	entity.drawLayer = entity.objectRecord.OrderFlag[d2enum.AnimationModeObjectNeutral]
 
-	entity.SetMode("NU", "HTH", 0)
+	entity.setMode("NU", "HTH", 0)
 
 	// stop torches going crazy for now
 	// need initFunc handling to set objects up properly
 	if objectRec.HasAnimationMode[d2enum.AnimationModeObjectOpened] {
-		entity.SetMode("ON", "HTH", 0)
+		entity.setMode("ON", "HTH", 0)
 	}
 
 	return entity, nil
 }
 
-// SetMode changes the graphical mode of this animated entity
-func (ob *Object) SetMode(animationMode, weaponClass string, direction int) error {
+// setMode changes the graphical mode of this animated entity
+func (ob *Object) setMode(animationMode, weaponClass string, direction int) error {
 	ob.direction = direction
 	ob.weaponClass = weaponClass
 

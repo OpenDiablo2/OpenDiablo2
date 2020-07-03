@@ -62,7 +62,7 @@ func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC
 		panic(err)
 	}
 
-	result.SetMode("NU", result.monstatEx.BaseWeaponClass, 0)
+	result.setMode("NU", result.monstatEx.BaseWeaponClass, 0)
 
 	result.mapEntity.directioner = result.rotate
 
@@ -152,7 +152,7 @@ func (v *NPC) next() {
 	}
 
 	if v.composite.GetAnimationMode() != newAnimationMode.String() {
-		v.SetMode(newAnimationMode.String(), v.weaponClass, v.direction)
+		v.setMode(newAnimationMode.String(), v.weaponClass, v.direction)
 	}
 }
 
@@ -165,12 +165,12 @@ func (v *NPC) rotate(direction int) {
 		newMode = d2enum.AnimationModeMonsterNeutral
 	}
 	if newMode.String() != v.composite.GetAnimationMode() || direction != v.direction {
-		v.SetMode(newMode.String(), v.weaponClass, direction)
+		v.setMode(newMode.String(), v.weaponClass, direction)
 	}
 }
 
-// SetMode changes the graphical mode of this animated entity
-func (v *NPC) SetMode(animationMode, weaponClass string, direction int) error {
+// setMode changes the graphical mode of this animated entity
+func (v *NPC) setMode(animationMode, weaponClass string, direction int) error {
 	v.direction = direction
 	v.weaponClass = weaponClass
 

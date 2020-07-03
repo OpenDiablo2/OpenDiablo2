@@ -73,7 +73,7 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 	//result.nameLabel.Alignment = d2ui.LabelAlignCenter
 	//result.nameLabel.SetText(name)
 	//result.nameLabel.Color = color.White
-	err = result.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), equipment.RightHand.GetWeaponClass(), direction)
+	err = result.setMode(d2enum.AnimationModePlayerTownNeutral.String(), equipment.RightHand.GetWeaponClass(), direction)
 	if err != nil {
 		panic(err)
 	}
@@ -138,7 +138,7 @@ func (v *Player) Render(target d2interface.Surface) {
 	//v.nameLabel.Render(target)
 }
 
-func (v *Player) SetMode(animationMode, weaponClass string, direction int) error {
+func (v *Player) setMode(animationMode, weaponClass string, direction int) error {
 	v.direction = direction
 	v.weaponClass = weaponClass
 
@@ -186,7 +186,7 @@ func (v *Player) rotate(direction int) {
 	newAnimationMode := v.GetAnimationMode().String()
 
 	if newAnimationMode != v.composite.GetAnimationMode() || direction != v.direction {
-		v.SetMode(newAnimationMode, v.weaponClass, direction)
+		v.setMode(newAnimationMode, v.weaponClass, direction)
 	}
 }
 
