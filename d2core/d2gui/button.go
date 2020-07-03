@@ -106,7 +106,6 @@ func createButton(renderer d2interface.Renderer, text string, buttonStyle Button
 	return button, nil
 }
 
-
 func (b *Button) onMouseButtonDown(event d2interface.MouseEvent) bool {
 	b.state = buttonStatePressed
 	return false
