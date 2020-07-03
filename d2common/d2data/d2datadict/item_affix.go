@@ -47,46 +47,38 @@ func getAffixString(t1 d2enum.ItemAffixSuperType, t2 d2enum.ItemAffixSubType) st
 	return name
 }
 
-func loadDictionary(
-	file []byte,
-	superType d2enum.ItemAffixSuperType,
-	subType d2enum.ItemAffixSubType,
-) []*ItemAffixCommonRecord {
-	dict := d2common.LoadDataDictionary(string(file))
-	records := createItemAffixRecords(dict, superType, subType)
+func loadDictionary(file []byte, superType d2enum.ItemAffixSuperType, subType d2enum.ItemAffixSubType) []*ItemAffixCommonRecord {
+	d := d2common.LoadDataDictionary(file)
+	records := createItemAffixRecords(d, superType, subType)
 	name := getAffixString(superType, subType)
-	log.Printf("Loaded %d %s records", len(dict.Data), name)
+	log.Printf("Loaded %d %s records", len(records), name)
 
 	return records
 }
 
-func createItemAffixRecords(
-	d *d2common.DataDictionary,
-	superType d2enum.ItemAffixSuperType,
-	subType d2enum.ItemAffixSubType,
-) []*ItemAffixCommonRecord {
+func createItemAffixRecords(d *d2common.DataDictionary, superType d2enum.ItemAffixSuperType, subType d2enum.ItemAffixSubType) []*ItemAffixCommonRecord {
 	records := make([]*ItemAffixCommonRecord, 0)
 
-	for index := range d.Data {
+	for d.Next() {
 		affix := &ItemAffixCommonRecord{
-			Name:           d.GetString("Name", index),
-			Version:        d.GetNumber("version", index),
+			Name:           d.String("Name"),
+			Version:        d.Number("version"),
 			Type:           subType,
 			IsPrefix:       superType == d2enum.ItemAffixPrefix,
 			IsSuffix:       superType == d2enum.ItemAffixSuffix,
-			Spawnable:      d.GetNumber("spawnable", index) == 1,
-			Rare:           d.GetNumber("rare", index) == 1,
-			Level:          d.GetNumber("level", index),
-			MaxLevel:       d.GetNumber("maxlevel", index),
-			LevelReq:       d.GetNumber("levelreq", index),
-			Class:          d.GetString("classspecific", index),
-			ClassLevelReq:  d.GetNumber("classlevelreq", index),
-			Frequency:      d.GetNumber("frequency", index),
-			GroupID:        d.GetNumber("group", index),
-			Transform:      d.GetNumber("transform", index) == 1,
-			TransformColor: d.GetString("transformcolor", index),
-			PriceAdd:       d.GetNumber("add", index),
-			PriceScale:     d.GetNumber("multiply", index),
+			Spawnable:      d.Bool("spawnable"),
+			Rare:           d.Bool("rare"),
+			Level:          d.Number("level"),
+			MaxLevel:       d.Number("maxlevel"),
+			LevelReq:       d.Number("levelreq"),
+			Class:          d.String("classspecific"),
+			ClassLevelReq:  d.Number("classlevelreq"),
+			Frequency:      d.Number("frequency"),
+			GroupID:        d.Number("group"),
+			Transform:      d.Bool("transform"),
+			TransformColor: d.String("transformcolor"),
+			PriceAdd:       d.Number("add"),
+			PriceScale:     d.Number("multiply"),
 		}
 
 		// modifiers (Property references with parameters to be eval'd)
@@ -96,10 +88,10 @@ func createItemAffixRecords(
 			minKey := fmt.Sprintf("mod%dmin", i)
 			maxKey := fmt.Sprintf("mod%dmax", i)
 			modifier := &ItemAffixCommonModifier{
-				Code:      d.GetString(codeKey, index),
-				Parameter: d.GetNumber(paramKey, index),
-				Min:       d.GetNumber(minKey, index),
-				Max:       d.GetNumber(maxKey, index),
+				Code:      d.String(codeKey),
+				Parameter: d.Number(paramKey),
+				Min:       d.Number(minKey),
+				Max:       d.Number(maxKey),
 			}
 			affix.Modifiers = append(affix.Modifiers, modifier)
 		}
@@ -107,14 +99,14 @@ func createItemAffixRecords(
 		// items to include for spawning
 		for i := 1; i <= 7; i++ {
 			itemKey := fmt.Sprintf("itype%d", i)
-			itemToken := d.GetString(itemKey, index)
+			itemToken := d.String(itemKey)
 			affix.ItemInclude = append(affix.ItemInclude, itemToken)
 		}
 
 		// items to exclude for spawning
 		for i := 1; i <= 7; i++ {
 			itemKey := fmt.Sprintf("etype%d", i)
-			itemToken := d.GetString(itemKey, index)
+			itemToken := d.String(itemKey)
 			affix.ItemExclude = append(affix.ItemExclude, itemToken)
 		}
 
@@ -133,6 +125,9 @@ func createItemAffixRecords(
 		group.addMember(affix)
 
 		records = append(records, affix)
+	}
+	if d.Err != nil {
+		panic(d.Err)
 	}
 
 	return records

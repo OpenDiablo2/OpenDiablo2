@@ -42,7 +42,7 @@ type ExperienceBreakpointsRecord struct {
 // ExperienceBreakpoints describes the required experience
 // for each level for each character class
 //nolint:gochecknoglobals // Currently global by design, only written once
-var ExperienceBreakpoints []*ExperienceBreakpointsRecord
+var ExperienceBreakpoints map[int]*ExperienceBreakpointsRecord
 
 //nolint:gochecknoglobals // Currently global by design
 var maxLevels map[d2enum.Hero]int
@@ -60,42 +60,40 @@ func GetExperienceBreakpoint(heroType d2enum.Hero, level int) int {
 // LoadExperienceBreakpoints loads experience.txt into a map
 // ExperienceBreakpoints []*ExperienceBreakpointsRecord
 func LoadExperienceBreakpoints(file []byte) {
-	d := d2common.LoadDataDictionary(string(file))
+	ExperienceBreakpoints = make(map[int]*ExperienceBreakpointsRecord, 0)
+
+	d := d2common.LoadDataDictionary(file)
 
 	// we skip the second row because that describes max level of char classes
-	ExperienceBreakpoints = make([]*ExperienceBreakpointsRecord, len(d.Data)-1)
+	d.Next()
+	maxLevels = map[d2enum.Hero]int{
+		d2enum.HeroAmazon:      d.Number("Amazon"),
+		d2enum.HeroBarbarian:   d.Number("Barbarian"),
+		d2enum.HeroDruid:       d.Number("Druid"),
+		d2enum.HeroAssassin:    d.Number("Assassin"),
+		d2enum.HeroNecromancer: d.Number("Necromancer"),
+		d2enum.HeroPaladin:     d.Number("Paladin"),
+		d2enum.HeroSorceress:   d.Number("Sorceress"),
+	}
 
-	for idx := range d.Data {
-		if idx == 0 {
-			// max levels are a special case
-			maxLevels = map[d2enum.Hero]int{
-				d2enum.HeroAmazon:      d.GetNumber("Amazon", idx),
-				d2enum.HeroBarbarian:   d.GetNumber("Barbarian", idx),
-				d2enum.HeroDruid:       d.GetNumber("Druid", idx),
-				d2enum.HeroAssassin:    d.GetNumber("Assassin", idx),
-				d2enum.HeroNecromancer: d.GetNumber("Necromancer", idx),
-				d2enum.HeroPaladin:     d.GetNumber("Paladin", idx),
-				d2enum.HeroSorceress:   d.GetNumber("Sorceress", idx),
-			}
-
-			continue
-		}
-
+	for d.Next() {
 		record := &ExperienceBreakpointsRecord{
-			Level: d.GetNumber("Level", idx),
+			Level: d.Number("Level"),
 			HeroBreakpoints: map[d2enum.Hero]int{
-				d2enum.HeroAmazon:      d.GetNumber("Amazon", idx),
-				d2enum.HeroBarbarian:   d.GetNumber("Barbarian", idx),
-				d2enum.HeroDruid:       d.GetNumber("Druid", idx),
-				d2enum.HeroAssassin:    d.GetNumber("Assassin", idx),
-				d2enum.HeroNecromancer: d.GetNumber("Necromancer", idx),
-				d2enum.HeroPaladin:     d.GetNumber("Paladin", idx),
-				d2enum.HeroSorceress:   d.GetNumber("Sorceress", idx),
+				d2enum.HeroAmazon:      d.Number("Amazon"),
+				d2enum.HeroBarbarian:   d.Number("Barbarian"),
+				d2enum.HeroDruid:       d.Number("Druid"),
+				d2enum.HeroAssassin:    d.Number("Assassin"),
+				d2enum.HeroNecromancer: d.Number("Necromancer"),
+				d2enum.HeroPaladin:     d.Number("Paladin"),
+				d2enum.HeroSorceress:   d.Number("Sorceress"),
 			},
-			Ratio: d.GetNumber("ExpRatio", idx),
+			Ratio: d.Number("ExpRatio"),
 		}
-
 		ExperienceBreakpoints[record.Level] = record
+	}
+	if d.Err != nil {
+		panic(d.Err)
 	}
 
 	log.Printf("Loaded %d ExperienceBreakpoint records", len(ExperienceBreakpoints))
