@@ -12,7 +12,7 @@ func Initialize() (d2interface.Terminal, error) {
 		return nil, err
 	}
 
-	if err := d2input.BindHandlerWithPriority(term, d2input.PriorityHigh); err != nil {
+	if err := d2input.BindHandlerWithPriority(term, d2interface.PriorityHigh); err != nil {
 		return nil, err
 	}
 

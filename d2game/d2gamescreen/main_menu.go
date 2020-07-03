@@ -429,8 +429,8 @@ func (v *MainMenu) Advance(tickTime float64) error {
 }
 
 // OnMouseButtonDown is called when a mouse button is clicked
-func (v *MainMenu) OnMouseButtonDown(event d2input.MouseEvent) bool {
-	if v.screenMode == screenModeTrademark && event.Button == d2input.MouseButtonLeft {
+func (v *MainMenu) OnMouseButtonDown(event d2interface.MouseEvent) bool {
+	if v.screenMode == screenModeTrademark && event.Button() == d2interface.MouseButtonLeft {
 		v.setScreenMode(screenModeMainMenu)
 		return true
 	}

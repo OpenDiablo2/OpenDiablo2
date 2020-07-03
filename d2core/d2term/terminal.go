@@ -15,7 +15,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 )
 
 // TermCategory applies styles to the lines in the  Terminal
@@ -103,8 +102,8 @@ func (t *terminal) Advance(elapsed float64) error {
 	return nil
 }
 
-func (t *terminal) OnKeyDown(event d2input.KeyEvent) bool {
-	if event.Key == d2input.KeyGraveAccent {
+func (t *terminal) OnKeyDown(event d2interface.KeyEvent) bool {
+	if event.Key() == d2interface.KeyGraveAccent {
 		t.toggleTerminal()
 	}
 
@@ -112,27 +111,27 @@ func (t *terminal) OnKeyDown(event d2input.KeyEvent) bool {
 		return false
 	}
 
-	switch event.Key {
-	case d2input.KeyEscape:
+	switch event.Key() {
+	case d2interface.KeyEscape:
 		t.command = ""
-	case d2input.KeyEnd:
+	case d2interface.KeyEnd:
 		t.outputIndex = 0
-	case d2input.KeyHome:
+	case d2interface.KeyHome:
 		t.outputIndex = d2common.MaxInt(0, len(t.outputHistory)-t.lineCount)
-	case d2input.KeyPageUp:
+	case d2interface.KeyPageUp:
 		maxOutputIndex := d2common.MaxInt(0, len(t.outputHistory)-t.lineCount)
 		if t.outputIndex += t.lineCount; t.outputIndex >= maxOutputIndex {
 			t.outputIndex = maxOutputIndex
 		}
-	case d2input.KeyPageDown:
+	case d2interface.KeyPageDown:
 		if t.outputIndex -= t.lineCount; t.outputIndex < 0 {
 			t.outputIndex = 0
 		}
-	case d2input.KeyUp, d2input.KeyDown:
-		t.handleControlKey(event.Key, event.KeyMod)
-	case d2input.KeyEnter:
+	case d2interface.KeyUp, d2interface.KeyDown:
+		t.handleControlKey(event.Key(), event.KeyMod())
+	case d2interface.KeyEnter:
 		t.processCommand()
-	case d2input.KeyBackspace:
+	case d2interface.KeyBackspace:
 		if len(t.command) > 0 {
 			t.command = t.command[:len(t.command)-1]
 		}
@@ -168,10 +167,10 @@ func (t *terminal) processCommand() {
 	t.command = ""
 }
 
-func (t *terminal) handleControlKey(eventKey d2input.Key, keyMod d2input.KeyMod) {
+func (t *terminal) handleControlKey(eventKey d2interface.Key, keyMod d2interface.KeyMod) {
 	switch eventKey {
-	case d2input.KeyUp:
-		if keyMod == d2input.KeyModControl {
+	case d2interface.KeyUp:
+		if keyMod == d2interface.KeyModControl {
 			t.lineCount = d2common.MaxInt(0, t.lineCount-1)
 		} else if len(t.commandHistory) > 0 {
 			t.command = t.commandHistory[t.commandIndex]
@@ -181,8 +180,8 @@ func (t *terminal) handleControlKey(eventKey d2input.Key, keyMod d2input.KeyMod)
 				t.commandIndex--
 			}
 		}
-	case d2input.KeyDown:
-		if keyMod == d2input.KeyModControl {
+	case d2interface.KeyDown:
+		if keyMod == d2interface.KeyModControl {
 			t.lineCount = d2common.MinInt(t.lineCount+1, termRowCountMax)
 		}
 	}
@@ -196,14 +195,14 @@ func (t *terminal) toggleTerminal() {
 	}
 }
 
-func (t *terminal) OnKeyChars(event d2input.KeyCharsEvent) bool {
+func (t *terminal) OnKeyChars(event d2interface.KeyCharsEvent) bool {
 	if !t.IsVisible() {
 		return false
 	}
 
 	var handled bool
 
-	for _, c := range event.Chars {
+	for _, c := range event.Chars() {
 		if c != '`' {
 			t.command += string(c)
 			handled = true

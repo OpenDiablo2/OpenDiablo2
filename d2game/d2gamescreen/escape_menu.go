@@ -7,7 +7,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 )
 
@@ -255,13 +254,13 @@ func (m *EscapeMenu) addTitle(l *layout, text string) {
 func (m *EscapeMenu) addBigSelectionLabel(l *layout, text string, targetLayout layoutID) {
 	guiLabel, _ := l.AddLabel(text, d2gui.FontStyle42Units)
 	label := &showLayoutLabel{Label: guiLabel, target: targetLayout, showLayout: m.showLayout}
-	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
+	label.SetMouseClickHandler(func(_ d2interface.MouseEvent) {
 		label.Trigger()
 	})
 
 	elID := len(l.actionableElements)
 
-	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
+	label.SetMouseEnterHandler(func(_ d2interface.MouseMoveEvent) {
 		m.onHoverElement(elID)
 	})
 	l.AddSpacerStatic(10, labelGutter)
@@ -272,13 +271,13 @@ func (m *EscapeMenu) addPreviousMenuLabel(l *layout) {
 	l.AddSpacerStatic(10, labelGutter)
 	guiLabel, _ := l.AddLabel("PREVIOUS MENU", d2gui.FontStyle30Units)
 	label := &showLayoutLabel{Label: guiLabel, target: optionsLayoutID, showLayout: m.showLayout}
-	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
+	label.SetMouseClickHandler(func(_ d2interface.MouseEvent) {
 		label.Trigger()
 	})
 
 	elID := len(l.actionableElements)
 
-	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
+	label.SetMouseEnterHandler(func(_ d2interface.MouseMoveEvent) {
 		m.onHoverElement(elID)
 	})
 
@@ -297,7 +296,7 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 
 	elID := len(l.actionableElements)
 
-	layout.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
+	layout.SetMouseEnterHandler(func(_ d2interface.MouseMoveEvent) {
 		m.onHoverElement(elID)
 	})
 	layout.AddSpacerDynamic()
@@ -312,7 +311,7 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 		updateValue:       m.onUpdateValue,
 	}
 
-	layout.SetMouseClickHandler(func(_ d2input.MouseEvent) {
+	layout.SetMouseClickHandler(func(_ d2interface.MouseEvent) {
 		label.Trigger()
 	})
 	l.AddSpacerStatic(10, labelGutter)
@@ -434,15 +433,15 @@ func (m *EscapeMenu) onEnterKey() {
 }
 
 // OnKeyDown defines the actions of the Escape Menu when a key is pressed
-func (m *EscapeMenu) OnKeyDown(event d2input.KeyEvent) bool {
-	switch event.Key {
-	case d2input.KeyEscape:
+func (m *EscapeMenu) OnKeyDown(event d2interface.KeyEvent) bool {
+	switch event.Key() {
+	case d2interface.KeyEscape:
 		m.onEscKey()
-	case d2input.KeyUp:
+	case d2interface.KeyUp:
 		m.onUpKey()
-	case d2input.KeyDown:
+	case d2interface.KeyDown:
 		m.onDownKey()
-	case d2input.KeyEnter:
+	case d2interface.KeyEnter:
 		m.onEnterKey()
 	default:
 		return false

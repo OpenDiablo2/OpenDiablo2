@@ -2,60 +2,27 @@ package d2input
 
 import (
 	"sort"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
-
-// Priority of the event handler
-type Priority int
-
-//noinspection GoUnusedConst
-const (
-	// PriorityLow is a low priority handler
-	PriorityLow Priority = iota
-	// PriorityDefault is a default priority handler
-	PriorityDefault
-	// PriorityHigh is a high priority handler
-	PriorityHigh
-)
-
-// Handler is an event handler
-type Handler interface{}
 
 type inputManager struct {
-	inputService InputService
+	inputService d2interface.InputService
 	cursorX      int
 	cursorY      int
 
-	buttonMod MouseButtonMod
-	keyMod    KeyMod
+	buttonMod d2interface.MouseButtonMod
+	keyMod    d2interface.KeyMod
 
 	entries handlerEntryList
 }
 
-func (im *inputManager) advance(_ float64) error {
+// Advance advances the inputManager
+func (im *inputManager) Advance(_, _ float64) error {
+	im.updateKeyMod()
+	im.updateButtonMod()
+
 	cursorX, cursorY := im.inputService.CursorPosition()
-
-	im.keyMod = 0
-	if im.inputService.IsKeyPressed(KeyAlt) {
-		im.keyMod |= KeyModAlt
-	}
-	if im.inputService.IsKeyPressed(KeyControl) {
-		im.keyMod |= KeyModControl
-	}
-	if im.inputService.IsKeyPressed(KeyShift) {
-		im.keyMod |= KeyModShift
-	}
-
-	im.buttonMod = 0
-	if im.inputService.IsMouseButtonPressed(MouseButtonLeft) {
-		im.buttonMod |= MouseButtonModLeft
-	}
-	if im.inputService.IsMouseButtonPressed(MouseButtonMiddle) {
-		im.buttonMod |= MouseButtonModMiddle
-	}
-	if im.inputService.IsMouseButtonPressed(MouseButtonRight) {
-		im.buttonMod |= MouseButtonModRight
-	}
-
 	eventBase := HandlerEvent{
 		im.keyMod,
 		im.buttonMod,
@@ -63,120 +30,216 @@ func (im *inputManager) advance(_ float64) error {
 		cursorY,
 	}
 
-	for key := keyMin; key <= keyMax; key++ {
-		if im.inputService.IsKeyJustPressed(key) {
-			event := KeyEvent{HandlerEvent: eventBase, Key: key}
-			im.propagate(func(handler Handler) bool {
-				if l, ok := handler.(KeyDownHandler); ok {
-					return l.OnKeyDown(event)
-				}
-
-				return false
-			})
-		}
-
-		if im.inputService.IsKeyPressed(key) {
-			event := KeyEvent{HandlerEvent: eventBase, Key: key, Duration: im.inputService.KeyPressDuration(key)}
-			im.propagate(func(handler Handler) bool {
-				if l, ok := handler.(KeyRepeatHandler); ok {
-					return l.OnKeyRepeat(event)
-				}
-
-				return false
-			})
-		}
-
-		if im.inputService.IsKeyJustReleased(key) {
-			event := KeyEvent{HandlerEvent: eventBase, Key: key}
-			im.propagate(func(handler Handler) bool {
-				if l, ok := handler.(KeyUpHandler); ok {
-					return l.OnKeyUp(event)
-				}
-
-				return false
-			})
-		}
+	for key := d2interface.KeyMin; key <= d2interface.KeyMax; key++ {
+		im.updateJustPressedKey(key, eventBase)
+		im.updateJustReleasedKey(key, eventBase)
+		im.updatePressedKey(key, eventBase)
 	}
 
-	if chars := im.inputService.InputChars(); len(chars) > 0 {
-		event := KeyCharsEvent{eventBase, chars}
-		im.propagate(func(handler Handler) bool {
-			if l, ok := handler.(KeyCharsHandler); ok {
-				l.OnKeyChars(event)
-			}
+	im.updateInputChars(eventBase)
 
-			return false
-		})
+	for button := d2interface.MouseButtonMin; button <= d2interface.MouseButtonMax; button++ {
+		im.updateJustPressedButton(button, eventBase)
+		im.updateJustReleasedButton(button, eventBase)
+		im.updatePressedButton(button, eventBase)
 	}
 
-	for button := mouseButtonMin; button <= mouseButtonMax; button++ {
-		if im.inputService.IsMouseButtonJustPressed(button) {
-			event := MouseEvent{eventBase, button}
-			im.propagate(func(handler Handler) bool {
-				if l, ok := handler.(MouseButtonDownHandler); ok {
-					return l.OnMouseButtonDown(event)
-				}
-
-				return false
-			})
-		}
-
-		if im.inputService.IsMouseButtonJustReleased(button) {
-			event := MouseEvent{eventBase, button}
-			im.propagate(func(handler Handler) bool {
-				if l, ok := handler.(MouseButtonUpHandler); ok {
-					return l.OnMouseButtonUp(event)
-				}
-
-				return false
-			})
-		}
-		if im.inputService.IsMouseButtonPressed(button) {
-			event := MouseEvent{eventBase, button}
-			im.propagate(func(handler Handler) bool {
-				if l, ok := handler.(MouseButtonRepeatHandler); ok {
-					return l.OnMouseButtonRepeat(event)
-				}
-
-				return false
-			})
-		}
-	}
-
-	if im.cursorX != cursorX || im.cursorY != cursorY {
-		event := MouseMoveEvent{eventBase}
-		im.propagate(func(handler Handler) bool {
-			if l, ok := handler.(MouseMoveHandler); ok {
-				return l.OnMouseMove(event)
-			}
-
-			return false
-		})
-
-		im.cursorX, im.cursorY = cursorX, cursorY
-	}
+	im.updateCursor(cursorX, cursorY, eventBase)
 
 	return nil
 }
 
-func (im *inputManager) bindHandler(handler Handler, priority Priority) error {
+func (im *inputManager) updateKeyMod() {
+	im.keyMod = 0
+	if im.inputService.IsKeyPressed(d2interface.KeyAlt) {
+		im.keyMod |= d2interface.KeyModAlt
+	}
+
+	if im.inputService.IsKeyPressed(d2interface.KeyControl) {
+		im.keyMod |= d2interface.KeyModControl
+	}
+
+	if im.inputService.IsKeyPressed(d2interface.KeyShift) {
+		im.keyMod |= d2interface.KeyModShift
+	}
+}
+
+func (im *inputManager) updateButtonMod() {
+	im.buttonMod = 0
+	if im.inputService.IsMouseButtonPressed(d2interface.MouseButtonLeft) {
+		im.buttonMod |= d2interface.MouseButtonModLeft
+	}
+
+	if im.inputService.IsMouseButtonPressed(d2interface.MouseButtonMiddle) {
+		im.buttonMod |= d2interface.MouseButtonModMiddle
+	}
+
+	if im.inputService.IsMouseButtonPressed(d2interface.MouseButtonRight) {
+		im.buttonMod |= d2interface.MouseButtonModRight
+	}
+}
+
+func (im *inputManager) updateJustPressedKey(k d2interface.Key, e HandlerEvent) {
+	if im.inputService.IsKeyJustPressed(k) {
+		event := KeyEvent{HandlerEvent: e, key: k}
+
+		fn := func(handler d2interface.InputEventHandler) bool {
+			if l, ok := handler.(d2interface.KeyDownHandler); ok {
+				return l.OnKeyDown(&event)
+			}
+
+			return false
+		}
+
+		im.propagate(fn)
+	}
+}
+
+func (im *inputManager) updateJustReleasedKey(k d2interface.Key, e HandlerEvent) {
+	if im.inputService.IsKeyJustReleased(k) {
+		event := KeyEvent{HandlerEvent: e, key: k}
+
+		fn := func(handler d2interface.InputEventHandler) bool {
+			if l, ok := handler.(d2interface.KeyUpHandler); ok {
+				return l.OnKeyUp(&event)
+			}
+
+			return false
+		}
+		im.propagate(fn)
+	}
+}
+
+func (im *inputManager) updatePressedKey(k d2interface.Key, e HandlerEvent) {
+	if im.inputService.IsKeyPressed(k) {
+		event := KeyEvent{
+			HandlerEvent: e,
+			key:          k,
+			duration:     im.inputService.KeyPressDuration(k),
+		}
+
+		fn := func(handler d2interface.InputEventHandler) bool {
+			if l, ok := handler.(d2interface.KeyRepeatHandler); ok {
+				return l.OnKeyRepeat(&event)
+			}
+
+			return false
+		}
+		im.propagate(fn)
+	}
+}
+
+func (im *inputManager) updateInputChars(eventBase HandlerEvent) {
+	if chars := im.inputService.InputChars(); len(chars) > 0 {
+		event := KeyCharsEvent{eventBase, chars}
+
+		fn := func(handler d2interface.InputEventHandler) bool {
+			if l, ok := handler.(d2interface.KeyCharsHandler); ok {
+				l.OnKeyChars(&event)
+			}
+
+			return false
+		}
+		im.propagate(fn)
+	}
+}
+
+func (im *inputManager) updateJustPressedButton(b d2interface.MouseButton, e HandlerEvent) {
+	if im.inputService.IsMouseButtonJustPressed(b) {
+		event := MouseEvent{e, b}
+
+		fn := func(handler d2interface.InputEventHandler) bool {
+			if l, ok := handler.(d2interface.MouseButtonDownHandler); ok {
+				return l.OnMouseButtonDown(&event)
+			}
+
+			return false
+		}
+		im.propagate(fn)
+	}
+}
+
+func (im *inputManager) updateJustReleasedButton(b d2interface.MouseButton, e HandlerEvent) {
+	if im.inputService.IsMouseButtonJustReleased(b) {
+		event := MouseEvent{e, b}
+
+		fn := func(handler d2interface.InputEventHandler) bool {
+			if l, ok := handler.(d2interface.MouseButtonUpHandler); ok {
+				return l.OnMouseButtonUp(&event)
+			}
+
+			return false
+		}
+		im.propagate(fn)
+	}
+}
+
+func (im *inputManager) updatePressedButton(b d2interface.MouseButton, e HandlerEvent) {
+	if im.inputService.IsMouseButtonPressed(b) {
+		event := MouseEvent{e, b}
+
+		fn := func(handler d2interface.InputEventHandler) bool {
+			if l, ok := handler.(d2interface.MouseButtonRepeatHandler); ok {
+				return l.OnMouseButtonRepeat(&event)
+			}
+
+			return false
+		}
+		im.propagate(fn)
+	}
+}
+
+func (im *inputManager) updateCursor(cursorX, cursorY int, e HandlerEvent) {
+	if im.cursorX != cursorX || im.cursorY != cursorY {
+		event := MouseMoveEvent{e}
+
+		fn := func(handler d2interface.InputEventHandler) bool {
+			if l, ok := handler.(d2interface.MouseMoveHandler); ok {
+				return l.OnMouseMove(&event)
+			}
+
+			return false
+		}
+		im.propagate(fn)
+
+		im.cursorX, im.cursorY = cursorX, cursorY
+	}
+}
+
+// BindHandlerWithPriority adds an event handler with a specific call priority
+func (im *inputManager) BindHandlerWithPriority(
+	h d2interface.InputEventHandler,
+	p d2interface.Priority) error {
+	return singleton.bindHandler(h, p)
+}
+
+// BindHandler adds an event handler
+func (im *inputManager) BindHandler(h d2interface.InputEventHandler) error {
+	return im.bindHandler(h, d2interface.PriorityDefault)
+}
+
+// BindHandler adds an event handler
+func (im *inputManager) bindHandler(h d2interface.InputEventHandler, p d2interface.Priority) error {
 	for _, entry := range im.entries {
-		if entry.handler == handler {
+		if entry.handler == h {
 			return ErrHasReg
 		}
 	}
 
-	im.entries = append(im.entries, handlerEntry{handler, priority})
+	entry := handlerEntry{h, p}
+	im.entries = append(im.entries, entry)
 	sort.Sort(im.entries)
 
 	return nil
 }
 
-func (im *inputManager) unbindHandler(handler Handler) error {
+// UnbindHandler removes a previously bound event handler
+func (im *inputManager) UnbindHandler(handler d2interface.InputEventHandler) error {
 	for i, entry := range im.entries {
 		if entry.handler == handler {
 			copy(im.entries[i:], im.entries[i+1:])
 			im.entries = im.entries[:len(im.entries)-1]
+
 			return nil
 		}
 	}
@@ -184,8 +247,9 @@ func (im *inputManager) unbindHandler(handler Handler) error {
 	return ErrNotReg
 }
 
-func (im *inputManager) propagate(callback func(Handler) bool) {
-	var priority Priority
+func (im *inputManager) propagate(callback func(d2interface.InputEventHandler) bool) {
+	var priority d2interface.Priority
+
 	var handled bool
 
 	for _, entry := range im.entries {
@@ -202,8 +266,8 @@ func (im *inputManager) propagate(callback func(Handler) bool) {
 }
 
 type handlerEntry struct {
-	handler  Handler
-	priority Priority
+	handler  d2interface.InputEventHandler
+	priority d2interface.Priority
 }
 
 type handlerEntryList []handlerEntry

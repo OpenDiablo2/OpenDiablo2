@@ -280,10 +280,10 @@ func (v *CharacterSelect) moveSelectionBox() {
 }
 
 // OnMouseButtonDown is called when a mouse button is clicked
-func (v *CharacterSelect) OnMouseButtonDown(event d2input.MouseEvent) bool {
+func (v *CharacterSelect) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	if !v.showDeleteConfirmation {
-		if event.Button == d2input.MouseButtonLeft {
-			mx, my := event.X, event.Y
+		if event.Button() == d2interface.MouseButtonLeft {
+			mx, my := event.X(), event.Y()
 			bw := 272
 			bh := 92
 			localMouseX := mx - 37
