@@ -17,27 +17,62 @@ type Object struct {
 	direction    int
 	highlight    bool
 	nameLabel    d2ui.Label
-	objectRecord *d2datadict.ObjectRecord
 	objectLookup *d2datadict.ObjectLookupRecord
+	objectRecord *d2datadict.ObjectRecord
+	objectType   *d2datadict.ObjectTypeRecord
 }
 
 // CreateObject creates an instance of AnimatedComposite
-func CreateObject(x, y int, object *d2datadict.ObjectLookupRecord, palettePath string) (*Object, error) {
+func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath string) (*Object, error) {
+	entity := &Object{
+		mapEntity:    createMapEntity(x, y),
+		objectRecord: objectRec,
+		objectType:   &d2datadict.ObjectTypes[objectRec.Index],
+		nameLabel:    d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
+	}
+
+	object := &d2datadict.ObjectLookupRecord{
+		Base:  "/Data/Global/Objects",
+		Token: entity.objectType.Token,
+		Mode:  "NU",
+		Class: "HTH",
+		HD:    "LIT",
+		TR:    "LIT",
+		LG:    "LIT",
+		RA:    "LIT",
+		LA:    "LIT",
+		RH:    "LIT",
+		LH:    "LIT",
+		SH:    "LIT",
+		S1:    "LIT",
+		S2:    "LIT",
+		S3:    "LIT",
+		S4:    "LIT",
+		S5:    "LIT",
+		S6:    "LIT",
+		S7:    "LIT",
+		S8:    "LIT",
+	}
+
+	entity.objectLookup = object
+
 	composite, err := d2asset.LoadComposite(object, palettePath)
 	if err != nil {
 		return nil, err
 	}
 
-	entity := &Object{
-		mapEntity:    createMapEntity(x, y),
-		composite:    composite,
-		objectLookup: object,
-		nameLabel:    d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
-	}
+	entity.composite = composite
+
 	entity.mapEntity.directioner = entity.rotate
-	entity.objectRecord = d2datadict.Objects[object.ObjectsTxtId]
 	entity.drawLayer = entity.objectRecord.OrderFlag[d2enum.AnimationModeObjectNeutral]
+
 	entity.SetMode(object.Mode, object.Class, 0)
+
+	// stop torches going crazy for now
+	// need initFunc handling to set objects up properly
+	if objectRec.HasAnimationMode[d2enum.AnimationModeObjectOpened] {
+		entity.SetMode("ON", "HTH", 0)
+	}
 
 	return entity, nil
 }
@@ -81,6 +116,7 @@ func (ob *Object) Render(target d2interface.Surface) {
 		ob.offsetX+int((ob.subcellX-ob.subcellY)*16),
 		ob.offsetY+int(((ob.subcellX+ob.subcellY)*8)-5),
 	)
+
 	if ob.highlight {
 		ob.nameLabel.SetText(d2common.TranslateString(ob.objectRecord.Name))
 		ob.nameLabel.SetPosition(-50, -50)
@@ -88,6 +124,7 @@ func (ob *Object) Render(target d2interface.Surface) {
 		target.PushBrightness(2)
 		defer target.Pop()
 	}
+
 	defer target.Pop()
 	ob.composite.Render(target)
 	ob.highlight = false
