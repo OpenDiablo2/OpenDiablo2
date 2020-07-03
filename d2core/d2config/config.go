@@ -1,4 +1,3 @@
-// Package d2config contains configuration objects and functions
 package d2config
 
 import (
