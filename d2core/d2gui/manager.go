@@ -38,6 +38,7 @@ func createGuiManager() (*manager, error) {
 		cursorVisible: true,
 	}
 
+	// TODO this has to do with having a singleton still, need to remove
 	if err := d2input.BindHandler(manager); err != nil {
 		return nil, err
 	}
@@ -52,7 +53,7 @@ func (m *manager) SetLayout(layout *Layout) {
 	}
 }
 
-func (m *manager) OnMouseButtonDown(event d2input.MouseEvent) bool {
+func (m *manager) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	if m.layout == nil {
 		return false
 	}
@@ -60,7 +61,7 @@ func (m *manager) OnMouseButtonDown(event d2input.MouseEvent) bool {
 	return m.layout.onMouseButtonDown(event)
 }
 
-func (m *manager) OnMouseButtonUp(event d2input.MouseEvent) bool {
+func (m *manager) OnMouseButtonUp(event d2interface.MouseEvent) bool {
 	if m.layout == nil {
 		return false
 	}
@@ -68,9 +69,9 @@ func (m *manager) OnMouseButtonUp(event d2input.MouseEvent) bool {
 	return m.layout.onMouseButtonUp(event)
 }
 
-func (m *manager) OnMouseMove(event d2input.MouseMoveEvent) bool {
-	m.cursorX = event.X
-	m.cursorY = event.Y
+func (m *manager) OnMouseMove(event d2interface.MouseMoveEvent) bool {
+	m.cursorX = event.X()
+	m.cursorY = event.Y()
 
 	if m.layout == nil {
 		return false

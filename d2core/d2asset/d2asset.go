@@ -17,7 +17,7 @@ import (
 var singleton *assetManager
 
 // Initialize creates and assigns all necessary dependencies for the assetManager top-level functions to work correctly
-func Initialize(term d2interface.Terminal) error {
+func Initialize() error {
 	var (
 		config                  = d2config.Get()
 		archiveManager          = createArchiveManager(&config)
@@ -37,6 +37,10 @@ func Initialize(term d2interface.Terminal) error {
 		fontManager,
 	}
 
+	return nil
+}
+
+func BindToTerminal(term d2interface.Terminal) {
 	if err := term.BindAction("assetspam", "display verbose asset manager logs", func(verbose bool) {
 		if verbose {
 			term.OutputInfof("asset manager verbose logging enabled")
@@ -44,13 +48,13 @@ func Initialize(term d2interface.Terminal) error {
 			term.OutputInfof("asset manager verbose logging disabled")
 		}
 
-		archiveManager.cache.SetVerbose(verbose)
-		fileManager.cache.SetVerbose(verbose)
-		paletteManager.cache.SetVerbose(verbose)
-		paletteTransformManager.cache.SetVerbose(verbose)
-		animationManager.cache.SetVerbose(verbose)
+		singleton.archiveManager.cache.SetVerbose(verbose)
+		singleton.fileManager.cache.SetVerbose(verbose)
+		singleton.paletteManager.cache.SetVerbose(verbose)
+		singleton.paletteTransformManager.cache.SetVerbose(verbose)
+		singleton.animationManager.cache.SetVerbose(verbose)
 	}); err != nil {
-		return err
+		panic(err)
 	}
 
 	if err := term.BindAction("assetstat", "display asset manager cache statistics", func() {
@@ -64,28 +68,27 @@ func Initialize(term d2interface.Terminal) error {
 			return float64(c.GetWeight()) / float64(c.GetBudget()) * percent
 		}
 
-		term.OutputInfof("archive cache: %f", cacheStatistics(archiveManager.cache))
-		term.OutputInfof("file cache: %f", cacheStatistics(fileManager.cache))
-		term.OutputInfof("palette cache: %f", cacheStatistics(paletteManager.cache))
-		term.OutputInfof("palette transform cache: %f", cacheStatistics(paletteTransformManager.cache))
-		term.OutputInfof("animation cache: %f", cacheStatistics(animationManager.cache))
-		term.OutputInfof("font cache: %f", cacheStatistics(fontManager.cache))
+		term.OutputInfof("archive cache: %f",
+			cacheStatistics(singleton.archiveManager.cache))
+		term.OutputInfof("file cache: %f", cacheStatistics(singleton.fileManager.cache))
+		term.OutputInfof("palette cache: %f", cacheStatistics(singleton.paletteManager.cache))
+		term.OutputInfof("palette transform cache: %f", cacheStatistics(singleton.paletteTransformManager.cache))
+		term.OutputInfof("animation cache: %f", cacheStatistics(singleton.animationManager.cache))
+		term.OutputInfof("font cache: %f", cacheStatistics(singleton.fontManager.cache))
 	}); err != nil {
-		return err
+		panic(err)
 	}
 
 	if err := term.BindAction("assetclear", "clear asset manager cache", func() {
-		archiveManager.cache.Clear()
-		fileManager.cache.Clear()
-		paletteManager.cache.Clear()
-		paletteTransformManager.cache.Clear()
-		animationManager.cache.Clear()
-		fontManager.cache.Clear()
+		singleton.archiveManager.cache.Clear()
+		singleton.fileManager.cache.Clear()
+		singleton.paletteManager.cache.Clear()
+		singleton.paletteTransformManager.cache.Clear()
+		singleton.animationManager.cache.Clear()
+		singleton.fontManager.cache.Clear()
 	}); err != nil {
-		return err
+		panic(err)
 	}
-
-	return nil
 }
 
 // LoadFileStream streams an MPQ file from a source file path

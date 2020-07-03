@@ -1,9 +1,5 @@
 package d2interface
 
-import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-)
-
 // TermCategory applies styles to the lines in the  Terminal
 type TermCategory int
 
@@ -19,12 +15,10 @@ const (
 // It is used throughout the codebase, most parts of the engine will
 // `bind` commands, which are available for use in the shell
 type Terminal interface {
+	AppComponent
 	BindLogger()
-
-	Advance(elapsed float64) error
-	OnKeyDown(event d2input.KeyEvent) bool
-	OnKeyChars(event d2input.KeyCharsEvent) bool
-	Render(surface Surface) error
+	OnKeyDown(event KeyEvent) bool
+	OnKeyChars(event KeyCharsEvent) bool
 	Execute(command string) error
 	OutputRaw(text string, category TermCategory)
 	Outputf(format string, params ...interface{})

@@ -13,9 +13,15 @@ import (
 	"os"
 	"runtime"
 	"runtime/pprof"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 
 	"golang.org/x/image/colornames"
 
@@ -25,19 +31,24 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	ebiten_audio "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen"
-	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 	"github.com/pkg/profile"
 
 	"gopkg.in/alecthomas/kingpin.v2"
+)
+
+const (
+	// componenet keys determine advance/render order
+	audioKey    string = "od2.001.audio"
+	inputKey    string = "od2.002.input"
+	terminalKey string = "od2.666.terminal"
 )
 
 // App represents the main application for the engine
@@ -52,9 +63,8 @@ type App struct {
 	profileOption     string
 	gitBranch         string
 	gitCommit         string
-	terminal          d2interface.Terminal
-	audio             d2interface.AudioProvider
 	tAllocSamples     *ring.Ring
+	components        map[string]d2interface.AppComponent
 }
 
 type bindTerminalEntry struct {
@@ -63,21 +73,174 @@ type bindTerminalEntry struct {
 	action      interface{}
 }
 
-const defaultFPS = 0.04 // 1/25
-const bytesToMegabyte = 1024 * 1024
-const nSamplesTAlloc = 100
+const (
+	defaultFPS      float64 = 0.04 // 1/25
+	bytesToMegabyte         = 1024 * 1024
+	nSamplesTAlloc          = 100
+)
 
 // Create creates a new instance of the application
-func Create(gitBranch, gitCommit string, terminal d2interface.Terminal, audio d2interface.AudioProvider) *App {
-	result := &App{
+func Create(gitBranch, gitCommit string) d2interface.App {
+
+	app := &App{
 		gitBranch:     gitBranch,
 		gitCommit:     gitCommit,
-		terminal:      terminal,
-		audio:         audio,
-		tAllocSamples: createZeroedRing(nSamplesTAlloc),
+		tAllocSamples: createZeroedRing(int(nSamplesTAlloc)),
+		components:    make(map[string]d2interface.AppComponent),
 	}
 
-	return result
+	// Create our providers
+	audioComponent, err := ebiten_audio.CreateAudio()
+	if err != nil {
+		panic(err)
+	}
+
+	if err := app.BindComponent(audioComponent, audioKey); err != nil {
+		panic(err)
+	}
+
+	inputComponent, err := d2input.Create()
+	if err != nil {
+		panic(err)
+	}
+
+	if err := app.BindComponent(inputComponent, inputKey); err != nil {
+		panic(err)
+	}
+
+	if err := d2gui.Initialize(); err != nil {
+		panic(err)
+	}
+
+	terminalComponent, err := d2term.Create()
+	if err != nil {
+		panic(err)
+	}
+
+	if err := app.BindComponent(terminalComponent, terminalKey); err != nil {
+		panic(err)
+	}
+
+	return app
+}
+
+// Advance advances each component, ordered by the component keys
+func (p *App) Advance(elapsed, current float64) error {
+	elapsedLastScreenAdvance := (current - p.lastScreenAdvance) * p.timeScale
+
+	if elapsedLastScreenAdvance > defaultFPS {
+		p.lastScreenAdvance = current
+
+		if err := d2screen.Advance(elapsedLastScreenAdvance); err != nil {
+			return err
+		}
+	}
+
+	// todo other singletons are still using the other advance
+	d2ui.Advance(elapsed)
+	if err := d2gui.Advance(elapsed); err != nil {
+		return err
+	}
+
+	for _, key := range p.getOrderedComponentKeys() {
+		component := p.components[key]
+		if err := component.Advance(elapsed, current); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Render renders each component, ordered by the component keys
+func (p *App) Render(target d2interface.Surface) error {
+	// TODO these things should be AppComponents
+	if err := d2screen.Render(target); err != nil {
+		return err
+	}
+
+	d2ui.Render(target)
+
+	if err := d2gui.Render(target); err != nil {
+		return err
+	}
+
+	if err := p.renderDebug(target); err != nil {
+		return err
+	}
+
+	if err := p.renderCapture(target); err != nil {
+		return err
+	}
+
+	// this is normal rendering for AppComponents
+	for _, key := range p.getOrderedComponentKeys() {
+		if err := p.components[key].Render(target); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (p *App) update(target d2interface.Surface) error {
+	currentTime := d2common.Now()
+	elapsedTime := (currentTime - p.lastTime) * p.timeScale
+	p.lastTime = currentTime
+
+	if err := p.Advance(elapsedTime, currentTime); err != nil {
+		return err
+	}
+
+	if err := p.Render(target); err != nil {
+		return err
+	}
+
+	if target.GetDepth() > 0 {
+		return errors.New("detected surface stack leak")
+	}
+
+	return nil
+}
+
+func (p *App) BindComponent(c d2interface.AppComponent, key string) error {
+	if target, _ := p.GetComponent(key); target == nil {
+		c.BindApp(p) // bind the component to this app
+		p.components[key] = c
+
+		return nil
+	}
+
+	return fmt.Errorf("app component '%s' already exists", key)
+}
+
+func (p *App) UnbindComponent(s string) error {
+	component, err := p.GetComponent(s)
+
+	if err == nil {
+		component.UnbindApp(p)
+		delete(p.components, s)
+	}
+
+	return err
+}
+
+func (p *App) GetComponent(s string) (d2interface.AppComponent, error) {
+	if component, found := p.components[s]; found {
+		return component, nil
+	}
+	return nil, fmt.Errorf("app component '%s' not found", s)
+}
+
+func (p *App) getOrderedComponentKeys() []string {
+	keys := make([]string, 0) // todo make this not use a map
+	for k := range p.components {
+		keys = append(keys, k)
+	}
+
+	sort.Strings(keys)
+
+	return keys
 }
 
 // Run executes the application and kicks off the entire game process
@@ -94,7 +257,7 @@ func (p *App) Run() {
 
 	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", p.gitBranch)
 	// If we fail to initialize, we will show the error screen
-	if err := p.initialize(p.audio, p.terminal); err != nil {
+	if err := p.initialize(); err != nil {
 		if gameErr := d2render.Run(updateInitError, 800, 600, windowTitle); gameErr != nil {
 			log.Fatal(gameErr)
 		}
@@ -104,7 +267,17 @@ func (p *App) Run() {
 		return
 	}
 
-	d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(p.audio, p.terminal))
+	termComponent, termError := p.GetComponent(terminalKey)
+	audioComponent, audioError := p.GetComponent(audioKey)
+
+	if termError == nil || audioError == nil {
+		audio := audioComponent.(d2interface.AudioProvider)
+		term := termComponent.(d2interface.Terminal)
+		d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(audio, term))
+	} else {
+		fmt.Println(audioError)
+		fmt.Println(termError)
+	}
 
 	if p.gitBranch == "" {
 		p.gitBranch = "Local Build"
@@ -117,7 +290,19 @@ func (p *App) Run() {
 	}
 }
 
-func (p *App) initialize(audioProvider d2interface.AudioProvider, term d2interface.Terminal) error {
+func (p *App) initialize() error {
+	if err := p.loadDataDict(); err != nil {
+		return err
+	}
+
+	if err := p.loadStrings(); err != nil {
+		return err
+	}
+
+	d2inventory.LoadHeroObjects()
+
+	d2script.CreateScriptEngine()
+
 	p.timeScale = 1.0
 	p.lastTime = d2common.Now()
 	p.lastScreenAdvance = p.lastTime
@@ -129,17 +314,12 @@ func (p *App) initialize(audioProvider d2interface.AudioProvider, term d2interfa
 	config := d2config.Get()
 	d2resource.LanguageCode = config.Language
 
-	renderer, err := ebiten.CreateRenderer()
-	if err != nil {
-		return err
-	}
-
-	if err := d2render.Initialize(renderer); err != nil {
-		return err
-	}
-
 	d2render.SetWindowIcon("d2logo.png")
-	term.BindLogger()
+	if term, err := p.GetComponent(terminalKey); err == nil {
+		term.(d2interface.Terminal).BindLogger()
+	} else {
+		fmt.Println(err)
+	}
 
 	terminalActions := [...]bindTerminalEntry{
 		{"dumpheap", "dumps the heap to pprof/heap.pprof", p.dumpHeap},
@@ -154,37 +334,39 @@ func (p *App) initialize(audioProvider d2interface.AudioProvider, term d2interfa
 		{"screen-gui", "enters the gui playground screen", p.enterGuiPlayground},
 	}
 
-	for idx := range terminalActions {
-		action := &terminalActions[idx]
+	if component, err := p.GetComponent(terminalKey); err == nil {
+		term := component.(d2interface.Terminal)
 
-		if err := term.BindAction(action.name, action.description, action.action); err != nil {
-			log.Fatal(err)
+		for idx := range terminalActions {
+			action := &terminalActions[idx]
+			name, desc, fn := action.name, action.description, action.action
+
+			if err := term.BindAction(name, desc, fn); err != nil {
+				log.Fatal(err)
+			}
 		}
+	} else {
+		fmt.Println(err) // no terminal err
 	}
 
-	if err := d2asset.Initialize(term); err != nil {
-		return err
+	if component, err := p.GetComponent(terminalKey); err == nil {
+		term := component.(d2interface.Terminal)
+
+		d2asset.BindToTerminal(term)
+	} else {
+		fmt.Println(err) // no terminal err
 	}
 
-	if err := d2gui.Initialize(); err != nil {
-		return err
+	if component, err := p.GetComponent(audioKey); err == nil {
+		audioProvider := component.(d2interface.AudioProvider)
+
+		audioProvider.SetVolumes(config.BgmVolume, config.SfxVolume)
+
+		d2ui.Initialize(audioProvider)
+
+	} else {
+		fmt.Println(err) // no terminal err
 	}
-
-	audioProvider.SetVolumes(config.BgmVolume, config.SfxVolume)
-
-	if err := p.loadDataDict(); err != nil {
-		return err
-	}
-
-	if err := p.loadStrings(); err != nil {
-		return err
-	}
-
-	d2inventory.LoadHeroObjects()
-
-	d2ui.Initialize(audioProvider)
-
-	d2script.CreateScriptEngine()
 
 	return nil
 }
@@ -382,80 +564,6 @@ func (p *App) renderCapture(target d2interface.Surface) error {
 	return nil
 }
 
-func (p *App) render(target d2interface.Surface) error {
-	if err := d2screen.Render(target); err != nil {
-		return err
-	}
-
-	d2ui.Render(target)
-
-	if err := d2gui.Render(target); err != nil {
-		return err
-	}
-
-	if err := p.renderDebug(target); err != nil {
-		return err
-	}
-
-	if err := p.renderCapture(target); err != nil {
-		return err
-	}
-
-	if err := p.terminal.Render(target); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (p *App) advance(elapsed, current float64) error {
-	elapsedLastScreenAdvance := (current - p.lastScreenAdvance) * p.timeScale
-
-	if elapsedLastScreenAdvance > defaultFPS {
-		p.lastScreenAdvance = current
-
-		if err := d2screen.Advance(elapsedLastScreenAdvance); err != nil {
-			return err
-		}
-	}
-
-	d2ui.Advance(elapsed)
-
-	if err := d2input.Advance(elapsed); err != nil {
-		return err
-	}
-
-	if err := d2gui.Advance(elapsed); err != nil {
-		return err
-	}
-
-	if err := p.terminal.Advance(elapsed); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (p *App) update(target d2interface.Surface) error {
-	currentTime := d2common.Now()
-	elapsedTime := (currentTime - p.lastTime) * p.timeScale
-	p.lastTime = currentTime
-
-	if err := p.advance(elapsedTime, currentTime); err != nil {
-		return err
-	}
-
-	if err := p.render(target); err != nil {
-		return err
-	}
-
-	if target.GetDepth() > 0 {
-		return errors.New("detected surface stack leak")
-	}
-
-	return nil
-}
-
 func (p *App) allocRate(totalAlloc uint64, fps float64) float64 {
 	p.tAllocSamples.Value = totalAlloc
 	p.tAllocSamples = p.tAllocSamples.Next()
@@ -483,7 +591,12 @@ func (p *App) dumpHeap() {
 func (p *App) toggleFullScreen() {
 	fullscreen := !d2render.IsFullScreen()
 	d2render.SetFullScreen(fullscreen)
-	p.terminal.OutputInfof("fullscreen is now: %v", fullscreen)
+	if terminalComponent, err := p.GetComponent(terminalKey); err == nil {
+		term := terminalComponent.(d2interface.Terminal)
+		term.OutputInfof("fullscreen is now: %v", fullscreen)
+	} else {
+		fmt.Println(err)
+	}
 }
 
 func (p *App) captureFrame(path string) {
@@ -505,21 +618,38 @@ func (p *App) stopAnimationCapture() {
 func (p *App) toggleVsync() {
 	vsync := !d2render.GetVSyncEnabled()
 	d2render.SetVSyncEnabled(vsync)
-	p.terminal.OutputInfof("vsync is now: %v", vsync)
+	if terminalComponent, err := p.GetComponent(terminalKey); err == nil {
+		term := terminalComponent.(d2interface.Terminal)
+		term.OutputInfof("vsync is now: %v", vsync)
+	} else {
+		fmt.Println(err)
+	}
 }
 
 func (p *App) toggleFpsCounter() {
 	p.showFPS = !p.showFPS
-	p.terminal.OutputInfof("fps counter is now: %v", p.showFPS)
+	if terminalComponent, err := p.GetComponent(terminalKey); err == nil {
+		term := terminalComponent.(d2interface.Terminal)
+		term.OutputInfof("fps counter is now: %v", p.showFPS)
+	} else {
+		fmt.Println(err)
+	}
+
 }
 
 func (p *App) setTimeScale(timeScale float64) {
-	if timeScale <= 0 {
-		p.terminal.OutputErrorf("invalid time scale value")
+	if terminalComponent, err := p.GetComponent(terminalKey); err == nil {
+		term := terminalComponent.(d2interface.Terminal)
+		if timeScale <= 0 {
+			term.OutputErrorf("invalid time scale value")
+		} else {
+			term.OutputInfof("timescale changed from %f to %f", p.timeScale, timeScale)
+			p.timeScale = timeScale
+		}
 	} else {
-		p.terminal.OutputInfof("timescale changed from %f to %f", p.timeScale, timeScale)
-		p.timeScale = timeScale
+		fmt.Println(err)
 	}
+
 }
 
 func (p *App) quitGame() {

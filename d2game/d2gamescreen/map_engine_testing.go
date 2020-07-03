@@ -266,28 +266,28 @@ func (met *MapEngineTest) Advance(tickTime float64) error {
 	return nil
 }
 
-func (met *MapEngineTest) OnKeyRepeat(event d2input.KeyEvent) bool {
+func (met *MapEngineTest) OnKeyRepeat(event d2interface.KeyEvent) bool {
 	var moveSpeed float64 = 8
-	if event.KeyMod == d2input.KeyModShift {
+	if event.KeyMod() == d2interface.KeyModShift {
 		moveSpeed *= 2
 	}
 
-	if event.Key == d2input.KeyDown {
+	if event.Key() == d2interface.KeyDown {
 		met.mapRenderer.MoveCameraBy(0, moveSpeed)
 		return true
 	}
 
-	if event.Key == d2input.KeyUp {
+	if event.Key() == d2interface.KeyUp {
 		met.mapRenderer.MoveCameraBy(0, -moveSpeed)
 		return true
 	}
 
-	if event.Key == d2input.KeyRight {
+	if event.Key() == d2interface.KeyRight {
 		met.mapRenderer.MoveCameraBy(moveSpeed, 0)
 		return true
 	}
 
-	if event.Key == d2input.KeyLeft {
+	if event.Key() == d2interface.KeyLeft {
 		met.mapRenderer.MoveCameraBy(-moveSpeed, 0)
 		return true
 	}
@@ -295,18 +295,18 @@ func (met *MapEngineTest) OnKeyRepeat(event d2input.KeyEvent) bool {
 	return false
 }
 
-func (met *MapEngineTest) OnKeyDown(event d2input.KeyEvent) bool {
-	if event.Key == d2input.KeyEscape {
+func (met *MapEngineTest) OnKeyDown(event d2interface.KeyEvent) bool {
+	if event.Key() == d2interface.KeyEscape {
 		os.Exit(0)
 		return true
 	}
 
-	if event.Key == d2input.KeyN {
-		if event.KeyMod == d2input.KeyModControl {
+	if event.Key() == d2interface.KeyN {
+		if event.KeyMod() == d2interface.KeyModControl {
 			//met.fileIndex = increment(met.fileIndex, 0, met.filesCount-1)
 			met.fileIndex++
 			d2screen.SetNextScreen(met)
-		} else if event.KeyMod == d2input.KeyModShift {
+		} else if event.KeyMod() == d2interface.KeyModShift {
 			met.levelPreset = increment(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
 			d2screen.SetNextScreen(met)
 		} else {
@@ -317,12 +317,12 @@ func (met *MapEngineTest) OnKeyDown(event d2input.KeyEvent) bool {
 		return true
 	}
 
-	if event.Key == d2input.KeyP {
-		if event.KeyMod == d2input.KeyModControl {
+	if event.Key() == d2interface.KeyP {
+		if event.KeyMod() == d2interface.KeyModControl {
 			//met.fileIndex = decrement(met.fileIndex, 0, met.filesCount-1)
 			met.fileIndex--
 			d2screen.SetNextScreen(met)
-		} else if event.KeyMod == d2input.KeyModShift {
+		} else if event.KeyMod() == d2interface.KeyModShift {
 			met.levelPreset = decrement(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
 			d2screen.SetNextScreen(met)
 		} else {

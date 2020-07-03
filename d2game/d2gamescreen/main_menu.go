@@ -360,8 +360,9 @@ func (v *MainMenu) Advance(tickTime float64) error {
 	return nil
 }
 
-func (v *MainMenu) OnMouseButtonDown(event d2input.MouseEvent) bool {
-	if v.screenMode == ScreenModeTrademark && event.Button == d2input.MouseButtonLeft {
+func (v *MainMenu) OnMouseButtonDown(event d2interface.MouseEvent) bool {
+	isLeftButton := event.Button() == d2interface.MouseButtonLeft
+	if v.screenMode == ScreenModeTrademark && isLeftButton {
 		v.SetScreenMode(ScreenModeMainMenu)
 		return true
 	}

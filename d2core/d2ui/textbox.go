@@ -62,7 +62,7 @@ func (v *TextBox) OnKeyChars(event d2input.KeyCharsEvent) bool {
 	if !(focusedTextBox == v) || !v.visible || !v.enabled {
 		return false
 	}
-	newText := string(event.Chars)
+	newText := string(event.Chars())
 	if len(newText) > 0 {
 		v.text += newText
 		v.SetText(v.text)
@@ -72,7 +72,8 @@ func (v *TextBox) OnKeyChars(event d2input.KeyCharsEvent) bool {
 }
 
 func (v *TextBox) OnKeyRepeat(event d2input.KeyEvent) bool {
-	if event.Key == d2input.KeyBackspace && debounceEvents(event.Duration) {
+	isBackspaceKey := event.Key() == d2interface.KeyBackspace
+	if isBackspaceKey && debounceEvents(event.Duration()) {
 		if len(v.text) >= 1 {
 			v.text = v.text[:len(v.text)-1]
 		}

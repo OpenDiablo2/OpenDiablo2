@@ -6,7 +6,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 )
 
 type layoutEntry struct {
@@ -234,41 +233,41 @@ func (l *Layout) getSize() (int, int) {
 	return d2common.MaxInt(width, l.width), d2common.MaxInt(height, l.height)
 }
 
-func (l *Layout) onMouseButtonDown(event d2input.MouseEvent) bool {
+func (l *Layout) onMouseButtonDown(event d2interface.MouseEvent) bool {
 	for _, entry := range l.entries {
 		eventLocal := event
 
-		if l.adjustEntryEvent(entry, &eventLocal.X, &eventLocal.Y) {
+		if l.adjustEntryEvent(entry, eventLocal.X(), eventLocal.Y()) {
 			entry.widget.onMouseButtonDown(eventLocal)
-			entry.mouseDown[event.Button] = true
+			entry.mouseDown[event.Button()] = true
 		}
 	}
 
 	return false
 }
 
-func (l *Layout) onMouseButtonUp(event d2input.MouseEvent) bool {
+func (l *Layout) onMouseButtonUp(event d2interface.MouseEvent) bool {
 	for _, entry := range l.entries {
 		eventLocal := event
 
-		if l.adjustEntryEvent(entry, &eventLocal.X, &eventLocal.Y) {
-			if entry.mouseDown[event.Button] {
+		if l.adjustEntryEvent(entry, eventLocal.X(), eventLocal.Y()) {
+			if entry.mouseDown[event.Button()] {
 				entry.widget.onMouseButtonClick(eventLocal)
 				entry.widget.onMouseButtonUp(eventLocal)
 			}
 		}
 
-		entry.mouseDown[event.Button] = false
+		entry.mouseDown[event.Button()] = false
 	}
 
 	return false
 }
 
-func (l *Layout) onMouseMove(event d2input.MouseMoveEvent) bool {
+func (l *Layout) onMouseMove(event d2interface.MouseMoveEvent) bool {
 	for _, entry := range l.entries {
 		eventLocal := event
 
-		if l.adjustEntryEvent(entry, &eventLocal.X, &eventLocal.Y) {
+		if l.adjustEntryEvent(entry, eventLocal.X(), eventLocal.Y()) {
 			entry.widget.onMouseMove(eventLocal)
 			if entry.mouseOver {
 				entry.widget.onMouseOver(eventLocal)
@@ -285,11 +284,11 @@ func (l *Layout) onMouseMove(event d2input.MouseMoveEvent) bool {
 	return false
 }
 
-func (l *Layout) adjustEntryEvent(entry *layoutEntry, eventX, eventY *int) bool {
-	*eventX -= entry.x
-	*eventY -= entry.y
+func (l *Layout) adjustEntryEvent(entry *layoutEntry, eventX, eventY int) bool {
+	eventX -= entry.x
+	eventY -= entry.y
 
-	if *eventX < 0 || *eventY < 0 || *eventX >= entry.width || *eventY >= entry.height {
+	if eventX < 0 || eventY < 0 || eventX >= entry.width || eventY >= entry.height {
 		return false
 	}
 

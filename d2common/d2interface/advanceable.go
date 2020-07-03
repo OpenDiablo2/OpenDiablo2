@@ -1,5 +1,5 @@
 package d2interface
 
 type Advanceable interface {
-	Advance(elapsed float64)
+	Advance(elapsedTime, currentTime float64) error
 }

@@ -2,23 +2,22 @@ package d2gui
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 )
 
-type MouseHandler func(d2input.MouseEvent)
-type MouseMoveHandler func(d2input.MouseMoveEvent)
+type MouseHandler func(d2interface.MouseEvent)
+type MouseMoveHandler func(d2interface.MouseMoveEvent)
 
 type widget interface {
 	render(target d2interface.Surface) error
 	advance(elapsed float64) error
 
-	onMouseMove(event d2input.MouseMoveEvent) bool
-	onMouseEnter(event d2input.MouseMoveEvent) bool
-	onMouseLeave(event d2input.MouseMoveEvent) bool
-	onMouseOver(event d2input.MouseMoveEvent) bool
-	onMouseButtonDown(event d2input.MouseEvent) bool
-	onMouseButtonUp(event d2input.MouseEvent) bool
-	onMouseButtonClick(event d2input.MouseEvent) bool
+	onMouseMove(event d2interface.MouseMoveEvent) bool
+	onMouseEnter(event d2interface.MouseMoveEvent) bool
+	onMouseLeave(event d2interface.MouseMoveEvent) bool
+	onMouseOver(event d2interface.MouseMoveEvent) bool
+	onMouseButtonDown(event d2interface.MouseEvent) bool
+	onMouseButtonUp(event d2interface.MouseEvent) bool
+	onMouseButtonClick(event d2interface.MouseEvent) bool
 
 	getPosition() (int, int)
 	setOffset(x, y int)
@@ -113,7 +112,7 @@ func (w *widgetBase) advance(elapsed float64) error {
 	return nil
 }
 
-func (w *widgetBase) onMouseEnter(event d2input.MouseMoveEvent) bool {
+func (w *widgetBase) onMouseEnter(event d2interface.MouseMoveEvent) bool {
 	if w.mouseEnterHandler != nil {
 		w.mouseEnterHandler(event)
 	}
@@ -121,7 +120,7 @@ func (w *widgetBase) onMouseEnter(event d2input.MouseMoveEvent) bool {
 	return false
 }
 
-func (w *widgetBase) onMouseLeave(event d2input.MouseMoveEvent) bool {
+func (w *widgetBase) onMouseLeave(event d2interface.MouseMoveEvent) bool {
 	if w.mouseLeaveHandler != nil {
 		w.mouseLeaveHandler(event)
 	}
@@ -129,7 +128,7 @@ func (w *widgetBase) onMouseLeave(event d2input.MouseMoveEvent) bool {
 	return false
 }
 
-func (w *widgetBase) onMouseButtonClick(event d2input.MouseEvent) bool {
+func (w *widgetBase) onMouseButtonClick(event d2interface.MouseEvent) bool {
 	if w.mouseClickHandler != nil {
 		w.mouseClickHandler(event)
 	}
@@ -137,18 +136,18 @@ func (w *widgetBase) onMouseButtonClick(event d2input.MouseEvent) bool {
 	return false
 }
 
-func (w *widgetBase) onMouseMove(event d2input.MouseMoveEvent) bool {
+func (w *widgetBase) onMouseMove(event d2interface.MouseMoveEvent) bool {
 	return false
 }
 
-func (w *widgetBase) onMouseOver(event d2input.MouseMoveEvent) bool {
+func (w *widgetBase) onMouseOver(event d2interface.MouseMoveEvent) bool {
 	return false
 }
 
-func (w *widgetBase) onMouseButtonDown(event d2input.MouseEvent) bool {
+func (w *widgetBase) onMouseButtonDown(event d2interface.MouseEvent) bool {
 	return false
 }
 
-func (w *widgetBase) onMouseButtonUp(event d2input.MouseEvent) bool {
+func (w *widgetBase) onMouseButtonUp(event d2interface.MouseEvent) bool {
 	return false
 }

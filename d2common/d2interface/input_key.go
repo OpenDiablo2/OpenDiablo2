@@ -1,5 +1,5 @@
 // Package d2input provides interaction with input services providing key and mouse interactions.
-package d2input
+package d2interface
 
 // Key represents button on a traditional keyboard.
 type Key int
@@ -207,9 +207,9 @@ const (
 	KeyShift
 
 	// Lowest key in key constants
-	keyMin = Key0
+	KeyMin = Key0
 	// Highest key is key constants
-	keyMax = KeyShift
+	KeyMax = KeyShift
 )
 
 // KeyMod represents a "modified" key action. This could mean, for example, ctrl-S

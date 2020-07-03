@@ -1,4 +1,4 @@
-package d2input
+package d2interface
 
 // MouseButton represents a traditional 3-button mouse
 type MouseButton int
@@ -11,15 +11,15 @@ const (
 	// MouseButtonRight is the right mouse button
 	MouseButtonRight
 
-	mouseButtonMin = MouseButtonLeft
-	mouseButtonMax = MouseButtonRight
+	MouseButtonMin = MouseButtonLeft
+	MouseButtonMax = MouseButtonRight
 )
 
 // MouseButtonMod represents a "modified" mouse button action. This could mean, for example, ctrl-mouse_left
 type MouseButtonMod int
 
 const (
-	// MouseButtonLeft is a modified left mouse button
+	// MouseButtonModLeft is a modified left mouse button
 	MouseButtonModLeft MouseButtonMod = 1 << iota
 	// MouseButtonModMiddle is a modified middle mouse button
 	MouseButtonModMiddle

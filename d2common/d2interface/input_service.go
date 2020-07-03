@@ -1,4 +1,4 @@
-package d2input
+package d2interface
 
 // InputService represents an interface offering Keyboard and Mouse interactions.
 type InputService interface {

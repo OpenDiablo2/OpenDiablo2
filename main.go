@@ -3,14 +3,13 @@ package main
 import (
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
-
-	ebiten_input "github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/ebiten"
-
-	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 )
 
 // GitBranch is set by the CI build process to the name of the branch
@@ -25,19 +24,21 @@ func main() {
 	log.SetFlags(log.Lshortfile)
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
 
-	// Initialize our providers
-	audio, err := ebiten2.CreateAudio()
+	////////////////////////////////////////////////////////////////////////////
+	// TODO these things need to be converted to AppComponents
+	d2config.Load()
+	d2asset.Initialize()
+
+	renderer, err := ebiten.CreateRenderer()
 	if err != nil {
 		panic(err)
 	}
 
-	d2input.Initialize(ebiten_input.InputService{}) // TODO d2input singleton must be init before d2term
-	term, err := d2term.Initialize()
-
-	if err != nil {
-		log.Fatal(err)
+	if err := d2render.Initialize(renderer); err != nil {
+		panic(err)
 	}
+	////////////////////////////////////////////////////////////////////////////
 
-	app := d2app.Create(GitBranch, GitCommit, term, audio)
+	app := d2app.Create(GitBranch, GitCommit)
 	app.Run()
 }

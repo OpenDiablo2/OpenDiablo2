@@ -2,6 +2,7 @@
 package ebiten
 
 import (
+	"errors"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -16,6 +17,7 @@ const sampleRate = 44100
 
 // AudioProvider represents a provider capable of playing audio
 type AudioProvider struct {
+	app          d2interface.App
 	audioContext *audio.Context // The Audio context
 	bgmAudio     *audio.Player  // The audio player
 	lastBgm      string
@@ -23,8 +25,40 @@ type AudioProvider struct {
 	bgmVolume    float64
 }
 
+func (eap *AudioProvider) Advance(_, _ float64) error {
+	return nil // AudioProvider doesn't need to advance
+}
+
+func (eap *AudioProvider) Render(_ d2interface.Surface) error {
+	return nil // AudioProvider doesn't need to render
+}
+
+func (eap *AudioProvider) Initialize() error {
+	panic("implement me")
+}
+
+func (eap *AudioProvider) BindApp(app d2interface.App) error {
+	if eap.app != nil {
+		return errors.New("audio provider already bound to an app")
+	}
+
+	eap.app = app
+
+	return nil
+}
+
+func (eap *AudioProvider) UnbindApp(app d2interface.App) error {
+	if eap.app == nil {
+		return errors.New("audio provider not bound to an app")
+	}
+
+	eap.app = nil
+
+	return nil
+}
+
 // CreateAudio creates an instance of ebiten's audio provider
-func CreateAudio() (*AudioProvider, error) {
+func CreateAudio() (d2interface.AudioProvider, error) {
 	result := &AudioProvider{}
 
 	var err error
