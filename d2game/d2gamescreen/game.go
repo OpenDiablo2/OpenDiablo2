@@ -25,38 +25,42 @@ type Game struct {
 	gameControls         *d2player.GameControls // TODO: Hack
 	localPlayer          *d2mapentity.Player
 	lastRegionType       d2enum.RegionIdType
-	audioProvider        d2interface.AudioProvider
-	terminal             d2interface.Terminal
 	ticksSinceLevelCheck float64
 	escapeMenu           *EscapeMenu
+
+	renderer      d2interface.Renderer
+	audioProvider d2interface.AudioProvider
+	terminal      d2interface.Terminal
 }
 
-func CreateGame(audioProvider d2interface.AudioProvider, gameClient *d2client.GameClient, term d2interface.Terminal) *Game {
+func CreateGame(renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, gameClient *d2client.GameClient,
+	term d2interface.Terminal) *Game {
 	result := &Game{
 		gameClient:           gameClient,
 		gameControls:         nil,
 		localPlayer:          nil,
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
-		mapRenderer:          d2maprenderer.CreateMapRenderer(gameClient.MapEngine, term),
-		escapeMenu:           NewEscapeMenu(audioProvider, term),
+		mapRenderer:          d2maprenderer.CreateMapRenderer(renderer, gameClient.MapEngine, term),
+		escapeMenu:           NewEscapeMenu(renderer, audioProvider, term),
 		audioProvider:        audioProvider,
+		renderer:             renderer,
 		terminal:             term,
 	}
 	result.escapeMenu.onLoad()
-	d2input.BindHandler(result.escapeMenu)
+	_ = d2input.BindHandler(result.escapeMenu)
 
 	return result
 }
 
-func (v *Game) OnLoad(loading d2screen.LoadingState) {
+func (v *Game) OnLoad(_ d2screen.LoadingState) {
 	v.audioProvider.PlayBGM("")
 }
 
 func (v *Game) OnUnload() error {
-	d2input.UnbindHandler(v.gameControls) // TODO: hack
-	d2input.UnbindHandler(v.escapeMenu)   // TODO: hack
-	v.gameClient.Close()
+	_ = d2input.UnbindHandler(v.gameControls) // TODO: hack
+	_ = d2input.UnbindHandler(v.escapeMenu)   // TODO: hack
+	_ = v.gameClient.Close()
 
 	return nil
 }
@@ -67,7 +71,7 @@ func (v *Game) Render(screen d2interface.Surface) error {
 		v.mapRenderer.RegenerateTileCache()
 	}
 
-	screen.Clear(color.Black)
+	_ = screen.Clear(color.Black)
 	v.mapRenderer.Render(screen)
 
 	if v.gameControls != nil {
@@ -85,7 +89,7 @@ func (v *Game) Advance(tickTime float64) error {
 	}
 
 	if v.gameControls != nil {
-		v.gameControls.Advance(tickTime)
+		_ = v.gameControls.Advance(tickTime)
 	}
 
 	v.ticksSinceLevelCheck += tickTime
@@ -118,9 +122,9 @@ func (v *Game) Advance(tickTime float64) error {
 			}
 
 			v.localPlayer = player
-			v.gameControls = d2player.NewGameControls(player, v.gameClient.MapEngine, v.mapRenderer, v, v.terminal)
+			v.gameControls = d2player.NewGameControls(v.renderer, player, v.gameClient.MapEngine, v.mapRenderer, v, v.terminal)
 			v.gameControls.Load()
-			d2input.BindHandler(v.gameControls)
+			_ = d2input.BindHandler(v.gameControls)
 
 			break
 		}
@@ -138,9 +142,9 @@ func (v *Game) Advance(tickTime float64) error {
 func (v *Game) OnPlayerMove(x, y float64) {
 	heroPosX := v.localPlayer.LocationX / 5.0
 	heroPosY := v.localPlayer.LocationY / 5.0
-	v.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(v.gameClient.PlayerId, heroPosX, heroPosY, x, y))
+	_ = v.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(v.gameClient.PlayerId, heroPosX, heroPosY, x, y))
 }
 
 func (v *Game) OnPlayerCast(missleID int, targetX, targetY float64) {
-	v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerId, missleID, targetX, targetY))
+	_ = v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerId, missleID, targetX, targetY))
 }

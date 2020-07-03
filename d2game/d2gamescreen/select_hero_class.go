@@ -69,9 +69,11 @@ type SelectHeroClass struct {
 	connectionHost     string
 	audioProvider      d2interface.AudioProvider
 	terminal           d2interface.Terminal
+	renderer           d2interface.Renderer
 }
 
 func CreateSelectHeroClass(
+	renderer d2interface.Renderer,
 	audioProvider d2interface.AudioProvider,
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	connectionHost string,
@@ -84,6 +86,7 @@ func CreateSelectHeroClass(
 		connectionHost: connectionHost,
 		audioProvider:  audioProvider,
 		terminal:       terminal,
+		renderer:       renderer,
 	}
 
 	return result
@@ -96,26 +99,26 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 	v.bgImage = loadSprite(d2resource.CharacterSelectBackground, d2resource.PaletteFechar)
 	v.bgImage.SetPosition(0, 0)
 
-	v.headingLabel = d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
+	v.headingLabel = d2ui.CreateLabel(v.renderer, d2resource.Font30, d2resource.PaletteUnits)
 	fontWidth, _ := v.headingLabel.GetSize()
 	v.headingLabel.SetPosition(400-fontWidth/2, 17)
 	v.headingLabel.SetText("Select Hero Class")
 	v.headingLabel.Alignment = d2ui.LabelAlignCenter
 
-	v.heroClassLabel = d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
+	v.heroClassLabel = d2ui.CreateLabel(v.renderer, d2resource.Font30, d2resource.PaletteUnits)
 	v.heroClassLabel.Alignment = d2ui.LabelAlignCenter
 	v.heroClassLabel.SetPosition(400, 65)
 
-	v.heroDesc1Label = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroDesc1Label = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
 	v.heroDesc1Label.Alignment = d2ui.LabelAlignCenter
 	v.heroDesc1Label.SetPosition(400, 100)
 	loading.Progress(0.3)
 
-	v.heroDesc2Label = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroDesc2Label = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
 	v.heroDesc2Label.Alignment = d2ui.LabelAlignCenter
 	v.heroDesc2Label.SetPosition(400, 115)
 
-	v.heroDesc3Label = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroDesc3Label = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
 	v.heroDesc3Label.Alignment = d2ui.LabelAlignCenter
 	v.heroDesc3Label.SetPosition(400, 130)
 
@@ -124,47 +127,47 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 	v.campfire.PlayForward()
 	v.campfire.SetBlend(true)
 
-	v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, "EXIT")
+	v.exitButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeMedium, "EXIT")
 	v.exitButton.SetPosition(33, 537)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 	d2ui.AddWidget(&v.exitButton)
 
-	v.okButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, "OK")
+	v.okButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeMedium, "OK")
 	v.okButton.SetPosition(630, 537)
 	v.okButton.OnActivated(func() { v.onOkButtonClicked() })
 	v.okButton.SetVisible(false)
 	v.okButton.SetEnabled(false)
 	d2ui.AddWidget(&v.okButton)
 
-	v.heroNameLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroNameLabel = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
 	v.heroNameLabel.Alignment = d2ui.LabelAlignLeft
 	v.heroNameLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
 	v.heroNameLabel.SetText("Character Name")
 	v.heroNameLabel.SetPosition(321, 475)
 	loading.Progress(0.4)
 
-	v.heroNameTextbox = d2ui.CreateTextbox()
+	v.heroNameTextbox = d2ui.CreateTextbox(v.renderer)
 	v.heroNameTextbox.SetPosition(318, 493)
 	v.heroNameTextbox.SetVisible(false)
 	d2ui.AddWidget(&v.heroNameTextbox)
 
-	v.expansionCheckbox = d2ui.CreateCheckbox(true)
+	v.expansionCheckbox = d2ui.CreateCheckbox(v.renderer, true)
 	v.expansionCheckbox.SetPosition(318, 526)
 	v.expansionCheckbox.SetVisible(false)
 	d2ui.AddWidget(&v.expansionCheckbox)
 
-	v.expansionCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.expansionCharLabel = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
 	v.expansionCharLabel.Alignment = d2ui.LabelAlignLeft
 	v.expansionCharLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
 	v.expansionCharLabel.SetText("EXPANSION CHARACTER")
 	v.expansionCharLabel.SetPosition(339, 526)
 
-	v.hardcoreCheckbox = d2ui.CreateCheckbox(false)
+	v.hardcoreCheckbox = d2ui.CreateCheckbox(v.renderer, false)
 	v.hardcoreCheckbox.SetPosition(318, 548)
 	v.hardcoreCheckbox.SetVisible(false)
 	d2ui.AddWidget(&v.hardcoreCheckbox)
 
-	v.hardcoreCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.hardcoreCharLabel = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
 	v.hardcoreCharLabel.Alignment = d2ui.LabelAlignLeft
 	v.hardcoreCharLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
 	v.hardcoreCharLabel.SetText("Hardcore")
@@ -440,36 +443,46 @@ func (v *SelectHeroClass) OnUnload() error {
 }
 
 func (v *SelectHeroClass) onExitButtonClicked() {
-	d2screen.SetNextScreen(CreateCharacterSelect(v.audioProvider, v.connectionType, v.connectionHost, v.terminal))
+	d2screen.SetNextScreen(CreateCharacterSelect(v.renderer, v.audioProvider, v.connectionType,
+		v.connectionHost, v.terminal))
 }
 
 func (v *SelectHeroClass) onOkButtonClicked() {
-	gameState := d2player.CreatePlayerState(v.heroNameTextbox.GetText(), v.selectedHero, d2datadict.CharStats[v.selectedHero], v.hardcoreCheckbox.GetCheckState())
+	gameState := d2player.CreatePlayerState(v.heroNameTextbox.GetText(), v.selectedHero,
+		d2datadict.CharStats[v.selectedHero], v.hardcoreCheckbox.GetCheckState())
 	gameClient, _ := d2client.Create(d2clientconnectiontype.Local)
-	gameClient.Open(v.connectionHost, gameState.FilePath)
-	d2screen.SetNextScreen(CreateGame(v.audioProvider, gameClient, v.terminal))
+
+	_ = gameClient.Open(v.connectionHost, gameState.FilePath)
+	d2screen.SetNextScreen(CreateGame(v.renderer, v.audioProvider, gameClient, v.terminal))
 }
 
 func (v *SelectHeroClass) Render(screen d2interface.Surface) error {
-	v.bgImage.RenderSegmented(screen, 4, 3, 0)
+	_ = v.bgImage.RenderSegmented(screen, 4, 3, 0)
 	v.headingLabel.Render(screen)
+
 	if v.selectedHero != d2enum.HeroNone {
 		v.heroClassLabel.Render(screen)
 		v.heroDesc1Label.Render(screen)
 		v.heroDesc2Label.Render(screen)
 		v.heroDesc3Label.Render(screen)
 	}
+
 	for heroClass, heroInfo := range v.heroRenderInfo {
 		if heroInfo.Stance == d2enum.HeroStanceIdle || heroInfo.Stance == d2enum.HeroStanceIdleSelected {
 			v.renderHero(screen, heroClass)
 		}
 	}
+
 	for heroClass, heroInfo := range v.heroRenderInfo {
 		if heroInfo.Stance != d2enum.HeroStanceIdle && heroInfo.Stance != d2enum.HeroStanceIdleSelected {
 			v.renderHero(screen, heroClass)
 		}
 	}
-	v.campfire.Render(screen)
+
+	if err := v.campfire.Render(screen); err != nil {
+		return err
+	}
+
 	if v.heroNameTextbox.GetVisible() {
 		v.heroNameLabel.Render(screen)
 		v.expansionCharLabel.Render(screen)
@@ -481,17 +494,26 @@ func (v *SelectHeroClass) Render(screen d2interface.Surface) error {
 
 func (v *SelectHeroClass) Advance(tickTime float64) error {
 	canSelect := true
-	v.campfire.Advance(tickTime)
-	for _, info := range v.heroRenderInfo {
-		info.Advance(tickTime)
-		if info.Stance != d2enum.HeroStanceIdle && info.Stance != d2enum.HeroStanceIdleSelected && info.Stance != d2enum.HeroStanceSelected {
+
+	if err := v.campfire.Advance(tickTime); err != nil {
+		return err
+	}
+
+	for infoIdx := range v.heroRenderInfo {
+		v.heroRenderInfo[infoIdx].Advance(tickTime)
+		if v.heroRenderInfo[infoIdx].Stance != d2enum.HeroStanceIdle &&
+			v.heroRenderInfo[infoIdx].Stance != d2enum.HeroStanceIdleSelected &&
+			v.heroRenderInfo[infoIdx].Stance != d2enum.HeroStanceSelected {
 			canSelect = false
 		}
 	}
-	for heroType, _ := range v.heroRenderInfo {
-		v.updateHeroSelectionHover(heroType, canSelect)
+
+	for heroTypeIdx := range v.heroRenderInfo {
+		v.updateHeroSelectionHover(heroTypeIdx, canSelect)
 	}
+
 	v.okButton.SetEnabled(len(v.heroNameTextbox.GetText()) >= 2 && v.selectedHero != d2enum.HeroNone)
+
 	return nil
 }
 
@@ -548,10 +570,12 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 	}
 
 	if mouseHover && renderInfo.Stance != d2enum.HeroStanceIdleSelected {
-		renderInfo.IdleSelectedSprite.SetCurrentFrame(renderInfo.IdleSprite.GetCurrentFrame())
+		_ = renderInfo.IdleSelectedSprite.SetCurrentFrame(renderInfo.IdleSprite.GetCurrentFrame())
+
 		renderInfo.Stance = d2enum.HeroStanceIdleSelected
 	} else if !mouseHover && renderInfo.Stance != d2enum.HeroStanceIdle {
-		renderInfo.IdleSprite.SetCurrentFrame(renderInfo.IdleSelectedSprite.GetCurrentFrame())
+		_ = renderInfo.IdleSprite.SetCurrentFrame(renderInfo.IdleSelectedSprite.GetCurrentFrame())
+
 		renderInfo.Stance = d2enum.HeroStanceIdle
 	}
 
@@ -652,13 +676,13 @@ func setSpriteToFirstFrame(sprite *d2ui.Sprite) {
 
 func drawSprite(sprite *d2ui.Sprite, target d2interface.Surface) {
 	if sprite != nil {
-		sprite.Render(target)
+		_ = sprite.Render(target)
 	}
 }
 
 func advanceSprite(sprite *d2ui.Sprite, elapsed float64) {
 	if sprite != nil {
-		sprite.Advance(elapsed)
+		_ = sprite.Advance(elapsed)
 	}
 }
 

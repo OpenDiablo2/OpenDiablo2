@@ -5,7 +5,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type Checkbox struct {
@@ -19,7 +18,7 @@ type Checkbox struct {
 	enabled       bool
 }
 
-func CreateCheckbox(checkState bool) Checkbox {
+func CreateCheckbox(renderer d2interface.Renderer, checkState bool) Checkbox {
 	result := Checkbox{
 		checkState: checkState,
 		visible:    true,
@@ -33,11 +32,13 @@ func CreateCheckbox(checkState bool) Checkbox {
 	result.width, result.height, _ = checkboxSprite.GetFrameSize(0)
 	checkboxSprite.SetPosition(0, 0)
 
-	result.Image, _ = d2render.NewSurface(result.width, result.height, d2interface.FilterNearest)
-	checkboxSprite.RenderSegmented(result.Image, 1, 1, 0)
+	result.Image, _ = renderer.NewSurface(result.width, result.height, d2interface.FilterNearest)
 
-	result.checkedImage, _ = d2render.NewSurface(result.width, result.height, d2interface.FilterNearest)
-	checkboxSprite.RenderSegmented(result.checkedImage, 1, 1, 1)
+	_ = checkboxSprite.RenderSegmented(result.Image, 1, 1, 0)
+
+	result.checkedImage, _ = renderer.NewSurface(result.width, result.height, d2interface.FilterNearest)
+
+	_ = checkboxSprite.RenderSegmented(result.checkedImage, 1, 1, 1)
 	return result
 }
 
@@ -48,9 +49,9 @@ func (v *Checkbox) Render(target d2interface.Surface) {
 	defer target.PopN(3)
 
 	if v.checkState {
-		target.Render(v.checkedImage)
+		_ = target.Render(v.checkedImage)
 	} else {
-		target.Render(v.Image)
+		_ = target.Render(v.Image)
 	}
 }
 
@@ -66,7 +67,7 @@ func (v *Checkbox) SetEnabled(enabled bool) {
 	v.enabled = enabled
 }
 
-func (v *Checkbox) SetPressed(pressed bool) {
+func (v *Checkbox) SetPressed(_ bool) {
 }
 
 func (v *Checkbox) SetCheckState(checkState bool) {

@@ -17,14 +17,14 @@ import (
 var singleton *assetManager
 
 // Initialize creates and assigns all necessary dependencies for the assetManager top-level functions to work correctly
-func Initialize(term d2interface.Terminal) error {
+func Initialize(renderer d2interface.Renderer, term d2interface.Terminal) error {
 	var (
 		config                  = d2config.Get()
 		archiveManager          = createArchiveManager(&config)
 		fileManager             = createFileManager(&config, archiveManager)
 		paletteManager          = createPaletteManager()
 		paletteTransformManager = createPaletteTransformManager()
-		animationManager        = createAnimationManager()
+		animationManager        = createAnimationManager(renderer)
 		fontManager             = createFontManager()
 	)
 

@@ -27,14 +27,14 @@ type TextBox struct {
 	filter    string
 }
 
-func CreateTextbox() TextBox {
+func CreateTextbox(renderer d2interface.Renderer) TextBox {
 	animation, _ := d2asset.LoadAnimation(d2resource.TextBox2, d2resource.PaletteUnits)
 	bgSprite, _ := LoadSprite(animation)
 	tb := TextBox{
 		filter:    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
 		bgSprite:  bgSprite,
-		textLabel: CreateLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
-		lineBar:   CreateLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
+		textLabel: CreateLabel(renderer, d2resource.FontFormal11, d2resource.PaletteUnits),
+		lineBar:   CreateLabel(renderer, d2resource.FontFormal11, d2resource.PaletteUnits),
 		enabled:   true,
 		visible:   true,
 	}

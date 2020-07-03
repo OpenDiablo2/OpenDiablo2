@@ -14,8 +14,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type playMode int
@@ -62,7 +60,8 @@ type Animation struct {
 }
 
 // CreateAnimationFromDCC creates an animation from d2dcc.DCC and d2dat.DATPalette
-func CreateAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transparency int) (*Animation, error) {
+func CreateAnimationFromDCC(renderer d2interface.Renderer, dcc *d2dcc.DCC, palette *d2dat.DATPalette,
+	transparency int) (*Animation, error) {
 	animation := &Animation{
 		playLength: defaultPlayLength,
 		playLoop:   true,
@@ -99,7 +98,7 @@ func CreateAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transpare
 				}
 			}
 
-			sfc, err := d2render.NewSurface(frameWidth, frameHeight, d2interface.FilterNearest)
+			sfc, err := renderer.NewSurface(frameWidth, frameHeight, d2interface.FilterNearest)
 			if err != nil {
 				return nil, err
 			}
@@ -127,7 +126,7 @@ func CreateAnimationFromDCC(dcc *d2dcc.DCC, palette *d2dat.DATPalette, transpare
 }
 
 // CreateAnimationFromDC6 creates an Animation from d2dc6.DC6 and d2dat.DATPalette
-func CreateAnimationFromDC6(dc6 *d2dc6.DC6, palette *d2dat.DATPalette) (*Animation, error) {
+func CreateAnimationFromDC6(renderer d2interface.Renderer, dc6 *d2dc6.DC6, palette *d2dat.DATPalette) (*Animation, error) {
 	animation := &Animation{
 		playLength:     defaultPlayLength,
 		playLoop:       true,
@@ -135,7 +134,7 @@ func CreateAnimationFromDC6(dc6 *d2dc6.DC6, palette *d2dat.DATPalette) (*Animati
 	}
 
 	for frameIndex, dc6Frame := range dc6.Frames {
-		sfc, err := d2render.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height), d2interface.FilterNearest)
+		sfc, err := renderer.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height), d2interface.FilterNearest)
 		if err != nil {
 			return nil, err
 		}
@@ -396,7 +395,7 @@ func (a *Animation) SetCurrentFrame(frameIndex int) error {
 
 // Rewind animation to beginning
 func (a *Animation) Rewind() {
-	a.SetCurrentFrame(0)
+	_ = a.SetCurrentFrame(0)
 }
 
 // PlayForward plays animation forward

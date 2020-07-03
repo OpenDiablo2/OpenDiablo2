@@ -139,7 +139,8 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2mapentity.MapEntity 
 			objectRecord := d2datadict.Objects[lookup.ObjectsTxtId]
 
 			if objectRecord != nil {
-				entity, err := d2mapentity.CreateObject((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, objectRecord, d2resource.PaletteUnits)
+				entity, err := d2mapentity.CreateObject((tileOffsetX*5)+object.X,
+					(tileOffsetY*5)+object.Y, objectRecord, d2resource.PaletteUnits)
 
 				if err != nil {
 					panic(err)

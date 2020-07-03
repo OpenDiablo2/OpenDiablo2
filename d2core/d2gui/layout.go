@@ -48,6 +48,8 @@ const (
 type Layout struct {
 	widgetBase
 
+	renderer d2interface.Renderer
+
 	width           int
 	height          int
 	verticalAlign   VerticalAlign
@@ -56,8 +58,12 @@ type Layout struct {
 	entries         []*layoutEntry
 }
 
-func createLayout(positionType PositionType) *Layout {
-	layout := &Layout{positionType: positionType}
+func createLayout(renderer d2interface.Renderer, positionType PositionType) *Layout {
+	layout := &Layout{
+		renderer:     renderer,
+		positionType: positionType,
+	}
+
 	layout.SetVisible(true)
 
 	return layout
@@ -77,7 +83,7 @@ func (l *Layout) SetHorizontalAlign(horizontalAlign HorizontalAlign) {
 }
 
 func (l *Layout) AddLayout(positionType PositionType) *Layout {
-	layout := createLayout(positionType)
+	layout := createLayout(l.renderer, positionType)
 	l.entries = append(l.entries, &layoutEntry{widget: layout})
 	return layout
 }
@@ -115,7 +121,7 @@ func (l *Layout) AddAnimatedSprite(imagePath, palettePath string, direction Anim
 }
 
 func (l *Layout) AddLabel(text string, fontStyle FontStyle) (*Label, error) {
-	label, err := createLabel(text, fontStyle)
+	label, err := createLabel(l.renderer, text, fontStyle)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +131,7 @@ func (l *Layout) AddLabel(text string, fontStyle FontStyle) (*Label, error) {
 }
 
 func (l *Layout) AddButton(text string, buttonStyle ButtonStyle) (*Button, error) {
-	button, err := createButton(text, buttonStyle)
+	button, err := createButton(l.renderer, text, buttonStyle)
 	if err != nil {
 		return nil, err
 	}

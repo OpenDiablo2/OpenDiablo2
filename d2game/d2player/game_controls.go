@@ -39,15 +39,16 @@ var rightMenuRect = d2common.Rectangle{Left: 400, Top: 0, Width: 400, Height: 60
 var bottomMenuRect = d2common.Rectangle{Left: 0, Top: 550, Width: 800, Height: 50}
 
 type GameControls struct {
-	hero              *d2mapentity.Player
-	mapEngine         *d2mapengine.MapEngine
-	mapRenderer       *d2maprenderer.MapRenderer
-	inventory         *Inventory
-	heroStatsPanel    *HeroStatsPanel
-	inputListener     InputCallbackListener
-	FreeCam           bool
-	lastMouseX        int
-	lastMouseY        int
+	renderer       d2interface.Renderer // TODO: This shouldn't be a dependency
+	hero           *d2mapentity.Player
+	mapEngine      *d2mapengine.MapEngine
+	mapRenderer    *d2maprenderer.MapRenderer
+	inventory      *Inventory
+	heroStatsPanel *HeroStatsPanel
+	inputListener  InputCallbackListener
+	FreeCam        bool
+	lastMouseX     int
+	lastMouseY     int
 
 	// UI
 	globeSprite        *d2ui.Sprite
@@ -80,27 +81,29 @@ const (
 	rightSkill = ActionableType(iota)
 )
 
-func NewGameControls(hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine, mapRenderer *d2maprenderer.MapRenderer, inputListener InputCallbackListener, term d2interface.Terminal) *GameControls {
+func NewGameControls(renderer d2interface.Renderer, hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
+	mapRenderer *d2maprenderer.MapRenderer, inputListener InputCallbackListener, term d2interface.Terminal) *GameControls {
 	term.BindAction("setmissile", "set missile id to summon on right click", func(id int) {
 		missileID = id
 	})
 
-	zoneLabel := d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
+	zoneLabel := d2ui.CreateLabel(renderer, d2resource.Font30, d2resource.PaletteUnits)
 	zoneLabel.Color = color.RGBA{R: 255, G: 88, B: 82, A: 255}
 	zoneLabel.Alignment = d2ui.LabelAlignCenter
 
-	nameLabel := d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
+	nameLabel := d2ui.CreateLabel(renderer, d2resource.FontFormal11, d2resource.PaletteStatic)
 	nameLabel.Alignment = d2ui.LabelAlignCenter
 	nameLabel.SetText("")
 	nameLabel.Color = color.White
 
 	gc := &GameControls{
+		renderer:       renderer,
 		hero:           hero,
 		mapEngine:      mapEngine,
 		inputListener:  inputListener,
 		mapRenderer:    mapRenderer,
 		inventory:      NewInventory(),
-		heroStatsPanel: NewHeroStatsPanel(hero.Name(), hero.Class, hero.Stats),
+		heroStatsPanel: NewHeroStatsPanel(renderer, hero.Name(), hero.Class, hero.Stats),
 		nameLabel:      &nameLabel,
 		zoneChangeText: &zoneLabel,
 		actionableRegions: []ActionableRegion{
@@ -269,7 +272,7 @@ func (g *GameControls) Load() {
 
 func (g *GameControls) loadUIButtons() {
 	// Run button
-	g.runButton = d2ui.CreateButton(d2ui.ButtonTypeRun, "")
+	g.runButton = d2ui.CreateButton(g.renderer, d2ui.ButtonTypeRun, "")
 	g.runButton.SetPosition(255, 570)
 	g.runButton.OnActivated(func() { g.onToggleRunButton() })
 	if g.hero.IsRunToggled() {

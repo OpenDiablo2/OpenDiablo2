@@ -4,10 +4,7 @@ import (
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 // LabelAlignment represents a label's alignment
@@ -25,6 +22,7 @@ const (
 // Label represents a user interface label
 type Label struct {
 	text      string
+	renderer  d2interface.Renderer
 	X         int
 	Y         int
 	Width     int
@@ -36,8 +34,9 @@ type Label struct {
 }
 
 // CreateLabel creates a new instance of a UI label
-func CreateLabel(fontPath, palettePath string) Label {
+func CreateLabel(renderer d2interface.Renderer, fontPath, palettePath string) Label {
 	result := Label{
+		renderer:  renderer,
 		Alignment: LabelAlignLeft,
 		Color:     color.White,
 		font:      GetFont(fontPath, palettePath),
@@ -66,7 +65,7 @@ func (v *Label) Render(target d2interface.Surface) {
 	target.PushTranslation(x, y)
 	defer target.PopN(3)
 
-	target.Render(v.imageData[v.text])
+	_ = target.Render(v.imageData[v.text])
 }
 
 // SetPosition moves the label to the specified location
@@ -86,8 +85,8 @@ func (v *Label) cacheImage() {
 	width, height := v.font.GetTextMetrics(v.text)
 	v.Width = width
 	v.Height = height
-	v.imageData[v.text], _ = d2render.NewSurface(width, height, d2interface.FilterNearest)
-	surface, _ := d2render.CreateSurface(v.imageData[v.text])
+	v.imageData[v.text], _ = v.renderer.NewSurface(width, height, d2interface.FilterNearest)
+	surface, _ := v.renderer.CreateSurface(v.imageData[v.text])
 	v.font.Render(0, 0, v.text, v.Color, surface)
 }
 

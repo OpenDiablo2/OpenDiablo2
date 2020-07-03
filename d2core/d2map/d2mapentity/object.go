@@ -1,22 +1,19 @@
 package d2mapentity
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
 // Object represents a composite of animations that can be projected onto the map.
 type Object struct {
 	mapEntity
-	composite    *d2asset.Composite
-	direction    int
-	highlight    bool
-	nameLabel    d2ui.Label
+	composite *d2asset.Composite
+	direction int
+	highlight bool
+	// nameLabel    d2ui.Label
 	objectLookup *d2datadict.ObjectLookupRecord
 	objectRecord *d2datadict.ObjectRecord
 	objectType   *d2datadict.ObjectTypeRecord
@@ -28,7 +25,7 @@ func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath stri
 		mapEntity:    createMapEntity(x, y),
 		objectRecord: objectRec,
 		objectType:   &d2datadict.ObjectTypes[objectRec.Index],
-		nameLabel:    d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
+		// nameLabel:    d2ui.CreateLabel(renderer, d2resource.FontFormal11, d2resource.PaletteStatic),
 	}
 
 	object := &d2datadict.ObjectLookupRecord{
@@ -118,9 +115,9 @@ func (ob *Object) Render(target d2interface.Surface) {
 	)
 
 	if ob.highlight {
-		ob.nameLabel.SetText(d2common.TranslateString(ob.objectRecord.Name))
-		ob.nameLabel.SetPosition(-50, -50)
-		ob.nameLabel.Render(target)
+		// ob.nameLabel.SetText(d2common.TranslateString(ob.objectRecord.Name))
+		// ob.nameLabel.SetPosition(-50, -50)
+		// ob.nameLabel.Render(target)
 		target.PushBrightness(2)
 		defer target.Pop()
 	}

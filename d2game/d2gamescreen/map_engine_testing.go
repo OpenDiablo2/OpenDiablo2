@@ -84,6 +84,7 @@ type MapEngineTest struct {
 	mapEngine   *d2mapengine.MapEngine
 	mapRenderer *d2maprenderer.MapRenderer
 	terminal    d2interface.Terminal
+	renderer    d2interface.Renderer
 
 	//TODO: this is region specific properties, should be refactored for multi-region rendering
 	currentRegion int
@@ -95,7 +96,7 @@ type MapEngineTest struct {
 }
 
 // CreateMapEngineTest creates the Map Engine Test screen and returns a pointer to it
-func CreateMapEngineTest(currentRegion, levelPreset int, term d2interface.Terminal) *MapEngineTest {
+func CreateMapEngineTest(currentRegion, levelPreset int, term d2interface.Terminal, renderer d2interface.Renderer) *MapEngineTest {
 	result := &MapEngineTest{
 		currentRegion: currentRegion,
 		levelPreset:   levelPreset,
@@ -103,6 +104,7 @@ func CreateMapEngineTest(currentRegion, levelPreset int, term d2interface.Termin
 		regionSpec:    regionSpec{},
 		filesCount:    0,
 		terminal:      term,
+		renderer:      renderer,
 	}
 	result.gameState = d2player.CreateTestGameState()
 
@@ -165,7 +167,7 @@ func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 
 	loading.Progress(0.5)
 
-	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.mapEngine, met.terminal)
+	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.renderer, met.mapEngine, met.terminal)
 
 	loading.Progress(0.7)
 	met.loadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)

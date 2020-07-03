@@ -3,25 +3,29 @@ package d2gui
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type Label struct {
 	widgetBase
 
-	text    string
-	font    *d2asset.Font
-	surface d2interface.Surface
+	renderer d2interface.Renderer
+	text     string
+	font     *d2asset.Font
+	surface  d2interface.Surface
 }
 
-func createLabel(text string, fontStyle FontStyle) (*Label, error) {
+func createLabel(renderer d2interface.Renderer, text string, fontStyle FontStyle) (*Label, error) {
 	font, err := loadFont(fontStyle)
 	if err != nil {
 		return nil, err
 	}
 
-	label := &Label{font: font}
-	label.setText(text)
+	label := &Label{
+		font:     font,
+		renderer: renderer,
+	}
+
+	_ = label.setText(text)
 	label.SetVisible(true)
 
 	return label, nil
@@ -48,7 +52,7 @@ func (l *Label) SetText(text string) error {
 
 func (l *Label) setText(text string) error {
 	width, height := l.font.GetTextMetrics(text)
-	surface, err := d2render.NewSurface(width, height, d2interface.FilterNearest)
+	surface, err := l.renderer.NewSurface(width, height, d2interface.FilterNearest)
 	if err != nil {
 		return err
 	}

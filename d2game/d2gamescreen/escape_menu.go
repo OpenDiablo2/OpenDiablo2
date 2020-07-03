@@ -64,9 +64,11 @@ type EscapeMenu struct {
 	currentLayout layoutID
 
 	// leftPent and rightPent are generated once and shared between the layouts
-	leftPent      *d2gui.AnimatedSprite
-	rightPent     *d2gui.AnimatedSprite
-	layouts       []*layout
+	leftPent  *d2gui.AnimatedSprite
+	rightPent *d2gui.AnimatedSprite
+	layouts   []*layout
+
+	renderer      d2interface.Renderer
 	audioProvider d2interface.AudioProvider
 	terminal      d2interface.Terminal
 }
@@ -122,10 +124,11 @@ type actionableElement interface {
 }
 
 // NewEscapeMenu creates a new escape menu
-func NewEscapeMenu(audioProvider d2interface.AudioProvider, term d2interface.Terminal) *EscapeMenu {
+func NewEscapeMenu(renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, term d2interface.Terminal) *EscapeMenu {
 	m := &EscapeMenu{
 		audioProvider: audioProvider,
 		terminal:      term,
+		renderer:      renderer,
 	}
 
 	m.layouts = []*layout{
@@ -204,7 +207,7 @@ func (m *EscapeMenu) newConfigureControlsLayout() *layout {
 }
 
 func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
-	wrapper := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
+	wrapper := d2gui.CreateLayout(m.renderer, d2gui.PositionTypeHorizontal)
 	wrapper.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	wrapper.AddSpacerDynamic()
 
@@ -365,7 +368,7 @@ func (m *EscapeMenu) showLayout(id layoutID) {
 	}
 
 	if id == saveLayoutID {
-		mainMenu := CreateMainMenu(m.audioProvider, m.terminal)
+		mainMenu := CreateMainMenu(m.renderer, m.audioProvider, m.terminal)
 		mainMenu.setScreenMode(screenModeMainMenu)
 		d2screen.SetNextScreen(mainMenu)
 

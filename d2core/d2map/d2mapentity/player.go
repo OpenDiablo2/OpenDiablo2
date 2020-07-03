@@ -1,8 +1,6 @@
 package d2mapentity
 
 import (
-	"image/color"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
@@ -11,19 +9,18 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
 type Player struct {
 	mapEntity
-	composite     *d2asset.Composite
-	Equipment     d2inventory.CharacterEquipment
-	Stats         d2hero.HeroStatsState
-	Class         d2enum.Hero
-	Id            string
-	direction     int
-	name          string
-	nameLabel     d2ui.Label
+	composite *d2asset.Composite
+	Equipment d2inventory.CharacterEquipment
+	Stats     d2hero.HeroStatsState
+	Class     d2enum.Hero
+	Id        string
+	direction int
+	name      string
+	// nameLabel     d2ui.Label
 	lastPathSize  int
 	isInTown      bool
 	animationMode string
@@ -62,24 +59,24 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 	stats.Stamina = stats.MaxStamina
 
 	result := &Player{
-		Id:           id,
-		mapEntity:    createMapEntity(x, y),
-		composite:    composite,
-		Equipment:    equipment,
-		Stats:        stats,
-		direction:    direction,
-		name:         name,
-		Class:        heroType,
-		nameLabel:    d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
+		Id:        id,
+		mapEntity: createMapEntity(x, y),
+		composite: composite,
+		Equipment: equipment,
+		Stats:     stats,
+		direction: direction,
+		name:      name,
+		Class:     heroType,
+		//nameLabel:    d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
 		isRunToggled: true,
 		isInTown:     true,
 		isRunning:    true,
 	}
 	result.SetSpeed(baseRunSpeed)
 	result.mapEntity.directioner = result.rotate
-	result.nameLabel.Alignment = d2ui.LabelAlignCenter
-	result.nameLabel.SetText(name)
-	result.nameLabel.Color = color.White
+	//result.nameLabel.Alignment = d2ui.LabelAlignCenter
+	//result.nameLabel.SetText(name)
+	//result.nameLabel.Color = color.White
 	err = result.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), equipment.RightHand.GetWeaponClass(), direction)
 	if err != nil {
 		panic(err)

@@ -16,6 +16,7 @@ type Configuration struct {
 	FullScreen      bool
 	RunInBackground bool
 	VsyncEnabled    bool
+	Backend         string
 }
 
 var singleton = getDefaultConfig()
@@ -27,8 +28,10 @@ func Load() error {
 	}
 
 	var loaded bool
+
 	for _, configPath := range configPaths {
 		log.Printf("loading configuration file from %s...", configPath)
+
 		if err := load(configPath); err == nil {
 			loaded = true
 			break
@@ -37,6 +40,7 @@ func Load() error {
 
 	if !loaded {
 		log.Println("failed to load configuration file, saving default configuration...")
+
 		if err := Save(); err != nil {
 			return err
 		}

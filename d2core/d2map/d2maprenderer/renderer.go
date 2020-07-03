@@ -6,19 +6,18 @@ import (
 	"log"
 	"math"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 )
 
 // The map renderer, used to render the map
 type MapRenderer struct {
+	renderer      d2interface.Renderer   // The renderer to use for drawing operations
 	mapEngine     *d2mapengine.MapEngine // The map engine that is being rendered
 	palette       *d2dat.DATPalette      // The palette used for this map
 	viewport      *Viewport              // The viewport for the map renderer (used for rendering offsets)
@@ -29,8 +28,9 @@ type MapRenderer struct {
 }
 
 // Creates an instance of the map renderer
-func CreateMapRenderer(mapEngine *d2mapengine.MapEngine, term d2interface.Terminal) *MapRenderer {
+func CreateMapRenderer(renderer d2interface.Renderer, mapEngine *d2mapengine.MapEngine, term d2interface.Terminal) *MapRenderer {
 	result := &MapRenderer{
+		renderer:  renderer,
 		mapEngine: mapEngine,
 		viewport:  NewViewport(0, 0, 800, 600),
 	}

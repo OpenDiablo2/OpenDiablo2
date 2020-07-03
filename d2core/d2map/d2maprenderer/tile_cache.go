@@ -3,14 +3,11 @@ package d2maprenderer
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
 func (mr *MapRenderer) generateTileCache() {
@@ -76,10 +73,10 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, 
 		}
 		tileYOffset := d2common.AbsInt32(tileYMinimum)
 		tileHeight := d2common.AbsInt32(tileData[i].Height)
-		image, _ := d2render.NewSurface(int(tileData[i].Width), int(tileHeight), d2interface.FilterNearest)
+		image, _ := mr.renderer.NewSurface(int(tileData[i].Width), int(tileHeight), d2interface.FilterNearest)
 		pixels := make([]byte, 4*tileData[i].Width*tileHeight)
 		mr.decodeTileGfxData(tileData[i].Blocks, &pixels, tileYOffset, tileData[i].Width)
-		image.ReplacePixels(pixels)
+		_ = image.ReplacePixels(pixels)
 		mr.setImageCacheRecord(tile.Style, tile.Sequence, 0, tileIndex, image)
 	}
 }
@@ -115,10 +112,10 @@ func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX,
 		return
 	}
 
-	image, _ := d2render.NewSurface(int(tileData.Width), tileHeight, d2interface.FilterNearest)
+	image, _ := mr.renderer.NewSurface(int(tileData.Width), tileHeight, d2interface.FilterNearest)
 	pixels := make([]byte, 4*tileData.Width*int32(tileHeight))
 	mr.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, tileData.Width)
-	image.ReplacePixels(pixels)
+	_ = image.ReplacePixels(pixels)
 	mr.setImageCacheRecord(tile.Style, tile.Sequence, 13, tileIndex, image)
 }
 
@@ -176,8 +173,9 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY in
 		return
 	}
 
-	image, _ := d2render.NewSurface(160, int(realHeight), d2interface.FilterNearest)
+	image, _ := mr.renderer.NewSurface(160, int(realHeight), d2interface.FilterNearest)
 	pixels := make([]byte, 4*160*realHeight)
+
 	mr.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, 160)
 
 	if newTileData != nil {

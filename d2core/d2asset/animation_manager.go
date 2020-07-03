@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
@@ -13,11 +15,15 @@ const (
 )
 
 type animationManager struct {
-	cache *d2common.Cache
+	cache    *d2common.Cache
+	renderer d2interface.Renderer
 }
 
-func createAnimationManager() *animationManager {
-	return &animationManager{d2common.CreateCache(animationBudget)}
+func createAnimationManager(renderer d2interface.Renderer) *animationManager {
+	return &animationManager{
+		renderer: renderer,
+		cache:    d2common.CreateCache(animationBudget),
+	}
 }
 
 func (am *animationManager) loadAnimation(animationPath, palettePath string, transparency int) (*Animation, error) {
@@ -41,7 +47,7 @@ func (am *animationManager) loadAnimation(animationPath, palettePath string, tra
 			return nil, err
 		}
 
-		animation, err = CreateAnimationFromDC6(dc6, palette)
+		animation, err = CreateAnimationFromDC6(am.renderer, dc6, palette)
 		if err != nil {
 			return nil, err
 		}
@@ -56,7 +62,7 @@ func (am *animationManager) loadAnimation(animationPath, palettePath string, tra
 			return nil, err
 		}
 
-		animation, err = CreateAnimationFromDCC(dcc, palette, transparency)
+		animation, err = CreateAnimationFromDCC(am.renderer, dcc, palette, transparency)
 		if err != nil {
 			return nil, err
 		}

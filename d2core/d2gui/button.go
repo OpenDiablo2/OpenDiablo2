@@ -8,7 +8,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 )
 
 type buttonState int
@@ -29,7 +28,7 @@ type Button struct {
 	surfaces []d2interface.Surface
 }
 
-func createButton(text string, buttonStyle ButtonStyle) (*Button, error) {
+func createButton(renderer d2interface.Renderer, text string, buttonStyle ButtonStyle) (*Button, error) {
 	config, ok := buttonStyleConfigs[buttonStyle]
 	if !ok {
 		return nil, errors.New("invalid button style")
@@ -73,7 +72,7 @@ func createButton(text string, buttonStyle ButtonStyle) (*Button, error) {
 	surfaceCount := animation.GetFrameCount() / (config.segmentsX * config.segmentsY)
 	surfaces := make([]d2interface.Surface, surfaceCount)
 	for i := 0; i < surfaceCount; i++ {
-		surface, err := d2render.NewSurface(buttonWidth, buttonHeight, d2interface.FilterNearest)
+		surface, err := renderer.NewSurface(buttonWidth, buttonHeight, d2interface.FilterNearest)
 		if err != nil {
 			return nil, err
 		}
@@ -108,17 +107,17 @@ func createButton(text string, buttonStyle ButtonStyle) (*Button, error) {
 	return button, nil
 }
 
-func (b *Button) onMouseButtonDown(event d2input.MouseEvent) bool {
+func (b *Button) onMouseButtonDown(_ d2input.MouseEvent) bool {
 	b.state = buttonStatePressed
 	return false
 }
 
-func (b *Button) onMouseButtonUp(event d2input.MouseEvent) bool {
+func (b *Button) onMouseButtonUp(_ d2input.MouseEvent) bool {
 	b.state = buttonStateDefault
 	return false
 }
 
-func (b *Button) onMouseLeave(event d2input.MouseMoveEvent) bool {
+func (b *Button) onMouseLeave(_ d2input.MouseMoveEvent) bool {
 	b.state = buttonStateDefault
 	return false
 }

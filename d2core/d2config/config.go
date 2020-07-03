@@ -23,6 +23,7 @@ func getDefaultConfig() *Configuration {
 		SfxVolume:       defaultSfxVolume,
 		BgmVolume:       defaultBgmVolume,
 		MpqPath:         "C:/Program Files (x86)/Diablo II",
+		Backend:         "Ebiten",
 		MpqLoadOrder: []string{
 			"Patch_D2.mpq",
 			"d2exp.mpq",
