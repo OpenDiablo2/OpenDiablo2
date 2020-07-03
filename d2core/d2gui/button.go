@@ -7,7 +7,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 )
 
 type buttonState int
@@ -107,17 +106,18 @@ func createButton(renderer d2interface.Renderer, text string, buttonStyle Button
 	return button, nil
 }
 
-func (b *Button) onMouseButtonDown(_ d2input.MouseEvent) bool {
+
+func (b *Button) onMouseButtonDown(event d2interface.MouseEvent) bool {
 	b.state = buttonStatePressed
 	return false
 }
 
-func (b *Button) onMouseButtonUp(_ d2input.MouseEvent) bool {
+func (b *Button) onMouseButtonUp(event d2interface.MouseEvent) bool {
 	b.state = buttonStateDefault
 	return false
 }
 
-func (b *Button) onMouseLeave(_ d2input.MouseMoveEvent) bool {
+func (b *Button) onMouseLeave(event d2interface.MouseMoveEvent) bool {
 	b.state = buttonStateDefault
 	return false
 }

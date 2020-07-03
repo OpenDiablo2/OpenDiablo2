@@ -415,7 +415,7 @@ func (p *App) advance(elapsed, current float64) error {
 
 	d2ui.Advance(elapsed)
 
-	if err := d2input.Advance(elapsed); err != nil {
+	if err := d2input.Advance(elapsed, current); err != nil {
 		return err
 	}
 

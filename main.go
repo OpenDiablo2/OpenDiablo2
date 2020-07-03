@@ -7,8 +7,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
 
-	ebiten_input "github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/ebiten"
-
 	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
@@ -38,8 +36,7 @@ func main() {
 		panic(err)
 	}
 
-	d2input.Initialize(ebiten_input.InputService{}) // TODO d2input singleton must be init before d2term
-
+	d2input.Create() // TODO d2input singleton must be init before d2term
 	term, err := d2term.Initialize()
 
 	if err != nil {

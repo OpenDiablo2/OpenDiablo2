@@ -8,7 +8,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 )
 
 // TextBox with cursor focus
@@ -58,11 +57,11 @@ func (v *TextBox) Render(target d2interface.Surface) {
 	}
 }
 
-func (v *TextBox) OnKeyChars(event d2input.KeyCharsEvent) bool {
+func (v *TextBox) OnKeyChars(event d2interface.KeyCharsEvent) bool {
 	if !(focusedTextBox == v) || !v.visible || !v.enabled {
 		return false
 	}
-	newText := string(event.Chars)
+	newText := string(event.Chars())
 	if len(newText) > 0 {
 		v.text += newText
 		v.SetText(v.text)
@@ -71,8 +70,8 @@ func (v *TextBox) OnKeyChars(event d2input.KeyCharsEvent) bool {
 	return false
 }
 
-func (v *TextBox) OnKeyRepeat(event d2input.KeyEvent) bool {
-	if event.Key == d2input.KeyBackspace && debounceEvents(event.Duration) {
+func (v *TextBox) OnKeyRepeat(event d2interface.KeyEvent) bool {
+	if event.Key() == d2interface.KeyBackspace && debounceEvents(event.Duration()) {
 		if len(v.text) >= 1 {
 			v.text = v.text[:len(v.text)-1]
 		}

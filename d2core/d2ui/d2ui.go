@@ -52,9 +52,9 @@ func AddWidget(widget Widget) {
 	singleton.widgets = append(singleton.widgets, widget)
 }
 
-func (u *UI) OnMouseButtonUp(event d2input.MouseEvent) bool {
-	singleton.CursorX, singleton.CursorY = event.X, event.Y
-	if event.Button == d2input.MouseButtonLeft {
+func (u *UI) OnMouseButtonUp(event d2interface.MouseEvent) bool {
+	singleton.CursorX, singleton.CursorY = event.X(), event.Y()
+	if event.Button() == d2interface.MouseButtonLeft {
 		singleton.cursorButtons |= CursorButtonLeft
 		// activate previously pressed widget if cursor is still hovering
 		w := singleton.pressedWidget
@@ -69,9 +69,9 @@ func (u *UI) OnMouseButtonUp(event d2input.MouseEvent) bool {
 	return false
 }
 
-func (u *UI) OnMouseButtonDown(event d2input.MouseEvent) bool {
-	singleton.CursorX, singleton.CursorY = event.X, event.Y
-	if event.Button == d2input.MouseButtonLeft {
+func (u *UI) OnMouseButtonDown(event d2interface.MouseEvent) bool {
+	singleton.CursorX, singleton.CursorY = event.X(), event.Y()
+	if event.Button() == d2interface.MouseButtonLeft {
 		// find and press a widget on screen
 		singleton.pressedWidget = nil
 		for _, w := range singleton.widgets {
@@ -83,7 +83,7 @@ func (u *UI) OnMouseButtonDown(event d2input.MouseEvent) bool {
 			}
 		}
 	}
-	if event.Button == d2input.MouseButtonRight {
+	if event.Button() == d2interface.MouseButtonRight {
 		singleton.cursorButtons |= CursorButtonRight
 	}
 	return false

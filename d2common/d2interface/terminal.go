@@ -1,9 +1,5 @@
 package d2interface
 
-import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-)
-
 // TermCategory applies styles to the lines in the  Terminal
 type TermCategory int
 
@@ -22,8 +18,8 @@ type Terminal interface {
 	BindLogger()
 
 	Advance(elapsed float64) error
-	OnKeyDown(event d2input.KeyEvent) bool
-	OnKeyChars(event d2input.KeyCharsEvent) bool
+	OnKeyDown(event KeyEvent) bool
+	OnKeyChars(event KeyCharsEvent) bool
 	Render(surface Surface) error
 	Execute(command string) error
 	OutputRaw(text string, category TermCategory)
