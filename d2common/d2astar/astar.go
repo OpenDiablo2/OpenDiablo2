@@ -9,7 +9,7 @@ var nodePool *sync.Pool
 var nodeMapPool *sync.Pool
 var priorityQueuePool *sync.Pool
 
-func init() { // nolint:gochecknoinits // we may pull this from the project ...
+func init() {
 	nodePool = &sync.Pool{
 		New: func() interface{} {
 			return &node{}
