@@ -25,6 +25,7 @@ type NPC struct {
 	monstatRecord *d2datadict.MonStatsRecord
 	monstatEx     *d2datadict.MonStats2Record
 	name          string
+	weaponClass   string
 }
 
 func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC {

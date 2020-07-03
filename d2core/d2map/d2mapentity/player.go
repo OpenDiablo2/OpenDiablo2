@@ -27,6 +27,7 @@ type Player struct {
 	isRunToggled  bool
 	isRunning     bool
 	isCasting     bool
+	weaponClass   string
 }
 
 // run speed should be walkspeed * 1.5, since in the original game it is 6 yards walk and 9 yards run.
