@@ -55,7 +55,7 @@ func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC
 		selectEquip(result.monstatEx.S8v),
 	}
 
-	composite, err := d2asset.LoadComposite("/Data/Global/Monsters", monstat.AnimationDirectoryToken,
+	composite, err := d2asset.LoadComposite(d2enum.ObjectTypeCharacter, monstat.AnimationDirectoryToken,
 		d2resource.PaletteUnits, equipment)
 	result.composite = composite
 

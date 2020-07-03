@@ -46,7 +46,7 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 		equipment.Shield.GetItemCode(),
 	}
 
-	composite, err := d2asset.LoadComposite("/data/global/chars", heroType.GetToken(),
+	composite, err := d2asset.LoadComposite(d2enum.ObjectTypePlayer, heroType.GetToken(),
 		d2resource.PaletteUnits, layerEquipment)
 	if err != nil {
 		panic(err)

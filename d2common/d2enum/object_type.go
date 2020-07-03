@@ -4,6 +4,7 @@ package d2enum
 type ObjectType int
 
 const (
-	ObjectTypeCharacter ObjectType = iota + 1
+	ObjectTypePlayer ObjectType = iota
+	ObjectTypeCharacter
 	ObjectTypeItem
 )

@@ -34,7 +34,7 @@ func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath stri
 		equipment[i] = "LIT"
 	}
 
-	composite, err := d2asset.LoadComposite("/Data/Global/Objects", entity.objectType.Token,
+	composite, err := d2asset.LoadComposite(d2enum.ObjectTypeItem, entity.objectType.Token,
 		d2resource.PaletteUnits, equipment)
 	if err != nil {
 		return nil, err

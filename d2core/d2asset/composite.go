@@ -13,6 +13,7 @@ import (
 
 // Composite is a composite entity animation
 type Composite struct {
+	baseType    d2enum.ObjectType
 	basePath    string
 	token       string
 	palettePath string
@@ -22,8 +23,9 @@ type Composite struct {
 }
 
 // CreateComposite creates a Composite from a given ObjectLookupRecord and palettePath.
-func CreateComposite(basePath, token, palettePath string, equpment *[d2enum.CompositeTypeMax]string) *Composite {
-	return &Composite{basePath: basePath, token: token, equipment: equpment, palettePath: palettePath}
+func CreateComposite(baseType d2enum.ObjectType, token, palettePath string, equpment *[d2enum.CompositeTypeMax]string) *Composite {
+	return &Composite{baseType: baseType, basePath: baseString(baseType),
+		token: token, equipment: equpment, palettePath: palettePath}
 }
 
 // Advance moves the composite animation forward for a given elapsed time in nanoseconds.
@@ -237,4 +239,17 @@ func (c *Composite) loadCompositeLayer(layerKey, layerValue, animationMode, weap
 	}
 
 	return nil, errors.New("animation not found")
+}
+
+func baseString(baseType d2enum.ObjectType) string {
+	switch baseType {
+	case d2enum.ObjectTypePlayer:
+		return "/data/global/chars"
+	case d2enum.ObjectTypeCharacter:
+		return "/data/global/monsters"
+	case d2enum.ObjectTypeItem:
+		return "/data/global/objects"
+	default:
+		return ""
+	}
 }
