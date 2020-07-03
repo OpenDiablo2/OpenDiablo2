@@ -286,7 +286,7 @@ func (v *MainMenu) onSinglePlayerClicked() {
 		return
 	}
 
-	d2screen.SetNextScreen(CreateSelectHeroClass(v.audioProvider, d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText()))
+	d2screen.SetNextScreen(CreateSelectHeroClass(v.audioProvider, d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText(), v.terminal))
 }
 
 func (v *MainMenu) onGithubButtonClicked() {

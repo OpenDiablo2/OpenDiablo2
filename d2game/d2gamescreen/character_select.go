@@ -209,7 +209,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 }
 
 func (v *CharacterSelect) onNewCharButtonClicked() {
-	d2screen.SetNextScreen(CreateSelectHeroClass(v.audioProvider, v.connectionType, v.connectionHost))
+	d2screen.SetNextScreen(CreateSelectHeroClass(v.audioProvider, v.connectionType, v.connectionHost, v.terminal))
 }
 
 func (v *CharacterSelect) onExitButtonClicked() {

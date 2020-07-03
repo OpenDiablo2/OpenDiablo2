@@ -71,14 +71,19 @@ type SelectHeroClass struct {
 	terminal           d2interface.Terminal
 }
 
-func CreateSelectHeroClass(audioProvider d2interface.AudioProvider,
-	connectionType d2clientconnectiontype.ClientConnectionType, connectionHost string) *SelectHeroClass {
+func CreateSelectHeroClass(
+	audioProvider d2interface.AudioProvider,
+	connectionType d2clientconnectiontype.ClientConnectionType,
+	connectionHost string,
+	terminal d2interface.Terminal,
+) *SelectHeroClass {
 	result := &SelectHeroClass{
 		heroRenderInfo: make(map[d2enum.Hero]*HeroRenderInfo),
 		selectedHero:   d2enum.HeroNone,
 		connectionType: connectionType,
 		connectionHost: connectionHost,
 		audioProvider:  audioProvider,
+		terminal:       terminal,
 	}
 
 	return result
