@@ -2,6 +2,7 @@
 package d2vector
 
 import (
+	"fmt"
 	"math"
 	"math/big"
 
@@ -64,7 +65,7 @@ func (v *Vector2) Unmarshal(buf []byte) error {
 
 // Clone creates a copy of this Vector
 func (v *Vector2) Clone() d2interface.Vector {
-	result := &Vector2{}
+	result := New(0, 0)
 	result.Copy(v)
 
 	return result
@@ -359,32 +360,47 @@ func (v *Vector2) Rotate(angle *big.Float) d2interface.Vector {
 	return v
 }
 
+// Floor rounds the vector down to the nearest whole numbers.
+func (v *Vector2) Floor() d2interface.Vector {
+	var xi, yi big.Int
+	v.x.Int(&xi)
+	v.y.Int(&yi)
+	v.X().SetInt(&xi)
+	v.Y().SetInt(&yi)
+
+	return v
+}
+
+func (v *Vector2) String() string {
+	return fmt.Sprintf("Vector2{%s, %s}", v.x.Text('f', 5), v.y.Text('f', 5))
+}
+
 // Up returns a new vector (0, 1)
-func Up() *Vector2 {
+func Up() d2interface.Vector {
 	return New(0, 1)
 }
 
 // Down returns a new vector (0, -1)
-func Down() *Vector2 {
+func Down() d2interface.Vector {
 	return New(0, -1)
 }
 
 // Right returns a new vector (1, 0)
-func Right() *Vector2 {
+func Right() d2interface.Vector {
 	return New(1, 0)
 }
 
 // Left returns a new vector (-1, 0)
-func Left() *Vector2 {
+func Left() d2interface.Vector {
 	return New(-1, 0)
 }
 
 // One returns a new vector (1, 1)
-func One() *Vector2 {
+func One() d2interface.Vector {
 	return New(1, 1)
 }
 
 // Zero returns a new vector (0, 0)
-func Zero() *Vector2 {
+func Zero() d2interface.Vector {
 	return New(0, 0)
 }

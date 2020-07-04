@@ -40,4 +40,6 @@ type Vector interface {
 	Reflect(normal Vector) Vector
 	Mirror(axis Vector) Vector
 	Rotate(delta *big.Float) Vector
+	Floor() Vector
+	String() string
 }
