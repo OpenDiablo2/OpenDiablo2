@@ -2,6 +2,7 @@
 package d2vector
 
 import (
+	"fmt"
 	"math"
 	"math/big"
 
@@ -64,7 +65,7 @@ func (v *Vector2) Unmarshal(buf []byte) error {
 
 // Clone creates a copy of this Vector
 func (v *Vector2) Clone() d2interface.Vector {
-	result := &Vector2{}
+	result := New(0, 0)
 	result.Copy(v)
 
 	return result
@@ -357,6 +358,10 @@ func (v *Vector2) Rotate(angle *big.Float) d2interface.Vector {
 	v.Set(newX, newY)
 
 	return v
+}
+
+func (v *Vector2) String() string {
+	return fmt.Sprintf("Vector2{%s, %s}", v.x.Text('f', 3), v.y.Text('f', 3))
 }
 
 // Up returns a new vector (0, 1)
