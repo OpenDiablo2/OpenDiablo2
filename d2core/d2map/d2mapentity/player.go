@@ -34,14 +34,14 @@ var baseRunSpeed = 9.0
 
 func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero, stats d2hero.HeroStatsState, equipment d2inventory.CharacterEquipment) *Player {
 	layerEquipment := &[d2enum.CompositeTypeMax]string{
-		equipment.Head.GetArmorClass(),
-		equipment.Torso.GetArmorClass(),
-		equipment.Legs.GetArmorClass(),
-		equipment.RightArm.GetArmorClass(),
-		equipment.LeftArm.GetArmorClass(),
-		equipment.RightHand.GetItemCode(),
-		equipment.LeftHand.GetItemCode(),
-		equipment.Shield.GetItemCode(),
+		d2enum.CompositeTypeHead:      equipment.Head.GetArmorClass(),
+		d2enum.CompositeTypeTorso:     equipment.Torso.GetArmorClass(),
+		d2enum.CompositeTypeLegs:      equipment.Legs.GetArmorClass(),
+		d2enum.CompositeTypeRightArm:  equipment.RightArm.GetArmorClass(),
+		d2enum.CompositeTypeLeftArm:   equipment.LeftArm.GetArmorClass(),
+		d2enum.CompositeTypeRightHand: equipment.RightHand.GetItemCode(),
+		d2enum.CompositeTypeLeftHand:  equipment.LeftHand.GetItemCode(),
+		d2enum.CompositeTypeShield:    equipment.Shield.GetItemCode(),
 	}
 
 	composite, err := d2asset.LoadComposite(d2enum.ObjectTypePlayer, heroType.GetToken(),
