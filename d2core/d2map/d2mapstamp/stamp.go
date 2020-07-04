@@ -5,6 +5,7 @@ import (
 	"math/rand"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2object"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
@@ -140,7 +141,7 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 			objectRecord := d2datadict.Objects[lookup.ObjectsTxtId]
 
 			if objectRecord != nil {
-				entity, err := d2mapentity.CreateObject((tileOffsetX*5)+object.X,
+				entity, err := d2object.CreateObject((tileOffsetX*5)+object.X,
 					(tileOffsetY*5)+object.Y, objectRecord, d2resource.PaletteUnits)
 
 				if err != nil {
