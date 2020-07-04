@@ -33,10 +33,10 @@ func CreateRenderer() (*Renderer, error) {
 	config := d2config.Get()
 
 	ebiten.SetCursorMode(ebiten.CursorModeHidden)
-	ebiten.SetFullscreen(config.FullScreen)
-	ebiten.SetRunnableOnUnfocused(config.RunInBackground)
-	ebiten.SetVsyncEnabled(config.VsyncEnabled)
-	ebiten.SetMaxTPS(config.TicksPerSecond)
+	ebiten.SetFullscreen(config.FullScreen())
+	ebiten.SetRunnableOnUnfocused(config.RunInBackground())
+	ebiten.SetVsyncEnabled(config.VsyncEnabled())
+	ebiten.SetMaxTPS(config.TicksPerSecond())
 
 	return result, nil
 }

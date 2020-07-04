@@ -7,7 +7,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
 const (
@@ -17,11 +16,16 @@ const (
 type fileManager struct {
 	cache          d2interface.Cache
 	archiveManager *archiveManager
-	config         *d2config.Configuration
+	config         d2interface.Configuration
 }
 
-func createFileManager(config *d2config.Configuration, archiveManager *archiveManager) *fileManager {
-	return &fileManager{d2common.CreateCache(fileBudget), archiveManager, config}
+func createFileManager(config d2interface.Configuration,
+	archiveManager *archiveManager) *fileManager {
+	return &fileManager{
+		d2common.CreateCache(fileBudget),
+		archiveManager,
+		config,
+	}
 }
 
 func (fm *fileManager) loadFileStream(filePath string) (*d2mpq.MpqDataStream, error) {
@@ -76,7 +80,7 @@ func (fm *fileManager) removeLocaleTokens(filePath string) string {
 	tableToken := d2resource.LanguageTableToken
 	fontToken := d2resource.LanguageFontToken
 
-	filePath = strings.ReplaceAll(filePath, tableToken, fm.config.Language)
+	filePath = strings.ReplaceAll(filePath, tableToken, fm.config.Language())
 
 	// fixme: not all languages==latin
 	filePath = strings.ReplaceAll(filePath, fontToken, "latin")

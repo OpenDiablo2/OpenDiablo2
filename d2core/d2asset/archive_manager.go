@@ -2,13 +2,12 @@ package d2asset
 
 import (
 	"errors"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"path"
 	"sync"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
 type archiveEntry struct {
@@ -18,7 +17,7 @@ type archiveEntry struct {
 
 type archiveManager struct {
 	cache   d2interface.Cache
-	config  *d2config.Configuration
+	config  d2interface.Configuration
 	entries []archiveEntry
 	mutex   sync.Mutex
 }
@@ -27,7 +26,7 @@ const (
 	archiveBudget = 1024 * 1024 * 512
 )
 
-func createArchiveManager(config *d2config.Configuration) *archiveManager {
+func createArchiveManager(config d2interface.Configuration) *archiveManager {
 	return &archiveManager{cache: d2common.CreateCache(archiveBudget), config: config}
 }
 
@@ -86,14 +85,14 @@ func (am *archiveManager) loadArchive(archivePath string) (*d2mpq.MPQ, error) {
 }
 
 func (am *archiveManager) cacheArchiveEntries() error {
-	if len(am.entries) == len(am.config.MpqLoadOrder) {
+	if len(am.entries) == len(am.config.MpqLoadOrder()) {
 		return nil
 	}
 
 	am.entries = nil
 
-	for _, archiveName := range am.config.MpqLoadOrder {
-		archivePath := path.Join(am.config.MpqPath, archiveName)
+	for _, archiveName := range am.config.MpqLoadOrder() {
+		archivePath := path.Join(am.config.MpqPath(), archiveName)
 
 		archive, err := am.loadArchive(archivePath)
 		if err != nil {
