@@ -21,3 +21,13 @@ func TestAbs(t *testing.T) {
 		t.Errorf("wanted %s: got %s", want, got)
 	}
 }
+
+func TestFloor(t *testing.T) {
+	v := New(1.6, 1.6)
+
+	want := New(1, 1)
+
+	if !v.Floor().Equals(want) {
+		t.Errorf("want %s: got %s", want, v)
+	}
+}
