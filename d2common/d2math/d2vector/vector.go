@@ -1,4 +1,5 @@
-package d2math
+// Package d2vector is an Implementation of 2-dimensional vectors with big.Float components
+package d2vector
 
 import (
 	"math"
@@ -6,14 +7,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
-
-// I want to put these somewhere convenient...
-// ZERO *Vector = &Vector{}
-// ONE *Vector = &Vector{1, 1}
-// RIGHT *Vector = &Vector{1, 0}
-// LEFT *Vector = &Vector{-1, 0}
-// UP *Vector = &Vector{0, -1}
-// DOWN *Vector = &Vector{0, 1}
 
 const (
 	// Epsilon is the threshold for what is `smol enough`
@@ -29,8 +22,8 @@ const (
 	zero float64 = 0.0
 )
 
-// NewVector2 creates a new Vector
-func NewVector2(x, y float64) *Vector2 {
+// New creates a new Vector2 and returns a pointer to it.
+func New(x, y float64) *Vector2 {
 	xbf, ybf := big.NewFloat(x), big.NewFloat(y)
 	xbf.SetPrec(d2precision)
 	ybf.SetPrec(d2precision)
@@ -39,8 +32,8 @@ func NewVector2(x, y float64) *Vector2 {
 	return result
 }
 
-// Vector is an Implementation of 2-dimensional vectors with
-// big.Float components
+// Vector2 has two big.Floats x and y and a set of methods
+// for common vector operations.
 type Vector2 struct {
 	x *big.Float
 	y *big.Float
@@ -230,6 +223,7 @@ func (v *Vector2) Length() *big.Float {
 	return xsq.Add(xsq, ysq)
 }
 
+// LengthSq returns the x and y values squared
 func (v *Vector2) LengthSq() (*big.Float, *big.Float) {
 	clone := v.Clone()
 	x, y := clone.X(), clone.Y()
@@ -260,7 +254,7 @@ func (v *Vector2) Normalize() d2interface.Vector {
 }
 
 // NormalizeRightHand rotate this Vector to its perpendicular,
-//in the positive direction.
+// in the positive direction.
 func (v *Vector2) NormalizeRightHand() d2interface.Vector {
 	x := v.x
 	v.x = v.y.Mul(v.y, big.NewFloat(negative1))
@@ -270,7 +264,7 @@ func (v *Vector2) NormalizeRightHand() d2interface.Vector {
 }
 
 // NormalizeLeftHand rotate this Vector to its perpendicular,
-//in the negative1 direction.
+// in the negative1 direction.
 func (v *Vector2) NormalizeLeftHand() d2interface.Vector {
 	x := v.x
 	v.x = v.y
@@ -279,7 +273,7 @@ func (v *Vector2) NormalizeLeftHand() d2interface.Vector {
 	return v
 }
 
-// Calculate the dot product of this Vector and the given Vector
+// Dot returns the dot product of this Vector and the given Vector.
 func (v *Vector2) Dot(src d2interface.Vector) *big.Float {
 	c := v.Clone()
 	c.X().Mul(c.X(), src.X())
@@ -312,7 +306,6 @@ func (v *Vector2) Lerp(
 
 // Reset this Vector the zero vector (0, 0).
 func (v *Vector2) Reset() d2interface.Vector {
-
 	v.x.SetFloat64(zero)
 	v.y.SetFloat64(zero)
 
@@ -364,4 +357,34 @@ func (v *Vector2) Rotate(angle *big.Float) d2interface.Vector {
 	v.Set(newX, newY)
 
 	return v
+}
+
+// Up returns a new vector (0, 1)
+func Up() *Vector2 {
+	return New(0, 1)
+}
+
+// Down returns a new vector (0, -1)
+func Down() *Vector2 {
+	return New(0, -1)
+}
+
+// Right returns a new vector (1, 0)
+func Right() *Vector2 {
+	return New(1, 0)
+}
+
+// Left returns a new vector (-1, 0)
+func Left() *Vector2 {
+	return New(-1, 0)
+}
+
+// One returns a new vector (1, 1)
+func One() *Vector2 {
+	return New(1, 1)
+}
+
+// Zero returns a new vector (0, 0)
+func Zero() *Vector2 {
+	return New(0, 0)
 }
