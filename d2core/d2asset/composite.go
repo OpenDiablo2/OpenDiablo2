@@ -138,7 +138,7 @@ func (c *Composite) SetDirection(direction int) {
 	}
 }
 
-// Direction returns the current direction the composite is facing
+// GetDirection returns the current direction the composite is facing
 func (c *Composite) GetDirection() int {
 	return c.direction
 }

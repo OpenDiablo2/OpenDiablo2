@@ -7,10 +7,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapstamp"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -21,7 +21,7 @@ import (
 // Represents the map data for a specific location
 type MapEngine struct {
 	seed          int64                      // The map seed
-	entities      []d2mapentity.MapEntity    // Entities on the map
+	entities      []d2interface.MapEntity    // Entities on the map
 	tiles         []d2ds1.TileRecord         // The map tiles
 	size          d2common.Size              // The size of the map, in tiles
 	levelType     d2datadict.LevelTypeRecord // The level type of this map
@@ -48,7 +48,7 @@ func (m *MapEngine) GetStartingPosition() (int, int) {
 }
 
 func (m *MapEngine) ResetMap(levelType d2enum.RegionIdType, width, height int) {
-	m.entities = make([]d2mapentity.MapEntity, 0)
+	m.entities = make([]d2interface.MapEntity, 0)
 	m.levelType = d2datadict.LevelTypes[levelType]
 	m.size = d2common.Size{Width: width, Height: height}
 	m.tiles = make([]d2ds1.TileRecord, width*height)
@@ -190,7 +190,7 @@ func (m *MapEngine) TileAt(tileX, tileY int) *d2ds1.TileRecord {
 }
 
 // Returns a reference to the map entities
-func (m *MapEngine) Entities() *[]d2mapentity.MapEntity {
+func (m *MapEngine) Entities() *[]d2interface.MapEntity {
 	return &m.entities
 }
 
@@ -200,12 +200,12 @@ func (m *MapEngine) Seed() int64 {
 }
 
 // Adds an entity to the map engine
-func (m *MapEngine) AddEntity(entity d2mapentity.MapEntity) {
+func (m *MapEngine) AddEntity(entity d2interface.MapEntity) {
 	m.entities = append(m.entities, entity)
 }
 
 // Removes an entity from the map engine
-func (m *MapEngine) RemoveEntity(entity d2mapentity.MapEntity) {
+func (m *MapEngine) RemoveEntity(entity d2interface.MapEntity) {
 	if entity == nil {
 		return
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
@@ -111,8 +112,8 @@ func (mr *Stamp) TileData(style int32, sequence int32, tileType d2enum.TileType)
 	return nil
 }
 
-func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2mapentity.MapEntity {
-	entities := make([]d2mapentity.MapEntity, 0)
+func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity {
+	entities := make([]d2interface.MapEntity, 0)
 
 	for _, object := range mr.ds1.Objects {
 		if object.Type == int(d2enum.ObjectTypeCharacter) {
