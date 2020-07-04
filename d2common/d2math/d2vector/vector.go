@@ -23,48 +23,48 @@ const (
 	zero float64 = 0.0
 )
 
-// New creates a new Vector2 and returns a pointer to it.
-func New(x, y float64) *Vector2 {
+// New creates a new BigFloat and returns a pointer to it.
+func New(x, y float64) *BigFloat {
 	xbf, ybf := big.NewFloat(x), big.NewFloat(y)
 	xbf.SetPrec(d2precision)
 	ybf.SetPrec(d2precision)
-	result := &Vector2{xbf, ybf}
+	result := &BigFloat{xbf, ybf}
 
 	return result
 }
 
-// Vector2 has two big.Floats x and y and a set of methods
+// BigFloat has two big.Floats x and y and a set of methods
 // for common vector operations.
-type Vector2 struct {
+type BigFloat struct {
 	x *big.Float
 	y *big.Float
 }
 
 // X returns the x member of the Vector
-func (v *Vector2) X() *big.Float {
+func (v *BigFloat) X() *big.Float {
 	return v.x
 }
 
 // Y returns the y member of the Vector
-func (v *Vector2) Y() *big.Float {
+func (v *BigFloat) Y() *big.Float {
 	return v.y
 }
 
 // Marshal converts the Vector into a slice of bytes
-func (v *Vector2) Marshal() ([]byte, error) {
+func (v *BigFloat) Marshal() ([]byte, error) {
 	// TODO not sure how to do this properly
 	return nil, nil
 }
 
 // Unmarshal converts a slice of bytes to x/y *big.Float
 // and assigns them to itself
-func (v *Vector2) Unmarshal(buf []byte) error {
+func (v *BigFloat) Unmarshal(buf []byte) error {
 	// TODO not sure how to do this properly
 	return nil
 }
 
 // Clone creates a copy of this Vector
-func (v *Vector2) Clone() d2interface.Vector {
+func (v *BigFloat) Clone() d2interface.Vector {
 	result := New(0, 0)
 	result.Copy(v)
 
@@ -72,7 +72,7 @@ func (v *Vector2) Clone() d2interface.Vector {
 }
 
 // Copy copies the src x/y members to this Vector x/y members
-func (v *Vector2) Copy(src d2interface.Vector) d2interface.Vector {
+func (v *BigFloat) Copy(src d2interface.Vector) d2interface.Vector {
 	v.x.Copy(src.X())
 	v.y.Copy(src.Y())
 
@@ -80,12 +80,12 @@ func (v *Vector2) Copy(src d2interface.Vector) d2interface.Vector {
 }
 
 // SetFromEntity copies the vector of a world entity
-// func (v *Vector2) SetFromEntity(entity d2interface.WorldEntity) d2interface.Vector {
+// func (v *BigFloat) SetFromEntity(entity d2interface.WorldEntity) d2interface.Vector {
 // 	return v.Copy(entity.Position())
 // }
 
 // Set the x,y members of the Vector
-func (v *Vector2) Set(x, y *big.Float) d2interface.Vector {
+func (v *BigFloat) Set(x, y *big.Float) d2interface.Vector {
 	v.x = x
 	v.y = y
 
@@ -94,7 +94,7 @@ func (v *Vector2) Set(x, y *big.Float) d2interface.Vector {
 
 // SetToPolar sets the `x` and `y` values of this object
 // from a given polar coordinate.
-func (v *Vector2) SetToPolar(azimuth, radius *big.Float) d2interface.Vector {
+func (v *BigFloat) SetToPolar(azimuth, radius *big.Float) d2interface.Vector {
 	// HACK we should do this better, with the big.Float
 	a, _ := azimuth.Float64()
 	r, _ := radius.Float64()
@@ -105,13 +105,13 @@ func (v *Vector2) SetToPolar(azimuth, radius *big.Float) d2interface.Vector {
 }
 
 // Equals check whether this Vector is equal to a given Vector.
-func (v *Vector2) Equals(src d2interface.Vector) bool {
+func (v *BigFloat) Equals(src d2interface.Vector) bool {
 	return v.x.Cmp(src.X()) == 0 && v.y.Cmp(src.Y()) == 0
 }
 
 // FuzzyEquals checks if the Vector is approximately equal
 // to the given Vector. epsilon is what we consider `smol enough`
-func (v *Vector2) FuzzyEquals(src d2interface.Vector) bool {
+func (v *BigFloat) FuzzyEquals(src d2interface.Vector) bool {
 	smol := big.NewFloat(epsilon)
 	d := v.Distance(src)
 	d.Abs(d)
@@ -120,7 +120,7 @@ func (v *Vector2) FuzzyEquals(src d2interface.Vector) bool {
 }
 
 // Abs returns a clone that is positive
-func (v *Vector2) Abs() d2interface.Vector {
+func (v *BigFloat) Abs() d2interface.Vector {
 	clone := v.Clone()
 	neg1 := big.NewFloat(-1.0)
 
@@ -137,7 +137,7 @@ func (v *Vector2) Abs() d2interface.Vector {
 
 // Angle computes the angle in radians with respect
 // to the positive x-axis
-func (v *Vector2) Angle() *big.Float {
+func (v *BigFloat) Angle() *big.Float {
 	// HACK we should find a way to do this purely
 	// with big.Float
 	floatX, _ := v.X().Float64()
@@ -152,12 +152,12 @@ func (v *Vector2) Angle() *big.Float {
 }
 
 // SetAngle sets the angle of this Vector
-func (v *Vector2) SetAngle(angle *big.Float) d2interface.Vector {
+func (v *BigFloat) SetAngle(angle *big.Float) d2interface.Vector {
 	return v.SetToPolar(angle, v.Length())
 }
 
 // Add to this Vector the components of the given Vector
-func (v *Vector2) Add(src d2interface.Vector) d2interface.Vector {
+func (v *BigFloat) Add(src d2interface.Vector) d2interface.Vector {
 	v.x.Add(v.x, src.X())
 	v.y.Add(v.y, src.Y())
 
@@ -165,7 +165,7 @@ func (v *Vector2) Add(src d2interface.Vector) d2interface.Vector {
 }
 
 // Subtract from this Vector the components of the given Vector
-func (v *Vector2) Subtract(src d2interface.Vector) d2interface.Vector {
+func (v *BigFloat) Subtract(src d2interface.Vector) d2interface.Vector {
 	v.x.Sub(v.x, src.X())
 	v.y.Sub(v.y, src.Y())
 
@@ -173,7 +173,7 @@ func (v *Vector2) Subtract(src d2interface.Vector) d2interface.Vector {
 }
 
 // Multiply this Vector with the components of the given Vector
-func (v *Vector2) Multiply(src d2interface.Vector) d2interface.Vector {
+func (v *BigFloat) Multiply(src d2interface.Vector) d2interface.Vector {
 	v.x.Mul(v.x, src.X())
 	v.y.Mul(v.y, src.Y())
 
@@ -181,7 +181,7 @@ func (v *Vector2) Multiply(src d2interface.Vector) d2interface.Vector {
 }
 
 // Scale this Vector by the given value
-func (v *Vector2) Scale(s *big.Float) d2interface.Vector {
+func (v *BigFloat) Scale(s *big.Float) d2interface.Vector {
 	v.x.Sub(v.x, s)
 	v.y.Sub(v.y, s)
 
@@ -189,7 +189,7 @@ func (v *Vector2) Scale(s *big.Float) d2interface.Vector {
 }
 
 // Divide this Vector by the given Vector
-func (v *Vector2) Divide(src d2interface.Vector) d2interface.Vector {
+func (v *BigFloat) Divide(src d2interface.Vector) d2interface.Vector {
 	v.x.Quo(v.x, src.X())
 	v.y.Quo(v.y, src.Y())
 
@@ -197,12 +197,12 @@ func (v *Vector2) Divide(src d2interface.Vector) d2interface.Vector {
 }
 
 // Negate thex and y components of this Vector
-func (v *Vector2) Negate() d2interface.Vector {
+func (v *BigFloat) Negate() d2interface.Vector {
 	return v.Scale(big.NewFloat(negative1))
 }
 
 // Distance calculate the distance between this Vector and the given Vector
-func (v *Vector2) Distance(src d2interface.Vector) *big.Float {
+func (v *BigFloat) Distance(src d2interface.Vector) *big.Float {
 	dist := v.DistanceSq(src)
 
 	return dist.Sqrt(dist)
@@ -210,7 +210,7 @@ func (v *Vector2) Distance(src d2interface.Vector) *big.Float {
 
 // DistanceSq calculate the distance suared between this Vector and the given
 // Vector
-func (v *Vector2) DistanceSq(src d2interface.Vector) *big.Float {
+func (v *BigFloat) DistanceSq(src d2interface.Vector) *big.Float {
 	delta := src.Clone().Subtract(v)
 	deltaSq := delta.Multiply(delta)
 
@@ -218,14 +218,14 @@ func (v *Vector2) DistanceSq(src d2interface.Vector) *big.Float {
 }
 
 // Length returns the length of this Vector
-func (v *Vector2) Length() *big.Float {
+func (v *BigFloat) Length() *big.Float {
 	xsq, ysq := v.LengthSq()
 
 	return xsq.Add(xsq, ysq)
 }
 
 // LengthSq returns the x and y values squared
-func (v *Vector2) LengthSq() (*big.Float, *big.Float) {
+func (v *BigFloat) LengthSq() (*big.Float, *big.Float) {
 	clone := v.Clone()
 	x, y := clone.X(), clone.Y()
 
@@ -233,13 +233,13 @@ func (v *Vector2) LengthSq() (*big.Float, *big.Float) {
 }
 
 // SetLength sets the length of this Vector
-func (v *Vector2) SetLength(length *big.Float) d2interface.Vector {
+func (v *BigFloat) SetLength(length *big.Float) d2interface.Vector {
 	return v.Normalize().Scale(length)
 }
 
 // Normalize Makes the vector a unit length vector (magnitude of 1) in the same
 // direction.
-func (v *Vector2) Normalize() d2interface.Vector {
+func (v *BigFloat) Normalize() d2interface.Vector {
 	xsq, ysq := v.LengthSq()
 	length := big.NewFloat(zero).Add(xsq, ysq)
 	one := big.NewFloat(1.0)
@@ -256,7 +256,7 @@ func (v *Vector2) Normalize() d2interface.Vector {
 
 // NormalizeRightHand rotate this Vector to its perpendicular,
 // in the positive direction.
-func (v *Vector2) NormalizeRightHand() d2interface.Vector {
+func (v *BigFloat) NormalizeRightHand() d2interface.Vector {
 	x := v.x
 	v.x = v.y.Mul(v.y, big.NewFloat(negative1))
 	v.y = x
@@ -266,7 +266,7 @@ func (v *Vector2) NormalizeRightHand() d2interface.Vector {
 
 // NormalizeLeftHand rotate this Vector to its perpendicular,
 // in the negative1 direction.
-func (v *Vector2) NormalizeLeftHand() d2interface.Vector {
+func (v *BigFloat) NormalizeLeftHand() d2interface.Vector {
 	x := v.x
 	v.x = v.y
 	v.y = x.Mul(x, big.NewFloat(negative1))
@@ -275,7 +275,7 @@ func (v *Vector2) NormalizeLeftHand() d2interface.Vector {
 }
 
 // Dot returns the dot product of this Vector and the given Vector.
-func (v *Vector2) Dot(src d2interface.Vector) *big.Float {
+func (v *BigFloat) Dot(src d2interface.Vector) *big.Float {
 	c := v.Clone()
 	c.X().Mul(c.X(), src.X())
 	c.Y().Mul(c.Y(), src.Y())
@@ -284,7 +284,7 @@ func (v *Vector2) Dot(src d2interface.Vector) *big.Float {
 }
 
 // Cross Calculate the cross product of this Vector and the given Vector.
-func (v *Vector2) Cross(src d2interface.Vector) *big.Float {
+func (v *BigFloat) Cross(src d2interface.Vector) *big.Float {
 	c := v.Clone()
 	c.X().Mul(c.X(), src.X())
 	c.Y().Mul(c.Y(), src.Y())
@@ -293,7 +293,7 @@ func (v *Vector2) Cross(src d2interface.Vector) *big.Float {
 }
 
 // Lerp Linearly interpolate between this Vector and the given Vector.
-func (v *Vector2) Lerp(
+func (v *BigFloat) Lerp(
 	src d2interface.Vector,
 	t *big.Float,
 ) d2interface.Vector {
@@ -306,7 +306,7 @@ func (v *Vector2) Lerp(
 }
 
 // Reset this Vector the zero vector (0, 0).
-func (v *Vector2) Reset() d2interface.Vector {
+func (v *BigFloat) Reset() d2interface.Vector {
 	v.x.SetFloat64(zero)
 	v.y.SetFloat64(zero)
 
@@ -314,7 +314,7 @@ func (v *Vector2) Reset() d2interface.Vector {
 }
 
 // Limit the length (or magnitude) of this Vector
-func (v *Vector2) Limit(max *big.Float) d2interface.Vector {
+func (v *BigFloat) Limit(max *big.Float) d2interface.Vector {
 	length := v.Length()
 
 	if max.Cmp(length) < 0 {
@@ -325,7 +325,7 @@ func (v *Vector2) Limit(max *big.Float) d2interface.Vector {
 }
 
 // Reflect this Vector off a line defined by a normal.
-func (v *Vector2) Reflect(normal d2interface.Vector) d2interface.Vector {
+func (v *BigFloat) Reflect(normal d2interface.Vector) d2interface.Vector {
 	clone := v.Clone()
 	clone.Normalize()
 
@@ -337,12 +337,12 @@ func (v *Vector2) Reflect(normal d2interface.Vector) d2interface.Vector {
 }
 
 // Mirror reflect this Vector across another.
-func (v *Vector2) Mirror(axis d2interface.Vector) d2interface.Vector {
+func (v *BigFloat) Mirror(axis d2interface.Vector) d2interface.Vector {
 	return v.Reflect(axis).Negate()
 }
 
 // Rotate this Vector by an angle amount.
-func (v *Vector2) Rotate(angle *big.Float) d2interface.Vector {
+func (v *BigFloat) Rotate(angle *big.Float) d2interface.Vector {
 	// HACK we should do this only with big.Float, not float64
 	// we are throwing away the precision here
 	floatAngle, _ := angle.Float64()
@@ -361,7 +361,7 @@ func (v *Vector2) Rotate(angle *big.Float) d2interface.Vector {
 }
 
 // Floor rounds the vector down to the nearest whole numbers.
-func (v *Vector2) Floor() d2interface.Vector {
+func (v *BigFloat) Floor() d2interface.Vector {
 	var xi, yi big.Int
 	v.x.Int(&xi)
 	v.y.Int(&yi)
@@ -371,8 +371,8 @@ func (v *Vector2) Floor() d2interface.Vector {
 	return v
 }
 
-func (v *Vector2) String() string {
-	return fmt.Sprintf("Vector2{%s, %s}", v.x.Text('f', 5), v.y.Text('f', 5))
+func (v *BigFloat) String() string {
+	return fmt.Sprintf("BigFloat{%s, %s}", v.x.Text('f', 5), v.y.Text('f', 5))
 }
 
 // Up returns a new vector (0, 1)
