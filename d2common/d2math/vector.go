@@ -7,14 +7,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
-// I want to put these somewhere convenient...
-// ZERO *Vector = &Vector{}
-// ONE *Vector = &Vector{1, 1}
-// RIGHT *Vector = &Vector{1, 0}
-// LEFT *Vector = &Vector{-1, 0}
-// UP *Vector = &Vector{0, -1}
-// DOWN *Vector = &Vector{0, 1}
-
 const (
 	// Epsilon is the threshold for what is `smol enough`
 	epsilon float64 = 0.0001
@@ -364,4 +356,34 @@ func (v *Vector2) Rotate(angle *big.Float) d2interface.Vector {
 	v.Set(newX, newY)
 
 	return v
+}
+
+// Up returns a new vector (0, 1)
+func Up() *Vector2 {
+	return NewVector2(0, 1)
+}
+
+// Down returns a new vector (0, -1)
+func Down() *Vector2 {
+	return NewVector2(0, -1)
+}
+
+// Right returns a new vector (1, 0)
+func Right() *Vector2 {
+	return NewVector2(1, 0)
+}
+
+// Left returns a new vector (-1, 0)
+func Left() *Vector2 {
+	return NewVector2(-1, 0)
+}
+
+// One returns a new vector (0, 0)
+func One() *Vector2 {
+	return NewVector2(1, 1)
+}
+
+// Zero returns a new vector (0, 0)
+func Zero() *Vector2 {
+	return NewVector2(0, 0)
 }
