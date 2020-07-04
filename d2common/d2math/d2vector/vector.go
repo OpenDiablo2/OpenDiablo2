@@ -360,47 +360,36 @@ func (v *Vector2) Rotate(angle *big.Float) d2interface.Vector {
 	return v
 }
 
-// Floor rounds the vector down to the nearest whole numbers.
-func (v *Vector2) Floor() d2interface.Vector {
-	var xi, yi big.Int
-	v.x.Int(&xi)
-	v.y.Int(&yi)
-	v.X().SetInt(&xi)
-	v.Y().SetInt(&yi)
-
-	return v
-}
-
 func (v *Vector2) String() string {
-	return fmt.Sprintf("Vector2{%s, %s}", v.x.Text('f', 5), v.y.Text('f', 5))
+	return fmt.Sprintf("Vector2{%s, %s}", v.x.Text('f', 3), v.y.Text('f', 3))
 }
 
 // Up returns a new vector (0, 1)
-func Up() d2interface.Vector {
+func Up() *Vector2 {
 	return New(0, 1)
 }
 
 // Down returns a new vector (0, -1)
-func Down() d2interface.Vector {
+func Down() *Vector2 {
 	return New(0, -1)
 }
 
 // Right returns a new vector (1, 0)
-func Right() d2interface.Vector {
+func Right() *Vector2 {
 	return New(1, 0)
 }
 
 // Left returns a new vector (-1, 0)
-func Left() d2interface.Vector {
+func Left() *Vector2 {
 	return New(-1, 0)
 }
 
 // One returns a new vector (1, 1)
-func One() d2interface.Vector {
+func One() *Vector2 {
 	return New(1, 1)
 }
 
 // Zero returns a new vector (0, 0)
-func Zero() d2interface.Vector {
+func Zero() *Vector2 {
 	return New(0, 0)
 }
