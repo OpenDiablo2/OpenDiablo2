@@ -1,4 +1,5 @@
-package d2math
+// Package d2vector is an Implementation of 2-dimensional vectors with big.Float components
+package d2vector
 
 import (
 	"math"
@@ -21,8 +22,8 @@ const (
 	zero float64 = 0.0
 )
 
-// NewVector2 creates a new Vector
-func NewVector2(x, y float64) *Vector2 {
+// New creates a new Vector2 and returns a pointer to it.
+func New(x, y float64) *Vector2 {
 	xbf, ybf := big.NewFloat(x), big.NewFloat(y)
 	xbf.SetPrec(d2precision)
 	ybf.SetPrec(d2precision)
@@ -31,8 +32,8 @@ func NewVector2(x, y float64) *Vector2 {
 	return result
 }
 
-// Vector2 is an Implementation of 2-dimensional vectors with
-// big.Float components
+// Vector2 has two big.Floats x and y and a set of methods
+// for common vector operations.
 type Vector2 struct {
 	x *big.Float
 	y *big.Float
@@ -360,30 +361,30 @@ func (v *Vector2) Rotate(angle *big.Float) d2interface.Vector {
 
 // Up returns a new vector (0, 1)
 func Up() *Vector2 {
-	return NewVector2(0, 1)
+	return New(0, 1)
 }
 
 // Down returns a new vector (0, -1)
 func Down() *Vector2 {
-	return NewVector2(0, -1)
+	return New(0, -1)
 }
 
 // Right returns a new vector (1, 0)
 func Right() *Vector2 {
-	return NewVector2(1, 0)
+	return New(1, 0)
 }
 
 // Left returns a new vector (-1, 0)
 func Left() *Vector2 {
-	return NewVector2(-1, 0)
+	return New(-1, 0)
 }
 
-// One returns a new vector (0, 0)
+// One returns a new vector (1, 1)
 func One() *Vector2 {
-	return NewVector2(1, 1)
+	return New(1, 1)
 }
 
 // Zero returns a new vector (0, 0)
 func Zero() *Vector2 {
-	return NewVector2(0, 0)
+	return New(0, 0)
 }
