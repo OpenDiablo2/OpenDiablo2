@@ -203,7 +203,8 @@ func (c *Composite) createMode(animationMode, weaponClass string) (*compositeMod
 			}
 		}
 
-		layer, err := c.loadCompositeLayer(cofLayer.Type.String(), layerValue, animationMode, weaponClass, c.palettePath, transparency)
+		layer, err := c.loadCompositeLayer(cofLayer.Type.String(), layerValue, animationMode,
+			cofLayer.WeaponClass.String(), c.palettePath, transparency)
 		if err == nil {
 			layer.SetPlaySpeed(mode.animationSpeed)
 			layer.PlayForward()
@@ -224,9 +225,7 @@ func (c *Composite) loadCompositeLayer(layerKey, layerValue, animationMode, weap
 	palettePath string, transparency int) (*Animation, error) {
 	animationPaths := []string{
 		fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dcc", c.basePath, c.token, layerKey, c.token, layerKey, layerValue, animationMode, weaponClass),
-		fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dcc", c.basePath, c.token, layerKey, c.token, layerKey, layerValue, animationMode, "HTH"),
 		fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dc6", c.basePath, c.token, layerKey, c.token, layerKey, layerValue, animationMode, weaponClass),
-		fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dc6", c.basePath, c.token, layerKey, c.token, layerKey, layerValue, animationMode, "HTH"),
 	}
 
 	for _, animationPath := range animationPaths {
