@@ -3,10 +3,11 @@ package d2asset
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
 type paletteManager struct {
-	cache *d2common.Cache
+	cache d2interface.Cache
 }
 
 const (

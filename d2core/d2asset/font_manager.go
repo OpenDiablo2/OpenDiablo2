@@ -2,6 +2,7 @@ package d2asset
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
@@ -11,7 +12,7 @@ const (
 )
 
 type fontManager struct {
-	cache *d2common.Cache
+	cache d2interface.Cache
 }
 
 func createFontManager() *fontManager {
