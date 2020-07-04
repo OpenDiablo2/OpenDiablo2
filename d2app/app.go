@@ -130,7 +130,7 @@ func (p *App) initialize() error {
 	}
 
 	config := d2config.Get()
-	d2resource.LanguageCode = config.Language
+	d2resource.LanguageCode = config.Language()
 
 	p.renderer.SetWindowIcon("d2logo.png")
 	p.terminal.BindLogger()
@@ -164,7 +164,7 @@ func (p *App) initialize() error {
 		return err
 	}
 
-	p.audio.SetVolumes(config.BgmVolume, config.SfxVolume)
+	p.audio.SetVolumes(config.BgmVolume(), config.SfxVolume())
 
 	if err := p.loadDataDict(); err != nil {
 		return err
@@ -583,7 +583,8 @@ func updateInitError(target d2interface.Surface) error {
 	width, height := target.GetSize()
 
 	target.PushTranslation(width/5, height/2)
-	target.DrawText("Could not find the MPQ files in the directory: %s\nPlease put the files and re-run the game.", d2config.Get().MpqPath)
+	target.DrawText(`Could not find the MPQ files in the directory: 
+		%s\nPlease put the files and re-run the game.`, d2config.Get().MpqPath())
 
 	return nil
 }
