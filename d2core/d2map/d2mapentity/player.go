@@ -18,7 +18,6 @@ type Player struct {
 	Stats     d2hero.HeroStatsState
 	Class     d2enum.Hero
 	Id        string
-	direction int
 	name      string
 	// nameLabel     d2ui.Label
 	lastPathSize  int
@@ -34,23 +33,19 @@ var baseWalkSpeed = 6.0
 var baseRunSpeed = 9.0
 
 func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero, stats d2hero.HeroStatsState, equipment d2inventory.CharacterEquipment) *Player {
-	object := &d2datadict.ObjectLookupRecord{
-		Mode:  d2enum.AnimationModePlayerTownNeutral.String(),
-		Base:  "/data/global/chars",
-		Token: heroType.GetToken(),
-		Class: equipment.RightHand.GetWeaponClass(),
-		SH:    equipment.Shield.GetItemCode(),
-		// TODO: Offhand class?
-		HD: equipment.Head.GetArmorClass(),
-		TR: equipment.Torso.GetArmorClass(),
-		LG: equipment.Legs.GetArmorClass(),
-		RA: equipment.RightArm.GetArmorClass(),
-		LA: equipment.LeftArm.GetArmorClass(),
-		RH: equipment.RightHand.GetItemCode(),
-		LH: equipment.LeftHand.GetItemCode(),
+	layerEquipment := &[d2enum.CompositeTypeMax]string{
+		d2enum.CompositeTypeHead:      equipment.Head.GetArmorClass(),
+		d2enum.CompositeTypeTorso:     equipment.Torso.GetArmorClass(),
+		d2enum.CompositeTypeLegs:      equipment.Legs.GetArmorClass(),
+		d2enum.CompositeTypeRightArm:  equipment.RightArm.GetArmorClass(),
+		d2enum.CompositeTypeLeftArm:   equipment.LeftArm.GetArmorClass(),
+		d2enum.CompositeTypeRightHand: equipment.RightHand.GetItemCode(),
+		d2enum.CompositeTypeLeftHand:  equipment.LeftHand.GetItemCode(),
+		d2enum.CompositeTypeShield:    equipment.Shield.GetItemCode(),
 	}
 
-	composite, err := d2asset.LoadComposite(object, d2resource.PaletteUnits)
+	composite, err := d2asset.LoadComposite(d2enum.ObjectTypePlayer, heroType.GetToken(),
+		d2resource.PaletteUnits)
 	if err != nil {
 		panic(err)
 	}
@@ -64,7 +59,6 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 		composite: composite,
 		Equipment: equipment,
 		Stats:     stats,
-		direction: direction,
 		name:      name,
 		Class:     heroType,
 		//nameLabel:    d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
@@ -77,10 +71,13 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 	//result.nameLabel.Alignment = d2ui.LabelAlignCenter
 	//result.nameLabel.SetText(name)
 	//result.nameLabel.Color = color.White
-	err = result.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), equipment.RightHand.GetWeaponClass(), direction)
+	err = composite.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), equipment.RightHand.GetWeaponClass())
 	if err != nil {
 		panic(err)
 	}
+	composite.SetDirection(direction)
+	composite.Equip(layerEquipment)
+
 	return result
 }
 
@@ -142,20 +139,6 @@ func (v *Player) Render(target d2interface.Surface) {
 	//v.nameLabel.Render(target)
 }
 
-func (v *Player) SetMode(animationMode, weaponClass string, direction int) error {
-	v.composite.SetMode(animationMode, weaponClass, direction)
-	v.direction = direction
-	v.weaponClass = weaponClass
-
-	err := v.composite.SetMode(animationMode, weaponClass, direction)
-	if err != nil {
-		err = v.composite.SetMode(animationMode, "HTH", direction)
-		v.weaponClass = "HTH"
-	}
-
-	return err
-}
-
 func (v *Player) GetAnimationMode() d2enum.PlayerAnimationMode {
 	if v.IsRunning() && !v.IsAtTarget() {
 		return d2enum.AnimationModePlayerRun
@@ -181,15 +164,19 @@ func (v *Player) GetAnimationMode() d2enum.PlayerAnimationMode {
 }
 
 func (v *Player) SetAnimationMode(animationMode string) error {
-	return v.composite.SetMode(animationMode, v.weaponClass, v.direction)
+	return v.composite.SetMode(animationMode, v.composite.GetWeaponClass())
 }
 
 // rotate sets direction and changes animation
 func (v *Player) rotate(direction int) {
 	newAnimationMode := v.GetAnimationMode().String()
 
-	if newAnimationMode != v.composite.GetAnimationMode() || direction != v.direction {
-		v.SetMode(newAnimationMode, v.weaponClass, direction)
+	if newAnimationMode != v.composite.GetAnimationMode() {
+		v.composite.SetMode(newAnimationMode, v.composite.GetWeaponClass())
+	}
+
+	if direction != v.composite.GetDirection() {
+		v.composite.SetDirection(direction)
 	}
 }
 

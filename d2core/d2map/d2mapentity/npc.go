@@ -21,8 +21,6 @@ type NPC struct {
 	path          int
 	isDone        bool
 	repetitions   int
-	direction     int
-	objectLookup  *d2datadict.ObjectLookupRecord
 	monstatRecord *d2datadict.MonStatsRecord
 	monstatEx     *d2datadict.MonStats2Record
 	name          string
@@ -36,29 +34,32 @@ func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC
 		monstatEx:     d2datadict.MonStats2[monstat.ExtraDataKey],
 	}
 
-	object := &d2datadict.ObjectLookupRecord{
-		Base:  "/Data/Global/Monsters",
-		Token: monstat.AnimationDirectoryToken,
-		Mode:  result.monstatEx.ResurrectMode.String(),
-		Class: result.monstatEx.BaseWeaponClass,
-		TR:    selectEquip(result.monstatEx.TRv),
-		LG:    selectEquip(result.monstatEx.LGv),
-		RH:    selectEquip(result.monstatEx.RHv),
-		SH:    selectEquip(result.monstatEx.SHv),
-		RA:    selectEquip(result.monstatEx.Rav),
-		LA:    selectEquip(result.monstatEx.Lav),
-		LH:    selectEquip(result.monstatEx.LHv),
-		HD:    selectEquip(result.monstatEx.HDv),
+	equipment := &[d2enum.CompositeTypeMax]string{
+		d2enum.CompositeTypeHead:      selectEquip(result.monstatEx.HDv),
+		d2enum.CompositeTypeTorso:     selectEquip(result.monstatEx.TRv),
+		d2enum.CompositeTypeLegs:      selectEquip(result.monstatEx.LGv),
+		d2enum.CompositeTypeRightArm:  selectEquip(result.monstatEx.Rav),
+		d2enum.CompositeTypeLeftArm:   selectEquip(result.monstatEx.Lav),
+		d2enum.CompositeTypeRightHand: selectEquip(result.monstatEx.RHv),
+		d2enum.CompositeTypeLeftHand:  selectEquip(result.monstatEx.LHv),
+		d2enum.CompositeTypeShield:    selectEquip(result.monstatEx.SHv),
+		d2enum.CompositeTypeSpecial1:  selectEquip(result.monstatEx.S1v),
+		d2enum.CompositeTypeSpecial2:  selectEquip(result.monstatEx.S2v),
+		d2enum.CompositeTypeSpecial3:  selectEquip(result.monstatEx.S3v),
+		d2enum.CompositeTypeSpecial4:  selectEquip(result.monstatEx.S4v),
+		d2enum.CompositeTypeSpecial5:  selectEquip(result.monstatEx.S5v),
+		d2enum.CompositeTypeSpecial6:  selectEquip(result.monstatEx.S6v),
+		d2enum.CompositeTypeSpecial7:  selectEquip(result.monstatEx.S7v),
+		d2enum.CompositeTypeSpecial8:  selectEquip(result.monstatEx.S8v),
 	}
-	result.objectLookup = object
-	composite, err := d2asset.LoadComposite(object, d2resource.PaletteUnits)
+
+	composite, _ := d2asset.LoadComposite(d2enum.ObjectTypeCharacter, monstat.AnimationDirectoryToken,
+		d2resource.PaletteUnits)
 	result.composite = composite
 
-	if err != nil {
-		panic(err)
-	}
+	composite.SetMode("NU", result.monstatEx.BaseWeaponClass)
+	composite.Equip(equipment)
 
-	result.SetMode(object.Mode, object.Class, direction)
 	result.mapEntity.directioner = result.rotate
 
 	if result.monstatRecord != nil && result.monstatRecord.IsInteractable {
@@ -75,7 +76,6 @@ func selectEquip(slice []string) string {
 
 	return ""
 }
-
 
 func (v *NPC) Render(target d2interface.Surface) {
 	target.PushTranslation(
@@ -148,7 +148,7 @@ func (v *NPC) next() {
 	}
 
 	if v.composite.GetAnimationMode() != newAnimationMode.String() {
-		v.SetMode(newAnimationMode.String(), v.weaponClass, v.direction)
+		v.composite.SetMode(newAnimationMode.String(), v.composite.GetWeaponClass())
 	}
 }
 
@@ -160,23 +160,14 @@ func (v *NPC) rotate(direction int) {
 	} else {
 		newMode = d2enum.AnimationModeMonsterNeutral
 	}
-	if newMode.String() != v.composite.GetAnimationMode() || direction != v.direction {
-		v.SetMode(newMode.String(), v.weaponClass, direction)
-	}
-}
 
-// SetMode changes the graphical mode of this animated entity
-func (v *NPC) SetMode(animationMode, weaponClass string, direction int) error {
-	v.direction = direction
-	v.weaponClass = weaponClass
-
-	err := v.composite.SetMode(animationMode, weaponClass, direction)
-	if err != nil {
-		err = v.composite.SetMode(animationMode, "HTH", direction)
-		v.weaponClass = "HTH"
+	if newMode.String() != v.composite.GetAnimationMode() {
+		v.composite.SetMode(newMode.String(), v.composite.GetWeaponClass())
 	}
 
-	return err
+	if v.composite.GetDirection() != direction {
+		v.composite.SetDirection(direction)
+	}
 }
 
 func (m *NPC) Selectable() bool {

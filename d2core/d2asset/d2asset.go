@@ -3,7 +3,7 @@ package d2asset
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -121,8 +121,8 @@ func LoadAnimationWithTransparency(animationPath, palettePath string, transparen
 }
 
 // LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it
-func LoadComposite(object *d2datadict.ObjectLookupRecord, palettePath string) (*Composite, error) {
-	return CreateComposite(object, palettePath), nil
+func LoadComposite(baseType d2enum.ObjectType, token, palettePath string) (*Composite, error) {
+	return CreateComposite(baseType, token, palettePath), nil
 }
 
 // LoadFont loads a font the resource files

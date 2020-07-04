@@ -26,7 +26,6 @@ type mapEntity struct {
 	LocationY          float64
 	TileX, TileY       int     // Coordinates of the tile the unit is within
 	subcellX, subcellY float64 // Subcell coordinates within the current tile
-	weaponClass        string
 	offsetX, offsetY   int
 	TargetX            float64
 	TargetY            float64

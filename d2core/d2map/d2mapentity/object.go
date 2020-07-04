@@ -4,6 +4,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
@@ -28,32 +29,8 @@ func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath stri
 		// nameLabel:    d2ui.CreateLabel(renderer, d2resource.FontFormal11, d2resource.PaletteStatic),
 	}
 
-	object := &d2datadict.ObjectLookupRecord{
-		Base:  "/Data/Global/Objects",
-		Token: entity.objectType.Token,
-		Mode:  "NU",
-		Class: "HTH",
-		HD:    "LIT",
-		TR:    "LIT",
-		LG:    "LIT",
-		RA:    "LIT",
-		LA:    "LIT",
-		RH:    "LIT",
-		LH:    "LIT",
-		SH:    "LIT",
-		S1:    "LIT",
-		S2:    "LIT",
-		S3:    "LIT",
-		S4:    "LIT",
-		S5:    "LIT",
-		S6:    "LIT",
-		S7:    "LIT",
-		S8:    "LIT",
-	}
-
-	entity.objectLookup = object
-
-	composite, err := d2asset.LoadComposite(object, palettePath)
+	composite, err := d2asset.LoadComposite(d2enum.ObjectTypeItem, entity.objectType.Token,
+		d2resource.PaletteUnits)
 	if err != nil {
 		return nil, err
 	}
@@ -63,28 +40,27 @@ func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath stri
 	entity.mapEntity.directioner = entity.rotate
 	entity.drawLayer = entity.objectRecord.OrderFlag[d2enum.AnimationModeObjectNeutral]
 
-	entity.SetMode(object.Mode, object.Class, 0)
+	entity.setMode("NU", 0)
 
 	// stop torches going crazy for now
 	// need initFunc handling to set objects up properly
 	if objectRec.HasAnimationMode[d2enum.AnimationModeObjectOpened] {
-		entity.SetMode("ON", "HTH", 0)
+		entity.setMode("ON", 0)
 	}
 
 	return entity, nil
 }
 
-// SetMode changes the graphical mode of this animated entity
-func (ob *Object) SetMode(animationMode, weaponClass string, direction int) error {
-	ob.composite.SetMode(animationMode, weaponClass, direction)
+// setMode changes the graphical mode of this animated entity
+func (ob *Object) setMode(animationMode string, direction int) error {
 	ob.direction = direction
-	ob.weaponClass = weaponClass
 
-	err := ob.composite.SetMode(animationMode, weaponClass, direction)
+	err := ob.composite.SetMode(animationMode, "HTH")
 	if err != nil {
-		err = ob.composite.SetMode(animationMode, "HTH", direction)
-		ob.weaponClass = "HTH"
+		return err
 	}
+
+	ob.composite.SetDirection(direction)
 
 	mode := d2enum.ObjectAnimationModeFromString(animationMode)
 	ob.mapEntity.drawLayer = ob.objectRecord.OrderFlag[mode]
@@ -92,7 +68,7 @@ func (ob *Object) SetMode(animationMode, weaponClass string, direction int) erro
 	// For objects their txt record entry overrides animationdata
 	speed := ob.objectRecord.FrameDelta[mode]
 	if speed != 0 {
-		ob.composite.SetSpeed(speed)
+		ob.composite.SetAnimSpeed(speed)
 	}
 
 	return err
