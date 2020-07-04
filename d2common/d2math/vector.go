@@ -39,7 +39,7 @@ func NewVector2(x, y float64) *Vector2 {
 	return result
 }
 
-// Vector is an Implementation of 2-dimensional vectors with
+// Vector2 is an Implementation of 2-dimensional vectors with
 // big.Float components
 type Vector2 struct {
 	x *big.Float
@@ -230,6 +230,7 @@ func (v *Vector2) Length() *big.Float {
 	return xsq.Add(xsq, ysq)
 }
 
+// LengthSq returns the x and y values squared
 func (v *Vector2) LengthSq() (*big.Float, *big.Float) {
 	clone := v.Clone()
 	x, y := clone.X(), clone.Y()
@@ -260,7 +261,7 @@ func (v *Vector2) Normalize() d2interface.Vector {
 }
 
 // NormalizeRightHand rotate this Vector to its perpendicular,
-//in the positive direction.
+// in the positive direction.
 func (v *Vector2) NormalizeRightHand() d2interface.Vector {
 	x := v.x
 	v.x = v.y.Mul(v.y, big.NewFloat(negative1))
@@ -270,7 +271,7 @@ func (v *Vector2) NormalizeRightHand() d2interface.Vector {
 }
 
 // NormalizeLeftHand rotate this Vector to its perpendicular,
-//in the negative1 direction.
+// in the negative1 direction.
 func (v *Vector2) NormalizeLeftHand() d2interface.Vector {
 	x := v.x
 	v.x = v.y
@@ -279,7 +280,7 @@ func (v *Vector2) NormalizeLeftHand() d2interface.Vector {
 	return v
 }
 
-// Calculate the dot product of this Vector and the given Vector
+// Dot returns the dot product of this Vector and the given Vector.
 func (v *Vector2) Dot(src d2interface.Vector) *big.Float {
 	c := v.Clone()
 	c.X().Mul(c.X(), src.X())
@@ -312,7 +313,6 @@ func (v *Vector2) Lerp(
 
 // Reset this Vector the zero vector (0, 0).
 func (v *Vector2) Reset() d2interface.Vector {
-
 	v.x.SetFloat64(zero)
 	v.y.SetFloat64(zero)
 
