@@ -1,6 +1,10 @@
-package d2mapentity
+// Package d2object implements objects placed on the map and their functionality
+package d2object
 
 import (
+	"math"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -10,26 +14,34 @@ import (
 
 // Object represents a composite of animations that can be projected onto the map.
 type Object struct {
-	mapEntity
-	composite *d2asset.Composite
-	direction int
-	highlight bool
+	composite          *d2asset.Composite
+	highlight          bool
+	LocationX          float64
+	LocationY          float64
+	TileX, TileY       int     // Coordinates of the tile the unit is within
+	subcellX, subcellY float64 // Subcell coordinates within the current tile
 	// nameLabel    d2ui.Label
-	objectLookup *d2datadict.ObjectLookupRecord
 	objectRecord *d2datadict.ObjectRecord
-	objectType   *d2datadict.ObjectTypeRecord
+	drawLayer    int
+	name         string
 }
 
 // CreateObject creates an instance of AnimatedComposite
 func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath string) (*Object, error) {
+	locX, locY := float64(x), float64(y)
 	entity := &Object{
-		mapEntity:    createMapEntity(x, y),
 		objectRecord: objectRec,
-		objectType:   &d2datadict.ObjectTypes[objectRec.Index],
-		// nameLabel:    d2ui.CreateLabel(renderer, d2resource.FontFormal11, d2resource.PaletteStatic),
+		LocationX:    locX,
+		LocationY:    locY,
+		subcellX:     1 + math.Mod(locX, 5),
+		subcellY:     1 + math.Mod(locY, 5),
+		TileX:        x / 5,
+		TileY:        y / 5,
+		name:         d2common.TranslateString(objectRec.Name),
 	}
+	objectType := &d2datadict.ObjectTypes[objectRec.Index]
 
-	composite, err := d2asset.LoadComposite(d2enum.ObjectTypeItem, entity.objectType.Token,
+	composite, err := d2asset.LoadComposite(d2enum.ObjectTypeItem, objectType.Token,
 		d2resource.PaletteUnits)
 	if err != nil {
 		return nil, err
@@ -37,24 +49,15 @@ func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath stri
 
 	entity.composite = composite
 
-	entity.mapEntity.directioner = entity.rotate
-	entity.drawLayer = entity.objectRecord.OrderFlag[d2enum.AnimationModeObjectNeutral]
-
 	entity.setMode("NU", 0)
 
-	// stop torches going crazy for now
-	// need initFunc handling to set objects up properly
-	if objectRec.HasAnimationMode[d2enum.AnimationModeObjectOpened] {
-		entity.setMode("ON", 0)
-	}
+	initObject(entity)
 
 	return entity, nil
 }
 
 // setMode changes the graphical mode of this animated entity
 func (ob *Object) setMode(animationMode string, direction int) error {
-	ob.direction = direction
-
 	err := ob.composite.SetMode(animationMode, "HTH")
 	if err != nil {
 		return err
@@ -63,7 +66,7 @@ func (ob *Object) setMode(animationMode string, direction int) error {
 	ob.composite.SetDirection(direction)
 
 	mode := d2enum.ObjectAnimationModeFromString(animationMode)
-	ob.mapEntity.drawLayer = ob.objectRecord.OrderFlag[mode]
+	ob.drawLayer = ob.objectRecord.OrderFlag[d2enum.AnimationModeObjectNeutral]
 
 	// For objects their txt record entry overrides animationdata
 	speed := ob.objectRecord.FrameDelta[mode]
@@ -86,14 +89,11 @@ func (ob *Object) Selectable() bool {
 // Render draws this animated entity onto the target
 func (ob *Object) Render(target d2interface.Surface) {
 	target.PushTranslation(
-		ob.offsetX+int((ob.subcellX-ob.subcellY)*16),
-		ob.offsetY+int(((ob.subcellX+ob.subcellY)*8)-5),
+		int((ob.subcellX-ob.subcellY)*16),
+		int(((ob.subcellX + ob.subcellY) * 8)),
 	)
 
 	if ob.highlight {
-		// ob.nameLabel.SetText(d2common.TranslateString(ob.objectRecord.Name))
-		// ob.nameLabel.SetPosition(-50, -50)
-		// ob.nameLabel.Render(target)
 		target.PushBrightness(2)
 		defer target.Pop()
 	}
@@ -103,10 +103,27 @@ func (ob *Object) Render(target d2interface.Surface) {
 	ob.highlight = false
 }
 
-// rotate sets direction and changes animation
-func (ob *Object) rotate(direction int) {
-}
-
+// Advance updates the animation
 func (ob *Object) Advance(elapsed float64) {
 	ob.composite.Advance(elapsed)
+}
+
+// GetLayer returns which layer of the map the object is drawn
+func (ob *Object) GetLayer() int {
+	return ob.drawLayer
+}
+
+// GetPosition of the object
+func (ob *Object) GetPosition() (x, y float64) {
+	return float64(ob.TileX), float64(ob.TileY)
+}
+
+// GetPositionF of the object but differently
+func (ob *Object) GetPositionF() (x, y float64) {
+	return float64(ob.TileX) + (ob.subcellX / 5.0), float64(ob.TileY) + ob.subcellY/5.0
+}
+
+// Name gets the name of the object
+func (ob *Object) Name() string {
+	return ob.name
 }
