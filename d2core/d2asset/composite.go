@@ -18,14 +18,14 @@ type Composite struct {
 	token       string
 	palettePath string
 	direction   int
-	equipment   *[d2enum.CompositeTypeMax]string
+	equipment   [d2enum.CompositeTypeMax]string
 	mode        *compositeMode
 }
 
 // CreateComposite creates a Composite from a given ObjectLookupRecord and palettePath.
-func CreateComposite(baseType d2enum.ObjectType, token, palettePath string, equpment *[d2enum.CompositeTypeMax]string) *Composite {
+func CreateComposite(baseType d2enum.ObjectType, token, palettePath string) *Composite {
 	return &Composite{baseType: baseType, basePath: baseString(baseType),
-		token: token, equipment: equpment, palettePath: palettePath}
+		token: token, palettePath: palettePath}
 }
 
 // Advance moves the composite animation forward for a given elapsed time in nanoseconds.
@@ -72,8 +72,13 @@ func (c *Composite) Render(target d2interface.Surface) error {
 }
 
 // GetAnimationMode returns the animation mode the Composite should render with.
-func (c Composite) GetAnimationMode() string {
+func (c *Composite) GetAnimationMode() string {
 	return c.mode.animationMode
+}
+
+// GetWeaponClass returns the currently loaded weapon class
+func (c *Composite) GetWeaponClass() string {
+	return c.mode.weaponClass
 }
 
 // SetMode sets the Composite's animation mode weapon class and direction
@@ -95,7 +100,11 @@ func (c *Composite) SetMode(animationMode, weaponClass string) error {
 
 // Equip changes the current layer configuration
 func (c *Composite) Equip(equipment *[d2enum.CompositeTypeMax]string) error {
-	c.equipment = equipment
+	c.equipment = *equipment
+	if c.mode == nil {
+		return nil
+	}
+
 	mode, err := c.createMode(c.mode.animationMode, c.mode.weaponClass)
 
 	if err != nil {
@@ -107,8 +116,8 @@ func (c *Composite) Equip(equipment *[d2enum.CompositeTypeMax]string) error {
 	return nil
 }
 
-// SetSpeed sets the speed at which the Composite's animation should advance through its frames
-func (c *Composite) SetSpeed(speed int) {
+// SetAnimSpeed sets the speed at which the Composite's animation should advance through its frames
+func (c *Composite) SetAnimSpeed(speed int) {
 	c.mode.animationSpeed = 1.0 / ((float64(speed) * 25.0) / 256.0)
 	for layerIdx := range c.mode.layers {
 		layer := c.mode.layers[layerIdx]
@@ -127,6 +136,11 @@ func (c *Composite) SetDirection(direction int) {
 			layer.SetDirection(c.direction)
 		}
 	}
+}
+
+// Direction returns the current direction the composite is facing
+func (c *Composite) GetDirection() int {
+	return c.direction
 }
 
 // GetPlayedCount returns the number of times the current animation mode has completed all its distinct frames
@@ -187,6 +201,10 @@ func (c *Composite) createMode(animationMode, weaponClass string) (*compositeMod
 
 	for _, cofLayer := range cof.CofLayers {
 		layerValue := c.equipment[cofLayer.Type]
+		if layerValue == "" {
+			layerValue = "lit"
+		}
+
 		blend := false
 		transparency := 255
 

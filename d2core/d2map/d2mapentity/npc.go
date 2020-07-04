@@ -21,11 +21,9 @@ type NPC struct {
 	path          int
 	isDone        bool
 	repetitions   int
-	direction     int
 	monstatRecord *d2datadict.MonStatsRecord
 	monstatEx     *d2datadict.MonStats2Record
 	name          string
-	weaponClass   string
 }
 
 func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC {
@@ -55,15 +53,12 @@ func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC
 		selectEquip(result.monstatEx.S8v),
 	}
 
-	composite, err := d2asset.LoadComposite(d2enum.ObjectTypeCharacter, monstat.AnimationDirectoryToken,
-		d2resource.PaletteUnits, equipment)
+	composite, _ := d2asset.LoadComposite(d2enum.ObjectTypeCharacter, monstat.AnimationDirectoryToken,
+		d2resource.PaletteUnits)
 	result.composite = composite
 
-	if err != nil {
-		panic(err)
-	}
-
-	result.setMode("NU", result.monstatEx.BaseWeaponClass, 0)
+	composite.SetMode("NU", result.monstatEx.BaseWeaponClass)
+	composite.Equip(equipment)
 
 	result.mapEntity.directioner = result.rotate
 
@@ -153,7 +148,7 @@ func (v *NPC) next() {
 	}
 
 	if v.composite.GetAnimationMode() != newAnimationMode.String() {
-		v.setMode(newAnimationMode.String(), v.weaponClass, v.direction)
+		v.composite.SetMode(newAnimationMode.String(), v.composite.GetWeaponClass())
 	}
 }
 
@@ -165,25 +160,14 @@ func (v *NPC) rotate(direction int) {
 	} else {
 		newMode = d2enum.AnimationModeMonsterNeutral
 	}
-	if newMode.String() != v.composite.GetAnimationMode() || direction != v.direction {
-		v.setMode(newMode.String(), v.weaponClass, direction)
-	}
-}
 
-// setMode changes the graphical mode of this animated entity
-func (v *NPC) setMode(animationMode, weaponClass string, direction int) error {
-	v.direction = direction
-	v.weaponClass = weaponClass
-
-	err := v.composite.SetMode(animationMode, weaponClass)
-	if err != nil {
-		err = v.composite.SetMode(animationMode, "HTH")
-		v.weaponClass = "HTH"
+	if newMode.String() != v.composite.GetAnimationMode() {
+		v.composite.SetMode(newMode.String(), v.composite.GetWeaponClass())
 	}
 
-	v.composite.SetDirection(direction)
-
-	return err
+	if v.composite.GetDirection() != direction {
+		v.composite.SetDirection(direction)
+	}
 }
 
 func (m *NPC) Selectable() bool {

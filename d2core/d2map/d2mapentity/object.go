@@ -29,13 +29,8 @@ func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath stri
 		// nameLabel:    d2ui.CreateLabel(renderer, d2resource.FontFormal11, d2resource.PaletteStatic),
 	}
 
-	equipment := &[d2enum.CompositeTypeMax]string{}
-	for i := range equipment {
-		equipment[i] = "LIT"
-	}
-
 	composite, err := d2asset.LoadComposite(d2enum.ObjectTypeItem, entity.objectType.Token,
-		d2resource.PaletteUnits, equipment)
+		d2resource.PaletteUnits)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +68,7 @@ func (ob *Object) setMode(animationMode string, direction int) error {
 	// For objects their txt record entry overrides animationdata
 	speed := ob.objectRecord.FrameDelta[mode]
 	if speed != 0 {
-		ob.composite.SetSpeed(speed)
+		ob.composite.SetAnimSpeed(speed)
 	}
 
 	return err

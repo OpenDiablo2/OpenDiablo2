@@ -18,7 +18,6 @@ type Player struct {
 	Stats     d2hero.HeroStatsState
 	Class     d2enum.Hero
 	Id        string
-	direction int
 	name      string
 	// nameLabel     d2ui.Label
 	lastPathSize  int
@@ -27,7 +26,6 @@ type Player struct {
 	isRunToggled  bool
 	isRunning     bool
 	isCasting     bool
-	weaponClass   string
 }
 
 // run speed should be walkspeed * 1.5, since in the original game it is 6 yards walk and 9 yards run.
@@ -47,7 +45,7 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 	}
 
 	composite, err := d2asset.LoadComposite(d2enum.ObjectTypePlayer, heroType.GetToken(),
-		d2resource.PaletteUnits, layerEquipment)
+		d2resource.PaletteUnits)
 	if err != nil {
 		panic(err)
 	}
@@ -61,7 +59,6 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 		composite: composite,
 		Equipment: equipment,
 		Stats:     stats,
-		direction: direction,
 		name:      name,
 		Class:     heroType,
 		//nameLabel:    d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
@@ -74,10 +71,13 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 	//result.nameLabel.Alignment = d2ui.LabelAlignCenter
 	//result.nameLabel.SetText(name)
 	//result.nameLabel.Color = color.White
-	err = result.setMode(d2enum.AnimationModePlayerTownNeutral.String(), equipment.RightHand.GetWeaponClass(), direction)
+	err = composite.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), equipment.RightHand.GetWeaponClass())
 	if err != nil {
 		panic(err)
 	}
+	composite.SetDirection(direction)
+	composite.Equip(layerEquipment)
+
 	return result
 }
 
@@ -139,21 +139,6 @@ func (v *Player) Render(target d2interface.Surface) {
 	//v.nameLabel.Render(target)
 }
 
-func (v *Player) setMode(animationMode, weaponClass string, direction int) error {
-	v.direction = direction
-	v.weaponClass = weaponClass
-
-	err := v.composite.SetMode(animationMode, weaponClass)
-	if err != nil {
-		err = v.composite.SetMode(animationMode, "HTH")
-		v.weaponClass = "HTH"
-	}
-
-	v.composite.SetDirection(direction)
-
-	return err
-}
-
 func (v *Player) GetAnimationMode() d2enum.PlayerAnimationMode {
 	if v.IsRunning() && !v.IsAtTarget() {
 		return d2enum.AnimationModePlayerRun
@@ -179,15 +164,19 @@ func (v *Player) GetAnimationMode() d2enum.PlayerAnimationMode {
 }
 
 func (v *Player) SetAnimationMode(animationMode string) error {
-	return v.composite.SetMode(animationMode, v.weaponClass)
+	return v.composite.SetMode(animationMode, v.composite.GetWeaponClass())
 }
 
 // rotate sets direction and changes animation
 func (v *Player) rotate(direction int) {
 	newAnimationMode := v.GetAnimationMode().String()
 
-	if newAnimationMode != v.composite.GetAnimationMode() || direction != v.direction {
-		v.setMode(newAnimationMode, v.weaponClass, direction)
+	if newAnimationMode != v.composite.GetAnimationMode() {
+		v.composite.SetMode(newAnimationMode, v.composite.GetWeaponClass())
+	}
+
+	if direction != v.composite.GetDirection() {
+		v.composite.SetDirection(direction)
 	}
 }
 

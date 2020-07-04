@@ -121,8 +121,8 @@ func LoadAnimationWithTransparency(animationPath, palettePath string, transparen
 }
 
 // LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it
-func LoadComposite(baseType d2enum.ObjectType, token, palettePath string, equipment *[d2enum.CompositeTypeMax]string) (*Composite, error) {
-	return CreateComposite(baseType, token, palettePath, equipment), nil
+func LoadComposite(baseType d2enum.ObjectType, token, palettePath string) (*Composite, error) {
+	return CreateComposite(baseType, token, palettePath), nil
 }
 
 // LoadFont loads a font the resource files
