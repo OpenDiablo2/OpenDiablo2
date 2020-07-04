@@ -8,6 +8,12 @@ type Position struct {
 	d2interface.Vector
 }
 
+// NewPosition creates a new Position at the given
+// float64 world position.
+func NewPosition(x, y float64) *Position {
+	return &Position{New(x, y)}
+}
+
 // World is the position, where 1 = one map
 // tile.
 func (p *Position) World() d2interface.Vector {
