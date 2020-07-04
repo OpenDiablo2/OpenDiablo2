@@ -40,14 +40,39 @@ func NewBigFloat(x, y float64) *BigFloat {
 	return result
 }
 
-// X returns the x member of the Vector
-func (v *BigFloat) X() *big.Float {
+// XBig returns the big.Float value of x.
+func (v *BigFloat) XBig() *big.Float {
 	return v.x
 }
 
-// Y returns the y member of the Vector
-func (v *BigFloat) Y() *big.Float {
+// YBig returns the big.Float value of y.
+func (v *BigFloat) YBig() *big.Float {
 	return v.y
+}
+
+// X64 returns the float64 value of x.
+func (v *BigFloat) X64() (float64, big.Accuracy) {
+	return v.x.Float64()
+}
+
+// Y64 returns the float64 value of y.
+func (v *BigFloat) Y64() (float64, big.Accuracy) {
+	return v.y.Float64()
+}
+
+// CopyFloat64 copies the values from a Float64 to f.
+func (v *BigFloat) CopyFloat64(sf Float64) {
+	v.x.Set(sf.XBig())
+	v.x.Set(sf.YBig())
+}
+
+// AsFloat64 returns a pointer to a float64 base on
+// the values of v.
+func (v *BigFloat) AsFloat64() *Float64 {
+	sf := new(Float64)
+	sf.x, _ = v.X64()
+	sf.y, _ = v.Y64()
+	return sf
 }
 
 // Marshal converts the Vector into a slice of bytes
@@ -73,8 +98,8 @@ func (v *BigFloat) Clone() d2interface.Vector {
 
 // Copy copies the src x/y members to this Vector x/y members
 func (v *BigFloat) Copy(src d2interface.Vector) d2interface.Vector {
-	v.x.Copy(src.X())
-	v.y.Copy(src.Y())
+	v.x.Copy(src.XBig())
+	v.y.Copy(src.YBig())
 
 	return v
 }
@@ -106,7 +131,7 @@ func (v *BigFloat) SetToPolar(azimuth, radius *big.Float) d2interface.Vector {
 
 // Equals check whether this Vector is equal to a given Vector.
 func (v *BigFloat) Equals(src d2interface.Vector) bool {
-	return v.x.Cmp(src.X()) == 0 && v.y.Cmp(src.Y()) == 0
+	return v.x.Cmp(src.XBig()) == 0 && v.y.Cmp(src.YBig()) == 0
 }
 
 // FuzzyEquals checks if the Vector is approximately equal
@@ -124,12 +149,12 @@ func (v *BigFloat) Abs() d2interface.Vector {
 	clone := v.Clone()
 	neg1 := big.NewFloat(-1.0)
 
-	if clone.X().Sign() == -1 { // is negative1
-		clone.X().Mul(clone.X(), neg1)
+	if clone.XBig().Sign() == -1 { // is negative1
+		clone.XBig().Mul(clone.XBig(), neg1)
 	}
 
-	if v.Y().Sign() == -1 { // is negative1
-		clone.Y().Mul(clone.Y(), neg1)
+	if v.YBig().Sign() == -1 { // is negative1
+		clone.YBig().Mul(clone.YBig(), neg1)
 	}
 
 	return clone
@@ -140,8 +165,8 @@ func (v *BigFloat) Abs() d2interface.Vector {
 func (v *BigFloat) Angle() *big.Float {
 	// HACK we should find a way to do this purely
 	// with big.Float
-	floatX, _ := v.X().Float64()
-	floatY, _ := v.Y().Float64()
+	floatX, _ := v.XBig().Float64()
+	floatY, _ := v.YBig().Float64()
 	floatAngle := math.Atan2(floatY, floatX)
 
 	if floatAngle < 0 {
@@ -158,24 +183,24 @@ func (v *BigFloat) SetAngle(angle *big.Float) d2interface.Vector {
 
 // Add to this Vector the components of the given Vector
 func (v *BigFloat) Add(src d2interface.Vector) d2interface.Vector {
-	v.x.Add(v.x, src.X())
-	v.y.Add(v.y, src.Y())
+	v.x.Add(v.x, src.XBig())
+	v.y.Add(v.y, src.YBig())
 
 	return v
 }
 
 // Subtract from this Vector the components of the given Vector
 func (v *BigFloat) Subtract(src d2interface.Vector) d2interface.Vector {
-	v.x.Sub(v.x, src.X())
-	v.y.Sub(v.y, src.Y())
+	v.x.Sub(v.x, src.XBig())
+	v.y.Sub(v.y, src.YBig())
 
 	return v
 }
 
 // Multiply this Vector with the components of the given Vector
 func (v *BigFloat) Multiply(src d2interface.Vector) d2interface.Vector {
-	v.x.Mul(v.x, src.X())
-	v.y.Mul(v.y, src.Y())
+	v.x.Mul(v.x, src.XBig())
+	v.y.Mul(v.y, src.YBig())
 
 	return v
 }
@@ -190,8 +215,8 @@ func (v *BigFloat) Scale(s *big.Float) d2interface.Vector {
 
 // Divide this Vector by the given Vector
 func (v *BigFloat) Divide(src d2interface.Vector) d2interface.Vector {
-	v.x.Quo(v.x, src.X())
-	v.y.Quo(v.y, src.Y())
+	v.x.Quo(v.x, src.XBig())
+	v.y.Quo(v.y, src.YBig())
 
 	return v
 }
@@ -214,7 +239,7 @@ func (v *BigFloat) DistanceSq(src d2interface.Vector) *big.Float {
 	delta := src.Clone().Subtract(v)
 	deltaSq := delta.Multiply(delta)
 
-	return big.NewFloat(zero).Add(deltaSq.X(), deltaSq.Y())
+	return big.NewFloat(zero).Add(deltaSq.XBig(), deltaSq.YBig())
 }
 
 // Length returns the length of this Vector
@@ -227,7 +252,7 @@ func (v *BigFloat) Length() *big.Float {
 // LengthSq returns the x and y values squared
 func (v *BigFloat) LengthSq() (*big.Float, *big.Float) {
 	clone := v.Clone()
-	x, y := clone.X(), clone.Y()
+	x, y := clone.XBig(), clone.YBig()
 
 	return x.Mul(x, x), y.Mul(y, y)
 }
@@ -277,19 +302,19 @@ func (v *BigFloat) NormalizeLeftHand() d2interface.Vector {
 // Dot returns the dot product of this Vector and the given Vector.
 func (v *BigFloat) Dot(src d2interface.Vector) *big.Float {
 	c := v.Clone()
-	c.X().Mul(c.X(), src.X())
-	c.Y().Mul(c.Y(), src.Y())
+	c.XBig().Mul(c.XBig(), src.XBig())
+	c.YBig().Mul(c.YBig(), src.YBig())
 
-	return c.X().Add(c.X(), c.Y())
+	return c.XBig().Add(c.XBig(), c.YBig())
 }
 
 // Cross Calculate the cross product of this Vector and the given Vector.
 func (v *BigFloat) Cross(src d2interface.Vector) *big.Float {
 	c := v.Clone()
-	c.X().Mul(c.X(), src.X())
-	c.Y().Mul(c.Y(), src.Y())
+	c.XBig().Mul(c.XBig(), src.XBig())
+	c.YBig().Mul(c.YBig(), src.YBig())
 
-	return c.X().Sub(c.X(), c.Y())
+	return c.XBig().Sub(c.XBig(), c.YBig())
 }
 
 // Lerp Linearly interpolate between this Vector and the given Vector.
@@ -298,9 +323,9 @@ func (v *BigFloat) Lerp(
 	t *big.Float,
 ) d2interface.Vector {
 	vc, sc := v.Clone(), src.Clone()
-	x, y := vc.X(), vc.Y()
-	v.x.Set(x.Add(x, t.Mul(t, sc.X().Sub(sc.X(), x))))
-	v.y.Set(y.Add(y, t.Mul(t, sc.Y().Sub(sc.Y(), y))))
+	x, y := vc.XBig(), vc.YBig()
+	v.x.Set(x.Add(x, t.Mul(t, sc.XBig().Sub(sc.XBig(), x))))
+	v.y.Set(y.Add(y, t.Mul(t, sc.YBig().Sub(sc.YBig(), y))))
 
 	return v
 }
@@ -366,14 +391,14 @@ func (v *BigFloat) Floor() d2interface.Vector {
 
 	v.x.Int(&xi)
 	v.y.Int(&yi)
-	v.X().SetInt(&xi)
-	v.Y().SetInt(&yi)
+	v.XBig().SetInt(&xi)
+	v.YBig().SetInt(&yi)
 
 	return v
 }
 
 func (v *BigFloat) String() string {
-	return fmt.Sprintf("BigFloat{%s, %s}", v.x.Text('f', 5), v.y.Text('f', 5))
+	return fmt.Sprintf("BigFloat{%s, %s}", v.x.Text('v', 5), v.y.Text('v', 5))
 }
 
 // BigFloatUp returns a new vector (0, 1)

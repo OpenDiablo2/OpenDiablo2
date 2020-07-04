@@ -1,11 +1,19 @@
 package d2interface
 
-import "math/big"
+import (
+	"math/big"
+)
 
 // Vector is a 2-dimensional vector implementation using big.Float
 type Vector interface {
-	X() *big.Float
-	Y() *big.Float
+	XBig() *big.Float
+	YBig() *big.Float
+	X64() (float64, big.Accuracy)
+	Y64() (float64, big.Accuracy)
+
+	Equals(src Vector) bool
+	FuzzyEquals(src Vector) bool
+
 	Marshal() ([]byte, error)
 	Unmarshal(buf []byte) error
 	Clone() Vector
@@ -13,8 +21,6 @@ type Vector interface {
 	// SetFromEntity(entity WorldEntity) Vector
 	Set(x, y *big.Float) Vector
 	SetToPolar(azimuth, radius *big.Float) Vector
-	Equals(src Vector) bool
-	FuzzyEquals(src Vector) bool
 	Abs() Vector
 	Angle() *big.Float
 	SetAngle(angle *big.Float) Vector
