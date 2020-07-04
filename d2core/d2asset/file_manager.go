@@ -2,6 +2,7 @@ package d2asset
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -14,7 +15,7 @@ const (
 )
 
 type fileManager struct {
-	cache          *d2common.Cache
+	cache          d2interface.Cache
 	archiveManager *archiveManager
 	config         *d2config.Configuration
 }

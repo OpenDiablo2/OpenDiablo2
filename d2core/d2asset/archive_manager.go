@@ -2,6 +2,7 @@ package d2asset
 
 import (
 	"errors"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"path"
 	"sync"
 
@@ -16,7 +17,7 @@ type archiveEntry struct {
 }
 
 type archiveManager struct {
-	cache   *d2common.Cache
+	cache   d2interface.Cache
 	config  *d2config.Configuration
 	entries []archiveEntry
 	mutex   sync.Mutex

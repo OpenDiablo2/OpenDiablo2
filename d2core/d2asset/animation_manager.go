@@ -15,7 +15,7 @@ const (
 )
 
 type animationManager struct {
-	cache    *d2common.Cache
+	cache    d2interface.Cache
 	renderer d2interface.Renderer
 }
 
