@@ -4,6 +4,7 @@ package d2object
 import (
 	"math"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -22,6 +23,7 @@ type Object struct {
 	// nameLabel    d2ui.Label
 	objectRecord *d2datadict.ObjectRecord
 	drawLayer    int
+	name         string
 }
 
 // CreateObject creates an instance of AnimatedComposite
@@ -35,7 +37,7 @@ func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath stri
 		subcellY:     1 + math.Mod(locY, 5),
 		TileX:        x / 5,
 		TileY:        y / 5,
-		// nameLabel:    d2ui.CreateLabel(renderer, d2resource.FontFormal11, d2resource.PaletteStatic),
+		name:         d2common.TranslateString(objectRec.Name),
 	}
 	objectType := &d2datadict.ObjectTypes[objectRec.Index]
 
@@ -123,5 +125,5 @@ func (ob *Object) GetPositionF() (x, y float64) {
 
 // Name gets the name of the object
 func (ob *Object) Name() string {
-	return ob.objectRecord.Name
+	return ob.name
 }
