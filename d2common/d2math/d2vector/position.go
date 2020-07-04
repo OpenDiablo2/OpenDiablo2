@@ -11,7 +11,8 @@ type Position struct {
 // NewPosition creates a new Position at the given
 // float64 world position.
 func NewPosition(x, y float64) *Position {
-	return &Position{New(x, y)}
+	// TODO: BigFloat dependency
+	return &Position{NewBigFloat(x, y)}
 }
 
 // World is the position, where 1 = one map
@@ -38,14 +39,16 @@ func (p *Position) TileOffset() d2interface.Vector {
 // tile.
 func (p *Position) SubWorld() d2interface.Vector {
 	c := p.World().Clone()
-	return c.Multiply(New(5, 5))
+	// TODO: BigFloat dependency
+	return c.Multiply(NewBigFloat(5, 5))
 }
 
 // SubTile is the tile position in sub tiles,
 // always a multiple of 5.
 func (p *Position) SubTile() d2interface.Vector {
 	c := p.Tile().Clone()
-	return c.Multiply(New(5, 5))
+	// TODO: BigFloat dependency
+	return c.Multiply(NewBigFloat(5, 5))
 }
 
 // SubTileOffset is the offset from the sub tile

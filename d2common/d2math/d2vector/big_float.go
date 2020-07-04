@@ -23,21 +23,21 @@ const (
 	zero float64 = 0.0
 )
 
-// New creates a new BigFloat and returns a pointer to it.
-func New(x, y float64) *BigFloat {
+// BigFloat is the implementation of Vector using float64
+// to store x and y.
+type BigFloat struct {
+	x *big.Float
+	y *big.Float
+}
+
+// NewBigFloat creates a new BigFloat and returns a pointer to it.
+func NewBigFloat(x, y float64) *BigFloat {
 	xbf, ybf := big.NewFloat(x), big.NewFloat(y)
 	xbf.SetPrec(d2precision)
 	ybf.SetPrec(d2precision)
 	result := &BigFloat{xbf, ybf}
 
 	return result
-}
-
-// BigFloat has two big.Floats x and y and a set of methods
-// for common vector operations.
-type BigFloat struct {
-	x *big.Float
-	y *big.Float
 }
 
 // X returns the x member of the Vector
@@ -65,7 +65,7 @@ func (v *BigFloat) Unmarshal(buf []byte) error {
 
 // Clone creates a copy of this Vector
 func (v *BigFloat) Clone() d2interface.Vector {
-	result := New(0, 0)
+	result := NewBigFloat(0, 0)
 	result.Copy(v)
 
 	return result
@@ -363,6 +363,7 @@ func (v *BigFloat) Rotate(angle *big.Float) d2interface.Vector {
 // Floor rounds the vector down to the nearest whole numbers.
 func (v *BigFloat) Floor() d2interface.Vector {
 	var xi, yi big.Int
+
 	v.x.Int(&xi)
 	v.y.Int(&yi)
 	v.X().SetInt(&xi)
@@ -375,32 +376,32 @@ func (v *BigFloat) String() string {
 	return fmt.Sprintf("BigFloat{%s, %s}", v.x.Text('f', 5), v.y.Text('f', 5))
 }
 
-// Up returns a new vector (0, 1)
-func Up() d2interface.Vector {
-	return New(0, 1)
+// BigFloatUp returns a new vector (0, 1)
+func BigFloatUp() d2interface.Vector {
+	return NewBigFloat(0, 1)
 }
 
-// Down returns a new vector (0, -1)
-func Down() d2interface.Vector {
-	return New(0, -1)
+// BigFloatDown returns a new vector (0, -1)
+func BigFloatDown() d2interface.Vector {
+	return NewBigFloat(0, -1)
 }
 
-// Right returns a new vector (1, 0)
-func Right() d2interface.Vector {
-	return New(1, 0)
+// BigFloatRight returns a new vector (1, 0)
+func BigFloatRight() d2interface.Vector {
+	return NewBigFloat(1, 0)
 }
 
-// Left returns a new vector (-1, 0)
-func Left() d2interface.Vector {
-	return New(-1, 0)
+// BigFloatLeft returns a new vector (-1, 0)
+func BigFloatLeft() d2interface.Vector {
+	return NewBigFloat(-1, 0)
 }
 
-// One returns a new vector (1, 1)
-func One() d2interface.Vector {
-	return New(1, 1)
+// BigFloatOne returns a new vector (1, 1)
+func BigFloatOne() d2interface.Vector {
+	return NewBigFloat(1, 1)
 }
 
-// Zero returns a new vector (0, 0)
-func Zero() d2interface.Vector {
-	return New(0, 0)
+// BigFloatZero returns a new vector (0, 0)
+func BigFloatZero() d2interface.Vector {
+	return NewBigFloat(0, 0)
 }

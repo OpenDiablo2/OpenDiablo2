@@ -19,8 +19,8 @@ func validate(t *testing.T, original, got, want, unchanged d2interface.Vector) {
 func TestTile(t *testing.T) {
 	p := NewPosition(1.6, 1.6)
 	got := p.Tile()
-	want := New(1, 1)
-	unchanged := New(1.6, 1.6)
+	want := NewBigFloat(1, 1)
+	unchanged := NewBigFloat(1.6, 1.6)
 
 	validate(t, p, got, want, unchanged)
 }
@@ -28,8 +28,8 @@ func TestTile(t *testing.T) {
 func TestTileOffset(t *testing.T) {
 	p := NewPosition(1.6, 1.6)
 	got := p.TileOffset()
-	want := New(0.6, 0.6)
-	unchanged := New(1.6, 1.6)
+	want := NewBigFloat(0.6, 0.6)
+	unchanged := NewBigFloat(1.6, 1.6)
 
 	validate(t, p, got, want, unchanged)
 }
@@ -37,8 +37,8 @@ func TestTileOffset(t *testing.T) {
 func TestSubWorld(t *testing.T) {
 	p := NewPosition(1, 1)
 	got := p.SubWorld()
-	want := New(5, 5)
-	unchanged := New(1, 1)
+	want := NewBigFloat(5, 5)
+	unchanged := NewBigFloat(1, 1)
 
 	validate(t, p, got, want, unchanged)
 }
@@ -46,8 +46,8 @@ func TestSubWorld(t *testing.T) {
 func TestSubTile(t *testing.T) {
 	p := NewPosition(1, 1)
 	got := p.SubTile()
-	want := New(5, 5)
-	unchanged := New(1, 1)
+	want := NewBigFloat(5, 5)
+	unchanged := NewBigFloat(1, 1)
 
 	validate(t, p, got, want, unchanged)
 }
@@ -55,8 +55,8 @@ func TestSubTile(t *testing.T) {
 func TestSubTileOffset(t *testing.T) {
 	p := NewPosition(1.1, 1.1)
 	got := p.SubTileOffset()
-	want := New(0.5, 0.5)
-	unchanged := New(1.1, 1.1)
+	want := NewBigFloat(0.5, 0.5)
+	unchanged := NewBigFloat(1.1, 1.1)
 
 	validate(t, p, got, want, unchanged)
 }
