@@ -126,5 +126,5 @@ func LoadFont(tablePath, spritePath, palettePath string) (*Font, error) {
 
 // LoadPalette loads a palette from a given palette path
 func LoadPalette(palettePath string) (d2interface.Palette, error) {
-	return singleton.paletteManager.loadPalette(palettePath)
+	return singleton.paletteManager.LoadPalette(palettePath)
 }

@@ -18,7 +18,7 @@ func createPaletteManager() *paletteManager {
 	return &paletteManager{d2common.CreateCache(paletteBudget)}
 }
 
-func (pm *paletteManager) loadPalette(palettePath string) (d2interface.Palette, error) {
+func (pm *paletteManager) LoadPalette(palettePath string) (d2interface.Palette, error) {
 	if palette, found := pm.cache.Retrieve(palettePath); found {
 		return palette.(d2interface.Palette), nil
 	}
