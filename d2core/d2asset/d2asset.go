@@ -6,7 +6,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
@@ -82,7 +81,7 @@ func Initialize(renderer d2interface.Renderer,
 }
 
 // LoadFileStream streams an MPQ file from a source file path
-func LoadFileStream(filePath string) (*d2mpq.MpqDataStream, error) {
+func LoadFileStream(filePath string) (d2interface.ArchiveDataStream, error) {
 	data, err := singleton.fileManager.loadFileStream(filePath)
 	if err != nil {
 		log.Printf("error loading file stream %s (%v)", filePath, err.Error())

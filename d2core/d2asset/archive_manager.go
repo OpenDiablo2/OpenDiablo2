@@ -5,21 +5,17 @@ import (
 	"path"
 	"sync"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
 )
 
-type archiveEntry struct {
-	archivePath  string
-	hashEntryMap d2mpq.HashEntryMap
-}
-
 type archiveManager struct {
-	cache   d2interface.Cache
-	config  d2interface.Configuration
-	entries []archiveEntry
-	mutex   sync.Mutex
+	cache    d2interface.Cache
+	config   d2interface.Configuration
+	archives []d2interface.Archive
+	mutex    sync.Mutex
 }
 
 const (
@@ -30,7 +26,7 @@ func createArchiveManager(config d2interface.Configuration) *archiveManager {
 	return &archiveManager{cache: d2common.CreateCache(archiveBudget), config: config}
 }
 
-func (am *archiveManager) loadArchiveForFile(filePath string) (*d2mpq.MPQ, error) {
+func (am *archiveManager) loadArchiveForFile(filePath string) (d2interface.Archive, error) {
 	am.mutex.Lock()
 	defer am.mutex.Unlock()
 
@@ -38,9 +34,9 @@ func (am *archiveManager) loadArchiveForFile(filePath string) (*d2mpq.MPQ, error
 		return nil, err
 	}
 
-	for _, archiveEntry := range am.entries {
-		if archiveEntry.hashEntryMap.Contains(filePath) {
-			result, ok := am.loadArchive(archiveEntry.archivePath)
+	for _, archive := range am.archives {
+		if archive.Contains(filePath) {
+			result, ok := am.loadArchive(archive.Path())
 			if ok == nil {
 				return result, nil
 			}
@@ -58,8 +54,8 @@ func (am *archiveManager) fileExistsInArchive(filePath string) (bool, error) {
 		return false, err
 	}
 
-	for _, archiveEntry := range am.entries {
-		if archiveEntry.hashEntryMap.Contains(filePath) {
+	for _, archiveEntry := range am.archives {
+		if archiveEntry.Contains(filePath) {
 			return true, nil
 		}
 	}
@@ -67,9 +63,9 @@ func (am *archiveManager) fileExistsInArchive(filePath string) (bool, error) {
 	return false, nil
 }
 
-func (am *archiveManager) loadArchive(archivePath string) (*d2mpq.MPQ, error) {
+func (am *archiveManager) loadArchive(archivePath string) (d2interface.Archive, error) {
 	if archive, found := am.cache.Retrieve(archivePath); found {
-		return archive.(*d2mpq.MPQ), nil
+		return archive.(d2interface.Archive), nil
 	}
 
 	archive, err := d2mpq.Load(archivePath)
@@ -77,7 +73,7 @@ func (am *archiveManager) loadArchive(archivePath string) (*d2mpq.MPQ, error) {
 		return nil, err
 	}
 
-	if err := am.cache.Insert(archivePath, archive, int(archive.Data.ArchiveSize)); err != nil {
+	if err := am.cache.Insert(archivePath, archive, int(archive.Size())); err != nil {
 		return nil, err
 	}
 
@@ -85,11 +81,11 @@ func (am *archiveManager) loadArchive(archivePath string) (*d2mpq.MPQ, error) {
 }
 
 func (am *archiveManager) cacheArchiveEntries() error {
-	if len(am.entries) == len(am.config.MpqLoadOrder()) {
+	if len(am.archives) == len(am.config.MpqLoadOrder()) {
 		return nil
 	}
 
-	am.entries = nil
+	am.archives = nil
 
 	for _, archiveName := range am.config.MpqLoadOrder() {
 		archivePath := path.Join(am.config.MpqPath(), archiveName)
@@ -99,9 +95,9 @@ func (am *archiveManager) cacheArchiveEntries() error {
 			return err
 		}
 
-		am.entries = append(
-			am.entries,
-			archiveEntry{archivePath, archive.HashEntryMap},
+		am.archives = append(
+			am.archives,
+			archive,
 		)
 	}
 

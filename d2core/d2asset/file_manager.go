@@ -1,7 +1,6 @@
 package d2asset
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"strings"
 
@@ -28,7 +27,7 @@ func createFileManager(config d2interface.Configuration,
 	}
 }
 
-func (fm *fileManager) loadFileStream(filePath string) (*d2mpq.MpqDataStream, error) {
+func (fm *fileManager) loadFileStream(filePath string) (d2interface.ArchiveDataStream, error) {
 	filePath = fm.fixupFilePath(filePath)
 
 	archive, err := fm.archiveManager.loadArchiveForFile(filePath)
