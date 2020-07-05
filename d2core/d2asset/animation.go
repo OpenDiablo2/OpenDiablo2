@@ -11,7 +11,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 )
@@ -60,7 +59,7 @@ type Animation struct {
 }
 
 // CreateAnimationFromDCC creates an animation from d2dcc.DCC and d2dat.DATPalette
-func CreateAnimationFromDCC(renderer d2interface.Renderer, dcc *d2dcc.DCC, palette *d2dat.DATPalette,
+func CreateAnimationFromDCC(renderer d2interface.Renderer, dcc *d2dcc.DCC, palette d2interface.Palette,
 	transparency int) (*Animation, error) {
 	animation := &Animation{
 		playLength: defaultPlayLength,
@@ -88,11 +87,11 @@ func CreateAnimationFromDCC(renderer d2interface.Renderer, dcc *d2dcc.DCC, palet
 			for y := 0; y < frameHeight; y++ {
 				for x := 0; x < frameWidth; x++ {
 					if paletteIndex := dccFrame.PixelData[y*frameWidth+x]; paletteIndex != 0 {
-						palColor := palette.Colors[paletteIndex]
+						palColor := palette.GetColors()[paletteIndex]
 						offset := (x + y*frameWidth) * bytesPerPixel
-						pixels[offset] = palColor.R
-						pixels[offset+1] = palColor.G
-						pixels[offset+2] = palColor.B
+						pixels[offset] = palColor.R()
+						pixels[offset+1] = palColor.G()
+						pixels[offset+2] = palColor.B()
 						pixels[offset+3] = byte(transparency)
 					}
 				}
@@ -126,7 +125,8 @@ func CreateAnimationFromDCC(renderer d2interface.Renderer, dcc *d2dcc.DCC, palet
 }
 
 // CreateAnimationFromDC6 creates an Animation from d2dc6.DC6 and d2dat.DATPalette
-func CreateAnimationFromDC6(renderer d2interface.Renderer, dc6 *d2dc6.DC6, palette *d2dat.DATPalette) (*Animation, error) {
+func CreateAnimationFromDC6(renderer d2interface.Renderer, dc6 *d2dc6.DC6,
+	palette d2interface.Palette) (*Animation, error) {
 	animation := &Animation{
 		playLength:     defaultPlayLength,
 		playLoop:       true,
@@ -180,11 +180,11 @@ func CreateAnimationFromDC6(renderer d2interface.Renderer, dc6 *d2dc6.DC6, palet
 			if indexData[i] < 1 { // TODO: Is this == -1 or < 1?
 				continue
 			}
-
-			colorData[i*bytesPerPixel] = palette.Colors[indexData[i]].R
-			colorData[i*bytesPerPixel+1] = palette.Colors[indexData[i]].G
-			colorData[i*bytesPerPixel+2] = palette.Colors[indexData[i]].B
-			colorData[i*bytesPerPixel+3] = 0xff
+			color := palette.GetColors()[indexData[i]]
+			colorData[i*bytesPerPixel] = color.R()
+			colorData[i*bytesPerPixel+1] = color.G()
+			colorData[i*bytesPerPixel+2] = color.B()
+			colorData[i*bytesPerPixel+3] = color.A()
 		}
 
 		if err := sfc.ReplacePixels(colorData); err != nil {

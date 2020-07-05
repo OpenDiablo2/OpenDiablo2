@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
@@ -126,6 +125,6 @@ func LoadFont(tablePath, spritePath, palettePath string) (*Font, error) {
 }
 
 // LoadPalette loads a palette from a given palette path
-func LoadPalette(palettePath string) (*d2dat.DATPalette, error) {
+func LoadPalette(palettePath string) (d2interface.Palette, error) {
 	return singleton.paletteManager.loadPalette(palettePath)
 }

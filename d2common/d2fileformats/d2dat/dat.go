@@ -1,11 +1,22 @@
 package d2dat
 
+import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
+const (
+	// index offset helpers
+	b = iota
+	g
+	r
+	o
+)
+
 // Load loads a DAT file.
-func Load(data []byte) (*DATPalette, error) {
+func Load(data []byte) (d2interface.Palette, error) {
 	palette := &DATPalette{}
 
 	for i := 0; i < 256; i++ {
-		palette.Colors[i] = DATColor{B: data[i*3], G: data[i*3+1], R: data[i*3+2]}
+		// offsets look like i*3+n, where n is 0,1,2
+		palette.colors[i] = &DATColor{b: data[i*o+b], g: data[i*o+g], r: data[i*o+r]}
 	}
 
 	return palette, nil
