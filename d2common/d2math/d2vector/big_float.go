@@ -3,10 +3,10 @@ package d2vector
 
 import (
 	"fmt"
-	"math"
 	"math/big"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
 const (
@@ -15,23 +15,15 @@ const (
 
 	// d2precision is how much precision we want from big.Float
 	d2precision uint = 64 // was chosen arbitrarily
-
-	// for convenience in negating sign
-	negative1 float64 = -1.0
-
-	// for convenience
-	zero float64 = 0.0
 )
 
-// BigFloat is the implementation of Vector using float64
-// to store x and y.
+// BigFloat is the implementation of Vector using big.Float.
 type BigFloat struct {
-	x *big.Float
-	y *big.Float
+	x, y *big.Float
 }
 
 // NewBigFloat creates a new BigFloat and returns a pointer to it.
-func NewBigFloat(x, y float64) *BigFloat {
+func NewBigFloat(x, y float64) d2interface.Vector {
 	xbf, ybf := big.NewFloat(x), big.NewFloat(y)
 	xbf.SetPrec(d2precision)
 	ybf.SetPrec(d2precision)
@@ -40,40 +32,105 @@ func NewBigFloat(x, y float64) *BigFloat {
 	return result
 }
 
-// XBig returns the big.Float value of x.
-func (v *BigFloat) XBig() *big.Float {
-	return v.x
+// XYBigFloat returns the values as big.Float.
+func (f *BigFloat) XYBigFloat() (*big.Float, *big.Float) {
+	return f.x, f.y
 }
 
-// YBig returns the big.Float value of y.
-func (v *BigFloat) YBig() *big.Float {
-	return v.y
+// XYFloat64 returns the values as float64.
+func (f *BigFloat) XYFloat64() (*float64, *float64) {
+	x, _ := f.x.Float64()
+	y, _ := f.y.Float64()
+
+	return &x, &y
 }
 
-// X64 returns the float64 value of x.
-func (v *BigFloat) X64() (float64, big.Accuracy) {
-	return v.x.Float64()
+// Equals check whether this Vector is equal to a given Vector.
+func (f *BigFloat) Equals(v d2interface.Vector) bool {
+	vx, vy := v.XYBigFloat()
+	return f.x.Cmp(vx) == 0 && f.y.Cmp(vy) == 0
 }
 
-// Y64 returns the float64 value of y.
-func (v *BigFloat) Y64() (float64, big.Accuracy) {
-	return v.y.Float64()
+// EqualsF checks if the Vector is approximately equal
+// to the given Vector.
+func (f *BigFloat) EqualsF(v d2interface.Vector) bool {
+	x, y := f.CompareF(v)
+	return x == 0 && y == 0
 }
 
-// CopyFloat64 copies the values from a Float64 to f.
-func (v *BigFloat) CopyFloat64(sf Float64) {
-	v.x.Set(sf.XBig())
-	v.x.Set(sf.YBig())
+// CompareF performs a fuzzy comparison and returns 2
+// ints represending the -1 to 1 comparison of x and y.
+func (f *BigFloat) CompareF(v d2interface.Vector) (int, int) {
+	vx, vy := v.XYFloat64()
+	fx, fy := f.XYFloat64()
+
+	return d2math.CompareFloat64Fuzzy(fx, vx),
+		d2math.CompareFloat64Fuzzy(fy, vy)
 }
 
-// AsFloat64 returns a pointer to a float64 base on
-// the values of v.
-func (v *BigFloat) AsFloat64() *Float64 {
-	sf := new(Float64)
-	sf.x, _ = v.X64()
-	sf.y, _ = v.Y64()
-	return sf
+// Set sets the vector values to the given float64 values.
+func (f *BigFloat) Set(x, y float64) d2interface.Vector {
+	f.x.SetFloat64(x)
+	f.x.SetFloat64(y)
+
+	return f
 }
+
+// Clone creates a copy of this Vector.
+func (f *BigFloat) Clone() d2interface.Vector {
+	result := NewBigFloat(0, 0)
+	x, y := result.XYBigFloat()
+	x.Copy(f.x)
+	y.Copy(f.y)
+
+	return result
+}
+
+// Floor rounds the vector down to the nearest whole numbers.
+func (f *BigFloat) Floor() d2interface.Vector {
+	var xi, yi big.Int
+
+	f.x.Int(&xi)
+	f.y.Int(&yi)
+	f.x.SetInt(&xi)
+	f.y.SetInt(&yi)
+
+	return f
+}
+
+// Add to this Vector the components of the given Vector.
+func (f *BigFloat) Add(v d2interface.Vector) d2interface.Vector {
+	vx, vy := v.XYBigFloat()
+	f.x.Add(f.x, vx)
+	f.y.Add(f.y, vy)
+
+	return f
+}
+
+// Subtract from this Vector from the components of the given Vector.
+func (f *BigFloat) Subtract(v d2interface.Vector) d2interface.Vector {
+	vx, vy := v.XYBigFloat()
+	f.x.Sub(f.x, vx)
+	f.y.Sub(f.y, vy)
+
+	return f
+}
+
+// Multiply this Vector by the components of the given Vector.
+func (f *BigFloat) Multiply(v d2interface.Vector) d2interface.Vector {
+	vx, vy := v.XYBigFloat()
+	f.x.Mul(f.x, vx)
+	f.y.Mul(f.y, vy)
+
+	return f
+}
+
+func (f *BigFloat) String() string {
+	return fmt.Sprintf("BigFloat{%s, %s}", f.x.Text('f', 5), f.y.Text('f', 5))
+}
+
+/*
+
 
 // Marshal converts the Vector into a slice of bytes
 func (v *BigFloat) Marshal() ([]byte, error) {
@@ -86,22 +143,6 @@ func (v *BigFloat) Marshal() ([]byte, error) {
 func (v *BigFloat) Unmarshal(buf []byte) error {
 	// TODO not sure how to do this properly
 	return nil
-}
-
-// Clone creates a copy of this Vector
-func (v *BigFloat) Clone() d2interface.Vector {
-	result := NewBigFloat(0, 0)
-	result.Copy(v)
-
-	return result
-}
-
-// Copy copies the src x/y members to this Vector x/y members
-func (v *BigFloat) Copy(src d2interface.Vector) d2interface.Vector {
-	v.x.Copy(src.XBig())
-	v.y.Copy(src.YBig())
-
-	return v
 }
 
 // SetFromEntity copies the vector of a world entity
@@ -127,21 +168,6 @@ func (v *BigFloat) SetToPolar(azimuth, radius *big.Float) d2interface.Vector {
 	v.y.SetFloat64(math.Sin(a) * r)
 
 	return v
-}
-
-// Equals check whether this Vector is equal to a given Vector.
-func (v *BigFloat) Equals(src d2interface.Vector) bool {
-	return v.x.Cmp(src.XBig()) == 0 && v.y.Cmp(src.YBig()) == 0
-}
-
-// FuzzyEquals checks if the Vector is approximately equal
-// to the given Vector. epsilon is what we consider `smol enough`
-func (v *BigFloat) FuzzyEquals(src d2interface.Vector) bool {
-	smol := big.NewFloat(epsilon)
-	d := v.Distance(src)
-	d.Abs(d)
-
-	return d.Cmp(smol) < 1 || d.Cmp(smol) < 1
 }
 
 // Abs returns a clone that is positive
@@ -181,29 +207,7 @@ func (v *BigFloat) SetAngle(angle *big.Float) d2interface.Vector {
 	return v.SetToPolar(angle, v.Length())
 }
 
-// Add to this Vector the components of the given Vector
-func (v *BigFloat) Add(src d2interface.Vector) d2interface.Vector {
-	v.x.Add(v.x, src.XBig())
-	v.y.Add(v.y, src.YBig())
 
-	return v
-}
-
-// Subtract from this Vector the components of the given Vector
-func (v *BigFloat) Subtract(src d2interface.Vector) d2interface.Vector {
-	v.x.Sub(v.x, src.XBig())
-	v.y.Sub(v.y, src.YBig())
-
-	return v
-}
-
-// Multiply this Vector with the components of the given Vector
-func (v *BigFloat) Multiply(src d2interface.Vector) d2interface.Vector {
-	v.x.Mul(v.x, src.XBig())
-	v.y.Mul(v.y, src.YBig())
-
-	return v
-}
 
 // Scale this Vector by the given value
 func (v *BigFloat) Scale(s *big.Float) d2interface.Vector {
@@ -385,21 +389,8 @@ func (v *BigFloat) Rotate(angle *big.Float) d2interface.Vector {
 	return v
 }
 
-// Floor rounds the vector down to the nearest whole numbers.
-func (v *BigFloat) Floor() d2interface.Vector {
-	var xi, yi big.Int
 
-	v.x.Int(&xi)
-	v.y.Int(&yi)
-	v.XBig().SetInt(&xi)
-	v.YBig().SetInt(&yi)
 
-	return v
-}
-
-func (v *BigFloat) String() string {
-	return fmt.Sprintf("BigFloat{%s, %s}", v.x.Text('v', 5), v.y.Text('v', 5))
-}
 
 // BigFloatUp returns a new vector (0, 1)
 func BigFloatUp() d2interface.Vector {
@@ -429,4 +420,4 @@ func BigFloatOne() d2interface.Vector {
 // BigFloatZero returns a new vector (0, 0)
 func BigFloatZero() d2interface.Vector {
 	return NewBigFloat(0, 0)
-}
+}*/
