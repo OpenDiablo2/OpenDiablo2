@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
@@ -106,13 +105,14 @@ func FileExists(filePath string) (bool, error) {
 }
 
 // LoadAnimation loads an animation by its resource path and its palette path
-func LoadAnimation(animationPath, palettePath string) (*Animation, error) {
+func LoadAnimation(animationPath, palettePath string) (d2interface.Animation, error) {
 	return LoadAnimationWithTransparency(animationPath, palettePath, 255)
 }
 
 // LoadAnimationWithTransparency loads an animation by its resource path and its palette path with a given transparency value
-func LoadAnimationWithTransparency(animationPath, palettePath string, transparency int) (*Animation, error) {
-	return singleton.animationManager.loadAnimation(animationPath, palettePath, transparency)
+func LoadAnimationWithTransparency(animationPath, palettePath string,
+	transparency int) (d2interface.Animation, error) {
+	return singleton.animationManager.LoadAnimation(animationPath, palettePath, transparency)
 }
 
 // LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it
@@ -126,6 +126,6 @@ func LoadFont(tablePath, spritePath, palettePath string) (*Font, error) {
 }
 
 // LoadPalette loads a palette from a given palette path
-func LoadPalette(palettePath string) (*d2dat.DATPalette, error) {
-	return singleton.paletteManager.loadPalette(palettePath)
+func LoadPalette(palettePath string) (d2interface.Palette, error) {
+	return singleton.paletteManager.LoadPalette(palettePath)
 }

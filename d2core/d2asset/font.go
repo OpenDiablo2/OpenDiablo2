@@ -19,7 +19,7 @@ type fontGlyph struct {
 
 // Font represents a displayable font
 type Font struct {
-	sheet  *Animation
+	sheet  d2interface.Animation
 	glyphs map[rune]fontGlyph
 	color  color.Color
 }
