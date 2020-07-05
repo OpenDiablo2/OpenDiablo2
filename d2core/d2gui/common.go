@@ -18,7 +18,8 @@ func loadFont(fontStyle FontStyle) (*d2asset.Font, error) {
 	return d2asset.LoadFont(config.fontBasePath+".tbl", config.fontBasePath+".dc6", config.palettePath)
 }
 
-func renderSegmented(animation *d2asset.Animation, segmentsX, segmentsY, frameOffset int, target d2interface.Surface) error {
+func renderSegmented(animation d2interface.Animation, segmentsX, segmentsY, frameOffset int,
+	target d2interface.Surface) error {
 	var currentY int
 	for y := 0; y < segmentsY; y++ {
 		var currentX int

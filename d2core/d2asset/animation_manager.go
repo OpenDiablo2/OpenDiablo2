@@ -19,6 +19,14 @@ type animationManager struct {
 	renderer d2interface.Renderer
 }
 
+func (am *animationManager) ClearCache() {
+	panic("implement me")
+}
+
+func (am *animationManager) GetCache() d2interface.Cache {
+	panic("implement me")
+}
+
 func createAnimationManager(renderer d2interface.Renderer) *animationManager {
 	return &animationManager{
 		renderer: renderer,
@@ -26,13 +34,15 @@ func createAnimationManager(renderer d2interface.Renderer) *animationManager {
 	}
 }
 
-func (am *animationManager) loadAnimation(animationPath, palettePath string, transparency int) (*Animation, error) {
+func (am *animationManager) LoadAnimation(
+	animationPath, palettePath string,
+	transparency int ) (d2interface.Animation, error) {
 	cachePath := fmt.Sprintf("%s;%s;%d", animationPath, palettePath, transparency)
 	if animation, found := am.cache.Retrieve(cachePath); found {
 		return animation.(*Animation).Clone(), nil
 	}
 
-	var animation *Animation
+	var animation d2interface.Animation
 
 	ext := strings.ToLower(filepath.Ext(animationPath))
 	switch ext {

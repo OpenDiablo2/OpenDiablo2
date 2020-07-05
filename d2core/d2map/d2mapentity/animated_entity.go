@@ -2,7 +2,6 @@ package d2mapentity
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 // AnimatedEntity represents an animation that can be projected onto the map.
@@ -12,11 +11,11 @@ type AnimatedEntity struct {
 	action      int
 	repetitions int
 
-	animation *d2asset.Animation
+	animation d2interface.Animation
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
-func CreateAnimatedEntity(x, y int, animation *d2asset.Animation) *AnimatedEntity {
+func CreateAnimatedEntity(x, y int, animation d2interface.Animation) *AnimatedEntity {
 	entity := &AnimatedEntity{
 		mapEntity: createMapEntity(x, y),
 		animation: animation,

@@ -164,7 +164,7 @@ type compositeMode struct {
 	weaponClass   string
 	playedCount   int
 
-	layers []*Animation
+	layers []d2interface.Animation
 
 	frameCount     int
 	frameIndex     int
@@ -194,7 +194,7 @@ func (c *Composite) createMode(animationMode, weaponClass string) (*compositeMod
 		cof:            cof,
 		animationMode:  animationMode,
 		weaponClass:    weaponClass,
-		layers:         make([]*Animation, d2enum.CompositeTypeMax),
+		layers:         make([]d2interface.Animation, d2enum.CompositeTypeMax),
 		frameCount:     animationData[0].FramesPerDirection,
 		animationSpeed: 1.0 / ((float64(animationData[0].AnimationSpeed) * 25.0) / 256.0),
 	}
@@ -240,7 +240,7 @@ func (c *Composite) createMode(animationMode, weaponClass string) (*compositeMod
 }
 
 func (c *Composite) loadCompositeLayer(layerKey, layerValue, animationMode, weaponClass,
-	palettePath string, transparency int) (*Animation, error) {
+	palettePath string, transparency int) (d2interface.Animation, error) {
 	animationPaths := []string{
 		fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dcc", c.basePath, c.token, layerKey, c.token, layerKey, layerValue, animationMode, weaponClass),
 		fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dc6", c.basePath, c.token, layerKey, c.token, layerKey, layerValue, animationMode, weaponClass),

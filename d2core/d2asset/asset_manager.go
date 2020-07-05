@@ -12,7 +12,7 @@ type assetManager struct {
 	archivedFileManager     d2interface.ArchivedFileManager
 	paletteManager          d2interface.ArchivedPaletteManager
 	paletteTransformManager *paletteTransformManager
-	animationManager        *animationManager
+	animationManager        d2interface.ArchivedAnimationManager
 	fontManager             *fontManager
 }
 
