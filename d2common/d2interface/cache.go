@@ -9,3 +9,9 @@ type Cache interface {
 	Retrieve(key string) (interface{}, bool)
 	Clear()
 }
+
+// Cacher is something that has a cache
+type Cacher interface {
+	ClearCache()
+	GetCache() Cache
+}

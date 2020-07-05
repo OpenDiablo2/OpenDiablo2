@@ -108,11 +108,6 @@ func (am *archiveManager) CacheArchiveEntries() error {
 	return nil
 }
 
-// SetVerbose enables/disables verbose printing for the archive manager
-func (am *archiveManager) SetVerbose(verbose bool) {
-	am.cache.SetVerbose(verbose)
-}
-
 // ClearCache clears the archive manager cache
 func (am *archiveManager) ClearCache() {
 	am.cache.Clear()

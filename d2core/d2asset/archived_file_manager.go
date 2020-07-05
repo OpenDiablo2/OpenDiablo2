@@ -19,7 +19,7 @@ type fileManager struct {
 }
 
 func createFileManager(config d2interface.Configuration,
-	archiveManager d2interface.ArchiveManager) *fileManager {
+	archiveManager d2interface.ArchiveManager) d2interface.ArchivedFileManager {
 	return &fileManager{
 		d2common.CreateCache(fileBudget),
 		archiveManager,
@@ -27,7 +27,8 @@ func createFileManager(config d2interface.Configuration,
 	}
 }
 
-func (fm *fileManager) loadFileStream(filePath string) (d2interface.ArchiveDataStream, error) {
+// LoadFileStream loads a file as a stream automatically from an archive
+func (fm *fileManager) LoadFileStream(filePath string) (d2interface.ArchiveDataStream, error) {
 	filePath = fm.fixupFilePath(filePath)
 
 	archive, err := fm.archiveManager.LoadArchiveForFile(filePath)
@@ -38,7 +39,8 @@ func (fm *fileManager) loadFileStream(filePath string) (d2interface.ArchiveDataS
 	return archive.ReadFileStream(filePath)
 }
 
-func (fm *fileManager) loadFile(filePath string) ([]byte, error) {
+// LoadFile loads a file automatically from a managed archive
+func (fm *fileManager) LoadFile(filePath string) ([]byte, error) {
 	filePath = fm.fixupFilePath(filePath)
 	if value, found := fm.cache.Retrieve(filePath); found {
 		return value.([]byte), nil
@@ -61,9 +63,18 @@ func (fm *fileManager) loadFile(filePath string) ([]byte, error) {
 	return data, nil
 }
 
-func (fm *fileManager) fileExists(filePath string) (bool, error) {
+// FileExists checks if a file exists in an archive
+func (fm *fileManager) FileExists(filePath string) (bool, error) {
 	filePath = fm.fixupFilePath(filePath)
 	return fm.archiveManager.FileExistsInArchive(filePath)
+}
+
+func (fm *fileManager) ClearCache() {
+	fm.cache.Clear()
+}
+
+func (fm *fileManager) GetCache() d2interface.Cache {
+	return fm.cache
 }
 
 func (fm *fileManager) fixupFilePath(filePath string) string {
