@@ -19,12 +19,12 @@ type fontGlyph struct {
 
 // Font represents a displayable font
 type Font struct {
-	sheet  *Animation
+	sheet  d2interface.Animation
 	glyphs map[rune]fontGlyph
 	color  color.Color
 }
 
-func loadFont(tablePath, spritePath, palettePath string) (*Font, error) {
+func loadFont(tablePath, spritePath, palettePath string) (d2interface.Font, error) {
 	sheet, err := LoadAnimation(spritePath, palettePath)
 	if err != nil {
 		return nil, err
@@ -62,6 +62,7 @@ func loadFont(tablePath, spritePath, palettePath string) (*Font, error) {
 	return font, nil
 }
 
+// SetColor sets the fonts color
 func (f *Font) SetColor(c color.Color) {
 	f.color = c
 }
@@ -94,7 +95,7 @@ func (f *Font) GetTextMetrics(text string) (width, height int) {
 }
 
 // Clone creates a shallow copy of the Font
-func (f *Font) Clone() *Font {
+func (f *Font) Clone() d2interface.Font {
 	return &Font{
 		sheet:  f.sheet,
 		glyphs: f.glyphs,

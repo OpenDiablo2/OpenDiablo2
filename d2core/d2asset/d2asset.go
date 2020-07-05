@@ -41,7 +41,7 @@ func Initialize(renderer d2interface.Renderer,
 
 		archiveManager.GetCache().SetVerbose(verbose)
 		archivedFileManager.GetCache().SetVerbose(verbose)
-		paletteManager.cache.SetVerbose(verbose)
+		paletteManager.GetCache().SetVerbose(verbose)
 		paletteTransformManager.cache.SetVerbose(verbose)
 		animationManager.cache.SetVerbose(verbose)
 	}); err != nil {
@@ -49,7 +49,6 @@ func Initialize(renderer d2interface.Renderer,
 	}
 
 	if err := term.BindAction("assetstat", "display asset manager cache statistics", func() {
-
 		var cacheStatistics = func(c d2interface.Cache) float64 {
 			const percent = 100.0
 			return float64(c.GetWeight()) / float64(c.GetBudget()) * percent
@@ -57,10 +56,10 @@ func Initialize(renderer d2interface.Renderer,
 
 		term.OutputInfof("archive cache: %f", cacheStatistics(archiveManager.GetCache()))
 		term.OutputInfof("file cache: %f", cacheStatistics(archivedFileManager.GetCache()))
-		term.OutputInfof("palette cache: %f", cacheStatistics(paletteManager.cache))
+		term.OutputInfof("palette cache: %f", cacheStatistics(paletteManager.GetCache()))
 		term.OutputInfof("palette transform cache: %f", cacheStatistics(paletteTransformManager.cache))
 		term.OutputInfof("animation cache: %f", cacheStatistics(animationManager.cache))
-		term.OutputInfof("font cache: %f", cacheStatistics(fontManager.cache))
+		term.OutputInfof("font cache: %f", cacheStatistics(fontManager.GetCache()))
 	}); err != nil {
 		return err
 	}
@@ -68,10 +67,10 @@ func Initialize(renderer d2interface.Renderer,
 	if err := term.BindAction("assetclear", "clear asset manager cache", func() {
 		archiveManager.ClearCache()
 		archivedFileManager.GetCache().Clear()
-		paletteManager.cache.Clear()
+		paletteManager.ClearCache()
 		paletteTransformManager.cache.Clear()
-		animationManager.cache.Clear()
-		fontManager.cache.Clear()
+		animationManager.ClearCache()
+		fontManager.ClearCache()
 	}); err != nil {
 		return err
 	}
@@ -105,13 +104,14 @@ func FileExists(filePath string) (bool, error) {
 }
 
 // LoadAnimation loads an animation by its resource path and its palette path
-func LoadAnimation(animationPath, palettePath string) (*Animation, error) {
+func LoadAnimation(animationPath, palettePath string) (d2interface.Animation, error) {
 	return LoadAnimationWithTransparency(animationPath, palettePath, 255)
 }
 
 // LoadAnimationWithTransparency loads an animation by its resource path and its palette path with a given transparency value
-func LoadAnimationWithTransparency(animationPath, palettePath string, transparency int) (*Animation, error) {
-	return singleton.animationManager.loadAnimation(animationPath, palettePath, transparency)
+func LoadAnimationWithTransparency(animationPath, palettePath string,
+	transparency int) (d2interface.Animation, error) {
+	return singleton.animationManager.LoadAnimation(animationPath, palettePath, transparency)
 }
 
 // LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it
@@ -120,8 +120,8 @@ func LoadComposite(baseType d2enum.ObjectType, token, palettePath string) (*Comp
 }
 
 // LoadFont loads a font the resource files
-func LoadFont(tablePath, spritePath, palettePath string) (*Font, error) {
-	return singleton.fontManager.loadFont(tablePath, spritePath, palettePath)
+func LoadFont(tablePath, spritePath, palettePath string) (d2interface.Font, error) {
+	return singleton.fontManager.LoadFont(tablePath, spritePath, palettePath)
 }
 
 // LoadPalette loads a palette from a given palette path

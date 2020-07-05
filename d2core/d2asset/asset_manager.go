@@ -12,8 +12,8 @@ type assetManager struct {
 	archivedFileManager     d2interface.ArchivedFileManager
 	paletteManager          d2interface.ArchivedPaletteManager
 	paletteTransformManager *paletteTransformManager
-	animationManager        *animationManager
-	fontManager             *fontManager
+	animationManager        d2interface.ArchivedAnimationManager
+	fontManager             d2interface.ArchivedFontManager
 }
 
 func loadDC6(dc6Path string) (*d2dc6.DC6, error) {

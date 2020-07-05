@@ -13,10 +13,10 @@ import (
 
 type manager struct {
 	layout        *Layout
-	cursorAnim    *d2asset.Animation
+	cursorAnim    d2interface.Animation
 	cursorX       int
 	cursorY       int
-	loadingAnim   *d2asset.Animation
+	loadingAnim   d2interface.Animation
 	cursorVisible bool
 	loading       bool
 }

@@ -19,7 +19,7 @@ type Sprite struct {
 	segmentsY   int
 	frameOffset int
 
-	animation *d2asset.Animation
+	animation d2interface.Animation
 }
 
 type AnimatedSprite struct {

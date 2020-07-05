@@ -14,10 +14,11 @@ const (
 	paletteBudget = 64
 )
 
-func createPaletteManager() *paletteManager {
+func createPaletteManager() d2interface.ArchivedPaletteManager {
 	return &paletteManager{d2common.CreateCache(paletteBudget)}
 }
 
+// LoadPalette loads a palette from archives managed by the ArchiveManager
 func (pm *paletteManager) LoadPalette(palettePath string) (d2interface.Palette, error) {
 	if palette, found := pm.cache.Retrieve(palettePath); found {
 		return palette.(d2interface.Palette), nil
@@ -38,4 +39,14 @@ func (pm *paletteManager) LoadPalette(palettePath string) (d2interface.Palette, 
 	}
 
 	return palette, nil
+}
+
+// ClearCache clears the palette cache
+func (pm *paletteManager) ClearCache() {
+	pm.cache.Clear()
+}
+
+// GetCache returns the palette managers cache
+func (pm *paletteManager) GetCache() d2interface.Cache {
+	return pm.cache
 }
