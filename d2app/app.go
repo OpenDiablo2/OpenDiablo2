@@ -66,6 +66,7 @@ func (p *App) Input() (d2interface.InputManager, error) {
 	if p.input == nil {
 		return nil, errors.New("no input manager bound to app")
 	}
+
 	return p.input, nil
 }
 
@@ -74,6 +75,7 @@ func (p *App) Audio() (d2interface.AudioProvider, error) {
 	if p.audio == nil {
 		return nil, errors.New("no audio provider bound to app")
 	}
+
 	return p.audio, nil
 }
 
@@ -81,6 +83,7 @@ func (p *App) Renderer() (d2interface.Renderer, error) {
 	if p.renderer == nil {
 		return nil, errors.New("no renderer bound to app")
 	}
+
 	return p.renderer, nil
 }
 
@@ -88,13 +91,16 @@ func (p *App) Terminal() (d2interface.Terminal, error) {
 	if p.terminal == nil {
 		return nil, errors.New("no terminal bound to app")
 	}
+
 	return p.terminal, nil
+
 }
 
 func (p *App) Asset() (d2interface.AssetManager, error) {
 	if p.asset == nil {
 		return nil, errors.New("no asset manager bound to app")
 	}
+
 	return p.asset, nil
 }
 
@@ -233,31 +239,51 @@ func (p *App) initialize() error {
 	if err != nil {
 		return err
 	}
-	asset.Initialize()
+
+	err = asset.Initialize()
+	if err != nil {
+		return err
+	}
 
 	input, err := p.Input()
 	if err != nil {
 		return err
 	}
-	input.Initialize()
+
+	err = input.Initialize()
+	if err != nil {
+		return err
+	}
 
 	render, err := p.Renderer()
 	if err != nil {
 		return err
 	}
-	render.Initialize()
+
+	err = render.Initialize()
+	if err != nil {
+		return err
+	}
 
 	terminal, err := p.Terminal()
 	if err != nil {
 		return err
 	}
-	terminal.Initialize()
+
+	err = terminal.Initialize()
+	if err != nil {
+		return err
+	}
 
 	audio, err := p.Audio()
 	if err != nil {
 		return err
 	}
-	audio.Initialize()
+
+	err = audio.Initialize()
+	if err != nil {
+		return err
+	}
 
 	p.timeScale = 1.0
 	p.lastTime = d2common.Now()

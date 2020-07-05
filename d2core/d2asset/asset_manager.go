@@ -54,12 +54,27 @@ func (am *assetManager) Initialize() error {
 		fontManager             = createFontManager()
 	)
 
-	singleton.Bind(archiveManager)
-	singleton.Bind(archivedFileManager)
-	singleton.Bind(paletteManager)
+	if err := singleton.Bind(archiveManager); err != nil {
+		return err
+	}
+
+	if err := singleton.Bind(archivedFileManager); err != nil {
+		return err
+	}
+
+	if err := singleton.Bind(paletteManager); err != nil {
+		return err
+	}
+
 	// singleton.Bind(paletteTransformManager) todo
-	singleton.Bind(animationManager)
-	singleton.Bind(fontManager)
+
+	if err := singleton.Bind(animationManager); err != nil {
+		return err
+	}
+
+	if err := singleton.Bind(fontManager); err != nil {
+		return err
+	}
 
 	if err := term.BindAction("assetspam", "display verbose asset manager logs", func(verbose bool) {
 		if verbose {
@@ -110,7 +125,7 @@ func (am *assetManager) Initialize() error {
 
 // Bind a subordinate asset manager
 func (am *assetManager) Bind(manager d2interface.AssetManagerSubordinate) error {
-	switch manager.(type) {
+	switch _ := manager.(type) {
 	case d2interface.ArchiveManager:
 		if err := manager.Bind(am); err != nil {
 			return nil
@@ -149,7 +164,6 @@ func (am *assetManager) Bind(manager d2interface.AssetManagerSubordinate) error 
 		}
 
 		am.fontManager = manager.(d2interface.ArchivedFontManager)
-
 	}
 
 	return nil

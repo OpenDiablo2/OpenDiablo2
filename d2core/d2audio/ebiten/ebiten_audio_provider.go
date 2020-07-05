@@ -3,14 +3,13 @@ package ebiten
 
 import (
 	"errors"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
-	"github.com/hajimehoshi/ebiten/audio/wav"
-
 	"github.com/hajimehoshi/ebiten/audio"
+	"github.com/hajimehoshi/ebiten/audio/wav"
 )
 
 const sampleRate = 44100
@@ -37,6 +36,7 @@ func (eap *AudioProvider) BindApp(app d2interface.App) error {
 	return nil
 }
 
+// Initialize the audio provider
 func (eap *AudioProvider) Initialize() error {
 	assetManager, err := eap.app.Asset()
 	if err != nil {
@@ -44,6 +44,7 @@ func (eap *AudioProvider) Initialize() error {
 	}
 
 	eap.assetManager = assetManager
+
 	return nil
 }
 
