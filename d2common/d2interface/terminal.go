@@ -15,6 +15,7 @@ const (
 // It is used throughout the codebase, most parts of the engine will
 // `bind` commands, which are available for use in the shell
 type Terminal interface {
+	AppComponent
 	BindLogger()
 
 	Advance(elapsed float64) error

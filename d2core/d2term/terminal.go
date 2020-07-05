@@ -13,7 +13,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
 )
 
 // TermCategory applies styles to the lines in the  Terminal
@@ -60,6 +59,7 @@ type termActionEntry struct {
 }
 
 type terminal struct {
+	app d2interface.App
 	outputHistory []termHistoryEntry
 	outputIndex   int
 
@@ -78,6 +78,30 @@ type terminal struct {
 	errorColor   color.RGBA
 
 	actions map[string]termActionEntry
+}
+
+// BindApp binds to an app instance
+func (t *terminal) BindApp(app d2interface.App) error {
+	if t.app != nil {
+		return errors.New("terminal already bound to an app instance")
+	}
+
+	t.app = app
+
+	return nil
+}
+
+func (t *terminal) Initialize() error {
+	input, err := t.app.Input()
+	if err != nil {
+		return err
+	}
+
+	if err := input.BindHandlerWithPriority(t, d2interface.PriorityHigh); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (t *terminal) Advance(elapsed float64) error {

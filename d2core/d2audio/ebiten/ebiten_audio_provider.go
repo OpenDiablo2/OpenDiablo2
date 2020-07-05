@@ -3,6 +3,7 @@ package ebiten
 
 import (
 	"errors"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -16,6 +17,7 @@ const sampleRate = 44100
 
 // AudioProvider represents a provider capable of playing audio
 type AudioProvider struct {
+	app          d2interface.App
 	assetManager d2interface.AssetManager
 	audioContext *audio.Context // The Audio context
 	bgmAudio     *audio.Player  // The audio player
@@ -24,12 +26,35 @@ type AudioProvider struct {
 	bgmVolume    float64
 }
 
+// BindApp binds to the OpenDiablo2 app
+func (eap *AudioProvider) BindApp(app d2interface.App) error {
+	if eap.app != nil {
+		return errors.New("audio provider already bound to an app instance")
+	}
+
+	eap.app = app
+
+	return nil
+}
+
+func (eap *AudioProvider) Initialize() error {
+	assetManager, err := eap.app.Asset()
+	if err != nil {
+		return err
+	}
+
+	eap.assetManager = assetManager
+	return nil
+}
+
 // Bind to an asset manager
 func (eap *AudioProvider) Bind(manager d2interface.AssetManager) error {
 	if eap.assetManager != nil {
 		return errors.New("font manager already bound to an asset manager")
 	}
+
 	eap.assetManager = manager
+
 	return nil
 }
 
@@ -107,7 +132,43 @@ func (eap *AudioProvider) PlayBGM(song string) {
 
 // LoadSoundEffect loads a sound affect so that it canb e played
 func (eap *AudioProvider) LoadSoundEffect(sfx string) (d2interface.SoundEffect, error) {
-	result := CreateSoundEffect(sfx, eap.audioContext, eap.sfxVolume) // TODO: Split
+	asset, err := eap.app.Asset()
+	if err != nil {
+		return nil, errors.New("cannot load audio without an asset manager")
+	}
+
+	result := &SoundEffect{}
+
+	var soundFile string
+
+	if _, exists := d2datadict.Sounds[sfx]; exists {
+		soundEntry := d2datadict.Sounds[sfx]
+		soundFile = soundEntry.FileName
+	} else {
+		soundFile = sfx
+	}
+
+	audioData, err := asset.LoadFile(soundFile)
+
+	if err != nil {
+		panic(err)
+	}
+
+	d, err := wav.Decode(eap.audioContext, audio.BytesReadSeekCloser(audioData))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	player, err := audio.NewPlayer(eap.audioContext, d)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	player.SetVolume(eap.sfxVolume)
+
+	result.player = player
 
 	return result, nil
 }

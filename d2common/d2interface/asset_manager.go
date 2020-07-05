@@ -5,6 +5,7 @@ import (
 )
 
 type AssetManager interface {
+	AppComponent
 	LoadFileStream(filePath string) (ArchiveDataStream, error)
 	LoadFile(filePath string) ([]byte, error)
 	FileExists(filePath string) (bool, error)

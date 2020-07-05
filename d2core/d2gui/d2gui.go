@@ -13,11 +13,11 @@ var (
 
 var singleton *manager
 
-func Initialize() error {
+func Initialize(assetManager d2interface.AssetManager, inputManager d2interface.InputManager) error {
 	verifyNotInit()
 
 	var err error
-	if singleton, err = createGuiManager(); err != nil {
+	if singleton, err = createGuiManager(assetManager, inputManager); err != nil {
 		return err
 	}
 

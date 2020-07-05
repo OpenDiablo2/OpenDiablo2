@@ -1,12 +1,14 @@
 package d2input
 
 import (
+	"errors"
 	"sort"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
 type inputManager struct {
+	app d2interface.App
 	inputService d2interface.InputService
 	cursorX      int
 	cursorY      int
@@ -15,6 +17,24 @@ type inputManager struct {
 	keyMod    d2interface.KeyMod
 
 	entries handlerEntryList
+}
+
+// BindApp binds to an app instance
+func (im *inputManager) BindApp(app d2interface.App) error {
+	if im.app != nil {
+		return errors.New("input manager already bound to an app instance")
+	}
+
+	im.app = app
+
+	return nil
+}
+
+// Initialize the input manager
+func (im *inputManager) Initialize() error {
+	// This is where calls to other app components through
+	// the app reference can be made
+	return nil
 }
 
 // Advance advances the inputManager

@@ -2,6 +2,7 @@ package d2interface
 
 // Renderer interface defines the functionality of a renderer
 type Renderer interface {
+	AppComponent
 	GetRendererName() string
 	SetWindowIcon(fileName string)
 	Run(f func(Surface) error, width, height int, title string) error

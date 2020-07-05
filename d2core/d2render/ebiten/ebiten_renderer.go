@@ -1,6 +1,7 @@
 package ebiten
 
 import (
+	"errors"
 	"image"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -11,23 +12,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
-type Renderer struct {
-	renderCallback func(surface d2interface.Surface) error
-}
 
-func (r *Renderer) Update(screen *ebiten.Image) error {
-	err := r.renderCallback(&ebitenSurface{image: screen})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (r *Renderer) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 800, 600
-}
-
-func CreateRenderer() (*Renderer, error) {
+func CreateRenderer() (d2interface.Renderer, error) {
 	result := &Renderer{}
 
 	config := d2config.Get()
@@ -39,6 +25,37 @@ func CreateRenderer() (*Renderer, error) {
 	ebiten.SetMaxTPS(config.TicksPerSecond())
 
 	return result, nil
+}
+
+type Renderer struct {
+	app d2interface.App
+	renderCallback func(surface d2interface.Surface) error
+}
+
+func (r *Renderer) BindApp(app d2interface.App) error {
+	if r.app != nil {
+		return errors.New("renderer already bound to app instance")
+	}
+	r.app = app
+	return nil
+}
+
+func (r *Renderer) Initialize() error {
+	// TODO any renderer init need to be done ?
+	return nil
+}
+
+func (r *Renderer) Update(screen *ebiten.Image) error {
+	err := r.renderCallback(&ebitenSurface{image: screen})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *Renderer) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return 800, 600
 }
 
 func (*Renderer) GetRendererName() string {

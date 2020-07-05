@@ -7,8 +7,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 )
 
 type manager struct {
@@ -21,13 +19,13 @@ type manager struct {
 	loading       bool
 }
 
-func createGuiManager() (*manager, error) {
-	cursorAnim, err := d2asset.LoadAnimation(d2resource.CursorDefault, d2resource.PaletteUnits)
+func createGuiManager(assetManager d2interface.AssetManager, inputManager d2interface.InputManager) (*manager, error) {
+	cursorAnim, err := assetManager.LoadAnimation(d2resource.CursorDefault, d2resource.PaletteUnits)
 	if err != nil {
 		return nil, err
 	}
 
-	loadingAnim, err := d2asset.LoadAnimation(d2resource.LoadingScreen, d2resource.PaletteLoading)
+	loadingAnim, err := assetManager.LoadAnimation(d2resource.LoadingScreen, d2resource.PaletteLoading)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +36,7 @@ func createGuiManager() (*manager, error) {
 		cursorVisible: true,
 	}
 
-	if err := d2input.BindHandler(manager); err != nil {
+	if err := inputManager.BindHandler(manager); err != nil {
 		return nil, err
 	}
 
