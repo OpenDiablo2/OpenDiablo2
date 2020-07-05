@@ -17,7 +17,7 @@ func Initialize(renderer d2interface.Renderer,
 	var (
 		config                  = d2config.Get()
 		archiveManager          = createArchiveManager(config)
-		fileManager             = createFileManager(config, archiveManager)
+		archivedFileManager     = createFileManager(config, archiveManager)
 		paletteManager          = createPaletteManager()
 		paletteTransformManager = createPaletteTransformManager()
 		animationManager        = createAnimationManager(renderer)
@@ -26,7 +26,7 @@ func Initialize(renderer d2interface.Renderer,
 
 	singleton = &assetManager{
 		archiveManager,
-		fileManager,
+		archivedFileManager,
 		paletteManager,
 		paletteTransformManager,
 		animationManager,
@@ -40,8 +40,8 @@ func Initialize(renderer d2interface.Renderer,
 			term.OutputInfof("asset manager verbose logging disabled")
 		}
 
-		archiveManager.SetVerbose(verbose)
-		fileManager.cache.SetVerbose(verbose)
+		archiveManager.GetCache().SetVerbose(verbose)
+		archivedFileManager.GetCache().SetVerbose(verbose)
 		paletteManager.cache.SetVerbose(verbose)
 		paletteTransformManager.cache.SetVerbose(verbose)
 		animationManager.cache.SetVerbose(verbose)
@@ -57,7 +57,7 @@ func Initialize(renderer d2interface.Renderer,
 		}
 
 		term.OutputInfof("archive cache: %f", cacheStatistics(archiveManager.GetCache()))
-		term.OutputInfof("file cache: %f", cacheStatistics(fileManager.cache))
+		term.OutputInfof("file cache: %f", cacheStatistics(archivedFileManager.GetCache()))
 		term.OutputInfof("palette cache: %f", cacheStatistics(paletteManager.cache))
 		term.OutputInfof("palette transform cache: %f", cacheStatistics(paletteTransformManager.cache))
 		term.OutputInfof("animation cache: %f", cacheStatistics(animationManager.cache))
@@ -68,7 +68,7 @@ func Initialize(renderer d2interface.Renderer,
 
 	if err := term.BindAction("assetclear", "clear asset manager cache", func() {
 		archiveManager.ClearCache()
-		fileManager.cache.Clear()
+		archivedFileManager.GetCache().Clear()
 		paletteManager.cache.Clear()
 		paletteTransformManager.cache.Clear()
 		animationManager.cache.Clear()
@@ -82,7 +82,7 @@ func Initialize(renderer d2interface.Renderer,
 
 // LoadFileStream streams an MPQ file from a source file path
 func LoadFileStream(filePath string) (d2interface.ArchiveDataStream, error) {
-	data, err := singleton.fileManager.loadFileStream(filePath)
+	data, err := singleton.archivedFileManager.LoadFileStream(filePath)
 	if err != nil {
 		log.Printf("error loading file stream %s (%v)", filePath, err.Error())
 	}
@@ -92,7 +92,7 @@ func LoadFileStream(filePath string) (d2interface.ArchiveDataStream, error) {
 
 // LoadFile loads an entire file from a source file path as a []byte
 func LoadFile(filePath string) ([]byte, error) {
-	data, err := singleton.fileManager.loadFile(filePath)
+	data, err := singleton.archivedFileManager.LoadFile(filePath)
 	if err != nil {
 		log.Printf("error loading file %s (%v)", filePath, err.Error())
 	}
@@ -102,7 +102,7 @@ func LoadFile(filePath string) ([]byte, error) {
 
 // FileExists checks if a file exists on the underlying file system at the given file path.
 func FileExists(filePath string) (bool, error) {
-	return singleton.fileManager.fileExists(filePath)
+	return singleton.archivedFileManager.FileExists(filePath)
 }
 
 // LoadAnimation loads an animation by its resource path and its palette path

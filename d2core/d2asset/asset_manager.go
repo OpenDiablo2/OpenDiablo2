@@ -9,7 +9,7 @@ import (
 
 type assetManager struct {
 	archiveManager          d2interface.ArchiveManager
-	fileManager             *fileManager
+	archivedFileManager     d2interface.ArchivedFileManager
 	paletteManager          *paletteManager
 	paletteTransformManager *paletteTransformManager
 	animationManager        *animationManager
