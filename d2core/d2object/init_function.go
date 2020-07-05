@@ -1,6 +1,8 @@
 package d2object
 
 import (
+	"math/rand"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
@@ -10,6 +12,7 @@ func initObject(ob *Object) bool {
 		8:  initTorch,
 		14: initTorch,
 		17: initWaypoint,
+		34: initTorchRnd,
 	}
 
 	fun, ok := funcs[ob.objectRecord.InitFn]
@@ -33,5 +36,16 @@ func initWaypoint(ob *Object) {
 	// Turn these on unconditionally for now, they look nice :)
 	if ob.objectRecord.HasAnimationMode[d2enum.AnimationModeObjectOperating] {
 		ob.setMode("ON", 0)
+	}
+}
+
+// Randomly spawns in either NU or OP
+func initTorchRnd(ob *Object) {
+	n := rand.Intn(2)
+
+	if n > 0 {
+		ob.setMode("NU", 0)
+	} else {
+		ob.setMode("OP", 0)
 	}
 }
