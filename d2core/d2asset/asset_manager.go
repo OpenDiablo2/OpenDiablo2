@@ -219,7 +219,6 @@ func (am *assetManager) LoadFont(tablePath, spritePath, palettePath string) (d2i
 // LoadPalette loads a palette from a given palette path
 func (am *assetManager) LoadPalette(palettePath string) (d2interface.Palette, error) {
 	return singleton.paletteManager.LoadPalette(palettePath)
-
 }
 
 func (am *assetManager) loadDC6(dc6Path string) (*d2dc6.DC6, error) {

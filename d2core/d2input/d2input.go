@@ -17,7 +17,7 @@ var (
 
 var singleton *inputManager // TODO remove this singleton
 
-// Initialize creates a single global input manager based on a specific input service
+// Create a single global input manager based on a specific input service
 func Create() (d2interface.InputManager, error) {
 	singleton = &inputManager{
 		inputService: ebiten_input.InputService{},

@@ -14,7 +14,7 @@ const (
 
 type fontManager struct {
 	assetManager d2interface.AssetManager
-	cache d2interface.Cache
+	cache        d2interface.Cache
 }
 
 func createFontManager() d2interface.ArchivedFontManager {
@@ -28,7 +28,9 @@ func (fm *fontManager) Bind(manager d2interface.AssetManager) error {
 	if fm.assetManager != nil {
 		return errors.New("font manager already bound to an asset manager")
 	}
+
 	fm.assetManager = manager
+
 	return nil
 }
 

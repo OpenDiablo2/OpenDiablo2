@@ -27,11 +27,13 @@ func CreateRenderer() (d2interface.Renderer, error) {
 	return result, nil
 }
 
+// Renderer renders the game
 type Renderer struct {
 	app d2interface.App
 	renderCallback func(surface d2interface.Surface) error
 }
 
+// BindApp binds the renderer to the App instance
 func (r *Renderer) BindApp(app d2interface.App) error {
 	if r.app != nil {
 		return errors.New("renderer already bound to app instance")
@@ -40,11 +42,13 @@ func (r *Renderer) BindApp(app d2interface.App) error {
 	return nil
 }
 
+// Initialize is called by the App after all AppComponents are bound
 func (r *Renderer) Initialize() error {
 	// TODO any renderer init need to be done ?
 	return nil
 }
 
+// Update is the render function
 func (r *Renderer) Update(screen *ebiten.Image) error {
 	err := r.renderCallback(&ebitenSurface{image: screen})
 	if err != nil {
@@ -54,14 +58,17 @@ func (r *Renderer) Update(screen *ebiten.Image) error {
 	return nil
 }
 
+// Layout defines the screen dimensions for the renderer
 func (r *Renderer) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return 800, 600
 }
 
+// GetRendererName returns the name of the renderer
 func (*Renderer) GetRendererName() string {
 	return "Ebiten"
 }
 
+// SetWindowIcon sets the window icon
 func (*Renderer) SetWindowIcon(fileName string) {
 	_, iconImage, err := ebitenutil.NewImageFromFile(fileName, ebiten.FilterLinear)
 	if err == nil {
@@ -69,6 +76,7 @@ func (*Renderer) SetWindowIcon(fileName string) {
 	}
 }
 
+//
 func (r *Renderer) IsDrawingSkipped() bool {
 	return ebiten.IsDrawingSkipped()
 }

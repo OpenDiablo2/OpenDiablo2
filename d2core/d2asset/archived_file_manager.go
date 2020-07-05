@@ -14,7 +14,7 @@ const (
 )
 
 type fileManager struct {
-	assetManager d2interface.AssetManager
+	assetManager   d2interface.AssetManager
 	cache          d2interface.Cache
 	archiveManager d2interface.ArchiveManager
 	config         d2interface.Configuration
@@ -34,7 +34,9 @@ func (fm *fileManager) Bind(manager d2interface.AssetManager) error {
 	if fm.assetManager != nil {
 		return errors.New("file manager already bound to an asset manager")
 	}
+
 	fm.assetManager = manager
+
 	return nil
 }
 

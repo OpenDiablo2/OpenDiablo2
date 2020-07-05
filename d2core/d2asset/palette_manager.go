@@ -10,7 +10,7 @@ import (
 
 type paletteManager struct {
 	assetManager d2interface.AssetManager
-	cache d2interface.Cache
+	cache        d2interface.Cache
 }
 
 const (
@@ -28,7 +28,9 @@ func (pm *paletteManager) Bind(manager d2interface.AssetManager) error {
 	if pm.assetManager != nil {
 		return errors.New("palette manager already bound to an asset manager")
 	}
+
 	pm.assetManager = manager
+
 	return nil
 }
 

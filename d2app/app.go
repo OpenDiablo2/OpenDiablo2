@@ -136,7 +136,6 @@ const nSamplesTAlloc = 100
 
 // Create creates a new instance of the application
 func Create(gitBranch, gitCommit string) *App {
-
 	// Create our providers
 	renderer, err := ebiten.CreateRenderer()
 	if err != nil {

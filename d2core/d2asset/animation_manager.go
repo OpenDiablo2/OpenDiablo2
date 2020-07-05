@@ -17,8 +17,8 @@ const (
 
 type animationManager struct {
 	assetManager d2interface.AssetManager
-	cache    d2interface.Cache
-	renderer d2interface.Renderer
+	cache        d2interface.Cache
+	renderer     d2interface.Renderer
 }
 
 // Bind to an asset manager
@@ -26,7 +26,9 @@ func (am *animationManager) Bind(manager d2interface.AssetManager) error {
 	if am.assetManager != nil {
 		return errors.New("file manager already bound to an asset manager")
 	}
+
 	am.assetManager = manager
+
 	return nil
 }
 
