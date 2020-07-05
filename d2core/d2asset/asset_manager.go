@@ -125,7 +125,7 @@ func (am *assetManager) Initialize() error {
 
 // Bind a subordinate asset manager
 func (am *assetManager) Bind(manager d2interface.AssetManagerSubordinate) error {
-	switch _ := manager.(type) {
+	switch manager.(type) {
 	case d2interface.ArchiveManager:
 		if err := manager.Bind(am); err != nil {
 			return nil
