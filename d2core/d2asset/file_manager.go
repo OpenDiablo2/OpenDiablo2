@@ -1,7 +1,6 @@
 package d2asset
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"strings"
 
@@ -15,12 +14,12 @@ const (
 
 type fileManager struct {
 	cache          d2interface.Cache
-	archiveManager *archiveManager
+	archiveManager d2interface.ArchiveManager
 	config         d2interface.Configuration
 }
 
 func createFileManager(config d2interface.Configuration,
-	archiveManager *archiveManager) *fileManager {
+	archiveManager d2interface.ArchiveManager) *fileManager {
 	return &fileManager{
 		d2common.CreateCache(fileBudget),
 		archiveManager,
@@ -28,10 +27,10 @@ func createFileManager(config d2interface.Configuration,
 	}
 }
 
-func (fm *fileManager) loadFileStream(filePath string) (*d2mpq.MpqDataStream, error) {
+func (fm *fileManager) loadFileStream(filePath string) (d2interface.ArchiveDataStream, error) {
 	filePath = fm.fixupFilePath(filePath)
 
-	archive, err := fm.archiveManager.loadArchiveForFile(filePath)
+	archive, err := fm.archiveManager.LoadArchiveForFile(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +44,7 @@ func (fm *fileManager) loadFile(filePath string) ([]byte, error) {
 		return value.([]byte), nil
 	}
 
-	archive, err := fm.archiveManager.loadArchiveForFile(filePath)
+	archive, err := fm.archiveManager.LoadArchiveForFile(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +63,7 @@ func (fm *fileManager) loadFile(filePath string) ([]byte, error) {
 
 func (fm *fileManager) fileExists(filePath string) (bool, error) {
 	filePath = fm.fixupFilePath(filePath)
-	return fm.archiveManager.fileExistsInArchive(filePath)
+	return fm.archiveManager.FileExistsInArchive(filePath)
 }
 
 func (fm *fileManager) fixupFilePath(filePath string) string {

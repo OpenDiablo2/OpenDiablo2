@@ -6,7 +6,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
@@ -41,7 +40,7 @@ func Initialize(renderer d2interface.Renderer,
 			term.OutputInfof("asset manager verbose logging disabled")
 		}
 
-		archiveManager.cache.SetVerbose(verbose)
+		archiveManager.SetVerbose(verbose)
 		fileManager.cache.SetVerbose(verbose)
 		paletteManager.cache.SetVerbose(verbose)
 		paletteTransformManager.cache.SetVerbose(verbose)
@@ -57,7 +56,7 @@ func Initialize(renderer d2interface.Renderer,
 			return float64(c.GetWeight()) / float64(c.GetBudget()) * percent
 		}
 
-		term.OutputInfof("archive cache: %f", cacheStatistics(archiveManager.cache))
+		term.OutputInfof("archive cache: %f", cacheStatistics(archiveManager.GetCache()))
 		term.OutputInfof("file cache: %f", cacheStatistics(fileManager.cache))
 		term.OutputInfof("palette cache: %f", cacheStatistics(paletteManager.cache))
 		term.OutputInfof("palette transform cache: %f", cacheStatistics(paletteTransformManager.cache))
@@ -68,7 +67,7 @@ func Initialize(renderer d2interface.Renderer,
 	}
 
 	if err := term.BindAction("assetclear", "clear asset manager cache", func() {
-		archiveManager.cache.Clear()
+		archiveManager.ClearCache()
 		fileManager.cache.Clear()
 		paletteManager.cache.Clear()
 		paletteTransformManager.cache.Clear()
@@ -82,7 +81,7 @@ func Initialize(renderer d2interface.Renderer,
 }
 
 // LoadFileStream streams an MPQ file from a source file path
-func LoadFileStream(filePath string) (*d2mpq.MpqDataStream, error) {
+func LoadFileStream(filePath string) (d2interface.ArchiveDataStream, error) {
 	data, err := singleton.fileManager.loadFileStream(filePath)
 	if err != nil {
 		log.Printf("error loading file stream %s (%v)", filePath, err.Error())

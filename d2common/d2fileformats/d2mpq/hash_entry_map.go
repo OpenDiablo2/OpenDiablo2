@@ -1,6 +1,6 @@
 package d2mpq
 
-// HashEntryMap represents a hash entry map
+// hashEntryMap represents a hash entry map
 type HashEntryMap struct {
 	entries map[uint64]HashTableEntry
 }

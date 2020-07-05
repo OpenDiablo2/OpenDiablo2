@@ -4,10 +4,11 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
 type assetManager struct {
-	archiveManager          *archiveManager
+	archiveManager          d2interface.ArchiveManager
 	fileManager             *fileManager
 	paletteManager          *paletteManager
 	paletteTransformManager *paletteTransformManager
