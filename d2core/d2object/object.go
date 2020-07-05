@@ -14,7 +14,7 @@ import (
 
 // Object represents a composite of animations that can be projected onto the map.
 type Object struct {
-	composite          *d2asset.Composite
+	composite          d2interface.CompositeAnimation
 	highlight          bool
 	LocationX          float64
 	LocationY          float64
@@ -41,6 +41,7 @@ func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath stri
 	}
 	objectType := &d2datadict.ObjectTypes[objectRec.Index]
 
+	// TODO get ri of the singleton asset manager
 	composite, err := d2asset.LoadComposite(d2enum.ObjectTypeItem, objectType.Token,
 		d2resource.PaletteUnits)
 	if err != nil {

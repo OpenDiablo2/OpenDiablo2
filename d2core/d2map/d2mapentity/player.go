@@ -13,7 +13,7 @@ import (
 
 type Player struct {
 	mapEntity
-	composite *d2asset.Composite
+	composite d2interface.CompositeAnimation
 	Equipment d2inventory.CharacterEquipment
 	Stats     d2hero.HeroStatsState
 	Class     d2enum.Hero

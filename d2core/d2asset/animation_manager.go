@@ -1,6 +1,7 @@
 package d2asset
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -15,8 +16,18 @@ const (
 )
 
 type animationManager struct {
+	assetManager d2interface.AssetManager
 	cache    d2interface.Cache
 	renderer d2interface.Renderer
+}
+
+// Bind to an asset manager
+func (am *animationManager) Bind(manager d2interface.AssetManager) error {
+	if am.assetManager != nil {
+		return errors.New("file manager already bound to an asset manager")
+	}
+	am.assetManager = manager
+	return nil
 }
 
 func (am *animationManager) ClearCache() {
@@ -47,12 +58,12 @@ func (am *animationManager) LoadAnimation(
 	ext := strings.ToLower(filepath.Ext(animationPath))
 	switch ext {
 	case ".dc6":
-		dc6, err := loadDC6(animationPath)
+		dc6, err := am.assetManager.(*assetManager).loadDC6(animationPath)
 		if err != nil {
 			return nil, err
 		}
 
-		palette, err := LoadPalette(palettePath)
+		palette, err := am.assetManager.LoadPalette(palettePath)
 		if err != nil {
 			return nil, err
 		}
@@ -62,12 +73,12 @@ func (am *animationManager) LoadAnimation(
 			return nil, err
 		}
 	case ".dcc":
-		dcc, err := loadDCC(animationPath)
+		dcc, err := am.assetManager.(*assetManager).loadDCC(animationPath)
 		if err != nil {
 			return nil, err
 		}
 
-		palette, err := LoadPalette(palettePath)
+		palette, err := am.assetManager.LoadPalette(palettePath)
 		if err != nil {
 			return nil, err
 		}

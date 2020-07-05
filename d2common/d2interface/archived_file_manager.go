@@ -4,6 +4,7 @@ package d2interface
 // by the ArchiveManager
 type ArchivedFileManager interface {
 	Cacher
+	AssetManagerSubordinate
 	LoadFileStream(filePath string) (ArchiveDataStream, error)
 	LoadFile(filePath string) ([]byte, error)
 	FileExists(filePath string) (bool, error)

@@ -25,12 +25,12 @@ type Font struct {
 }
 
 func loadFont(tablePath, spritePath, palettePath string) (d2interface.Font, error) {
-	sheet, err := LoadAnimation(spritePath, palettePath)
+	sheet, err := singleton.LoadAnimation(spritePath, palettePath)
 	if err != nil {
 		return nil, err
 	}
 
-	data, err := LoadFile(tablePath)
+	data, err := singleton.LoadFile(tablePath)
 	if err != nil {
 		return nil, err
 	}
@@ -42,6 +42,7 @@ func loadFont(tablePath, spritePath, palettePath string) (d2interface.Font, erro
 	_, maxCharHeight := sheet.GetFrameBounds()
 
 	glyphs := make(map[rune]fontGlyph)
+
 	for i := 12; i < len(data); i += 14 {
 		code := rune(binary.LittleEndian.Uint16(data[i : i+2]))
 

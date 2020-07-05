@@ -1,12 +1,15 @@
 package d2asset
 
 import (
+	"errors"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
 type paletteManager struct {
+	assetManager d2interface.AssetManager
 	cache d2interface.Cache
 }
 
@@ -15,7 +18,18 @@ const (
 )
 
 func createPaletteManager() d2interface.ArchivedPaletteManager {
-	return &paletteManager{d2common.CreateCache(paletteBudget)}
+	return &paletteManager{
+		cache: d2common.CreateCache(paletteBudget),
+	}
+}
+
+// Bind to an asset manager
+func (pm *paletteManager) Bind(manager d2interface.AssetManager) error {
+	if pm.assetManager != nil {
+		return errors.New("palette manager already bound to an asset manager")
+	}
+	pm.assetManager = manager
+	return nil
 }
 
 // LoadPalette loads a palette from archives managed by the ArchiveManager
@@ -24,7 +38,7 @@ func (pm *paletteManager) LoadPalette(palettePath string) (d2interface.Palette, 
 		return palette.(d2interface.Palette), nil
 	}
 
-	paletteData, err := LoadFile(palettePath)
+	paletteData, err := pm.assetManager.LoadFile(palettePath)
 	if err != nil {
 		return nil, err
 	}

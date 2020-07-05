@@ -50,6 +50,7 @@ type App struct {
 	profileOption     string
 	gitBranch         string
 	gitCommit         string
+	asset			  d2interface.AssetManager
 	terminal          d2interface.Terminal
 	audio             d2interface.AudioProvider
 	renderer          d2interface.Renderer
@@ -156,9 +157,6 @@ func (p *App) initialize() error {
 		}
 	}
 
-	if err := d2asset.Initialize(p.renderer, p.terminal); err != nil {
-		return err
-	}
 
 	if err := d2gui.Initialize(); err != nil {
 		return err

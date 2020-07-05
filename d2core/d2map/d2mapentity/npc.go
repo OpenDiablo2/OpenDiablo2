@@ -14,7 +14,7 @@ import (
 
 type NPC struct {
 	mapEntity
-	composite     *d2asset.Composite
+	composite     d2interface.CompositeAnimation
 	action        int
 	HasPaths      bool
 	Paths         []d2common.Path

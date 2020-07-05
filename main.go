@@ -1,10 +1,11 @@
 package main
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
-	
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
 
 	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
@@ -31,13 +32,22 @@ func main() {
 		panic(err)
 	}
 
+	d2input.Create() // TODO d2input singleton must be init before d2term
+	term, err := d2term.Initialize()
+
+
+	assetManager, err := d2asset.Initialize(renderer, term)
+	if err != nil {
+		panic(err)
+	}
+
 	audio, err := ebiten2.CreateAudio()
 	if err != nil {
 		panic(err)
 	}
 
-	d2input.Create() // TODO d2input singleton must be init before d2term
-	term, err := d2term.Initialize()
+	assetManager.Bind(audio)
+
 
 	if err != nil {
 		log.Fatal(err)

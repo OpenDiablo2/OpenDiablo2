@@ -18,7 +18,7 @@ import (
 type MapRenderer struct {
 	renderer      d2interface.Renderer   // The renderer to use for drawing operations
 	mapEngine     *d2mapengine.MapEngine // The map engine that is being rendered
-	palette       d2interface.Palette      // The palette used for this map
+	palette       d2interface.Palette    // The palette used for this map
 	viewport      *Viewport              // The viewport for the map renderer (used for rendering offsets)
 	camera        Camera                 // The camera for this map renderer (used to determine where on the map we are rendering)
 	debugVisLevel int                    // Debug visibility index (0=none, 1=tiles, 2=sub-tiles)

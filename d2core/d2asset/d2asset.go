@@ -1,18 +1,17 @@
 package d2asset
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
+	"log"
 )
 
 var singleton *assetManager
 
 // Initialize creates and assigns all necessary dependencies for the assetManager top-level functions to work correctly
-func Initialize(renderer d2interface.Renderer,
-	term d2interface.Terminal) error {
+func Initialize(renderer d2interface.Renderer, term d2interface.Terminal) (d2interface.
+	AssetManager, error) {
 	var (
 		config                  = d2config.Get()
 		archiveManager          = createArchiveManager(config)
@@ -24,13 +23,14 @@ func Initialize(renderer d2interface.Renderer,
 	)
 
 	singleton = &assetManager{
-		archiveManager,
-		archivedFileManager,
-		paletteManager,
-		paletteTransformManager,
-		animationManager,
-		fontManager,
+		paletteTransformManager: paletteTransformManager,
 	}
+	singleton.Bind(archiveManager)
+	singleton.Bind(archivedFileManager)
+	singleton.Bind(paletteManager)
+	// singleton.Bind(paletteTransformManager) todo
+	singleton.Bind(animationManager)
+	singleton.Bind(fontManager)
 
 	if err := term.BindAction("assetspam", "display verbose asset manager logs", func(verbose bool) {
 		if verbose {
@@ -45,7 +45,7 @@ func Initialize(renderer d2interface.Renderer,
 		paletteTransformManager.cache.SetVerbose(verbose)
 		animationManager.cache.SetVerbose(verbose)
 	}); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := term.BindAction("assetstat", "display asset manager cache statistics", func() {
@@ -61,7 +61,7 @@ func Initialize(renderer d2interface.Renderer,
 		term.OutputInfof("animation cache: %f", cacheStatistics(animationManager.cache))
 		term.OutputInfof("font cache: %f", cacheStatistics(fontManager.GetCache()))
 	}); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := term.BindAction("assetclear", "clear asset manager cache", func() {
@@ -72,20 +72,19 @@ func Initialize(renderer d2interface.Renderer,
 		animationManager.ClearCache()
 		fontManager.ClearCache()
 	}); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return singleton, nil
 }
 
-// LoadFileStream streams an MPQ file from a source file path
-func LoadFileStream(filePath string) (d2interface.ArchiveDataStream, error) {
-	data, err := singleton.archivedFileManager.LoadFileStream(filePath)
-	if err != nil {
-		log.Printf("error loading file stream %s (%v)", filePath, err.Error())
-	}
+// TODO remove all of these funcs that use the singleton
+// they are only here to prop up the other packages that
+// dont have a reference to the asset manager yet
 
-	return data, err
+// LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it
+func LoadComposite(baseType d2enum.ObjectType, token, palettePath string) (d2interface.CompositeAnimation, error) {
+	return CreateComposite(baseType, token, palettePath), nil
 }
 
 // LoadFile loads an entire file from a source file path as a []byte
@@ -105,18 +104,13 @@ func FileExists(filePath string) (bool, error) {
 
 // LoadAnimation loads an animation by its resource path and its palette path
 func LoadAnimation(animationPath, palettePath string) (d2interface.Animation, error) {
-	return LoadAnimationWithTransparency(animationPath, palettePath, 255)
+	return singleton.LoadAnimationWithTransparency(animationPath, palettePath, 255)
 }
 
 // LoadAnimationWithTransparency loads an animation by its resource path and its palette path with a given transparency value
 func LoadAnimationWithTransparency(animationPath, palettePath string,
 	transparency int) (d2interface.Animation, error) {
 	return singleton.animationManager.LoadAnimation(animationPath, palettePath, transparency)
-}
-
-// LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it
-func LoadComposite(baseType d2enum.ObjectType, token, palettePath string) (*Composite, error) {
-	return CreateComposite(baseType, token, palettePath), nil
 }
 
 // LoadFont loads a font the resource files

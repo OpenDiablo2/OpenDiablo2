@@ -2,11 +2,11 @@
 package ebiten
 
 import (
+	"errors"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/hajimehoshi/ebiten/audio/wav"
 
 	"github.com/hajimehoshi/ebiten/audio"
@@ -16,11 +16,21 @@ const sampleRate = 44100
 
 // AudioProvider represents a provider capable of playing audio
 type AudioProvider struct {
+	assetManager d2interface.AssetManager
 	audioContext *audio.Context // The Audio context
 	bgmAudio     *audio.Player  // The audio player
 	lastBgm      string
 	sfxVolume    float64
 	bgmVolume    float64
+}
+
+// Bind to an asset manager
+func (eap *AudioProvider) Bind(manager d2interface.AssetManager) error {
+	if eap.assetManager != nil {
+		return errors.New("font manager already bound to an asset manager")
+	}
+	eap.assetManager = manager
+	return nil
 }
 
 // CreateAudio creates an instance of ebiten's audio provider
@@ -60,7 +70,7 @@ func (eap *AudioProvider) PlayBGM(song string) {
 		}
 	}
 
-	audioStream, err := d2asset.LoadFileStream(song)
+	audioStream, err := eap.assetManager.LoadFileStream(song)
 
 	if err != nil {
 		panic(err)

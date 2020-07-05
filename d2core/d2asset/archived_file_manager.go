@@ -1,10 +1,11 @@
 package d2asset
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"errors"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 )
 
@@ -13,6 +14,7 @@ const (
 )
 
 type fileManager struct {
+	assetManager d2interface.AssetManager
 	cache          d2interface.Cache
 	archiveManager d2interface.ArchiveManager
 	config         d2interface.Configuration
@@ -21,10 +23,19 @@ type fileManager struct {
 func createFileManager(config d2interface.Configuration,
 	archiveManager d2interface.ArchiveManager) d2interface.ArchivedFileManager {
 	return &fileManager{
-		d2common.CreateCache(fileBudget),
-		archiveManager,
-		config,
+		cache: d2common.CreateCache(fileBudget),
+		archiveManager: archiveManager,
+		config: config,
 	}
+}
+
+// Bind to an asset manager
+func (fm *fileManager) Bind(manager d2interface.AssetManager) error {
+	if fm.assetManager != nil {
+		return errors.New("file manager already bound to an asset manager")
+	}
+	fm.assetManager = manager
+	return nil
 }
 
 // LoadFileStream loads a file as a stream automatically from an archive

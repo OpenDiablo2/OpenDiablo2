@@ -12,6 +12,7 @@ import (
 )
 
 type archiveManager struct {
+	assetManager d2interface.AssetManager
 	cache    d2interface.Cache
 	config   d2interface.Configuration
 	archives []d2interface.Archive
@@ -24,6 +25,15 @@ const (
 
 func createArchiveManager(config d2interface.Configuration) d2interface.ArchiveManager {
 	return &archiveManager{cache: d2common.CreateCache(archiveBudget), config: config}
+}
+
+// Bind to an asset manager
+func (am *archiveManager) Bind(manager d2interface.AssetManager) error {
+	if am.assetManager != nil {
+		return errors.New("file manager already bound to an asset manager")
+	}
+	am.assetManager = manager
+	return nil
 }
 
 // LoadArchiveForFile loads the archive for the given (in-archive) file path

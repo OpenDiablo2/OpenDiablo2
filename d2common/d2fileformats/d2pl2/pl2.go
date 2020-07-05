@@ -8,24 +8,24 @@ import (
 
 // PL2 represents a palette file.
 type PL2 struct {
-	BasePalette PL2Palette
+	basePalette PL2Palette
 
-	LightLevelVariations [32]PL2PaletteTransform
-	InvColorVariations   [16]PL2PaletteTransform
-	SelectedUintShift    PL2PaletteTransform
-	AlphaBlend           [3][256]PL2PaletteTransform
-	AdditiveBlend        [256]PL2PaletteTransform
-	MultiplicativeBlend  [256]PL2PaletteTransform
-	HueVariations        [111]PL2PaletteTransform
-	RedTones             PL2PaletteTransform
-	GreenTones           PL2PaletteTransform
-	BlueTones            PL2PaletteTransform
-	UnknownVariations    [14]PL2PaletteTransform
-	MaxComponentBlend    [256]PL2PaletteTransform
-	DarkendColorShift    PL2PaletteTransform
+	lightLevelVariations [32]PL2PaletteTransform
+	invColorVariations   [16]PL2PaletteTransform
+	selectedUintShift    PL2PaletteTransform
+	alphaBlend           [3][256]PL2PaletteTransform
+	additiveBlend        [256]PL2PaletteTransform
+	multiplicativeBlend  [256]PL2PaletteTransform
+	hueVariations        [111]PL2PaletteTransform
+	redTones             PL2PaletteTransform
+	greenTones           PL2PaletteTransform
+	blueTones            PL2PaletteTransform
+	unknownVariations    [14]PL2PaletteTransform
+	maxComponentBlend    [256]PL2PaletteTransform
+	darkendColorShift    PL2PaletteTransform
 
-	TextColors      [13]PL2Color24Bits
-	TextColorShifts [13]PL2PaletteTransform
+	textColors      [13]PL2Color24Bits
+	textColorShifts [13]PL2PaletteTransform
 }
 
 // Load uses restruct to read the binary pl2 data into structs

@@ -1,10 +1,11 @@
 package d2asset
 
 import (
+	"errors"
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
 const (
@@ -12,11 +13,23 @@ const (
 )
 
 type fontManager struct {
+	assetManager d2interface.AssetManager
 	cache d2interface.Cache
 }
 
 func createFontManager() d2interface.ArchivedFontManager {
-	return &fontManager{d2common.CreateCache(fontBudget)}
+	return &fontManager{
+		cache: d2common.CreateCache(fontBudget),
+	}
+}
+
+// Bind to an asset manager
+func (fm *fontManager) Bind(manager d2interface.AssetManager) error {
+	if fm.assetManager != nil {
+		return errors.New("font manager already bound to an asset manager")
+	}
+	fm.assetManager = manager
+	return nil
 }
 
 // LoadFont loads a font from the archives managed by the ArchiveManager
