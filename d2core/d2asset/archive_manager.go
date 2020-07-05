@@ -22,21 +22,21 @@ const (
 	archiveBudget = 1024 * 1024 * 512
 )
 
-func createArchiveManager(config d2interface.Configuration) *archiveManager {
+func createArchiveManager(config d2interface.Configuration) d2interface.ArchiveManager {
 	return &archiveManager{cache: d2common.CreateCache(archiveBudget), config: config}
 }
 
-func (am *archiveManager) loadArchiveForFile(filePath string) (d2interface.Archive, error) {
+func (am *archiveManager) LoadArchiveForFile(filePath string) (d2interface.Archive, error) {
 	am.mutex.Lock()
 	defer am.mutex.Unlock()
 
-	if err := am.cacheArchiveEntries(); err != nil {
+	if err := am.CacheArchiveEntries(); err != nil {
 		return nil, err
 	}
 
 	for _, archive := range am.archives {
 		if archive.Contains(filePath) {
-			result, ok := am.loadArchive(archive.Path())
+			result, ok := am.LoadArchive(archive.Path())
 			if ok == nil {
 				return result, nil
 			}
@@ -46,11 +46,11 @@ func (am *archiveManager) loadArchiveForFile(filePath string) (d2interface.Archi
 	return nil, errors.New("file not found")
 }
 
-func (am *archiveManager) fileExistsInArchive(filePath string) (bool, error) {
+func (am *archiveManager) FileExistsInArchive(filePath string) (bool, error) {
 	am.mutex.Lock()
 	defer am.mutex.Unlock()
 
-	if err := am.cacheArchiveEntries(); err != nil {
+	if err := am.CacheArchiveEntries(); err != nil {
 		return false, err
 	}
 
@@ -63,7 +63,7 @@ func (am *archiveManager) fileExistsInArchive(filePath string) (bool, error) {
 	return false, nil
 }
 
-func (am *archiveManager) loadArchive(archivePath string) (d2interface.Archive, error) {
+func (am *archiveManager) LoadArchive(archivePath string) (d2interface.Archive, error) {
 	if archive, found := am.cache.Retrieve(archivePath); found {
 		return archive.(d2interface.Archive), nil
 	}
@@ -80,7 +80,7 @@ func (am *archiveManager) loadArchive(archivePath string) (d2interface.Archive, 
 	return archive, nil
 }
 
-func (am *archiveManager) cacheArchiveEntries() error {
+func (am *archiveManager) CacheArchiveEntries() error {
 	if len(am.archives) == len(am.config.MpqLoadOrder()) {
 		return nil
 	}
@@ -90,7 +90,7 @@ func (am *archiveManager) cacheArchiveEntries() error {
 	for _, archiveName := range am.config.MpqLoadOrder() {
 		archivePath := path.Join(am.config.MpqPath(), archiveName)
 
-		archive, err := am.loadArchive(archivePath)
+		archive, err := am.LoadArchive(archivePath)
 		if err != nil {
 			return err
 		}
@@ -102,4 +102,16 @@ func (am *archiveManager) cacheArchiveEntries() error {
 	}
 
 	return nil
+}
+
+func (am *archiveManager) SetVerbose(verbose bool) {
+	am.cache.SetVerbose(verbose)
+}
+
+func (am *archiveManager) ClearCache() {
+	am.cache.Clear()
+}
+
+func (am *archiveManager) GetCache() d2interface.Cache {
+	return am.cache
 }
