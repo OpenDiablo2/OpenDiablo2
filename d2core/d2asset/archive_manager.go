@@ -26,6 +26,7 @@ func createArchiveManager(config d2interface.Configuration) d2interface.ArchiveM
 	return &archiveManager{cache: d2common.CreateCache(archiveBudget), config: config}
 }
 
+// LoadArchiveForFile loads the archive for the given (in-archive) file path
 func (am *archiveManager) LoadArchiveForFile(filePath string) (d2interface.Archive, error) {
 	am.mutex.Lock()
 	defer am.mutex.Unlock()
@@ -46,6 +47,7 @@ func (am *archiveManager) LoadArchiveForFile(filePath string) (d2interface.Archi
 	return nil, errors.New("file not found")
 }
 
+// FileExistsInArchive checks if a file exists in an archive
 func (am *archiveManager) FileExistsInArchive(filePath string) (bool, error) {
 	am.mutex.Lock()
 	defer am.mutex.Unlock()
@@ -63,6 +65,7 @@ func (am *archiveManager) FileExistsInArchive(filePath string) (bool, error) {
 	return false, nil
 }
 
+// LoadArchive loads and caches an archive
 func (am *archiveManager) LoadArchive(archivePath string) (d2interface.Archive, error) {
 	if archive, found := am.cache.Retrieve(archivePath); found {
 		return archive.(d2interface.Archive), nil
@@ -80,6 +83,7 @@ func (am *archiveManager) LoadArchive(archivePath string) (d2interface.Archive, 
 	return archive, nil
 }
 
+// CacheArchiveEntries updates the archive entries
 func (am *archiveManager) CacheArchiveEntries() error {
 	if len(am.archives) == len(am.config.MpqLoadOrder()) {
 		return nil
@@ -104,14 +108,17 @@ func (am *archiveManager) CacheArchiveEntries() error {
 	return nil
 }
 
+// SetVerbose enables/disables verbose printing for the archive manager
 func (am *archiveManager) SetVerbose(verbose bool) {
 	am.cache.SetVerbose(verbose)
 }
 
+// ClearCache clears the archive manager cache
 func (am *archiveManager) ClearCache() {
 	am.cache.Clear()
 }
 
+// GetCache returns the archive manager cache
 func (am *archiveManager) GetCache() d2interface.Cache {
 	return am.cache
 }
