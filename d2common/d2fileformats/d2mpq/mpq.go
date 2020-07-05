@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/binary"
 	"errors"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"io/ioutil"
 	"log"
 	"os"
@@ -15,11 +16,11 @@ import (
 
 // MPQ represents an MPQ archive
 type MPQ struct {
-	FileName          string
-	File              *os.File
-	HashEntryMap      HashEntryMap
-	BlockTableEntries []BlockTableEntry
-	Data              Data
+	filePath          string
+	file              *os.File
+	hashEntryMap      HashEntryMap
+	blockTableEntries []BlockTableEntry
+	data              Data
 }
 
 // Data Represents a MPQ file
@@ -95,14 +96,14 @@ func (v BlockTableEntry) HasFlag(flag FileFlag) bool {
 }
 
 // Load loads an MPQ file and returns a MPQ structure
-func Load(fileName string) (*MPQ, error) {
-	result := &MPQ{FileName: fileName}
+func Load(fileName string) (d2interface.Archive, error) {
+	result := &MPQ{filePath: fileName}
 
 	var err error
 	if runtime.GOOS == "linux" {
-		result.File, err = openIgnoreCase(fileName)
+		result.file, err = openIgnoreCase(fileName)
 	} else {
-		result.File, err = os.Open(fileName) //nolint:gosec Will fix later
+		result.file, err = os.Open(fileName) //nolint:gosec Will fix later
 	}
 
 	if err != nil {
@@ -144,13 +145,13 @@ func openIgnoreCase(mpqPath string) (*os.File, error) {
 }
 
 func (v *MPQ) readHeader() error {
-	err := binary.Read(v.File, binary.LittleEndian, &v.Data)
+	err := binary.Read(v.file, binary.LittleEndian, &v.data)
 
 	if err != nil {
 		return err
 	}
 
-	if string(v.Data.Magic[:]) != "MPQ\x1A" {
+	if string(v.data.Magic[:]) != "MPQ\x1A" {
 		return errors.New("invalid mpq header")
 	}
 
@@ -161,23 +162,23 @@ func (v *MPQ) readHeader() error {
 }
 
 func (v *MPQ) loadHashTable() {
-	_, err := v.File.Seek(int64(v.Data.HashTableOffset), 0)
+	_, err := v.file.Seek(int64(v.data.HashTableOffset), 0)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	hashData := make([]uint32, v.Data.HashTableEntries*4) //nolint:gomnd Decryption magic
+	hashData := make([]uint32, v.data.HashTableEntries*4) //nolint:gomnd Decryption magic
 	hash := make([]byte, 4)
 
 	for i := range hashData {
-		_, _ = v.File.Read(hash)
+		_, _ = v.file.Read(hash)
 		hashData[i] = binary.LittleEndian.Uint32(hash)
 	}
 
 	decrypt(hashData, hashString("(hash table)", 3))
 
-	for i := uint32(0); i < v.Data.HashTableEntries; i++ {
-		v.HashEntryMap.Insert(&HashTableEntry{
+	for i := uint32(0); i < v.data.HashTableEntries; i++ {
+		v.hashEntryMap.Insert(&HashTableEntry{
 			NamePartA: hashData[i*4],
 			NamePartB: hashData[(i*4)+1],
 			//nolint:godox    // TODO: Verify that we're grabbing the right high/lo word for the vars below
@@ -189,23 +190,23 @@ func (v *MPQ) loadHashTable() {
 }
 
 func (v *MPQ) loadBlockTable() {
-	_, err := v.File.Seek(int64(v.Data.BlockTableOffset), 0)
+	_, err := v.file.Seek(int64(v.data.BlockTableOffset), 0)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	blockData := make([]uint32, v.Data.BlockTableEntries*4) //nolint:gomnd binary data
+	blockData := make([]uint32, v.data.BlockTableEntries*4) //nolint:gomnd binary data
 	hash := make([]byte, 4)
 
 	for i := range blockData {
-		_, _ = v.File.Read(hash[:]) //nolint:errcheck Will fix later
+		_, _ = v.file.Read(hash[:]) //nolint:errcheck Will fix later
 		blockData[i] = binary.LittleEndian.Uint32(hash)
 	}
 
 	decrypt(blockData, hashString("(block table)", 3))
 
-	for i := uint32(0); i < v.Data.BlockTableEntries; i++ {
-		v.BlockTableEntries = append(v.BlockTableEntries, BlockTableEntry{
+	for i := uint32(0); i < v.data.BlockTableEntries; i++ {
+		v.blockTableEntries = append(v.blockTableEntries, BlockTableEntry{
 			FilePosition:         blockData[(i * 4)],
 			CompressedFileSize:   blockData[(i*4)+1],
 			UncompressedFileSize: blockData[(i*4)+2],
@@ -259,18 +260,18 @@ func hashString(key string, hashType uint32) uint32 {
 
 // GetFileBlockData gets a block table entry
 func (v *MPQ) getFileBlockData(fileName string) (BlockTableEntry, error) {
-	fileEntry, found := v.HashEntryMap.Find(fileName)
+	fileEntry, found := v.hashEntryMap.Find(fileName)
 
-	if !found || fileEntry.BlockIndex >= uint32(len(v.BlockTableEntries)) {
+	if !found || fileEntry.BlockIndex >= uint32(len(v.blockTableEntries)) {
 		return BlockTableEntry{}, errors.New("file not found")
 	}
 
-	return v.BlockTableEntries[fileEntry.BlockIndex], nil
+	return v.blockTableEntries[fileEntry.BlockIndex], nil
 }
 
 // Close closes the MPQ file
 func (v *MPQ) Close() {
-	err := v.File.Close()
+	err := v.file.Close()
 	if err != nil {
 		log.Panic(err)
 	}
@@ -278,7 +279,7 @@ func (v *MPQ) Close() {
 
 // FileExists checks the mpq to see if the file exists
 func (v *MPQ) FileExists(fileName string) bool {
-	return v.HashEntryMap.Contains(fileName)
+	return v.hashEntryMap.Contains(fileName)
 }
 
 // ReadFile reads a file from the MPQ and returns a memory stream
@@ -304,7 +305,7 @@ func (v *MPQ) ReadFile(fileName string) ([]byte, error) {
 }
 
 // ReadFileStream reads the mpq file data and returns a stream
-func (v *MPQ) ReadFileStream(fileName string) (*MpqDataStream, error) {
+func (v *MPQ) ReadFileStream(fileName string) (d2interface.ArchiveDataStream, error) {
 	fileBlockData, err := v.getFileBlockData(fileName)
 
 	if err != nil {
@@ -363,4 +364,16 @@ func (v *MPQ) GetFileList() ([]string, error) {
 	}
 
 	return filePaths, nil
+}
+
+func (v *MPQ) Path() string {
+	return v.filePath
+}
+
+func (v *MPQ) Contains(filename string) bool {
+	return v.hashEntryMap.Contains(filename)
+}
+
+func (v *MPQ) Size() uint32 {
+	return v.data.ArchiveSize
 }
