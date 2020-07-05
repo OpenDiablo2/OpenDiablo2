@@ -39,7 +39,7 @@ func (am *animationManager) LoadAnimation(
 	transparency int ) (d2interface.Animation, error) {
 	cachePath := fmt.Sprintf("%s;%s;%d", animationPath, palettePath, transparency)
 	if animation, found := am.cache.Retrieve(cachePath); found {
-		return animation.(*Animation).Clone(), nil
+		return animation.(d2interface.Animation).Clone(), nil
 	}
 
 	var animation d2interface.Animation
@@ -62,17 +62,17 @@ func (am *animationManager) LoadAnimation(
 			return nil, err
 		}
 	case ".dcc":
-		dcc, err := loadDCC(animationPath)
-		if err != nil {
-			return nil, err
-		}
+		//dcc, err := loadDCC(animationPath)
+		//if err != nil {
+		//	return nil, err
+		//}
 
 		palette, err := LoadPalette(palettePath)
 		if err != nil {
 			return nil, err
 		}
 
-		animation, err = CreateAnimationFromDCC(am.renderer, dcc, palette, transparency)
+		animation, err = CreateDCCAnimation(am.renderer, animationPath, palette, transparency)
 		if err != nil {
 			return nil, err
 		}

@@ -3,6 +3,7 @@ package d2asset
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
@@ -218,6 +219,8 @@ func (c *Composite) createMode(animationMode, weaponClass string) (*compositeMod
 				transparency = 192
 			case d2enum.DrawEffectModulate:
 				blend = true
+			default:
+				log.Println("Unhandled DrawEffect ", cofLayer.DrawEffect, " requested for layer ", cofLayer.Type.String(), " of ", c.token)
 			}
 		}
 
