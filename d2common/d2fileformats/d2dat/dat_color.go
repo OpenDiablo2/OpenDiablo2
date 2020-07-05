@@ -14,10 +14,10 @@ const (
 )
 
 const (
-	bitShiftA = iota*colorBits
-	bitShiftB
-	bitShiftG
-	bitShiftR
+	bitShift0 = iota*colorBits
+	bitShift8
+	bitShift16
+	bitShift24
 )
 
 // R gets the red component
@@ -42,19 +42,36 @@ func (c *DATColor) A() uint8 {
 
 // RGBA gets the combination of the color components (0xRRGGBBAA)
 func (c *DATColor) RGBA() uint32 {
-	rgba := uint32(c.r)<<bitShiftR
-	rgba += uint32(c.g)<<bitShiftG
-	rgba += uint32(c.b)<<bitShiftB
-	rgba += uint32(c.b)<<bitShiftA
-
-	return rgba
+	return toComposite(c.r, c.g, c.b, c.a)
 }
 
 // SetRGBA sets the color components using the given RGBA form
 func (c *DATColor) SetRGBA(rgba uint32) {
-	c.r = uint8(rgba>>bitShiftR & mask)
-	c.g = uint8(rgba>>bitShiftG & mask)
-	c.b = uint8(rgba>>bitShiftB & mask)
-	c.a = uint8(rgba>>bitShiftA & mask)
+	c.r, c.g, c.b, c.a = toComponent(rgba)
+}
+
+func (c *DATColor) BGRA() uint32 {
+	return toComposite(c.b, c.g, c.r, c.a)
+}
+
+func (c *DATColor) SetBGRA(bgra uint32) {
+	c.b, c.g, c.r, c.a = toComponent(bgra)
+}
+
+func toComposite (w,x,y,z uint8) uint32 {
+	composite := uint32(w)<<bitShift24
+	composite += uint32(x)<<bitShift16
+	composite += uint32(y)<<bitShift8
+	composite += uint32(z)<<bitShift0
+
+	return composite
+}
+
+func toComponent (wxyz uint32) (w,x,y,z uint8){
+	w = uint8(wxyz>>bitShift24 & mask)
+	x = uint8(wxyz>>bitShift16 & mask)
+	y = uint8(wxyz>>bitShift8 & mask)
+	z = uint8(wxyz>>bitShift0 & mask)
+	return w, x, y, z
 }
 

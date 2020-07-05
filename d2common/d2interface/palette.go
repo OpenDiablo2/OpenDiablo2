@@ -10,6 +10,8 @@ type Color interface {
 	A() uint8
 	RGBA() uint32
 	SetRGBA(uint32)
+	BGRA() uint32
+	SetBGRA(uint32)
 }
 
 // Palette is a color palette
