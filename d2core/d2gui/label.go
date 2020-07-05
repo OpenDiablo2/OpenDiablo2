@@ -2,7 +2,6 @@ package d2gui
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 type Label struct {
@@ -10,7 +9,7 @@ type Label struct {
 
 	renderer d2interface.Renderer
 	text     string
-	font     *d2asset.Font
+	font     d2interface.Font
 	surface  d2interface.Surface
 }
 

@@ -15,14 +15,16 @@ type fontManager struct {
 	cache d2interface.Cache
 }
 
-func createFontManager() *fontManager {
+func createFontManager() d2interface.ArchivedFontManager {
 	return &fontManager{d2common.CreateCache(fontBudget)}
 }
 
-func (fm *fontManager) loadFont(tablePath, spritePath, palettePath string) (*Font, error) {
+// LoadFont loads a font from the archives managed by the ArchiveManager
+func (fm *fontManager) LoadFont(tablePath, spritePath, palettePath string) (d2interface.Font,
+	error) {
 	cachePath := fmt.Sprintf("%s;%s;%s", tablePath, spritePath, palettePath)
 	if font, found := fm.cache.Retrieve(cachePath); found {
-		return font.(*Font).Clone(), nil
+		return font.(d2interface.Font).Clone(), nil
 	}
 
 	font, err := loadFont(tablePath, spritePath, palettePath)
@@ -35,4 +37,14 @@ func (fm *fontManager) loadFont(tablePath, spritePath, palettePath string) (*Fon
 	}
 
 	return font, nil
+}
+
+// ClearCache clears the font cache
+func (fm *fontManager) ClearCache() {
+	fm.cache.Clear()
+}
+
+// GetCache returns the font managers cache
+func (fm *fontManager) GetCache() d2interface.Cache {
+	return fm.cache
 }

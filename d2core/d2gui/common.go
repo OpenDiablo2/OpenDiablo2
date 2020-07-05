@@ -9,7 +9,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
-func loadFont(fontStyle FontStyle) (*d2asset.Font, error) {
+func loadFont(fontStyle FontStyle) (d2interface.Font, error) {
 	config, ok := fontStyleConfigs[fontStyle]
 	if !ok {
 		return nil, errors.New("invalid font style")
