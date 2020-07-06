@@ -47,6 +47,8 @@ func (am *animationManager) LoadAnimation(
 	ext := strings.ToLower(filepath.Ext(animationPath))
 	switch ext {
 	case ".dc6":
+		// NOTE: if someone feels like it they can make DC6 load directions on demand
+		// see dcc for how to do it
 		dc6, err := loadDC6(animationPath)
 		if err != nil {
 			return nil, err
@@ -62,11 +64,6 @@ func (am *animationManager) LoadAnimation(
 			return nil, err
 		}
 	case ".dcc":
-		//dcc, err := loadDCC(animationPath)
-		//if err != nil {
-		//	return nil, err
-		//}
-
 		palette, err := LoadPalette(palettePath)
 		if err != nil {
 			return nil, err
