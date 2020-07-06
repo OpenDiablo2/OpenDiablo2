@@ -224,7 +224,7 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 
 	v.campfire = loadSprite(d2resource.CharacterSelectCampfire, image.Point{X: 380, Y: 335}, 0, true, true)
 
-	v.createCheckboxes()
+	v.createCheckboxes(v.renderer)
 	loading.Progress(0.5)
 
 	for hero, config := range getHeroRenderConfiguration() {
@@ -276,19 +276,19 @@ func (v *SelectHeroClass) createLabels() {
 	v.heroDesc3Label.Alignment = d2ui.LabelAlignCenter
 	v.heroDesc3Label.SetPosition(400, 130)
 
-	v.heroNameLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroNameLabel = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
 	v.heroNameLabel.Alignment = d2ui.LabelAlignLeft
 	v.heroNameLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
 	v.heroNameLabel.SetText("Character Name")
 	v.heroNameLabel.SetPosition(321, 475)
 
-	v.expansionCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.expansionCharLabel = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
 	v.expansionCharLabel.Alignment = d2ui.LabelAlignLeft
 	v.expansionCharLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
 	v.expansionCharLabel.SetText("EXPANSION CHARACTER")
 	v.expansionCharLabel.SetPosition(339, 526)
 
-	v.hardcoreCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.hardcoreCharLabel = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
 	v.hardcoreCharLabel.Alignment = d2ui.LabelAlignLeft
 	v.hardcoreCharLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
 	v.hardcoreCharLabel.SetText("Hardcore")
@@ -309,8 +309,8 @@ func (v *SelectHeroClass) createButtons() {
 	d2ui.AddWidget(&v.okButton)
 }
 
-func (v *SelectHeroClass) createCheckboxes() {
-	v.heroNameTextbox = d2ui.CreateTextbox()
+func (v *SelectHeroClass) createCheckboxes(renderer d2interface.Renderer) {
+	v.heroNameTextbox = d2ui.CreateTextbox(renderer)
 	v.heroNameTextbox.SetPosition(318, 493)
 	v.heroNameTextbox.SetVisible(false)
 	d2ui.AddWidget(&v.heroNameTextbox)
@@ -320,7 +320,7 @@ func (v *SelectHeroClass) createCheckboxes() {
 	v.expansionCheckbox.SetVisible(false)
 	d2ui.AddWidget(&v.expansionCheckbox)
 
-	v.hardcoreCheckbox = d2ui.CreateCheckbox(false)
+	v.hardcoreCheckbox = d2ui.CreateCheckbox(renderer, false)
 	v.hardcoreCheckbox.SetPosition(318, 548)
 	v.hardcoreCheckbox.SetVisible(false)
 	d2ui.AddWidget(&v.hardcoreCheckbox)
@@ -356,7 +356,7 @@ func (v *SelectHeroClass) onOkButtonClicked() {
 		fmt.Printf("can not connect to the host: %s\n", v.connectionHost)
 	}
 
-	d2screen.SetNextScreen(CreateGame(v.audioProvider, gameClient, v.terminal))
+	d2screen.SetNextScreen(CreateGame(v.renderer, v.audioProvider, gameClient, v.terminal))
 }
 
 // Render renders the Select Hero Class screen

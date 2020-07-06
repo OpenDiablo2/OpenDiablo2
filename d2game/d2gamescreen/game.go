@@ -158,7 +158,7 @@ func (v *Game) bindGameControls() {
 		}
 
 		v.localPlayer = player
-		v.gameControls = d2player.NewGameControls(player, v.gameClient.MapEngine, v.mapRenderer, v, v.terminal)
+		v.gameControls = d2player.NewGameControls(v.renderer, player, v.gameClient.MapEngine, v.mapRenderer, v, v.terminal)
 		v.gameControls.Load()
 
 		if err := d2input.BindHandler(v.gameControls); err != nil {
