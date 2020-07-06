@@ -37,16 +37,16 @@ func (f *Float64) Equals(v d2interface.Vector) bool {
 	return f.x == *vx && f.y == *vy
 }
 
-// EqualsF checks if the Vector is approximately equal
+// EqualsApprox checks if the Vector is approximately equal
 // to the given Vector.
-func (f *Float64) EqualsF(v d2interface.Vector) bool {
-	x, y := f.CompareF(v)
+func (f *Float64) EqualsApprox(v d2interface.Vector) bool {
+	x, y := f.CompareApprox(v)
 	return x == 0 && y == 0
 }
 
-// CompareF performs a fuzzy comparison and returns 2
+// CompareApprox performs a fuzzy comparison and returns 2
 // ints represending the -1 to 1 comparison of x and y.
-func (f *Float64) CompareF(v d2interface.Vector) (x, y int) {
+func (f *Float64) CompareApprox(v d2interface.Vector) (x, y int) {
 	vx, vy := v.XYFloat64()
 	return d2math.CompareFloat64Fuzzy(&f.x, vx),
 		d2math.CompareFloat64Fuzzy(&f.y, vy)

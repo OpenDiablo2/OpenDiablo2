@@ -131,13 +131,13 @@ func testEqualsF(vector func(float64, float64) d2interface.Vector, t *testing.T)
 	a := vector(1+subEpsilon, 2+subEpsilon)
 	b := vector(1, 2)
 
-	got := a.EqualsF(b)
+	got := a.EqualsApprox(b)
 
 	evaluateBool(fmt.Sprintf("approximate equality %s and %s", a, b), true, got, t)
 
 	a.Add(vector(epsilon, epsilon))
 
-	got = a.EqualsF(b)
+	got = a.EqualsApprox(b)
 
 	evaluateBool(fmt.Sprintf("approximate equality %s and %s", a, b), false, got, t)
 }
@@ -148,7 +148,7 @@ func testCompareF(vector func(float64, float64) d2interface.Vector, t *testing.T
 	f := vector(1+subEpsilon, 1+subEpsilon)
 	c := vector(1, 1)
 
-	x, y := f.CompareF(c)
+	x, y := f.CompareApprox(c)
 
 	got := x == 0 && y == 0
 
@@ -157,7 +157,7 @@ func testCompareF(vector func(float64, float64) d2interface.Vector, t *testing.T
 	l := vector(2, 2)
 	s := vector(-1, 3)
 
-	x, y = l.CompareF(s)
+	x, y = l.CompareApprox(s)
 
 	got = x == -1 && y == 1
 
@@ -166,7 +166,7 @@ func testCompareF(vector func(float64, float64) d2interface.Vector, t *testing.T
 	e := vector(2, 2)
 	q := vector(3, -1)
 
-	x, y = e.CompareF(q)
+	x, y = e.CompareApprox(q)
 
 	got = x == 1 && y == -1
 

@@ -14,8 +14,8 @@ type Vector interface {
 	XYFloat64() (*float64, *float64)
 
 	Equals(v Vector) bool
-	EqualsF(v Vector) bool
-	CompareF(Vector) (int, int)
+	EqualsApprox(v Vector) bool
+	CompareApprox(Vector) (int, int)
 
 	Set(x, y float64) Vector
 	Clone() Vector

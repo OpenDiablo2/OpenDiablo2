@@ -7,11 +7,11 @@ import (
 )
 
 func validate(t *testing.T, original, got, want, unchanged d2interface.Vector) {
-	if !got.EqualsF(want) {
+	if !got.EqualsApprox(want) {
 		t.Errorf("want %s: got %s", want, got)
 	}
 
-	if !original.EqualsF(unchanged) {
+	if !original.EqualsApprox(unchanged) {
 		t.Errorf("Position value %s was incorrectly changed to %s when calling this method", unchanged, original)
 	}
 }
