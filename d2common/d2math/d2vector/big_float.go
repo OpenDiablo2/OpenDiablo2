@@ -71,7 +71,7 @@ func (f *BigFloat) CompareF(v d2interface.Vector) (x, y int) {
 // Set sets the vector values to the given float64 values.
 func (f *BigFloat) Set(x, y float64) d2interface.Vector {
 	f.x.SetFloat64(x)
-	f.x.SetFloat64(y)
+	f.y.SetFloat64(y)
 
 	return f
 }
@@ -180,6 +180,7 @@ func (f *BigFloat) Length() float64 {
 	return r
 }
 
+// TODO: Improve this based on float64 standard library Stringer implementation.
 func (f *BigFloat) String() string {
 	return fmt.Sprintf("BigFloat{%s, %s}", f.x.Text('f', 5), f.y.Text('f', 5))
 }
