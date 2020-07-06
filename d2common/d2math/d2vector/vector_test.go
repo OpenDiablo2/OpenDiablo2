@@ -61,6 +61,21 @@ func TestDistance(t *testing.T) {
 	testDistance(NewBigFloat, t)
 }
 
+func TestScale(t *testing.T) {
+	testScale(NewFloat64, t)
+	testScale(NewBigFloat, t)
+}
+
+func TestAbs(t *testing.T) {
+	testAbs(NewFloat64, t)
+	testAbs(NewBigFloat, t)
+}
+
+func TestNegate(t *testing.T) {
+	testNegate(NewFloat64, t)
+	testNegate(NewBigFloat, t)
+}
+
 func testEquals(vector func(float64, float64) d2interface.Vector, t *testing.T) {
 	a := vector(1, 2)
 	b := vector(1, 2)
@@ -182,17 +197,47 @@ func testDivide(vector func(float64, float64) d2interface.Vector, t *testing.T) 
 	got := v.Divide(vector(2, 2))
 
 	if !got.Equals(want) {
-		t.Errorf("wanted %s: got %s", want, got)
+		t.Errorf("divide %s by (2,2): wanted %s: got %s", v, want, got)
 	}
 }
 
 func testDistance(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	v := vector(1, -1)
-	d := vector(1, 3)
+	v := vector(1, 3)
+	d := vector(1, -1)
 	want := 4.0
 	got := v.Distance(d)
 
 	if got != want {
 		t.Errorf("distance from %s to %s: wanted %f: got %f", v, d, want, got)
+	}
+}
+
+func testScale(vector func(float64, float64) d2interface.Vector, t *testing.T) {
+	v := vector(2, 3)
+	want := vector(4, 6)
+	got := v.Scale(2)
+
+	if !got.Equals(want) {
+		t.Errorf("scale (2, 3) by 2: wanted %s: got %s", want, got)
+	}
+}
+
+func testAbs(vector func(float64, float64) d2interface.Vector, t *testing.T) {
+	v := vector(-1, 1)
+	want := vector(1, 1)
+	got := v.Abs()
+
+	if !got.Equals(want) {
+		t.Errorf("absolute value of (-1, 1): wanted %s: got %s", want, got)
+	}
+}
+
+func testNegate(vector func(float64, float64) d2interface.Vector, t *testing.T) {
+	v := vector(-1, 1)
+	want := vector(1, -1)
+	got := v.Negate()
+
+	if !got.Equals(want) {
+		t.Errorf("negated value of (-1, 1): wanted %s: got %s", want, got)
 	}
 }

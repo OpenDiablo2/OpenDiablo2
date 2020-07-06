@@ -125,6 +125,15 @@ func (f *BigFloat) Multiply(v d2interface.Vector) d2interface.Vector {
 	return f
 }
 
+// Scale multiplies this vector by a single value.
+func (f *BigFloat) Scale(s float64) d2interface.Vector {
+	sb := big.NewFloat(s)
+	f.x.Mul(f.x, sb)
+	f.y.Mul(f.y, sb)
+
+	return f
+}
+
 // Divide divides this vector by the components of the given vector.
 func (f *BigFloat) Divide(v d2interface.Vector) d2interface.Vector {
 	vx, vy := v.XYBigFloat()
@@ -134,17 +143,38 @@ func (f *BigFloat) Divide(v d2interface.Vector) d2interface.Vector {
 	return f
 }
 
-// Distance calculate the distance between this Vector and the given Vector
+// Abs sets the vector to it's absolute (positive) equivalent.
+func (f *BigFloat) Abs() d2interface.Vector {
+	xm, ym := 1.0, 1.0
+	if f.x.Sign() == -1 {
+		xm = -1
+	}
+
+	if f.y.Sign() == -1 {
+		ym = -1
+	}
+
+	m := NewBigFloat(xm, ym)
+	f.Multiply(m)
+
+	return f
+}
+
+// Negate multiplies the vector by -1.
+func (f *BigFloat) Negate() d2interface.Vector {
+	return f.Scale(-1)
+}
+
+// Distance is the distance between this Vector and the given Vector.
 func (f *BigFloat) Distance(v d2interface.Vector) float64 {
 	delta := v.Clone().Subtract(f)
 	return delta.Length()
 }
 
-// Length returns the length of this Vector
+// Length is the length/magnitude/quantity of this Vector.
 func (f *BigFloat) Length() float64 {
 	sqx, sqy := f.Clone().Multiply(f).XYBigFloat()
 	sum := big.NewFloat(0).Add(sqx, sqy)
-
 	r, _ := sum.Sqrt(sum).Float64()
 
 	return r

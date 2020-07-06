@@ -100,6 +100,14 @@ func (f *Float64) Multiply(v d2interface.Vector) d2interface.Vector {
 	return f
 }
 
+// Scale multiplies this vector by a single value.
+func (f *Float64) Scale(s float64) d2interface.Vector {
+	f.x *= s
+	f.y *= s
+
+	return f
+}
+
 // Divide divides this vector by the components of the given vector.
 func (f *Float64) Divide(v d2interface.Vector) d2interface.Vector {
 	vx, vy := v.XYFloat64()
@@ -109,14 +117,35 @@ func (f *Float64) Divide(v d2interface.Vector) d2interface.Vector {
 	return f
 }
 
-// Distance calculate the distance between this Vector and the given Vector
+// Abs sets the vector to it's absolute (positive) equivalent.
+func (f *Float64) Abs() d2interface.Vector {
+	xm, ym := 1.0, 1.0
+	if f.x < 0 {
+		xm = -1
+	}
+
+	if f.y < 0 {
+		ym = -1
+	}
+
+	f.Multiply(NewFloat64(xm, ym))
+
+	return f
+}
+
+// Negate multiplies the vector by -1.
+func (f *Float64) Negate() d2interface.Vector {
+	return f.Scale(-1)
+}
+
+// Distance calculate the distance between this Vector and the given Vector.
 func (f *Float64) Distance(v d2interface.Vector) float64 {
 	delta := v.Clone().Subtract(f)
 
 	return delta.Length()
 }
 
-// Length returns the length of this Vector
+// Length returns the length of this Vector.
 func (f *Float64) Length() float64 {
 	sqx, sqy := f.Clone().Multiply(f).XYFloat64()
 	sum := *sqx + *sqy

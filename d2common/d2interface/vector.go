@@ -19,11 +19,15 @@ type Vector interface {
 
 	Set(x, y float64) Vector
 	Clone() Vector
+
 	Floor() Vector
 	Add(v Vector) Vector
 	Subtract(v Vector) Vector
 	Multiply(v Vector) Vector
+	Scale(s float64) Vector
 	Divide(v Vector) Vector
+	Abs() Vector
+	Negate() Vector
 
 	Distance(v Vector) float64
 	Length() float64
@@ -36,20 +40,15 @@ type Vector interface {
 		Unmarshal(buf []byte) error
 		Copy(src Vector) Vector
 		// SetFromEntity(entity WorldEntity) Vector
-		Set(x, y *big.Float) Vector
 		SetToPolar(azimuth, radius *big.Float) Vector
-		Abs() Vector
 		Angle() *big.Float
 		SetAngle(angle *big.Float) Vector
 		Scale(value *big.Float) Vector
-		Negate() Vector
 		DistanceSq(src Vector) *big.Float
-		SetLength(length *big.Float) Vector
 		LengthSq() (*big.Float, *big.Float)
 		Normalize() Vector
 		NormalizeRightHand() Vector
 		NormalizeLeftHand() Vector
-		Dot(src Vector) *big.Float
 		Cross(src Vector) *big.Float
 		Lerp(src Vector, t *big.Float) Vector
 		Reset() Vector
