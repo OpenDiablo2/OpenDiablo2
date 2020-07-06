@@ -11,7 +11,7 @@ import (
 
 // DCCAnimation represens an animation decoded from DCC
 type DCCAnimation struct {
-	Animation
+	animation
 	dccPath      string
 	transparency int
 	palette      d2iface.Palette
@@ -27,14 +27,14 @@ func CreateDCCAnimation(renderer d2iface.Renderer, dccPath string, palette d2ifa
 		return nil, err
 	}
 
-	anim := Animation{
+	anim := animation{
 		playLength: defaultPlayLength,
 		playLoop:   true,
 		directions: make([]animationDirection, dcc.NumberOfDirections),
 	}
 
 	DCC := DCCAnimation{
-		Animation:    anim,
+		animation:    anim,
 		dccPath:      dccPath,
 		palette:      palette,
 		renderer:     renderer,

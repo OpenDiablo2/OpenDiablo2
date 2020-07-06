@@ -7,20 +7,20 @@ import (
 
 // DC6Animation is an animation made from a DC6 file
 type DC6Animation struct {
-	Animation
+	animation
 }
 
 // CreateDC6Animation creates an Animation from d2dc6.DC6 and d2dat.DATPalette
 func CreateDC6Animation(renderer d2iface.Renderer, dc6 *d2dc6.DC6,
 	palette d2iface.Palette) (d2iface.Animation, error) {
-	animation := Animation{
+	animation := animation{
 		directions:     make([]animationDirection, dc6.Directions),
 		playLength:     defaultPlayLength,
 		playLoop:       true,
 		originAtBottom: true,
 	}
 
-	DC6 := DC6Animation{Animation: animation}
+	DC6 := DC6Animation{animation: animation}
 
 	for frameIndex, dc6Frame := range dc6.Frames {
 		sfc, err := renderer.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height),
@@ -104,7 +104,7 @@ func CreateDC6Animation(renderer d2iface.Renderer, dc6 *d2dc6.DC6,
 }
 
 // Clone creates a copy of the animation
-func (a *Animation) Clone() d2iface.Animation {
+func (a *DC6Animation) Clone() d2iface.Animation {
 	animation := *a
 	return &animation
 }
