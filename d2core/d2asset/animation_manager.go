@@ -57,7 +57,7 @@ func (am *animationManager) LoadAnimation(
 			return nil, err
 		}
 
-		animation, err = CreateAnimationFromDC6(am.renderer, dc6, palette)
+		animation, err = CreateDC6Animation(am.renderer, dc6, palette)
 		if err != nil {
 			return nil, err
 		}
