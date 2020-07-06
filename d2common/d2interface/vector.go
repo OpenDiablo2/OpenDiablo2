@@ -23,6 +23,8 @@ type Vector interface {
 	Add(v Vector) Vector
 	Subtract(v Vector) Vector
 	Multiply(v Vector) Vector
+	Divide(v Vector) Vector
+
 	String() string
 
 	/*
@@ -37,7 +39,6 @@ type Vector interface {
 		Angle() *big.Float
 		SetAngle(angle *big.Float) Vector
 		Scale(value *big.Float) Vector
-		Divide(src Vector) Vector
 		Negate() Vector
 		Distance(src Vector) *big.Float
 		DistanceSq(src Vector) *big.Float

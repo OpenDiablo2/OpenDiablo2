@@ -36,9 +36,29 @@ func TestFloor(t *testing.T) {
 	testFloor(NewBigFloat, t)
 }
 
-func testEquals(fn func(float64, float64) d2interface.Vector, t *testing.T) {
-	a := fn(1, 2)
-	b := fn(1, 2)
+func TestAdd(t *testing.T) {
+	testAdd(NewFloat64, t)
+	testAdd(NewBigFloat, t)
+}
+
+func TestSubtract(t *testing.T) {
+	testSubtract(NewFloat64, t)
+	testSubtract(NewBigFloat, t)
+}
+
+func TestMultiply(t *testing.T) {
+	testMultiply(NewFloat64, t)
+	testMultiply(NewBigFloat, t)
+}
+
+func TestDivide(t *testing.T) {
+	testDivide(NewFloat64, t)
+	testDivide(NewBigFloat, t)
+}
+
+func testEquals(vector func(float64, float64) d2interface.Vector, t *testing.T) {
+	a := vector(1, 2)
+	b := vector(1, 2)
 
 	if !a.Equals(b) {
 		t.Errorf("vectors %s and %s were not exactly equal", a, b)
@@ -51,60 +71,60 @@ func testEquals(fn func(float64, float64) d2interface.Vector, t *testing.T) {
 	}
 }
 
-func testEqualsF(fn func(float64, float64) d2interface.Vector, t *testing.T) {
+func testEqualsF(vector func(float64, float64) d2interface.Vector, t *testing.T) {
 	subEpsilon := epsilon / 3
 
-	a := fn(1+subEpsilon, 2+subEpsilon)
-	b := fn(1, 2)
+	a := vector(1+subEpsilon, 2+subEpsilon)
+	b := vector(1, 2)
 
 	if !a.EqualsF(b) {
 		t.Errorf("vectors %s and %s were not almost equal", a, b)
 	}
 
-	a.Add(fn(epsilon, epsilon))
+	a.Add(vector(epsilon, epsilon))
 
 	if a.Equals(b) {
 		t.Errorf("vectors %s and %s were almost equal", a, b)
 	}
 }
 
-func testCompareF(fn func(float64, float64) d2interface.Vector, t *testing.T) {
+func testCompareF(vector func(float64, float64) d2interface.Vector, t *testing.T) {
 	subEpsilon := epsilon / 3
 
-	f := fn(1+subEpsilon, 1+subEpsilon)
-	c := fn(1, 1)
+	f := vector(1+subEpsilon, 1+subEpsilon)
+	c := vector(1, 1)
 
 	if x, y := f.CompareF(c); (x + y) != 0 {
 		t.Errorf("call to %s.Compare(%s) returned comparison (%d, %d)", f, c, x, y)
 	}
 
-	l := fn(2, 2)
-	s := fn(-1, -1)
+	l := vector(2, 2)
+	s := vector(-1, -1)
 
 	if x, y := l.CompareF(s); x != 1 || y != 1 {
 		t.Errorf("call to %s.Compare(%s) returned comparison (%d, %d)", l, s, x, y)
 	}
 
-	e := fn(2, 2)
-	q := fn(2, 2)
+	e := vector(2, 2)
+	q := vector(2, 2)
 
 	if x, y := e.CompareF(q); x != 0 || y != 0 {
 		t.Errorf("call to %s.Compare(%s) returned comparison (%d, %d)", e, q, x, y)
 	}
 }
 
-func testSet(fn func(float64, float64) d2interface.Vector, t *testing.T) {
-	got := fn(1, 1)
-	want := fn(2, 3)
-	got.Add(fn(1, 2))
+func testSet(vector func(float64, float64) d2interface.Vector, t *testing.T) {
+	got := vector(1, 1)
+	want := vector(2, 3)
+	got.Add(vector(1, 2))
 
 	if !got.Equals(want) {
 		t.Errorf("wanted %s: got %s", want, got)
 	}
 }
 
-func testClone(fn func(float64, float64) d2interface.Vector, t *testing.T) {
-	want := fn(1, 2)
+func testClone(vector func(float64, float64) d2interface.Vector, t *testing.T) {
+	want := vector(1, 2)
 	got := want.Clone()
 
 	if !got.Equals(want) {
@@ -112,12 +132,51 @@ func testClone(fn func(float64, float64) d2interface.Vector, t *testing.T) {
 	}
 }
 
-func testFloor(fn func(float64, float64) d2interface.Vector, t *testing.T) {
-	v := fn(1.6, 1.6)
-
-	want := fn(1, 1)
+func testFloor(vector func(float64, float64) d2interface.Vector, t *testing.T) {
+	v := vector(1.6, 1.6)
+	want := vector(1, 1)
 
 	if !v.Floor().Equals(want) {
 		t.Errorf("want %s: got %s", want, v)
+	}
+}
+
+func testAdd(vector func(float64, float64) d2interface.Vector, t *testing.T) {
+	v := vector(1, 1)
+	want := vector(1.5, 1.5)
+	got := v.Add(vector(0.5, 0.5))
+
+	if !got.Equals(want) {
+		t.Errorf("wanted %s: got %s", want, got)
+	}
+}
+
+func testSubtract(vector func(float64, float64) d2interface.Vector, t *testing.T) {
+	v := vector(1, 1)
+	want := vector(0.5, 0.5)
+	got := v.Subtract(vector(0.5, 0.5))
+
+	if !got.Equals(want) {
+		t.Errorf("wanted %s: got %s", want, got)
+	}
+}
+
+func testMultiply(vector func(float64, float64) d2interface.Vector, t *testing.T) {
+	v := vector(1, 1)
+	want := vector(2, 2)
+	got := v.Multiply(vector(2, 2))
+
+	if !got.Equals(want) {
+		t.Errorf("wanted %s: got %s", want, got)
+	}
+}
+
+func testDivide(vector func(float64, float64) d2interface.Vector, t *testing.T) {
+	v := vector(1, 1)
+	want := vector(0.5, 0.5)
+	got := v.Divide(vector(2, 2))
+
+	if !got.Equals(want) {
+		t.Errorf("wanted %s: got %s", want, got)
 	}
 }

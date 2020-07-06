@@ -33,16 +33,16 @@ func NewBigFloat(x, y float64) d2interface.Vector {
 }
 
 // XYBigFloat returns the values as big.Float.
-func (f *BigFloat) XYBigFloat() (*big.Float, *big.Float) {
+func (f *BigFloat) XYBigFloat() (x, y *big.Float) {
 	return f.x, f.y
 }
 
 // XYFloat64 returns the values as float64.
-func (f *BigFloat) XYFloat64() (*float64, *float64) {
-	x, _ := f.x.Float64()
-	y, _ := f.y.Float64()
+func (f *BigFloat) XYFloat64() (x, y *float64) {
+	xf, _ := f.x.Float64()
+	yf, _ := f.y.Float64()
 
-	return &x, &y
+	return &xf, &yf
 }
 
 // Equals check whether this Vector is equal to a given Vector.
@@ -60,7 +60,7 @@ func (f *BigFloat) EqualsF(v d2interface.Vector) bool {
 
 // CompareF performs a fuzzy comparison and returns 2
 // ints represending the -1 to 1 comparison of x and y.
-func (f *BigFloat) CompareF(v d2interface.Vector) (int, int) {
+func (f *BigFloat) CompareF(v d2interface.Vector) (x, y int) {
 	vx, vy := v.XYFloat64()
 	fx, fy := f.XYFloat64()
 
@@ -121,6 +121,15 @@ func (f *BigFloat) Multiply(v d2interface.Vector) d2interface.Vector {
 	vx, vy := v.XYBigFloat()
 	f.x.Mul(f.x, vx)
 	f.y.Mul(f.y, vy)
+
+	return f
+}
+
+// Divide divides this vector by the components of the given vector.
+func (f *BigFloat) Divide(v d2interface.Vector) d2interface.Vector {
+	vx, vy := v.XYBigFloat()
+	f.x.Quo(f.x, vx)
+	f.y.Quo(f.y, vy)
 
 	return f
 }

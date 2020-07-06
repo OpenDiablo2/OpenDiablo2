@@ -21,13 +21,13 @@ func NewFloat64(x, y float64) d2interface.Vector {
 }
 
 // XYBigFloat returns the values as big.Float.
-func (f *Float64) XYBigFloat() (*big.Float, *big.Float) {
+func (f *Float64) XYBigFloat() (x, y *big.Float) {
 	bf := NewBigFloat(f.x, f.y)
 	return bf.XYBigFloat()
 }
 
 // XYFloat64 returns the values as float64.
-func (f *Float64) XYFloat64() (*float64, *float64) {
+func (f *Float64) XYFloat64() (x, y *float64) {
 	return &f.x, &f.y
 }
 
@@ -46,7 +46,7 @@ func (f *Float64) EqualsF(v d2interface.Vector) bool {
 
 // CompareF performs a fuzzy comparison and returns 2
 // ints represending the -1 to 1 comparison of x and y.
-func (f *Float64) CompareF(v d2interface.Vector) (int, int) {
+func (f *Float64) CompareF(v d2interface.Vector) (x, y int) {
 	vx, vy := v.XYFloat64()
 	return d2math.CompareFloat64Fuzzy(&f.x, vx),
 		d2math.CompareFloat64Fuzzy(&f.y, vy)
@@ -98,6 +98,15 @@ func (f *Float64) Multiply(v d2interface.Vector) d2interface.Vector {
 	f.y *= *vy
 
 	return v
+}
+
+// Divide divides this vector by the components of the given vector.
+func (f *Float64) Divide(v d2interface.Vector) d2interface.Vector {
+	vx, vy := v.XYFloat64()
+	f.x /= *vx
+	f.y /= *vy
+
+	return f
 }
 
 func (f *Float64) String() string {
