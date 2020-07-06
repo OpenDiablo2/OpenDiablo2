@@ -28,14 +28,14 @@ func initObject(ob *Object) bool {
 // Initializes torch/brazier type objects
 func initTorch(ob *Object) {
 	if ob.objectRecord.HasAnimationMode[d2enum.AnimationModeObjectOperating] {
-		ob.setMode("ON", 0)
+		ob.setMode("ON", 0, true)
 	}
 }
 
 func initWaypoint(ob *Object) {
 	// Turn these on unconditionally for now, they look nice :)
 	if ob.objectRecord.HasAnimationMode[d2enum.AnimationModeObjectOperating] {
-		ob.setMode("ON", 0)
+		ob.setMode("ON", 0, true)
 	}
 }
 
@@ -44,8 +44,8 @@ func initTorchRnd(ob *Object) {
 	n := rand.Intn(2)
 
 	if n > 0 {
-		ob.setMode("NU", 0)
+		ob.setMode("NU", 0, true)
 	} else {
-		ob.setMode("OP", 0)
+		ob.setMode("OP", 0, true)
 	}
 }
