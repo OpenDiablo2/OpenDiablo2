@@ -134,6 +134,22 @@ func (f *BigFloat) Divide(v d2interface.Vector) d2interface.Vector {
 	return f
 }
 
+// Distance calculate the distance between this Vector and the given Vector
+func (f *BigFloat) Distance(v d2interface.Vector) float64 {
+	delta := v.Clone().Subtract(f)
+	return delta.Length()
+}
+
+// Length returns the length of this Vector
+func (f *BigFloat) Length() float64 {
+	sqx, sqy := f.Clone().Multiply(f).XYBigFloat()
+	sum := big.NewFloat(0).Add(sqx, sqy)
+
+	r, _ := sum.Sqrt(sum).Float64()
+
+	return r
+}
+
 func (f *BigFloat) String() string {
 	return fmt.Sprintf("BigFloat{%s, %s}", f.x.Text('f', 5), f.y.Text('f', 5))
 }
@@ -226,49 +242,13 @@ func (v *BigFloat) Scale(s *big.Float) d2interface.Vector {
 	return v
 }
 
-// Divide this Vector by the given Vector
-func (v *BigFloat) Divide(src d2interface.Vector) d2interface.Vector {
-	v.x.Quo(v.x, src.XBig())
-	v.y.Quo(v.y, src.YBig())
-
-	return v
-}
 
 // Negate thex and y components of this Vector
 func (v *BigFloat) Negate() d2interface.Vector {
 	return v.Scale(big.NewFloat(negative1))
 }
 
-// Distance calculate the distance between this Vector and the given Vector
-func (v *BigFloat) Distance(src d2interface.Vector) *big.Float {
-	dist := v.DistanceSq(src)
 
-	return dist.Sqrt(dist)
-}
-
-// DistanceSq calculate the distance suared between this Vector and the given
-// Vector
-func (v *BigFloat) DistanceSq(src d2interface.Vector) *big.Float {
-	delta := src.Clone().Subtract(v)
-	deltaSq := delta.Multiply(delta)
-
-	return big.NewFloat(zero).Add(deltaSq.XBig(), deltaSq.YBig())
-}
-
-// Length returns the length of this Vector
-func (v *BigFloat) Length() *big.Float {
-	xsq, ysq := v.LengthSq()
-
-	return xsq.Add(xsq, ysq)
-}
-
-// LengthSq returns the x and y values squared
-func (v *BigFloat) LengthSq() (*big.Float, *big.Float) {
-	clone := v.Clone()
-	x, y := clone.XBig(), clone.YBig()
-
-	return x.Mul(x, x), y.Mul(y, y)
-}
 
 // SetLength sets the length of this Vector
 func (v *BigFloat) SetLength(length *big.Float) d2interface.Vector {

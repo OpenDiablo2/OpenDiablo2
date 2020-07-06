@@ -56,6 +56,11 @@ func TestDivide(t *testing.T) {
 	testDivide(NewBigFloat, t)
 }
 
+func TestDistance(t *testing.T) {
+	testDistance(NewFloat64, t)
+	testDistance(NewBigFloat, t)
+}
+
 func testEquals(vector func(float64, float64) d2interface.Vector, t *testing.T) {
 	a := vector(1, 2)
 	b := vector(1, 2)
@@ -153,8 +158,8 @@ func testAdd(vector func(float64, float64) d2interface.Vector, t *testing.T) {
 
 func testSubtract(vector func(float64, float64) d2interface.Vector, t *testing.T) {
 	v := vector(1, 1)
-	want := vector(0.5, 0.5)
-	got := v.Subtract(vector(0.5, 0.5))
+	want := vector(0.4, 0.4)
+	got := v.Subtract(vector(0.6, 0.6))
 
 	if !got.Equals(want) {
 		t.Errorf("wanted %s: got %s", want, got)
@@ -178,5 +183,16 @@ func testDivide(vector func(float64, float64) d2interface.Vector, t *testing.T) 
 
 	if !got.Equals(want) {
 		t.Errorf("wanted %s: got %s", want, got)
+	}
+}
+
+func testDistance(vector func(float64, float64) d2interface.Vector, t *testing.T) {
+	v := vector(1, -1)
+	d := vector(1, 3)
+	want := 4.0
+	got := v.Distance(d)
+
+	if got != want {
+		t.Errorf("distance from %s to %s: wanted %f: got %f", v, d, want, got)
 	}
 }

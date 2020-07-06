@@ -88,7 +88,7 @@ func (f *Float64) Subtract(v d2interface.Vector) d2interface.Vector {
 	f.x -= *vx
 	f.y -= *vy
 
-	return v
+	return f
 }
 
 // Multiply this Vector by the components of the given Vector.
@@ -97,7 +97,7 @@ func (f *Float64) Multiply(v d2interface.Vector) d2interface.Vector {
 	f.x *= *vx
 	f.y *= *vy
 
-	return v
+	return f
 }
 
 // Divide divides this vector by the components of the given vector.
@@ -107,6 +107,21 @@ func (f *Float64) Divide(v d2interface.Vector) d2interface.Vector {
 	f.y /= *vy
 
 	return f
+}
+
+// Distance calculate the distance between this Vector and the given Vector
+func (f *Float64) Distance(v d2interface.Vector) float64 {
+	delta := v.Clone().Subtract(f)
+
+	return delta.Length()
+}
+
+// Length returns the length of this Vector
+func (f *Float64) Length() float64 {
+	sqx, sqy := f.Clone().Multiply(f).XYFloat64()
+	sum := *sqx + *sqy
+
+	return math.Sqrt(sum)
 }
 
 func (f *Float64) String() string {

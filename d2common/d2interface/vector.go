@@ -25,6 +25,9 @@ type Vector interface {
 	Multiply(v Vector) Vector
 	Divide(v Vector) Vector
 
+	Distance(v Vector) float64
+	Length() float64
+
 	String() string
 
 	/*
@@ -40,9 +43,7 @@ type Vector interface {
 		SetAngle(angle *big.Float) Vector
 		Scale(value *big.Float) Vector
 		Negate() Vector
-		Distance(src Vector) *big.Float
 		DistanceSq(src Vector) *big.Float
-		Length() *big.Float
 		SetLength(length *big.Float) Vector
 		LengthSq() (*big.Float, *big.Float)
 		Normalize() Vector
