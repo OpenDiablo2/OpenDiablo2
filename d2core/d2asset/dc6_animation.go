@@ -5,15 +5,22 @@ import (
 	d2iface "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
+// DC6Animation is an animation made from a DC6 file
+type DC6Animation struct {
+	Animation
+}
+
 // CreateDC6Animation creates an Animation from d2dc6.DC6 and d2dat.DATPalette
 func CreateDC6Animation(renderer d2iface.Renderer, dc6 *d2dc6.DC6,
 	palette d2iface.Palette) (d2iface.Animation, error) {
-	animation := &Animation{
+	animation := Animation{
 		directions:     make([]animationDirection, dc6.Directions),
 		playLength:     defaultPlayLength,
 		playLoop:       true,
 		originAtBottom: true,
 	}
+
+	DC6 := DC6Animation{Animation: animation}
 
 	for frameIndex, dc6Frame := range dc6.Frames {
 		sfc, err := renderer.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height),
@@ -93,9 +100,8 @@ func CreateDC6Animation(renderer d2iface.Renderer, dc6 *d2dc6.DC6,
 		})
 	}
 
-	return animation, nil
+	return &DC6, nil
 }
-
 
 // Clone creates a copy of the animation
 func (a *Animation) Clone() d2iface.Animation {
