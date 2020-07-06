@@ -63,7 +63,7 @@ func (a *DCCAnimation) SetDirection(directionIndex int) error {
 	}
 
 	direction := d2dcc.Dir64ToDcc(directionIndex, len(a.directions))
-	if a.directions[direction].decoded == false {
+	if !a.directions[direction].decoded {
 		err := a.decodeDirection(direction)
 		if err != nil {
 			return err

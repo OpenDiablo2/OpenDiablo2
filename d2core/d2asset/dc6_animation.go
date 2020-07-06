@@ -1,18 +1,28 @@
 package d2asset
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
+	"errors"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 	d2iface "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
 // DC6Animation is an animation made from a DC6 file
 type DC6Animation struct {
 	animation
+	dc6Path  string
+	palette  d2iface.Palette
+	renderer d2iface.Renderer
 }
 
 // CreateDC6Animation creates an Animation from d2dc6.DC6 and d2dat.DATPalette
-func CreateDC6Animation(renderer d2iface.Renderer, dc6 *d2dc6.DC6,
+func CreateDC6Animation(renderer d2iface.Renderer, dc6Path string,
 	palette d2iface.Palette) (d2iface.Animation, error) {
+	dc6, err := loadDC6(dc6Path)
+	if err != nil {
+		return nil, err
+	}
+
 	animation := animation{
 		directions:     make([]animationDirection, dc6.Directions),
 		playLength:     defaultPlayLength,
@@ -20,13 +30,54 @@ func CreateDC6Animation(renderer d2iface.Renderer, dc6 *d2dc6.DC6,
 		originAtBottom: true,
 	}
 
-	DC6 := DC6Animation{animation: animation}
+	anim := DC6Animation{
+		animation: animation,
+		dc6Path:   dc6Path,
+		palette:   palette,
+		renderer:  renderer,
+	}
 
-	for frameIndex, dc6Frame := range dc6.Frames {
-		sfc, err := renderer.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height),
+	err = anim.SetDirection(0)
+
+	return &anim, err
+}
+
+// SetDirection decodes and sets the direction
+func (a *DC6Animation) SetDirection(directionIndex int) error {
+	const smallestInvalidDirectionIndex = 64
+	if directionIndex >= smallestInvalidDirectionIndex {
+		return errors.New("invalid direction index")
+	}
+
+	direction := d2dcc.Dir64ToDcc(directionIndex, len(a.directions))
+	if !a.directions[direction].decoded {
+		err := a.decodeDirection(direction)
+		if err != nil {
+			return err
+		}
+	}
+
+	a.directionIndex = direction
+	a.frameIndex = 0
+
+	return nil
+}
+
+func (a *DC6Animation) decodeDirection(directionIndex int) error {
+	dc6, err := loadDC6(a.dc6Path)
+	if err != nil {
+		return err
+	}
+
+	startFrame := directionIndex * int(dc6.FramesPerDirection)
+
+	for i := 0; i < int(dc6.FramesPerDirection); i++ {
+		dc6Frame := dc6.Frames[startFrame+i]
+
+		sfc, err := a.renderer.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height),
 			d2iface.FilterNearest)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		indexData := make([]int, dc6Frame.Width*dc6Frame.Height)
@@ -72,7 +123,7 @@ func CreateDC6Animation(renderer d2iface.Renderer, dc6 *d2dc6.DC6,
 				continue
 			}
 
-			c := palette.GetColors()[indexData[i]]
+			c := a.palette.GetColors()[indexData[i]]
 			colorData[i*bytesPerPixel] = c.R()
 			colorData[i*bytesPerPixel+1] = c.G()
 			colorData[i*bytesPerPixel+2] = c.B()
@@ -80,18 +131,11 @@ func CreateDC6Animation(renderer d2iface.Renderer, dc6 *d2dc6.DC6,
 		}
 
 		if err := sfc.ReplacePixels(colorData); err != nil {
-			return nil, err
+			return err
 		}
 
-		directionIndex := frameIndex / int(dc6.FramesPerDirection)
-
-		// Is this required?
-		//if directionIndex >= len(animation.directions) {
-		//	animation.directions = append(animation.directions, new(animationDirection))
-		//}
-
-		direction := &animation.directions[directionIndex]
-		direction.frames = append(direction.frames, &animationFrame{
+		a.directions[directionIndex].decoded = true
+		a.directions[directionIndex].frames = append(a.directions[directionIndex].frames, &animationFrame{
 			width:   int(dc6Frame.Width),
 			height:  int(dc6Frame.Height),
 			offsetX: int(dc6Frame.OffsetX),
@@ -100,7 +144,7 @@ func CreateDC6Animation(renderer d2iface.Renderer, dc6 *d2dc6.DC6,
 		})
 	}
 
-	return &DC6, nil
+	return nil
 }
 
 // Clone creates a copy of the animation
