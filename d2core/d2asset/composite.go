@@ -152,11 +152,42 @@ func (c *Composite) GetPlayedCount() int {
 	return c.mode.playedCount
 }
 
+// SetPlayLoop turns on or off animation looping
+func (c *Composite) SetPlayLoop(loop bool) {
+	for layerIdx := range c.mode.layers {
+		layer := c.mode.layers[layerIdx]
+		if layer != nil {
+			layer.SetPlayLoop(loop)
+		}
+	}
+}
+
+// SetSubLoop sets a loop to be between the specified frame indices
+func (c *Composite) SetSubLoop(startFrame, endFrame int) {
+	for layerIdx := range c.mode.layers {
+		layer := c.mode.layers[layerIdx]
+		if layer != nil {
+			layer.SetSubLoop(startFrame, endFrame)
+		}
+	}
+}
+
+// SetCurrentFrame sets the current frame index of the animation
+func (c *Composite) SetCurrentFrame(frame int) {
+	for layerIdx := range c.mode.layers {
+		layer := c.mode.layers[layerIdx]
+		if layer != nil {
+			layer.SetCurrentFrame(frame)
+		}
+	}
+}
+
 func (c *Composite) resetPlayedCount() {
 	if c.mode != nil {
 		c.mode.playedCount = 0
 	}
 }
+
 
 type compositeMode struct {
 	cof           *d2cof.COF
