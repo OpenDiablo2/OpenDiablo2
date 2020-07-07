@@ -1,4 +1,4 @@
-package d2interface
+package d2enum
 
 // MouseButton represents a traditional 3-button mouse
 type MouseButton int

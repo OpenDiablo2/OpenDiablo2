@@ -1,6 +1,7 @@
 package d2gui
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
@@ -51,7 +52,7 @@ func (l *Label) SetText(text string) error {
 
 func (l *Label) setText(text string) error {
 	width, height := l.font.GetTextMetrics(text)
-	surface, err := l.renderer.NewSurface(width, height, d2interface.FilterNearest)
+	surface, err := l.renderer.NewSurface(width, height, d2enum.FilterNearest)
 	if err != nil {
 		return err
 	}

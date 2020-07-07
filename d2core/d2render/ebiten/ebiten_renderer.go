@@ -4,6 +4,7 @@ import (
 	"errors"
 	"image"
 
+  "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/hajimehoshi/ebiten"
@@ -50,7 +51,7 @@ func (r *Renderer) Initialize() error {
 
 // Update is the render function
 func (r *Renderer) Update(screen *ebiten.Image) error {
-	err := r.renderCallback(&ebitenSurface{image: screen})
+	err := r.renderCallback(createEbitenSurface(screen))
 	if err != nil {
 		return err
 	}
@@ -90,24 +91,24 @@ func (r *Renderer) Run(f func(surface d2interface.Surface) error, width, height 
 }
 
 func (r *Renderer) CreateSurface(surface d2interface.Surface) (d2interface.Surface, error) {
-	result := &ebitenSurface{
-		image: surface.(*ebitenSurface).image,
-		stateCurrent: surfaceState{
+	result := createEbitenSurface(
+		surface.(*ebitenSurface).image,
+		surfaceState{
 			filter: ebiten.FilterNearest,
 			mode:   ebiten.CompositeModeSourceOver,
 		},
-	}
+	)
+
 	return result, nil
 }
 
-func (r *Renderer) NewSurface(width, height int, filter d2interface.Filter) (d2interface.Surface, error) {
+func (r *Renderer) NewSurface(width, height int, filter d2enum.Filter) (d2interface.Surface, error) {
 	ebitenFilter := d2ToEbitenFilter(filter)
 	img, err := ebiten.NewImage(width, height, ebitenFilter)
 	if err != nil {
 		return nil, err
 	}
-	result := &ebitenSurface{image: img}
-	return result, nil
+	return createEbitenSurface(img), nil
 }
 
 func (r *Renderer) IsFullScreen() bool {

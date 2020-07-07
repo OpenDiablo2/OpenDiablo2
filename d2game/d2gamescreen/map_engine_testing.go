@@ -296,26 +296,26 @@ func (met *MapEngineTest) Advance(tickTime float64) error {
 // OnKeyRepeat is called to handle repeated key presses
 func (met *MapEngineTest) OnKeyRepeat(event d2interface.KeyEvent) bool {
 	var moveSpeed float64 = 8
-	if event.KeyMod() == d2interface.KeyModShift {
+	if event.KeyMod() == d2enum.KeyModShift {
 		moveSpeed *= 2
 	}
 
-	if event.Key() == d2interface.KeyDown {
+	if event.Key() == d2enum.KeyDown {
 		met.mapRenderer.MoveCameraBy(0, moveSpeed)
 		return true
 	}
 
-	if event.Key() == d2interface.KeyUp {
+	if event.Key() == d2enum.KeyUp {
 		met.mapRenderer.MoveCameraBy(0, -moveSpeed)
 		return true
 	}
 
-	if event.Key() == d2interface.KeyRight {
+	if event.Key() == d2enum.KeyRight {
 		met.mapRenderer.MoveCameraBy(moveSpeed, 0)
 		return true
 	}
 
-	if event.Key() == d2interface.KeyLeft {
+	if event.Key() == d2enum.KeyLeft {
 		met.mapRenderer.MoveCameraBy(-moveSpeed, 0)
 		return true
 	}
@@ -325,17 +325,17 @@ func (met *MapEngineTest) OnKeyRepeat(event d2interface.KeyEvent) bool {
 
 // OnKeyDown defines the actions of the Map Engine Test screen when a key is pressed
 func (met *MapEngineTest) OnKeyDown(event d2interface.KeyEvent) bool {
-	if event.Key() == d2interface.KeyEscape {
+	if event.Key() == d2enum.KeyEscape {
 		os.Exit(0)
 		return true
 	}
 
-	if event.Key() == d2interface.KeyN {
+	if event.Key() == d2enum.KeyN {
 		switch event.KeyMod() {
-		case d2interface.KeyModControl:
+		case d2enum.KeyModControl:
 			met.fileIndex++
 			d2screen.SetNextScreen(met)
-		case d2interface.KeyModShift:
+		case d2enum.KeyModShift:
 			met.levelPreset = increment(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
 			d2screen.SetNextScreen(met)
 		default:
@@ -346,12 +346,12 @@ func (met *MapEngineTest) OnKeyDown(event d2interface.KeyEvent) bool {
 		return true
 	}
 
-	if event.Key() == d2interface.KeyP {
+	if event.Key() == d2enum.KeyP {
 		switch event.KeyMod() {
-		case d2interface.KeyModControl:
+		case d2enum.KeyModControl:
 			met.fileIndex--
 			d2screen.SetNextScreen(met)
-		case d2interface.KeyModShift:
+		case d2enum.KeyModShift:
 			met.levelPreset = decrement(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
 			d2screen.SetNextScreen(met)
 		default:

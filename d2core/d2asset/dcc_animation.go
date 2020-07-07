@@ -2,6 +2,7 @@ package d2asset
 
 import (
 	"errors"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -118,7 +119,7 @@ func (a *DCCAnimation) decodeDirection(directionIndex int) error {
 			}
 		}
 
-		sfc, err := a.renderer.NewSurface(frameWidth, frameHeight, d2iface.FilterNearest)
+		sfc, err := a.renderer.NewSurface(frameWidth, frameHeight, d2enum.FilterNearest)
 		if err != nil {
 			return err
 		}

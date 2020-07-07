@@ -146,8 +146,7 @@ var CubeRecipes []*CubeRecipeRecord
 // LoadCubeRecipes populates CubeRecipes with
 // the data from CubeMain.txt.
 func LoadCubeRecipes(file []byte) {
-	// Load data
-	d := d2common.LoadDataDictionary(string(file))
+	CubeRecipes = make([]*CubeRecipeRecord, 0)
 
 	// There are repeated fields and sections in this file, some
 	// of which have inconsistent naming conventions. These slices
@@ -160,60 +159,65 @@ func LoadCubeRecipes(file []byte) {
 
 	var inputFields = []string{"input 1", "input 2", "input 3", "input 4", "input 5", "input 6", "input 7"}
 
-	// Create records
-	CubeRecipes = make([]*CubeRecipeRecord, len(d.Data))
-	for idx := range d.Data {
-		CubeRecipes[idx] = &CubeRecipeRecord{
-			Description: d.GetString("description", idx),
+	d := d2common.LoadDataDictionary(file)
+	for d.Next() {
+		record := &CubeRecipeRecord{
+			Description: d.String("description"),
 
-			Enabled: d.GetNumber("enabled", idx) == 1,
-			Ladder:  d.GetNumber("ladder", idx) == 1,
+			Enabled: d.Bool("enabled"),
+			Ladder:  d.Bool("ladder"),
 
-			MinDiff: d.GetNumber("min diff", idx),
-			Version: d.GetNumber("version", idx),
+			MinDiff: d.Number("min diff"),
+			Version: d.Number("version"),
 
-			ReqStatID:    d.GetNumber("param", idx),
-			ReqOperation: d.GetNumber("op", idx),
-			ReqValue:     d.GetNumber("value", idx),
+			ReqStatID:    d.Number("param"),
+			ReqOperation: d.Number("op"),
+			ReqValue:     d.Number("value"),
 
-			Class: classFieldToEnum(d.GetString("class", idx)),
+			Class: classFieldToEnum(d.String("class")),
 
-			NumInputs: d.GetNumber("numinputs", idx),
+			NumInputs: d.Number("numinputs"),
 		}
 
 		// Create inputs - input 1-7
-		CubeRecipes[idx].Inputs = make([]CubeRecipeItem, 7)
+		record.Inputs = make([]CubeRecipeItem, len(inputFields))
 		for i := range inputFields {
-			CubeRecipes[idx].Inputs[i] = newCubeRecipeItem(
-				d.GetString(inputFields[i], idx))
+			record.Inputs[i] = newCubeRecipeItem(
+				d.String(inputFields[i]))
 		}
 
 		// Create outputs - output "", b, c
-		CubeRecipes[idx].Outputs = make([]CubeRecipeResult, 3)
+		record.Outputs = make([]CubeRecipeResult, len(outputLabels))
 		for o, outLabel := range outputLabels {
-			CubeRecipes[idx].Outputs[o] = CubeRecipeResult{
+			record.Outputs[o] = CubeRecipeResult{
 				Item: newCubeRecipeItem(
-					d.GetString(outputFields[o], idx)),
+					d.String(outputFields[o])),
 
-				Level:  d.GetNumber(outLabel+"lvl", idx),
-				ILevel: d.GetNumber(outLabel+"plvl", idx),
-				PLevel: d.GetNumber(outLabel+"ilvl", idx),
+				Level:  d.Number(outLabel + "lvl"),
+				ILevel: d.Number(outLabel + "plvl"),
+				PLevel: d.Number(outLabel + "ilvl"),
 			}
 
 			// Create properties - mod 1-5
-			properties := make([]CubeRecipeItemProperty, 5)
+			properties := make([]CubeRecipeItemProperty, len(propLabels))
 			for p, prop := range propLabels {
 				properties[p] = CubeRecipeItemProperty{
-					Code:   d.GetString(outLabel+prop, idx),
-					Chance: d.GetNumber(outLabel+prop+" chance", idx),
-					Param:  d.GetNumber(outLabel+prop+" param", idx),
-					Min:    d.GetNumber(outLabel+prop+" min", idx),
-					Max:    d.GetNumber(outLabel+prop+" max", idx),
+					Code:   d.String(outLabel + prop),
+					Chance: d.Number(outLabel + prop + " chance"),
+					Param:  d.Number(outLabel + prop + " param"),
+					Min:    d.Number(outLabel + prop + " min"),
+					Max:    d.Number(outLabel + prop + " max"),
 				}
 			}
 
-			CubeRecipes[idx].Outputs[o].Properties = properties
+			record.Outputs[o].Properties = properties
 		}
+
+		CubeRecipes = append(CubeRecipes, record)
+	}
+
+	if d.Err != nil {
+		panic(d.Err)
 	}
 
 	log.Printf("Loaded %d CubeMainRecord records", len(CubeRecipes))

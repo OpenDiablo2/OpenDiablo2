@@ -57,61 +57,58 @@ var Gems map[string]*GemsRecord //nolint:gochecknoglobals // Currently global by
 
 // LoadGems loads gem records into a map[string]*GemsRecord
 func LoadGems(file []byte) {
-	d := d2common.LoadDataDictionary(string(file))
+	Gems = make(map[string]*GemsRecord)
 
-	Gems = make(map[string]*GemsRecord, len(d.Data))
-
-	for idx := range d.Data {
-		if d.GetString("name", idx) != expansion {
-			/*
-				"Expansion" is the only field in line 36 of /data/global/excel/gems.txt and is only used to visually
-				separate base-game gems and expansion runes.
-			*/
-			gem := &GemsRecord{
-				Name:            d.GetString("name", idx),
-				Letter:          d.GetString("letter", idx),
-				Transform:       d.GetNumber("transform", idx),
-				Code:            d.GetString("code", idx),
-				Nummods:         d.GetNumber("nummods", idx),
-				WeaponMod1Code:  d.GetString("weaponMod1Code", idx),
-				WeaponMod1Param: d.GetNumber("weaponMod1Param", idx),
-				WeaponMod1Min:   d.GetNumber("weaponMod1Min", idx),
-				WeaponMod1Max:   d.GetNumber("weaponMod1Max", idx),
-				WeaponMod2Code:  d.GetString("weaponMod2Code", idx),
-				WeaponMod2Param: d.GetNumber("weaponMod2Param", idx),
-				WeaponMod2Min:   d.GetNumber("weaponMod2Min", idx),
-				WeaponMod2Max:   d.GetNumber("weaponMod2Max", idx),
-				WeaponMod3Code:  d.GetString("weaponMod3Code", idx),
-				WeaponMod3Param: d.GetNumber("weaponMod3Param", idx),
-				WeaponMod3Min:   d.GetNumber("weaponMod3Min", idx),
-				WeaponMod3Max:   d.GetNumber("weaponMod3Max", idx),
-				HelmMod1Code:    d.GetString("helmMod1Code", idx),
-				HelmMod1Param:   d.GetNumber("helmMod1Param", idx),
-				HelmMod1Min:     d.GetNumber("helmMod1Min", idx),
-				HelmMod1Max:     d.GetNumber("helmMod1Max", idx),
-				HelmMod2Code:    d.GetString("helmMod2Code", idx),
-				HelmMod2Param:   d.GetNumber("helmMod2Param", idx),
-				HelmMod2Min:     d.GetNumber("helmMod2Min", idx),
-				HelmMod2Max:     d.GetNumber("helmMod2Max", idx),
-				HelmMod3Code:    d.GetString("helmMod3Code", idx),
-				HelmMod3Param:   d.GetNumber("helmMod3Param", idx),
-				HelmMod3Min:     d.GetNumber("helmMod3Min", idx),
-				HelmMod3Max:     d.GetNumber("helmMod3Max", idx),
-				ShieldMod1Code:  d.GetString("shieldMod1Code", idx),
-				ShieldMod1Param: d.GetNumber("shieldMod1Param", idx),
-				ShieldMod1Min:   d.GetNumber("shieldMod1Min", idx),
-				ShieldMod1Max:   d.GetNumber("shieldMod1Max", idx),
-				ShieldMod2Code:  d.GetString("shieldMod2Code", idx),
-				ShieldMod2Param: d.GetNumber("shieldMod2Param", idx),
-				ShieldMod2Min:   d.GetNumber("shieldMod2Min", idx),
-				ShieldMod2Max:   d.GetNumber("shieldMod2Max", idx),
-				ShieldMod3Code:  d.GetString("shieldMod3Code", idx),
-				ShieldMod3Param: d.GetNumber("shieldMod3Param", idx),
-				ShieldMod3Min:   d.GetNumber("shieldMod3Min", idx),
-				ShieldMod3Max:   d.GetNumber("shieldMod3Max", idx),
-			}
-			Gems[gem.Name] = gem
+	d := d2common.LoadDataDictionary(file)
+	for d.Next() {
+		gem := &GemsRecord{
+			Name:            d.String("name"),
+			Letter:          d.String("letter"),
+			Transform:       d.Number("transform"),
+			Code:            d.String("code"),
+			Nummods:         d.Number("nummods"),
+			WeaponMod1Code:  d.String("weaponMod1Code"),
+			WeaponMod1Param: d.Number("weaponMod1Param"),
+			WeaponMod1Min:   d.Number("weaponMod1Min"),
+			WeaponMod1Max:   d.Number("weaponMod1Max"),
+			WeaponMod2Code:  d.String("weaponMod2Code"),
+			WeaponMod2Param: d.Number("weaponMod2Param"),
+			WeaponMod2Min:   d.Number("weaponMod2Min"),
+			WeaponMod2Max:   d.Number("weaponMod2Max"),
+			WeaponMod3Code:  d.String("weaponMod3Code"),
+			WeaponMod3Param: d.Number("weaponMod3Param"),
+			WeaponMod3Min:   d.Number("weaponMod3Min"),
+			WeaponMod3Max:   d.Number("weaponMod3Max"),
+			HelmMod1Code:    d.String("helmMod1Code"),
+			HelmMod1Param:   d.Number("helmMod1Param"),
+			HelmMod1Min:     d.Number("helmMod1Min"),
+			HelmMod1Max:     d.Number("helmMod1Max"),
+			HelmMod2Code:    d.String("helmMod2Code"),
+			HelmMod2Param:   d.Number("helmMod2Param"),
+			HelmMod2Min:     d.Number("helmMod2Min"),
+			HelmMod2Max:     d.Number("helmMod2Max"),
+			HelmMod3Code:    d.String("helmMod3Code"),
+			HelmMod3Param:   d.Number("helmMod3Param"),
+			HelmMod3Min:     d.Number("helmMod3Min"),
+			HelmMod3Max:     d.Number("helmMod3Max"),
+			ShieldMod1Code:  d.String("shieldMod1Code"),
+			ShieldMod1Param: d.Number("shieldMod1Param"),
+			ShieldMod1Min:   d.Number("shieldMod1Min"),
+			ShieldMod1Max:   d.Number("shieldMod1Max"),
+			ShieldMod2Code:  d.String("shieldMod2Code"),
+			ShieldMod2Param: d.Number("shieldMod2Param"),
+			ShieldMod2Min:   d.Number("shieldMod2Min"),
+			ShieldMod2Max:   d.Number("shieldMod2Max"),
+			ShieldMod3Code:  d.String("shieldMod3Code"),
+			ShieldMod3Param: d.Number("shieldMod3Param"),
+			ShieldMod3Min:   d.Number("shieldMod3Min"),
+			ShieldMod3Max:   d.Number("shieldMod3Max"),
 		}
+		Gems[gem.Name] = gem
+	}
+
+	if d.Err != nil {
+		panic(d.Err)
 	}
 
 	log.Printf("Loaded %d Gems records", len(Gems))

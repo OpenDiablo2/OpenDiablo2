@@ -41,21 +41,24 @@ var LevelMazeDetails map[int]*LevelMazeDetailsRecord //nolint:gochecknoglobals /
 
 // LoadLevelMazeDetails loads LevelMazeDetailsRecords from text file
 func LoadLevelMazeDetails(file []byte) {
-	dict := d2common.LoadDataDictionary(string(file))
-	numRecords := len(dict.Data)
-	LevelMazeDetails = make(map[int]*LevelMazeDetailsRecord, numRecords)
+	LevelMazeDetails = make(map[int]*LevelMazeDetailsRecord)
 
-	for idx := range dict.Data {
+	d := d2common.LoadDataDictionary(file)
+	for d.Next() {
 		record := &LevelMazeDetailsRecord{
-			Name:              dict.GetString("Name", idx),
-			LevelID:           dict.GetNumber("Level", idx),
-			NumRoomsNormal:    dict.GetNumber("Rooms", idx),
-			NumRoomsNightmare: dict.GetNumber("Rooms(N)", idx),
-			NumRoomsHell:      dict.GetNumber("Rooms(H)", idx),
-			SizeX:             dict.GetNumber("SizeX", idx),
-			SizeY:             dict.GetNumber("SizeY", idx),
+			Name:              d.String("Name"),
+			LevelID:           d.Number("Level"),
+			NumRoomsNormal:    d.Number("Rooms"),
+			NumRoomsNightmare: d.Number("Rooms(N)"),
+			NumRoomsHell:      d.Number("Rooms(H)"),
+			SizeX:             d.Number("SizeX"),
+			SizeY:             d.Number("SizeY"),
 		}
 		LevelMazeDetails[record.LevelID] = record
+	}
+
+	if d.Err != nil {
+		panic(d.Err)
 	}
 
 	log.Printf("Loaded %d LevelMazeDetails records", len(LevelMazeDetails))

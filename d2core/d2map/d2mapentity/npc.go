@@ -60,6 +60,7 @@ func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC
 	composite.SetMode("NU", result.monstatEx.BaseWeaponClass)
 	composite.Equip(equipment)
 
+	result.SetSpeed(float64(monstat.SpeedBase))
 	result.mapEntity.directioner = result.rotate
 
 	if result.monstatRecord != nil && result.monstatRecord.IsInteractable {

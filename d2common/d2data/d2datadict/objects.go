@@ -25,7 +25,7 @@ type ObjectRecord struct {
 	token string // refers to what graphics this object uses
 
 	// Don't use, index by line number
-	id              int //nolint:golint it's ok that it's called Id, unused indexed by line number instead
+	id              int //nolint:golint,stylecheck // unused, indexed by line number instead
 	SpawnMax        int // unused?
 	TrapProbability int // unused
 

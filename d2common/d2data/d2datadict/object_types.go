@@ -23,9 +23,14 @@ func LoadObjectTypes(objectTypeData []byte) {
 	count := streamReader.GetInt32()
 	ObjectTypes = make([]ObjectTypeRecord, count)
 
+	const (
+		nameSize  = 32
+		tokenSize = 20
+	)
+
 	for i := range ObjectTypes {
-		nameBytes := streamReader.ReadBytes(32)
-		tokenBytes := streamReader.ReadBytes(20)
+		nameBytes := streamReader.ReadBytes(nameSize)
+		tokenBytes := streamReader.ReadBytes(tokenSize)
 		ObjectTypes[i] = ObjectTypeRecord{
 			Name:  strings.TrimSpace(strings.ReplaceAll(string(nameBytes), string(0), "")),
 			Token: strings.TrimSpace(strings.ReplaceAll(string(tokenBytes), string(0), "")),

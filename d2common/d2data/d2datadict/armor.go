@@ -6,6 +6,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
+// Armors stores all of the ArmorRecords
 //nolint:gochecknoglobals // Currently global by design, only written once
 var Armors map[string]*ItemCommonRecord
 

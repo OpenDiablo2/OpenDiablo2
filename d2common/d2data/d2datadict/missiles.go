@@ -110,7 +110,7 @@ type MissileRecord struct {
 	ExplosionMissile string // name of a missile from missiles.txt that is created upon collision
 	// or anytime it is destroyed if AlwaysExplode is true
 
-	Id int //nolint:golint Id is the correct key
+	Id int //nolint:golint,stylecheck // Id is the correct key
 
 	ClientMovementFunc  int
 	ClientCollisionFunc int

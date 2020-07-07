@@ -130,7 +130,7 @@ func (s *HeroStatsPanel) Render(target d2interface.Surface) {
 	if s.staticMenuImageCache == nil {
 		frameWidth, frameHeight := s.frame.GetFrameBounds()
 		framesCount := s.frame.GetFrameCount()
-		surface, err := s.renderer.NewSurface(frameWidth*framesCount, frameHeight*framesCount, d2interface.FilterNearest)
+		surface, err := s.renderer.NewSurface(frameWidth*framesCount, frameHeight*framesCount, d2enum.FilterNearest)
 
 		if err != nil {
 			return

@@ -94,32 +94,34 @@ type DifficultyLevelRecord struct {
 
 // LoadDifficultyLevels is a loader for difficultylevels.txt
 func LoadDifficultyLevels(file []byte) {
-	dict := d2common.LoadDataDictionary(string(file))
-	numRows := len(dict.Data)
+	DifficultyLevels = make(map[string]*DifficultyLevelRecord)
 
-	DifficultyLevels = make(map[string]*DifficultyLevelRecord, numRows)
-
-	for idx := range dict.Data {
+	d := d2common.LoadDataDictionary(file)
+	for d.Next() {
 		record := &DifficultyLevelRecord{
-			Name:                   dict.GetString("Name", idx),
-			ResistancePenalty:      dict.GetNumber("ResistPenalty", idx),
-			DeathExperiencePenalty: dict.GetNumber("DeathExpPenalty", idx),
-			DropChanceLow:          dict.GetNumber("UberCodeOddsNormal", idx),
-			DropChanceNormal:       dict.GetNumber("UberCodeOddsNormal", idx),
-			DropChanceSuperior:     dict.GetNumber("UberCodeOddsNormal", idx),
-			DropChanceExceptional:  dict.GetNumber("UberCodeOddsNormal", idx),
-			DropChanceMagic:        dict.GetNumber("UberCodeOddsGood", idx),
-			DropChanceRare:         dict.GetNumber("UberCodeOddsGood", idx),
-			DropChanceSet:          dict.GetNumber("UberCodeOddsGood", idx),
-			DropChanceUnique:       dict.GetNumber("UberCodeOddsGood", idx),
-			MonsterSkillBonus:      dict.GetNumber("MonsterSkillBonus", idx),
-			MonsterColdDivisor:     dict.GetNumber("MonsterColdDivisor", idx),
-			MonsterFreezeDivisor:   dict.GetNumber("MonsterFreezeDivisor", idx),
-			AiCurseDivisor:         dict.GetNumber("AiCurseDivisor", idx),
-			LifeStealDivisor:       dict.GetNumber("LifeStealDivisor", idx),
-			ManaStealDivisor:       dict.GetNumber("ManaStealDivisor", idx),
+			Name:                   d.String("Name"),
+			ResistancePenalty:      d.Number("ResistPenalty"),
+			DeathExperiencePenalty: d.Number("DeathExpPenalty"),
+			DropChanceLow:          d.Number("UberCodeOddsNormal"),
+			DropChanceNormal:       d.Number("UberCodeOddsNormal"),
+			DropChanceSuperior:     d.Number("UberCodeOddsNormal"),
+			DropChanceExceptional:  d.Number("UberCodeOddsNormal"),
+			DropChanceMagic:        d.Number("UberCodeOddsGood"),
+			DropChanceRare:         d.Number("UberCodeOddsGood"),
+			DropChanceSet:          d.Number("UberCodeOddsGood"),
+			DropChanceUnique:       d.Number("UberCodeOddsGood"),
+			MonsterSkillBonus:      d.Number("MonsterSkillBonus"),
+			MonsterColdDivisor:     d.Number("MonsterColdDivisor"),
+			MonsterFreezeDivisor:   d.Number("MonsterFreezeDivisor"),
+			AiCurseDivisor:         d.Number("AiCurseDivisor"),
+			LifeStealDivisor:       d.Number("LifeStealDivisor"),
+			ManaStealDivisor:       d.Number("ManaStealDivisor"),
 		}
 		DifficultyLevels[record.Name] = record
+	}
+
+	if d.Err != nil {
+		panic(d.Err)
 	}
 
 	log.Printf("Loaded %d DifficultyLevel records", len(DifficultyLevels))

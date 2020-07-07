@@ -1,4 +1,4 @@
-package d2interface
+package d2enum
 
 // Priority of the event handler
 type Priority int
