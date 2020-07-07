@@ -3,6 +3,7 @@ package d2asset
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
@@ -152,11 +153,42 @@ func (c *Composite) GetPlayedCount() int {
 	return c.mode.playedCount
 }
 
+// SetPlayLoop turns on or off animation looping
+func (c *Composite) SetPlayLoop(loop bool) {
+	for layerIdx := range c.mode.layers {
+		layer := c.mode.layers[layerIdx]
+		if layer != nil {
+			layer.SetPlayLoop(loop)
+		}
+	}
+}
+
+// SetSubLoop sets a loop to be between the specified frame indices
+func (c *Composite) SetSubLoop(startFrame, endFrame int) {
+	for layerIdx := range c.mode.layers {
+		layer := c.mode.layers[layerIdx]
+		if layer != nil {
+			layer.SetSubLoop(startFrame, endFrame)
+		}
+	}
+}
+
+// SetCurrentFrame sets the current frame index of the animation
+func (c *Composite) SetCurrentFrame(frame int) {
+	for layerIdx := range c.mode.layers {
+		layer := c.mode.layers[layerIdx]
+		if layer != nil {
+			layer.SetCurrentFrame(frame)
+		}
+	}
+}
+
 func (c *Composite) resetPlayedCount() {
 	if c.mode != nil {
 		c.mode.playedCount = 0
 	}
 }
+
 
 type compositeMode struct {
 	cof           *d2cof.COF
@@ -218,6 +250,8 @@ func (c *Composite) createMode(animationMode, weaponClass string) (*compositeMod
 				transparency = 192
 			case d2enum.DrawEffectModulate:
 				blend = true
+			default:
+				log.Println("Unhandled DrawEffect ", cofLayer.DrawEffect, " requested for layer ", cofLayer.Type.String(), " of ", c.token)
 			}
 		}
 

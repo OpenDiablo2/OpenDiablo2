@@ -3,6 +3,7 @@ package d2object
 
 import (
 	"math"
+	"math/rand"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
@@ -50,7 +51,7 @@ func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath stri
 
 	entity.composite = composite
 
-	entity.setMode("NU", 0)
+	entity.setMode("NU", 0, false)
 
 	initObject(entity)
 
@@ -58,7 +59,7 @@ func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath stri
 }
 
 // setMode changes the graphical mode of this animated entity
-func (ob *Object) setMode(animationMode string, direction int) error {
+func (ob *Object) setMode(animationMode string, direction int, randomFrame bool) error {
 	err := ob.composite.SetMode(animationMode, "HTH")
 	if err != nil {
 		return err
@@ -73,6 +74,20 @@ func (ob *Object) setMode(animationMode string, direction int) error {
 	speed := ob.objectRecord.FrameDelta[mode]
 	if speed != 0 {
 		ob.composite.SetAnimSpeed(speed)
+	}
+
+	frameCount := ob.objectRecord.FrameCount[mode]
+
+	if frameCount != 0 {
+		ob.composite.SetSubLoop(0, frameCount)
+	}
+
+	ob.composite.SetPlayLoop(ob.objectRecord.CycleAnimation[mode])
+	ob.composite.SetCurrentFrame(ob.objectRecord.StartFrame[mode])
+
+	if randomFrame {
+		n := rand.Intn(frameCount)
+		ob.composite.SetCurrentFrame(n)
 	}
 
 	return err
