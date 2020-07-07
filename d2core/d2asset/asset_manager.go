@@ -164,6 +164,9 @@ func (am *assetManager) Bind(manager d2interface.AssetManagerSubordinate) error 
 		}
 
 		am.fontManager = manager.(d2interface.ArchivedFontManager)
+
+	default:
+		return errors.New("unknown asset manager subordinate type")
 	}
 
 	return nil
