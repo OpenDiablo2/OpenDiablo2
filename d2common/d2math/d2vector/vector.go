@@ -12,7 +12,7 @@ type Vector struct {
 	x, y float64
 }
 
-// NewVector creates a new Vector and returns a pointer to it.
+// NewVector creates a new Vector with the given x and y values.
 func NewVector(x, y float64) Vector {
 	return Vector{x, y}
 }
@@ -164,13 +164,13 @@ func (v *Vector) Angle(o Vector) float64 {
 	return math.Acos(dotClamped)
 }
 
-// SignedAngle computes the signed angle in radians from this vector to the given vector.
+// SignedAngle computes the signed (clockwise) angle in radians from this vector to the given vector.
 func (v *Vector) SignedAngle(o Vector) float64 {
 	unsigned := v.Angle(o)
 	sign := d2math.Sign(v.x*o.y - v.y*o.x)
 
-	if sign < 0 {
-		return -unsigned
+	if sign > 0 {
+		return d2math.RadFull - unsigned
 	}
 
 	return unsigned
@@ -180,51 +180,10 @@ func (v Vector) String() string {
 	return fmt.Sprintf("Vector{%g, %g}", v.x, v.y)
 }
 
-/*// SetAngle sets the angle of this Vector
-func (f *Vector) SetAngle(angle float64) *Vector {
-	return f.SetToPolar(angle, f.Length())
-}*/
-
-/*// SetToPolar sets the `x` and `y` values of this object from a
-// given polar coordinate.
-// TODO: How does this work?
-func (f *Vector) SetToPolar(azimuth, radius float64) *Vector {
-	// HACK we should do this better, with the big.Float
-	f.x = math.Cos(azimuth) * radius
-	f.y = math.Sin(azimuth) * radius
-
-	return f
-}*/
-
 /*
-
-
-// SetAngle sets the angle of this Vector
-func (v *BigFloat) SetAngle(angle *big.Float) d2interface.Vector {
-	return v.SetToPolar(angle, v.Length())
-}
-
-
 // SetLength sets the length of this Vector
 func (v *BigFloat) SetLength(length *big.Float) d2interface.Vector {
 	return v.Normalize().Scale(length)
-}
-
-// Normalize Makes the vector a unit length vector (magnitude of 1) in the same
-// direction.
-func (v *BigFloat) Normalize() d2interface.Vector {
-	xsq, ysq := v.LengthSq()
-	length := big.NewFloat(zero).Add(xsq, ysq)
-	one := big.NewFloat(1.0)
-
-	if length.Cmp(one) > 0 {
-		length.Quo(one, length.Sqrt(length))
-
-		v.x.Mul(v.x, length)
-		v.y.Mul(v.y, length)
-	}
-
-	return v
 }
 
 // NormalizeRightHand rotate this Vector to its perpendicular,

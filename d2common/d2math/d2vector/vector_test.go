@@ -249,19 +249,19 @@ func TestNormalize(t *testing.T) {
 }
 
 func TestAngle(t *testing.T) {
-	v := NewVector(1, 0)
+	v := NewVector(0, 1)
 	c := v.Clone()
-	other := NewVector(-1, 0.3)
+	other := NewVector(1, 0.3)
 
 	d := fmt.Sprintf("angle from %s to %s", c, other)
 
-	want := 2.8501358591119264
+	want := 1.2793395323170293
 	got := v.Angle(other)
 
 	evaluateScalar(d, want, got, t)
 	evaluateChanged(d, v, c, t)
 
-	other.Set(-1, -0.3)
+	other.Set(-1, 0.3)
 	c = other.Clone()
 
 	d = fmt.Sprintf("angle from %s to %s", c, other)
@@ -273,26 +273,37 @@ func TestAngle(t *testing.T) {
 }
 
 func TestSignedAngle(t *testing.T) {
-	v := NewVector(1, 0)
+	v := NewVector(0, 1)
 	c := v.Clone()
-	other := NewVector(-1, 0.3)
-
-	d := fmt.Sprintf("angle from %s to %s", v, other)
-
-	want := 2.8501358591119264
+	other := NewVector(1, 0.3)
+	want := 1.2793395323170293
 	got := v.SignedAngle(other)
 
+	d := fmt.Sprintf("angle from %s to %s", v, other)
 	evaluateScalar(d, want, got, t)
 	evaluateChanged(d, v, c, t)
 
-	other.Set(-1, -0.3)
+	other.Set(-1, 0.3)
 	c = other.Clone()
-
-	d = fmt.Sprintf("angle from %s to %s", v, other)
-
-	want = -want
+	want = 5.0038457214660585
 	got = v.SignedAngle(other)
 
+	d = fmt.Sprintf("angle from %s to %s", v, other)
 	evaluateScalar(d, want, got, t)
 	evaluateChanged(d, other, c, t)
 }
+
+/*
+func TestRotate(t *testing.T) {
+	v := NewVector(0, 1)
+
+	other := NewVector(1, 0)
+
+	v.Rotate(90 / d2math.RadToDeg)
+
+	got := v.SignedAngle(other)
+
+	fmt.Println(got, got*d2math.RadToDeg) ///
+
+	fmt.Println(v, v.Length(), got*d2math.RadToDeg)
+}*/
