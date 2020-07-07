@@ -2,6 +2,7 @@ package d2input
 
 import (
 	"errors"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
@@ -32,13 +33,13 @@ func Advance(elapsed, current float64) error {
 }
 
 // BindHandlerWithPriority adds an event handler with a specific call priority
-func BindHandlerWithPriority(handler d2interface.InputEventHandler, priority d2interface.Priority) error {
+func BindHandlerWithPriority(handler d2interface.InputEventHandler, priority d2enum.Priority) error {
 	return singleton.BindHandlerWithPriority(handler, priority)
 }
 
 // BindHandler adds an event handler
 func BindHandler(handler d2interface.InputEventHandler) error {
-	return BindHandlerWithPriority(handler, d2interface.PriorityDefault)
+	return BindHandlerWithPriority(handler, d2enum.PriorityDefault)
 }
 
 // UnbindHandler removes a previously bound event handler

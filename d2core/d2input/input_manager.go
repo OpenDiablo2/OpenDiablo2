@@ -210,17 +210,17 @@ func (im *inputManager) updateCursor(cursorX, cursorY int, e HandlerEvent) {
 // BindHandlerWithPriority adds an event handler with a specific call priority
 func (im *inputManager) BindHandlerWithPriority(
 	h d2interface.InputEventHandler,
-	p d2interface.Priority) error {
+	p d2enum.Priority) error {
 	return singleton.bindHandler(h, p)
 }
 
 // BindHandler adds an event handler
 func (im *inputManager) BindHandler(h d2interface.InputEventHandler) error {
-	return im.bindHandler(h, d2interface.PriorityDefault)
+	return im.bindHandler(h, d2enum.PriorityDefault)
 }
 
 // BindHandler adds an event handler
-func (im *inputManager) bindHandler(h d2interface.InputEventHandler, p d2interface.Priority) error {
+func (im *inputManager) bindHandler(h d2interface.InputEventHandler, p d2enum.Priority) error {
 	for _, entry := range im.entries {
 		if entry.handler == h {
 			return ErrHasReg
@@ -249,7 +249,7 @@ func (im *inputManager) UnbindHandler(handler d2interface.InputEventHandler) err
 }
 
 func (im *inputManager) propagate(callback func(d2interface.InputEventHandler) bool) {
-	var priority d2interface.Priority
+	var priority d2enum.Priority
 
 	var handled bool
 
@@ -268,7 +268,7 @@ func (im *inputManager) propagate(callback func(d2interface.InputEventHandler) b
 
 type handlerEntry struct {
 	handler  d2interface.InputEventHandler
-	priority d2interface.Priority
+	priority d2enum.Priority
 }
 
 type handlerEntryList []handlerEntry

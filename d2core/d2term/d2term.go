@@ -1,6 +1,7 @@
 package d2term
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 )
@@ -12,7 +13,7 @@ func Initialize() (d2interface.Terminal, error) {
 		return nil, err
 	}
 
-	if err := d2input.BindHandlerWithPriority(term, d2interface.PriorityHigh); err != nil {
+	if err := d2input.BindHandlerWithPriority(term, d2enum.PriorityHigh); err != nil {
 		return nil, err
 	}
 
