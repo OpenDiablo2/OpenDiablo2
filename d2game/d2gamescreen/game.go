@@ -1,13 +1,14 @@
 package d2gamescreen
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
+
+	"fmt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -19,6 +20,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 )
 
+const hideZoneTextAfterSeconds = 2.0
+
+// Game represents the Gameplay screen
 type Game struct {
 	gameClient           *d2client.GameClient
 	mapRenderer          *d2maprenderer.MapRenderer
@@ -33,6 +37,7 @@ type Game struct {
 	terminal      d2interface.Terminal
 }
 
+// CreateGame creates the Gameplay screen and returns a pointer to it
 func CreateGame(renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, gameClient *d2client.GameClient,
 	term d2interface.Terminal) *Game {
 	result := &Game{
@@ -48,30 +53,47 @@ func CreateGame(renderer d2interface.Renderer, audioProvider d2interface.AudioPr
 		terminal:             term,
 	}
 	result.escapeMenu.onLoad()
-	_ = d2input.BindHandler(result.escapeMenu)
+
+	if err := d2input.BindHandler(result.escapeMenu); err != nil {
+		fmt.Println("failed to add gameplay screen as event handler")
+	}
 
 	return result
 }
 
+// OnLoad loads the resources for the Gameplay screen
 func (v *Game) OnLoad(_ d2screen.LoadingState) {
 	v.audioProvider.PlayBGM("")
 }
 
+// OnUnload releases the resources of Gameplay screen
 func (v *Game) OnUnload() error {
-	_ = d2input.UnbindHandler(v.gameControls) // TODO: hack
-	_ = d2input.UnbindHandler(v.escapeMenu)   // TODO: hack
-	_ = v.gameClient.Close()
+	if err := d2input.UnbindHandler(v.gameControls); err != nil { // TODO: hack
+		return err
+	}
+
+	if err := d2input.UnbindHandler(v.escapeMenu); err != nil { // TODO: hack
+		return err
+	}
+
+	if err := v.gameClient.Close(); err != nil {
+		return err
+	}
 
 	return nil
 }
 
+// Render renders the Gameplay screen
 func (v *Game) Render(screen d2interface.Surface) error {
 	if v.gameClient.RegenMap {
 		v.gameClient.RegenMap = false
 		v.mapRenderer.RegenerateTileCache()
 	}
 
-	_ = screen.Clear(color.Black)
+	if err := screen.Clear(color.Black); err != nil {
+		return err
+	}
+
 	v.mapRenderer.Render(screen)
 
 	if v.gameControls != nil {
@@ -81,15 +103,16 @@ func (v *Game) Render(screen d2interface.Surface) error {
 	return nil
 }
 
-var hideZoneTextAfterSeconds = 2.0
-
+// Advance runs the update logic on the Gameplay screen
 func (v *Game) Advance(tickTime float64) error {
 	if (v.escapeMenu != nil && !v.escapeMenu.isOpen) || len(v.gameClient.Players) != 1 {
 		v.gameClient.MapEngine.Advance(tickTime) // TODO: Hack
 	}
 
 	if v.gameControls != nil {
-		_ = v.gameControls.Advance(tickTime)
+		if err := v.gameControls.Advance(tickTime); err != nil {
+			return err
+		}
 	}
 
 	v.ticksSinceLevelCheck += tickTime
@@ -116,18 +139,7 @@ func (v *Game) Advance(tickTime float64) error {
 
 	// Bind the game controls to the player once it exists
 	if v.gameControls == nil {
-		for _, player := range v.gameClient.Players {
-			if player.Id != v.gameClient.PlayerId {
-				continue
-			}
-
-			v.localPlayer = player
-			v.gameControls = d2player.NewGameControls(v.renderer, player, v.gameClient.MapEngine, v.mapRenderer, v, v.terminal)
-			v.gameControls.Load()
-			_ = d2input.BindHandler(v.gameControls)
-
-			break
-		}
+		v.bindGameControls()
 	}
 
 	// Update the camera to focus on the player
@@ -139,12 +151,42 @@ func (v *Game) Advance(tickTime float64) error {
 	return nil
 }
 
+func (v *Game) bindGameControls() {
+	for _, player := range v.gameClient.Players {
+		if player.Id != v.gameClient.PlayerId {
+			continue
+		}
+
+		v.localPlayer = player
+		v.gameControls = d2player.NewGameControls(v.renderer, player, v.gameClient.MapEngine, v.mapRenderer, v, v.terminal)
+		v.gameControls.Load()
+
+		if err := d2input.BindHandler(v.gameControls); err != nil {
+			fmt.Printf("failed to add gameControls as input handler for player: %s\n", player.Id)
+		}
+
+		break
+	}
+}
+
+// OnPlayerMove sends the player move action to the server
 func (v *Game) OnPlayerMove(x, y float64) {
 	heroPosX := v.localPlayer.LocationX / 5.0
 	heroPosY := v.localPlayer.LocationY / 5.0
-	_ = v.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(v.gameClient.PlayerId, heroPosX, heroPosY, x, y))
+
+	err := v.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(v.gameClient.PlayerId, heroPosX, heroPosY, x, y))
+	if err != nil {
+		fmt.Printf("failed to send MovePlayer packet to the server, playerId: %s, x: %g, x: %g\n", v.gameClient.PlayerId, x, y)
+	}
 }
 
-func (v *Game) OnPlayerCast(missleID int, targetX, targetY float64) {
-	_ = v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerId, missleID, targetX, targetY))
+// OnPlayerCast sends the casting skill action to the server
+func (v *Game) OnPlayerCast(missileID int, targetX, targetY float64) {
+	err := v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerId, missileID, targetX, targetY))
+	if err != nil {
+		fmt.Printf(
+			"failed to send CastSkill packet to the server, playerId: %s, missileId: %d, x: %g, x: %g\n",
+			v.gameClient.PlayerId, missileID, targetX, targetY,
+		)
+	}
 }

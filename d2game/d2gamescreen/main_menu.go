@@ -1,3 +1,4 @@
+// Package d2gamescreen contains the screens
 package d2gamescreen
 
 import (
