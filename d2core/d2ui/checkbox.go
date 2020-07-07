@@ -32,11 +32,11 @@ func CreateCheckbox(renderer d2interface.Renderer, checkState bool) Checkbox {
 	result.width, result.height, _ = checkboxSprite.GetFrameSize(0)
 	checkboxSprite.SetPosition(0, 0)
 
-	result.Image, _ = renderer.NewSurface(result.width, result.height, d2interface.FilterNearest)
+	result.Image, _ = renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
 
 	_ = checkboxSprite.RenderSegmented(result.Image, 1, 1, 0)
 
-	result.checkedImage, _ = renderer.NewSurface(result.width, result.height, d2interface.FilterNearest)
+	result.checkedImage, _ = renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
 
 	_ = checkboxSprite.RenderSegmented(result.checkedImage, 1, 1, 1)
 	return result
@@ -45,7 +45,7 @@ func CreateCheckbox(renderer d2interface.Renderer, checkState bool) Checkbox {
 func (v *Checkbox) Render(target d2interface.Surface) {
 	target.PushCompositeMode(d2enum.CompositeModeSourceAtop)
 	target.PushTranslation(v.x, v.y)
-	target.PushFilter(d2interface.FilterNearest)
+	target.PushFilter(d2enum.FilterNearest)
 	defer target.PopN(3)
 
 	if v.checkState {

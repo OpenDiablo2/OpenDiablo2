@@ -2,6 +2,7 @@ package d2asset
 
 import (
 	"errors"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 	d2iface "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -75,7 +76,7 @@ func (a *DC6Animation) decodeDirection(directionIndex int) error {
 		dc6Frame := dc6.Frames[startFrame+i]
 
 		sfc, err := a.renderer.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height),
-			d2iface.FilterNearest)
+			d2enum.FilterNearest)
 		if err != nil {
 			return err
 		}
