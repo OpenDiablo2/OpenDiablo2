@@ -2,6 +2,7 @@ package d2gui
 
 import (
 	"errors"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -71,7 +72,7 @@ func createButton(renderer d2interface.Renderer, text string, buttonStyle Button
 	surfaceCount := animation.GetFrameCount() / (config.segmentsX * config.segmentsY)
 	surfaces := make([]d2interface.Surface, surfaceCount)
 	for i := 0; i < surfaceCount; i++ {
-		surface, err := renderer.NewSurface(buttonWidth, buttonHeight, d2interface.FilterNearest)
+		surface, err := renderer.NewSurface(buttonWidth, buttonHeight, d2enum.FilterNearest)
 		if err != nil {
 			return nil, err
 		}

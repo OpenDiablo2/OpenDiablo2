@@ -1,6 +1,7 @@
 package d2ui
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"strings"
 	"time"
 
@@ -71,7 +72,7 @@ func (v *TextBox) OnKeyChars(event d2interface.KeyCharsEvent) bool {
 }
 
 func (v *TextBox) OnKeyRepeat(event d2interface.KeyEvent) bool {
-	if event.Key() == d2interface.KeyBackspace && debounceEvents(event.Duration()) {
+	if event.Key() == d2enum.KeyBackspace && debounceEvents(event.Duration()) {
 		if len(v.text) >= 1 {
 			v.text = v.text[:len(v.text)-1]
 		}

@@ -1,24 +1,24 @@
 package d2input
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
 // HandlerEvent is an event that EventHandlers will process and respond to
 type HandlerEvent struct {
-	keyMod    d2interface.KeyMod
-	buttonMod d2interface.MouseButtonMod
+	keyMod    d2enum.KeyMod
+	buttonMod d2enum.MouseButtonMod
 	x         int
 	y         int
 }
 
 // KeyMod yields the modifier for a key action
-func (e *HandlerEvent) KeyMod() d2interface.KeyMod {
+func (e *HandlerEvent) KeyMod() d2enum.KeyMod {
 	return e.keyMod
 }
 
 // ButtonMod yields the modifier for a button action
-func (e *HandlerEvent) ButtonMod() d2interface.MouseButtonMod {
+func (e *HandlerEvent) ButtonMod() d2enum.MouseButtonMod {
 	return e.buttonMod
 }
 
@@ -43,12 +43,12 @@ func (e *KeyCharsEvent) Chars() []rune {
 
 type KeyEvent struct {
 	HandlerEvent
-	key d2interface.Key
+	key d2enum.Key
 	// Duration represents the number of frames this key has been pressed for
 	duration int
 }
 
-func (e *KeyEvent) Key() d2interface.Key {
+func (e *KeyEvent) Key() d2enum.Key {
 	return e.key
 }
 func (e *KeyEvent) Duration() int {
@@ -57,14 +57,14 @@ func (e *KeyEvent) Duration() int {
 
 type MouseEvent struct {
 	HandlerEvent
-	mouseButton d2interface.MouseButton
+	mouseButton d2enum.MouseButton
 }
 
-func (e *MouseEvent) KeyMod() d2interface.KeyMod {
+func (e *MouseEvent) KeyMod() d2enum.KeyMod {
 	return e.HandlerEvent.keyMod
 }
 
-func (e *MouseEvent) ButtonMod() d2interface.MouseButtonMod {
+func (e *MouseEvent) ButtonMod() d2enum.MouseButtonMod {
 	return e.HandlerEvent.buttonMod
 }
 
@@ -76,7 +76,7 @@ func (e *MouseEvent) Y() int {
 	return e.HandlerEvent.y
 }
 
-func (e *MouseEvent) Button() d2interface.MouseButton {
+func (e *MouseEvent) Button() d2enum.MouseButton {
 	return e.mouseButton
 }
 
@@ -84,11 +84,11 @@ type MouseMoveEvent struct {
 	HandlerEvent
 }
 
-func (e *MouseMoveEvent) KeyMod() d2interface.KeyMod {
+func (e *MouseMoveEvent) KeyMod() d2enum.KeyMod {
 	return e.HandlerEvent.keyMod
 }
 
-func (e *MouseMoveEvent) ButtonMod() d2interface.MouseButtonMod {
+func (e *MouseMoveEvent) ButtonMod() d2enum.MouseButtonMod {
 	return e.HandlerEvent.buttonMod
 }
 

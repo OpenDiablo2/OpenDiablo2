@@ -30,7 +30,7 @@ func (s *ebitenSurface) PushCompositeMode(mode d2enum.CompositeMode) {
 	s.stateCurrent.mode = d2ToEbitenCompositeMode(mode)
 }
 
-func (s *ebitenSurface) PushFilter(filter d2interface.Filter) {
+func (s *ebitenSurface) PushFilter(filter d2enum.Filter) {
 	s.stateStack = append(s.stateStack, s.stateCurrent)
 	s.stateCurrent.filter = d2ToEbitenFilter(filter)
 }

@@ -3,6 +3,7 @@ package d2gamescreen
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"image/color"
 	"log"
 	"os"
@@ -431,7 +432,7 @@ func (v *MainMenu) Advance(tickTime float64) error {
 
 // OnMouseButtonDown is called when a mouse button is clicked
 func (v *MainMenu) OnMouseButtonDown(event d2interface.MouseEvent) bool {
-	if v.screenMode == screenModeTrademark && event.Button() == d2interface.MouseButtonLeft {
+	if v.screenMode == screenModeTrademark && event.Button() == d2enum.MouseButtonLeft {
 		v.setScreenMode(screenModeMainMenu)
 		return true
 	}

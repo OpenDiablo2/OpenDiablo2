@@ -1,6 +1,7 @@
 package d2ui
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -54,7 +55,7 @@ func AddWidget(widget Widget) {
 
 func (u *UI) OnMouseButtonUp(event d2interface.MouseEvent) bool {
 	singleton.CursorX, singleton.CursorY = event.X(), event.Y()
-	if event.Button() == d2interface.MouseButtonLeft {
+	if event.Button() == d2enum.MouseButtonLeft {
 		singleton.cursorButtons |= CursorButtonLeft
 		// activate previously pressed widget if cursor is still hovering
 		w := singleton.pressedWidget
@@ -71,7 +72,7 @@ func (u *UI) OnMouseButtonUp(event d2interface.MouseEvent) bool {
 
 func (u *UI) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	singleton.CursorX, singleton.CursorY = event.X(), event.Y()
-	if event.Button() == d2interface.MouseButtonLeft {
+	if event.Button() == d2enum.MouseButtonLeft {
 		// find and press a widget on screen
 		singleton.pressedWidget = nil
 		for _, w := range singleton.widgets {
@@ -83,7 +84,7 @@ func (u *UI) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 			}
 		}
 	}
-	if event.Button() == d2interface.MouseButtonRight {
+	if event.Button() == d2enum.MouseButtonRight {
 		singleton.cursorButtons |= CursorButtonRight
 	}
 	return false

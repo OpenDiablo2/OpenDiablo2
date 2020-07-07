@@ -2,120 +2,120 @@
 package ebiten
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
 var (
 	//nolint:gochecknoglobals This is a constant in all but by name, no constant map in go
-	keyToEbiten = map[d2interface.Key]ebiten.Key{
-		d2interface.Key0:            ebiten.Key0,
-		d2interface.Key1:            ebiten.Key1,
-		d2interface.Key2:            ebiten.Key2,
-		d2interface.Key3:            ebiten.Key3,
-		d2interface.Key4:            ebiten.Key4,
-		d2interface.Key5:            ebiten.Key5,
-		d2interface.Key6:            ebiten.Key6,
-		d2interface.Key7:            ebiten.Key7,
-		d2interface.Key8:            ebiten.Key8,
-		d2interface.Key9:            ebiten.Key9,
-		d2interface.KeyA:            ebiten.KeyA,
-		d2interface.KeyB:            ebiten.KeyB,
-		d2interface.KeyC:            ebiten.KeyC,
-		d2interface.KeyD:            ebiten.KeyD,
-		d2interface.KeyE:            ebiten.KeyE,
-		d2interface.KeyF:            ebiten.KeyF,
-		d2interface.KeyG:            ebiten.KeyG,
-		d2interface.KeyH:            ebiten.KeyH,
-		d2interface.KeyI:            ebiten.KeyI,
-		d2interface.KeyJ:            ebiten.KeyJ,
-		d2interface.KeyK:            ebiten.KeyK,
-		d2interface.KeyL:            ebiten.KeyL,
-		d2interface.KeyM:            ebiten.KeyM,
-		d2interface.KeyN:            ebiten.KeyN,
-		d2interface.KeyO:            ebiten.KeyO,
-		d2interface.KeyP:            ebiten.KeyP,
-		d2interface.KeyQ:            ebiten.KeyQ,
-		d2interface.KeyR:            ebiten.KeyR,
-		d2interface.KeyS:            ebiten.KeyS,
-		d2interface.KeyT:            ebiten.KeyT,
-		d2interface.KeyU:            ebiten.KeyU,
-		d2interface.KeyV:            ebiten.KeyV,
-		d2interface.KeyW:            ebiten.KeyW,
-		d2interface.KeyX:            ebiten.KeyX,
-		d2interface.KeyY:            ebiten.KeyY,
-		d2interface.KeyZ:            ebiten.KeyZ,
-		d2interface.KeyApostrophe:   ebiten.KeyApostrophe,
-		d2interface.KeyBackslash:    ebiten.KeyBackslash,
-		d2interface.KeyBackspace:    ebiten.KeyBackspace,
-		d2interface.KeyCapsLock:     ebiten.KeyCapsLock,
-		d2interface.KeyComma:        ebiten.KeyComma,
-		d2interface.KeyDelete:       ebiten.KeyDelete,
-		d2interface.KeyDown:         ebiten.KeyDown,
-		d2interface.KeyEnd:          ebiten.KeyEnd,
-		d2interface.KeyEnter:        ebiten.KeyEnter,
-		d2interface.KeyEqual:        ebiten.KeyEqual,
-		d2interface.KeyEscape:       ebiten.KeyEscape,
-		d2interface.KeyF1:           ebiten.KeyF1,
-		d2interface.KeyF2:           ebiten.KeyF2,
-		d2interface.KeyF3:           ebiten.KeyF3,
-		d2interface.KeyF4:           ebiten.KeyF4,
-		d2interface.KeyF5:           ebiten.KeyF5,
-		d2interface.KeyF6:           ebiten.KeyF6,
-		d2interface.KeyF7:           ebiten.KeyF7,
-		d2interface.KeyF8:           ebiten.KeyF8,
-		d2interface.KeyF9:           ebiten.KeyF9,
-		d2interface.KeyF10:          ebiten.KeyF10,
-		d2interface.KeyF11:          ebiten.KeyF11,
-		d2interface.KeyF12:          ebiten.KeyF12,
-		d2interface.KeyGraveAccent:  ebiten.KeyGraveAccent,
-		d2interface.KeyHome:         ebiten.KeyHome,
-		d2interface.KeyInsert:       ebiten.KeyInsert,
-		d2interface.KeyKP0:          ebiten.KeyKP0,
-		d2interface.KeyKP1:          ebiten.KeyKP1,
-		d2interface.KeyKP2:          ebiten.KeyKP2,
-		d2interface.KeyKP3:          ebiten.KeyKP3,
-		d2interface.KeyKP4:          ebiten.KeyKP4,
-		d2interface.KeyKP5:          ebiten.KeyKP5,
-		d2interface.KeyKP6:          ebiten.KeyKP6,
-		d2interface.KeyKP7:          ebiten.KeyKP7,
-		d2interface.KeyKP8:          ebiten.KeyKP8,
-		d2interface.KeyKP9:          ebiten.KeyKP9,
-		d2interface.KeyKPAdd:        ebiten.KeyKPAdd,
-		d2interface.KeyKPDecimal:    ebiten.KeyKPDecimal,
-		d2interface.KeyKPDivide:     ebiten.KeyKPDivide,
-		d2interface.KeyKPEnter:      ebiten.KeyKPEnter,
-		d2interface.KeyKPEqual:      ebiten.KeyKPEqual,
-		d2interface.KeyKPMultiply:   ebiten.KeyKPMultiply,
-		d2interface.KeyKPSubtract:   ebiten.KeyKPSubtract,
-		d2interface.KeyLeft:         ebiten.KeyLeft,
-		d2interface.KeyLeftBracket:  ebiten.KeyLeftBracket,
-		d2interface.KeyMenu:         ebiten.KeyMenu,
-		d2interface.KeyMinus:        ebiten.KeyMinus,
-		d2interface.KeyNumLock:      ebiten.KeyNumLock,
-		d2interface.KeyPageDown:     ebiten.KeyPageDown,
-		d2interface.KeyPageUp:       ebiten.KeyPageUp,
-		d2interface.KeyPause:        ebiten.KeyPause,
-		d2interface.KeyPeriod:       ebiten.KeyPeriod,
-		d2interface.KeyPrintScreen:  ebiten.KeyPrintScreen,
-		d2interface.KeyRight:        ebiten.KeyRight,
-		d2interface.KeyRightBracket: ebiten.KeyRightBracket,
-		d2interface.KeyScrollLock:   ebiten.KeyScrollLock,
-		d2interface.KeySemicolon:    ebiten.KeySemicolon,
-		d2interface.KeySlash:        ebiten.KeySlash,
-		d2interface.KeySpace:        ebiten.KeySpace,
-		d2interface.KeyTab:          ebiten.KeyTab,
-		d2interface.KeyUp:           ebiten.KeyUp,
-		d2interface.KeyAlt:          ebiten.KeyAlt,
-		d2interface.KeyControl:      ebiten.KeyControl,
-		d2interface.KeyShift:        ebiten.KeyShift,
+	keyToEbiten = map[d2enum.Key]ebiten.Key{
+		d2enum.Key0:            ebiten.Key0,
+		d2enum.Key1:            ebiten.Key1,
+		d2enum.Key2:            ebiten.Key2,
+		d2enum.Key3:            ebiten.Key3,
+		d2enum.Key4:            ebiten.Key4,
+		d2enum.Key5:            ebiten.Key5,
+		d2enum.Key6:            ebiten.Key6,
+		d2enum.Key7:            ebiten.Key7,
+		d2enum.Key8:            ebiten.Key8,
+		d2enum.Key9:            ebiten.Key9,
+		d2enum.KeyA:            ebiten.KeyA,
+		d2enum.KeyB:            ebiten.KeyB,
+		d2enum.KeyC:            ebiten.KeyC,
+		d2enum.KeyD:            ebiten.KeyD,
+		d2enum.KeyE:            ebiten.KeyE,
+		d2enum.KeyF:            ebiten.KeyF,
+		d2enum.KeyG:            ebiten.KeyG,
+		d2enum.KeyH:            ebiten.KeyH,
+		d2enum.KeyI:            ebiten.KeyI,
+		d2enum.KeyJ:            ebiten.KeyJ,
+		d2enum.KeyK:            ebiten.KeyK,
+		d2enum.KeyL:            ebiten.KeyL,
+		d2enum.KeyM:            ebiten.KeyM,
+		d2enum.KeyN:            ebiten.KeyN,
+		d2enum.KeyO:            ebiten.KeyO,
+		d2enum.KeyP:            ebiten.KeyP,
+		d2enum.KeyQ:            ebiten.KeyQ,
+		d2enum.KeyR:            ebiten.KeyR,
+		d2enum.KeyS:            ebiten.KeyS,
+		d2enum.KeyT:            ebiten.KeyT,
+		d2enum.KeyU:            ebiten.KeyU,
+		d2enum.KeyV:            ebiten.KeyV,
+		d2enum.KeyW:            ebiten.KeyW,
+		d2enum.KeyX:            ebiten.KeyX,
+		d2enum.KeyY:            ebiten.KeyY,
+		d2enum.KeyZ:            ebiten.KeyZ,
+		d2enum.KeyApostrophe:   ebiten.KeyApostrophe,
+		d2enum.KeyBackslash:    ebiten.KeyBackslash,
+		d2enum.KeyBackspace:    ebiten.KeyBackspace,
+		d2enum.KeyCapsLock:     ebiten.KeyCapsLock,
+		d2enum.KeyComma:        ebiten.KeyComma,
+		d2enum.KeyDelete:       ebiten.KeyDelete,
+		d2enum.KeyDown:         ebiten.KeyDown,
+		d2enum.KeyEnd:          ebiten.KeyEnd,
+		d2enum.KeyEnter:        ebiten.KeyEnter,
+		d2enum.KeyEqual:        ebiten.KeyEqual,
+		d2enum.KeyEscape:       ebiten.KeyEscape,
+		d2enum.KeyF1:           ebiten.KeyF1,
+		d2enum.KeyF2:           ebiten.KeyF2,
+		d2enum.KeyF3:           ebiten.KeyF3,
+		d2enum.KeyF4:           ebiten.KeyF4,
+		d2enum.KeyF5:           ebiten.KeyF5,
+		d2enum.KeyF6:           ebiten.KeyF6,
+		d2enum.KeyF7:           ebiten.KeyF7,
+		d2enum.KeyF8:           ebiten.KeyF8,
+		d2enum.KeyF9:           ebiten.KeyF9,
+		d2enum.KeyF10:          ebiten.KeyF10,
+		d2enum.KeyF11:          ebiten.KeyF11,
+		d2enum.KeyF12:          ebiten.KeyF12,
+		d2enum.KeyGraveAccent:  ebiten.KeyGraveAccent,
+		d2enum.KeyHome:         ebiten.KeyHome,
+		d2enum.KeyInsert:       ebiten.KeyInsert,
+		d2enum.KeyKP0:          ebiten.KeyKP0,
+		d2enum.KeyKP1:          ebiten.KeyKP1,
+		d2enum.KeyKP2:          ebiten.KeyKP2,
+		d2enum.KeyKP3:          ebiten.KeyKP3,
+		d2enum.KeyKP4:          ebiten.KeyKP4,
+		d2enum.KeyKP5:          ebiten.KeyKP5,
+		d2enum.KeyKP6:          ebiten.KeyKP6,
+		d2enum.KeyKP7:          ebiten.KeyKP7,
+		d2enum.KeyKP8:          ebiten.KeyKP8,
+		d2enum.KeyKP9:          ebiten.KeyKP9,
+		d2enum.KeyKPAdd:        ebiten.KeyKPAdd,
+		d2enum.KeyKPDecimal:    ebiten.KeyKPDecimal,
+		d2enum.KeyKPDivide:     ebiten.KeyKPDivide,
+		d2enum.KeyKPEnter:      ebiten.KeyKPEnter,
+		d2enum.KeyKPEqual:      ebiten.KeyKPEqual,
+		d2enum.KeyKPMultiply:   ebiten.KeyKPMultiply,
+		d2enum.KeyKPSubtract:   ebiten.KeyKPSubtract,
+		d2enum.KeyLeft:         ebiten.KeyLeft,
+		d2enum.KeyLeftBracket:  ebiten.KeyLeftBracket,
+		d2enum.KeyMenu:         ebiten.KeyMenu,
+		d2enum.KeyMinus:        ebiten.KeyMinus,
+		d2enum.KeyNumLock:      ebiten.KeyNumLock,
+		d2enum.KeyPageDown:     ebiten.KeyPageDown,
+		d2enum.KeyPageUp:       ebiten.KeyPageUp,
+		d2enum.KeyPause:        ebiten.KeyPause,
+		d2enum.KeyPeriod:       ebiten.KeyPeriod,
+		d2enum.KeyPrintScreen:  ebiten.KeyPrintScreen,
+		d2enum.KeyRight:        ebiten.KeyRight,
+		d2enum.KeyRightBracket: ebiten.KeyRightBracket,
+		d2enum.KeyScrollLock:   ebiten.KeyScrollLock,
+		d2enum.KeySemicolon:    ebiten.KeySemicolon,
+		d2enum.KeySlash:        ebiten.KeySlash,
+		d2enum.KeySpace:        ebiten.KeySpace,
+		d2enum.KeyTab:          ebiten.KeyTab,
+		d2enum.KeyUp:           ebiten.KeyUp,
+		d2enum.KeyAlt:          ebiten.KeyAlt,
+		d2enum.KeyControl:      ebiten.KeyControl,
+		d2enum.KeyShift:        ebiten.KeyShift,
 	}
 	//nolint:gochecknoglobals This is a constant in all but by name, no constant map in go
-	mouseButtonToEbiten = map[d2interface.MouseButton]ebiten.MouseButton{
-		d2interface.MouseButtonLeft:   ebiten.MouseButtonLeft,
-		d2interface.MouseButtonMiddle: ebiten.MouseButtonMiddle,
-		d2interface.MouseButtonRight:  ebiten.MouseButtonRight,
+	mouseButtonToEbiten = map[d2enum.MouseButton]ebiten.MouseButton{
+		d2enum.MouseButtonLeft:   ebiten.MouseButtonLeft,
+		d2enum.MouseButtonMiddle: ebiten.MouseButtonMiddle,
+		d2enum.MouseButtonRight:  ebiten.MouseButtonRight,
 	}
 )
 
@@ -133,36 +133,36 @@ func (is InputService) InputChars() []rune {
 }
 
 // IsKeyPressed checks if the provided key is down.
-func (is InputService) IsKeyPressed(key d2interface.Key) bool {
+func (is InputService) IsKeyPressed(key d2enum.Key) bool {
 	return ebiten.IsKeyPressed(keyToEbiten[key])
 }
 
 // IsKeyJustPressed checks if the provided key is just transitioned from up to down.
-func (is InputService) IsKeyJustPressed(key d2interface.Key) bool {
+func (is InputService) IsKeyJustPressed(key d2enum.Key) bool {
 	return inpututil.IsKeyJustPressed(keyToEbiten[key])
 }
 
 // IsKeyJustReleased checks if the provided key is just transitioned from down to up.
-func (is InputService) IsKeyJustReleased(key d2interface.Key) bool {
+func (is InputService) IsKeyJustReleased(key d2enum.Key) bool {
 	return inpututil.IsKeyJustReleased(keyToEbiten[key])
 }
 
 // IsMouseButtonPressed checks if the provided mouse button is down.
-func (is InputService) IsMouseButtonPressed(button d2interface.MouseButton) bool {
+func (is InputService) IsMouseButtonPressed(button d2enum.MouseButton) bool {
 	return ebiten.IsMouseButtonPressed(mouseButtonToEbiten[button])
 }
 
 // IsMouseButtonJustPressed checks if the provided mouse button is just transitioned from up to down.
-func (is InputService) IsMouseButtonJustPressed(button d2interface.MouseButton) bool {
+func (is InputService) IsMouseButtonJustPressed(button d2enum.MouseButton) bool {
 	return inpututil.IsMouseButtonJustPressed(mouseButtonToEbiten[button])
 }
 
 // IsMouseButtonJustReleased checks if the provided mouse button is just transitioned from down to up.
-func (is InputService) IsMouseButtonJustReleased(button d2interface.MouseButton) bool {
+func (is InputService) IsMouseButtonJustReleased(button d2enum.MouseButton) bool {
 	return inpututil.IsMouseButtonJustReleased(mouseButtonToEbiten[button])
 }
 
 // KeyPressDuration returns how long the key is pressed in frames.
-func (is InputService) KeyPressDuration(key d2interface.Key) int {
+func (is InputService) KeyPressDuration(key d2enum.Key) int {
 	return inpututil.KeyPressDuration(keyToEbiten[key])
 }

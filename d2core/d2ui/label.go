@@ -60,7 +60,7 @@ func (v *Label) Render(target d2interface.Surface) {
 		x, y = v.X-v.Width, v.Y
 	}
 
-	target.PushFilter(d2interface.FilterNearest)
+	target.PushFilter(d2enum.FilterNearest)
 	target.PushCompositeMode(d2enum.CompositeModeSourceAtop)
 	target.PushTranslation(x, y)
 	defer target.PopN(3)
@@ -85,7 +85,7 @@ func (v *Label) cacheImage() {
 	width, height := v.font.GetTextMetrics(v.text)
 	v.Width = width
 	v.Height = height
-	v.imageData[v.text], _ = v.renderer.NewSurface(width, height, d2interface.FilterNearest)
+	v.imageData[v.text], _ = v.renderer.NewSurface(width, height, d2enum.FilterNearest)
 	surface, _ := v.renderer.CreateSurface(v.imageData[v.text])
 	v.font.Render(0, 0, v.text, v.Color, surface)
 }

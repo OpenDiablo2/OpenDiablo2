@@ -7,7 +7,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
 func (mr *MapRenderer) generateTileCache() {
@@ -73,7 +72,7 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, 
 		}
 		tileYOffset := d2common.AbsInt32(tileYMinimum)
 		tileHeight := d2common.AbsInt32(tileData[i].Height)
-		image, _ := mr.renderer.NewSurface(int(tileData[i].Width), int(tileHeight), d2interface.FilterNearest)
+		image, _ := mr.renderer.NewSurface(int(tileData[i].Width), int(tileHeight), d2enum.FilterNearest)
 		pixels := make([]byte, 4*tileData[i].Width*tileHeight)
 		mr.decodeTileGfxData(tileData[i].Blocks, &pixels, tileYOffset, tileData[i].Width)
 		_ = image.ReplacePixels(pixels)
@@ -112,7 +111,7 @@ func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX,
 		return
 	}
 
-	image, _ := mr.renderer.NewSurface(int(tileData.Width), tileHeight, d2interface.FilterNearest)
+	image, _ := mr.renderer.NewSurface(int(tileData.Width), tileHeight, d2enum.FilterNearest)
 	pixels := make([]byte, 4*tileData.Width*int32(tileHeight))
 	mr.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, tileData.Width)
 	_ = image.ReplacePixels(pixels)
@@ -173,7 +172,7 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY in
 		return
 	}
 
-	image, _ := mr.renderer.NewSurface(160, int(realHeight), d2interface.FilterNearest)
+	image, _ := mr.renderer.NewSurface(160, int(realHeight), d2enum.FilterNearest)
 	pixels := make([]byte, 4*160*realHeight)
 
 	mr.decodeTileGfxData(tileData.Blocks, &pixels, tileYOffset, 160)

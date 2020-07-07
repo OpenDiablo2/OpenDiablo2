@@ -2,6 +2,7 @@ package d2gamescreen
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
@@ -435,13 +436,13 @@ func (m *EscapeMenu) onEnterKey() {
 // OnKeyDown defines the actions of the Escape Menu when a key is pressed
 func (m *EscapeMenu) OnKeyDown(event d2interface.KeyEvent) bool {
 	switch event.Key() {
-	case d2interface.KeyEscape:
+	case d2enum.KeyEscape:
 		m.onEscKey()
-	case d2interface.KeyUp:
+	case d2enum.KeyUp:
 		m.onUpKey()
-	case d2interface.KeyDown:
+	case d2enum.KeyDown:
 		m.onDownKey()
-	case d2interface.KeyEnter:
+	case d2enum.KeyEnter:
 		m.onEnterKey()
 	default:
 		return false

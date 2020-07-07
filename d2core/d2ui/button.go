@@ -126,7 +126,7 @@ func CreateButton(renderer d2interface.Renderer, buttonType ButtonType, text str
 		result.height += h
 	}
 
-	result.normalSurface, _ = renderer.NewSurface(result.width, result.height, d2interface.FilterNearest)
+	result.normalSurface, _ = renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
 	_, fontHeight := font.GetTextMetrics(text)
 	textY := (result.height / 2) - (fontHeight / 2) + buttonLayout.TextOffset
 
@@ -136,22 +136,22 @@ func CreateButton(renderer d2interface.Renderer, buttonType ButtonType, text str
 	font.Render(0, textY, text, color.RGBA{R: 100, G: 100, B: 100, A: 255}, result.normalSurface)
 	if buttonLayout.AllowFrameChange {
 		if totalButtonTypes > 1 {
-			result.pressedSurface, _ = renderer.NewSurface(result.width, result.height, d2interface.FilterNearest)
+			result.pressedSurface, _ = renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
 			buttonSprite.RenderSegmented(result.pressedSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+1)
 			font.Render(-2, textY+2, text, color.RGBA{R: 100, G: 100, B: 100, A: 255}, result.pressedSurface)
 		}
 		if totalButtonTypes > 2 {
-			result.toggledSurface, _ = renderer.NewSurface(result.width, result.height, d2interface.FilterNearest)
+			result.toggledSurface, _ = renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
 			buttonSprite.RenderSegmented(result.toggledSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+2)
 			font.Render(0, textY, text, color.RGBA{R: 100, G: 100, B: 100, A: 255}, result.toggledSurface)
 		}
 		if totalButtonTypes > 3 {
-			result.pressedToggledSurface, _ = renderer.NewSurface(result.width, result.height, d2interface.FilterNearest)
+			result.pressedToggledSurface, _ = renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
 			buttonSprite.RenderSegmented(result.pressedToggledSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+3)
 			font.Render(0, textY, text, color.RGBA{R: 100, G: 100, B: 100, A: 255}, result.pressedToggledSurface)
 		}
 		if buttonLayout.DisabledFrame != -1 {
-			result.disabledSurface, _ = renderer.NewSurface(result.width, result.height, d2interface.FilterNearest)
+			result.disabledSurface, _ = renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
 			buttonSprite.RenderSegmented(result.disabledSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.DisabledFrame)
 			font.Render(0, textY, text, color.RGBA{R: 100, G: 100, B: 100, A: 255}, result.disabledSurface)
 		}
@@ -175,7 +175,7 @@ func (v *Button) Activate() {
 // Render renders the button
 func (v *Button) Render(target d2interface.Surface) {
 	target.PushCompositeMode(d2enum.CompositeModeSourceAtop)
-	target.PushFilter(d2interface.FilterNearest)
+	target.PushFilter(d2enum.FilterNearest)
 	target.PushTranslation(v.x, v.y)
 	defer target.PopN(3)
 
