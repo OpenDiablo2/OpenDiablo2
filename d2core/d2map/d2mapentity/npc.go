@@ -34,23 +34,10 @@ func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC
 		monstatEx:     d2datadict.MonStats2[monstat.ExtraDataKey],
 	}
 
-	equipment := &[d2enum.CompositeTypeMax]string{
-		d2enum.CompositeTypeHead:      selectEquip(result.monstatEx.HDv),
-		d2enum.CompositeTypeTorso:     selectEquip(result.monstatEx.TRv),
-		d2enum.CompositeTypeLegs:      selectEquip(result.monstatEx.LGv),
-		d2enum.CompositeTypeRightArm:  selectEquip(result.monstatEx.Rav),
-		d2enum.CompositeTypeLeftArm:   selectEquip(result.monstatEx.Lav),
-		d2enum.CompositeTypeRightHand: selectEquip(result.monstatEx.RHv),
-		d2enum.CompositeTypeLeftHand:  selectEquip(result.monstatEx.LHv),
-		d2enum.CompositeTypeShield:    selectEquip(result.monstatEx.SHv),
-		d2enum.CompositeTypeSpecial1:  selectEquip(result.monstatEx.S1v),
-		d2enum.CompositeTypeSpecial2:  selectEquip(result.monstatEx.S2v),
-		d2enum.CompositeTypeSpecial3:  selectEquip(result.monstatEx.S3v),
-		d2enum.CompositeTypeSpecial4:  selectEquip(result.monstatEx.S4v),
-		d2enum.CompositeTypeSpecial5:  selectEquip(result.monstatEx.S5v),
-		d2enum.CompositeTypeSpecial6:  selectEquip(result.monstatEx.S6v),
-		d2enum.CompositeTypeSpecial7:  selectEquip(result.monstatEx.S7v),
-		d2enum.CompositeTypeSpecial8:  selectEquip(result.monstatEx.S8v),
+	var equipment [16]string
+
+	for compType, opts := range result.monstatEx.EquipmentOptions {
+		equipment[compType] = selectEquip(opts)
 	}
 
 	composite, _ := d2asset.LoadComposite(d2enum.ObjectTypeCharacter, monstat.AnimationDirectoryToken,
@@ -58,10 +45,12 @@ func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC
 	result.composite = composite
 
 	composite.SetMode("NU", result.monstatEx.BaseWeaponClass)
-	composite.Equip(equipment)
+	composite.Equip(&equipment)
 
 	result.SetSpeed(float64(monstat.SpeedBase))
 	result.mapEntity.directioner = result.rotate
+
+	result.composite.SetDirection(direction)
 
 	if result.monstatRecord != nil && result.monstatRecord.IsInteractable {
 		result.name = d2common.TranslateString(result.monstatRecord.NameStringTableKey)
