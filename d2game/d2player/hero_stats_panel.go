@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -276,9 +277,9 @@ func (s *HeroStatsPanel) createStatValueLabel(stat int, x int, y int) d2ui.Label
 }
 
 func (s *HeroStatsPanel) createTextLabel(element PanelText) d2ui.Label {
-	label := d2ui.CreateLabel(s.renderer, element.Font, d2resource.PaletteStatic)
+	label := d2ui.CreateLabel(element.Font, d2resource.PaletteStatic)
 	if element.AlignCenter {
-		label.Alignment = d2ui.LabelAlignCenter
+		label.Alignment = d2gui.HorizontalAlignCenter
 	}
 
 	label.SetText(element.Text)

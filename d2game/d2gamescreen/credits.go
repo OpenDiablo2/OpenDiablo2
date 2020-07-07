@@ -256,7 +256,7 @@ func (v *Credits) getNewFontLabel(isHeading bool) *d2ui.Label {
 	newLabelItem := &labelItem{
 		Available: false,
 		IsHeading: isHeading,
-		Label:     d2ui.CreateLabel(v.renderer, d2resource.FontFormal10, d2resource.PaletteSky),
+		Label:     d2ui.CreateLabel(d2resource.FontFormal10, d2resource.PaletteSky),
 	}
 
 	if isHeading {
