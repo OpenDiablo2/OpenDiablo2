@@ -13,4 +13,7 @@ type CompositeAnimation interface {
 	SetDirection(direction int)
 	GetDirection() int
 	GetPlayedCount() int
+	SetSubLoop(start, end int)
+	SetPlayLoop(bool)
+	SetCurrentFrame(int)
 }
