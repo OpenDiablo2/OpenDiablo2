@@ -98,7 +98,7 @@ func (t *terminal) Initialize() error {
 		return err
 	}
 
-	if err := input.BindHandlerWithPriority(t, d2interface.PriorityHigh); err != nil {
+	if err := input.BindHandlerWithPriority(t, d2enum.PriorityHigh); err != nil {
 		return err
 	}
 
