@@ -23,7 +23,7 @@ type DCCAnimation struct {
 func CreateDCCAnimation(renderer d2iface.Renderer, dccPath string, palette d2iface.Palette,
 	transparency int) (d2iface.Animation, error) {
 
-	dcc, err := loadDCC(dccPath)
+	dcc, err := singleton.loadDCC(dccPath)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (a *DCCAnimation) SetDirection(directionIndex int) error {
 }
 
 func (a *DCCAnimation) decodeDirection(directionIndex int) error {
-	dcc, err := loadDCC(a.dccPath)
+	dcc, err := singleton.loadDCC(a.dccPath)
 	if err != nil {
 		return err
 	}

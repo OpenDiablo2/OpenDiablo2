@@ -19,7 +19,7 @@ type DC6Animation struct {
 // CreateDC6Animation creates an Animation from d2dc6.DC6 and d2dat.DATPalette
 func CreateDC6Animation(renderer d2iface.Renderer, dc6Path string,
 	palette d2iface.Palette) (d2iface.Animation, error) {
-	dc6, err := loadDC6(dc6Path)
+	dc6, err := singleton.loadDC6(dc6Path)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (a *DC6Animation) SetDirection(directionIndex int) error {
 }
 
 func (a *DC6Animation) decodeDirection(directionIndex int) error {
-	dc6, err := loadDC6(a.dc6Path)
+	dc6, err := singleton.loadDC6(a.dc6Path)
 	if err != nil {
 		return err
 	}
