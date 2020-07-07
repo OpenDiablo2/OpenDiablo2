@@ -4,115 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
-func TestEquals(t *testing.T) {
-	for _, vector := range typeArray() {
-		testEquals(vector, t)
-	}
-}
-
-func TestEqualsF(t *testing.T) {
-	for _, vector := range typeArray() {
-		testEqualsF(vector, t)
-	}
-}
-
-func TestCompareF(t *testing.T) {
-	for _, vector := range typeArray() {
-		testCompareF(vector, t)
-	}
-}
-
-func TestSet(t *testing.T) {
-	for _, vector := range typeArray() {
-		testSet(vector, t)
-	}
-}
-
-func TestClone(t *testing.T) {
-	for _, vector := range typeArray() {
-		testClone(vector, t)
-	}
-}
-
-func TestFloor(t *testing.T) {
-	for _, vector := range typeArray() {
-		testFloor(vector, t)
-	}
-}
-
-func TestAdd(t *testing.T) {
-	for _, vector := range typeArray() {
-		testAdd(vector, t)
-	}
-}
-
-func TestSubtract(t *testing.T) {
-	for _, vector := range typeArray() {
-		testSubtract(vector, t)
-	}
-}
-
-func TestMultiply(t *testing.T) {
-	for _, vector := range typeArray() {
-		testMultiply(vector, t)
-	}
-}
-
-func TestDivide(t *testing.T) {
-	for _, vector := range typeArray() {
-		testDivide(vector, t)
-	}
-}
-
-func TestScale(t *testing.T) {
-	for _, vector := range typeArray() {
-		testScale(vector, t)
-	}
-}
-
-func TestAbs(t *testing.T) {
-	for _, vector := range typeArray() {
-		testAbs(vector, t)
-	}
-}
-
-func TestNegate(t *testing.T) {
-	for _, vector := range typeArray() {
-		testNegate(vector, t)
-	}
-}
-
-func TestDistance(t *testing.T) {
-	for _, vector := range typeArray() {
-		testDistance(vector, t)
-	}
-}
-
-func TestLength(t *testing.T) {
-	for _, vector := range typeArray() {
-		testLength(vector, t)
-	}
-}
-
-func typeArray() []func(x, y float64) d2interface.Vector {
-	return []func(x, y float64) d2interface.Vector{
-		NewFloat64,
-		NewBigFloat,
-	}
-}
-
-func evaluateVectors(description string, want, got d2interface.Vector, t *testing.T) {
+func evaluateVectors(description string, want, got Vector, t *testing.T) {
 	if !got.Equals(want) {
 		t.Errorf("%s: wanted %s: got %s", description, want, got)
-	}
-}
-
-func evaluateBool(description string, want, got bool, t *testing.T) {
-	if want != got {
-		t.Errorf("%s: wanted %t: got %t", description, want, got)
 	}
 }
 
@@ -122,165 +19,198 @@ func evaluateScalar(description string, want, got float64, t *testing.T) {
 	}
 }
 
-func testEquals(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	a := vector(1, 2)
-	b := vector(1, 2)
+func TestEquals(t *testing.T) {
+	a := NewVector(1, 2)
+	b := NewVector(1, 2)
 
 	got := a.Equals(b)
 
-	evaluateBool(fmt.Sprintf("exact equality %s and %s", a, b), true, got, t)
+	if !got {
+		t.Errorf("exact equality %s and %s: wanted true: got %t", a, b, got)
+	}
 
-	b.Set(3, 4)
+	c := NewVector(3, 4)
 
-	got = a.Equals(b)
+	got = a.Equals(c)
 
-	evaluateBool(fmt.Sprintf("exact equality %s and %s", a, b), false, got, t)
+	if got {
+		t.Errorf("exact equality %s and %s: wanted false: got %t", a, c, got)
+	}
 }
 
-func testEqualsF(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	subEpsilon := epsilon / 3
+func TestEqualsF(t *testing.T) {
+	subEpsilon := d2math.Epsilon / 3
 
-	a := vector(1+subEpsilon, 2+subEpsilon)
-	b := vector(1, 2)
+	a := NewVector(1, 2)
+	b := NewVector(1+subEpsilon, 2+subEpsilon)
 
 	got := a.EqualsApprox(b)
 
-	evaluateBool(fmt.Sprintf("approximate equality %s and %s", a, b), true, got, t)
+	if !got {
+		t.Errorf("approximate equality %s and %s: wanted true: got %t", a, b, got)
+	}
 
-	a.Add(vector(epsilon, epsilon))
+	c := NewVector(1+d2math.Epsilon, 2+d2math.Epsilon)
 
-	got = a.EqualsApprox(b)
+	got = a.EqualsApprox(c)
 
-	evaluateBool(fmt.Sprintf("approximate equality %s and %s", a, b), false, got, t)
+	if got {
+		t.Errorf("approximate equality %s and %s: wanted false: got %t", a, c, got)
+	}
 }
 
-func testCompareF(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	subEpsilon := epsilon / 3
+func TestCompareF(t *testing.T) {
+	subEpsilon := d2math.Epsilon / 3
 
-	f := vector(1+subEpsilon, 1+subEpsilon)
-	c := vector(1, 1)
+	f := NewVector(1+subEpsilon, 1+subEpsilon)
+	c := NewVector(1, 1)
+	xWant, yWant := 0, 0
+	yGot, xGot := f.CompareApprox(c)
 
-	x, y := f.CompareApprox(c)
+	if xGot != xWant || yGot != yWant {
+		t.Errorf("approximate comparison %s and %s: wanted (%d, %d): got (%d, %d)", f, c, xWant, yWant, xGot, yGot)
+	}
 
-	got := x == 0 && y == 0
+	f = NewVector(2, 2)
+	c = NewVector(-1, 3)
+	xWant, yWant = 1, -1
+	xGot, yGot = f.CompareApprox(c)
 
-	evaluateBool(fmt.Sprintf("approximate comparison %s and %s", f, c), true, got, t)
+	if xGot != xWant || yGot != yWant {
+		t.Errorf("approximate comparison %s and %s: wanted (%d, %d): got (%d, %d)", f, c, xWant, yWant, xGot, yGot)
+	}
 
-	l := vector(2, 2)
-	s := vector(-1, 3)
+	f = NewVector(2, 2)
+	c = NewVector(3, -1)
+	xWant, yWant = -1, 1
+	xGot, yGot = f.CompareApprox(c)
 
-	x, y = l.CompareApprox(s)
-
-	got = x == -1 && y == 1
-
-	evaluateBool(fmt.Sprintf("approximate comparison %s and %s", l, s), true, got, t)
-
-	e := vector(2, 2)
-	q := vector(3, -1)
-
-	x, y = e.CompareApprox(q)
-
-	got = x == 1 && y == -1
-
-	evaluateBool(fmt.Sprintf("approximate comparison %s and %s", e, q), true, got, t)
+	if xGot != xWant || yGot != yWant {
+		t.Errorf("approximate comparison %s and %s: wanted (%d, %d): got (%d, %d)", f, c, xWant, yWant, xGot, yGot)
+	}
 }
 
-func testSet(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	v := vector(1, 1)
-	want := vector(2, 3)
-	got := v.Clone().Set(2, 3)
+func TestSet(t *testing.T) {
+	v := NewVector(1, 1)
+	want := NewVector(2, 3)
+	got := v.Clone()
+	got.Set(2, 3)
 
 	evaluateVectors(fmt.Sprintf("set %s to (2, 3)", v), want, got, t)
 }
 
-func testClone(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	want := vector(1, 2)
+func TestClone(t *testing.T) {
+	want := NewVector(1, 2)
 	got := want.Clone()
 
 	evaluateVectors(fmt.Sprintf("clone %s", want), want, got, t)
 }
 
-func testFloor(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	v := vector(1.6, 1.6)
-	want := vector(1, 1)
-	got := v.Clone().Floor()
+func TestFloor(t *testing.T) {
+	v := NewVector(1.6, 1.6)
+	want := NewVector(1, 1)
+	got := v.Clone()
+	got.Floor()
 
 	evaluateVectors(fmt.Sprintf("round %s down", v), want, got, t)
 }
 
-func testAdd(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	v := vector(1, 1)
-	add := vector(0.5, 0.5)
-	want := vector(1.5, 1.5)
-	got := v.Clone().Add(add)
+func TestAdd(t *testing.T) {
+	v := NewVector(1, 1)
+	add := NewVector(0.5, 0.5)
+	want := NewVector(1.5, 1.5)
+	got := v.Clone()
+	got.Add(&add)
 
 	evaluateVectors(fmt.Sprintf("add %s to %s", add, v), want, got, t)
 }
 
-func testSubtract(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	v := vector(1, 1)
-	subtract := vector(0.6, 0.6)
-	want := vector(0.4, 0.4)
-	got := v.Clone().Subtract(subtract)
+func TestSubtract(t *testing.T) {
+	v := NewVector(1, 1)
+	subtract := NewVector(0.6, 0.6)
+	want := NewVector(0.4, 0.4)
+	got := v.Clone()
+	got.Subtract(&subtract)
 
 	evaluateVectors(fmt.Sprintf("subtract %s from %s", subtract, v), want, got, t)
 }
 
-func testMultiply(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	v := vector(1, 1)
-	multiply := vector(2, 2)
-	want := vector(2, 2)
-	got := v.Clone().Multiply(multiply)
+func TestMultiply(t *testing.T) {
+	v := NewVector(1, 1)
+	multiply := NewVector(2, 2)
+	want := NewVector(2, 2)
+	got := v.Clone()
+	got.Multiply(&multiply)
 
 	evaluateVectors(fmt.Sprintf("multiply %s by %s", v, multiply), want, got, t)
 }
 
-func testDivide(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	v := vector(1, 1)
-	divide := vector(2, 2)
-	want := vector(0.5, 0.5)
-	got := v.Clone().Divide(divide)
+func TestDivide(t *testing.T) {
+	v := NewVector(1, 1)
+	divide := NewVector(2, 2)
+	want := NewVector(0.5, 0.5)
+	got := v.Clone()
+	got.Divide(&divide)
 
 	evaluateVectors(fmt.Sprintf("divide %s by %s", v, divide), want, got, t)
 }
 
-func testScale(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	v := vector(2, 3)
-	want := vector(4, 6)
-	got := v.Clone().Scale(2)
+func TestScale(t *testing.T) {
+	v := NewVector(2, 3)
+	want := NewVector(4, 6)
+	got := v.Clone()
+	got.Scale(2)
 
 	evaluateVectors(fmt.Sprintf("scale %s by 2", v), want, got, t)
 }
 
-func testAbs(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	v := vector(-1, 1)
-	want := vector(1, 1)
-	got := v.Clone().Abs()
+func TestAbs(t *testing.T) {
+	v := NewVector(-1, 1)
+	want := NewVector(1, 1)
+	got := v.Clone()
+	got.Abs()
 
 	evaluateVectors(fmt.Sprintf("absolute value of %s", v), want, got, t)
 }
 
-func testNegate(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	v := vector(-1, 1)
-	want := vector(1, -1)
-	got := v.Clone().Negate()
+func TestNegate(t *testing.T) {
+	v := NewVector(-1, 1)
+	want := NewVector(1, -1)
+	got := v.Clone()
+	got.Negate()
 
 	evaluateVectors(fmt.Sprintf("inverse value of %s", v), want, got, t)
 }
 
-func testDistance(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	v := vector(1, 3)
-	other := vector(1, -1)
+func TestDistance(t *testing.T) {
+	v := NewVector(1, 3)
+	other := NewVector(1, -1)
 	want := 4.0
-	got := v.Clone().Distance(other)
+	c := v.Clone()
+	got := c.Distance(other)
 
 	evaluateScalar(fmt.Sprintf("distance from %s to %s", v, other), want, got, t)
 }
 
-func testLength(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	v := vector(2, 0)
+func TestLength(t *testing.T) {
+	v := NewVector(2, 0)
 	want := 2.0
 	got := v.Length()
 
 	evaluateScalar(fmt.Sprintf("length of %s", v), want, got, t)
+}
+
+func TestDot(t *testing.T) {
+	v := NewVector(1, 1)
+	want := 2.0
+	got := v.Dot(&v)
+	evaluateScalar(fmt.Sprintf("dot product of %s", v), want, got, t)
+}
+
+func TestAngle(t *testing.T) {
+	v := NewVector(-1, 0)
+	want := 45.0
+	got := v.Angle()
+
+	fmt.Println(want, got)
 }
