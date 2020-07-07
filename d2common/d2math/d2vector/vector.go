@@ -49,6 +49,13 @@ func (f *Vector) Clone() Vector {
 	return NewVector(f.x, f.y)
 }
 
+// Copy sets this vector's values to those of the given vector.
+func (f *Vector) Copy(v *Vector) *Vector {
+	f.x = v.x
+	f.y = v.y
+	return f
+}
+
 // Floor rounds the vector down to the nearest whole numbers.
 func (f *Vector) Floor() *Vector {
 	f.x = math.Floor(f.x)
@@ -137,24 +144,48 @@ func (f *Vector) Dot(v *Vector) float64 {
 	return f.x*v.x + f.y*v.y
 }
 
-// Angle computes the angle in radians with respect to the
-// positive x-axis
-func (f *Vector) Angle() float64 {
-	floatAngle := math.Atan2(f.y, f.x)
+// Normalize sets the vector length to 1 without changing the direction.
+func (f *Vector) Normalize() *Vector {
+	f.Scale(1.0 / f.Length())
+	return f
+}
 
-	if floatAngle < 0 {
-		floatAngle += 2.0 * math.Pi
+// Angle computes the unsigned angle in radians from this vector to the given vector.
+func (f *Vector) Angle(v Vector) float64 {
+	from := f.Clone()
+	from.Normalize()
+
+	to := v.Clone()
+	to.Normalize()
+
+	denominator := math.Sqrt(from.Length() * to.Length())
+	dotClamped := d2math.ClampFloat64(from.Dot(&to)/denominator, -1, 1)
+
+	return math.Acos(dotClamped)
+}
+
+// SignedAngle computes the signed angle in radians from this vector to the given vector.
+func (f *Vector) SignedAngle(v Vector) float64 {
+	unsigned := f.Angle(v)
+	sign := d2math.Sign(f.x*v.y - f.y*v.x)
+
+	if sign < 0 {
+		return -unsigned
 	}
 
-	return floatAngle
+	return unsigned
 }
 
-// SetAngle sets the angle of this Vector
+func (f Vector) String() string {
+	return fmt.Sprintf("Vector{%g, %g}", f.x, f.y)
+}
+
+/*// SetAngle sets the angle of this Vector
 func (f *Vector) SetAngle(angle float64) *Vector {
 	return f.SetToPolar(angle, f.Length())
-}
+}*/
 
-// SetToPolar sets the `x` and `y` values of this object from a
+/*// SetToPolar sets the `x` and `y` values of this object from a
 // given polar coordinate.
 // TODO: How does this work?
 func (f *Vector) SetToPolar(azimuth, radius float64) *Vector {
@@ -163,11 +194,7 @@ func (f *Vector) SetToPolar(azimuth, radius float64) *Vector {
 	f.y = math.Sin(azimuth) * radius
 
 	return f
-}
-
-func (f Vector) String() string {
-	return fmt.Sprintf("Vector{%g, %g}", f.x, f.y)
-}
+}*/
 
 /*
 

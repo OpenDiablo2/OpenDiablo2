@@ -7,7 +7,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
-func evaluateVectors(description string, want, got Vector, t *testing.T) {
+func evaluateVector(description string, want, got Vector, t *testing.T) {
 	if !got.Equals(want) {
 		t.Errorf("%s: wanted %s: got %s", description, want, got)
 	}
@@ -16,6 +16,12 @@ func evaluateVectors(description string, want, got Vector, t *testing.T) {
 func evaluateScalar(description string, want, got float64, t *testing.T) {
 	if want != got {
 		t.Errorf("%s: wanted %f: got %f", description, want, got)
+	}
+}
+
+func evaluateChanged(description string, original, clone Vector, t *testing.T) {
+	if !original.Equals(clone) {
+		t.Errorf("%s: changed vector %s to %s unexpectedly", description, clone, original)
 	}
 }
 
@@ -96,14 +102,22 @@ func TestSet(t *testing.T) {
 	got := v.Clone()
 	got.Set(2, 3)
 
-	evaluateVectors(fmt.Sprintf("set %s to (2, 3)", v), want, got, t)
+	evaluateVector(fmt.Sprintf("set %s to (2, 3)", v), want, got, t)
 }
 
 func TestClone(t *testing.T) {
 	want := NewVector(1, 2)
 	got := want.Clone()
 
-	evaluateVectors(fmt.Sprintf("clone %s", want), want, got, t)
+	evaluateVector(fmt.Sprintf("clone %s", want), want, got, t)
+}
+
+func TestCopy(t *testing.T) {
+	want := NewVector(1, 2)
+	got := NewVector(0, 0)
+	got.Copy(&want)
+
+	evaluateVector(fmt.Sprintf("copy %s to %s", got, want), want, got, t)
 }
 
 func TestFloor(t *testing.T) {
@@ -112,7 +126,7 @@ func TestFloor(t *testing.T) {
 	got := v.Clone()
 	got.Floor()
 
-	evaluateVectors(fmt.Sprintf("round %s down", v), want, got, t)
+	evaluateVector(fmt.Sprintf("round %s down", v), want, got, t)
 }
 
 func TestAdd(t *testing.T) {
@@ -122,7 +136,7 @@ func TestAdd(t *testing.T) {
 	got := v.Clone()
 	got.Add(&add)
 
-	evaluateVectors(fmt.Sprintf("add %s to %s", add, v), want, got, t)
+	evaluateVector(fmt.Sprintf("add %s to %s", add, v), want, got, t)
 }
 
 func TestSubtract(t *testing.T) {
@@ -132,7 +146,7 @@ func TestSubtract(t *testing.T) {
 	got := v.Clone()
 	got.Subtract(&subtract)
 
-	evaluateVectors(fmt.Sprintf("subtract %s from %s", subtract, v), want, got, t)
+	evaluateVector(fmt.Sprintf("subtract %s from %s", subtract, v), want, got, t)
 }
 
 func TestMultiply(t *testing.T) {
@@ -142,7 +156,7 @@ func TestMultiply(t *testing.T) {
 	got := v.Clone()
 	got.Multiply(&multiply)
 
-	evaluateVectors(fmt.Sprintf("multiply %s by %s", v, multiply), want, got, t)
+	evaluateVector(fmt.Sprintf("multiply %s by %s", v, multiply), want, got, t)
 }
 
 func TestDivide(t *testing.T) {
@@ -152,7 +166,7 @@ func TestDivide(t *testing.T) {
 	got := v.Clone()
 	got.Divide(&divide)
 
-	evaluateVectors(fmt.Sprintf("divide %s by %s", v, divide), want, got, t)
+	evaluateVector(fmt.Sprintf("divide %s by %s", v, divide), want, got, t)
 }
 
 func TestScale(t *testing.T) {
@@ -161,7 +175,7 @@ func TestScale(t *testing.T) {
 	got := v.Clone()
 	got.Scale(2)
 
-	evaluateVectors(fmt.Sprintf("scale %s by 2", v), want, got, t)
+	evaluateVector(fmt.Sprintf("scale %s by 2", v), want, got, t)
 }
 
 func TestAbs(t *testing.T) {
@@ -170,7 +184,7 @@ func TestAbs(t *testing.T) {
 	got := v.Clone()
 	got.Abs()
 
-	evaluateVectors(fmt.Sprintf("absolute value of %s", v), want, got, t)
+	evaluateVector(fmt.Sprintf("absolute value of %s", v), want, got, t)
 }
 
 func TestNegate(t *testing.T) {
@@ -179,7 +193,7 @@ func TestNegate(t *testing.T) {
 	got := v.Clone()
 	got.Negate()
 
-	evaluateVectors(fmt.Sprintf("inverse value of %s", v), want, got, t)
+	evaluateVector(fmt.Sprintf("inverse value of %s", v), want, got, t)
 }
 
 func TestDistance(t *testing.T) {
@@ -194,23 +208,91 @@ func TestDistance(t *testing.T) {
 
 func TestLength(t *testing.T) {
 	v := NewVector(2, 0)
+	c := v.Clone()
 	want := 2.0
 	got := v.Length()
 
-	evaluateScalar(fmt.Sprintf("length of %s", v), want, got, t)
+	d := fmt.Sprintf("length of %s", c)
+
+	evaluateChanged(d, v, c, t)
+
+	evaluateScalar(d, want, got, t)
 }
 
 func TestDot(t *testing.T) {
 	v := NewVector(1, 1)
+	c := v.Clone()
 	want := 2.0
 	got := v.Dot(&v)
-	evaluateScalar(fmt.Sprintf("dot product of %s", v), want, got, t)
+
+	d := fmt.Sprintf("dot product of %s", c)
+
+	evaluateChanged(d, v, c, t)
+
+	evaluateScalar(d, want, got, t)
+}
+
+func TestNormalize(t *testing.T) {
+	v := NewVector(10, 0)
+	c := v.Clone()
+	want := NewVector(1, 0)
+	got := v.Normalize()
+
+	evaluateVector(fmt.Sprintf("normalize %s", c), want, *got, t)
+
+	v = NewVector(0, 10)
+	c = v.Clone()
+	want = NewVector(0, 1)
+	got = v.Normalize()
+
+	evaluateVector(fmt.Sprintf("normalize %s", c), want, *got, t)
 }
 
 func TestAngle(t *testing.T) {
-	v := NewVector(-1, 0)
-	want := 45.0
-	got := v.Angle()
+	v := NewVector(1, 0)
+	c := v.Clone()
+	other := NewVector(-1, 0.3)
 
-	fmt.Println(want, got)
+	d := fmt.Sprintf("angle from %s to %s", c, other)
+
+	want := 2.8501358591119264
+	got := v.Angle(other)
+
+	evaluateScalar(d, want, got, t)
+	evaluateChanged(d, v, c, t)
+
+	other.Set(-1, -0.3)
+	c = other.Clone()
+
+	d = fmt.Sprintf("angle from %s to %s", c, other)
+
+	got = v.Angle(other)
+
+	evaluateScalar(d, want, got, t)
+	evaluateChanged(d, other, c, t)
+}
+
+func TestSignedAngle(t *testing.T) {
+	v := NewVector(1, 0)
+	c := v.Clone()
+	other := NewVector(-1, 0.3)
+
+	d := fmt.Sprintf("angle from %s to %s", v, other)
+
+	want := 2.8501358591119264
+	got := v.SignedAngle(other)
+
+	evaluateScalar(d, want, got, t)
+	evaluateChanged(d, v, c, t)
+
+	other.Set(-1, -0.3)
+	c = other.Clone()
+
+	d = fmt.Sprintf("angle from %s to %s", v, other)
+
+	want = -want
+	got = v.SignedAngle(other)
+
+	evaluateScalar(d, want, got, t)
+	evaluateChanged(d, other, c, t)
 }
