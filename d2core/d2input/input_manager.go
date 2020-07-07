@@ -231,7 +231,7 @@ func (im *inputManager) updateCursor(cursorX, cursorY int, e HandlerEvent) {
 func (im *inputManager) BindHandlerWithPriority(
 	h d2interface.InputEventHandler,
 	p d2enum.Priority) error {
-	return singleton.bindHandler(h, p)
+	return im.bindHandler(h, p)
 }
 
 // BindHandler adds an event handler
