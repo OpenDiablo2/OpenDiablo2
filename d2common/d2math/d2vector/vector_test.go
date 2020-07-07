@@ -67,12 +67,6 @@ func TestDivide(t *testing.T) {
 	}
 }
 
-func TestDistance(t *testing.T) {
-	for _, vector := range typeArray() {
-		testDistance(vector, t)
-	}
-}
-
 func TestScale(t *testing.T) {
 	for _, vector := range typeArray() {
 		testScale(vector, t)
@@ -88,6 +82,18 @@ func TestAbs(t *testing.T) {
 func TestNegate(t *testing.T) {
 	for _, vector := range typeArray() {
 		testNegate(vector, t)
+	}
+}
+
+func TestDistance(t *testing.T) {
+	for _, vector := range typeArray() {
+		testDistance(vector, t)
+	}
+}
+
+func TestLength(t *testing.T) {
+	for _, vector := range typeArray() {
+		testLength(vector, t)
 	}
 }
 
@@ -232,14 +238,6 @@ func testDivide(vector func(float64, float64) d2interface.Vector, t *testing.T) 
 	evaluateVectors(fmt.Sprintf("divide %s by %s", v, divide), want, got, t)
 }
 
-func testDistance(vector func(float64, float64) d2interface.Vector, t *testing.T) {
-	v := vector(1, 3)
-	other := vector(1, -1)
-	got := v.Clone().Distance(other) == 4.0
-
-	evaluateBool(fmt.Sprintf("distance from %s to %s", v, other), true, got, t)
-}
-
 func testScale(vector func(float64, float64) d2interface.Vector, t *testing.T) {
 	v := vector(2, 3)
 	want := vector(4, 6)
@@ -262,4 +260,19 @@ func testNegate(vector func(float64, float64) d2interface.Vector, t *testing.T) 
 	got := v.Clone().Negate()
 
 	evaluateVectors(fmt.Sprintf("inverse value of %s", v), want, got, t)
+}
+
+func testDistance(vector func(float64, float64) d2interface.Vector, t *testing.T) {
+	v := vector(1, 3)
+	other := vector(1, -1)
+	got := v.Clone().Distance(other) == 4.0
+
+	evaluateBool(fmt.Sprintf("distance from %s to %s", v, other), true, got, t)
+}
+
+func testLength(vector func(float64, float64) d2interface.Vector, t *testing.T) {
+	v := vector(2, 0)
+	got := v.Length() == 2.0
+
+	evaluateBool(fmt.Sprintf("length of %s", v), true, got, t)
 }
