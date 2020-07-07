@@ -18,144 +18,144 @@ func NewVector(x, y float64) Vector {
 }
 
 // Equals check whether this Vector is equal to a given Vector.
-func (f *Vector) Equals(v Vector) bool {
-	return f.x == v.x && f.y == v.y
+func (v *Vector) Equals(o Vector) bool {
+	return v.x == o.x && v.y == o.y
 }
 
 // EqualsApprox checks if the Vector is approximately equal
 // to the given Vector.
-func (f *Vector) EqualsApprox(v Vector) bool {
-	x, y := f.CompareApprox(v)
+func (v *Vector) EqualsApprox(o Vector) bool {
+	x, y := v.CompareApprox(o)
 	return x == 0 && y == 0
 }
 
 // CompareApprox performs a fuzzy comparison and returns 2
 // ints represending the -1 to 1 comparison of x and y.
-func (f *Vector) CompareApprox(v Vector) (x, y int) {
-	return d2math.CompareFloat64Fuzzy(f.x, v.x),
-		d2math.CompareFloat64Fuzzy(f.y, v.y)
+func (v *Vector) CompareApprox(o Vector) (x, y int) {
+	return d2math.CompareFloat64Fuzzy(v.x, o.x),
+		d2math.CompareFloat64Fuzzy(v.y, o.y)
 }
 
 // Set sets the vector values to the given float64 values.
-func (f *Vector) Set(x, y float64) *Vector {
-	f.x = x
-	f.y = y
+func (v *Vector) Set(x, y float64) *Vector {
+	v.x = x
+	v.y = y
 
-	return f
+	return v
 }
 
 // Clone creates a copy of this Vector.
-func (f *Vector) Clone() Vector {
-	return NewVector(f.x, f.y)
+func (v *Vector) Clone() Vector {
+	return NewVector(v.x, v.y)
 }
 
 // Copy sets this vector's values to those of the given vector.
-func (f *Vector) Copy(v *Vector) *Vector {
-	f.x = v.x
-	f.y = v.y
-	return f
+func (v *Vector) Copy(o *Vector) *Vector {
+	v.x = o.x
+	v.y = o.y
+	return v
 }
 
 // Floor rounds the vector down to the nearest whole numbers.
-func (f *Vector) Floor() *Vector {
-	f.x = math.Floor(f.x)
-	f.y = math.Floor(f.y)
+func (v *Vector) Floor() *Vector {
+	v.x = math.Floor(v.x)
+	v.y = math.Floor(v.y)
 
-	return f
+	return v
 }
 
 // Add to this Vector the components of the given Vector.
-func (f *Vector) Add(v *Vector) *Vector {
-	f.x += v.x
-	f.y += v.y
+func (v *Vector) Add(o *Vector) *Vector {
+	v.x += o.x
+	v.y += o.y
 
-	return f
+	return v
 }
 
 // Subtract from this Vector from the components of the given Vector.
-func (f *Vector) Subtract(v *Vector) *Vector {
-	f.x -= v.x
-	f.y -= v.y
+func (v *Vector) Subtract(o *Vector) *Vector {
+	v.x -= o.x
+	v.y -= o.y
 
-	return f
+	return v
 }
 
 // Multiply this Vector by the components of the given Vector.
-func (f *Vector) Multiply(v *Vector) *Vector {
-	f.x *= v.x
-	f.y *= v.y
+func (v *Vector) Multiply(o *Vector) *Vector {
+	v.x *= o.x
+	v.y *= o.y
 
-	return f
+	return v
 }
 
 // Scale multiplies this vector by a single value.
-func (f *Vector) Scale(s float64) *Vector {
-	f.x *= s
-	f.y *= s
+func (v *Vector) Scale(s float64) *Vector {
+	v.x *= s
+	v.y *= s
 
-	return f
+	return v
 }
 
 // Divide divides this vector by the components of the given vector.
-func (f *Vector) Divide(v *Vector) *Vector {
-	f.x /= v.x
-	f.y /= v.y
+func (v *Vector) Divide(o *Vector) *Vector {
+	v.x /= o.x
+	v.y /= o.y
 
-	return f
+	return v
 }
 
 // Abs sets the vector to it's absolute (positive) equivalent.
-func (f *Vector) Abs() *Vector {
+func (v *Vector) Abs() *Vector {
 	xm, ym := 1.0, 1.0
-	if f.x < 0 {
+	if v.x < 0 {
 		xm = -1
 	}
 
-	if f.y < 0 {
+	if v.y < 0 {
 		ym = -1
 	}
 
-	f.x *= xm
-	f.y *= ym
+	v.x *= xm
+	v.y *= ym
 
-	return f
+	return v
 }
 
 // Negate multiplies the vector by -1.
-func (f *Vector) Negate() *Vector {
-	return f.Scale(-1)
+func (v *Vector) Negate() *Vector {
+	return v.Scale(-1)
 }
 
 // Distance calculate the distance between this Vector and the given Vector.
-func (f *Vector) Distance(v Vector) float64 {
-	delta := v.Clone()
-	delta.Subtract(f)
+func (v *Vector) Distance(o Vector) float64 {
+	delta := o.Clone()
+	delta.Subtract(v)
 
 	return delta.Length()
 }
 
 // Length returns the length of this Vector.
-func (f *Vector) Length() float64 {
-	return math.Sqrt(f.Dot(f))
+func (v *Vector) Length() float64 {
+	return math.Sqrt(v.Dot(v))
 }
 
 // Dot returns the dot product of this Vector and the given Vector.
-func (f *Vector) Dot(v *Vector) float64 {
-	return f.x*v.x + f.y*v.y
+func (v *Vector) Dot(o *Vector) float64 {
+	return v.x*o.x + v.y*o.y
 }
 
 // Normalize sets the vector length to 1 without changing the direction.
-func (f *Vector) Normalize() *Vector {
-	f.Scale(1.0 / f.Length())
-	return f
+func (v *Vector) Normalize() *Vector {
+	v.Scale(1 / v.Length())
+	return v
 }
 
 // Angle computes the unsigned angle in radians from this vector to the given vector.
-func (f *Vector) Angle(v Vector) float64 {
-	from := f.Clone()
+func (v *Vector) Angle(o Vector) float64 {
+	from := v.Clone()
 	from.Normalize()
 
-	to := v.Clone()
+	to := o.Clone()
 	to.Normalize()
 
 	denominator := math.Sqrt(from.Length() * to.Length())
@@ -165,9 +165,9 @@ func (f *Vector) Angle(v Vector) float64 {
 }
 
 // SignedAngle computes the signed angle in radians from this vector to the given vector.
-func (f *Vector) SignedAngle(v Vector) float64 {
-	unsigned := f.Angle(v)
-	sign := d2math.Sign(f.x*v.y - f.y*v.x)
+func (v *Vector) SignedAngle(o Vector) float64 {
+	unsigned := v.Angle(o)
+	sign := d2math.Sign(v.x*o.y - v.y*o.x)
 
 	if sign < 0 {
 		return -unsigned
@@ -176,8 +176,8 @@ func (f *Vector) SignedAngle(v Vector) float64 {
 	return unsigned
 }
 
-func (f Vector) String() string {
-	return fmt.Sprintf("Vector{%g, %g}", f.x, f.y)
+func (v Vector) String() string {
+	return fmt.Sprintf("Vector{%g, %g}", v.x, v.y)
 }
 
 /*// SetAngle sets the angle of this Vector
