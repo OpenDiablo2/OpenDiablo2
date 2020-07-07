@@ -92,7 +92,7 @@ func load(configPath string) error {
 		return err
 	}
 
-	if err := unmarshalIntoInterface(data); err != nil {
+	if err = unmarshalIntoInterface(data); err != nil {
 		return err
 	}
 
@@ -117,7 +117,7 @@ func unmarshalIntoInterface(d []byte) error {
 }
 
 // TODO figure out a way to unmarshal into an interface
-type hack struct{
+type hack struct {
 	MpqLoadOrder []string
 	Language string
 	MpqPath string
