@@ -175,7 +175,7 @@ const (
 	LevelPreset        = "/data/global/excel/LvlPrest.txt"
 	LevelType          = "/data/global/excel/LvlTypes.txt"
 	ObjectType         = "/data/global/excel/objtype.bin"
-	LevelWarp          = "/data/global/excel/LvlWarp.bin"
+	LevelWarp          = "/data/global/excel/LvlWarp.txt"
 	LevelDetails       = "/data/global/excel/Levels.txt"
 	LevelMaze          = "/data/global/excel/LvlMaze.txt"
 	LevelSubstitutions = "/data/global/excel/LvlSub.txt"

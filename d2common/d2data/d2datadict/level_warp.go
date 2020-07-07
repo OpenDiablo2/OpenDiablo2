@@ -9,17 +9,18 @@ import (
 // LevelWarpRecord is a representation of a row from lvlwarp.txt
 // it describes the warp graphics offsets and dimensions for levels
 type LevelWarpRecord struct {
-	ID         int32
-	SelectX    int32
-	SelectY    int32
-	SelectDX   int32
-	SelectDY   int32
-	ExitWalkX  int32
-	ExitWalkY  int32
-	OffsetX    int32
-	OffsetY    int32
+	Name       string
+	ID         int
+	SelectX    int
+	SelectY    int
+	SelectDX   int
+	SelectDY   int
+	ExitWalkX  int
+	ExitWalkY  int
+	OffsetX    int
+	OffsetY    int
 	LitVersion bool
-	Tiles      int32
+	Tiles      int
 	Direction  string
 }
 
@@ -28,27 +29,27 @@ type LevelWarpRecord struct {
 var LevelWarps map[int]*LevelWarpRecord
 
 // LoadLevelWarps loads LevelWarpRecord's from text file data
-func LoadLevelWarps(levelWarpData []byte) {
+func LoadLevelWarps(file []byte) {
 	LevelWarps = make(map[int]*LevelWarpRecord)
-	streamReader := d2common.CreateStreamReader(levelWarpData)
-	numRecords := int(streamReader.GetInt32())
 
-	for i := 0; i < numRecords; i++ {
-		id := int(streamReader.GetInt32())
-		LevelWarps[id] = &LevelWarpRecord{}
-		LevelWarps[id].ID = int32(id)
-		LevelWarps[id].SelectX = streamReader.GetInt32()
-		LevelWarps[id].SelectY = streamReader.GetInt32()
-		LevelWarps[id].SelectDX = streamReader.GetInt32()
-		LevelWarps[id].SelectDY = streamReader.GetInt32()
-		LevelWarps[id].ExitWalkX = streamReader.GetInt32()
-		LevelWarps[id].ExitWalkY = streamReader.GetInt32()
-		LevelWarps[id].OffsetX = streamReader.GetInt32()
-		LevelWarps[id].OffsetY = streamReader.GetInt32()
-		LevelWarps[id].LitVersion = streamReader.GetInt32() == 1
-		LevelWarps[id].Tiles = streamReader.GetInt32()
-		LevelWarps[id].Direction = string(streamReader.GetByte())
-		streamReader.SkipBytes(3)
+	d := d2common.LoadDataDictionary(file)
+	for d.Next() {
+		record := &LevelWarpRecord{
+			Name:       d.String("Name"),
+			ID:         d.Number("Id"),
+			SelectX:    d.Number("SelectX"),
+			SelectY:    d.Number("SelectY"),
+			SelectDX:   d.Number("SelectDX"),
+			SelectDY:   d.Number("SelectDY"),
+			ExitWalkX:  d.Number("ExitWalkX"),
+			ExitWalkY:  d.Number("ExitWalkY"),
+			OffsetX:    d.Number("OffsetX"),
+			OffsetY:    d.Number("OffsetY"),
+			LitVersion: d.Bool("LitVersion"),
+			Tiles:      d.Number("Tiles"),
+			Direction:  d.String("Direction"),
+		}
+		LevelWarps[record.ID] = record
 	}
 
 	log.Printf("Loaded %d level warps", len(LevelWarps))
