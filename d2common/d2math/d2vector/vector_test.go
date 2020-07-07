@@ -116,6 +116,12 @@ func evaluateBool(description string, want, got bool, t *testing.T) {
 	}
 }
 
+func evaluateScalar(description string, want, got float64, t *testing.T) {
+	if want != got {
+		t.Errorf("%s: wanted %f: got %f", description, want, got)
+	}
+}
+
 func testEquals(vector func(float64, float64) d2interface.Vector, t *testing.T) {
 	a := vector(1, 2)
 	b := vector(1, 2)
@@ -265,14 +271,16 @@ func testNegate(vector func(float64, float64) d2interface.Vector, t *testing.T) 
 func testDistance(vector func(float64, float64) d2interface.Vector, t *testing.T) {
 	v := vector(1, 3)
 	other := vector(1, -1)
-	got := v.Clone().Distance(other) == 4.0
+	want := 4.0
+	got := v.Clone().Distance(other)
 
-	evaluateBool(fmt.Sprintf("distance from %s to %s", v, other), true, got, t)
+	evaluateScalar(fmt.Sprintf("distance from %s to %s", v, other), want, got, t)
 }
 
 func testLength(vector func(float64, float64) d2interface.Vector, t *testing.T) {
 	v := vector(2, 0)
-	got := v.Length() == 2.0
+	want := 2.0
+	got := v.Length()
 
-	evaluateBool(fmt.Sprintf("length of %s", v), true, got, t)
+	evaluateScalar(fmt.Sprintf("length of %s", v), want, got, t)
 }
