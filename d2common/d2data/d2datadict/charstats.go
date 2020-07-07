@@ -67,6 +67,8 @@ var weaponTokenMap map[string]d2enum.WeaponClass //nolint:gochecknoglobals // Cu
 //nolint:funlen // Makes no sense to split
 // LoadCharStats loads charstats.txt file contents into map[d2enum.Hero]*CharStatsRecord
 func LoadCharStats(file []byte) {
+	CharStats = make(map[d2enum.Hero]*CharStatsRecord)
+
 	charStringMap = map[string]d2enum.Hero{
 		"Amazon":      d2enum.HeroAmazon,
 		"Barbarian":   d2enum.HeroBarbarian,
@@ -95,102 +97,104 @@ func LoadCharStats(file []byte) {
 		"ht2": d2enum.WeaponClassTwoHandToHand,
 	}
 
-	d := d2common.LoadDataDictionary(string(file))
-	CharStats = make(map[d2enum.Hero]*CharStatsRecord, len(d.Data))
-
-	for idx := range d.Data {
+	d := d2common.LoadDataDictionary(file)
+	for d.Next() {
 		record := &CharStatsRecord{
-			Class: charStringMap[d.GetString("class", idx)],
+			Class: charStringMap[d.String("class")],
 
-			InitStr:     d.GetNumber("str", idx),
-			InitDex:     d.GetNumber("dex", idx),
-			InitVit:     d.GetNumber("vit", idx),
-			InitEne:     d.GetNumber("int", idx),
-			InitStamina: d.GetNumber("stamina", idx),
+			InitStr:     d.Number("str"),
+			InitDex:     d.Number("dex"),
+			InitVit:     d.Number("vit"),
+			InitEne:     d.Number("int"),
+			InitStamina: d.Number("stamina"),
 
-			ManaRegen:   d.GetNumber("ManaRegen", idx),
-			ToHitFactor: d.GetNumber("ToHitFactor", idx),
+			ManaRegen:   d.Number("ManaRegen"),
+			ToHitFactor: d.Number("ToHitFactor"),
 
-			VelocityWalk:    d.GetNumber("WalkVelocity", idx),
-			VelocityRun:     d.GetNumber("RunVelocity", idx),
-			StaminaRunDrain: d.GetNumber("RunDrain", idx),
+			VelocityWalk:    d.Number("WalkVelocity"),
+			VelocityRun:     d.Number("RunVelocity"),
+			StaminaRunDrain: d.Number("RunDrain"),
 
-			LifePerLevel:    d.GetNumber("LifePerLevel", idx),
-			ManaPerLevel:    d.GetNumber("ManaPerLevel", idx),
-			StaminaPerLevel: d.GetNumber("StaminaPerLevel", idx),
+			LifePerLevel:    d.Number("LifePerLevel"),
+			ManaPerLevel:    d.Number("ManaPerLevel"),
+			StaminaPerLevel: d.Number("StaminaPerLevel"),
 
-			LifePerVit:    d.GetNumber("LifePerVitality", idx),
-			ManaPerEne:    d.GetNumber("ManaPerMagic", idx),
-			StaminaPerVit: d.GetNumber("StaminaPerVitality", idx),
+			LifePerVit:    d.Number("LifePerVitality"),
+			ManaPerEne:    d.Number("ManaPerMagic"),
+			StaminaPerVit: d.Number("StaminaPerVitality"),
 
-			StatPerLevel: d.GetNumber("StatPerLevel", idx),
-			BlockFactor:  d.GetNumber("BlockFactor", idx),
+			StatPerLevel: d.Number("StatPerLevel"),
+			BlockFactor:  d.Number("BlockFactor"),
 
-			StartSkillBonus:   d.GetString("StartSkill", idx),
-			SkillStrAll:       d.GetString("StrAllSkills", idx),
-			SkillStrClassOnly: d.GetString("StrClassOnly", idx),
+			StartSkillBonus:   d.String("StartSkill"),
+			SkillStrAll:       d.String("StrAllSkills"),
+			SkillStrClassOnly: d.String("StrClassOnly"),
 
 			BaseSkill: [10]string{
-				d.GetString("Skill 1", idx),
-				d.GetString("Skill 2", idx),
-				d.GetString("Skill 3", idx),
-				d.GetString("Skill 4", idx),
-				d.GetString("Skill 5", idx),
-				d.GetString("Skill 6", idx),
-				d.GetString("Skill 7", idx),
-				d.GetString("Skill 8", idx),
-				d.GetString("Skill 9", idx),
-				d.GetString("Skill 10", idx),
+				d.String("Skill 1"),
+				d.String("Skill 2"),
+				d.String("Skill 3"),
+				d.String("Skill 4"),
+				d.String("Skill 5"),
+				d.String("Skill 6"),
+				d.String("Skill 7"),
+				d.String("Skill 8"),
+				d.String("Skill 9"),
+				d.String("Skill 10"),
 			},
 
 			SkillStrTab: [3]string{
-				d.GetString("StrSkillTab1", idx),
-				d.GetString("StrSkillTab2", idx),
-				d.GetString("StrSkillTab3", idx),
+				d.String("StrSkillTab1"),
+				d.String("StrSkillTab2"),
+				d.String("StrSkillTab3"),
 			},
 
-			BaseWeaponClass: weaponTokenMap[d.GetString("baseWClass", idx)],
+			BaseWeaponClass: weaponTokenMap[d.String("baseWClass")],
 
 			StartItem: [10]string{
-				d.GetString("item1", idx),
-				d.GetString("item2", idx),
-				d.GetString("item3", idx),
-				d.GetString("item4", idx),
-				d.GetString("item5", idx),
-				d.GetString("item6", idx),
-				d.GetString("item7", idx),
-				d.GetString("item8", idx),
-				d.GetString("item9", idx),
-				d.GetString("item10", idx),
+				d.String("item1"),
+				d.String("item2"),
+				d.String("item3"),
+				d.String("item4"),
+				d.String("item5"),
+				d.String("item6"),
+				d.String("item7"),
+				d.String("item8"),
+				d.String("item9"),
+				d.String("item10"),
 			},
 
 			StartItemLocation: [10]string{
-				d.GetString("item1loc", idx),
-				d.GetString("item2loc", idx),
-				d.GetString("item3loc", idx),
-				d.GetString("item4loc", idx),
-				d.GetString("item5loc", idx),
-				d.GetString("item6loc", idx),
-				d.GetString("item7loc", idx),
-				d.GetString("item8loc", idx),
-				d.GetString("item9loc", idx),
-				d.GetString("item10loc", idx),
+				d.String("item1loc"),
+				d.String("item2loc"),
+				d.String("item3loc"),
+				d.String("item4loc"),
+				d.String("item5loc"),
+				d.String("item6loc"),
+				d.String("item7loc"),
+				d.String("item8loc"),
+				d.String("item9loc"),
+				d.String("item10loc"),
 			},
 
 			StartItemCount: [10]int{
-				d.GetNumber("item1count", idx),
-				d.GetNumber("item2count", idx),
-				d.GetNumber("item3count", idx),
-				d.GetNumber("item4count", idx),
-				d.GetNumber("item5count", idx),
-				d.GetNumber("item6count", idx),
-				d.GetNumber("item7count", idx),
-				d.GetNumber("item8count", idx),
-				d.GetNumber("item9count", idx),
-				d.GetNumber("item10count", idx),
+				d.Number("item1count"),
+				d.Number("item2count"),
+				d.Number("item3count"),
+				d.Number("item4count"),
+				d.Number("item5count"),
+				d.Number("item6count"),
+				d.Number("item7count"),
+				d.Number("item8count"),
+				d.Number("item9count"),
+				d.Number("item10count"),
 			},
 		}
 		CharStats[record.Class] = record
+	}
+
+	if d.Err != nil {
+		panic(d.Err)
 	}
 
 	log.Printf("Loaded %d CharStats records", len(CharStats))

@@ -70,37 +70,39 @@ var LevelSubstitutions map[int]*LevelSubstitutionRecord
 
 // LoadLevelSubstitutions loads lvlsub.txt and parses into records
 func LoadLevelSubstitutions(file []byte) {
-	dict := d2common.LoadDataDictionary(string(file))
-	numRecords := len(dict.Data)
-	LevelSubstitutions = make(map[int]*LevelSubstitutionRecord, numRecords)
+	LevelSubstitutions = make(map[int]*LevelSubstitutionRecord)
 
-	for idx := range dict.Data {
+	d := d2common.LoadDataDictionary(file)
+	for d.Next() {
 		record := &LevelSubstitutionRecord{
-			Name:         dict.GetString("Name", idx),
-			ID:           dict.GetNumber("Type", idx),
-			File:         dict.GetString("File", idx),
-			IsExpansion:  dict.GetNumber("Expansion", idx) > 0,
-			BorderType:   dict.GetNumber("BordType", idx),
-			GridSize:     dict.GetNumber("GridSize", idx),
-			Mask:         dict.GetNumber("Dt1Mask", idx),
-			ChanceSpawn0: dict.GetNumber("Prob0", idx),
-			ChanceSpawn1: dict.GetNumber("Prob1", idx),
-			ChanceSpawn2: dict.GetNumber("Prob2", idx),
-			ChanceSpawn3: dict.GetNumber("Prob3", idx),
-			ChanceSpawn4: dict.GetNumber("Prob4", idx),
-			ChanceFloor0: dict.GetNumber("Trials0", idx),
-			ChanceFloor1: dict.GetNumber("Trials1", idx),
-			ChanceFloor2: dict.GetNumber("Trials2", idx),
-			ChanceFloor3: dict.GetNumber("Trials3", idx),
-			ChanceFloor4: dict.GetNumber("Trials4", idx),
-			GridMax0:     dict.GetNumber("Max0", idx),
-			GridMax1:     dict.GetNumber("Max1", idx),
-			GridMax2:     dict.GetNumber("Max2", idx),
-			GridMax3:     dict.GetNumber("Max3", idx),
-			GridMax4:     dict.GetNumber("Max4", idx),
+			Name:         d.String("Name"),
+			ID:           d.Number("Type"),
+			File:         d.String("File"),
+			IsExpansion:  d.Number("Expansion") > 0,
+			BorderType:   d.Number("BordType"),
+			GridSize:     d.Number("GridSize"),
+			Mask:         d.Number("Dt1Mask"),
+			ChanceSpawn0: d.Number("Prob0"),
+			ChanceSpawn1: d.Number("Prob1"),
+			ChanceSpawn2: d.Number("Prob2"),
+			ChanceSpawn3: d.Number("Prob3"),
+			ChanceSpawn4: d.Number("Prob4"),
+			ChanceFloor0: d.Number("Trials0"),
+			ChanceFloor1: d.Number("Trials1"),
+			ChanceFloor2: d.Number("Trials2"),
+			ChanceFloor3: d.Number("Trials3"),
+			ChanceFloor4: d.Number("Trials4"),
+			GridMax0:     d.Number("Max0"),
+			GridMax1:     d.Number("Max1"),
+			GridMax2:     d.Number("Max2"),
+			GridMax3:     d.Number("Max3"),
+			GridMax4:     d.Number("Max4"),
 		}
-
 		LevelSubstitutions[record.ID] = record
+	}
+
+	if d.Err != nil {
+		panic(d.Err)
 	}
 
 	log.Printf("Loaded %d LevelSubstitution records", len(LevelSubstitutions))
