@@ -60,8 +60,7 @@ func (am *animationManager) LoadAnimation(
 	ext := strings.ToLower(filepath.Ext(animationPath))
 	switch ext {
 	case ".dc6":
-
-		dc6, err := am.assetManager.(*assetManager).loadDC6(animationPath)
+		_, err := am.assetManager.(*assetManager).loadDC6(animationPath)
 		if err != nil {
 			return nil, err
 		}
@@ -76,7 +75,7 @@ func (am *animationManager) LoadAnimation(
 			return nil, err
 		}
 	case ".dcc":
-		dcc, err := am.assetManager.(*assetManager).loadDCC(animationPath)
+		_, err := am.assetManager.(*assetManager).loadDCC(animationPath)
 		if err != nil {
 			return nil, err
 		}
