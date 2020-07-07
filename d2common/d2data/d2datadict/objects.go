@@ -22,7 +22,7 @@ type ObjectRecord struct {
 	Description string
 	Token       string // refers to what graphics this object uses
 
-	ID              int
+	Id              int //nolint:golint,stylecheck // ID is the right key
 	SpawnMax        int // unused?
 	TrapProbability int // unused
 
