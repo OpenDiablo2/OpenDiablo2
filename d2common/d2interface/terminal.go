@@ -1,15 +1,6 @@
 package d2interface
 
-// TermCategory applies styles to the lines in the  Terminal
-type TermCategory int
-
-// Terminal Category types
-const (
-	TermCategoryNone TermCategory = iota
-	TermCategoryInfo
-	TermCategoryWarning
-	TermCategoryError
-)
+import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 // Terminal is a drop-down terminal and shell
 // It is used throughout the codebase, most parts of the engine will
@@ -22,7 +13,7 @@ type Terminal interface {
 	OnKeyChars(event KeyCharsEvent) bool
 	Render(surface Surface) error
 	Execute(command string) error
-	OutputRaw(text string, category TermCategory)
+	OutputRaw(text string, category d2enum.TermCategory)
 	Outputf(format string, params ...interface{})
 	OutputInfof(format string, params ...interface{})
 	OutputWarningf(format string, params ...interface{})

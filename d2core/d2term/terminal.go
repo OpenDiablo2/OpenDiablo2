@@ -18,14 +18,14 @@ import (
 )
 
 // TermCategory applies styles to the lines in the  Terminal
-type TermCategory d2interface.TermCategory
+type TermCategory d2enum.TermCategory
 
 // Terminal Category types
 const (
-	TermCategoryNone    = TermCategory(d2interface.TermCategoryNone)
-	TermCategoryInfo    = TermCategory(d2interface.TermCategoryInfo)
-	TermCategoryWarning = TermCategory(d2interface.TermCategoryWarning)
-	TermCategoryError   = TermCategory(d2interface.TermCategoryError)
+	TermCategoryNone    = TermCategory(d2enum.TermCategoryNone)
+	TermCategoryInfo    = TermCategory(d2enum.TermCategoryInfo)
+	TermCategoryWarning = TermCategory(d2enum.TermCategoryWarning)
+	TermCategoryError   = TermCategory(d2enum.TermCategoryError)
 )
 const (
 	termCharWidth   = 6
@@ -52,7 +52,7 @@ const (
 
 type termHistoryEntry struct {
 	text     string
-	category d2interface.TermCategory
+	category d2enum.TermCategory
 }
 
 type termActionEntry struct {
@@ -239,11 +239,11 @@ func (t *terminal) Render(surface d2interface.Surface) error {
 		surface.PushTranslation(-termCharWidth*2, 0)
 
 		switch historyEntry.category {
-		case d2interface.TermCategoryInfo:
+		case d2enum.TermCategoryInfo:
 			surface.DrawRect(termCharWidth, termCharHeight, t.infoColor)
-		case d2interface.TermCategoryWarning:
+		case d2enum.TermCategoryWarning:
 			surface.DrawRect(termCharWidth, termCharHeight, t.warningColor)
-		case d2interface.TermCategoryError:
+		case d2enum.TermCategoryError:
 			surface.DrawRect(termCharWidth, termCharHeight, t.errorColor)
 		}
 
@@ -348,7 +348,7 @@ func parseActionParams(actionType reflect.Type, actionParams []string) ([]reflec
 	return paramValues, nil
 }
 
-func (t *terminal) OutputRaw(text string, category d2interface.TermCategory) {
+func (t *terminal) OutputRaw(text string, category d2enum.TermCategory) {
 	var line string
 
 	for _, word := range strings.Split(text, " ") {
@@ -371,19 +371,19 @@ func (t *terminal) OutputRaw(text string, category d2interface.TermCategory) {
 }
 
 func (t *terminal) Outputf(format string, params ...interface{}) {
-	t.OutputRaw(fmt.Sprintf(format, params...), d2interface.TermCategoryNone)
+	t.OutputRaw(fmt.Sprintf(format, params...), d2enum.TermCategoryNone)
 }
 
 func (t *terminal) OutputInfof(format string, params ...interface{}) {
-	t.OutputRaw(fmt.Sprintf(format, params...), d2interface.TermCategoryInfo)
+	t.OutputRaw(fmt.Sprintf(format, params...), d2enum.TermCategoryInfo)
 }
 
 func (t *terminal) OutputWarningf(format string, params ...interface{}) {
-	t.OutputRaw(fmt.Sprintf(format, params...), d2interface.TermCategoryWarning)
+	t.OutputRaw(fmt.Sprintf(format, params...), d2enum.TermCategoryWarning)
 }
 
 func (t *terminal) OutputErrorf(format string, params ...interface{}) {
-	t.OutputRaw(fmt.Sprintf(format, params...), d2interface.TermCategoryError)
+	t.OutputRaw(fmt.Sprintf(format, params...), d2enum.TermCategoryError)
 }
 
 func (t *terminal) OutputClear() {
