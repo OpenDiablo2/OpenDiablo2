@@ -1,32 +1,32 @@
 package ebiten
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/hajimehoshi/ebiten"
 )
 
-func d2ToEbitenFilter(filter d2interface.Filter) ebiten.Filter {
+func d2ToEbitenFilter(filter d2enum.Filter) ebiten.Filter {
 	switch filter {
-	case d2interface.FilterDefault:
+	case d2enum.FilterDefault:
 		return ebiten.FilterDefault
-	case d2interface.FilterLinear:
+	case d2enum.FilterLinear:
 		return ebiten.FilterLinear
-	case d2interface.FilterNearest:
+	case d2enum.FilterNearest:
 		return ebiten.FilterNearest
 	}
 
 	return ebiten.FilterDefault
 }
 
-func ebitenToD2Filter(filter ebiten.Filter) d2interface.Filter {
+func ebitenToD2Filter(filter ebiten.Filter) d2enum.Filter {
 	switch filter {
 	case ebiten.FilterDefault:
-		return d2interface.FilterDefault
+		return d2enum.FilterDefault
 	case ebiten.FilterLinear:
-		return d2interface.FilterLinear
+		return d2enum.FilterLinear
 	case ebiten.FilterNearest:
-		return d2interface.FilterNearest
+		return d2enum.FilterNearest
 	}
 
-	return d2interface.FilterDefault
+	return d2enum.FilterDefault
 }

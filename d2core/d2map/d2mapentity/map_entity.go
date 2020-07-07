@@ -3,22 +3,9 @@ package d2mapentity
 import (
 	"math"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2astar"
 )
-
-type MapEntity interface {
-	Render(target d2interface.Surface)
-	Advance(tickTime float64)
-	GetPosition() (float64, float64)
-	GetLayer() int
-	GetPositionF() (float64, float64)
-	Name() string
-	Selectable() bool
-	Highlight()
-}
 
 // mapEntity represents an entity on the map that can be animated
 type mapEntity struct {
@@ -26,7 +13,6 @@ type mapEntity struct {
 	LocationY          float64
 	TileX, TileY       int     // Coordinates of the tile the unit is within
 	subcellX, subcellY float64 // Subcell coordinates within the current tile
-	weaponClass        string
 	offsetX, offsetY   int
 	TargetX            float64
 	TargetY            float64

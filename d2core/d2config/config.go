@@ -1,4 +1,3 @@
-// Package d2config contains configuration objects and functions
 package d2config
 
 import (
@@ -15,15 +14,16 @@ const defaultBgmVolume = 0.3
 
 func getDefaultConfig() *Configuration {
 	config := &Configuration{
-		Language:        "ENG",
-		FullScreen:      false,
-		TicksPerSecond:  -1,
-		RunInBackground: true,
-		VsyncEnabled:    true,
-		SfxVolume:       defaultSfxVolume,
-		BgmVolume:       defaultBgmVolume,
-		MpqPath:         "C:/Program Files (x86)/Diablo II",
-		MpqLoadOrder: []string{
+		language:        "ENG",
+		fullScreen:      false,
+		ticksPerSecond:  -1,
+		runInBackground: true,
+		vsyncEnabled:    true,
+		sfxVolume:       defaultSfxVolume,
+		bgmVolume:       defaultBgmVolume,
+		mpqPath:         "C:/Program Files (x86)/Diablo II",
+		backend:         "Ebiten",
+		mpqLoadOrder: []string{
 			"Patch_D2.mpq",
 			"d2exp.mpq",
 			"d2xmusic.mpq",
@@ -41,11 +41,11 @@ func getDefaultConfig() *Configuration {
 	switch runtime.GOOS {
 	case "windows":
 		if runtime.GOARCH == "386" {
-			config.MpqPath = "C:/Program Files/Diablo II"
+			config.mpqPath = "C:/Program Files/Diablo II"
 		}
 	case "darwin":
-		config.MpqPath = "/Applications/Diablo II/"
-		config.MpqLoadOrder = []string{
+		config.mpqPath = "/Applications/Diablo II/"
+		config.mpqLoadOrder = []string{
 			"Diablo II Patch",
 			"Diablo II Expansion Data",
 			"Diablo II Expansion Movies",
@@ -60,7 +60,7 @@ func getDefaultConfig() *Configuration {
 		}
 	case "linux":
 		if usr, err := user.Current(); err == nil {
-			config.MpqPath = path.Join(usr.HomeDir, ".wine/drive_c/Program Files (x86)/Diablo II")
+			config.mpqPath = path.Join(usr.HomeDir, ".wine/drive_c/Program Files (x86)/Diablo II")
 		}
 	}
 
@@ -92,7 +92,7 @@ func load(configPath string) error {
 		return err
 	}
 
-	if err = json.Unmarshal(data, &singleton); err != nil {
+	if err := unmarshalIntoInterface(data); err != nil {
 		return err
 	}
 
@@ -103,6 +103,60 @@ func load(configPath string) error {
 	}
 
 	return nil
+}
+
+func unmarshalIntoInterface(d []byte) error {
+	tmp := &hack{} // an empty concrete implementation
+	if err := json.Unmarshal(d, tmp); err != nil {
+		return err
+	}
+
+	tmp2cfg(tmp, singleton) // transfer tmp values to singleton
+
+	return nil
+}
+
+// TODO figure out a way to unmarshal into an interface
+type hack struct{
+	MpqLoadOrder []string
+	Language string
+	MpqPath string
+	TicksPerSecond int
+	FpsCap int
+	SfxVolume float64
+	BgmVolume float64
+	FullScreen bool
+	RunInBackground bool
+	VsyncEnabled bool
+	Backend string
+}
+
+func cfg2tmp (a *Configuration, b *hack) {
+	b.MpqLoadOrder = a.mpqLoadOrder
+	b.Language = a.language
+	b.MpqPath = a.mpqPath
+	b.TicksPerSecond = a.ticksPerSecond
+	b.FpsCap = a.fpsCap
+	b.SfxVolume = a.sfxVolume
+	b.BgmVolume = a.bgmVolume
+	b.FullScreen = a.fullScreen
+	b.RunInBackground = a.runInBackground
+	b.VsyncEnabled = a.vsyncEnabled
+	b.Backend = a.backend
+}
+
+func tmp2cfg (b *hack, a *Configuration) {
+		a.mpqLoadOrder = b.MpqLoadOrder
+		a.language = b.Language
+		a.mpqPath = b.MpqPath
+		a.ticksPerSecond = b.TicksPerSecond
+		a.fpsCap = b.FpsCap
+		a.sfxVolume = b.SfxVolume
+		a.bgmVolume = b.BgmVolume
+		a.fullScreen = b.FullScreen
+		a.runInBackground = b.RunInBackground
+		a.vsyncEnabled = b.VsyncEnabled
+		a.backend = b.Backend
 }
 
 func save(configPath string) error {
@@ -118,14 +172,16 @@ func save(configPath string) error {
 		return err
 	}
 
-	data, err := json.MarshalIndent(singleton, "", "    ")
+	tmp := &hack{}
+	cfg2tmp(singleton, tmp)
+	data, err := json.MarshalIndent(tmp, "", "    ")
 
 	if err != nil {
 		return err
 	}
 
-	if _, err := configFile.Write(data); err != nil {
-		return err
+	if _, writeErr := configFile.Write(data); writeErr != nil {
+		return writeErr
 	}
 
 	err = configFile.Close()

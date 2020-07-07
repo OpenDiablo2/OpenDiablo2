@@ -8,21 +8,20 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 // Sprite is a positioned visual object.
 type Sprite struct {
 	x         int
 	y         int
-	animation *d2asset.Animation
+	animation d2interface.Animation
 }
 
 var (
 	ErrNoAnimation = errors.New("no animation was specified")
 )
 
-func LoadSprite(animation *d2asset.Animation) (*Sprite, error) {
+func LoadSprite(animation d2interface.Animation) (*Sprite, error) {
 	if animation == nil {
 		return nil, ErrNoAnimation
 	}

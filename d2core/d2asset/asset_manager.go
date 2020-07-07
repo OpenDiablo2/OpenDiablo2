@@ -4,15 +4,16 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
 type assetManager struct {
-	archiveManager          *archiveManager
-	fileManager             *fileManager
-	paletteManager          *paletteManager
+	archiveManager          d2interface.ArchiveManager
+	archivedFileManager     d2interface.ArchivedFileManager
+	paletteManager          d2interface.ArchivedPaletteManager
 	paletteTransformManager *paletteTransformManager
-	animationManager        *animationManager
-	fontManager             *fontManager
+	animationManager        d2interface.ArchivedAnimationManager
+	fontManager             d2interface.ArchivedFontManager
 }
 
 func loadDC6(dc6Path string) (*d2dc6.DC6, error) {

@@ -16,14 +16,17 @@ func testPath(worldInput string, t *testing.T, expectedDist float64) {
 	world := ParseWorld(worldInput)
 	t.Logf("Input world\n%s", world.RenderPath([]Pather{}))
 	p, dist, found := Path(world.From(), world.To(), math.MaxFloat64)
+
 	if !found {
 		t.Log("Could not find a path")
 	} else {
 		t.Logf("Resulting path\n%s", world.RenderPath(p))
 	}
+
 	if !found && expectedDist >= 0 {
 		t.Fatal("Could not find a path")
 	}
+
 	if found && dist != expectedDist {
 		t.Fatalf("Expected dist to be %v but got %v", expectedDist, dist)
 	}
@@ -126,6 +129,7 @@ F............................~.................................................
 ..............................................X....~.......MM......X.X.X.X.X.X.
 ...............................................X...~.......M.........X...X...XT
 `)
+
 	for i := 0; i < b.N; i++ {
 		Path(world.From(), world.To(), math.MaxFloat64)
 	}

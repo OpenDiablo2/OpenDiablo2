@@ -34,17 +34,19 @@ type Credits struct {
 	cycleTime          float64
 	cyclesTillNextLine int
 	doneWithCredits    bool
+	renderer           d2interface.Renderer
 	audioProvider      d2interface.AudioProvider
 	terminal           d2interface.Terminal
 }
 
 // CreateCredits creates an instance of the credits screen
-func CreateCredits(audioProvider d2interface.AudioProvider) *Credits {
+func CreateCredits(renderer d2interface.Renderer, audioProvider d2interface.AudioProvider) *Credits {
 	result := &Credits{
 		labels:             make([]*labelItem, 0),
 		cycleTime:          0,
 		doneWithCredits:    false,
 		cyclesTillNextLine: 0,
+		renderer:           renderer,
 		audioProvider:      audioProvider,
 	}
 
@@ -83,7 +85,7 @@ func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 	v.creditsBackground.SetPosition(0, 0)
 	loading.Progress(0.2)
 
-	v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, "EXIT")
+	v.exitButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeMedium, "EXIT")
 	v.exitButton.SetPosition(33, 543)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 	d2ui.AddWidget(&v.exitButton)
@@ -157,7 +159,7 @@ func (v *Credits) Advance(tickTime float64) error {
 }
 
 func (v *Credits) onExitButtonClicked() {
-	mainMenu := CreateMainMenu(v.audioProvider, v.terminal)
+	mainMenu := CreateMainMenu(v.renderer, v.audioProvider, v.terminal)
 	mainMenu.setScreenMode(screenModeMainMenu)
 	d2screen.SetNextScreen(mainMenu)
 }
@@ -254,7 +256,7 @@ func (v *Credits) getNewFontLabel(isHeading bool) *d2ui.Label {
 	newLabelItem := &labelItem{
 		Available: false,
 		IsHeading: isHeading,
-		Label:     d2ui.CreateLabel(d2resource.FontFormal10, d2resource.PaletteSky),
+		Label:     d2ui.CreateLabel(v.renderer, d2resource.FontFormal10, d2resource.PaletteSky),
 	}
 
 	if isHeading {

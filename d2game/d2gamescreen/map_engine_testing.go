@@ -79,11 +79,13 @@ var regions = []regionSpec{
 	{d2enum.RegionAct5Lava, 1053, 1058, []int{}},
 }
 
+// MapEngineTest represents the MapEngineTest screen
 type MapEngineTest struct {
 	gameState   *d2player.PlayerState
 	mapEngine   *d2mapengine.MapEngine
 	mapRenderer *d2maprenderer.MapRenderer
 	terminal    d2interface.Terminal
+	renderer    d2interface.Renderer
 
 	//TODO: this is region specific properties, should be refactored for multi-region rendering
 	currentRegion int
@@ -95,7 +97,7 @@ type MapEngineTest struct {
 }
 
 // CreateMapEngineTest creates the Map Engine Test screen and returns a pointer to it
-func CreateMapEngineTest(currentRegion, levelPreset int, term d2interface.Terminal) *MapEngineTest {
+func CreateMapEngineTest(currentRegion, levelPreset int, term d2interface.Terminal, renderer d2interface.Renderer) *MapEngineTest {
 	result := &MapEngineTest{
 		currentRegion: currentRegion,
 		levelPreset:   levelPreset,
@@ -103,40 +105,43 @@ func CreateMapEngineTest(currentRegion, levelPreset int, term d2interface.Termin
 		regionSpec:    regionSpec{},
 		filesCount:    0,
 		terminal:      term,
+		renderer:      renderer,
 	}
 	result.gameState = d2player.CreateTestGameState()
 
 	return result
 }
 
-func (met *MapEngineTest) loadRegionByIndex(n int, levelPreset, fileIndex int) {
+func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 	log.Printf("Loaded region: Type(%d) LevelPreset(%d) FileIndex(%d)", n, levelPreset, fileIndex)
 	d2maprenderer.InvalidateImageCache()
 
 	for _, spec := range regions {
-		if spec.regionType == d2enum.RegionIdType(n) {
-			met.regionSpec = spec
-			inExtra := false
-
-			for _, e := range spec.extra {
-				if e == levelPreset {
-					inExtra = true
-					break
-				}
-			}
-
-			if !inExtra {
-				if levelPreset < spec.startPresetIndex {
-					levelPreset = spec.startPresetIndex
-				}
-
-				if levelPreset > spec.endPresetIndex {
-					levelPreset = spec.endPresetIndex
-				}
-			}
-
-			met.levelPreset = levelPreset
+		if spec.regionType != d2enum.RegionIdType(n) {
+			continue
 		}
+
+		met.regionSpec = spec
+		inExtra := false
+
+		for _, e := range spec.extra {
+			if e == levelPreset {
+				inExtra = true
+				break
+			}
+		}
+
+		if !inExtra {
+			if levelPreset < spec.startPresetIndex {
+				levelPreset = spec.startPresetIndex
+			}
+
+			if levelPreset > spec.endPresetIndex {
+				levelPreset = spec.endPresetIndex
+			}
+		}
+
+		met.levelPreset = levelPreset
 	}
 
 	if n == 0 {
@@ -165,7 +170,7 @@ func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 
 	loading.Progress(0.5)
 
-	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.mapEngine, met.terminal)
+	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.renderer, met.mapEngine, met.terminal)
 
 	loading.Progress(0.7)
 	met.loadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
@@ -184,99 +189,98 @@ func (met *MapEngineTest) OnUnload() error {
 func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 	met.mapRenderer.Render(screen)
 
+	// levelFilesToPick := make([]string, 0)
+	// fileIndex := met.fileIndex
+	// levelPreset := curRegion.LevelPreset()
+	// regionPath := curRegion.RegionPath()
+	// for n, fileRecord := range levelPreset.Files {
+	// 	if len(fileRecord) == 0 || fileRecord == "" || fileRecord == "0" {
+	// 		continue
+	// 	}
+	// 	levelFilesToPick = append(levelFilesToPick, fileRecord)
+	// 	if fileRecord == regionPath {
+	// 		fileIndex = n
+	// 	}
+	// }
+	// if met.fileIndex == -1 {
+	// 	met.fileIndex = fileIndex
+	// }
+	// met.filesCount = len(levelFilesToPick)
 	//
-	//levelFilesToPick := make([]string, 0)
-	//fileIndex := met.fileIndex
-	//levelPreset := curRegion.LevelPreset()
-	//regionPath := curRegion.RegionPath()
-	//for n, fileRecord := range levelPreset.Files {
-	//	if len(fileRecord) == 0 || fileRecord == "" || fileRecord == "0" {
-	//		continue
-	//	}
-	//	levelFilesToPick = append(levelFilesToPick, fileRecord)
-	//	if fileRecord == regionPath {
-	//		fileIndex = n
-	//	}
-	//}
-	//if met.fileIndex == -1 {
-	//	met.fileIndex = fileIndex
-	//}
-	//met.filesCount = len(levelFilesToPick)
 	//
+	// regionWidth, regionHeight := curRegion.GetTileSize()
+	// if tileX >= 0 && tileY >= 0 && tileX < regionWidth && tileY < regionHeight {
+	// 	tile := curRegion.Tile(tileX, tileY)
+	// 	screen.PushTranslation(5, 5)
+	// 	screen.DrawText("%d, %d (Tile %d.%d, %d.%d)", screenX, screenY, tileX, subtileX, tileY, subtileY)
+	// 	screen.PushTranslation(0, 16)
+	// 	screen.DrawText("Map: " + curRegion.LevelType().Name)
+	// 	screen.PushTranslation(0, 16)
+	// 	screen.DrawText("%v: %v/%v [%v, %v]", regionPath, fileIndex+1, met.filesCount, met.currentRegion, met.levelPreset)
+	// 	screen.PushTranslation(0, 16)
+	// 	screen.DrawText("N - next region, P - previous region")
+	// 	screen.PushTranslation(0, 16)
+	// 	screen.DrawText("Shift+N - next preset, Shift+P - previous preset")
+	// 	screen.PushTranslation(0, 16)
+	// 	screen.DrawText("Ctrl+N - next file, Ctrl+P - previous file")
+	// 	screen.PushTranslation(0, 16)
+	// 	popN := 7
+	// 	if len(tile.Floors) > 0 {
+	// 		screen.PushTranslation(0, 16)
+	// 		screen.DrawText("Floors:")
+	// 		screen.PushTranslation(16, 0)
+	// 		for idx, floor := range tile.Floors {
+	// 			popN++
+	// 			screen.PushTranslation(0, 16)
+	// 			tileData := curRegion.TileData(int32(floor.Style), int32(floor.Sequence), d2enum.Floor)
+	// 			tileSubAttrs := d2dt1.SubTileFlags{}
+	// 			if tileData != nil {
+	// 				tileSubAttrs = *tileData.GetSubTileFlags(subtileX, subtileY)
+	// 			}
+	// 			screen.DrawText("Floor %v: [ANI:%t] %s", idx, floor.Animated, tileSubAttrs.DebugString())
 	//
-	//regionWidth, regionHeight := curRegion.GetTileSize()
-	//if tileX >= 0 && tileY >= 0 && tileX < regionWidth && tileY < regionHeight {
-	//	tile := curRegion.Tile(tileX, tileY)
-	//	screen.PushTranslation(5, 5)
-	//	screen.DrawText("%d, %d (Tile %d.%d, %d.%d)", screenX, screenY, tileX, subtileX, tileY, subtileY)
-	//	screen.PushTranslation(0, 16)
-	//	screen.DrawText("Map: " + curRegion.LevelType().Name)
-	//	screen.PushTranslation(0, 16)
-	//	screen.DrawText("%v: %v/%v [%v, %v]", regionPath, fileIndex+1, met.filesCount, met.currentRegion, met.levelPreset)
-	//	screen.PushTranslation(0, 16)
-	//	screen.DrawText("N - next region, P - previous region")
-	//	screen.PushTranslation(0, 16)
-	//	screen.DrawText("Shift+N - next preset, Shift+P - previous preset")
-	//	screen.PushTranslation(0, 16)
-	//	screen.DrawText("Ctrl+N - next file, Ctrl+P - previous file")
-	//	screen.PushTranslation(0, 16)
-	//	popN := 7
-	//	if len(tile.Floors) > 0 {
-	//		screen.PushTranslation(0, 16)
-	//		screen.DrawText("Floors:")
-	//		screen.PushTranslation(16, 0)
-	//		for idx, floor := range tile.Floors {
-	//			popN++
-	//			screen.PushTranslation(0, 16)
-	//			tileData := curRegion.TileData(int32(floor.Style), int32(floor.Sequence), d2enum.Floor)
-	//			tileSubAttrs := d2dt1.SubTileFlags{}
-	//			if tileData != nil {
-	//				tileSubAttrs = *tileData.GetSubTileFlags(subtileX, subtileY)
-	//			}
-	//			screen.DrawText("Floor %v: [ANI:%t] %s", idx, floor.Animated, tileSubAttrs.DebugString())
+	// 		}
+	// 		screen.PushTranslation(-16, 0)
+	// 		popN += 3
+	// 	}
+	// 	if len(tile.Walls) > 0 {
+	// 		screen.PushTranslation(0, 16)
+	// 		screen.DrawText("Walls:")
+	// 		screen.PushTranslation(16, 0)
+	// 		for idx, wall := range tile.Walls {
+	// 			popN++
+	// 			screen.PushTranslation(0, 16)
+	// 			tileData := curRegion.TileData(int32(wall.Style), int32(wall.Sequence), d2enum.Floor)
+	// 			tileSubAttrs := d2dt1.SubTileFlags{}
+	// 			if tileData != nil {
+	// 				tileSubAttrs = *tileData.GetSubTileFlags(subtileX, subtileY)
+	// 			}
+	// 			screen.DrawText("Wall %v: [HID:%t] %s", idx, wall.Hidden, tileSubAttrs.DebugString())
 	//
-	//		}
-	//		screen.PushTranslation(-16, 0)
-	//		popN += 3
-	//	}
-	//	if len(tile.Walls) > 0 {
-	//		screen.PushTranslation(0, 16)
-	//		screen.DrawText("Walls:")
-	//		screen.PushTranslation(16, 0)
-	//		for idx, wall := range tile.Walls {
-	//			popN++
-	//			screen.PushTranslation(0, 16)
-	//			tileData := curRegion.TileData(int32(wall.Style), int32(wall.Sequence), d2enum.Floor)
-	//			tileSubAttrs := d2dt1.SubTileFlags{}
-	//			if tileData != nil {
-	//				tileSubAttrs = *tileData.GetSubTileFlags(subtileX, subtileY)
-	//			}
-	//			screen.DrawText("Wall %v: [HID:%t] %s", idx, wall.Hidden, tileSubAttrs.DebugString())
+	// 		}
+	// 		screen.PushTranslation(-16, 0)
+	// 		popN += 3
+	// 	}
+	// 	if len(tile.Walls) > 0 {
+	// 		screen.PushTranslation(0, 16)
+	// 		screen.DrawText("Shadows:")
+	// 		screen.PushTranslation(16, 0)
+	// 		for idx, shadow := range tile.Shadows {
+	// 			popN++
+	// 			screen.PushTranslation(0, 16)
+	// 			tileData := curRegion.TileData(int32(shadow.Style), int32(shadow.Sequence), d2enum.Floor)
+	// 			tileSubAttrs := d2dt1.SubTileFlags{}
+	// 			if tileData != nil {
+	// 				tileSubAttrs = *tileData.GetSubTileFlags(subtileX, subtileY)
+	// 			}
+	// 			screen.DrawText("Wall %v: [HID:%t] %s", idx, shadow.Hidden, tileSubAttrs.DebugString())
 	//
-	//		}
-	//		screen.PushTranslation(-16, 0)
-	//		popN += 3
-	//	}
-	//	if len(tile.Walls) > 0 {
-	//		screen.PushTranslation(0, 16)
-	//		screen.DrawText("Shadows:")
-	//		screen.PushTranslation(16, 0)
-	//		for idx, shadow := range tile.Shadows {
-	//			popN++
-	//			screen.PushTranslation(0, 16)
-	//			tileData := curRegion.TileData(int32(shadow.Style), int32(shadow.Sequence), d2enum.Floor)
-	//			tileSubAttrs := d2dt1.SubTileFlags{}
-	//			if tileData != nil {
-	//				tileSubAttrs = *tileData.GetSubTileFlags(subtileX, subtileY)
-	//			}
-	//			screen.DrawText("Wall %v: [HID:%t] %s", idx, shadow.Hidden, tileSubAttrs.DebugString())
-	//
-	//		}
-	//		screen.PushTranslation(-16, 0)
-	//		popN += 3
-	//	}
-	//	screen.PopN(popN)
-	//}
+	// 		}
+	// 		screen.PushTranslation(-16, 0)
+	// 		popN += 3
+	// 	}
+	// 	screen.PopN(popN)
+	// }
 
 	return nil
 }
@@ -290,28 +294,28 @@ func (met *MapEngineTest) Advance(tickTime float64) error {
 }
 
 // OnKeyRepeat is called to handle repeated key presses
-func (met *MapEngineTest) OnKeyRepeat(event d2input.KeyEvent) bool {
+func (met *MapEngineTest) OnKeyRepeat(event d2interface.KeyEvent) bool {
 	var moveSpeed float64 = 8
-	if event.KeyMod == d2input.KeyModShift {
+	if event.KeyMod() == d2enum.KeyModShift {
 		moveSpeed *= 2
 	}
 
-	if event.Key == d2input.KeyDown {
+	if event.Key() == d2enum.KeyDown {
 		met.mapRenderer.MoveCameraBy(0, moveSpeed)
 		return true
 	}
 
-	if event.Key == d2input.KeyUp {
+	if event.Key() == d2enum.KeyUp {
 		met.mapRenderer.MoveCameraBy(0, -moveSpeed)
 		return true
 	}
 
-	if event.Key == d2input.KeyRight {
+	if event.Key() == d2enum.KeyRight {
 		met.mapRenderer.MoveCameraBy(moveSpeed, 0)
 		return true
 	}
 
-	if event.Key == d2input.KeyLeft {
+	if event.Key() == d2enum.KeyLeft {
 		met.mapRenderer.MoveCameraBy(-moveSpeed, 0)
 		return true
 	}
@@ -320,18 +324,18 @@ func (met *MapEngineTest) OnKeyRepeat(event d2input.KeyEvent) bool {
 }
 
 // OnKeyDown defines the actions of the Map Engine Test screen when a key is pressed
-func (met *MapEngineTest) OnKeyDown(event d2input.KeyEvent) bool {
-	if event.Key == d2input.KeyEscape {
+func (met *MapEngineTest) OnKeyDown(event d2interface.KeyEvent) bool {
+	if event.Key() == d2enum.KeyEscape {
 		os.Exit(0)
 		return true
 	}
 
-	if event.Key == d2input.KeyN {
-		switch event.KeyMod {
-		case d2input.KeyModControl:
+	if event.Key() == d2enum.KeyN {
+		switch event.KeyMod() {
+		case d2enum.KeyModControl:
 			met.fileIndex++
 			d2screen.SetNextScreen(met)
-		case d2input.KeyModShift:
+		case d2enum.KeyModShift:
 			met.levelPreset = increment(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
 			d2screen.SetNextScreen(met)
 		default:
@@ -342,12 +346,12 @@ func (met *MapEngineTest) OnKeyDown(event d2input.KeyEvent) bool {
 		return true
 	}
 
-	if event.Key == d2input.KeyP {
-		switch event.KeyMod {
-		case d2input.KeyModControl:
+	if event.Key() == d2enum.KeyP {
+		switch event.KeyMod() {
+		case d2enum.KeyModControl:
 			met.fileIndex--
 			d2screen.SetNextScreen(met)
-		case d2input.KeyModShift:
+		case d2enum.KeyModShift:
 			met.levelPreset = decrement(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
 			d2screen.SetNextScreen(met)
 		default:

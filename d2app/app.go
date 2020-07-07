@@ -29,8 +29,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen"
@@ -54,6 +52,7 @@ type App struct {
 	gitCommit         string
 	terminal          d2interface.Terminal
 	audio             d2interface.AudioProvider
+	renderer          d2interface.Renderer
 	tAllocSamples     *ring.Ring
 }
 
@@ -68,12 +67,16 @@ const bytesToMegabyte = 1024 * 1024
 const nSamplesTAlloc = 100
 
 // Create creates a new instance of the application
-func Create(gitBranch, gitCommit string, terminal d2interface.Terminal, audio d2interface.AudioProvider) *App {
+func Create(gitBranch, gitCommit string,
+	terminal d2interface.Terminal,
+	audio d2interface.AudioProvider,
+	renderer d2interface.Renderer) *App {
 	result := &App{
 		gitBranch:     gitBranch,
 		gitCommit:     gitCommit,
 		terminal:      terminal,
 		audio:         audio,
+		renderer:      renderer,
 		tAllocSamples: createZeroedRing(nSamplesTAlloc),
 	}
 
@@ -94,8 +97,8 @@ func (p *App) Run() {
 
 	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", p.gitBranch)
 	// If we fail to initialize, we will show the error screen
-	if err := p.initialize(p.audio, p.terminal); err != nil {
-		if gameErr := d2render.Run(updateInitError, 800, 600, windowTitle); gameErr != nil {
+	if err := p.initialize(); err != nil {
+		if gameErr := p.renderer.Run(updateInitError, 800, 600, windowTitle); gameErr != nil {
 			log.Fatal(gameErr)
 		}
 
@@ -104,7 +107,7 @@ func (p *App) Run() {
 		return
 	}
 
-	d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(p.audio, p.terminal))
+	d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(p.renderer, p.audio, p.terminal))
 
 	if p.gitBranch == "" {
 		p.gitBranch = "Local Build"
@@ -112,12 +115,12 @@ func (p *App) Run() {
 
 	d2common.SetBuildInfo(p.gitBranch, p.gitCommit)
 
-	if err := d2render.Run(p.update, 800, 600, windowTitle); err != nil {
+	if err := p.renderer.Run(p.update, 800, 600, windowTitle); err != nil {
 		log.Panic(err)
 	}
 }
 
-func (p *App) initialize(audioProvider d2interface.AudioProvider, term d2interface.Terminal) error {
+func (p *App) initialize() error {
 	p.timeScale = 1.0
 	p.lastTime = d2common.Now()
 	p.lastScreenAdvance = p.lastTime
@@ -127,19 +130,10 @@ func (p *App) initialize(audioProvider d2interface.AudioProvider, term d2interfa
 	}
 
 	config := d2config.Get()
-	d2resource.LanguageCode = config.Language
+	d2resource.LanguageCode = config.Language()
 
-	renderer, err := ebiten.CreateRenderer()
-	if err != nil {
-		return err
-	}
-
-	if err := d2render.Initialize(renderer); err != nil {
-		return err
-	}
-
-	d2render.SetWindowIcon("d2logo.png")
-	term.BindLogger()
+	p.renderer.SetWindowIcon("d2logo.png")
+	p.terminal.BindLogger()
 
 	terminalActions := [...]bindTerminalEntry{
 		{"dumpheap", "dumps the heap to pprof/heap.pprof", p.dumpHeap},
@@ -157,12 +151,12 @@ func (p *App) initialize(audioProvider d2interface.AudioProvider, term d2interfa
 	for idx := range terminalActions {
 		action := &terminalActions[idx]
 
-		if err := term.BindAction(action.name, action.description, action.action); err != nil {
+		if err := p.terminal.BindAction(action.name, action.description, action.action); err != nil {
 			log.Fatal(err)
 		}
 	}
 
-	if err := d2asset.Initialize(term); err != nil {
+	if err := d2asset.Initialize(p.renderer, p.terminal); err != nil {
 		return err
 	}
 
@@ -170,7 +164,7 @@ func (p *App) initialize(audioProvider d2interface.AudioProvider, term d2interfa
 		return err
 	}
 
-	audioProvider.SetVolumes(config.BgmVolume, config.SfxVolume)
+	p.audio.SetVolumes(config.BgmVolume(), config.SfxVolume())
 
 	if err := p.loadDataDict(); err != nil {
 		return err
@@ -182,7 +176,7 @@ func (p *App) initialize(audioProvider d2interface.AudioProvider, term d2interfa
 
 	d2inventory.LoadHeroObjects()
 
-	d2ui.Initialize(audioProvider)
+	d2ui.Initialize(p.audio)
 
 	d2script.CreateScriptEngine()
 
@@ -263,9 +257,9 @@ func (p *App) renderDebug(target d2interface.Surface) error {
 		return nil
 	}
 
-	vsyncEnabled := d2render.GetVSyncEnabled()
-	fps := d2render.CurrentFPS()
-	cx, cy := d2render.GetCursorPos()
+	vsyncEnabled := p.renderer.GetVSyncEnabled()
+	fps := p.renderer.CurrentFPS()
+	cx, cy := p.renderer.GetCursorPos()
 
 	target.PushTranslation(5, 565)
 	target.DrawText("vsync:" + strconv.FormatBool(vsyncEnabled) + "\nFPS:" + strconv.Itoa(int(fps)))
@@ -421,7 +415,7 @@ func (p *App) advance(elapsed, current float64) error {
 
 	d2ui.Advance(elapsed)
 
-	if err := d2input.Advance(elapsed); err != nil {
+	if err := d2input.Advance(elapsed, current); err != nil {
 		return err
 	}
 
@@ -481,8 +475,8 @@ func (p *App) dumpHeap() {
 }
 
 func (p *App) toggleFullScreen() {
-	fullscreen := !d2render.IsFullScreen()
-	d2render.SetFullScreen(fullscreen)
+	fullscreen := !p.renderer.IsFullScreen()
+	p.renderer.SetFullScreen(fullscreen)
 	p.terminal.OutputInfof("fullscreen is now: %v", fullscreen)
 }
 
@@ -503,8 +497,8 @@ func (p *App) stopAnimationCapture() {
 }
 
 func (p *App) toggleVsync() {
-	vsync := !d2render.GetVSyncEnabled()
-	d2render.SetVSyncEnabled(vsync)
+	vsync := !p.renderer.GetVSyncEnabled()
+	p.renderer.SetVSyncEnabled(vsync)
 	p.terminal.OutputInfof("vsync is now: %v", vsync)
 }
 
@@ -527,7 +521,7 @@ func (p *App) quitGame() {
 }
 
 func (p *App) enterGuiPlayground() {
-	d2screen.SetNextScreen(d2gamescreen.CreateGuiTestMain())
+	d2screen.SetNextScreen(d2gamescreen.CreateGuiTestMain(p.renderer))
 }
 
 func createZeroedRing(n int) *ring.Ring {
@@ -584,11 +578,13 @@ func enableProfiler(profileOption string) interface{ Stop() } {
 }
 
 func updateInitError(target d2interface.Surface) error {
-	target.Clear(colornames.Darkred)
+	_ = target.Clear(colornames.Darkred)
+
 	width, height := target.GetSize()
 
 	target.PushTranslation(width/5, height/2)
-	target.DrawText("Could not find the MPQ files in the directory: %s\nPlease put the files and re-run the game.", d2config.Get().MpqPath)
+	target.DrawText(`Could not find the MPQ files in the directory: 
+		%s\nPlease put the files and re-run the game.`, d2config.Get().MpqPath())
 
 	return nil
 }

@@ -21,11 +21,11 @@ func (mr *MapRenderer) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, t
 				for n > 0 {
 					colorIndex := block.EncodedData[idx]
 					if colorIndex != 0 {
-						pixelColor := mr.palette.Colors[colorIndex]
+						pixelColor := mr.palette.GetColors()[colorIndex]
 						offset := 4 * (((blockY + y + tileYOffset) * tileWidth) + (blockX + x))
-						(*pixels)[offset] = pixelColor.R
-						(*pixels)[offset+1] = pixelColor.G
-						(*pixels)[offset+2] = pixelColor.B
+						(*pixels)[offset] = pixelColor.R()
+						(*pixels)[offset+1] = pixelColor.G()
+						(*pixels)[offset+2] = pixelColor.B()
 						(*pixels)[offset+3] = 255
 					}
 					x++
@@ -58,12 +58,12 @@ func (mr *MapRenderer) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, t
 			for b2 > 0 {
 				colorIndex := block.EncodedData[idx]
 				if colorIndex != 0 {
-					pixelColor := mr.palette.Colors[colorIndex]
+					pixelColor := mr.palette.GetColors()[colorIndex]
 
 					offset := 4 * (((blockY + y + tileYOffset) * tileWidth) + (blockX + x))
-					(*pixels)[offset] = pixelColor.R
-					(*pixels)[offset+1] = pixelColor.G
-					(*pixels)[offset+2] = pixelColor.B
+					(*pixels)[offset] = pixelColor.R()
+					(*pixels)[offset+1] = pixelColor.G()
+					(*pixels)[offset+2] = pixelColor.B()
 					(*pixels)[offset+3] = 255
 
 				}

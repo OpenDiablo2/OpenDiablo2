@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
+	
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
-
-	ebiten_input "github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/ebiten"
 
 	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 
@@ -26,18 +26,23 @@ func main() {
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
 
 	// Initialize our providers
+	renderer, err := ebiten.CreateRenderer()
+	if err != nil {
+		panic(err)
+	}
+
 	audio, err := ebiten2.CreateAudio()
 	if err != nil {
 		panic(err)
 	}
 
-	d2input.Initialize(ebiten_input.InputService{}) // TODO d2input singleton must be init before d2term
+	d2input.Create() // TODO d2input singleton must be init before d2term
 	term, err := d2term.Initialize()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	app := d2app.Create(GitBranch, GitCommit, term, audio)
+	app := d2app.Create(GitBranch, GitCommit, term, audio, renderer)
 	app.Run()
 }

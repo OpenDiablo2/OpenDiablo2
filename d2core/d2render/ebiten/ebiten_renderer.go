@@ -1,6 +1,7 @@
 package ebiten
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"image"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -33,10 +34,10 @@ func CreateRenderer() (*Renderer, error) {
 	config := d2config.Get()
 
 	ebiten.SetCursorMode(ebiten.CursorModeHidden)
-	ebiten.SetFullscreen(config.FullScreen)
-	ebiten.SetRunnableOnUnfocused(config.RunInBackground)
-	ebiten.SetVsyncEnabled(config.VsyncEnabled)
-	ebiten.SetMaxTPS(config.TicksPerSecond)
+	ebiten.SetFullscreen(config.FullScreen())
+	ebiten.SetRunnableOnUnfocused(config.RunInBackground())
+	ebiten.SetVsyncEnabled(config.VsyncEnabled())
+	ebiten.SetMaxTPS(config.TicksPerSecond())
 
 	return result, nil
 }
@@ -75,7 +76,7 @@ func (r *Renderer) CreateSurface(surface d2interface.Surface) (d2interface.Surfa
 	return result, nil
 }
 
-func (r *Renderer) NewSurface(width, height int, filter d2interface.Filter) (d2interface.Surface, error) {
+func (r *Renderer) NewSurface(width, height int, filter d2enum.Filter) (d2interface.Surface, error) {
 	ebitenFilter := d2ToEbitenFilter(filter)
 	img, err := ebiten.NewImage(width, height, ebitenFilter)
 	if err != nil {

@@ -1,12 +1,11 @@
 package d2asset
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
 const (
@@ -14,19 +13,25 @@ const (
 )
 
 type fileManager struct {
-	cache          *d2common.Cache
-	archiveManager *archiveManager
-	config         *d2config.Configuration
+	cache          d2interface.Cache
+	archiveManager d2interface.ArchiveManager
+	config         d2interface.Configuration
 }
 
-func createFileManager(config *d2config.Configuration, archiveManager *archiveManager) *fileManager {
-	return &fileManager{d2common.CreateCache(fileBudget), archiveManager, config}
+func createFileManager(config d2interface.Configuration,
+	archiveManager d2interface.ArchiveManager) d2interface.ArchivedFileManager {
+	return &fileManager{
+		d2common.CreateCache(fileBudget),
+		archiveManager,
+		config,
+	}
 }
 
-func (fm *fileManager) loadFileStream(filePath string) (*d2mpq.MpqDataStream, error) {
+// LoadFileStream loads a file as a stream automatically from an archive
+func (fm *fileManager) LoadFileStream(filePath string) (d2interface.ArchiveDataStream, error) {
 	filePath = fm.fixupFilePath(filePath)
 
-	archive, err := fm.archiveManager.loadArchiveForFile(filePath)
+	archive, err := fm.archiveManager.LoadArchiveForFile(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -34,13 +39,14 @@ func (fm *fileManager) loadFileStream(filePath string) (*d2mpq.MpqDataStream, er
 	return archive.ReadFileStream(filePath)
 }
 
-func (fm *fileManager) loadFile(filePath string) ([]byte, error) {
+// LoadFile loads a file automatically from a managed archive
+func (fm *fileManager) LoadFile(filePath string) ([]byte, error) {
 	filePath = fm.fixupFilePath(filePath)
 	if value, found := fm.cache.Retrieve(filePath); found {
 		return value.([]byte), nil
 	}
 
-	archive, err := fm.archiveManager.loadArchiveForFile(filePath)
+	archive, err := fm.archiveManager.LoadArchiveForFile(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -57,9 +63,18 @@ func (fm *fileManager) loadFile(filePath string) ([]byte, error) {
 	return data, nil
 }
 
-func (fm *fileManager) fileExists(filePath string) (bool, error) {
+// FileExists checks if a file exists in an archive
+func (fm *fileManager) FileExists(filePath string) (bool, error) {
 	filePath = fm.fixupFilePath(filePath)
-	return fm.archiveManager.fileExistsInArchive(filePath)
+	return fm.archiveManager.FileExistsInArchive(filePath)
+}
+
+func (fm *fileManager) ClearCache() {
+	fm.cache.Clear()
+}
+
+func (fm *fileManager) GetCache() d2interface.Cache {
+	return fm.cache
 }
 
 func (fm *fileManager) fixupFilePath(filePath string) string {
@@ -75,7 +90,7 @@ func (fm *fileManager) removeLocaleTokens(filePath string) string {
 	tableToken := d2resource.LanguageTableToken
 	fontToken := d2resource.LanguageFontToken
 
-	filePath = strings.ReplaceAll(filePath, tableToken, fm.config.Language)
+	filePath = strings.ReplaceAll(filePath, tableToken, fm.config.Language())
 
 	// fixme: not all languages==latin
 	filePath = strings.ReplaceAll(filePath, fontToken, "latin")

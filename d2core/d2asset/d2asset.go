@@ -1,36 +1,31 @@
-/*
-Package d2asset has behaviors to load and save assets from disk.
-*/
 package d2asset
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
 var singleton *assetManager
 
 // Initialize creates and assigns all necessary dependencies for the assetManager top-level functions to work correctly
-func Initialize(term d2interface.Terminal) error {
+func Initialize(renderer d2interface.Renderer,
+	term d2interface.Terminal) error {
 	var (
 		config                  = d2config.Get()
-		archiveManager          = createArchiveManager(&config)
-		fileManager             = createFileManager(&config, archiveManager)
+		archiveManager          = createArchiveManager(config)
+		archivedFileManager     = createFileManager(config, archiveManager)
 		paletteManager          = createPaletteManager()
 		paletteTransformManager = createPaletteTransformManager()
-		animationManager        = createAnimationManager()
+		animationManager        = createAnimationManager(renderer)
 		fontManager             = createFontManager()
 	)
 
 	singleton = &assetManager{
 		archiveManager,
-		fileManager,
+		archivedFileManager,
 		paletteManager,
 		paletteTransformManager,
 		animationManager,
@@ -44,9 +39,9 @@ func Initialize(term d2interface.Terminal) error {
 			term.OutputInfof("asset manager verbose logging disabled")
 		}
 
-		archiveManager.cache.SetVerbose(verbose)
-		fileManager.cache.SetVerbose(verbose)
-		paletteManager.cache.SetVerbose(verbose)
+		archiveManager.GetCache().SetVerbose(verbose)
+		archivedFileManager.GetCache().SetVerbose(verbose)
+		paletteManager.GetCache().SetVerbose(verbose)
 		paletteTransformManager.cache.SetVerbose(verbose)
 		animationManager.cache.SetVerbose(verbose)
 	}); err != nil {
@@ -54,33 +49,28 @@ func Initialize(term d2interface.Terminal) error {
 	}
 
 	if err := term.BindAction("assetstat", "display asset manager cache statistics", func() {
-		type cache interface {
-			GetWeight() int
-			GetBudget() int
-		}
-
-		var cacheStatistics = func(c cache) float64 {
+		var cacheStatistics = func(c d2interface.Cache) float64 {
 			const percent = 100.0
 			return float64(c.GetWeight()) / float64(c.GetBudget()) * percent
 		}
 
-		term.OutputInfof("archive cache: %f", cacheStatistics(archiveManager.cache))
-		term.OutputInfof("file cache: %f", cacheStatistics(fileManager.cache))
-		term.OutputInfof("palette cache: %f", cacheStatistics(paletteManager.cache))
+		term.OutputInfof("archive cache: %f", cacheStatistics(archiveManager.GetCache()))
+		term.OutputInfof("file cache: %f", cacheStatistics(archivedFileManager.GetCache()))
+		term.OutputInfof("palette cache: %f", cacheStatistics(paletteManager.GetCache()))
 		term.OutputInfof("palette transform cache: %f", cacheStatistics(paletteTransformManager.cache))
 		term.OutputInfof("animation cache: %f", cacheStatistics(animationManager.cache))
-		term.OutputInfof("font cache: %f", cacheStatistics(fontManager.cache))
+		term.OutputInfof("font cache: %f", cacheStatistics(fontManager.GetCache()))
 	}); err != nil {
 		return err
 	}
 
 	if err := term.BindAction("assetclear", "clear asset manager cache", func() {
-		archiveManager.cache.Clear()
-		fileManager.cache.Clear()
-		paletteManager.cache.Clear()
+		archiveManager.ClearCache()
+		archivedFileManager.GetCache().Clear()
+		paletteManager.ClearCache()
 		paletteTransformManager.cache.Clear()
-		animationManager.cache.Clear()
-		fontManager.cache.Clear()
+		animationManager.ClearCache()
+		fontManager.ClearCache()
 	}); err != nil {
 		return err
 	}
@@ -89,8 +79,8 @@ func Initialize(term d2interface.Terminal) error {
 }
 
 // LoadFileStream streams an MPQ file from a source file path
-func LoadFileStream(filePath string) (*d2mpq.MpqDataStream, error) {
-	data, err := singleton.fileManager.loadFileStream(filePath)
+func LoadFileStream(filePath string) (d2interface.ArchiveDataStream, error) {
+	data, err := singleton.archivedFileManager.LoadFileStream(filePath)
 	if err != nil {
 		log.Printf("error loading file stream %s (%v)", filePath, err.Error())
 	}
@@ -100,7 +90,7 @@ func LoadFileStream(filePath string) (*d2mpq.MpqDataStream, error) {
 
 // LoadFile loads an entire file from a source file path as a []byte
 func LoadFile(filePath string) ([]byte, error) {
-	data, err := singleton.fileManager.loadFile(filePath)
+	data, err := singleton.archivedFileManager.LoadFile(filePath)
 	if err != nil {
 		log.Printf("error loading file %s (%v)", filePath, err.Error())
 	}
@@ -110,30 +100,31 @@ func LoadFile(filePath string) ([]byte, error) {
 
 // FileExists checks if a file exists on the underlying file system at the given file path.
 func FileExists(filePath string) (bool, error) {
-	return singleton.fileManager.fileExists(filePath)
+	return singleton.archivedFileManager.FileExists(filePath)
 }
 
 // LoadAnimation loads an animation by its resource path and its palette path
-func LoadAnimation(animationPath, palettePath string) (*Animation, error) {
+func LoadAnimation(animationPath, palettePath string) (d2interface.Animation, error) {
 	return LoadAnimationWithTransparency(animationPath, palettePath, 255)
 }
 
 // LoadAnimationWithTransparency loads an animation by its resource path and its palette path with a given transparency value
-func LoadAnimationWithTransparency(animationPath, palettePath string, transparency int) (*Animation, error) {
-	return singleton.animationManager.loadAnimation(animationPath, palettePath, transparency)
+func LoadAnimationWithTransparency(animationPath, palettePath string,
+	transparency int) (d2interface.Animation, error) {
+	return singleton.animationManager.LoadAnimation(animationPath, palettePath, transparency)
 }
 
 // LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it
-func LoadComposite(object *d2datadict.ObjectLookupRecord, palettePath string) (*Composite, error) {
-	return CreateComposite(object, palettePath), nil
+func LoadComposite(baseType d2enum.ObjectType, token, palettePath string) (*Composite, error) {
+	return CreateComposite(baseType, token, palettePath), nil
 }
 
 // LoadFont loads a font the resource files
-func LoadFont(tablePath, spritePath, palettePath string) (*Font, error) {
-	return singleton.fontManager.loadFont(tablePath, spritePath, palettePath)
+func LoadFont(tablePath, spritePath, palettePath string) (d2interface.Font, error) {
+	return singleton.fontManager.LoadFont(tablePath, spritePath, palettePath)
 }
 
 // LoadPalette loads a palette from a given palette path
-func LoadPalette(palettePath string) (*d2dat.DATPalette, error) {
-	return singleton.paletteManager.loadPalette(palettePath)
+func LoadPalette(palettePath string) (d2interface.Palette, error) {
+	return singleton.paletteManager.LoadPalette(palettePath)
 }

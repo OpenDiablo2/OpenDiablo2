@@ -2,6 +2,7 @@ package d2gamescreen
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"image/color"
 	"math"
 	"os"
@@ -49,16 +50,19 @@ type CharacterSelect struct {
 	connectionHost         string
 	audioProvider          d2interface.AudioProvider
 	terminal               d2interface.Terminal
+	renderer               d2interface.Renderer
 }
 
 // CreateCharacterSelect creates the character select screen and returns a pointer to it
 func CreateCharacterSelect(
+	renderer d2interface.Renderer,
 	audioProvider d2interface.AudioProvider,
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	connectionHost string, term d2interface.Terminal,
 ) *CharacterSelect {
 	return &CharacterSelect{
 		selectedCharacter: -1,
+		renderer:          renderer,
 		connectionType:    connectionType,
 		connectionHost:    connectionHost,
 		audioProvider:     audioProvider,
@@ -82,13 +86,13 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 
 	v.createButtons(loading)
 
-	v.d2HeroTitle = d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
+	v.d2HeroTitle = d2ui.CreateLabel(v.renderer, d2resource.Font42, d2resource.PaletteUnits)
 	v.d2HeroTitle.SetPosition(320, 23)
 	v.d2HeroTitle.Alignment = d2ui.LabelAlignCenter
 
 	loading.Progress(0.3)
 
-	v.deleteCharConfirmLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.deleteCharConfirmLabel = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
 	lines := d2common.SplitIntoLinesWithMaxWidth(
 		"Are you sure that you want to delete this character? Take note: this will delete all versions of this Character.",
 		29,
@@ -116,12 +120,12 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 			xOffset = 385
 		}
 
-		v.characterNameLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+		v.characterNameLabel[i] = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
 		v.characterNameLabel[i].Color = color.RGBA{R: 188, G: 168, B: 140, A: 255}
 		v.characterNameLabel[i].SetPosition(xOffset, 100+((i/2)*95))
-		v.characterStatsLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+		v.characterStatsLabel[i] = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
 		v.characterStatsLabel[i].SetPosition(xOffset, 115+((i/2)*95))
-		v.characterExpLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteStatic)
+		v.characterExpLabel[i] = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteStatic)
 		v.characterExpLabel[i].Color = color.RGBA{R: 24, G: 255, A: 255}
 		v.characterExpLabel[i].SetPosition(xOffset, 130+((i/2)*95))
 	}
@@ -130,6 +134,7 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 
 func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
 	v.newCharButton = d2ui.CreateButton(
+		v.renderer,
 		d2ui.ButtonTypeTall,
 		d2common.CombineStrings(d2common.SplitIntoLinesWithMaxWidth("CREATE NEW CHARACTER", 15)),
 	)
@@ -138,6 +143,7 @@ func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
 	d2ui.AddWidget(&v.newCharButton)
 
 	v.convertCharButton = d2ui.CreateButton(
+		v.renderer,
 		d2ui.ButtonTypeTall,
 		d2common.CombineStrings(d2common.SplitIntoLinesWithMaxWidth("CONVERT TO EXPANSION", 15)),
 	)
@@ -146,6 +152,7 @@ func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
 	d2ui.AddWidget(&v.convertCharButton)
 
 	v.deleteCharButton = d2ui.CreateButton(
+		v.renderer,
 		d2ui.ButtonTypeTall,
 		d2common.CombineStrings(d2common.SplitIntoLinesWithMaxWidth("DELETE CHARACTER", 15)),
 	)
@@ -153,25 +160,25 @@ func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
 	v.deleteCharButton.SetPosition(433, 468)
 	d2ui.AddWidget(&v.deleteCharButton)
 
-	v.exitButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, "EXIT")
+	v.exitButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeMedium, "EXIT")
 	v.exitButton.SetPosition(33, 537)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 	d2ui.AddWidget(&v.exitButton)
 	loading.Progress(0.2)
 
-	v.deleteCharCancelButton = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "NO")
+	v.deleteCharCancelButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeOkCancel, "NO")
 	v.deleteCharCancelButton.SetPosition(282, 308)
 	v.deleteCharCancelButton.SetVisible(false)
 	v.deleteCharCancelButton.OnActivated(func() { v.onDeleteCharacterCancelClicked() })
 	d2ui.AddWidget(&v.deleteCharCancelButton)
 
-	v.deleteCharOkButton = d2ui.CreateButton(d2ui.ButtonTypeOkCancel, "YES")
+	v.deleteCharOkButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeOkCancel, "YES")
 	v.deleteCharOkButton.SetPosition(422, 308)
 	v.deleteCharOkButton.SetVisible(false)
 	v.deleteCharOkButton.OnActivated(func() { v.onDeleteCharacterConfirmClicked() })
 	d2ui.AddWidget(&v.deleteCharOkButton)
 
-	v.okButton = d2ui.CreateButton(d2ui.ButtonTypeMedium, "OK")
+	v.okButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeMedium, "OK")
 	v.okButton.SetPosition(625, 537)
 	v.okButton.OnActivated(func() { v.onOkButtonClicked() })
 	d2ui.AddWidget(&v.okButton)
@@ -209,11 +216,11 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 }
 
 func (v *CharacterSelect) onNewCharButtonClicked() {
-	d2screen.SetNextScreen(CreateSelectHeroClass(v.audioProvider, v.connectionType, v.connectionHost))
+	d2screen.SetNextScreen(CreateSelectHeroClass(v.renderer, v.audioProvider, v.connectionType, v.connectionHost, v.terminal))
 }
 
 func (v *CharacterSelect) onExitButtonClicked() {
-	mainMenu := CreateMainMenu(v.audioProvider, v.terminal)
+	mainMenu := CreateMainMenu(v.renderer, v.audioProvider, v.terminal)
 	mainMenu.setScreenMode(screenModeMainMenu)
 	d2screen.SetNextScreen(mainMenu)
 }
@@ -274,10 +281,10 @@ func (v *CharacterSelect) moveSelectionBox() {
 }
 
 // OnMouseButtonDown is called when a mouse button is clicked
-func (v *CharacterSelect) OnMouseButtonDown(event d2input.MouseEvent) bool {
+func (v *CharacterSelect) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	if !v.showDeleteConfirmation {
-		if event.Button == d2input.MouseButtonLeft {
-			mx, my := event.X, event.Y
+		if event.Button() == d2enum.MouseButtonLeft {
+			mx, my := event.X(), event.Y()
 			bw := 272
 			bh := 92
 			localMouseX := mx - 37
@@ -371,5 +378,5 @@ func (v *CharacterSelect) onOkButtonClicked() {
 		fmt.Printf("can not connect to the host: %s", host)
 	}
 
-	d2screen.SetNextScreen(CreateGame(v.audioProvider, gameClient, v.terminal))
+	d2screen.SetNextScreen(CreateGame(v.renderer, v.audioProvider, gameClient, v.terminal))
 }

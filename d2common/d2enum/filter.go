@@ -1,4 +1,4 @@
-package d2interface
+package d2enum
 
 // Filter represents the type of texture filter to be used when an image is magnified or minified.
 type Filter int

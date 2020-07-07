@@ -6,29 +6,75 @@ import (
 
 // Configuration defines the configuration for the engine, loaded from config.json
 type Configuration struct {
-	MpqLoadOrder    []string
-	Language        string
-	MpqPath         string
-	TicksPerSecond  int
-	FpsCap          int
-	SfxVolume       float64
-	BgmVolume       float64
-	FullScreen      bool
-	RunInBackground bool
-	VsyncEnabled    bool
+	mpqLoadOrder    []string
+	language        string
+	mpqPath         string
+	ticksPerSecond  int
+	fpsCap          int
+	sfxVolume       float64
+	bgmVolume       float64
+	fullScreen      bool
+	runInBackground bool
+	vsyncEnabled    bool
+	backend         string
 }
 
-var singleton = getDefaultConfig()
+func (c *Configuration) MpqLoadOrder() []string {
+	return c.mpqLoadOrder
+}
 
-func Load() error {
+func (c *Configuration) Language() string {
+	return c.language
+}
+
+func (c *Configuration) MpqPath() string {
+	return c.mpqPath
+}
+
+func (c *Configuration) TicksPerSecond() int {
+	return c.ticksPerSecond
+}
+
+func (c *Configuration) FpsCap() int {
+	return c.fpsCap
+}
+
+func (c *Configuration) SfxVolume() float64 {
+	return c.sfxVolume
+}
+
+func (c *Configuration) BgmVolume() float64 {
+	return c.bgmVolume
+}
+
+func (c *Configuration) FullScreen() bool {
+	return c.fullScreen
+}
+
+func (c *Configuration) RunInBackground() bool {
+	return c.runInBackground
+}
+
+func (c *Configuration) VsyncEnabled() bool {
+	return c.vsyncEnabled
+}
+
+func (c *Configuration) Backend() string {
+	return c.backend
+}
+
+// Load loads a configuration object from disk
+func (c *Configuration) Load() error {
 	configPaths := []string{
-		getLocalConfigPath(),
 		getDefaultConfigPath(),
+		getLocalConfigPath(),
 	}
 
 	var loaded bool
+
 	for _, configPath := range configPaths {
 		log.Printf("loading configuration file from %s...", configPath)
+
 		if err := load(configPath); err == nil {
 			loaded = true
 			break
@@ -37,6 +83,7 @@ func Load() error {
 
 	if !loaded {
 		log.Println("failed to load configuration file, saving default configuration...")
+
 		if err := Save(); err != nil {
 			return err
 		}
@@ -45,7 +92,8 @@ func Load() error {
 	return nil
 }
 
-func Save() error {
+// Save saves the configuration object to disk
+func (c *Configuration) Save() error {
 	configPath := getDefaultConfigPath()
 	log.Printf("saving configuration file to %s...", configPath)
 
@@ -55,12 +103,4 @@ func Save() error {
 	}
 
 	return err
-}
-
-func Get() Configuration {
-	if singleton == nil {
-		panic("configuration is not initialized")
-	}
-
-	return *singleton
 }

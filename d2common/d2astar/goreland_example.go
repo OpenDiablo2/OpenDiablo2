@@ -15,18 +15,22 @@ package d2astar
 // The key differences between this example and the Tile world:
 // 1) There is no grid.  Trucks have arbitrary coordinates.
 // 2) Edges are not implied by the grid positions.  Instead edges are explicitly
-//    modelled as Tubes.
+//    modeled as Tubes.
 //
 // The key similarities between this example and the Tile world:
 // 1) They both use Manhattan distance as their heuristic
 // 2) Both implement Pather
 
-//Goreland represents a world of trucks and tubes.
+// Goreland represents a world of trucks and tubes.
 type Goreland struct {
 	//	trucks map[int]*Truck		// not needed really
 }
 
-//Tube is an edge. They connect Trucks, and have a cost.
+const (
+	_tenFuckingMillion = 10000000
+)
+
+// Tube is an edge. They connect Trucks, and have a cost.
 type Tube struct {
 	from *Truck
 	to   *Truck
@@ -47,39 +51,41 @@ type Truck struct {
 
 // PathNeighbors returns the neighbors of the Truck
 func (t *Truck) PathNeighbors() []Pather {
-
 	neighbors := []Pather{}
 
 	for _, tubeElement := range t.outTo {
 		neighbors = append(neighbors, Pather(tubeElement.to))
 	}
+
 	return neighbors
 }
 
 // PathNeighborCost returns the cost of the tube leading to Truck.
 func (t *Truck) PathNeighborCost(to Pather) float64 {
-
 	for _, tubeElement := range (t).outTo {
 		if Pather((tubeElement.to)) == to {
 			return tubeElement.Cost
 		}
 	}
-	return 10000000
+
+	return _tenFuckingMillion
 }
 
 // PathEstimatedCost uses Manhattan distance to estimate orthogonal distance
 // between non-adjacent nodes.
 func (t *Truck) PathEstimatedCost(to Pather) float64 {
-
 	toT := to.(*Truck)
 	absX := toT.X - t.X
+
 	if absX < 0 {
 		absX = -absX
 	}
+
 	absY := toT.Y - t.Y
 	if absY < 0 {
 		absY = -absY
 	}
+
 	r := float64(absX + absY)
 
 	return r
@@ -87,11 +93,12 @@ func (t *Truck) PathEstimatedCost(to Pather) float64 {
 
 // RenderPath renders a path on top of a Goreland world.
 func (w Goreland) RenderPath(path []Pather) string {
-
 	s := ""
+
 	for _, p := range path {
 		pT := p.(*Truck)
 		s = pT.label + " " + s
 	}
+
 	return s
 }

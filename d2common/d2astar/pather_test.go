@@ -29,7 +29,7 @@ const (
 )
 
 // KindRunes map tile kinds to output runes.
-var KindRunes = map[int]rune{
+var KindRunes = map[int]rune{ // nolint:gochecknoglobals // it's a test
 	KindPlain:    '.',
 	KindRiver:    '~',
 	KindMountain: 'M',
@@ -40,7 +40,7 @@ var KindRunes = map[int]rune{
 }
 
 // RuneKinds map input runes to tile kinds.
-var RuneKinds = map[rune]int{
+var RuneKinds = map[rune]int{ // nolint:gochecknoglobals // it's a test
 	'.': KindPlain,
 	'~': KindRiver,
 	'M': KindMountain,
@@ -50,7 +50,7 @@ var RuneKinds = map[rune]int{
 }
 
 // KindCosts map tile kinds to movement costs.
-var KindCosts = map[int]float64{
+var KindCosts = map[int]float64{ // nolint:gochecknoglobals // it's a test
 	KindPlain:    1.0,
 	KindFrom:     1.0,
 	KindTo:       1.0,
@@ -71,7 +71,8 @@ type Tile struct {
 // PathNeighbors returns the neighbors of the tile, excluding blockers and
 // tiles off the edge of the board.
 func (t *Tile) PathNeighbors() []Pather {
-	neighbors := []Pather{}
+	neighbors := make([]Pather, 0)
+
 	for _, offset := range [][]int{
 		{-1, 0},
 		{1, 0},
@@ -83,6 +84,7 @@ func (t *Tile) PathNeighbors() []Pather {
 			neighbors = append(neighbors, n)
 		}
 	}
+
 	return neighbors
 }
 
@@ -97,13 +99,16 @@ func (t *Tile) PathNeighborCost(to Pather) float64 {
 func (t *Tile) PathEstimatedCost(to Pather) float64 {
 	toT := to.(*Tile)
 	absX := toT.X - t.X
+
 	if absX < 0 {
 		absX = -absX
 	}
+
 	absY := toT.Y - t.Y
 	if absY < 0 {
 		absY = -absY
 	}
+
 	return float64(absX + absY)
 }
 
@@ -115,6 +120,7 @@ func (w World) Tile(x, y int) *Tile {
 	if w[x] == nil {
 		return nil
 	}
+
 	return w[x][y]
 }
 
@@ -123,6 +129,7 @@ func (w World) SetTile(t *Tile, x, y int) {
 	if w[x] == nil {
 		w[x] = map[int]*Tile{}
 	}
+
 	w[x][y] = t
 	t.X = x
 	t.Y = y
@@ -139,6 +146,7 @@ func (w World) FirstOfKind(kind int) *Tile {
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -158,41 +166,50 @@ func (w World) RenderPath(path []Pather) string {
 	if width == 0 {
 		return ""
 	}
+
 	height := len(w[0])
 	pathLocs := map[string]bool{}
+
 	for _, p := range path {
 		pT := p.(*Tile)
 		pathLocs[fmt.Sprintf("%d,%d", pT.X, pT.Y)] = true
 	}
+
 	rows := make([]string, height)
+
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 			t := w.Tile(x, y)
 			r := ' '
+
 			if pathLocs[fmt.Sprintf("%d,%d", x, y)] {
 				r = KindRunes[KindPath]
 			} else if t != nil {
 				r = KindRunes[t.Kind]
 			}
+
 			rows[y] += string(r)
 		}
 	}
+
 	return strings.Join(rows, "\n")
 }
 
 // ParseWorld parses a textual representation of a world into a world map.
 func ParseWorld(input string) World {
 	w := World{}
+
 	for y, row := range strings.Split(strings.TrimSpace(input), "\n") {
 		for x, raw := range row {
 			kind, ok := RuneKinds[raw]
+
 			if !ok {
 				kind = KindBlocker
 			}
-			w.SetTile(&Tile{
-				Kind: kind,
-			}, x, y)
+
+			w.SetTile(&Tile{Kind: kind}, x, y)
 		}
 	}
+
 	return w
 }

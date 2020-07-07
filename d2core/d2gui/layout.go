@@ -6,7 +6,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 )
 
 type layoutEntry struct {
@@ -48,6 +47,8 @@ const (
 type Layout struct {
 	widgetBase
 
+	renderer d2interface.Renderer
+
 	width           int
 	height          int
 	verticalAlign   VerticalAlign
@@ -56,8 +57,12 @@ type Layout struct {
 	entries         []*layoutEntry
 }
 
-func createLayout(positionType PositionType) *Layout {
-	layout := &Layout{positionType: positionType}
+func createLayout(renderer d2interface.Renderer, positionType PositionType) *Layout {
+	layout := &Layout{
+		renderer:     renderer,
+		positionType: positionType,
+	}
+
 	layout.SetVisible(true)
 
 	return layout
@@ -77,7 +82,7 @@ func (l *Layout) SetHorizontalAlign(horizontalAlign HorizontalAlign) {
 }
 
 func (l *Layout) AddLayout(positionType PositionType) *Layout {
-	layout := createLayout(positionType)
+	layout := createLayout(l.renderer, positionType)
 	l.entries = append(l.entries, &layoutEntry{widget: layout})
 	return layout
 }
@@ -115,7 +120,7 @@ func (l *Layout) AddAnimatedSprite(imagePath, palettePath string, direction Anim
 }
 
 func (l *Layout) AddLabel(text string, fontStyle FontStyle) (*Label, error) {
-	label, err := createLabel(text, fontStyle)
+	label, err := createLabel(l.renderer, text, fontStyle)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +130,7 @@ func (l *Layout) AddLabel(text string, fontStyle FontStyle) (*Label, error) {
 }
 
 func (l *Layout) AddButton(text string, buttonStyle ButtonStyle) (*Button, error) {
-	button, err := createButton(text, buttonStyle)
+	button, err := createButton(l.renderer, text, buttonStyle)
 	if err != nil {
 		return nil, err
 	}
@@ -234,41 +239,41 @@ func (l *Layout) getSize() (int, int) {
 	return d2common.MaxInt(width, l.width), d2common.MaxInt(height, l.height)
 }
 
-func (l *Layout) onMouseButtonDown(event d2input.MouseEvent) bool {
+func (l *Layout) onMouseButtonDown(event d2interface.MouseEvent) bool {
 	for _, entry := range l.entries {
 		eventLocal := event
 
-		if l.adjustEntryEvent(entry, &eventLocal.X, &eventLocal.Y) {
+		if l.adjustEntryEvent(entry, eventLocal.X(), eventLocal.Y()) {
 			entry.widget.onMouseButtonDown(eventLocal)
-			entry.mouseDown[event.Button] = true
+			entry.mouseDown[event.Button()] = true
 		}
 	}
 
 	return false
 }
 
-func (l *Layout) onMouseButtonUp(event d2input.MouseEvent) bool {
+func (l *Layout) onMouseButtonUp(event d2interface.MouseEvent) bool {
 	for _, entry := range l.entries {
 		eventLocal := event
 
-		if l.adjustEntryEvent(entry, &eventLocal.X, &eventLocal.Y) {
-			if entry.mouseDown[event.Button] {
+		if l.adjustEntryEvent(entry, eventLocal.X(), eventLocal.Y()) {
+			if entry.mouseDown[event.Button()] {
 				entry.widget.onMouseButtonClick(eventLocal)
 				entry.widget.onMouseButtonUp(eventLocal)
 			}
 		}
 
-		entry.mouseDown[event.Button] = false
+		entry.mouseDown[event.Button()] = false
 	}
 
 	return false
 }
 
-func (l *Layout) onMouseMove(event d2input.MouseMoveEvent) bool {
+func (l *Layout) onMouseMove(event d2interface.MouseMoveEvent) bool {
 	for _, entry := range l.entries {
 		eventLocal := event
 
-		if l.adjustEntryEvent(entry, &eventLocal.X, &eventLocal.Y) {
+		if l.adjustEntryEvent(entry, eventLocal.X(), eventLocal.Y()) {
 			entry.widget.onMouseMove(eventLocal)
 			if entry.mouseOver {
 				entry.widget.onMouseOver(eventLocal)
@@ -285,11 +290,11 @@ func (l *Layout) onMouseMove(event d2input.MouseMoveEvent) bool {
 	return false
 }
 
-func (l *Layout) adjustEntryEvent(entry *layoutEntry, eventX, eventY *int) bool {
-	*eventX -= entry.x
-	*eventY -= entry.y
+func (l *Layout) adjustEntryEvent(entry *layoutEntry, eventX, eventY int) bool {
+	eventX -= entry.x
+	eventY -= entry.y
 
-	if *eventX < 0 || *eventY < 0 || *eventX >= entry.width || *eventY >= entry.height {
+	if eventX < 0 || eventY < 0 || eventX >= entry.width || eventY >= entry.height {
 		return false
 	}
 

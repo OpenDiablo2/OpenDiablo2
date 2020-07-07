@@ -1,4 +1,3 @@
-// Package d2player contains the information necessary for managing players
 package d2player
 
 import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
