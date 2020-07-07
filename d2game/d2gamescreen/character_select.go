@@ -2,6 +2,7 @@ package d2gamescreen
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"image/color"
 	"math"
 	"os"
@@ -282,7 +283,7 @@ func (v *CharacterSelect) moveSelectionBox() {
 // OnMouseButtonDown is called when a mouse button is clicked
 func (v *CharacterSelect) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	if !v.showDeleteConfirmation {
-		if event.Button() == d2interface.MouseButtonLeft {
+		if event.Button() == d2enum.MouseButtonLeft {
 			mx, my := event.X(), event.Y()
 			bw := 272
 			bh := 92

@@ -1,4 +1,4 @@
-package d2interface
+package d2enum
 
 // Key represents button on a traditional keyboard.
 type Key int

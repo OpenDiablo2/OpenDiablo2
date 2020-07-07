@@ -1,6 +1,7 @@
 package d2input
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"sort"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -11,8 +12,8 @@ type inputManager struct {
 	cursorX      int
 	cursorY      int
 
-	buttonMod d2interface.MouseButtonMod
-	keyMod    d2interface.KeyMod
+	buttonMod d2enum.MouseButtonMod
+	keyMod    d2enum.KeyMod
 
 	entries handlerEntryList
 }
@@ -30,7 +31,7 @@ func (im *inputManager) Advance(_, _ float64) error {
 		cursorY,
 	}
 
-	for key := d2interface.KeyMin; key <= d2interface.KeyMax; key++ {
+	for key := d2enum.KeyMin; key <= d2enum.KeyMax; key++ {
 		im.updateJustPressedKey(key, eventBase)
 		im.updateJustReleasedKey(key, eventBase)
 		im.updatePressedKey(key, eventBase)
@@ -38,7 +39,7 @@ func (im *inputManager) Advance(_, _ float64) error {
 
 	im.updateInputChars(eventBase)
 
-	for button := d2interface.MouseButtonMin; button <= d2interface.MouseButtonMax; button++ {
+	for button := d2enum.MouseButtonMin; button <= d2enum.MouseButtonMax; button++ {
 		im.updateJustPressedButton(button, eventBase)
 		im.updateJustReleasedButton(button, eventBase)
 		im.updatePressedButton(button, eventBase)
@@ -51,35 +52,35 @@ func (im *inputManager) Advance(_, _ float64) error {
 
 func (im *inputManager) updateKeyMod() {
 	im.keyMod = 0
-	if im.inputService.IsKeyPressed(d2interface.KeyAlt) {
-		im.keyMod |= d2interface.KeyModAlt
+	if im.inputService.IsKeyPressed(d2enum.KeyAlt) {
+		im.keyMod |= d2enum.KeyModAlt
 	}
 
-	if im.inputService.IsKeyPressed(d2interface.KeyControl) {
-		im.keyMod |= d2interface.KeyModControl
+	if im.inputService.IsKeyPressed(d2enum.KeyControl) {
+		im.keyMod |= d2enum.KeyModControl
 	}
 
-	if im.inputService.IsKeyPressed(d2interface.KeyShift) {
-		im.keyMod |= d2interface.KeyModShift
+	if im.inputService.IsKeyPressed(d2enum.KeyShift) {
+		im.keyMod |= d2enum.KeyModShift
 	}
 }
 
 func (im *inputManager) updateButtonMod() {
 	im.buttonMod = 0
-	if im.inputService.IsMouseButtonPressed(d2interface.MouseButtonLeft) {
-		im.buttonMod |= d2interface.MouseButtonModLeft
+	if im.inputService.IsMouseButtonPressed(d2enum.MouseButtonLeft) {
+		im.buttonMod |= d2enum.MouseButtonModLeft
 	}
 
-	if im.inputService.IsMouseButtonPressed(d2interface.MouseButtonMiddle) {
-		im.buttonMod |= d2interface.MouseButtonModMiddle
+	if im.inputService.IsMouseButtonPressed(d2enum.MouseButtonMiddle) {
+		im.buttonMod |= d2enum.MouseButtonModMiddle
 	}
 
-	if im.inputService.IsMouseButtonPressed(d2interface.MouseButtonRight) {
-		im.buttonMod |= d2interface.MouseButtonModRight
+	if im.inputService.IsMouseButtonPressed(d2enum.MouseButtonRight) {
+		im.buttonMod |= d2enum.MouseButtonModRight
 	}
 }
 
-func (im *inputManager) updateJustPressedKey(k d2interface.Key, e HandlerEvent) {
+func (im *inputManager) updateJustPressedKey(k d2enum.Key, e HandlerEvent) {
 	if im.inputService.IsKeyJustPressed(k) {
 		event := KeyEvent{HandlerEvent: e, key: k}
 
@@ -95,7 +96,7 @@ func (im *inputManager) updateJustPressedKey(k d2interface.Key, e HandlerEvent) 
 	}
 }
 
-func (im *inputManager) updateJustReleasedKey(k d2interface.Key, e HandlerEvent) {
+func (im *inputManager) updateJustReleasedKey(k d2enum.Key, e HandlerEvent) {
 	if im.inputService.IsKeyJustReleased(k) {
 		event := KeyEvent{HandlerEvent: e, key: k}
 
@@ -110,7 +111,7 @@ func (im *inputManager) updateJustReleasedKey(k d2interface.Key, e HandlerEvent)
 	}
 }
 
-func (im *inputManager) updatePressedKey(k d2interface.Key, e HandlerEvent) {
+func (im *inputManager) updatePressedKey(k d2enum.Key, e HandlerEvent) {
 	if im.inputService.IsKeyPressed(k) {
 		event := KeyEvent{
 			HandlerEvent: e,
@@ -144,7 +145,7 @@ func (im *inputManager) updateInputChars(eventBase HandlerEvent) {
 	}
 }
 
-func (im *inputManager) updateJustPressedButton(b d2interface.MouseButton, e HandlerEvent) {
+func (im *inputManager) updateJustPressedButton(b d2enum.MouseButton, e HandlerEvent) {
 	if im.inputService.IsMouseButtonJustPressed(b) {
 		event := MouseEvent{e, b}
 
@@ -159,7 +160,7 @@ func (im *inputManager) updateJustPressedButton(b d2interface.MouseButton, e Han
 	}
 }
 
-func (im *inputManager) updateJustReleasedButton(b d2interface.MouseButton, e HandlerEvent) {
+func (im *inputManager) updateJustReleasedButton(b d2enum.MouseButton, e HandlerEvent) {
 	if im.inputService.IsMouseButtonJustReleased(b) {
 		event := MouseEvent{e, b}
 
@@ -174,7 +175,7 @@ func (im *inputManager) updateJustReleasedButton(b d2interface.MouseButton, e Ha
 	}
 }
 
-func (im *inputManager) updatePressedButton(b d2interface.MouseButton, e HandlerEvent) {
+func (im *inputManager) updatePressedButton(b d2enum.MouseButton, e HandlerEvent) {
 	if im.inputService.IsMouseButtonPressed(b) {
 		event := MouseEvent{e, b}
 
