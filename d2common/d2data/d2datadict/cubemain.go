@@ -212,8 +212,10 @@ func LoadCubeRecipes(file []byte) {
 
 			record.Outputs[o].Properties = properties
 		}
+
 		CubeRecipes = append(CubeRecipes, record)
 	}
+
 	if d.Err != nil {
 		panic(d.Err)
 	}

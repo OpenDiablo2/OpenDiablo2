@@ -82,11 +82,14 @@ func LoadAutoMaps(file []byte) {
 			// aren't useful see the AutoMapRecord struct.
 		}
 		record.Frames = make([]int, len(frameFields))
+
 		for i := range frameFields {
 			record.Frames[i] = d.Number(frameFields[i])
 		}
+
 		AutoMaps = append(AutoMaps, record)
 	}
+
 	if d.Err != nil {
 		panic(d.Err)
 	}

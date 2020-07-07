@@ -95,7 +95,7 @@ type LevelDetailsRecord struct {
 
 	// Id
 	// Level ID (used in columns like VIS0-7)
-	Id int //nolint:golint Id is the right key
+	Id int //nolint:golint,stylecheck // Id is the right key
 
 	// Palette is the Act Palette . Reference only
 	Palette int // Pal
@@ -381,7 +381,7 @@ func GetLevelDetails(id int) *LevelDetailsRecord {
 // LoadLevelDetails loads level details records from levels.txt
 //nolint:funlen // Txt loader, makes no sense to split
 func LoadLevelDetails(file []byte) {
-	LevelDetails = make(map[int]*LevelDetailsRecord, 0)
+	LevelDetails = make(map[int]*LevelDetailsRecord)
 
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
@@ -534,6 +534,7 @@ func LoadLevelDetails(file []byte) {
 		}
 		LevelDetails[record.Id] = record
 	}
+
 	if d.Err != nil {
 		panic(d.Err)
 	}

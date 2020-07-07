@@ -9,37 +9,6 @@ import (
 
 // MonStats2Record is a representation of a row from monstats2.txt
 type MonStats2Record struct {
-	// Key, the object ID MonStatEx feild from MonStat
-	Key string
-
-	// These follow three are apparently unused
-	Height        int
-	OverlayHeight int
-	PixelHeight   int
-
-	// Diameter in subtiles
-	SizeX int
-	SizeY int
-
-	// This specifies if the size values get used for collision detection
-	NoGfxHitTest bool
-
-	// Bounding box
-	BoxTop    int
-	BoxLeft   int
-	BoxWidth  int
-	BoxHeight int
-
-	// Spawn method used
-	SpawnMethod int
-
-	// Melee radius
-	MeleeRng int
-
-	// base weaponclass?
-	BaseWeaponClass string
-	HitClass        int
-
 	// Available options for equipment
 	// randomly selected from
 	HDv []string
@@ -59,44 +28,39 @@ type MonStats2Record struct {
 	S7v []string
 	S8v []string
 
-	// Does the unit have this component
-	HD bool
-	TR bool
-	LG bool
-	RA bool
-	LA bool
-	RH bool
-	LH bool
-	SH bool
-	S1 bool
-	S2 bool
-	S3 bool
-	S4 bool
-	S5 bool
-	S6 bool
-	S7 bool
-	S8 bool
+	Key             string // Key, the object ID MonStatEx feild from MonStat
+	BaseWeaponClass string
+	ResurrectSkill  string
+	Heart           string
+	BodyPart        string
+
+	// These follow three are apparently unused
+	Height        int
+	OverlayHeight int
+	PixelHeight   int
+
+	// Diameter in subtiles
+	SizeX int
+	SizeY int
+
+	// Bounding box
+	BoxTop    int
+	BoxLeft   int
+	BoxWidth  int
+	BoxHeight int
+
+	// Spawn method used
+	SpawnMethod int
+
+	// Melee radius
+	MeleeRng int
+
+	// base weaponclass?
+
+	HitClass int
 
 	// Sum of available components
 	TotalPieces int
-
-	// Available animation modes
-	mDT bool
-	mNU bool
-	mWL bool
-	mGH bool
-	mA1 bool
-	mA2 bool
-	mBL bool
-	mSC bool
-	mS1 bool
-	mS2 bool
-	mS3 bool
-	mS4 bool
-	mDD bool
-	mKB bool
-	mSQ bool
-	mRN bool
 
 	// Number of directions for each mode
 	dDT int
@@ -116,6 +80,79 @@ type MonStats2Record struct {
 	dSQ int
 	dRN int
 
+	// If the units is restored on map reload
+	Restore int
+
+	// What maximap index is used for the automap
+	AutomapCel int
+
+	// Blood offset?
+	LocalBlood int
+
+	// 0 = don't bleed, 1 = small blood missile, 2 = small and large, > 3 other missiles?
+	Bleed int
+
+	// If the unit is lights up the area
+	Light int
+
+	// Light color
+	LightR int
+	LightG int
+	lightB int
+
+	// Palettes per difficulty
+	NormalPalette    int
+	NightmarePalette int
+	HellPalatte      int
+
+	// These two are useless as of 1.07
+
+	// Inferno animation stuff
+	InfernoLen      int
+	InfernoAnim     int
+	InfernoRollback int
+	// Which mode is used after resurrection
+	ResurrectMode d2enum.MonsterAnimationMode
+
+	// This specifies if the size values get used for collision detection
+	NoGfxHitTest bool
+
+	// Does the unit have this component
+	HD bool
+	TR bool
+	LG bool
+	RA bool
+	LA bool
+	RH bool
+	LH bool
+	SH bool
+	S1 bool
+	S2 bool
+	S3 bool
+	S4 bool
+	S5 bool
+	S6 bool
+	S7 bool
+	S8 bool
+
+	// Available animation modes
+	mDT bool
+	mNU bool
+	mWL bool
+	mGH bool
+	mA1 bool
+	mA2 bool
+	mBL bool
+	mSC bool
+	mS1 bool
+	mS2 bool
+	mS3 bool
+	mS4 bool
+	mDD bool
+	mKB bool
+	mSQ bool
+	mRN bool
+
 	// Available modes while moving aside from WL and RN
 	A1mv bool
 	A2mv bool
@@ -124,12 +161,6 @@ type MonStats2Record struct {
 	S2mv bool
 	S3mv bool
 	S4mv bool
-
-	// If the units is restored on map reload
-	Restore int
-
-	// What maximap index is used for the automap
-	AutomapCel int
 
 	// true of unit uses an automap entry
 	NoMap bool
@@ -191,39 +222,8 @@ type MonStats2Record struct {
 	// If multiple layers should be used on death (otherwise only TR)
 	CompositeDeath bool
 
-	// Blood offset?
-	LocalBlood int
-
-	// 0 = don't bleed, 1 = small blood missile, 2 = small and large, > 3 other missiles?
-	Bleed int
-
-	// If the unit is lights up the area
-	Light int
-
-	// Light color
-	LightR int
-	LightG int
-	lightB int
-
-	// Palettes per difficulty
-	NormalPalette    int
-	NightmarePalette int
-	HellPalatte      int
-
-	// These two are useless as of 1.07
-	Heart    string
-	BodyPart string
-
-	// Inferno animation stuff
-	InfernoLen      int
-	InfernoAnim     int
-	InfernoRollback int
-
-	// Which mode is used after resurrection
-	ResurrectMode d2enum.MonsterAnimationMode
-
 	// Which skill is used for resurrection
-	ResurrectSkill string
+
 }
 
 // MonStats2 stores all of the MonStats2Records
@@ -233,7 +233,7 @@ var MonStats2 map[string]*MonStats2Record
 // LoadMonStats2 loads MonStats2Records from monstats2.txt
 //nolint:funlen //just a big data loader
 func LoadMonStats2(file []byte) {
-	MonStats2 = make(map[string]*MonStats2Record, 0)
+	MonStats2 = make(map[string]*MonStats2Record)
 
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
@@ -366,6 +366,7 @@ func LoadMonStats2(file []byte) {
 		}
 		MonStats2[record.Key] = record
 	}
+
 	if d.Err != nil {
 		panic(d.Err)
 	}

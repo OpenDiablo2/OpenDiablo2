@@ -8,8 +8,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
-// MagicPrefix + MagicSuffix store item affix records
+// MagicPrefix stores all of the magic prefix records
 var MagicPrefix []*ItemAffixCommonRecord //nolint:gochecknoglobals // Currently global by design
+// MagicSuffix stores all of the magic suffix records
 var MagicSuffix []*ItemAffixCommonRecord //nolint:gochecknoglobals // Currently global by design
 
 // LoadMagicPrefix loads MagicPrefix.txt

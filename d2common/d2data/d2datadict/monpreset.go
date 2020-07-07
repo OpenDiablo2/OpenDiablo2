@@ -12,7 +12,7 @@ var MonPresets map[int32][]string
 
 // LoadMonPresets loads monster presets from monpresets.txt
 func LoadMonPresets(file []byte) {
-	MonPresets = make(map[int32][]string, 0)
+	MonPresets = make(map[int32][]string)
 
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
@@ -20,8 +20,10 @@ func LoadMonPresets(file []byte) {
 		if _, ok := MonPresets[act]; !ok {
 			MonPresets[act] = make([]string, 0)
 		}
+
 		MonPresets[act] = append(MonPresets[act], d.String("Place"))
 	}
+
 	if d.Err != nil {
 		panic(d.Err)
 	}

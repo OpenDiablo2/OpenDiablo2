@@ -41,7 +41,7 @@ var LevelMazeDetails map[int]*LevelMazeDetailsRecord //nolint:gochecknoglobals /
 
 // LoadLevelMazeDetails loads LevelMazeDetailsRecords from text file
 func LoadLevelMazeDetails(file []byte) {
-	LevelMazeDetails = make(map[int]*LevelMazeDetailsRecord, 0)
+	LevelMazeDetails = make(map[int]*LevelMazeDetailsRecord)
 
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
@@ -56,6 +56,7 @@ func LoadLevelMazeDetails(file []byte) {
 		}
 		LevelMazeDetails[record.LevelID] = record
 	}
+
 	if d.Err != nil {
 		panic(d.Err)
 	}

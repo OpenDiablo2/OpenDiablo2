@@ -70,7 +70,7 @@ var LevelSubstitutions map[int]*LevelSubstitutionRecord
 
 // LoadLevelSubstitutions loads lvlsub.txt and parses into records
 func LoadLevelSubstitutions(file []byte) {
-	LevelSubstitutions = make(map[int]*LevelSubstitutionRecord, 0)
+	LevelSubstitutions = make(map[int]*LevelSubstitutionRecord)
 
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
@@ -100,6 +100,7 @@ func LoadLevelSubstitutions(file []byte) {
 		}
 		LevelSubstitutions[record.ID] = record
 	}
+
 	if d.Err != nil {
 		panic(d.Err)
 	}

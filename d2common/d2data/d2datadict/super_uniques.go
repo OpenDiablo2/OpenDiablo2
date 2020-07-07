@@ -125,7 +125,7 @@ var SuperUniques map[string]*SuperUniqueRecord
 
 // LoadSuperUniques loads SuperUniqueRecords from superuniques.txt
 func LoadSuperUniques(file []byte) {
-	SuperUniques = make(map[string]*SuperUniqueRecord, 0)
+	SuperUniques = make(map[string]*SuperUniqueRecord)
 
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
@@ -154,6 +154,7 @@ func LoadSuperUniques(file []byte) {
 		}
 		SuperUniques[record.Key] = record
 	}
+
 	if d.Err != nil {
 		panic(d.Err)
 	}

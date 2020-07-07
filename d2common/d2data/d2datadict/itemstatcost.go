@@ -109,7 +109,7 @@ var ItemStatCosts map[string]*ItemStatCostRecord
 
 // LoadItemStatCosts loads ItemStatCostRecord's from text
 func LoadItemStatCosts(file []byte) {
-	ItemStatCosts = make(map[string]*ItemStatCostRecord, 0)
+	ItemStatCosts = make(map[string]*ItemStatCostRecord)
 
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
@@ -182,6 +182,7 @@ func LoadItemStatCosts(file []byte) {
 		}
 		ItemStatCosts[record.Name] = record
 	}
+
 	if d.Err != nil {
 		panic(d.Err)
 	}

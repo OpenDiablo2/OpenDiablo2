@@ -169,6 +169,7 @@ func LoadHireling(file []byte) {
 		}
 		Hirelings = append(Hirelings, hireling)
 	}
+
 	if d.Err != nil {
 		panic(d.Err)
 	}

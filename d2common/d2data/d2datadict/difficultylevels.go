@@ -94,7 +94,7 @@ type DifficultyLevelRecord struct {
 
 // LoadDifficultyLevels is a loader for difficultylevels.txt
 func LoadDifficultyLevels(file []byte) {
-	DifficultyLevels = make(map[string]*DifficultyLevelRecord, 0)
+	DifficultyLevels = make(map[string]*DifficultyLevelRecord)
 
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
@@ -119,6 +119,7 @@ func LoadDifficultyLevels(file []byte) {
 		}
 		DifficultyLevels[record.Name] = record
 	}
+
 	if d.Err != nil {
 		panic(d.Err)
 	}

@@ -60,12 +60,12 @@ func GetExperienceBreakpoint(heroType d2enum.Hero, level int) int {
 // LoadExperienceBreakpoints loads experience.txt into a map
 // ExperienceBreakpoints []*ExperienceBreakpointsRecord
 func LoadExperienceBreakpoints(file []byte) {
-	ExperienceBreakpoints = make(map[int]*ExperienceBreakpointsRecord, 0)
+	ExperienceBreakpoints = make(map[int]*ExperienceBreakpointsRecord)
 
 	d := d2common.LoadDataDictionary(file)
-
-	// we skip the second row because that describes max level of char classes
 	d.Next()
+
+	// the first row describes the max level of char classes
 	maxLevels = map[d2enum.Hero]int{
 		d2enum.HeroAmazon:      d.Number("Amazon"),
 		d2enum.HeroBarbarian:   d.Number("Barbarian"),
@@ -92,6 +92,7 @@ func LoadExperienceBreakpoints(file []byte) {
 		}
 		ExperienceBreakpoints[record.Level] = record
 	}
+
 	if d.Err != nil {
 		panic(d.Err)
 	}

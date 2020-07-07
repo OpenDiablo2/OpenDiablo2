@@ -57,7 +57,7 @@ var Gems map[string]*GemsRecord //nolint:gochecknoglobals // Currently global by
 
 // LoadGems loads gem records into a map[string]*GemsRecord
 func LoadGems(file []byte) {
-	Gems = make(map[string]*GemsRecord, 0)
+	Gems = make(map[string]*GemsRecord)
 
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
@@ -106,6 +106,7 @@ func LoadGems(file []byte) {
 		}
 		Gems[gem.Name] = gem
 	}
+
 	if d.Err != nil {
 		panic(d.Err)
 	}

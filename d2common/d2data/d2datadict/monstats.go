@@ -28,7 +28,7 @@ type (
 		// column also links other hardcoded effects to the units, such as the
 		// transparency on necro summons and the name-color change on unique boss
 		// units (thanks to Kingpin for the info)
-		Id string // called `hcIdx` in monstats.txt //nolint:golint Id is the right key
+		Id string //nolint:golint,stylecheck // called `hcIdx` in monstats.txt
 
 		// BaseKey is an ID pointer of the “base” unit for this specific
 		// monster type (ex. There are five types of “Fallen”; all of them have
@@ -81,12 +81,10 @@ type (
 		SpawnAnimationKey string // called `spawnmode` in monstats.txt
 
 		// MinionId1 is an Id of a minion that spawns when this monster is created
-		//nolint:golint Id is the right key
-		MinionId1 string // called `minion1` in monstats.txt
+		MinionId1 string //nolint:golint,stylecheck // called `minion1` in monstats.txt
 
 		// MinionId2 is an Id of a minion that spawns when this monster is created
-		//nolint:golint Id is the right key
-		MinionId2 string // called `minion2` in monstats.txt
+		MinionId2 string //nolint:golint,stylecheck // called `minion2` in monstats.txt
 
 		// SoundKeyNormal, SoundKeySpecial
 		// specifies the ID pointer to this monsters “Sound Bank” in MonSound.txt
@@ -115,14 +113,14 @@ type (
 		// the ID Pointer to the skill (from Skills.txt) the monster will cast when
 		// this specific slot is accessed by the AI. Which slots are used is
 		// determined by the units AI.
-		SkillId1 string // called `Skill1` in monstats.txt //nolint:golint Id is the right key
-		SkillId2 string // called `Skill2` in monstats.txt //nolint:golint Id is the right key
-		SkillId3 string // called `Skill3` in monstats.txt //nolint:golint Id is the right key
-		SkillId4 string // called `Skill4` in monstats.txt //nolint:golint Id is the right key
-		SkillId5 string // called `Skill5` in monstats.txt //nolint:golint Id is the right key
-		SkillId6 string // called `Skill6` in monstats.txt //nolint:golint Id is the right key
-		SkillId7 string // called `Skill7` in monstats.txt //nolint:golint Id is the right key
-		SkillId8 string // called `Skill8` in monstats.txt //nolint:golint Id is the right key
+		SkillId1 string //nolint:golint,stylecheck // called `Skill1` in monstats.txt
+		SkillId2 string //nolint:golint,stylecheck // called `Skill2` in monstats.txt
+		SkillId3 string //nolint:golint,stylecheck // called `Skill3` in monstats.txt
+		SkillId4 string //nolint:golint,stylecheck // called `Skill4` in monstats.txt
+		SkillId5 string //nolint:golint,stylecheck // called `Skill5` in monstats.txt
+		SkillId6 string //nolint:golint,stylecheck // called `Skill6` in monstats.txt
+		SkillId7 string //nolint:golint,stylecheck // called `Skill7` in monstats.txt
+		SkillId8 string //nolint:golint,stylecheck // called `Skill8` in monstats.txt
 
 		// SkillAnimation1 -- SkillAnimation8
 		// the graphical MODE (or SEQUENCE) this unit uses when it uses this skill.
@@ -139,8 +137,7 @@ type (
 		// ID Pointer to the skill that controls this units damage. This is used for
 		// the druids summons. IE their damage is specified solely by Skills.txt and
 		// not by MonStats.txt.
-		//nolint:golint Id is the right key
-		DamageSkillId string // called `SkillDamage` in monstats.txt
+		DamageSkillId string //nolint:golint,stylecheck // called `SkillDamage` in monstats.txt
 
 		// ElementAttackMode1 -- ElementAttackMode3
 		// the mode to which the elemental damage is appended. The modes to which
@@ -190,12 +187,12 @@ type (
 
 		// TreasureClassQuestTriggerId
 		// the ID of the Quest that triggers the Quest Treasureclass drop.
-		TreasureClassQuestTriggerId string // called `TCQuestId` in monstats.txt
+		TreasureClassQuestTriggerId string //nolint:golint,stylecheck // called `TCQuestId` in monstats.txt
 
 		// TreasureClassQuestCompleteId
 		//  the ID of the Quest State that you need to complete to trigger the Quest
 		// Treasureclass trop.
-		TreasureClassQuestCompleteId string // called `TCQuestCP` in monstats.txt
+		TreasureClassQuestCompleteId string //nolint:golint,stylecheck // called `TCQuestCP` in monstats.txt
 
 		// PaletteId indicates which palette (color) entry the unit will use, most
 		// monsters have a palshift.dat file in their COF folder, this file
@@ -208,7 +205,7 @@ type (
 		// such as FC do not accept their palettes.
 		// NOTE no 2: some monsters got unused palettes, ZM (zombie) for example
 		// will turn light-rotten-green with palette nr 5 and pink-creamy with 6.
-		PaletteId int // called `TransLvl` in monstats.txt
+		PaletteId int //nolint:golint,stylecheck // called `TransLvl` in monstats.txt
 
 		// SpawnOffsetX, SpawnOffsetY
 		// are the x/y offsets at which spawned monsters are placed. IE this prevents
@@ -683,14 +680,14 @@ type (
 	}
 )
 
-var MonStats map[string]*MonStatsRecord
+// MonStats stores all of the MonStat Records
+var MonStats map[string]*MonStatsRecord //nolint:gochecknoglobals // Currently global by design, only written once
 
-//nolint:funlen // Makes no sense to split
-func LoadMonStats(file []byte) {
+// LoadMonStats loads monstats
+func LoadMonStats(file []byte) { // nolint:funlen // Makes no sense to split
+	MonStats = make(map[string]*MonStatsRecord)
+
 	d := d2common.LoadDataDictionary(file)
-
-	MonStats = make(map[string]*MonStatsRecord, 0)
-
 	for d.Next() {
 		record := &MonStatsRecord{
 			Key:                            d.String("Id"),
@@ -948,6 +945,7 @@ func LoadMonStats(file []byte) {
 		}
 		MonStats[record.Key] = record
 	}
+
 	if d.Err != nil {
 		panic(d.Err)
 	}
