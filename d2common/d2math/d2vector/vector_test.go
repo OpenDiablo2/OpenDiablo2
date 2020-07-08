@@ -25,6 +25,12 @@ func evaluateScalar(description string, want, got float64, t *testing.T) {
 	}
 }
 
+func evaluateScalarApprox(description string, want, got float64, t *testing.T) {
+	if d2math.CompareFloat64Fuzzy(want, got) != 0 {
+		t.Errorf("%s: wanted %f: got %f", description, want, got)
+	}
+}
+
 func evaluateChanged(description string, original, clone Vector, t *testing.T) {
 	if !original.Equals(clone) {
 		t.Errorf("%s: changed vector %s to %s unexpectedly", description, clone, original)
@@ -223,6 +229,17 @@ func TestLength(t *testing.T) {
 	evaluateChanged(d, v, c, t)
 
 	evaluateScalar(d, want, got, t)
+}
+
+func TestSetLength(t *testing.T) {
+	v := NewVector(1, 1)
+	c := v.Clone()
+	want := 2.0
+	got := v.SetLength(want).Length()
+
+	d := fmt.Sprintf("length of %s", c)
+
+	evaluateScalarApprox(d, want, got, t)
 }
 
 func TestDot(t *testing.T) {

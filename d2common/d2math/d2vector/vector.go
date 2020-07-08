@@ -139,6 +139,13 @@ func (v *Vector) Length() float64 {
 	return math.Sqrt(v.Dot(v))
 }
 
+// SetLength sets the length of this Vector
+func (v *Vector) SetLength(length float64) *Vector {
+	v.Normalize()
+	v.Scale(length)
+	return v
+}
+
 // Dot returns the dot product of this Vector and the given Vector.
 func (v *Vector) Dot(o *Vector) float64 {
 	return v.x*o.x + v.y*o.y
@@ -200,10 +207,6 @@ func (self Vector) Do(applyFn func(float64) float64) {
 }*/
 
 /*
-// SetLength sets the length of this Vector
-func (v *BigFloat) SetLength(length *big.Float) d2interface.Vector {
-	return v.Normalize().Scale(length)
-}
 
 // NormalizeRightHand rotate this Vector to its perpendicular,
 // in the positive direction.
