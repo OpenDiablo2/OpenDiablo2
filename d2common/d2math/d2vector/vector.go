@@ -280,42 +280,32 @@ func (v Vector) String() string {
 	return fmt.Sprintf("Vector{%.3f, %.3f}", v.x, v.y)
 }
 
-/*// Iterates through the elements of this vector and for each element invokes
-// the function.
-func (self Vector) Do(applyFn func(float64) float64) {
-	for i, e := range self {
-		self[i] = applyFn(e)
-	}
-}*/
-
-/*
-
-// BigFloatUp returns a new vector (0, 1)
-func BigFloatUp() d2interface.Vector {
-	return NewBigFloat(0, 1)
+// VectorUp returns a new vector (0, 1)
+func VectorUp() Vector {
+	return NewVector(0, 1)
 }
 
-// BigFloatDown returns a new vector (0, -1)
-func BigFloatDown() d2interface.Vector {
-	return NewBigFloat(0, -1)
+// VectorDown returns a new vector (0, -1)
+func VectorDown() Vector {
+	return NewVector(0, -1)
 }
 
-// BigFloatRight returns a new vector (1, 0)
-func BigFloatRight() d2interface.Vector {
-	return NewBigFloat(1, 0)
+// VectorRight returns a new vector (1, 0)
+func VectorRight() Vector {
+	return NewVector(1, 0)
 }
 
-// BigFloatLeft returns a new vector (-1, 0)
-func BigFloatLeft() d2interface.Vector {
-	return NewBigFloat(-1, 0)
+// VectorLeft returns a new vector (-1, 0)
+func VectorLeft() Vector {
+	return NewVector(-1, 0)
 }
 
-// BigFloatOne returns a new vector (1, 1)
-func BigFloatOne() d2interface.Vector {
-	return NewBigFloat(1, 1)
+// VectorOne returns a new vector (1, 1)
+func VectorOne() Vector {
+	return NewVector(1, 1)
 }
 
-// BigFloatZero returns a new vector (0, 0)
-func BigFloatZero() d2interface.Vector {
-	return NewBigFloat(0, 0)
-}*/
+// VectorZero returns a new vector (0, 0)
+func VectorZero() Vector {
+	return NewVector(0, 0)
+}
