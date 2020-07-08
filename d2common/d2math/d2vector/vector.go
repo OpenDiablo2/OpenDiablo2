@@ -53,6 +53,7 @@ func (v *Vector) Clone() Vector {
 func (v *Vector) Copy(o *Vector) *Vector {
 	v.x = o.x
 	v.y = o.y
+
 	return v
 }
 
@@ -151,6 +152,24 @@ func (v *Vector) Dot(o *Vector) float64 {
 	return v.x*o.x + v.y*o.y
 }
 
+// Cross returns the cross product of this Vector and the given Vector.
+// Note: Cross product is specific to 3D space. This a not cross product.
+// It is the Z component of a 3D vector cross product calculation. The X
+// and Y components use the value of z which doesn't exist in 2D.
+// See: https://stackoverflow.com/questions/243945/calculating-a-2d-vectors-cross-product
+//
+// The sign of Cross indicates whether the direction between the points
+// described by vectors v and o around the origin (0,0) moves clockwise
+// or anti-clockwise. The perspective is from the would-be position of
+// positive Z and the direction is from v to o.
+//
+// Negative = clockwise
+// Positive = anti-clockwise
+// 0 = vectors are identical.
+func (v *Vector) Cross(o Vector) float64 {
+	return v.x*o.y - v.y*o.x
+}
+
 // Normalize sets the vector length to 1 without changing the direction.
 func (v *Vector) Normalize() *Vector {
 	v.Scale(1 / v.Length())
@@ -186,8 +205,8 @@ func (v *Vector) SignedAngle(o Vector) float64 {
 // Rotate moves the vector around it's origin clockwise, by the given angle in radians.
 func (v *Vector) Rotate(angle float64) *Vector {
 	a := -angle
-	x := (v.x * math.Cos(a)) - (v.y * math.Sin(a))
-	y := (v.x * math.Sin(a)) + (v.y * math.Cos(a))
+	x := v.x*math.Cos(a) - v.y*math.Sin(a)
+	y := v.x*math.Sin(a) + v.y*math.Cos(a)
 	v.x = x
 	v.y = y
 
@@ -226,17 +245,6 @@ func (v *BigFloat) NormalizeLeftHand() d2interface.Vector {
 	v.y = x.Mul(x, big.NewFloat(negative1))
 
 	return v
-}
-
-
-
-// Cross Calculate the cross product of this Vector and the given Vector.
-func (v *BigFloat) Cross(src d2interface.Vector) *big.Float {
-	c := v.Clone()
-	c.XBig().Mul(c.XBig(), src.XBig())
-	c.YBig().Mul(c.YBig(), src.YBig())
-
-	return c.XBig().Sub(c.XBig(), c.YBig())
 }
 
 // Lerp Linearly interpolate between this Vector and the given Vector.

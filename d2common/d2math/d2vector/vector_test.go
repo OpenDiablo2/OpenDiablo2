@@ -255,6 +255,23 @@ func TestDot(t *testing.T) {
 	evaluateScalar(d, want, got, t)
 }
 
+func TestCross(t *testing.T) {
+	v := NewVector(1, 1)
+
+	clock := NewVector(1, 0)
+	anti := NewVector(0, 1)
+
+	want := -1.0
+	got := v.Cross(clock)
+
+	evaluateScalar(fmt.Sprintf("cross product of %s and %s", v, clock), want, got, t)
+
+	want = 1.0
+	got = v.Cross(anti)
+
+	evaluateScalar(fmt.Sprintf("cross product of %s and %s", v, anti), want, got, t)
+}
+
 func TestNormalize(t *testing.T) {
 	v := NewVector(10, 0)
 	c := v.Clone()
