@@ -213,6 +213,24 @@ func (v *Vector) Rotate(angle float64) *Vector {
 	return v
 }
 
+// NinetyAnti rotates this vector by 90 degrees anti-clockwise.
+func (v *Vector) NinetyAnti() *Vector {
+	x := v.x
+	v.x = v.y * -1
+	v.y = x
+
+	return v
+}
+
+// NinetyClock rotates this vector by 90 degrees clockwise.
+func (v *Vector) NinetyClock() *Vector {
+	y := v.y
+	v.y = v.x * -1
+	v.x = y
+
+	return v
+}
+
 func (v Vector) String() string {
 	return fmt.Sprintf("Vector{%.3f, %.3f}", v.x, v.y)
 }
@@ -227,25 +245,9 @@ func (self Vector) Do(applyFn func(float64) float64) {
 
 /*
 
-// NormalizeRightHand rotate this Vector to its perpendicular,
-// in the positive direction.
-func (v *BigFloat) NormalizeRightHand() d2interface.Vector {
-	x := v.x
-	v.x = v.y.Mul(v.y, big.NewFloat(negative1))
-	v.y = x
 
-	return v
-}
 
-// NormalizeLeftHand rotate this Vector to its perpendicular,
-// in the negative1 direction.
-func (v *BigFloat) NormalizeLeftHand() d2interface.Vector {
-	x := v.x
-	v.x = v.y
-	v.y = x.Mul(x, big.NewFloat(negative1))
 
-	return v
-}
 
 // Lerp Linearly interpolate between this Vector and the given Vector.
 func (v *BigFloat) Lerp(
@@ -256,14 +258,6 @@ func (v *BigFloat) Lerp(
 	x, y := vc.XBig(), vc.YBig()
 	v.x.Set(x.Add(x, t.Mul(t, sc.XBig().Sub(sc.XBig(), x))))
 	v.y.Set(y.Add(y, t.Mul(t, sc.YBig().Sub(sc.YBig(), y))))
-
-	return v
-}
-
-// Reset this Vector the zero vector (0, 0).
-func (v *BigFloat) Reset() d2interface.Vector {
-	v.x.SetFloat64(zero)
-	v.y.SetFloat64(zero)
 
 	return v
 }

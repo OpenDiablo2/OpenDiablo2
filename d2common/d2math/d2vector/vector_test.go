@@ -351,3 +351,24 @@ func TestRotate(t *testing.T) {
 
 	evaluateVectorApprox(fmt.Sprintf("rotated %s by %.1f", c, angle*d2math.RadToDeg), want, *got, t)
 }
+
+func TestNinetyAnti(t *testing.T) {
+	v := NewVector(0, 1)
+	c := v.Clone()
+
+	want := NewVector(-1, 0)
+	got := v.NinetyAnti()
+
+	evaluateVector(fmt.Sprintf("rotated %s by 90 degrees clockwise", c), want, *got, t)
+}
+
+func TestNinetyClock(t *testing.T) {
+	v := NewVector(0, 1)
+	c := v.Clone()
+
+	want := NewVector(1, 0)
+	v = c.Clone()
+	got := v.NinetyClock()
+
+	evaluateVector(fmt.Sprintf("rotated %s by 90 degrees anti-clockwise", c), want, *got, t)
+}
