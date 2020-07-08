@@ -3,13 +3,11 @@ package main
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
-	
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
-
 	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
-
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 )
 
@@ -24,6 +22,10 @@ var GitCommit string
 func main() {
 	log.SetFlags(log.Lshortfile)
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
+
+	if err := d2config.Load(); err != nil {
+		panic(err)
+	}
 
 	// Initialize our providers
 	renderer, err := ebiten.CreateRenderer()
@@ -44,5 +46,7 @@ func main() {
 	}
 
 	app := d2app.Create(GitBranch, GitCommit, term, audio, renderer)
-	app.Run()
+	if err := app.Run(); err != nil {
+		log.Fatal(err)
+	}
 }

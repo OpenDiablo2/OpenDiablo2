@@ -17,8 +17,6 @@ import (
 	"strings"
 	"sync"
 
-	"golang.org/x/image/colornames"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
@@ -34,7 +32,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 	"github.com/pkg/profile"
-
+	"golang.org/x/image/colornames"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -47,7 +45,6 @@ type App struct {
 	captureState      captureState
 	capturePath       string
 	captureFrames     []*image.RGBA
-	profileOption     string
 	gitBranch         string
 	gitCommit         string
 	terminal          d2interface.Terminal
@@ -62,9 +59,12 @@ type bindTerminalEntry struct {
 	action      interface{}
 }
 
-const defaultFPS = 0.04 // 1/25
-const bytesToMegabyte = 1024 * 1024
-const nSamplesTAlloc = 100
+const (
+	defaultFPS      = 0.04 // 1/25
+	bytesToMegabyte = 1024 * 1024
+	nSamplesTAlloc  = 100
+	debugPopN       = 6
+)
 
 // Create creates a new instance of the application
 func Create(gitBranch, gitCommit string,
@@ -84,7 +84,7 @@ func Create(gitBranch, gitCommit string,
 }
 
 // Run executes the application and kicks off the entire game process
-func (p *App) Run() {
+func (p *App) Run() error {
 	profileOption := kingpin.Flag("profile", "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)").String()
 	kingpin.Parse()
 
@@ -99,12 +99,10 @@ func (p *App) Run() {
 	// If we fail to initialize, we will show the error screen
 	if err := p.initialize(); err != nil {
 		if gameErr := p.renderer.Run(updateInitError, 800, 600, windowTitle); gameErr != nil {
-			log.Fatal(gameErr)
+			return gameErr
 		}
 
-		log.Fatal(err)
-
-		return
+		return err
 	}
 
 	d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(p.renderer, p.audio, p.terminal))
@@ -116,8 +114,10 @@ func (p *App) Run() {
 	d2common.SetBuildInfo(p.gitBranch, p.gitCommit)
 
 	if err := p.renderer.Run(p.update, 800, 600, windowTitle); err != nil {
-		log.Panic(err)
+		return err
 	}
+
+	return nil
 }
 
 func (p *App) initialize() error {
@@ -125,12 +125,8 @@ func (p *App) initialize() error {
 	p.lastTime = d2common.Now()
 	p.lastScreenAdvance = p.lastTime
 
-	if err := d2config.Load(); err != nil {
-		return err
-	}
-
-	config := d2config.Get()
-	d2resource.LanguageCode = config.Language()
+	config := d2config.Config
+	d2resource.LanguageCode = config.Language
 
 	p.renderer.SetWindowIcon("d2logo.png")
 	p.terminal.BindLogger()
@@ -164,7 +160,7 @@ func (p *App) initialize() error {
 		return err
 	}
 
-	p.audio.SetVolumes(config.BgmVolume(), config.SfxVolume())
+	p.audio.SetVolumes(config.BgmVolume, config.SfxVolume)
 
 	if err := p.loadDataDict(); err != nil {
 		return err
@@ -280,7 +276,7 @@ func (p *App) renderDebug(target d2interface.Surface) error {
 	target.DrawText("NumGC    " + strconv.FormatInt(int64(m.NumGC), 10))
 	target.PushTranslation(0, 16)
 	target.DrawText("Coords   " + strconv.FormatInt(int64(cx), 10) + "," + strconv.FormatInt(int64(cy), 10))
-	target.PopN(6) //nolint:gomnd This is the number of records we have popped
+	target.PopN(debugPopN)
 
 	return nil
 }
@@ -584,7 +580,7 @@ func updateInitError(target d2interface.Surface) error {
 
 	target.PushTranslation(width/5, height/2)
 	target.DrawText(`Could not find the MPQ files in the directory: 
-		%s\nPlease put the files and re-run the game.`, d2config.Get().MpqPath())
+		%s\nPlease put the files and re-run the game.`, d2config.Config.MpqPath)
 
 	return nil
 }
