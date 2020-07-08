@@ -21,6 +21,8 @@ type widget interface {
 
 	getPosition() (int, int)
 	setOffset(x, y int)
+	SetScreenPos(x, y int)
+	ScreenPos() (x, y int)
 	getSize() (int, int)
 	getLayer() int
 	isVisible() bool
@@ -30,6 +32,8 @@ type widget interface {
 type widgetBase struct {
 	x         int
 	y         int
+	Sx		  int
+	Sy        int
 	layer     int
 	visible   bool
 	expanding bool
@@ -53,6 +57,16 @@ func (w *widgetBase) GetPosition() (int, int) {
 
 func (w *widgetBase) GetOffset() (int, int) {
 	return w.offsetX, w.offsetY
+}
+
+// SetScreenPos sets the screen position
+func (w *widgetBase) SetScreenPos(x, y int) {
+	w.Sx, w.Sy = x, y
+}
+
+// ScreenPos returns the screen position
+func (w *widgetBase) ScreenPos() (x, y int) {
+	return w.Sx, w.Sy
 }
 
 func (w *widgetBase) setOffset(x, y int) {
