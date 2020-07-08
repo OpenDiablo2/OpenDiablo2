@@ -192,9 +192,13 @@ func (v *Vector) Cross(o Vector) float64 {
 }
 
 // Normalize sets the vector length to 1 without changing the direction.
-func (v *Vector) Normalize() *Vector {
-	v.Scale(1 / v.Length())
-	return v
+// The normalized vector may be scaled by the float64 return value to
+// restore it's original length.
+func (v *Vector) Normalize() float64 {
+	multiplier := 1 / v.Length()
+	v.Scale(multiplier)
+
+	return 1 / multiplier
 }
 
 // Angle computes the unsigned angle in radians from this vector to the given vector.
@@ -221,6 +225,26 @@ func (v *Vector) SignedAngle(o Vector) float64 {
 	}
 
 	return unsigned
+}
+
+// Reflect sets this Vector to it's reflection off a line defined by a normal.
+func (v *Vector) Reflect(normal Vector) *Vector {
+	normal.Normalize()
+	undo := v.Normalize()
+
+	normal.Scale(2 * v.Dot(&normal))
+	v.Subtract(&normal)
+	v.Scale(undo)
+
+	return v
+}
+
+// ReflectSurface does the same thing as Reflect, except the given vector describes,
+// the surface line, not it's normal.
+func (v *Vector) ReflectSurface(surface Vector) *Vector {
+	v.Reflect(surface).Negate()
+
+	return v
 }
 
 // Rotate moves the vector around it's origin clockwise, by the given angle in radians.
@@ -265,43 +289,6 @@ func (self Vector) Do(applyFn func(float64) float64) {
 }*/
 
 /*
-
-
-
-
-
-
-
-// Limit the length (or magnitude) of this Vector
-func (v *BigFloat) Limit(max *big.Float) d2interface.Vector {
-	length := v.Length()
-
-	if max.Cmp(length) < 0 {
-		v.Scale(length.Quo(max, length))
-	}
-
-	return v
-}
-
-// Reflect this Vector off a line defined by a normal.
-func (v *BigFloat) Reflect(normal d2interface.Vector) d2interface.Vector {
-	clone := v.Clone()
-	clone.Normalize()
-
-	two := big.NewFloat(2.0) // there's some matrix algebra magic here
-	dot := v.Clone().Dot(normal)
-	normal.Scale(two.Mul(two, dot))
-
-	return v.Subtract(normal)
-}
-
-// Mirror reflect this Vector across another.
-func (v *BigFloat) Mirror(axis d2interface.Vector) d2interface.Vector {
-	return v.Reflect(axis).Negate()
-}
-
-
-
 
 // BigFloatUp returns a new vector (0, 1)
 func BigFloatUp() d2interface.Vector {

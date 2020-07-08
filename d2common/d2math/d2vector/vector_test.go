@@ -300,16 +300,21 @@ func TestNormalize(t *testing.T) {
 	v := NewVector(10, 0)
 	c := v.Clone()
 	want := NewVector(1, 0)
-	got := v.Normalize()
+	v.Normalize()
 
-	evaluateVector(fmt.Sprintf("normalize %s", c), want, *got, t)
+	evaluateVector(fmt.Sprintf("normalize %s", c), want, v, t)
 
 	v = NewVector(0, 10)
 	c = v.Clone()
 	want = NewVector(0, 1)
-	got = v.Normalize()
+	reverse := v.Normalize()
 
-	evaluateVector(fmt.Sprintf("normalize %s", c), want, *got, t)
+	evaluateVector(fmt.Sprintf("normalize %s", c), want, v, t)
+
+	want = NewVector(0, 10)
+	v.Scale(reverse)
+
+	evaluateVector(fmt.Sprintf("reverse normalizing of %s", c), want, v, t)
 }
 
 func TestAngle(t *testing.T) {
@@ -355,6 +360,26 @@ func TestSignedAngle(t *testing.T) {
 	d = fmt.Sprintf("angle from %s to %s", v, other)
 	evaluateScalar(d, want, got, t)
 	evaluateChanged(d, other, c, t)
+}
+
+func TestReflect(t *testing.T) {
+	rightDown := NewVector(1, -1)
+	up := NewVector(0, 1)
+
+	want := NewVector(1, 1)
+	got := rightDown.Reflect(up)
+
+	evaluateVector(fmt.Sprintf("reflect direction %s off surface with normal %s", rightDown, up), want, *got, t)
+}
+
+func TestReflectSurface(t *testing.T) {
+	rightDown := NewVector(1, -1)
+	up := NewVector(0, 1)
+
+	want := NewVector(-1, -1)
+	got := rightDown.ReflectSurface(up)
+
+	evaluateVector(fmt.Sprintf("reflect direction %s off surface with normal %s", rightDown, up), want, *got, t)
 }
 
 func TestRotate(t *testing.T) {
