@@ -141,6 +141,18 @@ func TestFloor(t *testing.T) {
 	evaluateVector(fmt.Sprintf("round %s down", v), want, got, t)
 }
 
+func TestClamp(t *testing.T) {
+	v := NewVector(-10, 10)
+	c := v.Clone()
+	a := NewVector(2, 2)
+	b := NewVector(7, 7)
+
+	want := NewVector(2, 7)
+	got := v.Clamp(&a, &b)
+
+	evaluateVector(fmt.Sprintf("clamp %s between %s and %s", c, a, b), want, *got, t)
+}
+
 func TestAdd(t *testing.T) {
 	v := NewVector(1, 1)
 	add := NewVector(0.5, 0.5)
@@ -240,6 +252,18 @@ func TestSetLength(t *testing.T) {
 	d := fmt.Sprintf("length of %s", c)
 
 	evaluateScalarApprox(d, want, got, t)
+}
+
+func TestLerp(t *testing.T) {
+	a := NewVector(0, 0)
+	b := NewVector(-20, 10)
+
+	x := 0.3
+
+	want := NewVector(-6, 3)
+	got := a.Lerp(&b, x)
+
+	evaluateVector(fmt.Sprintf("linear interpolation between %s and %s by %.2f", a, b, x), want, *got, t)
 }
 
 func TestDot(t *testing.T) {

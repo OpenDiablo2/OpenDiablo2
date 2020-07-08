@@ -7,7 +7,8 @@ const (
 	Epsilon float64 = 0.0001
 
 	RadToDeg float64 = 57.29578
-	RadFull  float64 = 6.283185253783088
+
+	RadFull float64 = 6.283185253783088
 )
 
 // CompareFloat64Fuzzy returns an integer between -1 and 1 describing
@@ -33,6 +34,7 @@ func ClampFloat64(a, min, max float64) float64 {
 	} else if a < min {
 		return min
 	}
+
 	return a
 }
 
@@ -44,5 +46,19 @@ func Sign(a float64) int {
 	case a > 0:
 		return +1
 	}
+
 	return 0
+}
+
+// Lerp returns the linear interpolation from a to b using interpolator x.
+func Lerp(a, b, x float64) float64 {
+	return a + x*(b-a)
+}
+
+// Unlerp returns the intepolator Lerp would require to return x when given
+// a and b. The x argument of this function can be thought of as the return
+// value of lerp. The return value of this function can be used as x in
+// Lerp.
+func Unlerp(a, b, x float64) float64 {
+	return (x - a) / (b - a)
 }

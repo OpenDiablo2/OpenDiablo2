@@ -65,6 +65,16 @@ func (v *Vector) Floor() *Vector {
 	return v
 }
 
+// Clamp limits the values of v to those of a and b. If the
+// values of v are between those of a and b they will be
+// unchanged.
+func (v *Vector) Clamp(a, b *Vector) *Vector {
+	v.x = d2math.ClampFloat64(v.x, a.x, b.x)
+	v.y = d2math.ClampFloat64(v.y, a.y, b.y)
+
+	return v
+}
+
 // Add to this Vector the components of the given Vector.
 func (v *Vector) Add(o *Vector) *Vector {
 	v.x += o.x
@@ -144,6 +154,17 @@ func (v *Vector) Length() float64 {
 func (v *Vector) SetLength(length float64) *Vector {
 	v.Normalize()
 	v.Scale(length)
+
+	return v
+}
+
+// Lerp linearly interpolates this vector toward the given vector.
+// The interp argument describes the distance between v and o where
+// 0 is v and 1 is o.
+func (v *Vector) Lerp(o *Vector, interp float64) *Vector {
+	v.x = d2math.Lerp(v.x, o.x, interp)
+	v.y = d2math.Lerp(v.y, o.y, interp)
+
 	return v
 }
 
@@ -249,18 +270,7 @@ func (self Vector) Do(applyFn func(float64) float64) {
 
 
 
-// Lerp Linearly interpolate between this Vector and the given Vector.
-func (v *BigFloat) Lerp(
-	src d2interface.Vector,
-	t *big.Float,
-) d2interface.Vector {
-	vc, sc := v.Clone(), src.Clone()
-	x, y := vc.XBig(), vc.YBig()
-	v.x.Set(x.Add(x, t.Mul(t, sc.XBig().Sub(sc.XBig(), x))))
-	v.y.Set(y.Add(y, t.Mul(t, sc.YBig().Sub(sc.YBig(), y))))
 
-	return v
-}
 
 // Limit the length (or magnitude) of this Vector
 func (v *BigFloat) Limit(max *big.Float) d2interface.Vector {
@@ -288,25 +298,6 @@ func (v *BigFloat) Reflect(normal d2interface.Vector) d2interface.Vector {
 // Mirror reflect this Vector across another.
 func (v *BigFloat) Mirror(axis d2interface.Vector) d2interface.Vector {
 	return v.Reflect(axis).Negate()
-}
-
-// Rotate this Vector by an angle amount.
-func (v *BigFloat) Rotate(angle *big.Float) d2interface.Vector {
-	// HACK we should do this only with big.Float, not float64
-	// we are throwing away the precision here
-	floatAngle, _ := angle.Float64()
-	cos := math.Cos(floatAngle)
-	sin := math.Sin(floatAngle)
-
-	oldX, _ := v.x.Float64()
-	oldY, _ := v.y.Float64()
-
-	newX := big.NewFloat(cos*oldX - sin*oldY)
-	newY := big.NewFloat(sin*oldX + cos*oldY)
-
-	v.Set(newX, newY)
-
-	return v
 }
 
 
