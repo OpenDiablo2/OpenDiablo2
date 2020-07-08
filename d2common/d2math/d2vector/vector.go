@@ -176,9 +176,28 @@ func (v *Vector) SignedAngle(o Vector) float64 {
 	return unsigned
 }
 
-func (v Vector) String() string {
-	return fmt.Sprintf("Vector{%g, %g}", v.x, v.y)
+// Rotate moves the vector around it's origin clockwise, by the given angle in radians.
+func (v *Vector) Rotate(angle float64) *Vector {
+	a := -angle
+	x := (v.x * math.Cos(a)) - (v.y * math.Sin(a))
+	y := (v.x * math.Sin(a)) + (v.y * math.Cos(a))
+	v.x = x
+	v.y = y
+
+	return v
 }
+
+func (v Vector) String() string {
+	return fmt.Sprintf("Vector{%.3f, %.3f}", v.x, v.y)
+}
+
+/*// Iterates through the elements of this vector and for each element invokes
+// the function.
+func (self Vector) Do(applyFn func(float64) float64) {
+	for i, e := range self {
+		self[i] = applyFn(e)
+	}
+}*/
 
 /*
 // SetLength sets the length of this Vector

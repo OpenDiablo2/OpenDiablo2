@@ -13,6 +13,12 @@ func evaluateVector(description string, want, got Vector, t *testing.T) {
 	}
 }
 
+func evaluateVectorApprox(description string, want, got Vector, t *testing.T) {
+	if !got.EqualsApprox(want) {
+		t.Errorf("%s: wanted %s: got %s", description, want, got)
+	}
+}
+
 func evaluateScalar(description string, want, got float64, t *testing.T) {
 	if want != got {
 		t.Errorf("%s: wanted %f: got %f", description, want, got)
@@ -293,17 +299,21 @@ func TestSignedAngle(t *testing.T) {
 	evaluateChanged(d, other, c, t)
 }
 
-/*
 func TestRotate(t *testing.T) {
-	v := NewVector(0, 1)
+	up := NewVector(0, 1)
+	right := NewVector(1, 0)
 
-	other := NewVector(1, 0)
+	c := right.Clone()
+	angle := -up.SignedAngle(right)
+	want := NewVector(0, 1)
+	got := right.Rotate(angle)
 
-	v.Rotate(90 / d2math.RadToDeg)
+	evaluateVectorApprox(fmt.Sprintf("rotated %s by %.1f", c, angle*d2math.RadToDeg), want, *got, t)
 
-	got := v.SignedAngle(other)
+	c = up.Clone()
+	angle -= d2math.RadFull
+	want = NewVector(-1, 0)
+	got = up.Rotate(angle)
 
-	fmt.Println(got, got*d2math.RadToDeg) ///
-
-	fmt.Println(v, v.Length(), got*d2math.RadToDeg)
-}*/
+	evaluateVectorApprox(fmt.Sprintf("rotated %s by %.1f", c, angle*d2math.RadToDeg), want, *got, t)
+}
