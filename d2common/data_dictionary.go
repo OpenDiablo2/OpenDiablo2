@@ -41,10 +41,11 @@ func LoadDataDictionary(buf []byte) *DataDictionary {
 }
 
 // Next reads the next row, skips Expansion lines or
-// returns false when the end of a file is reached or an error occured
+// returns false when the end of a file is reached or an error occurred
 func (d *DataDictionary) Next() bool {
 	var err error
 	d.record, err = d.r.Read()
+
 	if err == io.EOF {
 		return false
 	} else if err != nil {
@@ -55,6 +56,7 @@ func (d *DataDictionary) Next() bool {
 	if d.record[0] == "Expansion" {
 		return d.Next()
 	}
+
 	return true
 }
 
@@ -69,6 +71,7 @@ func (d *DataDictionary) Number(field string) int {
 	if err != nil {
 		return 0
 	}
+
 	return n
 }
 
@@ -84,5 +87,6 @@ func (d *DataDictionary) Bool(field string) bool {
 	if n > 1 {
 		log.Panic("Bool on non-bool field")
 	}
+
 	return n == 1
 }
