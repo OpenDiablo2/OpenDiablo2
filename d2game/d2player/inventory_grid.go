@@ -27,7 +27,7 @@ var ErrorInventoryFull = errors.New("inventory full")
 // Handles layout and rendering item icons based on code.
 type ItemGrid struct {
 	items          []InventoryItem
-	equipmentSlots map[d2enum.EquippedSlotType]EquipmentSlot
+	equipmentSlots map[d2enum.EquippedSlot]EquipmentSlot
 	width          int
 	height         int
 	originX        int
@@ -73,7 +73,7 @@ func (g *ItemGrid) GetSlot(x int, y int) InventoryItem {
 	return nil
 }
 
-func (g *ItemGrid) ChangeEquippedSlot(slot d2enum.EquippedSlotType, item InventoryItem) {
+func (g *ItemGrid) ChangeEquippedSlot(slot d2enum.EquippedSlot, item InventoryItem) {
 	var curItem = g.equipmentSlots[slot]
 	curItem.item = item
 	g.equipmentSlots[slot] = curItem
