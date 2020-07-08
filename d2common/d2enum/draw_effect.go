@@ -8,7 +8,7 @@ const (
 
 	// DrawEffectPctTransparency25 is a draw effect that implements the following function:
 	// GL_MODULATE; GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA 25 % transparency (colormaps 49-304 in a .pl2)
-	DrawEffectPctTransparency25 = iota
+	DrawEffectPctTransparency25 DrawEffect = iota
 
 	// DrawEffectPctTransparency50 is a draw effect that implements the following function:
 	// GL_MODULATE; GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA 50 % transparency (colormaps 305-560 in a .pl2)
@@ -37,4 +37,7 @@ const (
 	// DrawEffectMod2X is a draw effect that implements the following function:
 	// GL_COMBINE_ARB; GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA (colormaps 1457-1712 in a .pl2)
 	DrawEffectMod2X
+
+	// no effect
+	DrawEffectNone
 )
