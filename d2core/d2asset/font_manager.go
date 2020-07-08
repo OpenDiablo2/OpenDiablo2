@@ -24,7 +24,7 @@ func (fm *fontManager) LoadFont(tablePath, spritePath, palettePath string) (d2in
 	error) {
 	cachePath := fmt.Sprintf("%s;%s;%s", tablePath, spritePath, palettePath)
 	if font, found := fm.cache.Retrieve(cachePath); found {
-		return font.(d2interface.Font).Clone(), nil
+		return font.(d2interface.Font), nil
 	}
 
 	font, err := loadFont(tablePath, spritePath, palettePath)
@@ -32,7 +32,7 @@ func (fm *fontManager) LoadFont(tablePath, spritePath, palettePath string) (d2in
 		return nil, err
 	}
 
-	if err := fm.cache.Insert(cachePath, font.Clone(), 1); err != nil {
+	if err := fm.cache.Insert(cachePath, font, 1); err != nil {
 		return nil, err
 	}
 

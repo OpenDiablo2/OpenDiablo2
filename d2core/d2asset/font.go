@@ -42,6 +42,7 @@ func loadFont(tablePath, spritePath, palettePath string) (d2interface.Font, erro
 	_, maxCharHeight := sheet.GetFrameBounds()
 
 	glyphs := make(map[rune]fontGlyph)
+
 	for i := 12; i < len(data); i += 14 {
 		code := rune(binary.LittleEndian.Uint16(data[i : i+2]))
 
@@ -92,15 +93,6 @@ func (f *Font) GetTextMetrics(text string) (width, height int) {
 	totalHeight += lineHeight
 
 	return totalWidth, totalHeight
-}
-
-// Clone creates a shallow copy of the Font
-func (f *Font) Clone() d2interface.Font {
-	return &Font{
-		sheet:  f.sheet,
-		glyphs: f.glyphs,
-		color:  f.color,
-	}
 }
 
 // RenderText prints a text using its configured style on a Surface (multi-lines are left-aligned, use label otherwise)
