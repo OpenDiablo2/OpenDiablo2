@@ -19,15 +19,8 @@ func (mr *MapRenderer) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, t
 				n := nbpix[y]
 				length -= n
 				for n > 0 {
-					colorIndex := block.EncodedData[idx]
-					if colorIndex != 0 {
-						pixelColor := mr.palette.GetColors()[colorIndex]
-						offset := 4 * (((blockY + y + tileYOffset) * tileWidth) + (blockX + x))
-						(*pixels)[offset] = pixelColor.R()
-						(*pixels)[offset+1] = pixelColor.G()
-						(*pixels)[offset+2] = pixelColor.B()
-						(*pixels)[offset+3] = 255
-					}
+					offset := (((blockY + y + tileYOffset) * tileWidth) + (blockX + x))
+					(*pixels)[offset] = block.EncodedData[idx]
 					x++
 					n--
 					idx++
@@ -56,17 +49,8 @@ func (mr *MapRenderer) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, t
 			x += int32(b1)
 			length -= int32(b2)
 			for b2 > 0 {
-				colorIndex := block.EncodedData[idx]
-				if colorIndex != 0 {
-					pixelColor := mr.palette.GetColors()[colorIndex]
-
-					offset := 4 * (((blockY + y + tileYOffset) * tileWidth) + (blockX + x))
-					(*pixels)[offset] = pixelColor.R()
-					(*pixels)[offset+1] = pixelColor.G()
-					(*pixels)[offset+2] = pixelColor.B()
-					(*pixels)[offset+3] = 255
-
-				}
+				offset := (((blockY + y + tileYOffset) * tileWidth) + (blockX + x))
+				(*pixels)[offset] = block.EncodedData[idx]
 				idx++
 				x++
 				b2--

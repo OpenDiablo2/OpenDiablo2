@@ -3,7 +3,6 @@ package d2asset
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
@@ -237,30 +236,17 @@ func (c *Composite) createMode(animationMode, weaponClass string) (*compositeMod
 			layerValue = "lit"
 		}
 
-		blend := false
-		transparency := 255
+		drawEffect := d2enum.DrawEffectNone
 
 		if cofLayer.Transparent {
-			switch cofLayer.DrawEffect {
-			case d2enum.DrawEffectPctTransparency25:
-				transparency = 64
-			case d2enum.DrawEffectPctTransparency50:
-				transparency = 128
-			case d2enum.DrawEffectPctTransparency75:
-				transparency = 192
-			case d2enum.DrawEffectModulate:
-				blend = true
-			default:
-				log.Println("Unhandled DrawEffect ", cofLayer.DrawEffect, " requested for layer ", cofLayer.Type.String(), " of ", c.token)
-			}
+			drawEffect = cofLayer.DrawEffect
 		}
 
 		layer, err := c.loadCompositeLayer(cofLayer.Type.String(), layerValue, animationMode,
-			cofLayer.WeaponClass.String(), c.palettePath, transparency)
+			cofLayer.WeaponClass.String(), c.palettePath, drawEffect)
 		if err == nil {
 			layer.SetPlaySpeed(mode.animationSpeed)
 			layer.PlayForward()
-			layer.SetBlend(blend)
 
 			if err := layer.SetDirection(c.direction); err != nil {
 				return nil, err
@@ -274,7 +260,7 @@ func (c *Composite) createMode(animationMode, weaponClass string) (*compositeMod
 }
 
 func (c *Composite) loadCompositeLayer(layerKey, layerValue, animationMode, weaponClass,
-	palettePath string, transparency int) (d2interface.Animation, error) {
+	palettePath string, drawEffect d2enum.DrawEffect) (d2interface.Animation, error) {
 	animationPaths := []string{
 		fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dcc", c.basePath, c.token, layerKey, c.token, layerKey, layerValue, animationMode, weaponClass),
 		fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dc6", c.basePath, c.token, layerKey, c.token, layerKey, layerValue, animationMode, weaponClass),
@@ -282,7 +268,7 @@ func (c *Composite) loadCompositeLayer(layerKey, layerValue, animationMode, weap
 
 	for _, animationPath := range animationPaths {
 		if exists, _ := FileExists(animationPath); exists {
-			animation, err := LoadAnimationWithTransparency(animationPath, palettePath, transparency)
+			animation, err := LoadAnimationWithEffect(animationPath, palettePath, drawEffect)
 			if err == nil {
 				return animation, nil
 			}

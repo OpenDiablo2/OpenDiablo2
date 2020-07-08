@@ -2,8 +2,9 @@ package d2asset
 
 import (
 	"errors"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"math"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
@@ -13,16 +14,15 @@ import (
 // DCCAnimation represens an animation decoded from DCC
 type DCCAnimation struct {
 	animation
-	dccPath      string
-	transparency int
-	palette      d2iface.Palette
-	renderer     d2iface.Renderer
+	dccPath  string
+	effect   d2enum.DrawEffect
+	palette  d2iface.Palette
+	renderer d2iface.Renderer
 }
 
 // CreateAnimationFromDCC creates an animation from d2dcc.DCC and d2dat.DATPalette
 func CreateDCCAnimation(renderer d2iface.Renderer, dccPath string, palette d2iface.Palette,
-	transparency int) (d2iface.Animation, error) {
-
+	effect d2enum.DrawEffect) (d2iface.Animation, error) {
 	dcc, err := loadDCC(dccPath)
 	if err != nil {
 		return nil, err
@@ -35,12 +35,20 @@ func CreateDCCAnimation(renderer d2iface.Renderer, dccPath string, palette d2ifa
 	}
 
 	DCC := DCCAnimation{
-		animation:    anim,
-		dccPath:      dccPath,
-		palette:      palette,
-		renderer:     renderer,
-		transparency: transparency,
+		animation: anim,
+		dccPath:   dccPath,
+		palette:   palette,
+		renderer:  renderer,
+		effect:    effect,
 	}
+
+	// Really the renderer should take DrawEffects and do the right thing
+	if effect == d2enum.DrawEffectModulate {
+		DCC.SetBlend(true)
+	}
+
+	// Transparency is now no longer handled, it should be done by using PL2 palette and
+	// picking the appropriate transform for the transparency level
 
 	err = DCC.SetDirection(0)
 	if err != nil {
@@ -99,25 +107,7 @@ func (a *DCCAnimation) decodeDirection(directionIndex int) error {
 		frameWidth := maxX - minX
 		frameHeight := maxY - minY
 
-		const bytesPerPixel = 4
-		pixels := make([]byte, frameWidth*frameHeight*bytesPerPixel)
-
-		for y := 0; y < frameHeight; y++ {
-			for x := 0; x < frameWidth; x++ {
-				paletteIndex := dccFrame.PixelData[y*frameWidth+x]
-
-				if paletteIndex == 0 {
-					continue
-				}
-
-				palColor := a.palette.GetColors()[paletteIndex]
-				offset := (x + y*frameWidth) * bytesPerPixel
-				pixels[offset] = palColor.R()
-				pixels[offset+1] = palColor.G()
-				pixels[offset+2] = palColor.B()
-				pixels[offset+3] = byte(a.transparency)
-			}
-		}
+		pixels := ImgIndexToRGBA(dccFrame.PixelData, a.palette)
 
 		sfc, err := a.renderer.NewSurface(frameWidth, frameHeight, d2enum.FilterNearest)
 		if err != nil {

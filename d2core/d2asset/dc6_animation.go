@@ -82,22 +82,7 @@ func (a *DC6Animation) decodeDirection(directionIndex int) error {
 		}
 
 		indexData := dc6.DecodeFrame(startFrame + i)
-
-		bytesPerPixel := 4
-		colorData := make([]byte, int(dc6Frame.Width)*int(dc6Frame.Height)*bytesPerPixel)
-
-		for i := 0; i < int(dc6Frame.Width*dc6Frame.Height); i++ {
-			// Index zero is hardcoded transparent regardless of palette
-			if indexData[i] == 0 {
-				continue
-			}
-
-			c := a.palette.GetColors()[indexData[i]]
-			colorData[i*bytesPerPixel] = c.R()
-			colorData[i*bytesPerPixel+1] = c.G()
-			colorData[i*bytesPerPixel+2] = c.B()
-			colorData[i*bytesPerPixel+3] = c.A()
-		}
+		colorData := ImgIndexToRGBA(indexData, a.palette)
 
 		if err := sfc.ReplacePixels(colorData); err != nil {
 			return err

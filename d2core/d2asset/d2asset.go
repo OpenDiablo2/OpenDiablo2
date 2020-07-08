@@ -104,13 +104,13 @@ func FileExists(filePath string) (bool, error) {
 
 // LoadAnimation loads an animation by its resource path and its palette path
 func LoadAnimation(animationPath, palettePath string) (d2interface.Animation, error) {
-	return LoadAnimationWithTransparency(animationPath, palettePath, 255)
+	return LoadAnimationWithEffect(animationPath, palettePath, d2enum.DrawEffectNone)
 }
 
-// LoadAnimationWithTransparency loads an animation by its resource path and its palette path with a given transparency value
-func LoadAnimationWithTransparency(animationPath, palettePath string,
-	transparency int) (d2interface.Animation, error) {
-	return singleton.animationManager.LoadAnimation(animationPath, palettePath, transparency)
+// LoadAnimationWithEffect loads an animation by its resource path and its palette path with a given transparency value
+func LoadAnimationWithEffect(animationPath, palettePath string,
+	drawEffect d2enum.DrawEffect) (d2interface.Animation, error) {
+	return singleton.animationManager.LoadAnimation(animationPath, palettePath, drawEffect)
 }
 
 // LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it

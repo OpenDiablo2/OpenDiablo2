@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -36,8 +37,8 @@ func createAnimationManager(renderer d2interface.Renderer) *animationManager {
 
 func (am *animationManager) LoadAnimation(
 	animationPath, palettePath string,
-	transparency int ) (d2interface.Animation, error) {
-	cachePath := fmt.Sprintf("%s;%s;%d", animationPath, palettePath, transparency)
+	effect d2enum.DrawEffect ) (d2interface.Animation, error) {
+	cachePath := fmt.Sprintf("%s;%s;%d", animationPath, palettePath, effect)
 	if animation, found := am.cache.Retrieve(cachePath); found {
 		return animation.(d2interface.Animation).Clone(), nil
 	}
@@ -62,7 +63,7 @@ func (am *animationManager) LoadAnimation(
 			return nil, err
 		}
 
-		animation, err = CreateDCCAnimation(am.renderer, animationPath, palette, transparency)
+		animation, err = CreateDCCAnimation(am.renderer, animationPath, palette, effect)
 		if err != nil {
 			return nil, err
 		}
