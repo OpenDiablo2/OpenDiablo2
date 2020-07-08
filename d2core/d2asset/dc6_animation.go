@@ -81,46 +81,14 @@ func (a *DC6Animation) decodeDirection(directionIndex int) error {
 			return err
 		}
 
-		indexData := make([]int, dc6Frame.Width*dc6Frame.Height)
-		for i := range indexData {
-			indexData[i] = -1
-		}
-
-		x := 0
-		y := int(dc6Frame.Height) - 1
-		offset := 0
-
-		for {
-			b := int(dc6Frame.FrameData[offset])
-			offset++
-
-			if b == 0x80 {
-				if y == 0 {
-					break
-				}
-				y--
-				x = 0
-			} else if b&0x80 > 0 {
-				transparentPixels := b & 0x7f
-				for i := 0; i < transparentPixels; i++ {
-					indexData[x+y*int(dc6Frame.Width)+i] = -1
-				}
-				x += transparentPixels
-			} else {
-				for i := 0; i < b; i++ {
-					indexData[x+y*int(dc6Frame.Width)+i] = int(dc6Frame.FrameData[offset])
-					offset++
-				}
-				x += b
-			}
-		}
+		indexData := dc6.DecodeFrame(startFrame + i)
 
 		bytesPerPixel := 4
 		colorData := make([]byte, int(dc6Frame.Width)*int(dc6Frame.Height)*bytesPerPixel)
 
 		for i := 0; i < int(dc6Frame.Width*dc6Frame.Height); i++ {
-			// TODO: Is this == -1 or < 1?
-			if indexData[i] < 1 {
+			// Index zero is hardcoded transparent regardless of palette
+			if indexData[i] == 0 {
 				continue
 			}
 
