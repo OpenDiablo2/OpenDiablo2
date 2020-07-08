@@ -22,7 +22,6 @@ type DCCAnimation struct {
 // CreateAnimationFromDCC creates an animation from d2dcc.DCC and d2dat.DATPalette
 func CreateDCCAnimation(renderer d2iface.Renderer, dccPath string, palette d2iface.Palette,
 	transparency int) (d2iface.Animation, error) {
-
 	dcc, err := loadDCC(dccPath)
 	if err != nil {
 		return nil, err
@@ -99,25 +98,7 @@ func (a *DCCAnimation) decodeDirection(directionIndex int) error {
 		frameWidth := maxX - minX
 		frameHeight := maxY - minY
 
-		const bytesPerPixel = 4
-		pixels := make([]byte, frameWidth*frameHeight*bytesPerPixel)
-
-		for y := 0; y < frameHeight; y++ {
-			for x := 0; x < frameWidth; x++ {
-				paletteIndex := dccFrame.PixelData[y*frameWidth+x]
-
-				if paletteIndex == 0 {
-					continue
-				}
-
-				palColor := a.palette.GetColors()[paletteIndex]
-				offset := (x + y*frameWidth) * bytesPerPixel
-				pixels[offset] = palColor.R()
-				pixels[offset+1] = palColor.G()
-				pixels[offset+2] = palColor.B()
-				pixels[offset+3] = byte(a.transparency)
-			}
-		}
+		pixels := ImgIndexToRGBA(dccFrame.PixelData, a.palette)
 
 		sfc, err := a.renderer.NewSurface(frameWidth, frameHeight, d2enum.FilterNearest)
 		if err != nil {
