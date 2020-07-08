@@ -1,6 +1,7 @@
 package d2ui
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"image"
 	"image/color"
 
@@ -112,7 +113,10 @@ func CreateButton(renderer d2interface.Renderer, buttonType ButtonType, text str
 	}
 	buttonLayout := ButtonLayouts[buttonType]
 	result.buttonLayout = buttonLayout
-	font := GetFont(buttonLayout.FontPath, d2resource.PaletteUnits)
+	lbl :=  CreateLabel(buttonLayout.FontPath, d2resource.PaletteUnits)
+	lbl.SetText(text)
+	lbl.Color = color.RGBA{R: 100, G: 100, B: 100, A: 255}
+	lbl.Alignment = d2gui.HorizontalAlignCenter
 
 	animation, _ := d2asset.LoadAnimation(buttonLayout.ResourceName, buttonLayout.PaletteName)
 	buttonSprite, _ := LoadSprite(animation)
@@ -127,33 +131,45 @@ func CreateButton(renderer d2interface.Renderer, buttonType ButtonType, text str
 	}
 
 	result.normalSurface, _ = renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
-	_, fontHeight := font.GetTextMetrics(text)
-	textY := (result.height / 2) - (fontHeight / 2) + buttonLayout.TextOffset
+	_, labelHeight := lbl.GetSize()
+
+	textY := result.height / 2 - labelHeight / 2
+	xOffset := result.width / 2
 
 	buttonSprite.SetPosition(0, 0)
 	buttonSprite.SetBlend(true)
 	buttonSprite.RenderSegmented(result.normalSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame)
-	font.Render(0, textY, text, color.RGBA{R: 100, G: 100, B: 100, A: 255}, result.normalSurface)
+
+	lbl.SetPosition(xOffset, textY)
+	lbl.Render(result.normalSurface)
 	if buttonLayout.AllowFrameChange {
 		if totalButtonTypes > 1 {
 			result.pressedSurface, _ = renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
 			buttonSprite.RenderSegmented(result.pressedSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+1)
-			font.Render(-2, textY+2, text, color.RGBA{R: 100, G: 100, B: 100, A: 255}, result.pressedSurface)
+
+			lbl.SetPosition(xOffset-2, textY + 2)
+			lbl.Render(result.pressedSurface)
 		}
 		if totalButtonTypes > 2 {
 			result.toggledSurface, _ = renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
 			buttonSprite.RenderSegmented(result.toggledSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+2)
-			font.Render(0, textY, text, color.RGBA{R: 100, G: 100, B: 100, A: 255}, result.toggledSurface)
+
+			lbl.SetPosition(xOffset, textY)
+			lbl.Render(result.toggledSurface)
 		}
 		if totalButtonTypes > 3 {
 			result.pressedToggledSurface, _ = renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
 			buttonSprite.RenderSegmented(result.pressedToggledSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame+3)
-			font.Render(0, textY, text, color.RGBA{R: 100, G: 100, B: 100, A: 255}, result.pressedToggledSurface)
+
+			lbl.SetPosition(xOffset, textY)
+			lbl.Render(result.pressedToggledSurface)
 		}
 		if buttonLayout.DisabledFrame != -1 {
 			result.disabledSurface, _ = renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
 			buttonSprite.RenderSegmented(result.disabledSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.DisabledFrame)
-			font.Render(0, textY, text, color.RGBA{R: 100, G: 100, B: 100, A: 255}, result.disabledSurface)
+
+			lbl.SetPosition(xOffset, textY)
+			lbl.Render(result.disabledSurface)
 		}
 	}
 	return result

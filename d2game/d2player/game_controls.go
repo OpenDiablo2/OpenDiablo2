@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"image"
 	"image/color"
 	"log"
@@ -86,12 +87,12 @@ func NewGameControls(renderer d2interface.Renderer, hero *d2mapentity.Player, ma
 		missileID = id
 	})
 
-	zoneLabel := d2ui.CreateLabel(renderer, d2resource.Font30, d2resource.PaletteUnits)
+	zoneLabel := d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
 	zoneLabel.Color = color.RGBA{R: 255, G: 88, B: 82, A: 255}
-	zoneLabel.Alignment = d2ui.LabelAlignCenter
+	zoneLabel.Alignment = d2gui.HorizontalAlignCenter
 
-	nameLabel := d2ui.CreateLabel(renderer, d2resource.FontFormal11, d2resource.PaletteStatic)
-	nameLabel.Alignment = d2ui.LabelAlignCenter
+	nameLabel := d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
+	nameLabel.Alignment = d2gui.HorizontalAlignCenter
 	nameLabel.SetText("")
 	nameLabel.Color = color.White
 

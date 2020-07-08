@@ -3,16 +3,14 @@ package d2gamescreen
 import (
 	"fmt"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"image/color"
 	"math"
 	"os"
-	"strings"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
@@ -86,19 +84,16 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 
 	v.createButtons(loading)
 
-	v.d2HeroTitle = d2ui.CreateLabel(v.renderer, d2resource.Font42, d2resource.PaletteUnits)
+	v.d2HeroTitle = d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
 	v.d2HeroTitle.SetPosition(320, 23)
-	v.d2HeroTitle.Alignment = d2ui.LabelAlignCenter
+	v.d2HeroTitle.Alignment = d2gui.HorizontalAlignCenter
 
 	loading.Progress(0.3)
 
-	v.deleteCharConfirmLabel = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
-	lines := d2common.SplitIntoLinesWithMaxWidth(
-		"Are you sure that you want to delete this character? Take note: this will delete all versions of this Character.",
-		29,
-	)
-	v.deleteCharConfirmLabel.SetText(strings.Join(lines, "\n"))
-	v.deleteCharConfirmLabel.Alignment = d2ui.LabelAlignCenter
+	v.deleteCharConfirmLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	lines := "Are you sure that you want\nto delete this character?\nTake note: this will delete all\nversions of this Character."
+	v.deleteCharConfirmLabel.SetText(lines)
+	v.deleteCharConfirmLabel.Alignment = d2gui.HorizontalAlignCenter
 	v.deleteCharConfirmLabel.SetPosition(400, 185)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.CharacterSelectionSelectBox, d2resource.PaletteSky)
@@ -120,12 +115,12 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 			xOffset = 385
 		}
 
-		v.characterNameLabel[i] = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
+		v.characterNameLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 		v.characterNameLabel[i].Color = color.RGBA{R: 188, G: 168, B: 140, A: 255}
 		v.characterNameLabel[i].SetPosition(xOffset, 100+((i/2)*95))
-		v.characterStatsLabel[i] = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
+		v.characterStatsLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 		v.characterStatsLabel[i].SetPosition(xOffset, 115+((i/2)*95))
-		v.characterExpLabel[i] = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteStatic)
+		v.characterExpLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteStatic)
 		v.characterExpLabel[i].Color = color.RGBA{R: 24, G: 255, A: 255}
 		v.characterExpLabel[i].SetPosition(xOffset, 130+((i/2)*95))
 	}
@@ -136,7 +131,7 @@ func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
 	v.newCharButton = d2ui.CreateButton(
 		v.renderer,
 		d2ui.ButtonTypeTall,
-		d2common.CombineStrings(d2common.SplitIntoLinesWithMaxWidth("CREATE NEW CHARACTER", 15)),
+		"CREATE NEW\nCHARACTER",
 	)
 	v.newCharButton.SetPosition(33, 468)
 	v.newCharButton.OnActivated(func() { v.onNewCharButtonClicked() })
@@ -145,7 +140,7 @@ func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
 	v.convertCharButton = d2ui.CreateButton(
 		v.renderer,
 		d2ui.ButtonTypeTall,
-		d2common.CombineStrings(d2common.SplitIntoLinesWithMaxWidth("CONVERT TO EXPANSION", 15)),
+		"CONVERT TO\nEXPANSION",
 	)
 	v.convertCharButton.SetPosition(233, 468)
 	v.convertCharButton.SetEnabled(false)
@@ -154,7 +149,7 @@ func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
 	v.deleteCharButton = d2ui.CreateButton(
 		v.renderer,
 		d2ui.ButtonTypeTall,
-		d2common.CombineStrings(d2common.SplitIntoLinesWithMaxWidth("DELETE CHARACTER", 15)),
+		"DELETE\nCHARACTER",
 	)
 	v.deleteCharButton.OnActivated(func() { v.onDeleteCharButtonClicked() })
 	v.deleteCharButton.SetPosition(433, 468)

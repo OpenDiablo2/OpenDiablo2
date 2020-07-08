@@ -19,6 +19,7 @@ const (
 	buttonStatePressedToggled
 )
 
+// Button is a user actionable drawable toggle switch
 type Button struct {
 	widgetBase
 
