@@ -5,15 +5,15 @@ import (
 	"path"
 	"sync"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
 type archiveManager struct {
 	cache    d2interface.Cache
-	config   d2interface.Configuration
+	config   *d2config.Configuration
 	archives []d2interface.Archive
 	mutex    sync.Mutex
 }
@@ -22,7 +22,7 @@ const (
 	archiveBudget = 1024 * 1024 * 512
 )
 
-func createArchiveManager(config d2interface.Configuration) d2interface.ArchiveManager {
+func createArchiveManager(config *d2config.Configuration) d2interface.ArchiveManager {
 	return &archiveManager{cache: d2common.CreateCache(archiveBudget), config: config}
 }
 
@@ -85,14 +85,14 @@ func (am *archiveManager) LoadArchive(archivePath string) (d2interface.Archive, 
 
 // CacheArchiveEntries updates the archive entries
 func (am *archiveManager) CacheArchiveEntries() error {
-	if len(am.archives) == len(am.config.MpqLoadOrder()) {
+	if len(am.archives) == len(am.config.MpqLoadOrder) {
 		return nil
 	}
 
 	am.archives = nil
 
-	for _, archiveName := range am.config.MpqLoadOrder() {
-		archivePath := path.Join(am.config.MpqPath(), archiveName)
+	for _, archiveName := range am.config.MpqLoadOrder {
+		archivePath := path.Join(am.config.MpqPath, archiveName)
 
 		archive, err := am.LoadArchive(archivePath)
 		if err != nil {

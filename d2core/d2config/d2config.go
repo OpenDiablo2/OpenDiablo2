@@ -1,106 +1,108 @@
 package d2config
 
 import (
+	"encoding/json"
 	"log"
+	"os"
+	"path"
 )
+
+// Config holds the configuration from config.json
+var Config *Configuration //nolint:gochecknoglobals // Currently global by design
 
 // Configuration defines the configuration for the engine, loaded from config.json
 type Configuration struct {
-	mpqLoadOrder    []string
-	language        string
-	mpqPath         string
-	ticksPerSecond  int
-	fpsCap          int
-	sfxVolume       float64
-	bgmVolume       float64
-	fullScreen      bool
-	runInBackground bool
-	vsyncEnabled    bool
-	backend         string
+	MpqLoadOrder    []string
+	Language        string
+	MpqPath         string
+	TicksPerSecond  int
+	FpsCap          int
+	SfxVolume       float64
+	BgmVolume       float64
+	FullScreen      bool
+	RunInBackground bool
+	VsyncEnabled    bool
+	Backend         string
 }
 
-func (c *Configuration) MpqLoadOrder() []string {
-	return c.mpqLoadOrder
-}
-
-func (c *Configuration) Language() string {
-	return c.language
-}
-
-func (c *Configuration) MpqPath() string {
-	return c.mpqPath
-}
-
-func (c *Configuration) TicksPerSecond() int {
-	return c.ticksPerSecond
-}
-
-func (c *Configuration) FpsCap() int {
-	return c.fpsCap
-}
-
-func (c *Configuration) SfxVolume() float64 {
-	return c.sfxVolume
-}
-
-func (c *Configuration) BgmVolume() float64 {
-	return c.bgmVolume
-}
-
-func (c *Configuration) FullScreen() bool {
-	return c.fullScreen
-}
-
-func (c *Configuration) RunInBackground() bool {
-	return c.runInBackground
-}
-
-func (c *Configuration) VsyncEnabled() bool {
-	return c.vsyncEnabled
-}
-
-func (c *Configuration) Backend() string {
-	return c.backend
+// Load loads a configuration object from disk
+func Load() error {
+	Config = new(Configuration)
+	return Config.Load()
 }
 
 // Load loads a configuration object from disk
 func (c *Configuration) Load() error {
 	configPaths := []string{
-		getDefaultConfigPath(),
-		getLocalConfigPath(),
+		defaultConfigPath(),
+		localConfigPath(),
 	}
-
-	var loaded bool
 
 	for _, configPath := range configPaths {
 		log.Printf("loading configuration file from %s...", configPath)
 
-		if err := load(configPath); err == nil {
-			loaded = true
-			break
+		if _, err := os.Stat(configPath); os.IsNotExist(err) {
+			continue
 		}
-	}
 
-	if !loaded {
-		log.Println("failed to load configuration file, saving default configuration...")
-
-		if err := Save(); err != nil {
+		configFile, err := os.Open(path.Clean(configPath))
+		if err != nil {
 			return err
 		}
+
+		if err := json.NewDecoder(configFile).Decode(&Config); err != nil {
+			return err
+		}
+
+		if err := configFile.Close(); err != nil {
+			return err
+		}
+
+		return nil
 	}
 
-	return nil
+	log.Println("failed to load configuration file, saving default configuration...")
+
+	Config = defaultConfig()
+
+	return Config.Save()
 }
 
 // Save saves the configuration object to disk
 func (c *Configuration) Save() error {
-	configPath := getDefaultConfigPath()
+	configPath := defaultConfigPath()
 	log.Printf("saving configuration file to %s...", configPath)
 
-	var err error
-	if err = save(configPath); err != nil {
-		log.Printf("failed to write configuration file (%s)", err)
+	configDir := path.Dir(configPath)
+	if err := os.MkdirAll(configDir, 0750); err != nil {
+		return err
 	}
 
-	return err
+	configFile, err := os.Create(configPath)
+	if err != nil {
+		return err
+	}
+
+	buf, err := json.MarshalIndent(Config, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	if _, err := configFile.Write(buf); err != nil {
+		return err
+	}
+
+	return configFile.Close()
+}
+
+func defaultConfigPath() string {
+	if configDir, err := os.UserConfigDir(); err == nil {
+		return path.Join(configDir, "OpenDiablo2", "config.json")
+	}
+
+	return localConfigPath()
+}
+
+func localConfigPath() string {
+	return path.Join(path.Dir(os.Args[0]), "config.json")
 }

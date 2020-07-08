@@ -1,15 +1,13 @@
 package ebiten
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"image"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
 type Renderer struct {
@@ -31,13 +29,12 @@ func (r *Renderer) Layout(outsideWidth, outsideHeight int) (screenWidth, screenH
 func CreateRenderer() (*Renderer, error) {
 	result := &Renderer{}
 
-	config := d2config.Get()
-
+	config := d2config.Config
 	ebiten.SetCursorMode(ebiten.CursorModeHidden)
-	ebiten.SetFullscreen(config.FullScreen())
-	ebiten.SetRunnableOnUnfocused(config.RunInBackground())
-	ebiten.SetVsyncEnabled(config.VsyncEnabled())
-	ebiten.SetMaxTPS(config.TicksPerSecond())
+	ebiten.SetFullscreen(config.FullScreen)
+	ebiten.SetRunnableOnUnfocused(config.RunInBackground)
+	ebiten.SetVsyncEnabled(config.VsyncEnabled)
+	ebiten.SetMaxTPS(config.TicksPerSecond)
 
 	return result, nil
 }
