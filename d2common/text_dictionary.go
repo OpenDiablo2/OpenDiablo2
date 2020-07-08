@@ -16,6 +16,7 @@ type textDictionaryHashEntry struct {
 
 var lookupTable map[string]string
 
+// TranslateString returns the translation of the given string
 func TranslateString(key string) string {
 	result, ok := lookupTable[key]
 	if !ok {
@@ -23,24 +24,16 @@ func TranslateString(key string) string {
 		// log.Panicf("Could not find a string for the key '%s'", key)
 		return key
 	}
+
 	return result
 }
 
-func GetDictionaryEntryCount() int {
-	if lookupTable == nil {
-		return 0
-	}
-	return len(lookupTable)
-}
-
-func GetTranslationMap() map[string]string {
-	return lookupTable
-}
-
+// LoadTextDictionary loads the text dictionary from the given data
 func LoadTextDictionary(dictionaryData []byte) {
 	if lookupTable == nil {
 		lookupTable = make(map[string]string)
 	}
+
 	br := CreateStreamReader(dictionaryData)
 	// CRC
 	br.ReadBytes(2)
@@ -50,6 +43,7 @@ func LoadTextDictionary(dictionaryData []byte) {
 	if _, err := br.ReadByte(); err != nil {
 		log.Fatal("Error reading Version record")
 	}
+
 	br.GetUInt32() // StringOffset
 	br.GetUInt32() // When the number of times you have missed a match with a hash key equals this value, you give up because it is not there.
 	br.GetUInt32() // FileSize
@@ -75,37 +69,31 @@ func LoadTextDictionary(dictionaryData []byte) {
 		if !hashEntry.IsActive {
 			continue
 		}
+
 		br.SetPosition(uint64(hashEntry.NameString))
 		nameVal := br.ReadBytes(int(hashEntry.NameLength - 1))
 		value := string(nameVal)
+
 		br.SetPosition(uint64(hashEntry.IndexString))
+
 		key := ""
+
 		for {
 			b := br.GetByte()
 			if b == 0 {
 				break
 			}
+
 			key += string(b)
 		}
+
 		if key == "x" || key == "X" {
 			key = "#" + strconv.Itoa(idx)
 		}
+
 		_, exists := lookupTable[key]
 		if !exists {
 			lookupTable[key] = value
-
 		}
-		// Use the following code to write out the values
-		/*=
-		f, err := os.OpenFile(`C:\Users\lunat\Desktop\D2\langdict.txt`,
-			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			log.Println(err)
-		}
-		defer f.Close()
-		if _, err := f.WriteString("\n[" + key + "] " + value); err != nil {
-			log.Println(err)
-		}
-		*/
 	}
 }

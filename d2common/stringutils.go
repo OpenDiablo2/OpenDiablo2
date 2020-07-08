@@ -15,14 +15,17 @@ func AsterToEmpty(text string) string {
 	if strings.HasPrefix(text, "*") {
 		return ""
 	}
+
 	return text
 }
 
-// EmptyToZero converts empty strings to "0" and leaves non-empty strings as is, for use before converting numerical data which equates empty to zero
+// EmptyToZero converts empty strings to "0" and leaves non-empty strings as is,
+// for use before converting numerical data which equates empty to zero
 func EmptyToZero(text string) string {
 	if text == "" || text == " " {
 		return "0"
 	}
+
 	return text
 }
 
@@ -32,6 +35,7 @@ func StringToInt(text string) int {
 	if err != nil {
 		panic(err)
 	}
+
 	return result
 }
 
@@ -43,6 +47,7 @@ func StringToUint(text string) uint {
 	if err != nil {
 		panic(err)
 	}
+
 	return uint(result)
 }
 
@@ -52,9 +57,11 @@ func StringToUint8(text string) uint8 {
 	if err != nil {
 		panic(err)
 	}
+
 	if result < 0 || result > 255 {
 		panic(fmt.Sprintf("value %d out of range of byte", result))
 	}
+
 	return uint8(result)
 }
 
@@ -64,16 +71,16 @@ func StringToInt8(text string) int8 {
 	if err != nil {
 		panic(err)
 	}
+
 	if result < -128 || result > 122 {
 		panic(fmt.Sprintf("value %d out of range of a signed byte", result))
 	}
+
 	return int8(result)
 }
 
-// StringToFloat64 converts a string to a float64
-
+// Utf16BytesToString converts a utf16 byte array to string
 func Utf16BytesToString(b []byte) (string, error) {
-
 	if len(b)%2 != 0 {
 		return "", fmt.Errorf("must have even length byte slice")
 	}
@@ -95,40 +102,43 @@ func Utf16BytesToString(b []byte) (string, error) {
 	return ret.String(), nil
 }
 
-func CombineStrings(input []string) string {
-	return strings.Join(input, "\n")
-}
-
+// SplitIntoLinesWithMaxWidth splits the given string into lines considering the given maxChars
 func SplitIntoLinesWithMaxWidth(fullSentence string, maxChars int) []string {
 	lines := make([]string, 0)
 	line := ""
 	totalLength := 0
 	words := strings.Split(fullSentence, " ")
+
 	if len(words[0]) > maxChars {
 		// mostly happened within CJK characters (no whitespace)
 		return splitCjkIntoChunks(fullSentence, maxChars)
 	}
+
 	for _, word := range words {
 		totalLength += 1 + len(word)
 		if totalLength > maxChars {
 			totalLength = len(word)
+
 			lines = append(lines, line)
 			line = ""
 		} else {
 			line += " "
 		}
+
 		line += word
 	}
 
 	if len(line) > 0 {
 		lines = append(lines, line)
 	}
+
 	return lines
 }
 
 func splitCjkIntoChunks(str string, chars int) []string {
 	chunks := make([]string, chars/len(str))
 	i, count := 0, 0
+
 	for j, ch := range str {
 		if ch < unicode.MaxLatin1 {
 			count++
@@ -136,10 +146,12 @@ func splitCjkIntoChunks(str string, chars int) []string {
 			// assume we're truncating CJK characters
 			count += 2
 		}
+
 		if count >= chars {
 			chunks = append(chunks, str[i:j])
 			i, count = j, 0
 		}
 	}
+
 	return append(chunks, str[i:])
 }

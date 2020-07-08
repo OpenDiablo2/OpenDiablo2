@@ -27,7 +27,7 @@ func LoadAnimationData(rawData []byte) {
 	AnimationData = make(map[string][]*AnimationDataRecord)
 	streamReader := d2common.CreateStreamReader(rawData)
 
-	for !streamReader.Eof() {
+	for !streamReader.EOF() {
 		dataCount := int(streamReader.GetInt32())
 		for i := 0; i < dataCount; i++ {
 			cofNameBytes := streamReader.ReadBytes(8)

@@ -4,17 +4,21 @@ import (
 	"math"
 )
 
+// MinInt returns the minimum of the given values
 func MinInt(a, b int) int {
 	if a < b {
 		return a
 	}
+
 	return b
 }
 
+// MaxInt returns the maximum of the given values
 func MaxInt(a, b int) int {
 	if a > b {
 		return a
 	}
+
 	return b
 }
 
@@ -23,6 +27,7 @@ func Min(a, b uint32) uint32 {
 	if a < b {
 		return a
 	}
+
 	return b
 }
 
@@ -31,6 +36,7 @@ func Max(a, b uint32) uint32 {
 	if a > b {
 		return a
 	}
+
 	return b
 }
 
@@ -39,13 +45,16 @@ func MaxInt32(a, b int32) int32 {
 	if a > b {
 		return a
 	}
+
 	return b
 }
 
+// AbsInt32 returns the absolute of the given int32
 func AbsInt32(a int32) int32 {
 	if a < 0 {
 		return -a
 	}
+
 	return a
 }
 
@@ -54,6 +63,7 @@ func MinInt32(a, b int32) int32 {
 	if a < b {
 		return a
 	}
+
 	return b
 }
 
@@ -70,12 +80,15 @@ func GetAngleBetween(p1X, p1Y, p2X, p2Y float64) int {
 
 	result := math.Atan2(deltaY, deltaX) * (180 / math.Pi)
 	iResult := int(result)
+
 	for iResult < 0 {
 		iResult += 360
 	}
+
 	for iResult >= 360 {
 		iResult -= 360
 	}
+
 	return iResult
 }
 
@@ -92,17 +105,18 @@ func AlmostEqual(a, b, threshold float64) bool {
 	return math.Abs(a-b) <= threshold
 }
 
-// Return the new adjusted value, as well as any remaining amount after the max
+// AdjustWithRemainder returns the new adjusted value, as well as any remaining amount after the max
 func AdjustWithRemainder(sourceValue, adjustment, targetvalue float64) (newValue, remainder float64) {
 	if adjustment == 0 || math.Abs(adjustment) < 0.000001 {
 		return sourceValue, 0
 	}
+
 	adjustNegative := adjustment < 0.0
 	maxNegative := targetvalue-sourceValue < 0.0
+
 	if adjustNegative != maxNegative {
 		// FIXME: This shouldn't happen but it happens all the time..
 		return sourceValue, 0
-		//panic("Cannot move towards the opposite direction...")
 	}
 
 	finalValue := sourceValue + adjustment
@@ -111,11 +125,13 @@ func AdjustWithRemainder(sourceValue, adjustment, targetvalue float64) (newValue
 			diff := finalValue - targetvalue
 			return targetvalue, diff
 		}
+
 		return finalValue, 0
 	}
 
 	if finalValue < targetvalue {
 		return targetvalue, finalValue - targetvalue
 	}
+
 	return finalValue, 0
 }

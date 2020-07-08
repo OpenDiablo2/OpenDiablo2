@@ -18,6 +18,7 @@ func CreateBitStream(newData []byte) *BitStream {
 		current:      0,
 		bitCount:     0,
 	}
+
 	return result
 }
 
@@ -26,11 +27,14 @@ func (v *BitStream) ReadBits(bitCount int) int {
 	if bitCount > 16 {
 		log.Panic("Maximum BitCount is 16")
 	}
+
 	if !v.EnsureBits(bitCount) {
 		return -1
 	}
+
 	result := v.current & (0xffff >> uint(16-bitCount))
 	v.WasteBits(bitCount)
+
 	return result
 }
 
@@ -39,6 +43,7 @@ func (v *BitStream) PeekByte() int {
 	if !v.EnsureBits(8) {
 		return -1
 	}
+
 	return v.current & 0xff
 }
 
@@ -47,19 +52,22 @@ func (v *BitStream) EnsureBits(bitCount int) bool {
 	if bitCount <= v.bitCount {
 		return true
 	}
+
 	if v.dataPosition >= len(v.data) {
 		return false
 	}
+
 	nextValue := v.data[v.dataPosition]
 	v.dataPosition++
 	v.current |= int(nextValue) << uint(v.bitCount)
 	v.bitCount += 8
+
 	return true
 }
 
 // WasteBits dry-reads the specified number of bits
 func (v *BitStream) WasteBits(bitCount int) {
-	//noinspection GoRedundantConversion
+	// noinspection GoRedundantConversion
 	v.current >>= uint(bitCount)
 	v.bitCount -= bitCount
 }
