@@ -5,7 +5,7 @@ type ItemEventFuncID int
 const (
 	// shoots a missile at the owner of a missile that has just hit you
 	// (Chilling Armor uses this)
-	ReflectMissile = ItemEventFuncID(iota)
+	ReflectMissile ItemEventFuncID = iota
 
 	// freezes the attacker for a set duration the attacker
 	// (Frozen Armor uses this)
