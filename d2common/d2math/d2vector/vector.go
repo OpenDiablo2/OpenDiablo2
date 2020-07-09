@@ -7,7 +7,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
-// Vector is the implementation of Vector using float64.
+// Vector is an implementation of a Euclidean vector using float64 with common vector convenience methods.
 type Vector struct {
 	x, y float64
 }
@@ -17,26 +17,26 @@ func NewVector(x, y float64) Vector {
 	return Vector{x, y}
 }
 
-// Equals check whether this Vector is equal to a given Vector.
+// Equals returns true if the float64 values of this vector are exactly equal to the given Vector.
 func (v *Vector) Equals(o Vector) bool {
 	return v.x == o.x && v.y == o.y
 }
 
-// EqualsApprox checks if the Vector is approximately equal
-// to the given Vector.
+// EqualsApprox returns true if the values of this Vector are approximately equal to those of the given Vector. If the
+// difference between either of the value pairs is smaller than d2math.Epsilon, they will be considered equal.
 func (v *Vector) EqualsApprox(o Vector) bool {
 	x, y := v.CompareApprox(o)
 	return x == 0 && y == 0
 }
 
-// CompareApprox performs a fuzzy comparison and returns 2
-// ints represending the -1 to 1 comparison of x and y.
+// CompareApprox returns 2 ints describing the difference between the vectors. If the difference between either of the
+// value pairs is smaller than d2math.Epsilon, they will be considered equal.
 func (v *Vector) CompareApprox(o Vector) (x, y int) {
 	return d2math.CompareFloat64Fuzzy(v.x, o.x),
 		d2math.CompareFloat64Fuzzy(v.y, o.y)
 }
 
-// Set sets the vector values to the given float64 values.
+// Set the vector values to the given float64 values.
 func (v *Vector) Set(x, y float64) *Vector {
 	v.x = x
 	v.y = y
@@ -44,7 +44,7 @@ func (v *Vector) Set(x, y float64) *Vector {
 	return v
 }
 
-// Clone creates a copy of this Vector.
+// Clone returns a new a copy of this Vector.
 func (v *Vector) Clone() Vector {
 	return NewVector(v.x, v.y)
 }
@@ -65,8 +65,7 @@ func (v *Vector) Floor() *Vector {
 	return v
 }
 
-// Clamp limits the values of v to those of a and b. If the
-// values of v are between those of a and b they will be
+// Clamp limits the values of v to those of a and b. If the values of v are between those of a and b they will be
 // unchanged.
 func (v *Vector) Clamp(a, b *Vector) *Vector {
 	v.x = d2math.ClampFloat64(v.x, a.x, b.x)
@@ -75,7 +74,7 @@ func (v *Vector) Clamp(a, b *Vector) *Vector {
 	return v
 }
 
-// Add to this Vector the components of the given Vector.
+// Add the given vector to this vector.
 func (v *Vector) Add(o *Vector) *Vector {
 	v.x += o.x
 	v.y += o.y
@@ -83,7 +82,7 @@ func (v *Vector) Add(o *Vector) *Vector {
 	return v
 }
 
-// Subtract from this Vector from the components of the given Vector.
+// Subtract the given vector from this vector.
 func (v *Vector) Subtract(o *Vector) *Vector {
 	v.x -= o.x
 	v.y -= o.y
@@ -91,7 +90,7 @@ func (v *Vector) Subtract(o *Vector) *Vector {
 	return v
 }
 
-// Multiply this Vector by the components of the given Vector.
+// Multiply this Vector by the given Vector.
 func (v *Vector) Multiply(o *Vector) *Vector {
 	v.x *= o.x
 	v.y *= o.y
@@ -99,7 +98,7 @@ func (v *Vector) Multiply(o *Vector) *Vector {
 	return v
 }
 
-// Scale multiplies this vector by a single value.
+// Scale multiplies both values of this vector by a single given value.
 func (v *Vector) Scale(s float64) *Vector {
 	v.x *= s
 	v.y *= s
@@ -107,7 +106,7 @@ func (v *Vector) Scale(s float64) *Vector {
 	return v
 }
 
-// Divide divides this vector by the components of the given vector.
+// Divide this vector by the given vector.
 func (v *Vector) Divide(o *Vector) *Vector {
 	v.x /= o.x
 	v.y /= o.y
@@ -132,12 +131,12 @@ func (v *Vector) Abs() *Vector {
 	return v
 }
 
-// Negate multiplies the vector by -1.
+// Negate multiplies this vector by -1.
 func (v *Vector) Negate() *Vector {
 	return v.Scale(-1)
 }
 
-// Distance calculate the distance between this Vector and the given Vector.
+// Distance between this Vector's position and that of the given Vector.
 func (v *Vector) Distance(o Vector) float64 {
 	delta := o.Clone()
 	delta.Subtract(v)
@@ -145,12 +144,12 @@ func (v *Vector) Distance(o Vector) float64 {
 	return delta.Length()
 }
 
-// Length returns the length of this Vector.
+// Length (magnitude/quantity) of this Vector.
 func (v *Vector) Length() float64 {
 	return math.Sqrt(v.Dot(v))
 }
 
-// SetLength sets the length of this Vector
+// SetLength sets the length of this Vector without changing the direction.
 func (v *Vector) SetLength(length float64) *Vector {
 	v.Normalize()
 	v.Scale(length)
@@ -158,9 +157,8 @@ func (v *Vector) SetLength(length float64) *Vector {
 	return v
 }
 
-// Lerp linearly interpolates this vector toward the given vector.
-// The interp argument describes the distance between v and o where
-// 0 is v and 1 is o.
+// Lerp sets this vector to the linear interpolation between this and the given vector. The interp argument determines
+// the distance between the two vectors. An interp of 0 will return this vector and 1 will return the given vector.
 func (v *Vector) Lerp(o *Vector, interp float64) *Vector {
 	v.x = d2math.Lerp(v.x, o.x, interp)
 	v.y = d2math.Lerp(v.y, o.y, interp)
@@ -173,16 +171,14 @@ func (v *Vector) Dot(o *Vector) float64 {
 	return v.x*o.x + v.y*o.y
 }
 
-// Cross returns the cross product of this Vector and the given Vector.
-// Note: Cross product is specific to 3D space. This a not cross product.
-// It is the Z component of a 3D vector cross product calculation. The X
-// and Y components use the value of z which doesn't exist in 2D.
-// See: https://stackoverflow.com/questions/243945/calculating-a-2d-vectors-cross-product
+// Cross returns the cross product of this Vector and the given Vector. Note: Cross product is specific to 3D space.
+// This a not cross product. It is the Z component of a 3D vector cross product calculation. The X and Y components use
+// the value of z which doesn't exist in 2D. See:
+// https://stackoverflow.com/questions/243945/calculating-a-2d-vectors-cross-product
 //
-// The sign of Cross indicates whether the direction between the points
-// described by vectors v and o around the origin (0,0) moves clockwise
-// or anti-clockwise. The perspective is from the would-be position of
-// positive Z and the direction is from v to o.
+// The sign of Cross indicates whether the direction between the points described by vectors v and o around the origin
+// (0,0) moves clockwise or anti-clockwise. The perspective is from the would-be position of positive Z and the
+// direction is from v to o.
 //
 // Negative = clockwise
 // Positive = anti-clockwise
@@ -191,9 +187,8 @@ func (v *Vector) Cross(o Vector) float64 {
 	return v.x*o.y - v.y*o.x
 }
 
-// Normalize sets the vector length to 1 without changing the direction.
-// The normalized vector may be scaled by the float64 return value to
-// restore it's original length.
+// Normalize sets the vector length to 1 without changing the direction. The normalized vector may be scaled by the
+// float64 return value to restore it's original length.
 func (v *Vector) Normalize() float64 {
 	multiplier := 1 / v.Length()
 	v.Scale(multiplier)
@@ -201,7 +196,8 @@ func (v *Vector) Normalize() float64 {
 	return 1 / multiplier
 }
 
-// Angle computes the unsigned angle in radians from this vector to the given vector.
+// Angle computes the unsigned angle in radians from this vector to the given vector. This angle will never exceed half
+// a full circle. For angles describing a full circumference use SignedAngle.
 func (v *Vector) Angle(o Vector) float64 {
 	from := v.Clone()
 	from.Normalize()
@@ -227,7 +223,7 @@ func (v *Vector) SignedAngle(o Vector) float64 {
 	return unsigned
 }
 
-// Reflect sets this Vector to it's reflection off a line defined by a normal.
+// Reflect sets this Vector to it's reflection off a line defined by the given normal.
 func (v *Vector) Reflect(normal Vector) *Vector {
 	normal.Normalize()
 	undo := v.Normalize()
