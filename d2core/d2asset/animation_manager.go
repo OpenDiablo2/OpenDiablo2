@@ -53,7 +53,7 @@ func (am *animationManager) LoadAnimation(
 			return nil, err
 		}
 
-		animation, err = CreateDC6Animation(am.renderer, animationPath, palette)
+		animation, err = CreateDC6Animation(am.renderer, animationPath, palette, d2enum.DrawEffectNone)
 		if err != nil {
 			return nil, err
 		}

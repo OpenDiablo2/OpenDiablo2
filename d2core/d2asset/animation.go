@@ -40,6 +40,7 @@ type animationDirection struct {
 // animation has directionality, play modes, and frame counting
 type animation struct {
 	directions       []animationDirection
+	effect           d2enum.DrawEffect
 	colorMod         color.Color
 	frameIndex       int
 	directionIndex   int
@@ -305,11 +306,6 @@ func (a *animation) ResetPlayedCount() {
 	a.playedCount = 0
 }
 
-// SetBlend sets the Animation alpha blending status
-func (a *animation) SetBlend(blend bool) {
-	if blend {
-		a.compositeMode = d2enum.CompositeModeLighter
-	} else {
-		a.compositeMode = d2enum.CompositeModeSourceOver
-	}
+func (a *animation) SetEffect(e d2enum.DrawEffect) {
+	a.effect = e
 }

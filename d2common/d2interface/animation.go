@@ -3,6 +3,8 @@ package d2interface
 import (
 	"image"
 	"image/color"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
 // Animation is an animation
@@ -35,5 +37,5 @@ type Animation interface {
 	SetColorMod(colorMod color.Color)
 	GetPlayedCount() int
 	ResetPlayedCount()
-	SetBlend(blend bool)
+	SetEffect(effect d2enum.DrawEffect)
 }

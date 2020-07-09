@@ -18,7 +18,7 @@ type DC6Animation struct {
 
 // CreateDC6Animation creates an Animation from d2dc6.DC6 and d2dat.DATPalette
 func CreateDC6Animation(renderer d2iface.Renderer, dc6Path string,
-	palette d2iface.Palette) (d2iface.Animation, error) {
+	palette d2iface.Palette, effect d2enum.DrawEffect) (d2iface.Animation, error) {
 	dc6, err := loadDC6(dc6Path)
 	if err != nil {
 		return nil, err
@@ -29,6 +29,7 @@ func CreateDC6Animation(renderer d2iface.Renderer, dc6Path string,
 		playLength:     defaultPlayLength,
 		playLoop:       true,
 		originAtBottom: true,
+		effect:         effect,
 	}
 
 	anim := DC6Animation{

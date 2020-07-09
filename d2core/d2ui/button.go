@@ -137,7 +137,7 @@ func CreateButton(renderer d2interface.Renderer, buttonType ButtonType, text str
 	xOffset := result.width / 2
 
 	buttonSprite.SetPosition(0, 0)
-	buttonSprite.SetBlend(true)
+	buttonSprite.SetEffect(d2enum.DrawEffectModulate)
 	buttonSprite.RenderSegmented(result.normalSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame)
 
 	lbl.SetPosition(xOffset, textY)
