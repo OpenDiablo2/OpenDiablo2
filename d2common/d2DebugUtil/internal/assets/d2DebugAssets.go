@@ -19,11 +19,11 @@
 package assets
 
 import (
-	"bytes"
-	"compress/gzip"
 	"fmt"
 	"image"
-	"io/ioutil"
+	"os"
+
+	"golang.org/x/image/bmp"
 )
 
 const (
@@ -34,20 +34,25 @@ const (
 	CharHeight = 16
 )
 
-func CreateTextImage() *image.RGBA {
-	s, err := gzip.NewReader(bytes.NewReader(compressedTextRGBA))
-	if err != nil {
-		panic(fmt.Sprintf("assets: gzip.NewReader failed: %v", err))
-	}
-	defer s.Close()
+func CreateTextImage() image.Image {
+	// s, err := gzip.NewReader(bytes.NewReader(compressedTextRGBA))
+	// if err != nil {
+	// 	panic(fmt.Sprintf("assets: gzip.NewReader failed: %v", err))
+	// }
+	// defer s.Close()
+	pwd, _ := os.Getwd()
+	infile, err := os.Open(pwd + "\\d2common\\d2DebugUtil\\internal\\assets\\noto_sans_mono_8x16.bmp")
 
-	pix, err := ioutil.ReadAll(s)
+	pwd = pwd
 	if err != nil {
-		panic(fmt.Sprintf("assets: ioutil.ReadAll failed: %v", err))
+		// replace this with real error handling
+		panic("ahhhh")
 	}
-	return &image.RGBA{
-		Pix:    pix,
-		Stride: 4 * imgWidth,
-		Rect:   image.Rect(0, 0, imgWidth, imgHeight),
+	defer infile.Close()
+	testbmp, err := bmp.Decode(infile)
+	if err != nil {
+		panic(fmt.Sprintf("assets: bmp.Decode failed: %v", err))
 	}
+
+	return testbmp
 }
