@@ -18,7 +18,6 @@ type Surface interface {
 	Pop()
 	PopN(n int)
 	PushColor(color color.Color)
-	PushCompositeMode(mode d2enum.CompositeMode)
 	PushEffect(effect d2enum.DrawEffect)
 	PushFilter(filter d2enum.Filter)
 	PushTranslation(x, y int)

@@ -412,7 +412,7 @@ func (g *GameControls) Render(target d2interface.Surface) {
 
 	// Stamina status bar
 	target.PushTranslation(273, 572)
-	target.PushCompositeMode(d2enum.CompositeModeLighter)
+	target.PushEffect(d2enum.DrawEffectModulate)
 	staminaPercent := float64(g.hero.Stats.Stamina) / float64(g.hero.Stats.MaxStamina)
 	target.DrawRect(int(staminaPercent*staminaBarWidth), 19, color.RGBA{R: 175, G: 136, B: 72, A: 200})
 	target.PopN(2)

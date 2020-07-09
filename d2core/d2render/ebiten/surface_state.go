@@ -10,7 +10,6 @@ import (
 type surfaceState struct {
 	x          int
 	y          int
-	mode       ebiten.CompositeMode
 	filter     ebiten.Filter
 	color      color.Color
 	brightness float64

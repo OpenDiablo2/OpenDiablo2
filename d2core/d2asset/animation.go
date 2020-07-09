@@ -46,7 +46,6 @@ type animation struct {
 	directionIndex   int
 	lastFrameTime    float64
 	playedCount      int
-	compositeMode    d2enum.CompositeMode
 	playMode         playMode
 	playLength       float64
 	subStartingFrame int
@@ -121,7 +120,7 @@ func (a *animation) Render(target d2iface.Surface) error {
 	target.PushTranslation(frame.offsetX, frame.offsetY)
 	defer target.Pop()
 
-	target.PushCompositeMode(a.compositeMode)
+	target.PushEffect(a.effect)
 	defer target.Pop()
 
 	target.PushColor(a.colorMod)
@@ -149,7 +148,7 @@ func (a *animation) RenderSection(sfc d2iface.Surface, bound image.Rectangle) er
 	frame := direction.frames[a.frameIndex]
 
 	sfc.PushTranslation(frame.offsetX, frame.offsetY)
-	sfc.PushCompositeMode(a.compositeMode)
+	sfc.PushEffect(a.effect)
 	sfc.PushColor(a.colorMod)
 
 	defer sfc.PopN(3)
