@@ -18,8 +18,8 @@ type Surface interface {
 	Pop()
 	PopN(n int)
 	PushColor(color color.Color)
-	PushCompositeMode(mode d2enum.CompositeMode)
-	PushFilter(filter Filter)
+	PushEffect(effect d2enum.DrawEffect)
+	PushFilter(filter d2enum.Filter)
 	PushTranslation(x, y int)
 	PushBrightness(brightness float64)
 	Render(surface Surface) error

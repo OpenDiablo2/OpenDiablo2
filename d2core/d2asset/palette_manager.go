@@ -3,23 +3,25 @@ package d2asset
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
 type paletteManager struct {
-	cache *d2common.Cache
+	cache d2interface.Cache
 }
 
 const (
 	paletteBudget = 64
 )
 
-func createPaletteManager() *paletteManager {
+func createPaletteManager() d2interface.ArchivedPaletteManager {
 	return &paletteManager{d2common.CreateCache(paletteBudget)}
 }
 
-func (pm *paletteManager) loadPalette(palettePath string) (*d2dat.DATPalette, error) {
+// LoadPalette loads a palette from archives managed by the ArchiveManager
+func (pm *paletteManager) LoadPalette(palettePath string) (d2interface.Palette, error) {
 	if palette, found := pm.cache.Retrieve(palettePath); found {
-		return palette.(*d2dat.DATPalette), nil
+		return palette.(d2interface.Palette), nil
 	}
 
 	paletteData, err := LoadFile(palettePath)
@@ -37,4 +39,14 @@ func (pm *paletteManager) loadPalette(palettePath string) (*d2dat.DATPalette, er
 	}
 
 	return palette, nil
+}
+
+// ClearCache clears the palette cache
+func (pm *paletteManager) ClearCache() {
+	pm.cache.Clear()
+}
+
+// GetCache returns the palette managers cache
+func (pm *paletteManager) GetCache() d2interface.Cache {
+	return pm.cache
 }

@@ -6,21 +6,19 @@ import (
 	"log"
 	"math"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 )
 
 // The map renderer, used to render the map
 type MapRenderer struct {
+	renderer      d2interface.Renderer   // The renderer to use for drawing operations
 	mapEngine     *d2mapengine.MapEngine // The map engine that is being rendered
-	palette       *d2dat.DATPalette      // The palette used for this map
+	palette       d2interface.Palette      // The palette used for this map
 	viewport      *Viewport              // The viewport for the map renderer (used for rendering offsets)
 	camera        Camera                 // The camera for this map renderer (used to determine where on the map we are rendering)
 	debugVisLevel int                    // Debug visibility index (0=none, 1=tiles, 2=sub-tiles)
@@ -29,8 +27,9 @@ type MapRenderer struct {
 }
 
 // Creates an instance of the map renderer
-func CreateMapRenderer(mapEngine *d2mapengine.MapEngine, term d2interface.Terminal) *MapRenderer {
+func CreateMapRenderer(renderer d2interface.Renderer, mapEngine *d2mapengine.MapEngine, term d2interface.Terminal) *MapRenderer {
 	result := &MapRenderer{
+		renderer:  renderer,
 		mapEngine: mapEngine,
 		viewport:  NewViewport(0, 0, 800, 600),
 	}
@@ -354,7 +353,7 @@ func (mr *MapRenderer) Advance(elapsed float64) {
 	}
 }
 
-func loadPaletteForAct(levelType d2enum.RegionIdType) (*d2dat.DATPalette, error) {
+func loadPaletteForAct(levelType d2enum.RegionIdType) (d2interface.Palette, error) {
 	var palettePath string
 	switch levelType {
 	case d2enum.RegionAct1Town, d2enum.RegionAct1Wilderness, d2enum.RegionAct1Cave, d2enum.RegionAct1Crypt,

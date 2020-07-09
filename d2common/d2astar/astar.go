@@ -76,15 +76,16 @@ func (nm nodeMap) get(p Pather) *node {
 		n.pather = p
 		nm[p] = n
 	}
+
 	return n
 }
 
 // Path calculates a short path and the distance between the two Pather nodes.
-//
 // If no path is found, found will be false and path will be the closest node to the target with a valid path.
 func Path(from, to Pather, maxCost float64) (path []Pather, distance float64, found bool) {
 	nm := nodeMapPool.Get().(nodeMap)
 	nq := priorityQueuePool.Get().(priorityQueue)
+
 	defer func() {
 		for k, v := range nm {
 			v.reset()
@@ -93,7 +94,9 @@ func Path(from, to Pather, maxCost float64) (path []Pather, distance float64, fo
 		}
 
 		nq = nq[0:0]
+
 		nodeMapPool.Put(nm)
+
 		priorityQueuePool.Put(nq)
 	}()
 
@@ -106,7 +109,9 @@ func Path(from, to Pather, maxCost float64) (path []Pather, distance float64, fo
 			// There's no path, fallback to closest.
 			break
 		}
+
 		current := heap.Pop(&nq).(*node)
+
 		current.open = false
 		current.closed = true
 

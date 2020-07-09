@@ -34,9 +34,9 @@ func Advance(elapsed float64) error {
 	return singleton.advance(elapsed)
 }
 
-func CreateLayout(positionType PositionType) *Layout {
+func CreateLayout(renderer d2interface.Renderer, positionType PositionType) *Layout {
 	verifyWasInit()
-	return createLayout(positionType)
+	return createLayout(renderer, positionType)
 }
 
 func SetLayout(layout *Layout) {

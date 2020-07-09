@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -9,7 +10,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -74,6 +74,7 @@ type HeroStatsPanel struct {
 	heroState            *d2hero.HeroStatsState
 	heroName             string
 	heroClass            d2enum.Hero
+	renderer             d2interface.Renderer
 	staticMenuImageCache *d2interface.Surface
 	labels               *StatsPanelLabels
 
@@ -82,11 +83,13 @@ type HeroStatsPanel struct {
 	isOpen  bool
 }
 
-func NewHeroStatsPanel(heroName string, heroClass d2enum.Hero, heroState d2hero.HeroStatsState) *HeroStatsPanel {
+func NewHeroStatsPanel(renderer d2interface.Renderer, heroName string, heroClass d2enum.Hero,
+	heroState d2hero.HeroStatsState) *HeroStatsPanel {
 	originX := 0
 	originY := 0
 
 	return &HeroStatsPanel{
+		renderer:  renderer,
 		originX:   originX,
 		originY:   originY,
 		heroState: &heroState,
@@ -128,7 +131,7 @@ func (s *HeroStatsPanel) Render(target d2interface.Surface) {
 	if s.staticMenuImageCache == nil {
 		frameWidth, frameHeight := s.frame.GetFrameBounds()
 		framesCount := s.frame.GetFrameCount()
-		surface, err := d2render.NewSurface(frameWidth*framesCount, frameHeight*framesCount, d2interface.FilterNearest)
+		surface, err := s.renderer.NewSurface(frameWidth*framesCount, frameHeight*framesCount, d2enum.FilterNearest)
 
 		if err != nil {
 			return
@@ -276,7 +279,7 @@ func (s *HeroStatsPanel) createStatValueLabel(stat int, x int, y int) d2ui.Label
 func (s *HeroStatsPanel) createTextLabel(element PanelText) d2ui.Label {
 	label := d2ui.CreateLabel(element.Font, d2resource.PaletteStatic)
 	if element.AlignCenter {
-		label.Alignment = d2ui.LabelAlignCenter
+		label.Alignment = d2gui.HorizontalAlignCenter
 	}
 
 	label.SetText(element.Text)

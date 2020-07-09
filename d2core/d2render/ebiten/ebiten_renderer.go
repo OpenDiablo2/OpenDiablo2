@@ -3,12 +3,11 @@ package ebiten
 import (
 	"image"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
 type Renderer struct {
@@ -16,7 +15,7 @@ type Renderer struct {
 }
 
 func (r *Renderer) Update(screen *ebiten.Image) error {
-	err := r.renderCallback(&ebitenSurface{image: screen})
+	err := r.renderCallback(createEbitenSurface(screen))
 	if err != nil {
 		return err
 	}
@@ -30,8 +29,7 @@ func (r *Renderer) Layout(outsideWidth, outsideHeight int) (screenWidth, screenH
 func CreateRenderer() (*Renderer, error) {
 	result := &Renderer{}
 
-	config := d2config.Get()
-
+	config := d2config.Config
 	ebiten.SetCursorMode(ebiten.CursorModeHidden)
 	ebiten.SetFullscreen(config.FullScreen)
 	ebiten.SetRunnableOnUnfocused(config.RunInBackground)
@@ -65,24 +63,24 @@ func (r *Renderer) Run(f func(surface d2interface.Surface) error, width, height 
 }
 
 func (r *Renderer) CreateSurface(surface d2interface.Surface) (d2interface.Surface, error) {
-	result := &ebitenSurface{
-		image: surface.(*ebitenSurface).image,
-		stateCurrent: surfaceState{
+	result := createEbitenSurface(
+		surface.(*ebitenSurface).image,
+		surfaceState{
 			filter: ebiten.FilterNearest,
-			mode:   ebiten.CompositeModeSourceOver,
+			effect: d2enum.DrawEffectNone,
 		},
-	}
+	)
+
 	return result, nil
 }
 
-func (r *Renderer) NewSurface(width, height int, filter d2interface.Filter) (d2interface.Surface, error) {
+func (r *Renderer) NewSurface(width, height int, filter d2enum.Filter) (d2interface.Surface, error) {
 	ebitenFilter := d2ToEbitenFilter(filter)
 	img, err := ebiten.NewImage(width, height, ebitenFilter)
 	if err != nil {
 		return nil, err
 	}
-	result := &ebitenSurface{image: img}
-	return result, nil
+	return createEbitenSurface(img), nil
 }
 
 func (r *Renderer) IsFullScreen() bool {

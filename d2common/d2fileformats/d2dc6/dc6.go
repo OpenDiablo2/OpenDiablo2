@@ -1,4 +1,3 @@
-// Package d2dc6 contains the logic for loading and processing DC6 files.
 package d2dc6
 
 import (
@@ -33,4 +32,41 @@ func Load(data []byte) (*DC6, error) {
 	}
 
 	return result, err
+}
+
+// Decodes the given frame to an indexed color texture
+func (d *DC6) DecodeFrame(frameIndex int) []byte {
+	frame := d.Frames[frameIndex]
+
+	indexData := make([]byte, frame.Width*frame.Height)
+	x := 0
+	y := int(frame.Height) - 1
+	offset := 0
+
+	for {
+		b := int(frame.FrameData[offset])
+		offset++
+
+		if b == 0x80 {
+			if y == 0 {
+				break
+			}
+
+			y--
+
+			x = 0
+		} else if b&0x80 > 0 {
+			transparentPixels := b & 0x7f
+			x += transparentPixels
+		} else {
+			for i := 0; i < b; i++ {
+				indexData[x+y*int(frame.Width)+i] = frame.FrameData[offset]
+				offset++
+			}
+
+			x += b
+		}
+	}
+
+	return indexData
 }

@@ -1,6 +1,9 @@
 package d2common
 
 import (
+	"bytes"
+	"encoding/csv"
+	"io"
 	"log"
 	"strconv"
 	"strings"
@@ -8,73 +11,81 @@ import (
 
 // DataDictionary represents a data file (Excel)
 type DataDictionary struct {
-	FieldNameLookup map[string]int
-	Data            [][]string
+	lookup map[string]int
+	r      *csv.Reader
+	record []string
+	Err    error
 }
 
 // LoadDataDictionary loads the contents of a spreadsheet style txt file
-func LoadDataDictionary(text string) *DataDictionary {
-	result := &DataDictionary{}
-	lines := strings.Split(text, "\r\n")
-	fileNames := strings.Split(lines[0], "\t")
-	result.FieldNameLookup = make(map[string]int)
+func LoadDataDictionary(buf []byte) *DataDictionary {
+	cr := csv.NewReader(bytes.NewReader(buf))
+	cr.Comma = '\t'
+	cr.ReuseRecord = true
 
-	for i, fieldName := range fileNames {
-		result.FieldNameLookup[fieldName] = i
-	}
-
-	result.Data = make([][]string, len(lines)-2)
-
-	for i, line := range lines[1:] {
-		if strings.TrimSpace(line) == "" {
-			continue
-		}
-
-		values := strings.Split(line, "\t")
-		if len(values) != len(result.FieldNameLookup) {
-			continue
-		}
-
-		result.Data[i] = values
-	}
-
-	return result
-}
-
-// GetString gets a string from the given column and row
-func (v *DataDictionary) GetString(fieldName string, index int) string {
-	return v.Data[index][v.FieldNameLookup[fieldName]]
-}
-
-// GetNumber gets a number for the given column and row
-func (v *DataDictionary) GetNumber(fieldName string, index int) int {
-	str := v.GetString(fieldName, index)
-	str = EmptyToZero(AsterToEmpty(str))
-
-	result, err := strconv.Atoi(str)
+	fieldNames, err := cr.Read()
 	if err != nil {
-		log.Panic(err)
+		panic(err)
 	}
 
-	return result
+	data := &DataDictionary{
+		lookup: make(map[string]int, len(fieldNames)),
+		r:      cr,
+	}
+
+	for i, name := range fieldNames {
+		data.lookup[name] = i
+	}
+
+	return data
 }
 
-// GetDelimitedList splits a delimited list from the given column and row
-func (v *DataDictionary) GetDelimitedList(fieldName string, index int) []string {
-	unsplit := v.GetString(fieldName, index)
+// Next reads the next row, skips Expansion lines or
+// returns false when the end of a file is reached or an error occurred
+func (d *DataDictionary) Next() bool {
+	var err error
+	d.record, err = d.r.Read()
 
-	// Comma delimited fields are quoted, not terribly pretty to fix that here but...
-	unsplit = strings.TrimRight(unsplit, "\"")
-	unsplit = strings.TrimLeft(unsplit, "\"")
+	if err == io.EOF {
+		return false
+	} else if err != nil {
+		d.Err = err
+		return false
+	}
 
-	return strings.Split(unsplit, ",")
+	if d.record[0] == "Expansion" {
+		return d.Next()
+	}
+
+	return true
 }
 
-// GetBool gets a bool value for the given column and row
-func (v *DataDictionary) GetBool(fieldName string, index int) bool {
-	n := v.GetNumber(fieldName, index)
+// String gets a string from the given column
+func (d *DataDictionary) String(field string) string {
+	return d.record[d.lookup[field]]
+}
+
+// Number gets a number for the given column
+func (d *DataDictionary) Number(field string) int {
+	n, err := strconv.Atoi(d.String(field))
+	if err != nil {
+		return 0
+	}
+
+	return n
+}
+
+// List splits a delimited list from the given column
+func (d *DataDictionary) List(field string) []string {
+	str := d.String(field)
+	return strings.Split(str, ",")
+}
+
+// Bool gets a bool value for the given column
+func (d *DataDictionary) Bool(field string) bool {
+	n := d.Number(field)
 	if n > 1 {
-		log.Panic("GetBool on non-bool field")
+		log.Panic("Bool on non-bool field")
 	}
 
 	return n == 1

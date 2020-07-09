@@ -1,6 +1,7 @@
 package d2ui
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"strings"
 	"time"
 
@@ -8,7 +9,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 )
 
 // TextBox with cursor focus
@@ -27,7 +27,7 @@ type TextBox struct {
 	filter    string
 }
 
-func CreateTextbox() TextBox {
+func CreateTextbox(renderer d2interface.Renderer) TextBox {
 	animation, _ := d2asset.LoadAnimation(d2resource.TextBox2, d2resource.PaletteUnits)
 	bgSprite, _ := LoadSprite(animation)
 	tb := TextBox{
@@ -58,11 +58,11 @@ func (v *TextBox) Render(target d2interface.Surface) {
 	}
 }
 
-func (v *TextBox) OnKeyChars(event d2input.KeyCharsEvent) bool {
+func (v *TextBox) OnKeyChars(event d2interface.KeyCharsEvent) bool {
 	if !(focusedTextBox == v) || !v.visible || !v.enabled {
 		return false
 	}
-	newText := string(event.Chars)
+	newText := string(event.Chars())
 	if len(newText) > 0 {
 		v.text += newText
 		v.SetText(v.text)
@@ -71,8 +71,8 @@ func (v *TextBox) OnKeyChars(event d2input.KeyCharsEvent) bool {
 	return false
 }
 
-func (v *TextBox) OnKeyRepeat(event d2input.KeyEvent) bool {
-	if event.Key == d2input.KeyBackspace && debounceEvents(event.Duration) {
+func (v *TextBox) OnKeyRepeat(event d2interface.KeyEvent) bool {
+	if event.Key() == d2enum.KeyBackspace && debounceEvents(event.Duration()) {
 		if len(v.text) >= 1 {
 			v.text = v.text[:len(v.text)-1]
 		}
@@ -137,10 +137,11 @@ func (v *TextBox) GetSize() (width, height int) {
 }
 
 func (v *TextBox) SetPosition(x, y int) {
+	lw, _ := v.textLabel.GetSize()
 	v.x = x
 	v.y = y
 	v.textLabel.SetPosition(v.x+6, v.y+3)
-	v.lineBar.SetPosition(v.x+6+v.textLabel.Width, v.y+3)
+	v.lineBar.SetPosition(v.x+6+lw, v.y+3)
 	v.bgSprite.SetPosition(v.x, v.y+26)
 }
 

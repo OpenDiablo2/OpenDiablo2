@@ -5,24 +5,24 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 // Sprite is a positioned visual object.
 type Sprite struct {
 	x         int
 	y         int
-	animation *d2asset.Animation
+	animation d2interface.Animation
 }
 
 var (
 	ErrNoAnimation = errors.New("no animation was specified")
 )
 
-func LoadSprite(animation *d2asset.Animation) (*Sprite, error) {
+func LoadSprite(animation d2interface.Animation) (*Sprite, error) {
 	if animation == nil {
 		return nil, ErrNoAnimation
 	}
@@ -180,11 +180,10 @@ func (s *Sprite) SetColorMod(color color.Color) {
 	s.animation.SetColorMod(color)
 }
 
-// SetBlend sets the animation alpha blending status
-func (s *Sprite) SetBlend(blend bool) {
-	s.animation.SetBlend(blend)
-}
-
 func (s *Sprite) Advance(elapsed float64) error {
 	return s.animation.Advance(elapsed)
+}
+
+func (s *Sprite) SetEffect(e d2enum.DrawEffect) {
+	s.animation.SetEffect(e)
 }

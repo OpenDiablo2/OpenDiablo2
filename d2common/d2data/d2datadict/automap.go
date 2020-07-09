@@ -2,17 +2,9 @@ package d2datadict
 
 import (
 	"log"
-	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
-
-const (
-	expansion = "Expansion" // blizzard put this in the txt where expansion data starts
-)
-
-//nolint:gochecknoglobals // Currently global by design, only written once
-var frameFields = []string{"Cel1", "Cel2", "Cel3", "Cel4"}
 
 // AutoMapRecord represents one row from d2data.mpq/AutoMap.txt.
 // Based on the information here https://d2mods.info/forum/kb/viewarticle?a=419
@@ -67,66 +59,40 @@ var AutoMaps []*AutoMapRecord
 // LoadAutoMaps populates AutoMaps with the data from AutoMap.txt.
 // It also amends a duplicate field (column) name in that data.
 func LoadAutoMaps(file []byte) {
-	// Fix the error in the original file
-	fileString := fixDuplicateFieldName(string(file))
+	AutoMaps = make([]*AutoMapRecord, 0)
+
+	var frameFields = []string{"Cel1", "Cel2", "Cel3", "Cel4"}
 
 	// Split file by newlines and tabs
-	d := d2common.LoadDataDictionary(fileString)
+	d := d2common.LoadDataDictionary(file)
+	for d.Next() {
+		record := &AutoMapRecord{
+			LevelName: d.String("LevelName"),
+			TileName:  d.String("TileName"),
 
-	// Construct records
-	AutoMaps = make([]*AutoMapRecord, len(d.Data))
+			Style:         d.Number("Style"),
+			StartSequence: d.Number("StartSequence"),
+			EndSequence:   d.Number("EndSequence"),
 
-	for idx := range d.Data {
-		if d.GetString("LevelName", idx) == expansion {
-			continue
-		}
-
-		AutoMaps[idx] = &AutoMapRecord{
-			LevelName: d.GetString("LevelName", idx),
-			TileName:  d.GetString("TileName", idx),
-
-			Style:         d.GetNumber("Style", idx),
-			StartSequence: d.GetNumber("StartSequence", idx),
-			EndSequence:   d.GetNumber("EndSequence", idx),
-
-			//Type1: d.GetString("Type1", idx),
-			//Type2: d.GetString("Type2", idx),
-			//Type3: d.GetString("Type3", idx),
-			//Type4: d.GetString("Type4", idx),
+			//Type1: d.String("Type1"),
+			//Type2: d.String("Type2"),
+			//Type3: d.String("Type3"),
+			//Type4: d.String("Type4"),
 			// Note: I commented these out for now because they supposedly
 			// aren't useful see the AutoMapRecord struct.
 		}
+		record.Frames = make([]int, len(frameFields))
 
-		AutoMaps[idx].Frames = make([]int, len(frameFields))
 		for i := range frameFields {
-			AutoMaps[idx].Frames[i] = d.GetNumber(frameFields[i], idx)
+			record.Frames[i] = d.Number(frameFields[i])
 		}
+
+		AutoMaps = append(AutoMaps, record)
+	}
+
+	if d.Err != nil {
+		panic(d.Err)
 	}
 
 	log.Printf("Loaded %d AutoMapRecord records", len(AutoMaps))
-}
-
-// fixDuplicateFieldName changes one of the two 'Type2' fields
-// in AutoMap.txt to 'Type3'. An error in the file can be seen
-// by looking at the lists of 'Type' and 'Cel' fields:
-//
-//	Type1	Type2	Type2*	Type4
-// 	Cel1	Cel2	Cel3	Cel4
-//
-// LoadDataDictionary uses a set of field names. The duplicate
-// is omitted resulting in all rows being skipped because their
-// counts are different from the field names count.
-func fixDuplicateFieldName(fileString string) string {
-	// Split rows
-	rows := strings.Split(fileString, "\r\n")
-
-	// Split the field names row and correct the duplicate
-	fieldNames := strings.Split(rows[0], "\t")
-	fieldNames[9] = "Type3"
-
-	// Join the field names back up and assign to the first row
-	rows[0] = strings.Join(fieldNames, "\t")
-
-	// Return the rows, joined back into one string
-	return strings.Join(rows, "\r\n")
 }

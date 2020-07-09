@@ -1,9 +1,9 @@
-// Package d2term provides a in-game terminal that allows executing custom commands for debugging
 package d2term
 
 import (
 	"errors"
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"image/color"
 	"log"
 	"math"
@@ -15,18 +15,17 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 )
 
 // TermCategory applies styles to the lines in the  Terminal
-type TermCategory d2interface.TermCategory
+type TermCategory d2enum.TermCategory
 
 // Terminal Category types
 const (
-	TermCategoryNone    = TermCategory(d2interface.TermCategoryNone)
-	TermCategoryInfo    = TermCategory(d2interface.TermCategoryInfo)
-	TermCategoryWarning = TermCategory(d2interface.TermCategoryWarning)
-	TermCategoryError   = TermCategory(d2interface.TermCategoryError)
+	TermCategoryNone    = TermCategory(d2enum.TermCategoryNone)
+	TermCategoryInfo    = TermCategory(d2enum.TermCategoryInfo)
+	TermCategoryWarning = TermCategory(d2enum.TermCategoryWarning)
+	TermCategoryError   = TermCategory(d2enum.TermCategoryError)
 )
 const (
 	termCharWidth   = 6
@@ -53,7 +52,7 @@ const (
 
 type termHistoryEntry struct {
 	text     string
-	category d2interface.TermCategory
+	category d2enum.TermCategory
 }
 
 type termActionEntry struct {
@@ -103,8 +102,8 @@ func (t *terminal) Advance(elapsed float64) error {
 	return nil
 }
 
-func (t *terminal) OnKeyDown(event d2input.KeyEvent) bool {
-	if event.Key == d2input.KeyGraveAccent {
+func (t *terminal) OnKeyDown(event d2interface.KeyEvent) bool {
+	if event.Key() == d2enum.KeyGraveAccent {
 		t.toggleTerminal()
 	}
 
@@ -112,27 +111,27 @@ func (t *terminal) OnKeyDown(event d2input.KeyEvent) bool {
 		return false
 	}
 
-	switch event.Key {
-	case d2input.KeyEscape:
+	switch event.Key() {
+	case d2enum.KeyEscape:
 		t.command = ""
-	case d2input.KeyEnd:
+	case d2enum.KeyEnd:
 		t.outputIndex = 0
-	case d2input.KeyHome:
+	case d2enum.KeyHome:
 		t.outputIndex = d2common.MaxInt(0, len(t.outputHistory)-t.lineCount)
-	case d2input.KeyPageUp:
+	case d2enum.KeyPageUp:
 		maxOutputIndex := d2common.MaxInt(0, len(t.outputHistory)-t.lineCount)
 		if t.outputIndex += t.lineCount; t.outputIndex >= maxOutputIndex {
 			t.outputIndex = maxOutputIndex
 		}
-	case d2input.KeyPageDown:
+	case d2enum.KeyPageDown:
 		if t.outputIndex -= t.lineCount; t.outputIndex < 0 {
 			t.outputIndex = 0
 		}
-	case d2input.KeyUp, d2input.KeyDown:
-		t.handleControlKey(event.Key, event.KeyMod)
-	case d2input.KeyEnter:
+	case d2enum.KeyUp, d2enum.KeyDown:
+		t.handleControlKey(event.Key(), event.KeyMod())
+	case d2enum.KeyEnter:
 		t.processCommand()
-	case d2input.KeyBackspace:
+	case d2enum.KeyBackspace:
 		if len(t.command) > 0 {
 			t.command = t.command[:len(t.command)-1]
 		}
@@ -168,10 +167,10 @@ func (t *terminal) processCommand() {
 	t.command = ""
 }
 
-func (t *terminal) handleControlKey(eventKey d2input.Key, keyMod d2input.KeyMod) {
+func (t *terminal) handleControlKey(eventKey d2enum.Key, keyMod d2enum.KeyMod) {
 	switch eventKey {
-	case d2input.KeyUp:
-		if keyMod == d2input.KeyModControl {
+	case d2enum.KeyUp:
+		if keyMod == d2enum.KeyModControl {
 			t.lineCount = d2common.MaxInt(0, t.lineCount-1)
 		} else if len(t.commandHistory) > 0 {
 			t.command = t.commandHistory[t.commandIndex]
@@ -181,8 +180,8 @@ func (t *terminal) handleControlKey(eventKey d2input.Key, keyMod d2input.KeyMod)
 				t.commandIndex--
 			}
 		}
-	case d2input.KeyDown:
-		if keyMod == d2input.KeyModControl {
+	case d2enum.KeyDown:
+		if keyMod == d2enum.KeyModControl {
 			t.lineCount = d2common.MinInt(t.lineCount+1, termRowCountMax)
 		}
 	}
@@ -196,14 +195,14 @@ func (t *terminal) toggleTerminal() {
 	}
 }
 
-func (t *terminal) OnKeyChars(event d2input.KeyCharsEvent) bool {
+func (t *terminal) OnKeyChars(event d2interface.KeyCharsEvent) bool {
 	if !t.IsVisible() {
 		return false
 	}
 
 	var handled bool
 
-	for _, c := range event.Chars {
+	for _, c := range event.Chars() {
 		if c != '`' {
 			t.command += string(c)
 			handled = true
@@ -240,11 +239,11 @@ func (t *terminal) Render(surface d2interface.Surface) error {
 		surface.PushTranslation(-termCharWidth*2, 0)
 
 		switch historyEntry.category {
-		case d2interface.TermCategoryInfo:
+		case d2enum.TermCategoryInfo:
 			surface.DrawRect(termCharWidth, termCharHeight, t.infoColor)
-		case d2interface.TermCategoryWarning:
+		case d2enum.TermCategoryWarning:
 			surface.DrawRect(termCharWidth, termCharHeight, t.warningColor)
-		case d2interface.TermCategoryError:
+		case d2enum.TermCategoryError:
 			surface.DrawRect(termCharWidth, termCharHeight, t.errorColor)
 		}
 
@@ -349,7 +348,7 @@ func parseActionParams(actionType reflect.Type, actionParams []string) ([]reflec
 	return paramValues, nil
 }
 
-func (t *terminal) OutputRaw(text string, category d2interface.TermCategory) {
+func (t *terminal) OutputRaw(text string, category d2enum.TermCategory) {
 	var line string
 
 	for _, word := range strings.Split(text, " ") {
@@ -372,19 +371,19 @@ func (t *terminal) OutputRaw(text string, category d2interface.TermCategory) {
 }
 
 func (t *terminal) Outputf(format string, params ...interface{}) {
-	t.OutputRaw(fmt.Sprintf(format, params...), d2interface.TermCategoryNone)
+	t.OutputRaw(fmt.Sprintf(format, params...), d2enum.TermCategoryNone)
 }
 
 func (t *terminal) OutputInfof(format string, params ...interface{}) {
-	t.OutputRaw(fmt.Sprintf(format, params...), d2interface.TermCategoryInfo)
+	t.OutputRaw(fmt.Sprintf(format, params...), d2enum.TermCategoryInfo)
 }
 
 func (t *terminal) OutputWarningf(format string, params ...interface{}) {
-	t.OutputRaw(fmt.Sprintf(format, params...), d2interface.TermCategoryWarning)
+	t.OutputRaw(fmt.Sprintf(format, params...), d2enum.TermCategoryWarning)
 }
 
 func (t *terminal) OutputErrorf(format string, params ...interface{}) {
-	t.OutputRaw(fmt.Sprintf(format, params...), d2interface.TermCategoryError)
+	t.OutputRaw(fmt.Sprintf(format, params...), d2enum.TermCategoryError)
 }
 
 func (t *terminal) OutputClear() {

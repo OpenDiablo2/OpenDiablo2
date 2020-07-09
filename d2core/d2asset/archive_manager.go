@@ -7,40 +7,37 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
-type archiveEntry struct {
-	archivePath  string
-	hashEntryMap d2mpq.HashEntryMap
-}
-
 type archiveManager struct {
-	cache   *d2common.Cache
-	config  *d2config.Configuration
-	entries []archiveEntry
-	mutex   sync.Mutex
+	cache    d2interface.Cache
+	config   *d2config.Configuration
+	archives []d2interface.Archive
+	mutex    sync.Mutex
 }
 
 const (
 	archiveBudget = 1024 * 1024 * 512
 )
 
-func createArchiveManager(config *d2config.Configuration) *archiveManager {
+func createArchiveManager(config *d2config.Configuration) d2interface.ArchiveManager {
 	return &archiveManager{cache: d2common.CreateCache(archiveBudget), config: config}
 }
 
-func (am *archiveManager) loadArchiveForFile(filePath string) (*d2mpq.MPQ, error) {
+// LoadArchiveForFile loads the archive for the given (in-archive) file path
+func (am *archiveManager) LoadArchiveForFile(filePath string) (d2interface.Archive, error) {
 	am.mutex.Lock()
 	defer am.mutex.Unlock()
 
-	if err := am.cacheArchiveEntries(); err != nil {
+	if err := am.CacheArchiveEntries(); err != nil {
 		return nil, err
 	}
 
-	for _, archiveEntry := range am.entries {
-		if archiveEntry.hashEntryMap.Contains(filePath) {
-			result, ok := am.loadArchive(archiveEntry.archivePath)
+	for _, archive := range am.archives {
+		if archive.Contains(filePath) {
+			result, ok := am.LoadArchive(archive.Path())
 			if ok == nil {
 				return result, nil
 			}
@@ -50,16 +47,17 @@ func (am *archiveManager) loadArchiveForFile(filePath string) (*d2mpq.MPQ, error
 	return nil, errors.New("file not found")
 }
 
-func (am *archiveManager) fileExistsInArchive(filePath string) (bool, error) {
+// FileExistsInArchive checks if a file exists in an archive
+func (am *archiveManager) FileExistsInArchive(filePath string) (bool, error) {
 	am.mutex.Lock()
 	defer am.mutex.Unlock()
 
-	if err := am.cacheArchiveEntries(); err != nil {
+	if err := am.CacheArchiveEntries(); err != nil {
 		return false, err
 	}
 
-	for _, archiveEntry := range am.entries {
-		if archiveEntry.hashEntryMap.Contains(filePath) {
+	for _, archiveEntry := range am.archives {
+		if archiveEntry.Contains(filePath) {
 			return true, nil
 		}
 	}
@@ -67,9 +65,10 @@ func (am *archiveManager) fileExistsInArchive(filePath string) (bool, error) {
 	return false, nil
 }
 
-func (am *archiveManager) loadArchive(archivePath string) (*d2mpq.MPQ, error) {
+// LoadArchive loads and caches an archive
+func (am *archiveManager) LoadArchive(archivePath string) (d2interface.Archive, error) {
 	if archive, found := am.cache.Retrieve(archivePath); found {
-		return archive.(*d2mpq.MPQ), nil
+		return archive.(d2interface.Archive), nil
 	}
 
 	archive, err := d2mpq.Load(archivePath)
@@ -77,33 +76,44 @@ func (am *archiveManager) loadArchive(archivePath string) (*d2mpq.MPQ, error) {
 		return nil, err
 	}
 
-	if err := am.cache.Insert(archivePath, archive, int(archive.Data.ArchiveSize)); err != nil {
+	if err := am.cache.Insert(archivePath, archive, int(archive.Size())); err != nil {
 		return nil, err
 	}
 
 	return archive, nil
 }
 
-func (am *archiveManager) cacheArchiveEntries() error {
-	if len(am.entries) == len(am.config.MpqLoadOrder) {
+// CacheArchiveEntries updates the archive entries
+func (am *archiveManager) CacheArchiveEntries() error {
+	if len(am.archives) == len(am.config.MpqLoadOrder) {
 		return nil
 	}
 
-	am.entries = nil
+	am.archives = nil
 
 	for _, archiveName := range am.config.MpqLoadOrder {
 		archivePath := path.Join(am.config.MpqPath, archiveName)
 
-		archive, err := am.loadArchive(archivePath)
+		archive, err := am.LoadArchive(archivePath)
 		if err != nil {
 			return err
 		}
 
-		am.entries = append(
-			am.entries,
-			archiveEntry{archivePath, archive.HashEntryMap},
+		am.archives = append(
+			am.archives,
+			archive,
 		)
 	}
 
 	return nil
+}
+
+// ClearCache clears the archive manager cache
+func (am *archiveManager) ClearCache() {
+	am.cache.Clear()
+}
+
+// GetCache returns the archive manager cache
+func (am *archiveManager) GetCache() d2interface.Cache {
+	return am.cache
 }

@@ -21,8 +21,6 @@ type NPC struct {
 	path          int
 	isDone        bool
 	repetitions   int
-	direction     int
-	objectLookup  *d2datadict.ObjectLookupRecord
 	monstatRecord *d2datadict.MonStatsRecord
 	monstatEx     *d2datadict.MonStats2Record
 	name          string
@@ -36,30 +34,23 @@ func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC
 		monstatEx:     d2datadict.MonStats2[monstat.ExtraDataKey],
 	}
 
-	object := &d2datadict.ObjectLookupRecord{
-		Base:  "/Data/Global/Monsters",
-		Token: monstat.AnimationDirectoryToken,
-		Mode:  result.monstatEx.ResurrectMode.String(),
-		Class: result.monstatEx.BaseWeaponClass,
-		TR:    selectEquip(result.monstatEx.TRv),
-		LG:    selectEquip(result.monstatEx.LGv),
-		RH:    selectEquip(result.monstatEx.RHv),
-		SH:    selectEquip(result.monstatEx.SHv),
-		RA:    selectEquip(result.monstatEx.Rav),
-		LA:    selectEquip(result.monstatEx.Lav),
-		LH:    selectEquip(result.monstatEx.LHv),
-		HD:    selectEquip(result.monstatEx.HDv),
+	var equipment [16]string
+
+	for compType, opts := range result.monstatEx.EquipmentOptions {
+		equipment[compType] = selectEquip(opts)
 	}
-	result.objectLookup = object
-	composite, err := d2asset.LoadComposite(object, d2resource.PaletteUnits)
+
+	composite, _ := d2asset.LoadComposite(d2enum.ObjectTypeCharacter, monstat.AnimationDirectoryToken,
+		d2resource.PaletteUnits)
 	result.composite = composite
 
-	if err != nil {
-		panic(err)
-	}
+	composite.SetMode("NU", result.monstatEx.BaseWeaponClass)
+	composite.Equip(&equipment)
 
-	result.SetMode(object.Mode, object.Class, direction)
+	result.SetSpeed(float64(monstat.SpeedBase))
 	result.mapEntity.directioner = result.rotate
+
+	result.composite.SetDirection(direction)
 
 	if result.monstatRecord != nil && result.monstatRecord.IsInteractable {
 		result.name = d2common.TranslateString(result.monstatRecord.NameStringTableKey)
@@ -75,7 +66,6 @@ func selectEquip(slice []string) string {
 
 	return ""
 }
-
 
 func (v *NPC) Render(target d2interface.Surface) {
 	target.PushTranslation(
@@ -148,7 +138,7 @@ func (v *NPC) next() {
 	}
 
 	if v.composite.GetAnimationMode() != newAnimationMode.String() {
-		v.SetMode(newAnimationMode.String(), v.weaponClass, v.direction)
+		v.composite.SetMode(newAnimationMode.String(), v.composite.GetWeaponClass())
 	}
 }
 
@@ -160,23 +150,14 @@ func (v *NPC) rotate(direction int) {
 	} else {
 		newMode = d2enum.AnimationModeMonsterNeutral
 	}
-	if newMode.String() != v.composite.GetAnimationMode() || direction != v.direction {
-		v.SetMode(newMode.String(), v.weaponClass, direction)
-	}
-}
 
-// SetMode changes the graphical mode of this animated entity
-func (v *NPC) SetMode(animationMode, weaponClass string, direction int) error {
-	v.direction = direction
-	v.weaponClass = weaponClass
-
-	err := v.composite.SetMode(animationMode, weaponClass, direction)
-	if err != nil {
-		err = v.composite.SetMode(animationMode, "HTH", direction)
-		v.weaponClass = "HTH"
+	if newMode.String() != v.composite.GetAnimationMode() {
+		v.composite.SetMode(newMode.String(), v.composite.GetWeaponClass())
 	}
 
-	return err
+	if v.composite.GetDirection() != direction {
+		v.composite.SetDirection(direction)
+	}
 }
 
 func (m *NPC) Selectable() bool {

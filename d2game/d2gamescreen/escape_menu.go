@@ -2,12 +2,12 @@ package d2gamescreen
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 )
 
@@ -64,9 +64,11 @@ type EscapeMenu struct {
 	currentLayout layoutID
 
 	// leftPent and rightPent are generated once and shared between the layouts
-	leftPent      *d2gui.AnimatedSprite
-	rightPent     *d2gui.AnimatedSprite
-	layouts       []*layout
+	leftPent  *d2gui.AnimatedSprite
+	rightPent *d2gui.AnimatedSprite
+	layouts   []*layout
+
+	renderer      d2interface.Renderer
 	audioProvider d2interface.AudioProvider
 	terminal      d2interface.Terminal
 }
@@ -122,10 +124,11 @@ type actionableElement interface {
 }
 
 // NewEscapeMenu creates a new escape menu
-func NewEscapeMenu(audioProvider d2interface.AudioProvider, term d2interface.Terminal) *EscapeMenu {
+func NewEscapeMenu(renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, term d2interface.Terminal) *EscapeMenu {
 	m := &EscapeMenu{
 		audioProvider: audioProvider,
 		terminal:      term,
+		renderer:      renderer,
 	}
 
 	m.layouts = []*layout{
@@ -204,7 +207,7 @@ func (m *EscapeMenu) newConfigureControlsLayout() *layout {
 }
 
 func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
-	wrapper := d2gui.CreateLayout(d2gui.PositionTypeHorizontal)
+	wrapper := d2gui.CreateLayout(m.renderer, d2gui.PositionTypeHorizontal)
 	wrapper.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	wrapper.AddSpacerDynamic()
 
@@ -252,13 +255,13 @@ func (m *EscapeMenu) addTitle(l *layout, text string) {
 func (m *EscapeMenu) addBigSelectionLabel(l *layout, text string, targetLayout layoutID) {
 	guiLabel, _ := l.AddLabel(text, d2gui.FontStyle42Units)
 	label := &showLayoutLabel{Label: guiLabel, target: targetLayout, showLayout: m.showLayout}
-	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
+	label.SetMouseClickHandler(func(_ d2interface.MouseEvent) {
 		label.Trigger()
 	})
 
 	elID := len(l.actionableElements)
 
-	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
+	label.SetMouseEnterHandler(func(_ d2interface.MouseMoveEvent) {
 		m.onHoverElement(elID)
 	})
 	l.AddSpacerStatic(10, labelGutter)
@@ -269,13 +272,13 @@ func (m *EscapeMenu) addPreviousMenuLabel(l *layout) {
 	l.AddSpacerStatic(10, labelGutter)
 	guiLabel, _ := l.AddLabel("PREVIOUS MENU", d2gui.FontStyle30Units)
 	label := &showLayoutLabel{Label: guiLabel, target: optionsLayoutID, showLayout: m.showLayout}
-	label.SetMouseClickHandler(func(_ d2input.MouseEvent) {
+	label.SetMouseClickHandler(func(_ d2interface.MouseEvent) {
 		label.Trigger()
 	})
 
 	elID := len(l.actionableElements)
 
-	label.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
+	label.SetMouseEnterHandler(func(_ d2interface.MouseMoveEvent) {
 		m.onHoverElement(elID)
 	})
 
@@ -294,7 +297,7 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 
 	elID := len(l.actionableElements)
 
-	layout.SetMouseEnterHandler(func(_ d2input.MouseMoveEvent) {
+	layout.SetMouseEnterHandler(func(_ d2interface.MouseMoveEvent) {
 		m.onHoverElement(elID)
 	})
 	layout.AddSpacerDynamic()
@@ -309,7 +312,7 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 		updateValue:       m.onUpdateValue,
 	}
 
-	layout.SetMouseClickHandler(func(_ d2input.MouseEvent) {
+	layout.SetMouseClickHandler(func(_ d2interface.MouseEvent) {
 		label.Trigger()
 	})
 	l.AddSpacerStatic(10, labelGutter)
@@ -365,7 +368,7 @@ func (m *EscapeMenu) showLayout(id layoutID) {
 	}
 
 	if id == saveLayoutID {
-		mainMenu := CreateMainMenu(m.audioProvider, m.terminal)
+		mainMenu := CreateMainMenu(m.renderer, m.audioProvider, m.terminal)
 		mainMenu.setScreenMode(screenModeMainMenu)
 		d2screen.SetNextScreen(mainMenu)
 
@@ -431,15 +434,15 @@ func (m *EscapeMenu) onEnterKey() {
 }
 
 // OnKeyDown defines the actions of the Escape Menu when a key is pressed
-func (m *EscapeMenu) OnKeyDown(event d2input.KeyEvent) bool {
-	switch event.Key {
-	case d2input.KeyEscape:
+func (m *EscapeMenu) OnKeyDown(event d2interface.KeyEvent) bool {
+	switch event.Key() {
+	case d2enum.KeyEscape:
 		m.onEscKey()
-	case d2input.KeyUp:
+	case d2enum.KeyUp:
 		m.onUpKey()
-	case d2input.KeyDown:
+	case d2enum.KeyDown:
 		m.onDownKey()
-	case d2input.KeyEnter:
+	case d2enum.KeyEnter:
 		m.onEnterKey()
 	default:
 		return false
