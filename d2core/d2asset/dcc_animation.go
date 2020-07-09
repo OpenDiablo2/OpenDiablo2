@@ -41,9 +41,6 @@ func CreateDCCAnimation(renderer d2iface.Renderer, dccPath string, palette d2ifa
 		renderer:  renderer,
 	}
 
-	// Transparency is now no longer handled, it should be done by using PL2 palette and
-	// picking the appropriate transform for the transparency level
-
 	err = DCC.SetDirection(0)
 	if err != nil {
 		return nil, err
