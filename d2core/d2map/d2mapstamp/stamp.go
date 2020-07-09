@@ -17,7 +17,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
-// Represents a pre-fabricated map stamp that can be placed on a map
+// Stamp represents a pre-fabricated map stamp that can be placed on a map.
 type Stamp struct {
 	regionPath  string                       // The file path of the region
 	levelType   d2datadict.LevelTypeRecord   // The level type id for this stamp
@@ -26,12 +26,13 @@ type Stamp struct {
 	ds1         *d2ds1.DS1                   // The backing DS1 file for this stamp
 }
 
-// Loads a stamp based on the supplied parameters
+// LoadStamp loads the Stamp data from file.
 func LoadStamp(levelType d2enum.RegionIdType, levelPreset int, fileIndex int) *Stamp {
 	stamp := &Stamp{
 		levelType:   d2datadict.LevelTypes[levelType],
 		levelPreset: d2datadict.LevelPresets[levelPreset],
 	}
+
 	for _, levelTypeDt1 := range stamp.levelType.Files {
 		if len(levelTypeDt1) != 0 && levelTypeDt1 != "" && levelTypeDt1 != "0" {
 			fileData, err := d2asset.LoadFile("/data/global/tiles/" + levelTypeDt1)
@@ -46,6 +47,7 @@ func LoadStamp(levelType d2enum.RegionIdType, levelPreset int, fileIndex int) *S
 	}
 
 	var levelFilesToPick []string
+
 	for _, fileRecord := range stamp.levelPreset.Files {
 		if len(fileRecord) != 0 && fileRecord != "" && fileRecord != "0" {
 			levelFilesToPick = append(levelFilesToPick, fileRecord)
@@ -63,9 +65,11 @@ func LoadStamp(levelType d2enum.RegionIdType, levelPreset int, fileIndex int) *S
 
 	stamp.regionPath = levelFilesToPick[levelIndex]
 	fileData, err := d2asset.LoadFile("/data/global/tiles/" + stamp.regionPath)
+
 	if err != nil {
 		panic(err)
 	}
+
 	stamp.ds1, _ = d2ds1.LoadDS1(fileData)
 
 	// Update the region info for the tiles
@@ -78,41 +82,43 @@ func LoadStamp(levelType d2enum.RegionIdType, levelPreset int, fileIndex int) *S
 	return stamp
 }
 
-// Returns the size of the stamp, in tiles
+// Size returns the size of the stamp in tiles.
 func (mr *Stamp) Size() d2common.Size {
 	return d2common.Size{int(mr.ds1.Width), int(mr.ds1.Height)}
 }
 
-// Gets the level preset id
+// LevelPreset returns the level preset ID.
 func (mr *Stamp) LevelPreset() d2datadict.LevelPresetRecord {
 	return mr.levelPreset
 }
 
-// Returns the level type id
+// LevelType returns the level type ID.
 func (mr *Stamp) LevelType() d2datadict.LevelTypeRecord {
 	return mr.levelType
 }
 
-// Gets the file path of the region
+// RegionPath returns the file path of the region.
 func (mr *Stamp) RegionPath() string {
 	return mr.regionPath
 }
 
-// Returns the specified tile
+// Tile returns the tile at the given x and y tile coordinates.
 func (mr *Stamp) Tile(x, y int) *d2ds1.TileRecord {
 	return &mr.ds1.Tiles[y][x]
 }
 
-// Returns tile data based on the supplied paramters
+// TileData returns the tile data for the tile with given style, sequence and type.
 func (mr *Stamp) TileData(style int32, sequence int32, tileType d2enum.TileType) *d2dt1.Tile {
 	for _, tile := range mr.tiles {
 		if tile.Style == style && tile.Sequence == sequence && tile.Type == int32(tileType) {
 			return &tile
 		}
 	}
+
 	return nil
 }
 
+// Entities spawns all entities and objects in this tile on the map.
 func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity {
 	entities := make([]d2interface.MapEntity, 0)
 

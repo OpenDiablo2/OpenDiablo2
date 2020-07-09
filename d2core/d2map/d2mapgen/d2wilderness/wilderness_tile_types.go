@@ -1,5 +1,6 @@
 package d2wilderness
 
+// nolint: golint // these probably don't require individual explanations.
 const (
 	TreeBorderSouth int = iota + 4
 	TreeBorderWest
