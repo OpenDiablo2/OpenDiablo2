@@ -43,10 +43,9 @@ func CreateCheckbox(renderer d2interface.Renderer, checkState bool) Checkbox {
 }
 
 func (v *Checkbox) Render(target d2interface.Surface) {
-	target.PushCompositeMode(d2enum.CompositeModeSourceAtop)
 	target.PushTranslation(v.x, v.y)
 	target.PushFilter(d2enum.FilterNearest)
-	defer target.PopN(3)
+	defer target.PopN(2)
 
 	if v.checkState {
 		_ = target.Render(v.checkedImage)

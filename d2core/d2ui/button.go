@@ -137,7 +137,7 @@ func CreateButton(renderer d2interface.Renderer, buttonType ButtonType, text str
 	xOffset := result.width / 2
 
 	buttonSprite.SetPosition(0, 0)
-	buttonSprite.SetBlend(true)
+	buttonSprite.SetEffect(d2enum.DrawEffectModulate)
 	buttonSprite.RenderSegmented(result.normalSurface, buttonLayout.XSegments, buttonLayout.YSegments, buttonLayout.BaseFrame)
 
 	lbl.SetPosition(xOffset, textY)
@@ -190,10 +190,9 @@ func (v *Button) Activate() {
 
 // Render renders the button
 func (v *Button) Render(target d2interface.Surface) {
-	target.PushCompositeMode(d2enum.CompositeModeSourceAtop)
 	target.PushFilter(d2enum.FilterNearest)
 	target.PushTranslation(v.x, v.y)
-	defer target.PopN(3)
+	defer target.PopN(2)
 
 	if !v.enabled {
 		target.PushColor(color.RGBA{R: 128, G: 128, B: 128, A: 195})

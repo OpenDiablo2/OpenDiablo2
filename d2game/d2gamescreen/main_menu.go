@@ -182,14 +182,14 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
 	animation, _ := d2asset.LoadAnimation(d2resource.Diablo2LogoFireLeft, d2resource.PaletteUnits)
 	v.diabloLogoLeft, _ = d2ui.LoadSprite(animation)
-	v.diabloLogoLeft.SetBlend(true)
+	v.diabloLogoLeft.SetEffect(d2enum.DrawEffectModulate)
 	v.diabloLogoLeft.PlayForward()
 	v.diabloLogoLeft.SetPosition(400, 120)
 	loading.Progress(0.6)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.Diablo2LogoFireRight, d2resource.PaletteUnits)
 	v.diabloLogoRight, _ = d2ui.LoadSprite(animation)
-	v.diabloLogoRight.SetBlend(true)
+	v.diabloLogoRight.SetEffect(d2enum.DrawEffectModulate)
 	v.diabloLogoRight.PlayForward()
 	v.diabloLogoRight.SetPosition(400, 120)
 

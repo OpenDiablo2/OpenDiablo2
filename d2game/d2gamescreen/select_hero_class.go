@@ -602,7 +602,8 @@ func advanceSprite(sprite *d2ui.Sprite, elapsed float64) {
 	}
 }
 
-func loadSprite(animationPath string, position image.Point, playLength int, playLoop, blend bool) *d2ui.Sprite {
+func loadSprite(animationPath string, position image.Point, playLength int, playLoop,
+	blend bool) *d2ui.Sprite {
 	if animationPath == "" {
 		return nil
 	}
@@ -615,7 +616,10 @@ func loadSprite(animationPath string, position image.Point, playLength int, play
 
 	animation.PlayForward()
 	animation.SetPlayLoop(playLoop)
-	animation.SetBlend(blend)
+
+	if blend {
+		animation.SetEffect(d2enum.DrawEffectModulate)
+	}
 
 	if playLength != 0 {
 		animation.SetPlayLengthMs(playLength)

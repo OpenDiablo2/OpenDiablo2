@@ -67,7 +67,7 @@ func (r *Renderer) CreateSurface(surface d2interface.Surface) (d2interface.Surfa
 		surface.(*ebitenSurface).image,
 		surfaceState{
 			filter: ebiten.FilterNearest,
-			mode:   ebiten.CompositeModeSourceOver,
+			effect: d2enum.DrawEffectNone,
 		},
 	)
 

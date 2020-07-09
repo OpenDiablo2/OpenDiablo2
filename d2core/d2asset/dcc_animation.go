@@ -15,7 +15,6 @@ import (
 type DCCAnimation struct {
 	animation
 	dccPath  string
-	effect   d2enum.DrawEffect
 	palette  d2iface.Palette
 	renderer d2iface.Renderer
 }
@@ -32,6 +31,7 @@ func CreateDCCAnimation(renderer d2iface.Renderer, dccPath string, palette d2ifa
 		playLength: defaultPlayLength,
 		playLoop:   true,
 		directions: make([]animationDirection, dcc.NumberOfDirections),
+		effect:     effect,
 	}
 
 	DCC := DCCAnimation{
@@ -39,16 +39,7 @@ func CreateDCCAnimation(renderer d2iface.Renderer, dccPath string, palette d2ifa
 		dccPath:   dccPath,
 		palette:   palette,
 		renderer:  renderer,
-		effect:    effect,
 	}
-
-	// Really the renderer should take DrawEffects and do the right thing
-	if effect == d2enum.DrawEffectModulate {
-		DCC.SetBlend(true)
-	}
-
-	// Transparency is now no longer handled, it should be done by using PL2 palette and
-	// picking the appropriate transform for the transparency level
 
 	err = DCC.SetDirection(0)
 	if err != nil {
