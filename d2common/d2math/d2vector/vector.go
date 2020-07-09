@@ -1,406 +1,312 @@
-// Package d2vector is an Implementation of 2-dimensional vectors with big.Float components
+// Package d2vector provides an implementation of a 2D Euclidean vector using float64 to store the two values.
 package d2vector
 
 import (
 	"fmt"
 	"math"
-	"math/big"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
-const (
-	// Epsilon is the threshold for what is `smol enough`
-	epsilon float64 = 0.0001
-
-	// d2precision is how much precision we want from big.Float
-	d2precision uint = 64 // was chosen arbitrarily
-
-	// for convenience in negating sign
-	negative1 float64 = -1.0
-
-	// for convenience
-	zero float64 = 0.0
-)
-
-// New creates a new Vector2 and returns a pointer to it.
-func New(x, y float64) *Vector2 {
-	xbf, ybf := big.NewFloat(x), big.NewFloat(y)
-	xbf.SetPrec(d2precision)
-	ybf.SetPrec(d2precision)
-	result := &Vector2{xbf, ybf}
-
-	return result
+// Vector is an implementation of a Euclidean vector using float64 with common vector convenience methods.
+type Vector struct {
+	x, y float64
 }
 
-// Vector2 has two big.Floats x and y and a set of methods
-// for common vector operations.
-type Vector2 struct {
-	x *big.Float
-	y *big.Float
+const two float64 = 2
+
+// NewVector creates a new Vector with the given x and y values.
+func NewVector(x, y float64) Vector {
+	return Vector{x, y}
 }
 
-// X returns the x member of the Vector
-func (v *Vector2) X() *big.Float {
-	return v.x
+// Equals returns true if the float64 values of this vector are exactly equal to the given Vector.
+func (v *Vector) Equals(o Vector) bool {
+	return v.x == o.x && v.y == o.y
 }
 
-// Y returns the y member of the Vector
-func (v *Vector2) Y() *big.Float {
-	return v.y
+// EqualsApprox returns true if the values of this Vector are approximately equal to those of the given Vector. If the
+// difference between either of the value pairs is smaller than d2math.Epsilon, they will be considered equal.
+func (v *Vector) EqualsApprox(o Vector) bool {
+	x, y := v.CompareApprox(o)
+	return x == 0 && y == 0
 }
 
-// Marshal converts the Vector into a slice of bytes
-func (v *Vector2) Marshal() ([]byte, error) {
-	// TODO not sure how to do this properly
-	return nil, nil
+// CompareApprox returns 2 ints describing the difference between the vectors. If the difference between either of the
+// value pairs is smaller than d2math.Epsilon, they will be considered equal.
+func (v *Vector) CompareApprox(o Vector) (x, y int) {
+	return d2math.CompareFloat64Fuzzy(v.x, o.x),
+		d2math.CompareFloat64Fuzzy(v.y, o.y)
 }
 
-// Unmarshal converts a slice of bytes to x/y *big.Float
-// and assigns them to itself
-func (v *Vector2) Unmarshal(buf []byte) error {
-	// TODO not sure how to do this properly
-	return nil
-}
-
-// Clone creates a copy of this Vector
-func (v *Vector2) Clone() d2interface.Vector {
-	result := New(0, 0)
-	result.Copy(v)
-
-	return result
-}
-
-// Copy copies the src x/y members to this Vector x/y members
-func (v *Vector2) Copy(src d2interface.Vector) d2interface.Vector {
-	v.x.Copy(src.X())
-	v.y.Copy(src.Y())
-
-	return v
-}
-
-// SetFromEntity copies the vector of a world entity
-// func (v *Vector2) SetFromEntity(entity d2interface.WorldEntity) d2interface.Vector {
-// 	return v.Copy(entity.Position())
-// }
-
-// Set the x,y members of the Vector
-func (v *Vector2) Set(x, y *big.Float) d2interface.Vector {
+// Set the vector values to the given float64 values.
+func (v *Vector) Set(x, y float64) *Vector {
 	v.x = x
 	v.y = y
 
 	return v
 }
 
-// SetToPolar sets the `x` and `y` values of this object
-// from a given polar coordinate.
-func (v *Vector2) SetToPolar(azimuth, radius *big.Float) d2interface.Vector {
-	// HACK we should do this better, with the big.Float
-	a, _ := azimuth.Float64()
-	r, _ := radius.Float64()
-	v.x.SetFloat64(math.Cos(a) * r)
-	v.y.SetFloat64(math.Sin(a) * r)
-
-	return v
+// Clone returns a new a copy of this Vector.
+func (v *Vector) Clone() Vector {
+	return NewVector(v.x, v.y)
 }
 
-// Equals check whether this Vector is equal to a given Vector.
-func (v *Vector2) Equals(src d2interface.Vector) bool {
-	return v.x.Cmp(src.X()) == 0 && v.y.Cmp(src.Y()) == 0
-}
-
-// FuzzyEquals checks if the Vector is approximately equal
-// to the given Vector. epsilon is what we consider `smol enough`
-func (v *Vector2) FuzzyEquals(src d2interface.Vector) bool {
-	smol := big.NewFloat(epsilon)
-	d := v.Distance(src)
-	d.Abs(d)
-
-	return d.Cmp(smol) < 1 || d.Cmp(smol) < 1
-}
-
-// Abs returns a clone that is positive
-func (v *Vector2) Abs() d2interface.Vector {
-	clone := v.Clone()
-	neg1 := big.NewFloat(-1.0)
-
-	if clone.X().Sign() == -1 { // is negative1
-		clone.X().Mul(clone.X(), neg1)
-	}
-
-	if v.Y().Sign() == -1 { // is negative1
-		clone.Y().Mul(clone.Y(), neg1)
-	}
-
-	return clone
-}
-
-// Angle computes the angle in radians with respect
-// to the positive x-axis
-func (v *Vector2) Angle() *big.Float {
-	// HACK we should find a way to do this purely
-	// with big.Float
-	floatX, _ := v.X().Float64()
-	floatY, _ := v.Y().Float64()
-	floatAngle := math.Atan2(floatY, floatX)
-
-	if floatAngle < 0 {
-		floatAngle += 2.0 * math.Pi
-	}
-
-	return big.NewFloat(floatAngle)
-}
-
-// SetAngle sets the angle of this Vector
-func (v *Vector2) SetAngle(angle *big.Float) d2interface.Vector {
-	return v.SetToPolar(angle, v.Length())
-}
-
-// Add to this Vector the components of the given Vector
-func (v *Vector2) Add(src d2interface.Vector) d2interface.Vector {
-	v.x.Add(v.x, src.X())
-	v.y.Add(v.y, src.Y())
-
-	return v
-}
-
-// Subtract from this Vector the components of the given Vector
-func (v *Vector2) Subtract(src d2interface.Vector) d2interface.Vector {
-	v.x.Sub(v.x, src.X())
-	v.y.Sub(v.y, src.Y())
-
-	return v
-}
-
-// Multiply this Vector with the components of the given Vector
-func (v *Vector2) Multiply(src d2interface.Vector) d2interface.Vector {
-	v.x.Mul(v.x, src.X())
-	v.y.Mul(v.y, src.Y())
-
-	return v
-}
-
-// Scale this Vector by the given value
-func (v *Vector2) Scale(s *big.Float) d2interface.Vector {
-	v.x.Sub(v.x, s)
-	v.y.Sub(v.y, s)
-
-	return v
-}
-
-// Divide this Vector by the given Vector
-func (v *Vector2) Divide(src d2interface.Vector) d2interface.Vector {
-	v.x.Quo(v.x, src.X())
-	v.y.Quo(v.y, src.Y())
-
-	return v
-}
-
-// Negate thex and y components of this Vector
-func (v *Vector2) Negate() d2interface.Vector {
-	return v.Scale(big.NewFloat(negative1))
-}
-
-// Distance calculate the distance between this Vector and the given Vector
-func (v *Vector2) Distance(src d2interface.Vector) *big.Float {
-	dist := v.DistanceSq(src)
-
-	return dist.Sqrt(dist)
-}
-
-// DistanceSq calculate the distance suared between this Vector and the given
-// Vector
-func (v *Vector2) DistanceSq(src d2interface.Vector) *big.Float {
-	delta := src.Clone().Subtract(v)
-	deltaSq := delta.Multiply(delta)
-
-	return big.NewFloat(zero).Add(deltaSq.X(), deltaSq.Y())
-}
-
-// Length returns the length of this Vector
-func (v *Vector2) Length() *big.Float {
-	xsq, ysq := v.LengthSq()
-
-	return xsq.Add(xsq, ysq)
-}
-
-// LengthSq returns the x and y values squared
-func (v *Vector2) LengthSq() (*big.Float, *big.Float) {
-	clone := v.Clone()
-	x, y := clone.X(), clone.Y()
-
-	return x.Mul(x, x), y.Mul(y, y)
-}
-
-// SetLength sets the length of this Vector
-func (v *Vector2) SetLength(length *big.Float) d2interface.Vector {
-	return v.Normalize().Scale(length)
-}
-
-// Normalize Makes the vector a unit length vector (magnitude of 1) in the same
-// direction.
-func (v *Vector2) Normalize() d2interface.Vector {
-	xsq, ysq := v.LengthSq()
-	length := big.NewFloat(zero).Add(xsq, ysq)
-	one := big.NewFloat(1.0)
-
-	if length.Cmp(one) > 0 {
-		length.Quo(one, length.Sqrt(length))
-
-		v.x.Mul(v.x, length)
-		v.y.Mul(v.y, length)
-	}
-
-	return v
-}
-
-// NormalizeRightHand rotate this Vector to its perpendicular,
-// in the positive direction.
-func (v *Vector2) NormalizeRightHand() d2interface.Vector {
-	x := v.x
-	v.x = v.y.Mul(v.y, big.NewFloat(negative1))
-	v.y = x
-
-	return v
-}
-
-// NormalizeLeftHand rotate this Vector to its perpendicular,
-// in the negative1 direction.
-func (v *Vector2) NormalizeLeftHand() d2interface.Vector {
-	x := v.x
-	v.x = v.y
-	v.y = x.Mul(x, big.NewFloat(negative1))
-
-	return v
-}
-
-// Dot returns the dot product of this Vector and the given Vector.
-func (v *Vector2) Dot(src d2interface.Vector) *big.Float {
-	c := v.Clone()
-	c.X().Mul(c.X(), src.X())
-	c.Y().Mul(c.Y(), src.Y())
-
-	return c.X().Add(c.X(), c.Y())
-}
-
-// Cross Calculate the cross product of this Vector and the given Vector.
-func (v *Vector2) Cross(src d2interface.Vector) *big.Float {
-	c := v.Clone()
-	c.X().Mul(c.X(), src.X())
-	c.Y().Mul(c.Y(), src.Y())
-
-	return c.X().Sub(c.X(), c.Y())
-}
-
-// Lerp Linearly interpolate between this Vector and the given Vector.
-func (v *Vector2) Lerp(
-	src d2interface.Vector,
-	t *big.Float,
-) d2interface.Vector {
-	vc, sc := v.Clone(), src.Clone()
-	x, y := vc.X(), vc.Y()
-	v.x.Set(x.Add(x, t.Mul(t, sc.X().Sub(sc.X(), x))))
-	v.y.Set(y.Add(y, t.Mul(t, sc.Y().Sub(sc.Y(), y))))
-
-	return v
-}
-
-// Reset this Vector the zero vector (0, 0).
-func (v *Vector2) Reset() d2interface.Vector {
-	v.x.SetFloat64(zero)
-	v.y.SetFloat64(zero)
-
-	return v
-}
-
-// Limit the length (or magnitude) of this Vector
-func (v *Vector2) Limit(max *big.Float) d2interface.Vector {
-	length := v.Length()
-
-	if max.Cmp(length) < 0 {
-		v.Scale(length.Quo(max, length))
-	}
-
-	return v
-}
-
-// Reflect this Vector off a line defined by a normal.
-func (v *Vector2) Reflect(normal d2interface.Vector) d2interface.Vector {
-	clone := v.Clone()
-	clone.Normalize()
-
-	two := big.NewFloat(2.0) // there's some matrix algebra magic here
-	dot := v.Clone().Dot(normal)
-	normal.Scale(two.Mul(two, dot))
-
-	return v.Subtract(normal)
-}
-
-// Mirror reflect this Vector across another.
-func (v *Vector2) Mirror(axis d2interface.Vector) d2interface.Vector {
-	return v.Reflect(axis).Negate()
-}
-
-// Rotate this Vector by an angle amount.
-func (v *Vector2) Rotate(angle *big.Float) d2interface.Vector {
-	// HACK we should do this only with big.Float, not float64
-	// we are throwing away the precision here
-	floatAngle, _ := angle.Float64()
-	cos := math.Cos(floatAngle)
-	sin := math.Sin(floatAngle)
-
-	oldX, _ := v.x.Float64()
-	oldY, _ := v.y.Float64()
-
-	newX := big.NewFloat(cos*oldX - sin*oldY)
-	newY := big.NewFloat(sin*oldX + cos*oldY)
-
-	v.Set(newX, newY)
+// Copy sets this vector's values to those of the given vector.
+func (v *Vector) Copy(o *Vector) *Vector {
+	v.x = o.x
+	v.y = o.y
 
 	return v
 }
 
 // Floor rounds the vector down to the nearest whole numbers.
-func (v *Vector2) Floor() d2interface.Vector {
-	var xi, yi big.Int
-	v.x.Int(&xi)
-	v.y.Int(&yi)
-	v.X().SetInt(&xi)
-	v.Y().SetInt(&yi)
+func (v *Vector) Floor() *Vector {
+	v.x = math.Floor(v.x)
+	v.y = math.Floor(v.y)
 
 	return v
 }
 
-func (v *Vector2) String() string {
-	return fmt.Sprintf("Vector2{%s, %s}", v.x.Text('f', 5), v.y.Text('f', 5))
+// Clamp limits the values of v to those of a and b. If the values of v are between those of a and b they will be
+// unchanged.
+func (v *Vector) Clamp(a, b *Vector) *Vector {
+	v.x = d2math.ClampFloat64(v.x, a.x, b.x)
+	v.y = d2math.ClampFloat64(v.y, a.y, b.y)
+
+	return v
 }
 
-// Up returns a new vector (0, 1)
-func Up() d2interface.Vector {
-	return New(0, 1)
+// Add the given vector to this vector.
+func (v *Vector) Add(o *Vector) *Vector {
+	v.x += o.x
+	v.y += o.y
+
+	return v
 }
 
-// Down returns a new vector (0, -1)
-func Down() d2interface.Vector {
-	return New(0, -1)
+// Subtract the given vector from this vector.
+func (v *Vector) Subtract(o *Vector) *Vector {
+	v.x -= o.x
+	v.y -= o.y
+
+	return v
 }
 
-// Right returns a new vector (1, 0)
-func Right() d2interface.Vector {
-	return New(1, 0)
+// Multiply this Vector by the given Vector.
+func (v *Vector) Multiply(o *Vector) *Vector {
+	v.x *= o.x
+	v.y *= o.y
+
+	return v
 }
 
-// Left returns a new vector (-1, 0)
-func Left() d2interface.Vector {
-	return New(-1, 0)
+// Scale multiplies both values of this vector by a single given value.
+func (v *Vector) Scale(s float64) *Vector {
+	v.x *= s
+	v.y *= s
+
+	return v
 }
 
-// One returns a new vector (1, 1)
-func One() d2interface.Vector {
-	return New(1, 1)
+// Divide this vector by the given vector.
+func (v *Vector) Divide(o *Vector) *Vector {
+	v.x /= o.x
+	v.y /= o.y
+
+	return v
 }
 
-// Zero returns a new vector (0, 0)
-func Zero() d2interface.Vector {
-	return New(0, 0)
+// Abs sets the vector to it's absolute (positive) equivalent.
+func (v *Vector) Abs() *Vector {
+	xm, ym := 1.0, 1.0
+	if v.x < 0 {
+		xm = -1
+	}
+
+	if v.y < 0 {
+		ym = -1
+	}
+
+	v.x *= xm
+	v.y *= ym
+
+	return v
+}
+
+// Negate multiplies this vector by -1.
+func (v *Vector) Negate() *Vector {
+	return v.Scale(-1)
+}
+
+// Distance between this Vector's position and that of the given Vector.
+func (v *Vector) Distance(o Vector) float64 {
+	delta := o.Clone()
+	delta.Subtract(v)
+
+	return delta.Length()
+}
+
+// Length (magnitude/quantity) of this Vector.
+func (v *Vector) Length() float64 {
+	return math.Sqrt(v.Dot(v))
+}
+
+// SetLength sets the length of this Vector without changing the direction.
+func (v *Vector) SetLength(length float64) *Vector {
+	v.Normalize()
+	v.Scale(length)
+
+	return v
+}
+
+// Lerp sets this vector to the linear interpolation between this and the given vector. The interp argument determines
+// the distance between the two vectors. An interp of 0 will return this vector and 1 will return the given vector.
+func (v *Vector) Lerp(o *Vector, interp float64) *Vector {
+	v.x = d2math.Lerp(v.x, o.x, interp)
+	v.y = d2math.Lerp(v.y, o.y, interp)
+
+	return v
+}
+
+// Dot returns the dot product of this Vector and the given Vector.
+func (v *Vector) Dot(o *Vector) float64 {
+	return v.x*o.x + v.y*o.y
+}
+
+// Cross returns the cross product of this Vector and the given Vector. Note: Cross product is specific to 3D space.
+// This a not cross product. It is the Z component of a 3D vector cross product calculation. The X and Y components use
+// the value of z which doesn't exist in 2D. See:
+// https://stackoverflow.com/questions/243945/calculating-a-2d-vectors-cross-product
+//
+// The sign of Cross indicates whether the direction between the points described by vectors v and o around the origin
+// (0,0) moves clockwise or anti-clockwise. The perspective is from the would-be position of positive Z and the
+// direction is from v to o.
+//
+// Negative = clockwise
+// Positive = anti-clockwise
+// 0 = vectors are identical.
+func (v *Vector) Cross(o Vector) float64 {
+	return v.x*o.y - v.y*o.x
+}
+
+// Normalize sets the vector length to 1 without changing the direction. The normalized vector may be scaled by the
+// float64 return value to restore it's original length.
+func (v *Vector) Normalize() float64 {
+	multiplier := 1 / v.Length()
+	v.Scale(multiplier)
+
+	return 1 / multiplier
+}
+
+// Angle computes the unsigned angle in radians from this vector to the given vector. This angle will never exceed half
+// a full circle. For angles describing a full circumference use SignedAngle.
+func (v *Vector) Angle(o Vector) float64 {
+	from := v.Clone()
+	from.Normalize()
+
+	to := o.Clone()
+	to.Normalize()
+
+	denominator := math.Sqrt(from.Length() * to.Length())
+	dotClamped := d2math.ClampFloat64(from.Dot(&to)/denominator, -1, 1)
+
+	return math.Acos(dotClamped)
+}
+
+// SignedAngle computes the signed (clockwise) angle in radians from this vector to the given vector.
+func (v *Vector) SignedAngle(o Vector) float64 {
+	unsigned := v.Angle(o)
+	sign := d2math.Sign(v.x*o.y - v.y*o.x)
+
+	if sign > 0 {
+		return d2math.RadFull - unsigned
+	}
+
+	return unsigned
+}
+
+// Reflect sets this Vector to it's reflection off a line defined by the given normal.
+func (v *Vector) Reflect(normal Vector) *Vector {
+	normal.Normalize()
+	undo := v.Normalize()
+
+	// 1*Dot is the directional (ignoring length) difference between the vector and the normal. Therefore 2*Dot takes
+	// us beyond the normal to the angle with the equivalent distance in the other direction i.e. the reflection.
+	normal.Scale(two * v.Dot(&normal))
+	v.Subtract(&normal)
+	v.Scale(undo)
+
+	return v
+}
+
+// ReflectSurface does the same thing as Reflect, except the given vector describes,
+// the surface line, not it's normal.
+func (v *Vector) ReflectSurface(surface Vector) *Vector {
+	v.Reflect(surface).Negate()
+
+	return v
+}
+
+// Rotate moves the vector around it's origin clockwise, by the given angle in radians.
+func (v *Vector) Rotate(angle float64) *Vector {
+	a := -angle
+	x := v.x*math.Cos(a) - v.y*math.Sin(a)
+	y := v.x*math.Sin(a) + v.y*math.Cos(a)
+	v.x = x
+	v.y = y
+
+	return v
+}
+
+// NinetyAnti rotates this vector by 90 degrees anti-clockwise.
+func (v *Vector) NinetyAnti() *Vector {
+	x := v.x
+	v.x = v.y * -1
+	v.y = x
+
+	return v
+}
+
+// NinetyClock rotates this vector by 90 degrees clockwise.
+func (v *Vector) NinetyClock() *Vector {
+	y := v.y
+	v.y = v.x * -1
+	v.x = y
+
+	return v
+}
+
+func (v Vector) String() string {
+	return fmt.Sprintf("Vector{%.3f, %.3f}", v.x, v.y)
+}
+
+// VectorUp returns a new vector (0, 1)
+func VectorUp() Vector {
+	return NewVector(0, 1)
+}
+
+// VectorDown returns a new vector (0, -1)
+func VectorDown() Vector {
+	return NewVector(0, -1)
+}
+
+// VectorRight returns a new vector (1, 0)
+func VectorRight() Vector {
+	return NewVector(1, 0)
+}
+
+// VectorLeft returns a new vector (-1, 0)
+func VectorLeft() Vector {
+	return NewVector(-1, 0)
+}
+
+// VectorOne returns a new vector (1, 1)
+func VectorOne() Vector {
+	return NewVector(1, 1)
+}
+
+// VectorZero returns a new vector (0, 0)
+func VectorZero() Vector {
+	return NewVector(0, 0)
 }
