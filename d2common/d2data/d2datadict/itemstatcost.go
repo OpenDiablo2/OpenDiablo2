@@ -159,8 +159,8 @@ func LoadItemStatCosts(file []byte) {
 
 			EventID1:     d2enum.GetItemEventType(d.String("itemevent1")),
 			EventID2:     d2enum.GetItemEventType(d.String("itemevent2")),
-			EventFuncID1: d2enum.GetItemEventFuncID(d.Number("itemeventfunc1")),
-			EventFuncID2: d2enum.GetItemEventFuncID(d.Number("itemeventfunc2")),
+			EventFuncID1: d2enum.ItemEventFuncID(d.Number("itemeventfunc1")),
+			EventFuncID2: d2enum.ItemEventFuncID(d.Number("itemeventfunc2")),
 
 			DescPriority: d.Number("descpriority"),
 			DescFnID:     d2enum.DescFuncID(d.Number("descfunc")),
