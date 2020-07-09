@@ -92,6 +92,7 @@ func (ob *Object) setMode(animationMode string, direction int, randomFrame bool)
 	return err
 }
 
+// Highlight sets the entity highlighted flag to true.
 func (ob *Object) Highlight() {
 	ob.highlight = true
 }

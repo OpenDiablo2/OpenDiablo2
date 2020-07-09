@@ -10,11 +10,14 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
+// Missile is a simple animated entity representing a projectile,
+// such as a spell or arrow.
 type Missile struct {
 	*AnimatedEntity
 	record *d2datadict.MissileRecord
 }
 
+// CreateMissile creates a new Missile and initializes it's animation.
 func CreateMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error) {
 	animation, err := d2asset.LoadAnimation(
 		fmt.Sprintf("%s/%s.dcc", d2resource.MissileData, record.Animation.CelFileName),
@@ -39,9 +42,12 @@ func CreateMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error)
 		record:         record,
 	}
 	result.Speed = float64(record.Velocity)
+
 	return result, nil
 }
 
+// SetRadians adjusts the entity target based on it's range, rotating it's
+// current destination by the value of angle in radians.
 func (m *Missile) SetRadians(angle float64, done func()) {
 	r := float64(m.record.Range)
 
@@ -51,6 +57,8 @@ func (m *Missile) SetRadians(angle float64, done func()) {
 	m.SetTarget(x, y, done)
 }
 
+// Advance is called once per frame and processes a
+// single game tick.
 func (m *Missile) Advance(tickTime float64) {
 	// TODO: collision detection
 	m.Step(tickTime)
