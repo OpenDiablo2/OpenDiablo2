@@ -19,9 +19,10 @@
 package assets
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
 	"image"
-	"os"
 
 	"golang.org/x/image/bmp"
 )
@@ -35,24 +36,16 @@ const (
 )
 
 func CreateTextImage() image.Image {
-	// s, err := gzip.NewReader(bytes.NewReader(compressedTextRGBA))
-	// if err != nil {
-	// 	panic(fmt.Sprintf("assets: gzip.NewReader failed: %v", err))
-	// }
-	// defer s.Close()
-	pwd, _ := os.Getwd()
-	infile, err := os.Open(pwd + "\\d2common\\d2DebugUtil\\internal\\assets\\noto_sans_mono_8x16.bmp")
-
-	pwd = pwd
+	s, err := gzip.NewReader(bytes.NewReader(CompressedDebugText))
 	if err != nil {
-		// replace this with real error handling
-		panic("ahhhh")
+		panic(fmt.Sprintf("assets: gzip.NewReader failed: %v", err))
 	}
-	defer infile.Close()
-	testbmp, err := bmp.Decode(infile)
+	defer s.Close()
+
+	debugBmp, err := bmp.Decode(s)
 	if err != nil {
 		panic(fmt.Sprintf("assets: bmp.Decode failed: %v", err))
 	}
 
-	return testbmp
+	return debugBmp
 }
