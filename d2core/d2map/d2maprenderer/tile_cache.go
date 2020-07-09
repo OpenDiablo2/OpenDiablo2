@@ -17,16 +17,19 @@ func (mr *MapRenderer) generateTileCache() {
 	for idx, tile := range *mr.mapEngine.Tiles() {
 		tileX := idx % mapEngineSize.Width
 		tileY := (idx - tileX) / mapEngineSize.Width
+
 		for i := range tile.Floors {
 			if !tile.Floors[i].Hidden && tile.Floors[i].Prop1 != 0 {
 				mr.generateFloorCache(&tile.Floors[i], tileX, tileY)
 			}
 		}
+
 		for i := range tile.Shadows {
 			if !tile.Shadows[i].Hidden && tile.Shadows[i].Prop1 != 0 {
 				mr.generateShadowCache(&tile.Shadows[i], tileX, tileY)
 			}
 		}
+
 		for i := range tile.Walls {
 			if !tile.Walls[i].Hidden && tile.Walls[i].Prop1 != 0 {
 				mr.generateWallCache(&tile.Walls[i], tileX, tileY)
@@ -37,11 +40,14 @@ func (mr *MapRenderer) generateTileCache() {
 
 func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) {
 	tileOptions := mr.mapEngine.GetTiles(int32(tile.Style), int32(tile.Sequence), 0)
+
 	var tileData []*d2dt1.Tile
+
 	var tileIndex byte
 
 	if tileOptions == nil {
 		log.Printf("Could not locate tile Style:%d, Seq: %d, Type: %d\n", tile.Style, tile.Sequence, 0)
+
 		tileData = append(tileData, &d2dt1.Tile{})
 		tileData[0].Width = 10
 		tileData[0].Height = 10
@@ -63,14 +69,19 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, 
 		} else {
 			tileIndex = byte(tileData[i].RarityFrameIndex)
 		}
+
 		cachedImage := mr.getImageCacheRecord(tile.Style, tile.Sequence, 0, tileIndex)
+
 		if cachedImage != nil {
 			return
 		}
+
 		tileYMinimum := int32(0)
+
 		for _, block := range tileData[i].Blocks {
 			tileYMinimum = d2common.MinInt32(tileYMinimum, int32(block.Y))
 		}
+
 		tileYOffset := d2common.AbsInt32(tileYMinimum)
 		tileHeight := d2common.AbsInt32(tileData[i].Height)
 		image, _ := mr.renderer.NewSurface(int(tileData[i].Width), int(tileHeight), d2enum.FilterNearest)
@@ -85,8 +96,11 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, 
 
 func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) {
 	tileOptions := mr.mapEngine.GetTiles(int32(tile.Style), int32(tile.Sequence), 13)
+
 	var tileIndex byte
+
 	var tileData *d2dt1.Tile
+
 	if tileOptions == nil {
 		return
 	} else {
@@ -101,10 +115,12 @@ func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX,
 	tile.RandomIndex = tileIndex
 	tileMinY := int32(0)
 	tileMaxY := int32(0)
+
 	for _, block := range tileData.Blocks {
 		tileMinY = d2common.MinInt32(tileMinY, int32(block.Y))
 		tileMaxY = d2common.MaxInt32(tileMaxY, int32(block.Y+32))
 	}
+
 	tileYOffset := -tileMinY
 	tileHeight := int(tileMaxY - tileMinY)
 	tile.YAdjust = int(tileMinY + 80)
@@ -124,8 +140,11 @@ func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX,
 
 func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int) {
 	tileOptions := mr.mapEngine.GetTiles(int32(tile.Style), int32(tile.Sequence), int32(tile.Type))
+
 	var tileIndex byte
+
 	var tileData *d2dt1.Tile
+
 	if tileOptions == nil {
 		return
 	} else {
@@ -134,6 +153,7 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY in
 	}
 
 	tile.RandomIndex = tileIndex
+
 	var newTileData *d2dt1.Tile = nil
 
 	if tile.Type == 3 {
@@ -158,7 +178,7 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY in
 
 	realHeight := d2common.MaxInt32(d2common.AbsInt32(tileData.Height), tileMaxY-tileMinY)
 	tileYOffset := -tileMinY
-	//tileHeight := int(tileMaxY - tileMinY)
+	/*tileHeight := int(tileMaxY - tileMinY)*/
 
 	if tile.Type == 15 {
 		tile.YAdjust = -int(tileData.RoofHeight)
@@ -207,6 +227,7 @@ func (mr *MapRenderer) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) b
 	tileSeed ^= tileSeed << 5
 
 	weightSum := 0
+
 	for _, tile := range tiles {
 		weightSum += int(tile.RarityFrameIndex)
 	}
@@ -218,6 +239,7 @@ func (mr *MapRenderer) getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) b
 	random := tileSeed % uint64(weightSum)
 
 	sum := 0
+
 	for i, tile := range tiles {
 		sum += int(tile.RarityFrameIndex)
 		if sum >= int(random) {
