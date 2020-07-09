@@ -6,8 +6,11 @@ const (
 	// Epsilon is used as the threshold for 'almost equal' operations.
 	Epsilon float64 = 0.0001
 
+	// RadToDeg is used to convert anges in radians to degrees by multiplying the radians by RadToDeg. Similarly,degrees
+	// are converted to radians when dividing by RadToDeg.
 	RadToDeg float64 = 57.29578
 
+	// RadFull is the radian equivalent of 360 degrees.
 	RadFull float64 = 6.283185253783088
 )
 

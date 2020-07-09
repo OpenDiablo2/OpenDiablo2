@@ -1,3 +1,4 @@
+// Package d2vector provides an implementation of a 2D Euclidean vector using float64 to store the two values.
 package d2vector
 
 import (
@@ -11,6 +12,8 @@ import (
 type Vector struct {
 	x, y float64
 }
+
+const two float64 = 2
 
 // NewVector creates a new Vector with the given x and y values.
 func NewVector(x, y float64) Vector {
@@ -228,7 +231,9 @@ func (v *Vector) Reflect(normal Vector) *Vector {
 	normal.Normalize()
 	undo := v.Normalize()
 
-	normal.Scale(2 * v.Dot(&normal))
+	// 1*Dot is the directional (ignoring length) difference between the vector and the normal. Therefore 2*Dot takes
+	// us beyond the normal to the angle with the equivalent distance in the other direction i.e. the reflection.
+	normal.Scale(two * v.Dot(&normal))
 	v.Subtract(&normal)
 	v.Scale(undo)
 

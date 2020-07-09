@@ -5,6 +5,8 @@ import (
 	"math"
 )
 
+const subTilesPerTile float64 = 5
+
 // Position is a vector in world space. The stored value is  the one returned by Position.World()
 type Position struct {
 	Vector
@@ -14,6 +16,7 @@ type Position struct {
 func NewPosition(x, y float64) *Position {
 	p := &Position{NewVector(x, y)}
 	p.checkValues()
+
 	return p
 }
 
@@ -53,13 +56,13 @@ func (p *Position) TileOffset() *Vector {
 // SubWorld is the position, where 5 = one map tile.
 func (p *Position) SubWorld() *Vector {
 	c := p.World().Clone()
-	return c.Scale(5)
+	return c.Scale(subTilesPerTile)
 }
 
 // SubTile is the tile position in sub tiles, always a multiple of 5.
 func (p *Position) SubTile() *Vector {
 	c := p.Tile().Clone()
-	return c.Scale(5)
+	return c.Scale(subTilesPerTile)
 }
 
 // SubTileOffset is the offset from the sub tile position in sub tiles, always < 1.

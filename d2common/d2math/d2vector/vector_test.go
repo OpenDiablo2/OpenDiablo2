@@ -300,6 +300,7 @@ func TestNormalize(t *testing.T) {
 	v := NewVector(10, 0)
 	c := v.Clone()
 	want := NewVector(1, 0)
+
 	v.Normalize()
 
 	evaluateVector(fmt.Sprintf("normalize %s", c), want, v, t)
@@ -312,6 +313,7 @@ func TestNormalize(t *testing.T) {
 	evaluateVector(fmt.Sprintf("normalize %s", c), want, v, t)
 
 	want = NewVector(0, 10)
+
 	v.Scale(reverse)
 
 	evaluateVector(fmt.Sprintf("reverse normalizing of %s", c), want, v, t)
@@ -420,4 +422,46 @@ func TestNinetyClock(t *testing.T) {
 	got := v.NinetyClock()
 
 	evaluateVector(fmt.Sprintf("rotated %s by 90 degrees anti-clockwise", c), want, *got, t)
+}
+
+func TestVectorUp(t *testing.T) {
+	got := VectorUp()
+	want := NewVector(0, 1)
+
+	evaluateVector("create normalized vector with up direction", want, got, t)
+}
+
+func TestVectorDown(t *testing.T) {
+	got := VectorDown()
+	want := NewVector(0, -1)
+
+	evaluateVector("create normalized vector with down direction", want, got, t)
+}
+
+func TestVectorRight(t *testing.T) {
+	got := VectorRight()
+	want := NewVector(1, 0)
+
+	evaluateVector("create normalized vector with right direction", want, got, t)
+}
+
+func TestVectorLeft(t *testing.T) {
+	got := VectorLeft()
+	want := NewVector(-1, 0)
+
+	evaluateVector("create normalized vector with left direction", want, got, t)
+}
+
+func TestVectorOne(t *testing.T) {
+	got := VectorOne()
+	want := NewVector(1, 1)
+
+	evaluateVector("create vector with X and Y values of 1", want, got, t)
+}
+
+func TestVectorZero(t *testing.T) {
+	got := VectorZero()
+	want := NewVector(0, 0)
+
+	evaluateVector("create vector with X and Y values of 0", want, got, t)
 }
