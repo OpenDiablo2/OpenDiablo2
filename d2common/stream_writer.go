@@ -12,6 +12,7 @@ func CreateStreamWriter() *StreamWriter {
 	result := &StreamWriter{
 		data: new(bytes.Buffer),
 	}
+
 	return result
 }
 

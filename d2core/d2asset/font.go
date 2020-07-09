@@ -95,19 +95,9 @@ func (f *Font) GetTextMetrics(text string) (width, height int) {
 	return totalWidth, totalHeight
 }
 
-// Clone creates a shallow copy of the Font
-func (f *Font) Clone() d2interface.Font {
-	return &Font{
-		sheet:  f.sheet,
-		glyphs: f.glyphs,
-		color:  f.color,
-	}
-}
-
-// RenderText draws a string of text in a style described by Font onto the d2interface.Surface
+// RenderText prints a text using its configured style on a Surface (multi-lines are left-aligned, use label otherwise)
 func (f *Font) RenderText(text string, target d2interface.Surface) error {
 	f.sheet.SetColorMod(f.color)
-	f.sheet.SetBlend(false)
 
 	lines := strings.Split(text, "\n")
 

@@ -1,12 +1,13 @@
 package d2asset
 
 import (
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"log"
 )
 
-var singleton *assetManager
+var singleton *assetManager //nolint:gochecknoglobals // Currently global by design
 
 // Create creates and assigns all necessary dependencies for the assetManager top-level functions to work correctly
 func Create() (d2interface.AssetManager, error) {
@@ -43,13 +44,13 @@ func FileExists(filePath string) (bool, error) {
 
 // LoadAnimation loads an animation by its resource path and its palette path
 func LoadAnimation(animationPath, palettePath string) (d2interface.Animation, error) {
-	return singleton.LoadAnimationWithTransparency(animationPath, palettePath, 255)
+	return LoadAnimationWithEffect(animationPath, palettePath, d2enum.DrawEffectNone)
 }
 
-// LoadAnimationWithTransparency loads an animation by its resource path and its palette path with a given transparency value
-func LoadAnimationWithTransparency(animationPath, palettePath string,
-	transparency int) (d2interface.Animation, error) {
-	return singleton.animationManager.LoadAnimation(animationPath, palettePath, transparency)
+// LoadAnimationWithEffect loads an animation by its resource path and its palette path with a given transparency value
+func LoadAnimationWithEffect(animationPath, palettePath string,
+	drawEffect d2enum.DrawEffect) (d2interface.Animation, error) {
+	return singleton.animationManager.LoadAnimation(animationPath, palettePath, drawEffect)
 }
 
 // LoadFont loads a font the resource files

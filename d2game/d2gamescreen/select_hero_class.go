@@ -2,6 +2,7 @@ package d2gamescreen
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"image"
 	"image/color"
 
@@ -254,42 +255,42 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 }
 
 func (v *SelectHeroClass) createLabels() {
-	v.headingLabel = d2ui.CreateLabel(v.renderer, d2resource.Font30, d2resource.PaletteUnits)
+	v.headingLabel = d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
 	fontWidth, _ := v.headingLabel.GetSize()
 	v.headingLabel.SetPosition(400-fontWidth/2, 17)
 	v.headingLabel.SetText("Select Hero Class")
-	v.headingLabel.Alignment = d2ui.LabelAlignCenter
+	v.headingLabel.Alignment = d2gui.HorizontalAlignCenter
 
-	v.heroClassLabel = d2ui.CreateLabel(v.renderer, d2resource.Font30, d2resource.PaletteUnits)
-	v.heroClassLabel.Alignment = d2ui.LabelAlignCenter
+	v.heroClassLabel = d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
+	v.heroClassLabel.Alignment = d2gui.HorizontalAlignCenter
 	v.heroClassLabel.SetPosition(400, 65)
 
-	v.heroDesc1Label = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
-	v.heroDesc1Label.Alignment = d2ui.LabelAlignCenter
+	v.heroDesc1Label = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroDesc1Label.Alignment = d2gui.HorizontalAlignCenter
 	v.heroDesc1Label.SetPosition(400, 100)
 
-	v.heroDesc2Label = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
-	v.heroDesc2Label.Alignment = d2ui.LabelAlignCenter
+	v.heroDesc2Label = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroDesc2Label.Alignment = d2gui.HorizontalAlignCenter
 	v.heroDesc2Label.SetPosition(400, 115)
 
-	v.heroDesc3Label = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
-	v.heroDesc3Label.Alignment = d2ui.LabelAlignCenter
+	v.heroDesc3Label = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroDesc3Label.Alignment = d2gui.HorizontalAlignCenter
 	v.heroDesc3Label.SetPosition(400, 130)
 
-	v.heroNameLabel = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
-	v.heroNameLabel.Alignment = d2ui.LabelAlignLeft
+	v.heroNameLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroNameLabel.Alignment = d2gui.HorizontalAlignLeft
 	v.heroNameLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
 	v.heroNameLabel.SetText("Character Name")
 	v.heroNameLabel.SetPosition(321, 475)
 
-	v.expansionCharLabel = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
-	v.expansionCharLabel.Alignment = d2ui.LabelAlignLeft
+	v.expansionCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.expansionCharLabel.Alignment = d2gui.HorizontalAlignLeft
 	v.expansionCharLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
 	v.expansionCharLabel.SetText("EXPANSION CHARACTER")
 	v.expansionCharLabel.SetPosition(339, 526)
 
-	v.hardcoreCharLabel = d2ui.CreateLabel(v.renderer, d2resource.Font16, d2resource.PaletteUnits)
-	v.hardcoreCharLabel.Alignment = d2ui.LabelAlignLeft
+	v.hardcoreCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.hardcoreCharLabel.Alignment = d2gui.HorizontalAlignLeft
 	v.hardcoreCharLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
 	v.hardcoreCharLabel.SetText("Hardcore")
 	v.hardcoreCharLabel.SetPosition(339, 548)
@@ -601,7 +602,8 @@ func advanceSprite(sprite *d2ui.Sprite, elapsed float64) {
 	}
 }
 
-func loadSprite(animationPath string, position image.Point, playLength int, playLoop, blend bool) *d2ui.Sprite {
+func loadSprite(animationPath string, position image.Point, playLength int, playLoop,
+	blend bool) *d2ui.Sprite {
 	if animationPath == "" {
 		return nil
 	}
@@ -614,7 +616,10 @@ func loadSprite(animationPath string, position image.Point, playLength int, play
 
 	animation.PlayForward()
 	animation.SetPlayLoop(playLoop)
-	animation.SetBlend(blend)
+
+	if blend {
+		animation.SetEffect(d2enum.DrawEffectModulate)
+	}
 
 	if playLength != 0 {
 		animation.SetPlayLengthMs(playLength)

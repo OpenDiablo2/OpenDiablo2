@@ -40,12 +40,12 @@ type animationDirection struct {
 // animation has directionality, play modes, and frame counting
 type animation struct {
 	directions       []animationDirection
+	effect           d2enum.DrawEffect
 	colorMod         color.Color
 	frameIndex       int
 	directionIndex   int
 	lastFrameTime    float64
 	playedCount      int
-	compositeMode    d2enum.CompositeMode
 	playMode         playMode
 	playLength       float64
 	subStartingFrame int
@@ -120,7 +120,7 @@ func (a *animation) Render(target d2iface.Surface) error {
 	target.PushTranslation(frame.offsetX, frame.offsetY)
 	defer target.Pop()
 
-	target.PushCompositeMode(a.compositeMode)
+	target.PushEffect(a.effect)
 	defer target.Pop()
 
 	target.PushColor(a.colorMod)
@@ -148,7 +148,7 @@ func (a *animation) RenderSection(sfc d2iface.Surface, bound image.Rectangle) er
 	frame := direction.frames[a.frameIndex]
 
 	sfc.PushTranslation(frame.offsetX, frame.offsetY)
-	sfc.PushCompositeMode(a.compositeMode)
+	sfc.PushEffect(a.effect)
 	sfc.PushColor(a.colorMod)
 
 	defer sfc.PopN(3)
@@ -305,11 +305,6 @@ func (a *animation) ResetPlayedCount() {
 	a.playedCount = 0
 }
 
-// SetBlend sets the Animation alpha blending status
-func (a *animation) SetBlend(blend bool) {
-	if blend {
-		a.compositeMode = d2enum.CompositeModeLighter
-	} else {
-		a.compositeMode = d2enum.CompositeModeSourceOver
-	}
+func (a *animation) SetEffect(e d2enum.DrawEffect) {
+	a.effect = e
 }

@@ -4,10 +4,9 @@ import (
 	"image/color"
 )
 
-// Font is a font
+// Font is a graphical representation associated with a set of glyphs.
 type Font interface {
 	SetColor(c color.Color)
 	GetTextMetrics(text string) (width, height int)
-	Clone() Font
 	RenderText(text string, target Surface) error
 }

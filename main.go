@@ -19,5 +19,8 @@ func main() {
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
 
 	app := d2app.Create(GitBranch, GitCommit)
-	app.Run()
+	if err := app.Run(); err != nil {
+		log.Fatal(err)
+	}
+
 }

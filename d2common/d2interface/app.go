@@ -3,7 +3,7 @@ package d2interface
 // App is the OpenDiablo2 application. It creates all of the AppComponents
 // and creates two-way references for dependency resolution.
 type App interface {
-	Run()
+	Run() error
 	BindAppComponent(AppComponent) error
 
 	// The AppComponents

@@ -241,10 +241,8 @@ func (l *Layout) getSize() (int, int) {
 
 func (l *Layout) onMouseButtonDown(event d2interface.MouseEvent) bool {
 	for _, entry := range l.entries {
-		eventLocal := event
-
-		if l.adjustEntryEvent(entry, eventLocal.X(), eventLocal.Y()) {
-			entry.widget.onMouseButtonDown(eventLocal)
+		if entry.IsIn(event) {
+			entry.widget.onMouseButtonDown(event)
 			entry.mouseDown[event.Button()] = true
 		}
 	}
@@ -254,12 +252,10 @@ func (l *Layout) onMouseButtonDown(event d2interface.MouseEvent) bool {
 
 func (l *Layout) onMouseButtonUp(event d2interface.MouseEvent) bool {
 	for _, entry := range l.entries {
-		eventLocal := event
-
-		if l.adjustEntryEvent(entry, eventLocal.X(), eventLocal.Y()) {
+		if entry.IsIn(event) {
 			if entry.mouseDown[event.Button()] {
-				entry.widget.onMouseButtonClick(eventLocal)
-				entry.widget.onMouseButtonUp(eventLocal)
+				entry.widget.onMouseButtonClick(event)
+				entry.widget.onMouseButtonUp(event)
 			}
 		}
 
@@ -271,34 +267,23 @@ func (l *Layout) onMouseButtonUp(event d2interface.MouseEvent) bool {
 
 func (l *Layout) onMouseMove(event d2interface.MouseMoveEvent) bool {
 	for _, entry := range l.entries {
-		eventLocal := event
+		if entry.IsIn(event) {
+			entry.widget.onMouseMove(event)
 
-		if l.adjustEntryEvent(entry, eventLocal.X(), eventLocal.Y()) {
-			entry.widget.onMouseMove(eventLocal)
 			if entry.mouseOver {
-				entry.widget.onMouseOver(eventLocal)
+				entry.widget.onMouseOver(event)
 			} else {
-				entry.widget.onMouseEnter(eventLocal)
+				entry.widget.onMouseEnter(event)
 			}
+
 			entry.mouseOver = true
 		} else if entry.mouseOver {
-			entry.widget.onMouseLeave(eventLocal)
+			entry.widget.onMouseLeave(event)
 			entry.mouseOver = false
 		}
 	}
 
 	return false
-}
-
-func (l *Layout) adjustEntryEvent(entry *layoutEntry, eventX, eventY int) bool {
-	eventX -= entry.x
-	eventY -= entry.y
-
-	if eventX < 0 || eventY < 0 || eventX >= entry.width || eventY >= entry.height {
-		return false
-	}
-
-	return true
 }
 
 func (l *Layout) AdjustEntryPlacement() {
@@ -365,6 +350,15 @@ func (l *Layout) AdjustEntryPlacement() {
 			entry.x, entry.y = entry.widget.getPosition()
 		}
 
+		sx, sy := l.ScreenPos()
+		entry.widget.SetScreenPos(entry.x + sx, entry.y + sy)
 		entry.widget.setOffset(offsetX, offsetY)
 	}
+}
+
+// IsIn layout entry, spc. of an event.
+func (l *layoutEntry) IsIn(event d2interface.HandlerEvent) bool {
+	sx, sy := l.widget.ScreenPos()
+	rect := d2common.Rectangle{Left: sx, Top: sy, Width: l.width, Height: l.height}
+	return rect.IsInRect(event.X(), event.Y())
 }

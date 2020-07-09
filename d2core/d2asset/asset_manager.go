@@ -45,7 +45,7 @@ func (am *assetManager) Initialize() error {
 	}
 
 	var (
-		config                  = d2config.Get()
+		config                  = d2config.Config
 		archiveManager          = createArchiveManager(config)
 		archivedFileManager     = createFileManager(config, archiveManager)
 		paletteManager          = createPaletteManager()
@@ -199,13 +199,13 @@ func (am *assetManager) FileExists(filePath string) (bool, error) {
 
 // LoadAnimation loads an animation by its resource path and its palette path
 func (am *assetManager) LoadAnimation(animationPath, palettePath string) (d2interface.Animation, error) {
-	return am.LoadAnimationWithTransparency(animationPath, palettePath, 255)
+	return am.LoadAnimationWithEffect(animationPath, palettePath, d2enum.DrawEffectNormal)
 }
 
 // LoadAnimationWithTransparency loads an animation by its resource path and its palette path with a given transparency value
-func (am *assetManager) LoadAnimationWithTransparency(animationPath, palettePath string,
-	transparency int) (d2interface.Animation, error) {
-	return singleton.animationManager.LoadAnimation(animationPath, palettePath, transparency)
+func (am *assetManager) LoadAnimationWithEffect(animationPath, palettePath string,
+	effect d2enum.DrawEffect) (d2interface.Animation, error) {
+	return singleton.animationManager.LoadAnimation(animationPath, palettePath, effect)
 }
 
 // LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it

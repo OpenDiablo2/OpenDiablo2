@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
@@ -27,7 +28,7 @@ func CreateMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error)
 		animation.SetSubLoop(record.Animation.SubStartingFrame, record.Animation.SubEndingFrame)
 	}
 
-	animation.SetBlend(true)
+	animation.SetEffect(d2enum.DrawEffectModulate)
 	//animation.SetPlaySpeed(float64(record.Animation.AnimationSpeed))
 	animation.SetPlayLoop(record.Animation.LoopAnimation)
 	animation.PlayForward()

@@ -1,6 +1,7 @@
 package d2gui
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
@@ -53,7 +54,6 @@ func createAnimatedSprite(imagePath, palettePath string, direction AnimationDire
 	} else {
 		sprite.animation.PlayBackward()
 	}
-	sprite.animation.SetBlend(false)
 	sprite.SetVisible(true)
 
 	return sprite, nil
@@ -83,4 +83,8 @@ func (s *Sprite) advance(elapsed float64) error {
 
 func (s *Sprite) getSize() (int, int) {
 	return s.animation.GetCurrentFrameSize()
+}
+
+func (s *Sprite) SetEffect(e d2enum.DrawEffect) {
+	s.animation.SetEffect(e)
 }

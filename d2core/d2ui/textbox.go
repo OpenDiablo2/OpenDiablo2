@@ -33,8 +33,8 @@ func CreateTextbox(renderer d2interface.Renderer) TextBox {
 	tb := TextBox{
 		filter:    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
 		bgSprite:  bgSprite,
-		textLabel: CreateLabel(renderer, d2resource.FontFormal11, d2resource.PaletteUnits),
-		lineBar:   CreateLabel(renderer, d2resource.FontFormal11, d2resource.PaletteUnits),
+		textLabel: CreateLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
+		lineBar:   CreateLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
 		enabled:   true,
 		visible:   true,
 	}
@@ -137,10 +137,11 @@ func (v *TextBox) GetSize() (width, height int) {
 }
 
 func (v *TextBox) SetPosition(x, y int) {
+	lw, _ := v.textLabel.GetSize()
 	v.x = x
 	v.y = y
 	v.textLabel.SetPosition(v.x+6, v.y+3)
-	v.lineBar.SetPosition(v.x+6+v.textLabel.Width, v.y+3)
+	v.lineBar.SetPosition(v.x+6+lw, v.y+3)
 	v.bgSprite.SetPosition(v.x, v.y+26)
 }
 

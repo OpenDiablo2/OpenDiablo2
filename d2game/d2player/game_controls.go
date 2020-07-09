@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"image"
 	"image/color"
 	"log"
@@ -86,12 +87,12 @@ func NewGameControls(renderer d2interface.Renderer, hero *d2mapentity.Player, ma
 		missileID = id
 	})
 
-	zoneLabel := d2ui.CreateLabel(renderer, d2resource.Font30, d2resource.PaletteUnits)
+	zoneLabel := d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
 	zoneLabel.Color = color.RGBA{R: 255, G: 88, B: 82, A: 255}
-	zoneLabel.Alignment = d2ui.LabelAlignCenter
+	zoneLabel.Alignment = d2gui.HorizontalAlignCenter
 
-	nameLabel := d2ui.CreateLabel(renderer, d2resource.FontFormal11, d2resource.PaletteStatic)
-	nameLabel.Alignment = d2ui.LabelAlignCenter
+	nameLabel := d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
+	nameLabel.Alignment = d2gui.HorizontalAlignCenter
 	nameLabel.SetText("")
 	nameLabel.Color = color.White
 
@@ -411,7 +412,7 @@ func (g *GameControls) Render(target d2interface.Surface) {
 
 	// Stamina status bar
 	target.PushTranslation(273, 572)
-	target.PushCompositeMode(d2enum.CompositeModeLighter)
+	target.PushEffect(d2enum.DrawEffectModulate)
 	staminaPercent := float64(g.hero.Stats.Stamina) / float64(g.hero.Stats.MaxStamina)
 	target.DrawRect(int(staminaPercent*staminaBarWidth), 19, color.RGBA{R: 175, G: 136, B: 72, A: 200})
 	target.PopN(2)

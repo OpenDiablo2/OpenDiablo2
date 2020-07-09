@@ -4,26 +4,23 @@ import (
 	"errors"
 	"image"
 
-  "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
-
-func CreateRenderer() (d2interface.Renderer, error) {
+// CreateRenderer creates an ebiten renderer instance
+func CreateRenderer() (*Renderer, error) {
 	result := &Renderer{}
 
-	config := d2config.Get()
-
+	config := d2config.Config
 	ebiten.SetCursorMode(ebiten.CursorModeHidden)
-	ebiten.SetFullscreen(config.FullScreen())
-	ebiten.SetRunnableOnUnfocused(config.RunInBackground())
-	ebiten.SetVsyncEnabled(config.VsyncEnabled())
-	ebiten.SetMaxTPS(config.TicksPerSecond())
+	ebiten.SetFullscreen(config.FullScreen)
+	ebiten.SetRunnableOnUnfocused(config.RunInBackground)
+	ebiten.SetVsyncEnabled(config.VsyncEnabled)
+	ebiten.SetMaxTPS(config.TicksPerSecond)
 
 	return result, nil
 }
@@ -64,6 +61,7 @@ func (r *Renderer) Layout(outsideWidth, outsideHeight int) (screenWidth, screenH
 	return 800, 600
 }
 
+
 // GetRendererName returns the name of the renderer
 func (*Renderer) GetRendererName() string {
 	return "Ebiten"
@@ -95,7 +93,7 @@ func (r *Renderer) CreateSurface(surface d2interface.Surface) (d2interface.Surfa
 		surface.(*ebitenSurface).image,
 		surfaceState{
 			filter: ebiten.FilterNearest,
-			mode:   ebiten.CompositeModeSourceOver,
+			effect: d2enum.DrawEffectNone,
 		},
 	)
 
