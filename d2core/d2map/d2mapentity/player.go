@@ -156,6 +156,7 @@ func (v *Player) Render(target d2interface.Surface) {
 	// v.nameLabel.Render(target)
 }
 
+// GetAnimationMode returns the current animation mode based on what the player is doing and where they are.
 func (v *Player) GetAnimationMode() d2enum.PlayerAnimationMode {
 	if v.IsRunning() && !v.IsAtTarget() {
 		return d2enum.AnimationModePlayerRun

@@ -106,8 +106,8 @@ func (mr *MapRenderer) ScreenToWorld(x, y int) (float64, float64) {
 	return mr.viewport.ScreenToWorld(x, y)
 }
 
-// ScreenToOrtho returns the orthogonal position, without accounting for the isometric angle, for the
-// given screen (pixel) position.
+// ScreenToOrtho returns the orthogonal position, without accounting for the isometric angle, for the given screen
+// (pixel) position.
 func (mr *MapRenderer) ScreenToOrtho(x, y int) (float64, float64) {
 	return mr.viewport.ScreenToOrtho(x, y)
 }

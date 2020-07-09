@@ -182,7 +182,7 @@ func (m *NPC) Selectable() bool {
 	return false
 }
 
-// Name returns the NPC's in-game name e.g. "Deckard Cain".
+// Name returns the NPC's in-game name (e.g. "Deckard Cain") or an empty string if it does not have a name.
 func (m *NPC) Name() string {
 	return m.name
 }
