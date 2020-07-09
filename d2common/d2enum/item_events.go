@@ -21,19 +21,19 @@ const (
 
 func GetItemEventType(s string) ItemEventType {
 	strLookupTable := map[string]ItemEventType{
-		"HitByMissile":     HitByMissile,
-		"DamagedInMelee":   DamagedInMelee,
-		"DamagedByMissile": DamagedByMissile,
-		"AttackedInMelee":  AttackedInMelee,
-		"DoActive":         DoActive,
-		"DoMeleeDamage":    DoMeleeDamage,
-		"DoMissileDamage":  DoMissileDamage,
-		"DoMeleeAttack":    DoMeleeAttack,
-		"DoMissileAttack":  DoMissileAttack,
-		"Kill":             Kill,
-		"Killed":           Killed,
-		"AbsorbDamage":     AbsorbDamage,
-		"LevelUp":          LevelUp,
+		"hitbymissile":     HitByMissile,
+		"damagedinmelee":   DamagedInMelee,
+		"damagedbymissile": DamagedByMissile,
+		"attackedinmelee":  AttackedInMelee,
+		"doactive":         DoActive,
+		"domeleedamage":    DoMeleeDamage,
+		"domissiledamage":  DoMissileDamage,
+		"domeleeattack":    DoMeleeAttack,
+		"domissileattack":  DoMissileAttack,
+		"kill":             Kill,
+		"killed":           Killed,
+		"absorbdamage":     AbsorbDamage,
+		"levelup":          LevelUp,
 	}
 	return strLookupTable[s]
 }
