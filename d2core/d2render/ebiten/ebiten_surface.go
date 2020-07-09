@@ -32,7 +32,7 @@ type ebitenSurface struct {
 }
 
 func createEbitenSurface(img *ebiten.Image, currentState ...surfaceState) *ebitenSurface {
-	state := surfaceState{}
+	state := surfaceState{effect: d2enum.DrawEffectNone}
 	if len(currentState) > 0 {
 		state = currentState[0]
 	}
@@ -53,6 +53,11 @@ func (s *ebitenSurface) PushTranslation(x, y int) {
 func (s *ebitenSurface) PushCompositeMode(mode d2enum.CompositeMode) {
 	s.stateStack = append(s.stateStack, s.stateCurrent)
 	s.stateCurrent.mode = d2ToEbitenCompositeMode(mode)
+}
+
+func (s *ebitenSurface) PushEffect(effect d2enum.DrawEffect) {
+	s.stateStack = append(s.stateStack, s.stateCurrent)
+	s.stateCurrent.effect = effect
 }
 
 func (s *ebitenSurface) PushFilter(filter d2enum.Filter) {
@@ -97,6 +102,23 @@ func (s *ebitenSurface) Render(sfc d2interface.Surface) error {
 
 	if s.stateCurrent.brightness != 0 {
 		opts.ColorM.ChangeHSV(0, 1, s.stateCurrent.brightness)
+	}
+
+	// Are these correct? who even knows
+	switch s.stateCurrent.effect {
+	case d2enum.DrawEffectPctTransparency25:
+		opts.ColorM.Translate(0, 0, 0, -0.25)
+	case d2enum.DrawEffectPctTransparency50:
+		opts.ColorM.Translate(0, 0, 0, -0.50)
+	case d2enum.DrawEffectPctTransparency75:
+		opts.ColorM.Translate(0, 0, 0, -0.75)
+	case d2enum.DrawEffectModulate:
+		opts.CompositeMode = ebiten.CompositeModeLighter
+	case d2enum.DrawEffectBurn:
+	case d2enum.DrawEffectNormal:
+	case d2enum.DrawEffectMod2XTrans:
+	case d2enum.DrawEffectMod2X:
+	case d2enum.DrawEffectNone:
 	}
 
 	var img = sfc.(*ebitenSurface).image
