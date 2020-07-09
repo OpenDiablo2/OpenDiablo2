@@ -11,6 +11,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 )
 
+// Player is the player character entity.
 type Player struct {
 	mapEntity
 	composite *d2asset.Composite
@@ -32,6 +33,7 @@ type Player struct {
 var baseWalkSpeed = 6.0
 var baseRunSpeed = 9.0
 
+// CreatePlayer creates a new player entity and returns a pointer to it.
 func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero, stats d2hero.HeroStatsState, equipment d2inventory.CharacterEquipment) *Player {
 	layerEquipment := &[d2enum.CompositeTypeMax]string{
 		d2enum.CompositeTypeHead:      equipment.Head.GetArmorClass(),
@@ -72,31 +74,40 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 	//result.nameLabel.SetText(name)
 	//result.nameLabel.Color = color.White
 	err = composite.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), equipment.RightHand.GetWeaponClass())
+
 	if err != nil {
 		panic(err)
 	}
+
 	composite.SetDirection(direction)
 	composite.Equip(layerEquipment)
 
 	return result
 }
 
+// SetIsInTown sets a flag indicating that the player is in town.
 func (p *Player) SetIsInTown(isInTown bool) {
 	p.isInTown = isInTown
 }
 
+// ToggleRunWalk sets a flag indicating whether the player is running.
 func (p *Player) ToggleRunWalk() {
 	p.isRunToggled = !p.isRunToggled
 }
 
+// IsRunToggled returns true if the UI button to toggle running is,
+// toggled i.e. not in it's default state.
 func (p *Player) IsRunToggled() bool {
 	return p.isRunToggled
 }
 
+// IsRunning returns true if the player is currently
 func (p *Player) IsRunning() bool {
 	return p.isRunning
 }
 
+// SetIsRunning alters the player speed and sets a flag indicating
+// that the player is running.
 func (p *Player) SetIsRunning(isRunning bool) {
 	p.isRunning = isRunning
 
@@ -107,17 +118,22 @@ func (p *Player) SetIsRunning(isRunning bool) {
 	}
 }
 
+// IsInTown returns true if the player is currently in town.
 func (p Player) IsInTown() bool {
 	return p.isInTown
 }
 
+// Advance is called once per frame and processes a
+// single game tick.
 func (v *Player) Advance(tickTime float64) {
 	v.Step(tickTime)
+
 	if v.IsCasting() && v.composite.GetPlayedCount() >= 1 {
 		v.isCasting = false
 		v.SetAnimationMode(v.GetAnimationMode().String())
 	}
 	v.composite.Advance(tickTime)
+
 	if v.lastPathSize != len(v.path) {
 		v.lastPathSize = len(v.path)
 	}
@@ -127,6 +143,7 @@ func (v *Player) Advance(tickTime float64) {
 	}
 }
 
+// Render renders the animated composite for this entity.
 func (v *Player) Render(target d2interface.Surface) {
 	target.PushTranslation(
 		v.offsetX+int((v.subcellX-v.subcellY)*16),
@@ -134,11 +151,12 @@ func (v *Player) Render(target d2interface.Surface) {
 	)
 	defer target.Pop()
 	v.composite.Render(target)
-	//v.nameLabel.X = v.offsetX
-	//v.nameLabel.Y = v.offsetY - 100
-	//v.nameLabel.Render(target)
+	// v.nameLabel.X = v.offsetX
+	// v.nameLabel.Y = v.offsetY - 100
+	// v.nameLabel.Render(target)
 }
 
+// GetAnimationMode returns the current animation mode based on what the player is doing and where they are.
 func (v *Player) GetAnimationMode() d2enum.PlayerAnimationMode {
 	if v.IsRunning() && !v.IsAtTarget() {
 		return d2enum.AnimationModePlayerRun
@@ -163,6 +181,7 @@ func (v *Player) GetAnimationMode() d2enum.PlayerAnimationMode {
 	return d2enum.AnimationModePlayerNeutral
 }
 
+// SetAnimationMode sets the animation mode for this entity's animated composite.
 func (v *Player) SetAnimationMode(animationMode string) error {
 	return v.composite.SetMode(animationMode, v.composite.GetWeaponClass())
 }
@@ -180,19 +199,24 @@ func (v *Player) rotate(direction int) {
 	}
 }
 
+// Name returns the player name.
 func (v *Player) Name() string {
 	return v.name
 }
 
+// IsCasting returns true if
 func (v *Player) IsCasting() bool {
 	return v.isCasting
 }
 
+// SetCasting sets a flag indicating the player is casting a skill and
+// sets the animation mode to the casting animation.
 func (v *Player) SetCasting() {
 	v.isCasting = true
 	v.SetAnimationMode(d2enum.AnimationModePlayerCast.String())
 }
 
+// Selectable returns true if the player is in town.
 func (v *Player) Selectable() bool {
 	// Players are selectable when in town
 	return v.IsInTown()

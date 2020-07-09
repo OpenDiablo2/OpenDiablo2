@@ -8,6 +8,7 @@ import (
 )
 
 // mapEntity represents an entity on the map that can be animated
+// TODO: Has a coordinate (issue #456)
 type mapEntity struct {
 	LocationX          float64
 	LocationY          float64
@@ -27,6 +28,7 @@ type mapEntity struct {
 // createMapEntity creates an instance of mapEntity
 func createMapEntity(x, y int) mapEntity {
 	locX, locY := float64(x), float64(y)
+
 	return mapEntity{
 		LocationX: locX,
 		LocationY: locY,
@@ -42,23 +44,29 @@ func createMapEntity(x, y int) mapEntity {
 	}
 }
 
+// GetLayer returns the draw layer for this entity.
 func (m *mapEntity) GetLayer() int {
 	return m.drawLayer
 }
 
+// SetPath sets the entity movement path. done() is called when the entity reaches it's path destination. For example,
+// when the player entity reaches the point a player clicked.
 func (m *mapEntity) SetPath(path []d2astar.Pather, done func()) {
 	m.path = path
 	m.done = done
 }
 
+// ClearPath clears the entity movement path.
 func (m *mapEntity) ClearPath() {
 	m.path = nil
 }
 
+// SetSpeed sets the entity movement speed.
 func (m *mapEntity) SetSpeed(speed float64) {
 	m.Speed = speed
 }
 
+// GetSpeed returns the entity movement speed.
 func (m *mapEntity) GetSpeed() float64 {
 	return m.Speed
 }
@@ -75,30 +83,37 @@ func (m *mapEntity) getStepLength(tickTime float64) (float64, float64) {
 	radians := (math.Pi / 180.0) * float64(angle)
 	oneStepX := length * math.Cos(radians)
 	oneStepY := length * math.Sin(radians)
+
 	return oneStepX, oneStepY
 }
 
+// IsAtTarget returns true if the entity is within a 0.0002 square of it's target and has a path.
 func (m *mapEntity) IsAtTarget() bool {
 	return math.Abs(m.LocationX-m.TargetX) < 0.0001 && math.Abs(m.LocationY-m.TargetY) < 0.0001 && !m.HasPathFinding()
 }
 
+// Step moves the entity along it's path by one tick. If the path is complete it calls entity.done() then returns.
 func (m *mapEntity) Step(tickTime float64) {
 	if m.IsAtTarget() {
 		if m.done != nil {
 			m.done()
 			m.done = nil
 		}
+
 		return
 	}
 
 	stepX, stepY := m.getStepLength(tickTime)
+
 	for {
 		if d2common.AlmostEqual(m.LocationX-m.TargetX, 0, 0.0001) {
 			stepX = 0
 		}
+
 		if d2common.AlmostEqual(m.LocationY-m.TargetY, 0, 0.0001) {
 			stepY = 0
 		}
+
 		m.LocationX, stepX = d2common.AdjustWithRemainder(m.LocationX, stepX, m.TargetX)
 		m.LocationY, stepY = d2common.AdjustWithRemainder(m.LocationY, stepY, m.TargetY)
 
@@ -129,15 +144,15 @@ func (m *mapEntity) Step(tickTime float64) {
 		if stepX == 0 && stepY == 0 {
 			break
 		}
-
 	}
 }
 
+// HasPathFinding returns false if the length of the entity movement path is 0.
 func (m *mapEntity) HasPathFinding() bool {
 	return len(m.path) > 0
 }
 
-// SetTarget sets target coordinates and changes animation based on proximity and direction
+// SetTarget sets target coordinates and changes animation based on proximity and direction.
 func (m *mapEntity) SetTarget(tx, ty float64, done func()) {
 	m.TargetX, m.TargetY = tx, ty
 	m.done = done
@@ -168,21 +183,26 @@ func angleToDirection(angle float64) int {
 	return newDirection
 }
 
+// GetPosition returns the entity's current tile position.
 func (m *mapEntity) GetPosition() (float64, float64) {
 	return float64(m.TileX), float64(m.TileY)
 }
 
+// GetPositionF returns the entity's current sub tile position.
 func (m *mapEntity) GetPositionF() (float64, float64) {
 	return float64(m.TileX) + (float64(m.subcellX) / 5.0), float64(m.TileY) + (float64(m.subcellY) / 5.0)
 }
 
+// Name returns the NPC's in-game name (e.g. "Deckard Cain") or an empty string if it does not have a name
 func (m *mapEntity) Name() string {
 	return ""
 }
 
+// Highlight is not currently implemented.
 func (m *mapEntity) Highlight() {
 }
 
+// Selectable returns true if the object can be highlighted/selected.
 func (m *mapEntity) Selectable() bool {
 	return false
 }

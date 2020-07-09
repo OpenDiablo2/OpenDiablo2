@@ -21,6 +21,7 @@ func CreateAnimatedEntity(x, y int, animation d2interface.Animation) *AnimatedEn
 		animation: animation,
 	}
 	entity.mapEntity.directioner = entity.rotate
+
 	return entity
 }
 
@@ -34,6 +35,7 @@ func (ae *AnimatedEntity) Render(target d2interface.Surface) {
 	ae.animation.Render(target)
 }
 
+// GetDirection returns the current facing direction of this entity.
 func (ae *AnimatedEntity) GetDirection() int {
 	return ae.direction
 }
@@ -45,6 +47,8 @@ func (ae *AnimatedEntity) rotate(direction int) {
 	ae.animation.SetDirection(ae.direction)
 }
 
+// Advance is called once per frame and processes a
+// single game tick.
 func (ae *AnimatedEntity) Advance(elapsed float64) {
 	ae.animation.Advance(elapsed)
 }

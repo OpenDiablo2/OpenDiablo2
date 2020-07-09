@@ -14,10 +14,12 @@ func (mr *MapRenderer) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, t
 			x := int32(0)
 			y := int32(0)
 			idx := 0
+
 			for length > 0 {
 				x = xjump[y]
 				n := nbpix[y]
 				length -= n
+
 				for n > 0 {
 					offset := (((blockY + y + tileYOffset) * tileWidth) + (blockX + x))
 					(*pixels)[offset] = block.EncodedData[idx]
@@ -27,6 +29,7 @@ func (mr *MapRenderer) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, t
 				}
 				y++
 			}
+
 			continue
 		}
 		// RLE Encoding
@@ -36,18 +39,23 @@ func (mr *MapRenderer) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, t
 		y := int32(0)
 		idx := 0
 		length := block.Length
+
 		for length > 0 {
 			b1 := block.EncodedData[idx]
 			b2 := block.EncodedData[idx+1]
 			idx += 2
 			length -= 2
+
 			if (b1 | b2) == 0 {
 				x = 0
 				y++
+
 				continue
 			}
+
 			x += int32(b1)
 			length -= int32(b2)
+
 			for b2 > 0 {
 				offset := (((blockY + y + tileYOffset) * tileWidth) + (blockX + x))
 				(*pixels)[offset] = block.EncodedData[idx]

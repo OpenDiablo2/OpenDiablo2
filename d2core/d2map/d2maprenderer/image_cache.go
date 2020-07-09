@@ -7,7 +7,7 @@ import (
 
 var imageCacheRecords map[uint32]d2interface.Surface
 
-// Invalidates the global region image cache. Call this when you are changing regions
+// InvalidateImageCache the global region image cache. Call this when you are changing regions.
 func InvalidateImageCache() {
 	imageCacheRecords = nil
 }
@@ -19,8 +19,10 @@ func (mr *MapRenderer) getImageCacheRecord(style, sequence byte, tileType d2enum
 
 func (mr *MapRenderer) setImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte, image d2interface.Surface) {
 	lookupIndex := uint32(style)<<24 | uint32(sequence)<<16 | uint32(tileType)<<8 | uint32(randomIndex)
+
 	if imageCacheRecords == nil {
 		imageCacheRecords = make(map[uint32]d2interface.Surface)
 	}
+
 	imageCacheRecords[lookupIndex] = image
 }
