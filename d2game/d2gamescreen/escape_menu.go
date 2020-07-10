@@ -3,15 +3,12 @@ package d2gamescreen
 import (
 	"fmt"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2script"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
 
 // TODO: fix pentagram

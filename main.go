@@ -3,14 +3,13 @@ package main
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2script"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
 	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
 
 // GitBranch is set by the CI build process to the name of the branch
