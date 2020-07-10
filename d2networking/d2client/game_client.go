@@ -73,7 +73,7 @@ func (g *GameClient) Open(connectionString string, saveFilePath string) error {
 func (g *GameClient) Close() error {
 	switch g.connectionType {
 	case d2clientconnectiontype.LANServer, d2clientconnectiontype.Local:
-		g.scriptEngine.Reset()
+		g.scriptEngine.DisallowEval()
 	}
 	return g.clientConnection.Close()
 }

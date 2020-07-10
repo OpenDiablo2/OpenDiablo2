@@ -18,9 +18,18 @@ type ScriptEngine struct {
 
 // CreateScriptEngine creates the script engine and returns a pointer to it.
 func CreateScriptEngine() *ScriptEngine {
-	engine := &ScriptEngine{}
-	engine.Reset()
-	return engine
+	vm := otto.New()
+	err := vm.Set("debugPrint", func(call otto.FunctionCall) otto.Value {
+		fmt.Printf("Script: %s\n", call.Argument(0).String())
+		return otto.Value{}
+	})
+	if err != nil {
+		fmt.Printf("could not bind the 'debugPrint' to the given function in script engine")
+	}
+	return &ScriptEngine{
+		vm:            vm,
+		isEvalAllowed: false,
+	}
 }
 
 // AllowEval allows the evaluation of JS code.
@@ -31,20 +40,6 @@ func (s *ScriptEngine) AllowEval() {
 // AllowEval disallows the evaluation of JS code.
 func (s *ScriptEngine) DisallowEval() {
 	s.isEvalAllowed = false
-}
-
-// Reset the engine by creating a new VM and assigning default functions.
-func (s *ScriptEngine) Reset() {
-	vm := otto.New()
-	err := vm.Set("debugPrint", func(call otto.FunctionCall) otto.Value {
-		fmt.Printf("Script: %s\n", call.Argument(0).String())
-		return otto.Value{}
-	})
-	if err != nil {
-		fmt.Printf("could not bind the 'debugPrint' to the given function in script engine")
-	}
-	s.DisallowEval()
-	s.vm = vm
 }
 
 // ToValue converts the given interface{} value to a otto.Value
