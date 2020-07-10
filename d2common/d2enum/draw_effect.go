@@ -5,7 +5,6 @@ type DrawEffect int
 
 // Names courtesy of Necrolis
 const (
-
 	// DrawEffectPctTransparency25 is a draw effect that implements the following function:
 	// GL_MODULATE; GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA 25 % transparency (colormaps 49-304 in a .pl2)
 	DrawEffectPctTransparency25 DrawEffect = iota

@@ -47,7 +47,7 @@ func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC
 		d2resource.PaletteUnits)
 	result.composite = composite
 
-	composite.SetMode("NU", result.monstatEx.BaseWeaponClass)
+	composite.SetMode(d2enum.MonsterAnimationModeNeutral, result.monstatEx.BaseWeaponClass)
 	composite.Equip(&equipment)
 
 	result.SetSpeed(float64(monstat.SpeedBase))
@@ -133,24 +133,24 @@ func (v *NPC) wait() bool {
 func (v *NPC) next() {
 	v.isDone = true
 	v.repetitions = 3 + rand.Intn(5)
-	newAnimationMode := d2enum.AnimationModeMonsterNeutral
+	newAnimationMode := d2enum.MonsterAnimationModeNeutral
 	// TODO: Figure out what 1-3 are for, 4 is correct.
 	switch v.action {
 	case 1:
-		newAnimationMode = d2enum.AnimationModeMonsterNeutral
+		newAnimationMode = d2enum.MonsterAnimationModeNeutral
 	case 2:
-		newAnimationMode = d2enum.AnimationModeMonsterNeutral
+		newAnimationMode = d2enum.MonsterAnimationModeNeutral
 	case 3:
-		newAnimationMode = d2enum.AnimationModeMonsterNeutral
+		newAnimationMode = d2enum.MonsterAnimationModeNeutral
 	case 4:
-		newAnimationMode = d2enum.AnimationModeMonsterSkill1
+		newAnimationMode = d2enum.MonsterAnimationModeSkill1
 		v.repetitions = 0
 	default:
 		v.repetitions = 0
 	}
 
 	if v.composite.GetAnimationMode() != newAnimationMode.String() {
-		v.composite.SetMode(newAnimationMode.String(), v.composite.GetWeaponClass())
+		v.composite.SetMode(newAnimationMode, v.composite.GetWeaponClass())
 	}
 }
 
@@ -158,13 +158,13 @@ func (v *NPC) next() {
 func (v *NPC) rotate(direction int) {
 	var newMode d2enum.MonsterAnimationMode
 	if !v.IsAtTarget() {
-		newMode = d2enum.AnimationModeMonsterWalk
+		newMode = d2enum.MonsterAnimationModeWalk
 	} else {
-		newMode = d2enum.AnimationModeMonsterNeutral
+		newMode = d2enum.MonsterAnimationModeNeutral
 	}
 
 	if newMode.String() != v.composite.GetAnimationMode() {
-		v.composite.SetMode(newMode.String(), v.composite.GetWeaponClass())
+		v.composite.SetMode(newMode, v.composite.GetWeaponClass())
 	}
 
 	if v.composite.GetDirection() != direction {

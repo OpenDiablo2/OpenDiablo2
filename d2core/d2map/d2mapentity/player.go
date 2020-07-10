@@ -73,8 +73,7 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 	//result.nameLabel.Alignment = d2ui.LabelAlignCenter
 	//result.nameLabel.SetText(name)
 	//result.nameLabel.Color = color.White
-	err = composite.SetMode(d2enum.AnimationModePlayerTownNeutral.String(), equipment.RightHand.GetWeaponClass())
-
+	err = composite.SetMode(d2enum.PlayerAnimationModeTownNeutral, equipment.RightHand.GetWeaponClass())
 	if err != nil {
 		panic(err)
 	}
@@ -130,7 +129,7 @@ func (v *Player) Advance(tickTime float64) {
 
 	if v.IsCasting() && v.composite.GetPlayedCount() >= 1 {
 		v.isCasting = false
-		v.SetAnimationMode(v.GetAnimationMode().String())
+		v.SetAnimationMode(v.GetAnimationMode())
 	}
 	v.composite.Advance(tickTime)
 
@@ -159,38 +158,37 @@ func (v *Player) Render(target d2interface.Surface) {
 // GetAnimationMode returns the current animation mode based on what the player is doing and where they are.
 func (v *Player) GetAnimationMode() d2enum.PlayerAnimationMode {
 	if v.IsRunning() && !v.IsAtTarget() {
-		return d2enum.AnimationModePlayerRun
+		return d2enum.PlayerAnimationModeRun
 	}
 
 	if v.IsInTown() {
 		if !v.IsAtTarget() {
-			return d2enum.AnimationModePlayerTownWalk
+			return d2enum.PlayerAnimationModeTownWalk
 		}
 
-		return d2enum.AnimationModePlayerTownNeutral
+		return d2enum.PlayerAnimationModeTownNeutral
 	}
 
 	if !v.IsAtTarget() {
-		return d2enum.AnimationModePlayerWalk
+		return d2enum.PlayerAnimationModeWalk
 	}
 
 	if v.IsCasting() {
-		return d2enum.AnimationModePlayerCast
+		return d2enum.PlayerAnimationModeCast
 	}
 
-	return d2enum.AnimationModePlayerNeutral
+	return d2enum.PlayerAnimationModeNeutral
 }
 
-// SetAnimationMode sets the animation mode for this entity's animated composite.
-func (v *Player) SetAnimationMode(animationMode string) error {
+func (v *Player) SetAnimationMode(animationMode d2enum.PlayerAnimationMode) error {
 	return v.composite.SetMode(animationMode, v.composite.GetWeaponClass())
 }
 
 // rotate sets direction and changes animation
 func (v *Player) rotate(direction int) {
-	newAnimationMode := v.GetAnimationMode().String()
+	newAnimationMode := v.GetAnimationMode()
 
-	if newAnimationMode != v.composite.GetAnimationMode() {
+	if newAnimationMode.String() != v.composite.GetAnimationMode() {
 		v.composite.SetMode(newAnimationMode, v.composite.GetWeaponClass())
 	}
 
@@ -213,7 +211,7 @@ func (v *Player) IsCasting() bool {
 // sets the animation mode to the casting animation.
 func (v *Player) SetCasting() {
 	v.isCasting = true
-	v.SetAnimationMode(d2enum.AnimationModePlayerCast.String())
+	v.SetAnimationMode(d2enum.PlayerAnimationModeCast)
 }
 
 // Selectable returns true if the player is in town.

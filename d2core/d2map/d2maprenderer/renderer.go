@@ -229,7 +229,7 @@ func (mr *MapRenderer) renderTilePass2(tile *d2ds1.TileRecord, target d2interfac
 
 func (mr *MapRenderer) renderTilePass3(tile *d2ds1.TileRecord, target d2interface.Surface) {
 	for _, wall := range tile.Walls {
-		if wall.Type == d2enum.Roof {
+		if wall.Type == d2enum.TileRoof {
 			mr.renderWall(wall, mr.viewport, target)
 		}
 	}

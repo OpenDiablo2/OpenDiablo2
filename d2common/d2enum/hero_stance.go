@@ -1,11 +1,13 @@
 package d2enum
 
+// HeroStance used to render hero stance
 type HeroStance int
 
+// HeroStance types
 const (
-	HeroStanceIdle         HeroStance = 0
-	HeroStanceIdleSelected HeroStance = 1
-	HeroStanceApproaching  HeroStance = 2
-	HeroStanceSelected     HeroStance = 3
-	HeroStanceRetreating   HeroStance = 4
+	HeroStanceIdle HeroStance = iota
+	HeroStanceIdleSelected
+	HeroStanceApproaching
+	HeroStanceSelected
+	HeroStanceRetreating
 )

@@ -22,9 +22,9 @@ const _Hero_name = "BarbarianNecromancerPaladinAssassinSorceressAmazonDruid"
 
 var _Hero_index = [...]uint8{0, 0, 9, 20, 27, 35, 44, 50, 55}
 
-func (h Hero) String() string {
-	if h < 0 || h >= Hero(len(_Hero_index)-1) {
-		return "Hero(" + strconv.FormatInt(int64(h), 10) + ")"
+func (i Hero) String() string {
+	if i < 0 || i >= Hero(len(_Hero_index)-1) {
+		return "Hero(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
-	return _Hero_name[_Hero_index[h]:_Hero_index[h+1]]
+	return _Hero_name[_Hero_index[i]:_Hero_index[i+1]]
 }
