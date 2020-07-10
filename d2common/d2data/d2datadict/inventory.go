@@ -19,6 +19,8 @@ type grid struct {
 	Box     *box
 	Rows    int
 	Columns int
+	CellWidth int
+	CellHeight int
 }
 
 type InventoryRecord struct {
@@ -49,17 +51,19 @@ func LoadInventory(file []byte) {
 			Right:  d.Number("gridRight"),
 			Top:    d.Number("gridTop"),
 			Bottom: d.Number("gridBottom"),
-			Width:  d.Number("gridBoxWidth"),
-			Height: d.Number("gridBoxHeight"),
 		}
+		gBox.Width = gBox.Right - gBox.Left
+		gBox.Height = gBox.Bottom - gBox.Top
 
 		record := &InventoryRecord{
 			Name:  d.String("class"),
 			Panel: pBox,
 			Grid: &grid{
 				Box:     gBox,
-				Rows:    d.Number("gridRows"),
-				Columns: d.Number("gridCols"),
+				Rows:    d.Number("gridY"),
+				Columns: d.Number("gridX"),
+				CellWidth:  d.Number("gridBoxWidth"),
+				CellHeight: d.Number("gridBoxHeight"),
 			},
 			Slots: map[d2enum.EquippedSlot]*box{
 				d2enum.EquippedSlotHead: {
