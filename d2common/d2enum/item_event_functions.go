@@ -1,7 +1,9 @@
 package d2enum
 
+// ItemEventFuncID represents a item event function
 type ItemEventFuncID int
 
+// Item event functions
 const (
 	// shoots a missile at the owner of a missile that has just hit you
 	// (Chilling Armor uses this)

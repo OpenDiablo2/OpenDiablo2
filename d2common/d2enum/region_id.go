@@ -1,9 +1,9 @@
 package d2enum
 
-// RegionIdType ...
-type RegionIdType int
+// RegionIdType represents a region Id
+type RegionIdType int //nolint:golint,stylecheck // many changed needed when changing to ID
 
-// Region ID types
+// Regions
 const (
 	RegionNone RegionIdType = iota
 	RegionAct1Town

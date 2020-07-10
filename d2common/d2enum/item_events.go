@@ -21,6 +21,7 @@ const (
 	ItemEventLevelUp                        // gain a level
 )
 
+//nolint:gochecknoglobals // better for lookup
 var itemEventsLookup = map[string]ItemEventType{
 	"hitbymissile":     ItemEventHitByMissile,
 	"damagedinmelee":   ItemEventDamagedInMelee,

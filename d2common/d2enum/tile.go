@@ -35,9 +35,9 @@ func (tile TileType) LowerWall() bool {
 		TileLowerWallsEquivalentToRightLeftNorthCornerWall,
 		TileLowerWallsEquivalentToSouthCornerwall:
 		return true
-	default:
-		return false
 	}
+
+	return false
 }
 
 // UpperWall checks for upper wall tiles
@@ -56,6 +56,7 @@ func (tile TileType) UpperWall() bool {
 		TileTree:
 		return true
 	}
+
 	return false
 }
 
@@ -65,5 +66,6 @@ func (tile TileType) Special() bool {
 	case TileSpecialTile1, TileSpecialTile2:
 		return true
 	}
+
 	return false
 }

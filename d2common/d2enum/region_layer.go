@@ -1,6 +1,6 @@
 package d2enum
 
-// RegionLayerType ...
+// RegionLayerType represents a region layer
 type RegionLayerType int
 
 // Region layer types
