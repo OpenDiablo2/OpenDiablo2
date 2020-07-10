@@ -1,18 +1,20 @@
 package d2enum
 
+// LayerStreamType represents a layer stream type
 type LayerStreamType int
 
+// Layer stream types
 const (
-	LayerStreamWall1        LayerStreamType = 0
-	LayerStreamWall2        LayerStreamType = 1
-	LayerStreamWall3        LayerStreamType = 2
-	LayerStreamWall4        LayerStreamType = 3
-	LayerStreamOrientation1 LayerStreamType = 4
-	LayerStreamOrientation2 LayerStreamType = 5
-	LayerStreamOrientation3 LayerStreamType = 6
-	LayerStreamOrientation4 LayerStreamType = 7
-	LayerStreamFloor1       LayerStreamType = 8
-	LayerStreamFloor2       LayerStreamType = 9
-	LayerStreamShadow       LayerStreamType = 10
-	LayerStreamSubstitute   LayerStreamType = 11
+	LayerStreamWall1 LayerStreamType = iota
+	LayerStreamWall2
+	LayerStreamWall3
+	LayerStreamWall4
+	LayerStreamOrientation1
+	LayerStreamOrientation2
+	LayerStreamOrientation3
+	LayerStreamOrientation4
+	LayerStreamFloor1
+	LayerStreamFloor2
+	LayerStreamShadow
+	LayerStreamSubstitute
 )

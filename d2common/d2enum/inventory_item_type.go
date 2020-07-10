@@ -1,9 +1,11 @@
 package d2enum
 
+// InventoryItemType represents a inventory item type
 type InventoryItemType int
 
+// Inventry item types
 const (
-	InventoryItemTypeItem   InventoryItemType = 0 // Item
-	InventoryItemTypeWeapon InventoryItemType = 1 // Weapon
-	InventoryItemTypeArmor  InventoryItemType = 2 // Armor
+	InventoryItemTypeItem InventoryItemType = iota
+	InventoryItemTypeWeapon
+	InventoryItemTypeArmor
 )

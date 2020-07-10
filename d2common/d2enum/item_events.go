@@ -1,39 +1,52 @@
 package d2enum
 
-// used in ItemStatCost
+// ItemEventType  used in ItemStatCost
 type ItemEventType int
 
+// Item event types
 const (
-	HitByMissile     = ItemEventType(iota) // hit By a Missile
-	DamagedInMelee                         // Damaged in Melee
-	DamagedByMissile                       // Damaged By Missile
-	AttackedInMelee                        // melee Attack atttempt
-	DoActive                               // do active state skill
-	DoMeleeDamage                          // do damage in melee
-	DoMissileDamage                        // do missile damage
-	DoMeleeAttack                          // do melee attack
-	DoMissileAttack                        // do missile attack
-	Kill                                   // killed something
-	Killed                                 // killed By something
-	AbsorbDamage                           // dealt damage
-	LevelUp                                // gain a level
+	ItemEventNone             ItemEventType = iota
+	ItemEventHitByMissile                   // hit By a Missile
+	ItemEventDamagedInMelee                 // Damaged in Melee
+	ItemEventDamagedByMissile               // Damaged By Missile
+	ItemEventAttackedInMelee                // melee Attack atttempt
+	ItemEventDoActive                       // do active state skill
+	ItemEventDoMeleeDamage                  // do damage in melee
+	ItemEventDoMissileDamage                // do missile damage
+	ItemEventDoMeleeAttack                  // do melee attack
+	ItemEventDoMissileAttack                // do missile attack
+	ItemEventKill                           // killed something
+	ItemEventKilled                         // killed By something
+	ItemEventAbsorbDamage                   // dealt damage
+	ItemEventLevelUp                        // gain a level
 )
 
+//nolint:gochecknoglobals // better for lookup
+var itemEventsLookup = map[string]ItemEventType{
+	"hitbymissile":     ItemEventHitByMissile,
+	"damagedinmelee":   ItemEventDamagedInMelee,
+	"damagedbymissile": ItemEventDamagedByMissile,
+	"attackedinmelee":  ItemEventAttackedInMelee,
+	"doactive":         ItemEventDoActive,
+	"domeleedamage":    ItemEventDoMeleeDamage,
+	"domissiledamage":  ItemEventDoMissileDamage,
+	"domeleeattack":    ItemEventDoMeleeAttack,
+	"domissileattack":  ItemEventDoMissileAttack,
+	"kill":             ItemEventKill,
+	"killed":           ItemEventKilled,
+	"absorbdamage":     ItemEventAbsorbDamage,
+	"levelup":          ItemEventLevelUp,
+}
+
+// GetItemEventType returns the ItemEventType from string, expects lowercase input
 func GetItemEventType(s string) ItemEventType {
-	strLookupTable := map[string]ItemEventType{
-		"HitByMissile":     HitByMissile,
-		"DamagedInMelee":   DamagedInMelee,
-		"DamagedByMissile": DamagedByMissile,
-		"AttackedInMelee":  AttackedInMelee,
-		"DoActive":         DoActive,
-		"DoMeleeDamage":    DoMeleeDamage,
-		"DoMissileDamage":  DoMissileDamage,
-		"DoMeleeAttack":    DoMeleeAttack,
-		"DoMissileAttack":  DoMissileAttack,
-		"Kill":             Kill,
-		"Killed":           Killed,
-		"AbsorbDamage":     AbsorbDamage,
-		"LevelUp":          LevelUp,
+	if s == "" {
+		return ItemEventNone
 	}
-	return strLookupTable[s]
+
+	if v, ok := itemEventsLookup[s]; ok {
+		return v
+	}
+
+	return ItemEventNone
 }

@@ -2,19 +2,25 @@ package d2enum
 
 import "log"
 
+//go:generate stringer -linecomment -type Hero
+//go:generate string2enum -samepkg -linecomment -type Hero
+
+// Hero is used for different types of hero's
 type Hero int
 
+// Heroes
 const (
-	HeroNone        Hero = 0 //
-	HeroBarbarian   Hero = 1 // Barbarian
-	HeroNecromancer Hero = 2 // Necromancer
-	HeroPaladin     Hero = 3 // Paladin
-	HeroAssassin    Hero = 4 // Assassin
-	HeroSorceress   Hero = 5 // Sorceress
-	HeroAmazon      Hero = 6 // Amazon
-	HeroDruid       Hero = 7 // Druid
+	HeroNone        Hero = iota //
+	HeroBarbarian               // Barbarian
+	HeroNecromancer             // Necromancer
+	HeroPaladin                 // Paladin
+	HeroAssassin                // Assassin
+	HeroSorceress               // Sorceress
+	HeroAmazon                  // Amazon
+	HeroDruid                   // Druid
 )
 
+// GetToken returns a 2 letter token
 func (h Hero) GetToken() string {
 	switch h {
 	case HeroBarbarian:
@@ -34,8 +40,6 @@ func (h Hero) GetToken() string {
 	default:
 		log.Fatalf("Unknown hero token: %d", h)
 	}
+
 	return ""
 }
-
-//go:generate stringer -linecomment -type Hero
-//go:generate string2enum -samepkg -linecomment -type Hero

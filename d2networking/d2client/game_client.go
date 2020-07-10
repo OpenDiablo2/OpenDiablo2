@@ -114,7 +114,7 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 				} else {
 					player.SetIsInTown(false)
 				}
-				err := player.SetAnimationMode(player.GetAnimationMode().String())
+				err := player.SetAnimationMode(player.GetAnimationMode())
 				if err != nil {
 					log.Printf("GameClient: error setting animation mode for player %s: %s", player.Id, err)
 				}

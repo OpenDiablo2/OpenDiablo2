@@ -1,11 +1,13 @@
 package d2enum
 
+// ItemEventFuncID represents a item event function
 type ItemEventFuncID int
 
+// Item event functions
 const (
 	// shoots a missile at the owner of a missile that has just hit you
 	// (Chilling Armor uses this)
-	ReflectMissile = ItemEventFuncID(iota)
+	ReflectMissile ItemEventFuncID = iota
 
 	// freezes the attacker for a set duration the attacker
 	// (Frozen Armor uses this)
@@ -102,42 +104,3 @@ const (
 	// reanimate the target as the specified monster
 	ReanimateTargetAsMonster
 )
-
-func GetItemEventFuncID(n int) ItemEventFuncID {
-	m := map[int]ItemEventFuncID{
-		0:  ReflectMissile,
-		1:  FreezeAttacker,
-		2:  FreezeChillAttacker,
-		3:  ReflectPercentDamage,
-		4:  DamageDealtToHealth,
-		5:  AttackerTakesPhysical,
-		6:  Knockback,
-		7:  InduceFear,
-		8:  BlindTarget,
-		9:  AttackerTakesLightning,
-		10: AttackerTakesFire,
-		11: AttackerTakesCold,
-		12: DamageTakenToMana,
-		13: FreezeTarget,
-		14: OpenWounds,
-		15: CrushingBlow,
-		16: ManaOnKillMonster,
-		17: LifeOnKillDemon,
-		18: SlowTarget,
-		19: CastSkillAgainstDefender,
-		20: CastSkillAgainstAttacker,
-		21: AbsorbPhysical,
-		22: TakeSummonDamage,
-		23: ManaAbsorbsDamage,
-		24: AbsorbElementalDamage,
-		25: TakeSummonDamage2,
-		26: TargetSlowsTarget,
-		27: LifeOnKillMonster,
-		28: RestInPeace,
-		29: CastSkillWithoutTarget,
-		30: ReanimateTargetAsMonster,
-	}
-	return m[n]
-}
-
-//? do i need to do this ? //go:generate stringer -linecomment -type AnimationMode

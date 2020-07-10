@@ -19,7 +19,7 @@ func (m *MapEngine) RegenerateWalkPaths() {
 			isBlocked := false
 
 			for _, floor := range tile.Floors {
-				tileData := m.GetTileData(int32(floor.Style), int32(floor.Sequence), d2enum.Floor)
+				tileData := m.GetTileData(int32(floor.Style), int32(floor.Sequence), d2enum.TileFloor)
 				if tileData == nil {
 					continue
 				}

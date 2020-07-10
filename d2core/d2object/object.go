@@ -50,7 +50,7 @@ func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath stri
 
 	entity.composite = composite
 
-	entity.setMode("NU", 0, false)
+	entity.setMode(d2enum.ObjectAnimationModeNeutral, 0, false)
 
 	initObject(entity)
 
@@ -58,7 +58,7 @@ func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath stri
 }
 
 // setMode changes the graphical mode of this animated entity
-func (ob *Object) setMode(animationMode string, direction int, randomFrame bool) error {
+func (ob *Object) setMode(animationMode d2enum.ObjectAnimationMode, direction int, randomFrame bool) error {
 	err := ob.composite.SetMode(animationMode, "HTH")
 	if err != nil {
 		return err
@@ -66,23 +66,23 @@ func (ob *Object) setMode(animationMode string, direction int, randomFrame bool)
 
 	ob.composite.SetDirection(direction)
 
-	mode := d2enum.ObjectAnimationModeFromString(animationMode)
-	ob.drawLayer = ob.objectRecord.OrderFlag[d2enum.AnimationModeObjectNeutral]
+	// mode := d2enum.ObjectAnimationModeFromString(animationMode)
+	ob.drawLayer = ob.objectRecord.OrderFlag[d2enum.ObjectAnimationModeNeutral]
 
 	// For objects their txt record entry overrides animationdata
-	speed := ob.objectRecord.FrameDelta[mode]
+	speed := ob.objectRecord.FrameDelta[animationMode]
 	if speed != 0 {
 		ob.composite.SetAnimSpeed(speed)
 	}
 
-	frameCount := ob.objectRecord.FrameCount[mode]
+	frameCount := ob.objectRecord.FrameCount[animationMode]
 
 	if frameCount != 0 {
 		ob.composite.SetSubLoop(0, frameCount)
 	}
 
-	ob.composite.SetPlayLoop(ob.objectRecord.CycleAnimation[mode])
-	ob.composite.SetCurrentFrame(ob.objectRecord.StartFrame[mode])
+	ob.composite.SetPlayLoop(ob.objectRecord.CycleAnimation[animationMode])
+	ob.composite.SetCurrentFrame(ob.objectRecord.StartFrame[animationMode])
 
 	if randomFrame {
 		n := rand.Intn(frameCount)
@@ -98,7 +98,7 @@ func (ob *Object) Highlight() {
 }
 
 func (ob *Object) Selectable() bool {
-	mode := d2enum.ObjectAnimationModeFromString(ob.composite.GetAnimationMode())
+	mode := ob.composite.ObjectAnimationMode()
 	return ob.objectRecord.Selectable[mode]
 }
 
