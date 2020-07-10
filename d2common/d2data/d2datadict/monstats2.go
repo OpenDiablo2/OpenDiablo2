@@ -308,7 +308,7 @@ func LoadMonStats2(file []byte) {
 			InfernoLen:         d.Number("InfernoLen"),
 			InfernoAnim:        d.Number("InfernoAnim"),
 			InfernoRollback:    d.Number("InfernoRollback"),
-			ResurrectMode:      d2enum.MonsterAnimationModeFromString(d.String("ResurrectMode")),
+			ResurrectMode:      monsterAnimationModeFromString(d.String("ResurrectMode")),
 			ResurrectSkill:     d.String("ResurrectSkill"),
 		}
 		MonStats2[record.Key] = record
@@ -319,4 +319,21 @@ func LoadMonStats2(file []byte) {
 	}
 
 	log.Printf("Loaded %d MonStats2 records", len(MonStats2))
+}
+
+//nolint:gochecknoglobals // better for lookup
+var monsterAnimationModeLookup = map[string]d2enum.MonsterAnimationMode{
+	d2enum.MonsterAnimationModeNeutral.String():  d2enum.MonsterAnimationModeNeutral,
+	d2enum.MonsterAnimationModeSkill1.String():   d2enum.MonsterAnimationModeSkill1,
+	d2enum.MonsterAnimationModeSequence.String(): d2enum.MonsterAnimationModeSequence,
+}
+
+func monsterAnimationModeFromString(s string) d2enum.MonsterAnimationMode {
+	v, ok := monsterAnimationModeLookup[s]
+	if !ok {
+		log.Fatalf("unhandled MonsterAnimationMode %q", s)
+		return d2enum.MonsterAnimationModeNeutral
+	}
+
+	return v
 }

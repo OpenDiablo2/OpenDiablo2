@@ -1,7 +1,6 @@
 package d2enum
 
 //go:generate stringer -linecomment -type MonsterAnimationMode -output monster_animation_mode_string.go
-//go:generate string2enum -samepkg -linecomment -type MonsterAnimationMode -output monster_animation_mode_string2enum.go
 
 // MonsterAnimationMode represents monster animation modes
 type MonsterAnimationMode int
@@ -21,7 +20,7 @@ const (
 	MonsterAnimationModeSkill3                                // S3
 	MonsterAnimationModeSkill4                                // S4
 	MonsterAnimationModeDead                                  // DD
-	MonsterAnimationModeKnockback                             //
+	MonsterAnimationModeKnockback                             // GH
 	MonsterAnimationModeSequence                              // xx
 	MonsterAnimationModeRun                                   // RN
 )
