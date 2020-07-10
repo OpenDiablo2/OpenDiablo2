@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 
@@ -27,20 +29,22 @@ import (
 type GameClient struct {
 	clientConnection ServerConnection                            // Abstract local/remote connection
 	connectionType   d2clientconnectiontype.ClientConnectionType // Type of connection (local or remote)
-	GameState        *d2player.PlayerState                       // local player state
-	MapEngine        *d2mapengine.MapEngine                      // Map and entities
-	PlayerId         string                                      // ID of the local player
-	Players          map[string]*d2mapentity.Player              // IDs of the other players
-	Seed             int64                                       // Map seed
-	RegenMap         bool                                        // Regenerate tile cache on render (map has changed)
+	scriptEngine     *d2script.ScriptEngine
+	GameState        *d2player.PlayerState          // local player state
+	MapEngine        *d2mapengine.MapEngine         // Map and entities
+	PlayerId         string                         // ID of the local player
+	Players          map[string]*d2mapentity.Player // IDs of the other players
+	Seed             int64                          // Map seed
+	RegenMap         bool                           // Regenerate tile cache on render (map has changed)
 }
 
 // Create constructs a new GameClient and returns a pointer to it.
-func Create(connectionType d2clientconnectiontype.ClientConnectionType) (*GameClient, error) {
+func Create(connectionType d2clientconnectiontype.ClientConnectionType, scriptEngine *d2script.ScriptEngine) (*GameClient, error) {
 	result := &GameClient{
 		MapEngine:      d2mapengine.CreateMapEngine(), // TODO: Mapgen - Needs levels.txt stuff
 		Players:        make(map[string]*d2mapentity.Player),
 		connectionType: connectionType,
+		scriptEngine:   scriptEngine,
 	}
 
 	switch connectionType {
@@ -61,18 +65,26 @@ func Create(connectionType d2clientconnectiontype.ClientConnectionType) (*GameCl
 // If the client is remote it sends a PlayerConnectionRequestPacket to the
 // server (see d2netpacket).
 func (g *GameClient) Open(connectionString string, saveFilePath string) error {
+	switch g.connectionType {
+	case d2clientconnectiontype.LANServer, d2clientconnectiontype.Local:
+		g.scriptEngine.AllowEval()
+	}
 	return g.clientConnection.Open(connectionString, saveFilePath)
 }
 
 // Close destroys the server if the client is local. For remote clients
 // it sends a DisconnectRequestPacket (see d2netpacket).
 func (g *GameClient) Close() error {
+	switch g.connectionType {
+	case d2clientconnectiontype.LANServer, d2clientconnectiontype.Local:
+		g.scriptEngine.Reset()
+	}
 	return g.clientConnection.Close()
 }
 
 // Destroy does the same thing as Close.
 func (g *GameClient) Destroy() error {
-	return g.clientConnection.Close()
+	return g.Close()
 }
 
 // OnPacketReceived is called by the ClientConection and processes incoming

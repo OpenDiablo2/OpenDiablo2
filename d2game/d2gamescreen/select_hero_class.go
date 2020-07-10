@@ -2,9 +2,12 @@ package d2gamescreen
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"image"
 	"image/color"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
@@ -187,6 +190,7 @@ type SelectHeroClass struct {
 	audioProvider      d2interface.AudioProvider
 	terminal           d2interface.Terminal
 	renderer           d2interface.Renderer
+	scriptEngine       *d2script.ScriptEngine
 }
 
 // CreateSelectHeroClass creates an instance of a SelectHeroClass
@@ -196,6 +200,7 @@ func CreateSelectHeroClass(
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	connectionHost string,
 	terminal d2interface.Terminal,
+	scriptEngine *d2script.ScriptEngine,
 ) *SelectHeroClass {
 	result := &SelectHeroClass{
 		heroRenderInfo: make(map[d2enum.Hero]*HeroRenderInfo),
@@ -205,6 +210,7 @@ func CreateSelectHeroClass(
 		audioProvider:  audioProvider,
 		terminal:       terminal,
 		renderer:       renderer,
+		scriptEngine:   scriptEngine,
 	}
 
 	return result
@@ -341,7 +347,7 @@ func (v *SelectHeroClass) OnUnload() error {
 
 func (v *SelectHeroClass) onExitButtonClicked() {
 	d2screen.SetNextScreen(CreateCharacterSelect(v.renderer, v.audioProvider, v.connectionType,
-		v.connectionHost, v.terminal))
+		v.connectionHost, v.terminal, v.scriptEngine))
 }
 
 func (v *SelectHeroClass) onOkButtonClicked() {
@@ -351,13 +357,13 @@ func (v *SelectHeroClass) onOkButtonClicked() {
 		d2datadict.CharStats[v.selectedHero],
 		v.hardcoreCheckbox.GetCheckState(),
 	)
-	gameClient, _ := d2client.Create(d2clientconnectiontype.Local)
+	gameClient, _ := d2client.Create(d2clientconnectiontype.Local, v.scriptEngine)
 
 	if err := gameClient.Open(v.connectionHost, gameState.FilePath); err != nil {
 		fmt.Printf("can not connect to the host: %s\n", v.connectionHost)
 	}
 
-	d2screen.SetNextScreen(CreateGame(v.renderer, v.audioProvider, gameClient, v.terminal))
+	d2screen.SetNextScreen(CreateGame(v.renderer, v.audioProvider, gameClient, v.terminal, v.scriptEngine))
 }
 
 // Render renders the Select Hero Class screen

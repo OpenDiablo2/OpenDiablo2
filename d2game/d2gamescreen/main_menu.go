@@ -3,13 +3,15 @@ package d2gamescreen
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"image/color"
 	"log"
 	"os"
 	"os/exec"
 	"runtime"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
@@ -75,16 +77,19 @@ type MainMenu struct {
 	renderer            d2interface.Renderer
 	audioProvider       d2interface.AudioProvider
 	terminal            d2interface.Terminal
+	scriptEngine        *d2script.ScriptEngine
 }
 
 // CreateMainMenu creates an instance of MainMenu
-func CreateMainMenu(renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, term d2interface.Terminal) *MainMenu {
+func CreateMainMenu(renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, term d2interface.Terminal,
+	scriptEngine *d2script.ScriptEngine) *MainMenu {
 	return &MainMenu{
 		screenMode:     screenModeUnknown,
 		leftButtonHeld: true,
 		renderer:       renderer,
 		audioProvider:  audioProvider,
 		terminal:       term,
+		scriptEngine:   scriptEngine,
 	}
 }
 
@@ -154,7 +159,7 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 	loading.Progress(0.3)
 
 	v.copyrightLabel2 = d2ui.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
-	v.copyrightLabel2.Alignment =d2gui.HorizontalAlignCenter
+	v.copyrightLabel2.Alignment = d2gui.HorizontalAlignCenter
 	v.copyrightLabel2.SetText("All Rights Reserved.")
 	v.copyrightLabel2.Color = color.RGBA{R: 188, G: 168, B: 140, A: 255}
 	v.copyrightLabel2.SetPosition(400, 525)
@@ -287,12 +292,12 @@ func (v *MainMenu) onSinglePlayerClicked() {
 	// Go here only if existing characters are available to select
 	if d2player.HasGameStates() {
 		d2screen.SetNextScreen(CreateCharacterSelect(v.renderer, v.audioProvider, d2clientconnectiontype.Local,
-			v.tcpJoinGameEntry.GetText(), v.terminal))
+			v.tcpJoinGameEntry.GetText(), v.terminal, v.scriptEngine))
 		return
 	}
 
 	d2screen.SetNextScreen(CreateSelectHeroClass(v.renderer, v.audioProvider,
-		d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText(), v.terminal))
+		d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText(), v.terminal, v.scriptEngine))
 }
 
 func (v *MainMenu) onGithubButtonClicked() {
@@ -321,7 +326,7 @@ func (v *MainMenu) onExitButtonClicked() {
 }
 
 func (v *MainMenu) onCreditsButtonClicked() {
-	d2screen.SetNextScreen(CreateCredits(v.renderer, v.audioProvider))
+	d2screen.SetNextScreen(CreateCredits(v.renderer, v.audioProvider, v.scriptEngine))
 }
 
 // Render renders the main menu
@@ -487,7 +492,7 @@ func (v *MainMenu) onTCPIPCancelClicked() {
 
 func (v *MainMenu) onTCPIPHostGameClicked() {
 	d2screen.SetNextScreen(CreateCharacterSelect(v.renderer, v.audioProvider,
-		d2clientconnectiontype.LANServer, "", v.terminal))
+		d2clientconnectiontype.LANServer, "", v.terminal, v.scriptEngine))
 }
 
 func (v *MainMenu) onTCPIPJoinGameClicked() {
@@ -500,5 +505,5 @@ func (v *MainMenu) onBtnTCPIPCancelClicked() {
 
 func (v *MainMenu) onBtnTCPIPOkClicked() {
 	d2screen.SetNextScreen(CreateCharacterSelect(v.renderer, v.audioProvider,
-		d2clientconnectiontype.LANClient, v.tcpJoinGameEntry.GetText(), v.terminal))
+		d2clientconnectiontype.LANClient, v.tcpJoinGameEntry.GetText(), v.terminal, v.scriptEngine))
 }

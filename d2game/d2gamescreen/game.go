@@ -3,6 +3,8 @@ package d2gamescreen
 import (
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
@@ -39,7 +41,7 @@ type Game struct {
 
 // CreateGame creates the Gameplay screen and returns a pointer to it
 func CreateGame(renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, gameClient *d2client.GameClient,
-	term d2interface.Terminal) *Game {
+	term d2interface.Terminal, scriptEngine *d2script.ScriptEngine) *Game {
 	result := &Game{
 		gameClient:           gameClient,
 		gameControls:         nil,
@@ -47,7 +49,7 @@ func CreateGame(renderer d2interface.Renderer, audioProvider d2interface.AudioPr
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
 		mapRenderer:          d2maprenderer.CreateMapRenderer(renderer, gameClient.MapEngine, term),
-		escapeMenu:           NewEscapeMenu(renderer, audioProvider, term),
+		escapeMenu:           NewEscapeMenu(renderer, audioProvider, term, scriptEngine),
 		audioProvider:        audioProvider,
 		renderer:             renderer,
 		terminal:             term,

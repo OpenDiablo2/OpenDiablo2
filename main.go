@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
 	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
@@ -40,12 +42,13 @@ func main() {
 
 	d2input.Create() // TODO d2input singleton must be init before d2term
 	term, err := d2term.Initialize()
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	app := d2app.Create(GitBranch, GitCommit, term, audio, renderer)
+	scriptEngine := d2script.CreateScriptEngine()
+
+	app := d2app.Create(GitBranch, GitCommit, term, scriptEngine, audio, renderer)
 	if err := app.Run(); err != nil {
 		log.Fatal(err)
 	}
