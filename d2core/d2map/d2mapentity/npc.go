@@ -12,6 +12,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
+// NPC is a passive complex entity with which the player can interact.
+// For example, Deckard Cain.
 type NPC struct {
 	mapEntity
 	composite     d2interface.CompositeAnimation
@@ -26,6 +28,7 @@ type NPC struct {
 	name          string
 }
 
+// CreateNPC creates a new NPC and returns a pointer to it.
 func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC {
 	result := &NPC{
 		mapEntity:     createMapEntity(x, y),
@@ -67,6 +70,7 @@ func selectEquip(slice []string) string {
 	return ""
 }
 
+// Render renders this entity's animated composite.
 func (v *NPC) Render(target d2interface.Surface) {
 	target.PushTranslation(
 		v.offsetX+int((v.subcellX-v.subcellY)*16),
@@ -76,10 +80,12 @@ func (v *NPC) Render(target d2interface.Surface) {
 	v.composite.Render(target)
 }
 
+// Path returns the current part of the entity's path.
 func (v *NPC) Path() d2common.Path {
 	return v.Paths[v.path]
 }
 
+// NextPath returns the next part of the entity's path.
 func (v *NPC) NextPath() d2common.Path {
 	v.path++
 	if v.path == len(v.Paths) {
@@ -89,12 +95,17 @@ func (v *NPC) NextPath() d2common.Path {
 	return v.Paths[v.path]
 }
 
+// SetPaths sets the entity's paths to the given slice. It also sets flags
+// on the entity indicating that it has paths and has completed the
+// previous none.
 func (v *NPC) SetPaths(paths []d2common.Path) {
 	v.Paths = paths
 	v.HasPaths = len(paths) > 0
 	v.isDone = true
 }
 
+// Advance is called once per frame and processes a
+// single game tick.
 func (v *NPC) Advance(tickTime float64) {
 	v.Step(tickTime)
 	v.composite.Advance(tickTime)
@@ -108,6 +119,7 @@ func (v *NPC) Advance(tickTime float64) {
 			float64(path.Y),
 			v.next,
 		)
+
 		v.action = path.Action
 	}
 }
@@ -160,14 +172,17 @@ func (v *NPC) rotate(direction int) {
 	}
 }
 
+// Selectable returns true if the object can be highlighted/selected.
 func (m *NPC) Selectable() bool {
 	// is there something handy that determines selectable npc's?
 	if m.name != "" {
 		return true
 	}
+
 	return false
 }
 
+// Name returns the NPC's in-game name (e.g. "Deckard Cain") or an empty string if it does not have a name.
 func (m *NPC) Name() string {
 	return m.name
 }

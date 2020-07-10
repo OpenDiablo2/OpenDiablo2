@@ -14,19 +14,19 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 )
 
-// The map renderer, used to render the map
+// MapRenderer manages the game viewport and camera. It requests tile and entity data from MapEngine and renders it.
 type MapRenderer struct {
-	renderer      d2interface.Renderer   // The renderer to use for drawing operations
+	renderer      d2interface.Renderer   // Used for drawing operations
 	mapEngine     *d2mapengine.MapEngine // The map engine that is being rendered
 	palette       d2interface.Palette    // The palette used for this map
-	viewport      *Viewport              // The viewport for the map renderer (used for rendering offsets)
-	camera        Camera                 // The camera for this map renderer (used to determine where on the map we are rendering)
+	viewport      *Viewport              // Used for rendering offsets
+	camera        Camera                 // Used to determine where on the map we are rendering
 	debugVisLevel int                    // Debug visibility index (0=none, 1=tiles, 2=sub-tiles)
 	lastFrameTime float64                // The last time the map was rendered
-	currentFrame  int                    // The current render frame (for animations)
+	currentFrame  int                    // Current render frame (for animations)
 }
 
-// Creates an instance of the map renderer
+// CreateMapRenderer creates a new MapRenderer, sets the required fields and returns a pointer to it.
 func CreateMapRenderer(renderer d2interface.Renderer, mapEngine *d2mapengine.MapEngine, term d2interface.Terminal) *MapRenderer {
 	result := &MapRenderer{
 		renderer:  renderer,
@@ -47,54 +47,77 @@ func CreateMapRenderer(renderer d2interface.Renderer, mapEngine *d2mapengine.Map
 	return result
 }
 
+// RegenerateTileCache calls MapRenderer.generateTileCache().
 func (mr *MapRenderer) RegenerateTileCache() {
 	mr.generateTileCache()
 }
 
+// SetMapEngine sets the MapEngine this renderer is rendering.
 func (mr *MapRenderer) SetMapEngine(mapEngine *d2mapengine.MapEngine) {
 	mr.mapEngine = mapEngine
 	mr.generateTileCache()
 }
 
+// Render determines the width and height of map tiles that should be rendered. The following four render passes are
+// made in succession:
+//
+// Pass 1: Lower wall tiles, tile shadows and floor tiles.
+//
+// Pass 2: Entities below walls.
+//
+// Pass 3: Upper wall tiles and entities above walls.
+//
+// Pass 4: Roof tiles.
 func (mr *MapRenderer) Render(target d2interface.Surface) {
 	mapSize := mr.mapEngine.Size()
+
 	stxf, styf := mr.viewport.ScreenToWorld(400, -200)
 	etxf, etyf := mr.viewport.ScreenToWorld(400, 1050)
+
 	startX := int(math.Max(0, math.Floor(stxf)))
 	startY := int(math.Max(0, math.Floor(styf)))
+
 	endX := int(math.Min(float64(mapSize.Width), math.Ceil(etxf)))
 	endY := int(math.Min(float64(mapSize.Height), math.Ceil(etyf)))
 
 	mr.renderPass1(target, startX, startY, endX, endY)
 	mr.renderPass2(target, startX, startY, endX, endY)
+
 	if mr.debugVisLevel > 0 {
 		mr.renderDebug(mr.debugVisLevel, target, startX, startY, endX, endY)
 	}
+
 	mr.renderPass3(target, startX, startY, endX, endY)
 	mr.renderPass4(target, startX, startY, endX, endY)
 }
 
+// MoveCameraTo sets the position of the camera to the given x and y coordinates.
 func (mr *MapRenderer) MoveCameraTo(x, y float64) {
 	mr.camera.MoveTo(x, y)
 }
 
+// MoveCameraBy adds the given vector to the current position of the camera.
 func (mr *MapRenderer) MoveCameraBy(x, y float64) {
 	mr.camera.MoveBy(x, y)
 }
 
+// ScreenToWorld returns the world position for the given screen (pixel) position.
 func (mr *MapRenderer) ScreenToWorld(x, y int) (float64, float64) {
 	return mr.viewport.ScreenToWorld(x, y)
 }
 
+// ScreenToOrtho returns the orthogonal position, without accounting for the isometric angle, for the given screen
+// (pixel) position.
 func (mr *MapRenderer) ScreenToOrtho(x, y int) (float64, float64) {
 	return mr.viewport.ScreenToOrtho(x, y)
 }
 
+// WorldToOrtho returns the orthogonal position for the given isometric world position.
 func (mr *MapRenderer) WorldToOrtho(x, y float64) (float64, float64) {
 	return mr.viewport.WorldToOrtho(x, y)
 }
 
-// Lower wall tiles, tile shadews, floor tiles
+// Lower wall tiles, tile shadows and floor tiles.
 func (mr *MapRenderer) renderPass1(target d2interface.Surface, startX, startY, endX, endY int) {
 	for tileY := startY; tileY < endY; tileY++ {
 		for tileX := startX; tileX < endX; tileX++ {
@@ -106,7 +129,7 @@ func (mr *MapRenderer) renderPass1(target d2interface.Surface, startX, startY, e
 	}
 }
 
-// Objects below walls
+// Entities below walls.
 func (mr *MapRenderer) renderPass2(target d2interface.Surface, startX, startY, endX, endY int) {
 	for tileY := startY; tileY < endY; tileY++ {
 		for tileX := startX; tileX < endX; tileX++ {
@@ -115,22 +138,26 @@ func (mr *MapRenderer) renderPass2(target d2interface.Surface, startX, startY, e
 			// TODO: Do not loop over every entity every frame
 			for _, mapEntity := range *mr.mapEngine.Entities() {
 				entityX, entityY := mapEntity.GetPosition()
+
 				if mapEntity.GetLayer() != 1 {
 					continue
 				}
+
 				if (int(entityX) != tileX) || (int(entityY) != tileY) {
 					continue
 				}
+
 				target.PushTranslation(mr.viewport.GetTranslationScreen())
 				mapEntity.Render(target)
 				target.Pop()
 			}
+
 			mr.viewport.PopTranslation()
 		}
 	}
 }
 
-// Upper wall tiles, objects that are on top of walls
+// Upper wall tiles and entities above walls.
 func (mr *MapRenderer) renderPass3(target d2interface.Surface, startX, startY, endX, endY int) {
 	for tileY := startY; tileY < endY; tileY++ {
 		for tileX := startX; tileX < endX; tileX++ {
@@ -141,22 +168,26 @@ func (mr *MapRenderer) renderPass3(target d2interface.Surface, startX, startY, e
 			// TODO: Do not loop over every entity every frame
 			for _, mapEntity := range *mr.mapEngine.Entities() {
 				entityX, entityY := mapEntity.GetPosition()
+
 				if mapEntity.GetLayer() == 1 {
 					continue
 				}
+
 				if (int(entityX) != tileX) || (int(entityY) != tileY) {
 					continue
 				}
+
 				target.PushTranslation(mr.viewport.GetTranslationScreen())
 				mapEntity.Render(target)
 				target.Pop()
 			}
+
 			mr.viewport.PopTranslation()
 		}
 	}
 }
 
-// Roof tiles
+// Roof tiles.
 func (mr *MapRenderer) renderPass4(target d2interface.Surface, startX, startY, endX, endY int) {
 	for tileY := startY; tileY < endY; tileY++ {
 		for tileX := startX; tileX < endX; tileX++ {
@@ -164,10 +195,8 @@ func (mr *MapRenderer) renderPass4(target d2interface.Surface, startX, startY, e
 			mr.viewport.PushTranslationWorld(float64(tileX), float64(tileY))
 			mr.renderTilePass3(tile, target)
 			mr.viewport.PopTranslation()
-
 		}
 	}
-
 }
 
 func (mr *MapRenderer) renderTilePass1(tile *d2ds1.TileRecord, target d2interface.Surface) {
@@ -213,6 +242,7 @@ func (mr *MapRenderer) renderFloor(tile d2ds1.FloorShadowRecord, target d2interf
 	} else {
 		img = mr.getImageCacheRecord(tile.Style, tile.Sequence, 0, byte(mr.currentFrame))
 	}
+
 	if img == nil {
 		log.Printf("Render called on uncached floor {%v,%v}", tile.Style, tile.Sequence)
 		return
@@ -254,6 +284,7 @@ func (mr *MapRenderer) renderShadow(tile d2ds1.FloorShadowRecord, target d2inter
 
 	target.PushTranslation(mr.viewport.GetTranslationScreen())
 	target.PushColor(color.RGBA{R: 255, G: 255, B: 255, A: 160})
+
 	defer target.PopN(2)
 
 	target.Render(img)
@@ -269,10 +300,12 @@ func (mr *MapRenderer) renderDebug(debugVisLevel int, target d2interface.Surface
 	}
 }
 
+// WorldToScreen returns the screen (pixel) position for the given isometric world position as two ints.
 func (mr *MapRenderer) WorldToScreen(x, y float64) (int, int) {
 	return mr.viewport.WorldToScreen(x, y)
 }
 
+// WorldToScreenF returns the screen (pixel) position for the given isometric world position as two float64s.
 func (mr *MapRenderer) WorldToScreenF(x, y float64) (float64, float64) {
 	return mr.viewport.WorldToScreenF(x, y)
 }
@@ -311,11 +344,11 @@ func (mr *MapRenderer) renderTileDebug(ax, ay int, debugVisLevel int, target d2i
 
 		tile := mr.mapEngine.TileAt(ax, ay)
 
-		//for i, floor := range tile.Floors {
-		//	target.PushTranslation(-20, 10+(i+1)*14)
-		//	target.DrawText("f: %v-%v", floor.Style, floor.Sequence)
-		//	target.Pop()
-		//}
+		/*for i, floor := range tile.Floors {
+			target.PushTranslation(-20, 10+(i+1)*14)
+			target.DrawText("f: %v-%v", floor.Style, floor.Sequence)
+			target.Pop()
+		}*/
 
 		for i, wall := range tile.Walls {
 			if wall.Type.Special() {
@@ -329,7 +362,9 @@ func (mr *MapRenderer) renderTileDebug(ax, ay int, debugVisLevel int, target d2i
 			for xx := 0; xx < 5; xx++ {
 				isoX := (xx - yy) * 16
 				isoY := (xx + yy) * 8
+
 				var walkableArea = (*mr.mapEngine.WalkMesh())[((yy+(ay*5))*mr.mapEngine.Size().Width*5)+xx+(ax*5)]
+
 				if !walkableArea.Walkable {
 					target.PushTranslation(isoX-3, isoY+4)
 					target.DrawRect(5, 5, tileCollisionColor)
@@ -340,6 +375,7 @@ func (mr *MapRenderer) renderTileDebug(ax, ay int, debugVisLevel int, target d2i
 	}
 }
 
+// Advance is called once per frame and maintains the MapRenderer's record previous render timestamp and current frame.
 func (mr *MapRenderer) Advance(elapsed float64) {
 	frameLength := 0.1
 
@@ -355,6 +391,7 @@ func (mr *MapRenderer) Advance(elapsed float64) {
 
 func loadPaletteForAct(levelType d2enum.RegionIdType) (d2interface.Palette, error) {
 	var palettePath string
+
 	switch levelType {
 	case d2enum.RegionAct1Town, d2enum.RegionAct1Wilderness, d2enum.RegionAct1Cave, d2enum.RegionAct1Crypt,
 		d2enum.RegionAct1Monestary, d2enum.RegionAct1Courtyard, d2enum.RegionAct1Barracks,
@@ -378,14 +415,17 @@ func loadPaletteForAct(levelType d2enum.RegionIdType) (d2interface.Palette, erro
 	return d2asset.LoadPalette(palettePath)
 }
 
+// ViewportToLeft moves the viewport to the left.
 func (mr *MapRenderer) ViewportToLeft() {
 	mr.viewport.toLeft()
 }
 
+// ViewportToRight moves the viewport to the right.
 func (mr *MapRenderer) ViewportToRight() {
 	mr.viewport.toRight()
 }
 
+// ViewportDefault resets the viewport to it's default position.
 func (mr *MapRenderer) ViewportDefault() {
 	mr.viewport.resetAlign()
 }
