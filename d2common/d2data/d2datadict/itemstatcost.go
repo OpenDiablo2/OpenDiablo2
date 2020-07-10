@@ -1,6 +1,7 @@
 package d2datadict
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -34,9 +35,6 @@ type ItemStatCostRecord struct {
 	// stat in the file simply must have this set or else you may break the
 	// entire op stuff.
 	Stuff string
-
-	DescFn      interface{} // the sprintf func
-	DescGroupFn interface{} // group sprintf func
 
 	Index int
 
@@ -75,7 +73,7 @@ type ItemStatCostRecord struct {
 	EventFuncID2 d2enum.ItemEventFuncID
 
 	DescPriority int // determines order when displayed
-	DescFnID     d2enum.DescFuncID
+	DescFnID     int
 
 	// Controls whenever and if so in what way the stat value is shown
 	// 0 = doesn't show the value of the stat
@@ -87,7 +85,7 @@ type ItemStatCostRecord struct {
 	// group func for desc (they need to be in the same affix)
 	DescGroup       int
 	DescGroupVal    int
-	DescGroupFuncID d2enum.DescFuncID
+	DescGroupFuncID int
 
 	CallbackEnabled bool // whether callback fn is called if value changes
 	Signed          bool // whether the stat is signed
@@ -101,6 +99,61 @@ type ItemStatCostRecord struct {
 	// like when socketing a jewel
 
 	DamageRelated bool // prevents stacking of stats while dual wielding
+}
+
+//nolint:gochecknoglobals // better for lookup
+var itemStatCostRecordLookup = []string{
+	"+%f %s",
+	"%f%% %s",
+	"%f %s",
+	"+%f%% %s",
+	"%f%% %s",
+	"+%f %s %s",
+	"%f%% %s %s",
+	"+%f%% %s %s",
+	"%f %s %s",
+	"%f %s %s",
+	"Repairs 1 Durability In %.0f Seconds",
+	"+%f %s",
+	"+%.0f to %s Skill Levels",
+	"+%.0f to %s Skill Levels (%s Only)",
+	"%.0f%% chance to cast %d %s on %s",
+	"Level %d %s Aura When Equipped",
+	"%f %s (Increases near %d)",
+	"%f%% %s (Increases near %d)",
+	"",
+	"%f%% %s",
+	"%f %s",
+	"%f%% %s %s",
+	"",
+	"%f%% %s %s",
+	"Level %.0f %s (%d/%d Charges)",
+	"",
+	"",
+	"+%f to %s (%s Only)",
+	"+%.0f to %s",
+}
+
+// DescString return a string based on the DescFnID
+func (r *ItemStatCostRecord) DescString(a ...interface{}) string {
+	if r.DescFnID < 0 || r.DescFnID > len(itemStatCostRecordLookup) {
+		return ""
+	}
+
+	format := itemStatCostRecordLookup[r.DescFnID]
+
+	return fmt.Sprintf(format, a...)
+}
+
+// DescGroupString return a string based on the DescGroupFuncID
+func (r *ItemStatCostRecord) DescGroupString(a ...interface{}) string {
+	if r.DescGroupFuncID < 0 || r.DescGroupFuncID > len(itemStatCostRecordLookup) {
+		return ""
+	}
+
+	format := itemStatCostRecordLookup[r.DescGroupFuncID]
+
+	return fmt.Sprintf(format, a...)
 }
 
 // ItemStatCosts stores all of the ItemStatCostRecords
@@ -163,16 +216,15 @@ func LoadItemStatCosts(file []byte) {
 			EventFuncID2: d2enum.ItemEventFuncID(d.Number("itemeventfunc2")),
 
 			DescPriority: d.Number("descpriority"),
-			DescFnID:     d2enum.DescFuncID(d.Number("descfunc")),
-			DescFn:       d2enum.GetDescFunction(d2enum.DescFuncID(d.Number("descfunc"))),
+			DescFnID:     d.Number("descfunc"),
 			DescVal:      d.Number("descval"),
 			DescStrPos:   d.String("descstrpos"),
 			DescStrNeg:   d.String("descstrneg"),
 			DescStr2:     d.String("descstr2"),
 
 			DescGroup:       d.Number("dgrp"),
-			DescGroupFuncID: d2enum.DescFuncID(d.Number("dgrpfunc")),
-			DescGroupFn:     d2enum.GetDescFunction(d2enum.DescFuncID(d.Number("dgrpfunc"))),
+			DescGroupFuncID: d.Number("dgrpfunc"),
+
 			DescGroupVal:    d.Number("dgrpval"),
 			DescGroupStrPos: d.String("dgrpstrpos"),
 			DescGroupStrNeg: d.String("dgrpstrneg"),
