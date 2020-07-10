@@ -26,9 +26,9 @@ func _() {
 	_ = x[MonsterAnimationModeRun-15]
 }
 
-const _MonsterAnimationMode_name = "DTNUWLGHA1A2BLSCS1S2S3S4DDxxRN"
+const _MonsterAnimationMode_name = "DTNUWLGHA1A2BLSCS1S2S3S4DDGHxxRN"
 
-var _MonsterAnimationMode_index = [...]uint8{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 26, 28, 30}
+var _MonsterAnimationMode_index = [...]uint8{0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32}
 
 func (i MonsterAnimationMode) String() string {
 	if i < 0 || i >= MonsterAnimationMode(len(_MonsterAnimationMode_index)-1) {
