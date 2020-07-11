@@ -13,8 +13,8 @@ import (
 // mapEntity represents an entity on the map that can be animated
 // TODO: Has a coordinate (issue #456)
 type mapEntity struct {
-	d2vector.Position
-	Target d2vector.Position
+	Position d2vector.Position
+	Target   d2vector.Position
 
 	LocationX          float64
 	LocationY          float64
@@ -89,7 +89,7 @@ func (m *mapEntity) getStepLength(tickTime float64) (float64, float64) {
 	length := tickTime * m.Speed
 
 	vector := m.Target.SubWorld()
-	vector.Subtract(m.SubWorld())
+	vector.Subtract(m.Position.SubWorld())
 	vector.SetLength(length)
 
 	return vector.X(), vector.Y()
@@ -131,7 +131,7 @@ func (m *mapEntity) Step(tickTime float64) {
 		m.LocationY, stepY = d2common.AdjustWithRemainder(m.LocationY, stepY, m.TargetY)
 
 		// TODO: This should be the authority
-		m.SetSubWorld(m.LocationX, m.LocationY) // //
+		m.Position.SetSubWorld(m.LocationX, m.LocationY) // //
 
 		// set the other value types
 		m.subcellX = 1 + math.Mod(m.LocationX, 5)
@@ -159,7 +159,7 @@ func (m *mapEntity) Step(tickTime float64) {
 				m.subcellY = 1 + math.Mod(m.LocationY, 5)
 
 				// TODO: This should be the authority
-				m.SetSubWorld(m.LocationX, m.LocationY) // //
+				m.Position.SetSubWorld(m.LocationX, m.LocationY) // //
 			}
 		}
 
@@ -210,13 +210,13 @@ func angleToDirection(angle float64) int {
 
 // GetPosition returns the entity's current tile position.
 func (m *mapEntity) GetPosition() (float64, float64) {
-	t := m.Tile()
+	t := m.Position.Tile()
 	return t.X(), t.Y()
 }
 
 // GetPositionF returns the entity's current sub tile position.
 func (m *mapEntity) GetPositionF() (float64, float64) {
-	w := m.World()
+	w := m.Position.World()
 	return w.X(), w.Y()
 }
 
