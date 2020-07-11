@@ -39,6 +39,8 @@ func createMapEntity(x, y int) mapEntity {
 	locX, locY := float64(x), float64(y)
 
 	return mapEntity{
+		Position:  d2vector.EntityPosition(locX, locY),
+		Target:    d2vector.EntityPosition(locX, locY),
 		LocationX: locX,
 		LocationY: locY,
 		TargetX:   locX,
