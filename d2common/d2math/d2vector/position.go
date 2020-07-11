@@ -70,22 +70,22 @@ func (p *Position) TileOffset() *Vector {
 	return c.Subtract(p.Tile())
 }
 
-// SubWorld is the position, where 5 = one map tile. (locationX, locationY)
-func (p *Position) SubWorld() *Vector {
+// WorldSubTile is the position, where 5 = one map tile. (locationX, locationY)
+func (p *Position) WorldSubTile() *Vector {
 	c := p.World().Clone()
 	return c.Scale(subTilesPerTile)
 }
 
-// SubTile is the tile position in sub tiles, always a multiple of 5.
+// TileSubTile is the tile position in sub tiles, always a multiple of 5.
 // unused
-func (p *Position) SubTile() *Vector {
+func (p *Position) TileSubTile() *Vector {
 	return p.Tile().Scale(subTilesPerTile)
 }
 
 // SubTileOffset is the offset from the sub tile position in sub tiles, always < 1.
 // unused
 func (p *Position) SubTileOffset() *Vector {
-	return p.SubWorld().Subtract(p.SubTile())
+	return p.WorldSubTile().Subtract(p.TileSubTile())
 }
 
 // This original value here was always zero. It is never assigned to but it is used. (offsetX, offsetY)
@@ -104,5 +104,5 @@ func (p *Position) SubCell() *Vector {
 }
 
 func (p Position) String() string {
-	return fmt.Sprintf("World: %s\nTile: %s\nSubWorld: %s\nSubCell: %s", p.World(), p.Tile(), p.SubWorld(), p.SubCell())
+	return fmt.Sprintf("World: %s\nTile: %s\nSubWorld: %s\nSubCell: %s", p.World(), p.Tile(), p.WorldSubTile(), p.SubCell())
 }

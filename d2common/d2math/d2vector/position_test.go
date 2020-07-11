@@ -34,7 +34,7 @@ func TestEntityPosition(t *testing.T) {
 	}
 
 	want = NewVector(locationX, locationY)
-	got = pos.SubWorld()
+	got = pos.WorldSubTile()
 
 	if !got.Equals(want) {
 		t.Errorf("sub tile position should match old value: got %s: want %s", got, want)
@@ -71,7 +71,7 @@ func TestTileOffset(t *testing.T) {
 
 func TestSubWorld(t *testing.T) {
 	p := NewPosition(1, 1)
-	got := p.SubWorld()
+	got := p.WorldSubTile()
 	want := NewVector(5, 5)
 	unchanged := NewVector(1, 1)
 
@@ -80,7 +80,7 @@ func TestSubWorld(t *testing.T) {
 
 func TestSubTile(t *testing.T) {
 	p := NewPosition(1, 1)
-	got := p.SubTile()
+	got := p.TileSubTile()
 	want := NewVector(5, 5)
 	unchanged := NewVector(1, 1)
 

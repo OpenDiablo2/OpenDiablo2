@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -16,8 +18,6 @@ type mapEntity struct {
 	Position d2vector.Position
 	Target   d2vector.Position
 
-	LocationX          float64
-	LocationY          float64
 	subcellX, subcellY float64 // Subcell coordinates within the current tile
 	offsetX, offsetY   int
 	TargetX            float64
@@ -41,8 +41,6 @@ func createMapEntity(x, y int) mapEntity {
 	return mapEntity{
 		Position:  d2vector.EntityPosition(locX, locY),
 		Target:    d2vector.EntityPosition(locX, locY),
-		LocationX: locX,
-		LocationY: locY,
 		TargetX:   locX,
 		TargetY:   locY,
 		subcellX:  1 + math.Mod(locX, 5),
@@ -54,8 +52,8 @@ func createMapEntity(x, y int) mapEntity {
 }
 
 func (m mapEntity) String() string {
-	return fmt.Sprintf("LocationXY: %.2f, %.2f\nsubcellXY: %.2f, %.2f\nTargetXY: %.2f, %.2f", // TileXY: %d, %d
-		m.LocationX, m.LocationY /*m.TileX, m.TileY,*/, m.subcellX, m.subcellY, m.TargetX, m.TargetY)
+	return fmt.Sprintf("subcellXY: %.2f, %.2f\nTargetXY: %.2f, %.2f", // TileXY: %d, %d
+		m.subcellX, m.subcellY, m.TargetX, m.TargetY)
 }
 
 // GetLayer returns the draw layer for this entity.
@@ -85,19 +83,17 @@ func (m *mapEntity) GetSpeed() float64 {
 	return m.Speed
 }
 
-func (m *mapEntity) getStepLength(tickTime float64) (float64, float64) {
+func (m *mapEntity) getStepLength(tickTime float64) (v *d2vector.Vector) {
 	length := tickTime * m.Speed
-
-	vector := m.Target.SubWorld()
-	vector.Subtract(m.Position.SubWorld())
-	vector.SetLength(length)
-
-	return vector.X(), vector.Y()
+	v = m.Target.WorldSubTile()
+	v.Subtract(m.Position.WorldSubTile())
+	v.SetLength(length)
+	return
 }
 
 // IsAtTarget returns true if the entity is within a 0.0002 square of it's target and has a path.
 func (m *mapEntity) IsAtTarget() bool {
-	return math.Abs(m.LocationX-m.TargetX) < 0.0001 && math.Abs(m.LocationY-m.TargetY) < 0.0001 && !m.HasPathFinding()
+	return m.Position.EqualsApprox(m.Target.Vector) && !m.HasPathFinding()
 }
 
 // Step moves the entity along it's path by one tick. If the path is complete it calls entity.done() then returns.
@@ -113,32 +109,42 @@ func (m *mapEntity) Step(tickTime float64) {
 	}
 
 	// per tick velocity
-	stepX, stepY := m.getStepLength(tickTime)
+	step := m.getStepLength(tickTime)
 
 	// endless loop - why?
+
 	for {
+		stepX, stepY := step.X(), step.Y()
+
+		position := m.Position.WorldSubTile()
+		targetPosition := m.Target.WorldSubTile()
+
 		// zero small values
-		if d2common.AlmostEqual(m.LocationX-m.TargetX, 0, 0.0001) {
+		if d2math.CompareFloat64Fuzzy(position.X(), targetPosition.X()) == 0 {
 			stepX = 0
 		}
 
-		if d2common.AlmostEqual(m.LocationY-m.TargetY, 0, 0.0001) {
+		if d2math.CompareFloat64Fuzzy(position.Y(), targetPosition.Y()) == 0 {
 			stepY = 0
 		}
 
+		step.Set(stepX, stepY)
+
 		// add velocity to current position, or return target if new position exceeds it
-		m.LocationX, stepX = d2common.AdjustWithRemainder(m.LocationX, stepX, m.TargetX)
-		m.LocationY, stepY = d2common.AdjustWithRemainder(m.LocationY, stepY, m.TargetY)
 
-		// TODO: This should be the authority
-		m.Position.SetSubWorld(m.LocationX, m.LocationY) // //
+		newPositionX, newStepX := d2common.AdjustWithRemainder(position.X(), step.X(), targetPosition.X())
+		newPositionY, newStepY := d2common.AdjustWithRemainder(position.Y(), step.Y(), targetPosition.Y())
 
+		m.Position.SetSubWorld(newPositionX, newPositionY)
+		step.Set(newStepX, newStepY)
+
+		position = m.Position.WorldSubTile()
 		// set the other value types
-		m.subcellX = 1 + math.Mod(m.LocationX, 5)
-		m.subcellY = 1 + math.Mod(m.LocationY, 5)
+		m.subcellX = 1 + math.Mod(position.X(), 5)
+		m.subcellY = 1 + math.Mod(position.Y(), 5)
 
 		// position is close to target
-		if d2common.AlmostEqual(m.LocationX, m.TargetX, 0.01) && d2common.AlmostEqual(m.LocationY, m.TargetY, 0.01) {
+		if d2common.AlmostEqual(position.X(), m.TargetX, 0.01) && d2common.AlmostEqual(position.Y(), m.TargetY, 0.01) {
 			// entity has a path
 			if len(m.path) > 0 {
 				// set target as next node in path
@@ -153,17 +159,14 @@ func (m *mapEntity) Step(tickTime float64) {
 				// entity had no path
 				// set location to target
 			} else {
-				m.LocationX = m.TargetX
-				m.LocationY = m.TargetY
-				m.subcellX = 1 + math.Mod(m.LocationX, 5)
-				m.subcellY = 1 + math.Mod(m.LocationY, 5)
-
-				// TODO: This should be the authority
-				m.Position.SetSubWorld(m.LocationX, m.LocationY) // //
+				m.Position.SetSubWorld(m.TargetX, m.TargetY)
+				position = m.Position.WorldSubTile()
+				m.subcellX = 1 + math.Mod(position.X(), 5)
+				m.subcellY = 1 + math.Mod(position.Y(), 5)
 			}
 		}
 
-		if stepX == 0 && stepY == 0 {
+		if step.IsZero() {
 			break
 		}
 	}
@@ -182,10 +185,11 @@ func (m *mapEntity) SetTarget(tx, ty float64, done func()) {
 	// TODO: This should be the authority
 	m.Target.SetSubWorld(tx, ty)
 
+	position := m.Position.WorldSubTile()
 	if m.directioner != nil {
 		angle := 359 - d2common.GetAngleBetween(
-			m.LocationX,
-			m.LocationY,
+			position.X(),
+			position.Y(),
 			tx,
 			ty,
 		)
