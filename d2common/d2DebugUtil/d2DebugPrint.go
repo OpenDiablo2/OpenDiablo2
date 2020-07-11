@@ -31,7 +31,6 @@ func D2DebugPrint(image *ebiten.Image, str string) error {
 //
 // The available runes are in U+0000 to U+00FF, which is C0 Controls and Basic Latin and C1 Controls and Latin-1 Supplement.
 func D2DebugPrintAt(image *ebiten.Image, str string, x, y int) {
-	drawDebugText(image, str, x+1, y+1, true)
 	drawDebugText(image, str, x, y, false)
 }
 

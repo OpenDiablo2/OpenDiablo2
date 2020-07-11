@@ -162,7 +162,6 @@ func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Recta
 
 func (s *ebitenSurface) DrawText(format string, params ...interface{}) {
 	d2DebugUtil.D2DebugPrintAt(s.image, fmt.Sprintf(format, params...), s.stateCurrent.x, s.stateCurrent.y)
-	//(s.image, fmt.Sprintf(format, params...), s.stateCurrent.x, s.stateCurrent.y)
 }
 
 func (s *ebitenSurface) DrawLine(x, y int, color color.Color) {
