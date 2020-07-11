@@ -12,7 +12,7 @@ func ImgIndexToRGBA(indexData []byte, palette d2interface.Palette) []byte {
 			continue
 		}
 
-		c := palette.GetColors()[indexData[i]]
+		c, _ := palette.GetColor(int(indexData[i]))
 		colorData[i*bytesPerPixel] = c.R()
 		colorData[i*bytesPerPixel+1] = c.G()
 		colorData[i*bytesPerPixel+2] = c.B()
