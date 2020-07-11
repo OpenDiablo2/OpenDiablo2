@@ -219,6 +219,10 @@ func (v *Vector) Cross(o Vector) float64 {
 // Normalize sets the vector length to 1 without changing the direction. The normalized vector may be scaled by the
 // float64 return value to restore it's original length.
 func (v *Vector) Normalize() float64 {
+	if v.x == 0 && v.y == 0 {
+		return 0
+	}
+
 	multiplier := 1 / v.Length()
 	v.Scale(multiplier)
 
