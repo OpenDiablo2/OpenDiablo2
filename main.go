@@ -9,6 +9,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
 
 // GitBranch is set by the CI build process to the name of the branch
@@ -40,12 +41,13 @@ func main() {
 
 	d2input.Create() // TODO d2input singleton must be init before d2term
 	term, err := d2term.Initialize()
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	app := d2app.Create(GitBranch, GitCommit, term, audio, renderer)
+	scriptEngine := d2script.CreateScriptEngine()
+
+	app := d2app.Create(GitBranch, GitCommit, term, scriptEngine, audio, renderer)
 	if err := app.Run(); err != nil {
 		log.Fatal(err)
 	}
