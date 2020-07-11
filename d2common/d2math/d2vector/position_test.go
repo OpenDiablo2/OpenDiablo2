@@ -8,8 +8,8 @@ import (
 
 func TestEntityPosition(t *testing.T) {
 	x, y := rand.Intn(1000), rand.Intn(1000)
-	pos := EntityPosition(x, y)
 	locX, locY := float64(x), float64(y)
+	pos := EntityPosition(locX, locY)
 
 	// old coordinate values			Position equivalent
 	locationX := locX                 // .SubWord().X()

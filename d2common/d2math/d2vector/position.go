@@ -24,13 +24,20 @@ func NewPosition(x, y float64) Position {
 // The value given should be the one set in d2mapstamp.Stamp.Entities:
 // (tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y
 // TODO: This probably doesn't support positions in between sub tiles so will only be suitable for spawning entities from map generation, not for multiplayer syncing.
-func EntityPosition(x, y int) Position {
-	return NewPosition(float64(x)/5, float64(y)/5)
+func EntityPosition(x, y float64) Position {
+	return NewPosition(x/5, y/5)
 }
 
-// Set sets this position to the given x and y values.
+// Set sets this position to the given x and y world position.
 func (p *Position) Set(x, y float64) {
 	p.x, p.y = x, y
+	p.checkValues()
+}
+
+// TODO: test this
+// SetSubWorld sets this position to the given x and y sub tile coordinates.
+func (p *Position) SetSubWorld(x, y float64) {
+	p.x, p.y = x/5, y/5
 	p.checkValues()
 }
 
@@ -44,8 +51,8 @@ func (p *Position) checkValues() {
 	}
 }
 
-// World is the position, where 1 = one map tile.
-// unused
+// World is the position, where 1 = one map tile. This is a pointer to the Position value and must be cloned with
+// Clone() if the position is not to be changed.
 func (p *Position) World() *Vector {
 	return &p.Vector
 }
@@ -81,6 +88,12 @@ func (p *Position) SubTileOffset() *Vector {
 	return p.SubWorld().Subtract(p.SubTile())
 }
 
+// This original value here was always zero. It is never assigned to but it is used. (offsetX, offsetY)
+func (p *Position) Offset() *Vector {
+	v := VectorZero()
+	return &v
+}
+
 // TODO: understand this and maybe improve/remove it
 // SubTileOffset() + 1. It's used for rendering. It seems to always do this:
 // 	v.offsetX+int((v.subcellX-v.subcellY)*16),
@@ -88,4 +101,8 @@ func (p *Position) SubTileOffset() *Vector {
 // ^ Maybe similar to Viewport.OrthoToWorld? (subCellX, subCellY)
 func (p *Position) SubCell() *Vector {
 	return p.SubTileOffset().AddScalar(1)
+}
+
+func (p Position) String() string {
+	return fmt.Sprintf("World: %s\nTile: %s\nSubWorld: %s\nSubCell: %s", p.World(), p.Tile(), p.SubWorld(), p.SubCell())
 }

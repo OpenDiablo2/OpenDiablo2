@@ -111,7 +111,9 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		path, _, _ := g.MapEngine.PathFind(movePlayer.StartX, movePlayer.StartY, movePlayer.DestX, movePlayer.DestY)
 		if len(path) > 0 {
 			player.SetPath(path, func() {
-				tile := g.MapEngine.TileAt(player.TileX, player.TileY)
+				// TODO: implement vector in TileAt
+				tilePosition := player.Position.Tile()
+				tile := g.MapEngine.TileAt(int(tilePosition.X()), int(tilePosition.Y()))
 				if tile == nil {
 					return
 				}

@@ -117,7 +117,9 @@ func (v *Game) Advance(tickTime float64) error {
 	if v.ticksSinceLevelCheck > 1.0 {
 		v.ticksSinceLevelCheck = 0
 		if v.localPlayer != nil {
-			tile := v.gameClient.MapEngine.TileAt(v.localPlayer.TileX, v.localPlayer.TileY)
+			// TODO: implement vector in TileAt
+			tilePosition := v.localPlayer.Position.Tile()
+			tile := v.gameClient.MapEngine.TileAt(int(tilePosition.X()), int(tilePosition.Y()))
 			if tile != nil {
 				musicInfo := d2common.GetMusicDef(tile.RegionType)
 				v.audioProvider.PlayBGM(musicInfo.MusicFile)

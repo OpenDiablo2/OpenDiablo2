@@ -18,7 +18,6 @@ type mapEntity struct {
 
 	LocationX          float64
 	LocationY          float64
-	TileX, TileY       int     // Coordinates of the tile the unit is within
 	subcellX, subcellY float64 // Subcell coordinates within the current tile
 	offsetX, offsetY   int
 	TargetX            float64
@@ -44,8 +43,6 @@ func createMapEntity(x, y int) mapEntity {
 		LocationY: locY,
 		TargetX:   locX,
 		TargetY:   locY,
-		TileX:     x / 5,
-		TileY:     y / 5,
 		subcellX:  1 + math.Mod(locX, 5),
 		subcellY:  1 + math.Mod(locY, 5),
 		Speed:     6,
@@ -55,8 +52,8 @@ func createMapEntity(x, y int) mapEntity {
 }
 
 func (m mapEntity) String() string {
-	return fmt.Sprintf("LocationXY: %.2f, %.2f\nTileXY: %d, %d\nsubcellXY: %.2f, %.2f\nTargetXY: %.2f, %.2f",
-		m.LocationX, m.LocationY, m.TileX, m.TileY, m.subcellX, m.subcellY, m.TargetX, m.TargetY)
+	return fmt.Sprintf("LocationXY: %.2f, %.2f\nsubcellXY: %.2f, %.2f\nTargetXY: %.2f, %.2f", // TileXY: %d, %d
+		m.LocationX, m.LocationY /*m.TileX, m.TileY,*/, m.subcellX, m.subcellY, m.TargetX, m.TargetY)
 }
 
 // GetLayer returns the draw layer for this entity.
@@ -137,8 +134,6 @@ func (m *mapEntity) Step(tickTime float64) {
 		// set the other value types
 		m.subcellX = 1 + math.Mod(m.LocationX, 5)
 		m.subcellY = 1 + math.Mod(m.LocationY, 5)
-		m.TileX = int(m.LocationX / 5)
-		m.TileY = int(m.LocationY / 5)
 
 		// position is close to target
 		if d2common.AlmostEqual(m.LocationX, m.TargetX, 0.01) && d2common.AlmostEqual(m.LocationY, m.TargetY, 0.01) {
@@ -160,8 +155,6 @@ func (m *mapEntity) Step(tickTime float64) {
 				m.LocationY = m.TargetY
 				m.subcellX = 1 + math.Mod(m.LocationX, 5)
 				m.subcellY = 1 + math.Mod(m.LocationY, 5)
-				m.TileX = int(m.LocationX / 5)
-				m.TileY = int(m.LocationY / 5)
 
 				// TODO: This should be the authority
 				m.SetSubWorld(m.LocationX, m.LocationY) // //
@@ -215,12 +208,14 @@ func angleToDirection(angle float64) int {
 
 // GetPosition returns the entity's current tile position.
 func (m *mapEntity) GetPosition() (float64, float64) {
-	return float64(m.TileX), float64(m.TileY)
+	t := m.Tile()
+	return t.X(), t.Y()
 }
 
 // GetPositionF returns the entity's current sub tile position.
 func (m *mapEntity) GetPositionF() (float64, float64) {
-	return float64(m.TileX) + (float64(m.subcellX) / 5.0), float64(m.TileY) + (float64(m.subcellY) / 5.0)
+	w := m.World()
+	return w.X(), w.Y()
 }
 
 // Name returns the NPC's in-game name (e.g. "Deckard Cain") or an empty string if it does not have a name
