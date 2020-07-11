@@ -6,10 +6,9 @@ import (
 	"image/color"
 	"math"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2DebugUtil"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
@@ -162,7 +161,7 @@ func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Recta
 }
 
 func (s *ebitenSurface) DrawText(format string, params ...interface{}) {
-	ebitenutil.DebugPrintAt(s.image, fmt.Sprintf(format, params...), s.stateCurrent.x, s.stateCurrent.y)
+	d2DebugUtil.D2DebugPrintAt(s.image, fmt.Sprintf(format, params...), s.stateCurrent.x, s.stateCurrent.y)
 }
 
 func (s *ebitenSurface) DrawLine(x, y int, color color.Color) {

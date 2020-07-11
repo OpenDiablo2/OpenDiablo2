@@ -15,13 +15,13 @@ package d2astar
 // The key differences between this example and the Tile world:
 // 1) There is no grid.  Trucks have arbitrary coordinates.
 // 2) Edges are not implied by the grid positions.  Instead edges are explicitly
-//    modeled as Tubes.
+//    modelled as Tubes.
 //
 // The key similarities between this example and the Tile world:
 // 1) They both use Manhattan distance as their heuristic
 // 2) Both implement Pather
 
-// Goreland represents a world of trucks and tubes.
+//Goreland represents a world of trucks and tubes.
 type Goreland struct {
 	//	trucks map[int]*Truck		// not needed really
 }
