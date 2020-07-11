@@ -154,13 +154,23 @@ func TestClamp(t *testing.T) {
 }
 
 func TestAdd(t *testing.T) {
-	v := NewVector(1, 1)
-	add := NewVector(0.5, 0.5)
-	want := NewVector(1.5, 1.5)
+	v := NewVector(1, 2)
+	add := NewVector(0.5, 3)
+	want := NewVector(1.5, 5)
 	got := v.Clone()
 	got.Add(&add)
 
 	evaluateVector(fmt.Sprintf("add %s to %s", add, v), want, got, t)
+}
+
+func TestAddScalar(t *testing.T) {
+	v := NewVector(1, -1)
+	add := 0.5
+	want := NewVector(1.5, -0.5)
+	got := v.Clone()
+	got.AddScalar(add)
+
+	evaluateVector(fmt.Sprintf("add %.2f to %s", add, v), want, got, t)
 }
 
 func TestSubtract(t *testing.T) {
@@ -184,13 +194,23 @@ func TestMultiply(t *testing.T) {
 }
 
 func TestDivide(t *testing.T) {
-	v := NewVector(1, 1)
-	divide := NewVector(2, 2)
-	want := NewVector(0.5, 0.5)
+	v := NewVector(1, 8)
+	divide := NewVector(2, 4)
+	want := NewVector(0.5, 2)
 	got := v.Clone()
 	got.Divide(&divide)
 
 	evaluateVector(fmt.Sprintf("divide %s by %s", v, divide), want, got, t)
+}
+
+func TestDivideScalar(t *testing.T) {
+	v := NewVector(1, 2)
+	divide := 2.0
+	want := NewVector(0.5, 1.0)
+	got := v.Clone()
+	got.DivideScalar(divide)
+
+	evaluateVector(fmt.Sprintf("divide %s by %.2f", v, divide), want, got, t)
 }
 
 func TestScale(t *testing.T) {

@@ -20,6 +20,16 @@ func NewVector(x, y float64) Vector {
 	return Vector{x, y}
 }
 
+// X returns the x value of this vector.
+func (v *Vector) X() float64 {
+	return v.x
+}
+
+// Y returns the y value of this vector.
+func (v *Vector) Y() float64 {
+	return v.y
+}
+
 // Equals returns true if the float64 values of this vector are exactly equal to the given Vector.
 func (v *Vector) Equals(o Vector) bool {
 	return v.x == o.x && v.y == o.y
@@ -85,6 +95,14 @@ func (v *Vector) Add(o *Vector) *Vector {
 	return v
 }
 
+// AddScalar the given vector to this vector.
+func (v *Vector) AddScalar(s float64) *Vector {
+	v.x += s
+	v.y += s
+
+	return v
+}
+
 // Subtract the given vector from this vector.
 func (v *Vector) Subtract(o *Vector) *Vector {
 	v.x -= o.x
@@ -113,6 +131,14 @@ func (v *Vector) Scale(s float64) *Vector {
 func (v *Vector) Divide(o *Vector) *Vector {
 	v.x /= o.x
 	v.y /= o.y
+
+	return v
+}
+
+// DivideScalar divides this vector by the given float64 value.
+func (v *Vector) DivideScalar(s float64) *Vector {
+	v.x /= s
+	v.y /= s
 
 	return v
 }
