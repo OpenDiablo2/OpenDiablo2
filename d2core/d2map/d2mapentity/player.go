@@ -57,7 +57,7 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 
 	result := &Player{
 		Id:        id,
-		mapEntity: createMapEntity(x, y),
+		mapEntity: newMapEntity(x, y),
 		composite: composite,
 		Equipment: equipment,
 		Stats:     stats,
@@ -147,7 +147,7 @@ func (v *Player) Render(target d2interface.Surface) {
 	renderOffset := v.Position.RenderOffset()
 	target.PushTranslation(
 		int((renderOffset.X()-renderOffset.Y())*16),
-		int(((renderOffset.X() + renderOffset.Y()) * 8)),
+		int(((renderOffset.X()+renderOffset.Y())*8)-5),
 	)
 
 	defer target.Pop()
@@ -159,19 +159,19 @@ func (v *Player) Render(target d2interface.Surface) {
 
 // GetAnimationMode returns the current animation mode based on what the player is doing and where they are.
 func (v *Player) GetAnimationMode() d2enum.PlayerAnimationMode {
-	if v.IsRunning() && !v.IsAtTarget() {
+	if v.IsRunning() && !v.atTarget() {
 		return d2enum.PlayerAnimationModeRun
 	}
 
 	if v.IsInTown() {
-		if !v.IsAtTarget() {
+		if !v.atTarget() {
 			return d2enum.PlayerAnimationModeTownWalk
 		}
 
 		return d2enum.PlayerAnimationModeTownNeutral
 	}
 
-	if !v.IsAtTarget() {
+	if !v.atTarget() {
 		return d2enum.PlayerAnimationModeWalk
 	}
 

@@ -54,7 +54,7 @@ func (m *Missile) SetRadians(angle float64, done func()) {
 	x := m.Position.X() + (r * math.Cos(angle))
 	y := m.Position.Y() + (r * math.Sin(angle))
 
-	m.SetTarget(x, y, done)
+	m.setTarget(x, y, done)
 }
 
 // Advance is called once per frame and processes a

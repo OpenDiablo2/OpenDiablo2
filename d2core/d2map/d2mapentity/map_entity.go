@@ -20,8 +20,8 @@ type mapEntity struct {
 	directioner func(direction int)
 }
 
-// createMapEntity creates an instance of mapEntity
-func createMapEntity(x, y int) mapEntity {
+// newMapEntity creates an instance of mapEntity
+func newMapEntity(x, y int) mapEntity {
 	locX, locY := float64(x), float64(y)
 
 	return mapEntity{
@@ -60,14 +60,15 @@ func (m *mapEntity) GetSpeed() float64 {
 	return m.Speed
 }
 
-// IsAtTarget returns true if the distance between entity and target is almost zero.
-func (m *mapEntity) IsAtTarget() bool {
-	return m.Position.EqualsApprox(m.Target.Vector) && !m.HasPathFinding()
+// atTarget returns true if the distance between entity and target is almost zero.
+// TODO: !m.hasPath() should be called separately by the caller, not hidden in here.
+func (m *mapEntity) atTarget() bool {
+	return m.Position.EqualsApprox(m.Target.Vector) && !m.hasPath()
 }
 
 // Step moves the entity along it's path by one tick. If the path is complete it calls entity.done() then returns.
 func (m *mapEntity) Step(tickTime float64) {
-	if m.IsAtTarget() {
+	if m.atTarget() {
 		if m.done != nil {
 			m.done()
 			m.done = nil
@@ -84,9 +85,9 @@ func (m *mapEntity) Step(tickTime float64) {
 
 		// New position is at target
 		if m.Position.EqualsApprox(m.Target.Vector) {
-			if len(m.path) > 0 {
+			if m.hasPath() {
 				// Set next path node
-				m.SetTarget(m.path[0].(*d2common.PathTile).X*5, m.path[0].(*d2common.PathTile).Y*5, m.done)
+				m.setTarget(m.path[0].(*d2common.PathTile).X*5, m.path[0].(*d2common.PathTile).Y*5, m.done)
 
 				if len(m.path) > 1 {
 					m.path = m.path[1:]
@@ -149,13 +150,13 @@ func applyVelocity(position, velocity, target *d2vector.Vector) {
 	}
 }
 
-// HasPathFinding returns false if the length of the entity movement path is 0.
-func (m *mapEntity) HasPathFinding() bool {
+// hasPath returns false if the length of the entity movement path is 0.
+func (m *mapEntity) hasPath() bool {
 	return len(m.path) > 0
 }
 
-// SetTarget sets target coordinates and changes animation based on proximity and direction.
-func (m *mapEntity) SetTarget(tx, ty float64, done func()) {
+// setTarget sets target coordinates and changes animation based on proximity and direction.
+func (m *mapEntity) setTarget(tx, ty float64, done func()) {
 	m.Target.Set(tx, ty)
 	m.done = done
 

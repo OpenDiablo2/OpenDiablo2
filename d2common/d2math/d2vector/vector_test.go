@@ -507,3 +507,17 @@ func TestVectorZero(t *testing.T) {
 
 	evaluateVector("create vector with X and Y values of 0", want, got, t)
 }
+
+// Apparently package level variables prevent compiler optimisation from eliminating benchmarks.
+var xr, yr int
+
+func BenchmarkVector_CompareApprox(b *testing.B) {
+	var x, y int
+
+	for n := 0; n < b.N; n++ {
+		v := NewVector(1, 1)
+		x, y = v.CompareApprox(NewVector(1.5, 1.5))
+	}
+
+	xr, yr = x, y
+}
