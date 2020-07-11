@@ -1,40 +1,66 @@
 package d2dc6
 
 import (
-	"encoding/binary"
-
-	"github.com/go-restruct/restruct"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // DC6 represents a DC6 file.
 type DC6 struct {
-	// Header
-	Version            int32  `struct:"int32"`
-	Flags              uint32 `struct:"uint32"`
-	Encoding           uint32 `struct:"uint32"`
-	Termination        []byte `struct:"[4]byte"`
-	Directions         uint32 `struct:"uint32"`
-	FramesPerDirection uint32 `struct:"uint32"`
-
-	FramePointers []uint32    `struct:"[]uint32,size=Directions*FramesPerDirection"`
-	Frames        []*DC6Frame `struct-size:"Directions*FramesPerDirection"`
+	Version            int32
+	Flags              uint32
+	Encoding           uint32
+	Termination        []byte // 4 bytes
+	Directions         uint32
+	FramesPerDirection uint32
+	FramePointers      []uint32    // size is Directions*FramesPerDirection
+	Frames             []*DC6Frame // size is Directions*FramesPerDirection
 }
 
 // Load uses restruct to read the binary dc6 data into structs then parses image data from the frame data.
 func Load(data []byte) (*DC6, error) {
-	result := &DC6{}
+	const (
+		terminationSize = 4
+		terminatorSize  = 3
+	)
 
-	restruct.EnableExprBeta()
-	err := restruct.Unpack(data, binary.LittleEndian, &result)
+	r := d2common.CreateStreamReader(data)
 
-	if err != nil {
-		return nil, err
+	var dc DC6
+	dc.Version = r.GetInt32()
+	dc.Flags = r.GetUInt32()
+	dc.Encoding = r.GetUInt32()
+	dc.Termination = r.ReadBytes(terminationSize)
+	dc.Directions = r.GetUInt32()
+	dc.FramesPerDirection = r.GetUInt32()
+
+	frameCount := int(dc.Directions * dc.FramesPerDirection)
+
+	dc.FramePointers = make([]uint32, frameCount)
+	for i := 0; i < frameCount; i++ {
+		dc.FramePointers[i] = r.GetUInt32()
 	}
 
-	return result, err
+	dc.Frames = make([]*DC6Frame, frameCount)
+	for i := 0; i < frameCount; i++ {
+		frame := &DC6Frame{
+			Flipped:   r.GetUInt32(),
+			Width:     r.GetUInt32(),
+			Height:    r.GetUInt32(),
+			OffsetX:   r.GetInt32(),
+			OffsetY:   r.GetInt32(),
+			Unknown:   r.GetUInt32(),
+			NextBlock: r.GetUInt32(),
+			Length:    r.GetUInt32(),
+		}
+		frame.FrameData = r.ReadBytes(int(frame.Length))
+		frame.Terminator = r.ReadBytes(terminatorSize)
+		dc.Frames[i] = frame
+	}
+
+	return &dc, nil
 }
 
-// Decodes the given frame to an indexed color texture
+// DecodeFrame decodes the given frame to an indexed color texture
 func (d *DC6) DecodeFrame(frameIndex int) []byte {
 	frame := d.Frames[frameIndex]
 
