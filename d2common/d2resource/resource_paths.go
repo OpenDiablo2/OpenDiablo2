@@ -196,6 +196,7 @@ const (
 
 	// --- Inventory Data ---
 
+	Inventory     = "/data/global/excel/inventory.txt"
 	Weapons     = "/data/global/excel/weapons.txt"
 	Armor       = "/data/global/excel/armor.txt"
 	Misc        = "/data/global/excel/misc.txt"
