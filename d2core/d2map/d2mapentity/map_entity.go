@@ -1,7 +1,10 @@
 package d2mapentity
 
 import (
+	"fmt"
 	"math"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2astar"
@@ -10,6 +13,9 @@ import (
 // mapEntity represents an entity on the map that can be animated
 // TODO: Has a coordinate (issue #456)
 type mapEntity struct {
+	d2vector.Position
+	Target d2vector.Position
+
 	LocationX          float64
 	LocationY          float64
 	TileX, TileY       int     // Coordinates of the tile the unit is within
@@ -17,9 +23,13 @@ type mapEntity struct {
 	offsetX, offsetY   int
 	TargetX            float64
 	TargetY            float64
-	Speed              float64
-	path               []d2astar.Pather
-	drawLayer          int
+
+	Speed     float64
+	path      []d2astar.Pather
+	drawLayer int
+
+	// TODO: delete this
+	debugLevel int
 
 	done        func()
 	directioner func(direction int)
@@ -42,6 +52,11 @@ func createMapEntity(x, y int) mapEntity {
 		drawLayer: 0,
 		path:      []d2astar.Pather{},
 	}
+}
+
+func (m mapEntity) String() string {
+	return fmt.Sprintf("LocationXY: %.2f, %.2f\nTileXY: %d, %d\nsubcellXY: %.2f, %.2f\nTargetXY: %.2f, %.2f",
+		m.LocationX, m.LocationY, m.TileX, m.TileY, m.subcellX, m.subcellY, m.TargetX, m.TargetY)
 }
 
 // GetLayer returns the draw layer for this entity.
@@ -74,17 +89,11 @@ func (m *mapEntity) GetSpeed() float64 {
 func (m *mapEntity) getStepLength(tickTime float64) (float64, float64) {
 	length := tickTime * m.Speed
 
-	angle := 359 - d2common.GetAngleBetween(
-		m.LocationX,
-		m.LocationY,
-		m.TargetX,
-		m.TargetY,
-	)
-	radians := (math.Pi / 180.0) * float64(angle)
-	oneStepX := length * math.Cos(radians)
-	oneStepY := length * math.Sin(radians)
+	vector := m.Target.SubWorld()
+	vector.Subtract(m.SubWorld())
+	vector.SetLength(length)
 
-	return oneStepX, oneStepY
+	return vector.X(), vector.Y()
 }
 
 // IsAtTarget returns true if the entity is within a 0.0002 square of it's target and has a path.
@@ -94,6 +103,7 @@ func (m *mapEntity) IsAtTarget() bool {
 
 // Step moves the entity along it's path by one tick. If the path is complete it calls entity.done() then returns.
 func (m *mapEntity) Step(tickTime float64) {
+	// no movement needed
 	if m.IsAtTarget() {
 		if m.done != nil {
 			m.done()
@@ -103,9 +113,12 @@ func (m *mapEntity) Step(tickTime float64) {
 		return
 	}
 
+	// per tick velocity
 	stepX, stepY := m.getStepLength(tickTime)
 
+	// endless loop - why?
 	for {
+		// zero small values
 		if d2common.AlmostEqual(m.LocationX-m.TargetX, 0, 0.0001) {
 			stepX = 0
 		}
@@ -114,23 +127,34 @@ func (m *mapEntity) Step(tickTime float64) {
 			stepY = 0
 		}
 
+		// add velocity to current position, or return target if new position exceeds it
 		m.LocationX, stepX = d2common.AdjustWithRemainder(m.LocationX, stepX, m.TargetX)
 		m.LocationY, stepY = d2common.AdjustWithRemainder(m.LocationY, stepY, m.TargetY)
 
+		// TODO: This should be the authority
+		m.SetSubWorld(m.LocationX, m.LocationY) // //
+
+		// set the other value types
 		m.subcellX = 1 + math.Mod(m.LocationX, 5)
 		m.subcellY = 1 + math.Mod(m.LocationY, 5)
 		m.TileX = int(m.LocationX / 5)
 		m.TileY = int(m.LocationY / 5)
 
+		// position is close to target
 		if d2common.AlmostEqual(m.LocationX, m.TargetX, 0.01) && d2common.AlmostEqual(m.LocationY, m.TargetY, 0.01) {
+			// entity has a path
 			if len(m.path) > 0 {
+				// set target as next node in path
 				m.SetTarget(m.path[0].(*d2common.PathTile).X*5, m.path[0].(*d2common.PathTile).Y*5, m.done)
 
+				// remove path node or set to empty slice if path is empty
 				if len(m.path) > 1 {
 					m.path = m.path[1:]
 				} else {
 					m.path = []d2astar.Pather{}
 				}
+				// entity had no path
+				// set location to target
 			} else {
 				m.LocationX = m.TargetX
 				m.LocationY = m.TargetY
@@ -138,6 +162,9 @@ func (m *mapEntity) Step(tickTime float64) {
 				m.subcellY = 1 + math.Mod(m.LocationY, 5)
 				m.TileX = int(m.LocationX / 5)
 				m.TileY = int(m.LocationY / 5)
+
+				// TODO: This should be the authority
+				m.SetSubWorld(m.LocationX, m.LocationY) // //
 			}
 		}
 
@@ -156,6 +183,9 @@ func (m *mapEntity) HasPathFinding() bool {
 func (m *mapEntity) SetTarget(tx, ty float64, done func()) {
 	m.TargetX, m.TargetY = tx, ty
 	m.done = done
+
+	// TODO: This should be the authority
+	m.Target.SetSubWorld(tx, ty)
 
 	if m.directioner != nil {
 		angle := 359 - d2common.GetAngleBetween(
