@@ -48,6 +48,7 @@ type App struct {
 	gitBranch         string
 	gitCommit         string
 	terminal          d2interface.Terminal
+	scriptEngine      *d2script.ScriptEngine
 	audio             d2interface.AudioProvider
 	renderer          d2interface.Renderer
 	tAllocSamples     *ring.Ring
@@ -69,12 +70,14 @@ const (
 // Create creates a new instance of the application
 func Create(gitBranch, gitCommit string,
 	terminal d2interface.Terminal,
+	scriptEngine *d2script.ScriptEngine,
 	audio d2interface.AudioProvider,
 	renderer d2interface.Renderer) *App {
 	result := &App{
 		gitBranch:     gitBranch,
 		gitCommit:     gitCommit,
 		terminal:      terminal,
+		scriptEngine:  scriptEngine,
 		audio:         audio,
 		renderer:      renderer,
 		tAllocSamples: createZeroedRing(nSamplesTAlloc),
@@ -105,7 +108,7 @@ func (p *App) Run() error {
 		return err
 	}
 
-	d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(p.renderer, p.audio, p.terminal))
+	d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(p.renderer, p.audio, p.terminal, p.scriptEngine))
 
 	if p.gitBranch == "" {
 		p.gitBranch = "Local Build"
@@ -142,6 +145,7 @@ func (p *App) initialize() error {
 		{"timescale", "set scalar for elapsed time", p.setTimeScale},
 		{"quit", "exits the game", p.quitGame},
 		{"screen-gui", "enters the gui playground screen", p.enterGuiPlayground},
+		{"js", "eval JS scripts", p.evalJS},
 	}
 
 	for idx := range terminalActions {
@@ -173,8 +177,6 @@ func (p *App) initialize() error {
 	d2inventory.LoadHeroObjects()
 
 	d2ui.Initialize(p.audio)
-
-	d2script.CreateScriptEngine()
 
 	return nil
 }
@@ -468,6 +470,16 @@ func (p *App) dumpHeap() {
 	if err := fileOut.Close(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func (p *App) evalJS(code string) {
+	val, err := p.scriptEngine.Eval(code)
+	if err != nil {
+		p.terminal.OutputErrorf("%s", err)
+		return
+	}
+
+	p.terminal.OutputInfof("%s", val)
 }
 
 func (p *App) toggleFullScreen() {

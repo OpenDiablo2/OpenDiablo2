@@ -2,13 +2,13 @@ package d2gamescreen
 
 import (
 	"fmt"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
 
 // TODO: fix pentagram
@@ -71,6 +71,7 @@ type EscapeMenu struct {
 	renderer      d2interface.Renderer
 	audioProvider d2interface.AudioProvider
 	terminal      d2interface.Terminal
+	scriptEngine  *d2script.ScriptEngine
 }
 
 type layout struct {
@@ -124,11 +125,13 @@ type actionableElement interface {
 }
 
 // NewEscapeMenu creates a new escape menu
-func NewEscapeMenu(renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, term d2interface.Terminal) *EscapeMenu {
+func NewEscapeMenu(renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, term d2interface.Terminal,
+	scriptEngine *d2script.ScriptEngine) *EscapeMenu {
 	m := &EscapeMenu{
 		audioProvider: audioProvider,
 		terminal:      term,
 		renderer:      renderer,
+		scriptEngine:  scriptEngine,
 	}
 
 	m.layouts = []*layout{
@@ -368,7 +371,7 @@ func (m *EscapeMenu) showLayout(id layoutID) {
 	}
 
 	if id == saveLayoutID {
-		mainMenu := CreateMainMenu(m.renderer, m.audioProvider, m.terminal)
+		mainMenu := CreateMainMenu(m.renderer, m.audioProvider, m.terminal, m.scriptEngine)
 		mainMenu.setScreenMode(screenModeMainMenu)
 		d2screen.SetNextScreen(mainMenu)
 

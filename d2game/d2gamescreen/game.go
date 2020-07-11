@@ -1,23 +1,21 @@
 package d2gamescreen
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
-
-	"fmt"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
 
 const hideZoneTextAfterSeconds = 2.0
@@ -39,7 +37,7 @@ type Game struct {
 
 // CreateGame creates the Gameplay screen and returns a pointer to it
 func CreateGame(renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, gameClient *d2client.GameClient,
-	term d2interface.Terminal) *Game {
+	term d2interface.Terminal, scriptEngine *d2script.ScriptEngine) *Game {
 	result := &Game{
 		gameClient:           gameClient,
 		gameControls:         nil,
@@ -47,7 +45,7 @@ func CreateGame(renderer d2interface.Renderer, audioProvider d2interface.AudioPr
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
 		mapRenderer:          d2maprenderer.CreateMapRenderer(renderer, gameClient.MapEngine, term),
-		escapeMenu:           NewEscapeMenu(renderer, audioProvider, term),
+		escapeMenu:           NewEscapeMenu(renderer, audioProvider, term, scriptEngine),
 		audioProvider:        audioProvider,
 		renderer:             renderer,
 		terminal:             term,

@@ -1,6 +1,7 @@
 package d2script
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
@@ -11,24 +12,34 @@ import (
 
 // ScriptEngine allows running JavaScript scripts
 type ScriptEngine struct {
-	vm *otto.Otto
+	vm            *otto.Otto
+	isEvalAllowed bool
 }
 
 // CreateScriptEngine creates the script engine and returns a pointer to it.
 func CreateScriptEngine() *ScriptEngine {
-	result := &ScriptEngine{
-		vm: otto.New(),
-	}
-
-	err := result.vm.Set("debugPrint", func(call otto.FunctionCall) otto.Value {
+	vm := otto.New()
+	err := vm.Set("debugPrint", func(call otto.FunctionCall) otto.Value {
 		fmt.Printf("Script: %s\n", call.Argument(0).String())
 		return otto.Value{}
 	})
 	if err != nil {
 		fmt.Printf("could not bind the 'debugPrint' to the given function in script engine")
 	}
+	return &ScriptEngine{
+		vm:            vm,
+		isEvalAllowed: false,
+	}
+}
 
-	return result
+// AllowEval allows the evaluation of JS code.
+func (s *ScriptEngine) AllowEval() {
+	s.isEvalAllowed = true
+}
+
+// AllowEval disallows the evaluation of JS code.
+func (s *ScriptEngine) DisallowEval() {
+	s.isEvalAllowed = false
 }
 
 // ToValue converts the given interface{} value to a otto.Value
@@ -59,4 +70,17 @@ func (s *ScriptEngine) RunScript(fileName string) (*otto.Value, error) {
 	}
 
 	return &val, nil
+}
+
+// Eval JS code.
+func (s *ScriptEngine) Eval(code string) (string, error) {
+	if !s.isEvalAllowed {
+		return "", errors.New("disabled")
+	}
+
+	val, err := s.vm.Eval(code)
+	if err != nil {
+		return "", err
+	}
+	return val.String(), nil
 }

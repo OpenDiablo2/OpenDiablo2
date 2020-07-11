@@ -2,17 +2,16 @@ package d2gamescreen
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"image/color"
 	"math"
 	"os"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
@@ -20,6 +19,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
+	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
 
 // CharacterSelect represents the character select screen
@@ -48,6 +48,7 @@ type CharacterSelect struct {
 	connectionHost         string
 	audioProvider          d2interface.AudioProvider
 	terminal               d2interface.Terminal
+	scriptEngine           *d2script.ScriptEngine
 	renderer               d2interface.Renderer
 }
 
@@ -56,7 +57,7 @@ func CreateCharacterSelect(
 	renderer d2interface.Renderer,
 	audioProvider d2interface.AudioProvider,
 	connectionType d2clientconnectiontype.ClientConnectionType,
-	connectionHost string, term d2interface.Terminal,
+	connectionHost string, term d2interface.Terminal, scriptEngine *d2script.ScriptEngine,
 ) *CharacterSelect {
 	return &CharacterSelect{
 		selectedCharacter: -1,
@@ -65,6 +66,7 @@ func CreateCharacterSelect(
 		connectionHost:    connectionHost,
 		audioProvider:     audioProvider,
 		terminal:          term,
+		scriptEngine:      scriptEngine,
 	}
 }
 
@@ -211,11 +213,12 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 }
 
 func (v *CharacterSelect) onNewCharButtonClicked() {
-	d2screen.SetNextScreen(CreateSelectHeroClass(v.renderer, v.audioProvider, v.connectionType, v.connectionHost, v.terminal))
+	d2screen.SetNextScreen(CreateSelectHeroClass(v.renderer, v.audioProvider, v.connectionType, v.connectionHost,
+		v.terminal, v.scriptEngine))
 }
 
 func (v *CharacterSelect) onExitButtonClicked() {
-	mainMenu := CreateMainMenu(v.renderer, v.audioProvider, v.terminal)
+	mainMenu := CreateMainMenu(v.renderer, v.audioProvider, v.terminal, v.scriptEngine)
 	mainMenu.setScreenMode(screenModeMainMenu)
 	d2screen.SetNextScreen(mainMenu)
 }
@@ -361,7 +364,7 @@ func (v *CharacterSelect) refreshGameStates() {
 }
 
 func (v *CharacterSelect) onOkButtonClicked() {
-	gameClient, _ := d2client.Create(v.connectionType)
+	gameClient, _ := d2client.Create(v.connectionType, v.scriptEngine)
 
 	host := ""
 	if v.connectionType == d2clientconnectiontype.LANClient {
@@ -373,5 +376,5 @@ func (v *CharacterSelect) onOkButtonClicked() {
 		fmt.Printf("can not connect to the host: %s", host)
 	}
 
-	d2screen.SetNextScreen(CreateGame(v.renderer, v.audioProvider, gameClient, v.terminal))
+	d2screen.SetNextScreen(CreateGame(v.renderer, v.audioProvider, gameClient, v.terminal, v.scriptEngine))
 }
