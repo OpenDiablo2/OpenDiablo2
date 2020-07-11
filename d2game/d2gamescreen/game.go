@@ -144,7 +144,8 @@ func (v *Game) Advance(tickTime float64) error {
 
 	// Update the camera to focus on the player
 	if v.localPlayer != nil && !v.gameControls.FreeCam {
-		rx, ry := v.mapRenderer.WorldToOrtho(v.localPlayer.LocationX/5, v.localPlayer.LocationY/5)
+		worldPosition := v.localPlayer.Position.World()
+		rx, ry := v.mapRenderer.WorldToOrtho(worldPosition.X(), worldPosition.Y())
 		v.mapRenderer.MoveCameraTo(rx, ry)
 	}
 
@@ -171,10 +172,9 @@ func (v *Game) bindGameControls() {
 
 // OnPlayerMove sends the player move action to the server
 func (v *Game) OnPlayerMove(x, y float64) {
-	heroPosX := v.localPlayer.LocationX / 5.0
-	heroPosY := v.localPlayer.LocationY / 5.0
+	worldPosition := v.localPlayer.Position.World()
 
-	err := v.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(v.gameClient.PlayerId, heroPosX, heroPosY, x, y))
+	err := v.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(v.gameClient.PlayerId, worldPosition.X(), worldPosition.Y(), x, y))
 	if err != nil {
 		fmt.Printf("failed to send MovePlayer packet to the server, playerId: %s, x: %g, x: %g\n", v.gameClient.PlayerId, x, y)
 	}

@@ -51,8 +51,9 @@ func CreateMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error)
 func (m *Missile) SetRadians(angle float64, done func()) {
 	r := float64(m.record.Range)
 
-	x := m.LocationX + (r * math.Cos(angle))
-	y := m.LocationY + (r * math.Sin(angle))
+	subTilePosition := m.Position.SubWorld()
+	x := subTilePosition.X() + (r * math.Cos(angle))
+	y := subTilePosition.Y() + (r * math.Sin(angle))
 
 	m.SetTarget(x, y, done)
 }
