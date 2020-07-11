@@ -27,10 +27,12 @@ func CreateAnimatedEntity(x, y int, animation d2interface.Animation) *AnimatedEn
 
 // Render draws this animated entity onto the target
 func (ae *AnimatedEntity) Render(target d2interface.Surface) {
+	subCellPosition := ae.Position.SubCell()
 	target.PushTranslation(
-		ae.offsetX+int((ae.subcellX-ae.subcellY)*16),
-		ae.offsetY+int(((ae.subcellX+ae.subcellY)*8)-5),
+		int((subCellPosition.X()-subCellPosition.Y())*16),
+		int(((subCellPosition.X()+subCellPosition.Y())*8)-5),
 	)
+
 	defer target.Pop()
 	ae.animation.Render(target)
 }

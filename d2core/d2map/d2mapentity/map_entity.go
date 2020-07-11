@@ -1,9 +1,6 @@
 package d2mapentity
 
 import (
-	"fmt"
-	"math"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
@@ -18,10 +15,10 @@ type mapEntity struct {
 	Position d2vector.Position
 	Target   d2vector.Position
 
-	subcellX, subcellY float64 // Subcell coordinates within the current tile
-	offsetX, offsetY   int
-	TargetX            float64
-	TargetY            float64
+	//subcellX, subcellY float64 // Subcell coordinates within the current tile
+	offsetX, offsetY int
+	TargetX          float64
+	TargetY          float64
 
 	Speed     float64
 	path      []d2astar.Pather
@@ -43,17 +40,10 @@ func createMapEntity(x, y int) mapEntity {
 		Target:    d2vector.EntityPosition(locX, locY),
 		TargetX:   locX,
 		TargetY:   locY,
-		subcellX:  1 + math.Mod(locX, 5),
-		subcellY:  1 + math.Mod(locY, 5),
 		Speed:     6,
 		drawLayer: 0,
 		path:      []d2astar.Pather{},
 	}
-}
-
-func (m mapEntity) String() string {
-	return fmt.Sprintf("subcellXY: %.2f, %.2f\nTargetXY: %.2f, %.2f", // TileXY: %d, %d
-		m.subcellX, m.subcellY, m.TargetX, m.TargetY)
 }
 
 // GetLayer returns the draw layer for this entity.
@@ -139,10 +129,6 @@ func (m *mapEntity) Step(tickTime float64) {
 		step.Set(newStepX, newStepY)
 
 		position = m.Position.WorldSubTile()
-		// set the other value types
-		m.subcellX = 1 + math.Mod(position.X(), 5)
-		m.subcellY = 1 + math.Mod(position.Y(), 5)
-
 		// position is close to target
 		if d2common.AlmostEqual(position.X(), m.TargetX, 0.01) && d2common.AlmostEqual(position.Y(), m.TargetY, 0.01) {
 			// entity has a path
@@ -161,8 +147,6 @@ func (m *mapEntity) Step(tickTime float64) {
 			} else {
 				m.Position.SetSubWorld(m.TargetX, m.TargetY)
 				position = m.Position.WorldSubTile()
-				m.subcellX = 1 + math.Mod(position.X(), 5)
-				m.subcellY = 1 + math.Mod(position.Y(), 5)
 			}
 		}
 

@@ -144,10 +144,12 @@ func (v *Player) Advance(tickTime float64) {
 
 // Render renders the animated composite for this entity.
 func (v *Player) Render(target d2interface.Surface) {
+	subCellPosition := v.Position.SubCell()
 	target.PushTranslation(
-		v.offsetX+int((v.subcellX-v.subcellY)*16),
-		v.offsetY+int(((v.subcellX+v.subcellY)*8)-5),
+		int((subCellPosition.X()-subCellPosition.Y())*16),
+		int(((subCellPosition.X()+subCellPosition.Y())*8)-5),
 	)
+
 	defer target.Pop()
 	v.composite.Render(target)
 	// v.nameLabel.X = v.offsetX

@@ -104,5 +104,5 @@ func (p *Position) SubCell() *Vector {
 }
 
 func (p Position) String() string {
-	return fmt.Sprintf("World: %s\nTile: %s\nSubWorld: %s\nSubCell: %s", p.World(), p.Tile(), p.WorldSubTile(), p.SubCell())
+	return fmt.Sprintf("World: %s\nTile: %s\nSubWorld: %s\nSubCell: %s\nSubTileOffset: %s", p.World(), p.Tile(), p.WorldSubTile(), p.SubCell(), p.SubTileOffset())
 }
