@@ -21,7 +21,7 @@ type PropertyRecord struct {
 	Stats [7]*stat
 }
 
-// Properties stores all of the PropertiesRecords
+// Properties stores all of the PropertyRecords
 var Properties map[string]*PropertyRecord //nolint:gochecknoglobals // Currently global by design, 
 // only written once
 
