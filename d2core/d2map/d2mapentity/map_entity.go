@@ -32,8 +32,8 @@ func createMapEntity(x, y int) mapEntity {
 	locX, locY := float64(x), float64(y)
 
 	return mapEntity{
-		Position:  d2vector.EntityPosition(locX, locY),
-		Target:    d2vector.EntityPosition(locX, locY),
+		Position:  d2vector.NewPosition(locX, locY),
+		Target:    d2vector.NewPosition(locX, locY),
 		Speed:     6,
 		drawLayer: 0,
 		path:      []d2astar.Pather{},
@@ -67,12 +67,12 @@ func (m *mapEntity) GetSpeed() float64 {
 	return m.Speed
 }
 
-func (m *mapEntity) getStepLength(tickTime float64) (v *d2vector.Vector) {
+func (m *mapEntity) getStepLength(tickTime float64) d2vector.Vector {
 	length := tickTime * m.Speed
-	v = m.Target.WorldSubTile()
-	v.Subtract(m.Position.WorldSubTile())
+	v := m.Target.Vector.Clone()
+	v.Subtract(&m.Position.Vector)
 	v.SetLength(length)
-	return
+	return v
 }
 
 // IsAtTarget returns true if the entity is within a 0.0002 square of it's target and has a path.
@@ -100,8 +100,8 @@ func (m *mapEntity) Step(tickTime float64) {
 	for {
 		stepX, stepY := step.X(), step.Y()
 
-		position := m.Position.WorldSubTile()
-		targetPosition := m.Target.WorldSubTile()
+		position := m.Position.Vector
+		targetPosition := m.Target.Vector
 
 		// zero small values
 		if d2math.CompareFloat64Fuzzy(position.X(), targetPosition.X()) == 0 {
@@ -119,10 +119,10 @@ func (m *mapEntity) Step(tickTime float64) {
 		newPositionX, newStepX := d2common.AdjustWithRemainder(position.X(), step.X(), targetPosition.X())
 		newPositionY, newStepY := d2common.AdjustWithRemainder(position.Y(), step.Y(), targetPosition.Y())
 
-		m.Position.SetSubWorld(newPositionX, newPositionY)
+		m.Position.Set(newPositionX, newPositionY)
 		step.Set(newStepX, newStepY)
 
-		position = m.Position.WorldSubTile()
+		position = m.Position.Vector
 		// position is close to target
 		if d2common.AlmostEqual(position.X(), targetPosition.X(), 0.01) && d2common.AlmostEqual(position.Y(), targetPosition.Y(), 0.01) {
 			// entity has a path
@@ -140,7 +140,7 @@ func (m *mapEntity) Step(tickTime float64) {
 				// set location to target
 			} else {
 				m.Position.Copy(&m.Target.Vector)
-				position = m.Position.WorldSubTile()
+				position = m.Position.Vector
 			}
 		}
 
@@ -157,7 +157,7 @@ func (m *mapEntity) HasPathFinding() bool {
 
 // SetTarget sets target coordinates and changes animation based on proximity and direction.
 func (m *mapEntity) SetTarget(tx, ty float64, done func()) {
-	m.Target.SetSubWorld(tx, ty)
+	m.Target.Set(tx, ty)
 	m.done = done
 
 	if m.directioner != nil {
@@ -167,13 +167,13 @@ func (m *mapEntity) SetTarget(tx, ty float64, done func()) {
 	}
 }
 
-// GetPosition returns the entity's current tile position.
+// GetPosition returns the entity's current tile position, always a whole number.
 func (m *mapEntity) GetPosition() (float64, float64) {
 	t := m.Position.Tile()
 	return t.X(), t.Y()
 }
 
-// GetPositionF returns the entity's current sub tile position.
+// GetPositionF returns the entity's current tile position where 0.2 is one sub tile.
 func (m *mapEntity) GetPositionF() (float64, float64) {
 	w := m.Position.World()
 	return w.X(), w.Y()

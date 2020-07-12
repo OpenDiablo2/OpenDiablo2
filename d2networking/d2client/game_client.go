@@ -136,10 +136,9 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		player.SetCasting()
 		player.ClearPath()
 		// currently hardcoded to missile skill
-		subTilePosition := player.Position.WorldSubTile()
 		missile, err := d2mapentity.CreateMissile(
-			int(subTilePosition.X()),
-			int(subTilePosition.Y()),
+			int(player.Position.X()),
+			int(player.Position.Y()),
 			d2datadict.Missiles[playerCast.SkillID],
 		)
 		if err != nil {
@@ -147,8 +146,8 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		}
 
 		rads := d2common.GetRadiansBetween(
-			subTilePosition.X(),
-			subTilePosition.Y(),
+			player.Position.X(),
+			player.Position.Y(),
 			playerCast.TargetX*5,
 			playerCast.TargetY*5,
 		)

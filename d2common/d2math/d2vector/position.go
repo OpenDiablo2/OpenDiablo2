@@ -8,17 +8,17 @@ import (
 )
 
 const (
-	subTilesPerTile          float64 = 5
-	entityDirectionCount     float64 = 64 // The diablo equivalent of 360 degrees when dealing with entity rotation.
+	subTilesPerTile          float64 = 5  // The number of sub tiles that make up one map tile.
+	entityDirectionCount     float64 = 64 // The Diablo equivalent of 360 degrees when dealing with entity rotation.
 	entityDirectionIncrement float64 = 8  // One 8th of 64. There are 8 possible facing directions for moving entities.
 )
 
-// Position is a vector in world space. The stored value is  the one returned by Position.World()
+// Position is a vector in world space. The stored value is the sub tile position.
 type Position struct {
 	Vector
 }
 
-// NewPosition creates a new Position at the given float64 world position.
+// NewPosition returns a Position struct with a vector at the given x and y sub tile coordinates.
 func NewPosition(x, y float64) Position {
 	p := Position{NewVector(x, y)}
 	p.checkValues()
@@ -26,23 +26,9 @@ func NewPosition(x, y float64) Position {
 	return p
 }
 
-// EntityPosition returns a Position struct based on the given entity spawn point.
-// The value given should be the one set in d2mapstamp.Stamp.Entities:
-// (tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y
-func EntityPosition(x, y float64) Position {
-	return NewPosition(x/5, y/5)
-}
-
-// Set sets this position to the given x and y world position.
+// Set sets this position to the given x and y sub tile coordinates.
 func (p *Position) Set(x, y float64) {
 	p.x, p.y = x, y
-	p.checkValues()
-}
-
-// TODO: test this
-// SetSubWorld sets this position to the given x and y sub tile coordinates.
-func (p *Position) SetSubWorld(x, y float64) {
-	p.x, p.y = x/5, y/5
 	p.checkValues()
 }
 
@@ -56,48 +42,30 @@ func (p *Position) checkValues() {
 	}
 }
 
-// World is the position, where 1 = one map tile. This is a pointer to the Position value and must be cloned with
-// Clone() if the position is not to be changed.
+// World is the exact position where 1 = one map tile and 0.2 = one sub tile.
 func (p *Position) World() *Vector {
-	return &p.Vector
+	c := p.Clone()
+	return c.DivideScalar(subTilesPerTile)
 }
 
-// Tile is the tile position, always a whole number. (tileX, tileY)
+// Tile is the position of the current map tile. It is the floor of World(), always a whole number.
 func (p *Position) Tile() *Vector {
-	c := p.World().Clone()
-	return c.Floor()
+	return p.World().Floor()
 }
 
-// TileOffset is the offset from the tile position, always < 1.
-// unused
-func (p *Position) TileOffset() *Vector {
-	c := p.World().Clone()
-	return c.Subtract(p.Tile())
-}
-
-// WorldSubTile is the position, where 5 = one map tile. (locationX, locationY)
-func (p *Position) WorldSubTile() *Vector {
-	c := p.World().Clone()
-	return c.Scale(subTilesPerTile)
-}
-
-// TileSubTile is the tile position in sub tiles, always a multiple of 5.
-// unused
-func (p *Position) TileSubTile() *Vector {
-	return p.Tile().Scale(subTilesPerTile)
-}
-
-// SubTileOffset is the offset from the sub tile position in sub tiles, always < 1.
-// unused
-func (p *Position) SubTileOffset() *Vector {
-	return p.WorldSubTile().Subtract(p.TileSubTile())
-}
-
-// RenderOffset is SubTileOffset() + 1. This places the vector at the bottom vertex of an isometric diamond visually
-// representing one sub tile. Sub tile indices increase to the lower right diagonal ('down') and to the lower left
-// diagonal ('left') of the isometric grid. This renders the target one index above which visually is one tile below.
+// RenderOffset is the offset in sub tiles from the curren tile, + 1. This places the vector at the bottom vertex of an
+// isometric diamond visually representing one sub tile. Sub tile indices increase to the lower right diagonal ('down')
+// and to the lower left diagonal ('left') of the isometric grid. This renders the target one index above which visually
+// is one tile below.
 func (p *Position) RenderOffset() *Vector {
-	return p.SubTileOffset().AddScalar(1)
+	return p.subTileOffset().AddScalar(1)
+}
+
+// SubTileOffset is the offset from the current map tile in sub tiles.
+func (p *Position) subTileOffset() *Vector {
+	t := p.Tile().Scale(subTilesPerTile)
+	c := p.Clone()
+	return c.Subtract(t)
 }
 
 // DirectionTo returns the entity direction from this vector to the given vector.
