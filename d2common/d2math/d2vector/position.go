@@ -99,11 +99,10 @@ func (p *Position) Offset() *Vector {
 	return &v
 }
 
-// TODO: rename this to RenderOffset
-// RenderOffset is SubTileOffset() + 1. This places the vector in at the bottom vertex of this sub tile, which is a
-// diamond in the isometric space.
-// SubTile indices increase to the lower right diagonal ('down') and to the lower left diagonal ('left').
-func (p *Position) SubCell() *Vector {
+// RenderOffset is SubTileOffset() + 1. This places the vector at the bottom vertex of an isometric diamond visually
+// representing one sub tile. Sub tile indices increase to the lower right diagonal ('down') and to the lower left
+// diagonal ('left') of the isometric grid. This renders the target one index above which visually is one tile below.
+func (p *Position) RenderOffset() *Vector {
 	return p.SubTileOffset().AddScalar(1)
 }
 
@@ -130,8 +129,4 @@ func (v *Vector) DirectionTo(target Vector) int {
 	}
 
 	return newDirection
-}
-
-func (p Position) String() string {
-	return fmt.Sprintf("World: %s\nTile: %s\nSubWorld: %s\nSubCell: %s\nSubTileOffset: %s", p.World(), p.Tile(), p.WorldSubTile(), p.SubCell(), p.SubTileOffset())
 }

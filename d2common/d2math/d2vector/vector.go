@@ -51,7 +51,6 @@ func (v *Vector) CompareApprox(o Vector) (x, y int) {
 		d2math.CompareFloat64Fuzzy(v.y, o.y)
 }
 
-// TODO: untested method
 // IsZero returns true if this vector's values are both exactly zero.
 func (v *Vector) IsZero() bool {
 	return v.x == 0 && v.y == 0

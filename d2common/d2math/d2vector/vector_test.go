@@ -77,7 +77,7 @@ func TestEqualsF(t *testing.T) {
 	}
 }
 
-func TestCompareF(t *testing.T) {
+func TestCompareApprox(t *testing.T) {
 	subEpsilon := d2math.Epsilon / 3
 
 	f := NewVector(1+subEpsilon, 1+subEpsilon)
@@ -105,6 +105,20 @@ func TestCompareF(t *testing.T) {
 
 	if xGot != xWant || yGot != yWant {
 		t.Errorf("approximate comparison %s and %s: wanted (%d, %d): got (%d, %d)", f, c, xWant, yWant, xGot, yGot)
+	}
+}
+
+func TestIsZero(t *testing.T) {
+	testIsZero(NewVector(0, 0), true, t)
+	testIsZero(NewVector(1, 0), false, t)
+	testIsZero(NewVector(0, 1), false, t)
+	testIsZero(NewVector(1, 1), false, t)
+}
+
+func testIsZero(v Vector, want bool, t *testing.T) {
+	got := v.IsZero()
+	if got != want {
+		t.Errorf("%s is zero: want %t: got %t", v, want, got)
 	}
 }
 

@@ -16,8 +16,8 @@ func TestEntityPosition(t *testing.T) {
 	locationY := locY                 // .SubWord().Y()
 	tileX := float64(x / 5)           // .Tile().X()
 	tileY := float64(y / 5)           // .Tile().Y()
-	subcellX := 1 + math.Mod(locX, 5) // .SubCell().X()
-	subcellY := 1 + math.Mod(locY, 5) // .SubCell().Y()
+	subcellX := 1 + math.Mod(locX, 5) // .RenderOffset().X()
+	subcellY := 1 + math.Mod(locY, 5) // .RenderOffset().Y()
 
 	want := NewVector(tileX, tileY)
 	got := pos.Tile()
@@ -27,7 +27,7 @@ func TestEntityPosition(t *testing.T) {
 	}
 
 	want = NewVector(subcellX, subcellY)
-	got = pos.SubCell()
+	got = pos.RenderOffset()
 
 	if !got.Equals(want) {
 		t.Errorf("sub cell position should match old value: got %s: want %s", got, want)
@@ -87,7 +87,7 @@ func TestSubTile(t *testing.T) {
 	validate("sub tile with offset", t, p.Vector, *got, want, unchanged)
 }
 
-func TestSubTileOffset(t *testing.T) {
+func TestRenderOffset(t *testing.T) {
 	p := NewPosition(1.1, 1.1)
 	got := p.SubTileOffset()
 	want := NewVector(0.5, 0.5)
