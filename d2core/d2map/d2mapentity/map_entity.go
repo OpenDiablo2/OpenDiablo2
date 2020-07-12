@@ -1,15 +1,10 @@
 package d2mapentity
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2astar"
-)
-
-const (
-	directionCount = 64
 )
 
 // mapEntity represents an entity on the map that can be animated
@@ -66,14 +61,6 @@ func (m *mapEntity) GetSpeed() float64 {
 	return m.Speed
 }
 
-func (m *mapEntity) getStepLength(tickTime float64) d2vector.Vector {
-	length := tickTime * m.Speed
-	v := m.Target.Vector.Clone()
-	v.Subtract(&m.Position.Vector)
-	v.SetLength(length)
-	return v
-}
-
 // IsAtTarget returns true if the entity is within a 0.0002 square of it's target and has a path.
 func (m *mapEntity) IsAtTarget() bool {
 	return m.Position.EqualsApprox(m.Target.Vector) && !m.HasPathFinding()
@@ -90,24 +77,16 @@ func (m *mapEntity) Step(tickTime float64) {
 		return
 	}
 
-	step := m.getStepLength(tickTime)
+	velocity := m.velocity(tickTime)
 
 	for {
-		stepX, stepY := step.X(), step.Y()
+		// Add the velocity to the position and set new velocity to remainder
+		applyVelocity(&m.Position.Vector, &velocity, &m.Target.Vector)
 
-		if d2math.EqualsApprox(m.Position.X(), m.Target.X()) {
-			stepX = 0
-		}
-
-		if d2math.EqualsApprox(m.Position.Y(), m.Target.Y()) {
-			stepY = 0
-		}
-
-		step.Set(stepX, stepY)
-		ApplyVelocity(&m.Position.Vector, &step, &m.Target.Vector)
-
+		// New position is at target
 		if m.Position.EqualsApprox(m.Target.Vector) {
 			if len(m.path) > 0 {
+				// Set next path node
 				m.SetTarget(m.path[0].(*d2common.PathTile).X*5, m.path[0].(*d2common.PathTile).Y*5, m.done)
 
 				if len(m.path) > 1 {
@@ -116,29 +95,55 @@ func (m *mapEntity) Step(tickTime float64) {
 					m.path = []d2astar.Pather{}
 				}
 			} else {
+				// End of path.
 				m.Position.Copy(&m.Target.Vector)
 			}
 		}
 
-		if step.IsZero() {
+		if velocity.IsZero() {
 			break
 		}
 	}
 }
 
-func ApplyVelocity(position, velocity, target *d2vector.Vector) {
-	dest := position.Clone()
+// velocity returns a vector describing the change in position this tick.
+func (m *mapEntity) velocity(tickTime float64) d2vector.Vector {
+	length := tickTime * m.Speed
+	v := m.Target.Vector.Clone()
+	v.Subtract(&m.Position.Vector)
+	v.SetLength(length)
+	return v
+}
 
+// applyVelocity adds velocity to position. If the new position extends beyond target from the original position, the
+// position is set to the target and velocity is set to the overshot amount.
+func applyVelocity(position, velocity, target *d2vector.Vector) {
+	// Set velocity values to zero if almost zero
+	x, y := position.CompareApprox(*target)
+	vx, vy := velocity.X(), velocity.Y()
+
+	if x == 0 {
+		vx = 0
+	}
+
+	if y == 0 {
+		vy = 0
+	}
+
+	velocity.Set(vx, vy)
+
+	dest := position.Clone()
 	dest.Add(velocity)
 
 	destDistance := position.Distance(dest)
 	targetDistance := position.Distance(*target)
 
 	if destDistance > targetDistance {
+		// Destination overshot target. Set position to target and velocity to overshot amount.
 		position.Copy(target)
 		velocity.Copy(dest.Subtract(target))
 	} else {
-
+		// At or before target, set position to destination and velocity to zero.
 		position.Copy(&dest)
 		velocity.Set(0, 0)
 	}
