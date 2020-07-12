@@ -85,34 +85,3 @@ func GetRadiansBetween(p1X, p1Y, p2X, p2Y float64) float64 {
 func AlmostEqual(a, b, threshold float64) bool {
 	return math.Abs(a-b) <= threshold
 }
-
-// AdjustWithRemainder returns the new adjusted value, as well as any remaining amount after the max
-func AdjustWithRemainder(sourceValue, adjustment, targetvalue float64) (newValue, remainder float64) {
-	if adjustment == 0 || math.Abs(adjustment) < 0.000001 {
-		return sourceValue, 0
-	}
-
-	adjustNegative := adjustment < 0.0
-	maxNegative := targetvalue-sourceValue < 0.0
-
-	if adjustNegative != maxNegative {
-		// FIXME: This shouldn't happen but it happens all the time..
-		return sourceValue, 0
-	}
-
-	finalValue := sourceValue + adjustment
-	if !adjustNegative {
-		if finalValue > targetvalue {
-			diff := finalValue - targetvalue
-			return targetvalue, diff
-		}
-
-		return finalValue, 0
-	}
-
-	if finalValue < targetvalue {
-		return targetvalue, finalValue - targetvalue
-	}
-
-	return finalValue, 0
-}

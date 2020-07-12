@@ -2,7 +2,6 @@ package d2mapentity
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -82,7 +81,6 @@ func (m *mapEntity) IsAtTarget() bool {
 
 // Step moves the entity along it's path by one tick. If the path is complete it calls entity.done() then returns.
 func (m *mapEntity) Step(tickTime float64) {
-	// no movement needed
 	if m.IsAtTarget() {
 		if m.done != nil {
 			m.done()
@@ -92,61 +90,57 @@ func (m *mapEntity) Step(tickTime float64) {
 		return
 	}
 
-	// per tick velocity
 	step := m.getStepLength(tickTime)
-
-	// endless loop - why?
 
 	for {
 		stepX, stepY := step.X(), step.Y()
 
-		position := m.Position.Vector
-		targetPosition := m.Target.Vector
-
-		// zero small values
-		if d2math.CompareFloat64Fuzzy(position.X(), targetPosition.X()) == 0 {
+		if d2math.EqualsApprox(m.Position.X(), m.Target.X()) {
 			stepX = 0
 		}
 
-		if d2math.CompareFloat64Fuzzy(position.Y(), targetPosition.Y()) == 0 {
+		if d2math.EqualsApprox(m.Position.Y(), m.Target.Y()) {
 			stepY = 0
 		}
 
 		step.Set(stepX, stepY)
+		ApplyVelocity(&m.Position.Vector, &step, &m.Target.Vector)
 
-		// add velocity to current position, or return target if new position exceeds it
-
-		newPositionX, newStepX := d2common.AdjustWithRemainder(position.X(), step.X(), targetPosition.X())
-		newPositionY, newStepY := d2common.AdjustWithRemainder(position.Y(), step.Y(), targetPosition.Y())
-
-		m.Position.Set(newPositionX, newPositionY)
-		step.Set(newStepX, newStepY)
-
-		position = m.Position.Vector
-		// position is close to target
-		if d2common.AlmostEqual(position.X(), targetPosition.X(), 0.01) && d2common.AlmostEqual(position.Y(), targetPosition.Y(), 0.01) {
-			// entity has a path
+		if m.Position.EqualsApprox(m.Target.Vector) {
 			if len(m.path) > 0 {
-				// set target as next node in path
 				m.SetTarget(m.path[0].(*d2common.PathTile).X*5, m.path[0].(*d2common.PathTile).Y*5, m.done)
 
-				// remove path node or set to empty slice if path is empty
 				if len(m.path) > 1 {
 					m.path = m.path[1:]
 				} else {
 					m.path = []d2astar.Pather{}
 				}
-				// entity had no path
-				// set location to target
 			} else {
 				m.Position.Copy(&m.Target.Vector)
-				position = m.Position.Vector
 			}
 		}
 
 		if step.IsZero() {
 			break
 		}
+	}
+}
+
+func ApplyVelocity(position, velocity, target *d2vector.Vector) {
+	dest := position.Clone()
+
+	dest.Add(velocity)
+
+	destDistance := position.Distance(dest)
+	targetDistance := position.Distance(*target)
+
+	if destDistance > targetDistance {
+		position.Copy(target)
+		velocity.Copy(dest.Subtract(target))
+	} else {
+
+		position.Copy(&dest)
+		velocity.Set(0, 0)
 	}
 }
 

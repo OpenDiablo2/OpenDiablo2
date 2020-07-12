@@ -4,6 +4,24 @@ import (
 	"testing"
 )
 
+func TestEqualsApprox(t *testing.T) {
+	subEpsilon := Epsilon / 3
+
+	a, b := 1+subEpsilon, 1.0
+	got := EqualsApprox(a, b)
+
+	if !got {
+		t.Errorf("compare %.2f and %.2f: wanted %t: got %t", a, b, true, got)
+	}
+
+	a, b = 1+Epsilon, 1.0
+	got = EqualsApprox(a, b)
+
+	if !got {
+		t.Errorf("compare %.2f and %.2f: wanted %t: got %t", a, b, false, got)
+	}
+}
+
 func TestCompareFloat64Fuzzy(t *testing.T) {
 	subEpsilon := Epsilon / 3
 

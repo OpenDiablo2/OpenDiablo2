@@ -14,6 +14,11 @@ const (
 	RadFull float64 = 6.283185253783088
 )
 
+// EqualsApprox returns true if the difference between a and b is less than Epsilon.
+func EqualsApprox(a, b float64) bool {
+	return math.Abs(a-b) < Epsilon
+}
+
 // CompareFloat64Fuzzy returns an integer between -1 and 1 describing
 // the comparison of floats a and b. 0 will be returned if the
 // absolute difference between a and b is less than Epsilon.
