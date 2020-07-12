@@ -17,7 +17,6 @@ import (
 	"runtime"
 	"runtime/pprof"
 	"strconv"
-	"strings"
 	"sync"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -34,9 +33,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2script"
-	"github.com/pkg/profile"
 	"golang.org/x/image/colornames"
-	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 // App represents the main application for the engine
@@ -92,7 +89,6 @@ func (p *App) Terminal() (d2interface.Terminal, error) {
 	}
 
 	return p.terminal, nil
-
 }
 
 func (p *App) Asset() (d2interface.AssetManager, error) {
@@ -226,15 +222,6 @@ func Create(gitBranch, gitCommit string) *App {
 
 // Run executes the application and kicks off the entire game process
 func (p *App) Run() error {
-	profileOption := kingpin.Flag("profile", "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)").String()
-	kingpin.Parse()
-
-	if len(*profileOption) > 0 {
-		profiler := enableProfiler(*profileOption)
-		if profiler != nil {
-			defer profiler.Stop()
-		}
-	}
 
 	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", p.gitBranch)
 	// If we fail to initialize, we will show the error screen
@@ -725,49 +712,6 @@ func createZeroedRing(n int) *ring.Ring {
 	}
 
 	return r
-}
-
-func enableProfiler(profileOption string) interface{ Stop() } {
-	var options []func(*profile.Profile)
-
-	switch strings.ToLower(strings.Trim(profileOption, " ")) {
-	case "cpu":
-		log.Printf("CPU profiling is enabled.")
-
-		options = append(options, profile.CPUProfile)
-	case "mem":
-		log.Printf("Memory profiling is enabled.")
-
-		options = append(options, profile.MemProfile)
-	case "block":
-		log.Printf("Block profiling is enabled.")
-
-		options = append(options, profile.BlockProfile)
-	case "goroutine":
-		log.Printf("Goroutine profiling is enabled.")
-
-		options = append(options, profile.GoroutineProfile)
-	case "trace":
-		log.Printf("Trace profiling is enabled.")
-
-		options = append(options, profile.TraceProfile)
-	case "thread":
-		log.Printf("Thread creation profiling is enabled.")
-
-		options = append(options, profile.ThreadcreationProfile)
-	case "mutex":
-		log.Printf("Mutex profiling is enabled.")
-
-		options = append(options, profile.MutexProfile)
-	}
-
-	options = append(options, profile.ProfilePath("./pprof/"))
-
-	if len(options) > 1 {
-		return profile.Start(options...)
-	}
-
-	return nil
 }
 
 func updateInitError(target d2interface.Surface) error {
