@@ -61,7 +61,7 @@ func (m *mapEntity) GetSpeed() float64 {
 	return m.Speed
 }
 
-// IsAtTarget returns true if the entity is within a 0.0002 square of it's target and has a path.
+// IsAtTarget returns true if the distance between entity and target is almost zero.
 func (m *mapEntity) IsAtTarget() bool {
 	return m.Position.EqualsApprox(m.Target.Vector) && !m.HasPathFinding()
 }
@@ -160,9 +160,9 @@ func (m *mapEntity) SetTarget(tx, ty float64, done func()) {
 	m.done = done
 
 	if m.directioner != nil {
-		angle := m.Position.DirectionTo(m.Target.Vector)
+		d := m.Position.DirectionTo(m.Target.Vector)
 
-		m.directioner(angle)
+		m.directioner(d)
 	}
 }
 

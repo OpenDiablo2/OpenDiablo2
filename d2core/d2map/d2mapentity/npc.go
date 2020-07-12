@@ -72,10 +72,10 @@ func selectEquip(slice []string) string {
 
 // Render renders this entity's animated composite.
 func (v *NPC) Render(target d2interface.Surface) {
-	subCellPosition := v.Position.RenderOffset()
+	renderOffset := v.Position.RenderOffset()
 	target.PushTranslation(
-		int((subCellPosition.X()-subCellPosition.Y())*16),
-		int(((subCellPosition.X()+subCellPosition.Y())*8)-5),
+		int((renderOffset.X()-renderOffset.Y())*16),
+		int(((renderOffset.X()+renderOffset.Y())*8)-5),
 	)
 
 	defer target.Pop()

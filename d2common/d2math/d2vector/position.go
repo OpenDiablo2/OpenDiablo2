@@ -10,7 +10,8 @@ import (
 const (
 	subTilesPerTile          float64 = 5  // The number of sub tiles that make up one map tile.
 	entityDirectionCount     float64 = 64 // The Diablo equivalent of 360 degrees when dealing with entity rotation.
-	entityDirectionIncrement float64 = 8  // One 8th of 64. There are 8 possible facing directions for moving entities.
+	entityDirectionIncrement float64 = 8  // One 8th of 64. There 8 possible facing directions for entities.
+	// Note: there should be 16 facing directions for entities. See Position.DirectionTo()
 )
 
 // Position is a vector in world space. The stored value is the sub tile position.
@@ -18,7 +19,8 @@ type Position struct {
 	Vector
 }
 
-// NewPosition returns a Position struct with a vector at the given x and y sub tile coordinates.
+// NewPosition returns a Position struct with the given sub tile coordinates where 1 = 1 sub tile, with a fractional
+// offset.
 func NewPosition(x, y float64) Position {
 	p := Position{NewVector(x, y)}
 	p.checkValues()
@@ -26,7 +28,7 @@ func NewPosition(x, y float64) Position {
 	return p
 }
 
-// Set sets this position to the given x and y sub tile coordinates.
+// Set sets this position to the given sub tile coordinates where 1 = 1 sub tile, with a fractional offset.
 func (p *Position) Set(x, y float64) {
 	p.x, p.y = x, y
 	p.checkValues()
@@ -69,7 +71,6 @@ func (p *Position) subTileOffset() *Vector {
 }
 
 // DirectionTo returns the entity direction from this vector to the given vector.
-// See entityDirectionCount.
 func (v *Vector) DirectionTo(target Vector) int {
 	direction := target.Clone()
 	direction.Subtract(v)
@@ -79,7 +80,7 @@ func (v *Vector) DirectionTo(target Vector) int {
 
 	// Note: The direction is always one increment out so we must subtract one increment.
 	// This might not work when we implement all 16 directions (as of this writing entities can only face one of 8
-	// directions)
+	// directions). See entityDirectionIncrement.
 	newDirection := int((angle / radiansPerDirection) - entityDirectionIncrement)
 
 	return d2math.WrapInt(newDirection, int(entityDirectionCount))

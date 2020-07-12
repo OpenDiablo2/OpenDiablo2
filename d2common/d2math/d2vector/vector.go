@@ -13,9 +13,7 @@ type Vector struct {
 	x, y float64
 }
 
-const (
-	two float64 = 2
-)
+const two float64 = 2
 
 // NewVector creates a new Vector with the given x and y values.
 func NewVector(x, y float64) Vector {
@@ -102,7 +100,7 @@ func (v *Vector) Add(o *Vector) *Vector {
 	return v
 }
 
-// AddScalar the given vector to this vector.
+// AddScalar the given value to both values of this vector.
 func (v *Vector) AddScalar(s float64) *Vector {
 	v.x += s
 	v.y += s
@@ -142,7 +140,7 @@ func (v *Vector) Divide(o *Vector) *Vector {
 	return v
 }
 
-// DivideScalar divides this vector by the given float64 value.
+// DivideScalar divides both values of this vector by the given value.
 func (v *Vector) DivideScalar(s float64) *Vector {
 	v.x /= s
 	v.y /= s
@@ -226,7 +224,7 @@ func (v *Vector) Cross(o Vector) float64 {
 // Normalize sets the vector length to 1 without changing the direction. The normalized vector may be scaled by the
 // float64 return value to restore it's original length.
 func (v *Vector) Normalize() float64 {
-	if v.x == 0 && v.y == 0 {
+	if v.IsZero() {
 		return 0
 	}
 
