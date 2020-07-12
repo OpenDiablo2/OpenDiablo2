@@ -40,12 +40,12 @@ func (c *DATColor) A() uint8 {
 	return mask
 }
 
-// RGBA gets the combination of the color components (0xRRGGBBAA)
+// RGBA gets the color components as uint32 in red, green, blue, alpha order
 func (c *DATColor) RGBA() uint32 {
 	return toComposite(c.r, c.g, c.b, c.a)
 }
 
-// SetRGBA sets the color components using the given RGBA form
+// SetRGBA sets the color components using uint32 in red, green, blue, alpha order
 func (c *DATColor) SetRGBA(rgba uint32) {
 	c.r, c.g, c.b, c.a = toComponent(rgba)
 }

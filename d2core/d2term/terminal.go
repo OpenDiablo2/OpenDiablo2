@@ -3,7 +3,6 @@ package d2term
 import (
 	"errors"
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"image/color"
 	"log"
 	"math"
@@ -13,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 

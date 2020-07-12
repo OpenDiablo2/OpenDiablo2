@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"image"
 	"image/color"
@@ -96,13 +97,36 @@ func NewGameControls(renderer d2interface.Renderer, hero *d2mapentity.Player, ma
 	nameLabel.SetText("")
 	nameLabel.Color = color.White
 
+	// TODO make this depend on the hero type to respect inventory.txt
+	var inventoryRecordKey string
+	switch hero.Class {
+	case d2enum.HeroAssassin:
+		inventoryRecordKey = "Assassin"
+	case d2enum.HeroAmazon:
+		inventoryRecordKey = "Amazon2"
+	case d2enum.HeroBarbarian:
+		inventoryRecordKey = "Barbarian2"
+	case d2enum.HeroDruid:
+		inventoryRecordKey = "Druid"
+	case d2enum.HeroNecromancer:
+		inventoryRecordKey = "Necromancer2"
+	case d2enum.HeroPaladin:
+		inventoryRecordKey = "Paladin2"
+	case d2enum.HeroSorceress:
+		inventoryRecordKey = "Sorceress2"
+	default:
+		inventoryRecordKey = "Amazon2"
+	}
+	
+	inventoryRecord := d2datadict.Inventory[inventoryRecordKey]
+
 	gc := &GameControls{
 		renderer:       renderer,
 		hero:           hero,
 		mapEngine:      mapEngine,
 		inputListener:  inputListener,
 		mapRenderer:    mapRenderer,
-		inventory:      NewInventory(),
+		inventory:      NewInventory(inventoryRecord),
 		heroStatsPanel: NewHeroStatsPanel(renderer, hero.Name(), hero.Class, hero.Stats),
 		nameLabel:      &nameLabel,
 		zoneChangeText: &zoneLabel,

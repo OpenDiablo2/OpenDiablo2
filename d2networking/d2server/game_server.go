@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"io"
 	"log"
 	"net"
@@ -32,7 +33,7 @@ type GameServer struct {
 	clientConnections map[string]ClientConnection
 	manager           *ConnectionManager
 	mapEngines        []*d2mapengine.MapEngine
-	scriptEngine      *d2script.ScriptEngine
+	scriptEngine      d2interface.ScriptEngine
 	udpConnection     *net.UDPConn
 	seed              int64
 	running           bool
@@ -51,10 +52,12 @@ func Create(openNetworkServer bool) {
 		return
 	}
 
+	scriptEngine, _ := d2script.CreateScriptEngine()
+
 	singletonServer = &GameServer{
 		clientConnections: make(map[string]ClientConnection),
 		mapEngines:        make([]*d2mapengine.MapEngine, 0),
-		scriptEngine:      d2script.CreateScriptEngine(),
+		scriptEngine:      scriptEngine,
 		seed:              time.Now().UnixNano(),
 	}
 

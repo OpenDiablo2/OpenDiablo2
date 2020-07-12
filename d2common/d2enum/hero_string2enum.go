@@ -16,3 +16,25 @@ func HeroFromString(s string) Hero {
 	}
 	panic(fmt.Errorf("unable to locate Hero enum corresponding to %q", s))
 }
+
+func _(s string) {
+	// Check for duplicate string values in type "Hero".
+	switch s {
+	// 0
+	case "":
+	// 1
+	case "Barbarian":
+	// 2
+	case "Necromancer":
+	// 3
+	case "Paladin":
+	// 4
+	case "Assassin":
+	// 5
+	case "Sorceress":
+	// 6
+	case "Amazon":
+	// 7
+	case "Druid":
+	}
+}

@@ -56,6 +56,7 @@ type App struct {
 	audio             d2interface.AudioProvider
 	renderer          d2interface.Renderer
 	input             d2interface.InputManager
+	scriptEngine 	d2interface.ScriptEngine
 	tAllocSamples     *ring.Ring
 }
 
@@ -118,6 +119,8 @@ func (p *App) BindAppComponent(component d2interface.AppComponent) error {
 		p.renderer = component.(d2interface.Renderer)
 	case d2interface.InputManager:
 		p.input = component.(d2interface.InputManager)
+	case d2interface.ScriptEngine:
+		p.scriptEngine = component.(d2interface.ScriptEngine)
 	}
 	return nil
 }
@@ -141,6 +144,11 @@ func Create(gitBranch, gitCommit string) *App {
 		panic(err)
 	}
 	config := d2config.Config
+
+	scriptEngine, err := d2script.CreateScriptEngine()
+	if err != nil {
+		panic(err)
+	}
 
 	// Create our providers
 	renderer, err := ebiten.CreateRenderer()
@@ -173,6 +181,11 @@ func Create(gitBranch, gitCommit string) *App {
 		gitCommit:     gitCommit,
 		tAllocSamples: createZeroedRing(nSamplesTAlloc),
 		config: config,
+	}
+
+	err = app.BindAppComponent(scriptEngine)
+	if err != nil {
+		panic(err)
 	}
 
 	err = app.BindAppComponent(assetManager)
@@ -225,7 +238,7 @@ func (p *App) Run() error {
 		return err
 	}
 
-	d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(p.renderer, p.audio, p.terminal))
+	d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(p.renderer, p.audio, p.terminal, p.scriptEngine))
 
 	if p.gitBranch == "" {
 		p.gitBranch = "Local Build"
@@ -312,6 +325,7 @@ func (p *App) initialize() error {
 		{"timescale", "set scalar for elapsed time", p.setTimeScale},
 		{"quit", "exits the game", p.quitGame},
 		{"screen-gui", "enters the gui playground screen", p.enterGuiPlayground},
+		{"js", "eval JS scripts", p.evalJS},
 	}
 
 	for idx := range terminalActions {
@@ -339,8 +353,6 @@ func (p *App) initialize() error {
 	d2inventory.LoadHeroObjects()
 
 	d2ui.Initialize(p.audio)
-
-	d2script.CreateScriptEngine()
 
 	return nil
 }
@@ -398,6 +410,7 @@ func (p *App) loadDataDict() error {
 		{d2resource.LevelSubstitutions, d2datadict.LoadLevelSubstitutions},
 		{d2resource.CubeRecipes, d2datadict.LoadCubeRecipes},
 		{d2resource.SuperUniques, d2datadict.LoadSuperUniques},
+		{d2resource.Inventory, d2datadict.LoadInventory},
 	}
 
 	d2datadict.InitObjectRecords()
@@ -634,6 +647,16 @@ func (p *App) dumpHeap() {
 	if err := fileOut.Close(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func (p *App) evalJS(code string) {
+	val, err := p.scriptEngine.Eval(code)
+	if err != nil {
+		p.terminal.OutputErrorf("%s", err)
+		return
+	}
+
+	p.terminal.OutputInfof("%s", val)
 }
 
 func (p *App) toggleFullScreen() {

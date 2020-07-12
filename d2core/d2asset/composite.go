@@ -71,8 +71,13 @@ func (c *Composite) Render(target d2interface.Surface) error {
 	return nil
 }
 
+// ObjectAnimationMode returns the object animation mode
+func (c *Composite) ObjectAnimationMode() d2enum.ObjectAnimationMode {
+	return c.mode.animationMode.(d2enum.ObjectAnimationMode)
+}
+
 // GetAnimationMode returns the animation mode the Composite should render with.
-func (c *Composite) GetAnimationMode() string {
+func (c *Composite) GetAnimationMode() d2interface.AnimationMode {
 	return c.mode.animationMode
 }
 
@@ -82,8 +87,8 @@ func (c *Composite) GetWeaponClass() string {
 }
 
 // SetMode sets the Composite's animation mode weapon class and direction
-func (c *Composite) SetMode(animationMode, weaponClass string) error {
-	if c.mode != nil && c.mode.animationMode == animationMode && c.mode.weaponClass == weaponClass {
+func (c *Composite) SetMode(animationMode d2interface.AnimationMode, weaponClass string) error {
+	if c.mode != nil && c.mode.animationMode.String() == animationMode.String() && c.mode.weaponClass == weaponClass {
 		return nil
 	}
 
@@ -188,10 +193,9 @@ func (c *Composite) resetPlayedCount() {
 	}
 }
 
-
 type compositeMode struct {
 	cof           *d2cof.COF
-	animationMode string
+	animationMode d2interface.AnimationMode
 	weaponClass   string
 	playedCount   int
 
@@ -203,7 +207,9 @@ type compositeMode struct {
 	lastFrameTime  float64
 }
 
-func (c *Composite) createMode(animationMode, weaponClass string) (*compositeMode, error) {
+func (c *Composite) createMode(animationMode d2interface.AnimationMode,
+	weaponClass string) (*compositeMode,
+	error) {
 	cofPath := fmt.Sprintf("%s/%s/COF/%s%s%s.COF", c.basePath, c.token, c.token, animationMode, weaponClass)
 	if exists, _ := singleton.FileExists(cofPath); !exists {
 		return nil, errors.New("composite not found")
@@ -214,7 +220,7 @@ func (c *Composite) createMode(animationMode, weaponClass string) (*compositeMod
 		return nil, err
 	}
 
-	animationKey := strings.ToLower(c.token + animationMode + weaponClass)
+	animationKey := strings.ToLower(c.token + animationMode.String() + weaponClass)
 
 	animationData := d2data.AnimationData[animationKey]
 	if len(animationData) == 0 {
@@ -242,7 +248,7 @@ func (c *Composite) createMode(animationMode, weaponClass string) (*compositeMod
 			drawEffect = cofLayer.DrawEffect
 		}
 
-		layer, err := c.loadCompositeLayer(cofLayer.Type.String(), layerValue, animationMode,
+		layer, err := c.loadCompositeLayer(cofLayer.Type.String(), layerValue, animationMode.String(),
 			cofLayer.WeaponClass.String(), c.palettePath, drawEffect)
 		if err == nil {
 			layer.SetPlaySpeed(mode.animationSpeed)

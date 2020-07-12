@@ -3,6 +3,7 @@ package d2player
 import (
 	"errors"
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -13,6 +14,11 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 )
+
+// images for 1x1 grid tile items (rings and stuff) are 28x28 pixel
+// however, the grid cells are 29x29 pixels, this is for padding
+// for each row in inventory, we need to account for this padding
+const cellPadding = 1
 
 type InventoryItem interface {
 	InventoryGridSize() (width int, height int)
@@ -36,15 +42,16 @@ type ItemGrid struct {
 	slotSize       int
 }
 
-func NewItemGrid(width int, height int, originX int, originY int) *ItemGrid {
+func NewItemGrid(record *d2datadict.InventoryRecord) *ItemGrid {
+	grid := record.Grid
 	return &ItemGrid{
-		width:          width,
-		height:         height,
-		originX:        originX,
-		originY:        originY,
-		slotSize:       29,
+		width:          grid.Box.Width,
+		height:         grid.Box.Height,
+		originX:        grid.Box.Left,
+		originY:        grid.Box.Top + (grid.Rows * cellPadding),
+		slotSize:       grid.CellWidth,
 		sprites:        make(map[string]*d2ui.Sprite),
-		equipmentSlots: genEquipmentSlotsMap(),
+		equipmentSlots: genEquipmentSlotsMap(record),
 	}
 }
 

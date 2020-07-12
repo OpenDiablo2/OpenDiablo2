@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -18,13 +19,12 @@ type Inventory struct {
 	isOpen  bool
 }
 
-func NewInventory() *Inventory {
-	originX := 400
-	originY := 0
+func NewInventory(record *d2datadict.InventoryRecord) *Inventory {
 	return &Inventory{
-		grid:    NewItemGrid(10, 4, originX+19, originY+320),
-		originX: originX,
-		originY: originY,
+		grid:    NewItemGrid(record),
+		originX: record.Panel.Left,
+		// originY: record.Panel.Top,
+		originY: 0, // expansion data has these all offset by +60 ...
 	}
 }
 
