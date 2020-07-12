@@ -3,7 +3,6 @@ package d2gamescreen
 import (
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
@@ -326,7 +325,7 @@ func (met *MapEngineTest) OnKeyRepeat(event d2interface.KeyEvent) bool {
 // OnKeyDown defines the actions of the Map Engine Test screen when a key is pressed
 func (met *MapEngineTest) OnKeyDown(event d2interface.KeyEvent) bool {
 	if event.Key() == d2enum.KeyEscape {
-		os.Exit(0)
+		met.terminal.Execute("quit")
 		return true
 	}
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image/color"
 	"log"
-	"os"
 	"os/exec"
 	"runtime"
 
@@ -315,7 +314,7 @@ func (v *MainMenu) onGithubButtonClicked() {
 }
 
 func (v *MainMenu) onExitButtonClicked() {
-	os.Exit(0)
+	v.terminal.Execute("quit")
 }
 
 func (v *MainMenu) onCreditsButtonClicked() {

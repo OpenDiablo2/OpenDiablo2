@@ -55,6 +55,7 @@ type App struct {
 	input             d2interface.InputManager
 	scriptEngine 	  d2interface.ScriptEngine
 	tAllocSamples     *ring.Ring
+	running 		  bool
 }
 
 // Input returns the input manager
@@ -185,6 +186,7 @@ func Create(gitBranch, gitCommit string) *App {
 		gitCommit:     gitCommit,
 		tAllocSamples: createZeroedRing(nSamplesTAlloc),
 		config: config,
+		running: true,
 	}
 
 	err = app.BindAppComponent(scriptEngine)
@@ -601,6 +603,10 @@ func (p *App) advance(elapsed, current float64) error {
 }
 
 func (p *App) update(target d2interface.Surface) error {
+	if !p.running {
+		return errors.New("exiting")
+	}
+
 	currentTime := d2common.Now()
 	elapsedTime := (currentTime - p.lastTime) * p.timeScale
 	p.lastTime = currentTime
@@ -697,7 +703,7 @@ func (p *App) setTimeScale(timeScale float64) {
 }
 
 func (p *App) quitGame() {
-	os.Exit(0)
+	p.running = false
 }
 
 func (p *App) enterGuiPlayground() {
