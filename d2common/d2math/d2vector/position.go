@@ -93,12 +93,6 @@ func (p *Position) SubTileOffset() *Vector {
 	return p.WorldSubTile().Subtract(p.TileSubTile())
 }
 
-// This original value here was always zero. It is never assigned to but it is used. (offsetX, offsetY)
-func (p *Position) Offset() *Vector {
-	v := VectorZero()
-	return &v
-}
-
 // RenderOffset is SubTileOffset() + 1. This places the vector at the bottom vertex of an isometric diamond visually
 // representing one sub tile. Sub tile indices increase to the lower right diagonal ('down') and to the lower left
 // diagonal ('left') of the isometric grid. This renders the target one index above which visually is one tile below.
@@ -120,13 +114,5 @@ func (v *Vector) DirectionTo(target Vector) int {
 	// directions)
 	newDirection := int((angle / radiansPerDirection) - entityDirectionIncrement)
 
-	if newDirection >= 64 {
-		return newDirection - 64
-	}
-
-	if newDirection < 0 {
-		return 64 + newDirection
-	}
-
-	return newDirection
+	return d2math.WrapInt(newDirection, int(entityDirectionCount))
 }

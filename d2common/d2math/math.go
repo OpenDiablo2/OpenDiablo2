@@ -65,3 +65,14 @@ func Lerp(a, b, x float64) float64 {
 func Unlerp(a, b, x float64) float64 {
 	return (x - a) / (b - a)
 }
+
+// WrapInt wraps x to between 0 and max. For example WrapInt(450, 360) would return 90.
+func WrapInt(x, max int) int {
+	wrapped := x % max
+
+	if wrapped < 0 {
+		return max + wrapped
+	}
+
+	return wrapped
+}

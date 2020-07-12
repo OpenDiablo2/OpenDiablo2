@@ -111,3 +111,39 @@ func TestUnlerp(t *testing.T) {
 		t.Errorf(d, x, a, b, want, got)
 	}
 }
+
+func TestWrapInt(t *testing.T) {
+	want := 50
+	a, b := 1050, 100
+	got := WrapInt(a, b)
+
+	d := "wrap %d between 0 and %d: want %d: got %d"
+
+	if got != want {
+		t.Errorf(d, a, b, want, got)
+	}
+
+	want = 270
+	a, b = -1170, 360
+	got = WrapInt(a, b)
+
+	if got != want {
+		t.Errorf(d, a, b, want, got)
+	}
+
+	want = 270
+	a, b = 270, 360
+	got = WrapInt(a, b)
+
+	if got != want {
+		t.Errorf(d, a, b, want, got)
+	}
+
+	want = 90
+	a, b = -270, 360
+	got = WrapInt(a, b)
+
+	if got != want {
+		t.Errorf(d, a, b, want, got)
+	}
+}
