@@ -13,7 +13,10 @@ type Vector struct {
 	x, y float64
 }
 
-const two float64 = 2
+const (
+	two                  float64 = 2
+	entityDirectionCount float64 = 64 // 64 is the diablo equivalent of 360 degrees when dealing with entity rotation.
+)
 
 // NewVector creates a new Vector with the given x and y values.
 func NewVector(x, y float64) Vector {
@@ -238,6 +241,10 @@ func (v *Vector) Normalize() float64 {
 // Angle computes the unsigned angle in radians from this vector to the given vector. This angle will never exceed half
 // a full circle. For angles describing a full circumference use SignedAngle.
 func (v *Vector) Angle(o Vector) float64 {
+	if v.IsZero() || o.IsZero() {
+		return 0
+	}
+
 	from := v.Clone()
 	from.Normalize()
 
@@ -260,6 +267,23 @@ func (v *Vector) SignedAngle(o Vector) float64 {
 	}
 
 	return unsigned
+}
+
+// TODO: Move this to Position and take a target argument, call it "DirectionTo"
+// Direction returns the anti-clockwise angle looking from this vector to the given vector. Positive X is zero.
+func (v *Vector) Direction() float64 {
+	angle := v.SignedAngle(VectorRight())
+	radiansPerDirection := d2math.RadFull / entityDirectionCount
+	offset := (45 / d2math.RadToDeg) - (radiansPerDirection / 2)
+	newDirection := (angle - offset) / radiansPerDirection
+
+	if newDirection >= 64 {
+		newDirection = newDirection - 64
+	} else if newDirection < 0 {
+		newDirection = 64 + newDirection
+	}
+
+	return newDirection
 }
 
 // Reflect sets this Vector to it's reflection off a line defined by the given normal.

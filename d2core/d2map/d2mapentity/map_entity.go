@@ -9,6 +9,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2astar"
 )
 
+const (
+	directionCount = 64
+)
+
 // mapEntity represents an entity on the map that can be animated
 // TODO: Has a coordinate (issue #456)
 type mapEntity struct {
@@ -156,31 +160,14 @@ func (m *mapEntity) SetTarget(tx, ty float64, done func()) {
 	m.Target.SetSubWorld(tx, ty)
 	m.done = done
 
-	position := m.Position.WorldSubTile()
 	if m.directioner != nil {
-		angle := 359 - d2common.GetAngleBetween(
-			position.X(),
-			position.Y(),
-			tx,
-			ty,
-		)
-		m.directioner(angleToDirection(float64(angle)))
+		direction := m.Target.Clone()
+		direction.Subtract(&m.Position.Vector)
+
+		angle := direction.Direction()
+
+		m.directioner(int(angle))
 	}
-}
-
-func angleToDirection(angle float64) int {
-	degreesPerDirection := 360.0 / 64.0
-	offset := 45.0 - (degreesPerDirection / 2)
-
-	newDirection := int((angle - offset) / degreesPerDirection)
-
-	if newDirection >= 64 {
-		newDirection = newDirection - 64
-	} else if newDirection < 0 {
-		newDirection = 64 + newDirection
-	}
-
-	return newDirection
 }
 
 // GetPosition returns the entity's current tile position.
