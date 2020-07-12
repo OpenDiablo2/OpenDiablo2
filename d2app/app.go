@@ -56,7 +56,7 @@ type App struct {
 	audio             d2interface.AudioProvider
 	renderer          d2interface.Renderer
 	input             d2interface.InputManager
-	scriptEngine 	d2interface.ScriptEngine
+	scriptEngine 	  d2interface.ScriptEngine
 	tAllocSamples     *ring.Ring
 }
 
@@ -101,6 +101,14 @@ func (p *App) Asset() (d2interface.AssetManager, error) {
 	}
 
 	return p.asset, nil
+}
+
+func (p *App) Script() (d2interface.ScriptEngine, error) {
+	if p.scriptEngine == nil {
+		return nil, errors.New("no script engine bound to app")
+	}
+
+	return p.scriptEngine, nil
 }
 
 // BindAppComponent makes a two-way reference between the app and the component

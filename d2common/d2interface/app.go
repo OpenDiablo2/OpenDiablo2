@@ -12,6 +12,7 @@ type App interface {
 	Renderer() (Renderer, error)
 	Terminal() (Terminal, error)
 	Asset() (AssetManager, error)
+	Script() (ScriptEngine, error)
 }
 
 // AppComponent defines a high-level part of the app.
