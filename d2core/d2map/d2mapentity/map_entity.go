@@ -161,12 +161,9 @@ func (m *mapEntity) SetTarget(tx, ty float64, done func()) {
 	m.done = done
 
 	if m.directioner != nil {
-		direction := m.Target.Clone()
-		direction.Subtract(&m.Position.Vector)
+		angle := m.Position.DirectionTo(m.Target.Vector)
 
-		angle := direction.Direction()
-
-		m.directioner(int(angle))
+		m.directioner(angle)
 	}
 }
 

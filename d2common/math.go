@@ -73,25 +73,6 @@ func MinInt32(a, b int32) int32 {
 
 // ScreenToIso converts screenspace coordinates to isometric coordinates
 
-// GetAngleBetween returns the angle between two points. 0deg is facing to the right.
-func GetAngleBetween(p1X, p1Y, p2X, p2Y float64) int {
-	deltaY := p1Y - p2Y
-	deltaX := p2X - p1X
-
-	result := math.Atan2(deltaY, deltaX) * (180 / math.Pi)
-	iResult := int(result)
-
-	for iResult < 0 {
-		iResult += 360
-	}
-
-	for iResult >= 360 {
-		iResult -= 360
-	}
-
-	return iResult
-}
-
 // GetRadiansBetween returns the radians between two points. 0rad is facing to the right.
 func GetRadiansBetween(p1X, p1Y, p2X, p2Y float64) float64 {
 	deltaY := p2Y - p1Y

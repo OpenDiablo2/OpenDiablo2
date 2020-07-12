@@ -3,9 +3,15 @@ package d2vector
 import (
 	"fmt"
 	"math"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
-const subTilesPerTile float64 = 5
+const (
+	subTilesPerTile          float64 = 5
+	entityDirectionCount     float64 = 64 // The diablo equivalent of 360 degrees when dealing with entity rotation.
+	entityDirectionIncrement float64 = 8  // One 8th of 64. There are 8 possible facing directions for moving entities.
+)
 
 // Position is a vector in world space. The stored value is  the one returned by Position.World()
 type Position struct {
@@ -23,7 +29,6 @@ func NewPosition(x, y float64) Position {
 // EntityPosition returns a Position struct based on the given entity spawn point.
 // The value given should be the one set in d2mapstamp.Stamp.Entities:
 // (tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y
-// TODO: This probably doesn't support positions in between sub tiles so will only be suitable for spawning entities from map generation, not for multiplayer syncing.
 func EntityPosition(x, y float64) Position {
 	return NewPosition(x/5, y/5)
 }
@@ -94,13 +99,37 @@ func (p *Position) Offset() *Vector {
 	return &v
 }
 
-// TODO: understand this and maybe improve/remove it
-// SubTileOffset() + 1. It's used for rendering. It seems to always do this:
-// 	v.offsetX+int((v.subcellX-v.subcellY)*16),
-//	v.offsetY+int(((v.subcellX+v.subcellY)*8)-5),
-// ^ Maybe similar to Viewport.OrthoToWorld? (subCellX, subCellY)
+// TODO: rename this to RenderOffset
+// RenderOffset is SubTileOffset() + 1. This places the vector in at the bottom vertex of this sub tile, which is a
+// diamond in the isometric space.
+// SubTile indices increase to the lower right diagonal ('down') and to the lower left diagonal ('left').
 func (p *Position) SubCell() *Vector {
 	return p.SubTileOffset().AddScalar(1)
+}
+
+// DirectionTo returns the entity direction from this vector to the given vector.
+// See entityDirectionCount.
+func (v *Vector) DirectionTo(target Vector) int {
+	direction := target.Clone()
+	direction.Subtract(v)
+
+	angle := direction.SignedAngle(VectorRight())
+	radiansPerDirection := d2math.RadFull / entityDirectionCount
+
+	// Note: The direction is always one increment out so we must subtract one increment.
+	// This might not work when we implement all 16 directions (as of this writing entities can only face one of 8
+	// directions)
+	newDirection := int((angle / radiansPerDirection) - entityDirectionIncrement)
+
+	if newDirection >= 64 {
+		return newDirection - 64
+	}
+
+	if newDirection < 0 {
+		return 64 + newDirection
+	}
+
+	return newDirection
 }
 
 func (p Position) String() string {
