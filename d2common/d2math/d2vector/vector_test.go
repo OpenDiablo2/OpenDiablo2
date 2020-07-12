@@ -347,6 +347,7 @@ func TestNormalize(t *testing.T) {
 	evaluateVector(fmt.Sprintf("normalize %s", c), want, v, t)
 
 	want = NewVector(0, 10)
+
 	v.Scale(reverse)
 
 	evaluateVector(fmt.Sprintf("reverse normalizing of %s", c), want, v, t)
@@ -354,6 +355,7 @@ func TestNormalize(t *testing.T) {
 	v = NewVector(0, 0)
 	c = v.Clone()
 	want = NewVector(0, 0)
+
 	v.Normalize()
 
 	evaluateVector(fmt.Sprintf("normalize zero vector should do nothing %s", c), want, v, t)

@@ -8,7 +8,6 @@ import (
 )
 
 // mapEntity represents an entity on the map that can be animated
-// TODO: Has a coordinate (issue #456)
 type mapEntity struct {
 	Position d2vector.Position
 	Target   d2vector.Position
@@ -112,6 +111,7 @@ func (m *mapEntity) velocity(tickTime float64) d2vector.Vector {
 	v := m.Target.Vector.Clone()
 	v.Subtract(&m.Position.Vector)
 	v.SetLength(length)
+
 	return v
 }
 
@@ -167,13 +167,13 @@ func (m *mapEntity) SetTarget(tx, ty float64, done func()) {
 }
 
 // GetPosition returns the entity's current tile position, always a whole number.
-func (m *mapEntity) GetPosition() (float64, float64) {
+func (m *mapEntity) GetPosition() (x, y float64) {
 	t := m.Position.Tile()
 	return t.X(), t.Y()
 }
 
 // GetPositionF returns the entity's current tile position where 0.2 is one sub tile.
-func (m *mapEntity) GetPositionF() (float64, float64) {
+func (m *mapEntity) GetPositionF() (x, y float64) {
 	w := m.Position.World()
 	return w.X(), w.Y()
 }

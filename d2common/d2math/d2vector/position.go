@@ -67,6 +67,7 @@ func (p *Position) RenderOffset() *Vector {
 func (p *Position) subTileOffset() *Vector {
 	t := p.Tile().Scale(subTilesPerTile)
 	c := p.Clone()
+
 	return c.Subtract(t)
 }
 

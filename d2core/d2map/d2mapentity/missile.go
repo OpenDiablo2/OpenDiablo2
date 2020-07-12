@@ -32,7 +32,7 @@ func CreateMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error)
 	}
 
 	animation.SetEffect(d2enum.DrawEffectModulate)
-	//animation.SetPlaySpeed(float64(record.Animation.AnimationSpeed))
+	// animation.SetPlaySpeed(float64(record.Animation.AnimationSpeed))
 	animation.SetPlayLoop(record.Animation.LoopAnimation)
 	animation.PlayForward()
 	entity := CreateAnimatedEntity(x, y, animation)

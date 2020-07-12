@@ -182,6 +182,7 @@ func (v *Player) GetAnimationMode() d2enum.PlayerAnimationMode {
 	return d2enum.PlayerAnimationModeNeutral
 }
 
+// SetAnimationMode sets the Composite's animation mode weapon class and direction.
 func (v *Player) SetAnimationMode(animationMode d2enum.PlayerAnimationMode) error {
 	return v.composite.SetMode(animationMode, v.composite.GetWeaponClass())
 }
