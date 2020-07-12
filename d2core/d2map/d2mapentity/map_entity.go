@@ -15,17 +15,9 @@ type mapEntity struct {
 	Position d2vector.Position
 	Target   d2vector.Position
 
-	//subcellX, subcellY float64 // Subcell coordinates within the current tile
-	offsetX, offsetY int
-	TargetX          float64
-	TargetY          float64
-
 	Speed     float64
 	path      []d2astar.Pather
 	drawLayer int
-
-	// TODO: delete this
-	debugLevel int
 
 	done        func()
 	directioner func(direction int)
@@ -38,8 +30,6 @@ func createMapEntity(x, y int) mapEntity {
 	return mapEntity{
 		Position:  d2vector.EntityPosition(locX, locY),
 		Target:    d2vector.EntityPosition(locX, locY),
-		TargetX:   locX,
-		TargetY:   locY,
 		Speed:     6,
 		drawLayer: 0,
 		path:      []d2astar.Pather{},
@@ -130,7 +120,7 @@ func (m *mapEntity) Step(tickTime float64) {
 
 		position = m.Position.WorldSubTile()
 		// position is close to target
-		if d2common.AlmostEqual(position.X(), m.TargetX, 0.01) && d2common.AlmostEqual(position.Y(), m.TargetY, 0.01) {
+		if d2common.AlmostEqual(position.X(), targetPosition.X(), 0.01) && d2common.AlmostEqual(position.Y(), targetPosition.Y(), 0.01) {
 			// entity has a path
 			if len(m.path) > 0 {
 				// set target as next node in path
@@ -145,7 +135,7 @@ func (m *mapEntity) Step(tickTime float64) {
 				// entity had no path
 				// set location to target
 			} else {
-				m.Position.SetSubWorld(m.TargetX, m.TargetY)
+				m.Position.Copy(&m.Target.Vector)
 				position = m.Position.WorldSubTile()
 			}
 		}
@@ -163,11 +153,8 @@ func (m *mapEntity) HasPathFinding() bool {
 
 // SetTarget sets target coordinates and changes animation based on proximity and direction.
 func (m *mapEntity) SetTarget(tx, ty float64, done func()) {
-	m.TargetX, m.TargetY = tx, ty
-	m.done = done
-
-	// TODO: This should be the authority
 	m.Target.SetSubWorld(tx, ty)
+	m.done = done
 
 	position := m.Position.WorldSubTile()
 	if m.directioner != nil {
