@@ -235,6 +235,7 @@ func (p *App) loadDataDict() error {
 		{d2resource.CubeRecipes, d2datadict.LoadCubeRecipes},
 		{d2resource.SuperUniques, d2datadict.LoadSuperUniques},
 		{d2resource.Inventory, d2datadict.LoadInventory},
+		{d2resource.Skills, d2datadict.LoadSkills},
 	}
 
 	d2datadict.InitObjectRecords()
