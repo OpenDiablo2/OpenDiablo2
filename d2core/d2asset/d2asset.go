@@ -31,47 +31,8 @@ func Initialize(renderer d2interface.Renderer,
 		fontManager,
 	}
 
-	if err := term.BindAction("assetspam", "display verbose asset manager logs", func(verbose bool) {
-		if verbose {
-			term.OutputInfof("asset manager verbose logging enabled")
-		} else {
-			term.OutputInfof("asset manager verbose logging disabled")
-		}
-
-		archiveManager.GetCache().SetVerbose(verbose)
-		archivedFileManager.GetCache().SetVerbose(verbose)
-		paletteManager.GetCache().SetVerbose(verbose)
-		paletteTransformManager.cache.SetVerbose(verbose)
-		animationManager.cache.SetVerbose(verbose)
-	}); err != nil {
-		return err
-	}
-
-	if err := term.BindAction("assetstat", "display asset manager cache statistics", func() {
-		var cacheStatistics = func(c d2interface.Cache) float64 {
-			const percent = 100.0
-			return float64(c.GetWeight()) / float64(c.GetBudget()) * percent
-		}
-
-		term.OutputInfof("archive cache: %f", cacheStatistics(archiveManager.GetCache()))
-		term.OutputInfof("file cache: %f", cacheStatistics(archivedFileManager.GetCache()))
-		term.OutputInfof("palette cache: %f", cacheStatistics(paletteManager.GetCache()))
-		term.OutputInfof("palette transform cache: %f", cacheStatistics(paletteTransformManager.cache))
-		term.OutputInfof("animation cache: %f", cacheStatistics(animationManager.cache))
-		term.OutputInfof("font cache: %f", cacheStatistics(fontManager.GetCache()))
-	}); err != nil {
-		return err
-	}
-
-	if err := term.BindAction("assetclear", "clear asset manager cache", func() {
-		archiveManager.ClearCache()
-		archivedFileManager.GetCache().Clear()
-		paletteManager.ClearCache()
-		paletteTransformManager.cache.Clear()
-		animationManager.ClearCache()
-		fontManager.ClearCache()
-	}); err != nil {
-		return err
+	if term != nil {
+		return singleton.BindTerminalCommands(term)
 	}
 
 	return nil
