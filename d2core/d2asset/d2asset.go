@@ -31,8 +31,8 @@ func Initialize(renderer d2interface.Renderer,
 		fontManager,
 	}
 
-	if err := singleton.BindTerminalCommands(term); err != nil {
-		return err
+	if term != nil {
+		return singleton.BindTerminalCommands(term)
 	}
 
 	return nil

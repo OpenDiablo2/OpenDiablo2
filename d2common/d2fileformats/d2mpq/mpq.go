@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/binary"
 	"errors"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"io/ioutil"
 	"log"
 	"os"
@@ -12,7 +11,11 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
+
+var _ d2interface.Archive = &MPQ{} // Static check to confirm struct conforms to interface
 
 // MPQ represents an MPQ archive
 type MPQ struct {

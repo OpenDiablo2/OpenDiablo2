@@ -2,11 +2,13 @@ package d2asset
 
 import (
 	"errors"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 	d2iface "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
+
+var _ d2iface.Animation = &DC6Animation{} // Static check to confirm struct conforms to interface
 
 // DC6Animation is an animation made from a DC6 file
 type DC6Animation struct {

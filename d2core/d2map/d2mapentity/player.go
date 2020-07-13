@@ -144,10 +144,12 @@ func (v *Player) Advance(tickTime float64) {
 
 // Render renders the animated composite for this entity.
 func (v *Player) Render(target d2interface.Surface) {
+	renderOffset := v.Position.RenderOffset()
 	target.PushTranslation(
-		v.offsetX+int((v.subcellX-v.subcellY)*16),
-		v.offsetY+int(((v.subcellX+v.subcellY)*8)-5),
+		int((renderOffset.X()-renderOffset.Y())*16),
+		int(((renderOffset.X()+renderOffset.Y())*8)-5),
 	)
+
 	defer target.Pop()
 	v.composite.Render(target)
 	// v.nameLabel.X = v.offsetX
@@ -180,6 +182,7 @@ func (v *Player) GetAnimationMode() d2enum.PlayerAnimationMode {
 	return d2enum.PlayerAnimationModeNeutral
 }
 
+// SetAnimationMode sets the Composite's animation mode weapon class and direction.
 func (v *Player) SetAnimationMode(animationMode d2enum.PlayerAnimationMode) error {
 	return v.composite.SetMode(animationMode, v.composite.GetWeaponClass())
 }

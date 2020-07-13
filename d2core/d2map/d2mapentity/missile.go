@@ -32,7 +32,7 @@ func CreateMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error)
 	}
 
 	animation.SetEffect(d2enum.DrawEffectModulate)
-	//animation.SetPlaySpeed(float64(record.Animation.AnimationSpeed))
+	// animation.SetPlaySpeed(float64(record.Animation.AnimationSpeed))
 	animation.SetPlayLoop(record.Animation.LoopAnimation)
 	animation.PlayForward()
 	entity := CreateAnimatedEntity(x, y, animation)
@@ -51,8 +51,8 @@ func CreateMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error)
 func (m *Missile) SetRadians(angle float64, done func()) {
 	r := float64(m.record.Range)
 
-	x := m.LocationX + (r * math.Cos(angle))
-	y := m.LocationY + (r * math.Sin(angle))
+	x := m.Position.X() + (r * math.Cos(angle))
+	y := m.Position.Y() + (r * math.Sin(angle))
 
 	m.SetTarget(x, y, done)
 }

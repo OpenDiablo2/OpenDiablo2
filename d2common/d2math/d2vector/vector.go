@@ -49,6 +49,11 @@ func (v *Vector) CompareApprox(o Vector) (x, y int) {
 		d2math.CompareFloat64Fuzzy(v.y, o.y)
 }
 
+// IsZero returns true if this vector's values are both exactly zero.
+func (v *Vector) IsZero() bool {
+	return v.x == 0 && v.y == 0
+}
+
 // Set the vector values to the given float64 values.
 func (v *Vector) Set(x, y float64) *Vector {
 	v.x = x
@@ -95,7 +100,7 @@ func (v *Vector) Add(o *Vector) *Vector {
 	return v
 }
 
-// AddScalar the given vector to this vector.
+// AddScalar the given value to both values of this vector.
 func (v *Vector) AddScalar(s float64) *Vector {
 	v.x += s
 	v.y += s
@@ -135,7 +140,7 @@ func (v *Vector) Divide(o *Vector) *Vector {
 	return v
 }
 
-// DivideScalar divides this vector by the given float64 value.
+// DivideScalar divides both values of this vector by the given value.
 func (v *Vector) DivideScalar(s float64) *Vector {
 	v.x /= s
 	v.y /= s
@@ -219,6 +224,10 @@ func (v *Vector) Cross(o Vector) float64 {
 // Normalize sets the vector length to 1 without changing the direction. The normalized vector may be scaled by the
 // float64 return value to restore it's original length.
 func (v *Vector) Normalize() float64 {
+	if v.IsZero() {
+		return 0
+	}
+
 	multiplier := 1 / v.Length()
 	v.Scale(multiplier)
 
@@ -228,6 +237,10 @@ func (v *Vector) Normalize() float64 {
 // Angle computes the unsigned angle in radians from this vector to the given vector. This angle will never exceed half
 // a full circle. For angles describing a full circumference use SignedAngle.
 func (v *Vector) Angle(o Vector) float64 {
+	if v.IsZero() || o.IsZero() {
+		return 0
+	}
+
 	from := v.Clone()
 	from.Normalize()
 

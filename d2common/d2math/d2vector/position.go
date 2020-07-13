@@ -3,16 +3,24 @@ package d2vector
 import (
 	"fmt"
 	"math"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
-const subTilesPerTile float64 = 5
+const (
+	subTilesPerTile          float64 = 5  // The number of sub tiles that make up one map tile.
+	entityDirectionCount     float64 = 64 // The Diablo equivalent of 360 degrees when dealing with entity rotation.
+	entityDirectionIncrement float64 = 8  // One 8th of 64. There 8 possible facing directions for entities.
+	// Note: there should be 16 facing directions for entities. See Position.DirectionTo()
+)
 
-// Position is a vector in world space. The stored value is  the one returned by Position.World()
+// Position is a vector in world space. The stored value is the sub tile position.
 type Position struct {
 	Vector
 }
 
-// NewPosition creates a new Position at the given float64 world position.
+// NewPosition returns a Position struct with the given sub tile coordinates where 1 = 1 sub tile, with a fractional
+// offset.
 func NewPosition(x, y float64) Position {
 	p := Position{NewVector(x, y)}
 	p.checkValues()
@@ -20,15 +28,7 @@ func NewPosition(x, y float64) Position {
 	return p
 }
 
-// EntityPosition returns a Position struct based on the given entity spawn point.
-// The value given should be the one set in d2mapstamp.Stamp.Entities:
-// (tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y
-// TODO: This probably doesn't support positions in between sub tiles so will only be suitable for spawning entities from map generation, not for multiplayer syncing.
-func EntityPosition(x, y int) Position {
-	return NewPosition(float64(x)/5, float64(y)/5)
-}
-
-// Set sets this position to the given x and y values.
+// Set sets this position to the given sub tile coordinates where 1 = 1 sub tile, with a fractional offset.
 func (p *Position) Set(x, y float64) {
 	p.x, p.y = x, y
 	p.checkValues()
@@ -44,48 +44,45 @@ func (p *Position) checkValues() {
 	}
 }
 
-// World is the position, where 1 = one map tile.
-// unused
+// World is the exact position where 1 = one map tile and 0.2 = one sub tile.
 func (p *Position) World() *Vector {
-	return &p.Vector
+	c := p.Clone()
+	return c.DivideScalar(subTilesPerTile)
 }
 
-// Tile is the tile position, always a whole number. (tileX, tileY)
+// Tile is the position of the current map tile. It is the floor of World(), always a whole number.
 func (p *Position) Tile() *Vector {
-	c := p.World().Clone()
-	return c.Floor()
+	return p.World().Floor()
 }
 
-// TileOffset is the offset from the tile position, always < 1.
-// unused
-func (p *Position) TileOffset() *Vector {
-	c := p.World().Clone()
-	return c.Subtract(p.Tile())
+// RenderOffset is the offset in sub tiles from the curren tile, + 1. This places the vector at the bottom vertex of an
+// isometric diamond visually representing one sub tile. Sub tile indices increase to the lower right diagonal ('down')
+// and to the lower left diagonal ('left') of the isometric grid. This renders the target one index above which visually
+// is one tile below.
+func (p *Position) RenderOffset() *Vector {
+	return p.subTileOffset().AddScalar(1)
 }
 
-// SubWorld is the position, where 5 = one map tile. (locationX, locationY)
-func (p *Position) SubWorld() *Vector {
-	c := p.World().Clone()
-	return c.Scale(subTilesPerTile)
+// SubTileOffset is the offset from the current map tile in sub tiles.
+func (p *Position) subTileOffset() *Vector {
+	t := p.Tile().Scale(subTilesPerTile)
+	c := p.Clone()
+
+	return c.Subtract(t)
 }
 
-// SubTile is the tile position in sub tiles, always a multiple of 5.
-// unused
-func (p *Position) SubTile() *Vector {
-	return p.Tile().Scale(subTilesPerTile)
-}
+// DirectionTo returns the entity direction from this vector to the given vector.
+func (v *Vector) DirectionTo(target Vector) int {
+	direction := target.Clone()
+	direction.Subtract(v)
 
-// SubTileOffset is the offset from the sub tile position in sub tiles, always < 1.
-// unused
-func (p *Position) SubTileOffset() *Vector {
-	return p.SubWorld().Subtract(p.SubTile())
-}
+	angle := direction.SignedAngle(VectorRight())
+	radiansPerDirection := d2math.RadFull / entityDirectionCount
 
-// TODO: understand this and maybe improve/remove it
-// SubTileOffset() + 1. It's used for rendering. It seems to always do this:
-// 	v.offsetX+int((v.subcellX-v.subcellY)*16),
-//	v.offsetY+int(((v.subcellX+v.subcellY)*8)-5),
-// ^ Maybe similar to Viewport.OrthoToWorld? (subCellX, subCellY)
-func (p *Position) SubCell() *Vector {
-	return p.SubTileOffset().AddScalar(1)
+	// Note: The direction is always one increment out so we must subtract one increment.
+	// This might not work when we implement all 16 directions (as of this writing entities can only face one of 8
+	// directions). See entityDirectionIncrement.
+	newDirection := int((angle / radiansPerDirection) - entityDirectionIncrement)
+
+	return d2math.WrapInt(newDirection, int(entityDirectionCount))
 }

@@ -11,7 +11,9 @@ import (
 	d2iface "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
-// DCCAnimation represens an animation decoded from DCC
+var _ d2iface.Animation = &DCCAnimation{} // Static check to confirm struct conforms to interface
+
+// DCCAnimation represents an animation decoded from DCC
 type DCCAnimation struct {
 	animation
 	dccPath  string

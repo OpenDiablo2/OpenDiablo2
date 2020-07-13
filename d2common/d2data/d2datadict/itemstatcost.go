@@ -103,23 +103,23 @@ type ItemStatCostRecord struct {
 }
 
 //nolint:gochecknoglobals // better for lookup
-var itemStatCostRecordLookup = []string{
-	"+%v %s",
+var StatDescriptionFormatStrings = []string{
+	"%v %s",
 	"%v%% %s",
 	"%v %s",
-	"+%v%% %s",
 	"%v%% %s",
-	"+%v %s %s",
+	"%v%% %s",
+	"%v %s %s",
+	"%v%% %v %s",
 	"%v%% %s %s",
-	"+%v%% %s %s",
 	"%v %s %s",
 	"%v %s %s",
 	"Repairs 1 Durability In %v Seconds",
-	"+%v %s",
-	"+%v to %s Skill Levels",
-	"+%v to %s Skill Levels (%s Only)",
+	"%v +%v",
+	"+%v to %s",
+	"+%v to %s %s",
 	"%v%% %s",
-	"Level %v %s Aura When Equipped",
+	"Level %v %s",
 	"%v %s (Increases near %v)",
 	"%v%% %s (Increases near %v)",
 	"",
@@ -131,46 +131,562 @@ var itemStatCostRecordLookup = []string{
 	"Level %v %s (%v/%v Charges)",
 	"",
 	"",
-	"+%v to %s (%s Only)",
-	"+%v to %s",
+	"%v to %s (%s Only)",
+	"%v to %s",
 }
 
-func fixString(s string) string {
-	var result string
-
+// these are the problem children
+func stringHack(s string) string {
 	// in the lookup table above, `+%v %s` always puts a `+` in front
 	// but when the stat value is negative it comes out as `+-`
-	result = strings.Replace(s, "+-", "-", -1)
+	s = strings.ReplaceAll(s, "+-", "-")
 
-	return result
+	// Pesky chance to cast
+	s = strings.ReplaceAll(s, "%d%% ", "")
+
+	// oddbal fnid 1 case for min/max damage
+	s = strings.ReplaceAll(s, " +%d", "")
+
+	s = strings.Trim(s, " ")
+
+	return s
 }
 
 var statValueCountLookup map[int]int //nolint:gochecknoglobals // lookup
 
 // DescString return a string based on the DescFnID
-func (r *ItemStatCostRecord) DescString(a ...string) string {
-	if r.DescFnID < 0 || r.DescFnID > len(itemStatCostRecordLookup) {
+func (r *ItemStatCostRecord) DescString(values ...int) string {
+	if r.DescFnID < 0 || r.DescFnID > len(StatDescriptionFormatStrings) {
 		return ""
 	}
 
-	format := itemStatCostRecordLookup[r.DescFnID]
-
-	// sprintf wants interfaces, not strings
-	asInterface := make([]interface{}, len(a))
-	for i, v := range a {
-		asInterface[i] = v
+	var result string
+	switch r.DescFnID {
+	case 0:
+		result = r.descFn1(values...)
+	case 1:
+		result = r.descFn2(values...)
+	case 2:
+		result = r.descFn3(values...)
+	case 3:
+		result = r.descFn4(values...)
+	case 4:
+		result = r.descFn5(values...)
+	case 5:
+		result = r.descFn6(values...)
+	case 6:
+		result = r.descFn7(values...)
+	case 7:
+		result = r.descFn8(values...)
+	case 8:
+		result = r.descFn9(values...)
+	case 10:
+		result = r.descFn11(values...)
+	case 11:
+		result = r.descFn12(values...)
+	case 12:
+		result = r.descFn13(values...)
+	case 13:
+		result = r.descFn14(values...)
+	case 14:
+		result = r.descFn15(values...)
+	case 15:
+		result = r.descFn16(values...)
+	case 16:
+		result = r.descFn17(values...)
+	case 17:
+		result = r.descFn18(values...)
+	case 19:
+		result = r.descFn20(values...)
+	case 21:
+		result = r.descFn22(values...)
+	case 22:
+		result = r.descFn23(values...)
+	case 23:
+		result = r.descFn24(values...)
+	case 26:
+		result = r.descFn27(values...)
+	case 27:
+		result = r.descFn28(values...)
 	}
 
-	return fixString(fmt.Sprintf(format, asInterface...))
+	return result
+}
+
+func makeStrings(values ...int) []string {
+	strlist := make([]string, len(values)+1)
+	for idx := range values {
+		strlist[idx] = fmt.Sprintf("%v", values[idx])
+	}
+
+	return strlist
+}
+
+func (r *ItemStatCostRecord) descFn1(values ...int) string {
+	format := StatDescriptionFormatStrings[r.DescFnID]
+
+	// we know there is only one value for this stat
+	value := values[0]
+
+	var stringTableKey string
+	if value < 0 {
+		stringTableKey = r.DescStrNeg
+	} else {
+		format = strings.Join([]string{"+", format}, "")
+		stringTableKey = r.DescStrPos
+	}
+
+	stringTableString := d2common.TranslateString(stringTableKey)
+
+	var result string
+
+	switch r.DescVal {
+	case 0:
+		result = fmt.Sprintf(format, stringTableString)
+	case 1:
+		result = fmt.Sprintf(format, value, stringTableString)
+	case 2:
+		formatSplit := strings.Split(format, " ")
+		format = strings.Join(reverseStringSlice(formatSplit), " ")
+		result = fmt.Sprintf(format, stringTableString, value)
+	default:
+		result = ""
+	}
+
+	// bugs
+	result = strings.Replace(result, "+-", "-", -1)
+	result = strings.Replace(result, " +%d", "", -1)
+
+	return result
+}
+
+func (r *ItemStatCostRecord) descFn2(values ...int) string {
+	format := StatDescriptionFormatStrings[r.DescFnID]
+
+	// we know there is only one value for this stat
+	value := values[0]
+
+	var stringTableKey string
+	if value < 0 {
+		stringTableKey = r.DescStrNeg
+	} else {
+		format = strings.Join([]string{"+", format}, "")
+		stringTableKey = r.DescStrPos
+	}
+
+	stringTableString := d2common.TranslateString(stringTableKey)
+
+	var result string
+
+	switch r.DescVal {
+	case 0:
+		result = fmt.Sprintf(format, stringTableString)
+	case 1:
+		result = fmt.Sprintf(format, value, stringTableString)
+	case 2:
+		formatSplit := strings.Split(format, " ")
+		format = strings.Join(reverseStringSlice(formatSplit), " ")
+		result = fmt.Sprintf(format, stringTableString, value)
+	default:
+		result = ""
+	}
+
+	// bugs
+	result = strings.Replace(result, " +%d", "", -1)
+
+	return result
+}
+
+func (r *ItemStatCostRecord) descFn3(values ...int) string {
+	format := StatDescriptionFormatStrings[r.DescFnID]
+
+	// we know there is only one value for this stat
+	value := values[0]
+
+	var stringTableKey string
+	if value < 0 {
+		stringTableKey = r.DescStrNeg
+	} else {
+		stringTableKey = r.DescStrPos
+	}
+
+	stringTableString := d2common.TranslateString(stringTableKey)
+
+	var result string
+
+	switch r.DescVal {
+	case 0:
+		format = strings.Split(format, " ")[0]
+		result = fmt.Sprintf(format, stringTableString)
+	case 1:
+		result = fmt.Sprintf(format, value, stringTableString)
+	case 2:
+		formatSplit := strings.Split(format, " ")
+		format = strings.Join(reverseStringSlice(formatSplit), " ")
+		result = fmt.Sprintf(format, stringTableString, value)
+	default:
+		result = ""
+	}
+
+	// bugs
+	result = strings.Replace(result, "+-", "-", -1)
+	result = strings.Replace(result, " +%d", "", -1)
+
+	return result
+}
+
+func (r *ItemStatCostRecord) descFn4(values ...int) string {
+	format := StatDescriptionFormatStrings[r.DescFnID]
+
+	// we know there is only one value for this stat
+	value := values[0]
+
+	var stringTableKey string
+	if value < 0 {
+		stringTableKey = r.DescStrNeg
+	} else {
+		format = strings.Join([]string{"+", format}, "")
+		stringTableKey = r.DescStrPos
+	}
+
+	stringTableString := d2common.TranslateString(stringTableKey)
+
+	var result string
+
+	switch r.DescVal {
+	case 0:
+		result = fmt.Sprintf(format, stringTableString)
+	case 1:
+		result = fmt.Sprintf(format, value, stringTableString)
+	case 2:
+		formatSplit := strings.Split(format, " ")
+		format = strings.Join(reverseStringSlice(formatSplit), " ")
+		result = fmt.Sprintf(format, stringTableString, value)
+	default:
+		result = ""
+	}
+
+	// bugs
+	result = strings.Replace(result, " +%d", "", -1)
+
+	return result
+}
+
+func (r *ItemStatCostRecord) descFn5(values ...int) string {
+	format := StatDescriptionFormatStrings[r.DescFnID]
+
+	// we know there is only one value for this stat
+	value := values[0]
+
+	var stringTableKey string
+	if value < 0 {
+		stringTableKey = r.DescStrNeg
+	} else {
+		stringTableKey = r.DescStrPos
+	}
+
+	stringTableString := d2common.TranslateString(stringTableKey)
+
+	var result string
+
+	switch r.DescVal {
+	case 0:
+		result = fmt.Sprintf(format, stringTableString)
+	case 1:
+		result = fmt.Sprintf(format, value, stringTableString)
+	case 2:
+		formatSplit := strings.Split(format, " ")
+		format = strings.Join(reverseStringSlice(formatSplit), " ")
+		result = fmt.Sprintf(format, stringTableString, value)
+	default:
+		result = ""
+	}
+
+	// bugs
+	result = strings.Replace(result, " +%d", "", -1)
+
+	return result
+}
+
+func (r *ItemStatCostRecord) descFn6(values ...int) string {
+	format := StatDescriptionFormatStrings[r.DescFnID]
+
+	// we know there is only one value for this stat
+	value := values[0]
+
+	var stringTableKey1 string
+	if value < 0 {
+		stringTableKey1 = r.DescStrNeg
+	} else {
+		format = strings.Join([]string{"+", format}, "")
+		stringTableKey1 = r.DescStrPos
+	}
+
+	stringTableStr1 := d2common.TranslateString(stringTableKey1)
+
+	// this stat has an additional string (Based on Character Level)
+	stringTableStr2 := d2common.TranslateString(r.DescStr2)
+
+	var result string
+
+	switch r.DescVal {
+	case 0:
+		result = fmt.Sprintf(format, stringTableStr1, stringTableStr2)
+	case 1:
+		result = fmt.Sprintf(format, value, stringTableStr1, stringTableStr2)
+	case 2:
+		formatSplit := strings.Split(format, " ")
+		format = strings.Join(reverseStringSlice(formatSplit), " ")
+		result = fmt.Sprintf(format, stringTableStr1, value)
+	default:
+		result = ""
+	}
+
+	// bugs
+	result = strings.Replace(result, "+-", "-", -1)
+	result = strings.Replace(result, " +%d", "", -1)
+
+	return result
+}
+
+func (r *ItemStatCostRecord) descFn7(values ...int) string {
+	format := StatDescriptionFormatStrings[r.DescFnID]
+
+	// we know there is only one value for this stat
+	value := values[0]
+
+	var stringTableKey string
+	if value < 0 {
+		stringTableKey = r.DescStrNeg
+	} else {
+		format = strings.Join([]string{"+", format}, "")
+		stringTableKey = r.DescStrPos
+	}
+
+	stringTableStr1 := d2common.TranslateString(stringTableKey)
+
+	// this stat has an additional string (Based on Character Level)
+	stringTableStr2 := d2common.TranslateString(r.DescStr2)
+
+	var result string
+
+	switch r.DescVal {
+	case 0:
+		result = fmt.Sprintf(format, stringTableStr1, stringTableStr2)
+	case 1:
+		result = fmt.Sprintf(format, value, stringTableStr1, stringTableStr2)
+	case 2:
+		formatSplit := strings.Split(format, " ")
+		// formatSplit = reverseStringSlice(formatSplit)
+		formatSplit[0], formatSplit[1] = formatSplit[1], formatSplit[0]
+		format = strings.Join(formatSplit, " ")
+		result = fmt.Sprintf(format, stringTableStr1, value, stringTableStr2)
+	default:
+		result = ""
+	}
+
+	return result
+}
+
+func (r *ItemStatCostRecord) descFn8(values ...int) string {
+	format := StatDescriptionFormatStrings[r.DescFnID]
+
+	// we know there is only one value for this stat
+	value := values[0]
+
+	var stringTableKey1 string
+	if value < 0 {
+		stringTableKey1 = r.DescStrNeg
+	} else {
+		format = strings.Join([]string{"+", format}, "")
+		stringTableKey1 = r.DescStrPos
+	}
+
+	stringTableStr1 := d2common.TranslateString(stringTableKey1)
+
+	// this stat has an additional string (Based on Character Level)
+	stringTableStr2 := d2common.TranslateString(r.DescStr2)
+
+	var result string
+
+	switch r.DescVal {
+	case 0:
+		result = fmt.Sprintf(format, stringTableStr1, stringTableStr2)
+	case 1:
+		result = fmt.Sprintf(format, value, stringTableStr1, stringTableStr2)
+	case 2:
+		formatSplit := strings.Split(format, " ")
+		formatSplit[0], formatSplit[1] = formatSplit[1], formatSplit[0]
+		format = strings.Join(formatSplit, " ")
+		result = fmt.Sprintf(format, stringTableStr1, value, stringTableStr2)
+	default:
+		result = ""
+	}
+
+	return result
+}
+
+func (r *ItemStatCostRecord) descFn9(values ...int) string {
+	format := StatDescriptionFormatStrings[r.DescFnID]
+
+	// we know there is only one value for this stat
+	value := values[0]
+
+	var stringTableKey1 string
+	if value < 0 {
+		stringTableKey1 = r.DescStrNeg
+	} else {
+		stringTableKey1 = r.DescStrPos
+	}
+
+	stringTableStr1 := d2common.TranslateString(stringTableKey1)
+
+	// this stat has an additional string (Based on Character Level)
+	stringTableStr2 := d2common.TranslateString(r.DescStr2)
+
+	var result string
+
+	switch r.DescVal {
+	case 0:
+		result = fmt.Sprintf(format, stringTableStr1, stringTableStr2)
+	case 1:
+		result = fmt.Sprintf(format, value, stringTableStr1, stringTableStr2)
+	case 2:
+		formatSplit := strings.Split(format, " ")
+		formatSplit[0], formatSplit[1] = formatSplit[1], formatSplit[0]
+		format = strings.Join(formatSplit, " ")
+		result = fmt.Sprintf(format, stringTableStr1, value, stringTableStr2)
+	default:
+		result = ""
+	}
+
+	return result
+}
+
+func (r *ItemStatCostRecord) descFn11(values ...int) string {
+	// we know there is only one value for this stat
+	value := values[0]
+
+	// the only stat to use this fn is "Repairs durability in X seconds"
+	format := d2common.TranslateString(r.DescStrPos)
+
+	return fmt.Sprintf(format, value)
+}
+
+func (r *ItemStatCostRecord) descFn12(values ...int) string {
+	format := StatDescriptionFormatStrings[r.DescFnID]
+
+	// we know there is only one value for this stat
+	value := values[0]
+
+	str1 := d2common.TranslateString(r.DescStrPos)
+
+	return fmt.Sprintf(format, str1, value)
+}
+
+func (r *ItemStatCostRecord) descFn13(values ...int) string {
+	format := StatDescriptionFormatStrings[r.DescFnID]
+	numSkills, heroIndex := values[0], values[1]
+
+	heroMap := map[int]d2enum.Hero{
+		int(d2enum.HeroAmazon): d2enum.HeroAmazon,
+		int(d2enum.HeroSorceress): d2enum.HeroSorceress,
+		int(d2enum.HeroNecromancer): d2enum.HeroNecromancer,
+		int(d2enum.HeroPaladin): d2enum.HeroPaladin,
+		int(d2enum.HeroBarbarian): d2enum.HeroBarbarian,
+		int(d2enum.HeroDruid): d2enum.HeroDruid,
+		int(d2enum.HeroAssassin): d2enum.HeroAssassin,
+	}
+
+	classRecord := CharStats[heroMap[heroIndex]]
+	descStr1 := d2common.TranslateString(classRecord.SkillStrAll)
+	result := fmt.Sprintf(format, numSkills, descStr1)
+
+	// bugs
+	result = strings.Replace(result, "+-", "-", -1)
+
+	return result
+}
+
+func (r *ItemStatCostRecord) descFn14(values ...int) string {
+	numSkills, heroIndex, skillTabIndex:= values[0], values[1], values[2]
+
+	if skillTabIndex > 2 || skillTabIndex < 0 {
+		skillTabIndex = 0
+	}
+
+	heroMap := map[int]d2enum.Hero{
+		int(d2enum.HeroAmazon): d2enum.HeroAmazon,
+		int(d2enum.HeroSorceress): d2enum.HeroSorceress,
+		int(d2enum.HeroNecromancer): d2enum.HeroNecromancer,
+		int(d2enum.HeroPaladin): d2enum.HeroPaladin,
+		int(d2enum.HeroBarbarian): d2enum.HeroBarbarian,
+		int(d2enum.HeroDruid): d2enum.HeroDruid,
+		int(d2enum.HeroAssassin): d2enum.HeroAssassin,
+	}
+
+	classRecord := CharStats[heroMap[heroIndex]]
+	skillTabKey := classRecord.SkillStrTab[skillTabIndex]
+	classOnlyKey := classRecord.SkillStrClassOnly
+
+	skillTabStr := d2common.TranslateString(skillTabKey) + " %v"
+	skillTabStr = strings.ReplaceAll(skillTabStr, "%d", "%v")
+	classOnlyStr := d2common.TranslateString(classOnlyKey)
+	result := fmt.Sprintf(skillTabStr, numSkills, classOnlyStr)
+
+	// bugs
+	result = strings.Replace(result, "+-", "-", -1)
+
+	return result
+}
+
+func (r *ItemStatCostRecord) descFn15(values ...int) string {
+	return ""
+}
+
+func (r *ItemStatCostRecord) descFn16(values ...int) string {
+	return ""
+}
+
+func (r *ItemStatCostRecord) descFn17(values ...int) string {
+	return ""
+}
+
+func (r *ItemStatCostRecord) descFn18(values ...int) string {
+	return ""
+}
+
+func (r *ItemStatCostRecord) descFn20(values ...int) string {
+	return ""
+}
+
+func (r *ItemStatCostRecord) descFn22(values ...int) string {
+	return ""
+}
+
+func (r *ItemStatCostRecord) descFn23(values ...int) string {
+	return ""
+}
+
+func (r *ItemStatCostRecord) descFn24(values ...int) string {
+	return ""
+}
+
+func (r *ItemStatCostRecord) descFn27(values ...int) string {
+	return ""
+}
+
+func (r *ItemStatCostRecord) descFn28(values ...int) string {
+	return ""
 }
 
 // DescGroupString return a string based on the DescGroupFuncID
 func (r *ItemStatCostRecord) DescGroupString(a ...interface{}) string {
-	if r.DescGroupFuncID < 0 || r.DescGroupFuncID > len(itemStatCostRecordLookup) {
+	if r.DescGroupFuncID < 0 || r.DescGroupFuncID > len(StatDescriptionFormatStrings) {
 		return ""
 	}
 
-	format := itemStatCostRecordLookup[r.DescGroupFuncID]
+	format := StatDescriptionFormatStrings[r.DescGroupFuncID]
 
 	return fmt.Sprintf(format, a...)
 }
@@ -186,13 +702,21 @@ func (r *ItemStatCostRecord) NumStatValues() int {
 		statValueCountLookup = make(map[int]int)
 	}
 
-	format := itemStatCostRecordLookup[r.DescGroupFuncID]
+	format := StatDescriptionFormatStrings[r.DescGroupFuncID]
 	pattern := regexp.MustCompile("%v")
 	matches := pattern.FindAllStringIndex(format, -1)
 	num := len(matches)
 	statValueCountLookup[r.DescGroupFuncID] = num
 
 	return num
+}
+
+func reverseStringSlice(s []string) []string {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+
+	return s
 }
 
 // ItemStatCosts stores all of the ItemStatCostRecords
@@ -255,11 +779,11 @@ func LoadItemStatCosts(file []byte) {
 			EventFuncID2: d2enum.ItemEventFuncID(d.Number("itemeventfunc2")),
 
 			DescPriority: d.Number("descpriority"),
-			DescFnID:     d.Number("descfunc") - 1, // offset to index-0
-			DescVal:      d.Number("descval"),
-			DescStrPos:   d.String("descstrpos"),
-			DescStrNeg:   d.String("descstrneg"),
-			DescStr2:     d.String("descstr2"),
+			DescFnID:     d.Number("descfunc") - 1,
+			// DescVal:      d.Number("descval"), // needs special handling
+			DescStrPos: d.String("descstrpos"),
+			DescStrNeg: d.String("descstrneg"),
+			DescStr2:   d.String("descstr2"),
 
 			DescGroup:       d.Number("dgrp"),
 			DescGroupFuncID: d.Number("dgrpfunc"),
@@ -271,6 +795,18 @@ func LoadItemStatCosts(file []byte) {
 
 			Stuff: d.String("stuff"),
 		}
+
+		descValStr := d.String("descval")
+		switch descValStr {
+		case "2":
+			record.DescVal = 2
+		case "0":
+			record.DescVal = 0
+		default:
+			// handle empty fields, seems like they should have been 1
+			record.DescVal = 1
+		}
+
 		ItemStatCosts[record.Name] = record
 	}
 
