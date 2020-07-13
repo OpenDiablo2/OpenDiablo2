@@ -1,6 +1,12 @@
 package d2common
 
-import "log"
+import (
+	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+)
+
+var _ d2interface.BitStream = &BitStream{} // Static check to confirm struct conforms to interface
 
 // BitStream is a utility class for reading groups of bits from a stream
 type BitStream struct {

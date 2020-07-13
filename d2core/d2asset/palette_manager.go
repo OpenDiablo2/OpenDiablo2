@@ -6,6 +6,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
+// Static checks to confirm struct conforms to interface
+var _ d2interface.ArchivedPaletteManager = &paletteManager{}
+var _ d2interface.Cacher = &paletteManager{}
+
 type paletteManager struct {
 	cache d2interface.Cache
 }
