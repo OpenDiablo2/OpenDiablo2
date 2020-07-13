@@ -2,10 +2,11 @@ package d2datadict
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"log"
+	"regexp"
+	"strings"
 )
 
 // ItemStatCostRecord represents a row from itemstatcost.txt
@@ -103,46 +104,64 @@ type ItemStatCostRecord struct {
 
 //nolint:gochecknoglobals // better for lookup
 var itemStatCostRecordLookup = []string{
-	"+%f %s",
-	"%f%% %s",
-	"%f %s",
-	"+%f%% %s",
-	"%f%% %s",
-	"+%f %s %s",
-	"%f%% %s %s",
-	"+%f%% %s %s",
-	"%f %s %s",
-	"%f %s %s",
-	"Repairs 1 Durability In %.0f Seconds",
-	"+%f %s",
-	"+%.0f to %s Skill Levels",
-	"+%.0f to %s Skill Levels (%s Only)",
-	"%.0f%% chance to cast %d %s on %s",
-	"Level %d %s Aura When Equipped",
-	"%f %s (Increases near %d)",
-	"%f%% %s (Increases near %d)",
+	"+%v %s",
+	"%v%% %s",
+	"%v %s",
+	"+%v%% %s",
+	"%v%% %s",
+	"+%v %s %s",
+	"%v%% %s %s",
+	"+%v%% %s %s",
+	"%v %s %s",
+	"%v %s %s",
+	"Repairs 1 Durability In %v Seconds",
+	"+%v %s",
+	"+%v to %s Skill Levels",
+	"+%v to %s Skill Levels (%s Only)",
+	"%v%% %s",
+	"Level %v %s Aura When Equipped",
+	"%v %s (Increases near %v)",
+	"%v%% %s (Increases near %v)",
 	"",
-	"%f%% %s",
-	"%f %s",
-	"%f%% %s %s",
+	"%v%% %s",
+	"%v %s",
+	"%v%% %s %s",
 	"",
-	"%f%% %s %s",
-	"Level %.0f %s (%d/%d Charges)",
+	"%v%% %s %s",
+	"Level %v %s (%v/%v Charges)",
 	"",
 	"",
-	"+%f to %s (%s Only)",
-	"+%.0f to %s",
+	"+%v to %s (%s Only)",
+	"+%v to %s",
 }
 
+func fixString(s string) string {
+	var result string
+
+	// in the lookup table above, `+%v %s` always puts a `+` in front
+	// but when the stat value is negative it comes out as `+-`
+	result = strings.Replace(s, "+-", "-", -1)
+
+	return result
+}
+
+var statValueCountLookup map[int]int //nolint:gochecknoglobals // lookup
+
 // DescString return a string based on the DescFnID
-func (r *ItemStatCostRecord) DescString(a ...interface{}) string {
+func (r *ItemStatCostRecord) DescString(a ...string) string {
 	if r.DescFnID < 0 || r.DescFnID > len(itemStatCostRecordLookup) {
 		return ""
 	}
 
 	format := itemStatCostRecordLookup[r.DescFnID]
 
-	return fmt.Sprintf(format, a...)
+	// sprintf wants interfaces, not strings
+	asInterface := make([]interface{}, len(a))
+	for i, v := range a {
+		asInterface[i] = v
+	}
+
+	return fixString(fmt.Sprintf(format, asInterface...))
 }
 
 // DescGroupString return a string based on the DescGroupFuncID
@@ -154,6 +173,26 @@ func (r *ItemStatCostRecord) DescGroupString(a ...interface{}) string {
 	format := itemStatCostRecordLookup[r.DescGroupFuncID]
 
 	return fmt.Sprintf(format, a...)
+}
+
+// NumStatValues returns the number of values a stat instance for this
+// record should have
+func (r *ItemStatCostRecord) NumStatValues() int {
+	if num, found := statValueCountLookup[r.DescGroupFuncID]; found {
+		return num
+	}
+
+	if statValueCountLookup == nil {
+		statValueCountLookup = make(map[int]int)
+	}
+
+	format := itemStatCostRecordLookup[r.DescGroupFuncID]
+	pattern := regexp.MustCompile("%v")
+	matches := pattern.FindAllStringIndex(format, -1)
+	num := len(matches)
+	statValueCountLookup[r.DescGroupFuncID] = num
+
+	return num
 }
 
 // ItemStatCosts stores all of the ItemStatCostRecords
@@ -216,7 +255,7 @@ func LoadItemStatCosts(file []byte) {
 			EventFuncID2: d2enum.ItemEventFuncID(d.Number("itemeventfunc2")),
 
 			DescPriority: d.Number("descpriority"),
-			DescFnID:     d.Number("descfunc"),
+			DescFnID:     d.Number("descfunc") - 1, // offset to index-0
 			DescVal:      d.Number("descval"),
 			DescStrPos:   d.String("descstrpos"),
 			DescStrNeg:   d.String("descstrneg"),
