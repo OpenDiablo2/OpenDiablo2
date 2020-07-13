@@ -15,7 +15,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
@@ -68,6 +67,7 @@ type MainMenu struct {
 	tcpJoinGameEntry    d2ui.TextBox
 	screenMode          mainMenuScreenMode
 	leftButtonHeld      bool
+	inputManager        d2interface.InputManager
 	renderer            d2interface.Renderer
 	audioProvider       d2interface.AudioProvider
 	terminal            d2interface.Terminal
@@ -75,12 +75,13 @@ type MainMenu struct {
 }
 
 // CreateMainMenu creates an instance of MainMenu
-func CreateMainMenu(renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, term d2interface.Terminal,
+func CreateMainMenu(renderer d2interface.Renderer, inputManager d2interface.InputManager, audioProvider d2interface.AudioProvider, term d2interface.Terminal,
 	scriptEngine *d2script.ScriptEngine) *MainMenu {
 	return &MainMenu{
 		screenMode:     screenModeUnknown,
 		leftButtonHeld: true,
 		renderer:       renderer,
+		inputManager:   inputManager,
 		audioProvider:  audioProvider,
 		terminal:       term,
 		scriptEngine:   scriptEngine,
@@ -109,7 +110,7 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 		v.setScreenMode(screenModeMainMenu)
 	}
 
-	if err := d2input.BindHandler(v); err != nil {
+	if err := v.inputManager.BindHandler(v); err != nil {
 		fmt.Println("failed to add main menu as event handler")
 	}
 }
@@ -279,18 +280,18 @@ func (v *MainMenu) createMultiplayerMenuButtons() {
 }
 
 func (v *MainMenu) onMapTestClicked() {
-	d2screen.SetNextScreen(CreateMapEngineTest(0, 1, v.terminal, v.renderer))
+	d2screen.SetNextScreen(CreateMapEngineTest(0, 1, v.terminal, v.renderer, v.inputManager))
 }
 
 func (v *MainMenu) onSinglePlayerClicked() {
 	// Go here only if existing characters are available to select
 	if d2player.HasGameStates() {
-		d2screen.SetNextScreen(CreateCharacterSelect(v.renderer, v.audioProvider, d2clientconnectiontype.Local,
+		d2screen.SetNextScreen(CreateCharacterSelect(v.renderer, v.inputManager, v.audioProvider, d2clientconnectiontype.Local,
 			v.tcpJoinGameEntry.GetText(), v.terminal, v.scriptEngine))
 		return
 	}
 
-	d2screen.SetNextScreen(CreateSelectHeroClass(v.renderer, v.audioProvider,
+	d2screen.SetNextScreen(CreateSelectHeroClass(v.renderer, v.inputManager, v.audioProvider,
 		d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText(), v.terminal, v.scriptEngine))
 }
 
@@ -320,7 +321,7 @@ func (v *MainMenu) onExitButtonClicked() {
 }
 
 func (v *MainMenu) onCreditsButtonClicked() {
-	d2screen.SetNextScreen(CreateCredits(v.renderer, v.audioProvider, v.scriptEngine))
+	d2screen.SetNextScreen(CreateCredits(v.renderer, v.inputManager, v.audioProvider, v.scriptEngine))
 }
 
 // Render renders the main menu
@@ -485,7 +486,7 @@ func (v *MainMenu) onTCPIPCancelClicked() {
 }
 
 func (v *MainMenu) onTCPIPHostGameClicked() {
-	d2screen.SetNextScreen(CreateCharacterSelect(v.renderer, v.audioProvider,
+	d2screen.SetNextScreen(CreateCharacterSelect(v.renderer, v.inputManager, v.audioProvider,
 		d2clientconnectiontype.LANServer, "", v.terminal, v.scriptEngine))
 }
 
@@ -498,6 +499,6 @@ func (v *MainMenu) onBtnTCPIPCancelClicked() {
 }
 
 func (v *MainMenu) onBtnTCPIPOkClicked() {
-	d2screen.SetNextScreen(CreateCharacterSelect(v.renderer, v.audioProvider,
+	d2screen.SetNextScreen(CreateCharacterSelect(v.renderer, v.inputManager, v.audioProvider,
 		d2clientconnectiontype.LANClient, v.tcpJoinGameEntry.GetText(), v.terminal, v.scriptEngine))
 }

@@ -25,7 +25,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -47,6 +46,7 @@ type App struct {
 	captureFrames     []*image.RGBA
 	gitBranch         string
 	gitCommit         string
+	inputManager      d2interface.InputManager
 	terminal          d2interface.Terminal
 	scriptEngine      *d2script.ScriptEngine
 	audio             d2interface.AudioProvider
@@ -69,6 +69,7 @@ const (
 
 // Create creates a new instance of the application
 func Create(gitBranch, gitCommit string,
+	inputManager d2interface.InputManager,
 	terminal d2interface.Terminal,
 	scriptEngine *d2script.ScriptEngine,
 	audio d2interface.AudioProvider,
@@ -76,6 +77,7 @@ func Create(gitBranch, gitCommit string,
 	result := &App{
 		gitBranch:     gitBranch,
 		gitCommit:     gitCommit,
+		inputManager:  inputManager,
 		terminal:      terminal,
 		scriptEngine:  scriptEngine,
 		audio:         audio,
@@ -108,7 +110,7 @@ func (p *App) Run() error {
 		return err
 	}
 
-	d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(p.renderer, p.audio, p.terminal, p.scriptEngine))
+	d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(p.renderer, p.inputManager, p.audio, p.terminal, p.scriptEngine))
 
 	if p.gitBranch == "" {
 		p.gitBranch = "Local Build"
@@ -160,7 +162,7 @@ func (p *App) initialize() error {
 		return err
 	}
 
-	if err := d2gui.Initialize(); err != nil {
+	if err := d2gui.Initialize(p.inputManager); err != nil {
 		return err
 	}
 
@@ -176,7 +178,7 @@ func (p *App) initialize() error {
 
 	d2inventory.LoadHeroObjects()
 
-	d2ui.Initialize(p.audio)
+	d2ui.Initialize(p.inputManager, p.audio)
 
 	return nil
 }
@@ -415,7 +417,7 @@ func (p *App) advance(elapsed, current float64) error {
 
 	d2ui.Advance(elapsed)
 
-	if err := d2input.Advance(elapsed, current); err != nil {
+	if err := p.inputManager.Advance(elapsed, current); err != nil {
 		return err
 	}
 
@@ -481,7 +483,7 @@ func (p *App) evalJS(code string) {
 		return
 	}
 
-	p.terminal.OutputInfof("%s", val)
+	log.Printf("%s", val)
 }
 
 func (p *App) toggleFullScreen() {
