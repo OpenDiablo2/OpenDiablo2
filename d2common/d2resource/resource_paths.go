@@ -187,6 +187,7 @@ const (
 	DifficultyLevels = "/data/global/excel/difficultylevels.txt"
 	AutoMap          = "/data/global/excel/AutoMap.txt"
 	CubeRecipes      = "/data/global/excel/cubemain.txt"
+	Skills           = "/data/global/excel/skills.txt"
 
 	// --- Animations ---
 
