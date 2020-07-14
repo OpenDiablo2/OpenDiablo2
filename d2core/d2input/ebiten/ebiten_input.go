@@ -69,7 +69,7 @@ var (
 		d2enum.KeyF10:          ebiten.KeyF10,
 		d2enum.KeyF11:          ebiten.KeyF11,
 		d2enum.KeyF12:          ebiten.KeyF12,
-		d2enum.KeyGraveAccent:  ebiten.KeyGraveAccent,
+		d2enum.KeyGraveAccent:  ebiten.KeyF12,
 		d2enum.KeyHome:         ebiten.KeyHome,
 		d2enum.KeyInsert:       ebiten.KeyInsert,
 		d2enum.KeyKP0:          ebiten.KeyKP0,
