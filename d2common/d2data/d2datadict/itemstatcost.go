@@ -1,11 +1,9 @@
 package d2datadict
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"log"
 )
 
 // ItemStatCostRecord represents a row from itemstatcost.txt
@@ -101,61 +99,6 @@ type ItemStatCostRecord struct {
 	DamageRelated bool // prevents stacking of stats while dual wielding
 }
 
-//nolint:gochecknoglobals // better for lookup
-var itemStatCostRecordLookup = []string{
-	"+%f %s",
-	"%f%% %s",
-	"%f %s",
-	"+%f%% %s",
-	"%f%% %s",
-	"+%f %s %s",
-	"%f%% %s %s",
-	"+%f%% %s %s",
-	"%f %s %s",
-	"%f %s %s",
-	"Repairs 1 Durability In %.0f Seconds",
-	"+%f %s",
-	"+%.0f to %s Skill Levels",
-	"+%.0f to %s Skill Levels (%s Only)",
-	"%.0f%% chance to cast %d %s on %s",
-	"Level %d %s Aura When Equipped",
-	"%f %s (Increases near %d)",
-	"%f%% %s (Increases near %d)",
-	"",
-	"%f%% %s",
-	"%f %s",
-	"%f%% %s %s",
-	"",
-	"%f%% %s %s",
-	"Level %.0f %s (%d/%d Charges)",
-	"",
-	"",
-	"+%f to %s (%s Only)",
-	"+%.0f to %s",
-}
-
-// DescString return a string based on the DescFnID
-func (r *ItemStatCostRecord) DescString(a ...interface{}) string {
-	if r.DescFnID < 0 || r.DescFnID > len(itemStatCostRecordLookup) {
-		return ""
-	}
-
-	format := itemStatCostRecordLookup[r.DescFnID]
-
-	return fmt.Sprintf(format, a...)
-}
-
-// DescGroupString return a string based on the DescGroupFuncID
-func (r *ItemStatCostRecord) DescGroupString(a ...interface{}) string {
-	if r.DescGroupFuncID < 0 || r.DescGroupFuncID > len(itemStatCostRecordLookup) {
-		return ""
-	}
-
-	format := itemStatCostRecordLookup[r.DescGroupFuncID]
-
-	return fmt.Sprintf(format, a...)
-}
-
 // ItemStatCosts stores all of the ItemStatCostRecords
 //nolint:gochecknoglobals // Currently global by design
 var ItemStatCosts map[string]*ItemStatCostRecord
@@ -216,11 +159,11 @@ func LoadItemStatCosts(file []byte) {
 			EventFuncID2: d2enum.ItemEventFuncID(d.Number("itemeventfunc2")),
 
 			DescPriority: d.Number("descpriority"),
-			DescFnID:     d.Number("descfunc"),
-			DescVal:      d.Number("descval"),
-			DescStrPos:   d.String("descstrpos"),
-			DescStrNeg:   d.String("descstrneg"),
-			DescStr2:     d.String("descstr2"),
+			DescFnID:     d.Number("descfunc") - 1,
+			// DescVal:      d.Number("descval"), // needs special handling
+			DescStrPos: d.String("descstrpos"),
+			DescStrNeg: d.String("descstrneg"),
+			DescStr2:   d.String("descstr2"),
 
 			DescGroup:       d.Number("dgrp"),
 			DescGroupFuncID: d.Number("dgrpfunc"),
@@ -232,6 +175,18 @@ func LoadItemStatCosts(file []byte) {
 
 			Stuff: d.String("stuff"),
 		}
+
+		descValStr := d.String("descval")
+		switch descValStr {
+		case "2":
+			record.DescVal = 2
+		case "0":
+			record.DescVal = 0
+		default:
+			// handle empty fields, seems like they should have been 1
+			record.DescVal = 1
+		}
+
 		ItemStatCosts[record.Name] = record
 	}
 
