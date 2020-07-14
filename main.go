@@ -39,15 +39,15 @@ func main() {
 		panic(err)
 	}
 
-	d2input.Create() // TODO d2input singleton must be init before d2term
-	term, err := d2term.Initialize()
+	inputManager := d2input.New()
+	term, err := d2term.New(inputManager)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	scriptEngine := d2script.CreateScriptEngine()
 
-	app := d2app.Create(GitBranch, GitCommit, term, scriptEngine, audio, renderer)
+	app := d2app.Create(GitBranch, GitCommit, inputManager, term, scriptEngine, audio, renderer)
 	if err := app.Run(); err != nil {
 		log.Fatal(err)
 	}

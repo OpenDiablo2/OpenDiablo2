@@ -181,6 +181,7 @@ type SelectHeroClass struct {
 	hardcoreCharLabel  d2ui.Label
 	connectionType     d2clientconnectiontype.ClientConnectionType
 	connectionHost     string
+	inputManager       d2interface.InputManager
 	audioProvider      d2interface.AudioProvider
 	terminal           d2interface.Terminal
 	renderer           d2interface.Renderer
@@ -190,6 +191,7 @@ type SelectHeroClass struct {
 // CreateSelectHeroClass creates an instance of a SelectHeroClass
 func CreateSelectHeroClass(
 	renderer d2interface.Renderer,
+	inputManager d2interface.InputManager,
 	audioProvider d2interface.AudioProvider,
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	connectionHost string,
@@ -201,6 +203,7 @@ func CreateSelectHeroClass(
 		selectedHero:   d2enum.HeroNone,
 		connectionType: connectionType,
 		connectionHost: connectionHost,
+		inputManager:   inputManager,
 		audioProvider:  audioProvider,
 		terminal:       terminal,
 		renderer:       renderer,
@@ -340,7 +343,7 @@ func (v *SelectHeroClass) OnUnload() error {
 }
 
 func (v *SelectHeroClass) onExitButtonClicked() {
-	d2screen.SetNextScreen(CreateCharacterSelect(v.renderer, v.audioProvider, v.connectionType,
+	d2screen.SetNextScreen(CreateCharacterSelect(v.renderer, v.inputManager, v.audioProvider, v.connectionType,
 		v.connectionHost, v.terminal, v.scriptEngine))
 }
 
@@ -357,7 +360,7 @@ func (v *SelectHeroClass) onOkButtonClicked() {
 		fmt.Printf("can not connect to the host: %s\n", v.connectionHost)
 	}
 
-	d2screen.SetNextScreen(CreateGame(v.renderer, v.audioProvider, gameClient, v.terminal, v.scriptEngine))
+	d2screen.SetNextScreen(CreateGame(v.renderer, v.inputManager, v.audioProvider, gameClient, v.terminal, v.scriptEngine))
 }
 
 // Render renders the Select Hero Class screen
