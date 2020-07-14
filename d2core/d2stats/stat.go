@@ -2,11 +2,12 @@ package d2stats
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"regexp"
-	"strings"
 )
 
 // CreateStat creates a stat instance with the given ID and number of values
@@ -21,14 +22,6 @@ func CreateStat(record *d2datadict.ItemStatCostRecord, values ...int) *Stat {
 	}
 
 	return stat
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-
-	return b
 }
 
 // Stat is an instance of a Stat, with a set of Values
@@ -56,8 +49,15 @@ func (s *Stat) Description() string {
 	return s.DescString(s.Values...)
 }
 
+// StatDescriptionFormatStrings is an array of the base format strings used
+// by the `descfn` methods for stats. The records in itemstatcost.txt have a
+// number field which denotes which of these functions is used for formatting
+// the stat description.
+// These came from phrozen keep:
+// https://d2mods.info/forum/kb/viewarticle?a=448
 //nolint:gochecknoglobals // better for lookup
 var StatDescriptionFormatStrings = []string{
+	"",
 	"%v %s",
 	"%v%% %s",
 	"%v %s",
@@ -88,23 +88,6 @@ var StatDescriptionFormatStrings = []string{
 	"+%v to %s",
 }
 
-// these are the problem children
-func stringHack(s string) string {
-	// in the lookup table above, `+%v %s` always puts a `+` in front
-	// but when the stat value is negative it comes out as `+-`
-	s = strings.ReplaceAll(s, "+-", "-")
-
-	// Pesky chance to cast
-	s = strings.ReplaceAll(s, "%d%% ", "")
-
-	// oddbal fnid 1 case for min/max damage
-	s = strings.ReplaceAll(s, " +%d", "")
-
-	s = strings.Trim(s, " ")
-
-	return s
-}
-
 var statValueCountLookup map[int]int //nolint:gochecknoglobals // lookup
 
 // DescString return a string based on the DescFnID
@@ -115,60 +98,51 @@ func (s *Stat) DescString(values ...int) string {
 
 	var result string
 	switch s.Record.DescFnID {
-	case 0:
-		result = s.descFn1(values...)
 	case 1:
-		result = s.descFn2(values...)
+		result = s.descFn1(values...)
 	case 2:
-		result = s.descFn3(values...)
+		result = s.descFn2(values...)
 	case 3:
-		result = s.descFn4(values...)
+		result = s.descFn3(values...)
 	case 4:
-		result = s.descFn5(values...)
+		result = s.descFn4(values...)
 	case 5:
-		result = s.descFn6(values...)
+		result = s.descFn5(values...)
 	case 6:
-		result = s.descFn7(values...)
+		result = s.descFn6(values...)
 	case 7:
-		result = s.descFn8(values...)
+		result = s.descFn7(values...)
 	case 8:
+		result = s.descFn8(values...)
+	case 9:
 		result = s.descFn9(values...)
-	case 10:
-		result = s.descFn11(values...)
 	case 11:
-		result = s.descFn12(values...)
+		result = s.descFn11(values...)
 	case 12:
-		result = s.descFn13(values...)
+		result = s.descFn12(values...)
 	case 13:
-		result = s.descFn14(values...)
+		result = s.descFn13(values...)
 	case 14:
-		result = s.descFn15(values...)
+		result = s.descFn14(values...)
 	case 15:
+		result = s.descFn15(values...)
+	case 16:
 		result = s.descFn16(values...)
-	case 19:
+	case 20:
 		result = s.descFn20(values...)
-	case 21:
-		result = s.descFn22(values...)
 	case 22:
-		result = s.descFn23(values...)
+		result = s.descFn22(values...)
 	case 23:
+		result = s.descFn23(values...)
+	case 24:
 		result = s.descFn24(values...)
-	case 26:
-		result = s.descFn27(values...)
 	case 27:
+		result = s.descFn27(values...)
+	case 28:
 		result = s.descFn28(values...)
 	}
 
 	return result
-}
-
-func makeStrings(values ...int) []string {
-	strlist := make([]string, len(values)+1)
-	for idx := range values {
-		strlist[idx] = fmt.Sprintf("%v", values[idx])
-	}
-
-	return strlist
 }
 
 func (s *Stat) descFn1(values ...int) string {
@@ -202,9 +176,8 @@ func (s *Stat) descFn1(values ...int) string {
 		result = ""
 	}
 
-	// bugs
-	result = strings.Replace(result, "+-", "-", -1)
-	result = strings.Replace(result, " +%d", "", -1)
+	result = strings.ReplaceAll(result, "+-", "-")
+	result = strings.ReplaceAll(result, " +%d", "")
 
 	return result
 }
@@ -241,7 +214,7 @@ func (s *Stat) descFn2(values ...int) string {
 	}
 
 	// bugs
-	result = strings.Replace(result, " +%d", "", -1)
+	result = strings.ReplaceAll(result, " +%d", "")
 
 	return result
 }
@@ -278,8 +251,8 @@ func (s *Stat) descFn3(values ...int) string {
 	}
 
 	// bugs
-	result = strings.Replace(result, "+-", "-", -1)
-	result = strings.Replace(result, " +%d", "", -1)
+	result = strings.ReplaceAll(result, "+-", "-")
+	result = strings.ReplaceAll(result, " +%d", "")
 
 	return result
 }
@@ -316,7 +289,7 @@ func (s *Stat) descFn4(values ...int) string {
 	}
 
 	// bugs
-	result = strings.Replace(result, " +%d", "", -1)
+	result = strings.ReplaceAll(result, " +%d", "")
 
 	return result
 }
@@ -352,7 +325,7 @@ func (s *Stat) descFn5(values ...int) string {
 	}
 
 	// bugs
-	result = strings.Replace(result, " +%d", "", -1)
+	result = strings.ReplaceAll(result, " +%d", "")
 
 	return result
 }
@@ -392,8 +365,8 @@ func (s *Stat) descFn6(values ...int) string {
 	}
 
 	// bugs
-	result = strings.Replace(result, "+-", "-", -1)
-	result = strings.Replace(result, " +%d", "", -1)
+	result = strings.ReplaceAll(result, "+-", "-")
+	result = strings.ReplaceAll(result, " +%d", "")
 
 	return result
 }
@@ -538,40 +511,39 @@ func (s *Stat) descFn13(values ...int) string {
 	numSkills, heroIndex := values[0], values[1]
 
 	heroMap := map[int]d2enum.Hero{
-		int(d2enum.HeroAmazon): d2enum.HeroAmazon,
-		int(d2enum.HeroSorceress): d2enum.HeroSorceress,
+		int(d2enum.HeroAmazon):      d2enum.HeroAmazon,
+		int(d2enum.HeroSorceress):   d2enum.HeroSorceress,
 		int(d2enum.HeroNecromancer): d2enum.HeroNecromancer,
-		int(d2enum.HeroPaladin): d2enum.HeroPaladin,
-		int(d2enum.HeroBarbarian): d2enum.HeroBarbarian,
-		int(d2enum.HeroDruid): d2enum.HeroDruid,
-		int(d2enum.HeroAssassin): d2enum.HeroAssassin,
+		int(d2enum.HeroPaladin):     d2enum.HeroPaladin,
+		int(d2enum.HeroBarbarian):   d2enum.HeroBarbarian,
+		int(d2enum.HeroDruid):       d2enum.HeroDruid,
+		int(d2enum.HeroAssassin):    d2enum.HeroAssassin,
 	}
 
 	classRecord := d2datadict.CharStats[heroMap[heroIndex]]
 	descStr1 := d2common.TranslateString(classRecord.SkillStrAll)
 	result := fmt.Sprintf(format, numSkills, descStr1)
 
-	// bugs
-	result = strings.Replace(result, "+-", "-", -1)
+	result = strings.ReplaceAll(result, "+-", "-")
 
 	return result
 }
 
 func (s *Stat) descFn14(values ...int) string {
-	numSkills, heroIndex, skillTabIndex:= values[0], values[1], values[2]
+	numSkills, heroIndex, skillTabIndex := values[0], values[1], values[2]
 
 	if skillTabIndex > 2 || skillTabIndex < 0 {
 		skillTabIndex = 0
 	}
 
 	heroMap := map[int]d2enum.Hero{
-		int(d2enum.HeroAmazon): d2enum.HeroAmazon,
-		int(d2enum.HeroSorceress): d2enum.HeroSorceress,
+		int(d2enum.HeroAmazon):      d2enum.HeroAmazon,
+		int(d2enum.HeroSorceress):   d2enum.HeroSorceress,
 		int(d2enum.HeroNecromancer): d2enum.HeroNecromancer,
-		int(d2enum.HeroPaladin): d2enum.HeroPaladin,
-		int(d2enum.HeroBarbarian): d2enum.HeroBarbarian,
-		int(d2enum.HeroDruid): d2enum.HeroDruid,
-		int(d2enum.HeroAssassin): d2enum.HeroAssassin,
+		int(d2enum.HeroPaladin):     d2enum.HeroPaladin,
+		int(d2enum.HeroBarbarian):   d2enum.HeroBarbarian,
+		int(d2enum.HeroDruid):       d2enum.HeroDruid,
+		int(d2enum.HeroAssassin):    d2enum.HeroAssassin,
 	}
 
 	classRecord := d2datadict.CharStats[heroMap[heroIndex]]
@@ -584,7 +556,7 @@ func (s *Stat) descFn14(values ...int) string {
 	result := fmt.Sprintf(skillTabStr, numSkills, classOnlyStr)
 
 	// bugs
-	result = strings.Replace(result, "+-", "-", -1)
+	result = strings.ReplaceAll(result, "+-", "-")
 
 	return result
 }
@@ -601,7 +573,7 @@ func within(n, min, max int) int {
 
 func (s *Stat) descFn15(values ...int) string {
 	format := d2common.TranslateString(s.Record.DescStrPos)
-	chanceToCast, skillLevel, skillIndex:= values[0], values[1], values[2]
+	chanceToCast, skillLevel, skillIndex := values[0], values[1], values[2]
 
 	chanceToCast = within(chanceToCast, 0, 100)
 	skillLevel = within(skillLevel, 1, 1<<8)
@@ -615,13 +587,13 @@ func (s *Stat) descFn15(values ...int) string {
 	result := fmt.Sprintf(format, chanceToCast, skillLevel, skillRecord.Skill)
 
 	// bugs
-	result = strings.Replace(result, "+-", "-", -1)
+	result = strings.ReplaceAll(result, "+-", "-")
 
 	return result
 }
 
 func (s *Stat) descFn16(values ...int) string {
-	skillLevel, skillIndex:= values[0], values[1]
+	skillLevel, skillIndex := values[0], values[1]
 
 	str1 := d2common.TranslateString(s.Record.DescStrPos)
 
@@ -630,55 +602,58 @@ func (s *Stat) descFn16(values ...int) string {
 	result := fmt.Sprintf(str1, skillLevel, skillRecord.Skill)
 
 	// bugs
-	result = strings.Replace(result, "+-", "-", -1)
+	result = strings.ReplaceAll(result, "+-", "-")
 
 	return result
 }
 
-//func (s *Stat) descFn17(values ...int) string {
-//	// these were not implemented in original D2
-//	// leaving them out for now as I don't know how to
-//	// write a test for them, nor do I think vanilla content uses them
-//	// item_armor_bytime
-//	// item_hp_bytime
-//	// item_mana_bytime
-//	// item_maxdamage_bytime
-//	// item_strength_bytime
-//	// item_dexterity_bytime
-//	// item_energy_bytime
-//	// item_vitality_bytime
-//	// item_tohit_bytime
-//	// item_cold_damagemax_bytime
-//	// item_fire_damagemax_bytime
-//	// item_ltng_damagemax_bytime
-//	// item_pois_damagemax_bytime
-//	// item_stamina_bytime
-//	// item_tohit_demon_bytime
-//	// item_tohit_undead_bytime
-//	// item_kick_damage_bytime
-//}
+/*
+func (s *Stat) descFn17(values ...int) string {
+	// these were not implemented in original D2
+	// leaving them out for now as I don't know how to
+	// write a test for them, nor do I think vanilla content uses them
+	// but these are the stat keys which point to this func...
+	// item_armor_bytime
+	// item_hp_bytime
+	// item_mana_bytime
+	// item_maxdamage_bytime
+	// item_strength_bytime
+	// item_dexterity_bytime
+	// item_energy_bytime
+	// item_vitality_bytime
+	// item_tohit_bytime
+	// item_cold_damagemax_bytime
+	// item_fire_damagemax_bytime
+	// item_ltng_damagemax_bytime
+	// item_pois_damagemax_bytime
+	// item_stamina_bytime
+	// item_tohit_demon_bytime
+	// item_tohit_undead_bytime
+	// item_kick_damage_bytime
+}
 
-//func (s *Stat) descFn18(values ...int) string {
-//	// same with these
-//	// item_armorpercent_bytime
-//	// item_maxdamage_percent_bytime
-//	// item_tohitpercent_bytime
-//	// item_resist_cold_bytime
-//	// item_resist_fire_bytime
-//	// item_resist_ltng_bytime
-//	// item_resist_pois_bytime
-//	// item_absorb_cold_bytime
-//	// item_absorb_fire_bytime
-//	// item_absorb_ltng_bytime
-//	// item_find_gold_bytime
-//	// item_find_magic_bytime
-//	// item_regenstamina_bytime
-//	// item_damage_demon_bytime
-//	// item_damage_undead_bytime
-//	// item_crushingblow_bytime
-//	// item_openwounds_bytime
-//	// item_deadlystrike_bytime
-//}
+func (s *Stat) descFn18(values ...int) string {
+	// ... same with these ...
+	// item_armorpercent_bytime
+	// item_maxdamage_percent_bytime
+	// item_tohitpercent_bytime
+	// item_resist_cold_bytime
+	// item_resist_fire_bytime
+	// item_resist_ltng_bytime
+	// item_resist_pois_bytime
+	// item_absorb_cold_bytime
+	// item_absorb_fire_bytime
+	// item_absorb_ltng_bytime
+	// item_find_gold_bytime
+	// item_find_magic_bytime
+	// item_regenstamina_bytime
+	// item_damage_demon_bytime
+	// item_damage_undead_bytime
+	// item_crushingblow_bytime
+	// item_openwounds_bytime
+	// item_deadlystrike_bytime
+}
+*/
 
 func (s *Stat) descFn20(values ...int) string {
 	format := StatDescriptionFormatStrings[s.Record.DescFnID]
@@ -712,17 +687,17 @@ func (s *Stat) descFn20(values ...int) string {
 	}
 
 	// bugs
-	result = strings.Replace(result, " +%d", "", -1)
+	result = strings.ReplaceAll(result, " +%d", "")
 
 	return result
 }
 
-
 func (s *Stat) descFn22(values ...int) string {
 	format := StatDescriptionFormatStrings[s.Record.DescFnID]
-	statAgainst, monsterIndex:= values[0], values[1]
+	statAgainst, monsterIndex := values[0], values[1]
 
 	var monsterKey string
+
 	for key := range d2datadict.MonStats {
 		if d2datadict.MonStats[key].Id == monsterIndex {
 			monsterKey = key
@@ -735,17 +710,17 @@ func (s *Stat) descFn22(values ...int) string {
 
 	result := fmt.Sprintf(format, statAgainst, str1, monsterName)
 
-	// bugs
-	result = strings.Replace(result, "+-", "-", -1)
+	result = strings.ReplaceAll(result, "+-", "-")
 
 	return result
 }
 
 func (s *Stat) descFn23(values ...int) string {
 	format := StatDescriptionFormatStrings[s.Record.DescFnID]
-	chanceReanimate, monsterIndex:= values[0], values[1]
+	chanceReanimate, monsterIndex := values[0], values[1]
 
 	var monsterKey string
+
 	for key := range d2datadict.MonStats {
 		if d2datadict.MonStats[key].Id == monsterIndex {
 			monsterKey = key
@@ -757,21 +732,19 @@ func (s *Stat) descFn23(values ...int) string {
 	monsterName := d2datadict.MonStats[monsterKey].NameString
 
 	result := fmt.Sprintf(format, chanceReanimate, str1, monsterName)
-
-	// bugs
-	result = strings.Replace(result, "+-", "-", -1)
+	result = strings.ReplaceAll(result, "+-", "-")
 
 	return result
 }
 
 func (s *Stat) descFn24(values ...int) string {
 	format := StatDescriptionFormatStrings[s.Record.DescFnID]
-	lvl, skillId, chargeMax, chargeCurrent := values[0], values[1], values[2], values[3]
+	lvl, skillID, chargeMax, chargeCurrent := values[0], values[1], values[2], values[3]
 
 	charges := d2common.TranslateString(s.Record.DescStrPos)
 	charges = fmt.Sprintf(charges, chargeCurrent, chargeMax)
 
-	skillName := d2datadict.SkillDetails[skillId].Skill
+	skillName := d2datadict.SkillDetails[skillID].Skill
 
 	result := fmt.Sprintf(format, lvl, skillName, charges)
 
@@ -780,18 +753,18 @@ func (s *Stat) descFn24(values ...int) string {
 
 func (s *Stat) descFn27(values ...int) string {
 	format := StatDescriptionFormatStrings[s.Record.DescFnID]
-	amount, skillId, heroIndex := values[0], values[1], values[2]
+	amount, skillID, heroIndex := values[0], values[1], values[2]
 
-	skillName := d2datadict.SkillDetails[skillId].Skill
+	skillName := d2datadict.SkillDetails[skillID].Skill
 
 	heroMap := map[int]d2enum.Hero{
-		int(d2enum.HeroAmazon): d2enum.HeroAmazon,
-		int(d2enum.HeroSorceress): d2enum.HeroSorceress,
+		int(d2enum.HeroAmazon):      d2enum.HeroAmazon,
+		int(d2enum.HeroSorceress):   d2enum.HeroSorceress,
 		int(d2enum.HeroNecromancer): d2enum.HeroNecromancer,
-		int(d2enum.HeroPaladin): d2enum.HeroPaladin,
-		int(d2enum.HeroBarbarian): d2enum.HeroBarbarian,
-		int(d2enum.HeroDruid): d2enum.HeroDruid,
-		int(d2enum.HeroAssassin): d2enum.HeroAssassin,
+		int(d2enum.HeroPaladin):     d2enum.HeroPaladin,
+		int(d2enum.HeroBarbarian):   d2enum.HeroBarbarian,
+		int(d2enum.HeroDruid):       d2enum.HeroDruid,
+		int(d2enum.HeroAssassin):    d2enum.HeroAssassin,
 	}
 
 	classRecord := d2datadict.CharStats[heroMap[heroIndex]]
@@ -802,9 +775,9 @@ func (s *Stat) descFn27(values ...int) string {
 
 func (s *Stat) descFn28(values ...int) string {
 	format := StatDescriptionFormatStrings[s.Record.DescFnID]
-	amount, skillId := values[0], values[1]
+	amount, skillID := values[0], values[1]
 
-	skillName := d2datadict.SkillDetails[skillId].Skill
+	skillName := d2datadict.SkillDetails[skillID].Skill
 
 	return fmt.Sprintf(format, amount, skillName)
 }
@@ -831,7 +804,6 @@ func (s *Stat) NumStatValues() int {
 	if statValueCountLookup == nil {
 		statValueCountLookup = make(map[int]int)
 	}
-
 
 	format := StatDescriptionFormatStrings[s.Record.DescGroupFuncID]
 	pattern := regexp.MustCompile("%v")

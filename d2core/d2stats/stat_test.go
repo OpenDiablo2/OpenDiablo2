@@ -14,6 +14,7 @@ func TestStat_AssetInit(t *testing.T) {
 	if err := d2config.Load(); err != nil {
 		panic(err)
 	}
+
 	if err := d2asset.Initialize(nil, nil); err != nil {
 		panic(err)
 	}
@@ -664,111 +665,27 @@ func TestStat_DescriptionFn14(t *testing.T) {
 		vals      []int
 		expect    string
 	}{
-		{
-			"item_addskill_tab",
-			[]int{12, 1, 0},
-			"+12 to Combat Skills (Barbarian Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{-6, 1, 1},
-			"-6 to Masteries (Barbarian Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{3, 1, 2},
-			"+3 to Warcries (Barbarian Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 2, 0},
-			"+5 to Curses (Necromancer Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 2, 1},
-			"+5 to Poison and Bone Skills (Necromancer Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 2, 2},
-			"+5 to Summoning Skills (Necromancer Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 3, 0},
-			"+5 to Combat Skills (Paladin Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 3, 1},
-			"+5 to Offensive Auras (Paladin Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 3, 2},
-			"+5 to Defensive Auras (Paladin Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 4, 0},
-			"+5 to Traps (Assassin Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 4, 1},
-			"+5 to Shadow Disciplines (Assassin Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 4, 2},
-			"+5 to Martial Arts (Assassin Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 5, 0},
-			"+5 to Fire Skills (Sorceress Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 5, 1},
-			"+5 to Lightning Skills (Sorceress Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 5, 2},
-			"+5 to Cold Skills (Sorceress Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 6, 0},
-			"+5 to Bow and Crossbow Skills (Amazon Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 6, 1},
-			"+5 to Passive and Magic Skills (Amazon Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 6, 2},
-			"+5 to Javelin and Spear Skills (Amazon Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 7, 0},
-			"+5 to Summoning Skills (Druid Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 7, 1},
-			"+5 to Shape Shifting Skills (Druid Only)",
-		},
-		{
-			"item_addskill_tab",
-			[]int{5, 7, 2},
-			"+5 to Elemental Skills (Druid Only)",
-		},
+		{"item_addskill_tab", []int{12, 1, 0}, "+12 to Combat Skills (Barbarian Only)"},
+		{"item_addskill_tab", []int{-6, 1, 1}, "-6 to Masteries (Barbarian Only)"},
+		{"item_addskill_tab", []int{3, 1, 2}, "+3 to Warcries (Barbarian Only)"},
+		{"item_addskill_tab", []int{5, 2, 0}, "+5 to Curses (Necromancer Only)"},
+		{"item_addskill_tab", []int{5, 2, 1}, "+5 to Poison and Bone Skills (Necromancer Only)"},
+		{"item_addskill_tab", []int{5, 2, 2}, "+5 to Summoning Skills (Necromancer Only)"},
+		{"item_addskill_tab", []int{5, 3, 0}, "+5 to Combat Skills (Paladin Only)"},
+		{"item_addskill_tab", []int{5, 3, 1}, "+5 to Offensive Auras (Paladin Only)"},
+		{"item_addskill_tab", []int{5, 3, 2}, "+5 to Defensive Auras (Paladin Only)"},
+		{"item_addskill_tab", []int{5, 4, 0}, "+5 to Traps (Assassin Only)"},
+		{"item_addskill_tab", []int{5, 4, 1}, "+5 to Shadow Disciplines (Assassin Only)"},
+		{"item_addskill_tab", []int{5, 4, 2}, "+5 to Martial Arts (Assassin Only)"},
+		{"item_addskill_tab", []int{5, 5, 0}, "+5 to Fire Skills (Sorceress Only)"},
+		{"item_addskill_tab", []int{5, 5, 1}, "+5 to Lightning Skills (Sorceress Only)"},
+		{"item_addskill_tab", []int{5, 5, 2}, "+5 to Cold Skills (Sorceress Only)"},
+		{"item_addskill_tab", []int{5, 6, 0}, "+5 to Bow and Crossbow Skills (Amazon Only)"},
+		{"item_addskill_tab", []int{5, 6, 1}, "+5 to Passive and Magic Skills (Amazon Only)"},
+		{"item_addskill_tab", []int{5, 6, 2}, "+5 to Javelin and Spear Skills (Amazon Only)"},
+		{"item_addskill_tab", []int{5, 7, 0}, "+5 to Summoning Skills (Druid Only)"},
+		{"item_addskill_tab", []int{5, 7, 1}, "+5 to Shape Shifting Skills (Druid Only)"},
+		{"item_addskill_tab", []int{5, 7, 2}, "+5 to Elemental Skills (Druid Only)"},
 	}
 
 	for idx := range tests {
@@ -845,7 +762,6 @@ func TestStat_DescriptionFn20(t *testing.T) {
 		{"passive_ltng_pierce", []int{-25}, "-25% to Enemy Lightning Resistance"},
 		{"passive_cold_pierce", []int{-25}, "-25% to Enemy Cold Resistance"},
 		{"passive_pois_pierce", []int{-25}, "-25% to Enemy Poison Resistance"},
-
 	}
 
 	for idx := range tests {
