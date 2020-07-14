@@ -61,14 +61,13 @@ func (m *mapEntity) GetSpeed() float64 {
 }
 
 // atTarget returns true if the distance between entity and target is almost zero.
-// TODO: !m.hasPath() should be called separately by the caller, not hidden in here.
 func (m *mapEntity) atTarget() bool {
-	return m.Position.EqualsApprox(m.Target.Vector) && !m.hasPath()
+	return m.Position.EqualsApprox(m.Target.Vector)
 }
 
 // Step moves the entity along it's path by one tick. If the path is complete it calls entity.done() then returns.
 func (m *mapEntity) Step(tickTime float64) {
-	if m.atTarget() {
+	if m.atTarget() && !m.hasPath() {
 		if m.done != nil {
 			m.done()
 			m.done = nil
