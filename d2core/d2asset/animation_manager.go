@@ -24,11 +24,11 @@ type animationManager struct {
 }
 
 func (am *animationManager) ClearCache() {
-	panic("implement me")
+	am.cache.Clear()
 }
 
 func (am *animationManager) GetCache() d2interface.Cache {
-	panic("implement me")
+	return am.cache
 }
 
 func createAnimationManager(renderer d2interface.Renderer) *animationManager {
