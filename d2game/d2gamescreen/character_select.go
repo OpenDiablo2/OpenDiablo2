@@ -11,7 +11,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
@@ -46,6 +45,7 @@ type CharacterSelect struct {
 	showDeleteConfirmation bool
 	connectionType         d2clientconnectiontype.ClientConnectionType
 	connectionHost         string
+	inputManager           d2interface.InputManager
 	audioProvider          d2interface.AudioProvider
 	terminal               d2interface.Terminal
 	scriptEngine           *d2script.ScriptEngine
@@ -55,6 +55,7 @@ type CharacterSelect struct {
 // CreateCharacterSelect creates the character select screen and returns a pointer to it
 func CreateCharacterSelect(
 	renderer d2interface.Renderer,
+	inputManager d2interface.InputManager,
 	audioProvider d2interface.AudioProvider,
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	connectionHost string, term d2interface.Terminal, scriptEngine *d2script.ScriptEngine,
@@ -64,6 +65,7 @@ func CreateCharacterSelect(
 		renderer:          renderer,
 		connectionType:    connectionType,
 		connectionHost:    connectionHost,
+		inputManager:      inputManager,
 		audioProvider:     audioProvider,
 		terminal:          term,
 		scriptEngine:      scriptEngine,
@@ -74,7 +76,7 @@ func CreateCharacterSelect(
 func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	v.audioProvider.PlayBGM(d2resource.BGMTitle)
 
-	if err := d2input.BindHandler(v); err != nil {
+	if err := v.inputManager.BindHandler(v); err != nil {
 		fmt.Println("failed to add Character Select screen as event handler")
 	}
 
@@ -213,12 +215,12 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 }
 
 func (v *CharacterSelect) onNewCharButtonClicked() {
-	d2screen.SetNextScreen(CreateSelectHeroClass(v.renderer, v.audioProvider, v.connectionType, v.connectionHost,
+	d2screen.SetNextScreen(CreateSelectHeroClass(v.renderer, v.inputManager, v.audioProvider, v.connectionType, v.connectionHost,
 		v.terminal, v.scriptEngine))
 }
 
 func (v *CharacterSelect) onExitButtonClicked() {
-	mainMenu := CreateMainMenu(v.renderer, v.audioProvider, v.terminal, v.scriptEngine)
+	mainMenu := CreateMainMenu(v.renderer, v.inputManager, v.audioProvider, v.terminal, v.scriptEngine)
 	mainMenu.setScreenMode(screenModeMainMenu)
 	d2screen.SetNextScreen(mainMenu)
 }
@@ -376,5 +378,5 @@ func (v *CharacterSelect) onOkButtonClicked() {
 		fmt.Printf("can not connect to the host: %s", host)
 	}
 
-	d2screen.SetNextScreen(CreateGame(v.renderer, v.audioProvider, gameClient, v.terminal, v.scriptEngine))
+	d2screen.SetNextScreen(CreateGame(v.renderer, v.inputManager, v.audioProvider, gameClient, v.terminal, v.scriptEngine))
 }

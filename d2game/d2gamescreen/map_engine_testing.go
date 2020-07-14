@@ -13,7 +13,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 )
@@ -81,11 +80,12 @@ var regions = []regionSpec{
 
 // MapEngineTest represents the MapEngineTest screen
 type MapEngineTest struct {
-	gameState   *d2player.PlayerState
-	mapEngine   *d2mapengine.MapEngine
-	mapRenderer *d2maprenderer.MapRenderer
-	terminal    d2interface.Terminal
-	renderer    d2interface.Renderer
+	gameState    *d2player.PlayerState
+	mapEngine    *d2mapengine.MapEngine
+	mapRenderer  *d2maprenderer.MapRenderer
+	terminal     d2interface.Terminal
+	renderer     d2interface.Renderer
+	inputManager d2interface.InputManager
 
 	//TODO: this is region specific properties, should be refactored for multi-region rendering
 	currentRegion int
@@ -97,7 +97,7 @@ type MapEngineTest struct {
 }
 
 // CreateMapEngineTest creates the Map Engine Test screen and returns a pointer to it
-func CreateMapEngineTest(currentRegion, levelPreset int, term d2interface.Terminal, renderer d2interface.Renderer) *MapEngineTest {
+func CreateMapEngineTest(currentRegion, levelPreset int, term d2interface.Terminal, renderer d2interface.Renderer, inputManager d2interface.InputManager) *MapEngineTest {
 	result := &MapEngineTest{
 		currentRegion: currentRegion,
 		levelPreset:   levelPreset,
@@ -106,6 +106,7 @@ func CreateMapEngineTest(currentRegion, levelPreset int, term d2interface.Termin
 		filesCount:    0,
 		terminal:      term,
 		renderer:      renderer,
+		inputManager:  inputManager,
 	}
 	result.gameState = d2player.CreateTestGameState()
 
@@ -160,7 +161,7 @@ func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 
 // OnLoad loads the resources for the Map Engine Test screen
 func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
-	if err := d2input.BindHandler(met); err != nil {
+	if err := met.inputManager.BindHandler(met); err != nil {
 		fmt.Printf("could not add MapEngineTest as event handler")
 	}
 
@@ -178,7 +179,7 @@ func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 
 // OnUnload releases the resources for the Map Engine Test screen
 func (met *MapEngineTest) OnUnload() error {
-	if err := d2input.UnbindHandler(met); err != nil {
+	if err := met.inputManager.UnbindHandler(met); err != nil {
 		return err
 	}
 

@@ -33,20 +33,25 @@ func TestStat_AssetInit(t *testing.T) {
 		d2common.LoadTextDictionary(data)
 	}
 
-
 	if data, err := d2asset.LoadFile(d2resource.ItemStatCost); err != nil {
 		panic(err)
 	} else {
 		d2datadict.LoadItemStatCosts(data)
 	}
 
-
+	// necessary for +skills stats descriptions
 	if data, err := d2asset.LoadFile(d2resource.CharStats); err != nil {
 		panic(err)
 	} else {
 		d2datadict.LoadCharStats(data)
 	}
 
+	// necessary for `chance to cast` skills
+	if data, err := d2asset.LoadFile(d2resource.Skills); err != nil {
+		panic(err)
+	} else {
+		d2datadict.LoadSkills(data)
+	}
 }
 
 func TestStat_Clone(t *testing.T) {

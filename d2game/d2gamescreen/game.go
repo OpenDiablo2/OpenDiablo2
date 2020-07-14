@@ -8,7 +8,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
@@ -31,12 +30,13 @@ type Game struct {
 	escapeMenu           *EscapeMenu
 
 	renderer      d2interface.Renderer
+	inputManager  d2interface.InputManager
 	audioProvider d2interface.AudioProvider
 	terminal      d2interface.Terminal
 }
 
 // CreateGame creates the Gameplay screen and returns a pointer to it
-func CreateGame(renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, gameClient *d2client.GameClient,
+func CreateGame(renderer d2interface.Renderer, inputManager d2interface.InputManager, audioProvider d2interface.AudioProvider, gameClient *d2client.GameClient,
 	term d2interface.Terminal, scriptEngine *d2script.ScriptEngine) *Game {
 	result := &Game{
 		gameClient:           gameClient,
@@ -45,14 +45,15 @@ func CreateGame(renderer d2interface.Renderer, audioProvider d2interface.AudioPr
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
 		mapRenderer:          d2maprenderer.CreateMapRenderer(renderer, gameClient.MapEngine, term),
-		escapeMenu:           NewEscapeMenu(renderer, audioProvider, term, scriptEngine),
+		escapeMenu:           NewEscapeMenu(renderer, inputManager, audioProvider, term, scriptEngine),
+		inputManager:         inputManager,
 		audioProvider:        audioProvider,
 		renderer:             renderer,
 		terminal:             term,
 	}
 	result.escapeMenu.onLoad()
 
-	if err := d2input.BindHandler(result.escapeMenu); err != nil {
+	if err := inputManager.BindHandler(result.escapeMenu); err != nil {
 		fmt.Println("failed to add gameplay screen as event handler")
 	}
 
@@ -66,11 +67,11 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 
 // OnUnload releases the resources of Gameplay screen
 func (v *Game) OnUnload() error {
-	if err := d2input.UnbindHandler(v.gameControls); err != nil { // TODO: hack
+	if err := v.inputManager.UnbindHandler(v.gameControls); err != nil { // TODO: hack
 		return err
 	}
 
-	if err := d2input.UnbindHandler(v.escapeMenu); err != nil { // TODO: hack
+	if err := v.inputManager.UnbindHandler(v.escapeMenu); err != nil { // TODO: hack
 		return err
 	}
 
@@ -162,7 +163,7 @@ func (v *Game) bindGameControls() {
 		v.gameControls = d2player.NewGameControls(v.renderer, player, v.gameClient.MapEngine, v.mapRenderer, v, v.terminal)
 		v.gameControls.Load()
 
-		if err := d2input.BindHandler(v.gameControls); err != nil {
+		if err := v.inputManager.BindHandler(v.gameControls); err != nil {
 			fmt.Printf("failed to add gameControls as input handler for player: %s\n", player.Id)
 		}
 
