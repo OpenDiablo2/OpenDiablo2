@@ -2,25 +2,22 @@
 package d2object
 
 import (
-	"math"
 	"math/rand"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 // Object represents a composite of animations that can be projected onto the map.
 type Object struct {
-	composite          *d2asset.Composite
-	highlight          bool
-	LocationX          float64
-	LocationY          float64
-	TileX, TileY       int     // Coordinates of the tile the unit is within
-	subcellX, subcellY float64 // Subcell coordinates within the current tile
+	Position  d2vector.Position
+	composite *d2asset.Composite
+	highlight bool
 	// nameLabel    d2ui.Label
 	objectRecord *d2datadict.ObjectRecord
 	drawLayer    int
@@ -32,12 +29,7 @@ func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath stri
 	locX, locY := float64(x), float64(y)
 	entity := &Object{
 		objectRecord: objectRec,
-		LocationX:    locX,
-		LocationY:    locY,
-		subcellX:     1 + math.Mod(locX, 5),
-		subcellY:     1 + math.Mod(locY, 5),
-		TileX:        x / 5,
-		TileY:        y / 5,
+		Position:     d2vector.NewPosition(locX, locY),
 		name:         d2common.TranslateString(objectRec.Name),
 	}
 	objectType := &d2datadict.ObjectTypes[objectRec.Index]
@@ -104,9 +96,10 @@ func (ob *Object) Selectable() bool {
 
 // Render draws this animated entity onto the target
 func (ob *Object) Render(target d2interface.Surface) {
+	renderOffset := ob.Position.RenderOffset()
 	target.PushTranslation(
-		int((ob.subcellX-ob.subcellY)*16),
-		int(((ob.subcellX + ob.subcellY) * 8)),
+		int((renderOffset.X()-renderOffset.Y())*16),
+		int(((renderOffset.X() + renderOffset.Y()) * 8)),
 	)
 
 	if ob.highlight {
@@ -131,12 +124,14 @@ func (ob *Object) GetLayer() int {
 
 // GetPosition of the object
 func (ob *Object) GetPosition() (x, y float64) {
-	return float64(ob.TileX), float64(ob.TileY)
+	w := ob.Position.Tile()
+	return w.X(), w.Y()
 }
 
 // GetPositionF of the object but differently
 func (ob *Object) GetPositionF() (x, y float64) {
-	return float64(ob.TileX) + (ob.subcellX / 5.0), float64(ob.TileY) + ob.subcellY/5.0
+	w := ob.Position.World()
+	return w.X(), w.Y()
 }
 
 // Name gets the name of the object

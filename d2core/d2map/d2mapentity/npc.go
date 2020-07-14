@@ -75,7 +75,7 @@ func (v *NPC) Render(target d2interface.Surface) {
 	renderOffset := v.Position.RenderOffset()
 	target.PushTranslation(
 		int((renderOffset.X()-renderOffset.Y())*16),
-		int(((renderOffset.X()+renderOffset.Y())*8)-5),
+		int(((renderOffset.X() + renderOffset.Y()) * 8)),
 	)
 
 	defer target.Pop()

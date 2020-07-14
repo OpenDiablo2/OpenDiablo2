@@ -239,6 +239,7 @@ func (p *App) loadDataDict() error {
 		{d2resource.Inventory, d2datadict.LoadInventory},
 		{d2resource.Skills, d2datadict.LoadSkills},
 		{d2resource.Properties, d2datadict.LoadProperties},
+		{d2resource.SkillDesc, d2datadict.LoadSkillDescriptions},
 	}
 
 	d2datadict.InitObjectRecords()
