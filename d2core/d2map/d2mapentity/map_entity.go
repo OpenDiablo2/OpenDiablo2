@@ -142,7 +142,11 @@ func applyVelocity(position, velocity, target *d2vector.Vector) {
 func (m *mapEntity) nextPath() {
 	if m.hasPath() {
 		// Set next path node
-		m.setTarget(m.path[0].(*d2common.PathTile).X*5, m.path[0].(*d2common.PathTile).Y*5, m.done)
+		m.setTarget(
+			m.path[0].(*d2common.PathTile).X*5,
+			m.path[0].(*d2common.PathTile).Y*5,
+			m.done,
+		)
 
 		if len(m.path) > 1 {
 			m.path = m.path[1:]

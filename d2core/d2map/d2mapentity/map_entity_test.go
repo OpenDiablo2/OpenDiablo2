@@ -74,7 +74,7 @@ func TestMapEntity_Step(t *testing.T) {
 	want := change.Add(&start)
 
 	if !e.Position.EqualsApprox(*want) {
-		t.Errorf("entity position after 5 steps: want %s: got %s", want, e.Position.Vector)
+		t.Errorf("entity position after %d steps: want %s: got %s", stepCount, want, e.Position.Vector)
 	}
 
 	if e.Position.Equals(start) {
@@ -88,6 +88,6 @@ func setupBenchmarkMapEntityStep() {
 
 func BenchmarkMapEntity_Step(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		stepEntity.Step(0.05)
+		stepEntity.Step(normalTickTime)
 	}
 }
