@@ -72,9 +72,13 @@ func TestMapEntity_Step(t *testing.T) {
 		//fmt.Printf("move\t%s\t%d\t%s\n", e.Position, len(e.path), e.Target)
 	}
 
-	change := e.velocity(0.05)
+	change := d2vector.NewVector(0, 0)
+	change.Copy(&e.Target.Vector)
+	change.Subtract(&e.Position.Vector)
+	change.SetLength(e.Speed * normalTickTime)
+
 	fmt.Println(change)
-	change.Scale(float64(stepCount - 1))
+	change.Scale(float64(stepCount))
 
 	want := change.Add(&start)
 

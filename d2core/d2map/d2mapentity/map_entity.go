@@ -11,6 +11,7 @@ import (
 type mapEntity struct {
 	Position d2vector.Position
 	Target   d2vector.Position
+	velocity d2vector.Vector
 
 	Speed     float64
 	path      []d2astar.Pather
@@ -43,6 +44,7 @@ func (m *mapEntity) GetLayer() int {
 func (m *mapEntity) SetPath(path []d2astar.Pather, done func()) {
 	m.path = path
 	m.done = done
+	m.nextPath()
 }
 
 // ClearPath clears the entity movement path.
@@ -60,11 +62,6 @@ func (m *mapEntity) GetSpeed() float64 {
 	return m.Speed
 }
 
-// atTarget returns true if the distance between entity and target is almost zero.
-func (m *mapEntity) atTarget() bool {
-	return m.Position.EqualsApprox(m.Target.Vector)
-}
-
 // Step moves the entity along it's path by one tick. If the path is complete it calls entity.done() then returns.
 func (m *mapEntity) Step(tickTime float64) {
 	if m.atTarget() && !m.hasPath() {
@@ -76,47 +73,39 @@ func (m *mapEntity) Step(tickTime float64) {
 		return
 	}
 
-	velocity := m.velocity(tickTime)
+	// Set velocity (speed and direction)
+	m.setVelocity(tickTime * m.Speed)
 
+	// This loop handles the situation where the velocity exceeds the distance to the current target. Each repitition applies
+	// the remaining velocity in the direction of the next path target.
 	for {
-		// Add the velocity to the position and set new velocity to remainder
-		applyVelocity(&m.Position.Vector, &velocity, &m.Target.Vector)
+		applyVelocity(&m.Position.Vector, &m.velocity, &m.Target.Vector)
 
-		// New position is at target
-		if m.Position.EqualsApprox(m.Target.Vector) {
-			if m.hasPath() {
-				// Set next path node
-				m.setTarget(m.path[0].(*d2common.PathTile).X*5, m.path[0].(*d2common.PathTile).Y*5, m.done)
-
-				if len(m.path) > 1 {
-					m.path = m.path[1:]
-				} else {
-					m.path = []d2astar.Pather{}
-				}
-			} else {
-				// End of path.
-				m.Position.Copy(&m.Target.Vector)
-			}
+		if m.atTarget() {
+			m.nextPath()
 		}
 
-		if velocity.IsZero() {
+		if m.velocity.IsZero() {
 			break
 		}
 	}
 }
 
-// velocity returns a vector describing the change in position this tick.
-func (m *mapEntity) velocity(tickTime float64) d2vector.Vector {
-	length := tickTime * m.Speed
-	v := m.Target.Vector.Clone()
-	v.Subtract(&m.Position.Vector)
-	v.SetLength(length)
-
-	return v
+// atTarget returns true if the distance between entity and target is almost zero.
+func (m *mapEntity) atTarget() bool {
+	return m.Position.EqualsApprox(m.Target.Vector)
 }
 
-// applyVelocity adds velocity to position. If the new position extends beyond target from the original position, the
-// position is set to the target and velocity is set to the overshot amount.
+// setVelocity returns a vector describing the given length and the direction to the current target.
+func (m *mapEntity) setVelocity(length float64) {
+	m.velocity.Copy(&m.Target.Vector)
+	m.velocity.Subtract(&m.Position.Vector)
+	m.velocity.SetLength(length)
+}
+
+// applyVelocity adds velocity to position. If the new position extends beyond the target: Target is set to the next
+// path node, Position is set to target and velocity is set to the over-extended length with the direction of to the
+// next node.
 func applyVelocity(position, velocity, target *d2vector.Vector) {
 	// Set velocity values to zero if almost zero
 	x, y := position.CompareApprox(*target)
@@ -149,6 +138,24 @@ func applyVelocity(position, velocity, target *d2vector.Vector) {
 	}
 }
 
+// Returns false if the path has ended.
+func (m *mapEntity) nextPath() {
+	if m.hasPath() {
+		// Set next path node
+		m.setTarget(m.path[0].(*d2common.PathTile).X*5, m.path[0].(*d2common.PathTile).Y*5, m.done)
+
+		if len(m.path) > 1 {
+			m.path = m.path[1:]
+		} else {
+			m.path = []d2astar.Pather{}
+		}
+	} else {
+		// End of path.
+		m.Position.Copy(&m.Target.Vector)
+	}
+
+}
+
 // hasPath returns false if the length of the entity movement path is 0.
 func (m *mapEntity) hasPath() bool {
 	return len(m.path) > 0
@@ -156,13 +163,20 @@ func (m *mapEntity) hasPath() bool {
 
 // setTarget sets target coordinates and changes animation based on proximity and direction.
 func (m *mapEntity) setTarget(tx, ty float64, done func()) {
+	// Set the target
 	m.Target.Set(tx, ty)
 	m.done = done
 
+	// Update the direction
 	if m.directioner != nil {
 		d := m.Position.DirectionTo(m.Target.Vector)
 
 		m.directioner(d)
+	}
+
+	// Update the velocity direction
+	if !m.velocity.IsZero() {
+		m.setVelocity(m.velocity.Length())
 	}
 }
 
