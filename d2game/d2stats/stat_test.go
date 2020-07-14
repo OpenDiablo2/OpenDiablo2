@@ -58,6 +58,13 @@ func TestStat_AssetInit(t *testing.T) {
 	} else {
 		d2datadict.LoadSkillDescriptions(data)
 	}
+
+	// for attack/damage vs monster type
+	if data, err := d2asset.LoadFile(d2resource.MonStats); err != nil {
+		panic(err)
+	} else {
+		d2datadict.LoadMonStats(data)
+	}
 }
 
 func TestStat_Clone(t *testing.T) {
@@ -782,12 +789,169 @@ func TestStat_DescriptionFn15(t *testing.T) {
 		vals      []int
 		expect    string
 	}{
-		{"item_skillonattack", []int{5, 7, 260}, ""},
-		{"item_skillonkill", []int{5, 7, 261}, ""},
-		{"item_skillondeath", []int{5, 7, 262}, ""},
-		{"item_skillonhit", []int{5, 7, 263}, ""},
-		{"item_skillonlevelup", []int{5, 7, 264}, ""},
-		{"item_skillongethit", []int{5, 7, 265}, ""},
+		{"item_skillonattack", []int{5, 7, 260}, "5% Chance to cast level 7 Dragon Claw on attack"},
+		{"item_skillonkill", []int{5, 7, 261}, "5% Chance to cast level 7 Charged Bolt Sentry when you Kill an Enemy"},
+		{"item_skillondeath", []int{5, 7, 262}, "5% Chance to cast level 7 Wake of Fire Sentry when you Die"},
+		{"item_skillonhit", []int{5, 7, 263}, "5% Chance to cast level 7 Weapon Block on striking"},
+		{"item_skillonlevelup", []int{5, 7, 264}, "5% Chance to cast level 7 Cloak of Shadows when you Level-Up"},
+		{"item_skillongethit", []int{5, 7, 265}, "5% Chance to cast level 7 Cobra Strike when struck"},
+	}
+
+	for idx := range tests {
+		test := tests[idx]
+		record := d2datadict.ItemStatCosts[test.recordKey]
+		expect := test.expect
+		stat := CreateStat(record, test.vals...)
+
+		if got := stat.Description(); got != expect {
+			t.Errorf(errFmt, errStr, test.recordKey, test.vals, expect, got)
+		}
+	}
+}
+
+func TestStat_DescriptionFn16(t *testing.T) {
+	tests := []struct {
+		recordKey string
+		vals      []int
+		expect    string
+	}{
+		{"item_aura", []int{3, 37}, "Level 3 Warmth Aura When Equipped"},
+	}
+
+	for idx := range tests {
+		test := tests[idx]
+		record := d2datadict.ItemStatCosts[test.recordKey]
+		expect := test.expect
+		stat := CreateStat(record, test.vals...)
+
+		if got := stat.Description(); got != expect {
+			t.Errorf(errFmt, errStr, test.recordKey, test.vals, expect, got)
+		}
+	}
+}
+
+func TestStat_DescriptionFn20(t *testing.T) {
+	tests := []struct {
+		recordKey string
+		vals      []int
+		expect    string
+	}{
+		{"item_fractionaltargetac", []int{-25}, "-25% Target Defense"},
+		{"item_pierce_cold", []int{-25}, "-25% to Enemy Cold Resistance"},
+		{"item_pierce_fire", []int{-25}, "-25% to Enemy Fire Resistance"},
+		{"item_pierce_ltng", []int{-25}, "-25% to Enemy Lightning Resistance"},
+		{"item_pierce_pois", []int{-25}, "-25% to Enemy Poison Resistance"},
+		{"passive_fire_pierce", []int{-25}, "-25% to Enemy Fire Resistance"},
+		{"passive_ltng_pierce", []int{-25}, "-25% to Enemy Lightning Resistance"},
+		{"passive_cold_pierce", []int{-25}, "-25% to Enemy Cold Resistance"},
+		{"passive_pois_pierce", []int{-25}, "-25% to Enemy Poison Resistance"},
+
+	}
+
+	for idx := range tests {
+		test := tests[idx]
+		record := d2datadict.ItemStatCosts[test.recordKey]
+		expect := test.expect
+		stat := CreateStat(record, test.vals...)
+
+		if got := stat.Description(); got != expect {
+			t.Errorf(errFmt, errStr, test.recordKey, test.vals, expect, got)
+		}
+	}
+}
+
+func TestStat_DescriptionFn22(t *testing.T) {
+	tests := []struct {
+		recordKey string
+		vals      []int
+		expect    string
+	}{
+		{"attack_vs_montype", []int{25, 40}, "25% to Attack Rating versus Specter"},
+		{"damage_vs_montype", []int{25, 41}, "25% to Damage versus Apparition"},
+	}
+
+	for idx := range tests {
+		test := tests[idx]
+		record := d2datadict.ItemStatCosts[test.recordKey]
+		expect := test.expect
+		stat := CreateStat(record, test.vals...)
+
+		if got := stat.Description(); got != expect {
+			t.Errorf(errFmt, errStr, test.recordKey, test.vals, expect, got)
+		}
+	}
+}
+
+func TestStat_DescriptionFn23(t *testing.T) {
+	tests := []struct {
+		recordKey string
+		vals      []int
+		expect    string
+	}{
+		{"item_reanimate", []int{25, 40}, "25% Reanimate as: Specter"},
+	}
+
+	for idx := range tests {
+		test := tests[idx]
+		record := d2datadict.ItemStatCosts[test.recordKey]
+		expect := test.expect
+		stat := CreateStat(record, test.vals...)
+
+		if got := stat.Description(); got != expect {
+			t.Errorf(errFmt, errStr, test.recordKey, test.vals, expect, got)
+		}
+	}
+}
+
+func TestStat_DescriptionFn24(t *testing.T) {
+	tests := []struct {
+		recordKey string
+		vals      []int
+		expect    string
+	}{
+		{"item_charged_skill", []int{25, 40, 20, 19}, "Level 25 Frozen Armor (19/20 Charges)"},
+	}
+
+	for idx := range tests {
+		test := tests[idx]
+		record := d2datadict.ItemStatCosts[test.recordKey]
+		expect := test.expect
+		stat := CreateStat(record, test.vals...)
+
+		if got := stat.Description(); got != expect {
+			t.Errorf(errFmt, errStr, test.recordKey, test.vals, expect, got)
+		}
+	}
+}
+
+func TestStat_DescriptionFn27(t *testing.T) {
+	tests := []struct {
+		recordKey string
+		vals      []int
+		expect    string
+	}{
+		{"item_singleskill", []int{25, 40, 5}, "+25 to Frozen Armor (Sorceress Only)"},
+	}
+
+	for idx := range tests {
+		test := tests[idx]
+		record := d2datadict.ItemStatCosts[test.recordKey]
+		expect := test.expect
+		stat := CreateStat(record, test.vals...)
+
+		if got := stat.Description(); got != expect {
+			t.Errorf(errFmt, errStr, test.recordKey, test.vals, expect, got)
+		}
+	}
+}
+
+func TestStat_DescriptionFn28(t *testing.T) {
+	tests := []struct {
+		recordKey string
+		vals      []int
+		expect    string
+	}{
+		{"item_nonclassskill", []int{25, 64}, "+25 to Frozen Orb"},
 	}
 
 	for idx := range tests {

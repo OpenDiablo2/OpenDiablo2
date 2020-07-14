@@ -28,7 +28,7 @@ type (
 		// column also links other hardcoded effects to the units, such as the
 		// transparency on necro summons and the name-color change on unique boss
 		// units (thanks to Kingpin for the info)
-		Id string //nolint:golint,stylecheck // called `hcIdx` in monstats.txt
+		Id int //nolint:golint,stylecheck // called `hcIdx` in monstats.txt
 
 		// BaseKey is an ID pointer of the “base” unit for this specific
 		// monster type (ex. There are five types of “Fallen”; all of them have
@@ -43,7 +43,7 @@ type (
 		// NameStringTableKey the string-key used in the TBL (string.tbl,
 		// expansionstring.tbl and patchstring.tbl) files to make this monsters
 		// name appear when you highlight it.
-		NameStringTableKey string // called `NameStr` in monstats.txt
+		NameString string // called `NameStr` in monstats.txt
 
 		// ExtraDataKey the ID pointer to an entry in MonStats2.txt.
 		ExtraDataKey string // called `MonStatsEx` in monstats.txt
@@ -691,11 +691,11 @@ func LoadMonStats(file []byte) { // nolint:funlen // Makes no sense to split
 	for d.Next() {
 		record := &MonStatsRecord{
 			Key:                            d.String("Id"),
-			Id:                             d.String("hcIdx"),
+			Id:                             d.Number("hcIdx"),
 			BaseKey:                        d.String("BaseId"),
 			NextKey:                        d.String("NextInClass"),
 			PaletteId:                      d.Number("TransLvl"),
-			NameStringTableKey:             d.String("NameStr"),
+			NameString:                     d.String("NameStr"),
 			ExtraDataKey:                   d.String("MonStatsEx"),
 			PropertiesKey:                  d.String("MonProp"),
 			MonsterGroup:                   d.String("MonType"),
@@ -943,6 +943,7 @@ func LoadMonStats(file []byte) { // nolint:funlen // Makes no sense to split
 			SpecialEndGeneric:              d.Number("SplEndGeneric") > 0,
 			SpecialClientEnd:               d.Number("SplClientEnd") > 0,
 		}
+
 		MonStats[record.Key] = record
 	}
 
