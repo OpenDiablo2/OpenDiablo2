@@ -264,7 +264,7 @@ func (mr *MapRenderer) renderWall(tile d2ds1.WallRecord, viewport *Viewport, tar
 		return
 	}
 
-	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust)-8)
+	viewport.PushTranslationOrtho(-80, float64(tile.YAdjust))
 	defer viewport.PopTranslation()
 
 	target.PushTranslation(viewport.GetTranslationScreen())
