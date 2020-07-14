@@ -34,19 +34,21 @@ type Credits struct {
 	cyclesTillNextLine int
 	doneWithCredits    bool
 	renderer           d2interface.Renderer
+	inputManager       d2interface.InputManager
 	audioProvider      d2interface.AudioProvider
 	terminal           d2interface.Terminal
 	scriptEngine       *d2script.ScriptEngine
 }
 
 // CreateCredits creates an instance of the credits screen
-func CreateCredits(renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, scriptEngine *d2script.ScriptEngine) *Credits {
+func CreateCredits(renderer d2interface.Renderer, inputManager d2interface.InputManager, audioProvider d2interface.AudioProvider, scriptEngine *d2script.ScriptEngine) *Credits {
 	result := &Credits{
 		labels:             make([]*labelItem, 0),
 		cycleTime:          0,
 		doneWithCredits:    false,
 		cyclesTillNextLine: 0,
 		renderer:           renderer,
+		inputManager:       inputManager,
 		audioProvider:      audioProvider,
 		scriptEngine:       scriptEngine,
 	}
@@ -160,7 +162,7 @@ func (v *Credits) Advance(tickTime float64) error {
 }
 
 func (v *Credits) onExitButtonClicked() {
-	mainMenu := CreateMainMenu(v.renderer, v.audioProvider, v.terminal, v.scriptEngine)
+	mainMenu := CreateMainMenu(v.renderer, v.inputManager, v.audioProvider, v.terminal, v.scriptEngine)
 	mainMenu.setScreenMode(screenModeMainMenu)
 	d2screen.SetNextScreen(mainMenu)
 }

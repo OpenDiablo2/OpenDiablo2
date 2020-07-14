@@ -69,6 +69,7 @@ type EscapeMenu struct {
 	layouts   []*layout
 
 	renderer      d2interface.Renderer
+	inputManager  d2interface.InputManager
 	audioProvider d2interface.AudioProvider
 	terminal      d2interface.Terminal
 	scriptEngine  *d2script.ScriptEngine
@@ -125,9 +126,10 @@ type actionableElement interface {
 }
 
 // NewEscapeMenu creates a new escape menu
-func NewEscapeMenu(renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, term d2interface.Terminal,
+func NewEscapeMenu(renderer d2interface.Renderer, inputManager d2interface.InputManager, audioProvider d2interface.AudioProvider, term d2interface.Terminal,
 	scriptEngine *d2script.ScriptEngine) *EscapeMenu {
 	m := &EscapeMenu{
+		inputManager:  inputManager,
 		audioProvider: audioProvider,
 		terminal:      term,
 		renderer:      renderer,
@@ -371,7 +373,7 @@ func (m *EscapeMenu) showLayout(id layoutID) {
 	}
 
 	if id == saveLayoutID {
-		mainMenu := CreateMainMenu(m.renderer, m.audioProvider, m.terminal, m.scriptEngine)
+		mainMenu := CreateMainMenu(m.renderer, m.inputManager, m.audioProvider, m.terminal, m.scriptEngine)
 		mainMenu.setScreenMode(screenModeMainMenu)
 		d2screen.SetNextScreen(mainMenu)
 

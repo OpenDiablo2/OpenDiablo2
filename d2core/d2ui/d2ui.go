@@ -1,13 +1,13 @@
 package d2ui
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 )
 
 // CursorButton represents a mouse button
@@ -21,6 +21,7 @@ const (
 )
 
 type UI struct {
+	inputManager  d2interface.InputManager
 	widgets       []Widget
 	cursorButtons CursorButton // TODO (carrelld) convert dependent code and remove
 	CursorX       int          // TODO (carrelld) convert dependent code and remove
@@ -31,14 +32,17 @@ type UI struct {
 var singleton UI
 var clickSfx d2interface.SoundEffect
 
-func Initialize(audioProvider d2interface.AudioProvider) {
+func Initialize(inputManager d2interface.InputManager, audioProvider d2interface.AudioProvider) {
 	sfx, err := audioProvider.LoadSoundEffect(d2resource.SFXButtonClick)
 	if err != nil {
 		log.Fatalf("failed to initialize ui: %v", err)
 	}
 	clickSfx = sfx
 
-	d2input.BindHandler(&singleton)
+	singleton.inputManager = inputManager
+	if err := singleton.inputManager.BindHandler(&singleton); err != nil {
+		log.Fatalf("failed to initialize ui: %v", err)
+	}
 }
 
 // Reset resets the state of the UI manager. Typically called for new screens
@@ -49,7 +53,7 @@ func Reset() {
 
 // AddWidget adds a widget to the UI manager
 func AddWidget(widget Widget) {
-	d2input.BindHandler(widget)
+	singleton.inputManager.BindHandler(widget)
 	singleton.widgets = append(singleton.widgets, widget)
 }
 

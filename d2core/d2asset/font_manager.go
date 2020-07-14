@@ -2,14 +2,18 @@ package d2asset
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
 const (
 	fontBudget = 64
 )
+
+// Static checks to confirm struct conforms to interface
+var _ d2interface.ArchivedFontManager = &fontManager{}
+var _ d2interface.Cacher = &fontManager{}
 
 type fontManager struct {
 	cache d2interface.Cache

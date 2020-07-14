@@ -5,15 +5,18 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 const (
 	animationBudget = 64
 )
+
+// Static checks to confirm struct conforms to interface
+var _ d2interface.ArchivedAnimationManager = &animationManager{}
+var _ d2interface.Cacher = &animationManager{}
 
 type animationManager struct {
 	cache    d2interface.Cache
@@ -21,11 +24,11 @@ type animationManager struct {
 }
 
 func (am *animationManager) ClearCache() {
-	panic("implement me")
+	am.cache.Clear()
 }
 
 func (am *animationManager) GetCache() d2interface.Cache {
-	panic("implement me")
+	return am.cache
 }
 
 func createAnimationManager(renderer d2interface.Renderer) *animationManager {
@@ -37,7 +40,7 @@ func createAnimationManager(renderer d2interface.Renderer) *animationManager {
 
 func (am *animationManager) LoadAnimation(
 	animationPath, palettePath string,
-	effect d2enum.DrawEffect ) (d2interface.Animation, error) {
+	effect d2enum.DrawEffect) (d2interface.Animation, error) {
 	cachePath := fmt.Sprintf("%s;%s;%d", animationPath, palettePath, effect)
 	if animation, found := am.cache.Retrieve(cachePath); found {
 		return animation.(d2interface.Animation).Clone(), nil

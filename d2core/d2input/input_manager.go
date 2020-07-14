@@ -1,10 +1,11 @@
 package d2input
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"sort"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	ebiten_input "github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/ebiten"
 )
 
 type inputManager struct {
@@ -16,6 +17,12 @@ type inputManager struct {
 	keyMod    d2enum.KeyMod
 
 	entries handlerEntryList
+}
+
+func New() d2interface.InputManager {
+	return &inputManager{
+		inputService: ebiten_input.InputService{},
+	}
 }
 
 // Advance advances the inputManager
@@ -211,7 +218,7 @@ func (im *inputManager) updateCursor(cursorX, cursorY int, e HandlerEvent) {
 func (im *inputManager) BindHandlerWithPriority(
 	h d2interface.InputEventHandler,
 	p d2enum.Priority) error {
-	return singleton.bindHandler(h, p)
+	return im.bindHandler(h, p)
 }
 
 // BindHandler adds an event handler
