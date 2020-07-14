@@ -1,8 +1,7 @@
 package d2mapentity
 
 import (
-	"fmt"
-	"math/rand"
+	"os"
 	"testing"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
@@ -19,30 +18,33 @@ const (
 
 func TestMain(m *testing.M) {
 	setup()
-	m.Run()
+	os.Exit(m.Run())
 }
 
 func setup() {
-	stepEntity = setupMovement()
-}
-
-func tickTime() float64 {
-	max := 0.06
-	min := 0.04
-	return rand.Float64() * (max - min)
+	setupBenchmarkMapEntityStep()
 }
 
 func entity() mapEntity {
 	return newMapEntity(10, 10)
 }
 
-func path(length int, origin d2vector.Vector) []d2astar.Pather {
+func movingEntity() mapEntity {
+	e := entity()
+	e.SetSpeed(9)
+	newPath := path(10, e.Position)
+	e.SetPath(newPath, func() {})
+
+	return e
+}
+
+func path(length int, origin d2vector.Position) []d2astar.Pather {
 	path := make([]d2astar.Pather, length)
 
-	x, y := origin.X(), origin.Y()
-
 	for i := 0; i < length; i++ {
-		path[i] = pathTile(x/5, (float64(i)+y+1)/5)
+		origin.AddScalar(float64(i+1) / 5)
+		tile := origin.World()
+		path[i] = pathTile(tile.X(), tile.Y())
 	}
 
 	return path
@@ -52,32 +54,21 @@ func pathTile(x, y float64) *d2common.PathTile {
 	return &d2common.PathTile{X: x, Y: y}
 }
 
-func setupMovement() mapEntity {
-	e := entity()
-	e.SetSpeed(12)
-	newPath := path(100, e.Position.Vector)
-	e.SetPath(newPath, func() {})
-
-	return e
-}
-
 func TestMapEntity_Step(t *testing.T) {
-	stepCount := 5
-	e := setupMovement()
+	stepCount := 10
+	e := movingEntity()
 	start := e.Position.Clone()
-	//fmt.Printf("start\t%s\t%d\t%s\n", e.Position, len(e.path), e.Target)
 
 	for i := 0; i < stepCount; i++ {
 		e.Step(normalTickTime)
-		//fmt.Printf("move\t%s\t%d\t%s\n", e.Position, len(e.path), e.Target)
 	}
 
+	// velocity
 	change := d2vector.NewVector(0, 0)
 	change.Copy(&e.Target.Vector)
 	change.Subtract(&e.Position.Vector)
 	change.SetLength(e.Speed * normalTickTime)
-
-	fmt.Println(change)
+	// change in position
 	change.Scale(float64(stepCount))
 
 	want := change.Add(&start)
@@ -85,6 +76,14 @@ func TestMapEntity_Step(t *testing.T) {
 	if !e.Position.EqualsApprox(*want) {
 		t.Errorf("entity position after 5 steps: want %s: got %s", want, e.Position.Vector)
 	}
+
+	if e.Position.Equals(start) {
+		t.Errorf("entity did not move, still at position %s", start)
+	}
+}
+
+func setupBenchmarkMapEntityStep() {
+	stepEntity = movingEntity()
 }
 
 func BenchmarkMapEntity_Step(b *testing.B) {

@@ -153,7 +153,6 @@ func (m *mapEntity) nextPath() {
 		// End of path.
 		m.Position.Copy(&m.Target.Vector)
 	}
-
 }
 
 // hasPath returns false if the length of the entity movement path is 0.
