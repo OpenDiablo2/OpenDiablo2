@@ -15,7 +15,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
 
 type labelItem struct {
@@ -33,24 +32,20 @@ type Credits struct {
 	cycleTime          float64
 	cyclesTillNextLine int
 	doneWithCredits    bool
-	renderer           d2interface.Renderer
-	inputManager       d2interface.InputManager
-	audioProvider      d2interface.AudioProvider
-	terminal           d2interface.Terminal
-	scriptEngine       *d2script.ScriptEngine
+
+	renderer  d2interface.Renderer
+	navigator Navigator
 }
 
 // CreateCredits creates an instance of the credits screen
-func CreateCredits(renderer d2interface.Renderer, inputManager d2interface.InputManager, audioProvider d2interface.AudioProvider, scriptEngine *d2script.ScriptEngine) *Credits {
+func CreateCredits(navigator Navigator, renderer d2interface.Renderer) *Credits {
 	result := &Credits{
 		labels:             make([]*labelItem, 0),
 		cycleTime:          0,
 		doneWithCredits:    false,
 		cyclesTillNextLine: 0,
 		renderer:           renderer,
-		inputManager:       inputManager,
-		audioProvider:      audioProvider,
-		scriptEngine:       scriptEngine,
+		navigator:          navigator,
 	}
 
 	return result
@@ -162,9 +157,7 @@ func (v *Credits) Advance(tickTime float64) error {
 }
 
 func (v *Credits) onExitButtonClicked() {
-	mainMenu := CreateMainMenu(v.renderer, v.inputManager, v.audioProvider, v.terminal, v.scriptEngine)
-	mainMenu.setScreenMode(screenModeMainMenu)
-	d2screen.SetNextScreen(mainMenu)
+	v.navigator.ToMainMenu()
 }
 
 func (v *Credits) addNextItem() {

@@ -29,6 +29,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 	"github.com/pkg/profile"
 	"golang.org/x/image/colornames"
@@ -110,7 +112,7 @@ func (p *App) Run() error {
 		return err
 	}
 
-	d2screen.SetNextScreen(d2gamescreen.CreateMainMenu(p.renderer, p.inputManager, p.audio, p.terminal, p.scriptEngine))
+	p.ToMainMenu()
 
 	if p.gitBranch == "" {
 		p.gitBranch = "Local Build"
@@ -600,4 +602,40 @@ func updateInitError(target d2interface.Surface) error {
 		%s\nPlease put the files and re-run the game.`, d2config.Config.MpqPath)
 
 	return nil
+}
+
+func (a *App) ToMainMenu() {
+	mainMenu := d2gamescreen.CreateMainMenu(a, a.renderer, a.inputManager, a.audio)
+	mainMenu.SetScreenMode(d2gamescreen.ScreenModeMainMenu)
+	d2screen.SetNextScreen(mainMenu)
+}
+
+func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType, host string) {
+	selectHero := d2gamescreen.CreateSelectHeroClass(a, a.renderer, a.audio, connType, host)
+	d2screen.SetNextScreen(selectHero)
+}
+
+func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.ClientConnectionType, host string) {
+	gameClient, _ := d2client.Create(connType, a.scriptEngine)
+
+	if err := gameClient.Open(host, filePath); err != nil {
+		// TODO an error screen should be shown in this case
+		fmt.Printf("can not connect to the host: %s", host)
+	}
+
+	d2screen.SetNextScreen(d2gamescreen.CreateGame(a, a.renderer, a.inputManager, a.audio, gameClient, a.terminal))
+}
+
+func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnectionType, connHost string) {
+	characterSelect := d2gamescreen.CreateCharacterSelect(a, a.renderer, a.inputManager, a.audio, connType, connHost)
+	d2screen.SetNextScreen(characterSelect)
+}
+
+func (a *App) ToMapEngineTest(region int, level int) {
+	met := d2gamescreen.CreateMapEngineTest(0, 1, a.terminal, a.renderer, a.inputManager)
+	d2screen.SetNextScreen(met)
+}
+
+func (a *App) ToCredits() {
+	d2screen.SetNextScreen(d2gamescreen.CreateCredits(a, a.renderer))
 }

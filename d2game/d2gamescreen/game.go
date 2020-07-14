@@ -14,7 +14,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
-	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
 
 const hideZoneTextAfterSeconds = 2.0
@@ -36,8 +35,7 @@ type Game struct {
 }
 
 // CreateGame creates the Gameplay screen and returns a pointer to it
-func CreateGame(renderer d2interface.Renderer, inputManager d2interface.InputManager, audioProvider d2interface.AudioProvider, gameClient *d2client.GameClient,
-	term d2interface.Terminal, scriptEngine *d2script.ScriptEngine) *Game {
+func CreateGame(navigator Navigator, renderer d2interface.Renderer, inputManager d2interface.InputManager, audioProvider d2interface.AudioProvider, gameClient *d2client.GameClient, term d2interface.Terminal) *Game {
 	result := &Game{
 		gameClient:           gameClient,
 		gameControls:         nil,
@@ -45,7 +43,7 @@ func CreateGame(renderer d2interface.Renderer, inputManager d2interface.InputMan
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
 		mapRenderer:          d2maprenderer.CreateMapRenderer(renderer, gameClient.MapEngine, term),
-		escapeMenu:           NewEscapeMenu(renderer, inputManager, audioProvider, term, scriptEngine),
+		escapeMenu:           NewEscapeMenu(navigator, renderer, audioProvider),
 		inputManager:         inputManager,
 		audioProvider:        audioProvider,
 		renderer:             renderer,
