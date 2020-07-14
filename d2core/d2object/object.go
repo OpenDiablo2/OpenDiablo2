@@ -99,7 +99,7 @@ func (ob *Object) Render(target d2interface.Surface) {
 	renderOffset := ob.Position.RenderOffset()
 	target.PushTranslation(
 		int((renderOffset.X()-renderOffset.Y())*16),
-		int(((renderOffset.X()+renderOffset.Y())*8)-5),
+		int(((renderOffset.X() + renderOffset.Y()) * 8)),
 	)
 
 	if ob.highlight {
