@@ -111,7 +111,8 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		path, _, _ := g.MapEngine.PathFind(movePlayer.StartX, movePlayer.StartY, movePlayer.DestX, movePlayer.DestY)
 		if len(path) > 0 {
 			player.SetPath(path, func() {
-				tile := g.MapEngine.TileAt(player.TileX, player.TileY)
+				tilePosition := player.Position.Tile()
+				tile := g.MapEngine.TileAt(int(tilePosition.X()), int(tilePosition.Y()))
 				if tile == nil {
 					return
 				}
@@ -135,8 +136,8 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		player.ClearPath()
 		// currently hardcoded to missile skill
 		missile, err := d2mapentity.CreateMissile(
-			int(player.LocationX),
-			int(player.LocationY),
+			int(player.Position.X()),
+			int(player.Position.Y()),
 			d2datadict.Missiles[playerCast.SkillID],
 		)
 		if err != nil {
@@ -144,8 +145,8 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		}
 
 		rads := d2common.GetRadiansBetween(
-			player.LocationX,
-			player.LocationY,
+			player.Position.X(),
+			player.Position.Y(),
 			playerCast.TargetX*5,
 			playerCast.TargetY*5,
 		)

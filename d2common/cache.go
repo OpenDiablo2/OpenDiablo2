@@ -8,6 +8,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
+var _ d2interface.Cache = &Cache{} // Static check to confirm struct conforms to interface
+
 type cacheNode struct {
 	next   *cacheNode
 	prev   *cacheNode

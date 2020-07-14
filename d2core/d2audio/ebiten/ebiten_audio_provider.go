@@ -7,12 +7,15 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
 	"github.com/hajimehoshi/ebiten/audio"
 	"github.com/hajimehoshi/ebiten/audio/wav"
 )
 
 const sampleRate = 44100
+
+var _ d2interface.AudioProvider = &AudioProvider{} // Static check to confirm struct conforms to interface
 
 // AudioProvider represents a provider capable of playing audio
 type AudioProvider struct {

@@ -6,18 +6,18 @@ import (
 	"testing"
 )
 
-func TestEntityPosition(t *testing.T) {
+func TestNewPosition(t *testing.T) {
 	x, y := rand.Intn(1000), rand.Intn(1000)
-	pos := EntityPosition(x, y)
 	locX, locY := float64(x), float64(y)
+	pos := NewPosition(locX, locY)
 
 	// old coordinate values			Position equivalent
 	locationX := locX                 // .SubWord().X()
 	locationY := locY                 // .SubWord().Y()
 	tileX := float64(x / 5)           // .Tile().X()
 	tileY := float64(y / 5)           // .Tile().Y()
-	subcellX := 1 + math.Mod(locX, 5) // .SubCell().X()
-	subcellY := 1 + math.Mod(locY, 5) // .SubCell().Y()
+	subcellX := 1 + math.Mod(locX, 5) // .RenderOffset().X()
+	subcellY := 1 + math.Mod(locY, 5) // .RenderOffset().Y()
 
 	want := NewVector(tileX, tileY)
 	got := pos.Tile()
@@ -27,14 +27,14 @@ func TestEntityPosition(t *testing.T) {
 	}
 
 	want = NewVector(subcellX, subcellY)
-	got = pos.SubCell()
+	got = pos.RenderOffset()
 
 	if !got.Equals(want) {
-		t.Errorf("sub cell position should match old value: got %s: want %s", got, want)
+		t.Errorf("render offset position should match old value: got %s: want %s", got, want)
 	}
 
 	want = NewVector(locationX, locationY)
-	got = pos.SubWorld()
+	got = &pos.Vector
 
 	if !got.Equals(want) {
 		t.Errorf("sub tile position should match old value: got %s: want %s", got, want)
@@ -51,47 +51,29 @@ func validate(description string, t *testing.T, original, got, want, unchanged V
 	}
 }
 
-func TestTile(t *testing.T) {
-	p := NewPosition(1.6, 1.6)
+func TestPosition_World(t *testing.T) {
+	p := NewPosition(5, 10)
+	unchanged := p.Clone()
+	got := p.World()
+	want := NewVector(1, 2)
+
+	validate("world position", t, p.Vector, *got, want, unchanged)
+}
+
+func TestPosition_Tile(t *testing.T) {
+	p := NewPosition(23, 24)
+	unchanged := p.Clone()
 	got := p.Tile()
-	want := NewVector(1, 1)
-	unchanged := NewVector(1.6, 1.6)
+	want := NewVector(4, 4)
 
 	validate("tile position", t, p.Vector, *got, want, unchanged)
 }
 
-func TestTileOffset(t *testing.T) {
-	p := NewPosition(1.6, 1.6)
-	got := p.TileOffset()
-	want := NewVector(0.6, 0.6)
-	unchanged := NewVector(1.6, 1.6)
-
-	validate("tile offset", t, p.Vector, *got, want, unchanged)
-}
-
-func TestSubWorld(t *testing.T) {
-	p := NewPosition(1, 1)
-	got := p.SubWorld()
-	want := NewVector(5, 5)
-	unchanged := NewVector(1, 1)
-
-	validate("sub tile world position", t, p.Vector, *got, want, unchanged)
-}
-
-func TestSubTile(t *testing.T) {
-	p := NewPosition(1, 1)
-	got := p.SubTile()
-	want := NewVector(5, 5)
-	unchanged := NewVector(1, 1)
-
-	validate("sub tile with offset", t, p.Vector, *got, want, unchanged)
-}
-
-func TestSubTileOffset(t *testing.T) {
-	p := NewPosition(1.1, 1.1)
-	got := p.SubTileOffset()
-	want := NewVector(0.5, 0.5)
-	unchanged := NewVector(1.1, 1.1)
+func TestPosition_RenderOffset(t *testing.T) {
+	p := NewPosition(12.1, 14.2)
+	unchanged := p.Clone()
+	got := p.RenderOffset()
+	want := NewVector(3.1, 5.2)
 
 	validate("offset from sub tile", t, p.Vector, *got, want, unchanged)
 }

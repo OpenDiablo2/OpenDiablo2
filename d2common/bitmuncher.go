@@ -2,6 +2,8 @@ package d2common
 
 import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
+var _ d2interface.BitMuncher = &BitMuncher{} // Static check to confirm struct conforms to interface
+
 // BitMuncher is used for parsing files that are not byte-aligned such as the DCC files.
 type BitMuncher struct {
 	data     []byte

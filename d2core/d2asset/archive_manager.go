@@ -11,6 +11,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
+// Static checks to confirm struct conforms to interface
+var _ d2interface.ArchiveManager = &archiveManager{}
+var _ d2interface.Cacher = &archiveManager{}
+
 type archiveManager struct {
 	assetManager d2interface.AssetManager
 	cache        d2interface.Cache

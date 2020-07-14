@@ -12,6 +12,10 @@ const (
 	fontBudget = 64
 )
 
+// Static checks to confirm struct conforms to interface
+var _ d2interface.ArchivedFontManager = &fontManager{}
+var _ d2interface.Cacher = &fontManager{}
+
 type fontManager struct {
 	assetManager d2interface.AssetManager
 	cache        d2interface.Cache

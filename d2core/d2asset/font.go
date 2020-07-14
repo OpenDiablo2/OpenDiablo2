@@ -6,10 +6,11 @@ import (
 	"image/color"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
+
+var _ d2interface.Font = &Font{} // Static check to confirm struct conforms to interface
 
 type fontGlyph struct {
 	frame  int

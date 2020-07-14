@@ -2,7 +2,15 @@ package d2input
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
+
+// Static checks to confirm struct conforms to interface
+var _ d2interface.InputEventHandler = &HandlerEvent{}
+var _ d2interface.KeyEvent = &KeyEvent{}
+var _ d2interface.KeyCharsEvent = &KeyCharsEvent{}
+var _ d2interface.MouseEvent = &MouseEvent{}
+var _ d2interface.MouseMoveEvent = &MouseMoveEvent{}
 
 // HandlerEvent is an event that EventHandlers will process and respond to
 type HandlerEvent struct {
