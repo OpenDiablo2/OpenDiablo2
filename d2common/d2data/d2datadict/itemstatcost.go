@@ -640,8 +640,35 @@ func (r *ItemStatCostRecord) descFn14(values ...int) string {
 	return result
 }
 
+func within(n, min, max int) int {
+	if n < min {
+		n = min
+	} else if n > max {
+		n = max
+	}
+
+	return n
+}
+
 func (r *ItemStatCostRecord) descFn15(values ...int) string {
-	return ""
+	format := d2common.TranslateString(r.DescStrPos)
+	chanceToCast, skillLevel, skillIndex:= values[0], values[1], values[2]
+
+	chanceToCast = within(chanceToCast, 0, 100)
+	skillLevel = within(skillLevel, 1, 1<<8)
+	skillLevel = within(skillLevel, 0, len(SkillDetails)-1)
+
+	skillRecord := SkillDetails[skillIndex]
+	//skillDescKey := skillRecord.Skilldesc
+	//skillDescRecord := SkillDescriptions[skillDescKey]
+	//skillShortName := d2common.TranslateString(skillDescRecord.ShortKey)
+
+	result := fmt.Sprintf(format, chanceToCast, skillLevel, skillRecord.Skill)
+
+	// bugs
+	result = strings.Replace(result, "+-", "-", -1)
+
+	return result
 }
 
 func (r *ItemStatCostRecord) descFn16(values ...int) string {

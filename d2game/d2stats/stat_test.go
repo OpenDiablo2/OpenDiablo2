@@ -52,6 +52,12 @@ func TestStat_AssetInit(t *testing.T) {
 	} else {
 		d2datadict.LoadSkills(data)
 	}
+
+	if data, err := d2asset.LoadFile(d2resource.SkillDesc); err != nil {
+		panic(err)
+	} else {
+		d2datadict.LoadSkillDescriptions(data)
+	}
 }
 
 func TestStat_Clone(t *testing.T) {
@@ -773,26 +779,25 @@ func TestStat_DescriptionFn14(t *testing.T) {
 func TestStat_DescriptionFn15(t *testing.T) {
 	tests := []struct {
 		recordKey string
-		val       int
+		vals      []int
 		expect    string
 	}{
-		{"item_skillonattack", 0, ""},
-		{"item_skillonkill", 0, ""},
-		{"item_skillondeath", 0, ""},
-		{"item_skillonhit", 0, ""},
-		{"item_skillonlevelup", 0, ""},
-		{"item_skillongethit", 0, ""},
+		{"item_skillonattack", []int{5, 7, 260}, ""},
+		{"item_skillonkill", []int{5, 7, 261}, ""},
+		{"item_skillondeath", []int{5, 7, 262}, ""},
+		{"item_skillonhit", []int{5, 7, 263}, ""},
+		{"item_skillonlevelup", []int{5, 7, 264}, ""},
+		{"item_skillongethit", []int{5, 7, 265}, ""},
 	}
 
 	for idx := range tests {
 		test := tests[idx]
 		record := d2datadict.ItemStatCosts[test.recordKey]
-		val := test.val
 		expect := test.expect
-		stat := CreateStat(record, val)
+		stat := CreateStat(record, test.vals...)
 
 		if got := stat.Description(); got != expect {
-			t.Errorf(errFmt, errStr, test.recordKey, val, expect, got)
+			t.Errorf(errFmt, errStr, test.recordKey, test.vals, expect, got)
 		}
 	}
 }
