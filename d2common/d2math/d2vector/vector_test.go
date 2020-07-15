@@ -308,28 +308,48 @@ func BenchmarkVector_Distance(b *testing.B) {
 	}
 }
 
-func TestLength(t *testing.T) {
+func TestVector_Length(t *testing.T) {
 	v := NewVector(2, 0)
 	c := v.Clone()
 	want := 2.0
-	got := v.Length()
+	got := c.Length()
 
-	d := fmt.Sprintf("length of %s", c)
+	d := fmt.Sprintf("length of %s", v)
 
-	evaluateChanged(d, v, c, t)
+	if !c.Equals(v) {
+		t.Errorf("%s: changed vector %s to %s unexpectedly", d, v, c)
+	}
 
-	evaluateScalar(d, want, got, t)
+	if got != want {
+		t.Errorf("%s: want %.3f: got %.3f", d, want, got)
+	}
 }
 
-func TestSetLength(t *testing.T) {
+func BenchmarkVector_Length(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		outFloat = v.Length()
+	}
+}
+
+func TestVector_SetLength(t *testing.T) {
 	v := NewVector(1, 1)
 	c := v.Clone()
 	want := 2.0
-	got := v.SetLength(want).Length()
+	got := c.SetLength(want).Length()
 
-	d := fmt.Sprintf("length of %s", c)
+	if !d2math.EqualsApprox(got, want) {
+		t.Errorf("set length of %s to %.3f :want %.3f: got %.3f", v, want, want, got)
+	}
+}
 
-	evaluateScalarApprox(d, want, got, t)
+func BenchmarkVector_SetLength(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		v.SetLength(5)
+	}
 }
 
 func TestLerp(t *testing.T) {

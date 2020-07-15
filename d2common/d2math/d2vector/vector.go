@@ -179,7 +179,8 @@ func (v *Vector) Length() float64 {
 	return math.Sqrt(v.Dot(v))
 }
 
-// SetLength sets the length of this Vector without changing the direction.
+// SetLength sets the length of this Vector without changing the direction. The length will be exact within
+// d2math.Epsilon. See d2math.EqualsApprox.
 func (v *Vector) SetLength(length float64) *Vector {
 	v.Normalize()
 	v.Scale(length)
