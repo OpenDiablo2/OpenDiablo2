@@ -1,7 +1,5 @@
 package d2math
 
-import "math"
-
 const (
 	// Epsilon is used as the threshold for 'almost equal' operations.
 	Epsilon float64 = 0.0001
@@ -16,7 +14,7 @@ const (
 
 // EqualsApprox returns true if the difference between a and b is less than Epsilon.
 func EqualsApprox(a, b float64) bool {
-	return math.Abs(a-b) < Epsilon
+	return Abs(a-b) < Epsilon
 }
 
 // CompareFloat64Fuzzy returns an integer between -1 and 1 describing
@@ -24,7 +22,8 @@ func EqualsApprox(a, b float64) bool {
 // absolute difference between a and b is less than Epsilon.
 func CompareFloat64Fuzzy(a, b float64) int {
 	delta := a - b
-	if math.Abs(delta) < Epsilon {
+
+	if Abs(delta) < Epsilon {
 		return 0
 	}
 
@@ -33,6 +32,15 @@ func CompareFloat64Fuzzy(a, b float64) int {
 	}
 
 	return -1
+}
+
+// Abs returns the absolute value of a. It is a less CPU intensive version of the standard library math.Abs().
+func Abs(a float64) float64 {
+	if a < 0 {
+		return a * -1
+	}
+
+	return a
 }
 
 // ClampFloat64 returns a clamped to min and max.
