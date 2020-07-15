@@ -2,22 +2,21 @@ package d2vector
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
-func TestMain(m *testing.M) {
+/*func TestMain(m *testing.M) {
 	setup()
 	os.Exit(m.Run())
-}
+}*/
 
 var outVector Vector
+var outFloat float64
 
-func setup() {
-	outVector = NewVector(0, 0)
-}
+/*func setup() {
+}*/
 
 // TODO: Remove these evaluate functions. Throwing test errors outside the relevant functions means otherwise handly links to failed tests now point here which is annoying.
 
@@ -262,30 +261,51 @@ func TestVector_Abs(t *testing.T) {
 }
 
 func BenchmarkVector_Abs(b *testing.B) {
-	v := NewVector(-1234, -5678)
+	v := NewVector(-1, -1)
 
 	for n := 0; n < b.N; n++ {
 		outVector = *v.Abs()
 	}
 }
 
-func TestNegate(t *testing.T) {
+func TestVector_Negate(t *testing.T) {
 	v := NewVector(-1, 1)
 	want := NewVector(1, -1)
 	got := v.Clone()
 	got.Negate()
 
-	evaluateVector(fmt.Sprintf("inverse value of %s", v), want, got, t)
+	if !want.Equals(got) {
+		t.Errorf("inverse value of %s: want %s: got %s", v, want, got)
+	}
 }
 
-func TestDistance(t *testing.T) {
+func BenchmarkVector_Negate(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		outVector = *v.Negate()
+	}
+}
+
+func TestVector_Distance(t *testing.T) {
 	v := NewVector(1, 3)
 	other := NewVector(1, -1)
 	want := 4.0
 	c := v.Clone()
 	got := c.Distance(other)
 
-	evaluateScalar(fmt.Sprintf("distance from %s to %s", v, other), want, got, t)
+	if got != want {
+		t.Errorf("distance from %s to %s: want %.3f: got %.3f", v, other, want, got)
+	}
+}
+
+func BenchmarkVector_Distance(b *testing.B) {
+	v := NewVector(1, 1)
+	d := NewVector(2, 2)
+
+	for n := 0; n < b.N; n++ {
+		outFloat = v.Distance(d)
+	}
 }
 
 func TestLength(t *testing.T) {
