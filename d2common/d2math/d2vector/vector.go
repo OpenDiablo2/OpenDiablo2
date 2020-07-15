@@ -150,17 +150,13 @@ func (v *Vector) DivideScalar(s float64) *Vector {
 
 // Abs sets the vector to it's absolute (positive) equivalent.
 func (v *Vector) Abs() *Vector {
-	xm, ym := 1.0, 1.0
 	if v.x < 0 {
-		xm = -1
+		v.x *= -1
 	}
 
 	if v.y < 0 {
-		ym = -1
+		v.y *= -1
 	}
-
-	v.x *= xm
-	v.y *= ym
 
 	return v
 }

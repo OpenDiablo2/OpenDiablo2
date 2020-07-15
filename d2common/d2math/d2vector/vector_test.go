@@ -2,10 +2,24 @@ package d2vector
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
+
+func TestMain(m *testing.M) {
+	setup()
+	os.Exit(m.Run())
+}
+
+var outVector Vector
+
+func setup() {
+	outVector = NewVector(0, 0)
+}
+
+// TODO: Remove these evaluate functions. Throwing test errors outside the relevant functions means otherwise handly links to failed tests now point here which is annoying.
 
 func evaluateVector(description string, want, got Vector, t *testing.T) {
 	if !got.Equals(want) {
@@ -236,13 +250,23 @@ func TestScale(t *testing.T) {
 	evaluateVector(fmt.Sprintf("scale %s by 2", v), want, got, t)
 }
 
-func TestAbs(t *testing.T) {
+func TestVector_Abs(t *testing.T) {
 	v := NewVector(-1, 1)
 	want := NewVector(1, 1)
 	got := v.Clone()
 	got.Abs()
 
-	evaluateVector(fmt.Sprintf("absolute value of %s", v), want, got, t)
+	if !want.Equals(got) {
+		t.Errorf("absolute value of %s: want %s: got %s", v, want, got)
+	}
+}
+
+func BenchmarkVector_Abs(b *testing.B) {
+	v := NewVector(-1234, -5678)
+
+	for n := 0; n < b.N; n++ {
+		outVector = *v.Abs()
+	}
 }
 
 func TestNegate(t *testing.T) {
