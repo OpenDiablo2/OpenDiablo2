@@ -10,6 +10,14 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
+type descValPosition int
+
+const (
+	descValHide descValPosition = iota
+	descValPrefix
+	descValuePostfix
+)
+
 // CreateStat creates a stat instance with the given ID and number of values
 func CreateStat(record *d2datadict.ItemStatCostRecord, values ...int) *Stat {
 	if record == nil {
@@ -56,7 +64,7 @@ func (s *Stat) Description() string {
 // These came from phrozen keep:
 // https://d2mods.info/forum/kb/viewarticle?a=448
 //nolint:gochecknoglobals // better for lookup
-var StatDescriptionFormatStrings = []string{
+var baseFormatStrings = []string{
 	"",
 	"%v %s",
 	"%v%% %s",
@@ -91,12 +99,14 @@ var StatDescriptionFormatStrings = []string{
 var statValueCountLookup map[int]int //nolint:gochecknoglobals // lookup
 
 // DescString return a string based on the DescFnID
-func (s *Stat) DescString(values ...int) string {
-	if s.Record.DescFnID < 0 || s.Record.DescFnID > len(StatDescriptionFormatStrings) {
+func (s *Stat) DescString(values ...int) string {// nolint:gocyclo switch statement is not so bad
+	if s.Record.DescFnID < 0 || s.Record.DescFnID > len(baseFormatStrings) {
 		return ""
 	}
 
 	var result string
+
+	//nolint:gomdn introducing a const for these would be worse
 	switch s.Record.DescFnID {
 	case 1:
 		result = s.descFn1(values...)
@@ -146,7 +156,7 @@ func (s *Stat) DescString(values ...int) string {
 }
 
 func (s *Stat) descFn1(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
+	format := baseFormatStrings[s.Record.DescFnID]
 
 	// we know there is only one value for this stat
 	value := values[0]
@@ -163,12 +173,12 @@ func (s *Stat) descFn1(values ...int) string {
 
 	var result string
 
-	switch s.Record.DescVal {
-	case 0:
+	switch descValPosition(s.Record.DescVal) {
+	case descValHide:
 		result = fmt.Sprintf(format, stringTableString)
-	case 1:
+	case descValPrefix:
 		result = fmt.Sprintf(format, value, stringTableString)
-	case 2:
+	case descValuePostfix:
 		formatSplit := strings.Split(format, " ")
 		format = strings.Join(reverseStringSlice(formatSplit), " ")
 		result = fmt.Sprintf(format, stringTableString, value)
@@ -183,7 +193,7 @@ func (s *Stat) descFn1(values ...int) string {
 }
 
 func (s *Stat) descFn2(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
+	format := baseFormatStrings[s.Record.DescFnID]
 
 	// we know there is only one value for this stat
 	value := values[0]
@@ -200,12 +210,12 @@ func (s *Stat) descFn2(values ...int) string {
 
 	var result string
 
-	switch s.Record.DescVal {
-	case 0:
+	switch descValPosition(s.Record.DescVal) {
+	case descValHide:
 		result = fmt.Sprintf(format, stringTableString)
-	case 1:
+	case descValPrefix:
 		result = fmt.Sprintf(format, value, stringTableString)
-	case 2:
+	case descValuePostfix:
 		formatSplit := strings.Split(format, " ")
 		format = strings.Join(reverseStringSlice(formatSplit), " ")
 		result = fmt.Sprintf(format, stringTableString, value)
@@ -213,14 +223,11 @@ func (s *Stat) descFn2(values ...int) string {
 		result = ""
 	}
 
-	// bugs
-	result = strings.ReplaceAll(result, " +%d", "")
-
-	return result
+	return fixString(result)
 }
 
 func (s *Stat) descFn3(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
+	format := baseFormatStrings[s.Record.DescFnID]
 
 	// we know there is only one value for this stat
 	value := values[0]
@@ -236,13 +243,13 @@ func (s *Stat) descFn3(values ...int) string {
 
 	var result string
 
-	switch s.Record.DescVal {
-	case 0:
+	switch descValPosition(s.Record.DescVal) {
+	case descValHide:
 		format = strings.Split(format, " ")[0]
 		result = fmt.Sprintf(format, stringTableString)
-	case 1:
+	case descValPrefix:
 		result = fmt.Sprintf(format, value, stringTableString)
-	case 2:
+	case descValuePostfix:
 		formatSplit := strings.Split(format, " ")
 		format = strings.Join(reverseStringSlice(formatSplit), " ")
 		result = fmt.Sprintf(format, stringTableString, value)
@@ -250,52 +257,16 @@ func (s *Stat) descFn3(values ...int) string {
 		result = ""
 	}
 
-	// bugs
-	result = strings.ReplaceAll(result, "+-", "-")
-	result = strings.ReplaceAll(result, " +%d", "")
-
-	return result
+	return fixString(result)
 }
 
 func (s *Stat) descFn4(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
-
-	// we know there is only one value for this stat
-	value := values[0]
-
-	var stringTableKey string
-	if value < 0 {
-		stringTableKey = s.Record.DescStrNeg
-	} else {
-		format = strings.Join([]string{"+", format}, "")
-		stringTableKey = s.Record.DescStrPos
-	}
-
-	stringTableString := d2common.TranslateString(stringTableKey)
-
-	var result string
-
-	switch s.Record.DescVal {
-	case 0:
-		result = fmt.Sprintf(format, stringTableString)
-	case 1:
-		result = fmt.Sprintf(format, value, stringTableString)
-	case 2:
-		formatSplit := strings.Split(format, " ")
-		format = strings.Join(reverseStringSlice(formatSplit), " ")
-		result = fmt.Sprintf(format, stringTableString, value)
-	default:
-		result = ""
-	}
-
-	// bugs
-	result = strings.ReplaceAll(result, " +%d", "")
-
-	return result
+	// for now, same as fn2
+	return s.descFn2(values...)
 }
 
 func (s *Stat) descFn5(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
+	format := baseFormatStrings[s.Record.DescFnID]
 
 	// we know there is only one value for this stat
 	value := values[0]
@@ -311,12 +282,12 @@ func (s *Stat) descFn5(values ...int) string {
 
 	var result string
 
-	switch s.Record.DescVal {
-	case 0:
+	switch descValPosition(s.Record.DescVal) {
+	case descValHide:
 		result = fmt.Sprintf(format, stringTableString)
-	case 1:
+	case descValPrefix:
 		result = fmt.Sprintf(format, value, stringTableString)
-	case 2:
+	case descValuePostfix:
 		formatSplit := strings.Split(format, " ")
 		format = strings.Join(reverseStringSlice(formatSplit), " ")
 		result = fmt.Sprintf(format, stringTableString, value)
@@ -324,14 +295,11 @@ func (s *Stat) descFn5(values ...int) string {
 		result = ""
 	}
 
-	// bugs
-	result = strings.ReplaceAll(result, " +%d", "")
-
-	return result
+	return fixString(result)
 }
 
 func (s *Stat) descFn6(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
+	format := baseFormatStrings[s.Record.DescFnID]
 
 	// we know there is only one value for this stat
 	value := values[0]
@@ -351,12 +319,12 @@ func (s *Stat) descFn6(values ...int) string {
 
 	var result string
 
-	switch s.Record.DescVal {
-	case 0:
+	switch descValPosition(s.Record.DescVal) {
+	case descValHide:
 		result = fmt.Sprintf(format, stringTableStr1, stringTableStr2)
-	case 1:
+	case descValPrefix:
 		result = fmt.Sprintf(format, value, stringTableStr1, stringTableStr2)
-	case 2:
+	case descValuePostfix:
 		formatSplit := strings.Split(format, " ")
 		format = strings.Join(reverseStringSlice(formatSplit), " ")
 		result = fmt.Sprintf(format, stringTableStr1, value)
@@ -364,15 +332,11 @@ func (s *Stat) descFn6(values ...int) string {
 		result = ""
 	}
 
-	// bugs
-	result = strings.ReplaceAll(result, "+-", "-")
-	result = strings.ReplaceAll(result, " +%d", "")
-
-	return result
+	return fixString(result)
 }
 
 func (s *Stat) descFn7(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
+	format := baseFormatStrings[s.Record.DescFnID]
 
 	// we know there is only one value for this stat
 	value := values[0]
@@ -392,14 +356,13 @@ func (s *Stat) descFn7(values ...int) string {
 
 	var result string
 
-	switch s.Record.DescVal {
-	case 0:
+	switch descValPosition(s.Record.DescVal) {
+	case descValHide:
 		result = fmt.Sprintf(format, stringTableStr1, stringTableStr2)
-	case 1:
+	case descValPrefix:
 		result = fmt.Sprintf(format, value, stringTableStr1, stringTableStr2)
-	case 2:
+	case descValuePostfix:
 		formatSplit := strings.Split(format, " ")
-		// formatSplit = reverseStringSlice(formatSplit)
 		formatSplit[0], formatSplit[1] = formatSplit[1], formatSplit[0]
 		format = strings.Join(formatSplit, " ")
 		result = fmt.Sprintf(format, stringTableStr1, value, stringTableStr2)
@@ -411,45 +374,12 @@ func (s *Stat) descFn7(values ...int) string {
 }
 
 func (s *Stat) descFn8(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
-
-	// we know there is only one value for this stat
-	value := values[0]
-
-	var stringTableKey1 string
-	if value < 0 {
-		stringTableKey1 = s.Record.DescStrNeg
-	} else {
-		format = strings.Join([]string{"+", format}, "")
-		stringTableKey1 = s.Record.DescStrPos
-	}
-
-	stringTableStr1 := d2common.TranslateString(stringTableKey1)
-
-	// this stat has an additional string (Based on Character Level)
-	stringTableStr2 := d2common.TranslateString(s.Record.DescStr2)
-
-	var result string
-
-	switch s.Record.DescVal {
-	case 0:
-		result = fmt.Sprintf(format, stringTableStr1, stringTableStr2)
-	case 1:
-		result = fmt.Sprintf(format, value, stringTableStr1, stringTableStr2)
-	case 2:
-		formatSplit := strings.Split(format, " ")
-		formatSplit[0], formatSplit[1] = formatSplit[1], formatSplit[0]
-		format = strings.Join(formatSplit, " ")
-		result = fmt.Sprintf(format, stringTableStr1, value, stringTableStr2)
-	default:
-		result = ""
-	}
-
-	return result
+	// for now, same as fn7
+	return s.descFn7(values...)
 }
 
 func (s *Stat) descFn9(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
+	format := baseFormatStrings[s.Record.DescFnID]
 
 	// we know there is only one value for this stat
 	value := values[0]
@@ -468,12 +398,12 @@ func (s *Stat) descFn9(values ...int) string {
 
 	var result string
 
-	switch s.Record.DescVal {
-	case 0:
+	switch descValPosition(s.Record.DescVal) {
+	case descValHide:
 		result = fmt.Sprintf(format, stringTableStr1, stringTableStr2)
-	case 1:
+	case descValPrefix:
 		result = fmt.Sprintf(format, value, stringTableStr1, stringTableStr2)
-	case 2:
+	case descValuePostfix:
 		formatSplit := strings.Split(format, " ")
 		formatSplit[0], formatSplit[1] = formatSplit[1], formatSplit[0]
 		format = strings.Join(formatSplit, " ")
@@ -496,7 +426,7 @@ func (s *Stat) descFn11(values ...int) string {
 }
 
 func (s *Stat) descFn12(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
+	format := baseFormatStrings[s.Record.DescFnID]
 
 	// we know there is only one value for this stat
 	value := values[0]
@@ -507,7 +437,7 @@ func (s *Stat) descFn12(values ...int) string {
 }
 
 func (s *Stat) descFn13(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
+	format := baseFormatStrings[s.Record.DescFnID]
 	numSkills, heroIndex := values[0], values[1]
 
 	heroMap := map[int]d2enum.Hero{
@@ -555,10 +485,7 @@ func (s *Stat) descFn14(values ...int) string {
 	classOnlyStr := d2common.TranslateString(classOnlyKey)
 	result := fmt.Sprintf(skillTabStr, numSkills, classOnlyStr)
 
-	// bugs
-	result = strings.ReplaceAll(result, "+-", "-")
-
-	return result
+	return fixString(result)
 }
 
 func within(n, min, max int) int {
@@ -576,17 +503,11 @@ func (s *Stat) descFn15(values ...int) string {
 	chanceToCast, skillLevel, skillIndex := values[0], values[1], values[2]
 
 	chanceToCast = within(chanceToCast, 0, 100)
-	skillLevel = within(skillLevel, 1, 1<<8)
+	skillLevel = within(skillLevel, 0, 255)
 	skillLevel = within(skillLevel, 0, len(d2datadict.SkillDetails)-1)
 
 	skillRecord := d2datadict.SkillDetails[skillIndex]
-	//skillDescKey := skillRecord.Skilldesc
-	//skillDescRecord := SkillDescriptions[skillDescKey]
-	//skillShortName := d2common.TranslateString(skillDescRecord.ShortKey)
-
 	result := fmt.Sprintf(format, chanceToCast, skillLevel, skillRecord.Skill)
-
-	// bugs
 	result = strings.ReplaceAll(result, "+-", "-")
 
 	return result
@@ -594,17 +515,11 @@ func (s *Stat) descFn15(values ...int) string {
 
 func (s *Stat) descFn16(values ...int) string {
 	skillLevel, skillIndex := values[0], values[1]
-
 	str1 := d2common.TranslateString(s.Record.DescStrPos)
-
 	skillRecord := d2datadict.SkillDetails[skillIndex]
-
 	result := fmt.Sprintf(str1, skillLevel, skillRecord.Skill)
 
-	// bugs
-	result = strings.ReplaceAll(result, "+-", "-")
-
-	return result
+	return fixString(result)
 }
 
 /*
@@ -656,44 +571,12 @@ func (s *Stat) descFn18(values ...int) string {
 */
 
 func (s *Stat) descFn20(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
-
-	// we know there is only one value for this stat
-	value := values[0]
-
-	var stringTableKey string
-	if value < 0 {
-		stringTableKey = s.Record.DescStrNeg
-	} else {
-		format = strings.Join([]string{"+", format}, "")
-		stringTableKey = s.Record.DescStrPos
-	}
-
-	stringTableString := d2common.TranslateString(stringTableKey)
-
-	var result string
-
-	switch s.Record.DescVal {
-	case 0:
-		result = fmt.Sprintf(format, stringTableString)
-	case 1:
-		result = fmt.Sprintf(format, value, stringTableString)
-	case 2:
-		formatSplit := strings.Split(format, " ")
-		format = strings.Join(reverseStringSlice(formatSplit), " ")
-		result = fmt.Sprintf(format, stringTableString, value)
-	default:
-		result = ""
-	}
-
-	// bugs
-	result = strings.ReplaceAll(result, " +%d", "")
-
-	return result
+	// for now, same as fn2
+	return s.descFn2(values...)
 }
 
 func (s *Stat) descFn22(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
+	format := baseFormatStrings[s.Record.DescFnID]
 	statAgainst, monsterIndex := values[0], values[1]
 
 	var monsterKey string
@@ -716,29 +599,12 @@ func (s *Stat) descFn22(values ...int) string {
 }
 
 func (s *Stat) descFn23(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
-	chanceReanimate, monsterIndex := values[0], values[1]
-
-	var monsterKey string
-
-	for key := range d2datadict.MonStats {
-		if d2datadict.MonStats[key].Id == monsterIndex {
-			monsterKey = key
-			break
-		}
-	}
-
-	str1 := d2common.TranslateString(s.Record.DescStrPos)
-	monsterName := d2datadict.MonStats[monsterKey].NameString
-
-	result := fmt.Sprintf(format, chanceReanimate, str1, monsterName)
-	result = strings.ReplaceAll(result, "+-", "-")
-
-	return result
+	// for now, same as fn22
+	return s.descFn22(values...)
 }
 
 func (s *Stat) descFn24(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
+	format := baseFormatStrings[s.Record.DescFnID]
 	lvl, skillID, chargeMax, chargeCurrent := values[0], values[1], values[2], values[3]
 
 	charges := d2common.TranslateString(s.Record.DescStrPos)
@@ -752,7 +618,7 @@ func (s *Stat) descFn24(values ...int) string {
 }
 
 func (s *Stat) descFn27(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
+	format := baseFormatStrings[s.Record.DescFnID]
 	amount, skillID, heroIndex := values[0], values[1], values[2]
 
 	skillName := d2datadict.SkillDetails[skillID].Skill
@@ -774,7 +640,7 @@ func (s *Stat) descFn27(values ...int) string {
 }
 
 func (s *Stat) descFn28(values ...int) string {
-	format := StatDescriptionFormatStrings[s.Record.DescFnID]
+	format := baseFormatStrings[s.Record.DescFnID]
 	amount, skillID := values[0], values[1]
 
 	skillName := d2datadict.SkillDetails[skillID].Skill
@@ -782,14 +648,21 @@ func (s *Stat) descFn28(values ...int) string {
 	return fmt.Sprintf(format, amount, skillName)
 }
 
+func fixString(s string) string {
+	s = strings.ReplaceAll(s, "+-", "-")
+	s = strings.ReplaceAll(s, " +%d", "")
+
+	return s
+}
+
 // DescGroupString return a string based on the DescGroupFuncID
 func (s *Stat) DescGroupString(a ...interface{}) string {
 	if s.Record.DescGroupFuncID < 0 || s.Record.DescGroupFuncID > len(
-		StatDescriptionFormatStrings) {
+		baseFormatStrings) {
 		return ""
 	}
 
-	format := StatDescriptionFormatStrings[s.Record.DescGroupFuncID]
+	format := baseFormatStrings[s.Record.DescGroupFuncID]
 
 	return fmt.Sprintf(format, a...)
 }
@@ -805,7 +678,7 @@ func (s *Stat) NumStatValues() int {
 		statValueCountLookup = make(map[int]int)
 	}
 
-	format := StatDescriptionFormatStrings[s.Record.DescGroupFuncID]
+	format := baseFormatStrings[s.Record.DescGroupFuncID]
 	pattern := regexp.MustCompile("%v")
 	matches := pattern.FindAllStringIndex(format, -1)
 	num := len(matches)
