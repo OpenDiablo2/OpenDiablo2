@@ -352,29 +352,52 @@ func BenchmarkVector_SetLength(b *testing.B) {
 	}
 }
 
-func TestLerp(t *testing.T) {
+func TestVector_Lerp(t *testing.T) {
 	a := NewVector(0, 0)
 	b := NewVector(-20, 10)
 
-	x := 0.3
+	interp := 0.3
 
 	want := NewVector(-6, 3)
-	got := a.Lerp(&b, x)
+	got := a.Lerp(&b, interp)
 
-	evaluateVector(fmt.Sprintf("linear interpolation between %s and %s by %.2f", a, b, x), want, *got, t)
+	if !got.Equals(want) {
+		t.Errorf("linear interpolation between %s and %s by %.2f: want %s: got %s", a, b, interp, want, got)
+	}
 }
 
-func TestDot(t *testing.T) {
+func BenchmarkVector_Lerp(b *testing.B) {
+	v := NewVector(1, 1)
+	t := NewVector(1000, 1000)
+
+	for n := 0; n < b.N; n++ {
+		v.Lerp(&t, 1.01)
+	}
+}
+
+func TestVector_Dot(t *testing.T) {
 	v := NewVector(1, 1)
 	c := v.Clone()
 	want := 2.0
-	got := v.Dot(&v)
+	got := c.Dot(&c)
 
-	d := fmt.Sprintf("dot product of %s", c)
+	d := fmt.Sprintf("dot product of %s", v)
 
-	evaluateChanged(d, v, c, t)
+	if !c.Equals(v) {
+		t.Errorf("%s: changed vector %s to %s unexpectedly", d, v, c)
+	}
 
-	evaluateScalar(d, want, got, t)
+	if got != want {
+		t.Errorf("%s: want %.3f: got %.3f", d, want, got)
+	}
+}
+
+func BenchmarkVector_Dot(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		outFloat = v.Dot(&v)
+	}
 }
 
 func TestCross(t *testing.T) {
