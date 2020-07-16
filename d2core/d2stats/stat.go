@@ -52,6 +52,34 @@ func (s Stat) Clone() *Stat {
 	return clone
 }
 
+// Combine sums the other stat with this one, altering the
+// values of this one.
+func (s *Stat) combine(other *Stat) (success bool) {
+	if !s.canBeCombinedWith(other) {
+		return false
+	}
+
+	for idx := range s.Values {
+		// todo different combination logic per descfnid
+		s.Values[idx] += other.Values[idx]
+	}
+
+	return true
+}
+
+func (s *Stat) canBeCombinedWith(other *Stat) bool {
+	if s.Record != other.Record {
+		return false
+	}
+
+	if len(s.Values) != len(other.Values) {
+		return false
+	}
+	// todo `10% reanimate as: foo` is not the same as `10% reanimate as: bar`
+
+	return true
+}
+
 // Description returns the formatted description string
 func (s *Stat) Description() string {
 	return s.DescString(s.Values...)
