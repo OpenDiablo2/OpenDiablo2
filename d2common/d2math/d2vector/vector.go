@@ -284,7 +284,8 @@ func (v *Vector) ReflectSurface(surface Vector) *Vector {
 	return v
 }
 
-// Rotate moves the vector around it's origin clockwise, by the given angle in radians.
+// Rotate moves the vector around it's origin clockwise, by the given angle in radians. The result will be exact within
+// d2math.Epsilon. See d2math.EqualsApprox.
 func (v *Vector) Rotate(angle float64) *Vector {
 	a := -angle
 	x := v.x*math.Cos(a) - v.y*math.Sin(a)
