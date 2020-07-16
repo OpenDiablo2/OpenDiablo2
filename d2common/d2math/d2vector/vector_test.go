@@ -561,24 +561,50 @@ func BenchmarkVector_SignedAngle(b *testing.B) {
 	}
 }
 
-func TestReflect(t *testing.T) {
-	rightDown := NewVector(1, -1)
+func TestVector_Reflect(t *testing.T) {
+	v := NewVector(1, -1)
+	c := v.Clone()
 	up := NewVector(0, 1)
 
 	want := NewVector(1, 1)
-	got := rightDown.Reflect(up)
 
-	evaluateVector(fmt.Sprintf("reflect direction %s off surface with normal %s", rightDown, up), want, *got, t)
+	v.Reflect(up)
+
+	if !want.Equals(v) {
+		t.Errorf("reflect direction %s off surface with normal %s: want %s: got %s", c, up, want, v)
+	}
 }
 
-func TestReflectSurface(t *testing.T) {
-	rightDown := NewVector(1, -1)
+func BenchmarkVector_Reflect(b *testing.B) {
+	v := NewVector(1, -1)
+	o := NewVector(0, 1)
+
+	for n := 0; n < b.N; n++ {
+		v.Reflect(o)
+	}
+}
+
+func TestVector_ReflectSurface(t *testing.T) {
+	v := NewVector(1, -1)
+	c := v.Clone()
 	up := NewVector(0, 1)
 
 	want := NewVector(-1, -1)
-	got := rightDown.ReflectSurface(up)
 
-	evaluateVector(fmt.Sprintf("reflect direction %s off surface with normal %s", rightDown, up), want, *got, t)
+	v.ReflectSurface(up)
+
+	if !want.Equals(v) {
+		t.Errorf("reflect direction %s off surface with normal %s: want %s: got %s", c, up, want, v)
+	}
+}
+
+func BenchmarkVector_ReflectSurface(b *testing.B) {
+	v := NewVector(1, -1)
+	o := NewVector(0, 1)
+
+	for n := 0; n < b.N; n++ {
+		v.ReflectSurface(o)
+	}
 }
 
 func TestRotate(t *testing.T) {
