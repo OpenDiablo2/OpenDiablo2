@@ -7,50 +7,15 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
-/*func TestMain(m *testing.M) {
-	setup()
-	os.Exit(m.Run())
-}*/
-
-var outVector Vector
-var outFloat float64
-var outBool bool
-var outInt int
-
-/*func setup() {
-}*/
-
-// TODO: Remove these evaluate functions. Throwing test errors outside the relevant functions means otherwise handly links to failed tests now point here which is annoying.
-
-func evaluateVector(description string, want, got Vector, t *testing.T) {
-	if !got.Equals(want) {
-		t.Errorf("%s: wanted %s: got %s", description, want, got)
-	}
-}
-
-func evaluateVectorApprox(description string, want, got Vector, t *testing.T) {
-	if !got.EqualsApprox(want) {
-		t.Errorf("%s: wanted %s: got %s", description, want, got)
-	}
-}
-
-func evaluateScalar(description string, want, got float64, t *testing.T) {
-	if want != got {
-		t.Errorf("%s: wanted %f: got %f", description, want, got)
-	}
-}
-
-func evaluateScalarApprox(description string, want, got float64, t *testing.T) {
-	if d2math.CompareFloat64Fuzzy(want, got) != 0 {
-		t.Errorf("%s: wanted %f: got %f", description, want, got)
-	}
-}
-
-func evaluateChanged(description string, original, clone Vector, t *testing.T) {
-	if !original.Equals(clone) {
-		t.Errorf("%s: changed vector %s to %s unexpectedly", description, clone, original)
-	}
-}
+//nolint:gochecknoglobals // These variables are assigned to in benchmark functions to avoid compiler optimisations
+// lowering the runtime of the benchmark. See: https://dave.cheney.net/2013/06/30/how-to-write-benchmarks-in-go (A note
+// on compiler optimisations)
+var (
+	outVector Vector
+	outFloat  float64
+	outBool   bool
+	outInt    int
+)
 
 func TestVector_Equals(t *testing.T) {
 	a := NewVector(1, 2)
@@ -150,7 +115,7 @@ func BenchmarkVector_CompareApprox(b *testing.B) {
 	}
 }
 
-func TestIsZero(t *testing.T) {
+func TestVector_IsZero(t *testing.T) {
 	testIsZero(NewVector(0, 0), true, t)
 	testIsZero(NewVector(1, 0), false, t)
 	testIsZero(NewVector(0, 1), false, t)
@@ -172,40 +137,81 @@ func BenchmarkVector_IsZero(b *testing.B) {
 	}
 }
 
-func TestSet(t *testing.T) {
+func TestVector_Set(t *testing.T) {
 	v := NewVector(1, 1)
 	want := NewVector(2, 3)
 	got := v.Clone()
 	got.Set(2, 3)
 
-	evaluateVector(fmt.Sprintf("set %s to (2, 3)", v), want, got, t)
+	if !got.Equals(want) {
+		t.Errorf("set %s to (2, 3): want %s: got %s", v, want, got)
+	}
 }
 
-func TestClone(t *testing.T) {
+func BenchmarkVector_Set(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		v.Set(1, 1)
+	}
+}
+
+func TestVector_Clone(t *testing.T) {
 	want := NewVector(1, 2)
 	got := want.Clone()
 
-	evaluateVector(fmt.Sprintf("clone %s", want), want, got, t)
+	if !got.Equals(want) {
+		t.Errorf("clone %s: want %s: got %s", want, want, got)
+	}
 }
 
-func TestCopy(t *testing.T) {
+func BenchmarkVector_Clone(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		outVector = v.Clone()
+	}
+}
+
+func TestVector_Copy(t *testing.T) {
 	want := NewVector(1, 2)
 	got := NewVector(0, 0)
 	got.Copy(&want)
 
-	evaluateVector(fmt.Sprintf("copy %s to %s", got, want), want, got, t)
+	if !got.Equals(want) {
+		t.Errorf("copy %s to %s: want %s: got %s", got, want, want, got)
+	}
 }
 
-func TestFloor(t *testing.T) {
+func BenchmarkVector_Copy(b *testing.B) {
+	v := NewVector(1, 1)
+	o := NewVector(2, 2)
+
+	for n := 0; n < b.N; n++ {
+		v.Copy(&o)
+	}
+}
+
+func TestVector_Floor(t *testing.T) {
 	v := NewVector(1.6, 1.6)
 	want := NewVector(1, 1)
 	got := v.Clone()
 	got.Floor()
 
-	evaluateVector(fmt.Sprintf("round %s down", v), want, got, t)
+	if !got.Equals(want) {
+		t.Errorf("round %s down: want %s: got %s", v, want, got)
+	}
 }
 
-func TestClamp(t *testing.T) {
+func BenchmarkVector_Floor(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		v.Floor()
+	}
+}
+
+func TestVector_Clamp(t *testing.T) {
 	v := NewVector(-10, 10)
 	c := v.Clone()
 	a := NewVector(2, 2)
@@ -214,76 +220,162 @@ func TestClamp(t *testing.T) {
 	want := NewVector(2, 7)
 	got := v.Clamp(&a, &b)
 
-	evaluateVector(fmt.Sprintf("clamp %s between %s and %s", c, a, b), want, *got, t)
+	if !got.Equals(want) {
+		t.Errorf("clamp %s between %s and %s: want %s: got %s", c, a, b, want, *got)
+	}
 }
 
-func TestAdd(t *testing.T) {
+func BenchmarkVector_Clamp(b *testing.B) {
+	v := NewVector(1, 1)
+	min := NewVector(0, 0)
+	max := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		v.Clamp(&min, &max)
+	}
+}
+
+func TestVector_Add(t *testing.T) {
 	v := NewVector(1, 2)
 	add := NewVector(0.5, 3)
 	want := NewVector(1.5, 5)
 	got := v.Clone()
 	got.Add(&add)
 
-	evaluateVector(fmt.Sprintf("add %s to %s", add, v), want, got, t)
+	if !got.Equals(want) {
+		t.Errorf("add %s to %s: want %s: got %s", add, v, want, got)
+	}
 }
 
-func TestAddScalar(t *testing.T) {
+func BenchmarkVector_Add(b *testing.B) {
+	v := NewVector(1, 1)
+	o := NewVector(0.01, 0.01)
+
+	for n := 0; n < b.N; n++ {
+		v.Add(&o)
+	}
+}
+
+func TestVector_AddScalar(t *testing.T) {
 	v := NewVector(1, -1)
 	add := 0.5
 	want := NewVector(1.5, -0.5)
 	got := v.Clone()
 	got.AddScalar(add)
 
-	evaluateVector(fmt.Sprintf("add %.2f to %s", add, v), want, got, t)
+	if !got.Equals(want) {
+		t.Errorf("add %.2f to %s: want %s: got %s", add, v, want, got)
+	}
 }
 
-func TestSubtract(t *testing.T) {
+func BenchmarkVector_AddScalar(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		v.AddScalar(0.01)
+	}
+}
+
+func TestVector_Subtract(t *testing.T) {
 	v := NewVector(1, 1)
 	subtract := NewVector(0.6, 0.6)
 	want := NewVector(0.4, 0.4)
 	got := v.Clone()
 	got.Subtract(&subtract)
 
-	evaluateVector(fmt.Sprintf("subtract %s from %s", subtract, v), want, got, t)
+	if !got.Equals(want) {
+		t.Errorf("subtract %s from %s: want %s: got %s", subtract, v, want, got)
+	}
 }
 
-func TestMultiply(t *testing.T) {
+func BenchmarkVector_Subtract(b *testing.B) {
+	v := NewVector(1, 1)
+	o := NewVector(0.01, 0.01)
+
+	for n := 0; n < b.N; n++ {
+		v.Subtract(&o)
+	}
+}
+
+func TestVector_Multiply(t *testing.T) {
 	v := NewVector(1, 1)
 	multiply := NewVector(2, 2)
 	want := NewVector(2, 2)
 	got := v.Clone()
 	got.Multiply(&multiply)
 
-	evaluateVector(fmt.Sprintf("multiply %s by %s", v, multiply), want, got, t)
+	if !got.Equals(want) {
+		t.Errorf("multiply %s by %s: want %s: got %s", v, multiply, want, got)
+	}
 }
 
-func TestDivide(t *testing.T) {
+func BenchmarkVector_Multiply(b *testing.B) {
+	v := NewVector(1, 1)
+	o := NewVector(0.01, 0.01)
+
+	for n := 0; n < b.N; n++ {
+		v.Multiply(&o)
+	}
+}
+
+func TestVector_Divide(t *testing.T) {
 	v := NewVector(1, 8)
 	divide := NewVector(2, 4)
 	want := NewVector(0.5, 2)
 	got := v.Clone()
 	got.Divide(&divide)
 
-	evaluateVector(fmt.Sprintf("divide %s by %s", v, divide), want, got, t)
+	if !got.Equals(want) {
+		t.Errorf("divide %s by %s: want %s: got %s", v, divide, want, got)
+	}
 }
 
-func TestDivideScalar(t *testing.T) {
+func BenchmarkVector_Divide(b *testing.B) {
+	v := NewVector(1, 1)
+	o := NewVector(3, 3)
+
+	for n := 0; n < b.N; n++ {
+		v.Divide(&o)
+	}
+}
+
+func TestVector_DivideScalar(t *testing.T) {
 	v := NewVector(1, 2)
 	divide := 2.0
 	want := NewVector(0.5, 1.0)
 	got := v.Clone()
 	got.DivideScalar(divide)
 
-	evaluateVector(fmt.Sprintf("divide %s by %.2f", v, divide), want, got, t)
+	if !got.Equals(want) {
+		t.Errorf("divide %s by %.2f: want %s: got %s", v, divide, want, got)
+	}
 }
 
-func TestScale(t *testing.T) {
+func BenchmarkVector_DivideScalar(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		v.DivideScalar(3)
+	}
+}
+
+func TestVector_Scale(t *testing.T) {
 	v := NewVector(2, 3)
 	want := NewVector(4, 6)
 	got := v.Clone()
 	got.Scale(2)
 
-	evaluateVector(fmt.Sprintf("scale %s by 2", v), want, got, t)
+	if !got.Equals(want) {
+		t.Errorf("scale %s by 2: want %s: got %s", v, want, got)
+	}
+}
+
+func BenchmarkVector_Scale(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		v.Scale(1.01)
+	}
 }
 
 func TestVector_Abs(t *testing.T) {
@@ -721,40 +813,52 @@ func TestVectorUp(t *testing.T) {
 	got := VectorUp()
 	want := NewVector(0, 1)
 
-	evaluateVector("create normalized vector with up direction", want, got, t)
+	if !want.Equals(got) {
+		t.Errorf("create normalized vector with up direction: want %s: got %s", want, got)
+	}
 }
 
 func TestVectorDown(t *testing.T) {
 	got := VectorDown()
 	want := NewVector(0, -1)
 
-	evaluateVector("create normalized vector with down direction", want, got, t)
+	if !want.Equals(got) {
+		t.Errorf("create normalized vector with down direction: want %s: got %s", want, got)
+	}
 }
 
 func TestVectorRight(t *testing.T) {
 	got := VectorRight()
 	want := NewVector(1, 0)
 
-	evaluateVector("create normalized vector with right direction", want, got, t)
+	if !want.Equals(got) {
+		t.Errorf("create normalized vector with right direction: want %s: got %s", want, got)
+	}
 }
 
 func TestVectorLeft(t *testing.T) {
 	got := VectorLeft()
 	want := NewVector(-1, 0)
 
-	evaluateVector("create normalized vector with left direction", want, got, t)
+	if !want.Equals(got) {
+		t.Errorf("create normalized vector with left direction: want %s: got %s", want, got)
+	}
 }
 
 func TestVectorOne(t *testing.T) {
 	got := VectorOne()
 	want := NewVector(1, 1)
 
-	evaluateVector("create vector with X and Y values of 1", want, got, t)
+	if !want.Equals(got) {
+		t.Errorf("create vector with X and Y values of 1: want %s: got %s", want, got)
+	}
 }
 
 func TestVectorZero(t *testing.T) {
 	got := VectorZero()
 	want := NewVector(0, 0)
 
-	evaluateVector("create vector with X and Y values of 0", want, got, t)
+	if !want.Equals(got) {
+		t.Errorf("create vector with X and Y values of 0: want %s: got %s", want, got)
+	}
 }
