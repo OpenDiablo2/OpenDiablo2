@@ -602,7 +602,7 @@ func BenchmarkVector_Normalize(b *testing.B) {
 	v := NewVector(1, 1)
 
 	for n := 0; n < b.N; n++ {
-		v.Normalize()
+		outFloat = v.Normalize()
 	}
 }
 

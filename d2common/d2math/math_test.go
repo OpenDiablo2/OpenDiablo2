@@ -4,6 +4,10 @@ import (
 	"testing"
 )
 
+var (
+	outFloat float64
+)
+
 func TestEqualsApprox(t *testing.T) {
 	subEpsilon := Epsilon / 3
 
@@ -27,7 +31,7 @@ func TestCompareFloat64Fuzzy(t *testing.T) {
 
 	want := 0
 	a, b := 1+subEpsilon, 1.0
-	got := CompareFloat64Fuzzy(a, b)
+	got := CompareApprox(a, b)
 
 	if got != want {
 		t.Errorf("compare %.2f and %.2f: wanted %d: got %d", a, b, want, got)
@@ -35,7 +39,7 @@ func TestCompareFloat64Fuzzy(t *testing.T) {
 
 	want = 1
 	a, b = 2, 1.0
-	got = CompareFloat64Fuzzy(a, b)
+	got = CompareApprox(a, b)
 
 	if got != want {
 		t.Errorf("compare %.2f and %.2f: wanted %d: got %d", a, b, want, got)
@@ -43,7 +47,7 @@ func TestCompareFloat64Fuzzy(t *testing.T) {
 
 	want = -1
 	a, b = -2, 1.0
-	got = CompareFloat64Fuzzy(a, b)
+	got = CompareApprox(a, b)
 
 	if got != want {
 		t.Errorf("compare %.2f and %.2f: wanted %d: got %d", a, b, want, got)
@@ -73,6 +77,14 @@ func TestClampFloat64(t *testing.T) {
 
 	if got != want {
 		t.Errorf("clamped %.2f between 0 and 1: wanted %.2f: got %.2f", a, want, got)
+	}
+}
+
+func BenchmarkClampFloat64(b *testing.B) {
+	f := 2.0
+
+	for n := 0; n < b.N; n++ {
+		outFloat = ClampFloat64(f, 0, 1)
 	}
 }
 

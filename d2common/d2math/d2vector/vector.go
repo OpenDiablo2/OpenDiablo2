@@ -38,15 +38,14 @@ func (v *Vector) Equals(o Vector) bool {
 // EqualsApprox returns true if the values of this Vector are approximately equal to those of the given Vector. If the
 // difference between either of the value pairs is smaller than d2math.Epsilon, they will be considered equal.
 func (v *Vector) EqualsApprox(o Vector) bool {
-	x, y := v.CompareApprox(o)
-	return x == 0 && y == 0
+	return d2math.EqualsApprox(v.x, o.x) && d2math.EqualsApprox(v.y, o.y)
 }
 
 // CompareApprox returns 2 ints describing the difference between the vectors. If the difference between either of the
 // value pairs is smaller than d2math.Epsilon, they will be considered equal.
 func (v *Vector) CompareApprox(o Vector) (x, y int) {
-	return d2math.CompareFloat64Fuzzy(v.x, o.x),
-		d2math.CompareFloat64Fuzzy(v.y, o.y)
+	return d2math.CompareApprox(v.x, o.x),
+		d2math.CompareApprox(v.y, o.y)
 }
 
 // IsZero returns true if this vector's values are both exactly zero.
@@ -276,8 +275,7 @@ func (v *Vector) Reflect(normal Vector) *Vector {
 	return v
 }
 
-// ReflectSurface does the same thing as Reflect, except the given vector describes,
-// the surface line, not it's normal.
+// ReflectSurface does the same thing as Reflect, except the given vector describes the surface line, not it's normal.
 func (v *Vector) ReflectSurface(surface Vector) *Vector {
 	v.Reflect(surface).Negate()
 
