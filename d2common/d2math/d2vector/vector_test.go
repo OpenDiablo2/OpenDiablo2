@@ -400,7 +400,7 @@ func BenchmarkVector_Dot(b *testing.B) {
 	}
 }
 
-func TestCross(t *testing.T) {
+func TestVector_Cross(t *testing.T) {
 	v := NewVector(1, 1)
 
 	clock := NewVector(1, 0)
@@ -409,43 +409,72 @@ func TestCross(t *testing.T) {
 	want := -1.0
 	got := v.Cross(clock)
 
-	evaluateScalar(fmt.Sprintf("cross product of %s and %s", v, clock), want, got, t)
+	if got != want {
+		t.Errorf("cross product of %s and %s: want %.3f: got %.3f", v, clock, want, got)
+	}
 
 	want = 1.0
 	got = v.Cross(anti)
 
-	evaluateScalar(fmt.Sprintf("cross product of %s and %s", v, anti), want, got, t)
+	if got != want {
+		t.Errorf("cross product of %s and %s: want %.3f: got %.3f", v, clock, want, got)
+	}
 }
 
-func TestNormalize(t *testing.T) {
+func BenchmarkVector_Cross(b *testing.B) {
+	v := NewVector(1, 1)
+	o := NewVector(0, 1)
+
+	for n := 0; n < b.N; n++ {
+		outFloat = v.Cross(o)
+	}
+}
+
+func TestVector_Normalize(t *testing.T) {
 	v := NewVector(10, 0)
 	c := v.Clone()
 	want := NewVector(1, 0)
 
-	v.Normalize()
+	c.Normalize()
 
-	evaluateVector(fmt.Sprintf("normalize %s", c), want, v, t)
+	if !want.Equals(c) {
+		t.Errorf("normalize %s: want %s: got %s", v, want, c)
+	}
 
 	v = NewVector(0, 10)
 	c = v.Clone()
 	want = NewVector(0, 1)
-	reverse := v.Normalize()
+	reverse := c.Normalize()
 
-	evaluateVector(fmt.Sprintf("normalize %s", c), want, v, t)
+	if !want.Equals(c) {
+		t.Errorf("normalize %s: want %s: got %s", v, want, c)
+	}
 
 	want = NewVector(0, 10)
 
-	v.Scale(reverse)
+	c.Scale(reverse)
 
-	evaluateVector(fmt.Sprintf("reverse normalizing of %s", c), want, v, t)
+	if !want.Equals(c) {
+		t.Errorf("reverse normalizing of %s: want %s: got %s", v, want, c)
+	}
 
 	v = NewVector(0, 0)
 	c = v.Clone()
 	want = NewVector(0, 0)
 
-	v.Normalize()
+	c.Normalize()
 
-	evaluateVector(fmt.Sprintf("normalize zero vector should do nothing %s", c), want, v, t)
+	if !want.Equals(c) {
+		t.Errorf("normalize zero vector %s should do nothing: want %s: got %s", v, want, c)
+	}
+}
+
+func BenchmarkVector_Normalize(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		v.Normalize()
+	}
 }
 
 func TestAngle(t *testing.T) {
