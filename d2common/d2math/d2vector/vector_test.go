@@ -607,36 +607,59 @@ func BenchmarkVector_ReflectSurface(b *testing.B) {
 	}
 }
 
-func TestRotate(t *testing.T) {
-	up := NewVector(0, 1)
+func TestVector_Rotate(t *testing.T) {
 	right := NewVector(1, 0)
-
 	c := right.Clone()
+
+	up := NewVector(0, 1)
 	angle := -up.SignedAngle(right)
 	want := NewVector(0, 1)
 	got := right.Rotate(angle)
 
-	evaluateVectorApprox(fmt.Sprintf("rotated %s by %.1f", c, angle*d2math.RadToDeg), want, *got, t)
+	if !want.EqualsApprox(*got) {
+		t.Errorf("rotated %s by %.1f: want %s: got %s", c, angle*d2math.RadToDeg, want, got)
+	}
 
 	c = up.Clone()
 	angle -= d2math.RadFull
 	want = NewVector(-1, 0)
 	got = up.Rotate(angle)
 
-	evaluateVectorApprox(fmt.Sprintf("rotated %s by %.1f", c, angle*d2math.RadToDeg), want, *got, t)
+	if !want.EqualsApprox(*got) {
+		t.Errorf("rotated %s by %.1f: want %s: got %s", c, angle*d2math.RadToDeg, want, got)
+	}
 }
 
-func TestNinetyAnti(t *testing.T) {
+func BenchmarkVector_Rotate(b *testing.B) {
+	v := NewVector(1, 0)
+	angle := 45.0
+
+	for n := 0; n < b.N; n++ {
+		v.Rotate(angle)
+	}
+}
+
+func TestVector_NinetyAnti(t *testing.T) {
 	v := NewVector(0, 1)
 	c := v.Clone()
 
 	want := NewVector(-1, 0)
 	got := v.NinetyAnti()
 
-	evaluateVector(fmt.Sprintf("rotated %s by 90 degrees clockwise", c), want, *got, t)
+	if !want.Equals(*got) {
+		t.Errorf("rotated %s by 90 degrees clockwise: want %s: got %s", c, want, *got)
+	}
 }
 
-func TestNinetyClock(t *testing.T) {
+func BenchmarkVector_NinetyAnti(b *testing.B) {
+	v := NewVector(1, 0)
+
+	for n := 0; n < b.N; n++ {
+		v.NinetyAnti()
+	}
+}
+
+func TestVector_NinetyClock(t *testing.T) {
 	v := NewVector(0, 1)
 	c := v.Clone()
 
@@ -644,7 +667,17 @@ func TestNinetyClock(t *testing.T) {
 	v = c.Clone()
 	got := v.NinetyClock()
 
-	evaluateVector(fmt.Sprintf("rotated %s by 90 degrees anti-clockwise", c), want, *got, t)
+	if !want.Equals(*got) {
+		t.Errorf("rotated %s by 90 degrees anti-clockwise: want %s: got %s", c, want, *got)
+	}
+}
+
+func BenchmarkVector_NinetyClock(b *testing.B) {
+	v := NewVector(1, 0)
+
+	for n := 0; n < b.N; n++ {
+		v.NinetyClock()
+	}
 }
 
 func TestVectorUp(t *testing.T) {
