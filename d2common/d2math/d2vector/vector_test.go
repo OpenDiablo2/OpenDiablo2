@@ -7,6 +7,19 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
+/*func TestMain(m *testing.M) {
+	setup()
+	os.Exit(m.Run())
+}*/
+
+var outVector Vector
+var outFloat float64
+
+/*func setup() {
+}*/
+
+// TODO: Remove these evaluate functions. Throwing test errors outside the relevant functions means otherwise handly links to failed tests now point here which is annoying.
+
 func evaluateVector(description string, want, got Vector, t *testing.T) {
 	if !got.Equals(want) {
 		t.Errorf("%s: wanted %s: got %s", description, want, got)
@@ -236,84 +249,158 @@ func TestScale(t *testing.T) {
 	evaluateVector(fmt.Sprintf("scale %s by 2", v), want, got, t)
 }
 
-func TestAbs(t *testing.T) {
+func TestVector_Abs(t *testing.T) {
 	v := NewVector(-1, 1)
 	want := NewVector(1, 1)
 	got := v.Clone()
 	got.Abs()
 
-	evaluateVector(fmt.Sprintf("absolute value of %s", v), want, got, t)
+	if !want.Equals(got) {
+		t.Errorf("absolute value of %s: want %s: got %s", v, want, got)
+	}
 }
 
-func TestNegate(t *testing.T) {
+func BenchmarkVector_Abs(b *testing.B) {
+	v := NewVector(-1, -1)
+
+	for n := 0; n < b.N; n++ {
+		outVector = *v.Abs()
+	}
+}
+
+func TestVector_Negate(t *testing.T) {
 	v := NewVector(-1, 1)
 	want := NewVector(1, -1)
 	got := v.Clone()
 	got.Negate()
 
-	evaluateVector(fmt.Sprintf("inverse value of %s", v), want, got, t)
+	if !want.Equals(got) {
+		t.Errorf("inverse value of %s: want %s: got %s", v, want, got)
+	}
 }
 
-func TestDistance(t *testing.T) {
+func BenchmarkVector_Negate(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		outVector = *v.Negate()
+	}
+}
+
+func TestVector_Distance(t *testing.T) {
 	v := NewVector(1, 3)
 	other := NewVector(1, -1)
 	want := 4.0
 	c := v.Clone()
 	got := c.Distance(other)
 
-	evaluateScalar(fmt.Sprintf("distance from %s to %s", v, other), want, got, t)
+	if got != want {
+		t.Errorf("distance from %s to %s: want %.3f: got %.3f", v, other, want, got)
+	}
 }
 
-func TestLength(t *testing.T) {
+func BenchmarkVector_Distance(b *testing.B) {
+	v := NewVector(1, 1)
+	d := NewVector(2, 2)
+
+	for n := 0; n < b.N; n++ {
+		outFloat = v.Distance(d)
+	}
+}
+
+func TestVector_Length(t *testing.T) {
 	v := NewVector(2, 0)
 	c := v.Clone()
 	want := 2.0
-	got := v.Length()
+	got := c.Length()
 
-	d := fmt.Sprintf("length of %s", c)
+	d := fmt.Sprintf("length of %s", v)
 
-	evaluateChanged(d, v, c, t)
+	if !c.Equals(v) {
+		t.Errorf("%s: changed vector %s to %s unexpectedly", d, v, c)
+	}
 
-	evaluateScalar(d, want, got, t)
+	if got != want {
+		t.Errorf("%s: want %.3f: got %.3f", d, want, got)
+	}
 }
 
-func TestSetLength(t *testing.T) {
+func BenchmarkVector_Length(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		outFloat = v.Length()
+	}
+}
+
+func TestVector_SetLength(t *testing.T) {
 	v := NewVector(1, 1)
 	c := v.Clone()
 	want := 2.0
-	got := v.SetLength(want).Length()
+	got := c.SetLength(want).Length()
 
-	d := fmt.Sprintf("length of %s", c)
-
-	evaluateScalarApprox(d, want, got, t)
+	if !d2math.EqualsApprox(got, want) {
+		t.Errorf("set length of %s to %.3f :want %.3f: got %.3f", v, want, want, got)
+	}
 }
 
-func TestLerp(t *testing.T) {
+func BenchmarkVector_SetLength(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		v.SetLength(5)
+	}
+}
+
+func TestVector_Lerp(t *testing.T) {
 	a := NewVector(0, 0)
 	b := NewVector(-20, 10)
 
-	x := 0.3
+	interp := 0.3
 
 	want := NewVector(-6, 3)
-	got := a.Lerp(&b, x)
+	got := a.Lerp(&b, interp)
 
-	evaluateVector(fmt.Sprintf("linear interpolation between %s and %s by %.2f", a, b, x), want, *got, t)
+	if !got.Equals(want) {
+		t.Errorf("linear interpolation between %s and %s by %.2f: want %s: got %s", a, b, interp, want, got)
+	}
 }
 
-func TestDot(t *testing.T) {
+func BenchmarkVector_Lerp(b *testing.B) {
+	v := NewVector(1, 1)
+	t := NewVector(1000, 1000)
+
+	for n := 0; n < b.N; n++ {
+		v.Lerp(&t, 1.01)
+	}
+}
+
+func TestVector_Dot(t *testing.T) {
 	v := NewVector(1, 1)
 	c := v.Clone()
 	want := 2.0
-	got := v.Dot(&v)
+	got := c.Dot(&c)
 
-	d := fmt.Sprintf("dot product of %s", c)
+	d := fmt.Sprintf("dot product of %s", v)
 
-	evaluateChanged(d, v, c, t)
+	if !c.Equals(v) {
+		t.Errorf("%s: changed vector %s to %s unexpectedly", d, v, c)
+	}
 
-	evaluateScalar(d, want, got, t)
+	if got != want {
+		t.Errorf("%s: want %.3f: got %.3f", d, want, got)
+	}
 }
 
-func TestCross(t *testing.T) {
+func BenchmarkVector_Dot(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		outFloat = v.Dot(&v)
+	}
+}
+
+func TestVector_Cross(t *testing.T) {
 	v := NewVector(1, 1)
 
 	clock := NewVector(1, 0)
@@ -322,88 +409,156 @@ func TestCross(t *testing.T) {
 	want := -1.0
 	got := v.Cross(clock)
 
-	evaluateScalar(fmt.Sprintf("cross product of %s and %s", v, clock), want, got, t)
+	if got != want {
+		t.Errorf("cross product of %s and %s: want %.3f: got %.3f", v, clock, want, got)
+	}
 
 	want = 1.0
 	got = v.Cross(anti)
 
-	evaluateScalar(fmt.Sprintf("cross product of %s and %s", v, anti), want, got, t)
+	if got != want {
+		t.Errorf("cross product of %s and %s: want %.3f: got %.3f", v, clock, want, got)
+	}
 }
 
-func TestNormalize(t *testing.T) {
+func BenchmarkVector_Cross(b *testing.B) {
+	v := NewVector(1, 1)
+	o := NewVector(0, 1)
+
+	for n := 0; n < b.N; n++ {
+		outFloat = v.Cross(o)
+	}
+}
+
+func TestVector_Normalize(t *testing.T) {
 	v := NewVector(10, 0)
 	c := v.Clone()
 	want := NewVector(1, 0)
 
-	v.Normalize()
+	c.Normalize()
 
-	evaluateVector(fmt.Sprintf("normalize %s", c), want, v, t)
+	if !want.Equals(c) {
+		t.Errorf("normalize %s: want %s: got %s", v, want, c)
+	}
 
 	v = NewVector(0, 10)
 	c = v.Clone()
 	want = NewVector(0, 1)
-	reverse := v.Normalize()
+	reverse := c.Normalize()
 
-	evaluateVector(fmt.Sprintf("normalize %s", c), want, v, t)
+	if !want.Equals(c) {
+		t.Errorf("normalize %s: want %s: got %s", v, want, c)
+	}
 
 	want = NewVector(0, 10)
 
-	v.Scale(reverse)
+	c.Scale(reverse)
 
-	evaluateVector(fmt.Sprintf("reverse normalizing of %s", c), want, v, t)
+	if !want.Equals(c) {
+		t.Errorf("reverse normalizing of %s: want %s: got %s", v, want, c)
+	}
 
 	v = NewVector(0, 0)
 	c = v.Clone()
 	want = NewVector(0, 0)
 
-	v.Normalize()
+	c.Normalize()
 
-	evaluateVector(fmt.Sprintf("normalize zero vector should do nothing %s", c), want, v, t)
+	if !want.Equals(c) {
+		t.Errorf("normalize zero vector %s should do nothing: want %s: got %s", v, want, c)
+	}
 }
 
-func TestAngle(t *testing.T) {
+func BenchmarkVector_Normalize(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		v.Normalize()
+	}
+}
+
+func TestVector_Angle(t *testing.T) {
 	v := NewVector(0, 1)
 	c := v.Clone()
 	other := NewVector(1, 0.3)
 
-	d := fmt.Sprintf("angle from %s to %s", c, other)
-
 	want := 1.2793395323170293
-	got := v.Angle(other)
+	got := c.Angle(other)
 
-	evaluateScalar(d, want, got, t)
-	evaluateChanged(d, v, c, t)
+	d := fmt.Sprintf("angle from %s to %s", v, other)
+
+	if got != want {
+		t.Errorf("%s: want %g: got %g", d, want, got)
+	}
+
+	if !c.Equals(v) {
+		t.Errorf("%s: changed vector %s to %s unexpectedly", d, v, c)
+	}
 
 	other.Set(-1, 0.3)
-	c = other.Clone()
+	co := other.Clone()
+	got = c.Angle(other)
 
 	d = fmt.Sprintf("angle from %s to %s", c, other)
 
-	got = v.Angle(other)
+	if got != want {
+		t.Errorf("%s: want %g: got %g", d, want, got)
+	}
 
-	evaluateScalar(d, want, got, t)
-	evaluateChanged(d, other, c, t)
+	if !co.Equals(other) {
+		t.Errorf("%s: changed vector %s to %s unexpectedly", d, co, other)
+	}
 }
 
-func TestSignedAngle(t *testing.T) {
+func BenchmarkVector_Angle(b *testing.B) {
+	v := NewVector(1, 1)
+	o := NewVector(0, 1)
+
+	for n := 0; n < b.N; n++ {
+		outFloat = v.Angle(o)
+	}
+}
+
+func TestVector_SignedAngle(t *testing.T) {
 	v := NewVector(0, 1)
 	c := v.Clone()
 	other := NewVector(1, 0.3)
 	want := 1.2793395323170293
-	got := v.SignedAngle(other)
+	got := c.SignedAngle(other)
 
 	d := fmt.Sprintf("angle from %s to %s", v, other)
-	evaluateScalar(d, want, got, t)
-	evaluateChanged(d, v, c, t)
+
+	if got != want {
+		t.Errorf("%s: want %g: got %g", d, want, got)
+	}
+
+	if !c.Equals(v) {
+		t.Errorf("%s: changed vector %s to %s unexpectedly", d, v, c)
+	}
 
 	other.Set(-1, 0.3)
-	c = other.Clone()
+	co := other.Clone()
 	want = 5.0038457214660585
-	got = v.SignedAngle(other)
+	got = c.SignedAngle(other)
 
 	d = fmt.Sprintf("angle from %s to %s", v, other)
-	evaluateScalar(d, want, got, t)
-	evaluateChanged(d, other, c, t)
+
+	if got != want {
+		t.Errorf("%s: want %g: got %g", d, want, got)
+	}
+
+	if !co.Equals(other) {
+		t.Errorf("%s: changed vector %s to %s unexpectedly", d, co, other)
+	}
+}
+
+func BenchmarkVector_SignedAngle(b *testing.B) {
+	v := NewVector(1, 1)
+	o := NewVector(0, 1)
+
+	for n := 0; n < b.N; n++ {
+		outFloat = v.SignedAngle(o)
+	}
 }
 
 func TestReflect(t *testing.T) {

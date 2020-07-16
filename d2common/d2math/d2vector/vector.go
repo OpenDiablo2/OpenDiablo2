@@ -150,17 +150,13 @@ func (v *Vector) DivideScalar(s float64) *Vector {
 
 // Abs sets the vector to it's absolute (positive) equivalent.
 func (v *Vector) Abs() *Vector {
-	xm, ym := 1.0, 1.0
 	if v.x < 0 {
-		xm = -1
+		v.x = -v.x
 	}
 
 	if v.y < 0 {
-		ym = -1
+		v.y = -v.y
 	}
-
-	v.x *= xm
-	v.y *= ym
 
 	return v
 }
@@ -183,7 +179,8 @@ func (v *Vector) Length() float64 {
 	return math.Sqrt(v.Dot(v))
 }
 
-// SetLength sets the length of this Vector without changing the direction.
+// SetLength sets the length of this Vector without changing the direction. The length will be exact within
+// d2math.Epsilon. See d2math.EqualsApprox.
 func (v *Vector) SetLength(length float64) *Vector {
 	v.Normalize()
 	v.Scale(length)

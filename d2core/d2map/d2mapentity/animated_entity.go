@@ -17,7 +17,7 @@ type AnimatedEntity struct {
 // CreateAnimatedEntity creates an instance of AnimatedEntity
 func CreateAnimatedEntity(x, y int, animation d2interface.Animation) *AnimatedEntity {
 	entity := &AnimatedEntity{
-		mapEntity: createMapEntity(x, y),
+		mapEntity: newMapEntity(x, y),
 		animation: animation,
 	}
 	entity.mapEntity.directioner = entity.rotate
@@ -30,7 +30,7 @@ func (ae *AnimatedEntity) Render(target d2interface.Surface) {
 	renderOffset := ae.Position.RenderOffset()
 	target.PushTranslation(
 		int((renderOffset.X()-renderOffset.Y())*16),
-		int(((renderOffset.X() + renderOffset.Y()) * 8)),
+		int(((renderOffset.X()+renderOffset.Y())*8)-5),
 	)
 
 	defer target.Pop()

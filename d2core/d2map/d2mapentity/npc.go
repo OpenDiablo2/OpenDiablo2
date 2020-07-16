@@ -31,7 +31,7 @@ type NPC struct {
 // CreateNPC creates a new NPC and returns a pointer to it.
 func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC {
 	result := &NPC{
-		mapEntity:     createMapEntity(x, y),
+		mapEntity:     newMapEntity(x, y),
 		HasPaths:      false,
 		monstatRecord: monstat,
 		monstatEx:     d2datadict.MonStats2[monstat.ExtraDataKey],
@@ -75,7 +75,7 @@ func (v *NPC) Render(target d2interface.Surface) {
 	renderOffset := v.Position.RenderOffset()
 	target.PushTranslation(
 		int((renderOffset.X()-renderOffset.Y())*16),
-		int(((renderOffset.X() + renderOffset.Y()) * 8)),
+		int(((renderOffset.X()+renderOffset.Y())*8)-5),
 	)
 
 	defer target.Pop()
@@ -116,7 +116,7 @@ func (v *NPC) Advance(tickTime float64) {
 		// If at the target, set target to the next path.
 		v.isDone = false
 		path := v.NextPath()
-		v.SetTarget(
+		v.setTarget(
 			float64(path.X),
 			float64(path.Y),
 			v.next,
@@ -159,7 +159,7 @@ func (v *NPC) next() {
 // rotate sets direction and changes animation
 func (v *NPC) rotate(direction int) {
 	var newMode d2enum.MonsterAnimationMode
-	if !v.IsAtTarget() {
+	if !v.atTarget() {
 		newMode = d2enum.MonsterAnimationModeWalk
 	} else {
 		newMode = d2enum.MonsterAnimationModeNeutral
