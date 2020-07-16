@@ -477,49 +477,88 @@ func BenchmarkVector_Normalize(b *testing.B) {
 	}
 }
 
-func TestAngle(t *testing.T) {
+func TestVector_Angle(t *testing.T) {
 	v := NewVector(0, 1)
 	c := v.Clone()
 	other := NewVector(1, 0.3)
 
-	d := fmt.Sprintf("angle from %s to %s", c, other)
-
 	want := 1.2793395323170293
-	got := v.Angle(other)
+	got := c.Angle(other)
 
-	evaluateScalar(d, want, got, t)
-	evaluateChanged(d, v, c, t)
+	d := fmt.Sprintf("angle from %s to %s", v, other)
+
+	if got != want {
+		t.Errorf("%s: want %g: got %g", d, want, got)
+	}
+
+	if !c.Equals(v) {
+		t.Errorf("%s: changed vector %s to %s unexpectedly", d, v, c)
+	}
 
 	other.Set(-1, 0.3)
-	c = other.Clone()
+	co := other.Clone()
+	got = c.Angle(other)
 
 	d = fmt.Sprintf("angle from %s to %s", c, other)
 
-	got = v.Angle(other)
+	if got != want {
+		t.Errorf("%s: want %g: got %g", d, want, got)
+	}
 
-	evaluateScalar(d, want, got, t)
-	evaluateChanged(d, other, c, t)
+	if !co.Equals(other) {
+		t.Errorf("%s: changed vector %s to %s unexpectedly", d, co, other)
+	}
 }
 
-func TestSignedAngle(t *testing.T) {
+func BenchmarkVector_Angle(b *testing.B) {
+	v := NewVector(1, 1)
+	o := NewVector(0, 1)
+
+	for n := 0; n < b.N; n++ {
+		outFloat = v.Angle(o)
+	}
+}
+
+func TestVector_SignedAngle(t *testing.T) {
 	v := NewVector(0, 1)
 	c := v.Clone()
 	other := NewVector(1, 0.3)
 	want := 1.2793395323170293
-	got := v.SignedAngle(other)
+	got := c.SignedAngle(other)
 
 	d := fmt.Sprintf("angle from %s to %s", v, other)
-	evaluateScalar(d, want, got, t)
-	evaluateChanged(d, v, c, t)
+
+	if got != want {
+		t.Errorf("%s: want %g: got %g", d, want, got)
+	}
+
+	if !c.Equals(v) {
+		t.Errorf("%s: changed vector %s to %s unexpectedly", d, v, c)
+	}
 
 	other.Set(-1, 0.3)
-	c = other.Clone()
+	co := other.Clone()
 	want = 5.0038457214660585
-	got = v.SignedAngle(other)
+	got = c.SignedAngle(other)
 
 	d = fmt.Sprintf("angle from %s to %s", v, other)
-	evaluateScalar(d, want, got, t)
-	evaluateChanged(d, other, c, t)
+
+	if got != want {
+		t.Errorf("%s: want %g: got %g", d, want, got)
+	}
+
+	if !co.Equals(other) {
+		t.Errorf("%s: changed vector %s to %s unexpectedly", d, co, other)
+	}
+}
+
+func BenchmarkVector_SignedAngle(b *testing.B) {
+	v := NewVector(1, 1)
+	o := NewVector(0, 1)
+
+	for n := 0; n < b.N; n++ {
+		outFloat = v.SignedAngle(o)
+	}
 }
 
 func TestReflect(t *testing.T) {
