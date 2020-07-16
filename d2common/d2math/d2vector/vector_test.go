@@ -14,6 +14,8 @@ import (
 
 var outVector Vector
 var outFloat float64
+var outBool bool
+var outInt int
 
 /*func setup() {
 }*/
@@ -50,7 +52,7 @@ func evaluateChanged(description string, original, clone Vector, t *testing.T) {
 	}
 }
 
-func TestEquals(t *testing.T) {
+func TestVector_Equals(t *testing.T) {
 	a := NewVector(1, 2)
 	b := NewVector(1, 2)
 
@@ -69,7 +71,16 @@ func TestEquals(t *testing.T) {
 	}
 }
 
-func TestEqualsF(t *testing.T) {
+func BenchmarkVector_Equals(b *testing.B) {
+	v := NewVector(1, 1)
+	o := NewVector(2, 2)
+
+	for n := 0; n < b.N; n++ {
+		outBool = v.Equals(o)
+	}
+}
+
+func TestVector_EqualsApprox(t *testing.T) {
 	subEpsilon := d2math.Epsilon / 3
 
 	a := NewVector(1, 2)
@@ -90,7 +101,16 @@ func TestEqualsF(t *testing.T) {
 	}
 }
 
-func TestCompareApprox(t *testing.T) {
+func BenchmarkVector_EqualsApprox(b *testing.B) {
+	v := NewVector(1, 1)
+	o := NewVector(2, 2)
+
+	for n := 0; n < b.N; n++ {
+		outBool = v.EqualsApprox(o)
+	}
+}
+
+func TestVector_CompareApprox(t *testing.T) {
 	subEpsilon := d2math.Epsilon / 3
 
 	f := NewVector(1+subEpsilon, 1+subEpsilon)
@@ -121,6 +141,15 @@ func TestCompareApprox(t *testing.T) {
 	}
 }
 
+func BenchmarkVector_CompareApprox(b *testing.B) {
+	v := NewVector(1, 1)
+	o := NewVector(2, 2)
+
+	for n := 0; n < b.N; n++ {
+		outInt, outInt = v.CompareApprox(o)
+	}
+}
+
 func TestIsZero(t *testing.T) {
 	testIsZero(NewVector(0, 0), true, t)
 	testIsZero(NewVector(1, 0), false, t)
@@ -132,6 +161,14 @@ func testIsZero(v Vector, want bool, t *testing.T) {
 	got := v.IsZero()
 	if got != want {
 		t.Errorf("%s is zero: want %t: got %t", v, want, got)
+	}
+}
+
+func BenchmarkVector_IsZero(b *testing.B) {
+	v := NewVector(1, 1)
+
+	for n := 0; n < b.N; n++ {
+		outBool = v.IsZero()
 	}
 }
 
