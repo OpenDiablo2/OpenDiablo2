@@ -56,7 +56,7 @@ func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC
 	result.composite.SetDirection(direction)
 
 	if result.monstatRecord != nil && result.monstatRecord.IsInteractable {
-		result.name = d2common.TranslateString(result.monstatRecord.NameStringTableKey)
+		result.name = d2common.TranslateString(result.monstatRecord.NameString)
 	}
 
 	return result
