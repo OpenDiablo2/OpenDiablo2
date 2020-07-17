@@ -2,6 +2,7 @@ package d2stats
 
 import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 
+// CreateStatList creates a stat list
 func CreateStatList(stats ...*Stat) *StatList {
 	return &StatList{stats}
 }

@@ -2,10 +2,10 @@ package d2stats
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"testing"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
 const (
@@ -13,6 +13,7 @@ const (
 	errFmt string = "%v:\n\tKey: %v\n\tVal: %+v\n\texpected: %v\n\tgot: %v\n\n"
 )
 
+//nolint:funlen // this just gets mock data ready for the tests
 func TestStat_InitMockData(t *testing.T) {
 	var itemStatCosts = map[string]*d2datadict.ItemStatCostRecord{
 		"strength": {
@@ -129,7 +130,7 @@ func TestStat_InitMockData(t *testing.T) {
 			DescVal:    int(descValPrefix),
 			DescStrPos: "Enhanced Defense",
 			DescStrNeg: "Enhanced Defense",
-			DescStr2: "(Based on Character Level)",
+			DescStr2:   "(Based on Character Level)",
 		},
 		"item_regenstamina_perlevel": {
 			Name:       "item_regenstamina_perlevel",
@@ -137,7 +138,7 @@ func TestStat_InitMockData(t *testing.T) {
 			DescVal:    int(descValPostfix),
 			DescStrPos: "Heal Stamina Plus",
 			DescStrNeg: "Heal Stamina Plus",
-			DescStr2: "(Based on Character Level)",
+			DescStr2:   "(Based on Character Level)",
 		},
 		"item_thorns_perlevel": {
 			Name:       "item_thorns_perlevel",
@@ -145,7 +146,7 @@ func TestStat_InitMockData(t *testing.T) {
 			DescVal:    int(descValPostfix),
 			DescStrPos: "Attacker Takes Damage of",
 			DescStrNeg: "Attacker Takes Damage of",
-			DescStr2: "(Based on Character Level)",
+			DescStr2:   "(Based on Character Level)",
 		},
 		"item_replenish_durability": {
 			Name:       "item_replenish_durability",
@@ -153,7 +154,7 @@ func TestStat_InitMockData(t *testing.T) {
 			DescVal:    int(descValPrefix),
 			DescStrPos: "Repairs %v durability per second",
 			DescStrNeg: "Repairs %v durability per second",
-			DescStr2: "",
+			DescStr2:   "",
 		},
 		"item_stupidity": {
 			Name:       "item_stupidity",
@@ -163,14 +164,14 @@ func TestStat_InitMockData(t *testing.T) {
 			DescStrNeg: "Hit Blinds Target",
 		},
 		"item_addclassskills": {
-			Name:       "item_addclassskills",
-			DescFnID:   13,
-			DescVal:    int(descValPrefix),
+			Name:     "item_addclassskills",
+			DescFnID: 13,
+			DescVal:  int(descValPrefix),
 		},
 		"item_addskill_tab": {
-			Name:       "item_addskill_tab",
-			DescFnID:   14,
-			DescVal:    int(descValPrefix),
+			Name:     "item_addskill_tab",
+			DescFnID: 14,
+			DescVal:  int(descValPrefix),
 		},
 		"item_skillonattack": {
 			Name:       "item_skillonattack",
@@ -232,8 +233,8 @@ func TestStat_InitMockData(t *testing.T) {
 
 	var charStats = map[d2enum.Hero]*d2datadict.CharStatsRecord{
 		d2enum.HeroPaladin: {
-			Class: d2enum.HeroPaladin,
-			SkillStrAll: "to Paladin Skill Levels",
+			Class:             d2enum.HeroPaladin,
+			SkillStrAll:       "to Paladin Skill Levels",
 			SkillStrClassOnly: "(Paladin Only)",
 			SkillStrTab: [3]string{
 				"+%d to Combat Skills",
@@ -244,8 +245,8 @@ func TestStat_InitMockData(t *testing.T) {
 	}
 
 	var skillDetails = map[int]*d2datadict.SkillRecord{
-		37  : {Skill: "Warmth"},
-		64  : {Skill: "Frozen Orb"},
+		37: {Skill: "Warmth"},
+		64: {Skill: "Frozen Orb"},
 	}
 
 	var monStats = map[string]*d2datadict.MonStatsRecord{
@@ -286,7 +287,7 @@ func TestStat_Clone(t *testing.T) {
 func TestStat_Descriptions(t *testing.T) {
 	tests := []struct {
 		recordKey string
-		vals       []int
+		vals      []int
 		expect    string
 	}{
 		// DescFn1
