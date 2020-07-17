@@ -17,10 +17,9 @@ func EqualsApprox(a, b float64) bool {
 	return Abs(a-b) < Epsilon
 }
 
-// CompareFloat64Fuzzy returns an integer between -1 and 1 describing
-// the comparison of floats a and b. 0 will be returned if the
-// absolute difference between a and b is less than Epsilon.
-func CompareFloat64Fuzzy(a, b float64) int {
+// CompareApprox returns an integer between -1 and 1 describing the comparison of floats a and b. 0 will be returned if
+// the absolute difference between a and b is less than Epsilon.
+func CompareApprox(a, b float64) int {
 	delta := a - b
 
 	if Abs(delta) < Epsilon {
@@ -37,14 +36,14 @@ func CompareFloat64Fuzzy(a, b float64) int {
 // Abs returns the absolute value of a. It is a less CPU intensive version of the standard library math.Abs().
 func Abs(a float64) float64 {
 	if a < 0 {
-		return a * -1
+		return -a
 	}
 
 	return a
 }
 
-// ClampFloat64 returns a clamped to min and max.
-func ClampFloat64(a, min, max float64) float64 {
+// Clamp returns a clamped to min and max.
+func Clamp(a, min, max float64) float64 {
 	if a > max {
 		return max
 	} else if a < min {
