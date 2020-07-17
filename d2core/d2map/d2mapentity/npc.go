@@ -16,20 +16,28 @@ import (
 // For example, Deckard Cain.
 type NPC struct {
 	mapEntity
+	Paths         []d2common.Path
+	name          string
 	composite     *d2asset.Composite
 	action        int
-	HasPaths      bool
-	Paths         []d2common.Path
 	path          int
-	isDone        bool
 	repetitions   int
 	monstatRecord *d2datadict.MonStatsRecord
 	monstatEx     *d2datadict.MonStats2Record
-	name          string
+	HasPaths      bool
+	isDone        bool
 }
 
+const (
+	magicOffsetX            = 5
+	magicOffsetScalarX      = 8
+	magicOffsetScalarY      = 16
+	minAnimationRepetitions = 3
+	maxAnimationRepetitions = 5
+)
+
 // CreateNPC creates a new NPC and returns a pointer to it.
-func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC {
+func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) (*NPC, error) {
 	result := &NPC{
 		mapEntity:     newMapEntity(x, y),
 		HasPaths:      false,
@@ -47,8 +55,14 @@ func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC
 		d2resource.PaletteUnits)
 	result.composite = composite
 
-	composite.SetMode(d2enum.MonsterAnimationModeNeutral, result.monstatEx.BaseWeaponClass)
-	composite.Equip(&equipment)
+	if err := composite.SetMode(d2enum.MonsterAnimationModeNeutral,
+		result.monstatEx.BaseWeaponClass); err != nil {
+		return nil, err
+	}
+
+	if err := composite.Equip(&equipment); err != nil {
+		return nil, err
+	}
 
 	result.SetSpeed(float64(monstat.SpeedBase))
 	result.mapEntity.directioner = result.rotate
@@ -59,7 +73,7 @@ func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) *NPC
 		result.name = d2common.TranslateString(result.monstatRecord.NameStringTableKey)
 	}
 
-	return result
+	return result, nil
 }
 
 func selectEquip(slice []string) string {
@@ -74,12 +88,15 @@ func selectEquip(slice []string) string {
 func (v *NPC) Render(target d2interface.Surface) {
 	renderOffset := v.Position.RenderOffset()
 	target.PushTranslation(
-		int((renderOffset.X()-renderOffset.Y())*16),
-		int(((renderOffset.X()+renderOffset.Y())*8)-5),
+		int((renderOffset.X()-renderOffset.Y())*magicOffsetScalarY),
+		int(((renderOffset.X()+renderOffset.Y())*magicOffsetScalarX)-magicOffsetX),
 	)
 
 	defer target.Pop()
-	v.composite.Render(target)
+
+	if v.composite.Render(target) != nil {
+		return
+	}
 }
 
 // Path returns the current part of the entity's path.
@@ -110,7 +127,10 @@ func (v *NPC) SetPaths(paths []d2common.Path) {
 // single game tick.
 func (v *NPC) Advance(tickTime float64) {
 	v.Step(tickTime)
-	v.composite.Advance(tickTime)
+
+	if err := v.composite.Advance(tickTime); err != nil {
+		return
+	}
 
 	if v.HasPaths && v.wait() {
 		// If at the target, set target to the next path.
@@ -133,26 +153,27 @@ func (v *NPC) wait() bool {
 }
 
 func (v *NPC) next() {
+	var newAnimationMode d2enum.MonsterAnimationMode
+
 	v.isDone = true
-	v.repetitions = 3 + rand.Intn(5)
-	newAnimationMode := d2enum.MonsterAnimationModeNeutral
-	// TODO: Figure out what 1-3 are for, 4 is correct.
-	switch v.action {
-	case 1:
-		newAnimationMode = d2enum.MonsterAnimationModeNeutral
-	case 2:
-		newAnimationMode = d2enum.MonsterAnimationModeNeutral
-	case 3:
-		newAnimationMode = d2enum.MonsterAnimationModeNeutral
-	case 4:
+	v.repetitions = minAnimationRepetitions + rand.Intn(maxAnimationRepetitions)
+
+	switch d2enum.NPCActionType(v.action) {
+	case d2enum.NPCActionSkill1:
 		newAnimationMode = d2enum.MonsterAnimationModeSkill1
 		v.repetitions = 0
+	case d2enum.NPCActionInvalid, d2enum.NPCAction1, d2enum.NPCAction2, d2enum.NPCAction3:
+		newAnimationMode = d2enum.MonsterAnimationModeNeutral
+		v.repetitions = 0
 	default:
+		newAnimationMode = d2enum.MonsterAnimationModeNeutral
 		v.repetitions = 0
 	}
 
 	if v.composite.GetAnimationMode() != newAnimationMode.String() {
-		v.composite.SetMode(newAnimationMode, v.composite.GetWeaponClass())
+		if err := v.composite.SetMode(newAnimationMode, v.composite.GetWeaponClass()); err != nil {
+			return
+		}
 	}
 }
 
@@ -166,7 +187,9 @@ func (v *NPC) rotate(direction int) {
 	}
 
 	if newMode.String() != v.composite.GetAnimationMode() {
-		v.composite.SetMode(newMode, v.composite.GetWeaponClass())
+		if err := v.composite.SetMode(newMode, v.composite.GetWeaponClass()); err != nil {
+			return
+		}
 	}
 
 	if v.composite.GetDirection() != direction {
@@ -175,16 +198,12 @@ func (v *NPC) rotate(direction int) {
 }
 
 // Selectable returns true if the object can be highlighted/selected.
-func (m *NPC) Selectable() bool {
+func (v *NPC) Selectable() bool {
 	// is there something handy that determines selectable npc's?
-	if m.name != "" {
-		return true
-	}
-
-	return false
+	return v.name != ""
 }
 
 // Name returns the NPC's in-game name (e.g. "Deckard Cain") or an empty string if it does not have a name.
-func (m *NPC) Name() string {
-	return m.name
+func (v *NPC) Name() string {
+	return v.name
 }
