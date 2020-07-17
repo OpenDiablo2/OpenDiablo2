@@ -325,7 +325,7 @@ func (mr *MapRenderer) renderTileDebug(ax, ay int, debugVisLevel int, target d2i
 	target.DrawLine(screenX2-screenX1, screenY2-screenY1, tileColor)
 	target.DrawLine(screenX3-screenX1, screenY3-screenY1, tileColor)
 	target.PushTranslation(-10, 10)
-	target.DrawText("%v, %v", ax, ay)
+	target.DrawTextf("%v, %v", ax, ay)
 	target.Pop()
 
 	if debugVisLevel > 1 {
@@ -346,14 +346,14 @@ func (mr *MapRenderer) renderTileDebug(ax, ay int, debugVisLevel int, target d2i
 
 		/*for i, floor := range tile.Floors {
 			target.PushTranslation(-20, 10+(i+1)*14)
-			target.DrawText("f: %v-%v", floor.Style, floor.Sequence)
+			target.DrawTextf("f: %v-%v", floor.Style, floor.Sequence)
 			target.Pop()
 		}*/
 
 		for i, wall := range tile.Walls {
 			if wall.Type.Special() {
 				target.PushTranslation(-20, 10+(i+1)*14)
-				target.DrawText("s: %v-%v", wall.Style, wall.Sequence)
+				target.DrawTextf("s: %v-%v", wall.Style, wall.Sequence)
 				target.Pop()
 			}
 		}

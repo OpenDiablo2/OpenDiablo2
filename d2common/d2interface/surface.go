@@ -12,7 +12,7 @@ type Surface interface {
 	Clear(color color.Color) error
 	DrawRect(width, height int, color color.Color)
 	DrawLine(x, y int, color color.Color)
-	DrawText(format string, params ...interface{})
+	DrawTextf(format string, params ...interface{})
 	GetSize() (width, height int)
 	GetDepth() int
 	Pop()

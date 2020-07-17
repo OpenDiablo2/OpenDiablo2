@@ -3,8 +3,9 @@ package ebiten
 import (
 	"image/color"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/hajimehoshi/ebiten"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
 type surfaceState struct {

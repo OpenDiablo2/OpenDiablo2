@@ -13,7 +13,10 @@ import (
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
-const cacheLimit = 512
+const (
+	maxAlpha   = 0xff
+	cacheLimit = 512
+)
 
 type colorMCacheKey uint32
 
@@ -43,32 +46,38 @@ func createEbitenSurface(img *ebiten.Image, currentState ...surfaceState) *ebite
 	}
 }
 
+// PushTranslation pushes an x,y translation to the state stack
 func (s *ebitenSurface) PushTranslation(x, y int) {
 	s.stateStack = append(s.stateStack, s.stateCurrent)
 	s.stateCurrent.x += x
 	s.stateCurrent.y += y
 }
 
+// PushEffect pushes an effect to the state stack
 func (s *ebitenSurface) PushEffect(effect d2enum.DrawEffect) {
 	s.stateStack = append(s.stateStack, s.stateCurrent)
 	s.stateCurrent.effect = effect
 }
 
+// PushFilter pushes a filter to the state stack
 func (s *ebitenSurface) PushFilter(filter d2enum.Filter) {
 	s.stateStack = append(s.stateStack, s.stateCurrent)
 	s.stateCurrent.filter = d2ToEbitenFilter(filter)
 }
 
-func (s *ebitenSurface) PushColor(color color.Color) {
+// PushColor pushes a color to the stat stack
+func (s *ebitenSurface) PushColor(c color.Color) {
 	s.stateStack = append(s.stateStack, s.stateCurrent)
-	s.stateCurrent.color = color
+	s.stateCurrent.color = c
 }
 
+// PushBrightness pushes a brightness value to the state stack
 func (s *ebitenSurface) PushBrightness(brightness float64) {
 	s.stateStack = append(s.stateStack, s.stateCurrent)
 	s.stateCurrent.brightness = brightness
 }
 
+// Pop pops a state off of the state stack
 func (s *ebitenSurface) Pop() {
 	count := len(s.stateStack)
 	if count == 0 {
@@ -79,12 +88,14 @@ func (s *ebitenSurface) Pop() {
 	s.stateStack = s.stateStack[:count-1]
 }
 
+// PopN pops n states off the the state stack
 func (s *ebitenSurface) PopN(n int) {
 	for i := 0; i < n; i++ {
 		s.Pop()
 	}
 }
 
+// Render renders the given surface
 func (s *ebitenSurface) Render(sfc d2interface.Surface) error {
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(float64(s.stateCurrent.x), float64(s.stateCurrent.y))
@@ -122,7 +133,7 @@ func (s *ebitenSurface) Render(sfc d2interface.Surface) error {
 	return s.image.DrawImage(img, opts)
 }
 
-// Renders the section of the animation frame enclosed by bounds
+// Renders the section of the surface, given the bounds
 func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Rectangle) error {
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(float64(s.stateCurrent.x), float64(s.stateCurrent.y))
@@ -160,48 +171,56 @@ func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Recta
 	return s.image.DrawImage(img.SubImage(bound).(*ebiten.Image), opts)
 }
 
-func (s *ebitenSurface) DrawText(format string, params ...interface{}) {
+// DrawTextf renders the string to the surface with the given format string and a set of parameters
+func (s *ebitenSurface) DrawTextf(format string, params ...interface{}) {
 	d2DebugUtil.D2DebugPrintAt(s.image, fmt.Sprintf(format, params...), s.stateCurrent.x, s.stateCurrent.y)
 }
 
-func (s *ebitenSurface) DrawLine(x, y int, color color.Color) {
+// DrawLine draws a line
+func (s *ebitenSurface) DrawLine(x, y int, fillColor color.Color) {
 	ebitenutil.DrawLine(
 		s.image,
 		float64(s.stateCurrent.x),
 		float64(s.stateCurrent.y),
 		float64(s.stateCurrent.x+x),
 		float64(s.stateCurrent.y+y),
-		color,
+		fillColor,
 	)
 }
 
-func (s *ebitenSurface) DrawRect(width, height int, color color.Color) {
+// DrawRect draws a rectangle
+func (s *ebitenSurface) DrawRect(width, height int, fillColor color.Color) {
 	ebitenutil.DrawRect(
 		s.image,
 		float64(s.stateCurrent.x),
 		float64(s.stateCurrent.y),
 		float64(width),
 		float64(height),
-		color,
+		fillColor,
 	)
 }
 
-func (s *ebitenSurface) Clear(color color.Color) error {
-	return s.image.Fill(color)
+// Clear clears the entire surface, filling with the given color
+func (s *ebitenSurface) Clear(fillColor color.Color) error {
+	return s.image.Fill(fillColor)
 }
 
-func (s *ebitenSurface) GetSize() (int, int) {
+// GetSize gets the size of the surface
+func (s *ebitenSurface) GetSize() (x, y int) {
 	return s.image.Size()
 }
 
+// GetDepth returns the depth of this surface in the stack
 func (s *ebitenSurface) GetDepth() int {
 	return len(s.stateStack)
 }
 
+// ReplacePixels replaces pixels in the surface with the given pixels
 func (s *ebitenSurface) ReplacePixels(pixels []byte) error {
 	return s.image.ReplacePixels(pixels)
 }
 
+// Screenshot returns an *image.RGBA of the surface
 func (s *ebitenSurface) Screenshot() *image.RGBA {
 	width, height := s.GetSize()
 	bounds := image.Rectangle{Min: image.Point{X: 0, Y: 0}, Max: image.Point{X: width, Y: height}}
@@ -233,23 +252,29 @@ func (s *ebitenSurface) colorToColorM(clr color.Color) ebiten.ColorM {
 	if ca == 0 {
 		emptyColorM := ebiten.ColorM{}
 		emptyColorM.Scale(0, 0, 0, 0)
+
 		return emptyColorM
 	}
+
 	key := colorMCacheKey(cr | (cg << 8) | (cb << 16) | (ca << 24))
 	e, ok := s.colorMCache[key]
+
 	if ok {
 		e.atime = s.now()
 		return e.colorMatrix
 	}
+
 	if len(s.colorMCache) > cacheLimit {
 		oldest := int64(math.MaxInt64)
 		oldestKey := colorMCacheKey(0)
+
 		for key, c := range s.colorMCache {
 			if c.atime < oldest {
 				oldestKey = key
 				oldest = c.atime
 			}
 		}
+
 		delete(s.colorMCache, oldestKey)
 	}
 
@@ -257,12 +282,14 @@ func (s *ebitenSurface) colorToColorM(clr color.Color) ebiten.ColorM {
 	rf := float64(cr) / float64(ca)
 	gf := float64(cg) / float64(ca)
 	bf := float64(cb) / float64(ca)
-	af := float64(ca) / 0xff
+	af := float64(ca) / maxAlpha
 	cm.Scale(rf, gf, bf, af)
+
 	e = &colorMCacheEntry{
 		colorMatrix: cm,
 		atime:       s.now(),
 	}
+
 	s.colorMCache[key] = e
 
 	return e.colorMatrix

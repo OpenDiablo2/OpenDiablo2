@@ -268,24 +268,24 @@ func (p *App) renderDebug(target d2interface.Surface) error {
 	cx, cy := p.renderer.GetCursorPos()
 
 	target.PushTranslation(5, 565)
-	target.DrawText("vsync:" + strconv.FormatBool(vsyncEnabled) + "\nFPS:" + strconv.Itoa(int(fps)))
+	target.DrawTextf("vsync:" + strconv.FormatBool(vsyncEnabled) + "\nFPS:" + strconv.Itoa(int(fps)))
 	target.Pop()
 
 	var m runtime.MemStats
 
 	runtime.ReadMemStats(&m)
 	target.PushTranslation(680, 0)
-	target.DrawText("Alloc    " + strconv.FormatInt(int64(m.Alloc)/bytesToMegabyte, 10))
+	target.DrawTextf("Alloc    " + strconv.FormatInt(int64(m.Alloc)/bytesToMegabyte, 10))
 	target.PushTranslation(0, 16)
-	target.DrawText("TAlloc/s " + strconv.FormatFloat(p.allocRate(m.TotalAlloc, fps), 'f', 2, 64))
+	target.DrawTextf("TAlloc/s " + strconv.FormatFloat(p.allocRate(m.TotalAlloc, fps), 'f', 2, 64))
 	target.PushTranslation(0, 16)
-	target.DrawText("Pause    " + strconv.FormatInt(int64(m.PauseTotalNs/bytesToMegabyte), 10))
+	target.DrawTextf("Pause    " + strconv.FormatInt(int64(m.PauseTotalNs/bytesToMegabyte), 10))
 	target.PushTranslation(0, 16)
-	target.DrawText("HeapSys  " + strconv.FormatInt(int64(m.HeapSys/bytesToMegabyte), 10))
+	target.DrawTextf("HeapSys  " + strconv.FormatInt(int64(m.HeapSys/bytesToMegabyte), 10))
 	target.PushTranslation(0, 16)
-	target.DrawText("NumGC    " + strconv.FormatInt(int64(m.NumGC), 10))
+	target.DrawTextf("NumGC    " + strconv.FormatInt(int64(m.NumGC), 10))
 	target.PushTranslation(0, 16)
-	target.DrawText("Coords   " + strconv.FormatInt(int64(cx), 10) + "," + strconv.FormatInt(int64(cy), 10))
+	target.DrawTextf("Coords   " + strconv.FormatInt(int64(cx), 10) + "," + strconv.FormatInt(int64(cy), 10))
 	target.PopN(debugPopN)
 
 	return nil
@@ -599,7 +599,7 @@ func updateInitError(target d2interface.Surface) error {
 	width, height := target.GetSize()
 
 	target.PushTranslation(width/5, height/2)
-	target.DrawText(`Could not find the MPQ files in the directory: 
+	target.DrawTextf(`Could not find the MPQ files in the directory: 
 		%s\nPlease put the files and re-run the game.`, d2config.Config.MpqPath)
 
 	return nil

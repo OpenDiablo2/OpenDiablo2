@@ -197,13 +197,13 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 	met.mapRenderer.Render(screen)
 
 	screen.PushTranslation(0, 16)
-	screen.DrawText("N - next region, P - previous region")
+	screen.DrawTextf("N - next region, P - previous region")
 	screen.PushTranslation(0, 16)
-	screen.DrawText("Shift+N - next preset, Shift+P - previous preset")
+	screen.DrawTextf("Shift+N - next preset, Shift+P - previous preset")
 	screen.PushTranslation(0, 16)
-	screen.DrawText("Ctrl+N - next file, Ctrl+P - previous file")
+	screen.DrawTextf("Ctrl+N - next file, Ctrl+P - previous file")
 	screen.PushTranslation(0, 16)
-	screen.DrawText("Left click selects tile, right click unselects")
+	screen.DrawTextf("Left click selects tile, right click unselects")
 	screen.PushTranslation(0, 16)
 
 	popN := 5
@@ -212,13 +212,13 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 		screen.PushTranslation(15, 16)
 		popN++
 
-		screen.DrawText("No tile selected")
+		screen.DrawTextf("No tile selected")
 	} else {
 		screen.PushTranslation(10, 32)
-		screen.DrawText("Tile %v,%v", met.selX, met.selY)
+		screen.DrawTextf("Tile %v,%v", met.selX, met.selY)
 
 		screen.PushTranslation(15, 16)
-		screen.DrawText("Walls")
+		screen.DrawTextf("Walls")
 		tpop := 0
 		for _, wall := range met.selectedTile.Walls {
 			screen.PushTranslation(0, 12)
@@ -230,13 +230,13 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 			for _, str := range stringSlice {
 				screen.PushTranslation(0, 12)
 				tpop++
-				screen.DrawText(str)
+				screen.DrawTextf(str)
 			}
 		}
 		screen.PopN(tpop)
 
 		screen.PushTranslation(170, 0)
-		screen.DrawText("Floors")
+		screen.DrawTextf("Floors")
 		tpop = 0
 		for _, floor := range met.selectedTile.Floors {
 			screen.PushTranslation(0, 12)
@@ -248,14 +248,14 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 			for _, str := range stringSlice {
 				screen.PushTranslation(0, 12)
 				tpop++
-				screen.DrawText(str)
+				screen.DrawTextf(str)
 			}
 		}
 		screen.PopN(tpop)
 
 		tpop = 0
 		screen.PushTranslation(170, 0)
-		screen.DrawText("Shadows")
+		screen.DrawTextf("Shadows")
 		for _, shadow := range met.selectedTile.Shadows {
 			screen.PushTranslation(0, 12)
 			tpop++
@@ -266,14 +266,14 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 			for _, str := range stringSlice {
 				screen.PushTranslation(0, 12)
 				tpop++
-				screen.DrawText(str)
+				screen.DrawTextf(str)
 			}
 		}
 		screen.PopN(tpop)
 
 		tpop = 0
 		screen.PushTranslation(170, 0)
-		screen.DrawText("Substitutions")
+		screen.DrawTextf("Substitutions")
 		for _, subst := range met.selectedTile.Substitutions {
 			screen.PushTranslation(0, 12)
 			tpop++
@@ -284,7 +284,7 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 			for _, str := range stringSlice {
 				screen.PushTranslation(0, 12)
 				tpop++
-				screen.DrawText(str)
+				screen.DrawTextf(str)
 			}
 		}
 		screen.PopN(tpop)
