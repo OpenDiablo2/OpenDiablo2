@@ -15,7 +15,7 @@ type descValPosition int
 const (
 	descValHide descValPosition = iota
 	descValPrefix
-	descValuePostfix
+	descValPostfix
 )
 
 // CreateStat creates a stat instance with the given ID and number of values
@@ -106,7 +106,7 @@ var baseFormatStrings = []string{
 	"%v %s %s",
 	"Repairs 1 Durability In %v Seconds",
 	"%v +%v",
-	"+%v to %s",
+	"+%v %s",
 	"+%v to %s %s",
 	"%v%% %s",
 	"%v %s",
@@ -206,7 +206,7 @@ func (s *Stat) descFn1(values ...int) string {
 		result = fmt.Sprintf(format, stringTableString)
 	case descValPrefix:
 		result = fmt.Sprintf(format, value, stringTableString)
-	case descValuePostfix:
+	case descValPostfix:
 		formatSplit := strings.Split(format, " ")
 		format = strings.Join(reverseStringSlice(formatSplit), " ")
 		result = fmt.Sprintf(format, stringTableString, value)
@@ -243,7 +243,7 @@ func (s *Stat) descFn2(values ...int) string {
 		result = fmt.Sprintf(format, stringTableString)
 	case descValPrefix:
 		result = fmt.Sprintf(format, value, stringTableString)
-	case descValuePostfix:
+	case descValPostfix:
 		formatSplit := strings.Split(format, " ")
 		format = strings.Join(reverseStringSlice(formatSplit), " ")
 		result = fmt.Sprintf(format, stringTableString, value)
@@ -277,7 +277,7 @@ func (s *Stat) descFn3(values ...int) string {
 		result = fmt.Sprintf(format, stringTableString)
 	case descValPrefix:
 		result = fmt.Sprintf(format, value, stringTableString)
-	case descValuePostfix:
+	case descValPostfix:
 		formatSplit := strings.Split(format, " ")
 		format = strings.Join(reverseStringSlice(formatSplit), " ")
 		result = fmt.Sprintf(format, stringTableString, value)
@@ -315,7 +315,7 @@ func (s *Stat) descFn5(values ...int) string {
 		result = fmt.Sprintf(format, stringTableString)
 	case descValPrefix:
 		result = fmt.Sprintf(format, value, stringTableString)
-	case descValuePostfix:
+	case descValPostfix:
 		formatSplit := strings.Split(format, " ")
 		format = strings.Join(reverseStringSlice(formatSplit), " ")
 		result = fmt.Sprintf(format, stringTableString, value)
@@ -352,7 +352,7 @@ func (s *Stat) descFn6(values ...int) string {
 		result = fmt.Sprintf(format, stringTableStr1, stringTableStr2)
 	case descValPrefix:
 		result = fmt.Sprintf(format, value, stringTableStr1, stringTableStr2)
-	case descValuePostfix:
+	case descValPostfix:
 		formatSplit := strings.Split(format, " ")
 		format = strings.Join(reverseStringSlice(formatSplit), " ")
 		result = fmt.Sprintf(format, stringTableStr1, value)
@@ -389,7 +389,7 @@ func (s *Stat) descFn7(values ...int) string {
 		result = fmt.Sprintf(format, stringTableStr1, stringTableStr2)
 	case descValPrefix:
 		result = fmt.Sprintf(format, value, stringTableStr1, stringTableStr2)
-	case descValuePostfix:
+	case descValPostfix:
 		formatSplit := strings.Split(format, " ")
 		formatSplit[0], formatSplit[1] = formatSplit[1], formatSplit[0]
 		format = strings.Join(formatSplit, " ")
@@ -431,7 +431,7 @@ func (s *Stat) descFn9(values ...int) string {
 		result = fmt.Sprintf(format, stringTableStr1, stringTableStr2)
 	case descValPrefix:
 		result = fmt.Sprintf(format, value, stringTableStr1, stringTableStr2)
-	case descValuePostfix:
+	case descValPostfix:
 		formatSplit := strings.Split(format, " ")
 		formatSplit[0], formatSplit[1] = formatSplit[1], formatSplit[0]
 		format = strings.Join(formatSplit, " ")
@@ -532,7 +532,7 @@ func (s *Stat) descFn15(values ...int) string {
 
 	chanceToCast = within(chanceToCast, 0, 100)
 	skillLevel = within(skillLevel, 0, 255)
-	skillLevel = within(skillLevel, 0, len(d2datadict.SkillDetails)-1)
+	skillLevel = within(skillLevel, 0, 255)
 
 	skillRecord := d2datadict.SkillDetails[skillIndex]
 	result := fmt.Sprintf(format, chanceToCast, skillLevel, skillRecord.Skill)
