@@ -15,9 +15,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
-	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
 
 type heroRenderConfig struct {
@@ -181,33 +179,22 @@ type SelectHeroClass struct {
 	hardcoreCharLabel  d2ui.Label
 	connectionType     d2clientconnectiontype.ClientConnectionType
 	connectionHost     string
-	inputManager       d2interface.InputManager
-	audioProvider      d2interface.AudioProvider
-	terminal           d2interface.Terminal
-	renderer           d2interface.Renderer
-	scriptEngine       *d2script.ScriptEngine
+
+	audioProvider d2interface.AudioProvider
+	renderer      d2interface.Renderer
+	navigator     Navigator
 }
 
 // CreateSelectHeroClass creates an instance of a SelectHeroClass
-func CreateSelectHeroClass(
-	renderer d2interface.Renderer,
-	inputManager d2interface.InputManager,
-	audioProvider d2interface.AudioProvider,
-	connectionType d2clientconnectiontype.ClientConnectionType,
-	connectionHost string,
-	terminal d2interface.Terminal,
-	scriptEngine *d2script.ScriptEngine,
-) *SelectHeroClass {
+func CreateSelectHeroClass(navigator Navigator, renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, connectionType d2clientconnectiontype.ClientConnectionType, connectionHost string) *SelectHeroClass {
 	result := &SelectHeroClass{
 		heroRenderInfo: make(map[d2enum.Hero]*HeroRenderInfo),
 		selectedHero:   d2enum.HeroNone,
 		connectionType: connectionType,
 		connectionHost: connectionHost,
-		inputManager:   inputManager,
 		audioProvider:  audioProvider,
-		terminal:       terminal,
 		renderer:       renderer,
-		scriptEngine:   scriptEngine,
+		navigator:      navigator,
 	}
 
 	return result
@@ -343,8 +330,7 @@ func (v *SelectHeroClass) OnUnload() error {
 }
 
 func (v *SelectHeroClass) onExitButtonClicked() {
-	d2screen.SetNextScreen(CreateCharacterSelect(v.renderer, v.inputManager, v.audioProvider, v.connectionType,
-		v.connectionHost, v.terminal, v.scriptEngine))
+	v.navigator.ToCharacterSelect(v.connectionType, v.connectionHost)
 }
 
 func (v *SelectHeroClass) onOkButtonClicked() {
@@ -354,13 +340,7 @@ func (v *SelectHeroClass) onOkButtonClicked() {
 		d2datadict.CharStats[v.selectedHero],
 		v.hardcoreCheckbox.GetCheckState(),
 	)
-	gameClient, _ := d2client.Create(d2clientconnectiontype.Local, v.scriptEngine)
-
-	if err := gameClient.Open(v.connectionHost, gameState.FilePath); err != nil {
-		fmt.Printf("can not connect to the host: %s\n", v.connectionHost)
-	}
-
-	d2screen.SetNextScreen(CreateGame(v.renderer, v.inputManager, v.audioProvider, gameClient, v.terminal, v.scriptEngine))
+	v.navigator.ToCreateGame(gameState.FilePath, d2clientconnectiontype.Local, v.connectionHost)
 }
 
 // Render renders the Select Hero Class screen
