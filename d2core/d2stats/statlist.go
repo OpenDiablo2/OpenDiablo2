@@ -72,9 +72,10 @@ func (sl *StatList) removeStat(idx int) *Stat {
 	return picked
 }
 
-// Reduce returns a new stat list, combining like stats
+// Append returns a new stat list, combining like stats
 func (sl *StatList) Append(other *StatList) *StatList {
 	clone := sl.Clone()
 	clone.stats = append(clone.stats, other.stats...)
+
 	return clone
 }
