@@ -42,8 +42,8 @@ func Abs(a float64) float64 {
 	return a
 }
 
-// ClampFloat64 returns a clamped to min and max.
-func ClampFloat64(a, min, max float64) float64 {
+// Clamp returns a clamped to min and max.
+func Clamp(a, min, max float64) float64 {
 	if a > max {
 		return max
 	} else if a < min {

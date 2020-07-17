@@ -1,4 +1,3 @@
-// Package d2vector provides an implementation of a 2D Euclidean vector using float64 to store the two values.
 package d2vector
 
 import (
@@ -85,8 +84,8 @@ func (v *Vector) Floor() *Vector {
 // Clamp limits the values of v to those of a and b. If the values of v are between those of a and b they will be
 // unchanged.
 func (v *Vector) Clamp(a, b *Vector) *Vector {
-	v.x = d2math.ClampFloat64(v.x, a.x, b.x)
-	v.y = d2math.ClampFloat64(v.y, a.y, b.y)
+	v.x = d2math.Clamp(v.x, a.x, b.x)
+	v.y = d2math.Clamp(v.y, a.y, b.y)
 
 	return v
 }
@@ -244,7 +243,7 @@ func (v *Vector) Angle(o Vector) float64 {
 	to.Normalize()
 
 	denominator := math.Sqrt(from.Length() * to.Length())
-	dotClamped := d2math.ClampFloat64(from.Dot(&to)/denominator, -1, 1)
+	dotClamped := d2math.Clamp(from.Dot(&to)/denominator, -1, 1)
 
 	return math.Acos(dotClamped)
 }
