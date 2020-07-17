@@ -27,14 +27,14 @@ type Stamp struct {
 }
 
 // LoadStamp loads the Stamp data from file.
-func LoadStamp(levelType d2enum.RegionIdType, levelPreset int, fileIndex int) *Stamp {
+func LoadStamp(levelType d2enum.RegionIdType, levelPreset, fileIndex int) *Stamp {
 	stamp := &Stamp{
 		levelType:   d2datadict.LevelTypes[levelType],
 		levelPreset: d2datadict.LevelPresets[levelPreset],
 	}
 
-	for _, levelTypeDt1 := range stamp.levelType.Files {
-		if len(levelTypeDt1) != 0 && levelTypeDt1 != "" && levelTypeDt1 != "0" {
+	for _, levelTypeDt1 := range &stamp.levelType.Files {
+		if levelTypeDt1 != "" && levelTypeDt1 != "0" {
 			fileData, err := d2asset.LoadFile("/data/global/tiles/" + levelTypeDt1)
 			if err != nil {
 				panic(err)
@@ -49,7 +49,7 @@ func LoadStamp(levelType d2enum.RegionIdType, levelPreset int, fileIndex int) *S
 	var levelFilesToPick []string
 
 	for _, fileRecord := range stamp.levelPreset.Files {
-		if len(fileRecord) != 0 && fileRecord != "" && fileRecord != "0" {
+		if fileRecord != "" && fileRecord != "0" {
 			levelFilesToPick = append(levelFilesToPick, fileRecord)
 		}
 	}
@@ -84,7 +84,7 @@ func LoadStamp(levelType d2enum.RegionIdType, levelPreset int, fileIndex int) *S
 
 // Size returns the size of the stamp in tiles.
 func (mr *Stamp) Size() d2common.Size {
-	return d2common.Size{int(mr.ds1.Width), int(mr.ds1.Height)}
+	return d2common.Size{Width: int(mr.ds1.Width), Height: int(mr.ds1.Height)}
 }
 
 // LevelPreset returns the level preset ID.
@@ -108,10 +108,11 @@ func (mr *Stamp) Tile(x, y int) *d2ds1.TileRecord {
 }
 
 // TileData returns the tile data for the tile with given style, sequence and type.
-func (mr *Stamp) TileData(style int32, sequence int32, tileType d2enum.TileType) *d2dt1.Tile {
-	for _, tile := range mr.tiles {
+func (mr *Stamp) TileData(style, sequence int32, tileType d2enum.TileType) *d2dt1.Tile {
+	for idx := range mr.tiles {
+		tile := &mr.tiles[idx]
 		if tile.Style == style && tile.Sequence == sequence && tile.Type == int32(tileType) {
-			return &tile
+			return tile
 		}
 	}
 
@@ -129,9 +130,13 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 			// (See monpreset and monplace txts for reference)
 			if monstat != nil {
 				// Temorary use of Lookup.
-				npc := d2mapentity.CreateNPC((tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y, monstat, 0)
-				npc.SetPaths(convertPaths(tileOffsetX, tileOffsetY, object.Paths))
-				entities = append(entities, npc)
+				npcX, npcY := (tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y
+				npc, err := d2mapentity.CreateNPC(npcX, npcY, monstat, 0)
+
+				if err == nil {
+					npc.SetPaths(convertPaths(tileOffsetX, tileOffsetY, object.Paths))
+					entities = append(entities, npc)
+				}
 			}
 		}
 
