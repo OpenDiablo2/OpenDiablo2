@@ -10,26 +10,37 @@ import (
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
+const (
+	screenWidth  = 800
+	screenHeight = 600
+)
+
+// Renderer is an implementation of a renderer
 type Renderer struct {
 	renderCallback func(surface d2interface.Surface) error
 }
 
+// Update updates the screen with the given *ebiten.Image
 func (r *Renderer) Update(screen *ebiten.Image) error {
 	err := r.renderCallback(createEbitenSurface(screen))
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
-func (r *Renderer) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 800, 600
+// Layout returns the renderer screen width and height
+func (r *Renderer) Layout(_, _ int) (width, height int) {
+	return screenWidth, screenHeight
 }
 
+// CreateRenderer creates an ebiten renderer instance
 func CreateRenderer() (*Renderer, error) {
 	result := &Renderer{}
 
 	config := d2config.Config
+
 	ebiten.SetCursorMode(ebiten.CursorModeHidden)
 	ebiten.SetFullscreen(config.FullScreen)
 	ebiten.SetRunnableOnUnfocused(config.RunInBackground)
@@ -39,10 +50,12 @@ func CreateRenderer() (*Renderer, error) {
 	return result, nil
 }
 
+// GetRendererName returns the name of the renderer
 func (*Renderer) GetRendererName() string {
 	return "Ebiten"
 }
 
+// SetWindowIcon sets the icon for the window, visible in the chrome of the window
 func (*Renderer) SetWindowIcon(fileName string) {
 	_, iconImage, err := ebitenutil.NewImageFromFile(fileName, ebiten.FilterLinear)
 	if err == nil {
@@ -50,18 +63,23 @@ func (*Renderer) SetWindowIcon(fileName string) {
 	}
 }
 
+// IsDrawingSkipped returns a bool for whether or not the drawing has been skipped
 func (r *Renderer) IsDrawingSkipped() bool {
 	return ebiten.IsDrawingSkipped()
 }
 
+// Run initializes the renderer
 func (r *Renderer) Run(f func(surface d2interface.Surface) error, width, height int, title string) error {
 	r.renderCallback = f
+
 	ebiten.SetWindowTitle(title)
 	ebiten.SetWindowResizable(true)
 	ebiten.SetWindowSize(width, height)
+
 	return ebiten.RunGame(r)
 }
 
+// CreateSurface creates a renderer surface from an existing surface
 func (r *Renderer) CreateSurface(surface d2interface.Surface) (d2interface.Surface, error) {
 	result := createEbitenSurface(
 		surface.(*ebitenSurface).image,
@@ -74,35 +92,44 @@ func (r *Renderer) CreateSurface(surface d2interface.Surface) (d2interface.Surfa
 	return result, nil
 }
 
+// NewSurface creates a new surface
 func (r *Renderer) NewSurface(width, height int, filter d2enum.Filter) (d2interface.Surface, error) {
 	ebitenFilter := d2ToEbitenFilter(filter)
 	img, err := ebiten.NewImage(width, height, ebitenFilter)
+
 	if err != nil {
 		return nil, err
 	}
+
 	return createEbitenSurface(img), nil
 }
 
+// IsFullScreen returns a boolean for whether or not the renderer is currently set to fullscreen
 func (r *Renderer) IsFullScreen() bool {
 	return ebiten.IsFullscreen()
 }
 
+// SetFullScreen sets the renderer to fullscreen, given a boolean
 func (r *Renderer) SetFullScreen(fullScreen bool) {
 	ebiten.SetFullscreen(fullScreen)
 }
 
+// SetVSyncEnabled enables vsync, given a boolean
 func (r *Renderer) SetVSyncEnabled(vsync bool) {
 	ebiten.SetVsyncEnabled(vsync)
 }
 
+// GetVSyncEnabled returns a boolean for whether or not vsync is enabled
 func (r *Renderer) GetVSyncEnabled() bool {
 	return ebiten.IsVsyncEnabled()
 }
 
-func (r *Renderer) GetCursorPos() (int, int) {
+// GetCursorPos returns the current cursor position x,y coordinates
+func (r *Renderer) GetCursorPos() (x, y int) {
 	return ebiten.CursorPosition()
 }
 
+// CurrentFPS returns the current frames per second of the renderer
 func (r *Renderer) CurrentFPS() float64 {
 	return ebiten.CurrentFPS()
 }

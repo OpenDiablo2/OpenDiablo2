@@ -234,7 +234,7 @@ func (t *terminal) Render(surface d2interface.Surface) error {
 		historyEntry := t.outputHistory[historyIndex]
 
 		surface.PushTranslation(termCharWidth*2, outputHeight-(i+1)*termCharHeight)
-		surface.DrawText(historyEntry.text)
+		surface.DrawTextf(historyEntry.text)
 		surface.PushTranslation(-termCharWidth*2, 0)
 
 		switch historyEntry.category {
@@ -252,7 +252,7 @@ func (t *terminal) Render(surface d2interface.Surface) error {
 
 	surface.PushTranslation(0, outputHeight)
 	surface.DrawRect(totalWidth, termCharHeight, t.fgColor)
-	surface.DrawText("> " + t.command)
+	surface.DrawTextf("> " + t.command)
 	surface.Pop()
 
 	surface.Pop()
