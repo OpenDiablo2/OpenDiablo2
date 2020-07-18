@@ -24,8 +24,6 @@ import (
 
 const (
 	udpBufferSize      = 4096
-	magicOffsetScalar  = 5
-	magicOffset        = 3
 	subtilesPerTile    = 5
 	middleOfTileOffset = 3
 )
@@ -332,8 +330,8 @@ func OnClientConnected(client ClientConnection) {
 		}
 
 		conPlayerState := connection.GetPlayerState()
-		playerX := int(conPlayerState.X*magicOffsetScalar) + magicOffset
-		playerY := int(conPlayerState.Y*magicOffsetScalar) + magicOffset
+		playerX := int(conPlayerState.X*subtilesPerTile) + middleOfTileOffset
+		playerY := int(conPlayerState.Y*subtilesPerTile) + middleOfTileOffset
 		err = client.SendPacketToClient(d2netpacket.CreateAddPlayerPacket(
 			connection.GetUniqueID(),
 			conPlayerState.HeroName,
