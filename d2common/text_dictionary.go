@@ -16,6 +16,10 @@ type textDictionaryHashEntry struct {
 
 var lookupTable map[string]string
 
+const (
+	crcByteCount = 2
+)
+
 // TranslateString returns the translation of the given string
 func TranslateString(key string) string {
 	result, ok := lookupTable[key]
@@ -35,10 +39,13 @@ func LoadTextDictionary(dictionaryData []byte) {
 	}
 
 	br := CreateStreamReader(dictionaryData)
-	// CRC
-	br.ReadBytes(2)
+
+	// skip past the CRC
+	br.ReadBytes(crcByteCount)
+
 	numberOfElements := br.GetUInt16()
 	hashTableSize := br.GetUInt32()
+
 	// Version (always 0)
 	if _, err := br.ReadByte(); err != nil {
 		log.Fatal("Error reading Version record")
