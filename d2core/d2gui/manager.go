@@ -37,6 +37,8 @@ func createGuiManager(inputManager d2interface.InputManager) (*manager, error) {
 		cursorVisible: true,
 	}
 
+	manager.clear()
+
 	if err := inputManager.BindHandler(manager); err != nil {
 		return nil, err
 	}
@@ -100,22 +102,37 @@ func (m *manager) render(target d2interface.Surface) error {
 }
 
 func (m *manager) renderLoadScreen(target d2interface.Surface) error {
-	target.Clear(color.Black)
+	if clearErr := target.Clear(color.Black); clearErr != nil {
+		return clearErr
+	}
+
+	pushCount := 0
 
 	screenWidth, screenHeight := target.GetSize()
 	animWidth, animHeight := m.loadingAnim.GetCurrentFrameSize()
+
 	target.PushTranslation(screenWidth/2-animWidth/2, screenHeight/2+animHeight/2)
+	pushCount++
+
 	target.PushTranslation(0, -animHeight)
-	defer target.PopN(2)
+	pushCount++
+
+	defer target.PopN(pushCount)
 
 	return m.loadingAnim.Render(target)
 }
 
 func (m *manager) renderCursor(target d2interface.Surface) error {
 	_, height := m.cursorAnim.GetCurrentFrameSize()
+	pushCount := 0
+
 	target.PushTranslation(m.cursorX, m.cursorY)
+	pushCount++
+
 	target.PushTranslation(0, -height)
-	defer target.PopN(2)
+	pushCount++
+
+	defer target.PopN(pushCount)
 
 	return m.cursorAnim.Render(target)
 }
@@ -136,7 +153,8 @@ func (m *manager) showLoadScreen(progress float64) {
 
 	animation := m.loadingAnim
 	frameCount := animation.GetFrameCount()
-	animation.SetCurrentFrame(int(float64(frameCount-1.0) * progress))
+
+	_ = animation.SetCurrentFrame(int(float64(frameCount-1) * progress))
 
 	m.loading = true
 }
