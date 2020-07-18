@@ -1,5 +1,15 @@
 package d2cof
 
+type directionCount int
+
+const (
+	four directionCount = 4 << iota
+	eight
+	sixteen
+	thirtyTwo
+	sixtyFour
+)
+
 // Dir64ToCof returns the cof direction based on the actual direction
 func Dir64ToCof(direction, numDirections int) int {
 	var dir4 = [64]int{
@@ -32,16 +42,16 @@ func Dir64ToCof(direction, numDirections int) int {
 		32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
 		48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63}
 
-	switch numDirections {
-	case 4:
+	switch directionCount(numDirections) {
+	case four:
 		return dir4[direction]
-	case 8:
+	case eight:
 		return dir8[direction]
-	case 16:
+	case sixteen:
 		return dir16[direction]
-	case 32:
+	case thirtyTwo:
 		return dir32[direction]
-	case 64:
+	case sixtyFour:
 		return dir64[direction]
 	default:
 		return 0

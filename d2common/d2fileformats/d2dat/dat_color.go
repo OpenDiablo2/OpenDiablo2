@@ -10,11 +10,11 @@ type DATColor struct {
 
 const (
 	colorBits = 8
-	mask = 0xff
+	mask      = 0xff
 )
 
 const (
-	bitShift0 = iota*colorBits
+	bitShift0 = iota * colorBits
 	bitShift8
 	bitShift16
 	bitShift24
@@ -50,28 +50,30 @@ func (c *DATColor) SetRGBA(rgba uint32) {
 	c.r, c.g, c.b, c.a = toComponent(rgba)
 }
 
+// BGRA gets the combination of the color components (0xBBGGRRAA)
 func (c *DATColor) BGRA() uint32 {
 	return toComposite(c.b, c.g, c.r, c.a)
 }
 
+// SetBGRA sets the color components using the given BGRA form
 func (c *DATColor) SetBGRA(bgra uint32) {
 	c.b, c.g, c.r, c.a = toComponent(bgra)
 }
 
-func toComposite (w,x,y,z uint8) uint32 {
-	composite := uint32(w)<<bitShift24
-	composite += uint32(x)<<bitShift16
-	composite += uint32(y)<<bitShift8
-	composite += uint32(z)<<bitShift0
+func toComposite(w, x, y, z uint8) uint32 {
+	composite := uint32(w) << bitShift24
+	composite += uint32(x) << bitShift16
+	composite += uint32(y) << bitShift8
+	composite += uint32(z) << bitShift0
 
 	return composite
 }
 
-func toComponent (wxyz uint32) (w,x,y,z uint8){
-	w = uint8(wxyz>>bitShift24 & mask)
-	x = uint8(wxyz>>bitShift16 & mask)
-	y = uint8(wxyz>>bitShift8 & mask)
-	z = uint8(wxyz>>bitShift0 & mask)
+func toComponent(wxyz uint32) (w, x, y, z uint8) {
+	w = uint8(wxyz >> bitShift24 & mask)
+	x = uint8(wxyz >> bitShift16 & mask)
+	y = uint8(wxyz >> bitShift8 & mask)
+	z = uint8(wxyz >> bitShift0 & mask)
+
 	return w, x, y, z
 }
-

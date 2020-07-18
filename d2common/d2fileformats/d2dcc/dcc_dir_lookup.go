@@ -1,5 +1,15 @@
 package d2dcc
 
+type directionCount int
+
+const (
+	four directionCount = 4 << iota
+	eight
+	sixteen
+	thirtyTwo
+	sixtyFour
+)
+
 // Dir64ToDcc returns the DCC direction based on the actual direction.
 // Special thanks for Necrolis for these tables!
 func Dir64ToDcc(direction, numDirections int) int {
@@ -33,16 +43,16 @@ func Dir64ToDcc(direction, numDirections int) int {
 		6, 48, 24, 49, 12, 50, 25, 51, 2, 52, 26, 53, 13, 54, 27, 55,
 		7, 56, 28, 57, 14, 58, 29, 59, 3, 60, 30, 61, 15, 62, 31, 63}
 
-	switch numDirections {
-	case 4:
+	switch directionCount(numDirections) {
+	case four:
 		return dir4[direction]
-	case 8:
+	case eight:
 		return dir8[direction]
-	case 16:
+	case sixteen:
 		return dir16[direction]
-	case 32:
+	case thirtyTwo:
 		return dir32[direction]
-	case 64:
+	case sixtyFour:
 		return dir64[direction]
 	default:
 		return 0
