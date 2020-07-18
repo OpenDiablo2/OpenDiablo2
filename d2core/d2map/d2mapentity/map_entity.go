@@ -140,8 +140,9 @@ func (m *mapEntity) nextPath() {
 	if m.hasPath() {
 		// Set next path node
 		m.setTarget(
-			m.path[0].(*d2common.PathTile).X*5,
-			m.path[0].(*d2common.PathTile).Y*5,
+			d2vector.NewPosition(
+				m.path[0].(*d2common.PathTile).X*5,
+				m.path[0].(*d2common.PathTile).Y*5),
 			m.done,
 		)
 
@@ -162,9 +163,9 @@ func (m *mapEntity) hasPath() bool {
 }
 
 // setTarget sets target coordinates and changes animation based on proximity and direction.
-func (m *mapEntity) setTarget(tx, ty float64, done func()) {
+func (m *mapEntity) setTarget(p d2vector.Position, done func()) {
 	// Set the target
-	m.Target.Set(tx, ty)
+	m.Target.Copy(&p.Vector)
 	m.done = done
 
 	// Update the direction

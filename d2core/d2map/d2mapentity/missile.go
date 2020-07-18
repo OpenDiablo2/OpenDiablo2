@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -54,7 +56,7 @@ func (m *Missile) SetRadians(angle float64, done func()) {
 	x := m.Position.X() + (r * math.Cos(angle))
 	y := m.Position.Y() + (r * math.Sin(angle))
 
-	m.setTarget(x, y, done)
+	m.setTarget(d2vector.NewPosition(x, y), done)
 }
 
 // Advance is called once per frame and processes a
