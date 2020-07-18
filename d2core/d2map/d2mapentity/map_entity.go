@@ -121,8 +121,8 @@ func applyVelocity(position, velocity, target *d2vector.Vector) {
 	dest := position.Clone()
 	dest.Add(velocity)
 
-	destDistance := position.Distance(dest)
-	targetDistance := position.Distance(*target)
+	destDistance := position.Distance(&dest)
+	targetDistance := position.Distance(target)
 
 	if destDistance > targetDistance {
 		// Destination overshot target. Set position to target and velocity to overshot amount.

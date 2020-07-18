@@ -84,7 +84,8 @@ func (v *Vector) DirectionTo(target Vector) int {
 	direction := target.Clone()
 	direction.Subtract(v)
 
-	angle := direction.SignedAngle(VectorRight())
+	right := VectorRight()
+	angle := direction.SignedAngle(&right)
 	radiansPerDirection := d2math.RadFull / entityDirectionCount
 
 	// Note: The direction is always one increment out so we must subtract one increment.

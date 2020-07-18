@@ -421,7 +421,7 @@ func TestVector_Distance(t *testing.T) {
 	other := NewVector(1, -1)
 	want := 4.0
 	c := v.Clone()
-	got := c.Distance(other)
+	got := c.Distance(&other)
 
 	if got != want {
 		t.Errorf("distance from %s to %s: want %.3f: got %.3f", v, other, want, got)
@@ -433,7 +433,7 @@ func BenchmarkVector_Distance(b *testing.B) {
 	d := NewVector(2, 2)
 
 	for n := 0; n < b.N; n++ {
-		outFloat = v.Distance(d)
+		outFloat = v.Distance(&d)
 	}
 }
 
@@ -536,14 +536,14 @@ func TestVector_Cross(t *testing.T) {
 	anti := NewVector(0, 1)
 
 	want := -1.0
-	got := v.Cross(clock)
+	got := v.Cross(&clock)
 
 	if got != want {
 		t.Errorf("cross product of %s and %s: want %.3f: got %.3f", v, clock, want, got)
 	}
 
 	want = 1.0
-	got = v.Cross(anti)
+	got = v.Cross(&anti)
 
 	if got != want {
 		t.Errorf("cross product of %s and %s: want %.3f: got %.3f", v, clock, want, got)
@@ -555,7 +555,7 @@ func BenchmarkVector_Cross(b *testing.B) {
 	o := NewVector(0, 1)
 
 	for n := 0; n < b.N; n++ {
-		outFloat = v.Cross(o)
+		outFloat = v.Cross(&o)
 	}
 }
 
@@ -573,18 +573,10 @@ func TestVector_Normalize(t *testing.T) {
 	v = NewVector(0, 10)
 	c = v.Clone()
 	want = NewVector(0, 1)
-	reverse := c.Normalize()
+	c.Normalize()
 
 	if !want.Equals(c) {
 		t.Errorf("normalize %s: want %s: got %s", v, want, c)
-	}
-
-	want = NewVector(0, 10)
-
-	c.Scale(reverse)
-
-	if !want.Equals(c) {
-		t.Errorf("reverse normalizing of %s: want %s: got %s", v, want, c)
 	}
 
 	v = NewVector(0, 0)
@@ -602,7 +594,7 @@ func BenchmarkVector_Normalize(b *testing.B) {
 	v := NewVector(1, 1)
 
 	for n := 0; n < b.N; n++ {
-		outFloat = v.Normalize()
+		v.Normalize()
 	}
 }
 
@@ -612,7 +604,7 @@ func TestVector_Angle(t *testing.T) {
 	other := NewVector(1, 0.3)
 
 	want := 1.2793395323170293
-	got := c.Angle(other)
+	got := c.Angle(&other)
 
 	d := fmt.Sprintf("angle from %s to %s", v, other)
 
@@ -626,7 +618,7 @@ func TestVector_Angle(t *testing.T) {
 
 	other.Set(-1, 0.3)
 	co := other.Clone()
-	got = c.Angle(other)
+	got = c.Angle(&other)
 
 	d = fmt.Sprintf("angle from %s to %s", c, other)
 
@@ -644,7 +636,7 @@ func BenchmarkVector_Angle(b *testing.B) {
 	o := NewVector(0, 1)
 
 	for n := 0; n < b.N; n++ {
-		outFloat = v.Angle(o)
+		outFloat = v.Angle(&o)
 	}
 }
 
@@ -653,7 +645,7 @@ func TestVector_SignedAngle(t *testing.T) {
 	c := v.Clone()
 	other := NewVector(1, 0.3)
 	want := 1.2793395323170293
-	got := c.SignedAngle(other)
+	got := c.SignedAngle(&other)
 
 	d := fmt.Sprintf("angle from %s to %s", v, other)
 
@@ -668,7 +660,7 @@ func TestVector_SignedAngle(t *testing.T) {
 	other.Set(-1, 0.3)
 	co := other.Clone()
 	want = 5.0038457214660585
-	got = c.SignedAngle(other)
+	got = c.SignedAngle(&other)
 
 	d = fmt.Sprintf("angle from %s to %s", v, other)
 
@@ -686,20 +678,22 @@ func BenchmarkVector_SignedAngle(b *testing.B) {
 	o := NewVector(0, 1)
 
 	for n := 0; n < b.N; n++ {
-		outFloat = v.SignedAngle(o)
+		outFloat = v.SignedAngle(&o)
 	}
 }
 
 func TestVector_Reflect(t *testing.T) {
 	v := NewVector(1, -1)
+	v.Normalize()
 	c := v.Clone()
 	up := NewVector(0, 1)
 
 	want := NewVector(1, 1)
+	want.Normalize()
 
-	v.Reflect(up)
+	v.Reflect(&up)
 
-	if !want.Equals(v) {
+	if !want.EqualsApprox(v) {
 		t.Errorf("reflect direction %s off surface with normal %s: want %s: got %s", c, up, want, v)
 	}
 }
@@ -709,20 +703,22 @@ func BenchmarkVector_Reflect(b *testing.B) {
 	o := NewVector(0, 1)
 
 	for n := 0; n < b.N; n++ {
-		v.Reflect(o)
+		v.Reflect(&o)
 	}
 }
 
 func TestVector_ReflectSurface(t *testing.T) {
 	v := NewVector(1, -1)
+	v.Normalize()
 	c := v.Clone()
 	up := NewVector(0, 1)
 
 	want := NewVector(-1, -1)
+	want.Normalize()
 
-	v.ReflectSurface(up)
+	v.ReflectSurface(&up)
 
-	if !want.Equals(v) {
+	if !want.EqualsApprox(v) {
 		t.Errorf("reflect direction %s off surface with normal %s: want %s: got %s", c, up, want, v)
 	}
 }
@@ -732,7 +728,7 @@ func BenchmarkVector_ReflectSurface(b *testing.B) {
 	o := NewVector(0, 1)
 
 	for n := 0; n < b.N; n++ {
-		v.ReflectSurface(o)
+		v.ReflectSurface(&o)
 	}
 }
 
@@ -741,7 +737,7 @@ func TestVector_Rotate(t *testing.T) {
 	c := right.Clone()
 
 	up := NewVector(0, 1)
-	angle := -up.SignedAngle(right)
+	angle := -up.SignedAngle(&right)
 	want := NewVector(0, 1)
 	got := right.Rotate(angle)
 
