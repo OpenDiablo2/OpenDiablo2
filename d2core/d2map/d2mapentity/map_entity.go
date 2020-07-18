@@ -23,14 +23,11 @@ type mapEntity struct {
 
 // newMapEntity creates an instance of mapEntity
 func newMapEntity(x, y int) mapEntity {
-	locX, locY := float64(x), float64(y)
+	pos := d2vector.NewPosition(float64(x), float64(y))
 
 	return mapEntity{
-		Position:  d2vector.NewPosition(locX, locY),
-		Target:    d2vector.NewPosition(locX, locY),
-		Speed:     6,
-		drawLayer: 0,
-		path:      []d2astar.Pather{},
+		Position: pos,
+		Target:   pos,
 	}
 }
 
