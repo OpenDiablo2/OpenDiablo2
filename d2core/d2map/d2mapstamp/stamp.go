@@ -4,6 +4,8 @@ import (
 	"math"
 	"math/rand"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2object"
 
@@ -171,8 +173,9 @@ func convertPaths(tileOffsetX, tileOffsetY int, paths []d2common.Path) []d2commo
 	result := make([]d2common.Path, len(paths))
 	for i := 0; i < len(paths); i++ {
 		result[i].Action = paths[i].Action
-		result[i].X = paths[i].X + (tileOffsetX * 5)
-		result[i].Y = paths[i].Y + (tileOffsetY * 5)
+		result[i].Position = d2vector.NewPosition(
+			paths[i].Position.X()+float64(tileOffsetX*5),
+			paths[i].Position.Y()+float64(tileOffsetY*5))
 	}
 
 	return result

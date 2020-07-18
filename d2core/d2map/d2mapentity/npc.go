@@ -137,8 +137,8 @@ func (v *NPC) Advance(tickTime float64) {
 		v.isDone = false
 		path := v.NextPath()
 		v.setTarget(
-			float64(path.X),
-			float64(path.Y),
+			path.Position.X(),
+			path.Position.Y(),
 			v.next,
 		)
 

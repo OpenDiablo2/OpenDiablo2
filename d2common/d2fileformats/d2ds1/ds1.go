@@ -4,6 +4,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 )
 
 const maxActNumber = 5
@@ -223,8 +224,9 @@ func (ds1 *DS1) loadNpcPaths(br *d2common.StreamReader, objIdx, numPaths int) {
 
 	for pathIdx := 0; pathIdx < numPaths; pathIdx++ {
 		newPath := d2common.Path{}
-		newPath.X = int(br.GetInt32())
-		newPath.Y = int(br.GetInt32())
+		newPath.Position = d2vector.NewPosition(
+			float64(br.GetInt32()),
+			float64(br.GetInt32()))
 
 		if ds1.Version >= 15 { //nolint:gomnd // Version number
 			newPath.Action = int(br.GetInt32())
