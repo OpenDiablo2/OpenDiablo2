@@ -54,7 +54,7 @@ func (t *PathTile) PathNeighbors() []d2astar.Pather {
 }
 
 // PathNeighborCost calculates the exact movement cost to neighbor nodes
-func (t *PathTile) PathNeighborCost(to d2astar.Pather) float64 {
+func (t *PathTile) PathNeighborCost(_ d2astar.Pather) float64 {
 	return 1 // No cost specifics currently...
 }
 
