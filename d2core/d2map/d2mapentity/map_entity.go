@@ -23,14 +23,11 @@ type mapEntity struct {
 
 // newMapEntity creates an instance of mapEntity
 func newMapEntity(x, y int) mapEntity {
-	locX, locY := float64(x), float64(y)
+	pos := d2vector.NewPosition(float64(x), float64(y))
 
 	return mapEntity{
-		Position:  d2vector.NewPosition(locX, locY),
-		Target:    d2vector.NewPosition(locX, locY),
-		Speed:     6,
-		drawLayer: 0,
-		path:      []d2astar.Pather{},
+		Position: pos,
+		Target:   pos,
 	}
 }
 
@@ -143,8 +140,7 @@ func (m *mapEntity) nextPath() {
 	if m.hasPath() {
 		// Set next path node
 		m.setTarget(
-			m.path[0].(*d2common.PathTile).X*5,
-			m.path[0].(*d2common.PathTile).Y*5,
+			m.path[0].(*d2common.PathTile).Position,
 			m.done,
 		)
 
@@ -165,9 +161,9 @@ func (m *mapEntity) hasPath() bool {
 }
 
 // setTarget sets target coordinates and changes animation based on proximity and direction.
-func (m *mapEntity) setTarget(tx, ty float64, done func()) {
+func (m *mapEntity) setTarget(p d2vector.Position, done func()) {
 	// Set the target
-	m.Target.Set(tx, ty)
+	m.Target.Copy(&p.Vector)
 	m.done = done
 
 	// Update the direction

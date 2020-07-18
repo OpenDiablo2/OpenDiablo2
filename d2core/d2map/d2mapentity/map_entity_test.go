@@ -51,7 +51,7 @@ func path(length int, origin d2vector.Position) []d2astar.Pather {
 }
 
 func pathTile(x, y float64) *d2common.PathTile {
-	return &d2common.PathTile{X: x, Y: y}
+	return &d2common.PathTile{Position: d2vector.NewPositionTile(x, y)}
 }
 
 func TestMapEntity_Step(t *testing.T) {

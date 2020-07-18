@@ -1,12 +1,18 @@
 package d2common
 
-import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2astar"
+import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2astar"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+)
 
 // PathTile represents a node in path finding
 type PathTile struct {
-	Walkable                                                    bool
-	Up, Down, Left, Right, UpLeft, UpRight, DownLeft, DownRight *PathTile
-	X, Y                                                        float64
+	Walkable            bool
+	Up, Down            *PathTile
+	Left, Right         *PathTile
+	UpLeft, UpRight     *PathTile
+	DownLeft, DownRight *PathTile
+	Position            d2vector.Position
 }
 
 // PathNeighbors returns the direct neighboring nodes of this node which can be pathed to
@@ -54,20 +60,9 @@ func (t *PathTile) PathNeighborCost(to d2astar.Pather) float64 {
 
 // PathEstimatedCost is a heuristic method for estimating movement costs between non-adjacent nodes
 func (t *PathTile) PathEstimatedCost(to d2astar.Pather) float64 {
-	toT := to.(*PathTile)
-	absX := toT.X - t.X
+	delta := to.(*PathTile).Position.Clone()
+	delta.Subtract(&t.Position.Vector)
+	delta.Abs()
 
-	if absX < 0 {
-		absX = -absX
-	}
-
-	absY := toT.Y - t.Y
-
-	if absY < 0 {
-		absY = -absY
-	}
-
-	r := absX + absY
-
-	return r
+	return delta.X() + delta.Y()
 }

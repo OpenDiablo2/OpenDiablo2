@@ -28,6 +28,14 @@ func NewPosition(x, y float64) Position {
 	return p
 }
 
+// NewPosition returns a Position struct with the given tile coordinates where 1 = 1 tile, with a fractional offset.
+func NewPositionTile(x, y float64) Position {
+	p := Position{NewVector(x*subTilesPerTile, y*subTilesPerTile)}
+	p.checkValues()
+
+	return p
+}
+
 // Set sets this position to the given sub tile coordinates where 1 = 1 sub tile, with a fractional offset.
 func (p *Position) Set(x, y float64) {
 	p.x, p.y = x, y
