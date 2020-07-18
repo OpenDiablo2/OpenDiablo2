@@ -16,16 +16,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
-// TermCategory applies styles to the lines in the  Terminal
-type TermCategory d2enum.TermCategory
-
-// Terminal Category types
-const (
-	TermCategoryNone    = TermCategory(d2enum.TermCategoryNone)
-	TermCategoryInfo    = TermCategory(d2enum.TermCategoryInfo)
-	TermCategoryWarning = TermCategory(d2enum.TermCategoryWarning)
-	TermCategoryError   = TermCategory(d2enum.TermCategoryError)
-)
 const (
 	termCharWidth   = 6
 	termCharHeight  = 16
@@ -33,6 +23,14 @@ const (
 	termRowCountMax = 32
 	termColCountMax = 128
 	termAnimLength  = 0.5
+)
+
+const (
+	darkGrey = 0x2e3436b0
+	lightGrey = 0x555753b0
+	lightBlue = 0x3465a4b0
+	yellow = 0xfce94fb0
+	red = 0xcc0000b0
 )
 
 type termVis int
@@ -492,14 +490,39 @@ func parseCommand(command string) []string {
 	return params
 }
 
+func rgbaColor(rgba uint32) color.RGBA {
+	result := color.RGBA{}
+	a, b, g, r := 0, 1, 2, 3
+	byteWidth := 8
+	byteMask := 0xff
+
+	for idx :=0; idx < 4; idx ++ {
+		shift := idx * byteWidth
+		component := uint8(rgba>>shift) & uint8(byteMask)
+
+		switch idx {
+		case a:
+			result.A = component
+		case b:
+			result.B = component
+		case g:
+			result.G = component
+		case r:
+			result.R = component
+		}
+	}
+
+	return result
+}
+
 func createTerminal() (*terminal, error) {
 	terminal := &terminal{
 		lineCount:    termRowCount,
-		bgColor:      color.RGBA{R: 0x2e, G: 0x34, B: 0x36, A: 0xb0},
-		fgColor:      color.RGBA{R: 0x55, G: 0x57, B: 0x53, A: 0xb0},
-		infoColor:    color.RGBA{R: 0x34, G: 0x65, B: 0xa4, A: 0xb0},
-		warningColor: color.RGBA{R: 0xfc, G: 0xe9, B: 0x4f, A: 0xb0},
-		errorColor:   color.RGBA{R: 0xcc, A: 0xb0},
+		bgColor:      rgbaColor(darkGrey),
+		fgColor:      rgbaColor(lightGrey),
+		infoColor:    rgbaColor(lightBlue),
+		warningColor: rgbaColor(yellow),
+		errorColor:   rgbaColor(red),
 		actions:      make(map[string]termActionEntry),
 	}
 
