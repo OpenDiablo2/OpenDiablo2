@@ -8,6 +8,11 @@ import (
 
 var _ d2interface.BitStream = &BitStream{} // Static check to confirm struct conforms to interface
 
+const (
+	maxBits = 16
+	bitsPerByte = 8
+)
+
 // BitStream is a utility class for reading groups of bits from a stream
 type BitStream struct {
 	data         []byte
@@ -30,7 +35,7 @@ func CreateBitStream(newData []byte) *BitStream {
 
 // ReadBits reads the specified number of bits and returns the value
 func (v *BitStream) ReadBits(bitCount int) int {
-	if bitCount > 16 {
+	if bitCount > maxBits {
 		log.Panic("Maximum BitCount is 16")
 	}
 
@@ -38,7 +43,7 @@ func (v *BitStream) ReadBits(bitCount int) int {
 		return -1
 	}
 
-	result := v.current & (0xffff >> uint(16-bitCount))
+	result := v.current & (0xffff >> uint(maxBits-bitCount))
 	v.WasteBits(bitCount)
 
 	return result
@@ -46,7 +51,7 @@ func (v *BitStream) ReadBits(bitCount int) int {
 
 // PeekByte returns the current byte without adjusting the position
 func (v *BitStream) PeekByte() int {
-	if !v.EnsureBits(8) {
+	if !v.EnsureBits(bitsPerByte) {
 		return -1
 	}
 
