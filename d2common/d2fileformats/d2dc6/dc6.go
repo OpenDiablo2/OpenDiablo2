@@ -4,6 +4,11 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+const (
+	endOfScanLine = 0x80
+	maxRunLength  = 0x7f
+)
+
 // DC6 represents a DC6 file.
 type DC6 struct {
 	Version            int32
@@ -41,6 +46,7 @@ func Load(data []byte) (*DC6, error) {
 	}
 
 	dc.Frames = make([]*DC6Frame, frameCount)
+
 	for i := 0; i < frameCount; i++ {
 		frame := &DC6Frame{
 			Flipped:   r.GetUInt32(),
@@ -73,7 +79,7 @@ func (d *DC6) DecodeFrame(frameIndex int) []byte {
 		b := int(frame.FrameData[offset])
 		offset++
 
-		if b == 0x80 {
+		if b == endOfScanLine {
 			if y == 0 {
 				break
 			}
@@ -81,8 +87,8 @@ func (d *DC6) DecodeFrame(frameIndex int) []byte {
 			y--
 
 			x = 0
-		} else if b&0x80 > 0 {
-			transparentPixels := b & 0x7f
+		} else if b&endOfScanLine > 0 {
+			transparentPixels := b & maxRunLength
 			x += transparentPixels
 		} else {
 			for i := 0; i < b; i++ {
