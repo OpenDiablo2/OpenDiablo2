@@ -140,9 +140,7 @@ func (m *mapEntity) nextPath() {
 	if m.hasPath() {
 		// Set next path node
 		m.setTarget(
-			d2vector.NewPosition(
-				m.path[0].(*d2common.PathTile).X*5,
-				m.path[0].(*d2common.PathTile).Y*5),
+			m.path[0].(*d2common.PathTile).Position,
 			m.done,
 		)
 

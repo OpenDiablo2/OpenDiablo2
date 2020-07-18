@@ -3,6 +3,8 @@ package d2mapengine
 import (
 	"math"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2astar"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -51,8 +53,9 @@ func (m *MapEngine) RegenerateWalkPaths() {
 			index := subTileX + (subTileY * m.size.Width * 5)
 			m.walkMesh[index] = d2common.PathTile{
 				Walkable: !isBlocked,
-				X:        float64(subTileX) / 5.0,
-				Y:        float64(subTileY) / 5.0,
+				Position: d2vector.NewPosition(
+					float64(subTileX),
+					float64(subTileY)),
 			}
 
 			ySkew := m.size.Width * 5
