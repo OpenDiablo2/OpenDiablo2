@@ -6,13 +6,16 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
+// AnimationDirection is a the animation play direction
 type AnimationDirection int
 
+// AnimationDirection types
 const (
-	DirectionForward  AnimationDirection = 0
-	DirectionBackward                    = 1
+	DirectionForward AnimationDirection = iota
+	DirectionBackward
 )
 
+// Sprite is an image
 type Sprite struct {
 	widgetBase
 
@@ -23,6 +26,7 @@ type Sprite struct {
 	animation d2interface.Animation
 }
 
+// AnimatedSprite is a sprite that has animation
 type AnimatedSprite struct {
 	*Sprite
 }
@@ -45,15 +49,19 @@ func createAnimatedSprite(imagePath, palettePath string, direction AnimationDire
 	if err != nil {
 		return nil, err
 	}
+
 	sprite := &AnimatedSprite{
 		&Sprite{},
 	}
+
 	sprite.animation = animation
+
 	if direction == DirectionForward {
 		sprite.animation.PlayForward()
 	} else {
 		sprite.animation.PlayBackward()
 	}
+
 	sprite.SetVisible(true)
 
 	return sprite, nil
@@ -64,9 +72,11 @@ func (s *AnimatedSprite) render(target d2interface.Surface) error {
 
 	target.PushTranslation(s.x, s.y-frameHeight)
 	defer target.Pop()
+
 	return s.animation.Render(target)
 }
 
+// SetSegmented sets the segment properties of the sprite
 func (s *Sprite) SetSegmented(segmentsX, segmentsY, frameOffset int) {
 	s.segmentsX = segmentsX
 	s.segmentsY = segmentsY
@@ -81,10 +91,11 @@ func (s *Sprite) advance(elapsed float64) error {
 	return s.animation.Advance(elapsed)
 }
 
-func (s *Sprite) getSize() (int, int) {
+func (s *Sprite) getSize() (width, height int) {
 	return s.animation.GetCurrentFrameSize()
 }
 
+// SetEffect sets the draw effect for the sprite
 func (s *Sprite) SetEffect(e d2enum.DrawEffect) {
 	s.animation.SetEffect(e)
 }

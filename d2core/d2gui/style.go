@@ -4,8 +4,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 )
 
+// FontStyle is a representation of a font with a palette
 type FontStyle int
 
+// Font styles
 const (
 	FontStyle16Units FontStyle = iota
 	FontStyle30Units
@@ -33,7 +35,19 @@ var fontStyleConfigs = map[FontStyle]fontStyleConfig{
 	FontStyleRediculous:     {d2resource.FontRediculous, d2resource.PaletteUnits},
 }
 
+// ButtonStyle is a representation of a button style. Button styles have
+// x and y sebment counts, an image, a palette, a font, and a text offset
 type ButtonStyle int
+
+// Button styles
+const (
+	ButtonStyleMedium ButtonStyle = iota
+	ButtonStyleNarrow
+	ButtonStyleOkCancel
+	ButtonStyleShort
+	ButtonStyleTall
+	ButtonStyleWide
+)
 
 type buttonStyleConfig struct {
 	segmentsX     int
@@ -43,15 +57,6 @@ type buttonStyleConfig struct {
 	fontStyle     FontStyle
 	textOffset    int
 }
-
-const (
-	ButtonStyleMedium ButtonStyle = iota
-	ButtonStyleNarrow
-	ButtonStyleOkCancel
-	ButtonStyleShort
-	ButtonStyleTall
-	ButtonStyleWide
-)
 
 var buttonStyleConfigs = map[ButtonStyle]buttonStyleConfig{
 	ButtonStyleMedium:   {1, 1, d2resource.MediumButtonBlank, d2resource.PaletteUnits, FontStyleExocet10, 0},
