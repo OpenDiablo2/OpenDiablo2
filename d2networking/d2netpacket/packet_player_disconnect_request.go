@@ -8,7 +8,7 @@ import (
 // PlayerDisconnectRequestPacket contains a player ID and game state.
 // It is sent by a remote client to close the connection (leave a game).
 type PlayerDisconnectRequestPacket struct {
-	Id          string                `json:"id"`
+	ID          string                `json:"id"`
 	PlayerState *d2player.PlayerState `json:"gameState"` // TODO: remove this? It isn't used.
 }
 
@@ -18,7 +18,7 @@ func CreatePlayerDisconnectRequestPacket(id string) NetPacket {
 	return NetPacket{
 		PacketType: d2netpackettype.PlayerDisconnectionNotification,
 		PacketData: PlayerDisconnectRequestPacket{
-			Id: id,
+			ID: id,
 		},
 	}
 }

@@ -10,14 +10,13 @@ import (
 	"net"
 	"strings"
 
+	uuid "github.com/satori/go.uuid"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
-	uuid "github.com/satori/go.uuid"
 )
 
 // RemoteClientConnection is the implementation of ClientConnection
@@ -126,8 +125,8 @@ func (r *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket
 		return fmt.Errorf("remoteClientConnection: attempted to send empty %v packet body", packet.PacketType)
 	}
 
-	if err := writer.Close(); err != nil {
-		return err
+	if writeErr := writer.Close(); writeErr != nil {
+		return writeErr
 	}
 
 	if _, err = r.udpConnection.Write(buff.Bytes()); err != nil {

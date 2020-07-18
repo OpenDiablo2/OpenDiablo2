@@ -153,7 +153,7 @@ func (v *Game) Advance(tickTime float64) error {
 
 func (v *Game) bindGameControls() {
 	for _, player := range v.gameClient.Players {
-		if player.Id != v.gameClient.PlayerId {
+		if player.Id != v.gameClient.PlayerID {
 			continue
 		}
 
@@ -173,19 +173,19 @@ func (v *Game) bindGameControls() {
 func (v *Game) OnPlayerMove(x, y float64) {
 	worldPosition := v.localPlayer.Position.World()
 
-	err := v.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(v.gameClient.PlayerId, worldPosition.X(), worldPosition.Y(), x, y))
+	err := v.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(v.gameClient.PlayerID, worldPosition.X(), worldPosition.Y(), x, y))
 	if err != nil {
-		fmt.Printf("failed to send MovePlayer packet to the server, playerId: %s, x: %g, x: %g\n", v.gameClient.PlayerId, x, y)
+		fmt.Printf("failed to send MovePlayer packet to the server, playerId: %s, x: %g, x: %g\n", v.gameClient.PlayerID, x, y)
 	}
 }
 
 // OnPlayerCast sends the casting skill action to the server
 func (v *Game) OnPlayerCast(missileID int, targetX, targetY float64) {
-	err := v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerId, missileID, targetX, targetY))
+	err := v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerID, missileID, targetX, targetY))
 	if err != nil {
 		fmt.Printf(
 			"failed to send CastSkill packet to the server, playerId: %s, missileId: %d, x: %g, x: %g\n",
-			v.gameClient.PlayerId, missileID, targetX, targetY,
+			v.gameClient.PlayerID, missileID, targetX, targetY,
 		)
 	}
 }

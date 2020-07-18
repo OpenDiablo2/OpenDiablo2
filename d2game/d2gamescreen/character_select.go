@@ -203,11 +203,15 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		v.characterNameLabel[i].SetText(v.gameStates[idx].HeroName)
 		v.characterStatsLabel[i].SetText("Level 1 " + v.gameStates[idx].HeroType.String())
 		v.characterExpLabel[i].SetText(expText)
+
+		heroType := v.gameStates[idx].HeroType
+		equipment := d2inventory.HeroObjects[heroType]
+
 		// TODO: Generate or load the object from the actual player data...
 		v.characterImage[i] = d2mapentity.CreatePlayer("", "", 0, 0, 0,
 			v.gameStates[idx].HeroType,
-			*v.gameStates[idx].Stats,
-			d2inventory.HeroObjects[v.gameStates[idx].HeroType],
+			v.gameStates[idx].Stats,
+			&equipment,
 		)
 	}
 }

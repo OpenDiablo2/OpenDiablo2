@@ -11,22 +11,23 @@ import (
 // It is sent by the server to create the entity for a newly connected
 // player on a client.
 type AddPlayerPacket struct {
-	Id        string                         `json:"id"`
+	ID        string                         `json:"id"`
 	Name      string                         `json:"name"`
 	X         int                            `json:"x"`
 	Y         int                            `json:"y"`
 	HeroType  d2enum.Hero                    `json:"hero"`
 	Equipment d2inventory.CharacterEquipment `json:"equipment"`
-	Stats     d2hero.HeroStatsState          `json:"heroStats"`
+	Stats     *d2hero.HeroStatsState         `json:"heroStats"`
 }
 
 // CreateAddPlayerPacket returns a NetPacket which declares an
 // AddPlayerPacket with the data in given parameters.
-func CreateAddPlayerPacket(id, name string, x, y int, heroType d2enum.Hero, stats d2hero.HeroStatsState, equipment d2inventory.CharacterEquipment) NetPacket {
+func CreateAddPlayerPacket(id, name string, x, y int, heroType d2enum.Hero,
+	stats *d2hero.HeroStatsState, equipment d2inventory.CharacterEquipment) NetPacket {
 	return NetPacket{
 		PacketType: d2netpackettype.AddPlayer,
 		PacketData: AddPlayerPacket{
-			Id:        id,
+			ID:        id,
 			Name:      name,
 			X:         x,
 			Y:         y,

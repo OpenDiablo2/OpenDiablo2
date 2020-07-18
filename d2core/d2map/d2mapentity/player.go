@@ -15,8 +15,8 @@ import (
 type Player struct {
 	mapEntity
 	composite *d2asset.Composite
-	Equipment d2inventory.CharacterEquipment
-	Stats     d2hero.HeroStatsState
+	Equipment *d2inventory.CharacterEquipment
+	Stats     *d2hero.HeroStatsState
 	Class     d2enum.Hero
 	Id        string
 	name      string
@@ -34,7 +34,8 @@ var baseWalkSpeed = 6.0
 var baseRunSpeed = 9.0
 
 // CreatePlayer creates a new player entity and returns a pointer to it.
-func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero, stats d2hero.HeroStatsState, equipment d2inventory.CharacterEquipment) *Player {
+func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero,
+	stats *d2hero.HeroStatsState, equipment *d2inventory.CharacterEquipment) *Player {
 	layerEquipment := &[d2enum.CompositeTypeMax]string{
 		d2enum.CompositeTypeHead:      equipment.Head.GetArmorClass(),
 		d2enum.CompositeTypeTorso:     equipment.Torso.GetArmorClass(),

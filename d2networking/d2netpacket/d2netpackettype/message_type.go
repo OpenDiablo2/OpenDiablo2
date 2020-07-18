@@ -1,4 +1,3 @@
-// Package d2netpackettype defines the enumerable NetPacketType.
 package d2netpackettype
 
 // NetPacketType is an enum referring to all packet types in package

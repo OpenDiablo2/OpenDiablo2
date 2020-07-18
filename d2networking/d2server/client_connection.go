@@ -9,7 +9,7 @@ import (
 // ClientConnection is an interface for abstracting local and remote
 // clients.
 type ClientConnection interface {
-	GetUniqueId() string
+	GetUniqueID() string
 	GetConnectionType() d2clientconnectiontype.ClientConnectionType
 	SendPacketToClient(packet d2netpacket.NetPacket) error
 	GetPlayerState() *d2player.PlayerState
