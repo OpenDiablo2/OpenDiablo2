@@ -2,6 +2,7 @@ package d2player
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"image"
 	"image/color"
@@ -157,22 +158,26 @@ func (g *GameControls) OnKeyRepeat(event d2interface.KeyEvent) bool {
 		}
 
 		if event.Key() == d2enum.KeyDown {
-			g.mapRenderer.MoveCameraBy(0, moveSpeed)
+			v := d2vector.NewVector(0, moveSpeed)
+			g.mapRenderer.MoveCameraBy(&v)
 			return true
 		}
 
 		if event.Key() == d2enum.KeyUp {
-			g.mapRenderer.MoveCameraBy(0, -moveSpeed)
+			v := d2vector.NewVector(0, -moveSpeed)
+			g.mapRenderer.MoveCameraBy(&v)
 			return true
 		}
 
 		if event.Key() == d2enum.KeyRight {
-			g.mapRenderer.MoveCameraBy(moveSpeed, 0)
+			v := d2vector.NewVector(moveSpeed, 0)
+			g.mapRenderer.MoveCameraBy(&v)
 			return true
 		}
 
 		if event.Key() == d2enum.KeyLeft {
-			g.mapRenderer.MoveCameraBy(-moveSpeed, 0)
+			v := d2vector.NewVector(-moveSpeed, 0)
+			g.mapRenderer.MoveCameraBy(&v)
 			return true
 		}
 	}

@@ -1,25 +1,48 @@
 package d2maprenderer
 
-// Camera is the position of the camera perspective in orthogonal world space. See viewport.go.
+import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+
+// Camera is the position of the Camera perspective in orthogonal world space. See viewport.go.
 // TODO: Has a coordinate (issue #456)
 type Camera struct {
-	x float64
-	y float64
+	position *d2vector.Position
+	target *d2vector.Position
 }
 
-// MoveTo sets the position of the camera to the given x and y coordinates.
-func (c *Camera) MoveTo(x, y float64) {
-	c.x = x
-	c.y = y
+// MoveTo sets the position of the Camera to the given position
+func (c *Camera) MoveTo(position *d2vector.Position) {
+	c.position = position
 }
 
-// MoveBy adds the given vector to the current position of the camera.
-func (c *Camera) MoveBy(x, y float64) {
-	c.x += x
-	c.y += y
+// MoveBy adds the given vector to the current position of the Camera.
+func (c *Camera) MoveBy(vector *d2vector.Vector) {
+	c.position.Add(vector)
 }
 
-// GetPosition returns the camera x and y position.
-func (c *Camera) GetPosition() (float64, float64) {
-	return c.x, c.y
+// SetTarget sets the target position
+func (c *Camera) SetTarget(target *d2vector.Position) {
+	c.target = target
+}
+
+// ClearTarget sets the target position
+func (c *Camera) ClearTarget() {
+	c.target = nil
+}
+
+// GetPosition returns the Camera position
+func (c *Camera) GetPosition() (*d2vector.Position) {
+	return c.position
+}
+
+// Advance returns the Camera position
+func (c *Camera) Advance(elapsed float64) {
+	c.advanceToTarget(elapsed)
+}
+
+func (c *Camera) advanceToTarget(_ float64) {
+	if c.target != nil {
+		diff := c.position.World().Subtract(c.target.World())
+		diff.Scale(-0.85)
+		c.MoveBy(diff)
+	}
 }

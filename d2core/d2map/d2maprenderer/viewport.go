@@ -17,7 +17,7 @@ const (
 	right  = 2
 )
 
-// Viewport is used for converting vectors between screen (pixel), orthogonal (camera) and world (isometric) space.
+// Viewport is used for converting vectors between screen (pixel), orthogonal (Camera) and world (isometric) space.
 // TODO: Has a coordinate (issue #456)
 type Viewport struct {
 	defaultScreenRect d2common.Rectangle
@@ -46,7 +46,7 @@ func NewViewport(x, y, width, height int) *Viewport {
 	}
 }
 
-// SetCamera sets the current camera to the given value.
+// SetCamera sets the current Camera to the given value.
 func (v *Viewport) SetCamera(camera *Camera) {
 	v.camera = camera
 }
@@ -178,7 +178,8 @@ func (v *Viewport) PopTranslation() {
 func (v *Viewport) getCameraOffset() (float64, float64) {
 	var camX, camY float64
 	if v.camera != nil {
-		camX, camY = v.camera.GetPosition()
+		camPosition := v.camera.GetPosition()
+		camX, camY = camPosition.X(), camPosition.Y()
 	}
 
 	camX -= float64(v.screenRect.Width / 2)

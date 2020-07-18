@@ -2,6 +2,7 @@ package d2gamescreen
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -114,18 +115,18 @@ func (v *Game) Render(screen d2interface.Surface) error {
 }
 
 // Advance runs the update logic on the Gameplay screen
-func (v *Game) Advance(tickTime float64) error {
+func (v *Game) Advance(elapsed float64) error {
 	if (v.escapeMenu != nil && !v.escapeMenu.isOpen) || len(v.gameClient.Players) != 1 {
-		v.gameClient.MapEngine.Advance(tickTime) // TODO: Hack
+		v.gameClient.MapEngine.Advance(elapsed) // TODO: Hack
 	}
 
 	if v.gameControls != nil {
-		if err := v.gameControls.Advance(tickTime); err != nil {
+		if err := v.gameControls.Advance(elapsed); err != nil {
 			return err
 		}
 	}
 
-	v.ticksSinceLevelCheck += tickTime
+	v.ticksSinceLevelCheck += elapsed
 	if v.ticksSinceLevelCheck > 1.0 {
 		v.ticksSinceLevelCheck = 0
 		if v.localPlayer != nil {
@@ -160,7 +161,9 @@ func (v *Game) Advance(tickTime float64) error {
 	if v.localPlayer != nil && !v.gameControls.FreeCam {
 		worldPosition := v.localPlayer.Position.World()
 		rx, ry := v.mapRenderer.WorldToOrtho(worldPosition.X(), worldPosition.Y())
-		v.mapRenderer.MoveCameraTo(rx, ry)
+		position := d2vector.NewPosition(rx, ry)
+		v.mapRenderer.SetCameraTarget(&position)
+		v.mapRenderer.Advance(elapsed)
 	}
 
 	return nil
