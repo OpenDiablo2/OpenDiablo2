@@ -1,26 +1,27 @@
 package d2localclient
 
 import (
+	uuid "github.com/satori/go.uuid"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server"
-	uuid "github.com/satori/go.uuid"
 )
 
 // LocalClientConnection is the implementation of ClientConnection
 // for a local client.
 type LocalClientConnection struct {
 	clientListener    d2networking.ClientListener // The game client
-	uniqueId          string                      // Unique ID generated on construction
+	uniqueID          string                      // Unique ID generated on construction
 	openNetworkServer bool                        // True if this is a server
 	playerState       *d2player.PlayerState       // Local player state
 }
 
-// GetUniqueId returns LocalClientConnection.uniqueId.
-func (l LocalClientConnection) GetUniqueId() string {
-	return l.uniqueId
+// GetUniqueID returns LocalClientConnection.uniqueID.
+func (l LocalClientConnection) GetUniqueID() string {
+	return l.uniqueID
 }
 
 // GetConnectionType returns an enum representing the connection type.
@@ -38,7 +39,7 @@ func (l *LocalClientConnection) SendPacketToClient(packet d2netpacket.NetPacket)
 // a pointer to it.
 func Create(openNetworkServer bool) *LocalClientConnection {
 	result := &LocalClientConnection{
-		uniqueId:          uuid.NewV4().String(),
+		uniqueID:          uuid.NewV4().String(),
 		openNetworkServer: openNetworkServer,
 	}
 
@@ -46,7 +47,7 @@ func Create(openNetworkServer bool) *LocalClientConnection {
 }
 
 // Open creates a new GameServer, runs the server and connects this client to it.
-func (l *LocalClientConnection) Open(_ string, saveFilePath string) error {
+func (l *LocalClientConnection) Open(_, saveFilePath string) error {
 	l.SetPlayerState(d2player.LoadPlayerState(saveFilePath))
 	d2server.Create(l.openNetworkServer)
 

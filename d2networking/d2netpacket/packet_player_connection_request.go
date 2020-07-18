@@ -8,7 +8,7 @@ import (
 // PlayerConnectionRequestPacket contains a player ID and game state.
 // It is sent by a remote client to initiate a connection (join a game).
 type PlayerConnectionRequestPacket struct {
-	Id          string                `json:"id"`
+	ID          string                `json:"id"`
 	PlayerState *d2player.PlayerState `json:"gameState"`
 }
 
@@ -18,7 +18,7 @@ func CreatePlayerConnectionRequestPacket(id string, playerState *d2player.Player
 	return NetPacket{
 		PacketType: d2netpackettype.PlayerConnectionRequest,
 		PacketData: PlayerConnectionRequestPacket{
-			Id:          id,
+			ID:          id,
 			PlayerState: playerState,
 		},
 	}

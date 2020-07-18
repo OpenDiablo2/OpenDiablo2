@@ -84,7 +84,7 @@ type HeroStatsPanel struct {
 }
 
 func NewHeroStatsPanel(renderer d2interface.Renderer, heroName string, heroClass d2enum.Hero,
-	heroState d2hero.HeroStatsState) *HeroStatsPanel {
+	heroState *d2hero.HeroStatsState) *HeroStatsPanel {
 	originX := 0
 	originY := 0
 
@@ -92,7 +92,7 @@ func NewHeroStatsPanel(renderer d2interface.Renderer, heroName string, heroClass
 		renderer:  renderer,
 		originX:   originX,
 		originY:   originY,
-		heroState: &heroState,
+		heroState: heroState,
 		heroName:  heroName,
 		heroClass: heroClass,
 		labels:    &StatsPanelLabels{},

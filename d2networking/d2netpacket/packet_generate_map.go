@@ -21,5 +21,4 @@ func CreateGenerateMapPacket(regionType d2enum.RegionIdType) NetPacket {
 			RegionType: regionType,
 		},
 	}
-
 }

@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
 
@@ -38,8 +37,8 @@ func CreateUDPClientConnection(udpConnection *net.UDPConn, id string, address *n
 	return result
 }
 
-// GetUniqueId returns UDPClientConnection.id
-func (u UDPClientConnection) GetUniqueId() string {
+// GetUniqueID returns UDPClientConnection.id
+func (u UDPClientConnection) GetUniqueID() string {
 	return u.id
 }
 
@@ -56,20 +55,26 @@ func (u *UDPClientConnection) SendPacketToClient(packet d2netpacket.NetPacket) e
 	if err != nil {
 		return err
 	}
+
 	var buff bytes.Buffer
+
 	buff.WriteByte(byte(packet.PacketType))
+
 	writer, _ := gzip.NewWriterLevel(&buff, gzip.BestCompression)
 
-	if written, err := writer.Write(data); err != nil {
-		return err
+	if written, writeErr := writer.Write(data); writeErr != nil {
+		return writeErr
 	} else if written == 0 {
-		return errors.New(fmt.Sprintf("RemoteClientConnection: attempted to send empty %v packet body.", packet.PacketType))
+		return fmt.Errorf("RemoteClientConnection: attempted to send empty %v packet body",
+			packet.PacketType)
 	}
-	if err = writer.Close(); err != nil {
-		return err
+
+	if writeErr := writer.Close(); writeErr != nil {
+		return writeErr
 	}
-	if _, err = u.udpConnection.WriteToUDP(buff.Bytes(), u.address); err != nil {
-		return err
+
+	if _, udpErr := u.udpConnection.WriteToUDP(buff.Bytes(), u.address); udpErr != nil {
+		return udpErr
 	}
 
 	return nil
