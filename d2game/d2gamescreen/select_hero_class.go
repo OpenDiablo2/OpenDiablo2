@@ -3,7 +3,6 @@ package d2gamescreen
 import (
 	"fmt"
 	"image"
-	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
@@ -37,98 +36,206 @@ type heroRenderConfig struct {
 	backWalkPlayLengthMs            int
 }
 
-func getHeroRenderConfiguration() map[d2enum.Hero]*heroRenderConfig {
-	return map[d2enum.Hero]*heroRenderConfig{
-		d2enum.HeroBarbarian: createHeroRenderConfig(
-			d2resource.CharacterSelectBarbarianUnselected, d2resource.CharacterSelectBarbarianUnselectedH,
-			d2resource.CharacterSelectBarbarianForwardWalk, d2resource.CharacterSelectBarbarianForwardWalkOverlay,
-			false, d2resource.CharacterSelectBarbarianSelected, "",
-			d2resource.CharacterSelectBarbarianBackWalk, "",
-			image.Rectangle{Min: image.Point{X: 364, Y: 201}, Max: image.Point{X: 90, Y: 170}},
-			d2resource.SFXBarbarianSelect, d2resource.SFXBarbarianDeselect, image.Point{X: 400, Y: 330},
-			0, 2500, 1000,
-		),
-		d2enum.HeroSorceress: createHeroRenderConfig(
-			d2resource.CharacterSelectSorceressUnselected, d2resource.CharacterSelectSorceressUnselectedH,
-			d2resource.CharacterSelectSorceressForwardWalk, d2resource.CharacterSelectSorceressForwardWalkOverlay,
-			true, d2resource.CharacterSelectSorceressSelected, d2resource.CharacterSelectSorceressSelectedOverlay,
-			d2resource.CharacterSelectSorceressBackWalk, d2resource.CharacterSelectSorceressBackWalkOverlay,
-			image.Rectangle{Min: image.Point{X: 580, Y: 240}, Max: image.Point{X: 65, Y: 160}},
-			d2resource.SFXSorceressSelect, d2resource.SFXSorceressDeselect, image.Point{X: 626, Y: 352},
-			2500, 2300, 1200,
-		),
-		d2enum.HeroNecromancer: createHeroRenderConfig(
-			d2resource.CharacterSelectNecromancerUnselected, d2resource.CharacterSelectNecromancerUnselectedH,
-			d2resource.CharacterSelectNecromancerForwardWalk, d2resource.CharacterSelectNecromancerForwardWalkOverlay,
-			true, d2resource.CharacterSelectNecromancerSelected, d2resource.CharacterSelectNecromancerSelectedOverlay,
-			d2resource.CharacterSelectNecromancerBackWalk, d2resource.CharacterSelectNecromancerBackWalkOverlay,
-			image.Rectangle{Min: image.Point{X: 265, Y: 220}, Max: image.Point{X: 55, Y: 175}},
-			d2resource.SFXNecromancerSelect, d2resource.SFXNecromancerDeselect, image.Point{X: 300, Y: 335},
-			1200, 2000, 1500,
-		),
-		d2enum.HeroPaladin: createHeroRenderConfig(
-			d2resource.CharacterSelectPaladinUnselected, d2resource.CharacterSelectPaladinUnselectedH,
-			d2resource.CharacterSelectPaladinForwardWalk, d2resource.CharacterSelectPaladinForwardWalkOverlay,
-			false, d2resource.CharacterSelectPaladinSelected, "",
-			d2resource.CharacterSelectPaladinBackWalk, "",
-			image.Rectangle{Min: image.Point{X: 490, Y: 210}, Max: image.Point{X: 65, Y: 180}},
-			d2resource.SFXPaladinSelect, d2resource.SFXPaladinDeselect, image.Point{X: 521, Y: 338},
-			2500, 3400, 1300,
-		),
-		d2enum.HeroAmazon: createHeroRenderConfig(
-			d2resource.CharacterSelectAmazonUnselected, d2resource.CharacterSelectAmazonUnselectedH,
-			d2resource.CharacterSelectAmazonForwardWalk, "",
-			false, d2resource.CharacterSelectAmazonSelected, "",
-			d2resource.CharacterSelectAmazonBackWalk, "",
-			image.Rectangle{Min: image.Point{X: 70, Y: 220}, Max: image.Point{X: 55, Y: 200}},
-			d2resource.SFXAmazonSelect, d2resource.SFXAmazonDeselect, image.Point{X: 100, Y: 339},
-			2500, 2200, 1500,
-		),
-		d2enum.HeroAssassin: createHeroRenderConfig(
-			d2resource.CharacterSelectAssassinUnselected, d2resource.CharacterSelectAssassinUnselectedH,
-			d2resource.CharacterSelectAssassinForwardWalk, "",
-			false, d2resource.CharacterSelectAssassinSelected, "",
-			d2resource.CharacterSelectAssassinBackWalk, "",
-			image.Rectangle{Min: image.Point{X: 175, Y: 235}, Max: image.Point{X: 50, Y: 180}},
-			d2resource.SFXAssassinSelect, d2resource.SFXAssassinDeselect, image.Point{X: 231, Y: 365},
-			2500, 3800, 1500,
-		),
-		d2enum.HeroDruid: createHeroRenderConfig(
-			d2resource.CharacterSelectDruidUnselected, d2resource.CharacterSelectDruidUnselectedH,
-			d2resource.CharacterSelectDruidForwardWalk, "",
-			false, d2resource.CharacterSelectDruidSelected, "",
-			d2resource.CharacterSelectDruidBackWalk, "",
-			image.Rectangle{Min: image.Point{X: 680, Y: 220}, Max: image.Point{X: 70, Y: 195}},
-			d2resource.SFXDruidSelect, d2resource.SFXDruidDeselect, image.Point{X: 720, Y: 370},
-			1500, 4800, 1500,
-		),
-	}
+func point(x, y int) image.Point {
+	return image.Point{X: x, Y: y}
 }
 
-func createHeroRenderConfig(idleAnimationPath, idleSelectedAnimationPath, forwardWalkAnimationPath,
-	forwardWalkOverlayAnimationPath string, forwardWalkOverlayBlend bool, selectedAnimationPath,
-	selectedOverlayAnimationPath, backWalkAnimationPath, backWalkOverlayAnimationPath string,
-	selectionBounds image.Rectangle, selectSfx, deselectSfx string, position image.Point,
-	idlePlayLengthMs, forwardWalkPlayLengthMs, backWalkPlayLengthMs int,
-) *heroRenderConfig {
-	return &heroRenderConfig{
-		idleAnimationPath:               idleAnimationPath,
-		idleSelectedAnimationPath:       idleSelectedAnimationPath,
-		forwardWalkAnimationPath:        forwardWalkAnimationPath,
-		forwardWalkOverlayAnimationPath: forwardWalkOverlayAnimationPath,
-		forwardWalkOverlayBlend:         forwardWalkOverlayBlend,
-		selectedAnimationPath:           selectedAnimationPath,
-		selectedOverlayAnimationPath:    selectedOverlayAnimationPath,
-		backWalkAnimationPath:           backWalkAnimationPath,
-		backWalkOverlayAnimationPath:    backWalkOverlayAnimationPath,
-		selectionBounds:                 selectionBounds,
-		selectSfx:                       selectSfx,
-		deselectSfx:                     deselectSfx,
-		position:                        position,
-		idlePlayLengthMs:                idlePlayLengthMs,
-		forwardWalkPlayLengthMs:         forwardWalkPlayLengthMs,
-		backWalkPlayLengthMs:            backWalkPlayLengthMs,
+func rect(x1, y1, x2, y2 int) image.Rectangle {
+	return image.Rectangle{Min: point(x1, y1), Max: point(x2, y2)}
+}
+
+// animation position, selection box bound, animation play lengths in ms
+const (
+	barbPosX, barbPosY                                     = 400, 330
+	barbRectMinX, barbRectMinY, barbRectMaxX, barbRectMaxY = 364, 201, 90, 170
+	barbIdleLength, barbForwardLength, barbBackLength      = 0, 2500, 1000
+
+	sorcPosX, sorcPosY                                     = 626, 352
+	sorcRectMinX, sorcRectMinY, sorcRectMaxX, sorcRectMaxY = 580, 240, 65, 160
+	sorcIdleLength, sorcForwardLength, sorcBackLength      = 2500, 2300, 1200
+
+	necPosX, necPosY                                   = 300, 335
+	necRectMinX, necRectMinY, necRectMaxX, necRectMaxY = 265, 220, 55, 175
+	necIdleLength, necForwardLength, necBackLength     = 1200, 2000, 1500
+
+	palPosX, palPosY                                   = 521, 338
+	palRectMinX, palRectMinY, palRectMaxX, palRectMaxY = 490, 210, 65, 180
+	palIdleLength, palForwardLength, palBackLength     = 2500, 3400, 1300
+
+	amaPosX, amaPosY                                   = 100, 339
+	amaRectMinX, amaRectMinY, amaRectMaxX, amaRectMaxY = 70, 220, 55, 200
+	amaIdleLength, amaForwardLength, amaBackLength     = 2500, 2200, 1500
+
+	assPosX, assPosY                                   = 231, 365
+	assRectMinX, assRectMinY, assRectMaxX, assRectMaxY = 175, 235, 50, 180
+	assIdleLength, assForwardLength, assBackLength     = 2500, 3800, 1500
+
+	druPosX, druPosY                                   = 720, 370
+	druRectMinX, druRectMinY, druRectMaxX, druRectMaxY = 680, 220, 70, 195
+	druIdleLength, druForwardLength, druBackLength     = 1500, 4800, 1500
+
+	campfirePosX, campfirePosY = 380, 335
+)
+
+// label and button positions
+const (
+	headingX, headingY               = 400, 17
+	heroClassLabelX, heroClassLabelY = 400, 65
+	heroDescLine1X, heroDescLine1Y   = 400, 100
+	heroDescLine2X, heroDescLine2Y   = 400, 115
+	heroDescLine3X, heroDescLine3Y   = 400, 130
+	heroNameLabelX, heroNameLabelY   = 321, 475
+	expansionLabelX, expansionLabelY = 339, 526
+	hardcoreLabelX, hardcoreLabelY   = 339, 548
+
+	selHeroExitBtnX, selHeroExitBtnY = 33, 537
+	selHeroOkBtnX, selHeroOkBtnY     = 630, 537
+
+	heroNameTextBoxX, heoNameTextBoxY       = 318, 493
+	expandsionCheckboxX, expansionCheckboxY = 318, 526
+	hardcoreCheckoxX, hardcoreCheckboxY     = 318, 548
+)
+
+const heroDescCharWidth = 37
+
+//nolint:funlen // this func returns a map of structs and the structs are big, deal with it
+func getHeroRenderConfiguration() map[d2enum.Hero]*heroRenderConfig {
+	configs := make(map[d2enum.Hero]*heroRenderConfig)
+
+	configs[d2enum.HeroBarbarian] = &heroRenderConfig{
+		d2resource.CharacterSelectBarbarianUnselected,
+		d2resource.CharacterSelectBarbarianUnselectedH,
+		d2resource.CharacterSelectBarbarianForwardWalk,
+		d2resource.CharacterSelectBarbarianForwardWalkOverlay,
+		false,
+		d2resource.CharacterSelectBarbarianSelected,
+		"",
+		d2resource.CharacterSelectBarbarianBackWalk,
+		"",
+		rect(barbRectMinX, barbRectMinY, barbRectMaxX, barbRectMaxY),
+		d2resource.SFXBarbarianSelect,
+		d2resource.SFXBarbarianDeselect,
+		point(barbPosX, barbPosY),
+		barbIdleLength,
+		barbForwardLength,
+		barbBackLength,
 	}
+
+	configs[d2enum.HeroSorceress] = &heroRenderConfig{
+		d2resource.CharacterSelectSorceressUnselected,
+		d2resource.CharacterSelectSorceressUnselectedH,
+		d2resource.CharacterSelectSorceressForwardWalk,
+		d2resource.CharacterSelectSorceressForwardWalkOverlay,
+		true,
+		d2resource.CharacterSelectSorceressSelected,
+		d2resource.CharacterSelectSorceressSelectedOverlay,
+		d2resource.CharacterSelectSorceressBackWalk,
+		d2resource.CharacterSelectSorceressBackWalkOverlay,
+		rect(sorcRectMinX, sorcRectMinY, sorcRectMaxX, sorcRectMaxY),
+		d2resource.SFXSorceressSelect,
+		d2resource.SFXSorceressDeselect,
+		point(sorcPosX, sorcPosY),
+		sorcIdleLength,
+		sorcForwardLength,
+		sorcBackLength,
+	}
+
+	configs[d2enum.HeroNecromancer] = &heroRenderConfig{
+		d2resource.CharacterSelectNecromancerUnselected,
+		d2resource.CharacterSelectNecromancerUnselectedH,
+		d2resource.CharacterSelectNecromancerForwardWalk,
+		d2resource.CharacterSelectNecromancerForwardWalkOverlay,
+		true,
+		d2resource.CharacterSelectNecromancerSelected,
+		d2resource.CharacterSelectNecromancerSelectedOverlay,
+		d2resource.CharacterSelectNecromancerBackWalk,
+		d2resource.CharacterSelectNecromancerBackWalkOverlay,
+		rect(necRectMinX, necRectMinY, necRectMaxX, necRectMaxY),
+		d2resource.SFXNecromancerSelect,
+		d2resource.SFXNecromancerDeselect,
+		point(necPosX, necPosY),
+		necIdleLength,
+		necForwardLength,
+		necBackLength,
+	}
+
+	configs[d2enum.HeroPaladin] = &heroRenderConfig{
+		d2resource.CharacterSelectPaladinUnselected,
+		d2resource.CharacterSelectPaladinUnselectedH,
+		d2resource.CharacterSelectPaladinForwardWalk,
+		d2resource.CharacterSelectPaladinForwardWalkOverlay,
+		false,
+		d2resource.CharacterSelectPaladinSelected,
+		"",
+		d2resource.CharacterSelectPaladinBackWalk,
+		"",
+		rect(palRectMinX, palRectMinY, palRectMaxX, palRectMaxY),
+		d2resource.SFXPaladinSelect,
+		d2resource.SFXPaladinDeselect,
+		point(palPosX, palPosY),
+		palIdleLength,
+		palForwardLength,
+		palBackLength,
+	}
+
+	configs[d2enum.HeroAmazon] = &heroRenderConfig{
+		d2resource.CharacterSelectAmazonUnselected,
+		d2resource.CharacterSelectAmazonUnselectedH,
+		d2resource.CharacterSelectAmazonForwardWalk,
+		"",
+		false,
+		d2resource.CharacterSelectAmazonSelected,
+		"",
+		d2resource.CharacterSelectAmazonBackWalk,
+		"",
+		rect(amaRectMinX, amaRectMinY, amaRectMaxX, amaRectMaxY),
+		d2resource.SFXAmazonSelect,
+		d2resource.SFXAmazonDeselect,
+		point(amaPosX, amaPosY),
+		amaIdleLength,
+		amaForwardLength,
+		amaBackLength,
+	}
+
+	configs[d2enum.HeroAssassin] = &heroRenderConfig{
+		d2resource.CharacterSelectAssassinUnselected,
+		d2resource.CharacterSelectAssassinUnselectedH,
+		d2resource.CharacterSelectAssassinForwardWalk,
+		"",
+		false,
+		d2resource.CharacterSelectAssassinSelected,
+		"",
+		d2resource.CharacterSelectAssassinBackWalk,
+		"",
+		rect(assRectMinX, assRectMinY, assRectMaxX, assRectMaxY),
+		d2resource.SFXAssassinSelect,
+		d2resource.SFXAssassinDeselect,
+		point(assPosX, assPosY),
+		assIdleLength,
+		assForwardLength,
+		assBackLength,
+	}
+
+	configs[d2enum.HeroDruid] = &heroRenderConfig{
+		d2resource.CharacterSelectDruidUnselected,
+		d2resource.CharacterSelectDruidUnselectedH,
+		d2resource.CharacterSelectDruidForwardWalk,
+		"",
+		false,
+		d2resource.CharacterSelectDruidSelected,
+		"",
+		d2resource.CharacterSelectDruidBackWalk,
+		"",
+		rect(druRectMinX, druRectMinY, druRectMaxX, druRectMaxY),
+		d2resource.SFXDruidSelect,
+		d2resource.SFXDruidDeselect,
+		point(druPosX, druPosY),
+		druIdleLength,
+		druForwardLength,
+		druBackLength,
+	}
+
+	return configs
 }
 
 // HeroRenderInfo stores the rendering information of a hero for the Select Hero Class screen
@@ -186,7 +293,13 @@ type SelectHeroClass struct {
 }
 
 // CreateSelectHeroClass creates an instance of a SelectHeroClass
-func CreateSelectHeroClass(navigator Navigator, renderer d2interface.Renderer, audioProvider d2interface.AudioProvider, connectionType d2clientconnectiontype.ClientConnectionType, connectionHost string) *SelectHeroClass {
+func CreateSelectHeroClass(
+	navigator Navigator,
+	renderer d2interface.Renderer,
+	audioProvider d2interface.AudioProvider,
+	connectionType d2clientconnectiontype.ClientConnectionType,
+	connectionHost string,
+) *SelectHeroClass {
 	result := &SelectHeroClass{
 		heroRenderInfo: make(map[d2enum.Hero]*HeroRenderInfo),
 		selectedHero:   d2enum.HeroNone,
@@ -203,20 +316,32 @@ func CreateSelectHeroClass(navigator Navigator, renderer d2interface.Renderer, a
 // OnLoad loads the resources for the Select Hero Class screen
 func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 	v.audioProvider.PlayBGM(d2resource.BGMTitle)
-	loading.Progress(0.1)
+	loading.Progress(tenPercent)
 
-	v.bgImage = loadSprite(d2resource.CharacterSelectBackground, image.Point{X: 0, Y: 0}, 0, true, false)
+	v.bgImage = loadSprite(
+		d2resource.CharacterSelectBackground,
+		point(0, 0),
+		0,
+		true,
+		false,
+	)
 
-	loading.Progress(0.3)
+	loading.Progress(thirtyPercent)
 
 	v.createLabels()
-	loading.Progress(0.4)
+	loading.Progress(fourtyPercent)
 	v.createButtons()
 
-	v.campfire = loadSprite(d2resource.CharacterSelectCampfire, image.Point{X: 380, Y: 335}, 0, true, true)
+	v.campfire = loadSprite(
+		d2resource.CharacterSelectCampfire,
+		point(campfirePosX, campfirePosY),
+		0,
+		true,
+		true,
+	)
 
 	v.createCheckboxes(v.renderer)
-	loading.Progress(0.5)
+	loading.Progress(fiftyPercent)
 
 	for hero, config := range getHeroRenderConfiguration() {
 		position := config.position
@@ -247,53 +372,56 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 func (v *SelectHeroClass) createLabels() {
 	v.headingLabel = d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
 	fontWidth, _ := v.headingLabel.GetSize()
-	v.headingLabel.SetPosition(400-fontWidth/2, 17)
+	half := 2
+	halfFontWidth := fontWidth / half
+
+	v.headingLabel.SetPosition(headingX-halfFontWidth, headingY)
 	v.headingLabel.SetText("Select Hero Class")
 	v.headingLabel.Alignment = d2gui.HorizontalAlignCenter
 
 	v.heroClassLabel = d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
 	v.heroClassLabel.Alignment = d2gui.HorizontalAlignCenter
-	v.heroClassLabel.SetPosition(400, 65)
+	v.heroClassLabel.SetPosition(heroClassLabelX, heroClassLabelY)
 
 	v.heroDesc1Label = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroDesc1Label.Alignment = d2gui.HorizontalAlignCenter
-	v.heroDesc1Label.SetPosition(400, 100)
+	v.heroDesc1Label.SetPosition(heroDescLine1X, heroDescLine1Y)
 
 	v.heroDesc2Label = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroDesc2Label.Alignment = d2gui.HorizontalAlignCenter
-	v.heroDesc2Label.SetPosition(400, 115)
+	v.heroDesc2Label.SetPosition(heroDescLine2X, heroDescLine2Y)
 
 	v.heroDesc3Label = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroDesc3Label.Alignment = d2gui.HorizontalAlignCenter
-	v.heroDesc3Label.SetPosition(400, 130)
+	v.heroDesc3Label.SetPosition(heroDescLine3X, heroDescLine3Y)
 
 	v.heroNameLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroNameLabel.Alignment = d2gui.HorizontalAlignLeft
-	v.heroNameLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
+	v.heroNameLabel.Color = rgbaColor(gold)
 	v.heroNameLabel.SetText("Character Name")
-	v.heroNameLabel.SetPosition(321, 475)
+	v.heroNameLabel.SetPosition(heroNameLabelX, heroNameLabelY)
 
 	v.expansionCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.expansionCharLabel.Alignment = d2gui.HorizontalAlignLeft
-	v.expansionCharLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
+	v.expansionCharLabel.Color = rgbaColor(gold)
 	v.expansionCharLabel.SetText("EXPANSION CHARACTER")
-	v.expansionCharLabel.SetPosition(339, 526)
+	v.expansionCharLabel.SetPosition(expansionLabelX, expansionLabelY)
 
 	v.hardcoreCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.hardcoreCharLabel.Alignment = d2gui.HorizontalAlignLeft
-	v.hardcoreCharLabel.Color = color.RGBA{R: 216, G: 196, B: 128, A: 255}
+	v.hardcoreCharLabel.Color = rgbaColor(gold)
 	v.hardcoreCharLabel.SetText("Hardcore")
-	v.hardcoreCharLabel.SetPosition(339, 548)
+	v.hardcoreCharLabel.SetPosition(hardcoreLabelX, hardcoreLabelY)
 }
 
 func (v *SelectHeroClass) createButtons() {
 	v.exitButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeMedium, "EXIT")
-	v.exitButton.SetPosition(33, 537)
+	v.exitButton.SetPosition(selHeroExitBtnX, selHeroExitBtnY)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 	d2ui.AddWidget(&v.exitButton)
 
 	v.okButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeMedium, "OK")
-	v.okButton.SetPosition(630, 537)
+	v.okButton.SetPosition(selHeroOkBtnX, selHeroOkBtnY)
 	v.okButton.OnActivated(func() { v.onOkButtonClicked() })
 	v.okButton.SetVisible(false)
 	v.okButton.SetEnabled(false)
@@ -302,17 +430,17 @@ func (v *SelectHeroClass) createButtons() {
 
 func (v *SelectHeroClass) createCheckboxes(renderer d2interface.Renderer) {
 	v.heroNameTextbox = d2ui.CreateTextbox(renderer)
-	v.heroNameTextbox.SetPosition(318, 493)
+	v.heroNameTextbox.SetPosition(heroNameTextBoxX, heoNameTextBoxY)
 	v.heroNameTextbox.SetVisible(false)
 	d2ui.AddWidget(&v.heroNameTextbox)
 
 	v.expansionCheckbox = d2ui.CreateCheckbox(v.renderer, true)
-	v.expansionCheckbox.SetPosition(318, 526)
+	v.expansionCheckbox.SetPosition(expandsionCheckboxX, expansionCheckboxY)
 	v.expansionCheckbox.SetVisible(false)
 	d2ui.AddWidget(&v.expansionCheckbox)
 
 	v.hardcoreCheckbox = d2ui.CreateCheckbox(renderer, false)
-	v.hardcoreCheckbox.SetPosition(318, 548)
+	v.hardcoreCheckbox.SetPosition(hardcoreCheckoxX, hardcoreCheckboxY)
 	v.hardcoreCheckbox.SetVisible(false)
 	d2ui.AddWidget(&v.hardcoreCheckbox)
 }
@@ -543,11 +671,18 @@ func (v *SelectHeroClass) updateHeroText() {
 	}
 }
 
+const (
+	oneLine = 1
+	twoLine = 2
+)
+
 func (v *SelectHeroClass) setDescLabels(descKey string) {
 	heroDesc := d2common.TranslateString(descKey)
-	parts := d2common.SplitIntoLinesWithMaxWidth(heroDesc, 37)
+	parts := d2common.SplitIntoLinesWithMaxWidth(heroDesc, heroDescCharWidth)
 
-	if len(parts) > 1 {
+	numLines := len(parts)
+
+	if numLines > oneLine {
 		v.heroDesc1Label.SetText(parts[0])
 		v.heroDesc2Label.SetText(parts[1])
 	} else {
@@ -555,7 +690,7 @@ func (v *SelectHeroClass) setDescLabels(descKey string) {
 		v.heroDesc2Label.SetText("")
 	}
 
-	if len(parts) > 2 {
+	if numLines > twoLine {
 		v.heroDesc3Label.SetText(parts[2])
 	} else {
 		v.heroDesc3Label.SetText("")
