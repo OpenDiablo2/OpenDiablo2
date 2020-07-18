@@ -24,7 +24,7 @@ func CreateGuiTestMain(renderer d2interface.Renderer) *GuiTestMain {
 func (g *GuiTestMain) OnLoad(loading d2screen.LoadingState) {
 	layout := d2gui.CreateLayout(g.renderer, d2gui.PositionTypeHorizontal)
 
-	loading.Progress(0.3)
+	loading.Progress(thirtyPercent)
 	//
 	layoutLeft := layout.AddLayout(d2gui.PositionTypeVertical)
 	layoutLeft.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
@@ -55,7 +55,7 @@ func (g *GuiTestMain) OnLoad(loading d2screen.LoadingState) {
 		fmt.Printf("could not add label: %s to the GuiTestMain screen\n", "FontStyleFormal12Static")
 	}
 
-	loading.Progress(0.6)
+	loading.Progress(sixtyPercent)
 
 	layout.AddSpacerDynamic()
 
@@ -82,7 +82,7 @@ func (g *GuiTestMain) OnLoad(loading d2screen.LoadingState) {
 		fmt.Printf("could not add button: %s to the GuiTestMain screen\n", "Wide")
 	}
 
-	loading.Progress(0.9)
+	loading.Progress(ninetyPercent)
 
 	layout.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	d2gui.SetLayout(layout)

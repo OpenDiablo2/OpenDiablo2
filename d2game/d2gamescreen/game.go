@@ -18,6 +18,12 @@ import (
 
 const hideZoneTextAfterSeconds = 2.0
 
+const (
+	moveErrStr         = "failed to send MovePlayer packet to the server, playerId: %s, x: %g, x: %g\n"
+	bindControlsErrStr = "failed to add gameControls as input handler for player: %s\n"
+	castErrStr         = "failed to send CastSkill packet to the server, playerId: %s, missileId: %d, x: %g, x: %g\n"
+)
+
 // Game represents the Gameplay screen
 type Game struct {
 	gameClient           *d2client.GameClient
@@ -35,7 +41,14 @@ type Game struct {
 }
 
 // CreateGame creates the Gameplay screen and returns a pointer to it
-func CreateGame(navigator Navigator, renderer d2interface.Renderer, inputManager d2interface.InputManager, audioProvider d2interface.AudioProvider, gameClient *d2client.GameClient, term d2interface.Terminal) *Game {
+func CreateGame(
+	navigator Navigator,
+	renderer d2interface.Renderer,
+	inputManager d2interface.InputManager,
+	audioProvider d2interface.AudioProvider,
+	gameClient *d2client.GameClient,
+	term d2interface.Terminal,
+) *Game {
 	result := &Game{
 		gameClient:           gameClient,
 		gameControls:         nil,
@@ -126,7 +139,9 @@ func (v *Game) Advance(tickTime float64) error {
 				// skip showing zone change text the first time we enter the world
 				if v.lastRegionType != d2enum.RegionNone && v.lastRegionType != tile.RegionType {
 					//TODO: Should not be using RegionType as an index - this will return incorrect LevelDetails record for most of the zones.
-					v.gameControls.SetZoneChangeText(fmt.Sprintf("Entering The %s", d2datadict.LevelDetails[int(tile.RegionType)].LevelDisplayName))
+					areaName := d2datadict.LevelDetails[int(tile.RegionType)].LevelDisplayName
+					areaChgStr := fmt.Sprintf("Entering The %s", areaName)
+					v.gameControls.SetZoneChangeText(areaChgStr)
 					v.gameControls.ShowZoneChangeText()
 					v.gameControls.HideZoneChangeTextAfter(hideZoneTextAfterSeconds)
 				}
@@ -162,7 +177,7 @@ func (v *Game) bindGameControls() {
 		v.gameControls.Load()
 
 		if err := v.inputManager.BindHandler(v.gameControls); err != nil {
-			fmt.Printf("failed to add gameControls as input handler for player: %s\n", player.Id)
+			fmt.Printf(bindControlsErrStr, player.Id)
 		}
 
 		break
@@ -170,12 +185,15 @@ func (v *Game) bindGameControls() {
 }
 
 // OnPlayerMove sends the player move action to the server
-func (v *Game) OnPlayerMove(x, y float64) {
+func (v *Game) OnPlayerMove(targetX, targetY float64) {
 	worldPosition := v.localPlayer.Position.World()
 
-	err := v.gameClient.SendPacketToServer(d2netpacket.CreateMovePlayerPacket(v.gameClient.PlayerID, worldPosition.X(), worldPosition.Y(), x, y))
+	playerID, worldX, worldY := v.gameClient.PlayerID, worldPosition.X(), worldPosition.Y()
+	createPlayerPacket := d2netpacket.CreateMovePlayerPacket(playerID, worldX, worldY, targetX, targetY)
+	err := v.gameClient.SendPacketToServer(createPlayerPacket)
+
 	if err != nil {
-		fmt.Printf("failed to send MovePlayer packet to the server, playerId: %s, x: %g, x: %g\n", v.gameClient.PlayerID, x, y)
+		fmt.Printf(moveErrStr, v.gameClient.PlayerID, targetX, targetY)
 	}
 }
 
@@ -183,9 +201,6 @@ func (v *Game) OnPlayerMove(x, y float64) {
 func (v *Game) OnPlayerCast(missileID int, targetX, targetY float64) {
 	err := v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerID, missileID, targetX, targetY))
 	if err != nil {
-		fmt.Printf(
-			"failed to send CastSkill packet to the server, playerId: %s, missileId: %d, x: %g, x: %g\n",
-			v.gameClient.PlayerID, missileID, targetX, targetY,
-		)
+		fmt.Printf(castErrStr, v.gameClient.PlayerID, missileID, targetX, targetY)
 	}
 }

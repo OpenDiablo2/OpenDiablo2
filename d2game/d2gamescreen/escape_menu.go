@@ -22,6 +22,7 @@ const (
 	sidePanelsSize = 80
 	pentSize       = 52
 	menuSize       = 500
+	spacerWidth    = 10
 
 	// layouts
 	noLayoutID layoutID = iota - 2
@@ -247,7 +248,7 @@ func (m *EscapeMenu) addTitle(l *layout, text string) {
 		fmt.Printf("could not add label: %s to the escape menu\n", text)
 	}
 
-	l.AddSpacerStatic(10, labelGutter)
+	l.AddSpacerStatic(spacerWidth, labelGutter)
 }
 
 func (m *EscapeMenu) addBigSelectionLabel(l *layout, text string, targetLayout layoutID) {
@@ -262,12 +263,12 @@ func (m *EscapeMenu) addBigSelectionLabel(l *layout, text string, targetLayout l
 	label.SetMouseEnterHandler(func(_ d2interface.MouseMoveEvent) {
 		m.onHoverElement(elID)
 	})
-	l.AddSpacerStatic(10, labelGutter)
+	l.AddSpacerStatic(spacerWidth, labelGutter)
 	l.actionableElements = append(l.actionableElements, label)
 }
 
 func (m *EscapeMenu) addPreviousMenuLabel(l *layout) {
-	l.AddSpacerStatic(10, labelGutter)
+	l.AddSpacerStatic(spacerWidth, labelGutter)
 	guiLabel, _ := l.AddLabel("PREVIOUS MENU", d2gui.FontStyle30Units)
 	label := &showLayoutLabel{Label: guiLabel, target: optionsLayoutID, showLayout: m.showLayout}
 	label.SetMouseClickHandler(func(_ d2interface.MouseEvent) {
@@ -313,7 +314,7 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 	layout.SetMouseClickHandler(func(_ d2interface.MouseEvent) {
 		label.Trigger()
 	})
-	l.AddSpacerStatic(10, labelGutter)
+	l.AddSpacerStatic(spacerWidth, labelGutter)
 	l.actionableElements = append(l.actionableElements, label)
 }
 
@@ -378,9 +379,9 @@ func (m *EscapeMenu) onHoverElement(id int) {
 	m.layouts[m.currentLayout].currentEl = id
 
 	x, _ := m.leftPent.GetPosition()
-	m.leftPent.SetPosition(x, y+10)
+	m.leftPent.SetPosition(x, y+spacerWidth)
 	x, _ = m.rightPent.GetPosition()
-	m.rightPent.SetPosition(x, y+10)
+	m.rightPent.SetPosition(x, y+spacerWidth)
 }
 
 func (m *EscapeMenu) onUpdateValue(optID optionID, value string) {

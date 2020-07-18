@@ -3,7 +3,6 @@ package d2gamescreen
 import (
 	"bufio"
 	"fmt"
-	"image/color"
 	"log"
 	"os"
 	"path"
@@ -16,6 +15,13 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
+
+const (
+	creditsX, creditsY = 0, 0
+	charSelExitBtnX, charSelExitBtnY = 33, 543
+)
+
+const secondsPerCycle float64 = 0.02
 
 type labelItem struct {
 	Label     d2ui.Label
@@ -80,14 +86,14 @@ func (v *Credits) LoadContributors() []string {
 func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 	animation, _ := d2asset.LoadAnimation(d2resource.CreditsBackground, d2resource.PaletteSky)
 	v.creditsBackground, _ = d2ui.LoadSprite(animation)
-	v.creditsBackground.SetPosition(0, 0)
-	loading.Progress(0.2)
+	v.creditsBackground.SetPosition(creditsX, creditsY)
+	loading.Progress(twentyPercent)
 
 	v.exitButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeMedium, "EXIT")
-	v.exitButton.SetPosition(33, 543)
+	v.exitButton.SetPosition(charSelExitBtnX, charSelExitBtnY)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 	d2ui.AddWidget(&v.exitButton)
-	loading.Progress(0.4)
+	loading.Progress(fourtyPercent)
 
 	fileData, err := d2asset.LoadFile(d2resource.CreditsText)
 	if err != nil {
@@ -95,7 +101,7 @@ func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 		return
 	}
 
-	loading.Progress(0.6)
+	loading.Progress(sixtyPercent)
 
 	creditData, _ := d2common.Utf16BytesToString(fileData[2:])
 	v.creditsText = strings.Split(creditData, "\r\n")
@@ -104,7 +110,7 @@ func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 		v.creditsText[i] = strings.Trim(v.creditsText[i], " ")
 	}
 
-	loading.Progress(0.8)
+	loading.Progress(eightyPercent)
 
 	v.creditsText = append(v.LoadContributors(), v.creditsText...)
 }
@@ -126,8 +132,6 @@ func (v *Credits) Render(screen d2interface.Surface) error {
 
 	return nil
 }
-
-const secondsPerCycle = float64(0.02)
 
 // Advance runs the update logic on the credits screen
 func (v *Credits) Advance(tickTime float64) error {
@@ -210,13 +214,22 @@ func (v *Credits) addNextItem() {
 	}
 }
 
+const(
+	itemLabelY = 605
+	itemLabelX = 400
+	itemLabel2offsetX = 10
+	halfItemLabel2offsetX = itemLabel2offsetX/2
+)
+
 func (v *Credits) setItemLabelPosition(label *d2ui.Label, isHeading, isNextHeading, isNextSpace bool) (isDoubled, nextHeading bool) {
 	width, _ := label.GetSize()
+	half := 2
+	halfWidth := width/half
 
 	if !isHeading && !isNextHeading && !isNextSpace {
 		isDoubled = true
 		// Gotta go side by side
-		label.SetPosition(400-width, 605)
+		label.SetPosition(itemLabelX-width, itemLabelY)
 
 		text2 := v.creditsText[0]
 		v.creditsText = v.creditsText[1:]
@@ -225,24 +238,29 @@ func (v *Credits) setItemLabelPosition(label *d2ui.Label, isHeading, isNextHeadi
 		label2 := v.getNewFontLabel(isHeading)
 		label2.SetText(text2)
 
-		label2.SetPosition(410, 605)
+		label2.SetPosition(itemLabelX+itemLabel2offsetX, itemLabelY)
 
 		return isDoubled, nextHeading
 	}
 
-	label.SetPosition(405-width/2, 605)
+	label.SetPosition(itemLabelX+halfItemLabel2offsetX-halfWidth, itemLabelY)
 
 	return isDoubled, isNextHeading
 }
+
+const (
+	lightRed = 0xff5852ff
+	beige = 0xc6b296ff
+)
 
 func (v *Credits) getNewFontLabel(isHeading bool) *d2ui.Label {
 	for _, label := range v.labels {
 		if label.Available {
 			label.Available = false
 			if isHeading {
-				label.Label.Color = color.RGBA{R: 255, G: 88, B: 82, A: 255}
+				label.Label.Color = rgbaColor(lightRed)
 			} else {
-				label.Label.Color = color.RGBA{R: 198, G: 178, B: 150, A: 255}
+				label.Label.Color = rgbaColor(beige)
 			}
 
 			return &label.Label
@@ -256,9 +274,9 @@ func (v *Credits) getNewFontLabel(isHeading bool) *d2ui.Label {
 	}
 
 	if isHeading {
-		newLabelItem.Label.Color = color.RGBA{R: 255, G: 88, B: 82, A: 255}
+		newLabelItem.Label.Color = rgbaColor(lightRed)
 	} else {
-		newLabelItem.Label.Color = color.RGBA{R: 198, G: 178, B: 150, A: 255}
+		newLabelItem.Label.Color = rgbaColor(beige)
 	}
 
 	v.labels = append(v.labels, newLabelItem)

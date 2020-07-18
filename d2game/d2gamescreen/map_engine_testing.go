@@ -103,7 +103,12 @@ type MapEngineTest struct {
 }
 
 // CreateMapEngineTest creates the Map Engine Test screen and returns a pointer to it
-func CreateMapEngineTest(currentRegion, levelPreset int, term d2interface.Terminal, renderer d2interface.Renderer, inputManager d2interface.InputManager) *MapEngineTest {
+func CreateMapEngineTest(currentRegion,
+	levelPreset int,
+	term d2interface.Terminal,
+	renderer d2interface.Renderer,
+	inputManager d2interface.InputManager,
+) *MapEngineTest {
 	result := &MapEngineTest{
 		currentRegion: currentRegion,
 		levelPreset:   levelPreset,
@@ -171,15 +176,15 @@ func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 		fmt.Printf("could not add MapEngineTest as event handler")
 	}
 
-	loading.Progress(0.2)
+	loading.Progress(twentyPercent)
 
 	met.mapEngine = d2mapengine.CreateMapEngine()
 
-	loading.Progress(0.5)
+	loading.Progress(fiftyPercent)
 
 	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.renderer, met.mapEngine, met.terminal)
 
-	loading.Progress(0.7)
+	loading.Progress(seventyPercent)
 	met.loadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
 }
 
