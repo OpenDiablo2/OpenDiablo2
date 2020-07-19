@@ -13,6 +13,7 @@ type PathTile struct {
 	UpLeft, UpRight     *PathTile
 	DownLeft, DownRight *PathTile
 	Position            d2vector.Position
+	SubX, SubY          int
 }
 
 // PathNeighbors returns the direct neighboring nodes of this node which can be pathed to
@@ -51,6 +52,10 @@ func (t *PathTile) PathNeighbors() []d2astar.Pather {
 	}
 
 	return result
+}
+
+func (t *PathTile) PathLocation() (int, int) {
+	return t.SubX, t.SubY
 }
 
 // PathNeighborCost calculates the exact movement cost to neighbor nodes

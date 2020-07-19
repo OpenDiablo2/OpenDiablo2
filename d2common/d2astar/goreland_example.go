@@ -60,6 +60,10 @@ func (t *Truck) PathNeighbors() []Pather {
 	return neighbors
 }
 
+func (t *Truck) PathLocation() (int, int) {
+	return t.X, t.Y
+}
+
 // PathNeighborCost returns the cost of the tube leading to Truck.
 func (t *Truck) PathNeighborCost(to Pather) float64 {
 	for _, tubeElement := range (t).outTo {

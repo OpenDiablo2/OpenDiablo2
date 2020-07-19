@@ -56,6 +56,8 @@ func (m *MapEngine) RegenerateWalkPaths() {
 				Position: d2vector.NewPosition(
 					float64(subTileX),
 					float64(subTileY)),
+				SubX: subTileX,
+				SubY: subTileY,
 			}
 
 			ySkew := m.size.Width * 5
@@ -118,7 +120,7 @@ func (m *MapEngine) PathFind(startX, startY, endX, endY float64) (path []d2astar
 
 	endNode := &m.walkMesh[endNodeIndex]
 
-	path, distance, found = d2astar.PathTheta(startNode, endNode, 80)
+	path, distance, found = d2astar.PathTheta(startNode, endNode, m, 80)
 	if path != nil {
 		// Reverse the path to fit what the game expects.
 		for i := len(path)/2 - 1; i >= 0; i-- {
@@ -130,4 +132,34 @@ func (m *MapEngine) PathFind(startX, startY, endX, endY float64) (path []d2astar
 	}
 
 	return
+}
+
+// QueryLOS finds out if there is a clear line of sight between two points
+func (m *MapEngine) QueryLOS(sX, sY, tX, tY int) bool {
+	dx := tX - sX
+	dy := tY - sY
+	N := math.Max(float64(dx), float64(dy))
+
+	var divN float64
+	if N == 0 {
+		divN = 0.0
+	} else {
+		divN = 1.0 / N
+	}
+
+	xstep := float64(dx) * divN
+	ystep := float64(dy) * divN
+	x := float64(sX)
+	y := float64(sY)
+
+	for i := 0; i <= int(N); i++ {
+		x += xstep
+		y += ystep
+
+		if !m.walkMesh[int(x)+(int(y)*m.size.Width*5)].Walkable {
+			return false
+		}
+	}
+
+	return true
 }

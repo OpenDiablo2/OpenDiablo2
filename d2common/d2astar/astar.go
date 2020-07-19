@@ -42,6 +42,14 @@ type Pather interface {
 	// PathEstimatedCost is a heuristic method for estimating movement costs
 	// between non-adjacent nodes.
 	PathEstimatedCost(to Pather) float64
+	// PathLocation returns the positon of the path node
+	PathLocation() (int, int)
+}
+
+// LOSFinder allows searching for line of sight between two points
+type LOSFinder interface {
+	// QueyLOS returns true if the two points are visible from each other
+	QueryLOS(sx, sy, tx, ty int) bool
 }
 
 // node is a wrapper to store A* data for a Pather node.
@@ -80,11 +88,7 @@ func (nm nodeMap) get(p Pather) *node {
 	return n
 }
 
-func isInLOS(from, to Pather) bool {
-	return true
-}
-
-func PathTheta(from, to Pather, maxCost float64) (path []Pather, distance float64, found bool) {
+func PathTheta(from, to Pather, losFinder LOSFinder, maxCost float64) (path []Pather, distance float64, found bool) {
 	nm := nodeMapPool.Get().(nodeMap)
 	nq := priorityQueuePool.Get().(priorityQueue)
 
@@ -142,7 +146,15 @@ func PathTheta(from, to Pather, maxCost float64) (path []Pather, distance float6
 			neighborNode := nm.get(neighbor)
 			parentNode := current.parent
 
-			if parentNode != nil && isInLOS(parentNode.pather, neighborNode.pather) {
+			var sX, sY int
+
+			if parentNode != nil {
+				sX, sY = parentNode.pather.PathLocation()
+
+			}
+			tX, tY := neighborNode.pather.PathLocation()
+
+			if parentNode != nil && losFinder.QueryLOS(sX, sY, tX, tY) {
 				if cost < neighborNode.cost {
 					if neighborNode.open {
 						heap.Remove(&nq, neighborNode.index)
@@ -268,6 +280,7 @@ func Path(from, to Pather, maxCost float64) (path []Pather, distance float64, fo
 				neighborNode.open = false
 				neighborNode.closed = false
 			}
+
 			if !neighborNode.open && !neighborNode.closed {
 				neighborNode.cost = cost
 				neighborNode.open = true
