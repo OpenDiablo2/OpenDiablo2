@@ -105,6 +105,11 @@ func (mr *MapRenderer) MoveCameraBy(vector *d2vector.Vector) {
 	mr.Camera.MoveBy(vector)
 }
 
+// MoveCameraTargetBy adds the given vector to the current position of the Camera.
+func (mr *MapRenderer) MoveCameraTargetBy(vector *d2vector.Vector) {
+	mr.Camera.MoveTargetBy(vector)
+}
+
 // ScreenToWorld returns the world position for the given screen (pixel) position.
 func (mr *MapRenderer) ScreenToWorld(x, y int) (float64, float64) {
 	return mr.viewport.ScreenToWorld(x, y)

@@ -163,7 +163,6 @@ func (v *Game) Advance(elapsed float64) error {
 		rx, ry := v.mapRenderer.WorldToOrtho(worldPosition.X(), worldPosition.Y())
 		position := d2vector.NewPosition(rx, ry)
 		v.mapRenderer.SetCameraTarget(&position)
-		v.mapRenderer.Advance(elapsed)
 	}
 
 	return nil

@@ -159,25 +159,29 @@ func (g *GameControls) OnKeyRepeat(event d2interface.KeyEvent) bool {
 
 		if event.Key() == d2enum.KeyDown {
 			v := d2vector.NewVector(0, moveSpeed)
-			g.mapRenderer.MoveCameraBy(&v)
+			g.mapRenderer.MoveCameraTargetBy(&v)
+
 			return true
 		}
 
 		if event.Key() == d2enum.KeyUp {
 			v := d2vector.NewVector(0, -moveSpeed)
-			g.mapRenderer.MoveCameraBy(&v)
+			g.mapRenderer.MoveCameraTargetBy(&v)
+
 			return true
 		}
 
 		if event.Key() == d2enum.KeyRight {
 			v := d2vector.NewVector(moveSpeed, 0)
-			g.mapRenderer.MoveCameraBy(&v)
+			g.mapRenderer.MoveCameraTargetBy(&v)
+
 			return true
 		}
 
 		if event.Key() == d2enum.KeyLeft {
 			v := d2vector.NewVector(-moveSpeed, 0)
-			g.mapRenderer.MoveCameraBy(&v)
+			g.mapRenderer.MoveCameraTargetBy(&v)
+
 			return true
 		}
 	}
@@ -230,6 +234,21 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 	if isLeft && shouldDoLeft && inRect {
 		lastLeftBtnActionTime = now
 		g.inputListener.OnPlayerMove(px, py)
+
+		if g.FreeCam {
+			if event.Button() == d2enum.MouseButtonLeft {
+				camVect := g.mapRenderer.Camera.GetPosition().Vector
+
+				x, y := float64(g.lastMouseX-400)/5, float64(g.lastMouseY-300)/5
+				targetPosition := d2vector.NewPositionTile(x, y)
+				targetPosition.Add(&camVect)
+
+				g.mapRenderer.SetCameraTarget(&targetPosition)
+
+				return true
+			}
+		}
+
 		return true
 	}
 
@@ -328,6 +347,7 @@ func (g *GameControls) onToggleRunButton() {
 
 // ScreenAdvanceHandler
 func (g *GameControls) Advance(elapsed float64) error {
+	g.mapRenderer.Advance(elapsed)
 	return nil
 }
 
