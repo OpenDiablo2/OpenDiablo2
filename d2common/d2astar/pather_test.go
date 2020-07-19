@@ -94,6 +94,11 @@ func (t *Tile) PathNeighborCost(to Pather) float64 {
 	return KindCosts[toT.Kind]
 }
 
+// PathLocation is the location of the tile
+func (t *Tile) PathLocation() (int, int) {
+	return t.X, t.Y
+}
+
 // PathEstimatedCost uses Manhattan distance to estimate orthogonal distance
 // between non-adjacent nodes.
 func (t *Tile) PathEstimatedCost(to Pather) float64 {
