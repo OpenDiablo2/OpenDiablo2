@@ -30,10 +30,6 @@ func (r *Renderer) Update(screen *ebiten.Image) error {
 	return nil
 }
 
-func (r *Renderer) Advance(elapsed float64) {
-	return
-}
-
 // Layout returns the renderer screen width and height
 func (r *Renderer) Layout(_, _ int) (width, height int) {
 	return screenWidth, screenHeight
