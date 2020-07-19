@@ -2,6 +2,7 @@ package d2gamescreen
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"log"
 	"os"
 	"strings"
@@ -167,7 +168,8 @@ func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 	}
 
 	met.mapRenderer.SetMapEngine(met.mapEngine)
-	met.mapRenderer.MoveCameraTo(met.mapRenderer.WorldToOrtho(met.mapEngine.GetCenterPosition()))
+	position := d2vector.NewPosition(met.mapRenderer.WorldToOrtho(met.mapEngine.GetCenterPosition()))
+	met.mapRenderer.SetCameraTarget(&position)
 }
 
 // OnLoad loads the resources for the Map Engine Test screen
@@ -317,11 +319,40 @@ func (met *MapEngineTest) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 		met.selY = int(py)
 		met.selectedTile = met.mapEngine.TileAt(int(px), int(py))
 
+		camVect := met.mapRenderer.Camera.GetPosition().Vector
+
+		x, y := float64(met.lastMouseX-400)/5, float64(met.lastMouseY-300)/5
+		targetPosition := d2vector.NewPositionTile(x, y)
+		targetPosition.Add(&camVect)
+
+		met.mapRenderer.SetCameraTarget(&targetPosition)
+
 		return true
 	}
 
 	if event.Button() == d2enum.MouseButtonRight {
 		met.selectedTile = nil
+
+		return true
+	}
+
+	return false
+}
+
+func (met *MapEngineTest) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
+	if event.Button() == d2enum.MouseButtonLeft {
+		px, py := met.mapRenderer.ScreenToWorld(met.lastMouseX, met.lastMouseY)
+		met.selX = int(px)
+		met.selY = int(py)
+		met.selectedTile = met.mapEngine.TileAt(int(px), int(py))
+
+		camVect := met.mapRenderer.Camera.GetPosition().Vector
+
+		x, y := float64(met.lastMouseX-400)/5, float64(met.lastMouseY-300)/5
+		targetPosition := d2vector.NewPositionTile(x, y)
+		targetPosition.Add(&camVect)
+
+		met.mapRenderer.SetCameraTarget(&targetPosition)
 
 		return true
 	}
@@ -345,22 +376,30 @@ func (met *MapEngineTest) OnKeyRepeat(event d2interface.KeyEvent) bool {
 	}
 
 	if event.Key() == d2enum.KeyDown {
-		met.mapRenderer.MoveCameraBy(0, moveSpeed)
+		v := d2vector.NewVector(0, moveSpeed)
+		met.mapRenderer.MoveCameraTargetBy(&v)
+
 		return true
 	}
 
 	if event.Key() == d2enum.KeyUp {
-		met.mapRenderer.MoveCameraBy(0, -moveSpeed)
+		v := d2vector.NewVector(0, -moveSpeed)
+		met.mapRenderer.MoveCameraTargetBy(&v)
+
 		return true
 	}
 
 	if event.Key() == d2enum.KeyRight {
-		met.mapRenderer.MoveCameraBy(moveSpeed, 0)
+		v := d2vector.NewVector(moveSpeed, 0)
+		met.mapRenderer.MoveCameraTargetBy(&v)
+
 		return true
 	}
 
 	if event.Key() == d2enum.KeyLeft {
-		met.mapRenderer.MoveCameraBy(-moveSpeed, 0)
+		v := d2vector.NewVector(-moveSpeed, 0)
+		met.mapRenderer.MoveCameraTargetBy(&v)
+
 		return true
 	}
 

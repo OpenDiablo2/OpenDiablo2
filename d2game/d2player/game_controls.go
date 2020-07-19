@@ -2,6 +2,7 @@ package d2player
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"image"
 	"image/color"
@@ -157,22 +158,30 @@ func (g *GameControls) OnKeyRepeat(event d2interface.KeyEvent) bool {
 		}
 
 		if event.Key() == d2enum.KeyDown {
-			g.mapRenderer.MoveCameraBy(0, moveSpeed)
+			v := d2vector.NewVector(0, moveSpeed)
+			g.mapRenderer.MoveCameraTargetBy(&v)
+
 			return true
 		}
 
 		if event.Key() == d2enum.KeyUp {
-			g.mapRenderer.MoveCameraBy(0, -moveSpeed)
+			v := d2vector.NewVector(0, -moveSpeed)
+			g.mapRenderer.MoveCameraTargetBy(&v)
+
 			return true
 		}
 
 		if event.Key() == d2enum.KeyRight {
-			g.mapRenderer.MoveCameraBy(moveSpeed, 0)
+			v := d2vector.NewVector(moveSpeed, 0)
+			g.mapRenderer.MoveCameraTargetBy(&v)
+
 			return true
 		}
 
 		if event.Key() == d2enum.KeyLeft {
-			g.mapRenderer.MoveCameraBy(-moveSpeed, 0)
+			v := d2vector.NewVector(-moveSpeed, 0)
+			g.mapRenderer.MoveCameraTargetBy(&v)
+
 			return true
 		}
 	}
@@ -225,6 +234,21 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 	if isLeft && shouldDoLeft && inRect {
 		lastLeftBtnActionTime = now
 		g.inputListener.OnPlayerMove(px, py)
+
+		if g.FreeCam {
+			if event.Button() == d2enum.MouseButtonLeft {
+				camVect := g.mapRenderer.Camera.GetPosition().Vector
+
+				x, y := float64(g.lastMouseX-400)/5, float64(g.lastMouseY-300)/5
+				targetPosition := d2vector.NewPositionTile(x, y)
+				targetPosition.Add(&camVect)
+
+				g.mapRenderer.SetCameraTarget(&targetPosition)
+
+				return true
+			}
+		}
+
 		return true
 	}
 
@@ -323,6 +347,7 @@ func (g *GameControls) onToggleRunButton() {
 
 // ScreenAdvanceHandler
 func (g *GameControls) Advance(elapsed float64) error {
+	g.mapRenderer.Advance(elapsed)
 	return nil
 }
 

@@ -2,6 +2,7 @@ package d2maprenderer
 
 import (
 	"errors"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"image/color"
 	"log"
 	"math"
@@ -14,13 +15,13 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 )
 
-// MapRenderer manages the game viewport and camera. It requests tile and entity data from MapEngine and renders it.
+// MapRenderer manages the game viewport and Camera. It requests tile and entity data from MapEngine and renders it.
 type MapRenderer struct {
 	renderer      d2interface.Renderer   // Used for drawing operations
 	mapEngine     *d2mapengine.MapEngine // The map engine that is being rendered
 	palette       d2interface.Palette    // The palette used for this map
 	viewport      *Viewport              // Used for rendering offsets
-	camera        Camera                 // Used to determine where on the map we are rendering
+	Camera        Camera                 // Used to determine where on the map we are rendering
 	debugVisLevel int                    // Debug visibility index (0=none, 1=tiles, 2=sub-tiles)
 	lastFrameTime float64                // The last time the map was rendered
 	currentFrame  int                    // Current render frame (for animations)
@@ -34,7 +35,10 @@ func CreateMapRenderer(renderer d2interface.Renderer, mapEngine *d2mapengine.Map
 		viewport:  NewViewport(0, 0, 800, 600),
 	}
 
-	result.viewport.SetCamera(&result.camera)
+	result.Camera = Camera{}
+	startPosition := d2vector.NewPosition(0,0)
+	result.Camera.position = &startPosition
+	result.viewport.SetCamera(&result.Camera)
 
 	term.BindAction("mapdebugvis", "set map debug visualization level", func(level int) {
 		result.debugVisLevel = level
@@ -91,14 +95,19 @@ func (mr *MapRenderer) Render(target d2interface.Surface) {
 	mr.renderPass4(target, startX, startY, endX, endY)
 }
 
-// MoveCameraTo sets the position of the camera to the given x and y coordinates.
-func (mr *MapRenderer) MoveCameraTo(x, y float64) {
-	mr.camera.MoveTo(x, y)
+// MoveCameraTo sets the position of the Camera to the given x and y coordinates.
+func (mr *MapRenderer) MoveCameraTo(position *d2vector.Position) {
+	mr.Camera.MoveTo(position)
 }
 
-// MoveCameraBy adds the given vector to the current position of the camera.
-func (mr *MapRenderer) MoveCameraBy(x, y float64) {
-	mr.camera.MoveBy(x, y)
+// MoveCameraBy adds the given vector to the current position of the Camera.
+func (mr *MapRenderer) MoveCameraBy(vector *d2vector.Vector) {
+	mr.Camera.MoveBy(vector)
+}
+
+// MoveCameraTargetBy adds the given vector to the current position of the Camera.
+func (mr *MapRenderer) MoveCameraTargetBy(vector *d2vector.Vector) {
+	mr.Camera.MoveTargetBy(vector)
 }
 
 // ScreenToWorld returns the world position for the given screen (pixel) position.
@@ -387,6 +396,8 @@ func (mr *MapRenderer) Advance(elapsed float64) {
 	if mr.currentFrame > 9 {
 		mr.currentFrame = 0
 	}
+
+	mr.Camera.Advance(elapsed)
 }
 
 func loadPaletteForAct(levelType d2enum.RegionIdType) (d2interface.Palette, error) {
@@ -428,4 +439,9 @@ func (mr *MapRenderer) ViewportToRight() {
 // ViewportDefault resets the viewport to it's default position.
 func (mr *MapRenderer) ViewportDefault() {
 	mr.viewport.resetAlign()
+}
+
+// SetCameraTarget sts the Camera target
+func (mr *MapRenderer) SetCameraTarget(position *d2vector.Position) {
+	mr.Camera.SetTarget(position)
 }
