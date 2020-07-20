@@ -25,3 +25,94 @@ func (t *MapTile) GetSubTileFlags(x, y int) *d2dt1.SubTileFlags {
 
 	return &t.SubTiles[subtileLookup[y][x]]
 }
+
+// PrepareTile selects which graphic to use and updates the tiles subtileflags
+func (t *MapTile) PrepareTile(x, y int, me *MapEngine) {
+	for wIdx := range t.Components.Walls {
+		wall := &t.Components.Walls[wIdx]
+		options := me.GetTiles(int(wall.Style), int(wall.Sequence), int(wall.Type))
+
+		if options == nil {
+			break
+		}
+
+		wall.RandomIndex = getRandomTile(options, x, y, me.seed)
+
+		for i, s := range t.SubTiles {
+			s.Combine(options[wall.RandomIndex].SubTileFlags[i])
+		}
+	}
+
+	for fIdx := range t.Components.Floors {
+		floor := &t.Components.Floors[fIdx]
+		options := me.GetTiles(int(floor.Style), int(floor.Sequence), 0)
+
+		if options == nil {
+			break
+		}
+
+		if options[0].MaterialFlags.Lava {
+			floor.Animated = true
+			floor.RandomIndex = 0
+		} else {
+			floor.RandomIndex = getRandomTile(options, x, y, me.seed)
+		}
+
+		for i, s := range t.SubTiles {
+			s.Combine(options[floor.RandomIndex].SubTileFlags[i])
+		}
+	}
+
+	for sIdx := range t.Components.Shadows {
+		shadow := &t.Components.Shadows[sIdx]
+		options := me.GetTiles(int(shadow.Style), int(shadow.Sequence), 13)
+
+		if options == nil {
+			break
+		}
+
+		shadow.RandomIndex = getRandomTile(options, x, y, me.seed)
+
+		for i, s := range t.SubTiles {
+			s.Combine(options[shadow.RandomIndex].SubTileFlags[i])
+		}
+	}
+}
+
+// Selects a random tile from the slice, rest of args just used for seeding
+func getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) byte {
+	/* Walker's Alias Method for weighted random selection
+	 * with xorshifting for random numbers */
+
+	var tileSeed uint64
+	tileSeed = uint64(seed) + uint64(x)
+	tileSeed *= uint64(y)
+
+	tileSeed ^= tileSeed << 13
+	tileSeed ^= tileSeed >> 17
+	tileSeed ^= tileSeed << 5
+
+	weightSum := 0
+
+	for i := range tiles {
+		weightSum += int(tiles[i].RarityFrameIndex)
+	}
+
+	if weightSum == 0 {
+		return 0
+	}
+
+	random := tileSeed % uint64(weightSum)
+
+	sum := 0
+
+	for i := range tiles {
+		sum += int(tiles[i].RarityFrameIndex)
+		if sum >= int(random) {
+			return byte(i)
+		}
+	}
+
+	// This return shouldn't be hit
+	return 0
+}

@@ -68,7 +68,7 @@ func (m *MapEngine) ResetMap(levelType d2enum.RegionIdType, width, height int) {
 }
 
 func (m *MapEngine) addDT1(fileName string) {
-	if len(fileName) == 0 || fileName == "0" {
+	if fileName == "" || fileName == "0" {
 		return
 	}
 
@@ -82,8 +82,8 @@ func (m *MapEngine) addDT1(fileName string) {
 	fileData, err := d2asset.LoadFile("/data/global/tiles/" + fileName)
 	if err != nil {
 		log.Printf("Could not load /data/global/tiles/%s", fileName)
-		return
 		// panic(err)
+		return
 	}
 
 	dt1, _ := d2dt1.LoadDT1(fileData)
@@ -188,6 +188,7 @@ func (m *MapEngine) PlaceStamp(stamp *d2mapstamp.Stamp, tileOffsetX, tileOffsetY
 			stampTile := *stamp.Tile(x, y)
 			m.tiles[targetTileIndex].RegionType = stamp.RegionID()
 			m.tiles[targetTileIndex].Components = stampTile
+			m.tiles[targetTileIndex].PrepareTile(x, y, m)
 		}
 	}
 
@@ -241,11 +242,12 @@ func (m *MapEngine) RemoveEntity(entity d2interface.MapEntity) {
 
 // GetTiles returns a slice of all tiles matching the given style,
 // sequence and tileType.
-func (m *MapEngine) GetTiles(style, sequence, tileType int32) []d2dt1.Tile {
+func (m *MapEngine) GetTiles(style, sequence, tileType int) []d2dt1.Tile {
 	var tiles []d2dt1.Tile
 
 	for idx := range m.dt1TileData {
-		if m.dt1TileData[idx].Style != style || m.dt1TileData[idx].Sequence != sequence || m.dt1TileData[idx].Type != tileType {
+		if m.dt1TileData[idx].Style != int32(style) || m.dt1TileData[idx].Sequence != int32(sequence) ||
+			m.dt1TileData[idx].Type != int32(tileType) {
 			continue
 		}
 
@@ -314,13 +316,14 @@ func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int,
 	m.PlaceStamp(region, 0, 0)
 }
 
-//// GetTileData returns the tile with the given style, sequence and tileType.
-//func (m *MapEngine) GetTileData(style int32, sequence int32, tileType d2enum.TileType) *d2dt1.Tile {
-//	for idx := range m.dt1TileData {
-//		if m.dt1TileData[idx].Style == style && m.dt1TileData[idx].Sequence == sequence && m.dt1TileData[idx].Type == int32(tileType) {
-//			return &m.dt1TileData[idx]
-//		}
-//	}
-//
-//	return nil
-//}
+// GetTileData returns the tile with the given style, sequence, tileType and index.
+func (m *MapEngine) GetTileData(style, sequence int, tileType d2enum.TileType, index byte) *d2dt1.Tile {
+	for idx := range m.dt1TileData {
+		if m.dt1TileData[idx].Style == int32(style) && m.dt1TileData[idx].Sequence == int32(sequence) &&
+			m.dt1TileData[idx].Type == int32(tileType) && m.dt1TileData[idx].RarityFrameIndex == int32(index) {
+			return &m.dt1TileData[idx]
+		}
+	}
+
+	return nil
+}
