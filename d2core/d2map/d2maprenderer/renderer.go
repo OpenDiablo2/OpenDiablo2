@@ -331,7 +331,9 @@ func (mr *MapRenderer) renderEntityDebug(target d2interface.Surface) {
 		world := pos
 		x, y := world.X()/5, world.Y()/5
 		velocity := e.GetVelocity()
-		vx, vy := velocity.X(), velocity.Y()
+		velocity = velocity.Clone()
+		// velocity.Scale(60) // arbitrary scale value, just to make it easy to see
+		vx, vy := mr.viewport.WorldToOrtho(velocity.X(), velocity.Y())
 		screenX, screenY := mr.viewport.WorldToScreen(x, y)
 
 		offX, offY := 40, -40
@@ -345,6 +347,7 @@ func (mr *MapRenderer) renderEntityDebug(target d2interface.Surface) {
 		target.Pop()
 		target.DrawTextf("World (%.2f, %.2f)\nVelocity (%.2f, %.2f)", x, y, vx, vy)
 		target.Pop()
+		target.DrawLine(int(vx), int(vy), color.RGBA{64, 255, 0, 255})
 		target.Pop()
 		mr.viewport.PopTranslation()
 	}
