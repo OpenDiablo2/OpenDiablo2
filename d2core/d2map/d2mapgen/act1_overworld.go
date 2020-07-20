@@ -265,6 +265,7 @@ func generateWilderness1Contents(mapEngine *d2mapengine.MapEngine, rect d2common
 			tile := mapEngine.Tile(rect.Left+x, rect.Top+y)
 			tile.RegionType = d2enum.RegionIdType(levelDetails.LevelType)
 			tile.Components.Floors = []d2ds1.FloorShadowRecord{wildernessGrass}
+			tile.PrepareTile(x, y, mapEngine)
 		}
 	}
 
