@@ -75,25 +75,20 @@ func (m *mapEntity) Step(tickTime float64) {
 
 	// Set velocity (speed and direction)
 	m.setVelocity(tickTime * m.Speed)
-	currVelocity := m.velocity.Clone()
-	currVelocity.SetLength(m.Speed)
 
 	// This loop handles the situation where the velocity exceeds the distance to the current target. Each repitition applies
 	// the remaining velocity in the direction of the next path target.
 	for {
-		tmpVelocity := m.velocity.Clone()
-		applyVelocity(&m.Position.Vector, &tmpVelocity, &m.Target.Vector)
+		applyVelocity(&m.Position.Vector, &m.velocity, &m.Target.Vector)
 
 		if m.atTarget() {
 			m.nextPath()
 		}
 
-		if tmpVelocity.IsZero() {
+		if m.velocity.IsZero() {
 			break
 		}
 	}
-
-	m.velocity = currVelocity
 }
 
 // atTarget returns true if the distance between entity and target is almost zero.
