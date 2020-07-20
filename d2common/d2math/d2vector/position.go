@@ -71,7 +71,7 @@ func (p *Position) RenderOffset() *Vector {
 	return p.subTileOffset().AddScalar(1)
 }
 
-// SubTileOffset is the offset from the current map tile in sub tiles.
+// subTileOffset is the offset from the current map tile in sub tiles.
 func (p *Position) subTileOffset() *Vector {
 	t := p.Tile().Scale(subTilesPerTile)
 	c := p.Clone()

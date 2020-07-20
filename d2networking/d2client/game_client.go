@@ -8,6 +8,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
@@ -173,34 +174,35 @@ func (g *GameClient) handleAddPlayerPacket(packet d2netpacket.NetPacket) error {
 }
 
 func (g *GameClient) handleMovePlayerPacket(packet d2netpacket.NetPacket) error {
-	//movePlayer := packet.PacketData.(d2netpacket.MovePlayerPacket)
-	//player := g.Players[movePlayer.PlayerID]
-	//path, _, _ := g.MapEngine.PathFind(movePlayer.StartX, movePlayer.StartY, movePlayer.DestX, movePlayer.DestY)
+	movePlayer := packet.PacketData.(d2netpacket.MovePlayerPacket)
+	player := g.Players[movePlayer.PlayerID]
+	start := d2vector.NewPositionTile(movePlayer.StartX, movePlayer.StartY)
+	dest := d2vector.NewPositionTile(movePlayer.DestX, movePlayer.DestY)
+	path := g.MapEngine.PathFind(start, dest)
 
+	if len(path) > 0 {
+		player.SetPath(path, func() {
+			tilePosition := player.Position.Tile()
+			tile := g.MapEngine.TileAt(int(tilePosition.X()), int(tilePosition.Y()))
 
-	//if len(path) > 0 {
-	//	player.SetPath(path, func() {
-	//		tilePosition := player.Position.Tile()
-	//		tile := g.MapEngine.TileAt(int(tilePosition.X()), int(tilePosition.Y()))
+			if tile == nil {
+				return
+			}
 
-	//		if tile == nil {
-	//			return
-	//		}
+			regionType := tile.RegionType
+			if regionType == d2enum.RegionAct1Town {
+				player.SetIsInTown(true)
+			} else {
+				player.SetIsInTown(false)
+			}
 
-	//		regionType := tile.RegionType
-	//		if regionType == d2enum.RegionAct1Town {
-	//			player.SetIsInTown(true)
-	//		} else {
-	//			player.SetIsInTown(false)
-	//		}
+			err := player.SetAnimationMode(player.GetAnimationMode())
 
-	//		err := player.SetAnimationMode(player.GetAnimationMode())
-
-	//		if err != nil {
-	//			log.Printf("GameClient: error setting animation mode for player %s: %s", player.Id, err)
-	//		}
-	//	})
-	//}
+			if err != nil {
+				log.Printf("GameClient: error setting animation mode for player %s: %s", player.Id, err)
+			}
+		})
+	}
 
 	return nil
 }

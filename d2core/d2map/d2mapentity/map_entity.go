@@ -3,8 +3,6 @@ package d2mapentity
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2astar"
 )
 
 // mapEntity represents an entity on the map that can be animated
@@ -14,7 +12,7 @@ type mapEntity struct {
 	velocity d2vector.Vector
 
 	Speed     float64
-	path      []d2astar.Pather
+	path      []d2vector.Position
 	drawLayer int
 
 	done        func()
@@ -38,7 +36,7 @@ func (m *mapEntity) GetLayer() int {
 
 // SetPath sets the entity movement path. done() is called when the entity reaches it's path destination. For example,
 // when the player entity reaches the point a player clicked.
-func (m *mapEntity) SetPath(path []d2astar.Pather, done func()) {
+func (m *mapEntity) SetPath(path []d2vector.Position, done func()) {
 	m.path = path
 	m.done = done
 	m.nextPath()
@@ -140,14 +138,14 @@ func (m *mapEntity) nextPath() {
 	if m.hasPath() {
 		// Set next path node
 		m.setTarget(
-			m.path[0].(*d2common.PathTile).Position,
+			m.path[0],
 			m.done,
 		)
 
 		if len(m.path) > 1 {
 			m.path = m.path[1:]
 		} else {
-			m.path = []d2astar.Pather{}
+			m.path = []d2vector.Position{}
 		}
 	} else {
 		// End of path.
