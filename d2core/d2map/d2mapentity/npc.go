@@ -1,6 +1,7 @@
 package d2mapentity
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"math/rand"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -205,4 +206,14 @@ func (v *NPC) Selectable() bool {
 // Name returns the NPC's in-game name (e.g. "Deckard Cain") or an empty string if it does not have a name.
 func (v *NPC) Name() string {
 	return v.name
+}
+
+// GetPosition returns the NPC's position
+func (v *NPC) GetPosition() d2vector.Position {
+	return v.mapEntity.Position
+}
+
+// GetVelocity returns the NPC's velocity vector
+func (v *NPC) GetVelocity() d2vector.Vector {
+	return v.mapEntity.velocity
 }

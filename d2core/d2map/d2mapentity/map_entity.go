@@ -28,6 +28,7 @@ func newMapEntity(x, y int) mapEntity {
 	return mapEntity{
 		Position: pos,
 		Target:   pos,
+		velocity: d2vector.NewVector(0, 0),
 	}
 }
 
@@ -67,25 +68,32 @@ func (m *mapEntity) Step(tickTime float64) {
 			m.done = nil
 		}
 
+		m.velocity.SetLength(0)
+
 		return
 	}
 
 	// Set velocity (speed and direction)
 	m.setVelocity(tickTime * m.Speed)
+	currVelocity := m.velocity.Clone()
+	currVelocity.SetLength(m.Speed)
 
 	// This loop handles the situation where the velocity exceeds the distance to the current target. Each repitition applies
 	// the remaining velocity in the direction of the next path target.
 	for {
-		applyVelocity(&m.Position.Vector, &m.velocity, &m.Target.Vector)
+		tmpVelocity := m.velocity.Clone()
+		applyVelocity(&m.Position.Vector, &tmpVelocity, &m.Target.Vector)
 
 		if m.atTarget() {
 			m.nextPath()
 		}
 
-		if m.velocity.IsZero() {
+		if tmpVelocity.IsZero() {
 			break
 		}
 	}
+
+	m.velocity = currVelocity
 }
 
 // atTarget returns true if the distance between entity and target is almost zero.

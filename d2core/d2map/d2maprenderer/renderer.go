@@ -17,14 +17,16 @@ import (
 
 // MapRenderer manages the game viewport and Camera. It requests tile and entity data from MapEngine and renders it.
 type MapRenderer struct {
-	renderer      d2interface.Renderer   // Used for drawing operations
-	mapEngine     *d2mapengine.MapEngine // The map engine that is being rendered
-	palette       d2interface.Palette    // The palette used for this map
-	viewport      *Viewport              // Used for rendering offsets
-	Camera        Camera                 // Used to determine where on the map we are rendering
-	debugVisLevel int                    // Debug visibility index (0=none, 1=tiles, 2=sub-tiles)
-	lastFrameTime float64                // The last time the map was rendered
-	currentFrame  int                    // Current render frame (for animations)
+	renderer         d2interface.Renderer   // Used for drawing operations
+	mapEngine        *d2mapengine.MapEngine // The map engine that is being rendered
+	palette          d2interface.Palette    // The palette used for this map
+	viewport         *Viewport              // Used for rendering offsets
+	Camera           Camera                 // Used to determine where on the map we are rendering
+	mapDebugVisLevel int                    // Map debug visibility index (0=none, 1=tiles,
+	// 2=sub-tiles)
+	entityDebugVisLevel int     // Entity Debug visibility index (0=none, 1=vectors)
+	lastFrameTime       float64 // The last time the map was rendered
+	currentFrame        int     // Current render frame (for animations)
 }
 
 // CreateMapRenderer creates a new MapRenderer, sets the required fields and returns a pointer to it.
@@ -36,12 +38,16 @@ func CreateMapRenderer(renderer d2interface.Renderer, mapEngine *d2mapengine.Map
 	}
 
 	result.Camera = Camera{}
-	startPosition := d2vector.NewPosition(0,0)
+	startPosition := d2vector.NewPosition(0, 0)
 	result.Camera.position = &startPosition
 	result.viewport.SetCamera(&result.Camera)
 
 	term.BindAction("mapdebugvis", "set map debug visualization level", func(level int) {
-		result.debugVisLevel = level
+		result.mapDebugVisLevel = level
+	})
+
+	term.BindAction("entitydebugvis", "set entity debug visualization level", func(level int) {
+		result.entityDebugVisLevel = level
 	})
 
 	if mapEngine.LevelType().ID != 0 {
@@ -87,12 +93,16 @@ func (mr *MapRenderer) Render(target d2interface.Surface) {
 	mr.renderPass1(target, startX, startY, endX, endY)
 	mr.renderPass2(target, startX, startY, endX, endY)
 
-	if mr.debugVisLevel > 0 {
-		mr.renderDebug(mr.debugVisLevel, target, startX, startY, endX, endY)
+	if mr.mapDebugVisLevel > 0 {
+		mr.renderMapDebug(mr.mapDebugVisLevel, target, startX, startY, endX, endY)
 	}
 
 	mr.renderPass3(target, startX, startY, endX, endY)
 	mr.renderPass4(target, startX, startY, endX, endY)
+
+	if mr.entityDebugVisLevel > 0 {
+		mr.renderEntityDebug(target)
+	}
 }
 
 // MoveCameraTo sets the position of the Camera to the given x and y coordinates.
@@ -146,7 +156,9 @@ func (mr *MapRenderer) renderPass2(target d2interface.Surface, startX, startY, e
 
 			// TODO: Do not loop over every entity every frame
 			for _, mapEntity := range *mr.mapEngine.Entities() {
-				entityX, entityY := mapEntity.GetPosition()
+				pos := mapEntity.GetPosition()
+				vec := pos.World()
+				entityX, entityY := vec.X(), vec.Y()
 
 				if mapEntity.GetLayer() != 1 {
 					continue
@@ -176,7 +188,9 @@ func (mr *MapRenderer) renderPass3(target d2interface.Surface, startX, startY, e
 
 			// TODO: Do not loop over every entity every frame
 			for _, mapEntity := range *mr.mapEngine.Entities() {
-				entityX, entityY := mapEntity.GetPosition()
+				pos := mapEntity.GetPosition()
+				vec := pos.World()
+				entityX, entityY := vec.X(), vec.Y()
 
 				if mapEntity.GetLayer() == 1 {
 					continue
@@ -299,13 +313,40 @@ func (mr *MapRenderer) renderShadow(tile d2ds1.FloorShadowRecord, target d2inter
 	target.Render(img)
 }
 
-func (mr *MapRenderer) renderDebug(debugVisLevel int, target d2interface.Surface, startX, startY, endX, endY int) {
+func (mr *MapRenderer) renderMapDebug(mapDebugVisLevel int, target d2interface.Surface, startX, startY, endX, endY int) {
 	for tileY := startY; tileY < endY; tileY++ {
 		for tileX := startX; tileX < endX; tileX++ {
 			mr.viewport.PushTranslationWorld(float64(tileX), float64(tileY))
-			mr.renderTileDebug(tileX, tileY, debugVisLevel, target)
+			mr.renderTileDebug(tileX, tileY, mapDebugVisLevel, target)
 			mr.viewport.PopTranslation()
 		}
+	}
+}
+
+func (mr *MapRenderer) renderEntityDebug(target d2interface.Surface) {
+	entities := *mr.mapEngine.Entities()
+	for idx := range entities {
+		e := entities[idx]
+		pos := e.GetPosition()
+		world := pos
+		x, y := world.X()/5, world.Y()/5
+		velocity := e.GetVelocity()
+		vx, vy := velocity.X(), velocity.Y()
+		screenX, screenY := mr.viewport.WorldToScreen(x, y)
+
+		offX, offY := 40, -40
+
+		mr.viewport.PushTranslationWorld(x, y)
+		target.PushTranslation(screenX, screenY)
+		target.DrawLine(offX, offY, color.RGBA{255, 255, 255, 128})
+		target.PushTranslation(offX+10, offY-20)
+		target.PushTranslation(-10, -10)
+		target.DrawRect(200, 50, color.RGBA{0, 0, 0, 64})
+		target.Pop()
+		target.DrawTextf("World (%.2f, %.2f)\nVelocity (%.2f, %.2f)", x, y, vx, vy)
+		target.Pop()
+		target.Pop()
+		mr.viewport.PopTranslation()
 	}
 }
 

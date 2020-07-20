@@ -19,6 +19,14 @@ type Missile struct {
 	record *d2datadict.MissileRecord
 }
 
+func (m *Missile) GetPosition() d2vector.Position {
+	return m.AnimatedEntity.Position
+}
+
+func (m *Missile) GetVelocity() d2vector.Vector {
+	return m.AnimatedEntity.velocity
+}
+
 // CreateMissile creates a new Missile and initializes it's animation.
 func CreateMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error) {
 	animation, err := d2asset.LoadAnimation(
