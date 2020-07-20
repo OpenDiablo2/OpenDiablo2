@@ -21,7 +21,8 @@ import (
 
 // Stamp represents a pre-fabricated map stamp that can be placed on a map.
 type Stamp struct {
-	regionPath  string                       // The file path of the region
+	regionPath  string // The file path of the region
+	regionID    d2enum.RegionIdType
 	levelType   d2datadict.LevelTypeRecord   // The level type id for this stamp
 	levelPreset d2datadict.LevelPresetRecord // The level preset id for this stamp
 	tiles       []d2dt1.Tile                 // The tiles contained on this stamp
@@ -31,6 +32,7 @@ type Stamp struct {
 // LoadStamp loads the Stamp data from file.
 func LoadStamp(levelType d2enum.RegionIdType, levelPreset, fileIndex int) *Stamp {
 	stamp := &Stamp{
+		regionID:    levelType,
 		levelType:   d2datadict.LevelTypes[levelType],
 		levelPreset: d2datadict.LevelPresets[levelPreset],
 	}
@@ -74,13 +76,6 @@ func LoadStamp(levelType d2enum.RegionIdType, levelPreset, fileIndex int) *Stamp
 
 	stamp.ds1, _ = d2ds1.LoadDS1(fileData)
 
-	// Update the region info for the tiles
-	for rx := 0; rx < len(stamp.ds1.Tiles); rx++ {
-		for x := 0; x < len(stamp.ds1.Tiles[rx]); x++ {
-			stamp.ds1.Tiles[rx][x].RegionType = levelType
-		}
-	}
-
 	return stamp
 }
 
@@ -97,6 +92,11 @@ func (mr *Stamp) LevelPreset() d2datadict.LevelPresetRecord {
 // LevelType returns the level type ID.
 func (mr *Stamp) LevelType() d2datadict.LevelTypeRecord {
 	return mr.levelType
+}
+
+// RegionPath returns the file path of the region.
+func (mr *Stamp) RegionID() d2enum.RegionIdType {
+	return mr.regionID
 }
 
 // RegionPath returns the file path of the region.

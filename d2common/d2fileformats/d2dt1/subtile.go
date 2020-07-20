@@ -12,6 +12,18 @@ type SubTileFlags struct {
 	Unknown3        bool
 }
 
+// Combine combines a second set of flags into the current one
+func (s *SubTileFlags) Combine(f SubTileFlags) {
+	s.BlockWalk = s.BlockWalk || f.BlockWalk
+	s.BlockLOS = s.BlockLOS || f.BlockLOS
+	s.BlockJump = s.BlockJump || f.BlockJump
+	s.BlockPlayerWalk = s.BlockPlayerWalk || f.BlockPlayerWalk
+	s.Unknown1 = s.Unknown1 || f.Unknown1
+	s.BlockLight = s.BlockLight || f.BlockLight
+	s.Unknown2 = s.Unknown2 || f.Unknown2
+	s.Unknown3 = s.Unknown3 || f.Unknown3
+}
+
 // DebugString returns the debug string
 func (s *SubTileFlags) DebugString() string {
 	result := ""

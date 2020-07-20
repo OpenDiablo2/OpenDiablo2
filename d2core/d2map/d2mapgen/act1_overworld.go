@@ -66,7 +66,7 @@ func GenerateAct1Overworld(mapEngine *d2mapengine.MapEngine) {
 		mapEngine.PlaceStamp(townStamp, mapWidth-townSize.Width, mapHeight-townSize.Height)
 	}
 
-	mapEngine.RegenerateWalkPaths()
+	//mapEngine.RegenerateWalkPaths()
 }
 
 func generateWilderness1TownEast(mapEngine *d2mapengine.MapEngine, startX, startY int) {
@@ -264,7 +264,7 @@ func generateWilderness1Contents(mapEngine *d2mapengine.MapEngine, rect d2common
 		for x := 0; x < rect.Width; x++ {
 			tile := mapEngine.Tile(rect.Left+x, rect.Top+y)
 			tile.RegionType = d2enum.RegionIdType(levelDetails.LevelType)
-			tile.Floors = []d2ds1.FloorShadowRecord{wildernessGrass}
+			tile.Components.Floors = []d2ds1.FloorShadowRecord{wildernessGrass}
 		}
 	}
 
@@ -320,11 +320,11 @@ func areaEmpty(mapEngine *d2mapengine.MapEngine, rect d2common.Rectangle) bool {
 
 	for y := rect.Top; y <= rect.Bottom(); y++ {
 		for x := rect.Left; x <= rect.Right(); x++ {
-			if len(mapEngine.Tile(x, y).Floors) == 0 {
+			if len(mapEngine.Tile(x, y).Components.Floors) == 0 {
 				continue
 			}
 
-			floor := mapEngine.Tile(x, y).Floors[0]
+			floor := mapEngine.Tile(x, y).Components.Floors[0]
 
 			if floor.Style != 0 || floor.Sequence != 0 || floor.Prop1 != 1 {
 				return false

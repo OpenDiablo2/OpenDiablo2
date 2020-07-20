@@ -173,33 +173,34 @@ func (g *GameClient) handleAddPlayerPacket(packet d2netpacket.NetPacket) error {
 }
 
 func (g *GameClient) handleMovePlayerPacket(packet d2netpacket.NetPacket) error {
-	movePlayer := packet.PacketData.(d2netpacket.MovePlayerPacket)
-	player := g.Players[movePlayer.PlayerID]
-	path, _, _ := g.MapEngine.PathFind(movePlayer.StartX, movePlayer.StartY, movePlayer.DestX, movePlayer.DestY)
+	//movePlayer := packet.PacketData.(d2netpacket.MovePlayerPacket)
+	//player := g.Players[movePlayer.PlayerID]
+	//path, _, _ := g.MapEngine.PathFind(movePlayer.StartX, movePlayer.StartY, movePlayer.DestX, movePlayer.DestY)
 
-	if len(path) > 0 {
-		player.SetPath(path, func() {
-			tilePosition := player.Position.Tile()
-			tile := g.MapEngine.TileAt(int(tilePosition.X()), int(tilePosition.Y()))
 
-			if tile == nil {
-				return
-			}
+	//if len(path) > 0 {
+	//	player.SetPath(path, func() {
+	//		tilePosition := player.Position.Tile()
+	//		tile := g.MapEngine.TileAt(int(tilePosition.X()), int(tilePosition.Y()))
 
-			regionType := tile.RegionType
-			if regionType == d2enum.RegionAct1Town {
-				player.SetIsInTown(true)
-			} else {
-				player.SetIsInTown(false)
-			}
+	//		if tile == nil {
+	//			return
+	//		}
 
-			err := player.SetAnimationMode(player.GetAnimationMode())
+	//		regionType := tile.RegionType
+	//		if regionType == d2enum.RegionAct1Town {
+	//			player.SetIsInTown(true)
+	//		} else {
+	//			player.SetIsInTown(false)
+	//		}
 
-			if err != nil {
-				log.Printf("GameClient: error setting animation mode for player %s: %s", player.Id, err)
-			}
-		})
-	}
+	//		err := player.SetAnimationMode(player.GetAnimationMode())
+
+	//		if err != nil {
+	//			log.Printf("GameClient: error setting animation mode for player %s: %s", player.Id, err)
+	//		}
+	//	})
+	//}
 
 	return nil
 }

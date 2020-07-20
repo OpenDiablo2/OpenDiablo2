@@ -18,21 +18,21 @@ func (mr *MapRenderer) generateTileCache() {
 		tileX := idx % mapEngineSize.Width
 		tileY := (idx - tileX) / mapEngineSize.Width
 
-		for i := range tile.Floors {
-			if !tile.Floors[i].Hidden && tile.Floors[i].Prop1 != 0 {
-				mr.generateFloorCache(&tile.Floors[i], tileX, tileY)
+		for i := range tile.Components.Floors {
+			if !tile.Components.Floors[i].Hidden && tile.Components.Floors[i].Prop1 != 0 {
+				mr.generateFloorCache(&tile.Components.Floors[i], tileX, tileY)
 			}
 		}
 
-		for i := range tile.Shadows {
-			if !tile.Shadows[i].Hidden && tile.Shadows[i].Prop1 != 0 {
-				mr.generateShadowCache(&tile.Shadows[i], tileX, tileY)
+		for i := range tile.Components.Shadows {
+			if !tile.Components.Shadows[i].Hidden && tile.Components.Shadows[i].Prop1 != 0 {
+				mr.generateShadowCache(&tile.Components.Shadows[i], tileX, tileY)
 			}
 		}
 
-		for i := range tile.Walls {
-			if !tile.Walls[i].Hidden && tile.Walls[i].Prop1 != 0 {
-				mr.generateWallCache(&tile.Walls[i], tileX, tileY)
+		for i := range tile.Components.Walls {
+			if !tile.Components.Walls[i].Hidden && tile.Components.Walls[i].Prop1 != 0 {
+				mr.generateWallCache(&tile.Components.Walls[i], tileX, tileY)
 			}
 		}
 	}
@@ -86,7 +86,7 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, 
 		tileHeight := d2common.AbsInt32(tileData[i].Height)
 		image, _ := mr.renderer.NewSurface(int(tileData[i].Width), int(tileHeight), d2enum.FilterNearest)
 		indexData := make([]byte, tileData[i].Width*tileHeight)
-		mr.decodeTileGfxData(tileData[i].Blocks, &indexData, tileYOffset, tileData[i].Width)
+		d2dt1.DecodeTileGfxData(tileData[i].Blocks, &indexData, tileYOffset, tileData[i].Width)
 		pixels := d2asset.ImgIndexToRGBA(indexData, mr.palette)
 
 		_ = image.ReplacePixels(pixels)
@@ -132,7 +132,7 @@ func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX,
 
 	image, _ := mr.renderer.NewSurface(int(tileData.Width), tileHeight, d2enum.FilterNearest)
 	indexData := make([]byte, tileData.Width*int32(tileHeight))
-	mr.decodeTileGfxData(tileData.Blocks, &indexData, tileYOffset, tileData.Width)
+	d2dt1.DecodeTileGfxData(tileData.Blocks, &indexData, tileYOffset, tileData.Width)
 	pixels := d2asset.ImgIndexToRGBA(indexData, mr.palette)
 	_ = image.ReplacePixels(pixels)
 	mr.setImageCacheRecord(tile.Style, tile.Sequence, 13, tileIndex, image)
@@ -199,10 +199,10 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY in
 	image, _ := mr.renderer.NewSurface(160, int(realHeight), d2enum.FilterNearest)
 	indexData := make([]byte, 160*realHeight)
 
-	mr.decodeTileGfxData(tileData.Blocks, &indexData, tileYOffset, 160)
+	d2dt1.DecodeTileGfxData(tileData.Blocks, &indexData, tileYOffset, 160)
 
 	if newTileData != nil {
-		mr.decodeTileGfxData(newTileData.Blocks, &indexData, tileYOffset, 160)
+		d2dt1.DecodeTileGfxData(newTileData.Blocks, &indexData, tileYOffset, 160)
 	}
 
 	pixels := d2asset.ImgIndexToRGBA(indexData, mr.palette)

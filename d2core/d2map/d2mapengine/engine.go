@@ -20,16 +20,17 @@ import (
 
 // MapEngine loads the tiles which make up the isometric map and the entities
 type MapEngine struct {
-	seed          int64                      // The map seed
-	entities      []d2interface.MapEntity    // Entities on the map
-	tiles         []d2ds1.TileRecord         // Map tiles
-	size          d2common.Size              // Size of the map, in tiles
-	levelType     d2datadict.LevelTypeRecord // Level type of this map
-	dt1TileData   []d2dt1.Tile               // DT1 tile data
-	walkMesh      []d2common.PathTile        // Sub tiles representing the walkable map area
-	startSubTileX int                        // Starting X position
-	startSubTileY int                        // Starting Y position
-	dt1Files      []string                   // List of DS1 strings
+	seed     int64                   // The map seed
+	entities []d2interface.MapEntity // Entities on the map
+	tiles    []MapTile
+	//tiles       []d2ds1.TileRecord         // Map tiles
+	size        d2common.Size              // Size of the map, in tiles
+	levelType   d2datadict.LevelTypeRecord // Level type of this map
+	dt1TileData []d2dt1.Tile               // DT1 tile data
+	//walkMesh      []d2common.PathTile        // Sub tiles representing the walkable map area
+	startSubTileX int      // Starting X position
+	startSubTileY int      // Starting Y position
+	dt1Files      []string // List of DS1 strings
 }
 
 // CreateMapEngine creates a new instance of the map engine and
@@ -40,9 +41,9 @@ func CreateMapEngine() *MapEngine {
 }
 
 // WalkMesh returns a pointer to a slice with the map's PathTiles.
-func (m *MapEngine) WalkMesh() *[]d2common.PathTile {
-	return &m.walkMesh
-}
+//func (m *MapEngine) WalkMesh() *[]d2common.PathTile {
+//	return &m.walkMesh
+//}
 
 // GetStartingPosition returns the starting position on the map in
 // sub-tiles.
@@ -56,9 +57,9 @@ func (m *MapEngine) ResetMap(levelType d2enum.RegionIdType, width, height int) {
 	m.entities = make([]d2interface.MapEntity, 0)
 	m.levelType = d2datadict.LevelTypes[levelType]
 	m.size = d2common.Size{Width: width, Height: height}
-	m.tiles = make([]d2ds1.TileRecord, width*height)
+	m.tiles = make([]MapTile, width*height)
 	m.dt1TileData = make([]d2dt1.Tile, 0)
-	m.walkMesh = make([]d2common.PathTile, width*height*25)
+	//m.walkMesh = make([]d2common.PathTile, width*height*25)
 	m.dt1Files = make([]string, 0)
 
 	for idx := range m.levelType.Files {
@@ -94,7 +95,7 @@ func (m *MapEngine) addDT1(fileName string) {
 // appends the tile data and files to MapEngine.dt1TileData and
 // MapEngine.dt1Files.
 func (m *MapEngine) AddDS1(fileName string) {
-	if len(fileName) == 0 || fileName == "0" {
+	if fileName == "" || fileName == "0" {
 		return
 	}
 
@@ -108,23 +109,23 @@ func (m *MapEngine) AddDS1(fileName string) {
 	for idx := range ds1.Files {
 		dt1File := ds1.Files[idx]
 		dt1File = strings.ToLower(dt1File)
-		dt1File = strings.Replace(dt1File, "c:", "", -1)       // Yes they did...
-		dt1File = strings.Replace(dt1File, ".tg1", ".dt1", -1) // Yes they did...
-		dt1File = strings.Replace(dt1File, "\\d2\\data\\global\\tiles\\", "", -1)
-		m.addDT1(strings.Replace(dt1File, "\\", "/", -1))
+		dt1File = strings.ReplaceAll(dt1File, "c:", "")       // Yes they did...
+		dt1File = strings.ReplaceAll(dt1File, ".tg1", ".dt1") // Yes they did...
+		dt1File = strings.ReplaceAll(dt1File, "\\d2\\data\\global\\tiles\\", "")
+		m.addDT1(strings.ReplaceAll(dt1File, "\\", "/"))
 	}
 }
 
-// FindTile returns the tile of given stye, sequence and tileType.
-func (m *MapEngine) FindTile(style, sequence, tileType int32) d2dt1.Tile {
-	for idx := range m.dt1TileData {
-		if m.dt1TileData[idx].Style == style && m.dt1TileData[idx].Sequence == sequence && m.dt1TileData[idx].Type == tileType {
-			return m.dt1TileData[idx]
-		}
-	}
-
-	panic("Could not find the requested tile!")
-}
+//// FindTile returns the tile of given stye, sequence and tileType.
+//func (m *MapEngine) FindTile(style, sequence, tileType int32) d2dt1.Tile {
+//	for idx := range m.dt1TileData {
+//		if m.dt1TileData[idx].Style == style && m.dt1TileData[idx].Sequence == sequence && m.dt1TileData[idx].Type == tileType {
+//			return m.dt1TileData[idx]
+//		}
+//	}
+//
+//	panic("Could not find the requested tile!")
+//}
 
 // LevelType returns the level type of this map.
 func (m *MapEngine) LevelType() d2datadict.LevelTypeRecord {
@@ -142,15 +143,22 @@ func (m *MapEngine) Size() d2common.Size {
 	return m.size
 }
 
+//func (m *MapEngine) SubTile(x, y int) *d2dt1.SubTileFlags {
+//	tX := x / 5
+//	tY := y / 5
+//	return &m.tiles[x+(y*m.size.Width)]
+//
+//}
+
 // Tile returns the TileRecord containing the data
 // for a single map tile.
-func (m *MapEngine) Tile(x, y int) *d2ds1.TileRecord {
+func (m *MapEngine) Tile(x, y int) *MapTile {
 	return &m.tiles[x+(y*m.size.Width)]
 }
 
 // Tiles returns a pointer to a slice contaning all
 // map tile data.
-func (m *MapEngine) Tiles() *[]d2ds1.TileRecord {
+func (m *MapEngine) Tiles() *[]MapTile {
 	return &m.tiles
 }
 
@@ -178,7 +186,8 @@ func (m *MapEngine) PlaceStamp(stamp *d2mapstamp.Stamp, tileOffsetX, tileOffsetY
 		for x := 0; x < stampW; x++ {
 			targetTileIndex := m.tileCoordinateToIndex((x + xMin), (y + yMin))
 			stampTile := *stamp.Tile(x, y)
-			m.tiles[targetTileIndex] = stampTile
+			m.tiles[targetTileIndex].RegionType = stamp.RegionID()
+			m.tiles[targetTileIndex].Components = stampTile
 		}
 	}
 
@@ -198,7 +207,7 @@ func (m *MapEngine) tileIndexToCoordinate(index int) (int, int) {
 
 // TileAt returns a pointer to the data for the map tile at the given
 // x and y index.
-func (m *MapEngine) TileAt(tileX, tileY int) *d2ds1.TileRecord {
+func (m *MapEngine) TileAt(tileX, tileY int) *MapTile {
 	idx := m.tileCoordinateToIndex(tileX, tileY)
 	if idx < 0 || idx >= len(m.tiles) {
 		return nil
@@ -255,7 +264,7 @@ func (m *MapEngine) GetTiles(style, sequence, tileType int32) []d2dt1.Tile {
 func (m *MapEngine) GetStartPosition() (float64, float64) {
 	for tileY := 0; tileY < m.size.Height; tileY++ {
 		for tileX := 0; tileX < m.size.Width; tileX++ {
-			tile := m.tiles[tileX+(tileY*m.size.Width)]
+			tile := m.tiles[tileX+(tileY*m.size.Width)].Components
 			for idx := range tile.Walls {
 				if tile.Walls[idx].Type.Special() && tile.Walls[idx].Style == 30 {
 					return float64(tileX) + 0.5, float64(tileY) + 0.5
@@ -285,7 +294,7 @@ func (m *MapEngine) TileExists(tileX, tileY int) bool {
 	tileIndex := m.tileCoordinateToIndex(tileX, tileY)
 
 	if valid := (tileIndex >= 0) && (tileIndex <= len(m.tiles)); valid {
-		tile := m.tiles[tileIndex]
+		tile := m.tiles[tileIndex].Components
 		numFeatures := len(tile.Floors)
 		numFeatures += len(tile.Shadows)
 		numFeatures += len(tile.Walls)
@@ -305,13 +314,13 @@ func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int,
 	m.PlaceStamp(region, 0, 0)
 }
 
-// GetTileData returns the tile with the given style, sequence and tileType.
-func (m *MapEngine) GetTileData(style int32, sequence int32, tileType d2enum.TileType) *d2dt1.Tile {
-	for idx := range m.dt1TileData {
-		if m.dt1TileData[idx].Style == style && m.dt1TileData[idx].Sequence == sequence && m.dt1TileData[idx].Type == int32(tileType) {
-			return &m.dt1TileData[idx]
-		}
-	}
-
-	return nil
-}
+//// GetTileData returns the tile with the given style, sequence and tileType.
+//func (m *MapEngine) GetTileData(style int32, sequence int32, tileType d2enum.TileType) *d2dt1.Tile {
+//	for idx := range m.dt1TileData {
+//		if m.dt1TileData[idx].Style == style && m.dt1TileData[idx].Sequence == sequence && m.dt1TileData[idx].Type == int32(tileType) {
+//			return &m.dt1TileData[idx]
+//		}
+//	}
+//
+//	return nil
+//}
