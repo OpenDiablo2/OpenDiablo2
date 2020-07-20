@@ -38,8 +38,8 @@ func (t *MapTile) PrepareTile(x, y int, me *MapEngine) {
 
 		wall.RandomIndex = getRandomTile(options, x, y, me.seed)
 
-		for i, s := range t.SubTiles {
-			s.Combine(options[wall.RandomIndex].SubTileFlags[i])
+		for i := range t.SubTiles {
+			t.SubTiles[i].Combine(options[wall.RandomIndex].SubTileFlags[i])
 		}
 	}
 
@@ -58,8 +58,8 @@ func (t *MapTile) PrepareTile(x, y int, me *MapEngine) {
 			floor.RandomIndex = getRandomTile(options, x, y, me.seed)
 		}
 
-		for i, s := range t.SubTiles {
-			s.Combine(options[floor.RandomIndex].SubTileFlags[i])
+		for i := range t.SubTiles {
+			t.SubTiles[i].Combine(options[floor.RandomIndex].SubTileFlags[i])
 		}
 	}
 
@@ -73,8 +73,8 @@ func (t *MapTile) PrepareTile(x, y int, me *MapEngine) {
 
 		shadow.RandomIndex = getRandomTile(options, x, y, me.seed)
 
-		for i, s := range t.SubTiles {
-			s.Combine(options[shadow.RandomIndex].SubTileFlags[i])
+		for i := range t.SubTiles {
+			t.SubTiles[i].Combine(options[shadow.RandomIndex].SubTileFlags[i])
 		}
 	}
 }
