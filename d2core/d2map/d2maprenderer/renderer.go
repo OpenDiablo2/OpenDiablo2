@@ -208,36 +208,36 @@ func (mr *MapRenderer) renderPass4(target d2interface.Surface, startX, startY, e
 	}
 }
 
-func (mr *MapRenderer) renderTilePass1(tile *d2ds1.TileRecord, target d2interface.Surface) {
-	for _, wall := range tile.Walls {
+func (mr *MapRenderer) renderTilePass1(tile *d2mapengine.MapTile, target d2interface.Surface) {
+	for _, wall := range tile.Components.Walls {
 		if !wall.Hidden && wall.Prop1 != 0 && wall.Type.LowerWall() {
 			mr.renderWall(wall, mr.viewport, target)
 		}
 	}
 
-	for _, floor := range tile.Floors {
+	for _, floor := range tile.Components.Floors {
 		if !floor.Hidden && floor.Prop1 != 0 {
 			mr.renderFloor(floor, target)
 		}
 	}
 
-	for _, shadow := range tile.Shadows {
+	for _, shadow := range tile.Components.Shadows {
 		if !shadow.Hidden && shadow.Prop1 != 0 {
 			mr.renderShadow(shadow, target)
 		}
 	}
 }
 
-func (mr *MapRenderer) renderTilePass2(tile *d2ds1.TileRecord, target d2interface.Surface) {
-	for _, wall := range tile.Walls {
+func (mr *MapRenderer) renderTilePass2(tile *d2mapengine.MapTile, target d2interface.Surface) {
+	for _, wall := range tile.Components.Walls {
 		if !wall.Hidden && wall.Type.UpperWall() {
 			mr.renderWall(wall, mr.viewport, target)
 		}
 	}
 }
 
-func (mr *MapRenderer) renderTilePass3(tile *d2ds1.TileRecord, target d2interface.Surface) {
-	for _, wall := range tile.Walls {
+func (mr *MapRenderer) renderTilePass3(tile *d2mapengine.MapTile, target d2interface.Surface) {
+	for _, wall := range tile.Components.Walls {
 		if wall.Type == d2enum.TileRoof {
 			mr.renderWall(wall, mr.viewport, target)
 		}
@@ -359,7 +359,7 @@ func (mr *MapRenderer) renderTileDebug(ax, ay int, debugVisLevel int, target d2i
 			target.Pop()
 		}*/
 
-		for i, wall := range tile.Walls {
+		for i, wall := range tile.Components.Walls {
 			if wall.Type.Special() {
 				target.PushTranslation(-20, 10+(i+1)*14)
 				target.DrawTextf("s: %v-%v", wall.Style, wall.Sequence)
@@ -372,9 +372,9 @@ func (mr *MapRenderer) renderTileDebug(ax, ay int, debugVisLevel int, target d2i
 				isoX := (xx - yy) * 16
 				isoY := (xx + yy) * 8
 
-				var walkableArea = (*mr.mapEngine.WalkMesh())[((yy+(ay*5))*mr.mapEngine.Size().Width*5)+xx+(ax*5)]
+				blocked := tile.GetSubTileFlags(xx, yy).BlockWalk
 
-				if !walkableArea.Walkable {
+				if blocked {
 					target.PushTranslation(isoX-3, isoY+4)
 					target.DrawRect(5, 5, tileCollisionColor)
 					target.Pop()

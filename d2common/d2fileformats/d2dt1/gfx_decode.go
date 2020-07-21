@@ -1,10 +1,8 @@
-package d2maprenderer
+package d2dt1
 
-import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
-
-func (mr *MapRenderer) decodeTileGfxData(blocks []d2dt1.Block, pixels *[]byte, tileYOffset int32, tileWidth int32) {
+func DecodeTileGfxData(blocks []Block, pixels *[]byte, tileYOffset int32, tileWidth int32) {
 	for _, block := range blocks {
-		if block.Format == d2dt1.BlockFormatIsometric {
+		if block.Format == BlockFormatIsometric {
 			// 3D isometric decoding
 			xjump := []int32{14, 12, 10, 8, 6, 4, 2, 0, 2, 4, 6, 8, 10, 12, 14}
 			nbpix := []int32{4, 8, 12, 16, 20, 24, 28, 32, 28, 24, 20, 16, 12, 8, 4}

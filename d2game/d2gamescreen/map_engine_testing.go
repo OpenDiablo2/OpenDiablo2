@@ -14,7 +14,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
@@ -92,7 +91,7 @@ type MapEngineTest struct {
 
 	lastMouseX, lastMouseY int
 	selX, selY             int
-	selectedTile           *d2ds1.TileRecord
+	selectedTile           *d2mapengine.MapTile
 
 	//TODO: this is region specific properties, should be refactored for multi-region rendering
 	currentRegion int
@@ -164,7 +163,7 @@ func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 		met.mapEngine = d2mapengine.CreateMapEngine() // necessary for map name update
 		met.mapEngine.SetSeed(time.Now().UnixNano())
 		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex, true)
-		met.mapEngine.RegenerateWalkPaths()
+		//met.mapEngine.RegenerateWalkPaths()
 	}
 
 	met.mapRenderer.SetMapEngine(met.mapEngine)
@@ -227,7 +226,7 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 		screen.PushTranslation(15, 16)
 		screen.DrawTextf("Walls")
 		tpop := 0
-		for _, wall := range met.selectedTile.Walls {
+		for _, wall := range met.selectedTile.Components.Walls {
 			screen.PushTranslation(0, 12)
 			tpop++
 			tmpString := fmt.Sprintf("%#v", wall)
@@ -245,7 +244,7 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 		screen.PushTranslation(170, 0)
 		screen.DrawTextf("Floors")
 		tpop = 0
-		for _, floor := range met.selectedTile.Floors {
+		for _, floor := range met.selectedTile.Components.Floors {
 			screen.PushTranslation(0, 12)
 			tpop++
 			tmpString := fmt.Sprintf("%#v", floor)
@@ -263,7 +262,7 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 		tpop = 0
 		screen.PushTranslation(170, 0)
 		screen.DrawTextf("Shadows")
-		for _, shadow := range met.selectedTile.Shadows {
+		for _, shadow := range met.selectedTile.Components.Shadows {
 			screen.PushTranslation(0, 12)
 			tpop++
 			tmpString := fmt.Sprintf("%#v", shadow)
@@ -281,7 +280,7 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 		tpop = 0
 		screen.PushTranslation(170, 0)
 		screen.DrawTextf("Substitutions")
-		for _, subst := range met.selectedTile.Substitutions {
+		for _, subst := range met.selectedTile.Components.Substitutions {
 			screen.PushTranslation(0, 12)
 			tpop++
 			tmpString := fmt.Sprintf("%#v", subst)
