@@ -122,12 +122,6 @@ func (ob *Object) GetLayer() int {
 	return ob.drawLayer
 }
 
-// GetPosition of the object
-func (ob *Object) GetPosition() (x, y float64) {
-	w := ob.Position.Tile()
-	return w.X(), w.Y()
-}
-
 // GetPositionF of the object but differently
 func (ob *Object) GetPositionF() (x, y float64) {
 	w := ob.Position.World()
@@ -137,4 +131,14 @@ func (ob *Object) GetPositionF() (x, y float64) {
 // Name gets the name of the object
 func (ob *Object) Name() string {
 	return ob.name
+}
+
+// GetPosition returns the object's position
+func (ob *Object) GetPosition() d2vector.Position {
+	return ob.Position
+}
+
+// GetVelocity returns the object's velocity vector
+func (ob *Object) GetVelocity() d2vector.Vector {
+	return d2vector.NewVector(0, 0)
 }
