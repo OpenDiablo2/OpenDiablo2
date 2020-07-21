@@ -20,7 +20,7 @@ func (m *MapEngine) checkLos(start, end d2vector.Position) (bool, d2vector.Posit
 	dv.Subtract(&start.Vector)
 	dx := dv.X()
 	dy := dv.Y()
-	N := math.Max(dx, dy)
+	N := math.Max(math.Abs(dx), math.Abs(dy))
 
 	var divN float64
 	if N == 0 {
