@@ -5,9 +5,6 @@ import (
 	"testing"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2astar"
 )
 
 var stepEntity mapEntity
@@ -38,8 +35,8 @@ func movingEntity() mapEntity {
 	return e
 }
 
-func path(length int, origin d2vector.Position) []d2astar.Pather {
-	path := make([]d2astar.Pather, length)
+func path(length int, origin d2vector.Position) []d2vector.Position {
+	path := make([]d2vector.Position, length)
 
 	for i := 0; i < length; i++ {
 		origin.AddScalar(float64(i+1) / 5)
@@ -50,8 +47,8 @@ func path(length int, origin d2vector.Position) []d2astar.Pather {
 	return path
 }
 
-func pathTile(x, y float64) *d2common.PathTile {
-	return &d2common.PathTile{Position: d2vector.NewPositionTile(x, y)}
+func pathTile(x, y float64) d2vector.Position {
+	return d2vector.NewPositionTile(x, y)
 }
 
 func TestMapEntity_Step(t *testing.T) {
