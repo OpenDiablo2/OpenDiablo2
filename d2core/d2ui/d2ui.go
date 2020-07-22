@@ -27,17 +27,17 @@ type UI struct {
 	CursorX       int          // TODO (carrelld) convert dependent code and remove
 	CursorY       int          // TODO (carrelld) convert dependent code and remove
 	pressedWidget Widget
+	clickSfx      d2interface.SoundEffect
 }
 
 var singleton UI
-var clickSfx d2interface.SoundEffect
 
 func Initialize(inputManager d2interface.InputManager, audioProvider d2interface.AudioProvider) {
 	sfx, err := audioProvider.LoadSoundEffect(d2resource.SFXButtonClick)
 	if err != nil {
 		log.Fatalf("failed to initialize ui: %v", err)
 	}
-	clickSfx = sfx
+	singleton.clickSfx = sfx
 
 	singleton.inputManager = inputManager
 	if err := singleton.inputManager.BindHandler(&singleton); err != nil {
@@ -83,7 +83,7 @@ func (u *UI) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 			if contains(w, singleton.CursorX, singleton.CursorY) && w.GetVisible() && w.GetEnabled() {
 				w.SetPressed(true)
 				singleton.pressedWidget = w
-				clickSfx.Play()
+				u.clickSfx.Play()
 				break
 			}
 		}

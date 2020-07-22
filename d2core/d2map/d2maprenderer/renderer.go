@@ -2,10 +2,11 @@ package d2maprenderer
 
 import (
 	"errors"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"image/color"
 	"log"
 	"math"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
@@ -17,13 +18,13 @@ import (
 
 // MapRenderer manages the game viewport and Camera. It requests tile and entity data from MapEngine and renders it.
 type MapRenderer struct {
-	renderer         d2interface.Renderer   // Used for drawing operations
-	mapEngine        *d2mapengine.MapEngine // The map engine that is being rendered
-	palette          d2interface.Palette    // The palette used for this map
-	viewport         *Viewport              // Used for rendering offsets
-	Camera           Camera                 // Used to determine where on the map we are rendering
-	mapDebugVisLevel int                    // Map debug visibility index (0=none, 1=tiles,
-	// 2=sub-tiles)
+	renderer            d2interface.Renderer   // Used for drawing operations
+	mapEngine           *d2mapengine.MapEngine // The map engine that is being rendered
+	palette             d2interface.Palette    // The palette used for this map
+	viewport            *Viewport              // Used for rendering offsets
+	Camera              Camera                 // Used to determine where on the map we are rendering
+	imageCacheRecords   map[uint32]d2interface.Surface
+	mapDebugVisLevel    int     // Map debug visibility index (0=none, 1=tiles, 2=sub-tiles)
 	entityDebugVisLevel int     // Entity Debug visibility index (0=none, 1=vectors)
 	lastFrameTime       float64 // The last time the map was rendered
 	currentFrame        int     // Current render frame (for animations)
@@ -488,4 +489,24 @@ func (mr *MapRenderer) ViewportDefault() {
 // SetCameraTarget sts the Camera target
 func (mr *MapRenderer) SetCameraTarget(position *d2vector.Position) {
 	mr.Camera.SetTarget(position)
+}
+
+// InvalidateImageCache the global region image cache. Call this when you are changing regions.
+func (mr *MapRenderer) InvalidateImageCache() {
+	mr.imageCacheRecords = nil
+}
+
+func (mr *MapRenderer) getImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte) d2interface.Surface {
+	lookupIndex := uint32(style)<<24 | uint32(sequence)<<16 | uint32(tileType)<<8 | uint32(randomIndex)
+	return mr.imageCacheRecords[lookupIndex]
+}
+
+func (mr *MapRenderer) setImageCacheRecord(style, sequence byte, tileType d2enum.TileType, randomIndex byte, image d2interface.Surface) {
+	lookupIndex := uint32(style)<<24 | uint32(sequence)<<16 | uint32(tileType)<<8 | uint32(randomIndex)
+
+	if mr.imageCacheRecords == nil {
+		mr.imageCacheRecords = make(map[uint32]d2interface.Surface)
+	}
+
+	mr.imageCacheRecords[lookupIndex] = image
 }

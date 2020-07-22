@@ -14,8 +14,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapstamp"
 )
 
-var wildernessGrass = d2ds1.FloorShadowRecord{Prop1: 1, Style: 0, Sequence: 0}
-
 func loadPreset(mapEngine *d2mapengine.MapEngine, id, index int) *d2mapstamp.Stamp {
 	for _, file := range d2datadict.LevelPreset(id).Files {
 		mapEngine.AddDS1(file)
@@ -264,7 +262,7 @@ func generateWilderness1Contents(mapEngine *d2mapengine.MapEngine, rect d2common
 		for x := 0; x < rect.Width; x++ {
 			tile := mapEngine.Tile(rect.Left+x, rect.Top+y)
 			tile.RegionType = d2enum.RegionIdType(levelDetails.LevelType)
-			tile.Components.Floors = []d2ds1.FloorShadowRecord{wildernessGrass}
+			tile.Components.Floors = []d2ds1.FloorShadowRecord{{Prop1: 1, Style: 0, Sequence: 0}} // wildernessGrass
 			tile.PrepareTile(x, y, mapEngine)
 		}
 	}

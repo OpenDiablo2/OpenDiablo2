@@ -2,11 +2,12 @@ package d2gamescreen
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
 
@@ -26,58 +27,60 @@ type regionSpec struct {
 	extra            []int
 }
 
-var regions = []regionSpec{
-	// Act I
-	{d2enum.RegionAct1Town, 1, 3, []int{}},
-	{d2enum.RegionAct1Wilderness, 4, 52, []int{
-		108,
-		160, 161, 162, 163, 164,
-	}},
-	{d2enum.RegionAct1Cave, 53, 107, []int{}},
-	{d2enum.RegionAct1Crypt, 109, 159, []int{}},
-	{d2enum.RegionAct1Monestary, 165, 165, []int{}},
-	{d2enum.RegionAct1Courtyard, 166, 166, []int{256}},
-	{d2enum.RegionAct1Barracks, 167, 205, []int{}},
-	{d2enum.RegionAct1Jail, 206, 255, []int{}},
-	{d2enum.RegionAct1Cathedral, 257, 257, []int{}},
-	{d2enum.RegionAct1Catacombs, 258, 299, []int{}},
-	{d2enum.RegionAct1Tristram, 300, 300, []int{}},
+func getRegions() []regionSpec {
+	return []regionSpec{
+		// Act I
+		{d2enum.RegionAct1Town, 1, 3, []int{}},
+		{d2enum.RegionAct1Wilderness, 4, 52, []int{
+			108,
+			160, 161, 162, 163, 164,
+		}},
+		{d2enum.RegionAct1Cave, 53, 107, []int{}},
+		{d2enum.RegionAct1Crypt, 109, 159, []int{}},
+		{d2enum.RegionAct1Monestary, 165, 165, []int{}},
+		{d2enum.RegionAct1Courtyard, 166, 166, []int{256}},
+		{d2enum.RegionAct1Barracks, 167, 205, []int{}},
+		{d2enum.RegionAct1Jail, 206, 255, []int{}},
+		{d2enum.RegionAct1Cathedral, 257, 257, []int{}},
+		{d2enum.RegionAct1Catacombs, 258, 299, []int{}},
+		{d2enum.RegionAct1Tristram, 300, 300, []int{}},
 
-	// Act II
-	{d2enum.RegionAct2Town, 301, 301, []int{}},
-	{d2enum.RegionAct2Sewer, 302, 352, []int{}},
-	{d2enum.RegionAct2Harem, 353, 357, []int{}},
-	{d2enum.RegionAct2Basement, 358, 361, []int{}},
-	{d2enum.RegionAct2Desert, 362, 413, []int{}},
-	{d2enum.RegionAct2Tomb, 414, 481, []int{}},
-	{d2enum.RegionAct2Lair, 482, 509, []int{}},
-	{d2enum.RegionAct2Arcane, 510, 528, []int{}},
+		// Act II
+		{d2enum.RegionAct2Town, 301, 301, []int{}},
+		{d2enum.RegionAct2Sewer, 302, 352, []int{}},
+		{d2enum.RegionAct2Harem, 353, 357, []int{}},
+		{d2enum.RegionAct2Basement, 358, 361, []int{}},
+		{d2enum.RegionAct2Desert, 362, 413, []int{}},
+		{d2enum.RegionAct2Tomb, 414, 481, []int{}},
+		{d2enum.RegionAct2Lair, 482, 509, []int{}},
+		{d2enum.RegionAct2Arcane, 510, 528, []int{}},
 
-	// Act III
-	{d2enum.RegionAct3Town, 529, 529, []int{}},
-	{d2enum.RegionAct3Jungle, 530, 604, []int{}},
-	{d2enum.RegionAct3Kurast, 605, 658, []int{
-		748, 749, 750, 751, 752, 753, 754, 755, 756, 757, 758, 759, 760, 761, 762, 763, 764, 765, 766, 767, 768, 769,
-		770, 771, 772, 773, 774, 775, 776, 777, 778, 779, 780, 781, 782, 783, 784, 785, 786, 787, 788, 789, 790, 791,
-		792, 793, 794, 795, 796,
-	}},
-	{d2enum.RegionAct3Spider, 659, 664, []int{}},
-	{d2enum.RegionAct3Dungeon, 665, 704, []int{}},
-	{d2enum.RegionAct3Sewer, 705, 747, []int{}},
+		// Act III
+		{d2enum.RegionAct3Town, 529, 529, []int{}},
+		{d2enum.RegionAct3Jungle, 530, 604, []int{}},
+		{d2enum.RegionAct3Kurast, 605, 658, []int{
+			748, 749, 750, 751, 752, 753, 754, 755, 756, 757, 758, 759, 760, 761, 762, 763, 764, 765, 766, 767, 768, 769,
+			770, 771, 772, 773, 774, 775, 776, 777, 778, 779, 780, 781, 782, 783, 784, 785, 786, 787, 788, 789, 790, 791,
+			792, 793, 794, 795, 796,
+		}},
+		{d2enum.RegionAct3Spider, 659, 664, []int{}},
+		{d2enum.RegionAct3Dungeon, 665, 704, []int{}},
+		{d2enum.RegionAct3Sewer, 705, 747, []int{}},
 
-	// Act IV
-	{d2enum.RegionAct4Town, 797, 798, []int{}},
-	{d2enum.RegionAct4Mesa, 799, 835, []int{}},
-	{d2enum.RegionAct4Lava, 836, 862, []int{}},
+		// Act IV
+		{d2enum.RegionAct4Town, 797, 798, []int{}},
+		{d2enum.RegionAct4Mesa, 799, 835, []int{}},
+		{d2enum.RegionAct4Lava, 836, 862, []int{}},
 
-	// Act V -- broken or wrong order
-	{d2enum.RegonAct5Town, 863, 864, []int{}},
-	{d2enum.RegionAct5Siege, 865, 879, []int{}},
-	{d2enum.RegionAct5Barricade, 880, 1002, []int{}},
-	{d2enum.RegionAct5IceCaves, 1003, 1041, []int{}},
-	{d2enum.RegionAct5Temple, 1042, 1052, []int{}},
-	{d2enum.RegionAct5Baal, 1059, 1090, []int{}},
-	{d2enum.RegionAct5Lava, 1053, 1058, []int{}},
+		// Act V -- broken or wrong order
+		{d2enum.RegonAct5Town, 863, 864, []int{}},
+		{d2enum.RegionAct5Siege, 865, 879, []int{}},
+		{d2enum.RegionAct5Barricade, 880, 1002, []int{}},
+		{d2enum.RegionAct5IceCaves, 1003, 1041, []int{}},
+		{d2enum.RegionAct5Temple, 1042, 1052, []int{}},
+		{d2enum.RegionAct5Baal, 1059, 1090, []int{}},
+		{d2enum.RegionAct5Lava, 1053, 1058, []int{}},
+	}
 }
 
 // MapEngineTest represents the MapEngineTest screen
@@ -126,9 +129,9 @@ func CreateMapEngineTest(currentRegion,
 
 func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 	log.Printf("Loaded region: Type(%d) LevelPreset(%d) FileIndex(%d)", n, levelPreset, fileIndex)
-	d2maprenderer.InvalidateImageCache()
+	met.mapRenderer.InvalidateImageCache()
 
-	for _, spec := range regions {
+	for _, spec := range getRegions() {
 		if spec.regionType != d2enum.RegionIdType(n) {
 			continue
 		}
@@ -421,7 +424,7 @@ func (met *MapEngineTest) OnKeyDown(event d2interface.KeyEvent) bool {
 			met.levelPreset = increment(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
 			d2screen.SetNextScreen(met)
 		default:
-			met.currentRegion = increment(met.currentRegion, 0, len(regions))
+			met.currentRegion = increment(met.currentRegion, 0, len(getRegions()))
 			d2screen.SetNextScreen(met)
 		}
 
@@ -437,7 +440,7 @@ func (met *MapEngineTest) OnKeyDown(event d2interface.KeyEvent) bool {
 			met.levelPreset = decrement(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
 			d2screen.SetNextScreen(met)
 		default:
-			met.currentRegion = decrement(met.currentRegion, 0, len(regions))
+			met.currentRegion = decrement(met.currentRegion, 0, len(getRegions()))
 			d2screen.SetNextScreen(met)
 		}
 

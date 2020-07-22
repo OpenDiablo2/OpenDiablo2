@@ -30,8 +30,8 @@ type Player struct {
 }
 
 // run speed should be walkspeed * 1.5, since in the original game it is 6 yards walk and 9 yards run.
-var baseWalkSpeed = 6.0
-var baseRunSpeed = 9.0
+const baseWalkSpeed = 6.0
+const baseRunSpeed = 9.0
 
 // CreatePlayer creates a new player entity and returns a pointer to it.
 func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero,
