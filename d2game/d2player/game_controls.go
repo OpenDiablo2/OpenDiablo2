@@ -259,7 +259,7 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 
 	if isRight && shouldDoRight && inRect {
 		lastRightBtnActionTime = now
-		g.inputListener.OnPlayerCast(missileID, px, py)
+		g.inputListener.OnPlayerCast(g.missileID, px, py)
 		return true
 	}
 
@@ -303,7 +303,7 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 	if event.Button() == d2enum.MouseButtonRight && !g.isInActiveMenusRect(mx, my) {
 		lastRightBtnActionTime = d2common.Now()
-		g.inputListener.OnPlayerCast(missileID, px, py)
+		g.inputListener.OnPlayerCast(g.missileID, px, py)
 		return true
 	}
 
