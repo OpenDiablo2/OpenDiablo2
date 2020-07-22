@@ -19,16 +19,18 @@ type Missile struct {
 	record *d2datadict.MissileRecord
 }
 
+// GetPosition returns the entity position and implements MapEntity.
 func (m *Missile) GetPosition() d2vector.Position {
 	return m.AnimatedEntity.Position
 }
 
+// GetVelocity returns the entity position and implements MapEntity.
 func (m *Missile) GetVelocity() d2vector.Vector {
 	return m.AnimatedEntity.velocity
 }
 
 // CreateMissile creates a new Missile and initializes it's animation.
-func CreateMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error) {
+func CreateMissile(position d2vector.Position, record *d2datadict.MissileRecord) (*Missile, error) {
 	animation, err := d2asset.LoadAnimation(
 		fmt.Sprintf("%s/%s.dcc", d2resource.MissileData, record.Animation.CelFileName),
 		d2resource.PaletteUnits,
@@ -45,7 +47,7 @@ func CreateMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error)
 	// animation.SetPlaySpeed(float64(record.Animation.AnimationSpeed))
 	animation.SetPlayLoop(record.Animation.LoopAnimation)
 	animation.PlayForward()
-	entity := CreateAnimatedEntity(x, y, animation)
+	entity := CreateAnimatedEntity(position, animation)
 
 	result := &Missile{
 		AnimatedEntity: entity,

@@ -6,6 +6,8 @@ import (
 	"math"
 	"os"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -297,7 +299,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		equipment := d2inventory.HeroObjects[heroType]
 
 		// TODO: Generate or load the object from the actual player data...
-		v.characterImage[i] = d2mapentity.CreatePlayer("", "", 0, 0, 0,
+		v.characterImage[i] = d2mapentity.CreatePlayer("", "", d2vector.NewPosition(0, 0), 0,
 			v.gameStates[idx].HeroType,
 			v.gameStates[idx].Stats,
 			&equipment,

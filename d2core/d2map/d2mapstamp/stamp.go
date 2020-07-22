@@ -132,8 +132,8 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 			// (See monpreset and monplace txts for reference)
 			if monstat != nil {
 				// Temorary use of Lookup.
-				npcX, npcY := (tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y
-				npc, err := d2mapentity.CreateNPC(npcX, npcY, monstat, 0)
+				position := d2vector.NewPosition(float64((tileOffsetX*5)+object.X), float64((tileOffsetY*5)+object.Y))
+				npc, err := d2mapentity.CreateNPC(position, monstat, 0)
 
 				if err == nil {
 					npc.SetPaths(convertPaths(tileOffsetX, tileOffsetY, object.Paths))

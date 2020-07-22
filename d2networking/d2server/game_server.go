@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
@@ -312,11 +314,12 @@ func OnClientConnected(client ClientConnection) {
 	playerState := client.GetPlayerState()
 
 	// these are in subtiles
-	playerX := int(sx*subtilesPerTile) + middleOfTileOffset
-	playerY := int(sy*subtilesPerTile) + middleOfTileOffset
+	position := d2vector.NewPosition(
+		sx*subtilesPerTile+middleOfTileOffset,
+		sy*subtilesPerTile+middleOfTileOffset)
 
 	createPlayerPacket := d2netpacket.CreateAddPlayerPacket(client.GetUniqueID(),
-		playerState.HeroName, playerX, playerY,
+		playerState.HeroName, position,
 		playerState.HeroType, playerState.Stats, playerState.Equipment)
 
 	for _, connection := range singletonServer.clientConnections {
@@ -330,12 +333,14 @@ func OnClientConnected(client ClientConnection) {
 		}
 
 		conPlayerState := connection.GetPlayerState()
-		playerX := int(conPlayerState.X*subtilesPerTile) + middleOfTileOffset
-		playerY := int(conPlayerState.Y*subtilesPerTile) + middleOfTileOffset
+		position := d2vector.NewPosition(
+			conPlayerState.X*subtilesPerTile+middleOfTileOffset,
+			conPlayerState.Y*subtilesPerTile+middleOfTileOffset)
+
 		err = client.SendPacketToClient(d2netpacket.CreateAddPlayerPacket(
 			connection.GetUniqueID(),
 			conPlayerState.HeroName,
-			playerX, playerY,
+			position,
 			conPlayerState.HeroType,
 			conPlayerState.Stats, conPlayerState.Equipment),
 		)

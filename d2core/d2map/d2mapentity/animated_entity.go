@@ -2,6 +2,7 @@ package d2mapentity
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 )
 
 // AnimatedEntity represents an animation that can be projected onto the map.
@@ -15,9 +16,9 @@ type AnimatedEntity struct {
 }
 
 // CreateAnimatedEntity creates an instance of AnimatedEntity
-func CreateAnimatedEntity(x, y int, animation d2interface.Animation) *AnimatedEntity {
+func CreateAnimatedEntity(position d2vector.Position, animation d2interface.Animation) *AnimatedEntity {
 	entity := &AnimatedEntity{
-		mapEntity: newMapEntity(x, y),
+		mapEntity: newMapEntity(position),
 		animation: animation,
 	}
 	entity.mapEntity.directioner = entity.rotate

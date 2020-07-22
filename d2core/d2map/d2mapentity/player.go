@@ -34,8 +34,14 @@ const baseWalkSpeed = 6.0
 const baseRunSpeed = 9.0
 
 // CreatePlayer creates a new player entity and returns a pointer to it.
-func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero,
-	stats *d2hero.HeroStatsState, equipment *d2inventory.CharacterEquipment) *Player {
+func CreatePlayer(
+	id,
+	name string,
+	position d2vector.Position,
+	direction int,
+	heroType d2enum.Hero,
+	stats *d2hero.HeroStatsState,
+	equipment *d2inventory.CharacterEquipment) *Player {
 	layerEquipment := &[d2enum.CompositeTypeMax]string{
 		d2enum.CompositeTypeHead:      equipment.Head.GetArmorClass(),
 		d2enum.CompositeTypeTorso:     equipment.Torso.GetArmorClass(),
@@ -58,7 +64,7 @@ func CreatePlayer(id, name string, x, y int, direction int, heroType d2enum.Hero
 
 	result := &Player{
 		Id:        id,
-		mapEntity: newMapEntity(x, y),
+		mapEntity: newMapEntity(position),
 		composite: composite,
 		Equipment: equipment,
 		Stats:     stats,

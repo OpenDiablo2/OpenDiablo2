@@ -1,8 +1,9 @@
 package d2mapentity
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"math/rand"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
@@ -38,9 +39,9 @@ const (
 )
 
 // CreateNPC creates a new NPC and returns a pointer to it.
-func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) (*NPC, error) {
+func CreateNPC(position d2vector.Position, monstat *d2datadict.MonStatsRecord, direction int) (*NPC, error) {
 	result := &NPC{
-		mapEntity:     newMapEntity(x, y),
+		mapEntity:     newMapEntity(position),
 		HasPaths:      false,
 		monstatRecord: monstat,
 		monstatEx:     d2datadict.MonStats2[monstat.ExtraDataKey],

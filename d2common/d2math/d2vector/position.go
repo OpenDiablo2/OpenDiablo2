@@ -28,7 +28,7 @@ func NewPosition(x, y float64) Position {
 	return p
 }
 
-// NewPosition returns a Position struct with the given tile coordinates where 1 = 1 tile, with a fractional offset.
+// NewPositionTile returns a Position struct with the given tile coordinates where 1 = 1 tile, with a fractional offset.
 func NewPositionTile(x, y float64) Position {
 	p := Position{NewVector(x*subTilesPerTile, y*subTilesPerTile)}
 	p.checkValues()

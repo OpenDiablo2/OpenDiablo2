@@ -23,7 +23,7 @@ func setup() {
 }
 
 func entity() mapEntity {
-	return newMapEntity(10, 10)
+	return newMapEntity(d2vector.NewPosition(10, 10))
 }
 
 func movingEntity() mapEntity {

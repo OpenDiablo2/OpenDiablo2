@@ -2,7 +2,6 @@ package d2mapentity
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
-
 )
 
 // mapEntity represents an entity on the map that can be animated
@@ -20,12 +19,10 @@ type mapEntity struct {
 }
 
 // newMapEntity creates an instance of mapEntity
-func newMapEntity(x, y int) mapEntity {
-	pos := d2vector.NewPosition(float64(x), float64(y))
-
+func newMapEntity(position d2vector.Position) mapEntity {
 	return mapEntity{
-		Position: pos,
-		Target:   pos,
+		Position: position,
+		Target:   position,
 		velocity: d2vector.NewVector(0, 0),
 	}
 }
