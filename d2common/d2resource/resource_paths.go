@@ -1,7 +1,5 @@
 package d2resource
 
-var LanguageCode string
-
 // Paths of the resources inside the mpq files.
 const (
 	// --- Screens ---
@@ -199,7 +197,7 @@ const (
 
 	// --- Inventory Data ---
 
-	Inventory     = "/data/global/excel/inventory.txt"
+	Inventory   = "/data/global/excel/inventory.txt"
 	Weapons     = "/data/global/excel/weapons.txt"
 	Armor       = "/data/global/excel/armor.txt"
 	Misc        = "/data/global/excel/misc.txt"
@@ -285,7 +283,7 @@ const (
 	// --- Enemy Data ---
 
 	MonStats     = "/data/global/excel/monstats.txt"
-	MonStats2 	 = "/data/global/excel/monstats2.txt"
+	MonStats2    = "/data/global/excel/monstats2.txt"
 	MonPreset    = "/data/global/excel/monpreset.txt"
 	SuperUniques = "/data/global/excel/SuperUniques.txt"
 

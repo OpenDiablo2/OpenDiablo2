@@ -1,14 +1,15 @@
 package d2player
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"image"
 	"image/color"
 	"log"
 	"math"
 	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
@@ -29,12 +30,13 @@ type Panel interface {
 	Close()
 }
 
-// ID of missile to create when user right clicks.
-var missileID = 59
-var expBarWidth = 120.0
-var staminaBarWidth = 102.0
-var globeHeight = 80
-var globeWidth = 80
+const (
+	initialMissileID = 59
+	expBarWidth      = 120.0
+	staminaBarWidth  = 102.0
+	globeHeight      = 80
+	globeWidth       = 80
+)
 
 var leftMenuRect = d2common.Rectangle{Left: 0, Top: 0, Width: 400, Height: 600}
 var rightMenuRect = d2common.Rectangle{Left: 400, Top: 0, Width: 400, Height: 600}
@@ -51,6 +53,7 @@ type GameControls struct {
 	FreeCam        bool
 	lastMouseX     int
 	lastMouseY     int
+	missileID      int // ID of missile to create when user right clicks.
 
 	// UI
 	globeSprite        *d2ui.Sprite
@@ -85,6 +88,7 @@ const (
 
 func NewGameControls(renderer d2interface.Renderer, hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
 	mapRenderer *d2maprenderer.MapRenderer, inputListener InputCallbackListener, term d2interface.Terminal) *GameControls {
+	missileID := initialMissileID
 	term.BindAction("setmissile", "set missile id to summon on right click", func(id int) {
 		missileID = id
 	})
@@ -118,7 +122,7 @@ func NewGameControls(renderer d2interface.Renderer, hero *d2mapentity.Player, ma
 	default:
 		inventoryRecordKey = "Amazon2"
 	}
-	
+
 	inventoryRecord := d2datadict.Inventory[inventoryRecordKey]
 
 	gc := &GameControls{
@@ -129,6 +133,7 @@ func NewGameControls(renderer d2interface.Renderer, hero *d2mapentity.Player, ma
 		mapRenderer:    mapRenderer,
 		inventory:      NewInventory(inventoryRecord),
 		heroStatsPanel: NewHeroStatsPanel(renderer, hero.Name(), hero.Class, hero.Stats),
+		missileID:      missileID,
 		nameLabel:      &nameLabel,
 		zoneChangeText: &zoneLabel,
 		actionableRegions: []ActionableRegion{
@@ -225,11 +230,11 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 	button := event.Button()
 	isLeft := button == d2enum.MouseButtonLeft
 	isRight := button == d2enum.MouseButtonRight
-	lastLeft:= now-lastLeftBtnActionTime
-	lastRight:= now-lastRightBtnActionTime
+	lastLeft := now - lastLeftBtnActionTime
+	lastRight := now - lastRightBtnActionTime
 	inRect := !g.isInActiveMenusRect(event.X(), event.Y())
-	shouldDoLeft  := lastLeft >= mouseBtnActionsTreshhold
-	shouldDoRight  := lastRight >= mouseBtnActionsTreshhold
+	shouldDoLeft := lastLeft >= mouseBtnActionsTreshhold
+	shouldDoRight := lastRight >= mouseBtnActionsTreshhold
 
 	if isLeft && shouldDoLeft && inRect {
 		lastLeftBtnActionTime = now
@@ -254,7 +259,7 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 
 	if isRight && shouldDoRight && inRect {
 		lastRightBtnActionTime = now
-		g.inputListener.OnPlayerCast(missileID, px, py)
+		g.inputListener.OnPlayerCast(g.missileID, px, py)
 		return true
 	}
 
@@ -298,7 +303,7 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 	if event.Button() == d2enum.MouseButtonRight && !g.isInActiveMenusRect(mx, my) {
 		lastRightBtnActionTime = d2common.Now()
-		g.inputListener.OnPlayerCast(missileID, px, py)
+		g.inputListener.OnPlayerCast(g.missileID, px, py)
 		return true
 	}
 

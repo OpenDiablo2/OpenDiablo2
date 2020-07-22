@@ -1,18 +1,16 @@
 package d2ui
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"strings"
 	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
-
-// TextBox with cursor focus
-var focusedTextBox *TextBox
 
 // TextBox represents a text input box
 type TextBox struct {
@@ -25,6 +23,7 @@ type TextBox struct {
 	textLabel Label
 	lineBar   Label
 	filter    string
+	isFocused bool
 }
 
 func CreateTextbox(renderer d2interface.Renderer) TextBox {
@@ -59,7 +58,7 @@ func (v *TextBox) Render(target d2interface.Surface) {
 }
 
 func (v *TextBox) OnKeyChars(event d2interface.KeyCharsEvent) bool {
-	if !(focusedTextBox == v) || !v.visible || !v.enabled {
+	if !v.isFocused || !v.visible || !v.enabled {
 		return false
 	}
 	newText := string(event.Chars())
@@ -178,5 +177,5 @@ func (v *TextBox) OnActivated(callback func()) {
 }
 
 func (v *TextBox) Activate() {
-	focusedTextBox = v
+	v.isFocused = true
 }

@@ -132,9 +132,6 @@ func (p *App) initialize() error {
 	p.lastTime = d2common.Now()
 	p.lastScreenAdvance = p.lastTime
 
-	config := d2config.Config
-	d2resource.LanguageCode = config.Language
-
 	p.renderer.SetWindowIcon("d2logo.png")
 	p.terminal.BindLogger()
 
@@ -168,6 +165,7 @@ func (p *App) initialize() error {
 		return err
 	}
 
+	config := d2config.Config
 	p.audio.SetVolumes(config.BgmVolume, config.SfxVolume)
 
 	if err := p.loadDataDict(); err != nil {
