@@ -7,7 +7,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 )
 
-// CreateStat creates a stat instance with the given ID and number of values
+// CreateStat creates a stat instance with the given record and values
 func CreateStat(record *d2datadict.ItemStatCostRecord, values ...d2stats.StatValue) d2stats.Stat {
 	if record == nil {
 		return nil

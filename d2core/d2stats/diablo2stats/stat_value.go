@@ -7,10 +7,9 @@ import (
 // static check that Diablo2StatValue implements StatValue
 var _ d2stats.StatValue = &Diablo2StatValue{}
 
-// Diablo2StatValue is a diablo 2 implementation of a StatValue
+// Diablo2StatValue is a diablo 2 implementation of a stat value
 type Diablo2StatValue struct {
-	int       int
-	float     float64
+	number    float64
 	_stringer func(d2stats.StatValue) string
 	_type     d2stats.StatValueType
 }
@@ -38,7 +37,7 @@ func (sv Diablo2StatValue) Clone() d2stats.StatValue {
 
 // Int returns the integer version of the stat value
 func (sv *Diablo2StatValue) Int() int {
-	return sv.int
+	return int(sv.number)
 }
 
 // String returns a string version of the value
@@ -48,21 +47,19 @@ func (sv *Diablo2StatValue) String() string {
 
 // Float returns a float64 version of the value
 func (sv *Diablo2StatValue) Float() float64 {
-	return sv.float
+	return sv.number
 }
 
 // SetInt sets the stat value using an int
 func (sv *Diablo2StatValue) SetInt(i int) d2stats.StatValue {
-	sv.int = i
-	sv.float = float64(i)
+	sv.number = float64(i)
 
 	return sv
 }
 
 // SetFloat sets the stat value using a float64
 func (sv *Diablo2StatValue) SetFloat(f float64) d2stats.StatValue {
-	sv.int = int(f)
-	sv.float = f
+	sv.number = f
 
 	return sv
 }
