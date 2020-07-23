@@ -21,7 +21,7 @@ type DCCAnimation struct {
 	renderer d2iface.Renderer
 }
 
-// CreateAnimationFromDCC creates an animation from d2dcc.DCC and d2dat.DATPalette
+// CreateDCCAnimation creates an animation from d2dcc.DCC and d2dat.DATPalette
 func CreateDCCAnimation(renderer d2iface.Renderer, dccPath string, palette d2iface.Palette,
 	effect d2enum.DrawEffect) (d2iface.Animation, error) {
 	dcc, err := loadDCC(dccPath)

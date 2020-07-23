@@ -6,6 +6,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 )
 
+// PathFind finds a path between given start and dest positions and returns the positions of the path
 func (m *MapEngine) PathFind(start, dest d2vector.Position) []d2vector.Position {
 	points := make([]d2vector.Position, 0)
 	_, point := m.checkLos(start, dest)

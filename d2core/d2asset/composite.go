@@ -138,7 +138,9 @@ func (c *Composite) SetDirection(direction int) {
 	for layerIdx := range c.mode.layers {
 		layer := c.mode.layers[layerIdx]
 		if layer != nil {
-			layer.SetDirection(c.direction)
+			if err := layer.SetDirection(c.direction); err != nil {
+				fmt.Printf("failed to set direction of layer: %d, err: %v\n", layerIdx, err)
+			}
 		}
 	}
 }
@@ -182,7 +184,9 @@ func (c *Composite) SetCurrentFrame(frame int) {
 	for layerIdx := range c.mode.layers {
 		layer := c.mode.layers[layerIdx]
 		if layer != nil {
-			layer.SetCurrentFrame(frame)
+			if err := layer.SetCurrentFrame(frame); err != nil {
+				fmt.Printf("failed to set current frame of layer: %d, err: %v\n", layerIdx, err)
+			}
 		}
 	}
 }

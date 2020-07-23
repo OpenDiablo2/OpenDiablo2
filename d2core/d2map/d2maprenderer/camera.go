@@ -23,12 +23,13 @@ func (c *Camera) SetTarget(target *d2vector.Position) {
 	c.target = target
 }
 
-// MoveBy adds the given vector to the current position of the Camera.
+// MoveTargetBy adds the given vector to the current position of the Camera.
 func (c *Camera) MoveTargetBy(vector *d2vector.Vector) {
 	if c.target == nil {
 		v := c.position.Clone()
-		c.target = &d2vector.Position{v}
+		c.target = &d2vector.Position{Vector: v}
 	}
+
 	c.target.Add(vector)
 }
 

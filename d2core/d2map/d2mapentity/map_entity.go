@@ -2,7 +2,6 @@ package d2mapentity
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
-
 )
 
 // mapEntity represents an entity on the map that can be animated

@@ -78,17 +78,17 @@ func (rn *RangedNumber) Add(other *RangedNumber) *RangedNumber {
 
 // Sub subtracts the given ranged number from this one, returning this one
 func (rn *RangedNumber) Sub(other *RangedNumber) *RangedNumber {
-	return rn.Set(rn.min - other.min, rn.max - other.max)
+	return rn.Set(rn.min-other.min, rn.max-other.max)
 }
 
 // Mul multiplies this ranged number by the given ranged number, returning this one
 func (rn *RangedNumber) Mul(other *RangedNumber) *RangedNumber {
-	return rn.Set(rn.min * other.min, rn.max * other.max)
+	return rn.Set(rn.min*other.min, rn.max*other.max)
 }
 
 // Div divides this ranged number by the given ranged number, returning this one
 func (rn *RangedNumber) Div(other *RangedNumber) *RangedNumber {
-	return rn.Set(rn.min / other.min, rn.max / other.max)
+	return rn.Set(rn.min/other.min, rn.max/other.max)
 }
 
 func (rn *RangedNumber) String() string {
@@ -98,4 +98,3 @@ func (rn *RangedNumber) String() string {
 
 	return fmt.Sprintf("%d to %d", rn.min, rn.max)
 }
-

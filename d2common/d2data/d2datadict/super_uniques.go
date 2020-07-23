@@ -22,7 +22,7 @@ type SuperUniqueRecord struct {
 	// Name for this SuperUnique which must be retrieved from a .TBL file
 	Name string
 
-	// the base monster type of the SuperUnique, refers to the "Key" field in monstats.go ("Id" column in the MonStats.txt)
+	// the base monster type of the SuperUnique, refers to the "Key" field in monstats.go ("ID" column in the MonStats.txt)
 	Class string
 
 	// This is the "hardcoded index".
@@ -39,7 +39,7 @@ type SuperUniqueRecord struct {
 	MonSound string
 
 	// These three fields assign special abilities so SuperUnique monsters such as "Fire Enchanted" or "Stone Skin".
-	// These fields refers to the Id's corresponding to the properties in MonUMod.txt.
+	// These fields refers to the ID's corresponding to the properties in MonUMod.txt.
 	// Here is the list of available properties.
 	// 0.  None
 	// 1.  Inits the random name seed, automatically added to monster, you don't need to add this UMod.

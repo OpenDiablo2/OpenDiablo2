@@ -2,8 +2,9 @@ package d2gamescreen
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"image/color"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
@@ -170,7 +171,7 @@ func (v *Game) Advance(elapsed float64) error {
 
 func (v *Game) bindGameControls() {
 	for _, player := range v.gameClient.Players {
-		if player.Id != v.gameClient.PlayerID {
+		if player.ID != v.gameClient.PlayerID {
 			continue
 		}
 
@@ -179,7 +180,7 @@ func (v *Game) bindGameControls() {
 		v.gameControls.Load()
 
 		if err := v.inputManager.BindHandler(v.gameControls); err != nil {
-			fmt.Printf(bindControlsErrStr, player.Id)
+			fmt.Printf(bindControlsErrStr, player.ID)
 		}
 
 		break

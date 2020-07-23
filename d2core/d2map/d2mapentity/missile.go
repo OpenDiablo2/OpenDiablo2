@@ -19,10 +19,12 @@ type Missile struct {
 	record *d2datadict.MissileRecord
 }
 
+// GetPosition returns the position of the missile
 func (m *Missile) GetPosition() d2vector.Position {
 	return m.AnimatedEntity.Position
 }
 
+// GetVelocity returns the velocity vector of the missile
 func (m *Missile) GetVelocity() d2vector.Vector {
 	return m.AnimatedEntity.velocity
 }
@@ -42,7 +44,6 @@ func CreateMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error)
 	}
 
 	animation.SetEffect(d2enum.DrawEffectModulate)
-	// animation.SetPlaySpeed(float64(record.Animation.AnimationSpeed))
 	animation.SetPlayLoop(record.Animation.LoopAnimation)
 	animation.PlayForward()
 	entity := CreateAnimatedEntity(x, y, animation)

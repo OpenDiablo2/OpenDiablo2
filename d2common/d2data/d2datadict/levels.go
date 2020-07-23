@@ -74,7 +74,7 @@ type LevelDetailsRecord struct {
 	MonsterUniqueID9  string // umon9
 	MonsterUniqueID10 string // umon10
 
-	// Critter Species 1-4. Uses the Id from monstats2.txt and only monsters
+	// Critter Species 1-4. Uses the ID from monstats2.txt and only monsters
 	// with critter column set to 1 can spawn here. critter column is also found
 	// in monstats2.txt. Critters are in reality only present clientside.
 	MonsterCritterID1 string // cmon1
@@ -93,9 +93,9 @@ type LevelDetailsRecord struct {
 	// present in the expension folders)
 	TitleImageName string // EntryFile
 
-	// Id
+	// ID
 	// Level ID (used in columns like VIS0-7)
-	Id int //nolint:golint,stylecheck // Id is the right key
+	Id int //nolint:golint,stylecheck // ID is the right key
 
 	// Palette is the Act Palette . Reference only
 	Palette int // Pal
@@ -138,7 +138,7 @@ type LevelDetailsRecord struct {
 	// location.
 	DependantLevelID int // Depend
 
-	// The type of the Level (Id from lvltypes.txt)
+	// The type of the Level (ID from lvltypes.txt)
 	LevelType int // LevelType
 
 	// Controls if teleport is allowed in that level.
@@ -367,7 +367,7 @@ type LevelDetailsRecord struct {
 //nolint:gochecknoglobals // Currently global by design, only written once
 var LevelDetails map[int]*LevelDetailsRecord
 
-// GetLevelDetails gets a LevelDetailsRecord by the record Id
+// GetLevelDetails gets a LevelDetailsRecord by the record ID
 func GetLevelDetails(id int) *LevelDetailsRecord {
 	for i := 0; i < len(LevelDetails); i++ {
 		if LevelDetails[i].Id == id {
@@ -387,7 +387,7 @@ func LoadLevelDetails(file []byte) {
 	for d.Next() {
 		record := &LevelDetailsRecord{
 			Name:                       d.String("Name "),
-			Id:                         d.Number("Id"),
+			Id:                         d.Number("ID"),
 			Palette:                    d.Number("Pal"),
 			Act:                        d.Number("Act"),
 			QuestFlag:                  d.Number("QuestFlag"),

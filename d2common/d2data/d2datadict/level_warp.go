@@ -36,7 +36,7 @@ func LoadLevelWarps(file []byte) {
 	for d.Next() {
 		record := &LevelWarpRecord{
 			Name:       d.String("Name"),
-			ID:         d.Number("Id"),
+			ID:         d.Number("ID"),
 			SelectX:    d.Number("SelectX"),
 			SelectY:    d.Number("SelectY"),
 			SelectDX:   d.Number("SelectDX"),

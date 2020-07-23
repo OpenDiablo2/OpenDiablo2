@@ -1,6 +1,6 @@
 package d2enum
 
-// RegionIdType represents a region Id
+// RegionIdType represents a region ID
 type RegionIdType int //nolint:golint,stylecheck // many changed needed when changing to ID
 
 // Regions

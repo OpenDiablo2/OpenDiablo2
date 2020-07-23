@@ -281,7 +281,7 @@ func LoadSkills(file []byte) {
 	for d.Next() {
 		record := &SkillRecord{
 			Skill:             d.String("skill"),
-			ID:                d.Number("Id"),
+			ID:                d.Number("ID"),
 			Charclass:         d.String("charclass"),
 			Skilldesc:         d.String("skilldesc"),
 			Srvstfunc:         d.Number("srvstfunc"),

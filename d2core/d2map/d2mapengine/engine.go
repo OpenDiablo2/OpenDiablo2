@@ -31,21 +31,18 @@ type MapEngine struct {
 	dt1Files      []string                   // List of DS1 strings
 }
 
-// CreateMapEngine creates a new instance of the map engine and
-// returns a pointer to it.
+// CreateMapEngine creates a new instance of the map engine and returns a pointer to it.
 func CreateMapEngine() *MapEngine {
 	engine := &MapEngine{}
 	return engine
 }
 
-// GetStartingPosition returns the starting position on the map in
-// sub-tiles.
-func (m *MapEngine) GetStartingPosition() (int, int) {
+// GetStartingPosition returns the starting position on the map in sub-tiles.
+func (m *MapEngine) GetStartingPosition() (x, y int) {
 	return m.startSubTileX, m.startSubTileY
 }
 
-// ResetMap clears all map and entity data and reloads it from the
-// cached files.
+// ResetMap clears all map and entity data and reloads it from the cached files.
 func (m *MapEngine) ResetMap(levelType d2enum.RegionIdType, width, height int) {
 	m.entities = make([]d2interface.MapEntity, 0)
 	m.levelType = d2datadict.LevelTypes[levelType]
@@ -176,8 +173,8 @@ func (m *MapEngine) tileCoordinateToIndex(x, y int) int {
 }
 
 // converts tile index from MapEngine.tiles to x,y coordinate
-func (m *MapEngine) tileIndexToCoordinate(index int) (int, int) {
-	return (index % m.size.Width), (index / m.size.Width)
+func (m *MapEngine) tileIndexToCoordinate(index int) (x, y int) {
+	return index % m.size.Width, index / m.size.Width
 }
 
 // SubTileAt gets the flags for the given subtile
@@ -224,7 +221,7 @@ func (m *MapEngine) RemoveEntity(entity d2interface.MapEntity) {
 // GetTiles returns a slice of all tiles matching the given style,
 // sequence and tileType.
 func (m *MapEngine) GetTiles(style, sequence, tileType int) []d2dt1.Tile {
-	var tiles []d2dt1.Tile
+	tiles := make([]d2dt1.Tile, 0, len(m.dt1TileData))
 
 	for idx := range m.dt1TileData {
 		if m.dt1TileData[idx].Style != int32(style) || m.dt1TileData[idx].Sequence != int32(sequence) ||
@@ -244,7 +241,7 @@ func (m *MapEngine) GetTiles(style, sequence, tileType int) []d2dt1.Tile {
 }
 
 // GetStartPosition returns the spawn point on entering the current map.
-func (m *MapEngine) GetStartPosition() (float64, float64) {
+func (m *MapEngine) GetStartPosition() (x, y float64) {
 	for tileY := 0; tileY < m.size.Height; tileY++ {
 		for tileX := 0; tileX < m.size.Width; tileX++ {
 			tile := m.tiles[tileX+(tileY*m.size.Width)].Components
@@ -260,7 +257,7 @@ func (m *MapEngine) GetStartPosition() (float64, float64) {
 }
 
 // GetCenterPosition returns the center point of the map.
-func (m *MapEngine) GetCenterPosition() (float64, float64) {
+func (m *MapEngine) GetCenterPosition() (x, y float64) {
 	return float64(m.size.Width) / 2.0, float64(m.size.Height) / 2.0
 }
 
@@ -290,7 +287,7 @@ func (m *MapEngine) TileExists(tileX, tileY int) bool {
 }
 
 // GenerateMap clears the map and places the specified stamp.
-func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset int, fileIndex int, cacheTiles bool) {
+func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset, fileIndex int) {
 	region := d2mapstamp.LoadStamp(regionType, levelPreset, fileIndex)
 	regionSize := region.Size()
 	m.ResetMap(regionType, regionSize.Width, regionSize.Height)

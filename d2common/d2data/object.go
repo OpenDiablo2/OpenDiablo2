@@ -6,10 +6,10 @@ import (
 
 // Object is a game world object
 type Object struct {
-	Type       int
-	Id         int //nolint:golint Id is the right key
-	X          int
-	Y          int
-	Flags      int
-	Paths      []d2common.Path
+	Type  int
+	Id    int //nolint:golint ID is the right key
+	X     int
+	Y     int
+	Flags int
+	Paths []d2common.Path
 }

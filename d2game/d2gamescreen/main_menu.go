@@ -71,6 +71,11 @@ const (
 	joinGameCharacterFilter = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890._:"
 )
 
+// BuildInfo contains information about the current build
+type BuildInfo struct {
+	Branch, Commit string
+}
+
 // MainMenu represents the main menu
 type MainMenu struct {
 	tcpIPBackground     *d2ui.Sprite
@@ -111,6 +116,8 @@ type MainMenu struct {
 	audioProvider d2interface.AudioProvider
 	scriptEngine  *d2script.ScriptEngine
 	navigator     Navigator
+
+	buildInfo BuildInfo
 }
 
 // CreateMainMenu creates an instance of MainMenu
@@ -119,6 +126,7 @@ func CreateMainMenu(
 	renderer d2interface.Renderer,
 	inputManager d2interface.InputManager,
 	audioProvider d2interface.AudioProvider,
+	buildInfo BuildInfo,
 ) *MainMenu {
 	return &MainMenu{
 		screenMode:     ScreenModeUnknown,
@@ -178,13 +186,13 @@ func (v *MainMenu) loadBackgroundSprites() {
 func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 	v.versionLabel = d2ui.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.versionLabel.Alignment = d2gui.HorizontalAlignRight
-	v.versionLabel.SetText("OpenDiablo2 - " + d2common.BuildInfo.Branch)
+	v.versionLabel.SetText("OpenDiablo2 - " + v.buildInfo.Branch)
 	v.versionLabel.Color = rgbaColor(white)
 	v.versionLabel.SetPosition(versionLabelX, versionLabelY)
 
 	v.commitLabel = d2ui.CreateLabel(d2resource.FontFormal10, d2resource.PaletteStatic)
 	v.commitLabel.Alignment = d2gui.HorizontalAlignLeft
-	v.commitLabel.SetText(d2common.BuildInfo.Commit)
+	v.commitLabel.SetText(v.buildInfo.Commit)
 	v.commitLabel.Color = rgbaColor(white)
 	v.commitLabel.SetPosition(commitLabelX, commitLabelY)
 

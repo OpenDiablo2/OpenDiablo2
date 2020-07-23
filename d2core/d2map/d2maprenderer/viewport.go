@@ -52,61 +52,61 @@ func (v *Viewport) SetCamera(camera *Camera) {
 }
 
 // WorldToScreen returns the screen space for the given world coordinates as two integers.
-func (v *Viewport) WorldToScreen(x, y float64) (int, int) {
+func (v *Viewport) WorldToScreen(x, y float64) (screenX, screenY int) {
 	return v.OrthoToScreen(v.WorldToOrtho(x, y))
 }
 
 // WorldToScreenF returns the screen space for the given world coordinates as two float64s.
-func (v *Viewport) WorldToScreenF(x, y float64) (float64, float64) {
+func (v *Viewport) WorldToScreenF(x, y float64) (screenX, screenY float64) {
 	return v.OrthoToScreenF(v.WorldToOrtho(x, y))
 }
 
 // ScreenToWorld returns the world position for the given screen coordinates.
-func (v *Viewport) ScreenToWorld(x, y int) (float64, float64) {
+func (v *Viewport) ScreenToWorld(x, y int) (worldX, worldY float64) {
 	return v.OrthoToWorld(v.ScreenToOrtho(x, y))
 }
 
 // OrthoToWorld returns the world position for the given orthogonal coordinates.
-func (v *Viewport) OrthoToWorld(x, y float64) (float64, float64) {
-	worldX := (x/80 + y/40) / 2
-	worldY := (y/40 - x/80) / 2
+func (v *Viewport) OrthoToWorld(x, y float64) (worldX, worldY float64) {
+	worldX = (x/80 + y/40) / 2
+	worldY = (y/40 - x/80) / 2
 
 	return worldX, worldY
 }
 
 // WorldToOrtho returns the orthogonal position for the given world coordinates.
-func (v *Viewport) WorldToOrtho(x, y float64) (float64, float64) {
-	orthoX := (x - y) * 80
-	orthoY := (x + y) * 40
+func (v *Viewport) WorldToOrtho(x, y float64) (orthoX, orthoY float64) {
+	orthoX = (x - y) * 80
+	orthoY = (x + y) * 40
 
 	return orthoX, orthoY
 }
 
 // ScreenToOrtho returns the orthogonal position for the given screen coordinates.
-func (v *Viewport) ScreenToOrtho(x, y int) (float64, float64) {
+func (v *Viewport) ScreenToOrtho(x, y int) (orthoX, orthoY float64) {
 	camX, camY := v.getCameraOffset()
-	screenX := float64(x) + camX - float64(v.screenRect.Left)
-	screenY := float64(y) + camY - float64(v.screenRect.Top)
+	orthoX = float64(x) + camX - float64(v.screenRect.Left)
+	orthoY = float64(y) + camY - float64(v.screenRect.Top)
+
+	return orthoX, orthoY
+}
+
+// OrthoToScreen returns the screen position for the given orthogonal coordinates as two ints.
+func (v *Viewport) OrthoToScreen(x, y float64) (screenX, screenY int) {
+	camOrthoX, camOrthoY := v.getCameraOffset()
+	screenX = int(math.Floor(x - camOrthoX + float64(v.screenRect.Left)))
+	screenY = int(math.Floor(y - camOrthoY + float64(v.screenRect.Top)))
 
 	return screenX, screenY
 }
 
-// OrthoToScreen returns the screen position for the given orthogonal coordinates as two ints.
-func (v *Viewport) OrthoToScreen(x, y float64) (int, int) {
-	camOrthoX, camOrthoY := v.getCameraOffset()
-	orthoX := int(math.Floor(x - camOrthoX + float64(v.screenRect.Left)))
-	orthoY := int(math.Floor(y - camOrthoY + float64(v.screenRect.Top)))
-
-	return orthoX, orthoY
-}
-
 // OrthoToScreenF returns the screen position for the given orthogonal coordinates as two float64s.
-func (v *Viewport) OrthoToScreenF(x, y float64) (float64, float64) {
+func (v *Viewport) OrthoToScreenF(x, y float64) (screenX, screenY float64) {
 	camOrthoX, camOrthoY := v.getCameraOffset()
-	orthoX := x - camOrthoX + float64(v.screenRect.Left)
-	orthoY := y - camOrthoY + float64(v.screenRect.Top)
+	screenX = x - camOrthoX + float64(v.screenRect.Left)
+	screenY = y - camOrthoY + float64(v.screenRect.Top)
 
-	return orthoX, orthoY
+	return screenX, screenY
 }
 
 // IsTileVisible returns false if no part of the tile is within the game screen.
@@ -136,12 +136,12 @@ func (v *Viewport) IsOrthoRectVisible(x1, y1, x2, y2 float64) bool {
 }
 
 // GetTranslationOrtho returns the viewport's current orthogonal space translation.
-func (v *Viewport) GetTranslationOrtho() (float64, float64) {
+func (v *Viewport) GetTranslationOrtho() (orthoX, orthoY float64) {
 	return v.transCurrent.x, v.transCurrent.y
 }
 
 // GetTranslationScreen returns the viewport's current screen space translation.
-func (v *Viewport) GetTranslationScreen() (int, int) {
+func (v *Viewport) GetTranslationScreen() (screenX, screenY int) {
 	return v.OrthoToScreen(v.transCurrent.x, v.transCurrent.y)
 }
 
@@ -175,8 +175,7 @@ func (v *Viewport) PopTranslation() {
 	v.transStack = v.transStack[:count-1]
 }
 
-func (v *Viewport) getCameraOffset() (float64, float64) {
-	var camX, camY float64
+func (v *Viewport) getCameraOffset() (camX, camY float64) {
 	if v.camera != nil {
 		camPosition := v.camera.GetPosition()
 		camX, camY = camPosition.X(), camPosition.Y()

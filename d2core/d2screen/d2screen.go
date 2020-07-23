@@ -56,14 +56,18 @@ func Advance(elapsed float64) error {
 		if !ok {
 			log.Println("loadingState chan should not be closed while in a loading screen")
 		}
+
 		if load.err != nil {
 			log.Printf("PROBLEM LOADING THE SCREEN: %v", load.err)
 			return load.err
 		}
+
 		d2gui.ShowLoadScreen(load.progress)
+
 		if load.done {
 			singleton.currentScreen = singleton.loadingScreen
 			singleton.loadingScreen = nil
+
 			d2gui.ShowCursor()
 			d2gui.HideLoadScreen()
 		}
@@ -80,17 +84,21 @@ func Advance(elapsed float64) error {
 		if handler, ok := singleton.nextScreen.(ScreenLoadHandler); ok {
 			d2gui.ShowLoadScreen(0)
 			d2gui.HideCursor()
+
 			singleton.loadingState = LoadingState{updates: make(chan loadingUpdate)}
+
 			go func() {
 				handler.OnLoad(singleton.loadingState)
 				singleton.loadingState.Done()
 			}()
+
 			singleton.currentScreen = nil
 			singleton.loadingScreen = singleton.nextScreen
 		} else {
 			singleton.currentScreen = singleton.nextScreen
 			singleton.loadingScreen = nil
 		}
+
 		singleton.nextScreen = nil
 	case singleton.currentScreen != nil:
 		if handler, ok := singleton.currentScreen.(ScreenAdvanceHandler); ok {
@@ -119,6 +127,8 @@ type LoadingState struct {
 	updates chan loadingUpdate
 }
 
+const progressCompleted = 1.0
+
 type loadingUpdate struct {
 	progress float64
 	err      error
@@ -137,6 +147,6 @@ func (l *LoadingState) Progress(ratio float64) {
 
 // Done provides a way for callers to report that screen loading has been completed.
 func (l *LoadingState) Done() {
-	l.updates <- loadingUpdate{progress: 1.0}
+	l.updates <- loadingUpdate{progress: progressCompleted}
 	l.updates <- loadingUpdate{done: true}
 }
