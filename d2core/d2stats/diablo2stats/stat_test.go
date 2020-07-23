@@ -1,7 +1,8 @@
-package d2stats
+package diablo2stats
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 	"testing"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
@@ -10,7 +11,7 @@ import (
 
 const (
 	errStr string = "incorrect description string format for stat"
-	errFmt string = "%v:\n\tKey: %v\n\tVal: %+v\n\texpected: %v\n\tgot: %v\n\n"
+	errFmt string = "%v:\n\tDescFnID: %v\n\tKey: %v\n\tVal: %+v\n\texpected: %v\n\tgot: %v\n\n"
 )
 
 //nolint:funlen // this just gets mock data ready for the tests
@@ -261,7 +262,7 @@ func TestStat_InitMockData(t *testing.T) {
 
 func TestStat_Clone(t *testing.T) {
 	r := d2datadict.ItemStatCosts["strength"]
-	s1 := CreateStat(r, 5)
+	s1 := NewStat(r, intVal(5))
 	s2 := s1.Clone()
 
 	// make sure the stats are distinct
@@ -270,109 +271,109 @@ func TestStat_Clone(t *testing.T) {
 	}
 
 	// make sure the stat values are unique
-	vs1, vs2 := s1.Values, s2.Values
+	vs1, vs2 := s1.Values(), s2.Values()
 	if &vs1 == &vs2 {
 		t.Errorf("stat values share the same pointer %d == %d", &s1, &s2)
 	}
 
-	s2.Values[0] = 6
-	v1, v2 := s1.Values[0], s2.Values[0]
+	s2.Values()[0].SetInt(6)
+	v1, v2 := s1.Values()[0].Int(), s2.Values()[0].Int()
 
 	// make sure the value ranges are distinct
 	if v1 == v2 {
-		t.Errorf("stat value ranges should not be equal")
+		t.Errorf("clones should not share stat values")
 	}
 }
 
 func TestStat_Descriptions(t *testing.T) {
 	tests := []struct {
 		recordKey string
-		vals      []int
+		vals      []d2stats.StatValue
 		expect    string
 	}{
 		// DescFn1
-		{"strength", []int{31}, "+31 to Strength"},
-		{"hpregen", []int{20}, "Replenish Life +20"},
-		{"hpregen", []int{-8}, "Drain Life -8"},
+		{"strength", []d2stats.StatValue{intVal(31)}, "+31 to Strength"},
+		{"hpregen", []d2stats.StatValue{intVal(20)}, "Replenish Life +20"},
+		{"hpregen", []d2stats.StatValue{intVal(-8)}, "Drain Life -8"},
 
 		// DescFn2
-		{"toblock", []int{16}, "+16% Increased Chance of Blocking"},
-		{"item_absorblight_percent", []int{10}, "Lightning Absorb +10%"},
+		{"toblock", []d2stats.StatValue{intVal(16)}, "+16% Increased Chance of Blocking"},
+		{"item_absorblight_percent", []d2stats.StatValue{intVal(10)}, "Lightning Absorb +10%"},
 
 		// DescFn3
-		{"normal_damage_reduction", []int{25}, "Damage Reduced by 25"},
-		{"item_restinpeace", []int{25}, "Slain Monsters Rest in Peace"},
+		{"normal_damage_reduction", []d2stats.StatValue{intVal(25)}, "Damage Reduced by 25"},
+		{"item_restinpeace", []d2stats.StatValue{intVal(25)}, "Slain Monsters Rest in Peace"},
 
 		// DescFn4
-		{"poisonresist", []int{25}, "Poison Resist +25%"},
-		{"item_fastermovevelocity", []int{25}, "+25% Faster Run/Walk"},
+		{"poisonresist", []d2stats.StatValue{intVal(25)}, "Poison Resist +25%"},
+		{"item_fastermovevelocity", []d2stats.StatValue{intVal(25)}, "+25% Faster Run/Walk"},
 
 		// DescFn5
-		{"item_howl", []int{25}, "Hit Causes Monster to Flee 25%"},
+		{"item_howl", []d2stats.StatValue{intVal(25)}, "Hit Causes Monster to Flee 25%"},
 
 		// DescFn6
-		{"item_hp_perlevel", []int{25}, "+25 to Life (Based on Character Level)"},
+		{"item_hp_perlevel", []d2stats.StatValue{intVal(25)}, "+25 to Life (Based on Character Level)"},
 
 		// DescFn7
-		{"item_resist_ltng_perlevel", []int{25}, "Lightning Resist +25% (Based on Character Level)"},
-		{"item_find_magic_perlevel", []int{25}, "+25% Better Chance of Getting Magic Items (" +
+		{"item_resist_ltng_perlevel", []d2stats.StatValue{intVal(25)}, "Lightning Resist +25% (Based on Character Level)"},
+		{"item_find_magic_perlevel", []d2stats.StatValue{intVal(25)}, "+25% Better Chance of Getting Magic Items (" +
 			"Based on Character Level)"},
 
 		// DescFn8
-		{"item_armorpercent_perlevel", []int{25}, "+25% Enhanced Defense (Based on Character Level)"},
-		{"item_regenstamina_perlevel", []int{25},
+		{"item_armorpercent_perlevel", []d2stats.StatValue{intVal(25)}, "+25% Enhanced Defense (Based on Character Level)"},
+		{"item_regenstamina_perlevel", []d2stats.StatValue{intVal(25)},
 			"Heal Stamina Plus +25% (Based on Character Level)"},
 
 		// DescFn9
-		{"item_thorns_perlevel", []int{25}, "Attacker Takes Damage of 25 (Based on Character Level)"},
+		{"item_thorns_perlevel", []d2stats.StatValue{intVal(25)}, "Attacker Takes Damage of 25 (Based on Character Level)"},
 
 		// DescFn11
-		{"item_replenish_durability", []int{2}, "Repairs 2 durability per second"},
+		{"item_replenish_durability", []d2stats.StatValue{intVal(2)}, "Repairs 2 durability per second"},
 
 		// DescFn12
-		{"item_stupidity", []int{5}, "Hit Blinds Target +5"},
+		{"item_stupidity", []d2stats.StatValue{intVal(5)}, "Hit Blinds Target +5"},
 
 		// DescFn13
-		{"item_addclassskills", []int{5, 3}, "+5 to Paladin Skill Levels"},
+		{"item_addclassskills", []d2stats.StatValue{intVal(5), intVal(3)}, "+5 to Paladin Skill Levels"},
 
 		// DescFn14
-		{"item_addskill_tab", []int{5, 3, 0}, "+5 to Combat Skills (Paladin Only)"},
-		{"item_addskill_tab", []int{5, 3, 1}, "+5 to Offensive Auras (Paladin Only)"},
-		{"item_addskill_tab", []int{5, 3, 2}, "+5 to Defensive Auras (Paladin Only)"},
+		{"item_addskill_tab", []d2stats.StatValue{intVal(5), intVal(3), intVal(0)}, "+5 to Combat Skills (Paladin Only)"},
+		{"item_addskill_tab", []d2stats.StatValue{intVal(5), intVal(3), intVal(1)}, "+5 to Offensive Auras (Paladin Only)"},
+		{"item_addskill_tab", []d2stats.StatValue{intVal(5), intVal(3), intVal(2)}, "+5 to Defensive Auras (Paladin Only)"},
 
 		// DescFn15
-		{"item_skillonattack", []int{5, 7, 64}, "5% Chance to cast level 7 Frozen Orb on attack"},
+		{"item_skillonattack", []d2stats.StatValue{intVal(5), intVal(7), intVal(64)}, "5% Chance to cast level 7 Frozen Orb on attack"},
 
 		// DescFn16
-		{"item_aura", []int{3, 37}, "Level 3 Warmth Aura When Equipped"},
+		{"item_aura", []d2stats.StatValue{intVal(3), intVal(37)}, "Level 3 Warmth Aura When Equipped"},
 
 		// DescFn20
-		{"item_fractionaltargetac", []int{-25}, "-25% Target Defense"},
+		{"item_fractionaltargetac", []d2stats.StatValue{intVal(-25)}, "-25% Target Defense"},
 
 		// DescFn22
-		{"attack_vs_montype", []int{25, 40}, "25% to Attack Rating versus Specter"},
+		{"attack_vs_montype", []d2stats.StatValue{intVal(25), intVal(40)}, "25% to Attack Rating versus Specter"},
 
 		// DescFn23
-		{"item_reanimate", []int{25, 40}, "25% Reanimate as: Specter"},
+		{"item_reanimate", []d2stats.StatValue{intVal(25), intVal(40)}, "25% Reanimate as: Specter"},
 
 		// DescFn24
-		{"item_charged_skill", []int{25, 64, 20, 19}, "Level 25 Frozen Orb (19/20 Charges)"},
+		{"item_charged_skill", []d2stats.StatValue{intVal(25), intVal(64), intVal(20), intVal(19)}, "Level 25 Frozen Orb (19/20 Charges)"},
 
 		// DescFn27
-		{"item_singleskill", []int{25, 64, 3}, "+25 to Frozen Orb (Paladin Only)"},
+		{"item_singleskill", []d2stats.StatValue{intVal(25), intVal(64), intVal(3)}, "+25 to Frozen Orb (Paladin Only)"},
 
 		// DescFn28
-		{"item_nonclassskill", []int{25, 64}, "+25 to Frozen Orb"},
+		{"item_nonclassskill", []d2stats.StatValue{intVal(25), intVal(64)}, "+25 to Frozen Orb"},
 	}
 
 	for idx := range tests {
 		test := tests[idx]
 		record := d2datadict.ItemStatCosts[test.recordKey]
 		expect := test.expect
-		stat := CreateStat(record, test.vals...)
+		stat := NewStat(record, test.vals...)
 
-		if got := stat.Description(); got != expect {
-			t.Errorf(errFmt, errStr, test.recordKey, test.vals, expect, got)
+		if got := stat.String(); got != expect {
+			t.Errorf(errFmt, errStr, record.DescFnID, test.recordKey, test.vals, expect, got)
 		} else {
 			success := "[Desc Func %d][%s %+v] %s"
 			success = fmt.Sprintf(success, record.DescFnID, record.Name, test.vals, got)
