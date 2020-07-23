@@ -5,8 +5,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 )
 
-// CreateStat creates a stat instance with the given record and values
-func CreateStat(record *d2datadict.ItemStatCostRecord, values ...d2stats.StatValue) d2stats.Stat {
+// NewStat creates a stat instance with the given record and values
+func NewStat(record *d2datadict.ItemStatCostRecord, values ...d2stats.StatValue) d2stats.Stat {
 	if record == nil {
 		return nil
 	}
@@ -19,13 +19,13 @@ func CreateStat(record *d2datadict.ItemStatCostRecord, values ...d2stats.StatVal
 	return stat
 }
 
-// CreateStatList creates a stat list
-func CreateStatList(stats ...d2stats.Stat) d2stats.StatList {
+// NewStatList creates a stat list
+func NewStatList(stats ...d2stats.Stat) d2stats.StatList {
 	return &Diablo2StatList{stats}
 }
 
-// CreateStatValue creates a stat value of the given type
-func CreateStatValue(t d2stats.StatValueType) d2stats.StatValue {
+// NewStatValue creates a stat value of the given type
+func NewStatValue(t d2stats.StatValueType) d2stats.StatValue {
 	sv := &Diablo2StatValue{_type: t}
 
 	switch t {
@@ -41,5 +41,5 @@ func CreateStatValue(t d2stats.StatValueType) d2stats.StatValue {
 }
 
 func intVal(i int) d2stats.StatValue {
-	return CreateStatValue(d2stats.StatValueInt).SetInt(i)
+	return NewStatValue(d2stats.StatValueInt).SetInt(i)
 }

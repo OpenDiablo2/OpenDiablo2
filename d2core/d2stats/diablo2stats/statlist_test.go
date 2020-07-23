@@ -9,7 +9,7 @@ import (
 
 func TestDiablo2StatList_Index(t *testing.T) {
 	record := d2datadict.ItemStatCosts["strength"]
-	strength := CreateStat(record, intVal(10))
+	strength := NewStat(record, intVal(10))
 
 	list1 := &Diablo2StatList{stats: []d2stats.Stat{strength}}
 	if list1.Index(0) != strength {
@@ -19,7 +19,7 @@ func TestDiablo2StatList_Index(t *testing.T) {
 
 func TestStatList_Clone(t *testing.T) {
 	record := d2datadict.ItemStatCosts["strength"]
-	strength := CreateStat(record, intVal(10))
+	strength := NewStat(record, intVal(10))
 
 	list1 := &Diablo2StatList{}
 	list1.Push(strength)
@@ -48,13 +48,13 @@ func TestStatList_Reduce(t *testing.T) {
 	}
 
 	stats := []d2stats.Stat{
-		CreateStat(records[0], intVal(1)),
-		CreateStat(records[0], intVal(1)),
-		CreateStat(records[0], intVal(1)),
-		CreateStat(records[0], intVal(1)),
+		NewStat(records[0], intVal(1)),
+		NewStat(records[0], intVal(1)),
+		NewStat(records[0], intVal(1)),
+		NewStat(records[0], intVal(1)),
 	}
 
-	list := CreateStatList(stats...)
+	list := NewStatList(stats...)
 	reduction := list.ReduceStats()
 
 	if len(reduction.Stats()) != 1 || reduction.Index(0).String() != "+4 to Strength" {
@@ -62,13 +62,13 @@ func TestStatList_Reduce(t *testing.T) {
 	}
 
 	stats = []d2stats.Stat{
-		CreateStat(records[0], intVal(1)),
-		CreateStat(records[1], intVal(1)),
-		CreateStat(records[2], intVal(1)),
-		CreateStat(records[3], intVal(1)),
+		NewStat(records[0], intVal(1)),
+		NewStat(records[1], intVal(1)),
+		NewStat(records[2], intVal(1)),
+		NewStat(records[3], intVal(1)),
 	}
 
-	list = CreateStatList(stats...)
+	list = NewStatList(stats...)
 	reduction = list.ReduceStats()
 
 	if len(reduction.Stats()) != 4 {
@@ -86,10 +86,10 @@ func TestStatList_Append(t *testing.T) {
 
 	list1 := &Diablo2StatList{
 		[]d2stats.Stat{
-			CreateStat(records[0], intVal(1)),
-			CreateStat(records[1], intVal(1)),
-			CreateStat(records[2], intVal(1)),
-			CreateStat(records[3], intVal(1)),
+			NewStat(records[0], intVal(1)),
+			NewStat(records[1], intVal(1)),
+			NewStat(records[2], intVal(1)),
+			NewStat(records[3], intVal(1)),
 		},
 	}
 	list2 := list1.Clone()

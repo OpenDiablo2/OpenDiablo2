@@ -262,7 +262,7 @@ func TestStat_InitMockData(t *testing.T) {
 
 func TestStat_Clone(t *testing.T) {
 	r := d2datadict.ItemStatCosts["strength"]
-	s1 := CreateStat(r, intVal(5))
+	s1 := NewStat(r, intVal(5))
 	s2 := s1.Clone()
 
 	// make sure the stats are distinct
@@ -370,7 +370,7 @@ func TestStat_Descriptions(t *testing.T) {
 		test := tests[idx]
 		record := d2datadict.ItemStatCosts[test.recordKey]
 		expect := test.expect
-		stat := CreateStat(record, test.vals...)
+		stat := NewStat(record, test.vals...)
 
 		if got := stat.String(); got != expect {
 			t.Errorf(errFmt, errStr, record.DescFnID, test.recordKey, test.vals, expect, got)
