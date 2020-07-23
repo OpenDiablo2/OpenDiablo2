@@ -109,17 +109,17 @@ func (s *Diablo2Stat) Copy(from d2stats.Stat) d2stats.Stat {
 }
 
 // Combine sums the other stat with this one (does not alter this stat, returns altered clone!)
-func (s *Diablo2Stat) Combine(other d2stats.Stat) (combined d2stats.Stat, err error) {
+func (s *Diablo2Stat) Combine(other d2stats.Stat) (result d2stats.Stat, err error) {
 	cantBeCombinedErr := fmt.Errorf("cannot combine %s with %s", s.Name(), other.Name())
 
 	if !s.canBeCombinedWith(other) {
 		return nil, cantBeCombinedErr
 	}
 
-	combined = s.Clone()
-	srcValues, dstValues := combined.Values(), other.Values()
+	result = s.Clone()
+	srcValues, dstValues := other.Values(), result.Values()
 
-	for idx := range s.values {
+	for idx := range result.Values() {
 		v1, v2 := dstValues[idx], srcValues[idx]
 
 		valType := v1.Type()
@@ -131,9 +131,7 @@ func (s *Diablo2Stat) Combine(other d2stats.Stat) (combined d2stats.Stat, err er
 		}
 	}
 
-	combined.SetValues(dstValues...)
-
-	return combined, nil
+	return result, nil
 }
 
 func (s *Diablo2Stat) canBeCombinedWith(other d2stats.Stat) bool {
