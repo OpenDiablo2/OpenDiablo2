@@ -25,6 +25,18 @@ func getHeroMap() map[int]d2enum.Hero {
 	}
 }
 
+func stringerUnsignedInt(sv d2stats.StatValue) string {
+	return fmt.Sprintf("%d", sv.Int())
+}
+
+func stringerUnsignedFloat(sv d2stats.StatValue) string {
+	return fmt.Sprintf("%.2f", sv.Float())
+}
+
+func stringerEmpty(_ d2stats.StatValue) string {
+	return ""
+}
+
 func stringerIntSigned(sv d2stats.StatValue) string {
 	return fmt.Sprintf("%+d", sv.Int())
 }

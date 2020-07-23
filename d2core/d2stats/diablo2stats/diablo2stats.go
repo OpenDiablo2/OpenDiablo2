@@ -1,8 +1,6 @@
 package diablo2stats
 
 import (
-	"fmt"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 )
@@ -32,11 +30,11 @@ func CreateStatValue(t d2stats.StatValueType) d2stats.StatValue {
 
 	switch t {
 	case d2stats.StatValueFloat:
-		sv._stringer = defaultFloatStringer
+		sv._stringer = stringerUnsignedFloat
 	case d2stats.StatValueInt:
-		sv._stringer = defaultIntStringer
+		sv._stringer = stringerUnsignedInt
 	default:
-		sv._stringer = defaultStringer
+		sv._stringer = stringerEmpty
 	}
 
 	return sv
@@ -44,20 +42,4 @@ func CreateStatValue(t d2stats.StatValueType) d2stats.StatValue {
 
 func intVal(i int) d2stats.StatValue {
 	return CreateStatValue(d2stats.StatValueInt).SetInt(i)
-}
-
-func floatVal(f float64) d2stats.StatValue {
-	return CreateStatValue(d2stats.StatValueFloat).SetFloat(f)
-}
-
-func defaultIntStringer(sv d2stats.StatValue) string {
-	return fmt.Sprintf("%d", sv.Int())
-}
-
-func defaultFloatStringer(sv d2stats.StatValue) string {
-	return fmt.Sprintf("%.2f", sv.Float())
-}
-
-func defaultStringer(_ d2stats.StatValue) string {
-	return ""
 }
