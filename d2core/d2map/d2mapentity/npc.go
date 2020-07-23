@@ -1,7 +1,6 @@
 package d2mapentity
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"math/rand"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -9,6 +8,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )

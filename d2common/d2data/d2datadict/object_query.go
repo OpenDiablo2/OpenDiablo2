@@ -10,11 +10,11 @@ import (
 type ObjectLookupRecord struct {
 	Act           int
 	Type          d2enum.ObjectType
-	Id            int //nolint:golint,stylecheck // Id is the right key
+	Id            int //nolint:golint,stylecheck // ID is the right key
 	Name          string
 	Description   string
-	ObjectsTxtId  int //nolint:golint,stylecheck // Id is the right key
-	MonstatsTxtId int //nolint:golint,stylecheck // Id is the right key
+	ObjectsTxtId  int //nolint:golint,stylecheck // ID is the right key
+	MonstatsTxtId int //nolint:golint,stylecheck // ID is the right key
 	Direction     int
 	Base          string
 	Token         string
@@ -44,7 +44,7 @@ type ObjectLookupRecord struct {
 func LookupObject(act, typ, id int) *ObjectLookupRecord {
 	object := lookupObject(act, typ, id, indexedObjects)
 	if object == nil {
-		log.Panicf("Failed to look up object Act: %d, Type: %d, Id: %d", act, typ, id)
+		log.Panicf("Failed to look up object Act: %d, Type: %d, ID: %d", act, typ, id)
 	}
 
 	return object
@@ -96,6 +96,6 @@ func indexObjects(objects []ObjectLookupRecord) [][][]*ObjectLookupRecord {
 
 // IndexedObjects is a slice of object records for quick lookups.
 // nil checks should be done for uninitialized values at each level.
-// [Act 1-5][Type 1-2][Id 0-855]
+// [Act 1-5][Type 1-2][ID 0-855]
 //nolint:gochecknoglobals // Currently global by design
 var indexedObjects [][][]*ObjectLookupRecord

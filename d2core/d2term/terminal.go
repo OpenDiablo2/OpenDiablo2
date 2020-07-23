@@ -26,11 +26,11 @@ const (
 )
 
 const (
-	darkGrey = 0x2e3436b0
+	darkGrey  = 0x2e3436b0
 	lightGrey = 0x555753b0
 	lightBlue = 0x3465a4b0
-	yellow = 0xfce94fb0
-	red = 0xcc0000b0
+	yellow    = 0xfce94fb0
+	red       = 0xcc0000b0
 )
 
 type termVis int
@@ -496,7 +496,7 @@ func rgbaColor(rgba uint32) color.RGBA {
 	byteWidth := 8
 	byteMask := 0xff
 
-	for idx :=0; idx < 4; idx ++ {
+	for idx := 0; idx < 4; idx++ {
 		shift := idx * byteWidth
 		component := uint8(rgba>>shift) & uint8(byteMask)
 

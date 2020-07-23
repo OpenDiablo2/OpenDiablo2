@@ -1,6 +1,8 @@
 package d2mapentity
 
 import (
+	"fmt"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
@@ -34,7 +36,10 @@ func (ae *AnimatedEntity) Render(target d2interface.Surface) {
 	)
 
 	defer target.Pop()
-	ae.animation.Render(target)
+
+	if err := ae.animation.Render(target); err != nil {
+		fmt.Printf("failed to render animated entity, err: %v\n", err)
+	}
 }
 
 // GetDirection returns the current facing direction of this entity.
@@ -46,11 +51,15 @@ func (ae *AnimatedEntity) GetDirection() int {
 func (ae *AnimatedEntity) rotate(direction int) {
 	ae.direction = direction
 
-	ae.animation.SetDirection(ae.direction)
+	if err := ae.animation.SetDirection(ae.direction); err != nil {
+		fmt.Printf("failed to update the animation direction, err: %v\n", err)
+	}
 }
 
 // Advance is called once per frame and processes a
 // single game tick.
 func (ae *AnimatedEntity) Advance(elapsed float64) {
-	ae.animation.Advance(elapsed)
+	if err := ae.animation.Advance(elapsed); err != nil {
+		fmt.Printf("failed to advance the animation, err: %v\n", err)
+	}
 }

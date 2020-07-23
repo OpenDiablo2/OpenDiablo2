@@ -2,6 +2,7 @@ package d2maprenderer
 
 import (
 	"errors"
+	"fmt"
 	"image/color"
 	"log"
 	"math"
@@ -43,13 +44,22 @@ func CreateMapRenderer(renderer d2interface.Renderer, mapEngine *d2mapengine.Map
 	result.Camera.position = &startPosition
 	result.viewport.SetCamera(&result.Camera)
 
-	term.BindAction("mapdebugvis", "set map debug visualization level", func(level int) {
+	var err error
+	err = term.BindAction("mapdebugvis", "set map debug visualization level", func(level int) {
 		result.mapDebugVisLevel = level
 	})
 
-	term.BindAction("entitydebugvis", "set entity debug visualization level", func(level int) {
+	if err != nil {
+		fmt.Printf("could not bind the mapdebugvis action, err: %v\n", err)
+	}
+
+	err = term.BindAction("entitydebugvis", "set entity debug visualization level", func(level int) {
 		result.entityDebugVisLevel = level
 	})
+
+	if err != nil {
+		fmt.Printf("could not bind the entitydebugvis action, err: %v\n", err)
+	}
 
 	if mapEngine.LevelType().ID != 0 {
 		result.generateTileCache()
@@ -122,18 +132,18 @@ func (mr *MapRenderer) MoveCameraTargetBy(vector *d2vector.Vector) {
 }
 
 // ScreenToWorld returns the world position for the given screen (pixel) position.
-func (mr *MapRenderer) ScreenToWorld(x, y int) (float64, float64) {
+func (mr *MapRenderer) ScreenToWorld(x, y int) (worldX, worldY float64) {
 	return mr.viewport.ScreenToWorld(x, y)
 }
 
 // ScreenToOrtho returns the orthogonal position, without accounting for the isometric angle, for the given screen
 // (pixel) position.
-func (mr *MapRenderer) ScreenToOrtho(x, y int) (float64, float64) {
+func (mr *MapRenderer) ScreenToOrtho(x, y int) (orthoX, orthoY float64) {
 	return mr.viewport.ScreenToOrtho(x, y)
 }
 
 // WorldToOrtho returns the orthogonal position for the given isometric world position.
-func (mr *MapRenderer) WorldToOrtho(x, y float64) (float64, float64) {
+func (mr *MapRenderer) WorldToOrtho(x, y float64) (orthoX, orthoY float64) {
 	return mr.viewport.WorldToOrtho(x, y)
 }
 
@@ -278,7 +288,9 @@ func (mr *MapRenderer) renderFloor(tile d2ds1.FloorShadowRecord, target d2interf
 	target.PushTranslation(mr.viewport.GetTranslationScreen())
 	defer target.Pop()
 
-	target.Render(img)
+	if err := target.Render(img); err != nil {
+		fmt.Printf("failed to render the floor, err: %v\n", err)
+	}
 }
 
 func (mr *MapRenderer) renderWall(tile d2ds1.WallRecord, viewport *Viewport, target d2interface.Surface) {
@@ -294,7 +306,9 @@ func (mr *MapRenderer) renderWall(tile d2ds1.WallRecord, viewport *Viewport, tar
 	target.PushTranslation(viewport.GetTranslationScreen())
 	defer target.Pop()
 
-	target.Render(img)
+	if err := target.Render(img); err != nil {
+		fmt.Printf("failed to render the wall, err: %v\n", err)
+	}
 }
 
 func (mr *MapRenderer) renderShadow(tile d2ds1.FloorShadowRecord, target d2interface.Surface) {
@@ -311,7 +325,9 @@ func (mr *MapRenderer) renderShadow(tile d2ds1.FloorShadowRecord, target d2inter
 
 	defer target.PopN(2)
 
-	target.Render(img)
+	if err := target.Render(img); err != nil {
+		fmt.Printf("failed to render the shadow, err: %v\n", err)
+	}
 }
 
 func (mr *MapRenderer) renderMapDebug(mapDebugVisLevel int, target d2interface.Surface, startX, startY, endX, endY int) {
@@ -333,7 +349,6 @@ func (mr *MapRenderer) renderEntityDebug(target d2interface.Surface) {
 		x, y := world.X()/5, world.Y()/5
 		velocity := e.GetVelocity()
 		velocity = velocity.Clone()
-		// velocity.Scale(60) // arbitrary scale value, just to make it easy to see
 		vx, vy := mr.viewport.WorldToOrtho(velocity.X(), velocity.Y())
 		screenX, screenY := mr.viewport.WorldToScreen(x, y)
 
@@ -355,16 +370,16 @@ func (mr *MapRenderer) renderEntityDebug(target d2interface.Surface) {
 }
 
 // WorldToScreen returns the screen (pixel) position for the given isometric world position as two ints.
-func (mr *MapRenderer) WorldToScreen(x, y float64) (int, int) {
+func (mr *MapRenderer) WorldToScreen(x, y float64) (screenX, screenY int) {
 	return mr.viewport.WorldToScreen(x, y)
 }
 
 // WorldToScreenF returns the screen (pixel) position for the given isometric world position as two float64s.
-func (mr *MapRenderer) WorldToScreenF(x, y float64) (float64, float64) {
+func (mr *MapRenderer) WorldToScreenF(x, y float64) (screenX, screenY float64) {
 	return mr.viewport.WorldToScreenF(x, y)
 }
 
-func (mr *MapRenderer) renderTileDebug(ax, ay int, debugVisLevel int, target d2interface.Surface) {
+func (mr *MapRenderer) renderTileDebug(ax, ay, debugVisLevel int, target d2interface.Surface) {
 	subTileColor := color.RGBA{R: 80, G: 80, B: 255, A: 50}
 	tileColor := color.RGBA{R: 255, G: 255, B: 255, A: 100}
 	tileCollisionColor := color.RGBA{R: 128, G: 0, B: 0, A: 100}
@@ -397,12 +412,6 @@ func (mr *MapRenderer) renderTileDebug(ax, ay int, debugVisLevel int, target d2i
 		}
 
 		tile := mr.mapEngine.TileAt(ax, ay)
-
-		/*for i, floor := range tile.Floors {
-			target.PushTranslation(-20, 10+(i+1)*14)
-			target.DrawTextf("f: %v-%v", floor.Style, floor.Sequence)
-			target.Pop()
-		}*/
 
 		for i, wall := range tile.Components.Walls {
 			if wall.Type.Special() {

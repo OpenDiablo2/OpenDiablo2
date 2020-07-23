@@ -287,6 +287,7 @@ func (a *animation) SetPlayLength(playLength float64) {
 func (a *animation) SetPlayLengthMs(playLengthMs int) {
 	// TODO remove this method
 	const millisecondsPerSecond = 1000.0
+
 	a.SetPlayLength(float64(playLengthMs) / millisecondsPerSecond)
 }
 

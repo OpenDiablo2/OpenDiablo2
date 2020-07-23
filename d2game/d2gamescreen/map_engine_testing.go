@@ -165,7 +165,7 @@ func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 	} else {
 		met.mapEngine = d2mapengine.CreateMapEngine() // necessary for map name update
 		met.mapEngine.SetSeed(time.Now().UnixNano())
-		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex, true)
+		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 		//met.mapEngine.RegenerateWalkPaths()
 	}
 

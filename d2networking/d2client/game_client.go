@@ -167,7 +167,7 @@ func (g *GameClient) handleAddPlayerPacket(packet d2netpacket.NetPacket) error {
 	newPlayer := d2mapentity.CreatePlayer(player.ID, player.Name, player.X, player.Y, 0,
 		player.HeroType, player.Stats, &player.Equipment)
 
-	g.Players[newPlayer.Id] = newPlayer
+	g.Players[newPlayer.ID] = newPlayer
 	g.MapEngine.AddEntity(newPlayer)
 
 	return nil
@@ -199,7 +199,7 @@ func (g *GameClient) handleMovePlayerPacket(packet d2netpacket.NetPacket) error 
 			err := player.SetAnimationMode(player.GetAnimationMode())
 
 			if err != nil {
-				log.Printf("GameClient: error setting animation mode for player %s: %s", player.Id, err)
+				log.Printf("GameClient: error setting animation mode for player %s: %s", player.ID, err)
 			}
 		})
 	}

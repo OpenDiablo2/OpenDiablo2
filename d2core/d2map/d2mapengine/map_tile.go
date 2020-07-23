@@ -79,11 +79,9 @@ func (t *MapTile) PrepareTile(x, y int, me *MapEngine) {
 	}
 }
 
+// Walker's Alias Method for weighted random selection with xorshifting for random numbers
 // Selects a random tile from the slice, rest of args just used for seeding
 func getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) byte {
-	/* Walker's Alias Method for weighted random selection
-	 * with xorshifting for random numbers */
-
 	var tileSeed uint64
 	tileSeed = uint64(seed) + uint64(x)
 	tileSeed *= uint64(y)

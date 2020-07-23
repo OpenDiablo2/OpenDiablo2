@@ -26,19 +26,17 @@ func CreateDC6Animation(renderer d2iface.Renderer, dc6Path string,
 		return nil, err
 	}
 
-	animation := animation{
-		directions:     make([]animationDirection, dc6.Directions),
-		playLength:     defaultPlayLength,
-		playLoop:       true,
-		originAtBottom: true,
-		effect:         effect,
-	}
-
 	anim := DC6Animation{
-		animation: animation,
-		dc6Path:   dc6Path,
-		palette:   palette,
-		renderer:  renderer,
+		animation: animation{
+			directions:     make([]animationDirection, dc6.Directions),
+			playLength:     defaultPlayLength,
+			playLoop:       true,
+			originAtBottom: true,
+			effect:         effect,
+		},
+		dc6Path:  dc6Path,
+		palette:  palette,
+		renderer: renderer,
 	}
 
 	err = anim.SetDirection(0)

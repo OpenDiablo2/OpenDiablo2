@@ -9,7 +9,7 @@ import (
 var _ d2interface.BitStream = &BitStream{} // Static check to confirm struct conforms to interface
 
 const (
-	maxBits = 16
+	maxBits     = 16
 	bitsPerByte = 8
 )
 

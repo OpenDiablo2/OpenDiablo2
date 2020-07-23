@@ -12,33 +12,32 @@ import (
 
 func (mr *MapRenderer) generateTileCache() {
 	mr.palette, _ = loadPaletteForAct(d2enum.RegionIdType(mr.mapEngine.LevelType().ID))
-	mapEngineSize := mr.mapEngine.Size()
 
-	for idx, tile := range *mr.mapEngine.Tiles() {
-		tileX := idx % mapEngineSize.Width
-		tileY := (idx - tileX) / mapEngineSize.Width
+	tiles := *mr.mapEngine.Tiles()
+	for idx := range tiles {
+		tile := &tiles[idx]
 
 		for i := range tile.Components.Floors {
 			if !tile.Components.Floors[i].Hidden && tile.Components.Floors[i].Prop1 != 0 {
-				mr.generateFloorCache(&tile.Components.Floors[i], tileX, tileY)
+				mr.generateFloorCache(&tile.Components.Floors[i])
 			}
 		}
 
 		for i := range tile.Components.Shadows {
 			if !tile.Components.Shadows[i].Hidden && tile.Components.Shadows[i].Prop1 != 0 {
-				mr.generateShadowCache(&tile.Components.Shadows[i], tileX, tileY)
+				mr.generateShadowCache(&tile.Components.Shadows[i])
 			}
 		}
 
 		for i := range tile.Components.Walls {
 			if !tile.Components.Walls[i].Hidden && tile.Components.Walls[i].Prop1 != 0 {
-				mr.generateWallCache(&tile.Components.Walls[i], tileX, tileY)
+				mr.generateWallCache(&tile.Components.Walls[i])
 			}
 		}
 	}
 }
 
-func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) {
+func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord) {
 	tileOptions := mr.mapEngine.GetTiles(int(tile.Style), int(tile.Sequence), 0)
 
 	var tileData []*d2dt1.Tile
@@ -93,16 +92,16 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord, tileX, 
 	}
 }
 
-func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX, tileY int) {
+func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord) {
 	tileOptions := mr.mapEngine.GetTiles(int(tile.Style), int(tile.Sequence), 13)
 
 	var tileData *d2dt1.Tile
 
 	if tileOptions == nil {
 		return
-	} else {
-		tileData = &tileOptions[tile.RandomIndex]
 	}
+
+	tileData = &tileOptions[tile.RandomIndex]
 
 	if tileData.Width == 0 || tileData.Height == 0 {
 		return
@@ -133,7 +132,7 @@ func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord, tileX,
 	mr.setImageCacheRecord(tile.Style, tile.Sequence, 13, tile.RandomIndex, image)
 }
 
-func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY int) {
+func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord) {
 	tileOptions := mr.mapEngine.GetTiles(int(tile.Style), int(tile.Sequence), int(tile.Type))
 
 	var tileData *d2dt1.Tile
@@ -167,7 +166,6 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord, tileX, tileY in
 
 	realHeight := d2common.MaxInt32(d2common.AbsInt32(tileData.Height), tileMaxY-tileMinY)
 	tileYOffset := -tileMinY
-	/*tileHeight := int(tileMaxY - tileMinY)*/
 
 	if tile.Type == 15 {
 		tile.YAdjust = -int(tileData.RoofHeight)

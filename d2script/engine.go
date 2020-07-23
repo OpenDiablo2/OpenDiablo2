@@ -23,9 +23,11 @@ func CreateScriptEngine() *ScriptEngine {
 		fmt.Printf("Script: %s\n", call.Argument(0).String())
 		return otto.Value{}
 	})
+
 	if err != nil {
 		fmt.Printf("could not bind the 'debugPrint' to the given function in script engine")
 	}
+
 	return &ScriptEngine{
 		vm:            vm,
 		isEvalAllowed: false,
@@ -37,7 +39,7 @@ func (s *ScriptEngine) AllowEval() {
 	s.isEvalAllowed = true
 }
 
-// AllowEval disallows the evaluation of JS code.
+// DisallowEval disallows the evaluation of JS code.
 func (s *ScriptEngine) DisallowEval() {
 	s.isEvalAllowed = false
 }
@@ -82,5 +84,6 @@ func (s *ScriptEngine) Eval(code string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return val.String(), nil
 }
