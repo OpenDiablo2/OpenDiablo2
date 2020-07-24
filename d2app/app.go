@@ -240,6 +240,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.Properties, d2datadict.LoadProperties},
 		{d2resource.SkillDesc, d2datadict.LoadSkillDescriptions},
 		{d2resource.ItemTypes, d2datadict.LoadItemTypes},
+		{d2resource.BodyLocations, d2datadict.LoadBodyLocations},
 	}
 
 	d2datadict.InitObjectRecords()

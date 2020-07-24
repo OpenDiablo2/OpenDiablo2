@@ -181,6 +181,7 @@ const (
 	SoundSettings    = "/data/global/excel/Sounds.txt"
 	ItemStatCost     = "/data/global/excel/ItemStatCost.txt"
 	ItemTypes        = "/data/global/excel/ItemTypes.txt"
+	BodyLocations    = "/data/global/excel/bodylocs.txt"
 	Properties       = "/data/global/excel/Properties.txt"
 	Hireling         = "/data/global/excel/hireling.txt"
 	DifficultyLevels = "/data/global/excel/difficultylevels.txt"
