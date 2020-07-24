@@ -1,12 +1,13 @@
 package d2datadict
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
+// ItemTypeRecord describes the types for items
 type ItemTypeRecord struct {
 	// Name (ItemType)
 	// A comment field that contains the “internal name” of this iType,
@@ -245,6 +246,7 @@ func LoadItemTypes(file []byte) {
 			InvGfx6:       d.String("InvGfx6"),
 			StorePage:     d.String("StorePage"),
 		}
+
 		ItemTypes[itemType.Name] = itemType
 	}
 
