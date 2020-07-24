@@ -96,7 +96,7 @@ func LoadHireling(file []byte) {
 		hireling := &HirelingRecord{
 			Hireling:        d.String("Hireling"),
 			SubType:         d.String("SubType"),
-			ID:              d.Number("ID"),
+			ID:              d.Number("Id"),
 			Class:           d.Number("Class"),
 			Act:             d.Number("Act"),
 			Difficulty:      d.Number("Difficulty"),
@@ -109,7 +109,7 @@ func LoadHireling(file []byte) {
 			HP:              d.Number("HP"),
 			HPPerLvl:        d.Number("HP/Lvl"),
 			Defense:         d.Number("Defense"),
-			DefPerLvl:       d.Number("ID"),
+			DefPerLvl:       d.Number("Id"),
 			Str:             d.Number("Str"),
 			StrPerLvl:       d.Number("Str/Lvl"),
 			Dex:             d.Number("Dex"),

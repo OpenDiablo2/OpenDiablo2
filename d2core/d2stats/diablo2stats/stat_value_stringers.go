@@ -74,7 +74,7 @@ func stringerSkillName(sv d2stats.StatValue) string {
 
 func stringerMonsterName(sv d2stats.StatValue) string {
 	for key := range d2datadict.MonStats {
-		if d2datadict.MonStats[key].Id == sv.Int() {
+		if d2datadict.MonStats[key].ID == sv.Int() {
 			return d2datadict.MonStats[key].NameString
 		}
 	}

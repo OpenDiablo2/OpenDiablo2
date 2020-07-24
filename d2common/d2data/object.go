@@ -7,7 +7,7 @@ import (
 // Object is a game world object
 type Object struct {
 	Type  int
-	Id    int //nolint:golint ID is the right key
+	ID    int
 	X     int
 	Y     int
 	Flags int
