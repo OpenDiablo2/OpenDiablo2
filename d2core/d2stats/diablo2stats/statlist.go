@@ -4,7 +4,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 )
 
-// static check that Diablo2Stat implements Stat
+// static check that diablo2Stat implements Stat
 var _ d2stats.StatList = &Diablo2StatList{}
 
 // Diablo2StatList is a diablo 2 implementation of a stat list

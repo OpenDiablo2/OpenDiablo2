@@ -6,15 +6,18 @@ import (
 )
 
 // NewStat creates a stat instance with the given record and values
-func NewStat(record *d2datadict.ItemStatCostRecord, values ...d2stats.StatValue) d2stats.Stat {
+func NewStat(key string, values ...float64) d2stats.Stat {
+	record := d2datadict.ItemStatCosts[key]
+
 	if record == nil {
 		return nil
 	}
 
-	stat := &Diablo2Stat{
+	stat := &diablo2Stat{
 		record: record,
-		values: values,
 	}
+
+	stat.init(values...) // init stat values, value types, and value combination rules
 
 	return stat
 }
@@ -24,22 +27,21 @@ func NewStatList(stats ...d2stats.Stat) d2stats.StatList {
 	return &Diablo2StatList{stats}
 }
 
-// NewStatValue creates a stat value of the given type
-func NewStatValue(t d2stats.StatValueType) d2stats.StatValue {
-	sv := &Diablo2StatValue{_type: t}
+// NewValue creates a stat value of the given type
+func NewValue(t d2stats.StatNumberType, c d2stats.ValueCombineType) d2stats.StatValue {
+	sv := &Diablo2StatValue{
+		numberType: t,
+		combineType: c,
+	}
 
 	switch t {
 	case d2stats.StatValueFloat:
-		sv._stringer = stringerUnsignedFloat
+		sv.stringerFn = stringerUnsignedFloat
 	case d2stats.StatValueInt:
-		sv._stringer = stringerUnsignedInt
+		sv.stringerFn = stringerUnsignedInt
 	default:
-		sv._stringer = stringerEmpty
+		sv.stringerFn = stringerEmpty
 	}
 
 	return sv
-}
-
-func intVal(i int) d2stats.StatValue {
-	return NewStatValue(d2stats.StatValueInt).SetInt(i)
 }
