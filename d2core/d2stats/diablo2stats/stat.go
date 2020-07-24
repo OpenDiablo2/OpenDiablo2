@@ -2,7 +2,6 @@ package diablo2stats
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -10,8 +9,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 )
 
-// static check that Diablo2Stat implements Stat
-var _ d2stats.Stat = &Diablo2Stat{}
+// static check that diablo2Stat implements Stat
+var _ d2stats.Stat = &diablo2Stat{}
 
 type descValPosition int
 
@@ -23,6 +22,10 @@ const (
 
 const (
 	maxSkillTabIndex = 2
+	oneValue         = 1
+	twoValue         = 2
+	threeValue       = 3
+	fourValue        = 4
 )
 
 const (
@@ -31,47 +34,188 @@ const (
 	fourComponentStr  = "%s %s %s %s"
 )
 
-// Diablo2Stat is an instance of a Diablo2Stat, with a set of values
-type Diablo2Stat struct {
+const (
+	intVal = d2stats.StatValueInt
+	sum    = d2stats.StatValueCombineSum
+	static = d2stats.StatValueCombineStatic
+)
+
+// diablo2Stat is an implementation of an OpenDiablo2 Stat, with a set of values.
+// It is pretty tightly coupled to the data files for d2
+type diablo2Stat struct {
 	record *d2datadict.ItemStatCostRecord
 	values []d2stats.StatValue
 }
 
+// depending on the stat record, sets up the proper number of values,
+// as well as set up the stat value number types, value combination types, and
+// the value stringer functions used
+func (s *diablo2Stat) init(numbers ...float64) {
+	if s.record == nil {
+		return
+	}
+
+	//nolint:gomdn introducing a const for these would be worse
+	switch s.record.DescFnID {
+	case 1:
+		// +31 to Strength
+		// Replenish Life +20 || Drain Life -8
+		s.values = make([]d2stats.StatValue, oneValue)
+		s.values[0] = NewValue(intVal, sum).SetStringer(stringerIntSigned)
+	case 2:
+		// +16% Increased Chance of Blocking
+		// Lightning Absorb +10%
+		s.values = make([]d2stats.StatValue, oneValue)
+		s.values[0] = NewValue(intVal, sum).SetStringer(stringerIntPercentageSigned)
+	case 3:
+		// Damage Reduced by 25
+		// Slain Monsters Rest in Peace
+		s.values = make([]d2stats.StatValue, oneValue)
+		s.values[0] = NewValue(intVal, sum)
+	case 4:
+		// Poison Resist +25%
+		// +25% Faster Run/Walk
+		s.values = make([]d2stats.StatValue, oneValue)
+		s.values[0] = NewValue(intVal, sum).SetStringer(stringerIntPercentageSigned)
+	case 5:
+		// Hit Causes Monster to Flee 25%
+		s.values = make([]d2stats.StatValue, oneValue)
+		s.values[0] = NewValue(intVal, sum)
+		s.values[0].SetStringer(stringerIntPercentageUnsigned)
+	case 6:
+		// +25 to Life (Based on Character Level)
+		s.values = make([]d2stats.StatValue, oneValue)
+		s.values[0] = NewValue(intVal, sum).SetStringer(stringerIntSigned)
+	case 7:
+		// Lightning Resist +25% (Based on Character Level)
+		// +25% Better Chance of Getting Magic Items (Based on Character Level)
+		s.values = make([]d2stats.StatValue, oneValue)
+		s.values[0] = NewValue(intVal, sum).SetStringer(stringerIntPercentageSigned)
+	case 8:
+		// +25% Enhanced Defense (Based on Character Level)
+		// Heal Stamina Plus +25% (Based on Character Level)
+		s.values = make([]d2stats.StatValue, oneValue)
+		s.values[0] = NewValue(intVal, sum).SetStringer(stringerIntPercentageSigned)
+	case 9:
+		// Attacker Takes Damage of 25 (Based on Character Level)
+		s.values = make([]d2stats.StatValue, oneValue)
+		s.values[0] = NewValue(intVal, sum)
+	case 11:
+		// Repairs 2 durability per second
+		s.values = make([]d2stats.StatValue, oneValue)
+		s.values[0] = NewValue(intVal, sum)
+	case 12:
+		// Hit Blinds Target +5
+		s.values = make([]d2stats.StatValue, oneValue)
+		s.values[0] = NewValue(intVal, sum).SetStringer(stringerIntSigned)
+	case 13:
+		// +5 to Paladin Skill Levels
+		s.values = make([]d2stats.StatValue, twoValue)
+		s.values[0] = NewValue(intVal, sum).SetStringer(stringerIntSigned)
+		s.values[1] = NewValue(intVal, sum).SetStringer(stringerClassAllSkills)
+	case 14:
+		// +5 to Combat Skills (Paladin Only)
+		s.values = make([]d2stats.StatValue, threeValue)
+		s.values[0] = NewValue(intVal, sum).SetStringer(stringerIntSigned)
+		s.values[1] = NewValue(intVal, sum).SetStringer(stringerClassOnly)
+		s.values[2] = NewValue(intVal, static)
+	case 15:
+		//  5% Chance to cast level 7 Frozen Orb on attack
+		s.values = make([]d2stats.StatValue, threeValue)
+		s.values[0] = NewValue(intVal, sum)
+		s.values[1] = NewValue(intVal, static)
+		s.values[2] = NewValue(intVal, static).SetStringer(stringerSkillName)
+	case 16:
+		// Level 3 Warmth Aura When Equipped
+		s.values = make([]d2stats.StatValue, twoValue)
+		s.values[0] = NewValue(intVal, sum)
+		s.values[1] = NewValue(intVal, static).SetStringer(stringerSkillName)
+	case 20:
+		// -25% Target Defense
+		s.values = make([]d2stats.StatValue, oneValue)
+		s.values[0] = NewValue(intVal, sum).SetStringer(stringerIntPercentageSigned)
+	case 22:
+		// 25% to Attack Rating versus Specter
+		s.values = make([]d2stats.StatValue, twoValue)
+		s.values[0] = NewValue(intVal, sum).SetStringer(stringerIntPercentageUnsigned)
+		s.values[1] = NewValue(intVal, static).SetStringer(stringerMonsterName)
+	case 23:
+		//  25% Reanimate as: Specter
+		s.values = make([]d2stats.StatValue, twoValue)
+		s.values[0] = NewValue(intVal, sum).SetStringer(stringerIntPercentageUnsigned)
+		s.values[1] = NewValue(intVal, static).SetStringer(stringerMonsterName)
+	case 24:
+		// Level 25 Frozen Orb (19/20 Charges)
+		s.values = make([]d2stats.StatValue, fourValue)
+		s.values[0] = NewValue(intVal, static)
+		s.values[1] = NewValue(intVal, static).SetStringer(stringerSkillName)
+		s.values[2] = NewValue(intVal, static)
+		s.values[3] = NewValue(intVal, static)
+	case 27:
+		// +25 to Frozen Orb (Paladin Only)
+		s.values = make([]d2stats.StatValue, threeValue)
+		s.values[0] = NewValue(intVal, sum).SetStringer(stringerIntSigned)
+		s.values[1] = NewValue(intVal, static).SetStringer(stringerSkillName)
+		s.values[2] = NewValue(intVal, static).SetStringer(stringerClassOnly)
+	case 28:
+		// +25 to Frozen Orb
+		s.values = make([]d2stats.StatValue, twoValue)
+		s.values[0] = NewValue(intVal, sum).SetStringer(stringerIntSigned)
+		s.values[1] = NewValue(intVal, static).SetStringer(stringerSkillName)
+	default:
+		return
+	}
+
+	for idx := range numbers {
+		if idx > len(s.values) {
+			break
+		}
+
+		s.values[idx].SetFloat(numbers[idx])
+	}
+}
+
 // Name returns the name of the stat (the key in itemstatcosts)
-func (s *Diablo2Stat) Name() string {
+func (s *diablo2Stat) Name() string {
 	return s.record.Name
 }
 
 // Priority returns the description printing priority
-func (s *Diablo2Stat) Priority() int {
+func (s *diablo2Stat) Priority() int {
 	return s.record.DescPriority
 }
 
 // Values returns the stat values of the stat
-func (s *Diablo2Stat) Values() []d2stats.StatValue {
+func (s *diablo2Stat) Values() []d2stats.StatValue {
 	return s.values
 }
 
 // SetValues sets the stat values
-func (s *Diablo2Stat) SetValues(values ...d2stats.StatValue) {
+func (s *diablo2Stat) SetValues(values ...d2stats.StatValue) {
 	s.values = make([]d2stats.StatValue, len(values))
 	for idx := range values {
 		s.values[idx] = values[idx]
 	}
 }
 
-// Clone returns a deep copy of the Diablo2Stat
-func (s *Diablo2Stat) Clone() d2stats.Stat {
-	clone := &Diablo2Stat{
+// Clone returns a deep copy of the diablo2Stat
+func (s *diablo2Stat) Clone() d2stats.Stat {
+	clone := &diablo2Stat{
 		record: s.record,
-		values: make([]d2stats.StatValue, len(s.Values())),
 	}
+
+	clone.init()
 
 	for idx := range s.values {
 		srcVal := s.values[idx]
-		dstVal := reflect.New(reflect.ValueOf(srcVal).Elem().Type()).Interface().(d2stats.StatValue)
+		dstVal := &Diablo2StatValue{
+			numberType:  srcVal.NumberType(),
+			combineType: srcVal.CombineType(),
+		}
 
-		switch srcVal.Type() {
+		dstVal.SetStringer(srcVal.Stringer())
+
+		switch srcVal.NumberType() {
 		case d2stats.StatValueInt:
 			dstVal.SetInt(srcVal.Int())
 		case d2stats.StatValueFloat:
@@ -85,14 +229,14 @@ func (s *Diablo2Stat) Clone() d2stats.Stat {
 }
 
 // Copy to this stat value the values of the given stat value
-func (s *Diablo2Stat) Copy(from d2stats.Stat) d2stats.Stat {
+func (s *diablo2Stat) Copy(from d2stats.Stat) d2stats.Stat {
 	srcValues := from.Values()
 	s.values = make([]d2stats.StatValue, len(srcValues))
 
 	for idx := range srcValues {
 		src := srcValues[idx]
-		valType := src.Type()
-		dst := &Diablo2StatValue{_type: valType}
+		valType := src.NumberType()
+		dst := &Diablo2StatValue{numberType: valType}
 		dst.SetStringer(src.Stringer())
 
 		switch valType {
@@ -109,7 +253,7 @@ func (s *Diablo2Stat) Copy(from d2stats.Stat) d2stats.Stat {
 }
 
 // Combine sums the other stat with this one (does not alter this stat, returns altered clone!)
-func (s *Diablo2Stat) Combine(other d2stats.Stat) (result d2stats.Stat, err error) {
+func (s *diablo2Stat) Combine(other d2stats.Stat) (result d2stats.Stat, err error) {
 	cantBeCombinedErr := fmt.Errorf("cannot combine %s with %s", s.Name(), other.Name())
 
 	if !s.canBeCombinedWith(other) {
@@ -121,20 +265,31 @@ func (s *Diablo2Stat) Combine(other d2stats.Stat) (result d2stats.Stat, err erro
 
 	for idx := range result.Values() {
 		v1, v2 := dstValues[idx], srcValues[idx]
+		combinationRule := v1.CombineType()
 
-		valType := v1.Type()
-		switch valType {
-		case d2stats.StatValueInt:
-			v1.SetInt(v1.Int() + v2.Int())
-		case d2stats.StatValueFloat:
-			v1.SetFloat(v1.Float() + v2.Float())
+		if combinationRule == d2stats.StatValueCombineStatic {
+			// we do not add the values, they remain the same
+			// for things like monster/class/skill index or on proc stats
+			// where the level of a skill isn't summed, but the
+			// chance to cast values are
+			continue
+		}
+
+		if combinationRule == d2stats.StatValueCombineSum {
+			valType := v1.NumberType()
+			switch valType {
+			case d2stats.StatValueInt:
+				v1.SetInt(v1.Int() + v2.Int())
+			case d2stats.StatValueFloat:
+				v1.SetFloat(v1.Float() + v2.Float())
+			}
 		}
 	}
 
 	return result, nil
 }
 
-func (s *Diablo2Stat) canBeCombinedWith(other d2stats.Stat) bool {
+func (s *diablo2Stat) canBeCombinedWith(other d2stats.Stat) bool {
 	if s.Name() != other.Name() {
 		return false
 	}
@@ -145,8 +300,24 @@ func (s *Diablo2Stat) canBeCombinedWith(other d2stats.Stat) bool {
 	}
 
 	for idx := range values1 {
-		if values1[idx].Type() != values2[idx].Type() {
+		if values1[idx].NumberType() != values2[idx].NumberType() {
 			return false
+		}
+
+		if values1[idx].CombineType() != values2[idx].CombineType() {
+			return false
+		}
+
+		// in the case that we are trying to combine stats like:
+		// 		+1 to Paladin Skills
+		// 		+1 to Sorceress Skills
+		// the numeric value (an index) that denotes the class skill type knows not to be summed
+		// with the other index, even though the format of the stat and stat value is pretty much
+		// the same.
+		if values1[idx].CombineType() == d2stats.StatValueCombineStatic {
+			if values1[idx].Float() != values2[idx].Float() {
+				return false
+			}
 		}
 	}
 
@@ -154,77 +325,40 @@ func (s *Diablo2Stat) canBeCombinedWith(other d2stats.Stat) bool {
 }
 
 // String returns the formatted description string
-func (s *Diablo2Stat) String() string { //nolint:gocyclo switch statement is not so bad
+func (s *diablo2Stat) String() string { //nolint:gocyclo switch statement is not so bad
 	var result string
+
+	for idx := range s.values {
+		if s.values[idx].Stringer() == nil {
+			s.values[idx].SetStringer(stringerUnsignedInt)
+		}
+	}
 
 	//nolint:gomdn introducing a const for these would be worse
 	switch s.record.DescFnID {
-	case 1:
-		s.values[0].SetStringer(stringerIntSigned)
+	case 1, 2, 3, 4, 5, 12, 20:
 		result = s.descFn1()
-	case 2:
-		s.values[0].SetStringer(stringerIntPercentageSigned)
-		result = s.descFn2()
-	case 3:
-		result = s.descFn3()
-	case 4:
-		s.values[0].SetStringer(stringerIntPercentageSigned)
-		result = s.descFn4()
-	case 5:
-		s.values[0].SetStringer(stringerIntPercentageUnsigned)
-		result = s.descFn5()
-	case 6:
-		s.values[0].SetStringer(stringerIntSigned)
+	case 6, 7, 8:
 		result = s.descFn6()
-	case 7:
-		s.values[0].SetStringer(stringerIntPercentageSigned)
-		result = s.descFn7()
-	case 8:
-		s.values[0].SetStringer(stringerIntPercentageSigned)
-		result = s.descFn8()
 	case 9:
 		result = s.descFn9()
 	case 11:
 		result = s.descFn11()
-	case 12:
-		s.values[0].SetStringer(stringerIntSigned)
-		result = s.descFn12()
 	case 13:
-		s.values[0].SetStringer(stringerIntSigned)
-		s.values[1].SetStringer(stringerClassAllSkills)
 		result = s.descFn13()
 	case 14:
-		s.values[0].SetStringer(stringerIntSigned)
-		s.values[1].SetStringer(stringerClassOnly)
 		result = s.descFn14()
 	case 15:
-		s.values[2].SetStringer(stringerSkillName)
 		result = s.descFn15()
 	case 16:
-		s.values[1].SetStringer(stringerSkillName)
 		result = s.descFn16()
-	case 20:
-		s.values[0].SetStringer(stringerIntPercentageSigned)
-		result = s.descFn20()
-	case 22:
-		s.values[0].SetStringer(stringerIntPercentageUnsigned)
-		s.values[1].SetStringer(stringerMonsterName)
+	case 22, 23:
 		result = s.descFn22()
-	case 23:
-		s.values[0].SetStringer(stringerIntPercentageUnsigned)
-		s.values[1].SetStringer(stringerMonsterName)
-		result = s.descFn23()
 	case 24:
-		s.values[1].SetStringer(stringerSkillName)
 		result = s.descFn24()
 	case 27:
-		s.values[0].SetStringer(stringerIntSigned)
-		s.values[1].SetStringer(stringerSkillName)
-		s.values[2].SetStringer(stringerClassOnly)
 		result = s.descFn27()
 	case 28:
-		s.values[0].SetStringer(stringerIntSigned)
-		s.values[1].SetStringer(stringerSkillName)
 		result = s.descFn28()
 	default:
 		result = ""
@@ -233,9 +367,7 @@ func (s *Diablo2Stat) String() string { //nolint:gocyclo switch statement is not
 	return result
 }
 
-// +31 to Strength
-// Replenish Life +20 || Drain Life -8
-func (s *Diablo2Stat) descFn1() string {
+func (s *diablo2Stat) descFn1() string {
 	var stringTableKey, result string
 
 	value := s.values[0]
@@ -264,35 +396,7 @@ func (s *Diablo2Stat) descFn1() string {
 	return result
 }
 
-// +16% Increased Chance of Blocking
-// Lightning Absorb +10%
-func (s *Diablo2Stat) descFn2() string {
-	// for now, same as fn1
-	return s.descFn1()
-}
-
-// Damage Reduced by 25
-// Slain Monsters Rest in Peace
-func (s *Diablo2Stat) descFn3() string {
-	// for now, same as fn1
-	return s.descFn1()
-}
-
-// Poison Resist +25%
-// +25% Faster Run/Walk
-func (s *Diablo2Stat) descFn4() string {
-	// for now, same as fn1
-	return s.descFn1()
-}
-
-// Hit Causes Monster to Flee 25%
-func (s *Diablo2Stat) descFn5() string {
-	// for now, same as fn1
-	return s.descFn1()
-}
-
-// +25 to Life (Based on Character Level)
-func (s *Diablo2Stat) descFn6() string {
+func (s *diablo2Stat) descFn6() string {
 	var stringTableKey, result string
 
 	value := s.values[0]
@@ -323,22 +427,7 @@ func (s *Diablo2Stat) descFn6() string {
 	return result
 }
 
-// Lightning Resist +25% (Based on Character Level)
-// +25% Better Chance of Getting Magic Items (Based on Character Level)
-func (s *Diablo2Stat) descFn7() string {
-	// for now, same as fn6
-	return s.descFn6()
-}
-
-// +25% Enhanced Defense (Based on Character Level)
-// Heal Stamina Plus +25% (Based on Character Level)
-func (s *Diablo2Stat) descFn8() string {
-	// for now, same as fn6
-	return s.descFn6()
-}
-
-// Attacker Takes Damage of 25 (Based on Character Level)
-func (s *Diablo2Stat) descFn9() string {
+func (s *diablo2Stat) descFn9() string {
 	var stringTableKey, result string
 
 	value := s.values[0]
@@ -368,8 +457,7 @@ func (s *Diablo2Stat) descFn9() string {
 	return result
 }
 
-// Repairs 2 durability per second
-func (s *Diablo2Stat) descFn11() string {
+func (s *diablo2Stat) descFn11() string {
 	var stringTableKey string
 
 	value := s.values[0]
@@ -387,14 +475,7 @@ func (s *Diablo2Stat) descFn11() string {
 	return fmt.Sprintf(formatString, value)
 }
 
-// Hit Blinds Target +5
-func (s *Diablo2Stat) descFn12() string {
-	// for now, same as fn1
-	return s.descFn1()
-}
-
-// +5 to Paladin Skill Levels
-func (s *Diablo2Stat) descFn13() string {
+func (s *diablo2Stat) descFn13() string {
 	value := s.values[0]
 	allSkills := s.values[1]
 
@@ -412,8 +493,7 @@ func (s *Diablo2Stat) descFn13() string {
 	}
 }
 
-//  +5 to Combat Skills (Paladin Only)
-func (s *Diablo2Stat) descFn14() string {
+func (s *diablo2Stat) descFn14() string {
 	// strings come out like `+5 to Combat Skills (Paladin Only)`
 	numSkills, hero, skillTab := s.values[0], s.values[1], s.values[2]
 	heroMap := getHeroMap()
@@ -440,8 +520,7 @@ func (s *Diablo2Stat) descFn14() string {
 	return fmt.Sprintf(threeComponentStr, numSkillsStr, skillTabStr, classOnlyStr)
 }
 
-//  5% Chance to cast level 7 Frozen Orb on attack
-func (s *Diablo2Stat) descFn15() string {
+func (s *diablo2Stat) descFn15() string {
 	chance, lvl, skill := s.values[0], s.values[1], s.values[2]
 
 	// Special case, `chance to cast` format is actually in the string table!
@@ -450,8 +529,7 @@ func (s *Diablo2Stat) descFn15() string {
 	return fmt.Sprintf(chanceToCastStr, chance.Int(), lvl.Int(), skill)
 }
 
-// Level 3 Warmth Aura When Equipped
-func (s *Diablo2Stat) descFn16() string {
+func (s *diablo2Stat) descFn16() string {
 	skillLevel, skillIndex := s.values[0], s.values[1]
 
 	// Special case, `Level # XYZ Aura When Equipped`, format is actually in the string table!
@@ -460,28 +538,14 @@ func (s *Diablo2Stat) descFn16() string {
 	return fmt.Sprintf(format, skillLevel.Int(), skillIndex)
 }
 
-// -25% Target Defense
-func (s *Diablo2Stat) descFn20() string {
-	// for now, same as fn2
-	return s.descFn2()
-}
-
-// 25% to Attack Rating versus Specter
-func (s *Diablo2Stat) descFn22() string {
+func (s *diablo2Stat) descFn22() string {
 	arBonus, monsterIndex := s.values[0], s.values[1]
 	arVersus := d2common.TranslateString(s.record.DescStrPos)
 
 	return fmt.Sprintf(threeComponentStr, arBonus, arVersus, monsterIndex)
 }
 
-//  25% Reanimate as: Specter
-func (s *Diablo2Stat) descFn23() string {
-	// for now, same as fn22
-	return s.descFn22()
-}
-
-// Level 25 Frozen Orb (19/20 Charges)
-func (s *Diablo2Stat) descFn24() string {
+func (s *diablo2Stat) descFn24() string {
 	// Special case formatting
 	format := "Level " + threeComponentStr
 
@@ -496,22 +560,20 @@ func (s *Diablo2Stat) descFn24() string {
 	return fmt.Sprintf(format, lvl, skill, chargeStr)
 }
 
-// +25 to Frozen Orb (Paladin Only)
-func (s *Diablo2Stat) descFn27() string {
+func (s *diablo2Stat) descFn27() string {
 	amount, skill, hero := s.values[0], s.values[1], s.values[2]
 
 	return fmt.Sprintf(fourComponentStr, amount, "to", skill, hero)
 }
 
-// +25 to Frozen Orb
-func (s *Diablo2Stat) descFn28() string {
+func (s *diablo2Stat) descFn28() string {
 	amount, skill := s.values[0], s.values[1]
 
 	return fmt.Sprintf(threeComponentStr, amount, "to", skill)
 }
 
 // DescGroupString return a string based on the DescGroupFuncID
-func (s *Diablo2Stat) DescGroupString(a ...interface{}) string {
+func (s *diablo2Stat) DescGroupString(a ...interface{}) string {
 	if s.record.DescGroupFuncID < 0 {
 		return ""
 	}
