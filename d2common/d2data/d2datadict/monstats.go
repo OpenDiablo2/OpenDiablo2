@@ -17,9 +17,9 @@ type (
 
 		// Key contains the pointer that will be used in other txt files
 		// such as levels.txt and superuniques.txt.
-		Key string // called `ID` in monstats.txt
+		Key string // called `Id` in monstats.txt
 
-		// ID is the actual internal ID of the unit (this is what the ID pointer
+		// Id is the actual internal ID of the unit (this is what the ID pointer
 		// actually points at) remember that no two units can have the same ID,
 		// this will result in lots of unpredictable behavior and crashes so please
 		// don’t do it. This 'HarcCodedInDeX' is used for several things, such as
@@ -28,7 +28,7 @@ type (
 		// column also links other hardcoded effects to the units, such as the
 		// transparency on necro summons and the name-color change on unique boss
 		// units (thanks to Kingpin for the info)
-		Id int //nolint:golint,stylecheck // called `hcIdx` in monstats.txt
+		ID int // called `hcIdx` in monstats.txt
 
 		// BaseKey is an ID pointer of the “base” unit for this specific
 		// monster type (ex. There are five types of “Fallen”; all of them have
@@ -80,10 +80,10 @@ type (
 		// which animation mode will the spawned monster be spawned in.
 		SpawnAnimationKey string // called `spawnmode` in monstats.txt
 
-		// MinionId1 is an ID of a minion that spawns when this monster is created
+		// MinionId1 is an Id of a minion that spawns when this monster is created
 		MinionId1 string //nolint:golint,stylecheck // called `minion1` in monstats.txt
 
-		// MinionId2 is an ID of a minion that spawns when this monster is created
+		// MinionId2 is an Id of a minion that spawns when this monster is created
 		MinionId2 string //nolint:golint,stylecheck // called `minion2` in monstats.txt
 
 		// SoundKeyNormal, SoundKeySpecial
@@ -690,8 +690,8 @@ func LoadMonStats(file []byte) { // nolint:funlen // Makes no sense to split
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
 		record := &MonStatsRecord{
-			Key:                            d.String("ID"),
-			Id:                             d.Number("hcIdx"),
+			Key:                            d.String("Id"),
+			ID:                             d.Number("hcIdx"),
 			BaseKey:                        d.String("BaseId"),
 			NextKey:                        d.String("NextInClass"),
 			PaletteId:                      d.Number("TransLvl"),

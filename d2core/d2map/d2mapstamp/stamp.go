@@ -127,7 +127,7 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 
 	for _, object := range mr.ds1.Objects {
 		if object.Type == int(d2enum.ObjectTypeCharacter) {
-			monstat := d2datadict.MonStats[d2datadict.MonPresets[mr.ds1.Act][object.Id]]
+			monstat := d2datadict.MonStats[d2datadict.MonPresets[mr.ds1.Act][object.ID]]
 			// If monstat is nil here it is a place_ type object, idk how to handle those yet.
 			// (See monpreset and monplace txts for reference)
 			if monstat != nil {
@@ -145,7 +145,7 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 		if object.Type == int(d2enum.ObjectTypeItem) {
 			// For objects the DS1 ID to objectID is hardcoded in the game
 			// use the lookup table
-			lookup := d2datadict.LookupObject(int(mr.ds1.Act), object.Type, object.Id)
+			lookup := d2datadict.LookupObject(int(mr.ds1.Act), object.Type, object.ID)
 
 			if lookup == nil {
 				continue

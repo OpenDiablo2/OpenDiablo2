@@ -250,7 +250,7 @@ func TestStat_InitMockData(t *testing.T) {
 	}
 
 	var monStats = map[string]*d2datadict.MonStatsRecord{
-		"Specter": {NameString: "Specter", Id: 40},
+		"Specter": {NameString: "Specter", ID: 40},
 	}
 
 	d2datadict.ItemStatCosts = itemStatCosts

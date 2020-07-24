@@ -115,7 +115,7 @@ func (ds1 *DS1) loadObjects(br *d2common.StreamReader) {
 		for objIdx := 0; objIdx < int(numberOfObjects); objIdx++ {
 			newObject := d2data.Object{}
 			newObject.Type = int(br.GetInt32())
-			newObject.Id = int(br.GetInt32())
+			newObject.ID = int(br.GetInt32())
 			newObject.X = int(br.GetInt32())
 			newObject.Y = int(br.GetInt32())
 			newObject.Flags = int(br.GetInt32())

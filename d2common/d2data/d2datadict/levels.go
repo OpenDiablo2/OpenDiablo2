@@ -95,7 +95,7 @@ type LevelDetailsRecord struct {
 
 	// ID
 	// Level ID (used in columns like VIS0-7)
-	Id int //nolint:golint,stylecheck // ID is the right key
+	ID int
 
 	// Palette is the Act Palette . Reference only
 	Palette int // Pal
@@ -138,7 +138,7 @@ type LevelDetailsRecord struct {
 	// location.
 	DependantLevelID int // Depend
 
-	// The type of the Level (ID from lvltypes.txt)
+	// The type of the Level (Id from lvltypes.txt)
 	LevelType int // LevelType
 
 	// Controls if teleport is allowed in that level.
@@ -367,10 +367,10 @@ type LevelDetailsRecord struct {
 //nolint:gochecknoglobals // Currently global by design, only written once
 var LevelDetails map[int]*LevelDetailsRecord
 
-// GetLevelDetails gets a LevelDetailsRecord by the record ID
+// GetLevelDetails gets a LevelDetailsRecord by the record Id
 func GetLevelDetails(id int) *LevelDetailsRecord {
 	for i := 0; i < len(LevelDetails); i++ {
-		if LevelDetails[i].Id == id {
+		if LevelDetails[i].ID == id {
 			return LevelDetails[i]
 		}
 	}
@@ -387,7 +387,7 @@ func LoadLevelDetails(file []byte) {
 	for d.Next() {
 		record := &LevelDetailsRecord{
 			Name:                       d.String("Name "),
-			Id:                         d.Number("ID"),
+			ID:                         d.Number("Id"),
 			Palette:                    d.Number("Pal"),
 			Act:                        d.Number("Act"),
 			QuestFlag:                  d.Number("QuestFlag"),
@@ -532,7 +532,7 @@ func LoadLevelDetails(file []byte) {
 			ObjectGroupSpawnChance6:    d.Number("ObjPrb6"),
 			ObjectGroupSpawnChance7:    d.Number("ObjPrb7"),
 		}
-		LevelDetails[record.Id] = record
+		LevelDetails[record.ID] = record
 	}
 
 	if d.Err != nil {

@@ -177,7 +177,7 @@ func LoadMonStats2(file []byte) {
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
 		record := &MonStats2Record{
-			Key:             d.String("ID"),
+			Key:             d.String("Id"),
 			Height:          d.Number("Height"),
 			OverlayHeight:   d.Number("OverlayHeight"),
 			PixelHeight:     d.Number("pixHeight"),
