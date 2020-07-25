@@ -51,13 +51,24 @@ func CreateGame(
 	gameClient *d2client.GameClient,
 	term d2interface.Terminal,
 ) *Game {
+	// find the local player and its initial location
+	var startX, startY float64
+	for _, player := range gameClient.Players {
+		if player.ID != gameClient.PlayerID {
+			continue
+		}
+		worldPosition := player.Position.World()
+		startX, startY = worldPosition.X(), worldPosition.Y()
+		break
+	}
+
 	result := &Game{
 		gameClient:           gameClient,
 		gameControls:         nil,
 		localPlayer:          nil,
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
-		mapRenderer:          d2maprenderer.CreateMapRenderer(renderer, gameClient.MapEngine, term),
+		mapRenderer:          d2maprenderer.CreateMapRenderer(renderer, gameClient.MapEngine, term, startX, startY),
 		escapeMenu:           NewEscapeMenu(navigator, renderer, audioProvider),
 		inputManager:         inputManager,
 		audioProvider:        audioProvider,
