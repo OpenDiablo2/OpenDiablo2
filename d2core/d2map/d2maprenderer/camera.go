@@ -27,7 +27,7 @@ func (c *Camera) SetTarget(target *d2vector.Position) {
 func (c *Camera) MoveTargetBy(vector *d2vector.Vector) {
 	if c.target == nil {
 		v := c.position.Clone()
-		c.target = &d2vector.Position{Vector: v}
+		c.target = &d2vector.Position{Vector: *v}
 	}
 
 	c.target.Add(vector)

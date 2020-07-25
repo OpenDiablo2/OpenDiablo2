@@ -164,28 +164,28 @@ func (g *GameControls) OnKeyRepeat(event d2interface.KeyEvent) bool {
 
 		if event.Key() == d2enum.KeyDown {
 			v := d2vector.NewVector(0, moveSpeed)
-			g.mapRenderer.MoveCameraTargetBy(&v)
+			g.mapRenderer.MoveCameraTargetBy(v)
 
 			return true
 		}
 
 		if event.Key() == d2enum.KeyUp {
 			v := d2vector.NewVector(0, -moveSpeed)
-			g.mapRenderer.MoveCameraTargetBy(&v)
+			g.mapRenderer.MoveCameraTargetBy(v)
 
 			return true
 		}
 
 		if event.Key() == d2enum.KeyRight {
 			v := d2vector.NewVector(moveSpeed, 0)
-			g.mapRenderer.MoveCameraTargetBy(&v)
+			g.mapRenderer.MoveCameraTargetBy(v)
 
 			return true
 		}
 
 		if event.Key() == d2enum.KeyLeft {
 			v := d2vector.NewVector(-moveSpeed, 0)
-			g.mapRenderer.MoveCameraTargetBy(&v)
+			g.mapRenderer.MoveCameraTargetBy(v)
 
 			return true
 		}

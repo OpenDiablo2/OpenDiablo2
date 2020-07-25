@@ -116,10 +116,10 @@ func BenchmarkVector_CompareApprox(b *testing.B) {
 }
 
 func TestVector_IsZero(t *testing.T) {
-	testIsZero(NewVector(0, 0), true, t)
-	testIsZero(NewVector(1, 0), false, t)
-	testIsZero(NewVector(0, 1), false, t)
-	testIsZero(NewVector(1, 1), false, t)
+	testIsZero(*NewVector(0, 0), true, t)
+	testIsZero(*NewVector(1, 0), false, t)
+	testIsZero(*NewVector(0, 1), false, t)
+	testIsZero(*NewVector(1, 1), false, t)
 }
 
 func testIsZero(v Vector, want bool, t *testing.T) {
@@ -169,14 +169,14 @@ func BenchmarkVector_Clone(b *testing.B) {
 	v := NewVector(1, 1)
 
 	for n := 0; n < b.N; n++ {
-		outVector = v.Clone()
+		outVector = *v.Clone()
 	}
 }
 
 func TestVector_Copy(t *testing.T) {
 	want := NewVector(1, 2)
 	got := NewVector(0, 0)
-	got.Copy(&want)
+	got.Copy(want)
 
 	if !got.Equals(want) {
 		t.Errorf("copy %s to %s: want %s: got %s", got, want, want, got)
@@ -188,7 +188,7 @@ func BenchmarkVector_Copy(b *testing.B) {
 	o := NewVector(2, 2)
 
 	for n := 0; n < b.N; n++ {
-		v.Copy(&o)
+		v.Copy(o)
 	}
 }
 
@@ -218,7 +218,7 @@ func TestVector_Clamp(t *testing.T) {
 	b := NewVector(7, 7)
 
 	want := NewVector(2, 7)
-	got := v.Clamp(&a, &b)
+	got := v.Clamp(a, b)
 
 	if !got.Equals(want) {
 		t.Errorf("clamp %s between %s and %s: want %s: got %s", c, a, b, want, *got)
@@ -231,7 +231,7 @@ func BenchmarkVector_Clamp(b *testing.B) {
 	max := NewVector(1, 1)
 
 	for n := 0; n < b.N; n++ {
-		v.Clamp(&min, &max)
+		v.Clamp(min, max)
 	}
 }
 
@@ -240,7 +240,7 @@ func TestVector_Add(t *testing.T) {
 	add := NewVector(0.5, 3)
 	want := NewVector(1.5, 5)
 	got := v.Clone()
-	got.Add(&add)
+	got.Add(add)
 
 	if !got.Equals(want) {
 		t.Errorf("add %s to %s: want %s: got %s", add, v, want, got)
@@ -252,7 +252,7 @@ func BenchmarkVector_Add(b *testing.B) {
 	o := NewVector(0.01, 0.01)
 
 	for n := 0; n < b.N; n++ {
-		v.Add(&o)
+		v.Add(o)
 	}
 }
 
@@ -281,7 +281,7 @@ func TestVector_Subtract(t *testing.T) {
 	subtract := NewVector(0.6, 0.6)
 	want := NewVector(0.4, 0.4)
 	got := v.Clone()
-	got.Subtract(&subtract)
+	got.Subtract(subtract)
 
 	if !got.Equals(want) {
 		t.Errorf("subtract %s from %s: want %s: got %s", subtract, v, want, got)
@@ -293,7 +293,7 @@ func BenchmarkVector_Subtract(b *testing.B) {
 	o := NewVector(0.01, 0.01)
 
 	for n := 0; n < b.N; n++ {
-		v.Subtract(&o)
+		v.Subtract(o)
 	}
 }
 
@@ -302,7 +302,7 @@ func TestVector_Multiply(t *testing.T) {
 	multiply := NewVector(2, 2)
 	want := NewVector(2, 2)
 	got := v.Clone()
-	got.Multiply(&multiply)
+	got.Multiply(multiply)
 
 	if !got.Equals(want) {
 		t.Errorf("multiply %s by %s: want %s: got %s", v, multiply, want, got)
@@ -314,7 +314,7 @@ func BenchmarkVector_Multiply(b *testing.B) {
 	o := NewVector(0.01, 0.01)
 
 	for n := 0; n < b.N; n++ {
-		v.Multiply(&o)
+		v.Multiply(o)
 	}
 }
 
@@ -323,7 +323,7 @@ func TestVector_Divide(t *testing.T) {
 	divide := NewVector(2, 4)
 	want := NewVector(0.5, 2)
 	got := v.Clone()
-	got.Divide(&divide)
+	got.Divide(divide)
 
 	if !got.Equals(want) {
 		t.Errorf("divide %s by %s: want %s: got %s", v, divide, want, got)
@@ -335,7 +335,7 @@ func BenchmarkVector_Divide(b *testing.B) {
 	o := NewVector(3, 3)
 
 	for n := 0; n < b.N; n++ {
-		v.Divide(&o)
+		v.Divide(o)
 	}
 }
 
@@ -488,7 +488,7 @@ func TestVector_Lerp(t *testing.T) {
 	interp := 0.3
 
 	want := NewVector(-6, 3)
-	got := a.Lerp(&b, interp)
+	got := a.Lerp(b, interp)
 
 	if !got.Equals(want) {
 		t.Errorf("linear interpolation between %s and %s by %.2f: want %s: got %s", a, b, interp, want, got)
@@ -500,7 +500,7 @@ func BenchmarkVector_Lerp(b *testing.B) {
 	t := NewVector(1000, 1000)
 
 	for n := 0; n < b.N; n++ {
-		v.Lerp(&t, 1.01)
+		v.Lerp(t, 1.01)
 	}
 }
 
@@ -508,7 +508,7 @@ func TestVector_Dot(t *testing.T) {
 	v := NewVector(1, 1)
 	c := v.Clone()
 	want := 2.0
-	got := c.Dot(&c)
+	got := c.Dot(c)
 
 	d := fmt.Sprintf("dot product of %s", v)
 
@@ -525,7 +525,7 @@ func BenchmarkVector_Dot(b *testing.B) {
 	v := NewVector(1, 1)
 
 	for n := 0; n < b.N; n++ {
-		outFloat = v.Dot(&v)
+		outFloat = v.Dot(v)
 	}
 }
 
@@ -573,18 +573,10 @@ func TestVector_Normalize(t *testing.T) {
 	v = NewVector(0, 10)
 	c = v.Clone()
 	want = NewVector(0, 1)
-	reverse := c.Normalize()
+	c.Normalize()
 
 	if !want.Equals(c) {
 		t.Errorf("normalize %s: want %s: got %s", v, want, c)
-	}
-
-	want = NewVector(0, 10)
-
-	c.Scale(reverse)
-
-	if !want.Equals(c) {
-		t.Errorf("reverse normalizing of %s: want %s: got %s", v, want, c)
 	}
 
 	v = NewVector(0, 0)
@@ -602,7 +594,7 @@ func BenchmarkVector_Normalize(b *testing.B) {
 	v := NewVector(1, 1)
 
 	for n := 0; n < b.N; n++ {
-		outFloat = v.Normalize()
+		outVector = *v.Normalize()
 	}
 }
 
@@ -696,6 +688,7 @@ func TestVector_Reflect(t *testing.T) {
 	up := NewVector(0, 1)
 
 	want := NewVector(1, 1)
+	want.Normalize()
 
 	v.Reflect(up)
 
@@ -719,6 +712,7 @@ func TestVector_ReflectSurface(t *testing.T) {
 	up := NewVector(0, 1)
 
 	want := NewVector(-1, -1)
+	want.Normalize()
 
 	v.ReflectSurface(up)
 
@@ -745,7 +739,7 @@ func TestVector_Rotate(t *testing.T) {
 	want := NewVector(0, 1)
 	got := right.Rotate(angle)
 
-	if !want.EqualsApprox(*got) {
+	if !want.EqualsApprox(got) {
 		t.Errorf("rotated %s by %.1f: want %s: got %s", c, angle*d2math.RadToDeg, want, got)
 	}
 
@@ -754,7 +748,7 @@ func TestVector_Rotate(t *testing.T) {
 	want = NewVector(-1, 0)
 	got = up.Rotate(angle)
 
-	if !want.EqualsApprox(*got) {
+	if !want.EqualsApprox(got) {
 		t.Errorf("rotated %s by %.1f: want %s: got %s", c, angle*d2math.RadToDeg, want, got)
 	}
 }
@@ -775,7 +769,7 @@ func TestVector_NinetyAnti(t *testing.T) {
 	want := NewVector(-1, 0)
 	got := v.NinetyAnti()
 
-	if !want.Equals(*got) {
+	if !want.Equals(got) {
 		t.Errorf("rotated %s by 90 degrees clockwise: want %s: got %s", c, want, *got)
 	}
 }
@@ -796,7 +790,7 @@ func TestVector_NinetyClock(t *testing.T) {
 	v = c.Clone()
 	got := v.NinetyClock()
 
-	if !want.Equals(*got) {
+	if !want.Equals(got) {
 		t.Errorf("rotated %s by 90 degrees anti-clockwise: want %s: got %s", c, want, *got)
 	}
 }

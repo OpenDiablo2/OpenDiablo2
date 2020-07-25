@@ -25,7 +25,7 @@ func newMapEntity(x, y int) mapEntity {
 	return mapEntity{
 		Position: pos,
 		Target:   pos,
-		velocity: d2vector.NewVector(0, 0),
+		velocity: *d2vector.VectorZero(),
 	}
 }
 
@@ -75,7 +75,7 @@ func (m *mapEntity) Step(tickTime float64) {
 	v := m.velocity.Clone() // Create a new vector
 
 	for {
-		applyVelocity(&m.Position.Vector, &v, &m.Target.Vector) // Pass the new vector to the function which alters it
+		applyVelocity(&m.Position.Vector, v, &m.Target.Vector) // Pass the new vector to the function which alters it
 
 		if m.atTarget() {
 			m.nextPath()
@@ -89,7 +89,7 @@ func (m *mapEntity) Step(tickTime float64) {
 
 // atTarget returns true if the distance between entity and target is almost zero.
 func (m *mapEntity) atTarget() bool {
-	return m.Position.EqualsApprox(m.Target.Vector)
+	return m.Position.EqualsApprox(&m.Target.Vector)
 }
 
 // setVelocity returns a vector describing the given length and the direction to the current target.
@@ -104,7 +104,7 @@ func (m *mapEntity) setVelocity(length float64) {
 // next node.
 func applyVelocity(position, velocity, target *d2vector.Vector) {
 	// Set velocity values to zero if almost zero
-	x, y := position.CompareApprox(*target)
+	x, y := position.CompareApprox(target)
 	vx, vy := velocity.X(), velocity.Y()
 
 	if x == 0 {
@@ -121,7 +121,7 @@ func applyVelocity(position, velocity, target *d2vector.Vector) {
 	dest.Add(velocity)
 
 	destDistance := position.Distance(dest)
-	targetDistance := position.Distance(*target)
+	targetDistance := position.Distance(target)
 
 	if destDistance > targetDistance {
 		// Destination overshot target. Set position to target and velocity to overshot amount.
@@ -129,7 +129,7 @@ func applyVelocity(position, velocity, target *d2vector.Vector) {
 		velocity.Copy(dest.Subtract(target))
 	} else {
 		// At or before target, set position to destination and velocity to zero.
-		position.Copy(&dest)
+		position.Copy(dest)
 		velocity.Set(0, 0)
 	}
 }

@@ -17,7 +17,7 @@ func (m *MapEngine) PathFind(start, dest d2vector.Position) []d2vector.Position 
 
 // checkLos finds out if there is a clear line of sight between two points
 func (m *MapEngine) checkLos(start, end d2vector.Position) (bool, d2vector.Position) {
-	dv := d2vector.Position{Vector: end.Clone()}
+	dv := d2vector.Position{Vector: *end.Clone()}
 	dv.Subtract(&start.Vector)
 	dx := dv.X()
 	dy := dv.Y()

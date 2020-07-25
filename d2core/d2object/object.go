@@ -140,5 +140,5 @@ func (ob *Object) GetPosition() d2vector.Position {
 
 // GetVelocity returns the object's velocity vector
 func (ob *Object) GetVelocity() d2vector.Vector {
-	return d2vector.NewVector(0, 0)
+	return *d2vector.VectorZero()
 }

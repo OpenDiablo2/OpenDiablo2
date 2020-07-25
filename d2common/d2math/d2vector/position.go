@@ -22,15 +22,15 @@ type Position struct {
 // NewPosition returns a Position struct with the given sub tile coordinates where 1 = 1 sub tile, with a fractional
 // offset.
 func NewPosition(x, y float64) Position {
-	p := Position{NewVector(x, y)}
+	p := Position{*NewVector(x, y)}
 	p.checkValues()
 
 	return p
 }
 
-// NewPosition returns a Position struct with the given tile coordinates where 1 = 1 tile, with a fractional offset.
+// NewPositionTile returns a Position struct with the given tile coordinates where 1 = 1 tile, with a fractional offset.
 func NewPositionTile(x, y float64) Position {
-	p := Position{NewVector(x*subTilesPerTile, y*subTilesPerTile)}
+	p := Position{*NewVector(x*subTilesPerTile, y*subTilesPerTile)}
 	p.checkValues()
 
 	return p

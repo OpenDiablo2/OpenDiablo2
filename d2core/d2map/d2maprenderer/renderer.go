@@ -349,7 +349,7 @@ func (mr *MapRenderer) renderEntityDebug(target d2interface.Surface) {
 		world := pos
 		x, y := world.X()/5, world.Y()/5
 		velocity := e.GetVelocity()
-		velocity = velocity.Clone()
+		velocity = *velocity.Clone()
 		vx, vy := mr.viewport.WorldToOrtho(velocity.X(), velocity.Y())
 		screenX, screenY := mr.viewport.WorldToScreen(x, y)
 

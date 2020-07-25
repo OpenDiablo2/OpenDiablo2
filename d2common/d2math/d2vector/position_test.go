@@ -42,11 +42,11 @@ func TestNewPosition(t *testing.T) {
 }
 
 func validate(description string, t *testing.T, original, got, want, unchanged Vector) {
-	if !got.EqualsApprox(want) {
+	if !got.EqualsApprox(&want) {
 		t.Errorf("%s: want %s: got %s", description, want, got)
 	}
 
-	if !original.EqualsApprox(unchanged) {
+	if !original.EqualsApprox(&unchanged) {
 		t.Errorf("Position value %s was incorrectly changed to %s when calling this method", unchanged, original)
 	}
 }
@@ -57,7 +57,7 @@ func TestPosition_World(t *testing.T) {
 	got := p.World()
 	want := NewVector(1, 2)
 
-	validate("world position", t, p.Vector, *got, want, unchanged)
+	validate("world position", t, p.Vector, *got, *want, *unchanged)
 }
 
 func TestPosition_Tile(t *testing.T) {
@@ -66,7 +66,7 @@ func TestPosition_Tile(t *testing.T) {
 	got := p.Tile()
 	want := NewVector(4, 4)
 
-	validate("tile position", t, p.Vector, *got, want, unchanged)
+	validate("tile position", t, p.Vector, *got, *want, *unchanged)
 }
 
 func TestPosition_RenderOffset(t *testing.T) {
@@ -75,5 +75,5 @@ func TestPosition_RenderOffset(t *testing.T) {
 	got := p.RenderOffset()
 	want := NewVector(3.1, 5.2)
 
-	validate("offset from sub tile", t, p.Vector, *got, want, unchanged)
+	validate("offset from sub tile", t, p.Vector, *got, *want, *unchanged)
 }
