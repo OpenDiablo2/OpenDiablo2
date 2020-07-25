@@ -183,6 +183,7 @@ const (
 	ItemTypes        = "/data/global/excel/ItemTypes.txt"
 	Sets             = "/data/global/excel/Sets.txt"
 	SetItems         = "/data/global/excel/SetItems.txt"
+	AutoMagic        = "/data/global/excel/automagic.txt"
 	BodyLocations    = "/data/global/excel/bodylocs.txt"
 	Properties       = "/data/global/excel/Properties.txt"
 	Hireling         = "/data/global/excel/hireling.txt"
