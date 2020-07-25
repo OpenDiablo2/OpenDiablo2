@@ -241,6 +241,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.SkillDesc, d2datadict.LoadSkillDescriptions},
 		{d2resource.ItemTypes, d2datadict.LoadItemTypes},
 		{d2resource.BodyLocations, d2datadict.LoadBodyLocations},
+		{d2resource.Sets, d2datadict.LoadSets},
 	}
 
 	d2datadict.InitObjectRecords()
