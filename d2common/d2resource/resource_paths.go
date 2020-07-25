@@ -181,6 +181,7 @@ const (
 	SoundSettings    = "/data/global/excel/Sounds.txt"
 	ItemStatCost     = "/data/global/excel/ItemStatCost.txt"
 	ItemTypes        = "/data/global/excel/ItemTypes.txt"
+	QualityItems     = "/data/global/excel/qualityitems.txt"
 	Sets             = "/data/global/excel/Sets.txt"
 	SetItems         = "/data/global/excel/SetItems.txt"
 	AutoMagic        = "/data/global/excel/automagic.txt"
