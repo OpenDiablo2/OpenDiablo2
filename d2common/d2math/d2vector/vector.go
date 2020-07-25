@@ -30,19 +30,19 @@ func (v *Vector) Y() float64 {
 }
 
 // Equals returns true if the float64 values of this vector are exactly equal to the given Vector.
-func (v *Vector) Equals(o Vector) bool {
+func (v *Vector) Equals(o *Vector) bool {
 	return v.x == o.x && v.y == o.y
 }
 
 // EqualsApprox returns true if the values of this Vector are approximately equal to those of the given Vector. If the
 // difference between either of the value pairs is smaller than d2math.Epsilon, they will be considered equal.
-func (v *Vector) EqualsApprox(o Vector) bool {
+func (v *Vector) EqualsApprox(o *Vector) bool {
 	return d2math.EqualsApprox(v.x, o.x) && d2math.EqualsApprox(v.y, o.y)
 }
 
 // CompareApprox returns 2 ints describing the difference between the vectors. If the difference between either of the
 // value pairs is smaller than d2math.Epsilon, they will be considered equal.
-func (v *Vector) CompareApprox(o Vector) (x, y int) {
+func (v *Vector) CompareApprox(o *Vector) (x, y int) {
 	return d2math.CompareApprox(v.x, o.x),
 		d2math.CompareApprox(v.y, o.y)
 }
@@ -165,7 +165,7 @@ func (v *Vector) Negate() *Vector {
 }
 
 // Distance between this Vector's position and that of the given Vector.
-func (v *Vector) Distance(o Vector) float64 {
+func (v *Vector) Distance(o *Vector) float64 {
 	delta := o.Clone()
 	delta.Subtract(v)
 
@@ -178,7 +178,7 @@ func (v *Vector) Length() float64 {
 }
 
 // SetLength sets the length of this Vector without changing the direction. The length will be exact within
-// d2math.Epsilon. See d2math.EqualsApprox.
+// d2math.Epsilon.
 func (v *Vector) SetLength(length float64) *Vector {
 	v.Normalize()
 	v.Scale(length)
@@ -212,26 +212,25 @@ func (v *Vector) Dot(o *Vector) float64 {
 // Negative = clockwise
 // Positive = anti-clockwise
 // 0 = vectors are identical.
-func (v *Vector) Cross(o Vector) float64 {
+func (v *Vector) Cross(o *Vector) float64 {
 	return v.x*o.y - v.y*o.x
 }
 
 // Normalize sets the vector length to 1 without changing the direction. The normalized vector may be scaled by the
 // float64 return value to restore it's original length.
-func (v *Vector) Normalize() float64 {
+func (v *Vector) Normalize() *Vector {
 	if v.IsZero() {
-		return 0
+		return v
 	}
 
-	multiplier := 1 / v.Length()
-	v.Scale(multiplier)
+	v.Scale(1 / v.Length())
 
-	return 1 / multiplier
+	return v
 }
 
 // Angle computes the unsigned angle in radians from this vector to the given vector. This angle will never exceed half
 // a full circle. For angles describing a full circumference use SignedAngle.
-func (v *Vector) Angle(o Vector) float64 {
+func (v *Vector) Angle(o *Vector) float64 {
 	if v.IsZero() || o.IsZero() {
 		return 0
 	}
@@ -249,7 +248,7 @@ func (v *Vector) Angle(o Vector) float64 {
 }
 
 // SignedAngle computes the signed (clockwise) angle in radians from this vector to the given vector.
-func (v *Vector) SignedAngle(o Vector) float64 {
+func (v *Vector) SignedAngle(o *Vector) float64 {
 	unsigned := v.Angle(o)
 	sign := d2math.Sign(v.x*o.y - v.y*o.x)
 
@@ -260,22 +259,22 @@ func (v *Vector) SignedAngle(o Vector) float64 {
 	return unsigned
 }
 
-// Reflect sets this Vector to it's reflection off a line defined by the given normal.
-func (v *Vector) Reflect(normal Vector) *Vector {
+// Reflect sets this Vector to it's reflection off a line defined by the given normal. The result will be exact within
+// d2math.Epsilon.
+func (v *Vector) Reflect(normal *Vector) *Vector {
 	normal.Normalize()
-	undo := v.Normalize()
+	v.Normalize()
 
 	// 1*Dot is the directional (ignoring length) difference between the vector and the normal. Therefore 2*Dot takes
 	// us beyond the normal to the angle with the equivalent distance in the other direction i.e. the reflection.
-	normal.Scale(two * v.Dot(&normal))
-	v.Subtract(&normal)
-	v.Scale(undo)
+	normal.Scale(two * v.Dot(normal))
+	v.Subtract(normal)
 
 	return v
 }
 
 // ReflectSurface does the same thing as Reflect, except the given vector describes the surface line, not it's normal.
-func (v *Vector) ReflectSurface(surface Vector) *Vector {
+func (v *Vector) ReflectSurface(surface *Vector) *Vector {
 	v.Reflect(surface).Negate()
 
 	return v

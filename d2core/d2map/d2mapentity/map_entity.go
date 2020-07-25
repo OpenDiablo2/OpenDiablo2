@@ -89,7 +89,7 @@ func (m *mapEntity) Step(tickTime float64) {
 
 // atTarget returns true if the distance between entity and target is almost zero.
 func (m *mapEntity) atTarget() bool {
-	return m.Position.EqualsApprox(m.Target.Vector)
+	return m.Position.EqualsApprox(&m.Target.Vector)
 }
 
 // setVelocity returns a vector describing the given length and the direction to the current target.
@@ -104,7 +104,7 @@ func (m *mapEntity) setVelocity(length float64) {
 // next node.
 func applyVelocity(position, velocity, target *d2vector.Vector) {
 	// Set velocity values to zero if almost zero
-	x, y := position.CompareApprox(*target)
+	x, y := position.CompareApprox(target)
 	vx, vy := velocity.X(), velocity.Y()
 
 	if x == 0 {
@@ -120,8 +120,8 @@ func applyVelocity(position, velocity, target *d2vector.Vector) {
 	dest := position.Clone()
 	dest.Add(velocity)
 
-	destDistance := position.Distance(*dest)
-	targetDistance := position.Distance(*target)
+	destDistance := position.Distance(dest)
+	targetDistance := position.Distance(target)
 
 	if destDistance > targetDistance {
 		// Destination overshot target. Set position to target and velocity to overshot amount.

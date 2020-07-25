@@ -22,31 +22,31 @@ func TestNewPosition(t *testing.T) {
 	want := NewVector(tileX, tileY)
 	got := pos.Tile()
 
-	if !got.Equals(*want) {
+	if !got.Equals(want) {
 		t.Errorf("world position should match old value: got %s: want %s", got, want)
 	}
 
 	want = NewVector(subcellX, subcellY)
 	got = pos.RenderOffset()
 
-	if !got.Equals(*want) {
+	if !got.Equals(want) {
 		t.Errorf("render offset position should match old value: got %s: want %s", got, want)
 	}
 
 	want = NewVector(locationX, locationY)
 	got = &pos.Vector
 
-	if !got.Equals(*want) {
+	if !got.Equals(want) {
 		t.Errorf("sub tile position should match old value: got %s: want %s", got, want)
 	}
 }
 
 func validate(description string, t *testing.T, original, got, want, unchanged Vector) {
-	if !got.EqualsApprox(want) {
+	if !got.EqualsApprox(&want) {
 		t.Errorf("%s: want %s: got %s", description, want, got)
 	}
 
-	if !original.EqualsApprox(unchanged) {
+	if !original.EqualsApprox(&unchanged) {
 		t.Errorf("Position value %s was incorrectly changed to %s when calling this method", unchanged, original)
 	}
 }
