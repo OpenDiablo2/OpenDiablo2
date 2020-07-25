@@ -32,7 +32,7 @@ type MapRenderer struct {
 }
 
 // CreateMapRenderer creates a new MapRenderer, sets the required fields and returns a pointer to it.
-func CreateMapRenderer(renderer d2interface.Renderer, mapEngine *d2mapengine.MapEngine, term d2interface.Terminal) *MapRenderer {
+func CreateMapRenderer(renderer d2interface.Renderer, mapEngine *d2mapengine.MapEngine, term d2interface.Terminal, startX, startY float64) *MapRenderer {
 	result := &MapRenderer{
 		renderer:  renderer,
 		mapEngine: mapEngine,
@@ -40,7 +40,8 @@ func CreateMapRenderer(renderer d2interface.Renderer, mapEngine *d2mapengine.Map
 	}
 
 	result.Camera = Camera{}
-	startPosition := d2vector.NewPosition(0, 0)
+	rx, ry := result.WorldToOrtho(startX, startY)
+	startPosition := d2vector.NewPosition(rx, ry)
 	result.Camera.position = &startPosition
 	result.viewport.SetCamera(&result.Camera)
 
