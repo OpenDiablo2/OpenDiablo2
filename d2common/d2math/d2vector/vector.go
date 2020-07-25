@@ -15,8 +15,8 @@ type Vector struct {
 const two float64 = 2
 
 // NewVector creates a new Vector with the given x and y values.
-func NewVector(x, y float64) Vector {
-	return Vector{x, y}
+func NewVector(x, y float64) *Vector {
+	return &Vector{x, y}
 }
 
 // X returns the x value of this vector.
@@ -61,7 +61,7 @@ func (v *Vector) Set(x, y float64) *Vector {
 }
 
 // Clone returns a new a copy of this Vector.
-func (v *Vector) Clone() Vector {
+func (v *Vector) Clone() *Vector {
 	return NewVector(v.x, v.y)
 }
 
@@ -243,7 +243,7 @@ func (v *Vector) Angle(o Vector) float64 {
 	to.Normalize()
 
 	denominator := math.Sqrt(from.Length() * to.Length())
-	dotClamped := d2math.Clamp(from.Dot(&to)/denominator, -1, 1)
+	dotClamped := d2math.Clamp(from.Dot(to)/denominator, -1, 1)
 
 	return math.Acos(dotClamped)
 }
@@ -316,31 +316,31 @@ func (v Vector) String() string {
 }
 
 // VectorUp returns a new vector (0, 1)
-func VectorUp() Vector {
+func VectorUp() *Vector {
 	return NewVector(0, 1)
 }
 
 // VectorDown returns a new vector (0, -1)
-func VectorDown() Vector {
+func VectorDown() *Vector {
 	return NewVector(0, -1)
 }
 
 // VectorRight returns a new vector (1, 0)
-func VectorRight() Vector {
+func VectorRight() *Vector {
 	return NewVector(1, 0)
 }
 
 // VectorLeft returns a new vector (-1, 0)
-func VectorLeft() Vector {
+func VectorLeft() *Vector {
 	return NewVector(-1, 0)
 }
 
 // VectorOne returns a new vector (1, 1)
-func VectorOne() Vector {
+func VectorOne() *Vector {
 	return NewVector(1, 1)
 }
 
 // VectorZero returns a new vector (0, 0)
-func VectorZero() Vector {
+func VectorZero() *Vector {
 	return NewVector(0, 0)
 }

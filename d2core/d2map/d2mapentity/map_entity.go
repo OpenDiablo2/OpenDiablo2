@@ -25,7 +25,7 @@ func newMapEntity(x, y int) mapEntity {
 	return mapEntity{
 		Position: pos,
 		Target:   pos,
-		velocity: d2vector.NewVector(0, 0),
+		velocity: *d2vector.VectorZero(),
 	}
 }
 
@@ -75,7 +75,7 @@ func (m *mapEntity) Step(tickTime float64) {
 	v := m.velocity.Clone() // Create a new vector
 
 	for {
-		applyVelocity(&m.Position.Vector, &v, &m.Target.Vector) // Pass the new vector to the function which alters it
+		applyVelocity(&m.Position.Vector, v, &m.Target.Vector) // Pass the new vector to the function which alters it
 
 		if m.atTarget() {
 			m.nextPath()
@@ -120,7 +120,7 @@ func applyVelocity(position, velocity, target *d2vector.Vector) {
 	dest := position.Clone()
 	dest.Add(velocity)
 
-	destDistance := position.Distance(dest)
+	destDistance := position.Distance(*dest)
 	targetDistance := position.Distance(*target)
 
 	if destDistance > targetDistance {
@@ -129,7 +129,7 @@ func applyVelocity(position, velocity, target *d2vector.Vector) {
 		velocity.Copy(dest.Subtract(target))
 	} else {
 		// At or before target, set position to destination and velocity to zero.
-		position.Copy(&dest)
+		position.Copy(dest)
 		velocity.Set(0, 0)
 	}
 }

@@ -22,21 +22,21 @@ func TestNewPosition(t *testing.T) {
 	want := NewVector(tileX, tileY)
 	got := pos.Tile()
 
-	if !got.Equals(want) {
+	if !got.Equals(*want) {
 		t.Errorf("world position should match old value: got %s: want %s", got, want)
 	}
 
 	want = NewVector(subcellX, subcellY)
 	got = pos.RenderOffset()
 
-	if !got.Equals(want) {
+	if !got.Equals(*want) {
 		t.Errorf("render offset position should match old value: got %s: want %s", got, want)
 	}
 
 	want = NewVector(locationX, locationY)
 	got = &pos.Vector
 
-	if !got.Equals(want) {
+	if !got.Equals(*want) {
 		t.Errorf("sub tile position should match old value: got %s: want %s", got, want)
 	}
 }
@@ -57,7 +57,7 @@ func TestPosition_World(t *testing.T) {
 	got := p.World()
 	want := NewVector(1, 2)
 
-	validate("world position", t, p.Vector, *got, want, unchanged)
+	validate("world position", t, p.Vector, *got, *want, *unchanged)
 }
 
 func TestPosition_Tile(t *testing.T) {
@@ -66,7 +66,7 @@ func TestPosition_Tile(t *testing.T) {
 	got := p.Tile()
 	want := NewVector(4, 4)
 
-	validate("tile position", t, p.Vector, *got, want, unchanged)
+	validate("tile position", t, p.Vector, *got, *want, *unchanged)
 }
 
 func TestPosition_RenderOffset(t *testing.T) {
@@ -75,5 +75,5 @@ func TestPosition_RenderOffset(t *testing.T) {
 	got := p.RenderOffset()
 	want := NewVector(3.1, 5.2)
 
-	validate("offset from sub tile", t, p.Vector, *got, want, unchanged)
+	validate("offset from sub tile", t, p.Vector, *got, *want, *unchanged)
 }

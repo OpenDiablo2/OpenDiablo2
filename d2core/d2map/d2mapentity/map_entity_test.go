@@ -68,13 +68,13 @@ func TestMapEntity_Step(t *testing.T) {
 	// change in position
 	change.Scale(float64(stepCount))
 
-	want := change.Add(&start)
+	want := change.Add(start)
 
 	if !e.Position.EqualsApprox(*want) {
 		t.Errorf("entity position after %d steps: want %s: got %s", stepCount, want, e.Position.Vector)
 	}
 
-	if e.Position.Equals(start) {
+	if e.Position.Equals(*start) {
 		t.Errorf("entity did not move, still at position %s", start)
 	}
 }
