@@ -185,8 +185,7 @@ type ItemTypeRecord struct {
 }
 
 // ItemTypes stores all of the ItemTypeRecords
-var ItemTypes map[string]*ItemTypeRecord //nolint:gochecknoglobals // Currently global by design,
-// only written once
+var ItemTypes map[string]*ItemTypeRecord //nolint:gochecknoglobals // Currently global by design, only written once
 
 // LoadItemTypes loads ItemType records
 func LoadItemTypes(file []byte) {
