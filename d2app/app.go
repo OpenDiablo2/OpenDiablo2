@@ -636,7 +636,7 @@ func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnection
 }
 
 func (a *App) ToMapEngineTest(region int, level int) {
-	met := d2gamescreen.CreateMapEngineTest(0, 1, a.terminal, a.renderer, a.inputManager)
+	met := d2gamescreen.CreateMapEngineTest(0, 1, a.terminal, a.renderer, a.inputManager, a.audio)
 	d2screen.SetNextScreen(met)
 }
 

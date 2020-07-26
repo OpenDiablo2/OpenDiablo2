@@ -502,9 +502,14 @@ func (mr *MapRenderer) ViewportDefault() {
 	mr.viewport.resetAlign()
 }
 
-// SetCameraTarget sts the Camera target
+// SetCameraTarget sets the Camera target
 func (mr *MapRenderer) SetCameraTarget(position *d2vector.Position) {
 	mr.Camera.SetTarget(position)
+}
+
+// SetCameraPosition sets the Camera position
+func (mr *MapRenderer) SetCameraPosition(position *d2vector.Position) {
+	mr.Camera.MoveTo(position)
 }
 
 // InvalidateImageCache the global region image cache. Call this when you are changing regions.

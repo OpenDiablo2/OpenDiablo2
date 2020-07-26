@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
@@ -85,12 +87,13 @@ func getRegions() []regionSpec {
 
 // MapEngineTest represents the MapEngineTest screen
 type MapEngineTest struct {
-	gameState    *d2player.PlayerState
-	mapEngine    *d2mapengine.MapEngine
-	mapRenderer  *d2maprenderer.MapRenderer
-	terminal     d2interface.Terminal
-	renderer     d2interface.Renderer
-	inputManager d2interface.InputManager
+	gameState     *d2player.PlayerState
+	mapEngine     *d2mapengine.MapEngine
+	mapRenderer   *d2maprenderer.MapRenderer
+	terminal      d2interface.Terminal
+	renderer      d2interface.Renderer
+	inputManager  d2interface.InputManager
+	audioProvider d2interface.AudioProvider
 
 	lastMouseX, lastMouseY int
 	selX, selY             int
@@ -111,6 +114,7 @@ func CreateMapEngineTest(currentRegion,
 	term d2interface.Terminal,
 	renderer d2interface.Renderer,
 	inputManager d2interface.InputManager,
+	audioProvider d2interface.AudioProvider,
 ) *MapEngineTest {
 	result := &MapEngineTest{
 		currentRegion: currentRegion,
@@ -121,6 +125,7 @@ func CreateMapEngineTest(currentRegion,
 		terminal:      term,
 		renderer:      renderer,
 		inputManager:  inputManager,
+		audioProvider: audioProvider,
 	}
 	result.gameState = d2player.CreateTestGameState()
 
@@ -171,7 +176,11 @@ func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 
 	met.mapRenderer.SetMapEngine(met.mapEngine)
 	position := d2vector.NewPosition(met.mapRenderer.WorldToOrtho(met.mapEngine.GetCenterPosition()))
-	met.mapRenderer.SetCameraTarget(&position)
+	met.mapRenderer.SetCameraPosition(&position)
+
+	musicDef := d2common.GetMusicDef(met.regionSpec.regionType)
+
+	met.audioProvider.PlayBGM(musicDef.MusicFile)
 }
 
 // OnLoad loads the resources for the Map Engine Test screen
