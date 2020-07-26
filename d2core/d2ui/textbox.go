@@ -14,15 +14,15 @@ import (
 
 // TextBox represents a text input box
 type TextBox struct {
-	text      string
-	x         int
-	y         int
-	visible   bool
-	enabled   bool
-	bgSprite  *Sprite
 	textLabel Label
 	lineBar   Label
+	text      string
 	filter    string
+	x         int
+	y         int
+	bgSprite  *Sprite
+	visible   bool
+	enabled   bool
 	isFocused bool
 }
 
