@@ -25,6 +25,8 @@ github.com/gordonklaus/ineffassign v0.0.0-20200309095847-7953dde2c7bf/go.mod h1:
 github.com/hajimehoshi/bitmapfont v1.2.0/go.mod h1:h9QrPk6Ktb2neObTlAbma6Ini1xgMjbJ3w7ysmD7IOU=
 github.com/hajimehoshi/ebiten v1.11.2 h1:4oixxPh5DuSNlmL/Q4LIOGFXCY8uLC+pcxOnqAGbwEY=
 github.com/hajimehoshi/ebiten v1.11.2/go.mod h1:aDEhx0K9gSpXw3Cxf2hCXDxPSoF8vgjNqKxrZa/B4Dg=
+github.com/hajimehoshi/ebiten v1.11.4 h1:ngYF0NxKjFBsY/Bol6V0X/b0hoCCTi9nJRg7Dv8+ePc=
+github.com/hajimehoshi/ebiten v1.11.4/go.mod h1:aDEhx0K9gSpXw3Cxf2hCXDxPSoF8vgjNqKxrZa/B4Dg=
 github.com/hajimehoshi/ebiten v1.12.0-alpha.5.0.20200627174955-aea4630b5f84 h1:BRvyD5kF4r9JGWd3xwBgQNpRhBDzvmAEXP2tv1MGjHA=
 github.com/hajimehoshi/ebiten v1.12.0-alpha.5.0.20200627174955-aea4630b5f84/go.mod h1:8vzUI4e0fBkbONYOY4WJN/qikY2zv/VG6kFTzJ0B//o=
 github.com/hajimehoshi/ebiten v1.12.0-alpha.6.0.20200629133528-780465b702ce h1:cEKWqbtxFremkIRhJxz0Z80wXqNNe8ZNk6ra8XASC1I=
