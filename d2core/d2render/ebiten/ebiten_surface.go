@@ -9,7 +9,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2debugutil"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2debugutil2"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
@@ -174,7 +174,7 @@ func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Recta
 
 // DrawTextf renders the string to the surface with the given format string and a set of parameters
 func (s *ebitenSurface) DrawTextf(format string, params ...interface{}) {
-	d2debugutil.D2DebugPrintAt(s.image, fmt.Sprintf(format, params...), s.stateCurrent.x, s.stateCurrent.y)
+	d2debugutil2.D2DebugPrintAt(s.image, fmt.Sprintf(format, params...), s.stateCurrent.x, s.stateCurrent.y)
 }
 
 // DrawLine draws a line
