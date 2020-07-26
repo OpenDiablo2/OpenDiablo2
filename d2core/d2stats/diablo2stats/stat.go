@@ -50,13 +50,20 @@ type diablo2Stat struct {
 // depending on the stat record, sets up the proper number of values,
 // as well as set up the stat value number types, value combination types, and
 // the value stringer functions used
-func (s *diablo2Stat) init(numbers ...float64) {
+func (s *diablo2Stat) init(numbers ...float64) {//nolint:funlen doesn't make sense to split
 	if s.record == nil {
 		return
 	}
 
 	//nolint:gomdn introducing a const for these would be worse
 	switch s.record.DescFnID {
+	case 0:
+		// special case for poisonlength, or other stats, which have a
+		// 0-value descfnID field but need to store values
+		s.values = make([]d2stats.StatValue, len(numbers))
+		for idx := range s.values {
+			s.values[idx] = NewValue(intVal, sum).SetStringer(stringerIntSigned)
+		}
 	case 1:
 		// +31 to Strength
 		// Replenish Life +20 || Drain Life -8
@@ -167,7 +174,7 @@ func (s *diablo2Stat) init(numbers ...float64) {
 	}
 
 	for idx := range numbers {
-		if idx > len(s.values) {
+		if idx > len(s.values)-1 {
 			break
 		}
 
@@ -561,6 +568,12 @@ func (s *diablo2Stat) descFn24() string {
 }
 
 func (s *diablo2Stat) descFn27() string {
+	// property "skill-rand" will try to make an instance with an invalid hero index
+	// in this case, we use descfn 28
+	if s.values[2].Int() == -1 {
+		return s.descFn28()
+	}
+
 	amount, skill, hero := s.values[0], s.values[1], s.values[2]
 
 	return fmt.Sprintf(fourComponentStr, amount, "to", skill, hero)

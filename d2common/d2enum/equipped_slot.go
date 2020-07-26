@@ -5,7 +5,8 @@ type EquippedSlot int
 
 // Equipped slot ID's
 const (
-	EquippedSlotHead EquippedSlot = iota + 1
+	EquippedSlotNone EquippedSlot = iota
+	EquippedSlotHead
 	EquippedSlotTorso
 	EquippedSlotLegs
 	EquippedSlotRightArm
