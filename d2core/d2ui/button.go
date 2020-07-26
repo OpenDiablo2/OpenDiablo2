@@ -222,7 +222,7 @@ func (v *Button) Activate() {
 }
 
 // Render renders the button
-func (v *Button) Render(target d2interface.Surface) {
+func (v *Button) Render(target d2interface.Surface) error {
 	target.PushFilter(d2enum.FilterNearest)
 	target.PushTranslation(v.x, v.y)
 
@@ -248,6 +248,8 @@ func (v *Button) Render(target d2interface.Surface) {
 	if err != nil {
 		fmt.Printf("failed to render button surface, err: %v\n", err)
 	}
+
+	return nil
 }
 
 // Toggle negates the toggled state of the button

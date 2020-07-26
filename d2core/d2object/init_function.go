@@ -7,8 +7,8 @@ import (
 )
 
 // Finds an init function for the given object
-func initObject(ob *Object) bool {
-	funcs := map[int]func(*Object){
+func initObject(ob *Object) (bool, error) {
+	funcs := map[int]func(*Object) error{
 		8:  initTorch,
 		14: initTorch,
 		17: initWaypoint,
@@ -17,35 +17,41 @@ func initObject(ob *Object) bool {
 
 	fun, ok := funcs[ob.objectRecord.InitFn]
 	if !ok {
-		return false
+		return false, nil
 	}
 
-	fun(ob)
+	if err := fun(ob); err != nil {
+		return false, err
+	}
 
-	return true
+	return true, nil
 }
 
 // Initializes torch/brazier type objects
-func initTorch(ob *Object) {
+func initTorch(ob *Object) error {
 	if ob.objectRecord.HasAnimationMode[d2enum.ObjectAnimationModeOpened] {
-		ob.setMode(d2enum.ObjectAnimationModeOpened, 0, true)
+		return ob.setMode(d2enum.ObjectAnimationModeOpened, 0, true)
 	}
+
+	return nil
 }
 
-func initWaypoint(ob *Object) {
+func initWaypoint(ob *Object) error {
 	// Turn these on unconditionally for now, they look nice :)
 	if ob.objectRecord.HasAnimationMode[d2enum.ObjectAnimationModeOpened] {
-		ob.setMode(d2enum.ObjectAnimationModeOpened, 0, true)
+		return ob.setMode(d2enum.ObjectAnimationModeOpened, 0, true)
 	}
+
+	return nil
 }
 
 // Randomly spawns in either NU or OP
-func initTorchRnd(ob *Object) {
+func initTorchRnd(ob *Object) error {
 	n := rand.Intn(2)
 
 	if n > 0 {
-		ob.setMode(d2enum.ObjectAnimationModeNeutral, 0, true)
-	} else {
-		ob.setMode(d2enum.ObjectAnimationModeOperating, 0, true)
+		return ob.setMode(d2enum.ObjectAnimationModeNeutral, 0, true)
 	}
+
+	return ob.setMode(d2enum.ObjectAnimationModeOperating, 0, true)
 }

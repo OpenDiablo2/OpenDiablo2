@@ -12,13 +12,15 @@ type worldTrans struct {
 }
 
 const (
-	center = 0
-	left   = 1
-	right  = 2
+	center     = 0
+	left       = 1
+	right      = 2
+	tileWidth  = 80
+	tileHeight = 40
+	half       = 2
 )
 
 // Viewport is used for converting vectors between screen (pixel), orthogonal (Camera) and world (isometric) space.
-// TODO: Has a coordinate (issue #456)
 type Viewport struct {
 	defaultScreenRect d2common.Rectangle
 	screenRect        d2common.Rectangle
@@ -68,16 +70,16 @@ func (v *Viewport) ScreenToWorld(x, y int) (worldX, worldY float64) {
 
 // OrthoToWorld returns the world position for the given orthogonal coordinates.
 func (v *Viewport) OrthoToWorld(x, y float64) (worldX, worldY float64) {
-	worldX = (x/80 + y/40) / 2
-	worldY = (y/40 - x/80) / 2
+	worldX = (x/80 + y/40) / half
+	worldY = (y/40 - x/80) / half
 
 	return worldX, worldY
 }
 
 // WorldToOrtho returns the orthogonal position for the given world coordinates.
 func (v *Viewport) WorldToOrtho(x, y float64) (orthoX, orthoY float64) {
-	orthoX = (x - y) * 80
-	orthoY = (x + y) * 40
+	orthoX = (x - y) * tileWidth
+	orthoY = (x + y) * tileHeight
 
 	return orthoX, orthoY
 }
@@ -119,10 +121,10 @@ func (v *Viewport) IsTileVisible(x, y float64) bool {
 
 // IsTileRectVisible returns false if none of the tiles rects are within the game screen.
 func (v *Viewport) IsTileRectVisible(rect d2common.Rectangle) bool {
-	left := float64((rect.Left - rect.Bottom()) * 80)
-	top := float64((rect.Left + rect.Top) * 40)
-	right := float64((rect.Right() - rect.Top) * 80)
-	bottom := float64((rect.Right() + rect.Bottom()) * 40)
+	left := float64((rect.Left - rect.Bottom()) * tileWidth)
+	top := float64((rect.Left + rect.Top) * tileHeight)
+	right := float64((rect.Right() - rect.Top) * tileWidth)
+	bottom := float64((rect.Right() + rect.Bottom()) * tileHeight)
 
 	return v.IsOrthoRectVisible(left, top, right, bottom)
 }
@@ -181,8 +183,8 @@ func (v *Viewport) getCameraOffset() (camX, camY float64) {
 		camX, camY = camPosition.X(), camPosition.Y()
 	}
 
-	camX -= float64(v.screenRect.Width / 2)
-	camY -= float64(v.screenRect.Height / 2)
+	camX -= float64(v.screenRect.Width / half)
+	camY -= float64(v.screenRect.Height / half)
 
 	return camX, camY
 }
@@ -192,8 +194,8 @@ func (v *Viewport) toLeft() {
 		return
 	}
 
-	v.screenRect.Width = v.defaultScreenRect.Width / 2
-	v.screenRect.Left = v.defaultScreenRect.Left + v.defaultScreenRect.Width/2
+	v.screenRect.Width = v.defaultScreenRect.Width / half
+	v.screenRect.Left = v.defaultScreenRect.Left + v.defaultScreenRect.Width/half
 	v.align = left
 }
 
@@ -202,7 +204,7 @@ func (v *Viewport) toRight() {
 		return
 	}
 
-	v.screenRect.Width = v.defaultScreenRect.Width / 2
+	v.screenRect.Width = v.defaultScreenRect.Width / half
 	v.align = right
 }
 

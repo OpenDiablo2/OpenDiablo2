@@ -6,7 +6,7 @@ import (
 
 // Drawable represents an instance that can be drawn
 type Drawable interface {
-	Render(target d2interface.Surface)
+	Render(target d2interface.Surface) error
 	Advance(elapsed float64)
 	GetSize() (width, height int)
 	SetPosition(x, y int)

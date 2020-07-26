@@ -17,6 +17,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 )
 
+const (
+	screenMiddleX = 400
+)
+
 // MapRenderer manages the game viewport and Camera. It requests tile and entity data from MapEngine and renders it.
 type MapRenderer struct {
 	renderer            d2interface.Renderer   // Used for drawing operations
@@ -32,7 +36,8 @@ type MapRenderer struct {
 }
 
 // CreateMapRenderer creates a new MapRenderer, sets the required fields and returns a pointer to it.
-func CreateMapRenderer(renderer d2interface.Renderer, mapEngine *d2mapengine.MapEngine, term d2interface.Terminal, startX, startY float64) *MapRenderer {
+func CreateMapRenderer(renderer d2interface.Renderer, mapEngine *d2mapengine.MapEngine,
+	term d2interface.Terminal, startX, startY float64) *MapRenderer {
 	result := &MapRenderer{
 		renderer:  renderer,
 		mapEngine: mapEngine,
@@ -93,8 +98,8 @@ func (mr *MapRenderer) SetMapEngine(mapEngine *d2mapengine.MapEngine) {
 func (mr *MapRenderer) Render(target d2interface.Surface) {
 	mapSize := mr.mapEngine.Size()
 
-	stxf, styf := mr.viewport.ScreenToWorld(400, -200)
-	etxf, etyf := mr.viewport.ScreenToWorld(400, 1050)
+	stxf, styf := mr.viewport.ScreenToWorld(screenMiddleX, -200)
+	etxf, etyf := mr.viewport.ScreenToWorld(screenMiddleX, 1050)
 
 	startX := int(math.Max(0, math.Floor(stxf)))
 	startY := int(math.Max(0, math.Floor(styf)))
@@ -322,7 +327,7 @@ func (mr *MapRenderer) renderShadow(tile d2ds1.FloorShadowRecord, target d2inter
 	defer mr.viewport.PushTranslationOrtho(-80, float64(tile.YAdjust)).PopTranslation()
 
 	target.PushTranslation(mr.viewport.GetTranslationScreen())
-	target.PushColor(color.RGBA{R: 255, G: 255, B: 255, A: 160})
+	target.PushColor(color.RGBA{R: 255, G: 255, B: 255, A: 160}) //nolint:gomnd // Not a magic number...
 
 	defer target.PopN(2)
 
@@ -343,6 +348,7 @@ func (mr *MapRenderer) renderMapDebug(mapDebugVisLevel int, target d2interface.S
 
 func (mr *MapRenderer) renderEntityDebug(target d2interface.Surface) {
 	entities := *mr.mapEngine.Entities()
+
 	for idx := range entities {
 		e := entities[idx]
 		pos := e.GetPosition()

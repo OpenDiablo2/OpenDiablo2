@@ -23,6 +23,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
+// Panel represents the panel at the bottom of the game screen
 type Panel interface {
 	IsOpen() bool
 	Toggle()
@@ -38,10 +39,7 @@ const (
 	globeWidth       = 80
 )
 
-var leftMenuRect = d2common.Rectangle{Left: 0, Top: 0, Width: 400, Height: 600}
-var rightMenuRect = d2common.Rectangle{Left: 400, Top: 0, Width: 400, Height: 600}
-var bottomMenuRect = d2common.Rectangle{Left: 0, Top: 550, Width: 800, Height: 50}
-
+// GameControls represents the game's controls on the screen
 type GameControls struct {
 	renderer       d2interface.Renderer // TODO: This shouldn't be a dependency
 	hero           *d2mapentity.Player
@@ -69,6 +67,7 @@ type GameControls struct {
 }
 
 type ActionableType int
+
 type ActionableRegion struct {
 	ActionableTypeId ActionableType
 	Rect             d2common.Rectangle
@@ -87,7 +86,7 @@ const (
 )
 
 func NewGameControls(renderer d2interface.Renderer, hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
-	mapRenderer *d2maprenderer.MapRenderer, inputListener InputCallbackListener, term d2interface.Terminal) *GameControls {
+	mapRenderer *d2maprenderer.MapRenderer, inputListener InputCallbackListener, term d2interface.Terminal) (*GameControls, error) {
 	missileID := initialMissileID
 	term.BindAction("setmissile", "set missile id to summon on right click", func(id int) {
 		missileID = id
@@ -104,6 +103,7 @@ func NewGameControls(renderer d2interface.Renderer, hero *d2mapentity.Player, ma
 
 	// TODO make this depend on the hero type to respect inventory.txt
 	var inventoryRecordKey string
+
 	switch hero.Class {
 	case d2enum.HeroAssassin:
 		inventoryRecordKey = "Assassin"
@@ -148,11 +148,15 @@ func NewGameControls(renderer d2interface.Renderer, hero *d2mapentity.Player, ma
 		},
 	}
 
-	term.BindAction("freecam", "toggle free camera movement", func() {
+	err := term.BindAction("freecam", "toggle free camera movement", func() {
 		gc.FreeCam = !gc.FreeCam
 	})
 
-	return gc
+	if err != nil {
+		return nil, err
+	}
+
+	return gc, nil
 }
 
 func (g *GameControls) OnKeyRepeat(event d2interface.KeyEvent) bool {
@@ -238,6 +242,7 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 
 	if isLeft && shouldDoLeft && inRect {
 		lastLeftBtnActionTime = now
+
 		g.inputListener.OnPlayerMove(px, py)
 
 		if g.FreeCam {
@@ -259,7 +264,9 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 
 	if isRight && shouldDoRight && inRect {
 		lastRightBtnActionTime = now
+
 		g.inputListener.OnPlayerCast(g.missileID, px, py)
+
 		return true
 	}
 
@@ -283,6 +290,7 @@ func (g *GameControls) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 
 func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	mx, my := event.X(), event.Y()
+
 	for i := range g.actionableRegions {
 		// If click is on a game control element
 		if g.actionableRegions[i].Rect.IsInRect(mx, my) {
@@ -297,13 +305,17 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 	if event.Button() == d2enum.MouseButtonLeft && !g.isInActiveMenusRect(mx, my) {
 		lastLeftBtnActionTime = d2common.Now()
+
 		g.inputListener.OnPlayerMove(px, py)
+
 		return true
 	}
 
 	if event.Button() == d2enum.MouseButtonRight && !g.isInActiveMenusRect(mx, my) {
 		lastRightBtnActionTime = d2common.Now()
+
 		g.inputListener.OnPlayerCast(g.missileID, px, py)
+
 		return true
 	}
 
@@ -335,11 +347,14 @@ func (g *GameControls) Load() {
 func (g *GameControls) loadUIButtons() {
 	// Run button
 	g.runButton = d2ui.CreateButton(g.renderer, d2ui.ButtonTypeRun, "")
+
 	g.runButton.SetPosition(255, 570)
 	g.runButton.OnActivated(func() { g.onToggleRunButton() })
+
 	if g.hero.IsRunToggled() {
 		g.runButton.Toggle()
 	}
+
 	d2ui.AddWidget(&g.runButton)
 }
 
@@ -350,7 +365,6 @@ func (g *GameControls) onToggleRunButton() {
 	g.hero.SetIsRunning(g.hero.IsRunToggled())
 }
 
-// ScreenAdvanceHandler
 func (g *GameControls) Advance(elapsed float64) error {
 	g.mapRenderer.Advance(elapsed)
 	return nil
@@ -380,6 +394,12 @@ func (g *GameControls) isRightPanelOpen() bool {
 }
 
 func (g *GameControls) isInActiveMenusRect(px int, py int) bool {
+	var bottomMenuRect = d2common.Rectangle{Left: 0, Top: 550, Width: 800, Height: 50}
+
+	var leftMenuRect = d2common.Rectangle{Left: 0, Top: 0, Width: 400, Height: 600}
+
+	var rightMenuRect = d2common.Rectangle{Left: 400, Top: 0, Width: 400, Height: 600}
+
 	if bottomMenuRect.IsInRect(px, py) {
 		return true
 	}
@@ -396,7 +416,7 @@ func (g *GameControls) isInActiveMenusRect(px int, py int) bool {
 }
 
 // TODO: consider caching the panels to single image that is reused.
-func (g *GameControls) Render(target d2interface.Surface) {
+func (g *GameControls) Render(target d2interface.Surface) error {
 	for entityIdx := range *g.mapEngine.Entities() {
 		entity := (*g.mapEngine.Entities())[entityIdx]
 		if !entity.Selectable() {
@@ -413,6 +433,7 @@ func (g *GameControls) Render(target d2interface.Surface) {
 			g.nameLabel.SetPosition(entScreenX, entScreenY-100)
 			g.nameLabel.Render(target)
 			entity.Highlight()
+
 			break
 		}
 	}
@@ -424,110 +445,213 @@ func (g *GameControls) Render(target d2interface.Surface) {
 	offset := 0
 
 	// Left globe holder
-	g.mainPanel.SetCurrentFrame(0)
+	if err := g.mainPanel.SetCurrentFrame(0); err != nil {
+		return err
+	}
+
 	w, _ := g.mainPanel.GetCurrentFrameSize()
+
 	g.mainPanel.SetPosition(offset, height)
-	g.mainPanel.Render(target)
+
+	if err := g.mainPanel.Render(target); err != nil {
+		return err
+	}
 
 	// Health status bar
 	healthPercent := float64(g.hero.Stats.Health) / float64(g.hero.Stats.MaxHealth)
 	hpBarHeight := int(healthPercent * float64(globeHeight))
-	g.hpManaStatusSprite.SetCurrentFrame(0)
+
+	if err := g.hpManaStatusSprite.SetCurrentFrame(0); err != nil {
+		return err
+	}
+
 	g.hpManaStatusSprite.SetPosition(offset+30, height-13)
-	g.hpManaStatusSprite.RenderSection(target, image.Rect(0, globeHeight-hpBarHeight, globeWidth, globeHeight))
+
+	if err := g.hpManaStatusSprite.RenderSection(target, image.Rect(0, globeHeight-hpBarHeight, globeWidth, globeHeight)); err != nil {
+		return err
+	}
 
 	// Left globe
-	g.globeSprite.SetCurrentFrame(0)
+	if err := g.globeSprite.SetCurrentFrame(0); err != nil {
+		return err
+	}
+
 	g.globeSprite.SetPosition(offset+28, height-5)
-	g.globeSprite.Render(target)
+
+	if err := g.globeSprite.Render(target); err != nil {
+		return err
+	}
 
 	offset += w
 
 	// Left skill
-	g.skillIcon.SetCurrentFrame(2)
+	if err := g.skillIcon.SetCurrentFrame(2); err != nil {
+		return err
+	}
+
 	w, _ = g.skillIcon.GetCurrentFrameSize()
+
 	g.skillIcon.SetPosition(offset, height)
-	g.skillIcon.Render(target)
+
+	if err := g.skillIcon.Render(target); err != nil {
+		return err
+	}
+
 	offset += w
 
 	// Left skill selector
-	g.mainPanel.SetCurrentFrame(1)
+	if err := g.mainPanel.SetCurrentFrame(1); err != nil {
+		return err
+	}
+
 	w, _ = g.mainPanel.GetCurrentFrameSize()
+
 	g.mainPanel.SetPosition(offset, height)
-	g.mainPanel.Render(target)
+
+	if err := g.mainPanel.Render(target); err != nil {
+		return err
+	}
+
 	offset += w
 
 	// Stamina
-	g.mainPanel.SetCurrentFrame(2)
+	if err := g.mainPanel.SetCurrentFrame(2); err != nil {
+		return err
+	}
+
 	w, _ = g.mainPanel.GetCurrentFrameSize()
+
 	g.mainPanel.SetPosition(offset, height)
-	g.mainPanel.Render(target)
+
+	if err := g.mainPanel.Render(target); err != nil {
+		return err
+	}
+
 	offset += w
 
 	// Stamina status bar
 	target.PushTranslation(273, 572)
 	target.PushEffect(d2enum.DrawEffectModulate)
+
 	staminaPercent := float64(g.hero.Stats.Stamina) / float64(g.hero.Stats.MaxStamina)
+
 	target.DrawRect(int(staminaPercent*staminaBarWidth), 19, color.RGBA{R: 175, G: 136, B: 72, A: 200})
 	target.PopN(2)
 
 	// Experience status bar
 	target.PushTranslation(256, 561)
+
 	expPercent := float64(g.hero.Stats.Experience) / float64(g.hero.Stats.NextLevelExp)
+
 	target.DrawRect(int(expPercent*expBarWidth), 2, color.RGBA{R: 255, G: 255, B: 255, A: 255})
 	target.Pop()
 
 	// Center menu button
-	g.menuButton.SetCurrentFrame(0)
+	if err := g.menuButton.SetCurrentFrame(0); err != nil {
+		return err
+	}
+
 	w, _ = g.mainPanel.GetCurrentFrameSize()
+
 	g.menuButton.SetPosition((width/2)-8, height-16)
-	g.menuButton.Render(target)
+
+	if err := g.menuButton.Render(target); err != nil {
+		return err
+	}
 
 	// Potions
-	g.mainPanel.SetCurrentFrame(3)
+	if err := g.mainPanel.SetCurrentFrame(3); err != nil {
+		return err
+	}
+
 	w, _ = g.mainPanel.GetCurrentFrameSize()
+
 	g.mainPanel.SetPosition(offset, height)
-	g.mainPanel.Render(target)
+
+	if err := g.mainPanel.Render(target); err != nil {
+		return err
+	}
+
 	offset += w
 
 	// Right skill selector
-	g.mainPanel.SetCurrentFrame(4)
+	if err := g.mainPanel.SetCurrentFrame(4); err != nil {
+		return err
+	}
+
 	w, _ = g.mainPanel.GetCurrentFrameSize()
+
 	g.mainPanel.SetPosition(offset, height)
-	g.mainPanel.Render(target)
+
+	if err := g.mainPanel.Render(target); err != nil {
+		return err
+	}
+
 	offset += w
 
 	// Right skill
-	g.skillIcon.SetCurrentFrame(2)
+	if err := g.skillIcon.SetCurrentFrame(2); err != nil {
+		return err
+	}
+
 	w, _ = g.skillIcon.GetCurrentFrameSize()
+
 	g.skillIcon.SetPosition(offset, height)
-	g.skillIcon.Render(target)
+
+	if err := g.skillIcon.Render(target); err != nil {
+		return err
+	}
+
 	offset += w
 
 	// Right globe holder
-	g.mainPanel.SetCurrentFrame(5)
+	if err := g.mainPanel.SetCurrentFrame(5); err != nil {
+		return err
+	}
+
 	w, _ = g.mainPanel.GetCurrentFrameSize()
+
 	g.mainPanel.SetPosition(offset, height)
-	g.mainPanel.Render(target)
+
+	if err := g.mainPanel.Render(target); err != nil {
+		return err
+	}
 
 	// Mana status bar
 	manaPercent := float64(g.hero.Stats.Mana) / float64(g.hero.Stats.MaxMana)
 	manaBarHeight := int(manaPercent * float64(globeHeight))
-	g.hpManaStatusSprite.SetCurrentFrame(1)
+
+	if err := g.hpManaStatusSprite.SetCurrentFrame(1); err != nil {
+		return err
+	}
+
 	g.hpManaStatusSprite.SetPosition(offset+7, height-12)
-	g.hpManaStatusSprite.RenderSection(target, image.Rect(0, globeHeight-manaBarHeight, globeWidth, globeHeight))
+
+	if err := g.hpManaStatusSprite.RenderSection(target, image.Rect(0, globeHeight-manaBarHeight, globeWidth, globeHeight)); err != nil {
+		return err
+	}
 
 	// Right globe
-	g.globeSprite.SetCurrentFrame(1)
+	if err := g.globeSprite.SetCurrentFrame(1); err != nil {
+		return err
+	}
+
 	g.globeSprite.SetPosition(offset+8, height-8)
-	g.globeSprite.Render(target)
-	g.globeSprite.Render(target)
+
+	if err := g.globeSprite.Render(target); err != nil {
+		return err
+	}
+
+	if err := g.globeSprite.Render(target); err != nil {
+		return err
+	}
 
 	if g.isZoneTextShown {
 		g.zoneChangeText.SetPosition(width/2, height/4)
 		g.zoneChangeText.Render(target)
 	}
 
+	return nil
 }
 
 func (g *GameControls) SetZoneChangeText(text string) {

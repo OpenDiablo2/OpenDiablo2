@@ -74,27 +74,46 @@ func (v *Scrollbar) GetLastDirChange() int {
 	return v.lastDirChange
 }
 
-func (v *Scrollbar) Render(target d2interface.Surface) {
+func (v *Scrollbar) Render(target d2interface.Surface) error {
 	if !v.visible || v.maxOffset == 0 {
-		return
+		return nil
 	}
+
 	offset := 0
+
 	if !v.enabled {
 		offset = 2
 	}
+
 	v.scrollbarSprite.SetPosition(v.x, v.y)
-	v.scrollbarSprite.RenderSegmented(target, 1, 1, 0+offset)
-	v.scrollbarSprite.SetPosition(v.x, v.y+v.height-10)
-	v.scrollbarSprite.RenderSegmented(target, 1, 1, 1+offset)
-	if v.maxOffset == 0 || v.currentOffset < 0 || v.currentOffset > v.maxOffset {
-		return
+
+	if err := v.scrollbarSprite.RenderSegmented(target, 1, 1, 0+offset); err != nil {
+		return err
 	}
+
+	v.scrollbarSprite.SetPosition(v.x, v.y+v.height-10)
+
+	if err := v.scrollbarSprite.RenderSegmented(target, 1, 1, 1+offset); err != nil {
+		return err
+	}
+
+	if v.maxOffset == 0 || v.currentOffset < 0 || v.currentOffset > v.maxOffset {
+		return nil
+	}
+
 	v.scrollbarSprite.SetPosition(v.x, v.y+10+v.getBarPosition())
+
 	offset = 0
+
 	if !v.enabled {
 		offset = 1
 	}
-	v.scrollbarSprite.RenderSegmented(target, 1, 1, 4+offset)
+
+	if err := v.scrollbarSprite.RenderSegmented(target, 1, 1, 4+offset); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (v *Scrollbar) Advance(elapsed float64) {

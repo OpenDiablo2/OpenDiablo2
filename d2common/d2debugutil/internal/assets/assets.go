@@ -28,9 +28,6 @@ import (
 )
 
 const (
-	imgWidth  = 256
-	imgHeight = 128
-
 	CharWidth  = 8
 	CharHeight = 16
 )
