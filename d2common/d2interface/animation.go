@@ -13,7 +13,7 @@ type Animation interface {
 	SetSubLoop(startFrame, EndFrame int)
 	Advance(elapsed float64) error
 	Render(target Surface) error
-	RenderFromOrigin(target Surface) error
+	RenderFromOrigin(target Surface, shadow bool) error
 	RenderSection(sfc Surface, bound image.Rectangle) error
 	GetFrameSize(frameIndex int) (int, int, error)
 	GetCurrentFrameSize() (int, int)

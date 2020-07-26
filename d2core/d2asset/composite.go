@@ -59,10 +59,20 @@ func (c *Composite) Render(target d2interface.Surface) error {
 	}
 
 	direction := d2cof.Dir64ToCof(c.direction, c.mode.cof.NumberOfDirections)
+
 	for _, layerIndex := range c.mode.cof.Priority[direction][c.mode.frameIndex] {
 		layer := c.mode.layers[layerIndex]
 		if layer != nil {
-			if err := layer.RenderFromOrigin(target); err != nil {
+			if err := layer.RenderFromOrigin(target, true); err != nil {
+				return err
+			}
+		}
+	}
+
+	for _, layerIndex := range c.mode.cof.Priority[direction][c.mode.frameIndex] {
+		layer := c.mode.layers[layerIndex]
+		if layer != nil {
+			if err := layer.RenderFromOrigin(target, false); err != nil {
 				return err
 			}
 		}

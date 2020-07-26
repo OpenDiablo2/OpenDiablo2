@@ -9,10 +9,13 @@ import (
 )
 
 type surfaceState struct {
-	x          int
-	y          int
-	filter     ebiten.Filter
-	color      color.Color
-	brightness float64
-	effect     d2enum.DrawEffect
+	x              int
+	y              int
+	filter         ebiten.Filter
+	color          color.Color
+	brightness     float64
+	saturation     float64
+	effect         d2enum.DrawEffect
+	skewX, skewY   float64
+	scaleX, scaleY float64
 }

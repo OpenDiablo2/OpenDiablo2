@@ -35,7 +35,15 @@ type ebitenSurface struct {
 }
 
 func createEbitenSurface(img *ebiten.Image, currentState ...surfaceState) *ebitenSurface {
-	state := surfaceState{effect: d2enum.DrawEffectNone}
+	state := surfaceState{
+		effect:     d2enum.DrawEffectNone,
+		saturation: 1.0,
+		brightness: 1.0,
+		skewX:      0.0,
+		skewY:      0.0,
+		scaleX:     1.0,
+		scaleY:     1.0,
+	}
 	if len(currentState) > 0 {
 		state = currentState[0]
 	}
@@ -52,6 +60,20 @@ func (s *ebitenSurface) PushTranslation(x, y int) {
 	s.stateStack = append(s.stateStack, s.stateCurrent)
 	s.stateCurrent.x += x
 	s.stateCurrent.y += y
+}
+
+// PushSkew pushes a skew to the state stack
+func (s *ebitenSurface) PushSkew(skewX, skewY float64) {
+	s.stateStack = append(s.stateStack, s.stateCurrent)
+	s.stateCurrent.skewX = skewX
+	s.stateCurrent.skewY = skewY
+}
+
+// PushScale pushes a scale to the state stack
+func (s *ebitenSurface) PushScale(scaleX, scaleY float64) {
+	s.stateStack = append(s.stateStack, s.stateCurrent)
+	s.stateCurrent.scaleX = scaleX
+	s.stateCurrent.scaleY = scaleY
 }
 
 // PushEffect pushes an effect to the state stack
@@ -78,6 +100,12 @@ func (s *ebitenSurface) PushBrightness(brightness float64) {
 	s.stateCurrent.brightness = brightness
 }
 
+// PushSaturation pushes a saturation value to the state stack
+func (s *ebitenSurface) PushSaturation(saturation float64) {
+	s.stateStack = append(s.stateStack, s.stateCurrent)
+	s.stateCurrent.saturation = saturation
+}
+
 // Pop pops a state off of the state stack
 func (s *ebitenSurface) Pop() {
 	count := len(s.stateStack)
@@ -99,15 +127,25 @@ func (s *ebitenSurface) PopN(n int) {
 // Render renders the given surface
 func (s *ebitenSurface) Render(sfc d2interface.Surface) error {
 	opts := &ebiten.DrawImageOptions{}
+
+	if s.stateCurrent.skewX != 0 || s.stateCurrent.skewY != 0 {
+		opts.GeoM.Skew(s.stateCurrent.skewX, s.stateCurrent.skewY)
+	}
+
+	if s.stateCurrent.scaleX != 1.0 || s.stateCurrent.scaleY != 1.0 {
+		opts.GeoM.Scale(s.stateCurrent.scaleX, s.stateCurrent.scaleY)
+	}
+
 	opts.GeoM.Translate(float64(s.stateCurrent.x), float64(s.stateCurrent.y))
+
 	opts.Filter = s.stateCurrent.filter
 
 	if s.stateCurrent.color != nil {
 		opts.ColorM = s.colorToColorM(s.stateCurrent.color)
 	}
 
-	if s.stateCurrent.brightness != 0 {
-		opts.ColorM.ChangeHSV(0, 1, s.stateCurrent.brightness)
+	if s.stateCurrent.brightness != 1 || s.stateCurrent.saturation != 1 {
+		opts.ColorM.ChangeHSV(0, s.stateCurrent.saturation, s.stateCurrent.brightness)
 	}
 
 	// Are these correct? who even knows
@@ -137,7 +175,17 @@ func (s *ebitenSurface) Render(sfc d2interface.Surface) error {
 // Renders the section of the surface, given the bounds
 func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Rectangle) error {
 	opts := &ebiten.DrawImageOptions{}
+
+	if s.stateCurrent.skewX != 0 || s.stateCurrent.skewY != 0 {
+		opts.GeoM.Skew(s.stateCurrent.skewX, s.stateCurrent.skewY)
+	}
+
+	if s.stateCurrent.scaleX != 1.0 || s.stateCurrent.scaleY != 1.0 {
+		opts.GeoM.Scale(s.stateCurrent.scaleX, s.stateCurrent.scaleY)
+	}
+
 	opts.GeoM.Translate(float64(s.stateCurrent.x), float64(s.stateCurrent.y))
+
 	opts.Filter = s.stateCurrent.filter
 
 	if s.stateCurrent.color != nil {
@@ -145,7 +193,7 @@ func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Recta
 	}
 
 	if s.stateCurrent.brightness != 0 {
-		opts.ColorM.ChangeHSV(0, 1, s.stateCurrent.brightness)
+		opts.ColorM.ChangeHSV(0, s.stateCurrent.saturation, s.stateCurrent.brightness)
 	}
 
 	// Are these correct? who even knows

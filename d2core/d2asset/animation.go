@@ -4,6 +4,7 @@ import (
 	"errors"
 	"image"
 	"image/color"
+	"math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
@@ -112,6 +113,24 @@ func (a *animation) Advance(elapsed float64) error {
 	return nil
 }
 
+func (a *animation) renderShadow(target d2iface.Surface) error {
+	//_, height := a.GetFrameBounds()
+	direction := a.directions[a.directionIndex]
+	frame := direction.frames[a.frameIndex]
+	target.PushFilter(d2enum.FilterLinear)
+	target.PushTranslation(
+		frame.offsetX,
+		int(float64(frame.offsetY)*0.5))
+	target.PushScale(1.0, 0.5)
+	target.PushSkew(0.5, 0.0)
+	target.PushEffect(d2enum.DrawEffectPctTransparency25)
+	target.PushBrightness(0.0)
+
+	defer target.PopN(6)
+
+	return target.Render(frame.image)
+}
+
 // Render renders the animation to the given surface
 func (a *animation) Render(target d2iface.Surface) error {
 	direction := a.directions[a.directionIndex]
@@ -130,13 +149,21 @@ func (a *animation) Render(target d2iface.Surface) error {
 }
 
 // RenderFromOrigin renders the animation from the animation origin
-func (a *animation) RenderFromOrigin(target d2iface.Surface) error {
+func (a *animation) RenderFromOrigin(target d2iface.Surface, shadow bool) error {
 	if a.originAtBottom {
 		direction := a.directions[a.directionIndex]
 		frame := direction.frames[a.frameIndex]
 		target.PushTranslation(0, -frame.height)
 
 		defer target.Pop()
+	}
+
+	if shadow {
+		_, height := a.GetFrameBounds()
+		height = int(math.Abs(float64(height)))
+		target.PushTranslation((-height / 2), 0)
+		defer target.Pop()
+		return a.renderShadow(target)
 	}
 
 	return a.Render(target)
