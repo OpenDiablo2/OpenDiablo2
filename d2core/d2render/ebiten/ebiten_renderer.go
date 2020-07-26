@@ -85,8 +85,14 @@ func (r *Renderer) CreateSurface(surface d2interface.Surface) (d2interface.Surfa
 	result := createEbitenSurface(
 		surface.(*ebitenSurface).image,
 		surfaceState{
-			filter: ebiten.FilterNearest,
-			effect: d2enum.DrawEffectNone,
+			filter:     ebiten.FilterNearest,
+			effect:     d2enum.DrawEffectNone,
+			saturation: 1.0,
+			brightness: 1.0,
+			skewX:      0.0,
+			skewY:      0.0,
+			scaleX:     0.0,
+			scaleY:     0.0,
 		},
 	)
 

@@ -21,7 +21,10 @@ type Surface interface {
 	PushEffect(effect d2enum.DrawEffect)
 	PushFilter(filter d2enum.Filter)
 	PushTranslation(x, y int)
+	PushSkew(x, y float64)
+	PushScale(x, y float64)
 	PushBrightness(brightness float64)
+	PushSaturation(saturation float64)
 	Render(surface Surface) error
 	// Renders a section of the surface enclosed by bounds
 	RenderSection(surface Surface, bound image.Rectangle) error
