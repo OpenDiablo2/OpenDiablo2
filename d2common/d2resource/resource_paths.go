@@ -265,7 +265,12 @@ const (
 	BGMAct4Mesa                 = "/data/global/music/Act4/mesa.wav"
 	BGMAct4Town4                = "/data/global/music/Act4/town4.wav"
 	BGMAct5Baal                 = "/data/global/music/Act5/baal.wav"
+	BGMAct5Siege                = "/data/global/music/Act5/siege.wav"
+	BGMAct5Shenk                = "/data/global/music/Act5/shenkmusic.wav"
 	BGMAct5XTown                = "/data/global/music/Act5/xtown.wav"
+	BGMAct5XTemple              = "/data/global/music/Act5/xtemple.wav"
+	BGMAct5IceCaves             = "/data/global/music/Act5/icecaves.wav"
+	BGMAct5Nihlathak            = "/data/global/music/Act5/nihlathakmusic.wav"
 
 	// --- Sound Effects ---
 

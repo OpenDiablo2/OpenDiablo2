@@ -11,6 +11,7 @@ type Camera struct {
 // MoveTo sets the position of the Camera to the given position
 func (c *Camera) MoveTo(position *d2vector.Position) {
 	c.position = position
+	c.target = position
 }
 
 // MoveBy adds the given vector to the current position of the Camera.
