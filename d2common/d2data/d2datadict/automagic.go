@@ -10,6 +10,29 @@ import (
 // AutoMagicRecord describes rules for automatically generating magic properties when spawning
 // items
 type AutoMagicRecord struct {
+	// IncludeItemCodes
+	// itype 1 to itype7
+	// "Include Type" fields. You need to place item codes in any of these columns to allow that item
+	// to receive mods from this row. See the note below.
+	IncludeItemCodes [7]string
+
+	// ModCode
+	// They're the Property codes from Properties.txt.
+	// These determine the actual properties which make up this autoprefix.
+	// Each autoprefix can include up to three modifiers.
+	ModCode [3]string
+
+	// ExcludeItemCodes
+	// etype 1 to etype3
+	// 'Exclude type' . This field prevents certain mods from spawning on specific item codes.
+	ExcludeItemCodes [3]string
+
+	// ModParam, min, max
+	// Parameter, min, and max values for the property
+	ModParam [3]int
+	ModMin   [3]int
+	ModMax   [3]int
+
 	// Name
 	// String Comment Blizzard lists the equivalent prefix/affix here.
 	// You can use what ever you wish here though. Handy for keeping track of groups.
@@ -23,28 +46,18 @@ type AutoMagicRecord struct {
 	// as Items with " version" set to 100 will NOT be generated in Classic Diablo II.
 	Version int
 
-	// Spawnable
-	// It is a boolean type field, and states if this autoprefix can actually spawn in the game.
-	// You can disable this row by setting it to 0 , or enable it by setting it to 1
-	Spawnable bool
-
-	// SpawnOnRare
-	// It decides whether this autoprefix spawns on rare quality items or not.
-	// You can prevent that from happening by setting it to 0 , or you can allow it by setting it to 1
-	SpawnOnRare bool // rare
-
 	// MinSpawnLevel
 	// this field accepts numeric values and specifies the minimum level from which this autoprefix
 	// can spawn. The column in question can be combined with the following maxlevel: to effectively
 	// control groups of automods,
 	// because you can use this field to combine multiple rows so that the autoprefixes are assigned
 	// based on the level of the treasure drop [see below].
-	MinSpawnLevel int // level
+	MinSpawnLevel int
 
 	// MaxSpawnLevel
 	// this field accepts numeric values and specifies the maximum level beyond which the automod
 	// stop spawning.
-	MaxSpawnLevel int // maxlevel
+	MaxSpawnLevel int
 
 	// LevelRequirement
 	// It is the level requirement for this autoprefix.
@@ -60,7 +73,7 @@ type AutoMagicRecord struct {
 	// This is a polite thing to do,
 	// as other classes gain no advantage from class specific modifiers.
 	// I am uncertain that this actually works.
-	ClassLevelRequirement int // classlevelreq
+	ClassLevelRequirement int
 
 	// Frequency
 	// For autoprefix groups, it states the chance to spawn this specific group member vs others.
@@ -77,49 +90,36 @@ type AutoMagicRecord struct {
 	// Weapons.txt or Armor.txt in order for the property to appear.
 	Group int
 
-	// ModCode
-	// They're the Property codes from Properties.txt.
-	// These determine the actual properties which make up this autoprefix.
-	// Each autoprefix can include up to three modifiers.
-	ModCode [3]string
+	// PaletteTransform
+	// If transform is set to 1 then the item will be colored with the chosen color code,
+	// taken from Colors.txt
+	PaletteTransform int
 
-	// ModParam, min, max
-	// Parameter, min, and max values for the property
-	ModParam [3]int
-	ModMin   [3]int
-	ModMax   [3]int
+	// CostDivide
+	// Numeric value that acts as divisor for the item price.
+	CostDivide int
+
+	// CostMultiply
+	// Numeric value that acts as multiplier for the item price.
+	CostMultiply int
+
+	// CostAdd
+	// Numeric value that acts as a flat sum added to the item price.
+	CostAdd int
+
+	// Spawnable
+	// It is a boolean type field, and states if this autoprefix can actually spawn in the game.
+	// You can disable this row by setting it to 0 , or enable it by setting it to 1
+	Spawnable bool
+
+	// SpawnOnRare
+	// It decides whether this autoprefix spawns on rare quality items or not.
+	// You can prevent that from happening by setting it to 0 , or you can allow it by setting it to 1
+	SpawnOnRare bool
 
 	// transform
 	// It is a boolean value whichallows the colorization of the items.
 	Transform bool
-
-	// PaletteTransform
-	// If transform is set to 1 then the item will be colored with the chosen color code,
-	// taken from Colors.txt
-	PaletteTransform int // transformcolor
-
-	// IncludeItemCodes
-	// itype 1 to itype7
-	// "Include Type" fields. You need to place item codes in any of these columns to allow that item
-	// to receive mods from this row. See the note below.
-	IncludeItemCodes [7]string
-
-	// ExcludeItemCodes
-	// etype 1 to etype3
-	// 'Exclude type' . This field prevents certain mods from spawning on specific item codes.
-	ExcludeItemCodes [3]string
-
-	// CostDivide
-	// Numeric value that acts as divisor for the item price.
-	CostDivide int // divide
-
-	// CostMultiply
-	// Numeric value that acts as multiplier for the item price.
-	CostMultiply int // multiply
-
-	// CostAdd
-	// Numeric value that acts as a flat sum added to the item price.
-	CostAdd int // add
 }
 
 // AutoMagic has all of the AutoMagicRecords, used for generating magic properties for spawned items
