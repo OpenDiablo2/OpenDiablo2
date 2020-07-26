@@ -148,7 +148,7 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	v.createLogos(loading)
 	v.createButtons(loading)
 
-	v.tcpJoinGameEntry = d2ui.CreateTextbox(v.renderer)
+	v.tcpJoinGameEntry = d2ui.CreateTextbox()
 	v.tcpJoinGameEntry.SetPosition(joinGameDialogX, joinGameDialogY)
 	v.tcpJoinGameEntry.SetFilter(joinGameCharacterFilter)
 	d2ui.AddWidget(&v.tcpJoinGameEntry)

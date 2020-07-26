@@ -72,78 +72,148 @@ func (g *Inventory) Load() {
 	g.grid.Add(items...)
 }
 
-func (g *Inventory) Render(target d2interface.Surface) {
+func (g *Inventory) Render(target d2interface.Surface) error {
 	if !g.isOpen {
-		return
+		return nil
 	}
 
 	x, y := g.originX, g.originY
 
 	// Frame
 	// Top left
-	g.frame.SetCurrentFrame(5)
+	if err := g.frame.SetCurrentFrame(5); err != nil {
+		return err
+	}
+
 	w, h := g.frame.GetCurrentFrameSize()
+
 	g.frame.SetPosition(x, y+h)
-	g.frame.Render(target)
+
+	if err := g.frame.Render(target); err != nil {
+		return err
+	}
+
 	x += w
 
 	// Top right
-	g.frame.SetCurrentFrame(6)
+	if err := g.frame.SetCurrentFrame(6); err != nil {
+		return err
+	}
+
 	w, h = g.frame.GetCurrentFrameSize()
+
 	g.frame.SetPosition(x, y+h)
-	g.frame.Render(target)
+
+	if err := g.frame.Render(target); err != nil {
+		return err
+	}
+
 	x += w
 	y += h
 
 	// Right
-	g.frame.SetCurrentFrame(7)
+	if err := g.frame.SetCurrentFrame(7); err != nil {
+		return err
+	}
+
 	w, h = g.frame.GetCurrentFrameSize()
+
 	g.frame.SetPosition(x-w, y+h)
-	g.frame.Render(target)
+
+	if err := g.frame.Render(target); err != nil {
+		return err
+	}
+
 	y += h
 
 	// Bottom right
-	g.frame.SetCurrentFrame(8)
+	if err := g.frame.SetCurrentFrame(8); err != nil {
+		return err
+	}
+
 	w, h = g.frame.GetCurrentFrameSize()
+
 	g.frame.SetPosition(x-w, y+h)
-	g.frame.Render(target)
+
+	if err := g.frame.Render(target); err != nil {
+		return err
+	}
+
 	x -= w
 
 	// Bottom left
-	g.frame.SetCurrentFrame(9)
+	if err := g.frame.SetCurrentFrame(9); err != nil {
+		return err
+	}
+
 	w, h = g.frame.GetCurrentFrameSize()
+
 	g.frame.SetPosition(x-w, y+h)
-	g.frame.Render(target)
+
+	if err := g.frame.Render(target); err != nil {
+		return err
+	}
 
 	x, y = g.originX, g.originY
 	y += 64
 
 	// Panel
 	// Top left
-	g.panel.SetCurrentFrame(4)
+	if err := g.panel.SetCurrentFrame(4); err != nil {
+		return err
+	}
+
 	w, h = g.panel.GetCurrentFrameSize()
+
 	g.panel.SetPosition(x, y+h)
-	g.panel.Render(target)
+
+	if err := g.panel.Render(target); err != nil {
+		return err
+	}
+
 	x += w
 
 	// Top right
-	g.panel.SetCurrentFrame(5)
+	if err := g.panel.SetCurrentFrame(5); err != nil {
+		return err
+	}
+
 	w, h = g.panel.GetCurrentFrameSize()
+
 	g.panel.SetPosition(x, y+h)
-	g.panel.Render(target)
+
+	if err := g.panel.Render(target); err != nil {
+		return err
+	}
+
 	y += h
 
 	// Bottom right
-	g.panel.SetCurrentFrame(7)
+	if err := g.panel.SetCurrentFrame(7); err != nil {
+		return err
+	}
+
 	w, h = g.panel.GetCurrentFrameSize()
 	g.panel.SetPosition(x, y+h)
-	g.panel.Render(target)
+
+	if err := g.panel.Render(target); err != nil {
+		return err
+	}
 
 	// Bottom left
-	g.panel.SetCurrentFrame(6)
+	if err := g.panel.SetCurrentFrame(6); err != nil {
+		return err
+	}
+
 	w, h = g.panel.GetCurrentFrameSize()
+
 	g.panel.SetPosition(x-w, y+h)
-	g.panel.Render(target)
+
+	if err := g.panel.Render(target); err != nil {
+		return err
+	}
 
 	g.grid.Render(target)
+
+	return nil
 }

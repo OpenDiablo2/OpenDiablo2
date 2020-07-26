@@ -219,7 +219,6 @@ func decode(input *d2common.BitStream, head *linkedNode) *linkedNode {
 	return node
 }
 
-// TODO: these consts for buildList need better names
 const (
 	decompVal1 = 256
 	decompVal2 = 257
@@ -374,6 +373,7 @@ func buildTree(tail *linkedNode) *linkedNode {
 }
 
 // HuffmanDecompress decompresses huffman-compressed data
+//nolint:gomnd // binary decode magic
 func HuffmanDecompress(data []byte) []byte {
 	comptype := data[0]
 	primes := getPrimes()
@@ -399,6 +399,7 @@ Loop:
 			break Loop
 		case 257:
 			newvalue := bitstream.ReadBits(8)
+
 			outputstream.PushByte(byte(newvalue))
 			tail = insertNode(tail, newvalue)
 		default:

@@ -1,18 +1,18 @@
 package d2player
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"strconv"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
+// PanelText represents text on the panel
 type PanelText struct {
 	X           int
 	Y           int
@@ -22,6 +22,7 @@ type PanelText struct {
 	AlignCenter bool
 }
 
+// StatsPanelLabels represents the labels in the status panel
 type StatsPanelLabels struct {
 	Level        d2ui.Label
 	Experience   d2ui.Label
@@ -38,36 +39,10 @@ type StatsPanelLabels struct {
 	Stamina      d2ui.Label
 }
 
-var StaticTextLabels = []PanelText{
-	{X: 110, Y: 100, Text: "Level", Font: d2resource.Font6, AlignCenter: true},
-	{X: 200, Y: 100, Text: "Experience", Font: d2resource.Font6, AlignCenter: true},
-	{X: 330, Y: 100, Text: "Next Level", Font: d2resource.Font6, AlignCenter: true},
-	{X: 100, Y: 150, Text: "Strength", Font: d2resource.Font6},
-	{X: 100, Y: 213, Text: "Dexterity", Font: d2resource.Font6},
-	{X: 100, Y: 300, Text: "Vitality", Font: d2resource.Font6},
-	{X: 100, Y: 360, Text: "Energy", Font: d2resource.Font6},
-	{X: 280, Y: 260, Text: "Defense", Font: d2resource.Font6},
-	{X: 280, Y: 300, Text: "Stamina", Font: d2resource.Font6, AlignCenter: true},
-	{X: 280, Y: 322, Text: "Life", Font: d2resource.Font6, AlignCenter: true},
-	{X: 280, Y: 360, Text: "Mana", Font: d2resource.Font6, AlignCenter: true},
-
-	// can't use "Fire\nResistance" because line spacing is too big and breaks the layout
-	{X: 310, Y: 395, Text: "Fire", Font: d2resource.Font6, AlignCenter: true},
-	{X: 310, Y: 402, Text: "Resistance", Font: d2resource.Font6, AlignCenter: true},
-
-	{X: 310, Y: 420, Text: "Cold", Font: d2resource.Font6, AlignCenter: true},
-	{X: 310, Y: 427, Text: "Resistance", Font: d2resource.Font6, AlignCenter: true},
-
-	{X: 310, Y: 445, Text: "Lightning", Font: d2resource.Font6, AlignCenter: true},
-	{X: 310, Y: 452, Text: "Resistance", Font: d2resource.Font6, AlignCenter: true},
-
-	{X: 310, Y: 468, Text: "Poison", Font: d2resource.Font6, AlignCenter: true},
-	{X: 310, Y: 477, Text: "Resistance", Font: d2resource.Font6, AlignCenter: true},
-}
-
 // stores all the labels that can change during gameplay(e.g. current level, current hp, mana, etc.)
 var StatValueLabels = make([]d2ui.Label, 13)
 
+// HeroStatsPanel represents the hero status panel
 type HeroStatsPanel struct {
 	frame                *d2ui.Sprite
 	panel                *d2ui.Sprite
@@ -83,6 +58,7 @@ type HeroStatsPanel struct {
 	isOpen  bool
 }
 
+// NewHeroStatsPanel creates a new hero status panel
 func NewHeroStatsPanel(renderer d2interface.Renderer, heroName string, heroClass d2enum.Hero,
 	heroState *d2hero.HeroStatsState) *HeroStatsPanel {
 	originX := 0
@@ -99,6 +75,7 @@ func NewHeroStatsPanel(renderer d2interface.Renderer, heroName string, heroClass
 	}
 }
 
+// Load loads the data for the hero status panel
 func (s *HeroStatsPanel) Load() {
 	animation, _ := d2asset.LoadAnimation(d2resource.Frame, d2resource.PaletteSky)
 	s.frame, _ = d2ui.LoadSprite(animation)
@@ -107,25 +84,30 @@ func (s *HeroStatsPanel) Load() {
 	s.initStatValueLabels()
 }
 
+// IsOpen returns true if the hero status panel is open
 func (s *HeroStatsPanel) IsOpen() bool {
 	return s.isOpen
 }
 
+// Toggle toggles the visibility of the hero status panel
 func (s *HeroStatsPanel) Toggle() {
 	s.isOpen = !s.isOpen
 }
 
+// Open opens the hero status panel
 func (s *HeroStatsPanel) Open() {
 	s.isOpen = true
 }
 
+// Close closed the hero status panel
 func (s *HeroStatsPanel) Close() {
 	s.isOpen = false
 }
 
-func (s *HeroStatsPanel) Render(target d2interface.Surface) {
+// Render renders the hero status panel
+func (s *HeroStatsPanel) Render(target d2interface.Surface) error {
 	if !s.isOpen {
-		return
+		return nil
 	}
 
 	if s.staticMenuImageCache == nil {
@@ -134,53 +116,101 @@ func (s *HeroStatsPanel) Render(target d2interface.Surface) {
 		surface, err := s.renderer.NewSurface(frameWidth*framesCount, frameHeight*framesCount, d2enum.FilterNearest)
 
 		if err != nil {
-			return
+			return err
 		}
+
 		s.staticMenuImageCache = &surface
-		s.renderStaticMenu(*s.staticMenuImageCache)
+
+		if err := s.renderStaticMenu(*s.staticMenuImageCache); err != nil {
+			return err
+		}
 	}
-	target.Render(*s.staticMenuImageCache)
+
+	if err := target.Render(*s.staticMenuImageCache); err != nil {
+		return err
+	}
+
 	s.renderStatValues(target)
+
+	return nil
 }
 
-func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) {
+func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) error {
 	x, y := s.originX, s.originY
 
 	// Frame
 	// Top left
-	s.frame.SetCurrentFrame(0)
+	if err := s.frame.SetCurrentFrame(0); err != nil {
+		return err
+	}
+
 	w, h := s.frame.GetCurrentFrameSize()
+
 	s.frame.SetPosition(x, y+h)
-	s.frame.Render(target)
+
+	if err := s.frame.Render(target); err != nil {
+		return err
+	}
+
 	x += w
 	y += h
 
 	// Top right
-	s.frame.SetCurrentFrame(1)
+	if err := s.frame.SetCurrentFrame(1); err != nil {
+		return err
+	}
+
 	w, h = s.frame.GetCurrentFrameSize()
+
 	s.frame.SetPosition(x, s.originY+h)
-	s.frame.Render(target)
+
+	if err := s.frame.Render(target); err != nil {
+		return err
+	}
+
 	x = s.originX
 
 	// Right
-	s.frame.SetCurrentFrame(2)
+	if err := s.frame.SetCurrentFrame(2); err != nil {
+		return err
+	}
+
 	w, h = s.frame.GetCurrentFrameSize()
 	s.frame.SetPosition(x, y+h)
-	s.frame.Render(target)
+
+	if err := s.frame.Render(target); err != nil {
+		return err
+	}
+
 	y += h
 
 	// Bottom left
-	s.frame.SetCurrentFrame(3)
+	if err := s.frame.SetCurrentFrame(3); err != nil {
+		return err
+	}
+
 	w, h = s.frame.GetCurrentFrameSize()
+
 	s.frame.SetPosition(x, y+h)
-	s.frame.Render(target)
+
+	if err := s.frame.Render(target); err != nil {
+		return err
+	}
+
 	x += w
 
 	// Bottom right
-	s.frame.SetCurrentFrame(4)
+	if err := s.frame.SetCurrentFrame(4); err != nil {
+		return err
+	}
+
 	w, h = s.frame.GetCurrentFrameSize()
+
 	s.frame.SetPosition(x, y+h)
-	s.frame.Render(target)
+
+	if err := s.frame.Render(target); err != nil {
+		return err
+	}
 
 	x, y = s.originX, s.originY
 	y += 64
@@ -188,42 +218,106 @@ func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) {
 
 	// Panel
 	// Top left
-	s.panel.SetCurrentFrame(0)
+	if err := s.panel.SetCurrentFrame(0); err != nil {
+		return err
+	}
+
 	w, h = s.panel.GetCurrentFrameSize()
+
 	s.panel.SetPosition(x, y+h)
-	s.panel.Render(target)
+
+	if err := s.panel.Render(target); err != nil {
+		return err
+	}
+
 	x += w
 
 	// Top right
-	s.panel.SetCurrentFrame(1)
+	if err := s.panel.SetCurrentFrame(1); err != nil {
+		return err
+	}
+
 	w, h = s.panel.GetCurrentFrameSize()
+
 	s.panel.SetPosition(x, y+h)
-	s.panel.Render(target)
+
+	if err := s.panel.Render(target); err != nil {
+		return err
+	}
+
 	y += h
 
 	// Bottom right
-	s.panel.SetCurrentFrame(3)
+	if err := s.panel.SetCurrentFrame(3); err != nil {
+		return err
+	}
+
 	w, h = s.panel.GetCurrentFrameSize()
+
 	s.panel.SetPosition(x, y+h)
-	s.panel.Render(target)
+
+	if err := s.panel.Render(target); err != nil {
+		return err
+	}
 
 	// Bottom left
-	s.panel.SetCurrentFrame(2)
+	if err := s.panel.SetCurrentFrame(2); err != nil {
+		return err
+	}
+
 	w, h = s.panel.GetCurrentFrameSize()
+
 	s.panel.SetPosition(x-w, y+h)
-	s.panel.Render(target)
+
+	if err := s.panel.Render(target); err != nil {
+		return err
+	}
 
 	var label d2ui.Label
+
 	// all static labels are not stored since we use them only once to generate the image cache
-	for _, textElement := range StaticTextLabels {
+
+	//nolint:gomnd
+	var staticTextLabels = []PanelText{
+		{X: 110, Y: 100, Text: "Level", Font: d2resource.Font6, AlignCenter: true},
+		{X: 200, Y: 100, Text: "Experience", Font: d2resource.Font6, AlignCenter: true},
+		{X: 330, Y: 100, Text: "Next Level", Font: d2resource.Font6, AlignCenter: true},
+		{X: 100, Y: 150, Text: "Strength", Font: d2resource.Font6},
+		{X: 100, Y: 213, Text: "Dexterity", Font: d2resource.Font6},
+		{X: 100, Y: 300, Text: "Vitality", Font: d2resource.Font6},
+		{X: 100, Y: 360, Text: "Energy", Font: d2resource.Font6},
+		{X: 280, Y: 260, Text: "Defense", Font: d2resource.Font6},
+		{X: 280, Y: 300, Text: "Stamina", Font: d2resource.Font6, AlignCenter: true},
+		{X: 280, Y: 322, Text: "Life", Font: d2resource.Font6, AlignCenter: true},
+		{X: 280, Y: 360, Text: "Mana", Font: d2resource.Font6, AlignCenter: true},
+
+		// can't use "Fire\nResistance" because line spacing is too big and breaks the layout
+		{X: 310, Y: 395, Text: "Fire", Font: d2resource.Font6, AlignCenter: true},
+		{X: 310, Y: 402, Text: "Resistance", Font: d2resource.Font6, AlignCenter: true},
+
+		{X: 310, Y: 420, Text: "Cold", Font: d2resource.Font6, AlignCenter: true},
+		{X: 310, Y: 427, Text: "Resistance", Font: d2resource.Font6, AlignCenter: true},
+
+		{X: 310, Y: 445, Text: "Lightning", Font: d2resource.Font6, AlignCenter: true},
+		{X: 310, Y: 452, Text: "Resistance", Font: d2resource.Font6, AlignCenter: true},
+
+		{X: 310, Y: 468, Text: "Poison", Font: d2resource.Font6, AlignCenter: true},
+		{X: 310, Y: 477, Text: "Resistance", Font: d2resource.Font6, AlignCenter: true},
+	}
+	for _, textElement := range staticTextLabels {
 		label = s.createTextLabel(textElement)
 		label.Render(target)
 	}
 	// hero name and class are part of the static image cache since they don't change after we enter the world
 	label = s.createTextLabel(PanelText{X: 165, Y: 72, Text: s.heroName, Font: d2resource.Font16, AlignCenter: true})
+
 	label.Render(target)
+
 	label = s.createTextLabel(PanelText{X: 330, Y: 72, Text: s.heroClass.String(), Font: d2resource.Font16, AlignCenter: true})
+
 	label.Render(target)
+
+	return nil
 }
 
 func (s *HeroStatsPanel) initStatValueLabels() {

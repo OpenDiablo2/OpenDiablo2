@@ -120,7 +120,9 @@ func (v *Game) Render(screen d2interface.Surface) error {
 	v.mapRenderer.Render(screen)
 
 	if v.gameControls != nil {
-		v.gameControls.Render(screen)
+		if err := v.gameControls.Render(screen); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -166,7 +168,9 @@ func (v *Game) Advance(elapsed float64) error {
 
 	// Bind the game controls to the player once it exists
 	if v.gameControls == nil {
-		v.bindGameControls()
+		if err := v.bindGameControls(); err != nil {
+			return err
+		}
 	}
 
 	// Update the camera to focus on the player
@@ -180,14 +184,21 @@ func (v *Game) Advance(elapsed float64) error {
 	return nil
 }
 
-func (v *Game) bindGameControls() {
+func (v *Game) bindGameControls() error {
 	for _, player := range v.gameClient.Players {
 		if player.ID != v.gameClient.PlayerID {
 			continue
 		}
 
 		v.localPlayer = player
-		v.gameControls = d2player.NewGameControls(v.renderer, player, v.gameClient.MapEngine, v.mapRenderer, v, v.terminal)
+
+		var err error
+		v.gameControls, err = d2player.NewGameControls(v.renderer, player, v.gameClient.MapEngine, v.mapRenderer, v, v.terminal)
+
+		if err != nil {
+			return err
+		}
+
 		v.gameControls.Load()
 
 		if err := v.inputManager.BindHandler(v.gameControls); err != nil {
@@ -196,6 +207,8 @@ func (v *Game) bindGameControls() {
 
 		break
 	}
+
+	return nil
 }
 
 // OnPlayerMove sends the player move action to the server

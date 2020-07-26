@@ -1,3 +1,4 @@
+//nolint:gomnd
 package d2mapgen
 
 import (
@@ -37,6 +38,7 @@ func GenerateAct1Overworld(mapEngine *d2mapengine.MapEngine) {
 	townSize := townStamp.Size()
 
 	log.Printf("Region Path: %s", townStamp.RegionPath())
+
 	if strings.Contains(townStamp.RegionPath(), "E1") {
 		// East Exit
 		mapEngine.PlaceStamp(townStamp, 0, 0)
@@ -63,8 +65,6 @@ func GenerateAct1Overworld(mapEngine *d2mapengine.MapEngine) {
 		// North Exit
 		mapEngine.PlaceStamp(townStamp, mapWidth-townSize.Width, mapHeight-townSize.Height)
 	}
-
-	//mapEngine.RegenerateWalkPaths()
 }
 
 func generateWilderness1TownEast(mapEngine *d2mapengine.MapEngine, startX, startY int) {

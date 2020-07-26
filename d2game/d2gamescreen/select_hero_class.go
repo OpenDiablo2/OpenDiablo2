@@ -429,7 +429,7 @@ func (v *SelectHeroClass) createButtons() {
 }
 
 func (v *SelectHeroClass) createCheckboxes(renderer d2interface.Renderer) {
-	v.heroNameTextbox = d2ui.CreateTextbox(renderer)
+	v.heroNameTextbox = d2ui.CreateTextbox()
 	v.heroNameTextbox.SetPosition(heroNameTextBoxX, heoNameTextBoxY)
 	v.heroNameTextbox.SetVisible(false)
 	d2ui.AddWidget(&v.heroNameTextbox)
