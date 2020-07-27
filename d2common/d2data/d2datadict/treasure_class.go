@@ -27,15 +27,16 @@ type TreasureClassRecord struct {
 	Treasures  []*Treasure
 }
 
-// Treasure describes a treasure to drop, or another treasure class record
+// Treasure describes a treasure to drop
+// the key is either a reference to an item, or to another treasure class
 type Treasure struct {
 	Name        string
 	Probability int
 }
 
-var TreasureClass map[string]*TreasureClassRecord
+var TreasureClass map[string]*TreasureClassRecord //nolint:gochecknoglobals // Currently global by design
 
-// LoadTreasureClass loads treasure class records from TreasureClassEx.txt
+// LoadTreasureClassRecords loads treasure class records from TreasureClassEx.txt
 //nolint:funlen // Makes no sense to split
 func LoadTreasureClassRecords(file []byte) {
 	TreasureClass = make(map[string]*TreasureClassRecord)
