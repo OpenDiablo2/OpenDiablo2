@@ -414,12 +414,10 @@ func (a *App) render(target d2interface.Surface) error {
 func (a *App) advance(elapsed, current float64) error {
 	elapsedLastScreenAdvance := (current - a.lastScreenAdvance) * a.timeScale
 
-	if elapsedLastScreenAdvance > defaultFPS {
-		a.lastScreenAdvance = current
+	a.lastScreenAdvance = current
 
-		if err := d2screen.Advance(elapsedLastScreenAdvance); err != nil {
-			return err
-		}
+	if err := d2screen.Advance(elapsedLastScreenAdvance); err != nil {
+		return err
 	}
 
 	d2ui.Advance(elapsed)
