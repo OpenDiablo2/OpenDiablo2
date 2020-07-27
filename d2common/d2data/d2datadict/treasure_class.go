@@ -28,7 +28,7 @@ type TreasureClassRecord struct {
 }
 
 // Treasure describes a treasure to drop
-// the key is either a reference to an item, or to another treasure class
+// the Name is either a reference to an item, or to another treasure class
 type Treasure struct {
 	Name        string
 	Probability int
