@@ -193,6 +193,7 @@ const (
 	CubeRecipes      = "/data/global/excel/cubemain.txt"
 	Skills           = "/data/global/excel/skills.txt"
 	SkillDesc        = "/data/global/excel/skilldesc.txt"
+	TreasureClass    = "/data/global/excel/TreasureClassEx.txt"
 
 	// --- Animations ---
 

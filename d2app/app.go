@@ -245,6 +245,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.Sets, d2datadict.LoadSets},
 		{d2resource.SetItems, d2datadict.LoadSetItems},
 		{d2resource.AutoMagic, d2datadict.LoadAutoMagicRecords},
+		{d2resource.TreasureClass, d2datadict.LoadTreasureClassRecords},
 	}
 
 	d2datadict.InitObjectRecords()
