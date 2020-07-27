@@ -135,6 +135,7 @@ func CreateMainMenu(
 		inputManager:   inputManager,
 		audioProvider:  audioProvider,
 		navigator:      navigator,
+		buildInfo: buildInfo,
 	}
 }
 
