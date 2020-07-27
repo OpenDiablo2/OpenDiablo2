@@ -88,11 +88,16 @@ func Create(gitBranch, gitCommit string,
 		tAllocSamples: createZeroedRing(nSamplesTAlloc),
 	}
 
+	if result.gitBranch == "" {
+		result.gitBranch = "Local Build"
+	}
+
 	return result
 }
 
 // Run executes the application and kicks off the entire game process
 func (a *App) Run() error {
+
 	profileOption := kingpin.Flag("profile", "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)").String()
 	kingpin.Parse()
 
@@ -114,10 +119,6 @@ func (a *App) Run() error {
 	}
 
 	a.ToMainMenu()
-
-	if a.gitBranch == "" {
-		a.gitBranch = "Local Build"
-	}
 
 	if err := a.renderer.Run(a.update, 800, 600, windowTitle); err != nil {
 		return err
