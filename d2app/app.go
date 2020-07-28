@@ -6,6 +6,7 @@ import (
 	"container/ring"
 	"errors"
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2item/diablo2item"
 	"image"
 	"image/gif"
 	"image/png"
@@ -16,6 +17,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/pkg/profile"
 	"golang.org/x/image/colornames"
@@ -265,7 +267,40 @@ func (a *App) loadDataDict() error {
 		entry.loader(data)
 	}
 
+	testTreasureClass()
+
 	return nil
+}
+
+func testTreasureClass() {
+	d2datadict.LoadItemEquivalencies()
+
+	//for code := range d2datadict.ItemEquivalencies {
+	//	equiv := d2datadict.ItemEquivalencies[code]
+	//	fmt.Printf("Item Equivalencies for [%s]:\n", code)
+	//	for idx := range equiv {
+	//		fmt.Printf("\t%s", equiv[idx].Name)
+	//	}
+	//}
+
+	generator := &diablo2item.ItemGenerator{}
+	generator.SetSeed(time.Now().UnixNano())
+	//for _, record := range d2datadict.TreasureClass {
+	//	fmt.Printf("\nTreasureClass [%s]:", record.Name)
+	//	items := generator.ItemsFromTreasureClass(record)
+	//	for idx := range items {
+	//		if commonRecord := items[idx].CommonRecord(); commonRecord != nil {
+	//			fmt.Printf("\n\tPicked: %s (Level %d)", commonRecord.Name, commonRecord.Level)
+	//		}
+	//	}
+	//}
+	tc := d2datadict.TreasureClass["Act 5 (N) Champ C"]
+	items := generator.ItemsFromTreasureClass(tc)
+	fmt.Printf("TreasureClass [%s]:\n", tc.Name)
+	for idx := range items {
+		rec := items[idx].CommonRecord()
+		fmt.Printf("\tPicked: %s (Level %d)\n", rec.Name, rec.Level)
+	}
 }
 
 func (a *App) renderDebug(target d2interface.Surface) error {

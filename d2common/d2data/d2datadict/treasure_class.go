@@ -2,15 +2,45 @@ package d2datadict
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"log"
 )
 
 const (
-	numTreasures    = 10
-	treasureItemFmt = "Item%d"
-	treasureProbFmt = "Prob%d"
+	maxTreasuresPerRecord = 10
+	treasureItemFmt       = "Item%d"
+	treasureProbFmt       = "Prob%d"
+)
+
+// TreasureDropType indicates the drop type of the treasure
+type TreasureDropType int
+
+const (
+	// TreasureNone is default bad case, but nothing should have this
+	TreasureNone TreasureDropType = iota
+
+	// TreasureGold indicates that the treasure drop type is for gold
+	TreasureGold
+
+	// indicates that the drop type resolves directly to an ItemCommonRecord
+	TreasureWeapon
+	TreasureArmor
+	TreasureMisc
+
+	// indicates that the code is for a dynamic item record, because the treasure code has
+	// and item level appended to it. this is for things like `armo63` or `weap24` which does not
+	// explicitly have an item record that matches this code, but we need to resolve this
+	TreasureWeaponDynamic
+	TreasureArmorDynamic
+	TreasureMiscDynamic
+)
+
+const (
+	GoldMultDropCodeStr   string = "gld,mul="
+	GoldDropCodeStr    		 = "gld"
+	WeaponDropCodeStr        = "weap"
+	ArmorDropCodeStr         = "armo"
+	MiscDropCodeStr          = "misc"
 )
 
 // TreasureClassRecord represents a rule for item drops in diablo 2
@@ -30,10 +60,11 @@ type TreasureClassRecord struct {
 // Treasure describes a treasure to drop
 // the Name is either a reference to an item, or to another treasure class
 type Treasure struct {
-	Name        string
+	Code        string
 	Probability int
 }
 
+// TreasureClass contains all of the TreasureClassRecords
 var TreasureClass map[string]*TreasureClassRecord //nolint:gochecknoglobals // Currently global by design
 
 // LoadTreasureClassRecords loads treasure class records from TreasureClassEx.txt
@@ -56,7 +87,11 @@ func LoadTreasureClassRecords(file []byte) {
 			FreqNoDrop: d.Number("NoDrop"),
 		}
 
-		for treasureIdx := 0; treasureIdx < numTreasures; treasureIdx++ {
+		if record.Name == "" {
+			continue
+		}
+
+		for treasureIdx := 0; treasureIdx < maxTreasuresPerRecord; treasureIdx++ {
 			treasureColumnKey := fmt.Sprintf(treasureItemFmt, treasureIdx+1)
 			probColumnKey := fmt.Sprintf(treasureProbFmt, treasureIdx+1)
 
@@ -68,16 +103,15 @@ func LoadTreasureClassRecords(file []byte) {
 			prob := d.Number(probColumnKey)
 
 			treasure := &Treasure{
-				Name:        treasureName,
+				Code:        treasureName,
 				Probability: prob,
 			}
 
 			if record.Treasures == nil {
 				record.Treasures = []*Treasure{treasure}
-				continue
+			} else {
+				record.Treasures = append(record.Treasures, treasure)
 			}
-
-			record.Treasures = append(record.Treasures, treasure)
 		}
 
 		TreasureClass[record.Name] = record

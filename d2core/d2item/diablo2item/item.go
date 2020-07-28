@@ -5,6 +5,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2item"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
 // PropertyPool is used for separating properties by their source
@@ -18,10 +19,12 @@ const (
 	PropertyPoolSet
 )
 
-// static check to ensure Diablo2Item implements Item
-var _ d2item.Item = &Diablo2Item{}
+// static check to ensure Item implements Item
+var _ d2item.Item = &Item{}
 
-type Diablo2Item struct {
+type Item struct {
+	code     string
+	modifier DropModifier
 	slotType d2enum.EquippedSlot
 	itemType d2enum.InventoryItemType
 
@@ -42,40 +45,54 @@ type Diablo2Item struct {
 
 	indestructable bool
 	ethereal       bool
+	itemLevel      int
 
 	numSockets int
-	sockets    []*d2item.Item // there are checks for handling the craziness this might entail
+	sockets    []*d2item.Item // there will be checks for handling the craziness this might entail
+
+	worldSprite     *d2ui.Sprite
+	inventorySprite *d2ui.Sprite
 }
 
 // Context returns the statContext that is being used to evaluate stats. for example,
 // stats which are based on character level will be evaluated with the player
 // as the statContext, as the player stat list will contain stats that describe the
 // character level
-func (i *Diablo2Item) Context() d2item.StatContext {
+func (i *Item) Context() d2item.StatContext {
 	return i.statContext
 }
 
 // SetContext sets the statContext for evaluating item stats
-func (i *Diablo2Item) SetContext(ctx d2item.StatContext) {
+func (i *Item) SetContext(ctx d2item.StatContext) {
 	i.statContext = ctx
 }
 
 // ItemType returns the type of item
-func (i *Diablo2Item) ItemType() d2enum.InventoryItemType {
+func (i *Item) ItemType() d2enum.InventoryItemType {
 	return i.itemType
 }
 
+// ItemLevel returns the level of item
+func (i *Item) ItemLevel() int {
+	return i.itemLevel
+}
+
+// CommonRecord returns the ItemCommonRecord of the item
+func (i *Item) CommonRecord() *d2datadict.ItemCommonRecord {
+	return i.recordItemCommon
+}
+
 // SlotType returns the slot type (where it can be equipped)
-func (i *Diablo2Item) SlotType() d2enum.EquippedSlot {
+func (i *Item) SlotType() d2enum.EquippedSlot {
 	return i.slotType
 }
 
 // StatList returns the evaluated stat list
-func (i *Diablo2Item) StatList() d2stats.StatList {
+func (i *Item) StatList() d2stats.StatList {
 	return i.statList
 }
 
 // Description returns the full description string for the item
-func (i *Diablo2Item) Description() string {
+func (i *Item) Description() string {
 	return ""
 }

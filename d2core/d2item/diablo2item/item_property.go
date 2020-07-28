@@ -67,21 +67,6 @@ const (
 	fnRandClassSkill = 36
 )
 
-// NewProperty creates a property
-func NewProperty(code string, values ...int) *Property {
-	result := &Property{}
-
-	record := d2datadict.Properties[code]
-	if record == nil {
-		return nil
-	}
-
-	result.record = record
-	result.inputParams = values
-
-	return result.init()
-}
-
 // Property is an item property. Properties act as stat initializers, as well as
 // item attribute initializers. A good example of this is for the `Ethereal` property,
 // which DOES have a stat, but the stat is actually non-printable as far as the record
@@ -104,7 +89,6 @@ type Property struct {
 
 func (p *Property) init() *Property {
 	p.stats = make([]d2stats.Stat, 0)
-	p.PropertyType = PropertyComputeStats
 
 	// some property functions need to be able to repeat last function
 	// this is for properties with multiple stats that want to repeat the same
@@ -145,28 +129,37 @@ func (p *Property) eval(propStatIdx, previousFnID int) (stat d2stats.Stat, funcI
 		fallthrough
 	case fnValuesToStat, fnSpeedRelated, fnMaxDurability, fnNumSockets,
 		fnStatMin, fnStatMax, fnSingleSkill, fnArmorPercent:
+		p.PropertyType = PropertyComputeStats
 		stat = p.fnValuesToStat(iscRecord)
 	case fnDamageMin, fnDamageMax, fnDamagePercent:
 		p.PropertyType = PropertyComputeInteger
 		p.computedInt = p.fnComputeInteger()
 	case fnClassSkillTab:
+		p.PropertyType = PropertyComputeStats
 		stat = p.fnClassSkillTab(iscRecord)
 	case fnProcs:
+		p.PropertyType = PropertyComputeStats
 		stat = p.fnProcs(iscRecord)
 	case fnRandomSkill:
+		p.PropertyType = PropertyComputeStats
 		stat = p.fnRandomSkill(iscRecord)
 	case fnStatParam:
+		p.PropertyType = PropertyComputeStats
 		stat = p.fnStatParam(iscRecord)
 	case fnChargeRelated:
+		p.PropertyType = PropertyComputeStats
 		stat = p.fnChargeRelated(iscRecord)
 	case fnIndestructable, fnEthereal:
 		p.PropertyType = PropertyComputeBoolean
 		p.computedBool = p.fnBoolean()
 	case fnClassSkills:
+		p.PropertyType = PropertyComputeStats
 		stat = p.fnClassSkills(pStatRecord, iscRecord)
 	case fnStateApplyToTarget:
+		p.PropertyType = PropertyComputeStats
 		stat = p.fnStateApplyToTarget(iscRecord)
 	case fnRandClassSkill:
+		p.PropertyType = PropertyComputeStats
 		stat = p.fnRandClassSkill(iscRecord)
 	case fnNone, fnUnused, fnTimeRelated:
 	default:

@@ -581,7 +581,7 @@ func TestNewProperty(t *testing.T) { //nolint:funlen it's mostly test-case defin
 				stripped := string(re.ReplaceAll([]byte(statStr), []byte(numericToken)))
 
 				if expectStr == "" {
-					statFmt := "[Non-printing stat] Name: %v, inputValues: %+v"
+					statFmt := "[Non-printing stat] Code: %v, inputValues: %+v"
 
 					vals := stat.Values()
 					valInts := make([]int, len(vals))

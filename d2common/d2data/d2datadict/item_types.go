@@ -246,7 +246,7 @@ func LoadItemTypes(file []byte) {
 			StorePage:     d.String("StorePage"),
 		}
 
-		ItemTypes[itemType.Name] = itemType
+		ItemTypes[itemType.Code] = itemType
 	}
 
 	if d.Err != nil {
@@ -254,4 +254,45 @@ func LoadItemTypes(file []byte) {
 	}
 
 	log.Printf("Loaded %d ItemType records", len(ItemTypes))
+}
+
+// ItemEquivalencies describes item equivalencies for ItemTypes
+var ItemEquivalencies map[string][]*ItemCommonRecord
+
+func LoadItemEquivalencies() {
+	ItemEquivalencies = make(map[string][]*ItemCommonRecord)
+
+	for typeCode := range ItemTypes {
+		itemType := ItemTypes[typeCode]
+		equivCode1, equivCode2 := itemType.Equiv1, itemType.Equiv2
+
+		if ItemEquivalencies[typeCode] == nil {
+			ItemEquivalencies[typeCode] = make([]*ItemCommonRecord, 0)
+		}
+
+		if equivCode1 != "" && ItemEquivalencies[equivCode1] == nil {
+			ItemEquivalencies[equivCode1] = make([]*ItemCommonRecord, 0)
+		}
+
+		if equivCode1 != "" && ItemEquivalencies[equivCode2] == nil {
+			ItemEquivalencies[equivCode2] = make([]*ItemCommonRecord, 0)
+		}
+
+		for commonCode := range CommonItems {
+			commonRecord := CommonItems[commonCode]
+
+			t := commonRecord.Type
+			if t == typeCode || t == equivCode1 || t == equivCode2 {
+				ItemEquivalencies[typeCode] = append(ItemEquivalencies[typeCode], commonRecord)
+
+				if equivCode1 != "" {
+					ItemEquivalencies[equivCode1] = append(ItemEquivalencies[equivCode1], commonRecord)
+				}
+
+				if equivCode2 != "" {
+					ItemEquivalencies[equivCode2] = append(ItemEquivalencies[equivCode2], commonRecord)
+				}
+			}
+		}
+	}
 }
