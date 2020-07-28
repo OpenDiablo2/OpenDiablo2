@@ -230,6 +230,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.Experience, d2datadict.LoadExperienceBreakpoints},
 		{d2resource.Gems, d2datadict.LoadGems},
 		{d2resource.QualityItems, d2datadict.LoadQualityItems},
+		{d2resource.Runes, d2datadict.LoadRunes},
 		{d2resource.DifficultyLevels, d2datadict.LoadDifficultyLevels},
 		{d2resource.AutoMap, d2datadict.LoadAutoMaps},
 		{d2resource.LevelDetails, d2datadict.LoadLevelDetails},
