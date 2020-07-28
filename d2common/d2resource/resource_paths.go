@@ -197,6 +197,8 @@ const (
 	TreasureClass    = "/data/global/excel/TreasureClassEx.txt"
 	States			 = "/data/global/excel/states.txt"
 
+	MonProp = "/data/global/excel/Monprop.txt"
+
 	// --- Animations ---
 
 	ObjectData          = "/data/global/objects"
