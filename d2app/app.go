@@ -222,6 +222,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.MonStats, d2datadict.LoadMonStats},
 		{d2resource.MonStats2, d2datadict.LoadMonStats2},
 		{d2resource.MonPreset, d2datadict.LoadMonPresets},
+		{d2resource.MonProp, d2datadict.LoadMonProps},
 		{d2resource.MagicPrefix, d2datadict.LoadMagicPrefix},
 		{d2resource.MagicSuffix, d2datadict.LoadMagicSuffix},
 		{d2resource.ItemStatCost, d2datadict.LoadItemStatCosts},
