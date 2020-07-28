@@ -301,6 +301,7 @@ const (
 	MonStats     = "/data/global/excel/monstats.txt"
 	MonStats2    = "/data/global/excel/monstats2.txt"
 	MonPreset    = "/data/global/excel/monpreset.txt"
+	MonType      = "/data/global/excel/Montype.txt"
 	SuperUniques = "/data/global/excel/SuperUniques.txt"
 
 	// --- Skill Data ---
