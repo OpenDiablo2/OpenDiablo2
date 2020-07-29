@@ -195,7 +195,7 @@ const (
 	Skills           = "/data/global/excel/skills.txt"
 	SkillDesc        = "/data/global/excel/skilldesc.txt"
 	TreasureClass    = "/data/global/excel/TreasureClassEx.txt"
-	States			 = "/data/global/excel/states.txt"
+	States           = "/data/global/excel/states.txt"
 
 	MonProp = "/data/global/excel/Monprop.txt"
 
@@ -226,6 +226,7 @@ const (
 	RareSuffix   = "/data/global/excel/RareSuffix.txt"
 	UniquePrefix = "/data/global/excel/UniquePrefix.txt"
 	UniqueSuffix = "/data/global/excel/UniqueSuffix.txt"
+	UniqueTitle  = "/data/global/excel/UniqueTitle.txt"
 
 	// --- Character Data ---
 
