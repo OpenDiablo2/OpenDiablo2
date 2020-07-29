@@ -253,6 +253,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.TreasureClass, d2datadict.LoadTreasureClassRecords},
 		{d2resource.States, d2datadict.LoadStates},
 		{d2resource.SoundEnvirons, d2datadict.LoadSoundEnvirons},
+		{d2resource.Shrines, d2datadict.LoadShrines},
 	}
 
 	d2datadict.InitObjectRecords()
