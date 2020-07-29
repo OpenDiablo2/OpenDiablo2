@@ -255,6 +255,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.States, d2datadict.LoadStates},
 		{d2resource.SoundEnvirons, d2datadict.LoadSoundEnvirons},
 		{d2resource.Shrines, d2datadict.LoadShrines},
+		{d2resource.ElemType, d2datadict.LoadElemTypes},
 	}
 
 	d2datadict.InitObjectRecords()
