@@ -11,7 +11,7 @@ import (
 )
 
 func loadFont(fontStyle FontStyle) (d2interface.Font, error) {
-	config, ok := fontStyleConfigs[fontStyle]
+	config, ok := getFontStyleConfigs()[fontStyle]
 	if !ok {
 		return nil, errors.New("invalid font style")
 	}
