@@ -8,9 +8,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
-//Get constant map of key enum to ebiten key enum
-func getKeyToEbitenMap() map[d2enum.Key]ebiten.Key {
-	return map[d2enum.Key]ebiten.Key{
+var (
+	//nolint:gochecknoglobals This is a constant in all but by name, no constant map in go
+	keyToEbiten = map[d2enum.Key]ebiten.Key{
 		d2enum.Key0:            ebiten.Key0,
 		d2enum.Key1:            ebiten.Key1,
 		d2enum.Key2:            ebiten.Key2,
@@ -112,15 +112,13 @@ func getKeyToEbitenMap() map[d2enum.Key]ebiten.Key {
 		d2enum.KeyControl:      ebiten.KeyControl,
 		d2enum.KeyShift:        ebiten.KeyShift,
 	}
-}
-
-func getMouseButtonToEbitenMap() map[d2enum.MouseButton]ebiten.MouseButton {
-	return map[d2enum.MouseButton]ebiten.MouseButton{
+	//nolint:gochecknoglobals This is a constant in all but by name, no constant map in go
+	mouseButtonToEbiten = map[d2enum.MouseButton]ebiten.MouseButton{
 		d2enum.MouseButtonLeft:   ebiten.MouseButtonLeft,
 		d2enum.MouseButtonMiddle: ebiten.MouseButtonMiddle,
 		d2enum.MouseButtonRight:  ebiten.MouseButtonRight,
 	}
-}
+)
 
 // InputService provides an abstraction on ebiten to support handling input events
 type InputService struct{}
@@ -137,35 +135,35 @@ func (is InputService) InputChars() []rune {
 
 // IsKeyPressed checks if the provided key is down.
 func (is InputService) IsKeyPressed(key d2enum.Key) bool {
-	return ebiten.IsKeyPressed(getKeyToEbitenMap()[key])
+	return ebiten.IsKeyPressed(keyToEbiten[key])
 }
 
 // IsKeyJustPressed checks if the provided key is just transitioned from up to down.
 func (is InputService) IsKeyJustPressed(key d2enum.Key) bool {
-	return inpututil.IsKeyJustPressed(getKeyToEbitenMap()[key])
+	return inpututil.IsKeyJustPressed(keyToEbiten[key])
 }
 
 // IsKeyJustReleased checks if the provided key is just transitioned from down to up.
 func (is InputService) IsKeyJustReleased(key d2enum.Key) bool {
-	return inpututil.IsKeyJustReleased(getKeyToEbitenMap()[key])
+	return inpututil.IsKeyJustReleased(keyToEbiten[key])
 }
 
 // IsMouseButtonPressed checks if the provided mouse button is down.
 func (is InputService) IsMouseButtonPressed(button d2enum.MouseButton) bool {
-	return ebiten.IsMouseButtonPressed(getMouseButtonToEbitenMap()[button])
+	return ebiten.IsMouseButtonPressed(mouseButtonToEbiten[button])
 }
 
 // IsMouseButtonJustPressed checks if the provided mouse button is just transitioned from up to down.
 func (is InputService) IsMouseButtonJustPressed(button d2enum.MouseButton) bool {
-	return inpututil.IsMouseButtonJustPressed(getMouseButtonToEbitenMap()[button])
+	return inpututil.IsMouseButtonJustPressed(mouseButtonToEbiten[button])
 }
 
 // IsMouseButtonJustReleased checks if the provided mouse button is just transitioned from down to up.
 func (is InputService) IsMouseButtonJustReleased(button d2enum.MouseButton) bool {
-	return inpututil.IsMouseButtonJustReleased(getMouseButtonToEbitenMap()[button])
+	return inpututil.IsMouseButtonJustReleased(mouseButtonToEbiten[button])
 }
 
 // KeyPressDuration returns how long the key is pressed in frames.
 func (is InputService) KeyPressDuration(key d2enum.Key) int {
-	return inpututil.KeyPressDuration(getKeyToEbitenMap()[key])
+	return inpututil.KeyPressDuration(keyToEbiten[key])
 }
