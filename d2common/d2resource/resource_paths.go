@@ -212,6 +212,7 @@ const (
 	Inventory   = "/data/global/excel/inventory.txt"
 	Weapons     = "/data/global/excel/weapons.txt"
 	Armor       = "/data/global/excel/armor.txt"
+	Books       = "/data/global/excel/books.txt"
 	Misc        = "/data/global/excel/misc.txt"
 	UniqueItems = "/data/global/excel/UniqueItems.txt"
 	Gems        = "/data/global/excel/gems.txt"
