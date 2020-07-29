@@ -36,11 +36,11 @@ const (
 )
 
 const (
-	GoldMultDropCodeStr   string = "gld,mul="
-	GoldDropCodeStr    		 = "gld"
-	WeaponDropCodeStr        = "weap"
-	ArmorDropCodeStr         = "armo"
-	MiscDropCodeStr          = "misc"
+	GoldMultDropCodeStr string = "gld,mul="
+	GoldDropCodeStr            = "gld"
+	WeaponDropCodeStr          = "weap"
+	ArmorDropCodeStr           = "armo"
+	MiscDropCodeStr            = "misc"
 )
 
 // TreasureClassRecord represents a rule for item drops in diablo 2

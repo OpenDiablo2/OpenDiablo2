@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	DropModifierBaseProbability = 1024
+	DropModifierBaseProbability = 1024 // base modifier probability total
 )
 
 type DropModifier int
@@ -33,6 +33,7 @@ type ItemGenerator struct {
 	Seed int64
 }
 
+// SetSeed sets the item generator seed
 func (ig *ItemGenerator) SetSeed(seed int64) {
 	rand.Seed(seed)
 	ig.Seed = seed
@@ -101,6 +102,7 @@ func rollTreasurePick(tcr *d2datadict.TreasureClassRecord) *d2datadict.Treasure 
 	return nil
 }
 
+// ItemsFromTreasureClass rolls for and creates items using a treasure class record
 func (ig *ItemGenerator) ItemsFromTreasureClass(tcr *d2datadict.TreasureClassRecord) []*Item {
 	result := make([]*Item, 0)
 
@@ -109,15 +111,15 @@ func (ig *ItemGenerator) ItemsFromTreasureClass(tcr *d2datadict.TreasureClassRec
 	// if tcr.NumPicks is negative, each item probability is instead a count for how many
 	// of that treasure to drop
 	if tcr.NumPicks < 0 {
-		picksLeft := tcr.NumPicks * -1
+		picksLeft := tcr.NumPicks
 
 		// for each of the treasures, we pick it N times, where N is the count for the item
 		// we do this until we run out of picks
 		for idx := range tcr.Treasures {
 			howMany := tcr.Treasures[idx].Probability
-			for count := 0; count < howMany && picksLeft > 0; count++ {
+			for count := 0; count < howMany && picksLeft < 0; count++ {
 				treasurePicks = append(treasurePicks, tcr.Treasures[idx])
-				picksLeft--
+				picksLeft++
 			}
 		}
 	} else {
@@ -146,15 +148,17 @@ func (ig *ItemGenerator) ItemsFromTreasureClass(tcr *d2datadict.TreasureClassRec
 		} else {
 			// the code is not for a treasure class, but for an item!
 			item := ig.ItemFromTreasure(picked)
-			item.modifier = rollDropModifier(tcr)
-			result = append(result, item)
+			if item != nil {
+				item.modifier = rollDropModifier(tcr)
+				result = append(result, item)
+			}
 		}
 	}
 
 	return result
 }
 
-// ItemFromTreasure rolls for a random item using the TreasureClass record
+// ItemFromTreasure rolls for a random item using the Treasure struct (from d2datadict)
 func (ig *ItemGenerator) ItemFromTreasure(treasure *d2datadict.Treasure) *Item {
 	result := &Item{code: treasure.Code}
 
@@ -177,7 +181,9 @@ func (ig *ItemGenerator) ItemFromTreasure(treasure *d2datadict.Treasure) *Item {
 		if numItems < 1 {
 			return nil
 		}
+
 		result.recordItemCommon = dynamicList[rand.Intn(numItems)] // random pick
+
 		return result
 	}
 
@@ -195,6 +201,7 @@ func resolveDynamicTreasureCode(code string) []*d2datadict.ItemCommonRecord {
 		record := equivList[idx]
 		minLevel := numericComponent
 		maxLevel := minLevel + DynamicItemLevelRange
+
 		if record.Level >= minLevel && record.Level < maxLevel {
 			result = append(result, record)
 		}
