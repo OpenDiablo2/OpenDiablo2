@@ -214,6 +214,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.ObjectDetails, d2datadict.LoadObjects},
 		{d2resource.Weapons, d2datadict.LoadWeapons},
 		{d2resource.Armor, d2datadict.LoadArmors},
+		{d2resource.Books, d2datadict.LoadBooks},
 		{d2resource.Misc, d2datadict.LoadMiscItems},
 		{d2resource.UniqueItems, d2datadict.LoadUniqueItems},
 		{d2resource.Missiles, d2datadict.LoadMissiles},
