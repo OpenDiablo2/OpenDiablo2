@@ -116,6 +116,10 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		if err := g.handleCastSkillPacket(packet); err != nil {
 			return err
 		}
+	case d2netpackettype.SpawnItem:
+		if err := g.handleSpawnItemPacket(packet); err != nil {
+			return err
+		}
 	case d2netpackettype.Ping:
 		if err := g.handlePingPacket(); err != nil {
 			log.Printf("GameClient: error responding to server ping: %s", err)
@@ -171,6 +175,17 @@ func (g *GameClient) handleAddPlayerPacket(packet d2netpacket.NetPacket) error {
 	g.MapEngine.AddEntity(newPlayer)
 
 	return nil
+}
+
+func (g *GameClient) handleSpawnItemPacket(packet d2netpacket.NetPacket) error {
+	item := packet.PacketData.(d2netpacket.SpawnItemPacket)
+	itemEntity, err := d2mapentity.CreateItem(item.X, item.Y, item.Codes...)
+
+	if err == nil {
+		g.MapEngine.AddEntity(itemEntity)
+	}
+
+	return err
 }
 
 func (g *GameClient) handleMovePlayerPacket(packet d2netpacket.NetPacket) error {

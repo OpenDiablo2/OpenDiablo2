@@ -151,6 +151,10 @@ func runNetworkServer() {
 			if err := handleMovePlayer(packetType, stringData); err != nil {
 				log.Printf("GameServer error: %v", err)
 			}
+		case d2netpackettype.SpawnItem:
+			if err := handleSpawnItem(packetType, stringData); err != nil {
+				log.Printf("GameServer error: %v", err)
+			}
 		case d2netpackettype.Pong:
 			if err := handlePingPong(stringData); err != nil {
 				log.Printf("GameServer error: %v", err)
@@ -184,6 +188,30 @@ func handlePlayerConnectionRequest(addr *net.UDPAddr, stringData string) error {
 
 func handleMovePlayer(packetType d2netpackettype.NetPacketType, stringData string) error {
 	packetData := d2netpacket.MovePlayerPacket{}
+	err := json.Unmarshal([]byte(stringData), &packetData)
+
+	if err != nil {
+		log.Printf("GameServer: error unmarshalling %T: %s", packetData, err)
+		return err
+	}
+
+	netPacket := d2netpacket.NetPacket{
+		PacketType: packetType,
+		PacketData: packetData,
+	}
+
+	for _, player := range singletonServer.clientConnections {
+		err = player.SendPacketToClient(netPacket)
+		if err != nil {
+			log.Printf("GameServer: error sending %T to client %s: %s", packetData, player.GetUniqueID(), err)
+		}
+	}
+
+	return nil
+}
+
+func handleSpawnItem(packetType d2netpackettype.NetPacketType, stringData string) error {
+	packetData := d2netpacket.SpawnItemPacket{}
 	err := json.Unmarshal([]byte(stringData), &packetData)
 
 	if err != nil {
@@ -377,7 +405,15 @@ func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) err
 				log.Printf("GameServer: error sending %T to client %s: %s", packet, player.GetUniqueID(), err)
 			}
 		}
+	case d2netpackettype.SpawnItem:
+		for _, player := range singletonServer.clientConnections {
+			err := player.SendPacketToClient(packet)
+			if err != nil {
+				log.Printf("GameServer: error sending %T to client %s: %s", packet, player.GetUniqueID(), err)
+			}
+		}
 	}
+
 
 	return nil
 }

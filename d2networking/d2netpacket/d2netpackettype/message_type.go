@@ -24,6 +24,7 @@ const (
 	Pong                                                 // Responds to a Ping packet
 	ServerClosed                                         // Sent by the local host when it has closed the server
 	CastSkill                                            // Sent by client or server, indicates entity casting skill
+	SpawnItem                                            // Sent by server
 )
 
 func (n NetPacketType) String() string {
@@ -38,6 +39,7 @@ func (n NetPacketType) String() string {
 		Pong:                            "Pong",
 		ServerClosed:                    "ServerClosed",
 		CastSkill:                       "CastSkill",
+		SpawnItem:                       "SpawnItem",
 	}
 
 	return strings[n]
