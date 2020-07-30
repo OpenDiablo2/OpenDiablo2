@@ -426,7 +426,7 @@ func (a *App) render(target d2interface.Surface) error {
 	return nil
 }
 
-func (a *App) advance(elapsed, current float64) error {
+func (a *App) advance(elapsed, elapsedUnscaled, current float64) error {
 	elapsedLastScreenAdvance := (current - a.lastScreenAdvance) * a.timeScale
 
 	a.lastScreenAdvance = current
@@ -445,7 +445,7 @@ func (a *App) advance(elapsed, current float64) error {
 		return err
 	}
 
-	if err := a.terminal.Advance(elapsed); err != nil {
+	if err := a.terminal.Advance(elapsedUnscaled); err != nil {
 		return err
 	}
 
@@ -454,10 +454,11 @@ func (a *App) advance(elapsed, current float64) error {
 
 func (a *App) update(target d2interface.Surface) error {
 	currentTime := d2common.Now()
-	elapsedTime := (currentTime - a.lastTime) * a.timeScale
+	elapsedTimeUnscaled := (currentTime - a.lastTime)
+	elapsedTime := elapsedTimeUnscaled * a.timeScale
 	a.lastTime = currentTime
 
-	if err := a.advance(elapsedTime, currentTime); err != nil {
+	if err := a.advance(elapsedTime, elapsedTimeUnscaled, currentTime); err != nil {
 		return err
 	}
 
