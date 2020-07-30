@@ -107,6 +107,8 @@ func (v *Game) OnUnload() error {
 		return err
 	}
 
+	v.soundEngine.Reset()
+
 	return nil
 }
 
