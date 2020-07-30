@@ -90,7 +90,7 @@ func LoadSounds(file []byte) {
 		}
 
 		soundEntry := createSoundEntry(line)
-		soundEntry.FileName = "/data/global/sfx/" + strings.ReplaceAll(soundEntry.FileName, `\`, "/")
+		soundEntry.FileName = strings.ReplaceAll(soundEntry.FileName, `\`, "/")
 		Sounds[soundEntry.Handle] = soundEntry
 
 		//nolint:gocritic // Debug util code
@@ -109,4 +109,15 @@ func LoadSounds(file []byte) {
 	} //nolint:wsl // Debug util code
 
 	log.Printf("Loaded %d sound definitions", len(Sounds))
+}
+
+// SelectSoundByIndex selects a sound by its ID
+func SelectSoundByIndex(index int) *SoundEntry {
+	for _, el := range Sounds {
+		if el.Index == index {
+			return &el
+		}
+	}
+
+	return nil
 }

@@ -16,31 +16,42 @@ type SoundEffect struct {
 }
 
 // CreateSoundEffect creates a new instance of ebiten's sound effect implementation.
-func CreateSoundEffect(sfx string, context *audio.Context, volume float64) *SoundEffect {
+func CreateSoundEffect(sfx string, context *audio.Context, volume float64, loop bool) *SoundEffect {
 	result := &SoundEffect{}
 
-	var soundFile string
+	soundFile := "/data/global/sfx/"
 
 	if _, exists := d2datadict.Sounds[sfx]; exists {
 		soundEntry := d2datadict.Sounds[sfx]
-		soundFile = soundEntry.FileName
+		soundFile += soundEntry.FileName
 	} else {
-		soundFile = sfx
+		soundFile += sfx
 	}
 
-	audioData, err := d2asset.LoadFile(soundFile)
+	audioData, err := d2asset.LoadFileStream(soundFile)
+
+	if err != nil {
+		audioData, err = d2asset.LoadFileStream("/data/global/music/" + sfx)
+	}
 
 	if err != nil {
 		panic(err)
 	}
 
-	d, err := wav.Decode(context, audio.BytesReadSeekCloser(audioData))
+	d, err := wav.Decode(context, audioData)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	player, err := audio.NewPlayer(context, d)
+	var player *audio.Player
+
+	if loop {
+		s := audio.NewInfiniteLoop(d, d.Length())
+		player, err = audio.NewPlayer(context, s)
+	} else {
+		player, err = audio.NewPlayer(context, d)
+	}
 
 	if err != nil {
 		log.Fatal(err)
@@ -51,6 +62,14 @@ func CreateSoundEffect(sfx string, context *audio.Context, volume float64) *Soun
 	result.player = player
 
 	return result
+}
+
+func (v *SoundEffect) SetVolume(volume float64) {
+	v.player.SetVolume(volume)
+}
+
+func (v *SoundEffect) IsPlaying() bool {
+	return v.player.IsPlaying()
 }
 
 // Play plays the sound effect

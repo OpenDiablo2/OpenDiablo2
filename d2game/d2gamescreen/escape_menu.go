@@ -319,7 +319,7 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 }
 
 func (m *EscapeMenu) onLoad() {
-	m.selectSound, _ = m.audioProvider.LoadSoundEffect(d2resource.SFXCursorSelect)
+	m.selectSound, _ = m.audioProvider.LoadSoundEffect(d2resource.SFXCursorSelect, false)
 }
 
 func (m *EscapeMenu) onEscKey() {

@@ -755,6 +755,6 @@ func loadSprite(animationPath string, position image.Point, playLength int, play
 }
 
 func (v *SelectHeroClass) loadSoundEffect(sfx string) d2interface.SoundEffect {
-	result, _ := v.audioProvider.LoadSoundEffect(sfx)
+	result, _ := v.audioProvider.LoadSoundEffect(sfx, false)
 	return result
 }

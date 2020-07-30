@@ -33,7 +33,7 @@ type UI struct {
 var singleton UI
 
 func Initialize(inputManager d2interface.InputManager, audioProvider d2interface.AudioProvider) {
-	sfx, err := audioProvider.LoadSoundEffect(d2resource.SFXButtonClick)
+	sfx, err := audioProvider.LoadSoundEffect(d2resource.SFXButtonClick, false)
 	if err != nil {
 		log.Fatalf("failed to initialize ui: %v", err)
 	}

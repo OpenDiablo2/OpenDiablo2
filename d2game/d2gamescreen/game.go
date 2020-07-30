@@ -2,14 +2,13 @@ package d2gamescreen
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"image/color"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
@@ -35,6 +34,8 @@ type Game struct {
 	lastRegionType       d2enum.RegionIdType
 	ticksSinceLevelCheck float64
 	escapeMenu           *EscapeMenu
+	soundEngine          *d2audio.SoundEngine
+	soundEnv             SoundEnvironment
 
 	renderer      d2interface.Renderer
 	inputManager  d2interface.InputManager
@@ -74,7 +75,10 @@ func CreateGame(
 		audioProvider:        audioProvider,
 		renderer:             renderer,
 		terminal:             term,
+		soundEngine:          d2audio.NewSoundEngine(audioProvider, term),
 	}
+	result.soundEnv = NewSoundEnvironment(result.soundEngine)
+
 	result.escapeMenu.onLoad()
 
 	if err := inputManager.BindHandler(result.escapeMenu); err != nil {
@@ -130,6 +134,8 @@ func (v *Game) Render(screen d2interface.Surface) error {
 
 // Advance runs the update logic on the Gameplay screen
 func (v *Game) Advance(elapsed float64) error {
+	v.soundEngine.Advance(elapsed)
+
 	if (v.escapeMenu != nil && !v.escapeMenu.isOpen) || len(v.gameClient.Players) != 1 {
 		v.gameClient.MapEngine.Advance(elapsed) // TODO: Hack
 	}
@@ -148,8 +154,7 @@ func (v *Game) Advance(elapsed float64) error {
 			tile := v.gameClient.MapEngine.TileAt(int(tilePosition.X()), int(tilePosition.Y()))
 
 			if tile != nil {
-				musicInfo := d2common.GetMusicDef(tile.RegionType)
-				v.audioProvider.PlayBGM(musicInfo.MusicFile)
+				v.soundEnv.SetEnv(d2datadict.LevelDetails[int(tile.RegionType)].SoundEnvironmentID)
 
 				// skip showing zone change text the first time we enter the world
 				if v.lastRegionType != d2enum.RegionNone && v.lastRegionType != tile.RegionType {
@@ -180,6 +185,8 @@ func (v *Game) Advance(elapsed float64) error {
 		position := d2vector.NewPosition(rx, ry)
 		v.mapRenderer.SetCameraTarget(&position)
 	}
+
+	v.soundEnv.Advance(elapsed)
 
 	return nil
 }
