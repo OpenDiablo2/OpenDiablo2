@@ -13,15 +13,15 @@ const (
 	monsterNotFound = "{Monster not found!}"
 )
 
-func getHeroMap() map[int]d2enum.Hero {
-	return map[int]d2enum.Hero{
-		int(d2enum.HeroAmazon):      d2enum.HeroAmazon,
-		int(d2enum.HeroSorceress):   d2enum.HeroSorceress,
-		int(d2enum.HeroNecromancer): d2enum.HeroNecromancer,
-		int(d2enum.HeroPaladin):     d2enum.HeroPaladin,
-		int(d2enum.HeroBarbarian):   d2enum.HeroBarbarian,
-		int(d2enum.HeroDruid):       d2enum.HeroDruid,
-		int(d2enum.HeroAssassin):    d2enum.HeroAssassin,
+func getHeroMap() []d2enum.Hero {
+	return []d2enum.Hero{
+		d2enum.HeroAmazon,
+		d2enum.HeroSorceress,
+		d2enum.HeroNecromancer,
+		d2enum.HeroPaladin,
+		d2enum.HeroBarbarian,
+		d2enum.HeroDruid,
+		d2enum.HeroAssassin,
 	}
 }
 

@@ -42,8 +42,8 @@ type UniqueItemRecord struct {
 
 // UniqueItemProperty is describes a property of a unique item
 type UniqueItemProperty struct {
-	Property  string
-	Parameter d2common.CalcString // depending on the property, this may be an int (usually), or a string
+	Code      string
+	Parameter string // depending on the property, this may be an int (usually), or a string
 	Min       int
 	Max       int
 }
@@ -105,8 +105,8 @@ func createUniqueItemRecord(r []string) UniqueItemRecord {
 
 func createUniqueItemProperty(r *[]string, inc func() int) UniqueItemProperty {
 	result := UniqueItemProperty{
-		Property:  (*r)[inc()],
-		Parameter: d2common.CalcString((*r)[inc()]),
+		Code:      (*r)[inc()],
+		Parameter: (*r)[inc()],
 		Min:       d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 		Max:       d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
 	}

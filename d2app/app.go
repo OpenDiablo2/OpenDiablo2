@@ -270,6 +270,8 @@ func (a *App) loadDataDict() error {
 		entry.loader(data)
 	}
 
+	d2datadict.LoadItemEquivalencies() // depends on ItemCommon and ItemTypes
+
 	return nil
 }
 
