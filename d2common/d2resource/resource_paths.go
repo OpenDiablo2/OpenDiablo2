@@ -199,6 +199,7 @@ const (
 	SoundEnvirons    = "/data/global/excel/soundenviron.txt"
 	Shrines          = "/data/global/excel/shrines.txt"
 	MonProp          = "/data/global/excel/Monprop.txt"
+	ElemType         = "/data/global/excel/ElemTypes.txt"
 
 	// --- Animations ---
 
