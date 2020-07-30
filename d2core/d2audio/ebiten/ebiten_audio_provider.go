@@ -97,8 +97,12 @@ func (eap *AudioProvider) PlayBGM(song string) {
 }
 
 // LoadSoundEffect loads a sound affect so that it canb e played
-func (eap *AudioProvider) LoadSoundEffect(sfx string) (d2interface.SoundEffect, error) {
-	result := CreateSoundEffect(sfx, eap.audioContext, eap.sfxVolume) // TODO: Split
+func (eap *AudioProvider) LoadSound(sfx string, loop bool, bgm bool) (d2interface.SoundEffect, error) {
+	volume := eap.sfxVolume
+	if bgm {
+		volume = eap.bgmVolume
+	}
+	result := CreateSoundEffect(sfx, eap.audioContext, volume, loop) // TODO: Split
 
 	return result, nil
 }

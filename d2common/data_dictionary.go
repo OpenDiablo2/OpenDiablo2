@@ -85,7 +85,7 @@ func (d *DataDictionary) List(field string) []string {
 func (d *DataDictionary) Bool(field string) bool {
 	n := d.Number(field)
 	if n > 1 {
-		log.Panic("Bool on non-bool field")
+		log.Panic("Bool on non-bool field ", field)
 	}
 
 	return n == 1

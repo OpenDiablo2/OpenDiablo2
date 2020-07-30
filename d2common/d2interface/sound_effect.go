@@ -4,4 +4,6 @@ package d2interface
 type SoundEffect interface {
 	Play()
 	Stop()
+	IsPlaying() bool
+	SetVolume(volume float64)
 }

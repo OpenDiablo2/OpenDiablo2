@@ -36,11 +36,11 @@ type SoundEnvironRecord struct {
 
 // SoundEnvirons contains the SoundEnviron records
 //nolint:gochecknoglobals // Currently global by design, only written once
-var SoundEnvirons map[string]*SoundEnvironRecord
+var SoundEnvirons map[int]*SoundEnvironRecord
 
 // LoadSoundEnvirons loads SoundEnvirons from the supplied file
 func LoadSoundEnvirons(file []byte) {
-	SoundEnvirons = make(map[string]*SoundEnvironRecord)
+	SoundEnvirons = make(map[int]*SoundEnvironRecord)
 
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
@@ -70,7 +70,7 @@ func LoadSoundEnvirons(file []byte) {
 			EAXRoomRoll:     d.Number("EAX Room Roll"),
 			EAXAirAbsorb:    d.Number("EAX Air Absorb"),
 		}
-		SoundEnvirons[record.Handle] = record
+		SoundEnvirons[record.Index] = record
 	}
 
 	if d.Err != nil {
