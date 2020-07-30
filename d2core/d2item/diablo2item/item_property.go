@@ -190,6 +190,10 @@ func (p *Property) fnValuesToStat(iscRecord *d2datadict.ItemStatCostRecord) d2st
 		min, max = p.inputParams[0], p.inputParams[1]
 	}
 
+	if max < min {
+		min, max = max, min
+	}
+
 	statValue = float64(rand.Intn(max-min+1) + min)
 
 	return diablo2stats.NewStat(iscRecord.Name, statValue, propParam)
@@ -210,12 +214,6 @@ func (p *Property) fnComputeInteger() int {
 
 	return statValue
 }
-
-// propertyFn9 Apply the same param and value in min-max range,
-// as used in the previous function block.
-// func (p *Property) propertyFn9(iscRecord *d2datadict.ItemStatCostRecord) d2stats.Stat {
-// 	return nil
-// }
 
 // fnClassSkillTab skilltab skill group ???
 func (p *Property) fnClassSkillTab(iscRecord *d2datadict.ItemStatCostRecord) d2stats.Stat {
@@ -300,12 +298,6 @@ func (p *Property) fnStatParam(iscRecord *d2datadict.ItemStatCostRecord) d2stats
 		return diablo2stats.NewStat(iscRecord.Name, val)
 	}
 }
-
-// fnTimeRelated Related to /time properties.
-// vanilla d2 doesn't use these stats
-// func (p *Property) fnTimeRelated(iscRecord *d2datadict.ItemStatCostRecord) d2stats.Stat {
-// 	return nil
-// }
 
 // fnChargeRelated Related to charged item.
 func (p *Property) fnChargeRelated(iscRecord *d2datadict.ItemStatCostRecord) d2stats.Stat {
