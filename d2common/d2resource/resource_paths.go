@@ -201,6 +201,7 @@ const (
 	MonProp          = "/data/global/excel/Monprop.txt"
 	ElemType         = "/data/global/excel/ElemTypes.txt"
 	PlrMode          = "/data/global/excel/PlrMode.txt"
+	PetType          = "/data/global/excel/pettype.txt"
 
 	// --- Animations ---
 
