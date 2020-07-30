@@ -229,6 +229,10 @@ func (s *diablo2Stat) Clone() d2stats.Stat {
 			dstVal.SetFloat(srcVal.Float())
 		}
 
+		if len(clone.values) < len(s.values) {
+			clone.values = make([]d2stats.StatValue, len(s.values))
+		}
+
 		clone.values[idx] = dstVal
 	}
 
