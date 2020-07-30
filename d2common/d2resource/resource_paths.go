@@ -200,6 +200,7 @@ const (
 	Shrines          = "/data/global/excel/shrines.txt"
 	MonProp          = "/data/global/excel/Monprop.txt"
 	ElemType         = "/data/global/excel/ElemTypes.txt"
+	PlrMode          = "/data/global/excel/PlrMode.txt"
 
 	// --- Animations ---
 
