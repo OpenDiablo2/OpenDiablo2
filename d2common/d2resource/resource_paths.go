@@ -197,7 +197,9 @@ const (
 	TreasureClass    = "/data/global/excel/TreasureClassEx.txt"
 	States           = "/data/global/excel/states.txt"
 	SoundEnvirons    = "/data/global/excel/soundenviron.txt"
+	Shrines          = "/data/global/excel/shrines.txt"
 	MonProp          = "/data/global/excel/Monprop.txt"
+	ElemType         = "/data/global/excel/ElemTypes.txt"
 
 	// --- Animations ---
 
@@ -211,6 +213,7 @@ const (
 	Inventory   = "/data/global/excel/inventory.txt"
 	Weapons     = "/data/global/excel/weapons.txt"
 	Armor       = "/data/global/excel/armor.txt"
+	Books       = "/data/global/excel/books.txt"
 	Misc        = "/data/global/excel/misc.txt"
 	UniqueItems = "/data/global/excel/UniqueItems.txt"
 	Gems        = "/data/global/excel/gems.txt"
@@ -303,6 +306,7 @@ const (
 	MonPreset    = "/data/global/excel/monpreset.txt"
 	MonType      = "/data/global/excel/Montype.txt"
 	SuperUniques = "/data/global/excel/SuperUniques.txt"
+	MonMode      = "/data/global/excel/monmode.txt"
 
 	// --- Skill Data ---
 

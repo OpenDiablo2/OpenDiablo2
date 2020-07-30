@@ -214,6 +214,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.ObjectDetails, d2datadict.LoadObjects},
 		{d2resource.Weapons, d2datadict.LoadWeapons},
 		{d2resource.Armor, d2datadict.LoadArmors},
+		{d2resource.Books, d2datadict.LoadBooks},
 		{d2resource.Misc, d2datadict.LoadMiscItems},
 		{d2resource.UniqueItems, d2datadict.LoadUniqueItems},
 		{d2resource.Missiles, d2datadict.LoadMissiles},
@@ -224,6 +225,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.MonPreset, d2datadict.LoadMonPresets},
 		{d2resource.MonProp, d2datadict.LoadMonProps},
 		{d2resource.MonType, d2datadict.LoadMonTypes},
+		{d2resource.MonMode, d2datadict.LoadMonModes},
 		{d2resource.MagicPrefix, d2datadict.LoadMagicPrefix},
 		{d2resource.MagicSuffix, d2datadict.LoadMagicSuffix},
 		{d2resource.ItemStatCost, d2datadict.LoadItemStatCosts},
@@ -252,6 +254,8 @@ func (a *App) loadDataDict() error {
 		{d2resource.TreasureClass, d2datadict.LoadTreasureClassRecords},
 		{d2resource.States, d2datadict.LoadStates},
 		{d2resource.SoundEnvirons, d2datadict.LoadSoundEnvirons},
+		{d2resource.Shrines, d2datadict.LoadShrines},
+		{d2resource.ElemType, d2datadict.LoadElemTypes},
 	}
 
 	d2datadict.InitObjectRecords()
