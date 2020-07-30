@@ -165,7 +165,7 @@ func (i *Item) PrefixRecords() []*d2datadict.ItemAffixCommonRecord {
 	return affixRecords(i.PrefixCodes, d2datadict.MagicPrefix)
 }
 
-// PrefixRecords returns the ItemAffixCommonRecords of the prefixes of the item
+// SuffixRecords returns the ItemAffixCommonRecords of the prefixes of the item
 func (i *Item) SuffixRecords() []*d2datadict.ItemAffixCommonRecord {
 	return affixRecords(i.SuffixCodes, d2datadict.MagicSuffix)
 }
@@ -345,6 +345,25 @@ func (i *Item) pickMagicSuffixes(max, totalMax int) {
 	}
 }
 
+// SetSeed sets the item generator seed
+func (i *Item) SetSeed(seed int64) {
+	if i.rand == nil {
+		source := rand.NewSource(seed)
+		i.rand = rand.New(source)
+	}
+	i.Seed = seed
+}
+
+func (i *Item) init() *Item {
+	if i.rand == nil {
+		i.SetSeed(0)
+	}
+	
+	i.generateAllProperties()
+	i.updateItemAttributes()
+	return i
+}
+
 func (i *Item) generateAllProperties() {
 	if i.attributes == nil {
 		i.attributes = &itemAttributes{}
@@ -452,12 +471,12 @@ func (i *Item) updateItemAttributes() {
 	}
 
 	def, minDef, maxDef := 0, r.MinAC, r.MaxAC
+	
+	if maxDef < minDef {
+		minDef, maxDef = maxDef, minDef
+	}
 
-	if minDef < 1 && maxDef < 1 {
-		if maxDef < minDef {
-			minDef, maxDef = maxDef, minDef
-		}
-
+	if minDef > 1 && maxDef > 1 {
 		def = i.rand.Intn(maxDef-minDef+1) + minDef
 	}
 

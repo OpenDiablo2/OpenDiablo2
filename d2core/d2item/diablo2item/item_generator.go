@@ -153,8 +153,7 @@ func (ig *ItemGenerator) ItemsFromTreasureClass(tcr *d2datadict.TreasureClassRec
 			itemSlice := ig.ItemsFromTreasureClass(record)
 			for itemIdx := range itemSlice {
 				itemSlice[itemIdx].applyDropModifier(ig.rollDropModifier(tcr))
-				itemSlice[itemIdx].generateAllProperties()
-				itemSlice[itemIdx].updateItemAttributes()
+				itemSlice[itemIdx].init()
 				result = append(result, itemSlice[itemIdx])
 			}
 		} else {
@@ -162,8 +161,7 @@ func (ig *ItemGenerator) ItemsFromTreasureClass(tcr *d2datadict.TreasureClassRec
 			item := ig.ItemFromTreasure(picked)
 			if item != nil {
 				item.applyDropModifier(ig.rollDropModifier(tcr))
-				item.generateAllProperties()
-				item.updateItemAttributes()
+				item.init()
 				result = append(result, item)
 			}
 		}

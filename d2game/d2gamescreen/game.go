@@ -24,6 +24,7 @@ const (
 	moveErrStr         = "failed to send MovePlayer packet to the server, playerId: %s, x: %g, x: %g\n"
 	bindControlsErrStr = "failed to add gameControls as input handler for player: %s\n"
 	castErrStr         = "failed to send CastSkill packet to the server, playerId: %s, missileId: %d, x: %g, x: %g\n"
+	spawnItemErrStr    = "failed to send SpawnItem packet to the server: (%d, %d) %+v"
 )
 
 // Game represents the Gameplay screen
@@ -87,6 +88,24 @@ func CreateGame(
 // OnLoad loads the resources for the Gameplay screen
 func (v *Game) OnLoad(_ d2screen.LoadingState) {
 	v.audioProvider.PlayBGM("")
+
+	v.terminal.BindAction(
+		"spawnitem",
+		"spawns an item at the local player position",
+		func(code1, code2, code3, code4, code5 string) {
+			codes := []string{code1, code2, code3, code4, code5}
+			v.debugSpawnItemAtPlayer(codes...)
+		},
+	)
+
+	v.terminal.BindAction(
+		"spawnitemat",
+		"spawns an item at the x,y coordinates",
+		func(x, y int, code1, code2, code3, code4, code5 string) {
+			codes := []string{code1, code2, code3, code4, code5}
+			v.debugSpawnItemAtLocation(x, y, codes...)
+		},
+	)
 }
 
 // OnUnload releases the resources of Gameplay screen
@@ -98,6 +117,9 @@ func (v *Game) OnUnload() error {
 	if err := v.inputManager.UnbindHandler(v.escapeMenu); err != nil { // TODO: hack
 		return err
 	}
+
+	v.terminal.UnbindAction("spawnItemAt")
+	v.terminal.UnbindAction("spawnItem")
 
 	if err := v.gameClient.Close(); err != nil {
 		return err
@@ -229,5 +251,25 @@ func (v *Game) OnPlayerCast(missileID int, targetX, targetY float64) {
 	err := v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerID, missileID, targetX, targetY))
 	if err != nil {
 		fmt.Printf(castErrStr, v.gameClient.PlayerID, missileID, targetX, targetY)
+	}
+}
+
+func (v *Game) debugSpawnItemAtPlayer(codes ...string) {
+	if v.localPlayer == nil {
+		return
+	}
+
+	pos := v.localPlayer.GetPosition()
+	tile := pos.Tile()
+	x, y := int(tile.X()), int(tile.Y())
+
+	v.debugSpawnItemAtLocation(x, y, codes...)
+}
+
+func (v *Game) debugSpawnItemAtLocation(x, y int, codes ...string) {
+	packet := d2netpacket.CreateSpawnItemPacket(x, y, codes...)
+	err := v.gameClient.SendPacketToServer(packet)
+	if err != nil {
+		fmt.Printf(spawnItemErrStr, x, y, codes)
 	}
 }
