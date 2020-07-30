@@ -257,6 +257,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.Shrines, d2datadict.LoadShrines},
 		{d2resource.ElemType, d2datadict.LoadElemTypes},
 		{d2resource.PlrMode, d2datadict.LoadPlrModes},
+		{d2resource.PetType, d2datadict.LoadPetTypes},
 	}
 
 	d2datadict.InitObjectRecords()
