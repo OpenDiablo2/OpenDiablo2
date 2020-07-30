@@ -17,6 +17,9 @@ const (
 	envStopped = 3
 )
 
+const volMax float64 = 255
+const originalFPS float64 = 25
+
 // A Sound that can be started and stopped
 type Sound struct {
 	effect  d2interface.SoundEffect
@@ -62,10 +65,10 @@ func (s *Sound) Play() {
 		s.effect.SetVolume(0)
 		s.volume = 0
 		s.state = envAttack
-		s.vTarget = float64(s.entry.Volume) / 255
-		s.vRate = (s.vTarget / (float64(s.entry.FadeIn) / 25))
+		s.vTarget = float64(s.entry.Volume) / volMax
+		s.vRate = (s.vTarget / (float64(s.entry.FadeIn) / originalFPS))
 	} else {
-		s.volume = float64(s.entry.Volume) / 255
+		s.volume = float64(s.entry.Volume) / volMax
 		s.effect.SetVolume(s.volume)
 		s.state = envSustain
 	}
@@ -76,7 +79,7 @@ func (s *Sound) Stop() {
 	if s.entry.FadeOut != 0 {
 		s.state = envRelease
 		s.vTarget = 0
-		s.vRate = (s.volume / (float64(s.entry.FadeOut) / 25))
+		s.vRate = (s.volume / (float64(s.entry.FadeOut) / originalFPS))
 	} else {
 		s.state = envStopped
 		s.volume = 0
@@ -168,7 +171,7 @@ func (s *SoundEngine) PlaySoundID(id int) *Sound {
 	entry := d2datadict.SelectSoundByIndex(id)
 
 	if entry.GroupSize > 0 {
-		entry = d2datadict.SelectSoundByIndex(entry.Index + rand.Intn(int(entry.GroupSize)))
+		entry = d2datadict.SelectSoundByIndex(entry.Index + rand.Intn(entry.GroupSize))
 	}
 
 	effect, _ := s.provider.LoadSoundEffect(entry.FileName, entry.Loop)
