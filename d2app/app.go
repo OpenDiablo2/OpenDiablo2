@@ -6,9 +6,6 @@ import (
 	"container/ring"
 	"errors"
 	"fmt"
-	"github.com/pkg/profile"
-	"golang.org/x/image/colornames"
-	"gopkg.in/alecthomas/kingpin.v2"
 	"image"
 	"image/gif"
 	"image/png"
@@ -19,7 +16,10 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
+
+	"github.com/pkg/profile"
+	"golang.org/x/image/colornames"
+	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
@@ -30,7 +30,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2item/diablo2item"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen"
@@ -256,6 +255,7 @@ func (a *App) loadDataDict() error {
 	}
 
 	d2datadict.InitObjectRecords()
+	d2datadict.LoadItemEquivalencies() // depends on ItemCommon and ItemTypes
 
 	for _, entry := range entries {
 		data, err := d2asset.LoadFile(entry.path)
@@ -266,39 +266,7 @@ func (a *App) loadDataDict() error {
 		entry.loader(data)
 	}
 
-	testTreasureClass()
-
 	return nil
-}
-
-func testTreasureClass() {
-	d2datadict.LoadItemEquivalencies()
-
-	generator := &diablo2item.ItemGenerator{}
-	generator.SetSeed(time.Now().UnixNano())
-
-	for _, record := range d2datadict.TreasureClass {
-		fmt.Printf("\nTreasureClass [%s]:", record.Name)
-		items := generator.ItemsFromTreasureClass(record)
-
-		for idx := range items {
-			if commonRecord := items[idx].CommonRecord(); commonRecord != nil {
-				fmt.Printf("\n\tPicked: %s (Level %d)", commonRecord.Name, commonRecord.Level)
-			}
-		}
-	}
-
-	// 100 hell baal quest drops
-	for i := 0; i < 100; i++ {
-		tc := d2datadict.TreasureClass["Baalq (H)"]
-		items := generator.ItemsFromTreasureClass(tc)
-		fmt.Printf("TreasureClass [%s]:\n", tc.Name)
-
-		for idx := range items {
-			rec := items[idx].CommonRecord()
-			fmt.Printf("\tPicked: %s (Level %d)\n", rec.Name, rec.Level)
-		}
-	}
 }
 
 func (a *App) renderDebug(target d2interface.Surface) error {
