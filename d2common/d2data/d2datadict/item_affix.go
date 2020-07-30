@@ -9,9 +9,11 @@ import (
 )
 
 // MagicPrefix stores all of the magic prefix records
-var MagicPrefix []*ItemAffixCommonRecord //nolint:gochecknoglobals // Currently global by design
+var MagicPrefix map[string]*ItemAffixCommonRecord //nolint:gochecknoglobals // Currently global by
+// design
 // MagicSuffix stores all of the magic suffix records
-var MagicSuffix []*ItemAffixCommonRecord //nolint:gochecknoglobals // Currently global by design
+var MagicSuffix map[string]*ItemAffixCommonRecord //nolint:gochecknoglobals // Currently global by
+// design
 
 // LoadMagicPrefix loads MagicPrefix.txt
 func LoadMagicPrefix(file []byte) {
@@ -48,7 +50,11 @@ func getAffixString(t1 d2enum.ItemAffixSuperType, t2 d2enum.ItemAffixSubType) st
 	return name
 }
 
-func loadDictionary(file []byte, superType d2enum.ItemAffixSuperType, subType d2enum.ItemAffixSubType) []*ItemAffixCommonRecord {
+func loadDictionary(
+	file []byte,
+	superType d2enum.ItemAffixSuperType,
+	subType d2enum.ItemAffixSubType,
+) map[string]*ItemAffixCommonRecord {
 	d := d2common.LoadDataDictionary(file)
 	records := createItemAffixRecords(d, superType, subType)
 	name := getAffixString(superType, subType)
@@ -57,8 +63,12 @@ func loadDictionary(file []byte, superType d2enum.ItemAffixSuperType, subType d2
 	return records
 }
 
-func createItemAffixRecords(d *d2common.DataDictionary, superType d2enum.ItemAffixSuperType, subType d2enum.ItemAffixSubType) []*ItemAffixCommonRecord {
-	records := make([]*ItemAffixCommonRecord, 0)
+func createItemAffixRecords(
+	d *d2common.DataDictionary,
+	superType d2enum.ItemAffixSuperType,
+	subType d2enum.ItemAffixSubType,
+) map[string]*ItemAffixCommonRecord {
+	records := make(map[string]*ItemAffixCommonRecord)
 
 	for d.Next() {
 		affix := &ItemAffixCommonRecord{
@@ -82,7 +92,7 @@ func createItemAffixRecords(d *d2common.DataDictionary, superType d2enum.ItemAff
 			PriceScale:     d.Number("multiply"),
 		}
 
-		// modifiers (Property references with parameters to be eval'd)
+		// modifiers (Code references with parameters to be eval'd)
 		for i := 1; i <= 3; i++ {
 			codeKey := fmt.Sprintf("mod%dcode", i)
 			paramKey := fmt.Sprintf("mod%dparam", i)
@@ -125,7 +135,7 @@ func createItemAffixRecords(d *d2common.DataDictionary, superType d2enum.ItemAff
 		group := ItemAffixGroups[affix.GroupID]
 		group.addMember(affix)
 
-		records = append(records, affix)
+		records[affix.Name] = affix
 	}
 	if d.Err != nil {
 		panic(d.Err)
