@@ -259,7 +259,6 @@ func (a *App) loadDataDict() error {
 	}
 
 	d2datadict.InitObjectRecords()
-	d2datadict.LoadItemEquivalencies() // depends on ItemCommon and ItemTypes
 
 	for _, entry := range entries {
 		data, err := d2asset.LoadFile(entry.path)
@@ -269,6 +268,8 @@ func (a *App) loadDataDict() error {
 
 		entry.loader(data)
 	}
+
+	d2datadict.LoadItemEquivalencies() // depends on ItemCommon and ItemTypes
 
 	return nil
 }
