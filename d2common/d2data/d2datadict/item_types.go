@@ -256,25 +256,26 @@ func LoadItemTypes(file []byte) {
 	log.Printf("Loaded %d ItemType records", len(ItemTypes))
 }
 
-// ItemEquivalencies describes item equivalencies for ItemTypes
-var ItemEquivalencies map[string][]*ItemCommonRecord
+// ItemEquivalenciesByTypeCode describes item equivalencies for ItemTypes
+var ItemEquivalenciesByTypeCode map[string][]*ItemCommonRecord
 
 // LoadItemEquivalencies loads a map of ItemType string codes to slices of ItemCommonRecord pointers
 func LoadItemEquivalencies() {
-	ItemEquivalencies = make(map[string][]*ItemCommonRecord)
+	ItemEquivalenciesByTypeCode = make(map[string][]*ItemCommonRecord)
 
-	makeEmptyEquivalencyMap()
+	makeEmptyEquivalencyMaps()
 
 	for icrCode := range CommonItems {
 		commonItem := CommonItems[icrCode]
 		updateEquivalencies(commonItem, ItemTypes[commonItem.Type], nil)
+
 		if commonItem.Type2 != "" { // some items (like gems) have a secondary type
 			updateEquivalencies(commonItem, ItemTypes[commonItem.Type2], nil)
 		}
 	}
 }
 
-func makeEmptyEquivalencyMap() {
+func makeEmptyEquivalencyMaps() {
 	for typeCode := range ItemTypes {
 		code := []string{
 			typeCode,
@@ -287,8 +288,8 @@ func makeEmptyEquivalencyMap() {
 				continue
 			}
 
-			if ItemEquivalencies[str] == nil {
-				ItemEquivalencies[str] = make([]*ItemCommonRecord, 0)
+			if ItemEquivalenciesByTypeCode[str] == nil {
+				ItemEquivalenciesByTypeCode[str] = make([]*ItemCommonRecord, 0)
 			}
 		}
 	}
@@ -305,8 +306,8 @@ func updateEquivalencies(icr *ItemCommonRecord, itemType *ItemTypeRecord, checke
 
 	checked = append(checked, itemType.Code)
 
-	if !equivPresent(icr, ItemEquivalencies[itemType.Code]) {
-		ItemEquivalencies[itemType.Code] = append(ItemEquivalencies[itemType.Code], icr)
+	if !itemEquivPresent(icr, ItemEquivalenciesByTypeCode[itemType.Code]) {
+		ItemEquivalenciesByTypeCode[itemType.Code] = append(ItemEquivalenciesByTypeCode[itemType.Code], icr)
 	}
 
 	if itemType.Equiv1 != "" {
@@ -318,7 +319,7 @@ func updateEquivalencies(icr *ItemCommonRecord, itemType *ItemTypeRecord, checke
 	}
 }
 
-func equivPresent(icr *ItemCommonRecord, list []*ItemCommonRecord) bool {
+func itemEquivPresent(icr *ItemCommonRecord, list []*ItemCommonRecord) bool {
 	for idx := range list {
 		if list[idx] == icr {
 			return true
@@ -328,17 +329,27 @@ func equivPresent(icr *ItemCommonRecord, list []*ItemCommonRecord) bool {
 	return false
 }
 
-func itemTypesAreEquivalent(a, b *ItemTypeRecord) bool {
-	a1, a2, a3 := a.Code, a.Equiv1, a.Equiv2
-	b1, b2, b3 := b.Code, b.Equiv1, b.Equiv2
+var itemCommonTypeLookup map[*ItemCommonRecord][]string
 
-	// if they share Code or Equiv fields that are not empty strings, they are
-	if ((a1 != "") && (a1 == b1 || a1 == b2 || a1 == b3)) ||
-		((a2 != "") && (a2 == b1 || a2 == b2 || a2 == b3)) ||
-		((a3 != "") && (a3 == b1 || a3 == b2 || a3 == b3)) {
-		return true
+func FindEquivalentTypesByItemCommonRecord(icr *ItemCommonRecord) []string {
+	if itemCommonTypeLookup == nil {
+		itemCommonTypeLookup = make(map[*ItemCommonRecord][]string)
 	}
 
-	// guess they aren't equivalent, then
-	return false
+	// the first lookup generates the lookup table entry, next time will just use the table
+	if itemCommonTypeLookup[icr] == nil {
+		itemCommonTypeLookup[icr] = make([]string, 0)
+
+		for code := range ItemEquivalenciesByTypeCode {
+			icrList := ItemEquivalenciesByTypeCode[code]
+			for idx := range icrList {
+				if icr == icrList[idx] {
+					itemCommonTypeLookup[icr] = append(itemCommonTypeLookup[icr], code)
+					break
+				}
+			}
+		}
+	}
+
+	return itemCommonTypeLookup[icr]
 }
