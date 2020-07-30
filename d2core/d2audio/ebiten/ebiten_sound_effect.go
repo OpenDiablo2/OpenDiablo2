@@ -12,7 +12,8 @@ import (
 
 // SoundEffect represents an ebiten implementation of a sound effect
 type SoundEffect struct {
-	player *audio.Player
+	player      *audio.Player
+	volumeScale float64
 }
 
 // CreateSoundEffect creates a new instance of ebiten's sound effect implementation.
@@ -57,6 +58,7 @@ func CreateSoundEffect(sfx string, context *audio.Context, volume float64, loop 
 		log.Fatal(err)
 	}
 
+	result.volumeScale = volume
 	player.SetVolume(volume)
 
 	result.player = player
@@ -65,7 +67,7 @@ func CreateSoundEffect(sfx string, context *audio.Context, volume float64, loop 
 }
 
 func (v *SoundEffect) SetVolume(volume float64) {
-	v.player.SetVolume(volume)
+	v.player.SetVolume(volume * v.volumeScale)
 }
 
 func (v *SoundEffect) IsPlaying() bool {

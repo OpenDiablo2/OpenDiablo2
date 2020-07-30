@@ -4,7 +4,6 @@ package d2interface
 // by the asset manager, and set the game engine's volume levels
 type AudioProvider interface {
 	PlayBGM(song string)
-	SetBGMVolume(volume float64)
-	LoadSoundEffect(sfx string, loop bool) (SoundEffect, error)
+	LoadSound(sfx string, loop bool, bgm bool) (SoundEffect, error)
 	SetVolumes(bgmVolume, sfxVolume float64)
 }

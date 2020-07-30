@@ -90,10 +90,10 @@ func (s *Sound) Stop() {
 
 // SoundEngine provides functions for playing sounds
 type SoundEngine struct {
-	provider d2interface.AudioProvider
-	timer    float64
-	accTime  float64
-	sounds   map[*Sound]struct{}
+	provider  d2interface.AudioProvider
+	timer     float64
+	accTime   float64
+	sounds    map[*Sound]struct{}
 }
 
 // NewSoundEngine creates a new sound engine
@@ -174,7 +174,7 @@ func (s *SoundEngine) PlaySoundID(id int) *Sound {
 		entry = d2datadict.SelectSoundByIndex(entry.Index + rand.Intn(entry.GroupSize))
 	}
 
-	effect, _ := s.provider.LoadSoundEffect(entry.FileName, entry.Loop)
+	effect, _ := s.provider.LoadSound(entry.FileName, entry.Loop, entry.MusicVol)
 
 	snd := Sound{
 		entry:  entry,

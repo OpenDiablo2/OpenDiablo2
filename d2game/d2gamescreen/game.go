@@ -35,7 +35,7 @@ type Game struct {
 	ticksSinceLevelCheck float64
 	escapeMenu           *EscapeMenu
 	soundEngine          *d2audio.SoundEngine
-	soundEnv             SoundEnvironment
+	soundEnv             d2audio.SoundEnvironment
 
 	renderer      d2interface.Renderer
 	inputManager  d2interface.InputManager
@@ -77,7 +77,7 @@ func CreateGame(
 		terminal:             term,
 		soundEngine:          d2audio.NewSoundEngine(audioProvider, term),
 	}
-	result.soundEnv = NewSoundEnvironment(result.soundEngine)
+	result.soundEnv = d2audio.NewSoundEnvironment(result.soundEngine)
 
 	result.escapeMenu.onLoad()
 

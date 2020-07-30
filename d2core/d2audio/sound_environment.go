@@ -1,19 +1,18 @@
-package d2gamescreen
+package d2audio
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
 )
 
 type SoundEnvironment struct {
 	environment *d2datadict.SoundEnvironRecord
-	engine      *d2audio.SoundEngine
-	bgm         *d2audio.Sound
-	ambiance    *d2audio.Sound
+	engine      *SoundEngine
+	bgm         *Sound
+	ambiance    *Sound
 	eventTimer  float64
 }
 
-func NewSoundEnvironment(soundEngine *d2audio.SoundEngine) SoundEnvironment {
+func NewSoundEnvironment(soundEngine *SoundEngine) SoundEnvironment {
 	r := SoundEnvironment{
 		// Start with env NONE
 		environment: d2datadict.SoundEnvirons[0],
