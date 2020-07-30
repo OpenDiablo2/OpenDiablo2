@@ -471,7 +471,7 @@ func (i *Item) updateItemAttributes() {
 	}
 
 	def, minDef, maxDef := 0, r.MinAC, r.MaxAC
-
+	
 	if maxDef < minDef {
 		minDef, maxDef = maxDef, minDef
 	}
