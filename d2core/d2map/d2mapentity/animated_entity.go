@@ -18,17 +18,6 @@ type AnimatedEntity struct {
 	highlight bool
 }
 
-// CreateAnimatedEntity creates an instance of AnimatedEntity
-func CreateAnimatedEntity(x, y int, animation d2interface.Animation) *AnimatedEntity {
-	entity := &AnimatedEntity{
-		mapEntity: newMapEntity(x, y),
-		animation: animation,
-	}
-	entity.mapEntity.directioner = entity.rotate
-
-	return entity
-}
-
 // Render draws this animated entity onto the target
 func (ae *AnimatedEntity) Render(target d2interface.Surface) {
 	renderOffset := ae.Position.RenderOffset()

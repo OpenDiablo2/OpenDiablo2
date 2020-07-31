@@ -7,6 +7,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
@@ -14,8 +15,19 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2item/diablo2item"
 )
 
-// CreatePlayer creates a new player entity and returns a pointer to it.
-func CreatePlayer(id, name string, x, y, direction int, heroType d2enum.Hero,
+// NewAnimatedEntity creates an instance of AnimatedEntity
+func NewAnimatedEntity(x, y int, animation d2interface.Animation) *AnimatedEntity {
+	entity := &AnimatedEntity{
+		mapEntity: newMapEntity(x, y),
+		animation: animation,
+	}
+	entity.mapEntity.directioner = entity.rotate
+
+	return entity
+}
+
+// NewPlayer creates a new player entity and returns a pointer to it.
+func NewPlayer(id, name string, x, y, direction int, heroType d2enum.Hero,
 	stats *d2hero.HeroStatsState, equipment *d2inventory.CharacterEquipment) *Player {
 	layerEquipment := &[d2enum.CompositeTypeMax]string{
 		d2enum.CompositeTypeHead:      equipment.Head.GetArmorClass(),
@@ -67,8 +79,8 @@ func CreatePlayer(id, name string, x, y, direction int, heroType d2enum.Hero,
 	return result
 }
 
-// CreateMissile creates a new Missile and initializes it's animation.
-func CreateMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error) {
+// NewMissile creates a new Missile and initializes it's animation.
+func NewMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error) {
 	animation, err := d2asset.LoadAnimation(
 		fmt.Sprintf("%s/%s.dcc", d2resource.MissileData, record.Animation.CelFileName),
 		d2resource.PaletteUnits,
@@ -84,7 +96,7 @@ func CreateMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error)
 	animation.SetEffect(d2enum.DrawEffectModulate)
 	animation.SetPlayLoop(record.Animation.LoopAnimation)
 	animation.PlayForward()
-	entity := CreateAnimatedEntity(x, y, animation)
+	entity := NewAnimatedEntity(x, y, animation)
 
 	result := &Missile{
 		AnimatedEntity: entity,
@@ -95,8 +107,8 @@ func CreateMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error)
 	return result, nil
 }
 
-// CreateItem creates an item map entity
-func CreateItem(x, y int, codes ...string) (*Item, error) {
+// NewItem creates an item map entity
+func NewItem(x, y int, codes ...string) (*Item, error) {
 	item := diablo2item.NewItem(codes...)
 
 	if item == nil {
@@ -113,7 +125,7 @@ func CreateItem(x, y int, codes ...string) (*Item, error) {
 
 	animation.PlayForward()
 	animation.SetPlayLoop(false)
-	entity := CreateAnimatedEntity(x*5, y*5, animation)
+	entity := NewAnimatedEntity(x*5, y*5, animation)
 
 	result := &Item{
 		AnimatedEntity: entity,
@@ -123,8 +135,8 @@ func CreateItem(x, y int, codes ...string) (*Item, error) {
 	return result, nil
 }
 
-// CreateNPC creates a new NPC and returns a pointer to it.
-func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) (*NPC, error) {
+// NewNPC creates a new NPC and returns a pointer to it.
+func NewNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) (*NPC, error) {
 	result := &NPC{
 		mapEntity:     newMapEntity(x, y),
 		HasPaths:      false,
