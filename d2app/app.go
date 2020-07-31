@@ -229,6 +229,8 @@ func (a *App) loadDataDict() error {
 		{d2resource.MagicPrefix, d2datadict.LoadMagicPrefix},
 		{d2resource.MagicSuffix, d2datadict.LoadMagicSuffix},
 		{d2resource.ItemStatCost, d2datadict.LoadItemStatCosts},
+		{d2resource.ItemRatio, d2datadict.LoadItemRatios},
+		{d2resource.Overlays, d2datadict.LoadOverlays},
 		{d2resource.CharStats, d2datadict.LoadCharStats},
 		{d2resource.Hireling, d2datadict.LoadHireling},
 		{d2resource.Experience, d2datadict.LoadExperienceBreakpoints},
@@ -260,6 +262,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.PetType, d2datadict.LoadPetTypes},
 		{d2resource.NPC, d2datadict.LoadNPCs},
 		{d2resource.MonsterUniqueModifier, d2datadict.LoadMonsterUniqueModifiers},
+		{d2resource.UniqueAppellation, d2datadict.LoadUniqueAppellations},
 	}
 
 	d2datadict.InitObjectRecords()
