@@ -31,6 +31,7 @@ func (ae *AnimatedEntity) Render(target d2interface.Surface) {
 	if ae.highlight {
 		target.PushBrightness(2)
 		defer target.Pop()
+		ae.highlight = false
 	}
 
 	if err := ae.animation.Render(target); err != nil {

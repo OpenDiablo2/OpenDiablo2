@@ -24,3 +24,13 @@ func (i *Item) GetPosition() d2vector.Position {
 func (i *Item) GetVelocity() d2vector.Vector {
 	return i.AnimatedEntity.velocity
 }
+
+// Selectable always returns true for items
+func (i *Item) Selectable() bool {
+	return true
+}
+
+// Highlight sets the highlight flag for a single render tick
+func (i *Item) Highlight() {
+	i.AnimatedEntity.highlight = true
+}

@@ -16,6 +16,8 @@ type mapEntity struct {
 
 	done        func()
 	directioner func(direction int)
+
+	highlight bool
 }
 
 // newMapEntity creates an instance of mapEntity
@@ -197,6 +199,7 @@ func (m *mapEntity) Name() string {
 
 // Highlight is not currently implemented.
 func (m *mapEntity) Highlight() {
+	m.highlight = true
 }
 
 // Selectable returns true if the object can be highlighted/selected.
