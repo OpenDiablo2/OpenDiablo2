@@ -34,3 +34,8 @@ func (i *Item) Selectable() bool {
 func (i *Item) Highlight() {
 	i.AnimatedEntity.highlight = true
 }
+
+// Name returns the item name
+func (i *Item) Name() string {
+	return i.Item.Name()
+}
