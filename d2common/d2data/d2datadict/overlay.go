@@ -13,6 +13,7 @@ type OverlayRecord struct {
 	Overlay string
 	// .dcc file found in Data/Globals/Overlays
 	Filename string
+	Version  bool
 	// Apparently unused, a similar field in the .dcc file is used instead
 	Frames int
 	// Unused
@@ -65,30 +66,32 @@ func LoadOverlays(file []byte) {
 
 	for d.Next() {
 		record := &OverlayRecord{
-			Overlay:      d.String("Overlay"),
-			Filename:     d.String("Filename"),
-			Frames:       d.Number("Frames"),
-			Character:    d.String("Character"),
-			PreDraw:      d.Bool("PreDraw"),
-			OneOfN:       d.Number("1ofN"),
-			Dir:          d.Bool("Dir"),
-			Open:         d.Bool("Open"),
-			Beta:         d.Bool("Beta"),
-			XOffset:      d.Number("Xoffset"),
-			YOffset:      d.Number("Yoffset"),
-			Height1:      d.Number("Height1"),
-			Height2:      d.Number("Height1"),
-			Height3:      d.Number("Height1"),
-			Height4:      d.Number("Height1"),
-			AnimRate:     d.Number("AnimRate"),
-			LoopWaitTime: d.Number("LoopWaitTime"),
-			Trans:        d.Number("Trans"),
-			InitRadius:   d.Number("InitRadius"),
-			Radius:       d.Number("Radius"),
-			Red:          uint8(d.Number("Red")),
-			Green:        uint8(d.Number("Green")),
-			Blue:         uint8(d.Number("Blue")),
-			LocalBlood:   d.Number("LocalBlood"),
+			Overlay:       d.String("Overlay"),
+			Filename:      d.String("Filename"),
+			Version:       d.Bool("Version"),
+			Frames:        d.Number("Frames"),
+			Character:     d.String("Character"),
+			PreDraw:       d.Bool("PreDraw"),
+			OneOfN:        d.Number("1ofN"),
+			Dir:           d.Bool("Dir"),
+			Open:          d.Bool("Open"),
+			Beta:          d.Bool("Beta"),
+			XOffset:       d.Number("Xoffset"),
+			YOffset:       d.Number("Yoffset"),
+			Height1:       d.Number("Height1"),
+			Height2:       d.Number("Height1"),
+			Height3:       d.Number("Height1"),
+			Height4:       d.Number("Height1"),
+			AnimRate:      d.Number("AnimRate"),
+			LoopWaitTime:  d.Number("LoopWaitTime"),
+			Trans:         d.Number("Trans"),
+			InitRadius:    d.Number("InitRadius"),
+			Radius:        d.Number("Radius"),
+			Red:           uint8(d.Number("Red")),
+			Green:         uint8(d.Number("Green")),
+			Blue:          uint8(d.Number("Blue")),
+			NumDirections: d.Number("NumDirections"),
+			LocalBlood:    d.Number("LocalBlood"),
 		}
 		Overlays[record.Overlay] = record
 	}
