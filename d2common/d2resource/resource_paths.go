@@ -208,6 +208,7 @@ const (
 	PetType               = "/data/global/excel/pettype.txt"
 	NPC                   = "/data/global/excel/npc.txt"
 	MonsterUniqueModifier = "/data/global/excel/monumod.txt"
+	MonsterEquipment      = "/data/global/excel/monequip.txt"
 	UniqueAppellation     = "/data/global/excel/UniqueAppellation.txt"
 	MonsterLevel          = "/data/global/excel/monlvl.txt"
 	MonsterSound          = "/data/global/excel/monsounds.txt"
