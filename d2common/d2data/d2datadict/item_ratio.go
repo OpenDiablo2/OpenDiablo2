@@ -7,6 +7,13 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// A helper type for item drop calculation
+type dropRatioInfo struct {
+	frequency  int
+	divisor    int
+	divisorMin int
+}
+
 //ItemRatioRecord encapsulates information found in ItemRatio.txt
 //The information has been gathered from [https://d2mods.info/forum/kb/viewarticle?a=387]
 type ItemRatioRecord struct {
@@ -19,22 +26,12 @@ type ItemRatioRecord struct {
 	ClassSpecific bool
 
 	// All following fields are used in item drop calculation
-	Unique           int
-	UniqueDivisor    int
-	UniqueMin        int
-	Rare             int
-	RareDivisor      int
-	RareMin          int
-	Set              int
-	SetDivisor       int
-	SetMin           int
-	Magic            int
-	MagicDivisor     int
-	MagicMin         int
-	HiQuality        int
-	HiQualityDivisor int
-	Normal           int
-	NormalDivisor    int
+	UniqueDropInfo    dropRatioInfo
+	RareDropInfo      dropRatioInfo
+	SetDropInfo       dropRatioInfo
+	MagicDropInfo     dropRatioInfo
+	HiQualityDropInfo dropRatioInfo
+	NormalDropInfo    dropRatioInfo
 }
 
 var ItemRatios map[string]*ItemRatioRecord
@@ -45,26 +42,40 @@ func LoadItemRatios(file []byte) {
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
 		record := &ItemRatioRecord{
-			Function:         d.String("Function"),
-			Version:          d.Bool("Version"),
-			Uber:             d.Bool("Uber"),
-			ClassSpecific:    d.Bool("Class Specific"),
-			Unique:           d.Number("Unique"),
-			UniqueDivisor:    d.Number("UniqueDivisor"),
-			UniqueMin:        d.Number("UniqueMin"),
-			Rare:             d.Number("Rare"),
-			RareDivisor:      d.Number("RareDivisor"),
-			RareMin:          d.Number("RareMin"),
-			Set:              d.Number("Set"),
-			SetDivisor:       d.Number("SetDivisor"),
-			SetMin:           d.Number("SetMin"),
-			Magic:            d.Number("Magic"),
-			MagicMin:         d.Number("MagicMin"),
-			MagicDivisor:     d.Number("MagicDivisor"),
-			HiQuality:        d.Number("HiQuality"),
-			HiQualityDivisor: d.Number("HiQualityDivisor"),
-			Normal:           d.Number("Normal"),
-			NormalDivisor:    d.Number("NormalDivisor"),
+			Function:      d.String("Function"),
+			Version:       d.Bool("Version"),
+			Uber:          d.Bool("Uber"),
+			ClassSpecific: d.Bool("Class Specific"),
+			UniqueDropInfo: dropRatioInfo{
+				frequency:  d.Number("Unique"),
+				divisor:    d.Number("UniqueDivisor"),
+				divisorMin: d.Number("UniqueMin"),
+			},
+			RareDropInfo: dropRatioInfo{
+				frequency:  d.Number("Rare"),
+				divisor:    d.Number("RareDivisor"),
+				divisorMin: d.Number("RareMin"),
+			},
+			SetDropInfo: dropRatioInfo{
+				frequency:  d.Number("Set"),
+				divisor:    d.Number("SetDivisor"),
+				divisorMin: d.Number("SetMin"),
+			},
+			MagicDropInfo: dropRatioInfo{
+				frequency:  d.Number("Magic"),
+				divisor:    d.Number("MagicDivisor"),
+				divisorMin: d.Number("MagicMin"),
+			},
+			HiQualityDropInfo: dropRatioInfo{
+				frequency:  d.Number("HiQuality"),
+				divisor:    d.Number("HiQualityDivisor"),
+				divisorMin: 0,
+			},
+			NormalDropInfo: dropRatioInfo{
+				frequency:  d.Number("Normal"),
+				divisor:    d.Number("NormalDivisor"),
+				divisorMin: 0,
+			},
 		}
 		ItemRatios[record.Function+strconv.FormatBool(record.Version)] = record
 	}
