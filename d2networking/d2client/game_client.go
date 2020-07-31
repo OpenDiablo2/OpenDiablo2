@@ -168,7 +168,7 @@ func (g *GameClient) handleUpdateServerInfoPacket(packet d2netpacket.NetPacket) 
 
 func (g *GameClient) handleAddPlayerPacket(packet d2netpacket.NetPacket) error {
 	player := packet.PacketData.(d2netpacket.AddPlayerPacket)
-	newPlayer := d2mapentity.CreatePlayer(player.ID, player.Name, player.X, player.Y, 0,
+	newPlayer := d2mapentity.NewPlayer(player.ID, player.Name, player.X, player.Y, 0,
 		player.HeroType, player.Stats, &player.Equipment)
 
 	g.Players[newPlayer.ID] = newPlayer
@@ -179,7 +179,7 @@ func (g *GameClient) handleAddPlayerPacket(packet d2netpacket.NetPacket) error {
 
 func (g *GameClient) handleSpawnItemPacket(packet d2netpacket.NetPacket) error {
 	item := packet.PacketData.(d2netpacket.SpawnItemPacket)
-	itemEntity, err := d2mapentity.CreateItem(item.X, item.Y, item.Codes...)
+	itemEntity, err := d2mapentity.NewItem(item.X, item.Y, item.Codes...)
 
 	if err == nil {
 		g.MapEngine.AddEntity(itemEntity)
@@ -230,7 +230,7 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 	player.ClearPath()
 
 	// currently hardcoded to missile skill
-	missile, err := d2mapentity.CreateMissile(
+	missile, err := d2mapentity.NewMissile(
 		int(player.Position.X()),
 		int(player.Position.Y()),
 		d2datadict.Missiles[playerCast.SkillID],

@@ -297,7 +297,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		equipment := d2inventory.HeroObjects[heroType]
 
 		// TODO: Generate or load the object from the actual player data...
-		v.characterImage[i] = d2mapentity.CreatePlayer("", "", 0, 0, 0,
+		v.characterImage[i] = d2mapentity.NewPlayer("", "", 0, 0, 0,
 			v.gameStates[idx].HeroType,
 			v.gameStates[idx].Stats,
 			&equipment,

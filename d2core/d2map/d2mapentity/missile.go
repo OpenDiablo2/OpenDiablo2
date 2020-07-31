@@ -1,15 +1,10 @@
 package d2mapentity
 
 import (
-	"fmt"
 	"math"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 )
 
 // Missile is a simple animated entity representing a projectile,
@@ -29,33 +24,6 @@ func (m *Missile) GetVelocity() d2vector.Vector {
 	return m.AnimatedEntity.velocity
 }
 
-// CreateMissile creates a new Missile and initializes it's animation.
-func CreateMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error) {
-	animation, err := d2asset.LoadAnimation(
-		fmt.Sprintf("%s/%s.dcc", d2resource.MissileData, record.Animation.CelFileName),
-		d2resource.PaletteUnits,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	if record.Animation.HasSubLoop {
-		animation.SetSubLoop(record.Animation.SubStartingFrame, record.Animation.SubEndingFrame)
-	}
-
-	animation.SetEffect(d2enum.DrawEffectModulate)
-	animation.SetPlayLoop(record.Animation.LoopAnimation)
-	animation.PlayForward()
-	entity := CreateAnimatedEntity(x, y, animation)
-
-	result := &Missile{
-		AnimatedEntity: entity,
-		record:         record,
-	}
-	result.Speed = float64(record.Velocity)
-
-	return result, nil
-}
 
 // SetRadians adjusts the entity target based on it's range, rotating it's
 // current destination by the value of angle in radians.

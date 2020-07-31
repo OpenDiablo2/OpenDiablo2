@@ -180,8 +180,10 @@ const (
 	ObjectDetails         = "/data/global/excel/Objects.txt"
 	SoundSettings         = "/data/global/excel/Sounds.txt"
 	ItemStatCost          = "/data/global/excel/ItemStatCost.txt"
+	ItemRatio             = "/data/global/excel/itemratio.txt"
 	ItemTypes             = "/data/global/excel/ItemTypes.txt"
 	QualityItems          = "/data/global/excel/qualityitems.txt"
+	Overlays              = "/data/global/excel/Overlay.txt"
 	Runes                 = "/data/global/excel/runes.txt"
 	Sets                  = "/data/global/excel/Sets.txt"
 	SetItems              = "/data/global/excel/SetItems.txt"
@@ -194,6 +196,8 @@ const (
 	CubeRecipes           = "/data/global/excel/cubemain.txt"
 	Skills                = "/data/global/excel/skills.txt"
 	SkillDesc             = "/data/global/excel/skilldesc.txt"
+	SkillCalc             = "/data/global/excel/skillcalc.txt"
+	MissileCalc           = "/data/global/excel/misscalc.txt"
 	TreasureClass         = "/data/global/excel/TreasureClassEx.txt"
 	States                = "/data/global/excel/states.txt"
 	SoundEnvirons         = "/data/global/excel/soundenviron.txt"
@@ -205,6 +209,9 @@ const (
 	NPC                   = "/data/global/excel/npc.txt"
 	MonsterUniqueModifier = "/data/global/excel/monumod.txt"
 	MonsterEquipment      = "/data/global/excel/monequip.txt"
+	UniqueAppellation     = "/data/global/excel/UniqueAppellation.txt"
+	MonsterLevel          = "/data/global/excel/monlvl.txt"
+	MonsterSound          = "/data/global/excel/monsounds.txt"
 
 	// --- Animations ---
 
