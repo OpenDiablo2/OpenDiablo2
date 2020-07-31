@@ -260,6 +260,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.PetType, d2datadict.LoadPetTypes},
 		{d2resource.NPC, d2datadict.LoadNPCs},
 		{d2resource.MonsterUniqueModifier, d2datadict.LoadMonsterUniqueModifiers},
+		{d2resource.MonsterLevel, d2datadict.LoadMonsterLevels},
 		{d2resource.MonsterSound, d2datadict.LoadMonsterSounds},
 	}
 

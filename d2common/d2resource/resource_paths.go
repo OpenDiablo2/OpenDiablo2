@@ -204,6 +204,7 @@ const (
 	PetType               = "/data/global/excel/pettype.txt"
 	NPC                   = "/data/global/excel/npc.txt"
 	MonsterUniqueModifier = "/data/global/excel/monumod.txt"
+	MonsterLevel          = "/data/global/excel/monlvl.txt"
 	MonsterSound          = "/data/global/excel/monsounds.txt"
 
 	// --- Animations ---
