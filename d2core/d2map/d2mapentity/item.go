@@ -1,12 +1,7 @@
 package d2mapentity
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2item/diablo2item"
 )
 
@@ -14,43 +9,33 @@ const (
 	errInvalidItemCodes = "invalid item codes supplied"
 )
 
+// Item is a map entity for an item
 type Item struct {
 	*AnimatedEntity
 	Item *diablo2item.Item
 }
 
+// GetPosition returns the item position vector
 func (i *Item) GetPosition() d2vector.Position {
 	return i.AnimatedEntity.Position
 }
 
+// GetVelocity returns the item velocity vector
 func (i *Item) GetVelocity() d2vector.Vector {
 	return i.AnimatedEntity.velocity
 }
 
-func CreateItem(x, y int, codes ...string) (*Item, error) {
-	item := diablo2item.NewItem(codes...)
+// Selectable always returns true for items
+func (i *Item) Selectable() bool {
+	return true
+}
 
-	if item == nil {
-		return nil, errors.New(errInvalidItemCodes)
-	}
+// Highlight sets the highlight flag for a single render tick
+func (i *Item) Highlight() {
+	i.AnimatedEntity.highlight = true
+}
 
-	animation, err := d2asset.LoadAnimation(
-		fmt.Sprintf("%s/%s.DC6", d2resource.ItemGraphics, item.CommonRecord().FlippyFile),
-		d2resource.PaletteUnits,
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	animation.PlayForward()
-	animation.SetPlayLoop(false)
-	entity := CreateAnimatedEntity(x*5, y*5, animation)
-
-	result := &Item{
-		AnimatedEntity: entity,
-		Item:           item,
-	}
-
-	return result, nil
+// Name returns the item name
+func (i *Item) Name() string {
+	return i.Item.Name()
 }

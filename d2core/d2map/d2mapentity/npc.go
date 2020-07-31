@@ -3,13 +3,11 @@ package d2mapentity
 import (
 	"math/rand"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
@@ -36,46 +34,6 @@ const (
 	minAnimationRepetitions = 3
 	maxAnimationRepetitions = 5
 )
-
-// CreateNPC creates a new NPC and returns a pointer to it.
-func CreateNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) (*NPC, error) {
-	result := &NPC{
-		mapEntity:     newMapEntity(x, y),
-		HasPaths:      false,
-		monstatRecord: monstat,
-		monstatEx:     d2datadict.MonStats2[monstat.ExtraDataKey],
-	}
-
-	var equipment [16]string
-
-	for compType, opts := range result.monstatEx.EquipmentOptions {
-		equipment[compType] = selectEquip(opts)
-	}
-
-	composite, _ := d2asset.LoadComposite(d2enum.ObjectTypeCharacter, monstat.AnimationDirectoryToken,
-		d2resource.PaletteUnits)
-	result.composite = composite
-
-	if err := composite.SetMode(d2enum.MonsterAnimationModeNeutral,
-		result.monstatEx.BaseWeaponClass); err != nil {
-		return nil, err
-	}
-
-	if err := composite.Equip(&equipment); err != nil {
-		return nil, err
-	}
-
-	result.SetSpeed(float64(monstat.SpeedBase))
-	result.mapEntity.directioner = result.rotate
-
-	result.composite.SetDirection(direction)
-
-	if result.monstatRecord != nil && result.monstatRecord.IsInteractable {
-		result.name = d2common.TranslateString(result.monstatRecord.NameString)
-	}
-
-	return result, nil
-}
 
 func selectEquip(slice []string) string {
 	if len(slice) != 0 {

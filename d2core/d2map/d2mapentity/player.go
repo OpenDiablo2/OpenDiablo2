@@ -3,11 +3,9 @@ package d2mapentity
 import (
 	"fmt"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
@@ -36,59 +34,6 @@ type Player struct {
 // run speed should be walkspeed * 1.5, since in the original game it is 6 yards walk and 9 yards run.
 const baseWalkSpeed = 6.0
 const baseRunSpeed = 9.0
-
-// CreatePlayer creates a new player entity and returns a pointer to it.
-func CreatePlayer(id, name string, x, y, direction int, heroType d2enum.Hero,
-	stats *d2hero.HeroStatsState, equipment *d2inventory.CharacterEquipment) *Player {
-	layerEquipment := &[d2enum.CompositeTypeMax]string{
-		d2enum.CompositeTypeHead:      equipment.Head.GetArmorClass(),
-		d2enum.CompositeTypeTorso:     equipment.Torso.GetArmorClass(),
-		d2enum.CompositeTypeLegs:      equipment.Legs.GetArmorClass(),
-		d2enum.CompositeTypeRightArm:  equipment.RightArm.GetArmorClass(),
-		d2enum.CompositeTypeLeftArm:   equipment.LeftArm.GetArmorClass(),
-		d2enum.CompositeTypeRightHand: equipment.RightHand.GetItemCode(),
-		d2enum.CompositeTypeLeftHand:  equipment.LeftHand.GetItemCode(),
-		d2enum.CompositeTypeShield:    equipment.Shield.GetItemCode(),
-	}
-
-	composite, err := d2asset.LoadComposite(d2enum.ObjectTypePlayer, heroType.GetToken(),
-		d2resource.PaletteUnits)
-	if err != nil {
-		panic(err)
-	}
-
-	stats.NextLevelExp = d2datadict.GetExperienceBreakpoint(heroType, stats.Level)
-	stats.Stamina = stats.MaxStamina
-
-	result := &Player{
-		ID:        id,
-		mapEntity: newMapEntity(x, y),
-		composite: composite,
-		Equipment: equipment,
-		Stats:     stats,
-		name:      name,
-		Class:     heroType,
-		//nameLabel:    d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
-		isRunToggled: true,
-		isInTown:     true,
-		isRunning:    true,
-	}
-	result.SetSpeed(baseRunSpeed)
-	result.mapEntity.directioner = result.rotate
-	err = composite.SetMode(d2enum.PlayerAnimationModeTownNeutral, equipment.RightHand.GetWeaponClass())
-
-	if err != nil {
-		panic(err)
-	}
-
-	composite.SetDirection(direction)
-
-	if err := composite.Equip(layerEquipment); err != nil {
-		fmt.Printf("failed to equip, err: %v\n", err)
-	}
-
-	return result
-}
 
 // SetIsInTown sets a flag indicating that the player is in town.
 func (p *Player) SetIsInTown(isInTown bool) {
