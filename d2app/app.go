@@ -244,6 +244,8 @@ func (a *App) loadDataDict() error {
 		{d2resource.SuperUniques, d2datadict.LoadSuperUniques},
 		{d2resource.Inventory, d2datadict.LoadInventory},
 		{d2resource.Skills, d2datadict.LoadSkills},
+		{d2resource.SkillCalc, d2datadict.LoadSkillCalculations},
+		{d2resource.MissileCalc, d2datadict.LoadMissileCalculations},
 		{d2resource.Properties, d2datadict.LoadProperties},
 		{d2resource.SkillDesc, d2datadict.LoadSkillDescriptions},
 		{d2resource.ItemTypes, d2datadict.LoadItemTypes},
