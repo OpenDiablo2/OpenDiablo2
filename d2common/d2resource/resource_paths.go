@@ -204,6 +204,7 @@ const (
 	PetType               = "/data/global/excel/pettype.txt"
 	NPC                   = "/data/global/excel/npc.txt"
 	MonsterUniqueModifier = "/data/global/excel/monumod.txt"
+	MonsterLevel          = "/data/global/excel/monlvl.txt"
 
 	// --- Animations ---
 
@@ -211,7 +212,7 @@ const (
 	AnimationData       = "/data/global/animdata.d2"
 	PlayerAnimationBase = "/data/global/CHARS"
 	MissileData         = "/data/global/missiles"
-	ItemGraphics     	= "/data/global/items"
+	ItemGraphics        = "/data/global/items"
 
 	// --- Inventory Data ---
 
