@@ -56,6 +56,11 @@ func (s *Sound) update(elapsed float64) {
 	}
 }
 
+// SetPan sets the stereo pan, range -1 to 1
+func (s *Sound) SetPan(pan float64) {
+	s.effect.SetPan(pan)
+}
+
 // Play the sound
 func (s *Sound) Play() {
 	log.Println("starting sound", s.entry.Handle)

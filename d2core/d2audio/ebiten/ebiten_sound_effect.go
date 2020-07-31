@@ -2,6 +2,7 @@ package ebiten
 
 import (
 	"log"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/audio"
 	"github.com/hajimehoshi/ebiten/audio/wav"
@@ -10,10 +11,45 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
+type panStream struct {
+	audio.ReadSeekCloser
+	pan float64 // -1: left; 0: center; 1: right
+}
+
+func NewPanStreamFromReader(src audio.ReadSeekCloser) *panStream {
+	return &panStream{
+		ReadSeekCloser: src,
+		pan:            0,
+	}
+}
+
+func (s *panStream) Read(p []byte) (n int, err error) {
+	n, err = s.ReadSeekCloser.Read(p)
+	if err != nil {
+		return
+	}
+
+	ls := math.Min(s.pan*-1+1, 1)
+	rs := math.Min(s.pan+1, 1)
+
+	for i := 0; i < len(p); i += 4 {
+		lc := int16(float64(int16(p[i])|int16(p[i+1])<<8) * ls)
+		rc := int16(float64(int16(p[i+2])|int16(p[i+3])<<8) * rs)
+
+		p[i] = byte(lc)
+		p[i+1] = byte(lc >> 8)
+		p[i+2] = byte(rc)
+		p[i+3] = byte(rc >> 8)
+	}
+
+	return
+}
+
 // SoundEffect represents an ebiten implementation of a sound effect
 type SoundEffect struct {
 	player      *audio.Player
 	volumeScale float64
+	panStream   *panStream
 }
 
 // CreateSoundEffect creates a new instance of ebiten's sound effect implementation.
@@ -49,9 +85,11 @@ func CreateSoundEffect(sfx string, context *audio.Context, volume float64, loop 
 
 	if loop {
 		s := audio.NewInfiniteLoop(d, d.Length())
-		player, err = audio.NewPlayer(context, s)
+		result.panStream = NewPanStreamFromReader(s)
+		player, err = audio.NewPlayer(context, result.panStream)
 	} else {
-		player, err = audio.NewPlayer(context, d)
+		result.panStream = NewPanStreamFromReader(d)
+		player, err = audio.NewPlayer(context, result.panStream)
 	}
 
 	if err != nil {
@@ -64,6 +102,10 @@ func CreateSoundEffect(sfx string, context *audio.Context, volume float64, loop 
 	result.player = player
 
 	return result
+}
+
+func (v *SoundEffect) SetPan(pan float64) {
+	v.panStream.pan = pan
 }
 
 func (v *SoundEffect) SetVolume(volume float64) {
