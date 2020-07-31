@@ -196,6 +196,8 @@ const (
 	CubeRecipes           = "/data/global/excel/cubemain.txt"
 	Skills                = "/data/global/excel/skills.txt"
 	SkillDesc             = "/data/global/excel/skilldesc.txt"
+	SkillCalc             = "/data/global/excel/skillcalc.txt"
+	MissileCalc           = "/data/global/excel/misscalc.txt"
 	TreasureClass         = "/data/global/excel/TreasureClassEx.txt"
 	States                = "/data/global/excel/states.txt"
 	SoundEnvirons         = "/data/global/excel/soundenviron.txt"
@@ -207,6 +209,8 @@ const (
 	NPC                   = "/data/global/excel/npc.txt"
 	MonsterUniqueModifier = "/data/global/excel/monumod.txt"
 	UniqueAppellation     = "/data/global/excel/UniqueAppellation.txt"
+	MonsterLevel          = "/data/global/excel/monlvl.txt"
+	MonsterSound          = "/data/global/excel/monsounds.txt"
 
 	// --- Animations ---
 

@@ -246,6 +246,8 @@ func (a *App) loadDataDict() error {
 		{d2resource.SuperUniques, d2datadict.LoadSuperUniques},
 		{d2resource.Inventory, d2datadict.LoadInventory},
 		{d2resource.Skills, d2datadict.LoadSkills},
+		{d2resource.SkillCalc, d2datadict.LoadSkillCalculations},
+		{d2resource.MissileCalc, d2datadict.LoadMissileCalculations},
 		{d2resource.Properties, d2datadict.LoadProperties},
 		{d2resource.SkillDesc, d2datadict.LoadSkillDescriptions},
 		{d2resource.ItemTypes, d2datadict.LoadItemTypes},
@@ -263,6 +265,8 @@ func (a *App) loadDataDict() error {
 		{d2resource.NPC, d2datadict.LoadNPCs},
 		{d2resource.MonsterUniqueModifier, d2datadict.LoadMonsterUniqueModifiers},
 		{d2resource.UniqueAppellation, d2datadict.LoadUniqueAppellations},
+		{d2resource.MonsterLevel, d2datadict.LoadMonsterLevels},
+		{d2resource.MonsterSound, d2datadict.LoadMonsterSounds},
 	}
 
 	d2datadict.InitObjectRecords()
