@@ -268,6 +268,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.UniqueAppellation, d2datadict.LoadUniqueAppellations},
 		{d2resource.MonsterLevel, d2datadict.LoadMonsterLevels},
 		{d2resource.MonsterSound, d2datadict.LoadMonsterSounds},
+		{d2resource.MonsterSequence, d2datadict.LoadMonsterSequences},
 	}
 
 	d2datadict.InitObjectRecords()
