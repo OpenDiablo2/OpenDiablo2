@@ -212,6 +212,7 @@ const (
 	UniqueAppellation     = "/data/global/excel/UniqueAppellation.txt"
 	MonsterLevel          = "/data/global/excel/monlvl.txt"
 	MonsterSound          = "/data/global/excel/monsounds.txt"
+	MonsterSequence       = "/data/global/excel/monseq.txt"
 
 	// --- Animations ---
 
