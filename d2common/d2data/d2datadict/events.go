@@ -7,8 +7,7 @@ import (
 )
 
 type EventRecord struct {
-	Event       string
-	Description string
+	Event string
 }
 
 var Events map[string]*EventRecord
@@ -19,8 +18,7 @@ func LoadEvents(file []byte) {
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
 		record := &EventRecord{
-			Event:       d.String("event"),
-			Description: d.String("*desc"),
+			Event: d.String("event"),
 		}
 		Events[record.Event] = record
 	}
