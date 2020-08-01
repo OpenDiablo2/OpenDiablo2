@@ -22,7 +22,7 @@ type AnimatedEntity struct {
 func (ae *AnimatedEntity) Render(target d2interface.Surface) {
 	renderOffset := ae.Position.RenderOffset()
 	ox, oy := renderOffset.X(), renderOffset.Y()
-	tx, ty := int((ox-oy)*16), int((ox-oy)*8)-5
+	tx, ty := int((ox-oy)*16), int((ox+oy)*8)-5
 
 	target.PushTranslation(tx, ty)
 
