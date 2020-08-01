@@ -96,10 +96,10 @@ func (a *DCCAnimation) decodeDirection(directionIndex int) error {
 		maxY = d2common.MaxInt(maxY, dccFrame.Box.Bottom())
 	}
 
-	for _, dccFrame := range direction.Frames {
-		frameWidth := maxX - minX
-		frameHeight := maxY - minY
+	frameWidth := maxX - minX
+	frameHeight := maxY - minY
 
+	for _, dccFrame := range direction.Frames {
 		pixels := ImgIndexToRGBA(dccFrame.PixelData, a.palette)
 
 		sfc, err := a.renderer.NewSurface(frameWidth, frameHeight, d2enum.FilterNearest)
@@ -113,8 +113,8 @@ func (a *DCCAnimation) decodeDirection(directionIndex int) error {
 
 		a.directions[directionIndex].decoded = true
 		a.directions[directionIndex].frames = append(a.directions[directionIndex].frames, &animationFrame{
-			width:   dccFrame.Width,
-			height:  dccFrame.Height,
+			width:   frameWidth,
+			height:  frameHeight,
 			offsetX: minX,
 			offsetY: minY,
 			image:   sfc,
