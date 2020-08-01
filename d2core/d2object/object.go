@@ -142,3 +142,8 @@ func (ob *Object) GetPosition() d2vector.Position {
 func (ob *Object) GetVelocity() d2vector.Vector {
 	return *d2vector.VectorZero()
 }
+
+// GetSize returns the current frame size
+func (ob *Object) GetSize() (width, height int) {
+	return ob.composite.GetSize()
+}

@@ -110,6 +110,26 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 			v.debugSpawnItemAtLocation(x, y, codes...)
 		},
 	)
+
+	v.terminal.BindAction(
+		"spawnmon",
+		"spawn monster at the local player position",
+		func(name string) {
+			x := int(v.localPlayer.Position.X())
+			y := int(v.localPlayer.Position.Y())
+			monstat := d2datadict.MonStats[name]
+			if monstat == nil {
+				v.terminal.OutputErrorf("no monstat entry for \"%s\"", name)
+				return
+			}
+			monster, err := d2mapentity.NewNPC(x, y, monstat, 0)
+			if err != nil {
+				v.terminal.OutputErrorf("error generating monster \"%s\": %v", name, err)
+				return
+			}
+			v.gameClient.MapEngine.AddEntity(monster)
+		},
+	)
 }
 
 // OnUnload releases the resources of Gameplay screen

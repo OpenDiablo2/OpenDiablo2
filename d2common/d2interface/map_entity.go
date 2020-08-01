@@ -8,6 +8,7 @@ type MapEntity interface {
 	Advance(tickTime float64)
 	GetPosition() d2vector.Position
 	GetVelocity() d2vector.Vector
+	GetSize() (width, height int)
 	GetLayer() int
 	GetPositionF() (float64, float64)
 	Name() string
