@@ -39,3 +39,18 @@ func (i *Item) Highlight() {
 func (i *Item) Name() string {
 	return i.Item.Name()
 }
+
+// GetSize returns the current frame size
+func (i *Item) GetSize() (width, height int) {
+	w, h := i.animation.GetCurrentFrameSize()
+
+	if w < minHitboxSize {
+		w = minHitboxSize
+	}
+
+	if h < minHitboxSize {
+		h = minHitboxSize
+	}
+
+	return w, h
+}

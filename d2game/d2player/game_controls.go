@@ -32,11 +32,12 @@ type Panel interface {
 }
 
 const (
-	initialMissileID = 59
-	expBarWidth      = 120.0
-	staminaBarWidth  = 102.0
-	globeHeight      = 80
-	globeWidth       = 80
+	initialMissileID   = 59
+	expBarWidth        = 120.0
+	staminaBarWidth    = 102.0
+	globeHeight        = 80
+	globeWidth         = 80
+	hoverLabelOuterPad = 5
 )
 
 // GameControls represents the game's controls on the screen
@@ -423,14 +424,25 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 			continue
 		}
 
+		entPos := entity.GetPosition()
+		entOffset := entPos.RenderOffset()
 		entScreenXf, entScreenYf := g.mapRenderer.WorldToScreenF(entity.GetPositionF())
 		entScreenX := int(math.Floor(entScreenXf))
 		entScreenY := int(math.Floor(entScreenYf))
+		entityWidth, entityHeight := entity.GetSize()
+		halfWidth, halfHeight := entityWidth/2, entityHeight/2
+		l, r := entScreenX-halfWidth-hoverLabelOuterPad, entScreenX+halfWidth+hoverLabelOuterPad
+		t, b := entScreenY-halfHeight-hoverLabelOuterPad, entScreenY+halfHeight-hoverLabelOuterPad
+		mx, my := g.lastMouseX, g.lastMouseY
+		xWithin := (l <= mx) && (r >= mx)
+		yWithin := (t <= my) && (b >= my)
+		within := xWithin && yWithin
 
-		if ((entScreenX - 20) <= g.lastMouseX) && ((entScreenX + 20) >= g.lastMouseX) &&
-			((entScreenY - 80) <= g.lastMouseY) && (entScreenY >= g.lastMouseY) {
+		if within {
+			xOff, yOff := int(entOffset.X()), int(entOffset.Y())
 			g.nameLabel.SetText(entity.Name())
-			g.nameLabel.SetPosition(entScreenX, entScreenY-100)
+			xLabel, yLabel := entScreenX-xOff, entScreenY-yOff-entityHeight-hoverLabelOuterPad
+			g.nameLabel.SetPosition(xLabel, yLabel)
 			g.nameLabel.Render(target)
 			entity.Highlight()
 

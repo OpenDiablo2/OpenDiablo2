@@ -4,6 +4,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 )
 
+const (
+	minHitboxSize = 30
+)
+
 // mapEntity represents an entity on the map that can be animated
 type mapEntity struct {
 	Position d2vector.Position
@@ -205,4 +209,9 @@ func (m *mapEntity) Highlight() {
 // Selectable returns true if the object can be highlighted/selected.
 func (m *mapEntity) Selectable() bool {
 	return false
+}
+
+// GetSize returns the current frame size
+func (m *mapEntity) GetSize() (width, height int) {
+	return minHitboxSize, minHitboxSize
 }

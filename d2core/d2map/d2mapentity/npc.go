@@ -175,3 +175,8 @@ func (v *NPC) GetPosition() d2vector.Position {
 func (v *NPC) GetVelocity() d2vector.Vector {
 	return v.mapEntity.velocity
 }
+
+// GetSize returns the current frame size
+func (v* NPC) GetSize() (width, height int) {
+	return v.composite.GetSize()
+}

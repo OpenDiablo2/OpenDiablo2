@@ -20,6 +20,12 @@ type Composite struct {
 	direction   int
 	equipment   [d2enum.CompositeTypeMax]string
 	mode        *compositeMode
+	size        *size
+}
+
+type size struct {
+	Width int
+	Height int
 }
 
 // CreateComposite creates a Composite from a given ObjectLookupRecord and palettePath.
@@ -298,6 +304,43 @@ func (c *Composite) loadCompositeLayer(layerKey, layerValue, animationMode, weap
 	}
 
 	return nil, errors.New("animation not found")
+}
+
+func (c *Composite) GetSize() (w, h int) {
+	c.updateSize()
+	return c.size.Width, c.size.Height
+}
+
+func (c *Composite) updateSize() {
+	if c.mode == nil {
+		return
+	}
+
+	direction := d2cof.Dir64ToCof(c.direction, c.mode.cof.NumberOfDirections)
+
+	biggestW, biggestH := 0, 0
+
+	for _, layerIndex := range c.mode.cof.Priority[direction][c.mode.frameIndex] {
+		layer := c.mode.layers[layerIndex]
+		if layer != nil {
+			w, h := layer.GetCurrentFrameSize()
+
+			if biggestW < w {
+				biggestW = w
+			}
+
+			if biggestH < h {
+				biggestH = h
+			}
+		}
+	}
+
+	if c.size == nil {
+		c.size = &size{}
+	}
+
+	c.size.Width = biggestW
+	c.size.Height = biggestH
 }
 
 func baseString(baseType d2enum.ObjectType) string {

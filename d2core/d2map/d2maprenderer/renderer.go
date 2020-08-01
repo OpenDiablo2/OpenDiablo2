@@ -361,18 +361,54 @@ func (mr *MapRenderer) renderEntityDebug(target d2interface.Surface) {
 
 		offX, offY := 40, -40
 
+		entScreenXf, entScreenYf := mr.WorldToScreenF(e.GetPositionF())
+		entScreenX := int(math.Floor(entScreenXf))
+		entScreenY := int(math.Floor(entScreenYf))
+		entityWidth, entityHeight := e.GetSize()
+		halfWidth, halfHeight := entityWidth/2, entityHeight/2
+		l, r := entScreenX-halfWidth, entScreenX+halfWidth
+		t, b := entScreenY-halfHeight, entScreenY+halfHeight
+		mx, my := mr.renderer.GetCursorPos()
+		xWithin := (l <= mx) && (r >= mx)
+		yWithin := (t <= my) && (b >= my)
+		within := xWithin && yWithin
+
+		boxLineColor := color.RGBA{255, 0, 255, 128}
+		boxHoverColor := color.RGBA{255, 255, 0, 128}
+
+		boxColor := boxLineColor
+
+		if within {
+			boxColor = boxHoverColor
+		}
+
+		// box
 		mr.viewport.PushTranslationWorld(x, y)
 		target.PushTranslation(screenX, screenY)
-		target.DrawLine(offX, offY, color.RGBA{255, 255, 255, 128})
-		target.PushTranslation(offX+10, offY-20)
-		target.PushTranslation(-10, -10)
-		target.DrawRect(200, 50, color.RGBA{0, 0, 0, 64})
-		target.Pop()
-		target.DrawTextf("World (%.2f, %.2f)\nVelocity (%.2f, %.2f)", x, y, vx, vy)
-		target.Pop()
-		target.DrawLine(int(vx), int(vy), color.RGBA{64, 255, 0, 255})
-		target.Pop()
+		target.PushTranslation(-halfWidth, -halfHeight)
+		target.DrawLine(0, entityHeight, boxColor)
+		target.DrawLine(entityWidth, 0, boxColor)
+		target.PushTranslation(entityWidth, entityHeight)
+		target.DrawLine(-entityWidth, 0, boxColor)
+		target.DrawLine(0, -entityHeight, boxColor)
+		target.PopN(3)
 		mr.viewport.PopTranslation()
+
+		// hover
+		if within {
+			mr.viewport.PushTranslationWorld(x, y)
+			target.PushTranslation(screenX, screenY)
+			target.DrawLine(offX, offY, color.RGBA{255, 255, 255, 128})
+			target.PushTranslation(offX+10, offY-20)
+			target.PushTranslation(-10, -10)
+			target.DrawRect(200, 50, color.RGBA{0, 0, 0, 64})
+			target.Pop()
+			target.DrawTextf("World (%.2f, %.2f)\nVelocity (%.2f, %.2f)", x, y, vx, vy)
+			target.Pop()
+			target.DrawLine(int(vx), int(vy), color.RGBA{64, 255, 0, 255})
+			target.Pop()
+			mr.viewport.PopTranslation()
+		}
 	}
 }
 

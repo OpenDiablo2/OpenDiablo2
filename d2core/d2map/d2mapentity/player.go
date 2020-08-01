@@ -192,3 +192,12 @@ func (p *Player) GetPosition() d2vector.Position {
 func (p *Player) GetVelocity() d2vector.Vector {
 	return p.mapEntity.velocity
 }
+
+// GetSize returns the current frame size
+func (p *Player) GetSize() (width, height int) {
+	width, height = p.composite.GetSize()
+	// hack: we need to get full size of composite animations, currently only gets legs
+	height = (height * 2) - (height / 2)
+
+	return width, height
+}
