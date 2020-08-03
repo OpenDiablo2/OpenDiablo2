@@ -168,7 +168,7 @@ func (g *Inventory) Render(target d2interface.Surface) error {
 		return err
 	}
 
-	x, y = g.originX, g.originY
+	x, y = g.originX+1, g.originY
 	y += 64
 
 	// Panel
