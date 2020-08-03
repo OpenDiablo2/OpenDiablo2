@@ -213,6 +213,7 @@ const (
 	MonsterLevel          = "/data/global/excel/monlvl.txt"
 	MonsterSound          = "/data/global/excel/monsounds.txt"
 	MonsterSequence       = "/data/global/excel/monseq.txt"
+	PlayerClass           = "/data/global/excel/PlayerClass.txt"
 
 	// --- Animations ---
 
