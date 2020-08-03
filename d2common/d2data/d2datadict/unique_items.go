@@ -135,7 +135,7 @@ func LoadUniqueItems(file []byte) {
 		}
 
 		rec := createUniqueItemRecord(r)
-		UniqueItems[rec.Code] = &rec
+		UniqueItems[rec.Name] = &rec
 	}
 
 	log.Printf("Loaded %d unique items", len(UniqueItems))
