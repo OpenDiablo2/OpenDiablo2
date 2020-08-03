@@ -2,6 +2,9 @@ package diablo2item
 
 import (
 	"fmt"
+	"math/rand"
+	"sort"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -9,7 +12,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats/diablo2stats"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-	"math/rand"
 )
 
 // PropertyPool is used for separating properties by their source
@@ -66,6 +68,9 @@ type Item struct {
 	setItemStatList d2stats.StatList
 
 	attributes *itemAttributes
+
+	GridX int
+	GridY int
 
 	sockets []*d2item.Item // there will be checks for handling the craziness this might entail
 }
@@ -695,6 +700,8 @@ func (i *Item) GetStatStrings() []string {
 		stats = diablo2stats.NewStatList(stats...).ReduceStats().Stats()
 	}
 
+	sort.Slice(stats, func(i, j int) bool { return stats[i].Priority() > stats[j].Priority() })
+
 	for statIdx := range stats {
 		statStr := stats[statIdx].String()
 		if statStr != "" {
@@ -785,4 +792,140 @@ func findMatchingAffixes(
 	}
 
 	return result
+}
+
+// these functions are to satisfy the inventory grid item interface
+func (i *Item) GetInventoryItemName() string {
+	return i.Label()
+}
+
+func (i *Item) GetInventoryItemType() d2enum.InventoryItemType {
+	typeCode := i.TypeRecord().Code
+
+	armorEquiv := d2datadict.ItemEquivalenciesByTypeCode["armo"]
+	weaponEquiv := d2datadict.ItemEquivalenciesByTypeCode["weap"]
+
+	for idx := range armorEquiv {
+		if armorEquiv[idx].Code == typeCode {
+			return d2enum.InventoryItemTypeArmor
+		}
+	}
+
+	for idx := range weaponEquiv {
+		if weaponEquiv[idx].Code == typeCode {
+			return d2enum.InventoryItemTypeWeapon
+		}
+	}
+
+	return d2enum.InventoryItemTypeItem
+}
+
+func (i *Item) InventoryGridSize() (int, int) {
+	r := i.CommonRecord()
+	return r.InventoryWidth, r.InventoryHeight
+}
+
+func (i *Item) GetItemCode() string {
+	return i.CommonRecord().Code
+}
+
+func (i *Item) Serialize() []byte {
+	panic("item serialization not yet implemented")
+}
+
+func (i *Item) InventoryGridSlot() (x, y int) {
+	return i.GridX, i.GridY
+}
+
+func (i *Item) SetInventoryGridSlot(x, y int) {
+	i.GridX, i.GridY = x, y
+}
+
+func (i *Item) GetInventoryGridSize() (int, int) {
+	return i.GridX, i.GridY
+}
+
+// from a string table
+const (
+	reqNotMet    = "ItemStats1a" // "Requirements not met",
+	unidentified = "ItemStats1b" // "Unidentified",
+	charges      = "ItemStats1c" // "Charges:",
+	durability   = "ItemStats1d" // "Durability:",
+	reqStrength  = "ItemStats1e" // "Required Strength:",
+	reqDexterity = "ItemStats1f" // "Required Dexterity:",
+	damage       = "ItemStats1g" // "Damage:",
+	defense      = "ItemStats1h" // "Defense:",
+	quantity     = "ItemStats1i" // "Quantity:",
+	of           = "ItemStats1j" // "of",
+	to           = "to"          // "to"
+	damage1h     = "ItemStats1l" // "One-Hand Damage:",
+	damage2h     = "ItemStats1m" // "Two-Hand Damage:",
+	damageThrow  = "ItemStats1n" // "Throw Damage:",
+	damageSmite  = "ItemStats1o" // "Smite Damage:",
+	reqLevel     = "ItemStats1p" // "Required Level:",
+)
+
+func (i *Item) GetItemDescription() []string {
+	lines := make([]string, 0)
+
+	common := i.CommonRecord()
+
+	lines = append(lines, i.Label())
+
+	str := ""
+
+	if common.MinAC > 0 {
+		min, max := common.MinAC, common.MaxAC
+		str = fmt.Sprintf("%s %v %s %v", d2common.TranslateString(defense), min, d2common.TranslateString(to), max)
+		str = d2ui.ColorTokenize(str, d2ui.ColorTokenWhite)
+		lines = append(lines, str)
+	}
+
+	if common.MinDamage > 0 {
+		min, max := common.MinDamage, common.MaxDamage
+		str = fmt.Sprintf("%s %v %s %v", d2common.TranslateString(damage1h), min, d2common.TranslateString(to), max)
+		str = d2ui.ColorTokenize(str, d2ui.ColorTokenWhite)
+		lines = append(lines, str)
+	}
+
+	if common.Min2HandDamage > 0 {
+		min, max := common.Min2HandDamage, common.Max2HandDamage
+		str = fmt.Sprintf("%s %v %s %v", d2common.TranslateString(damage2h), min, d2common.TranslateString(to), max)
+		str = d2ui.ColorTokenize(str, d2ui.ColorTokenWhite)
+		lines = append(lines, str)
+	}
+
+	if common.MinMissileDamage > 0 {
+		min, max := common.MinMissileDamage, common.MaxMissileDamage
+		str = fmt.Sprintf("%s %v %s %v", d2common.TranslateString(damageThrow), min, d2common.TranslateString(to), max)
+		str = d2ui.ColorTokenize(str, d2ui.ColorTokenWhite)
+		lines = append(lines, str)
+	}
+
+	if common.RequiredStrength > 1 {
+		str = fmt.Sprintf("%s %v", d2common.TranslateString(reqStrength), common.RequiredStrength)
+		str = d2ui.ColorTokenize(str, d2ui.ColorTokenWhite)
+		lines = append(lines, str)
+	}
+
+	if common.RequiredDexterity > 1 {
+		str = fmt.Sprintf("%s %v", d2common.TranslateString(reqDexterity), common.RequiredDexterity)
+		str = d2ui.ColorTokenize(str, d2ui.ColorTokenWhite)
+		lines = append(lines, str)
+	}
+
+	if common.RequiredLevel > 1 {
+		str = fmt.Sprintf("%s %v", d2common.TranslateString(reqLevel), common.RequiredLevel)
+		str = d2ui.ColorTokenize(str, d2ui.ColorTokenWhite)
+		lines = append(lines, str)
+	}
+
+	statStrings := i.GetStatStrings()
+
+	for _, statStr := range statStrings {
+		str = d2ui.ColorTokenize(statStr, d2ui.ColorTokenBlue)
+		lines = append(lines, str)
+	}
+
+	return lines
 }

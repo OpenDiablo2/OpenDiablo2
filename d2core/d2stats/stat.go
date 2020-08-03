@@ -11,4 +11,5 @@ type Stat interface {
 	String() string
 	Values() []StatValue
 	SetValues(...StatValue)
+	Priority() int
 }
