@@ -259,6 +259,7 @@ func (g *Inventory) renderItemDescription(target d2interface.Surface, i Inventor
 	lines := i.GetItemDescription()
 
 	maxW, maxH := 0, 0
+	_, iy := g.grid.SlotToScreen(i.InventoryGridSlot())
 
 	for idx := range lines {
 		w, h := g.hoverLabel.GetTextMetrics(lines[idx])
@@ -271,7 +272,7 @@ func (g *Inventory) renderItemDescription(target d2interface.Surface, i Inventor
 	}
 
 	halfW, halfH := maxW/2, maxH/2
-	centerX, centerY := g.hoverX, g.hoverY
+	centerX, centerY := g.hoverX, iy - halfH
 
 	if (centerX + halfW) > 800 {
 		centerX = 800 - halfW
