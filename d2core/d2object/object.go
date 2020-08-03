@@ -128,8 +128,8 @@ func (ob *Object) GetPositionF() (x, y float64) {
 	return w.X(), w.Y()
 }
 
-// Name gets the name of the object
-func (ob *Object) Name() string {
+// Label gets the name of the object
+func (ob *Object) Label() string {
 	return ob.name
 }
 

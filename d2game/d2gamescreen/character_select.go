@@ -175,8 +175,8 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 		}
 
 		v.characterNameLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
-		v.characterNameLabel[i].Color = rgbaColor(lightBrown)
 		v.characterNameLabel[i].SetPosition(offsetX, offsetY)
+		v.characterNameLabel[i].Color[0] = rgbaColor(lightBrown)
 
 		offsetY += labelHeight
 		v.characterStatsLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
@@ -184,8 +184,8 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 
 		offsetY += labelHeight
 		v.characterExpLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteStatic)
-		v.characterExpLabel[i].Color = rgbaColor(lightGreen)
 		v.characterExpLabel[i].SetPosition(offsetX, offsetY)
+		v.characterExpLabel[i].Color[0] = rgbaColor(lightGreen)
 	}
 	v.refreshGameStates()
 }
@@ -289,9 +289,12 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 			continue
 		}
 
-		v.characterNameLabel[i].SetText(v.gameStates[idx].HeroName)
-		v.characterStatsLabel[i].SetText("Level 1 " + v.gameStates[idx].HeroType.String())
-		v.characterExpLabel[i].SetText(expText)
+		heroName := v.gameStates[idx].HeroName
+		heroInfo := "Level 1 " + v.gameStates[idx].HeroType.String()
+
+		v.characterNameLabel[i].SetText(d2ui.ColorTokenize(heroName, d2ui.ColorTokenGold))
+		v.characterStatsLabel[i].SetText(d2ui.ColorTokenize(heroInfo, d2ui.ColorTokenWhite))
+		v.characterExpLabel[i].SetText(d2ui.ColorTokenize(expText, d2ui.ColorTokenGreen))
 
 		heroType := v.gameStates[idx].HeroType
 		equipment := d2inventory.HeroObjects[heroType]

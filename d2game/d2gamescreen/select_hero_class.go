@@ -397,20 +397,17 @@ func (v *SelectHeroClass) createLabels() {
 
 	v.heroNameLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroNameLabel.Alignment = d2gui.HorizontalAlignLeft
-	v.heroNameLabel.Color = rgbaColor(gold)
-	v.heroNameLabel.SetText("Character Name")
+	v.heroNameLabel.SetText(d2ui.ColorTokenize("Character Name", d2ui.ColorTokenGold))
 	v.heroNameLabel.SetPosition(heroNameLabelX, heroNameLabelY)
 
 	v.expansionCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.expansionCharLabel.Alignment = d2gui.HorizontalAlignLeft
-	v.expansionCharLabel.Color = rgbaColor(gold)
-	v.expansionCharLabel.SetText("EXPANSION CHARACTER")
+	v.expansionCharLabel.SetText(d2ui.ColorTokenize("EXPANSION CHARACTER", d2ui.ColorTokenGold))
 	v.expansionCharLabel.SetPosition(expansionLabelX, expansionLabelY)
 
 	v.hardcoreCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.hardcoreCharLabel.Alignment = d2gui.HorizontalAlignLeft
-	v.hardcoreCharLabel.Color = rgbaColor(gold)
-	v.hardcoreCharLabel.SetText("Hardcore")
+	v.hardcoreCharLabel.SetText(d2ui.ColorTokenize("Hardcore", d2ui.ColorTokenGold))
 	v.hardcoreCharLabel.SetPosition(hardcoreLabelX, hardcoreLabelY)
 }
 

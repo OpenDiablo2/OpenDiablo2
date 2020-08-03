@@ -112,8 +112,10 @@ func CreateButton(renderer d2interface.Renderer, buttonType ButtonType, text str
 	buttonLayout := getButtonLayouts()[buttonType]
 	result.buttonLayout = buttonLayout
 	lbl := CreateLabel(buttonLayout.FontPath, d2resource.PaletteUnits)
+
+
 	lbl.SetText(text)
-	lbl.Color = color.RGBA{R: 100, G: 100, B: 100, A: 255}
+	lbl.Color[0] = color.RGBA{R: 100, G: 100, B: 100, A: 255}
 	lbl.Alignment = d2gui.HorizontalAlignCenter
 
 	animation, _ := d2asset.LoadAnimation(buttonLayout.ResourceName, buttonLayout.PaletteName)

@@ -6,6 +6,6 @@ type Item interface {
 	Context() StatContext
 	SetContext(StatContext)
 
-	Name() string
+	Label() string
 	Description() string
 }

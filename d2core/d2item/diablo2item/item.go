@@ -31,7 +31,6 @@ const (
 	propertyIndestructable = "indestruct"
 )
 
-
 const (
 	magicItemPrefixMax = 1
 	magicItemSuffixMax = 1
@@ -95,6 +94,8 @@ type itemAttributes struct {
 	requiredDexterity       int
 	classSpecific           d2enum.Hero
 
+	identitified   bool
+	crafted        bool
 	durable        bool // some items specify that they have no durability
 	indestructable bool
 	ethereal       bool
@@ -107,9 +108,39 @@ type minMaxEnhanceable struct {
 	enhance int
 }
 
-// Name returns the item name
-func (i *Item) Name() string {
-	return i.name
+// Label returns the item name
+func (i *Item) Label() string {
+	str := i.name
+
+	if i.attributes.crafted {
+		return d2ui.ColorTokenize(str, d2ui.ColorTokenCraftedItem)
+	}
+
+	if i.SetItemRecord() != nil {
+		return d2ui.ColorTokenize(str, d2ui.ColorTokenSetItem)
+	}
+
+	if i.UniqueRecord() != nil {
+		return d2ui.ColorTokenize(str, d2ui.ColorTokenUniqueItem)
+	}
+
+	numAffixes := len(i.PrefixRecords()) + len(i.SuffixRecords())
+
+	if numAffixes > 0 && numAffixes < 3 {
+		return d2ui.ColorTokenize(str, d2ui.ColorTokenMagicItem)
+	}
+
+	if numAffixes > 2 {
+		return d2ui.ColorTokenize(str, d2ui.ColorTokenRareItem)
+	}
+
+	if i.sockets != nil {
+		if len(i.sockets) > 0 {
+			return d2ui.ColorTokenize(str, d2ui.ColorTokenSocketedItem)
+		}
+	}
+
+	return d2ui.ColorTokenize(str, d2ui.ColorTokenNormalItem)
 }
 
 // Context returns the statContext that is being used to evaluate stats. for example,
@@ -187,7 +218,6 @@ func affixRecords(
 
 	return result
 }
-
 
 // SlotType returns the slot type (where it can be equipped)
 func (i *Item) SlotType() d2enum.EquippedSlot {
@@ -358,7 +388,7 @@ func (i *Item) init() *Item {
 	if i.rand == nil {
 		i.SetSeed(0)
 	}
-	
+
 	i.generateAllProperties()
 	i.updateItemAttributes()
 	return i
@@ -471,7 +501,7 @@ func (i *Item) updateItemAttributes() {
 	}
 
 	def, minDef, maxDef := 0, r.MinAC, r.MaxAC
-	
+
 	if maxDef < minDef {
 		minDef, maxDef = maxDef, minDef
 	}

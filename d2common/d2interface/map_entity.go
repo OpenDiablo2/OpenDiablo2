@@ -11,7 +11,7 @@ type MapEntity interface {
 	GetSize() (width, height int)
 	GetLayer() int
 	GetPositionF() (float64, float64)
-	Name() string
+	Label() string
 	Selectable() bool
 	Highlight()
 }
