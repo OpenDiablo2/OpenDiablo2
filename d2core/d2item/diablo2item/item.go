@@ -845,6 +845,11 @@ func (i *Item) GetInventoryGridSize() (int, int) {
 	return i.GridX, i.GridY
 }
 
+func (i *Item) Identify() *Item {
+	i.attributes.identitified = true
+	return i
+}
+
 // from a string table
 const (
 	reqNotMet    = "ItemStats1a" // "Requirements not met",

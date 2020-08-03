@@ -65,10 +65,10 @@ func (g *Inventory) Load() {
 	animation, _ = d2asset.LoadAnimation(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 	g.panel, _ = d2ui.LoadSprite(animation)
 	items := []InventoryItem{
-		diablo2item.NewItem("kit", "Crimson", "of the Bat", "of Frost"),
-		diablo2item.NewItem("rin", "Steel", "of Shock"),
-		diablo2item.NewItem("jav"),
-		diablo2item.NewItem("buc"),
+		diablo2item.NewItem("kit", "Crimson", "of the Bat", "of Frost").Identify(),
+		diablo2item.NewItem("rin", "Steel", "of Shock").Identify(),
+		diablo2item.NewItem("jav").Identify(),
+		diablo2item.NewItem("buc").Identify(),
 		//diablo2item.NewItem("Arctic Furs", "qui"),
 		// TODO: Load the player's actual items
 	}
