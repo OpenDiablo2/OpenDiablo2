@@ -124,6 +124,9 @@ func NewGameControls(renderer d2interface.Renderer, hero *d2mapentity.Player, ma
 
 	inventoryRecord := d2datadict.Inventory[inventoryRecordKey]
 
+	hoverLabel := &nameLabel
+	hoverLabel.SetBackgroundColor(color.RGBA{0,0,0, uint8(128)})
+
 	gc := &GameControls{
 		renderer:       renderer,
 		hero:           hero,
@@ -133,7 +136,7 @@ func NewGameControls(renderer d2interface.Renderer, hero *d2mapentity.Player, ma
 		inventory:      NewInventory(inventoryRecord),
 		heroStatsPanel: NewHeroStatsPanel(renderer, hero.Name(), hero.Class, hero.Stats),
 		missileID:      missileID,
-		nameLabel:      &nameLabel,
+		nameLabel:      hoverLabel,
 		zoneChangeText: &zoneLabel,
 		actionableRegions: []ActionableRegion{
 			{leftSkill, d2common.Rectangle{Left: 115, Top: 550, Width: 50, Height: 50}},
@@ -438,10 +441,12 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 
 		if within {
 			xOff, yOff := int(entOffset.X()), int(entOffset.Y())
+
 			g.nameLabel.SetText(entity.Label())
 
 			xLabel, yLabel := entScreenX-xOff, entScreenY-yOff-entityHeight-hoverLabelOuterPad
 			g.nameLabel.SetPosition(xLabel, yLabel)
+
 			g.nameLabel.Render(target)
 			entity.Highlight()
 

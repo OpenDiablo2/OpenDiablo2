@@ -61,12 +61,13 @@ func ColorTokenize(s string, t ColorToken) string {
 
 // Label represents a user interface label
 type Label struct {
-	text      string
-	X         int
-	Y         int
-	Alignment d2gui.HorizontalAlign
-	font      d2interface.Font
-	Color     map[int]color.Color
+	text            string
+	X               int
+	Y               int
+	Alignment       d2gui.HorizontalAlign
+	font            d2interface.Font
+	Color           map[int]color.Color
+	backgroundColor color.Color
 }
 
 // CreateLabel creates a new instance of a UI label
@@ -99,11 +100,15 @@ func (v *Label) Render(target d2interface.Surface) {
 
 		for idx := range characters {
 			character := string(characters[idx])
-			charWidth, _ := v.GetTextMetrics(character)
+			charWidth, charHeight := v.GetTextMetrics(character)
 
 			if v.Color[idx] != nil {
 				lastColor = v.Color[idx]
 				v.font.SetColor(lastColor)
+			}
+
+			if v.backgroundColor != nil {
+				target.DrawRect(charWidth, charHeight, v.backgroundColor)
 			}
 
 			_ = v.font.RenderText(character, target)
@@ -140,6 +145,11 @@ func (v *Label) GetTextMetrics(text string) (width, height int) {
 // SetText sets the label's text
 func (v *Label) SetText(newText string) {
 	v.text = v.processColorTokens(newText)
+}
+
+// SetBackgroundColor sets the background highlight color
+func (v *Label) SetBackgroundColor(c color.RGBA) {
+	v.backgroundColor = c
 }
 
 func (v *Label) processColorTokens(str string) string {
