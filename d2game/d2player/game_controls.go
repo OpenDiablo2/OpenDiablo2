@@ -279,6 +279,8 @@ func (g *GameControls) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	mx, my := event.X(), event.Y()
 	g.lastMouseX = mx
 	g.lastMouseY = my
+	g.inventory.lastMouseX = mx
+	g.inventory.lastMouseY = my
 
 	for i := range g.actionableRegions {
 		// Mouse over a game control element
@@ -454,8 +456,8 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		}
 	}
 
-	g.inventory.Render(target)
 	g.heroStatsPanel.Render(target)
+	g.inventory.Render(target)
 
 	width, height := target.GetSize()
 	offset := 0
