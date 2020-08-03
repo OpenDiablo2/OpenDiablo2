@@ -112,6 +112,10 @@ type minMaxEnhanceable struct {
 func (i *Item) Label() string {
 	str := i.name
 
+	if !i.attributes.identitified {
+		str = d2common.TranslateString(i.CommonRecord().NameString)
+	}
+
 	if i.attributes.crafted {
 		return d2ui.ColorTokenize(str, d2ui.ColorTokenCraftedItem)
 	}
