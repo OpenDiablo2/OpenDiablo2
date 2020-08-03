@@ -258,9 +258,9 @@ func (v *Credits) getNewFontLabel(isHeading bool) *d2ui.Label {
 		if label.Available {
 			label.Available = false
 			if isHeading {
-				label.Label.Color = rgbaColor(lightRed)
+				label.Label.Color[0] = rgbaColor(lightRed)
 			} else {
-				label.Label.Color = rgbaColor(beige)
+				label.Label.Color[0] = rgbaColor(beige)
 			}
 
 			return &label.Label
@@ -274,9 +274,9 @@ func (v *Credits) getNewFontLabel(isHeading bool) *d2ui.Label {
 	}
 
 	if isHeading {
-		newLabelItem.Label.Color = rgbaColor(lightRed)
+		newLabelItem.Label.Color[0] = rgbaColor(lightRed)
 	} else {
-		newLabelItem.Label.Color = rgbaColor(beige)
+		newLabelItem.Label.Color[0] = rgbaColor(beige)
 	}
 
 	v.labels = append(v.labels, newLabelItem)

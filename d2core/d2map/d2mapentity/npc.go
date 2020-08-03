@@ -161,8 +161,8 @@ func (v *NPC) Selectable() bool {
 	return v.name != ""
 }
 
-// Name returns the NPC's in-game name (e.g. "Deckard Cain") or an empty string if it does not have a name.
-func (v *NPC) Name() string {
+// Label returns the NPC's in-game name (e.g. "Deckard Cain") or an empty string if it does not have a name.
+func (v *NPC) Label() string {
 	return v.name
 }
 

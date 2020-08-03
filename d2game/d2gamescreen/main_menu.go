@@ -188,32 +188,32 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 	v.versionLabel = d2ui.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.versionLabel.Alignment = d2gui.HorizontalAlignRight
 	v.versionLabel.SetText("OpenDiablo2 - " + v.buildInfo.Branch)
-	v.versionLabel.Color = rgbaColor(white)
+	v.versionLabel.Color[0] = rgbaColor(white)
 	v.versionLabel.SetPosition(versionLabelX, versionLabelY)
 
 	v.commitLabel = d2ui.CreateLabel(d2resource.FontFormal10, d2resource.PaletteStatic)
 	v.commitLabel.Alignment = d2gui.HorizontalAlignLeft
 	v.commitLabel.SetText(v.buildInfo.Commit)
-	v.commitLabel.Color = rgbaColor(white)
+	v.commitLabel.Color[0] = rgbaColor(white)
 	v.commitLabel.SetPosition(commitLabelX, commitLabelY)
 
 	v.copyrightLabel = d2ui.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.copyrightLabel.Alignment = d2gui.HorizontalAlignCenter
 	v.copyrightLabel.SetText("Diablo 2 is © Copyright 2000-2016 Blizzard Entertainment")
-	v.copyrightLabel.Color = rgbaColor(lightBrown)
+	v.copyrightLabel.Color[0] = rgbaColor(lightBrown)
 	v.copyrightLabel.SetPosition(copyrightX, copyrightY)
 	loading.Progress(thirtyPercent)
 
 	v.copyrightLabel2 = d2ui.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.copyrightLabel2.Alignment = d2gui.HorizontalAlignCenter
 	v.copyrightLabel2.SetText("All Rights Reserved.")
-	v.copyrightLabel2.Color = rgbaColor(lightBrown)
+	v.copyrightLabel2.Color[0] = rgbaColor(lightBrown)
 	v.copyrightLabel2.SetPosition(copyright2X, copyright2Y)
 
 	v.openDiabloLabel = d2ui.CreateLabel(d2resource.FontFormal10, d2resource.PaletteStatic)
 	v.openDiabloLabel.Alignment = d2gui.HorizontalAlignCenter
 	v.openDiabloLabel.SetText("OpenDiablo2 is neither developed by, nor endorsed by Blizzard or its parent company Activision")
-	v.openDiabloLabel.Color = rgbaColor(lightYellow)
+	v.openDiabloLabel.Color[0] = rgbaColor(lightYellow)
 	v.openDiabloLabel.SetPosition(od2LabelX, od2LabelY)
 	loading.Progress(fiftyPercent)
 
@@ -226,7 +226,7 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 	v.tcpJoinGameLabel.Alignment = d2gui.HorizontalAlignCenter
 	v.tcpJoinGameLabel.SetText("Enter Host IP Address\nto Join Game")
 
-	v.tcpJoinGameLabel.Color = rgbaColor(gold)
+	v.tcpJoinGameLabel.Color[0] = rgbaColor(gold)
 	v.tcpJoinGameLabel.SetPosition(joinGameX, joinGameY)
 }
 

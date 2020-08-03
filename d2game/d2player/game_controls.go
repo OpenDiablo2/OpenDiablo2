@@ -94,13 +94,11 @@ func NewGameControls(renderer d2interface.Renderer, hero *d2mapentity.Player, ma
 	})
 
 	zoneLabel := d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
-	zoneLabel.Color = color.RGBA{R: 255, G: 88, B: 82, A: 255}
 	zoneLabel.Alignment = d2gui.HorizontalAlignCenter
 
 	nameLabel := d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
 	nameLabel.Alignment = d2gui.HorizontalAlignCenter
-	nameLabel.SetText("")
-	nameLabel.Color = color.White
+	nameLabel.SetText(d2ui.ColorTokenize("", d2ui.ColorTokenServer))
 
 	// TODO make this depend on the hero type to respect inventory.txt
 	var inventoryRecordKey string
@@ -440,7 +438,8 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 
 		if within {
 			xOff, yOff := int(entOffset.X()), int(entOffset.Y())
-			g.nameLabel.SetText(entity.Name())
+			g.nameLabel.SetText(entity.Label())
+
 			xLabel, yLabel := entScreenX-xOff, entScreenY-yOff-entityHeight-hoverLabelOuterPad
 			g.nameLabel.SetPosition(xLabel, yLabel)
 			g.nameLabel.Render(target)

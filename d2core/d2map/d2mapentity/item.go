@@ -1,9 +1,13 @@
 package d2mapentity
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2item/diablo2item"
 )
+
+// static check that item implements map entity interface
+var _ d2interface.MapEntity = &Item{}
 
 const (
 	errInvalidItemCodes = "invalid item codes supplied"
@@ -36,8 +40,8 @@ func (i *Item) Highlight() {
 }
 
 // Name returns the item name
-func (i *Item) Name() string {
-	return i.Item.Name()
+func (i *Item) Label() string {
+	return i.Item.Label()
 }
 
 // GetSize returns the current frame size

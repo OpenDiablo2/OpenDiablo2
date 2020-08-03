@@ -196,8 +196,8 @@ func (m *mapEntity) GetPositionF() (x, y float64) {
 	return w.X(), w.Y()
 }
 
-// Name returns the NPC's in-game name (e.g. "Deckard Cain") or an empty string if it does not have a name
-func (m *mapEntity) Name() string {
+// Label returns the NPC's in-game name (e.g. "Deckard Cain") or an empty string if it does not have a name
+func (m *mapEntity) Label() string {
 	return ""
 }
 
