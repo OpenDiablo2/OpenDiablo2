@@ -6,85 +6,81 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
-//PetTypeRecord represents a single line in PetType.txt
-//The information has been gathered from [https://d2mods.info/forum/kb/viewarticle?a=355]
+// PetTypeRecord represents a single line in PetType.txt
+// The information has been gathered from [https:// d2mods.info/forum/kb/viewarticle?a=355]
 type PetTypeRecord struct {
-	//Name of the pet type, reffered by "pettype" in skills.txt
-	PetType string
-
-	//ID number of the pet type
-	Idx int
-
-	//ID number of the group this pet belongs to
-	Group int
-
-	BaseMax int
-
-	//If true, the pet warps with the player, otherwise it dies
-	Warp bool
-
-	//If true, and Warp is false, the pet only die if the distance between the player
-	//and the pet exceeds 41 sub-tiles.
-	Range bool
-
-	//Unknown
-	PartySend bool
-
-	//If true, can be unsummoned
-	Unsummon bool
-
-	//If true, pet is displayed on the automap
-	Automap bool
-
-	//String file for the text under the pet icon
+	// Name of the pet type, refferred by "pettype" in skills.txt
 	Name string
 
-	//If true, the pet's HP will be displayed under the icon
-	DrawHP bool
+	// Name text under the pet icon
+	IconName string
 
-	//Pet icon type
-	IconType int
-
-	//.dc6 file for the pet's icon, located in /data/global/ui/hireables
+	// .dc6 file for the pet's icon, located in /data/global/ui/hireables
 	BaseIcon string
 
-	//Alternative pet index from monstats.txt
-	MClass1 int
-
-	//Alternative pet icon .dc6 file
+	// Alternative pet icon .dc6 file
 	MIcon1 string
+	MIcon2 string
+	MIcon3 string
+	MIcon4 string
 
-	//ditto, there can be four alternatives
+	// ID number of the pet type
+	ID int
+
+	// GroupID number of the group this pet belongs to
+	GroupID int
+
+	// BaseMax unknown what this does...
+	BaseMax int
+
+	// Pet icon type
+	IconType int
+
+	// Alternative pet index from monstats.txt
+	MClass1 int
 	MClass2 int
-	MIcon2  string
 	MClass3 int
-	MIcon3  string
 	MClass4 int
-	MIcon4  string
 
-	//EOL int, not loaded
+	// Warp warps with the player, otherwise it dies
+	Warp bool
+
+	// Range the pet only die if the distance between the player  and the pet exceeds 41 sub-tiles.
+	Range bool
+
+	// Unknown
+	PartySend bool
+
+	// Unsummon whether the pet can be unsummoned
+	Unsummon bool
+
+	// Automap whether the pet is displayed on the automap
+	Automap bool
+
+	// If true, the pet's HP will be displayed under the icon
+	DrawHP bool
 }
 
-//PetTypes stores the PetTypeRecords
-var PetTypes map[string]*PetTypeRecord //nolint:gochecknoglobals // Currently global by design
+// PetTypes stores the PetTypeRecords
+var PetTypes map[string]*PetTypeRecord // nolint:gochecknoglobals // Currently global by design
 
-//LoadPetTypes loads PetTypeRecords into PetTypes
+// LoadPetTypes loads PetTypeRecords into PetTypes
 func LoadPetTypes(file []byte) {
 	PetTypes = make(map[string]*PetTypeRecord)
 
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
 		record := &PetTypeRecord{
-			PetType:   d.String("pet type"),
-			Idx:       d.Number("idx"),
-			Group:     d.Number("group"),
+			Name:      d.String("pet type"),
+			ID:        d.Number("idx"),
+			GroupID:   d.Number("group"),
 			BaseMax:   d.Number("basemax"),
 			Warp:      d.Bool("warp"),
 			Range:     d.Bool("range"),
 			PartySend: d.Bool("partysend"),
 			Unsummon:  d.Bool("unsummon"),
 			Automap:   d.Bool("automap"),
-			Name:      d.String("name"),
+			IconName:  d.String("name"),
 			DrawHP:    d.Bool("drawhp"),
 			IconType:  d.Number("icontype"),
 			BaseIcon:  d.String("baseicon"),
@@ -97,7 +93,7 @@ func LoadPetTypes(file []byte) {
 			MClass4:   d.Number("mclass4"),
 			MIcon4:    d.String("micon4"),
 		}
-		PetTypes[record.PetType] = record
+		PetTypes[record.Name] = record
 	}
 
 	if d.Err != nil {

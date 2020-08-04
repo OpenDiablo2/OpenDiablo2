@@ -215,6 +215,7 @@ const (
 	MonsterSequence       = "/data/global/excel/monseq.txt"
 	PlayerClass           = "/data/global/excel/PlayerClass.txt"
 	ObjectGroup           = "/data/global/excel/objgroup.txt"
+	CompCode              = "/data/global/excel/compcode.txt"
 
 	// --- Animations ---
 
@@ -324,6 +325,7 @@ const (
 	SuperUniques     = "/data/global/excel/SuperUniques.txt"
 	MonMode          = "/data/global/excel/monmode.txt"
 	MonsterPlacement = "/data/global/excel/MonPlace.txt"
+	MonsterAI        = "/data/global/excel/monai.txt"
 
 	// --- Skill Data ---
 

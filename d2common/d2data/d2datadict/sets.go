@@ -1,11 +1,27 @@
 package d2datadict
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+const (
+	numPartialSetProperties = 4
+	numFullSetProperties    = 8
+	fmtPropCode             = "%sCode%d%s"
+	fmtPropParam            = "%sParam%d%s"
+	fmtPropMin              = "%sMin%d%s"
+	fmtPropMax              = "%sMax%d%s"
+	partialIdxOffset        = 2
+	setPartialToken         = "P"
+	setPartialTokenA        = "a"
+	setPartialTokenB        = "b"
+	setFullToken            = "F"
+)
+
+// SetRecord describes the set bonus for a group of set items
 type SetRecord struct {
 	// index
 	// String key linked to by the set field in SetItems.
@@ -24,62 +40,43 @@ type SetRecord struct {
 	// (reference only, not loaded into game).
 	Level int
 
-	// PCodeA, PCodeB -- PCode2a,PCode2b to PCode5a,PCode5b
-	// An ID pointer of a property from Properties.txt,
-	// these columns control each of the five pairs of different partial set modifiers a set item can
-	// grant you at most.
-	PCodeA [4]string
-	PCodeB [4]string
+	// Properties contains the partial and full set bonus properties.
+	Properties struct {
+		PartialA []*setProperty
+		PartialB []*setProperty
+		Full     []*setProperty
+	}
+}
 
-	// PParamA, PParamB -- PParam2[a|b] to PParam5[a|b]
-	// The parameter passed on to the associated property, this is used to pass skill IDs, state IDs,
-	// monster IDs, montype IDs and the like on to the properties that require them,
-	// these fields support calculations.
-	PParamA [4]int
-	PParamB [4]int
-
-	// PMinA, PMaxA, PMinB, PMaxB -- P[Min|Max]2[a|b] to P[Min|Max]5[a|b]
-	// Minimum value to assign to the associated property.
-	// Certain properties have special interpretations based on stat encoding (e.g.
-	// chance-to-cast and charged skills). See the File Guides for Properties.txt and ItemStatCost.
-	// txt for further details.
-	PMinA [4]int
-	PMaxA [4]int
-	PMinB [4]int
-	PMaxB [4]int
-
-	// FCode -- FCode1 to FCode8
-	// An ID pointer of a property from Properties.txt,
+type setProperty struct {
+	// Code is an ID pointer of a property from Properties.txt,
 	// these columns control each of the eight different full set modifiers a set item can grant you
 	// at most.
-	FCode [8]string
+	Code string
 
-	// FParam -- FParam1 to FParam8
-	// The parameter passed on to the associated property, this is used to pass skill IDs, state IDs,
+	// Param is the passed on to the associated property, this is used to pass skill IDs, state IDs,
 	// monster IDs, montype IDs and the like on to the properties that require them,
 	// these fields support calculations.
-	FParam [8]int
+	Param string
 
-	// FMin -- FMin1 to FMin8
-	// Minimum value to assign to the associated property.
+	// Min value to assign to the associated property.
 	// Certain properties have special interpretations based on stat encoding (e.g.
 	// chance-to-cast and charged skills). See the File Guides for Properties.txt and ItemStatCost.
 	// txt for further details.
-	FMin [8]int
+	Min int
 
-	// FMax -- FMax1 to FMax8
-	// Maximum value to assign to the associated property.
+	// Max value to assign to the associated property.
 	// Certain properties have special interpretations based on stat encoding (e.g.
 	// chance-to-cast and charged skills). See the File Guides for Properties.txt and ItemStatCost.
 	// txt for further details.
-	FMax [8]int
+	Max int
 }
 
 // SetRecords contain the set records from sets.txt
-var SetRecords map[string]*SetRecord
+var SetRecords map[string]*SetRecord //nolint:gochecknoglobals // Currently global by design
 
 // LoadSetRecords loads set records from sets.txt
-func LoadSets(file []byte) {
+func LoadSetRecords(file []byte) { //nolint:funlen // doesn't make sense to split
 	SetRecords = make(map[string]*SetRecord)
 
 	d := d2common.LoadDataDictionary(file)
@@ -89,94 +86,71 @@ func LoadSets(file []byte) {
 			StringTableKey: d.String("name"),
 			Version:        d.Number("version"),
 			Level:          d.Number("level"),
-			PCodeA:          [4]string{
-				d.String("PCode2a"),
-				d.String("PCode3a"),
-				d.String("PCode4a"),
-				d.String("PCode5a"),
+			Properties: struct {
+				PartialA []*setProperty
+				PartialB []*setProperty
+				Full     []*setProperty
+			}{
+				PartialA: make([]*setProperty, 0),
+				PartialB: make([]*setProperty, 0),
+				Full:     make([]*setProperty, 0),
 			},
-			PCodeB:          [4]string{
-				d.String("PCode2b"),
-				d.String("PCode3b"),
-				d.String("PCode4b"),
-				d.String("PCode5b"),
-			},
-			PParamA:          [4]int{
-				d.Number("PParam2a"),
-				d.Number("PParam3a"),
-				d.Number("PParam4a"),
-				d.Number("PParam5a"),
-			},
-			PParamB:          [4]int{
-				d.Number("PParam2b"),
-				d.Number("PParam3b"),
-				d.Number("PParam4b"),
-				d.Number("PParam5b"),
-			},
-			PMinA:          [4]int{
-				d.Number("PMin2a"),
-				d.Number("PMin3a"),
-				d.Number("PMin4a"),
-				d.Number("PMin5a"),
-			},
-			PMinB:          [4]int{
-				d.Number("PMin2b"),
-				d.Number("PMin3b"),
-				d.Number("PMin4b"),
-				d.Number("PMin5b"),
-			},
-			PMaxA:          [4]int{
-				d.Number("PMax2a"),
-				d.Number("PMax3a"),
-				d.Number("PMax4a"),
-				d.Number("PMax5a"),
-			},
-			PMaxB:          [4]int{
-				d.Number("PMax2b"),
-				d.Number("PMax3b"),
-				d.Number("PMax4b"),
-				d.Number("PMax5b"),
-			},
-			FCode:          [8]string{
-				d.String("FCode1"),
-				d.String("FCode2"),
-				d.String("FCode3"),
-				d.String("FCode4"),
-				d.String("FCode5"),
-				d.String("FCode6"),
-				d.String("FCode7"),
-				d.String("FCode9"),
-			},
-			FParam:          [8]int{
-				d.Number("FParam1"),
-				d.Number("FParam2"),
-				d.Number("FParam3"),
-				d.Number("FParam4"),
-				d.Number("FParam5"),
-				d.Number("FParam6"),
-				d.Number("FParam7"),
-				d.Number("FParam9"),
-			},
-			FMin:          [8]int{
-				d.Number("FMin1"),
-				d.Number("FMin2"),
-				d.Number("FMin3"),
-				d.Number("FMin4"),
-				d.Number("FMin5"),
-				d.Number("FMin6"),
-				d.Number("FMin7"),
-				d.Number("FMin9"),
-			},
-			FMax:          [8]int{
-				d.Number("FMax1"),
-				d.Number("FMax2"),
-				d.Number("FMax3"),
-				d.Number("FMax4"),
-				d.Number("FMax5"),
-				d.Number("FMax6"),
-				d.Number("FMax7"),
-				d.Number("FMax9"),
-			},
+		}
+
+		// for partial properties 2a thru 5b
+		for idx := 0; idx < numPartialSetProperties; idx++ {
+			num := idx + partialIdxOffset // needs to be 2,3,4,5
+			columnA := fmt.Sprintf(fmtPropCode, setPartialToken, num, setPartialTokenA)
+			columnB := fmt.Sprintf(fmtPropCode, setPartialToken, num, setPartialTokenB)
+
+			if codeA := d.String(columnA); codeA != "" {
+				paramColumn := fmt.Sprintf(fmtPropParam, setPartialToken, num, setPartialTokenA)
+				minColumn := fmt.Sprintf(fmtPropMin, setPartialToken, num, setPartialTokenA)
+				maxColumn := fmt.Sprintf(fmtPropMax, setPartialToken, num, setPartialTokenA)
+
+				propA := &setProperty{
+					Code:  codeA,
+					Param: d.String(paramColumn),
+					Min:   d.Number(minColumn),
+					Max:   d.Number(maxColumn),
+				}
+
+				record.Properties.PartialA = append(record.Properties.PartialA, propA)
+			}
+
+			if codeB := d.String(columnB); codeB != "" {
+				paramColumn := fmt.Sprintf(fmtPropParam, setPartialToken, num, setPartialTokenB)
+				minColumn := fmt.Sprintf(fmtPropMin, setPartialToken, num, setPartialTokenB)
+				maxColumn := fmt.Sprintf(fmtPropMax, setPartialToken, num, setPartialTokenB)
+
+				propB := &setProperty{
+					Code:  codeB,
+					Param: d.String(paramColumn),
+					Min:   d.Number(minColumn),
+					Max:   d.Number(maxColumn),
+				}
+
+				record.Properties.PartialB = append(record.Properties.PartialB, propB)
+			}
+		}
+
+		for idx := 0; idx < numFullSetProperties; idx++ {
+			num := idx + 1
+			codeColumn := fmt.Sprintf(fmtPropCode, setFullToken, num, "")
+			paramColumn := fmt.Sprintf(fmtPropParam, setFullToken, num, "")
+			minColumn := fmt.Sprintf(fmtPropMin, setFullToken, num, "")
+			maxColumn := fmt.Sprintf(fmtPropMax, setFullToken, num, "")
+
+			if code := d.String(codeColumn); code != "" {
+				prop := &setProperty{
+					Code:  code,
+					Param: d.String(paramColumn),
+					Min:   d.Number(minColumn),
+					Max:   d.Number(maxColumn),
+				}
+
+				record.Properties.Full = append(record.Properties.Full, prop)
+			}
 		}
 
 		SetRecords[record.Key] = record

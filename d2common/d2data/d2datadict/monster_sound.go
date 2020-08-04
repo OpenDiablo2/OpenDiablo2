@@ -6,31 +6,32 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
-//MonsterSoundRecord represents a single line in MonSounds.txt
-//Information gathered from [https://d2mods.info/forum/kb/viewarticle?a=418]
+// Information gathered from [https://d2mods.info/forum/kb/viewarticle?a=418]
+
+// MonsterSoundRecord represents a single line in MonSounds.txt
 type MonsterSoundRecord struct {
-	//ID is the identifier, used in MonStats.txt to refer to a particular sound record
+	// ID is the identifier, used in MonStats.txt to refer to a particular sound record
 	ID string
 
-	//Melee attack sound ID, refers to a sound from Sounds.txt
+	// Melee attack sound ID, refers to a sound from Sounds.txt
 	Attack1 string
 
-	//Weapon attack sound ID, refers to a sound from Sounds.txt
+	// Weapon attack sound ID, refers to a sound from Sounds.txt
 	Weapon1 string
 
-	//Delay in frames of Attack1 sound
+	// Delay in frames of Attack1 sound
 	Attack1Delay int
 
-	//Delay in frames of Weapon1 sound
+	// Delay in frames of Weapon1 sound
 	Weapon1Delay int
 
-	//Probability of playing Attack1 sound instead of Weapon1
+	// Probability of playing Attack1 sound instead of Weapon1
 	Attack1Probability int
 
-	//Overrides weapon volume from Sounds.txt
+	// Overrides weapon volume from Sounds.txt
 	Weapon1Volume int
 
-	//Ditto, 2 sets of sounds are possible
+	// Ditto, 2 sets of sounds are possible
 	Attack2            string
 	Weapon2            string
 	Attack2Delay       int
@@ -38,60 +39,60 @@ type MonsterSoundRecord struct {
 	Attack2Probability int
 	Weapon2Volume      int
 
-	//Sound when monster takes a hit, refers to a sound from Sounds.txt
+	// Sound when monster takes a hit, refers to a sound from Sounds.txt
 	HitSound string
 
-	//Sound when monster dies, refers to a sound from Sounds.txt
+	// Sound when monster dies, refers to a sound from Sounds.txt
 	DeathSound string
 
-	//Delay in frames of HitSound
+	// Delay in frames of HitSound
 	HitDelay int
 
-	//Delay in frames of DeathSound
+	// Delay in frames of DeathSound
 	DeaDelay int
 
-	//Sound when monster enters skill mode
+	// Sound when monster enters skill mode
 	Skill1 string
 	Skill2 string
 	Skill3 string
 	Skill4 string
 
-	//Sound played each loop of the WL animation
+	// Sound played each loop of the WL animation
 	Footstep string
 
-	//Additional WL animation sound
+	// Additional WL animation sound
 	FootstepLayer string
 
-	//Number of footstep sounds played (e.g. 2 for two-legged monsters)
+	// Number of footstep sounds played (e.g. 2 for two-legged monsters)
 	FootstepCount int
 
-	//FsOff, possibly delay between footstep sounds
+	// FsOff, possibly delay between footstep sounds
 	FootstepOffset int
 
-	//Probability of playing footstep sound, percentage
+	// Probability of playing footstep sound, percentage
 	FootstepProbability int
 
-	//Sound when monster is neutral (also played when walking)
+	// Sound when monster is neutral (also played when walking)
 	Neutral string
 
-	//Delay in frames between neutral sounds
+	// Delay in frames between neutral sounds
 	NeutralTime int
 
-	//Sound when monster is initialized
+	// Sound when monster is initialized
 	Init string
 
-	//Sound when monster is encountered
+	// Sound when monster is encountered
 	Taunt string
 
-	//Sound when monster retreats
+	// Sound when monster retreats
 	Flee string
 
-	//The following are related to skills in some way
-	//Initial monster animation code (MonMode.txt)
+	// The following are related to skills in some way
+	// Initial monster animation code (MonMode.txt)
 	CvtMo1 string
-	//ID of skill
+	// ID of skill
 	CvtSk1 string
-	//End monster animation code (MonMode.txt)
+	// End monster animation code (MonMode.txt)
 	CvtTgt1 string
 
 	CvtMo2  string
@@ -103,10 +104,11 @@ type MonsterSoundRecord struct {
 	CvtTgt3 string
 }
 
-//MonsterSounds stores the MonsterSoundRecords
+// MonsterSounds stores the MonsterSoundRecords
+//nolint:gochecknoglobals // Currently global by design
 var MonsterSounds map[string]*MonsterSoundRecord
 
-//LoadMonsterSounds loads MonsterSoundRecords into MonsterSounds
+// LoadMonsterSounds loads MonsterSoundRecords into MonsterSounds
 func LoadMonsterSounds(file []byte) {
 	MonsterSounds = make(map[string]*MonsterSoundRecord)
 

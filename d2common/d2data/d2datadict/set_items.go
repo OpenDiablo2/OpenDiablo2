@@ -2,23 +2,24 @@ package d2datadict
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 const (
-	numPropertiesOnSetItem = 9
+	numPropertiesOnSetItem      = 9
 	numBonusPropertiesOnSetItem = 5
-	bonusToken1 = "a"
-	bonusToken2 = "b"
-	propCodeFmt = "prop%d"
-	propParamFmt = "par%d"
-	propMinFmt = "min%d"
-	propMaxFmt = "max%d"
-	bonusCodeFmt = "aprop%d%s"
-	bonusParamFmt = "apar%d%s"
-	bonusMinFmt = "amin%d%s"
-	bonusMaxFmt = "amax%d%s"
+	bonusToken1                 = "a"
+	bonusToken2                 = "b"
+	propCodeFmt                 = "prop%d"
+	propParamFmt                = "par%d"
+	propMinFmt                  = "min%d"
+	propMaxFmt                  = "max%d"
+	bonusCodeFmt                = "aprop%d%s"
+	bonusParamFmt               = "apar%d%s"
+	bonusMinFmt                 = "amin%d%s"
+	bonusMaxFmt                 = "amax%d%s"
 )
 
 // SetItemRecord represents a set item
@@ -152,7 +153,6 @@ func LoadSetItems(file []byte) {
 			CostMult:                  d.Number("cost mult"),
 			CostAdd:                   d.Number("cost add"),
 			AddFn:                     d.Number("add func"),
-
 		}
 
 		// normal properties
@@ -178,14 +178,14 @@ func LoadSetItems(file []byte) {
 			bonus1[idx] = &SetItemProperty{
 				d.String(fmt.Sprintf(bonusCodeFmt, num, bonusToken1)),
 				d.String(fmt.Sprintf(bonusParamFmt, num, bonusToken1)),
-				d.Number(fmt.Sprintf(bonusMinFmt, num,bonusToken1)),
+				d.Number(fmt.Sprintf(bonusMinFmt, num, bonusToken1)),
 				d.Number(fmt.Sprintf(bonusMaxFmt, num, bonusToken1)),
 			}
 
 			bonus2[idx] = &SetItemProperty{
 				d.String(fmt.Sprintf(bonusCodeFmt, num, bonusToken2)),
 				d.String(fmt.Sprintf(bonusParamFmt, num, bonusToken2)),
-				d.Number(fmt.Sprintf(bonusMinFmt, num,bonusToken2)),
+				d.Number(fmt.Sprintf(bonusMinFmt, num, bonusToken2)),
 				d.Number(fmt.Sprintf(bonusMaxFmt, num, bonusToken2)),
 			}
 		}

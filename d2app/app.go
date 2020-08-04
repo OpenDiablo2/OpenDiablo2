@@ -38,6 +38,14 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
 
+// these are used for debug print info
+const (
+	fpsX, fpsY         = 5, 565
+	memInfoX, memInfoY = 670, 5
+	debugLineHeight    = 16
+	errMsgPadding      = 20
+)
+
 // App represents the main application for the engine
 type App struct {
 	lastTime          float64
@@ -64,7 +72,6 @@ type bindTerminalEntry struct {
 }
 
 const (
-	defaultFPS      = 0.04 // 1/25
 	bytesToMegabyte = 1024 * 1024
 	nSamplesTAlloc  = 100
 	debugPopN       = 6
@@ -97,7 +104,6 @@ func Create(gitBranch, gitCommit string,
 
 // Run executes the application and kicks off the entire game process
 func (a *App) Run() error {
-
 	profileOption := kingpin.Flag("profile", "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)").String()
 	kingpin.Parse()
 
@@ -138,7 +144,7 @@ func (a *App) initialize() error {
 	terminalActions := [...]bindTerminalEntry{
 		{"dumpheap", "dumps the heap to pprof/heap.pprof", a.dumpHeap},
 		{"fullscreen", "toggles fullscreen", a.toggleFullScreen},
-		{"capframe", "captures a still frame", a.captureFrame},
+		{"capframe", "captures a still frame", a.setupCaptureFrame},
 		{"capgifstart", "captures an animation (start)", a.startAnimationCapture},
 		{"capgifstop", "captures an animation (stop)", a.stopAnimationCapture},
 		{"vsync", "toggles vsync", a.toggleVsync},
@@ -236,7 +242,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.Experience, d2datadict.LoadExperienceBreakpoints},
 		{d2resource.Gems, d2datadict.LoadGems},
 		{d2resource.QualityItems, d2datadict.LoadQualityItems},
-		{d2resource.Runes, d2datadict.LoadRunes},
+		{d2resource.Runes, d2datadict.LoadRunewords},
 		{d2resource.DifficultyLevels, d2datadict.LoadDifficultyLevels},
 		{d2resource.AutoMap, d2datadict.LoadAutoMaps},
 		{d2resource.LevelDetails, d2datadict.LoadLevelDetails},
@@ -252,7 +258,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.SkillDesc, d2datadict.LoadSkillDescriptions},
 		{d2resource.ItemTypes, d2datadict.LoadItemTypes},
 		{d2resource.BodyLocations, d2datadict.LoadBodyLocations},
-		{d2resource.Sets, d2datadict.LoadSets},
+		{d2resource.Sets, d2datadict.LoadSetRecords},
 		{d2resource.SetItems, d2datadict.LoadSetItems},
 		{d2resource.AutoMagic, d2datadict.LoadAutoMagicRecords},
 		{d2resource.TreasureClass, d2datadict.LoadTreasureClassRecords},
@@ -272,6 +278,8 @@ func (a *App) loadDataDict() error {
 		{d2resource.PlayerClass, d2datadict.LoadPlayerClasses},
 		{d2resource.MonsterPlacement, d2datadict.LoadMonsterPlacements},
 		{d2resource.ObjectGroup, d2datadict.LoadObjectGroups},
+		{d2resource.CompCode, d2datadict.LoadComponentCodes},
+		{d2resource.MonsterAI, d2datadict.LoadMonsterAI},
 	}
 
 	d2datadict.InitObjectRecords()
@@ -299,24 +307,24 @@ func (a *App) renderDebug(target d2interface.Surface) error {
 	fps := a.renderer.CurrentFPS()
 	cx, cy := a.renderer.GetCursorPos()
 
-	target.PushTranslation(5, 565)
+	target.PushTranslation(fpsX, fpsY)
 	target.DrawTextf("vsync:" + strconv.FormatBool(vsyncEnabled) + "\nFPS:" + strconv.Itoa(int(fps)))
 	target.Pop()
 
 	var m runtime.MemStats
 
 	runtime.ReadMemStats(&m)
-	target.PushTranslation(680, 0)
+	target.PushTranslation(memInfoX, memInfoY)
 	target.DrawTextf("Alloc    " + strconv.FormatInt(int64(m.Alloc)/bytesToMegabyte, 10))
-	target.PushTranslation(0, 16)
+	target.PushTranslation(0, debugLineHeight)
 	target.DrawTextf("TAlloc/s " + strconv.FormatFloat(a.allocRate(m.TotalAlloc, fps), 'f', 2, 64))
-	target.PushTranslation(0, 16)
+	target.PushTranslation(0, debugLineHeight)
 	target.DrawTextf("Pause    " + strconv.FormatInt(int64(m.PauseTotalNs/bytesToMegabyte), 10))
-	target.PushTranslation(0, 16)
+	target.PushTranslation(0, debugLineHeight)
 	target.DrawTextf("HeapSys  " + strconv.FormatInt(int64(m.HeapSys/bytesToMegabyte), 10))
-	target.PushTranslation(0, 16)
+	target.PushTranslation(0, debugLineHeight)
 	target.DrawTextf("NumGC    " + strconv.FormatInt(int64(m.NumGC), 10))
-	target.PushTranslation(0, 16)
+	target.PushTranslation(0, debugLineHeight)
 	target.DrawTextf("Coords   " + strconv.FormatInt(int64(cx), 10) + "," + strconv.FormatInt(int64(cy), 10))
 	target.PopN(debugPopN)
 
@@ -334,80 +342,18 @@ func (a *App) renderCapture(target d2interface.Surface) error {
 	case captureStateFrame:
 		defer cleanupCapture()
 
-		fp, err := os.Create(a.capturePath)
-		if err != nil {
+		if err := a.doCaptureFrame(target); err != nil {
 			return err
 		}
-
-		defer func() {
-			if err := fp.Close(); err != nil {
-				log.Fatal(err)
-			}
-		}()
-
-		screenshot := target.Screenshot()
-		if err := png.Encode(fp, screenshot); err != nil {
-			return err
-		}
-
-		log.Printf("saved frame to %s", a.capturePath)
 	case captureStateGif:
-		screenshot := target.Screenshot()
-		a.captureFrames = append(a.captureFrames, screenshot)
+		a.doCaptureGif(target)
 	case captureStateNone:
 		if len(a.captureFrames) > 0 {
 			defer cleanupCapture()
 
-			fp, err := os.Create(a.capturePath)
-			if err != nil {
+			if err := a.convertFramesToGif(); err != nil {
 				return err
 			}
-
-			defer func() {
-				if err := fp.Close(); err != nil {
-					log.Fatal(err)
-				}
-			}()
-
-			var (
-				framesTotal  = len(a.captureFrames)
-				framesPal    = make([]*image.Paletted, framesTotal)
-				frameDelays  = make([]int, framesTotal)
-				framesPerCPU = framesTotal / runtime.NumCPU()
-			)
-
-			var waitGroup sync.WaitGroup
-
-			for i := 0; i < framesTotal; i += framesPerCPU {
-				waitGroup.Add(1)
-
-				go func(start, end int) {
-					defer waitGroup.Done()
-
-					for j := start; j < end; j++ {
-						var buffer bytes.Buffer
-						if err := gif.Encode(&buffer, a.captureFrames[j], nil); err != nil {
-							panic(err)
-						}
-
-						framePal, err := gif.Decode(&buffer)
-						if err != nil {
-							panic(err)
-						}
-
-						framesPal[j] = framePal.(*image.Paletted)
-						frameDelays[j] = 5
-					}
-				}(i, d2common.MinInt(i+framesPerCPU, framesTotal))
-			}
-
-			waitGroup.Wait()
-
-			if err := gif.EncodeAll(fp, &gif.GIF{Image: framesPal, Delay: frameDelays}); err != nil {
-				return err
-			}
-
-			log.Printf("saved animation to %s", a.capturePath)
 		}
 	}
 
@@ -468,7 +414,7 @@ func (a *App) advance(elapsed, elapsedUnscaled, current float64) error {
 
 func (a *App) update(target d2interface.Surface) error {
 	currentTime := d2common.Now()
-	elapsedTimeUnscaled := (currentTime - a.lastTime)
+	elapsedTimeUnscaled := currentTime - a.lastTime
 	elapsedTime := elapsedTimeUnscaled * a.timeScale
 	a.lastTime = currentTime
 
@@ -527,10 +473,92 @@ func (a *App) toggleFullScreen() {
 	a.terminal.OutputInfof("fullscreen is now: %v", fullscreen)
 }
 
-func (a *App) captureFrame(path string) {
+func (a *App) setupCaptureFrame(path string) {
 	a.captureState = captureStateFrame
 	a.capturePath = path
 	a.captureFrames = nil
+}
+
+func (a *App) doCaptureFrame(target d2interface.Surface) error {
+	fp, err := os.Create(a.capturePath)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err := fp.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	screenshot := target.Screenshot()
+	if err := png.Encode(fp, screenshot); err != nil {
+		return err
+	}
+
+	log.Printf("saved frame to %s", a.capturePath)
+
+	return nil
+}
+
+func (a *App) doCaptureGif(target d2interface.Surface) {
+	screenshot := target.Screenshot()
+	a.captureFrames = append(a.captureFrames, screenshot)
+}
+
+func (a *App) convertFramesToGif() error {
+	fp, err := os.Create(a.capturePath)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err := fp.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	var (
+		framesTotal  = len(a.captureFrames)
+		framesPal    = make([]*image.Paletted, framesTotal)
+		frameDelays  = make([]int, framesTotal)
+		framesPerCPU = framesTotal / runtime.NumCPU()
+	)
+
+	var waitGroup sync.WaitGroup
+
+	for i := 0; i < framesTotal; i += framesPerCPU {
+		waitGroup.Add(1)
+
+		go func(start, end int) {
+			defer waitGroup.Done()
+
+			for j := start; j < end; j++ {
+				var buffer bytes.Buffer
+				if err := gif.Encode(&buffer, a.captureFrames[j], nil); err != nil {
+					panic(err)
+				}
+
+				framePal, err := gif.Decode(&buffer)
+				if err != nil {
+					panic(err)
+				}
+
+				framesPal[j] = framePal.(*image.Paletted)
+				frameDelays[j] = 5
+			}
+		}(i, d2common.MinInt(i+framesPerCPU, framesTotal))
+	}
+
+	waitGroup.Wait()
+
+	if err := gif.EncodeAll(fp, &gif.GIF{Image: framesPal, Delay: frameDelays}); err != nil {
+		return err
+	}
+
+	log.Printf("saved animation to %s", a.capturePath)
+
+	return nil
 }
 
 func (a *App) startAnimationCapture(path string) {
@@ -627,26 +655,28 @@ func enableProfiler(profileOption string) interface{ Stop() } {
 func updateInitError(target d2interface.Surface) error {
 	_ = target.Clear(colornames.Darkred)
 
-	width, height := target.GetSize()
-
-	target.PushTranslation(width/5, height/2)
+	target.PushTranslation(errMsgPadding, errMsgPadding)
 	target.DrawTextf(`Could not find the MPQ files in the directory: 
 		%s\nPlease put the files and re-run the game.`, d2config.Config.MpqPath)
 
 	return nil
 }
 
+// ToMainMenu forces the game to transition to the Main Menu
 func (a *App) ToMainMenu() {
-	mainMenu := d2gamescreen.CreateMainMenu(a, a.renderer, a.inputManager, a.audio, d2gamescreen.BuildInfo{Branch: a.gitBranch, Commit: a.gitCommit})
+	buildInfo := d2gamescreen.BuildInfo{Branch: a.gitBranch, Commit: a.gitCommit}
+	mainMenu := d2gamescreen.CreateMainMenu(a, a.renderer, a.inputManager, a.audio, buildInfo)
 	mainMenu.SetScreenMode(d2gamescreen.ScreenModeMainMenu)
 	d2screen.SetNextScreen(mainMenu)
 }
 
+// ToSelectHero forces the game to transition to the Select Hero (create character) screen
 func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType, host string) {
 	selectHero := d2gamescreen.CreateSelectHeroClass(a, a.renderer, a.audio, connType, host)
 	d2screen.SetNextScreen(selectHero)
 }
 
+// ToCreateGame forces the game to transition to the Create Game screen
 func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.ClientConnectionType, host string) {
 	gameClient, _ := d2client.Create(connType, a.scriptEngine)
 
@@ -658,16 +688,20 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 	d2screen.SetNextScreen(d2gamescreen.CreateGame(a, a.renderer, a.inputManager, a.audio, gameClient, a.terminal))
 }
 
+// ToCharacterSelect forces the game to transition to the Character Select (load character) screen
 func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnectionType, connHost string) {
 	characterSelect := d2gamescreen.CreateCharacterSelect(a, a.renderer, a.inputManager, a.audio, connType, connHost)
 	d2screen.SetNextScreen(characterSelect)
 }
 
-func (a *App) ToMapEngineTest(region int, level int) {
-	met := d2gamescreen.CreateMapEngineTest(0, 1, a.terminal, a.renderer, a.inputManager, a.audio)
+// ToMapEngineTest forces the game to transition to the map engine test screen
+func (a *App) ToMapEngineTest(region, level int) {
+	met := d2gamescreen.CreateMapEngineTest(region, level, a.terminal, a.renderer, a.inputManager,
+		a.audio)
 	d2screen.SetNextScreen(met)
 }
 
+// ToCredits forces the game to transition to the credits screen
 func (a *App) ToCredits() {
 	d2screen.SetNextScreen(d2gamescreen.CreateCredits(a, a.renderer))
 }

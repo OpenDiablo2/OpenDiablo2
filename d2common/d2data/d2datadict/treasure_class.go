@@ -2,45 +2,15 @@ package d2datadict
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 const (
 	maxTreasuresPerRecord = 10
 	treasureItemFmt       = "Item%d"
 	treasureProbFmt       = "Prob%d"
-)
-
-// TreasureDropType indicates the drop type of the treasure
-type TreasureDropType int
-
-const (
-	// TreasureNone is default bad case, but nothing should have this
-	TreasureNone TreasureDropType = iota
-
-	// TreasureGold indicates that the treasure drop type is for gold
-	TreasureGold
-
-	// indicates that the drop type resolves directly to an ItemCommonRecord
-	TreasureWeapon
-	TreasureArmor
-	TreasureMisc
-
-	// indicates that the code is for a dynamic item record, because the treasure code has
-	// and item level appended to it. this is for things like `armo63` or `weap24` which does not
-	// explicitly have an item record that matches this code, but we need to resolve this
-	TreasureWeaponDynamic
-	TreasureArmorDynamic
-	TreasureMiscDynamic
-)
-
-const (
-	GoldMultDropCodeStr string = "gld,mul="
-	GoldDropCodeStr            = "gld"
-	WeaponDropCodeStr          = "weap"
-	ArmorDropCodeStr           = "armo"
-	MiscDropCodeStr            = "misc"
 )
 
 // TreasureClassRecord represents a rule for item drops in diablo 2
