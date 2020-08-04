@@ -322,6 +322,7 @@ const (
 	MonType      = "/data/global/excel/Montype.txt"
 	SuperUniques = "/data/global/excel/SuperUniques.txt"
 	MonMode      = "/data/global/excel/monmode.txt"
+	MonsterPlacement = "/data/global/excel/MonPlace.txt"
 
 	// --- Skill Data ---
 
