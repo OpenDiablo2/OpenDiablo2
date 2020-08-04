@@ -270,6 +270,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.MonsterSound, d2datadict.LoadMonsterSounds},
 		{d2resource.MonsterSequence, d2datadict.LoadMonsterSequences},
 		{d2resource.PlayerClass, d2datadict.LoadPlayerClasses},
+		{d2resource.MonsterPlacement, d2datadict.LoadMonsterPlacements},
 	}
 
 	d2datadict.InitObjectRecords()
