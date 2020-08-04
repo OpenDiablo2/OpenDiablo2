@@ -24,7 +24,7 @@ import (
 type RemoteClientConnection struct {
 	clientListener d2networking.ClientListener // The GameClient
 	uniqueID       string                      // Unique ID generated on construction
-	udpConnection  *net.UDPConn                // UDP connection to the server
+	tcpConnection  *net.TCPConn                // UDP connection to the server
 	active         bool                        // The connection is currently open
 }
 
@@ -46,14 +46,14 @@ func (r *RemoteClientConnection) Open(connectionString, saveFilePath string) err
 	}
 
 	// TODO: Connect to the server
-	udpAddress, err := net.ResolveUDPAddr("udp", connectionString)
+	tcpAddress, err := net.ResolveTCPAddr("tcp", connectionString)
 
 	// TODO: Show connection error screen if connection fails
 	if err != nil {
 		return err
 	}
 
-	r.udpConnection, err = net.DialUDP("udp", nil, udpAddress)
+	r.tcpConnection, err = net.DialTCP("tcp", nil, tcpAddress)
 	// TODO: Show connection error screen if connection fails
 	if err != nil {
 		return err
@@ -62,10 +62,12 @@ func (r *RemoteClientConnection) Open(connectionString, saveFilePath string) err
 	r.active = true
 	go r.serverListener()
 
-	log.Printf("Connected to server at %s", r.udpConnection.RemoteAddr().String())
+	log.Printf("Connected to server at %s", r.tcpConnection.RemoteAddr().String())
 
 	gameState := d2player.LoadPlayerState(saveFilePath)
-	err = r.SendPacketToServer(d2netpacket.CreatePlayerConnectionRequestPacket(r.GetUniqueID(), gameState))
+	packet := d2netpacket.CreatePlayerConnectionRequestPacket(r.GetUniqueID(), gameState)
+	log.Println(packet)
+	err = r.SendPacketToServer(packet)
 
 	if err != nil {
 		log.Print("RemoteClientConnection: error sending PlayerConnectionRequestPacket to server.")
@@ -107,42 +109,42 @@ func (r *RemoteClientConnection) SetClientListener(listener d2networking.ClientL
 // SendPacketToServer compresses the JSON encoding of a NetPacket and
 // sends it to the server.
 func (r *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket) error {
-	data, err := json.Marshal(packet.PacketData)
+	data, err := json.Marshal(packet)
 	if err != nil {
 		return err
 	}
 
-	var buff bytes.Buffer
+	//var buff bytes.Buffer
+	//
+	//buff.WriteByte(byte(packet.PacketType))
+	//writer, _ := gzip.NewWriterLevel(&buff, gzip.BestCompression)
+	//
+	//var written int
+	//
+	//if written, err = writer.Write(data); err != nil {
+	//	return err
+	//} else if written == 0 {
+	//	return fmt.Errorf("remoteClientConnection: attempted to send empty %v packet body", packet.PacketType)
+	//}
+	//
+	//if writeErr := writer.Close(); writeErr != nil {
+	//	return writeErr
+	//}
 
-	buff.WriteByte(byte(packet.PacketType))
-	writer, _ := gzip.NewWriterLevel(&buff, gzip.BestCompression)
-
-	var written int
-
-	if written, err = writer.Write(data); err != nil {
-		return err
-	} else if written == 0 {
-		return fmt.Errorf("remoteClientConnection: attempted to send empty %v packet body", packet.PacketType)
-	}
-
-	if writeErr := writer.Close(); writeErr != nil {
-		return writeErr
-	}
-
-	if _, err = r.udpConnection.Write(buff.Bytes()); err != nil {
+	if _, err = r.tcpConnection.Write(data); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// serverListener runs a while loop, reading from the GameServer's UDP
+// serverListener runs a while loop, reading from the GameServer's TCP
 // connection.
 func (r *RemoteClientConnection) serverListener() {
-	buffer := make([]byte, 4096)
+	buf := make([]byte, 4096)
 
 	for r.active {
-		n, _, err := r.udpConnection.ReadFromUDP(buffer)
+		n, err := r.tcpConnection.Read(buf)
 		if err != nil {
 			fmt.Printf("Socket error: %s\n", err)
 			continue
@@ -152,7 +154,7 @@ func (r *RemoteClientConnection) serverListener() {
 			continue
 		}
 
-		data, packetType, err := r.bytesToJSON(buffer)
+		data, packetType, err := r.bytesToJSON(buf)
 		if err != nil {
 			log.Println(packetType, err)
 		}

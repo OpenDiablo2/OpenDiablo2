@@ -1,8 +1,10 @@
 package d2netpacket
 
 import (
+	"encoding/json"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
+	"log"
 )
 
 // PlayerConnectionRequestPacket contains a player ID and game state.
@@ -22,4 +24,14 @@ func CreatePlayerConnectionRequestPacket(id string, playerState *d2player.Player
 			PlayerState: playerState,
 		},
 	}
+}
+
+func UnmarshalPlayerConnectionRequest(packet []byte) (PlayerConnectionRequestPacket, error) {
+	var p NetPacket
+	if err := json.Unmarshal(packet, &p); err != nil {
+		return PlayerConnectionRequestPacket{}, err
+	}
+
+	log.Println(p)
+	return p.PacketData.(PlayerConnectionRequestPacket), nil
 }
