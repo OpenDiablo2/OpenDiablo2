@@ -257,7 +257,7 @@ func LoadItemTypes(file []byte) {
 }
 
 // ItemEquivalenciesByTypeCode describes item equivalencies for ItemTypes
-var ItemEquivalenciesByTypeCode map[string][]*ItemCommonRecord
+var ItemEquivalenciesByTypeCode map[string][]*ItemCommonRecord //nolint:gochecknoglobals // Currently global by design
 
 // LoadItemEquivalencies loads a map of ItemType string codes to slices of ItemCommonRecord pointers
 func LoadItemEquivalencies() {
@@ -329,8 +329,10 @@ func itemEquivPresent(icr *ItemCommonRecord, list []*ItemCommonRecord) bool {
 	return false
 }
 
-var itemCommonTypeLookup map[*ItemCommonRecord][]string
+var itemCommonTypeLookup map[*ItemCommonRecord][]string //nolint:gochecknoglobals // Currently global by design
 
+// FindEquivalentTypesByItemCommonRecord returns itemtype codes that are equivalent
+// to the given item common record
 func FindEquivalentTypesByItemCommonRecord(icr *ItemCommonRecord) []string {
 	if itemCommonTypeLookup == nil {
 		itemCommonTypeLookup = make(map[*ItemCommonRecord][]string)

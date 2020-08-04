@@ -6,13 +6,17 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// ComponentCodeRecord represents a single row from compcode.txt
 type ComponentCodeRecord struct {
 	Component string
 	Code      string
 }
 
-var ComponentCodes map[string]*ComponentCodeRecord
+// ComponentCodes is a lookup table for DCC Animation Component Subtype,
+// it links hardcoded data with the txt files
+var ComponentCodes map[string]*ComponentCodeRecord //nolint:gochecknoglobals // Currently global by design
 
+// LoadComponentCodes loads components code records from compcode.txt
 func LoadComponentCodes(file []byte) {
 	ComponentCodes = make(map[string]*ComponentCodeRecord)
 
@@ -30,5 +34,4 @@ func LoadComponentCodes(file []byte) {
 	}
 
 	log.Printf("Loaded %d ComponentCode records", len(ComponentCodes))
-
 }

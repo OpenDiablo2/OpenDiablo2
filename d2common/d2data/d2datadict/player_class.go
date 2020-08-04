@@ -6,20 +6,20 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
-//PlayerClassRecord represents a single line from PlayerClass.txt
-//Lookup table for class codes
+// PlayerClassRecord represents a single line from PlayerClass.txt
+// Lookup table for class codes
 type PlayerClassRecord struct {
-	//Class name
+	// Name of the player class
 	Name string
 
-	//Class code
+	// Code for the player class
 	Code string
 }
 
-//PlayerClasses stores the PlayerClassRecords
-var PlayerClasses map[string]*PlayerClassRecord
+// PlayerClasses stores the PlayerClassRecords
+var PlayerClasses map[string]*PlayerClassRecord // nolint:gochecknoglobals // Currently global by design
 
-//LoadPlayerClasses loads the PlayerClassRecords into PlayerClasses
+// LoadPlayerClasses loads the PlayerClassRecords into PlayerClasses
 func LoadPlayerClasses(file []byte) {
 	PlayerClasses = make(map[string]*PlayerClassRecord)
 
@@ -29,9 +29,11 @@ func LoadPlayerClasses(file []byte) {
 			Name: d.String("Player Class"),
 			Code: d.String("Code"),
 		}
-		if record.Name == "Expansion" {
+
+		if record.Name == expansion {
 			continue
 		}
+
 		PlayerClasses[record.Name] = record
 	}
 

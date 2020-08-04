@@ -6,12 +6,15 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// EventRecord is a representation of a single row from events.txt
 type EventRecord struct {
 	Event string
 }
 
-var Events map[string]*EventRecord
+// Events holds all of the event records from events.txt
+var Events map[string]*EventRecord //nolint:gochecknoglobals // Currently global by design
 
+// LoadEvents loads all of the event records from events.txt
 func LoadEvents(file []byte) {
 	Events = make(map[string]*EventRecord)
 
@@ -28,5 +31,4 @@ func LoadEvents(file []byte) {
 	}
 
 	log.Printf("Loaded %d Event records", len(Events))
-
 }

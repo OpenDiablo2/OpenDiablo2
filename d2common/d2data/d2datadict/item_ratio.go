@@ -14,8 +14,9 @@ type dropRatioInfo struct {
 	divisorMin int
 }
 
-//ItemRatioRecord encapsulates information found in ItemRatio.txt
-//The information has been gathered from [https://d2mods.info/forum/kb/viewarticle?a=387]
+// ItemRatioRecord encapsulates information found in ItemRatio.txt, it specifies drop ratios
+// for various types of items
+// The information has been gathered from [https://d2mods.info/forum/kb/viewarticle?a=387]
 type ItemRatioRecord struct {
 	Function string
 	// 0 for classic, 1 for LoD
@@ -34,8 +35,10 @@ type ItemRatioRecord struct {
 	NormalDropInfo    dropRatioInfo
 }
 
-var ItemRatios map[string]*ItemRatioRecord
+// ItemRatios holds all of the ItemRatioRecords from ItemRatio.txt
+var ItemRatios map[string]*ItemRatioRecord //nolint:gochecknoglobals // Currently global by design
 
+// LoadItemRatios loads all of the ItemRatioRecords from ItemRatio.txt
 func LoadItemRatios(file []byte) {
 	ItemRatios = make(map[string]*ItemRatioRecord)
 

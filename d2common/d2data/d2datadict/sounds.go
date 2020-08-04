@@ -9,43 +9,43 @@ import (
 // SoundEntry represents a sound entry
 type SoundEntry struct {
 	Handle    string
-	Index     int
 	FileName  string
+	Index     int
 	Volume    int
 	GroupSize int
-	Loop      bool
 	FadeIn    int
 	FadeOut   int
-	DeferInst bool
-	StopInst  bool
 	Duration  int
 	Compound  int
 	Reverb    int
 	Falloff   int
+	Priority  int
+	Block1    int
+	Block2    int
+	Block3    int
+	Loop      bool
+	DeferInst bool
+	StopInst  bool
 	Cache     bool
 	AsyncOnly bool
-	Priority  int
 	Stream    bool
 	Stereo    bool
 	Tracking  bool
 	Solo      bool
 	MusicVol  bool
-	Block1    int
-	Block2    int
-	Block3    int
 }
 
 // Sounds stores all of the SoundEntries
 //nolint:gochecknoglobals // Currently global by design, only written once
-var Sounds map[string]SoundEntry
+var Sounds map[string]*SoundEntry
 
 // LoadSounds loads SoundEntries from sounds.txt
 func LoadSounds(file []byte) {
-	Sounds = make(map[string]SoundEntry)
+	Sounds = make(map[string]*SoundEntry)
 
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
-		entry := SoundEntry{
+		entry := &SoundEntry{
 			Handle:    d.String("Sound"),
 			Index:     d.Number("Index"),
 			FileName:  d.String("FileName"),
@@ -84,9 +84,9 @@ func LoadSounds(file []byte) {
 
 // SelectSoundByIndex selects a sound by its ID
 func SelectSoundByIndex(index int) *SoundEntry {
-	for _, el := range Sounds {
-		if el.Index == index {
-			return &el
+	for idx := range Sounds {
+		if Sounds[idx].Index == index {
+			return Sounds[idx]
 		}
 	}
 

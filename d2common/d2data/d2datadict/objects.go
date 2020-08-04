@@ -71,15 +71,10 @@ type ObjectRecord struct {
 	Width  int
 	Height int
 
-	OperateFn int // what function is called when the player clicks on the object
-	// (todo: we should enumerate all the functions somewhere, but probably not here
-	//        b/c it's a very long list)
+	OperateFn  int // what function is called when the player clicks on the object
 	PopulateFn int // what function is used to spawn this object?
-	// (see above todo)
-	InitFn int // what function is run when the object is initialized?
-	// (see above todo)
-	ClientFn int // controls special audio-visual functions
-	// (see above todo)
+	InitFn     int // what function is run when the object is initialized?
+	ClientFn   int // controls special audio-visual functions
 
 	// 'To ...' or 'trap door' when highlighting, not sure which is T/F
 	AutoMap int // controls how this object appears on the map

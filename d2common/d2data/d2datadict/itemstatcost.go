@@ -1,9 +1,10 @@
 package d2datadict
 
 import (
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"log"
 )
 
 // ItemStatCostRecord represents a row from itemstatcost.txt
