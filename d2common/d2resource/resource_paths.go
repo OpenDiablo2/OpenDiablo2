@@ -214,6 +214,7 @@ const (
 	MonsterSound          = "/data/global/excel/monsounds.txt"
 	MonsterSequence       = "/data/global/excel/monseq.txt"
 	PlayerClass           = "/data/global/excel/PlayerClass.txt"
+	ObjectGroup           = "/data/global/excel/objgroup.txt"
 	CompCode              = "/data/global/excel/compcode.txt"
 
 	// --- Animations ---
