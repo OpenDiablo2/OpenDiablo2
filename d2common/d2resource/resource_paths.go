@@ -214,6 +214,7 @@ const (
 	MonsterSound          = "/data/global/excel/monsounds.txt"
 	MonsterSequence       = "/data/global/excel/monseq.txt"
 	PlayerClass           = "/data/global/excel/PlayerClass.txt"
+	CompCode              = "/data/global/excel/compcode.txt"
 
 	// --- Animations ---
 
@@ -316,13 +317,14 @@ const (
 
 	// --- Enemy Data ---
 
-	MonStats     = "/data/global/excel/monstats.txt"
-	MonStats2    = "/data/global/excel/monstats2.txt"
-	MonPreset    = "/data/global/excel/monpreset.txt"
-	MonType      = "/data/global/excel/Montype.txt"
-	SuperUniques = "/data/global/excel/SuperUniques.txt"
-	MonMode      = "/data/global/excel/monmode.txt"
+	MonStats         = "/data/global/excel/monstats.txt"
+	MonStats2        = "/data/global/excel/monstats2.txt"
+	MonPreset        = "/data/global/excel/monpreset.txt"
+	MonType          = "/data/global/excel/Montype.txt"
+	SuperUniques     = "/data/global/excel/SuperUniques.txt"
+	MonMode          = "/data/global/excel/monmode.txt"
 	MonsterPlacement = "/data/global/excel/MonPlace.txt"
+	MonsterAI        = "/data/global/excel/monai.txt"
 
 	// --- Skill Data ---
 

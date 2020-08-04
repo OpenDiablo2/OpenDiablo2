@@ -6,60 +6,55 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
-//MonsterLevelRecord represents a single row in monlvl.txt
+// MonsterLevelRecord represents a single row in monlvl.txt
 type MonsterLevelRecord struct {
 
-	//The level
+	// The level
 	Level int
 
-	//Values for Battle.net
-	BattleNet monsterLevelValues
+	// Values for Battle.net
+	BattleNet monsterDifficultyLevels
 
-	//Values for ladder/single player/lan
-	Ladder monsterLevelValues
+	// Values for ladder/single player/lan
+	Ladder monsterDifficultyLevels
+}
+
+type monsterDifficultyLevels struct {
+	Normal    monsterLevelValues
+	Nightmare monsterLevelValues
+	Hell      monsterLevelValues
 }
 
 type monsterLevelValues struct {
-	//Armor class
-	//An AC is calcuated as (MonLvl.txt Ac * Monstats.txt AC) / 100)
-	ArmorClass          int
-	ArmorClassNightmare int
-	ArmorClassHell      int
+	// DefenseRating AC is calcuated as (MonLvl.txt Ac * Monstats.txt AC) / 100)
+	DefenseRating int // also known as armor class
 
-	//To hit, influences ToHit values for both attacks
+	// ToHit influences ToHit values for both attacks
 	// (MonLvl.txt TH * Monstats.txt A1TH
 	// and MonLvl.txt TH * Monstats.txt A2TH) / 100
-	ToHit          int
-	ToHitNightmare int
-	ToHitHell      int
+	AttackRating int
 
-	//Hitpoints, influences both minimum and maximum HP
-	//(MonLvl.txt HP * Monstats.txt minHP) / 100
+	// Hitpoints, influences both minimum and maximum HP
+	// (MonLvl.txt HP * Monstats.txt minHP) / 100
 	// and MonLvl.txt HP * Monstats.txt maxHP) / 100
-	Hitpoints          int
-	HitpointsNightmare int
-	HitpointsHell      int
+	Hitpoints int
 
-	//Damage, influences minimum and maximum damage for both attacks
-	//MonLvl.txt DM * Monstats.txt A1MinD) / 100
+	// Damage, influences minimum and maximum damage for both attacks
+	// MonLvl.txt DM * Monstats.txt A1MinD) / 100
 	// and MonLvl.txt DM * Monstats.txt A1MaxD) / 100
 	// and MonLvl.txt DM * Monstats.txt A2MinD) / 100
 	// and MonLvl.txt DM * Monstats.txt A2MaxD) / 100
-	Damage          int
-	DamageNightmare int
-	DamageHell      int
+	Damage int
 
-	//Experience points
-	//The formula is (MonLvl.txt XP * Monstats.txt Exp) / 100
-	Experience          int
-	ExperienceNightmare int
-	ExperienceHell      int
+	// Experience points,
+	// the formula is (MonLvl.txt XP * Monstats.txt Exp) / 100
+	Experience int
 }
 
-//MonsterLevels stores the MonsterLevelRecords
-var MonsterLevels map[int]*MonsterLevelRecord
+// MonsterLevels stores the MonsterLevelRecords
+var MonsterLevels map[int]*MonsterLevelRecord //nolint:gochecknoglobals // Currently global by design
 
-//LoadMonsterLevels loads LoadMonsterLevelRecords into MonsterLevels
+// LoadMonsterLevels loads LoadMonsterLevelRecords into MonsterLevels
 func LoadMonsterLevels(file []byte) {
 	MonsterLevels = make(map[int]*MonsterLevelRecord)
 
@@ -67,39 +62,39 @@ func LoadMonsterLevels(file []byte) {
 	for d.Next() {
 		record := &MonsterLevelRecord{
 			Level: d.Number("Level"),
-			BattleNet: monsterLevelValues{
-				ArmorClass:          d.Number("AC"),
-				ArmorClassNightmare: d.Number("AC(N)"),
-				ArmorClassHell:      d.Number("AC(H)"),
-				ToHit:               d.Number("TH"),
-				ToHitNightmare:      d.Number("TH (N)"),
-				ToHitHell:           d.Number("TH (H)"),
-				Hitpoints:           d.Number("HP"),
-				HitpointsNightmare:  d.Number("HP (N)"),
-				HitpointsHell:       d.Number("HP (H)"),
-				Damage:              d.Number("DM"),
-				DamageNightmare:     d.Number("DM (N)"),
-				DamageHell:          d.Number("DM (H)"),
-				Experience:          d.Number("XP"),
-				ExperienceNightmare: d.Number("XP (N)"),
-				ExperienceHell:      d.Number("XP (H)"),
+			BattleNet: monsterDifficultyLevels{
+				Normal: monsterLevelValues{
+					Hitpoints:  d.Number("HP"),
+					Damage:     d.Number("DM"),
+					Experience: d.Number("XP"),
+				},
+				Nightmare: monsterLevelValues{
+					Hitpoints:  d.Number("HP(N)"),
+					Damage:     d.Number("DM(N)"),
+					Experience: d.Number("XP(N)"),
+				},
+				Hell: monsterLevelValues{
+					Hitpoints:  d.Number("HP(H)"),
+					Damage:     d.Number("DM(H)"),
+					Experience: d.Number("XP(H)"),
+				},
 			},
-			Ladder: monsterLevelValues{
-				ArmorClass:          d.Number("L-AC"),
-				ArmorClassNightmare: d.Number("L-AC(N)"),
-				ArmorClassHell:      d.Number("L-AC(H)"),
-				ToHit:               d.Number("L-TH"),
-				ToHitNightmare:      d.Number("L-TH (N)"),
-				ToHitHell:           d.Number("L-TH (H)"),
-				Hitpoints:           d.Number("L-HP"),
-				HitpointsNightmare:  d.Number("L-HP (N)"),
-				HitpointsHell:       d.Number("L-HP (H)"),
-				Damage:              d.Number("L-DM"),
-				DamageNightmare:     d.Number("L-DM (N)"),
-				DamageHell:          d.Number("L-DM (H)"),
-				Experience:          d.Number("L-XP"),
-				ExperienceNightmare: d.Number("L-XP (N)"),
-				ExperienceHell:      d.Number("L-XP (H)"),
+			Ladder: monsterDifficultyLevels{
+				Normal: monsterLevelValues{
+					Hitpoints:  d.Number("L-HP"),
+					Damage:     d.Number("L-DM"),
+					Experience: d.Number("L-XP"),
+				},
+				Nightmare: monsterLevelValues{
+					Hitpoints:  d.Number("L-HP(N)"),
+					Damage:     d.Number("L-DM(N)"),
+					Experience: d.Number("L-XP(N)"),
+				},
+				Hell: monsterLevelValues{
+					Hitpoints:  d.Number("L-HP(H)"),
+					Damage:     d.Number("L-DM(H)"),
+					Experience: d.Number("L-XP(H)"),
+				},
 			},
 		}
 		MonsterLevels[record.Level] = record

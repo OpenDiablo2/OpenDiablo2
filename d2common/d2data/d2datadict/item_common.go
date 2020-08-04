@@ -177,7 +177,8 @@ func LoadCommonItems(file []byte, source d2enum.InventoryItemType) map[string]*I
 		}
 
 		rec := createCommonItemRecord(line, mapping, source)
-		if rec.Name == "Expansion" {
+
+		if rec.Name == expansion {
 			continue
 		}
 
@@ -396,4 +397,3 @@ func createItemUsageStats(r *[]string, mapping map[string]int) [3]ItemUsageStat 
 
 	return result
 }
-

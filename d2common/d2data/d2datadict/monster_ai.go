@@ -6,13 +6,15 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
-// The monai.txt file is a lookup table for unit AI codes
+// MonsterAIRecord represents a single row from monai.txt
 type MonsterAIRecord struct {
 	AI string
 }
 
-var MonsterAI map[string]*MonsterAIRecord
+// MonsterAI holds the MonsterAIRecords, The monai.txt file is a lookup table for unit AI codes
+var MonsterAI map[string]*MonsterAIRecord //nolint:gochecknoglobals // Currently global by design
 
+// LoadMonsterAI loads MonsterAIRecords from monai.txt
 func LoadMonsterAI(file []byte) {
 	MonsterAI = make(map[string]*MonsterAIRecord)
 
@@ -29,5 +31,4 @@ func LoadMonsterAI(file []byte) {
 	}
 
 	log.Printf("Loaded %d MonsterAI records", len(MonsterAI))
-
 }

@@ -1,10 +1,13 @@
 package d2datadict
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// SkillDescriptionRecord is a single row from skilldesc.txt and is used for
+// generating text strings for skills.
 type SkillDescriptionRecord struct {
 	Name         string // skilldesc
 	SkillPage    string // SkillPage
@@ -121,12 +124,12 @@ type SkillDescriptionRecord struct {
 	Dsc3calcb7   string // dsc3calcb7
 }
 
-// ItemStatCosts stores all of the ItemStatCostRecords
+// SkillDescriptions stores all of the SkillDescriptionRecords
 //nolint:gochecknoglobals // Currently global by design
 var SkillDescriptions map[string]*SkillDescriptionRecord
 
-// LoadItemStatCosts loads ItemStatCostRecord's from text
-func LoadSkillDescriptions(file []byte) {
+// LoadSkillDescriptions loads skill description records from skilldesc.txt
+func LoadSkillDescriptions(file []byte) { //nolint:funlen // doesn't make sense to split
 	SkillDescriptions = make(map[string]*SkillDescriptionRecord)
 
 	d := d2common.LoadDataDictionary(file)

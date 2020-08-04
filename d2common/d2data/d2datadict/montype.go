@@ -17,7 +17,6 @@ type MonTypeRecord struct {
 	// display code that accesses MonType uses StrPlur.
 	StrSing   string
 	StrPlural string
-	// EOL int // unused
 }
 
 // MonTypes stores all of the MonTypeRecords

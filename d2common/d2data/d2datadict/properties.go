@@ -6,6 +6,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+// PropertyStatRecord contains stat information for a property
 type PropertyStatRecord struct {
 	SetID      int
 	Value      int
@@ -21,8 +22,7 @@ type PropertyRecord struct {
 }
 
 // Properties stores all of the PropertyRecords
-var Properties map[string]*PropertyRecord //nolint:gochecknoglobals // Currently global by design, 
-// only written once
+var Properties map[string]*PropertyRecord //nolint:gochecknoglobals // Currently global by design, only written once
 
 // LoadProperties loads gem records into a map[string]*PropertiesRecord
 func LoadProperties(file []byte) {

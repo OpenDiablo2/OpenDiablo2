@@ -6,19 +6,19 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
-//PlrModeRecord represents a single line in PlrMode.txt
+// PlrModeRecord represents a single line in PlrMode.txt
 type PlrModeRecord struct {
-	//Player animation mode name
+	// Player animation mode name
 	Name string
 
-	//Player animation mode token
+	// Player animation mode token
 	Token string
 }
 
-//PlrModes stores the PlrModeRecords
+// PlrModes stores the PlrModeRecords
 var PlrModes map[string]*PlrModeRecord //nolint:gochecknoglobals // Currently global by design
 
-//LoadPlrModes loads PlrModeRecords into PlrModes
+// LoadPlrModes loads PlrModeRecords into PlrModes
 func LoadPlrModes(file []byte) {
 	PlrModes = make(map[string]*PlrModeRecord)
 

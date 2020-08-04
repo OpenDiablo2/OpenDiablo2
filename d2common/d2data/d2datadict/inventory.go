@@ -1,9 +1,10 @@
 package d2datadict
 
 import (
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"log"
 )
 
 type box struct {
@@ -16,13 +17,15 @@ type box struct {
 }
 
 type grid struct {
-	Box     *box
-	Rows    int
-	Columns int
-	CellWidth int
+	Box        *box
+	Rows       int
+	Columns    int
+	CellWidth  int
 	CellHeight int
 }
 
+// InventoryRecord represents a single row from inventory.txt, it describes the grid
+// layout and positioning of various inventory-related ui panels.
 type InventoryRecord struct {
 	Name  string
 	Panel *box
@@ -30,11 +33,14 @@ type InventoryRecord struct {
 	Slots map[d2enum.EquippedSlot]*box
 }
 
-var Inventory map[string]*InventoryRecord
+// Inventory holds all of the inventory records from inventory.txt
+var Inventory map[string]*InventoryRecord //nolint:gochecknoglobals // Currently global by design
 
-func LoadInventory(file []byte) {
+// LoadInventory loads all of the inventory records from inventory.txt
+func LoadInventory(file []byte) { //nolint:funlen // doesn't make sense to split
 	d := d2common.LoadDataDictionary(file)
-	Inventory = make(map[string]*InventoryRecord, 0)
+	Inventory = make(map[string]*InventoryRecord)
+
 	for d.Next() {
 		// we need to calc the width/height for the box as it isn't
 		// specified in the txt file
@@ -59,9 +65,9 @@ func LoadInventory(file []byte) {
 			Name:  d.String("class"),
 			Panel: pBox,
 			Grid: &grid{
-				Box:     gBox,
-				Rows:    d.Number("gridY"),
-				Columns: d.Number("gridX"),
+				Box:        gBox,
+				Rows:       d.Number("gridY"),
+				Columns:    d.Number("gridX"),
 				CellWidth:  d.Number("gridBoxWidth"),
 				CellHeight: d.Number("gridBoxHeight"),
 			},

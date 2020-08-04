@@ -6,30 +6,18 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
-// OverlayRecord encapsulates information found in Overlay.txt
 // The information has been gathered from [https://d2mods.info/forum/kb/viewarticle?a=465]
+
+// OverlayRecord encapsulates information found in Overlay.txt
 type OverlayRecord struct {
 	// Overlay name
-	Overlay string
+	Name string
+
 	// .dcc file found in Data/Globals/Overlays
 	Filename string
-	Version  bool
-	// Apparently unused, a similar field in the .dcc file is used instead
-	Frames int
-	// Unused
-	Character string
-	// Controls overlay drawing precedence
-	PreDraw bool
-	// Unknown
-	OneOfN int
 
-	// Unknown
-	Dir  bool
-	Open bool
-	Beta bool
-
-	XOffset int
-	YOffset int
+	// XOffset, YOffset the x,y offset of the overlay
+	XOffset, YOffset int
 
 	// These values modify Y-axis placement
 	Height1 int
@@ -37,63 +25,71 @@ type OverlayRecord struct {
 	Height3 int
 	Height4 int
 
-	// Animation speed control
+	// AnimRate animation speed control
 	AnimRate int
-	// Unused
-	LoopWaitTime int
-	// Controls overlay blending mode, check out the link for more info
+
+	// Trans controls overlay blending mode, check out the link for more info
 	// This should probably become an "enum" later on
 	Trans int
-	// Maximum light radius
+
+	// Radius maximum for light
 	Radius int
-	// Light radius increase per frame
+
+	// InitRadius Light radius increase per frame
 	InitRadius int
 
-	Red   uint8
-	Green uint8
-	Blue  uint8
+	// Red, Green, Blue color for light
+	Red, Green, Blue uint8
 
-	// Unknown
-	NumDirections int
-	LocalBlood    int
+	// Version is 100 for expansion, 0 for vanilla
+	Version bool
+
+	// PreDraw controls overlay drawing precedence
+	PreDraw bool
+
+	// Unknown fields, commenting out for now
+	// NumDirections int
+	// LocalBlood    int
+	// OneOfN int
+	// Dir  bool
+	// Open bool
+	// Beta bool
+
+	// Apparently unused
+	// Character string
+	// LoopWaitTime int
+	// Frames int
 }
 
-var Overlays map[string]*OverlayRecord
+// Overlays contains all of the OverlayRecords from Overlay.txt
+var Overlays map[string]*OverlayRecord // nolint:gochecknoglobals // Currently global by design
 
+// LoadOverlays loads overlay records from Overlay.txt
 func LoadOverlays(file []byte) {
 	Overlays = make(map[string]*OverlayRecord)
 	d := d2common.LoadDataDictionary(file)
 
 	for d.Next() {
 		record := &OverlayRecord{
-			Overlay:       d.String("Overlay"),
-			Filename:      d.String("Filename"),
-			Version:       d.Bool("Version"),
-			Frames:        d.Number("Frames"),
-			Character:     d.String("Character"),
-			PreDraw:       d.Bool("PreDraw"),
-			OneOfN:        d.Number("1ofN"),
-			Dir:           d.Bool("Dir"),
-			Open:          d.Bool("Open"),
-			Beta:          d.Bool("Beta"),
-			XOffset:       d.Number("Xoffset"),
-			YOffset:       d.Number("Yoffset"),
-			Height1:       d.Number("Height1"),
-			Height2:       d.Number("Height1"),
-			Height3:       d.Number("Height1"),
-			Height4:       d.Number("Height1"),
-			AnimRate:      d.Number("AnimRate"),
-			LoopWaitTime:  d.Number("LoopWaitTime"),
-			Trans:         d.Number("Trans"),
-			InitRadius:    d.Number("InitRadius"),
-			Radius:        d.Number("Radius"),
-			Red:           uint8(d.Number("Red")),
-			Green:         uint8(d.Number("Green")),
-			Blue:          uint8(d.Number("Blue")),
-			NumDirections: d.Number("NumDirections"),
-			LocalBlood:    d.Number("LocalBlood"),
+			Name:       d.String("Overlay"),
+			Filename:   d.String("Filename"),
+			Version:    d.Bool("Version"),
+			PreDraw:    d.Bool("PreDraw"),
+			XOffset:    d.Number("Xoffset"),
+			YOffset:    d.Number("Yoffset"),
+			Height1:    d.Number("Height1"),
+			Height2:    d.Number("Height1"),
+			Height3:    d.Number("Height1"),
+			Height4:    d.Number("Height1"),
+			AnimRate:   d.Number("AnimRate"),
+			Trans:      d.Number("Trans"),
+			InitRadius: d.Number("InitRadius"),
+			Radius:     d.Number("Radius"),
+			Red:        uint8(d.Number("Red")),
+			Green:      uint8(d.Number("Green")),
+			Blue:       uint8(d.Number("Blue")),
 		}
-		Overlays[record.Overlay] = record
+		Overlays[record.Name] = record
 	}
 
 	if d.Err != nil {
@@ -101,5 +97,4 @@ func LoadOverlays(file []byte) {
 	}
 
 	log.Printf("Loaded %d Overlay records", len(Overlays))
-
 }

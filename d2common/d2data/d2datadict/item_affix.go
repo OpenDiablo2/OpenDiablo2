@@ -9,11 +9,12 @@ import (
 )
 
 // MagicPrefix stores all of the magic prefix records
-var MagicPrefix map[string]*ItemAffixCommonRecord //nolint:gochecknoglobals // Currently global by
-// design
+// nolint:gochecknoglobals // Currently global by design
+var MagicPrefix map[string]*ItemAffixCommonRecord
+
 // MagicSuffix stores all of the magic suffix records
-var MagicSuffix map[string]*ItemAffixCommonRecord //nolint:gochecknoglobals // Currently global by
-// design
+// nolint:gochecknoglobals // Currently global by design
+var MagicSuffix map[string]*ItemAffixCommonRecord
 
 // LoadMagicPrefix loads MagicPrefix.txt
 func LoadMagicPrefix(file []byte) {
@@ -137,6 +138,7 @@ func createItemAffixRecords(
 
 		records[affix.Name] = affix
 	}
+
 	if d.Err != nil {
 		panic(d.Err)
 	}
@@ -220,7 +222,7 @@ type ItemAffixCommonRecord struct {
 // item with a given quality level
 func (a *ItemAffixCommonRecord) ProbabilityToSpawn(qlvl int) float64 {
 	if (qlvl > a.MaxLevel) || (qlvl < a.Level) {
-		return 0.0
+		return 0
 	}
 
 	p := float64(a.Frequency) / float64(a.Group.getTotalFrequency())
