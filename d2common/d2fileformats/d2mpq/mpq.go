@@ -369,14 +369,17 @@ func (v *MPQ) GetFileList() ([]string, error) {
 	return filePaths, nil
 }
 
+// Path returns the MPQ file path
 func (v *MPQ) Path() string {
 	return v.filePath
 }
 
+// Contains returns bool for whether the given filename exists in the mpq
 func (v *MPQ) Contains(filename string) bool {
 	return v.hashEntryMap.Contains(filename)
 }
 
+// Size returns the size of the mpq in bytes
 func (v *MPQ) Size() uint32 {
 	return v.data.ArchiveSize
 }
