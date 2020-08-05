@@ -6,6 +6,7 @@ import (
 	"container/ring"
 	"errors"
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"image"
 	"image/gif"
 	"image/png"
@@ -547,7 +548,7 @@ func (a *App) convertFramesToGif() error {
 				framesPal[j] = framePal.(*image.Paletted)
 				frameDelays[j] = 5
 			}
-		}(i, d2common.MinInt(i+framesPerCPU, framesTotal))
+		}(i, d2math.MinInt(i+framesPerCPU, framesTotal))
 	}
 
 	waitGroup.Wait()

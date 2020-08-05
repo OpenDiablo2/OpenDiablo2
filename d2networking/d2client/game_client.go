@@ -2,10 +2,10 @@ package d2client
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"log"
 	"os"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
@@ -240,7 +240,7 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 		return err
 	}
 
-	rads := d2common.GetRadiansBetween(
+	rads := d2math.GetRadiansBetween(
 		player.Position.X(),
 		player.Position.Y(),
 		playerCast.TargetX*numSubtilesPerTile,

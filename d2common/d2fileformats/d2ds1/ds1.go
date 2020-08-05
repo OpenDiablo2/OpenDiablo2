@@ -4,6 +4,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 )
 
@@ -42,7 +43,7 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 	ds1.Height = br.GetInt32() + 1
 
 	if ds1.Version >= 8 { //nolint:gomnd // Version number
-		ds1.Act = d2common.MinInt32(maxActNumber, br.GetInt32()+1)
+		ds1.Act = d2math.MinInt32(maxActNumber, br.GetInt32()+1)
 	}
 
 	if ds1.Version >= 10 { //nolint:gomnd // Version number

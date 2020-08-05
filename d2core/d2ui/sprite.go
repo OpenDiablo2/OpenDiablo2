@@ -2,13 +2,12 @@ package d2ui
 
 import (
 	"errors"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"image"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // Sprite is a positioned visual object.
@@ -67,7 +66,7 @@ func (s *Sprite) RenderSegmented(target d2interface.Surface, segmentsX, segments
 			}
 
 			frameWidth, frameHeight := s.GetCurrentFrameSize()
-			maxFrameHeight = d2common.MaxInt(maxFrameHeight, frameHeight)
+			maxFrameHeight = d2math.MaxInt(maxFrameHeight, frameHeight)
 			currentX += frameWidth
 		}
 

@@ -2,11 +2,11 @@ package d2gui
 
 import (
 	"errors"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
@@ -40,7 +40,7 @@ func renderSegmented(animation d2interface.Animation, segmentsX, segmentsY, fram
 			}
 
 			width, height := animation.GetCurrentFrameSize()
-			maxHeight = d2common.MaxInt(maxHeight, height)
+			maxHeight = d2math.MaxInt(maxHeight, height)
 			currentX += width
 		}
 

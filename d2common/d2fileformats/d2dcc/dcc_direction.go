@@ -1,6 +1,7 @@
 package d2dcc
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -58,10 +59,10 @@ func CreateDCCDirection(bm d2interface.BitMuncher, file *DCC) *DCCDirection { //
 	// Load the frame headers
 	for frameIdx := 0; frameIdx < file.FramesPerDirection; frameIdx++ {
 		result.Frames[frameIdx] = CreateDCCDirectionFrame(bm, result)
-		minx = int(d2common.MinInt32(int32(result.Frames[frameIdx].Box.Left), int32(minx)))
-		miny = int(d2common.MinInt32(int32(result.Frames[frameIdx].Box.Top), int32(miny)))
-		maxx = int(d2common.MaxInt32(int32(result.Frames[frameIdx].Box.Right()), int32(maxx)))
-		maxy = int(d2common.MaxInt32(int32(result.Frames[frameIdx].Box.Bottom()), int32(maxy)))
+		minx = int(d2math.MinInt32(int32(result.Frames[frameIdx].Box.Left), int32(minx)))
+		miny = int(d2math.MinInt32(int32(result.Frames[frameIdx].Box.Top), int32(miny)))
+		maxx = int(d2math.MaxInt32(int32(result.Frames[frameIdx].Box.Right()), int32(maxx)))
+		maxy = int(d2math.MaxInt32(int32(result.Frames[frameIdx].Box.Bottom()), int32(maxy)))
 	}
 
 	result.Box = d2common.Rectangle{Left: minx, Top: miny, Width: maxx - minx, Height: maxy - miny}

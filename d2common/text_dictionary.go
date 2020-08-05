@@ -14,7 +14,7 @@ type textDictionaryHashEntry struct {
 	NameLength  uint16
 }
 
-var lookupTable map[string]string
+var lookupTable map[string]string //nolint:gochecknoglobals // currently global by design
 
 const (
 	crcByteCount = 2
