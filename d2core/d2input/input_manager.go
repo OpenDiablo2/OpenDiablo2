@@ -19,7 +19,8 @@ type inputManager struct {
 	entries handlerEntryList
 }
 
-func New() d2interface.InputManager {
+// NewInputManager returns a new input manager instance
+func NewInputManager() d2interface.InputManager {
 	return &inputManager{
 		inputService: ebiten_input.InputService{},
 	}
