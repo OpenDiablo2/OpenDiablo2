@@ -110,11 +110,11 @@ func (w *widgetBase) SetMouseClickHandler(handler MouseHandler) {
 	w.mouseClickHandler = handler
 }
 
-func (w *widgetBase) getPosition() (int, int) {
+func (w *widgetBase) getPosition() (x, y int) {
 	return w.x, w.y
 }
 
-func (w *widgetBase) getSize() (int, int) {
+func (w *widgetBase) getSize() (width, height int) {
 	return 0, 0
 }
 

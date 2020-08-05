@@ -2,17 +2,16 @@ package d2gui
 
 import (
 	"errors"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 func loadFont(fontStyle FontStyle) (d2interface.Font, error) {
-	config, ok := fontStyleConfigs[fontStyle]
-	if !ok {
+	config := getFontStyleConfig(fontStyle)
+	if config == nil {
 		return nil, errors.New("invalid font style")
 	}
 

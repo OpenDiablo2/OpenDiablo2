@@ -11,7 +11,7 @@ var (
 	errNotInit = errors.New("gui system is not initialized")
 )
 
-var singleton *manager
+var singleton *manager // nolint:gochecknoglobals // currently global by design
 
 // Initialize creates a singleton gui manager
 func Initialize(inputManager d2interface.InputManager) error {
