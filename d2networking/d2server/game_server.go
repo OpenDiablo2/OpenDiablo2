@@ -210,6 +210,7 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 		packetTypeID, err := buff.ReadByte()
 		if err != nil {
 		}
+
 		log.Println(string(packetTypeID))
 
 		packetType := d2netpackettype.NetPacketType(packetTypeID)
@@ -221,9 +222,6 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 
 		sb := new(strings.Builder)
 
-		// This will throw errors where packets are not compressed. This doesn't
-		// break anything, so the gzip.ErrHeader error is currently ignored to
-		// avoid noisy logging.
 		written, err := io.Copy(sb, reader)
 
 		if err != nil && err != gzip.ErrHeader {
@@ -274,6 +272,7 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 func (g *GameServer) registerConnection(b []byte, conn net.Conn) error {
 	g.Lock()
 
+	log.Println(string(b))
 	// check to see if the server is full
 	if len(g.connections) >= g.maxConnections {
 		return ErrServerFull

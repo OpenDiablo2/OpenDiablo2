@@ -130,7 +130,7 @@ func (r *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket
 		return writeErr
 	}
 
-	if _, err = r.tcpConnection.Write(data); err != nil {
+	if _, err = r.tcpConnection.Write(buff.Bytes()); err != nil {
 		return err
 	}
 
