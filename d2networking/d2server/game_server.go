@@ -200,8 +200,10 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 			log.Println(err)
 			return
 		}
+		log.Println(string(buffer))
 
 		trimmedBuffer := buffer[:n]
+		log.Println(string(trimmedBuffer))
 		// If this is the first packet we are seeing from this specific connection we first need to see if the client
 		// is sending a valid request. If this is a valid request, we will register it and flip the connected switch
 		// to.
@@ -209,7 +211,6 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 			packet := d2netpacket.InspectPacketType(trimmedBuffer)
 			if packet != d2netpackettype.PlayerConnectionRequest {
 				log.Printf("Closing connection with %s: did not receive new player connection request...\n", conn.RemoteAddr().String())
-				continue
 			}
 
 			// TODO: I do not think this error check actually works. Need to retrofit with Errors.Is().

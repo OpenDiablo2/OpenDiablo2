@@ -147,7 +147,7 @@ func (r *RemoteClientConnection) serverListener() {
 		n, err := r.tcpConnection.Read(buf)
 		if err != nil {
 			fmt.Printf("Socket error: %s\n", err)
-			continue
+			r.active = false
 		}
 
 		if n <= 0 {
