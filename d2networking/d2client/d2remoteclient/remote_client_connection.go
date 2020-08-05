@@ -66,7 +66,6 @@ func (r *RemoteClientConnection) Open(connectionString, saveFilePath string) err
 
 	gameState := d2player.LoadPlayerState(saveFilePath)
 	packet := d2netpacket.CreatePlayerConnectionRequestPacket(r.GetUniqueID(), gameState)
-	log.Println(packet)
 	err = r.SendPacketToServer(packet)
 
 	if err != nil {
@@ -114,22 +113,22 @@ func (r *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket
 		return err
 	}
 
-	//var buff bytes.Buffer
-	//
-	//buff.WriteByte(byte(packet.PacketType))
-	//writer, _ := gzip.NewWriterLevel(&buff, gzip.BestCompression)
-	//
-	//var written int
-	//
-	//if written, err = writer.Write(data); err != nil {
-	//	return err
-	//} else if written == 0 {
-	//	return fmt.Errorf("remoteClientConnection: attempted to send empty %v packet body", packet.PacketType)
-	//}
-	//
-	//if writeErr := writer.Close(); writeErr != nil {
-	//	return writeErr
-	//}
+	var buff bytes.Buffer
+
+	buff.WriteByte(byte(packet.PacketType))
+	writer, _ := gzip.NewWriterLevel(&buff, gzip.BestCompression)
+
+	var written int
+
+	if written, err = writer.Write(data); err != nil {
+		return err
+	} else if written == 0 {
+		return fmt.Errorf("remoteClientConnection: attempted to send empty %v packet body", packet.PacketType)
+	}
+
+	if writeErr := writer.Close(); writeErr != nil {
+		return writeErr
+	}
 
 	if _, err = r.tcpConnection.Write(data); err != nil {
 		return err

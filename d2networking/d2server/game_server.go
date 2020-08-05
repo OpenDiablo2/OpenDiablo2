@@ -1,12 +1,16 @@
 package d2server
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"errors"
 	"fmt"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server/d2tcpclientconnection"
+	"io"
 	"log"
 	"net"
+	"strings"
 	"sync"
 	"time"
 
@@ -200,21 +204,45 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 			log.Println(err)
 			return
 		}
-		log.Println(string(buffer))
+
+		buff := bytes.NewBuffer(buffer)
+
+		packetTypeID, err := buff.ReadByte()
+		if err != nil {
+		}
+		log.Println(string(packetTypeID))
+
+		packetType := d2netpackettype.NetPacketType(packetTypeID)
+		reader, err := gzip.NewReader(buff)
+
+		if err != nil {
+			log.Println(err)
+		}
+
+		sb := new(strings.Builder)
+
+		// This will throw errors where packets are not compressed. This doesn't
+		// break anything, so the gzip.ErrHeader error is currently ignored to
+		// avoid noisy logging.
+		written, err := io.Copy(sb, reader)
+
+		if err != nil && err != gzip.ErrHeader {
+		}
+
+		if written == 0 {
+		}
 
 		trimmedBuffer := buffer[:n]
-		log.Println(string(trimmedBuffer))
 		// If this is the first packet we are seeing from this specific connection we first need to see if the client
 		// is sending a valid request. If this is a valid request, we will register it and flip the connected switch
 		// to.
 		if connected == 0 {
-			packet := d2netpacket.InspectPacketType(trimmedBuffer)
-			if packet != d2netpackettype.PlayerConnectionRequest {
+			if packetType != d2netpackettype.PlayerConnectionRequest {
 				log.Printf("Closing connection with %s: did not receive new player connection request...\n", conn.RemoteAddr().String())
 			}
 
 			// TODO: I do not think this error check actually works. Need to retrofit with Errors.Is().
-			if err := g.registerConnection(trimmedBuffer, conn); err != nil {
+			if err := g.registerConnection([]byte(sb.String()), conn); err != nil {
 				switch err {
 				case ErrServerFull: // Server is currently full and not accepting new connections.
 					// TODO: Need to create a new Server Full packet to return to clients.
