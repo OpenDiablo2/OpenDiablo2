@@ -176,7 +176,7 @@ func (m *MapEngine) tileCoordinateToIndex(x, y int) int {
 	return x + (y * m.size.Width)
 }
 
-// converts tile index from MapEngine.tiles to x,y coordinate
+// tileIndexToCoordinate converts tile index from MapEngine.tiles to x,y coordinate
 func (m *MapEngine) tileIndexToCoordinate(index int) (x, y int) {
 	return index % m.size.Width, index / m.size.Width
 }
@@ -200,8 +200,8 @@ func (m *MapEngine) TileAt(tileX, tileY int) *MapTile {
 }
 
 // Entities returns a pointer a slice of all map entities.
-func (m *MapEngine) Entities() *map[string]d2interface.MapEntity {
-	return &m.entities
+func (m *MapEngine) Entities() map[string]d2interface.MapEntity {
+	return m.entities
 }
 
 // Seed returns the map generation seed.
@@ -214,7 +214,7 @@ func (m *MapEngine) AddEntity(entity d2interface.MapEntity) {
 	m.entities[entity.ID()] = entity
 }
 
-// RemoveEntity is not currently implemented.
+// RemoveEntity removes an entity from the map engine
 func (m *MapEngine) RemoveEntity(entity d2interface.MapEntity) {
 	if entity == nil {
 		return

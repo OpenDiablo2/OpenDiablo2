@@ -421,8 +421,8 @@ func (g *GameControls) isInActiveMenusRect(px int, py int) bool {
 
 // TODO: consider caching the panels to single image that is reused.
 func (g *GameControls) Render(target d2interface.Surface) error {
-	for entityIdx := range *g.mapEngine.Entities() {
-		entity := (*g.mapEngine.Entities())[entityIdx]
+	for entityIdx := range g.mapEngine.Entities() {
+		entity := (g.mapEngine.Entities())[entityIdx]
 		if !entity.Selectable() {
 			continue
 		}
