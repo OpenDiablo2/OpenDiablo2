@@ -214,7 +214,8 @@ func (g *GameClient) handleMovePlayerPacket(packet d2netpacket.NetPacket) error 
 			err := player.SetAnimationMode(player.GetAnimationMode())
 
 			if err != nil {
-				log.Printf("GameClient: error setting animation mode for player %s: %s", player.ID, err)
+				fmtStr := "GameClient: error setting animation mode for player %s: %s"
+				log.Printf(fmtStr, player.ID(), err)
 			}
 		})
 	}

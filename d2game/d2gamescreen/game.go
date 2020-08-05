@@ -253,7 +253,7 @@ func (v *Game) bindGameControls() error {
 		v.gameControls.Load()
 
 		if err := v.inputManager.BindHandler(v.gameControls); err != nil {
-			fmt.Printf(bindControlsErrStr, player.ID)
+			fmt.Printf(bindControlsErrStr, player.ID())
 		}
 
 		break
