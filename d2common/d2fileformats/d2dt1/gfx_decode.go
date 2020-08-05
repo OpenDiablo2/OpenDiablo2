@@ -1,6 +1,11 @@
 package d2dt1
 
-func DecodeTileGfxData(blocks []Block, pixels *[]byte, tileYOffset int32, tileWidth int32) {
+const (
+	blockDataLength = 256
+)
+
+// DecodeTileGfxData decodes tile graphics data for a slice of dt1 blocks
+func DecodeTileGfxData(blocks []Block, pixels *[]byte, tileYOffset, tileWidth int32) {
 	for _, block := range blocks {
 		if block.Format == BlockFormatIsometric {
 			// 3D isometric decoding
@@ -8,7 +13,7 @@ func DecodeTileGfxData(blocks []Block, pixels *[]byte, tileYOffset int32, tileWi
 			nbpix := []int32{4, 8, 12, 16, 20, 24, 28, 32, 28, 24, 20, 16, 12, 8, 4}
 			blockX := int32(block.X)
 			blockY := int32(block.Y)
-			length := int32(256)
+			length := int32(blockDataLength)
 			x := int32(0)
 			y := int32(0)
 			idx := 0
@@ -19,7 +24,7 @@ func DecodeTileGfxData(blocks []Block, pixels *[]byte, tileYOffset int32, tileWi
 				length -= n
 
 				for n > 0 {
-					offset := (((blockY + y + tileYOffset) * tileWidth) + (blockX + x))
+					offset := ((blockY + y + tileYOffset) * tileWidth) + (blockX + x)
 					(*pixels)[offset] = block.EncodedData[idx]
 					x++
 					n--
@@ -55,7 +60,7 @@ func DecodeTileGfxData(blocks []Block, pixels *[]byte, tileYOffset int32, tileWi
 			length -= int32(b2)
 
 			for b2 > 0 {
-				offset := (((blockY + y + tileYOffset) * tileWidth) + (blockX + x))
+				offset := ((blockY + y + tileYOffset) * tileWidth) + (blockX + x)
 				(*pixels)[offset] = block.EncodedData[idx]
 				idx++
 				x++
