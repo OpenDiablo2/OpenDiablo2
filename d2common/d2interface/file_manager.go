@@ -1,8 +1,8 @@
 package d2interface
 
-// ArchivedFileManager manages file access to the archives being managed
+// FileManager manages file access to the archives being managed
 // by the ArchiveManager
-type ArchivedFileManager interface {
+type FileManager interface {
 	Cacher
 	LoadFileStream(filePath string) (ArchiveDataStream, error)
 	LoadFile(filePath string) ([]byte, error)

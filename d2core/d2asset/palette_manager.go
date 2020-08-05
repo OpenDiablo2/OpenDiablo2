@@ -7,7 +7,7 @@ import (
 )
 
 // Static checks to confirm struct conforms to interface
-var _ d2interface.ArchivedPaletteManager = &paletteManager{}
+var _ d2interface.PaletteManager = &paletteManager{}
 var _ d2interface.Cacher = &paletteManager{}
 
 type paletteManager struct {
@@ -18,7 +18,7 @@ const (
 	paletteBudget = 64
 )
 
-func createPaletteManager() d2interface.ArchivedPaletteManager {
+func createPaletteManager() d2interface.PaletteManager {
 	return &paletteManager{d2common.CreateCache(paletteBudget)}
 }
 
