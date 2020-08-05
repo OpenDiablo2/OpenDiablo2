@@ -9,6 +9,14 @@ const (
 	maxRunLength  = 0x7f
 )
 
+type scanlineState int
+
+const (
+	endOfLine scanlineState = iota
+	runOfTransparentPixels
+	runOfOpaquePixels
+)
+
 // DC6 represents a DC6 file.
 type DC6 struct {
 	Version            int32
@@ -75,22 +83,24 @@ func (d *DC6) DecodeFrame(frameIndex int) []byte {
 	y := int(frame.Height) - 1
 	offset := 0
 
+loop: // this is a label for the loop, so the switch can break the loop (and not the switch)
 	for {
 		b := int(frame.FrameData[offset])
 		offset++
 
-		if b == endOfScanLine {
+		switch scanlineType(b) {
+		case endOfLine:
 			if y == 0 {
-				break
+				break loop
 			}
 
 			y--
 
 			x = 0
-		} else if b&endOfScanLine > 0 {
+		case runOfTransparentPixels:
 			transparentPixels := b & maxRunLength
 			x += transparentPixels
-		} else {
+		case runOfOpaquePixels:
 			for i := 0; i < b; i++ {
 				indexData[x+y*int(frame.Width)+i] = frame.FrameData[offset]
 				offset++
@@ -101,4 +111,16 @@ func (d *DC6) DecodeFrame(frameIndex int) []byte {
 	}
 
 	return indexData
+}
+
+func scanlineType(b int) scanlineState {
+	if b == endOfScanLine {
+		return endOfLine
+	}
+
+	if (b & endOfScanLine) > 0 {
+		return runOfTransparentPixels
+	}
+
+	return runOfOpaquePixels
 }
