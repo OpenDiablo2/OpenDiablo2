@@ -31,8 +31,8 @@ type Button struct {
 }
 
 func createButton(renderer d2interface.Renderer, text string, buttonStyle ButtonStyle) (*Button, error) {
-	config, ok := buttonStyleConfigs[buttonStyle]
-	if !ok {
+	config := getButtonStyleConfig(buttonStyle)
+	if config == nil {
 		return nil, errors.New("invalid button style")
 	}
 
