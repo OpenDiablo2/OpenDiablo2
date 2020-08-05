@@ -88,9 +88,11 @@ const (
 	GamePanels          = "/data/global/ui/PANEL/800ctrlpnl7.dc6"
 	GameGlobeOverlap    = "/data/global/ui/PANEL/overlap.DC6"
 	HealthManaIndicator = "/data/global/ui/PANEL/hlthmana.DC6"
-	GameSmallMenuButton = "/data/global/ui/PANEL/menubutton.DC6" // TODO: Used for inventory popout
-	SkillIcon           = "/data/global/ui/PANEL/Skillicon.DC6"  // TODO: Used for skill icon button
 	AddSkillButton      = "/data/global/ui/PANEL/level.DC6"
+
+	// Issue #685 - used in the mini-panel
+	GameSmallMenuButton = "/data/global/ui/PANEL/menubutton.DC6"
+	SkillIcon           = "/data/global/ui/PANEL/Skillicon.DC6"
 
 	// --- Mouse Pointers ---
 
@@ -98,7 +100,7 @@ const (
 
 	// --- Fonts & Locale (strings) ---
 
-	LanguageFontToken    = "{LANG_FONT}"
+	LanguageFontToken    = "{LANG_FONT}" //nolint:gosec // this is just a format string
 	LanguageTableToken   = "{LANG}"
 	Font6                = "/data/local/FONT/" + LanguageFontToken + "/font6"
 	Font8                = "/data/local/FONT/" + LanguageFontToken + "/font8"
