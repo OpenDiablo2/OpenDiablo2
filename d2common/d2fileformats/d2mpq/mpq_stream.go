@@ -6,12 +6,12 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"log"
 	"strings"
 
 	"github.com/JoshVarga/blast"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2compression"
 )
 
@@ -120,7 +120,7 @@ func (v *Stream) readInternalSingleUnit(buffer []byte, offset, count uint32) uin
 		v.loadSingleUnit()
 	}
 
-	bytesToCopy := d2common.Min(uint32(len(v.CurrentData))-v.CurrentPosition, count)
+	bytesToCopy := d2math.Min(uint32(len(v.CurrentData))-v.CurrentPosition, count)
 
 	copy(buffer[offset:offset+bytesToCopy], v.CurrentData[v.CurrentPosition:v.CurrentPosition+bytesToCopy])
 
@@ -133,7 +133,7 @@ func (v *Stream) readInternal(buffer []byte, offset, count uint32) uint32 {
 	v.bufferData()
 
 	localPosition := v.CurrentPosition % v.BlockSize
-	bytesToCopy := d2common.MinInt32(int32(len(v.CurrentData))-int32(localPosition), int32(count))
+	bytesToCopy := d2math.MinInt32(int32(len(v.CurrentData))-int32(localPosition), int32(count))
 
 	if bytesToCopy <= 0 {
 		return 0
@@ -153,7 +153,7 @@ func (v *Stream) bufferData() {
 		return
 	}
 
-	expectedLength := d2common.Min(v.BlockTableEntry.UncompressedFileSize-(requiredBlock*v.BlockSize), v.BlockSize)
+	expectedLength := d2math.Min(v.BlockTableEntry.UncompressedFileSize-(requiredBlock*v.BlockSize), v.BlockSize)
 	v.CurrentData = v.loadBlock(requiredBlock, expectedLength)
 	v.CurrentBlockIndex = requiredBlock
 }

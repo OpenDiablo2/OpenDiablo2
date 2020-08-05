@@ -1,9 +1,9 @@
 package d2maprenderer
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
@@ -77,11 +77,11 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord) {
 		tileYMinimum := int32(0)
 
 		for _, block := range tileData[i].Blocks {
-			tileYMinimum = d2common.MinInt32(tileYMinimum, int32(block.Y))
+			tileYMinimum = d2math.MinInt32(tileYMinimum, int32(block.Y))
 		}
 
-		tileYOffset := d2common.AbsInt32(tileYMinimum)
-		tileHeight := d2common.AbsInt32(tileData[i].Height)
+		tileYOffset := d2math.AbsInt32(tileYMinimum)
+		tileHeight := d2math.AbsInt32(tileData[i].Height)
 		image, _ := mr.renderer.NewSurface(int(tileData[i].Width), int(tileHeight), d2enum.FilterNearest)
 		indexData := make([]byte, tileData[i].Width*tileHeight)
 		d2dt1.DecodeTileGfxData(tileData[i].Blocks, &indexData, tileYOffset, tileData[i].Width)
@@ -111,8 +111,8 @@ func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord) {
 	tileMaxY := int32(0)
 
 	for _, block := range tileData.Blocks {
-		tileMinY = d2common.MinInt32(tileMinY, int32(block.Y))
-		tileMaxY = d2common.MaxInt32(tileMaxY, int32(block.Y+32))
+		tileMinY = d2math.MinInt32(tileMinY, int32(block.Y))
+		tileMaxY = d2math.MaxInt32(tileMaxY, int32(block.Y+32))
 	}
 
 	tileYOffset := -tileMinY
@@ -160,11 +160,11 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord) {
 	}
 
 	for _, block := range target.Blocks {
-		tileMinY = d2common.MinInt32(tileMinY, int32(block.Y))
-		tileMaxY = d2common.MaxInt32(tileMaxY, int32(block.Y+32))
+		tileMinY = d2math.MinInt32(tileMinY, int32(block.Y))
+		tileMaxY = d2math.MaxInt32(tileMaxY, int32(block.Y+32))
 	}
 
-	realHeight := d2common.MaxInt32(d2common.AbsInt32(tileData.Height), tileMaxY-tileMinY)
+	realHeight := d2math.MaxInt32(d2math.AbsInt32(tileData.Height), tileMaxY-tileMinY)
 	tileYOffset := -tileMinY
 
 	if tile.Type == 15 {

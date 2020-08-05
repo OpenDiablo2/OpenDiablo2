@@ -2,6 +2,7 @@ package d2asset
 
 import (
 	"errors"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"image"
 	"image/color"
 	"math"
@@ -10,7 +11,6 @@ import (
 
 	d2iface "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 )
 
@@ -207,8 +207,8 @@ func (a *animation) GetFrameBounds() (maxWidth, maxHeight int) {
 
 	direction := a.directions[a.directionIndex]
 	for _, frame := range direction.frames {
-		maxWidth = d2common.MaxInt(maxWidth, frame.width)
-		maxHeight = d2common.MaxInt(maxHeight, frame.height)
+		maxWidth = d2math.MaxInt(maxWidth, frame.width)
+		maxHeight = d2math.MaxInt(maxHeight, frame.height)
 	}
 
 	return maxWidth, maxHeight

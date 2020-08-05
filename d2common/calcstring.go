@@ -5,4 +5,5 @@ package d2common
 // source, for instance a missile might have a movement speed of lvl*2
 type CalcString string
 
-// todo: the logic for parsing these should exist here
+// Issue #689
+// info about calcstrings can be found here: https://d2mods.info/forum/kb/viewarticle?a=371

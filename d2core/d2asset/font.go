@@ -3,10 +3,10 @@ package d2asset
 import (
 	"encoding/binary"
 	"errors"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"image/color"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
@@ -80,17 +80,17 @@ func (f *Font) GetTextMetrics(text string) (width, height int) {
 
 	for _, c := range text {
 		if c == '\n' {
-			totalWidth = d2common.MaxInt(totalWidth, lineWidth)
+			totalWidth = d2math.MaxInt(totalWidth, lineWidth)
 			totalHeight += lineHeight
 			lineWidth = 0
 			lineHeight = 0
 		} else if glyph, ok := f.glyphs[c]; ok {
 			lineWidth += glyph.width
-			lineHeight = d2common.MaxInt(lineHeight, glyph.height)
+			lineHeight = d2math.MaxInt(lineHeight, glyph.height)
 		}
 	}
 
-	totalWidth = d2common.MaxInt(totalWidth, lineWidth)
+	totalWidth = d2math.MaxInt(totalWidth, lineWidth)
 	totalHeight += lineHeight
 
 	return totalWidth, totalHeight
@@ -122,7 +122,7 @@ func (f *Font) RenderText(text string, target d2interface.Surface) error {
 				return err
 			}
 
-			lineHeight = d2common.MaxInt(lineHeight, glyph.height)
+			lineHeight = d2math.MaxInt(lineHeight, glyph.height)
 			lineLength++
 
 			target.PushTranslation(glyph.width, 0)

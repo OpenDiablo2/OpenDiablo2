@@ -3,6 +3,7 @@ package d2gui
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
 type layoutEntry struct {
@@ -258,14 +259,14 @@ func (l *Layout) getContentSize() (width, height int) {
 
 		switch l.positionType {
 		case PositionTypeVertical:
-			width = d2common.MaxInt(width, w)
+			width = d2math.MaxInt(width, w)
 			height += h
 		case PositionTypeHorizontal:
 			width += w
-			height = d2common.MaxInt(height, h)
+			height = d2math.MaxInt(height, h)
 		case PositionTypeAbsolute:
-			width = d2common.MaxInt(width, x+w)
-			height = d2common.MaxInt(height, y+h)
+			width = d2math.MaxInt(width, x+w)
+			height = d2math.MaxInt(height, y+h)
 		}
 	}
 
@@ -274,7 +275,7 @@ func (l *Layout) getContentSize() (width, height int) {
 
 func (l *Layout) getSize() (width, height int) {
 	width, height = l.getContentSize()
-	return d2common.MaxInt(width, l.width), d2common.MaxInt(height, l.height)
+	return d2math.MaxInt(width, l.width), d2math.MaxInt(height, l.height)
 }
 
 func (l *Layout) onMouseButtonDown(event d2interface.MouseEvent) bool {
@@ -348,8 +349,8 @@ func (l *Layout) AdjustEntryPlacement() {
 			expanderWidth = (width - contentWidth) / expanderCount
 		}
 
-		expanderWidth = d2common.MaxInt(0, expanderWidth)
-		expanderHeight = d2common.MaxInt(0, expanderHeight)
+		expanderWidth = d2math.MaxInt(0, expanderWidth)
+		expanderHeight = d2math.MaxInt(0, expanderHeight)
 	}
 
 	var offsetX, offsetY int
