@@ -6,6 +6,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 )
 
+const assumedFPS = 25
+
+// SoundEnvironment represents the audio environment for map areas
 type SoundEnvironment struct {
 	environment *d2datadict.SoundEnvironRecord
 	engine      *SoundEngine
@@ -14,6 +17,7 @@ type SoundEnvironment struct {
 	eventTimer  float64
 }
 
+// NewSoundEnvironment creates a SoundEnvironment using the given SoundEngine
 func NewSoundEnvironment(soundEngine *SoundEngine) SoundEnvironment {
 	r := SoundEnvironment{
 		// Start with env NONE
@@ -24,9 +28,10 @@ func NewSoundEnvironment(soundEngine *SoundEngine) SoundEnvironment {
 	return r
 }
 
-func (s *SoundEnvironment) SetEnv(environment int) {
-	if s.environment.Index != environment {
-		newEnv := d2datadict.SoundEnvirons[environment]
+// SetEnv sets the sound environment using the given record index
+func (s *SoundEnvironment) SetEnv(environmentIdx int) {
+	if s.environment.Index != environmentIdx {
+		newEnv := d2datadict.SoundEnvirons[environmentIdx]
 
 		if s.environment.Song != newEnv.Song {
 			if s.bgm != nil {
@@ -48,10 +53,11 @@ func (s *SoundEnvironment) SetEnv(environment int) {
 	}
 }
 
+// Advance advances the sound engine and plays sounds when necessary
 func (s *SoundEnvironment) Advance(elapsed float64) {
 	s.eventTimer -= elapsed
 	if s.eventTimer < 0 {
-		s.eventTimer = float64(s.environment.EventDelay) / 25
+		s.eventTimer = float64(s.environment.EventDelay) / assumedFPS
 
 		snd := s.engine.PlaySoundID(s.environment.DayEvent)
 		if snd != nil {

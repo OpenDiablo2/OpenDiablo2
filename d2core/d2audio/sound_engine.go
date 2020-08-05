@@ -71,7 +71,7 @@ func (s *Sound) Play() {
 		s.volume = 0
 		s.state = envAttack
 		s.vTarget = float64(s.entry.Volume) / volMax
-		s.vRate = (s.vTarget / (float64(s.entry.FadeIn) / originalFPS))
+		s.vRate = s.vTarget / (float64(s.entry.FadeIn) / originalFPS)
 	} else {
 		s.volume = float64(s.entry.Volume) / volMax
 		s.effect.SetVolume(s.volume)
@@ -84,7 +84,7 @@ func (s *Sound) Stop() {
 	if s.entry.FadeOut != 0 {
 		s.state = envRelease
 		s.vTarget = 0
-		s.vRate = (s.volume / (float64(s.entry.FadeOut) / originalFPS))
+		s.vRate = s.volume / (float64(s.entry.FadeOut) / originalFPS)
 	} else {
 		s.state = envStopped
 		s.volume = 0
@@ -95,10 +95,10 @@ func (s *Sound) Stop() {
 
 // SoundEngine provides functions for playing sounds
 type SoundEngine struct {
-	provider  d2interface.AudioProvider
-	timer     float64
-	accTime   float64
-	sounds    map[*Sound]struct{}
+	provider d2interface.AudioProvider
+	timer    float64
+	accTime  float64
+	sounds   map[*Sound]struct{}
 }
 
 // NewSoundEngine creates a new sound engine
