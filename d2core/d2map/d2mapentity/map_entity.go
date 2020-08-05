@@ -1,6 +1,8 @@
 package d2mapentity
 
 import (
+	uuid "github.com/satori/go.uuid"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 )
 
@@ -10,6 +12,7 @@ const (
 
 // mapEntity represents an entity on the map that can be animated
 type mapEntity struct {
+	uuid     string
 	Position d2vector.Position
 	Target   d2vector.Position
 	velocity d2vector.Vector
@@ -29,6 +32,7 @@ func newMapEntity(x, y int) mapEntity {
 	pos := d2vector.NewPosition(float64(x), float64(y))
 
 	return mapEntity{
+		uuid:     uuid.NewV4().String(),
 		Position: pos,
 		Target:   pos,
 		velocity: *d2vector.VectorZero(),

@@ -4,6 +4,8 @@ package d2object
 import (
 	"math/rand"
 
+	uuid "github.com/satori/go.uuid"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -15,6 +17,7 @@ import (
 
 // Object represents a composite of animations that can be projected onto the map.
 type Object struct {
+	uuid string
 	Position  d2vector.Position
 	composite *d2asset.Composite
 	highlight bool
@@ -28,6 +31,7 @@ type Object struct {
 func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath string) (*Object, error) {
 	locX, locY := float64(x), float64(y)
 	entity := &Object{
+		uuid: uuid.NewV4().String(),
 		objectRecord: objectRec,
 		Position:     d2vector.NewPosition(locX, locY),
 		name:         d2common.TranslateString(objectRec.Name),
@@ -82,6 +86,11 @@ func (ob *Object) setMode(animationMode d2enum.ObjectAnimationMode, direction in
 	}
 
 	return err
+}
+
+// ID returns the object uuid
+func (ob *Object) ID() string {
+	return ob.uuid
 }
 
 // Highlight sets the entity highlighted flag to true.

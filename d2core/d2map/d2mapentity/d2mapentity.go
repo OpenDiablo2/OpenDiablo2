@@ -3,7 +3,6 @@ package d2mapentity
 import (
 	"errors"
 	"fmt"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -50,7 +49,6 @@ func NewPlayer(id, name string, x, y, direction int, heroType d2enum.Hero,
 	stats.Stamina = stats.MaxStamina
 
 	result := &Player{
-		ID:        id,
 		mapEntity: newMapEntity(x, y),
 		composite: composite,
 		Equipment: equipment,
@@ -62,6 +60,8 @@ func NewPlayer(id, name string, x, y, direction int, heroType d2enum.Hero,
 		isInTown:     true,
 		isRunning:    true,
 	}
+
+	result.mapEntity.uuid = id
 	result.SetSpeed(baseRunSpeed)
 	result.mapEntity.directioner = result.rotate
 	err = composite.SetMode(d2enum.PlayerAnimationModeTownNeutral, equipment.RightHand.GetWeaponClass())

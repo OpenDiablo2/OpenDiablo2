@@ -171,7 +171,7 @@ func (g *GameClient) handleAddPlayerPacket(packet d2netpacket.NetPacket) error {
 	newPlayer := d2mapentity.NewPlayer(player.ID, player.Name, player.X, player.Y, 0,
 		player.HeroType, player.Stats, &player.Equipment)
 
-	g.Players[newPlayer.ID] = newPlayer
+	g.Players[newPlayer.ID()] = newPlayer
 	g.MapEngine.AddEntity(newPlayer)
 
 	return nil

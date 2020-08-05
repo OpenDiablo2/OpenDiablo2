@@ -19,6 +19,11 @@ type Item struct {
 	Item *diablo2item.Item
 }
 
+// ID returns the item uuid
+func (i *Item) ID() string {
+	return i.AnimatedEntity.uuid
+}
+
 // GetPosition returns the item position vector
 func (i *Item) GetPosition() d2vector.Position {
 	return i.AnimatedEntity.Position
