@@ -16,6 +16,7 @@
 //go:generate file2byteslice -input /tmp/compressedTextRGBA -output textrgba.go -package assets -var compressedTextRGBA
 //go:generate gofmt -s -w .
 
+// Package assets provides files for use by the debug utils
 package assets
 
 import (
@@ -28,21 +29,26 @@ import (
 )
 
 const (
-	CharWidth  = 8
+	// CharWidth of all glyphs inside of the glyph table image
+	CharWidth = 8
+
+	// CharHeight of all glyphs inside of the glyph table image
 	CharHeight = 16
 )
 
+// CreateTextImage creates
 func CreateTextImage() image.Image {
 	s, err := gzip.NewReader(bytes.NewReader(CompressedDebugText))
 	if err != nil {
 		panic(fmt.Sprintf("assets: gzip.NewReader failed: %v", err))
 	}
-	defer s.Close()
 
 	debugBmp, err := bmp.Decode(s)
 	if err != nil {
 		panic(fmt.Sprintf("assets: bmp.Decode failed: %v", err))
 	}
+
+	_ = s.Close()
 
 	return debugBmp
 }

@@ -222,7 +222,8 @@ func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Recta
 
 // DrawTextf renders the string to the surface with the given format string and a set of parameters
 func (s *ebitenSurface) DrawTextf(format string, params ...interface{}) {
-	d2debugutil.D2DebugPrintAt(s.image, fmt.Sprintf(format, params...), s.stateCurrent.x, s.stateCurrent.y)
+	str := fmt.Sprintf(format, params...)
+	d2debugutil.DebugPrinter.PrintAt(s.image, str, s.stateCurrent.x, s.stateCurrent.y)
 }
 
 // DrawLine draws a line
