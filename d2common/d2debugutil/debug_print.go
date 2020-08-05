@@ -1,70 +1,97 @@
+// Package d2debugutil provides debug utilities
 package d2debugutil
 
 import (
 	"image"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2debugutil/internal/assets"
+
 	"github.com/hajimehoshi/ebiten"
 )
 
-var (
-	debugPrintTextImage     *ebiten.Image
-	debugPrintTextSubImages = map[rune]*ebiten.Image{}
+const (
+	cw = assets.CharWidth
+	ch = assets.CharHeight
 )
 
-func init() {
-	img := assets.CreateTextImage()
-	debugPrintTextImage, _ = ebiten.NewImageFromImage(img, ebiten.FilterDefault)
+// DebugPrinter is the global debug printer
+var DebugPrinter = NewDebugPrinter() //nolint:gochecknoglobals // currently global by design
+
+// NewDebugPrinter creates a new debug printer
+func NewDebugPrinter() *GlyphPrinter {
+	img, err := ebiten.NewImageFromImage(assets.CreateTextImage(), ebiten.FilterDefault)
+	if err != nil {
+		return nil
+	}
+
+	printer := &GlyphPrinter{
+		glyphImageTable: img,
+		glyphs:          make(map[rune]*ebiten.Image),
+	}
+
+	return printer
 }
 
-// DebugPrint draws the string str on the image on left top corner.
+// GlyphPrinter uses an image containing glyphs to draw text onto ebiten images
+type GlyphPrinter struct {
+	glyphImageTable *ebiten.Image
+	glyphs          map[rune]*ebiten.Image
+}
+
+// Print draws the string str on the image on left top corner.
 //
-// The available runes are in U+0000 to U+00FF, which is C0 Controls and Basic Latin and C1 Controls and Latin-1 Supplement.
+// The available runes are in U+0000 to U+00FF, which is C0 Controls and
+// Basic Latin and C1 Controls and Latin-1 Supplement.
 //
 // DebugPrint always returns nil as of 1.5.0-alpha.
-func D2DebugPrint(image *ebiten.Image, str string) error {
-	D2DebugPrintAt(image, str, 0, 0)
+func (p *GlyphPrinter) Print(target *ebiten.Image, str string) error {
+	p.PrintAt(target, str, 0, 0)
 	return nil
 }
 
-// DebugPrintAt draws the string str on the image at (x, y) position.
-//
-// The available runes are in U+0000 to U+00FF, which is C0 Controls and Basic Latin and C1 Controls and Latin-1 Supplement.
-func D2DebugPrintAt(image *ebiten.Image, str string, x, y int) {
-	drawDebugText(image, str, x, y, false)
+// PrintAt draws the string str on the image at (x, y) position.
+// The available runes are in U+0000 to U+00FF, which is C0 Controls and
+// Basic Latin and C1 Controls and Latin-1 Supplement.
+func (p *GlyphPrinter) PrintAt(target *ebiten.Image, str string, x, y int) {
+	p.drawDebugText(target, str, x, y, false)
 }
 
-func drawDebugText(rt *ebiten.Image, str string, ox, oy int, shadow bool) {
+func (p *GlyphPrinter) drawDebugText(target *ebiten.Image, str string, ox, oy int, shadow bool) {
 	op := &ebiten.DrawImageOptions{}
+
 	if shadow {
 		op.ColorM.Scale(0, 0, 0, 0.5)
 	}
+
 	x := 0
 	y := 0
-	w, _ := debugPrintTextImage.Size()
+
+	w, _ := p.glyphImageTable.Size()
+
 	for _, c := range str {
-		const (
-			cw = assets.CharWidth
-			ch = assets.CharHeight
-		)
 		if c == '\n' {
 			x = 0
 			y += ch
+
 			continue
 		}
-		s, ok := debugPrintTextSubImages[c]
+
+		s, ok := p.glyphs[c]
 		if !ok {
 			n := w / cw
 			sx := (int(c) % n) * cw
 			sy := (int(c) / n) * ch
-			s = debugPrintTextImage.SubImage(image.Rect(sx, sy, sx+cw, sy+ch)).(*ebiten.Image)
-			debugPrintTextSubImages[c] = s
+			rect := image.Rect(sx, sy, sx+cw, sy+ch)
+			s = p.glyphImageTable.SubImage(rect).(*ebiten.Image)
+			p.glyphs[c] = s
 		}
+
 		op.GeoM.Reset()
 		op.GeoM.Translate(float64(x), float64(y))
 		op.GeoM.Translate(float64(ox+1), float64(oy))
+
 		op.CompositeMode = ebiten.CompositeModeLighter
-		_ = rt.DrawImage(s, op)
+		_ = target.DrawImage(s, op)
 		x += cw
 	}
 }
