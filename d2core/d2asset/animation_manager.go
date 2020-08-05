@@ -15,7 +15,7 @@ const (
 )
 
 // Static checks to confirm struct conforms to interface
-var _ d2interface.ArchivedAnimationManager = &animationManager{}
+var _ d2interface.AnimationManager = &animationManager{}
 var _ d2interface.Cacher = &animationManager{}
 
 type animationManager struct {

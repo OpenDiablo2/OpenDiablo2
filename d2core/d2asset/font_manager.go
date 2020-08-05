@@ -12,14 +12,14 @@ const (
 )
 
 // Static checks to confirm struct conforms to interface
-var _ d2interface.ArchivedFontManager = &fontManager{}
+var _ d2interface.FontManager = &fontManager{}
 var _ d2interface.Cacher = &fontManager{}
 
 type fontManager struct {
 	cache d2interface.Cache
 }
 
-func createFontManager() d2interface.ArchivedFontManager {
+func createFontManager() d2interface.FontManager {
 	return &fontManager{d2common.CreateCache(fontBudget)}
 }
 

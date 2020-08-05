@@ -9,11 +9,11 @@ import (
 
 type assetManager struct {
 	archiveManager          d2interface.ArchiveManager
-	archivedFileManager     d2interface.ArchivedFileManager
-	paletteManager          d2interface.ArchivedPaletteManager
+	archivedFileManager     d2interface.FileManager
+	paletteManager          d2interface.PaletteManager
 	paletteTransformManager *paletteTransformManager
-	animationManager        d2interface.ArchivedAnimationManager
-	fontManager             d2interface.ArchivedFontManager
+	animationManager        d2interface.AnimationManager
+	fontManager             d2interface.FontManager
 }
 
 func loadDC6(dc6Path string) (*d2dc6.DC6, error) {

@@ -14,7 +14,7 @@ const (
 )
 
 // Static checks to confirm struct conforms to interface
-var _ d2interface.ArchivedFileManager = &fileManager{}
+var _ d2interface.FileManager = &fileManager{}
 var _ d2interface.Cacher = &fileManager{}
 
 type fileManager struct {
@@ -24,7 +24,7 @@ type fileManager struct {
 }
 
 func createFileManager(config *d2config.Configuration,
-	archiveManager d2interface.ArchiveManager) d2interface.ArchivedFileManager {
+	archiveManager d2interface.ArchiveManager) d2interface.FileManager {
 	return &fileManager{
 		d2common.CreateCache(fileBudget),
 		archiveManager,

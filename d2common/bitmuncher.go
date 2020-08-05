@@ -1,9 +1,5 @@
 package d2common
 
-import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
-var _ d2interface.BitMuncher = &BitMuncher{} // Static check to confirm struct conforms to interface
-
 // BitMuncher is used for parsing files that are not byte-aligned such as the DCC files.
 type BitMuncher struct {
 	data     []byte
@@ -19,17 +15,17 @@ const (
 )
 
 // CreateBitMuncher Creates a BitMuncher
-func CreateBitMuncher(data []byte, offset int) d2interface.BitMuncher {
+func CreateBitMuncher(data []byte, offset int) *BitMuncher {
 	return (&BitMuncher{}).Init(data, offset)
 }
 
 // CopyBitMuncher Creates a copy of the source BitMuncher
-func CopyBitMuncher(source d2interface.BitMuncher) d2interface.BitMuncher {
+func CopyBitMuncher(source *BitMuncher) *BitMuncher {
 	return source.Copy()
 }
 
 // Init initializes the BitMuncher with data and an offset
-func (v *BitMuncher) Init(data []byte, offset int) d2interface.BitMuncher {
+func (v *BitMuncher) Init(data []byte, offset int) *BitMuncher {
 	v.data = data
 	v.offset = offset
 	v.bitsRead = 0
@@ -38,7 +34,7 @@ func (v *BitMuncher) Init(data []byte, offset int) d2interface.BitMuncher {
 }
 
 // Copy returns a copy of a BitMuncher
-func (v BitMuncher) Copy() d2interface.BitMuncher {
+func (v BitMuncher) Copy() *BitMuncher {
 	v.bitsRead = 0
 	return &v
 }

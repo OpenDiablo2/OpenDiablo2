@@ -2,11 +2,7 @@ package d2common
 
 import (
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
-
-var _ d2interface.BitStream = &BitStream{} // Static check to confirm struct conforms to interface
 
 const (
 	maxBits     = 16
