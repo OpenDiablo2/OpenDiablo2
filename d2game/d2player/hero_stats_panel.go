@@ -24,19 +24,19 @@ type PanelText struct {
 
 // StatsPanelLabels represents the labels in the status panel
 type StatsPanelLabels struct {
-	Level        d2ui.Label
-	Experience   d2ui.Label
-	NextLevelExp d2ui.Label
-	Strength     d2ui.Label
-	Dexterity    d2ui.Label
-	Vitality     d2ui.Label
-	Energy       d2ui.Label
-	Health       d2ui.Label
-	MaxHealth    d2ui.Label
-	Mana         d2ui.Label
-	MaxMana      d2ui.Label
-	MaxStamina   d2ui.Label
-	Stamina      d2ui.Label
+	Level        *d2ui.Label
+	Experience   *d2ui.Label
+	NextLevelExp *d2ui.Label
+	Strength     *d2ui.Label
+	Dexterity    *d2ui.Label
+	Vitality     *d2ui.Label
+	Energy       *d2ui.Label
+	Health       *d2ui.Label
+	MaxHealth    *d2ui.Label
+	Mana         *d2ui.Label
+	MaxMana      *d2ui.Label
+	MaxStamina   *d2ui.Label
+	Stamina      *d2ui.Label
 }
 
 // stores all the labels that can change during gameplay(e.g. current level, current hp, mana, etc.)
@@ -44,6 +44,7 @@ var StatValueLabels = make([]d2ui.Label, 13)
 
 // HeroStatsPanel represents the hero status panel
 type HeroStatsPanel struct {
+	uiManager            *d2ui.UIManager
 	frame                *d2ui.Sprite
 	panel                *d2ui.Sprite
 	heroState            *d2hero.HeroStatsState
@@ -59,13 +60,14 @@ type HeroStatsPanel struct {
 }
 
 // NewHeroStatsPanel creates a new hero status panel
-func NewHeroStatsPanel(renderer d2interface.Renderer, heroName string, heroClass d2enum.Hero,
+func NewHeroStatsPanel(ui *d2ui.UIManager, heroName string, heroClass d2enum.Hero,
 	heroState *d2hero.HeroStatsState) *HeroStatsPanel {
 	originX := 0
 	originY := 0
 
 	return &HeroStatsPanel{
-		renderer:  renderer,
+		uiManager: ui,
+		renderer:  ui.Renderer(),
 		originX:   originX,
 		originY:   originY,
 		heroState: heroState,
@@ -78,9 +80,9 @@ func NewHeroStatsPanel(renderer d2interface.Renderer, heroName string, heroClass
 // Load loads the data for the hero status panel
 func (s *HeroStatsPanel) Load() {
 	animation, _ := d2asset.LoadAnimation(d2resource.Frame, d2resource.PaletteSky)
-	s.frame, _ = d2ui.LoadSprite(animation)
+	s.frame, _ = s.uiManager.LoadSprite(animation)
 	animation, _ = d2asset.LoadAnimation(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
-	s.panel, _ = d2ui.LoadSprite(animation)
+	s.panel, _ = s.uiManager.LoadSprite(animation)
 	s.initStatValueLabels()
 }
 
@@ -273,7 +275,7 @@ func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) error {
 		return err
 	}
 
-	var label d2ui.Label
+	var label *d2ui.Label
 
 	// all static labels are not stored since we use them only once to generate the image cache
 
@@ -360,23 +362,25 @@ func (s *HeroStatsPanel) renderStatValues(target d2interface.Surface) {
 	s.renderStatValueNum(s.labels.Mana, s.heroState.Mana, target)
 }
 
-func (s *HeroStatsPanel) renderStatValueNum(label d2ui.Label, value int, target d2interface.Surface) {
+func (s *HeroStatsPanel) renderStatValueNum(label *d2ui.Label, value int,
+	target d2interface.Surface) {
 	label.SetText(strconv.Itoa(value))
 	label.Render(target)
 }
 
-func (s *HeroStatsPanel) createStatValueLabel(stat int, x int, y int) d2ui.Label {
+func (s *HeroStatsPanel) createStatValueLabel(stat int, x int, y int) *d2ui.Label {
 	text := strconv.Itoa(stat)
 	return s.createTextLabel(PanelText{X: x, Y: y, Text: text, Font: d2resource.Font16, AlignCenter: true})
 }
 
-func (s *HeroStatsPanel) createTextLabel(element PanelText) d2ui.Label {
-	label := d2ui.CreateLabel(element.Font, d2resource.PaletteStatic)
+func (s *HeroStatsPanel) createTextLabel(element PanelText) *d2ui.Label {
+	label := s.uiManager.CreateLabel(element.Font, d2resource.PaletteStatic)
 	if element.AlignCenter {
 		label.Alignment = d2gui.HorizontalAlignCenter
 	}
 
 	label.SetText(element.Text)
 	label.SetPosition(element.X, element.Y)
+
 	return label
 }

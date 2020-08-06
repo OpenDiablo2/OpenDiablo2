@@ -14,9 +14,10 @@ import (
 )
 
 type Inventory struct {
-	frame *d2ui.Sprite
-	panel *d2ui.Sprite
-	grid  *ItemGrid
+	uiManager *d2ui.UIManager
+	frame     *d2ui.Sprite
+	panel     *d2ui.Sprite
+	grid      *ItemGrid
 
 	hoverLabel     *d2ui.Label
 	hoverX, hoverY int
@@ -28,15 +29,16 @@ type Inventory struct {
 	isOpen bool
 }
 
-func NewInventory(record *d2datadict.InventoryRecord) *Inventory {
+func NewInventory(ui *d2ui.UIManager, record *d2datadict.InventoryRecord) *Inventory {
 
-	hoverLabel := d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
+	hoverLabel := ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
 	hoverLabel.Alignment = d2gui.HorizontalAlignCenter
 
 	return &Inventory{
-		grid:       NewItemGrid(record),
+		uiManager:  ui,
+		grid:       NewItemGrid(ui, record),
 		originX:    record.Panel.Left,
-		hoverLabel: &hoverLabel,
+		hoverLabel: hoverLabel,
 		// originY: record.Panel.Top,
 		originY: 0, // expansion data has these all offset by +60 ...
 	}
@@ -60,10 +62,10 @@ func (g *Inventory) Close() {
 
 func (g *Inventory) Load() {
 	animation, _ := d2asset.LoadAnimation(d2resource.Frame, d2resource.PaletteSky)
-	g.frame, _ = d2ui.LoadSprite(animation)
+	g.frame, _ = g.uiManager.LoadSprite(animation)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
-	g.panel, _ = d2ui.LoadSprite(animation)
+	g.panel, _ = g.uiManager.LoadSprite(animation)
 	items := []InventoryItem{
 		diablo2item.NewItem("kit", "Crimson", "of the Bat", "of Frost").Identify(),
 		diablo2item.NewItem("rin", "Steel", "of Shock").Identify(),
@@ -246,6 +248,7 @@ func (g *Inventory) Render(target d2interface.Surface) error {
 			}
 
 			g.renderItemDescription(target, item)
+
 			break
 		}
 	}
@@ -272,7 +275,7 @@ func (g *Inventory) renderItemDescription(target d2interface.Surface, i Inventor
 	}
 
 	halfW, halfH := maxW/2, maxH/2
-	centerX, centerY := g.hoverX, iy - halfH
+	centerX, centerY := g.hoverX, iy-halfH
 
 	if (centerX + halfW) > 800 {
 		centerX = 800 - halfW

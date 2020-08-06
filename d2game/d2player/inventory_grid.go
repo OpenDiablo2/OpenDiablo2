@@ -33,6 +33,7 @@ var ErrorInventoryFull = errors.New("inventory full")
 // Reusable grid for use with player and merchant inventory.
 // Handles layout and rendering item icons based on code.
 type ItemGrid struct {
+	uiManager      *d2ui.UIManager
 	items          []InventoryItem
 	equipmentSlots map[d2enum.EquippedSlot]EquipmentSlot
 	width          int
@@ -43,10 +44,11 @@ type ItemGrid struct {
 	slotSize       int
 }
 
-func NewItemGrid(record *d2datadict.InventoryRecord) *ItemGrid {
+func NewItemGrid(ui *d2ui.UIManager, record *d2datadict.InventoryRecord) *ItemGrid {
 	grid := record.Grid
 
 	return &ItemGrid{
+		uiManager:      ui,
 		width:          grid.Box.Width,
 		height:         grid.Box.Height,
 		originX:        grid.Box.Left,
@@ -126,7 +128,7 @@ func (g *ItemGrid) loadItem(item InventoryItem) {
 			return
 		}
 
-		itemSprite, err = d2ui.LoadSprite(animation)
+		itemSprite, err = g.uiManager.LoadSprite(animation)
 		if err != nil {
 			log.Printf("Failed to load sprite, error: " + err.Error())
 		}

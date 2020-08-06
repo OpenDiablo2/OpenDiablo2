@@ -64,6 +64,7 @@ type App struct {
 	audio             d2interface.AudioProvider
 	renderer          d2interface.Renderer
 	screen            *d2screen.ScreenManager
+	ui                *d2ui.UIManager
 	tAllocSamples     *ring.Ring
 }
 
@@ -85,7 +86,11 @@ func Create(gitBranch, gitCommit string,
 	terminal d2interface.Terminal,
 	scriptEngine *d2script.ScriptEngine,
 	audio d2interface.AudioProvider,
-	renderer d2interface.Renderer) *App {
+	renderer d2interface.Renderer,
+) *App {
+	uiManager := d2ui.NewUIManager(renderer, inputManager, audio)
+	screenManager := d2screen.NewScreenManager(uiManager)
+
 	result := &App{
 		gitBranch:     gitBranch,
 		gitCommit:     gitCommit,
@@ -94,7 +99,8 @@ func Create(gitBranch, gitCommit string,
 		scriptEngine:  scriptEngine,
 		audio:         audio,
 		renderer:      renderer,
-		screen:        d2screen.NewScreenManager(),
+		ui:            uiManager,
+		screen:        screenManager,
 		tAllocSamples: createZeroedRing(nSamplesTAlloc),
 	}
 
@@ -187,7 +193,7 @@ func (a *App) initialize() error {
 
 	d2inventory.LoadHeroObjects()
 
-	d2ui.Initialize(a.inputManager, a.audio)
+	a.ui.Initialize()
 
 	return nil
 }
@@ -368,7 +374,7 @@ func (a *App) render(target d2interface.Surface) error {
 		return err
 	}
 
-	d2ui.Render(target)
+	a.ui.Render(target)
 
 	if err := d2gui.Render(target); err != nil {
 		return err
@@ -398,7 +404,7 @@ func (a *App) advance(elapsed, elapsedUnscaled, current float64) error {
 		return err
 	}
 
-	d2ui.Advance(elapsed)
+	a.ui.Advance(elapsed)
 
 	if err := a.inputManager.Advance(elapsed, current); err != nil {
 		return err
@@ -668,14 +674,14 @@ func updateInitError(target d2interface.Surface) error {
 // ToMainMenu forces the game to transition to the Main Menu
 func (a *App) ToMainMenu() {
 	buildInfo := d2gamescreen.BuildInfo{Branch: a.gitBranch, Commit: a.gitCommit}
-	mainMenu := d2gamescreen.CreateMainMenu(a, a.renderer, a.inputManager, a.audio, buildInfo)
-	mainMenu.SetScreenMode(d2gamescreen.ScreenModeMainMenu)
+	mainMenu := d2gamescreen.CreateMainMenu(a, a.renderer, a.inputManager, a.audio, a.ui, buildInfo)
+	// mainMenu.SetScreenMode(d2gamescreen.ScreenModeMainMenu)
 	a.screen.SetNextScreen(mainMenu)
 }
 
 // ToSelectHero forces the game to transition to the Select Hero (create character) screen
 func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType, host string) {
-	selectHero := d2gamescreen.CreateSelectHeroClass(a, a.renderer, a.audio, connType, host)
+	selectHero := d2gamescreen.CreateSelectHeroClass(a, a.renderer, a.audio, a.ui, connType, host)
 	a.screen.SetNextScreen(selectHero)
 }
 
@@ -693,7 +699,8 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 
 // ToCharacterSelect forces the game to transition to the Character Select (load character) screen
 func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnectionType, connHost string) {
-	characterSelect := d2gamescreen.CreateCharacterSelect(a, a.renderer, a.inputManager, a.audio, connType, connHost)
+	characterSelect := d2gamescreen.CreateCharacterSelect(a, a.renderer, a.inputManager, a.audio,
+	a.ui, connType, connHost)
 	a.screen.SetNextScreen(characterSelect)
 }
 
@@ -706,5 +713,5 @@ func (a *App) ToMapEngineTest(region, level int) {
 
 // ToCredits forces the game to transition to the credits screen
 func (a *App) ToCredits() {
-	a.screen.SetNextScreen(d2gamescreen.CreateCredits(a, a.renderer))
+	a.screen.SetNextScreen(d2gamescreen.CreateCredits(a, a.renderer, a.ui))
 }

@@ -12,8 +12,9 @@ import (
 
 // TextBox represents a text input box
 type TextBox struct {
-	textLabel Label
-	lineBar   Label
+	manager   *UIManager
+	textLabel *Label
+	lineBar   *Label
 	text      string
 	filter    string
 	x         int
@@ -25,18 +26,20 @@ type TextBox struct {
 }
 
 // CreateTextbox creates a new instance of a text box
-func CreateTextbox() TextBox {
+func (ui *UIManager) CreateTextbox() *TextBox {
 	animation, _ := d2asset.LoadAnimation(d2resource.TextBox2, d2resource.PaletteUnits)
-	bgSprite, _ := LoadSprite(animation)
-	tb := TextBox{
+	bgSprite, _ := ui.LoadSprite(animation)
+	tb := &TextBox{
 		filter:    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
 		bgSprite:  bgSprite,
-		textLabel: CreateLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
-		lineBar:   CreateLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
+		textLabel: ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
+		lineBar:   ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
 		enabled:   true,
 		visible:   true,
 	}
 	tb.lineBar.SetText("_")
+
+	ui.addWidget(tb)
 
 	return tb
 }
@@ -63,6 +66,11 @@ func (v *TextBox) Render(target d2interface.Surface) error {
 	}
 
 	return nil
+}
+
+// bindManager binds the textbox to the UI manager
+func (v *TextBox) bindManager(manager *UIManager) {
+	v.manager = manager
 }
 
 // OnKeyChars handles key character events
@@ -115,13 +123,11 @@ func debounceEvents(numFrames int) bool {
 }
 
 // Advance updates the text box
-func (v *TextBox) Advance(_ float64) {
-	if !v.visible || !v.enabled {
-		return
-	}
+func (v *TextBox) Advance(_ float64) error {
+	return nil
 }
 
-// Update updates the textbox
+// Update updates the textbox (not currently implemented)
 func (v *TextBox) Update() {
 }
 

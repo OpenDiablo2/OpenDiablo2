@@ -2,11 +2,16 @@ package d2screen
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
 // NewScreenManager creates a screen manager
-func NewScreenManager() *ScreenManager {
-	return &ScreenManager{}
+func NewScreenManager(ui *d2ui.UIManager) *ScreenManager {
+	sm := &ScreenManager{
+		uiManager: ui,
+	}
+
+	return sm
 }
 
 // Screen is an exported interface

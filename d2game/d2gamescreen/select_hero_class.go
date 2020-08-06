@@ -267,23 +267,24 @@ func (hri *HeroRenderInfo) advance(elapsed float64) {
 
 // SelectHeroClass represents the Select Hero Class screen
 type SelectHeroClass struct {
+	uiManager          *d2ui.UIManager
 	bgImage            *d2ui.Sprite
 	campfire           *d2ui.Sprite
-	headingLabel       d2ui.Label
-	heroClassLabel     d2ui.Label
-	heroDesc1Label     d2ui.Label
-	heroDesc2Label     d2ui.Label
-	heroDesc3Label     d2ui.Label
-	heroNameTextbox    d2ui.TextBox
-	heroNameLabel      d2ui.Label
+	headingLabel       *d2ui.Label
+	heroClassLabel     *d2ui.Label
+	heroDesc1Label     *d2ui.Label
+	heroDesc2Label     *d2ui.Label
+	heroDesc3Label     *d2ui.Label
+	heroNameTextbox    *d2ui.TextBox
+	heroNameLabel      *d2ui.Label
 	heroRenderInfo     map[d2enum.Hero]*HeroRenderInfo
 	selectedHero       d2enum.Hero
-	exitButton         d2ui.Button
-	okButton           d2ui.Button
-	expansionCheckbox  d2ui.Checkbox
-	expansionCharLabel d2ui.Label
-	hardcoreCheckbox   d2ui.Checkbox
-	hardcoreCharLabel  d2ui.Label
+	exitButton         *d2ui.Button
+	okButton           *d2ui.Button
+	expansionCheckbox  *d2ui.Checkbox
+	expansionCharLabel *d2ui.Label
+	hardcoreCheckbox   *d2ui.Checkbox
+	hardcoreCharLabel  *d2ui.Label
 	connectionType     d2clientconnectiontype.ClientConnectionType
 	connectionHost     string
 
@@ -297,6 +298,7 @@ func CreateSelectHeroClass(
 	navigator Navigator,
 	renderer d2interface.Renderer,
 	audioProvider d2interface.AudioProvider,
+	ui *d2ui.UIManager,
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	connectionHost string,
 ) *SelectHeroClass {
@@ -308,6 +310,7 @@ func CreateSelectHeroClass(
 		audioProvider:  audioProvider,
 		renderer:       renderer,
 		navigator:      navigator,
+		uiManager:      ui,
 	}
 
 	return result
@@ -318,7 +321,7 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 	v.audioProvider.PlayBGM(d2resource.BGMTitle)
 	loading.Progress(tenPercent)
 
-	v.bgImage = loadSprite(
+	v.bgImage = v.loadSprite(
 		d2resource.CharacterSelectBackground,
 		point(0, 0),
 		0,
@@ -332,7 +335,7 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 	loading.Progress(fourtyPercent)
 	v.createButtons()
 
-	v.campfire = loadSprite(
+	v.campfire = v.loadSprite(
 		d2resource.CharacterSelectCampfire,
 		point(campfirePosX, campfirePosY),
 		0,
@@ -340,12 +343,12 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 		true,
 	)
 
-	v.createCheckboxes(v.renderer)
+	v.createCheckboxes()
 	loading.Progress(fiftyPercent)
 
 	for hero, config := range getHeroRenderConfiguration() {
 		position := config.position
-		forwardWalkOverlaySprite := loadSprite(
+		forwardWalkOverlaySprite := v.loadSprite(
 			config.forwardWalkOverlayAnimationPath,
 			position,
 			config.forwardWalkPlayLengthMs,
@@ -353,24 +356,32 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 			config.forwardWalkOverlayBlend,
 		)
 		v.heroRenderInfo[hero] = &HeroRenderInfo{
-			Stance:                   d2enum.HeroStanceIdle,
-			IdleSprite:               loadSprite(config.idleAnimationPath, position, config.idlePlayLengthMs, true, false),
-			IdleSelectedSprite:       loadSprite(config.idleSelectedAnimationPath, position, config.idlePlayLengthMs, true, false),
-			ForwardWalkSprite:        loadSprite(config.forwardWalkAnimationPath, position, config.forwardWalkPlayLengthMs, false, false),
+			Stance: d2enum.HeroStanceIdle,
+			IdleSprite: v.loadSprite(config.idleAnimationPath, position,
+				config.idlePlayLengthMs, true, false),
+			IdleSelectedSprite: v.loadSprite(config.idleSelectedAnimationPath,
+				position,
+				config.idlePlayLengthMs, true, false),
+			ForwardWalkSprite: v.loadSprite(config.forwardWalkAnimationPath, position,
+				config.forwardWalkPlayLengthMs, false, false),
 			ForwardWalkSpriteOverlay: forwardWalkOverlaySprite,
-			SelectedSprite:           loadSprite(config.selectedAnimationPath, position, config.idlePlayLengthMs, true, false),
-			SelectedSpriteOverlay:    loadSprite(config.selectedOverlayAnimationPath, position, config.idlePlayLengthMs, true, true),
-			BackWalkSprite:           loadSprite(config.backWalkAnimationPath, position, config.backWalkPlayLengthMs, false, false),
-			BackWalkSpriteOverlay:    loadSprite(config.backWalkOverlayAnimationPath, position, config.backWalkPlayLengthMs, false, true),
-			SelectionBounds:          config.selectionBounds,
-			SelectSfx:                v.loadSoundEffect(config.selectSfx),
-			DeselectSfx:              v.loadSoundEffect(config.deselectSfx),
+			SelectedSprite: v.loadSprite(config.selectedAnimationPath, position,
+				config.idlePlayLengthMs, true, false),
+			SelectedSpriteOverlay: v.loadSprite(config.selectedOverlayAnimationPath, position,
+				config.idlePlayLengthMs, true, true),
+			BackWalkSprite: v.loadSprite(config.backWalkAnimationPath, position,
+				config.backWalkPlayLengthMs, false, false),
+			BackWalkSpriteOverlay: v.loadSprite(config.backWalkOverlayAnimationPath, position,
+				config.backWalkPlayLengthMs, false, true),
+			SelectionBounds: config.selectionBounds,
+			SelectSfx:       v.loadSoundEffect(config.selectSfx),
+			DeselectSfx:     v.loadSoundEffect(config.deselectSfx),
 		}
 	}
 }
 
 func (v *SelectHeroClass) createLabels() {
-	v.headingLabel = d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
+	v.headingLabel = v.uiManager.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
 	fontWidth, _ := v.headingLabel.GetSize()
 	half := 2
 	halfFontWidth := fontWidth / half
@@ -379,67 +390,62 @@ func (v *SelectHeroClass) createLabels() {
 	v.headingLabel.SetText("Select Hero Class")
 	v.headingLabel.Alignment = d2gui.HorizontalAlignCenter
 
-	v.heroClassLabel = d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
+	v.heroClassLabel = v.uiManager.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
 	v.heroClassLabel.Alignment = d2gui.HorizontalAlignCenter
 	v.heroClassLabel.SetPosition(heroClassLabelX, heroClassLabelY)
 
-	v.heroDesc1Label = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroDesc1Label = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroDesc1Label.Alignment = d2gui.HorizontalAlignCenter
 	v.heroDesc1Label.SetPosition(heroDescLine1X, heroDescLine1Y)
 
-	v.heroDesc2Label = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroDesc2Label = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroDesc2Label.Alignment = d2gui.HorizontalAlignCenter
 	v.heroDesc2Label.SetPosition(heroDescLine2X, heroDescLine2Y)
 
-	v.heroDesc3Label = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroDesc3Label = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroDesc3Label.Alignment = d2gui.HorizontalAlignCenter
 	v.heroDesc3Label.SetPosition(heroDescLine3X, heroDescLine3Y)
 
-	v.heroNameLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroNameLabel = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroNameLabel.Alignment = d2gui.HorizontalAlignLeft
 	v.heroNameLabel.SetText(d2ui.ColorTokenize("Character Name", d2ui.ColorTokenGold))
 	v.heroNameLabel.SetPosition(heroNameLabelX, heroNameLabelY)
 
-	v.expansionCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.expansionCharLabel = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.expansionCharLabel.Alignment = d2gui.HorizontalAlignLeft
 	v.expansionCharLabel.SetText(d2ui.ColorTokenize("EXPANSION CHARACTER", d2ui.ColorTokenGold))
 	v.expansionCharLabel.SetPosition(expansionLabelX, expansionLabelY)
 
-	v.hardcoreCharLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.hardcoreCharLabel = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.hardcoreCharLabel.Alignment = d2gui.HorizontalAlignLeft
 	v.hardcoreCharLabel.SetText(d2ui.ColorTokenize("Hardcore", d2ui.ColorTokenGold))
 	v.hardcoreCharLabel.SetPosition(hardcoreLabelX, hardcoreLabelY)
 }
 
 func (v *SelectHeroClass) createButtons() {
-	v.exitButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeMedium, "EXIT")
+	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, "EXIT")
 	v.exitButton.SetPosition(selHeroExitBtnX, selHeroExitBtnY)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
-	d2ui.AddWidget(&v.exitButton)
 
-	v.okButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeMedium, "OK")
+	v.okButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, "OK")
 	v.okButton.SetPosition(selHeroOkBtnX, selHeroOkBtnY)
 	v.okButton.OnActivated(func() { v.onOkButtonClicked() })
 	v.okButton.SetVisible(false)
 	v.okButton.SetEnabled(false)
-	d2ui.AddWidget(&v.okButton)
 }
 
-func (v *SelectHeroClass) createCheckboxes(renderer d2interface.Renderer) {
-	v.heroNameTextbox = d2ui.CreateTextbox()
+func (v *SelectHeroClass) createCheckboxes() {
+	v.heroNameTextbox = v.uiManager.CreateTextbox()
 	v.heroNameTextbox.SetPosition(heroNameTextBoxX, heoNameTextBoxY)
 	v.heroNameTextbox.SetVisible(false)
-	d2ui.AddWidget(&v.heroNameTextbox)
 
-	v.expansionCheckbox = d2ui.CreateCheckbox(v.renderer, true)
+	v.expansionCheckbox = v.uiManager.CreateCheckbox(true)
 	v.expansionCheckbox.SetPosition(expandsionCheckboxX, expansionCheckboxY)
 	v.expansionCheckbox.SetVisible(false)
-	d2ui.AddWidget(&v.expansionCheckbox)
 
-	v.hardcoreCheckbox = d2ui.CreateCheckbox(renderer, false)
+	v.hardcoreCheckbox = v.uiManager.CreateCheckbox(false)
 	v.hardcoreCheckbox.SetPosition(hardcoreCheckoxX, hardcoreCheckboxY)
 	v.hardcoreCheckbox.SetVisible(false)
-	d2ui.AddWidget(&v.hardcoreCheckbox)
 }
 
 // OnUnload releases the resources of the Select Hero Class screen
@@ -559,11 +565,11 @@ func (v *SelectHeroClass) updateHeroSelectionHover(hero d2enum.Hero, canSelect b
 		return
 	}
 
-	mouseX, mouseY := d2ui.CursorPosition()
+	mouseX, mouseY := v.uiManager.CursorPosition()
 	b := renderInfo.SelectionBounds
 	mouseHover := (mouseX >= b.Min.X) && (mouseX <= b.Min.X+b.Max.X) && (mouseY >= b.Min.Y) && (mouseY <= b.Min.Y+b.Max.Y)
 
-	if mouseHover && d2ui.CursorButtonPressed(d2ui.CursorButtonLeft) {
+	if mouseHover && v.uiManager.CursorButtonPressed(d2ui.CursorButtonLeft) {
 		v.handleCursorButtonPress(hero, renderInfo)
 		return
 	}
@@ -717,7 +723,9 @@ func advanceSprite(sprite *d2ui.Sprite, elapsed float64) {
 	}
 }
 
-func loadSprite(animationPath string, position image.Point, playLength int, playLoop,
+func (v *SelectHeroClass) loadSprite(animationPath string, position image.Point,
+	playLength int,
+	playLoop,
 	blend bool) *d2ui.Sprite {
 	if animationPath == "" {
 		return nil
@@ -740,7 +748,7 @@ func loadSprite(animationPath string, position image.Point, playLength int, play
 		animation.SetPlayLengthMs(playLength)
 	}
 
-	sprite, err := d2ui.LoadSprite(animation)
+	sprite, err := v.uiManager.LoadSprite(animation)
 	if err != nil {
 		fmt.Printf("could not load sprite for the animation: %s\n", animationPath)
 		return nil

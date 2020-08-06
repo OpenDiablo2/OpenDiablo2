@@ -153,8 +153,11 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 	}
 }
 
+var _ Widget = &Button{} // static check to ensure button implements widget
+
 // Button defines a standard wide UI button
 type Button struct {
+	manager               *UIManager
 	buttonLayout          ButtonLayout
 	normalSurface         d2interface.Surface
 	pressedSurface        d2interface.Surface
@@ -172,47 +175,50 @@ type Button struct {
 	toggled               bool
 }
 
-// CreateButton creates an instance of Button
-func CreateButton(renderer d2interface.Renderer, buttonType ButtonType, text string) Button {
-	result := Button{
+// NewButton creates an instance of Button
+func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
+	btn := &Button{
 		width:   0,
 		height:  0,
 		visible: true,
 		enabled: true,
 		pressed: false,
 	}
+
 	buttonLayout := getButtonLayouts()[buttonType]
-	result.buttonLayout = buttonLayout
-	lbl := CreateLabel(buttonLayout.FontPath, d2resource.PaletteUnits)
+	btn.buttonLayout = buttonLayout
+	lbl := ui.CreateLabel(buttonLayout.FontPath, d2resource.PaletteUnits)
 
 	lbl.SetText(text)
 	lbl.Color[0] = d2common.Color(greyAlpha100)
 	lbl.Alignment = d2gui.HorizontalAlignCenter
 
 	animation, _ := d2asset.LoadAnimation(buttonLayout.ResourceName, buttonLayout.PaletteName)
-	buttonSprite, _ := LoadSprite(animation)
+	buttonSprite, _ := ui.LoadSprite(animation)
 
 	for i := 0; i < buttonLayout.XSegments; i++ {
 		w, _, _ := buttonSprite.GetFrameSize(i)
-		result.width += w
+		btn.width += w
 	}
 
 	for i := 0; i < buttonLayout.YSegments; i++ {
 		_, h, _ := buttonSprite.GetFrameSize(i * buttonLayout.YSegments)
-		result.height += h
+		btn.height += h
 	}
 
-	result.normalSurface, _ = renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
+	btn.normalSurface, _ = ui.renderer.NewSurface(btn.width, btn.height, d2enum.FilterNearest)
 
 	buttonSprite.SetPosition(0, 0)
 	buttonSprite.SetEffect(d2enum.DrawEffectModulate)
 
-	result.renderFrames(renderer, buttonSprite, &buttonLayout, &lbl)
+	ui.addWidget(btn) // important that this comes before renderFrames!
 
-	return result
+	btn.renderFrames(buttonSprite, &buttonLayout, lbl)
+
+	return btn
 }
 
-func (v *Button) renderFrames(renderer d2interface.Renderer, btnSprite *Sprite, btnLayout *ButtonLayout, label *Label) {
+func (v *Button) renderFrames(btnSprite *Sprite, btnLayout *ButtonLayout, label *Label) {
 	totalButtonTypes := btnSprite.GetFrameCount() / (btnLayout.XSegments * btnLayout.YSegments)
 
 	var err error
@@ -237,7 +243,8 @@ func (v *Button) renderFrames(renderer d2interface.Renderer, btnSprite *Sprite, 
 		if totalButtonTypes > 0 { // button has more than one type
 			frameOffset++
 
-			v.pressedSurface, _ = renderer.NewSurface(v.width, v.height, d2enum.FilterNearest)
+			v.pressedSurface, _ = v.manager.renderer.NewSurface(v.width, v.height,
+				d2enum.FilterNearest)
 			err = btnSprite.RenderSegmented(v.pressedSurface, xSeg, ySeg, baseFrame+frameOffset)
 
 			if err != nil {
@@ -252,7 +259,8 @@ func (v *Button) renderFrames(renderer d2interface.Renderer, btnSprite *Sprite, 
 		if totalButtonTypes > 0 { // button has more than two types
 			frameOffset++
 
-			v.toggledSurface, _ = renderer.NewSurface(v.width, v.height, d2enum.FilterNearest)
+			v.toggledSurface, _ = v.manager.renderer.NewSurface(v.width, v.height,
+				d2enum.FilterNearest)
 			err = btnSprite.RenderSegmented(v.pressedSurface, xSeg, ySeg, baseFrame+frameOffset)
 
 			if err != nil {
@@ -267,7 +275,8 @@ func (v *Button) renderFrames(renderer d2interface.Renderer, btnSprite *Sprite, 
 		if totalButtonTypes > 0 { // button has more than three types
 			frameOffset++
 
-			v.pressedToggledSurface, _ = renderer.NewSurface(v.width, v.height, d2enum.FilterNearest)
+			v.pressedToggledSurface, _ = v.manager.renderer.NewSurface(v.width, v.height,
+				d2enum.FilterNearest)
 			err = btnSprite.RenderSegmented(v.pressedSurface, xSeg, ySeg, baseFrame+frameOffset)
 
 			if err != nil {
@@ -279,7 +288,8 @@ func (v *Button) renderFrames(renderer d2interface.Renderer, btnSprite *Sprite, 
 		}
 
 		if btnLayout.DisabledFrame != -1 {
-			v.disabledSurface, _ = renderer.NewSurface(v.width, v.height, d2enum.FilterNearest)
+			v.disabledSurface, _ = v.manager.renderer.NewSurface(v.width, v.height,
+				d2enum.FilterNearest)
 			err = btnSprite.RenderSegmented(v.disabledSurface, xSeg, ySeg, btnLayout.DisabledFrame)
 
 			if err != nil {
@@ -290,6 +300,11 @@ func (v *Button) renderFrames(renderer d2interface.Renderer, btnSprite *Sprite, 
 			label.Render(v.disabledSurface)
 		}
 	}
+}
+
+// bindManager binds the button to the UI manager
+func (v *Button) bindManager(manager *UIManager) {
+	v.manager = manager
 }
 
 // OnActivated defines the callback handler for the activate event
@@ -344,8 +359,8 @@ func (v *Button) Toggle() {
 }
 
 // Advance advances the button state
-func (v *Button) Advance(_ float64) {
-
+func (v *Button) Advance(_ float64) error {
+	return nil
 }
 
 // GetEnabled returns the enabled state

@@ -1,66 +1,20 @@
 package d2ui
 
 import (
-	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"image/color"
 	"log"
 	"regexp"
 	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 )
-
-// ColorToken is a string which is used inside of label strings to set font color.
-type ColorToken string
-
-const (
-	colorTokenFmt   = `%s%s`
-	colorTokenMatch = `\[[^\]]+\]`
-	colorStrMatch   = colorTokenMatch + `[^\[]+`
-)
-
-const (
-	ColorTokenGrey   ColorToken = "[grey]"
-	ColorTokenRed    ColorToken = "[red]"
-	ColorTokenWhite  ColorToken = "[white]"
-	ColorTokenBlue   ColorToken = "[blue]"
-	ColorTokenYellow ColorToken = "[yellow]"
-	ColorTokenGreen  ColorToken = "[green]"
-	ColorTokenGold   ColorToken = "[gold]"
-	ColorTokenOrange ColorToken = "[orange]"
-	ColorTokenBlack  ColorToken = "[black]"
-)
-
-// Color tokens for item labels
-const (
-	ColorTokenSocketedItem = ColorTokenGrey
-	ColorTokenNormalItem   = ColorTokenWhite
-	ColorTokenMagicItem    = ColorTokenBlue
-	ColorTokenRareItem     = ColorTokenYellow
-	ColorTokenSetItem      = ColorTokenGreen
-	ColorTokenUniqueItem   = ColorTokenGold
-	ColorTokenCraftedItem  = ColorTokenOrange
-)
-
-const (
-	ColorTokenServer = ColorTokenRed
-	ColorTokenButton = ColorTokenBlack
-)
-
-const (
-	ColorTokenCharacterName = ColorTokenGold
-	ColorTokenCharacterDesc = ColorTokenWhite
-	ColorTokenCharacterType = ColorTokenGreen
-)
-
-// ColorTokenize formats the string with the given color token
-func ColorTokenize(s string, t ColorToken) string {
-	return fmt.Sprintf(colorTokenFmt, t, s)
-}
 
 // Label represents a user interface label
 type Label struct {
+	manager         *UIManager
 	text            string
 	X               int
 	Y               int
@@ -71,13 +25,15 @@ type Label struct {
 }
 
 // CreateLabel creates a new instance of a UI label
-func CreateLabel(fontPath, palettePath string) Label {
+func (ui *UIManager) CreateLabel(fontPath, palettePath string) *Label {
 	font, _ := d2asset.LoadFont(fontPath+".tbl", fontPath+".dc6", palettePath)
-	result := Label{
+	result := &Label{
 		Alignment: d2gui.HorizontalAlignLeft,
 		Color:     map[int]color.Color{0: color.White},
 		font:      font,
 	}
+
+	result.bindManager(ui)
 
 	return result
 }
@@ -126,6 +82,11 @@ func (v *Label) Render(target d2interface.Surface) {
 	target.Pop()
 }
 
+// bindManager binds the label to the UI manager
+func (v *Label) bindManager(manager *UIManager) {
+	v.manager = manager
+}
+
 // SetPosition moves the label to the specified location
 func (v *Label) SetPosition(x, y int) {
 	v.X = x
@@ -148,7 +109,7 @@ func (v *Label) SetText(newText string) {
 }
 
 // SetBackgroundColor sets the background highlight color
-func (v *Label) SetBackgroundColor(c color.RGBA) {
+func (v *Label) SetBackgroundColor(c color.Color) {
 	v.backgroundColor = c
 }
 
@@ -203,19 +164,17 @@ func (v *Label) getAlignOffset(textWidth int) int {
 }
 
 func getColor(token ColorToken) color.Color {
-	alpha := uint8(255)
-
 	// todo this should really come from the PL2 files
 	colors := map[ColorToken]color.Color{
-		ColorTokenGrey:   color.RGBA{105, 105, 105, alpha},
-		ColorTokenWhite:  color.RGBA{255, 255, 255, alpha},
-		ColorTokenBlue:   color.RGBA{105, 105, 255, alpha},
-		ColorTokenYellow: color.RGBA{255, 255, 100, alpha},
-		ColorTokenGreen:  color.RGBA{0, 255, 0, alpha},
-		ColorTokenGold:   color.RGBA{199, 179, 119, alpha},
-		ColorTokenOrange: color.RGBA{255, 168, 0, alpha},
-		ColorTokenRed:    color.RGBA{255, 77, 77, alpha},
-		ColorTokenBlack:    color.RGBA{0, 0, 0, alpha},
+		ColorTokenGrey:   d2common.Color(colorGrey100Alpha),
+		ColorTokenWhite:  d2common.Color(colorWhite100Alpha),
+		ColorTokenBlue:   d2common.Color(colorBlue100Alpha),
+		ColorTokenYellow: d2common.Color(colorYellow100Alpha),
+		ColorTokenGreen:  d2common.Color(colorGreen100Alpha),
+		ColorTokenGold:   d2common.Color(colorGold100Alpha),
+		ColorTokenOrange: d2common.Color(colorOrange100Alpha),
+		ColorTokenRed:    d2common.Color(colorRed100Alpha),
+		ColorTokenBlack:  d2common.Color(colorBlack100Alpha),
 	}
 
 	chosen := colors[token]

@@ -17,14 +17,14 @@ import (
 )
 
 const (
-	creditsX, creditsY = 0, 0
+	creditsX, creditsY               = 0, 0
 	charSelExitBtnX, charSelExitBtnY = 33, 543
 )
 
 const secondsPerCycle float64 = 0.02
 
 type labelItem struct {
-	Label     d2ui.Label
+	Label     *d2ui.Label
 	IsHeading bool
 	Available bool
 }
@@ -32,7 +32,7 @@ type labelItem struct {
 // Credits represents the credits screen
 type Credits struct {
 	creditsBackground  *d2ui.Sprite
-	exitButton         d2ui.Button
+	exitButton         *d2ui.Button
 	creditsText        []string
 	labels             []*labelItem
 	cycleTime          float64
@@ -41,10 +41,11 @@ type Credits struct {
 
 	renderer  d2interface.Renderer
 	navigator Navigator
+	uiManager *d2ui.UIManager
 }
 
 // CreateCredits creates an instance of the credits screen
-func CreateCredits(navigator Navigator, renderer d2interface.Renderer) *Credits {
+func CreateCredits(navigator Navigator, renderer d2interface.Renderer, ui *d2ui.UIManager) *Credits {
 	result := &Credits{
 		labels:             make([]*labelItem, 0),
 		cycleTime:          0,
@@ -52,6 +53,7 @@ func CreateCredits(navigator Navigator, renderer d2interface.Renderer) *Credits 
 		cyclesTillNextLine: 0,
 		renderer:           renderer,
 		navigator:          navigator,
+		uiManager:          ui,
 	}
 
 	return result
@@ -85,14 +87,13 @@ func (v *Credits) LoadContributors() []string {
 // OnLoad is called to load the resources for the credits screen
 func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 	animation, _ := d2asset.LoadAnimation(d2resource.CreditsBackground, d2resource.PaletteSky)
-	v.creditsBackground, _ = d2ui.LoadSprite(animation)
+	v.creditsBackground, _ = v.uiManager.LoadSprite(animation)
 	v.creditsBackground.SetPosition(creditsX, creditsY)
 	loading.Progress(twentyPercent)
 
-	v.exitButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeMedium, "EXIT")
+	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, "EXIT")
 	v.exitButton.SetPosition(charSelExitBtnX, charSelExitBtnY)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
-	d2ui.AddWidget(&v.exitButton)
 	loading.Progress(fourtyPercent)
 
 	fileData, err := d2asset.LoadFile(d2resource.CreditsText)
@@ -214,17 +215,17 @@ func (v *Credits) addNextItem() {
 	}
 }
 
-const(
-	itemLabelY = 605
-	itemLabelX = 400
-	itemLabel2offsetX = 10
-	halfItemLabel2offsetX = itemLabel2offsetX/2
+const (
+	itemLabelY            = 605
+	itemLabelX            = 400
+	itemLabel2offsetX     = 10
+	halfItemLabel2offsetX = itemLabel2offsetX / 2
 )
 
 func (v *Credits) setItemLabelPosition(label *d2ui.Label, isHeading, isNextHeading, isNextSpace bool) (isDoubled, nextHeading bool) {
 	width, _ := label.GetSize()
 	half := 2
-	halfWidth := width/half
+	halfWidth := width / half
 
 	if !isHeading && !isNextHeading && !isNextSpace {
 		isDoubled = true
@@ -250,7 +251,7 @@ func (v *Credits) setItemLabelPosition(label *d2ui.Label, isHeading, isNextHeadi
 
 const (
 	lightRed = 0xff5852ff
-	beige = 0xc6b296ff
+	beige    = 0xc6b296ff
 )
 
 func (v *Credits) getNewFontLabel(isHeading bool) *d2ui.Label {
@@ -263,14 +264,14 @@ func (v *Credits) getNewFontLabel(isHeading bool) *d2ui.Label {
 				label.Label.Color[0] = rgbaColor(beige)
 			}
 
-			return &label.Label
+			return label.Label
 		}
 	}
 
 	newLabelItem := &labelItem{
 		Available: false,
 		IsHeading: isHeading,
-		Label:     d2ui.CreateLabel(d2resource.FontFormal10, d2resource.PaletteSky),
+		Label:     v.uiManager.CreateLabel(d2resource.FontFormal10, d2resource.PaletteSky),
 	}
 
 	if isHeading {
@@ -281,5 +282,5 @@ func (v *Credits) getNewFontLabel(isHeading bool) *d2ui.Label {
 
 	v.labels = append(v.labels, newLabelItem)
 
-	return &newLabelItem.Label
+	return newLabelItem.Label
 }

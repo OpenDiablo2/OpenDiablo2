@@ -3,6 +3,7 @@ package d2gamescreen
 import (
 	"fmt"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
@@ -30,6 +31,7 @@ const (
 type Game struct {
 	gameClient           *d2client.GameClient
 	mapRenderer          *d2maprenderer.MapRenderer
+	uiManager            *d2ui.UIManager
 	gameControls         *d2player.GameControls // TODO: Hack
 	localPlayer          *d2mapentity.Player
 	lastRegionType       d2enum.RegionIdType
@@ -77,6 +79,7 @@ func CreateGame(
 		renderer:             renderer,
 		terminal:             term,
 		soundEngine:          d2audio.NewSoundEngine(audioProvider, term),
+		uiManager:            d2ui.NewUIManager(renderer, inputManager, audioProvider),
 	}
 	result.soundEnv = d2audio.NewSoundEnvironment(result.soundEngine)
 
@@ -244,7 +247,8 @@ func (v *Game) bindGameControls() error {
 		v.localPlayer = player
 
 		var err error
-		v.gameControls, err = d2player.NewGameControls(v.renderer, player, v.gameClient.MapEngine, v.mapRenderer, v, v.terminal)
+		v.gameControls, err = d2player.NewGameControls(v.renderer, player,
+			v.gameClient.MapEngine, v.mapRenderer, v, v.terminal, v.uiManager)
 
 		if err != nil {
 			return err

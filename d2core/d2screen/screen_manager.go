@@ -10,6 +10,7 @@ import (
 
 // ScreenManager manages game screens (main menu, credits, character select, game, etc)
 type ScreenManager struct {
+	uiManager     *d2ui.UIManager
 	nextScreen    Screen
 	loadingScreen Screen
 	loadingState  LoadingState
@@ -52,7 +53,7 @@ func (sm *ScreenManager) Advance(elapsed float64) error {
 			}
 		}
 
-		d2ui.Reset()
+		sm.uiManager.Reset()
 		d2gui.SetLayout(nil)
 
 		if handler, ok := sm.nextScreen.(ScreenLoadHandler); ok {

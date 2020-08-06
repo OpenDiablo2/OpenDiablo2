@@ -9,6 +9,7 @@ import (
 
 // Checkbox represents a checkbox UI element
 type Checkbox struct {
+	manager      *UIManager
 	Image        d2interface.Surface
 	checkedImage d2interface.Surface
 	x            int
@@ -22,8 +23,8 @@ type Checkbox struct {
 }
 
 // CreateCheckbox creates a new instance of a checkbox
-func CreateCheckbox(renderer d2interface.Renderer, checkState bool) Checkbox {
-	result := Checkbox{
+func (ui *UIManager) CreateCheckbox(checkState bool) *Checkbox {
+	result := &Checkbox{
 		checkState: checkState,
 		visible:    true,
 		width:      0,
@@ -32,19 +33,26 @@ func CreateCheckbox(renderer d2interface.Renderer, checkState bool) Checkbox {
 	}
 
 	animation, _ := d2asset.LoadAnimation(d2resource.Checkbox, d2resource.PaletteFechar)
-	checkboxSprite, _ := LoadSprite(animation)
+	checkboxSprite, _ := ui.LoadSprite(animation)
 	result.width, result.height, _ = checkboxSprite.GetFrameSize(0)
 	checkboxSprite.SetPosition(0, 0)
 
-	result.Image, _ = renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
+	result.Image, _ = ui.renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
 
 	_ = checkboxSprite.RenderSegmented(result.Image, 1, 1, 0)
 
-	result.checkedImage, _ = renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
+	result.checkedImage, _ = ui.renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
 
 	_ = checkboxSprite.RenderSegmented(result.checkedImage, 1, 1, 1)
 
+	ui.addWidget(result)
+
 	return result
+}
+
+// bindManager binds the checkbox to the UI manager
+func (v *Checkbox) bindManager(manager *UIManager) {
+	v.manager = manager
 }
 
 // Render renders the checkbox
@@ -65,8 +73,8 @@ func (v *Checkbox) Render(target d2interface.Surface) error {
 }
 
 // Advance does nothing for checkboxes
-func (v *Checkbox) Advance(_ float64) {
-
+func (v *Checkbox) Advance(_ float64) error {
+	return nil
 }
 
 // GetEnabled returns the enabled state of the checkbox

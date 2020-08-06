@@ -22,21 +22,21 @@ import (
 // CharacterSelect represents the character select screen
 type CharacterSelect struct {
 	background             *d2ui.Sprite
-	newCharButton          d2ui.Button
-	convertCharButton      d2ui.Button
-	deleteCharButton       d2ui.Button
-	exitButton             d2ui.Button
-	okButton               d2ui.Button
-	deleteCharCancelButton d2ui.Button
-	deleteCharOkButton     d2ui.Button
+	newCharButton          *d2ui.Button
+	convertCharButton      *d2ui.Button
+	deleteCharButton       *d2ui.Button
+	exitButton             *d2ui.Button
+	okButton               *d2ui.Button
+	deleteCharCancelButton *d2ui.Button
+	deleteCharOkButton     *d2ui.Button
 	selectionBox           *d2ui.Sprite
 	okCancelBox            *d2ui.Sprite
-	d2HeroTitle            d2ui.Label
-	deleteCharConfirmLabel d2ui.Label
-	charScrollbar          d2ui.Scrollbar
-	characterNameLabel     [8]d2ui.Label
-	characterStatsLabel    [8]d2ui.Label
-	characterExpLabel      [8]d2ui.Label
+	d2HeroTitle            *d2ui.Label
+	deleteCharConfirmLabel *d2ui.Label
+	charScrollbar          *d2ui.Scrollbar
+	characterNameLabel     [8]*d2ui.Label
+	characterStatsLabel    [8]*d2ui.Label
+	characterExpLabel      [8]*d2ui.Label
 	characterImage         [8]*d2mapentity.Player
 	gameStates             []*d2player.PlayerState
 	selectedCharacter      int
@@ -44,6 +44,7 @@ type CharacterSelect struct {
 	connectionType         d2clientconnectiontype.ClientConnectionType
 	connectionHost         string
 
+	uiManager     *d2ui.UIManager
 	inputManager  d2interface.InputManager
 	audioProvider d2interface.AudioProvider
 	renderer      d2interface.Renderer
@@ -56,6 +57,7 @@ func CreateCharacterSelect(
 	renderer d2interface.Renderer,
 	inputManager d2interface.InputManager,
 	audioProvider d2interface.AudioProvider,
+	ui *d2ui.UIManager,
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	connectionHost string,
 ) *CharacterSelect {
@@ -67,6 +69,7 @@ func CreateCharacterSelect(
 		inputManager:      inputManager,
 		audioProvider:     audioProvider,
 		navigator:         navigator,
+		uiManager:         ui,
 	}
 }
 
@@ -132,19 +135,19 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 
 	animation, _ := d2asset.LoadAnimation(d2resource.CharacterSelectionBackground, d2resource.PaletteSky)
 	bgX, bgY := 0, 0
-	v.background, _ = d2ui.LoadSprite(animation)
+	v.background, _ = v.uiManager.LoadSprite(animation)
 	v.background.SetPosition(bgX, bgY)
 
 	v.createButtons(loading)
 
 	heroTitleX, heroTitleY := 320, 23
-	v.d2HeroTitle = d2ui.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
+	v.d2HeroTitle = v.uiManager.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
 	v.d2HeroTitle.SetPosition(heroTitleX, heroTitleY)
 	v.d2HeroTitle.Alignment = d2gui.HorizontalAlignCenter
 
 	loading.Progress(thirtyPercent)
 
-	v.deleteCharConfirmLabel = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.deleteCharConfirmLabel = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 	lines := "Are you sure that you want\nto delete this character?\nTake note: this will delete all\nversions of this Character."
 	v.deleteCharConfirmLabel.SetText(lines)
 	v.deleteCharConfirmLabel.Alignment = d2gui.HorizontalAlignCenter
@@ -152,19 +155,18 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	v.deleteCharConfirmLabel.SetPosition(deleteConfirmX, deleteConfirmY)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.CharacterSelectionSelectBox, d2resource.PaletteSky)
-	v.selectionBox, _ = d2ui.LoadSprite(animation)
+	v.selectionBox, _ = v.uiManager.LoadSprite(animation)
 	selBoxX, selBoxY := 37, 86
 	v.selectionBox.SetPosition(selBoxX, selBoxY)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
-	v.okCancelBox, _ = d2ui.LoadSprite(animation)
+	v.okCancelBox, _ = v.uiManager.LoadSprite(animation)
 	okCancelX, okCancelY := 270, 175
 	v.okCancelBox.SetPosition(okCancelX, okCancelY)
 
 	scrollBarX, scrollBarY, scrollBarHeight := 586, 87, 369
-	v.charScrollbar = d2ui.CreateScrollbar(scrollBarX, scrollBarY, scrollBarHeight)
+	v.charScrollbar = v.uiManager.CreateScrollbar(scrollBarX, scrollBarY, scrollBarHeight)
 	v.charScrollbar.OnActivated(func() { v.onScrollUpdate() })
-	d2ui.AddWidget(&v.charScrollbar)
 
 	loading.Progress(fiftyPercent)
 
@@ -174,16 +176,16 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 			offsetX = 385
 		}
 
-		v.characterNameLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+		v.characterNameLabel[i] = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 		v.characterNameLabel[i].SetPosition(offsetX, offsetY)
 		v.characterNameLabel[i].Color[0] = rgbaColor(lightBrown)
 
 		offsetY += labelHeight
-		v.characterStatsLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+		v.characterStatsLabel[i] = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
 		v.characterStatsLabel[i].SetPosition(offsetX, offsetY)
 
 		offsetY += labelHeight
-		v.characterExpLabel[i] = d2ui.CreateLabel(d2resource.Font16, d2resource.PaletteStatic)
+		v.characterExpLabel[i] = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteStatic)
 		v.characterExpLabel[i].SetPosition(offsetX, offsetY)
 		v.characterExpLabel[i].Color[0] = rgbaColor(lightGreen)
 	}
@@ -216,58 +218,39 @@ func rgbaColor(rgba uint32) color.RGBA {
 }
 
 func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
-	v.newCharButton = d2ui.CreateButton(
-		v.renderer,
-		d2ui.ButtonTypeTall,
-		"CREATE NEW\nCHARACTER",
-	)
+	v.newCharButton = v.uiManager.NewButton(d2ui.ButtonTypeTall, "CREATE NEW\nCHARACTER")
 
 	v.newCharButton.SetPosition(newCharBtnX, newCharBtnY)
 	v.newCharButton.OnActivated(func() { v.onNewCharButtonClicked() })
-	d2ui.AddWidget(&v.newCharButton)
 
-	v.convertCharButton = d2ui.CreateButton(
-		v.renderer,
-		d2ui.ButtonTypeTall,
-		"CONVERT TO\nEXPANSION",
-	)
+	v.convertCharButton = v.uiManager.NewButton(d2ui.ButtonTypeTall, "CONVERT TO\nEXPANSION")
 
 	v.convertCharButton.SetPosition(convertCharBtnX, convertCharBtnY)
 	v.convertCharButton.SetEnabled(false)
-	d2ui.AddWidget(&v.convertCharButton)
 
-	v.deleteCharButton = d2ui.CreateButton(
-		v.renderer,
-		d2ui.ButtonTypeTall,
-		"DELETE\nCHARACTER",
-	)
+	v.deleteCharButton = v.uiManager.NewButton(d2ui.ButtonTypeTall, "DELETE\nCHARACTER")
 	v.deleteCharButton.OnActivated(func() { v.onDeleteCharButtonClicked() })
 	v.deleteCharButton.SetPosition(deleteCharBtnX, deleteCharBtnY)
-	d2ui.AddWidget(&v.deleteCharButton)
 
-	v.exitButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeMedium, "EXIT")
+	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, "EXIT")
 	v.exitButton.SetPosition(exitBtnX, exitBtnY)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
-	d2ui.AddWidget(&v.exitButton)
 
 	loading.Progress(twentyPercent)
 
-	v.deleteCharCancelButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeOkCancel, "NO")
+	v.deleteCharCancelButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, "NO")
 	v.deleteCharCancelButton.SetPosition(deleteCancelX, deleteCancelY)
 	v.deleteCharCancelButton.SetVisible(false)
 	v.deleteCharCancelButton.OnActivated(func() { v.onDeleteCharacterCancelClicked() })
-	d2ui.AddWidget(&v.deleteCharCancelButton)
 
-	v.deleteCharOkButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeOkCancel, "YES")
+	v.deleteCharOkButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, "YES")
 	v.deleteCharOkButton.SetPosition(deleteOkX, deleteOkY)
 	v.deleteCharOkButton.SetVisible(false)
 	v.deleteCharOkButton.OnActivated(func() { v.onDeleteCharacterConfirmClicked() })
-	d2ui.AddWidget(&v.deleteCharOkButton)
 
-	v.okButton = d2ui.CreateButton(v.renderer, d2ui.ButtonTypeMedium, "OK")
+	v.okButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, "OK")
 	v.okButton.SetPosition(okBtnX, okBtnY)
 	v.okButton.OnActivated(func() { v.onOkButtonClicked() })
-	d2ui.AddWidget(&v.okButton)
 }
 
 func (v *CharacterSelect) onScrollUpdate() {
