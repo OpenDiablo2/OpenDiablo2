@@ -50,9 +50,10 @@ func CreateCheckbox(renderer d2interface.Renderer, checkState bool) Checkbox {
 // Render renders the checkbox
 func (v *Checkbox) Render(target d2interface.Surface) error {
 	target.PushTranslation(v.x, v.y)
-	target.PushFilter(d2enum.FilterNearest)
+	defer target.Pop()
 
-	defer target.PopN(2)
+	target.PushFilter(d2enum.FilterNearest)
+	defer target.Pop()
 
 	if v.checkState {
 		_ = target.Render(v.checkedImage)
@@ -64,7 +65,7 @@ func (v *Checkbox) Render(target d2interface.Surface) error {
 }
 
 // Advance does nothing for checkboxes
-func (v *Checkbox) Advance(elapsed float64) {
+func (v *Checkbox) Advance(_ float64) {
 
 }
 
@@ -97,7 +98,7 @@ func (v *Checkbox) GetPressed() bool {
 	return v.checkState
 }
 
-// OnACtivated sets the callback function of the click event for the checkbox
+// OnActivated sets the callback function of the click event for the checkbox
 func (v *Checkbox) OnActivated(callback func()) {
 	v.onClick = callback
 }
@@ -108,16 +109,17 @@ func (v *Checkbox) Activate() {
 	if v.onClick == nil {
 		return
 	}
+
 	v.onClick()
 }
 
 // GetPosition returns the position of the checkbox
-func (v *Checkbox) GetPosition() (int, int) {
+func (v *Checkbox) GetPosition() (x, y int) {
 	return v.x, v.y
 }
 
 // GetSize returns the size of the checkbox
-func (v *Checkbox) GetSize() (int, int) {
+func (v *Checkbox) GetSize() (width, height int) {
 	return v.width, v.height
 }
 
@@ -127,7 +129,7 @@ func (v *Checkbox) GetVisible() bool {
 }
 
 // SetPosition sets the position of the checkbox
-func (v *Checkbox) SetPosition(x int, y int) {
+func (v *Checkbox) SetPosition(x, y int) {
 	v.x = x
 	v.y = y
 }
