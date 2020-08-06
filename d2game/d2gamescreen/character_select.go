@@ -135,19 +135,19 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 
 	animation, _ := d2asset.LoadAnimation(d2resource.CharacterSelectionBackground, d2resource.PaletteSky)
 	bgX, bgY := 0, 0
-	v.background, _ = v.uiManager.LoadSprite(animation)
+	v.background, _ = v.uiManager.NewSprite(animation)
 	v.background.SetPosition(bgX, bgY)
 
 	v.createButtons(loading)
 
 	heroTitleX, heroTitleY := 320, 23
-	v.d2HeroTitle = v.uiManager.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
+	v.d2HeroTitle = v.uiManager.NewLabel(d2resource.Font42, d2resource.PaletteUnits)
 	v.d2HeroTitle.SetPosition(heroTitleX, heroTitleY)
 	v.d2HeroTitle.Alignment = d2gui.HorizontalAlignCenter
 
 	loading.Progress(thirtyPercent)
 
-	v.deleteCharConfirmLabel = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.deleteCharConfirmLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	lines := "Are you sure that you want\nto delete this character?\nTake note: this will delete all\nversions of this Character."
 	v.deleteCharConfirmLabel.SetText(lines)
 	v.deleteCharConfirmLabel.Alignment = d2gui.HorizontalAlignCenter
@@ -155,17 +155,17 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	v.deleteCharConfirmLabel.SetPosition(deleteConfirmX, deleteConfirmY)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.CharacterSelectionSelectBox, d2resource.PaletteSky)
-	v.selectionBox, _ = v.uiManager.LoadSprite(animation)
+	v.selectionBox, _ = v.uiManager.NewSprite(animation)
 	selBoxX, selBoxY := 37, 86
 	v.selectionBox.SetPosition(selBoxX, selBoxY)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
-	v.okCancelBox, _ = v.uiManager.LoadSprite(animation)
+	v.okCancelBox, _ = v.uiManager.NewSprite(animation)
 	okCancelX, okCancelY := 270, 175
 	v.okCancelBox.SetPosition(okCancelX, okCancelY)
 
 	scrollBarX, scrollBarY, scrollBarHeight := 586, 87, 369
-	v.charScrollbar = v.uiManager.CreateScrollbar(scrollBarX, scrollBarY, scrollBarHeight)
+	v.charScrollbar = v.uiManager.NewScrollbar(scrollBarX, scrollBarY, scrollBarHeight)
 	v.charScrollbar.OnActivated(func() { v.onScrollUpdate() })
 
 	loading.Progress(fiftyPercent)
@@ -176,16 +176,16 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 			offsetX = 385
 		}
 
-		v.characterNameLabel[i] = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+		v.characterNameLabel[i] = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 		v.characterNameLabel[i].SetPosition(offsetX, offsetY)
 		v.characterNameLabel[i].Color[0] = rgbaColor(lightBrown)
 
 		offsetY += labelHeight
-		v.characterStatsLabel[i] = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+		v.characterStatsLabel[i] = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 		v.characterStatsLabel[i].SetPosition(offsetX, offsetY)
 
 		offsetY += labelHeight
-		v.characterExpLabel[i] = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteStatic)
+		v.characterExpLabel[i] = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
 		v.characterExpLabel[i].SetPosition(offsetX, offsetY)
 		v.characterExpLabel[i].Color[0] = rgbaColor(lightGreen)
 	}

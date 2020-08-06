@@ -80,9 +80,9 @@ func NewHeroStatsPanel(ui *d2ui.UIManager, heroName string, heroClass d2enum.Her
 // Load loads the data for the hero status panel
 func (s *HeroStatsPanel) Load() {
 	animation, _ := d2asset.LoadAnimation(d2resource.Frame, d2resource.PaletteSky)
-	s.frame, _ = s.uiManager.LoadSprite(animation)
+	s.frame, _ = s.uiManager.NewSprite(animation)
 	animation, _ = d2asset.LoadAnimation(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
-	s.panel, _ = s.uiManager.LoadSprite(animation)
+	s.panel, _ = s.uiManager.NewSprite(animation)
 	s.initStatValueLabels()
 }
 
@@ -374,7 +374,7 @@ func (s *HeroStatsPanel) createStatValueLabel(stat int, x int, y int) *d2ui.Labe
 }
 
 func (s *HeroStatsPanel) createTextLabel(element PanelText) *d2ui.Label {
-	label := s.uiManager.CreateLabel(element.Font, d2resource.PaletteStatic)
+	label := s.uiManager.NewLabel(element.Font, d2resource.PaletteStatic)
 	if element.AlignCenter {
 		label.Alignment = d2gui.HorizontalAlignCenter
 	}

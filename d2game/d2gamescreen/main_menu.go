@@ -152,7 +152,7 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	v.createLogos(loading)
 	v.createButtons(loading)
 
-	v.tcpJoinGameEntry = v.uiManager.CreateTextbox()
+	v.tcpJoinGameEntry = v.uiManager.NewTextbox()
 	v.tcpJoinGameEntry.SetPosition(joinGameDialogX, joinGameDialogY)
 	v.tcpJoinGameEntry.SetFilter(joinGameCharacterFilter)
 	loading.Progress(ninetyPercent)
@@ -170,61 +170,61 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 
 func (v *MainMenu) loadBackgroundSprites() {
 	animation, _ := d2asset.LoadAnimation(d2resource.GameSelectScreen, d2resource.PaletteSky)
-	v.background, _ = v.uiManager.LoadSprite(animation)
+	v.background, _ = v.uiManager.NewSprite(animation)
 	v.background.SetPosition(backgroundX, backgroundY)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.TrademarkScreen, d2resource.PaletteSky)
-	v.trademarkBackground, _ = v.uiManager.LoadSprite(animation)
+	v.trademarkBackground, _ = v.uiManager.NewSprite(animation)
 	v.trademarkBackground.SetPosition(backgroundX, backgroundY)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.TCPIPBackground, d2resource.PaletteSky)
-	v.tcpIPBackground, _ = v.uiManager.LoadSprite(animation)
+	v.tcpIPBackground, _ = v.uiManager.NewSprite(animation)
 	v.tcpIPBackground.SetPosition(backgroundX, backgroundY)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
-	v.serverIPBackground, _ = v.uiManager.LoadSprite(animation)
+	v.serverIPBackground, _ = v.uiManager.NewSprite(animation)
 	v.serverIPBackground.SetPosition(serverIPbackgroundX, serverIPbackgroundY)
 }
 
 func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
-	v.versionLabel = v.uiManager.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
+	v.versionLabel = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.versionLabel.Alignment = d2gui.HorizontalAlignRight
 	v.versionLabel.SetText("OpenDiablo2 - " + v.buildInfo.Branch)
 	v.versionLabel.Color[0] = rgbaColor(white)
 	v.versionLabel.SetPosition(versionLabelX, versionLabelY)
 
-	v.commitLabel = v.uiManager.CreateLabel(d2resource.FontFormal10, d2resource.PaletteStatic)
+	v.commitLabel = v.uiManager.NewLabel(d2resource.FontFormal10, d2resource.PaletteStatic)
 	v.commitLabel.Alignment = d2gui.HorizontalAlignLeft
 	v.commitLabel.SetText(v.buildInfo.Commit)
 	v.commitLabel.Color[0] = rgbaColor(white)
 	v.commitLabel.SetPosition(commitLabelX, commitLabelY)
 
-	v.copyrightLabel = v.uiManager.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
+	v.copyrightLabel = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.copyrightLabel.Alignment = d2gui.HorizontalAlignCenter
 	v.copyrightLabel.SetText("Diablo 2 is © Copyright 2000-2016 Blizzard Entertainment")
 	v.copyrightLabel.Color[0] = rgbaColor(lightBrown)
 	v.copyrightLabel.SetPosition(copyrightX, copyrightY)
 	loading.Progress(thirtyPercent)
 
-	v.copyrightLabel2 = v.uiManager.CreateLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
+	v.copyrightLabel2 = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.copyrightLabel2.Alignment = d2gui.HorizontalAlignCenter
 	v.copyrightLabel2.SetText("All Rights Reserved.")
 	v.copyrightLabel2.Color[0] = rgbaColor(lightBrown)
 	v.copyrightLabel2.SetPosition(copyright2X, copyright2Y)
 
-	v.openDiabloLabel = v.uiManager.CreateLabel(d2resource.FontFormal10, d2resource.PaletteStatic)
+	v.openDiabloLabel = v.uiManager.NewLabel(d2resource.FontFormal10, d2resource.PaletteStatic)
 	v.openDiabloLabel.Alignment = d2gui.HorizontalAlignCenter
 	v.openDiabloLabel.SetText("OpenDiablo2 is neither developed by, nor endorsed by Blizzard or its parent company Activision")
 	v.openDiabloLabel.Color[0] = rgbaColor(lightYellow)
 	v.openDiabloLabel.SetPosition(od2LabelX, od2LabelY)
 	loading.Progress(fiftyPercent)
 
-	v.tcpIPOptionsLabel = v.uiManager.CreateLabel(d2resource.Font42, d2resource.PaletteUnits)
+	v.tcpIPOptionsLabel = v.uiManager.NewLabel(d2resource.Font42, d2resource.PaletteUnits)
 	v.tcpIPOptionsLabel.SetPosition(tcpOptionsX, tcpOptionsY)
 	v.tcpIPOptionsLabel.Alignment = d2gui.HorizontalAlignCenter
 	v.tcpIPOptionsLabel.SetText("TCP/IP Options")
 
-	v.tcpJoinGameLabel = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.tcpJoinGameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.tcpJoinGameLabel.Alignment = d2gui.HorizontalAlignCenter
 	v.tcpJoinGameLabel.SetText("Enter Host IP Address\nto Join Game")
 
@@ -234,24 +234,24 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 
 func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
 	animation, _ := d2asset.LoadAnimation(d2resource.Diablo2LogoFireLeft, d2resource.PaletteUnits)
-	v.diabloLogoLeft, _ = v.uiManager.LoadSprite(animation)
+	v.diabloLogoLeft, _ = v.uiManager.NewSprite(animation)
 	v.diabloLogoLeft.SetEffect(d2enum.DrawEffectModulate)
 	v.diabloLogoLeft.PlayForward()
 	v.diabloLogoLeft.SetPosition(diabloLogoX, diabloLogoY)
 	loading.Progress(sixtyPercent)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.Diablo2LogoFireRight, d2resource.PaletteUnits)
-	v.diabloLogoRight, _ = v.uiManager.LoadSprite(animation)
+	v.diabloLogoRight, _ = v.uiManager.NewSprite(animation)
 	v.diabloLogoRight.SetEffect(d2enum.DrawEffectModulate)
 	v.diabloLogoRight.PlayForward()
 	v.diabloLogoRight.SetPosition(diabloLogoX, diabloLogoY)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.Diablo2LogoBlackLeft, d2resource.PaletteUnits)
-	v.diabloLogoLeftBack, _ = v.uiManager.LoadSprite(animation)
+	v.diabloLogoLeftBack, _ = v.uiManager.NewSprite(animation)
 	v.diabloLogoLeftBack.SetPosition(diabloLogoX, diabloLogoY)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.Diablo2LogoBlackRight, d2resource.PaletteUnits)
-	v.diabloLogoRightBack, _ = v.uiManager.LoadSprite(animation)
+	v.diabloLogoRightBack, _ = v.uiManager.NewSprite(animation)
 	v.diabloLogoRightBack.SetPosition(diabloLogoX, diabloLogoY)
 }
 

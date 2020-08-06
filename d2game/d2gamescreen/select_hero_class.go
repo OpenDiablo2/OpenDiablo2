@@ -381,7 +381,7 @@ func (v *SelectHeroClass) OnLoad(loading d2screen.LoadingState) {
 }
 
 func (v *SelectHeroClass) createLabels() {
-	v.headingLabel = v.uiManager.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
+	v.headingLabel = v.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
 	fontWidth, _ := v.headingLabel.GetSize()
 	half := 2
 	halfFontWidth := fontWidth / half
@@ -390,33 +390,33 @@ func (v *SelectHeroClass) createLabels() {
 	v.headingLabel.SetText("Select Hero Class")
 	v.headingLabel.Alignment = d2gui.HorizontalAlignCenter
 
-	v.heroClassLabel = v.uiManager.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
+	v.heroClassLabel = v.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
 	v.heroClassLabel.Alignment = d2gui.HorizontalAlignCenter
 	v.heroClassLabel.SetPosition(heroClassLabelX, heroClassLabelY)
 
-	v.heroDesc1Label = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroDesc1Label = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroDesc1Label.Alignment = d2gui.HorizontalAlignCenter
 	v.heroDesc1Label.SetPosition(heroDescLine1X, heroDescLine1Y)
 
-	v.heroDesc2Label = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroDesc2Label = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroDesc2Label.Alignment = d2gui.HorizontalAlignCenter
 	v.heroDesc2Label.SetPosition(heroDescLine2X, heroDescLine2Y)
 
-	v.heroDesc3Label = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroDesc3Label = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroDesc3Label.Alignment = d2gui.HorizontalAlignCenter
 	v.heroDesc3Label.SetPosition(heroDescLine3X, heroDescLine3Y)
 
-	v.heroNameLabel = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.heroNameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroNameLabel.Alignment = d2gui.HorizontalAlignLeft
 	v.heroNameLabel.SetText(d2ui.ColorTokenize("Character Name", d2ui.ColorTokenGold))
 	v.heroNameLabel.SetPosition(heroNameLabelX, heroNameLabelY)
 
-	v.expansionCharLabel = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.expansionCharLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.expansionCharLabel.Alignment = d2gui.HorizontalAlignLeft
 	v.expansionCharLabel.SetText(d2ui.ColorTokenize("EXPANSION CHARACTER", d2ui.ColorTokenGold))
 	v.expansionCharLabel.SetPosition(expansionLabelX, expansionLabelY)
 
-	v.hardcoreCharLabel = v.uiManager.CreateLabel(d2resource.Font16, d2resource.PaletteUnits)
+	v.hardcoreCharLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.hardcoreCharLabel.Alignment = d2gui.HorizontalAlignLeft
 	v.hardcoreCharLabel.SetText(d2ui.ColorTokenize("Hardcore", d2ui.ColorTokenGold))
 	v.hardcoreCharLabel.SetPosition(hardcoreLabelX, hardcoreLabelY)
@@ -435,15 +435,15 @@ func (v *SelectHeroClass) createButtons() {
 }
 
 func (v *SelectHeroClass) createCheckboxes() {
-	v.heroNameTextbox = v.uiManager.CreateTextbox()
+	v.heroNameTextbox = v.uiManager.NewTextbox()
 	v.heroNameTextbox.SetPosition(heroNameTextBoxX, heoNameTextBoxY)
 	v.heroNameTextbox.SetVisible(false)
 
-	v.expansionCheckbox = v.uiManager.CreateCheckbox(true)
+	v.expansionCheckbox = v.uiManager.NewCheckbox(true)
 	v.expansionCheckbox.SetPosition(expandsionCheckboxX, expansionCheckboxY)
 	v.expansionCheckbox.SetVisible(false)
 
-	v.hardcoreCheckbox = v.uiManager.CreateCheckbox(false)
+	v.hardcoreCheckbox = v.uiManager.NewCheckbox(false)
 	v.hardcoreCheckbox.SetPosition(hardcoreCheckoxX, hardcoreCheckboxY)
 	v.hardcoreCheckbox.SetVisible(false)
 }
@@ -748,7 +748,7 @@ func (v *SelectHeroClass) loadSprite(animationPath string, position image.Point,
 		animation.SetPlayLengthMs(playLength)
 	}
 
-	sprite, err := v.uiManager.LoadSprite(animation)
+	sprite, err := v.uiManager.NewSprite(animation)
 	if err != nil {
 		fmt.Printf("could not load sprite for the animation: %s\n", animationPath)
 		return nil

@@ -24,8 +24,8 @@ type Label struct {
 	backgroundColor color.Color
 }
 
-// CreateLabel creates a new instance of a UI label
-func (ui *UIManager) CreateLabel(fontPath, palettePath string) *Label {
+// NewLabel creates a new instance of a UI label
+func (ui *UIManager) NewLabel(fontPath, palettePath string) *Label {
 	font, _ := d2asset.LoadFont(fontPath+".tbl", fontPath+".dc6", palettePath)
 	result := &Label{
 		Alignment: d2gui.HorizontalAlignLeft,

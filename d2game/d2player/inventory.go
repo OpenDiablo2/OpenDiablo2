@@ -31,7 +31,7 @@ type Inventory struct {
 
 func NewInventory(ui *d2ui.UIManager, record *d2datadict.InventoryRecord) *Inventory {
 
-	hoverLabel := ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
+	hoverLabel := ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
 	hoverLabel.Alignment = d2gui.HorizontalAlignCenter
 
 	return &Inventory{
@@ -62,10 +62,10 @@ func (g *Inventory) Close() {
 
 func (g *Inventory) Load() {
 	animation, _ := d2asset.LoadAnimation(d2resource.Frame, d2resource.PaletteSky)
-	g.frame, _ = g.uiManager.LoadSprite(animation)
+	g.frame, _ = g.uiManager.NewSprite(animation)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
-	g.panel, _ = g.uiManager.LoadSprite(animation)
+	g.panel, _ = g.uiManager.NewSprite(animation)
 	items := []InventoryItem{
 		diablo2item.NewItem("kit", "Crimson", "of the Bat", "of Frost").Identify(),
 		diablo2item.NewItem("rin", "Steel", "of Shock").Identify(),

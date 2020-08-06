@@ -187,14 +187,14 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 
 	buttonLayout := getButtonLayouts()[buttonType]
 	btn.buttonLayout = buttonLayout
-	lbl := ui.CreateLabel(buttonLayout.FontPath, d2resource.PaletteUnits)
+	lbl := ui.NewLabel(buttonLayout.FontPath, d2resource.PaletteUnits)
 
 	lbl.SetText(text)
 	lbl.Color[0] = d2common.Color(greyAlpha100)
 	lbl.Alignment = d2gui.HorizontalAlignCenter
 
 	animation, _ := d2asset.LoadAnimation(buttonLayout.ResourceName, buttonLayout.PaletteName)
-	buttonSprite, _ := ui.LoadSprite(animation)
+	buttonSprite, _ := ui.NewSprite(animation)
 
 	for i := 0; i < buttonLayout.XSegments; i++ {
 		w, _, _ := buttonSprite.GetFrameSize(i)

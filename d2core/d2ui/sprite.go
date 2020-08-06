@@ -21,8 +21,8 @@ const (
 	errNoAnimation = "no animation was specified"
 )
 
-// LoadSprite creates a new Sprite
-func (ui *UIManager) LoadSprite(animation d2interface.Animation) (*Sprite, error) {
+// NewSprite creates a new Sprite
+func (ui *UIManager) NewSprite(animation d2interface.Animation) (*Sprite, error) {
 	if animation == nil {
 		return nil, fmt.Errorf(errNoAnimation)
 	}

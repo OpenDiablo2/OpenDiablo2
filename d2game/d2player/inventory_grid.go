@@ -128,7 +128,7 @@ func (g *ItemGrid) loadItem(item InventoryItem) {
 			return
 		}
 
-		itemSprite, err = g.uiManager.LoadSprite(animation)
+		itemSprite, err = g.uiManager.NewSprite(animation)
 		if err != nil {
 			log.Printf("Failed to load sprite, error: " + err.Error())
 		}

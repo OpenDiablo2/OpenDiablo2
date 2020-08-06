@@ -22,8 +22,8 @@ type Checkbox struct {
 	enabled      bool
 }
 
-// CreateCheckbox creates a new instance of a checkbox
-func (ui *UIManager) CreateCheckbox(checkState bool) *Checkbox {
+// NewCheckbox creates a new instance of a checkbox
+func (ui *UIManager) NewCheckbox(checkState bool) *Checkbox {
 	result := &Checkbox{
 		checkState: checkState,
 		visible:    true,
@@ -33,7 +33,7 @@ func (ui *UIManager) CreateCheckbox(checkState bool) *Checkbox {
 	}
 
 	animation, _ := d2asset.LoadAnimation(d2resource.Checkbox, d2resource.PaletteFechar)
-	checkboxSprite, _ := ui.LoadSprite(animation)
+	checkboxSprite, _ := ui.NewSprite(animation)
 	result.width, result.height, _ = checkboxSprite.GetFrameSize(0)
 	checkboxSprite.SetPosition(0, 0)
 

@@ -87,7 +87,7 @@ func (v *Credits) LoadContributors() []string {
 // OnLoad is called to load the resources for the credits screen
 func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 	animation, _ := d2asset.LoadAnimation(d2resource.CreditsBackground, d2resource.PaletteSky)
-	v.creditsBackground, _ = v.uiManager.LoadSprite(animation)
+	v.creditsBackground, _ = v.uiManager.NewSprite(animation)
 	v.creditsBackground.SetPosition(creditsX, creditsY)
 	loading.Progress(twentyPercent)
 
@@ -271,7 +271,7 @@ func (v *Credits) getNewFontLabel(isHeading bool) *d2ui.Label {
 	newLabelItem := &labelItem{
 		Available: false,
 		IsHeading: isHeading,
-		Label:     v.uiManager.CreateLabel(d2resource.FontFormal10, d2resource.PaletteSky),
+		Label:     v.uiManager.NewLabel(d2resource.FontFormal10, d2resource.PaletteSky),
 	}
 
 	if isHeading {

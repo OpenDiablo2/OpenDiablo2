@@ -101,10 +101,10 @@ func NewGameControls(
 		missileID = id
 	})
 
-	zoneLabel := ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
+	zoneLabel := ui.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
 	zoneLabel.Alignment = d2gui.HorizontalAlignCenter
 
-	nameLabel := ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
+	nameLabel := ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
 	nameLabel.Alignment = d2gui.HorizontalAlignCenter
 	nameLabel.SetText(d2ui.ColorTokenize("", d2ui.ColorTokenServer))
 
@@ -337,19 +337,19 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 func (g *GameControls) Load() {
 	animation, _ := d2asset.LoadAnimation(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
-	g.globeSprite, _ = g.uiManager.LoadSprite(animation)
+	g.globeSprite, _ = g.uiManager.NewSprite(animation)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.HealthManaIndicator, d2resource.PaletteSky)
-	g.hpManaStatusSprite, _ = g.uiManager.LoadSprite(animation)
+	g.hpManaStatusSprite, _ = g.uiManager.NewSprite(animation)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.GamePanels, d2resource.PaletteSky)
-	g.mainPanel, _ = g.uiManager.LoadSprite(animation)
+	g.mainPanel, _ = g.uiManager.NewSprite(animation)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.MenuButton, d2resource.PaletteSky)
-	g.menuButton, _ = g.uiManager.LoadSprite(animation)
+	g.menuButton, _ = g.uiManager.NewSprite(animation)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.GenericSkills, d2resource.PaletteSky)
-	g.skillIcon, _ = g.uiManager.LoadSprite(animation)
+	g.skillIcon, _ = g.uiManager.NewSprite(animation)
 
 	g.loadUIButtons()
 
