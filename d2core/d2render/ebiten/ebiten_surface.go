@@ -17,6 +17,9 @@ import (
 const (
 	maxAlpha   = 0xff
 	cacheLimit = 512
+	Transparency25 = 0.25
+	Transparency50 = 0.50
+	Transparency75 = 0.75
 )
 
 type colorMCacheKey uint32
@@ -37,12 +40,12 @@ type ebitenSurface struct {
 func createEbitenSurface(img *ebiten.Image, currentState ...surfaceState) *ebitenSurface {
 	state := surfaceState{
 		effect:     d2enum.DrawEffectNone,
-		saturation: 1.0,
-		brightness: 1.0,
-		skewX:      0.0,
-		skewY:      0.0,
-		scaleX:     1.0,
-		scaleY:     1.0,
+		saturation: defaultSaturation,
+		brightness: defaultBrightness,
+		skewX:      defaultSkewX,
+		skewY:      defaultSkewY,
+		scaleX:     defaultScaleX,
+		scaleY:     defaultScaleY,
 	}
 	if len(currentState) > 0 {
 		state = currentState[0]
@@ -151,11 +154,11 @@ func (s *ebitenSurface) Render(sfc d2interface.Surface) error {
 	// Are these correct? who even knows
 	switch s.stateCurrent.effect {
 	case d2enum.DrawEffectPctTransparency25:
-		opts.ColorM.Translate(0, 0, 0, -0.25)
+		opts.ColorM.Translate(0, 0, 0, -Transparency25)
 	case d2enum.DrawEffectPctTransparency50:
-		opts.ColorM.Translate(0, 0, 0, -0.50)
+		opts.ColorM.Translate(0, 0, 0, -Transparency50)
 	case d2enum.DrawEffectPctTransparency75:
-		opts.ColorM.Translate(0, 0, 0, -0.75)
+		opts.ColorM.Translate(0, 0, 0, -Transparency75)
 	case d2enum.DrawEffectModulate:
 		opts.CompositeMode = ebiten.CompositeModeLighter
 	// TODO: idk what to do when ebiten doesn't exactly match, pick closest?
