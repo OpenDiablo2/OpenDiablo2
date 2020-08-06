@@ -46,6 +46,7 @@ type GameControls struct {
 	hero           *d2mapentity.Player
 	mapEngine      *d2mapengine.MapEngine
 	mapRenderer    *d2maprenderer.MapRenderer
+	uiManager      *d2ui.UIManager
 	inventory      *Inventory
 	heroStatsPanel *HeroStatsPanel
 	inputListener  InputCallbackListener
@@ -62,7 +63,7 @@ type GameControls struct {
 	skillIcon          *d2ui.Sprite
 	zoneChangeText     *d2ui.Label
 	nameLabel          *d2ui.Label
-	runButton          d2ui.Button
+	runButton          *d2ui.Button
 	isZoneTextShown    bool
 	actionableRegions  []ActionableRegion
 }
@@ -86,17 +87,24 @@ const (
 	rightSkill = ActionableType(iota)
 )
 
-func NewGameControls(renderer d2interface.Renderer, hero *d2mapentity.Player, mapEngine *d2mapengine.MapEngine,
-	mapRenderer *d2maprenderer.MapRenderer, inputListener InputCallbackListener, term d2interface.Terminal) (*GameControls, error) {
+func NewGameControls(
+	renderer d2interface.Renderer,
+	hero *d2mapentity.Player,
+	mapEngine *d2mapengine.MapEngine,
+	mapRenderer *d2maprenderer.MapRenderer,
+	inputListener InputCallbackListener,
+	term d2interface.Terminal,
+	ui *d2ui.UIManager,
+) (*GameControls, error) {
 	missileID := initialMissileID
 	term.BindAction("setmissile", "set missile id to summon on right click", func(id int) {
 		missileID = id
 	})
 
-	zoneLabel := d2ui.CreateLabel(d2resource.Font30, d2resource.PaletteUnits)
+	zoneLabel := ui.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
 	zoneLabel.Alignment = d2gui.HorizontalAlignCenter
 
-	nameLabel := d2ui.CreateLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
+	nameLabel := ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
 	nameLabel.Alignment = d2gui.HorizontalAlignCenter
 	nameLabel.SetText(d2ui.ColorTokenize("", d2ui.ColorTokenServer))
 
@@ -124,20 +132,21 @@ func NewGameControls(renderer d2interface.Renderer, hero *d2mapentity.Player, ma
 
 	inventoryRecord := d2datadict.Inventory[inventoryRecordKey]
 
-	hoverLabel := &nameLabel
-	hoverLabel.SetBackgroundColor(color.RGBA{0,0,0, uint8(128)})
+	hoverLabel := nameLabel
+	hoverLabel.SetBackgroundColor(color.RGBA{0, 0, 0, uint8(128)})
 
 	gc := &GameControls{
+		uiManager:      ui,
 		renderer:       renderer,
 		hero:           hero,
 		mapEngine:      mapEngine,
 		inputListener:  inputListener,
 		mapRenderer:    mapRenderer,
-		inventory:      NewInventory(inventoryRecord),
-		heroStatsPanel: NewHeroStatsPanel(renderer, hero.Name(), hero.Class, hero.Stats),
+		inventory:      NewInventory(ui, inventoryRecord),
+		heroStatsPanel: NewHeroStatsPanel(ui, hero.Name(), hero.Class, hero.Stats),
 		missileID:      missileID,
 		nameLabel:      hoverLabel,
-		zoneChangeText: &zoneLabel,
+		zoneChangeText: zoneLabel,
 		actionableRegions: []ActionableRegion{
 			{leftSkill, d2common.Rectangle{Left: 115, Top: 550, Width: 50, Height: 50}},
 			{leftSelec, d2common.Rectangle{Left: 206, Top: 563, Width: 30, Height: 30}},
@@ -328,19 +337,19 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 func (g *GameControls) Load() {
 	animation, _ := d2asset.LoadAnimation(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
-	g.globeSprite, _ = d2ui.LoadSprite(animation)
+	g.globeSprite, _ = g.uiManager.NewSprite(animation)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.HealthManaIndicator, d2resource.PaletteSky)
-	g.hpManaStatusSprite, _ = d2ui.LoadSprite(animation)
+	g.hpManaStatusSprite, _ = g.uiManager.NewSprite(animation)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.GamePanels, d2resource.PaletteSky)
-	g.mainPanel, _ = d2ui.LoadSprite(animation)
+	g.mainPanel, _ = g.uiManager.NewSprite(animation)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.MenuButton, d2resource.PaletteSky)
-	g.menuButton, _ = d2ui.LoadSprite(animation)
+	g.menuButton, _ = g.uiManager.NewSprite(animation)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.GenericSkills, d2resource.PaletteSky)
-	g.skillIcon, _ = d2ui.LoadSprite(animation)
+	g.skillIcon, _ = g.uiManager.NewSprite(animation)
 
 	g.loadUIButtons()
 
@@ -350,7 +359,7 @@ func (g *GameControls) Load() {
 
 func (g *GameControls) loadUIButtons() {
 	// Run button
-	g.runButton = d2ui.CreateButton(g.renderer, d2ui.ButtonTypeRun, "")
+	g.runButton = g.uiManager.NewButton(d2ui.ButtonTypeRun, "")
 
 	g.runButton.SetPosition(255, 570)
 	g.runButton.OnActivated(func() { g.onToggleRunButton() })
@@ -358,8 +367,6 @@ func (g *GameControls) loadUIButtons() {
 	if g.hero.IsRunToggled() {
 		g.runButton.Toggle()
 	}
-
-	d2ui.AddWidget(&g.runButton)
 }
 
 func (g *GameControls) onToggleRunButton() {

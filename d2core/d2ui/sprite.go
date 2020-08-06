@@ -1,13 +1,13 @@
 package d2ui
 
 import (
-	"errors"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
+	"fmt"
 	"image"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
 // Sprite is a positioned visual object.
@@ -17,17 +17,20 @@ type Sprite struct {
 	animation d2interface.Animation
 }
 
-var (
-	ErrNoAnimation = errors.New("no animation was specified")
+const (
+	errNoAnimation = "no animation was specified"
 )
 
-func LoadSprite(animation d2interface.Animation) (*Sprite, error) {
+// NewSprite creates a new Sprite
+func (ui *UIManager) NewSprite(animation d2interface.Animation) (*Sprite, error) {
 	if animation == nil {
-		return nil, ErrNoAnimation
+		return nil, fmt.Errorf(errNoAnimation)
 	}
+
 	return &Sprite{animation: animation}, nil
 }
 
+// Render renders the sprite on the given surface
 func (s *Sprite) Render(target d2interface.Surface) error {
 	_, frameHeight := s.animation.GetCurrentFrameSize()
 
@@ -45,12 +48,12 @@ func (s *Sprite) RenderSection(sfc d2interface.Surface, bound image.Rectangle) e
 	return s.animation.RenderSection(sfc, bound)
 }
 
+// RenderSegmented renders a sprite that is internally segmented as frames
 func (s *Sprite) RenderSegmented(target d2interface.Surface, segmentsX, segmentsY, frameOffset int) error {
 	var currentY int
 
 	for y := 0; y < segmentsY; y++ {
-		var currentX int
-		var maxFrameHeight int
+		var currentX, maxFrameHeight int
 
 		for x := 0; x < segmentsX; x++ {
 			if err := s.animation.SetCurrentFrame(x + y*segmentsX + frameOffset*segmentsX*segmentsY); err != nil {
@@ -83,22 +86,22 @@ func (s *Sprite) SetPosition(x, y int) {
 }
 
 // GetPosition retrieves the 2D position of the sprite
-func (s *Sprite) GetPosition() (int, int) {
+func (s *Sprite) GetPosition() (x, y int) {
 	return s.x, s.y
 }
 
 // GetFrameSize gets the Size(width, height) of a indexed frame.
-func (s *Sprite) GetFrameSize(frameIndex int) (int, int, error) {
+func (s *Sprite) GetFrameSize(frameIndex int) (x, y int, err error) {
 	return s.animation.GetFrameSize(frameIndex)
 }
 
 // GetCurrentFrameSize gets the Size(width, height) of the current frame.
-func (s *Sprite) GetCurrentFrameSize() (int, int) {
+func (s *Sprite) GetCurrentFrameSize() (width, height int) {
 	return s.animation.GetCurrentFrameSize()
 }
 
 // GetFrameBounds gets maximum Size(width, height) of all frame.
-func (s *Sprite) GetFrameBounds() (int, int) {
+func (s *Sprite) GetFrameBounds() (width, height int) {
 	return s.animation.GetFrameBounds()
 }
 
@@ -144,7 +147,7 @@ func (s *Sprite) SetCurrentFrame(frameIndex int) error {
 
 // Rewind sprite to beginning
 func (s *Sprite) Rewind() {
-	s.animation.SetCurrentFrame(0)
+	_ = s.animation.SetCurrentFrame(0)
 }
 
 // PlayForward plays sprite forward
@@ -167,22 +170,27 @@ func (s *Sprite) SetPlayLoop(loop bool) {
 	s.animation.SetPlayLoop(loop)
 }
 
+// SetPlayLength sets the play length of the sprite animation
 func (s *Sprite) SetPlayLength(playLength float64) {
 	s.animation.SetPlayLength(playLength)
 }
 
+// SetPlayLengthMs sets the play length of the sprite animation in milliseconds
 func (s *Sprite) SetPlayLengthMs(playLengthMs int) {
 	s.animation.SetPlayLengthMs(playLengthMs)
 }
 
-func (s *Sprite) SetColorMod(color color.Color) {
-	s.animation.SetColorMod(color)
+// SetColorMod sets the color modifier
+func (s *Sprite) SetColorMod(c color.Color) {
+	s.animation.SetColorMod(c)
 }
 
+// Advance advances the animation
 func (s *Sprite) Advance(elapsed float64) error {
 	return s.animation.Advance(elapsed)
 }
 
+// SetEffect sets the draw effect type
 func (s *Sprite) SetEffect(e d2enum.DrawEffect) {
 	s.animation.SetEffect(e)
 }
