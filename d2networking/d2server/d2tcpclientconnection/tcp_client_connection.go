@@ -1,8 +1,6 @@
 package d2tcpclientconnection
 
 import (
-	"bytes"
-	"compress/gzip"
 	"encoding/json"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
@@ -29,17 +27,12 @@ func (t TCPClientConnection) GetUniqueID() string {
 }
 
 func (t *TCPClientConnection) SendPacketToClient(p d2netpacket.NetPacket) error {
-	var buff bytes.Buffer
-
 	packet, err := json.Marshal(p)
 	if err != nil {
 		return err
 	}
 
-	writer, _ := gzip.NewWriterLevel(&buff, gzip.BestCompression)
-	writer.Write(packet)
-	defer writer.Close()
-	_, err = t.tcpConnection.Write(buff.Bytes())
+	_, err = t.tcpConnection.Write(packet)
 	if err != nil {
 		return err
 	}

@@ -12,7 +12,7 @@ import (
 // PacketType.
 type NetPacket struct {
 	PacketType d2netpackettype.NetPacketType `json:"packetType"`
-	PacketData interface{}                   `json:"packetData"`
+	PacketData json.RawMessage               `json:"packetData"`
 }
 
 func InspectPacketType(b []byte) d2netpackettype.NetPacketType {
@@ -32,4 +32,11 @@ func UnmarshalNetPacket(packet []byte) (NetPacket, error) {
 	}
 
 	return p, nil
+}
+
+// MarshalPacket is a quick helper function to Marshal very anything UNSAFELY, meaning the error is not checked before sending.
+func MarshalPacket(packet interface{}) []byte {
+	b, _ := json.Marshal(packet)
+
+	return b
 }

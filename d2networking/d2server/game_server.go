@@ -1,16 +1,12 @@
 package d2server
 
 import (
-	"bytes"
-	"compress/gzip"
 	"context"
 	"errors"
 	"fmt"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server/d2tcpclientconnection"
-	"io"
 	"log"
 	"net"
-	"strings"
 	"sync"
 	"time"
 
@@ -151,9 +147,6 @@ func (g *GameServer) packetManager() {
 		case <-g.ctx.Done():
 			return
 		case p := <-g.packetManagerChan:
-			for k, v := range g.connections {
-				log.Println(k, v.GetConnectionType())
-			}
 			switch d2netpacket.InspectPacketType(p) {
 			case d2netpackettype.PlayerConnectionRequest:
 				player, err := d2netpacket.UnmarshalNetPacket(p)
@@ -178,7 +171,6 @@ func (g *GameServer) packetManager() {
 			case d2netpackettype.ServerClosed:
 				g.Stop()
 			}
-			log.Println("Received packet")
 		}
 	}
 }
@@ -205,42 +197,24 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 			return
 		}
 
-		buff := bytes.NewBuffer(buffer)
+		buff := buffer[:n]
 
-		packetTypeID, err := buff.ReadByte()
-		if err != nil {
-		}
-
-		log.Println(string(packetTypeID))
-
-		packetType := d2netpackettype.NetPacketType(packetTypeID)
-		reader, err := gzip.NewReader(buff)
-
+		packet, err := d2netpacket.UnmarshalNetPacket(buff)
 		if err != nil {
 			log.Println(err)
+			return // exit this connection as we could not read the first packet
 		}
 
-		sb := new(strings.Builder)
-
-		written, err := io.Copy(sb, reader)
-
-		if err != nil && err != gzip.ErrHeader {
-		}
-
-		if written == 0 {
-		}
-
-		trimmedBuffer := buffer[:n]
 		// If this is the first packet we are seeing from this specific connection we first need to see if the client
 		// is sending a valid request. If this is a valid request, we will register it and flip the connected switch
 		// to.
 		if connected == 0 {
-			if packetType != d2netpackettype.PlayerConnectionRequest {
+			if packet.PacketType != d2netpackettype.PlayerConnectionRequest {
 				log.Printf("Closing connection with %s: did not receive new player connection request...\n", conn.RemoteAddr().String())
 			}
 
 			// TODO: I do not think this error check actually works. Need to retrofit with Errors.Is().
-			if err := g.registerConnection([]byte(sb.String()), conn); err != nil {
+			if err := g.registerConnection(packet.PacketData, conn); err != nil {
 				switch err {
 				case ErrServerFull: // Server is currently full and not accepting new connections.
 					// TODO: Need to create a new Server Full packet to return to clients.
@@ -259,7 +233,7 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 		case <-g.ctx.Done():
 			return
 		default:
-			g.packetManagerChan <- trimmedBuffer
+			g.packetManagerChan <- packet.PacketData
 		}
 	}
 }
@@ -429,12 +403,13 @@ func OnClientDisconnected(client ClientConnection) {
 func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) error {
 	switch packet.PacketType {
 	case d2netpackettype.MovePlayer:
+		movePacket, _ := d2netpacket.UnmarshalMovePlayer(packet.PacketData)
 		// TODO: This needs to be verified on the server (here) before sending to other clients....
 		// TODO: Hacky, this should be updated in realtime ----------------
 		// TODO: Verify player id
 		playerState := singletonServer.connections[client.GetUniqueID()].GetPlayerState()
-		playerState.X = packet.PacketData.(d2netpacket.MovePlayerPacket).DestX
-		playerState.Y = packet.PacketData.(d2netpacket.MovePlayerPacket).DestY
+		playerState.X = movePacket.DestX
+		playerState.Y = movePacket.DestY
 		// ----------------------------------------------------------------
 		for _, player := range singletonServer.connections {
 			err := player.SendPacketToClient(packet)

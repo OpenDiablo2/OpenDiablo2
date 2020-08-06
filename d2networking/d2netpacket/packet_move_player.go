@@ -19,15 +19,18 @@ type MovePlayerPacket struct {
 // CreateMovePlayerPacket returns a NetPacket which declares a MovePlayerPacket
 // with the given ID and movement command.
 func CreateMovePlayerPacket(playerID string, startX, startY, destX, destY float64) NetPacket {
+	movePlayerPacket := MovePlayerPacket{
+		PlayerID: playerID,
+		StartX:   startX,
+		StartY:   startY,
+		DestX:    destX,
+		DestY:    destY,
+	}
+	b, _ := json.Marshal(movePlayerPacket)
+
 	return NetPacket{
 		PacketType: d2netpackettype.MovePlayer,
-		PacketData: MovePlayerPacket{
-			PlayerID: playerID,
-			StartX:   startX,
-			StartY:   startY,
-			DestX:    destX,
-			DestY:    destY,
-		},
+		PacketData: b,
 	}
 }
 

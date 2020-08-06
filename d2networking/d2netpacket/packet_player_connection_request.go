@@ -16,12 +16,15 @@ type PlayerConnectionRequestPacket struct {
 // CreatePlayerConnectionRequestPacket returns a NetPacket which defines a
 // PlayerConnectionRequestPacket with the given ID and game state.
 func CreatePlayerConnectionRequestPacket(id string, playerState *d2player.PlayerState) NetPacket {
+	playerConnectionRequest := PlayerConnectionRequestPacket{
+		ID:          id,
+		PlayerState: playerState,
+	}
+	b, _ := json.Marshal(playerConnectionRequest)
+
 	return NetPacket{
 		PacketType: d2netpackettype.PlayerConnectionRequest,
-		PacketData: PlayerConnectionRequestPacket{
-			ID:          id,
-			PlayerState: playerState,
-		},
+		PacketData: b,
 	}
 }
 
