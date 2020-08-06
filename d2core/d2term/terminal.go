@@ -3,7 +3,6 @@ package d2term
 import (
 	"errors"
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"image/color"
 	"log"
 	"math"
@@ -14,15 +13,17 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
 const (
-	termCharWidth   = 6
-	termCharHeight  = 16
-	termRowCount    = 24
-	termRowCountMax = 32
-	termColCountMax = 128
-	termAnimLength  = 0.5
+	termCharWidth       = 6
+	termCharHeight      = 16
+	termCharDoubleWidth = termCharWidth * 2
+	termRowCount        = 24
+	termRowCountMax     = 32
+	termColCountMax     = 128
+	termAnimLength      = 0.5
 )
 
 const (
@@ -231,9 +232,9 @@ func (t *terminal) Render(surface d2interface.Surface) error {
 
 		historyEntry := t.outputHistory[historyIndex]
 
-		surface.PushTranslation(termCharWidth*2, outputHeight-(i+1)*termCharHeight)
+		surface.PushTranslation(termCharDoubleWidth, outputHeight-(i+1)*termCharHeight)
 		surface.DrawTextf(historyEntry.text)
-		surface.PushTranslation(-termCharWidth*2, 0)
+		surface.PushTranslation(-termCharDoubleWidth, 0)
 
 		switch historyEntry.category {
 		case d2enum.TermCategoryInfo:
