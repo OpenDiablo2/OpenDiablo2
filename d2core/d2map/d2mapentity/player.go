@@ -14,7 +14,6 @@ import (
 // Player is the player character entity.
 type Player struct {
 	mapEntity
-	ID            string
 	name          string
 	animationMode string
 	composite     *d2asset.Composite
@@ -34,6 +33,11 @@ type Player struct {
 // run speed should be walkspeed * 1.5, since in the original game it is 6 yards walk and 9 yards run.
 const baseWalkSpeed = 6.0
 const baseRunSpeed = 9.0
+
+// ID returns the Player uuid
+func (p *Player) ID() string {
+	return p.mapEntity.uuid
+}
 
 // SetIsInTown sets a flag indicating that the player is in town.
 func (p *Player) SetIsInTown(isInTown bool) {
@@ -86,7 +90,7 @@ func (p *Player) Advance(tickTime float64) {
 	}
 
 	if err := p.composite.Advance(tickTime); err != nil {
-		fmt.Printf("failed to advance composite animation of player: %s, err: %v\n", p.ID, err)
+		fmt.Printf("failed to advance composite animation of player: %s, err: %v\n", p.ID(), err)
 	}
 
 	if p.lastPathSize != len(p.path) {
@@ -109,7 +113,7 @@ func (p *Player) Render(target d2interface.Surface) {
 	defer target.Pop()
 
 	if err := p.composite.Render(target); err != nil {
-		fmt.Printf("failed to render the composite of player: %s, err: %v\n", p.ID, err)
+		fmt.Printf("failed to render the composite of player: %s, err: %v\n", p.ID(), err)
 	}
 }
 
@@ -173,7 +177,8 @@ func (p *Player) IsCasting() bool {
 func (p *Player) SetCasting() {
 	p.isCasting = true
 	if err := p.SetAnimationMode(d2enum.PlayerAnimationModeCast); err != nil {
-		fmt.Printf("failed to set animationMode of player: %s to: %d, err: %v\n", p.ID, d2enum.PlayerAnimationModeCast, err)
+		fmtStr := "failed to set animationMode of player: %s to: %d, err: %v\n"
+		fmt.Printf(fmtStr, p.ID(), d2enum.PlayerAnimationModeCast, err)
 	}
 }
 

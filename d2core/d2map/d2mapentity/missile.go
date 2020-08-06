@@ -14,6 +14,11 @@ type Missile struct {
 	record *d2datadict.MissileRecord
 }
 
+// ID returns the missile uuid
+func (m *Missile) ID() string {
+	return m.AnimatedEntity.uuid
+}
+
 // GetPosition returns the position of the missile
 func (m *Missile) GetPosition() d2vector.Position {
 	return m.AnimatedEntity.Position

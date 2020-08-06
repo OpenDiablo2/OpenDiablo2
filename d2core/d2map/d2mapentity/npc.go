@@ -43,6 +43,11 @@ func selectEquip(slice []string) string {
 	return ""
 }
 
+// ID returns the NPC uuid
+func (v *NPC) ID() string {
+	return v.mapEntity.uuid
+}
+
 // Render renders this entity's animated composite.
 func (v *NPC) Render(target d2interface.Surface) {
 	renderOffset := v.Position.RenderOffset()

@@ -56,7 +56,7 @@ func CreateGame(
 	// find the local player and its initial location
 	var startX, startY float64
 	for _, player := range gameClient.Players {
-		if player.ID != gameClient.PlayerID {
+		if player.ID() != gameClient.PlayerID {
 			continue
 		}
 		worldPosition := player.Position.World()
@@ -237,7 +237,7 @@ func (v *Game) Advance(elapsed float64) error {
 
 func (v *Game) bindGameControls() error {
 	for _, player := range v.gameClient.Players {
-		if player.ID != v.gameClient.PlayerID {
+		if player.ID() != v.gameClient.PlayerID {
 			continue
 		}
 
@@ -253,7 +253,7 @@ func (v *Game) bindGameControls() error {
 		v.gameControls.Load()
 
 		if err := v.inputManager.BindHandler(v.gameControls); err != nil {
-			fmt.Printf(bindControlsErrStr, player.ID)
+			fmt.Printf(bindControlsErrStr, player.ID())
 		}
 
 		break

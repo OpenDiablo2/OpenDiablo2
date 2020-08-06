@@ -20,8 +20,8 @@ import (
 
 // MapEngine loads the tiles which make up the isometric map and the entities
 type MapEngine struct {
-	seed          int64                   // The map seed
-	entities      []d2interface.MapEntity // Entities on the map
+	seed          int64                            // The map seed
+	entities      map[string]d2interface.MapEntity // Entities on the map
 	tiles         []MapTile
 	size          d2common.Size              // Size of the map, in tiles
 	levelType     d2datadict.LevelTypeRecord // Level type of this map
@@ -44,7 +44,7 @@ func (m *MapEngine) GetStartingPosition() (x, y int) {
 
 // ResetMap clears all map and entity data and reloads it from the cached files.
 func (m *MapEngine) ResetMap(levelType d2enum.RegionIdType, width, height int) {
-	m.entities = make([]d2interface.MapEntity, 0)
+	m.entities = make(map[string]d2interface.MapEntity)
 	m.levelType = d2datadict.LevelTypes[levelType]
 	m.size = d2common.Size{Width: width, Height: height}
 	m.tiles = make([]MapTile, width*height)
@@ -155,7 +155,7 @@ func (m *MapEngine) PlaceStamp(stamp *d2mapstamp.Stamp, tileOffsetX, tileOffsetY
 	// Copy over the map tile data
 	for y := 0; y < stampH; y++ {
 		for x := 0; x < stampW; x++ {
-			targetTileIndex := m.tileCoordinateToIndex((x + xMin), (y + yMin))
+			targetTileIndex := m.tileCoordinateToIndex(x+xMin, y+yMin)
 			stampTile := *stamp.Tile(x, y)
 			m.tiles[targetTileIndex].RegionType = stamp.RegionID()
 			m.tiles[targetTileIndex].Components = stampTile
@@ -164,7 +164,11 @@ func (m *MapEngine) PlaceStamp(stamp *d2mapstamp.Stamp, tileOffsetX, tileOffsetY
 	}
 
 	// Copy over the entities
-	m.entities = append(m.entities, stamp.Entities(tileOffsetX, tileOffsetY)...)
+	stampEntities := stamp.Entities(tileOffsetX, tileOffsetY)
+	for idx := range stampEntities {
+		e := stampEntities[idx]
+		m.entities[e.ID()] = e
+	}
 }
 
 // converts x,y tile coordinate into index in MapEngine.tiles
@@ -172,7 +176,7 @@ func (m *MapEngine) tileCoordinateToIndex(x, y int) int {
 	return x + (y * m.size.Width)
 }
 
-// converts tile index from MapEngine.tiles to x,y coordinate
+// tileIndexToCoordinate converts tile index from MapEngine.tiles to x,y coordinate
 func (m *MapEngine) tileIndexToCoordinate(index int) (x, y int) {
 	return index % m.size.Width, index / m.size.Width
 }
@@ -196,8 +200,8 @@ func (m *MapEngine) TileAt(tileX, tileY int) *MapTile {
 }
 
 // Entities returns a pointer a slice of all map entities.
-func (m *MapEngine) Entities() *[]d2interface.MapEntity {
-	return &m.entities
+func (m *MapEngine) Entities() map[string]d2interface.MapEntity {
+	return m.entities
 }
 
 // Seed returns the map generation seed.
@@ -207,15 +211,16 @@ func (m *MapEngine) Seed() int64 {
 
 // AddEntity adds an entity to a slice containing all entities.
 func (m *MapEngine) AddEntity(entity d2interface.MapEntity) {
-	m.entities = append(m.entities, entity)
+	m.entities[entity.ID()] = entity
 }
 
-// RemoveEntity is not currently implemented.
+// RemoveEntity removes an entity from the map engine
 func (m *MapEngine) RemoveEntity(entity d2interface.MapEntity) {
 	if entity == nil {
 		return
 	}
-	// m.entities.Remove(entity)
+
+	delete(m.entities, entity.ID())
 }
 
 // GetTiles returns a slice of all tiles matching the given style,
@@ -264,8 +269,8 @@ func (m *MapEngine) GetCenterPosition() (x, y float64) {
 // Advance calls the Advance() method for all entities,
 // processing a single tick.
 func (m *MapEngine) Advance(tickTime float64) {
-	for idx := range m.entities {
-		m.entities[idx].Advance(tickTime)
+	for ID := range m.entities {
+		m.entities[ID].Advance(tickTime)
 	}
 }
 
