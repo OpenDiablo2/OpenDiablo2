@@ -1,4 +1,4 @@
-package d2data
+package d2ds1
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"

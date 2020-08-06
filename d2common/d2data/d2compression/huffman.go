@@ -256,7 +256,8 @@ func insertNode(tail *linkedNode, decomp int) *linkedNode {
 
 	adjustTree(newnode)
 
-	// TODO: For compression type 0, AdjustTree should be called once for every value written and only once here
+	// ISSUE #680: For compression type 0, adjustTree should be
+	// called once for every value written and only once here
 	adjustTree(newnode)
 
 	return result

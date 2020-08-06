@@ -2,7 +2,6 @@ package d2ds1
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
@@ -13,7 +12,7 @@ const maxActNumber = 5
 // DS1 represents the "stamp" data that is used to build up maps.
 type DS1 struct {
 	Files                      []string            // FilePtr table of file string pointers
-	Objects                    []d2data.Object     // Objects
+	Objects                    []Object            // Objects
 	Tiles                      [][]TileRecord      // The tile data for the DS1
 	SubstitutionGroups         []SubstitutionGroup // Substitution groups for the DS1
 	Version                    int32               // The version of the DS1
@@ -111,10 +110,10 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 func (ds1 *DS1) loadObjects(br *d2common.StreamReader) {
 	if ds1.Version >= 2 { //nolint:gomnd // Version number
 		numberOfObjects := br.GetInt32()
-		ds1.Objects = make([]d2data.Object, numberOfObjects)
+		ds1.Objects = make([]Object, numberOfObjects)
 
 		for objIdx := 0; objIdx < int(numberOfObjects); objIdx++ {
-			newObject := d2data.Object{}
+			newObject := Object{}
 			newObject.Type = int(br.GetInt32())
 			newObject.ID = int(br.GetInt32())
 			newObject.X = int(br.GetInt32())
@@ -124,7 +123,7 @@ func (ds1 *DS1) loadObjects(br *d2common.StreamReader) {
 			ds1.Objects[objIdx] = newObject
 		}
 	} else {
-		ds1.Objects = make([]d2data.Object, 0)
+		ds1.Objects = make([]Object, 0)
 	}
 }
 

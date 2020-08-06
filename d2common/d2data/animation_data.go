@@ -7,6 +7,11 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
+const (
+	numCofNameBytes = 8
+	numFlagBytes    = 144
+)
+
 // AnimationDataRecord represents a single entry in the animation data dictionary file
 type AnimationDataRecord struct {
 	// COFName is the name of the COF file used for this animation
@@ -30,13 +35,13 @@ func LoadAnimationData(rawData []byte) {
 	for !streamReader.EOF() {
 		dataCount := int(streamReader.GetInt32())
 		for i := 0; i < dataCount; i++ {
-			cofNameBytes := streamReader.ReadBytes(8)
+			cofNameBytes := streamReader.ReadBytes(numCofNameBytes)
 			data := &AnimationDataRecord{
 				COFName:            strings.ReplaceAll(string(cofNameBytes), string(0), ""),
 				FramesPerDirection: int(streamReader.GetInt32()),
 				AnimationSpeed:     int(streamReader.GetInt32()),
 			}
-			data.Flags = streamReader.ReadBytes(144)
+			data.Flags = streamReader.ReadBytes(numFlagBytes)
 			cofIndex := strings.ToLower(data.COFName)
 
 			if _, found := AnimationData[cofIndex]; !found {

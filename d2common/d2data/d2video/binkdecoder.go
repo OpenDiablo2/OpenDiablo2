@@ -11,22 +11,22 @@ type BinkVideoMode uint32
 
 const (
 	// BinkVideoModeNormal is a normal video
-	BinkVideoModeNormal BinkVideoMode = 0
+	BinkVideoModeNormal BinkVideoMode = iota
 
 	// BinkVideoModeHeightDoubled is a height-doubled video
-	BinkVideoModeHeightDoubled BinkVideoMode = 1
+	BinkVideoModeHeightDoubled
 
 	// BinkVideoModeHeightInterlaced is a height-interlaced video
-	BinkVideoModeHeightInterlaced BinkVideoMode = 2
+	BinkVideoModeHeightInterlaced
 
 	// BinkVideoModeWidthDoubled is a width-doubled video
-	BinkVideoModeWidthDoubled BinkVideoMode = 3
+	BinkVideoModeWidthDoubled
 
 	// BinkVideoModeWidthAndHeightDoubled is a width and height-doubled video
-	BinkVideoModeWidthAndHeightDoubled BinkVideoMode = 4
+	BinkVideoModeWidthAndHeightDoubled
 
 	// BinkVideoModeWidthAndHeightInterlaced is a width and height interlaced video
-	BinkVideoModeWidthAndHeightInterlaced BinkVideoMode = 5
+	BinkVideoModeWidthAndHeightInterlaced
 )
 
 // BinkAudioAlgorithm represents the type of bink audio algorithm
@@ -34,10 +34,10 @@ type BinkAudioAlgorithm uint32
 
 const (
 	// BinkAudioAlgorithmFFT is the FTT audio algorithm
-	BinkAudioAlgorithmFFT BinkAudioAlgorithm = 0
+	BinkAudioAlgorithmFFT BinkAudioAlgorithm = iota
 
 	// BinkAudioAlgorithmDCT is the DCT audio algorithm
-	BinkAudioAlgorithmDCT BinkAudioAlgorithm = 1
+	BinkAudioAlgorithmDCT
 )
 
 // BinkAudioTrack represents an audio track
@@ -84,8 +84,7 @@ func CreateBinkDecoder(source []byte) *BinkDecoder {
 
 // GetNextFrame gets the next frame
 func (v *BinkDecoder) GetNextFrame() {
-	//nolint:gocritic    // v.streamReader.SetPosition(uint64(v.FrameIndexTable[i] & 0xFFFFFFFE))
-
+	//nolint:gocritic // v.streamReader.SetPosition(uint64(v.FrameIndexTable[i] & 0xFFFFFFFE))
 	lengthOfAudioPackets := v.streamReader.GetUInt32() - 4 //nolint:gomnd // decode magic
 	samplesInPacket := v.streamReader.GetUInt32()
 
