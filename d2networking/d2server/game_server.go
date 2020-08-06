@@ -241,7 +241,6 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 func (g *GameServer) registerConnection(b []byte, conn net.Conn) error {
 	g.Lock()
 
-	log.Println(string(b))
 	// check to see if the server is full
 	if len(g.connections) >= g.maxConnections {
 		return ErrServerFull
