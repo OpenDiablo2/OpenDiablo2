@@ -2,6 +2,7 @@ package d2server
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server/d2tcpclientconnection"
@@ -185,21 +186,15 @@ func (g *GameServer) sendPacketToClients(packet d2netpacket.NetPacket) {
 // via Go Routine. Context should be a property of the GameServer Struct.
 func (g *GameServer) handleConnection(conn net.Conn) {
 	var connected int
-	buffer := make([]byte, ChunkSize)
+	var packet d2netpacket.NetPacket
 
 	log.Printf("Accepting connection: %s", conn.RemoteAddr().String())
 	defer conn.Close()
 
+	decoder := json.NewDecoder(conn)
+
 	for {
-		n, err := conn.Read(buffer)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		buff := buffer[:n]
-
-		packet, err := d2netpacket.UnmarshalNetPacket(buff)
+		err := decoder.Decode(&packet)
 		if err != nil {
 			log.Println(err)
 			return // exit this connection as we could not read the first packet
