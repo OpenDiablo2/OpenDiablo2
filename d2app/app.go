@@ -6,7 +6,6 @@ import (
 	"container/ring"
 	"errors"
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"image"
 	"image/gif"
 	"image/png"
@@ -26,6 +25,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
@@ -63,6 +63,7 @@ type App struct {
 	scriptEngine      *d2script.ScriptEngine
 	audio             d2interface.AudioProvider
 	renderer          d2interface.Renderer
+	screen            *d2screen.ScreenManager
 	tAllocSamples     *ring.Ring
 }
 
@@ -93,6 +94,7 @@ func Create(gitBranch, gitCommit string,
 		scriptEngine:  scriptEngine,
 		audio:         audio,
 		renderer:      renderer,
+		screen:        d2screen.NewScreenManager(),
 		tAllocSamples: createZeroedRing(nSamplesTAlloc),
 	}
 
@@ -362,7 +364,7 @@ func (a *App) renderCapture(target d2interface.Surface) error {
 }
 
 func (a *App) render(target d2interface.Surface) error {
-	if err := d2screen.Render(target); err != nil {
+	if err := a.screen.Render(target); err != nil {
 		return err
 	}
 
@@ -392,7 +394,7 @@ func (a *App) advance(elapsed, elapsedUnscaled, current float64) error {
 
 	a.lastScreenAdvance = current
 
-	if err := d2screen.Advance(elapsedLastScreenAdvance); err != nil {
+	if err := a.screen.Advance(elapsedLastScreenAdvance); err != nil {
 		return err
 	}
 
@@ -597,7 +599,7 @@ func (a *App) quitGame() {
 }
 
 func (a *App) enterGuiPlayground() {
-	d2screen.SetNextScreen(d2gamescreen.CreateGuiTestMain(a.renderer))
+	a.screen.SetNextScreen(d2gamescreen.CreateGuiTestMain(a.renderer))
 }
 
 func createZeroedRing(n int) *ring.Ring {
@@ -668,13 +670,13 @@ func (a *App) ToMainMenu() {
 	buildInfo := d2gamescreen.BuildInfo{Branch: a.gitBranch, Commit: a.gitCommit}
 	mainMenu := d2gamescreen.CreateMainMenu(a, a.renderer, a.inputManager, a.audio, buildInfo)
 	mainMenu.SetScreenMode(d2gamescreen.ScreenModeMainMenu)
-	d2screen.SetNextScreen(mainMenu)
+	a.screen.SetNextScreen(mainMenu)
 }
 
 // ToSelectHero forces the game to transition to the Select Hero (create character) screen
 func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType, host string) {
 	selectHero := d2gamescreen.CreateSelectHeroClass(a, a.renderer, a.audio, connType, host)
-	d2screen.SetNextScreen(selectHero)
+	a.screen.SetNextScreen(selectHero)
 }
 
 // ToCreateGame forces the game to transition to the Create Game screen
@@ -686,23 +688,23 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 		fmt.Printf("can not connect to the host: %s", host)
 	}
 
-	d2screen.SetNextScreen(d2gamescreen.CreateGame(a, a.renderer, a.inputManager, a.audio, gameClient, a.terminal))
+	a.screen.SetNextScreen(d2gamescreen.CreateGame(a, a.renderer, a.inputManager, a.audio, gameClient, a.terminal))
 }
 
 // ToCharacterSelect forces the game to transition to the Character Select (load character) screen
 func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnectionType, connHost string) {
 	characterSelect := d2gamescreen.CreateCharacterSelect(a, a.renderer, a.inputManager, a.audio, connType, connHost)
-	d2screen.SetNextScreen(characterSelect)
+	a.screen.SetNextScreen(characterSelect)
 }
 
 // ToMapEngineTest forces the game to transition to the map engine test screen
 func (a *App) ToMapEngineTest(region, level int) {
 	met := d2gamescreen.CreateMapEngineTest(region, level, a.terminal, a.renderer, a.inputManager,
-		a.audio)
-	d2screen.SetNextScreen(met)
+		a.audio, a.screen)
+	a.screen.SetNextScreen(met)
 }
 
 // ToCredits forces the game to transition to the credits screen
 func (a *App) ToCredits() {
-	d2screen.SetNextScreen(d2gamescreen.CreateCredits(a, a.renderer))
+	a.screen.SetNextScreen(d2gamescreen.CreateCredits(a, a.renderer))
 }

@@ -94,6 +94,7 @@ type MapEngineTest struct {
 	renderer      d2interface.Renderer
 	inputManager  d2interface.InputManager
 	audioProvider d2interface.AudioProvider
+	screen        *d2screen.ScreenManager
 
 	lastMouseX, lastMouseY int
 	selX, selY             int
@@ -115,6 +116,7 @@ func CreateMapEngineTest(currentRegion,
 	renderer d2interface.Renderer,
 	inputManager d2interface.InputManager,
 	audioProvider d2interface.AudioProvider,
+	screen *d2screen.ScreenManager,
 ) *MapEngineTest {
 	result := &MapEngineTest{
 		currentRegion: currentRegion,
@@ -126,6 +128,7 @@ func CreateMapEngineTest(currentRegion,
 		renderer:      renderer,
 		inputManager:  inputManager,
 		audioProvider: audioProvider,
+		screen:        screen,
 	}
 	result.gameState = d2player.CreateTestGameState()
 
@@ -428,13 +431,13 @@ func (met *MapEngineTest) OnKeyDown(event d2interface.KeyEvent) bool {
 		switch event.KeyMod() {
 		case d2enum.KeyModControl:
 			met.fileIndex++
-			d2screen.SetNextScreen(met)
+			met.screen.SetNextScreen(met)
 		case d2enum.KeyModShift:
 			met.levelPreset = increment(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
-			d2screen.SetNextScreen(met)
+			met.screen.SetNextScreen(met)
 		default:
 			met.currentRegion = increment(met.currentRegion, 0, len(getRegions()))
-			d2screen.SetNextScreen(met)
+			met.screen.SetNextScreen(met)
 		}
 
 		return true
@@ -444,13 +447,13 @@ func (met *MapEngineTest) OnKeyDown(event d2interface.KeyEvent) bool {
 		switch event.KeyMod() {
 		case d2enum.KeyModControl:
 			met.fileIndex--
-			d2screen.SetNextScreen(met)
+			met.screen.SetNextScreen(met)
 		case d2enum.KeyModShift:
 			met.levelPreset = decrement(met.levelPreset, met.regionSpec.startPresetIndex, met.regionSpec.endPresetIndex)
-			d2screen.SetNextScreen(met)
+			met.screen.SetNextScreen(met)
 		default:
 			met.currentRegion = decrement(met.currentRegion, 0, len(getRegions()))
-			d2screen.SetNextScreen(met)
+			met.screen.SetNextScreen(met)
 		}
 
 		return true
