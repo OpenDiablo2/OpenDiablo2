@@ -4,33 +4,33 @@ package d2enum
 type MonUModConstIndex int
 
 const (
-	//Champion chance
+	// Champion chance
 	ChampionChance MonUModConstIndex = iota
 
-	//MinionHPBonus is the HP bonus received by minions
+	// MinionHPBonus is the HP bonus received by minions
 	MinionHPBonus
 	MinionHPBonusNightmare
 	MinionHPBonusHell
 
-	//ChampionHPBonus is the HP bonus received by champions
+	// ChampionHPBonus is the HP bonus received by champions
 	ChampionHPBonus
 	ChampionHPBonusNightmare
 	ChampionHPBonusHell
 
-	//UniqueHPBonus is the HP bonus received by random uniques
+	// UniqueHPBonus is the HP bonus received by random uniques
 	UniqueHPBonus
 	UniqueHPBonusNightmare
 	UniqueHPBonusHell
 
-	//Attack rating and damage bonus of champions
+	// Attack rating and damage bonus of champions
 	ChampionAttackRatingBonus
 	ChampionDamageBonus
 
-	//Attack rating and damage bonus of strong minions
+	// Attack rating and damage bonus of strong minions
 	StrongMinionAttackRatingBonus
 	StrongMinionDamageBonus
 
-	//Minion elemental damage bonus
+	// Minion elemental damage bonus
 	MinionElementalDamageMinBonus
 	MinionElementalDamageMinBonusNightmare
 	MinionElementalDamageMinBonusHell
@@ -39,7 +39,7 @@ const (
 	MinionElementalDamageMaxBonusNightmare
 	MinionElementalDamageMaxBonusHell
 
-	//Minion elemental damage bonus
+	// Minion elemental damage bonus
 	ChampionElementalDamageMinBonus
 	ChampionElementalDamageMinBonusNightmare
 	ChampionElementalDamageMinBonusHell
@@ -48,7 +48,7 @@ const (
 	ChampionElementalDamageMaxBonusNightmare
 	ChampionElementalDamageMaxBonusHell
 
-	//Unique elemental damage bonus
+	// Unique elemental damage bonus
 	UniqueElementalDamageMinBonus
 	UniqueElementalDamageMinBonusNightmare
 	UniqueElementalDamageMinBonusHell
