@@ -23,13 +23,13 @@ type RareItemPrefixRecord struct {
 }
 
 // RarePrefixes is where all RareItemPrefixRecords are stored
-var RarePrefixes map[string]*RareItemPrefixRecord // nolint:gochecknoglobals // global by design
+var RarePrefixes []*RareItemPrefixRecord // nolint:gochecknoglobals // global by design
 
 // LoadRareItemPrefixRecords loads the rare item prefix records from rareprefix.txt
 func LoadRareItemPrefixRecords(file []byte) {
 	d := d2common.LoadDataDictionary(file)
 
-	RarePrefixes = make(map[string]*RareItemPrefixRecord)
+	RarePrefixes = make([]*RareItemPrefixRecord, 0)
 
 	for d.Next() {
 		record := &RareItemPrefixRecord{
@@ -52,7 +52,7 @@ func LoadRareItemPrefixRecords(file []byte) {
 			}
 		}
 
-		RarePrefixes[record.Name] = record
+		RarePrefixes = append(RarePrefixes, record)
 	}
 
 	log.Printf("Loaded %d RarePrefix records", len(RarePrefixes))

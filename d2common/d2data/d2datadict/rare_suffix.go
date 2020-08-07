@@ -23,13 +23,13 @@ type RareItemSuffixRecord struct {
 }
 
 // RareSuffixes is where all RareItemSuffixRecords are stored
-var RareSuffixes map[string]*RareItemSuffixRecord // nolint:gochecknoglobals // global by design
+var RareSuffixes []*RareItemSuffixRecord // nolint:gochecknoglobals // global by design
 
 // LoadRareItemSuffixRecords loads the rare item suffix records from raresuffix.txt
 func LoadRareItemSuffixRecords(file []byte) {
 	d := d2common.LoadDataDictionary(file)
 
-	RareSuffixes = make(map[string]*RareItemSuffixRecord)
+	RareSuffixes = make([]*RareItemSuffixRecord, 0)
 
 	for d.Next() {
 		record := &RareItemSuffixRecord{
@@ -52,7 +52,7 @@ func LoadRareItemSuffixRecords(file []byte) {
 			}
 		}
 
-		RareSuffixes[record.Name] = record
+		RareSuffixes = append(RareSuffixes, record)
 	}
 
 	log.Printf("Loaded %d RareSuffix records", len(RareSuffixes))
