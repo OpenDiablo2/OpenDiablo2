@@ -241,11 +241,10 @@ const (
 
 	MagicPrefix = "/data/global/excel/MagicPrefix.txt"
 	MagicSuffix = "/data/global/excel/MagicSuffix.txt"
+	RarePrefix   = "/data/global/excel/RarePrefix.txt" // these are for item names
+	RareSuffix   = "/data/global/excel/RareSuffix.txt"
 
 	// --- Monster Prefix/Suffixes (?) ---
-
-	RarePrefix   = "/data/global/excel/RarePrefix.txt"
-	RareSuffix   = "/data/global/excel/RareSuffix.txt"
 	UniquePrefix = "/data/global/excel/UniquePrefix.txt"
 	UniqueSuffix = "/data/global/excel/UniqueSuffix.txt"
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"sort"
+	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
@@ -655,18 +656,40 @@ func (i *Item) generateName() {
 
 	name := d2common.TranslateString(i.CommonRecord().NameString)
 
-	if i.PrefixRecords() != nil {
+	numAffixes := 0
+	if prefixes := i.PrefixRecords(); prefixes != nil {
+		numAffixes += len(prefixes)
+	}
+
+	if suffixes := i.SuffixRecords(); suffixes != nil {
+		numAffixes += len(suffixes)
+	}
+
+	// if it has 1 to 2 affixes, it's a magic item, and we just put the current item
+	// name between the prefix and suffix strings
+	if numAffixes > 0 && numAffixes < 3 {
 		if len(i.PrefixRecords()) > 0 {
 			affix := i.PrefixRecords()[i.rand.Intn(len(i.PrefixRecords()))]
 			name = fmt.Sprintf("%s %s", affix.Name, name)
 		}
-	}
 
-	if i.SuffixRecords() != nil {
 		if len(i.SuffixRecords()) > 0 {
 			affix := i.SuffixRecords()[i.rand.Intn(len(i.SuffixRecords()))]
 			name = fmt.Sprintf("%s %s", name, affix.Name)
 		}
+	}
+
+	// if it has more than 2 affixes, it's a rare item
+	// rare items use entries from rareprefix.txt and raresuffix.txt to make their names,
+	// and the prefix and suffix actually go before thec current item name
+	if numAffixes >= 3 {
+		i.rand.Seed(i.Seed)
+
+		numPrefix, numSuffix := len(d2datadict.RarePrefixes), len(d2datadict.RareSuffixes)
+		preIdx, sufIdx := i.rand.Intn(numPrefix), i.rand.Intn(numSuffix)
+		prefix := d2datadict.RarePrefixes[preIdx].Name
+		suffix := d2datadict.RareSuffixes[sufIdx].Name
+		name = fmt.Sprintf("%s %s\n%s", strings.Title(prefix), strings.Title(suffix), name)
 	}
 
 	i.name = name
@@ -795,10 +818,13 @@ func findMatchingAffixes(
 }
 
 // these functions are to satisfy the inventory grid item interface
+
+// GetInventoryItemName returns the item name
 func (i *Item) GetInventoryItemName() string {
 	return i.Label()
 }
 
+// GetInventoryItemType returns whether the item is a weapon, armor, or misc item
 func (i *Item) GetInventoryItemType() d2enum.InventoryItemType {
 	typeCode := i.TypeRecord().Code
 
