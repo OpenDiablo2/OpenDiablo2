@@ -145,7 +145,10 @@ func (g *GameClient) SendPacketToServer(packet d2netpacket.NetPacket) error {
 }
 
 func (g *GameClient) handleGenerateMapPacket(packet d2netpacket.NetPacket) error {
-	mapData := packet.PacketData.(d2netpacket.GenerateMapPacket)
+	mapData, err := d2netpacket.UnmarshalGenerateMap(packet.PacketData)
+	if err != nil {
+		return err
+	}
 
 	if mapData.RegionType == d2enum.RegionAct1Town {
 		d2mapgen.GenerateAct1Overworld(g.MapEngine)
@@ -157,7 +160,11 @@ func (g *GameClient) handleGenerateMapPacket(packet d2netpacket.NetPacket) error
 }
 
 func (g *GameClient) handleUpdateServerInfoPacket(packet d2netpacket.NetPacket) error {
-	serverInfo := packet.PacketData.(d2netpacket.UpdateServerInfoPacket)
+	serverInfo, err := d2netpacket.UnmarshalUpdateServerInfo(packet.PacketData)
+	if err != nil {
+		return err
+	}
+
 	g.MapEngine.SetSeed(serverInfo.Seed)
 	g.PlayerID = serverInfo.PlayerID
 	g.Seed = serverInfo.Seed
@@ -167,7 +174,11 @@ func (g *GameClient) handleUpdateServerInfoPacket(packet d2netpacket.NetPacket) 
 }
 
 func (g *GameClient) handleAddPlayerPacket(packet d2netpacket.NetPacket) error {
-	player := packet.PacketData.(d2netpacket.AddPlayerPacket)
+	player, err := d2netpacket.UnmarshalAddPlayer(packet.PacketData)
+	if err != nil {
+		return err
+	}
+
 	newPlayer := d2mapentity.NewPlayer(player.ID, player.Name, player.X, player.Y, 0,
 		player.HeroType, player.Stats, &player.Equipment)
 
@@ -178,7 +189,11 @@ func (g *GameClient) handleAddPlayerPacket(packet d2netpacket.NetPacket) error {
 }
 
 func (g *GameClient) handleSpawnItemPacket(packet d2netpacket.NetPacket) error {
-	item := packet.PacketData.(d2netpacket.SpawnItemPacket)
+	item, err := d2netpacket.UnmarshalSpawnItem(packet.PacketData)
+	if err != nil {
+		return err
+	}
+
 	itemEntity, err := d2mapentity.NewItem(item.X, item.Y, item.Codes...)
 
 	if err == nil {
@@ -189,7 +204,11 @@ func (g *GameClient) handleSpawnItemPacket(packet d2netpacket.NetPacket) error {
 }
 
 func (g *GameClient) handleMovePlayerPacket(packet d2netpacket.NetPacket) error {
-	movePlayer := packet.PacketData.(d2netpacket.MovePlayerPacket)
+	movePlayer, err := d2netpacket.UnmarshalMovePlayer(packet.PacketData)
+	if err != nil {
+		return err
+	}
+
 	player := g.Players[movePlayer.PlayerID]
 	start := d2vector.NewPositionTile(movePlayer.StartX, movePlayer.StartY)
 	dest := d2vector.NewPositionTile(movePlayer.DestX, movePlayer.DestY)
@@ -224,7 +243,11 @@ func (g *GameClient) handleMovePlayerPacket(packet d2netpacket.NetPacket) error 
 }
 
 func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
-	playerCast := packet.PacketData.(d2netpacket.CastPacket)
+	playerCast, err := d2netpacket.UnmarshalCast(packet.PacketData)
+	if err != nil {
+		return err
+	}
+
 	player := g.Players[playerCast.SourceEntityID]
 
 	player.SetCasting()

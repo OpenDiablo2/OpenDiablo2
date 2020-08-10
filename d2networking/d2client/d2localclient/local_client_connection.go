@@ -17,6 +17,7 @@ type LocalClientConnection struct {
 	uniqueID          string                      // Unique ID generated on construction
 	openNetworkServer bool                        // True if this is a server
 	playerState       *d2player.PlayerState       // Local player state
+	gameServer        *d2server.GameServer        // Game Server
 }
 
 // GetUniqueID returns LocalClientConnection.uniqueID.
@@ -48,10 +49,18 @@ func Create(openNetworkServer bool) *LocalClientConnection {
 
 // Open creates a new GameServer, runs the server and connects this client to it.
 func (l *LocalClientConnection) Open(_, saveFilePath string) error {
-	l.SetPlayerState(d2player.LoadPlayerState(saveFilePath))
-	d2server.Create(l.openNetworkServer)
+	var err error
 
-	go d2server.Run()
+	l.SetPlayerState(d2player.LoadPlayerState(saveFilePath))
+	l.gameServer, err = d2server.NewGameServer(l.openNetworkServer, 30)
+	if err != nil {
+		return err
+	}
+
+	if err := l.gameServer.Start(); err != nil {
+		return err
+	}
+
 	d2server.OnClientConnected(l)
 
 	return nil
@@ -65,7 +74,7 @@ func (l *LocalClientConnection) Close() error {
 	}
 
 	d2server.OnClientDisconnected(l)
-	d2server.Destroy()
+	l.gameServer.Stop()
 
 	return nil
 }

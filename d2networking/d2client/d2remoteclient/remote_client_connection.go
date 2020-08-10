@@ -1,11 +1,8 @@
 package d2remoteclient
 
 import (
-	"bytes"
-	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"strings"
@@ -24,7 +21,7 @@ import (
 type RemoteClientConnection struct {
 	clientListener d2networking.ClientListener // The GameClient
 	uniqueID       string                      // Unique ID generated on construction
-	udpConnection  *net.UDPConn                // UDP connection to the server
+	tcpConnection  *net.TCPConn                // UDP connection to the server
 	active         bool                        // The connection is currently open
 }
 
@@ -46,14 +43,14 @@ func (r *RemoteClientConnection) Open(connectionString, saveFilePath string) err
 	}
 
 	// TODO: Connect to the server
-	udpAddress, err := net.ResolveUDPAddr("udp", connectionString)
+	tcpAddress, err := net.ResolveTCPAddr("tcp", connectionString)
 
 	// TODO: Show connection error screen if connection fails
 	if err != nil {
 		return err
 	}
 
-	r.udpConnection, err = net.DialUDP("udp", nil, udpAddress)
+	r.tcpConnection, err = net.DialTCP("tcp", nil, tcpAddress)
 	// TODO: Show connection error screen if connection fails
 	if err != nil {
 		return err
@@ -62,10 +59,11 @@ func (r *RemoteClientConnection) Open(connectionString, saveFilePath string) err
 	r.active = true
 	go r.serverListener()
 
-	log.Printf("Connected to server at %s", r.udpConnection.RemoteAddr().String())
+	log.Printf("Connected to server at %s", r.tcpConnection.RemoteAddr().String())
 
 	gameState := d2player.LoadPlayerState(saveFilePath)
-	err = r.SendPacketToServer(d2netpacket.CreatePlayerConnectionRequestPacket(r.GetUniqueID(), gameState))
+	packet := d2netpacket.CreatePlayerConnectionRequestPacket(r.GetUniqueID(), gameState)
+	err = r.SendPacketToServer(packet)
 
 	if err != nil {
 		log.Print("RemoteClientConnection: error sending PlayerConnectionRequestPacket to server.")
@@ -107,102 +105,47 @@ func (r *RemoteClientConnection) SetClientListener(listener d2networking.ClientL
 // SendPacketToServer compresses the JSON encoding of a NetPacket and
 // sends it to the server.
 func (r *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket) error {
-	data, err := json.Marshal(packet.PacketData)
+	data, err := json.Marshal(packet)
 	if err != nil {
 		return err
 	}
 
-	var buff bytes.Buffer
-
-	buff.WriteByte(byte(packet.PacketType))
-	writer, _ := gzip.NewWriterLevel(&buff, gzip.BestCompression)
-
-	var written int
-
-	if written, err = writer.Write(data); err != nil {
-		return err
-	} else if written == 0 {
-		return fmt.Errorf("remoteClientConnection: attempted to send empty %v packet body", packet.PacketType)
-	}
-
-	if writeErr := writer.Close(); writeErr != nil {
-		return writeErr
-	}
-
-	if _, err = r.udpConnection.Write(buff.Bytes()); err != nil {
+	if _, err = r.tcpConnection.Write(data); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// serverListener runs a while loop, reading from the GameServer's UDP
+// serverListener runs a while loop, reading from the GameServer's TCP
 // connection.
 func (r *RemoteClientConnection) serverListener() {
-	buffer := make([]byte, 4096)
+	var packet d2netpacket.NetPacket
+	decoder := json.NewDecoder(r.tcpConnection)
 
-	for r.active {
-		n, _, err := r.udpConnection.ReadFromUDP(buffer)
+	for {
+		err := decoder.Decode(&packet)
+
+		p, err := r.decodeToPacket(packet.PacketType, string(packet.PacketData))
 		if err != nil {
-			fmt.Printf("Socket error: %s\n", err)
-			continue
+			log.Println(packet.PacketType, err)
 		}
 
-		if n <= 0 {
-			continue
-		}
-
-		data, packetType, err := r.bytesToJSON(buffer)
+		err = r.clientListener.OnPacketReceived(p)
 		if err != nil {
-			log.Println(packetType, err)
-		}
-
-		packet, err := r.decodeToPacket(packetType, data)
-		if err != nil {
-			log.Println(packetType, err)
-		}
-
-		err = r.clientListener.OnPacketReceived(packet)
-		if err != nil {
-			log.Println(packetType, err)
+			log.Println(packet.PacketType, err)
 		}
 	}
 }
 
 // bytesToJSON reads the packet type, decompresses the packet and returns a JSON string.
 func (r *RemoteClientConnection) bytesToJSON(buffer []byte) (string, d2netpackettype.NetPacketType, error) {
-	buff := bytes.NewBuffer(buffer)
-
-	packetTypeID, err := buff.ReadByte()
+	packet, err := d2netpacket.UnmarshalNetPacket(buffer)
 	if err != nil {
-		// The packet type here will be UpdateServerInfo. That shouldn't matter
-		// but perhaps we should have a 'None' packet type anyway.
-		return "", d2netpackettype.NetPacketType(0), fmt.Errorf("error reading packet type: %s", err)
+		return "", 0, err
 	}
 
-	packetType := d2netpackettype.NetPacketType(packetTypeID)
-	reader, err := gzip.NewReader(buff)
-
-	if err != nil {
-		return "", packetType, fmt.Errorf("error creating reader for %v packet: %s", packetType, err)
-	}
-
-	sb := new(strings.Builder)
-
-	// This will throw errors where packets are not compressed. This doesn't
-	// break anything, so the gzip.ErrHeader error is currently ignored to
-	// avoid noisy logging.
-	written, err := io.Copy(sb, reader)
-
-	if err != nil && err != gzip.ErrHeader {
-		return "", packetType, fmt.Errorf("error copying bytes from %v packet: %s", packetType, err)
-	}
-
-	if written == 0 {
-		return "", packetType, fmt.Errorf("empty %v packet received", packetType)
-	}
-
-	return sb.String(), packetType, nil
+	return string(packet.PacketData), packet.PacketType, nil
 }
 
 // decodeToPacket unmarshals the JSON string into the correct struct
@@ -219,7 +162,7 @@ func (r *RemoteClientConnection) decodeToPacket(t d2netpackettype.NetPacketType,
 			break
 		}
 
-		np = d2netpacket.NetPacket{PacketType: t, PacketData: p}
+		np = d2netpacket.NetPacket{PacketType: t, PacketData: d2netpacket.MarshalPacket(p)}
 
 	case d2netpackettype.MovePlayer:
 		var p d2netpacket.MovePlayerPacket
@@ -227,7 +170,7 @@ func (r *RemoteClientConnection) decodeToPacket(t d2netpackettype.NetPacketType,
 			break
 		}
 
-		np = d2netpacket.NetPacket{PacketType: t, PacketData: p}
+		np = d2netpacket.NetPacket{PacketType: t, PacketData: d2netpacket.MarshalPacket(p)}
 
 	case d2netpackettype.UpdateServerInfo:
 		var p d2netpacket.UpdateServerInfoPacket
@@ -235,7 +178,7 @@ func (r *RemoteClientConnection) decodeToPacket(t d2netpackettype.NetPacketType,
 			break
 		}
 
-		np = d2netpacket.NetPacket{PacketType: t, PacketData: p}
+		np = d2netpacket.NetPacket{PacketType: t, PacketData: d2netpacket.MarshalPacket(p)}
 
 	case d2netpackettype.AddPlayer:
 		var p d2netpacket.AddPlayerPacket
@@ -243,7 +186,7 @@ func (r *RemoteClientConnection) decodeToPacket(t d2netpackettype.NetPacketType,
 			break
 		}
 
-		np = d2netpacket.NetPacket{PacketType: t, PacketData: p}
+		np = d2netpacket.NetPacket{PacketType: t, PacketData: d2netpacket.MarshalPacket(p)}
 
 	case d2netpackettype.Ping:
 		var p d2netpacket.PingPacket
@@ -251,7 +194,7 @@ func (r *RemoteClientConnection) decodeToPacket(t d2netpackettype.NetPacketType,
 			break
 		}
 
-		np = d2netpacket.NetPacket{PacketType: t, PacketData: p}
+		np = d2netpacket.NetPacket{PacketType: t, PacketData: d2netpacket.MarshalPacket(p)}
 
 	case d2netpackettype.PlayerDisconnectionNotification:
 		var p d2netpacket.PlayerDisconnectRequestPacket
@@ -259,7 +202,7 @@ func (r *RemoteClientConnection) decodeToPacket(t d2netpackettype.NetPacketType,
 			break
 		}
 
-		np = d2netpacket.NetPacket{PacketType: t, PacketData: p}
+		np = d2netpacket.NetPacket{PacketType: t, PacketData: d2netpacket.MarshalPacket(p)}
 
 	default:
 		err = fmt.Errorf("RemoteClientConnection: unrecognized packet type: %v", t)
