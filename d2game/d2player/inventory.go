@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
@@ -13,24 +14,25 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
+// Inventory represents the inventory
 type Inventory struct {
-	uiManager *d2ui.UIManager
-	frame     *d2ui.Sprite
-	panel     *d2ui.Sprite
-	grid      *ItemGrid
-
-	hoverLabel     *d2ui.Label
-	hoverX, hoverY int
-	hovering       bool
-
-	originX, originY       int
-	lastMouseX, lastMouseY int
-
-	isOpen bool
+	uiManager  *d2ui.UIManager
+	frame      *d2ui.Sprite
+	panel      *d2ui.Sprite
+	grid       *ItemGrid
+	hoverLabel *d2ui.Label
+	hoverX     int
+	hoverY     int
+	originX    int
+	originY    int
+	lastMouseX int
+	lastMouseY int
+	hovering   bool
+	isOpen     bool
 }
 
+// NewInventory creates an inventory instance and returns a pointer to it
 func NewInventory(ui *d2ui.UIManager, record *d2datadict.InventoryRecord) *Inventory {
-
 	hoverLabel := ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
 	hoverLabel.Alignment = d2gui.HorizontalAlignCenter
 
@@ -44,22 +46,27 @@ func NewInventory(ui *d2ui.UIManager, record *d2datadict.InventoryRecord) *Inven
 	}
 }
 
+// IsOpen returns true if the inventory is open
 func (g *Inventory) IsOpen() bool {
 	return g.isOpen
 }
 
+// Toggle negates the open state of the inventory
 func (g *Inventory) Toggle() {
 	g.isOpen = !g.isOpen
 }
 
+// Open opens the inventory
 func (g *Inventory) Open() {
 	g.isOpen = true
 }
 
+// Close closes the inventory
 func (g *Inventory) Close() {
 	g.isOpen = false
 }
 
+// Load loads the resources required by the inventory
 func (g *Inventory) Load() {
 	animation, _ := d2asset.LoadAnimation(d2resource.Frame, d2resource.PaletteSky)
 	g.frame, _ = g.uiManager.NewSprite(animation)
@@ -71,9 +78,10 @@ func (g *Inventory) Load() {
 		diablo2item.NewItem("rin", "Steel", "of Shock").Identify(),
 		diablo2item.NewItem("jav").Identify(),
 		diablo2item.NewItem("buc").Identify(),
-		//diablo2item.NewItem("Arctic Furs", "qui"),
+		// diablo2item.NewItem("Arctic Furs", "qui"),
 		// TODO: Load the player's actual items
 	}
+
 	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotLeftArm, diablo2item.NewItem("wnd"))
 	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotRightArm, diablo2item.NewItem("buc"))
 	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotHead, diablo2item.NewItem("crn"))
@@ -85,9 +93,14 @@ func (g *Inventory) Load() {
 	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotRightHand, diablo2item.NewItem("rin"))
 	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotNeck, diablo2item.NewItem("amu"))
 	// TODO: Load the player's actual items
-	g.grid.Add(items...)
+
+	_, err := g.grid.Add(items...)
+	if err != nil {
+		fmt.Printf("could not add items to the inventory, err: %v\n", err)
+	}
 }
 
+// Render draws the inventory onto the given surface
 func (g *Inventory) Render(target d2interface.Surface) error {
 	if !g.isOpen {
 		return nil
@@ -194,7 +207,7 @@ func (g *Inventory) Render(target d2interface.Surface) error {
 		return err
 	}
 
-	w, h = g.panel.GetCurrentFrameSize()
+	_, h = g.panel.GetCurrentFrameSize()
 
 	g.panel.SetPosition(x, y+h)
 
@@ -209,7 +222,7 @@ func (g *Inventory) Render(target d2interface.Surface) error {
 		return err
 	}
 
-	w, h = g.panel.GetCurrentFrameSize()
+	_, h = g.panel.GetCurrentFrameSize()
 	g.panel.SetPosition(x, y+h)
 
 	if err := g.panel.Render(target); err != nil {

@@ -1,10 +1,10 @@
 package d2dcc
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
 const cellsPerRow = 4
@@ -35,21 +35,22 @@ type DCCDirection struct {
 }
 
 // CreateDCCDirection creates an instance of a DCCDirection.
-func CreateDCCDirection(bm *d2common.BitMuncher,
-	file *DCC) *DCCDirection { //nolint:funlen // Can't reduce
+func CreateDCCDirection(bm *d2common.BitMuncher, file *DCC) *DCCDirection {
 	var crazyBitTable = []byte{0, 1, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 26, 28, 30, 32}
 
-	result := &DCCDirection{}
-	result.OutSizeCoded = int(bm.GetUInt32())
-	result.CompressionFlags = int(bm.GetBits(2))                //nolint:gomnd // binary data
-	result.Variable0Bits = int(crazyBitTable[bm.GetBits(4)])    //nolint:gomnd // binary data
-	result.WidthBits = int(crazyBitTable[bm.GetBits(4)])        //nolint:gomnd // binary data
-	result.HeightBits = int(crazyBitTable[bm.GetBits(4)])       //nolint:gomnd // binary data
-	result.XOffsetBits = int(crazyBitTable[bm.GetBits(4)])      //nolint:gomnd // binary data
-	result.YOffsetBits = int(crazyBitTable[bm.GetBits(4)])      //nolint:gomnd // binary data
-	result.OptionalDataBits = int(crazyBitTable[bm.GetBits(4)]) //nolint:gomnd // binary data
-	result.CodedBytesBits = int(crazyBitTable[bm.GetBits(4)])   //nolint:gomnd // binary data
-	result.Frames = make([]*DCCDirectionFrame, file.FramesPerDirection)
+	result := &DCCDirection{
+		OutSizeCoded:     int(bm.GetUInt32()),
+		CompressionFlags: int(bm.GetBits(2)),                //nolint:gomnd // binary data
+		Variable0Bits:    int(crazyBitTable[bm.GetBits(4)]), //nolint:gomnd // binary data
+		WidthBits:        int(crazyBitTable[bm.GetBits(4)]), //nolint:gomnd // binary data
+		HeightBits:       int(crazyBitTable[bm.GetBits(4)]), //nolint:gomnd // binary data
+		XOffsetBits:      int(crazyBitTable[bm.GetBits(4)]), //nolint:gomnd // binary data
+		YOffsetBits:      int(crazyBitTable[bm.GetBits(4)]), //nolint:gomnd // binary data
+		OptionalDataBits: int(crazyBitTable[bm.GetBits(4)]), //nolint:gomnd // binary data
+		CodedBytesBits:   int(crazyBitTable[bm.GetBits(4)]), //nolint:gomnd // binary data
+		Frames:           make([]*DCCDirectionFrame, file.FramesPerDirection),
+	}
+
 	minx := 100000
 	miny := 100000
 	maxx := -100000
@@ -81,10 +82,7 @@ func CreateDCCDirection(bm *d2common.BitMuncher,
 		result.RawPixelCodesBitstreamSize = int(bm.GetBits(20)) //nolint:gomnd // binary data
 	}
 
-	// PixelValuesKey
-	paletteEntryCount := 0
-
-	for i := 0; i < 256; i++ {
+	for paletteEntryCount, i := 0, 0; i < 256; i++ {
 		valid := bm.GetBit() != 0
 		if valid {
 			result.PaletteEntries[paletteEntryCount] = byte(i)
@@ -132,25 +130,29 @@ func CreateDCCDirection(bm *d2common.BitMuncher,
 	result.PixelBuffer = nil
 
 	// Verify that everything we expected to read was actually read (sanity check)...
-	if equalCellsBitstream.BitsRead() != result.EqualCellsBitstreamSize {
-		log.Panic("Did not read the correct number of bits!")
-	}
-
-	if pixelMaskBitstream.BitsRead() != result.PixelMaskBitstreamSize {
-		log.Panic("Did not read the correct number of bits!")
-	}
-
-	if encodingTypeBitsream.BitsRead() != result.EncodingTypeBitsreamSize {
-		log.Panic("Did not read the correct number of bits!")
-	}
-
-	if rawPixelCodesBitstream.BitsRead() != result.RawPixelCodesBitstreamSize {
-		log.Panic("Did not read the correct number of bits!")
-	}
+	result.verify(equalCellsBitstream, pixelMaskBitstream, encodingTypeBitsream, rawPixelCodesBitstream)
 
 	bm.SkipBits(pixelCodeandDisplacement.BitsRead())
 
 	return result
+}
+
+func (v *DCCDirection) verify(equalCellsBitstream, pixelMaskBitstream, encodingTypeBitsream, rawPixelCodesBitstream *d2common.BitMuncher) {
+	if equalCellsBitstream.BitsRead() != v.EqualCellsBitstreamSize {
+		log.Panic("Did not read the correct number of bits!")
+	}
+
+	if pixelMaskBitstream.BitsRead() != v.PixelMaskBitstreamSize {
+		log.Panic("Did not read the correct number of bits!")
+	}
+
+	if encodingTypeBitsream.BitsRead() != v.EncodingTypeBitsreamSize {
+		log.Panic("Did not read the correct number of bits!")
+	}
+
+	if rawPixelCodesBitstream.BitsRead() != v.RawPixelCodesBitstreamSize {
+		log.Panic("Did not read the correct number of bits!")
+	}
 }
 
 //nolint:gocognit nolint:gocyclo // Can't reduce

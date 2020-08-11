@@ -40,6 +40,7 @@ func main() {
 	}
 
 	inputManager := d2input.NewInputManager()
+
 	term, err := d2term.New(inputManager)
 	if err != nil {
 		log.Fatal(err)

@@ -2,12 +2,12 @@ package d2asset
 
 import (
 	"errors"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"image"
 	"image/color"
 	"math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 
 	d2iface "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
@@ -114,9 +114,9 @@ func (a *animation) Advance(elapsed float64) error {
 }
 
 func (a *animation) renderShadow(target d2iface.Surface) error {
-	//_, height := a.GetFrameBounds()
 	direction := a.directions[a.directionIndex]
 	frame := direction.frames[a.frameIndex]
+
 	target.PushFilter(d2enum.FilterLinear)
 	target.PushTranslation(
 		frame.offsetX,
@@ -161,8 +161,10 @@ func (a *animation) RenderFromOrigin(target d2iface.Surface, shadow bool) error 
 	if shadow {
 		_, height := a.GetFrameBounds()
 		height = int(math.Abs(float64(height)))
-		target.PushTranslation((-height / 2), 0)
+
+		target.PushTranslation(-height/2, 0)
 		defer target.Pop()
+
 		return a.renderShadow(target)
 	}
 
