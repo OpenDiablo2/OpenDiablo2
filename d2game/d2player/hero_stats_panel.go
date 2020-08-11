@@ -39,9 +39,6 @@ type StatsPanelLabels struct {
 	Stamina      *d2ui.Label
 }
 
-// stores all the labels that can change during gameplay(e.g. current level, current hp, mana, etc.)
-var StatValueLabels = make([]d2ui.Label, 13)
-
 // HeroStatsPanel represents the hero status panel
 type HeroStatsPanel struct {
 	uiManager            *d2ui.UIManager
@@ -162,7 +159,7 @@ func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) error {
 		return err
 	}
 
-	w, h = s.frame.GetCurrentFrameSize()
+	_, h = s.frame.GetCurrentFrameSize()
 
 	s.frame.SetPosition(x, s.originY+h)
 
@@ -177,7 +174,7 @@ func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) error {
 		return err
 	}
 
-	w, h = s.frame.GetCurrentFrameSize()
+	_, h = s.frame.GetCurrentFrameSize()
 	s.frame.SetPosition(x, y+h)
 
 	if err := s.frame.Render(target); err != nil {
@@ -206,7 +203,7 @@ func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) error {
 		return err
 	}
 
-	w, h = s.frame.GetCurrentFrameSize()
+	_, h = s.frame.GetCurrentFrameSize()
 
 	s.frame.SetPosition(x, y+h)
 
@@ -239,7 +236,7 @@ func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) error {
 		return err
 	}
 
-	w, h = s.panel.GetCurrentFrameSize()
+	_, h = s.panel.GetCurrentFrameSize()
 
 	s.panel.SetPosition(x, y+h)
 
@@ -254,7 +251,7 @@ func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) error {
 		return err
 	}
 
-	w, h = s.panel.GetCurrentFrameSize()
+	_, h = s.panel.GetCurrentFrameSize()
 
 	s.panel.SetPosition(x, y+h)
 
@@ -306,6 +303,7 @@ func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) error {
 		{X: 310, Y: 468, Text: "Poison", Font: d2resource.Font6, AlignCenter: true},
 		{X: 310, Y: 477, Text: "Resistance", Font: d2resource.Font6, AlignCenter: true},
 	}
+
 	for _, textElement := range staticTextLabels {
 		label = s.createTextLabel(textElement)
 		label.Render(target)
@@ -368,7 +366,7 @@ func (s *HeroStatsPanel) renderStatValueNum(label *d2ui.Label, value int,
 	label.Render(target)
 }
 
-func (s *HeroStatsPanel) createStatValueLabel(stat int, x int, y int) *d2ui.Label {
+func (s *HeroStatsPanel) createStatValueLabel(stat, x, y int) *d2ui.Label {
 	text := strconv.Itoa(stat)
 	return s.createTextLabel(PanelText{X: x, Y: y, Text: text, Font: d2resource.Font16, AlignCenter: true})
 }

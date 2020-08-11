@@ -3,11 +3,11 @@ package d2asset
 import (
 	"encoding/binary"
 	"errors"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"image/color"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
 var _ d2interface.Font = &Font{} // Static check to confirm struct conforms to interface

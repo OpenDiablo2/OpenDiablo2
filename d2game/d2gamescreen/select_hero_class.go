@@ -469,7 +469,6 @@ func (v *SelectHeroClass) onOkButtonClicked() {
 		v.heroNameTextbox.GetText(),
 		v.selectedHero,
 		d2datadict.CharStats[v.selectedHero],
-		v.hardcoreCheckbox.GetCheckState(),
 	)
 	v.navigator.ToCreateGame(gameState.FilePath, d2clientconnectiontype.Local, v.connectionHost)
 }

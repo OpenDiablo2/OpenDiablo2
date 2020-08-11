@@ -24,7 +24,7 @@ type Composite struct {
 }
 
 type size struct {
-	Width int
+	Width  int
 	Height int
 }
 
@@ -306,6 +306,7 @@ func (c *Composite) loadCompositeLayer(layerKey, layerValue, animationMode, weap
 	return nil, errors.New("animation not found")
 }
 
+// GetSize returns the size of the composite
 func (c *Composite) GetSize() (w, h int) {
 	c.updateSize()
 	return c.size.Width, c.size.Height

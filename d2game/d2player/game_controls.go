@@ -32,40 +32,41 @@ type Panel interface {
 }
 
 const (
-	initialMissileID   = 59
-	expBarWidth        = 120.0
-	staminaBarWidth    = 102.0
-	globeHeight        = 80
-	globeWidth         = 80
-	hoverLabelOuterPad = 5
+	initialMissileID         = 59
+	expBarWidth              = 120.0
+	staminaBarWidth          = 102.0
+	globeHeight              = 80
+	globeWidth               = 80
+	hoverLabelOuterPad       = 5
+	mouseBtnActionsTreshhold = 0.25
 )
 
 // GameControls represents the game's controls on the screen
 type GameControls struct {
-	renderer       d2interface.Renderer // TODO: This shouldn't be a dependency
-	hero           *d2mapentity.Player
-	mapEngine      *d2mapengine.MapEngine
-	mapRenderer    *d2maprenderer.MapRenderer
-	uiManager      *d2ui.UIManager
-	inventory      *Inventory
-	heroStatsPanel *HeroStatsPanel
-	inputListener  InputCallbackListener
-	FreeCam        bool
-	lastMouseX     int
-	lastMouseY     int
-	missileID      int // ID of missile to create when user right clicks.
-
-	// UI
-	globeSprite        *d2ui.Sprite
-	hpManaStatusSprite *d2ui.Sprite
-	mainPanel          *d2ui.Sprite
-	menuButton         *d2ui.Sprite
-	skillIcon          *d2ui.Sprite
-	zoneChangeText     *d2ui.Label
-	nameLabel          *d2ui.Label
-	runButton          *d2ui.Button
-	isZoneTextShown    bool
-	actionableRegions  []ActionableRegion
+	actionableRegions      []ActionableRegion
+	renderer               d2interface.Renderer // TODO: This shouldn't be a dependency
+	inputListener          InputCallbackListener
+	hero                   *d2mapentity.Player
+	mapEngine              *d2mapengine.MapEngine
+	mapRenderer            *d2maprenderer.MapRenderer
+	uiManager              *d2ui.UIManager
+	inventory              *Inventory
+	heroStatsPanel         *HeroStatsPanel
+	lastMouseX             int
+	lastMouseY             int
+	missileID              int
+	globeSprite            *d2ui.Sprite
+	hpManaStatusSprite     *d2ui.Sprite
+	mainPanel              *d2ui.Sprite
+	menuButton             *d2ui.Sprite
+	skillIcon              *d2ui.Sprite
+	zoneChangeText         *d2ui.Label
+	nameLabel              *d2ui.Label
+	runButton              *d2ui.Button
+	lastLeftBtnActionTime  float64
+	lastRightBtnActionTime float64
+	FreeCam                bool
+	isZoneTextShown        bool
 }
 
 type ActionableType int
@@ -87,6 +88,7 @@ const (
 	rightSkill = ActionableType(iota)
 )
 
+// NewGameControls creates a GameControls instance and returns a pointer to it
 func NewGameControls(
 	renderer d2interface.Renderer,
 	hero *d2mapentity.Player,
@@ -97,9 +99,13 @@ func NewGameControls(
 	ui *d2ui.UIManager,
 ) (*GameControls, error) {
 	missileID := initialMissileID
-	term.BindAction("setmissile", "set missile id to summon on right click", func(id int) {
+
+	err := term.BindAction("setmissile", "set missile id to summon on right click", func(id int) {
 		missileID = id
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	zoneLabel := ui.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
 	zoneLabel.Alignment = d2gui.HorizontalAlignCenter
@@ -157,9 +163,11 @@ func NewGameControls(
 			{rightSelec, d2common.Rectangle{Left: 562, Top: 563, Width: 30, Height: 30}},
 			{rightSkill, d2common.Rectangle{Left: 634, Top: 550, Width: 50, Height: 50}},
 		},
+		lastLeftBtnActionTime:  0,
+		lastRightBtnActionTime: 0,
 	}
 
-	err := term.BindAction("freecam", "toggle free camera movement", func() {
+	err = term.BindAction("freecam", "toggle free camera movement", func() {
 		gc.FreeCam = !gc.FreeCam
 	})
 
@@ -170,6 +178,7 @@ func NewGameControls(
 	return gc, nil
 }
 
+// OnKeyRepeat is called to handle repeated key presses
 func (g *GameControls) OnKeyRepeat(event d2interface.KeyEvent) bool {
 	if g.FreeCam {
 		var moveSpeed float64 = 8
@@ -209,6 +218,7 @@ func (g *GameControls) OnKeyRepeat(event d2interface.KeyEvent) bool {
 	return false
 }
 
+// OnKeyDown handles key presses
 func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 	switch event.Key() {
 	case d2enum.KeyEscape:
@@ -216,6 +226,7 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 			g.inventory.Close()
 			g.heroStatsPanel.Close()
 			g.updateLayout()
+
 			break
 		}
 	case d2enum.KeyI:
@@ -229,13 +240,11 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 	default:
 		return false
 	}
+
 	return false
 }
 
-var lastLeftBtnActionTime float64 = 0
-var lastRightBtnActionTime float64 = 0
-var mouseBtnActionsTreshhold = 0.25
-
+// OnMouseButtonRepeat handles repeated mouse clicks
 func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 	px, py := g.mapRenderer.ScreenToWorld(event.X(), event.Y())
 	px = float64(int(px*10)) / 10.0
@@ -245,14 +254,14 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 	button := event.Button()
 	isLeft := button == d2enum.MouseButtonLeft
 	isRight := button == d2enum.MouseButtonRight
-	lastLeft := now - lastLeftBtnActionTime
-	lastRight := now - lastRightBtnActionTime
+	lastLeft := now - g.lastLeftBtnActionTime
+	lastRight := now - g.lastRightBtnActionTime
 	inRect := !g.isInActiveMenusRect(event.X(), event.Y())
 	shouldDoLeft := lastLeft >= mouseBtnActionsTreshhold
 	shouldDoRight := lastRight >= mouseBtnActionsTreshhold
 
 	if isLeft && shouldDoLeft && inRect {
-		lastLeftBtnActionTime = now
+		g.lastLeftBtnActionTime = now
 
 		g.inputListener.OnPlayerMove(px, py)
 
@@ -274,7 +283,7 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 	}
 
 	if isRight && shouldDoRight && inRect {
-		lastRightBtnActionTime = now
+		g.lastRightBtnActionTime = now
 
 		g.inputListener.OnPlayerCast(g.missileID, px, py)
 
@@ -284,6 +293,7 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 	return true
 }
 
+// OnMouseMove handles mouse movement events
 func (g *GameControls) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	mx, my := event.X(), event.Y()
 	g.lastMouseX = mx
@@ -301,6 +311,7 @@ func (g *GameControls) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	return false
 }
 
+// OnMouseButtonDown handles mouse button presses
 func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	mx, my := event.X(), event.Y()
 
@@ -317,7 +328,7 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	py = float64(int(py*10)) / 10.0
 
 	if event.Button() == d2enum.MouseButtonLeft && !g.isInActiveMenusRect(mx, my) {
-		lastLeftBtnActionTime = d2common.Now()
+		g.lastLeftBtnActionTime = d2common.Now()
 
 		g.inputListener.OnPlayerMove(px, py)
 
@@ -325,7 +336,7 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	}
 
 	if event.Button() == d2enum.MouseButtonRight && !g.isInActiveMenusRect(mx, my) {
-		lastRightBtnActionTime = d2common.Now()
+		g.lastRightBtnActionTime = d2common.Now()
 
 		g.inputListener.OnPlayerCast(g.missileID, px, py)
 
@@ -335,6 +346,7 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	return false
 }
 
+// Load loads the resources required for the GameControls
 func (g *GameControls) Load() {
 	animation, _ := d2asset.LoadAnimation(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
 	g.globeSprite, _ = g.uiManager.NewSprite(animation)
@@ -376,6 +388,7 @@ func (g *GameControls) onToggleRunButton() {
 	g.hero.SetIsRunning(g.hero.IsRunToggled())
 }
 
+// Advance advances the state of the GameControls
 func (g *GameControls) Advance(elapsed float64) error {
 	g.mapRenderer.Advance(elapsed)
 	return nil
@@ -385,11 +398,12 @@ func (g *GameControls) updateLayout() {
 	isRightPanelOpen := g.isLeftPanelOpen()
 	isLeftPanelOpen := g.isRightPanelOpen()
 
-	if isRightPanelOpen == isLeftPanelOpen {
+	switch {
+	case isRightPanelOpen == isLeftPanelOpen:
 		g.mapRenderer.ViewportDefault()
-	} else if isRightPanelOpen {
+	case isRightPanelOpen:
 		g.mapRenderer.ViewportToLeft()
-	} else {
+	default:
 		g.mapRenderer.ViewportToRight()
 	}
 }
@@ -404,7 +418,7 @@ func (g *GameControls) isRightPanelOpen() bool {
 	return g.inventory.IsOpen()
 }
 
-func (g *GameControls) isInActiveMenusRect(px int, py int) bool {
+func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 	var bottomMenuRect = d2common.Rectangle{Left: 0, Top: 550, Width: 800, Height: 50}
 
 	var leftMenuRect = d2common.Rectangle{Left: 0, Top: 0, Width: 400, Height: 600}
@@ -427,6 +441,7 @@ func (g *GameControls) isInActiveMenusRect(px int, py int) bool {
 }
 
 // TODO: consider caching the panels to single image that is reused.
+// Render draws the GameControls onto the target
 func (g *GameControls) Render(target d2interface.Surface) error {
 	for entityIdx := range g.mapEngine.Entities() {
 		entity := (g.mapEngine.Entities())[entityIdx]
@@ -463,8 +478,13 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		}
 	}
 
-	g.heroStatsPanel.Render(target)
-	g.inventory.Render(target)
+	if err := g.heroStatsPanel.Render(target); err != nil {
+		return err
+	}
+
+	if err := g.inventory.Render(target); err != nil {
+		return err
+	}
 
 	width, height := target.GetSize()
 	offset := 0
@@ -679,14 +699,17 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	return nil
 }
 
+// SetZoneChangeText sets the zoneChangeText
 func (g *GameControls) SetZoneChangeText(text string) {
 	g.zoneChangeText.SetText(text)
 }
 
+// ShowZoneChangeText shows the zoneChangeText
 func (g *GameControls) ShowZoneChangeText() {
 	g.isZoneTextShown = true
 }
 
+// HideZoneChangeTextAfter hides the zoneChangeText after the given amount of seconds
 func (g *GameControls) HideZoneChangeTextAfter(delay float64) {
 	time.AfterFunc(time.Duration(delay)*time.Second, func() {
 		g.isZoneTextShown = false
