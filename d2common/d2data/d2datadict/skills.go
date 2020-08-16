@@ -4,6 +4,8 @@ import (
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2calculation"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2calculation/d2parser"
 )
 
 // SkillDetails has all of the SkillRecords
@@ -16,9 +18,9 @@ type SkillRecord struct {
 	Skill             string
 	Charclass         string
 	Skilldesc         string
-	Prgcalc1          string
-	Prgcalc2          string
-	Prgcalc3          string
+	Prgcalc1          d2calculation.Calculation
+	Prgcalc2          d2calculation.Calculation
+	Prgcalc3          d2calculation.Calculation
 	Srvmissile        string
 	Srvmissilea       string
 	Srvmissileb       string
@@ -26,20 +28,20 @@ type SkillRecord struct {
 	Srvoverlay        string
 	Aurastate         string
 	Auratargetstate   string
-	Auralencalc       string
-	Aurarangecalc     string
+	Auralencalc       d2calculation.Calculation
+	Aurarangecalc     d2calculation.Calculation
 	Aurastat1         string
-	Aurastatcalc1     string
+	Aurastatcalc1     d2calculation.Calculation
 	Aurastat2         string
-	Aurastatcalc2     string
+	Aurastatcalc2     d2calculation.Calculation
 	Aurastat3         string
-	Aurastatcalc3     string
+	Aurastatcalc3     d2calculation.Calculation
 	Aurastat4         string
-	Aurastatcalc4     string
+	Aurastatcalc4     d2calculation.Calculation
 	Aurastat5         string
-	Aurastatcalc5     string
+	Aurastatcalc5     d2calculation.Calculation
 	Aurastat6         string
-	Aurastatcalc6     string
+	Aurastatcalc6     d2calculation.Calculation
 	Auraevent1        string
 	Auraevent2        string
 	Auraevent3        string
@@ -48,31 +50,31 @@ type SkillRecord struct {
 	Passivestate      string
 	Passiveitype      string
 	Passivestat1      string
-	Passivecalc1      string
+	Passivecalc1      d2calculation.Calculation
 	Passivestat2      string
-	Passivecalc2      string
+	Passivecalc2      d2calculation.Calculation
 	Passivestat3      string
-	Passivecalc3      string
+	Passivecalc3      d2calculation.Calculation
 	Passivestat4      string
-	Passivecalc4      string
+	Passivecalc4      d2calculation.Calculation
 	Passivestat5      string
-	Passivecalc5      string
+	Passivecalc5      d2calculation.Calculation
 	Passiveevent      string
 	Passiveeventfunc  string
 	Summon            string
 	Pettype           string
-	Petmax            string
+	Petmax            d2calculation.Calculation
 	Summode           string
 	Sumskill1         string
-	Sumsk1calc        string
+	Sumsk1calc        d2calculation.Calculation
 	Sumskill2         string
-	Sumsk2calc        string
+	Sumsk2calc        d2calculation.Calculation
 	Sumskill3         string
-	Sumsk3calc        string
+	Sumsk3calc        d2calculation.Calculation
 	Sumskill4         string
-	Sumsk4calc        string
+	Sumsk4calc        d2calculation.Calculation
 	Sumskill5         string
-	Sumsk5calc        string
+	Sumsk5calc        d2calculation.Calculation
 	Sumoverlay        string
 	Stsound           string
 	Stsoundclass      string
@@ -91,12 +93,9 @@ type SkillRecord struct {
 	Cltmissileb       string
 	Cltmissilec       string
 	Cltmissiled       string
-	Cltcalc1          string
-	Cltcalc1Desc      string
-	Cltcalc2          string
-	Cltcalc2Desc      string
-	Cltcalc3          string
-	Cltcalc3Desc      string
+	Cltcalc1          d2calculation.Calculation
+	Cltcalc2          d2calculation.Calculation
+	Cltcalc3          d2calculation.Calculation
 	Range             string
 	Itypea1           string
 	Itypea2           string
@@ -113,35 +112,23 @@ type SkillRecord struct {
 	Monanim           string
 	ItemCastSound     string
 	ItemCastOverlay   string
-	Skpoints          string
+	Skpoints          d2calculation.Calculation
 	Reqskill1         string
 	Reqskill2         string
 	Reqskill3         string
 	State1            string
 	State2            string
 	State3            string
-	Perdelay          string
-	Calc1             string
-	Calc1Desc         string
-	Calc2             string
-	Calc2Desc         string
-	Calc3             string
-	Calc3Desc         string
-	Calc4             string
-	Calc4Desc         string
-	Param1Desc        string
-	Param2Desc        string
-	Param3Desc        string
-	Param4Desc        string
-	Param5Desc        string
-	Param6Desc        string
-	Param7Desc        string
-	Param8Desc        string
-	ToHitCalc         string
-	DmgSymPerCalc     string
+	Perdelay          d2calculation.Calculation
+	Calc1             d2calculation.Calculation
+	Calc2             d2calculation.Calculation
+	Calc3             d2calculation.Calculation
+	Calc4             d2calculation.Calculation
+	ToHitCalc         d2calculation.Calculation
+	DmgSymPerCalc     d2calculation.Calculation
 	EType             string
-	EDmgSymPerCalc    string
-	ELenSymPerCalc    string
+	EDmgSymPerCalc    d2calculation.Calculation
+	ELenSymPerCalc    d2calculation.Calculation
 	ID                int
 	Srvstfunc         int
 	Srvdofunc         int
@@ -277,8 +264,13 @@ type SkillRecord struct {
 func LoadSkills(file []byte) {
 	SkillDetails = make(map[int]*SkillRecord)
 
+	parser := d2parser.New()
+
 	d := d2common.LoadDataDictionary(file)
 	for d.Next() {
+		name := d.String("skill")
+		parser.SetCurrentReference("skill", name)
+
 		record := &SkillRecord{
 			Skill:             d.String("skill"),
 			ID:                d.Number("Id"),
@@ -290,9 +282,9 @@ func LoadSkills(file []byte) {
 			Srvprgfunc1:       d.Number("srvprgfunc1"),
 			Srvprgfunc2:       d.Number("srvprgfunc2"),
 			Srvprgfunc3:       d.Number("srvprgfunc3"),
-			Prgcalc1:          d.String("prgcalc1"),
-			Prgcalc2:          d.String("prgcalc2"),
-			Prgcalc3:          d.String("prgcalc3"),
+			Prgcalc1:          parser.Parse(d.String("prgcalc1")),
+			Prgcalc2:          parser.Parse(d.String("prgcalc2")),
+			Prgcalc3:          parser.Parse(d.String("prgcalc3")),
 			Prgdam:            d.Number("prgdam"),
 			Srvmissile:        d.String("srvmissile"),
 			Decquant:          d.Bool("decquant"),
@@ -304,20 +296,20 @@ func LoadSkills(file []byte) {
 			Aurafilter:        d.Number("aurafilter"),
 			Aurastate:         d.String("aurastate"),
 			Auratargetstate:   d.String("auratargetstate"),
-			Auralencalc:       d.String("auralencalc"),
-			Aurarangecalc:     d.String("aurarangecalc"),
+			Auralencalc:       parser.Parse(d.String("auralencalc")),
+			Aurarangecalc:     parser.Parse(d.String("aurarangecalc")),
 			Aurastat1:         d.String("aurastat1"),
-			Aurastatcalc1:     d.String("aurastatcalc1"),
+			Aurastatcalc1:     parser.Parse(d.String("aurastatcalc1")),
 			Aurastat2:         d.String("aurastat2"),
-			Aurastatcalc2:     d.String("aurastatcalc2"),
+			Aurastatcalc2:     parser.Parse(d.String("aurastatcalc2")),
 			Aurastat3:         d.String("aurastat3"),
-			Aurastatcalc3:     d.String("aurastatcalc3"),
+			Aurastatcalc3:     parser.Parse(d.String("aurastatcalc3")),
 			Aurastat4:         d.String("aurastat4"),
-			Aurastatcalc4:     d.String("aurastatcalc4"),
+			Aurastatcalc4:     parser.Parse(d.String("aurastatcalc4")),
 			Aurastat5:         d.String("aurastat5"),
-			Aurastatcalc5:     d.String("aurastatcalc5"),
+			Aurastatcalc5:     parser.Parse(d.String("aurastatcalc5")),
 			Aurastat6:         d.String("aurastat6"),
-			Aurastatcalc6:     d.String("aurastatcalc6"),
+			Aurastatcalc6:     parser.Parse(d.String("aurastatcalc6")),
 			Auraevent1:        d.String("auraevent1"),
 			Auraeventfunc1:    d.Number("auraeventfunc1"),
 			Auraevent2:        d.String("auraevent2"),
@@ -329,31 +321,31 @@ func LoadSkills(file []byte) {
 			Passivestate:      d.String("passivestate"),
 			Passiveitype:      d.String("passiveitype"),
 			Passivestat1:      d.String("passivestat1"),
-			Passivecalc1:      d.String("passivecalc1"),
+			Passivecalc1:      parser.Parse(d.String("passivecalc1")),
 			Passivestat2:      d.String("passivestat2"),
-			Passivecalc2:      d.String("passivecalc2"),
+			Passivecalc2:      parser.Parse(d.String("passivecalc2")),
 			Passivestat3:      d.String("passivestat3"),
-			Passivecalc3:      d.String("passivecalc3"),
+			Passivecalc3:      parser.Parse(d.String("passivecalc3")),
 			Passivestat4:      d.String("passivestat4"),
-			Passivecalc4:      d.String("passivecalc4"),
+			Passivecalc4:      parser.Parse(d.String("passivecalc4")),
 			Passivestat5:      d.String("passivestat5"),
-			Passivecalc5:      d.String("passivecalc5"),
+			Passivecalc5:      parser.Parse(d.String("passivecalc5")),
 			Passiveevent:      d.String("passiveevent"),
 			Passiveeventfunc:  d.String("passiveeventfunc"),
 			Summon:            d.String("summon"),
 			Pettype:           d.String("pettype"),
-			Petmax:            d.String("petmax"),
+			Petmax:            parser.Parse(d.String("petmax")),
 			Summode:           d.String("summode"),
 			Sumskill1:         d.String("sumskill1"),
-			Sumsk1calc:        d.String("sumsk1calc"),
+			Sumsk1calc:        parser.Parse(d.String("sumsk1calc")),
 			Sumskill2:         d.String("sumskill2"),
-			Sumsk2calc:        d.String("sumsk2calc"),
+			Sumsk2calc:        parser.Parse(d.String("sumsk2calc")),
 			Sumskill3:         d.String("sumskill3"),
-			Sumsk3calc:        d.String("sumsk3calc"),
+			Sumsk3calc:        parser.Parse(d.String("sumsk3calc")),
 			Sumskill4:         d.String("sumskill4"),
-			Sumsk4calc:        d.String("sumsk4calc"),
+			Sumsk4calc:        parser.Parse(d.String("sumsk4calc")),
 			Sumskill5:         d.String("sumskill5"),
-			Sumsk5calc:        d.String("sumsk5calc"),
+			Sumsk5calc:        parser.Parse(d.String("sumsk5calc")),
 			Sumumod:           d.Number("sumumod"),
 			Sumoverlay:        d.String("sumoverlay"),
 			Stsuccessonly:     d.Bool("stsuccessonly"),
@@ -381,12 +373,9 @@ func LoadSkills(file []byte) {
 			Cltmissileb:       d.String("cltmissileb"),
 			Cltmissilec:       d.String("cltmissilec"),
 			Cltmissiled:       d.String("cltmissiled"),
-			Cltcalc1:          d.String("cltcalc1"),
-			Cltcalc1Desc:      d.String("*cltcalc1 desc"),
-			Cltcalc2:          d.String("cltcalc2"),
-			Cltcalc2Desc:      d.String("*cltcalc2 desc"),
-			Cltcalc3:          d.String("cltcalc3"),
-			Cltcalc3Desc:      d.String("*cltcalc3 desc"),
+			Cltcalc1:          parser.Parse(d.String("cltcalc1")),
+			Cltcalc2:          parser.Parse(d.String("cltcalc2")),
+			Cltcalc3:          parser.Parse(d.String("cltcalc3")),
 			Warp:              d.Bool("warp"),
 			Immediate:         d.Bool("immediate"),
 			Enhanceable:       d.Bool("enhanceable"),
@@ -431,7 +420,7 @@ func LoadSkills(file []byte) {
 			ItemCltCheckStart: d.Bool("ItemCltCheckStart"),
 			ItemCastSound:     d.String("ItemCastSound"),
 			ItemCastOverlay:   d.String("ItemCastOverlay"),
-			Skpoints:          d.String("skpoints"),
+			Skpoints:          parser.Parse(d.String("skpoints")),
 			Reqlevel:          d.Number("reqlevel"),
 			Maxlvl:            d.Number("maxlvl"),
 			Reqstr:            d.Number("reqstr"),
@@ -460,40 +449,28 @@ func LoadSkills(file []byte) {
 			InTown:            d.Bool("InTown"),
 			Aura:              d.Bool("aura"),
 			Periodic:          d.Bool("periodic"),
-			Perdelay:          d.String("perdelay"),
+			Perdelay:          parser.Parse(d.String("perdelay")),
 			Finishing:         d.Bool("finishing"),
 			Passive:           d.Bool("passive"),
 			Progressive:       d.Bool("progressive"),
 			General:           d.Bool("general"),
 			Scroll:            d.Bool("scroll"),
-			Calc1:             d.String("calc1"),
-			Calc1Desc:         d.String("*calc1 desc"),
-			Calc2:             d.String("calc2"),
-			Calc2Desc:         d.String("*calc2 desc"),
-			Calc3:             d.String("calc3"),
-			Calc3Desc:         d.String("*calc3 desc"),
-			Calc4:             d.String("calc4"),
-			Calc4Desc:         d.String("*calc4 desc"),
+			Calc1:             parser.Parse(d.String("calc1")),
+			Calc2:             parser.Parse(d.String("calc2")),
+			Calc3:             parser.Parse(d.String("calc3")),
+			Calc4:             parser.Parse(d.String("calc4")),
 			Param1:            d.Number("Param1"),
-			Param1Desc:        d.String("*Param1 Description"),
 			Param2:            d.Number("Param2"),
-			Param2Desc:        d.String("*Param2 Description"),
 			Param3:            d.Number("Param3"),
-			Param3Desc:        d.String("*Param3 Description"),
 			Param4:            d.Number("Param4"),
-			Param4Desc:        d.String("*Param4 Description"),
 			Param5:            d.Number("Param5"),
-			Param5Desc:        d.String("*Param5 Description"),
 			Param6:            d.Number("Param6"),
-			Param6Desc:        d.String("*Param6 Description"),
 			Param7:            d.Number("Param7"),
-			Param7Desc:        d.String("*Param7 Description"),
 			Param8:            d.Number("Param8"),
-			Param8Desc:        d.String("*Param8 Description"),
 			InGame:            d.Bool("InGame"),
 			ToHit:             d.Number("ToHit"),
 			LevToHit:          d.Number("LevToHit"),
-			ToHitCalc:         d.String("ToHitCalc"),
+			ToHitCalc:         parser.Parse(d.String("ToHitCalc")),
 			ResultFlags:       d.Number("ResultFlags"),
 			HitFlags:          d.Number("HitFlags"),
 			HitClass:          d.Number("HitClass"),
@@ -512,7 +489,7 @@ func LoadSkills(file []byte) {
 			MaxLevDam3:        d.Number("MaxLevDam3"),
 			MaxLevDam4:        d.Number("MaxLevDam4"),
 			MaxLevDam5:        d.Number("MaxLevDam5"),
-			DmgSymPerCalc:     d.String("DmgSymPerCalc"),
+			DmgSymPerCalc:     parser.Parse(d.String("DmgSymPerCalc")),
 			EType:             d.String("EType"),
 			EMin:              d.Number("EMin"),
 			EMinLev1:          d.Number("EMinLev1"),
@@ -526,12 +503,12 @@ func LoadSkills(file []byte) {
 			EMaxLev3:          d.Number("EMaxLev3"),
 			EMaxLev4:          d.Number("EMaxLev4"),
 			EMaxLev5:          d.Number("EMaxLev5"),
-			EDmgSymPerCalc:    d.String("EDmgSymPerCalc"),
+			EDmgSymPerCalc:    parser.Parse(d.String("EDmgSymPerCalc")),
 			ELen:              d.Number("ELen"),
 			ELevLen1:          d.Number("ELevLen1"),
 			ELevLen2:          d.Number("ELevLen2"),
 			ELevLen3:          d.Number("ELevLen3"),
-			ELenSymPerCalc:    d.String("ELenSymPerCalc"),
+			ELenSymPerCalc:    parser.Parse(d.String("ELenSymPerCalc")),
 			Aitype:            d.Number("aitype"),
 			Aibonus:           d.Number("aibonus"),
 			CostMult:          d.Number("cost mult"),

@@ -1,9 +1,12 @@
 package d2parser
 
 import (
+	"log"
+	"strconv"
+	"strings"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2calculation"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2calculation/d2lexer"
-	"strconv"
 )
 
 // Parser is a parser for calculations used for skill and missiles.
@@ -37,7 +40,19 @@ func (parser *Parser) SetCurrentReference(propType, propName string) {
 
 // Parse parses the calculation string and creates a Calculation tree.
 func (parser *Parser) Parse(calc string) d2calculation.Calculation {
+	calc = strings.TrimSpace(calc)
+	if calc == "" {
+		return &d2calculation.ConstantCalculation{Value: 0}
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Error parsing calculation: %v", calc)
+		}
+	}()
+
 	parser.lex = d2lexer.New([]byte(calc))
+
 	return parser.parseLevel(0)
 }
 
@@ -140,6 +155,10 @@ func (parser *Parser) parseProduction() d2calculation.Calculation {
 			t = parser.peek()
 			if t.Type != d2lexer.Symbol ||
 				t.Value != ")" {
+				if t.Type == d2lexer.EOF { // Ignore unclosed final parenthesis due to syntax error in original Fire Wall calculation.
+					return node
+				}
+
 				panic("Parenthesis not closed!")
 			}
 
