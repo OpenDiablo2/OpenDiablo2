@@ -38,4 +38,5 @@ type Animation interface {
 	GetPlayedCount() int
 	ResetPlayedCount()
 	SetEffect(effect d2enum.DrawEffect)
+	SetShadow(shadow bool)
 }

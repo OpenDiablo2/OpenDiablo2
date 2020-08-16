@@ -275,6 +275,7 @@ func (c *Composite) createMode(animationMode animationMode, weaponClass string) 
 		if err == nil {
 			layer.SetPlaySpeed(mode.animationSpeed)
 			layer.PlayForward()
+			layer.SetShadow(cofLayer.Shadow != 0)
 
 			if err := layer.SetDirection(c.direction); err != nil {
 				return nil, err
