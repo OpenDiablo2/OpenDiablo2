@@ -27,7 +27,7 @@ const (
 	dbgBoxHeight  = 60
 	dbgBoxPadding = 10
 
-	dbgCollisionSize = 5
+	dbgCollisionSize    = 5
 	dbgCollisionOffsetX = -3
 	dbgCollisionOffsetY = 4
 
@@ -197,22 +197,29 @@ func (mr *MapRenderer) renderPass2(target d2interface.Surface, startX, startY, e
 		for tileX := startX; tileX < endX; tileX++ {
 			mr.viewport.PushTranslationWorld(float64(tileX), float64(tileY))
 
+			tileEnt := make([]d2interface.MapEntity, 0)
+
+			// TODO: Do not loop over every entity every frame
+			for _, mapEntity := range mr.mapEngine.Entities() {
+				pos := mapEntity.GetPosition()
+				vec := pos.World()
+				entityX, entityY := vec.X(), vec.Y()
+
+				if mapEntity.GetLayer() != 1 {
+					continue
+				}
+
+				if (int(entityX) != tileX) || (int(entityY) != tileY) {
+					continue
+				}
+
+				tileEnt = append(tileEnt, mapEntity)
+			}
+
 			for subY := 0; subY < 5; subY++ {
 				for subX := 0; subX < 5; subX++ {
-					// TODO: Do not loop over every entity every frame
-					for _, mapEntity := range mr.mapEngine.Entities() {
+					for _, mapEntity := range tileEnt {
 						pos := mapEntity.GetPosition()
-						vec := pos.World()
-						entityX, entityY := vec.X(), vec.Y()
-
-						if mapEntity.GetLayer() != 1 {
-							continue
-						}
-
-						if (int(entityX) != tileX) || (int(entityY) != tileY) {
-							continue
-						}
-
 						if (int(pos.SubTileOffset().X()) != subX) || (int(pos.SubTileOffset().Y()) != subY) {
 							continue
 						}
@@ -237,22 +244,29 @@ func (mr *MapRenderer) renderPass3(target d2interface.Surface, startX, startY, e
 			mr.viewport.PushTranslationWorld(float64(tileX), float64(tileY))
 			mr.renderTilePass2(tile, target)
 
+			tileEnt := make([]d2interface.MapEntity, 0)
+
+			// TODO: Do not loop over every entity every frame
+			for _, mapEntity := range mr.mapEngine.Entities() {
+				pos := mapEntity.GetPosition()
+				vec := pos.World()
+				entityX, entityY := vec.X(), vec.Y()
+
+				if mapEntity.GetLayer() == 1 {
+					continue
+				}
+
+				if (int(entityX) != tileX) || (int(entityY) != tileY) {
+					continue
+				}
+
+				tileEnt = append(tileEnt, mapEntity)
+			}
+
 			for subY := 0; subY < 5; subY++ {
 				for subX := 0; subX < 5; subX++ {
-					// TODO: Do not loop over every entity every frame
-					for _, mapEntity := range mr.mapEngine.Entities() {
+					for _, mapEntity := range tileEnt {
 						pos := mapEntity.GetPosition()
-						vec := pos.World()
-						entityX, entityY := vec.X(), vec.Y()
-
-						if mapEntity.GetLayer() == 1 {
-							continue
-						}
-
-						if (int(entityX) != tileX) || (int(entityY) != tileY) {
-							continue
-						}
-
 						if (int(pos.SubTileOffset().X()) != subX) || (int(pos.SubTileOffset().Y()) != subY) {
 							continue
 						}
