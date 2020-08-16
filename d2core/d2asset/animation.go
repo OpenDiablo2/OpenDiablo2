@@ -158,7 +158,7 @@ func (a *animation) RenderFromOrigin(target d2iface.Surface, shadow bool) error 
 		defer target.Pop()
 	}
 
-	if shadow {
+	if shadow && !a.effect.Transparent() {
 		_, height := a.GetFrameBounds()
 		height = int(math.Abs(float64(height)))
 
