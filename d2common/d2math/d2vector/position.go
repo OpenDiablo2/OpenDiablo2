@@ -68,11 +68,11 @@ func (p *Position) Tile() *Vector {
 // and to the lower left diagonal ('left') of the isometric grid. This renders the target one index above which visually
 // is one tile below.
 func (p *Position) RenderOffset() *Vector {
-	return p.subTileOffset().AddScalar(1)
+	return p.SubTileOffset().AddScalar(1)
 }
 
 // subTileOffset is the offset from the current map tile in sub tiles.
-func (p *Position) subTileOffset() *Vector {
+func (p *Position) SubTileOffset() *Vector {
 	t := p.Tile().Scale(subTilesPerTile)
 	c := p.Clone()
 

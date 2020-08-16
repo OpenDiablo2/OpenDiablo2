@@ -197,23 +197,31 @@ func (mr *MapRenderer) renderPass2(target d2interface.Surface, startX, startY, e
 		for tileX := startX; tileX < endX; tileX++ {
 			mr.viewport.PushTranslationWorld(float64(tileX), float64(tileY))
 
-			// TODO: Do not loop over every entity every frame
-			for _, mapEntity := range mr.mapEngine.Entities() {
-				pos := mapEntity.GetPosition()
-				vec := pos.World()
-				entityX, entityY := vec.X(), vec.Y()
+			for subY := 0; subY < 5; subY++ {
+				for subX := 0; subX < 5; subX++ {
+					// TODO: Do not loop over every entity every frame
+					for _, mapEntity := range mr.mapEngine.Entities() {
+						pos := mapEntity.GetPosition()
+						vec := pos.World()
+						entityX, entityY := vec.X(), vec.Y()
 
-				if mapEntity.GetLayer() != 1 {
-					continue
+						if mapEntity.GetLayer() != 1 {
+							continue
+						}
+
+						if (int(entityX) != tileX) || (int(entityY) != tileY) {
+							continue
+						}
+
+						if (int(pos.SubTileOffset().X()) != subX) || (int(pos.SubTileOffset().Y()) != subY) {
+							continue
+						}
+
+						target.PushTranslation(mr.viewport.GetTranslationScreen())
+						mapEntity.Render(target)
+						target.Pop()
+					}
 				}
-
-				if (int(entityX) != tileX) || (int(entityY) != tileY) {
-					continue
-				}
-
-				target.PushTranslation(mr.viewport.GetTranslationScreen())
-				mapEntity.Render(target)
-				target.Pop()
 			}
 
 			mr.viewport.PopTranslation()
@@ -229,23 +237,31 @@ func (mr *MapRenderer) renderPass3(target d2interface.Surface, startX, startY, e
 			mr.viewport.PushTranslationWorld(float64(tileX), float64(tileY))
 			mr.renderTilePass2(tile, target)
 
-			// TODO: Do not loop over every entity every frame
-			for _, mapEntity := range mr.mapEngine.Entities() {
-				pos := mapEntity.GetPosition()
-				vec := pos.World()
-				entityX, entityY := vec.X(), vec.Y()
+			for subY := 0; subY < 5; subY++ {
+				for subX := 0; subX < 5; subX++ {
+					// TODO: Do not loop over every entity every frame
+					for _, mapEntity := range mr.mapEngine.Entities() {
+						pos := mapEntity.GetPosition()
+						vec := pos.World()
+						entityX, entityY := vec.X(), vec.Y()
 
-				if mapEntity.GetLayer() == 1 {
-					continue
+						if mapEntity.GetLayer() == 1 {
+							continue
+						}
+
+						if (int(entityX) != tileX) || (int(entityY) != tileY) {
+							continue
+						}
+
+						if (int(pos.SubTileOffset().X()) != subX) || (int(pos.SubTileOffset().Y()) != subY) {
+							continue
+						}
+
+						target.PushTranslation(mr.viewport.GetTranslationScreen())
+						mapEntity.Render(target)
+						target.Pop()
+					}
 				}
-
-				if (int(entityX) != tileX) || (int(entityY) != tileY) {
-					continue
-				}
-
-				target.PushTranslation(mr.viewport.GetTranslationScreen())
-				mapEntity.Render(target)
-				target.Pop()
 			}
 
 			mr.viewport.PopTranslation()
