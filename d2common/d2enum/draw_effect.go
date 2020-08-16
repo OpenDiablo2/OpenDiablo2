@@ -40,3 +40,11 @@ const (
 	// no effect
 	DrawEffectNone
 )
+
+func (d DrawEffect) Transparent() bool {
+	if d == DrawEffectNone {
+		return false
+	}
+
+	return true
+}

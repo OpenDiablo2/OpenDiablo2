@@ -54,6 +54,7 @@ type animation struct {
 	originAtBottom   bool
 	playLoop         bool
 	hasSubLoop       bool // runs after first animation ends
+	hasShadow        bool
 }
 
 // SetSubLoop sets a sub loop for the animation
@@ -158,7 +159,7 @@ func (a *animation) RenderFromOrigin(target d2iface.Surface, shadow bool) error 
 		defer target.Pop()
 	}
 
-	if shadow {
+	if shadow && !a.effect.Transparent() && a.hasShadow {
 		_, height := a.GetFrameBounds()
 		height = int(math.Abs(float64(height)))
 
@@ -337,4 +338,8 @@ func (a *animation) ResetPlayedCount() {
 
 func (a *animation) SetEffect(e d2enum.DrawEffect) {
 	a.effect = e
+}
+
+func (a *animation) SetShadow(shadow bool) {
+	a.hasShadow = shadow
 }
