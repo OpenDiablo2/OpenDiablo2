@@ -4,8 +4,7 @@ package d2debugutil
 import (
 	"image"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2debugutil/internal/assets"
-
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2debugutil/assets"
 	"github.com/hajimehoshi/ebiten"
 )
 

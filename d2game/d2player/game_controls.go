@@ -69,6 +69,8 @@ type GameControls struct {
 	lastRightBtnActionTime float64
 	FreeCam                bool
 	isZoneTextShown        bool
+	hpStatsIsVisible       bool
+	manaStatsIsVisible     bool
 }
 
 type ActionableType int
@@ -713,13 +715,13 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	manaWithin := (765 >= mx) && (700 <= mx) && (575 >= my) && (525 <= my)
 
 	// Display current hp and mana stats hpGlobe or manaGlobe region is clicked
-	if hpWithin {
+	if hpWithin || g.hpStatsIsVisible {
 		g.hpManaStatsLabel.SetText(d2ui.ColorTokenize(fmt.Sprintf("LIFE: %v / %v", float64(g.hero.Stats.Health), float64(g.hero.Stats.MaxHealth)), d2ui.ColorTokenWhite))
 		g.hpManaStatsLabel.SetPosition(15, 485)
 		g.hpManaStatsLabel.Render(target)
 	}
 
-	if manaWithin {
+	if manaWithin || g.manaStatsIsVisible {
 		g.hpManaStatsLabel.SetText(fmt.Sprintf("MANA: %v / %v", float64(g.hero.Stats.Mana), float64(g.hero.Stats.MaxMana)))
 		widthManaLabel, _ := g.hpManaStatsLabel.GetSize()
 		xManaLabel := 785 - widthManaLabel
@@ -747,6 +749,26 @@ func (g *GameControls) HideZoneChangeTextAfter(delay float64) {
 	})
 }
 
+// HpStatsIsVisible returns true if the hp and mana stats are visible to the player
+func (g *GameControls) HpStatsIsVisible() bool {
+	return g.hpStatsIsVisible
+}
+
+// ManaStatsIsVisible returns true if the hp and mana stats are visible to the player
+func (g *GameControls) ManaStatsIsVisible() bool {
+	return g.manaStatsIsVisible
+}
+
+// ToggleHpStats toggles the visibility of the hp and mana stats placed above their respective globe
+func (g *GameControls) ToggleHpStats() {
+	g.hpStatsIsVisible = !g.hpStatsIsVisible
+}
+
+// ToggleManaStats toggles the visibility of the hp and mana stats placed above their respective globe
+func (g *GameControls) ToggleManaStats() {
+	g.manaStatsIsVisible = !g.manaStatsIsVisible
+}
+
 // Handles what to do when an actionable is hovered
 func (g *GameControls) onHoverActionable(item ActionableType) {
 	switch item {
@@ -766,7 +788,9 @@ func (g *GameControls) onHoverActionable(item ActionableType) {
 		return
 	case rightSkill:
 		return
-	case hpGlobe, manaGlobe:
+	case hpGlobe:
+		return
+	case manaGlobe:
 		return
 	default:
 		log.Printf("Unrecognized ActionableType(%d) being hovered\n", item)
@@ -792,6 +816,12 @@ func (g *GameControls) onClickActionable(item ActionableType) {
 		log.Println("Right Skill Selector Action Pressed")
 	case rightSkill:
 		log.Println("Right Skill Action Pressed")
+	case hpGlobe:
+		g.ToggleHpStats()
+		log.Println("HP Globe Pressed")
+	case manaGlobe:
+		g.ToggleManaStats()
+		log.Println("Mana Globe Pressed")
 	default:
 		log.Printf("Unrecognized ActionableType(%d) being clicked\n", item)
 	}
