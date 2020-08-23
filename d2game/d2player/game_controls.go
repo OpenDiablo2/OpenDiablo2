@@ -69,7 +69,6 @@ type GameControls struct {
 	lastRightBtnActionTime float64
 	FreeCam                bool
 	isZoneTextShown        bool
-	hpManaStatsIsVisible   bool
 }
 
 type ActionableType int
@@ -456,6 +455,8 @@ func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 // TODO: consider caching the panels to single image that is reused.
 // Render draws the GameControls onto the target
 func (g *GameControls) Render(target d2interface.Surface) error {
+
+	mx, my := g.lastMouseX, g.lastMouseY
 	for entityIdx := range g.mapEngine.Entities() {
 		entity := (g.mapEngine.Entities())[entityIdx]
 		if !entity.Selectable() {
@@ -471,7 +472,6 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		halfWidth, halfHeight := entityWidth/2, entityHeight/2
 		l, r := entScreenX-halfWidth-hoverLabelOuterPad, entScreenX+halfWidth+hoverLabelOuterPad
 		t, b := entScreenY-halfHeight-hoverLabelOuterPad, entScreenY+halfHeight-hoverLabelOuterPad
-		mx, my := g.lastMouseX, g.lastMouseY
 		xWithin := (l <= mx) && (r >= mx)
 		yWithin := (t <= my) && (b >= my)
 		within := xWithin && yWithin
@@ -709,17 +709,21 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		g.zoneChangeText.Render(target)
 	}
 
-	// Display current hp and mana stats hpGlobe or manaGlobe region is clicked
-	if g.hpManaStatsIsVisible {
-		yHpManaLabel := 485
-		g.hpManaStatsLabel.SetText(d2ui.ColorTokenize(fmt.Sprintf("LIFE: %v / %v", float64(g.hero.Stats.Health), float64(g.hero.Stats.MaxHealth)), d2ui.ColorTokenWhite))
-		g.hpManaStatsLabel.SetPosition(15, yHpManaLabel)
-		g.hpManaStatsLabel.Render(target)
+	hpWithin := (95 >= mx) && (30 <= mx) && (575 >= my) && (525 <= my)
+	manaWithin := (765 >= mx) && (700 <= mx) && (575 >= my) && (525 <= my)
 
+	// Display current hp and mana stats hpGlobe or manaGlobe region is clicked
+	if hpWithin {
+		g.hpManaStatsLabel.SetText(d2ui.ColorTokenize(fmt.Sprintf("LIFE: %v / %v", float64(g.hero.Stats.Health), float64(g.hero.Stats.MaxHealth)), d2ui.ColorTokenWhite))
+		g.hpManaStatsLabel.SetPosition(15, 485)
+		g.hpManaStatsLabel.Render(target)
+	}
+
+	if manaWithin {
 		g.hpManaStatsLabel.SetText(fmt.Sprintf("MANA: %v / %v", float64(g.hero.Stats.Mana), float64(g.hero.Stats.MaxMana)))
 		widthManaLabel, _ := g.hpManaStatsLabel.GetSize()
 		xManaLabel := 785 - widthManaLabel
-		g.hpManaStatsLabel.SetPosition(xManaLabel, yHpManaLabel)
+		g.hpManaStatsLabel.SetPosition(xManaLabel, 485)
 		g.hpManaStatsLabel.Render(target)
 	}
 
@@ -741,16 +745,6 @@ func (g *GameControls) HideZoneChangeTextAfter(delay float64) {
 	time.AfterFunc(time.Duration(delay)*time.Second, func() {
 		g.isZoneTextShown = false
 	})
-}
-
-// HpManaStatsIsVisible returns true if the hp and mana stats are visible to the player
-func (g *GameControls) HpManaStatsIsVisible() bool {
-	return g.hpManaStatsIsVisible
-}
-
-// ToggleHpManaStatus toggles the visibility of the hp and mana stats placed above their respective globe
-func (g *GameControls) ToggleHpManaStatus() {
-	g.hpManaStatsIsVisible = !g.hpManaStatsIsVisible
 }
 
 // Handles what to do when an actionable is hovered
@@ -798,12 +792,6 @@ func (g *GameControls) onClickActionable(item ActionableType) {
 		log.Println("Right Skill Selector Action Pressed")
 	case rightSkill:
 		log.Println("Right Skill Action Pressed")
-	case hpGlobe:
-		g.ToggleHpManaStatus()
-		log.Println("HP/Mana Stats Action [HP Globe] Pressed")
-	case manaGlobe:
-		g.ToggleHpManaStatus()
-		log.Println("HP/Mana Stats Action [Mana Globe] Pressed")
 	default:
 		log.Printf("Unrecognized ActionableType(%d) being clicked\n", item)
 	}
