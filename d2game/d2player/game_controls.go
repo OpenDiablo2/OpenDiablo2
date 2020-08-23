@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"log"
@@ -62,11 +63,13 @@ type GameControls struct {
 	skillIcon              *d2ui.Sprite
 	zoneChangeText         *d2ui.Label
 	nameLabel              *d2ui.Label
+	hpManaStatsLabel       *d2ui.Label
 	runButton              *d2ui.Button
 	lastLeftBtnActionTime  float64
 	lastRightBtnActionTime float64
 	FreeCam                bool
 	isZoneTextShown        bool
+	hpManaStatsIsVisible   bool
 }
 
 type ActionableType int
@@ -86,6 +89,8 @@ const (
 	miniPanel  = ActionableType(iota)
 	rightSelec = ActionableType(iota)
 	rightSkill = ActionableType(iota)
+	hpGlobe    = ActionableType(iota)
+	manaGlobe  = ActionableType(iota)
 )
 
 // NewGameControls creates a GameControls instance and returns a pointer to it
@@ -114,6 +119,9 @@ func NewGameControls(
 	nameLabel.Alignment = d2gui.HorizontalAlignCenter
 	nameLabel.SetText(d2ui.ColorTokenize("", d2ui.ColorTokenServer))
 
+	hpManaStatsLabel := ui.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
+	hpManaStatsLabel.Alignment = d2gui.HorizontalAlignLeft
+
 	// TODO make this depend on the hero type to respect inventory.txt
 	var inventoryRecordKey string
 
@@ -141,18 +149,21 @@ func NewGameControls(
 	hoverLabel := nameLabel
 	hoverLabel.SetBackgroundColor(color.RGBA{0, 0, 0, uint8(128)})
 
+	globeStatsLabel := hpManaStatsLabel
+
 	gc := &GameControls{
-		uiManager:      ui,
-		renderer:       renderer,
-		hero:           hero,
-		mapEngine:      mapEngine,
-		inputListener:  inputListener,
-		mapRenderer:    mapRenderer,
-		inventory:      NewInventory(ui, inventoryRecord),
-		heroStatsPanel: NewHeroStatsPanel(ui, hero.Name(), hero.Class, hero.Stats),
-		missileID:      missileID,
-		nameLabel:      hoverLabel,
-		zoneChangeText: zoneLabel,
+		uiManager:        ui,
+		renderer:         renderer,
+		hero:             hero,
+		mapEngine:        mapEngine,
+		inputListener:    inputListener,
+		mapRenderer:      mapRenderer,
+		inventory:        NewInventory(ui, inventoryRecord),
+		heroStatsPanel:   NewHeroStatsPanel(ui, hero.Name(), hero.Class, hero.Stats),
+		missileID:        missileID,
+		nameLabel:        hoverLabel,
+		zoneChangeText:   zoneLabel,
+		hpManaStatsLabel: globeStatsLabel,
 		actionableRegions: []ActionableRegion{
 			{leftSkill, d2common.Rectangle{Left: 115, Top: 550, Width: 50, Height: 50}},
 			{leftSelec, d2common.Rectangle{Left: 206, Top: 563, Width: 30, Height: 30}},
@@ -162,6 +173,8 @@ func NewGameControls(
 			{miniPanel, d2common.Rectangle{Left: 393, Top: 563, Width: 12, Height: 23}},
 			{rightSelec, d2common.Rectangle{Left: 562, Top: 563, Width: 30, Height: 30}},
 			{rightSkill, d2common.Rectangle{Left: 634, Top: 550, Width: 50, Height: 50}},
+			{hpGlobe, d2common.Rectangle{Left: 30, Top: 525, Width: 65, Height: 50}},
+			{manaGlobe, d2common.Rectangle{Left: 700, Top: 525, Width: 65, Height: 50}},
 		},
 		lastLeftBtnActionTime:  0,
 		lastRightBtnActionTime: 0,
@@ -696,6 +709,20 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		g.zoneChangeText.Render(target)
 	}
 
+	// Display current hp and mana stats hpGlobe or manaGlobe region is clicked
+	if g.hpManaStatsIsVisible {
+		yHpManaLabel := 485
+		g.hpManaStatsLabel.SetText(d2ui.ColorTokenize(fmt.Sprintf("LIFE: %v / %v", float64(g.hero.Stats.Health), float64(g.hero.Stats.MaxHealth)), d2ui.ColorTokenWhite))
+		g.hpManaStatsLabel.SetPosition(15, yHpManaLabel)
+		g.hpManaStatsLabel.Render(target)
+
+		g.hpManaStatsLabel.SetText(fmt.Sprintf("MANA: %v / %v", float64(g.hero.Stats.Mana), float64(g.hero.Stats.MaxMana)))
+		widthManaLabel, _ := g.hpManaStatsLabel.GetSize()
+		xManaLabel := 785 - widthManaLabel
+		g.hpManaStatsLabel.SetPosition(xManaLabel, yHpManaLabel)
+		g.hpManaStatsLabel.Render(target)
+	}
+
 	return nil
 }
 
@@ -716,6 +743,16 @@ func (g *GameControls) HideZoneChangeTextAfter(delay float64) {
 	})
 }
 
+// HpManaStatsIsVisible returns true if the hp and mana stats are visible to the player
+func (g *GameControls) HpManaStatsIsVisible() bool {
+	return g.hpManaStatsIsVisible
+}
+
+// ToggleHpManaStatus toggles the visibility of the hp and mana stats placed above their respective globe
+func (g *GameControls) ToggleHpManaStatus() {
+	g.hpManaStatsIsVisible = !g.hpManaStatsIsVisible
+}
+
 // Handles what to do when an actionable is hovered
 func (g *GameControls) onHoverActionable(item ActionableType) {
 	switch item {
@@ -734,6 +771,8 @@ func (g *GameControls) onHoverActionable(item ActionableType) {
 	case rightSelec:
 		return
 	case rightSkill:
+		return
+	case hpGlobe, manaGlobe:
 		return
 	default:
 		log.Printf("Unrecognized ActionableType(%d) being hovered\n", item)
@@ -759,6 +798,12 @@ func (g *GameControls) onClickActionable(item ActionableType) {
 		log.Println("Right Skill Selector Action Pressed")
 	case rightSkill:
 		log.Println("Right Skill Action Pressed")
+	case hpGlobe:
+		g.ToggleHpManaStatus()
+		log.Println("HP/Mana Stats Action [HP Globe] Pressed")
+	case manaGlobe:
+		g.ToggleHpManaStatus()
+		log.Println("HP/Mana Stats Action [Mana Globe] Pressed")
 	default:
 		log.Printf("Unrecognized ActionableType(%d) being clicked\n", item)
 	}
