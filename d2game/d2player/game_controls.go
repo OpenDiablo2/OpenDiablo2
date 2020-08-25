@@ -9,10 +9,9 @@ import (
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -53,6 +52,7 @@ type GameControls struct {
 	uiManager              *d2ui.UIManager
 	inventory              *Inventory
 	heroStatsPanel         *HeroStatsPanel
+	miniPanel              *miniPanel
 	lastMouseX             int
 	lastMouseY             int
 	missileID              int
@@ -71,6 +71,7 @@ type GameControls struct {
 	isZoneTextShown        bool
 	hpStatsIsVisible       bool
 	manaStatsIsVisible     bool
+	isSinglePlayer         bool
 }
 
 type ActionableType int
@@ -82,16 +83,18 @@ type ActionableRegion struct {
 
 const (
 	// Since they require special handling, not considering (1) globes, (2) content of the mini panel, (3) belt
-	leftSkill  = ActionableType(iota)
-	leftSelec  = ActionableType(iota)
-	xp         = ActionableType(iota)
-	walkRun    = ActionableType(iota)
-	stamina    = ActionableType(iota)
-	miniPanel  = ActionableType(iota)
-	rightSelec = ActionableType(iota)
-	rightSkill = ActionableType(iota)
-	hpGlobe    = ActionableType(iota)
-	manaGlobe  = ActionableType(iota)
+	leftSkill ActionableType = iota
+	leftSelect
+	xp
+	walkRun
+	stamina
+	miniPnl
+	rightSelect
+	rightSkill
+	hpGlobe
+	manaGlobe
+	miniPanelCharacter
+	miniPanelInventory
 )
 
 // NewGameControls creates a GameControls instance and returns a pointer to it
@@ -103,6 +106,7 @@ func NewGameControls(
 	inputListener InputCallbackListener,
 	term d2interface.Terminal,
 	ui *d2ui.UIManager,
+	isSinglePlayer bool,
 ) (*GameControls, error) {
 	missileID := initialMissileID
 
@@ -161,24 +165,28 @@ func NewGameControls(
 		mapRenderer:      mapRenderer,
 		inventory:        NewInventory(ui, inventoryRecord),
 		heroStatsPanel:   NewHeroStatsPanel(ui, hero.Name(), hero.Class, hero.Stats),
+		miniPanel:      newMiniPanel(ui, isSinglePlayer),
 		missileID:        missileID,
 		nameLabel:        hoverLabel,
 		zoneChangeText:   zoneLabel,
 		hpManaStatsLabel: globeStatsLabel,
 		actionableRegions: []ActionableRegion{
 			{leftSkill, d2common.Rectangle{Left: 115, Top: 550, Width: 50, Height: 50}},
-			{leftSelec, d2common.Rectangle{Left: 206, Top: 563, Width: 30, Height: 30}},
+			{leftSelect, d2common.Rectangle{Left: 206, Top: 563, Width: 30, Height: 30}},
 			{xp, d2common.Rectangle{Left: 253, Top: 560, Width: 125, Height: 5}},
 			{walkRun, d2common.Rectangle{Left: 255, Top: 573, Width: 17, Height: 20}},
 			{stamina, d2common.Rectangle{Left: 273, Top: 573, Width: 105, Height: 20}},
-			{miniPanel, d2common.Rectangle{Left: 393, Top: 563, Width: 12, Height: 23}},
-			{rightSelec, d2common.Rectangle{Left: 562, Top: 563, Width: 30, Height: 30}},
+			{miniPnl, d2common.Rectangle{Left: 393, Top: 563, Width: 12, Height: 23}},
+			{rightSelect, d2common.Rectangle{Left: 562, Top: 563, Width: 30, Height: 30}},
 			{rightSkill, d2common.Rectangle{Left: 634, Top: 550, Width: 50, Height: 50}},
 			{hpGlobe, d2common.Rectangle{Left: 30, Top: 525, Width: 65, Height: 50}},
 			{manaGlobe, d2common.Rectangle{Left: 700, Top: 525, Width: 65, Height: 50}},
+			{miniPanelCharacter, d2common.Rectangle{Left: 325, Top: 526, Width: 26, Height: 26}},
+			{miniPanelInventory, d2common.Rectangle{Left: 351, Top: 526, Width: 26, Height: 26}},
 		},
 		lastLeftBtnActionTime:  0,
 		lastRightBtnActionTime: 0,
+		isSinglePlayer:         isSinglePlayer,
 	}
 
 	err = term.BindAction("freecam", "toggle free camera movement", func() {
@@ -372,6 +380,7 @@ func (g *GameControls) Load() {
 	g.mainPanel, _ = g.uiManager.NewSprite(animation)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.MenuButton, d2resource.PaletteSky)
+	_ = animation.SetCurrentFrame(2)
 	g.menuButton, _ = g.uiManager.NewSprite(animation)
 
 	animation, _ = d2asset.LoadAnimation(d2resource.GenericSkills, d2resource.PaletteSky)
@@ -448,6 +457,10 @@ func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 	}
 
 	if g.isRightPanelOpen() && rightMenuRect.IsInRect(px, py) {
+		return true
+	}
+
+	if g.miniPanel.IsOpen() && g.miniPanel.isInRect(px, py) {
 		return true
 	}
 
@@ -607,7 +620,12 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	target.Pop()
 
 	// Center menu button
-	if err := g.menuButton.SetCurrentFrame(0); err != nil {
+	menuButtonFrameIndex := 0
+	if g.miniPanel.isOpen {
+		menuButtonFrameIndex = 2
+	}
+
+	if err := g.menuButton.SetCurrentFrame(menuButtonFrameIndex); err != nil {
 		return err
 	}
 
@@ -616,6 +634,10 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	g.menuButton.SetPosition((width/2)-8, height-16)
 
 	if err := g.menuButton.Render(target); err != nil {
+		return err
+	}
+
+	if err := g.miniPanel.Render(target); err != nil {
 		return err
 	}
 
@@ -774,7 +796,7 @@ func (g *GameControls) onHoverActionable(item ActionableType) {
 	switch item {
 	case leftSkill:
 		return
-	case leftSelec:
+	case leftSelect:
 		return
 	case xp:
 		return
@@ -782,9 +804,9 @@ func (g *GameControls) onHoverActionable(item ActionableType) {
 		return
 	case stamina:
 		return
-	case miniPanel:
+	case miniPnl:
 		return
-	case rightSelec:
+	case rightSelect:
 		return
 	case rightSkill:
 		return
@@ -802,7 +824,7 @@ func (g *GameControls) onClickActionable(item ActionableType) {
 	switch item {
 	case leftSkill:
 		log.Println("Left Skill Action Pressed")
-	case leftSelec:
+	case leftSelect:
 		log.Println("Left Skill Selector Action Pressed")
 	case xp:
 		log.Println("XP Action Pressed")
@@ -810,9 +832,11 @@ func (g *GameControls) onClickActionable(item ActionableType) {
 		log.Println("Walk/Run Action Pressed")
 	case stamina:
 		log.Println("Stamina Action Pressed")
-	case miniPanel:
+	case miniPnl:
 		log.Println("Mini Panel Action Pressed")
-	case rightSelec:
+
+		g.miniPanel.Toggle()
+	case rightSelect:
 		log.Println("Right Skill Selector Action Pressed")
 	case rightSkill:
 		log.Println("Right Skill Action Pressed")
@@ -822,6 +846,16 @@ func (g *GameControls) onClickActionable(item ActionableType) {
 	case manaGlobe:
 		g.ToggleManaStats()
 		log.Println("Mana Globe Pressed")
+	case miniPanelCharacter:
+		log.Println("Character button on mini panel is pressed")
+
+		g.heroStatsPanel.Toggle()
+		g.updateLayout()
+	case miniPanelInventory:
+		log.Println("Inventory button on mini panel is pressed")
+
+		g.inventory.Toggle()
+		g.updateLayout()
 	default:
 		log.Printf("Unrecognized ActionableType(%d) being clicked\n", item)
 	}

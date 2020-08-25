@@ -2,9 +2,10 @@ package d2client
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"log"
 	"os"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -289,4 +290,8 @@ func (g *GameClient) handlePingPacket() error {
 	}
 
 	return nil
+}
+
+func (g *GameClient) IsSinglePlayer() bool {
+	return g.connectionType == d2clientconnectiontype.Local
 }
