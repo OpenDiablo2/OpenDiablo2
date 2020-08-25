@@ -134,6 +134,7 @@ const (
 	// --- GAME UI ---
 
 	PentSpin        = "/data/global/ui/CURSOR/pentspin.DC6"
+	Minipanel       = "/data/global/ui/PANEL/minipanel.DC6"
 	MinipanelSmall  = "/data/global/ui/PANEL/minipanel_s.dc6"
 	MinipanelButton = "/data/global/ui/PANEL/minipanelbtn.DC6"
 
@@ -241,8 +242,8 @@ const (
 
 	MagicPrefix = "/data/global/excel/MagicPrefix.txt"
 	MagicSuffix = "/data/global/excel/MagicSuffix.txt"
-	RarePrefix   = "/data/global/excel/RarePrefix.txt" // these are for item names
-	RareSuffix   = "/data/global/excel/RareSuffix.txt"
+	RarePrefix  = "/data/global/excel/RarePrefix.txt" // these are for item names
+	RareSuffix  = "/data/global/excel/RareSuffix.txt"
 
 	// --- Monster Prefix/Suffixes (?) ---
 	UniquePrefix = "/data/global/excel/UniquePrefix.txt"

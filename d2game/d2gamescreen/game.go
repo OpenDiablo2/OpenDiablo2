@@ -2,9 +2,10 @@ package d2gamescreen
 
 import (
 	"fmt"
+	"image/color"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -248,7 +249,7 @@ func (v *Game) bindGameControls() error {
 
 		var err error
 		v.gameControls, err = d2player.NewGameControls(v.renderer, player,
-			v.gameClient.MapEngine, v.mapRenderer, v, v.terminal, v.uiManager)
+			v.gameClient.MapEngine, v.mapRenderer, v, v.terminal, v.uiManager, v.gameClient.IsSinglePlayer())
 
 		if err != nil {
 			return err
