@@ -4,8 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2loader/asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2loader/asset/types"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset/types"
 )
 
 // static check that Source implements AssetSource

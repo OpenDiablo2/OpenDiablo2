@@ -3,8 +3,8 @@ package d2loader
 import (
 	"testing"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2loader/asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2loader/asset/types"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset/types"
 )
 
 func TestCache_newCache(t *testing.T) {

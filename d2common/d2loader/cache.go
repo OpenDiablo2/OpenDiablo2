@@ -3,7 +3,7 @@ package d2loader
 import (
 	"fmt"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2loader/asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset"
 )
 
 const (
