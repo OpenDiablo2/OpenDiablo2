@@ -122,6 +122,7 @@ func (g *GameServer) Start() error {
 			c, err := g.listener.Accept()
 			if err != nil {
 				log.Printf("Unable to accept connection: %s\n", err)
+				return
 			}
 
 			go g.handleConnection(c)
