@@ -37,7 +37,7 @@ func LoadAnimationData(rawData []byte) {
 		for i := 0; i < dataCount; i++ {
 			cofNameBytes := streamReader.ReadBytes(numCofNameBytes)
 			data := &AnimationDataRecord{
-				COFName:            strings.ReplaceAll(string(cofNameBytes), string(0), ""),
+				COFName:            strings.ReplaceAll(string(cofNameBytes), string(byte(0)), ""),
 				FramesPerDirection: int(streamReader.GetInt32()),
 				AnimationSpeed:     int(streamReader.GetInt32()),
 			}

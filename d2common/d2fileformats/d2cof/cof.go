@@ -44,7 +44,7 @@ func Load(fileData []byte) (*COF, error) {
 		layer.Transparent = streamReader.GetByte() != 0
 		layer.DrawEffect = d2enum.DrawEffect(streamReader.GetByte())
 		weaponClassStr := streamReader.ReadBytes(4) //nolint:gomnd // Binary data
-		layer.WeaponClass = d2enum.WeaponClassFromString(strings.TrimSpace(strings.ReplaceAll(string(weaponClassStr), string(0), "")))
+		layer.WeaponClass = d2enum.WeaponClassFromString(strings.TrimSpace(strings.ReplaceAll(string(weaponClassStr), string(byte(0)), "")))
 		result.CofLayers[i] = layer
 		result.CompositeLayers[layer.Type] = i
 	}
