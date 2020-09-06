@@ -89,7 +89,6 @@ func (l *Logger) print(level LogLevel, msg string) {
 	case LogLevelError:
 		fmtString = LogFmtError
 	case LogLevelNone:
-		fallthrough
 	default:
 		return
 	}
