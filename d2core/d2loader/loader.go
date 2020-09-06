@@ -3,7 +3,6 @@ package d2loader
 import (
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 
@@ -30,7 +29,7 @@ func NewLoader() *Loader {
 // that have been added
 type Loader struct {
 	*Cache
-	log     *d2common.Logger
+	*d2common.Logger
 	sources []asset.Source
 }
 
@@ -41,7 +40,7 @@ func (l *Loader) Load(subPath string) (asset.Asset, error) {
 
 	// first, we check the cache for an existing entry
 	if cached, err := l.Get(subPath); err == nil {
-		l.log.Debug(fmt.Sprintf("file `%s` exists in loader cache", subPath))
+		l.Debug(fmt.Sprintf("file `%s` exists in loader cache", subPath))
 		return cached, nil
 	}
 
@@ -72,7 +71,7 @@ func (l *Loader) AddSource(path string) {
 
 	info, err := os.Lstat(cleanPath)
 	if err != nil {
-		l.log.Warning(err.Error())
+		l.Warning(err.Error())
 		return
 	}
 
@@ -83,7 +82,7 @@ func (l *Loader) AddSource(path string) {
 			Root: cleanPath,
 		}
 
-		l.log.Debug(fmt.Sprintf("adding filesystem source `%s`", cleanPath))
+		l.Debug(fmt.Sprintf("adding filesystem source `%s`", cleanPath))
 		l.sources = append(l.sources, source)
 	}
 
@@ -92,26 +91,19 @@ func (l *Loader) AddSource(path string) {
 	}
 
 	ext := filepath.Ext(cleanPath)
-	sourceType := types.SourceTypeFromFileExtension(ext)
+	sourceType := types.Ext2SourceType(ext)
 
 	switch sourceType {
 	case types.AssetSourceMPQ:
 		source, err := mpq.NewSource(cleanPath)
 		if err == nil {
-			l.log.Debug(fmt.Sprintf("adding MPQ source `%s`", cleanPath))
+			l.Debug(fmt.Sprintf("adding MPQ source `%s`", cleanPath))
 			l.sources = append(l.sources, source)
 		}
 	case types.AssetSourceUnknown:
-		l.log.Warning(fmt.Sprintf("unknown asset source `%s`", cleanPath))
+		l.Warning(fmt.Sprintf("unknown asset source `%s`", cleanPath))
 		fallthrough
 	default:
 		return
 	}
-}
-
-// SetLogger sets the logger and log level for the loader
-func (l *Loader) SetLogger(writer io.Writer, level d2common.LogLevel) {
-	l.log = &d2common.Logger{}
-	l.log.Writer = writer
-	l.log.SetLevel(level)
 }

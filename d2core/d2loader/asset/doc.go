@@ -1,2 +1,2 @@
-// Package asset provides interfaces for Asset and AssetSource
+// Package asset provides interfaces for Asset and Source
 package asset

@@ -1,10 +1,11 @@
 package mpq
 
 import (
+	"path/filepath"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2loader/asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2loader/asset/types"
-	"path/filepath"
 )
 
 // static check that Asset implements Asset
@@ -12,9 +13,9 @@ var _ asset.Asset = &Asset{}
 
 // Asset represents a file record within an MPQ archive
 type Asset struct {
-	stream    d2interface.ArchiveDataStream
-	name      string
-	source    *Source
+	stream d2interface.ArchiveDataStream
+	name   string
+	source *Source
 }
 
 // Type returns the asset type

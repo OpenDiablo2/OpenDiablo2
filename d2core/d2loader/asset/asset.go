@@ -1,8 +1,9 @@
 package asset
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2loader/asset/types"
 	"io"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2loader/asset/types"
 )
 
 // Asset represents a game asset. It has a type, an asset source, a sub-path (within the

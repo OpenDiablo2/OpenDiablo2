@@ -12,8 +12,8 @@ const (
 	AssetSourceMPQ
 )
 
-// SourceTypeFromFileExtension returns the SourceType from the given file extension
-func SourceTypeFromFileExtension(ext string) SourceType {
+// Ext2SourceType returns the SourceType from the given file extension
+func Ext2SourceType(ext string) SourceType {
 	ext = strings.ToLower(ext)
 	ext = strings.ReplaceAll(ext, ".", "")
 
