@@ -1,10 +1,9 @@
-// Package d2debugutil provides debug utilities
-package d2debugutil
+package d2util
 
 import (
 	"image"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2debugutil/assets"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util/assets"
 	"github.com/hajimehoshi/ebiten"
 )
 

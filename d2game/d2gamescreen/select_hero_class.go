@@ -3,9 +3,9 @@ package d2gamescreen
 import (
 	"fmt"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"image"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -681,7 +681,7 @@ const (
 
 func (v *SelectHeroClass) setDescLabels(descKey string) {
 	heroDesc := d2tbl.TranslateString(descKey)
-	parts := d2common.SplitIntoLinesWithMaxWidth(heroDesc, heroDescCharWidth)
+	parts := d2util.SplitIntoLinesWithMaxWidth(heroDesc, heroDescCharWidth)
 
 	numLines := len(parts)
 

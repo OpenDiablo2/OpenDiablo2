@@ -1,12 +1,12 @@
 package d2ui
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"image/color"
 	"log"
 	"regexp"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
@@ -166,15 +166,15 @@ func (v *Label) getAlignOffset(textWidth int) int {
 func getColor(token ColorToken) color.Color {
 	// todo this should really come from the PL2 files
 	colors := map[ColorToken]color.Color{
-		ColorTokenGrey:   d2common.Color(colorGrey100Alpha),
-		ColorTokenWhite:  d2common.Color(colorWhite100Alpha),
-		ColorTokenBlue:   d2common.Color(colorBlue100Alpha),
-		ColorTokenYellow: d2common.Color(colorYellow100Alpha),
-		ColorTokenGreen:  d2common.Color(colorGreen100Alpha),
-		ColorTokenGold:   d2common.Color(colorGold100Alpha),
-		ColorTokenOrange: d2common.Color(colorOrange100Alpha),
-		ColorTokenRed:    d2common.Color(colorRed100Alpha),
-		ColorTokenBlack:  d2common.Color(colorBlack100Alpha),
+		ColorTokenGrey:   d2util.Color(colorGrey100Alpha),
+		ColorTokenWhite:  d2util.Color(colorWhite100Alpha),
+		ColorTokenBlue:   d2util.Color(colorBlue100Alpha),
+		ColorTokenYellow: d2util.Color(colorYellow100Alpha),
+		ColorTokenGreen:  d2util.Color(colorGreen100Alpha),
+		ColorTokenGold:   d2util.Color(colorGold100Alpha),
+		ColorTokenOrange: d2util.Color(colorOrange100Alpha),
+		ColorTokenRed:    d2util.Color(colorRed100Alpha),
+		ColorTokenBlack:  d2util.Color(colorBlack100Alpha),
 	}
 
 	chosen := colors[token]

@@ -3,11 +3,11 @@ package d2maprenderer
 import (
 	"errors"
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"image/color"
 	"log"
 	"math"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -431,8 +431,8 @@ func (mr *MapRenderer) renderEntityDebug(target d2interface.Surface) {
 		yWithin := (t <= my) && (b >= my)
 		within := xWithin && yWithin
 
-		boxLineColor := d2common.Color(magentaFullOpacity)
-		boxHoverColor := d2common.Color(yellowFullOpacity)
+		boxLineColor := d2util.Color(magentaFullOpacity)
+		boxHoverColor := d2util.Color(yellowFullOpacity)
 
 		boxColor := boxLineColor
 
@@ -465,14 +465,14 @@ func (mr *MapRenderer) renderEntityDebug(target d2interface.Surface) {
 		if within {
 			mr.viewport.PushTranslationWorld(x, y)
 			target.PushTranslation(screenX, screenY)
-			target.DrawLine(offX, offY, d2common.Color(whiteHalfOpacity))
+			target.DrawLine(offX, offY, d2util.Color(whiteHalfOpacity))
 			target.PushTranslation(offX+dbgBoxPadding, offY-dbgBoxPadding*two)
 			target.PushTranslation(-dbgOffsetXY, -dbgOffsetXY)
-			target.DrawRect(dbgBoxWidth, dbgBoxHeight, d2common.Color(blackQuarterOpacity))
+			target.DrawRect(dbgBoxWidth, dbgBoxHeight, d2util.Color(blackQuarterOpacity))
 			target.Pop()
 			target.DrawTextf("World (%.2f, %.2f)\nVelocity (%.2f, %.2f)", x, y, vx, vy)
 			target.Pop()
-			target.DrawLine(int(vx), int(vy), d2common.Color(lightGreenFullOpacity))
+			target.DrawLine(int(vx), int(vy), d2util.Color(lightGreenFullOpacity))
 			target.Pop()
 			mr.viewport.PopTranslation()
 		}
@@ -490,9 +490,9 @@ func (mr *MapRenderer) WorldToScreenF(x, y float64) (screenX, screenY float64) {
 }
 
 func (mr *MapRenderer) renderTileDebug(ax, ay, debugVisLevel int, target d2interface.Surface) {
-	subTileColor := d2common.Color(lightBlueQuarterOpacity)
-	tileColor := d2common.Color(whiteQuarterOpacity)
-	tileCollisionColor := d2common.Color(redQuarterOpacity)
+	subTileColor := d2util.Color(lightBlueQuarterOpacity)
+	tileColor := d2util.Color(whiteQuarterOpacity)
+	tileCollisionColor := d2util.Color(redQuarterOpacity)
 
 	screenX1, screenY1 := mr.viewport.WorldToScreen(float64(ax), float64(ay))
 	screenX2, screenY2 := mr.viewport.WorldToScreen(float64(ax+1), float64(ay))
