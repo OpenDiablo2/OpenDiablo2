@@ -1,11 +1,11 @@
 package d2datadict
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2calculation"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2calculation/d2parser"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // SkillDescriptionRecord is a single row from skilldesc.txt and is used for

@@ -1,9 +1,10 @@
 package d2tbl
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 	"log"
 	"strconv"
+	
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 )
 
 type textDictionaryHashEntry struct {

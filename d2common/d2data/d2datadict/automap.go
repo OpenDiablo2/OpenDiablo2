@@ -1,8 +1,9 @@
 package d2datadict
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // AutoMapRecord represents one row from d2data.mpq/AutoMap.txt.

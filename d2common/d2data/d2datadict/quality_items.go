@@ -1,9 +1,10 @@
 package d2datadict
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
 	"strconv"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // QualityRecord represents a single row of QualityItems.txt, which controls

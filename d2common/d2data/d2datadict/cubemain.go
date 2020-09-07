@@ -1,12 +1,12 @@
 package d2datadict
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
 	"strconv"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // CubeRecipeRecord represents one row from CubeMain.txt.

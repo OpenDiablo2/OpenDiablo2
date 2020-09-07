@@ -1,11 +1,11 @@
 package d2datadict
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2calculation"
 	"log"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2calculation"
 )
 
 // MissileCalcParam is a calculation parameter for a missile
