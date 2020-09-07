@@ -1,10 +1,9 @@
 package d2data
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 	"log"
 	"strings"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 const (
@@ -30,7 +29,7 @@ var AnimationData map[string][]*AnimationDataRecord //nolint:gochecknoglobals //
 // LoadAnimationData loads the animation data table into the global AnimationData dictionary
 func LoadAnimationData(rawData []byte) {
 	AnimationData = make(map[string][]*AnimationDataRecord)
-	streamReader := d2common.CreateStreamReader(rawData)
+	streamReader := d2datautils.CreateStreamReader(rawData)
 
 	for !streamReader.EOF() {
 		dataCount := int(streamReader.GetInt32())

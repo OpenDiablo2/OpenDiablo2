@@ -2,8 +2,7 @@ package d2dcc
 
 import (
 	"errors"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 )
 
 const dccFileSignature = 0x74
@@ -25,7 +24,7 @@ func Load(fileData []byte) (*DCC, error) {
 		fileData: fileData,
 	}
 
-	var bm = d2common.CreateBitMuncher(fileData, 0)
+	var bm = d2datautils.CreateBitMuncher(fileData, 0)
 
 	result.Signature = int(bm.GetByte())
 
@@ -54,6 +53,6 @@ func Load(fileData []byte) (*DCC, error) {
 
 // DecodeDirection decodes and returns the given direction
 func (dcc *DCC) DecodeDirection(direction int) *DCCDirection {
-	return CreateDCCDirection(d2common.CreateBitMuncher(dcc.fileData,
+	return CreateDCCDirection(d2datautils.CreateBitMuncher(dcc.fileData,
 		dcc.directionOffsets[direction]*directionOffsetMultiplier), dcc)
 }

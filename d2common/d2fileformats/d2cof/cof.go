@@ -1,9 +1,9 @@
 package d2cof
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
@@ -22,7 +22,7 @@ type COF struct {
 // Load loads a COF file.
 func Load(fileData []byte) (*COF, error) {
 	result := &COF{}
-	streamReader := d2common.CreateStreamReader(fileData)
+	streamReader := d2datautils.CreateStreamReader(fileData)
 	result.NumberOfLayers = int(streamReader.GetByte())
 	result.FramesPerDirection = int(streamReader.GetByte())
 	result.NumberOfDirections = int(streamReader.GetByte())

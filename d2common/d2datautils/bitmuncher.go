@@ -1,4 +1,4 @@
-package d2common
+package d2datautils
 
 // BitMuncher is used for parsing files that are not byte-aligned such as the DCC files.
 type BitMuncher struct {

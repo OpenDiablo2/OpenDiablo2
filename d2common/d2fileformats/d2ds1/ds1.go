@@ -1,7 +1,7 @@
 package d2ds1
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
@@ -37,7 +37,7 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 		NumberOfShadowLayers:       1,
 		NumberOfSubstitutionLayers: 0,
 	}
-	br := d2common.CreateStreamReader(fileData)
+	br := d2datautils.CreateStreamReader(fileData)
 	ds1.Version = br.GetInt32()
 	ds1.Width = br.GetInt32() + 1
 	ds1.Height = br.GetInt32() + 1
@@ -108,7 +108,7 @@ func LoadDS1(fileData []byte) (*DS1, error) {
 	return ds1, nil
 }
 
-func (ds1 *DS1) loadObjects(br *d2common.StreamReader) {
+func (ds1 *DS1) loadObjects(br *d2datautils.StreamReader) {
 	if ds1.Version >= 2 { //nolint:gomnd // Version number
 		numberOfObjects := br.GetInt32()
 		ds1.Objects = make([]Object, numberOfObjects)
@@ -128,7 +128,7 @@ func (ds1 *DS1) loadObjects(br *d2common.StreamReader) {
 	}
 }
 
-func (ds1 *DS1) loadSubstitutions(br *d2common.StreamReader) {
+func (ds1 *DS1) loadSubstitutions(br *d2datautils.StreamReader) {
 	if ds1.Version >= 12 && (ds1.SubstitutionType == 1 || ds1.SubstitutionType == 2) {
 		if ds1.Version >= 18 { //nolint:gomnd // Version number
 			br.GetUInt32()
@@ -189,7 +189,7 @@ func (ds1 *DS1) setupStreamLayerTypes() []d2enum.LayerStreamType {
 	return layerStream
 }
 
-func (ds1 *DS1) loadNPCs(br *d2common.StreamReader) {
+func (ds1 *DS1) loadNPCs(br *d2datautils.StreamReader) {
 	if ds1.Version >= 14 { //nolint:gomnd // Version number
 		numberOfNpcs := br.GetInt32()
 		for npcIdx := 0; npcIdx < int(numberOfNpcs); npcIdx++ {
@@ -218,7 +218,7 @@ func (ds1 *DS1) loadNPCs(br *d2common.StreamReader) {
 	}
 }
 
-func (ds1 *DS1) loadNpcPaths(br *d2common.StreamReader, objIdx, numPaths int) {
+func (ds1 *DS1) loadNpcPaths(br *d2datautils.StreamReader, objIdx, numPaths int) {
 	if ds1.Objects[objIdx].Paths == nil {
 		ds1.Objects[objIdx].Paths = make([]d2path.Path, numPaths)
 	}
@@ -237,7 +237,7 @@ func (ds1 *DS1) loadNpcPaths(br *d2common.StreamReader, objIdx, numPaths int) {
 	}
 }
 
-func (ds1 *DS1) loadLayerStreams(br *d2common.StreamReader, layerStream []d2enum.LayerStreamType) {
+func (ds1 *DS1) loadLayerStreams(br *d2datautils.StreamReader, layerStream []d2enum.LayerStreamType) {
 	var dirLookup = []int32{
 		0x00, 0x01, 0x02, 0x01, 0x02, 0x03, 0x03, 0x05, 0x05, 0x06,
 		0x06, 0x07, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E,

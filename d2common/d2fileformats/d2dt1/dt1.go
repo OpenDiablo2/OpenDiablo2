@@ -2,8 +2,7 @@ package d2dt1
 
 import (
 	"fmt"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 )
 
 // DT1 represents a DT1 file.
@@ -26,7 +25,7 @@ const (
 //nolint:funlen Can't reduce
 func LoadDT1(fileData []byte) (*DT1, error) {
 	result := &DT1{}
-	br := d2common.CreateStreamReader(fileData)
+	br := d2datautils.CreateStreamReader(fileData)
 	ver1 := br.GetInt32()
 	ver2 := br.GetInt32()
 

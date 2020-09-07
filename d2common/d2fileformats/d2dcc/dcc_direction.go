@@ -1,10 +1,10 @@
 package d2dcc
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
@@ -36,7 +36,7 @@ type DCCDirection struct {
 }
 
 // CreateDCCDirection creates an instance of a DCCDirection.
-func CreateDCCDirection(bm *d2common.BitMuncher, file *DCC) *DCCDirection {
+func CreateDCCDirection(bm *d2datautils.BitMuncher, file *DCC) *DCCDirection {
 	var crazyBitTable = []byte{0, 1, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 26, 28, 30, 32}
 
 	result := &DCCDirection{
@@ -96,23 +96,23 @@ func CreateDCCDirection(bm *d2common.BitMuncher, file *DCC) *DCCDirection {
 	// here. For example, if you are on byte offset 3, bit offset 6, and
 	// the EqualCellsBitstreamSize is 20 bytes, then the next bit stream
 	// will be located at byte 23, bit offset 6!
-	equalCellsBitstream := d2common.CopyBitMuncher(bm)
+	equalCellsBitstream := d2datautils.CopyBitMuncher(bm)
 
 	bm.SkipBits(result.EqualCellsBitstreamSize)
 
-	pixelMaskBitstream := d2common.CopyBitMuncher(bm)
+	pixelMaskBitstream := d2datautils.CopyBitMuncher(bm)
 
 	bm.SkipBits(result.PixelMaskBitstreamSize)
 
-	encodingTypeBitsream := d2common.CopyBitMuncher(bm)
+	encodingTypeBitsream := d2datautils.CopyBitMuncher(bm)
 
 	bm.SkipBits(result.EncodingTypeBitsreamSize)
 
-	rawPixelCodesBitstream := d2common.CopyBitMuncher(bm)
+	rawPixelCodesBitstream := d2datautils.CopyBitMuncher(bm)
 
 	bm.SkipBits(result.RawPixelCodesBitstreamSize)
 
-	pixelCodeandDisplacement := d2common.CopyBitMuncher(bm)
+	pixelCodeandDisplacement := d2datautils.CopyBitMuncher(bm)
 
 	// Calculate the cells for the direction
 	result.calculateCells()
@@ -138,7 +138,7 @@ func CreateDCCDirection(bm *d2common.BitMuncher, file *DCC) *DCCDirection {
 	return result
 }
 
-func (v *DCCDirection) verify(equalCellsBitstream, pixelMaskBitstream, encodingTypeBitsream, rawPixelCodesBitstream *d2common.BitMuncher) {
+func (v *DCCDirection) verify(equalCellsBitstream, pixelMaskBitstream, encodingTypeBitsream, rawPixelCodesBitstream *d2datautils.BitMuncher) {
 	if equalCellsBitstream.BitsRead() != v.EqualCellsBitstreamSize {
 		log.Panic("Did not read the correct number of bits!")
 	}
@@ -157,7 +157,7 @@ func (v *DCCDirection) verify(equalCellsBitstream, pixelMaskBitstream, encodingT
 }
 
 //nolint:gocognit nolint:gocyclo // Can't reduce
-func (v *DCCDirection) generateFrames(pcd *d2common.BitMuncher) {
+func (v *DCCDirection) generateFrames(pcd *d2datautils.BitMuncher) {
 	pbIdx := 0
 
 	for _, cell := range v.Cells {
@@ -260,7 +260,7 @@ func (v *DCCDirection) generateFrames(pcd *d2common.BitMuncher) {
 }
 
 //nolint:funlen nolint:gocognit // can't reduce
-func (v *DCCDirection) fillPixelBuffer(pcd, ec, pm, et, rp *d2common.BitMuncher) {
+func (v *DCCDirection) fillPixelBuffer(pcd, ec, pm, et, rp *d2datautils.BitMuncher) {
 	var pixelMaskLookup = []int{0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4}
 
 	lastPixel := uint32(0)

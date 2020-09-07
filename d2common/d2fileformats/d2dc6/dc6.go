@@ -1,7 +1,7 @@
 package d2dc6
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 )
 
 const (
@@ -36,7 +36,7 @@ func Load(data []byte) (*DC6, error) {
 		terminatorSize  = 3
 	)
 
-	r := d2common.CreateStreamReader(data)
+	r := d2datautils.CreateStreamReader(data)
 
 	var dc DC6
 	dc.Version = r.GetInt32()
