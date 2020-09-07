@@ -1,9 +1,9 @@
 package d2mapentity
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2path"
 	"math/rand"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -15,7 +15,7 @@ import (
 // For example, Deckard Cain.
 type NPC struct {
 	mapEntity
-	Paths         []d2common.Path
+	Paths         []d2path.Path
 	name          string
 	composite     *d2asset.Composite
 	action        int
@@ -64,12 +64,12 @@ func (v *NPC) Render(target d2interface.Surface) {
 }
 
 // Path returns the current part of the entity's path.
-func (v *NPC) Path() d2common.Path {
+func (v *NPC) Path() d2path.Path {
 	return v.Paths[v.path]
 }
 
 // NextPath returns the next part of the entity's path.
-func (v *NPC) NextPath() d2common.Path {
+func (v *NPC) NextPath() d2path.Path {
 	v.path++
 	if v.path == len(v.Paths) {
 		v.path = 0
@@ -81,7 +81,7 @@ func (v *NPC) NextPath() d2common.Path {
 // SetPaths sets the entity's paths to the given slice. It also sets flags
 // on the entity indicating that it has paths and has completed the
 // previous none.
-func (v *NPC) SetPaths(paths []d2common.Path) {
+func (v *NPC) SetPaths(paths []d2path.Path) {
 	v.Paths = paths
 	v.HasPaths = len(paths) > 0
 	v.isDone = true

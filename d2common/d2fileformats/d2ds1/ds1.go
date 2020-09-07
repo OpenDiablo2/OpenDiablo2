@@ -5,6 +5,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2path"
 )
 
 const maxActNumber = 5
@@ -219,11 +220,11 @@ func (ds1 *DS1) loadNPCs(br *d2common.StreamReader) {
 
 func (ds1 *DS1) loadNpcPaths(br *d2common.StreamReader, objIdx, numPaths int) {
 	if ds1.Objects[objIdx].Paths == nil {
-		ds1.Objects[objIdx].Paths = make([]d2common.Path, numPaths)
+		ds1.Objects[objIdx].Paths = make([]d2path.Path, numPaths)
 	}
 
 	for pathIdx := 0; pathIdx < numPaths; pathIdx++ {
-		newPath := d2common.Path{}
+		newPath := d2path.Path{}
 		newPath.Position = d2vector.NewPosition(
 			float64(br.GetInt32()),
 			float64(br.GetInt32()))

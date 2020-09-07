@@ -1,6 +1,7 @@
 package d2mapstamp
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2path"
 	"math"
 	"math/rand"
 
@@ -169,8 +170,8 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 	return entities
 }
 
-func convertPaths(tileOffsetX, tileOffsetY int, paths []d2common.Path) []d2common.Path {
-	result := make([]d2common.Path, len(paths))
+func convertPaths(tileOffsetX, tileOffsetY int, paths []d2path.Path) []d2path.Path {
+	result := make([]d2path.Path, len(paths))
 	for i := 0; i < len(paths); i++ {
 		result[i].Action = paths[i].Action
 		result[i].Position = d2vector.NewPosition(

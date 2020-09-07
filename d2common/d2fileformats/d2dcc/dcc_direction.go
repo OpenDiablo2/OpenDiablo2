@@ -1,6 +1,7 @@
 package d2dcc
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -26,7 +27,7 @@ type DCCDirection struct {
 	RawPixelCodesBitstreamSize int
 	Frames                     []*DCCDirectionFrame
 	PaletteEntries             [256]byte
-	Box                        d2common.Rectangle
+	Box                        d2geom.Rectangle
 	Cells                      []*DCCCell
 	PixelData                  []byte
 	HorizontalCellCount        int
@@ -65,7 +66,7 @@ func CreateDCCDirection(bm *d2common.BitMuncher, file *DCC) *DCCDirection {
 		maxy = int(d2math.MaxInt32(int32(result.Frames[frameIdx].Box.Bottom()), int32(maxy)))
 	}
 
-	result.Box = d2common.Rectangle{Left: minx, Top: miny, Width: maxx - minx, Height: maxy - miny}
+	result.Box = d2geom.Rectangle{Left: minx, Top: miny, Width: maxx - minx, Height: maxy - miny}
 
 	if result.OptionalDataBits > 0 {
 		log.Panic("Optional bits in DCC data is not currently supported.")

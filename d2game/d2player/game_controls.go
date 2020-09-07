@@ -2,6 +2,7 @@ package d2player
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"image"
 	"image/color"
 	"log"
@@ -78,7 +79,7 @@ type ActionableType int
 
 type ActionableRegion struct {
 	ActionableTypeId ActionableType
-	Rect             d2common.Rectangle
+	Rect             d2geom.Rectangle
 }
 
 const (
@@ -171,18 +172,18 @@ func NewGameControls(
 		zoneChangeText:   zoneLabel,
 		hpManaStatsLabel: globeStatsLabel,
 		actionableRegions: []ActionableRegion{
-			{leftSkill, d2common.Rectangle{Left: 115, Top: 550, Width: 50, Height: 50}},
-			{leftSelect, d2common.Rectangle{Left: 206, Top: 563, Width: 30, Height: 30}},
-			{xp, d2common.Rectangle{Left: 253, Top: 560, Width: 125, Height: 5}},
-			{walkRun, d2common.Rectangle{Left: 255, Top: 573, Width: 17, Height: 20}},
-			{stamina, d2common.Rectangle{Left: 273, Top: 573, Width: 105, Height: 20}},
-			{miniPnl, d2common.Rectangle{Left: 393, Top: 563, Width: 12, Height: 23}},
-			{rightSelect, d2common.Rectangle{Left: 562, Top: 563, Width: 30, Height: 30}},
-			{rightSkill, d2common.Rectangle{Left: 634, Top: 550, Width: 50, Height: 50}},
-			{hpGlobe, d2common.Rectangle{Left: 30, Top: 525, Width: 65, Height: 50}},
-			{manaGlobe, d2common.Rectangle{Left: 700, Top: 525, Width: 65, Height: 50}},
-			{miniPanelCharacter, d2common.Rectangle{Left: 325, Top: 526, Width: 26, Height: 26}},
-			{miniPanelInventory, d2common.Rectangle{Left: 351, Top: 526, Width: 26, Height: 26}},
+			{leftSkill, d2geom.Rectangle{Left: 115, Top: 550, Width: 50, Height: 50}},
+			{leftSelect, d2geom.Rectangle{Left: 206, Top: 563, Width: 30, Height: 30}},
+			{xp, d2geom.Rectangle{Left: 253, Top: 560, Width: 125, Height: 5}},
+			{walkRun, d2geom.Rectangle{Left: 255, Top: 573, Width: 17, Height: 20}},
+			{stamina, d2geom.Rectangle{Left: 273, Top: 573, Width: 105, Height: 20}},
+			{miniPnl, d2geom.Rectangle{Left: 393, Top: 563, Width: 12, Height: 23}},
+			{rightSelect, d2geom.Rectangle{Left: 562, Top: 563, Width: 30, Height: 30}},
+			{rightSkill, d2geom.Rectangle{Left: 634, Top: 550, Width: 50, Height: 50}},
+			{hpGlobe, d2geom.Rectangle{Left: 30, Top: 525, Width: 65, Height: 50}},
+			{manaGlobe, d2geom.Rectangle{Left: 700, Top: 525, Width: 65, Height: 50}},
+			{miniPanelCharacter, d2geom.Rectangle{Left: 325, Top: 526, Width: 26, Height: 26}},
+			{miniPanelInventory, d2geom.Rectangle{Left: 351, Top: 526, Width: 26, Height: 26}},
 		},
 		lastLeftBtnActionTime:  0,
 		lastRightBtnActionTime: 0,
@@ -442,11 +443,11 @@ func (g *GameControls) isRightPanelOpen() bool {
 }
 
 func (g *GameControls) isInActiveMenusRect(px, py int) bool {
-	var bottomMenuRect = d2common.Rectangle{Left: 0, Top: 550, Width: 800, Height: 50}
+	var bottomMenuRect = d2geom.Rectangle{Left: 0, Top: 550, Width: 800, Height: 50}
 
-	var leftMenuRect = d2common.Rectangle{Left: 0, Top: 0, Width: 400, Height: 600}
+	var leftMenuRect = d2geom.Rectangle{Left: 0, Top: 0, Width: 400, Height: 600}
 
-	var rightMenuRect = d2common.Rectangle{Left: 400, Top: 0, Width: 400, Height: 600}
+	var rightMenuRect = d2geom.Rectangle{Left: 400, Top: 0, Width: 400, Height: 600}
 
 	if bottomMenuRect.IsInRect(px, py) {
 		return true

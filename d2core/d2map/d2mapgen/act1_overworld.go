@@ -2,11 +2,11 @@
 package d2mapgen
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"log"
 	"math/rand"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
@@ -99,7 +99,7 @@ func generateWilderness1TownEast(mapEngine *d2mapengine.MapEngine, startX, start
 	fenceSouthEastStamp := loadPreset(mapEngine, d2wilderness.TreeBorderSouthEast, 0)
 	fenceWestEdge := loadPreset(mapEngine, d2wilderness.TreeBoxNorthEast, 0)
 
-	areaRect := d2common.Rectangle{
+	areaRect := d2geom.Rectangle{
 		Left:   startX,
 		Top:    startY + 9,
 		Width:  levelDetails.SizeXNormal,
@@ -154,7 +154,7 @@ func generateWilderness1TownSouth(mapEngine *d2mapengine.MapEngine, startX, star
 	fenceSouthWestStamp := loadPreset(mapEngine, d2wilderness.TreeBorderSouthWest, 0)
 	fenceWaterBorderSouthEast := loadPreset(mapEngine, d2wilderness.WaterBorderEast, 1)
 
-	areaRect := d2common.Rectangle{
+	areaRect := d2geom.Rectangle{
 		Left:   startX + 2,
 		Top:    startY,
 		Width:  levelDetails.SizeXNormal - 2,
@@ -239,7 +239,7 @@ func generateWilderness1TownWest(mapEngine *d2mapengine.MapEngine, startX, start
 	mapEngine.PlaceStamp(fenceSouthWestStamp, startX, startY+levelDetails.SizeYNormal-12)
 	mapEngine.PlaceStamp(fenceNorthEastStamp, startX+levelDetails.SizeXNormal-9, startY-15)
 
-	areaRect := d2common.Rectangle{
+	areaRect := d2geom.Rectangle{
 		Left:   startX + 9,
 		Top:    startY - 10,
 		Width:  levelDetails.SizeXNormal - 9,
@@ -248,11 +248,11 @@ func generateWilderness1TownWest(mapEngine *d2mapengine.MapEngine, startX, start
 	generateWilderness1Contents(mapEngine, areaRect)
 }
 
-func generateWilderness1Contents(mapEngine *d2mapengine.MapEngine, rect d2common.Rectangle) {
+func generateWilderness1Contents(mapEngine *d2mapengine.MapEngine, rect d2geom.Rectangle) {
 	levelDetails := d2datadict.GetLevelDetails(2)
 
 	denOfEvil := loadPreset(mapEngine, d2wilderness.DenOfEvilEntrance, 0)
-	denOfEvilLoc := d2common.Point{
+	denOfEvilLoc := d2geom.Point{
 		X: rect.Left + (rect.Width / 2) + rand.Intn(10),
 		Y: rect.Top + (rect.Height / 2) + rand.Intn(10),
 	}
@@ -295,7 +295,7 @@ func generateWilderness1Contents(mapEngine *d2mapengine.MapEngine, rect d2common
 	for numPlaced < 25 {
 		stamp := stuff[rand.Intn(len(stuff))]
 
-		stampRect := d2common.Rectangle{
+		stampRect := d2geom.Rectangle{
 			Left:   rect.Left + rand.Intn(rect.Width) - stamp.Size().Width,
 			Top:    rect.Top + rand.Intn(rect.Height) - stamp.Size().Height,
 			Width:  stamp.Size().Width,
@@ -309,7 +309,7 @@ func generateWilderness1Contents(mapEngine *d2mapengine.MapEngine, rect d2common
 	}
 }
 
-func areaEmpty(mapEngine *d2mapengine.MapEngine, rect d2common.Rectangle) bool {
+func areaEmpty(mapEngine *d2mapengine.MapEngine, rect d2geom.Rectangle) bool {
 	mapHeight := mapEngine.Size().Height
 	mapWidth := mapEngine.Size().Width
 

@@ -1,6 +1,7 @@
 package d2dcc
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
@@ -8,7 +9,7 @@ import (
 
 // DCCDirectionFrame represents a direction frame for a DCC.
 type DCCDirectionFrame struct {
-	Box                   d2common.Rectangle
+	Box                   d2geom.Rectangle
 	Cells                 []DCCCell
 	PixelData             []byte
 	Width                 int
@@ -40,7 +41,7 @@ func CreateDCCDirectionFrame(bits *d2common.BitMuncher, direction *DCCDirection)
 	if result.FrameIsBottomUp {
 		log.Panic("Bottom up frames are not implemented.")
 	} else {
-		result.Box = d2common.Rectangle{
+		result.Box = d2geom.Rectangle{
 			Left:   result.XOffset,
 			Top:    result.YOffset - result.Height + 1,
 			Width:  result.Width,
