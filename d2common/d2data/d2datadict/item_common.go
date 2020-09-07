@@ -1,29 +1,28 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2calculation"
 	"strconv"
 	"strings"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
 // ItemCommonRecord is a representation of entries from armor.txt, weapons.txt, and misc.txt
 type ItemCommonRecord struct {
-	UsageStats             [3]ItemUsageStat    // stat boosts applied upon usage
-	CureOverlayStates      [2]string           // name of the overlay states that are removed upon use of this item
-	OverlayState           string              // name of the overlay state to be applied upon use of this item
-	SpellDescriptionString string              // points to a string containing the description
-	BetterGem              string              // 3 char code pointing to the gem this upgrades to (non if not applicable)
-	SpellDescriptionCalc   d2common.CalcString // a calc string what value to display
-	WeaponClass            string              // what kind of attack does this weapon have (i.e. determines attack animations)
-	WeaponClass2Hand       string              // what kind of attack when wielded with two hands
-	HitClass               string              // determines sounds/graphic effects when attacking
-	SpecialFeature         string              // Just a comment
-	FlavorText             string              // unknown, probably just for reference
-	TransmogCode           string              // the 3 char code representing the item this becomes via transmog
-	NightmareUpgrade       string              // upgraded in higher difficulties
+	UsageStats             [3]ItemUsageStat         // stat boosts applied upon usage
+	CureOverlayStates      [2]string                // name of the overlay states that are removed upon use of this item
+	OverlayState           string                   // name of the overlay state to be applied upon use of this item
+	SpellDescriptionString string                   // points to a string containing the description
+	BetterGem              string                   // 3 char code pointing to the gem this upgrades to (non if not applicable)
+	SpellDescriptionCalc   d2calculation.CalcString // a calc string what value to display
+	WeaponClass            string                   // what kind of attack does this weapon have (i.e. determines attack animations)
+	WeaponClass2Hand       string                   // what kind of attack when wielded with two hands
+	HitClass               string                   // determines sounds/graphic effects when attacking
+	SpecialFeature         string                   // Just a comment
+	FlavorText             string                   // unknown, probably just for reference
+	TransmogCode           string                   // the 3 char code representing the item this becomes via transmog
+	NightmareUpgrade       string                   // upgraded in higher difficulties
 	HellUpgrade            string
 	SourceArt              string                       // unused?
 	GameArt                string                       // unused?
@@ -141,8 +140,8 @@ type ItemCommonRecord struct {
 
 // ItemUsageStat the stat that gets applied when the item is used
 type ItemUsageStat struct {
-	Stat string              // name of the stat to add to
-	Calc d2common.CalcString // calc string representing the amount to add
+	Stat string                   // name of the stat to add to
+	Calc d2calculation.CalcString // calc string representing the amount to add
 }
 
 // ItemVendorParams are parameters that vendors use
@@ -342,7 +341,7 @@ func createCommonItemRecord(line string, mapping map[string]int, source d2enum.I
 		SpellDescriptionType: mapLoadInt(&r, mapping, "spelldesc"),
 		// 0 = none, 1 = use desc string, 2 = use desc string + calc value
 		SpellDescriptionString: mapLoadString(&r, mapping, "spelldescstr"),
-		SpellDescriptionCalc:   d2common.CalcString(mapLoadString(&r, mapping, "spelldesccalc")),
+		SpellDescriptionCalc:   d2calculation.CalcString(mapLoadString(&r, mapping, "spelldesccalc")),
 
 		BetterGem: mapLoadString(&r, mapping, "BetterGem"),
 
@@ -392,7 +391,7 @@ func createItemUsageStats(r *[]string, mapping map[string]int) [3]ItemUsageStat 
 	result := [3]ItemUsageStat{}
 	for i := 0; i < 3; i++ {
 		result[i].Stat = mapLoadString(r, mapping, "stat"+strconv.Itoa(i))
-		result[i].Calc = d2common.CalcString(mapLoadString(r, mapping, "calc"+strconv.Itoa(i)))
+		result[i].Calc = d2calculation.CalcString(mapLoadString(r, mapping, "calc"+strconv.Itoa(i)))
 	}
 
 	return result

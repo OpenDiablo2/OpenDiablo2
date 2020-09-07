@@ -1,4 +1,4 @@
-package d2common
+package d2calculation
 
 // CalcString is a type of string often used in datafiles to specify
 // a value that is calculated dynamically based on the stats of the relevant
