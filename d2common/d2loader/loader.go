@@ -3,6 +3,7 @@ package d2loader
 import (
 	"errors"
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"os"
 	"path/filepath"
 
@@ -14,13 +15,15 @@ import (
 )
 
 const (
+	defaultCacheBudget = 1024 * 1024 * 512
+	defaultCacheEntryWeight = 1
 	errFileNotFound = "file not found"
 )
 
 // NewLoader creates a new loader
 func NewLoader() *Loader {
 	loader := &Loader{}
-	loader.Cache = newCache()
+	loader.Cache = d2common.CreateCache(defaultCacheBudget)
 
 	return loader
 }
@@ -28,7 +31,7 @@ func NewLoader() *Loader {
 // Loader represents the manager that handles loading and caching assets with the asset sources
 // that have been added
 type Loader struct {
-	*Cache
+	d2interface.Cache
 	*d2common.Logger
 	sources []asset.Source
 }
@@ -39,9 +42,9 @@ func (l *Loader) Load(subPath string) (asset.Asset, error) {
 	subPath = filepath.Clean(subPath)
 
 	// first, we check the cache for an existing entry
-	if cached, err := l.Get(subPath); err == nil {
+	if cached, found := l.Retrieve(subPath); found {
 		l.Debug(fmt.Sprintf("file `%s` exists in loader cache", subPath))
-		return cached, nil
+		return cached.(asset.Asset), nil
 	}
 
 	// if it isn't in the cache, we check if each source can open the file
@@ -50,7 +53,7 @@ func (l *Loader) Load(subPath string) (asset.Asset, error) {
 
 		// if the source can open the file, then we cache it and return it
 		if loadedAsset, err := source.Open(subPath); err == nil {
-			l.Add(subPath, loadedAsset)
+			l.Insert(subPath, loadedAsset, defaultCacheEntryWeight)
 			return loadedAsset, nil
 		}
 	}

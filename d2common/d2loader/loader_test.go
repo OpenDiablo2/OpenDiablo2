@@ -26,14 +26,6 @@ func TestLoader_NewLoader(t *testing.T) {
 	if loader.Cache == nil {
 		t.Error("loader should not be nil")
 	}
-
-	if loader.Cache.entries == nil {
-		t.Error("loader cache should not be nil")
-	}
-
-	if &loader.entries != &loader.Cache.entries {
-		t.Error("loader cache should be embedded")
-	}
 }
 
 func TestLoader_AddSource(t *testing.T) {
