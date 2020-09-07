@@ -2,7 +2,7 @@ package d2asset
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
@@ -19,7 +19,7 @@ type fontManager struct {
 }
 
 func createFontManager() d2interface.FontManager {
-	return &fontManager{d2common.CreateCache(fontBudget)}
+	return &fontManager{d2cache.CreateCache(fontBudget)}
 }
 
 // LoadFont loads a font from the archives managed by the ArchiveManager

@@ -1,7 +1,7 @@
 package d2asset
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2pl2"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
@@ -15,7 +15,7 @@ const (
 )
 
 func createPaletteTransformManager() *paletteTransformManager {
-	return &paletteTransformManager{d2common.CreateCache(paletteTransformBudget)}
+	return &paletteTransformManager{d2cache.CreateCache(paletteTransformBudget)}
 }
 
 func (pm *paletteTransformManager) loadPaletteTransform(path string) (*d2pl2.PL2, error) {

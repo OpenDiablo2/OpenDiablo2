@@ -1,7 +1,7 @@
 package d2asset
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
@@ -19,7 +19,7 @@ const (
 )
 
 func createPaletteManager() d2interface.PaletteManager {
-	return &paletteManager{d2common.CreateCache(paletteBudget)}
+	return &paletteManager{d2cache.CreateCache(paletteBudget)}
 }
 
 // LoadPalette loads a palette from archives managed by the ArchiveManager

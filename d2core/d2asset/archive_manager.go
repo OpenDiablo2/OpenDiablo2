@@ -2,7 +2,7 @@ package d2asset
 
 import (
 	"errors"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
 	"path"
 	"sync"
 
@@ -27,7 +27,7 @@ const (
 )
 
 func createArchiveManager(config *d2config.Configuration) d2interface.ArchiveManager {
-	return &archiveManager{cache: d2common.CreateCache(archiveBudget), config: config}
+	return &archiveManager{cache: d2cache.CreateCache(archiveBudget), config: config}
 }
 
 // LoadArchiveForFile loads the archive for the given (in-archive) file path

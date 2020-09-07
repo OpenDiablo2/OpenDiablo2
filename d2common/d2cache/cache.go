@@ -1,4 +1,4 @@
-package d2common
+package d2cache
 
 import (
 	"errors"

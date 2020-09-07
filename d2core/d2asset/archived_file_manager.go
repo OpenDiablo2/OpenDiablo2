@@ -1,7 +1,7 @@
 package d2asset
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -26,7 +26,7 @@ type fileManager struct {
 func createFileManager(config *d2config.Configuration,
 	archiveManager d2interface.ArchiveManager) d2interface.FileManager {
 	return &fileManager{
-		d2common.CreateCache(fileBudget),
+		d2cache.CreateCache(fileBudget),
 		archiveManager,
 		config,
 	}

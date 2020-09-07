@@ -2,7 +2,7 @@ package d2asset
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
 	"path/filepath"
 	"strings"
 
@@ -34,7 +34,7 @@ func (am *animationManager) GetCache() d2interface.Cache {
 func createAnimationManager(renderer d2interface.Renderer) *animationManager {
 	return &animationManager{
 		renderer: renderer,
-		cache:    d2common.CreateCache(animationBudget),
+		cache:    d2cache.CreateCache(animationBudget),
 	}
 }
 
