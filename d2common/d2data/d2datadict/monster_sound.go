@@ -1,9 +1,8 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // Information gathered from [https://d2mods.info/forum/kb/viewarticle?a=418]
@@ -112,7 +111,7 @@ var MonsterSounds map[string]*MonsterSoundRecord
 func LoadMonsterSounds(file []byte) {
 	MonsterSounds = make(map[string]*MonsterSoundRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &MonsterSoundRecord{
 			ID:                  d.String("Id"),

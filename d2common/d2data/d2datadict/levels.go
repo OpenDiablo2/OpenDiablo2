@@ -1,9 +1,9 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
@@ -383,7 +383,7 @@ func GetLevelDetails(id int) *LevelDetailsRecord {
 func LoadLevelDetails(file []byte) {
 	LevelDetails = make(map[int]*LevelDetailsRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &LevelDetailsRecord{
 			Name:                       d.String("Name "),

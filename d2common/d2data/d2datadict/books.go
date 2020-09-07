@@ -1,9 +1,8 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // BooksRecord is a representation of a row from books.txt
@@ -28,7 +27,7 @@ var Books map[string]*BooksRecord //nolint:gochecknoglobals // Currently global 
 func LoadBooks(file []byte) {
 	Books = make(map[string]*BooksRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &BooksRecord{
 			Name:            d.String("Name"),

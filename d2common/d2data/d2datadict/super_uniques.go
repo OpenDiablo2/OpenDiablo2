@@ -1,9 +1,8 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // https://d2mods.info/forum/kb/viewarticle?a=162
@@ -127,7 +126,7 @@ var SuperUniques map[string]*SuperUniqueRecord
 func LoadSuperUniques(file []byte) {
 	SuperUniques = make(map[string]*SuperUniqueRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &SuperUniqueRecord{
 			Key:      d.String("Superunique"),

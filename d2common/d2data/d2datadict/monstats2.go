@@ -1,9 +1,9 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
@@ -174,7 +174,7 @@ var MonStats2 map[string]*MonStats2Record
 func LoadMonStats2(file []byte) {
 	MonStats2 = make(map[string]*MonStats2Record)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &MonStats2Record{
 			Key:             d.String("Id"),

@@ -2,10 +2,9 @@ package d2datadict
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
 	"strconv"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 const (
@@ -58,7 +57,7 @@ var ObjectGroups map[int]*ObjectGroupRecord //nolint:gochecknoglobals // Current
 // LoadObjectGroups loads the ObjectGroupRecords into ObjectGroups.
 func LoadObjectGroups(file []byte) {
 	ObjectGroups = make(map[int]*ObjectGroupRecord)
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 
 	for d.Next() {
 		groupName := d.String("GroupName")
@@ -84,7 +83,7 @@ func LoadObjectGroups(file []byte) {
 	log.Printf("Loaded %d ObjectGroup records", len(ObjectGroups))
 }
 
-func createMembers(d *d2common.DataDictionary, shrinesOrWells bool) *[objectsGroupSize]ObjectGroupMember {
+func createMembers(d *d2txt.DataDictionary, shrinesOrWells bool) *[objectsGroupSize]ObjectGroupMember {
 	var members [objectsGroupSize]ObjectGroupMember
 
 	for i := 0; i < objectsGroupSize; i++ {

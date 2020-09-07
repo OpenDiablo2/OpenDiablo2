@@ -1,11 +1,10 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // https://d2mods.info/forum/kb/viewarticle?a=360
@@ -687,7 +686,7 @@ var MonStats map[string]*MonStatsRecord //nolint:gochecknoglobals // Currently g
 func LoadMonStats(file []byte) { // nolint:funlen // Makes no sense to split
 	MonStats = make(map[string]*MonStatsRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &MonStatsRecord{
 			Key:                            d.String("Id"),

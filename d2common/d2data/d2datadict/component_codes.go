@@ -1,9 +1,8 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // ComponentCodeRecord represents a single row from compcode.txt
@@ -20,7 +19,7 @@ var ComponentCodes map[string]*ComponentCodeRecord //nolint:gochecknoglobals // 
 func LoadComponentCodes(file []byte) {
 	ComponentCodes = make(map[string]*ComponentCodeRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &ComponentCodeRecord{
 			Component: d.String("component"),

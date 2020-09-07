@@ -2,9 +2,8 @@ package d2datadict
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 const (
@@ -79,7 +78,7 @@ var SetRecords map[string]*SetRecord //nolint:gochecknoglobals // Currently glob
 func LoadSetRecords(file []byte) { //nolint:funlen // doesn't make sense to split
 	SetRecords = make(map[string]*SetRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &SetRecord{
 			Key:            d.String("index"),

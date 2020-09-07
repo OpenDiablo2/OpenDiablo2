@@ -1,4 +1,4 @@
-package d2common
+package d2txt
 
 import (
 	"bytes"

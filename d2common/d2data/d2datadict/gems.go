@@ -1,9 +1,8 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // GemsRecord is a representation of a single row of gems.txt
@@ -59,7 +58,7 @@ var Gems map[string]*GemsRecord //nolint:gochecknoglobals // Currently global by
 func LoadGems(file []byte) {
 	Gems = make(map[string]*GemsRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		gem := &GemsRecord{
 			Name:            d.String("name"),

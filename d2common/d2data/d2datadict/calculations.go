@@ -1,9 +1,8 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // CalculationRecord The skillcalc.txt and misscalc.txt files are essentially lookup tables
@@ -24,7 +23,7 @@ var MissileCalculations map[string]*CalculationRecord //nolint:gochecknoglobals 
 func LoadSkillCalculations(file []byte) {
 	SkillCalculations = make(map[string]*CalculationRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &CalculationRecord{
 			Code:        d.String("code"),
@@ -44,7 +43,7 @@ func LoadSkillCalculations(file []byte) {
 func LoadMissileCalculations(file []byte) {
 	MissileCalculations = make(map[string]*CalculationRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &CalculationRecord{
 			Code:        d.String("code"),

@@ -1,9 +1,8 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // LevelMazeDetailsRecord is a representation of a row from lvlmaze.txt
@@ -43,7 +42,7 @@ var LevelMazeDetails map[int]*LevelMazeDetailsRecord //nolint:gochecknoglobals /
 func LoadLevelMazeDetails(file []byte) {
 	LevelMazeDetails = make(map[int]*LevelMazeDetailsRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &LevelMazeDetailsRecord{
 			Name:              d.String("Name"),

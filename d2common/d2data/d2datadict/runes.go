@@ -2,9 +2,8 @@ package d2datadict
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 const (
@@ -67,7 +66,7 @@ var Runewords map[string]*RunesRecord //nolint:gochecknoglobals // Currently glo
 func LoadRunewords(file []byte) {
 	Runewords = make(map[string]*RunesRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &RunesRecord{
 			Name:     d.String("name"),

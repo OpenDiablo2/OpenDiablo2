@@ -1,9 +1,9 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
@@ -62,7 +62,7 @@ func GetExperienceBreakpoint(heroType d2enum.Hero, level int) int {
 func LoadExperienceBreakpoints(file []byte) {
 	ExperienceBreakpoints = make(map[int]*ExperienceBreakpointsRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	d.Next()
 
 	// the first row describes the max level of char classes

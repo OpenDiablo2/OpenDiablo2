@@ -1,9 +1,8 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // MonsterAIRecord represents a single row from monai.txt
@@ -18,7 +17,7 @@ var MonsterAI map[string]*MonsterAIRecord //nolint:gochecknoglobals // Currently
 func LoadMonsterAI(file []byte) {
 	MonsterAI = make(map[string]*MonsterAIRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &MonsterAIRecord{
 			AI: d.String("AI"),

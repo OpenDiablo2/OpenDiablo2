@@ -1,9 +1,8 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // MonsterSequenceRecord contains a record for a monster sequence
@@ -41,7 +40,7 @@ var MonsterSequences map[string]*MonsterSequenceRecord
 func LoadMonsterSequences(file []byte) {
 	MonsterSequences = make(map[string]*MonsterSequenceRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 
 	for d.Next() {
 		name := d.String("sequence")

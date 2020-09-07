@@ -1,9 +1,8 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 const (
@@ -72,7 +71,7 @@ func LoadMonsterUniqueModifiers(file []byte) {
 	MonsterUniqueModifiers = make(map[string]*MonsterUniqueModifierRecord)
 	MonsterUniqueModifierConstants = make([]int, 0, numModifierConstants)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &MonsterUniqueModifierRecord{
 			Name:          d.String("uniquemod"),

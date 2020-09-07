@@ -1,9 +1,8 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // LevelWarpRecord is a representation of a row from lvlwarp.txt
@@ -32,7 +31,7 @@ var LevelWarps map[int]*LevelWarpRecord
 func LoadLevelWarps(file []byte) {
 	LevelWarps = make(map[int]*LevelWarpRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &LevelWarpRecord{
 			Name:       d.String("Name"),

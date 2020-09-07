@@ -1,9 +1,9 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
@@ -38,7 +38,7 @@ var Inventory map[string]*InventoryRecord //nolint:gochecknoglobals // Currently
 
 // LoadInventory loads all of the inventory records from inventory.txt
 func LoadInventory(file []byte) { //nolint:funlen // doesn't make sense to split
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	Inventory = make(map[string]*InventoryRecord)
 
 	for d.Next() {

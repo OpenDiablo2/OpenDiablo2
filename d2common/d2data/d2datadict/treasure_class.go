@@ -2,9 +2,8 @@ package d2datadict
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 const (
@@ -42,7 +41,7 @@ var TreasureClass map[string]*TreasureClassRecord //nolint:gochecknoglobals // C
 func LoadTreasureClassRecords(file []byte) {
 	TreasureClass = make(map[string]*TreasureClassRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 
 	for d.Next() {
 		record := &TreasureClassRecord{

@@ -1,9 +1,8 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // UniqueAppellationRecord described the extra suffix of a unique monster name
@@ -20,7 +19,7 @@ var UniqueAppellations map[string]*UniqueAppellationRecord
 func LoadUniqueAppellations(file []byte) {
 	UniqueAppellations = make(map[string]*UniqueAppellationRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &UniqueAppellationRecord{
 			Name: d.String("Name"),
