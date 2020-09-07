@@ -6,6 +6,7 @@ import (
 	"container/ring"
 	"errors"
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"image"
 	"image/gif"
 	"image/png"
@@ -211,7 +212,7 @@ func (a *App) loadStrings() error {
 			return err
 		}
 
-		d2common.LoadTextDictionary(data)
+		d2tbl.LoadTextDictionary(data)
 	}
 
 	return nil

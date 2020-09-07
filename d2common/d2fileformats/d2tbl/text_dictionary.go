@@ -1,6 +1,7 @@
-package d2common
+package d2tbl
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"log"
 	"strconv"
 )
@@ -38,7 +39,7 @@ func LoadTextDictionary(dictionaryData []byte) {
 		lookupTable = make(map[string]string)
 	}
 
-	br := CreateStreamReader(dictionaryData)
+	br := d2common.CreateStreamReader(dictionaryData)
 
 	// skip past the CRC
 	br.ReadBytes(crcByteCount)

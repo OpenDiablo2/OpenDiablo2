@@ -2,8 +2,8 @@ package diablo2stats
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
@@ -55,7 +55,7 @@ func stringerClassAllSkills(sv d2stats.StatValue) string {
 	heroMap := getHeroMap()
 	classRecord := d2datadict.CharStats[heroMap[heroIndex]]
 
-	return d2common.TranslateString(classRecord.SkillStrAll)
+	return d2tbl.TranslateString(classRecord.SkillStrAll)
 }
 
 func stringerClassOnly(sv d2stats.StatValue) string {
@@ -64,7 +64,7 @@ func stringerClassOnly(sv d2stats.StatValue) string {
 	classRecord := d2datadict.CharStats[heroMap[heroIndex]]
 	classOnlyKey := classRecord.SkillStrClassOnly
 
-	return d2common.TranslateString(classOnlyKey)
+	return d2tbl.TranslateString(classOnlyKey)
 }
 
 func stringerSkillName(sv d2stats.StatValue) string {

@@ -2,9 +2,9 @@ package diablo2stats
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 )
@@ -391,7 +391,7 @@ func (s *diablo2Stat) descFn1() string {
 		stringTableKey = s.record.DescStrPos
 	}
 
-	stringTableString := d2common.TranslateString(stringTableKey)
+	stringTableString := d2tbl.TranslateString(stringTableKey)
 
 	switch descValPosition(s.record.DescVal) {
 	case descValPrefix:
@@ -420,8 +420,8 @@ func (s *diablo2Stat) descFn6() string {
 		stringTableKey = s.record.DescStrPos
 	}
 
-	str1 := d2common.TranslateString(stringTableKey)
-	str2 := d2common.TranslateString(s.record.DescStr2)
+	str1 := d2tbl.TranslateString(stringTableKey)
+	str2 := d2tbl.TranslateString(s.record.DescStr2)
 
 	switch descValPosition(s.record.DescVal) {
 	case descValPrefix:
@@ -451,8 +451,8 @@ func (s *diablo2Stat) descFn9() string {
 		stringTableKey = s.record.DescStrPos
 	}
 
-	str1 := d2common.TranslateString(stringTableKey)
-	str2 := d2common.TranslateString(s.record.DescStr2)
+	str1 := d2tbl.TranslateString(stringTableKey)
+	str2 := d2tbl.TranslateString(s.record.DescStr2)
 
 	switch descValPosition(s.record.DescVal) {
 	case descValPrefix:
@@ -479,7 +479,7 @@ func (s *diablo2Stat) descFn11() string {
 		stringTableKey = s.record.DescStrPos
 	}
 
-	str1 := d2common.TranslateString(stringTableKey)
+	str1 := d2tbl.TranslateString(stringTableKey)
 
 	formatString := str1
 
@@ -522,7 +522,7 @@ func (s *diablo2Stat) descFn14() string {
 
 	// `to Combat Skills`
 	skillTabKey := classRecord.SkillStrTab[skillTabIndex]
-	skillTabStr := d2common.TranslateString(skillTabKey)
+	skillTabStr := d2tbl.TranslateString(skillTabKey)
 	skillTabStr = strings.ReplaceAll(skillTabStr, "+%d ", "") // has a token we dont need
 
 	// `(Paladin Only)`
@@ -535,7 +535,7 @@ func (s *diablo2Stat) descFn15() string {
 	chance, lvl, skill := s.values[0], s.values[1], s.values[2]
 
 	// Special case, `chance to cast` format is actually in the string table!
-	chanceToCastStr := d2common.TranslateString(s.record.DescStrPos)
+	chanceToCastStr := d2tbl.TranslateString(s.record.DescStrPos)
 
 	return fmt.Sprintf(chanceToCastStr, chance.Int(), lvl.Int(), skill)
 }
@@ -544,14 +544,14 @@ func (s *diablo2Stat) descFn16() string {
 	skillLevel, skillIndex := s.values[0], s.values[1]
 
 	// Special case, `Level # XYZ Aura When Equipped`, format is actually in the string table!
-	format := d2common.TranslateString(s.record.DescStrPos)
+	format := d2tbl.TranslateString(s.record.DescStrPos)
 
 	return fmt.Sprintf(format, skillLevel.Int(), skillIndex)
 }
 
 func (s *diablo2Stat) descFn22() string {
 	arBonus, monsterIndex := s.values[0], s.values[1]
-	arVersus := d2common.TranslateString(s.record.DescStrPos)
+	arVersus := d2tbl.TranslateString(s.record.DescStrPos)
 
 	return fmt.Sprintf(threeComponentStr, arBonus, arVersus, monsterIndex)
 }
@@ -565,7 +565,7 @@ func (s *diablo2Stat) descFn24() string {
 		s.values[2].Int(),
 		s.values[3].Int()
 
-	chargeStr := d2common.TranslateString(s.record.DescStrPos)
+	chargeStr := d2tbl.TranslateString(s.record.DescStrPos)
 	chargeStr = fmt.Sprintf(chargeStr, chargeCurrent, chargeMax)
 
 	return fmt.Sprintf(format, lvl, skill, chargeStr)

@@ -3,9 +3,9 @@ package d2mapentity
 import (
 	"errors"
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -169,7 +169,7 @@ func NewNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) (*NPC, 
 	result.composite.SetDirection(direction)
 
 	if result.monstatRecord != nil && result.monstatRecord.IsInteractable {
-		result.name = d2common.TranslateString(result.monstatRecord.NameString)
+		result.name = d2tbl.TranslateString(result.monstatRecord.NameString)
 	}
 
 	return result, nil

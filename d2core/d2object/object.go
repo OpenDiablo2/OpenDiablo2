@@ -2,11 +2,11 @@
 package d2object
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"math/rand"
 
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -31,10 +31,10 @@ type Object struct {
 func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath string) (*Object, error) {
 	locX, locY := float64(x), float64(y)
 	entity := &Object{
-		uuid: uuid.NewV4().String(),
+		uuid:         uuid.NewV4().String(),
 		objectRecord: objectRec,
 		Position:     d2vector.NewPosition(locX, locY),
-		name:         d2common.TranslateString(objectRec.Name),
+		name:         d2tbl.TranslateString(objectRec.Name),
 	}
 	objectType := &d2datadict.ObjectTypes[objectRec.Index]
 
