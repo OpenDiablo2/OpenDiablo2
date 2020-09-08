@@ -53,6 +53,7 @@ type GameControls struct {
 	uiManager              *d2ui.UIManager
 	inventory              *Inventory
 	heroStatsPanel         *HeroStatsPanel
+	helpOverlay            *HelpOverlay
 	miniPanel              *miniPanel
 	lastMouseX             int
 	lastMouseY             int
@@ -166,6 +167,7 @@ func NewGameControls(
 		mapRenderer:      mapRenderer,
 		inventory:        NewInventory(ui, inventoryRecord),
 		heroStatsPanel:   NewHeroStatsPanel(ui, hero.Name(), hero.Class, hero.Stats),
+		helpOverlay:      NewHelpOverlay(renderer),
 		miniPanel:        newMiniPanel(ui, isSinglePlayer),
 		missileID:        missileID,
 		nameLabel:        hoverLabel,
@@ -260,6 +262,9 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 		g.updateLayout()
 	case d2enum.KeyR:
 		g.onToggleRunButton()
+	case d2enum.KeyH:
+		g.helpOverlay.Toggle()
+		g.updateLayout()
 	default:
 		return false
 	}
@@ -391,6 +396,7 @@ func (g *GameControls) Load() {
 
 	g.inventory.Load()
 	g.heroStatsPanel.Load()
+	g.helpOverlay.Load()
 }
 
 func (g *GameControls) loadUIButtons() {
@@ -750,6 +756,10 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		xManaLabel := 785 - widthManaLabel
 		g.hpManaStatsLabel.SetPosition(xManaLabel, 485)
 		g.hpManaStatsLabel.Render(target)
+	}
+
+	if err := g.helpOverlay.Render(target); err != nil {
+		return err
 	}
 
 	return nil
