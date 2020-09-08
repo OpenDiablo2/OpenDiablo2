@@ -1,4 +1,4 @@
-package d2common
+package d2geom
 
 // Point represents a point
 type Point struct {

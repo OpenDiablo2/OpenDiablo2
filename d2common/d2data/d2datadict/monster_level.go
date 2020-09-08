@@ -3,7 +3,7 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // MonsterLevelRecord represents a single row in monlvl.txt
@@ -58,7 +58,7 @@ var MonsterLevels map[int]*MonsterLevelRecord //nolint:gochecknoglobals // Curre
 func LoadMonsterLevels(file []byte) {
 	MonsterLevels = make(map[int]*MonsterLevelRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &MonsterLevelRecord{
 			Level: d.Number("Level"),

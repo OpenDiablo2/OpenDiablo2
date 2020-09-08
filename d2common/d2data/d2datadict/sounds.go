@@ -3,7 +3,7 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // SoundEntry represents a sound entry
@@ -43,7 +43,7 @@ var Sounds map[string]*SoundEntry
 func LoadSounds(file []byte) {
 	Sounds = make(map[string]*SoundEntry)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		entry := &SoundEntry{
 			Handle:    d.String("Sound"),

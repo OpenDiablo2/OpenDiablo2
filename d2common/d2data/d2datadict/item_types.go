@@ -3,8 +3,8 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // ItemTypeRecord describes the types for items
@@ -201,7 +201,7 @@ func LoadItemTypes(file []byte) {
 		"sor": d2enum.HeroSorceress,
 	}
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		if d.String("*eol") == "" {
 			continue

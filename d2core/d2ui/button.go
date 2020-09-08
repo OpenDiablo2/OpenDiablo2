@@ -2,9 +2,9 @@ package d2ui
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"image"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -190,7 +190,7 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 	lbl := ui.NewLabel(buttonLayout.FontPath, d2resource.PaletteUnits)
 
 	lbl.SetText(text)
-	lbl.Color[0] = d2common.Color(greyAlpha100)
+	lbl.Color[0] = d2util.Color(greyAlpha100)
 	lbl.Alignment = d2gui.HorizontalAlignCenter
 
 	animation, _ := d2asset.LoadAnimation(buttonLayout.ResourceName, buttonLayout.PaletteName)
@@ -333,7 +333,7 @@ func (v *Button) Render(target d2interface.Surface) error {
 
 	switch {
 	case !v.enabled:
-		target.PushColor(d2common.Color(lightGreyAlpha75))
+		target.PushColor(d2util.Color(lightGreyAlpha75))
 		defer target.Pop()
 		err = target.Render(v.disabledSurface)
 	case v.toggled && v.pressed:

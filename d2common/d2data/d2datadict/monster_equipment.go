@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 const (
@@ -48,7 +48,7 @@ var MonsterEquipment map[string][]*MonsterEquipmentRecord //nolint:gochecknoglob
 func LoadMonsterEquipment(file []byte) {
 	MonsterEquipment = make(map[string][]*MonsterEquipmentRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &MonsterEquipmentRecord{
 			Name:      d.String("monster"),

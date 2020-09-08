@@ -3,7 +3,7 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // The information has been gathered from [https://d2mods.info/forum/kb/viewarticle?a=465]
@@ -67,7 +67,7 @@ var Overlays map[string]*OverlayRecord // nolint:gochecknoglobals // Currently g
 // LoadOverlays loads overlay records from Overlay.txt
 func LoadOverlays(file []byte) {
 	Overlays = make(map[string]*OverlayRecord)
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 
 	for d.Next() {
 		record := &OverlayRecord{

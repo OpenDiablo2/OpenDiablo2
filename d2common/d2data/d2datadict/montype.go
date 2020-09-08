@@ -2,8 +2,8 @@ package d2datadict
 
 import (
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // MonTypeRecord is a representation of a single row of MonType.txt.
@@ -26,7 +26,7 @@ var MonTypes map[string]*MonTypeRecord //nolint:gochecknoglobals // Currently gl
 func LoadMonTypes(file []byte) {
 	MonTypes = make(map[string]*MonTypeRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &MonTypeRecord{
 			Type:      d.String("type"),

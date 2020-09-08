@@ -3,7 +3,7 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // MonsterPlacementRecord represents a line from MonPlace.txt.
@@ -14,7 +14,7 @@ var MonsterPlacements []MonsterPlacementRecord //nolint:gochecknoglobals // Curr
 
 // LoadMonsterPlacements loads the MonsterPlacementRecords into MonsterPlacements.
 func LoadMonsterPlacements(file []byte) {
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		MonsterPlacements = append(MonsterPlacements, MonsterPlacementRecord(d.String("code")))
 	}

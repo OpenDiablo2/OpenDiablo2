@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 const (
@@ -27,7 +27,7 @@ var RareSuffixes []*RareItemSuffixRecord // nolint:gochecknoglobals // global by
 
 // LoadRareItemSuffixRecords loads the rare item suffix records from raresuffix.txt
 func LoadRareItemSuffixRecords(file []byte) {
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 
 	RareSuffixes = make([]*RareItemSuffixRecord, 0)
 

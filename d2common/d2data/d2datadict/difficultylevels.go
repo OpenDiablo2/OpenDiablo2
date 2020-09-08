@@ -3,7 +3,7 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // DifficultyLevels contain the difficulty records for each difficulty
@@ -96,7 +96,7 @@ type DifficultyLevelRecord struct {
 func LoadDifficultyLevels(file []byte) {
 	DifficultyLevels = make(map[string]*DifficultyLevelRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &DifficultyLevelRecord{
 			Name:                   d.String("Name"),

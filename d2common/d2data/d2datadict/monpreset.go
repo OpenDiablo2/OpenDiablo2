@@ -3,7 +3,7 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // MonPresets stores monster presets
@@ -14,7 +14,7 @@ var MonPresets map[int32][]string
 func LoadMonPresets(file []byte) {
 	MonPresets = make(map[int32][]string)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		act := int32(d.Number("Act"))
 		if _, ok := MonPresets[act]; !ok {

@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // CubeRecipeRecord represents one row from CubeMain.txt.
@@ -159,7 +159,7 @@ func LoadCubeRecipes(file []byte) {
 
 	var inputFields = []string{"input 1", "input 2", "input 3", "input 4", "input 5", "input 6", "input 7"}
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &CubeRecipeRecord{
 			Description: d.String("description"),

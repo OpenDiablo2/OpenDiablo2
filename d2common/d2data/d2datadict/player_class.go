@@ -3,7 +3,7 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // PlayerClassRecord represents a single line from PlayerClass.txt
@@ -23,7 +23,7 @@ var PlayerClasses map[string]*PlayerClassRecord // nolint:gochecknoglobals // Cu
 func LoadPlayerClasses(file []byte) {
 	PlayerClasses = make(map[string]*PlayerClassRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &PlayerClassRecord{
 			Name: d.String("Player Class"),

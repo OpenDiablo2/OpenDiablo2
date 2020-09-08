@@ -1,6 +1,7 @@
 package d2mapengine
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"log"
 	"strings"
 
@@ -13,7 +14,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapstamp"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 )
@@ -23,7 +23,7 @@ type MapEngine struct {
 	seed          int64                            // The map seed
 	entities      map[string]d2interface.MapEntity // Entities on the map
 	tiles         []MapTile
-	size          d2common.Size              // Size of the map, in tiles
+	size          d2geom.Size                // Size of the map, in tiles
 	levelType     d2datadict.LevelTypeRecord // Level type of this map
 	dt1TileData   []d2dt1.Tile               // DT1 tile data
 	startSubTileX int                        // Starting X position
@@ -46,7 +46,7 @@ func (m *MapEngine) GetStartingPosition() (x, y int) {
 func (m *MapEngine) ResetMap(levelType d2enum.RegionIdType, width, height int) {
 	m.entities = make(map[string]d2interface.MapEntity)
 	m.levelType = d2datadict.LevelTypes[levelType]
-	m.size = d2common.Size{Width: width, Height: height}
+	m.size = d2geom.Size{Width: width, Height: height}
 	m.tiles = make([]MapTile, width*height)
 	m.dt1TileData = make([]d2dt1.Tile, 0)
 	m.dt1Files = make([]string, 0)
@@ -117,7 +117,7 @@ func (m *MapEngine) SetSeed(seed int64) {
 }
 
 // Size returns the size of the map in sub-tiles.
-func (m *MapEngine) Size() d2common.Size {
+func (m *MapEngine) Size() d2geom.Size {
 	return m.size
 }
 

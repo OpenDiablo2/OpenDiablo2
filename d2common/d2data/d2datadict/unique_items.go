@@ -1,10 +1,9 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"log"
 	"strings"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // UniqueItemRecord is a representation of a row from uniqueitems.txt
@@ -56,22 +55,22 @@ func createUniqueItemRecord(r []string) UniqueItemRecord {
 	}
 	result := UniqueItemRecord{
 		Name:    r[inc()],
-		Version: d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
-		Enabled: d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		Version: d2util.StringToInt(d2util.EmptyToZero(r[inc()])),
+		Enabled: d2util.StringToInt(d2util.EmptyToZero(r[inc()])) == 1,
 
-		Ladder:  d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
-		Rarity:  d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
-		NoLimit: d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
+		Ladder:  d2util.StringToInt(d2util.EmptyToZero(r[inc()])) == 1,
+		Rarity:  d2util.StringToInt(d2util.EmptyToZero(r[inc()])),
+		NoLimit: d2util.StringToInt(d2util.EmptyToZero(r[inc()])) == 1,
 
-		Level:         d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
-		RequiredLevel: d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		Level:         d2util.StringToInt(d2util.EmptyToZero(r[inc()])),
+		RequiredLevel: d2util.StringToInt(d2util.EmptyToZero(r[inc()])),
 		Code:          r[inc()],
 
 		TypeDescription: r[inc()],
 		UberDescription: r[inc()],
-		SingleCopy:      d2common.StringToInt(d2common.EmptyToZero(r[inc()])) == 1,
-		CostMultiplier:  d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
-		CostAdd:         d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		SingleCopy:      d2util.StringToInt(d2util.EmptyToZero(r[inc()])) == 1,
+		CostMultiplier:  d2util.StringToInt(d2util.EmptyToZero(r[inc()])),
+		CostAdd:         d2util.StringToInt(d2util.EmptyToZero(r[inc()])),
 
 		CharacterGfxTransform: r[inc()],
 		InventoryGfxTransform: r[inc()],
@@ -79,7 +78,7 @@ func createUniqueItemRecord(r []string) UniqueItemRecord {
 		InventoryFile:         r[inc()],
 
 		DropSound:    r[inc()],
-		DropSfxFrame: d2common.StringToInt(d2common.EmptyToZero(r[inc()])),
+		DropSfxFrame: d2util.StringToInt(d2util.EmptyToZero(r[inc()])),
 		UseSound:     r[inc()],
 
 		Properties: [12]UniqueItemProperty{
@@ -107,8 +106,8 @@ func createUniqueItemProperty(r *[]string, inc func() int) UniqueItemProperty {
 	result := UniqueItemProperty{
 		Code:      (*r)[inc()],
 		Parameter: (*r)[inc()],
-		Min:       d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
-		Max:       d2common.StringToInt(d2common.EmptyToZero((*r)[inc()])),
+		Min:       d2util.StringToInt(d2util.EmptyToZero((*r)[inc()])),
+		Max:       d2util.StringToInt(d2util.EmptyToZero((*r)[inc()])),
 	}
 
 	return result

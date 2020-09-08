@@ -4,7 +4,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // A helper type for item drop calculation
@@ -42,7 +42,7 @@ var ItemRatios map[string]*ItemRatioRecord //nolint:gochecknoglobals // Currentl
 func LoadItemRatios(file []byte) {
 	ItemRatios = make(map[string]*ItemRatioRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &ItemRatioRecord{
 			Function:      d.String("Function"),

@@ -3,12 +3,12 @@ package d2gamescreen
 import (
 	"bufio"
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"log"
 	"os"
 	"path"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -104,7 +104,7 @@ func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 
 	loading.Progress(sixtyPercent)
 
-	creditData, _ := d2common.Utf16BytesToString(fileData[2:])
+	creditData, _ := d2util.Utf16BytesToString(fileData[2:])
 	v.creditsText = strings.Split(creditData, "\r\n")
 
 	for i := range v.creditsText {

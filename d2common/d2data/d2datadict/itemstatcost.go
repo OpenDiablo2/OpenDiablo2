@@ -3,8 +3,8 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // ItemStatCostRecord represents a row from itemstatcost.txt
@@ -108,7 +108,7 @@ var ItemStatCosts map[string]*ItemStatCostRecord
 func LoadItemStatCosts(file []byte) {
 	ItemStatCosts = make(map[string]*ItemStatCostRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &ItemStatCostRecord{
 			Name:  d.String("Stat"),

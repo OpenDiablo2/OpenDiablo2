@@ -3,12 +3,12 @@ package d2gamescreen
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"log"
 	"os"
 	"os/exec"
 	"runtime"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -281,7 +281,7 @@ func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
 	v.mapTestButton.OnActivated(func() { v.onMapTestClicked() })
 
 	v.btnTCPIPCancel = v.uiManager.NewButton(d2ui.ButtonTypeMedium,
-		d2common.TranslateString("cancel"))
+		d2tbl.TranslateString("cancel"))
 	v.btnTCPIPCancel.SetPosition(tcpBtnX, tcpBtnY)
 	v.btnTCPIPCancel.OnActivated(func() { v.onTCPIPCancelClicked() })
 
@@ -307,7 +307,7 @@ func (v *MainMenu) createMultiplayerMenuButtons() {
 	v.networkTCPIPButton.OnActivated(func() { v.onNetworkTCPIPClicked() })
 
 	v.networkCancelButton = v.uiManager.NewButton(d2ui.ButtonTypeWide,
-		d2common.TranslateString("cancel"))
+		d2tbl.TranslateString("cancel"))
 	v.networkCancelButton.SetPosition(networkCancelBtnX, networkCancelBtnY)
 	v.networkCancelButton.OnActivated(func() { v.onNetworkCancelClicked() })
 

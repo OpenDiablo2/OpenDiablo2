@@ -3,9 +3,9 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2calculation"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2calculation/d2parser"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // SkillDescriptionRecord is a single row from skilldesc.txt and is used for
@@ -137,7 +137,7 @@ func LoadSkillDescriptions(file []byte) { //nolint:funlen // doesn't make sense 
 	parser := d2parser.New()
 	parser.SetCurrentReference("skill", "TODO: connect skill with description!") //nolint:godox // TODO: Connect skill with description.
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &SkillDescriptionRecord{
 			d.String("skilldesc"),

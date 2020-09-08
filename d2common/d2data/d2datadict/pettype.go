@@ -3,7 +3,7 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // PetTypeRecord represents a single line in PetType.txt
@@ -68,7 +68,7 @@ var PetTypes map[string]*PetTypeRecord // nolint:gochecknoglobals // Currently g
 func LoadPetTypes(file []byte) {
 	PetTypes = make(map[string]*PetTypeRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &PetTypeRecord{
 			Name:      d.String("pet type"),

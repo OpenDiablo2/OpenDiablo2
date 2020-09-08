@@ -1,7 +1,7 @@
 package d2compression
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 )
 
 // WavDecompress decompresses wav files
@@ -32,8 +32,8 @@ func WavDecompress(data []byte, channelCount int) []byte { //nolint:funlen doesn
 		-1, 2, -1, 4, -1, 6, -1, 8,
 	}
 
-	input := d2common.CreateStreamReader(data)
-	output := d2common.CreateStreamWriter()
+	input := d2datautils.CreateStreamReader(data)
+	output := d2datautils.CreateStreamWriter()
 
 	input.GetByte()
 

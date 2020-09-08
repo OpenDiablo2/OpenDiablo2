@@ -33,7 +33,7 @@ package d2compression
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 )
 
 // linkedNode is a node which is both hierachcical (parent/child) and doubly linked (next/prev)
@@ -199,7 +199,7 @@ func getPrimes() [][]byte {
 	}
 }
 
-func decode(input *d2common.BitStream, head *linkedNode) *linkedNode {
+func decode(input *d2datautils.BitStream, head *linkedNode) *linkedNode {
 	node := head
 
 	for node.child0 != nil {
@@ -386,8 +386,8 @@ func HuffmanDecompress(data []byte) []byte {
 	tail := buildList(primes[comptype])
 	head := buildTree(tail)
 
-	outputstream := d2common.CreateStreamWriter()
-	bitstream := d2common.CreateBitStream(data[1:])
+	outputstream := d2datautils.CreateStreamWriter()
+	bitstream := d2datautils.CreateBitStream(data[1:])
 
 	var decoded int
 

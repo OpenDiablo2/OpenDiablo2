@@ -3,8 +3,8 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // CharStatsRecord is a struct that represents a single row from charstats.txt
@@ -97,7 +97,7 @@ func LoadCharStats(file []byte) {
 		"ht2": d2enum.WeaponClassTwoHandToHand,
 	}
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &CharStatsRecord{
 			Class: charStringMap[d.String("class")],

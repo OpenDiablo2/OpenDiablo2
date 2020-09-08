@@ -1,10 +1,9 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"log"
 	"strings"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // LevelTypeRecord is a representation of a row from lvltype.txt
@@ -45,7 +44,7 @@ func LoadLevelTypes(file []byte) {
 		}
 
 		LevelTypes[j].Name = parts[inc()]
-		LevelTypes[j].ID = d2common.StringToInt(parts[inc()])
+		LevelTypes[j].ID = d2util.StringToInt(parts[inc()])
 
 		for fileIdx := range LevelTypes[i].Files {
 			LevelTypes[j].Files[fileIdx] = parts[inc()]
@@ -55,7 +54,7 @@ func LoadLevelTypes(file []byte) {
 		}
 
 		LevelTypes[j].Beta = parts[inc()] != "1"
-		LevelTypes[j].Act = d2common.StringToInt(parts[inc()])
+		LevelTypes[j].Act = d2util.StringToInt(parts[inc()])
 		LevelTypes[j].Expansion = parts[inc()] != "1"
 	}
 	log.Printf("Loaded %d LevelType records", len(LevelTypes))

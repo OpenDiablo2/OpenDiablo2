@@ -1,4 +1,4 @@
-package d2common
+package d2geom
 
 // Rectangle represents a rectangle
 type Rectangle struct {

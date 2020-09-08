@@ -2,8 +2,8 @@ package d2datadict
 
 import (
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // PlrModeRecord represents a single line in PlrMode.txt
@@ -22,7 +22,7 @@ var PlrModes map[string]*PlrModeRecord //nolint:gochecknoglobals // Currently gl
 func LoadPlrModes(file []byte) {
 	PlrModes = make(map[string]*PlrModeRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &PlrModeRecord{
 			Name:  d.String("Name"),

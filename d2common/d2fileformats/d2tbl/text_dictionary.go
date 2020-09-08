@@ -1,8 +1,10 @@
-package d2common
+package d2tbl
 
 import (
 	"log"
 	"strconv"
+	
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 )
 
 type textDictionaryHashEntry struct {
@@ -38,7 +40,7 @@ func LoadTextDictionary(dictionaryData []byte) {
 		lookupTable = make(map[string]string)
 	}
 
-	br := CreateStreamReader(dictionaryData)
+	br := d2datautils.CreateStreamReader(dictionaryData)
 
 	// skip past the CRC
 	br.ReadBytes(crcByteCount)

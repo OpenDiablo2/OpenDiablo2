@@ -3,7 +3,7 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // AutoMapRecord represents one row from d2data.mpq/AutoMap.txt.
@@ -64,7 +64,7 @@ func LoadAutoMaps(file []byte) {
 	var frameFields = []string{"Cel1", "Cel2", "Cel3", "Cel4"}
 
 	// Split file by newlines and tabs
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &AutoMapRecord{
 			LevelName: d.String("LevelName"),

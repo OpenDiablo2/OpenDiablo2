@@ -1,9 +1,8 @@
 package d2video
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // BinkVideoMode is the video mode type
@@ -53,7 +52,7 @@ type BinkAudioTrack struct {
 type BinkDecoder struct {
 	AudioTracks           []BinkAudioTrack
 	FrameIndexTable       []uint32
-	streamReader          *d2common.StreamReader
+	streamReader          *d2datautils.StreamReader
 	fileSize              uint32
 	numberOfFrames        uint32
 	largestFrameSizeBytes uint32
@@ -74,7 +73,7 @@ type BinkDecoder struct {
 // CreateBinkDecoder returns a new instance of the bink decoder
 func CreateBinkDecoder(source []byte) *BinkDecoder {
 	result := &BinkDecoder{
-		streamReader: d2common.CreateStreamReader(source),
+		streamReader: d2datautils.CreateStreamReader(source),
 	}
 
 	result.loadHeaderInformation()

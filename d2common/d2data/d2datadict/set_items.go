@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 const (
@@ -133,7 +133,7 @@ var SetItems map[string]*SetItemRecord //nolint:gochecknoglobals // Currently gl
 func LoadSetItems(file []byte) {
 	SetItems = make(map[string]*SetItemRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 
 	for d.Next() {
 		record := &SetItemRecord{

@@ -1,10 +1,9 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"log"
 	"strings"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 // LevelPresetRecord is a representation of a row from lvlprest.txt
@@ -41,21 +40,21 @@ func createLevelPresetRecord(props []string) LevelPresetRecord {
 	}
 	result := LevelPresetRecord{
 		Name:         props[inc()],
-		DefinitionID: d2common.StringToInt(props[inc()]),
-		LevelID:      d2common.StringToInt(props[inc()]),
-		Populate:     d2common.StringToUint8(props[inc()]) == 1,
-		Logicals:     d2common.StringToUint8(props[inc()]) == 1,
-		Outdoors:     d2common.StringToUint8(props[inc()]) == 1,
-		Animate:      d2common.StringToUint8(props[inc()]) == 1,
-		KillEdge:     d2common.StringToUint8(props[inc()]) == 1,
-		FillBlanks:   d2common.StringToUint8(props[inc()]) == 1,
-		SizeX:        d2common.StringToInt(props[inc()]),
-		SizeY:        d2common.StringToInt(props[inc()]),
-		AutoMap:      d2common.StringToUint8(props[inc()]) == 1,
-		Scan:         d2common.StringToUint8(props[inc()]) == 1,
-		Pops:         d2common.StringToInt(props[inc()]),
-		PopPad:       d2common.StringToInt(props[inc()]),
-		FileCount:    d2common.StringToInt(props[inc()]),
+		DefinitionID: d2util.StringToInt(props[inc()]),
+		LevelID:      d2util.StringToInt(props[inc()]),
+		Populate:     d2util.StringToUint8(props[inc()]) == 1,
+		Logicals:     d2util.StringToUint8(props[inc()]) == 1,
+		Outdoors:     d2util.StringToUint8(props[inc()]) == 1,
+		Animate:      d2util.StringToUint8(props[inc()]) == 1,
+		KillEdge:     d2util.StringToUint8(props[inc()]) == 1,
+		FillBlanks:   d2util.StringToUint8(props[inc()]) == 1,
+		SizeX:        d2util.StringToInt(props[inc()]),
+		SizeY:        d2util.StringToInt(props[inc()]),
+		AutoMap:      d2util.StringToUint8(props[inc()]) == 1,
+		Scan:         d2util.StringToUint8(props[inc()]) == 1,
+		Pops:         d2util.StringToInt(props[inc()]),
+		PopPad:       d2util.StringToInt(props[inc()]),
+		FileCount:    d2util.StringToInt(props[inc()]),
 		Files: [6]string{
 			props[inc()],
 			props[inc()],
@@ -64,9 +63,9 @@ func createLevelPresetRecord(props []string) LevelPresetRecord {
 			props[inc()],
 			props[inc()],
 		},
-		Dt1Mask:   d2common.StringToUint(props[inc()]),
-		Beta:      d2common.StringToUint8(props[inc()]) == 1,
-		Expansion: d2common.StringToUint8(props[inc()]) == 1,
+		Dt1Mask:   d2util.StringToUint(props[inc()]),
+		Beta:      d2util.StringToUint8(props[inc()]) == 1,
+		Expansion: d2util.StringToUint8(props[inc()]) == 1,
 	}
 
 	return result

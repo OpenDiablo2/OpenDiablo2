@@ -1,9 +1,8 @@
 package d2datadict
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"strings"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
 
 func mapHeaders(line string) map[string]int {
@@ -20,7 +19,7 @@ func mapHeaders(line string) map[string]int {
 func mapLoadInt(r *[]string, mapping map[string]int, field string) int {
 	index, ok := (mapping)[field]
 	if ok {
-		return d2common.StringToInt(d2common.EmptyToZero(d2common.AsterToEmpty((*r)[index])))
+		return d2util.StringToInt(d2util.EmptyToZero(d2util.AsterToEmpty((*r)[index])))
 	}
 
 	return 0
@@ -29,7 +28,7 @@ func mapLoadInt(r *[]string, mapping map[string]int, field string) int {
 func mapLoadString(r *[]string, mapping map[string]int, field string) string {
 	index, ok := (mapping)[field]
 	if ok {
-		return d2common.AsterToEmpty((*r)[index])
+		return d2util.AsterToEmpty((*r)[index])
 	}
 
 	return ""
@@ -42,7 +41,7 @@ func mapLoadBool(r *[]string, mapping map[string]int, field string) bool {
 func mapLoadUint8(r *[]string, mapping map[string]int, field string) uint8 {
 	index, ok := (mapping)[field]
 	if ok {
-		return d2common.StringToUint8(d2common.EmptyToZero(d2common.AsterToEmpty((*r)[index])))
+		return d2util.StringToUint8(d2util.EmptyToZero(d2util.AsterToEmpty((*r)[index])))
 	}
 
 	return 0

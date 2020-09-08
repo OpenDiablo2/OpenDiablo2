@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // MagicPrefix stores all of the magic prefix records
@@ -56,7 +56,7 @@ func loadDictionary(
 	superType d2enum.ItemAffixSuperType,
 	subType d2enum.ItemAffixSubType,
 ) map[string]*ItemAffixCommonRecord {
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	records := createItemAffixRecords(d, superType, subType)
 	name := getAffixString(superType, subType)
 	log.Printf("Loaded %d %s records", len(records), name)
@@ -65,7 +65,7 @@ func loadDictionary(
 }
 
 func createItemAffixRecords(
-	d *d2common.DataDictionary,
+	d *d2txt.DataDictionary,
 	superType d2enum.ItemAffixSuperType,
 	subType d2enum.ItemAffixSubType,
 ) map[string]*ItemAffixCommonRecord {

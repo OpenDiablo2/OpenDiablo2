@@ -1,6 +1,8 @@
 package d2mapstamp
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2path"
 	"math"
 	"math/rand"
 
@@ -9,7 +11,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2object"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
@@ -80,8 +81,8 @@ func LoadStamp(levelType d2enum.RegionIdType, levelPreset, fileIndex int) *Stamp
 }
 
 // Size returns the size of the stamp in tiles.
-func (mr *Stamp) Size() d2common.Size {
-	return d2common.Size{Width: int(mr.ds1.Width), Height: int(mr.ds1.Height)}
+func (mr *Stamp) Size() d2geom.Size {
+	return d2geom.Size{Width: int(mr.ds1.Width), Height: int(mr.ds1.Height)}
 }
 
 // LevelPreset returns the level preset ID.
@@ -169,8 +170,8 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 	return entities
 }
 
-func convertPaths(tileOffsetX, tileOffsetY int, paths []d2common.Path) []d2common.Path {
-	result := make([]d2common.Path, len(paths))
+func convertPaths(tileOffsetX, tileOffsetY int, paths []d2path.Path) []d2path.Path {
+	result := make([]d2path.Path, len(paths))
 	for i := 0; i < len(paths); i++ {
 		result[i].Action = paths[i].Action
 		result[i].Position = d2vector.NewPosition(

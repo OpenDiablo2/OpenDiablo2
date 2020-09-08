@@ -1,7 +1,7 @@
 package d2ds1
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2path"
 )
 
 // Object is a game world object
@@ -11,5 +11,5 @@ type Object struct {
 	X     int
 	Y     int
 	Flags int
-	Paths []d2common.Path
+	Paths []d2path.Path
 }

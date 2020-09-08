@@ -1,7 +1,7 @@
 package d2player
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -13,7 +13,7 @@ type miniPanel struct {
 	button         *d2ui.Sprite
 	isOpen         bool
 	isSinglePlayer bool
-	rectangle      d2common.Rectangle
+	rectangle      d2geom.Rectangle
 }
 
 func newMiniPanel(uiManager *d2ui.UIManager, isSinglePlayer bool) *miniPanel {
@@ -27,7 +27,7 @@ func newMiniPanel(uiManager *d2ui.UIManager, isSinglePlayer bool) *miniPanel {
 	animation, _ = d2asset.LoadAnimation(d2resource.MinipanelButton, d2resource.PaletteSky)
 	buttonSprite, _ := uiManager.NewSprite(animation)
 
-	rectangle := d2common.Rectangle{Left: 325, Top: 526, Width: 156, Height: 26}
+	rectangle := d2geom.Rectangle{Left: 325, Top: 526, Width: 156, Height: 26}
 
 	if !isSinglePlayer {
 		rectangle.Width = 182

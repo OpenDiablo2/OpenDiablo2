@@ -3,7 +3,7 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // ElemTypeRecord represents a single line in ElemType.txt
@@ -22,7 +22,7 @@ var ElemTypes map[string]*ElemTypeRecord //nolint:gochecknoglobals // Currently 
 func LoadElemTypes(file []byte) {
 	ElemTypes = make(map[string]*ElemTypeRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &ElemTypeRecord{
 			ElemType: d.String("Elemental Type"),

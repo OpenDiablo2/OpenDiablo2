@@ -1,4 +1,4 @@
-package d2common
+package d2path
 
 import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 

@@ -2,12 +2,11 @@ package d2gamescreen
 
 import (
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"log"
 	"os"
 	"strings"
 	"time"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 
@@ -181,7 +180,7 @@ func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 	position := d2vector.NewPosition(met.mapRenderer.WorldToOrtho(met.mapEngine.GetCenterPosition()))
 	met.mapRenderer.SetCameraPosition(&position)
 
-	musicDef := d2common.GetMusicDef(met.regionSpec.regionType)
+	musicDef := d2resource.GetMusicDef(met.regionSpec.regionType)
 
 	met.audioProvider.PlayBGM(musicDef.MusicFile)
 }

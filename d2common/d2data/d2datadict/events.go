@@ -3,7 +3,7 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // EventRecord is a representation of a single row from events.txt
@@ -18,7 +18,7 @@ var Events map[string]*EventRecord //nolint:gochecknoglobals // Currently global
 func LoadEvents(file []byte) {
 	Events = make(map[string]*EventRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		record := &EventRecord{
 			Event: d.String("event"),

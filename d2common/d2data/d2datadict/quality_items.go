@@ -4,7 +4,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // QualityRecord represents a single row of QualityItems.txt, which controls
@@ -46,7 +46,7 @@ var QualityItems map[string]*QualityRecord //nolint:gochecknoglobals // Currentl
 func LoadQualityItems(file []byte) {
 	QualityItems = make(map[string]*QualityRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		qual := &QualityRecord{
 			NumMods:   d.Number("nummods"),

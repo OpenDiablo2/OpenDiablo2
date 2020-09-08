@@ -3,7 +3,7 @@ package d2datadict
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
 // PropertyStatRecord contains stat information for a property
@@ -28,7 +28,7 @@ var Properties map[string]*PropertyRecord //nolint:gochecknoglobals // Currently
 func LoadProperties(file []byte) {
 	Properties = make(map[string]*PropertyRecord)
 
-	d := d2common.LoadDataDictionary(file)
+	d := d2txt.LoadDataDictionary(file)
 	for d.Next() {
 		prop := &PropertyRecord{
 			Code:   d.String("code"),

@@ -6,6 +6,8 @@ import (
 	"container/ring"
 	"errors"
 	"fmt"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"image"
 	"image/gif"
 	"image/png"
@@ -21,7 +23,6 @@ import (
 	"golang.org/x/image/colornames"
 	"gopkg.in/alecthomas/kingpin.v2"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -144,7 +145,7 @@ func (a *App) Run() error {
 
 func (a *App) initialize() error {
 	a.timeScale = 1.0
-	a.lastTime = d2common.Now()
+	a.lastTime = d2util.Now()
 	a.lastScreenAdvance = a.lastTime
 
 	a.renderer.SetWindowIcon("d2logo.png")
@@ -211,7 +212,7 @@ func (a *App) loadStrings() error {
 			return err
 		}
 
-		d2common.LoadTextDictionary(data)
+		d2tbl.LoadTextDictionary(data)
 	}
 
 	return nil
@@ -424,7 +425,7 @@ func (a *App) advance(elapsed, elapsedUnscaled, current float64) error {
 }
 
 func (a *App) update(target d2interface.Surface) error {
-	currentTime := d2common.Now()
+	currentTime := d2util.Now()
 	elapsedTimeUnscaled := currentTime - a.lastTime
 	elapsedTime := elapsedTimeUnscaled * a.timeScale
 	a.lastTime = currentTime
