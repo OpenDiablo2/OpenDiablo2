@@ -13,33 +13,56 @@ const (
 	maxRecordsPerBlock    = 67
 	byteCountName         = 8
 	byteCountSpeedPadding = 2
-	numActions            = 144
+	numEvents             = 144
+	speedDivisor          = 256
+	speedBaseFPS          = 25
+	milliseconds          = 1000
 )
 
-type record struct {
-	name               string
-	framesPerDirection uint32
-	speed              uint16
-	actions            map[int]byte
-}
-
-type hashTable [numBlocks]byte
-
-type block struct {
-	recordCount uint32
-	records     []*record
-}
-
-type AnimationDataSet struct {
+// AnimationData is a representation of the binary data from `data/global/AnimData.d2`
+type AnimationData struct {
 	hashTable
-	blocks [numBlocks]*block
+	blocks  [numBlocks]*block
+	entries map[string][]*AnimationDataRecord
 }
 
-// Load loads the data into an AnimationDataSet struct
-func Load(data []byte) (*AnimationDataSet, error) {
+// GetRecordNames returns a slice of all record name strings
+func (ad *AnimationData) GetRecordNames() []string {
+	result := make([]string, 0)
+
+	for name := range ad.entries {
+		result = append(result, name)
+	}
+
+	return result
+}
+
+// GetRecord returns a single AnimationDataRecord with the given name string. If there is more
+// than one record with the given name string, the last record entry will be returned.
+func (ad *AnimationData) GetRecord(name string) *AnimationDataRecord {
+	records := ad.GetRecords(name)
+	numRecords := len(records)
+
+	if numRecords < 1 {
+		return nil
+	}
+
+	return records[numRecords-1]
+}
+
+// GetRecords returns all records that have the given name string. The AnimData.d2 files have
+// multiple records with the same name, but other values in the record are different.
+func (ad *AnimationData) GetRecords(name string) []*AnimationDataRecord {
+	return ad.entries[name]
+}
+
+// Load loads the data into an AnimationData struct
+func Load(data []byte) (*AnimationData, error) {
 	reader := d2common.CreateStreamReader(data)
-	animdata := &AnimationDataSet{}
+	animdata := &AnimationData{}
 	hashIdx := 0
+
+	animdata.entries = make(map[string][]*AnimationDataRecord)
 
 	for blockIdx := range animdata.blocks {
 		recordCount := reader.GetUInt32()
@@ -47,13 +70,13 @@ func Load(data []byte) (*AnimationDataSet, error) {
 			return nil, fmt.Errorf("more than %d records in block", maxRecordsPerBlock)
 		}
 
-		records := make([]*record, recordCount)
+		records := make([]*AnimationDataRecord, recordCount)
 
 		for recordIdx := uint32(0); recordIdx < recordCount; recordIdx++ {
 			nameBytes := reader.ReadBytes(byteCountName)
 
-			if nameBytes[7] != byte(0) {
-				return nil, errors.New("animdata record name missing null terminator byte")
+			if nameBytes[byteCountName-1] != byte(0) {
+				return nil, errors.New("animdata AnimationDataRecord name missing null terminator byte")
 			}
 
 			name := string(nameBytes)
@@ -66,23 +89,29 @@ func Load(data []byte) (*AnimationDataSet, error) {
 
 			reader.SkipBytes(byteCountSpeedPadding)
 
-			actions := make(map[int]byte)
+			events := make(map[int]AnimationEvent)
 
-			for actionIdx := 0; actionIdx < numActions; actionIdx++ {
-				actionByte := reader.GetByte()
-				if actionByte != 0 {
-					actions[actionIdx] = actionByte
+			for eventIdx := 0; eventIdx < numEvents; eventIdx++ {
+				event := AnimationEvent(reader.GetByte())
+				if event != AnimationEventNone {
+					events[eventIdx] = event
 				}
 			}
 
-			r := &record{
+			r := &AnimationDataRecord{
 				name,
 				frames,
 				speed,
-				actions,
+				events,
 			}
 
 			records[recordIdx] = r
+
+			if _, found := animdata.entries[r.name]; !found {
+				animdata.entries[r.name] = make([]*AnimationDataRecord, 0)
+			}
+
+			animdata.entries[r.name] = append(animdata.entries[r.name], r)
 		}
 
 		b := &block{
@@ -98,16 +127,4 @@ func Load(data []byte) (*AnimationDataSet, error) {
 	}
 
 	return animdata, nil
-}
-
-func hashName(name string) byte {
-	hashBytes := []byte(strings.ToUpper(name))
-
-	var hash uint32
-	for hashByteIdx := range hashBytes {
-		hash += uint32(hashBytes[hashByteIdx])
-	}
-
-	hash %= numBlocks
-	return byte(hash)
 }
