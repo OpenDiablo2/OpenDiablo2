@@ -3,11 +3,12 @@ package d2loader
 import (
 	"errors"
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"os"
 	"path/filepath"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset/types"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/filesystem"
@@ -23,7 +24,7 @@ const (
 // NewLoader creates a new loader
 func NewLoader() *Loader {
 	loader := &Loader{}
-	loader.Cache = d2common.CreateCache(defaultCacheBudget)
+	loader.Cache = d2cache.CreateCache(defaultCacheBudget)
 
 	return loader
 }
