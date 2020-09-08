@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 )
 
 const (
@@ -58,7 +58,7 @@ func (ad *AnimationData) GetRecords(name string) []*AnimationDataRecord {
 
 // Load loads the data into an AnimationData struct
 func Load(data []byte) (*AnimationData, error) {
-	reader := d2common.CreateStreamReader(data)
+	reader := d2datautils.CreateStreamReader(data)
 	animdata := &AnimationData{}
 	hashIdx := 0
 
