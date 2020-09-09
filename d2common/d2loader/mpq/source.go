@@ -47,6 +47,11 @@ func (v *Source) Open(name string) (a asset.Asset, err error) {
 }
 
 // String returns the path of the MPQ on the host filesystem
-func (v *Source) String() string {
+func (v *Source) Path() string {
 	return v.MPQ.Path()
+}
+
+// String returns the path
+func (v *Source) String() string {
+	return v.Path()
 }
