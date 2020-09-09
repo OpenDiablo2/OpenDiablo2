@@ -3,7 +3,7 @@ package d2tbl
 import (
 	"log"
 	"strconv"
-	
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 )
 
@@ -35,7 +35,7 @@ func TranslateString(key string) string {
 }
 
 // LoadTextDictionary loads the text dictionary from the given data
-func LoadTextDictionary(dictionaryData []byte) {
+func LoadTextDictionary(dictionaryData []byte) map[string]string {
 	if lookupTable == nil {
 		lookupTable = make(map[string]string)
 	}
@@ -105,4 +105,6 @@ func LoadTextDictionary(dictionaryData []byte) {
 			lookupTable[key] = value
 		}
 	}
+
+	return lookupTable
 }
