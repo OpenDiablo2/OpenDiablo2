@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player/help"
 	"image"
 	"image/color"
 	"log"
@@ -53,7 +54,7 @@ type GameControls struct {
 	uiManager              *d2ui.UIManager
 	inventory              *Inventory
 	heroStatsPanel         *HeroStatsPanel
-	helpOverlay            *HelpOverlay
+	helpOverlay            *help.Overlay
 	miniPanel              *miniPanel
 	lastMouseX             int
 	lastMouseY             int
@@ -167,7 +168,7 @@ func NewGameControls(
 		mapRenderer:      mapRenderer,
 		inventory:        NewInventory(ui, inventoryRecord),
 		heroStatsPanel:   NewHeroStatsPanel(ui, hero.Name(), hero.Class, hero.Stats),
-		helpOverlay:      NewHelpOverlay(renderer),
+		helpOverlay:      help.NewHelpOverlay(renderer),
 		miniPanel:        newMiniPanel(ui, isSinglePlayer),
 		missileID:        missileID,
 		nameLabel:        hoverLabel,
