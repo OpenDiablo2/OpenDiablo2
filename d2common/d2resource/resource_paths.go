@@ -90,6 +90,13 @@ const (
 	HealthManaIndicator = "/data/global/ui/PANEL/hlthmana.DC6"
 	AddSkillButton      = "/data/global/ui/PANEL/level.DC6"
 
+	// --- Help Overlay ---
+
+	//HelpBorder = "/data/global/ui/MENU/helpborder.DC6"
+	HelpBorder       = "/data/global/ui/MENU/800helpborder.DC6"
+	HelpYellowBullet = "/data/global/ui/MENU/helpyellowbullet.DC6"
+	HelpWhiteBullet  = "/data/global/ui/MENU/helpwhitebullet.DC6"
+
 	// Issue #685 - used in the mini-panel
 	GameSmallMenuButton = "/data/global/ui/PANEL/menubutton.DC6"
 	SkillIcon           = "/data/global/ui/PANEL/Skillicon.DC6"
