@@ -3,16 +3,17 @@ package d2loader
 import (
 	"errors"
 	"fmt"
+
 	"os"
 	"path/filepath"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset/types"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/filesystem"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 const (
@@ -33,7 +34,7 @@ func NewLoader() *Loader {
 // that have been added
 type Loader struct {
 	d2interface.Cache
-	*d2common.Logger
+	*d2util.Logger
 	sources []asset.Source
 }
 
