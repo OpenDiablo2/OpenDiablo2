@@ -35,7 +35,7 @@ func NewLoader() *Loader {
 type Loader struct {
 	d2interface.Cache
 	*d2util.Logger
-	sources []asset.Source
+	Sources []asset.Source
 }
 
 // Load attempts to load an asset with the given sub-path. The sub-path is relative to the root
