@@ -19,7 +19,7 @@ jobs:
             -   name: Install dependencies
                 run: |
                     sudo apt-get update
-                    sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev > /dev/null 2>&1
+                    sudo apt-get install -y xvfb libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev libsdl2-dev libasound2-dev > /dev/null 2>&1
 
             -   name: Run golangci-lint
                 continue-on-error: true
@@ -28,7 +28,10 @@ jobs:
                     version: v1.27
 
             -   name: Run tests
-                run: go test -v -race ./...
+                env:
+                    DISPLAY: ":99.0"
+                run: |
+                    xvfb-run --auto-servernum go test -v -race ./...
 
             -   name: Build binary
                 run: go build .
