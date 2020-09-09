@@ -16,9 +16,9 @@ import (
 )
 
 const (
-	defaultCacheBudget = 1024 * 1024 * 512
+	defaultCacheBudget      = 1024 * 1024 * 512
 	defaultCacheEntryWeight = 1
-	errFileNotFound = "file not found"
+	errFileNotFound         = "file not found"
 )
 
 // NewLoader creates a new loader
@@ -29,12 +29,12 @@ func NewLoader() *Loader {
 	return loader
 }
 
-// Loader represents the manager that handles loading and caching assets with the asset sources
+// Loader represents the manager that handles loading and caching assets with the asset Sources
 // that have been added
 type Loader struct {
 	d2interface.Cache
 	*d2common.Logger
-	sources []asset.Source
+	Sources []asset.Source
 }
 
 // Load attempts to load an asset with the given sub-path. The sub-path is relative to the root
@@ -49,13 +49,13 @@ func (l *Loader) Load(subPath string) (asset.Asset, error) {
 	}
 
 	// if it isn't in the cache, we check if each source can open the file
-	for idx := range l.sources {
-		source := l.sources[idx]
+	for idx := range l.Sources {
+		source := l.Sources[idx]
 
 		// if the source can open the file, then we cache it and return it
 		if loadedAsset, err := source.Open(subPath); err == nil {
-			l.Insert(subPath, loadedAsset, defaultCacheEntryWeight)
-			return loadedAsset, nil
+			err := l.Insert(subPath, loadedAsset, defaultCacheEntryWeight)
+			return loadedAsset, err
 		}
 	}
 
@@ -66,9 +66,9 @@ func (l *Loader) Load(subPath string) (asset.Asset, error) {
 // or a file on the host filesystem. In the case that it is a file, the file extension is used
 // to determine the type of asset source. In the case that the path points to a directory, a
 // FileSystemSource will be added.
-func (l *Loader) AddSource(path string) {
-	if l.sources == nil {
-		l.sources = make([]asset.Source, 0)
+func (l *Loader) AddSource(path string) (asset.Source, error) {
+	if l.Sources == nil {
+		l.Sources = make([]asset.Source, 0)
 	}
 
 	cleanPath := filepath.Clean(path)
@@ -76,38 +76,43 @@ func (l *Loader) AddSource(path string) {
 	info, err := os.Lstat(cleanPath)
 	if err != nil {
 		l.Warning(err.Error())
-		return
+		return nil, err
 	}
 
 	mode := info.Mode()
 
+	sourceType := types.AssetSourceUnknown
+
 	if mode.IsDir() {
-		source := &filesystem.Source{
-			Root: cleanPath,
-		}
-
-		l.Debug(fmt.Sprintf("adding filesystem source `%s`", cleanPath))
-		l.sources = append(l.sources, source)
+		sourceType = types.AssetSourceFileSystem
 	}
 
-	if !mode.IsRegular() {
-		return
+	if mode.IsRegular() {
+		ext := filepath.Ext(cleanPath)
+		sourceType = types.Ext2SourceType(ext)
 	}
-
-	ext := filepath.Ext(cleanPath)
-	sourceType := types.Ext2SourceType(ext)
 
 	switch sourceType {
 	case types.AssetSourceMPQ:
 		source, err := mpq.NewSource(cleanPath)
 		if err == nil {
 			l.Debug(fmt.Sprintf("adding MPQ source `%s`", cleanPath))
-			l.sources = append(l.sources, source)
+			l.Sources = append(l.Sources, source)
+
+			return source, nil
 		}
+	case types.AssetSourceFileSystem:
+		source := &filesystem.Source{
+			Root: cleanPath,
+		}
+
+		l.Debug(fmt.Sprintf("adding filesystem source `%s`", cleanPath))
+		l.Sources = append(l.Sources, source)
+
+		return source, nil
 	case types.AssetSourceUnknown:
 		l.Warning(fmt.Sprintf("unknown asset source `%s`", cleanPath))
-		fallthrough
-	default:
-		return
 	}
+
+	return nil, fmt.Errorf("unknown asset source `%s`", cleanPath)
 }

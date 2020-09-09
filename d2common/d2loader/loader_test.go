@@ -8,16 +8,17 @@ import (
 )
 
 const (
-	sourceA     = "testdata/A"
-	sourceB     = "testdata/B"
-	sourceC     = "testdata/C"
-	sourceD     = "testdata/D.mpq"
-	commonFile  = "common.txt"
-	exclusiveA  = "exclusive_a.txt"
-	exclusiveB  = "exclusive_b.txt"
-	exclusiveC  = "exclusive_c.txt"
-	exclusiveD  = "exclusive_d.txt"
-	badFilePath = "a/bad/file/path.txt"
+	sourcePathA   = "testdata/A"
+	sourcePathB   = "testdata/B"
+	sourcePathC   = "testdata/C"
+	sourcePathD   = "testdata/D.mpq"
+	commonFile    = "common.txt"
+	exclusiveA    = "exclusive_a.txt"
+	exclusiveB    = "exclusive_b.txt"
+	exclusiveC    = "exclusive_c.txt"
+	exclusiveD    = "exclusive_d.txt"
+	badSourcePath = "/x/y/z.mpq"
+	badFilePath   = "a/bad/file/path.txt"
 )
 
 func TestLoader_NewLoader(t *testing.T) {
@@ -31,38 +32,63 @@ func TestLoader_NewLoader(t *testing.T) {
 func TestLoader_AddSource(t *testing.T) {
 	loader := NewLoader()
 
-	loader.AddSource(sourceA)
-	loader.AddSource(sourceB)
-	loader.AddSource(sourceC)
-	loader.AddSource(sourceD)
-	loader.AddSource("bad/path")
+	sourceA, errA := loader.AddSource(sourcePathA)
+	sourceB, errB := loader.AddSource(sourcePathB)
+	sourceC, errC := loader.AddSource(sourcePathC)
+	sourceD, errD := loader.AddSource(sourcePathD)
+	sourceE, errE := loader.AddSource(badSourcePath)
 
-	if loader.sources[0].String() != sourceA {
+	if errA != nil {
+		t.Error(errA)
+	}
+
+	if errB != nil {
+		t.Error(errB)
+	}
+
+	if errC != nil {
+		t.Error(errC)
+	}
+
+	if errD != nil {
+		t.Error(errD)
+	}
+
+	if errE == nil {
+		t.Error("expecting error on bad file path")
+	}
+
+	if sourceA.String() != sourcePathA {
 		t.Error("source path not the same as what we added")
 	}
 
-	if loader.sources[1].String() != sourceB {
+	if sourceB.String() != sourcePathB {
 		t.Error("source path not the same as what we added")
 	}
 
-	if loader.sources[2].String() != sourceC {
+	if sourceC.String() != sourcePathC {
 		t.Error("source path not the same as what we added")
 	}
 
-	if loader.sources[3].String() != sourceD {
+	if sourceD.String() != sourcePathD {
 		t.Error("source path not the same as what we added")
+	}
+
+
+	if sourceE != nil {
+		t.Error("source for bad path should be nil")
 	}
 }
 
 func TestLoader_Load(t *testing.T) {
 	loader := NewLoader()
 
-	loader.AddSource(sourceB) // we expect files common to any source to come from here
-	loader.AddSource(sourceD)
-	loader.AddSource(sourceA)
-	loader.AddSource(sourceC)
+	_, _ = loader.AddSource(sourcePathB) // we expect files common to any source to come from here
+	_, _ = loader.AddSource(sourcePathD)
+	_, _ = loader.AddSource(sourcePathA)
+	_, _ = loader.AddSource(sourcePathC)
 
-	entryCommon, errCommon := loader.Load(commonFile) // common file exists in all three sources
+	entryCommon, errCommon := loader.Load(commonFile) // common file exists in all three Sources
 
 	entryA, errA := loader.Load(exclusiveA) // each source has a file exclusive to itself
 	entryB, errB := loader.Load(exclusiveB)
@@ -73,7 +99,7 @@ func TestLoader_Load(t *testing.T) {
 
 	if entryCommon == nil || errCommon != nil {
 		t.Error("common entry should exist")
-	} else if entryCommon.Source() != loader.sources[0] {
+	} else if entryCommon.Source() != loader.Sources[0] {
 		t.Error("common entry should come from the first loader source")
 	}
 
@@ -93,7 +119,7 @@ func TestLoader_Load(t *testing.T) {
 		entry asset.Asset
 		data  string
 	}{
-		{entryCommon, "b"}, // sourceB is loaded first, we expect a "b"
+		{entryCommon, "b"}, // sourcePathB is loaded first, we expect a "b"
 		{entryA, "a"},
 		{entryB, "b"},
 		{entryC, "c"},

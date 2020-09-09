@@ -44,6 +44,11 @@ func (s *Source) fullPath(subPath string) string {
 }
 
 // String returns the Root dir of this file system source
-func (s *Source) String() string {
+func (s *Source) Path() string {
 	return s.Root
+}
+
+// String returns the path
+func (s *Source) String() string {
+	return s.Path()
 }

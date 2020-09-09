@@ -14,7 +14,7 @@ var _ asset.Asset = &Asset{}
 // Asset represents a file record within an MPQ archive
 type Asset struct {
 	stream d2interface.ArchiveDataStream
-	name   string
+	path   string
 	source *Source
 }
 
@@ -30,7 +30,7 @@ func (a *Asset) Source() asset.Source {
 
 // Path returns the sub-path (within the source) of this asset
 func (a *Asset) Path() string {
-	return a.name
+	return a.path
 }
 
 // Read will read asset data into the given buffer
@@ -41,4 +41,9 @@ func (a *Asset) Read(buf []byte) (n int, err error) {
 // Seek will seek the read position for the next read operation
 func (a *Asset) Seek(offset int64, whence int) (n int64, err error) {
 	return a.stream.Seek(offset, whence)
+}
+
+// Path returns the path
+func (a *Asset) String() string {
+	return a.Path()
 }

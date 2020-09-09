@@ -42,3 +42,8 @@ func (fsa *Asset) Read(p []byte) (n int, err error) {
 func (fsa *Asset) Seek(offset int64, whence int) (int64, error) {
 	return fsa.file.Seek(offset, whence)
 }
+
+// String returns the path
+func (fsa *Asset) String() string {
+	return fsa.Path()
+}
