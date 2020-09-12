@@ -8,8 +8,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"

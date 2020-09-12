@@ -1,4 +1,3 @@
-//nolint:gomnd
 package d2mapgen
 
 import (
@@ -20,7 +19,7 @@ func loadPreset(mapEngine *d2mapengine.MapEngine, id, index int) *d2mapstamp.Sta
 		mapEngine.AddDS1(file)
 	}
 
-	return d2mapstamp.LoadStamp(d2enum.RegionAct1Wilderness, id, index)
+	return mapEngine.LoadStamp(d2enum.RegionAct1Wilderness, id, index)
 }
 
 // GenerateAct1Overworld generates the map and entities for the first town and surrounding area.
@@ -33,7 +32,7 @@ func GenerateAct1Overworld(mapEngine *d2mapengine.MapEngine) {
 	mapWidth := mapEngine.Size().Width
 	mapHeight := mapEngine.Size().Height
 
-	townStamp := d2mapstamp.LoadStamp(d2enum.RegionAct1Town, 1, -1)
+	townStamp := mapEngine.LoadStamp(d2enum.RegionAct1Town, 1, -1)
 	townStamp.RegionPath()
 	townSize := townStamp.Size()
 

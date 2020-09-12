@@ -16,7 +16,8 @@ import (
 
 // MapEngine loads the tiles which make up the isometric map and the entities
 type MapEngine struct {
-	asset         *d2asset.AssetManager
+	asset *d2asset.AssetManager
+	*d2mapstamp.StampFactory
 	seed          int64                            // The map seed
 	entities      map[string]d2interface.MapEntity // Entities on the map
 	tiles         []MapTile
@@ -31,7 +32,8 @@ type MapEngine struct {
 // CreateMapEngine creates a new instance of the map engine and returns a pointer to it.
 func CreateMapEngine(asset *d2asset.AssetManager) *MapEngine {
 	engine := &MapEngine{
-		asset: asset,
+		asset:        asset,
+		StampFactory: d2mapstamp.NewStampFactory(asset),
 	}
 	return engine
 }
@@ -292,7 +294,7 @@ func (m *MapEngine) TileExists(tileX, tileY int) bool {
 
 // GenerateMap clears the map and places the specified stamp.
 func (m *MapEngine) GenerateMap(regionType d2enum.RegionIdType, levelPreset, fileIndex int) {
-	region := d2mapstamp.LoadStamp(regionType, levelPreset, fileIndex)
+	region := m.LoadStamp(regionType, levelPreset, fileIndex)
 	regionSize := region.Size()
 	m.ResetMap(regionType, regionSize.Width, regionSize.Height)
 	m.PlaceStamp(region, 0, 0)
