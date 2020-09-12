@@ -37,11 +37,6 @@ func Initialize(renderer d2interface.Renderer,
 	return nil
 }
 
-// LoadAnimation loads an animation by its resource path and its palette path
-func LoadAnimation(animationPath, palettePath string) (d2interface.Animation, error) {
-	return Singleton.LoadAnimation(animationPath, palettePath)
-}
-
 // LoadAnimationWithEffect loads an animation by its resource path and its palette path with a given transparency value
 func LoadAnimationWithEffect(animationPath, palettePath string,
 	drawEffect d2enum.DrawEffect) (d2interface.Animation, error) {
