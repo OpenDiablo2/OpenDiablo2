@@ -51,6 +51,7 @@ type Game struct {
 // CreateGame creates the Gameplay screen and returns a pointer to it
 func CreateGame(
 	navigator Navigator,
+	ui *d2ui.UIManager,
 	renderer d2interface.Renderer,
 	inputManager d2interface.InputManager,
 	audioProvider d2interface.AudioProvider,
@@ -84,7 +85,7 @@ func CreateGame(
 		renderer:             renderer,
 		terminal:             term,
 		soundEngine:          d2audio.NewSoundEngine(audioProvider, term),
-		uiManager:            d2ui.NewUIManager(renderer, inputManager, audioProvider),
+		uiManager:            ui,
 	}
 	result.soundEnv = d2audio.NewSoundEnvironment(result.soundEngine)
 

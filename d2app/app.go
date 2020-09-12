@@ -92,7 +92,7 @@ func Create(gitBranch, gitCommit string,
 	renderer d2interface.Renderer,
 	asset *d2asset.AssetManager,
 ) *App {
-	uiManager := d2ui.NewUIManager(renderer, inputManager, audio)
+	uiManager := d2ui.NewUIManager(asset, renderer, inputManager, audio)
 	screenManager := d2screen.NewScreenManager(uiManager)
 
 	result := &App{
@@ -696,7 +696,8 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 		fmt.Printf("can not connect to the host: %s", host)
 	}
 
-	a.screen.SetNextScreen(d2gamescreen.CreateGame(a, a.renderer, a.inputManager, a.audio, gameClient, a.terminal))
+	a.screen.SetNextScreen(d2gamescreen.CreateGame(a, a.ui, a.renderer, a.inputManager,
+		a.audio, gameClient, a.terminal))
 }
 
 // ToCharacterSelect forces the game to transition to the Character Select (load character) screen

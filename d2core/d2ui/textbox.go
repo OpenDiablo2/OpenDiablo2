@@ -7,7 +7,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 // TextBox represents a text input box
@@ -27,7 +26,7 @@ type TextBox struct {
 
 // NewTextbox creates a new instance of a text box
 func (ui *UIManager) NewTextbox() *TextBox {
-	animation, _ := d2asset.LoadAnimation(d2resource.TextBox2, d2resource.PaletteUnits)
+	animation, _ := ui.asset.LoadAnimation(d2resource.TextBox2, d2resource.PaletteUnits)
 	bgSprite, _ := ui.NewSprite(animation)
 	tb := &TextBox{
 		filter:    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",

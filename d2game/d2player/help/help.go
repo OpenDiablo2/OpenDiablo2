@@ -2,8 +2,9 @@ package help
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"image/color"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
@@ -36,9 +37,10 @@ type Overlay struct {
 	layout    *d2gui.Layout
 }
 
-func NewHelpOverlay(renderer d2interface.Renderer) *Overlay {
+func NewHelpOverlay(renderer d2interface.Renderer, ui *d2ui.UIManager) *Overlay {
 	h := &Overlay{
-		renderer: renderer,
+		renderer:  renderer,
+		uiManager: ui,
 	}
 
 	return h

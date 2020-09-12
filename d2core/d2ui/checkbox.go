@@ -4,7 +4,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 // Checkbox represents a checkbox UI element
@@ -32,7 +31,7 @@ func (ui *UIManager) NewCheckbox(checkState bool) *Checkbox {
 		enabled:    true,
 	}
 
-	animation, _ := d2asset.LoadAnimation(d2resource.Checkbox, d2resource.PaletteFechar)
+	animation, _ := ui.asset.LoadAnimation(d2resource.Checkbox, d2resource.PaletteFechar)
 	checkboxSprite, _ := ui.NewSprite(animation)
 	result.width, result.height, _ = checkboxSprite.GetFrameSize(0)
 	checkboxSprite.SetPosition(0, 0)
