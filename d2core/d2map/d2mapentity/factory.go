@@ -201,7 +201,7 @@ func (f *MapEntityFactory) NewObject(x, y int, objectRec *d2datadict.ObjectRecor
 	}
 	objectType := &d2datadict.ObjectTypes[objectRec.Index]
 
-	composite, err := d2asset.LoadComposite(d2enum.ObjectTypeItem, objectType.Token,
+	composite, err := f.asset.LoadComposite(d2enum.ObjectTypeItem, objectType.Token,
 		palettePath)
 	if err != nil {
 		return nil, err

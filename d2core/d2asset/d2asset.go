@@ -1,7 +1,6 @@
 package d2asset
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
@@ -35,9 +34,4 @@ func Initialize(renderer d2interface.Renderer,
 	}
 
 	return nil
-}
-
-// LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it
-func LoadComposite(baseType d2enum.ObjectType, token, palettePath string) (*Composite, error) {
-	return Singleton.LoadComposite(baseType, token, palettePath)
 }
