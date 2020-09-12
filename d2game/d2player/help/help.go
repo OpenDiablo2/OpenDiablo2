@@ -38,8 +38,10 @@ type Overlay struct {
 	layout    *d2gui.Layout
 }
 
-func NewHelpOverlay(renderer d2interface.Renderer, ui *d2ui.UIManager) *Overlay {
+func NewHelpOverlay(asset *d2asset.AssetManager, renderer d2interface.Renderer,
+	ui *d2ui.UIManager) *Overlay {
 	h := &Overlay{
+		asset:     asset,
 		renderer:  renderer,
 		uiManager: ui,
 	}

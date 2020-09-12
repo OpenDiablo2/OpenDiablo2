@@ -172,7 +172,7 @@ func NewGameControls(
 		mapRenderer:      mapRenderer,
 		inventory:        NewInventory(asset, ui, inventoryRecord),
 		heroStatsPanel:   NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
-		helpOverlay:      help.NewHelpOverlay(renderer, ui),
+		helpOverlay:      help.NewHelpOverlay(asset, renderer, ui),
 		miniPanel:        newMiniPanel(asset, ui, isSinglePlayer),
 		missileID:        missileID,
 		nameLabel:        hoverLabel,
