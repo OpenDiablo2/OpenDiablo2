@@ -3,6 +3,8 @@ package d2asset
 import (
 	"errors"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 	d2iface "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -14,34 +16,9 @@ var _ d2iface.Animation = &DC6Animation{} // Static check to confirm struct conf
 type DC6Animation struct {
 	animation
 	dc6Path  string
+	dc6      *d2dc6.DC6
 	palette  d2iface.Palette
 	renderer d2iface.Renderer
-}
-
-// CreateDC6Animation creates an Animation from d2dc6.DC6 and d2dat.DATPalette
-func CreateDC6Animation(renderer d2iface.Renderer, dc6Path string,
-	palette d2iface.Palette, effect d2enum.DrawEffect) (d2iface.Animation, error) {
-	dc6, err := loadDC6(dc6Path)
-	if err != nil {
-		return nil, err
-	}
-
-	anim := DC6Animation{
-		animation: animation{
-			directions:     make([]animationDirection, dc6.Directions),
-			playLength:     defaultPlayLength,
-			playLoop:       true,
-			originAtBottom: true,
-			effect:         effect,
-		},
-		dc6Path:  dc6Path,
-		palette:  palette,
-		renderer: renderer,
-	}
-
-	err = anim.SetDirection(0)
-
-	return &anim, err
 }
 
 // SetDirection decodes and sets the direction
@@ -66,11 +43,7 @@ func (a *DC6Animation) SetDirection(directionIndex int) error {
 }
 
 func (a *DC6Animation) decodeDirection(directionIndex int) error {
-	dc6, err := loadDC6(a.dc6Path)
-	if err != nil {
-		return err
-	}
-
+	dc6 := a.dc6
 	startFrame := directionIndex * int(dc6.FramesPerDirection)
 
 	for i := 0; i < int(dc6.FramesPerDirection); i++ {

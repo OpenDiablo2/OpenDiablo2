@@ -4,9 +4,6 @@ import (
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
@@ -58,7 +55,15 @@ func (am *AssetManager) LoadAnimationWithEffect(animationPath, palettePath strin
 
 // LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it
 func (am *AssetManager) LoadComposite(baseType d2enum.ObjectType, token, palettePath string) (*Composite, error) {
-	return CreateComposite(baseType, token, palettePath), nil
+	c := &Composite{
+		AssetManager: am,
+		baseType:     baseType,
+		basePath:     baseString(baseType),
+		token:        token,
+		palettePath:  palettePath,
+	}
+
+	return c, nil
 }
 
 // LoadFont loads a font the resource files
@@ -69,38 +74,6 @@ func (am *AssetManager) LoadFont(tablePath, spritePath, palettePath string) (d2i
 // LoadPalette loads a palette from a given palette path
 func (am *AssetManager) LoadPalette(palettePath string) (d2interface.Palette, error) {
 	return am.paletteManager.LoadPalette(palettePath)
-}
-
-func loadDC6(dc6Path string) (*d2dc6.DC6, error) {
-	dc6Data, err := Singleton.LoadFile(dc6Path)
-	if err != nil {
-		return nil, err
-	}
-
-	dc6, err := d2dc6.Load(dc6Data)
-	if err != nil {
-		return nil, err
-	}
-
-	return dc6, nil
-}
-
-func loadDCC(dccPath string) (*d2dcc.DCC, error) {
-	dccData, err := Singleton.LoadFile(dccPath)
-	if err != nil {
-		return nil, err
-	}
-
-	return d2dcc.Load(dccData)
-}
-
-func loadCOF(cofPath string) (*d2cof.COF, error) {
-	cofData, err := Singleton.LoadFile(cofPath)
-	if err != nil {
-		return nil, err
-	}
-
-	return d2cof.Load(cofData)
 }
 
 func (am *AssetManager) BindTerminalCommands(term d2interface.Terminal) error {

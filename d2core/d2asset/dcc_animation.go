@@ -16,39 +16,10 @@ var _ d2iface.Animation = &DCCAnimation{} // Static check to confirm struct conf
 // DCCAnimation represents an animation decoded from DCC
 type DCCAnimation struct {
 	animation
+	*animationManager
 	dccPath  string
 	palette  d2iface.Palette
 	renderer d2iface.Renderer
-}
-
-// CreateDCCAnimation creates an animation from d2dcc.DCC and d2dat.DATPalette
-func CreateDCCAnimation(renderer d2iface.Renderer, dccPath string, palette d2iface.Palette,
-	effect d2enum.DrawEffect) (d2iface.Animation, error) {
-	dcc, err := loadDCC(dccPath)
-	if err != nil {
-		return nil, err
-	}
-
-	anim := animation{
-		playLength: defaultPlayLength,
-		playLoop:   true,
-		directions: make([]animationDirection, dcc.NumberOfDirections),
-		effect:     effect,
-	}
-
-	DCC := DCCAnimation{
-		animation: anim,
-		dccPath:   dccPath,
-		palette:   palette,
-		renderer:  renderer,
-	}
-
-	err = DCC.SetDirection(0)
-	if err != nil {
-		return nil, err
-	}
-
-	return &DCC, nil
 }
 
 // Clone creates a copy of the animation
@@ -79,7 +50,7 @@ func (a *DCCAnimation) SetDirection(directionIndex int) error {
 }
 
 func (a *DCCAnimation) decodeDirection(directionIndex int) error {
-	dcc, err := loadDCC(a.dccPath)
+	dcc, err := a.loadDCC(a.dccPath)
 	if err != nil {
 		return err
 	}

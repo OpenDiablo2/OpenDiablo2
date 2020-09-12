@@ -35,10 +35,10 @@ func main() {
 		panic(err)
 	}
 
-	if err := d2asset.Initialize(renderer, nil); err != nil {
+	asset, err := d2asset.Initialize(renderer, nil)
+	if err != nil {
 		panic(err)
 	}
-	asset := d2asset.Singleton
 
 	audio, err := ebiten2.CreateAudio(asset)
 	if err != nil {
