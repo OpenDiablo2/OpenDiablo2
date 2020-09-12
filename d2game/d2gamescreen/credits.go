@@ -39,14 +39,17 @@ type Credits struct {
 	cyclesTillNextLine int
 	doneWithCredits    bool
 
+	asset     *d2asset.AssetManager
 	renderer  d2interface.Renderer
 	navigator Navigator
 	uiManager *d2ui.UIManager
 }
 
 // CreateCredits creates an instance of the credits screen
-func CreateCredits(navigator Navigator, renderer d2interface.Renderer, ui *d2ui.UIManager) *Credits {
+func CreateCredits(navigator Navigator, asset *d2asset.AssetManager, renderer d2interface.Renderer,
+	ui *d2ui.UIManager) *Credits {
 	result := &Credits{
+		asset:              asset,
 		labels:             make([]*labelItem, 0),
 		cycleTime:          0,
 		doneWithCredits:    false,
@@ -86,7 +89,7 @@ func (v *Credits) LoadContributors() []string {
 
 // OnLoad is called to load the resources for the credits screen
 func (v *Credits) OnLoad(loading d2screen.LoadingState) {
-	animation, _ := d2asset.LoadAnimation(d2resource.CreditsBackground, d2resource.PaletteSky)
+	animation, _ := v.asset.LoadAnimation(d2resource.CreditsBackground, d2resource.PaletteSky)
 	v.creditsBackground, _ = v.uiManager.NewSprite(animation)
 	v.creditsBackground.SetPosition(creditsX, creditsY)
 	loading.Progress(twentyPercent)
@@ -96,7 +99,7 @@ func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 	loading.Progress(fourtyPercent)
 
-	fileData, err := d2asset.LoadFile(d2resource.CreditsText)
+	fileData, err := v.asset.LoadFile(d2resource.CreditsText)
 	if err != nil {
 		loading.Error(err)
 		return

@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
@@ -28,13 +29,18 @@ func main() {
 		panic(err)
 	}
 
-	// Initialize our providers
+	// NewAssetManager our providers
 	renderer, err := ebiten.CreateRenderer()
 	if err != nil {
 		panic(err)
 	}
 
-	audio, err := ebiten2.CreateAudio()
+	asset, err := d2asset.NewAssetManager(renderer, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	audio, err := ebiten2.CreateAudio(asset)
 	if err != nil {
 		panic(err)
 	}
@@ -46,9 +52,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	asset.BindTerminalCommands(term)
+
 	scriptEngine := d2script.CreateScriptEngine()
 
-	app := d2app.Create(GitBranch, GitCommit, inputManager, term, scriptEngine, audio, renderer)
+	app := d2app.Create(GitBranch, GitCommit, inputManager, term, scriptEngine, audio, renderer, asset)
 	if err := app.Run(); err != nil {
 		log.Fatal(err)
 	}

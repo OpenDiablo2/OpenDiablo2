@@ -16,6 +16,7 @@ import (
 
 // Inventory represents the inventory
 type Inventory struct {
+	asset      *d2asset.AssetManager
 	uiManager  *d2ui.UIManager
 	frame      *d2ui.Sprite
 	panel      *d2ui.Sprite
@@ -32,13 +33,15 @@ type Inventory struct {
 }
 
 // NewInventory creates an inventory instance and returns a pointer to it
-func NewInventory(ui *d2ui.UIManager, record *d2datadict.InventoryRecord) *Inventory {
+func NewInventory(asset *d2asset.AssetManager, ui *d2ui.UIManager,
+	record *d2datadict.InventoryRecord) *Inventory {
 	hoverLabel := ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
 	hoverLabel.Alignment = d2gui.HorizontalAlignCenter
 
 	return &Inventory{
+		asset:      asset,
 		uiManager:  ui,
-		grid:       NewItemGrid(ui, record),
+		grid:       NewItemGrid(asset, ui, record),
 		originX:    record.Panel.Left,
 		hoverLabel: hoverLabel,
 		// originY: record.Panel.Top,
@@ -68,10 +71,10 @@ func (g *Inventory) Close() {
 
 // Load loads the resources required by the inventory
 func (g *Inventory) Load() {
-	animation, _ := d2asset.LoadAnimation(d2resource.Frame, d2resource.PaletteSky)
+	animation, _ := g.asset.LoadAnimation(d2resource.Frame, d2resource.PaletteSky)
 	g.frame, _ = g.uiManager.NewSprite(animation)
 
-	animation, _ = d2asset.LoadAnimation(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
+	animation, _ = g.asset.LoadAnimation(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 	g.panel, _ = g.uiManager.NewSprite(animation)
 	items := []InventoryItem{
 		diablo2item.NewItem("kit", "Crimson", "of the Bat", "of Frost").Identify(),

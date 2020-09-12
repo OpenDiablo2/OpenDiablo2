@@ -8,7 +8,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 )
 
@@ -192,7 +191,7 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 	lbl.Color[0] = d2util.Color(greyAlpha100)
 	lbl.Alignment = d2gui.HorizontalAlignCenter
 
-	animation, _ := d2asset.LoadAnimation(buttonLayout.ResourceName, buttonLayout.PaletteName)
+	animation, _ := ui.asset.LoadAnimation(buttonLayout.ResourceName, buttonLayout.PaletteName)
 	buttonSprite, _ := ui.NewSprite(animation)
 
 	for i := 0; i < buttonLayout.XSegments; i++ {

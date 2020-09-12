@@ -60,6 +60,7 @@ type App struct {
 	captureFrames     []*image.RGBA
 	gitBranch         string
 	gitCommit         string
+	asset             *d2asset.AssetManager
 	inputManager      d2interface.InputManager
 	terminal          d2interface.Terminal
 	scriptEngine      *d2script.ScriptEngine
@@ -89,8 +90,9 @@ func Create(gitBranch, gitCommit string,
 	scriptEngine *d2script.ScriptEngine,
 	audio d2interface.AudioProvider,
 	renderer d2interface.Renderer,
+	asset *d2asset.AssetManager,
 ) *App {
-	uiManager := d2ui.NewUIManager(renderer, inputManager, audio)
+	uiManager := d2ui.NewUIManager(asset, renderer, inputManager, audio)
 	screenManager := d2screen.NewScreenManager(uiManager)
 
 	result := &App{
@@ -103,6 +105,7 @@ func Create(gitBranch, gitCommit string,
 		renderer:      renderer,
 		ui:            uiManager,
 		screen:        screenManager,
+		asset:         asset,
 		tAllocSamples: createZeroedRing(nSamplesTAlloc),
 	}
 
@@ -174,11 +177,7 @@ func (a *App) initialize() error {
 		}
 	}
 
-	if err := d2asset.Initialize(a.renderer, a.terminal); err != nil {
-		return err
-	}
-
-	if err := d2gui.Initialize(a.inputManager); err != nil {
+	if err := d2gui.Initialize(a.asset, a.inputManager); err != nil {
 		return err
 	}
 
@@ -208,7 +207,7 @@ func (a *App) loadStrings() error {
 	}
 
 	for _, tablePath := range tablePaths {
-		data, err := d2asset.LoadFile(tablePath)
+		data, err := a.asset.LoadFile(tablePath)
 		if err != nil {
 			return err
 		}
@@ -298,7 +297,7 @@ func (a *App) loadDataDict() error {
 	d2datadict.InitObjectRecords()
 
 	for _, entry := range entries {
-		data, err := d2asset.LoadFile(entry.path)
+		data, err := a.asset.LoadFile(entry.path)
 		if err != nil {
 			return err
 		}
@@ -678,42 +677,51 @@ func updateInitError(target d2interface.Surface) error {
 // ToMainMenu forces the game to transition to the Main Menu
 func (a *App) ToMainMenu() {
 	buildInfo := d2gamescreen.BuildInfo{Branch: a.gitBranch, Commit: a.gitCommit}
-	mainMenu := d2gamescreen.CreateMainMenu(a, a.renderer, a.inputManager, a.audio, a.ui, buildInfo)
+
+	mainMenu := d2gamescreen.CreateMainMenu(a, a.asset, a.renderer, a.inputManager, a.audio, a.ui,
+		buildInfo)
+
 	a.screen.SetNextScreen(mainMenu)
 }
 
 // ToSelectHero forces the game to transition to the Select Hero (create character) screen
 func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType, host string) {
-	selectHero := d2gamescreen.CreateSelectHeroClass(a, a.renderer, a.audio, a.ui, connType, host)
+	selectHero := d2gamescreen.CreateSelectHeroClass(a, a.asset, a.renderer, a.audio, a.ui,
+		connType, host)
 	a.screen.SetNextScreen(selectHero)
 }
 
 // ToCreateGame forces the game to transition to the Create Game screen
 func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.ClientConnectionType, host string) {
-	gameClient, _ := d2client.Create(connType, a.scriptEngine)
+	gameClient, _ := d2client.Create(connType, a.asset, a.scriptEngine)
 
 	if err := gameClient.Open(host, filePath); err != nil {
 		// TODO an error screen should be shown in this case
 		fmt.Printf("can not connect to the host: %s", host)
 	}
 
-	a.screen.SetNextScreen(d2gamescreen.CreateGame(a, a.renderer, a.inputManager, a.audio, gameClient, a.terminal))
+	a.screen.SetNextScreen(d2gamescreen.CreateGame(a, a.asset, a.ui, a.renderer, a.inputManager,
+		a.audio, gameClient, a.terminal))
 }
 
 // ToCharacterSelect forces the game to transition to the Character Select (load character) screen
 func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnectionType, connHost string) {
-	characterSelect := d2gamescreen.CreateCharacterSelect(a, a.renderer, a.inputManager, a.audio, a.ui, connType, connHost)
+
+	characterSelect := d2gamescreen.CreateCharacterSelect(a, a.asset, a.renderer, a.inputManager,
+		a.audio, a.ui, connType, connHost)
+
 	a.screen.SetNextScreen(characterSelect)
 }
 
 // ToMapEngineTest forces the game to transition to the map engine test screen
 func (a *App) ToMapEngineTest(region, level int) {
-	met := d2gamescreen.CreateMapEngineTest(region, level, a.terminal, a.renderer, a.inputManager,
+	met := d2gamescreen.CreateMapEngineTest(region, level, a.asset, a.terminal, a.renderer,
+		a.inputManager,
 		a.audio, a.screen)
 	a.screen.SetNextScreen(met)
 }
 
 // ToCredits forces the game to transition to the credits screen
 func (a *App) ToCredits() {
-	a.screen.SetNextScreen(d2gamescreen.CreateCredits(a, a.renderer, a.ui))
+	a.screen.SetNextScreen(d2gamescreen.CreateCredits(a, a.asset, a.renderer, a.ui))
 }

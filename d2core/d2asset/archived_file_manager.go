@@ -3,7 +3,6 @@ package d2asset
 import (
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
@@ -18,18 +17,10 @@ var _ d2interface.FileManager = &fileManager{}
 var _ d2interface.Cacher = &fileManager{}
 
 type fileManager struct {
+	*AssetManager
 	cache          d2interface.Cache
 	archiveManager d2interface.ArchiveManager
 	config         *d2config.Configuration
-}
-
-func createFileManager(config *d2config.Configuration,
-	archiveManager d2interface.ArchiveManager) d2interface.FileManager {
-	return &fileManager{
-		d2cache.CreateCache(fileBudget),
-		archiveManager,
-		config,
-	}
 }
 
 // LoadFileStream loads a file as a stream automatically from an archive

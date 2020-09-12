@@ -1,9 +1,6 @@
 package d2mapstamp
 
 import (
-	"math"
-	"math/rand"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
@@ -13,69 +10,22 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2path"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2object"
+)
+
+const (
+	subtilesPerTile = 5
 )
 
 // Stamp represents a pre-fabricated map stamp that can be placed on a map.
 type Stamp struct {
+	entity      *d2mapentity.MapEntityFactory
 	regionPath  string // The file path of the region
 	regionID    d2enum.RegionIdType
 	levelType   d2datadict.LevelTypeRecord   // The level type id for this stamp
 	levelPreset d2datadict.LevelPresetRecord // The level preset id for this stamp
 	tiles       []d2dt1.Tile                 // The tiles contained on this stamp
 	ds1         *d2ds1.DS1                   // The backing DS1 file for this stamp
-}
-
-// LoadStamp loads the Stamp data from file.
-func LoadStamp(levelType d2enum.RegionIdType, levelPreset, fileIndex int) *Stamp {
-	stamp := &Stamp{
-		regionID:    levelType,
-		levelType:   d2datadict.LevelTypes[levelType],
-		levelPreset: d2datadict.LevelPresets[levelPreset],
-	}
-
-	for _, levelTypeDt1 := range &stamp.levelType.Files {
-		if levelTypeDt1 != "" && levelTypeDt1 != "0" {
-			fileData, err := d2asset.LoadFile("/data/global/tiles/" + levelTypeDt1)
-			if err != nil {
-				panic(err)
-			}
-
-			dt1, _ := d2dt1.LoadDT1(fileData)
-
-			stamp.tiles = append(stamp.tiles, dt1.Tiles...)
-		}
-	}
-
-	var levelFilesToPick []string
-
-	for _, fileRecord := range stamp.levelPreset.Files {
-		if fileRecord != "" && fileRecord != "0" {
-			levelFilesToPick = append(levelFilesToPick, fileRecord)
-		}
-	}
-
-	levelIndex := int(math.Round(float64(len(levelFilesToPick)-1) * rand.Float64()))
-	if fileIndex >= 0 && fileIndex < len(levelFilesToPick) {
-		levelIndex = fileIndex
-	}
-
-	if levelFilesToPick == nil {
-		panic("no level files to pick from")
-	}
-
-	stamp.regionPath = levelFilesToPick[levelIndex]
-	fileData, err := d2asset.LoadFile("/data/global/tiles/" + stamp.regionPath)
-
-	if err != nil {
-		panic(err)
-	}
-
-	stamp.ds1, _ = d2ds1.LoadDS1(fileData)
-
-	return stamp
 }
 
 // Size returns the size of the stamp in tiles.
@@ -132,7 +82,7 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 			if monstat != nil {
 				// Temorary use of Lookup.
 				npcX, npcY := (tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y
-				npc, err := d2mapentity.NewNPC(npcX, npcY, monstat, 0)
+				npc, err := mr.entity.NewNPC(npcX, npcY, monstat, 0)
 
 				if err == nil {
 					npc.SetPaths(convertPaths(tileOffsetX, tileOffsetY, object.Paths))
@@ -153,7 +103,7 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 			objectRecord := d2datadict.Objects[lookup.ObjectsTxtId]
 
 			if objectRecord != nil {
-				entity, err := d2object.CreateObject((tileOffsetX*5)+object.X,
+				entity, err := mr.entity.NewObject((tileOffsetX*5)+object.X,
 					(tileOffsetY*5)+object.Y, objectRecord, d2resource.PaletteUnits)
 
 				if err != nil {
@@ -173,8 +123,8 @@ func convertPaths(tileOffsetX, tileOffsetY int, paths []d2path.Path) []d2path.Pa
 	for i := 0; i < len(paths); i++ {
 		result[i].Action = paths[i].Action
 		result[i].Position = d2vector.NewPosition(
-			paths[i].Position.X()+float64(tileOffsetX*5),
-			paths[i].Position.Y()+float64(tileOffsetY*5))
+			paths[i].Position.X()+float64(tileOffsetX*subtilesPerTile),
+			paths[i].Position.Y()+float64(tileOffsetY*subtilesPerTile))
 	}
 
 	return result

@@ -11,7 +11,7 @@ import (
 )
 
 func (mr *MapRenderer) generateTileCache() {
-	mr.palette, _ = loadPaletteForAct(d2enum.RegionIdType(mr.mapEngine.LevelType().ID))
+	mr.palette, _ = mr.loadPaletteForAct(d2enum.RegionIdType(mr.mapEngine.LevelType().ID))
 
 	tiles := *mr.mapEngine.Tiles()
 	for idx := range tiles {

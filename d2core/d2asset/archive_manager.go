@@ -5,7 +5,6 @@ import (
 	"path"
 	"sync"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
@@ -16,6 +15,7 @@ var _ d2interface.ArchiveManager = &archiveManager{}
 var _ d2interface.Cacher = &archiveManager{}
 
 type archiveManager struct {
+	*AssetManager
 	cache    d2interface.Cache
 	config   *d2config.Configuration
 	archives []d2interface.Archive
@@ -25,10 +25,6 @@ type archiveManager struct {
 const (
 	archiveBudget = 1024 * 1024 * 512
 )
-
-func createArchiveManager(config *d2config.Configuration) d2interface.ArchiveManager {
-	return &archiveManager{cache: d2cache.CreateCache(archiveBudget), config: config}
-}
 
 // LoadArchiveForFile loads the archive for the given (in-archive) file path
 func (am *archiveManager) LoadArchiveForFile(filePath string) (d2interface.Archive, error) {

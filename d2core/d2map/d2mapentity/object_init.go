@@ -1,4 +1,4 @@
-package d2object
+package d2mapentity
 
 import (
 	"math/rand"

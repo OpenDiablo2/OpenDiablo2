@@ -2,8 +2,9 @@ package help
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"image/color"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
@@ -25,6 +26,7 @@ const (
 
 // HelpOverlay represents the in-game overlay that toggles visibility when the h key is pressed
 type Overlay struct {
+	asset     *d2asset.AssetManager
 	isOpen    bool
 	renderer  d2interface.Renderer
 	frames    []*d2ui.Sprite
@@ -36,9 +38,12 @@ type Overlay struct {
 	layout    *d2gui.Layout
 }
 
-func NewHelpOverlay(renderer d2interface.Renderer) *Overlay {
+func NewHelpOverlay(asset *d2asset.AssetManager, renderer d2interface.Renderer,
+	ui *d2ui.UIManager) *Overlay {
 	h := &Overlay{
-		renderer: renderer,
+		asset:     asset,
+		renderer:  renderer,
+		uiManager: ui,
 	}
 
 	return h
@@ -89,7 +94,7 @@ func (h *Overlay) Load() {
 		prevY = 0
 	)
 	for frameIndex := 0; frameIndex < 7; frameIndex++ {
-		animation, _ := d2asset.LoadAnimation(d2resource.HelpBorder, d2resource.PaletteSky)
+		animation, _ := h.asset.LoadAnimation(d2resource.HelpBorder, d2resource.PaletteSky)
 		_ = animation.SetCurrentFrame(frameIndex)
 		f, _ := h.uiManager.NewSprite(animation)
 
@@ -139,7 +144,7 @@ func (h *Overlay) Load() {
 
 	// Close
 
-	anim, _ := d2asset.LoadAnimation(d2resource.SquareButton, d2resource.PaletteSky)
+	anim, _ := h.asset.LoadAnimation(d2resource.SquareButton, d2resource.PaletteSky)
 	close, _ := h.uiManager.NewSprite(anim)
 	_ = close.SetCurrentFrame(0)
 	close.SetPosition(685, 57)
@@ -339,7 +344,7 @@ func (h *Overlay) createBullet(c callout) {
 	newLabel.SetPosition(c.LabelX, c.LabelY)
 	h.text = append(h.text, newLabel)
 
-	anim, _ := d2asset.LoadAnimation(d2resource.HelpYellowBullet, d2resource.PaletteSky)
+	anim, _ := h.asset.LoadAnimation(d2resource.HelpYellowBullet, d2resource.PaletteSky)
 	newDot, _ := h.uiManager.NewSprite(anim)
 	_ = newDot.SetCurrentFrame(0)
 	newDot.SetPosition(c.DotX, c.DotY+14)
@@ -365,7 +370,7 @@ func (h *Overlay) createCallout(c callout) {
 	}
 	h.lines = append(h.lines, l)
 
-	anim, _ := d2asset.LoadAnimation(d2resource.HelpWhiteBullet, d2resource.PaletteSky)
+	anim, _ := h.asset.LoadAnimation(d2resource.HelpWhiteBullet, d2resource.PaletteSky)
 	newDot, _ := h.uiManager.NewSprite(anim)
 	_ = newDot.SetCurrentFrame(0)
 	newDot.SetPosition(c.DotX, c.DotY)

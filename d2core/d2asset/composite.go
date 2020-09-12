@@ -13,6 +13,7 @@ import (
 
 // Composite is a composite entity animation
 type Composite struct {
+	*AssetManager
 	baseType    d2enum.ObjectType
 	basePath    string
 	token       string
@@ -26,12 +27,6 @@ type Composite struct {
 type size struct {
 	Width  int
 	Height int
-}
-
-// CreateComposite creates a Composite from a given ObjectLookupRecord and palettePath.
-func CreateComposite(baseType d2enum.ObjectType, token, palettePath string) *Composite {
-	return &Composite{baseType: baseType, basePath: baseString(baseType),
-		token: token, palettePath: palettePath}
 }
 
 // Advance moves the composite animation forward for a given elapsed time in nanoseconds.
@@ -233,11 +228,11 @@ type compositeMode struct {
 
 func (c *Composite) createMode(animationMode animationMode, weaponClass string) (*compositeMode, error) {
 	cofPath := fmt.Sprintf("%s/%s/COF/%s%s%s.COF", c.basePath, c.token, c.token, animationMode, weaponClass)
-	if exists, _ := FileExists(cofPath); !exists {
+	if exists, _ := c.FileExists(cofPath); !exists {
 		return nil, errors.New("composite not found")
 	}
 
-	cof, err := loadCOF(cofPath)
+	cof, err := c.loadCOF(cofPath)
 	if err != nil {
 		return nil, err
 	}
@@ -296,8 +291,9 @@ func (c *Composite) loadCompositeLayer(layerKey, layerValue, animationMode, weap
 	}
 
 	for _, animationPath := range animationPaths {
-		if exists, _ := FileExists(animationPath); exists {
-			animation, err := LoadAnimationWithEffect(animationPath, palettePath, drawEffect)
+		if exists, _ := c.FileExists(animationPath); exists {
+			animation, err := c.LoadAnimationWithEffect(animationPath, palettePath,
+				drawEffect)
 			if err == nil {
 				return animation, nil
 			}
@@ -343,6 +339,15 @@ func (c *Composite) updateSize() {
 
 	c.size.Width = biggestW
 	c.size.Height = biggestH
+}
+
+func (c *Composite) loadCOF(cofPath string) (*d2cof.COF, error) {
+	cofData, err := c.LoadFile(cofPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return d2cof.Load(cofData)
 }
 
 func baseString(baseType d2enum.ObjectType) string {

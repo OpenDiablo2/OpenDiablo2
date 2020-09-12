@@ -1,22 +1,12 @@
 package d2gui
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
+	"errors"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
-
-type layoutEntry struct {
-	widget widget
-
-	x      int
-	y      int
-	width  int
-	height int
-
-	mouseOver bool
-	mouseDown [3]bool
-}
 
 const layoutDebug = false // turns on debug rendering stuff for layouts
 
@@ -168,7 +158,7 @@ func (l *Layout) AddLabel(text string, fontStyle FontStyle) (*Label, error) {
 
 // AddButton given a string and ButtonStyle, adds a button as a layout entry
 func (l *Layout) AddButton(text string, buttonStyle ButtonStyle) (*Button, error) {
-	button, err := createButton(l.renderer, text, buttonStyle)
+	button, err := l.createButton(l.renderer, text, buttonStyle)
 	if err != nil {
 		return nil, err
 	}
@@ -421,10 +411,88 @@ func (l *Layout) handleEntryVerticalAlign(width int, entry *layoutEntry) {
 	}
 }
 
-// IsIn layout entry, spc. of an event.
-func (l *layoutEntry) IsIn(event d2interface.HandlerEvent) bool {
-	sx, sy := l.widget.ScreenPos()
-	rect := d2geom.Rectangle{Left: sx, Top: sy, Width: l.width, Height: l.height}
+func (l *Layout) createButton(renderer d2interface.Renderer, text string,
+	buttonStyle ButtonStyle) (*Button,
+	error) {
+	config := getButtonStyleConfig(buttonStyle)
+	if config == nil {
+		return nil, errors.New("invalid button style")
+	}
 
-	return rect.IsInRect(event.X(), event.Y())
+	animation, loadErr := singleton.asset.LoadAnimation(config.animationPath, config.palettePath)
+	if loadErr != nil {
+		return nil, loadErr
+	}
+
+	var buttonWidth int
+
+	for i := 0; i < config.segmentsX; i++ {
+		w, _, err := animation.GetFrameSize(i)
+		if err != nil {
+			return nil, err
+		}
+
+		buttonWidth += w
+	}
+
+	var buttonHeight int
+
+	for i := 0; i < config.segmentsY; i++ {
+		_, h, err := animation.GetFrameSize(i * config.segmentsY)
+		if err != nil {
+			return nil, err
+		}
+
+		buttonHeight += h
+	}
+
+	font, loadErr := loadFont(config.fontStyle)
+	if loadErr != nil {
+		return nil, loadErr
+	}
+
+	textColor := rgbaColor(grey)
+	textWidth, textHeight := font.GetTextMetrics(text)
+	textX := half(buttonWidth) - half(textWidth)
+	textY := half(buttonHeight) - half(textHeight) + config.textOffset
+
+	surfaceCount := animation.GetFrameCount() / (config.segmentsX * config.segmentsY)
+	surfaces := make([]d2interface.Surface, surfaceCount)
+
+	for i := 0; i < surfaceCount; i++ {
+		surface, surfaceErr := renderer.NewSurface(buttonWidth, buttonHeight, d2enum.FilterNearest)
+		if surfaceErr != nil {
+			return nil, surfaceErr
+		}
+
+		segX, segY, frame := config.segmentsX, config.segmentsY, i
+		if segErr := renderSegmented(animation, segX, segY, frame, surface); segErr != nil {
+			return nil, segErr
+		}
+
+		font.SetColor(textColor)
+
+		var textOffsetX, textOffsetY int
+
+		switch buttonState(i) {
+		case buttonStatePressed, buttonStatePressedToggled:
+			textOffsetX = -2
+			textOffsetY = 2
+		}
+
+		surface.PushTranslation(textX+textOffsetX, textY+textOffsetY)
+		surfaceErr = font.RenderText(text, surface)
+		surface.Pop()
+
+		if surfaceErr != nil {
+			return nil, surfaceErr
+		}
+
+		surfaces[i] = surface
+	}
+
+	button := &Button{width: buttonWidth, height: buttonHeight, surfaces: surfaces}
+	button.SetVisible(true)
+
+	return button, nil
 }

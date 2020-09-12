@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"image"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
@@ -269,6 +268,7 @@ func (hri *HeroRenderInfo) advance(elapsed float64) {
 
 // SelectHeroClass represents the Select Hero Class screen
 type SelectHeroClass struct {
+	asset              *d2asset.AssetManager
 	uiManager          *d2ui.UIManager
 	bgImage            *d2ui.Sprite
 	campfire           *d2ui.Sprite
@@ -298,6 +298,7 @@ type SelectHeroClass struct {
 // CreateSelectHeroClass creates an instance of a SelectHeroClass
 func CreateSelectHeroClass(
 	navigator Navigator,
+	manager *d2asset.AssetManager,
 	renderer d2interface.Renderer,
 	audioProvider d2interface.AudioProvider,
 	ui *d2ui.UIManager,
@@ -732,7 +733,7 @@ func (v *SelectHeroClass) loadSprite(animationPath string, position image.Point,
 		return nil
 	}
 
-	animation, err := d2asset.LoadAnimation(animationPath, d2resource.PaletteFechar)
+	animation, err := v.asset.LoadAnimation(animationPath, d2resource.PaletteFechar)
 	if err != nil {
 		fmt.Printf("could not load animation: %s\n", animationPath)
 		return nil

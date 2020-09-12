@@ -111,6 +111,7 @@ type MainMenu struct {
 	screenMode          mainMenuScreenMode
 	leftButtonHeld      bool
 
+	asset         *d2asset.AssetManager
 	inputManager  d2interface.InputManager
 	renderer      d2interface.Renderer
 	audioProvider d2interface.AudioProvider
@@ -124,6 +125,7 @@ type MainMenu struct {
 // CreateMainMenu creates an instance of MainMenu
 func CreateMainMenu(
 	navigator Navigator,
+	asset *d2asset.AssetManager,
 	renderer d2interface.Renderer,
 	inputManager d2interface.InputManager,
 	audioProvider d2interface.AudioProvider,
@@ -131,6 +133,7 @@ func CreateMainMenu(
 	buildInfo BuildInfo,
 ) *MainMenu {
 	return &MainMenu{
+		asset:          asset,
 		screenMode:     ScreenModeUnknown,
 		leftButtonHeld: true,
 		renderer:       renderer,
@@ -169,19 +172,19 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 }
 
 func (v *MainMenu) loadBackgroundSprites() {
-	animation, _ := d2asset.LoadAnimation(d2resource.GameSelectScreen, d2resource.PaletteSky)
+	animation, _ := v.asset.LoadAnimation(d2resource.GameSelectScreen, d2resource.PaletteSky)
 	v.background, _ = v.uiManager.NewSprite(animation)
 	v.background.SetPosition(backgroundX, backgroundY)
 
-	animation, _ = d2asset.LoadAnimation(d2resource.TrademarkScreen, d2resource.PaletteSky)
+	animation, _ = v.asset.LoadAnimation(d2resource.TrademarkScreen, d2resource.PaletteSky)
 	v.trademarkBackground, _ = v.uiManager.NewSprite(animation)
 	v.trademarkBackground.SetPosition(backgroundX, backgroundY)
 
-	animation, _ = d2asset.LoadAnimation(d2resource.TCPIPBackground, d2resource.PaletteSky)
+	animation, _ = v.asset.LoadAnimation(d2resource.TCPIPBackground, d2resource.PaletteSky)
 	v.tcpIPBackground, _ = v.uiManager.NewSprite(animation)
 	v.tcpIPBackground.SetPosition(backgroundX, backgroundY)
 
-	animation, _ = d2asset.LoadAnimation(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
+	animation, _ = v.asset.LoadAnimation(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
 	v.serverIPBackground, _ = v.uiManager.NewSprite(animation)
 	v.serverIPBackground.SetPosition(serverIPbackgroundX, serverIPbackgroundY)
 }
@@ -233,24 +236,24 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 }
 
 func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
-	animation, _ := d2asset.LoadAnimation(d2resource.Diablo2LogoFireLeft, d2resource.PaletteUnits)
+	animation, _ := v.asset.LoadAnimation(d2resource.Diablo2LogoFireLeft, d2resource.PaletteUnits)
 	v.diabloLogoLeft, _ = v.uiManager.NewSprite(animation)
 	v.diabloLogoLeft.SetEffect(d2enum.DrawEffectModulate)
 	v.diabloLogoLeft.PlayForward()
 	v.diabloLogoLeft.SetPosition(diabloLogoX, diabloLogoY)
 	loading.Progress(sixtyPercent)
 
-	animation, _ = d2asset.LoadAnimation(d2resource.Diablo2LogoFireRight, d2resource.PaletteUnits)
+	animation, _ = v.asset.LoadAnimation(d2resource.Diablo2LogoFireRight, d2resource.PaletteUnits)
 	v.diabloLogoRight, _ = v.uiManager.NewSprite(animation)
 	v.diabloLogoRight.SetEffect(d2enum.DrawEffectModulate)
 	v.diabloLogoRight.PlayForward()
 	v.diabloLogoRight.SetPosition(diabloLogoX, diabloLogoY)
 
-	animation, _ = d2asset.LoadAnimation(d2resource.Diablo2LogoBlackLeft, d2resource.PaletteUnits)
+	animation, _ = v.asset.LoadAnimation(d2resource.Diablo2LogoBlackLeft, d2resource.PaletteUnits)
 	v.diabloLogoLeftBack, _ = v.uiManager.NewSprite(animation)
 	v.diabloLogoLeftBack.SetPosition(diabloLogoX, diabloLogoY)
 
-	animation, _ = d2asset.LoadAnimation(d2resource.Diablo2LogoBlackRight, d2resource.PaletteUnits)
+	animation, _ = v.asset.LoadAnimation(d2resource.Diablo2LogoBlackRight, d2resource.PaletteUnits)
 	v.diabloLogoRightBack, _ = v.uiManager.NewSprite(animation)
 	v.diabloLogoRightBack.SetPosition(diabloLogoX, diabloLogoY)
 }

@@ -6,7 +6,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 func loadFont(fontStyle FontStyle) (d2interface.Font, error) {
@@ -15,7 +14,8 @@ func loadFont(fontStyle FontStyle) (d2interface.Font, error) {
 		return nil, errors.New("invalid font style")
 	}
 
-	return d2asset.LoadFont(config.fontBasePath+".tbl", config.fontBasePath+".dc6", config.palettePath)
+	return singleton.asset.LoadFont(config.fontBasePath+".tbl", config.fontBasePath+".dc6",
+		config.palettePath)
 }
 
 func renderSegmented(animation d2interface.Animation, segmentsX, segmentsY, frameOffset int,

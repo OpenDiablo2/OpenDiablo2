@@ -1,18 +1,14 @@
 // Package d2object implements objects placed on the map and their functionality
-package d2object
+package d2mapentity
 
 import (
 	"fmt"
 	"math/rand"
 
-	uuid "github.com/satori/go.uuid"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
@@ -26,36 +22,6 @@ type Object struct {
 	objectRecord *d2datadict.ObjectRecord
 	drawLayer    int
 	name         string
-}
-
-// CreateObject creates an instance of AnimatedComposite
-func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath string) (*Object, error) {
-	locX, locY := float64(x), float64(y)
-	entity := &Object{
-		uuid:         uuid.NewV4().String(),
-		objectRecord: objectRec,
-		Position:     d2vector.NewPosition(locX, locY),
-		name:         d2tbl.TranslateString(objectRec.Name),
-	}
-	objectType := &d2datadict.ObjectTypes[objectRec.Index]
-
-	composite, err := d2asset.LoadComposite(d2enum.ObjectTypeItem, objectType.Token,
-		d2resource.PaletteUnits)
-	if err != nil {
-		return nil, err
-	}
-
-	entity.composite = composite
-
-	if err := entity.setMode(d2enum.ObjectAnimationModeNeutral, 0, false); err != nil {
-		return nil, err
-	}
-
-	if _, err := initObject(entity); err != nil {
-		return nil, err
-	}
-
-	return entity, nil
 }
 
 // setMode changes the graphical mode of this animated entity

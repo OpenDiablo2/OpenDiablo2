@@ -5,12 +5,12 @@ import (
 	"math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 type manager struct {
+	asset         *d2asset.AssetManager
 	layout        *Layout
 	cursorAnim    d2interface.Animation
 	cursorX       int
@@ -20,18 +20,19 @@ type manager struct {
 	loading       bool
 }
 
-func createGuiManager(inputManager d2interface.InputManager) (*manager, error) {
-	cursorAnim, err := d2asset.LoadAnimation(d2resource.CursorDefault, d2resource.PaletteUnits)
+func createGuiManager(asset *d2asset.AssetManager, inputManager d2interface.InputManager) (*manager, error) {
+	cursorAnim, err := asset.LoadAnimation(d2resource.CursorDefault, d2resource.PaletteUnits)
 	if err != nil {
 		return nil, err
 	}
 
-	loadingAnim, err := d2asset.LoadAnimation(d2resource.LoadingScreen, d2resource.PaletteLoading)
+	loadingAnim, err := asset.LoadAnimation(d2resource.LoadingScreen, d2resource.PaletteLoading)
 	if err != nil {
 		return nil, err
 	}
 
 	manager := &manager{
+		asset:         asset,
 		cursorAnim:    cursorAnim,
 		loadingAnim:   loadingAnim,
 		cursorVisible: true,

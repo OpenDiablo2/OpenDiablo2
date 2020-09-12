@@ -1,8 +1,6 @@
 package d2asset
 
 import (
-	"encoding/binary"
-	"errors"
 	"image/color"
 	"strings"
 
@@ -23,45 +21,6 @@ type Font struct {
 	sheet  d2interface.Animation
 	glyphs map[rune]fontGlyph
 	color  color.Color
-}
-
-func loadFont(tablePath, spritePath, palettePath string) (d2interface.Font, error) {
-	sheet, err := LoadAnimation(spritePath, palettePath)
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := LoadFile(tablePath)
-	if err != nil {
-		return nil, err
-	}
-
-	if string(data[:5]) != "Woo!\x01" {
-		return nil, errors.New("invalid font table format")
-	}
-
-	_, maxCharHeight := sheet.GetFrameBounds()
-
-	glyphs := make(map[rune]fontGlyph)
-
-	for i := 12; i < len(data); i += 14 {
-		code := rune(binary.LittleEndian.Uint16(data[i : i+2]))
-
-		var glyph fontGlyph
-		glyph.frame = int(binary.LittleEndian.Uint16(data[i+8 : i+10]))
-		glyph.width = int(data[i+3])
-		glyph.height = maxCharHeight
-
-		glyphs[code] = glyph
-	}
-
-	font := &Font{
-		sheet:  sheet,
-		glyphs: glyphs,
-		color:  color.White,
-	}
-
-	return font, nil
 }
 
 // SetColor sets the fonts color

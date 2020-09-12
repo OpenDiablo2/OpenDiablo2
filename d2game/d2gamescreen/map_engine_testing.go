@@ -7,17 +7,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 )
@@ -87,6 +84,7 @@ func getRegions() []regionSpec {
 
 // MapEngineTest represents the MapEngineTest screen
 type MapEngineTest struct {
+	asset         *d2asset.AssetManager
 	gameState     *d2player.PlayerState
 	mapEngine     *d2mapengine.MapEngine
 	mapRenderer   *d2maprenderer.MapRenderer
@@ -112,6 +110,7 @@ type MapEngineTest struct {
 // CreateMapEngineTest creates the Map Engine Test screen and returns a pointer to it
 func CreateMapEngineTest(currentRegion,
 	levelPreset int,
+	asset *d2asset.AssetManager,
 	term d2interface.Terminal,
 	renderer d2interface.Renderer,
 	inputManager d2interface.InputManager,
@@ -124,6 +123,7 @@ func CreateMapEngineTest(currentRegion,
 		fileIndex:     0,
 		regionSpec:    regionSpec{},
 		filesCount:    0,
+		asset:         asset,
 		terminal:      term,
 		renderer:      renderer,
 		inputManager:  inputManager,
@@ -171,7 +171,7 @@ func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 		met.mapEngine.SetSeed(time.Now().UnixNano())
 		d2mapgen.GenerateAct1Overworld(met.mapEngine)
 	} else {
-		met.mapEngine = d2mapengine.CreateMapEngine() // necessary for map name update
+		met.mapEngine = d2mapengine.CreateMapEngine(met.asset) // necessary for map name update
 		met.mapEngine.SetSeed(time.Now().UnixNano())
 		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 	}
@@ -193,11 +193,12 @@ func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 
 	loading.Progress(twentyPercent)
 
-	met.mapEngine = d2mapengine.CreateMapEngine()
+	met.mapEngine = d2mapengine.CreateMapEngine(met.asset)
 
 	loading.Progress(fiftyPercent)
 
-	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.renderer, met.mapEngine, met.terminal, 0.0, 0.0)
+	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.asset, met.renderer, met.mapEngine,
+		met.terminal, 0.0, 0.0)
 
 	loading.Progress(seventyPercent)
 	met.loadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)

@@ -3,7 +3,6 @@ package d2gui
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 // AnimationDirection is a the animation play direction
@@ -32,7 +31,7 @@ type AnimatedSprite struct {
 }
 
 func createSprite(imagePath, palettePath string) (*Sprite, error) {
-	animation, err := d2asset.LoadAnimation(imagePath, palettePath)
+	animation, err := singleton.asset.LoadAnimation(imagePath, palettePath)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +44,7 @@ func createSprite(imagePath, palettePath string) (*Sprite, error) {
 }
 
 func createAnimatedSprite(imagePath, palettePath string, direction AnimationDirection) (*AnimatedSprite, error) {
-	animation, err := d2asset.LoadAnimation(imagePath, palettePath)
+	animation, err := singleton.asset.LoadAnimation(imagePath, palettePath)
 	if err != nil {
 		return nil, err
 	}

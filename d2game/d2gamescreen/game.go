@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 
@@ -30,6 +32,8 @@ const (
 
 // Game represents the Gameplay screen
 type Game struct {
+	*d2mapentity.MapEntityFactory
+	asset                *d2asset.AssetManager
 	gameClient           *d2client.GameClient
 	mapRenderer          *d2maprenderer.MapRenderer
 	uiManager            *d2ui.UIManager
@@ -50,6 +54,8 @@ type Game struct {
 // CreateGame creates the Gameplay screen and returns a pointer to it
 func CreateGame(
 	navigator Navigator,
+	asset *d2asset.AssetManager,
+	ui *d2ui.UIManager,
 	renderer d2interface.Renderer,
 	inputManager d2interface.InputManager,
 	audioProvider d2interface.AudioProvider,
@@ -71,19 +77,21 @@ func CreateGame(
 	}
 
 	result := &Game{
+		asset:                asset,
 		gameClient:           gameClient,
 		gameControls:         nil,
 		localPlayer:          nil,
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
-		mapRenderer:          d2maprenderer.CreateMapRenderer(renderer, gameClient.MapEngine, term, startX, startY),
-		escapeMenu:           NewEscapeMenu(navigator, renderer, audioProvider),
-		inputManager:         inputManager,
-		audioProvider:        audioProvider,
-		renderer:             renderer,
-		terminal:             term,
-		soundEngine:          d2audio.NewSoundEngine(audioProvider, term),
-		uiManager:            d2ui.NewUIManager(renderer, inputManager, audioProvider),
+		mapRenderer: d2maprenderer.CreateMapRenderer(asset, renderer,
+			gameClient.MapEngine, term, startX, startY),
+		escapeMenu:    NewEscapeMenu(navigator, renderer, audioProvider),
+		inputManager:  inputManager,
+		audioProvider: audioProvider,
+		renderer:      renderer,
+		terminal:      term,
+		soundEngine:   d2audio.NewSoundEngine(audioProvider, term),
+		uiManager:     ui,
 	}
 	result.soundEnv = d2audio.NewSoundEnvironment(result.soundEngine)
 
@@ -135,12 +143,13 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 				v.terminal.OutputErrorf("no monstat entry for \"%s\"", name)
 				return
 			}
-			var monster *d2mapentity.NPC
-			monster, err = d2mapentity.NewNPC(x, y, monstat, 0)
+
+			monster, err := v.gameClient.MapEngine.NewNPC(x, y, monstat, 0)
 			if err != nil {
 				v.terminal.OutputErrorf("error generating monster \"%s\": %v", name, err)
 				return
 			}
+
 			v.gameClient.MapEngine.AddEntity(monster)
 		},
 	)
@@ -266,7 +275,7 @@ func (v *Game) bindGameControls() error {
 		v.localPlayer = player
 
 		var err error
-		v.gameControls, err = d2player.NewGameControls(v.renderer, player,
+		v.gameControls, err = d2player.NewGameControls(v.asset, v.renderer, player,
 			v.gameClient.MapEngine, v.mapRenderer, v, v.terminal, v.uiManager, v.gameClient.IsSinglePlayer())
 
 		if err != nil {

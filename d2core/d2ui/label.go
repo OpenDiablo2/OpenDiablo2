@@ -8,7 +8,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 )
 
@@ -26,7 +25,7 @@ type Label struct {
 
 // NewLabel creates a new instance of a UI label
 func (ui *UIManager) NewLabel(fontPath, palettePath string) *Label {
-	font, _ := d2asset.LoadFont(fontPath+".tbl", fontPath+".dc6", palettePath)
+	font, _ := ui.asset.LoadFont(fontPath+".tbl", fontPath+".dc6", palettePath)
 	result := &Label{
 		Alignment: d2gui.HorizontalAlignLeft,
 		Color:     map[int]color.Color{0: color.White},
