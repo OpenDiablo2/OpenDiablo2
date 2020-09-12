@@ -7,6 +7,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 )
 
+// TextDictionary is a string map
+type TextDictionary map[string]string
+
 type textDictionaryHashEntry struct {
 	IsActive    bool
 	Index       uint16
@@ -16,7 +19,7 @@ type textDictionaryHashEntry struct {
 	NameLength  uint16
 }
 
-var lookupTable map[string]string //nolint:gochecknoglobals // currently global by design
+var lookupTable TextDictionary //nolint:gochecknoglobals // currently global by design
 
 const (
 	crcByteCount = 2
@@ -35,9 +38,9 @@ func TranslateString(key string) string {
 }
 
 // LoadTextDictionary loads the text dictionary from the given data
-func LoadTextDictionary(dictionaryData []byte) map[string]string {
+func LoadTextDictionary(dictionaryData []byte) TextDictionary {
 	if lookupTable == nil {
-		lookupTable = make(map[string]string)
+		lookupTable = make(TextDictionary)
 	}
 
 	br := d2datautils.CreateStreamReader(dictionaryData)

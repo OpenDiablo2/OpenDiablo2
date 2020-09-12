@@ -1,6 +1,11 @@
 package types
 
-import "strings"
+import (
+	"path/filepath"
+	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
+)
 
 // SourceType represents the type of the asset source
 type SourceType int
@@ -26,4 +31,14 @@ func Ext2SourceType(ext string) SourceType {
 	}
 
 	return AssetSourceUnknown
+}
+
+func CheckSourceType(path string) SourceType {
+	if _, err := d2mpq.Load(path); err == nil {
+		return AssetSourceMPQ
+	}
+
+	ext := filepath.Ext(path)
+
+	return Ext2SourceType(ext)
 }

@@ -1,6 +1,8 @@
 package mpq
 
 import (
+	"fmt"
+	"io"
 	"path/filepath"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -8,12 +10,17 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset/types"
 )
 
+const (
+	bufLength = 32
+)
+
 // static check that Asset implements Asset
 var _ asset.Asset = &Asset{}
 
 // Asset represents a file record within an MPQ archive
 type Asset struct {
-	stream d2interface.ArchiveDataStream
+	stream d2interface.DataStream
+	data   []byte
 	path   string
 	source *Source
 }
@@ -35,12 +42,56 @@ func (a *Asset) Path() string {
 
 // Read will read asset data into the given buffer
 func (a *Asset) Read(buf []byte) (n int, err error) {
-	return a.stream.Read(buf)
+	totalRead, err := a.stream.Read(buf)
+	if totalRead == 0 {
+		return 0, io.EOF
+	}
+
+	return totalRead, nil
 }
 
 // Seek will seek the read position for the next read operation
 func (a *Asset) Seek(offset int64, whence int) (n int64, err error) {
 	return a.stream.Seek(offset, whence)
+}
+
+// Seek will seek the read position for the next read operation
+func (a *Asset) Close() (err error) {
+	_, err = a.Seek(0, 0)
+	return err
+}
+
+// Data returns the raw file data as a slice of bytes
+func (a *Asset) Data() ([]byte, error) {
+	if a.stream == nil {
+		return nil, fmt.Errorf("asset has no file: %s", a.Path())
+	}
+
+	if a.data != nil {
+		return a.data, nil
+	}
+
+	_, seekErr := a.Seek(0, 0)
+	if seekErr != nil {
+		return nil, seekErr
+	}
+
+	buf := make([]byte, bufLength)
+	data := make([]byte, 0)
+
+	for {
+		numBytesRead, readErr := a.Read(buf)
+
+		data = append(data, buf[:numBytesRead]...)
+
+		if readErr != nil || numBytesRead == 0 {
+			break
+		}
+	}
+
+	a.data = data
+
+	return data, nil
 }
 
 // Path returns the path

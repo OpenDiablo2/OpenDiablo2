@@ -1,11 +1,10 @@
 package d2loader
 
 import (
-	"errors"
 	"fmt"
-
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -13,19 +12,35 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset/types"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/filesystem"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/mpq"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
 const (
 	defaultCacheBudget      = 1024 * 1024 * 512
 	defaultCacheEntryWeight = 1
-	errFileNotFound         = "file not found"
+	errFmtFileNotFound      = "file not found: %s"
+)
+
+const (
+	defaultLanguage = "ENG"
+)
+
+const (
+	fontToken  = d2resource.LanguageFontToken
+	tableToken = d2resource.LanguageTableToken
 )
 
 // NewLoader creates a new loader
-func NewLoader() *Loader {
-	loader := &Loader{}
+func NewLoader(config *d2config.Configuration) *Loader {
+	loader := &Loader{
+		config: config,
+	}
+
 	loader.Cache = d2cache.CreateCache(defaultCacheBudget)
+
+	loader.initFromConfig()
 
 	return loader
 }
@@ -33,20 +48,43 @@ func NewLoader() *Loader {
 // Loader represents the manager that handles loading and caching assets with the asset Sources
 // that have been added
 type Loader struct {
+	config *d2config.Configuration
 	d2interface.Cache
 	*d2util.Logger
 	Sources []asset.Source
 }
 
-// Load attempts to load an asset with the given sub-path. The sub-path is relative to the root
+func (l *Loader) initFromConfig() {
+	if l.config == nil {
+		return
+	}
+
+	for _, mpqName := range l.config.MpqLoadOrder {
+		cleanDir := filepath.Clean(l.config.MpqPath)
+		srcPath := filepath.Join(cleanDir, mpqName)
+		l.AddSource(srcPath)
+	}
+}
+
+// LoadFileStream attempts to load an asset with the given sub-path. The sub-path is relative to the root
 // of each asset source root (regardless of the type of asset source)
 func (l *Loader) Load(subPath string) (asset.Asset, error) {
+	lang := defaultLanguage
+
+	if l.config != nil {
+		lang = l.config.Language
+	}
+
 	subPath = filepath.Clean(subPath)
+	subPath = strings.ReplaceAll(subPath, fontToken, "latin")
+	subPath = strings.ReplaceAll(subPath, tableToken, lang)
 
 	// first, we check the cache for an existing entry
 	if cached, found := l.Retrieve(subPath); found {
 		l.Debug(fmt.Sprintf("file `%s` exists in loader cache", subPath))
-		return cached.(asset.Asset), nil
+		a := cached.(asset.Asset)
+		a.Seek(0, 0)
+		return a, nil
 	}
 
 	// if it isn't in the cache, we check if each source can open the file
@@ -60,7 +98,7 @@ func (l *Loader) Load(subPath string) (asset.Asset, error) {
 		}
 	}
 
-	return nil, errors.New(errFileNotFound)
+	return nil, fmt.Errorf(errFmtFileNotFound, subPath)
 }
 
 // AddSource adds an asset source with the given path. The path will either resolve to a directory
@@ -89,8 +127,7 @@ func (l *Loader) AddSource(path string) (asset.Source, error) {
 	}
 
 	if mode.IsRegular() {
-		ext := filepath.Ext(cleanPath)
-		sourceType = types.Ext2SourceType(ext)
+		sourceType = types.CheckSourceType(cleanPath)
 	}
 
 	switch sourceType {

@@ -76,7 +76,7 @@ func NewHeroStatsPanel(asset *d2asset.AssetManager, ui *d2ui.UIManager, heroName
 	}
 }
 
-// Load loads the data for the hero status panel
+// Load the data for the hero status panel
 func (s *HeroStatsPanel) Load() {
 	animation, _ := s.asset.LoadAnimation(d2resource.Frame, d2resource.PaletteSky)
 	s.frame, _ = s.uiManager.NewSprite(animation)

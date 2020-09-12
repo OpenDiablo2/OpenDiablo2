@@ -379,7 +379,7 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	return false
 }
 
-// Load loads the resources required for the GameControls
+// Load the resources required for the GameControls
 func (g *GameControls) Load() {
 	animation, _ := g.asset.LoadAnimation(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
 	g.globeSprite, _ = g.uiManager.NewSprite(animation)

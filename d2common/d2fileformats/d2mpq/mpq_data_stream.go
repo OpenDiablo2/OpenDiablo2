@@ -2,7 +2,7 @@ package d2mpq
 
 import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
-var _ d2interface.ArchiveDataStream = &MpqDataStream{} // Static check to confirm struct conforms to interface
+var _ d2interface.DataStream = &MpqDataStream{} // Static check to confirm struct conforms to interface
 
 // MpqDataStream represents a stream for MPQ data.
 type MpqDataStream struct {
