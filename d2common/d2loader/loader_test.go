@@ -74,7 +74,6 @@ func TestLoader_AddSource(t *testing.T) {
 		t.Error("source path not the same as what we added")
 	}
 
-
 	if sourceE != nil {
 		t.Error("source for bad path should be nil")
 	}

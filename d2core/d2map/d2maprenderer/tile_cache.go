@@ -1,12 +1,12 @@
 package d2maprenderer
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 

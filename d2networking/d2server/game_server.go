@@ -5,31 +5,32 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server/d2tcpclientconnection"
 	"log"
 	"net"
 	"sync"
 	"time"
+
+	"github.com/robertkrimen/otto"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server/d2tcpclientconnection"
 	"github.com/OpenDiablo2/OpenDiablo2/d2script"
-	"github.com/robertkrimen/otto"
 )
 
 const (
-	Port                   = "6669"
-	ChunkSize          int = 4096
+	port                   = "6669"
+	chunkSize          int = 4096
 	subtilesPerTile        = 5
 	middleOfTileOffset     = 3
 )
 
 var (
-	ErrPlayerAlreadyExists = errors.New("player already exists")
-	ErrServerFull          = errors.New("server full") // Server currently at maximum TCP connections
+	errPlayerAlreadyExists = errors.New("player already exists")
+	errServerFull          = errors.New("server full") // Server currently at maximum TCP connections
 )
 
 // GameServer manages a copy of the map and entities as well as manages packet routing and connections.
@@ -102,12 +103,13 @@ func NewGameServer(networkServer bool, maxConnections ...int) (*GameServer, erro
 // Start essentially starts all of the game server go routines as well as begins listening for connection. This will
 // return an error if it is unable to bind to a socket.
 func (g *GameServer) Start() error {
-	listenerAddress := "127.0.0.1:" + Port
+	listenerAddress := "127.0.0.1:" + port
 	if g.networkServer {
-		listenerAddress = "0.0.0.0:" + Port
+		listenerAddress = "0.0.0.0:" + port
 	}
 
 	log.Printf("Starting Game Server @ %s\n", listenerAddress)
+
 	l, err := net.Listen("tcp4", listenerAddress)
 	if err != nil {
 		return err
@@ -132,11 +134,14 @@ func (g *GameServer) Start() error {
 	return nil
 }
 
+// Stop stops the game server
 func (g *GameServer) Stop() {
 	g.Lock()
 	g.cancel()
 
-	g.listener.Close()
+	if err := g.listener.Close(); err != nil {
+		log.Printf("failed to close the listener %s, err: %v\n", g.listener.Addr(), err)
+	}
 }
 
 // packetManager is meant to be started as a Goroutine and is used to manage routing of packets to clients.
@@ -155,6 +160,7 @@ func (g *GameServer) packetManager() {
 				if err != nil {
 					log.Printf("Unable to unmarshal PlayerConnectionRequestPacket: %s\n", err)
 				}
+
 				g.sendPacketToClients(player)
 			case d2netpackettype.MovePlayer:
 				move, err := d2netpacket.UnmarshalNetPacket(p)
@@ -162,6 +168,7 @@ func (g *GameServer) packetManager() {
 					log.Println(err)
 					continue
 				}
+
 				g.sendPacketToClients(move)
 			case d2netpackettype.SpawnItem:
 				item, err := d2netpacket.UnmarshalNetPacket(p)
@@ -169,6 +176,7 @@ func (g *GameServer) packetManager() {
 					log.Println(err)
 					continue
 				}
+
 				g.sendPacketToClients(item)
 			case d2netpackettype.ServerClosed:
 				g.Stop()
@@ -179,7 +187,9 @@ func (g *GameServer) packetManager() {
 
 func (g *GameServer) sendPacketToClients(packet d2netpacket.NetPacket) {
 	for _, c := range g.connections {
-		c.SendPacketToClient(packet)
+		if err := c.SendPacketToClient(packet); err != nil {
+			log.Printf("GameServer: error sending packet: %s to client %s: %s", packet.PacketType, c.GetUniqueID(), err)
+		}
 	}
 }
 
@@ -187,10 +197,16 @@ func (g *GameServer) sendPacketToClients(packet d2netpacket.NetPacket) {
 // via Go Routine. Context should be a property of the GameServer Struct.
 func (g *GameServer) handleConnection(conn net.Conn) {
 	var connected int
+
 	var packet d2netpacket.NetPacket
 
-	log.Printf("Accepting connection: %s", conn.RemoteAddr().String())
-	defer conn.Close()
+	log.Printf("Accepting connection: %s\n", conn.RemoteAddr().String())
+
+	defer func() {
+		if err := conn.Close(); err != nil {
+			log.Printf("failed to close the connection: %s\n", conn.RemoteAddr())
+		}
+	}()
 
 	decoder := json.NewDecoder(conn)
 
@@ -212,11 +228,11 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 			// TODO: I do not think this error check actually works. Need to retrofit with Errors.Is().
 			if err := g.registerConnection(packet.PacketData, conn); err != nil {
 				switch err {
-				case ErrServerFull: // Server is currently full and not accepting new connections.
+				case errServerFull: // Server is currently full and not accepting new connections.
 					// TODO: Need to create a new Server Full packet to return to clients.
 					log.Println(err)
 					return
-				case ErrPlayerAlreadyExists: // Player is already registered and did not disconnection correctly.
+				case errPlayerAlreadyExists: // Player is already registered and did not disconnection correctly.
 					log.Println(err)
 					return
 				}
@@ -237,14 +253,14 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 // registerConnection accepts a PlayerConnectionRequestPacket and thread safely updates the connection pool
 //
 // Errors:
-// - ErrServerFull
-// - ErrPlayerAlreadyExists
+// - errServerFull
+// - errPlayerAlreadyExists
 func (g *GameServer) registerConnection(b []byte, conn net.Conn) error {
 	g.Lock()
 
 	// check to see if the server is full
 	if len(g.connections) >= g.maxConnections {
-		return ErrServerFull
+		return errServerFull
 	}
 
 	// if it is not full, unmarshal the playerConnectionRequest
@@ -255,7 +271,7 @@ func (g *GameServer) registerConnection(b []byte, conn net.Conn) error {
 
 	// check to see if the player is already registered
 	if _, ok := g.connections[packet.ID]; ok {
-		return ErrPlayerAlreadyExists
+		return errPlayerAlreadyExists
 	}
 
 	// Client a new TCP Client Connection and add it to the connections map
@@ -274,48 +290,7 @@ func (g *GameServer) registerConnection(b []byte, conn net.Conn) error {
 	// This really should be deferred however to much time will be spend holding a lock when we attempt to send a packet
 	g.Unlock()
 
-	if err := client.SendPacketToClient(d2netpacket.CreateUpdateServerInfoPacket(g.seed, client.GetUniqueID())); err != nil {
-		log.Printf("GameServer: error sending UpdateServerInfoPacket to client %s: %s", client.GetUniqueID(), err)
-	}
-	if err := client.SendPacketToClient(d2netpacket.CreateGenerateMapPacket(d2enum.RegionAct1Town)); err != nil {
-		log.Printf("GameServer: error sending GenerateMapPacket to client %s: %s", client.GetUniqueID(), err)
-	}
-
-	playerState := client.GetPlayerState()
-
-	// these are in subtiles
-	playerX := int(sx*subtilesPerTile) + middleOfTileOffset
-	playerY := int(sy*subtilesPerTile) + middleOfTileOffset
-
-	createPlayerPacket := d2netpacket.CreateAddPlayerPacket(client.GetUniqueID(),
-		playerState.HeroName, playerX, playerY,
-		playerState.HeroType, playerState.Stats, playerState.Equipment)
-
-	for _, connection := range g.connections {
-		err := connection.SendPacketToClient(createPlayerPacket)
-		if err != nil {
-			log.Printf("GameServer: error sending %T to client %s: %s", createPlayerPacket, connection.GetUniqueID(), err)
-		}
-
-		if connection.GetUniqueID() == client.GetUniqueID() {
-			continue
-		}
-
-		conPlayerState := connection.GetPlayerState()
-		playerX := int(conPlayerState.X*subtilesPerTile) + middleOfTileOffset
-		playerY := int(conPlayerState.Y*subtilesPerTile) + middleOfTileOffset
-		err = client.SendPacketToClient(d2netpacket.CreateAddPlayerPacket(
-			connection.GetUniqueID(),
-			conPlayerState.HeroName,
-			playerX, playerY,
-			conPlayerState.HeroType,
-			conPlayerState.Stats, conPlayerState.Equipment),
-		)
-
-		if err != nil {
-			log.Printf("GameServer: error sending CreateAddPlayerPacket to client %s: %s", connection.GetUniqueID(), err)
-		}
-	}
+	handleClientConnection(g, client, sx, sy)
 
 	return nil
 }
@@ -338,14 +313,17 @@ func OnClientConnected(client ClientConnection) {
 
 	log.Printf("Client connected with an id of %s", client.GetUniqueID())
 	singletonServer.connections[client.GetUniqueID()] = client
-	err := client.SendPacketToClient(d2netpacket.CreateUpdateServerInfoPacket(singletonServer.seed, client.GetUniqueID()))
 
+	handleClientConnection(singletonServer, client, sx, sy)
+}
+
+func handleClientConnection(gameServer *GameServer, client ClientConnection, x, y float64) {
+	err := client.SendPacketToClient(d2netpacket.CreateUpdateServerInfoPacket(gameServer.seed, client.GetUniqueID()))
 	if err != nil {
 		log.Printf("GameServer: error sending UpdateServerInfoPacket to client %s: %s", client.GetUniqueID(), err)
 	}
 
 	err = client.SendPacketToClient(d2netpacket.CreateGenerateMapPacket(d2enum.RegionAct1Town))
-
 	if err != nil {
 		log.Printf("GameServer: error sending GenerateMapPacket to client %s: %s", client.GetUniqueID(), err)
 	}
@@ -353,14 +331,20 @@ func OnClientConnected(client ClientConnection) {
 	playerState := client.GetPlayerState()
 
 	// these are in subtiles
-	playerX := int(sx*subtilesPerTile) + middleOfTileOffset
-	playerY := int(sy*subtilesPerTile) + middleOfTileOffset
+	playerX := int(x*subtilesPerTile) + middleOfTileOffset
+	playerY := int(y*subtilesPerTile) + middleOfTileOffset
 
-	createPlayerPacket := d2netpacket.CreateAddPlayerPacket(client.GetUniqueID(),
-		playerState.HeroName, playerX, playerY,
-		playerState.HeroType, playerState.Stats, playerState.Equipment)
+	createPlayerPacket := d2netpacket.CreateAddPlayerPacket(
+		client.GetUniqueID(),
+		playerState.HeroName,
+		playerX,
+		playerY,
+		playerState.HeroType,
+		playerState.Stats,
+		playerState.Equipment,
+	)
 
-	for _, connection := range singletonServer.connections {
+	for _, connection := range gameServer.connections {
 		err := connection.SendPacketToClient(createPlayerPacket)
 		if err != nil {
 			log.Printf("GameServer: error sending %T to client %s: %s", createPlayerPacket, connection.GetUniqueID(), err)
@@ -373,12 +357,16 @@ func OnClientConnected(client ClientConnection) {
 		conPlayerState := connection.GetPlayerState()
 		playerX := int(conPlayerState.X*subtilesPerTile) + middleOfTileOffset
 		playerY := int(conPlayerState.Y*subtilesPerTile) + middleOfTileOffset
-		err = client.SendPacketToClient(d2netpacket.CreateAddPlayerPacket(
-			connection.GetUniqueID(),
-			conPlayerState.HeroName,
-			playerX, playerY,
-			conPlayerState.HeroType,
-			conPlayerState.Stats, conPlayerState.Equipment),
+		err = client.SendPacketToClient(
+			d2netpacket.CreateAddPlayerPacket(
+				connection.GetUniqueID(),
+				conPlayerState.HeroName,
+				playerX,
+				playerY,
+				conPlayerState.HeroType,
+				conPlayerState.Stats,
+				conPlayerState.Equipment,
+			),
 		)
 
 		if err != nil {

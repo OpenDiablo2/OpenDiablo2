@@ -1,8 +1,9 @@
 package d2datadict
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 func mapHeaders(line string) map[string]int {

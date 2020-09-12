@@ -58,12 +58,15 @@ func CreateGame(
 ) *Game {
 	// find the local player and its initial location
 	var startX, startY float64
+
 	for _, player := range gameClient.Players {
 		if player.ID() != gameClient.PlayerID {
 			continue
 		}
+
 		worldPosition := player.Position.World()
 		startX, startY = worldPosition.X(), worldPosition.Y()
+
 		break
 	}
 
@@ -97,7 +100,7 @@ func CreateGame(
 func (v *Game) OnLoad(_ d2screen.LoadingState) {
 	v.audioProvider.PlayBGM("")
 
-	v.terminal.BindAction(
+	err := v.terminal.BindAction(
 		"spawnitem",
 		"spawns an item at the local player position",
 		func(code1, code2, code3, code4, code5 string) {
@@ -105,8 +108,11 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 			v.debugSpawnItemAtPlayer(codes...)
 		},
 	)
+	if err != nil {
+		fmt.Printf("failed to bind the '%s' action, err: %v\n", "spawnitem", err)
+	}
 
-	v.terminal.BindAction(
+	err = v.terminal.BindAction(
 		"spawnitemat",
 		"spawns an item at the x,y coordinates",
 		func(x, y int, code1, code2, code3, code4, code5 string) {
@@ -114,8 +120,11 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 			v.debugSpawnItemAtLocation(x, y, codes...)
 		},
 	)
+	if err != nil {
+		fmt.Printf("failed to bind the '%s' action, err: %v\n", "spawnitemat", err)
+	}
 
-	v.terminal.BindAction(
+	err = v.terminal.BindAction(
 		"spawnmon",
 		"spawn monster at the local player position",
 		func(name string) {
@@ -126,7 +135,8 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 				v.terminal.OutputErrorf("no monstat entry for \"%s\"", name)
 				return
 			}
-			monster, err := d2mapentity.NewNPC(x, y, monstat, 0)
+			var monster *d2mapentity.NPC
+			monster, err = d2mapentity.NewNPC(x, y, monstat, 0)
 			if err != nil {
 				v.terminal.OutputErrorf("error generating monster \"%s\": %v", name, err)
 				return
@@ -134,6 +144,9 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 			v.gameClient.MapEngine.AddEntity(monster)
 		},
 	)
+	if err != nil {
+		fmt.Printf("failed to bind the '%s' action, err: %v\n", "spawnmon", err)
+	}
 }
 
 // OnUnload releases the resources of Gameplay screen
@@ -146,8 +159,13 @@ func (v *Game) OnUnload() error {
 		return err
 	}
 
-	v.terminal.UnbindAction("spawnItemAt")
-	v.terminal.UnbindAction("spawnItem")
+	if err := v.terminal.UnbindAction("spawnItemAt"); err != nil {
+		return err
+	}
+
+	if err := v.terminal.UnbindAction("spawnItem"); err != nil {
+		return err
+	}
 
 	if err := v.gameClient.Close(); err != nil {
 		return err
@@ -302,6 +320,7 @@ func (v *Game) debugSpawnItemAtPlayer(codes ...string) {
 
 func (v *Game) debugSpawnItemAtLocation(x, y int, codes ...string) {
 	packet := d2netpacket.CreateSpawnItemPacket(x, y, codes...)
+
 	err := v.gameClient.SendPacketToServer(packet)
 	if err != nil {
 		fmt.Printf(spawnItemErrStr, x, y, codes)

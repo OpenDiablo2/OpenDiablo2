@@ -121,10 +121,15 @@ func (r *RemoteClientConnection) SendPacketToServer(packet d2netpacket.NetPacket
 // connection.
 func (r *RemoteClientConnection) serverListener() {
 	var packet d2netpacket.NetPacket
+
 	decoder := json.NewDecoder(r.tcpConnection)
 
 	for {
 		err := decoder.Decode(&packet)
+		if err != nil {
+			log.Printf("failed to decode the packet, err: %v\n", err)
+			return
+		}
 
 		p, err := r.decodeToPacket(packet.PacketType, string(packet.PacketData))
 		if err != nil {

@@ -2,13 +2,14 @@
 package d2object
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
+	"fmt"
 	"math/rand"
 
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -17,7 +18,7 @@ import (
 
 // Object represents a composite of animations that can be projected onto the map.
 type Object struct {
-	uuid string
+	uuid      string
 	Position  d2vector.Position
 	composite *d2asset.Composite
 	highlight bool
@@ -46,9 +47,13 @@ func CreateObject(x, y int, objectRec *d2datadict.ObjectRecord, palettePath stri
 
 	entity.composite = composite
 
-	entity.setMode(d2enum.ObjectAnimationModeNeutral, 0, false)
+	if err := entity.setMode(d2enum.ObjectAnimationModeNeutral, 0, false); err != nil {
+		return nil, err
+	}
 
-	initObject(entity)
+	if _, err := initObject(entity); err != nil {
+		return nil, err
+	}
 
 	return entity, nil
 }
@@ -62,7 +67,6 @@ func (ob *Object) setMode(animationMode d2enum.ObjectAnimationMode, direction in
 
 	ob.composite.SetDirection(direction)
 
-	// mode := d2enum.ObjectAnimationModeFromString(animationMode)
 	ob.drawLayer = ob.objectRecord.OrderFlag[d2enum.ObjectAnimationModeNeutral]
 
 	// For objects their txt record entry overrides animationdata
@@ -98,6 +102,7 @@ func (ob *Object) Highlight() {
 	ob.highlight = true
 }
 
+// Selectable returns if the object is selectable or not
 func (ob *Object) Selectable() bool {
 	mode := ob.composite.ObjectAnimationMode()
 	return ob.objectRecord.Selectable[mode]
@@ -117,13 +122,19 @@ func (ob *Object) Render(target d2interface.Surface) {
 	}
 
 	defer target.Pop()
-	ob.composite.Render(target)
+
+	if err := ob.composite.Render(target); err != nil {
+		fmt.Printf("failed to render composite animation, err: %v\n", err)
+	}
+
 	ob.highlight = false
 }
 
 // Advance updates the animation
 func (ob *Object) Advance(elapsed float64) {
-	ob.composite.Advance(elapsed)
+	if err := ob.composite.Advance(elapsed); err != nil {
+		fmt.Printf("failed to advance composiste animation, err: %v\n", err)
+	}
 }
 
 // GetLayer returns which layer of the map the object is drawn

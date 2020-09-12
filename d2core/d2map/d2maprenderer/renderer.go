@@ -3,17 +3,16 @@ package d2maprenderer
 import (
 	"errors"
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"image/color"
 	"log"
 	"math"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 )

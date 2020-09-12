@@ -1,9 +1,9 @@
 package d2cof
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 

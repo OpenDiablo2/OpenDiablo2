@@ -1,9 +1,10 @@
 package d2datadict
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"log"
 	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 // LevelPresetRecord is a representation of a row from lvlprest.txt

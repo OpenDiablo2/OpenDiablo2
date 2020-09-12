@@ -2,14 +2,15 @@ package d2player
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player/help"
 	"image"
 	"image/color"
 	"log"
 	"math"
 	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
+	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player/help"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -80,7 +81,7 @@ type GameControls struct {
 type ActionableType int
 
 type ActionableRegion struct {
-	ActionableTypeId ActionableType
+	ActionableTypeID ActionableType
 	Rect             d2geom.Rectangle
 }
 
@@ -149,7 +150,7 @@ func NewGameControls(
 	case d2enum.HeroSorceress:
 		inventoryRecordKey = "Sorceress2"
 	default:
-		inventoryRecordKey = "Amazon2"
+		return nil, fmt.Errorf("unknown hero class: %d", hero.Class)
 	}
 
 	inventoryRecord := d2datadict.Inventory[inventoryRecordKey]
@@ -333,7 +334,7 @@ func (g *GameControls) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	for i := range g.actionableRegions {
 		// Mouse over a game control element
 		if g.actionableRegions[i].Rect.IsInRect(mx, my) {
-			g.onHoverActionable(g.actionableRegions[i].ActionableTypeId)
+			g.onHoverActionable(g.actionableRegions[i].ActionableTypeID)
 		}
 	}
 
@@ -347,7 +348,7 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	for i := range g.actionableRegions {
 		// If click is on a game control element
 		if g.actionableRegions[i].Rect.IsInRect(mx, my) {
-			g.onClickActionable(g.actionableRegions[i].ActionableTypeId)
+			g.onClickActionable(g.actionableRegions[i].ActionableTypeID)
 			return false
 		}
 	}
@@ -478,8 +479,8 @@ func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 // TODO: consider caching the panels to single image that is reused.
 // Render draws the GameControls onto the target
 func (g *GameControls) Render(target d2interface.Surface) error {
-
 	mx, my := g.lastMouseX, g.lastMouseY
+
 	for entityIdx := range g.mapEngine.Entities() {
 		entity := (g.mapEngine.Entities())[entityIdx]
 		if !entity.Selectable() {
@@ -637,7 +638,7 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		return err
 	}
 
-	w, _ = g.mainPanel.GetCurrentFrameSize()
+	g.mainPanel.GetCurrentFrameSize()
 
 	g.menuButton.SetPosition((width/2)-8, height-16)
 
@@ -699,7 +700,7 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		return err
 	}
 
-	w, _ = g.mainPanel.GetCurrentFrameSize()
+	g.mainPanel.GetCurrentFrameSize()
 
 	g.mainPanel.SetPosition(offset, height)
 
@@ -741,12 +742,15 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		g.zoneChangeText.Render(target)
 	}
 
-	hpWithin := (95 >= mx) && (30 <= mx) && (575 >= my) && (525 <= my)
-	manaWithin := (765 >= mx) && (700 <= mx) && (575 >= my) && (525 <= my)
+	hpWithin := (mx <= 95) && (mx >= 30) && (my <= 575) && (my >= 525)
+	manaWithin := (mx <= 765) && (mx >= 700) && (my <= 575) && (my >= 525)
 
 	// Display current hp and mana stats hpGlobe or manaGlobe region is clicked
 	if hpWithin || g.hpStatsIsVisible {
-		g.hpManaStatsLabel.SetText(d2ui.ColorTokenize(fmt.Sprintf("LIFE: %v / %v", float64(g.hero.Stats.Health), float64(g.hero.Stats.MaxHealth)), d2ui.ColorTokenWhite))
+		g.hpManaStatsLabel.SetText(d2ui.ColorTokenize(
+			fmt.Sprintf("LIFE: %v / %v", float64(g.hero.Stats.Health), float64(g.hero.Stats.MaxHealth)),
+			d2ui.ColorTokenWhite),
+		)
 		g.hpManaStatsLabel.SetPosition(15, 485)
 		g.hpManaStatsLabel.Render(target)
 	}

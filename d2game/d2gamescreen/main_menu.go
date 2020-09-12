@@ -3,13 +3,13 @@ package d2gamescreen
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"log"
 	"os"
 	"os/exec"
 	"runtime"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -138,7 +138,7 @@ func CreateMainMenu(
 		audioProvider:  audioProvider,
 		navigator:      navigator,
 		buildInfo:      buildInfo,
-		uiManager: ui,
+		uiManager:      ui,
 	}
 }
 

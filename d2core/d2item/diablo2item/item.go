@@ -2,13 +2,13 @@ package diablo2item
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"math/rand"
 	"sort"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2item"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats/diablo2stats"
@@ -249,7 +249,6 @@ func (i *Item) Description() string {
 // drop modifier is supplied, it will attempt to reconcile by picked
 // magic affixes as if it were a rare.
 func (i *Item) applyDropModifier(modifier DropModifier) {
-
 	modifier = i.sanitizeDropModifier(modifier)
 
 	switch modifier {
@@ -345,13 +344,15 @@ func (i *Item) pickMagicAffixes(mod DropModifier) {
 		totalAffixes = numPrefixes + numSuffixes
 	}
 
-	i.pickMagicPrefixes(numPrefixes, totalAffixes)
-	i.pickMagicSuffixes(numSuffixes, totalAffixes)
+	i.PrefixCodes = i.pickRandomAffixes(numPrefixes, totalAffixes, d2datadict.MagicPrefix)
+	i.SuffixCodes = i.pickRandomAffixes(numSuffixes, totalAffixes, d2datadict.MagicSuffix)
 }
 
-func (i *Item) pickMagicPrefixes(max, totalMax int) {
+func (i *Item) pickRandomAffixes(max, totalMax int, affixMap map[string]*d2datadict.ItemAffixCommonRecord) []string {
+	pickedCodes := make([]string, 0)
+
 	for numPicks := 0; numPicks < max; numPicks++ {
-		matches := findMatchingAffixes(i.CommonRecord(), d2datadict.MagicPrefix)
+		matches := findMatchingAffixes(i.CommonRecord(), affixMap)
 
 		if rollPrefix := i.rand.Intn(2); rollPrefix > 0 {
 			affixCount := len(i.PrefixRecords()) + len(i.SuffixRecords())
@@ -361,28 +362,12 @@ func (i *Item) pickMagicPrefixes(max, totalMax int) {
 
 			if len(matches) > 0 {
 				picked := matches[i.rand.Intn(len(matches))]
-				i.PrefixCodes = append(i.PrefixCodes, picked.Name)
+				pickedCodes = append(pickedCodes, picked.Name)
 			}
 		}
 	}
-}
 
-func (i *Item) pickMagicSuffixes(max, totalMax int) {
-	for numPicks := 0; numPicks < max; numPicks++ {
-		matches := findMatchingAffixes(i.CommonRecord(), d2datadict.MagicSuffix)
-
-		if rollSuffix := i.rand.Intn(2); rollSuffix > 0 {
-			affixCount := len(i.PrefixRecords()) + len(i.SuffixRecords())
-			if len(i.PrefixRecords()) > max || affixCount > totalMax {
-				break
-			}
-
-			if len(matches) > 0 {
-				picked := matches[i.rand.Intn(len(matches))]
-				i.SuffixCodes = append(i.SuffixCodes, picked.Name)
-			}
-		}
-	}
+	return pickedCodes
 }
 
 // SetSeed sets the item generator seed
@@ -391,6 +376,7 @@ func (i *Item) SetSeed(seed int64) {
 		source := rand.NewSource(seed)
 		i.rand = rand.New(source)
 	}
+
 	i.Seed = seed
 }
 
@@ -401,6 +387,7 @@ func (i *Item) init() *Item {
 
 	i.generateAllProperties()
 	i.updateItemAttributes()
+
 	return i
 }
 
@@ -430,12 +417,8 @@ func (i *Item) generateProperties(pool PropertyPool) {
 	var props []*Property
 
 	switch pool {
-	case PropertyPoolPrefix:
-		if generated := i.generatePrefixProperties(); generated != nil {
-			props = generated
-		}
-	case PropertyPoolSuffix:
-		if generated := i.generateSuffixProperties(); generated != nil {
+	case PropertyPoolPrefix, PropertyPoolSuffix:
+		if generated := i.generateAffixProperties(pool); generated != nil {
 			props = generated
 		}
 	case PropertyPoolUnique:
@@ -446,8 +429,7 @@ func (i *Item) generateProperties(pool PropertyPool) {
 		if generated := i.generateSetItemProperties(); generated != nil {
 			props = generated
 		}
-	case PropertyPoolSet:
-		// todo set bonus handling, needs player/equipment context
+	case PropertyPoolSet: // todo set bonus handling, needs player/equipment context
 	}
 
 	if props == nil {
@@ -523,45 +505,30 @@ func (i *Item) updateItemAttributes() {
 	i.attributes.defense = def
 }
 
-func (i *Item) generatePrefixProperties() []*Property {
-	if i.PrefixRecords() == nil || len(i.PrefixRecords()) < 1 {
+func (i *Item) generateAffixProperties(pool PropertyPool) []*Property {
+	var affixRecords []*d2datadict.ItemAffixCommonRecord
+
+	switch pool {
+	case PropertyPoolPrefix:
+		affixRecords = i.PrefixRecords()
+	case PropertyPoolSuffix:
+		affixRecords = i.SuffixRecords()
+	default:
+		return nil
+	}
+
+	if affixRecords == nil || len(affixRecords) < 1 {
 		return nil
 	}
 
 	result := make([]*Property, 0)
 
 	// for each prefix
-	for recIdx := range i.PrefixRecords() {
-		prefix := i.PrefixRecords()[recIdx]
+	for recIdx := range affixRecords {
+		affix := affixRecords[recIdx]
 		// for each modifier
-		for modIdx := range prefix.Modifiers {
-			mod := prefix.Modifiers[modIdx]
-
-			prop := NewProperty(mod.Code, mod.Parameter, mod.Min, mod.Max)
-			if prop == nil {
-				continue
-			}
-
-			result = append(result, prop)
-		}
-	}
-
-	return result
-}
-
-func (i *Item) generateSuffixProperties() []*Property {
-	if i.SuffixRecords() == nil || len(i.SuffixRecords()) < 1 {
-		return nil
-	}
-
-	result := make([]*Property, 0)
-
-	// for each prefix
-	for recIdx := range i.SuffixRecords() {
-		prefix := i.SuffixRecords()[recIdx]
-		// for each modifier
-		for modIdx := range prefix.Modifiers {
-			mod := prefix.Modifiers[modIdx]
+		for modIdx := range affix.Modifiers {
+			mod := affix.Modifiers[modIdx]
 
 			prop := NewProperty(mod.Code, mod.Parameter, mod.Min, mod.Max)
 			if prop == nil {
@@ -846,7 +813,7 @@ func (i *Item) GetInventoryItemType() d2enum.InventoryItemType {
 	return d2enum.InventoryItemTypeItem
 }
 
-func (i *Item) InventoryGridSize() (int, int) {
+func (i *Item) InventoryGridSize() (width, height int) {
 	r := i.CommonRecord()
 	return r.InventoryWidth, r.InventoryHeight
 }
@@ -867,7 +834,7 @@ func (i *Item) SetInventoryGridSlot(x, y int) {
 	i.GridX, i.GridY = x, y
 }
 
-func (i *Item) GetInventoryGridSize() (int, int) {
+func (i *Item) GetInventoryGridSize() (x, y int) {
 	return i.GridX, i.GridY
 }
 

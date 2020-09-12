@@ -2,7 +2,6 @@
 package d2mapgen
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"log"
 	"math/rand"
 	"strings"
@@ -10,6 +9,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen/d2wilderness"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapstamp"
@@ -39,30 +39,24 @@ func GenerateAct1Overworld(mapEngine *d2mapengine.MapEngine) {
 
 	log.Printf("Region Path: %s", townStamp.RegionPath())
 
-	if strings.Contains(townStamp.RegionPath(), "E1") {
-		// East Exit
+	switch {
+	case strings.Contains(townStamp.RegionPath(), "E1"):
 		mapEngine.PlaceStamp(townStamp, 0, 0)
 		generateWilderness1TownEast(mapEngine, townSize.Width, 0)
-	} else if strings.Contains(townStamp.RegionPath(), "S1") {
-		// South Exit
+	case strings.Contains(townStamp.RegionPath(), "S1"):
 		mapEngine.PlaceStamp(townStamp, mapWidth-townSize.Width, 0)
-
-		// Generate the river running along the edge of the map
 		rightWaterBorderStamp := loadPreset(mapEngine, d2wilderness.WaterBorderEast, 0)
 		rightWaterBorderStamp2 := loadPreset(mapEngine, d2wilderness.WaterBorderWest, 0)
-		// Place the water on the right side of the map
+
 		for y := townSize.Height; y < mapHeight-9; y += 9 {
 			mapEngine.PlaceStamp(rightWaterBorderStamp, mapWidth-17, y)
 			mapEngine.PlaceStamp(rightWaterBorderStamp2, mapWidth-9, y)
 		}
 		generateWilderness1TownSouth(mapEngine, mapWidth-wilderness1Details.SizeXNormal-14, townSize.Height)
-	} else if strings.Contains(townStamp.RegionPath(), "W1") {
-		// West Exit
+	case strings.Contains(townStamp.RegionPath(), "W1"):
 		mapEngine.PlaceStamp(townStamp, mapWidth-townSize.Width, mapHeight-townSize.Height)
-
 		generateWilderness1TownWest(mapEngine, mapWidth-townSize.Width-wilderness1Details.SizeXNormal, mapHeight-wilderness1Details.SizeYNormal)
-	} else {
-		// North Exit
+	default:
 		mapEngine.PlaceStamp(townStamp, mapWidth-townSize.Width, mapHeight-townSize.Height)
 	}
 }

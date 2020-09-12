@@ -52,6 +52,7 @@ func (l *LocalClientConnection) Open(_, saveFilePath string) error {
 	var err error
 
 	l.SetPlayerState(d2player.LoadPlayerState(saveFilePath))
+
 	l.gameServer, err = d2server.NewGameServer(l.openNetworkServer, 30)
 	if err != nil {
 		return err

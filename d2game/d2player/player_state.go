@@ -44,7 +44,7 @@ func GetAllPlayerStates() []*PlayerState {
 
 	for _, file := range files {
 		fileName := file.Name()
-		if file.IsDir() || len(fileName) < 5 || strings.ToLower(fileName[len(fileName)-4:]) != ".od2" {
+		if file.IsDir() || len(fileName) < 5 || !strings.EqualFold(fileName[len(fileName)-4:], ".od2") {
 			continue
 		}
 

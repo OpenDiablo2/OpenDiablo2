@@ -6,8 +6,6 @@ import (
 	"container/ring"
 	"errors"
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"image"
 	"image/gif"
 	"image/png"
@@ -18,6 +16,9 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
 	"github.com/pkg/profile"
 	"golang.org/x/image/colornames"
@@ -678,7 +679,6 @@ func updateInitError(target d2interface.Surface) error {
 func (a *App) ToMainMenu() {
 	buildInfo := d2gamescreen.BuildInfo{Branch: a.gitBranch, Commit: a.gitCommit}
 	mainMenu := d2gamescreen.CreateMainMenu(a, a.renderer, a.inputManager, a.audio, a.ui, buildInfo)
-	// mainMenu.SetScreenMode(d2gamescreen.ScreenModeMainMenu)
 	a.screen.SetNextScreen(mainMenu)
 }
 
@@ -702,8 +702,7 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 
 // ToCharacterSelect forces the game to transition to the Character Select (load character) screen
 func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnectionType, connHost string) {
-	characterSelect := d2gamescreen.CreateCharacterSelect(a, a.renderer, a.inputManager, a.audio,
-	a.ui, connType, connHost)
+	characterSelect := d2gamescreen.CreateCharacterSelect(a, a.renderer, a.inputManager, a.audio, a.ui, connType, connHost)
 	a.screen.SetNextScreen(characterSelect)
 }
 

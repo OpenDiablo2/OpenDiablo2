@@ -1,9 +1,10 @@
 package d2dcc
 
 import (
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
-	"log"
 )
 
 // DCCDirectionFrame represents a direction frame for a DCC.

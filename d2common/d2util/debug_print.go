@@ -4,6 +4,7 @@ import (
 	"image"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util/assets"
+
 	"github.com/hajimehoshi/ebiten"
 )
 

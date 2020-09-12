@@ -9,17 +9,17 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 const (
-	maxAlpha   = 0xff
-	cacheLimit = 512
-	Transparency25 = 0.25
-	Transparency50 = 0.50
-	Transparency75 = 0.75
+	maxAlpha       = 0xff
+	cacheLimit     = 512
+	transparency25 = 0.25
+	transparency50 = 0.50
+	transparency75 = 0.75
 )
 
 type colorMCacheKey uint32
@@ -129,54 +129,31 @@ func (s *ebitenSurface) PopN(n int) {
 
 // Render renders the given surface
 func (s *ebitenSurface) Render(sfc d2interface.Surface) error {
-	opts := &ebiten.DrawImageOptions{}
-
-	if s.stateCurrent.skewX != 0 || s.stateCurrent.skewY != 0 {
-		opts.GeoM.Skew(s.stateCurrent.skewX, s.stateCurrent.skewY)
-	}
-
-	if s.stateCurrent.scaleX != 1.0 || s.stateCurrent.scaleY != 1.0 {
-		opts.GeoM.Scale(s.stateCurrent.scaleX, s.stateCurrent.scaleY)
-	}
-
-	opts.GeoM.Translate(float64(s.stateCurrent.x), float64(s.stateCurrent.y))
-
-	opts.Filter = s.stateCurrent.filter
-
-	if s.stateCurrent.color != nil {
-		opts.ColorM = s.colorToColorM(s.stateCurrent.color)
-	}
+	opts := s.createDrawImageOptions()
 
 	if s.stateCurrent.brightness != 1 || s.stateCurrent.saturation != 1 {
 		opts.ColorM.ChangeHSV(0, s.stateCurrent.saturation, s.stateCurrent.brightness)
 	}
 
-	// Are these correct? who even knows
-	switch s.stateCurrent.effect {
-	case d2enum.DrawEffectPctTransparency25:
-		opts.ColorM.Translate(0, 0, 0, -Transparency25)
-	case d2enum.DrawEffectPctTransparency50:
-		opts.ColorM.Translate(0, 0, 0, -Transparency50)
-	case d2enum.DrawEffectPctTransparency75:
-		opts.ColorM.Translate(0, 0, 0, -Transparency75)
-	case d2enum.DrawEffectModulate:
-		opts.CompositeMode = ebiten.CompositeModeLighter
-	// TODO: idk what to do when ebiten doesn't exactly match, pick closest?
-	case d2enum.DrawEffectBurn:
-	case d2enum.DrawEffectNormal:
-	case d2enum.DrawEffectMod2XTrans:
-	case d2enum.DrawEffectMod2X:
-	case d2enum.DrawEffectNone:
-		opts.CompositeMode = ebiten.CompositeModeSourceOver
-	}
+	s.handleStateEffect(opts)
 
-	var img = sfc.(*ebitenSurface).image
-
-	return s.image.DrawImage(img, opts)
+	return s.image.DrawImage(sfc.(*ebitenSurface).image, opts)
 }
 
 // Renders the section of the surface, given the bounds
 func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Rectangle) error {
+	opts := s.createDrawImageOptions()
+
+	if s.stateCurrent.brightness != 0 {
+		opts.ColorM.ChangeHSV(0, s.stateCurrent.saturation, s.stateCurrent.brightness)
+	}
+
+	s.handleStateEffect(opts)
+
+	return s.image.DrawImage(sfc.(*ebitenSurface).image.SubImage(bound).(*ebiten.Image), opts)
+}
+
+func (s *ebitenSurface) createDrawImageOptions() *ebiten.DrawImageOptions {
 	opts := &ebiten.DrawImageOptions{}
 
 	if s.stateCurrent.skewX != 0 || s.stateCurrent.skewY != 0 {
@@ -195,18 +172,17 @@ func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Recta
 		opts.ColorM = s.colorToColorM(s.stateCurrent.color)
 	}
 
-	if s.stateCurrent.brightness != 0 {
-		opts.ColorM.ChangeHSV(0, s.stateCurrent.saturation, s.stateCurrent.brightness)
-	}
+	return opts
+}
 
-	// Are these correct? who even knows
+func (s *ebitenSurface) handleStateEffect(opts *ebiten.DrawImageOptions) {
 	switch s.stateCurrent.effect {
 	case d2enum.DrawEffectPctTransparency25:
-		opts.ColorM.Translate(0, 0, 0, -0.25)
+		opts.ColorM.Translate(0, 0, 0, -transparency25)
 	case d2enum.DrawEffectPctTransparency50:
-		opts.ColorM.Translate(0, 0, 0, -0.50)
+		opts.ColorM.Translate(0, 0, 0, -transparency50)
 	case d2enum.DrawEffectPctTransparency75:
-		opts.ColorM.Translate(0, 0, 0, -0.75)
+		opts.ColorM.Translate(0, 0, 0, -transparency75)
 	case d2enum.DrawEffectModulate:
 		opts.CompositeMode = ebiten.CompositeModeLighter
 	// TODO: idk what to do when ebiten doesn't exactly match, pick closest?
@@ -217,10 +193,6 @@ func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Recta
 	case d2enum.DrawEffectNone:
 		opts.CompositeMode = ebiten.CompositeModeSourceOver
 	}
-
-	var img = sfc.(*ebitenSurface).image
-
-	return s.image.DrawImage(img.SubImage(bound).(*ebiten.Image), opts)
 }
 
 // DrawTextf renders the string to the surface with the given format string and a set of parameters

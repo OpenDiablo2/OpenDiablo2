@@ -2,10 +2,10 @@ package d2asset
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
 	"path/filepath"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )

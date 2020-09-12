@@ -2,8 +2,9 @@ package d2netpacket
 
 import (
 	"encoding/json"
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
 
 // NetPacket is used to wrap and send all packet types under d2netpacket.

@@ -1,21 +1,17 @@
 package d2mapengine
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"log"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapstamp"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapstamp"
 )
 
 // MapEngine loads the tiles which make up the isometric map and the entities

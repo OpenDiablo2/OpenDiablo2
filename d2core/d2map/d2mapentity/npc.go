@@ -1,13 +1,13 @@
 package d2mapentity
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2path"
 	"math/rand"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2path"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
@@ -182,6 +182,6 @@ func (v *NPC) GetVelocity() d2vector.Vector {
 }
 
 // GetSize returns the current frame size
-func (v* NPC) GetSize() (width, height int) {
+func (v *NPC) GetSize() (width, height int) {
 	return v.composite.GetSize()
 }

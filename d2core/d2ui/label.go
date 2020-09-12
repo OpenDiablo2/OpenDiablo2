@@ -1,13 +1,13 @@
 package d2ui
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"image/color"
 	"log"
 	"regexp"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 )

@@ -2,6 +2,7 @@ package d2netpacket
 
 import (
 	"encoding/json"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
@@ -34,5 +35,6 @@ func UnmarshalPlayerConnectionRequest(packet []byte) (PlayerConnectionRequestPac
 	if err := json.Unmarshal(packet, &resp); err != nil {
 		return PlayerConnectionRequestPacket{}, err
 	}
+
 	return resp, nil
 }

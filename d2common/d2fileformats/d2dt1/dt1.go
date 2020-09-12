@@ -2,6 +2,7 @@ package d2dt1
 
 import (
 	"fmt"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 )
 

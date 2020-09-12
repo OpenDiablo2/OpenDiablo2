@@ -29,7 +29,7 @@ func genEquipmentSlotsMap(record *d2datadict.InventoryRecord) map[d2enum.Equippe
 		d2enum.EquippedSlotBelt,
 		d2enum.EquippedSlotGloves,
 	}
-	
+
 	for _, slot := range slots {
 		box := record.Slots[slot]
 		equipmentSlot := EquipmentSlot{

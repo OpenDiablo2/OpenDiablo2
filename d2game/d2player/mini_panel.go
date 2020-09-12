@@ -21,6 +21,7 @@ func newMiniPanel(uiManager *d2ui.UIManager, isSinglePlayer bool) *miniPanel {
 	if isSinglePlayer {
 		miniPanelContainerPath = d2resource.MinipanelSmall
 	}
+
 	animation, _ := d2asset.LoadAnimation(miniPanelContainerPath, d2resource.PaletteSky)
 	containerSprite, _ := uiManager.NewSprite(animation)
 

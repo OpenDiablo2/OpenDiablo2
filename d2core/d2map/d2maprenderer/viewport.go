@@ -1,8 +1,9 @@
 package d2maprenderer
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"math"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 )
 
 type worldTrans struct {

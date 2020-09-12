@@ -2,9 +2,10 @@ package d2tcpclientconnection
 
 import (
 	"encoding/json"
+	"net"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
-	"net"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 )
