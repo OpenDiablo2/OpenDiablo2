@@ -3,6 +3,8 @@ package d2gui
 import (
 	"errors"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
@@ -14,11 +16,11 @@ var (
 var singleton *manager // nolint:gochecknoglobals // currently global by design
 
 // Initialize creates a singleton gui manager
-func Initialize(inputManager d2interface.InputManager) error {
+func Initialize(asset *d2asset.AssetManager, inputManager d2interface.InputManager) error {
 	verifyNotInit()
 
 	var err error
-	if singleton, err = createGuiManager(inputManager); err != nil {
+	if singleton, err = createGuiManager(asset, inputManager); err != nil {
 		return err
 	}
 

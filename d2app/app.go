@@ -177,7 +177,7 @@ func (a *App) initialize() error {
 		}
 	}
 
-	if err := d2gui.Initialize(a.inputManager); err != nil {
+	if err := d2gui.Initialize(a.asset, a.inputManager); err != nil {
 		return err
 	}
 
