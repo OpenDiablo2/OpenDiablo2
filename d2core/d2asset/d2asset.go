@@ -6,8 +6,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
-// Initialize creates and assigns all necessary dependencies for the AssetManager top-level functions to work correctly
-func Initialize(renderer d2interface.Renderer,
+// NewAssetManager creates and assigns all necessary dependencies for the AssetManager top-level functions to work correctly
+func NewAssetManager(renderer d2interface.Renderer,
 	term d2interface.Terminal) (*AssetManager, error) {
 
 	manager := &AssetManager{}

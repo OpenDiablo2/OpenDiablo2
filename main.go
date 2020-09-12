@@ -29,13 +29,13 @@ func main() {
 		panic(err)
 	}
 
-	// Initialize our providers
+	// NewAssetManager our providers
 	renderer, err := ebiten.CreateRenderer()
 	if err != nil {
 		panic(err)
 	}
 
-	asset, err := d2asset.Initialize(renderer, nil)
+	asset, err := d2asset.NewAssetManager(renderer, nil)
 	if err != nil {
 		panic(err)
 	}
