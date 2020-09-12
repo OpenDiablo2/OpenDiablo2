@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"

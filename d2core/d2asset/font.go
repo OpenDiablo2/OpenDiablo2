@@ -26,7 +26,7 @@ type Font struct {
 }
 
 func loadFont(tablePath, spritePath, palettePath string) (d2interface.Font, error) {
-	sheet, err := LoadAnimation(spritePath, palettePath)
+	sheet, err := Singleton.LoadAnimation(spritePath, palettePath)
 	if err != nil {
 		return nil, err
 	}

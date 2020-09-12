@@ -37,21 +37,6 @@ func Initialize(renderer d2interface.Renderer,
 	return nil
 }
 
-// LoadFileStream streams an MPQ file from a source file path
-func LoadFileStream(filePath string) (d2interface.ArchiveDataStream, error) {
-	return Singleton.LoadFileStream(filePath)
-}
-
-// LoadFile loads an entire file from a source file path as a []byte
-func LoadFile(filePath string) ([]byte, error) {
-	return Singleton.LoadFile(filePath)
-}
-
-// FileExists checks if a file exists on the underlying file system at the given file path.
-func FileExists(filePath string) (bool, error) {
-	return Singleton.FileExists(filePath)
-}
-
 // LoadAnimation loads an animation by its resource path and its palette path
 func LoadAnimation(animationPath, palettePath string) (d2interface.Animation, error) {
 	return Singleton.LoadAnimation(animationPath, palettePath)
