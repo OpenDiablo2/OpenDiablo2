@@ -44,7 +44,7 @@ func (i *Item) Highlight() {
 	i.AnimatedEntity.highlight = true
 }
 
-// Name returns the item name
+// Label returns the item label
 func (i *Item) Label() string {
 	return i.Item.Label()
 }

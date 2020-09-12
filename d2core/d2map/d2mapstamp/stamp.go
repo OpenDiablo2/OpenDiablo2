@@ -1,23 +1,21 @@
 package d2mapstamp
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2path"
 	"math"
 	"math/rand"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2object"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2path"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2object"
 )
 
 // Stamp represents a pre-fabricated map stamp that can be placed on a map.
@@ -95,7 +93,7 @@ func (mr *Stamp) LevelType() d2datadict.LevelTypeRecord {
 	return mr.levelType
 }
 
-// RegionPath returns the file path of the region.
+// RegionID returns the regionID
 func (mr *Stamp) RegionID() d2enum.RegionIdType {
 	return mr.regionID
 }

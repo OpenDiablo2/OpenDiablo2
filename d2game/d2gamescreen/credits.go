@@ -3,7 +3,6 @@ package d2gamescreen
 import (
 	"bufio"
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"log"
 	"os"
 	"path"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"

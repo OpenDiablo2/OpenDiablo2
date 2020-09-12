@@ -35,5 +35,6 @@ func UnmarshalPong(packet []byte) (PongPacket, error) {
 	if err := json.Unmarshal(packet, &resp); err != nil {
 		return resp, err
 	}
+
 	return resp, nil
 }

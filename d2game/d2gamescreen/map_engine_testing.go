@@ -2,11 +2,12 @@ package d2gamescreen
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 
@@ -173,7 +174,6 @@ func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 		met.mapEngine = d2mapengine.CreateMapEngine() // necessary for map name update
 		met.mapEngine.SetSeed(time.Now().UnixNano())
 		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
-		//met.mapEngine.RegenerateWalkPaths()
 	}
 
 	met.mapRenderer.SetMapEngine(met.mapEngine)
@@ -325,20 +325,10 @@ func (met *MapEngineTest) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	return false
 }
 
+// OnMouseButtonDown handles mouse button down events
 func (met *MapEngineTest) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	if event.Button() == d2enum.MouseButtonLeft {
-		px, py := met.mapRenderer.ScreenToWorld(met.lastMouseX, met.lastMouseY)
-		met.selX = int(px)
-		met.selY = int(py)
-		met.selectedTile = met.mapEngine.TileAt(int(px), int(py))
-
-		camVect := met.mapRenderer.Camera.GetPosition().Vector
-
-		x, y := float64(met.lastMouseX-400)/5, float64(met.lastMouseY-300)/5
-		targetPosition := d2vector.NewPositionTile(x, y)
-		targetPosition.Add(&camVect)
-
-		met.mapRenderer.SetCameraTarget(&targetPosition)
+		met.handleLeftClick()
 
 		return true
 	}
@@ -352,25 +342,30 @@ func (met *MapEngineTest) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	return false
 }
 
+// OnMouseButtonRepeat handles repeated mouse clicks
 func (met *MapEngineTest) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 	if event.Button() == d2enum.MouseButtonLeft {
-		px, py := met.mapRenderer.ScreenToWorld(met.lastMouseX, met.lastMouseY)
-		met.selX = int(px)
-		met.selY = int(py)
-		met.selectedTile = met.mapEngine.TileAt(int(px), int(py))
-
-		camVect := met.mapRenderer.Camera.GetPosition().Vector
-
-		x, y := float64(met.lastMouseX-400)/5, float64(met.lastMouseY-300)/5
-		targetPosition := d2vector.NewPositionTile(x, y)
-		targetPosition.Add(&camVect)
-
-		met.mapRenderer.SetCameraTarget(&targetPosition)
+		met.handleLeftClick()
 
 		return true
 	}
 
 	return false
+}
+
+func (met *MapEngineTest) handleLeftClick() {
+	px, py := met.mapRenderer.ScreenToWorld(met.lastMouseX, met.lastMouseY)
+	met.selX = int(px)
+	met.selY = int(py)
+	met.selectedTile = met.mapEngine.TileAt(int(px), int(py))
+
+	camVect := met.mapRenderer.Camera.GetPosition().Vector
+
+	x, y := float64(met.lastMouseX-400)/5, float64(met.lastMouseY-300)/5
+	targetPosition := d2vector.NewPositionTile(x, y)
+	targetPosition.Add(&camVect)
+
+	met.mapRenderer.SetCameraTarget(&targetPosition)
 }
 
 // Advance runs the update logic on the Map Engine Test screen

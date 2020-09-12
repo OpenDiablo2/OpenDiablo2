@@ -2,6 +2,7 @@ package d2netpacket
 
 import (
 	"encoding/json"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
 

@@ -29,7 +29,6 @@ func (m *Missile) GetVelocity() d2vector.Vector {
 	return m.AnimatedEntity.velocity
 }
 
-
 // SetRadians adjusts the entity target based on it's range, rotating it's
 // current destination by the value of angle in radians.
 func (m *Missile) SetRadians(angle float64, done func()) {

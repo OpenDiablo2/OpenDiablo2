@@ -6,13 +6,13 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"log"
 	"strings"
 
 	"github.com/JoshVarga/blast"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2compression"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
 // Stream represents a stream of data in an MPQ archive

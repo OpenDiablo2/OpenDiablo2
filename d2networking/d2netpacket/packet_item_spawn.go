@@ -2,10 +2,11 @@ package d2netpacket
 
 import (
 	"encoding/json"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
 
-// CreateItemPacket contains the data required to create a Item entity
+// SpawnItemPacket contains the data required to create a Item entity
 type SpawnItemPacket struct {
 	X     int      `json:"x"`
 	Y     int      `json:"y"`

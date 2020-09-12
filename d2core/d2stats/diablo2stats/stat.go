@@ -2,10 +2,10 @@ package diablo2stats
 
 import (
 	"fmt"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 )
 
@@ -50,7 +50,7 @@ type diablo2Stat struct {
 // depending on the stat record, sets up the proper number of values,
 // as well as set up the stat value number types, value combination types, and
 // the value stringer functions used
-func (s *diablo2Stat) init(numbers ...float64) {//nolint:funlen doesn't make sense to split
+func (s *diablo2Stat) init(numbers ...float64) { //nolint:funlen doesn't make sense to split
 	if s.record == nil {
 		return
 	}

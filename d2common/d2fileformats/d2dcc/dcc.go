@@ -2,6 +2,7 @@ package d2dcc
 
 import (
 	"errors"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 )
 

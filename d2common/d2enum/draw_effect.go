@@ -41,10 +41,7 @@ const (
 	DrawEffectNone
 )
 
+// Transparent returns true if there is no effect, false otherwise
 func (d DrawEffect) Transparent() bool {
-	if d == DrawEffectNone {
-		return false
-	}
-
-	return true
+	return d != DrawEffectNone
 }

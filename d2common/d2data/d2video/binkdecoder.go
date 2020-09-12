@@ -1,8 +1,9 @@
 package d2video
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 )
 
 // BinkVideoMode is the video mode type

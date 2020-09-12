@@ -1,10 +1,11 @@
 package diablo2item
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"math/rand"
 	"regexp"
 	"strconv"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 )
 
 const (
@@ -45,6 +46,7 @@ func (ig *ItemGenerator) SetSeed(seed int64) {
 		ig.source = rand.NewSource(seed)
 		ig.rand = rand.New(ig.source)
 	}
+
 	ig.Seed = seed
 }
 
@@ -240,7 +242,7 @@ func getStringComponent(code string) string {
 func getNumericComponent(code string) int {
 	result := 0
 
-	re := regexp.MustCompile(`[^\d]`)
+	re := regexp.MustCompile(`\D`)
 	numStr := string(re.ReplaceAll([]byte(code), []byte("")))
 
 	if number, err := strconv.ParseInt(numStr, 10, 32); err == nil {

@@ -1,9 +1,10 @@
 package d2dcc
 
 import (
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
@@ -138,7 +139,12 @@ func CreateDCCDirection(bm *d2datautils.BitMuncher, file *DCC) *DCCDirection {
 	return result
 }
 
-func (v *DCCDirection) verify(equalCellsBitstream, pixelMaskBitstream, encodingTypeBitsream, rawPixelCodesBitstream *d2datautils.BitMuncher) {
+func (v *DCCDirection) verify(
+	equalCellsBitstream,
+	pixelMaskBitstream,
+	encodingTypeBitstream,
+	rawPixelCodesBitstream *d2datautils.BitMuncher,
+) {
 	if equalCellsBitstream.BitsRead() != v.EqualCellsBitstreamSize {
 		log.Panic("Did not read the correct number of bits!")
 	}
@@ -147,7 +153,7 @@ func (v *DCCDirection) verify(equalCellsBitstream, pixelMaskBitstream, encodingT
 		log.Panic("Did not read the correct number of bits!")
 	}
 
-	if encodingTypeBitsream.BitsRead() != v.EncodingTypeBitsreamSize {
+	if encodingTypeBitstream.BitsRead() != v.EncodingTypeBitsreamSize {
 		log.Panic("Did not read the correct number of bits!")
 	}
 

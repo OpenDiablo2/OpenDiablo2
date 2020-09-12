@@ -573,6 +573,7 @@ func TestVector_Normalize(t *testing.T) {
 	v = NewVector(0, 10)
 	c = v.Clone()
 	want = NewVector(0, 1)
+
 	c.Normalize()
 
 	if !want.Equals(c) {

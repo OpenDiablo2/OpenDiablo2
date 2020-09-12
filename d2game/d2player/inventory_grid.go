@@ -28,9 +28,9 @@ type InventoryItem interface {
 	GetItemDescription() []string
 }
 
-var ErrorInventoryFull = errors.New("inventory full")
+var errorInventoryFull = errors.New("inventory full")
 
-// Reusable grid for use with player and merchant inventory.
+// ItemGrid is a reusable grid for use with player and merchant inventory.
 // Handles layout and rendering item icons based on code.
 type ItemGrid struct {
 	uiManager      *d2ui.UIManager
@@ -59,14 +59,14 @@ func NewItemGrid(ui *d2ui.UIManager, record *d2datadict.InventoryRecord) *ItemGr
 	}
 }
 
-func (g *ItemGrid) SlotToScreen(slotX int, slotY int) (screenX int, screenY int) {
+func (g *ItemGrid) SlotToScreen(slotX, slotY int) (screenX, screenY int) {
 	screenX = g.originX + slotX*g.slotSize
 	screenY = g.originY + slotY*g.slotSize
 
 	return screenX, screenY
 }
 
-func (g *ItemGrid) ScreenToSlot(screenX int, screenY int) (slotX int, slotY int) {
+func (g *ItemGrid) ScreenToSlot(screenX, screenY int) (slotX, slotY int) {
 	slotX = (screenX - g.originX) / g.slotSize
 	slotY = (screenY - g.originY) / g.slotSize
 
@@ -103,7 +103,7 @@ func (g *ItemGrid) Add(items ...InventoryItem) (int, error) {
 		if g.add(item) {
 			added++
 		} else {
-			err = ErrorInventoryFull
+			err = errorInventoryFull
 			break
 		}
 	}
