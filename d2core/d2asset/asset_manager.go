@@ -47,7 +47,7 @@ func (am *AssetManager) FileExists(filePath string) (bool, error) {
 
 // LoadAnimation loads an animation by its resource path and its palette path
 func (am *AssetManager) LoadAnimation(animationPath, palettePath string) (d2interface.Animation, error) {
-	return LoadAnimationWithEffect(animationPath, palettePath, d2enum.DrawEffectNone)
+	return am.LoadAnimationWithEffect(animationPath, palettePath, d2enum.DrawEffectNone)
 }
 
 // LoadAnimationWithEffect loads an animation by its resource path and its palette path with a given transparency value

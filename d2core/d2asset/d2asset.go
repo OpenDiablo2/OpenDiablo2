@@ -37,20 +37,9 @@ func Initialize(renderer d2interface.Renderer,
 	return nil
 }
 
-// LoadAnimationWithEffect loads an animation by its resource path and its palette path with a given transparency value
-func LoadAnimationWithEffect(animationPath, palettePath string,
-	drawEffect d2enum.DrawEffect) (d2interface.Animation, error) {
-	return Singleton.LoadAnimationWithEffect(animationPath, palettePath, drawEffect)
-}
-
 // LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it
 func LoadComposite(baseType d2enum.ObjectType, token, palettePath string) (*Composite, error) {
 	return Singleton.LoadComposite(baseType, token, palettePath)
-}
-
-// LoadFont loads a font the resource files
-func LoadFont(tablePath, spritePath, palettePath string) (d2interface.Font, error) {
-	return Singleton.LoadFont(tablePath, spritePath, palettePath)
 }
 
 // LoadPalette loads a palette from a given palette path
