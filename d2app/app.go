@@ -708,7 +708,8 @@ func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnection
 
 // ToMapEngineTest forces the game to transition to the map engine test screen
 func (a *App) ToMapEngineTest(region, level int) {
-	met := d2gamescreen.CreateMapEngineTest(region, level, a.terminal, a.renderer, a.inputManager,
+	met := d2gamescreen.CreateMapEngineTest(region, level, a.asset, a.terminal, a.renderer,
+		a.inputManager,
 		a.audio, a.screen)
 	a.screen.SetNextScreen(met)
 }
