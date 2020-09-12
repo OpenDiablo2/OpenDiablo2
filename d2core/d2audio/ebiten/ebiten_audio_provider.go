@@ -4,6 +4,7 @@ package ebiten
 import (
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
@@ -15,18 +16,11 @@ const sampleRate = 44100
 
 var _ d2interface.AudioProvider = &AudioProvider{} // Static check to confirm struct conforms to interface
 
-// AudioProvider represents a provider capable of playing audio
-type AudioProvider struct {
-	audioContext *audio.Context // The Audio context
-	bgmAudio     *audio.Player  // The audio player
-	lastBgm      string
-	sfxVolume    float64
-	bgmVolume    float64
-}
-
 // CreateAudio creates an instance of ebiten's audio provider
-func CreateAudio() (*AudioProvider, error) {
-	result := &AudioProvider{}
+func CreateAudio(am *d2asset.AssetManager) (*AudioProvider, error) {
+	result := &AudioProvider{
+		assetManager: am,
+	}
 
 	var err error
 	result.audioContext, err = audio.NewContext(sampleRate)
@@ -37,6 +31,16 @@ func CreateAudio() (*AudioProvider, error) {
 	}
 
 	return result, nil
+}
+
+// AudioProvider represents a provider capable of playing audio
+type AudioProvider struct {
+	assetManager *d2asset.AssetManager
+	audioContext *audio.Context // The Audio context
+	bgmAudio     *audio.Player  // The audio player
+	lastBgm      string
+	sfxVolume    float64
+	bgmVolume    float64
 }
 
 // PlayBGM loads an audio stream and plays it in the background
@@ -61,7 +65,7 @@ func (eap *AudioProvider) PlayBGM(song string) {
 		}
 	}
 
-	audioStream, err := d2asset.LoadFileStream(song)
+	audioStream, err := eap.assetManager.LoadFileStream(song)
 
 	if err != nil {
 		panic(err)
@@ -103,7 +107,7 @@ func (eap *AudioProvider) LoadSound(sfx string, loop, bgm bool) (d2interface.Sou
 		volume = eap.bgmVolume
 	}
 
-	result := CreateSoundEffect(sfx, eap.audioContext, loop)
+	result := eap.createSoundEffect(sfx, eap.audioContext, loop)
 
 	result.volumeScale = volume
 	result.SetVolume(volume)
@@ -115,4 +119,54 @@ func (eap *AudioProvider) LoadSound(sfx string, loop, bgm bool) (d2interface.Sou
 func (eap *AudioProvider) SetVolumes(bgmVolume, sfxVolume float64) {
 	eap.sfxVolume = sfxVolume
 	eap.bgmVolume = bgmVolume
+}
+
+// createSoundEffect creates a new instance of ebiten's sound effect implementation.
+func (eap *AudioProvider) createSoundEffect(sfx string, context *audio.Context,
+	loop bool) *SoundEffect {
+	result := &SoundEffect{}
+
+	soundFile := "/data/global/sfx/"
+
+	if _, exists := d2datadict.Sounds[sfx]; exists {
+		soundEntry := d2datadict.Sounds[sfx]
+		soundFile += soundEntry.FileName
+	} else {
+		soundFile += sfx
+	}
+
+	audioData, err := eap.assetManager.LoadFileStream(soundFile)
+
+	if err != nil {
+		audioData, err = eap.assetManager.LoadFileStream("/data/global/music/" + sfx)
+	}
+
+	if err != nil {
+		panic(err)
+	}
+
+	d, err := wav.Decode(context, audioData)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var player *audio.Player
+
+	if loop {
+		s := audio.NewInfiniteLoop(d, d.Length())
+		result.panStream = newPanStreamFromReader(s)
+		player, err = audio.NewPlayer(context, result.panStream)
+	} else {
+		result.panStream = newPanStreamFromReader(d)
+		player, err = audio.NewPlayer(context, result.panStream)
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result.player = player
+
+	return result
 }

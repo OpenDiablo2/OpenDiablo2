@@ -1,14 +1,9 @@
 package ebiten
 
 import (
-	"log"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/audio"
-	"github.com/hajimehoshi/ebiten/audio/wav"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 type panStream struct {
@@ -54,55 +49,6 @@ type SoundEffect struct {
 	player      *audio.Player
 	volumeScale float64
 	panStream   *panStream
-}
-
-// CreateSoundEffect creates a new instance of ebiten's sound effect implementation.
-func CreateSoundEffect(sfx string, context *audio.Context, loop bool) *SoundEffect {
-	result := &SoundEffect{}
-
-	soundFile := "/data/global/sfx/"
-
-	if _, exists := d2datadict.Sounds[sfx]; exists {
-		soundEntry := d2datadict.Sounds[sfx]
-		soundFile += soundEntry.FileName
-	} else {
-		soundFile += sfx
-	}
-
-	audioData, err := d2asset.LoadFileStream(soundFile)
-
-	if err != nil {
-		audioData, err = d2asset.LoadFileStream("/data/global/music/" + sfx)
-	}
-
-	if err != nil {
-		panic(err)
-	}
-
-	d, err := wav.Decode(context, audioData)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var player *audio.Player
-
-	if loop {
-		s := audio.NewInfiniteLoop(d, d.Length())
-		result.panStream = newPanStreamFromReader(s)
-		player, err = audio.NewPlayer(context, result.panStream)
-	} else {
-		result.panStream = newPanStreamFromReader(d)
-		player, err = audio.NewPlayer(context, result.panStream)
-	}
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	result.player = player
-
-	return result
 }
 
 // SetPan sets the audio pan, left is -1.0, center is 0.0, right is 1.0

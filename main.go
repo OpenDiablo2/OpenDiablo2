@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
@@ -34,7 +35,12 @@ func main() {
 		panic(err)
 	}
 
-	audio, err := ebiten2.CreateAudio()
+	if err := d2asset.Initialize(renderer, nil); err != nil {
+		panic(err)
+	}
+	asset := d2asset.Singleton
+
+	audio, err := ebiten2.CreateAudio(asset)
 	if err != nil {
 		panic(err)
 	}
@@ -46,9 +52,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	asset.BindTerminalCommands(term)
+
 	scriptEngine := d2script.CreateScriptEngine()
 
-	app := d2app.Create(GitBranch, GitCommit, inputManager, term, scriptEngine, audio, renderer)
+	app := d2app.Create(GitBranch, GitCommit, inputManager, term, scriptEngine, audio, renderer, asset)
 	if err := app.Run(); err != nil {
 		log.Fatal(err)
 	}

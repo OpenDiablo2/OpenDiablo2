@@ -60,7 +60,7 @@ type App struct {
 	captureFrames     []*image.RGBA
 	gitBranch         string
 	gitCommit         string
-	assetManager      *d2asset.AssetManager
+	asset             *d2asset.AssetManager
 	inputManager      d2interface.InputManager
 	terminal          d2interface.Terminal
 	scriptEngine      *d2script.ScriptEngine
@@ -90,6 +90,7 @@ func Create(gitBranch, gitCommit string,
 	scriptEngine *d2script.ScriptEngine,
 	audio d2interface.AudioProvider,
 	renderer d2interface.Renderer,
+	asset *d2asset.AssetManager,
 ) *App {
 	uiManager := d2ui.NewUIManager(renderer, inputManager, audio)
 	screenManager := d2screen.NewScreenManager(uiManager)
@@ -104,6 +105,7 @@ func Create(gitBranch, gitCommit string,
 		renderer:      renderer,
 		ui:            uiManager,
 		screen:        screenManager,
+		asset:         asset,
 		tAllocSamples: createZeroedRing(nSamplesTAlloc),
 	}
 
@@ -175,12 +177,6 @@ func (a *App) initialize() error {
 		}
 	}
 
-	if err := d2asset.Initialize(a.renderer, a.terminal); err != nil {
-		return err
-	}
-
-	a.assetManager = d2asset.Singleton
-
 	if err := d2gui.Initialize(a.inputManager); err != nil {
 		return err
 	}
@@ -211,7 +207,7 @@ func (a *App) loadStrings() error {
 	}
 
 	for _, tablePath := range tablePaths {
-		data, err := a.assetManager.LoadFile(tablePath)
+		data, err := a.asset.LoadFile(tablePath)
 		if err != nil {
 			return err
 		}
@@ -301,7 +297,7 @@ func (a *App) loadDataDict() error {
 	d2datadict.InitObjectRecords()
 
 	for _, entry := range entries {
-		data, err := a.assetManager.LoadFile(entry.path)
+		data, err := a.asset.LoadFile(entry.path)
 		if err != nil {
 			return err
 		}
