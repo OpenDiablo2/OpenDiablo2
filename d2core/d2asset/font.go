@@ -31,7 +31,7 @@ func loadFont(tablePath, spritePath, palettePath string) (d2interface.Font, erro
 		return nil, err
 	}
 
-	data, err := LoadFile(tablePath)
+	data, err := Singleton.LoadFile(tablePath)
 	if err != nil {
 		return nil, err
 	}

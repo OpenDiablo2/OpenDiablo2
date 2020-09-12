@@ -1,12 +1,13 @@
 package d2asset
 
 import (
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"log"
 )
 
 // AssetManager loads files and game objects
@@ -70,9 +71,8 @@ func (am *AssetManager) LoadPalette(palettePath string) (d2interface.Palette, er
 	return am.paletteManager.LoadPalette(palettePath)
 }
 
-
 func loadDC6(dc6Path string) (*d2dc6.DC6, error) {
-	dc6Data, err := LoadFile(dc6Path)
+	dc6Data, err := Singleton.LoadFile(dc6Path)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func loadDC6(dc6Path string) (*d2dc6.DC6, error) {
 }
 
 func loadDCC(dccPath string) (*d2dcc.DCC, error) {
-	dccData, err := LoadFile(dccPath)
+	dccData, err := Singleton.LoadFile(dccPath)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func loadDCC(dccPath string) (*d2dcc.DCC, error) {
 }
 
 func loadCOF(cofPath string) (*d2cof.COF, error) {
-	cofData, err := LoadFile(cofPath)
+	cofData, err := Singleton.LoadFile(cofPath)
 	if err != nil {
 		return nil, err
 	}

@@ -23,7 +23,7 @@ func (pm *paletteTransformManager) loadPaletteTransform(path string) (*d2pl2.PL2
 		return pl2.(*d2pl2.PL2), nil
 	}
 
-	data, err := LoadFile(path)
+	data, err := Singleton.LoadFile(path)
 	if err != nil {
 		return nil, err
 	}

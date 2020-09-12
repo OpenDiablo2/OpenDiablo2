@@ -16,6 +16,7 @@ import (
 
 // MapEngine loads the tiles which make up the isometric map and the entities
 type MapEngine struct {
+	asset         *d2asset.AssetManager
 	seed          int64                            // The map seed
 	entities      map[string]d2interface.MapEntity // Entities on the map
 	tiles         []MapTile
@@ -28,8 +29,10 @@ type MapEngine struct {
 }
 
 // CreateMapEngine creates a new instance of the map engine and returns a pointer to it.
-func CreateMapEngine() *MapEngine {
-	engine := &MapEngine{}
+func CreateMapEngine(asset *d2asset.AssetManager) *MapEngine {
+	engine := &MapEngine{
+		asset: asset,
+	}
 	return engine
 }
 
@@ -64,7 +67,7 @@ func (m *MapEngine) addDT1(fileName string) {
 		}
 	}
 
-	fileData, err := d2asset.LoadFile("/data/global/tiles/" + fileName)
+	fileData, err := m.asset.LoadFile("/data/global/tiles/" + fileName)
 	if err != nil {
 		log.Printf("Could not load /data/global/tiles/%s", fileName)
 		// panic(err)
@@ -84,7 +87,7 @@ func (m *MapEngine) AddDS1(fileName string) {
 		return
 	}
 
-	fileData, err := d2asset.LoadFile("/data/global/tiles/" + fileName)
+	fileData, err := m.asset.LoadFile("/data/global/tiles/" + fileName)
 	if err != nil {
 		panic(err)
 	}

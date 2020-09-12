@@ -28,7 +28,7 @@ func (pm *paletteManager) LoadPalette(palettePath string) (d2interface.Palette, 
 		return palette.(d2interface.Palette), nil
 	}
 
-	paletteData, err := LoadFile(palettePath)
+	paletteData, err := Singleton.LoadFile(palettePath)
 	if err != nil {
 		return nil, err
 	}

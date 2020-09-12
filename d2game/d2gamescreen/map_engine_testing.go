@@ -171,7 +171,7 @@ func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 		met.mapEngine.SetSeed(time.Now().UnixNano())
 		d2mapgen.GenerateAct1Overworld(met.mapEngine)
 	} else {
-		met.mapEngine = d2mapengine.CreateMapEngine() // necessary for map name update
+		met.mapEngine = d2mapengine.CreateMapEngine(met.asset) // necessary for map name update
 		met.mapEngine.SetSeed(time.Now().UnixNano())
 		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 	}
@@ -193,7 +193,7 @@ func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 
 	loading.Progress(twentyPercent)
 
-	met.mapEngine = d2mapengine.CreateMapEngine()
+	met.mapEngine = d2mapengine.CreateMapEngine(met.asset)
 
 	loading.Progress(fiftyPercent)
 

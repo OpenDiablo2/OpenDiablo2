@@ -1,6 +1,7 @@
 package d2localclient
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
@@ -13,6 +14,7 @@ import (
 // LocalClientConnection is the implementation of ClientConnection
 // for a local client.
 type LocalClientConnection struct {
+	asset             *d2asset.AssetManager
 	clientListener    d2networking.ClientListener // The game client
 	uniqueID          string                      // Unique ID generated on construction
 	openNetworkServer bool                        // True if this is a server
@@ -38,8 +40,9 @@ func (l *LocalClientConnection) SendPacketToClient(packet d2netpacket.NetPacket)
 
 // Create constructs a new LocalClientConnection and returns
 // a pointer to it.
-func Create(openNetworkServer bool) *LocalClientConnection {
+func Create(asset *d2asset.AssetManager, openNetworkServer bool) *LocalClientConnection {
 	result := &LocalClientConnection{
+		asset:             asset,
 		uniqueID:          uuid.NewV4().String(),
 		openNetworkServer: openNetworkServer,
 	}
@@ -53,7 +56,7 @@ func (l *LocalClientConnection) Open(_, saveFilePath string) error {
 
 	l.SetPlayerState(d2player.LoadPlayerState(saveFilePath))
 
-	l.gameServer, err = d2server.NewGameServer(l.openNetworkServer, 30)
+	l.gameServer, err = d2server.NewGameServer(l.asset, l.openNetworkServer, 30)
 	if err != nil {
 		return err
 	}

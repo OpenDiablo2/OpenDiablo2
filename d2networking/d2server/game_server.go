@@ -13,6 +13,7 @@ import (
 	"github.com/robertkrimen/otto"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
@@ -42,6 +43,7 @@ type GameServer struct {
 	networkServer     bool
 	ctx               context.Context
 	cancel            context.CancelFunc
+	asset             *d2asset.AssetManager
 	mapEngines        []*d2mapengine.MapEngine
 	scriptEngine      *d2script.ScriptEngine
 	seed              int64
@@ -57,7 +59,9 @@ var singletonServer *GameServer
 // ctx: required context item
 // networkServer: true = 0.0.0.0 | false = 127.0.0.1
 // maxConnections (default: 8): maximum number of TCP connections allowed open
-func NewGameServer(networkServer bool, maxConnections ...int) (*GameServer, error) {
+func NewGameServer(asset *d2asset.AssetManager, networkServer bool,
+	maxConnections ...int) (*GameServer,
+	error) {
 	if len(maxConnections) == 0 {
 		maxConnections = []int{8}
 	}
@@ -67,6 +71,7 @@ func NewGameServer(networkServer bool, maxConnections ...int) (*GameServer, erro
 	gameServer := &GameServer{
 		ctx:               ctx,
 		cancel:            cancel,
+		asset:             asset,
 		connections:       make(map[string]ClientConnection),
 		networkServer:     networkServer,
 		maxConnections:    maxConnections[0],
@@ -78,7 +83,7 @@ func NewGameServer(networkServer bool, maxConnections ...int) (*GameServer, erro
 
 	// TODO: In order to support dedicated mode we need to load the levels txt and files. Revisit this once this we can
 	//   load files independent of the app.
-	mapEngine := d2mapengine.CreateMapEngine()
+	mapEngine := d2mapengine.CreateMapEngine(asset)
 	mapEngine.SetSeed(gameServer.seed)
 	mapEngine.ResetMap(d2enum.RegionAct1Town, 100, 100) // TODO: Mapgen - Needs levels.txt stuff
 	d2mapgen.GenerateAct1Overworld(mapEngine)

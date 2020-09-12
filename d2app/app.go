@@ -689,7 +689,7 @@ func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType,
 
 // ToCreateGame forces the game to transition to the Create Game screen
 func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.ClientConnectionType, host string) {
-	gameClient, _ := d2client.Create(connType, a.scriptEngine)
+	gameClient, _ := d2client.Create(connType, a.asset, a.scriptEngine)
 
 	if err := gameClient.Open(host, filePath); err != nil {
 		// TODO an error screen should be shown in this case

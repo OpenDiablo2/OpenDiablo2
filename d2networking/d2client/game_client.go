@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
@@ -31,6 +33,7 @@ const (
 type GameClient struct {
 	clientConnection ServerConnection                            // Abstract local/remote connection
 	connectionType   d2clientconnectiontype.ClientConnectionType // Type of connection (local or remote)
+	asset            *d2asset.AssetManager
 	scriptEngine     *d2script.ScriptEngine
 	GameState        *d2player.PlayerState          // local player state
 	MapEngine        *d2mapengine.MapEngine         // Map and entities
@@ -41,9 +44,11 @@ type GameClient struct {
 }
 
 // Create constructs a new GameClient and returns a pointer to it.
-func Create(connectionType d2clientconnectiontype.ClientConnectionType, scriptEngine *d2script.ScriptEngine) (*GameClient, error) {
+func Create(connectionType d2clientconnectiontype.ClientConnectionType,
+	asset *d2asset.AssetManager, scriptEngine *d2script.ScriptEngine) (*GameClient, error) {
 	result := &GameClient{
-		MapEngine:      d2mapengine.CreateMapEngine(), // TODO: Mapgen - Needs levels.txt stuff
+		asset:          asset,
+		MapEngine:      d2mapengine.CreateMapEngine(asset), // TODO: Mapgen - Needs levels.txt stuff
 		Players:        make(map[string]*d2mapentity.Player),
 		connectionType: connectionType,
 		scriptEngine:   scriptEngine,
@@ -53,9 +58,9 @@ func Create(connectionType d2clientconnectiontype.ClientConnectionType, scriptEn
 	case d2clientconnectiontype.LANClient:
 		result.clientConnection = d2remoteclient.Create()
 	case d2clientconnectiontype.LANServer:
-		result.clientConnection = d2localclient.Create(true)
+		result.clientConnection = d2localclient.Create(asset, true)
 	case d2clientconnectiontype.Local:
-		result.clientConnection = d2localclient.Create(false)
+		result.clientConnection = d2localclient.Create(asset, false)
 	default:
 		return nil, fmt.Errorf("unknown client connection type specified: %d", connectionType)
 	}
