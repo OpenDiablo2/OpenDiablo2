@@ -51,7 +51,7 @@ func (am *animationManager) LoadAnimation(
 	ext := strings.ToLower(filepath.Ext(animationPath))
 	switch ext {
 	case ".dc6":
-		palette, err := LoadPalette(palettePath)
+		palette, err := Singleton.LoadPalette(palettePath)
 		if err != nil {
 			return nil, err
 		}

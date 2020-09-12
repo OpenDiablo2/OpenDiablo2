@@ -48,6 +48,7 @@ const (
 
 // MapRenderer manages the game viewport and Camera. It requests tile and entity data from MapEngine and renders it.
 type MapRenderer struct {
+	asset               *d2asset.AssetManager
 	renderer            d2interface.Renderer   // Used for drawing operations
 	mapEngine           *d2mapengine.MapEngine // The map engine that is being rendered
 	palette             d2interface.Palette    // The palette used for this map
@@ -61,9 +62,11 @@ type MapRenderer struct {
 }
 
 // CreateMapRenderer creates a new MapRenderer, sets the required fields and returns a pointer to it.
-func CreateMapRenderer(renderer d2interface.Renderer, mapEngine *d2mapengine.MapEngine,
+func CreateMapRenderer(asset *d2asset.AssetManager, renderer d2interface.Renderer,
+	mapEngine *d2mapengine.MapEngine,
 	term d2interface.Terminal, startX, startY float64) *MapRenderer {
 	result := &MapRenderer{
+		asset:     asset,
 		renderer:  renderer,
 		mapEngine: mapEngine,
 		viewport:  NewViewport(0, 0, 800, 600),
@@ -563,7 +566,8 @@ func (mr *MapRenderer) Advance(elapsed float64) {
 	mr.Camera.Advance(elapsed)
 }
 
-func loadPaletteForAct(levelType d2enum.RegionIdType) (d2interface.Palette, error) {
+func (mr *MapRenderer) loadPaletteForAct(levelType d2enum.RegionIdType) (d2interface.Palette,
+	error) {
 	var palettePath string
 
 	switch levelType {
@@ -586,7 +590,7 @@ func loadPaletteForAct(levelType d2enum.RegionIdType) (d2interface.Palette, erro
 		return nil, errors.New("failed to find palette for region")
 	}
 
-	return d2asset.LoadPalette(palettePath)
+	return mr.asset.LoadPalette(palettePath)
 }
 
 // ViewportToLeft moves the viewport to the left.

@@ -83,14 +83,15 @@ func CreateGame(
 		localPlayer:          nil,
 		lastRegionType:       d2enum.RegionNone,
 		ticksSinceLevelCheck: 0,
-		mapRenderer:          d2maprenderer.CreateMapRenderer(renderer, gameClient.MapEngine, term, startX, startY),
-		escapeMenu:           NewEscapeMenu(navigator, renderer, audioProvider),
-		inputManager:         inputManager,
-		audioProvider:        audioProvider,
-		renderer:             renderer,
-		terminal:             term,
-		soundEngine:          d2audio.NewSoundEngine(audioProvider, term),
-		uiManager:            ui,
+		mapRenderer: d2maprenderer.CreateMapRenderer(asset, renderer,
+			gameClient.MapEngine, term, startX, startY),
+		escapeMenu:    NewEscapeMenu(navigator, renderer, audioProvider),
+		inputManager:  inputManager,
+		audioProvider: audioProvider,
+		renderer:      renderer,
+		terminal:      term,
+		soundEngine:   d2audio.NewSoundEngine(audioProvider, term),
+		uiManager:     ui,
 	}
 	result.soundEnv = d2audio.NewSoundEnvironment(result.soundEngine)
 

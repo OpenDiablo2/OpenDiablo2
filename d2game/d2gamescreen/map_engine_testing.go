@@ -197,7 +197,8 @@ func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 
 	loading.Progress(fiftyPercent)
 
-	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.renderer, met.mapEngine, met.terminal, 0.0, 0.0)
+	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.asset, met.renderer, met.mapEngine,
+		met.terminal, 0.0, 0.0)
 
 	loading.Progress(seventyPercent)
 	met.loadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
