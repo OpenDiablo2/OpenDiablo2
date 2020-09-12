@@ -30,6 +30,7 @@ const (
 
 // Game represents the Gameplay screen
 type Game struct {
+	*d2mapentity.MapEntityFactory
 	gameClient           *d2client.GameClient
 	mapRenderer          *d2maprenderer.MapRenderer
 	uiManager            *d2ui.UIManager
@@ -135,12 +136,13 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 				v.terminal.OutputErrorf("no monstat entry for \"%s\"", name)
 				return
 			}
-			var monster *d2mapentity.NPC
-			monster, err = d2mapentity.NewNPC(x, y, monstat, 0)
+
+			monster, err := v.gameClient.MapEngine.NewNPC(x, y, monstat, 0)
 			if err != nil {
 				v.terminal.OutputErrorf("error generating monster \"%s\": %v", name, err)
 				return
 			}
+
 			v.gameClient.MapEngine.AddEntity(monster)
 		},
 	)

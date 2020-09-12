@@ -4,6 +4,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
@@ -18,6 +20,7 @@ import (
 type MapEngine struct {
 	asset *d2asset.AssetManager
 	*d2mapstamp.StampFactory
+	*d2mapentity.MapEntityFactory
 	seed          int64                            // The map seed
 	entities      map[string]d2interface.MapEntity // Entities on the map
 	tiles         []MapTile
@@ -31,10 +34,15 @@ type MapEngine struct {
 
 // CreateMapEngine creates a new instance of the map engine and returns a pointer to it.
 func CreateMapEngine(asset *d2asset.AssetManager) *MapEngine {
+	entity := d2mapentity.NewMapEntityFactory(asset)
+	stamp := d2mapstamp.NewStampFactory(asset, entity)
+
 	engine := &MapEngine{
-		asset:        asset,
-		StampFactory: d2mapstamp.NewStampFactory(asset),
+		asset:            asset,
+		MapEntityFactory: entity,
+		StampFactory:     stamp,
 	}
+
 	return engine
 }
 

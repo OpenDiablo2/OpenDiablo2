@@ -701,7 +701,9 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 
 // ToCharacterSelect forces the game to transition to the Character Select (load character) screen
 func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnectionType, connHost string) {
-	characterSelect := d2gamescreen.CreateCharacterSelect(a, a.renderer, a.inputManager, a.audio, a.ui, connType, connHost)
+
+	characterSelect := d2gamescreen.CreateCharacterSelect(a, a.asset, a.renderer, a.inputManager,
+		a.audio, a.ui, connType, connHost)
 
 	a.screen.SetNextScreen(characterSelect)
 }

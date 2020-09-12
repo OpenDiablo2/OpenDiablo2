@@ -20,6 +20,7 @@ const (
 
 // Stamp represents a pre-fabricated map stamp that can be placed on a map.
 type Stamp struct {
+	entity      *d2mapentity.MapEntityFactory
 	regionPath  string // The file path of the region
 	regionID    d2enum.RegionIdType
 	levelType   d2datadict.LevelTypeRecord   // The level type id for this stamp
@@ -82,7 +83,7 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 			if monstat != nil {
 				// Temorary use of Lookup.
 				npcX, npcY := (tileOffsetX*5)+object.X, (tileOffsetY*5)+object.Y
-				npc, err := d2mapentity.NewNPC(npcX, npcY, monstat, 0)
+				npc, err := mr.entity.NewNPC(npcX, npcY, monstat, 0)
 
 				if err == nil {
 					npc.SetPaths(convertPaths(tileOffsetX, tileOffsetY, object.Paths))

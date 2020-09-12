@@ -4,6 +4,8 @@ import (
 	"math"
 	"math/rand"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
@@ -11,17 +13,19 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
-func NewStampFactory(asset *d2asset.AssetManager) *StampFactory {
-	return &StampFactory{asset}
+func NewStampFactory(asset *d2asset.AssetManager, entity *d2mapentity.MapEntityFactory) *StampFactory {
+	return &StampFactory{asset, entity}
 }
 
 type StampFactory struct {
-	asset *d2asset.AssetManager
+	asset  *d2asset.AssetManager
+	entity *d2mapentity.MapEntityFactory
 }
 
 // LoadStamp loads the Stamp data from file.
 func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fileIndex int) *Stamp {
 	stamp := &Stamp{
+		entity:      f.entity,
 		regionID:    levelType,
 		levelType:   d2datadict.LevelTypes[levelType],
 		levelPreset: d2datadict.LevelPresets[levelPreset],

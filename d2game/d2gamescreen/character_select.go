@@ -21,6 +21,7 @@ import (
 
 // CharacterSelect represents the character select screen
 type CharacterSelect struct {
+	*d2mapentity.MapEntityFactory
 	background             *d2ui.Sprite
 	newCharButton          *d2ui.Button
 	convertCharButton      *d2ui.Button
@@ -54,6 +55,7 @@ type CharacterSelect struct {
 // CreateCharacterSelect creates the character select screen and returns a pointer to it
 func CreateCharacterSelect(
 	navigator Navigator,
+	asset *d2asset.AssetManager,
 	renderer d2interface.Renderer,
 	inputManager d2interface.InputManager,
 	audioProvider d2interface.AudioProvider,
@@ -63,6 +65,7 @@ func CreateCharacterSelect(
 ) *CharacterSelect {
 	return &CharacterSelect{
 		selectedCharacter: -1,
+		MapEntityFactory:  d2mapentity.NewMapEntityFactory(asset),
 		renderer:          renderer,
 		connectionType:    connectionType,
 		connectionHost:    connectionHost,
@@ -283,7 +286,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		equipment := d2inventory.HeroObjects[heroType]
 
 		// TODO: Generate or load the object from the actual player data...
-		v.characterImage[i] = d2mapentity.NewPlayer("", "", 0, 0, 0,
+		v.characterImage[i] = v.NewPlayer("", "", 0, 0, 0,
 			v.gameStates[idx].HeroType,
 			v.gameStates[idx].Stats,
 			&equipment,
