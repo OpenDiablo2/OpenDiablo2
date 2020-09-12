@@ -716,5 +716,5 @@ func (a *App) ToMapEngineTest(region, level int) {
 
 // ToCredits forces the game to transition to the credits screen
 func (a *App) ToCredits() {
-	a.screen.SetNextScreen(d2gamescreen.CreateCredits(a, a.renderer, a.ui))
+	a.screen.SetNextScreen(d2gamescreen.CreateCredits(a, a.asset, a.renderer, a.ui))
 }

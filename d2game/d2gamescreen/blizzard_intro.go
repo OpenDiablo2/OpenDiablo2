@@ -8,17 +8,20 @@ import (
 
 // BlizzardIntro represents the Blizzard Intro screen
 type BlizzardIntro struct {
+	asset        *d2asset.AssetManager
 	videoDecoder *d2video.BinkDecoder
 }
 
 // CreateBlizzardIntro creates a Blizzard Intro screen
-func CreateBlizzardIntro() *BlizzardIntro {
-	return &BlizzardIntro{}
+func CreateBlizzardIntro(asset *d2asset.AssetManager) *BlizzardIntro {
+	return &BlizzardIntro{
+		asset: asset,
+	}
 }
 
 // OnLoad loads the resources for the Blizzard Intro screen
 func (v *BlizzardIntro) OnLoad(loading d2screen.LoadingState) {
-	videoBytes, err := d2asset.LoadFile("/data/local/video/BlizNorth640x480.bik")
+	videoBytes, err := v.asset.LoadFile("/data/local/video/BlizNorth640x480.bik")
 	if err != nil {
 		loading.Error(err)
 		return
