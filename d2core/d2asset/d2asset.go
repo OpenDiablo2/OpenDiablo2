@@ -8,9 +8,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
-var singleton *assetManager //nolint:gochecknoglobals // Currently global by design
+var Singleton *AssetManager //nolint:gochecknoglobals // Currently global by design
 
-// Initialize creates and assigns all necessary dependencies for the assetManager top-level functions to work correctly
+// Initialize creates and assigns all necessary dependencies for the AssetManager top-level functions to work correctly
 func Initialize(renderer d2interface.Renderer,
 	term d2interface.Terminal) error {
 	var (
@@ -22,7 +22,7 @@ func Initialize(renderer d2interface.Renderer,
 		fontManager             = createFontManager()
 	)
 
-	singleton = &assetManager{
+	Singleton = &AssetManager{
 		archiveManager,
 		archivedFileManager,
 		paletteManager,
@@ -32,7 +32,7 @@ func Initialize(renderer d2interface.Renderer,
 	}
 
 	if term != nil {
-		return singleton.BindTerminalCommands(term)
+		return Singleton.BindTerminalCommands(term)
 	}
 
 	return nil
@@ -40,7 +40,7 @@ func Initialize(renderer d2interface.Renderer,
 
 // LoadFileStream streams an MPQ file from a source file path
 func LoadFileStream(filePath string) (d2interface.ArchiveDataStream, error) {
-	data, err := singleton.archivedFileManager.LoadFileStream(filePath)
+	data, err := Singleton.archivedFileManager.LoadFileStream(filePath)
 	if err != nil {
 		log.Printf("error loading file stream %s (%v)", filePath, err.Error())
 	}
@@ -50,7 +50,7 @@ func LoadFileStream(filePath string) (d2interface.ArchiveDataStream, error) {
 
 // LoadFile loads an entire file from a source file path as a []byte
 func LoadFile(filePath string) ([]byte, error) {
-	data, err := singleton.archivedFileManager.LoadFile(filePath)
+	data, err := Singleton.archivedFileManager.LoadFile(filePath)
 	if err != nil {
 		log.Printf("error loading file %s (%v)", filePath, err.Error())
 	}
@@ -60,7 +60,7 @@ func LoadFile(filePath string) ([]byte, error) {
 
 // FileExists checks if a file exists on the underlying file system at the given file path.
 func FileExists(filePath string) (bool, error) {
-	return singleton.archivedFileManager.FileExists(filePath)
+	return Singleton.archivedFileManager.FileExists(filePath)
 }
 
 // LoadAnimation loads an animation by its resource path and its palette path
@@ -71,7 +71,7 @@ func LoadAnimation(animationPath, palettePath string) (d2interface.Animation, er
 // LoadAnimationWithEffect loads an animation by its resource path and its palette path with a given transparency value
 func LoadAnimationWithEffect(animationPath, palettePath string,
 	drawEffect d2enum.DrawEffect) (d2interface.Animation, error) {
-	return singleton.animationManager.LoadAnimation(animationPath, palettePath, drawEffect)
+	return Singleton.animationManager.LoadAnimation(animationPath, palettePath, drawEffect)
 }
 
 // LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it
@@ -81,10 +81,10 @@ func LoadComposite(baseType d2enum.ObjectType, token, palettePath string) (*Comp
 
 // LoadFont loads a font the resource files
 func LoadFont(tablePath, spritePath, palettePath string) (d2interface.Font, error) {
-	return singleton.fontManager.LoadFont(tablePath, spritePath, palettePath)
+	return Singleton.fontManager.LoadFont(tablePath, spritePath, palettePath)
 }
 
 // LoadPalette loads a palette from a given palette path
 func LoadPalette(palettePath string) (d2interface.Palette, error) {
-	return singleton.paletteManager.LoadPalette(palettePath)
+	return Singleton.paletteManager.LoadPalette(palettePath)
 }

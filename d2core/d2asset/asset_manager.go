@@ -7,7 +7,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
-type assetManager struct {
+// AssetManager loads files and game objects
+type AssetManager struct {
 	archiveManager          d2interface.ArchiveManager
 	archivedFileManager     d2interface.FileManager
 	paletteManager          d2interface.PaletteManager
@@ -48,7 +49,7 @@ func loadCOF(cofPath string) (*d2cof.COF, error) {
 	return d2cof.Load(cofData)
 }
 
-func (am *assetManager) BindTerminalCommands(term d2interface.Terminal) error {
+func (am *AssetManager) BindTerminalCommands(term d2interface.Terminal) error {
 	if err := term.BindAction("assetspam", "display verbose asset manager logs", func(verbose bool) {
 		if verbose {
 			term.OutputInfof("asset manager verbose logging enabled")
