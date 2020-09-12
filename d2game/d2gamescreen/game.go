@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 
@@ -31,6 +33,7 @@ const (
 // Game represents the Gameplay screen
 type Game struct {
 	*d2mapentity.MapEntityFactory
+	asset                *d2asset.AssetManager
 	gameClient           *d2client.GameClient
 	mapRenderer          *d2maprenderer.MapRenderer
 	uiManager            *d2ui.UIManager
@@ -51,6 +54,7 @@ type Game struct {
 // CreateGame creates the Gameplay screen and returns a pointer to it
 func CreateGame(
 	navigator Navigator,
+	asset *d2asset.AssetManager,
 	ui *d2ui.UIManager,
 	renderer d2interface.Renderer,
 	inputManager d2interface.InputManager,
@@ -73,6 +77,7 @@ func CreateGame(
 	}
 
 	result := &Game{
+		asset:                asset,
 		gameClient:           gameClient,
 		gameControls:         nil,
 		localPlayer:          nil,
@@ -269,7 +274,7 @@ func (v *Game) bindGameControls() error {
 		v.localPlayer = player
 
 		var err error
-		v.gameControls, err = d2player.NewGameControls(v.renderer, player,
+		v.gameControls, err = d2player.NewGameControls(v.asset, v.renderer, player,
 			v.gameClient.MapEngine, v.mapRenderer, v, v.terminal, v.uiManager, v.gameClient.IsSinglePlayer())
 
 		if err != nil {

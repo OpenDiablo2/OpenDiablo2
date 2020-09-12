@@ -9,6 +9,7 @@ import (
 )
 
 type miniPanel struct {
+	asset          *d2asset.AssetManager
 	container      *d2ui.Sprite
 	button         *d2ui.Sprite
 	isOpen         bool
@@ -16,16 +17,16 @@ type miniPanel struct {
 	rectangle      d2geom.Rectangle
 }
 
-func newMiniPanel(uiManager *d2ui.UIManager, isSinglePlayer bool) *miniPanel {
+func newMiniPanel(asset *d2asset.AssetManager, uiManager *d2ui.UIManager, isSinglePlayer bool) *miniPanel {
 	miniPanelContainerPath := d2resource.Minipanel
 	if isSinglePlayer {
 		miniPanelContainerPath = d2resource.MinipanelSmall
 	}
 
-	animation, _ := d2asset.LoadAnimation(miniPanelContainerPath, d2resource.PaletteSky)
+	animation, _ := asset.LoadAnimation(miniPanelContainerPath, d2resource.PaletteSky)
 	containerSprite, _ := uiManager.NewSprite(animation)
 
-	animation, _ = d2asset.LoadAnimation(d2resource.MinipanelButton, d2resource.PaletteSky)
+	animation, _ = asset.LoadAnimation(d2resource.MinipanelButton, d2resource.PaletteSky)
 	buttonSprite, _ := uiManager.NewSprite(animation)
 
 	rectangle := d2geom.Rectangle{Left: 325, Top: 526, Width: 156, Height: 26}
@@ -34,7 +35,14 @@ func newMiniPanel(uiManager *d2ui.UIManager, isSinglePlayer bool) *miniPanel {
 		rectangle.Width = 182
 	}
 
-	return &miniPanel{container: containerSprite, button: buttonSprite, isOpen: true, isSinglePlayer: isSinglePlayer, rectangle: rectangle}
+	return &miniPanel{
+		asset:          asset,
+		container:      containerSprite,
+		button:         buttonSprite,
+		isOpen:         true,
+		isSinglePlayer: isSinglePlayer,
+		rectangle:      rectangle,
+	}
 }
 
 func (m *miniPanel) IsOpen() bool {

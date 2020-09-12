@@ -41,6 +41,7 @@ type StatsPanelLabels struct {
 
 // HeroStatsPanel represents the hero status panel
 type HeroStatsPanel struct {
+	asset                *d2asset.AssetManager
 	uiManager            *d2ui.UIManager
 	frame                *d2ui.Sprite
 	panel                *d2ui.Sprite
@@ -57,12 +58,13 @@ type HeroStatsPanel struct {
 }
 
 // NewHeroStatsPanel creates a new hero status panel
-func NewHeroStatsPanel(ui *d2ui.UIManager, heroName string, heroClass d2enum.Hero,
+func NewHeroStatsPanel(asset *d2asset.AssetManager, ui *d2ui.UIManager, heroName string, heroClass d2enum.Hero,
 	heroState *d2hero.HeroStatsState) *HeroStatsPanel {
 	originX := 0
 	originY := 0
 
 	return &HeroStatsPanel{
+		asset:     asset,
 		uiManager: ui,
 		renderer:  ui.Renderer(),
 		originX:   originX,
@@ -76,9 +78,9 @@ func NewHeroStatsPanel(ui *d2ui.UIManager, heroName string, heroClass d2enum.Her
 
 // Load loads the data for the hero status panel
 func (s *HeroStatsPanel) Load() {
-	animation, _ := d2asset.LoadAnimation(d2resource.Frame, d2resource.PaletteSky)
+	animation, _ := s.asset.LoadAnimation(d2resource.Frame, d2resource.PaletteSky)
 	s.frame, _ = s.uiManager.NewSprite(animation)
-	animation, _ = d2asset.LoadAnimation(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
+	animation, _ = s.asset.LoadAnimation(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 	s.panel, _ = s.uiManager.NewSprite(animation)
 	s.initStatValueLabels()
 }

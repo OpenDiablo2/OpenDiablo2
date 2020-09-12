@@ -47,6 +47,7 @@ const (
 // GameControls represents the game's controls on the screen
 type GameControls struct {
 	actionableRegions      []ActionableRegion
+	asset                  *d2asset.AssetManager
 	renderer               d2interface.Renderer // TODO: This shouldn't be a dependency
 	inputListener          InputCallbackListener
 	hero                   *d2mapentity.Player
@@ -103,6 +104,7 @@ const (
 
 // NewGameControls creates a GameControls instance and returns a pointer to it
 func NewGameControls(
+	asset *d2asset.AssetManager,
 	renderer d2interface.Renderer,
 	hero *d2mapentity.Player,
 	mapEngine *d2mapengine.MapEngine,
@@ -161,16 +163,17 @@ func NewGameControls(
 	globeStatsLabel := hpManaStatsLabel
 
 	gc := &GameControls{
+		asset:            asset,
 		uiManager:        ui,
 		renderer:         renderer,
 		hero:             hero,
 		mapEngine:        mapEngine,
 		inputListener:    inputListener,
 		mapRenderer:      mapRenderer,
-		inventory:        NewInventory(ui, inventoryRecord),
-		heroStatsPanel:   NewHeroStatsPanel(ui, hero.Name(), hero.Class, hero.Stats),
+		inventory:        NewInventory(asset, ui, inventoryRecord),
+		heroStatsPanel:   NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
 		helpOverlay:      help.NewHelpOverlay(renderer, ui),
-		miniPanel:        newMiniPanel(ui, isSinglePlayer),
+		miniPanel:        newMiniPanel(asset, ui, isSinglePlayer),
 		missileID:        missileID,
 		nameLabel:        hoverLabel,
 		zoneChangeText:   zoneLabel,
@@ -378,20 +381,20 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 // Load loads the resources required for the GameControls
 func (g *GameControls) Load() {
-	animation, _ := d2asset.LoadAnimation(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
+	animation, _ := g.asset.LoadAnimation(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
 	g.globeSprite, _ = g.uiManager.NewSprite(animation)
 
-	animation, _ = d2asset.LoadAnimation(d2resource.HealthManaIndicator, d2resource.PaletteSky)
+	animation, _ = g.asset.LoadAnimation(d2resource.HealthManaIndicator, d2resource.PaletteSky)
 	g.hpManaStatusSprite, _ = g.uiManager.NewSprite(animation)
 
-	animation, _ = d2asset.LoadAnimation(d2resource.GamePanels, d2resource.PaletteSky)
+	animation, _ = g.asset.LoadAnimation(d2resource.GamePanels, d2resource.PaletteSky)
 	g.mainPanel, _ = g.uiManager.NewSprite(animation)
 
-	animation, _ = d2asset.LoadAnimation(d2resource.MenuButton, d2resource.PaletteSky)
+	animation, _ = g.asset.LoadAnimation(d2resource.MenuButton, d2resource.PaletteSky)
 	_ = animation.SetCurrentFrame(2)
 	g.menuButton, _ = g.uiManager.NewSprite(animation)
 
-	animation, _ = d2asset.LoadAnimation(d2resource.GenericSkills, d2resource.PaletteSky)
+	animation, _ = g.asset.LoadAnimation(d2resource.GenericSkills, d2resource.PaletteSky)
 	g.skillIcon, _ = g.uiManager.NewSprite(animation)
 
 	g.loadUIButtons()

@@ -677,13 +677,17 @@ func updateInitError(target d2interface.Surface) error {
 // ToMainMenu forces the game to transition to the Main Menu
 func (a *App) ToMainMenu() {
 	buildInfo := d2gamescreen.BuildInfo{Branch: a.gitBranch, Commit: a.gitCommit}
-	mainMenu := d2gamescreen.CreateMainMenu(a, a.renderer, a.inputManager, a.audio, a.ui, buildInfo)
+
+	mainMenu := d2gamescreen.CreateMainMenu(a, a.asset, a.renderer, a.inputManager, a.audio, a.ui,
+		buildInfo)
+
 	a.screen.SetNextScreen(mainMenu)
 }
 
 // ToSelectHero forces the game to transition to the Select Hero (create character) screen
 func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType, host string) {
-	selectHero := d2gamescreen.CreateSelectHeroClass(a, a.renderer, a.audio, a.ui, connType, host)
+	selectHero := d2gamescreen.CreateSelectHeroClass(a, a.asset, a.renderer, a.audio, a.ui,
+		connType, host)
 	a.screen.SetNextScreen(selectHero)
 }
 
@@ -696,7 +700,7 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 		fmt.Printf("can not connect to the host: %s", host)
 	}
 
-	a.screen.SetNextScreen(d2gamescreen.CreateGame(a, a.ui, a.renderer, a.inputManager,
+	a.screen.SetNextScreen(d2gamescreen.CreateGame(a, a.asset, a.ui, a.renderer, a.inputManager,
 		a.audio, gameClient, a.terminal))
 }
 

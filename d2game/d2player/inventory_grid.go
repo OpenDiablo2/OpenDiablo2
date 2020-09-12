@@ -33,6 +33,7 @@ var errorInventoryFull = errors.New("inventory full")
 // ItemGrid is a reusable grid for use with player and merchant inventory.
 // Handles layout and rendering item icons based on code.
 type ItemGrid struct {
+	asset          *d2asset.AssetManager
 	uiManager      *d2ui.UIManager
 	items          []InventoryItem
 	equipmentSlots map[d2enum.EquippedSlot]EquipmentSlot
@@ -44,10 +45,12 @@ type ItemGrid struct {
 	slotSize       int
 }
 
-func NewItemGrid(ui *d2ui.UIManager, record *d2datadict.InventoryRecord) *ItemGrid {
+func NewItemGrid(asset *d2asset.AssetManager, ui *d2ui.UIManager,
+	record *d2datadict.InventoryRecord) *ItemGrid {
 	grid := record.Grid
 
 	return &ItemGrid{
+		asset:          asset,
 		uiManager:      ui,
 		width:          grid.Box.Width,
 		height:         grid.Box.Height,
@@ -118,7 +121,7 @@ func (g *ItemGrid) loadItem(item InventoryItem) {
 		var itemSprite *d2ui.Sprite
 
 		// TODO: Put the pattern into D2Shared
-		animation, err := d2asset.LoadAnimation(
+		animation, err := g.asset.LoadAnimation(
 			fmt.Sprintf("/data/global/items/inv%s.dc6", item.GetItemCode()),
 			d2resource.PaletteSky,
 		)

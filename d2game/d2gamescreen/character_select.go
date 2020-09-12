@@ -21,6 +21,7 @@ import (
 
 // CharacterSelect represents the character select screen
 type CharacterSelect struct {
+	asset *d2asset.AssetManager
 	*d2mapentity.MapEntityFactory
 	background             *d2ui.Sprite
 	newCharButton          *d2ui.Button
@@ -65,6 +66,7 @@ func CreateCharacterSelect(
 ) *CharacterSelect {
 	return &CharacterSelect{
 		selectedCharacter: -1,
+		asset:             asset,
 		MapEntityFactory:  d2mapentity.NewMapEntityFactory(asset),
 		renderer:          renderer,
 		connectionType:    connectionType,
@@ -136,7 +138,8 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 
 	loading.Progress(tenPercent)
 
-	animation, _ := d2asset.LoadAnimation(d2resource.CharacterSelectionBackground, d2resource.PaletteSky)
+	animation, _ := v.asset.LoadAnimation(d2resource.CharacterSelectionBackground,
+		d2resource.PaletteSky)
 	bgX, bgY := 0, 0
 	v.background, _ = v.uiManager.NewSprite(animation)
 	v.background.SetPosition(bgX, bgY)
@@ -157,12 +160,13 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	deleteConfirmX, deleteConfirmY := 400, 185
 	v.deleteCharConfirmLabel.SetPosition(deleteConfirmX, deleteConfirmY)
 
-	animation, _ = d2asset.LoadAnimation(d2resource.CharacterSelectionSelectBox, d2resource.PaletteSky)
+	animation, _ = v.asset.LoadAnimation(d2resource.CharacterSelectionSelectBox,
+		d2resource.PaletteSky)
 	v.selectionBox, _ = v.uiManager.NewSprite(animation)
 	selBoxX, selBoxY := 37, 86
 	v.selectionBox.SetPosition(selBoxX, selBoxY)
 
-	animation, _ = d2asset.LoadAnimation(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
+	animation, _ = v.asset.LoadAnimation(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
 	v.okCancelBox, _ = v.uiManager.NewSprite(animation)
 	okCancelX, okCancelY := 270, 175
 	v.okCancelBox.SetPosition(okCancelX, okCancelY)
