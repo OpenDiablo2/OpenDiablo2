@@ -60,6 +60,7 @@ type App struct {
 	captureFrames     []*image.RGBA
 	gitBranch         string
 	gitCommit         string
+	assetManager      *d2asset.AssetManager
 	inputManager      d2interface.InputManager
 	terminal          d2interface.Terminal
 	scriptEngine      *d2script.ScriptEngine
@@ -178,6 +179,8 @@ func (a *App) initialize() error {
 		return err
 	}
 
+	a.assetManager = d2asset.Singleton
+
 	if err := d2gui.Initialize(a.inputManager); err != nil {
 		return err
 	}
@@ -208,7 +211,7 @@ func (a *App) loadStrings() error {
 	}
 
 	for _, tablePath := range tablePaths {
-		data, err := d2asset.LoadFile(tablePath)
+		data, err := a.assetManager.LoadFile(tablePath)
 		if err != nil {
 			return err
 		}
@@ -298,7 +301,7 @@ func (a *App) loadDataDict() error {
 	d2datadict.InitObjectRecords()
 
 	for _, entry := range entries {
-		data, err := d2asset.LoadFile(entry.path)
+		data, err := a.assetManager.LoadFile(entry.path)
 		if err != nil {
 			return err
 		}
@@ -703,6 +706,7 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 // ToCharacterSelect forces the game to transition to the Character Select (load character) screen
 func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnectionType, connHost string) {
 	characterSelect := d2gamescreen.CreateCharacterSelect(a, a.renderer, a.inputManager, a.audio, a.ui, connType, connHost)
+
 	a.screen.SetNextScreen(characterSelect)
 }
 

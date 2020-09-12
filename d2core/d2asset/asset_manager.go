@@ -1,10 +1,12 @@
 package d2asset
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"log"
 )
 
 // AssetManager loads files and game objects
@@ -16,6 +18,58 @@ type AssetManager struct {
 	animationManager        d2interface.AnimationManager
 	fontManager             d2interface.FontManager
 }
+
+// LoadFileStream streams an MPQ file from a source file path
+func (am *AssetManager) LoadFileStream(filePath string) (d2interface.ArchiveDataStream, error) {
+	data, err := am.archivedFileManager.LoadFileStream(filePath)
+	if err != nil {
+		log.Printf("error loading file stream %s (%v)", filePath, err.Error())
+	}
+
+	return data, err
+}
+
+// LoadFile loads an entire file from a source file path as a []byte
+func (am *AssetManager) LoadFile(filePath string) ([]byte, error) {
+	data, err := am.archivedFileManager.LoadFile(filePath)
+	if err != nil {
+		log.Printf("error loading file %s (%v)", filePath, err.Error())
+	}
+
+	return data, err
+}
+
+// FileExists checks if a file exists on the underlying file system at the given file path.
+func (am *AssetManager) FileExists(filePath string) (bool, error) {
+	return am.archivedFileManager.FileExists(filePath)
+}
+
+// LoadAnimation loads an animation by its resource path and its palette path
+func (am *AssetManager) LoadAnimation(animationPath, palettePath string) (d2interface.Animation, error) {
+	return LoadAnimationWithEffect(animationPath, palettePath, d2enum.DrawEffectNone)
+}
+
+// LoadAnimationWithEffect loads an animation by its resource path and its palette path with a given transparency value
+func (am *AssetManager) LoadAnimationWithEffect(animationPath, palettePath string,
+	drawEffect d2enum.DrawEffect) (d2interface.Animation, error) {
+	return am.animationManager.LoadAnimation(animationPath, palettePath, drawEffect)
+}
+
+// LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it
+func (am *AssetManager) LoadComposite(baseType d2enum.ObjectType, token, palettePath string) (*Composite, error) {
+	return CreateComposite(baseType, token, palettePath), nil
+}
+
+// LoadFont loads a font the resource files
+func (am *AssetManager) LoadFont(tablePath, spritePath, palettePath string) (d2interface.Font, error) {
+	return am.fontManager.LoadFont(tablePath, spritePath, palettePath)
+}
+
+// LoadPalette loads a palette from a given palette path
+func (am *AssetManager) LoadPalette(palettePath string) (d2interface.Palette, error) {
+	return am.paletteManager.LoadPalette(palettePath)
+}
+
 
 func loadDC6(dc6Path string) (*d2dc6.DC6, error) {
 	dc6Data, err := LoadFile(dc6Path)
