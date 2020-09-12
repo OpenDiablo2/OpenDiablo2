@@ -41,8 +41,3 @@ func Initialize(renderer d2interface.Renderer,
 func LoadComposite(baseType d2enum.ObjectType, token, palettePath string) (*Composite, error) {
 	return Singleton.LoadComposite(baseType, token, palettePath)
 }
-
-// LoadPalette loads a palette from a given palette path
-func LoadPalette(palettePath string) (d2interface.Palette, error) {
-	return Singleton.LoadPalette(palettePath)
-}

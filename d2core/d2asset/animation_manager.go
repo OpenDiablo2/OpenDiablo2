@@ -61,7 +61,7 @@ func (am *animationManager) LoadAnimation(
 			return nil, err
 		}
 	case ".dcc":
-		palette, err := LoadPalette(palettePath)
+		palette, err := Singleton.LoadPalette(palettePath)
 		if err != nil {
 			return nil, err
 		}
