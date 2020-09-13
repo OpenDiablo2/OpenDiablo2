@@ -14,21 +14,18 @@ import (
 // Player is the player character entity.
 type Player struct {
 	mapEntity
-	name          string
-	animationMode string
-	composite     *d2asset.Composite
-	Equipment     *d2inventory.CharacterEquipment
-	Stats         *d2hero.HeroStatsState
-	Class         d2enum.Hero
-	lastPathSize  int
-	isInTown      bool
-	isRunToggled  bool
-	isRunning     bool
-	isCasting     bool
+	name              string
+	animationMode     string
+	composite         *d2asset.Composite
+	Equipment         *d2inventory.CharacterEquipment
+	Stats             *d2hero.HeroStatsState
+	Class             d2enum.Hero
+	lastPathSize      int
+	isInTown          bool
+	isRunToggled      bool
+	isRunning         bool
+	isCasting         bool
 	onFinishedCasting func()
-
-	// nameLabel     d2ui.Label
-
 }
 
 // run speed should be walkspeed * 1.5, since in the original game it is 6 yards walk and 9 yards run.
