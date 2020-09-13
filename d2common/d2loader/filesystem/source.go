@@ -43,7 +43,7 @@ func (s *Source) fullPath(subPath string) string {
 	return filepath.Clean(filepath.Join(s.Root, subPath))
 }
 
-// String returns the Root dir of this file system source
+// Path returns the Root dir of this file system source
 func (s *Source) Path() string {
 	return s.Root
 }

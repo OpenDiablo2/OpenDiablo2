@@ -9,10 +9,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset/types"
 )
 
-const (
-	sep = "\\"
-)
-
 // static check that Source implements AssetSource
 var _ asset.Source = &Source{}
 

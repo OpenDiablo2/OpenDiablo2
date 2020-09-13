@@ -19,6 +19,7 @@ var _ asset.Asset = &Asset{}
 type Asset struct {
 	assetType types.AssetType
 	source    *Source
+	data      []byte
 	path      string
 	file      *os.File
 }
@@ -59,6 +60,10 @@ func (fsa *Asset) Data() ([]byte, error) {
 		return nil, fmt.Errorf("asset has no file: %s", fsa.Path())
 	}
 
+	if fsa.data != nil {
+		return fsa.data, nil
+	}
+
 	_, seekErr := fsa.file.Seek(0, 0)
 	if seekErr != nil {
 		return nil, seekErr
@@ -76,6 +81,8 @@ func (fsa *Asset) Data() ([]byte, error) {
 			break
 		}
 	}
+
+	fsa.data = data
 
 	return data, nil
 }

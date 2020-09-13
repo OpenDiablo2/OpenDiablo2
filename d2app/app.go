@@ -17,6 +17,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2animdata"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
@@ -192,9 +194,45 @@ func (a *App) initialize() error {
 		return err
 	}
 
+	if err := a.loadAnimationData(); err != nil {
+		return err
+	}
+
 	d2inventory.LoadHeroObjects()
 
 	a.ui.Initialize()
+
+	return nil
+}
+
+func (a *App) loadAnimationData() error {
+	paths := []string{
+		d2resource.AnimationData,
+	}
+
+	for _, path := range paths {
+		data, err := a.asset.LoadFile(path)
+		if err != nil {
+			return err
+		}
+
+		animData, err := d2animdata.Load(data)
+		if err != nil {
+			return err
+		}
+
+		names := animData.GetRecordNames()
+
+		matches := make([]string, 0)
+		for _, name := range names {
+			if strings.HasPrefix(name, "DZ") {
+				//record := animData.GetRecord(name)
+				matches = append(matches, name)
+			}
+		}
+
+		_ = matches
+	}
 
 	return nil
 }

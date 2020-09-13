@@ -62,11 +62,15 @@ func (l *Loader) initFromConfig() {
 	for _, mpqName := range l.config.MpqLoadOrder {
 		cleanDir := filepath.Clean(l.config.MpqPath)
 		srcPath := filepath.Join(cleanDir, mpqName)
-		l.AddSource(srcPath)
+
+		_, err := l.AddSource(srcPath)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	}
 }
 
-// LoadFileStream attempts to load an asset with the given sub-path. The sub-path is relative to the root
+// Load attempts to load an asset with the given sub-path. The sub-path is relative to the root
 // of each asset source root (regardless of the type of asset source)
 func (l *Loader) Load(subPath string) (asset.Asset, error) {
 	lang := defaultLanguage
@@ -82,9 +86,11 @@ func (l *Loader) Load(subPath string) (asset.Asset, error) {
 	// first, we check the cache for an existing entry
 	if cached, found := l.Retrieve(subPath); found {
 		l.Debug(fmt.Sprintf("file `%s` exists in loader cache", subPath))
+
 		a := cached.(asset.Asset)
-		a.Seek(0, 0)
-		return a, nil
+		_, err := a.Seek(0, 0)
+
+		return a, err
 	}
 
 	// if it isn't in the cache, we check if each source can open the file

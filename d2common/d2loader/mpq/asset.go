@@ -47,7 +47,7 @@ func (a *Asset) Read(buf []byte) (n int, err error) {
 		return 0, io.EOF
 	}
 
-	return totalRead, nil
+	return totalRead, err
 }
 
 // Seek will seek the read position for the next read operation
@@ -55,7 +55,7 @@ func (a *Asset) Seek(offset int64, whence int) (n int64, err error) {
 	return a.stream.Seek(offset, whence)
 }
 
-// Seek will seek the read position for the next read operation
+// Close will seek the read position for the next read operation
 func (a *Asset) Close() (err error) {
 	_, err = a.Seek(0, 0)
 	return err
@@ -94,7 +94,7 @@ func (a *Asset) Data() ([]byte, error) {
 	return data, nil
 }
 
-// Path returns the path
+// String returns the path
 func (a *Asset) String() string {
 	return a.Path()
 }
