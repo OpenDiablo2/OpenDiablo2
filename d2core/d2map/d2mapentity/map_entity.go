@@ -57,6 +57,12 @@ func (m *mapEntity) ClearPath() {
 	m.path = nil
 }
 
+// StopMoving  will clear the path and target of the entity.
+func (m *mapEntity) StopMoving() {
+	m.ClearPath()
+	m.setTarget(m.Position, nil)
+}
+
 // SetSpeed sets the entity movement speed.
 func (m *mapEntity) SetSpeed(speed float64) {
 	m.Speed = speed

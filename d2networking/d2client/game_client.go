@@ -229,12 +229,7 @@ func (g *GameClient) handleMovePlayerPacket(packet d2netpacket.NetPacket) error 
 				return
 			}
 
-			regionType := tile.RegionType
-			if regionType == d2enum.RegionAct1Town {
-				player.SetIsInTown(true)
-			} else {
-				player.SetIsInTown(false)
-			}
+			player.SetIsInTown(tile.RegionType == d2enum.RegionAct1Town)
 
 			err := player.SetAnimationMode(player.GetAnimationMode())
 
@@ -255,9 +250,20 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 	}
 
 	player := g.Players[playerCast.SourceEntityID]
+	player.StopMoving()
 
-	player.SetCasting()
-	player.ClearPath()
+	castX := playerCast.TargetX * numSubtilesPerTile
+	castY := playerCast.TargetY * numSubtilesPerTile
+
+	rads := d2math.GetRadiansBetween(
+		player.Position.X(),
+		player.Position.Y(),
+		castX,
+		castY,
+	)
+
+	direction := player.Position.DirectionTo(*d2vector.NewVector(castX, castY))
+	player.SetDirection(direction)
 
 	// currently hardcoded to missile skill
 	missile, err := g.MapEngine.NewMissile(
@@ -270,18 +276,13 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 		return err
 	}
 
-	rads := d2math.GetRadiansBetween(
-		player.Position.X(),
-		player.Position.Y(),
-		playerCast.TargetX*numSubtilesPerTile,
-		playerCast.TargetY*numSubtilesPerTile,
-	)
-
 	missile.SetRadians(rads, func() {
 		g.MapEngine.RemoveEntity(missile)
 	})
 
-	g.MapEngine.AddEntity(missile)
+	player.StartCasting(func() {
+		g.MapEngine.AddEntity(missile)
+	})
 
 	return nil
 }

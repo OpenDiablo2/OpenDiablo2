@@ -293,7 +293,7 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 	shouldDoLeft := lastLeft >= mouseBtnActionsTreshhold
 	shouldDoRight := lastRight >= mouseBtnActionsTreshhold
 
-	if isLeft && shouldDoLeft && inRect {
+	if isLeft && shouldDoLeft && inRect && !g.hero.IsCasting() {
 		g.lastLeftBtnActionTime = now
 
 		g.inputListener.OnPlayerMove(px, py)
@@ -315,7 +315,7 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 		return true
 	}
 
-	if isRight && shouldDoRight && inRect {
+	if isRight && shouldDoRight && inRect && !g.hero.IsCasting() {
 		g.lastRightBtnActionTime = now
 
 		g.inputListener.OnPlayerCast(g.missileID, px, py)
@@ -360,7 +360,7 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	px = float64(int(px*10)) / 10.0
 	py = float64(int(py*10)) / 10.0
 
-	if event.Button() == d2enum.MouseButtonLeft && !g.isInActiveMenusRect(mx, my) {
+	if event.Button() == d2enum.MouseButtonLeft && !g.isInActiveMenusRect(mx, my) && !g.hero.IsCasting() {
 		g.lastLeftBtnActionTime = d2util.Now()
 
 		g.inputListener.OnPlayerMove(px, py)
@@ -368,7 +368,7 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 		return true
 	}
 
-	if event.Button() == d2enum.MouseButtonRight && !g.isInActiveMenusRect(mx, my) {
+	if event.Button() == d2enum.MouseButtonRight && !g.isInActiveMenusRect(mx, my) && !g.hero.IsCasting() {
 		g.lastRightBtnActionTime = d2util.Now()
 
 		g.inputListener.OnPlayerCast(g.missileID, px, py)
