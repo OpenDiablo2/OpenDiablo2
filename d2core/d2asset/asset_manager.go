@@ -73,7 +73,7 @@ func (am *AssetManager) LoadFile(filePath string) ([]byte, error) {
 
 // FileExists checks if a file exists on the underlying file system at the given file path.
 func (am *AssetManager) FileExists(filePath string) (bool, error) {
-	if loadedAsset, err := am.loader.Load(filePath); err != nil && loadedAsset != nil {
+	if loadedAsset, err := am.loader.Load(filePath); err != nil || loadedAsset == nil {
 		return false, err
 	}
 
@@ -238,6 +238,7 @@ func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary,
 	return table, err
 }
 
+// LoadPaletteTransform loads a palette transform file
 func (am *AssetManager) LoadPaletteTransform(path string) (*d2pl2.PL2, error) {
 	if pl2, found := am.transforms.Retrieve(path); found {
 		return pl2.(*d2pl2.PL2), nil
@@ -342,6 +343,7 @@ func (am *AssetManager) loadDCC(path string) (*d2dcc.DCC, error) {
 	return d2dcc.Load(dccData)
 }
 
+// BindTerminalCommands binds the in-game terminal comands for the asset manager.
 func (am *AssetManager) BindTerminalCommands(term d2interface.Terminal) error {
 	if err := term.BindAction("assetspam", "display verbose asset manager logs", func(verbose bool) {
 		if verbose {
