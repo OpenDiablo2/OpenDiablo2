@@ -57,6 +57,10 @@ func (a *Asset) Seek(offset int64, whence int) (n int64, err error) {
 
 // Close will seek the read position for the next read operation
 func (a *Asset) Close() (err error) {
+	// Calling a.stream.Close() will set the stream to nil, we dont want to do that.
+	// Because this asset gets cached, it may get retrieved again and used, in which
+	// case we will want the stream ready. So, instead of closing, we just seek back to the start.
+	// The garbage collector should get around to it if it ever gets ejected from the cache.
 	_, err = a.Seek(0, 0)
 	return err
 }
