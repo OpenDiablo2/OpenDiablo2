@@ -14,20 +14,18 @@ import (
 // Player is the player character entity.
 type Player struct {
 	mapEntity
-	name          string
-	animationMode string
-	composite     *d2asset.Composite
-	Equipment     *d2inventory.CharacterEquipment
-	Stats         *d2hero.HeroStatsState
-	Class         d2enum.Hero
-	lastPathSize  int
-	isInTown      bool
-	isRunToggled  bool
-	isRunning     bool
-	isCasting     bool
-
-	// nameLabel     d2ui.Label
-
+	name              string
+	animationMode     string
+	composite         *d2asset.Composite
+	Equipment         *d2inventory.CharacterEquipment
+	Stats             *d2hero.HeroStatsState
+	Class             d2enum.Hero
+	lastPathSize      int
+	isInTown          bool
+	isRunToggled      bool
+	isRunning         bool
+	isCasting         bool
+	onFinishedCasting func()
 }
 
 // run speed should be walkspeed * 1.5, since in the original game it is 6 yards walk and 9 yards run.
@@ -84,6 +82,11 @@ func (p *Player) Advance(tickTime float64) {
 
 	if p.IsCasting() && p.composite.GetPlayedCount() >= 1 {
 		p.isCasting = false
+		if p.onFinishedCasting != nil {
+			p.onFinishedCasting()
+			p.onFinishedCasting = nil
+		}
+
 		if err := p.SetAnimationMode(p.GetAnimationMode()); err != nil {
 			fmt.Printf("failed to set animationMode to: %d, err: %v\n", p.GetAnimationMode(), err)
 		}
@@ -162,6 +165,11 @@ func (p *Player) rotate(direction int) {
 	}
 }
 
+// SetDirection will rotate the player and change the animation
+func (p *Player) SetDirection(direction int) {
+	p.rotate(direction)
+}
+
 // Name returns the player name.
 func (p *Player) Name() string {
 	return p.name
@@ -172,10 +180,11 @@ func (p *Player) IsCasting() bool {
 	return p.isCasting
 }
 
-// SetCasting sets a flag indicating the player is casting a skill and
+// StartCasting sets a flag indicating the player is casting a skill and
 // sets the animation mode to the casting animation.
-func (p *Player) SetCasting() {
+func (p *Player) StartCasting(onFinishedCasting func()) {
 	p.isCasting = true
+	p.onFinishedCasting = onFinishedCasting
 	if err := p.SetAnimationMode(d2enum.PlayerAnimationModeCast); err != nil {
 		fmtStr := "failed to set animationMode of player: %s to: %d, err: %v\n"
 		fmt.Printf(fmtStr, p.ID(), d2enum.PlayerAnimationModeCast, err)
