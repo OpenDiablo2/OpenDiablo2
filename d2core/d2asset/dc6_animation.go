@@ -3,22 +3,24 @@ package d2asset
 import (
 	"errors"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
-	d2iface "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
-var _ d2iface.Animation = &DC6Animation{} // Static check to confirm struct conforms to interface
+var _ d2interface.Animation = &DC6Animation{} // Static check to confirm struct conforms to
+// interface
 
 // DC6Animation is an animation made from a DC6 file
 type DC6Animation struct {
 	animation
 	dc6Path  string
 	dc6      *d2dc6.DC6
-	palette  d2iface.Palette
-	renderer d2iface.Renderer
+	palette  d2interface.Palette
+	renderer d2interface.Renderer
 }
 
 // SetDirection decodes and sets the direction
@@ -56,7 +58,7 @@ func (a *DC6Animation) decodeDirection(directionIndex int) error {
 		}
 
 		indexData := dc6.DecodeFrame(startFrame + i)
-		colorData := ImgIndexToRGBA(indexData, a.palette)
+		colorData := d2util.ImgIndexToRGBA(indexData, a.palette)
 
 		if err := sfc.ReplacePixels(colorData); err != nil {
 			return err
@@ -76,7 +78,7 @@ func (a *DC6Animation) decodeDirection(directionIndex int) error {
 }
 
 // Clone creates a copy of the animation
-func (a *DC6Animation) Clone() d2iface.Animation {
+func (a *DC6Animation) Clone() d2interface.Animation {
 	animation := *a
 	return &animation
 }

@@ -1,6 +1,8 @@
 package mpq
 
 import (
+	"strings"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset"
@@ -32,6 +34,7 @@ func (v *Source) Type() types.SourceType {
 
 // Open attempts to open a file within the MPQ archive
 func (v *Source) Open(name string) (a asset.Asset, err error) {
+	name = cleanName(name)
 	stream, err := v.MPQ.ReadFileStream(name)
 
 	if err != nil {
@@ -41,12 +44,13 @@ func (v *Source) Open(name string) (a asset.Asset, err error) {
 	a = &Asset{
 		source: v,
 		stream: stream,
+		path:   name,
 	}
 
 	return a, nil
 }
 
-// String returns the path of the MPQ on the host filesystem
+// Path returns the path of the MPQ on the host filesystem
 func (v *Source) Path() string {
 	return v.MPQ.Path()
 }
@@ -54,4 +58,14 @@ func (v *Source) Path() string {
 // String returns the path
 func (v *Source) String() string {
 	return v.Path()
+}
+
+func cleanName(name string) string {
+	name = strings.ReplaceAll(name, "/", "\\")
+
+	if string(name[0]) == "\\" {
+		name = name[1:]
+	}
+
+	return name
 }

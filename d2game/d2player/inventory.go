@@ -69,7 +69,7 @@ func (g *Inventory) Close() {
 	g.isOpen = false
 }
 
-// Load loads the resources required by the inventory
+// Load the resources required by the inventory
 func (g *Inventory) Load() {
 	animation, _ := g.asset.LoadAnimation(d2resource.Frame, d2resource.PaletteSky)
 	g.frame, _ = g.uiManager.NewSprite(animation)

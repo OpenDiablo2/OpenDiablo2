@@ -1,10 +1,15 @@
 package filesystem
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset/types"
+)
+
+const (
+	bufLength = 32
 )
 
 // static check that Asset implements Asset
@@ -14,6 +19,7 @@ var _ asset.Asset = &Asset{}
 type Asset struct {
 	assetType types.AssetType
 	source    *Source
+	data      []byte
 	path      string
 	file      *os.File
 }
@@ -41,6 +47,44 @@ func (fsa *Asset) Read(p []byte) (n int, err error) {
 // Seek seeks within the file
 func (fsa *Asset) Seek(offset int64, whence int) (int64, error) {
 	return fsa.file.Seek(offset, whence)
+}
+
+// Close closes the file
+func (fsa *Asset) Close() error {
+	return fsa.file.Close()
+}
+
+// Data returns the raw file data as a slice of bytes
+func (fsa *Asset) Data() ([]byte, error) {
+	if fsa.file == nil {
+		return nil, fmt.Errorf("asset has no file: %s", fsa.Path())
+	}
+
+	if fsa.data != nil {
+		return fsa.data, nil
+	}
+
+	_, seekErr := fsa.file.Seek(0, 0)
+	if seekErr != nil {
+		return nil, seekErr
+	}
+
+	buf := make([]byte, bufLength)
+	data := make([]byte, 0)
+
+	for {
+		numBytesRead, readErr := fsa.Read(buf)
+
+		data = append(data, buf[:numBytesRead]...)
+
+		if readErr != nil {
+			break
+		}
+	}
+
+	fsa.data = data
+
+	return data, nil
 }
 
 // String returns the path

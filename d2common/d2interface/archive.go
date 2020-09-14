@@ -11,7 +11,7 @@ type Archive interface {
 	Close()
 	FileExists(fileName string) bool
 	ReadFile(fileName string) ([]byte, error)
-	ReadFileStream(fileName string) (ArchiveDataStream, error)
+	ReadFileStream(fileName string) (DataStream, error)
 	ReadTextFile(fileName string) (string, error)
 	GetFileList() ([]string, error)
 }

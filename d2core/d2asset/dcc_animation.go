@@ -4,26 +4,29 @@ import (
 	"errors"
 	"math"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
-	d2iface "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
-var _ d2iface.Animation = &DCCAnimation{} // Static check to confirm struct conforms to interface
+var _ d2interface.Animation = &DCCAnimation{} // Static check to confirm struct conforms to
+// interface
 
 // DCCAnimation represents an animation decoded from DCC
 type DCCAnimation struct {
 	animation
-	*animationManager
+	*AssetManager
 	dccPath  string
-	palette  d2iface.Palette
-	renderer d2iface.Renderer
+	palette  d2interface.Palette
+	renderer d2interface.Renderer
 }
 
 // Clone creates a copy of the animation
-func (a *DCCAnimation) Clone() d2iface.Animation {
+func (a *DCCAnimation) Clone() d2interface.Animation {
 	animation := *a
 	return &animation
 }
@@ -71,7 +74,7 @@ func (a *DCCAnimation) decodeDirection(directionIndex int) error {
 	frameHeight := maxY - minY
 
 	for _, dccFrame := range direction.Frames {
-		pixels := ImgIndexToRGBA(dccFrame.PixelData, a.palette)
+		pixels := d2util.ImgIndexToRGBA(dccFrame.PixelData, a.palette)
 
 		sfc, err := a.renderer.NewSurface(frameWidth, frameHeight, d2enum.FilterNearest)
 		if err != nil {

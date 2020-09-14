@@ -308,7 +308,7 @@ func (v *MPQ) ReadFile(fileName string) ([]byte, error) {
 }
 
 // ReadFileStream reads the mpq file data and returns a stream
-func (v *MPQ) ReadFileStream(fileName string) (d2interface.ArchiveDataStream, error) {
+func (v *MPQ) ReadFileStream(fileName string) (d2interface.DataStream, error) {
 	fileBlockData, err := v.getFileBlockData(fileName)
 
 	if err != nil {

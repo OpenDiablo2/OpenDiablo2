@@ -7,11 +7,9 @@ import (
 	"math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
-
-	d2iface "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
 type playMode int
@@ -30,7 +28,7 @@ type animationFrame struct {
 	offsetX int
 	offsetY int
 
-	image d2iface.Surface
+	image d2interface.Surface
 }
 
 type animationDirection struct {
@@ -114,7 +112,7 @@ func (a *animation) Advance(elapsed float64) error {
 	return nil
 }
 
-func (a *animation) renderShadow(target d2iface.Surface) error {
+func (a *animation) renderShadow(target d2interface.Surface) error {
 	direction := a.directions[a.directionIndex]
 	frame := direction.frames[a.frameIndex]
 
@@ -133,7 +131,7 @@ func (a *animation) renderShadow(target d2iface.Surface) error {
 }
 
 // Render renders the animation to the given surface
-func (a *animation) Render(target d2iface.Surface) error {
+func (a *animation) Render(target d2interface.Surface) error {
 	direction := a.directions[a.directionIndex]
 	frame := direction.frames[a.frameIndex]
 
@@ -150,7 +148,7 @@ func (a *animation) Render(target d2iface.Surface) error {
 }
 
 // RenderFromOrigin renders the animation from the animation origin
-func (a *animation) RenderFromOrigin(target d2iface.Surface, shadow bool) error {
+func (a *animation) RenderFromOrigin(target d2interface.Surface, shadow bool) error {
 	if a.originAtBottom {
 		direction := a.directions[a.directionIndex]
 		frame := direction.frames[a.frameIndex]
@@ -173,7 +171,7 @@ func (a *animation) RenderFromOrigin(target d2iface.Surface, shadow bool) error 
 }
 
 // RenderSection renders the section of the animation frame enclosed by bounds
-func (a *animation) RenderSection(sfc d2iface.Surface, bound image.Rectangle) error {
+func (a *animation) RenderSection(sfc d2interface.Surface, bound image.Rectangle) error {
 	direction := a.directions[a.directionIndex]
 	frame := direction.frames[a.frameIndex]
 

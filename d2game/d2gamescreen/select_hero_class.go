@@ -298,7 +298,7 @@ type SelectHeroClass struct {
 // CreateSelectHeroClass creates an instance of a SelectHeroClass
 func CreateSelectHeroClass(
 	navigator Navigator,
-	manager *d2asset.AssetManager,
+	asset *d2asset.AssetManager,
 	renderer d2interface.Renderer,
 	audioProvider d2interface.AudioProvider,
 	ui *d2ui.UIManager,
@@ -306,6 +306,7 @@ func CreateSelectHeroClass(
 	connectionHost string,
 ) *SelectHeroClass {
 	result := &SelectHeroClass{
+		asset:          asset,
 		heroRenderInfo: make(map[d2enum.Hero]*HeroRenderInfo),
 		selectedHero:   d2enum.HeroNone,
 		connectionType: connectionType,

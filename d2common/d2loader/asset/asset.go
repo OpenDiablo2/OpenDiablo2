@@ -11,8 +11,11 @@ import (
 // asset source), and it can read data and seek within the data
 type Asset interface {
 	fmt.Stringer
-	io.ReadSeeker
+	io.Reader
+	io.Seeker
+	io.Closer
 	Type() types.AssetType
 	Source() Source
 	Path() string
+	Data() ([]byte, error)
 }

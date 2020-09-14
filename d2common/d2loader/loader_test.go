@@ -17,12 +17,13 @@ const (
 	exclusiveB    = "exclusive_b.txt"
 	exclusiveC    = "exclusive_c.txt"
 	exclusiveD    = "exclusive_d.txt"
+	subdirCommonD = "dir\\common.txt"
 	badSourcePath = "/x/y/z.mpq"
 	badFilePath   = "a/bad/file/path.txt"
 )
 
 func TestLoader_NewLoader(t *testing.T) {
-	loader := NewLoader()
+	loader := NewLoader(nil)
 
 	if loader.Cache == nil {
 		t.Error("loader should not be nil")
@@ -30,7 +31,7 @@ func TestLoader_NewLoader(t *testing.T) {
 }
 
 func TestLoader_AddSource(t *testing.T) {
-	loader := NewLoader()
+	loader := NewLoader(nil)
 
 	sourceA, errA := loader.AddSource(sourcePathA)
 	sourceB, errB := loader.AddSource(sourcePathB)
@@ -80,7 +81,7 @@ func TestLoader_AddSource(t *testing.T) {
 }
 
 func TestLoader_Load(t *testing.T) {
-	loader := NewLoader()
+	loader := NewLoader(nil)
 
 	_, _ = loader.AddSource(sourcePathB) // we expect files common to any source to come from here
 	_, _ = loader.AddSource(sourcePathD)
@@ -93,6 +94,7 @@ func TestLoader_Load(t *testing.T) {
 	entryB, errB := loader.Load(exclusiveB)
 	entryC, errC := loader.Load(exclusiveC)
 	entryD, errD := loader.Load(exclusiveD)
+	entryDsubdir, errDsubdir := loader.Load(subdirCommonD)
 
 	_, expectedError := loader.Load(badFilePath) // we expect an Error for this bad file path
 
@@ -104,6 +106,10 @@ func TestLoader_Load(t *testing.T) {
 
 	if errA != nil || errB != nil || errC != nil || errD != nil {
 		t.Error("files exclusive to each source don't exist")
+	}
+
+	if errDsubdir != nil {
+		t.Error("mpq subdir entry not found")
 	}
 
 	if expectedError == nil {
@@ -123,6 +129,7 @@ func TestLoader_Load(t *testing.T) {
 		{entryB, "b"},
 		{entryC, "c"},
 		{entryD, "d"},
+		{entryDsubdir, "d"},
 	}
 
 	for idx := range tests {

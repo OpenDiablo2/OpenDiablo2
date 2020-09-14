@@ -1,4 +1,4 @@
-package d2asset
+package d2util
 
 import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
