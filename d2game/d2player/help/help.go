@@ -94,9 +94,8 @@ func (h *Overlay) Load() {
 		prevY = 0
 	)
 	for frameIndex := 0; frameIndex < 7; frameIndex++ {
-		animation, _ := h.asset.LoadAnimation(d2resource.HelpBorder, d2resource.PaletteSky)
-		_ = animation.SetCurrentFrame(frameIndex)
-		f, _ := h.uiManager.NewSprite(animation)
+		f, _ := h.uiManager.NewSprite(d2resource.HelpBorder, d2resource.PaletteSky)
+		_ = f.SetCurrentFrame(frameIndex)
 
 		ww, hh := f.GetCurrentFrameSize()
 		//fmt.Printf("Help frame %d size: %d, %d\n", frameIndex, ww, hh)
@@ -143,9 +142,7 @@ func (h *Overlay) Load() {
 	h.text = append(h.text, newLabel)
 
 	// Close
-
-	anim, _ := h.asset.LoadAnimation(d2resource.SquareButton, d2resource.PaletteSky)
-	close, _ := h.uiManager.NewSprite(anim)
+	close, _ := h.uiManager.NewSprite(d2resource.SquareButton, d2resource.PaletteSky)
 	_ = close.SetCurrentFrame(0)
 	close.SetPosition(685, 57)
 	h.frames = append(h.frames, close)
@@ -344,8 +341,7 @@ func (h *Overlay) createBullet(c callout) {
 	newLabel.SetPosition(c.LabelX, c.LabelY)
 	h.text = append(h.text, newLabel)
 
-	anim, _ := h.asset.LoadAnimation(d2resource.HelpYellowBullet, d2resource.PaletteSky)
-	newDot, _ := h.uiManager.NewSprite(anim)
+	newDot, _ := h.uiManager.NewSprite(d2resource.HelpYellowBullet, d2resource.PaletteSky)
 	_ = newDot.SetCurrentFrame(0)
 	newDot.SetPosition(c.DotX, c.DotY+14)
 	h.frames = append(h.frames, newDot)
@@ -370,8 +366,7 @@ func (h *Overlay) createCallout(c callout) {
 	}
 	h.lines = append(h.lines, l)
 
-	anim, _ := h.asset.LoadAnimation(d2resource.HelpWhiteBullet, d2resource.PaletteSky)
-	newDot, _ := h.uiManager.NewSprite(anim)
+	newDot, _ := h.uiManager.NewSprite(d2resource.HelpWhiteBullet, d2resource.PaletteSky)
 	_ = newDot.SetCurrentFrame(0)
 	newDot.SetPosition(c.DotX, c.DotY)
 	h.frames = append(h.frames, newDot)

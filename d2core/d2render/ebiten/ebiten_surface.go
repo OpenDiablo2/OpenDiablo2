@@ -30,6 +30,7 @@ type colorMCacheEntry struct {
 }
 
 type ebitenSurface struct {
+	renderer       *Renderer
 	stateStack     []surfaceState
 	stateCurrent   surfaceState
 	image          *ebiten.Image
@@ -37,7 +38,7 @@ type ebitenSurface struct {
 	monotonicClock int64
 }
 
-func createEbitenSurface(img *ebiten.Image, currentState ...surfaceState) *ebitenSurface {
+func createEbitenSurface(r *Renderer, img *ebiten.Image, currentState ...surfaceState) *ebitenSurface {
 	state := surfaceState{
 		effect:     d2enum.DrawEffectNone,
 		saturation: defaultSaturation,
@@ -52,10 +53,16 @@ func createEbitenSurface(img *ebiten.Image, currentState ...surfaceState) *ebite
 	}
 
 	return &ebitenSurface{
+		renderer:     r,
 		image:        img,
 		stateCurrent: state,
 		colorMCache:  make(map[colorMCacheKey]*colorMCacheEntry),
 	}
+}
+
+// Renderer returns the renderer
+func (s *ebitenSurface) Renderer() d2interface.Renderer {
+	return s.renderer
 }
 
 // PushTranslation pushes an x,y translation to the state stack

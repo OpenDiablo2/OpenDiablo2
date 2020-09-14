@@ -29,7 +29,7 @@ type Renderer struct {
 
 // Update updates the screen with the given *ebiten.Image
 func (r *Renderer) Update(screen *ebiten.Image) error {
-	err := r.renderCallback(createEbitenSurface(screen))
+	err := r.renderCallback(createEbitenSurface(r, screen))
 	if err != nil {
 		return err
 	}
@@ -88,19 +88,18 @@ func (r *Renderer) Run(f func(surface d2interface.Surface) error, width, height 
 
 // CreateSurface creates a renderer surface from an existing surface
 func (r *Renderer) CreateSurface(surface d2interface.Surface) (d2interface.Surface, error) {
-	result := createEbitenSurface(
-		surface.(*ebitenSurface).image,
-		surfaceState{
-			filter:     ebiten.FilterNearest,
-			effect:     d2enum.DrawEffectNone,
-			saturation: defaultSaturation,
-			brightness: defaultBrightness,
-			skewX:      defaultSkewX,
-			skewY:      defaultSkewY,
-			scaleX:     defaultScaleX,
-			scaleY:     defaultScaleY,
-		},
-	)
+	img := surface.(*ebitenSurface).image
+	sfcState := surfaceState{
+		filter:     ebiten.FilterNearest,
+		effect:     d2enum.DrawEffectNone,
+		saturation: defaultSaturation,
+		brightness: defaultBrightness,
+		skewX:      defaultSkewX,
+		skewY:      defaultSkewY,
+		scaleX:     defaultScaleX,
+		scaleY:     defaultScaleY,
+	}
+	result := createEbitenSurface(r, img, sfcState)
 
 	return result, nil
 }
@@ -114,7 +113,7 @@ func (r *Renderer) NewSurface(width, height int, filter d2enum.Filter) (d2interf
 		return nil, err
 	}
 
-	return createEbitenSurface(img), nil
+	return createEbitenSurface(r, img), nil
 }
 
 // IsFullScreen returns a boolean for whether or not the renderer is currently set to fullscreen

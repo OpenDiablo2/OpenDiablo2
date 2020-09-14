@@ -23,6 +23,8 @@ const (
 const defaultPlayLength = 1.0
 
 type animationFrame struct {
+	decoded bool
+
 	width   int
 	height  int
 	offsetX int
@@ -33,11 +35,13 @@ type animationFrame struct {
 
 type animationDirection struct {
 	decoded bool
-	frames  []*animationFrame
+	frames  []animationFrame
 }
 
-// animation has directionality, play modes, and frame counting
-type animation struct {
+// Animation has directionality, play modes, and frame counting
+type Animation struct {
+	renderer         d2interface.Renderer
+	onBindRenderer   func(renderer d2interface.Renderer) error
 	directions       []animationDirection
 	effect           d2enum.DrawEffect
 	colorMod         color.Color
@@ -56,14 +60,14 @@ type animation struct {
 }
 
 // SetSubLoop sets a sub loop for the animation
-func (a *animation) SetSubLoop(startFrame, endFrame int) {
+func (a *Animation) SetSubLoop(startFrame, endFrame int) {
 	a.subStartingFrame = startFrame
 	a.subEndingFrame = endFrame
 	a.hasSubLoop = true
 }
 
 // Advance advances the animation state
-func (a *animation) Advance(elapsed float64) error {
+func (a *Animation) Advance(elapsed float64) error {
 	if a.playMode == playModePause {
 		return nil
 	}
@@ -112,7 +116,7 @@ func (a *animation) Advance(elapsed float64) error {
 	return nil
 }
 
-func (a *animation) renderShadow(target d2interface.Surface) error {
+func (a *Animation) renderShadow(target d2interface.Surface) error {
 	direction := a.directions[a.directionIndex]
 	frame := direction.frames[a.frameIndex]
 
@@ -131,7 +135,11 @@ func (a *animation) renderShadow(target d2interface.Surface) error {
 }
 
 // Render renders the animation to the given surface
-func (a *animation) Render(target d2interface.Surface) error {
+func (a *Animation) Render(target d2interface.Surface) error {
+	if a.renderer == nil {
+		a.BindRenderer(target.Renderer())
+	}
+
 	direction := a.directions[a.directionIndex]
 	frame := direction.frames[a.frameIndex]
 
@@ -147,8 +155,22 @@ func (a *animation) Render(target d2interface.Surface) error {
 	return target.Render(frame.image)
 }
 
+// BindRenderer binds the given renderer to the animation so that it can initialize
+// the required surfaces
+func (a *Animation) BindRenderer(r d2interface.Renderer) error {
+	if a.onBindRenderer == nil {
+		return errors.New("the Animation does not have a onBindRenderer handler")
+	}
+
+	return a.onBindRenderer(r)
+}
+
 // RenderFromOrigin renders the animation from the animation origin
-func (a *animation) RenderFromOrigin(target d2interface.Surface, shadow bool) error {
+func (a *Animation) RenderFromOrigin(target d2interface.Surface, shadow bool) error {
+	if a.renderer == nil {
+		a.BindRenderer(target.Renderer())
+	}
+
 	if a.originAtBottom {
 		direction := a.directions[a.directionIndex]
 		frame := direction.frames[a.frameIndex]
@@ -171,7 +193,11 @@ func (a *animation) RenderFromOrigin(target d2interface.Surface, shadow bool) er
 }
 
 // RenderSection renders the section of the animation frame enclosed by bounds
-func (a *animation) RenderSection(sfc d2interface.Surface, bound image.Rectangle) error {
+func (a *Animation) RenderSection(sfc d2interface.Surface, bound image.Rectangle) error {
+	if a.renderer == nil {
+		a.BindRenderer(sfc.Renderer())
+	}
+
 	direction := a.directions[a.directionIndex]
 	frame := direction.frames[a.frameIndex]
 
@@ -185,7 +211,7 @@ func (a *animation) RenderSection(sfc d2interface.Surface, bound image.Rectangle
 }
 
 // GetFrameSize gets the Size(width, height) of a indexed frame.
-func (a *animation) GetFrameSize(frameIndex int) (width, height int, err error) {
+func (a *Animation) GetFrameSize(frameIndex int) (width, height int, err error) {
 	direction := a.directions[a.directionIndex]
 	if frameIndex >= len(direction.frames) {
 		return 0, 0, errors.New("invalid frame index")
@@ -197,16 +223,17 @@ func (a *animation) GetFrameSize(frameIndex int) (width, height int, err error) 
 }
 
 // GetCurrentFrameSize gets the Size(width, height) of the current frame.
-func (a *animation) GetCurrentFrameSize() (width, height int) {
+func (a *Animation) GetCurrentFrameSize() (width, height int) {
 	width, height, _ = a.GetFrameSize(a.frameIndex)
 	return width, height
 }
 
 // GetFrameBounds gets maximum Size(width, height) of all frame.
-func (a *animation) GetFrameBounds() (maxWidth, maxHeight int) {
+func (a *Animation) GetFrameBounds() (maxWidth, maxHeight int) {
 	maxWidth, maxHeight = 0, 0
 
 	direction := a.directions[a.directionIndex]
+
 	for _, frame := range direction.frames {
 		maxWidth = d2math.MaxInt(maxWidth, frame.width)
 		maxHeight = d2math.MaxInt(maxHeight, frame.height)
@@ -216,33 +243,33 @@ func (a *animation) GetFrameBounds() (maxWidth, maxHeight int) {
 }
 
 // GetCurrentFrame gets index of current frame in animation
-func (a *animation) GetCurrentFrame() int {
+func (a *Animation) GetCurrentFrame() int {
 	return a.frameIndex
 }
 
 // GetFrameCount gets number of frames in animation
-func (a *animation) GetFrameCount() int {
+func (a *Animation) GetFrameCount() int {
 	direction := a.directions[a.directionIndex]
 	return len(direction.frames)
 }
 
 // IsOnFirstFrame gets if the animation on its first frame
-func (a *animation) IsOnFirstFrame() bool {
+func (a *Animation) IsOnFirstFrame() bool {
 	return a.frameIndex == 0
 }
 
 // IsOnLastFrame gets if the animation on its last frame
-func (a *animation) IsOnLastFrame() bool {
+func (a *Animation) IsOnLastFrame() bool {
 	return a.frameIndex == a.GetFrameCount()-1
 }
 
 // GetDirectionCount gets the number of animation direction
-func (a *animation) GetDirectionCount() int {
+func (a *Animation) GetDirectionCount() int {
 	return len(a.directions)
 }
 
 // SetDirection places the animation in the direction of an animation
-func (a *animation) SetDirection(directionIndex int) error {
+func (a *Animation) SetDirection(directionIndex int) error {
 	const smallestInvalidDirectionIndex = 64
 	if directionIndex >= smallestInvalidDirectionIndex {
 		return errors.New("invalid direction index")
@@ -255,12 +282,12 @@ func (a *animation) SetDirection(directionIndex int) error {
 }
 
 // GetDirection get the current animation direction
-func (a *animation) GetDirection() int {
+func (a *Animation) GetDirection() int {
 	return a.directionIndex
 }
 
 // SetCurrentFrame sets animation at a specific frame
-func (a *animation) SetCurrentFrame(frameIndex int) error {
+func (a *Animation) SetCurrentFrame(frameIndex int) error {
 	if frameIndex >= a.GetFrameCount() {
 		return errors.New("invalid frame index")
 	}
@@ -272,47 +299,47 @@ func (a *animation) SetCurrentFrame(frameIndex int) error {
 }
 
 // Rewind animation to beginning
-func (a *animation) Rewind() {
+func (a *Animation) Rewind() {
 	_ = a.SetCurrentFrame(0)
 }
 
 // PlayForward plays animation forward
-func (a *animation) PlayForward() {
+func (a *Animation) PlayForward() {
 	a.playMode = playModeForward
 	a.lastFrameTime = 0
 }
 
 // PlayBackward plays animation backward
-func (a *animation) PlayBackward() {
+func (a *Animation) PlayBackward() {
 	a.playMode = playModeBackward
 	a.lastFrameTime = 0
 }
 
 // Pause animation
-func (a *animation) Pause() {
+func (a *Animation) Pause() {
 	a.playMode = playModePause
 	a.lastFrameTime = 0
 }
 
 // SetPlayLoop sets whether to loop the animation
-func (a *animation) SetPlayLoop(loop bool) {
+func (a *Animation) SetPlayLoop(loop bool) {
 	a.playLoop = loop
 }
 
 // SetPlaySpeed sets play speed of the animation
-func (a *animation) SetPlaySpeed(playSpeed float64) {
+func (a *Animation) SetPlaySpeed(playSpeed float64) {
 	a.SetPlayLength(playSpeed * float64(a.GetFrameCount()))
 }
 
 // SetPlayLength sets the Animation's play length in seconds
-func (a *animation) SetPlayLength(playLength float64) {
+func (a *Animation) SetPlayLength(playLength float64) {
 	// TODO refactor to use time.Duration instead of float64
 	a.playLength = playLength
 	a.lastFrameTime = 0
 }
 
 // SetPlayLengthMs sets the Animation's play length in milliseconds
-func (a *animation) SetPlayLengthMs(playLengthMs int) {
+func (a *Animation) SetPlayLengthMs(playLengthMs int) {
 	// TODO remove this method
 	const millisecondsPerSecond = 1000.0
 
@@ -320,24 +347,24 @@ func (a *animation) SetPlayLengthMs(playLengthMs int) {
 }
 
 // SetColorMod sets the Animation's color mod
-func (a *animation) SetColorMod(colorMod color.Color) {
+func (a *Animation) SetColorMod(colorMod color.Color) {
 	a.colorMod = colorMod
 }
 
 // GetPlayedCount gets the number of times the application played
-func (a *animation) GetPlayedCount() int {
+func (a *Animation) GetPlayedCount() int {
 	return a.playedCount
 }
 
 // ResetPlayedCount resets the play count
-func (a *animation) ResetPlayedCount() {
+func (a *Animation) ResetPlayedCount() {
 	a.playedCount = 0
 }
 
-func (a *animation) SetEffect(e d2enum.DrawEffect) {
+func (a *Animation) SetEffect(e d2enum.DrawEffect) {
 	a.effect = e
 }
 
-func (a *animation) SetShadow(shadow bool) {
+func (a *Animation) SetShadow(shadow bool) {
 	a.hasShadow = shadow
 }

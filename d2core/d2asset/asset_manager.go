@@ -1,7 +1,6 @@
 package d2asset
 
 import (
-	"encoding/binary"
 	"fmt"
 	"image/color"
 	"log"
@@ -32,7 +31,6 @@ const (
 
 // AssetManager loads files and game objects
 type AssetManager struct {
-	renderer   d2interface.Renderer
 	loader     *d2loader.Loader
 	tables     d2interface.Cache
 	animations d2interface.Cache
@@ -80,12 +78,12 @@ func (am *AssetManager) FileExists(filePath string) (bool, error) {
 	return true, nil
 }
 
-// LoadAnimation loads an animation by its resource path and its palette path
+// LoadAnimation loads an Animation by its resource path and its palette path
 func (am *AssetManager) LoadAnimation(animationPath, palettePath string) (d2interface.Animation, error) {
 	return am.LoadAnimationWithEffect(animationPath, palettePath, d2enum.DrawEffectNone)
 }
 
-// LoadAnimationWithEffect loads an animation by its resource path and its palette path with a given transparency value
+// LoadAnimationWithEffect loads an Animation by its resource path and its palette path with a given transparency value
 func (am *AssetManager) LoadAnimationWithEffect(animationPath, palettePath string,
 	effect d2enum.DrawEffect) (d2interface.Animation, error) {
 	cachePath := fmt.Sprintf("%s;%s;%d", animationPath, palettePath, effect)
@@ -108,17 +106,17 @@ func (am *AssetManager) LoadAnimationWithEffect(animationPath, palettePath strin
 
 	switch animAsset.Type() {
 	case types.AssetTypeDC6:
-		animation, err = am.createDC6Animation(animationPath, palette, effect)
+		animation, err = am.loadDC6(animationPath, palette, effect)
 		if err != nil {
 			return nil, err
 		}
 	case types.AssetTypeDCC:
-		animation, err = am.createDCCAnimation(animationPath, palette, effect)
+		animation, err = am.loadDCC(animationPath, palette, effect)
 		if err != nil {
 			return nil, err
 		}
 	default:
-		return nil, fmt.Errorf("unknown animation format for file: %s", animAsset.Path())
+		return nil, fmt.Errorf("unknown Animation format for file: %s", animAsset.Path())
 	}
 
 	err = am.animations.Insert(cachePath, animation, defaultCacheEntryWeight)
@@ -140,11 +138,11 @@ func (am *AssetManager) LoadComposite(baseType d2enum.ObjectType, token, palette
 }
 
 // LoadFont loads a font the resource files
-func (am *AssetManager) LoadFont(tablePath, spritePath, palettePath string) (d2interface.Font, error) {
+func (am *AssetManager) LoadFont(tablePath, spritePath, palettePath string) (*Font, error) {
 	cachePath := fmt.Sprintf("%s;%s;%s", tablePath, spritePath, palettePath)
 
 	if cached, found := am.fonts.Retrieve(cachePath); found {
-		return cached.(d2interface.Font), nil
+		return cached.(*Font), nil
 	}
 
 	sheet, err := am.LoadAnimation(spritePath, palettePath)
@@ -161,25 +159,10 @@ func (am *AssetManager) LoadFont(tablePath, spritePath, palettePath string) (d2i
 		return nil, fmt.Errorf("invalid font table format: %s", tablePath)
 	}
 
-	_, maxCharHeight := sheet.GetFrameBounds()
-
-	glyphs := make(map[rune]fontGlyph)
-
-	for i := 12; i < len(tableData); i += 14 {
-		code := rune(binary.LittleEndian.Uint16(tableData[i : i+2]))
-
-		var glyph fontGlyph
-		glyph.frame = int(binary.LittleEndian.Uint16(tableData[i+8 : i+10]))
-		glyph.width = int(tableData[i+3])
-		glyph.height = maxCharHeight
-
-		glyphs[code] = glyph
-	}
-
 	font := &Font{
-		sheet:  sheet,
-		glyphs: glyphs,
-		color:  color.White,
+		table: tableData,
+		sheet: sheet,
+		color: color.White,
 	}
 
 	err = am.fonts.Insert(cachePath, font, defaultCacheEntryWeight)
@@ -229,7 +212,7 @@ func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary,
 	}
 
 	table := d2tbl.LoadTextDictionary(data)
-	if table != nil {
+	if table == nil {
 		return nil, fmt.Errorf("table not found: %s", tablePath)
 	}
 
@@ -261,66 +244,9 @@ func (am *AssetManager) LoadPaletteTransform(path string) (*d2pl2.PL2, error) {
 	return pl2, nil
 }
 
-// createDC6Animation creates an Animation from d2dc6.DC6 and d2dat.DATPalette
-func (am *AssetManager) createDC6Animation(dc6Path string,
+// loadDC6 creates an Animation from d2dc6.DC6 and d2dat.DATPalette
+func (am *AssetManager) loadDC6(path string,
 	palette d2interface.Palette, effect d2enum.DrawEffect) (d2interface.Animation, error) {
-	dc6, err := am.loadDC6(dc6Path)
-	if err != nil {
-		return nil, err
-	}
-
-	anim := DC6Animation{
-		animation: animation{
-			directions:     make([]animationDirection, dc6.Directions),
-			playLength:     defaultPlayLength,
-			playLoop:       true,
-			originAtBottom: true,
-			effect:         effect,
-		},
-		dc6Path:  dc6Path,
-		dc6:      dc6,
-		palette:  palette,
-		renderer: am.renderer,
-	}
-
-	err = anim.SetDirection(0)
-
-	return &anim, err
-}
-
-// createDCCAnimation creates an animation from d2dcc.DCC and d2dat.DATPalette
-func (am *AssetManager) createDCCAnimation(dccPath string,
-	palette d2interface.Palette,
-	effect d2enum.DrawEffect) (d2interface.Animation, error) {
-	dcc, err := am.loadDCC(dccPath)
-	if err != nil {
-		return nil, err
-	}
-
-	anim := animation{
-		playLength: defaultPlayLength,
-		playLoop:   true,
-		directions: make([]animationDirection, dcc.NumberOfDirections),
-		effect:     effect,
-	}
-
-	DCC := DCCAnimation{
-		animation:    anim,
-		AssetManager: am,
-		dccPath:      dccPath,
-		palette:      palette,
-		renderer:     am.renderer,
-	}
-
-	err = DCC.SetDirection(0)
-	if err != nil {
-		return nil, err
-	}
-
-	return &DCC, nil
-}
-
-func (am *AssetManager) loadDC6(path string) (*d2dc6.DC6, error) {
 	dc6Data, err := am.LoadFile(path)
 	if err != nil {
 		return nil, err
@@ -331,16 +257,27 @@ func (am *AssetManager) loadDC6(path string) (*d2dc6.DC6, error) {
 		return nil, err
 	}
 
-	return dc6, nil
+	animation, err := newDC6Animation(dc6, palette, effect)
+
+	return animation, err
 }
 
-func (am *AssetManager) loadDCC(path string) (*d2dcc.DCC, error) {
+// loadDCC creates an Animation from d2dcc.DCC and d2dat.DATPalette
+func (am *AssetManager) loadDCC(path string,
+	palette d2interface.Palette, effect d2enum.DrawEffect) (d2interface.Animation, error) {
 	dccData, err := am.LoadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	return d2dcc.Load(dccData)
+	dcc, err := d2dcc.Load(dccData)
+	if err != nil {
+		return nil, err
+	}
+
+	animation, err := newDCCAnimation(dcc, palette, effect)
+
+	return animation, nil
 }
 
 // BindTerminalCommands binds the in-game terminal comands for the asset manager.
@@ -368,7 +305,7 @@ func (am *AssetManager) BindTerminalCommands(term d2interface.Terminal) error {
 
 		term.OutputInfof("palette cache: %f", cacheStatistics(am.palettes))
 		term.OutputInfof("palette transform cache: %f", cacheStatistics(am.transforms))
-		term.OutputInfof("animation cache: %f", cacheStatistics(am.animations))
+		term.OutputInfof("Animation cache: %f", cacheStatistics(am.animations))
 		term.OutputInfof("font cache: %f", cacheStatistics(am.fonts))
 	}); err != nil {
 		return err

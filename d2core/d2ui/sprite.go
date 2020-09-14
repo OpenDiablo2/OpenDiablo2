@@ -22,9 +22,15 @@ const (
 )
 
 // NewSprite creates a new Sprite
-func (ui *UIManager) NewSprite(animation d2interface.Animation) (*Sprite, error) {
-	if animation == nil {
+func (ui *UIManager) NewSprite(animationPath, palettePath string) (*Sprite, error) {
+	animation, err := ui.asset.LoadAnimation(animationPath, palettePath)
+	if animation == nil || err != nil {
 		return nil, fmt.Errorf(errNoAnimation)
+	}
+
+	err = animation.BindRenderer(ui.renderer)
+	if err != nil {
+		return nil, err
 	}
 
 	return &Sprite{animation: animation}, nil
@@ -56,7 +62,8 @@ func (s *Sprite) RenderSegmented(target d2interface.Surface, segmentsX, segments
 		var currentX, maxFrameHeight int
 
 		for x := 0; x < segmentsX; x++ {
-			if err := s.animation.SetCurrentFrame(x + y*segmentsX + frameOffset*segmentsX*segmentsY); err != nil {
+			idx := x + y*segmentsX + frameOffset*segmentsX*segmentsY
+			if err := s.animation.SetCurrentFrame(idx); err != nil {
 				return err
 			}
 

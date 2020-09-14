@@ -63,6 +63,7 @@ func (c *Composite) Render(target d2interface.Surface) error {
 
 	for _, layerIndex := range c.mode.cof.Priority[direction][c.mode.frameIndex] {
 		layer := c.mode.layers[layerIndex]
+
 		if layer != nil {
 			if err := layer.RenderFromOrigin(target, true); err != nil {
 				return err
@@ -145,6 +146,10 @@ func (c *Composite) SetAnimSpeed(speed int) {
 
 // SetDirection sets the direction of the composite and its layers
 func (c *Composite) SetDirection(direction int) {
+	if c.mode == nil {
+		return
+	}
+
 	c.direction = direction
 	for layerIdx := range c.mode.layers {
 		layer := c.mode.layers[layerIdx]
@@ -241,7 +246,7 @@ func (c *Composite) createMode(animationMode animationMode, weaponClass string) 
 
 	animationData := d2data.AnimationData[animationKey]
 	if len(animationData) == 0 {
-		return nil, errors.New("could not find animation data")
+		return nil, errors.New("could not find Animation data")
 	}
 
 	mode := &compositeMode{
@@ -300,7 +305,7 @@ func (c *Composite) loadCompositeLayer(layerKey, layerValue, animationMode, weap
 		}
 	}
 
-	return nil, errors.New("animation not found")
+	return nil, errors.New("Animation not found")
 }
 
 // GetSize returns the size of the composite

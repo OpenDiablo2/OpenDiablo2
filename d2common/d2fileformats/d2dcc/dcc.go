@@ -15,6 +15,7 @@ type DCC struct {
 	Version            int
 	NumberOfDirections int
 	FramesPerDirection int
+	Directions         []*DCCDirection
 	directionOffsets   []int
 	fileData           []byte
 }
@@ -37,6 +38,8 @@ func Load(fileData []byte) (*DCC, error) {
 	result.NumberOfDirections = int(bm.GetByte())
 	result.FramesPerDirection = int(bm.GetInt32())
 
+	result.Directions = make([]*DCCDirection, result.NumberOfDirections)
+
 	if bm.GetInt32() != 1 {
 		return nil, errors.New("this value isn't 1. It has to be 1")
 	}
@@ -47,13 +50,14 @@ func Load(fileData []byte) (*DCC, error) {
 
 	for i := 0; i < result.NumberOfDirections; i++ {
 		result.directionOffsets[i] = int(bm.GetInt32())
+		result.Directions[i] = result.decodeDirection(i)
 	}
 
 	return result, nil
 }
 
-// DecodeDirection decodes and returns the given direction
-func (dcc *DCC) DecodeDirection(direction int) *DCCDirection {
+// decodeDirection decodes and returns the given direction
+func (dcc *DCC) decodeDirection(direction int) *DCCDirection {
 	return CreateDCCDirection(d2datautils.CreateBitMuncher(dcc.fileData,
 		dcc.directionOffsets[direction]*directionOffsetMultiplier), dcc)
 }
