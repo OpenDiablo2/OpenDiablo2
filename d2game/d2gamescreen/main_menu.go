@@ -172,20 +172,16 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 }
 
 func (v *MainMenu) loadBackgroundSprites() {
-	animation, _ := v.asset.LoadAnimation(d2resource.GameSelectScreen, d2resource.PaletteSky)
-	v.background, _ = v.uiManager.NewSprite(animation)
+	v.background, _ = v.uiManager.NewSprite(d2resource.GameSelectScreen, d2resource.PaletteSky)
 	v.background.SetPosition(backgroundX, backgroundY)
 
-	animation, _ = v.asset.LoadAnimation(d2resource.TrademarkScreen, d2resource.PaletteSky)
-	v.trademarkBackground, _ = v.uiManager.NewSprite(animation)
+	v.trademarkBackground, _ = v.uiManager.NewSprite(d2resource.TrademarkScreen, d2resource.PaletteSky)
 	v.trademarkBackground.SetPosition(backgroundX, backgroundY)
 
-	animation, _ = v.asset.LoadAnimation(d2resource.TCPIPBackground, d2resource.PaletteSky)
-	v.tcpIPBackground, _ = v.uiManager.NewSprite(animation)
+	v.tcpIPBackground, _ = v.uiManager.NewSprite(d2resource.TCPIPBackground, d2resource.PaletteSky)
 	v.tcpIPBackground.SetPosition(backgroundX, backgroundY)
 
-	animation, _ = v.asset.LoadAnimation(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
-	v.serverIPBackground, _ = v.uiManager.NewSprite(animation)
+	v.serverIPBackground, _ = v.uiManager.NewSprite(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
 	v.serverIPBackground.SetPosition(serverIPbackgroundX, serverIPbackgroundY)
 }
 
@@ -236,25 +232,21 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 }
 
 func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
-	animation, _ := v.asset.LoadAnimation(d2resource.Diablo2LogoFireLeft, d2resource.PaletteUnits)
-	v.diabloLogoLeft, _ = v.uiManager.NewSprite(animation)
+	v.diabloLogoLeft, _ = v.uiManager.NewSprite(d2resource.Diablo2LogoFireLeft, d2resource.PaletteUnits)
 	v.diabloLogoLeft.SetEffect(d2enum.DrawEffectModulate)
 	v.diabloLogoLeft.PlayForward()
 	v.diabloLogoLeft.SetPosition(diabloLogoX, diabloLogoY)
 	loading.Progress(sixtyPercent)
 
-	animation, _ = v.asset.LoadAnimation(d2resource.Diablo2LogoFireRight, d2resource.PaletteUnits)
-	v.diabloLogoRight, _ = v.uiManager.NewSprite(animation)
+	v.diabloLogoRight, _ = v.uiManager.NewSprite(d2resource.Diablo2LogoFireRight, d2resource.PaletteUnits)
 	v.diabloLogoRight.SetEffect(d2enum.DrawEffectModulate)
 	v.diabloLogoRight.PlayForward()
 	v.diabloLogoRight.SetPosition(diabloLogoX, diabloLogoY)
 
-	animation, _ = v.asset.LoadAnimation(d2resource.Diablo2LogoBlackLeft, d2resource.PaletteUnits)
-	v.diabloLogoLeftBack, _ = v.uiManager.NewSprite(animation)
+	v.diabloLogoLeftBack, _ = v.uiManager.NewSprite(d2resource.Diablo2LogoBlackLeft, d2resource.PaletteUnits)
 	v.diabloLogoLeftBack.SetPosition(diabloLogoX, diabloLogoY)
 
-	animation, _ = v.asset.LoadAnimation(d2resource.Diablo2LogoBlackRight, d2resource.PaletteUnits)
-	v.diabloLogoRightBack, _ = v.uiManager.NewSprite(animation)
+	v.diabloLogoRightBack, _ = v.uiManager.NewSprite(d2resource.Diablo2LogoBlackRight, d2resource.PaletteUnits)
 	v.diabloLogoRightBack.SetPosition(diabloLogoX, diabloLogoY)
 }
 

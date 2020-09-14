@@ -3,9 +3,9 @@ package d2asset
 import (
 	"errors"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -14,13 +14,58 @@ import (
 var _ d2interface.Animation = &DC6Animation{} // Static check to confirm struct conforms to
 // interface
 
+func newDC6Animation(
+	dc6 *d2dc6.DC6,
+	pal d2interface.Palette,
+	effect d2enum.DrawEffect,
+) (d2interface.Animation, error) {
+	DC6 := &DC6Animation{
+		dc6:     dc6,
+		palette: pal,
+	}
+
+	anim := Animation{
+		playLength:     defaultPlayLength,
+		playLoop:       true,
+		originAtBottom: true,
+		effect:         effect,
+		onBindRenderer: func(r d2interface.Renderer) error {
+			if DC6.renderer != r {
+				DC6.renderer = r
+				return DC6.createSurfaces()
+			}
+
+			return nil
+		},
+	}
+
+	DC6.Animation = anim
+
+	err := DC6.init()
+	if err != nil {
+		return nil, err
+	}
+
+	return DC6, nil
+}
+
 // DC6Animation is an animation made from a DC6 file
 type DC6Animation struct {
-	animation
-	dc6Path  string
-	dc6      *d2dc6.DC6
-	palette  d2interface.Palette
-	renderer d2interface.Renderer
+	Animation
+	dc6     *d2dc6.DC6
+	palette d2interface.Palette
+}
+
+func (a *DC6Animation) init() error {
+	a.directions = make([]animationDirection, a.dc6.Directions)
+
+	for directionIndex := range a.directions {
+		a.directions[directionIndex].frames = make([]animationFrame, a.dc6.FramesPerDirection)
+	}
+
+	err := a.decode()
+
+	return err
 }
 
 // SetDirection decodes and sets the direction
@@ -31,7 +76,8 @@ func (a *DC6Animation) SetDirection(directionIndex int) error {
 	}
 
 	direction := d2dcc.Dir64ToDcc(directionIndex, len(a.directions))
-	if !a.directions[direction].decoded {
+
+	if !a.directions[directionIndex].decoded {
 		err := a.decodeDirection(direction)
 		if err != nil {
 			return err
@@ -39,42 +85,113 @@ func (a *DC6Animation) SetDirection(directionIndex int) error {
 	}
 
 	a.directionIndex = direction
-	a.frameIndex = 0
+
+	return nil
+}
+
+func (a *DC6Animation) decode() error {
+	for directionIndex := 0; directionIndex < len(a.directions); directionIndex++ {
+		err := a.decodeDirection(directionIndex)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
 
 func (a *DC6Animation) decodeDirection(directionIndex int) error {
-	dc6 := a.dc6
-	startFrame := directionIndex * int(dc6.FramesPerDirection)
-
-	for i := 0; i < int(dc6.FramesPerDirection); i++ {
-		dc6Frame := dc6.Frames[startFrame+i]
-
-		sfc, err := a.renderer.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height),
-			d2enum.FilterNearest)
+	for frameIndex := 0; frameIndex < int(a.dc6.FramesPerDirection); frameIndex++ {
+		frame, err := a.decodeFrame(directionIndex, frameIndex)
 		if err != nil {
 			return err
 		}
 
-		indexData := dc6.DecodeFrame(startFrame + i)
-		colorData := d2util.ImgIndexToRGBA(indexData, a.palette)
+		a.directions[directionIndex].frames[frameIndex] = frame
+	}
 
-		if err := sfc.ReplacePixels(colorData); err != nil {
+	a.directions[directionIndex].decoded = true
+
+	return nil
+}
+
+func (a *DC6Animation) decodeFrame(directionIndex, frameIndex int) (animationFrame, error) {
+	startFrame := directionIndex * int(a.dc6.FramesPerDirection)
+
+	dc6Frame := a.dc6.Frames[startFrame+frameIndex]
+
+	frame := animationFrame{
+		width:   int(dc6Frame.Width),
+		height:  int(dc6Frame.Height),
+		offsetX: int(dc6Frame.OffsetX),
+		offsetY: int(dc6Frame.OffsetY),
+	}
+
+	a.directions[directionIndex].frames[frameIndex].decoded = true
+
+	return frame, nil
+}
+
+func (a *DC6Animation) createSurfaces() error {
+	for directionIndex := 0; directionIndex < len(a.directions); directionIndex++ {
+		err := a.createDirectionSurfaces(directionIndex)
+		if err != nil {
 			return err
 		}
-
-		a.directions[directionIndex].decoded = true
-		a.directions[directionIndex].frames = append(a.directions[directionIndex].frames, &animationFrame{
-			width:   int(dc6Frame.Width),
-			height:  int(dc6Frame.Height),
-			offsetX: int(dc6Frame.OffsetX),
-			offsetY: int(dc6Frame.OffsetY),
-			image:   sfc,
-		})
 	}
 
 	return nil
+}
+
+func (a *DC6Animation) createDirectionSurfaces(directionIndex int) error {
+	for frameIndex := 0; frameIndex < int(a.dc6.FramesPerDirection); frameIndex++ {
+		if !a.directions[directionIndex].decoded {
+			err := a.decodeDirection(directionIndex)
+			if err != nil {
+				return err
+			}
+		}
+
+		surface, err := a.createFrameSurface(directionIndex, frameIndex)
+		if err != nil {
+			return err
+		}
+
+		a.directions[directionIndex].frames[frameIndex].image = surface
+	}
+
+	return nil
+}
+
+func (a *DC6Animation) createFrameSurface(directionIndex, frameIndex int) (d2interface.Surface, error) {
+	if !a.directions[directionIndex].frames[frameIndex].decoded {
+		frame, err := a.decodeFrame(directionIndex, frameIndex)
+		if err != nil {
+			return nil, err
+		}
+
+		a.directions[directionIndex].frames[frameIndex] = frame
+	}
+
+	startFrame := directionIndex * int(a.dc6.FramesPerDirection)
+	dc6Frame := a.dc6.Frames[startFrame+frameIndex]
+	indexData := a.dc6.DecodeFrame(startFrame + frameIndex)
+	colorData := d2util.ImgIndexToRGBA(indexData, a.palette)
+
+	if a.renderer == nil {
+		return nil, errors.New("no renderer")
+	}
+
+	sfc, err := a.renderer.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height), d2enum.FilterNearest)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := sfc.ReplacePixels(colorData); err != nil {
+		return nil, err
+	}
+
+	return sfc, nil
 }
 
 // Clone creates a copy of the animation

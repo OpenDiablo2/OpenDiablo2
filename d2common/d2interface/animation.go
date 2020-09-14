@@ -9,6 +9,7 @@ import (
 
 // Animation is an animation
 type Animation interface {
+	BindRenderer(Renderer) error
 	Clone() Animation
 	SetSubLoop(startFrame, EndFrame int)
 	Advance(elapsed float64) error

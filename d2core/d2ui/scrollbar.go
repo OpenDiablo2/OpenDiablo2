@@ -28,8 +28,7 @@ type Scrollbar struct {
 
 // NewScrollbar creates a scrollbar instance
 func (ui *UIManager) NewScrollbar(x, y, height int) *Scrollbar {
-	animation, _ := ui.asset.LoadAnimation(d2resource.Scrollbar, d2resource.PaletteSky)
-	scrollbarSprite, _ := ui.NewSprite(animation)
+	scrollbarSprite, _ := ui.NewSprite(d2resource.Scrollbar, d2resource.PaletteSky)
 	result := &Scrollbar{
 		visible:         true,
 		enabled:         true,

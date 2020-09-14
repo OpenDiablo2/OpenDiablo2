@@ -35,7 +35,7 @@ func main() {
 		panic(err)
 	}
 
-	asset, err := d2asset.NewAssetManager(renderer, d2config.Config, nil)
+	asset, err := d2asset.NewAssetManager(d2config.Config)
 	if err != nil {
 		panic(err)
 	}

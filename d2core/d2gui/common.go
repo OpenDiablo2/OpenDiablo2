@@ -4,11 +4,13 @@ import (
 	"errors"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
-func loadFont(fontStyle FontStyle) (d2interface.Font, error) {
+func loadFont(fontStyle FontStyle) (*d2asset.Font, error) {
 	config := getFontStyleConfig(fontStyle)
 	if config == nil {
 		return nil, errors.New("invalid font style")

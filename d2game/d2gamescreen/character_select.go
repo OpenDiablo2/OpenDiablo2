@@ -138,10 +138,8 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 
 	loading.Progress(tenPercent)
 
-	animation, _ := v.asset.LoadAnimation(d2resource.CharacterSelectionBackground,
-		d2resource.PaletteSky)
 	bgX, bgY := 0, 0
-	v.background, _ = v.uiManager.NewSprite(animation)
+	v.background, _ = v.uiManager.NewSprite(d2resource.CharacterSelectionBackground, d2resource.PaletteSky)
 	v.background.SetPosition(bgX, bgY)
 
 	v.createButtons(loading)
@@ -160,14 +158,11 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	deleteConfirmX, deleteConfirmY := 400, 185
 	v.deleteCharConfirmLabel.SetPosition(deleteConfirmX, deleteConfirmY)
 
-	animation, _ = v.asset.LoadAnimation(d2resource.CharacterSelectionSelectBox,
-		d2resource.PaletteSky)
-	v.selectionBox, _ = v.uiManager.NewSprite(animation)
+	v.selectionBox, _ = v.uiManager.NewSprite(d2resource.CharacterSelectionSelectBox, d2resource.PaletteSky)
 	selBoxX, selBoxY := 37, 86
 	v.selectionBox.SetPosition(selBoxX, selBoxY)
 
-	animation, _ = v.asset.LoadAnimation(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
-	v.okCancelBox, _ = v.uiManager.NewSprite(animation)
+	v.okCancelBox, _ = v.uiManager.NewSprite(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
 	okCancelX, okCancelY := 270, 175
 	v.okCancelBox.SetPosition(okCancelX, okCancelY)
 

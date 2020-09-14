@@ -31,8 +31,7 @@ func (ui *UIManager) NewCheckbox(checkState bool) *Checkbox {
 		enabled:    true,
 	}
 
-	animation, _ := ui.asset.LoadAnimation(d2resource.Checkbox, d2resource.PaletteFechar)
-	checkboxSprite, _ := ui.NewSprite(animation)
+	checkboxSprite, _ := ui.NewSprite(d2resource.Checkbox, d2resource.PaletteFechar)
 	result.width, result.height, _ = checkboxSprite.GetFrameSize(0)
 	checkboxSprite.SetPosition(0, 0)
 

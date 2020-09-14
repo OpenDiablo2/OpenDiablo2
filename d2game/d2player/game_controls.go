@@ -381,21 +381,16 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 // Load the resources required for the GameControls
 func (g *GameControls) Load() {
-	animation, _ := g.asset.LoadAnimation(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
-	g.globeSprite, _ = g.uiManager.NewSprite(animation)
+	g.globeSprite, _ = g.uiManager.NewSprite(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
 
-	animation, _ = g.asset.LoadAnimation(d2resource.HealthManaIndicator, d2resource.PaletteSky)
-	g.hpManaStatusSprite, _ = g.uiManager.NewSprite(animation)
+	g.hpManaStatusSprite, _ = g.uiManager.NewSprite(d2resource.HealthManaIndicator, d2resource.PaletteSky)
 
-	animation, _ = g.asset.LoadAnimation(d2resource.GamePanels, d2resource.PaletteSky)
-	g.mainPanel, _ = g.uiManager.NewSprite(animation)
+	g.mainPanel, _ = g.uiManager.NewSprite(d2resource.GamePanels, d2resource.PaletteSky)
 
-	animation, _ = g.asset.LoadAnimation(d2resource.MenuButton, d2resource.PaletteSky)
-	_ = animation.SetCurrentFrame(2)
-	g.menuButton, _ = g.uiManager.NewSprite(animation)
+	g.menuButton, _ = g.uiManager.NewSprite(d2resource.MenuButton, d2resource.PaletteSky)
+	_ = g.menuButton.SetCurrentFrame(2)
 
-	animation, _ = g.asset.LoadAnimation(d2resource.GenericSkills, d2resource.PaletteSky)
-	g.skillIcon, _ = g.uiManager.NewSprite(animation)
+	g.skillIcon, _ = g.uiManager.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
 
 	g.loadUIButtons()
 

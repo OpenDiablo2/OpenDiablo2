@@ -121,17 +121,8 @@ func (g *ItemGrid) loadItem(item InventoryItem) {
 		var itemSprite *d2ui.Sprite
 
 		// TODO: Put the pattern into D2Shared
-		animation, err := g.asset.LoadAnimation(
-			fmt.Sprintf("/data/global/items/inv%s.dc6", item.GetItemCode()),
-			d2resource.PaletteSky,
-		)
-
-		if err != nil {
-			log.Printf("failed to load sprite for item (%s): %v", item.GetItemCode(), err)
-			return
-		}
-
-		itemSprite, err = g.uiManager.NewSprite(animation)
+		imgPath := fmt.Sprintf("/data/global/items/inv%s.dc6", item.GetItemCode())
+		itemSprite, err := g.uiManager.NewSprite(imgPath, d2resource.PaletteSky)
 		if err != nil {
 			log.Printf("Failed to load sprite, error: " + err.Error())
 		}

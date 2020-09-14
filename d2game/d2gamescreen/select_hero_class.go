@@ -734,27 +734,21 @@ func (v *SelectHeroClass) loadSprite(animationPath string, position image.Point,
 		return nil
 	}
 
-	animation, err := v.asset.LoadAnimation(animationPath, d2resource.PaletteFechar)
-	if err != nil {
-		fmt.Printf("could not load animation: %s\n", animationPath)
-		return nil
-	}
-
-	animation.PlayForward()
-	animation.SetPlayLoop(playLoop)
-
-	if blend {
-		animation.SetEffect(d2enum.DrawEffectModulate)
-	}
-
-	if playLength != 0 {
-		animation.SetPlayLengthMs(playLength)
-	}
-
-	sprite, err := v.uiManager.NewSprite(animation)
+	sprite, err := v.uiManager.NewSprite(animationPath, d2resource.PaletteFechar)
 	if err != nil {
 		fmt.Printf("could not load sprite for the animation: %s\n", animationPath)
 		return nil
+	}
+
+	sprite.PlayForward()
+	sprite.SetPlayLoop(playLoop)
+
+	if blend {
+		sprite.SetEffect(d2enum.DrawEffectModulate)
+	}
+
+	if playLength != 0 {
+		sprite.SetPlayLengthMs(playLength)
 	}
 
 	sprite.SetPosition(position.X, position.Y)

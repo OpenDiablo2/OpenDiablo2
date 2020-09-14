@@ -71,11 +71,9 @@ func (g *Inventory) Close() {
 
 // Load the resources required by the inventory
 func (g *Inventory) Load() {
-	animation, _ := g.asset.LoadAnimation(d2resource.Frame, d2resource.PaletteSky)
-	g.frame, _ = g.uiManager.NewSprite(animation)
+	g.frame, _ = g.uiManager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
 
-	animation, _ = g.asset.LoadAnimation(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
-	g.panel, _ = g.uiManager.NewSprite(animation)
+	g.panel, _ = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 	items := []InventoryItem{
 		diablo2item.NewItem("kit", "Crimson", "of the Bat", "of Frost").Identify(),
 		diablo2item.NewItem("rin", "Steel", "of Shock").Identify(),

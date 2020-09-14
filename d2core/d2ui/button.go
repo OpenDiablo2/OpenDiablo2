@@ -191,8 +191,7 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 	lbl.Color[0] = d2util.Color(greyAlpha100)
 	lbl.Alignment = d2gui.HorizontalAlignCenter
 
-	animation, _ := ui.asset.LoadAnimation(buttonLayout.ResourceName, buttonLayout.PaletteName)
-	buttonSprite, _ := ui.NewSprite(animation)
+	buttonSprite, _ := ui.NewSprite(buttonLayout.ResourceName, buttonLayout.PaletteName)
 
 	for i := 0; i < buttonLayout.XSegments; i++ {
 		w, _, _ := buttonSprite.GetFrameSize(i)

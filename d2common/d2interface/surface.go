@@ -9,6 +9,7 @@ import (
 
 // Surface represents a renderable surface.
 type Surface interface {
+	Renderer() Renderer
 	Clear(color color.Color) error
 	DrawRect(width, height int, color color.Color)
 	DrawLine(x, y int, color color.Color)

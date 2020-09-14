@@ -23,11 +23,9 @@ func newMiniPanel(asset *d2asset.AssetManager, uiManager *d2ui.UIManager, isSing
 		miniPanelContainerPath = d2resource.MinipanelSmall
 	}
 
-	animation, _ := asset.LoadAnimation(miniPanelContainerPath, d2resource.PaletteSky)
-	containerSprite, _ := uiManager.NewSprite(animation)
+	containerSprite, _ := uiManager.NewSprite(miniPanelContainerPath, d2resource.PaletteSky)
 
-	animation, _ = asset.LoadAnimation(d2resource.MinipanelButton, d2resource.PaletteSky)
-	buttonSprite, _ := uiManager.NewSprite(animation)
+	buttonSprite, _ := uiManager.NewSprite(d2resource.MinipanelButton, d2resource.PaletteSky)
 
 	rectangle := d2geom.Rectangle{Left: 325, Top: 526, Width: 156, Height: 26}
 

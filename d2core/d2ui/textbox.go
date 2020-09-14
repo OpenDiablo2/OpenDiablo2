@@ -26,8 +26,7 @@ type TextBox struct {
 
 // NewTextbox creates a new instance of a text box
 func (ui *UIManager) NewTextbox() *TextBox {
-	animation, _ := ui.asset.LoadAnimation(d2resource.TextBox2, d2resource.PaletteUnits)
-	bgSprite, _ := ui.NewSprite(animation)
+	bgSprite, _ := ui.NewSprite(d2resource.TextBox2, d2resource.PaletteUnits)
 	tb := &TextBox{
 		filter:    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
 		bgSprite:  bgSprite,
