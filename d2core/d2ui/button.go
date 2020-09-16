@@ -83,6 +83,10 @@ const (
 	buttonOkCancelSegmentsY     = 1
 	buttonOkCancelDisabledFrame = -1
 
+	buttonCloseSegmentsX     = 1
+	buttonCloseSegmentsY     = 1
+	buttonCloseDisabledFrame = -1
+
 	buttonRunSegmentsX     = 1
 	buttonRunSegmentsY     = 1
 	buttonRunDisabledFrame = -1
@@ -146,6 +150,16 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			PaletteName:      d2resource.PaletteSky,
 			Toggleable:       true,
 			FontPath:         d2resource.FontRediculous,
+			AllowFrameChange: true,
+		},
+		ButtonTypeClose: {
+			XSegments: buttonCloseSegmentsX,
+			YSegments: buttonCloseSegmentsY,
+			DisabledFrame: buttonCloseDisabledFrame,
+			ResourceName: d2resource.SquareButton,
+			PaletteName: d2resource.PaletteUnits,
+			Toggleable: true,
+			FontPath: d2resource.Font30,
 			AllowFrameChange: true,
 		},
 	}

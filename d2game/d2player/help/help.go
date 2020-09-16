@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -26,16 +24,17 @@ const (
 
 // HelpOverlay represents the in-game overlay that toggles visibility when the h key is pressed
 type Overlay struct {
-	asset     *d2asset.AssetManager
-	isOpen    bool
-	renderer  d2interface.Renderer
-	frames    []*d2ui.Sprite
-	text      []*d2ui.Label
-	lines     []line
-	uiManager *d2ui.UIManager
-	originX   int
-	originY   int
-	layout    *d2gui.Layout
+	asset       *d2asset.AssetManager
+	isOpen      bool
+	renderer    d2interface.Renderer
+	frames      []*d2ui.Sprite
+	text        []*d2ui.Label
+	lines       []line
+	uiManager   *d2ui.UIManager
+	originX     int
+	originY     int
+	layout      *d2gui.Layout
+	closeButton *d2ui.Button
 }
 
 func NewHelpOverlay(asset *d2asset.AssetManager, renderer d2interface.Renderer,
@@ -49,12 +48,9 @@ func NewHelpOverlay(asset *d2asset.AssetManager, renderer d2interface.Renderer,
 	return h
 }
 
-func (h *Overlay) onHoverElement(n int) {
-
-}
-
-func (h *Overlay) setLayout(id int) {
-	h.onHoverElement(0)
+func (h *Overlay) onMouseDown() {
+	// If mouse over close button
+	// close()
 }
 
 func (h *Overlay) Toggle() {
@@ -68,6 +64,7 @@ func (h *Overlay) Toggle() {
 
 func (h *Overlay) close() {
 	h.isOpen = false
+	h.closeButton.SetVisible(false)
 	d2gui.SetLayout(nil)
 }
 
@@ -75,14 +72,26 @@ func (h *Overlay) open() {
 	h.isOpen = true
 	if h.layout == nil {
 		h.layout = d2gui.CreateLayout(h.renderer, d2gui.PositionTypeHorizontal)
-		// layoutLeft := h.layout.AddLayout(d2gui.PositionTypeVertical)
-
-		// tlCorner, _ := layoutLeft.AddSprite(d2resource.HelpBorder, d2resource.PaletteSky)
-		// tlCorner.SetSegmented(0, 0, 0)
-
-		//layoutLeft.AddSprite(imagePath, palettePath)
 	}
+
+	h.closeButton.SetVisible(true)
+	h.closeButton.SetPressed(false)
+
 	d2gui.SetLayout(h.layout)
+}
+
+func (h *Overlay) IsOpen() bool {
+	return h.isOpen
+}
+
+func (h *Overlay) IsInRect(px, py int) bool {
+	ww, hh := h.closeButton.GetSize()
+	x, y := h.closeButton.GetPosition()
+
+	if px >= x && px <= x+ww && py >= y && py <= y+hh {
+		return true
+	}
+	return false
 }
 
 func (h *Overlay) Load() {
@@ -142,14 +151,25 @@ func (h *Overlay) Load() {
 	h.text = append(h.text, newLabel)
 
 	// Close
-	close, _ := h.uiManager.NewSprite(d2resource.SquareButton, d2resource.PaletteSky)
-	_ = close.SetCurrentFrame(0)
-	close.SetPosition(685, 57)
-	h.frames = append(h.frames, close)
+
+	//close, _ := h.uiManager.NewSprite(d2resource.SquareButton, d2resource.PaletteSky)
+	//_ = close.SetCurrentFrame(0)
+	//close.SetPosition(685, 57)
+	//h.frames = append(h.frames, close)
+
+	h.closeButton = h.uiManager.NewButton(d2ui.ButtonTypeClose, "0")
+	h.closeButton.SetPosition(685, 25)
+	h.closeButton.SetVisible(false)
+	h.closeButton.OnActivated(func() { h.close() })
 
 	newLabel = h.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
 	newLabel.SetText("Close")
 	newLabel.SetPosition(680, 60)
+	h.text = append(h.text, newLabel)
+
+	newLabel = h.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteSky)
+	newLabel.SetText("0")
+	newLabel.SetPosition(695, 32)
 	h.text = append(h.text, newLabel)
 
 	// Bullets
@@ -349,7 +369,7 @@ func (h *Overlay) createBullet(c callout) {
 
 func (h *Overlay) createCallout(c callout) {
 	newLabel := h.uiManager.NewLabel(d2resource.FontFormal11, d2resource.PaletteSky)
-	newLabel.Color[0] = d2util.Color(0xff0000_ff)
+	newLabel.Color[0] = color.White
 	newLabel.SetText(c.LabelText)
 	newLabel.SetPosition(c.LabelX, c.LabelY)
 	newLabel.Alignment = d2gui.HorizontalAlignCenter
@@ -386,53 +406,10 @@ func (h *Overlay) Render(target d2interface.Surface) error {
 	}
 
 	for _, l := range h.lines {
-
 		target.PushTranslation(l.StartX, l.StartY)
 		target.DrawLine(l.MoveX, l.MoveY, l.Color)
 		target.Pop()
-
-		// target.DrawLine(0, entityHeight, color.White)
-		// target.DrawLine(entityWidth, 0, color.White)
 	}
-
-	// x, y := h.originX, h.originY
-
-	// y += 20
-
-	// frameIndex := 0
-
-	// // Frame
-	// // Top left
-	// if err := h.frame.SetCurrentFrame(frameIndex); err != nil {
-	// 	return err
-	// }
-
-	// h.frame.SetCurrentFrame(frameIndex)
-	// h.frame.Render(target)
-	// frameIndex++
-
-	// width, height := h.frame.GetCurrentFrameSize()
-	// _ = width
-	// y += height
-	// h.frame.SetPosition(x, y)
-
-	// if err := h.frame.SetCurrentFrame(frameIndex); err != nil {
-	// 	return err
-	// }
-
-	// h.frame.SetCurrentFrame(frameIndex)
-	// h.frame.Render(target)
-	// frameIndex++
-
-	// // _ = width
-
-	// h.frame.SetPosition(x, y)
-
-	// if err := h.frame.Render(target); err != nil {
-	// 	return err
-	// }
-
-	//d2gui.Render(target)
 
 	return nil
 }
