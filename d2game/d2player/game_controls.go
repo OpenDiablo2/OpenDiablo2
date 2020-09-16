@@ -471,6 +471,10 @@ func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 		return true
 	}
 
+	if g.helpOverlay.IsOpen() && g.helpOverlay.IsInRect(px, py) {
+		return true
+	}
+
 	return false
 }
 
