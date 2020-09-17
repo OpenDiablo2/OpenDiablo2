@@ -1,7 +1,9 @@
 package d2datadict
 
 import (
+	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common"
 )
@@ -13,7 +15,7 @@ type BooksRecord struct {
 	Completed       string
 	ScrollSpellCode string
 	BookSpellCode   string
-	pSpell          int
+	PSpell          int
 	SpellIcon       int
 	ScrollSkill     string
 	BookSkill       string
@@ -29,21 +31,14 @@ func LoadBooks(file []byte) {
 	Books = make(map[string]*BooksRecord)
 
 	d := d2common.LoadDataDictionary(file)
+
 	for d.Next() {
-		record := &BooksRecord{
-			Name:            d.String("Name"),
-			Namco:           d.String("Namco"),
-			Completed:       d.String("Completed"),
-			ScrollSpellCode: d.String("ScrollSpellCode"),
-			BookSpellCode:   d.String("BooksSpellCode"),
-			pSpell:          d.Number("pSpell"),
-			SpellIcon:       d.Number("SpellIcon"),
-			ScrollSkill:     d.String("ScrollSkill"),
-			BookSkill:       d.String("BookSkill"),
-			BaseCost:        d.Number("BaseCost"),
-			CostPerCharge:   d.Number("CostPerCharge"),
+		record := BooksRecord{}
+		err := d.PopulateStruct(reflect.ValueOf(&record).Elem())
+		if err != nil {
+			fmt.Println(err)
 		}
-		Books[record.Namco] = record
+		Books[record.Namco] = &record
 	}
 
 	if d.Err != nil {

@@ -3,8 +3,10 @@ package d2common
 import (
 	"bytes"
 	"encoding/csv"
+	"fmt"
 	"io"
 	"log"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -89,4 +91,41 @@ func (d *DataDictionary) Bool(field string) bool {
 	}
 
 	return n == 1
+}
+
+// PopulateStruct uses reflection to fill struct fields based on their names and types.
+// In this implementation, the struct field name must match the data field name exactly. Missing fields will be 0 and
+// unexpected fields will throw an error.
+func (d *DataDictionary) PopulateStruct(values reflect.Value) error {
+	// Get the struct's Type object
+	structType := values.Type()
+
+	// Create a map of struct fields to reflect Value objects
+	valueMap := make(map[string]reflect.Value)
+
+	for i := 0; i < structType.NumField(); i++ {
+		v := values.Field(i)
+		fieldName := structType.Field(i).Name
+
+		valueMap[fieldName] = v
+	}
+
+	// Iterate over the data field names, checking they exist in the struct and populating the struct fields.
+	for k, _ := range d.lookup {
+		// Always make the first character upper case because struct fields must be exported for reflection.
+		value, exists := valueMap[strings.Title(k)]
+		if !exists {
+			return fmt.Errorf("data key %s is invalid for type %s", k, structType.Name())
+		}
+
+		switch value.Kind() {
+		case reflect.String:
+			value.SetString(d.String(k))
+
+		case reflect.Int:
+			value.SetInt(int64(d.Number(k)))
+		}
+	}
+
+	return nil
 }
