@@ -5,6 +5,7 @@ import (
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -44,6 +45,7 @@ type Game struct {
 	escapeMenu           *EscapeMenu
 	soundEngine          *d2audio.SoundEngine
 	soundEnv             d2audio.SoundEnvironment
+	guiManager           *d2gui.GuiManager
 
 	renderer      d2interface.Renderer
 	inputManager  d2interface.InputManager
@@ -61,6 +63,7 @@ func CreateGame(
 	audioProvider d2interface.AudioProvider,
 	gameClient *d2client.GameClient,
 	term d2interface.Terminal,
+	guiManager *d2gui.GuiManager,
 ) *Game {
 	// find the local player and its initial location
 	var startX, startY float64
@@ -85,13 +88,14 @@ func CreateGame(
 		ticksSinceLevelCheck: 0,
 		mapRenderer: d2maprenderer.CreateMapRenderer(asset, renderer,
 			gameClient.MapEngine, term, startX, startY),
-		escapeMenu:    NewEscapeMenu(navigator, renderer, audioProvider),
+		escapeMenu:    NewEscapeMenu(navigator, renderer, audioProvider, guiManager, asset),
 		inputManager:  inputManager,
 		audioProvider: audioProvider,
 		renderer:      renderer,
 		terminal:      term,
 		soundEngine:   d2audio.NewSoundEngine(audioProvider, term),
 		uiManager:     ui,
+		guiManager:    guiManager,
 	}
 	result.soundEnv = d2audio.NewSoundEnvironment(result.soundEngine)
 
@@ -275,8 +279,8 @@ func (v *Game) bindGameControls() error {
 		v.localPlayer = player
 
 		var err error
-		v.gameControls, err = d2player.NewGameControls(v.asset, v.renderer, player,
-			v.gameClient.MapEngine, v.mapRenderer, v, v.terminal, v.uiManager, v.gameClient.IsSinglePlayer())
+		v.gameControls, err = d2player.NewGameControls(v.asset, v.renderer, player, v.gameClient.MapEngine,
+			v.mapRenderer, v, v.terminal, v.uiManager, v.guiManager, v.gameClient.IsSinglePlayer())
 
 		if err != nil {
 			return err

@@ -6,6 +6,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 const layoutDebug = false // turns on debug rendering stuff for layouts
@@ -53,7 +54,8 @@ const (
 type Layout struct {
 	widgetBase
 
-	renderer d2interface.Renderer
+	renderer     d2interface.Renderer
+	assetManager *d2asset.AssetManager
 
 	width           int
 	height          int
@@ -63,10 +65,11 @@ type Layout struct {
 	entries         []*layoutEntry
 }
 
-func createLayout(renderer d2interface.Renderer, positionType PositionType) *Layout {
+func CreateLayout(renderer d2interface.Renderer, positionType PositionType, assetManager *d2asset.AssetManager) *Layout {
 	layout := &Layout{
 		renderer:     renderer,
 		positionType: positionType,
+		assetManager: assetManager,
 	}
 
 	layout.SetVisible(true)
@@ -93,7 +96,7 @@ func (l *Layout) SetHorizontalAlign(horizontalAlign HorizontalAlign) {
 // AddLayout adds a nested layout to this layout, given a position type.
 // Returns a pointer to the nested layout
 func (l *Layout) AddLayout(positionType PositionType) *Layout {
-	layout := createLayout(l.renderer, positionType)
+	layout := CreateLayout(l.renderer, positionType, l.assetManager)
 	l.entries = append(l.entries, &layoutEntry{widget: layout})
 
 	return layout
@@ -121,7 +124,7 @@ func (l *Layout) AddSpacerDynamic() *SpacerDynamic {
 
 // AddSprite given a path and palette, adds a Sprite as a layout entry
 func (l *Layout) AddSprite(imagePath, palettePath string) (*Sprite, error) {
-	sprite, err := createSprite(imagePath, palettePath)
+	sprite, err := createSprite(imagePath, palettePath, l.assetManager)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +137,7 @@ func (l *Layout) AddSprite(imagePath, palettePath string) (*Sprite, error) {
 // AddAnimatedSprite given a path, palette, and direction will add an animated
 // sprite as a layout entry
 func (l *Layout) AddAnimatedSprite(imagePath, palettePath string, direction AnimationDirection) (*AnimatedSprite, error) {
-	sprite, err := createAnimatedSprite(imagePath, palettePath, direction)
+	sprite, err := createAnimatedSprite(imagePath, palettePath, direction, l.assetManager)
 	if err != nil {
 		return nil, err
 	}
@@ -146,10 +149,12 @@ func (l *Layout) AddAnimatedSprite(imagePath, palettePath string, direction Anim
 
 // AddLabel given a string and a FontStyle, adds a text label as a layout entry
 func (l *Layout) AddLabel(text string, fontStyle FontStyle) (*Label, error) {
-	label, err := createLabel(l.renderer, text, fontStyle)
+	font, err := l.loadFont(fontStyle)
 	if err != nil {
 		return nil, err
 	}
+
+	label := createLabel(l.renderer, text, font)
 
 	l.entries = append(l.entries, &layoutEntry{widget: label})
 
@@ -419,7 +424,7 @@ func (l *Layout) createButton(renderer d2interface.Renderer, text string,
 		return nil, errors.New("invalid button style")
 	}
 
-	animation, loadErr := singleton.asset.LoadAnimation(config.animationPath, config.palettePath)
+	animation, loadErr := l.assetManager.LoadAnimation(config.animationPath, config.palettePath)
 	if loadErr != nil {
 		return nil, loadErr
 	}
@@ -446,7 +451,7 @@ func (l *Layout) createButton(renderer d2interface.Renderer, text string,
 		buttonHeight += h
 	}
 
-	font, loadErr := loadFont(config.fontStyle)
+	font, loadErr := l.loadFont(config.fontStyle)
 	if loadErr != nil {
 		return nil, loadErr
 	}
@@ -495,4 +500,13 @@ func (l *Layout) createButton(renderer d2interface.Renderer, text string,
 	button.SetVisible(true)
 
 	return button, nil
+}
+
+func (l *Layout) loadFont(fontStyle FontStyle) (*d2asset.Font, error) {
+	config := getFontStyleConfig(fontStyle)
+	if config == nil {
+		return nil, errors.New("invalid font style")
+	}
+
+	return l.assetManager.LoadFont(config.fontBasePath+".tbl", config.fontBasePath+".dc6", config.palettePath)
 }

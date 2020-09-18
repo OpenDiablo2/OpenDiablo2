@@ -4,25 +4,30 @@ import (
 	"fmt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 )
 
 // GuiTestMain is a playground screen for the gui components
 type GuiTestMain struct {
-	renderer d2interface.Renderer
+	renderer     d2interface.Renderer
+	guiManager   *d2gui.GuiManager
+	assetManager *d2asset.AssetManager
 }
 
 // CreateGuiTestMain creates a GuiTestMain screen
-func CreateGuiTestMain(renderer d2interface.Renderer) *GuiTestMain {
+func CreateGuiTestMain(renderer d2interface.Renderer, guiManager *d2gui.GuiManager, assetManager *d2asset.AssetManager) *GuiTestMain {
 	return &GuiTestMain{
-		renderer: renderer,
+		renderer:     renderer,
+		guiManager:   guiManager,
+		assetManager: assetManager,
 	}
 }
 
 // OnLoad loads the resources and creates the gui components
 func (g *GuiTestMain) OnLoad(loading d2screen.LoadingState) {
-	layout := d2gui.CreateLayout(g.renderer, d2gui.PositionTypeHorizontal)
+	layout := d2gui.CreateLayout(g.renderer, d2gui.PositionTypeHorizontal, g.assetManager)
 
 	loading.Progress(thirtyPercent)
 	//
@@ -85,7 +90,7 @@ func (g *GuiTestMain) OnLoad(loading d2screen.LoadingState) {
 	loading.Progress(ninetyPercent)
 
 	layout.SetVerticalAlign(d2gui.VerticalAlignMiddle)
-	d2gui.SetLayout(layout)
+	g.guiManager.SetLayout(layout)
 }
 
 // Render does nothing for the GuiTestMain screen

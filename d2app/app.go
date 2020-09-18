@@ -68,6 +68,7 @@ type App struct {
 	screen            *d2screen.ScreenManager
 	ui                *d2ui.UIManager
 	tAllocSamples     *ring.Ring
+	guiManager        *d2gui.GuiManager
 }
 
 type bindTerminalEntry struct {
@@ -92,7 +93,6 @@ func Create(gitBranch, gitCommit string,
 	asset *d2asset.AssetManager,
 ) *App {
 	uiManager := d2ui.NewUIManager(asset, renderer, inputManager, audio)
-	screenManager := d2screen.NewScreenManager(uiManager)
 
 	result := &App{
 		gitBranch:     gitBranch,
@@ -103,7 +103,6 @@ func Create(gitBranch, gitCommit string,
 		audio:         audio,
 		renderer:      renderer,
 		ui:            uiManager,
-		screen:        screenManager,
 		asset:         asset,
 		tAllocSamples: createZeroedRing(nSamplesTAlloc),
 	}
@@ -176,9 +175,14 @@ func (a *App) initialize() error {
 		}
 	}
 
-	if err := d2gui.Initialize(a.asset, a.inputManager); err != nil {
+	var err error
+
+	a.guiManager, err = d2gui.CreateGuiManager(a.asset, a.inputManager)
+	if err != nil {
 		return err
 	}
+
+	a.screen = d2screen.NewScreenManager(a.ui, a.guiManager)
 
 	config := d2config.Config
 	a.audio.SetVolumes(config.BgmVolume, config.SfxVolume)
@@ -378,7 +382,7 @@ func (a *App) render(target d2interface.Surface) error {
 
 	a.ui.Render(target)
 
-	if err := d2gui.Render(target); err != nil {
+	if err := a.guiManager.Render(target); err != nil {
 		return err
 	}
 
@@ -412,7 +416,7 @@ func (a *App) advance(elapsed, elapsedUnscaled, current float64) error {
 		return err
 	}
 
-	if err := d2gui.Advance(elapsed); err != nil {
+	if err := a.guiManager.Advance(elapsed); err != nil {
 		return err
 	}
 
@@ -609,7 +613,7 @@ func (a *App) quitGame() {
 }
 
 func (a *App) enterGuiPlayground() {
-	a.screen.SetNextScreen(d2gamescreen.CreateGuiTestMain(a.renderer))
+	a.screen.SetNextScreen(d2gamescreen.CreateGuiTestMain(a.renderer, a.guiManager, a.asset))
 }
 
 func createZeroedRing(n int) *ring.Ring {
@@ -702,12 +706,11 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 	}
 
 	a.screen.SetNextScreen(d2gamescreen.CreateGame(a, a.asset, a.ui, a.renderer, a.inputManager,
-		a.audio, gameClient, a.terminal))
+		a.audio, gameClient, a.terminal, a.guiManager))
 }
 
 // ToCharacterSelect forces the game to transition to the Character Select (load character) screen
 func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnectionType, connHost string) {
-
 	characterSelect := d2gamescreen.CreateCharacterSelect(a, a.asset, a.renderer, a.inputManager,
 		a.audio, a.ui, connType, connHost)
 

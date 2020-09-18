@@ -6,6 +6,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 )
 
@@ -70,6 +71,8 @@ type EscapeMenu struct {
 	renderer      d2interface.Renderer
 	audioProvider d2interface.AudioProvider
 	navigator     Navigator
+	guiManager    *d2gui.GuiManager
+	assetManager  *d2asset.AssetManager
 }
 
 type layout struct {
@@ -123,11 +126,18 @@ type actionableElement interface {
 }
 
 // NewEscapeMenu creates a new escape menu
-func NewEscapeMenu(navigator Navigator, renderer d2interface.Renderer, audioProvider d2interface.AudioProvider) *EscapeMenu {
+func NewEscapeMenu(navigator Navigator,
+	renderer d2interface.Renderer,
+	audioProvider d2interface.AudioProvider,
+	guiManager *d2gui.GuiManager,
+	assetManager *d2asset.AssetManager,
+) *EscapeMenu {
 	m := &EscapeMenu{
 		audioProvider: audioProvider,
 		renderer:      renderer,
 		navigator:     navigator,
+		guiManager:    guiManager,
+		assetManager:  assetManager,
 	}
 
 	m.layouts = []*layout{
@@ -206,7 +216,7 @@ func (m *EscapeMenu) newConfigureControlsLayout() *layout {
 }
 
 func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
-	wrapper := d2gui.CreateLayout(m.renderer, d2gui.PositionTypeHorizontal)
+	wrapper := d2gui.CreateLayout(m.renderer, d2gui.PositionTypeHorizontal, m.assetManager)
 	wrapper.SetVerticalAlign(d2gui.VerticalAlignMiddle)
 	wrapper.AddSpacerDynamic()
 
@@ -346,7 +356,7 @@ func (m *EscapeMenu) onEscKey() {
 func (m *EscapeMenu) close() {
 	m.isOpen = false
 
-	d2gui.SetLayout(nil)
+	m.guiManager.SetLayout(nil)
 }
 
 func (m *EscapeMenu) open() {
@@ -393,7 +403,7 @@ func (m *EscapeMenu) setLayout(id layoutID) {
 	m.rightPent = m.layouts[id].rightPent
 	m.currentLayout = id
 	m.layouts[id].currentEl = 0
-	d2gui.SetLayout(m.layouts[id].Layout)
+	m.guiManager.SetLayout(m.layouts[id].Layout)
 	m.onHoverElement(0)
 }
 
