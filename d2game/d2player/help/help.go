@@ -22,7 +22,7 @@ const (
 	rFrame
 )
 
-// HelpOverlay represents the in-game overlay that toggles visibility when the h key is pressed
+// Overlay represents the in-game overlay that toggles visibility when the h key is pressed
 type Overlay struct {
 	asset       *d2asset.AssetManager
 	isOpen      bool
@@ -35,14 +35,20 @@ type Overlay struct {
 	originY     int
 	layout      *d2gui.Layout
 	closeButton *d2ui.Button
+	guiManager  *d2gui.GuiManager
 }
 
-func NewHelpOverlay(asset *d2asset.AssetManager, renderer d2interface.Renderer,
-	ui *d2ui.UIManager) *Overlay {
+func NewHelpOverlay(
+	asset *d2asset.AssetManager,
+	renderer d2interface.Renderer,
+	ui *d2ui.UIManager,
+	guiManager *d2gui.GuiManager,
+) *Overlay {
 	h := &Overlay{
-		asset:     asset,
-		renderer:  renderer,
-		uiManager: ui,
+		asset:      asset,
+		renderer:   renderer,
+		uiManager:  ui,
+		guiManager: guiManager,
 	}
 
 	return h
@@ -65,19 +71,19 @@ func (h *Overlay) Toggle() {
 func (h *Overlay) close() {
 	h.isOpen = false
 	h.closeButton.SetVisible(false)
-	d2gui.SetLayout(nil)
+	h.guiManager.SetLayout(nil)
 }
 
 func (h *Overlay) open() {
 	h.isOpen = true
 	if h.layout == nil {
-		h.layout = d2gui.CreateLayout(h.renderer, d2gui.PositionTypeHorizontal)
+		h.layout = d2gui.CreateLayout(h.renderer, d2gui.PositionTypeHorizontal, h.asset)
 	}
 
 	h.closeButton.SetVisible(true)
 	h.closeButton.SetPressed(false)
 
-	d2gui.SetLayout(h.layout)
+	h.guiManager.SetLayout(h.layout)
 }
 
 func (h *Overlay) IsOpen() bool {

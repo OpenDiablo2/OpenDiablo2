@@ -112,6 +112,7 @@ func NewGameControls(
 	inputListener InputCallbackListener,
 	term d2interface.Terminal,
 	ui *d2ui.UIManager,
+	guiManager *d2gui.GuiManager,
 	isSinglePlayer bool,
 ) (*GameControls, error) {
 	missileID := initialMissileID
@@ -172,7 +173,7 @@ func NewGameControls(
 		mapRenderer:      mapRenderer,
 		inventory:        NewInventory(asset, ui, inventoryRecord),
 		heroStatsPanel:   NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
-		helpOverlay:      help.NewHelpOverlay(asset, renderer, ui),
+		helpOverlay:      help.NewHelpOverlay(asset, renderer, ui, guiManager),
 		miniPanel:        newMiniPanel(asset, ui, isSinglePlayer),
 		missileID:        missileID,
 		nameLabel:        hoverLabel,

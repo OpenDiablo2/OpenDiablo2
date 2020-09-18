@@ -9,7 +9,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
-type manager struct {
+type GuiManager struct {
 	asset         *d2asset.AssetManager
 	layout        *Layout
 	cursorAnim    d2interface.Animation
@@ -20,7 +20,8 @@ type manager struct {
 	loading       bool
 }
 
-func createGuiManager(asset *d2asset.AssetManager, inputManager d2interface.InputManager) (*manager, error) {
+// CreateGuiManager creates an instance of the GuiManager
+func CreateGuiManager(asset *d2asset.AssetManager, inputManager d2interface.InputManager) (*GuiManager, error) {
 	cursorAnim, err := asset.LoadAnimation(d2resource.CursorDefault, d2resource.PaletteUnits)
 	if err != nil {
 		return nil, err
@@ -31,7 +32,7 @@ func createGuiManager(asset *d2asset.AssetManager, inputManager d2interface.Inpu
 		return nil, err
 	}
 
-	manager := &manager{
+	manager := &GuiManager{
 		asset:         asset,
 		cursorAnim:    cursorAnim,
 		loadingAnim:   loadingAnim,
@@ -47,14 +48,16 @@ func createGuiManager(asset *d2asset.AssetManager, inputManager d2interface.Inpu
 	return manager, nil
 }
 
-func (m *manager) SetLayout(layout *Layout) {
+// SetLayout sets the layout of the GuiManager
+func (m *GuiManager) SetLayout(layout *Layout) {
 	m.layout = layout
 	if m.layout != nil {
 		m.layout.AdjustEntryPlacement()
 	}
 }
 
-func (m *manager) OnMouseButtonDown(event d2interface.MouseEvent) bool {
+// OnMouseButtonDown handles mouse button click events
+func (m *GuiManager) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	if m.layout == nil {
 		return false
 	}
@@ -62,7 +65,8 @@ func (m *manager) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	return m.layout.onMouseButtonDown(event)
 }
 
-func (m *manager) OnMouseButtonUp(event d2interface.MouseEvent) bool {
+// OnMouseButtonUp handles the mouse button release events
+func (m *GuiManager) OnMouseButtonUp(event d2interface.MouseEvent) bool {
 	if m.layout == nil {
 		return false
 	}
@@ -70,7 +74,8 @@ func (m *manager) OnMouseButtonUp(event d2interface.MouseEvent) bool {
 	return m.layout.onMouseButtonUp(event)
 }
 
-func (m *manager) OnMouseMove(event d2interface.MouseMoveEvent) bool {
+// OnMouseMove handles mouse movement events
+func (m *GuiManager) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	m.cursorX = event.X()
 	m.cursorY = event.Y()
 
@@ -81,7 +86,8 @@ func (m *manager) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	return m.layout.onMouseMove(event)
 }
 
-func (m *manager) render(target d2interface.Surface) error {
+// Render renders the GuiManager to the given surface
+func (m *GuiManager) Render(target d2interface.Surface) error {
 	if m.loading {
 		if err := m.renderLoadScreen(target); err != nil {
 			return err
@@ -102,7 +108,7 @@ func (m *manager) render(target d2interface.Surface) error {
 	return nil
 }
 
-func (m *manager) renderLoadScreen(target d2interface.Surface) error {
+func (m *GuiManager) renderLoadScreen(target d2interface.Surface) error {
 	if clearErr := target.Clear(color.Black); clearErr != nil {
 		return clearErr
 	}
@@ -123,7 +129,7 @@ func (m *manager) renderLoadScreen(target d2interface.Surface) error {
 	return m.loadingAnim.Render(target)
 }
 
-func (m *manager) renderCursor(target d2interface.Surface) error {
+func (m *GuiManager) renderCursor(target d2interface.Surface) error {
 	_, height := m.cursorAnim.GetCurrentFrameSize()
 	pushCount := 0
 
@@ -138,7 +144,8 @@ func (m *manager) renderCursor(target d2interface.Surface) error {
 	return m.cursorAnim.Render(target)
 }
 
-func (m *manager) advance(elapsed float64) error {
+// Advance advances the GuiManager state
+func (m *GuiManager) Advance(elapsed float64) error {
 	if !m.loading && m.layout != nil {
 		if err := m.layout.advance(elapsed); err != nil {
 			return err
@@ -148,7 +155,8 @@ func (m *manager) advance(elapsed float64) error {
 	return nil
 }
 
-func (m *manager) showLoadScreen(progress float64) {
+// ShowLoadScreen shows the loading screen with the given progress
+func (m *GuiManager) ShowLoadScreen(progress float64) {
 	progress = math.Min(progress, 1.0)
 	progress = math.Max(progress, 0.0)
 
@@ -160,19 +168,22 @@ func (m *manager) showLoadScreen(progress float64) {
 	m.loading = true
 }
 
-func (m *manager) hideLoadScreen() {
+// HideLoadScreen hides the load screen
+func (m *GuiManager) HideLoadScreen() {
 	m.loading = false
 }
 
-func (m *manager) showCursor() {
+// ShowCursor makes the cursor visible
+func (m *GuiManager) ShowCursor() {
 	m.cursorVisible = true
 }
 
-func (m *manager) hideCursor() {
+// HideCursor hides the cursor
+func (m *GuiManager) HideCursor() {
 	m.cursorVisible = false
 }
 
-func (m *manager) clear() {
+func (m *GuiManager) clear() {
 	m.SetLayout(nil)
-	m.hideLoadScreen()
+	m.HideLoadScreen()
 }

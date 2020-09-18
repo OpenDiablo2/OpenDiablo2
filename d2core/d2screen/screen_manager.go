@@ -15,6 +15,12 @@ type ScreenManager struct {
 	loadingScreen Screen
 	loadingState  LoadingState
 	currentScreen Screen
+	guiManager    *d2gui.GuiManager
+}
+
+// NewScreenManager creates a screen manager
+func NewScreenManager(ui *d2ui.UIManager, guiManager *d2gui.GuiManager) *ScreenManager {
+	return &ScreenManager{uiManager: ui, guiManager: guiManager}
 }
 
 // SetNextScreen is about to set a given screen as next
@@ -37,14 +43,14 @@ func (sm *ScreenManager) Advance(elapsed float64) error {
 			return load.err
 		}
 
-		d2gui.ShowLoadScreen(load.progress)
+		sm.guiManager.ShowLoadScreen(load.progress)
 
 		if load.done {
 			sm.currentScreen = sm.loadingScreen
 			sm.loadingScreen = nil
 
-			d2gui.ShowCursor()
-			d2gui.HideLoadScreen()
+			sm.guiManager.ShowCursor()
+			sm.guiManager.HideLoadScreen()
 		}
 	case sm.nextScreen != nil:
 		if handler, ok := sm.currentScreen.(ScreenUnloadHandler); ok {
@@ -54,11 +60,11 @@ func (sm *ScreenManager) Advance(elapsed float64) error {
 		}
 
 		sm.uiManager.Reset()
-		d2gui.SetLayout(nil)
+		sm.guiManager.SetLayout(nil)
 
 		if handler, ok := sm.nextScreen.(ScreenLoadHandler); ok {
-			d2gui.ShowLoadScreen(0)
-			d2gui.HideCursor()
+			sm.guiManager.ShowLoadScreen(0)
+			sm.guiManager.HideCursor()
 
 			sm.loadingState = LoadingState{updates: make(chan loadingUpdate)}
 
