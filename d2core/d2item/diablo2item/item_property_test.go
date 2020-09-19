@@ -541,10 +541,9 @@ func TestNewProperty(t *testing.T) { //nolint:funlen it's mostly test-case defin
 		},
 	}
 
+	factory, _ := NewItemFactory(nil)
 	numericToken := "#"
 	re := regexp.MustCompile(`\d+`)
-
-	factory, _ := NewItemFactory(nil)
 
 	for testIdx := range tests {
 		test := &tests[testIdx]
