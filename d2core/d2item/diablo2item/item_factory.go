@@ -1,11 +1,20 @@
 package diablo2item
 
 import (
+	"errors"
 	"math/rand"
 	"regexp"
 	"strconv"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+)
+
+const (
+	defaultSeed = 0
 )
 
 const (
@@ -33,24 +42,128 @@ const (
 	goldItemCode         = "gld"
 )
 
-// ItemGenerator is a diablo 2 implementation of an item generator
-type ItemGenerator struct {
+func NewItemFactory(asset *d2asset.AssetManager) (*ItemFactory, error) {
+	factory := &ItemFactory{
+		asset: asset,
+		Seed:  0,
+	}
+
+	factory.SetSeed(defaultSeed)
+
+	return factory, nil
+}
+
+// ItemFactory is a diablo 2 implementation of an item generator
+type ItemFactory struct {
+	asset  *d2asset.AssetManager
 	rand   *rand.Rand
 	source rand.Source
 	Seed   int64
 }
 
 // SetSeed sets the item generator seed
-func (ig *ItemGenerator) SetSeed(seed int64) {
-	if ig.rand == nil || ig.source == nil {
-		ig.source = rand.NewSource(seed)
-		ig.rand = rand.New(ig.source)
+func (f *ItemFactory) SetSeed(seed int64) {
+	if f.rand == nil || f.source == nil {
+		f.source = rand.NewSource(seed)
+		f.rand = rand.New(f.source)
 	}
 
-	ig.Seed = seed
+	f.Seed = seed
 }
 
-func (ig *ItemGenerator) rollDropModifier(tcr *d2datadict.TreasureClassRecord) DropModifier {
+func (f *ItemFactory) NewItem(codes ...string) (*Item, error) {
+	var item *Item
+
+	var common, set, unique string
+
+	var prefixes, suffixes []string
+
+	for _, code := range codes {
+		if found := f.asset.Records.Item.All[code]; found != nil {
+			common = code
+			continue
+		}
+
+		if found := d2datadict.SetItems[code]; found != nil {
+			set = code
+			continue
+		}
+
+		if found := d2datadict.UniqueItems[code]; found != nil {
+			unique = code
+			continue
+		}
+
+		if found := d2datadict.MagicPrefix[code]; found != nil {
+			if prefixes == nil {
+				prefixes = make([]string, 0)
+			}
+
+			prefixes = append(prefixes, code)
+
+			continue
+		}
+
+		if found := d2datadict.MagicSuffix[code]; found != nil {
+			if suffixes == nil {
+				suffixes = make([]string, 0)
+			}
+
+			suffixes = append(suffixes, code)
+
+			continue
+		}
+	}
+
+	if common != "" { // we will at least have a regular item
+		item = &Item{CommonCode: common}
+
+		if set != "" { // it's a set item
+			item.SetItemCode = set
+			return item.init(), nil
+		}
+
+		if unique != "" { // it's a unique item
+			item.UniqueCode = unique
+			return item.init(), nil
+		}
+
+		if prefixes != nil {
+			if len(prefixes) > 0 { // it's a magic or rare item
+				item.PrefixCodes = prefixes
+			}
+		}
+
+		if suffixes != nil {
+			if len(suffixes) > 0 { // it's a magic or rare item
+				item.SuffixCodes = suffixes
+			}
+		}
+
+		item.factory = f
+		return item.init(), nil
+	}
+
+	return nil, errors.New("cannot create item")
+}
+
+// NewProperty creates a property
+func (f *ItemFactory) NewProperty(code string, values ...int) *Property {
+	record := d2datadict.Properties[code]
+
+	if record == nil {
+		return nil
+	}
+
+	result := &Property{
+		record:      record,
+		inputParams: values,
+	}
+
+	return result.init()
+}
+
+func (f *ItemFactory) rollDropModifier(tcr *d2datadict.TreasureClassRecord) DropModifier {
 	modMap := map[int]DropModifier{
 		0: DropModifierNone,
 		1: DropModifierUnique,
@@ -75,7 +188,7 @@ func (ig *ItemGenerator) rollDropModifier(tcr *d2datadict.TreasureClassRecord) D
 		dropModifiers[idx] += dropModifiers[idx-1]
 	}
 
-	roll := ig.rand.Intn(dropModifiers[len(dropModifiers)-1])
+	roll := f.rand.Intn(dropModifiers[len(dropModifiers)-1])
 
 	for idx := range dropModifiers {
 		if roll < dropModifiers[idx] {
@@ -86,7 +199,7 @@ func (ig *ItemGenerator) rollDropModifier(tcr *d2datadict.TreasureClassRecord) D
 	return DropModifierNone
 }
 
-func (ig *ItemGenerator) rollTreasurePick(tcr *d2datadict.TreasureClassRecord) *d2datadict.Treasure {
+func (f *ItemFactory) rollTreasurePick(tcr *d2datadict.TreasureClassRecord) *d2datadict.Treasure {
 	// treasure probabilities
 	tprob := make([]int, len(tcr.Treasures)+1)
 	total := tcr.FreqNoDrop
@@ -97,7 +210,7 @@ func (ig *ItemGenerator) rollTreasurePick(tcr *d2datadict.TreasureClassRecord) *
 		tprob[idx+1] = total
 	}
 
-	roll := ig.rand.Intn(total)
+	roll := f.rand.Intn(total)
 
 	for idx := range tprob {
 		if roll < tprob[idx] {
@@ -113,7 +226,7 @@ func (ig *ItemGenerator) rollTreasurePick(tcr *d2datadict.TreasureClassRecord) *
 }
 
 // ItemsFromTreasureClass rolls for and creates items using a treasure class record
-func (ig *ItemGenerator) ItemsFromTreasureClass(tcr *d2datadict.TreasureClassRecord) []*Item {
+func (f *ItemFactory) ItemsFromTreasureClass(tcr *d2datadict.TreasureClassRecord) []*Item {
 	result := make([]*Item, 0)
 
 	treasurePicks := make([]*d2datadict.Treasure, 0)
@@ -135,7 +248,7 @@ func (ig *ItemGenerator) ItemsFromTreasureClass(tcr *d2datadict.TreasureClassRec
 	} else {
 		// for N picks, we roll for a treasure and append to our treasures if it isn't a NoDrop
 		for picksLeft := tcr.NumPicks; picksLeft > 0; picksLeft-- {
-			rolledTreasure := ig.rollTreasurePick(tcr)
+			rolledTreasure := f.rollTreasurePick(tcr)
 
 			if rolledTreasure == nil {
 				continue
@@ -152,17 +265,17 @@ func (ig *ItemGenerator) ItemsFromTreasureClass(tcr *d2datadict.TreasureClassRec
 		picked := treasurePicks[idx]
 		if record, found := d2datadict.TreasureClass[picked.Code]; found {
 			// the code is for a treasure class, we roll again using that TC
-			itemSlice := ig.ItemsFromTreasureClass(record)
+			itemSlice := f.ItemsFromTreasureClass(record)
 			for itemIdx := range itemSlice {
-				itemSlice[itemIdx].applyDropModifier(ig.rollDropModifier(tcr))
+				itemSlice[itemIdx].applyDropModifier(f.rollDropModifier(tcr))
 				itemSlice[itemIdx].init()
 				result = append(result, itemSlice[itemIdx])
 			}
 		} else {
 			// the code is not for a treasure class, but for an item
-			item := ig.ItemFromTreasure(picked)
+			item := f.ItemFromTreasure(picked)
 			if item != nil {
-				item.applyDropModifier(ig.rollDropModifier(tcr))
+				item.applyDropModifier(f.rollDropModifier(tcr))
 				item.init()
 				result = append(result, item)
 			}
@@ -172,36 +285,36 @@ func (ig *ItemGenerator) ItemsFromTreasureClass(tcr *d2datadict.TreasureClassRec
 	return result
 }
 
-// ItemFromTreasure rolls for a ig.rand.m item using the Treasure struct (from d2datadict)
-func (ig *ItemGenerator) ItemFromTreasure(treasure *d2datadict.Treasure) *Item {
+// ItemFromTreasure rolls for a f.rand.m item using the Treasure struct (from d2datadict)
+func (f *ItemFactory) ItemFromTreasure(treasure *d2datadict.Treasure) *Item {
 	result := &Item{
-		rand: rand.New(rand.NewSource(ig.Seed)),
+		rand: rand.New(rand.NewSource(f.Seed)),
 	}
 
 	// in this case, the treasure code is a code used by an ItemCommonRecord
-	commonRecord := d2datadict.CommonItems[treasure.Code]
+	commonRecord := f.asset.Records.Item.All[treasure.Code]
 	if commonRecord != nil {
 		result.CommonCode = commonRecord.Code
 		return result
 	}
 
 	// next, we check if the treasure code is a generic type like `armo`
-	equivList := d2datadict.ItemEquivalenciesByTypeCode[treasure.Code]
+	equivList := f.asset.Records.Item.Equivalency[treasure.Code]
 	if equivList != nil {
-		result.CommonCode = equivList[ig.rand.Intn(len(equivList))].Code
+		result.CommonCode = equivList[f.rand.Intn(len(equivList))].Code
 		return result
 	}
 
 	// in this case, the treasure code is something like `armo23` and needs to
 	// be resolved to ItemCommonRecords for armors with levels 23,24,25
-	matches := resolveDynamicTreasureCode(treasure.Code)
+	matches := f.resolveDynamicTreasureCode(treasure.Code)
 	if matches != nil {
 		numItems := len(matches)
 		if numItems < 1 {
 			return nil
 		}
 
-		result.CommonCode = matches[ig.rand.Intn(numItems)].Code
+		result.CommonCode = matches[f.rand.Intn(numItems)].Code
 
 		return result
 	}
@@ -209,7 +322,56 @@ func (ig *ItemGenerator) ItemFromTreasure(treasure *d2datadict.Treasure) *Item {
 	return nil
 }
 
-func resolveDynamicTreasureCode(code string) []*d2datadict.ItemCommonRecord {
+// FindMatchingAffixes for a given ItemCommonRecord, find all possible affixes that can spawn
+func (f *ItemFactory) FindMatchingAffixes(
+	icr *d2records.ItemCommonRecord,
+	fromAffixes map[string]*d2datadict.ItemAffixCommonRecord,
+) []*d2datadict.ItemAffixCommonRecord {
+	result := make([]*d2datadict.ItemAffixCommonRecord, 0)
+
+	equivItemTypes := f.asset.Records.FindEquivalentTypesByItemCommonRecord(icr)
+
+	for prefixIdx := range fromAffixes {
+		include, exclude := false, false
+		affix := fromAffixes[prefixIdx]
+
+		for itemTypeIdx := range equivItemTypes {
+			itemType := equivItemTypes[itemTypeIdx]
+
+			for _, excludedType := range affix.ItemExclude {
+				if itemType == excludedType {
+					exclude = true
+					break
+				}
+			}
+
+			if exclude {
+				break
+			}
+
+			for _, includedType := range affix.ItemInclude {
+				if itemType == includedType {
+					include = true
+					break
+				}
+			}
+
+			if !include {
+				continue
+			}
+
+			if icr.Level < affix.Level {
+				continue
+			}
+
+			result = append(result, affix)
+		}
+	}
+
+	return result
+}
+
+func (f *ItemFactory) resolveDynamicTreasureCode(code string) []*d2records.ItemCommonRecord {
 	numericComponent := getNumericComponent(code)
 	stringComponent := getStringComponent(code)
 
@@ -218,8 +380,8 @@ func resolveDynamicTreasureCode(code string) []*d2datadict.ItemCommonRecord {
 		stringComponent = goldItemCode
 	}
 
-	result := make([]*d2datadict.ItemCommonRecord, 0)
-	equivList := d2datadict.ItemEquivalenciesByTypeCode[stringComponent]
+	result := make([]*d2records.ItemCommonRecord, 0)
+	equivList := f.asset.Records.Item.Equivalency[stringComponent]
 
 	for idx := range equivList {
 		record := equivList[idx]

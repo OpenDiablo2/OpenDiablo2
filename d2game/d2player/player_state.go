@@ -91,25 +91,6 @@ func LoadPlayerState(filePath string) *PlayerState {
 	return result
 }
 
-// CreatePlayerState creates a PlayerState instance and returns a pointer to it
-func CreatePlayerState(heroName string, hero d2enum.Hero, classStats *d2datadict.CharStatsRecord) *PlayerState {
-	result := &PlayerState{
-		HeroName:  heroName,
-		HeroType:  hero,
-		Act:       1,
-		Stats:     d2hero.CreateHeroStatsState(hero, classStats),
-		Equipment: d2inventory.HeroObjects[hero],
-		FilePath:  "",
-	}
-
-	if err := result.Save(); err != nil {
-		fmt.Printf("failed to save game state!, err: %v\n", err)
-		return nil
-	}
-
-	return result
-}
-
 func getGameBaseSavePath() (string, error) {
 	configDir, err := os.UserConfigDir()
 	if err != nil {

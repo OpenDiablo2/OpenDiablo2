@@ -23,6 +23,8 @@ import (
 type CharacterSelect struct {
 	asset *d2asset.AssetManager
 	*d2mapentity.MapEntityFactory
+	*d2inventory.InventoryItemFactory
+	*d2player.PlayerStateFactory
 	background             *d2ui.Sprite
 	newCharButton          *d2ui.Button
 	convertCharButton      *d2ui.Button
@@ -64,17 +66,23 @@ func CreateCharacterSelect(
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	connectionHost string,
 ) *CharacterSelect {
+	playerStateFactory, _ := d2player.NewPlayerStateFactory(asset) // TODO: handle errors
+	inventoryItemFactory, _ := d2inventory.NewInventoryItemFactory(asset)
+	entityFactory, _ := d2mapentity.NewMapEntityFactory(asset)
+
 	return &CharacterSelect{
-		selectedCharacter: -1,
-		asset:             asset,
-		MapEntityFactory:  d2mapentity.NewMapEntityFactory(asset),
-		renderer:          renderer,
-		connectionType:    connectionType,
-		connectionHost:    connectionHost,
-		inputManager:      inputManager,
-		audioProvider:     audioProvider,
-		navigator:         navigator,
-		uiManager:         ui,
+		selectedCharacter:    -1,
+		asset:                asset,
+		MapEntityFactory:     entityFactory,
+		renderer:             renderer,
+		connectionType:       connectionType,
+		connectionHost:       connectionHost,
+		inputManager:         inputManager,
+		audioProvider:        audioProvider,
+		navigator:            navigator,
+		uiManager:            ui,
+		PlayerStateFactory:   playerStateFactory,
+		InventoryItemFactory: inventoryItemFactory,
 	}
 }
 
@@ -282,7 +290,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		v.characterExpLabel[i].SetText(d2ui.ColorTokenize(expText, d2ui.ColorTokenGreen))
 
 		heroType := v.gameStates[idx].HeroType
-		equipment := d2inventory.HeroObjects[heroType]
+		equipment := v.DefaultHeroItems[heroType]
 
 		// TODO: Generate or load the object from the actual player data...
 		v.characterImage[i] = v.NewPlayer("", "", 0, 0, 0,

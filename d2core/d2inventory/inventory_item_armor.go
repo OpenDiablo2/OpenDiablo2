@@ -1,9 +1,6 @@
 package d2inventory
 
 import (
-	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
@@ -16,22 +13,6 @@ type InventoryItemArmor struct {
 	ItemName       string `json:"itemName"`
 	ItemCode       string `json:"itemCode"`
 	ArmorClass     string `json:"armorClass"`
-}
-
-// GetArmorItemByCode returns the armor item for the given code
-func GetArmorItemByCode(code string) *InventoryItemArmor {
-	result := d2datadict.Armors[code]
-	if result == nil {
-		log.Fatalf("Could not find armor entry for code '%s'", code)
-	}
-
-	return &InventoryItemArmor{
-		InventorySizeX: result.InventoryWidth,
-		InventorySizeY: result.InventoryHeight,
-		ItemName:       result.Name,
-		ItemCode:       result.Code,
-		ArmorClass:     "lit", // TODO: Where does this come from?
-	}
 }
 
 // GetArmorClass returns the class of the armor
