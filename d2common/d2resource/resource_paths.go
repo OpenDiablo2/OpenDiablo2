@@ -199,6 +199,7 @@ const (
 	SetItems              = "/data/global/excel/SetItems.txt"
 	AutoMagic             = "/data/global/excel/automagic.txt"
 	BodyLocations         = "/data/global/excel/bodylocs.txt"
+	Events                = "/data/global/excel/events.txt"
 	Properties            = "/data/global/excel/Properties.txt"
 	Hireling              = "/data/global/excel/hireling.txt"
 	DifficultyLevels      = "/data/global/excel/difficultylevels.txt"
