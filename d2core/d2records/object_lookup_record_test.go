@@ -33,7 +33,7 @@ func TestIndexObjects(t *testing.T) {
 		{Act: 2, Type: d2enum.ObjectTypeItem, Id: 3, Description: "Act2ItemId3"},
 	}
 
-	indexedTestObjects := indexObjects(testObjects)
+	r.initObjectRecords(testObjects)
 
 	typeCharacter := int(d2enum.ObjectTypeCharacter)
 	typeItem := int(d2enum.ObjectTypeItem)

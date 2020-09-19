@@ -214,7 +214,7 @@ func (r *RecordManager) init() error {
 		}
 	}
 
-	r.initObjectRecords()
+	r.initObjectRecords(objectLookups)
 
 	return nil
 }
@@ -312,12 +312,12 @@ func (r *RecordManager) FindEquivalentTypesByItemCommonRecord(
 	return r.Item.EquivalenceByRecord[icr]
 }
 
-func (r *RecordManager) initObjectRecords() {
+func (r *RecordManager) initObjectRecords(lookups []ObjectLookupRecord) {
 	// Allocating 6 to allow Acts 1-5 without requiring a -1 at every read.
 	records := make(IndexedObjects, 6)
 
-	for i := range objectLookups {
-		record := &objectLookups[i]
+	for i := range lookups {
+		record := &lookups[i]
 		if records[record.Act] == nil {
 			// Likewise allocating 3 so a -1 isn't necessary.
 			records[record.Act] = make([][]*ObjectLookupRecord, 3)
