@@ -5,6 +5,12 @@ import (
 	"image/color"
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
@@ -37,6 +43,106 @@ type AssetManager struct {
 	fonts      d2interface.Cache
 	palettes   d2interface.Cache
 	transforms d2interface.Cache
+	Records    *d2records.RecordManager
+}
+
+func (am *AssetManager) init() error {
+	rm, err := d2records.NewRecordManager()
+	if err != nil {
+		return err
+	}
+
+	am.Records = rm
+
+	err = am.initDataDictionaries()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (am *AssetManager) initDataDictionaries() error {
+	dictPaths := []string{
+		d2resource.LevelType,
+		d2resource.LevelPreset,
+		d2resource.LevelWarp,
+		d2resource.ObjectType,
+		d2resource.ObjectDetails,
+		d2resource.Weapons,
+		d2resource.Armor,
+		d2resource.Misc,
+		d2resource.Books,
+		d2resource.ItemTypes,
+		d2resource.UniqueItems,
+		d2resource.Missiles,
+		d2resource.SoundSettings,
+		d2resource.MonStats,
+		d2resource.MonStats2,
+		d2resource.MonPreset,
+		d2resource.MonProp,
+		d2resource.MonType,
+		d2resource.MonMode,
+		d2resource.MagicPrefix,
+		d2resource.MagicSuffix,
+		d2resource.ItemStatCost,
+		d2resource.ItemRatio,
+		d2resource.Overlays,
+		d2resource.CharStats,
+		d2resource.Hireling,
+		d2resource.Experience,
+		d2resource.Gems,
+		d2resource.QualityItems,
+		d2resource.Runes,
+		d2resource.DifficultyLevels,
+		d2resource.AutoMap,
+		d2resource.LevelDetails,
+		d2resource.LevelMaze,
+		d2resource.LevelSubstitutions,
+		d2resource.CubeRecipes,
+		d2resource.SuperUniques,
+		d2resource.Inventory,
+		d2resource.Skills,
+		d2resource.SkillCalc,
+		d2resource.MissileCalc,
+		d2resource.Properties,
+		d2resource.SkillDesc,
+		d2resource.BodyLocations,
+		d2resource.Sets,
+		d2resource.SetItems,
+		d2resource.AutoMagic,
+		d2resource.TreasureClass,
+		d2resource.States,
+		d2resource.SoundEnvirons,
+		d2resource.Shrines,
+		d2resource.ElemType,
+		d2resource.PlrMode,
+		d2resource.PetType,
+		d2resource.NPC,
+		d2resource.MonsterUniqueModifier,
+		d2resource.MonsterEquipment,
+		d2resource.UniqueAppellation,
+		d2resource.MonsterLevel,
+		d2resource.MonsterSound,
+		d2resource.MonsterSequence,
+		d2resource.PlayerClass,
+		d2resource.MonsterPlacement,
+		d2resource.ObjectGroup,
+		d2resource.CompCode,
+		d2resource.MonsterAI,
+		d2resource.RarePrefix,
+		d2resource.RareSuffix,
+		d2resource.Events,
+	}
+
+	for _, path := range dictPaths {
+		err := am.LoadRecords(path)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // LoadAsset loads an asset
@@ -242,6 +348,37 @@ func (am *AssetManager) LoadPaletteTransform(path string) (*d2pl2.PL2, error) {
 	}
 
 	return pl2, nil
+}
+
+// LoadDataDictionary loads a txt data file
+func (am *AssetManager) LoadDataDictionary(path string) (*d2txt.DataDictionary, error) {
+	// we purposefully do not cache data dictionaries because we are already
+	// caching the file data. The underlying csv.Reader does not implement io.Seeker,
+	// so after it has been iterated through, we cannot iterate through it again.
+	//
+	// The easy way around this is to not cache d2txt.DataDictionary objects, and just create
+	// a new instance from cached file data if/when we ever need to reload the data dict
+	if data, err := am.LoadFile(path); err != nil {
+		return nil, err
+	} else {
+		return d2txt.LoadDataDictionary(data), nil
+	}
+}
+
+// LoadRecords will load the records for the given path into the record manager.
+// This is dependant on the record manager having bound a loader for the given path.
+func (am *AssetManager) LoadRecords(path string) error {
+	dict, err := am.LoadDataDictionary(path)
+	if err != nil {
+		return err
+	}
+
+	err = am.Records.Load(path, dict)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // loadDC6 creates an Animation from d2dc6.DC6 and d2dat.DATPalette
