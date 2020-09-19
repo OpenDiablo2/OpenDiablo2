@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"image"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
@@ -268,18 +270,20 @@ func (hri *HeroRenderInfo) advance(elapsed float64) {
 
 // SelectHeroClass represents the Select Hero Class screen
 type SelectHeroClass struct {
-	asset              *d2asset.AssetManager
-	uiManager          *d2ui.UIManager
-	bgImage            *d2ui.Sprite
-	campfire           *d2ui.Sprite
-	headingLabel       *d2ui.Label
-	heroClassLabel     *d2ui.Label
-	heroDesc1Label     *d2ui.Label
-	heroDesc2Label     *d2ui.Label
-	heroDesc3Label     *d2ui.Label
-	heroNameTextbox    *d2ui.TextBox
-	heroNameLabel      *d2ui.Label
-	heroRenderInfo     map[d2enum.Hero]*HeroRenderInfo
+	asset           *d2asset.AssetManager
+	uiManager       *d2ui.UIManager
+	bgImage         *d2ui.Sprite
+	campfire        *d2ui.Sprite
+	headingLabel    *d2ui.Label
+	heroClassLabel  *d2ui.Label
+	heroDesc1Label  *d2ui.Label
+	heroDesc2Label  *d2ui.Label
+	heroDesc3Label  *d2ui.Label
+	heroNameTextbox *d2ui.TextBox
+	heroNameLabel   *d2ui.Label
+	heroRenderInfo  map[d2enum.Hero]*HeroRenderInfo
+	*d2inventory.InventoryItemFactory
+	*d2player.PlayerStateFactory
 	selectedHero       d2enum.Hero
 	exitButton         *d2ui.Button
 	okButton           *d2ui.Button
@@ -305,16 +309,21 @@ func CreateSelectHeroClass(
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	connectionHost string,
 ) *SelectHeroClass {
+	playerStateFactory, _ := d2player.NewPlayerStateFactory(asset)
+	inventoryItemFactory, _ := d2inventory.NewInventoryItemFactory(asset)
+
 	result := &SelectHeroClass{
-		asset:          asset,
-		heroRenderInfo: make(map[d2enum.Hero]*HeroRenderInfo),
-		selectedHero:   d2enum.HeroNone,
-		connectionType: connectionType,
-		connectionHost: connectionHost,
-		audioProvider:  audioProvider,
-		renderer:       renderer,
-		navigator:      navigator,
-		uiManager:      ui,
+		asset:                asset,
+		heroRenderInfo:       make(map[d2enum.Hero]*HeroRenderInfo),
+		selectedHero:         d2enum.HeroNone,
+		connectionType:       connectionType,
+		connectionHost:       connectionHost,
+		audioProvider:        audioProvider,
+		renderer:             renderer,
+		navigator:            navigator,
+		uiManager:            ui,
+		PlayerStateFactory:   playerStateFactory,
+		InventoryItemFactory: inventoryItemFactory,
 	}
 
 	return result
@@ -469,12 +478,14 @@ func (v *SelectHeroClass) onExitButtonClicked() {
 }
 
 func (v *SelectHeroClass) onOkButtonClicked() {
-	gameState := d2player.CreatePlayerState(
+	playerState := v.CreatePlayerState(
 		v.heroNameTextbox.GetText(),
 		v.selectedHero,
 		d2datadict.CharStats[v.selectedHero],
 	)
-	v.navigator.ToCreateGame(gameState.FilePath, d2clientconnectiontype.Local, v.connectionHost)
+
+	playerState.Equipment = v.InventoryItemFactory.DefaultHeroItems[v.selectedHero]
+	v.navigator.ToCreateGame(playerState.FilePath, d2clientconnectiontype.Local, v.connectionHost)
 }
 
 // Render renders the Select Hero Class screen

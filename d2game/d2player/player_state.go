@@ -38,7 +38,7 @@ func HasGameStates() bool {
 }
 
 // GetAllPlayerStates returns all player saves
-func GetAllPlayerStates() []*PlayerState {
+func (f *PlayerStateFactory) GetAllPlayerStates() []*PlayerState {
 	basePath, _ := getGameBaseSavePath()
 	files, _ := ioutil.ReadDir(basePath)
 	result := make([]*PlayerState, 0)
@@ -56,15 +56,15 @@ func GetAllPlayerStates() []*PlayerState {
 			// temporarily loading default class stats if the character was created before saving stats/skills was introduced
 			// to be removed in the future
 			classStats := d2datadict.CharStats[gameState.HeroType]
-			gameState.Stats = d2hero.CreateHeroStatsState(gameState.HeroType, classStats)
-			gameState.Skills = d2hero.CreateHeroSkillsState(classStats)
+			gameState.Stats = f.CreateHeroStatsState(gameState.HeroType, classStats)
+			gameState.Skills = f.CreateHeroSkillsState(classStats)
 
 			if err := gameState.Save(); err != nil {
 				fmt.Printf("failed to save game state!, err: %v\n", err)
 			}
 		}
-		result = append(result, gameState)
 
+		result = append(result, gameState)
 	}
 
 	return result
@@ -89,26 +89,6 @@ func LoadPlayerState(filePath string) *PlayerState {
 
 	err = json.Unmarshal(strData, result)
 	if err != nil {
-		return nil
-	}
-
-	return result
-}
-
-// CreatePlayerState creates a PlayerState instance and returns a pointer to it
-func CreatePlayerState(heroName string, hero d2enum.Hero, classStats *d2datadict.CharStatsRecord) *PlayerState {
-	result := &PlayerState{
-		HeroName:  heroName,
-		HeroType:  hero,
-		Act:       1,
-		Stats:     d2hero.CreateHeroStatsState(hero, classStats),
-		Skills:    d2hero.CreateHeroSkillsState(classStats),
-		Equipment: d2inventory.HeroObjects[hero],
-		FilePath:  "",
-	}
-
-	if err := result.Save(); err != nil {
-		fmt.Printf("failed to save game state!, err: %v\n", err)
 		return nil
 	}
 

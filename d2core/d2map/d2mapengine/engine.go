@@ -34,7 +34,7 @@ type MapEngine struct {
 
 // CreateMapEngine creates a new instance of the map engine and returns a pointer to it.
 func CreateMapEngine(asset *d2asset.AssetManager) *MapEngine {
-	entity := d2mapentity.NewMapEntityFactory(asset)
+	entity, _ := d2mapentity.NewMapEntityFactory(asset)
 	stamp := d2mapstamp.NewStampFactory(asset, entity)
 
 	engine := &MapEngine{

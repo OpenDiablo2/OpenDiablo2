@@ -116,6 +116,10 @@ func uniqueItemsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 			},
 		}
 
+		if record.Name == "" {
+			continue
+		}
+
 		records[record.Name] = record
 	}
 

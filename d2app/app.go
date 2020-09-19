@@ -31,7 +31,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen"
@@ -195,8 +194,6 @@ func (a *App) initialize() error {
 		return err
 	}
 
-	d2inventory.LoadHeroObjects()
-
 	a.ui.Initialize()
 
 	return nil
@@ -231,10 +228,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.LevelWarp, d2datadict.LoadLevelWarps},
 		{d2resource.ObjectType, d2datadict.LoadObjectTypes},
 		{d2resource.ObjectDetails, d2datadict.LoadObjects},
-		{d2resource.Weapons, d2datadict.LoadWeapons},
-		{d2resource.Armor, d2datadict.LoadArmors},
 		{d2resource.Books, d2datadict.LoadBooks},
-		{d2resource.Misc, d2datadict.LoadMiscItems},
 		{d2resource.UniqueItems, d2datadict.LoadUniqueItems},
 		{d2resource.Missiles, d2datadict.LoadMissiles},
 		{d2resource.SoundSettings, d2datadict.LoadSounds},
@@ -269,7 +263,6 @@ func (a *App) loadDataDict() error {
 		{d2resource.MissileCalc, d2datadict.LoadMissileCalculations},
 		{d2resource.Properties, d2datadict.LoadProperties},
 		{d2resource.SkillDesc, d2datadict.LoadSkillDescriptions},
-		{d2resource.ItemTypes, d2datadict.LoadItemTypes},
 		{d2resource.BodyLocations, d2datadict.LoadBodyLocations},
 		{d2resource.Sets, d2datadict.LoadSetRecords},
 		{d2resource.SetItems, d2datadict.LoadSetItems},
@@ -307,8 +300,6 @@ func (a *App) loadDataDict() error {
 
 		entry.loader(data)
 	}
-
-	d2datadict.LoadItemEquivalencies() // depends on ItemCommon and ItemTypes
 
 	return nil
 }

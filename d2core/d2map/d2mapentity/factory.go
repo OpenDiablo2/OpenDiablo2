@@ -1,7 +1,6 @@
 package d2mapentity
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
@@ -19,13 +18,24 @@ import (
 )
 
 // NewMapEntityFactory creates a MapEntityFactory instance with the given asset manager
-func NewMapEntityFactory(asset *d2asset.AssetManager) *MapEntityFactory {
-	return &MapEntityFactory{asset}
+func NewMapEntityFactory(asset *d2asset.AssetManager) (*MapEntityFactory, error) {
+	itemFactory, err := diablo2item.NewItemFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
+	entityFactory := &MapEntityFactory{
+		asset,
+		itemFactory,
+	}
+
+	return entityFactory, nil
 }
 
 // MapEntityFactory creates map entities for the MapEngine
 type MapEntityFactory struct {
 	asset *d2asset.AssetManager
+	item  *diablo2item.ItemFactory
 }
 
 // NewAnimatedEntity creates an instance of AnimatedEntity
@@ -128,10 +138,10 @@ func (f *MapEntityFactory) NewMissile(x, y int, record *d2datadict.MissileRecord
 
 // NewItem creates an item map entity
 func (f *MapEntityFactory) NewItem(x, y int, codes ...string) (*Item, error) {
-	item := diablo2item.NewItem(codes...)
+	item, err := f.item.NewItem(codes...)
 
-	if item == nil {
-		return nil, errors.New(errInvalidItemCodes)
+	if err != nil {
+		return nil, err
 	}
 
 	filename := item.CommonRecord().FlippyFile

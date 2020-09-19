@@ -544,9 +544,11 @@ func TestNewProperty(t *testing.T) { //nolint:funlen it's mostly test-case defin
 	numericToken := "#"
 	re := regexp.MustCompile(`\d+`)
 
+	factory, _ := NewItemFactory(nil)
+
 	for testIdx := range tests {
 		test := &tests[testIdx]
-		prop := NewProperty(test.propKey, test.inputValues...)
+		prop := factory.NewProperty(test.propKey, test.inputValues...)
 
 		if prop == nil {
 			t.Error("property is nil")
