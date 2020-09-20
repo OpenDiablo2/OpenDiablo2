@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -17,6 +18,7 @@ import (
 // Inventory represents the inventory
 type Inventory struct {
 	asset      *d2asset.AssetManager
+	item       *diablo2item.ItemFactory
 	uiManager  *d2ui.UIManager
 	frame      *d2ui.Sprite
 	panel      *d2ui.Sprite
@@ -34,13 +36,16 @@ type Inventory struct {
 
 // NewInventory creates an inventory instance and returns a pointer to it
 func NewInventory(asset *d2asset.AssetManager, ui *d2ui.UIManager,
-	record *d2datadict.InventoryRecord) *Inventory {
+	record *d2records.InventoryRecord) *Inventory {
 	hoverLabel := ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
 	hoverLabel.Alignment = d2gui.HorizontalAlignCenter
+
+	itemFactory, _ := diablo2item.NewItemFactory(asset) // TODO handle errors
 
 	return &Inventory{
 		asset:      asset,
 		uiManager:  ui,
+		item:       itemFactory,
 		grid:       NewItemGrid(asset, ui, record),
 		originX:    record.Panel.Left,
 		hoverLabel: hoverLabel,
@@ -74,28 +79,52 @@ func (g *Inventory) Load() {
 	g.frame, _ = g.uiManager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
 
 	g.panel, _ = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
-	items := []InventoryItem{
-		diablo2item.NewItem("kit", "Crimson", "of the Bat", "of Frost").Identify(),
-		diablo2item.NewItem("rin", "Steel", "of Shock").Identify(),
-		diablo2item.NewItem("jav").Identify(),
-		diablo2item.NewItem("buc").Identify(),
-		// diablo2item.NewItem("Arctic Furs", "qui"),
-		// TODO: Load the player's actual items
+
+	// TODO: remove this item test code
+	testInventoryCodes := [][]string{
+		{"kit", "Crimson", "of the Bat", "of Frost"},
+		{"rin", "Steel", "of Shock"},
+		{"jav"},
+		{"buc"},
 	}
 
-	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotLeftArm, diablo2item.NewItem("wnd"))
-	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotRightArm, diablo2item.NewItem("buc"))
-	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotHead, diablo2item.NewItem("crn"))
-	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotTorso, diablo2item.NewItem("plt"))
-	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotLegs, diablo2item.NewItem("vbt"))
-	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotBelt, diablo2item.NewItem("vbl"))
-	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotGloves, diablo2item.NewItem("lgl"))
-	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotLeftHand, diablo2item.NewItem("rin"))
-	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotRightHand, diablo2item.NewItem("rin"))
-	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotNeck, diablo2item.NewItem("amu"))
+	inventoryItems := make([]InventoryItem, 0)
+
+	for idx := range testInventoryCodes {
+		item, err := g.item.NewItem(testInventoryCodes[idx]...)
+		if err != nil {
+			continue
+		}
+
+		item.Identify()
+		inventoryItems = append(inventoryItems, item)
+	}
+
+	testEquippedItemCodes := map[d2enum.EquippedSlot][]string{
+		d2enum.EquippedSlotLeftArm:   {"wnd"},
+		d2enum.EquippedSlotRightArm:  {"buc"},
+		d2enum.EquippedSlotHead:      {"crn"},
+		d2enum.EquippedSlotTorso:     {"plt"},
+		d2enum.EquippedSlotLegs:      {"vbt"},
+		d2enum.EquippedSlotBelt:      {"vbl"},
+		d2enum.EquippedSlotGloves:    {"lgl"},
+		d2enum.EquippedSlotLeftHand:  {"rin"},
+		d2enum.EquippedSlotRightHand: {"rin"},
+		d2enum.EquippedSlotNeck:      {"amu"},
+	}
+
+	for slot := range testEquippedItemCodes {
+		item, err := g.item.NewItem(testEquippedItemCodes[slot]...)
+		if err != nil {
+			continue
+		}
+
+		g.grid.ChangeEquippedSlot(slot, item)
+	}
+
 	// TODO: Load the player's actual items
 
-	_, err := g.grid.Add(items...)
+	_, err := g.grid.Add(inventoryItems...)
 	if err != nil {
 		fmt.Printf("could not add items to the inventory, err: %v\n", err)
 	}

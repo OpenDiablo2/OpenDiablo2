@@ -4,9 +4,10 @@ import (
 	"log"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
@@ -24,17 +25,17 @@ type MapEngine struct {
 	seed          int64                            // The map seed
 	entities      map[string]d2interface.MapEntity // Entities on the map
 	tiles         []MapTile
-	size          d2geom.Size                // Size of the map, in tiles
-	levelType     d2datadict.LevelTypeRecord // Level type of this map
-	dt1TileData   []d2dt1.Tile               // DT1 tile data
-	startSubTileX int                        // Starting X position
-	startSubTileY int                        // Starting Y position
-	dt1Files      []string                   // List of DS1 strings
+	size          d2geom.Size               // Size of the map, in tiles
+	levelType     d2records.LevelTypeRecord // Level type of this map
+	dt1TileData   []d2dt1.Tile              // DT1 tile data
+	startSubTileX int                       // Starting X position
+	startSubTileY int                       // Starting Y position
+	dt1Files      []string                  // List of DS1 strings
 }
 
 // CreateMapEngine creates a new instance of the map engine and returns a pointer to it.
 func CreateMapEngine(asset *d2asset.AssetManager) *MapEngine {
-	entity := d2mapentity.NewMapEntityFactory(asset)
+	entity, _ := d2mapentity.NewMapEntityFactory(asset)
 	stamp := d2mapstamp.NewStampFactory(asset, entity)
 
 	engine := &MapEngine{
@@ -54,7 +55,7 @@ func (m *MapEngine) GetStartingPosition() (x, y int) {
 // ResetMap clears all map and entity data and reloads it from the cached files.
 func (m *MapEngine) ResetMap(levelType d2enum.RegionIdType, width, height int) {
 	m.entities = make(map[string]d2interface.MapEntity)
-	m.levelType = d2datadict.LevelTypes[levelType]
+	m.levelType = *m.asset.Records.Level.Types[levelType]
 	m.size = d2geom.Size{Width: width, Height: height}
 	m.tiles = make([]MapTile, width*height)
 	m.dt1TileData = make([]d2dt1.Tile, 0)
@@ -115,7 +116,7 @@ func (m *MapEngine) AddDS1(fileName string) {
 }
 
 // LevelType returns the level type of this map.
-func (m *MapEngine) LevelType() d2datadict.LevelTypeRecord {
+func (m *MapEngine) LevelType() d2records.LevelTypeRecord {
 	return m.levelType
 }
 

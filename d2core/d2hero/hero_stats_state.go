@@ -1,8 +1,8 @@
 package d2hero
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 )
 
 // HeroStatsState is a serializable state of hero stats.
@@ -35,11 +35,11 @@ type HeroStatsState struct {
 }
 
 // CreateHeroStatsState generates a running state from a hero stats.
-func CreateHeroStatsState(heroClass d2enum.Hero, classStats *d2datadict.CharStatsRecord) *HeroStatsState {
+func (f *HeroStateFactory) CreateHeroStatsState(heroClass d2enum.Hero, classStats *d2records.CharStatsRecord) *HeroStatsState {
 	result := HeroStatsState{
 		Level:        1,
 		Experience:   0,
-		NextLevelExp: d2datadict.GetExperienceBreakpoint(heroClass, 1),
+		NextLevelExp: f.asset.Records.GetExperienceBreakpoint(heroClass, 1),
 		Strength:     classStats.InitStr,
 		Dexterity:    classStats.InitDex,
 		Vitality:     classStats.InitVit,

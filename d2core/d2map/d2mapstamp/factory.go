@@ -6,7 +6,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
@@ -25,10 +24,11 @@ type StampFactory struct {
 // LoadStamp loads the Stamp data from file.
 func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fileIndex int) *Stamp {
 	stamp := &Stamp{
+		factory:     f,
 		entity:      f.entity,
 		regionID:    levelType,
-		levelType:   d2datadict.LevelTypes[levelType],
-		levelPreset: d2datadict.LevelPresets[levelPreset],
+		levelType:   *f.asset.Records.Level.Types[levelType],
+		levelPreset: f.asset.Records.Level.Presets[levelPreset],
 	}
 
 	for _, levelTypeDt1 := range &stamp.levelType.Files {

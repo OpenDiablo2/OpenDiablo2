@@ -12,7 +12,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player/help"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
@@ -51,6 +50,7 @@ type GameControls struct {
 	renderer               d2interface.Renderer // TODO: This shouldn't be a dependency
 	inputListener          InputCallbackListener
 	hero                   *d2mapentity.Player
+	heroState              *d2hero.HeroStateFactory
 	mapEngine              *d2mapengine.MapEngine
 	mapRenderer            *d2maprenderer.MapRenderer
 	uiManager              *d2ui.UIManager
@@ -155,18 +155,24 @@ func NewGameControls(
 		return nil, fmt.Errorf("unknown hero class: %d", hero.Class)
 	}
 
-	inventoryRecord := d2datadict.Inventory[inventoryRecordKey]
+	inventoryRecord := asset.Records.Layout.Inventory[inventoryRecordKey]
 
 	hoverLabel := nameLabel
 	hoverLabel.SetBackgroundColor(color.RGBA{0, 0, 0, uint8(128)})
 
 	globeStatsLabel := hpManaStatsLabel
 
+	heroState, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
 	gc := &GameControls{
 		asset:            asset,
 		uiManager:        ui,
 		renderer:         renderer,
 		hero:             hero,
+		heroState:        heroState,
 		mapEngine:        mapEngine,
 		inputListener:    inputListener,
 		mapRenderer:      mapRenderer,
@@ -196,7 +202,7 @@ func NewGameControls(
 		isSinglePlayer:         isSinglePlayer,
 	}
 
-	err := term.BindAction("freecam", "toggle free camera movement", func() {
+	err = term.BindAction("freecam", "toggle free camera movement", func() {
 		gc.FreeCam = !gc.FreeCam
 	})
 
@@ -205,13 +211,23 @@ func NewGameControls(
 	}
 
 	err = term.BindAction("setleftskill", "set skill to fire on left click", func(id int) {
-		skillRecord := d2datadict.SkillDetails[id]
-		gc.hero.LeftSkill = &d2hero.HeroSkill{SkillPoints: 0, SkillRecord: skillRecord, SkillDescriptionRecord: d2datadict.SkillDescriptions[skillRecord.Skilldesc]}
+		skillRecord := gc.asset.Records.Skill.Details[id]
+		skill, err := heroState.CreateHeroSkill(0, skillRecord.Skill)
+		if err != nil {
+			term.OutputErrorf("cannot create skill with ID of %d", id)
+		}
+
+		gc.hero.LeftSkill = skill
 	})
 
 	err = term.BindAction("setrightskill", "set skill to fire on right click", func(id int) {
-		skillRecord := d2datadict.SkillDetails[id]
-		gc.hero.RightSkill = &d2hero.HeroSkill{SkillPoints: 0, SkillRecord: skillRecord, SkillDescriptionRecord: d2datadict.SkillDescriptions[skillRecord.Skilldesc]}
+		skillRecord := gc.asset.Records.Skill.Details[id]
+		skill, err := heroState.CreateHeroSkill(0, skillRecord.Skill)
+		if err != nil {
+			term.OutputErrorf("cannot create skill with ID of %d", id)
+		}
+
+		gc.hero.RightSkill = skill
 	})
 
 	if err != nil {
@@ -416,7 +432,7 @@ func (g *GameControls) Load() {
 	attackIconID := 2
 
 	g.leftSkill = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
-	g.rightSkill = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills} 
+	g.rightSkill = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
 
 	g.loadUIButtons()
 
