@@ -261,7 +261,6 @@ func (a *App) loadDataDict() error {
 		{d2resource.MissileCalc, d2datadict.LoadMissileCalculations},
 		{d2resource.Properties, d2datadict.LoadProperties},
 		{d2resource.SkillDesc, d2datadict.LoadSkillDescriptions},
-		{d2resource.BodyLocations, d2datadict.LoadBodyLocations},
 		{d2resource.Sets, d2datadict.LoadSetRecords},
 		{d2resource.SetItems, d2datadict.LoadSetItems},
 		{d2resource.TreasureClass, d2datadict.LoadTreasureClassRecords},
