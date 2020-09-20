@@ -204,24 +204,24 @@ func (i *Item) SetItemRecord() *d2datadict.SetItemRecord {
 }
 
 // PrefixRecords returns the ItemAffixCommonRecords of the prefixes of the item
-func (i *Item) PrefixRecords() []*d2datadict.ItemAffixCommonRecord {
-	return affixRecords(i.PrefixCodes, d2datadict.MagicPrefix)
+func (i *Item) PrefixRecords() []*d2records.ItemAffixCommonRecord {
+	return affixRecords(i.PrefixCodes, i.factory.asset.Records.Item.Magic.Prefix)
 }
 
 // SuffixRecords returns the ItemAffixCommonRecords of the prefixes of the item
-func (i *Item) SuffixRecords() []*d2datadict.ItemAffixCommonRecord {
-	return affixRecords(i.SuffixCodes, d2datadict.MagicSuffix)
+func (i *Item) SuffixRecords() []*d2records.ItemAffixCommonRecord {
+	return affixRecords(i.SuffixCodes, i.factory.asset.Records.Item.Magic.Suffix)
 }
 
 func affixRecords(
 	fromCodes []string,
-	affixes map[string]*d2datadict.ItemAffixCommonRecord,
-) []*d2datadict.ItemAffixCommonRecord {
+	affixes map[string]*d2records.ItemAffixCommonRecord,
+) []*d2records.ItemAffixCommonRecord {
 	if len(fromCodes) < 1 {
 		return nil
 	}
 
-	result := make([]*d2datadict.ItemAffixCommonRecord, len(fromCodes))
+	result := make([]*d2records.ItemAffixCommonRecord, len(fromCodes))
 
 	for idx, code := range fromCodes {
 		rec := affixes[code]
@@ -346,11 +346,15 @@ func (i *Item) pickMagicAffixes(mod DropModifier) {
 		totalAffixes = numPrefixes + numSuffixes
 	}
 
-	i.PrefixCodes = i.pickRandomAffixes(numPrefixes, totalAffixes, d2datadict.MagicPrefix)
-	i.SuffixCodes = i.pickRandomAffixes(numSuffixes, totalAffixes, d2datadict.MagicSuffix)
+	prefixes := i.factory.asset.Records.Item.Magic.Prefix
+	suffixes := i.factory.asset.Records.Item.Magic.Prefix
+
+	i.PrefixCodes = i.pickRandomAffixes(numPrefixes, totalAffixes, prefixes)
+	i.SuffixCodes = i.pickRandomAffixes(numSuffixes, totalAffixes, suffixes)
 }
 
-func (i *Item) pickRandomAffixes(max, totalMax int, affixMap map[string]*d2datadict.ItemAffixCommonRecord) []string {
+func (i *Item) pickRandomAffixes(max, totalMax int,
+	affixMap map[string]*d2records.ItemAffixCommonRecord) []string {
 	pickedCodes := make([]string, 0)
 
 	for numPicks := 0; numPicks < max; numPicks++ {
@@ -508,7 +512,7 @@ func (i *Item) updateItemAttributes() {
 }
 
 func (i *Item) generateAffixProperties(pool PropertyPool) []*Property {
-	var affixRecords []*d2datadict.ItemAffixCommonRecord
+	var affixRecords []*d2records.ItemAffixCommonRecord
 
 	switch pool {
 	case PropertyPoolPrefix:

@@ -104,7 +104,7 @@ func (f *ItemFactory) NewItem(codes ...string) (*Item, error) {
 			continue
 		}
 
-		if found := d2datadict.MagicPrefix[code]; found != nil {
+		if found := f.asset.Records.Item.Magic.Prefix[code]; found != nil {
 			if prefixes == nil {
 				prefixes = make([]string, 0)
 			}
@@ -114,7 +114,7 @@ func (f *ItemFactory) NewItem(codes ...string) (*Item, error) {
 			continue
 		}
 
-		if found := d2datadict.MagicSuffix[code]; found != nil {
+		if found := f.asset.Records.Item.Magic.Suffix[code]; found != nil {
 			if suffixes == nil {
 				suffixes = make([]string, 0)
 			}
@@ -336,9 +336,9 @@ func (f *ItemFactory) ItemFromTreasure(treasure *d2datadict.Treasure) *Item {
 // FindMatchingAffixes for a given ItemCommonRecord, find all possible affixes that can spawn
 func (f *ItemFactory) FindMatchingAffixes(
 	icr *d2records.ItemCommonRecord,
-	fromAffixes map[string]*d2datadict.ItemAffixCommonRecord,
-) []*d2datadict.ItemAffixCommonRecord {
-	result := make([]*d2datadict.ItemAffixCommonRecord, 0)
+	fromAffixes map[string]*d2records.ItemAffixCommonRecord,
+) []*d2records.ItemAffixCommonRecord {
+	result := make([]*d2records.ItemAffixCommonRecord, 0)
 
 	equivItemTypes := f.asset.Records.FindEquivalentTypesByItemCommonRecord(icr)
 
