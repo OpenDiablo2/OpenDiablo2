@@ -1,12 +1,15 @@
 package d2hero
 
-import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
+)
 
 // HeroSkillsState hold all spells that a hero has.
 type HeroSkillsState map[int]*HeroSkill
 
 // CreateHeroSkillsState will assemble the hero skills from the class stats record.
-func (f *HeroStateFactory) CreateHeroSkillsState(classStats *d2datadict.CharStatsRecord) *HeroSkillsState {
+func (f *HeroStateFactory) CreateHeroSkillsState(classStats *d2records.CharStatsRecord) *HeroSkillsState {
 	baseSkills := HeroSkillsState{}
 
 	for idx := range classStats.BaseSkill {

@@ -6,7 +6,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -481,7 +480,7 @@ func (v *SelectHeroClass) onOkButtonClicked() {
 	playerState := v.CreatePlayerState(
 		v.heroNameTextbox.GetText(),
 		v.selectedHero,
-		d2datadict.CharStats[v.selectedHero],
+		v.asset.Records.Character.Stats[v.selectedHero],
 	)
 
 	playerState.Equipment = v.InventoryItemFactory.DefaultHeroItems[v.selectedHero]

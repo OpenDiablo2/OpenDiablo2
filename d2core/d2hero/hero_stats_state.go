@@ -1,8 +1,8 @@
 package d2hero
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 )
 
 // HeroStatsState is a serializable state of hero stats.
@@ -36,7 +36,7 @@ type HeroStatsState struct {
 
 // CreateHeroStatsState generates a running state from a hero stats.
 func (f *HeroStateFactory) CreateHeroStatsState(heroClass d2enum.Hero,
-	classStats *d2datadict.CharStatsRecord) *HeroStatsState {
+	classStats *d2records.CharStatsRecord) *HeroStatsState {
 	result := HeroStatsState{
 		Level:        1,
 		Experience:   0,

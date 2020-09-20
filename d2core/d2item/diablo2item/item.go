@@ -13,7 +13,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2item"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats/diablo2stats"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -690,7 +689,7 @@ func (i *Item) GetStatStrings() []string {
 	}
 
 	if len(stats) > 0 {
-		stats = diablo2stats.NewStatList(stats...).ReduceStats().Stats()
+		stats = i.factory.stat.NewStatList(stats...).ReduceStats().Stats()
 	}
 
 	sort.Slice(stats, func(i, j int) bool { return stats[i].Priority() > stats[j].Priority() })

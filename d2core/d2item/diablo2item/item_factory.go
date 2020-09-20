@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strconv"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats/diablo2stats"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -43,19 +45,27 @@ const (
 )
 
 func NewItemFactory(asset *d2asset.AssetManager) (*ItemFactory, error) {
-	factory := &ItemFactory{
+	itemFactory := &ItemFactory{
 		asset: asset,
 		Seed:  0,
 	}
 
-	factory.SetSeed(defaultSeed)
+	itemFactory.SetSeed(defaultSeed)
 
-	return factory, nil
+	statFactory, err := diablo2stats.NewStatFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
+	itemFactory.stat = statFactory
+
+	return itemFactory, nil
 }
 
 // ItemFactory is a diablo 2 implementation of an item generator
 type ItemFactory struct {
 	asset  *d2asset.AssetManager
+	stat   *diablo2stats.StatFactory
 	rand   *rand.Rand
 	source rand.Source
 	Seed   int64
@@ -156,6 +166,7 @@ func (f *ItemFactory) NewProperty(code string, values ...int) *Property {
 	}
 
 	result := &Property{
+		factory:     f,
 		record:      record,
 		inputParams: values,
 	}
