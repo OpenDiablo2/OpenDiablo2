@@ -94,7 +94,7 @@ func (f *ItemFactory) NewItem(codes ...string) (*Item, error) {
 			continue
 		}
 
-		if found := d2datadict.SetItems[code]; found != nil {
+		if found := f.asset.Records.Item.SetItems[code]; found != nil {
 			set = code
 			continue
 		}

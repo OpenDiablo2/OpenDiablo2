@@ -194,13 +194,13 @@ func (i *Item) UniqueRecord() *d2records.UniqueItemRecord {
 }
 
 // SetRecord returns the SetRecord of the item
-func (i *Item) SetRecord() *d2datadict.SetRecord {
-	return d2datadict.SetRecords[i.SetCode]
+func (i *Item) SetRecord() *d2records.SetRecord {
+	return i.factory.asset.Records.Item.Sets[i.SetCode]
 }
 
 // SetItemRecord returns the SetRecord of the item
-func (i *Item) SetItemRecord() *d2datadict.SetItemRecord {
-	return d2datadict.SetItems[i.SetItemCode]
+func (i *Item) SetItemRecord() *d2records.SetItemRecord {
+	return i.factory.asset.Records.Item.SetItems[i.SetItemCode]
 }
 
 // PrefixRecords returns the ItemAffixCommonRecords of the prefixes of the item
@@ -311,7 +311,7 @@ func (i *Item) pickUniqueRecord() {
 }
 
 func (i *Item) pickSetRecords() {
-	if matches := findMatchingSetItemRecords(i.CommonRecord()); len(matches) > 0 {
+	if matches := i.findMatchingSetItemRecords(i.CommonRecord()); len(matches) > 0 {
 		picked := matches[i.rand.Intn(len(matches))]
 		i.SetItemCode = picked.SetItemKey
 
@@ -732,15 +732,15 @@ func findMatchingUniqueRecords(icr *d2records.ItemCommonRecord) []*d2datadict.Un
 }
 
 // find possible SetItemRecords that the given ItemCommonRecord can have
-func findMatchingSetItemRecords(icr *d2records.ItemCommonRecord) []*d2datadict.SetItemRecord {
-	result := make([]*d2datadict.SetItemRecord, 0)
+func (i *Item) findMatchingSetItemRecords(icr *d2records.ItemCommonRecord) []*d2records.SetItemRecord {
+	result := make([]*d2records.SetItemRecord, 0)
 
 	c1, c2, c3, c4 := icr.Code, icr.NormalCode, icr.UberCode, icr.UltraCode
 
-	for setItemIdx := range d2datadict.SetItems {
-		switch d2datadict.SetItems[setItemIdx].ItemCode {
+	for setItemIdx := range i.factory.asset.Records.Item.SetItems {
+		switch i.factory.asset.Records.Item.SetItems[setItemIdx].ItemCode {
 		case c1, c2, c3, c4:
-			result = append(result, d2datadict.SetItems[setItemIdx])
+			result = append(result, i.factory.asset.Records.Item.SetItems[setItemIdx])
 		}
 	}
 
