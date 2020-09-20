@@ -228,7 +228,6 @@ func (a *App) loadDataDict() error {
 		{d2resource.LevelWarp, d2datadict.LoadLevelWarps},
 		{d2resource.ObjectType, d2datadict.LoadObjectTypes},
 		{d2resource.ObjectDetails, d2datadict.LoadObjects},
-		{d2resource.Books, d2datadict.LoadBooks},
 		{d2resource.UniqueItems, d2datadict.LoadUniqueItems},
 		{d2resource.Missiles, d2datadict.LoadMissiles},
 		{d2resource.SoundSettings, d2datadict.LoadSounds},
