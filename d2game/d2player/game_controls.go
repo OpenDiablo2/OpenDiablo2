@@ -12,7 +12,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player/help"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
@@ -156,7 +155,7 @@ func NewGameControls(
 		return nil, fmt.Errorf("unknown hero class: %d", hero.Class)
 	}
 
-	inventoryRecord := d2datadict.Inventory[inventoryRecordKey]
+	inventoryRecord := asset.Records.Layout.Inventory[inventoryRecordKey]
 
 	hoverLabel := nameLabel
 	hoverLabel.SetBackgroundColor(color.RGBA{0, 0, 0, uint8(128)})

@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -35,7 +36,7 @@ type Inventory struct {
 
 // NewInventory creates an inventory instance and returns a pointer to it
 func NewInventory(asset *d2asset.AssetManager, ui *d2ui.UIManager,
-	record *d2datadict.InventoryRecord) *Inventory {
+	record *d2records.InventoryRecord) *Inventory {
 	hoverLabel := ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
 	hoverLabel.Alignment = d2gui.HorizontalAlignCenter
 

@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
@@ -46,7 +47,7 @@ type ItemGrid struct {
 }
 
 func NewItemGrid(asset *d2asset.AssetManager, ui *d2ui.UIManager,
-	record *d2datadict.InventoryRecord) *ItemGrid {
+	record *d2records.InventoryRecord) *ItemGrid {
 	grid := record.Grid
 
 	return &ItemGrid{
