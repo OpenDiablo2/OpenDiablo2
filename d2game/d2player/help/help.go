@@ -115,7 +115,7 @@ func (h *Overlay) Load() {
 			log.Print(err)
 		}
 
-		err := f.SetCurrentFrame(frameIndex)
+		err = f.SetCurrentFrame(frameIndex)
 		if err != nil {
 			log.Print(err)
 		}
@@ -380,7 +380,7 @@ func (h *Overlay) createBullet(c callout) {
 		log.Print(err)
 	}
 
-	err := newDot.SetCurrentFrame(0)
+	err = newDot.SetCurrentFrame(0)
 	if err != nil {
 		log.Print(err)
 	}
@@ -412,7 +412,7 @@ func (h *Overlay) createCallout(c callout) {
 		log.Print(err)
 	}
 
-	err := newDot.SetCurrentFrame(0)
+	err = newDot.SetCurrentFrame(0)
 	if err != nil {
 		log.Print(err)
 	}

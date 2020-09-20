@@ -69,7 +69,7 @@ func (v *Stream) loadBlockOffsets() error {
 
 	mpqBytes := make([]byte, blockPositionCount*4) //nolint:gomnd MPQ magic
 
-	_, err := v.MPQData.file.Read(mpqBytes)
+	_, err = v.MPQData.file.Read(mpqBytes)
 	if err != nil {
 		return err
 	}

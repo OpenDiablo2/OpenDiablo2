@@ -231,7 +231,6 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 		btn.height += h
 	}
 
-	var err error
 	btn.normalSurface, err = ui.renderer.NewSurface(btn.width, btn.height, d2enum.FilterNearest)
 	if err != nil {
 		log.Print(err)

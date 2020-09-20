@@ -217,7 +217,7 @@ func (f *MapEntityFactory) NewObject(x, y int, objectRec *d2datadict.ObjectRecor
 		return nil, err
 	}
 
-	err = initObject(entity)
+	_, err = initObject(entity)
 	if err != nil {
 		return nil, err
 	}

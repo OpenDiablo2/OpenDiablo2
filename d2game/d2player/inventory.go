@@ -103,7 +103,7 @@ func (g *Inventory) Load() {
 	g.grid.ChangeEquippedSlot(d2enum.EquippedSlotNeck, diablo2item.NewItem("amu"))
 	// TODO: Load the player's actual items
 
-	_, err := g.grid.Add(items...)
+	_, err = g.grid.Add(items...)
 	if err != nil {
 		fmt.Printf("could not add items to the inventory, err: %v\n", err)
 	}

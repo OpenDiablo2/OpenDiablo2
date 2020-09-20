@@ -290,21 +290,18 @@ func (c *Composite) createMode(animationMode animationMode, weaponClass string) 
 
 func (c *Composite) loadCompositeLayer(layerKey, layerValue, animationMode, weaponClass,
 	palettePath string, drawEffect d2enum.DrawEffect) (d2interface.Animation, error) {
-	var err error
 	animationPaths := []string{
 		fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dcc", c.basePath, c.token, layerKey, c.token, layerKey, layerValue, animationMode, weaponClass),
 		fmt.Sprintf("%s/%s/%s/%s%s%s%s%s.dc6", c.basePath, c.token, layerKey, c.token, layerKey, layerValue, animationMode, weaponClass),
 	}
 
 	for _, animationPath := range animationPaths {
-		if exists, err := c.FileExists(animationPath); exists {
-			animation, err := c.LoadAnimationWithEffect(animationPath, palettePath,
-				drawEffect)
+		if exists, err := c.FileExists(animationPath); exists && err == nil {
+			animation, err := c.LoadAnimationWithEffect(animationPath, palettePath, drawEffect)
 			if err == nil {
 				return animation, nil
 			}
-		}
-		if err != nil {
+		} else {
 			return nil, fmt.Errorf("animation path '%s' not found: %v", animationPath, err)
 		}
 	}
