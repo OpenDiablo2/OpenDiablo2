@@ -10,14 +10,11 @@ import (
 func objectDetailsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	records := make(ObjectDetails)
 
-	i := -1
-	inc := func() int {
-		i++
-		return i
-	}
+	i := 0
 
 	for d.Next() {
 		record := &ObjectDetailsRecord{
+			Index: i,
 			Name:        d.String("Name"),
 			Description: d.String("description - not loaded"),
 			id:          d.Number("Id"),
@@ -222,9 +219,8 @@ func objectDetailsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 			AutoMap: d.Number("AutoMap"),
 		}
 
-		inc()
-
 		records[i] = record
+		i++
 	}
 
 	if d.Err != nil {

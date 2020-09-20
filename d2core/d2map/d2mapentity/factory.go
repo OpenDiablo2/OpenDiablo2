@@ -7,7 +7,6 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -218,7 +217,7 @@ func (f *MapEntityFactory) NewNPC(x, y int, monstat *d2records.MonStatsRecord, d
 }
 
 // NewObject creates an instance of AnimatedComposite
-func (f *MapEntityFactory) NewObject(x, y int, objectRec *d2datadict.ObjectRecord,
+func (f *MapEntityFactory) NewObject(x, y int, objectRec *d2records.ObjectDetailsRecord,
 	palettePath string) (*Object, error) {
 	locX, locY := float64(x), float64(y)
 	entity := &Object{
@@ -227,7 +226,7 @@ func (f *MapEntityFactory) NewObject(x, y int, objectRec *d2datadict.ObjectRecor
 		Position:     d2vector.NewPosition(locX, locY),
 		name:         d2tbl.TranslateString(objectRec.Name),
 	}
-	objectType := &d2datadict.ObjectTypes[objectRec.Index]
+	objectType := f.asset.Records.Object.Types[objectRec.Index]
 
 	composite, err := f.asset.LoadComposite(d2enum.ObjectTypeItem, objectType.Token,
 		palettePath)

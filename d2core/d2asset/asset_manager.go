@@ -240,6 +240,8 @@ func (am *AssetManager) LoadComposite(baseType d2enum.ObjectType, token, palette
 		palettePath:  palettePath,
 	}
 
+	c.SetDirection(0)
+
 	return c, nil
 }
 

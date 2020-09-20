@@ -223,8 +223,6 @@ func (a *App) loadDataDict() error {
 		path   string
 		loader func(data []byte)
 	}{
-		{d2resource.ObjectType, d2datadict.LoadObjectTypes},
-		{d2resource.ObjectDetails, d2datadict.LoadObjects},
 		{d2resource.UniqueItems, d2datadict.LoadUniqueItems},
 		{d2resource.AnimationData, d2data.LoadAnimationData},
 		{d2resource.Overlays, d2datadict.LoadOverlays},
@@ -241,12 +239,9 @@ func (a *App) loadDataDict() error {
 		{d2resource.PetType, d2datadict.LoadPetTypes},
 		{d2resource.UniqueAppellation, d2datadict.LoadUniqueAppellations},
 		{d2resource.PlayerClass, d2datadict.LoadPlayerClasses},
-		{d2resource.ObjectGroup, d2datadict.LoadObjectGroups},
 		{d2resource.RarePrefix, d2datadict.LoadRareItemPrefixRecords},
 		{d2resource.RareSuffix, d2datadict.LoadRareItemSuffixRecords},
 	}
-
-	d2datadict.InitObjectRecords()
 
 	for _, entry := range entries {
 		data, err := a.asset.LoadFile(entry.path)
