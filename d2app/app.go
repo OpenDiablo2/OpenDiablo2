@@ -235,7 +235,6 @@ func (a *App) loadDataDict() error {
 		{d2resource.States, d2datadict.LoadStates},
 		{d2resource.Shrines, d2datadict.LoadShrines},
 		{d2resource.PlrMode, d2datadict.LoadPlrModes},
-		{d2resource.PetType, d2datadict.LoadPetTypes},
 		{d2resource.UniqueAppellation, d2datadict.LoadUniqueAppellations},
 		{d2resource.PlayerClass, d2datadict.LoadPlayerClasses},
 		{d2resource.RarePrefix, d2datadict.LoadRareItemPrefixRecords},
