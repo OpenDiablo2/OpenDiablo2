@@ -35,8 +35,7 @@ type HeroStatsState struct {
 }
 
 // CreateHeroStatsState generates a running state from a hero stats.
-func (f *HeroStateFactory) CreateHeroStatsState(heroClass d2enum.Hero,
-	classStats *d2records.CharStatsRecord) *HeroStatsState {
+func (f *HeroStateFactory) CreateHeroStatsState(heroClass d2enum.Hero, classStats *d2records.CharStatsRecord) *HeroStatsState {
 	result := HeroStatsState{
 		Level:        1,
 		Experience:   0,

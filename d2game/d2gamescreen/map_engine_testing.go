@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
@@ -16,7 +18,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 )
 
 type regionSpec struct {
@@ -84,16 +85,17 @@ func getRegions() []regionSpec {
 
 // MapEngineTest represents the MapEngineTest screen
 type MapEngineTest struct {
-	asset         *d2asset.AssetManager
-	gameState     *d2player.PlayerState
-	mapEngine     *d2mapengine.MapEngine
-	mapGen        *d2mapgen.MapGenerator
-	mapRenderer   *d2maprenderer.MapRenderer
-	terminal      d2interface.Terminal
-	renderer      d2interface.Renderer
-	inputManager  d2interface.InputManager
-	audioProvider d2interface.AudioProvider
-	screen        *d2screen.ScreenManager
+	asset              *d2asset.AssetManager
+	playerStateFactory *d2hero.HeroStateFactory
+	playerState        *d2hero.HeroState
+	mapEngine          *d2mapengine.MapEngine
+	mapGen             *d2mapgen.MapGenerator
+	mapRenderer        *d2maprenderer.MapRenderer
+	terminal           d2interface.Terminal
+	renderer           d2interface.Renderer
+	inputManager       d2interface.InputManager
+	audioProvider      d2interface.AudioProvider
+	screen             *d2screen.ScreenManager
 
 	lastMouseX, lastMouseY int
 	selX, selY             int
@@ -117,23 +119,30 @@ func CreateMapEngineTest(currentRegion,
 	inputManager d2interface.InputManager,
 	audioProvider d2interface.AudioProvider,
 	screen *d2screen.ScreenManager,
-) *MapEngineTest {
-	result := &MapEngineTest{
-		currentRegion: currentRegion,
-		levelPreset:   levelPreset,
-		fileIndex:     0,
-		regionSpec:    regionSpec{},
-		filesCount:    0,
-		asset:         asset,
-		terminal:      term,
-		renderer:      renderer,
-		inputManager:  inputManager,
-		audioProvider: audioProvider,
-		screen:        screen,
+) (*MapEngineTest, error) {
+	heroStateFactory, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return nil, err
 	}
-	result.gameState = d2player.CreateTestGameState()
 
-	return result
+	result := &MapEngineTest{
+		currentRegion:      currentRegion,
+		levelPreset:        levelPreset,
+		fileIndex:          0,
+		regionSpec:         regionSpec{},
+		filesCount:         0,
+		asset:              asset,
+		terminal:           term,
+		renderer:           renderer,
+		inputManager:       inputManager,
+		audioProvider:      audioProvider,
+		screen:             screen,
+		playerStateFactory: heroStateFactory,
+	}
+
+	result.playerState = heroStateFactory.CreateTestGameState()
+
+	return result, nil
 }
 
 func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {

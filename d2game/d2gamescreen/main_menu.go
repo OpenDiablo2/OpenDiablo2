@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -16,7 +18,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
@@ -118,6 +119,7 @@ type MainMenu struct {
 	scriptEngine  *d2script.ScriptEngine
 	navigator     Navigator
 	uiManager     *d2ui.UIManager
+	heroState     *d2hero.HeroStateFactory
 
 	buildInfo BuildInfo
 }
@@ -131,8 +133,13 @@ func CreateMainMenu(
 	audioProvider d2interface.AudioProvider,
 	ui *d2ui.UIManager,
 	buildInfo BuildInfo,
-) *MainMenu {
-	return &MainMenu{
+) (*MainMenu, error) {
+	heroStateFactory, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
+	mainMenu := &MainMenu{
 		asset:          asset,
 		screenMode:     ScreenModeUnknown,
 		leftButtonHeld: true,
@@ -142,7 +149,10 @@ func CreateMainMenu(
 		navigator:      navigator,
 		buildInfo:      buildInfo,
 		uiManager:      ui,
+		heroState:      heroStateFactory,
 	}
+
+	return mainMenu, nil
 }
 
 // OnLoad is called to load the resources for the main menu
@@ -320,7 +330,7 @@ func (v *MainMenu) onMapTestClicked() {
 }
 
 func (v *MainMenu) onSinglePlayerClicked() {
-	if d2player.HasGameStates() {
+	if v.heroState.HasGameStates() {
 		// Go here only if existing characters are available to select
 		v.navigator.ToCharacterSelect(d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText())
 	} else {

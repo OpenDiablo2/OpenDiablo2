@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"image"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -15,7 +17,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 )
 
@@ -282,7 +283,7 @@ type SelectHeroClass struct {
 	heroNameLabel   *d2ui.Label
 	heroRenderInfo  map[d2enum.Hero]*HeroRenderInfo
 	*d2inventory.InventoryItemFactory
-	*d2player.PlayerStateFactory
+	*d2hero.HeroStateFactory
 	selectedHero       d2enum.Hero
 	exitButton         *d2ui.Button
 	okButton           *d2ui.Button
@@ -307,9 +308,16 @@ func CreateSelectHeroClass(
 	ui *d2ui.UIManager,
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	connectionHost string,
-) *SelectHeroClass {
-	playerStateFactory, _ := d2player.NewPlayerStateFactory(asset)
-	inventoryItemFactory, _ := d2inventory.NewInventoryItemFactory(asset)
+) (*SelectHeroClass, error) {
+	playerStateFactory, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
+	inventoryItemFactory, err := d2inventory.NewInventoryItemFactory(asset)
+	if err != nil {
+		return nil, err
+	}
 
 	result := &SelectHeroClass{
 		asset:                asset,
@@ -321,11 +329,11 @@ func CreateSelectHeroClass(
 		renderer:             renderer,
 		navigator:            navigator,
 		uiManager:            ui,
-		PlayerStateFactory:   playerStateFactory,
+		HeroStateFactory:     playerStateFactory,
 		InventoryItemFactory: inventoryItemFactory,
 	}
 
-	return result
+	return result, nil
 }
 
 // OnLoad loads the resources for the Select Hero Class screen
@@ -477,11 +485,20 @@ func (v *SelectHeroClass) onExitButtonClicked() {
 }
 
 func (v *SelectHeroClass) onOkButtonClicked() {
-	playerState := v.CreatePlayerState(
-		v.heroNameTextbox.GetText(),
-		v.selectedHero,
-		v.asset.Records.Character.Stats[v.selectedHero],
-	)
+
+	heroName := v.heroNameTextbox.GetText()
+	defaultStats := v.asset.Records.Character.Stats[v.selectedHero]
+	statsState := v.CreateHeroStatsState(v.selectedHero, defaultStats)
+
+	playerState, err := v.CreateHeroState(heroName, v.selectedHero, statsState)
+
+	if err := v.Save(playerState); err != nil {
+		fmt.Printf("failed to save game state!, err: %v\n", err)
+	}
+
+	if err != nil {
+		return
+	}
 
 	playerState.Equipment = v.InventoryItemFactory.DefaultHeroItems[v.selectedHero]
 	v.navigator.ToCreateGame(playerState.FilePath, d2clientconnectiontype.Local, v.connectionHost)

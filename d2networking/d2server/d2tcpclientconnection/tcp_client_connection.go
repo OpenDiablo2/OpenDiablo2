@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"net"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 )
 
 type TCPClientConnection struct {
 	id            string
 	tcpConnection net.Conn
-	playerState   *d2player.PlayerState
+	playerState   *d2hero.HeroState
 }
 
 func CreateTCPClientConnection(tcpConnection net.Conn, id string) *TCPClientConnection {
@@ -41,11 +41,11 @@ func (t *TCPClientConnection) SendPacketToClient(p d2netpacket.NetPacket) error 
 	return nil
 }
 
-func (t *TCPClientConnection) SetPlayerState(playerState *d2player.PlayerState) {
+func (t *TCPClientConnection) SetPlayerState(playerState *d2hero.HeroState) {
 	t.playerState = playerState
 }
 
-func (t *TCPClientConnection) GetPlayerState() *d2player.PlayerState {
+func (t *TCPClientConnection) GetPlayerState() *d2hero.HeroState {
 	return t.playerState
 }
 

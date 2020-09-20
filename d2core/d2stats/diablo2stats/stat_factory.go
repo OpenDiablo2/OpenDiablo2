@@ -30,7 +30,8 @@ func (f *StatFactory) NewStat(key string, values ...float64) d2stats.Stat {
 	}
 
 	stat := &diablo2Stat{
-		record: record,
+		factory: f,
+		record:  record,
 	}
 
 	stat.init(values...) // init stat values, value types, and value combination rules
@@ -121,13 +122,13 @@ func (f *StatFactory) stringerClassOnly(sv d2stats.StatValue) string {
 }
 
 func (f *StatFactory) stringerSkillName(sv d2stats.StatValue) string {
-	skillRecord := d2datadict.SkillDetails[sv.Int()]
+	skillRecord := f.asset.Records.Skill.Details[sv.Int()]
 	return skillRecord.Skill
 }
 
 func (f *StatFactory) stringerMonsterName(sv d2stats.StatValue) string {
 	for key := range d2datadict.MonStats {
-		if d2datadict.MonStats[key].ID == sv.Int() {
+		if f.asset.Records.Monster.Stats[key].ID == sv.Int() {
 			return d2datadict.MonStats[key].NameString
 		}
 	}

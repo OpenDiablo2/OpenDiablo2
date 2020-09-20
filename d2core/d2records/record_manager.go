@@ -382,3 +382,14 @@ func (r *RecordManager) SelectSoundByIndex(index int) *SoundDetailsRecord {
 
 	return nil
 }
+
+// GetSkillByName returns the skill record for the given Skill name.
+func (r *RecordManager) GetSkillByName(skillName string) *SkillRecord {
+	for idx := range r.Skill.Details {
+		if r.Skill.Details[idx].Skill == skillName {
+			return r.Skill.Details[idx]
+		}
+	}
+
+	return nil
+}

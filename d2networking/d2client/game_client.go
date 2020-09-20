@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -16,7 +18,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2localclient"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2remoteclient"
@@ -36,7 +37,7 @@ type GameClient struct {
 	connectionType   d2clientconnectiontype.ClientConnectionType // Type of connection (local or remote)
 	asset            *d2asset.AssetManager
 	scriptEngine     *d2script.ScriptEngine
-	GameState        *d2player.PlayerState          // local player state
+	GameState        *d2hero.HeroState              // local player state
 	MapEngine        *d2mapengine.MapEngine         // Map and entities
 	mapGen           *d2mapgen.MapGenerator         // map generator
 	PlayerID         string                         // ID of the local player
@@ -65,13 +66,17 @@ func Create(connectionType d2clientconnectiontype.ClientConnectionType,
 
 	switch connectionType {
 	case d2clientconnectiontype.LANClient:
-		result.clientConnection = d2remoteclient.Create()
+		result.clientConnection, err = d2remoteclient.Create(asset)
 	case d2clientconnectiontype.LANServer:
-		result.clientConnection = d2localclient.Create(asset, true)
+		result.clientConnection, err = d2localclient.Create(asset, true)
 	case d2clientconnectiontype.Local:
-		result.clientConnection = d2localclient.Create(asset, false)
+		result.clientConnection, err = d2localclient.Create(asset, false)
 	default:
-		return nil, fmt.Errorf("unknown client connection type specified: %d", connectionType)
+		err = fmt.Errorf("unknown client connection type specified: %d", connectionType)
+	}
+
+	if err != nil {
+		return nil, err
 	}
 
 	result.clientConnection.SetClientListener(result)
@@ -273,7 +278,7 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 
 	direction := player.Position.DirectionTo(*d2vector.NewVector(castX, castY))
 	player.SetDirection(direction)
-	skill := d2datadict.SkillDetails[playerCast.SkillID]
+	skill := g.asset.Records.Skill.Details[playerCast.SkillID]
 	missileRecord := d2datadict.GetMissileByName(skill.Cltmissile)
 
 	if missileRecord == nil {
@@ -297,7 +302,7 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 	})
 
 	player.StartCasting(func() {
-		// shoot the missile after the player finished casting 
+		// shoot the missile after the player finished casting
 		g.MapEngine.AddEntity(missile)
 	})
 

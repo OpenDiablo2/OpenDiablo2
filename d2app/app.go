@@ -247,9 +247,7 @@ func (a *App) loadDataDict() error {
 		{d2resource.CubeRecipes, d2datadict.LoadCubeRecipes},
 		{d2resource.SuperUniques, d2datadict.LoadSuperUniques},
 		{d2resource.Inventory, d2datadict.LoadInventory},
-		{d2resource.Skills, d2datadict.LoadSkills},
 		{d2resource.Properties, d2datadict.LoadProperties},
-		{d2resource.SkillDesc, d2datadict.LoadSkillDescriptions},
 		{d2resource.Sets, d2datadict.LoadSetRecords},
 		{d2resource.SetItems, d2datadict.LoadSetItems},
 		{d2resource.TreasureClass, d2datadict.LoadTreasureClassRecords},
@@ -659,16 +657,23 @@ func updateInitError(target d2interface.Surface) error {
 func (a *App) ToMainMenu() {
 	buildInfo := d2gamescreen.BuildInfo{Branch: a.gitBranch, Commit: a.gitCommit}
 
-	mainMenu := d2gamescreen.CreateMainMenu(a, a.asset, a.renderer, a.inputManager, a.audio, a.ui,
-		buildInfo)
+	mainMenu, err := d2gamescreen.CreateMainMenu(a, a.asset, a.renderer, a.inputManager, a.audio, a.ui, buildInfo)
+	if err != nil {
+		log.Print(err)
+		return
+	}
 
 	a.screen.SetNextScreen(mainMenu)
 }
 
 // ToSelectHero forces the game to transition to the Select Hero (create character) screen
 func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType, host string) {
-	selectHero := d2gamescreen.CreateSelectHeroClass(a, a.asset, a.renderer, a.audio, a.ui,
-		connType, host)
+	selectHero, err := d2gamescreen.CreateSelectHeroClass(a, a.asset, a.renderer, a.audio, a.ui, connType, host)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
 	a.screen.SetNextScreen(selectHero)
 }
 
@@ -695,9 +700,12 @@ func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnection
 
 // ToMapEngineTest forces the game to transition to the map engine test screen
 func (a *App) ToMapEngineTest(region, level int) {
-	met := d2gamescreen.CreateMapEngineTest(region, level, a.asset, a.terminal, a.renderer,
-		a.inputManager,
-		a.audio, a.screen)
+	met, err := d2gamescreen.CreateMapEngineTest(region, level, a.asset, a.terminal, a.renderer, a.inputManager, a.audio, a.screen)
+	if err != nil {
+		return
+		log.Print(err)
+	}
+
 	a.screen.SetNextScreen(met)
 }
 

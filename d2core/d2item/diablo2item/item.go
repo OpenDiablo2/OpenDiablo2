@@ -560,8 +560,8 @@ func (i *Item) generateUniqueProperties() []*Property {
 		paramInt := getNumericComponent(propInfo.Parameter)
 
 		if paramStr != "" {
-			for skillID := range d2datadict.SkillDetails {
-				if d2datadict.SkillDetails[skillID].Skill == paramStr {
+			for skillID := range i.factory.asset.Records.Skill.Details {
+				if i.factory.asset.Records.Skill.Details[skillID].Skill == paramStr {
 					paramInt = skillID
 				}
 			}
@@ -594,8 +594,8 @@ func (i *Item) generateSetItemProperties() []*Property {
 		paramInt := getNumericComponent(setProp.Parameter)
 
 		if paramStr != "" {
-			for skillID := range d2datadict.SkillDetails {
-				if d2datadict.SkillDetails[skillID].Skill == paramStr {
+			for skillID := range i.factory.asset.Records.Skill.Details {
+				if i.factory.asset.Records.Skill.Details[skillID].Skill == paramStr {
 					paramInt = skillID
 				}
 			}

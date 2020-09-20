@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 )
@@ -19,10 +19,10 @@ import (
 // d2server.ClientConnection interface to represent remote client from the
 // server perspective.
 type UDPClientConnection struct {
-	id            string                // ID of the associated RemoteClientConnection
-	address       *net.UDPAddr          // IP address of the associated RemoteClientConnection
-	udpConnection *net.UDPConn          // Server's UDP Connection
-	playerState   *d2player.PlayerState // Client's game state
+	id            string              // ID of the associated RemoteClientConnection
+	address       *net.UDPAddr        // IP address of the associated RemoteClientConnection
+	udpConnection *net.UDPConn        // Server's UDP Connection
+	playerState   *d2hero.PlayerState // Client's game state
 }
 
 // CreateUDPClientConnection constructs a new UDPClientConnection and
@@ -81,11 +81,11 @@ func (u *UDPClientConnection) SendPacketToClient(packet d2netpacket.NetPacket) e
 }
 
 // SetPlayerState sets UDP.playerState to the given value.
-func (u *UDPClientConnection) SetPlayerState(playerState *d2player.PlayerState) {
+func (u *UDPClientConnection) SetPlayerState(playerState *d2hero.PlayerState) {
 	u.playerState = playerState
 }
 
 // GetPlayerState returns UDPClientConnection.playerState.
-func (u *UDPClientConnection) GetPlayerState() *d2player.PlayerState {
+func (u *UDPClientConnection) GetPlayerState() *d2hero.PlayerState {
 	return u.playerState
 }
