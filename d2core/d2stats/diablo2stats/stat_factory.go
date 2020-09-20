@@ -3,7 +3,6 @@ package diablo2stats
 import (
 	"fmt"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -127,9 +126,9 @@ func (f *StatFactory) stringerSkillName(sv d2stats.StatValue) string {
 }
 
 func (f *StatFactory) stringerMonsterName(sv d2stats.StatValue) string {
-	for key := range d2datadict.MonStats {
+	for key := range f.asset.Records.Monster.Stats {
 		if f.asset.Records.Monster.Stats[key].ID == sv.Int() {
-			return d2datadict.MonStats[key].NameString
+			return f.asset.Records.Monster.Stats[key].NameString
 		}
 	}
 

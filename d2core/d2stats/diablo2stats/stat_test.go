@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
@@ -231,12 +232,12 @@ var itemStatCosts = map[string]*d2records.ItemStatCostRecord{
 	},
 }
 
-var skillDetails = map[int]*d2datadict.SkillRecord{
+var skillDetails = map[int]*d2records.SkillRecord{
 	37: {Skill: "Warmth"},
 	64: {Skill: "Frozen Orb"},
 }
 
-var monStats = map[string]*d2datadict.MonStatsRecord{
+var monStats = map[string]*d2records.MonStatsRecord{
 	"Specter": {NameString: "Specter", ID: 40},
 }
 
@@ -252,11 +253,24 @@ var charStats = map[d2enum.Hero]*d2records.CharStatsRecord{
 		},
 	},
 }
+var testAssetManager2 *d2asset.AssetManager
 
-var testFactory, _ = NewStatFactory(nil)
+var testStatFactory2 *StatFactory
+
+func TestSetup_Stat(t *testing.T) {
+	testAssetManager2 = &d2asset.AssetManager{}
+	testAssetManager2.Records = &d2records.RecordManager{}
+
+	testStatFactory2, _ = NewStatFactory(testAssetManager2)
+
+	testAssetManager2.Records.Item.Stats = itemStatCosts
+	testAssetManager2.Records.Character.Stats = charStats
+	testAssetManager2.Records.Skill.Details = skillDetails
+	testAssetManager2.Records.Monster.Stats = monStats
+}
 
 func TestStat_Clone(t *testing.T) {
-	s1 := testFactory.NewStat("strength", 5)
+	s1 := testStatFactory2.NewStat("strength", 5)
 	s2 := s1.Clone()
 
 	// make sure the stats are distinct
@@ -369,7 +383,7 @@ func TestStat_Descriptions(t *testing.T) {
 		key := test.recordKey
 		record := itemStatCosts[key]
 		expect := test.expect
-		stat := testFactory.NewStat(key, test.vals...)
+		stat := testStatFactory2.NewStat(key, test.vals...)
 
 		if got := stat.String(); got != expect {
 			t.Errorf(errFmt, errStr, record.DescFnID, test.recordKey, test.vals, expect, got)
@@ -382,8 +396,8 @@ func TestStat_Descriptions(t *testing.T) {
 }
 
 func TestDiablo2Stat_Combine(t *testing.T) {
-	a := testFactory.NewStat("item_nonclassskill", 25, 64) // "+25 to Frozen Orb"
-	b := testFactory.NewStat("item_nonclassskill", 5, 64)  // "+5 to Frozen Orb"
+	a := testStatFactory2.NewStat("item_nonclassskill", 25, 64) // "+25 to Frozen Orb"
+	b := testStatFactory2.NewStat("item_nonclassskill", 5, 64)  // "+5 to Frozen Orb"
 
 	c, err := a.Combine(b)
 
@@ -391,7 +405,7 @@ func TestDiablo2Stat_Combine(t *testing.T) {
 		t.Errorf("stats combination failed\r%s", err)
 	}
 
-	d := testFactory.NewStat("item_nonclassskill", 5, 37) // "+5 to Warmth"
+	d := testStatFactory2.NewStat("item_nonclassskill", 5, 37) // "+5 to Warmth"
 	_, err = c.Combine(d)
 
 	if err == nil {

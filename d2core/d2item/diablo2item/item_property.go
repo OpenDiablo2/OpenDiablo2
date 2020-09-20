@@ -3,7 +3,6 @@ package diablo2item
 import (
 	"math/rand"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 )
@@ -70,7 +69,7 @@ const (
 // Property is an item property.
 type Property struct {
 	factory      *ItemFactory
-	record       *d2datadict.PropertyRecord
+	record       *d2records.PropertyRecord
 	stats        []d2stats.Stat
 	PropertyType PropertyType
 
@@ -328,7 +327,7 @@ func (p *Property) fnBoolean() bool {
 
 // fnClassSkills Add to group of skills, group determined by stat ID, uses ValX parameter.
 func (p *Property) fnClassSkills(
-	propStatRecord *d2datadict.PropertyStatRecord,
+	propStatRecord *d2records.PropertyStatRecord,
 	iscRecord *d2records.ItemStatCostRecord,
 ) d2stats.Stat {
 	// in order 0..6

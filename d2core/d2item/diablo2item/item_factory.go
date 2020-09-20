@@ -159,7 +159,7 @@ func (f *ItemFactory) NewItem(codes ...string) (*Item, error) {
 
 // NewProperty creates a property
 func (f *ItemFactory) NewProperty(code string, values ...int) *Property {
-	record := d2datadict.Properties[code]
+	record := f.asset.Records.Properties[code]
 
 	if record == nil {
 		return nil
