@@ -225,7 +225,6 @@ func (a *App) loadDataDict() error {
 	}{
 		{d2resource.UniqueItems, d2datadict.LoadUniqueItems},
 		{d2resource.AnimationData, d2data.LoadAnimationData},
-		{d2resource.QualityItems, d2datadict.LoadQualityItems},
 		{d2resource.Runes, d2datadict.LoadRunewords},
 		{d2resource.SuperUniques, d2datadict.LoadSuperUniques},
 		{d2resource.Sets, d2datadict.LoadSetRecords},
