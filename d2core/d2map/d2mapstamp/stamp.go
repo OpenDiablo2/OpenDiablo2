@@ -20,6 +20,7 @@ const (
 
 // Stamp represents a pre-fabricated map stamp that can be placed on a map.
 type Stamp struct {
+	factory     *StampFactory
 	entity      *d2mapentity.MapEntityFactory
 	regionPath  string // The file path of the region
 	regionID    d2enum.RegionIdType
@@ -77,7 +78,8 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 
 	for _, object := range mr.ds1.Objects {
 		if object.Type == int(d2enum.ObjectTypeCharacter) {
-			monstat := d2datadict.MonStats[d2datadict.MonPresets[mr.ds1.Act][object.ID]]
+			monPreset := mr.factory.asset.Records.Monster.Presets[mr.ds1.Act][object.ID]
+			monstat := mr.factory.asset.Records.Monster.Stats[monPreset]
 			// If monstat is nil here it is a place_ type object, idk how to handle those yet.
 			// (See monpreset and monplace txts for reference)
 			if monstat != nil {

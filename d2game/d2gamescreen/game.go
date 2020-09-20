@@ -10,7 +10,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
@@ -142,7 +141,7 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 		func(name string) {
 			x := int(v.localPlayer.Position.X())
 			y := int(v.localPlayer.Position.Y())
-			monstat := d2datadict.MonStats[name]
+			monstat := v.asset.Records.Monster.Stats[name]
 			if monstat == nil {
 				v.terminal.OutputErrorf("no monstat entry for \"%s\"", name)
 				return

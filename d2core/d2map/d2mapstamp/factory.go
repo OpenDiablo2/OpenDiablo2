@@ -24,6 +24,7 @@ type StampFactory struct {
 // LoadStamp loads the Stamp data from file.
 func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fileIndex int) *Stamp {
 	stamp := &Stamp{
+		factory:     f,
 		entity:      f.entity,
 		regionID:    levelType,
 		levelType:   *f.asset.Records.Level.Types[levelType],

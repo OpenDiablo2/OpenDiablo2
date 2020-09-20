@@ -178,12 +178,12 @@ func (f *MapEntityFactory) NewItem(x, y int, codes ...string) (*Item, error) {
 }
 
 // NewNPC creates a new NPC and returns a pointer to it.
-func (f *MapEntityFactory) NewNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) (*NPC, error) {
+func (f *MapEntityFactory) NewNPC(x, y int, monstat *d2records.MonStatsRecord, direction int) (*NPC, error) {
 	result := &NPC{
 		mapEntity:     newMapEntity(x, y),
 		HasPaths:      false,
 		monstatRecord: monstat,
-		monstatEx:     d2datadict.MonStats2[monstat.ExtraDataKey],
+		monstatEx:     f.asset.Records.Monster.Stats2[monstat.ExtraDataKey],
 	}
 
 	var equipment [16]string
