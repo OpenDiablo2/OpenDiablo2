@@ -36,7 +36,6 @@ type Panel interface {
 }
 
 const (
-	attackSkillID            = 0
 	expBarWidth              = 120.0
 	staminaBarWidth          = 102.0
 	globeHeight              = 80
@@ -418,10 +417,6 @@ func (g *GameControls) Load() {
 
 	g.leftSkill = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
 	g.rightSkill = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills} 
-
-	//TODO: those should be saved
-	g.hero.LeftSkill = (*g.hero.Skills)[attackSkillID]
-	g.hero.RightSkill = (*g.hero.Skills)[attackSkillID] 
 
 	g.loadUIButtons()
 

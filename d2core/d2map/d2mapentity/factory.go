@@ -62,12 +62,16 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 	stats.NextLevelExp = d2datadict.GetExperienceBreakpoint(heroType, stats.Level)
 	stats.Stamina = stats.MaxStamina
 
+	attackSkillID := 0
 	result := &Player{
 		mapEntity: newMapEntity(x, y),
 		composite: composite,
 		Equipment: equipment,
 		Stats:     stats,
 		Skills:    skills,
+		//TODO: active left & right skill should be loaded from save file instead
+		LeftSkill: (*skills)[attackSkillID],
+		RightSkill:  (*skills)[attackSkillID],
 		name:      name,
 		Class:     heroType,
 		//nameLabel:    d2ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
