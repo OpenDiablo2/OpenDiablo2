@@ -158,7 +158,7 @@ func (h *Overlay) Load() {
 
 	// Close
 
-	h.closeButton = h.uiManager.NewButton(d2ui.ButtonTypeBuySell, "0") // Need buy/sell button frame 10
+	h.closeButton = h.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
 	h.closeButton.SetPosition(685, 25)
 	h.closeButton.SetVisible(false)
 	h.closeButton.OnActivated(func() { h.close() })

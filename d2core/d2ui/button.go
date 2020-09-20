@@ -39,7 +39,7 @@ const (
 	ButtonTypeMinipanelMessage   ButtonType = 17
 	ButtonTypeMinipanelQuest     ButtonType = 18
 	ButtonTypeMinipanelMen       ButtonType = 19
-	ButtonTypeBuySell            ButtonType = 20
+	ButtonTypeSquareClose        ButtonType = 20
 )
 
 const (
@@ -86,7 +86,7 @@ const (
 
 	buttonBuySellSegmentsX     = 1
 	buttonBuySellSegmentsY     = 1
-	buttonBuySellDisabledFrame = -1
+	buttonBuySellDisabledFrame = 1
 
 	buttonRunSegmentsX     = 1
 	buttonRunSegmentsY     = 1
@@ -153,7 +153,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			FontPath:         d2resource.FontRediculous,
 			AllowFrameChange: true,
 		},
-		ButtonTypeBuySell: {
+		ButtonTypeSquareClose: {
 			XSegments:        buttonBuySellSegmentsX,
 			YSegments:        buttonBuySellSegmentsY,
 			DisabledFrame:    buttonBuySellDisabledFrame,
@@ -266,6 +266,13 @@ func (v *Button) renderFrames(btnSprite *Sprite, btnLayout *ButtonLayout, label 
 
 			label.SetPosition(xOffset-pressedButtonOffset, textY+pressedButtonOffset)
 			label.Render(v.pressedSurface)
+		}
+
+		if btnLayout.ResourceName == d2resource.BuySellButton {
+			// Without returning early, the button UI gets all subsequent (unrelated) frames stacked on top
+			// Only 2 frames from this sprite are applicable to the button in question
+			// The presentation is incorrect without this hack
+			return
 		}
 
 		totalButtonTypes--
