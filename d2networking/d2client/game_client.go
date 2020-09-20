@@ -186,7 +186,7 @@ func (g *GameClient) handleAddPlayerPacket(packet d2netpacket.NetPacket) error {
 	}
 
 	newPlayer := g.MapEngine.NewPlayer(player.ID, player.Name, player.X, player.Y, 0,
-		player.HeroType, player.Stats, &player.Equipment)
+		player.HeroType, player.Stats, player.Skills, &player.Equipment)
 
 	g.Players[newPlayer.ID()] = newPlayer
 	g.MapEngine.AddEntity(newPlayer)
@@ -264,12 +264,19 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 
 	direction := player.Position.DirectionTo(*d2vector.NewVector(castX, castY))
 	player.SetDirection(direction)
+	skill := d2datadict.SkillDetails[playerCast.SkillID]
+	missileRecord := d2datadict.GetMissileByName(skill.Cltmissile)
 
-	// currently hardcoded to missile skill
+	if missileRecord == nil {
+		//TODO: handle casts that have no missiles(or have multiple missiles and require additional logic)
+		log.Println("Missile not found for skill ID", skill.ID)
+		return nil
+	}
+
 	missile, err := g.MapEngine.NewMissile(
 		int(player.Position.X()),
 		int(player.Position.Y()),
-		d2datadict.Missiles[playerCast.SkillID],
+		d2datadict.Missiles[missileRecord.Id],
 	)
 
 	if err != nil {
@@ -281,6 +288,7 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 	})
 
 	player.StartCasting(func() {
+		// shoot the missile after the player finished casting 
 		g.MapEngine.AddEntity(missile)
 	})
 

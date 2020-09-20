@@ -12,6 +12,8 @@ import (
 //nolint:gochecknoglobals // Currently global by design, only written once
 var SkillDetails map[int]*SkillRecord
 
+var skillDetailsByName map[string]*SkillRecord
+
 // SkillRecord is a row from the skills.txt file. Here are two resources for more info on each field
 // [https://d2mods.info/forum/viewtopic.php?t=41556, https://d2mods.info/forum/kb/viewarticle?a=246]
 type SkillRecord struct {
@@ -263,6 +265,7 @@ type SkillRecord struct {
 // LoadCharStats loads charstats.txt file contents into map[d2enum.Hero]*CharStatsRecord
 func LoadSkills(file []byte) {
 	SkillDetails = make(map[int]*SkillRecord)
+	skillDetailsByName = make(map[string]*SkillRecord)
 
 	parser := d2parser.New()
 
@@ -515,6 +518,7 @@ func LoadSkills(file []byte) {
 			CostAdd:           d.Number("cost add"),
 		}
 		SkillDetails[record.ID] = record
+		skillDetailsByName[record.Skill] = record
 	}
 
 	if d.Err != nil {
@@ -522,4 +526,9 @@ func LoadSkills(file []byte) {
 	}
 
 	log.Printf("Loaded %d Skill records", len(SkillDetails))
+}
+
+// GetSkillByName returns the skill record for the given Skill name.
+func GetSkillByName(skillName string) *SkillRecord {
+	return skillDetailsByName[skillName]
 }

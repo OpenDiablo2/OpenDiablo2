@@ -17,7 +17,7 @@ type SkillDescriptionRecord struct {
 	SkillColumn  string                    // SkillColumn
 	ListRow      string                    // ListRow
 	ListPool     string                    // ListPool
-	IconCel      string                    // IconCel
+	IconCel      int                       // IconCel
 	NameKey      string                    // str name
 	ShortKey     string                    // str short
 	LongKey      string                    // str long
@@ -146,7 +146,7 @@ func LoadSkillDescriptions(file []byte) { //nolint:funlen // doesn't make sense 
 			d.String("SkillColumn"),
 			d.String("ListRow"),
 			d.String("ListPool"),
-			d.String("IconCel"),
+			d.Number("IconCel"),
 			d.String("str name"),
 			d.String("str short"),
 			d.String("str long"),

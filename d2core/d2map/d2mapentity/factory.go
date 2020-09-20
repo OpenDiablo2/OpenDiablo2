@@ -41,7 +41,7 @@ func NewAnimatedEntity(x, y int, animation d2interface.Animation) *AnimatedEntit
 
 // NewPlayer creates a new player entity and returns a pointer to it.
 func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroType d2enum.Hero,
-	stats *d2hero.HeroStatsState, equipment *d2inventory.CharacterEquipment) *Player {
+	stats *d2hero.HeroStatsState, skills *d2hero.HeroSkillsState, equipment *d2inventory.CharacterEquipment) *Player {
 	layerEquipment := &[d2enum.CompositeTypeMax]string{
 		d2enum.CompositeTypeHead:      equipment.Head.GetArmorClass(),
 		d2enum.CompositeTypeTorso:     equipment.Torso.GetArmorClass(),
@@ -62,11 +62,16 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 	stats.NextLevelExp = d2datadict.GetExperienceBreakpoint(heroType, stats.Level)
 	stats.Stamina = stats.MaxStamina
 
+	attackSkillID := 0
 	result := &Player{
 		mapEntity: newMapEntity(x, y),
 		composite: composite,
 		Equipment: equipment,
 		Stats:     stats,
+		Skills:    skills,
+		//TODO: active left & right skill should be loaded from save file instead
+		LeftSkill: (*skills)[attackSkillID],
+		RightSkill:  (*skills)[attackSkillID],
 		name:      name,
 		Class:     heroType,
 		//nameLabel:    d2ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
