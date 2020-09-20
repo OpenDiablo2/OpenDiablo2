@@ -267,7 +267,6 @@ func (a *App) loadDataDict() error {
 		{d2resource.PlayerClass, d2datadict.LoadPlayerClasses},
 		{d2resource.MonsterPlacement, d2datadict.LoadMonsterPlacements},
 		{d2resource.ObjectGroup, d2datadict.LoadObjectGroups},
-		{d2resource.CompCode, d2datadict.LoadComponentCodes},
 		{d2resource.MonsterAI, d2datadict.LoadMonsterAI},
 		{d2resource.RarePrefix, d2datadict.LoadRareItemPrefixRecords},
 		{d2resource.RareSuffix, d2datadict.LoadRareItemSuffixRecords},
