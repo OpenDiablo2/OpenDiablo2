@@ -158,12 +158,7 @@ func (h *Overlay) Load() {
 
 	// Close
 
-	//close, _ := h.uiManager.NewSprite(d2resource.SquareButton, d2resource.PaletteSky)
-	//_ = close.SetCurrentFrame(0)
-	//close.SetPosition(685, 57)
-	//h.frames = append(h.frames, close)
-
-	h.closeButton = h.uiManager.NewButton(d2ui.ButtonTypeClose, "0")
+	h.closeButton = h.uiManager.NewButton(d2ui.ButtonTypeBuySell, "0") // Need buy/sell button frame 10
 	h.closeButton.SetPosition(685, 25)
 	h.closeButton.SetVisible(false)
 	h.closeButton.OnActivated(func() { h.close() })
@@ -171,11 +166,6 @@ func (h *Overlay) Load() {
 	newLabel = h.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
 	newLabel.SetText("Close")
 	newLabel.SetPosition(680, 60)
-	h.text = append(h.text, newLabel)
-
-	newLabel = h.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteSky)
-	newLabel.SetText("0")
-	newLabel.SetPosition(695, 32)
 	h.text = append(h.text, newLabel)
 
 	// Bullets
