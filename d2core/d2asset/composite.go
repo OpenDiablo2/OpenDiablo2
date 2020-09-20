@@ -295,16 +295,13 @@ func (c *Composite) loadCompositeLayer(layerKey, layerValue, animationMode, weap
 	}
 
 	for _, animationPath := range animationPaths {
-		exists, err := c.FileExists(animationPath)
 
-		if err == nil && exists {
+		if exists, err := c.FileExists(animationPath); exists && err == nil {
 			animation, err := c.LoadAnimationWithEffect(animationPath, palettePath, drawEffect)
 			if err == nil {
 				return animation, nil
 			}
-		}
-
-		if err != nil {
+		} else {
 			return nil, fmt.Errorf("animation path '%s' not found: %v", animationPath, err)
 		}
 	}

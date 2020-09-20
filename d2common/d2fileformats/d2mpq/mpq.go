@@ -180,7 +180,7 @@ func (v *MPQ) loadHashTable() error {
 	for i := range hashData {
 		_, err := v.file.Read(hash)
 		if err != nil {
-			return err
+			log.Print(err)
 		}
 
 		hashData[i] = binary.LittleEndian.Uint32(hash)
