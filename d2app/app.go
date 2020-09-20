@@ -233,7 +233,6 @@ func (a *App) loadDataDict() error {
 		{d2resource.MonPreset, d2datadict.LoadMonPresets},
 		{d2resource.MonProp, d2datadict.LoadMonProps},
 		{d2resource.MonType, d2datadict.LoadMonTypes},
-		{d2resource.MonMode, d2datadict.LoadMonModes},
 		{d2resource.Overlays, d2datadict.LoadOverlays},
 		{d2resource.QualityItems, d2datadict.LoadQualityItems},
 		{d2resource.Runes, d2datadict.LoadRunewords},
