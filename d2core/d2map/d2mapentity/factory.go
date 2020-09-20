@@ -164,8 +164,11 @@ func (f *MapEntityFactory) NewNPC(x, y int, monstat *d2datadict.MonStatsRecord, 
 		equipment[compType] = selectEquip(opts)
 	}
 
-	composite, _ := f.asset.LoadComposite(d2enum.ObjectTypeCharacter, monstat.AnimationDirectoryToken,
+	composite, err := f.asset.LoadComposite(d2enum.ObjectTypeCharacter, monstat.AnimationDirectoryToken,
 		d2resource.PaletteUnits)
+	if err != nil {
+		return nil, err
+	}
 	result.composite = composite
 
 	if err := composite.SetMode(d2enum.MonsterAnimationModeNeutral,
@@ -209,9 +212,15 @@ func (f *MapEntityFactory) NewObject(x, y int, objectRec *d2datadict.ObjectRecor
 
 	entity.composite = composite
 
-	entity.setMode(d2enum.ObjectAnimationModeNeutral, 0, false)
+	err = entity.setMode(d2enum.ObjectAnimationModeNeutral, 0, false)
+	if err != nil {
+		return nil, err
+	}
 
-	initObject(entity)
+	err = initObject(entity)
+	if err != nil {
+		return nil, err
+	}
 
 	return entity, nil
 }

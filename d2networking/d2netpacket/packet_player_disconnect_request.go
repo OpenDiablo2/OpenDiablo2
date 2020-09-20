@@ -2,6 +2,7 @@ package d2netpacket
 
 import (
 	"encoding/json"
+	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
@@ -20,7 +21,10 @@ func CreatePlayerDisconnectRequestPacket(id string) NetPacket {
 	playerDisconnectRequest := PlayerDisconnectRequestPacket{
 		ID: id,
 	}
-	b, _ := json.Marshal(playerDisconnectRequest)
+	b, err := json.Marshal(playerDisconnectRequest)
+	if err != nil {
+		log.Print(err)
+	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.PlayerDisconnectionNotification,

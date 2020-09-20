@@ -382,16 +382,35 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 // Load the resources required for the GameControls
 func (g *GameControls) Load() {
-	g.globeSprite, _ = g.uiManager.NewSprite(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
+	var err error
+	g.globeSprite, err = g.uiManager.NewSprite(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
 
-	g.hpManaStatusSprite, _ = g.uiManager.NewSprite(d2resource.HealthManaIndicator, d2resource.PaletteSky)
+	g.hpManaStatusSprite, err = g.uiManager.NewSprite(d2resource.HealthManaIndicator, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
 
-	g.mainPanel, _ = g.uiManager.NewSprite(d2resource.GamePanels, d2resource.PaletteSky)
+	g.mainPanel, err = g.uiManager.NewSprite(d2resource.GamePanels, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
 
-	g.menuButton, _ = g.uiManager.NewSprite(d2resource.MenuButton, d2resource.PaletteSky)
-	_ = g.menuButton.SetCurrentFrame(2)
+	g.menuButton, err = g.uiManager.NewSprite(d2resource.MenuButton, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
+	err = g.menuButton.SetCurrentFrame(2)
+	if err != nil {
+		log.Print(err)
+	}
 
-	g.skillIcon, _ = g.uiManager.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
+	g.skillIcon, err = g.uiManager.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
 
 	g.loadUIButtons()
 

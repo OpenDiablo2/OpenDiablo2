@@ -4,6 +4,7 @@ import (
 	"errors"
 	"image"
 	"image/color"
+	"log"
 	"math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -137,7 +138,10 @@ func (a *Animation) renderShadow(target d2interface.Surface) error {
 // Render renders the animation to the given surface
 func (a *Animation) Render(target d2interface.Surface) error {
 	if a.renderer == nil {
-		a.BindRenderer(target.Renderer())
+		err := a.BindRenderer(target.Renderer())
+		if err != nil {
+			return err
+		}
 	}
 
 	direction := a.directions[a.directionIndex]
@@ -168,7 +172,10 @@ func (a *Animation) BindRenderer(r d2interface.Renderer) error {
 // RenderFromOrigin renders the animation from the animation origin
 func (a *Animation) RenderFromOrigin(target d2interface.Surface, shadow bool) error {
 	if a.renderer == nil {
-		a.BindRenderer(target.Renderer())
+		err := a.BindRenderer(target.Renderer())
+		if err != nil {
+			return err
+		}
 	}
 
 	if a.originAtBottom {
@@ -195,7 +202,10 @@ func (a *Animation) RenderFromOrigin(target d2interface.Surface, shadow bool) er
 // RenderSection renders the section of the animation frame enclosed by bounds
 func (a *Animation) RenderSection(sfc d2interface.Surface, bound image.Rectangle) error {
 	if a.renderer == nil {
-		a.BindRenderer(sfc.Renderer())
+		err := a.BindRenderer(sfc.Renderer())
+		if err != nil {
+			return err
+		}
 	}
 
 	direction := a.directions[a.directionIndex]
@@ -224,7 +234,10 @@ func (a *Animation) GetFrameSize(frameIndex int) (width, height int, err error) 
 
 // GetCurrentFrameSize gets the Size(width, height) of the current frame.
 func (a *Animation) GetCurrentFrameSize() (width, height int) {
-	width, height, _ = a.GetFrameSize(a.frameIndex)
+	width, height, err := a.GetFrameSize(a.frameIndex)
+	if err != nil {
+		log.Print(err)
+	}
 	return width, height
 }
 
@@ -300,7 +313,10 @@ func (a *Animation) SetCurrentFrame(frameIndex int) error {
 
 // Rewind animation to beginning
 func (a *Animation) Rewind() {
-	_ = a.SetCurrentFrame(0)
+	err := a.SetCurrentFrame(0)
+	if err != nil {
+		log.Print(err)
+	}
 }
 
 // PlayForward plays animation forward

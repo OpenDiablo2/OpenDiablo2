@@ -2,6 +2,7 @@ package d2gui
 
 import (
 	"image/color"
+	"log"
 	"math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -163,7 +164,10 @@ func (m *GuiManager) ShowLoadScreen(progress float64) {
 	animation := m.loadingAnim
 	frameCount := animation.GetFrameCount()
 
-	_ = animation.SetCurrentFrame(int(float64(frameCount-1) * progress))
+	err := animation.SetCurrentFrame(int(float64(frameCount-1) * progress))
+	if err != nil {
+		log.Print(err)
+	}
 
 	m.loading = true
 }

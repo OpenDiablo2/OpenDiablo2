@@ -37,7 +37,10 @@ func UnmarshalNetPacket(packet []byte) (NetPacket, error) {
 
 // MarshalPacket is a quick helper function to Marshal very anything UNSAFELY, meaning the error is not checked before sending.
 func MarshalPacket(packet interface{}) []byte {
-	b, _ := json.Marshal(packet)
+	b, err := json.Marshal(packet)
+	if err != nil {
+		log.Print(err)
+	}
 
 	return b
 }

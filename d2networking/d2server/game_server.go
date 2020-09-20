@@ -391,7 +391,10 @@ func OnClientDisconnected(client ClientConnection) {
 func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) error {
 	switch packet.PacketType {
 	case d2netpackettype.MovePlayer:
-		movePacket, _ := d2netpacket.UnmarshalMovePlayer(packet.PacketData)
+		movePacket, err := d2netpacket.UnmarshalMovePlayer(packet.PacketData)
+		if err != nil {
+			return err
+		}
 		// TODO: This needs to be verified on the server (here) before sending to other clients....
 		// TODO: Hacky, this should be updated in realtime ----------------
 		// TODO: Verify player id

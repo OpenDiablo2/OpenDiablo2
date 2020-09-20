@@ -1,6 +1,7 @@
 package d2mapstamp
 
 import (
+	"log"
 	"math"
 	"math/rand"
 
@@ -38,7 +39,11 @@ func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fil
 				panic(err)
 			}
 
-			dt1, _ := d2dt1.LoadDT1(fileData)
+			dt1, err := d2dt1.LoadDT1(fileData)
+			if err != nil {
+				log.Print(err)
+				return nil
+			}
 
 			stamp.tiles = append(stamp.tiles, dt1.Tiles...)
 		}
@@ -68,7 +73,11 @@ func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fil
 		panic(err)
 	}
 
-	stamp.ds1, _ = d2ds1.LoadDS1(fileData)
+	stamp.ds1, err = d2ds1.LoadDS1(fileData)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
 	return stamp
 }

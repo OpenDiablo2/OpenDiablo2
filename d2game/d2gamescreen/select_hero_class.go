@@ -3,6 +3,7 @@ package d2gamescreen
 import (
 	"fmt"
 	"image"
+	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -757,6 +758,11 @@ func (v *SelectHeroClass) loadSprite(animationPath string, position image.Point,
 }
 
 func (v *SelectHeroClass) loadSoundEffect(sfx string) d2interface.SoundEffect {
-	result, _ := v.audioProvider.LoadSound(sfx, false, false)
+	result, err := v.audioProvider.LoadSound(sfx, false, false)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
+
 	return result
 }

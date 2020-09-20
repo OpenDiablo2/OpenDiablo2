@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"strconv"
@@ -30,16 +31,30 @@ type PlayerState struct {
 
 // HasGameStates returns true if the player has any previously saved game
 func HasGameStates() bool {
-	basePath, _ := getGameBaseSavePath()
-	files, _ := ioutil.ReadDir(basePath)
+	basePath, err := getGameBaseSavePath()
+	if err != nil {
+		log.Print(err)
+	}
+	files, err := ioutil.ReadDir(basePath)
+	if err != nil {
+		log.Print(err)
+	}
 
 	return len(files) > 0
 }
 
 // GetAllPlayerStates returns all player saves
 func GetAllPlayerStates() []*PlayerState {
-	basePath, _ := getGameBaseSavePath()
-	files, _ := ioutil.ReadDir(basePath)
+	basePath, err := getGameBaseSavePath()
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
+	files, err := ioutil.ReadDir(basePath)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 	result := make([]*PlayerState, 0)
 
 	for _, file := range files {
@@ -121,7 +136,10 @@ func getGameBaseSavePath() (string, error) {
 
 func getFirstFreeFileName() string {
 	i := 0
-	basePath, _ := getGameBaseSavePath()
+	basePath, err := getGameBaseSavePath()
+	if err != nil {
+		log.Print(err)
+	}
 
 	for {
 		filePath := path.Join(basePath, strconv.Itoa(i)+".od2")
@@ -141,7 +159,11 @@ func (v *PlayerState) Save() error {
 		return err
 	}
 
-	fileJSON, _ := json.MarshalIndent(v, "", "   ")
+	fileJSON, err := json.MarshalIndent(v, "", "   ")
+	if err != nil {
+		return err
+	}
+
 	if err := ioutil.WriteFile(v.FilePath, fileJSON, 0644); err != nil {
 		return err
 	}

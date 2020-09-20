@@ -2,6 +2,7 @@ package d2netpacket
 
 import (
 	"encoding/json"
+	"log"
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
@@ -19,7 +20,10 @@ func CreatePingPacket() NetPacket {
 	ping := PingPacket{
 		TS: time.Now(),
 	}
-	b, _ := json.Marshal(ping)
+	b, err := json.Marshal(ping)
+	if err != nil {
+		log.Print(err)
+	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.Ping,

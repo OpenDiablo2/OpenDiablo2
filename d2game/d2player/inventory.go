@@ -3,6 +3,7 @@ package d2player
 import (
 	"fmt"
 	"image/color"
+	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -71,9 +72,16 @@ func (g *Inventory) Close() {
 
 // Load the resources required by the inventory
 func (g *Inventory) Load() {
-	g.frame, _ = g.uiManager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
+	var err error
+	g.frame, err = g.uiManager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
 
-	g.panel, _ = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
+	g.panel, err = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
 	items := []InventoryItem{
 		diablo2item.NewItem("kit", "Crimson", "of the Bat", "of Frost").Identify(),
 		diablo2item.NewItem("rin", "Steel", "of Shock").Identify(),

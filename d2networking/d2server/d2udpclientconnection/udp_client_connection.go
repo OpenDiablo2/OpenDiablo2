@@ -6,6 +6,7 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
@@ -60,7 +61,10 @@ func (u *UDPClientConnection) SendPacketToClient(packet d2netpacket.NetPacket) e
 
 	buff.WriteByte(byte(packet.PacketType))
 
-	writer, _ := gzip.NewWriterLevel(&buff, gzip.BestCompression)
+	writer, err := gzip.NewWriterLevel(&buff, gzip.BestCompression)
+	if err != nil {
+		log.Print(err)
+	}
 
 	if written, writeErr := writer.Write(data); writeErr != nil {
 		return writeErr

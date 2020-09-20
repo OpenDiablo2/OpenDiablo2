@@ -2,6 +2,7 @@ package d2netpacket
 
 import (
 	"encoding/json"
+	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
@@ -21,7 +22,10 @@ func CreateSpawnItemPacket(x, y int, codes ...string) NetPacket {
 		Y:     y,
 		Codes: codes,
 	}
-	b, _ := json.Marshal(spawnItemPacket)
+	b, err := json.Marshal(spawnItemPacket)
+	if err != nil {
+		log.Print(err)
+	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.SpawnItem,

@@ -84,7 +84,10 @@ func (m *MapEngine) addDT1(fileName string) {
 		return
 	}
 
-	dt1, _ := d2dt1.LoadDT1(fileData)
+	dt1, err := d2dt1.LoadDT1(fileData)
+	if err != nil {
+		log.Print(err)
+	}
 	m.dt1TileData = append(m.dt1TileData, dt1.Tiles...)
 	m.dt1Files = append(m.dt1Files, fileName)
 }
@@ -102,7 +105,10 @@ func (m *MapEngine) AddDS1(fileName string) {
 		panic(err)
 	}
 
-	ds1, _ := d2ds1.LoadDS1(fileData)
+	ds1, err := d2ds1.LoadDS1(fileData)
+	if err != nil {
+		log.Print(err)
+	}
 
 	for idx := range ds1.Files {
 		dt1File := ds1.Files[idx]

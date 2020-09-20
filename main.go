@@ -52,7 +52,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	asset.BindTerminalCommands(term)
+	err = asset.BindTerminalCommands(term)
+	if err != nil {
+		return err
+	}
 
 	scriptEngine := d2script.CreateScriptEngine()
 
