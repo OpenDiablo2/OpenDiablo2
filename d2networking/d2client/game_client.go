@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
@@ -14,7 +16,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2localclient"
@@ -37,6 +38,7 @@ type GameClient struct {
 	scriptEngine     *d2script.ScriptEngine
 	GameState        *d2player.PlayerState          // local player state
 	MapEngine        *d2mapengine.MapEngine         // Map and entities
+	mapGen           *d2mapgen.MapGenerator         // map generator
 	PlayerID         string                         // ID of the local player
 	Players          map[string]*d2mapentity.Player // IDs of the other players
 	Seed             int64                          // Map seed
@@ -53,6 +55,13 @@ func Create(connectionType d2clientconnectiontype.ClientConnectionType,
 		connectionType: connectionType,
 		scriptEngine:   scriptEngine,
 	}
+
+	mapGen, err := d2mapgen.NewMapGenerator(asset, result.MapEngine)
+	if err != nil {
+		return nil, err
+	}
+
+	result.mapGen = mapGen
 
 	switch connectionType {
 	case d2clientconnectiontype.LANClient:
@@ -157,7 +166,7 @@ func (g *GameClient) handleGenerateMapPacket(packet d2netpacket.NetPacket) error
 	}
 
 	if mapData.RegionType == d2enum.RegionAct1Town {
-		d2mapgen.GenerateAct1Overworld(g.MapEngine)
+		g.mapGen.GenerateAct1Overworld()
 	}
 
 	g.RegenMap = true

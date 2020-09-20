@@ -11,6 +11,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2path"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 )
 
 const (
@@ -22,10 +23,10 @@ type Stamp struct {
 	entity      *d2mapentity.MapEntityFactory
 	regionPath  string // The file path of the region
 	regionID    d2enum.RegionIdType
-	levelType   d2datadict.LevelTypeRecord   // The level type id for this stamp
-	levelPreset d2datadict.LevelPresetRecord // The level preset id for this stamp
-	tiles       []d2dt1.Tile                 // The tiles contained on this stamp
-	ds1         *d2ds1.DS1                   // The backing DS1 file for this stamp
+	levelType   d2records.LevelTypeRecord   // The level type id for this stamp
+	levelPreset d2records.LevelPresetRecord // The level preset id for this stamp
+	tiles       []d2dt1.Tile                // The tiles contained on this stamp
+	ds1         *d2ds1.DS1                  // The backing DS1 file for this stamp
 }
 
 // Size returns the size of the stamp in tiles.
@@ -34,12 +35,12 @@ func (mr *Stamp) Size() d2geom.Size {
 }
 
 // LevelPreset returns the level preset ID.
-func (mr *Stamp) LevelPreset() d2datadict.LevelPresetRecord {
+func (mr *Stamp) LevelPreset() d2records.LevelPresetRecord {
 	return mr.levelPreset
 }
 
 // LevelType returns the level type ID.
-func (mr *Stamp) LevelType() d2datadict.LevelTypeRecord {
+func (mr *Stamp) LevelType() d2records.LevelTypeRecord {
 	return mr.levelType
 }
 

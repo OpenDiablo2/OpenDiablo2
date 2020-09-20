@@ -87,6 +87,7 @@ type MapEngineTest struct {
 	asset         *d2asset.AssetManager
 	gameState     *d2player.PlayerState
 	mapEngine     *d2mapengine.MapEngine
+	mapGen        *d2mapgen.MapGenerator
 	mapRenderer   *d2maprenderer.MapRenderer
 	terminal      d2interface.Terminal
 	renderer      d2interface.Renderer
@@ -167,9 +168,12 @@ func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 		met.levelPreset = levelPreset
 	}
 
+	mapGen, _ := d2mapgen.NewMapGenerator(met.asset, met.mapEngine)
+	met.mapGen = mapGen
+
 	if n == 0 {
 		met.mapEngine.SetSeed(time.Now().UnixNano())
-		d2mapgen.GenerateAct1Overworld(met.mapEngine)
+		met.mapGen.GenerateAct1Overworld()
 	} else {
 		met.mapEngine = d2mapengine.CreateMapEngine(met.asset) // necessary for map name update
 		met.mapEngine.SetSeed(time.Now().UnixNano())

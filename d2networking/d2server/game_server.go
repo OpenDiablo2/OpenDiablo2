@@ -86,7 +86,13 @@ func NewGameServer(asset *d2asset.AssetManager, networkServer bool,
 	mapEngine := d2mapengine.CreateMapEngine(asset)
 	mapEngine.SetSeed(gameServer.seed)
 	mapEngine.ResetMap(d2enum.RegionAct1Town, 100, 100) // TODO: Mapgen - Needs levels.txt stuff
-	d2mapgen.GenerateAct1Overworld(mapEngine)
+
+	mapGen, err := d2mapgen.NewMapGenerator(asset, mapEngine)
+	if err != nil {
+		return nil, err
+	}
+
+	mapGen.GenerateAct1Overworld()
 
 	gameServer.mapEngines = append(gameServer.mapEngines, mapEngine)
 

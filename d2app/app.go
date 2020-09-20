@@ -223,9 +223,6 @@ func (a *App) loadDataDict() error {
 		path   string
 		loader func(data []byte)
 	}{
-		{d2resource.LevelType, d2datadict.LoadLevelTypes},
-		{d2resource.LevelPreset, d2datadict.LoadLevelPresets},
-		{d2resource.LevelWarp, d2datadict.LoadLevelWarps},
 		{d2resource.ObjectType, d2datadict.LoadObjectTypes},
 		{d2resource.ObjectDetails, d2datadict.LoadObjects},
 		{d2resource.UniqueItems, d2datadict.LoadUniqueItems},
@@ -249,9 +246,6 @@ func (a *App) loadDataDict() error {
 		{d2resource.QualityItems, d2datadict.LoadQualityItems},
 		{d2resource.Runes, d2datadict.LoadRunewords},
 		{d2resource.DifficultyLevels, d2datadict.LoadDifficultyLevels},
-		{d2resource.LevelDetails, d2datadict.LoadLevelDetails},
-		{d2resource.LevelMaze, d2datadict.LoadLevelMazeDetails},
-		{d2resource.LevelSubstitutions, d2datadict.LoadLevelSubstitutions},
 		{d2resource.CubeRecipes, d2datadict.LoadCubeRecipes},
 		{d2resource.SuperUniques, d2datadict.LoadSuperUniques},
 		{d2resource.Inventory, d2datadict.LoadInventory},

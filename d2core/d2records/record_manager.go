@@ -274,6 +274,17 @@ func (r *RecordManager) GetExperienceBreakpoint(heroType d2enum.Hero, level int)
 	return r.Character.Experience[level].HeroBreakpoints[heroType]
 }
 
+// GetLevelDetails gets a LevelDetailsRecord by the record Id
+func (r *RecordManager) GetLevelDetails(id int) *LevelDetailsRecord {
+	for i := 0; i < len(r.Level.Details); i++ {
+		if r.Level.Details[i].ID == id {
+			return r.Level.Details[i]
+		}
+	}
+
+	return nil
+}
+
 // LevelPreset looks up a LevelPresetRecord by ID
 func (r *RecordManager) LevelPreset(id int) LevelPresetRecord {
 	for i := 0; i < len(r.Level.Presets); i++ {
