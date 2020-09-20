@@ -13,7 +13,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
@@ -279,7 +278,7 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 	direction := player.Position.DirectionTo(*d2vector.NewVector(castX, castY))
 	player.SetDirection(direction)
 	skill := g.asset.Records.Skill.Details[playerCast.SkillID]
-	missileRecord := d2datadict.GetMissileByName(skill.Cltmissile)
+	missileRecord := g.asset.Records.GetMissileByName(skill.Cltmissile)
 
 	if missileRecord == nil {
 		//TODO: handle casts that have no missiles(or have multiple missiles and require additional logic)
@@ -290,7 +289,7 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 	missile, err := g.MapEngine.NewMissile(
 		int(player.Position.X()),
 		int(player.Position.Y()),
-		d2datadict.Missiles[missileRecord.Id],
+		missileRecord,
 	)
 
 	if err != nil {

@@ -2,6 +2,7 @@ package d2records
 
 import (
 	"log"
+	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 
@@ -10,6 +11,7 @@ import (
 
 func missilesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	records := make(Missiles)
+	r.missilesByName = make(missilesByName)
 
 	for d.Next() {
 		record := &MissileRecord{
@@ -295,6 +297,7 @@ func missilesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		}
 
 		records[record.Id] = record
+		r.missilesByName[sanitizeMissilesKey(record.Name)] = record
 	}
 
 	if d.Err != nil {
@@ -306,4 +309,8 @@ func missilesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	r.Missiles = records
 
 	return nil
+}
+
+func sanitizeMissilesKey(missileName string) string {
+	return strings.ToLower(strings.ReplaceAll(missileName, " ", ""))
 }

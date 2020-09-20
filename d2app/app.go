@@ -226,7 +226,6 @@ func (a *App) loadDataDict() error {
 		{d2resource.ObjectType, d2datadict.LoadObjectTypes},
 		{d2resource.ObjectDetails, d2datadict.LoadObjects},
 		{d2resource.UniqueItems, d2datadict.LoadUniqueItems},
-		{d2resource.Missiles, d2datadict.LoadMissiles},
 		{d2resource.SoundSettings, d2datadict.LoadSounds},
 		{d2resource.AnimationData, d2data.LoadAnimationData},
 		{d2resource.MonStats, d2datadict.LoadMonStats},

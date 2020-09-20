@@ -3,6 +3,8 @@ package d2mapentity
 import (
 	"fmt"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
+
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
@@ -120,7 +122,7 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 }
 
 // NewMissile creates a new Missile and initializes it's animation.
-func (f *MapEntityFactory) NewMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error) {
+func (f *MapEntityFactory) NewMissile(x, y int, record *d2records.MissileRecord) (*Missile, error) {
 	animation, err := f.asset.LoadAnimation(
 		fmt.Sprintf("%s/%s.dcc", d2resource.MissileData, record.Animation.CelFileName),
 		d2resource.PaletteUnits,

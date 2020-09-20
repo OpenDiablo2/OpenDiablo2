@@ -91,6 +91,7 @@ type RecordManager struct {
 		Warp    LevelWarps
 	}
 	Missiles
+	missilesByName
 	Monster struct {
 		AI         MonsterAI
 		Equipment  MonsterEquipment
@@ -392,4 +393,9 @@ func (r *RecordManager) GetSkillByName(skillName string) *SkillRecord {
 	}
 
 	return nil
+}
+
+// GetMissileByName allows lookup of a MissileRecord by a given name. The name will be lowercased and stripped of whitespaces.
+func (r *RecordManager) GetMissileByName(missileName string) *MissileRecord {
+	return r.missilesByName[sanitizeMissilesKey(missileName)]
 }

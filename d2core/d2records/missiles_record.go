@@ -5,6 +5,8 @@ import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2calculation"
 // Missiles stores all of the MissileRecords
 type Missiles map[int]*MissileRecord
 
+type missilesByName map[string]*MissileRecord
+
 // MissileCalcParam is a calculation parameter for a missile
 type MissileCalcParam struct {
 	Param int
