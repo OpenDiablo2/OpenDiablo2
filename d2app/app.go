@@ -250,7 +250,6 @@ func (a *App) loadDataDict() error {
 		{d2resource.QualityItems, d2datadict.LoadQualityItems},
 		{d2resource.Runes, d2datadict.LoadRunewords},
 		{d2resource.DifficultyLevels, d2datadict.LoadDifficultyLevels},
-		{d2resource.AutoMap, d2datadict.LoadAutoMaps},
 		{d2resource.LevelDetails, d2datadict.LoadLevelDetails},
 		{d2resource.LevelMaze, d2datadict.LoadLevelMazeDetails},
 		{d2resource.LevelSubstitutions, d2datadict.LoadLevelSubstitutions},
