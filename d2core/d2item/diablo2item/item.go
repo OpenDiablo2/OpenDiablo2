@@ -8,7 +8,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2item"
@@ -303,7 +302,7 @@ func (i *Item) sanitizeDropModifier(modifier DropModifier) DropModifier {
 }
 
 func (i *Item) pickUniqueRecord() {
-	matches := findMatchingUniqueRecords(i.CommonRecord())
+	matches := i.findMatchingUniqueRecords(i.CommonRecord())
 	if len(matches) > 0 {
 		match := matches[i.rand.Intn(len(matches))]
 		i.UniqueCode = match.Code
@@ -714,13 +713,13 @@ func (i *Item) GetStatStrings() []string {
 	return result
 }
 
-func findMatchingUniqueRecords(icr *d2records.ItemCommonRecord) []*d2datadict.UniqueItemRecord {
-	result := make([]*d2datadict.UniqueItemRecord, 0)
+func (i *Item) findMatchingUniqueRecords(icr *d2records.ItemCommonRecord) []*d2records.UniqueItemRecord {
+	result := make([]*d2records.UniqueItemRecord, 0)
 
 	c1, c2, c3, c4 := icr.Code, icr.NormalCode, icr.UberCode, icr.UltraCode
 
-	for uCode := range d2datadict.UniqueItems {
-		uRec := d2datadict.UniqueItems[uCode]
+	for uCode := range i.factory.asset.Records.Item.Unique {
+		uRec := i.factory.asset.Records.Item.Unique[uCode]
 
 		switch uCode {
 		case c1, c2, c3, c4:

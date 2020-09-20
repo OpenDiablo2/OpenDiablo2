@@ -223,7 +223,6 @@ func (a *App) loadDataDict() error {
 		path   string
 		loader func(data []byte)
 	}{
-		{d2resource.UniqueItems, d2datadict.LoadUniqueItems},
 		{d2resource.AnimationData, d2data.LoadAnimationData},
 		{d2resource.SuperUniques, d2datadict.LoadSuperUniques},
 		{d2resource.TreasureClass, d2datadict.LoadTreasureClassRecords},

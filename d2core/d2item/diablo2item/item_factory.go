@@ -99,7 +99,7 @@ func (f *ItemFactory) NewItem(codes ...string) (*Item, error) {
 			continue
 		}
 
-		if found := d2datadict.UniqueItems[code]; found != nil {
+		if found := f.asset.Records.Item.Unique[code]; found != nil {
 			unique = code
 			continue
 		}
