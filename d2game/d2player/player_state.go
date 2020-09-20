@@ -17,16 +17,17 @@ import (
 
 // PlayerState stores the state of the player
 type PlayerState struct {
-	HeroName  string                         `json:"heroName"`
-	HeroType  d2enum.Hero                    `json:"heroType"`
-	HeroLevel int                            `json:"heroLevel"`
-	Act       int                            `json:"act"`
-	FilePath  string                         `json:"-"`
-	Equipment d2inventory.CharacterEquipment `json:"equipment"`
-	Stats     *d2hero.HeroStatsState         `json:"stats"`
-	Skills    *d2hero.HeroSkillsState        `json:"skills"`
-	X         float64                        `json:"x"`
-	Y         float64                        `json:"y"`
+	heroStateFactory *d2hero.HeroStateFactory
+	HeroName         string                         `json:"heroName"`
+	HeroType         d2enum.Hero                    `json:"heroType"`
+	HeroLevel        int                            `json:"heroLevel"`
+	Act              int                            `json:"act"`
+	FilePath         string                         `json:"-"`
+	Equipment        d2inventory.CharacterEquipment `json:"equipment"`
+	Stats            *d2hero.HeroStatsState         `json:"stats"`
+	Skills           *d2hero.HeroSkillsState        `json:"skills"`
+	X                float64                        `json:"x"`
+	Y                float64                        `json:"y"`
 }
 
 // HasGameStates returns true if the player has any previously saved game
@@ -51,14 +52,13 @@ func (f *PlayerStateFactory) GetAllPlayerStates() []*PlayerState {
 
 		gameState := LoadPlayerState(path.Join(basePath, file.Name()))
 		if gameState == nil || gameState.HeroType == d2enum.HeroNone {
-			continue
+
 		} else if gameState.Stats == nil || gameState.Skills == nil {
 			// temporarily loading default class stats if the character was created before saving stats/skills was introduced
 			// to be removed in the future
 			classStats := d2datadict.CharStats[gameState.HeroType]
 			gameState.Stats = f.CreateHeroStatsState(gameState.HeroType, classStats)
 			gameState.Skills = f.CreateHeroSkillsState(classStats)
-
 			if err := gameState.Save(); err != nil {
 				fmt.Printf("failed to save game state!, err: %v\n", err)
 			}

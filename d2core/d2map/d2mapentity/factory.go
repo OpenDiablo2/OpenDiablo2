@@ -3,13 +3,13 @@ package d2mapentity
 import (
 	"fmt"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
@@ -24,7 +24,13 @@ func NewMapEntityFactory(asset *d2asset.AssetManager) (*MapEntityFactory, error)
 		return nil, err
 	}
 
+	stateFactory, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
 	entityFactory := &MapEntityFactory{
+		stateFactory,
 		asset,
 		itemFactory,
 	}
@@ -34,6 +40,7 @@ func NewMapEntityFactory(asset *d2asset.AssetManager) (*MapEntityFactory, error)
 
 // MapEntityFactory creates map entities for the MapEngine
 type MapEntityFactory struct {
+	*d2hero.HeroStateFactory
 	asset *d2asset.AssetManager
 	item  *diablo2item.ItemFactory
 }
@@ -69,7 +76,7 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 		panic(err)
 	}
 
-	stats.NextLevelExp = d2datadict.GetExperienceBreakpoint(heroType, stats.Level)
+	stats.NextLevelExp = f.asset.Records.GetExperienceBreakpoint(heroType, stats.Level)
 	stats.Stamina = stats.MaxStamina
 
 	attackSkillID := 0
@@ -80,10 +87,10 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 		Stats:     stats,
 		Skills:    skills,
 		//TODO: active left & right skill should be loaded from save file instead
-		LeftSkill: (*skills)[attackSkillID],
-		RightSkill:  (*skills)[attackSkillID],
-		name:      name,
-		Class:     heroType,
+		LeftSkill:  (*skills)[attackSkillID],
+		RightSkill: (*skills)[attackSkillID],
+		name:       name,
+		Class:      heroType,
 		//nameLabel:    d2ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
 		isRunToggled: true,
 		isInTown:     true,
@@ -224,9 +231,9 @@ func (f *MapEntityFactory) NewObject(x, y int, objectRec *d2datadict.ObjectRecor
 
 	entity.composite = composite
 
-	entity.setMode(d2enum.ObjectAnimationModeNeutral, 0, false)
+	_ = entity.setMode(d2enum.ObjectAnimationModeNeutral, 0, false)
 
-	initObject(entity)
+	_, _ = initObject(entity)
 
 	return entity, nil
 }

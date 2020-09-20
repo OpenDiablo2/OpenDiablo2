@@ -246,7 +246,6 @@ func (a *App) loadDataDict() error {
 		{d2resource.Overlays, d2datadict.LoadOverlays},
 		{d2resource.CharStats, d2datadict.LoadCharStats},
 		{d2resource.Hireling, d2datadict.LoadHireling},
-		{d2resource.Experience, d2datadict.LoadExperienceBreakpoints},
 		{d2resource.Gems, d2datadict.LoadGems},
 		{d2resource.QualityItems, d2datadict.LoadQualityItems},
 		{d2resource.Runes, d2datadict.LoadRunewords},

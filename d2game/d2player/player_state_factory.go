@@ -18,9 +18,15 @@ func NewPlayerStateFactory(asset *d2asset.AssetManager) (*PlayerStateFactory, er
 		return nil, err
 	}
 
+	heroState, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
 	factory := &PlayerStateFactory{
 		asset:                asset,
 		InventoryItemFactory: inventoryItemFactory,
+		HeroStateFactory:     heroState,
 	}
 
 	return factory, nil
