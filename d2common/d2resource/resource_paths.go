@@ -168,7 +168,7 @@ const (
 	RunButton      = "/data/global/ui/PANEL/runbutton.dc6"
 	MenuButton     = "/data/global/ui/PANEL/menubutton.DC6"
 	GoldCoinButton = "/data/global/ui/panel/goldcoinbtn.dc6"
-	SquareButton   = "/data/global/ui/panel/buysellbtn.dc6"
+	BuySellButton  = "/data/global/ui/panel/buysellbtn.dc6"
 
 	ArmorPlaceholder      = "/data/global/ui/PANEL/inv_armor.DC6"
 	BeltPlaceholder       = "/data/global/ui/PANEL/inv_belt.DC6"
