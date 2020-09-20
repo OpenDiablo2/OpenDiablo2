@@ -658,10 +658,16 @@ func (i *Item) generateName() {
 	if numAffixes >= 3 {
 		i.rand.Seed(i.Seed)
 
-		numPrefix, numSuffix := len(d2datadict.RarePrefixes), len(d2datadict.RareSuffixes)
+		prefixes := i.factory.asset.Records.Item.Rare.Prefix
+		suffixes := i.factory.asset.Records.Item.Rare.Suffix
+
+		numPrefix := len(prefixes)
+		numSuffix := len(suffixes)
+
 		preIdx, sufIdx := i.rand.Intn(numPrefix), i.rand.Intn(numSuffix)
-		prefix := d2datadict.RarePrefixes[preIdx].Name
-		suffix := d2datadict.RareSuffixes[sufIdx].Name
+		prefix := prefixes[preIdx].Name
+		suffix := suffixes[sufIdx].Name
+
 		name = fmt.Sprintf("%s %s\n%s", strings.Title(prefix), strings.Title(suffix), name)
 	}
 

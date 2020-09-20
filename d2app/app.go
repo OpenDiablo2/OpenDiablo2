@@ -233,8 +233,6 @@ func (a *App) loadDataDict() error {
 		{d2resource.States, d2datadict.LoadStates},
 		{d2resource.Shrines, d2datadict.LoadShrines},
 		{d2resource.UniqueAppellation, d2datadict.LoadUniqueAppellations},
-		{d2resource.RarePrefix, d2datadict.LoadRareItemPrefixRecords},
-		{d2resource.RareSuffix, d2datadict.LoadRareItemSuffixRecords},
 	}
 
 	for _, entry := range entries {
