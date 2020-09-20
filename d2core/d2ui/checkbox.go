@@ -1,6 +1,8 @@
 package d2ui
 
 import (
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -23,6 +25,7 @@ type Checkbox struct {
 
 // NewCheckbox creates a new instance of a checkbox
 func (ui *UIManager) NewCheckbox(checkState bool) *Checkbox {
+	var err error
 	result := &Checkbox{
 		checkState: checkState,
 		visible:    true,
@@ -31,17 +34,42 @@ func (ui *UIManager) NewCheckbox(checkState bool) *Checkbox {
 		enabled:    true,
 	}
 
-	checkboxSprite, _ := ui.NewSprite(d2resource.Checkbox, d2resource.PaletteFechar)
-	result.width, result.height, _ = checkboxSprite.GetFrameSize(0)
+	checkboxSprite, err := ui.NewSprite(d2resource.Checkbox, d2resource.PaletteFechar)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
+
+	result.width, result.height, err = checkboxSprite.GetFrameSize(0)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 	checkboxSprite.SetPosition(0, 0)
 
-	result.Image, _ = ui.renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
+	result.Image, err = ui.renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
-	_ = checkboxSprite.RenderSegmented(result.Image, 1, 1, 0)
+	err = checkboxSprite.RenderSegmented(result.Image, 1, 1, 0)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
-	result.checkedImage, _ = ui.renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
+	result.checkedImage, err = ui.renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
-	_ = checkboxSprite.RenderSegmented(result.checkedImage, 1, 1, 1)
+	err = checkboxSprite.RenderSegmented(result.checkedImage, 1, 1, 1)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
 	ui.addWidget(result)
 
@@ -55,6 +83,7 @@ func (v *Checkbox) bindManager(manager *UIManager) {
 
 // Render renders the checkbox
 func (v *Checkbox) Render(target d2interface.Surface) error {
+	var err error
 	target.PushTranslation(v.x, v.y)
 	defer target.Pop()
 
@@ -62,9 +91,15 @@ func (v *Checkbox) Render(target d2interface.Surface) error {
 	defer target.Pop()
 
 	if v.checkState {
-		_ = target.Render(v.checkedImage)
+		err = target.Render(v.checkedImage)
+		if err != nil {
+			return err
+		}
 	} else {
-		_ = target.Render(v.Image)
+		err = target.Render(v.Image)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

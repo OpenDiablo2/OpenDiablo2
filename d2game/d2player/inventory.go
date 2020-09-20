@@ -3,6 +3,7 @@ package d2player
 import (
 	"fmt"
 	"image/color"
+	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
@@ -76,7 +77,11 @@ func (g *Inventory) Close() {
 
 // Load the resources required by the inventory
 func (g *Inventory) Load() {
-	g.frame, _ = g.uiManager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
+	var err error
+	g.frame, err = g.uiManager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
 
 	g.panel, _ = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 
@@ -116,6 +121,7 @@ func (g *Inventory) Load() {
 	for slot := range testEquippedItemCodes {
 		item, err := g.item.NewItem(testEquippedItemCodes[slot]...)
 		if err != nil {
+			log.Print(err)
 			continue
 		}
 
@@ -123,8 +129,7 @@ func (g *Inventory) Load() {
 	}
 
 	// TODO: Load the player's actual items
-
-	_, err := g.grid.Add(inventoryItems...)
+	_, err = g.grid.Add(inventoryItems...)
 	if err != nil {
 		fmt.Printf("could not add items to the inventory, err: %v\n", err)
 	}

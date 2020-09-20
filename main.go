@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -52,7 +54,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	asset.BindTerminalCommands(term)
+	err = asset.BindTerminalCommands(term)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
 
 	scriptEngine := d2script.CreateScriptEngine()
 

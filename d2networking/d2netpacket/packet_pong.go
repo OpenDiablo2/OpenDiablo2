@@ -2,6 +2,7 @@ package d2netpacket
 
 import (
 	"encoding/json"
+	"log"
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
@@ -21,7 +22,10 @@ func CreatePongPacket(id string) NetPacket {
 		ID: id,
 		TS: time.Now(),
 	}
-	b, _ := json.Marshal(pong)
+	b, err := json.Marshal(pong)
+	if err != nil {
+		log.Print(err)
+	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.Pong,

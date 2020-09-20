@@ -27,7 +27,11 @@ type Label struct {
 
 // NewLabel creates a new instance of a UI label
 func (ui *UIManager) NewLabel(fontPath, palettePath string) *Label {
-	font, _ := ui.asset.LoadFont(fontPath+".tbl", fontPath+".dc6", palettePath)
+	font, err := ui.asset.LoadFont(fontPath+".tbl", fontPath+".dc6", palettePath)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
 	result := &Label{
 		Alignment: d2gui.HorizontalAlignLeft,
@@ -69,7 +73,10 @@ func (v *Label) Render(target d2interface.Surface) {
 				target.DrawRect(charWidth, charHeight, v.backgroundColor)
 			}
 
-			_ = v.font.RenderText(character, target)
+			err := v.font.RenderText(character, target)
+			if err != nil {
+				log.Print(err)
+			}
 
 			target.PushTranslation(charWidth, 0)
 		}

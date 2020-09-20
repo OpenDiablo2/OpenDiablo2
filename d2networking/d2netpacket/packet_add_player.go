@@ -2,6 +2,7 @@ package d2netpacket
 
 import (
 	"encoding/json"
+	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
@@ -37,7 +38,10 @@ func CreateAddPlayerPacket(id, name string, x, y int, heroType d2enum.Hero,
 		Stats:     stats,
 		Skills:    skills,
 	}
-	b, _ := json.Marshal(addPlayerPacket)
+	b, err := json.Marshal(addPlayerPacket)
+	if err != nil {
+		log.Print(err)
+	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.AddPlayer,

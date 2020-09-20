@@ -3,6 +3,7 @@ package d2gamescreen
 import (
 	"fmt"
 	"image/color"
+	"log"
 	"math"
 	"os"
 
@@ -135,6 +136,7 @@ const (
 
 // OnLoad loads the resources for the Character Select screen
 func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
+	var err error
 	v.audioProvider.PlayBGM(d2resource.BGMTitle)
 
 	if err := v.inputManager.BindHandler(v); err != nil {
@@ -144,7 +146,10 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	loading.Progress(tenPercent)
 
 	bgX, bgY := 0, 0
-	v.background, _ = v.uiManager.NewSprite(d2resource.CharacterSelectionBackground, d2resource.PaletteSky)
+	v.background, err = v.uiManager.NewSprite(d2resource.CharacterSelectionBackground, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
 	v.background.SetPosition(bgX, bgY)
 
 	v.createButtons(loading)
@@ -163,11 +168,17 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	deleteConfirmX, deleteConfirmY := 400, 185
 	v.deleteCharConfirmLabel.SetPosition(deleteConfirmX, deleteConfirmY)
 
-	v.selectionBox, _ = v.uiManager.NewSprite(d2resource.CharacterSelectionSelectBox, d2resource.PaletteSky)
+	v.selectionBox, err = v.uiManager.NewSprite(d2resource.CharacterSelectionSelectBox, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
 	selBoxX, selBoxY := 37, 86
 	v.selectionBox.SetPosition(selBoxX, selBoxY)
 
-	v.okCancelBox, _ = v.uiManager.NewSprite(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
+	v.okCancelBox, err = v.uiManager.NewSprite(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
+	if err != nil {
+		log.Print(err)
+	}
 	okCancelX, okCancelY := 270, 175
 	v.okCancelBox.SetPosition(okCancelX, okCancelY)
 
@@ -416,7 +427,10 @@ func (v *CharacterSelect) onDeleteCharButtonClicked() {
 }
 
 func (v *CharacterSelect) onDeleteCharacterConfirmClicked() {
-	_ = os.Remove(v.gameStates[v.selectedCharacter].FilePath)
+	err := os.Remove(v.gameStates[v.selectedCharacter].FilePath)
+	if err != nil {
+		log.Print(err)
+	}
 	v.charScrollbar.SetCurrentOffset(0)
 	v.refreshGameStates()
 	v.toggleDeleteCharacterDialog(false)

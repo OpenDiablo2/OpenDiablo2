@@ -1,6 +1,10 @@
 package d2util
 
-import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+import (
+	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+)
 
 func ImgIndexToRGBA(indexData []byte, palette d2interface.Palette) []byte {
 	bytesPerPixel := 4
@@ -12,7 +16,10 @@ func ImgIndexToRGBA(indexData []byte, palette d2interface.Palette) []byte {
 			continue
 		}
 
-		c, _ := palette.GetColor(int(indexData[i]))
+		c, err := palette.GetColor(int(indexData[i]))
+		if err != nil {
+			log.Print(err)
+		}
 		colorData[i*bytesPerPixel] = c.R()
 		colorData[i*bytesPerPixel+1] = c.G()
 		colorData[i*bytesPerPixel+2] = c.B()

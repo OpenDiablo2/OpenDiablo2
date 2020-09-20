@@ -2,6 +2,7 @@ package d2netpacket
 
 import (
 	"encoding/json"
+	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
@@ -28,7 +29,10 @@ func CreateCastPacket(entityID string, skillID int, targetX, targetY float64) Ne
 		TargetY:        targetY,
 		TargetEntityID: "", // TODO implement targeting entities
 	}
-	b, _ := json.Marshal(castPacket)
+	b, err := json.Marshal(castPacket)
+	if err != nil {
+		log.Print(err)
+	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.CastSkill,
