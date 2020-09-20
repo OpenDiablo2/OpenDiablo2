@@ -288,6 +288,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		v.characterImage[i] = v.NewPlayer("", "", 0, 0, 0,
 			v.gameStates[idx].HeroType,
 			v.gameStates[idx].Stats,
+			v.gameStates[idx].Skills,
 			&equipment,
 		)
 	}

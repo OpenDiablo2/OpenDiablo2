@@ -306,10 +306,17 @@ func createMissileRecord(line string) MissileRecord {
 // Missiles stores all of the MissileRecords
 //nolint:gochecknoglobals // Currently global by design, only written once
 var Missiles map[int]*MissileRecord
+var missilesByName map[string]*MissileRecord
+
+// GetMissileByName allows lookup of a MissileRecord by a given name. The name will be lowercased and stripped of whitespaces.
+func GetMissileByName(missileName string) *MissileRecord {
+	return missilesByName[sanitize(missileName)]
+}
 
 // LoadMissiles loads MissileRecords from missiles.txt
 func LoadMissiles(file []byte) {
 	Missiles = make(map[int]*MissileRecord)
+	missilesByName = make(map[string]*MissileRecord)
 	data := strings.Split(string(file), "\r\n")[1:]
 
 	for _, line := range data {
@@ -319,9 +326,14 @@ func LoadMissiles(file []byte) {
 
 		rec := createMissileRecord(line)
 		Missiles[rec.Id] = &rec
+		missilesByName[sanitize(rec.Name)] = &rec
 	}
 
 	log.Printf("Loaded %d missiles", len(Missiles))
+}
+
+func sanitize(missileName string) string {
+	return strings.ToLower(strings.ReplaceAll(missileName, " ", ""))
 }
 
 func loadMissileCalcParam(r *[]string, inc func() int) MissileCalcParam {

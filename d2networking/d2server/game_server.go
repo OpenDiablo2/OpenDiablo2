@@ -346,6 +346,7 @@ func handleClientConnection(gameServer *GameServer, client ClientConnection, x, 
 		playerY,
 		playerState.HeroType,
 		playerState.Stats,
+		playerState.Skills,
 		playerState.Equipment,
 	)
 
@@ -370,6 +371,7 @@ func handleClientConnection(gameServer *GameServer, client ClientConnection, x, 
 				playerY,
 				conPlayerState.HeroType,
 				conPlayerState.Stats,
+				conPlayerState.Skills,
 				conPlayerState.Equipment,
 			),
 		)

@@ -27,7 +27,7 @@ const hideZoneTextAfterSeconds = 2.0
 const (
 	moveErrStr         = "failed to send MovePlayer packet to the server, playerId: %s, x: %g, x: %g\n"
 	bindControlsErrStr = "failed to add gameControls as input handler for player: %s\n"
-	castErrStr         = "failed to send CastSkill packet to the server, playerId: %s, missileId: %d, x: %g, x: %g\n"
+	castErrStr         = "failed to send CastSkill packet to the server, playerId: %s, skillId: %d, x: %g, x: %g\n"
 	spawnItemErrStr    = "failed to send SpawnItem packet to the server: (%d, %d) %+v"
 )
 
@@ -312,10 +312,10 @@ func (v *Game) OnPlayerMove(targetX, targetY float64) {
 }
 
 // OnPlayerCast sends the casting skill action to the server
-func (v *Game) OnPlayerCast(missileID int, targetX, targetY float64) {
-	err := v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerID, missileID, targetX, targetY))
+func (v *Game) OnPlayerCast(skillID int, targetX, targetY float64) {
+	err := v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerID, skillID, targetX, targetY))
 	if err != nil {
-		fmt.Printf(castErrStr, v.gameClient.PlayerID, missileID, targetX, targetY)
+		fmt.Printf(castErrStr, v.gameClient.PlayerID, skillID, targetX, targetY)
 	}
 }
 
