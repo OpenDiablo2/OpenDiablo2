@@ -4,7 +4,10 @@ import (
 	"log"
 	"math/rand"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
@@ -23,7 +26,7 @@ const originalFPS float64 = 25
 // A Sound that can be started and stopped
 type Sound struct {
 	effect  d2interface.SoundEffect
-	entry   *d2datadict.SoundEntry
+	entry   *d2records.SoundDetailsRecord
 	volume  float64
 	vTarget float64
 	vRate   float64
@@ -95,6 +98,7 @@ func (s *Sound) Stop() {
 
 // SoundEngine provides functions for playing sounds
 type SoundEngine struct {
+	asset    *d2asset.AssetManager
 	provider d2interface.AudioProvider
 	timer    float64
 	accTime  float64
@@ -102,8 +106,10 @@ type SoundEngine struct {
 }
 
 // NewSoundEngine creates a new sound engine
-func NewSoundEngine(provider d2interface.AudioProvider, term d2interface.Terminal) *SoundEngine {
+func NewSoundEngine(provider d2interface.AudioProvider,
+	asset *d2asset.AssetManager, term d2interface.Terminal) *SoundEngine {
 	r := SoundEngine{
+		asset:    asset,
 		provider: provider,
 		sounds:   map[*Sound]struct{}{},
 		timer:    1,
@@ -173,10 +179,10 @@ func (s *SoundEngine) PlaySoundID(id int) *Sound {
 		return nil
 	}
 
-	entry := d2datadict.SelectSoundByIndex(id)
+	entry := s.asset.Records.SelectSoundByIndex(id)
 
 	if entry.GroupSize > 0 {
-		entry = d2datadict.SelectSoundByIndex(entry.Index + rand.Intn(entry.GroupSize))
+		entry = s.asset.Records.SelectSoundByIndex(entry.Index + rand.Intn(entry.GroupSize))
 	}
 
 	effect, _ := s.provider.LoadSound(entry.FileName, entry.Loop, entry.MusicVol)
@@ -195,6 +201,6 @@ func (s *SoundEngine) PlaySoundID(id int) *Sound {
 
 // PlaySoundHandle plays a sound by sounds.txt handle
 func (s *SoundEngine) PlaySoundHandle(handle string) *Sound {
-	sound := d2datadict.Sounds[handle].Index
+	sound := s.asset.Records.Sound.Details[handle].Index
 	return s.PlaySoundID(sound)
 }

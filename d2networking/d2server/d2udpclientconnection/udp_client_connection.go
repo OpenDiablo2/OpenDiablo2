@@ -19,10 +19,10 @@ import (
 // d2server.ClientConnection interface to represent remote client from the
 // server perspective.
 type UDPClientConnection struct {
-	id            string              // ID of the associated RemoteClientConnection
-	address       *net.UDPAddr        // IP address of the associated RemoteClientConnection
-	udpConnection *net.UDPConn        // Server's UDP Connection
-	playerState   *d2hero.PlayerState // Client's game state
+	id            string            // ID of the associated RemoteClientConnection
+	address       *net.UDPAddr      // IP address of the associated RemoteClientConnection
+	udpConnection *net.UDPConn      // Server's UDP Connection
+	playerState   *d2hero.HeroState // Client's game state
 }
 
 // CreateUDPClientConnection constructs a new UDPClientConnection and
@@ -80,12 +80,12 @@ func (u *UDPClientConnection) SendPacketToClient(packet d2netpacket.NetPacket) e
 	return nil
 }
 
-// SetPlayerState sets UDP.playerState to the given value.
-func (u *UDPClientConnection) SetPlayerState(playerState *d2hero.PlayerState) {
+// SetHeroState sets UDP.playerState to the given value.
+func (u *UDPClientConnection) SetHeroState(playerState *d2hero.HeroState) {
 	u.playerState = playerState
 }
 
-// GetPlayerState returns UDPClientConnection.playerState.
-func (u *UDPClientConnection) GetPlayerState() *d2hero.PlayerState {
+// GetHeroState returns UDPClientConnection.playerState.
+func (u *UDPClientConnection) GetHeroState() *d2hero.HeroState {
 	return u.playerState
 }

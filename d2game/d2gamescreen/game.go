@@ -92,7 +92,7 @@ func CreateGame(
 		audioProvider: audioProvider,
 		renderer:      renderer,
 		terminal:      term,
-		soundEngine:   d2audio.NewSoundEngine(audioProvider, term),
+		soundEngine:   d2audio.NewSoundEngine(audioProvider, asset, term),
 		uiManager:     ui,
 		guiManager:    guiManager,
 	}
