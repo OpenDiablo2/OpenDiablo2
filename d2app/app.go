@@ -228,7 +228,6 @@ func (a *App) loadDataDict() error {
 		{d2resource.QualityItems, d2datadict.LoadQualityItems},
 		{d2resource.Runes, d2datadict.LoadRunewords},
 		{d2resource.SuperUniques, d2datadict.LoadSuperUniques},
-		{d2resource.Properties, d2datadict.LoadProperties},
 		{d2resource.Sets, d2datadict.LoadSetRecords},
 		{d2resource.SetItems, d2datadict.LoadSetItems},
 		{d2resource.TreasureClass, d2datadict.LoadTreasureClassRecords},
