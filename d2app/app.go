@@ -230,7 +230,6 @@ func (a *App) loadDataDict() error {
 		{d2resource.Sets, d2datadict.LoadSetRecords},
 		{d2resource.SetItems, d2datadict.LoadSetItems},
 		{d2resource.TreasureClass, d2datadict.LoadTreasureClassRecords},
-		{d2resource.States, d2datadict.LoadStates},
 		{d2resource.Shrines, d2datadict.LoadShrines},
 		{d2resource.UniqueAppellation, d2datadict.LoadUniqueAppellations},
 	}
