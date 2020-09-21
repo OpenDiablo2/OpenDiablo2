@@ -21,7 +21,6 @@ import (
 	"golang.org/x/image/colornames"
 	"gopkg.in/alecthomas/kingpin.v2"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
@@ -185,10 +184,6 @@ func (a *App) initialize() error {
 	config := d2config.Config
 	a.audio.SetVolumes(config.BgmVolume, config.SfxVolume)
 
-	if err := a.loadDataDict(); err != nil {
-		return err
-	}
-
 	if err := a.loadStrings(); err != nil {
 		return err
 	}
@@ -212,26 +207,6 @@ func (a *App) loadStrings() error {
 		}
 
 		d2tbl.LoadTextDictionary(data)
-	}
-
-	return nil
-}
-
-func (a *App) loadDataDict() error {
-	entries := []struct {
-		path   string
-		loader func(data []byte)
-	}{
-		{d2resource.AnimationData, d2data.LoadAnimationData},
-	}
-
-	for _, entry := range entries {
-		data, err := a.asset.LoadFile(entry.path)
-		if err != nil {
-			return err
-		}
-
-		entry.loader(data)
 	}
 
 	return nil

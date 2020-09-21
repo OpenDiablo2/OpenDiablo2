@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -26,6 +28,7 @@ func NewRecordManager() (*RecordManager, error) {
 // RecordManager stores all of the records loaded from txt files
 type RecordManager struct {
 	boundLoaders map[string][]recordLoader // there can be more than one loader bound for a file
+	Animations   d2data.AnimationData
 	BodyLocations
 	Calculation struct {
 		Skills   Calculations
