@@ -11,8 +11,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 )
 
 const (
@@ -174,7 +172,7 @@ func (f *ItemFactory) NewProperty(code string, values ...int) *Property {
 	return result.init()
 }
 
-func (f *ItemFactory) rollDropModifier(tcr *d2datadict.TreasureClassRecord) DropModifier {
+func (f *ItemFactory) rollDropModifier(tcr *d2records.TreasureClassRecord) DropModifier {
 	modMap := map[int]DropModifier{
 		0: DropModifierNone,
 		1: DropModifierUnique,
@@ -210,7 +208,7 @@ func (f *ItemFactory) rollDropModifier(tcr *d2datadict.TreasureClassRecord) Drop
 	return DropModifierNone
 }
 
-func (f *ItemFactory) rollTreasurePick(tcr *d2datadict.TreasureClassRecord) *d2datadict.Treasure {
+func (f *ItemFactory) rollTreasurePick(tcr *d2records.TreasureClassRecord) *d2records.Treasure {
 	// treasure probabilities
 	tprob := make([]int, len(tcr.Treasures)+1)
 	total := tcr.FreqNoDrop
@@ -237,10 +235,10 @@ func (f *ItemFactory) rollTreasurePick(tcr *d2datadict.TreasureClassRecord) *d2d
 }
 
 // ItemsFromTreasureClass rolls for and creates items using a treasure class record
-func (f *ItemFactory) ItemsFromTreasureClass(tcr *d2datadict.TreasureClassRecord) []*Item {
+func (f *ItemFactory) ItemsFromTreasureClass(tcr *d2records.TreasureClassRecord) []*Item {
 	result := make([]*Item, 0)
 
-	treasurePicks := make([]*d2datadict.Treasure, 0)
+	treasurePicks := make([]*d2records.Treasure, 0)
 
 	// if tcr.NumPicks is negative, each item probability is instead a count for how many
 	// of that treasure to drop
@@ -274,7 +272,7 @@ func (f *ItemFactory) ItemsFromTreasureClass(tcr *d2datadict.TreasureClassRecord
 	// case we will roll that treasure class, eventually getting a slice of items
 	for idx := range treasurePicks {
 		picked := treasurePicks[idx]
-		if record, found := d2datadict.TreasureClass[picked.Code]; found {
+		if record, found := f.asset.Records.Item.TreasureClass[picked.Code]; found {
 			// the code is for a treasure class, we roll again using that TC
 			itemSlice := f.ItemsFromTreasureClass(record)
 			for itemIdx := range itemSlice {
@@ -297,7 +295,7 @@ func (f *ItemFactory) ItemsFromTreasureClass(tcr *d2datadict.TreasureClassRecord
 }
 
 // ItemFromTreasure rolls for a f.rand.m item using the Treasure struct (from d2datadict)
-func (f *ItemFactory) ItemFromTreasure(treasure *d2datadict.Treasure) *Item {
+func (f *ItemFactory) ItemFromTreasure(treasure *d2records.Treasure) *Item {
 	result := &Item{
 		rand: rand.New(rand.NewSource(f.Seed)),
 	}
