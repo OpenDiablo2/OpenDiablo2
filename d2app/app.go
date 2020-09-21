@@ -22,7 +22,6 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
@@ -224,7 +223,6 @@ func (a *App) loadDataDict() error {
 		loader func(data []byte)
 	}{
 		{d2resource.AnimationData, d2data.LoadAnimationData},
-		{d2resource.UniqueAppellation, d2datadict.LoadUniqueAppellations},
 	}
 
 	for _, entry := range entries {
