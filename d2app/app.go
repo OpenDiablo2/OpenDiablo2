@@ -224,7 +224,6 @@ func (a *App) loadDataDict() error {
 		loader func(data []byte)
 	}{
 		{d2resource.AnimationData, d2data.LoadAnimationData},
-		{d2resource.SuperUniques, d2datadict.LoadSuperUniques},
 		{d2resource.TreasureClass, d2datadict.LoadTreasureClassRecords},
 		{d2resource.UniqueAppellation, d2datadict.LoadUniqueAppellations},
 	}
