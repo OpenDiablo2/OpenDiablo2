@@ -1,7 +1,7 @@
 package d2mapentity
 
 import (
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 )
@@ -32,7 +32,7 @@ func newMapEntity(x, y int) mapEntity {
 	pos := d2vector.NewPosition(float64(x), float64(y))
 
 	return mapEntity{
-		uuid:     uuid.NewV4().String(),
+		uuid:     uuid.New().String(),
 		Position: pos,
 		Target:   pos,
 		velocity: *d2vector.VectorZero(),

@@ -3,7 +3,7 @@ package d2localclient
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
@@ -50,7 +50,7 @@ func Create(asset *d2asset.AssetManager, openNetworkServer bool) (*LocalClientCo
 	result := &LocalClientConnection{
 		heroState:         heroStateFactory,
 		asset:             asset,
-		uniqueID:          uuid.NewV4().String(),
+		uniqueID:          uuid.New().String(),
 		openNetworkServer: openNetworkServer,
 	}
 

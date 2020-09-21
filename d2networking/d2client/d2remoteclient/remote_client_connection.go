@@ -8,15 +8,12 @@ import (
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
-
-	uuid "github.com/satori/go.uuid"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
+	"github.com/google/uuid"
 )
 
 // RemoteClientConnection is the implementation of ClientConnection
@@ -40,7 +37,7 @@ func Create(asset *d2asset.AssetManager) (*RemoteClientConnection, error) {
 
 	result := &RemoteClientConnection{
 		heroState: heroStateFactory,
-		uniqueID:  uuid.NewV4().String(),
+		uniqueID:  uuid.New().String(),
 	}
 
 	return result, nil
