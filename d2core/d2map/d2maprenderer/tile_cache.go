@@ -144,10 +144,12 @@ func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord) {
 	indexData := make([]byte, tileData.Width*int32(tileHeight))
 	d2dt1.DecodeTileGfxData(tileData.Blocks, &indexData, tileYOffset, tileData.Width)
 	pixels := d2util.ImgIndexToRGBA(indexData, mr.palette)
+
 	err = image.ReplacePixels(pixels)
 	if err != nil {
 		log.Print(err)
 	}
+
 	mr.setImageCacheRecord(tile.Style, tile.Sequence, 13, tile.RandomIndex, image)
 }
 

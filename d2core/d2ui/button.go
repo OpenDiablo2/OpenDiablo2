@@ -274,7 +274,6 @@ func (v *Button) renderFrames(btnSprite *Sprite, btnLayout *ButtonLayout, label 
 		if totalButtonTypes > 0 { // button has more than one type
 			frameOffset++
 
-
 			v.pressedSurface, err = v.manager.renderer.NewSurface(v.width, v.height,
 				d2enum.FilterNearest)
 			if err != nil {

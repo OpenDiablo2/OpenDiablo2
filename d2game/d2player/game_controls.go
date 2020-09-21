@@ -53,7 +53,7 @@ type GameControls struct {
 	heroState              *d2hero.HeroStateFactory
 	mapEngine              *d2mapengine.MapEngine
 	mapRenderer            *d2maprenderer.MapRenderer
-	uiManager              *d2ui.UIManager
+	ui                     *d2ui.UIManager
 	inventory              *Inventory
 	heroStatsPanel         *HeroStatsPanel
 	helpOverlay            *help.Overlay
@@ -169,7 +169,7 @@ func NewGameControls(
 
 	gc := &GameControls{
 		asset:            asset,
-		uiManager:        ui,
+		ui:               ui,
 		renderer:         renderer,
 		hero:             hero,
 		heroState:        heroState,
@@ -419,22 +419,22 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 // Load the resources required for the GameControls
 func (g *GameControls) Load() {
 	var err error
-	g.globeSprite, err = g.uiManager.NewSprite(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
+	g.globeSprite, err = g.ui.NewSprite(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
 	}
 
-	g.hpManaStatusSprite, err = g.uiManager.NewSprite(d2resource.HealthManaIndicator, d2resource.PaletteSky)
+	g.hpManaStatusSprite, err = g.ui.NewSprite(d2resource.HealthManaIndicator, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
 	}
 
-	g.mainPanel, err = g.uiManager.NewSprite(d2resource.GamePanels, d2resource.PaletteSky)
+	g.mainPanel, err = g.ui.NewSprite(d2resource.GamePanels, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
 	}
 
-	g.menuButton, err = g.uiManager.NewSprite(d2resource.MenuButton, d2resource.PaletteSky)
+	g.menuButton, err = g.ui.NewSprite(d2resource.MenuButton, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
 	}
@@ -444,7 +444,11 @@ func (g *GameControls) Load() {
 	}
 
 	// TODO: temporarily hardcoded to Attack, should come from saved state for hero
-	genericSkillsSprite, _ := g.uiManager.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
+	genericSkillsSprite, err := g.ui.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
+
 	attackIconID := 2
 
 	g.leftSkill = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
@@ -459,7 +463,7 @@ func (g *GameControls) Load() {
 
 func (g *GameControls) loadUIButtons() {
 	// Run button
-	g.runButton = g.uiManager.NewButton(d2ui.ButtonTypeRun, "")
+	g.runButton = g.ui.NewButton(d2ui.ButtonTypeRun, "")
 
 	g.runButton.SetPosition(255, 570)
 	g.runButton.OnActivated(func() { g.onToggleRunButton() })
@@ -629,7 +633,7 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	// Left skill
 	skillResourcePath := g.getSkillResourceByClass(g.hero.LeftSkill.Charclass)
 	if skillResourcePath != g.leftSkill.SkillResourcePath {
-		g.leftSkill.SkillIcon, _ = g.uiManager.NewSprite(skillResourcePath, d2resource.PaletteSky)
+		g.leftSkill.SkillIcon, _ = g.ui.NewSprite(skillResourcePath, d2resource.PaletteSky)
 	}
 
 	if err := g.leftSkill.SkillIcon.SetCurrentFrame(g.hero.LeftSkill.IconCel); err != nil {
@@ -748,7 +752,7 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	// Right skill
 	skillResourcePath = g.getSkillResourceByClass(g.hero.RightSkill.Charclass)
 	if skillResourcePath != g.rightSkill.SkillResourcePath {
-		g.rightSkill.SkillIcon, _ = g.uiManager.NewSprite(skillResourcePath, d2resource.PaletteSky)
+		g.rightSkill.SkillIcon, _ = g.ui.NewSprite(skillResourcePath, d2resource.PaletteSky)
 	}
 
 	if err := g.rightSkill.SkillIcon.SetCurrentFrame(g.hero.RightSkill.IconCel); err != nil {
