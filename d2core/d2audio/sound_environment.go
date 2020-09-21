@@ -3,14 +3,14 @@ package d2audio
 import (
 	"math/rand"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 )
 
 const assumedFPS = 25
 
 // SoundEnvironment represents the audio environment for map areas
 type SoundEnvironment struct {
-	environment *d2datadict.SoundEnvironRecord
+	environment *d2records.SoundEnvironRecord
 	engine      *SoundEngine
 	bgm         *Sound
 	ambiance    *Sound
@@ -21,7 +21,7 @@ type SoundEnvironment struct {
 func NewSoundEnvironment(soundEngine *SoundEngine) SoundEnvironment {
 	r := SoundEnvironment{
 		// Start with env NONE
-		environment: d2datadict.SoundEnvirons[0],
+		environment: soundEngine.asset.Records.Sound.Environment[0],
 		engine:      soundEngine,
 	}
 
@@ -31,7 +31,7 @@ func NewSoundEnvironment(soundEngine *SoundEngine) SoundEnvironment {
 // SetEnv sets the sound environment using the given record index
 func (s *SoundEnvironment) SetEnv(environmentIdx int) {
 	if s.environment.Index != environmentIdx {
-		newEnv := d2datadict.SoundEnvirons[environmentIdx]
+		newEnv := s.engine.asset.Records.Sound.Environment[environmentIdx]
 
 		if s.environment.Song != newEnv.Song {
 			if s.bgm != nil {

@@ -86,7 +86,13 @@ func NewGameServer(asset *d2asset.AssetManager, networkServer bool,
 	mapEngine := d2mapengine.CreateMapEngine(asset)
 	mapEngine.SetSeed(gameServer.seed)
 	mapEngine.ResetMap(d2enum.RegionAct1Town, 100, 100) // TODO: Mapgen - Needs levels.txt stuff
-	d2mapgen.GenerateAct1Overworld(mapEngine)
+
+	mapGen, err := d2mapgen.NewMapGenerator(asset, mapEngine)
+	if err != nil {
+		return nil, err
+	}
+
+	mapGen.GenerateAct1Overworld()
 
 	gameServer.mapEngines = append(gameServer.mapEngines, mapEngine)
 
@@ -346,6 +352,7 @@ func handleClientConnection(gameServer *GameServer, client ClientConnection, x, 
 		playerY,
 		playerState.HeroType,
 		playerState.Stats,
+		playerState.Skills,
 		playerState.Equipment,
 	)
 
@@ -370,6 +377,7 @@ func handleClientConnection(gameServer *GameServer, client ClientConnection, x, 
 				playerY,
 				conPlayerState.HeroType,
 				conPlayerState.Stats,
+				conPlayerState.Skills,
 				conPlayerState.Equipment,
 			),
 		)
@@ -391,7 +399,10 @@ func OnClientDisconnected(client ClientConnection) {
 func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) error {
 	switch packet.PacketType {
 	case d2netpackettype.MovePlayer:
-		movePacket, _ := d2netpacket.UnmarshalMovePlayer(packet.PacketData)
+		movePacket, err := d2netpacket.UnmarshalMovePlayer(packet.PacketData)
+		if err != nil {
+			return err
+		}
 		// TODO: This needs to be verified on the server (here) before sending to other clients....
 		// TODO: Hacky, this should be updated in realtime ----------------
 		// TODO: Verify player id

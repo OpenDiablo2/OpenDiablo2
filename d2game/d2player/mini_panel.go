@@ -1,6 +1,8 @@
 package d2player
 
 import (
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -23,9 +25,17 @@ func newMiniPanel(asset *d2asset.AssetManager, uiManager *d2ui.UIManager, isSing
 		miniPanelContainerPath = d2resource.MinipanelSmall
 	}
 
-	containerSprite, _ := uiManager.NewSprite(miniPanelContainerPath, d2resource.PaletteSky)
+	containerSprite, err := uiManager.NewSprite(miniPanelContainerPath, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
-	buttonSprite, _ := uiManager.NewSprite(d2resource.MinipanelButton, d2resource.PaletteSky)
+	buttonSprite, err := uiManager.NewSprite(d2resource.MinipanelButton, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
 	rectangle := d2geom.Rectangle{Left: 325, Top: 526, Width: 156, Height: 26}
 

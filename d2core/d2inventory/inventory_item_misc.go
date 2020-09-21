@@ -1,9 +1,6 @@
 package d2inventory
 
 import (
-	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
@@ -15,21 +12,6 @@ type InventoryItemMisc struct {
 	InventorySlotY int    `json:"inventorySlotY"`
 	ItemName       string `json:"itemName"`
 	ItemCode       string `json:"itemCode"`
-}
-
-// GetMiscItemByCode returns the miscellaneous item for the given code
-func GetMiscItemByCode(code string) *InventoryItemMisc {
-	result := d2datadict.MiscItems[code]
-	if result == nil {
-		log.Fatalf("Could not find misc item entry for code '%s'", code)
-	}
-
-	return &InventoryItemMisc{
-		InventorySizeX: result.InventoryWidth,
-		InventorySizeY: result.InventoryHeight,
-		ItemName:       result.Name,
-		ItemCode:       result.Code,
-	}
 }
 
 // InventoryItemName returns the name of the miscellaneous item

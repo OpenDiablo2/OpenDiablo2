@@ -3,6 +3,7 @@ package d2ui
 import (
 	"fmt"
 	"image"
+	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -39,11 +40,12 @@ const (
 	ButtonTypeMinipanelMessage   ButtonType = 17
 	ButtonTypeMinipanelQuest     ButtonType = 18
 	ButtonTypeMinipanelMen       ButtonType = 19
+	ButtonTypeSquareClose        ButtonType = 20
 )
 
 const (
-	greyAlpha100     = 0x646464_ff
-	lightGreyAlpha75 = 0x808080_c3
+	greyAlpha100     = 0x646464ff
+	lightGreyAlpha75 = 0x808080c3
 )
 
 // ButtonLayout defines the type of buttons
@@ -83,9 +85,9 @@ const (
 	buttonOkCancelSegmentsY     = 1
 	buttonOkCancelDisabledFrame = -1
 
-	buttonCloseSegmentsX     = 1
-	buttonCloseSegmentsY     = 1
-	buttonCloseDisabledFrame = -1
+	buttonBuySellSegmentsX     = 1
+	buttonBuySellSegmentsY     = 1
+	buttonBuySellDisabledFrame = 1
 
 	buttonRunSegmentsX     = 1
 	buttonRunSegmentsY     = 1
@@ -152,15 +154,16 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			FontPath:         d2resource.FontRediculous,
 			AllowFrameChange: true,
 		},
-		ButtonTypeClose: {
-			XSegments: buttonCloseSegmentsX,
-			YSegments: buttonCloseSegmentsY,
-			DisabledFrame: buttonCloseDisabledFrame,
-			ResourceName: d2resource.SquareButton,
-			PaletteName: d2resource.PaletteUnits,
-			Toggleable: true,
-			FontPath: d2resource.Font30,
+		ButtonTypeSquareClose: {
+			XSegments:        buttonBuySellSegmentsX,
+			YSegments:        buttonBuySellSegmentsY,
+			DisabledFrame:    buttonBuySellDisabledFrame,
+			ResourceName:     d2resource.BuySellButton,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
 			AllowFrameChange: true,
+			BaseFrame:        10,
 		},
 	}
 }
@@ -205,19 +208,36 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 	lbl.Color[0] = d2util.Color(greyAlpha100)
 	lbl.Alignment = d2gui.HorizontalAlignCenter
 
-	buttonSprite, _ := ui.NewSprite(buttonLayout.ResourceName, buttonLayout.PaletteName)
+	buttonSprite, err := ui.NewSprite(buttonLayout.ResourceName, buttonLayout.PaletteName)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
 	for i := 0; i < buttonLayout.XSegments; i++ {
-		w, _, _ := buttonSprite.GetFrameSize(i)
+		w, _, err := buttonSprite.GetFrameSize(i)
+		if err != nil {
+			log.Print(err)
+			return nil
+		}
 		btn.width += w
 	}
 
 	for i := 0; i < buttonLayout.YSegments; i++ {
-		_, h, _ := buttonSprite.GetFrameSize(i * buttonLayout.YSegments)
+		_, h, err := buttonSprite.GetFrameSize(i * buttonLayout.YSegments)
+		if err != nil {
+			log.Print(err)
+			return nil
+		}
+
 		btn.height += h
 	}
 
-	btn.normalSurface, _ = ui.renderer.NewSurface(btn.width, btn.height, d2enum.FilterNearest)
+	btn.normalSurface, err = ui.renderer.NewSurface(btn.width, btn.height, d2enum.FilterNearest)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
 	buttonSprite.SetPosition(0, 0)
 	buttonSprite.SetEffect(d2enum.DrawEffectModulate)
@@ -230,9 +250,9 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 }
 
 func (v *Button) renderFrames(btnSprite *Sprite, btnLayout *ButtonLayout, label *Label) {
+	var err error
 	totalButtonTypes := btnSprite.GetFrameCount() / (btnLayout.XSegments * btnLayout.YSegments)
 
-	var err error
 	err = btnSprite.RenderSegmented(v.normalSurface, btnLayout.XSegments, btnLayout.YSegments, btnLayout.BaseFrame)
 
 	if err != nil {
@@ -254,10 +274,14 @@ func (v *Button) renderFrames(btnSprite *Sprite, btnLayout *ButtonLayout, label 
 		if totalButtonTypes > 0 { // button has more than one type
 			frameOffset++
 
-			v.pressedSurface, _ = v.manager.renderer.NewSurface(v.width, v.height,
-				d2enum.FilterNearest)
-			err = btnSprite.RenderSegmented(v.pressedSurface, xSeg, ySeg, baseFrame+frameOffset)
 
+			v.pressedSurface, err = v.manager.renderer.NewSurface(v.width, v.height,
+				d2enum.FilterNearest)
+			if err != nil {
+				log.Print(err)
+			}
+
+			err = btnSprite.RenderSegmented(v.pressedSurface, xSeg, ySeg, baseFrame+frameOffset)
 			if err != nil {
 				fmt.Printf("failed to render button pressedSurface, err: %v\n", err)
 			}
@@ -266,14 +290,24 @@ func (v *Button) renderFrames(btnSprite *Sprite, btnLayout *ButtonLayout, label 
 			label.Render(v.pressedSurface)
 		}
 
+		if btnLayout.ResourceName == d2resource.BuySellButton {
+			// Without returning early, the button UI gets all subsequent (unrelated) frames stacked on top
+			// Only 2 frames from this sprite are applicable to the button in question
+			// The presentation is incorrect without this hack
+			return
+		}
+
 		totalButtonTypes--
 		if totalButtonTypes > 0 { // button has more than two types
 			frameOffset++
 
-			v.toggledSurface, _ = v.manager.renderer.NewSurface(v.width, v.height,
+			v.toggledSurface, err = v.manager.renderer.NewSurface(v.width, v.height,
 				d2enum.FilterNearest)
-			err = btnSprite.RenderSegmented(v.pressedSurface, xSeg, ySeg, baseFrame+frameOffset)
+			if err != nil {
+				log.Print(err)
+			}
 
+			err = btnSprite.RenderSegmented(v.pressedSurface, xSeg, ySeg, baseFrame+frameOffset)
 			if err != nil {
 				fmt.Printf("failed to render button toggledSurface, err: %v\n", err)
 			}
@@ -286,10 +320,13 @@ func (v *Button) renderFrames(btnSprite *Sprite, btnLayout *ButtonLayout, label 
 		if totalButtonTypes > 0 { // button has more than three types
 			frameOffset++
 
-			v.pressedToggledSurface, _ = v.manager.renderer.NewSurface(v.width, v.height,
+			v.pressedToggledSurface, err = v.manager.renderer.NewSurface(v.width, v.height,
 				d2enum.FilterNearest)
-			err = btnSprite.RenderSegmented(v.pressedSurface, xSeg, ySeg, baseFrame+frameOffset)
+			if err != nil {
+				log.Print(err)
+			}
 
+			err = btnSprite.RenderSegmented(v.pressedSurface, xSeg, ySeg, baseFrame+frameOffset)
 			if err != nil {
 				fmt.Printf("failed to render button pressedToggledSurface, err: %v\n", err)
 			}
@@ -299,10 +336,13 @@ func (v *Button) renderFrames(btnSprite *Sprite, btnLayout *ButtonLayout, label 
 		}
 
 		if btnLayout.DisabledFrame != -1 {
-			v.disabledSurface, _ = v.manager.renderer.NewSurface(v.width, v.height,
+			v.disabledSurface, err = v.manager.renderer.NewSurface(v.width, v.height,
 				d2enum.FilterNearest)
-			err = btnSprite.RenderSegmented(v.disabledSurface, xSeg, ySeg, btnLayout.DisabledFrame)
+			if err != nil {
+				log.Print(err)
+			}
 
+			err = btnSprite.RenderSegmented(v.disabledSurface, xSeg, ySeg, btnLayout.DisabledFrame)
 			if err != nil {
 				fmt.Printf("failed to render button disabledSurface, err: %v\n", err)
 			}

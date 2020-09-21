@@ -2,6 +2,7 @@ package d2util
 
 import (
 	"image"
+	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util/assets"
 
@@ -90,7 +91,10 @@ func (p *GlyphPrinter) drawDebugText(target *ebiten.Image, str string, ox, oy in
 		op.GeoM.Translate(float64(ox+1), float64(oy))
 
 		op.CompositeMode = ebiten.CompositeModeLighter
-		_ = target.DrawImage(s, op)
+		err := target.DrawImage(s, op)
+		if err != nil {
+			log.Print(err)
+		}
 		x += cw
 	}
 }

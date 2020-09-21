@@ -89,7 +89,11 @@ func (v *Credits) LoadContributors() []string {
 
 // OnLoad is called to load the resources for the credits screen
 func (v *Credits) OnLoad(loading d2screen.LoadingState) {
-	v.creditsBackground, _ = v.uiManager.NewSprite(d2resource.CreditsBackground, d2resource.PaletteSky)
+	var err error
+	v.creditsBackground, err = v.uiManager.NewSprite(d2resource.CreditsBackground, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
 	v.creditsBackground.SetPosition(creditsX, creditsY)
 	loading.Progress(twentyPercent)
 
@@ -106,7 +110,11 @@ func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 
 	loading.Progress(sixtyPercent)
 
-	creditData, _ := d2util.Utf16BytesToString(fileData[2:])
+	creditData, err := d2util.Utf16BytesToString(fileData[2:])
+	if err != nil {
+		log.Print(err)
+	}
+
 	v.creditsText = strings.Split(creditData, "\r\n")
 
 	for i := range v.creditsText {

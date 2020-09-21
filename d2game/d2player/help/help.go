@@ -3,6 +3,7 @@ package help
 import (
 	"fmt"
 	"image/color"
+	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
@@ -109,8 +110,15 @@ func (h *Overlay) Load() {
 		prevY = 0
 	)
 	for frameIndex := 0; frameIndex < 7; frameIndex++ {
-		f, _ := h.uiManager.NewSprite(d2resource.HelpBorder, d2resource.PaletteSky)
-		_ = f.SetCurrentFrame(frameIndex)
+		f, err := h.uiManager.NewSprite(d2resource.HelpBorder, d2resource.PaletteSky)
+		if err != nil {
+			log.Print(err)
+		}
+
+		err = f.SetCurrentFrame(frameIndex)
+		if err != nil {
+			log.Print(err)
+		}
 
 		ww, hh := f.GetCurrentFrameSize()
 		//fmt.Printf("Help frame %d size: %d, %d\n", frameIndex, ww, hh)
@@ -158,12 +166,7 @@ func (h *Overlay) Load() {
 
 	// Close
 
-	//close, _ := h.uiManager.NewSprite(d2resource.SquareButton, d2resource.PaletteSky)
-	//_ = close.SetCurrentFrame(0)
-	//close.SetPosition(685, 57)
-	//h.frames = append(h.frames, close)
-
-	h.closeButton = h.uiManager.NewButton(d2ui.ButtonTypeClose, "0")
+	h.closeButton = h.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
 	h.closeButton.SetPosition(685, 25)
 	h.closeButton.SetVisible(false)
 	h.closeButton.OnActivated(func() { h.close() })
@@ -171,11 +174,6 @@ func (h *Overlay) Load() {
 	newLabel = h.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
 	newLabel.SetText("Close")
 	newLabel.SetPosition(680, 60)
-	h.text = append(h.text, newLabel)
-
-	newLabel = h.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteSky)
-	newLabel.SetText("0")
-	newLabel.SetPosition(695, 32)
 	h.text = append(h.text, newLabel)
 
 	// Bullets
@@ -367,8 +365,15 @@ func (h *Overlay) createBullet(c callout) {
 	newLabel.SetPosition(c.LabelX, c.LabelY)
 	h.text = append(h.text, newLabel)
 
-	newDot, _ := h.uiManager.NewSprite(d2resource.HelpYellowBullet, d2resource.PaletteSky)
-	_ = newDot.SetCurrentFrame(0)
+	newDot, err := h.uiManager.NewSprite(d2resource.HelpYellowBullet, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
+
+	err = newDot.SetCurrentFrame(0)
+	if err != nil {
+		log.Print(err)
+	}
 	newDot.SetPosition(c.DotX, c.DotY+14)
 	h.frames = append(h.frames, newDot)
 }
@@ -392,8 +397,16 @@ func (h *Overlay) createCallout(c callout) {
 	}
 	h.lines = append(h.lines, l)
 
-	newDot, _ := h.uiManager.NewSprite(d2resource.HelpWhiteBullet, d2resource.PaletteSky)
-	_ = newDot.SetCurrentFrame(0)
+	newDot, err := h.uiManager.NewSprite(d2resource.HelpWhiteBullet, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
+
+	err = newDot.SetCurrentFrame(0)
+	if err != nil {
+		log.Print(err)
+	}
+
 	newDot.SetPosition(c.DotX, c.DotY)
 	h.frames = append(h.frames, newDot)
 }
@@ -404,7 +417,10 @@ func (h *Overlay) Render(target d2interface.Surface) error {
 	}
 
 	for _, f := range h.frames {
-		_ = f.Render(target)
+		err := f.Render(target)
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, t := range h.text {

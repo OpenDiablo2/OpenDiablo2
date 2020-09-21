@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -16,7 +18,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
@@ -118,6 +119,7 @@ type MainMenu struct {
 	scriptEngine  *d2script.ScriptEngine
 	navigator     Navigator
 	uiManager     *d2ui.UIManager
+	heroState     *d2hero.HeroStateFactory
 
 	buildInfo BuildInfo
 }
@@ -131,8 +133,13 @@ func CreateMainMenu(
 	audioProvider d2interface.AudioProvider,
 	ui *d2ui.UIManager,
 	buildInfo BuildInfo,
-) *MainMenu {
-	return &MainMenu{
+) (*MainMenu, error) {
+	heroStateFactory, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
+	mainMenu := &MainMenu{
 		asset:          asset,
 		screenMode:     ScreenModeUnknown,
 		leftButtonHeld: true,
@@ -142,7 +149,10 @@ func CreateMainMenu(
 		navigator:      navigator,
 		buildInfo:      buildInfo,
 		uiManager:      ui,
+		heroState:      heroStateFactory,
 	}
+
+	return mainMenu, nil
 }
 
 // OnLoad is called to load the resources for the main menu
@@ -172,16 +182,29 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 }
 
 func (v *MainMenu) loadBackgroundSprites() {
-	v.background, _ = v.uiManager.NewSprite(d2resource.GameSelectScreen, d2resource.PaletteSky)
+	var err error
+	v.background, err = v.uiManager.NewSprite(d2resource.GameSelectScreen, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
 	v.background.SetPosition(backgroundX, backgroundY)
 
-	v.trademarkBackground, _ = v.uiManager.NewSprite(d2resource.TrademarkScreen, d2resource.PaletteSky)
+	v.trademarkBackground, err = v.uiManager.NewSprite(d2resource.TrademarkScreen, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
 	v.trademarkBackground.SetPosition(backgroundX, backgroundY)
 
-	v.tcpIPBackground, _ = v.uiManager.NewSprite(d2resource.TCPIPBackground, d2resource.PaletteSky)
+	v.tcpIPBackground, err = v.uiManager.NewSprite(d2resource.TCPIPBackground, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
 	v.tcpIPBackground.SetPosition(backgroundX, backgroundY)
 
-	v.serverIPBackground, _ = v.uiManager.NewSprite(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
+	v.serverIPBackground, err = v.uiManager.NewSprite(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
+	if err != nil {
+		log.Print(err)
+	}
 	v.serverIPBackground.SetPosition(serverIPbackgroundX, serverIPbackgroundY)
 }
 
@@ -232,21 +255,34 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 }
 
 func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
-	v.diabloLogoLeft, _ = v.uiManager.NewSprite(d2resource.Diablo2LogoFireLeft, d2resource.PaletteUnits)
+	var err error
+	v.diabloLogoLeft, err = v.uiManager.NewSprite(d2resource.Diablo2LogoFireLeft, d2resource.PaletteUnits)
+	if err != nil {
+		log.Print(err)
+	}
 	v.diabloLogoLeft.SetEffect(d2enum.DrawEffectModulate)
 	v.diabloLogoLeft.PlayForward()
 	v.diabloLogoLeft.SetPosition(diabloLogoX, diabloLogoY)
 	loading.Progress(sixtyPercent)
 
-	v.diabloLogoRight, _ = v.uiManager.NewSprite(d2resource.Diablo2LogoFireRight, d2resource.PaletteUnits)
+	v.diabloLogoRight, err = v.uiManager.NewSprite(d2resource.Diablo2LogoFireRight, d2resource.PaletteUnits)
+	if err != nil {
+		log.Print(err)
+	}
 	v.diabloLogoRight.SetEffect(d2enum.DrawEffectModulate)
 	v.diabloLogoRight.PlayForward()
 	v.diabloLogoRight.SetPosition(diabloLogoX, diabloLogoY)
 
-	v.diabloLogoLeftBack, _ = v.uiManager.NewSprite(d2resource.Diablo2LogoBlackLeft, d2resource.PaletteUnits)
+	v.diabloLogoLeftBack, err = v.uiManager.NewSprite(d2resource.Diablo2LogoBlackLeft, d2resource.PaletteUnits)
+	if err != nil {
+		log.Print(err)
+	}
 	v.diabloLogoLeftBack.SetPosition(diabloLogoX, diabloLogoY)
 
-	v.diabloLogoRightBack, _ = v.uiManager.NewSprite(d2resource.Diablo2LogoBlackRight, d2resource.PaletteUnits)
+	v.diabloLogoRightBack, err = v.uiManager.NewSprite(d2resource.Diablo2LogoBlackRight, d2resource.PaletteUnits)
+	if err != nil {
+		log.Print(err)
+	}
 	v.diabloLogoRightBack.SetPosition(diabloLogoX, diabloLogoY)
 }
 
@@ -320,7 +356,7 @@ func (v *MainMenu) onMapTestClicked() {
 }
 
 func (v *MainMenu) onSinglePlayerClicked() {
-	if d2player.HasGameStates() {
+	if v.heroState.HasGameStates() {
 		// Go here only if existing characters are available to select
 		v.navigator.ToCharacterSelect(d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText())
 	} else {

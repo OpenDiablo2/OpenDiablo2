@@ -4,7 +4,10 @@ import (
 	"log"
 	"math/rand"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
@@ -23,7 +26,7 @@ const originalFPS float64 = 25
 // A Sound that can be started and stopped
 type Sound struct {
 	effect  d2interface.SoundEffect
-	entry   *d2datadict.SoundEntry
+	entry   *d2records.SoundDetailsRecord
 	volume  float64
 	vTarget float64
 	vRate   float64
@@ -95,6 +98,7 @@ func (s *Sound) Stop() {
 
 // SoundEngine provides functions for playing sounds
 type SoundEngine struct {
+	asset    *d2asset.AssetManager
 	provider d2interface.AudioProvider
 	timer    float64
 	accTime  float64
@@ -102,29 +106,49 @@ type SoundEngine struct {
 }
 
 // NewSoundEngine creates a new sound engine
-func NewSoundEngine(provider d2interface.AudioProvider, term d2interface.Terminal) *SoundEngine {
+func NewSoundEngine(provider d2interface.AudioProvider,
+	asset *d2asset.AssetManager, term d2interface.Terminal) *SoundEngine {
 	r := SoundEngine{
+		asset:    asset,
 		provider: provider,
 		sounds:   map[*Sound]struct{}{},
 		timer:    1,
 	}
 
-	_ = term.BindAction("playsoundid", "plays the sound for a given id", func(id int) {
+	err := term.BindAction("playsoundid", "plays the sound for a given id", func(id int) {
 		r.PlaySoundID(id)
 	})
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
-	_ = term.BindAction("playsound", "plays the sound for a given handle string", func(handle string) {
+	err = term.BindAction("playsound", "plays the sound for a given handle string", func(handle string) {
 		r.PlaySoundHandle(handle)
 	})
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
-	_ = term.BindAction("activesounds", "list currently active sounds", func() {
+	err = term.BindAction("activesounds", "list currently active sounds", func() {
 		for s := range r.sounds {
+
+			if err != nil {
+				log.Print(err)
+				return
+			}
 			log.Println(s)
 		}
 	})
 
-	_ = term.BindAction("killsounds", "kill active sounds", func() {
+	err = term.BindAction("killsounds", "kill active sounds", func() {
 		for s := range r.sounds {
+
+			if err != nil {
+				log.Print(err)
+				return
+			}
 			s.Stop()
 		}
 	})
@@ -173,13 +197,17 @@ func (s *SoundEngine) PlaySoundID(id int) *Sound {
 		return nil
 	}
 
-	entry := d2datadict.SelectSoundByIndex(id)
+	entry := s.asset.Records.SelectSoundByIndex(id)
 
 	if entry.GroupSize > 0 {
-		entry = d2datadict.SelectSoundByIndex(entry.Index + rand.Intn(entry.GroupSize))
+		entry = s.asset.Records.SelectSoundByIndex(entry.Index + rand.Intn(entry.GroupSize))
 	}
 
-	effect, _ := s.provider.LoadSound(entry.FileName, entry.Loop, entry.MusicVol)
+	effect, err := s.provider.LoadSound(entry.FileName, entry.Loop, entry.MusicVol)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
 	snd := Sound{
 		entry:  entry,
@@ -195,6 +223,6 @@ func (s *SoundEngine) PlaySoundID(id int) *Sound {
 
 // PlaySoundHandle plays a sound by sounds.txt handle
 func (s *SoundEngine) PlaySoundHandle(handle string) *Sound {
-	sound := d2datadict.Sounds[handle].Index
+	sound := s.asset.Records.Sound.Details[handle].Index
 	return s.PlaySoundID(sound)
 }

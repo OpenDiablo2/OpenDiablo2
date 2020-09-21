@@ -1,12 +1,12 @@
 package d2mapstamp
 
 import (
+	"log"
 	"math"
 	"math/rand"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
@@ -25,10 +25,11 @@ type StampFactory struct {
 // LoadStamp loads the Stamp data from file.
 func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fileIndex int) *Stamp {
 	stamp := &Stamp{
+		factory:     f,
 		entity:      f.entity,
 		regionID:    levelType,
-		levelType:   d2datadict.LevelTypes[levelType],
-		levelPreset: d2datadict.LevelPresets[levelPreset],
+		levelType:   *f.asset.Records.Level.Types[levelType],
+		levelPreset: f.asset.Records.Level.Presets[levelPreset],
 	}
 
 	for _, levelTypeDt1 := range &stamp.levelType.Files {
@@ -38,7 +39,11 @@ func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fil
 				panic(err)
 			}
 
-			dt1, _ := d2dt1.LoadDT1(fileData)
+			dt1, err := d2dt1.LoadDT1(fileData)
+			if err != nil {
+				log.Print(err)
+				return nil
+			}
 
 			stamp.tiles = append(stamp.tiles, dt1.Tiles...)
 		}
@@ -68,7 +73,11 @@ func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fil
 		panic(err)
 	}
 
-	stamp.ds1, _ = d2ds1.LoadDS1(fileData)
+	stamp.ds1, err = d2ds1.LoadDS1(fileData)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
 	return stamp
 }

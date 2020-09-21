@@ -24,6 +24,7 @@ import (
 	"compress/gzip"
 	"fmt"
 	"image"
+	"log"
 
 	"golang.org/x/image/bmp"
 )
@@ -48,7 +49,10 @@ func CreateTextImage() image.Image {
 		panic(fmt.Sprintf("assets: bmp.Decode failed: %v", err))
 	}
 
-	_ = s.Close()
+	err = s.Close()
+	if err != nil {
+		log.Print(err)
+	}
 
 	return debugBmp
 }

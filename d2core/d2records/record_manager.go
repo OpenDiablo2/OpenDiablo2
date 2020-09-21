@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -26,6 +28,7 @@ func NewRecordManager() (*RecordManager, error) {
 // RecordManager stores all of the records loaded from txt files
 type RecordManager struct {
 	boundLoaders map[string][]recordLoader // there can be more than one loader bound for a file
+	Animations   d2data.AnimationData
 	BodyLocations
 	Calculation struct {
 		Skills   Calculations
@@ -91,6 +94,7 @@ type RecordManager struct {
 		Warp    LevelWarps
 	}
 	Missiles
+	missilesByName
 	Monster struct {
 		AI         MonsterAI
 		Equipment  MonsterEquipment
@@ -274,6 +278,17 @@ func (r *RecordManager) GetExperienceBreakpoint(heroType d2enum.Hero, level int)
 	return r.Character.Experience[level].HeroBreakpoints[heroType]
 }
 
+// GetLevelDetails gets a LevelDetailsRecord by the record Id
+func (r *RecordManager) GetLevelDetails(id int) *LevelDetailsRecord {
+	for i := 0; i < len(r.Level.Details); i++ {
+		if r.Level.Details[i].ID == id {
+			return r.Level.Details[i]
+		}
+	}
+
+	return nil
+}
+
 // LevelPreset looks up a LevelPresetRecord by ID
 func (r *RecordManager) LevelPreset(id int) LevelPresetRecord {
 	for i := 0; i < len(r.Level.Presets); i++ {
@@ -370,4 +385,20 @@ func (r *RecordManager) SelectSoundByIndex(index int) *SoundDetailsRecord {
 	}
 
 	return nil
+}
+
+// GetSkillByName returns the skill record for the given Skill name.
+func (r *RecordManager) GetSkillByName(skillName string) *SkillRecord {
+	for idx := range r.Skill.Details {
+		if r.Skill.Details[idx].Skill == skillName {
+			return r.Skill.Details[idx]
+		}
+	}
+
+	return nil
+}
+
+// GetMissileByName allows lookup of a MissileRecord by a given name. The name will be lowercased and stripped of whitespaces.
+func (r *RecordManager) GetMissileByName(missileName string) *MissileRecord {
+	return r.missilesByName[sanitizeMissilesKey(missileName)]
 }

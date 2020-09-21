@@ -1,9 +1,10 @@
 package d2data
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 	"log"
 	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
 )
 
 const (
@@ -24,11 +25,11 @@ type AnimationDataRecord struct {
 }
 
 // AnimationData represents all of the animation data records, mapped by the COF index
-var AnimationData map[string][]*AnimationDataRecord //nolint:gochecknoglobals // Currently global by design
+type AnimationData map[string][]*AnimationDataRecord
 
 // LoadAnimationData loads the animation data table into the global AnimationData dictionary
-func LoadAnimationData(rawData []byte) {
-	AnimationData = make(map[string][]*AnimationDataRecord)
+func LoadAnimationData(rawData []byte) AnimationData {
+	animdata := make(AnimationData)
 	streamReader := d2datautils.CreateStreamReader(rawData)
 
 	for !streamReader.EOF() {
@@ -43,13 +44,15 @@ func LoadAnimationData(rawData []byte) {
 			data.Flags = streamReader.ReadBytes(numFlagBytes)
 			cofIndex := strings.ToLower(data.COFName)
 
-			if _, found := AnimationData[cofIndex]; !found {
-				AnimationData[cofIndex] = make([]*AnimationDataRecord, 0)
+			if _, found := animdata[cofIndex]; !found {
+				animdata[cofIndex] = make([]*AnimationDataRecord, 0)
 			}
 
-			AnimationData[cofIndex] = append(AnimationData[cofIndex], data)
+			animdata[cofIndex] = append(animdata[cofIndex], data)
 		}
 	}
 
-	log.Printf("Loaded %d animation data records", len(AnimationData))
+	log.Printf("Loaded %d animation data records", len(animdata))
+
+	return animdata
 }

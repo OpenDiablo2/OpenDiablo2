@@ -3,9 +3,8 @@ package diablo2item
 import (
 	"math/rand"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats/diablo2stats"
 )
 
 const (
@@ -67,15 +66,10 @@ const (
 	fnRandClassSkill = 36
 )
 
-// Property is an item property. Properties act as stat initializers, as well as
-// item attribute initializers. A good example of this is for the `Ethereal` property,
-// which DOES have a stat, but the stat is actually non-printable as far as the record
-// in itemstatcosts.txt is concerned. The behavior of displaying `Ethereal` on an item
-// in diablo 2 is hardcoded into whatever handled displaying item descriptions, not
-// what was generating stat descriptions (this is a guess, though).
-// Another example in min/max damage properties, which do NOT have stats!
+// Property is an item property.
 type Property struct {
-	record       *d2datadict.PropertyRecord
+	factory      *ItemFactory
+	record       *d2records.PropertyRecord
 	stats        []d2stats.Stat
 	PropertyType PropertyType
 
@@ -119,7 +113,7 @@ func (p *Property) init() *Property {
 // repeat the previous fn with the same parameters, but for a different stat.
 func (p *Property) eval(propStatIdx, previousFnID int) (stat d2stats.Stat, funcID int) {
 	pStatRecord := p.record.Stats[propStatIdx]
-	iscRecord := d2datadict.ItemStatCosts[pStatRecord.StatCode]
+	iscRecord := p.factory.asset.Records.Item.Stats[pStatRecord.StatCode]
 
 	funcID = pStatRecord.FunctionID
 
@@ -169,7 +163,7 @@ func (p *Property) eval(propStatIdx, previousFnID int) (stat d2stats.Stat, funcI
 }
 
 // fnValuesToStat Applies a value to a stat, can use SetX parameter.
-func (p *Property) fnValuesToStat(iscRecord *d2datadict.ItemStatCostRecord) d2stats.Stat {
+func (p *Property) fnValuesToStat(iscRecord *d2records.ItemStatCostRecord) d2stats.Stat {
 	// the only special case to handle for this function is for
 	// property "color", which corresponds to ISC record "item_lightcolor"
 	// I'm not yet sure how to handle this special case... it is likely
@@ -196,7 +190,7 @@ func (p *Property) fnValuesToStat(iscRecord *d2datadict.ItemStatCostRecord) d2st
 
 	statValue = float64(rand.Intn(max-min+1) + min)
 
-	return diablo2stats.NewStat(iscRecord.Name, statValue, propParam)
+	return p.factory.stat.NewStat(iscRecord.Name, statValue, propParam)
 }
 
 // fnComputeInteger Dmg-min related ???
@@ -216,7 +210,7 @@ func (p *Property) fnComputeInteger() int {
 }
 
 // fnClassSkillTab skilltab skill group ???
-func (p *Property) fnClassSkillTab(iscRecord *d2datadict.ItemStatCostRecord) d2stats.Stat {
+func (p *Property) fnClassSkillTab(iscRecord *d2records.ItemStatCostRecord) d2stats.Stat {
 	// from here: https://d2mods.info/forum/kb/viewarticle?a=45
 	// Amazon
 	// 0 - Bow & Crossbow
@@ -251,11 +245,11 @@ func (p *Property) fnClassSkillTab(iscRecord *d2datadict.ItemStatCostRecord) d2s
 	classIdx := float64(param / skillTabsPerClass)
 	level := float64(rand.Intn(max-min+1) + min)
 
-	return diablo2stats.NewStat(iscRecord.Name, level, classIdx, skillTabIdx)
+	return p.factory.stat.NewStat(iscRecord.Name, level, classIdx, skillTabIdx)
 }
 
 // fnProcs event-based skills ???
-func (p *Property) fnProcs(iscRecord *d2datadict.ItemStatCostRecord) d2stats.Stat {
+func (p *Property) fnProcs(iscRecord *d2records.ItemStatCostRecord) d2stats.Stat {
 	var skillID, chance, skillLevel float64
 
 	switch len(p.inputParams) {
@@ -267,11 +261,11 @@ func (p *Property) fnProcs(iscRecord *d2datadict.ItemStatCostRecord) d2stats.Sta
 		skillLevel = float64(p.inputParams[2])
 	}
 
-	return diablo2stats.NewStat(iscRecord.Name, chance, skillLevel, skillID)
+	return p.factory.stat.NewStat(iscRecord.Name, chance, skillLevel, skillID)
 }
 
 // fnRandomSkill random selection of parameters for parameter-based stat ???
-func (p *Property) fnRandomSkill(iscRecord *d2datadict.ItemStatCostRecord) d2stats.Stat {
+func (p *Property) fnRandomSkill(iscRecord *d2records.ItemStatCostRecord) d2stats.Stat {
 	var skillLevel, skillID float64
 
 	invalidHeroIndex := -1.0
@@ -285,22 +279,22 @@ func (p *Property) fnRandomSkill(iscRecord *d2datadict.ItemStatCostRecord) d2sta
 		skillID = float64(rand.Intn(max-min+1) + min)
 	}
 
-	return diablo2stats.NewStat(iscRecord.Name, skillLevel, skillID, invalidHeroIndex)
+	return p.factory.stat.NewStat(iscRecord.Name, skillLevel, skillID, invalidHeroIndex)
 }
 
 // fnStatParam use param field only
-func (p *Property) fnStatParam(iscRecord *d2datadict.ItemStatCostRecord) d2stats.Stat {
+func (p *Property) fnStatParam(iscRecord *d2records.ItemStatCostRecord) d2stats.Stat {
 	switch len(p.inputParams) {
 	case noValue:
 		return nil
 	default:
 		val := float64(p.inputParams[0])
-		return diablo2stats.NewStat(iscRecord.Name, val)
+		return p.factory.stat.NewStat(iscRecord.Name, val)
 	}
 }
 
 // fnChargeRelated Related to charged item.
-func (p *Property) fnChargeRelated(iscRecord *d2datadict.ItemStatCostRecord) d2stats.Stat {
+func (p *Property) fnChargeRelated(iscRecord *d2records.ItemStatCostRecord) d2stats.Stat {
 	var lvl, skill, charges float64
 
 	switch len(p.inputParams) {
@@ -311,7 +305,7 @@ func (p *Property) fnChargeRelated(iscRecord *d2datadict.ItemStatCostRecord) d2s
 		skill = float64(p.inputParams[0])
 		charges = float64(p.inputParams[1])
 
-		return diablo2stats.NewStat(iscRecord.Name, lvl, skill, charges, charges)
+		return p.factory.stat.NewStat(iscRecord.Name, lvl, skill, charges, charges)
 	}
 }
 
@@ -333,8 +327,8 @@ func (p *Property) fnBoolean() bool {
 
 // fnClassSkills Add to group of skills, group determined by stat ID, uses ValX parameter.
 func (p *Property) fnClassSkills(
-	propStatRecord *d2datadict.PropertyStatRecord,
-	iscRecord *d2datadict.ItemStatCostRecord,
+	propStatRecord *d2records.PropertyStatRecord,
+	iscRecord *d2records.ItemStatCostRecord,
 ) d2stats.Stat {
 	// in order 0..6
 	// Amazon
@@ -355,16 +349,16 @@ func (p *Property) fnClassSkills(
 	statValue := rand.Intn(max-min+1) + min
 	classIdx = propStatRecord.Value
 
-	return diablo2stats.NewStat(iscRecord.Name, float64(statValue), float64(classIdx))
+	return p.factory.stat.NewStat(iscRecord.Name, float64(statValue), float64(classIdx))
 }
 
 // fnStateApplyToTarget property applied to character or target monster ???
-func (p *Property) fnStateApplyToTarget(iscRecord *d2datadict.ItemStatCostRecord) d2stats.Stat {
+func (p *Property) fnStateApplyToTarget(iscRecord *d2records.ItemStatCostRecord) d2stats.Stat {
 	// todo need to implement states
 	return nil
 }
 
 // fnRandClassSkill property applied to character or target monster ???
-func (p *Property) fnRandClassSkill(iscRecord *d2datadict.ItemStatCostRecord) d2stats.Stat {
+func (p *Property) fnRandClassSkill(iscRecord *d2records.ItemStatCostRecord) d2stats.Stat {
 	return nil
 }

@@ -1,6 +1,8 @@
 package d2ui
 
 import (
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 )
@@ -28,7 +30,12 @@ type Scrollbar struct {
 
 // NewScrollbar creates a scrollbar instance
 func (ui *UIManager) NewScrollbar(x, y, height int) *Scrollbar {
-	scrollbarSprite, _ := ui.NewSprite(d2resource.Scrollbar, d2resource.PaletteSky)
+	scrollbarSprite, err := ui.NewSprite(d2resource.Scrollbar, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
+
 	result := &Scrollbar{
 		visible:         true,
 		enabled:         true,

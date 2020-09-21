@@ -7,9 +7,12 @@ import (
 	"net"
 	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
+
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
@@ -19,6 +22,8 @@ import (
 // RemoteClientConnection is the implementation of ClientConnection
 // for a remote client.
 type RemoteClientConnection struct {
+	asset          *d2asset.AssetManager
+	heroState      *d2hero.HeroStateFactory
 	clientListener d2networking.ClientListener // The GameClient
 	uniqueID       string                      // Unique ID generated on construction
 	tcpConnection  *net.TCPConn                // UDP connection to the server
@@ -27,12 +32,18 @@ type RemoteClientConnection struct {
 
 // Create constructs a new RemoteClientConnection
 // and returns a pointer to it.
-func Create() *RemoteClientConnection {
-	result := &RemoteClientConnection{
-		uniqueID: uuid.NewV4().String(),
+func Create(asset *d2asset.AssetManager) (*RemoteClientConnection, error) {
+	heroStateFactory, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return nil, err
 	}
 
-	return result
+	result := &RemoteClientConnection{
+		heroState: heroStateFactory,
+		uniqueID:  uuid.NewV4().String(),
+	}
+
+	return result, nil
 }
 
 // Open runs serverListener() in a goroutine to continuously read UDP packets.
@@ -61,7 +72,7 @@ func (r *RemoteClientConnection) Open(connectionString, saveFilePath string) err
 
 	log.Printf("Connected to server at %s", r.tcpConnection.RemoteAddr().String())
 
-	gameState := d2player.LoadPlayerState(saveFilePath)
+	gameState := r.heroState.LoadHeroState(saveFilePath)
 	packet := d2netpacket.CreatePlayerConnectionRequestPacket(r.GetUniqueID(), gameState)
 	err = r.SendPacketToServer(packet)
 

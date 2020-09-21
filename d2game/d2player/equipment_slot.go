@@ -1,8 +1,8 @@
 package d2player
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 )
 
 // EquipmentSlot represents an equipment slot for a player
@@ -14,7 +14,7 @@ type EquipmentSlot struct {
 	height int
 }
 
-func genEquipmentSlotsMap(record *d2datadict.InventoryRecord) map[d2enum.EquippedSlot]EquipmentSlot {
+func genEquipmentSlotsMap(record *d2records.InventoryRecord) map[d2enum.EquippedSlot]EquipmentSlot {
 	slotMap := map[d2enum.EquippedSlot]EquipmentSlot{}
 
 	slots := []d2enum.EquippedSlot{

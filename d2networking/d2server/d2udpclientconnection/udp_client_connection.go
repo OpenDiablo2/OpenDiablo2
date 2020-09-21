@@ -6,11 +6,12 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 )
@@ -19,10 +20,10 @@ import (
 // d2server.ClientConnection interface to represent remote client from the
 // server perspective.
 type UDPClientConnection struct {
-	id            string                // ID of the associated RemoteClientConnection
-	address       *net.UDPAddr          // IP address of the associated RemoteClientConnection
-	udpConnection *net.UDPConn          // Server's UDP Connection
-	playerState   *d2player.PlayerState // Client's game state
+	id            string            // ID of the associated RemoteClientConnection
+	address       *net.UDPAddr      // IP address of the associated RemoteClientConnection
+	udpConnection *net.UDPConn      // Server's UDP Connection
+	playerState   *d2hero.HeroState // Client's game state
 }
 
 // CreateUDPClientConnection constructs a new UDPClientConnection and
@@ -60,7 +61,10 @@ func (u *UDPClientConnection) SendPacketToClient(packet d2netpacket.NetPacket) e
 
 	buff.WriteByte(byte(packet.PacketType))
 
-	writer, _ := gzip.NewWriterLevel(&buff, gzip.BestCompression)
+	writer, err := gzip.NewWriterLevel(&buff, gzip.BestCompression)
+	if err != nil {
+		log.Print(err)
+	}
 
 	if written, writeErr := writer.Write(data); writeErr != nil {
 		return writeErr
@@ -80,12 +84,12 @@ func (u *UDPClientConnection) SendPacketToClient(packet d2netpacket.NetPacket) e
 	return nil
 }
 
-// SetPlayerState sets UDP.playerState to the given value.
-func (u *UDPClientConnection) SetPlayerState(playerState *d2player.PlayerState) {
+// SetHeroState sets UDP.playerState to the given value.
+func (u *UDPClientConnection) SetHeroState(playerState *d2hero.HeroState) {
 	u.playerState = playerState
 }
 
-// GetPlayerState returns UDPClientConnection.playerState.
-func (u *UDPClientConnection) GetPlayerState() *d2player.PlayerState {
+// GetHeroState returns UDPClientConnection.playerState.
+func (u *UDPClientConnection) GetHeroState() *d2hero.HeroState {
 	return u.playerState
 }

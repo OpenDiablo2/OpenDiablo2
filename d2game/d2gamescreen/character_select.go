@@ -3,19 +3,20 @@ package d2gamescreen
 import (
 	"fmt"
 	"image/color"
+	"log"
 	"math"
 	"os"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 )
 
@@ -23,6 +24,7 @@ import (
 type CharacterSelect struct {
 	asset *d2asset.AssetManager
 	*d2mapentity.MapEntityFactory
+	*d2hero.HeroStateFactory
 	background             *d2ui.Sprite
 	newCharButton          *d2ui.Button
 	convertCharButton      *d2ui.Button
@@ -40,7 +42,7 @@ type CharacterSelect struct {
 	characterStatsLabel    [8]*d2ui.Label
 	characterExpLabel      [8]*d2ui.Label
 	characterImage         [8]*d2mapentity.Player
-	gameStates             []*d2player.PlayerState
+	gameStates             []*d2hero.HeroState
 	selectedCharacter      int
 	showDeleteConfirmation bool
 	connectionType         d2clientconnectiontype.ClientConnectionType
@@ -64,10 +66,13 @@ func CreateCharacterSelect(
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	connectionHost string,
 ) *CharacterSelect {
+	playerStateFactory, _ := d2hero.NewHeroStateFactory(asset) // TODO: handle errors
+	entityFactory, _ := d2mapentity.NewMapEntityFactory(asset)
+
 	return &CharacterSelect{
 		selectedCharacter: -1,
 		asset:             asset,
-		MapEntityFactory:  d2mapentity.NewMapEntityFactory(asset),
+		MapEntityFactory:  entityFactory,
 		renderer:          renderer,
 		connectionType:    connectionType,
 		connectionHost:    connectionHost,
@@ -75,6 +80,7 @@ func CreateCharacterSelect(
 		audioProvider:     audioProvider,
 		navigator:         navigator,
 		uiManager:         ui,
+		HeroStateFactory:  playerStateFactory,
 	}
 }
 
@@ -130,6 +136,7 @@ const (
 
 // OnLoad loads the resources for the Character Select screen
 func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
+	var err error
 	v.audioProvider.PlayBGM(d2resource.BGMTitle)
 
 	if err := v.inputManager.BindHandler(v); err != nil {
@@ -139,7 +146,10 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	loading.Progress(tenPercent)
 
 	bgX, bgY := 0, 0
-	v.background, _ = v.uiManager.NewSprite(d2resource.CharacterSelectionBackground, d2resource.PaletteSky)
+	v.background, err = v.uiManager.NewSprite(d2resource.CharacterSelectionBackground, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
 	v.background.SetPosition(bgX, bgY)
 
 	v.createButtons(loading)
@@ -158,11 +168,17 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	deleteConfirmX, deleteConfirmY := 400, 185
 	v.deleteCharConfirmLabel.SetPosition(deleteConfirmX, deleteConfirmY)
 
-	v.selectionBox, _ = v.uiManager.NewSprite(d2resource.CharacterSelectionSelectBox, d2resource.PaletteSky)
+	v.selectionBox, err = v.uiManager.NewSprite(d2resource.CharacterSelectionSelectBox, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
 	selBoxX, selBoxY := 37, 86
 	v.selectionBox.SetPosition(selBoxX, selBoxY)
 
-	v.okCancelBox, _ = v.uiManager.NewSprite(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
+	v.okCancelBox, err = v.uiManager.NewSprite(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
+	if err != nil {
+		log.Print(err)
+	}
 	okCancelX, okCancelY := 270, 175
 	v.okCancelBox.SetPosition(okCancelX, okCancelY)
 
@@ -282,12 +298,13 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		v.characterExpLabel[i].SetText(d2ui.ColorTokenize(expText, d2ui.ColorTokenGreen))
 
 		heroType := v.gameStates[idx].HeroType
-		equipment := d2inventory.HeroObjects[heroType]
+		equipment := v.DefaultHeroItems[heroType]
 
 		// TODO: Generate or load the object from the actual player data...
 		v.characterImage[i] = v.NewPlayer("", "", 0, 0, 0,
 			v.gameStates[idx].HeroType,
 			v.gameStates[idx].Stats,
+			v.gameStates[idx].Skills,
 			&equipment,
 		)
 	}
@@ -410,7 +427,10 @@ func (v *CharacterSelect) onDeleteCharButtonClicked() {
 }
 
 func (v *CharacterSelect) onDeleteCharacterConfirmClicked() {
-	_ = os.Remove(v.gameStates[v.selectedCharacter].FilePath)
+	err := os.Remove(v.gameStates[v.selectedCharacter].FilePath)
+	if err != nil {
+		log.Print(err)
+	}
 	v.charScrollbar.SetCurrentOffset(0)
 	v.refreshGameStates()
 	v.toggleDeleteCharacterDialog(false)
@@ -433,7 +453,11 @@ func (v *CharacterSelect) toggleDeleteCharacterDialog(showDialog bool) {
 }
 
 func (v *CharacterSelect) refreshGameStates() {
-	v.gameStates = d2player.GetAllPlayerStates()
+	gameStates, err := v.HeroStateFactory.GetAllHeroStates()
+	if err == nil {
+		v.gameStates = gameStates
+	}
+
 	v.updateCharacterBoxes()
 
 	if len(v.gameStates) > 0 {

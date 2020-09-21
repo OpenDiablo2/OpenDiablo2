@@ -3,7 +3,8 @@ package d2mapentity
 import (
 	"math/rand"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
@@ -21,8 +22,8 @@ type NPC struct {
 	action        int
 	path          int
 	repetitions   int
-	monstatRecord *d2datadict.MonStatsRecord
-	monstatEx     *d2datadict.MonStats2Record
+	monstatRecord *d2records.MonStatsRecord
+	monstatEx     *d2records.MonStats2Record
 	HasPaths      bool
 	isDone        bool
 }

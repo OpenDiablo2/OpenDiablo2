@@ -1,6 +1,7 @@
 package d2animdata
 
 import (
+	"log"
 	"os"
 	"testing"
 )
@@ -30,7 +31,11 @@ func TestLoad(t *testing.T) {
 		t.Error(loadErr)
 	}
 
-	_ = testFile.Close()
+	err := testFile.Close()
+	if err != nil {
+		t.Fail()
+		log.Print(err)
+	}
 }
 
 func TestLoad_BadData(t *testing.T) {
@@ -58,7 +63,11 @@ func TestLoad_BadData(t *testing.T) {
 		t.Error("bad data file should not be parsed")
 	}
 
-	_ = testFile.Close()
+	err := testFile.Close()
+	if err != nil {
+		t.Fail()
+		log.Print(err)
+	}
 }
 
 func TestAnimationData_GetRecordNames(t *testing.T) {

@@ -19,6 +19,9 @@ type Player struct {
 	composite         *d2asset.Composite
 	Equipment         *d2inventory.CharacterEquipment
 	Stats             *d2hero.HeroStatsState
+	Skills            map[int]*d2hero.HeroSkill
+	LeftSkill         *d2hero.HeroSkill
+	RightSkill        *d2hero.HeroSkill
 	Class             d2enum.Hero
 	lastPathSize      int
 	isInTown          bool

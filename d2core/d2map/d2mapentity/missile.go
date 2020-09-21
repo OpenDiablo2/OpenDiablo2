@@ -3,15 +3,15 @@ package d2mapentity
 import (
 	"math"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 )
 
 // Missile is a simple animated entity representing a projectile,
 // such as a spell or arrow.
 type Missile struct {
 	*AnimatedEntity
-	record *d2datadict.MissileRecord
+	record *d2records.MissileRecord
 }
 
 // ID returns the missile uuid

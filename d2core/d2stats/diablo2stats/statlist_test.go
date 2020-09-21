@@ -3,11 +3,30 @@ package diablo2stats
 import (
 	"testing"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 )
 
+var testAssetManager *d2asset.AssetManager
+
+var testStatFactory *StatFactory
+
+func TestSetup_StatList(t *testing.T) {
+	testAssetManager = &d2asset.AssetManager{}
+	testAssetManager.Records = &d2records.RecordManager{}
+
+	testStatFactory, _ = NewStatFactory(testAssetManager)
+
+	testAssetManager.Records.Item.Stats = itemStatCosts
+	testAssetManager.Records.Character.Stats = charStats
+	testAssetManager.Records.Skill.Details = skillDetails
+	testAssetManager.Records.Monster.Stats = monStats
+}
+
 func TestDiablo2StatList_Index(t *testing.T) {
-	strength := NewStat("strength", 10)
+	strength := testStatFactory.NewStat("strength", 10)
 
 	list1 := &Diablo2StatList{stats: []d2stats.Stat{strength}}
 	if list1.Index(0) != strength {
@@ -16,7 +35,7 @@ func TestDiablo2StatList_Index(t *testing.T) {
 }
 
 func TestStatList_Clone(t *testing.T) {
-	strength := NewStat("strength", 10)
+	strength := testStatFactory.NewStat("strength", 10)
 
 	list1 := &Diablo2StatList{}
 	list1.Push(strength)
@@ -38,13 +57,13 @@ func TestStatList_Clone(t *testing.T) {
 
 func TestStatList_Reduce(t *testing.T) {
 	stats := []d2stats.Stat{
-		NewStat("strength", 1),
-		NewStat("strength", 1),
-		NewStat("strength", 1),
-		NewStat("strength", 1),
+		testStatFactory.NewStat("strength", 1),
+		testStatFactory.NewStat("strength", 1),
+		testStatFactory.NewStat("strength", 1),
+		testStatFactory.NewStat("strength", 1),
 	}
 
-	list := NewStatList(stats...)
+	list := testStatFactory.NewStatList(stats...)
 	reduction := list.ReduceStats()
 
 	if len(reduction.Stats()) != 1 || reduction.Index(0).String() != "+4 to Strength" {
@@ -52,13 +71,13 @@ func TestStatList_Reduce(t *testing.T) {
 	}
 
 	stats = []d2stats.Stat{
-		NewStat("strength", 1),
-		NewStat("energy", 1),
-		NewStat("dexterity", 1),
-		NewStat("vitality", 1),
+		testStatFactory.NewStat("strength", 1),
+		testStatFactory.NewStat("energy", 1),
+		testStatFactory.NewStat("dexterity", 1),
+		testStatFactory.NewStat("vitality", 1),
 	}
 
-	list = NewStatList(stats...)
+	list = testStatFactory.NewStatList(stats...)
 	reduction = list.ReduceStats()
 
 	if len(reduction.Stats()) != 4 {
@@ -69,10 +88,10 @@ func TestStatList_Reduce(t *testing.T) {
 func TestStatList_Append(t *testing.T) {
 	list1 := &Diablo2StatList{
 		[]d2stats.Stat{
-			NewStat("strength", 1),
-			NewStat("energy", 1),
-			NewStat("dexterity", 1),
-			NewStat("vitality", 1),
+			testStatFactory.NewStat("strength", 1),
+			testStatFactory.NewStat("energy", 1),
+			testStatFactory.NewStat("dexterity", 1),
+			testStatFactory.NewStat("vitality", 1),
 		},
 	}
 	list2 := list1.Clone()

@@ -4,7 +4,6 @@ package ebiten
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
@@ -19,7 +18,7 @@ var _ d2interface.AudioProvider = &AudioProvider{} // Static check to confirm st
 // CreateAudio creates an instance of ebiten's audio provider
 func CreateAudio(am *d2asset.AssetManager) (*AudioProvider, error) {
 	result := &AudioProvider{
-		assetManager: am,
+		asset: am,
 	}
 
 	var err error
@@ -35,7 +34,7 @@ func CreateAudio(am *d2asset.AssetManager) (*AudioProvider, error) {
 
 // AudioProvider represents a provider capable of playing audio
 type AudioProvider struct {
-	assetManager *d2asset.AssetManager
+	asset        *d2asset.AssetManager
 	audioContext *audio.Context // The Audio context
 	bgmAudio     *audio.Player  // The audio player
 	lastBgm      string
@@ -52,7 +51,10 @@ func (eap *AudioProvider) PlayBGM(song string) {
 	eap.lastBgm = song
 
 	if song == "" && eap.bgmAudio != nil && eap.bgmAudio.IsPlaying() {
-		_ = eap.bgmAudio.Pause()
+		err := eap.bgmAudio.Pause()
+		if err != nil {
+			log.Print(err)
+		}
 
 		return
 	}
@@ -65,7 +67,7 @@ func (eap *AudioProvider) PlayBGM(song string) {
 		}
 	}
 
-	audioStream, err := eap.assetManager.LoadFileStream(song)
+	audioStream, err := eap.asset.LoadFileStream(song)
 
 	if err != nil {
 		panic(err)
@@ -128,17 +130,17 @@ func (eap *AudioProvider) createSoundEffect(sfx string, context *audio.Context,
 
 	soundFile := "/data/global/sfx/"
 
-	if _, exists := d2datadict.Sounds[sfx]; exists {
-		soundEntry := d2datadict.Sounds[sfx]
+	if _, exists := eap.asset.Records.Sound.Details[sfx]; exists {
+		soundEntry := eap.asset.Records.Sound.Details[sfx]
 		soundFile += soundEntry.FileName
 	} else {
 		soundFile += sfx
 	}
 
-	audioData, err := eap.assetManager.LoadFileStream(soundFile)
+	audioData, err := eap.asset.LoadFileStream(soundFile)
 
 	if err != nil {
-		audioData, err = eap.assetManager.LoadFileStream("/data/global/music/" + sfx)
+		audioData, err = eap.asset.LoadFileStream("/data/global/music/" + sfx)
 	}
 
 	if err != nil {

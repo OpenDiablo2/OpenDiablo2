@@ -49,7 +49,10 @@ func (ui *UIManager) Reset() {
 
 // addWidget adds a widget to the UI manager
 func (ui *UIManager) addWidget(widget Widget) {
-	_ = ui.inputManager.BindHandler(widget)
+	err := ui.inputManager.BindHandler(widget)
+	if err != nil {
+		log.Print(err)
+	}
 	ui.widgets = append(ui.widgets, widget)
 
 	widget.bindManager(ui)
@@ -105,7 +108,10 @@ func (ui *UIManager) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 func (ui *UIManager) Render(target d2interface.Surface) {
 	for _, widget := range ui.widgets {
 		if widget.GetVisible() {
-			_ = widget.Render(target)
+			err := widget.Render(target)
+			if err != nil {
+				log.Print(err)
+			}
 		}
 	}
 }
@@ -122,7 +128,10 @@ func (ui *UIManager) contains(w Widget, x, y int) bool {
 func (ui *UIManager) Advance(elapsed float64) {
 	for _, widget := range ui.widgets {
 		if widget.GetVisible() {
-			_ = widget.Advance(elapsed)
+			err := widget.Advance(elapsed)
+			if err != nil {
+				log.Print(err)
+			}
 		}
 	}
 }

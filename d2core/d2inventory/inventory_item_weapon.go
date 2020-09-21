@@ -1,9 +1,6 @@
 package d2inventory
 
 import (
-	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
@@ -17,24 +14,6 @@ type InventoryItemWeapon struct {
 	ItemCode           string `json:"itemCode"`
 	WeaponClass        string `json:"weaponClass"`
 	WeaponClassOffHand string `json:"weaponClassOffHand"`
-}
-
-// GetWeaponItemByCode returns the weapon item for the given code
-func GetWeaponItemByCode(code string) *InventoryItemWeapon {
-	// TODO: Non-normal codes will fail here...
-	result := d2datadict.Weapons[code]
-	if result == nil {
-		log.Fatalf("Could not find weapon entry for code '%s'", code)
-	}
-
-	return &InventoryItemWeapon{
-		InventorySizeX:     result.InventoryWidth,
-		InventorySizeY:     result.InventoryHeight,
-		ItemName:           result.Name,
-		ItemCode:           result.Code,
-		WeaponClass:        result.WeaponClass,
-		WeaponClassOffHand: result.WeaponClass2Hand,
-	}
 }
 
 // GetWeaponClass returns the class of the weapon
