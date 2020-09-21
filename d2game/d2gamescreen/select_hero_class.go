@@ -5,7 +5,10 @@ import (
 	"image"
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -15,7 +18,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 )
 
@@ -269,18 +271,20 @@ func (hri *HeroRenderInfo) advance(elapsed float64) {
 
 // SelectHeroClass represents the Select Hero Class screen
 type SelectHeroClass struct {
-	asset              *d2asset.AssetManager
-	uiManager          *d2ui.UIManager
-	bgImage            *d2ui.Sprite
-	campfire           *d2ui.Sprite
-	headingLabel       *d2ui.Label
-	heroClassLabel     *d2ui.Label
-	heroDesc1Label     *d2ui.Label
-	heroDesc2Label     *d2ui.Label
-	heroDesc3Label     *d2ui.Label
-	heroNameTextbox    *d2ui.TextBox
-	heroNameLabel      *d2ui.Label
-	heroRenderInfo     map[d2enum.Hero]*HeroRenderInfo
+	asset           *d2asset.AssetManager
+	uiManager       *d2ui.UIManager
+	bgImage         *d2ui.Sprite
+	campfire        *d2ui.Sprite
+	headingLabel    *d2ui.Label
+	heroClassLabel  *d2ui.Label
+	heroDesc1Label  *d2ui.Label
+	heroDesc2Label  *d2ui.Label
+	heroDesc3Label  *d2ui.Label
+	heroNameTextbox *d2ui.TextBox
+	heroNameLabel   *d2ui.Label
+	heroRenderInfo  map[d2enum.Hero]*HeroRenderInfo
+	*d2inventory.InventoryItemFactory
+	*d2hero.HeroStateFactory
 	selectedHero       d2enum.Hero
 	exitButton         *d2ui.Button
 	okButton           *d2ui.Button
@@ -305,20 +309,32 @@ func CreateSelectHeroClass(
 	ui *d2ui.UIManager,
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	connectionHost string,
-) *SelectHeroClass {
-	result := &SelectHeroClass{
-		asset:          asset,
-		heroRenderInfo: make(map[d2enum.Hero]*HeroRenderInfo),
-		selectedHero:   d2enum.HeroNone,
-		connectionType: connectionType,
-		connectionHost: connectionHost,
-		audioProvider:  audioProvider,
-		renderer:       renderer,
-		navigator:      navigator,
-		uiManager:      ui,
+) (*SelectHeroClass, error) {
+	playerStateFactory, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return nil, err
 	}
 
-	return result
+	inventoryItemFactory, err := d2inventory.NewInventoryItemFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
+	result := &SelectHeroClass{
+		asset:                asset,
+		heroRenderInfo:       make(map[d2enum.Hero]*HeroRenderInfo),
+		selectedHero:         d2enum.HeroNone,
+		connectionType:       connectionType,
+		connectionHost:       connectionHost,
+		audioProvider:        audioProvider,
+		renderer:             renderer,
+		navigator:            navigator,
+		uiManager:            ui,
+		HeroStateFactory:     playerStateFactory,
+		InventoryItemFactory: inventoryItemFactory,
+	}
+
+	return result, nil
 }
 
 // OnLoad loads the resources for the Select Hero Class screen
@@ -470,12 +486,23 @@ func (v *SelectHeroClass) onExitButtonClicked() {
 }
 
 func (v *SelectHeroClass) onOkButtonClicked() {
-	gameState := d2player.CreatePlayerState(
-		v.heroNameTextbox.GetText(),
-		v.selectedHero,
-		d2datadict.CharStats[v.selectedHero],
-	)
-	v.navigator.ToCreateGame(gameState.FilePath, d2clientconnectiontype.Local, v.connectionHost)
+
+	heroName := v.heroNameTextbox.GetText()
+	defaultStats := v.asset.Records.Character.Stats[v.selectedHero]
+	statsState := v.CreateHeroStatsState(v.selectedHero, defaultStats)
+
+	playerState, err := v.CreateHeroState(heroName, v.selectedHero, statsState)
+
+	if err := v.Save(playerState); err != nil {
+		fmt.Printf("failed to save game state!, err: %v\n", err)
+	}
+
+	if err != nil {
+		return
+	}
+
+	playerState.Equipment = v.InventoryItemFactory.DefaultHeroItems[v.selectedHero]
+	v.navigator.ToCreateGame(playerState.FilePath, d2clientconnectiontype.Local, v.connectionHost)
 }
 
 // Render renders the Select Hero Class screen

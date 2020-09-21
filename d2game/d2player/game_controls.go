@@ -12,10 +12,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player/help"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -35,7 +35,6 @@ type Panel interface {
 }
 
 const (
-	initialMissileID         = 59
 	expBarWidth              = 120.0
 	staminaBarWidth          = 102.0
 	globeHeight              = 80
@@ -51,6 +50,7 @@ type GameControls struct {
 	renderer               d2interface.Renderer // TODO: This shouldn't be a dependency
 	inputListener          InputCallbackListener
 	hero                   *d2mapentity.Player
+	heroState              *d2hero.HeroStateFactory
 	mapEngine              *d2mapengine.MapEngine
 	mapRenderer            *d2maprenderer.MapRenderer
 	uiManager              *d2ui.UIManager
@@ -65,7 +65,8 @@ type GameControls struct {
 	hpManaStatusSprite     *d2ui.Sprite
 	mainPanel              *d2ui.Sprite
 	menuButton             *d2ui.Sprite
-	skillIcon              *d2ui.Sprite
+	leftSkill              *SkillResource
+	rightSkill             *SkillResource
 	zoneChangeText         *d2ui.Label
 	nameLabel              *d2ui.Label
 	hpManaStatsLabel       *d2ui.Label
@@ -86,15 +87,21 @@ type ActionableRegion struct {
 	Rect             d2geom.Rectangle
 }
 
+type SkillResource struct {
+	SkillResourcePath string
+	IconNumber        int
+	SkillIcon         *d2ui.Sprite
+}
+
 const (
 	// Since they require special handling, not considering (1) globes, (2) content of the mini panel, (3) belt
 	leftSkill ActionableType = iota
-	leftSelect
+	newStats
 	xp
 	walkRun
 	stamina
 	miniPnl
-	rightSelect
+	newSkills
 	rightSkill
 	hpGlobe
 	manaGlobe
@@ -115,14 +122,6 @@ func NewGameControls(
 	guiManager *d2gui.GuiManager,
 	isSinglePlayer bool,
 ) (*GameControls, error) {
-	missileID := initialMissileID
-
-	err := term.BindAction("setmissile", "set missile id to summon on right click", func(id int) {
-		missileID = id
-	})
-	if err != nil {
-		return nil, err
-	}
 
 	zoneLabel := ui.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
 	zoneLabel.Alignment = d2gui.HorizontalAlignCenter
@@ -156,18 +155,24 @@ func NewGameControls(
 		return nil, fmt.Errorf("unknown hero class: %d", hero.Class)
 	}
 
-	inventoryRecord := d2datadict.Inventory[inventoryRecordKey]
+	inventoryRecord := asset.Records.Layout.Inventory[inventoryRecordKey]
 
 	hoverLabel := nameLabel
 	hoverLabel.SetBackgroundColor(color.RGBA{0, 0, 0, uint8(128)})
 
 	globeStatsLabel := hpManaStatsLabel
 
+	heroState, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
 	gc := &GameControls{
 		asset:            asset,
 		uiManager:        ui,
 		renderer:         renderer,
 		hero:             hero,
+		heroState:        heroState,
 		mapEngine:        mapEngine,
 		inputListener:    inputListener,
 		mapRenderer:      mapRenderer,
@@ -175,18 +180,17 @@ func NewGameControls(
 		heroStatsPanel:   NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
 		helpOverlay:      help.NewHelpOverlay(asset, renderer, ui, guiManager),
 		miniPanel:        newMiniPanel(asset, ui, isSinglePlayer),
-		missileID:        missileID,
 		nameLabel:        hoverLabel,
 		zoneChangeText:   zoneLabel,
 		hpManaStatsLabel: globeStatsLabel,
 		actionableRegions: []ActionableRegion{
 			{leftSkill, d2geom.Rectangle{Left: 115, Top: 550, Width: 50, Height: 50}},
-			{leftSelect, d2geom.Rectangle{Left: 206, Top: 563, Width: 30, Height: 30}},
+			{newStats, d2geom.Rectangle{Left: 206, Top: 563, Width: 30, Height: 30}},
 			{xp, d2geom.Rectangle{Left: 253, Top: 560, Width: 125, Height: 5}},
 			{walkRun, d2geom.Rectangle{Left: 255, Top: 573, Width: 17, Height: 20}},
 			{stamina, d2geom.Rectangle{Left: 273, Top: 573, Width: 105, Height: 20}},
 			{miniPnl, d2geom.Rectangle{Left: 393, Top: 563, Width: 12, Height: 23}},
-			{rightSelect, d2geom.Rectangle{Left: 562, Top: 563, Width: 30, Height: 30}},
+			{newSkills, d2geom.Rectangle{Left: 562, Top: 563, Width: 30, Height: 30}},
 			{rightSkill, d2geom.Rectangle{Left: 634, Top: 550, Width: 50, Height: 50}},
 			{hpGlobe, d2geom.Rectangle{Left: 30, Top: 525, Width: 65, Height: 50}},
 			{manaGlobe, d2geom.Rectangle{Left: 700, Top: 525, Width: 65, Height: 50}},
@@ -200,6 +204,30 @@ func NewGameControls(
 
 	err = term.BindAction("freecam", "toggle free camera movement", func() {
 		gc.FreeCam = !gc.FreeCam
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = term.BindAction("setleftskill", "set skill to fire on left click", func(id int) {
+		skillRecord := gc.asset.Records.Skill.Details[id]
+		skill, err := heroState.CreateHeroSkill(0, skillRecord.Skill)
+		if err != nil {
+			term.OutputErrorf("cannot create skill with ID of %d", id)
+		}
+
+		gc.hero.LeftSkill = skill
+	})
+
+	err = term.BindAction("setrightskill", "set skill to fire on right click", func(id int) {
+		skillRecord := gc.asset.Records.Skill.Details[id]
+		skill, err := heroState.CreateHeroSkill(0, skillRecord.Skill)
+		if err != nil {
+			term.OutputErrorf("cannot create skill with ID of %d", id)
+		}
+
+		gc.hero.RightSkill = skill
 	})
 
 	if err != nil {
@@ -297,7 +325,11 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 	if isLeft && shouldDoLeft && inRect && !g.hero.IsCasting() {
 		g.lastLeftBtnActionTime = now
 
-		g.inputListener.OnPlayerMove(px, py)
+		if event.KeyMod() == d2enum.KeyModShift {
+			g.inputListener.OnPlayerCast(g.hero.LeftSkill.ID, px, py)
+		} else {
+			g.inputListener.OnPlayerMove(px, py)
+		}
 
 		if g.FreeCam {
 			if event.Button() == d2enum.MouseButtonLeft {
@@ -319,7 +351,7 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 	if isRight && shouldDoRight && inRect && !g.hero.IsCasting() {
 		g.lastRightBtnActionTime = now
 
-		g.inputListener.OnPlayerCast(g.missileID, px, py)
+		g.inputListener.OnPlayerCast(g.hero.RightSkill.ID, px, py)
 
 		return true
 	}
@@ -364,7 +396,11 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	if event.Button() == d2enum.MouseButtonLeft && !g.isInActiveMenusRect(mx, my) && !g.hero.IsCasting() {
 		g.lastLeftBtnActionTime = d2util.Now()
 
-		g.inputListener.OnPlayerMove(px, py)
+		if event.KeyMod() == d2enum.KeyModShift {
+			g.inputListener.OnPlayerCast(g.hero.LeftSkill.ID, px, py)
+		} else {
+			g.inputListener.OnPlayerMove(px, py)
+		}
 
 		return true
 	}
@@ -372,7 +408,7 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	if event.Button() == d2enum.MouseButtonRight && !g.isInActiveMenusRect(mx, my) && !g.hero.IsCasting() {
 		g.lastRightBtnActionTime = d2util.Now()
 
-		g.inputListener.OnPlayerCast(g.missileID, px, py)
+		g.inputListener.OnPlayerCast(g.hero.RightSkill.ID, px, py)
 
 		return true
 	}
@@ -407,10 +443,12 @@ func (g *GameControls) Load() {
 		log.Print(err)
 	}
 
-	g.skillIcon, err = g.uiManager.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
-	if err != nil {
-		log.Print(err)
-	}
+	// TODO: temporarily hardcoded to Attack, should come from saved state for hero
+	genericSkillsSprite, _ := g.uiManager.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
+	attackIconID := 2
+
+	g.leftSkill = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
+	g.rightSkill = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
 
 	g.loadUIButtons()
 
@@ -589,21 +627,26 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	offset += w
 
 	// Left skill
-	if err := g.skillIcon.SetCurrentFrame(2); err != nil {
+	skillResourcePath := g.getSkillResourceByClass(g.hero.LeftSkill.Charclass)
+	if skillResourcePath != g.leftSkill.SkillResourcePath {
+		g.leftSkill.SkillIcon, _ = g.uiManager.NewSprite(skillResourcePath, d2resource.PaletteSky)
+	}
+
+	if err := g.leftSkill.SkillIcon.SetCurrentFrame(g.hero.LeftSkill.IconCel); err != nil {
 		return err
 	}
 
-	w, _ = g.skillIcon.GetCurrentFrameSize()
+	w, _ = g.leftSkill.SkillIcon.GetCurrentFrameSize()
 
-	g.skillIcon.SetPosition(offset, height)
+	g.leftSkill.SkillIcon.SetPosition(offset, height)
 
-	if err := g.skillIcon.Render(target); err != nil {
+	if err := g.leftSkill.SkillIcon.Render(target); err != nil {
 		return err
 	}
 
 	offset += w
 
-	// Left skill selector
+	// New Stats Selector
 	if err := g.mainPanel.SetCurrentFrame(1); err != nil {
 		return err
 	}
@@ -687,7 +730,7 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 
 	offset += w
 
-	// Right skill selector
+	// New Skills Selector
 	if err := g.mainPanel.SetCurrentFrame(4); err != nil {
 		return err
 	}
@@ -703,15 +746,20 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	offset += w
 
 	// Right skill
-	if err := g.skillIcon.SetCurrentFrame(2); err != nil {
+	skillResourcePath = g.getSkillResourceByClass(g.hero.RightSkill.Charclass)
+	if skillResourcePath != g.rightSkill.SkillResourcePath {
+		g.rightSkill.SkillIcon, _ = g.uiManager.NewSprite(skillResourcePath, d2resource.PaletteSky)
+	}
+
+	if err := g.rightSkill.SkillIcon.SetCurrentFrame(g.hero.RightSkill.IconCel); err != nil {
 		return err
 	}
 
-	w, _ = g.skillIcon.GetCurrentFrameSize()
+	w, _ = g.rightSkill.SkillIcon.GetCurrentFrameSize()
 
-	g.skillIcon.SetPosition(offset, height)
+	g.rightSkill.SkillIcon.SetPosition(offset, height)
 
-	if err := g.skillIcon.Render(target); err != nil {
+	if err := g.rightSkill.SkillIcon.Render(target); err != nil {
 		return err
 	}
 
@@ -819,7 +867,7 @@ func (g *GameControls) ManaStatsIsVisible() bool {
 	return g.manaStatsIsVisible
 }
 
-// ToggleHpStats toggles the visibility of the hp and mana stats placed above their respective globe
+// ToggleHpStats toggles the visibility of the hp and mana stats placed above their respective globe and load only if they do not match
 func (g *GameControls) ToggleHpStats() {
 	g.hpStatsIsVisible = !g.hpStatsIsVisible
 }
@@ -834,7 +882,7 @@ func (g *GameControls) onHoverActionable(item ActionableType) {
 	switch item {
 	case leftSkill:
 		return
-	case leftSelect:
+	case newStats:
 		return
 	case xp:
 		return
@@ -844,7 +892,7 @@ func (g *GameControls) onHoverActionable(item ActionableType) {
 		return
 	case miniPnl:
 		return
-	case rightSelect:
+	case newSkills:
 		return
 	case rightSkill:
 		return
@@ -862,8 +910,8 @@ func (g *GameControls) onClickActionable(item ActionableType) {
 	switch item {
 	case leftSkill:
 		log.Println("Left Skill Action Pressed")
-	case leftSelect:
-		log.Println("Left Skill Selector Action Pressed")
+	case newStats:
+		log.Println("New Stats Selector Action Pressed")
 	case xp:
 		log.Println("XP Action Pressed")
 	case walkRun:
@@ -874,8 +922,8 @@ func (g *GameControls) onClickActionable(item ActionableType) {
 		log.Println("Mini Panel Action Pressed")
 
 		g.miniPanel.Toggle()
-	case rightSelect:
-		log.Println("Right Skill Selector Action Pressed")
+	case newSkills:
+		log.Println("New Skills Selector Action Pressed")
 	case rightSkill:
 		log.Println("Right Skill Action Pressed")
 	case hpGlobe:
@@ -897,4 +945,31 @@ func (g *GameControls) onClickActionable(item ActionableType) {
 	default:
 		log.Printf("Unrecognized ActionableType(%d) being clicked\n", item)
 	}
+}
+
+func (g *GameControls) getSkillResourceByClass(class string) string {
+	resource := ""
+
+	switch class {
+	case "":
+		resource = d2resource.GenericSkills
+	case "bar":
+		resource = d2resource.BarbarianSkills
+	case "nec":
+		resource = d2resource.NecromancerSkills
+	case "pal":
+		resource = d2resource.PaladinSkills
+	case "ass":
+		resource = d2resource.AssassinSkills
+	case "sor":
+		resource = d2resource.SorcererSkills
+	case "ama":
+		resource = d2resource.AmazonSkills
+	case "dru":
+		resource = d2resource.DruidSkills
+	default:
+		log.Fatalf("Unknown class token: '%s'", class)
+	}
+
+	return resource
 }

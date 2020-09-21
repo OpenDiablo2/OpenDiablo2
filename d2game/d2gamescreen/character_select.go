@@ -7,16 +7,16 @@ import (
 	"math"
 	"os"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 )
 
@@ -24,6 +24,7 @@ import (
 type CharacterSelect struct {
 	asset *d2asset.AssetManager
 	*d2mapentity.MapEntityFactory
+	*d2hero.HeroStateFactory
 	background             *d2ui.Sprite
 	newCharButton          *d2ui.Button
 	convertCharButton      *d2ui.Button
@@ -41,7 +42,7 @@ type CharacterSelect struct {
 	characterStatsLabel    [8]*d2ui.Label
 	characterExpLabel      [8]*d2ui.Label
 	characterImage         [8]*d2mapentity.Player
-	gameStates             []*d2player.PlayerState
+	gameStates             []*d2hero.HeroState
 	selectedCharacter      int
 	showDeleteConfirmation bool
 	connectionType         d2clientconnectiontype.ClientConnectionType
@@ -65,10 +66,13 @@ func CreateCharacterSelect(
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	connectionHost string,
 ) *CharacterSelect {
+	playerStateFactory, _ := d2hero.NewHeroStateFactory(asset) // TODO: handle errors
+	entityFactory, _ := d2mapentity.NewMapEntityFactory(asset)
+
 	return &CharacterSelect{
 		selectedCharacter: -1,
 		asset:             asset,
-		MapEntityFactory:  d2mapentity.NewMapEntityFactory(asset),
+		MapEntityFactory:  entityFactory,
 		renderer:          renderer,
 		connectionType:    connectionType,
 		connectionHost:    connectionHost,
@@ -76,6 +80,7 @@ func CreateCharacterSelect(
 		audioProvider:     audioProvider,
 		navigator:         navigator,
 		uiManager:         ui,
+		HeroStateFactory:  playerStateFactory,
 	}
 }
 
@@ -293,12 +298,13 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		v.characterExpLabel[i].SetText(d2ui.ColorTokenize(expText, d2ui.ColorTokenGreen))
 
 		heroType := v.gameStates[idx].HeroType
-		equipment := d2inventory.HeroObjects[heroType]
+		equipment := v.DefaultHeroItems[heroType]
 
 		// TODO: Generate or load the object from the actual player data...
 		v.characterImage[i] = v.NewPlayer("", "", 0, 0, 0,
 			v.gameStates[idx].HeroType,
 			v.gameStates[idx].Stats,
+			v.gameStates[idx].Skills,
 			&equipment,
 		)
 	}
@@ -447,7 +453,11 @@ func (v *CharacterSelect) toggleDeleteCharacterDialog(showDialog bool) {
 }
 
 func (v *CharacterSelect) refreshGameStates() {
-	v.gameStates = d2player.GetAllPlayerStates()
+	gameStates, err := v.HeroStateFactory.GetAllHeroStates()
+	if err == nil {
+		v.gameStates = gameStates
+	}
+
 	v.updateCharacterBoxes()
 
 	if len(v.gameStates) > 0 {

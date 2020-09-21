@@ -21,8 +21,6 @@ import (
 	"golang.org/x/image/colornames"
 	"gopkg.in/alecthomas/kingpin.v2"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
@@ -31,7 +29,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen"
@@ -187,15 +184,9 @@ func (a *App) initialize() error {
 	config := d2config.Config
 	a.audio.SetVolumes(config.BgmVolume, config.SfxVolume)
 
-	if err := a.loadDataDict(); err != nil {
-		return err
-	}
-
 	if err := a.loadStrings(); err != nil {
 		return err
 	}
-
-	d2inventory.LoadHeroObjects()
 
 	a.ui.Initialize()
 
@@ -217,98 +208,6 @@ func (a *App) loadStrings() error {
 
 		d2tbl.LoadTextDictionary(data)
 	}
-
-	return nil
-}
-
-func (a *App) loadDataDict() error {
-	entries := []struct {
-		path   string
-		loader func(data []byte)
-	}{
-		{d2resource.LevelType, d2datadict.LoadLevelTypes},
-		{d2resource.LevelPreset, d2datadict.LoadLevelPresets},
-		{d2resource.LevelWarp, d2datadict.LoadLevelWarps},
-		{d2resource.ObjectType, d2datadict.LoadObjectTypes},
-		{d2resource.ObjectDetails, d2datadict.LoadObjects},
-		{d2resource.Weapons, d2datadict.LoadWeapons},
-		{d2resource.Armor, d2datadict.LoadArmors},
-		{d2resource.Books, d2datadict.LoadBooks},
-		{d2resource.Misc, d2datadict.LoadMiscItems},
-		{d2resource.UniqueItems, d2datadict.LoadUniqueItems},
-		{d2resource.Missiles, d2datadict.LoadMissiles},
-		{d2resource.SoundSettings, d2datadict.LoadSounds},
-		{d2resource.AnimationData, d2data.LoadAnimationData},
-		{d2resource.MonStats, d2datadict.LoadMonStats},
-		{d2resource.MonStats2, d2datadict.LoadMonStats2},
-		{d2resource.MonPreset, d2datadict.LoadMonPresets},
-		{d2resource.MonProp, d2datadict.LoadMonProps},
-		{d2resource.MonType, d2datadict.LoadMonTypes},
-		{d2resource.MonMode, d2datadict.LoadMonModes},
-		{d2resource.MagicPrefix, d2datadict.LoadMagicPrefix},
-		{d2resource.MagicSuffix, d2datadict.LoadMagicSuffix},
-		{d2resource.ItemStatCost, d2datadict.LoadItemStatCosts},
-		{d2resource.ItemRatio, d2datadict.LoadItemRatios},
-		{d2resource.Overlays, d2datadict.LoadOverlays},
-		{d2resource.CharStats, d2datadict.LoadCharStats},
-		{d2resource.Hireling, d2datadict.LoadHireling},
-		{d2resource.Experience, d2datadict.LoadExperienceBreakpoints},
-		{d2resource.Gems, d2datadict.LoadGems},
-		{d2resource.QualityItems, d2datadict.LoadQualityItems},
-		{d2resource.Runes, d2datadict.LoadRunewords},
-		{d2resource.DifficultyLevels, d2datadict.LoadDifficultyLevels},
-		{d2resource.AutoMap, d2datadict.LoadAutoMaps},
-		{d2resource.LevelDetails, d2datadict.LoadLevelDetails},
-		{d2resource.LevelMaze, d2datadict.LoadLevelMazeDetails},
-		{d2resource.LevelSubstitutions, d2datadict.LoadLevelSubstitutions},
-		{d2resource.CubeRecipes, d2datadict.LoadCubeRecipes},
-		{d2resource.SuperUniques, d2datadict.LoadSuperUniques},
-		{d2resource.Inventory, d2datadict.LoadInventory},
-		{d2resource.Skills, d2datadict.LoadSkills},
-		{d2resource.SkillCalc, d2datadict.LoadSkillCalculations},
-		{d2resource.MissileCalc, d2datadict.LoadMissileCalculations},
-		{d2resource.Properties, d2datadict.LoadProperties},
-		{d2resource.SkillDesc, d2datadict.LoadSkillDescriptions},
-		{d2resource.ItemTypes, d2datadict.LoadItemTypes},
-		{d2resource.BodyLocations, d2datadict.LoadBodyLocations},
-		{d2resource.Sets, d2datadict.LoadSetRecords},
-		{d2resource.SetItems, d2datadict.LoadSetItems},
-		{d2resource.AutoMagic, d2datadict.LoadAutoMagicRecords},
-		{d2resource.TreasureClass, d2datadict.LoadTreasureClassRecords},
-		{d2resource.States, d2datadict.LoadStates},
-		{d2resource.SoundEnvirons, d2datadict.LoadSoundEnvirons},
-		{d2resource.Shrines, d2datadict.LoadShrines},
-		{d2resource.ElemType, d2datadict.LoadElemTypes},
-		{d2resource.PlrMode, d2datadict.LoadPlrModes},
-		{d2resource.PetType, d2datadict.LoadPetTypes},
-		{d2resource.NPC, d2datadict.LoadNPCs},
-		{d2resource.MonsterUniqueModifier, d2datadict.LoadMonsterUniqueModifiers},
-		{d2resource.MonsterEquipment, d2datadict.LoadMonsterEquipment},
-		{d2resource.UniqueAppellation, d2datadict.LoadUniqueAppellations},
-		{d2resource.MonsterLevel, d2datadict.LoadMonsterLevels},
-		{d2resource.MonsterSound, d2datadict.LoadMonsterSounds},
-		{d2resource.MonsterSequence, d2datadict.LoadMonsterSequences},
-		{d2resource.PlayerClass, d2datadict.LoadPlayerClasses},
-		{d2resource.MonsterPlacement, d2datadict.LoadMonsterPlacements},
-		{d2resource.ObjectGroup, d2datadict.LoadObjectGroups},
-		{d2resource.CompCode, d2datadict.LoadComponentCodes},
-		{d2resource.MonsterAI, d2datadict.LoadMonsterAI},
-		{d2resource.RarePrefix, d2datadict.LoadRareItemPrefixRecords},
-		{d2resource.RareSuffix, d2datadict.LoadRareItemSuffixRecords},
-	}
-
-	d2datadict.InitObjectRecords()
-
-	for _, entry := range entries {
-		data, err := a.asset.LoadFile(entry.path)
-		if err != nil {
-			return err
-		}
-
-		entry.loader(data)
-	}
-
-	d2datadict.LoadItemEquivalencies() // depends on ItemCommon and ItemTypes
 
 	return nil
 }
@@ -689,16 +588,23 @@ func updateInitError(target d2interface.Surface) error {
 func (a *App) ToMainMenu() {
 	buildInfo := d2gamescreen.BuildInfo{Branch: a.gitBranch, Commit: a.gitCommit}
 
-	mainMenu := d2gamescreen.CreateMainMenu(a, a.asset, a.renderer, a.inputManager, a.audio, a.ui,
-		buildInfo)
+	mainMenu, err := d2gamescreen.CreateMainMenu(a, a.asset, a.renderer, a.inputManager, a.audio, a.ui, buildInfo)
+	if err != nil {
+		log.Print(err)
+		return
+	}
 
 	a.screen.SetNextScreen(mainMenu)
 }
 
 // ToSelectHero forces the game to transition to the Select Hero (create character) screen
 func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType, host string) {
-	selectHero := d2gamescreen.CreateSelectHeroClass(a, a.asset, a.renderer, a.audio, a.ui,
-		connType, host)
+	selectHero, err := d2gamescreen.CreateSelectHeroClass(a, a.asset, a.renderer, a.audio, a.ui, connType, host)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
 	a.screen.SetNextScreen(selectHero)
 }
 
@@ -728,9 +634,12 @@ func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnection
 
 // ToMapEngineTest forces the game to transition to the map engine test screen
 func (a *App) ToMapEngineTest(region, level int) {
-	met := d2gamescreen.CreateMapEngineTest(region, level, a.asset, a.terminal, a.renderer,
-		a.inputManager,
-		a.audio, a.screen)
+	met, err := d2gamescreen.CreateMapEngineTest(region, level, a.asset, a.terminal, a.renderer, a.inputManager, a.audio, a.screen)
+	if err != nil {
+		return
+		log.Print(err)
+	}
+
 	a.screen.SetNextScreen(met)
 }
 

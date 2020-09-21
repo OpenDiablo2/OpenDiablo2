@@ -40,11 +40,12 @@ const (
 	ButtonTypeMinipanelMessage   ButtonType = 17
 	ButtonTypeMinipanelQuest     ButtonType = 18
 	ButtonTypeMinipanelMen       ButtonType = 19
+	ButtonTypeSquareClose        ButtonType = 20
 )
 
 const (
-	greyAlpha100     = 0x646464_ff
-	lightGreyAlpha75 = 0x808080_c3
+	greyAlpha100     = 0x646464ff
+	lightGreyAlpha75 = 0x808080c3
 )
 
 // ButtonLayout defines the type of buttons
@@ -84,9 +85,9 @@ const (
 	buttonOkCancelSegmentsY     = 1
 	buttonOkCancelDisabledFrame = -1
 
-	buttonCloseSegmentsX     = 1
-	buttonCloseSegmentsY     = 1
-	buttonCloseDisabledFrame = -1
+	buttonBuySellSegmentsX     = 1
+	buttonBuySellSegmentsY     = 1
+	buttonBuySellDisabledFrame = 1
 
 	buttonRunSegmentsX     = 1
 	buttonRunSegmentsY     = 1
@@ -153,15 +154,16 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			FontPath:         d2resource.FontRediculous,
 			AllowFrameChange: true,
 		},
-		ButtonTypeClose: {
-			XSegments: buttonCloseSegmentsX,
-			YSegments: buttonCloseSegmentsY,
-			DisabledFrame: buttonCloseDisabledFrame,
-			ResourceName: d2resource.SquareButton,
-			PaletteName: d2resource.PaletteUnits,
-			Toggleable: true,
-			FontPath: d2resource.Font30,
+		ButtonTypeSquareClose: {
+			XSegments:        buttonBuySellSegmentsX,
+			YSegments:        buttonBuySellSegmentsY,
+			DisabledFrame:    buttonBuySellDisabledFrame,
+			ResourceName:     d2resource.BuySellButton,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
 			AllowFrameChange: true,
+			BaseFrame:        10,
 		},
 	}
 }
@@ -286,6 +288,13 @@ func (v *Button) renderFrames(btnSprite *Sprite, btnLayout *ButtonLayout, label 
 
 			label.SetPosition(xOffset-pressedButtonOffset, textY+pressedButtonOffset)
 			label.Render(v.pressedSurface)
+		}
+
+		if btnLayout.ResourceName == d2resource.BuySellButton {
+			// Without returning early, the button UI gets all subsequent (unrelated) frames stacked on top
+			// Only 2 frames from this sprite are applicable to the button in question
+			// The presentation is incorrect without this hack
+			return
 		}
 
 		totalButtonTypes--

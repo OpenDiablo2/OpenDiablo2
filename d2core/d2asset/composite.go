@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -244,7 +243,7 @@ func (c *Composite) createMode(animationMode animationMode, weaponClass string) 
 
 	animationKey := strings.ToLower(c.token + animationMode.String() + weaponClass)
 
-	animationData := d2data.AnimationData[animationKey]
+	animationData := c.Records.Animations[animationKey]
 	if len(animationData) == 0 {
 		return nil, errors.New("could not find Animation data")
 	}

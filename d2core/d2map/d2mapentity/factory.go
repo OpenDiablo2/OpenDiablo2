@@ -1,16 +1,16 @@
 package d2mapentity
 
 import (
-	"errors"
 	"fmt"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
+
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
@@ -19,13 +19,31 @@ import (
 )
 
 // NewMapEntityFactory creates a MapEntityFactory instance with the given asset manager
-func NewMapEntityFactory(asset *d2asset.AssetManager) *MapEntityFactory {
-	return &MapEntityFactory{asset}
+func NewMapEntityFactory(asset *d2asset.AssetManager) (*MapEntityFactory, error) {
+	itemFactory, err := diablo2item.NewItemFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
+	stateFactory, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
+	entityFactory := &MapEntityFactory{
+		stateFactory,
+		asset,
+		itemFactory,
+	}
+
+	return entityFactory, nil
 }
 
 // MapEntityFactory creates map entities for the MapEngine
 type MapEntityFactory struct {
+	*d2hero.HeroStateFactory
 	asset *d2asset.AssetManager
+	item  *diablo2item.ItemFactory
 }
 
 // NewAnimatedEntity creates an instance of AnimatedEntity
@@ -41,7 +59,7 @@ func NewAnimatedEntity(x, y int, animation d2interface.Animation) *AnimatedEntit
 
 // NewPlayer creates a new player entity and returns a pointer to it.
 func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroType d2enum.Hero,
-	stats *d2hero.HeroStatsState, equipment *d2inventory.CharacterEquipment) *Player {
+	stats *d2hero.HeroStatsState, skills map[int]*d2hero.HeroSkill, equipment *d2inventory.CharacterEquipment) *Player {
 	layerEquipment := &[d2enum.CompositeTypeMax]string{
 		d2enum.CompositeTypeHead:      equipment.Head.GetArmorClass(),
 		d2enum.CompositeTypeTorso:     equipment.Torso.GetArmorClass(),
@@ -59,16 +77,25 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 		panic(err)
 	}
 
-	stats.NextLevelExp = d2datadict.GetExperienceBreakpoint(heroType, stats.Level)
+	stats.NextLevelExp = f.asset.Records.GetExperienceBreakpoint(heroType, stats.Level)
 	stats.Stamina = stats.MaxStamina
 
+	defaultCharStats := f.asset.Records.Character.Stats[heroType]
+	statsState := f.HeroStateFactory.CreateHeroStatsState(heroType, defaultCharStats)
+	heroState, _ := f.CreateHeroState(name, heroType, statsState)
+
+	attackSkillID := 0
 	result := &Player{
 		mapEntity: newMapEntity(x, y),
 		composite: composite,
 		Equipment: equipment,
-		Stats:     stats,
-		name:      name,
-		Class:     heroType,
+		Stats:     heroState.Stats,
+		Skills:    heroState.Skills,
+		//TODO: active left & right skill should be loaded from save file instead
+		LeftSkill:  heroState.Skills[attackSkillID],
+		RightSkill: heroState.Skills[attackSkillID],
+		name:       name,
+		Class:      heroType,
 		//nameLabel:    d2ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
 		isRunToggled: true,
 		isInTown:     true,
@@ -94,7 +121,7 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 }
 
 // NewMissile creates a new Missile and initializes it's animation.
-func (f *MapEntityFactory) NewMissile(x, y int, record *d2datadict.MissileRecord) (*Missile, error) {
+func (f *MapEntityFactory) NewMissile(x, y int, record *d2records.MissileRecord) (*Missile, error) {
 	animation, err := f.asset.LoadAnimation(
 		fmt.Sprintf("%s/%s.dcc", d2resource.MissileData, record.Animation.CelFileName),
 		d2resource.PaletteUnits,
@@ -123,10 +150,10 @@ func (f *MapEntityFactory) NewMissile(x, y int, record *d2datadict.MissileRecord
 
 // NewItem creates an item map entity
 func (f *MapEntityFactory) NewItem(x, y int, codes ...string) (*Item, error) {
-	item := diablo2item.NewItem(codes...)
+	item, err := f.item.NewItem(codes...)
 
-	if item == nil {
-		return nil, errors.New(errInvalidItemCodes)
+	if err != nil {
+		return nil, err
 	}
 
 	filename := item.CommonRecord().FlippyFile
@@ -150,12 +177,12 @@ func (f *MapEntityFactory) NewItem(x, y int, codes ...string) (*Item, error) {
 }
 
 // NewNPC creates a new NPC and returns a pointer to it.
-func (f *MapEntityFactory) NewNPC(x, y int, monstat *d2datadict.MonStatsRecord, direction int) (*NPC, error) {
+func (f *MapEntityFactory) NewNPC(x, y int, monstat *d2records.MonStatsRecord, direction int) (*NPC, error) {
 	result := &NPC{
 		mapEntity:     newMapEntity(x, y),
 		HasPaths:      false,
 		monstatRecord: monstat,
-		monstatEx:     d2datadict.MonStats2[monstat.ExtraDataKey],
+		monstatEx:     f.asset.Records.Monster.Stats2[monstat.ExtraDataKey],
 	}
 
 	var equipment [16]string
@@ -193,7 +220,7 @@ func (f *MapEntityFactory) NewNPC(x, y int, monstat *d2datadict.MonStatsRecord, 
 }
 
 // NewObject creates an instance of AnimatedComposite
-func (f *MapEntityFactory) NewObject(x, y int, objectRec *d2datadict.ObjectRecord,
+func (f *MapEntityFactory) NewObject(x, y int, objectRec *d2records.ObjectDetailsRecord,
 	palettePath string) (*Object, error) {
 	locX, locY := float64(x), float64(y)
 	entity := &Object{
@@ -202,7 +229,7 @@ func (f *MapEntityFactory) NewObject(x, y int, objectRec *d2datadict.ObjectRecor
 		Position:     d2vector.NewPosition(locX, locY),
 		name:         d2tbl.TranslateString(objectRec.Name),
 	}
-	objectType := &d2datadict.ObjectTypes[objectRec.Index]
+	objectType := f.asset.Records.Object.Types[objectRec.Index]
 
 	composite, err := f.asset.LoadComposite(d2enum.ObjectTypeItem, objectType.Token,
 		palettePath)

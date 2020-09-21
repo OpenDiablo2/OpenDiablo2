@@ -10,7 +10,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio"
@@ -27,7 +26,7 @@ const hideZoneTextAfterSeconds = 2.0
 const (
 	moveErrStr         = "failed to send MovePlayer packet to the server, playerId: %s, x: %g, x: %g\n"
 	bindControlsErrStr = "failed to add gameControls as input handler for player: %s\n"
-	castErrStr         = "failed to send CastSkill packet to the server, playerId: %s, missileId: %d, x: %g, x: %g\n"
+	castErrStr         = "failed to send CastSkill packet to the server, playerId: %s, skillId: %d, x: %g, x: %g\n"
 	spawnItemErrStr    = "failed to send SpawnItem packet to the server: (%d, %d) %+v"
 )
 
@@ -93,7 +92,7 @@ func CreateGame(
 		audioProvider: audioProvider,
 		renderer:      renderer,
 		terminal:      term,
-		soundEngine:   d2audio.NewSoundEngine(audioProvider, term),
+		soundEngine:   d2audio.NewSoundEngine(audioProvider, asset, term),
 		uiManager:     ui,
 		guiManager:    guiManager,
 	}
@@ -142,7 +141,7 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 		func(name string) {
 			x := int(v.localPlayer.Position.X())
 			y := int(v.localPlayer.Position.Y())
-			monstat := d2datadict.MonStats[name]
+			monstat := v.asset.Records.Monster.Stats[name]
 			if monstat == nil {
 				v.terminal.OutputErrorf("no monstat entry for \"%s\"", name)
 				return
@@ -233,12 +232,13 @@ func (v *Game) Advance(elapsed float64) error {
 			tile := v.gameClient.MapEngine.TileAt(int(tilePosition.X()), int(tilePosition.Y()))
 
 			if tile != nil {
-				v.soundEnv.SetEnv(d2datadict.LevelDetails[int(tile.RegionType)].SoundEnvironmentID)
+				levelDetails := v.asset.Records.Level.Details[int(tile.RegionType)]
+				v.soundEnv.SetEnv(levelDetails.SoundEnvironmentID)
 
 				// skip showing zone change text the first time we enter the world
 				if v.lastRegionType != d2enum.RegionNone && v.lastRegionType != tile.RegionType {
 					//TODO: Should not be using RegionType as an index - this will return incorrect LevelDetails record for most of the zones.
-					areaName := d2datadict.LevelDetails[int(tile.RegionType)].LevelDisplayName
+					areaName := levelDetails.LevelDisplayName
 					areaChgStr := fmt.Sprintf("Entering The %s", areaName)
 					v.gameControls.SetZoneChangeText(areaChgStr)
 					v.gameControls.ShowZoneChangeText()
@@ -312,10 +312,10 @@ func (v *Game) OnPlayerMove(targetX, targetY float64) {
 }
 
 // OnPlayerCast sends the casting skill action to the server
-func (v *Game) OnPlayerCast(missileID int, targetX, targetY float64) {
-	err := v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerID, missileID, targetX, targetY))
+func (v *Game) OnPlayerCast(skillID int, targetX, targetY float64) {
+	err := v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerID, skillID, targetX, targetY))
 	if err != nil {
-		fmt.Printf(castErrStr, v.gameClient.PlayerID, missileID, targetX, targetY)
+		fmt.Printf(castErrStr, v.gameClient.PlayerID, skillID, targetX, targetY)
 	}
 }
 

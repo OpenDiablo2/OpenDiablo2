@@ -9,10 +9,6 @@ import (
 // static check that item implements map entity interface
 var _ d2interface.MapEntity = &Item{}
 
-const (
-	errInvalidItemCodes = "invalid item codes supplied"
-)
-
 // Item is a map entity for an item
 type Item struct {
 	*AnimatedEntity
