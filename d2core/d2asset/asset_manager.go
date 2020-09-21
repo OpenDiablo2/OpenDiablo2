@@ -5,6 +5,8 @@ import (
 	"image/color"
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
@@ -142,6 +144,11 @@ func (am *AssetManager) initDataDictionaries() error {
 		}
 	}
 
+	err := am.initAnimationData(d2resource.AnimationData)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -239,6 +246,8 @@ func (am *AssetManager) LoadComposite(baseType d2enum.ObjectType, token, palette
 		token:        token,
 		palettePath:  palettePath,
 	}
+
+	c.SetDirection(0)
 
 	return c, nil
 }
@@ -415,6 +424,19 @@ func (am *AssetManager) loadDCC(path string,
 	animation, err := newDCCAnimation(dcc, palette, effect)
 
 	return animation, nil
+}
+
+func (am *AssetManager) initAnimationData(path string) error {
+	animDataBytes, err := am.LoadFile(path)
+	if err != nil {
+		return err
+	}
+
+	animData := d2data.LoadAnimationData(animDataBytes)
+
+	am.Records.Animations = animData
+
+	return nil
 }
 
 // BindTerminalCommands binds the in-game terminal comands for the asset manager.

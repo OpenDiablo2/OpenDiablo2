@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
@@ -19,7 +20,7 @@ type Object struct {
 	composite *d2asset.Composite
 	highlight bool
 	// nameLabel    d2ui.Label
-	objectRecord *d2datadict.ObjectRecord
+	objectRecord *d2records.ObjectDetailsRecord
 	drawLayer    int
 	name         string
 }

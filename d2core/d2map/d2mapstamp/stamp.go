@@ -1,7 +1,6 @@
 package d2mapstamp
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
@@ -97,13 +96,13 @@ func (mr *Stamp) Entities(tileOffsetX, tileOffsetY int) []d2interface.MapEntity 
 		if object.Type == int(d2enum.ObjectTypeItem) {
 			// For objects the DS1 ID to objectID is hardcoded in the game
 			// use the lookup table
-			lookup := d2datadict.LookupObject(int(mr.ds1.Act), object.Type, object.ID)
+			lookup := mr.factory.asset.Records.LookupObject(int(mr.ds1.Act), object.Type, object.ID)
 
 			if lookup == nil {
 				continue
 			}
 
-			objectRecord := d2datadict.Objects[lookup.ObjectsTxtId]
+			objectRecord := mr.factory.asset.Records.Object.Details[lookup.ObjectsTxtId]
 
 			if objectRecord != nil {
 				entity, err := mr.entity.NewObject((tileOffsetX*5)+object.X,

@@ -8,7 +8,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2datadict"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2item"
@@ -194,13 +193,13 @@ func (i *Item) UniqueRecord() *d2records.UniqueItemRecord {
 }
 
 // SetRecord returns the SetRecord of the item
-func (i *Item) SetRecord() *d2datadict.SetRecord {
-	return d2datadict.SetRecords[i.SetCode]
+func (i *Item) SetRecord() *d2records.SetRecord {
+	return i.factory.asset.Records.Item.Sets[i.SetCode]
 }
 
 // SetItemRecord returns the SetRecord of the item
-func (i *Item) SetItemRecord() *d2datadict.SetItemRecord {
-	return d2datadict.SetItems[i.SetItemCode]
+func (i *Item) SetItemRecord() *d2records.SetItemRecord {
+	return i.factory.asset.Records.Item.SetItems[i.SetItemCode]
 }
 
 // PrefixRecords returns the ItemAffixCommonRecords of the prefixes of the item
@@ -303,7 +302,7 @@ func (i *Item) sanitizeDropModifier(modifier DropModifier) DropModifier {
 }
 
 func (i *Item) pickUniqueRecord() {
-	matches := findMatchingUniqueRecords(i.CommonRecord())
+	matches := i.findMatchingUniqueRecords(i.CommonRecord())
 	if len(matches) > 0 {
 		match := matches[i.rand.Intn(len(matches))]
 		i.UniqueCode = match.Code
@@ -311,7 +310,7 @@ func (i *Item) pickUniqueRecord() {
 }
 
 func (i *Item) pickSetRecords() {
-	if matches := findMatchingSetItemRecords(i.CommonRecord()); len(matches) > 0 {
+	if matches := i.findMatchingSetItemRecords(i.CommonRecord()); len(matches) > 0 {
 		picked := matches[i.rand.Intn(len(matches))]
 		i.SetItemCode = picked.SetItemKey
 
@@ -658,10 +657,16 @@ func (i *Item) generateName() {
 	if numAffixes >= 3 {
 		i.rand.Seed(i.Seed)
 
-		numPrefix, numSuffix := len(d2datadict.RarePrefixes), len(d2datadict.RareSuffixes)
+		prefixes := i.factory.asset.Records.Item.Rare.Prefix
+		suffixes := i.factory.asset.Records.Item.Rare.Suffix
+
+		numPrefix := len(prefixes)
+		numSuffix := len(suffixes)
+
 		preIdx, sufIdx := i.rand.Intn(numPrefix), i.rand.Intn(numSuffix)
-		prefix := d2datadict.RarePrefixes[preIdx].Name
-		suffix := d2datadict.RareSuffixes[sufIdx].Name
+		prefix := prefixes[preIdx].Name
+		suffix := suffixes[sufIdx].Name
+
 		name = fmt.Sprintf("%s %s\n%s", strings.Title(prefix), strings.Title(suffix), name)
 	}
 
@@ -708,13 +713,13 @@ func (i *Item) GetStatStrings() []string {
 	return result
 }
 
-func findMatchingUniqueRecords(icr *d2records.ItemCommonRecord) []*d2datadict.UniqueItemRecord {
-	result := make([]*d2datadict.UniqueItemRecord, 0)
+func (i *Item) findMatchingUniqueRecords(icr *d2records.ItemCommonRecord) []*d2records.UniqueItemRecord {
+	result := make([]*d2records.UniqueItemRecord, 0)
 
 	c1, c2, c3, c4 := icr.Code, icr.NormalCode, icr.UberCode, icr.UltraCode
 
-	for uCode := range d2datadict.UniqueItems {
-		uRec := d2datadict.UniqueItems[uCode]
+	for uCode := range i.factory.asset.Records.Item.Unique {
+		uRec := i.factory.asset.Records.Item.Unique[uCode]
 
 		switch uCode {
 		case c1, c2, c3, c4:
@@ -726,15 +731,15 @@ func findMatchingUniqueRecords(icr *d2records.ItemCommonRecord) []*d2datadict.Un
 }
 
 // find possible SetItemRecords that the given ItemCommonRecord can have
-func findMatchingSetItemRecords(icr *d2records.ItemCommonRecord) []*d2datadict.SetItemRecord {
-	result := make([]*d2datadict.SetItemRecord, 0)
+func (i *Item) findMatchingSetItemRecords(icr *d2records.ItemCommonRecord) []*d2records.SetItemRecord {
+	result := make([]*d2records.SetItemRecord, 0)
 
 	c1, c2, c3, c4 := icr.Code, icr.NormalCode, icr.UberCode, icr.UltraCode
 
-	for setItemIdx := range d2datadict.SetItems {
-		switch d2datadict.SetItems[setItemIdx].ItemCode {
+	for setItemIdx := range i.factory.asset.Records.Item.SetItems {
+		switch i.factory.asset.Records.Item.SetItems[setItemIdx].ItemCode {
 		case c1, c2, c3, c4:
-			result = append(result, d2datadict.SetItems[setItemIdx])
+			result = append(result, i.factory.asset.Records.Item.SetItems[setItemIdx])
 		}
 	}
 
