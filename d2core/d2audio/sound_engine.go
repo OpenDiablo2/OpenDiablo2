@@ -133,14 +133,13 @@ func NewSoundEngine(provider d2interface.AudioProvider,
 
 	err = term.BindAction("activesounds", "list currently active sounds", func() {
 		for s := range r.sounds {
-
-			if err != nil {
-				log.Print(err)
-				return
-			}
 			log.Println(s)
 		}
 	})
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
 	err = term.BindAction("killsounds", "kill active sounds", func() {
 		for s := range r.sounds {
@@ -152,6 +151,10 @@ func NewSoundEngine(provider d2interface.AudioProvider,
 			s.Stop()
 		}
 	})
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
 	return &r
 }
