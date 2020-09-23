@@ -126,7 +126,7 @@ func NewGameControls(
 	zoneLabel := ui.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
 	zoneLabel.Alignment = d2gui.HorizontalAlignCenter
 
-	nameLabel := ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
+	nameLabel := ui.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
 	nameLabel.Alignment = d2gui.HorizontalAlignCenter
 	nameLabel.SetText(d2ui.ColorTokenize("", d2ui.ColorTokenServer))
 
