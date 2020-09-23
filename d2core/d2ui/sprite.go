@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -154,7 +155,10 @@ func (s *Sprite) SetCurrentFrame(frameIndex int) error {
 
 // Rewind sprite to beginning
 func (s *Sprite) Rewind() {
-	_ = s.animation.SetCurrentFrame(0)
+	err := s.animation.SetCurrentFrame(0)
+	if err != nil {
+		log.Print(err)
+	}
 }
 
 // PlayForward plays sprite forward

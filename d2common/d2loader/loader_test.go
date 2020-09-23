@@ -2,6 +2,7 @@ package d2loader
 
 import (
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset"
@@ -83,11 +84,26 @@ func TestLoader_AddSource(t *testing.T) {
 func TestLoader_Load(t *testing.T) {
 	loader := NewLoader(nil)
 
-	_, _ = loader.AddSource(sourcePathB) // we expect files common to any source to come from here
-	_, _ = loader.AddSource(sourcePathD)
-	_, _ = loader.AddSource(sourcePathA)
-	_, _ = loader.AddSource(sourcePathC)
-
+	_, err := loader.AddSource(sourcePathB) // we expect files common to any source to come from here
+	if err != nil {
+		t.Fail()
+		log.Print(err)
+	}
+	_, err = loader.AddSource(sourcePathD)
+	if err != nil {
+		t.Fail()
+		log.Print(err)
+	}
+	_, err = loader.AddSource(sourcePathA)
+	if err != nil {
+		t.Fail()
+		log.Print(err)
+	}
+	_, err = loader.AddSource(sourcePathC)
+	if err != nil {
+		t.Fail()
+		log.Print(err)
+	}
 	entryCommon, errCommon := loader.Load(commonFile) // common file exists in all three Sources
 
 	entryA, errA := loader.Load(exclusiveA) // each source has a file exclusive to itself

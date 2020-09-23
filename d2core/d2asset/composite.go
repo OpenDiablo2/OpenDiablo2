@@ -232,8 +232,8 @@ type compositeMode struct {
 
 func (c *Composite) createMode(animationMode animationMode, weaponClass string) (*compositeMode, error) {
 	cofPath := fmt.Sprintf("%s/%s/COF/%s%s%s.COF", c.basePath, c.token, c.token, animationMode, weaponClass)
-	if exists, _ := c.FileExists(cofPath); !exists {
-		return nil, errors.New("composite not found")
+	if exists, err := c.FileExists(cofPath); !exists {
+		return nil, fmt.Errorf("composite not found at path '%s': %v", cofPath, err)
 	}
 
 	cof, err := c.loadCOF(cofPath)
@@ -295,16 +295,18 @@ func (c *Composite) loadCompositeLayer(layerKey, layerValue, animationMode, weap
 	}
 
 	for _, animationPath := range animationPaths {
-		if exists, _ := c.FileExists(animationPath); exists {
-			animation, err := c.LoadAnimationWithEffect(animationPath, palettePath,
-				drawEffect)
+
+		if exists, err := c.FileExists(animationPath); exists && err == nil {
+			animation, err := c.LoadAnimationWithEffect(animationPath, palettePath, drawEffect)
 			if err == nil {
 				return animation, nil
 			}
+		} else {
+			return nil, fmt.Errorf("animation path '%s' not found: %v", animationPath, err)
 		}
 	}
 
-	return nil, errors.New("Animation not found")
+	return nil, errors.New("animation not found")
 }
 
 // GetSize returns the size of the composite

@@ -158,13 +158,17 @@ func (v *MPQ) readHeader() error {
 		return errors.New("invalid mpq header")
 	}
 
-	v.loadHashTable()
+	err = v.loadHashTable()
+	if err != nil {
+		return err
+	}
+
 	v.loadBlockTable()
 
 	return nil
 }
 
-func (v *MPQ) loadHashTable() {
+func (v *MPQ) loadHashTable() error {
 	_, err := v.file.Seek(int64(v.data.HashTableOffset), 0)
 	if err != nil {
 		log.Panic(err)
@@ -174,7 +178,11 @@ func (v *MPQ) loadHashTable() {
 	hash := make([]byte, 4)
 
 	for i := range hashData {
-		_, _ = v.file.Read(hash)
+		_, err := v.file.Read(hash)
+		if err != nil {
+			log.Print(err)
+		}
+
 		hashData[i] = binary.LittleEndian.Uint32(hash)
 	}
 
@@ -190,6 +198,8 @@ func (v *MPQ) loadHashTable() {
 			BlockIndex: hashData[(i*4)+3],
 		})
 	}
+
+	return nil
 }
 
 func (v *MPQ) loadBlockTable() {
@@ -202,7 +212,10 @@ func (v *MPQ) loadBlockTable() {
 	hash := make([]byte, 4)
 
 	for i := range blockData {
-		_, _ = v.file.Read(hash[:]) //nolint:errcheck Will fix later
+		_, err = v.file.Read(hash[:]) //nolint:errcheck Will fix later
+		if err != nil {
+			log.Print(err)
+		}
 		blockData[i] = binary.LittleEndian.Uint32(hash)
 	}
 

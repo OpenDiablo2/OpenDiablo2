@@ -1,6 +1,8 @@
 package d2gui
 
 import (
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -22,7 +24,11 @@ func createLabel(renderer d2interface.Renderer, text string, font *d2asset.Font)
 		renderer: renderer,
 	}
 
-	_ = label.setText(text)
+	err := label.setText(text)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 	label.SetVisible(true)
 
 	return label

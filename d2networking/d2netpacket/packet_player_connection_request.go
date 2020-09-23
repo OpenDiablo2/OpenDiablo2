@@ -2,6 +2,7 @@ package d2netpacket
 
 import (
 	"encoding/json"
+	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 
@@ -22,7 +23,10 @@ func CreatePlayerConnectionRequestPacket(id string, playerState *d2hero.HeroStat
 		ID:          id,
 		PlayerState: playerState,
 	}
-	b, _ := json.Marshal(playerConnectionRequest)
+	b, err := json.Marshal(playerConnectionRequest)
+	if err != nil {
+		log.Print(err)
+	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.PlayerConnectionRequest,

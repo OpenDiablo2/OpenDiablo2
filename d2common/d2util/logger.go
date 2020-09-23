@@ -3,6 +3,7 @@ package d2util
 import (
 	"fmt"
 	"io"
+	"log"
 )
 
 // LogLevel determines how verbose the logging is (higher is more verbose)
@@ -93,7 +94,10 @@ func (l *Logger) print(level LogLevel, msg string) {
 		return
 	}
 
-	_, _ = l.Write(format(fmtString, []byte(msg)))
+	_, err := l.Write(format(fmtString, []byte(msg)))
+	if err != nil {
+		log.Print(err)
+	}
 }
 
 func format(fmtStr string, fmtInput []byte) []byte {

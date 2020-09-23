@@ -51,7 +51,10 @@ func (eap *AudioProvider) PlayBGM(song string) {
 	eap.lastBgm = song
 
 	if song == "" && eap.bgmAudio != nil && eap.bgmAudio.IsPlaying() {
-		_ = eap.bgmAudio.Pause()
+		err := eap.bgmAudio.Pause()
+		if err != nil {
+			log.Print(err)
+		}
 
 		return
 	}

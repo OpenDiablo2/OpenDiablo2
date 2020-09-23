@@ -12,7 +12,11 @@ import (
 )
 
 func (mr *MapRenderer) generateTileCache() {
-	mr.palette, _ = mr.loadPaletteForAct(d2enum.RegionIdType(mr.mapEngine.LevelType().ID))
+	var err error
+	mr.palette, err = mr.loadPaletteForAct(d2enum.RegionIdType(mr.mapEngine.LevelType().ID))
+	if err != nil {
+		log.Print(err)
+	}
 
 	tiles := *mr.mapEngine.Tiles()
 	for idx := range tiles {
@@ -83,12 +87,19 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord) {
 
 		tileYOffset := d2math.AbsInt32(tileYMinimum)
 		tileHeight := d2math.AbsInt32(tileData[i].Height)
-		image, _ := mr.renderer.NewSurface(int(tileData[i].Width), int(tileHeight), d2enum.FilterNearest)
+		image, err := mr.renderer.NewSurface(int(tileData[i].Width), int(tileHeight), d2enum.FilterNearest)
+		if err != nil {
+			log.Print(err)
+		}
+
 		indexData := make([]byte, tileData[i].Width*tileHeight)
 		d2dt1.DecodeTileGfxData(tileData[i].Blocks, &indexData, tileYOffset, tileData[i].Width)
 		pixels := d2util.ImgIndexToRGBA(indexData, mr.palette)
 
-		_ = image.ReplacePixels(pixels)
+		err = image.ReplacePixels(pixels)
+		if err != nil {
+			log.Print(err)
+		}
 		mr.setImageCacheRecord(tile.Style, tile.Sequence, 0, tileIndex, image)
 	}
 }
@@ -125,11 +136,20 @@ func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord) {
 		return
 	}
 
-	image, _ := mr.renderer.NewSurface(int(tileData.Width), tileHeight, d2enum.FilterNearest)
+	image, err := mr.renderer.NewSurface(int(tileData.Width), tileHeight, d2enum.FilterNearest)
+	if err != nil {
+		log.Print(err)
+	}
+
 	indexData := make([]byte, tileData.Width*int32(tileHeight))
 	d2dt1.DecodeTileGfxData(tileData.Blocks, &indexData, tileYOffset, tileData.Width)
 	pixels := d2util.ImgIndexToRGBA(indexData, mr.palette)
-	_ = image.ReplacePixels(pixels)
+
+	err = image.ReplacePixels(pixels)
+	if err != nil {
+		log.Print(err)
+	}
+
 	mr.setImageCacheRecord(tile.Style, tile.Sequence, 13, tile.RandomIndex, image)
 }
 
@@ -184,7 +204,11 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord) {
 		return
 	}
 
-	image, _ := mr.renderer.NewSurface(160, int(realHeight), d2enum.FilterNearest)
+	image, err := mr.renderer.NewSurface(160, int(realHeight), d2enum.FilterNearest)
+	if err != nil {
+		log.Print(err)
+	}
+
 	indexData := make([]byte, 160*realHeight)
 
 	d2dt1.DecodeTileGfxData(tileData.Blocks, &indexData, tileYOffset, 160)

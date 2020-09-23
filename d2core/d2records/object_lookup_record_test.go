@@ -1,6 +1,7 @@
 package d2records
 
 import (
+	"log"
 	"testing"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -12,7 +13,10 @@ import (
 func TestIndexObjects(t *testing.T) {
 	assert := testify.New(t)
 
-	r, _ := NewRecordManager()
+	r, err := NewRecordManager()
+	if err != nil {
+		log.Print(err)
+	}
 
 	testObjects := []ObjectLookupRecord{
 		{Act: 1, Type: d2enum.ObjectTypeCharacter, Id: 0, Description: "Act1CharId0"},

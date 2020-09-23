@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -78,8 +79,17 @@ func NewHeroStatsPanel(asset *d2asset.AssetManager, ui *d2ui.UIManager, heroName
 
 // Load the data for the hero status panel
 func (s *HeroStatsPanel) Load() {
-	s.frame, _ = s.uiManager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
-	s.panel, _ = s.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
+	var err error
+	s.frame, err = s.uiManager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
+
+	s.panel, err = s.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
+
 	s.initStatValueLabels()
 }
 

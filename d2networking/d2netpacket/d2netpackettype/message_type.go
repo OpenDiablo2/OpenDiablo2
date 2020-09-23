@@ -1,6 +1,9 @@
 package d2netpackettype
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"log"
+)
 
 // NetPacketType is an enum referring to all packet types in package
 // d2netpacket.
@@ -50,7 +53,10 @@ func (n NetPacketType) String() string {
 }
 
 func (n NetPacketType) MarshalPacket() []byte {
-	p, _ := json.Marshal(n)
+	p, err := json.Marshal(n)
+	if err != nil {
+		log.Print(err)
+	}
 
 	return p
 }

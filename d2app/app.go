@@ -362,7 +362,10 @@ func (a *App) dumpHeap() {
 		}
 	}
 
-	fileOut, _ := os.Create("./pprof/heap.pprof")
+	fileOut, err := os.Create("./pprof/heap.pprof")
+	if err != nil {
+		log.Print(err)
+	}
 
 	if err := pprof.WriteHeapProfile(fileOut); err != nil {
 		log.Fatal(err)
@@ -569,7 +572,10 @@ func enableProfiler(profileOption string) interface{ Stop() } {
 }
 
 func updateInitError(target d2interface.Surface) error {
-	_ = target.Clear(colornames.Darkred)
+	err := target.Clear(colornames.Darkred)
+	if err != nil {
+		return err
+	}
 
 	target.PushTranslation(errMsgPadding, errMsgPadding)
 	target.DrawTextf(`Could not find the MPQ files in the directory: 
@@ -604,9 +610,12 @@ func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType,
 
 // ToCreateGame forces the game to transition to the Create Game screen
 func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.ClientConnectionType, host string) {
-	gameClient, _ := d2client.Create(connType, a.asset, a.scriptEngine)
+	gameClient, err := d2client.Create(connType, a.asset, a.scriptEngine)
+	if err != nil {
+		log.Print(err)
+	}
 
-	if err := gameClient.Open(host, filePath); err != nil {
+	if err = gameClient.Open(host, filePath); err != nil {
 		// TODO an error screen should be shown in this case
 		fmt.Printf("can not connect to the host: %s", host)
 	}
