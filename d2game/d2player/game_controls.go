@@ -816,24 +816,19 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		g.zoneChangeText.Render(target)
 	}
 
-	hpWithin := (mx <= 95) && (mx >= 30) && (my <= 575) && (my >= 525)
-	manaWithin := (mx <= 765) && (mx >= 700) && (my <= 575) && (my >= 525)
-
 	// Display current hp and mana stats hpGlobe or manaGlobe region is clicked
-	if hpWithin || g.hpStatsIsVisible {
-		g.hpManaStatsLabel.SetText(d2ui.ColorTokenize(
-			fmt.Sprintf("LIFE: %v / %v", float64(g.hero.Stats.Health), float64(g.hero.Stats.MaxHealth)),
-			d2ui.ColorTokenWhite),
-		)
-		g.hpManaStatsLabel.SetPosition(15, 485)
+	if g.actionableRegions[hpGlobe].Rect.IsInRect(mx, my) || g.hpStatsIsVisible {
+		g.hpManaStatsLabel.SetText(fmt.Sprintf("Life: %v / %v", float64(g.hero.Stats.Health), float64(g.hero.Stats.MaxHealth)))
+		g.hpManaStatsLabel.SetPosition(15, 487)
 		g.hpManaStatsLabel.Render(target)
 	}
 
-	if manaWithin || g.manaStatsIsVisible {
-		g.hpManaStatsLabel.SetText(fmt.Sprintf("MANA: %v / %v", float64(g.hero.Stats.Mana), float64(g.hero.Stats.MaxMana)))
+	if g.actionableRegions[manaGlobe].Rect.IsInRect(mx, my) || g.manaStatsIsVisible {
+		g.hpManaStatsLabel.SetText(fmt.Sprintf("Mana: %v / %v", float64(g.hero.Stats.Mana), float64(g.hero.Stats.MaxMana)))
+		// In case if the mana value gets higher, we need to shift the label to the left a little, hense widthManaLabel.
 		widthManaLabel, _ := g.hpManaStatsLabel.GetSize()
 		xManaLabel := 785 - widthManaLabel
-		g.hpManaStatsLabel.SetPosition(xManaLabel, 485)
+		g.hpManaStatsLabel.SetPosition(xManaLabel, 487)
 		g.hpManaStatsLabel.Render(target)
 	}
 
