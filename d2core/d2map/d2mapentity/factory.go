@@ -3,9 +3,7 @@ package d2mapentity
 import (
 	"fmt"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
-
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
@@ -16,6 +14,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2item/diablo2item"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 )
 
 // NewMapEntityFactory creates a MapEntityFactory instance with the given asset manager
@@ -221,7 +220,7 @@ func (f *MapEntityFactory) NewObject(x, y int, objectRec *d2records.ObjectDetail
 	palettePath string) (*Object, error) {
 	locX, locY := float64(x), float64(y)
 	entity := &Object{
-		uuid:         uuid.NewV4().String(),
+		uuid:         uuid.New().String(),
 		objectRecord: objectRec,
 		Position:     d2vector.NewPosition(locX, locY),
 		name:         d2tbl.TranslateString(objectRec.Name),
