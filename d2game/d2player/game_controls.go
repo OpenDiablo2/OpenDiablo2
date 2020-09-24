@@ -107,6 +107,11 @@ const (
 	manaGlobe
 	miniPanelCharacter
 	miniPanelInventory
+	miniPanelSkillTree
+	miniPanelAutomap
+	miniPanelMessageLog
+	miniPanelQuestLog
+	miniPanelGameMenu
 )
 
 // NewGameControls creates a GameControls instance and returns a pointer to it
@@ -192,10 +197,15 @@ func NewGameControls(
 			{miniPnl, d2geom.Rectangle{Left: 393, Top: 563, Width: 12, Height: 23}},
 			{newSkills, d2geom.Rectangle{Left: 562, Top: 563, Width: 30, Height: 30}},
 			{rightSkill, d2geom.Rectangle{Left: 634, Top: 550, Width: 50, Height: 50}},
-			{hpGlobe, d2geom.Rectangle{Left: 30, Top: 525, Width: 65, Height: 50}},
-			{manaGlobe, d2geom.Rectangle{Left: 700, Top: 525, Width: 65, Height: 50}},
-			{miniPanelCharacter, d2geom.Rectangle{Left: 325, Top: 526, Width: 26, Height: 26}},
-			{miniPanelInventory, d2geom.Rectangle{Left: 351, Top: 526, Width: 26, Height: 26}},
+			{hpGlobe, d2geom.Rectangle{Left: 30, Top: 525, Width: 80, Height: 60}},
+			{manaGlobe, d2geom.Rectangle{Left: 695, Top: 525, Width: 80, Height: 60}},
+			{miniPanelCharacter, d2geom.Rectangle{Left: 324, Top: 528, Width: 22, Height: 26}},
+			{miniPanelInventory, d2geom.Rectangle{Left: 346, Top: 528, Width: 22, Height: 26}},
+			{miniPanelSkillTree, d2geom.Rectangle{Left: 368, Top: 528, Width: 22, Height: 26}},
+			{miniPanelAutomap, d2geom.Rectangle{Left: 390, Top: 528, Width: 22, Height: 26}},
+			{miniPanelMessageLog, d2geom.Rectangle{Left: 412, Top: 528, Width: 22, Height: 26}},
+			{miniPanelQuestLog, d2geom.Rectangle{Left: 434, Top: 528, Width: 22, Height: 26}},
+			{miniPanelGameMenu, d2geom.Rectangle{Left: 456, Top: 528, Width: 22, Height: 26}},
 		},
 		lastLeftBtnActionTime:  0,
 		lastRightBtnActionTime: 0,
@@ -841,6 +851,82 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		return err
 	}
 
+	// Minipanel is closed and minipanel button is hovered.
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPnl].Rect.IsInRect(mx, my) {
+		g.nameLabel.SetText("Close Mini Panel")
+		g.nameLabel.SetPosition(399, 544)
+		g.nameLabel.Render(target)
+	}
+
+	// Minipanel is open and minipanel button is hovered.
+	if !g.miniPanel.IsOpen() && g.actionableRegions[miniPnl].Rect.IsInRect(mx, my) {
+		g.nameLabel.SetText("Open Mini Panel")
+		g.nameLabel.SetPosition(399, 544)
+		g.nameLabel.Render(target)
+	}
+
+	// Display character tooltip when hovered.
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelCharacter].Rect.IsInRect(mx, my) {
+		g.nameLabel.SetText("Character (A) (C)")
+		g.nameLabel.SetPosition(340, 510)
+		g.nameLabel.Render(target)
+	}
+
+	// Display inventory tooltip when hovered.
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelInventory].Rect.IsInRect(mx, my) {
+		g.nameLabel.SetText("Inventory (I) (B)")
+		g.nameLabel.SetPosition(360, 510)
+		g.nameLabel.Render(target)
+	}
+
+	// Display skill tree tooltip when hovered.
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelSkillTree].Rect.IsInRect(mx, my) {
+		g.nameLabel.SetText("Skill Tree (T) (P)")
+		g.nameLabel.SetPosition(380, 510)
+		g.nameLabel.Render(target)
+	}
+
+	// Display automap tooltip when hovered.
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelAutomap].Rect.IsInRect(mx, my) {
+		g.nameLabel.SetText("Automap (TAB) (Mouse 3)")
+		g.nameLabel.SetPosition(400, 510)
+		g.nameLabel.Render(target)
+	}
+
+	// Display message log tooltip when hovered.
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelMessageLog].Rect.IsInRect(mx, my) {
+		g.nameLabel.SetText("Message Log (M)")
+		g.nameLabel.SetPosition(420, 510)
+		g.nameLabel.Render(target)
+	}
+
+	// Display quest log tooltip when hovered.
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelQuestLog].Rect.IsInRect(mx, my) {
+		g.nameLabel.SetText("Quest Log (Q)")
+		g.nameLabel.SetPosition(440, 510)
+		g.nameLabel.Render(target)
+	}
+
+	// Display game menu tooltip when hovered.
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelGameMenu].Rect.IsInRect(mx, my) {
+		g.nameLabel.SetText("Game Menu (ESC)")
+		g.nameLabel.SetPosition(460, 510)
+		g.nameLabel.Render(target)
+	}
+
+	// Display stamina tooltip when hovered.
+	if g.miniPanel.IsOpen() && g.actionableRegions[stamina].Rect.IsInRect(mx, my) {
+		g.nameLabel.SetText(fmt.Sprintf("Stamina: %v / %v", float64(g.hero.Stats.Stamina), float64(g.hero.Stats.MaxStamina)))
+		g.nameLabel.SetPosition(320, 535)
+		g.nameLabel.Render(target)
+	}
+
+	// Display experience tooltip when hovered.
+	if g.miniPanel.IsOpen() && g.actionableRegions[xp].Rect.IsInRect(mx, my) {
+		g.nameLabel.SetText(fmt.Sprintf("Experience: %v / %v", float64(g.hero.Stats.Experience), float64(g.hero.Stats.NextLevelExp)))
+		g.nameLabel.SetPosition(255, 535)
+		g.nameLabel.Render(target)
+	}
 	return nil
 }
 
@@ -903,6 +989,20 @@ func (g *GameControls) onHoverActionable(item ActionableType) {
 	case hpGlobe:
 		return
 	case manaGlobe:
+		return
+	case miniPanelCharacter:
+		return
+	case miniPanelInventory:
+		return
+	case miniPanelSkillTree:
+		return
+	case miniPanelAutomap:
+		return
+	case miniPanelMessageLog:
+		return
+	case miniPanelQuestLog:
+		return
+	case miniPanelGameMenu:
 		return
 	default:
 		log.Printf("Unrecognized ActionableType(%d) being hovered\n", item)
