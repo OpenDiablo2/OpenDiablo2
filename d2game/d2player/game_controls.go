@@ -6,8 +6,10 @@ import (
 	"image/color"
 	"log"
 	"math"
+	"strings"
 	"time"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player/help"
@@ -826,16 +828,26 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		g.zoneChangeText.Render(target)
 	}
 
+	// Create and format Health string from string lookup table.
+	fmtHealth := d2tbl.TranslateString("panelhealth")
+	healthCurr, healthMax := int(g.hero.Stats.Health), int(g.hero.Stats.MaxHealth)
+	strPanelHealth := fmt.Sprintf(fmtHealth, healthCurr, healthMax)
+
 	// Display current hp and mana stats hpGlobe or manaGlobe region is clicked
 	if g.actionableRegions[hpGlobe].Rect.IsInRect(mx, my) || g.hpStatsIsVisible {
-		g.hpManaStatsLabel.SetText(fmt.Sprintf("Life: %v / %v", float64(g.hero.Stats.Health), float64(g.hero.Stats.MaxHealth)))
+		g.hpManaStatsLabel.SetText(strPanelHealth)
 		g.hpManaStatsLabel.SetPosition(15, 487)
 		g.hpManaStatsLabel.Render(target)
 	}
 
+	// Create and format Mana string from string lookup table.
+	fmtMana := d2tbl.TranslateString("panelmana")
+	manaCurr, manaMax := int(g.hero.Stats.Mana), int(g.hero.Stats.MaxMana)
+	strPanelMana := fmt.Sprintf(fmtMana, manaCurr, manaMax)
+
 	if g.actionableRegions[manaGlobe].Rect.IsInRect(mx, my) || g.manaStatsIsVisible {
-		g.hpManaStatsLabel.SetText(fmt.Sprintf("Mana: %v / %v", float64(g.hero.Stats.Mana), float64(g.hero.Stats.MaxMana)))
-		// In case if the mana value gets higher, we need to shift the label to the left a little, hense widthManaLabel.
+		g.hpManaStatsLabel.SetText(strPanelMana)
+		// In case if the mana value gets higher, we need to shift the label to the left a little, hence widthManaLabel.
 		widthManaLabel, _ := g.hpManaStatsLabel.GetSize()
 		xManaLabel := 785 - widthManaLabel
 		g.hpManaStatsLabel.SetPosition(xManaLabel, 487)
@@ -848,77 +860,104 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 
 	// Minipanel is closed and minipanel button is hovered.
 	if g.miniPanel.IsOpen() && g.actionableRegions[miniPnl].Rect.IsInRect(mx, my) {
-		g.nameLabel.SetText("Close Mini Panel")
+		g.nameLabel.SetText(d2tbl.TranslateString("panelcmini")) //"Close Mini Panel"
 		g.nameLabel.SetPosition(399, 544)
 		g.nameLabel.Render(target)
 	}
 
 	// Minipanel is open and minipanel button is hovered.
 	if !g.miniPanel.IsOpen() && g.actionableRegions[miniPnl].Rect.IsInRect(mx, my) {
-		g.nameLabel.SetText("Open Mini Panel")
+		g.nameLabel.SetText(d2tbl.TranslateString("panelmini")) //"Open Mini Panel"
 		g.nameLabel.SetPosition(399, 544)
 		g.nameLabel.Render(target)
 	}
 
 	// Display character tooltip when hovered.
 	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelCharacter].Rect.IsInRect(mx, my) {
-		g.nameLabel.SetText("Character (A) (C)")
+		g.nameLabel.SetText(d2tbl.TranslateString("minipanelchar")) //"Character" no hotkey
 		g.nameLabel.SetPosition(340, 510)
 		g.nameLabel.Render(target)
 	}
 
 	// Display inventory tooltip when hovered.
 	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelInventory].Rect.IsInRect(mx, my) {
-		g.nameLabel.SetText("Inventory (I) (B)")
+		g.nameLabel.SetText(d2tbl.TranslateString("minipanelinv")) //"Inventory" no hotkey
 		g.nameLabel.SetPosition(360, 510)
 		g.nameLabel.Render(target)
 	}
 
 	// Display skill tree tooltip when hovered.
 	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelSkillTree].Rect.IsInRect(mx, my) {
-		g.nameLabel.SetText("Skill Tree (T) (P)")
+		g.nameLabel.SetText(d2tbl.TranslateString("minipaneltree")) //"Skill Treee" no hotkey
 		g.nameLabel.SetPosition(380, 510)
 		g.nameLabel.Render(target)
 	}
 
 	// Display automap tooltip when hovered.
 	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelAutomap].Rect.IsInRect(mx, my) {
-		g.nameLabel.SetText("Automap (TAB) (Mouse 3)")
+		g.nameLabel.SetText(d2tbl.TranslateString("minipanelautomap")) //"Automap" no hotkey
 		g.nameLabel.SetPosition(400, 510)
 		g.nameLabel.Render(target)
 	}
 
 	// Display message log tooltip when hovered.
 	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelMessageLog].Rect.IsInRect(mx, my) {
-		g.nameLabel.SetText("Message Log (M)")
+		g.nameLabel.SetText(d2tbl.TranslateString("minipanelmessage")) //"Message Log" no hotkey
 		g.nameLabel.SetPosition(420, 510)
 		g.nameLabel.Render(target)
 	}
 
 	// Display quest log tooltip when hovered.
 	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelQuestLog].Rect.IsInRect(mx, my) {
-		g.nameLabel.SetText("Quest Log (Q)")
+		g.nameLabel.SetText(d2tbl.TranslateString("minipanelquest")) //"Quest Log" no hotkey
 		g.nameLabel.SetPosition(440, 510)
 		g.nameLabel.Render(target)
 	}
 
 	// Display game menu tooltip when hovered.
 	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelGameMenu].Rect.IsInRect(mx, my) {
-		g.nameLabel.SetText("Game Menu (ESC)")
+		g.nameLabel.SetText(d2tbl.TranslateString("minipanelmenubtn")) //"Game Menu (Esc)" // the (Esc) is hardcoded in.
 		g.nameLabel.SetPosition(460, 510)
 		g.nameLabel.Render(target)
 	}
 
+	// Create and format Stamina string from string lookup table.
+	fmtStamina := d2tbl.TranslateString("panelstamina")
+	staminaCurr, staminaMax := int(g.hero.Stats.Stamina), int(g.hero.Stats.MaxStamina)
+	strPanelStamina := fmt.Sprintf(fmtStamina, staminaCurr, staminaMax)
+
 	// Display stamina tooltip when hovered.
 	if g.miniPanel.IsOpen() && g.actionableRegions[stamina].Rect.IsInRect(mx, my) {
-		g.nameLabel.SetText(fmt.Sprintf("Stamina: %v / %v", float64(g.hero.Stats.Stamina), float64(g.hero.Stats.MaxStamina)))
+		g.nameLabel.SetText(strPanelStamina)
 		g.nameLabel.SetPosition(320, 535)
 		g.nameLabel.Render(target)
 	}
 
+	// Display run/walk tooltip when hovered.  Note that whether the player is walking or running, the tooltip is the same in Diablo 2.
+	if g.actionableRegions[walkRun].Rect.IsInRect(mx, my) && !g.hero.IsRunToggled() {
+		g.nameLabel.SetText(d2tbl.TranslateString("RunOn")) //"Run" no hotkeys
+		g.nameLabel.SetPosition(263, 563)
+		g.nameLabel.Render(target)
+	}
+
+	if g.actionableRegions[walkRun].Rect.IsInRect(mx, my) && g.hero.IsRunToggled() {
+		g.nameLabel.SetText(d2tbl.TranslateString("RunOff")) //"Walk" no hotkeys
+		g.nameLabel.SetPosition(263, 563)
+		g.nameLabel.Render(target)
+	}
+
+	// Create and format Experience string from string lookup table.
+	fmtExp := d2tbl.TranslateString("panelexp")
+	// The English string for "panelexp" is "Experience: %u / %u", however %u doesn't translate well. So
+	// we need to rewrite %u into a formatable Go verb. %d is used in other strings, so we go with that,
+	// keeping in mind that %u likely referred to an unsigned integer.
+	fmtExp = strings.ReplaceAll(fmtExp, "%u", "%d")
+	expCurr, expMax := uint(g.hero.Stats.Experience), uint(g.hero.Stats.NextLevelExp)
+	strPanelExp := fmt.Sprintf(fmtExp, expCurr, expMax)
+
 	// Display experience tooltip when hovered.
 	if g.miniPanel.IsOpen() && g.actionableRegions[xp].Rect.IsInRect(mx, my) {
-		g.nameLabel.SetText(fmt.Sprintf("Experience: %v / %v", float64(g.hero.Stats.Experience), float64(g.hero.Stats.NextLevelExp)))
+		g.nameLabel.SetText(strPanelExp)
 		g.nameLabel.SetPosition(255, 535)
 		g.nameLabel.Render(target)
 	}
