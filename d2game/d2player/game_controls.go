@@ -951,7 +951,7 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	// The English string for "panelexp" is "Experience: %u / %u", however %u doesn't translate well. So
 	// we need to rewrite %u into a formatable Go verb. %d is used in other strings, so we go with that,
 	// keeping in mind that %u likely referred to an unsigned integer.
-	fmtExp = strings.Replace(fmtExp, "%u", "%d", -1)
+	fmtExp = strings.ReplaceAll(fmtExp, "%u", "%d")
 	expCurr, expMax := uint(g.hero.Stats.Experience), uint(g.hero.Stats.NextLevelExp)
 	strPanelExp := fmt.Sprintf(fmtExp, expCurr, expMax)
 
