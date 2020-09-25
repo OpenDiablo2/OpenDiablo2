@@ -44,6 +44,8 @@ type CharacterSelect struct {
 	characterImage         [8]*d2mapentity.Player
 	gameStates             []*d2hero.HeroState
 	selectedCharacter      int
+	tickTimer              float64
+	storedTickTimer        float64
 	showDeleteConfirmation bool
 	connectionType         d2clientconnectiontype.ClientConnectionType
 	connectionHost         string
@@ -132,6 +134,10 @@ const (
 	deleteOkX, deleteOkY             = 422, 308
 	exitBtnX, exitBtnY               = 33, 537
 	okBtnX, okBtnY                   = 625, 537
+)
+
+const (
+	doubleClickTime = 1.25
 )
 
 // OnLoad loads the resources for the Character Select screen
@@ -390,18 +396,37 @@ func (v *CharacterSelect) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 			localMouseX := mx - selectionBoxOffsetX
 			localMouseY := my - selectionBoxOffsetY
 
+			// if Mouse is within character selection bounds.
 			if localMouseX > 0 && localMouseX < bw*2 && localMouseY >= 0 && localMouseY < bh*4 {
 				adjustY := localMouseY / bh
+				// sets current verticle index for selected character in left column.
 				selectedIndex := adjustY * selectionBoxNumColumns
 
+				// if selected character in left column should be in right column, add 1.
 				if localMouseX > bw {
 					selectedIndex++
 				}
 
+				// Make sure selection takes the scrollbar into account to make proper selection.
 				if (v.charScrollbar.GetCurrentOffset()*2)+selectedIndex < len(v.gameStates) {
-					v.selectedCharacter = (v.charScrollbar.GetCurrentOffset() * 2) + selectedIndex
+					selectedIndex = (v.charScrollbar.GetCurrentOffset() * 2) + selectedIndex
+				}
+
+				// if the selection box didn't move, check if it was a double click, otherwise set selectedCharacter to
+				// selectedIndex and move selection box over both.
+				if v.selectedCharacter == selectedIndex {
+					// our very first click in this screen.
+					if int(v.storedTickTimer) == 0 {
+						// We clicked twice within character selection box within  v.doubleClickTime seconds.
+					} else if (v.tickTimer - v.storedTickTimer) < doubleClickTime {
+						v.onOkButtonClicked()
+					}
+				} else {
+					v.selectedCharacter = selectedIndex
 					v.moveSelectionBox()
 				}
+				// Keep track of when we last clicked so we can determine if we double clicked a character.
+				v.storedTickTimer = v.tickTimer
 			}
 
 			return true
@@ -415,6 +440,7 @@ func (v *CharacterSelect) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 func (v *CharacterSelect) Advance(tickTime float64) error {
 	for _, hero := range v.characterImage {
 		if hero != nil {
+			v.tickTimer += tickTime
 			hero.Advance(tickTime)
 		}
 	}
