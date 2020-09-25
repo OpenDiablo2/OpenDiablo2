@@ -419,7 +419,7 @@ func (v *CharacterSelect) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 					if (v.tickTimer - v.storedTickTimer) < doubleClickTime {
 						v.onOkButtonClicked()
 					}
-				} else {
+				} else if selectedIndex < len(v.gameStates) {
 					v.selectedCharacter = selectedIndex
 					v.moveSelectionBox()
 				}
