@@ -415,10 +415,8 @@ func (v *CharacterSelect) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 				// if the selection box didn't move, check if it was a double click, otherwise set selectedCharacter to
 				// selectedIndex and move selection box over both.
 				if v.selectedCharacter == selectedIndex {
-					// our very first click in this screen.
-					if int(v.storedTickTimer) == 0 {
-						// We clicked twice within character selection box within  v.doubleClickTime seconds.
-					} else if (v.tickTimer - v.storedTickTimer) < doubleClickTime {
+					// We clicked twice within character selection box within  v.doubleClickTime seconds.
+					if (v.tickTimer - v.storedTickTimer) < doubleClickTime {
 						v.onOkButtonClicked()
 					}
 				} else {
