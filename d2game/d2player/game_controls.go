@@ -58,7 +58,7 @@ type GameControls struct {
 	ui                     *d2ui.UIManager
 	inventory              *Inventory
 	heroStatsPanel         *HeroStatsPanel
-	helpOverlay            *help.Overlay
+	HelpOverlay            *help.Overlay
 	miniPanel              *miniPanel
 	lastMouseX             int
 	lastMouseY             int
@@ -185,7 +185,7 @@ func NewGameControls(
 		mapRenderer:      mapRenderer,
 		inventory:        NewInventory(asset, ui, inventoryRecord),
 		heroStatsPanel:   NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
-		helpOverlay:      help.NewHelpOverlay(asset, renderer, ui, guiManager),
+		HelpOverlay:      help.NewHelpOverlay(asset, renderer, ui, guiManager),
 		miniPanel:        newMiniPanel(asset, ui, isSinglePlayer),
 		nameLabel:        hoverLabel,
 		zoneChangeText:   zoneLabel,
@@ -309,7 +309,7 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 	case d2enum.KeyR:
 		g.onToggleRunButton()
 	case d2enum.KeyH:
-		g.helpOverlay.Toggle()
+		g.HelpOverlay.Toggle()
 		g.updateLayout()
 	default:
 		return false
@@ -470,7 +470,7 @@ func (g *GameControls) Load() {
 
 	g.inventory.Load()
 	g.heroStatsPanel.Load()
-	g.helpOverlay.Load()
+	g.HelpOverlay.Load()
 }
 
 func (g *GameControls) loadUIButtons() {
@@ -545,7 +545,7 @@ func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 		return true
 	}
 
-	if g.helpOverlay.IsOpen() && g.helpOverlay.IsInRect(px, py) {
+	if g.HelpOverlay.IsOpen() && g.HelpOverlay.IsInRect(px, py) {
 		return true
 	}
 
@@ -854,7 +854,7 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		g.hpManaStatsLabel.Render(target)
 	}
 
-	if err := g.helpOverlay.Render(target); err != nil {
+	if err := g.HelpOverlay.Render(target); err != nil {
 		return err
 	}
 

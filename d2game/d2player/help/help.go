@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -157,7 +158,7 @@ func (h *Overlay) Load() {
 
 	// Title
 
-	text := "Diablo II Help"
+	text := d2tbl.TranslateString("Strhelp1") // "Diablo II Help"
 	newLabel := h.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
 	newLabel.SetText(text)
 	ww, _ := newLabel.GetSize()
@@ -172,80 +173,80 @@ func (h *Overlay) Load() {
 	h.closeButton.OnActivated(func() { h.close() })
 
 	newLabel = h.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
-	newLabel.SetText("Close")
+	newLabel.SetText(d2tbl.TranslateString("strClose")) // "Close"
 	newLabel.SetPosition(680, 60)
 	h.text = append(h.text, newLabel)
 
 	// Bullets
 
-	yOffset := 60
+	yOffset := 59
 	h.createBullet(callout{
-		LabelText: "Hold Down <Ctrl> to Run",
+		LabelText: fmt.Sprintf(d2tbl.TranslateString("StrHelp2"), "Ctrl"), // TODO "Ctrl" should be hotkey // "Hold Down <%s> to Run"
 		LabelX:    100,
-		LabelY:    yOffset,
+		LabelY:    yOffset - 10,
 		DotX:      100 - 12,
 		DotY:      yOffset,
 	})
 
-	yOffset += 12
+	yOffset += 20
 	h.createBullet(callout{
-		LabelText: "Hold down <Alt> to highlight items on the ground",
+		LabelText: fmt.Sprintf(d2tbl.TranslateString("StrHelp3"), "Alt"), // TODO "Alt" should be hotkey // "Hold down <%s> to highlight items on the ground"
 		LabelX:    100,
-		LabelY:    yOffset,
+		LabelY:    yOffset - 10,
 		DotX:      100 - 12,
 		DotY:      yOffset,
 	})
 
-	yOffset += 12
+	yOffset += 20
 	h.createBullet(callout{
-		LabelText: "Hold down <Shift> to attack while standing still",
+		LabelText: fmt.Sprintf(d2tbl.TranslateString("StrHelp4"), "Shift"), // TODO "Shift" should be hotkey // "Hold down <%s> to attack while standing still"
 		LabelX:    100,
-		LabelY:    yOffset,
+		LabelY:    yOffset - 10,
 		DotX:      100 - 12,
 		DotY:      yOffset,
 	})
 
-	yOffset += 12
+	yOffset += 20
 	h.createBullet(callout{
-		LabelText: "Hit <Tab> to toggle the automap on and off",
+		LabelText: fmt.Sprintf(d2tbl.TranslateString("StrHelp5"), "Tab"), // TODO "Tab" should be hotkey // "Hit <%s> to toggle the automap on and off"
 		LabelX:    100,
-		LabelY:    yOffset,
+		LabelY:    yOffset - 10,
 		DotX:      100 - 12,
 		DotY:      yOffset,
 	})
 
-	yOffset += 12
+	yOffset += 20
 	h.createBullet(callout{
-		LabelText: "Hit <Esc> to bring up the Game Menu",
+		LabelText: d2tbl.TranslateString("StrHelp6"), // "Hit <Esc> to bring up the Game Menu"
 		LabelX:    100,
-		LabelY:    yOffset,
+		LabelY:    yOffset - 10,
 		DotX:      100 - 12,
 		DotY:      yOffset,
 	})
 
-	yOffset += 12
+	yOffset += 20
 	h.createBullet(callout{
-		LabelText: "Hit <Enter> to go into chat mode",
+		LabelText: d2tbl.TranslateString("StrHelp7"), // "Hit <Enter> to go into chat mode"
 		LabelX:    100,
-		LabelY:    yOffset,
+		LabelY:    yOffset - 10,
 		DotX:      100 - 12,
 		DotY:      yOffset,
 	})
 
-	yOffset += 12
+	yOffset += 20
 	h.createBullet(callout{
-		LabelText: "Use F1-F8 to set your Left or Right Mouse Button Skills",
+		LabelText: d2tbl.TranslateString("StrHelp8"), // "Hit F1-F8 to set your Left or Right Mouse Buttton Skills."
 		LabelX:    100,
-		LabelY:    yOffset,
+		LabelY:    yOffset - 10,
 		DotX:      100 - 12,
 		DotY:      yOffset,
 	})
 
-	yOffset += 12
+	yOffset += 20
 	h.createBullet(callout{
-		LabelText: "Hit <H> to toggle this screen open and closed",
+		LabelText: fmt.Sprintf(d2tbl.TranslateString("StrHelp8a"), "H"), // TODO "H" should be hotkey
 		LabelX:    100,
-		LabelY:    yOffset,
+		LabelY:    yOffset - 10,
 		DotX:      100 - 12,
 		DotY:      yOffset,
 	})
@@ -253,87 +254,142 @@ func (h *Overlay) Load() {
 	// Callouts
 
 	h.createCallout(callout{
-		LabelText: "New Stats",
-		LabelX:    220,
-		LabelY:    350,
-		DotX:      215,
-		DotY:      575,
+		LabelText: d2tbl.TranslateString("strlvlup"), // "New Stats"
+		LabelX:    222,
+		LabelY:    355,
+		DotX:      217,
+		DotY:      574,
 	})
 
 	h.createCallout(callout{
-		LabelText: "New Skill",
-		LabelX:    575,
-		LabelY:    350,
-		DotX:      570,
-		DotY:      575,
+		LabelText: d2tbl.TranslateString("strnewskl"), // "New Skill"
+		LabelX:    578,
+		LabelY:    355,
+		DotX:      573,
+		DotY:      574,
 	})
 
-	h.createCallout(callout{
-		LabelText: "Left Mouse-\nButton Skill\n(Click to Change)",
+	// Some of the help fonts require mulktiple lines.
+	h.createLabel(callout{
+		LabelText: d2tbl.TranslateString("StrHelp10"), // "Left Mouse-"
 		LabelX:    135,
-		LabelY:    380,
+		LabelY:    382,
+	})
+
+	h.createLabel(callout{
+		LabelText: d2tbl.TranslateString("StrHelp11"), // "Button Skill"
+		LabelX:    135,
+		LabelY:    397,
+	})
+
+	h.createCallout(callout{
+		LabelText: d2tbl.TranslateString("StrHelp12"), // "(Click to Change)"
+		LabelX:    135,
+		LabelY:    412,
 		DotX:      130,
 		DotY:      565,
 	})
 
-	h.createCallout(callout{
-		LabelText: "Mini-Panel\n(Opens Character,\ninventory, and\nother screens)",
-		LabelX:    450,
-		LabelY:    365,
-		DotX:      445,
-		DotY:      540,
-	})
-
-	h.createCallout(callout{
-		LabelText: "Right Mouse-\nButton Skill\n(Click to Change)",
+	h.createLabel(callout{
+		LabelText: d2tbl.TranslateString("StrHelp13"), // "Right Mouse"
 		LabelX:    675,
-		LabelY:    375,
+		LabelY:    381,
+	})
+
+	h.createLabel(callout{
+		LabelText: d2tbl.TranslateString("StrHelp11"), // "Button Skill"
+		LabelX:    675,
+		LabelY:    396,
+	})
+
+	h.createCallout(callout{
+		LabelText: d2tbl.TranslateString("StrHelp12"), // "(Click to Change)"
+		LabelX:    675,
+		LabelY:    411,
 		DotX:      670,
-		DotY:      560,
+		DotY:      562,
+	})
+
+	h.createLabel(callout{
+		LabelText: d2tbl.TranslateString("StrHelp17"), // "Mini-Panel"
+		LabelX:    450,
+		LabelY:    371,
+	})
+
+	h.createLabel(callout{
+		LabelText: d2tbl.TranslateString("StrHelp18"), // "(Opens Character,"
+		LabelX:    450,
+		LabelY:    386,
+	})
+
+	h.createLabel(callout{
+		LabelText: d2tbl.TranslateString("StrHelp19"), // "inventory, and"
+		LabelX:    450,
+		LabelY:    401,
 	})
 
 	h.createCallout(callout{
-		LabelText: "Life Orb",
+		LabelText: d2tbl.TranslateString("StrHelp20"), // "other screens)"
+		LabelX:    450,
+		LabelY:    417,
+		DotX:      445,
+		DotY:      539,
+	})
+
+	h.createCallout(callout{
+		LabelText: d2tbl.TranslateString("StrHelp9"), // "Life Orb"
 		LabelX:    65,
-		LabelY:    460,
+		LabelY:    451,
 		DotX:      60,
-		DotY:      535,
+		DotY:      538,
 	})
 
 	h.createCallout(callout{
-		LabelText: "Stamina Bar",
+		LabelText: d2tbl.TranslateString("StrHelp15"), // "Stamina Bar"
 		LabelX:    315,
-		LabelY:    460,
+		LabelY:    450,
 		DotX:      310,
-		DotY:      585,
+		DotY:      583,
 	})
 
 	h.createCallout(callout{
-		LabelText: "Mana Orb",
+		LabelText: d2tbl.TranslateString("StrHelp22"), // "Mana Orb"
 		LabelX:    745,
-		LabelY:    460,
+		LabelY:    451,
 		DotX:      740,
-		DotY:      535,
+		DotY:      538,
 	})
 
-	h.createCallout(callout{
-		LabelText: "Run/Walk\nToggle",
-		LabelX:    263,
+	h.createLabel(callout{
+		LabelText: d2tbl.TranslateString("StrHelp14"), // "Run/Walk"
+		LabelX:    264,
 		LabelY:    480,
-		DotX:      258,
-		DotY:      585,
 	})
 
 	h.createCallout(callout{
-		LabelText: "Experience\nBar",
+		LabelText: d2tbl.TranslateString("StrHelp14a"), // "Toggle"
+		LabelX:    264,
+		LabelY:    495,
+		DotX:      259,
+		DotY:      583,
+	})
+
+	h.createLabel(callout{
+		LabelText: d2tbl.TranslateString("StrHelp16"), // "Experience"
 		LabelX:    370,
-		LabelY:    480,
+		LabelY:    476,
+	})
+
+	h.createCallout(callout{
+		LabelText: d2tbl.TranslateString("StrHelp16a"), // "Bar"
+		LabelX:    370,
+		LabelY:    493,
 		DotX:      365,
 		DotY:      565,
 	})
 
 	h.createCallout(callout{
-		LabelText: "Belt",
+		LabelText: d2tbl.TranslateString("StrHelp21"), // "Belt"
 		LabelX:    535,
 		LabelY:    490,
 		DotX:      530,
@@ -359,7 +415,7 @@ type callout struct {
 }
 
 func (h *Overlay) createBullet(c callout) {
-	newLabel := h.uiManager.NewLabel(d2resource.FontFormal11, d2resource.PaletteSky)
+	newLabel := h.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteSky)
 	newLabel.SetText(c.LabelText)
 	//ww, hh = newLabel.GetSize()
 	newLabel.SetPosition(c.LabelX, c.LabelY)
@@ -378,8 +434,17 @@ func (h *Overlay) createBullet(c callout) {
 	h.frames = append(h.frames, newDot)
 }
 
+func (h *Overlay) createLabel(c callout) {
+	newLabel := h.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteSky)
+	newLabel.SetText(c.LabelText)
+	//ww, hh = newLabel.GetSize()
+	newLabel.SetPosition(c.LabelX, c.LabelY)
+	h.text = append(h.text, newLabel)
+	newLabel.Alignment = d2gui.HorizontalAlignCenter
+}
+
 func (h *Overlay) createCallout(c callout) {
-	newLabel := h.uiManager.NewLabel(d2resource.FontFormal11, d2resource.PaletteSky)
+	newLabel := h.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteSky)
 	newLabel.Color[0] = color.White
 	newLabel.SetText(c.LabelText)
 	newLabel.SetPosition(c.LabelX, c.LabelY)
