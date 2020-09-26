@@ -1,2 +1,2 @@
-// Package d2inventory provides repreentations of player inventory
+// Package d2inventory provides representations of player inventory
 package d2inventory
