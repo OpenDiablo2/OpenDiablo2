@@ -57,6 +57,7 @@ type RecordManager struct {
 		EquivalenceByRecord ItemEquivalenceByRecord // NOTE: populated when all items are loaded
 
 		AutoMagic
+		Belts
 		Books
 		Gems
 		Magic struct {
@@ -149,6 +150,7 @@ func (r *RecordManager) init() error {
 		{d2resource.Armor, armorLoader},
 		{d2resource.Misc, miscItemsLoader},
 		{d2resource.Books, booksLoader},
+		{d2resource.Belts, beltsLoader},
 		{d2resource.ItemTypes, itemTypesLoader}, // WARN: needs to be after weapons, armor, and misc
 		{d2resource.UniqueItems, uniqueItemsLoader},
 		{d2resource.Missiles, missilesLoader},

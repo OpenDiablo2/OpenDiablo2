@@ -227,6 +227,8 @@ const (
 	PlayerClass           = "/data/global/excel/PlayerClass.txt"
 	ObjectGroup           = "/data/global/excel/objgroup.txt"
 	CompCode              = "/data/global/excel/compcode.txt"
+	Belts                 = "/data/global/excel/belts.txt"
+
 
 	// --- Animations ---
 
