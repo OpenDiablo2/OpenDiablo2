@@ -8,6 +8,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -202,6 +203,10 @@ func (v *Game) Render(screen d2interface.Surface) error {
 	v.mapRenderer.Render(screen)
 
 	if v.gameControls != nil {
+		if v.gameControls.HelpOverlay != nil && v.gameControls.HelpOverlay.IsOpen() {
+			// When help overlay is open, put transparent black screen. Magic noumber is hex for RGBA.
+			screen.DrawRect(800, 600, d2util.Color(0x0000007f))
+		}
 		if err := v.gameControls.Render(screen); err != nil {
 			return err
 		}
