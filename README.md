@@ -24,6 +24,14 @@ Diablo 2 and its content is ©2000 Blizzard Entertainment, Inc. All rights reser
 
 ALL OTHER TRADEMARKS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS.
 
+## Status
+
+At the moment (october 2020) the game starts, you can select any character and run around Act1 town. 
+
+Much work has been made in the background, but a lot of work still has to be done for the game to be playable.
+
+Feel free to contribute!
+
 ## Building
 
 To pull the project down, run `go get github.com/OpenDiablo2/OpenDiablo2`
