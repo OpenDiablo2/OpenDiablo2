@@ -1,4 +1,4 @@
-package d2gamescreen
+package d2player
 
 import (
 	"fmt"
@@ -71,7 +71,7 @@ type EscapeMenu struct {
 
 	renderer      d2interface.Renderer
 	audioProvider d2interface.AudioProvider
-	navigator     Navigator
+	navigator     d2interface.Navigator
 	guiManager    *d2gui.GuiManager
 	assetManager  *d2asset.AssetManager
 }
@@ -127,7 +127,7 @@ type actionableElement interface {
 }
 
 // NewEscapeMenu creates a new escape menu
-func NewEscapeMenu(navigator Navigator,
+func NewEscapeMenu(navigator d2interface.Navigator,
 	renderer d2interface.Renderer,
 	audioProvider d2interface.AudioProvider,
 	guiManager *d2gui.GuiManager,
@@ -351,7 +351,7 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 	l.actionableElements = append(l.actionableElements, label)
 }
 
-func (m *EscapeMenu) onLoad() {
+func (m *EscapeMenu) OnLoad() {
 	var err error
 	m.selectSound, err = m.audioProvider.LoadSound(d2resource.SFXCursorSelect, false, false)
 	if err != nil {
@@ -464,6 +464,10 @@ func (m *EscapeMenu) onEnterKey() {
 	}
 
 	m.layouts[m.currentLayout].actionableElements[m.layouts[m.currentLayout].currentEl].Trigger()
+}
+
+func (m *EscapeMenu) IsOpen() bool {
+	return m.isOpen
 }
 
 // OnKeyDown defines the actions of the Escape Menu when a key is pressed

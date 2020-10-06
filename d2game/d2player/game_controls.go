@@ -55,6 +55,7 @@ type GameControls struct {
 	heroState              *d2hero.HeroStateFactory
 	mapEngine              *d2mapengine.MapEngine
 	mapRenderer            *d2maprenderer.MapRenderer
+	escapeMenu             *EscapeMenu
 	ui                     *d2ui.UIManager
 	inventory              *Inventory
 	heroStatsPanel         *HeroStatsPanel
@@ -122,11 +123,13 @@ func NewGameControls(
 	renderer d2interface.Renderer,
 	hero *d2mapentity.Player,
 	mapEngine *d2mapengine.MapEngine,
+	escapeMenu *EscapeMenu,
 	mapRenderer *d2maprenderer.MapRenderer,
 	inputListener InputCallbackListener,
 	term d2interface.Terminal,
 	ui *d2ui.UIManager,
 	guiManager *d2gui.GuiManager,
+
 	isSinglePlayer bool,
 ) (*GameControls, error) {
 
@@ -181,6 +184,7 @@ func NewGameControls(
 		hero:             hero,
 		heroState:        heroState,
 		mapEngine:        mapEngine,
+		escapeMenu:       escapeMenu,
 		inputListener:    inputListener,
 		mapRenderer:      mapRenderer,
 		inventory:        NewInventory(asset, ui, inventoryRecord),
@@ -554,6 +558,10 @@ func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 	}
 
 	if g.miniPanel.IsOpen() && g.miniPanel.isInRect(px, py) {
+		return true
+	}
+
+	if g.escapeMenu.IsOpen() {
 		return true
 	}
 

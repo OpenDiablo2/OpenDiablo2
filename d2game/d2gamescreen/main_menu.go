@@ -117,7 +117,7 @@ type MainMenu struct {
 	renderer      d2interface.Renderer
 	audioProvider d2interface.AudioProvider
 	scriptEngine  *d2script.ScriptEngine
-	navigator     Navigator
+	navigator     d2interface.Navigator
 	uiManager     *d2ui.UIManager
 	heroState     *d2hero.HeroStateFactory
 
@@ -126,7 +126,7 @@ type MainMenu struct {
 
 // CreateMainMenu creates an instance of MainMenu
 func CreateMainMenu(
-	navigator Navigator,
+	navigator d2interface.Navigator,
 	asset *d2asset.AssetManager,
 	renderer d2interface.Renderer,
 	inputManager d2interface.InputManager,
