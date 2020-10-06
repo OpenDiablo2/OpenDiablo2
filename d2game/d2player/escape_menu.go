@@ -359,12 +359,7 @@ func (m *EscapeMenu) OnLoad() {
 	}
 }
 
-func (m *EscapeMenu) onEscKey() {
-	if !m.isOpen {
-		m.open()
-		return
-	}
-
+func (m *EscapeMenu) OnEscKey() {
 	switch m.currentLayout {
 	case optionsLayoutID:
 		m.setLayout(mainLayoutID)
@@ -473,8 +468,6 @@ func (m *EscapeMenu) IsOpen() bool {
 // OnKeyDown defines the actions of the Escape Menu when a key is pressed
 func (m *EscapeMenu) OnKeyDown(event d2interface.KeyEvent) bool {
 	switch event.Key() {
-	case d2enum.KeyEscape:
-		m.onEscKey()
 	case d2enum.KeyUp:
 		m.onUpKey()
 	case d2enum.KeyDown:

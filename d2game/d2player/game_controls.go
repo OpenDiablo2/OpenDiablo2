@@ -297,13 +297,8 @@ func (g *GameControls) OnKeyRepeat(event d2interface.KeyEvent) bool {
 func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 	switch event.Key() {
 	case d2enum.KeyEscape:
-		if g.inventory.IsOpen() || g.heroStatsPanel.IsOpen() {
-			g.inventory.Close()
-			g.heroStatsPanel.Close()
-			g.updateLayout()
-
-			break
-		}
+		g.onEscKey()
+		break
 	case d2enum.KeyI:
 		g.inventory.Toggle()
 		g.updateLayout()
@@ -332,6 +327,35 @@ func (g *GameControls) OnKeyUp(event d2interface.KeyEvent) bool {
 	}
 
 	return false
+}
+
+func (g *GameControls) onEscKey() {
+	// When escape is pressed:
+	// 1. If there was some overlay or panel open, close it
+	// 2. Otherwise, if the Escape Menu was open, let the Escape Menu handle it
+	// 3. If nothing was open, open the Escape Menu
+
+	escHandled := false
+	if g.inventory.IsOpen() {
+		g.inventory.Close()
+		escHandled = true
+	}
+	if g.heroStatsPanel.IsOpen() {
+		g.heroStatsPanel.Close()
+		escHandled = true
+	}
+	if g.HelpOverlay.IsOpen() {
+		g.HelpOverlay.Toggle()
+		escHandled = true
+	}
+
+	if escHandled {
+		g.updateLayout()
+	} else if g.escapeMenu.isOpen {
+		g.escapeMenu.OnEscKey()
+	} else {
+		g.escapeMenu.open()
+	}
 }
 
 // OnMouseButtonRepeat handles repeated mouse clicks
