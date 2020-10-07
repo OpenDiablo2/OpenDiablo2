@@ -96,9 +96,9 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 		name:       name,
 		Class:      heroType,
 		//nameLabel:    d2ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
-		isRunToggled: true,
+		isRunToggled: false,
 		isInTown:     true,
-		isRunning:    true,
+		isRunning:    false,
 	}
 
 	result.mapEntity.uuid = id

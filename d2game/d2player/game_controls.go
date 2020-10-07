@@ -306,11 +306,23 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 	case d2enum.KeyC:
 		g.heroStatsPanel.Toggle()
 		g.updateLayout()
-	case d2enum.KeyR:
+	case d2enum.KeyR, d2enum.KeyControl:
 		g.onToggleRunButton()
 	case d2enum.KeyH:
 		g.HelpOverlay.Toggle()
 		g.updateLayout()
+	default:
+		return false
+	}
+
+	return false
+}
+
+// OnKeyUp handles key release
+func (g *GameControls) OnKeyUp(event d2interface.KeyEvent) bool {
+	switch event.Key() {
+	case d2enum.KeyControl:
+		g.onToggleRunButton()
 	default:
 		return false
 	}
