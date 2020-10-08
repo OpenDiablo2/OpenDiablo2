@@ -268,6 +268,10 @@ func (l *Layout) getContentSize() (width, height int) {
 	return width, height
 }
 
+func (l *Layout) GetSize() (width, height int) {
+	return l.getSize()
+}
+
 func (l *Layout) getSize() (width, height int) {
 	width, height = l.getContentSize()
 	return d2math.MaxInt(width, l.width), d2math.MaxInt(height, l.height)
