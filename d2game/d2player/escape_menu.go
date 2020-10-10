@@ -3,6 +3,7 @@ package d2player
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -22,7 +23,7 @@ const (
 	// UI
 	labelGutter    = 10
 	sidePanelsSize = 80
-	pentSize       = 52
+	pentSize       = 54
 	menuSize       = 500
 	spacerWidth    = 10
 
@@ -81,6 +82,7 @@ type layout struct {
 	leftPent           *d2gui.AnimatedSprite
 	rightPent          *d2gui.AnimatedSprite
 	currentEl          int
+	rendered           bool
 	actionableElements []actionableElement
 }
 
@@ -224,9 +226,9 @@ func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
 	center := wrapper.AddLayout(d2gui.PositionTypeHorizontal)
 	center.SetSize(menuSize, 0)
 
-	left := center.AddLayout(d2gui.PositionTypeHorizontal)
-	left.SetSize(sidePanelsSize, 0)
-	leftPent, err := left.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionForward)
+	left := center.AddLayout(d2gui.PositionTypeVertical)
+	left.SetSize(sidePanelsSize, pentSize)
+	leftPent, err := left.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionBackward)
 	if err != nil {
 		log.Print(err)
 		return nil
@@ -244,8 +246,8 @@ func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
 	right := center.AddLayout(d2gui.PositionTypeHorizontal)
 	// For some reason, aligning the panel to the right won't align the pentagram, so we need to add a static spacer.
 	right.AddSpacerStatic(sidePanelsSize-pentSize, 0)
-	right.SetSize(sidePanelsSize, 0)
-	rightPent, err := right.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionBackward)
+	right.SetSize(sidePanelsSize, pentSize)
+	rightPent, err := right.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionForward)
 	if err != nil {
 		log.Print(err)
 		return nil
@@ -360,6 +362,7 @@ func (m *EscapeMenu) OnLoad() {
 }
 
 func (m *EscapeMenu) OnEscKey() {
+	// note: original D2 returns straight to the game from however deep in the menu we are
 	switch m.currentLayout {
 	case optionsLayoutID:
 		m.setLayout(mainLayoutID)
@@ -424,9 +427,23 @@ func (m *EscapeMenu) setLayout(id layoutID) {
 	m.leftPent = m.layouts[id].leftPent
 	m.rightPent = m.layouts[id].rightPent
 	m.currentLayout = id
-	m.layouts[id].currentEl = 0
+	m.layouts[id].currentEl = len(m.layouts[id].actionableElements) - 1 // default to Previous Menu
 	m.guiManager.SetLayout(m.layouts[id].Layout)
-	m.onHoverElement(0)
+
+	// when first rendering a layout, widgets don't have offsets so we hide pentagrams for a frame
+	if !m.layouts[id].rendered {
+		m.layouts[id].rendered = true
+		m.leftPent.SetVisible(false)
+		m.rightPent.SetVisible(false)
+		go func() {
+			time.Sleep(16 * time.Millisecond)
+			m.onHoverElement(m.layouts[id].currentEl)
+			m.leftPent.SetVisible(true)
+			m.rightPent.SetVisible(true)
+		}()
+	} else {
+		m.onHoverElement(m.layouts[id].currentEl)
+	}
 }
 
 func (m *EscapeMenu) onUpKey() {
