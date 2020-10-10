@@ -26,7 +26,7 @@ ALL OTHER TRADEMARKS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS.
 
 ## Status
 
-At the moment (october 2020) the game starts, you can select any character and run around Act1 town. 
+At the moment (october 2020) the game starts, you can select any character and run around Act1 town.
 
 Much work has been made in the background, but a lot of work still has to be done for the game to be playable.
 
@@ -98,6 +98,14 @@ You can export the profiler output with the following command:\
 Ingame you can create a heap dump by pressing `~` and typing `dumpheap`. A heap.pprof is written to the `pprof` directory.
 
 You may need to install [Graphviz](http://www.graphviz.org/download/) in order to convert the profiler output.
+
+## Debugging
+
+### Layouts
+
+Layouts can show their boundaries and other visual debugging information when they render. Set `layoutDebug` to `true` in `d2core/d2gui/layout.go` to enable this behavior.
+
+![Example layout in debug mode](https://user-images.githubusercontent.com/1004323/85792085-31816480-b733-11ea-867e-291946bfff83.png)
 
 ## Roadmap
 
