@@ -68,8 +68,8 @@ type GameControls struct {
 	hpManaStatusSprite     *d2ui.Sprite
 	mainPanel              *d2ui.Sprite
 	menuButton             *d2ui.Sprite
-	leftSkill              *SkillResource
-	rightSkill             *SkillResource
+	leftSkillResource      *SkillResource
+	rightSkillResource     *SkillResource
 	zoneChangeText         *d2ui.Label
 	nameLabel              *d2ui.Label
 	hpManaStatsLabel       *d2ui.Label
@@ -90,9 +90,12 @@ type ActionableRegion struct {
 	Rect             d2geom.Rectangle
 }
 
+// SkillResource represents a Skill with its corresponding icon sprite, path to DC6 file and icon number.
+// SkillResourcePath points to a DC6 resource which contains the icons of multiple skills as frames.
+// The IconNumber is the frame at which we can find our skill sprite in the DC6 file.
 type SkillResource struct {
-	SkillResourcePath string
-	IconNumber        int
+	SkillResourcePath string // path to a skills DC6 file(see getSkillResourceByClass)
+	IconNumber        int    // the index of the frame in the DC6 file
 	SkillIcon         *d2ui.Sprite
 }
 
@@ -230,7 +233,8 @@ func NewGameControls(
 		skillRecord := gc.asset.Records.Skill.Details[id]
 		skill, err := heroState.CreateHeroSkill(0, skillRecord.Skill)
 		if err != nil {
-			term.OutputErrorf("cannot create skill with ID of %d", id)
+			term.OutputErrorf("cannot create skill with ID of %d, error: %s", id, err)
+			return
 		}
 
 		gc.hero.LeftSkill = skill
@@ -240,7 +244,8 @@ func NewGameControls(
 		skillRecord := gc.asset.Records.Skill.Details[id]
 		skill, err := heroState.CreateHeroSkill(0, skillRecord.Skill)
 		if err != nil {
-			term.OutputErrorf("cannot create skill with ID of %d", id)
+			term.OutputErrorf("cannot create skill with ID of %d, error: %s", id, err)
+			return
 		}
 
 		gc.hero.RightSkill = skill
@@ -503,8 +508,8 @@ func (g *GameControls) Load() {
 
 	attackIconID := 2
 
-	g.leftSkill = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
-	g.rightSkill = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
+	g.leftSkillResource = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
+	g.rightSkillResource = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
 
 	g.loadUIButtons()
 
@@ -688,19 +693,19 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 
 	// Left skill
 	skillResourcePath := g.getSkillResourceByClass(g.hero.LeftSkill.Charclass)
-	if skillResourcePath != g.leftSkill.SkillResourcePath {
-		g.leftSkill.SkillIcon, _ = g.ui.NewSprite(skillResourcePath, d2resource.PaletteSky)
+	if skillResourcePath != g.leftSkillResource.SkillResourcePath {
+		g.leftSkillResource.SkillIcon, _ = g.ui.NewSprite(skillResourcePath, d2resource.PaletteSky)
 	}
 
-	if err := g.leftSkill.SkillIcon.SetCurrentFrame(g.hero.LeftSkill.IconCel); err != nil {
+	if err := g.leftSkillResource.SkillIcon.SetCurrentFrame(g.hero.LeftSkill.IconCel); err != nil {
 		return err
 	}
 
-	w, _ = g.leftSkill.SkillIcon.GetCurrentFrameSize()
+	w, _ = g.leftSkillResource.SkillIcon.GetCurrentFrameSize()
 
-	g.leftSkill.SkillIcon.SetPosition(offset, height)
+	g.leftSkillResource.SkillIcon.SetPosition(offset, height)
 
-	if err := g.leftSkill.SkillIcon.Render(target); err != nil {
+	if err := g.leftSkillResource.SkillIcon.Render(target); err != nil {
 		return err
 	}
 
@@ -807,19 +812,19 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 
 	// Right skill
 	skillResourcePath = g.getSkillResourceByClass(g.hero.RightSkill.Charclass)
-	if skillResourcePath != g.rightSkill.SkillResourcePath {
-		g.rightSkill.SkillIcon, _ = g.ui.NewSprite(skillResourcePath, d2resource.PaletteSky)
+	if skillResourcePath != g.rightSkillResource.SkillResourcePath {
+		g.rightSkillResource.SkillIcon, _ = g.ui.NewSprite(skillResourcePath, d2resource.PaletteSky)
 	}
 
-	if err := g.rightSkill.SkillIcon.SetCurrentFrame(g.hero.RightSkill.IconCel); err != nil {
+	if err := g.rightSkillResource.SkillIcon.SetCurrentFrame(g.hero.RightSkill.IconCel); err != nil {
 		return err
 	}
 
-	w, _ = g.rightSkill.SkillIcon.GetCurrentFrameSize()
+	w, _ = g.rightSkillResource.SkillIcon.GetCurrentFrameSize()
 
-	g.rightSkill.SkillIcon.SetPosition(offset, height)
+	g.rightSkillResource.SkillIcon.SetPosition(offset, height)
 
-	if err := g.rightSkill.SkillIcon.Render(target); err != nil {
+	if err := g.rightSkillResource.SkillIcon.Render(target); err != nil {
 		return err
 	}
 

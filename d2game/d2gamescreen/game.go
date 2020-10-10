@@ -194,6 +194,7 @@ func (v *Game) Render(screen d2interface.Surface) error {
 	if v.gameClient.RegenMap {
 		v.gameClient.RegenMap = false
 		v.mapRenderer.RegenerateTileCache()
+		v.gameClient.MapEngine.IsLoading = false
 	}
 
 	if err := screen.Clear(color.Black); err != nil {
