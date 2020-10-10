@@ -124,6 +124,12 @@ func (mr *MapRenderer) SetMapEngine(mapEngine *d2mapengine.MapEngine) {
 //
 // Pass 4: Roof tiles.
 func (mr *MapRenderer) Render(target d2interface.Surface) {
+	// TODO:(temp hack) should not render before the map has been fully generated -
+	// Prevents concurrent map read & write exceptions that otherwise occur when we join a TCP game
+	// as a remote client, due to rendering before we have handled the GenerateMapPacket.
+	if mr.mapEngine.IsLoading {
+		return
+	}
 	mapSize := mr.mapEngine.Size()
 
 	stxf, styf := mr.viewport.ScreenToWorld(screenMiddleX, -200)

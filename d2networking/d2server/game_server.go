@@ -14,6 +14,7 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapgen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
@@ -181,6 +182,14 @@ func (g *GameServer) packetManager() {
 				}
 
 				g.sendPacketToClients(move)
+			case d2netpackettype.CastSkill:
+				castSkill, err := d2netpacket.UnmarshalNetPacket(p)
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+
+				g.sendPacketToClients(castSkill)
 			case d2netpackettype.SpawnItem:
 				item, err := d2netpacket.UnmarshalNetPacket(p)
 				if err != nil {
@@ -345,6 +354,8 @@ func handleClientConnection(gameServer *GameServer, client ClientConnection, x, 
 	playerX := int(x*subtilesPerTile) + middleOfTileOffset
 	playerY := int(y*subtilesPerTile) + middleOfTileOffset
 
+	d2hero.HydrateSkills(playerState.Skills, gameServer.asset)
+
 	createPlayerPacket := d2netpacket.CreateAddPlayerPacket(
 		client.GetUniqueID(),
 		playerState.HeroName,
@@ -430,6 +441,8 @@ func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) err
 				log.Printf("GameServer: error sending %T to client %s: %s", packet, player.GetUniqueID(), err)
 			}
 		}
+	default:
+		log.Printf("GameServer: received unknown packet %T", packet)
 	}
 
 	return nil

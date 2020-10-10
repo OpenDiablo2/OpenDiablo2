@@ -23,13 +23,8 @@ type shallowHeroSkill struct {
 
 // MarshalJSON overrides the default logic used when the HeroSkill is serialized to a byte array.
 func (hs *HeroSkill) MarshalJSON() ([]byte, error) {
-	// only serialize the ID instead of the whole SkillRecord object.
-	shallow := shallowHeroSkill{
-		SkillID:     hs.SkillRecord.ID,
-		SkillPoints: hs.SkillPoints,
-	}
-
-	bytes, err := json.Marshal(shallow)
+	// only serialize the shallow object instead of the SkillRecord & SkillDescriptionRecord
+	bytes, err := json.Marshal(hs.shallow)
 	if err != nil {
 		log.Fatalln(err)
 	}

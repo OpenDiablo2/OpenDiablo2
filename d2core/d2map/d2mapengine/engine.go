@@ -31,6 +31,8 @@ type MapEngine struct {
 	startSubTileX int                       // Starting X position
 	startSubTileY int                       // Starting Y position
 	dt1Files      []string                  // List of DS1 strings
+	// TODO: remove this flag and show loading screen until the initial server packets are handled and the map is generated (only for remote client)
+	IsLoading     bool                      // (temp) Whether we have processed the GenerateMapPacket(only for remote client)
 }
 
 // CreateMapEngine creates a new instance of the map engine and returns a pointer to it.
@@ -42,6 +44,8 @@ func CreateMapEngine(asset *d2asset.AssetManager) *MapEngine {
 		asset:            asset,
 		MapEntityFactory: entity,
 		StampFactory:     stamp,
+		// This will be set to true when we are using a remote client connection, and then set to false after we process the GenerateMapPacket
+		IsLoading:        false,
 	}
 
 	return engine
@@ -285,6 +289,12 @@ func (m *MapEngine) GetCenterPosition() (x, y float64) {
 // Advance calls the Advance() method for all entities,
 // processing a single tick.
 func (m *MapEngine) Advance(tickTime float64) {
+	// TODO:(temp hack) prevents concurrent map read & write exceptions that occur when we join a TCP game as a remote client
+	// due to the engine updating entities before handling the GenerateMapPacket
+	if m.IsLoading {
+		return
+	}
+
 	for ID := range m.entities {
 		m.entities[ID].Advance(tickTime)
 	}
