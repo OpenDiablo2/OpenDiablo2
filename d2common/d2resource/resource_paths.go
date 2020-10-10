@@ -228,7 +228,7 @@ const (
 	ObjectGroup           = "/data/global/excel/objgroup.txt"
 	CompCode              = "/data/global/excel/compcode.txt"
 	Belts                 = "/data/global/excel/belts.txt"
-
+	Gamble                = "/data/global/excel/gamble.txt"
 
 	// --- Animations ---
 

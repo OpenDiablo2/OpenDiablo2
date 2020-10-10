@@ -45,6 +45,7 @@ type RecordManager struct {
 	ComponentCodes
 	DifficultyLevels
 	ElemTypes
+	Gamble
 	Hirelings
 	Item struct {
 		All CommonItems // NOTE: populated when armor, weapons, and misc items are ALL loaded
@@ -167,6 +168,7 @@ func (r *RecordManager) init() error {
 		{d2resource.ItemRatio, itemRatioLoader},
 		{d2resource.Overlays, overlaysLoader},
 		{d2resource.CharStats, charStatsLoader},
+		{d2resource.Gamble, gambleLoader},
 		{d2resource.Hireling, hirelingLoader},
 		{d2resource.Experience, experienceLoader},
 		{d2resource.Gems, gemsLoader},
