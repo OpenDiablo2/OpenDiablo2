@@ -89,6 +89,7 @@ func (am *AssetManager) initDataDictionaries() error {
 		d2resource.MagicSuffix,
 		d2resource.ItemStatCost,
 		d2resource.ItemRatio,
+		d2resource.StorePage,
 		d2resource.Overlays,
 		d2resource.CharStats,
 		d2resource.Hireling,

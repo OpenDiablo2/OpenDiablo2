@@ -231,6 +231,7 @@ const (
 	Belts                 = "/data/global/excel/belts.txt"
 	Gamble                = "/data/global/excel/gamble.txt"
 	Colors                = "/data/global/excel/colors.txt"
+	StorePage             = "/data/global/excel/StorePage.txt"
 
 	// --- Animations ---
 

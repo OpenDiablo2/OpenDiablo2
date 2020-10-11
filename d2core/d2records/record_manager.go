@@ -82,6 +82,7 @@ type RecordManager struct {
 		TreasureClass
 		Types  ItemTypes
 		Unique UniqueItems
+		StorePages
 	}
 	Layout struct {
 		Inventory
@@ -170,6 +171,7 @@ func (r *RecordManager) init() error {
 		{d2resource.MagicSuffix, magicSuffixLoader},
 		{d2resource.ItemStatCost, itemStatCostLoader},
 		{d2resource.ItemRatio, itemRatioLoader},
+		{d2resource.StorePage, storePagesLoader},
 		{d2resource.Overlays, overlaysLoader},
 		{d2resource.CharStats, charStatsLoader},
 		{d2resource.Gamble, gambleLoader},
