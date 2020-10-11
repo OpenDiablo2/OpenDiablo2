@@ -121,6 +121,7 @@ type RecordManager struct {
 	Object struct {
 		Details ObjectDetails
 		Lookup  IndexedObjects
+		Modes   ObjectModes
 		Shrines
 		Types ObjectTypes
 	}
@@ -147,6 +148,7 @@ func (r *RecordManager) init() error {
 		{d2resource.LevelWarp, levelWarpsLoader},
 		{d2resource.ObjectType, objectTypesLoader},
 		{d2resource.ObjectDetails, objectDetailsLoader},
+		{d2resource.ObjectMode, objectModesLoader},
 		{d2resource.Weapons, weaponsLoader},
 		{d2resource.Armor, armorLoader},
 		{d2resource.Misc, miscItemsLoader},

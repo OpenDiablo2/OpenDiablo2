@@ -188,6 +188,7 @@ const (
 	LevelSubstitutions = "/data/global/excel/LvlSub.txt"
 
 	ObjectDetails         = "/data/global/excel/Objects.txt"
+	ObjectMode            = "/data/global/excel/ObjMode.txt"
 	SoundSettings         = "/data/global/excel/Sounds.txt"
 	ItemStatCost          = "/data/global/excel/ItemStatCost.txt"
 	ItemRatio             = "/data/global/excel/itemratio.txt"
