@@ -8,6 +8,12 @@ import "github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 func HydrateSkills(skills map[int]*HeroSkill, asset *d2asset.AssetManager) {
 	for skillID := range skills {
 		heroSkill := skills[skillID]
+
+		// TODO: figure out why these are nil sometimes
+		if heroSkill == nil {
+			continue
+		}
+
 		heroSkill.SkillRecord = asset.Records.Skill.Details[skillID]
 		heroSkill.SkillDescriptionRecord = asset.Records.Skill.Descriptions[heroSkill.SkillRecord.Skilldesc]
 		heroSkill.SkillPoints = skills[skillID].SkillPoints

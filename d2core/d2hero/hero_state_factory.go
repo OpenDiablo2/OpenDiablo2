@@ -187,6 +187,12 @@ func (f *HeroStateFactory) LoadHeroState(filePath string) *HeroState {
 	// We cant do this while unmarshalling because there is no reference to the asset manager.
 	for idx := range result.Skills {
 		hs := result.Skills[idx]
+
+		// TODO: figure out why this can be nil
+		if hs == nil {
+			continue
+		}
+
 		hs.SkillRecord = f.asset.Records.Skill.Details[hs.shallow.SkillID]
 		hs.SkillDescriptionRecord = f.asset.Records.Skill.Descriptions[hs.SkillRecord.Skilldesc]
 		hs.SkillPoints = hs.shallow.SkillPoints
