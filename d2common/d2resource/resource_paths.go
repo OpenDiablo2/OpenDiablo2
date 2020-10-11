@@ -230,6 +230,7 @@ const (
 	CompCode              = "/data/global/excel/compcode.txt"
 	Belts                 = "/data/global/excel/belts.txt"
 	Gamble                = "/data/global/excel/gamble.txt"
+	Colors                = "/data/global/excel/colors.txt"
 
 	// --- Animations ---
 

@@ -135,6 +135,7 @@ func (am *AssetManager) initDataDictionaries() error {
 		d2resource.RarePrefix,
 		d2resource.RareSuffix,
 		d2resource.Events,
+		d2resource.Colors,
 	}
 
 	for _, path := range dictPaths {

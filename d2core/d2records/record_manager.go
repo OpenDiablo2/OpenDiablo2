@@ -43,6 +43,7 @@ type RecordManager struct {
 		Stats      CharStats
 	}
 	ComponentCodes
+	Colors
 	DifficultyLevels
 	ElemTypes
 	Gamble
@@ -154,6 +155,7 @@ func (r *RecordManager) init() error {
 		{d2resource.Misc, miscItemsLoader},
 		{d2resource.Books, booksLoader},
 		{d2resource.Belts, beltsLoader},
+		{d2resource.Colors, colorsLoader},
 		{d2resource.ItemTypes, itemTypesLoader}, // WARN: needs to be after weapons, armor, and misc
 		{d2resource.UniqueItems, uniqueItemsLoader},
 		{d2resource.Missiles, missilesLoader},
