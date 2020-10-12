@@ -4,14 +4,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gravestench/ecs"
+	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
 
 func Test_FileHandleResolver_Process(t *testing.T) {
-	cfg := ecs.NewWorldConfig()
+	cfg := akara.NewWorldConfig()
 
 	fileTypeResolver := NewFileTypeResolver()
 	fileHandleResolver := NewFileHandleResolver()
@@ -21,7 +21,7 @@ func Test_FileHandleResolver_Process(t *testing.T) {
 		With(fileSourceResolver).
 		With(fileHandleResolver)
 
-	world := ecs.NewWorld(cfg)
+	world := akara.NewWorld(cfg)
 
 	filepathMap, err := world.GetMap(d2components.FilePath)
 	if err != nil {

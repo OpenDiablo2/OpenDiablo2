@@ -3,34 +3,34 @@ package d2systems
 import (
 	"time"
 
-	"github.com/gravestench/ecs"
+	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
 
 // NewMovementSystem creates a movement system
 func NewMovementSystem() *MovementSystem {
-	cfg := ecs.NewFilter().Require(d2components.Position, d2components.Velocity)
+	cfg := akara.NewFilter().Require(d2components.Position, d2components.Velocity)
 
 	filter := cfg.Build()
 
 	return &MovementSystem{
-		SubscriberSystem: ecs.NewSubscriberSystem(filter),
+		SubscriberSystem: akara.NewSubscriberSystem(filter),
 	}
 }
 
 // static check that MovementSystem implements the System interface
-var _ ecs.System = &MovementSystem{}
+var _ akara.System = &MovementSystem{}
 
 // MovementSystem handles entity movement based on velocity and position components
 type MovementSystem struct {
-	*ecs.SubscriberSystem
+	*akara.SubscriberSystem
 	positions  *d2components.PositionMap
 	velocities *d2components.VelocityMap
 }
 
 // Init initializes the system with the given world
-func (m *MovementSystem) Init(world *ecs.World) {
+func (m *MovementSystem) Init(world *akara.World) {
 	m.World = world
 
 	if world == nil {
@@ -59,7 +59,7 @@ func (m *MovementSystem) Process() {
 }
 
 // ProcessEntity updates an individual entity in the movement system
-func (m *MovementSystem) ProcessEntity(id ecs.EID) {
+func (m *MovementSystem) ProcessEntity(id akara.EID) {
 	position, found := m.positions.GetPosition(id)
 	if !found {
 		return

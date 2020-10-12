@@ -1,12 +1,12 @@
 package d2components
 
 import (
-	"github.com/gravestench/ecs"
+	"github.com/gravestench/akara"
 )
 
 // Component type ID's
 const (
-	GameConfigCID ecs.ComponentID = iota
+	GameConfigCID akara.ComponentID = iota
 	FilePathCID
 	FileTypeCID
 	FileSourceCID
@@ -21,7 +21,9 @@ const (
 	AssetDs1CID
 	AssetDt1CID
 	AssetWavCID
-	AssetD2CID
+	AssetD2AnimDataCID
 	PositionCID
 	VelocityCID
+	DirtyCID
+	PriorityCID
 )

@@ -4,15 +4,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gravestench/ecs"
+	"github.com/gravestench/akara"
 )
 
 func TestTimeScaleSystem_Init(t *testing.T) {
-	cfg := ecs.NewWorldConfig()
+	cfg := akara.NewWorldConfig()
 
 	cfg.With(NewTimeScaleSystem())
 
-	world := ecs.NewWorld(cfg)
+	world := akara.NewWorld(cfg)
 
 	if len(world.Systems) != 1 {
 		t.Error("system not added to the world")
@@ -20,7 +20,7 @@ func TestTimeScaleSystem_Init(t *testing.T) {
 }
 
 func TestTimeScaleSystem_Process(t *testing.T) {
-	cfg := ecs.NewWorldConfig()
+	cfg := akara.NewWorldConfig()
 
 	timescaleSystem := NewTimeScaleSystem()
 
@@ -28,7 +28,7 @@ func TestTimeScaleSystem_Process(t *testing.T) {
 
 	timescaleSystem.scale = 0.01
 
-	world := ecs.NewWorld(cfg)
+	world := akara.NewWorld(cfg)
 
 	actual := time.Second
 	expected := time.Duration(timescaleSystem.scale) * actual

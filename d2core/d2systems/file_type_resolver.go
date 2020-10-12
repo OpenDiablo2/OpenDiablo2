@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gravestench/ecs"
+	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
@@ -13,34 +13,36 @@ import (
 )
 
 // NewFileTypeResolver creates a new file type resolution system.
-func NewFileTypeResolver() *FileTypeResolutionSystem {
-	cfg := ecs.NewFilter()
+func NewFileTypeResolver() *FileTypeResolver {
+	// we subscribe only to entities that have a filepath
+	// and have not yet been given a file type
+	filesToCheck := akara.NewFilter().
+		Require(d2components.FilePath).
+		Forbid(d2components.FileType).
+		Build()
 
-	cfg.Require(d2components.FilePath)
-
-	filter := cfg.Build()
-
-	return &FileTypeResolutionSystem{
-		SubscriberSystem: ecs.NewSubscriberSystem(filter),
+	return &FileTypeResolver{
+		SubscriberSystem: akara.NewSubscriberSystem(filesToCheck),
 	}
 }
 
-// static check that FileTypeResolutionSystem implements the System interface
-var _ ecs.System = &FileTypeResolutionSystem{}
+// static check that FileTypeResolver implements the System interface
+var _ akara.System = &FileTypeResolver{}
 
-// FileTypeResolutionSystem is responsible for determining file types from file file paths.
+// FileTypeResolver is responsible for determining file types from file paths.
 // This system will subscribe to entities that have a file path component, but do not
 // have a file type component. It will use the file path component to determine the file type,
 // and it will then create the file type component for the entity, thus removing the entity
 // from its subscription.
-type FileTypeResolutionSystem struct {
-	*ecs.SubscriberSystem
-	filePaths *d2components.FilePathMap
-	fileTypes *d2components.FileTypeMap
+type FileTypeResolver struct {
+	*akara.SubscriberSystem
+	filesToCheck *akara.Subscription
+	filePaths    *d2components.FilePathMap
+	fileTypes    *d2components.FileTypeMap
 }
 
 // Init initializes the system with the given world
-func (m *FileTypeResolutionSystem) Init(world *ecs.World) {
+func (m *FileTypeResolver) Init(world *akara.World) {
 	m.World = world
 
 	if world == nil {
@@ -52,6 +54,8 @@ func (m *FileTypeResolutionSystem) Init(world *ecs.World) {
 		m.AddSubscription(m.Subscriptions[subIdx])
 	}
 
+	m.filesToCheck = m.Subscriptions[0]
+
 	// try to inject the components we require, then cast the returned
 	// abstract ComponentMap back to the concrete implementation
 	m.filePaths = m.InjectMap(d2components.FilePath).(*d2components.FilePathMap)
@@ -59,24 +63,19 @@ func (m *FileTypeResolutionSystem) Init(world *ecs.World) {
 }
 
 // Process processes all of the Entities
-func (m *FileTypeResolutionSystem) Process() {
-	for subIdx := range m.Subscriptions {
-		entities := m.Subscriptions[subIdx].GetEntities()
-		for entIdx := range entities {
-			m.ProcessEntity(entities[entIdx])
-		}
+func (m *FileTypeResolver) Process() {
+	for _, eid := range m.filesToCheck.GetEntities() {
+		m.determineFileType(eid)
 	}
 }
 
-// ProcessEntity updates an individual entity in the system
-func (m *FileTypeResolutionSystem) ProcessEntity(id ecs.EID) {
+func (m *FileTypeResolver) determineFileType(id akara.EID) {
 	fp, found := m.filePaths.GetFilePath(id)
 	if !found {
 		return
 	}
 
 	ft := m.fileTypes.AddFileType(id)
-
 	if _, err := d2mpq.Load(fp.Path); err == nil {
 		ft.Type = d2enum.FileTypeMPQ
 		return

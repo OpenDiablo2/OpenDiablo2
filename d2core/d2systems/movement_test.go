@@ -7,17 +7,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gravestench/ecs"
+	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
 
 func TestMovementSystem_Init(t *testing.T) {
-	cfg := ecs.NewWorldConfig()
+	cfg := akara.NewWorldConfig()
 
 	cfg.With(NewMovementSystem())
 
-	world := ecs.NewWorld(cfg)
+	world := akara.NewWorld(cfg)
 
 	if len(world.Systems) != 1 {
 		t.Error("system not added to the world")
@@ -43,7 +43,7 @@ func TestMovementSystem_SetActive(t *testing.T) {
 }
 
 func TestMovementSystem_EntityAdded(t *testing.T) {
-	cfg := ecs.NewWorldConfig()
+	cfg := akara.NewWorldConfig()
 
 	movement := NewMovementSystem()
 
@@ -51,7 +51,7 @@ func TestMovementSystem_EntityAdded(t *testing.T) {
 		With(d2components.NewPositionMap()).
 		With(d2components.NewVelocityMap())
 
-	world := ecs.NewWorld(cfg)
+	world := akara.NewWorld(cfg)
 
 	e := world.NewEntity()
 
@@ -85,7 +85,7 @@ func TestMovementSystem_EntityAdded(t *testing.T) {
 
 func TestMovementSystem_Update(t *testing.T) {
 	// world bootstrap
-	cfg := ecs.NewWorldConfig()
+	cfg := akara.NewWorldConfig()
 
 	movementSystem := NewMovementSystem()
 	positions := d2components.NewPositionMap()
@@ -93,7 +93,7 @@ func TestMovementSystem_Update(t *testing.T) {
 
 	cfg.With(movementSystem).With(positions).With(velocities)
 
-	world := ecs.NewWorld(cfg)
+	world := akara.NewWorld(cfg)
 
 	// lets make an entity and add some components to it
 	e := world.NewEntity()
@@ -117,13 +117,13 @@ func TestMovementSystem_Update(t *testing.T) {
 }
 
 func bench_N_entities(n int, b *testing.B) {
-	cfg := ecs.NewWorldConfig()
+	cfg := akara.NewWorldConfig()
 
 	movementSystem := NewMovementSystem()
 
 	cfg.With(movementSystem)
 
-	world := ecs.NewWorld(cfg)
+	world := akara.NewWorld(cfg)
 
 	for idx := 0; idx < n; idx++ {
 		e := world.NewEntity()

@@ -1,14 +1,14 @@
 package d2components
 
 import (
-	"github.com/gravestench/ecs"
+	"github.com/gravestench/akara"
 )
 
 // static check that FilePathComponent implements Component
-var _ ecs.Component = &FilePathComponent{}
+var _ akara.Component = &FilePathComponent{}
 
 // static check that FilePathMap implements ComponentMap
-var _ ecs.ComponentMap = &FilePathMap{}
+var _ akara.ComponentMap = &FilePathMap{}
 
 // FilePathComponent is a component that contains a file Path string
 type FilePathComponent struct {
@@ -16,12 +16,12 @@ type FilePathComponent struct {
 }
 
 // ID returns a unique identifier for the component type
-func (*FilePathComponent) ID() ecs.ComponentID {
+func (*FilePathComponent) ID() akara.ComponentID {
 	return FilePathCID
 }
 
-// NewMap returns a new component map the component type
-func (*FilePathComponent) NewMap() ecs.ComponentMap {
+// NewMap returns a new component map for the component type
+func (*FilePathComponent) NewMap() akara.ComponentMap {
 	return NewFilePathMap()
 }
 
@@ -31,7 +31,7 @@ var FilePath = (*FilePathComponent)(nil) // nolint:gochecknoglobals // global by
 // NewFilePathMap creates a new map of entity ID's to FilePath
 func NewFilePathMap() *FilePathMap {
 	cm := &FilePathMap{
-		components: make(map[ecs.EID]*FilePathComponent),
+		components: make(map[akara.EID]*FilePathComponent),
 	}
 
 	return cm
@@ -39,28 +39,28 @@ func NewFilePathMap() *FilePathMap {
 
 // FilePathMap is a map of entity ID's to FilePath
 type FilePathMap struct {
-	world      *ecs.World
-	components map[ecs.EID]*FilePathComponent
+	world      *akara.World
+	components map[akara.EID]*FilePathComponent
 }
 
 // Init initializes the component map with the given world
-func (cm *FilePathMap) Init(world *ecs.World) {
+func (cm *FilePathMap) Init(world *akara.World) {
 	cm.world = world
 }
 
 // ID returns a unique identifier for the component type
-func (*FilePathMap) ID() ecs.ComponentID {
+func (*FilePathMap) ID() akara.ComponentID {
 	return FilePathCID
 }
 
-// NewMap returns a new component map the component type
-func (*FilePathMap) NewMap() ecs.ComponentMap {
+// NewMap returns a new component map for the component type
+func (*FilePathMap) NewMap() akara.ComponentMap {
 	return NewFilePathMap()
 }
 
 // Add a new FilePathComponent for the given entity id, return that component.
 // If the entity already has a component, just return that one.
-func (cm *FilePathMap) Add(id ecs.EID) ecs.Component {
+func (cm *FilePathMap) Add(id akara.EID) akara.Component {
 	if com, has := cm.components[id]; has {
 		return com
 	}
@@ -75,25 +75,25 @@ func (cm *FilePathMap) Add(id ecs.EID) ecs.Component {
 // AddFilePath adds a new FilePathComponent for the given entity id and returns it.
 // If the entity already has a FilePathComponent, just return that one.
 // this is a convenience method for the generic Add method, as it returns a
-// *FilePathComponent instead of an ecs.Component
-func (cm *FilePathMap) AddFilePath(id ecs.EID) *FilePathComponent {
+// *FilePathComponent instead of an akara.Component
+func (cm *FilePathMap) AddFilePath(id akara.EID) *FilePathComponent {
 	return cm.Add(id).(*FilePathComponent)
 }
 
 // Get returns the component associated with the given entity id
-func (cm *FilePathMap) Get(id ecs.EID) (ecs.Component, bool) {
+func (cm *FilePathMap) Get(id akara.EID) (akara.Component, bool) {
 	entry, found := cm.components[id]
 	return entry, found
 }
 
 // GetFilePath returns the FilePathComponent associated with the given entity id
-func (cm *FilePathMap) GetFilePath(id ecs.EID) (*FilePathComponent, bool) {
+func (cm *FilePathMap) GetFilePath(id akara.EID) (*FilePathComponent, bool) {
 	entry, found := cm.components[id]
 	return entry, found
 }
 
 // Remove a component for the given entity id, return the component.
-func (cm *FilePathMap) Remove(id ecs.EID) {
+func (cm *FilePathMap) Remove(id akara.EID) {
 	delete(cm.components, id)
 	cm.world.UpdateEntity(id)
 }
