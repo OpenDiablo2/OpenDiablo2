@@ -3,14 +3,14 @@ package d2systems
 import (
 	"testing"
 
-	"github.com/gravestench/ecs"
+	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
 
 func Test_FileSourceResolution(t *testing.T) {
-	cfg := ecs.NewWorldConfig()
+	cfg := akara.NewWorldConfig()
 
 	srcResolver := NewFileSourceResolver()
 	fileTypeResolver := NewFileTypeResolver()
@@ -18,7 +18,7 @@ func Test_FileSourceResolution(t *testing.T) {
 	cfg.With(fileTypeResolver).
 		With(srcResolver)
 
-	world := ecs.NewWorld(cfg)
+	world := akara.NewWorld(cfg)
 
 	filepathMap, err := world.GetMap(d2components.FilePath)
 	if err != nil {
@@ -40,5 +40,14 @@ func Test_FileSourceResolution(t *testing.T) {
 
 	if ft.Type != d2enum.FileTypeDirectory {
 		t.Error("expected file system source type for entity")
+	}
+
+	fs, found := srcResolver.fileSources.GetFileSource(sourceEntity)
+	if !found {
+		t.Error("file source not created for entity")
+	}
+
+	if fs.AbstractSource == nil {
+		t.Error("nil file AbstractSource interface inside of file source component")
 	}
 }

@@ -1,16 +1,16 @@
 package d2components
 
 import (
-	"github.com/gravestench/ecs"
+	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
 // static check that FileTypeComponent implements Component
-var _ ecs.Component = &FileTypeComponent{}
+var _ akara.Component = &FileTypeComponent{}
 
 // static check that FileTypeMap implements ComponentMap
-var _ ecs.ComponentMap = &FileTypeMap{}
+var _ akara.ComponentMap = &FileTypeMap{}
 
 // FileTypeComponent is a component that contains a file Type
 type FileTypeComponent struct {
@@ -18,12 +18,12 @@ type FileTypeComponent struct {
 }
 
 // ID returns a unique identifier for the component type
-func (*FileTypeComponent) ID() ecs.ComponentID {
+func (*FileTypeComponent) ID() akara.ComponentID {
 	return FileTypeCID
 }
 
-// NewMap returns a new component map the component type
-func (*FileTypeComponent) NewMap() ecs.ComponentMap {
+// NewMap returns a new component map for the component type
+func (*FileTypeComponent) NewMap() akara.ComponentMap {
 	return NewFileTypeMap()
 }
 
@@ -33,7 +33,7 @@ var FileType = (*FileTypeComponent)(nil) // nolint:gochecknoglobals // global by
 // NewFileTypeMap creates a new map of entity ID's to FileType
 func NewFileTypeMap() *FileTypeMap {
 	cm := &FileTypeMap{
-		components: make(map[ecs.EID]*FileTypeComponent),
+		components: make(map[akara.EID]*FileTypeComponent),
 	}
 
 	return cm
@@ -41,28 +41,28 @@ func NewFileTypeMap() *FileTypeMap {
 
 // FileTypeMap is a map of entity ID's to FileType
 type FileTypeMap struct {
-	world      *ecs.World
-	components map[ecs.EID]*FileTypeComponent
+	world      *akara.World
+	components map[akara.EID]*FileTypeComponent
 }
 
 // Init initializes the component map with the given world
-func (cm *FileTypeMap) Init(world *ecs.World) {
+func (cm *FileTypeMap) Init(world *akara.World) {
 	cm.world = world
 }
 
 // ID returns a unique identifier for the component type
-func (*FileTypeMap) ID() ecs.ComponentID {
+func (*FileTypeMap) ID() akara.ComponentID {
 	return FileTypeCID
 }
 
-// NewMap returns a new component map the component type
-func (*FileTypeMap) NewMap() ecs.ComponentMap {
+// NewMap returns a new component map for the component type
+func (*FileTypeMap) NewMap() akara.ComponentMap {
 	return NewFileTypeMap()
 }
 
 // Add a new FileTypeComponent for the given entity id, return that component.
 // If the entity already has a component, just return that one.
-func (cm *FileTypeMap) Add(id ecs.EID) ecs.Component {
+func (cm *FileTypeMap) Add(id akara.EID) akara.Component {
 	if com, has := cm.components[id]; has {
 		return com
 	}
@@ -77,25 +77,25 @@ func (cm *FileTypeMap) Add(id ecs.EID) ecs.Component {
 // AddFileType adds a new FileTypeComponent for the given entity id and returns it.
 // If the entity already has a file type component, just return that one.
 // this is a convenience method for the generic Add method, as it returns a
-// *FileTypeComponent instead of an ecs.Component
-func (cm *FileTypeMap) AddFileType(id ecs.EID) *FileTypeComponent {
+// *FileTypeComponent instead of an akara.Component
+func (cm *FileTypeMap) AddFileType(id akara.EID) *FileTypeComponent {
 	return cm.Add(id).(*FileTypeComponent)
 }
 
 // Get returns the component associated with the given entity id
-func (cm *FileTypeMap) Get(id ecs.EID) (ecs.Component, bool) {
+func (cm *FileTypeMap) Get(id akara.EID) (akara.Component, bool) {
 	entry, found := cm.components[id]
 	return entry, found
 }
 
 // GetFileType returns the FileTypeComponent associated with the given entity id
-func (cm *FileTypeMap) GetFileType(id ecs.EID) (*FileTypeComponent, bool) {
+func (cm *FileTypeMap) GetFileType(id akara.EID) (*FileTypeComponent, bool) {
 	entry, found := cm.components[id]
 	return entry, found
 }
 
 // Remove a component for the given entity id, return the component.
-func (cm *FileTypeMap) Remove(id ecs.EID) {
+func (cm *FileTypeMap) Remove(id akara.EID) {
 	delete(cm.components, id)
 	cm.world.UpdateEntity(id)
 }

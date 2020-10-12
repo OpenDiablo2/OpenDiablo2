@@ -4,11 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gravestench/ecs"
+	"github.com/gravestench/akara"
 )
 
 func Test_SystemIntegrationTest(t *testing.T) {
-	cfg := ecs.NewWorldConfig()
+	cfg := akara.NewWorldConfig()
 
 	scale := NewTimeScaleSystem()
 	movement := NewMovementSystem()
@@ -16,7 +16,7 @@ func Test_SystemIntegrationTest(t *testing.T) {
 	cfg.With(scale)
 	cfg.With(movement)
 
-	world := ecs.NewWorld(cfg)
+	world := akara.NewWorld(cfg)
 
 	e := world.NewEntity()
 	pos := movement.positions.AddPosition(e)

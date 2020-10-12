@@ -3,19 +3,19 @@ package d2systems
 import (
 	"testing"
 
-	"github.com/gravestench/ecs"
+	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
 func TestNewFileTypeResolver_KnownType(t *testing.T) {
-	cfg := ecs.NewWorldConfig()
+	cfg := akara.NewWorldConfig()
 
 	resolver := NewFileTypeResolver()
 
 	cfg.With(resolver)
 
-	world := ecs.NewWorld(cfg)
+	world := akara.NewWorld(cfg)
 
 	e := world.NewEntity()
 
@@ -43,13 +43,13 @@ func TestNewFileTypeResolver_KnownType(t *testing.T) {
 }
 
 func TestNewFileTypeResolver_UnknownType(t *testing.T) {
-	cfg := ecs.NewWorldConfig()
+	cfg := akara.NewWorldConfig()
 
 	resolver := NewFileTypeResolver()
 
 	cfg.With(resolver)
 
-	world := ecs.NewWorld(cfg)
+	world := akara.NewWorld(cfg)
 
 	e := world.NewEntity()
 

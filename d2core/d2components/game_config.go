@@ -5,14 +5,14 @@ import (
 	"path"
 	"runtime"
 
-	"github.com/gravestench/ecs"
+	"github.com/gravestench/akara"
 )
 
 // static check that GameConfigComponent implements Component
-var _ ecs.Component = &GameConfigComponent{}
+var _ akara.Component = &GameConfigComponent{}
 
 // static check that GameConfigMap implements ComponentMap
-var _ ecs.ComponentMap = &GameConfigMap{}
+var _ akara.ComponentMap = &GameConfigMap{}
 
 type GameConfigComponent struct {
 	MpqLoadOrder    []string
@@ -29,12 +29,12 @@ type GameConfigComponent struct {
 }
 
 // ID returns a unique identifier for the component type
-func (*GameConfigComponent) ID() ecs.ComponentID {
+func (*GameConfigComponent) ID() akara.ComponentID {
 	return GameConfigCID
 }
 
-// NewMap returns a new component map the component type
-func (*GameConfigComponent) NewMap() ecs.ComponentMap {
+// NewMap returns a new component map for the component type
+func (*GameConfigComponent) NewMap() akara.ComponentMap {
 	return NewGameConfigMap()
 }
 
@@ -44,7 +44,7 @@ var GameConfig = (*GameConfigComponent)(nil) // nolint:gochecknoglobals // globa
 // NewGameConfigMap creates a new map of entity ID's to GameConfigComponent components
 func NewGameConfigMap() *GameConfigMap {
 	cm := &GameConfigMap{
-		components: make(map[ecs.EID]*GameConfigComponent),
+		components: make(map[akara.EID]*GameConfigComponent),
 	}
 
 	return cm
@@ -52,18 +52,18 @@ func NewGameConfigMap() *GameConfigMap {
 
 // GameConfigMap is a map of entity ID's to GameConfigComponent components
 type GameConfigMap struct {
-	world      *ecs.World
-	components map[ecs.EID]*GameConfigComponent
+	world      *akara.World
+	components map[akara.EID]*GameConfigComponent
 }
 
 // Init initializes the component map with the given world
-func (cm *GameConfigMap) Init(world *ecs.World) {
+func (cm *GameConfigMap) Init(world *akara.World) {
 	cm.world = world
 }
 
 // Add a new GameConfigComponent for the given entity id, return that component.
 // If the entity already has a component, just return that one.
-func (cm *GameConfigMap) Add(id ecs.EID) ecs.Component {
+func (cm *GameConfigMap) Add(id akara.EID) akara.Component {
 	if com, has := cm.components[id]; has {
 		return com
 	}
@@ -76,37 +76,37 @@ func (cm *GameConfigMap) Add(id ecs.EID) ecs.Component {
 }
 
 // ID returns a unique identifier for the component type
-func (*GameConfigMap) ID() ecs.ComponentID {
+func (*GameConfigMap) ID() akara.ComponentID {
 	return GameConfigCID
 }
 
-// NewMap returns a new component map the component type
-func (*GameConfigMap) NewMap() ecs.ComponentMap {
+// NewMap returns a new component map for the component type
+func (*GameConfigMap) NewMap() akara.ComponentMap {
 	return NewGameConfigMap()
 }
 
 // AddGameConfig adds a new GameConfigComponent for the given entity id and returns it.
 // If the entity already has a GameConfigComponent component, just return that one.
 // this is a convenience method for the generic Add method, as it returns a
-// *GameConfigComponent instead of an ecs.Component
-func (cm *GameConfigMap) AddGameConfig(id ecs.EID) *GameConfigComponent {
+// *GameConfigComponent instead of an akara.Component
+func (cm *GameConfigMap) AddGameConfig(id akara.EID) *GameConfigComponent {
 	return cm.Add(id).(*GameConfigComponent)
 }
 
 // Get returns the component associated with the given entity id
-func (cm *GameConfigMap) Get(id ecs.EID) (ecs.Component, bool) {
+func (cm *GameConfigMap) Get(id akara.EID) (akara.Component, bool) {
 	entry, found := cm.components[id]
 	return entry, found
 }
 
 // GetGameConfig returns the GameConfigComponent component associated with the given entity id
-func (cm *GameConfigMap) GetGameConfig(id ecs.EID) (*GameConfigComponent, bool) {
+func (cm *GameConfigMap) GetGameConfig(id akara.EID) (*GameConfigComponent, bool) {
 	entry, found := cm.components[id]
 	return entry, found
 }
 
 // Remove a component for the given entity id, return the component.
-func (cm *GameConfigMap) Remove(id ecs.EID) {
+func (cm *GameConfigMap) Remove(id akara.EID) {
 	delete(cm.components, id)
 	cm.world.UpdateEntity(id)
 }

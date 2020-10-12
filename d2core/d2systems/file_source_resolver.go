@@ -3,8 +3,9 @@ package d2systems
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
-	"github.com/gravestench/ecs"
+	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
@@ -14,27 +15,27 @@ import (
 
 func NewFileSourceResolver() *FileSourceResolver {
 	// subscribe to entities with a file type and file path, but no file source type
-	filesToCheck := ecs.NewFilter().
+	filesToCheck := akara.NewFilter().
 		Require(d2components.FilePath).
 		Require(d2components.FileType).
 		Forbid(d2components.FileSource).
 		Build()
 
 	return &FileSourceResolver{
-		SubscriberSystem: ecs.NewSubscriberSystem(filesToCheck),
+		SubscriberSystem: akara.NewSubscriberSystem(filesToCheck),
 	}
 }
 
 type FileSourceResolver struct {
-	*ecs.SubscriberSystem
-	fileSub     *ecs.Subscription
+	*akara.SubscriberSystem
+	fileSub     *akara.Subscription
 	filePaths   *d2components.FilePathMap
 	fileTypes   *d2components.FileTypeMap
 	fileSources *d2components.FileSourceMap
 }
 
 // Init initializes the system with the given world
-func (m *FileSourceResolver) Init(world *ecs.World) {
+func (m *FileSourceResolver) Init(world *akara.World) {
 	m.World = world
 
 	if world == nil {
@@ -65,18 +66,18 @@ func (m *FileSourceResolver) Process() {
 }
 
 // ProcessEntity updates an individual entity in the system
-func (m *FileSourceResolver) ProcessEntity(id ecs.EID) {
+func (m *FileSourceResolver) ProcessEntity(id akara.EID) {
 	fp, found := m.filePaths.GetFilePath(id)
 	if !found {
 		return
 	}
 
-	fst, found := m.fileTypes.GetFileType(id)
+	ft, found := m.fileTypes.GetFileType(id)
 	if !found {
 		return
 	}
 
-	switch fst.Type {
+	switch ft.Type {
 	case d2enum.FileTypeUnknown:
 		return
 	case d2enum.FileTypeMPQ:
@@ -84,7 +85,7 @@ func (m *FileSourceResolver) ProcessEntity(id ecs.EID) {
 		instance, err := m.makeMpqSource(fp.Path)
 
 		if err != nil {
-			fst.Type = d2enum.FileTypeUnknown
+			ft.Type = d2enum.FileTypeUnknown
 			break
 		}
 
@@ -94,13 +95,11 @@ func (m *FileSourceResolver) ProcessEntity(id ecs.EID) {
 		instance, err := m.makeFileSystemSource(fp.Path)
 
 		if err != nil {
-			fst.Type = d2enum.FileTypeUnknown
+			ft.Type = d2enum.FileTypeUnknown
 			break
 		}
 
 		source.AbstractSource = instance
-	default:
-		fst.Type = d2enum.FileTypeUnknown
 	}
 }
 
@@ -141,10 +140,20 @@ type mpqSource struct {
 }
 
 func (s *mpqSource) Open(path *d2components.FilePathComponent) (d2interface.DataStream, error) {
-	fileData, err := s.mpq.ReadFileStream(path.Path)
+	fileData, err := s.mpq.ReadFileStream(s.cleanMpqPath(path.Path))
 	if err != nil {
 		return nil, err
 	}
 
 	return fileData, nil
+}
+
+func (s *mpqSource) cleanMpqPath(path string) string {
+	path = strings.ReplaceAll(path, "/", "\\")
+
+	if string(path[0]) == "\\" {
+		path = path[1:]
+	}
+
+	return path
 }
