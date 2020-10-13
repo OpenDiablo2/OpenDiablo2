@@ -104,6 +104,11 @@ func (m *FileTypeResolver) determineFileType(id akara.EID) {
 		ft.Type = d2enum.FileTypePalette
 	case ".tbl":
 		ft.Type = d2enum.FileTypeStringTable
+		// HACK: we should probably not use the path to check for the type
+		// but we have two types of .tbl file :(
+		if strings.Contains(fp.Path, "FONT") {
+			ft.Type = d2enum.FileTypeFontTable
+		}
 	case ".txt":
 		ft.Type = d2enum.FileTypeDataDictionary
 	case ".cof":

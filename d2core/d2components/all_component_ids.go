@@ -12,6 +12,7 @@ const (
 	FileSourceCID
 	FileHandleCID
 	AssetStringTableCID
+	AssetFontTableCID
 	AssetDataDictionaryCID
 	AssetPaletteCID
 	AssetPaletteTransformCID

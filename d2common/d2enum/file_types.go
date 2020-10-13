@@ -10,6 +10,7 @@ const (
 	FileTypeMPQ
 	FileTypeJSON
 	FileTypeStringTable
+	FileTypeFontTable
 	FileTypeDataDictionary
 	FileTypePalette
 	FileTypePaletteTransform

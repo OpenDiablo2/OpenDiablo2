@@ -4,6 +4,10 @@ import (
 	"errors"
 	"io"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2animdata"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
@@ -19,6 +23,11 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
+)
+
+const (
+	assetCacheBudget      = 1024
+	assetCacheEntryWeight = 1 // may want to make different weights for different asset types
 )
 
 // NewAssetLoader creates a new asset loader instance
@@ -49,6 +58,7 @@ func NewAssetLoader() *AssetLoaderSystem {
 
 	return &AssetLoaderSystem{
 		SubscriberSystem: akara.NewSubscriberSystem(filesToLoad, fileSources),
+		cache:            d2cache.CreateCache(assetCacheBudget).(*d2cache.Cache),
 	}
 }
 
@@ -58,11 +68,13 @@ type AssetLoaderSystem struct {
 	*akara.SubscriberSystem
 	fileSub          *akara.Subscription
 	sourceSub        *akara.Subscription
+	cache            *d2cache.Cache
 	filePaths        *d2components.FilePathMap
 	fileTypes        *d2components.FileTypeMap
 	fileHandles      *d2components.FileHandleMap
 	fileSources      *d2components.FileSourceMap
 	stringTables     *d2components.StringTableMap
+	fontTables       *d2components.FontTableMap
 	dataDictionaries *d2components.DataDictionaryMap
 	palettes         *d2components.PaletteMap
 	transforms       *d2components.PaletteTransformMap
@@ -101,6 +113,7 @@ func (m *AssetLoaderSystem) Init(world *akara.World) {
 	m.dataDictionaries = m.InjectMap(d2components.DataDictionary).(*d2components.DataDictionaryMap)
 	m.palettes = m.InjectMap(d2components.Palette).(*d2components.PaletteMap)
 	m.transforms = m.InjectMap(d2components.PaletteTransform).(*d2components.PaletteTransformMap)
+	m.fontTables = m.InjectMap(d2components.FontTable).(*d2components.FontTableMap)
 	m.cof = m.InjectMap(d2components.Cof).(*d2components.CofMap)
 	m.dc6 = m.InjectMap(d2components.Dc6).(*d2components.Dc6Map)
 	m.dcc = m.InjectMap(d2components.Dcc).(*d2components.DccMap)
@@ -118,6 +131,11 @@ func (m *AssetLoaderSystem) Process() {
 }
 
 func (m *AssetLoaderSystem) loadAsset(id akara.EID) {
+	fp, found := m.filePaths.GetFilePath(id)
+	if !found {
+		return
+	}
+
 	ft, found := m.fileTypes.GetFileType(id)
 	if !found {
 		return
@@ -127,6 +145,12 @@ func (m *AssetLoaderSystem) loadAsset(id akara.EID) {
 	if !found {
 		return
 	}
+
+	if found := m.pullFromCache(id, fp.Path, ft.Type); found {
+		return
+	}
+
+	_, _ = fh.Data.Seek(0, 0)
 
 	data, buf := make([]byte, 0), make([]byte, 16)
 
@@ -139,129 +163,185 @@ func (m *AssetLoaderSystem) loadAsset(id akara.EID) {
 		}
 	}
 
-	err := m.tryToParse(id, data, ft.Type)
+	err := m.parseAndCache(id, fp.Path, ft.Type, data)
 	if err != nil {
 		ft.Type = d2enum.FileTypeUnknown
 	}
 }
 
-func (m *AssetLoaderSystem) tryToParse(id akara.EID, data []byte, t d2enum.FileType) error {
+func (m *AssetLoaderSystem) pullFromCache(id akara.EID, path string, t d2enum.FileType) bool {
+	entry, found := m.cache.Retrieve(path)
+	if !found {
+		return found
+	}
+
+	switch t {
+	case d2enum.FileTypeStringTable:
+		m.stringTables.AddStringTable(id).TextDictionary = entry.(*d2tbl.TextDictionary)
+	case d2enum.FileTypeFontTable:
+		m.fontTables.AddFontTable(id).Data = entry.([]byte)
+	case d2enum.FileTypeDataDictionary:
+		m.dataDictionaries.AddDataDictionary(id).DataDictionary = entry.(*d2txt.DataDictionary)
+	case d2enum.FileTypePalette:
+		m.palettes.AddPalette(id).Palette = entry.(d2interface.Palette)
+	case d2enum.FileTypePaletteTransform:
+		m.transforms.AddPaletteTransform(id).Transform = entry.(*d2pl2.PL2)
+	case d2enum.FileTypeCOF:
+		m.cof.AddCof(id).COF = entry.(*d2cof.COF)
+	case d2enum.FileTypeDC6:
+		m.dc6.AddDc6(id).DC6 = entry.(*d2dc6.DC6)
+	case d2enum.FileTypeDCC:
+		m.dcc.AddDcc(id).DCC = entry.(*d2dcc.DCC)
+	case d2enum.FileTypeDS1:
+		m.ds1.AddDs1(id).DS1 = entry.(*d2ds1.DS1)
+	case d2enum.FileTypeDT1:
+		m.dt1.AddDt1(id).DT1 = entry.(*d2dt1.DT1)
+	case d2enum.FileTypeWAV:
+		m.wav.AddWav(id).Data = entry.(d2interface.DataStream)
+	case d2enum.FileTypeD2:
+		m.animDatas.AddAnimData(id).AnimationData = entry.(*d2animdata.AnimationData)
+	}
+
+	return found
+}
+
+func (m *AssetLoaderSystem) parseAndCache(id akara.EID, path string, t d2enum.FileType, data []byte) error {
 	var err error
 
 	switch t {
 	case d2enum.FileTypeStringTable:
-		m.loadFileTypeStringTable(id, data) // TODO: add error handling for string table load
+		m.loadFileTypeStringTable(id, path, data) // TODO: add error handling for string table load
+	case d2enum.FileTypeFontTable:
+		m.loadFileTypeFontTable(id, path, data) // TODO: add error handling for string table load
 	case d2enum.FileTypeDataDictionary:
-		m.loadFileTypeDataDictionary(id, data) // TODO: add error handling for data dict load
+		m.loadFileTypeDataDictionary(id, path, data) // TODO: add error handling for data dict load
 	case d2enum.FileTypePalette:
-		err = m.loadFileTypePalette(id, data)
+		err = m.loadFileTypePalette(id, path, data)
 	case d2enum.FileTypePaletteTransform:
-		err = m.loadFileTypePaletteTransform(id, data)
+		err = m.loadFileTypePaletteTransform(id, path, data)
 	case d2enum.FileTypeCOF:
-		err = m.loadFileTypeCOF(id, data)
+		err = m.loadFileTypeCOF(id, path, data)
 	case d2enum.FileTypeDC6:
-		err = m.loadFileTypeDC6(id, data)
+		err = m.loadFileTypeDC6(id, path, data)
 	case d2enum.FileTypeDCC:
-		err = m.loadFileTypeDCC(id, data)
+		err = m.loadFileTypeDCC(id, path, data)
 	case d2enum.FileTypeDS1:
-		err = m.loadFileTypeDS1(id, data)
+		err = m.loadFileTypeDS1(id, path, data)
 	case d2enum.FileTypeDT1:
-		err = m.loadFileTypeDT1(id, data)
+		err = m.loadFileTypeDT1(id, path, data)
 	case d2enum.FileTypeWAV:
 		fh, found := m.fileHandles.GetFileHandle(id)
 		if !found {
 			return errors.New("no file handle for wav file")
 		}
 
-		m.loadFileTypeWAV(id, fh.Data)
+		m.loadFileTypeWAV(id, path, fh.Data)
 	case d2enum.FileTypeD2:
-		err = m.loadFileTypeD2(id, data)
+		err = m.loadFileTypeD2(id, path, data)
 	}
 
 	return err
 }
 
-func (m *AssetLoaderSystem) loadFileTypeStringTable(id akara.EID, data []byte) {
+func (m *AssetLoaderSystem) loadFileTypeStringTable(id akara.EID, path string, data []byte) {
 	txt := d2tbl.LoadTextDictionary(data)
-	m.stringTables.AddStringTable(id).TextDictionary = &txt
+	loaded := &txt
+	m.stringTables.AddStringTable(id).TextDictionary = loaded
+	m.cache.Insert(path, loaded, assetCacheEntryWeight)
 }
 
-func (m *AssetLoaderSystem) loadFileTypeDataDictionary(id akara.EID, data []byte) {
-	m.dataDictionaries.AddDataDictionary(id).DataDictionary = d2txt.LoadDataDictionary(data)
+func (m *AssetLoaderSystem) loadFileTypeFontTable(id akara.EID, path string, data []byte) {
+	m.fontTables.AddFontTable(id).Data = data
+	m.cache.Insert(path, data, assetCacheEntryWeight)
 }
 
-func (m *AssetLoaderSystem) loadFileTypePalette(id akara.EID, data []byte) error {
+func (m *AssetLoaderSystem) loadFileTypeDataDictionary(id akara.EID, path string, data []byte) {
+	loaded := d2txt.LoadDataDictionary(data)
+	m.dataDictionaries.AddDataDictionary(id).DataDictionary = loaded
+	m.cache.Insert(path, loaded, assetCacheEntryWeight)
+}
+
+func (m *AssetLoaderSystem) loadFileTypePalette(id akara.EID, path string, data []byte) error {
 	loaded, err := d2dat.Load(data)
 	if err == nil {
 		m.palettes.AddPalette(id).Palette = loaded
+		m.cache.Insert(path, loaded, assetCacheEntryWeight)
 	}
 
 	return err
 }
 
-func (m *AssetLoaderSystem) loadFileTypePaletteTransform(id akara.EID, data []byte) error {
+func (m *AssetLoaderSystem) loadFileTypePaletteTransform(id akara.EID, path string, data []byte) error {
 	loaded, err := d2pl2.Load(data)
 	if err == nil {
 		m.transforms.AddPaletteTransform(id).Transform = loaded
+		m.cache.Insert(path, loaded, assetCacheEntryWeight)
 	}
 
 	return err
 }
 
-func (m *AssetLoaderSystem) loadFileTypeCOF(id akara.EID, data []byte) error {
+func (m *AssetLoaderSystem) loadFileTypeCOF(id akara.EID, path string, data []byte) error {
 	loaded, err := d2cof.Load(data)
 	if err == nil {
 		m.cof.AddCof(id).COF = loaded
+		m.cache.Insert(path, loaded, assetCacheEntryWeight)
 	}
 
 	return err
 }
 
-func (m *AssetLoaderSystem) loadFileTypeDC6(id akara.EID, data []byte) error {
+func (m *AssetLoaderSystem) loadFileTypeDC6(id akara.EID, path string, data []byte) error {
 	loaded, err := d2dc6.Load(data)
 	if err == nil {
 		m.dc6.AddDc6(id).DC6 = loaded
+		m.cache.Insert(path, loaded, assetCacheEntryWeight)
 	}
 
 	return err
 }
 
-func (m *AssetLoaderSystem) loadFileTypeDCC(id akara.EID, data []byte) error {
+func (m *AssetLoaderSystem) loadFileTypeDCC(id akara.EID, path string, data []byte) error {
 	loaded, err := d2dcc.Load(data)
 	if err == nil {
 		m.dcc.AddDcc(id).DCC = loaded
+		m.cache.Insert(path, loaded, assetCacheEntryWeight)
 	}
 
 	return err
 }
 
-func (m *AssetLoaderSystem) loadFileTypeDS1(id akara.EID, data []byte) error {
+func (m *AssetLoaderSystem) loadFileTypeDS1(id akara.EID, path string, data []byte) error {
 	loaded, err := d2ds1.LoadDS1(data)
 	if err == nil {
 		m.ds1.AddDs1(id).DS1 = loaded
+		m.cache.Insert(path, loaded, assetCacheEntryWeight)
 	}
 
 	return err
 }
 
-func (m *AssetLoaderSystem) loadFileTypeDT1(id akara.EID, data []byte) error {
+func (m *AssetLoaderSystem) loadFileTypeDT1(id akara.EID, path string, data []byte) error {
 	loaded, err := d2dt1.LoadDT1(data)
 	if err == nil {
 		m.dt1.AddDt1(id).DT1 = loaded
+		m.cache.Insert(path, loaded, assetCacheEntryWeight)
 	}
 
 	return err
 }
 
-func (m *AssetLoaderSystem) loadFileTypeWAV(id akara.EID, seeker io.ReadSeeker) {
+func (m *AssetLoaderSystem) loadFileTypeWAV(id akara.EID, path string, seeker io.ReadSeeker) {
 	component := m.wav.AddWav(id)
 	component.Data = seeker
+	m.cache.Insert(path, seeker, assetCacheEntryWeight)
 }
 
-func (m *AssetLoaderSystem) loadFileTypeD2(id akara.EID, data []byte) error {
+func (m *AssetLoaderSystem) loadFileTypeD2(id akara.EID, path string, data []byte) error {
 	loaded, err := d2animdata.Load(data)
 	if err == nil {
 		m.animDatas.AddAnimData(id).AnimationData = loaded
+		m.cache.Insert(path, loaded, assetCacheEntryWeight)
 	}
 
 	return err
