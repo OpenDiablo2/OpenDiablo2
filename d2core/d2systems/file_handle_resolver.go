@@ -1,9 +1,28 @@
 package d2systems
 
 import (
+	"fmt"
+	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+
 	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
+)
+
+const (
+	languageTokenFont        = "{LANG_FONT}"
+	languageTokenStringTable = "{LANG}"
+)
+
+const (
+	fileHandleCacheBudget      = 1024
+	fileHandleCacheEntryWeight = 1
 )
 
 func NewFileHandleResolver() *FileHandleResolutionSystem {
@@ -19,13 +38,19 @@ func NewFileHandleResolver() *FileHandleResolutionSystem {
 		RequireOne(d2components.FileSource).
 		Build()
 
+	configsToUse := akara.NewFilter().
+		Require(d2components.GameConfig).
+		Build()
+
 	return &FileHandleResolutionSystem{
-		SubscriberSystem: akara.NewSubscriberSystem(filesToSource, sourcesToUse),
+		SubscriberSystem: akara.NewSubscriberSystem(filesToSource, sourcesToUse, configsToUse),
+		cache:            d2cache.CreateCache(fileHandleCacheBudget).(*d2cache.Cache),
 	}
 }
 
 type FileHandleResolutionSystem struct {
 	*akara.SubscriberSystem
+	cache        *d2cache.Cache
 	filesToLoad  *akara.Subscription
 	sourcesToUse *akara.Subscription
 	filePaths    *d2components.FilePathMap
@@ -83,18 +108,79 @@ func (m *FileHandleResolutionSystem) loadFileWithSource(fileID, sourceID akara.E
 		return false
 	}
 
+	ft, found := m.fileTypes.GetFileType(fileID)
+	if !found {
+		return false
+	}
+
 	source, found := m.fileSources.GetFileSource(sourceID)
 	if !found {
 		return false
 	}
 
-	data, err := source.Open(fp)
-	if err != nil {
+	sourceFp, found := m.filePaths.GetFilePath(sourceID)
+	if !found {
 		return false
 	}
 
-	dataComponent := m.fileHandles.AddFileHandle(fileID)
-	dataComponent.Data = data
+	// replace the locale tokens if present
+	if strings.Contains(fp.Path, languageTokenFont) {
+		fp.Path = strings.ReplaceAll(fp.Path, languageTokenFont, "latin")
+	} else if strings.Contains(fp.Path, languageTokenStringTable) {
+		fp.Path = strings.ReplaceAll(fp.Path, languageTokenStringTable, "ENG")
+	}
+
+	cacheKey := m.makeCacheKey(fp.Path, sourceFp.Path)
+	if entry, found := m.cache.Retrieve(cacheKey); found {
+		component := m.fileHandles.AddFileHandle(fileID)
+		component.Data = entry.(d2interface.DataStream)
+
+		return true
+	}
+
+	data, err := source.Open(fp)
+	if err != nil {
+		// HACK: sound environment stuff doesnt specify the path, just the filename
+		// so we gotta check this edge case
+		if ft.Type != d2enum.FileTypeWAV {
+			return false
+		}
+
+		if !strings.Contains(fp.Path, "sfx") {
+			return false
+		}
+
+		tryPath := strings.ReplaceAll(fp.Path, "sfx", "music")
+		tmpComponent := &d2components.FilePathComponent{Path: tryPath}
+
+		cacheKey := m.makeCacheKey(tryPath, sourceFp.Path)
+		if entry, found := m.cache.Retrieve(cacheKey); found {
+			component := m.fileHandles.AddFileHandle(fileID)
+			component.Data = entry.(d2interface.DataStream)
+			fp.Path = tryPath
+
+			return true
+		} else {
+			data, err = source.Open(tmpComponent)
+			if err != nil {
+				return false
+			}
+
+			fp.Path = tryPath
+		}
+	}
+
+	fmt.Printf("%s -> %s\n", sourceFp.Path, fp.Path)
+
+	component := m.fileHandles.AddFileHandle(fileID)
+	component.Data = data
+
+	m.cache.Insert(cacheKey, data, assetCacheEntryWeight)
 
 	return true
+}
+
+func (m *FileHandleResolutionSystem) makeCacheKey(path, source string) string {
+	const sep = "->"
+	return strings.Join([]string{source, path}, sep)
 }
