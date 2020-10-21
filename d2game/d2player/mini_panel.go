@@ -47,7 +47,7 @@ func newMiniPanel(asset *d2asset.AssetManager, uiManager *d2ui.UIManager, isSing
 		asset:          asset,
 		container:      containerSprite,
 		button:         buttonSprite,
-		isOpen:         true,
+		isOpen:         false,
 		isSinglePlayer: isSinglePlayer,
 		rectangle:      rectangle,
 	}
