@@ -1129,6 +1129,9 @@ func (g *GameControls) onClickActionable(item ActionableType) {
 
 		g.inventory.Toggle()
 		g.updateLayout()
+	case miniPanelGameMenu:
+		g.miniPanel.Close()
+		g.escapeMenu.open()
 	default:
 		log.Printf("Unrecognized ActionableType(%d) being clicked\n", item)
 	}
