@@ -55,6 +55,7 @@ type GameControls struct {
 	heroState              *d2hero.HeroStateFactory
 	mapEngine              *d2mapengine.MapEngine
 	mapRenderer            *d2maprenderer.MapRenderer
+	escapeMenu             *EscapeMenu
 	ui                     *d2ui.UIManager
 	inventory              *Inventory
 	heroStatsPanel         *HeroStatsPanel
@@ -67,8 +68,8 @@ type GameControls struct {
 	hpManaStatusSprite     *d2ui.Sprite
 	mainPanel              *d2ui.Sprite
 	menuButton             *d2ui.Sprite
-	leftSkill              *SkillResource
-	rightSkill             *SkillResource
+	leftSkillResource      *SkillResource
+	rightSkillResource     *SkillResource
 	zoneChangeText         *d2ui.Label
 	nameLabel              *d2ui.Label
 	hpManaStatsLabel       *d2ui.Label
@@ -89,9 +90,12 @@ type ActionableRegion struct {
 	Rect             d2geom.Rectangle
 }
 
+// SkillResource represents a Skill with its corresponding icon sprite, path to DC6 file and icon number.
+// SkillResourcePath points to a DC6 resource which contains the icons of multiple skills as frames.
+// The IconNumber is the frame at which we can find our skill sprite in the DC6 file.
 type SkillResource struct {
-	SkillResourcePath string
-	IconNumber        int
+	SkillResourcePath string // path to a skills DC6 file(see getSkillResourceByClass)
+	IconNumber        int    // the index of the frame in the DC6 file
 	SkillIcon         *d2ui.Sprite
 }
 
@@ -122,11 +126,13 @@ func NewGameControls(
 	renderer d2interface.Renderer,
 	hero *d2mapentity.Player,
 	mapEngine *d2mapengine.MapEngine,
+	escapeMenu *EscapeMenu,
 	mapRenderer *d2maprenderer.MapRenderer,
 	inputListener InputCallbackListener,
 	term d2interface.Terminal,
 	ui *d2ui.UIManager,
 	guiManager *d2gui.GuiManager,
+
 	isSinglePlayer bool,
 ) (*GameControls, error) {
 
@@ -181,6 +187,7 @@ func NewGameControls(
 		hero:             hero,
 		heroState:        heroState,
 		mapEngine:        mapEngine,
+		escapeMenu:       escapeMenu,
 		inputListener:    inputListener,
 		mapRenderer:      mapRenderer,
 		inventory:        NewInventory(asset, ui, inventoryRecord),
@@ -226,7 +233,8 @@ func NewGameControls(
 		skillRecord := gc.asset.Records.Skill.Details[id]
 		skill, err := heroState.CreateHeroSkill(0, skillRecord.Skill)
 		if err != nil {
-			term.OutputErrorf("cannot create skill with ID of %d", id)
+			term.OutputErrorf("cannot create skill with ID of %d, error: %s", id, err)
+			return
 		}
 
 		gc.hero.LeftSkill = skill
@@ -236,7 +244,8 @@ func NewGameControls(
 		skillRecord := gc.asset.Records.Skill.Details[id]
 		skill, err := heroState.CreateHeroSkill(0, skillRecord.Skill)
 		if err != nil {
-			term.OutputErrorf("cannot create skill with ID of %d", id)
+			term.OutputErrorf("cannot create skill with ID of %d, error: %s", id, err)
+			return
 		}
 
 		gc.hero.RightSkill = skill
@@ -293,20 +302,15 @@ func (g *GameControls) OnKeyRepeat(event d2interface.KeyEvent) bool {
 func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 	switch event.Key() {
 	case d2enum.KeyEscape:
-		if g.inventory.IsOpen() || g.heroStatsPanel.IsOpen() {
-			g.inventory.Close()
-			g.heroStatsPanel.Close()
-			g.updateLayout()
-
-			break
-		}
+		g.onEscKey()
+		break
 	case d2enum.KeyI:
 		g.inventory.Toggle()
 		g.updateLayout()
 	case d2enum.KeyC:
 		g.heroStatsPanel.Toggle()
 		g.updateLayout()
-	case d2enum.KeyR:
+	case d2enum.KeyR, d2enum.KeyControl:
 		g.onToggleRunButton()
 	case d2enum.KeyH:
 		g.HelpOverlay.Toggle()
@@ -316,6 +320,47 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 	}
 
 	return false
+}
+
+// OnKeyUp handles key release
+func (g *GameControls) OnKeyUp(event d2interface.KeyEvent) bool {
+	switch event.Key() {
+	case d2enum.KeyControl:
+		g.onToggleRunButton()
+	default:
+		return false
+	}
+
+	return false
+}
+
+func (g *GameControls) onEscKey() {
+	// When escape is pressed:
+	// 1. If there was some overlay or panel open, close it
+	// 2. Otherwise, if the Escape Menu was open, let the Escape Menu handle it
+	// 3. If nothing was open, open the Escape Menu
+
+	escHandled := false
+	if g.inventory.IsOpen() {
+		g.inventory.Close()
+		escHandled = true
+	}
+	if g.heroStatsPanel.IsOpen() {
+		g.heroStatsPanel.Close()
+		escHandled = true
+	}
+	if g.HelpOverlay.IsOpen() {
+		g.HelpOverlay.Toggle()
+		escHandled = true
+	}
+
+	if escHandled {
+		g.updateLayout()
+	} else if g.escapeMenu.isOpen {
+		g.escapeMenu.OnEscKey()
+	} else {
+		g.escapeMenu.open()
+	}
 }
 
 // OnMouseButtonRepeat handles repeated mouse clicks
@@ -463,8 +508,8 @@ func (g *GameControls) Load() {
 
 	attackIconID := 2
 
-	g.leftSkill = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
-	g.rightSkill = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
+	g.leftSkillResource = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
+	g.rightSkillResource = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
 
 	g.loadUIButtons()
 
@@ -542,6 +587,10 @@ func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 	}
 
 	if g.miniPanel.IsOpen() && g.miniPanel.isInRect(px, py) {
+		return true
+	}
+
+	if g.escapeMenu.IsOpen() {
 		return true
 	}
 
@@ -644,19 +693,19 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 
 	// Left skill
 	skillResourcePath := g.getSkillResourceByClass(g.hero.LeftSkill.Charclass)
-	if skillResourcePath != g.leftSkill.SkillResourcePath {
-		g.leftSkill.SkillIcon, _ = g.ui.NewSprite(skillResourcePath, d2resource.PaletteSky)
+	if skillResourcePath != g.leftSkillResource.SkillResourcePath {
+		g.leftSkillResource.SkillIcon, _ = g.ui.NewSprite(skillResourcePath, d2resource.PaletteSky)
 	}
 
-	if err := g.leftSkill.SkillIcon.SetCurrentFrame(g.hero.LeftSkill.IconCel); err != nil {
+	if err := g.leftSkillResource.SkillIcon.SetCurrentFrame(g.hero.LeftSkill.IconCel); err != nil {
 		return err
 	}
 
-	w, _ = g.leftSkill.SkillIcon.GetCurrentFrameSize()
+	w, _ = g.leftSkillResource.SkillIcon.GetCurrentFrameSize()
 
-	g.leftSkill.SkillIcon.SetPosition(offset, height)
+	g.leftSkillResource.SkillIcon.SetPosition(offset, height)
 
-	if err := g.leftSkill.SkillIcon.Render(target); err != nil {
+	if err := g.leftSkillResource.SkillIcon.Render(target); err != nil {
 		return err
 	}
 
@@ -763,19 +812,19 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 
 	// Right skill
 	skillResourcePath = g.getSkillResourceByClass(g.hero.RightSkill.Charclass)
-	if skillResourcePath != g.rightSkill.SkillResourcePath {
-		g.rightSkill.SkillIcon, _ = g.ui.NewSprite(skillResourcePath, d2resource.PaletteSky)
+	if skillResourcePath != g.rightSkillResource.SkillResourcePath {
+		g.rightSkillResource.SkillIcon, _ = g.ui.NewSprite(skillResourcePath, d2resource.PaletteSky)
 	}
 
-	if err := g.rightSkill.SkillIcon.SetCurrentFrame(g.hero.RightSkill.IconCel); err != nil {
+	if err := g.rightSkillResource.SkillIcon.SetCurrentFrame(g.hero.RightSkill.IconCel); err != nil {
 		return err
 	}
 
-	w, _ = g.rightSkill.SkillIcon.GetCurrentFrameSize()
+	w, _ = g.rightSkillResource.SkillIcon.GetCurrentFrameSize()
 
-	g.rightSkill.SkillIcon.SetPosition(offset, height)
+	g.rightSkillResource.SkillIcon.SetPosition(offset, height)
 
-	if err := g.rightSkill.SkillIcon.Render(target); err != nil {
+	if err := g.rightSkillResource.SkillIcon.Render(target); err != nil {
 		return err
 	}
 

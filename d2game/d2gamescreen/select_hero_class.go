@@ -297,12 +297,12 @@ type SelectHeroClass struct {
 
 	audioProvider d2interface.AudioProvider
 	renderer      d2interface.Renderer
-	navigator     Navigator
+	navigator     d2interface.Navigator
 }
 
 // CreateSelectHeroClass creates an instance of a SelectHeroClass
 func CreateSelectHeroClass(
-	navigator Navigator,
+	navigator d2interface.Navigator,
 	asset *d2asset.AssetManager,
 	renderer d2interface.Renderer,
 	audioProvider d2interface.AudioProvider,

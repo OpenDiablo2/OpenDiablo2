@@ -43,8 +43,10 @@ type RecordManager struct {
 		Stats      CharStats
 	}
 	ComponentCodes
+	Colors
 	DifficultyLevels
 	ElemTypes
+	Gamble
 	Hirelings
 	Item struct {
 		All CommonItems // NOTE: populated when armor, weapons, and misc items are ALL loaded
@@ -80,6 +82,7 @@ type RecordManager struct {
 		TreasureClass
 		Types  ItemTypes
 		Unique UniqueItems
+		StorePages
 	}
 	Layout struct {
 		Inventory
@@ -120,6 +123,7 @@ type RecordManager struct {
 	Object struct {
 		Details ObjectDetails
 		Lookup  IndexedObjects
+		Modes   ObjectModes
 		Shrines
 		Types ObjectTypes
 	}
@@ -146,11 +150,13 @@ func (r *RecordManager) init() error {
 		{d2resource.LevelWarp, levelWarpsLoader},
 		{d2resource.ObjectType, objectTypesLoader},
 		{d2resource.ObjectDetails, objectDetailsLoader},
+		{d2resource.ObjectMode, objectModesLoader},
 		{d2resource.Weapons, weaponsLoader},
 		{d2resource.Armor, armorLoader},
 		{d2resource.Misc, miscItemsLoader},
 		{d2resource.Books, booksLoader},
 		{d2resource.Belts, beltsLoader},
+		{d2resource.Colors, colorsLoader},
 		{d2resource.ItemTypes, itemTypesLoader}, // WARN: needs to be after weapons, armor, and misc
 		{d2resource.UniqueItems, uniqueItemsLoader},
 		{d2resource.Missiles, missilesLoader},
@@ -165,8 +171,10 @@ func (r *RecordManager) init() error {
 		{d2resource.MagicSuffix, magicSuffixLoader},
 		{d2resource.ItemStatCost, itemStatCostLoader},
 		{d2resource.ItemRatio, itemRatioLoader},
+		{d2resource.StorePage, storePagesLoader},
 		{d2resource.Overlays, overlaysLoader},
 		{d2resource.CharStats, charStatsLoader},
+		{d2resource.Gamble, gambleLoader},
 		{d2resource.Hireling, hirelingLoader},
 		{d2resource.Experience, experienceLoader},
 		{d2resource.Gems, gemsLoader},

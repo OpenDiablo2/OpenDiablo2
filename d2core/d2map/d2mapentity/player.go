@@ -185,12 +185,19 @@ func (p *Player) IsCasting() bool {
 
 // StartCasting sets a flag indicating the player is casting a skill and
 // sets the animation mode to the casting animation.
-func (p *Player) StartCasting(onFinishedCasting func()) {
+// This handles all types of skills - melee, ranged, kick, summon, etc.
+func (p *Player) StartCasting(animMode d2enum.PlayerAnimationMode, onFinishedCasting func()) {
+	// passive skills, auras, etc.
+	if animMode == d2enum.PlayerAnimationModeNone {
+		return
+	}
+
 	p.isCasting = true
 	p.onFinishedCasting = onFinishedCasting
-	if err := p.SetAnimationMode(d2enum.PlayerAnimationModeCast); err != nil {
+
+	if err := p.SetAnimationMode(animMode); err != nil {
 		fmtStr := "failed to set animationMode of player: %s to: %d, err: %v\n"
-		fmt.Printf(fmtStr, p.ID(), d2enum.PlayerAnimationModeCast, err)
+		fmt.Printf(fmtStr, p.ID(), animMode, err)
 	}
 }
 

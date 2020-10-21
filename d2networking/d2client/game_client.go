@@ -17,6 +17,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2localclient"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2remoteclient"
@@ -55,6 +56,10 @@ func Create(connectionType d2clientconnectiontype.ClientConnectionType,
 		connectionType: connectionType,
 		scriptEngine:   scriptEngine,
 	}
+
+	// for a remote client connection, set loading to true - wait until we process the GenerateMapPacket
+	// before we start updating map entites
+	result.MapEngine.IsLoading = connectionType == d2clientconnectiontype.LANClient
 
 	mapGen, err := d2mapgen.NewMapGenerator(asset, result.MapEngine)
 	if err != nil {
@@ -198,6 +203,8 @@ func (g *GameClient) handleAddPlayerPacket(packet d2netpacket.NetPacket) error {
 		return err
 	}
 
+	d2hero.HydrateSkills(player.Skills, g.asset)
+
 	newPlayer := g.MapEngine.NewPlayer(player.ID, player.Name, player.X, player.Y, 0,
 		player.HeroType, player.Stats, player.Skills, &player.Equipment)
 
@@ -268,42 +275,79 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 	castX := playerCast.TargetX * numSubtilesPerTile
 	castY := playerCast.TargetY * numSubtilesPerTile
 
-	rads := d2math.GetRadiansBetween(
+	direction := player.Position.DirectionTo(*d2vector.NewVector(castX, castY))
+	player.SetDirection(direction)
+
+	skillRecord := g.asset.Records.Skill.Details[playerCast.SkillID]
+	missileEntity, err := g.createMissileEntity(skillRecord, player, castX, castY)
+	if err != nil {
+		return err
+	}
+
+	player.StartCasting(skillRecord.Anim, func() {
+		if missileEntity != nil {
+			// shoot the missile after the player has finished casting
+			g.MapEngine.AddEntity(missileEntity)
+		}
+	})
+
+	overlayRecord := g.asset.Records.Layout.Overlays[skillRecord.Castoverlay]
+	g.playCastOverlay(overlayRecord, int(player.Position.X()), int(player.Position.Y()))
+
+	return nil
+}
+
+func (g *GameClient) createMissileEntity(skillRecord *d2records.SkillRecord, player *d2mapentity.Player, castX float64, castY float64) (*d2mapentity.Missile, error) {
+	missileRecord := g.asset.Records.GetMissileByName(skillRecord.Cltmissile)
+	if missileRecord == nil {
+		return nil, nil
+	}
+
+	var missileEntity *d2mapentity.Missile
+
+	radians := d2math.GetRadiansBetween(
 		player.Position.X(),
 		player.Position.Y(),
 		castX,
 		castY,
 	)
 
-	direction := player.Position.DirectionTo(*d2vector.NewVector(castX, castY))
-	player.SetDirection(direction)
-	skill := g.asset.Records.Skill.Details[playerCast.SkillID]
-	missileRecord := g.asset.Records.GetMissileByName(skill.Cltmissile)
+	missileEntity, err := g.MapEngine.NewMissile(
+		int(player.Position.X()),
+		int(player.Position.Y()),
+		g.asset.Records.Missiles[missileRecord.Id],
+	)
 
-	if missileRecord == nil {
-		//TODO: handle casts that have no missiles(or have multiple missiles and require additional logic)
-		log.Println("Missile not found for skill ID", skill.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	missileEntity.SetRadians(radians, func() {
+		g.MapEngine.RemoveEntity(missileEntity)
+	})
+
+	return missileEntity, nil
+}
+
+func (g *GameClient) playCastOverlay(overlayRecord *d2records.OverlayRecord, x int, y int) error {
+	if overlayRecord == nil {
 		return nil
 	}
 
-	missile, err := g.MapEngine.NewMissile(
-		int(player.Position.X()),
-		int(player.Position.Y()),
-		missileRecord,
+	overlayEntity, err := g.MapEngine.NewCastOverlay(
+		x,
+		y,
+		overlayRecord,
 	)
-
 	if err != nil {
 		return err
 	}
 
-	missile.SetRadians(rads, func() {
-		g.MapEngine.RemoveEntity(missile)
+	overlayEntity.SetOnDoneFunc(func() {
+		g.MapEngine.RemoveEntity(overlayEntity)
 	})
 
-	player.StartCasting(func() {
-		// shoot the missile after the player finished casting
-		g.MapEngine.AddEntity(missile)
-	})
+	g.MapEngine.AddEntity(overlayEntity)
 
 	return nil
 }

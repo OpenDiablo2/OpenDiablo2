@@ -188,6 +188,7 @@ const (
 	LevelSubstitutions = "/data/global/excel/LvlSub.txt"
 
 	ObjectDetails         = "/data/global/excel/Objects.txt"
+	ObjectMode            = "/data/global/excel/ObjMode.txt"
 	SoundSettings         = "/data/global/excel/Sounds.txt"
 	ItemStatCost          = "/data/global/excel/ItemStatCost.txt"
 	ItemRatio             = "/data/global/excel/itemratio.txt"
@@ -228,7 +229,9 @@ const (
 	ObjectGroup           = "/data/global/excel/objgroup.txt"
 	CompCode              = "/data/global/excel/compcode.txt"
 	Belts                 = "/data/global/excel/belts.txt"
-
+	Gamble                = "/data/global/excel/gamble.txt"
+	Colors                = "/data/global/excel/colors.txt"
+	StorePage             = "/data/global/excel/StorePage.txt"
 
 	// --- Animations ---
 

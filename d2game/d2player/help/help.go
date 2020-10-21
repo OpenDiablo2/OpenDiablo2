@@ -56,11 +56,6 @@ func NewHelpOverlay(
 	return h
 }
 
-func (h *Overlay) onMouseDown() {
-	// If mouse over close button
-	// close()
-}
-
 func (h *Overlay) Toggle() {
 	fmt.Print("Help overlay toggled\n")
 	if h.isOpen {
@@ -93,8 +88,9 @@ func (h *Overlay) IsOpen() bool {
 }
 
 func (h *Overlay) IsInRect(px, py int) bool {
-	ww, hh := h.closeButton.GetSize()
-	x, y := h.closeButton.GetPosition()
+
+	ww, hh := h.layout.GetSize()
+	x, y := h.layout.GetPosition()
 
 	if px >= x && px <= x+ww && py >= y && py <= y+hh {
 		return true

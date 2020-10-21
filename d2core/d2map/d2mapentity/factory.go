@@ -96,9 +96,9 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 		name:       name,
 		Class:      heroType,
 		//nameLabel:    d2ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic),
-		isRunToggled: true,
+		isRunToggled: false,
 		isInTown:     true,
-		isRunning:    true,
+		isRunning:    false,
 	}
 
 	result.mapEntity.uuid = id
@@ -213,6 +213,43 @@ func (f *MapEntityFactory) NewNPC(x, y int, monstat *d2records.MonStatsRecord, d
 
 	if result.monstatRecord != nil && result.monstatRecord.IsInteractable {
 		result.name = d2tbl.TranslateString(result.monstatRecord.NameString)
+	}
+
+	return result, nil
+}
+
+// NewCastOverlay creates a cast overlay map entity
+func (f *MapEntityFactory) NewCastOverlay(x, y int, overlayRecord *d2records.OverlayRecord) (*CastOverlay, error) {
+	animation, err := f.asset.LoadAnimationWithEffect(
+		fmt.Sprintf("/data/Global/Overlays/%s.dcc", overlayRecord.Filename),
+		d2resource.PaletteUnits,
+		d2enum.DrawEffectModulate,
+	)
+
+	// TODO: Frame index and played count seem to be shared across the cloned animation objects when we retrieve the animation from the asset manager cache.
+	animation.Rewind()
+	animation.ResetPlayedCount()
+
+	if err != nil {
+		return nil, err
+	}
+
+	animationSpeed := float64(overlayRecord.AnimRate*25.0) / 1000.0
+	playLoop := false // TODO: should be based on the overlay record, some overlays can repeat(e.g. Bone Shield, Frozen Armor)
+
+	animation.SetPlayLength(animationSpeed)
+	animation.SetPlayLoop(playLoop)
+	animation.PlayForward()
+
+	targetX := x + overlayRecord.XOffset
+	targetY := y + overlayRecord.YOffset
+
+	entity := NewAnimatedEntity(targetX, targetY, animation)
+
+	result := &CastOverlay{
+		AnimatedEntity: entity,
+		record:         overlayRecord,
+		playLoop: playLoop,
 	}
 
 	return result, nil

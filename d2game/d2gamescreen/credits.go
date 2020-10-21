@@ -41,12 +41,12 @@ type Credits struct {
 
 	asset     *d2asset.AssetManager
 	renderer  d2interface.Renderer
-	navigator Navigator
+	navigator d2interface.Navigator
 	uiManager *d2ui.UIManager
 }
 
 // CreateCredits creates an instance of the credits screen
-func CreateCredits(navigator Navigator, asset *d2asset.AssetManager, renderer d2interface.Renderer,
+func CreateCredits(navigator d2interface.Navigator, asset *d2asset.AssetManager, renderer d2interface.Renderer,
 	ui *d2ui.UIManager) *Credits {
 	result := &Credits{
 		asset:              asset,

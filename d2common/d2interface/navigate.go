@@ -1,4 +1,4 @@
-package d2gamescreen
+package d2interface
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"

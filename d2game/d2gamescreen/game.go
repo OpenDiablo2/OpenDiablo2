@@ -42,7 +42,7 @@ type Game struct {
 	localPlayer          *d2mapentity.Player
 	lastRegionType       d2enum.RegionIdType
 	ticksSinceLevelCheck float64
-	escapeMenu           *EscapeMenu
+	escapeMenu           *d2player.EscapeMenu
 	soundEngine          *d2audio.SoundEngine
 	soundEnv             d2audio.SoundEnvironment
 	guiManager           *d2gui.GuiManager
@@ -55,7 +55,7 @@ type Game struct {
 
 // CreateGame creates the Gameplay screen and returns a pointer to it
 func CreateGame(
-	navigator Navigator,
+	navigator d2interface.Navigator,
 	asset *d2asset.AssetManager,
 	ui *d2ui.UIManager,
 	renderer d2interface.Renderer,
@@ -88,7 +88,7 @@ func CreateGame(
 		ticksSinceLevelCheck: 0,
 		mapRenderer: d2maprenderer.CreateMapRenderer(asset, renderer,
 			gameClient.MapEngine, term, startX, startY),
-		escapeMenu:    NewEscapeMenu(navigator, renderer, audioProvider, guiManager, asset),
+		escapeMenu:    d2player.NewEscapeMenu(navigator, renderer, audioProvider, guiManager, asset),
 		inputManager:  inputManager,
 		audioProvider: audioProvider,
 		renderer:      renderer,
@@ -99,7 +99,7 @@ func CreateGame(
 	}
 	result.soundEnv = d2audio.NewSoundEnvironment(result.soundEngine)
 
-	result.escapeMenu.onLoad()
+	result.escapeMenu.OnLoad()
 
 	if err := inputManager.BindHandler(result.escapeMenu); err != nil {
 		fmt.Println("failed to add gameplay screen as event handler")
@@ -194,6 +194,7 @@ func (v *Game) Render(screen d2interface.Surface) error {
 	if v.gameClient.RegenMap {
 		v.gameClient.RegenMap = false
 		v.mapRenderer.RegenerateTileCache()
+		v.gameClient.MapEngine.IsLoading = false
 	}
 
 	if err := screen.Clear(color.Black); err != nil {
@@ -219,7 +220,7 @@ func (v *Game) Render(screen d2interface.Surface) error {
 func (v *Game) Advance(elapsed float64) error {
 	v.soundEngine.Advance(elapsed)
 
-	if (v.escapeMenu != nil && !v.escapeMenu.isOpen) || len(v.gameClient.Players) != 1 {
+	if (v.escapeMenu != nil && !v.escapeMenu.IsOpen()) || len(v.gameClient.Players) != 1 {
 		v.gameClient.MapEngine.Advance(elapsed) // TODO: Hack
 	}
 
@@ -285,7 +286,7 @@ func (v *Game) bindGameControls() error {
 
 		var err error
 		v.gameControls, err = d2player.NewGameControls(v.asset, v.renderer, player, v.gameClient.MapEngine,
-			v.mapRenderer, v, v.terminal, v.uiManager, v.guiManager, v.gameClient.IsSinglePlayer())
+			v.escapeMenu, v.mapRenderer, v, v.terminal, v.uiManager, v.guiManager, v.gameClient.IsSinglePlayer())
 
 		if err != nil {
 			return err

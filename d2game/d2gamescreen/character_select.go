@@ -54,12 +54,12 @@ type CharacterSelect struct {
 	inputManager  d2interface.InputManager
 	audioProvider d2interface.AudioProvider
 	renderer      d2interface.Renderer
-	navigator     Navigator
+	navigator     d2interface.Navigator
 }
 
 // CreateCharacterSelect creates the character select screen and returns a pointer to it
 func CreateCharacterSelect(
-	navigator Navigator,
+	navigator d2interface.Navigator,
 	asset *d2asset.AssetManager,
 	renderer d2interface.Renderer,
 	inputManager d2interface.InputManager,
