@@ -341,7 +341,7 @@ func (s *HeroStatsPanel) initStatValueLabels() {
 	s.labels.Energy = s.createStatValueLabel(s.heroState.Energy, 175, 355)
 
 	s.labels.MaxStamina = s.createStatValueLabel(s.heroState.MaxStamina, 330, 295)
-	s.labels.Stamina = s.createStatValueLabel(s.heroState.Stamina, 370, 295)
+	s.labels.Stamina = s.createStatValueLabel(int(s.heroState.Stamina), 370, 295)
 
 	s.labels.MaxHealth = s.createStatValueLabel(s.heroState.MaxHealth, 330, 320)
 	s.labels.Health = s.createStatValueLabel(s.heroState.Health, 370, 320)
@@ -364,7 +364,7 @@ func (s *HeroStatsPanel) renderStatValues(target d2interface.Surface) {
 	s.renderStatValueNum(s.labels.Health, s.heroState.Health, target)
 
 	s.renderStatValueNum(s.labels.MaxStamina, s.heroState.MaxStamina, target)
-	s.renderStatValueNum(s.labels.Stamina, s.heroState.Stamina, target)
+	s.renderStatValueNum(s.labels.Stamina, int(s.heroState.Stamina), target)
 
 	s.renderStatValueNum(s.labels.MaxMana, s.heroState.MaxMana, target)
 	s.renderStatValueNum(s.labels.Mana, s.heroState.Mana, target)

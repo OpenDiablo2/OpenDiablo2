@@ -2,7 +2,6 @@ package d2mapentity
 
 import (
 	"fmt"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
@@ -105,6 +104,20 @@ func (p *Player) Advance(tickTime float64) {
 
 	if p.composite.GetAnimationMode() != p.animationMode {
 		p.animationMode = p.composite.GetAnimationMode()
+	}
+
+	// Drain and regenerate Stamina
+	if p.IsRunning() && !p.atTarget() && !p.IsInTown() {
+		p.Stats.Stamina -= float64(p.composite.AssetManager.Records.Character.Stats[p.Class].StaminaRunDrain) * tickTime / 5
+		if p.Stats.Stamina < 0 {
+			p.SetSpeed(baseWalkSpeed)
+			p.Stats.Stamina = 0
+		}
+	} else if p.Stats.Stamina < float64(p.Stats.MaxStamina) {
+		p.Stats.Stamina += float64(p.composite.AssetManager.Records.Character.Stats[p.Class].StaminaRunDrain) * tickTime / 5
+		if p.IsRunning() {
+			p.SetSpeed(baseRunSpeed)
+		}
 	}
 }
 

@@ -77,7 +77,7 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 	}
 
 	stats.NextLevelExp = f.asset.Records.GetExperienceBreakpoint(heroType, stats.Level)
-	stats.Stamina = stats.MaxStamina
+	stats.Stamina = float64(stats.MaxStamina)
 
 	defaultCharStats := f.asset.Records.Character.Stats[heroType]
 	statsState := f.HeroStateFactory.CreateHeroStatsState(heroType, defaultCharStats)
@@ -249,7 +249,7 @@ func (f *MapEntityFactory) NewCastOverlay(x, y int, overlayRecord *d2records.Ove
 	result := &CastOverlay{
 		AnimatedEntity: entity,
 		record:         overlayRecord,
-		playLoop: playLoop,
+		playLoop:       playLoop,
 	}
 
 	return result, nil
