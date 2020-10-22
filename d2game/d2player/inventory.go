@@ -3,7 +3,6 @@ package d2player
 import (
 	"fmt"
 	"image/color"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
@@ -21,7 +20,7 @@ type Inventory struct {
 	asset      *d2asset.AssetManager
 	item       *diablo2item.ItemFactory
 	uiManager  *d2ui.UIManager
-	frame      *d2ui.Sprite
+	frame      *d2ui.UIFrame
 	panel      *d2ui.Sprite
 	grid       *ItemGrid
 	hoverLabel *d2ui.Label
@@ -77,12 +76,7 @@ func (g *Inventory) Close() {
 
 // Load the resources required by the inventory
 func (g *Inventory) Load() {
-	sprite, err := g.uiManager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
-	if err != nil {
-		log.Print(err)
-	}
-
-	g.frame = sprite
+	g.frame = d2ui.NewUIFrame(g.asset, g.uiManager, d2ui.FrameRight)
 
 	g.panel, _ = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 
@@ -129,7 +123,7 @@ func (g *Inventory) Load() {
 	}
 
 	// TODO: Load the player's actual items
-	_, err = g.grid.Add(inventoryItems...)
+	_, err := g.grid.Add(inventoryItems...)
 	if err != nil {
 		fmt.Printf("could not add items to the inventory, err: %v\n", err)
 	}
@@ -141,84 +135,9 @@ func (g *Inventory) Render(target d2interface.Surface) error {
 		return nil
 	}
 
-	x, y := g.originX, g.originY
+	g.frame.Render(target)
 
-	// Frame
-	// Top left
-	if err := g.frame.SetCurrentFrame(5); err != nil {
-		return err
-	}
-
-	w, h := g.frame.GetCurrentFrameSize()
-
-	g.frame.SetPosition(x, y+h)
-
-	if err := g.frame.Render(target); err != nil {
-		return err
-	}
-
-	x += w
-
-	// Top right
-	if err := g.frame.SetCurrentFrame(6); err != nil {
-		return err
-	}
-
-	w, h = g.frame.GetCurrentFrameSize()
-
-	g.frame.SetPosition(x, y+h)
-
-	if err := g.frame.Render(target); err != nil {
-		return err
-	}
-
-	x += w
-	y += h
-
-	// Right
-	if err := g.frame.SetCurrentFrame(7); err != nil {
-		return err
-	}
-
-	w, h = g.frame.GetCurrentFrameSize()
-
-	g.frame.SetPosition(x-w, y+h)
-
-	if err := g.frame.Render(target); err != nil {
-		return err
-	}
-
-	y += h
-
-	// Bottom right
-	if err := g.frame.SetCurrentFrame(8); err != nil {
-		return err
-	}
-
-	w, h = g.frame.GetCurrentFrameSize()
-
-	g.frame.SetPosition(x-w, y+h)
-
-	if err := g.frame.Render(target); err != nil {
-		return err
-	}
-
-	x -= w
-
-	// Bottom left
-	if err := g.frame.SetCurrentFrame(9); err != nil {
-		return err
-	}
-
-	w, h = g.frame.GetCurrentFrameSize()
-
-	g.frame.SetPosition(x-w, y+h)
-
-	if err := g.frame.Render(target); err != nil {
-		return err
-	}
-
-	x, y = g.originX+1, g.originY
+	x, y := g.originX+1, g.originY
 	y += 64
 
 	// Panel
@@ -227,7 +146,7 @@ func (g *Inventory) Render(target d2interface.Surface) error {
 		return err
 	}
 
-	w, h = g.panel.GetCurrentFrameSize()
+	w, h := g.panel.GetCurrentFrameSize()
 
 	g.panel.SetPosition(x, y+h)
 

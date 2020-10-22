@@ -18,9 +18,9 @@ func skillDescriptionLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	for d.Next() {
 		record := &SkillDescriptionRecord{
 			d.String("skilldesc"),
-			d.String("SkillPage"),
-			d.String("SkillRow"),
-			d.String("SkillColumn"),
+			d.Number("SkillPage"),
+			d.Number("SkillRow"),
+			d.Number("SkillColumn"),
 			d.String("ListRow"),
 			d.String("ListPool"),
 			d.Number("IconCel"),

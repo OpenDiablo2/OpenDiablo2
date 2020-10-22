@@ -44,7 +44,7 @@ type StatsPanelLabels struct {
 type HeroStatsPanel struct {
 	asset                *d2asset.AssetManager
 	uiManager            *d2ui.UIManager
-	frame                *d2ui.Sprite
+	frame                *d2ui.UIFrame
 	panel                *d2ui.Sprite
 	heroState            *d2hero.HeroStatsState
 	heroName             string
@@ -81,10 +81,7 @@ func NewHeroStatsPanel(asset *d2asset.AssetManager, ui *d2ui.UIManager, heroName
 func (s *HeroStatsPanel) Load() {
 	var err error
 
-	s.frame, err = s.uiManager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
-	if err != nil {
-		log.Print(err)
-	}
+	s.frame = d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameLeft)
 
 	s.panel, err = s.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 	if err != nil {
@@ -146,83 +143,9 @@ func (s *HeroStatsPanel) Render(target d2interface.Surface) error {
 }
 
 func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) error {
+
+	s.frame.Render(target)
 	x, y := s.originX, s.originY
-
-	// Frame
-	// Top left
-	if err := s.frame.SetCurrentFrame(0); err != nil {
-		return err
-	}
-
-	w, h := s.frame.GetCurrentFrameSize()
-
-	s.frame.SetPosition(x, y+h)
-
-	if err := s.frame.Render(target); err != nil {
-		return err
-	}
-
-	x += w
-	y += h
-
-	// Top right
-	if err := s.frame.SetCurrentFrame(1); err != nil {
-		return err
-	}
-
-	_, h = s.frame.GetCurrentFrameSize()
-
-	s.frame.SetPosition(x, s.originY+h)
-
-	if err := s.frame.Render(target); err != nil {
-		return err
-	}
-
-	x = s.originX
-
-	// Right
-	if err := s.frame.SetCurrentFrame(2); err != nil {
-		return err
-	}
-
-	_, h = s.frame.GetCurrentFrameSize()
-	s.frame.SetPosition(x, y+h)
-
-	if err := s.frame.Render(target); err != nil {
-		return err
-	}
-
-	y += h
-
-	// Bottom left
-	if err := s.frame.SetCurrentFrame(3); err != nil {
-		return err
-	}
-
-	w, h = s.frame.GetCurrentFrameSize()
-
-	s.frame.SetPosition(x, y+h)
-
-	if err := s.frame.Render(target); err != nil {
-		return err
-	}
-
-	x += w
-
-	// Bottom right
-	if err := s.frame.SetCurrentFrame(4); err != nil {
-		return err
-	}
-
-	_, h = s.frame.GetCurrentFrameSize()
-
-	s.frame.SetPosition(x, y+h)
-
-	if err := s.frame.Render(target); err != nil {
-		return err
-	}
-
-	x, y = s.originX, s.originY
 	y += 64
 	x += 80
 
@@ -232,7 +155,7 @@ func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) error {
 		return err
 	}
 
-	w, h = s.panel.GetCurrentFrameSize()
+	w, h := s.panel.GetCurrentFrameSize()
 
 	s.panel.SetPosition(x, y+h)
 
