@@ -22,6 +22,11 @@ const (
 
 	AvailSPLabelX = 677
 	AvailSPLabelY = 72
+
+	SkillIconXOff = 346
+	SkillIconYOff = 59
+	SkillIconDistX = 69
+	SkillIconDistY = 68
 )
 
 type SkillTreeTab struct {
@@ -379,6 +384,25 @@ func (s *SkillTree) renderTab (target d2interface.Surface, tab int) error {
 	return nil
 }
 
+func (s *SkillTree) renderSkillIcons(target d2interface.Surface, tab int) error {
+
+	skillIcon := s.resources.skillIcon
+	for idx:=range s.skills {
+		skill := s.skills[idx]
+		if skill.SkillPage != tab + 1 {
+			continue
+		}
+		if err := skillIcon.SetCurrentFrame(skill.IconCel); err != nil {
+			return err
+		}
+		skillIcon.SetPosition(SkillIconXOff + skill.SkillColumn * SkillIconDistX, SkillIconYOff + skill.SkillRow * SkillIconDistY)
+		if err := skillIcon.Render(target); err != nil {
+			return err
+		}
+	}
+	return nil
+
+}
 func (s *SkillTree) Render (target d2interface.Surface) error {
 	if !s.isOpen {
 		return nil
@@ -386,5 +410,6 @@ func (s *SkillTree) Render (target d2interface.Surface) error {
 	s.frame.Render(target)
 	s.renderTabCommon(target)
 	s.renderTab(target, s.selectedTab)
+	s.renderSkillIcons(target, s.selectedTab)
 	return nil
 }
