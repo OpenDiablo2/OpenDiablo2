@@ -17,6 +17,6 @@ type Color interface {
 // Palette is a color palette
 type Palette interface {
 	NumColors() int
-	GetColors() [256]Color
+	GetColors() [numColors]Color
 	GetColor(idx int) (Color, error)
 }
