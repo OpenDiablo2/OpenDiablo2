@@ -98,6 +98,16 @@ func (c *Composite) GetAnimationMode() string {
 	return c.mode.animationMode.String()
 }
 
+// GetCurrentFrame returns the frame index in the current animation mode.
+func (c *Composite) GetCurrentFrame() int {
+	return c.mode.frameIndex
+}
+
+// GetFrameCount returns the number of frames in the current animation mode.
+func (c *Composite) GetFrameCount() int {
+	return c.mode.frameCount
+}
+
 // GetWeaponClass returns the currently loaded weapon class
 func (c *Composite) GetWeaponClass() string {
 	return c.mode.weaponClass

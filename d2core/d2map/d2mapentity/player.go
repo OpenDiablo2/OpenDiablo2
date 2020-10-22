@@ -83,15 +83,19 @@ func (p *Player) IsInTown() bool {
 func (p *Player) Advance(tickTime float64) {
 	p.Step(tickTime)
 
-	if p.IsCasting() && p.composite.GetPlayedCount() >= 1 {
-		p.isCasting = false
-		if p.onFinishedCasting != nil {
-			p.onFinishedCasting()
-			p.onFinishedCasting = nil
+	if p.IsCasting() {
+		if p.composite.GetPlayedCount() >= 1 {
+			p.isCasting = false
+			if err := p.SetAnimationMode(p.GetAnimationMode()); err != nil {
+				fmt.Printf("failed to set animationMode to: %d, err: %v\n", p.GetAnimationMode(), err)
+			}
 		}
 
-		if err := p.SetAnimationMode(p.GetAnimationMode()); err != nil {
-			fmt.Printf("failed to set animationMode to: %d, err: %v\n", p.GetAnimationMode(), err)
+		// skills are casted after the first half of the casting animation is played
+		isHalfDoneCasting := float64(p.composite.GetCurrentFrame()) / float64(p.composite.GetFrameCount()) >= 0.5
+		if isHalfDoneCasting && p.onFinishedCasting != nil {
+			p.onFinishedCasting()
+			p.onFinishedCasting = nil
 		}
 	}
 

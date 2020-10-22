@@ -12,7 +12,7 @@ type SkillDescriptionRecord struct {
 	SkillPage    int                       // SkillPage
 	SkillRow     int                       // SkillRow
 	SkillColumn  int                       // SkillColumn
-	ListRow      string                    // ListRow
+	ListRow      int                       // ListRow
 	ListPool     string                    // ListPool
 	IconCel      int                       // IconCel
 	NameKey      string                    // str name

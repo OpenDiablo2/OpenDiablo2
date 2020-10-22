@@ -69,6 +69,7 @@ type GameControls struct {
 	hpManaStatusSprite     *d2ui.Sprite
 	mainPanel              *d2ui.Sprite
 	menuButton             *d2ui.Sprite
+	skillSelectMenu        *SkillSelectMenu
 	leftSkillResource      *SkillResource
 	rightSkillResource     *SkillResource
 	zoneChangeText         *d2ui.Label
@@ -192,6 +193,7 @@ func NewGameControls(
 		inputListener:    inputListener,
 		mapRenderer:      mapRenderer,
 		inventory:        NewInventory(asset, ui, inventoryRecord),
+		skillSelectMenu:  NewSkillSelectMenu(asset, ui, hero),
 		skilltree:        NewSkillTree(hero.Skills, hero.Class, asset, renderer, ui, guiManager),
 		heroStatsPanel:   NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
 		HelpOverlay:      help.NewHelpOverlay(asset, renderer, ui, guiManager),
@@ -223,35 +225,7 @@ func NewGameControls(
 		isSinglePlayer:         isSinglePlayer,
 	}
 
-	err = term.BindAction("freecam", "toggle free camera movement", func() {
-		gc.FreeCam = !gc.FreeCam
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = term.BindAction("setleftskill", "set skill to fire on left click", func(id int) {
-		skillRecord := gc.asset.Records.Skill.Details[id]
-		skill, err := heroState.CreateHeroSkill(0, skillRecord.Skill)
-		if err != nil {
-			term.OutputErrorf("cannot create skill with ID of %d, error: %s", id, err)
-			return
-		}
-
-		gc.hero.LeftSkill = skill
-	})
-
-	err = term.BindAction("setrightskill", "set skill to fire on right click", func(id int) {
-		skillRecord := gc.asset.Records.Skill.Details[id]
-		skill, err := heroState.CreateHeroSkill(0, skillRecord.Skill)
-		if err != nil {
-			term.OutputErrorf("cannot create skill with ID of %d, error: %s", id, err)
-			return
-		}
-
-		gc.hero.RightSkill = skill
-	})
+	gc.bindTerminalCommands(term)
 
 	if err != nil {
 		return nil, err
@@ -346,6 +320,10 @@ func (g *GameControls) OnKeyUp(event d2interface.KeyEvent) bool {
 func (g *GameControls) onEscKey() {
 	escHandled := false
 
+	if g.skillSelectMenu.IsOpen() {
+		g.skillSelectMenu.ClosePanels()
+		escHandled = true
+	}
 	if g.inventory.IsOpen() {
 		g.inventory.Close()
 
@@ -447,6 +425,9 @@ func (g *GameControls) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 		}
 	}
 
+	g.skillSelectMenu.LeftPanel.HandleMouseMove(mx, my)
+	g.skillSelectMenu.RightPanel.HandleMouseMove(mx, my)
+
 	return false
 }
 
@@ -460,6 +441,13 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 			g.onClickActionable(g.actionableRegions[i].actionableTypeID)
 			return false
 		}
+	}
+
+	if g.skillSelectMenu.IsOpen() && event.Button() == d2enum.MouseButtonLeft {
+		g.lastLeftBtnActionTime = d2util.Now()
+		g.skillSelectMenu.HandleClick(mx, my)
+		g.skillSelectMenu.ClosePanels()
+		return false
 	}
 
 	px, py := g.mapRenderer.ScreenToWorld(mx, my)
@@ -616,11 +604,15 @@ func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 		return true
 	}
 
+	if g.skillSelectMenu.IsOpen() {
+		return true
+	}
+
 	return false
 }
 
-// TODO: consider caching the panels to single image that is reused.
 // Render draws the GameControls onto the target
+// TODO: consider caching the panels to single image that is reused.
 func (g *GameControls) Render(target d2interface.Surface) error {
 	mx, my := g.lastMouseX, g.lastMouseY
 
@@ -714,9 +706,10 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	offset += w
 
 	// Left skill
-	skillResourcePath := g.getSkillResourceByClass(g.hero.LeftSkill.Charclass)
-	if skillResourcePath != g.leftSkillResource.SkillResourcePath {
-		g.leftSkillResource.SkillIcon, _ = g.ui.NewSprite(skillResourcePath, d2resource.PaletteSky)
+	newSkillResourcePath := g.getSkillResourceByClass(g.hero.LeftSkill.Charclass)
+	if newSkillResourcePath != g.leftSkillResource.SkillResourcePath {
+		g.leftSkillResource.SkillResourcePath = newSkillResourcePath
+		g.leftSkillResource.SkillIcon, _ = g.ui.NewSprite(newSkillResourcePath, d2resource.PaletteSky)
 	}
 
 	if err := g.leftSkillResource.SkillIcon.SetCurrentFrame(g.hero.LeftSkill.IconCel); err != nil {
@@ -833,9 +826,10 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	offset += w
 
 	// Right skill
-	skillResourcePath = g.getSkillResourceByClass(g.hero.RightSkill.Charclass)
-	if skillResourcePath != g.rightSkillResource.SkillResourcePath {
-		g.rightSkillResource.SkillIcon, _ = g.ui.NewSprite(skillResourcePath, d2resource.PaletteSky)
+	newSkillResourcePath = g.getSkillResourceByClass(g.hero.RightSkill.Charclass)
+	if newSkillResourcePath != g.rightSkillResource.SkillResourcePath {
+		g.rightSkillResource.SkillIcon, _ = g.ui.NewSprite(newSkillResourcePath, d2resource.PaletteSky)
+		g.rightSkillResource.SkillResourcePath = newSkillResourcePath
 	}
 
 	if err := g.rightSkillResource.SkillIcon.SetCurrentFrame(g.hero.RightSkill.IconCel); err != nil {
@@ -1033,6 +1027,10 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		g.nameLabel.Render(target)
 	}
 
+	if g.skillSelectMenu.IsOpen() {
+		g.skillSelectMenu.Render(target)
+	}
+
 	return nil
 }
 
@@ -1119,7 +1117,7 @@ func (g *GameControls) onHoverActionable(item actionableType) {
 func (g *GameControls) onClickActionable(item actionableType) {
 	switch item {
 	case leftSkill:
-		log.Println("Left Skill Action Pressed")
+		g.skillSelectMenu.ToggleLeftPanel()
 	case newStats:
 		log.Println("New Stats Selector Action Pressed")
 	case xp:
@@ -1135,7 +1133,7 @@ func (g *GameControls) onClickActionable(item actionableType) {
 	case newSkills:
 		log.Println("New Skills Selector Action Pressed")
 	case rightSkill:
-		log.Println("Right Skill Action Pressed")
+		g.skillSelectMenu.ToggleRightPanel()
 	case hpGlobe:
 		g.ToggleHpStats()
 		log.Println("HP Globe Pressed")
@@ -1163,6 +1161,106 @@ func (g *GameControls) onClickActionable(item actionableType) {
 	default:
 		log.Printf("Unrecognized actionableType(%d) being clicked\n", item)
 	}
+}
+
+func (g *GameControls) bindTerminalCommands(term d2interface.Terminal) error {
+	err := term.BindAction("freecam", "toggle free camera movement", func() {
+		g.FreeCam = !g.FreeCam
+	})
+
+	if err != nil {
+		return err
+	}
+
+	err = term.BindAction("setleftskill", "set skill to fire on left click", func(id int) {
+		skillRecord := g.asset.Records.Skill.Details[id]
+		skill, err := g.heroState.CreateHeroSkill(1, skillRecord.Skill)
+		if err != nil {
+			term.OutputErrorf("cannot create skill with ID of %d, error: %s", id, err)
+			return
+		}
+
+		g.hero.LeftSkill = skill
+	})
+
+	err = term.BindAction("learnskills", "learn all skills for the a given class", func(token string) {
+		if len(token) < 3 {
+			term.OutputErrorf("The given class token should be at least 3 characters")
+			return
+		}
+		validPrefixes := []string{"ama", "ass", "nec", "bar", "sor", "dru", "pal"}
+		classToken := strings.ToLower(token)
+		tokenPrefix := classToken[0:3]
+		isValidToken := false
+
+		for idx := range validPrefixes {
+			if strings.Compare(tokenPrefix, validPrefixes[idx]) == 0 {
+				isValidToken = true
+			}
+		}
+
+		if !isValidToken {
+			term.OutputErrorf("Invalid class, must be a value starting with(case insensitive): %s", strings.Join(validPrefixes, ", "))
+			return
+		}
+
+		learnedSkillsCount := 0
+		for _, skillDetailRecord := range g.asset.Records.Skill.Details {
+			if skillDetailRecord.Charclass == classToken || skillDetailRecord.Charclass == "" {
+				skill, err := g.heroState.CreateHeroSkill(1, skillDetailRecord.Skill)
+				if skill == nil {
+					continue
+				}
+
+				learnedSkillsCount++
+				g.hero.Skills[skill.ID] = skill
+
+				if err != nil {
+					break
+				}
+			}
+		}
+		g.skillSelectMenu.RegenerateImageCache()
+		log.Printf("Learned %d skills", learnedSkillsCount)
+
+		if err != nil {
+			term.OutputErrorf("cannot learn skill for class, error: %s", err)
+			return
+		}
+	})
+
+	err = term.BindAction("setrightskill", "set skill to fire on right click", func(id int) {
+		skillRecord := g.asset.Records.Skill.Details[id]
+		skill, err := g.heroState.CreateHeroSkill(0, skillRecord.Skill)
+		if err != nil {
+			term.OutputErrorf("cannot create skill with ID of %d, error: %s", id, err)
+			return
+		}
+
+		g.hero.RightSkill = skill
+	})
+
+	err = term.BindAction("learnskillid", "learn a skill by a given ID", func(id int) {
+		skillRecord := g.asset.Records.Skill.Details[id]
+		if skillRecord == nil {
+			term.OutputErrorf("cannot find a skill record for ID: %d", id)
+			return
+		}
+
+		skill, err := g.heroState.CreateHeroSkill(1, skillRecord.Skill)
+
+		g.hero.Skills[skill.ID] = skill
+
+		if err != nil {
+			term.OutputErrorf("cannot learn skill for class, error: %s", err)
+			return
+		}
+
+		g.skillSelectMenu.RegenerateImageCache()
+		log.Println("Learned skill: ", skill.Skill)
+	})
+
+	return nil
 }
 
 func (g *GameControls) getSkillResourceByClass(class string) string {
