@@ -41,6 +41,9 @@ const (
 	ButtonTypeMinipanelQuest     ButtonType = 18
 	ButtonTypeMinipanelMen       ButtonType = 19
 	ButtonTypeSquareClose        ButtonType = 20
+
+	ButtonNoFixedWidth           int = -1
+	ButtonNoFixedHeight          int = -1
 )
 
 const (
@@ -65,6 +68,10 @@ type ButtonLayout struct {
 	TextOffset       int
 	Toggleable       bool
 	AllowFrameChange bool
+	HasImage         bool
+	FixedWidth       int
+	FixedHeight      int
+	LabelColor       uint32
 }
 
 const (
@@ -111,6 +118,10 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			PaletteName:      d2resource.PaletteUnits,
 			FontPath:         d2resource.FontExocet10,
 			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
 		},
 		ButtonTypeShort: {
 			XSegments:        buttonShortSegmentsX,
@@ -121,6 +132,10 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			PaletteName:      d2resource.PaletteUnits,
 			FontPath:         d2resource.FontRediculous,
 			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
 		},
 		ButtonTypeMedium: {
 			XSegments:        buttonMediumSegmentsX,
@@ -129,6 +144,10 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			PaletteName:      d2resource.PaletteUnits,
 			FontPath:         d2resource.FontExocet10,
 			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
 		},
 		ButtonTypeTall: {
 			XSegments:        buttonTallSegmentsX,
@@ -138,6 +157,10 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			PaletteName:      d2resource.PaletteUnits,
 			FontPath:         d2resource.FontExocet10,
 			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
 		},
 		ButtonTypeOkCancel: {
 			XSegments:        buttonOkCancelSegmentsX,
@@ -147,6 +170,10 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			PaletteName:      d2resource.PaletteUnits,
 			FontPath:         d2resource.FontRediculous,
 			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
 		},
 		ButtonTypeRun: {
 			XSegments:        buttonRunSegmentsX,
@@ -157,6 +184,10 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			Toggleable:       true,
 			FontPath:         d2resource.FontRediculous,
 			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
 		},
 		ButtonTypeSquareClose: {
 			XSegments:        buttonBuySellSegmentsX,
@@ -168,6 +199,10 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			FontPath:         d2resource.Font30,
 			AllowFrameChange: true,
 			BaseFrame:        closeButtonBaseFrame,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
 		},
 	}
 }
@@ -209,7 +244,7 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 	lbl := ui.NewLabel(buttonLayout.FontPath, d2resource.PaletteUnits)
 
 	lbl.SetText(text)
-	lbl.Color[0] = d2util.Color(greyAlpha100)
+	lbl.Color[0] = d2util.Color(buttonLayout.LabelColor)
 	lbl.Alignment = d2gui.HorizontalAlignCenter
 
 	buttonSprite, err := ui.NewSprite(buttonLayout.ResourceName, buttonLayout.PaletteName)
@@ -217,25 +252,32 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 		log.Print(err)
 		return nil
 	}
+	if buttonLayout.FixedWidth > 0 {
+		btn.width = buttonLayout.FixedWidth
+	} else {
+	    for i := 0; i < buttonLayout.XSegments; i++ {
+		    w, _, err := buttonSprite.GetFrameSize(i)
+		    if err != nil {
+			    log.Print(err)
+			    return nil
+		    }
 
-	for i := 0; i < buttonLayout.XSegments; i++ {
-		w, _, err := buttonSprite.GetFrameSize(i)
-		if err != nil {
-			log.Print(err)
-			return nil
-		}
-
-		btn.width += w
+		    btn.width += w
+	    }
 	}
 
-	for i := 0; i < buttonLayout.YSegments; i++ {
-		_, h, err := buttonSprite.GetFrameSize(i * buttonLayout.YSegments)
-		if err != nil {
-			log.Print(err)
-			return nil
-		}
+	if buttonLayout.FixedHeight > 0 {
+		btn.height = buttonLayout.FixedHeight
+	} else {
+		for i := 0; i < buttonLayout.YSegments; i++ {
+			_, h, err := buttonSprite.GetFrameSize(i * buttonLayout.YSegments)
+			if err != nil {
+				log.Print(err)
+				return nil
+			}
 
-		btn.height += h
+			btn.height += h
+		}
 	}
 
 	btn.normalSurface, err = ui.renderer.NewSurface(btn.width, btn.height, d2enum.FilterNearest)
@@ -259,10 +301,12 @@ func (v *Button) renderFrames(btnSprite *Sprite, btnLayout *ButtonLayout, label 
 
 	totalButtonTypes := btnSprite.GetFrameCount() / (btnLayout.XSegments * btnLayout.YSegments)
 
-	err = btnSprite.RenderSegmented(v.normalSurface, btnLayout.XSegments, btnLayout.YSegments, btnLayout.BaseFrame)
+	if v.buttonLayout.HasImage {
+		err = btnSprite.RenderSegmented(v.normalSurface, btnLayout.XSegments, btnLayout.YSegments, btnLayout.BaseFrame)
 
-	if err != nil {
-		fmt.Printf("failed to render button normalSurface, err: %v\n", err)
+		if err != nil {
+			fmt.Printf("failed to render button normalSurface, err: %v\n", err)
+		}
 	}
 
 	_, labelHeight := label.GetSize()
@@ -272,7 +316,7 @@ func (v *Button) renderFrames(btnSprite *Sprite, btnLayout *ButtonLayout, label 
 	label.SetPosition(xOffset, textY)
 	label.Render(v.normalSurface)
 
-	if btnLayout.AllowFrameChange {
+	if btnLayout.HasImage && btnLayout.AllowFrameChange {
 		frameOffset := 0
 		xSeg, ySeg, baseFrame := btnLayout.XSegments, btnLayout.YSegments, btnLayout.BaseFrame
 
