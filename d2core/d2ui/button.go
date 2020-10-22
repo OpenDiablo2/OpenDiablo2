@@ -41,6 +41,7 @@ const (
 	ButtonTypeMinipanelQuest     ButtonType = 18
 	ButtonTypeMinipanelMen       ButtonType = 19
 	ButtonTypeSquareClose        ButtonType = 20
+	ButtonTypeSkillTreeTab       ButtonType = 21
 
 	ButtonNoFixedWidth           int = -1
 	ButtonNoFixedHeight          int = -1
@@ -53,6 +54,7 @@ const (
 const (
 	greyAlpha100     = 0x646464ff
 	lightGreyAlpha75 = 0x808080c3
+	whiteAlpha100    = 0xffffffff
 )
 
 // ButtonLayout defines the type of buttons
@@ -203,6 +205,21 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			FixedWidth:       ButtonNoFixedWidth,
 			FixedHeight:      ButtonNoFixedHeight,
 			LabelColor:       greyAlpha100,
+		},
+		ButtonTypeSkillTreeTab: {
+			XSegments:        1,
+			YSegments:        1,
+			DisabledFrame:    7,
+			ResourceName:     d2resource.SkillsPanelAmazon,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: false,
+			BaseFrame:        7,
+			HasImage:         false,
+			FixedWidth:       93,
+			FixedHeight:      107,
+			LabelColor:       whiteAlpha100,
 		},
 	}
 }
