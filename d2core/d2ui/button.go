@@ -395,7 +395,11 @@ func (v *Button) Render(target d2interface.Surface) error {
 	case v.toggled && v.pressed:
 		err = target.Render(v.pressedToggledSurface)
 	case v.pressed:
-		err = target.Render(v.pressedSurface)
+		if v.buttonLayout.AllowFrameChange {
+			err = target.Render(v.pressedSurface)
+		} else {
+			err = target.Render(v.normalSurface)
+		}
 	case v.toggled:
 		err = target.Render(v.toggledSurface)
 	default:
