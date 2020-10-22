@@ -30,8 +30,8 @@ type HeroStatsState struct {
 	PoisonResistance    int `json:"poisonResistance"`
 
 	// values which are not saved/loaded(computed)
-	Stamina      int `json:"-"` // only MaxStamina is saved, Stamina gets reset on entering world
-	NextLevelExp int `json:"-"`
+	Stamina      float64 `json:"-"` // only MaxStamina is saved, Stamina gets reset on entering world
+	NextLevelExp int     `json:"-"`
 }
 
 // CreateHeroStatsState generates a running state from a hero stats.
@@ -53,7 +53,7 @@ func (f *HeroStateFactory) CreateHeroStatsState(heroClass d2enum.Hero, classStat
 
 	result.Mana = result.MaxMana
 	result.Health = result.MaxHealth
-	result.Stamina = result.MaxStamina
+	result.Stamina = float64(result.MaxStamina)
 
 	// TODO: For demonstration purposes (hp, mana, exp, & character stats panel gets updated depending on stats)
 	result.Health = 50
