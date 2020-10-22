@@ -47,7 +47,7 @@ func main() {
 	}
 }
 
-func extractFile(mpq d2interface.Archive, mpqFile string, filename string, outPath string)  {
+func extractFile(mpq d2interface.Archive, mpqFile string, filename string, outPath string) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("recovered from panic in file: %s, %v", filename, r)
