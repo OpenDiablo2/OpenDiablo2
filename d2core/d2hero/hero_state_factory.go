@@ -53,7 +53,7 @@ func (f *HeroStateFactory) CreateHeroState(
 	}
 
 	defaultStats := f.asset.Records.Character.Stats[hero]
-	skillState, err := f.CreateHeroSkillsState(defaultStats)
+	skillState, err := f.CreateHeroSkillsState(defaultStats, hero)
 
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func (f *HeroStateFactory) GetAllHeroStates() ([]*HeroState, error) {
 			classStats := f.asset.Records.Character.Stats[gameState.HeroType]
 			gameState.Stats = f.CreateHeroStatsState(gameState.HeroType, classStats)
 
-			skillState, err := f.CreateHeroSkillsState(classStats)
+			skillState, err := f.CreateHeroSkillsState(classStats, gameState.HeroType)
 			if err != nil {
 				return nil, err
 			}
@@ -104,7 +104,7 @@ func (f *HeroStateFactory) GetAllHeroStates() ([]*HeroState, error) {
 }
 
 // CreateHeroSkillsState will assemble the hero skills from the class stats record.
-func (f *HeroStateFactory) CreateHeroSkillsState(classStats *d2records.CharStatsRecord) (map[int]*HeroSkill, error) {
+func (f *HeroStateFactory) CreateHeroSkillsState(classStats *d2records.CharStatsRecord, heroType d2enum.Hero) (map[int]*HeroSkill, error) {
 	baseSkills := map[int]*HeroSkill{}
 
 	for idx := range classStats.BaseSkill {
@@ -121,6 +121,16 @@ func (f *HeroStateFactory) CreateHeroSkillsState(classStats *d2records.CharStats
 
 		baseSkills[skill.ID] = skill
 	}
+
+	skillList := f.asset.Records.Skill.Details
+	token := strings.ToLower(heroType.GetToken3())
+	for idx := range skillList {
+		if skillList[idx].Charclass == token {
+			skill, _ := f.CreateHeroSkill(0, skillList[idx].Skill)
+			baseSkills[skill.ID] = skill
+		}
+	}
+
 
 	skillRecord, err := f.CreateHeroSkill(1, "Attack")
 	if err != nil {

@@ -43,3 +43,26 @@ func (h Hero) GetToken() string {
 
 	return ""
 }
+
+// GetToken3 returns a 3 letter token
+func (h Hero) GetToken3() string {
+	switch h {
+	case HeroBarbarian:
+		return "BAR"
+	case HeroNecromancer:
+		return "NEC"
+	case HeroPaladin:
+		return "PAL"
+	case HeroAssassin:
+		return "ASS"
+	case HeroSorceress:
+		return "SOR"
+	case HeroAmazon:
+		return "AMA"
+	case HeroDruid:
+		return "DRU"
+	default:
+		log.Fatalf("Unknown hero token: %d", h)
+	}
+	return ""
+}
