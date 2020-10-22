@@ -47,10 +47,10 @@ const (
 
 // GameControls represents the game's controls on the screen
 type GameControls struct {
-	actionableRegions      []ActionableRegion
+	actionableRegions      []actionableRegion
 	asset                  *d2asset.AssetManager
 	renderer               d2interface.Renderer // TODO: This shouldn't be a dependency
-	inputListener          InputCallbackListener
+	inputListener          inputCallbackListener
 	hero                   *d2mapentity.Player
 	heroState              *d2hero.HeroStateFactory
 	mapEngine              *d2mapengine.MapEngine
@@ -83,11 +83,11 @@ type GameControls struct {
 	isSinglePlayer         bool
 }
 
-type ActionableType int
+type actionableType int
 
-type ActionableRegion struct {
-	ActionableTypeID ActionableType
-	Rect             d2geom.Rectangle
+type actionableRegion struct {
+	actionableTypeID actionableType
+	rect             d2geom.Rectangle
 }
 
 // SkillResource represents a Skill with its corresponding icon sprite, path to DC6 file and icon number.
@@ -101,7 +101,7 @@ type SkillResource struct {
 
 const (
 	// Since they require special handling, not considering (1) globes, (2) content of the mini panel, (3) belt
-	leftSkill ActionableType = iota
+	leftSkill actionableType = iota
 	newStats
 	xp
 	walkRun
@@ -128,7 +128,7 @@ func NewGameControls(
 	mapEngine *d2mapengine.MapEngine,
 	escapeMenu *EscapeMenu,
 	mapRenderer *d2maprenderer.MapRenderer,
-	inputListener InputCallbackListener,
+	inputListener inputCallbackListener,
 	term d2interface.Terminal,
 	ui *d2ui.UIManager,
 	guiManager *d2gui.GuiManager,
@@ -197,7 +197,7 @@ func NewGameControls(
 		nameLabel:        hoverLabel,
 		zoneChangeText:   zoneLabel,
 		hpManaStatsLabel: globeStatsLabel,
-		actionableRegions: []ActionableRegion{
+		actionableRegions: []actionableRegion{
 			{leftSkill, d2geom.Rectangle{Left: 115, Top: 550, Width: 50, Height: 50}},
 			{newStats, d2geom.Rectangle{Left: 206, Top: 563, Width: 30, Height: 30}},
 			{xp, d2geom.Rectangle{Left: 253, Top: 560, Width: 125, Height: 5}},
@@ -431,8 +431,8 @@ func (g *GameControls) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 
 	for i := range g.actionableRegions {
 		// Mouse over a game control element
-		if g.actionableRegions[i].Rect.IsInRect(mx, my) {
-			g.onHoverActionable(g.actionableRegions[i].ActionableTypeID)
+		if g.actionableRegions[i].rect.IsInRect(mx, my) {
+			g.onHoverActionable(g.actionableRegions[i].actionableTypeID)
 		}
 	}
 
@@ -445,8 +445,8 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 	for i := range g.actionableRegions {
 		// If click is on a game control element
-		if g.actionableRegions[i].Rect.IsInRect(mx, my) {
-			g.onClickActionable(g.actionableRegions[i].ActionableTypeID)
+		if g.actionableRegions[i].rect.IsInRect(mx, my) {
+			g.onClickActionable(g.actionableRegions[i].actionableTypeID)
 			return false
 		}
 	}
@@ -890,7 +890,7 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	strPanelHealth := fmt.Sprintf(fmtHealth, healthCurr, healthMax)
 
 	// Display current hp and mana stats hpGlobe or manaGlobe region is clicked
-	if g.actionableRegions[hpGlobe].Rect.IsInRect(mx, my) || g.hpStatsIsVisible {
+	if g.actionableRegions[hpGlobe].rect.IsInRect(mx, my) || g.hpStatsIsVisible {
 		g.hpManaStatsLabel.SetText(strPanelHealth)
 		g.hpManaStatsLabel.SetPosition(15, 487)
 		g.hpManaStatsLabel.Render(target)
@@ -901,7 +901,7 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	manaCurr, manaMax := int(g.hero.Stats.Mana), int(g.hero.Stats.MaxMana)
 	strPanelMana := fmt.Sprintf(fmtMana, manaCurr, manaMax)
 
-	if g.actionableRegions[manaGlobe].Rect.IsInRect(mx, my) || g.manaStatsIsVisible {
+	if g.actionableRegions[manaGlobe].rect.IsInRect(mx, my) || g.manaStatsIsVisible {
 		g.hpManaStatsLabel.SetText(strPanelMana)
 		// In case if the mana value gets higher, we need to shift the label to the left a little, hence widthManaLabel.
 		widthManaLabel, _ := g.hpManaStatsLabel.GetSize()
@@ -915,63 +915,63 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	}
 
 	// Minipanel is closed and minipanel button is hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPnl].Rect.IsInRect(mx, my) {
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPnl].rect.IsInRect(mx, my) {
 		g.nameLabel.SetText(d2tbl.TranslateString("panelcmini")) //"Close Mini Panel"
 		g.nameLabel.SetPosition(399, 544)
 		g.nameLabel.Render(target)
 	}
 
 	// Minipanel is open and minipanel button is hovered.
-	if !g.miniPanel.IsOpen() && g.actionableRegions[miniPnl].Rect.IsInRect(mx, my) {
+	if !g.miniPanel.IsOpen() && g.actionableRegions[miniPnl].rect.IsInRect(mx, my) {
 		g.nameLabel.SetText(d2tbl.TranslateString("panelmini")) //"Open Mini Panel"
 		g.nameLabel.SetPosition(399, 544)
 		g.nameLabel.Render(target)
 	}
 
 	// Display character tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelCharacter].Rect.IsInRect(mx, my) {
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelCharacter].rect.IsInRect(mx, my) {
 		g.nameLabel.SetText(d2tbl.TranslateString("minipanelchar")) //"Character" no hotkey
 		g.nameLabel.SetPosition(340, 510)
 		g.nameLabel.Render(target)
 	}
 
 	// Display inventory tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelInventory].Rect.IsInRect(mx, my) {
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelInventory].rect.IsInRect(mx, my) {
 		g.nameLabel.SetText(d2tbl.TranslateString("minipanelinv")) //"Inventory" no hotkey
 		g.nameLabel.SetPosition(360, 510)
 		g.nameLabel.Render(target)
 	}
 
 	// Display skill tree tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelSkillTree].Rect.IsInRect(mx, my) {
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelSkillTree].rect.IsInRect(mx, my) {
 		g.nameLabel.SetText(d2tbl.TranslateString("minipaneltree")) //"Skill Treee" no hotkey
 		g.nameLabel.SetPosition(380, 510)
 		g.nameLabel.Render(target)
 	}
 
 	// Display automap tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelAutomap].Rect.IsInRect(mx, my) {
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelAutomap].rect.IsInRect(mx, my) {
 		g.nameLabel.SetText(d2tbl.TranslateString("minipanelautomap")) //"Automap" no hotkey
 		g.nameLabel.SetPosition(400, 510)
 		g.nameLabel.Render(target)
 	}
 
 	// Display message log tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelMessageLog].Rect.IsInRect(mx, my) {
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelMessageLog].rect.IsInRect(mx, my) {
 		g.nameLabel.SetText(d2tbl.TranslateString("minipanelmessage")) //"Message Log" no hotkey
 		g.nameLabel.SetPosition(420, 510)
 		g.nameLabel.Render(target)
 	}
 
 	// Display quest log tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelQuestLog].Rect.IsInRect(mx, my) {
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelQuestLog].rect.IsInRect(mx, my) {
 		g.nameLabel.SetText(d2tbl.TranslateString("minipanelquest")) //"Quest Log" no hotkey
 		g.nameLabel.SetPosition(440, 510)
 		g.nameLabel.Render(target)
 	}
 
 	// Display game menu tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelGameMenu].Rect.IsInRect(mx, my) {
+	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelGameMenu].rect.IsInRect(mx, my) {
 		g.nameLabel.SetText(d2tbl.TranslateString("minipanelmenubtn")) //"Game Menu (Esc)" // the (Esc) is hardcoded in.
 		g.nameLabel.SetPosition(460, 510)
 		g.nameLabel.Render(target)
@@ -983,20 +983,20 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	strPanelStamina := fmt.Sprintf(fmtStamina, staminaCurr, staminaMax)
 
 	// Display stamina tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[stamina].Rect.IsInRect(mx, my) {
+	if g.miniPanel.IsOpen() && g.actionableRegions[stamina].rect.IsInRect(mx, my) {
 		g.nameLabel.SetText(strPanelStamina)
 		g.nameLabel.SetPosition(320, 535)
 		g.nameLabel.Render(target)
 	}
 
 	// Display run/walk tooltip when hovered.  Note that whether the player is walking or running, the tooltip is the same in Diablo 2.
-	if g.actionableRegions[walkRun].Rect.IsInRect(mx, my) && !g.hero.IsRunToggled() {
+	if g.actionableRegions[walkRun].rect.IsInRect(mx, my) && !g.hero.IsRunToggled() {
 		g.nameLabel.SetText(d2tbl.TranslateString("RunOn")) //"Run" no hotkeys
 		g.nameLabel.SetPosition(263, 563)
 		g.nameLabel.Render(target)
 	}
 
-	if g.actionableRegions[walkRun].Rect.IsInRect(mx, my) && g.hero.IsRunToggled() {
+	if g.actionableRegions[walkRun].rect.IsInRect(mx, my) && g.hero.IsRunToggled() {
 		g.nameLabel.SetText(d2tbl.TranslateString("RunOff")) //"Walk" no hotkeys
 		g.nameLabel.SetPosition(263, 563)
 		g.nameLabel.Render(target)
@@ -1012,7 +1012,7 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	strPanelExp := fmt.Sprintf(fmtExp, expCurr, expMax)
 
 	// Display experience tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[xp].Rect.IsInRect(mx, my) {
+	if g.miniPanel.IsOpen() && g.actionableRegions[xp].rect.IsInRect(mx, my) {
 		g.nameLabel.SetText(strPanelExp)
 		g.nameLabel.SetPosition(255, 535)
 		g.nameLabel.Render(target)
@@ -1059,7 +1059,7 @@ func (g *GameControls) ToggleManaStats() {
 }
 
 // Handles what to do when an actionable is hovered
-func (g *GameControls) onHoverActionable(item ActionableType) {
+func (g *GameControls) onHoverActionable(item actionableType) {
 	switch item {
 	case leftSkill:
 		return
@@ -1096,12 +1096,12 @@ func (g *GameControls) onHoverActionable(item ActionableType) {
 	case miniPanelGameMenu:
 		return
 	default:
-		log.Printf("Unrecognized ActionableType(%d) being hovered\n", item)
+		log.Printf("Unrecognized actionableType(%d) being hovered\n", item)
 	}
 }
 
 // Handles what to do when an actionable is clicked
-func (g *GameControls) onClickActionable(item ActionableType) {
+func (g *GameControls) onClickActionable(item actionableType) {
 	switch item {
 	case leftSkill:
 		log.Println("Left Skill Action Pressed")
@@ -1141,7 +1141,7 @@ func (g *GameControls) onClickActionable(item ActionableType) {
 		g.miniPanel.Close()
 		g.escapeMenu.open()
 	default:
-		log.Printf("Unrecognized ActionableType(%d) being clicked\n", item)
+		log.Printf("Unrecognized actionableType(%d) being clicked\n", item)
 	}
 }
 

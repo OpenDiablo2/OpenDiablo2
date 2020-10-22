@@ -1,4 +1,4 @@
-// d2records provides a RecordManager implementation which is used to parse
+// Package d2records provides a RecordManager implementation which is used to parse
 // the various txt files from the d2 mpq archives. Each data dictionary (txt file) is
 // parsed into slices or maps of structs. There is a struct type defined for each txt file.
 //

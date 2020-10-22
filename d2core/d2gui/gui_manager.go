@@ -10,6 +10,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
+// GuiManager is a GUI widget manager that handles dynamic layout/positioning of widgets
 type GuiManager struct {
 	asset         *d2asset.AssetManager
 	layout        *Layout

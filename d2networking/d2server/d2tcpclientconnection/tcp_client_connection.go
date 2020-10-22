@@ -11,12 +11,14 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
 )
 
+// TCPClientConnection represents a client connection over TCP
 type TCPClientConnection struct {
 	id            string
 	tcpConnection net.Conn
 	playerState   *d2hero.HeroState
 }
 
+// CreateTCPClientConnection creates a new tcp client connection instance
 func CreateTCPClientConnection(tcpConnection net.Conn, id string) *TCPClientConnection {
 	return &TCPClientConnection{
 		tcpConnection: tcpConnection,
@@ -24,10 +26,12 @@ func CreateTCPClientConnection(tcpConnection net.Conn, id string) *TCPClientConn
 	}
 }
 
+// GetUniqueID returns the unique ID for the tcp client connection
 func (t TCPClientConnection) GetUniqueID() string {
 	return t.id
 }
 
+// SendPacketToClient marshals and sends (writes) NetPackets
 func (t *TCPClientConnection) SendPacketToClient(p d2netpacket.NetPacket) error {
 	packet, err := json.Marshal(p)
 	if err != nil {
@@ -42,10 +46,12 @@ func (t *TCPClientConnection) SendPacketToClient(p d2netpacket.NetPacket) error 
 	return nil
 }
 
+// SetPlayerState sets the game client player state
 func (t *TCPClientConnection) SetPlayerState(playerState *d2hero.HeroState) {
 	t.playerState = playerState
 }
 
+// GetPlayerState gets the game client player state
 func (t *TCPClientConnection) GetPlayerState() *d2hero.HeroState {
 	return t.playerState
 }

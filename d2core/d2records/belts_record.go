@@ -1,7 +1,9 @@
 package d2records
 
+// Belts stores all of the BeltRecords
 type Belts map[string]*BeltRecord
 
+// BeltRecord is a representation of the belt ui-panel dimensions/positioning
 type BeltRecord struct {
 	Name      string
 	NumBoxes  int

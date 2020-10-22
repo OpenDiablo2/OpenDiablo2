@@ -331,6 +331,7 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 	return nil
 }
 
+// OnMouseMove is the mouse move handler
 func (met *MapEngineTest) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	mx, my := event.X(), event.Y()
 	met.lastMouseX = mx

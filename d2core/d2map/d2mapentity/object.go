@@ -1,4 +1,4 @@
-// Package d2object implements objects placed on the map and their functionality
+// Package d2mapentity implements map entities
 package d2mapentity
 
 import (

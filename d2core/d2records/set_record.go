@@ -30,6 +30,7 @@ type SetRecord struct {
 	}
 }
 
+// SetProperty represents a property possessed by the set
 type SetProperty struct {
 	// Code is an ID pointer of a property from Properties.txt,
 	// these columns control each of the eight different full set modifiers a set item can grant you

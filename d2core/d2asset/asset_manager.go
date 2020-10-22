@@ -369,11 +369,12 @@ func (am *AssetManager) LoadDataDictionary(path string) (*d2txt.DataDictionary, 
 	//
 	// The easy way around this is to not cache d2txt.DataDictionary objects, and just create
 	// a new instance from cached file data if/when we ever need to reload the data dict
-	if data, err := am.LoadFile(path); err != nil {
+	data, err := am.LoadFile(path)
+	if err != nil {
 		return nil, err
-	} else {
-		return d2txt.LoadDataDictionary(data), nil
 	}
+
+	return d2txt.LoadDataDictionary(data), nil
 }
 
 // LoadRecords will load the records for the given path into the record manager.

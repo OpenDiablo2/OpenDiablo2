@@ -24,6 +24,7 @@ type RunesRecord struct {
 	Properties []*RunewordProperty
 }
 
+// RunewordProperty is a representation of a stat possessed by this runeword
 type RunewordProperty struct {
 	// Code is the property code
 	Code string

@@ -52,6 +52,7 @@ func (n NetPacketType) String() string {
 	return strings[n]
 }
 
+// MarshalPacket marshals the packet to a byte slice
 func (n NetPacketType) MarshalPacket() []byte {
 	p, err := json.Marshal(n)
 	if err != nil {

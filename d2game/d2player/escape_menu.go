@@ -360,6 +360,7 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 	l.actionableElements = append(l.actionableElements, label)
 }
 
+// OnLoad loads the necessary files for the escape menu
 func (m *EscapeMenu) OnLoad() {
 	var err error
 
@@ -369,6 +370,7 @@ func (m *EscapeMenu) OnLoad() {
 	}
 }
 
+// OnEscKey is called when the escape key is pressed
 func (m *EscapeMenu) OnEscKey() {
 	// note: original D2 returns straight to the game from however deep in the menu we are
 	switch m.currentLayout {
@@ -491,6 +493,7 @@ func (m *EscapeMenu) onEnterKey() {
 	m.layouts[m.currentLayout].actionableElements[m.layouts[m.currentLayout].currentEl].Trigger()
 }
 
+// IsOpen returns whether the escape menu is open (visible) or not
 func (m *EscapeMenu) IsOpen() bool {
 	return m.isOpen
 }

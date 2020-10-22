@@ -41,6 +41,7 @@ type Overlay struct {
 	guiManager  *d2gui.GuiManager
 }
 
+// NewHelpOverlay creates a new HelpOverlay instance
 func NewHelpOverlay(
 	asset *d2asset.AssetManager,
 	renderer d2interface.Renderer,
@@ -57,6 +58,7 @@ func NewHelpOverlay(
 	return h
 }
 
+// Toggle the visibility state of the overlay
 func (h *Overlay) Toggle() {
 	fmt.Print("Help overlay toggled\n")
 
@@ -85,10 +87,12 @@ func (h *Overlay) open() {
 	h.guiManager.SetLayout(h.layout)
 }
 
+// IsOpen returns whether or not the overlay is visible/open
 func (h *Overlay) IsOpen() bool {
 	return h.isOpen
 }
 
+// IsInRect checks if the given point is within the overlay layout rectangle
 func (h *Overlay) IsInRect(px, py int) bool {
 
 	ww, hh := h.layout.GetSize()
@@ -101,8 +105,8 @@ func (h *Overlay) IsInRect(px, py int) bool {
 	return false
 }
 
+// Load the overlay graphical assets
 func (h *Overlay) Load() {
-
 	var (
 		x     = 0
 		y     = 0
@@ -485,6 +489,7 @@ func (h *Overlay) createCallout(c callout) {
 	h.frames = append(h.frames, newDot)
 }
 
+// Render the overlay to the given surface
 func (h *Overlay) Render(target d2interface.Surface) error {
 	if !h.isOpen {
 		return nil

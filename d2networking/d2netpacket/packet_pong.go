@@ -34,6 +34,7 @@ func CreatePongPacket(id string) NetPacket {
 	}
 }
 
+// UnmarshalPong unmarshals the given data to a PongPacket struct
 func UnmarshalPong(packet []byte) (PongPacket, error) {
 	var resp PongPacket
 

@@ -33,6 +33,7 @@ func CreateGenerateMapPacket(regionType d2enum.RegionIdType) NetPacket {
 	}
 }
 
+// UnmarshalGenerateMap unmarshals the given packet data into a GenerateMapPacket struct
 func UnmarshalGenerateMap(packet []byte) (GenerateMapPacket, error) {
 	var p GenerateMapPacket
 	if err := json.Unmarshal(packet, &p); err != nil {
