@@ -109,7 +109,7 @@ func (f *HeroStateFactory) CreateHeroSkillsState(classStats *d2records.CharStats
 	for idx := range classStats.BaseSkill {
 		skillName := &classStats.BaseSkill[idx]
 
-		if len(*skillName) == 0 {
+		if *skillName == "" {
 			continue
 		}
 
