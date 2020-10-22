@@ -378,10 +378,12 @@ func (a *Animation) ResetPlayedCount() {
 	a.playedCount = 0
 }
 
+// SetEffect sets the draw effect for the animation
 func (a *Animation) SetEffect(e d2enum.DrawEffect) {
 	a.effect = e
 }
 
+// SetShadow sets bool for whether or not to draw a shadow
 func (a *Animation) SetShadow(shadow bool) {
 	a.hasShadow = shadow
 }

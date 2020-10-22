@@ -513,6 +513,7 @@ func (v *CharacterSelect) onOkButtonClicked() {
 	v.navigator.ToCreateGame(v.gameStates[v.selectedCharacter].FilePath, v.connectionType, v.connectionHost)
 }
 
+// OnUnload candles cleanup when this screen is closed
 func (v *CharacterSelect) OnUnload() error {
 	if err := v.inputManager.UnbindHandler(v); err != nil { // TODO: hack
 		return err

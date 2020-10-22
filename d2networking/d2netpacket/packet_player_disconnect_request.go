@@ -34,6 +34,8 @@ func CreatePlayerDisconnectRequestPacket(id string) NetPacket {
 	}
 }
 
+// UnmarshalPlayerDisconnectionRequest unmarshals the given data to a
+// PlayerDisconnectRequestPacket struct
 func UnmarshalPlayerDisconnectionRequest(packet []byte) (PlayerDisconnectRequestPacket, error) {
 	var resp PlayerDisconnectRequestPacket
 

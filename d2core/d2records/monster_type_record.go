@@ -1,6 +1,6 @@
 package d2records
 
-// MonTypes stores all of the MonTypeRecords
+// MonsterTypes stores all of the MonTypeRecords
 type MonsterTypes map[string]*MonTypeRecord
 
 // MonTypeRecord is a representation of a single row of MonType.txt.

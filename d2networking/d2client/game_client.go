@@ -364,6 +364,7 @@ func (g *GameClient) handlePingPacket() error {
 	return nil
 }
 
+// IsSinglePlayer returns a bool for whether the game is a single-player game
 func (g *GameClient) IsSinglePlayer() bool {
 	return g.connectionType == d2clientconnectiontype.Local
 }

@@ -16,6 +16,7 @@ type NetPacket struct {
 	PacketData json.RawMessage               `json:"packetData"`
 }
 
+// InspectPacketType determines the packet type from the given data
 func InspectPacketType(b []byte) d2netpackettype.NetPacketType {
 	var packet NetPacket
 
@@ -26,6 +27,7 @@ func InspectPacketType(b []byte) d2netpackettype.NetPacketType {
 	return packet.PacketType
 }
 
+// UnmarshalNetPacket unmarshals the byte slice into a NetPacket struct
 func UnmarshalNetPacket(packet []byte) (NetPacket, error) {
 	var p NetPacket
 	if err := json.Unmarshal(packet, &p); err != nil {

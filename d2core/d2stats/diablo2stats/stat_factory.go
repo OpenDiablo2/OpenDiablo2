@@ -9,6 +9,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 )
 
+// NewStatFactory creates a new stat factory instance
 func NewStatFactory(asset *d2asset.AssetManager) (*StatFactory, error) {
 	factory := &StatFactory{asset: asset}
 

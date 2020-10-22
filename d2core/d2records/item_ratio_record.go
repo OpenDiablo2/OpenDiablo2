@@ -3,7 +3,7 @@ package d2records
 // ItemRatios holds all of the ItemRatioRecords from ItemRatio.txt
 type ItemRatios map[string]*ItemRatioRecord
 
-// A helper type for item drop calculation
+// DropRatioInfo is a helper struct for item drop calculation
 type DropRatioInfo struct {
 	Frequency  int
 	Divisor    int

@@ -33,6 +33,7 @@ func CreateUpdateServerInfoPacket(seed int64, playerID string) NetPacket {
 	}
 }
 
+// UnmarshalUpdateServerInfo unmarshals the data to a UpdateServerInfoPacket struct
 func UnmarshalUpdateServerInfo(packet []byte) (UpdateServerInfoPacket, error) {
 	var resp UpdateServerInfoPacket
 

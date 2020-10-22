@@ -6,7 +6,7 @@ import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 // for each level for each character class
 type ExperienceBreakpoints map[int]*ExperienceBreakpointsRecord
 
-// Type ExperienceMaxLevels defines the max character levels
+// ExperienceMaxLevels defines the max character levels
 type ExperienceMaxLevels map[d2enum.Hero]int
 
 // ExperienceBreakpointsRecord describes the experience points required to

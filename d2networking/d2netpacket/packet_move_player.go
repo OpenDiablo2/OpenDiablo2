@@ -40,6 +40,7 @@ func CreateMovePlayerPacket(playerID string, startX, startY, destX, destY float6
 	}
 }
 
+// UnmarshalMovePlayer unmarshals the given data to a MovePlayerPacket struct
 func UnmarshalMovePlayer(packet []byte) (MovePlayerPacket, error) {
 	var p MovePlayerPacket
 	if err := json.Unmarshal(packet, &p); err != nil {
