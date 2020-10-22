@@ -1,3 +1,4 @@
+// Package d2tcpclientconnection provides a TCP protocol implementation of a client connection
 package d2tcpclientconnection
 
 import (

@@ -1,3 +1,4 @@
+// Package help contains the in-game diablo2 help panel
 package help
 
 import (
