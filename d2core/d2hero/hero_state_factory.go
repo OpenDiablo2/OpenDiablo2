@@ -158,6 +158,7 @@ func (f *HeroStateFactory) CreateHeroSkill(points int, name string) (*HeroSkill,
 		SkillPoints:            points,
 		SkillRecord:            skillRecord,
 		SkillDescriptionRecord: skillDescRecord,
+		shallow: &shallowHeroSkill{SkillID: skillRecord.ID, SkillPoints: points},
 	}
 
 	return result, nil

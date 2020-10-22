@@ -21,7 +21,7 @@ func skillDescriptionLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 			d.Number("SkillPage"),
 			d.Number("SkillRow"),
 			d.Number("SkillColumn"),
-			d.String("ListRow"),
+			d.Number("ListRow"),
 			d.String("ListPool"),
 			d.Number("IconCel"),
 			d.String("str name"),
