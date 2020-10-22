@@ -117,20 +117,33 @@ func (a *Animation) Advance(elapsed float64) error {
 	return nil
 }
 
+const (
+	full = 1.0
+	half = 0.5
+	zero = 0.0
+)
+
 func (a *Animation) renderShadow(target d2interface.Surface) error {
 	direction := a.directions[a.directionIndex]
 	frame := direction.frames[a.frameIndex]
 
 	target.PushFilter(d2enum.FilterLinear)
-	target.PushTranslation(
-		frame.offsetX,
-		int(float64(frame.offsetY)*0.5))
-	target.PushScale(1.0, 0.5)
-	target.PushSkew(0.5, 0.0)
-	target.PushEffect(d2enum.DrawEffectPctTransparency25)
-	target.PushBrightness(0.0)
+	defer target.Pop()
 
-	defer target.PopN(6)
+	target.PushTranslation(frame.offsetX, int(float64(frame.offsetY)*half))
+	defer target.Pop()
+
+	target.PushScale(full, half)
+	defer target.Pop()
+
+	target.PushSkew(half, zero)
+	defer target.Pop()
+
+	target.PushEffect(d2enum.DrawEffectPctTransparency25)
+	defer target.Pop()
+
+	target.PushBrightness(zero)
+	defer target.Pop()
 
 	return target.Render(frame.image)
 }
@@ -189,8 +202,9 @@ func (a *Animation) RenderFromOrigin(target d2interface.Surface, shadow bool) er
 	if shadow && !a.effect.Transparent() && a.hasShadow {
 		_, height := a.GetFrameBounds()
 		height = int(math.Abs(float64(height)))
+		halfHeight := height / 2 //nolint:mnd // this ain't rocket surgery...
 
-		target.PushTranslation(-height/2, 0)
+		target.PushTranslation(-halfHeight, 0)
 		defer target.Pop()
 
 		return a.renderShadow(target)
@@ -200,9 +214,9 @@ func (a *Animation) RenderFromOrigin(target d2interface.Surface, shadow bool) er
 }
 
 // RenderSection renders the section of the animation frame enclosed by bounds
-func (a *Animation) RenderSection(sfc d2interface.Surface, bound image.Rectangle) error {
+func (a *Animation) RenderSection(target d2interface.Surface, bound image.Rectangle) error {
 	if a.renderer == nil {
-		err := a.BindRenderer(sfc.Renderer())
+		err := a.BindRenderer(target.Renderer())
 		if err != nil {
 			return err
 		}
@@ -211,13 +225,16 @@ func (a *Animation) RenderSection(sfc d2interface.Surface, bound image.Rectangle
 	direction := a.directions[a.directionIndex]
 	frame := direction.frames[a.frameIndex]
 
-	sfc.PushTranslation(frame.offsetX, frame.offsetY)
-	sfc.PushEffect(a.effect)
-	sfc.PushColor(a.colorMod)
+	target.PushTranslation(frame.offsetX, frame.offsetY)
+	defer target.Pop()
 
-	defer sfc.PopN(3)
+	target.PushEffect(a.effect)
+	defer target.Pop()
 
-	return sfc.RenderSection(frame.image, bound)
+	target.PushColor(a.colorMod)
+	defer target.Pop()
+
+	return target.RenderSection(frame.image, bound)
 }
 
 // GetFrameSize gets the Size(width, height) of a indexed frame.

@@ -44,6 +44,10 @@ const (
 )
 
 const (
+	closeButtonBaseFrame = 10 // base frame offset of the "close" button dc6
+)
+
+const (
 	greyAlpha100     = 0x646464ff
 	lightGreyAlpha75 = 0x808080c3
 )
@@ -163,7 +167,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			Toggleable:       true,
 			FontPath:         d2resource.Font30,
 			AllowFrameChange: true,
-			BaseFrame:        10,
+			BaseFrame:        closeButtonBaseFrame,
 		},
 	}
 }

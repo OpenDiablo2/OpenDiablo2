@@ -35,6 +35,10 @@ type MapEngine struct {
 	IsLoading bool // (temp) Whether we have processed the GenerateMapPacket(only for remote client)
 }
 
+const (
+	subtilesPerTile = 5
+)
+
 // CreateMapEngine creates a new instance of the map engine and returns a pointer to it.
 func CreateMapEngine(asset *d2asset.AssetManager) *MapEngine {
 	entity, _ := d2mapentity.NewMapEntityFactory(asset)
@@ -204,9 +208,9 @@ func (m *MapEngine) tileIndexToCoordinate(index int) (x, y int) {
 
 // SubTileAt gets the flags for the given subtile
 func (m *MapEngine) SubTileAt(subX, subY int) *d2dt1.SubTileFlags {
-	tile := m.TileAt(subX/5, subY/5)
+	tile := m.TileAt(subX/subtilesPerTile, subY/subtilesPerTile)
 
-	return tile.GetSubTileFlags(subX%5, subY%5)
+	return tile.GetSubTileFlags(subX%subtilesPerTile, subY%subtilesPerTile)
 }
 
 // TileAt returns a pointer to the data for the map tile at the given

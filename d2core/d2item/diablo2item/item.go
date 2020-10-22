@@ -44,6 +44,8 @@ const (
 	rareJewelAffixMax  = 4
 )
 
+const maxAffixesOnMagicItem = 2
+
 // static check to ensure Item implements Item
 var _ d2item.Item = &Item{}
 
@@ -138,11 +140,11 @@ func (i *Item) Label() string {
 
 	numAffixes := len(i.PrefixRecords()) + len(i.SuffixRecords())
 
-	if numAffixes > 0 && numAffixes < 3 {
+	if numAffixes > 0 && numAffixes <= maxAffixesOnMagicItem {
 		return d2ui.ColorTokenize(str, d2ui.ColorTokenMagicItem)
 	}
 
-	if numAffixes > 2 {
+	if numAffixes > maxAffixesOnMagicItem {
 		return d2ui.ColorTokenize(str, d2ui.ColorTokenRareItem)
 	}
 
@@ -655,7 +657,7 @@ func (i *Item) generateName() {
 	// if it has more than 2 affixes, it's a rare item
 	// rare items use entries from rareprefix.txt and raresuffix.txt to make their names,
 	// and the prefix and suffix actually go before thec current item name
-	if numAffixes >= 3 {
+	if numAffixes > maxAffixesOnMagicItem {
 		i.rand.Seed(i.Seed)
 
 		prefixes := i.factory.asset.Records.Item.Rare.Prefix
