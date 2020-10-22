@@ -80,6 +80,7 @@ func NewHeroStatsPanel(asset *d2asset.AssetManager, ui *d2ui.UIManager, heroName
 // Load the data for the hero status panel
 func (s *HeroStatsPanel) Load() {
 	var err error
+
 	s.frame, err = s.uiManager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)

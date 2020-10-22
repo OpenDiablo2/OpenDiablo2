@@ -22,6 +22,7 @@ func CreatePongPacket(id string) NetPacket {
 		ID: id,
 		TS: time.Now(),
 	}
+
 	b, err := json.Marshal(pong)
 	if err != nil {
 		log.Print(err)

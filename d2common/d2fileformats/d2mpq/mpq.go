@@ -216,6 +216,7 @@ func (v *MPQ) loadBlockTable() {
 		if err != nil {
 			log.Print(err)
 		}
+
 		blockData[i] = binary.LittleEndian.Uint32(hash)
 	}
 

@@ -279,6 +279,7 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 	player.SetDirection(direction)
 
 	skillRecord := g.asset.Records.Skill.Details[playerCast.SkillID]
+
 	missileEntity, err := g.createMissileEntity(skillRecord, player, castX, castY)
 	if err != nil {
 		return err

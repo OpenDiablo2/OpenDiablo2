@@ -238,6 +238,7 @@ func (a *Animation) GetCurrentFrameSize() (width, height int) {
 	if err != nil {
 		log.Print(err)
 	}
+
 	return width, height
 }
 

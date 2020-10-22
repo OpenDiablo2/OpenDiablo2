@@ -20,6 +20,7 @@ func CreatePingPacket() NetPacket {
 	ping := PingPacket{
 		TS: time.Now(),
 	}
+
 	b, err := json.Marshal(ping)
 	if err != nil {
 		log.Print(err)

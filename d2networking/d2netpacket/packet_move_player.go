@@ -28,6 +28,7 @@ func CreateMovePlayerPacket(playerID string, startX, startY, destX, destY float6
 		DestX:    destX,
 		DestY:    destY,
 	}
+
 	b, err := json.Marshal(movePlayerPacket)
 	if err != nil {
 		log.Print(err)

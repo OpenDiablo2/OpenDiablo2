@@ -636,8 +636,8 @@ func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnection
 func (a *App) ToMapEngineTest(region, level int) {
 	met, err := d2gamescreen.CreateMapEngineTest(region, level, a.asset, a.terminal, a.renderer, a.inputManager, a.audio, a.screen)
 	if err != nil {
-		return
 		log.Print(err)
+		return
 	}
 
 	a.screen.SetNextScreen(met)

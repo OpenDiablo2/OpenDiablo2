@@ -1,3 +1,4 @@
+// Package d2wilderness provides an enumeration of wilderness types
 package d2wilderness
 
 // nolint: golint // these probably don't require individual explanations.

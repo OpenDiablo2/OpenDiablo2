@@ -198,6 +198,7 @@ func (r *RemoteClientConnection) decodeToPacket(t d2netpackettype.NetPacketType,
 		if err = json.Unmarshal([]byte(data), &p); err != nil {
 			break
 		}
+
 		np = d2netpacket.NetPacket{PacketType: t, PacketData: d2netpacket.MarshalPacket(p)}
 
 	case d2netpackettype.CastSkill:

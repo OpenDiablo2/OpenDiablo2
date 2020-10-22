@@ -54,6 +54,7 @@ func (f *HeroStateFactory) CreateHeroState(
 
 	defaultStats := f.asset.Records.Character.Stats[hero]
 	skillState, err := f.CreateHeroSkillsState(defaultStats)
+
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +110,7 @@ func (f *HeroStateFactory) CreateHeroSkillsState(classStats *d2records.CharStats
 	for idx := range classStats.BaseSkill {
 		skillName := &classStats.BaseSkill[idx]
 
-		if len(*skillName) == 0 {
+		if *skillName == "" {
 			continue
 		}
 

@@ -22,6 +22,7 @@ func CreateSpawnItemPacket(x, y int, codes ...string) NetPacket {
 		Y:     y,
 		Codes: codes,
 	}
+
 	b, err := json.Marshal(spawnItemPacket)
 	if err != nil {
 		log.Print(err)
