@@ -9,26 +9,43 @@ import (
 )
 
 type UIFrame struct {
-	asset *d2asset.AssetManager
-	uiManager *UIManager
-	frame *Sprite
-	originX int
-	originY int
+	asset            *d2asset.AssetManager
+	uiManager        *UIManager
+	frame            *Sprite
+	originX          int
+	originY          int
 	frameOrientation FrameOrientation
 }
 
 type FrameOrientation = int
-const(
+
+const (
 	FrameLeft FrameOrientation = iota
 	FrameRight
 )
 
-func NewUIFrame (
+// frame indices into dc6 images for panels
+const (
+	leftFrameTopLeft = iota
+	leftFrameTopRight
+	leftFrameMiddleRight
+	leftFrameBottomLeft
+	leftFrameBottomRight
+	rightFrameTopLeft
+	rightFrameTopRight
+	rightFrameMiddleRight
+	rightFrameBottomRight
+	rightFrameBottomLeft
+)
+
+type offsetCalcFn = func(u *UIFrame) (x, y int)
+
+func NewUIFrame(
 	asset *d2asset.AssetManager,
 	uiManager *UIManager,
 	frameOrientation FrameOrientation,
 ) *UIFrame {
-	var originX, originY = 0,0
+	var originX, originY = 0, 0
 
 	switch frameOrientation {
 	case FrameLeft:
@@ -38,12 +55,12 @@ func NewUIFrame (
 		originX = 400
 		originY = 0
 	}
-	frame := &UIFrame {
-		asset : asset,
-		uiManager: uiManager,
+	frame := &UIFrame{
+		asset:            asset,
+		uiManager:        uiManager,
 		frameOrientation: frameOrientation,
-		originX: originX,
-		originY: originY,
+		originX:          originX,
+		originY:          originY,
 	}
 	frame.Load()
 	return frame
@@ -68,161 +85,118 @@ func (u *UIFrame) Render(target d2interface.Surface) error {
 }
 
 func (u *UIFrame) renderLeft(target d2interface.Surface) error {
-	x, y := u.originX, u.originY
-
-	// Frame
-	// Top left
-	if err := u.frame.SetCurrentFrame(0); err != nil {
-		return err
+	// the frame pieces we are interested in.
+	framePieces := []int{
+		leftFrameTopLeft,
+		leftFrameTopRight,
+		leftFrameMiddleRight,
+		leftFrameBottomLeft,
+		leftFrameBottomRight,
 	}
 
-	w, h := u.frame.GetCurrentFrameSize()
+	// the frame coordinates
+	coord := make(map[int]*struct{ x, y int })
 
-	u.frame.SetPosition(x, y+h)
+	startX, startY := u.originX, u.originY
+	currentX, currentY := startX, startY
 
-	if err := u.frame.Render(target); err != nil {
-		return err
+	// first determine the coordinates for each frame
+	// the order that we check is important
+	for _, piece := range framePieces {
+		width, height, err := u.frame.GetFrameSize(piece)
+		if err != nil {
+			return err
+		}
+
+		c := &struct{ x, y int }{}
+
+		switch piece {
+		case leftFrameTopLeft:
+			c.x, c.y = currentX, currentY+height
+			currentX, currentY = currentX+width, currentY+height
+		case leftFrameTopRight:
+			c.x, c.y = currentX, startY+height
+			currentX = startX
+		case leftFrameMiddleRight:
+			c.x, c.y = currentX, currentY+height
+			currentY += height
+		case leftFrameBottomLeft:
+			c.x, c.y = currentX, currentY+height
+			currentX += width
+		case leftFrameBottomRight:
+			c.x, c.y = currentX, currentY+height
+		}
+
+		coord[piece] = c
 	}
 
-	x += w
-	y += h
-
-	// Top right
-	if err := u.frame.SetCurrentFrame(1); err != nil {
-		return err
+	// now render the pieces with the coordinates
+	for idx, c := range coord {
+		err := u.renderFramePiece(target, c.x, c.y, idx)
+		if err != nil {
+			return err
+		}
 	}
 
-	_, h = u.frame.GetCurrentFrameSize()
-
-	u.frame.SetPosition(x, u.originY+h)
-
-	if err := u.frame.Render(target); err != nil {
-		return err
-	}
-
-	x = u.originX
-
-	// Right
-	if err := u.frame.SetCurrentFrame(2); err != nil {
-		return err
-	}
-
-	_, h = u.frame.GetCurrentFrameSize()
-	u.frame.SetPosition(x, y+h)
-
-	if err := u.frame.Render(target); err != nil {
-		return err
-	}
-
-	y += h
-
-	// Bottom left
-	if err := u.frame.SetCurrentFrame(3); err != nil {
-		return err
-	}
-
-	w, h = u.frame.GetCurrentFrameSize()
-
-	u.frame.SetPosition(x, y+h)
-
-	if err := u.frame.Render(target); err != nil {
-		return err
-	}
-
-	x += w
-
-	// Bottom right
-	if err := u.frame.SetCurrentFrame(4); err != nil {
-		return err
-	}
-
-	_, h = u.frame.GetCurrentFrameSize()
-
-	u.frame.SetPosition(x, y+h)
-
-	if err := u.frame.Render(target); err != nil {
-		return err
-	}
 	return nil
 }
 
 func (u *UIFrame) renderRight(target d2interface.Surface) error {
-	x, y := u.originX, u.originY
-
-	// Frame
-	// Top left
-	if err := u.frame.SetCurrentFrame(5); err != nil {
-		return err
+	// the frame pieces we are interested in.
+	framePieces := []int{
+		rightFrameTopLeft,
+		rightFrameTopRight,
+		rightFrameMiddleRight,
+		rightFrameBottomRight,
+		rightFrameBottomLeft,
 	}
 
-	w, h := u.frame.GetCurrentFrameSize()
+	// the frame coordinates
+	coord := make(map[int]*struct{ x, y int })
 
-	u.frame.SetPosition(x, y+h)
+	startX, startY := u.originX, u.originY
+	currentX, currentY := startX, startY
 
-	if err := u.frame.Render(target); err != nil {
-		return err
+	// first determine the coordinates for each frame
+	// the order that we check is important
+	for _, piece := range framePieces {
+		width, height, err := u.frame.GetFrameSize(piece)
+		if err != nil {
+			return err
+		}
+
+		c := &struct{ x, y int }{}
+
+		switch piece {
+		case rightFrameTopLeft:
+			c.x, c.y = currentX, currentY+height
+			currentX += width
+		case rightFrameTopRight:
+			c.x, c.y = currentX, currentY+height
+			currentX += width
+			currentY += height
+		case rightFrameMiddleRight:
+			c.x, c.y = currentX-width, currentY+height
+			currentY += height
+		case rightFrameBottomRight:
+			c.x, c.y = currentX-width, currentY+height
+			currentX -= width
+		case rightFrameBottomLeft:
+			c.x, c.y = currentX-width, currentY+height
+			currentX += width
+		}
+
+		coord[piece] = c
 	}
 
-	x += w
-
-	// Top right
-	if err := u.frame.SetCurrentFrame(6); err != nil {
-		return err
+	// now render the pieces with the coordinates
+	for idx, c := range coord {
+		err := u.renderFramePiece(target, c.x, c.y, idx)
+		if err != nil {
+			return err
+		}
 	}
 
-	w, h = u.frame.GetCurrentFrameSize()
-
-	u.frame.SetPosition(x, y+h)
-
-	if err := u.frame.Render(target); err != nil {
-		return err
-	}
-
-	x += w
-	y += h
-
-	// Right
-	if err := u.frame.SetCurrentFrame(7); err != nil {
-		return err
-	}
-
-	w, h = u.frame.GetCurrentFrameSize()
-
-	u.frame.SetPosition(x-w, y+h)
-
-	if err := u.frame.Render(target); err != nil {
-		return err
-	}
-
-	y += h
-
-	// Bottom right
-	if err := u.frame.SetCurrentFrame(8); err != nil {
-		return err
-	}
-
-	w, h = u.frame.GetCurrentFrameSize()
-
-	u.frame.SetPosition(x-w, y+h)
-
-	if err := u.frame.Render(target); err != nil {
-		return err
-	}
-
-	x -= w
-
-	// Bottom left
-	if err := u.frame.SetCurrentFrame(9); err != nil {
-		return err
-	}
-
-	w, h = u.frame.GetCurrentFrameSize()
-
-	u.frame.SetPosition(x-w, y+h)
-
-	if err := u.frame.Render(target); err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -232,4 +206,18 @@ func (u *UIFrame) GetFrameBounds() (width, height int) {
 
 func (u *UIFrame) GetFrameCount() int {
 	return u.frame.GetFrameCount()
+}
+
+func (u *UIFrame) renderFramePiece(sfc d2interface.Surface, x, y, idx int) error {
+	if err := u.frame.SetCurrentFrame(idx); err != nil {
+		return err
+	}
+
+	u.frame.SetPosition(x, y)
+
+	if err := u.frame.Render(sfc); err != nil {
+		return err
+	}
+
+	return nil
 }
