@@ -151,13 +151,13 @@ func NewGameControls(
 
 	switch hero.Class {
 	case d2enum.HeroAssassin:
-		inventoryRecordKey = "Assassin"
+		inventoryRecordKey = "Assassin2"
 	case d2enum.HeroAmazon:
 		inventoryRecordKey = "Amazon2"
 	case d2enum.HeroBarbarian:
 		inventoryRecordKey = "Barbarian2"
 	case d2enum.HeroDruid:
-		inventoryRecordKey = "Druid"
+		inventoryRecordKey = "Druid2"
 	case d2enum.HeroNecromancer:
 		inventoryRecordKey = "Necromancer2"
 	case d2enum.HeroPaladin:
