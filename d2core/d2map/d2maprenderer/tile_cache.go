@@ -3,12 +3,11 @@ package d2maprenderer
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 func (mr *MapRenderer) generateTileCache() {

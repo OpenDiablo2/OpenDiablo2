@@ -13,16 +13,20 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
+// NewStampFactory creates a MapStamp factory instance
 func NewStampFactory(asset *d2asset.AssetManager, entity *d2mapentity.MapEntityFactory) *StampFactory {
 	return &StampFactory{asset, entity}
 }
 
+// StampFactory is responsible for loading map stamps. A stamp can be thought of like a
+// preset map configuration, like the various configurations of Act 1 town.
 type StampFactory struct {
 	asset  *d2asset.AssetManager
 	entity *d2mapentity.MapEntityFactory
 }
 
-// LoadStamp loads the Stamp data from file.
+// LoadStamp loads the Stamp data from file, using the given level type, level preset index, and
+// level file index.
 func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fileIndex int) *Stamp {
 	stamp := &Stamp{
 		factory:     f,
@@ -33,20 +37,22 @@ func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fil
 	}
 
 	for _, levelTypeDt1 := range &stamp.levelType.Files {
-		if levelTypeDt1 != "" && levelTypeDt1 != "0" {
-			fileData, err := f.asset.LoadFile("/data/global/tiles/" + levelTypeDt1)
-			if err != nil {
-				panic(err)
-			}
-
-			dt1, err := d2dt1.LoadDT1(fileData)
-			if err != nil {
-				log.Print(err)
-				return nil
-			}
-
-			stamp.tiles = append(stamp.tiles, dt1.Tiles...)
+		if levelTypeDt1 == "" || levelTypeDt1 == "0" {
+			continue
 		}
+
+		fileData, err := f.asset.LoadFile("/data/global/tiles/" + levelTypeDt1)
+		if err != nil {
+			panic(err)
+		}
+
+		dt1, err := d2dt1.LoadDT1(fileData)
+		if err != nil {
+			log.Print(err)
+			return nil
+		}
+
+		stamp.tiles = append(stamp.tiles, dt1.Tiles...)
 	}
 
 	var levelFilesToPick []string
