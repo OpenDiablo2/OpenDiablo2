@@ -59,6 +59,7 @@ func NewHelpOverlay(
 
 func (h *Overlay) Toggle() {
 	fmt.Print("Help overlay toggled\n")
+
 	if h.isOpen {
 		h.close()
 	} else {
@@ -96,6 +97,7 @@ func (h *Overlay) IsInRect(px, py int) bool {
 	if px >= x && px <= x+ww && py >= y && py <= y+hh {
 		return true
 	}
+
 	return false
 }
 
@@ -107,6 +109,7 @@ func (h *Overlay) Load() {
 		prevX = 0
 		prevY = 0
 	)
+
 	for frameIndex := 0; frameIndex < 7; frameIndex++ {
 		f, err := h.uiManager.NewSprite(d2resource.HelpBorder, d2resource.PaletteSky)
 		if err != nil {
@@ -177,6 +180,7 @@ func (h *Overlay) Load() {
 	// Bullets
 
 	yOffset := 59
+
 	h.createBullet(callout{
 		LabelText: fmt.Sprintf(d2tbl.TranslateString("StrHelp2"), "Ctrl"), // TODO "Ctrl" should be hotkey // "Hold Down <%s> to Run"
 		LabelX:    100,
@@ -186,6 +190,7 @@ func (h *Overlay) Load() {
 	})
 
 	yOffset += 20
+
 	h.createBullet(callout{
 		LabelText: fmt.Sprintf(d2tbl.TranslateString("StrHelp3"), "Alt"), // TODO "Alt" should be hotkey // "Hold down <%s> to highlight items on the ground"
 		LabelX:    100,
@@ -195,6 +200,7 @@ func (h *Overlay) Load() {
 	})
 
 	yOffset += 20
+
 	h.createBullet(callout{
 		LabelText: fmt.Sprintf(d2tbl.TranslateString("StrHelp4"), "Shift"), // TODO "Shift" should be hotkey // "Hold down <%s> to attack while standing still"
 		LabelX:    100,
@@ -204,6 +210,7 @@ func (h *Overlay) Load() {
 	})
 
 	yOffset += 20
+
 	h.createBullet(callout{
 		LabelText: fmt.Sprintf(d2tbl.TranslateString("StrHelp5"), "Tab"), // TODO "Tab" should be hotkey // "Hit <%s> to toggle the automap on and off"
 		LabelX:    100,
@@ -213,6 +220,7 @@ func (h *Overlay) Load() {
 	})
 
 	yOffset += 20
+
 	h.createBullet(callout{
 		LabelText: d2tbl.TranslateString("StrHelp6"), // "Hit <Esc> to bring up the Game Menu"
 		LabelX:    100,
@@ -222,6 +230,7 @@ func (h *Overlay) Load() {
 	})
 
 	yOffset += 20
+
 	h.createBullet(callout{
 		LabelText: d2tbl.TranslateString("StrHelp7"), // "Hit <Enter> to go into chat mode"
 		LabelX:    100,
@@ -231,6 +240,7 @@ func (h *Overlay) Load() {
 	})
 
 	yOffset += 20
+
 	h.createBullet(callout{
 		LabelText: d2tbl.TranslateString("StrHelp8"), // "Hit F1-F8 to set your Left or Right Mouse Buttton Skills."
 		LabelX:    100,
@@ -240,6 +250,7 @@ func (h *Overlay) Load() {
 	})
 
 	yOffset += 20
+
 	h.createBullet(callout{
 		LabelText: fmt.Sprintf(d2tbl.TranslateString("StrHelp8a"), "H"), // TODO "H" should be hotkey
 		LabelX:    100,
@@ -392,7 +403,6 @@ func (h *Overlay) Load() {
 		DotX:      530,
 		DotY:      568,
 	})
-
 }
 
 type line struct {
@@ -427,6 +437,7 @@ func (h *Overlay) createBullet(c callout) {
 	if err != nil {
 		log.Print(err)
 	}
+
 	newDot.SetPosition(c.DotX, c.DotY+14)
 	h.frames = append(h.frames, newDot)
 }
@@ -457,6 +468,7 @@ func (h *Overlay) createCallout(c callout) {
 		MoveY:  c.DotY - c.LabelY - hh - 5,
 		Color:  color.White,
 	}
+
 	h.lines = append(h.lines, l)
 
 	newDot, err := h.uiManager.NewSprite(d2resource.HelpWhiteBullet, d2resource.PaletteSky)

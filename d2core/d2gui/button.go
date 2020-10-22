@@ -28,16 +28,19 @@ type Button struct {
 
 func (b *Button) onMouseButtonDown(_ d2interface.MouseEvent) bool {
 	b.state = buttonStatePressed
+
 	return false
 }
 
 func (b *Button) onMouseButtonUp(_ d2interface.MouseEvent) bool {
 	b.state = buttonStateDefault
+
 	return false
 }
 
 func (b *Button) onMouseLeave(_ d2interface.MouseMoveEvent) bool {
 	b.state = buttonStateDefault
+
 	return false
 }
 

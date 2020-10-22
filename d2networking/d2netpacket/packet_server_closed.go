@@ -20,6 +20,7 @@ func CreateServerClosedPacket() NetPacket {
 	serverClosed := ServerClosedPacket{
 		TS: time.Now(),
 	}
+
 	b, err := json.Marshal(serverClosed)
 	if err != nil {
 		log.Print(err)

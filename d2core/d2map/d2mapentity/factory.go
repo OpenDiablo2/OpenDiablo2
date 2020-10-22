@@ -192,9 +192,11 @@ func (f *MapEntityFactory) NewNPC(x, y int, monstat *d2records.MonStatsRecord, d
 
 	composite, err := f.asset.LoadComposite(d2enum.ObjectTypeCharacter, monstat.AnimationDirectoryToken,
 		d2resource.PaletteUnits)
+
 	if err != nil {
 		return nil, err
 	}
+
 	result.composite = composite
 
 	if err := composite.SetMode(d2enum.MonsterAnimationModeNeutral,

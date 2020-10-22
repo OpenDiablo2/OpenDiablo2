@@ -123,6 +123,7 @@ func (g *ItemGrid) loadItem(item InventoryItem) {
 
 		// TODO: Put the pattern into D2Shared
 		imgPath := fmt.Sprintf("/data/global/items/inv%s.dc6", item.GetItemCode())
+
 		itemSprite, err := g.uiManager.NewSprite(imgPath, d2resource.PaletteSky)
 		if err != nil {
 			log.Printf("Failed to load sprite, error: " + err.Error())
@@ -223,6 +224,7 @@ func (g *ItemGrid) renderItem(item InventoryItem, target d2interface.Surface, x,
 	if itemSprite != nil {
 		itemSprite.SetPosition(x, y)
 		itemSprite.GetCurrentFrameSize()
+
 		err := itemSprite.Render(target)
 		if err != nil {
 			log.Print(err)

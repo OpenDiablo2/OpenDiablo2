@@ -93,6 +93,7 @@ func (m *MapEngine) addDT1(fileName string) {
 	if err != nil {
 		log.Print(err)
 	}
+
 	m.dt1TileData = append(m.dt1TileData, dt1.Tiles...)
 	m.dt1Files = append(m.dt1Files, fileName)
 }

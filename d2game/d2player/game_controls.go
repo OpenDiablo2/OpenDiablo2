@@ -334,23 +334,28 @@ func (g *GameControls) OnKeyUp(event d2interface.KeyEvent) bool {
 	return false
 }
 
+// When escape is pressed:
+// 1. If there was some overlay or panel open, close it
+// 2. Otherwise, if the Escape Menu was open, let the Escape Menu handle it
+// 3. If nothing was open, open the Escape Menu
 func (g *GameControls) onEscKey() {
-	// When escape is pressed:
-	// 1. If there was some overlay or panel open, close it
-	// 2. Otherwise, if the Escape Menu was open, let the Escape Menu handle it
-	// 3. If nothing was open, open the Escape Menu
-
 	escHandled := false
+
 	if g.inventory.IsOpen() {
 		g.inventory.Close()
+
 		escHandled = true
 	}
+
 	if g.heroStatsPanel.IsOpen() {
 		g.heroStatsPanel.Close()
+
 		escHandled = true
 	}
+
 	if g.HelpOverlay.IsOpen() {
 		g.HelpOverlay.Toggle()
+
 		escHandled = true
 	}
 
@@ -476,6 +481,7 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 // Load the resources required for the GameControls
 func (g *GameControls) Load() {
 	var err error
+
 	g.globeSprite, err = g.ui.NewSprite(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
@@ -495,6 +501,7 @@ func (g *GameControls) Load() {
 	if err != nil {
 		log.Print(err)
 	}
+
 	err = g.menuButton.SetCurrentFrame(2)
 	if err != nil {
 		log.Print(err)
@@ -1010,6 +1017,7 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		g.nameLabel.SetPosition(255, 535)
 		g.nameLabel.Render(target)
 	}
+
 	return nil
 }
 

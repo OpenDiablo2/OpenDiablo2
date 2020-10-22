@@ -208,6 +208,7 @@ func (v *Game) Render(screen d2interface.Surface) error {
 			// When help overlay is open, put transparent black screen. Magic noumber is hex for RGBA.
 			screen.DrawRect(800, 600, d2util.Color(0x0000007f))
 		}
+
 		if err := v.gameControls.Render(screen); err != nil {
 			return err
 		}

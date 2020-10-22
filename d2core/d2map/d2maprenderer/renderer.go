@@ -130,6 +130,7 @@ func (mr *MapRenderer) Render(target d2interface.Surface) {
 	if mr.mapEngine.IsLoading {
 		return
 	}
+
 	mapSize := mr.mapEngine.Size()
 
 	stxf, styf := mr.viewport.ScreenToWorld(screenMiddleX, -200)

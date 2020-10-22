@@ -21,6 +21,7 @@ func CreateGenerateMapPacket(regionType d2enum.RegionIdType) NetPacket {
 	generateMapPacket := GenerateMapPacket{
 		RegionType: regionType,
 	}
+
 	b, err := json.Marshal(generateMapPacket)
 	if err != nil {
 		log.Print(err)

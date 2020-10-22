@@ -54,6 +54,7 @@ func (f *HeroStateFactory) CreateHeroState(
 
 	defaultStats := f.asset.Records.Character.Stats[hero]
 	skillState, err := f.CreateHeroSkillsState(defaultStats)
+
 	if err != nil {
 		return nil, err
 	}

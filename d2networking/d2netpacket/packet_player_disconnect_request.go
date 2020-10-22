@@ -22,6 +22,7 @@ func CreatePlayerDisconnectRequestPacket(id string) NetPacket {
 	playerDisconnectRequest := PlayerDisconnectRequestPacket{
 		ID: id,
 	}
+
 	b, err := json.Marshal(playerDisconnectRequest)
 	if err != nil {
 		log.Print(err)

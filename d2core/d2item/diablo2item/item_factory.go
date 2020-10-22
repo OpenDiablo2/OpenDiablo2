@@ -149,6 +149,7 @@ func (f *ItemFactory) NewItem(codes ...string) (*Item, error) {
 		}
 
 		item.factory = f
+
 		return item.init(), nil
 	}
 

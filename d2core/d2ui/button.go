@@ -220,6 +220,7 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 			log.Print(err)
 			return nil
 		}
+
 		btn.width += w
 	}
 
@@ -251,6 +252,7 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 
 func (v *Button) renderFrames(btnSprite *Sprite, btnLayout *ButtonLayout, label *Label) {
 	var err error
+
 	totalButtonTypes := btnSprite.GetFrameCount() / (btnLayout.XSegments * btnLayout.YSegments)
 
 	err = btnSprite.RenderSegmented(v.normalSurface, btnLayout.XSegments, btnLayout.YSegments, btnLayout.BaseFrame)

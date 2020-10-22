@@ -29,6 +29,7 @@ func CreateCastPacket(entityID string, skillID int, targetX, targetY float64) Ne
 		TargetY:        targetY,
 		TargetEntityID: "", // TODO implement targeting entities
 	}
+
 	b, err := json.Marshal(castPacket)
 	if err != nil {
 		log.Print(err)
