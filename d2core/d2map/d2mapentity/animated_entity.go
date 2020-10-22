@@ -18,18 +18,32 @@ type AnimatedEntity struct {
 	highlight bool
 }
 
+const (
+	subtileWidth   = 16 // pixels
+	subtileHeight  = 8
+	subtileOffsetY = -5
+)
+
+const (
+	highlightBrightness = 2
+)
+
+func translateSubtile(fx, fy float64) (x, y int) {
+	return int(fx * subtileWidth), int(fy*subtileHeight) - subtileOffsetY
+}
+
 // Render draws this animated entity onto the target
 func (ae *AnimatedEntity) Render(target d2interface.Surface) {
 	renderOffset := ae.Position.RenderOffset()
 	ox, oy := renderOffset.X(), renderOffset.Y()
-	tx, ty := int((ox-oy)*16), int((ox+oy)*8)-5
+	tx, ty := translateSubtile(ox-oy, ox+oy)
 
 	target.PushTranslation(tx, ty)
 
 	defer target.Pop()
 
 	if ae.highlight {
-		target.PushBrightness(2)
+		target.PushBrightness(highlightBrightness)
 		defer target.Pop()
 
 		ae.highlight = false
