@@ -58,6 +58,7 @@ type GameControls struct {
 	escapeMenu             *EscapeMenu
 	ui                     *d2ui.UIManager
 	inventory              *Inventory
+	skilltree              *SkillTree
 	heroStatsPanel         *HeroStatsPanel
 	HelpOverlay            *help.Overlay
 	miniPanel              *miniPanel
@@ -191,6 +192,7 @@ func NewGameControls(
 		inputListener:    inputListener,
 		mapRenderer:      mapRenderer,
 		inventory:        NewInventory(asset, ui, inventoryRecord),
+		skilltree:        NewSkillTree(hero.Skills, hero.Class, asset, renderer, ui, guiManager),
 		heroStatsPanel:   NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
 		HelpOverlay:      help.NewHelpOverlay(asset, renderer, ui, guiManager),
 		miniPanel:        newMiniPanel(asset, ui, isSinglePlayer),
@@ -307,6 +309,9 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 	case d2enum.KeyI:
 		g.inventory.Toggle()
 		g.updateLayout()
+	case d2enum.KeyT:
+		g.skilltree.Toggle()
+		g.updateLayout()
 	case d2enum.KeyC:
 		g.heroStatsPanel.Toggle()
 		g.updateLayout()
@@ -343,6 +348,12 @@ func (g *GameControls) onEscKey() {
 
 	if g.inventory.IsOpen() {
 		g.inventory.Close()
+
+		escHandled = true
+	}
+
+	if g.skilltree.IsOpen() {
+		g.skilltree.Close()
 
 		escHandled = true
 	}
@@ -521,6 +532,7 @@ func (g *GameControls) Load() {
 	g.loadUIButtons()
 
 	g.inventory.Load()
+	g.skilltree.Load()
 	g.heroStatsPanel.Load()
 	g.HelpOverlay.Load()
 }
@@ -570,8 +582,7 @@ func (g *GameControls) isLeftPanelOpen() bool {
 }
 
 func (g *GameControls) isRightPanelOpen() bool {
-	// TODO: add skills tree panel
-	return g.inventory.IsOpen()
+	return g.inventory.IsOpen() || g.skilltree.IsOpen()
 }
 
 func (g *GameControls) isInActiveMenusRect(px, py int) bool {
@@ -652,6 +663,10 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	}
 
 	if err := g.inventory.Render(target); err != nil {
+		return err
+	}
+
+	if err := g.skilltree.Render(target); err != nil {
 		return err
 	}
 
@@ -1136,6 +1151,11 @@ func (g *GameControls) onClickActionable(item actionableType) {
 		log.Println("Inventory button on mini panel is pressed")
 
 		g.inventory.Toggle()
+		g.updateLayout()
+	case miniPanelSkillTree:
+		log.Println("Skilltree button on mini panel is pressed")
+
+		g.skilltree.Toggle()
 		g.updateLayout()
 	case miniPanelGameMenu:
 		g.miniPanel.Close()
