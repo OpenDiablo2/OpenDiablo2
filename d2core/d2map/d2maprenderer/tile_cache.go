@@ -10,6 +10,13 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
+const (
+	tileMinHeight          int16 = 32
+	shadowAdjustY          int32 = 80
+	defaultFloorTileWidth        = 10
+	defaultFloorTileHeight       = 10
+)
+
 func (mr *MapRenderer) generateTileCache() {
 	var err error
 	mr.palette, err = mr.loadPaletteForAct(d2enum.RegionIdType(mr.mapEngine.LevelType().ID))
@@ -51,8 +58,8 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord) {
 		log.Printf("Could not locate tile Style:%d, Seq: %d, Type: %d\n", tile.Style, tile.Sequence, 0)
 
 		tileData = append(tileData, &d2dt1.Tile{})
-		tileData[0].Width = 10
-		tileData[0].Height = 10
+		tileData[0].Width = defaultFloorTileWidth
+		tileData[0].Height = defaultFloorTileHeight
 	} else {
 		if !tileOptions[0].MaterialFlags.Lava {
 			tileData = append(tileData, &tileOptions[tile.RandomIndex])
@@ -106,8 +113,10 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord) {
 	}
 }
 
+const shadowTileType = 13
+
 func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord) {
-	tileOptions := mr.mapEngine.GetTiles(int(tile.Style), int(tile.Sequence), 13)
+	tileOptions := mr.mapEngine.GetTiles(int(tile.Style), int(tile.Sequence), shadowTileType)
 
 	var tileData *d2dt1.Tile
 
@@ -126,14 +135,14 @@ func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord) {
 
 	for _, block := range tileData.Blocks {
 		tileMinY = d2math.MinInt32(tileMinY, int32(block.Y))
-		tileMaxY = d2math.MaxInt32(tileMaxY, int32(block.Y+32))
+		tileMaxY = d2math.MaxInt32(tileMaxY, int32(block.Y+tileMinHeight))
 	}
 
 	tileYOffset := -tileMinY
 	tileHeight := int(tileMaxY - tileMinY)
-	tile.YAdjust = int(tileMinY + 80)
+	tile.YAdjust = int(tileMinY + shadowAdjustY)
 
-	cachedImage := mr.getImageCacheRecord(tile.Style, tile.Sequence, 13, tile.RandomIndex)
+	cachedImage := mr.getImageCacheRecord(tile.Style, tile.Sequence, d2enum.TileShadow, tile.RandomIndex)
 	if cachedImage != nil {
 		return
 	}
@@ -152,7 +161,7 @@ func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord) {
 		log.Print(err)
 	}
 
-	mr.setImageCacheRecord(tile.Style, tile.Sequence, 13, tile.RandomIndex, image)
+	mr.setImageCacheRecord(tile.Style, tile.Sequence, d2enum.TileShadow, tile.RandomIndex, image)
 }
 
 func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord) {

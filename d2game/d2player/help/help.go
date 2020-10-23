@@ -16,13 +16,13 @@ import (
 )
 
 const (
-	tlCornerFrame = iota
-	lFrame
-	tFrameLHalf
-	tFrameRHalf
-	trCornerFrameTHalf
-	trCornerFrameRHalf
-	rFrame
+	frameTopLeft = iota
+	frameBottomLeft
+	frameTopMiddleLeft
+	frameTopMiddleRight
+	frameTopRightNoCorner
+	frameTopRight
+	frameBottomRight
 )
 
 const (
@@ -34,9 +34,10 @@ const (
 	windowWidth = 800
 
 	bulletOffsetY = 14
+	lineOffset    = 5
 
 	// the title of the panel
-	titleLabelOffsetX = -30
+	titleLabelOffsetX = -37
 
 	// for the bulleted list near the top of the screen
 	listRootX              = 100
@@ -48,8 +49,10 @@ const (
 	listBulletX            = listRootX - listBulletOffsetX
 
 	// the close button for the help panel
-	closeButtonX = 685
-	closeButtonY = 25
+	closeButtonX      = 685
+	closeButtonY      = 25
+	closeButtonLabelX = 680
+	closeButtonLabelY = 60
 
 	// the rest of these are for text with a line and dot, towards the bottom of the screen
 	newStatsLabelX = 222
@@ -217,14 +220,42 @@ func (h *Overlay) IsInRect(px, py int) bool {
 
 // Load the overlay graphical assets
 func (h *Overlay) Load() {
-	var (
-		x     = 0
-		y     = 0
-		prevX = 0
-		prevY = 0
+	/*
+		the 800x600 help screen dc6 file frames look like this
+		the position we set for frames is the lower-left corner x,y
+		+----+------------------+-------------------+------------+----+
+		| 1  | 3                | 4                 | 5          | 6  |
+		|    |------------------+-------------------|            |    |
+		|    |                                      |            |    |
+		|    |                                      |            |    |
+		+----+                                      +------------+----+
+		| 2  |                                                   | 7  |
+		|    |                                                   |    |
+		|    |                                                   |    |
+		+----+                                                   +----+
+	*/
+	const (
+		// if you add up frame widths 1,3,4,5,6 you get (65+255+255+245+20) = 840
+		magicHelpBorderOffsetX = -40
 	)
 
-	for frameIndex := 0; frameIndex < 7; frameIndex++ {
+	frames := []int{
+		frameTopLeft,
+		frameBottomLeft,
+		frameTopMiddleLeft,
+		frameTopMiddleRight,
+		frameTopRightNoCorner,
+		frameTopRight,
+		frameBottomRight,
+	}
+
+	left, top := 0, 0
+	firstFrameWidth := 0
+	prevY := 0
+	prevWidth := 0
+	currentX, currentY := left, top
+
+	for _, frameIndex := range frames {
 		f, err := h.uiManager.NewSprite(d2resource.HelpBorder, d2resource.PaletteSky)
 		if err != nil {
 			log.Print(err)
@@ -235,38 +266,36 @@ func (h *Overlay) Load() {
 			log.Print(err)
 		}
 
-		ww, hh := f.GetCurrentFrameSize()
-		//fmt.Printf("Help frame %d size: %d, %d\n", frameIndex, ww, hh)
+		frameWidth, frameHeight := f.GetCurrentFrameSize()
 
 		switch frameIndex {
-		case tlCornerFrame:
-			y = hh
-		case lFrame:
-			y = hh + prevY
-		case tFrameLHalf:
-			y = hh
-			x = 65
-		case tFrameRHalf:
-			y = hh
-			x = windowWidth - ww - 245
-		case trCornerFrameTHalf:
-			y = hh
-			x = windowWidth - ww - 20
-		case trCornerFrameRHalf:
-			y = hh
-			x = windowWidth - ww
-		case rFrame:
-			y = hh + prevY
-			x = windowWidth - ww
+		case frameTopLeft:
+			currentY += frameHeight
+			firstFrameWidth = frameWidth
+		case frameBottomLeft:
+			currentY += frameHeight
+		case frameTopMiddleLeft:
+			currentX = firstFrameWidth
+			currentY = top + frameHeight
+		case frameTopMiddleRight:
+			currentY = top + frameHeight
+			currentX += prevWidth
+			currentX += magicHelpBorderOffsetX
+		case frameTopRightNoCorner:
+			currentY = top + frameHeight
+			currentX += prevWidth
+		case frameTopRight:
+			currentY = top + frameHeight
+			currentX += prevWidth
+		case frameBottomRight:
+			currentY = prevY + frameHeight
 		}
 
-		//y += 50
+		prevY = currentY
+		prevWidth = frameWidth
 
-		_ = prevX
+		f.SetPosition(currentX, currentY)
 
-		prevX = x
-		prevY = y
-		f.SetPosition(x, y)
 		h.frames = append(h.frames, f)
 	}
 
@@ -290,7 +319,7 @@ func (h *Overlay) Load() {
 
 	newLabel = h.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
 	newLabel.SetText(d2tbl.TranslateString("strClose")) // "Close"
-	newLabel.SetPosition(680, 60)
+	newLabel.SetPosition(closeButtonLabelX, closeButtonLabelY)
 	h.text = append(h.text, newLabel)
 
 	// Bullets
@@ -301,6 +330,7 @@ func (h *Overlay) Load() {
 
 		// TODO "Alt" should be hotkey // "Hold down <%s> to highlight items on the ground"
 		{text: fmt.Sprintf(d2tbl.TranslateString("StrHelp3"), "Alt")},
+
 		// TODO "Shift" should be hotkey // "Hold down <%s> to attack while standing still"
 		{text: fmt.Sprintf(d2tbl.TranslateString("StrHelp4"), "Shift")},
 
@@ -536,9 +566,9 @@ func (h *Overlay) createCallout(c callout) {
 
 	l := line{
 		StartX: c.LabelX,
-		StartY: c.LabelY + hh + 5,
+		StartY: c.LabelY + hh + lineOffset,
 		MoveX:  0,
-		MoveY:  c.DotY - c.LabelY - hh - 5,
+		MoveY:  c.DotY - c.LabelY - hh - lineOffset,
 		Color:  color.White,
 	}
 

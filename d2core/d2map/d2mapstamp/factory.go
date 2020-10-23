@@ -13,6 +13,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
+const (
+	AutoFileIndex = -1
+)
+
 // NewStampFactory creates a MapStamp factory instance
 func NewStampFactory(asset *d2asset.AssetManager, entity *d2mapentity.MapEntityFactory) *StampFactory {
 	return &StampFactory{asset, entity}

@@ -534,7 +534,7 @@ func (mr *MapRenderer) renderTileDebug(ax, ay, debugVisLevel int, target d2inter
 
 		for i, wall := range tile.Components.Walls {
 			if wall.Type.Special() {
-				target.PushTranslation(-20, 10+(i+1)*14) // what are these magic numbers??
+				target.PushTranslation(-20, 10+(i+1)*14) // nolint:gomnd // just for debug
 				target.DrawTextf("s: %v-%v", wall.Style, wall.Sequence)
 				target.Pop()
 			}

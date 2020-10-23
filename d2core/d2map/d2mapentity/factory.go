@@ -17,6 +17,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 )
 
+const (
+	subtilesPerTile = 5
+)
+
 // NewMapEntityFactory creates a MapEntityFactory instance with the given asset manager
 func NewMapEntityFactory(asset *d2asset.AssetManager) (*MapEntityFactory, error) {
 	itemFactory, err := diablo2item.NewItemFactory(asset)
@@ -166,7 +170,7 @@ func (f *MapEntityFactory) NewItem(x, y int, codes ...string) (*Item, error) {
 
 	animation.PlayForward()
 	animation.SetPlayLoop(false)
-	entity := NewAnimatedEntity(x*5, y*5, animation)
+	entity := NewAnimatedEntity(x*subtilesPerTile, y*subtilesPerTile, animation)
 
 	result := &Item{
 		AnimatedEntity: entity,

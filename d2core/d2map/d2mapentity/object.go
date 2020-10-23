@@ -79,8 +79,8 @@ func (ob *Object) Selectable() bool {
 func (ob *Object) Render(target d2interface.Surface) {
 	renderOffset := ob.Position.RenderOffset()
 	target.PushTranslation(
-		int((renderOffset.X()-renderOffset.Y())*16),
-		int(((renderOffset.X() + renderOffset.Y()) * 8)),
+		int((renderOffset.X()-renderOffset.Y())*subtileWidth),
+		int(((renderOffset.X() + renderOffset.Y()) * subtileHeight)),
 	)
 
 	if ob.highlight {
