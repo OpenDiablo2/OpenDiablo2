@@ -44,7 +44,10 @@ const (
 	rareJewelAffixMax  = 4
 )
 
-const maxAffixesOnMagicItem = 2
+const (
+	maxAffixesOnMagicItem = 2
+	sidesOnACoin          = 2 // for random coin flip
+)
 
 // static check to ensure Item implements Item
 var _ d2item.Item = &Item{}
@@ -362,7 +365,8 @@ func (i *Item) pickRandomAffixes(max, totalMax int,
 	for numPicks := 0; numPicks < max; numPicks++ {
 		matches := i.factory.FindMatchingAffixes(i.CommonRecord(), affixMap)
 
-		if rollPrefix := i.rand.Intn(2); rollPrefix > 0 {
+		// flip a coin for whether to get an affix on this pick
+		if coinToss := i.rand.Intn(sidesOnACoin) > 0; coinToss {
 			affixCount := len(i.PrefixRecords()) + len(i.SuffixRecords())
 			if len(i.PrefixRecords()) > max || affixCount > totalMax {
 				break

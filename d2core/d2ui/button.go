@@ -43,8 +43,8 @@ const (
 	ButtonTypeSquareClose        ButtonType = 20
 	ButtonTypeSkillTreeTab       ButtonType = 21
 
-	ButtonNoFixedWidth           int = -1
-	ButtonNoFixedHeight          int = -1
+	ButtonNoFixedWidth  int = -1
+	ButtonNoFixedHeight int = -1
 )
 
 const (
@@ -101,6 +101,13 @@ const (
 	buttonBuySellSegmentsX     = 1
 	buttonBuySellSegmentsY     = 1
 	buttonBuySellDisabledFrame = 1
+
+	buttonSkillTreeTabXSegments     = 1
+	buttonSkillTreeTabYSegments     = 1
+	buttonSkillTreeTabDisabledFrame = 7
+	buttonSkillTreeTabBaseFrame     = 7
+	buttonSkillTreeTabFixedWidth    = 93
+	buttonSkillTreeTabFixedHeight   = 107
 
 	buttonRunSegmentsX     = 1
 	buttonRunSegmentsY     = 1
@@ -207,18 +214,18 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			LabelColor:       greyAlpha100,
 		},
 		ButtonTypeSkillTreeTab: {
-			XSegments:        1,
-			YSegments:        1,
-			DisabledFrame:    7,
+			XSegments:        buttonSkillTreeTabXSegments,
+			YSegments:        buttonSkillTreeTabYSegments,
+			DisabledFrame:    buttonSkillTreeTabDisabledFrame,
+			BaseFrame:        buttonSkillTreeTabBaseFrame,
 			ResourceName:     d2resource.SkillsPanelAmazon,
 			PaletteName:      d2resource.PaletteSky,
 			Toggleable:       false,
 			FontPath:         d2resource.Font16,
 			AllowFrameChange: false,
-			BaseFrame:        7,
 			HasImage:         false,
-			FixedWidth:       93,
-			FixedHeight:      107,
+			FixedWidth:       buttonSkillTreeTabFixedWidth,
+			FixedHeight:      buttonSkillTreeTabFixedHeight,
 			LabelColor:       whiteAlpha100,
 		},
 	}
@@ -272,15 +279,15 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 	if buttonLayout.FixedWidth > 0 {
 		btn.width = buttonLayout.FixedWidth
 	} else {
-	    for i := 0; i < buttonLayout.XSegments; i++ {
-		    w, _, err := buttonSprite.GetFrameSize(i)
-		    if err != nil {
-			    log.Print(err)
-			    return nil
-		    }
+		for i := 0; i < buttonLayout.XSegments; i++ {
+			w, _, err := buttonSprite.GetFrameSize(i)
+			if err != nil {
+				log.Print(err)
+				return nil
+			}
 
-		    btn.width += w
-	    }
+			btn.width += w
+		}
 	}
 
 	if buttonLayout.FixedHeight > 0 {

@@ -27,7 +27,7 @@ func (m *MapEngine) checkLos(start, end d2vector.Position) (bool, d2vector.Posit
 	if N == 0 {
 		divN = 0.0
 	} else {
-		divN = 1.0 / N
+		divN = 1.0 / N // nolint:gomnd // we're just taking inverse...
 	}
 
 	xstep := dx * divN

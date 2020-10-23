@@ -12,17 +12,37 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapstamp"
 )
 
+const (
+	presetA = iota
+	presetB
+	presetC
+	presetD
+	presetE
+	presetF
+)
+
+const (
+	wildernessDetailsRecordID = 2
+)
+
+const (
+	mapWidth      = 150
+	mapHeight     = mapWidth
+	mapMargin     = 9
+	autoFileIndex = d2mapstamp.AutoFileIndex
+)
+
 // GenerateAct1Overworld generates the map and entities for the first town and surrounding area.
 func (g *MapGenerator) GenerateAct1Overworld() {
 	rand.Seed(g.engine.Seed())
 
-	wilderness1Details := g.asset.Records.GetLevelDetails(2)
+	wilderness1Details := g.asset.Records.GetLevelDetails(wildernessDetailsRecordID)
 
-	g.engine.ResetMap(d2enum.RegionAct1Town, 150, 150)
+	g.engine.ResetMap(d2enum.RegionAct1Town, mapWidth, mapHeight)
 	mapWidth := g.engine.Size().Width
 	mapHeight := g.engine.Size().Height
 
-	townStamp := g.engine.LoadStamp(d2enum.RegionAct1Town, 1, -1)
+	townStamp := g.engine.LoadStamp(d2enum.RegionAct1Town, presetB, autoFileIndex)
 	townStamp.RegionPath()
 	townSize := townStamp.Size()
 
@@ -37,11 +57,19 @@ func (g *MapGenerator) GenerateAct1Overworld() {
 		rightWaterBorderStamp := g.loadPreset(d2wilderness.WaterBorderEast, 0)
 		rightWaterBorderStamp2 := g.loadPreset(d2wilderness.WaterBorderWest, 0)
 
-		for y := townSize.Height; y < mapHeight-9; y += 9 {
-			g.engine.PlaceStamp(rightWaterBorderStamp, mapWidth-17, y)
-			g.engine.PlaceStamp(rightWaterBorderStamp2, mapWidth-9, y)
+		mapInnerHeight := mapHeight - mapMargin
+		mapInnerWidth := mapWidth - mapMargin
+
+		for y := townSize.Height; y < mapInnerHeight; y += mapMargin {
+			g.engine.PlaceStamp(rightWaterBorderStamp, mapInnerWidth-mapMargin, y)
+			g.engine.PlaceStamp(rightWaterBorderStamp2, mapInnerWidth, y)
 		}
-		g.generateWilderness1TownSouth(mapWidth-wilderness1Details.SizeXNormal-14, townSize.Height)
+
+		edgeOffset := 14
+		startX := mapWidth - wilderness1Details.SizeXNormal - edgeOffset
+		startY := townSize.Height
+
+		g.generateWilderness1TownSouth(startX, startY)
 	case strings.Contains(townStamp.RegionPath(), "W1"):
 		g.engine.PlaceStamp(townStamp, mapWidth-townSize.Width, mapHeight-townSize.Height)
 		startX := mapWidth - townSize.Width - wilderness1Details.SizeXNormal
@@ -53,36 +81,36 @@ func (g *MapGenerator) GenerateAct1Overworld() {
 }
 
 func (g *MapGenerator) generateWilderness1TownEast(startX, startY int) {
-	levelDetails := g.asset.Records.GetLevelDetails(2)
+	levelDetails := g.asset.Records.GetLevelDetails(wildernessDetailsRecordID)
 
 	fenceNorthStamp := []*d2mapstamp.Stamp{
-		g.loadPreset(d2wilderness.TreeBorderNorth, 0),
-		g.loadPreset(d2wilderness.TreeBorderNorth, 1),
-		g.loadPreset(d2wilderness.TreeBorderNorth, 2),
+		g.loadPreset(d2wilderness.TreeBorderNorth, presetA),
+		g.loadPreset(d2wilderness.TreeBorderNorth, presetB),
+		g.loadPreset(d2wilderness.TreeBorderNorth, presetC),
 	}
 
 	fenceSouthStamp := []*d2mapstamp.Stamp{
-		g.loadPreset(d2wilderness.TreeBorderSouth, 0),
-		g.loadPreset(d2wilderness.TreeBorderSouth, 1),
-		g.loadPreset(d2wilderness.TreeBorderSouth, 2),
+		g.loadPreset(d2wilderness.TreeBorderSouth, presetA),
+		g.loadPreset(d2wilderness.TreeBorderSouth, presetB),
+		g.loadPreset(d2wilderness.TreeBorderSouth, presetC),
 	}
 
 	fenceWestStamp := []*d2mapstamp.Stamp{
-		g.loadPreset(d2wilderness.TreeBorderWest, 0),
-		g.loadPreset(d2wilderness.TreeBorderWest, 1),
-		g.loadPreset(d2wilderness.TreeBorderWest, 2),
+		g.loadPreset(d2wilderness.TreeBorderWest, presetA),
+		g.loadPreset(d2wilderness.TreeBorderWest, presetB),
+		g.loadPreset(d2wilderness.TreeBorderWest, presetC),
 	}
 
 	fenceEastStamp := []*d2mapstamp.Stamp{
-		g.loadPreset(d2wilderness.TreeBorderEast, 0),
-		g.loadPreset(d2wilderness.TreeBorderEast, 1),
-		g.loadPreset(d2wilderness.TreeBorderEast, 2),
+		g.loadPreset(d2wilderness.TreeBorderEast, presetA),
+		g.loadPreset(d2wilderness.TreeBorderEast, presetB),
+		g.loadPreset(d2wilderness.TreeBorderEast, presetC),
 	}
 
-	fenceSouthWestStamp := g.loadPreset(d2wilderness.TreeBorderSouthWest, 0)
-	fenceNorthEastStamp := g.loadPreset(d2wilderness.TreeBorderNorthEast, 0)
-	fenceSouthEastStamp := g.loadPreset(d2wilderness.TreeBorderSouthEast, 0)
-	fenceWestEdge := g.loadPreset(d2wilderness.TreeBoxNorthEast, 0)
+	fenceSouthWestStamp := g.loadPreset(d2wilderness.TreeBorderSouthWest, presetA)
+	fenceNorthEastStamp := g.loadPreset(d2wilderness.TreeBorderNorthEast, presetA)
+	fenceSouthEastStamp := g.loadPreset(d2wilderness.TreeBorderSouthEast, presetA)
+	fenceWestEdge := g.loadPreset(d2wilderness.TreeBoxNorthEast, presetA)
 
 	areaRect := d2geom.Rectangle{
 		Left:   startX,
@@ -118,29 +146,29 @@ func (g *MapGenerator) generateWilderness1TownEast(startX, startY int) {
 }
 
 func (g *MapGenerator) generateWilderness1TownSouth(startX, startY int) {
-	levelDetails := g.asset.Records.GetLevelDetails(2)
+	levelDetails := g.asset.Records.GetLevelDetails(wildernessDetailsRecordID)
 
 	fenceNorthStamp := []*d2mapstamp.Stamp{
-		g.loadPreset(d2wilderness.TreeBorderNorth, 0),
-		g.loadPreset(d2wilderness.TreeBorderNorth, 1),
-		g.loadPreset(d2wilderness.TreeBorderNorth, 2),
+		g.loadPreset(d2wilderness.TreeBorderNorth, presetA),
+		g.loadPreset(d2wilderness.TreeBorderNorth, presetB),
+		g.loadPreset(d2wilderness.TreeBorderNorth, presetC),
 	}
 
 	fenceWestStamp := []*d2mapstamp.Stamp{
-		g.loadPreset(d2wilderness.TreeBorderWest, 0),
-		g.loadPreset(d2wilderness.TreeBorderWest, 1),
-		g.loadPreset(d2wilderness.TreeBorderWest, 2),
+		g.loadPreset(d2wilderness.TreeBorderWest, presetA),
+		g.loadPreset(d2wilderness.TreeBorderWest, presetB),
+		g.loadPreset(d2wilderness.TreeBorderWest, presetC),
 	}
 
 	fenceSouthStamp := []*d2mapstamp.Stamp{
-		g.loadPreset(d2wilderness.TreeBorderSouth, 0),
-		g.loadPreset(d2wilderness.TreeBorderSouth, 1),
-		g.loadPreset(d2wilderness.TreeBorderSouth, 2),
+		g.loadPreset(d2wilderness.TreeBorderSouth, presetA),
+		g.loadPreset(d2wilderness.TreeBorderSouth, presetB),
+		g.loadPreset(d2wilderness.TreeBorderSouth, presetC),
 	}
 
-	fenceNorthWestStamp := g.loadPreset(d2wilderness.TreeBorderNorthWest, 0)
-	fenceSouthWestStamp := g.loadPreset(d2wilderness.TreeBorderSouthWest, 0)
-	fenceWaterBorderSouthEast := g.loadPreset(d2wilderness.WaterBorderEast, 1)
+	fenceNorthWestStamp := g.loadPreset(d2wilderness.TreeBorderNorthWest, presetA)
+	fenceSouthWestStamp := g.loadPreset(d2wilderness.TreeBorderSouthWest, presetB)
+	fenceWaterBorderSouthEast := g.loadPreset(d2wilderness.WaterBorderEast, presetC)
 
 	areaRect := d2geom.Rectangle{
 		Left:   startX + 2,
@@ -171,35 +199,35 @@ func (g *MapGenerator) generateWilderness1TownSouth(startX, startY int) {
 }
 
 func (g *MapGenerator) generateWilderness1TownWest(startX, startY int) {
-	levelDetails := g.asset.Records.GetLevelDetails(2)
+	levelDetails := g.asset.Records.GetLevelDetails(wildernessDetailsRecordID)
 
-	fenceEastEdge := g.loadPreset(d2wilderness.TreeBoxSouthWest, 0)
-	fenceNorthWestStamp := g.loadPreset(d2wilderness.TreeBorderNorthWest, 0)
-	fenceNorthEastStamp := g.loadPreset(d2wilderness.TreeBorderNorthEast, 0)
-	fenceSouthWestStamp := g.loadPreset(d2wilderness.TreeBorderSouthWest, 0)
+	fenceEastEdge := g.loadPreset(d2wilderness.TreeBoxSouthWest, presetA)
+	fenceNorthWestStamp := g.loadPreset(d2wilderness.TreeBorderNorthWest, presetA)
+	fenceNorthEastStamp := g.loadPreset(d2wilderness.TreeBorderNorthEast, presetA)
+	fenceSouthWestStamp := g.loadPreset(d2wilderness.TreeBorderSouthWest, presetA)
 
 	fenceSouthStamp := []*d2mapstamp.Stamp{
-		g.loadPreset(d2wilderness.TreeBorderSouth, 0),
-		g.loadPreset(d2wilderness.TreeBorderSouth, 1),
-		g.loadPreset(d2wilderness.TreeBorderSouth, 2),
+		g.loadPreset(d2wilderness.TreeBorderSouth, presetA),
+		g.loadPreset(d2wilderness.TreeBorderSouth, presetB),
+		g.loadPreset(d2wilderness.TreeBorderSouth, presetC),
 	}
 
 	fenceNorthStamp := []*d2mapstamp.Stamp{
-		g.loadPreset(d2wilderness.TreeBorderNorth, 0),
-		g.loadPreset(d2wilderness.TreeBorderNorth, 1),
-		g.loadPreset(d2wilderness.TreeBorderNorth, 2),
+		g.loadPreset(d2wilderness.TreeBorderNorth, presetA),
+		g.loadPreset(d2wilderness.TreeBorderNorth, presetB),
+		g.loadPreset(d2wilderness.TreeBorderNorth, presetC),
 	}
 
 	fenceEastStamp := []*d2mapstamp.Stamp{
-		g.loadPreset(d2wilderness.TreeBorderEast, 0),
-		g.loadPreset(d2wilderness.TreeBorderEast, 1),
-		g.loadPreset(d2wilderness.TreeBorderEast, 2),
+		g.loadPreset(d2wilderness.TreeBorderEast, presetA),
+		g.loadPreset(d2wilderness.TreeBorderEast, presetB),
+		g.loadPreset(d2wilderness.TreeBorderEast, presetC),
 	}
 
 	fenceWestStamp := []*d2mapstamp.Stamp{
-		g.loadPreset(d2wilderness.TreeBorderWest, 0),
-		g.loadPreset(d2wilderness.TreeBorderWest, 1),
-		g.loadPreset(d2wilderness.TreeBorderWest, 2),
+		g.loadPreset(d2wilderness.TreeBorderWest, presetA),
+		g.loadPreset(d2wilderness.TreeBorderWest, presetB),
+		g.loadPreset(d2wilderness.TreeBorderWest, presetC),
 	}
 
 	// Draw the north and south fences
@@ -237,7 +265,7 @@ func (g *MapGenerator) generateWilderness1TownWest(startX, startY int) {
 }
 
 func (g *MapGenerator) generateWilderness1Contents(rect d2geom.Rectangle) {
-	levelDetails := g.asset.Records.GetLevelDetails(2)
+	levelDetails := g.asset.Records.GetLevelDetails(wildernessDetailsRecordID)
 
 	denOfEvil := g.loadPreset(d2wilderness.DenOfEvilEntrance, 0)
 	denOfEvilLoc := d2geom.Point{
@@ -256,25 +284,25 @@ func (g *MapGenerator) generateWilderness1Contents(rect d2geom.Rectangle) {
 	}
 
 	stuff := []*d2mapstamp.Stamp{
-		g.loadPreset(d2wilderness.StoneFill1, 0),
-		g.loadPreset(d2wilderness.StoneFill1, 1),
-		g.loadPreset(d2wilderness.StoneFill1, 2),
-		g.loadPreset(d2wilderness.StoneFill2, 0),
-		g.loadPreset(d2wilderness.StoneFill2, 1),
-		g.loadPreset(d2wilderness.StoneFill2, 2),
-		g.loadPreset(d2wilderness.Cottages1, 0),
-		g.loadPreset(d2wilderness.Cottages1, 1),
-		g.loadPreset(d2wilderness.Cottages1, 2),
-		g.loadPreset(d2wilderness.Cottages1, 3),
-		g.loadPreset(d2wilderness.Cottages1, 4),
-		g.loadPreset(d2wilderness.Cottages1, 5),
-		g.loadPreset(d2wilderness.FallenCamp1, 0),
-		g.loadPreset(d2wilderness.FallenCamp1, 1),
-		g.loadPreset(d2wilderness.FallenCamp1, 2),
-		g.loadPreset(d2wilderness.FallenCamp1, 3),
-		g.loadPreset(d2wilderness.Pond, 0),
-		g.loadPreset(d2wilderness.SwampFill1, 0),
-		g.loadPreset(d2wilderness.SwampFill2, 0),
+		g.loadPreset(d2wilderness.StoneFill1, presetA),
+		g.loadPreset(d2wilderness.StoneFill1, presetB),
+		g.loadPreset(d2wilderness.StoneFill1, presetC),
+		g.loadPreset(d2wilderness.StoneFill2, presetA),
+		g.loadPreset(d2wilderness.StoneFill2, presetB),
+		g.loadPreset(d2wilderness.StoneFill2, presetC),
+		g.loadPreset(d2wilderness.Cottages1, presetA),
+		g.loadPreset(d2wilderness.Cottages1, presetB),
+		g.loadPreset(d2wilderness.Cottages1, presetC),
+		g.loadPreset(d2wilderness.Cottages1, presetD),
+		g.loadPreset(d2wilderness.Cottages1, presetE),
+		g.loadPreset(d2wilderness.Cottages1, presetF),
+		g.loadPreset(d2wilderness.FallenCamp1, presetA),
+		g.loadPreset(d2wilderness.FallenCamp1, presetB),
+		g.loadPreset(d2wilderness.FallenCamp1, presetC),
+		g.loadPreset(d2wilderness.FallenCamp1, presetD),
+		g.loadPreset(d2wilderness.Pond, presetA),
+		g.loadPreset(d2wilderness.SwampFill1, presetA),
+		g.loadPreset(d2wilderness.SwampFill2, presetA),
 	}
 
 	g.engine.PlaceStamp(denOfEvil, denOfEvilLoc.X, denOfEvilLoc.Y)

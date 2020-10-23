@@ -59,6 +59,10 @@ const (
 	optAutomapShowNames
 )
 
+const (
+	singleFrame = time.Millisecond * 16
+)
+
 // EscapeMenu represents the in-game menu that shows up when the esc key is pressed
 type EscapeMenu struct {
 	isOpen        bool
@@ -449,7 +453,7 @@ func (m *EscapeMenu) setLayout(id layoutID) {
 		m.rightPent.SetVisible(false)
 
 		go func() {
-			time.Sleep(16 * time.Millisecond)
+			time.Sleep(singleFrame)
 			m.onHoverElement(m.layouts[id].currentEl)
 			m.leftPent.SetVisible(true)
 			m.rightPent.SetVisible(true)

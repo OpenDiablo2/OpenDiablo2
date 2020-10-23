@@ -92,7 +92,7 @@ func (p *Player) Advance(tickTime float64) {
 		}
 
 		// skills are casted after the first half of the casting animation is played
-		isHalfDoneCasting := float64(p.composite.GetCurrentFrame()) / float64(p.composite.GetFrameCount()) >= 0.5
+		isHalfDoneCasting := float64(p.composite.GetCurrentFrame())/float64(p.composite.GetFrameCount()) >= 0.5
 		if isHalfDoneCasting && p.onFinishedCasting != nil {
 			p.onFinishedCasting()
 			p.onFinishedCasting = nil
@@ -111,15 +111,24 @@ func (p *Player) Advance(tickTime float64) {
 		p.animationMode = p.composite.GetAnimationMode()
 	}
 
+	charstats := p.composite.AssetManager.Records.Character.Stats[p.Class]
+	staminaDrain := float64(charstats.StaminaRunDrain)
+
+	// This number has been determined by trying it out and checking if the stamina drain is
+	// the same as in d2 with the drain value from the assets.
+	// (We stopped the time for a lvl 1 babarian to loose all stamina which is around 25 seconds
+	// if i Remember correctly)
+	const magicStaminaDrainDivisor = 5
+
 	// Drain and regenerate Stamina
 	if p.IsRunning() && !p.atTarget() && !p.IsInTown() {
-		p.Stats.Stamina -= float64(p.composite.AssetManager.Records.Character.Stats[p.Class].StaminaRunDrain) * tickTime / 5
+		p.Stats.Stamina -= staminaDrain * tickTime / magicStaminaDrainDivisor
 		if p.Stats.Stamina <= 0 {
 			p.SetSpeed(baseWalkSpeed)
 			p.Stats.Stamina = 0
 		}
 	} else if p.Stats.Stamina < float64(p.Stats.MaxStamina) {
-		p.Stats.Stamina += float64(p.composite.AssetManager.Records.Character.Stats[p.Class].StaminaRunDrain) * tickTime / 5
+		p.Stats.Stamina += staminaDrain * tickTime / magicStaminaDrainDivisor
 		if p.IsRunning() {
 			p.SetSpeed(baseRunSpeed)
 		}
@@ -130,8 +139,8 @@ func (p *Player) Advance(tickTime float64) {
 func (p *Player) Render(target d2interface.Surface) {
 	renderOffset := p.Position.RenderOffset()
 	target.PushTranslation(
-		int((renderOffset.X()-renderOffset.Y())*16),
-		int(((renderOffset.X()+renderOffset.Y())*8)-5),
+		int((renderOffset.X()-renderOffset.Y())*subtileWidth),
+		int(((renderOffset.X()+renderOffset.Y())*subtileHeight)+subtileOffsetY),
 	)
 
 	defer target.Pop()
@@ -238,7 +247,7 @@ func (p *Player) GetVelocity() d2vector.Vector {
 // GetSize returns the current frame size
 func (p *Player) GetSize() (width, height int) {
 	width, height = p.composite.GetSize()
-	// hack: we need to get full size of composite animations, currently only gets legs
+	// todo: we need to get full size of composite animations, currently only gets legs
 	height = (height * 2) - (height / 2)
 
 	return width, height
