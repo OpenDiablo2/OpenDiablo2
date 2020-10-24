@@ -2,6 +2,7 @@ package d2player
 
 import (
 	"fmt"
+	"image/color"
 	"log"
 	"sort"
 
@@ -25,6 +26,9 @@ const (
 	leftPanelStartX   = 90
 	skillPanelOffsetY = 465
 	skillListsLength  = 5 // 0 to 4. 0 - General Skills, 1 to 3 - Class-specific skills(based on the 3 different skill trees), 4 - Other skills
+	tooltipPadLeft    = 3
+	tooltipPadRight   = 3
+	tooltipPadBottom  = 5
 )
 
 // SkillPanel represents a skill select menu popup that is displayed when the player left clicks on his active left/right skill.
@@ -39,8 +43,7 @@ type SkillPanel struct {
 	renderer             d2interface.Renderer
 	ui                   *d2ui.UIManager
 	hoveredSkill         *d2hero.HeroSkill
-	hoverTooltipPos      d2geom.Point
-	//TODO: should be a cached image which contains the skill text + the tooltip background
+	hoverTooltipRect     *d2geom.Rectangle
 	hoverTooltipText *d2ui.Label
 }
 
@@ -132,9 +135,14 @@ func (s *SkillPanel) Render(target d2interface.Surface) error {
 	}
 
 	if s.hoveredSkill != nil {
-		target.PushTranslation(s.hoverTooltipPos.X, s.hoverTooltipPos.Y)
+		target.PushTranslation(s.hoverTooltipRect.Left, s.hoverTooltipRect.Top)
+		target.DrawRect(s.hoverTooltipRect.Width, s.hoverTooltipRect.Height, color.RGBA{0, 0, 0, uint8(200)})
+
+		// the text should be centered horizontally in the tooltip rect
+		target.PushTranslation(s.hoverTooltipRect.Width/2, 0)
 		s.hoverTooltipText.Render(target)
-		target.Pop()
+
+		target.PopN(2)
 	}
 
 	return nil
@@ -326,19 +334,26 @@ func (s *SkillPanel) HandleMouseMove(X int, Y int) bool {
 
 	if previousHovered != s.hoveredSkill && s.hoveredSkill != nil {
 		skillDescription := d2tbl.TranslateString(s.hoveredSkill.ShortKey)
-		//TODO: should generate a cached image for the tooltip instead
 		s.hoverTooltipText.SetText(fmt.Sprintf("%s\n%s", s.hoveredSkill.Skill, skillDescription))
 
 		listRow := s.GetListRowByPos(X, Y)
-		tooltipWidth, _ := s.hoverTooltipText.GetSize()
-		tooltipX := (s.getSkillIdxAtPos(X, Y) * skillIconWidth) + s.getRowStartX(listRow) + (tooltipWidth / 2)
+		textWidth, textHeight := s.hoverTooltipText.GetSize()
+
+		tooltipX := (s.getSkillIdxAtPos(X, Y) * skillIconWidth) + s.getRowStartX(listRow)
+		tooltipWidth := textWidth + tooltipPadLeft + tooltipPadRight
+
 		if tooltipX+tooltipWidth >= screenWidth {
-			tooltipX = screenWidth - (tooltipWidth / 2)
+			tooltipX = screenWidth - tooltipWidth
 		}
 
 		tooltipY := listRow.Rectangle.Top + listRow.Rectangle.Height
+		tooltipHeight := textHeight + tooltipPadBottom
 
-		s.hoverTooltipPos = d2geom.Point{X: tooltipX, Y: tooltipY}
+		s.hoverTooltipRect = &d2geom.Rectangle{
+			Left:   tooltipX,
+			Top:    tooltipY,
+			Width:  tooltipWidth,
+			Height: tooltipHeight}
 	}
 
 	return true
