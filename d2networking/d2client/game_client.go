@@ -280,15 +280,31 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 
 	skillRecord := g.asset.Records.Skill.Details[playerCast.SkillID]
 
-	missileEntity, err := g.createMissileEntity(skillRecord, player, castX, castY)
+	missileEntities, err := g.createMissileEntities(skillRecord, player, castX, castY)
 	if err != nil {
 		return err
 	}
 
+	var summonedNpcEntity *d2mapentity.NPC
+	if skillRecord.Summon != "" {
+		summonedNpcEntity, err = g.createSummonedNpcEntity(skillRecord, int(castX), int(castY))
+
+		if err != nil {
+			return err
+		}
+	}
+
 	player.StartCasting(skillRecord.Anim, func() {
-		if missileEntity != nil {
-			// shoot the missile after the player has finished casting
-			g.MapEngine.AddEntity(missileEntity)
+		if len(missileEntities) > 0 {
+			// shoot the missiles of the skill after the player has finished casting
+			for _, missileEntity := range missileEntities {
+				g.MapEngine.AddEntity(missileEntity)
+			}
+		}
+
+		if summonedNpcEntity != nil {
+			// summon the referenced NPC after the player has finished casting
+			g.MapEngine.AddEntity(summonedNpcEntity)
 		}
 	})
 
@@ -298,13 +314,52 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 	return nil
 }
 
-func (g *GameClient) createMissileEntity(skillRecord *d2records.SkillRecord, player *d2mapentity.Player, castX float64, castY float64) (*d2mapentity.Missile, error) {
-	missileRecord := g.asset.Records.GetMissileByName(skillRecord.Cltmissile)
+func (g *GameClient) createSummonedNpcEntity(skillRecord *d2records.SkillRecord, X, Y int) (*d2mapentity.NPC, error) {
+	monsterStatsRecord := g.asset.Records.Monster.Stats[skillRecord.Summon]
+
+	if monsterStatsRecord == nil {
+		return nil, fmt.Errorf("Cannot cast skill - No monstat entry for \"%s\"", skillRecord.Summon)
+	}
+
+	// TODO: overlay animations for the summon
+	summonedNpcEntity, err := g.MapEngine.NewNPC(X, Y, monsterStatsRecord, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	return summonedNpcEntity, nil
+}
+
+func (g *GameClient) createMissileEntities(skillRecord *d2records.SkillRecord, player *d2mapentity.Player, castX float64, castY float64) ([]*d2mapentity.Missile, error) {
+	missileRecords := []*d2records.MissileRecord{
+		g.asset.Records.GetMissileByName(skillRecord.Cltmissile),
+		g.asset.Records.GetMissileByName(skillRecord.Cltmissilea),
+		g.asset.Records.GetMissileByName(skillRecord.Cltmissileb),
+		g.asset.Records.GetMissileByName(skillRecord.Cltmissilec),
+		g.asset.Records.GetMissileByName(skillRecord.Cltmissiled),
+	}
+
+	missileEntities := make([]*d2mapentity.Missile, 0)
+	for _, missileRecord := range missileRecords {
+		if missileRecord == nil {
+			continue;
+		}
+
+		missileEntity, err := g.createMissileEntity(missileRecord, player, castX, castY)
+		if err != nil {
+			return nil, err
+		}
+
+		missileEntities = append(missileEntities, missileEntity)
+	}
+
+	return missileEntities, nil
+}
+
+func (g *GameClient) createMissileEntity(missileRecord *d2records.MissileRecord, player *d2mapentity.Player, castX, castY float64) (*d2mapentity.Missile, error){
 	if missileRecord == nil {
 		return nil, nil
 	}
-
-	var missileEntity *d2mapentity.Missile
 
 	radians := d2math.GetRadiansBetween(
 		player.Position.X(),

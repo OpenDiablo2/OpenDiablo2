@@ -213,6 +213,7 @@ func (p *Player) IsCasting() bool {
 // StartCasting sets a flag indicating the player is casting a skill and
 // sets the animation mode to the casting animation.
 // This handles all types of skills - melee, ranged, kick, summon, etc.
+// NB: onFinishedCasting is called when the casting animation is >50% complete
 func (p *Player) StartCasting(animMode d2enum.PlayerAnimationMode, onFinishedCasting func()) {
 	// passive skills, auras, etc.
 	if animMode == d2enum.PlayerAnimationModeNone {
