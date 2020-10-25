@@ -380,7 +380,7 @@ func (v *Button) renderFrames(btnSprite *Sprite, btnLayout *ButtonLayout, label 
 				log.Print(err)
 			}
 
-			err = btnSprite.RenderSegmented(v.pressedSurface, xSeg, ySeg, baseFrame+frameOffset)
+			err = btnSprite.RenderSegmented(v.toggledSurface, xSeg, ySeg, baseFrame+frameOffset)
 			if err != nil {
 				fmt.Printf("failed to render button toggledSurface, err: %v\n", err)
 			}
