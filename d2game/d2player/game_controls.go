@@ -3,13 +3,13 @@ package d2player
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"log"
 	"math"
 	"strings"
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player/help"
@@ -39,10 +39,194 @@ type Panel interface {
 const (
 	expBarWidth              = 120.0
 	staminaBarWidth          = 102.0
+	staminaBarHeight         = 19.0
 	globeHeight              = 80
 	globeWidth               = 80
 	hoverLabelOuterPad       = 5
 	mouseBtnActionsTreshhold = 0.25
+)
+
+const (
+	// Since they require special handling, not considering (1) globes, (2) content of the mini panel, (3) belt
+	leftSkill actionableType = iota
+	newStats
+	xp
+	walkRun
+	stamina
+	miniPnl
+	newSkills
+	rightSkill
+	hpGlobe
+	manaGlobe
+	miniPanelCharacter
+	miniPanelInventory
+	miniPanelSkillTree
+	miniPanelAutomap
+	miniPanelMessageLog
+	miniPanelQuestLog
+	miniPanelGameMenu
+)
+
+const (
+	leftSkillX,
+	leftSkillY,
+	leftSkillWidth,
+	leftSkillHeight = 115, 550, 50, 50
+
+	newStatsX,
+	newStatsY,
+	newStatsWidth,
+	newStatsHeight = 206, 563, 30, 30
+
+	xpX,
+	xpY,
+	xpWidth,
+	xpHeight = 253, 560, 125, 5
+
+	walkRunX,
+	walkRunY,
+	walkRunWidth,
+	walkRunHeight = 255, 573, 17, 20
+
+	staminaX,
+	staminaY,
+	staminaWidth,
+	staminaHeight = 273, 573, 105, 20
+
+	miniPnlX,
+	miniPnlY,
+	miniPnlWidth,
+	miniPnlHeight = 393, 563, 12, 23
+
+	newSkillsX,
+	newSkillsY,
+	newSkillsWidth,
+	newSkillsHeight = 562, 563, 30, 30
+
+	rightSkillX,
+	rightSkillY,
+	rightSkillWidth,
+	rightSkillHeight = 634, 550, 50, 50
+
+	hpGlobeX,
+	hpGlobeY,
+	hpGlobeWidth,
+	hpGlobeHeight = 30, 525, 80, 60
+
+	manaGlobeX,
+	manaGlobeY,
+	manaGlobeWidth,
+	manaGlobeHeight = 695, 525, 80, 60
+
+	miniPanelCharacterX,
+	miniPanelCharacterY,
+	miniPanelCharacterWidth,
+	miniPanelCharacterHeight = 324, 528, 22, 26
+
+	miniPanelInventoryX,
+	miniPanelInventoryY,
+	miniPanelInventoryWidth,
+	miniPanelInventoryHeight = 346, 528, 22, 26
+
+	miniPanelSkillTreeX,
+	miniPanelSkillTreeY,
+	miniPanelSkillTreeWidth,
+	miniPanelSkillTreeHeight = 368, 528, 22, 26
+
+	miniPanelAutomapX,
+	miniPanelAutomapY,
+	miniPanelAutomapWidth,
+	miniPanelAutomapHeight = 390, 528, 22, 26
+
+	miniPanelMessageLogX,
+	miniPanelMessageLogY,
+	miniPanelMessageLogWidth,
+	miniPanelMessageLogHeight = 412, 528, 22, 26
+
+	miniPanelQuestLogX,
+	miniPanelQuestLogY,
+	miniPanelQuestLogWidth,
+	miniPanelQuestLogHeight = 434, 528, 22, 26
+
+	miniPanelGameMenuX,
+	miniPanelGameMenuY,
+	miniPanelGameMenuWidth,
+	miniPanelGameMenuHeight = 456, 528, 22, 26
+)
+
+const (
+	hpLabelX = 15
+	hpLabelY = 487
+
+	manaLabelX = 785
+	manaLabelY = 487
+)
+
+const (
+	runButtonX = 255
+	runButtonY = 570
+)
+
+const (
+	frameMenuButton        = 2
+	frameHealthStatus      = 0
+	frameManaStatus        = 1
+	frameNewStatsSelector  = 1
+	frameStamina           = 2
+	framePotions           = 3
+	frameNewSkillsSelector = 4
+	frameRightGlobeHolder  = 5
+	frameRightGlobe        = 1
+)
+
+const (
+	manaStatusOffsetX = 7
+	manaStatusOffsetY = -12
+
+	healthStatusOffsetX = 30
+	healthStatusOffsetY = -13
+
+	globeSpriteOffsetX = 28
+	globeSpriteOffsetY = -5
+
+	staminaBarOffsetX = 273
+	staminaBarOffsetY = 572
+
+	experienceBarOffsetX = 256
+	experienceBarOffsetY = 561
+
+	rightGlobeOffsetX = 8
+	rightGlobeOffsetY = -8
+
+	miniPanelButtonOffsetX = -8
+	miniPanelButtonOffsetY = -16
+)
+
+const (
+	lightBrownAlpha72 = 0xaf8848c8
+	whiteAlpha100     = 0xffffffff
+)
+
+const (
+	zoneChangeTextX = screenWidth / 2
+	zoneChangeTextY = screenHeight / 4
+)
+
+const (
+	menuBottomRectX,
+	menuBottomRectY,
+	menuBottomRectW,
+	menuBottomRectH = 0, 550, 800, 50
+
+	menuLeftRectX,
+	menuLeftRectY,
+	menuLeftRectW,
+	menuLeftRectH = 0, 550, 800, 50
+
+	menuRightRectX,
+	menuRightRectY,
+	menuRightRectW,
+	menuRightRectH = 0, 550, 800, 50
 )
 
 // GameControls represents the game's controls on the screen
@@ -62,6 +246,9 @@ type GameControls struct {
 	heroStatsPanel         *HeroStatsPanel
 	HelpOverlay            *help.Overlay
 	miniPanel              *miniPanel
+	bottomMenuRect         *d2geom.Rectangle
+	leftMenuRect           *d2geom.Rectangle
+	rightMenuRect          *d2geom.Rectangle
 	lastMouseX             int
 	lastMouseY             int
 	missileID              int
@@ -101,28 +288,8 @@ type SkillResource struct {
 	SkillIcon         *d2ui.Sprite
 }
 
-const (
-	// Since they require special handling, not considering (1) globes, (2) content of the mini panel, (3) belt
-	leftSkill actionableType = iota
-	newStats
-	xp
-	walkRun
-	stamina
-	miniPnl
-	newSkills
-	rightSkill
-	hpGlobe
-	manaGlobe
-	miniPanelCharacter
-	miniPanelInventory
-	miniPanelSkillTree
-	miniPanelAutomap
-	miniPanelMessageLog
-	miniPanelQuestLog
-	miniPanelGameMenu
-)
-
 // NewGameControls creates a GameControls instance and returns a pointer to it
+// nolint:funlen // doesn't make sense to split this up
 func NewGameControls(
 	asset *d2asset.AssetManager,
 	renderer d2interface.Renderer,
@@ -137,7 +304,6 @@ func NewGameControls(
 
 	isSinglePlayer bool,
 ) (*GameControls, error) {
-
 	zoneLabel := ui.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
 	zoneLabel.Alignment = d2gui.HorizontalAlignCenter
 
@@ -172,8 +338,10 @@ func NewGameControls(
 
 	inventoryRecord := asset.Records.Layout.Inventory[inventoryRecordKey]
 
+	const blackAlpha50percent = 0x0000007f
+
 	hoverLabel := nameLabel
-	hoverLabel.SetBackgroundColor(color.RGBA{0, 0, 0, uint8(128)})
+	hoverLabel.SetBackgroundColor(d2util.Color(blackAlpha50percent))
 
 	globeStatsLabel := hpManaStatsLabel
 
@@ -201,32 +369,134 @@ func NewGameControls(
 		nameLabel:        hoverLabel,
 		zoneChangeText:   zoneLabel,
 		hpManaStatsLabel: globeStatsLabel,
+		bottomMenuRect: &d2geom.Rectangle{
+			Left:   menuBottomRectX,
+			Top:    menuBottomRectY,
+			Width:  menuBottomRectW,
+			Height: menuBottomRectH,
+		},
+		leftMenuRect: &d2geom.Rectangle{
+			Left:   menuLeftRectX,
+			Top:    menuLeftRectY,
+			Width:  menuLeftRectW,
+			Height: menuLeftRectH,
+		},
+		rightMenuRect: &d2geom.Rectangle{
+			Left:   menuRightRectX,
+			Top:    menuRightRectY,
+			Width:  menuRightRectW,
+			Height: menuRightRectH,
+		},
 		actionableRegions: []actionableRegion{
-			{leftSkill, d2geom.Rectangle{Left: 115, Top: 550, Width: 50, Height: 50}},
-			{newStats, d2geom.Rectangle{Left: 206, Top: 563, Width: 30, Height: 30}},
-			{xp, d2geom.Rectangle{Left: 253, Top: 560, Width: 125, Height: 5}},
-			{walkRun, d2geom.Rectangle{Left: 255, Top: 573, Width: 17, Height: 20}},
-			{stamina, d2geom.Rectangle{Left: 273, Top: 573, Width: 105, Height: 20}},
-			{miniPnl, d2geom.Rectangle{Left: 393, Top: 563, Width: 12, Height: 23}},
-			{newSkills, d2geom.Rectangle{Left: 562, Top: 563, Width: 30, Height: 30}},
-			{rightSkill, d2geom.Rectangle{Left: 634, Top: 550, Width: 50, Height: 50}},
-			{hpGlobe, d2geom.Rectangle{Left: 30, Top: 525, Width: 80, Height: 60}},
-			{manaGlobe, d2geom.Rectangle{Left: 695, Top: 525, Width: 80, Height: 60}},
-			{miniPanelCharacter, d2geom.Rectangle{Left: 324, Top: 528, Width: 22, Height: 26}},
-			{miniPanelInventory, d2geom.Rectangle{Left: 346, Top: 528, Width: 22, Height: 26}},
-			{miniPanelSkillTree, d2geom.Rectangle{Left: 368, Top: 528, Width: 22, Height: 26}},
-			{miniPanelAutomap, d2geom.Rectangle{Left: 390, Top: 528, Width: 22, Height: 26}},
-			{miniPanelMessageLog, d2geom.Rectangle{Left: 412, Top: 528, Width: 22, Height: 26}},
-			{miniPanelQuestLog, d2geom.Rectangle{Left: 434, Top: 528, Width: 22, Height: 26}},
-			{miniPanelGameMenu, d2geom.Rectangle{Left: 456, Top: 528, Width: 22, Height: 26}},
+			{leftSkill, d2geom.Rectangle{
+				Left:   leftSkillX,
+				Top:    leftSkillY,
+				Width:  leftSkillWidth,
+				Height: leftSkillHeight,
+			}},
+			{newStats, d2geom.Rectangle{
+				Left:   newStatsX,
+				Top:    newStatsY,
+				Width:  newStatsWidth,
+				Height: newStatsHeight,
+			}},
+			{xp, d2geom.Rectangle{
+				Left:   xpX,
+				Top:    xpY,
+				Width:  xpWidth,
+				Height: xpHeight,
+			}},
+			{walkRun, d2geom.Rectangle{
+				Left:   walkRunX,
+				Top:    walkRunY,
+				Width:  walkRunWidth,
+				Height: walkRunHeight,
+			}},
+			{stamina, d2geom.Rectangle{
+				Left:   staminaX,
+				Top:    staminaY,
+				Width:  staminaWidth,
+				Height: staminaHeight,
+			}},
+			{miniPnl, d2geom.Rectangle{
+				Left:   miniPnlX,
+				Top:    miniPnlY,
+				Width:  miniPnlWidth,
+				Height: miniPnlHeight,
+			}},
+			{newSkills, d2geom.Rectangle{
+				Left:   newSkillsX,
+				Top:    newSkillsY,
+				Width:  newSkillsWidth,
+				Height: newSkillsHeight,
+			}},
+			{rightSkill, d2geom.Rectangle{
+				Left:   rightSkillX,
+				Top:    rightSkillY,
+				Width:  rightSkillWidth,
+				Height: rightSkillHeight,
+			}},
+			{hpGlobe, d2geom.Rectangle{
+				Left:   hpGlobeX,
+				Top:    hpGlobeY,
+				Width:  hpGlobeWidth,
+				Height: hpGlobeHeight,
+			}},
+			{manaGlobe, d2geom.Rectangle{
+				Left:   manaGlobeX,
+				Top:    manaGlobeY,
+				Width:  manaGlobeWidth,
+				Height: manaGlobeHeight,
+			}},
+			{miniPanelCharacter, d2geom.Rectangle{
+				Left:   miniPanelCharacterX,
+				Top:    miniPanelCharacterY,
+				Width:  miniPanelCharacterWidth,
+				Height: miniPanelCharacterHeight,
+			}},
+			{miniPanelInventory, d2geom.Rectangle{
+				Left:   miniPanelInventoryX,
+				Top:    miniPanelInventoryY,
+				Width:  miniPanelInventoryWidth,
+				Height: miniPanelInventoryHeight,
+			}},
+			{miniPanelSkillTree, d2geom.Rectangle{
+				Left:   miniPanelSkillTreeX,
+				Top:    miniPanelSkillTreeY,
+				Width:  miniPanelSkillTreeWidth,
+				Height: miniPanelSkillTreeHeight,
+			}},
+			{miniPanelAutomap, d2geom.Rectangle{
+				Left:   miniPanelAutomapX,
+				Top:    miniPanelAutomapY,
+				Width:  miniPanelAutomapWidth,
+				Height: miniPanelAutomapHeight,
+			}},
+			{miniPanelMessageLog, d2geom.Rectangle{
+				Left:   miniPanelMessageLogX,
+				Top:    miniPanelMessageLogY,
+				Width:  miniPanelMessageLogWidth,
+				Height: miniPanelMessageLogHeight,
+			}},
+			{miniPanelQuestLog, d2geom.Rectangle{
+				Left:   miniPanelQuestLogX,
+				Top:    miniPanelQuestLogY,
+				Width:  miniPanelQuestLogWidth,
+				Height: miniPanelQuestLogHeight,
+			}},
+			{miniPanelGameMenu, d2geom.Rectangle{
+				Left:   miniPanelGameMenuX,
+				Top:    miniPanelGameMenuY,
+				Width:  miniPanelGameMenuWidth,
+				Height: miniPanelGameMenuHeight,
+			}},
 		},
 		lastLeftBtnActionTime:  0,
 		lastRightBtnActionTime: 0,
 		isSinglePlayer:         isSinglePlayer,
 	}
 
-	gc.bindTerminalCommands(term)
-
+	err = gc.bindTerminalCommands(term)
 	if err != nil {
 		return nil, err
 	}
@@ -279,7 +549,6 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 	switch event.Key() {
 	case d2enum.KeyEscape:
 		g.onEscKey()
-		break
 	case d2enum.KeyI:
 		g.inventory.Toggle()
 		g.updateLayout()
@@ -322,8 +591,10 @@ func (g *GameControls) onEscKey() {
 
 	if g.skillSelectMenu.IsOpen() {
 		g.skillSelectMenu.ClosePanels()
+
 		escHandled = true
 	}
+
 	if g.inventory.IsOpen() {
 		g.inventory.Close()
 
@@ -348,20 +619,34 @@ func (g *GameControls) onEscKey() {
 		escHandled = true
 	}
 
-	if escHandled {
+	switch escHandled {
+	case true:
 		g.updateLayout()
-	} else if g.escapeMenu.isOpen {
-		g.escapeMenu.OnEscKey()
-	} else {
-		g.escapeMenu.open()
+	case false:
+		if g.escapeMenu.IsOpen() {
+			g.escapeMenu.OnEscKey()
+		} else {
+			g.escapeMenu.open()
+		}
 	}
+}
+
+func truncateFloat64(n float64) float64 {
+	const ten = 10.0
+	return float64(int(n*ten)) / ten
 }
 
 // OnMouseButtonRepeat handles repeated mouse clicks
 func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
+	const (
+		screenWidth, screenHeight         = 800, 600
+		halfScreenWidth, halfScreenHeight = screenWidth / 2, screenHeight / 2
+		subtilesPerTile                   = 5
+	)
+
 	px, py := g.mapRenderer.ScreenToWorld(event.X(), event.Y())
-	px = float64(int(px*10)) / 10.0
-	py = float64(int(py*10)) / 10.0
+	px = truncateFloat64(px)
+	py = truncateFloat64(py)
 
 	now := d2util.Now()
 	button := event.Button()
@@ -386,7 +671,9 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 			if event.Button() == d2enum.MouseButtonLeft {
 				camVect := g.mapRenderer.Camera.GetPosition().Vector
 
-				x, y := float64(g.lastMouseX-400)/5, float64(g.lastMouseY-300)/5
+				x := float64(halfScreenWidth) / subtilesPerTile
+				y := float64(halfScreenHeight) / subtilesPerTile
+
 				targetPosition := d2vector.NewPositionTile(x, y)
 				targetPosition.Add(&camVect)
 
@@ -447,12 +734,13 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 		g.lastLeftBtnActionTime = d2util.Now()
 		g.skillSelectMenu.HandleClick(mx, my)
 		g.skillSelectMenu.ClosePanels()
+
 		return false
 	}
 
 	px, py := g.mapRenderer.ScreenToWorld(mx, my)
-	px = float64(int(px*10)) / 10.0
-	py = float64(int(py*10)) / 10.0
+	px = truncateFloat64(px)
+	py = truncateFloat64(py)
 
 	if event.Button() == d2enum.MouseButtonLeft && !g.isInActiveMenusRect(mx, my) && !g.hero.IsCasting() {
 		g.lastLeftBtnActionTime = d2util.Now()
@@ -501,7 +789,7 @@ func (g *GameControls) Load() {
 		log.Print(err)
 	}
 
-	err = g.menuButton.SetCurrentFrame(2)
+	err = g.menuButton.SetCurrentFrame(frameMenuButton)
 	if err != nil {
 		log.Print(err)
 	}
@@ -514,8 +802,17 @@ func (g *GameControls) Load() {
 
 	attackIconID := 2
 
-	g.leftSkillResource = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
-	g.rightSkillResource = &SkillResource{SkillIcon: genericSkillsSprite, IconNumber: attackIconID, SkillResourcePath: d2resource.GenericSkills}
+	g.leftSkillResource = &SkillResource{
+		SkillIcon:         genericSkillsSprite,
+		IconNumber:        attackIconID,
+		SkillResourcePath: d2resource.GenericSkills,
+	}
+
+	g.rightSkillResource = &SkillResource{
+		SkillIcon:         genericSkillsSprite,
+		IconNumber:        attackIconID,
+		SkillResourcePath: d2resource.GenericSkills,
+	}
 
 	g.loadUIButtons()
 
@@ -529,7 +826,7 @@ func (g *GameControls) loadUIButtons() {
 	// Run button
 	g.runButton = g.ui.NewButton(d2ui.ButtonTypeRun, "")
 
-	g.runButton.SetPosition(255, 570)
+	g.runButton.SetPosition(runButtonX, runButtonY)
 	g.runButton.OnActivated(func() { g.onToggleRunButton() })
 
 	if g.hero.IsRunToggled() {
@@ -574,21 +871,15 @@ func (g *GameControls) isRightPanelOpen() bool {
 }
 
 func (g *GameControls) isInActiveMenusRect(px, py int) bool {
-	var bottomMenuRect = d2geom.Rectangle{Left: 0, Top: 550, Width: 800, Height: 50}
-
-	var leftMenuRect = d2geom.Rectangle{Left: 0, Top: 0, Width: 400, Height: 600}
-
-	var rightMenuRect = d2geom.Rectangle{Left: 400, Top: 0, Width: 400, Height: 600}
-
-	if bottomMenuRect.IsInRect(px, py) {
+	if g.bottomMenuRect.IsInRect(px, py) {
 		return true
 	}
 
-	if g.isLeftPanelOpen() && leftMenuRect.IsInRect(px, py) {
+	if g.isLeftPanelOpen() && g.leftMenuRect.IsInRect(px, py) {
 		return true
 	}
 
-	if g.isRightPanelOpen() && rightMenuRect.IsInRect(px, py) {
+	if g.isRightPanelOpen() && g.rightMenuRect.IsInRect(px, py) {
 		return true
 	}
 
@@ -614,6 +905,20 @@ func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 // Render draws the GameControls onto the target
 // TODO: consider caching the panels to single image that is reused.
 func (g *GameControls) Render(target d2interface.Surface) error {
+	g.renderForSelectableEntitiesHovered(target)
+
+	if err := g.renderPanels(target); err != nil {
+		return err
+	}
+
+	if err := g.renderHUD(target); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *GameControls) renderForSelectableEntitiesHovered(target d2interface.Surface) {
 	mx, my := g.lastMouseX, g.lastMouseY
 
 	for entityIdx := range g.mapEngine.Entities() {
@@ -628,7 +933,7 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		entScreenX := int(math.Floor(entScreenXf))
 		entScreenY := int(math.Floor(entScreenYf))
 		entityWidth, entityHeight := entity.GetSize()
-		halfWidth, halfHeight := entityWidth/2, entityHeight/2
+		halfWidth, halfHeight := entityWidth>>1, entityHeight>>1
 		l, r := entScreenX-halfWidth-hoverLabelOuterPad, entScreenX+halfWidth+hoverLabelOuterPad
 		t, b := entScreenY-halfHeight-hoverLabelOuterPad, entScreenY+halfHeight-hoverLabelOuterPad
 		xWithin := (l <= mx) && (r >= mx)
@@ -649,7 +954,9 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 			break
 		}
 	}
+}
 
+func (g *GameControls) renderPanels(target d2interface.Surface) error {
 	if err := g.heroStatsPanel.Render(target); err != nil {
 		return err
 	}
@@ -662,8 +969,13 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		return err
 	}
 
+	return nil
+}
+
+func (g *GameControls) renderHUD(target d2interface.Surface) error {
+	mx, my := g.lastMouseX, g.lastMouseY
 	width, height := target.GetSize()
-	offset := 0
+	offsetX := 0
 
 	// Left globe holder
 	if err := g.mainPanel.SetCurrentFrame(0); err != nil {
@@ -672,7 +984,7 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 
 	w, _ := g.mainPanel.GetCurrentFrameSize()
 
-	g.mainPanel.SetPosition(offset, height)
+	g.mainPanel.SetPosition(offsetX, height)
 
 	if err := g.mainPanel.Render(target); err != nil {
 		return err
@@ -686,24 +998,25 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		return err
 	}
 
-	g.hpManaStatusSprite.SetPosition(offset+30, height-13)
+	g.hpManaStatusSprite.SetPosition(offsetX+healthStatusOffsetX, height+healthStatusOffsetY)
 
-	if err := g.hpManaStatusSprite.RenderSection(target, image.Rect(0, globeHeight-hpBarHeight, globeWidth, globeHeight)); err != nil {
+	healthMaskRect := image.Rect(0, globeHeight-hpBarHeight, globeWidth, globeHeight)
+	if err := g.hpManaStatusSprite.RenderSection(target, healthMaskRect); err != nil {
 		return err
 	}
 
 	// Left globe
-	if err := g.globeSprite.SetCurrentFrame(0); err != nil {
+	if err := g.globeSprite.SetCurrentFrame(frameHealthStatus); err != nil {
 		return err
 	}
 
-	g.globeSprite.SetPosition(offset+28, height-5)
+	g.globeSprite.SetPosition(offsetX+globeSpriteOffsetX, height+globeSpriteOffsetY)
 
 	if err := g.globeSprite.Render(target); err != nil {
 		return err
 	}
 
-	offset += w
+	offsetX += w
 
 	// Left skill
 	newSkillResourcePath := g.getSkillResourceByClass(g.hero.LeftSkill.Charclass)
@@ -718,59 +1031,61 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 
 	w, _ = g.leftSkillResource.SkillIcon.GetCurrentFrameSize()
 
-	g.leftSkillResource.SkillIcon.SetPosition(offset, height)
+	g.leftSkillResource.SkillIcon.SetPosition(offsetX, height)
 
 	if err := g.leftSkillResource.SkillIcon.Render(target); err != nil {
 		return err
 	}
 
-	offset += w
+	offsetX += w
 
 	// New Stats Selector
-	if err := g.mainPanel.SetCurrentFrame(1); err != nil {
+	if err := g.mainPanel.SetCurrentFrame(frameNewStatsSelector); err != nil {
 		return err
 	}
 
 	w, _ = g.mainPanel.GetCurrentFrameSize()
 
-	g.mainPanel.SetPosition(offset, height)
+	g.mainPanel.SetPosition(offsetX, height)
 
 	if err := g.mainPanel.Render(target); err != nil {
 		return err
 	}
 
-	offset += w
+	offsetX += w
 
 	// Stamina
-	if err := g.mainPanel.SetCurrentFrame(2); err != nil {
+	if err := g.mainPanel.SetCurrentFrame(frameStamina); err != nil {
 		return err
 	}
 
 	w, _ = g.mainPanel.GetCurrentFrameSize()
 
-	g.mainPanel.SetPosition(offset, height)
+	g.mainPanel.SetPosition(offsetX, height)
 
 	if err := g.mainPanel.Render(target); err != nil {
 		return err
 	}
 
-	offset += w
+	offsetX += w
 
 	// Stamina status bar
-	target.PushTranslation(273, 572)
+	target.PushTranslation(staminaBarOffsetX, staminaBarOffsetY)
 	target.PushEffect(d2enum.DrawEffectModulate)
 
-	staminaPercent := float64(g.hero.Stats.Stamina) / float64(g.hero.Stats.MaxStamina)
+	staminaPercent := g.hero.Stats.Stamina / float64(g.hero.Stats.MaxStamina)
 
-	target.DrawRect(int(staminaPercent*staminaBarWidth), 19, color.RGBA{R: 175, G: 136, B: 72, A: 200})
-	target.PopN(2)
+	staminaBarColor := d2util.Color(lightBrownAlpha72)
+	target.DrawRect(int(staminaPercent*staminaBarWidth), staminaBarHeight, staminaBarColor)
+	target.Pop()
+	target.Pop()
 
 	// Experience status bar
-	target.PushTranslation(256, 561)
+	target.PushTranslation(experienceBarOffsetX, experienceBarOffsetY)
 
 	expPercent := float64(g.hero.Stats.Experience) / float64(g.hero.Stats.NextLevelExp)
 
-	target.DrawRect(int(expPercent*expBarWidth), 2, color.RGBA{R: 255, G: 255, B: 255, A: 255})
+	target.DrawRect(int(expPercent*expBarWidth), 2, d2util.Color(whiteAlpha100))
 	target.Pop()
 
 	// Center menu button
@@ -783,9 +1098,9 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		return err
 	}
 
-	g.mainPanel.GetCurrentFrameSize()
+	buttonX, buttonY := (width>>1)+miniPanelButtonOffsetX, height+miniPanelButtonOffsetY
 
-	g.menuButton.SetPosition((width/2)-8, height-16)
+	g.menuButton.SetPosition(buttonX, buttonY)
 
 	if err := g.menuButton.Render(target); err != nil {
 		return err
@@ -796,34 +1111,34 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	}
 
 	// Potions
-	if err := g.mainPanel.SetCurrentFrame(3); err != nil {
+	if err := g.mainPanel.SetCurrentFrame(framePotions); err != nil {
 		return err
 	}
 
 	w, _ = g.mainPanel.GetCurrentFrameSize()
 
-	g.mainPanel.SetPosition(offset, height)
+	g.mainPanel.SetPosition(offsetX, height)
 
 	if err := g.mainPanel.Render(target); err != nil {
 		return err
 	}
 
-	offset += w
+	offsetX += w
 
 	// New Skills Selector
-	if err := g.mainPanel.SetCurrentFrame(4); err != nil {
+	if err := g.mainPanel.SetCurrentFrame(frameNewSkillsSelector); err != nil {
 		return err
 	}
 
 	w, _ = g.mainPanel.GetCurrentFrameSize()
 
-	g.mainPanel.SetPosition(offset, height)
+	g.mainPanel.SetPosition(offsetX, height)
 
 	if err := g.mainPanel.Render(target); err != nil {
 		return err
 	}
 
-	offset += w
+	offsetX += w
 
 	// Right skill
 	newSkillResourcePath = g.getSkillResourceByClass(g.hero.RightSkill.Charclass)
@@ -838,22 +1153,22 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 
 	w, _ = g.rightSkillResource.SkillIcon.GetCurrentFrameSize()
 
-	g.rightSkillResource.SkillIcon.SetPosition(offset, height)
+	g.rightSkillResource.SkillIcon.SetPosition(offsetX, height)
 
 	if err := g.rightSkillResource.SkillIcon.Render(target); err != nil {
 		return err
 	}
 
-	offset += w
+	offsetX += w
 
 	// Right globe holder
-	if err := g.mainPanel.SetCurrentFrame(5); err != nil {
+	if err := g.mainPanel.SetCurrentFrame(frameRightGlobeHolder); err != nil {
 		return err
 	}
 
 	g.mainPanel.GetCurrentFrameSize()
 
-	g.mainPanel.SetPosition(offset, height)
+	g.mainPanel.SetPosition(offsetX, height)
 
 	if err := g.mainPanel.Render(target); err != nil {
 		return err
@@ -863,22 +1178,23 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	manaPercent := float64(g.hero.Stats.Mana) / float64(g.hero.Stats.MaxMana)
 	manaBarHeight := int(manaPercent * float64(globeHeight))
 
-	if err := g.hpManaStatusSprite.SetCurrentFrame(1); err != nil {
+	if err := g.hpManaStatusSprite.SetCurrentFrame(frameManaStatus); err != nil {
 		return err
 	}
 
-	g.hpManaStatusSprite.SetPosition(offset+7, height-12)
+	g.hpManaStatusSprite.SetPosition(offsetX+manaStatusOffsetX, height+manaStatusOffsetY)
 
-	if err := g.hpManaStatusSprite.RenderSection(target, image.Rect(0, globeHeight-manaBarHeight, globeWidth, globeHeight)); err != nil {
+	manaMaskRect := image.Rect(0, globeHeight-manaBarHeight, globeWidth, globeHeight)
+	if err := g.hpManaStatusSprite.RenderSection(target, manaMaskRect); err != nil {
 		return err
 	}
 
 	// Right globe
-	if err := g.globeSprite.SetCurrentFrame(1); err != nil {
+	if err := g.globeSprite.SetCurrentFrame(frameRightGlobe); err != nil {
 		return err
 	}
 
-	g.globeSprite.SetPosition(offset+8, height-8)
+	g.globeSprite.SetPosition(offsetX+rightGlobeOffsetX, height+rightGlobeOffsetY)
 
 	if err := g.globeSprite.Render(target); err != nil {
 		return err
@@ -889,33 +1205,33 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	}
 
 	if g.isZoneTextShown {
-		g.zoneChangeText.SetPosition(width/2, height/4)
+		g.zoneChangeText.SetPosition(zoneChangeTextX, zoneChangeTextY)
 		g.zoneChangeText.Render(target)
 	}
 
 	// Create and format Health string from string lookup table.
 	fmtHealth := d2tbl.TranslateString("panelhealth")
-	healthCurr, healthMax := int(g.hero.Stats.Health), int(g.hero.Stats.MaxHealth)
+	healthCurr, healthMax := g.hero.Stats.Health, g.hero.Stats.MaxHealth
 	strPanelHealth := fmt.Sprintf(fmtHealth, healthCurr, healthMax)
 
 	// Display current hp and mana stats hpGlobe or manaGlobe region is clicked
 	if g.actionableRegions[hpGlobe].rect.IsInRect(mx, my) || g.hpStatsIsVisible {
 		g.hpManaStatsLabel.SetText(strPanelHealth)
-		g.hpManaStatsLabel.SetPosition(15, 487)
+		g.hpManaStatsLabel.SetPosition(hpLabelX, hpLabelY)
 		g.hpManaStatsLabel.Render(target)
 	}
 
 	// Create and format Mana string from string lookup table.
 	fmtMana := d2tbl.TranslateString("panelmana")
-	manaCurr, manaMax := int(g.hero.Stats.Mana), int(g.hero.Stats.MaxMana)
+	manaCurr, manaMax := g.hero.Stats.Mana, g.hero.Stats.MaxMana
 	strPanelMana := fmt.Sprintf(fmtMana, manaCurr, manaMax)
 
 	if g.actionableRegions[manaGlobe].rect.IsInRect(mx, my) || g.manaStatsIsVisible {
 		g.hpManaStatsLabel.SetText(strPanelMana)
 		// In case if the mana value gets higher, we need to shift the label to the left a little, hence widthManaLabel.
 		widthManaLabel, _ := g.hpManaStatsLabel.GetSize()
-		xManaLabel := 785 - widthManaLabel
-		g.hpManaStatsLabel.SetPosition(xManaLabel, 487)
+		xManaLabel := manaLabelX - widthManaLabel
+		g.hpManaStatsLabel.SetPosition(xManaLabel, manaLabelY)
 		g.hpManaStatsLabel.Render(target)
 	}
 
@@ -923,107 +1239,126 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		return err
 	}
 
-	// Minipanel is closed and minipanel button is hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPnl].rect.IsInRect(mx, my) {
-		g.nameLabel.SetText(d2tbl.TranslateString("panelcmini")) //"Close Mini Panel"
-		g.nameLabel.SetPosition(399, 544)
+	miniPanelButtons := map[actionableType]string{
+		miniPanelCharacter:  "minipanelchar",
+		miniPanelInventory:  "minipanelinv",
+		miniPanelSkillTree:  "minipaneltree",
+		miniPanelAutomap:    "minipanelautomap",
+		miniPanelMessageLog: "minipanelmessage",
+		miniPanelQuestLog:   "minipanelquest",
+		miniPanelGameMenu:   "minipanelmenubtn",
+	}
+
+	for miniPanelButton, stringTableKey := range miniPanelButtons {
+		if !g.miniPanel.IsOpen() {
+			continue
+		}
+
+		if g.actionableRegions[miniPanelButton].rect.IsInRect(mx, my) {
+			rect := &g.actionableRegions[miniPanelButton].rect
+			g.nameLabel.SetText(d2tbl.TranslateString(stringTableKey))
+
+			halfButtonWidth := rect.Width >> 1
+			halfButtonHeight := rect.Height >> 1
+
+			centerX := rect.Left + halfButtonWidth
+			centerY := rect.Top + halfButtonHeight
+
+			_, labelHeight := g.nameLabel.GetSize()
+
+			labelX := centerX
+			labelY := centerY - halfButtonHeight - labelHeight
+
+			g.nameLabel.SetPosition(labelX, labelY)
+			g.nameLabel.Render(target)
+		}
+	}
+
+	// Display run/walk tooltip when hovered.
+	// Note that whether the player is walking or running, the tooltip is the same in Diablo 2.
+	if g.actionableRegions[walkRun].rect.IsInRect(mx, my) {
+		var stringTableKey string
+
+		if g.hero.IsRunToggled() {
+			stringTableKey = "RunOff"
+		} else {
+			stringTableKey = "RunOn"
+		}
+
+		g.nameLabel.SetText(d2tbl.TranslateString(stringTableKey))
+
+		rect := &g.actionableRegions[walkRun].rect
+
+		halfButtonWidth := rect.Width >> 1
+		halfButtonHeight := rect.Height >> 1
+
+		centerX := rect.Left + halfButtonWidth
+		centerY := rect.Top + halfButtonHeight
+
+		_, labelHeight := g.nameLabel.GetSize()
+
+		labelX := centerX
+		labelY := centerY - halfButtonHeight - labelHeight
+
+		g.nameLabel.SetPosition(labelX, labelY)
 		g.nameLabel.Render(target)
 	}
 
-	// Minipanel is open and minipanel button is hovered.
-	if !g.miniPanel.IsOpen() && g.actionableRegions[miniPnl].rect.IsInRect(mx, my) {
-		g.nameLabel.SetText(d2tbl.TranslateString("panelmini")) //"Open Mini Panel"
-		g.nameLabel.SetPosition(399, 544)
-		g.nameLabel.Render(target)
-	}
-
-	// Display character tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelCharacter].rect.IsInRect(mx, my) {
-		g.nameLabel.SetText(d2tbl.TranslateString("minipanelchar")) //"Character" no hotkey
-		g.nameLabel.SetPosition(340, 510)
-		g.nameLabel.Render(target)
-	}
-
-	// Display inventory tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelInventory].rect.IsInRect(mx, my) {
-		g.nameLabel.SetText(d2tbl.TranslateString("minipanelinv")) //"Inventory" no hotkey
-		g.nameLabel.SetPosition(360, 510)
-		g.nameLabel.Render(target)
-	}
-
-	// Display skill tree tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelSkillTree].rect.IsInRect(mx, my) {
-		g.nameLabel.SetText(d2tbl.TranslateString("minipaneltree")) //"Skill Treee" no hotkey
-		g.nameLabel.SetPosition(380, 510)
-		g.nameLabel.Render(target)
-	}
-
-	// Display automap tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelAutomap].rect.IsInRect(mx, my) {
-		g.nameLabel.SetText(d2tbl.TranslateString("minipanelautomap")) //"Automap" no hotkey
-		g.nameLabel.SetPosition(400, 510)
-		g.nameLabel.Render(target)
-	}
-
-	// Display message log tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelMessageLog].rect.IsInRect(mx, my) {
-		g.nameLabel.SetText(d2tbl.TranslateString("minipanelmessage")) //"Message Log" no hotkey
-		g.nameLabel.SetPosition(420, 510)
-		g.nameLabel.Render(target)
-	}
-
-	// Display quest log tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelQuestLog].rect.IsInRect(mx, my) {
-		g.nameLabel.SetText(d2tbl.TranslateString("minipanelquest")) //"Quest Log" no hotkey
-		g.nameLabel.SetPosition(440, 510)
-		g.nameLabel.Render(target)
-	}
-
-	// Display game menu tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[miniPanelGameMenu].rect.IsInRect(mx, my) {
-		g.nameLabel.SetText(d2tbl.TranslateString("minipanelmenubtn")) //"Game Menu (Esc)" // the (Esc) is hardcoded in.
-		g.nameLabel.SetPosition(460, 510)
-		g.nameLabel.Render(target)
-	}
-
-	// Create and format Stamina string from string lookup table.
-	fmtStamina := d2tbl.TranslateString("panelstamina")
-	staminaCurr, staminaMax := int(g.hero.Stats.Stamina), int(g.hero.Stats.MaxStamina)
-	strPanelStamina := fmt.Sprintf(fmtStamina, staminaCurr, staminaMax)
+	const (
+		staminaExperienceY = 535
+	)
 
 	// Display stamina tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[stamina].rect.IsInRect(mx, my) {
+	if g.actionableRegions[stamina].rect.IsInRect(mx, my) {
+		// Create and format Stamina string from string lookup table.
+		fmtStamina := d2tbl.TranslateString("panelstamina")
+		staminaCurr, staminaMax := int(g.hero.Stats.Stamina), g.hero.Stats.MaxStamina
+		strPanelStamina := fmt.Sprintf(fmtStamina, staminaCurr, staminaMax)
+
 		g.nameLabel.SetText(strPanelStamina)
-		g.nameLabel.SetPosition(320, 535)
+
+		rect := &g.actionableRegions[stamina].rect
+
+		halfButtonWidth := rect.Width >> 1
+		centerX := rect.Left + halfButtonWidth
+
+		_, labelHeight := g.nameLabel.GetSize()
+		halfLabelHeight := labelHeight >> 1
+
+		labelX := centerX
+		labelY := staminaExperienceY - halfLabelHeight
+
+		g.nameLabel.SetPosition(labelX, labelY)
 		g.nameLabel.Render(target)
 	}
-
-	// Display run/walk tooltip when hovered.  Note that whether the player is walking or running, the tooltip is the same in Diablo 2.
-	if g.actionableRegions[walkRun].rect.IsInRect(mx, my) && !g.hero.IsRunToggled() {
-		g.nameLabel.SetText(d2tbl.TranslateString("RunOn")) //"Run" no hotkeys
-		g.nameLabel.SetPosition(263, 563)
-		g.nameLabel.Render(target)
-	}
-
-	if g.actionableRegions[walkRun].rect.IsInRect(mx, my) && g.hero.IsRunToggled() {
-		g.nameLabel.SetText(d2tbl.TranslateString("RunOff")) //"Walk" no hotkeys
-		g.nameLabel.SetPosition(263, 563)
-		g.nameLabel.Render(target)
-	}
-
-	// Create and format Experience string from string lookup table.
-	fmtExp := d2tbl.TranslateString("panelexp")
-	// The English string for "panelexp" is "Experience: %u / %u", however %u doesn't translate well. So
-	// we need to rewrite %u into a formatable Go verb. %d is used in other strings, so we go with that,
-	// keeping in mind that %u likely referred to an unsigned integer.
-	fmtExp = strings.ReplaceAll(fmtExp, "%u", "%d")
-	expCurr, expMax := uint(g.hero.Stats.Experience), uint(g.hero.Stats.NextLevelExp)
-	strPanelExp := fmt.Sprintf(fmtExp, expCurr, expMax)
 
 	// Display experience tooltip when hovered.
-	if g.miniPanel.IsOpen() && g.actionableRegions[xp].rect.IsInRect(mx, my) {
+	if g.actionableRegions[xp].rect.IsInRect(mx, my) {
+		// Create and format Experience string from string lookup table.
+		fmtExp := d2tbl.TranslateString("panelexp")
+
+		// The English string for "panelexp" is "Experience: %u / %u", however %u doesn't
+		// translate well. So we need to rewrite %u into a formatable Go verb. %d is used in other
+		// strings, so we go with that, keeping in mind that %u likely referred to
+		// an unsigned integer.
+		fmtExp = strings.ReplaceAll(fmtExp, "%u", "%d")
+
+		expCurr, expMax := uint(g.hero.Stats.Experience), uint(g.hero.Stats.NextLevelExp)
+		strPanelExp := fmt.Sprintf(fmtExp, expCurr, expMax)
+
 		g.nameLabel.SetText(strPanelExp)
-		g.nameLabel.SetPosition(255, 535)
+		rect := &g.actionableRegions[stamina].rect
+
+		halfButtonWidth := rect.Width >> 1
+		centerX := rect.Left + halfButtonWidth
+
+		_, labelHeight := g.nameLabel.GetSize()
+		halfLabelHeight := labelHeight >> 1
+
+		labelX := centerX
+		labelY := staminaExperienceY - halfLabelHeight
+
+		g.nameLabel.SetPosition(labelX, labelY)
 		g.nameLabel.Render(target)
 	}
 
@@ -1073,121 +1408,173 @@ func (g *GameControls) ToggleManaStats() {
 
 // Handles what to do when an actionable is hovered
 func (g *GameControls) onHoverActionable(item actionableType) {
-	switch item {
-	case leftSkill:
-		return
-	case newStats:
-		return
-	case xp:
-		return
-	case walkRun:
-		return
-	case stamina:
-		return
-	case miniPnl:
-		return
-	case newSkills:
-		return
-	case rightSkill:
-		return
-	case hpGlobe:
-		return
-	case manaGlobe:
-		return
-	case miniPanelCharacter:
-		return
-	case miniPanelInventory:
-		return
-	case miniPanelSkillTree:
-		return
-	case miniPanelAutomap:
-		return
-	case miniPanelMessageLog:
-		return
-	case miniPanelQuestLog:
-		return
-	case miniPanelGameMenu:
-		return
-	default:
-		log.Printf("Unrecognized actionableType(%d) being hovered\n", item)
+	hoverMap := map[actionableType]func(){
+		leftSkill:           func() {},
+		newStats:            func() {},
+		xp:                  func() {},
+		walkRun:             func() {},
+		stamina:             func() {},
+		miniPnl:             func() {},
+		newSkills:           func() {},
+		rightSkill:          func() {},
+		hpGlobe:             func() {},
+		manaGlobe:           func() {},
+		miniPanelCharacter:  func() {},
+		miniPanelInventory:  func() {},
+		miniPanelSkillTree:  func() {},
+		miniPanelAutomap:    func() {},
+		miniPanelMessageLog: func() {},
+		miniPanelQuestLog:   func() {},
+		miniPanelGameMenu:   func() {},
 	}
+
+	onHover, found := hoverMap[item]
+	if !found {
+		log.Printf("Unrecognized actionableType(%d) being hovered\n", item)
+		return
+	}
+
+	onHover()
 }
 
 // Handles what to do when an actionable is clicked
 func (g *GameControls) onClickActionable(item actionableType) {
-	switch item {
-	case leftSkill:
-		g.skillSelectMenu.ToggleLeftPanel()
-	case newStats:
-		log.Println("New Stats Selector Action Pressed")
-	case xp:
-		log.Println("XP Action Pressed")
-	case walkRun:
-		log.Println("Walk/Run Action Pressed")
-	case stamina:
-		log.Println("Stamina Action Pressed")
-	case miniPnl:
-		log.Println("Mini Panel Action Pressed")
+	actionMap := map[actionableType]func(){
+		leftSkill: func() {
+			g.skillSelectMenu.ToggleLeftPanel()
+		},
 
-		g.miniPanel.Toggle()
-	case newSkills:
-		log.Println("New Skills Selector Action Pressed")
-	case rightSkill:
-		g.skillSelectMenu.ToggleRightPanel()
-	case hpGlobe:
-		g.ToggleHpStats()
-		log.Println("HP Globe Pressed")
-	case manaGlobe:
-		g.ToggleManaStats()
-		log.Println("Mana Globe Pressed")
-	case miniPanelCharacter:
-		log.Println("Character button on mini panel is pressed")
+		newStats: func() {
+			log.Println("New Stats Selector Action Pressed")
+		},
 
-		g.heroStatsPanel.Toggle()
-		g.updateLayout()
-	case miniPanelInventory:
-		log.Println("Inventory button on mini panel is pressed")
+		xp: func() {
+			log.Println("XP Action Pressed")
+		},
 
-		g.inventory.Toggle()
-		g.updateLayout()
-	case miniPanelSkillTree:
-		log.Println("Skilltree button on mini panel is pressed")
+		walkRun: func() {
+			log.Println("Walk/Run Action Pressed")
+		},
 
-		g.skilltree.Toggle()
-		g.updateLayout()
-	case miniPanelGameMenu:
-		g.miniPanel.Close()
-		g.escapeMenu.open()
-	default:
-		log.Printf("Unrecognized actionableType(%d) being clicked\n", item)
+		stamina: func() {
+			log.Println("Stamina Action Pressed")
+		},
+
+		miniPnl: func() {
+			log.Println("Mini Panel Action Pressed")
+
+			g.miniPanel.Toggle()
+		},
+
+		newSkills: func() {
+			log.Println("New Skills Selector Action Pressed")
+		},
+
+		rightSkill: func() {
+			g.skillSelectMenu.ToggleRightPanel()
+		},
+
+		hpGlobe: func() {
+			g.ToggleHpStats()
+			log.Println("HP Globe Pressed")
+		},
+
+		manaGlobe: func() {
+			g.ToggleManaStats()
+			log.Println("Mana Globe Pressed")
+		},
+
+		miniPanelCharacter: func() {
+			log.Println("Character button on mini panel is pressed")
+
+			g.heroStatsPanel.Toggle()
+			g.updateLayout()
+		},
+
+		miniPanelInventory: func() {
+			log.Println("Inventory button on mini panel is pressed")
+
+			g.inventory.Toggle()
+			g.updateLayout()
+		},
+
+		miniPanelSkillTree: func() {
+			log.Println("Skilltree button on mini panel is pressed")
+
+			g.skilltree.Toggle()
+			g.updateLayout()
+		},
+
+		miniPanelGameMenu: func() {
+			g.miniPanel.Close()
+			g.escapeMenu.open()
+		},
 	}
+
+	action, found := actionMap[item]
+	if !found {
+		log.Printf("Unrecognized actionableType(%d) being clicked\n", item)
+		return
+	}
+
+	action()
 }
 
-func (g *GameControls) bindTerminalCommands(term d2interface.Terminal) error {
-	err := term.BindAction("freecam", "toggle free camera movement", func() {
+func (g *GameControls) bindFreeCamCommand(term d2interface.Terminal) error {
+	return term.BindAction("freecam", "toggle free camera movement", func() {
 		g.FreeCam = !g.FreeCam
 	})
+}
 
-	if err != nil {
-		return err
-	}
-
-	err = term.BindAction("setleftskill", "set skill to fire on left click", func(id int) {
+func (g *GameControls) bindSetLeftSkillCommand(term d2interface.Terminal) error {
+	setLeftSkill := func(id int) {
 		skillRecord := g.asset.Records.Skill.Details[id]
 		skill, err := g.heroState.CreateHeroSkill(1, skillRecord.Skill)
+
 		if err != nil {
 			term.OutputErrorf("cannot create skill with ID of %d, error: %s", id, err)
 			return
 		}
 
 		g.hero.LeftSkill = skill
-	})
+	}
 
-	err = term.BindAction("learnskills", "learn all skills for the a given class", func(token string) {
-		if len(token) < 3 {
+	return term.BindAction(
+		"setleftskill",
+		"set skill to fire on left click",
+		setLeftSkill,
+	)
+}
+
+func (g *GameControls) bindSetRightSkillCommand(term d2interface.Terminal) error {
+	setRightSkill := func(id int) {
+		skillRecord := g.asset.Records.Skill.Details[id]
+		skill, err := g.heroState.CreateHeroSkill(0, skillRecord.Skill)
+
+		if err != nil {
+			term.OutputErrorf("cannot create skill with ID of %d, error: %s", id, err)
+			return
+		}
+
+		g.hero.RightSkill = skill
+	}
+
+	return term.BindAction(
+		"setrightskill",
+		"set skill to fire on right click",
+		setRightSkill,
+	)
+}
+
+const classTokenLength = 3
+
+func (g *GameControls) bindLearnSkillsCommand(term d2interface.Terminal) error {
+	learnSkills := func(token string) {
+		if len(token) < classTokenLength {
 			term.OutputErrorf("The given class token should be at least 3 characters")
 			return
 		}
+
 		validPrefixes := []string{"ama", "ass", "nec", "bar", "sor", "dru", "pal"}
 		classToken := strings.ToLower(token)
 		tokenPrefix := classToken[0:3]
@@ -1200,26 +1587,36 @@ func (g *GameControls) bindTerminalCommands(term d2interface.Terminal) error {
 		}
 
 		if !isValidToken {
-			term.OutputErrorf("Invalid class, must be a value starting with(case insensitive): %s", strings.Join(validPrefixes, ", "))
+			fmtInvalid := "Invalid class, must be a value starting with(case insensitive): %s"
+			term.OutputErrorf(fmtInvalid, strings.Join(validPrefixes, ", "))
+
 			return
 		}
 
+		var err error
+
 		learnedSkillsCount := 0
+
 		for _, skillDetailRecord := range g.asset.Records.Skill.Details {
-			if skillDetailRecord.Charclass == classToken || skillDetailRecord.Charclass == "" {
-				skill, err := g.heroState.CreateHeroSkill(1, skillDetailRecord.Skill)
-				if skill == nil {
-					continue
-				}
+			if skillDetailRecord.Charclass != classToken && skillDetailRecord.Charclass != "" {
+				continue
+			}
 
-				learnedSkillsCount++
-				g.hero.Skills[skill.ID] = skill
+			skill, skillErr := g.heroState.CreateHeroSkill(1, skillDetailRecord.Skill)
+			if skill == nil {
+				continue
+			}
 
-				if err != nil {
-					break
-				}
+			learnedSkillsCount++
+
+			g.hero.Skills[skill.ID] = skill
+
+			if skillErr != nil {
+				err = skillErr
+				break
 			}
 		}
+
 		g.skillSelectMenu.RegenerateImageCache()
 		log.Printf("Learned %d skills", learnedSkillsCount)
 
@@ -1227,20 +1624,17 @@ func (g *GameControls) bindTerminalCommands(term d2interface.Terminal) error {
 			term.OutputErrorf("cannot learn skill for class, error: %s", err)
 			return
 		}
-	})
+	}
 
-	err = term.BindAction("setrightskill", "set skill to fire on right click", func(id int) {
-		skillRecord := g.asset.Records.Skill.Details[id]
-		skill, err := g.heroState.CreateHeroSkill(0, skillRecord.Skill)
-		if err != nil {
-			term.OutputErrorf("cannot create skill with ID of %d, error: %s", id, err)
-			return
-		}
+	return term.BindAction(
+		"learnskills",
+		"learn all skills for the a given class",
+		learnSkills,
+	)
+}
 
-		g.hero.RightSkill = skill
-	})
-
-	err = term.BindAction("learnskillid", "learn a skill by a given ID", func(id int) {
+func (g *GameControls) bindLearnSkillByIDCommand(term d2interface.Terminal) error {
+	learnByID := func(id int) {
 		skillRecord := g.asset.Records.Skill.Details[id]
 		if skillRecord == nil {
 			term.OutputErrorf("cannot find a skill record for ID: %d", id)
@@ -1248,6 +1642,10 @@ func (g *GameControls) bindTerminalCommands(term d2interface.Terminal) error {
 		}
 
 		skill, err := g.heroState.CreateHeroSkill(1, skillRecord.Skill)
+		if skill == nil {
+			term.OutputErrorf("cannot create skill: %s", skillRecord.Skill)
+			return
+		}
 
 		g.hero.Skills[skill.ID] = skill
 
@@ -1258,34 +1656,55 @@ func (g *GameControls) bindTerminalCommands(term d2interface.Terminal) error {
 
 		g.skillSelectMenu.RegenerateImageCache()
 		log.Println("Learned skill: ", skill.Skill)
-	})
+	}
+
+	return term.BindAction(
+		"learnskillid",
+		"learn a skill by a given ID",
+		learnByID,
+	)
+}
+
+func (g *GameControls) bindTerminalCommands(term d2interface.Terminal) error {
+	if err := g.bindFreeCamCommand(term); err != nil {
+		return err
+	}
+
+	if err := g.bindSetLeftSkillCommand(term); err != nil {
+		return err
+	}
+
+	if err := g.bindSetRightSkillCommand(term); err != nil {
+		return err
+	}
+
+	if err := g.bindLearnSkillsCommand(term); err != nil {
+		return err
+	}
+
+	if err := g.bindLearnSkillByIDCommand(term); err != nil {
+		return err
+	}
 
 	return nil
 }
 
 func (g *GameControls) getSkillResourceByClass(class string) string {
-	resource := ""
+	resourceMap := map[string]string{
+		"":    d2resource.GenericSkills,
+		"bar": d2resource.BarbarianSkills,
+		"nec": d2resource.NecromancerSkills,
+		"pal": d2resource.PaladinSkills,
+		"ass": d2resource.AssassinSkills,
+		"sor": d2resource.SorcererSkills,
+		"ama": d2resource.AmazonSkills,
+		"dru": d2resource.DruidSkills,
+	}
 
-	switch class {
-	case "":
-		resource = d2resource.GenericSkills
-	case "bar":
-		resource = d2resource.BarbarianSkills
-	case "nec":
-		resource = d2resource.NecromancerSkills
-	case "pal":
-		resource = d2resource.PaladinSkills
-	case "ass":
-		resource = d2resource.AssassinSkills
-	case "sor":
-		resource = d2resource.SorcererSkills
-	case "ama":
-		resource = d2resource.AmazonSkills
-	case "dru":
-		resource = d2resource.DruidSkills
-	default:
+	entry, found := resourceMap[class]
+	if !found {
 		log.Fatalf("Unknown class token: '%s'", class)
 	}
 
-	return resource
+	return entry
 }
