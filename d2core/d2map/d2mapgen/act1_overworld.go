@@ -29,7 +29,7 @@ const (
 	mapWidth      = 150
 	mapHeight     = mapWidth
 	mapMargin     = 9
-	autoFileIndex = d2mapstamp.AutoFileIndex
+	autoFileIndex = -1
 )
 
 // GenerateAct1Overworld generates the map and entities for the first town and surrounding area.

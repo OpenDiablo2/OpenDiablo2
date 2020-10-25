@@ -168,7 +168,7 @@ func (s *HeroStatsPanel) Close() {
 	s.onCloseCb()
 }
 
-// Set the callback run on closing the HeroStatsPanel
+// SetOnCloseCb the callback run on closing the HeroStatsPanel
 func (s *HeroStatsPanel) SetOnCloseCb(cb func()) {
 	s.onCloseCb = cb
 }

@@ -8,21 +8,24 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
+type frameOrientation = int
+
+// Frame orientations
+const (
+	FrameLeft frameOrientation = iota
+	FrameRight
+)
+
+// UIFrame is a representation of a ui panel that occupies the left or right half of the screen
+// when it is visible.
 type UIFrame struct {
 	asset            *d2asset.AssetManager
 	uiManager        *UIManager
 	frame            *Sprite
 	originX          int
 	originY          int
-	frameOrientation FrameOrientation
+	frameOrientation frameOrientation
 }
-
-type FrameOrientation = int
-
-const (
-	FrameLeft FrameOrientation = iota
-	FrameRight
-)
 
 // frame indices into dc6 images for panels
 const (
@@ -38,12 +41,11 @@ const (
 	rightFrameBottomLeft
 )
 
-type offsetCalcFn = func(u *UIFrame) (x, y int)
-
+// NewUIFrame creates a new Frame instance
 func NewUIFrame(
 	asset *d2asset.AssetManager,
 	uiManager *UIManager,
-	frameOrientation FrameOrientation,
+	frameOrientation frameOrientation,
 ) *UIFrame {
 	var originX, originY = 0, 0
 
@@ -55,6 +57,7 @@ func NewUIFrame(
 		originX = 400
 		originY = 0
 	}
+
 	frame := &UIFrame{
 		asset:            asset,
 		uiManager:        uiManager,
@@ -63,17 +66,21 @@ func NewUIFrame(
 		originY:          originY,
 	}
 	frame.Load()
+
 	return frame
 }
 
+// Load the necessary frame resources
 func (u *UIFrame) Load() {
 	sprite, err := u.uiManager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
 	}
+
 	u.frame = sprite
 }
 
+// Render the frame to the target surface
 func (u *UIFrame) Render(target d2interface.Surface) error {
 	switch u.frameOrientation {
 	case FrameLeft:
@@ -81,6 +88,7 @@ func (u *UIFrame) Render(target d2interface.Surface) error {
 	case FrameRight:
 		return u.renderRight(target)
 	}
+
 	return nil
 }
 
@@ -200,10 +208,12 @@ func (u *UIFrame) renderRight(target d2interface.Surface) error {
 	return nil
 }
 
+// GetFrameBounds returns the maximum width and height of all frames in sprite.
 func (u *UIFrame) GetFrameBounds() (width, height int) {
 	return u.frame.GetFrameBounds()
 }
 
+// GetFrameCount returns the number of frames in the sprite
 func (u *UIFrame) GetFrameCount() int {
 	return u.frame.GetFrameCount()
 }
