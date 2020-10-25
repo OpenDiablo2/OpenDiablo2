@@ -62,18 +62,18 @@ type ButtonLayout struct {
 	ResourceName     string
 	PaletteName      string
 	FontPath         string
+	ClickableRect    *image.Rectangle
 	XSegments        int
 	YSegments        int
 	BaseFrame        int
 	DisabledFrame    int
-	ClickableRect    *image.Rectangle
 	TextOffset       int
-	Toggleable       bool
-	AllowFrameChange bool
-	HasImage         bool
 	FixedWidth       int
 	FixedHeight      int
 	LabelColor       uint32
+	Toggleable       bool
+	AllowFrameChange bool
+	HasImage         bool
 }
 
 const (
@@ -276,13 +276,14 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 		log.Print(err)
 		return nil
 	}
+
 	if buttonLayout.FixedWidth > 0 {
 		btn.width = buttonLayout.FixedWidth
 	} else {
 		for i := 0; i < buttonLayout.XSegments; i++ {
-			w, _, err := buttonSprite.GetFrameSize(i)
-			if err != nil {
-				log.Print(err)
+			w, _, frameSizeErr := buttonSprite.GetFrameSize(i)
+			if frameSizeErr != nil {
+				log.Print(frameSizeErr)
 				return nil
 			}
 
@@ -294,9 +295,9 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 		btn.height = buttonLayout.FixedHeight
 	} else {
 		for i := 0; i < buttonLayout.YSegments; i++ {
-			_, h, err := buttonSprite.GetFrameSize(i * buttonLayout.YSegments)
-			if err != nil {
-				log.Print(err)
+			_, h, frameSizeErr := buttonSprite.GetFrameSize(i * buttonLayout.YSegments)
+			if frameSizeErr != nil {
+				log.Print(frameSizeErr)
 				return nil
 			}
 
