@@ -99,8 +99,8 @@ func (m *miniPanel) Render(target d2interface.Surface) error {
 	}
 
 	width, height := target.GetSize()
-	halfW, halfH := width>>1, height>>1
-	x, y := halfW+containerOffsetX, halfH+containerOffsetY
+	halfW := width >> 1
+	x, y := halfW+containerOffsetX, height+containerOffsetY
 
 	m.container.SetPosition(x, y)
 
