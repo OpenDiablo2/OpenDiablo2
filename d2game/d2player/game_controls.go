@@ -242,7 +242,7 @@ type GameControls struct {
 	escapeMenu             *EscapeMenu
 	ui                     *d2ui.UIManager
 	inventory              *Inventory
-	skilltree              *SkillTree
+	skilltree              *skillTree
 	heroStatsPanel         *HeroStatsPanel
 	HelpOverlay            *help.Overlay
 	miniPanel              *miniPanel
@@ -362,7 +362,7 @@ func NewGameControls(
 		mapRenderer:      mapRenderer,
 		inventory:        NewInventory(asset, ui, inventoryRecord),
 		skillSelectMenu:  NewSkillSelectMenu(asset, ui, hero),
-		skilltree:        NewSkillTree(hero.Skills, hero.Class, asset, renderer, ui, guiManager),
+		skilltree:        newSkillTree(hero.Skills, hero.Class, asset, renderer, ui, guiManager),
 		heroStatsPanel:   NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
 		HelpOverlay:      help.NewHelpOverlay(asset, renderer, ui, guiManager),
 		miniPanel:        newMiniPanel(asset, ui, isSinglePlayer),
@@ -817,7 +817,7 @@ func (g *GameControls) Load() {
 	g.loadUIButtons()
 
 	g.inventory.Load()
-	g.skilltree.Load()
+	g.skilltree.load()
 	g.heroStatsPanel.Load()
 	g.HelpOverlay.Load()
 }
