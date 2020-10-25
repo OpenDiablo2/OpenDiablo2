@@ -173,7 +173,7 @@ func (v *Label) getAlignOffset(textWidth int) int {
 }
 
 func getColor(token ColorToken) color.Color {
-	// todo this should really come from the PL2 files
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/823
 	colors := map[ColorToken]color.Color{
 		ColorTokenGrey:   d2util.Color(colorGrey100Alpha),
 		ColorTokenWhite:  d2util.Color(colorWhite100Alpha),

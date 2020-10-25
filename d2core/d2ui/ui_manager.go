@@ -17,9 +17,9 @@ type UIManager struct {
 	inputManager  d2interface.InputManager
 	audio         d2interface.AudioProvider
 	widgets       []Widget
-	cursorButtons CursorButton // TODO (carrelld) convert dependent code and remove
-	CursorX       int          // TODO (carrelld) convert dependent code and remove
-	CursorY       int          // TODO (carrelld) convert dependent code and remove
+	cursorButtons CursorButton
+	CursorX       int
+	CursorY       int
 	pressedWidget Widget
 	clickSfx      d2interface.SoundEffect
 }

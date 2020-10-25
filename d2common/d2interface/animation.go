@@ -34,7 +34,6 @@ type Animation interface {
 	SetPlayLoop(loop bool)
 	SetPlaySpeed(playSpeed float64)
 	SetPlayLength(playLength float64)
-	SetPlayLengthMs(playLengthMs int)
 	SetColorMod(colorMod color.Color)
 	GetPlayedCount() int
 	ResetPlayedCount()

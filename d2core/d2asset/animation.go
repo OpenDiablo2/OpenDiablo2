@@ -51,7 +51,7 @@ type Animation struct {
 	lastFrameTime    float64
 	playedCount      int
 	playMode         playMode
-	playLength       float64
+	playLength       float64 // https://github.com/OpenDiablo2/OpenDiablo2/issues/813
 	subStartingFrame int
 	subEndingFrame   int
 	originAtBottom   bool
@@ -367,17 +367,9 @@ func (a *Animation) SetPlaySpeed(playSpeed float64) {
 
 // SetPlayLength sets the Animation's play length in seconds
 func (a *Animation) SetPlayLength(playLength float64) {
-	// TODO refactor to use time.Duration instead of float64
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/813
 	a.playLength = playLength
 	a.lastFrameTime = 0
-}
-
-// SetPlayLengthMs sets the Animation's play length in milliseconds
-func (a *Animation) SetPlayLengthMs(playLengthMs int) {
-	// TODO remove this method
-	const millisecondsPerSecond = 1000.0
-
-	a.SetPlayLength(float64(playLengthMs) / millisecondsPerSecond)
 }
 
 // SetColorMod sets the Animation's color mod

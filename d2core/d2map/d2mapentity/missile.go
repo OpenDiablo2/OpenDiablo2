@@ -43,7 +43,7 @@ func (m *Missile) SetRadians(angle float64, done func()) {
 // Advance is called once per frame and processes a
 // single game tick.
 func (m *Missile) Advance(tickTime float64) {
-	// TODO: collision detection
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/819
 	m.Step(tickTime)
 	m.AnimatedEntity.Advance(tickTime)
 }

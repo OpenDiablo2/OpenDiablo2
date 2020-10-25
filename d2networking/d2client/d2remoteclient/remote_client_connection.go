@@ -50,16 +50,13 @@ func (r *RemoteClientConnection) Open(connectionString, saveFilePath string) err
 		connectionString += ":6669"
 	}
 
-	// TODO: Connect to the server
 	tcpAddress, err := net.ResolveTCPAddr("tcp", connectionString)
 
-	// TODO: Show connection error screen if connection fails
 	if err != nil {
 		return err
 	}
 
 	r.tcpConnection, err = net.DialTCP("tcp", nil, tcpAddress)
-	// TODO: Show connection error screen if connection fails
 	if err != nil {
 		return err
 	}

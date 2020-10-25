@@ -388,7 +388,7 @@ func (f *ItemFactory) resolveDynamicTreasureCode(code string) []*d2records.ItemC
 	stringComponent := getStringComponent(code)
 
 	if stringComponent == goldItemCodeWithMult {
-		// todo need to do something with the numeric component (the gold multiplier)
+		// need to do something with the numeric component (the gold multiplier)
 		stringComponent = goldItemCode
 	}
 

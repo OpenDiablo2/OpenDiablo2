@@ -33,7 +33,7 @@ func (co *CastOverlay) GetVelocity() d2vector.Vector {
 // SetRadians adjusts the entity target based on it's range, rotating it's
 // current destination by the value of angle in radians.
 func (co *CastOverlay) SetRadians(angle float64, done func()) {
-	rads := float64(co.record.Height2) // TODO:
+	rads := float64(co.record.Height2)
 
 	x := co.Position.X() + (rads * math.Cos(angle))
 	y := co.Position.Y() + (rads * math.Sin(angle))

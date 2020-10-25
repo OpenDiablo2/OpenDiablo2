@@ -441,7 +441,8 @@ func (i *Item) generateProperties(pool PropertyPool) {
 		if generated := i.generateSetItemProperties(); generated != nil {
 			props = generated
 		}
-	case PropertyPoolSet: // todo set bonus handling, needs player/equipment context
+	case PropertyPoolSet:
+		// https://github.com/OpenDiablo2/OpenDiablo2/issues/817
 	}
 
 	if props == nil {

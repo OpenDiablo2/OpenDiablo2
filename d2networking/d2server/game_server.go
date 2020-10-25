@@ -52,6 +52,7 @@ type GameServer struct {
 	packetManagerChan chan []byte
 }
 
+// https://github.com/OpenDiablo2/OpenDiablo2/issues/824
 //nolint:gochecknoglobals // currently singleton by design
 var singletonServer *GameServer
 
@@ -82,8 +83,7 @@ func NewGameServer(asset *d2asset.AssetManager, networkServer bool,
 		seed:              time.Now().UnixNano(),
 	}
 
-	// TODO: In order to support dedicated mode we need to load the levels txt and files. Revisit this once this we can
-	//   load files independent of the app.
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/827
 	mapEngine := d2mapengine.CreateMapEngine(asset)
 	mapEngine.SetSeed(gameServer.seed)
 	mapEngine.ResetMap(d2enum.RegionAct1Town, 100, 100)
@@ -105,8 +105,7 @@ func NewGameServer(asset *d2asset.AssetManager, networkServer bool,
 		return val
 	})
 
-	// TODO: Temporary hack to work around local connections. Possible that we can move away from the singleton pattern here
-	// 		but for now this will work.
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/824
 	singletonServer = gameServer
 
 	return gameServer, nil
@@ -245,11 +244,10 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 				log.Printf("Closing connection with %s: did not receive new player connection request...\n", conn.RemoteAddr().String())
 			}
 
-			// TODO: I do not think this error check actually works. Need to retrofit with Errors.Is().
 			if err := g.registerConnection(packet.PacketData, conn); err != nil {
 				switch err {
 				case errServerFull: // Server is currently full and not accepting new connections.
-					// TODO: Need to create a new Server Full packet to return to clients.
+					// https://github.com/OpenDiablo2/OpenDiablo2/issues/828
 					log.Println(err)
 					return
 				case errPlayerAlreadyExists: // Player is already registered and did not disconnection correctly.
@@ -301,7 +299,8 @@ func (g *GameServer) registerConnection(b []byte, conn net.Conn) error {
 	g.connections[client.GetUniqueID()] = client
 
 	// Temporary position hack --------------------------------------------
-	sx, sy := g.mapEngines[0].GetStartPosition() // TODO: Another temporary hack
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/829
+	sx, sy := g.mapEngines[0].GetStartPosition()
 	clientPlayerState := client.GetPlayerState()
 	clientPlayerState.X = sx
 	clientPlayerState.Y = sy
@@ -325,7 +324,8 @@ func (g *GameServer) registerConnection(b []byte, conn net.Conn) error {
 // For more information, see d2networking.d2netpacket.
 func OnClientConnected(client ClientConnection) {
 	// Temporary position hack --------------------------------------------
-	sx, sy := singletonServer.mapEngines[0].GetStartPosition() // TODO: Another temporary hack
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/829
+	sx, sy := singletonServer.mapEngines[0].GetStartPosition()
 	clientPlayerState := client.GetPlayerState()
 	clientPlayerState.X = sx
 	clientPlayerState.Y = sy
@@ -408,15 +408,17 @@ func OnClientDisconnected(client ClientConnection) {
 
 // OnPacketReceived is called by the local client to 'send' a packet to the server.
 func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) error {
+	if singletonServer == nil {
+		return errors.New("singleton server is nil")
+	}
+
 	switch packet.PacketType {
 	case d2netpackettype.MovePlayer:
 		movePacket, err := d2netpacket.UnmarshalMovePlayer(packet.PacketData)
 		if err != nil {
 			return err
 		}
-		// TODO: This needs to be verified on the server (here) before sending to other clients....
-		// TODO: Hacky, this should be updated in realtime ----------------
-		// TODO: Verify player id
+		// https://github.com/OpenDiablo2/OpenDiablo2/issues/830
 		playerState := singletonServer.connections[client.GetUniqueID()].GetPlayerState()
 		playerState.X = movePacket.DestX
 		playerState.Y = movePacket.DestY

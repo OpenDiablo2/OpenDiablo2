@@ -254,7 +254,7 @@ func (p *Player) GetVelocity() d2vector.Vector {
 // GetSize returns the current frame size
 func (p *Player) GetSize() (width, height int) {
 	width, height = p.composite.GetSize()
-	// todo: we need to get full size of composite animations, currently only gets legs
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/820
 	height = (height * 2) - (height / 2)
 
 	return width, height

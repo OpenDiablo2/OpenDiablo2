@@ -9,7 +9,7 @@ import (
 
 // MovePlayerPacket contains a movement command for a specific player entity.
 // It is sent by the server to move a player entity on a client.
-// TODO: Need to handle being on different maps
+// https://github.com/OpenDiablo2/OpenDiablo2/issues/825
 type MovePlayerPacket struct {
 	PlayerID string  `json:"playerId"`
 	StartX   float64 `json:"startX"`

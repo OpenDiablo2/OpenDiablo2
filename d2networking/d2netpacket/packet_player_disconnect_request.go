@@ -13,7 +13,7 @@ import (
 // It is sent by a remote client to close the connection (leave a game).
 type PlayerDisconnectRequestPacket struct {
 	ID          string            `json:"id"`
-	PlayerState *d2hero.HeroState `json:"gameState"` // TODO: remove this? It isn't used.
+	PlayerState *d2hero.HeroState `json:"gameState"`
 }
 
 // CreatePlayerDisconnectRequestPacket returns a NetPacket which defines a

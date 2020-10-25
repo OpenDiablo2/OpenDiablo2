@@ -48,14 +48,14 @@ func (f *HeroStateFactory) CreateHeroStatsState(heroClass d2enum.Hero, classStat
 		MaxHealth:  classStats.InitVit * classStats.LifePerVit,
 		MaxMana:    classStats.InitEne * classStats.ManaPerEne,
 		MaxStamina: classStats.InitStamina,
-		// TODO: chance to hit, defense rating
+		// https://github.com/OpenDiablo2/OpenDiablo2/issues/814
 	}
 
 	result.Mana = result.MaxMana
 	result.Health = result.MaxHealth
 	result.Stamina = float64(result.MaxStamina)
 
-	// TODO: For demonstration purposes (hp, mana, exp, & character stats panel gets updated depending on stats)
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/815
 	result.Health = 50
 	result.Mana = 30
 	result.Experience = 166
