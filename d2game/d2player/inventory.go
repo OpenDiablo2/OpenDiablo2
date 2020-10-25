@@ -26,15 +26,20 @@ const (
 	blackAlpha70 = 0x000000C8
 )
 
+const (
+	invCloseButtonX, invCloseButtonY = 419, 449
+)
+
 // Inventory represents the inventory
 type Inventory struct {
-	asset      *d2asset.AssetManager
-	item       *diablo2item.ItemFactory
-	uiManager  *d2ui.UIManager
-	frame      *d2ui.UIFrame
-	panel      *d2ui.Sprite
-	grid       *ItemGrid
-	hoverLabel *d2ui.Label
+	asset       *d2asset.AssetManager
+	item        *diablo2item.ItemFactory
+	uiManager   *d2ui.UIManager
+	frame       *d2ui.UIFrame
+	panel       *d2ui.Sprite
+	grid        *ItemGrid
+	hoverLabel  *d2ui.Label
+	closeButton *d2ui.Button
 	hoverX     int
 	hoverY     int
 	originX    int
@@ -43,6 +48,7 @@ type Inventory struct {
 	lastMouseY int
 	hovering   bool
 	isOpen     bool
+	onCloseCb  func()
 }
 
 // NewInventory creates an inventory instance and returns a pointer to it
@@ -72,22 +78,39 @@ func (g *Inventory) IsOpen() bool {
 
 // Toggle negates the open state of the inventory
 func (g *Inventory) Toggle() {
-	g.isOpen = !g.isOpen
+	if g.isOpen {
+		g.Close()
+	} else {
+		g.Open()
+	}
 }
 
 // Open opens the inventory
 func (g *Inventory) Open() {
 	g.isOpen = true
+	g.closeButton.SetVisible(true)
 }
 
 // Close closes the inventory
 func (g *Inventory) Close() {
 	g.isOpen = false
+	g.closeButton.SetVisible(false)
+	g.onCloseCb()
+}
+
+// Set the callback run on closing the inventory
+func (g *Inventory) SetOnCloseCb(cb func()) {
+       g.onCloseCb = cb
 }
 
 // Load the resources required by the inventory
 func (g *Inventory) Load() {
 	g.frame = d2ui.NewUIFrame(g.asset, g.uiManager, d2ui.FrameRight)
+
+	g.closeButton = g.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
+	g.closeButton.SetVisible(false)
+	g.closeButton.SetPosition(invCloseButtonX, invCloseButtonY)
+	g.closeButton.OnActivated(func() { g.Close() })
 
 	g.panel, _ = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 

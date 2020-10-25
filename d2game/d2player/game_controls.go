@@ -496,6 +496,11 @@ func NewGameControls(
 		isSinglePlayer:         isSinglePlayer,
 	}
 
+	closeCb := func() { gc.updateLayout() }
+	gc.heroStatsPanel.SetOnCloseCb(closeCb)
+	gc.inventory.SetOnCloseCb(closeCb)
+	gc.skilltree.SetOnCloseCb(closeCb)
+
 	err = gc.bindTerminalCommands(term)
 	if err != nil {
 		return nil, err
