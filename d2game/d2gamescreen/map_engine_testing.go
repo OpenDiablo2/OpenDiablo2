@@ -20,6 +20,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 )
 
+const (
+	subtilesPerTile = 5
+)
+
 type regionSpec struct {
 	regionType       d2enum.RegionIdType
 	startPresetIndex int
@@ -226,61 +230,74 @@ func (met *MapEngineTest) OnUnload() error {
 	return nil
 }
 
+const (
+	lineSmallOffsetY  = 12
+	lineNormalOffsetY = 16
+	lineSmallIndentX  = 10
+	lineNormalIndentX = 15
+	lineBigIndentX    = 170
+)
+
 // Render renders the Map Engine Test screen
 func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 	met.mapRenderer.Render(screen)
 
-	screen.PushTranslation(0, 16)
+	screen.PushTranslation(0, lineNormalOffsetY)
 	screen.DrawTextf("N - next region, P - previous region")
-	screen.PushTranslation(0, 16)
+	screen.PushTranslation(0, lineNormalOffsetY)
 	screen.DrawTextf("Shift+N - next preset, Shift+P - previous preset")
-	screen.PushTranslation(0, 16)
+	screen.PushTranslation(0, lineNormalOffsetY)
 	screen.DrawTextf("Ctrl+N - next file, Ctrl+P - previous file")
-	screen.PushTranslation(0, 16)
+	screen.PushTranslation(0, lineNormalOffsetY)
 	screen.DrawTextf("Left click selects tile, right click unselects")
-	screen.PushTranslation(0, 16)
+	screen.PushTranslation(0, lineNormalOffsetY)
 
 	popN := 5
 
 	if met.selectedTile == nil {
-		screen.PushTranslation(15, 16)
+		screen.PushTranslation(lineNormalIndentX, lineNormalOffsetY)
 		popN++
 
 		screen.DrawTextf("No tile selected")
 	} else {
-		screen.PushTranslation(10, 32)
+		screen.PushTranslation(lineSmallIndentX, lineNormalOffsetY)
+		screen.PushTranslation(0, lineNormalOffsetY) // extra vspace
+
 		screen.DrawTextf("Tile %v,%v", met.selX, met.selY)
 
-		screen.PushTranslation(15, 16)
+		screen.PushTranslation(lineNormalIndentX, lineNormalOffsetY)
 		screen.DrawTextf("Walls")
+
 		tpop := 0
 		for _, wall := range met.selectedTile.Components.Walls {
-			screen.PushTranslation(0, 12)
+			screen.PushTranslation(0, lineSmallOffsetY)
 			tpop++
 			tmpString := fmt.Sprintf("%#v", wall)
 			stringSlice := strings.Split(tmpString, " ")
 			tmp2 := strings.Split(stringSlice[0], "{")
 			stringSlice[0] = tmp2[1]
 			for _, str := range stringSlice {
-				screen.PushTranslation(0, 12)
+				screen.PushTranslation(0, lineSmallOffsetY)
 				tpop++
 				screen.DrawTextf(str)
 			}
 		}
+
 		screen.PopN(tpop)
 
-		screen.PushTranslation(170, 0)
+		screen.PushTranslation(lineBigIndentX, 0)
 		screen.DrawTextf("Floors")
+
 		tpop = 0
 		for _, floor := range met.selectedTile.Components.Floors {
-			screen.PushTranslation(0, 12)
+			screen.PushTranslation(0, lineSmallOffsetY)
 			tpop++
 			tmpString := fmt.Sprintf("%#v", floor)
 			stringSlice := strings.Split(tmpString, " ")
 			tmp2 := strings.Split(stringSlice[0], "{")
 			stringSlice[0] = tmp2[1]
 			for _, str := range stringSlice {
-				screen.PushTranslation(0, 12)
+				screen.PushTranslation(0, lineSmallOffsetY)
 				tpop++
 				screen.DrawTextf(str)
 			}
@@ -288,17 +305,17 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 		screen.PopN(tpop)
 
 		tpop = 0
-		screen.PushTranslation(170, 0)
+		screen.PushTranslation(lineBigIndentX, 0)
 		screen.DrawTextf("Shadows")
 		for _, shadow := range met.selectedTile.Components.Shadows {
-			screen.PushTranslation(0, 12)
+			screen.PushTranslation(0, lineSmallOffsetY)
 			tpop++
 			tmpString := fmt.Sprintf("%#v", shadow)
 			stringSlice := strings.Split(tmpString, " ")
 			tmp2 := strings.Split(stringSlice[0], "{")
 			stringSlice[0] = tmp2[1]
 			for _, str := range stringSlice {
-				screen.PushTranslation(0, 12)
+				screen.PushTranslation(0, lineSmallOffsetY)
 				tpop++
 				screen.DrawTextf(str)
 			}
@@ -306,17 +323,17 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 		screen.PopN(tpop)
 
 		tpop = 0
-		screen.PushTranslation(170, 0)
+		screen.PushTranslation(lineBigIndentX, 0)
 		screen.DrawTextf("Substitutions")
 		for _, subst := range met.selectedTile.Components.Substitutions {
-			screen.PushTranslation(0, 12)
+			screen.PushTranslation(0, lineSmallOffsetY)
 			tpop++
 			tmpString := fmt.Sprintf("%#v", subst)
 			stringSlice := strings.Split(tmpString, " ")
 			tmp2 := strings.Split(stringSlice[0], "{")
 			stringSlice[0] = tmp2[1]
 			for _, str := range stringSlice {
-				screen.PushTranslation(0, 12)
+				screen.PushTranslation(0, lineSmallOffsetY)
 				tpop++
 				screen.DrawTextf(str)
 			}
@@ -376,7 +393,11 @@ func (met *MapEngineTest) handleLeftClick() {
 
 	camVect := met.mapRenderer.Camera.GetPosition().Vector
 
-	x, y := float64(met.lastMouseX-400)/5, float64(met.lastMouseY-300)/5
+	halfScreenWidth, halfScreenHeight := screenWidth>>1, screenHeight>>1
+
+	x := float64(met.lastMouseX-halfScreenWidth) / subtilesPerTile
+	y := float64(met.lastMouseY-halfScreenHeight) / subtilesPerTile
+
 	targetPosition := d2vector.NewPositionTile(x, y)
 	targetPosition.Add(&camVect)
 
