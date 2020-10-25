@@ -235,7 +235,7 @@ const (
 	lineNormalOffsetY = 16
 	lineSmallIndentX  = 10
 	lineNormalIndentX = 15
-	lineBigIndentX    = 170
+	lineBigIndentX    = 170 // distance between text columns
 )
 
 // Render renders the Map Engine Test screen
@@ -243,29 +243,44 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 	met.mapRenderer.Render(screen)
 
 	screen.PushTranslation(0, lineNormalOffsetY)
-	screen.DrawTextf("N - next region, P - previous region")
-	screen.PushTranslation(0, lineNormalOffsetY)
-	screen.DrawTextf("Shift+N - next preset, Shift+P - previous preset")
-	screen.PushTranslation(0, lineNormalOffsetY)
-	screen.DrawTextf("Ctrl+N - next file, Ctrl+P - previous file")
-	screen.PushTranslation(0, lineNormalOffsetY)
-	screen.DrawTextf("Left click selects tile, right click unselects")
-	screen.PushTranslation(0, lineNormalOffsetY)
+	defer screen.Pop()
 
-	popN := 5
+	screen.DrawTextf("N - next region, P - previous region")
+
+	screen.PushTranslation(0, lineNormalOffsetY)
+	defer screen.Pop()
+
+	screen.DrawTextf("Shift+N - next preset, Shift+P - previous preset")
+
+	screen.PushTranslation(0, lineNormalOffsetY)
+	defer screen.Pop()
+
+	screen.DrawTextf("Ctrl+N - next file, Ctrl+P - previous file")
+
+	screen.PushTranslation(0, lineNormalOffsetY)
+	defer screen.Pop()
+
+	screen.DrawTextf("Left click selects tile, right click unselects")
+
+	screen.PushTranslation(0, lineNormalOffsetY)
+	defer screen.Pop()
 
 	if met.selectedTile == nil {
 		screen.PushTranslation(lineNormalIndentX, lineNormalOffsetY)
-		popN++
+		defer screen.Pop()
 
 		screen.DrawTextf("No tile selected")
 	} else {
 		screen.PushTranslation(lineSmallIndentX, lineNormalOffsetY)
+		defer screen.Pop()
 		screen.PushTranslation(0, lineNormalOffsetY) // extra vspace
+		defer screen.Pop()
 
 		screen.DrawTextf("Tile %v,%v", met.selX, met.selY)
 
 		screen.PushTranslation(lineNormalIndentX, lineNormalOffsetY)
+		defer screen.Pop()
+
 		screen.DrawTextf("Walls")
 
 		tpop := 0
@@ -286,6 +301,7 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 		screen.PopN(tpop)
 
 		screen.PushTranslation(lineBigIndentX, 0)
+		defer screen.Pop()
 		screen.DrawTextf("Floors")
 
 		tpop = 0
@@ -304,9 +320,11 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 		}
 		screen.PopN(tpop)
 
-		tpop = 0
 		screen.PushTranslation(lineBigIndentX, 0)
+		defer screen.Pop()
 		screen.DrawTextf("Shadows")
+
+		tpop = 0
 		for _, shadow := range met.selectedTile.Components.Shadows {
 			screen.PushTranslation(0, lineSmallOffsetY)
 			tpop++
@@ -322,9 +340,11 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 		}
 		screen.PopN(tpop)
 
-		tpop = 0
 		screen.PushTranslation(lineBigIndentX, 0)
+		defer screen.Pop()
 		screen.DrawTextf("Substitutions")
+
+		tpop = 0
 		for _, subst := range met.selectedTile.Components.Substitutions {
 			screen.PushTranslation(0, lineSmallOffsetY)
 			tpop++
@@ -339,11 +359,7 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 			}
 		}
 		screen.PopN(tpop)
-
-		popN += 5
 	}
-
-	screen.PopN(popN)
 
 	return nil
 }
