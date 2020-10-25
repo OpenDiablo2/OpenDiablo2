@@ -221,12 +221,12 @@ const (
 	menuLeftRectX,
 	menuLeftRectY,
 	menuLeftRectW,
-	menuLeftRectH = 0, 550, 800, 50
+	menuLeftRectH = 0, 0, 400, 600
 
 	menuRightRectX,
 	menuRightRectY,
 	menuRightRectW,
-	menuRightRectH = 0, 550, 800, 50
+	menuRightRectH = 400, 0, 400, 600
 )
 
 // GameControls represents the game's controls on the screen
@@ -493,6 +493,11 @@ func NewGameControls(
 		lastRightBtnActionTime: 0,
 		isSinglePlayer:         isSinglePlayer,
 	}
+
+	closeCb := func() { gc.updateLayout() }
+	gc.heroStatsPanel.SetOnCloseCb(closeCb)
+	gc.inventory.SetOnCloseCb(closeCb)
+	gc.skilltree.SetOnCloseCb(closeCb)
 
 	err = gc.bindTerminalCommands(term)
 	if err != nil {
