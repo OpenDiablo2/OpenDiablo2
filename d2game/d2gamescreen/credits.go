@@ -63,7 +63,6 @@ func CreateCredits(navigator d2interface.Navigator, asset *d2asset.AssetManager,
 }
 
 // LoadContributors loads the contributors data from file
-// TODO: use markdown for file and convert it to the suitable format
 func (v *Credits) LoadContributors() []string {
 	file, err := os.Open(path.Join("./", "CONTRIBUTORS"))
 	if err != nil || file == nil {

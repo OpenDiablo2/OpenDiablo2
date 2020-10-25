@@ -88,7 +88,6 @@ func (s *SkillPanel) Close() {
 // IsInRect returns whether the X Y coordinates are in some of the list rows of the panel.
 func (s *SkillPanel) IsInRect(x, y int) bool {
 	for _, listRow := range s.ListRows {
-		// TODO: investigate why listRow can be nil
 		if listRow != nil && listRow.IsInRect(x, y) {
 			return true
 		}

@@ -221,19 +221,19 @@ const (
 	menuLeftRectX,
 	menuLeftRectY,
 	menuLeftRectW,
-	menuLeftRectH = 0, 550, 800, 50
+	menuLeftRectH = 0, 0, 400, 600
 
 	menuRightRectX,
 	menuRightRectY,
 	menuRightRectW,
-	menuRightRectH = 0, 550, 800, 50
+	menuRightRectH = 400, 0, 400, 600
 )
 
 // GameControls represents the game's controls on the screen
 type GameControls struct {
 	actionableRegions      []actionableRegion
 	asset                  *d2asset.AssetManager
-	renderer               d2interface.Renderer // TODO: This shouldn't be a dependency
+	renderer               d2interface.Renderer // https://github.com/OpenDiablo2/OpenDiablo2/issues/798
 	inputListener          inputCallbackListener
 	hero                   *d2mapentity.Player
 	heroState              *d2hero.HeroStateFactory
@@ -251,7 +251,6 @@ type GameControls struct {
 	rightMenuRect          *d2geom.Rectangle
 	lastMouseX             int
 	lastMouseY             int
-	missileID              int
 	globeSprite            *d2ui.Sprite
 	hpManaStatusSprite     *d2ui.Sprite
 	mainPanel              *d2ui.Sprite
@@ -314,7 +313,6 @@ func NewGameControls(
 	hpManaStatsLabel := ui.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	hpManaStatsLabel.Alignment = d2gui.HorizontalAlignLeft
 
-	// TODO make this depend on the hero type to respect inventory.txt
 	var inventoryRecordKey string
 
 	switch hero.Class {
@@ -495,6 +493,11 @@ func NewGameControls(
 		lastRightBtnActionTime: 0,
 		isSinglePlayer:         isSinglePlayer,
 	}
+
+	closeCb := func() { gc.updateLayout() }
+	gc.heroStatsPanel.SetOnCloseCb(closeCb)
+	gc.inventory.SetOnCloseCb(closeCb)
+	gc.skilltree.SetOnCloseCb(closeCb)
 
 	err = gc.bindTerminalCommands(term)
 	if err != nil {
@@ -794,7 +797,7 @@ func (g *GameControls) Load() {
 		log.Print(err)
 	}
 
-	// TODO: temporarily hardcoded to Attack, should come from saved state for hero
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/799
 	genericSkillsSprite, err := g.ui.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
@@ -837,7 +840,8 @@ func (g *GameControls) loadUIButtons() {
 func (g *GameControls) onToggleRunButton() {
 	g.runButton.Toggle()
 	g.hero.ToggleRunWalk()
-	// TODO: change the running menu icon
+
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/800
 	g.hero.SetIsRunning(g.hero.IsRunToggled())
 }
 
@@ -862,7 +866,7 @@ func (g *GameControls) updateLayout() {
 }
 
 func (g *GameControls) isLeftPanelOpen() bool {
-	// TODO: add quest log panel
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/801
 	return g.heroStatsPanel.IsOpen()
 }
 
@@ -903,7 +907,6 @@ func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 }
 
 // Render draws the GameControls onto the target
-// TODO: consider caching the panels to single image that is reused.
 func (g *GameControls) Render(target d2interface.Surface) error {
 	g.renderForSelectableEntitiesHovered(target)
 

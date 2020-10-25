@@ -53,6 +53,10 @@ const (
 	labelResPoisLine2X, labelResPoisLine2Y   = 310, 477
 )
 
+const (
+	heroStatsCloseButtonX, heroStatsCloseButtonY = 208, 453
+)
+
 // PanelText represents text on the panel
 type PanelText struct {
 	X           int
@@ -91,6 +95,8 @@ type HeroStatsPanel struct {
 	renderer             d2interface.Renderer
 	staticMenuImageCache *d2interface.Surface
 	labels               *StatsPanelLabels
+	closeButton          *d2ui.Button
+	onCloseCb            func()
 
 	originX int
 	originY int
@@ -122,6 +128,11 @@ func (s *HeroStatsPanel) Load() {
 
 	s.frame = d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameLeft)
 
+	s.closeButton = s.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
+	s.closeButton.SetVisible(false)
+	s.closeButton.SetPosition(heroStatsCloseButtonX, heroStatsCloseButtonY)
+	s.closeButton.OnActivated(func() { s.Close() })
+
 	s.panel, err = s.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
@@ -137,17 +148,29 @@ func (s *HeroStatsPanel) IsOpen() bool {
 
 // Toggle toggles the visibility of the hero status panel
 func (s *HeroStatsPanel) Toggle() {
-	s.isOpen = !s.isOpen
+	if s.isOpen {
+		s.Close()
+	} else {
+		s.Open()
+	}
 }
 
 // Open opens the hero status panel
 func (s *HeroStatsPanel) Open() {
 	s.isOpen = true
+	s.closeButton.SetVisible(true)
 }
 
 // Close closed the hero status panel
 func (s *HeroStatsPanel) Close() {
 	s.isOpen = false
+	s.closeButton.SetVisible(false)
+	s.onCloseCb()
+}
+
+// Set the callback run on closing the HeroStatsPanel
+func (s *HeroStatsPanel) SetOnCloseCb(cb func()) {
+	s.onCloseCb = cb
 }
 
 // Render renders the hero status panel

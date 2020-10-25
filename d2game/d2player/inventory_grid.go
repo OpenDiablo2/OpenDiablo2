@@ -21,6 +21,10 @@ import (
 // for each row in inventory, we need to account for this padding
 const cellPadding = 1
 
+const (
+	fmtFlippyFile = "/data/global/items/inv%s.dc6"
+)
+
 // InventoryItem is an interface for an items that can be placed in the inventory grid
 type InventoryItem interface {
 	InventoryGridSize() (width int, height int)
@@ -127,8 +131,7 @@ func (g *ItemGrid) loadItem(item InventoryItem) {
 	if _, exists := g.sprites[item.GetItemCode()]; !exists {
 		var itemSprite *d2ui.Sprite
 
-		// TODO: Put the pattern into D2Shared
-		imgPath := fmt.Sprintf("/data/global/items/inv%s.dc6", item.GetItemCode())
+		imgPath := fmt.Sprintf(fmtFlippyFile, item.GetItemCode())
 
 		itemSprite, err := g.uiManager.NewSprite(imgPath, d2resource.PaletteSky)
 		if err != nil {

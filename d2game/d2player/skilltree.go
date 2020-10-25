@@ -27,6 +27,11 @@ const (
 	skillIconYOff  = 59
 	skillIconDistX = 69
 	skillIconDistY = 68
+
+	skillCloseButtonXLeft   = 416
+	skillCloseButtonXMiddle = 501
+	skillCloseButtonXRight  = 572
+	skillCloseButtonY       = 449
 )
 
 const (
@@ -62,8 +67,9 @@ const (
 )
 
 type skillTreeTab struct {
-	buttonText string
-	button     *d2ui.Button
+	buttonText      string
+	button          *d2ui.Button
+	closeButtonPosX int
 }
 
 func (st *skillTreeTab) createButton(uiManager *d2ui.UIManager, x, y int) {
@@ -90,11 +96,13 @@ type skillTree struct {
 	heroClass    d2enum.Hero
 	frame        *d2ui.UIFrame
 	availSPLabel *d2ui.Label
+	closeButton  *d2ui.Button
 	tab          [3]*skillTreeTab
 	isOpen       bool
 	originX      int
 	originY      int
 	selectedTab  int
+	onCloseCb    func()
 }
 
 func newSkillTree(
@@ -126,6 +134,9 @@ func newSkillTree(
 
 func (s *skillTree) load() {
 	s.frame = d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameRight)
+	s.closeButton = s.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
+	s.closeButton.SetVisible(false)
+	s.closeButton.OnActivated(func() { s.Close() })
 
 	s.setHeroTypeResourcePath()
 	s.loadForHeroType()
@@ -165,6 +176,7 @@ func (s *skillTree) loadForHeroType() {
 type heroTabData struct {
 	resources        *skillTreeHeroTypeResources
 	str1, str2, str3 string
+	closeButtonPos   [3]int
 }
 
 func makeTabString(keys ...interface{}) string {
@@ -184,6 +196,10 @@ func makeTabString(keys ...interface{}) string {
 	return fmt.Sprintf(format, translations...)
 }
 
+func makeCloseButtonPos(close1 int , close2 int, close3 int) [3]int {
+	return [3]int{ close1, close2, close3 }
+}
+
 func (s *skillTree) getTab(class d2enum.Hero) (heroTabData, bool) {
 	tabMap := map[d2enum.Hero]heroTabData{
 		d2enum.HeroBarbarian: {
@@ -194,6 +210,10 @@ func (s *skillTree) getTab(class d2enum.Hero) (heroTabData, bool) {
 			makeTabString("StrSklTree21", "StrSklTree4"),
 			makeTabString("StrSklTree21", "StrSklTree22"),
 			makeTabString("StrSklTree20"),
+			makeCloseButtonPos(
+				skillCloseButtonXRight,
+				skillCloseButtonXLeft,
+				skillCloseButtonXRight),
 		},
 		d2enum.HeroNecromancer: {
 			&skillTreeHeroTypeResources{
@@ -203,6 +223,10 @@ func (s *skillTree) getTab(class d2enum.Hero) (heroTabData, bool) {
 			makeTabString("StrSklTree19"),
 			makeTabString("StrSklTree17", "StrSklTree18", "StrSklTree5"),
 			makeTabString("StrSklTree16", "StrSklTree5"),
+			makeCloseButtonPos(
+				skillCloseButtonXLeft,
+				skillCloseButtonXRight,
+				skillCloseButtonXLeft),
 		},
 		d2enum.HeroPaladin: {
 			&skillTreeHeroTypeResources{
@@ -212,6 +236,10 @@ func (s *skillTree) getTab(class d2enum.Hero) (heroTabData, bool) {
 			makeTabString("StrSklTree15", "StrSklTree4"),
 			makeTabString("StrSklTree14", "StrSklTree13"),
 			makeTabString("StrSklTree12", "StrSklTree13"),
+			makeCloseButtonPos(
+				skillCloseButtonXLeft,
+				skillCloseButtonXMiddle,
+				skillCloseButtonXLeft),
 		},
 
 		d2enum.HeroAssassin: {
@@ -223,6 +251,10 @@ func (s *skillTree) getTab(class d2enum.Hero) (heroTabData, bool) {
 			makeTabString("StrSklTree30"),
 			makeTabString("StrSklTree31", "StrSklTree32"),
 			makeTabString("StrSklTree33", "StrSklTree34"),
+			makeCloseButtonPos(
+				skillCloseButtonXMiddle,
+				skillCloseButtonXRight,
+				skillCloseButtonXLeft),
 		},
 		d2enum.HeroSorceress: {
 			&skillTreeHeroTypeResources{
@@ -232,6 +264,10 @@ func (s *skillTree) getTab(class d2enum.Hero) (heroTabData, bool) {
 			makeTabString("StrSklTree25", "StrSklTree5"),
 			makeTabString("StrSklTree24", "StrSklTree5"),
 			makeTabString("StrSklTree23", "StrSklTree5"),
+			makeCloseButtonPos(
+				skillCloseButtonXLeft,
+				skillCloseButtonXLeft,
+				skillCloseButtonXRight),
 		},
 
 		d2enum.HeroAmazon: {
@@ -242,6 +278,10 @@ func (s *skillTree) getTab(class d2enum.Hero) (heroTabData, bool) {
 			makeTabString("StrSklTree10", "StrSklTree11", "StrSklTree4"),
 			makeTabString("StrSklTree8", "StrSklTree9", "StrSklTree4"),
 			makeTabString("StrSklTree6", "StrSklTree7", "StrSklTree4"),
+			makeCloseButtonPos(
+				skillCloseButtonXRight,
+				skillCloseButtonXMiddle,
+				skillCloseButtonXLeft),
 		},
 
 		d2enum.HeroDruid: {
@@ -252,6 +292,10 @@ func (s *skillTree) getTab(class d2enum.Hero) (heroTabData, bool) {
 			makeTabString("StrSklTree26"),
 			makeTabString("StrSklTree27", "StrSklTree28"),
 			makeTabString("StrSklTree29"),
+			makeCloseButtonPos(
+				skillCloseButtonXRight,
+				skillCloseButtonXRight,
+				skillCloseButtonXRight),
 		},
 	}
 
@@ -268,8 +312,12 @@ func (s *skillTree) setHeroTypeResourcePath() {
 
 	s.resources = entry.resources
 	s.tab[firstTab].buttonText = entry.str1
-	s.tab[secondTab].buttonText = entry.str1
-	s.tab[thirdTab].buttonText = entry.str1
+	s.tab[secondTab].buttonText = entry.str2
+	s.tab[thirdTab].buttonText = entry.str3
+
+	for i:= 0; i < 3; i++ {
+		s.tab[i].closeButtonPosX = entry.closeButtonPos[i]
+	}
 }
 
 // Toggle the skill tree visibility
@@ -287,10 +335,11 @@ func (s *skillTree) Toggle() {
 func (s *skillTree) Close() {
 	s.isOpen = false
 	s.guiManager.SetLayout(nil)
-
+	s.closeButton.SetVisible(false)
 	for i := 0; i < 3; i++ {
 		s.tab[i].button.SetVisible(false)
 	}
+	s.onCloseCb()
 }
 
 // Open the skill tree
@@ -300,6 +349,7 @@ func (s *skillTree) Open() {
 		s.layout = d2gui.CreateLayout(s.renderer, d2gui.PositionTypeHorizontal, s.asset)
 	}
 
+	s.closeButton.SetVisible(true)
 	for i := 0; i < 3; i++ {
 		s.tab[i].button.SetVisible(true)
 	}
@@ -311,8 +361,15 @@ func (s *skillTree) IsOpen() bool {
 	return s.isOpen
 }
 
+// Set the callback run on closing the skilltree
+func (s *skillTree) SetOnCloseCb(cb func()) {
+       s.onCloseCb = cb
+}
+
+
 func (s *skillTree) setTab(tab int) {
 	s.selectedTab = tab
+	s.closeButton.SetPosition(s.tab[tab].closeButtonPosX, skillCloseButtonY)
 }
 
 func (s *skillTree) renderPanelSegment(
