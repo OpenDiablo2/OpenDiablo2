@@ -2,9 +2,10 @@ package d2player
 
 import (
 	"fmt"
-	"image/color"
 	"log"
 	"sort"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
@@ -36,16 +37,16 @@ const (
 type SkillPanel struct {
 	asset                *d2asset.AssetManager
 	activeSkill          *d2hero.HeroSkill
-	isOpen               bool
-	regenerateImageCache bool
 	hero                 *d2mapentity.Player
 	ListRows             []*SkillListRow
-	isLeftPanel          bool
 	renderer             d2interface.Renderer
 	ui                   *d2ui.UIManager
 	hoveredSkill         *d2hero.HeroSkill
 	hoverTooltipRect     *d2geom.Rectangle
 	hoverTooltipText     *d2ui.Label
+	isOpen               bool
+	regenerateImageCache bool
+	isLeftPanel          bool
 }
 
 // NewHeroSkillsPanel creates a new hero status panel
@@ -85,11 +86,10 @@ func (s *SkillPanel) Close() {
 }
 
 // IsInRect returns whether the X Y coordinates are in some of the list rows of the panel.
-func (s *SkillPanel) IsInRect(X int, Y int) bool {
+func (s *SkillPanel) IsInRect(x, y int) bool {
 	for _, listRow := range s.ListRows {
-
 		// TODO: investigate why listRow can be nil
-		if listRow != nil && listRow.IsInRect(X, Y) {
+		if listRow != nil && listRow.IsInRect(x, y) {
 			return true
 		}
 	}
@@ -98,9 +98,9 @@ func (s *SkillPanel) IsInRect(X int, Y int) bool {
 }
 
 // GetListRowByPos returns the skill list row for a given X and Y, based on the width and height of the skills list.
-func (s *SkillPanel) GetListRowByPos(X int, Y int) *SkillListRow {
+func (s *SkillPanel) GetListRowByPos(x, y int) *SkillListRow {
 	for _, listRow := range s.ListRows {
-		if listRow.IsInRect(X, Y) {
+		if listRow.IsInRect(x, y) {
 			return listRow
 		}
 	}
@@ -115,11 +115,15 @@ func (s *SkillPanel) Render(target d2interface.Surface) error {
 	}
 
 	if s.regenerateImageCache {
-		s.generateSkillRowImageCache(target)
+		if err := s.generateSkillRowImageCache(); err != nil {
+			return err
+		}
+
 		s.regenerateImageCache = false
 	}
 
 	renderedRows := 0
+
 	for _, skillListRow := range s.ListRows {
 		if len(skillListRow.Skills) == 0 {
 			continue
@@ -129,7 +133,11 @@ func (s *SkillPanel) Render(target d2interface.Surface) error {
 		rowOffsetY := skillPanelOffsetY - (renderedRows * skillIconHeight)
 
 		target.PushTranslation(startX, rowOffsetY)
-		target.Render(skillListRow.cachedImage)
+
+		if err := target.Render(skillListRow.cachedImage); err != nil {
+			return err
+		}
+
 		target.Pop()
 
 		renderedRows++
@@ -137,20 +145,25 @@ func (s *SkillPanel) Render(target d2interface.Surface) error {
 
 	if s.hoveredSkill != nil {
 		target.PushTranslation(s.hoverTooltipRect.Left, s.hoverTooltipRect.Top)
-		target.DrawRect(s.hoverTooltipRect.Width, s.hoverTooltipRect.Height, color.RGBA{0, 0, 0, uint8(200)})
+
+		black70 := d2util.Color(blackAlpha70)
+		target.DrawRect(s.hoverTooltipRect.Width, s.hoverTooltipRect.Height, black70)
 
 		// the text should be centered horizontally in the tooltip rect
-		target.PushTranslation(s.hoverTooltipRect.Width/2, 0)
+		centerX := s.hoverTooltipRect.Width >> 1
+		target.PushTranslation(centerX, 0)
 		s.hoverTooltipText.Render(target)
 
-		target.PopN(2)
+		target.Pop()
+		target.Pop()
 	}
 
 	return nil
 }
 
 // RegenerateImageCache will force re-generating the cached menu image on next Render.
-// Somewhat expensive operation, should not be called often. Currently called every time the panel is opened or when the player learns a new skill.
+// Somewhat expensive operation, should not be called often.
+// Currently called every time the panel is opened or when the player learns a new skill.
 func (s *SkillPanel) RegenerateImageCache() {
 	s.regenerateImageCache = true
 }
@@ -169,7 +182,7 @@ func (s *SkillPanel) Toggle() {
 	}
 }
 
-func (s *SkillPanel) generateSkillRowImageCache(target d2interface.Surface) error {
+func (s *SkillPanel) generateSkillRowImageCache() error {
 	for idx := range s.ListRows {
 		s.ListRows[idx] = &SkillListRow{Skills: make([]*d2hero.HeroSkill, 0), Rectangle: d2geom.Rectangle{Height: 0, Width: 0}}
 	}
@@ -189,6 +202,7 @@ func (s *SkillPanel) generateSkillRowImageCache(target d2interface.Surface) erro
 	}
 
 	visibleRows := 0
+
 	for idx, skillListRow := range s.ListRows {
 		// row won't be considered as visible
 		if len(skillListRow.Skills) == 0 {
@@ -202,13 +216,15 @@ func (s *SkillPanel) generateSkillRowImageCache(target d2interface.Surface) erro
 			Top:    skillPanelOffsetY - (visibleRows * skillIconHeight),
 		}
 
+		skillRow := skillListRow
+
 		sort.SliceStable(skillListRow.Skills, func(a, b int) bool {
 			// left panel skills are aligned by ID (low to high), right panel is the opposite
 			if s.isLeftPanel {
-				return skillListRow.Skills[a].ID < skillListRow.Skills[b].ID
+				return skillRow.Skills[a].ID < skillRow.Skills[b].ID
 			}
 
-			return skillListRow.Skills[a].ID > skillListRow.Skills[b].ID
+			return skillRow.Skills[a].ID > skillRow.Skills[b].ID
 		})
 
 		cachedImage, err := s.createSkillListImage(skillListRow)
@@ -234,6 +250,7 @@ func (s *SkillPanel) createSkillListImage(skillsListRow *SkillListRow) (d2interf
 
 	lastSkillResourcePath := d2resource.GenericSkills
 	skillSprite, _ := s.ui.NewSprite(s.getSkillResourceByClass(""), d2resource.PaletteSky)
+
 	for idx, skill := range skillsListRow.Skills {
 		currentResourcePath := s.getSkillResourceByClass(skill.Charclass)
 		// only load a new sprite if the DCC file path changed
@@ -257,6 +274,7 @@ func (s *SkillPanel) createSkillListImage(skillsListRow *SkillListRow) (d2interf
 		if err := skillSprite.Render(surface); err != nil {
 			return nil, err
 		}
+
 		surface.Pop()
 	}
 
@@ -272,38 +290,39 @@ func (s *SkillPanel) getRowStartX(skillRow *SkillListRow) int {
 	return rightPanelEndX - skillRow.GetWidth()
 }
 
-func (s *SkillPanel) getSkillAtPos(X int, Y int) *d2hero.HeroSkill {
-	listRow := s.GetListRowByPos(X, Y)
+func (s *SkillPanel) getSkillAtPos(x, y int) *d2hero.HeroSkill {
+	listRow := s.GetListRowByPos(x, y)
 
 	if listRow == nil {
 		return nil
 	}
 
-	skillIndex := (X - s.getRowStartX(listRow)) / skillIconWidth
+	skillIndex := (x - s.getRowStartX(listRow)) / skillIconWidth
 	skill := listRow.Skills[skillIndex]
 
 	return skill
 }
 
-func (s *SkillPanel) getSkillIdxAtPos(X int, Y int) int {
-	listRow := s.GetListRowByPos(X, Y)
+func (s *SkillPanel) getSkillIdxAtPos(x, y int) int {
+	listRow := s.GetListRowByPos(x, y)
 
 	if listRow == nil {
 		return -1
 	}
 
-	skillIndex := (X - s.getRowStartX(listRow)) / skillIconWidth
+	skillIndex := (x - s.getRowStartX(listRow)) / skillIconWidth
 
 	return skillIndex
 }
 
-// HandleClick will change the hero's active(left or right) skill and return true. Returns false if the given X, Y is out of panel boundaries.
-func (s *SkillPanel) HandleClick(X int, Y int) bool {
-	if !s.isOpen || !s.IsInRect(X, Y) {
+// HandleClick will change the hero's active(left or right) skill and return true.
+// Returns false if the given X, Y is out of panel boundaries.
+func (s *SkillPanel) HandleClick(x, y int) bool {
+	if !s.isOpen || !s.IsInRect(x, y) {
 		return false
 	}
 
-	clickedSkill := s.getSkillAtPos(X, Y)
+	clickedSkill := s.getSkillAtPos(x, y)
 
 	if clickedSkill == nil {
 		return false
@@ -319,28 +338,28 @@ func (s *SkillPanel) HandleClick(X int, Y int) bool {
 }
 
 // HandleMouseMove will process a mouse move event, if inside the panel.
-func (s *SkillPanel) HandleMouseMove(X int, Y int) bool {
+func (s *SkillPanel) HandleMouseMove(x, y int) bool {
 	if !s.isOpen {
 		return false
 	}
 
-	if !s.IsInRect(X, Y) {
+	if !s.IsInRect(x, y) {
 		// panel still open but player hovered outside panel - hide the previously hovered skill(if any)
 		s.hoveredSkill = nil
 		return false
 	}
 
 	previousHovered := s.hoveredSkill
-	s.hoveredSkill = s.getSkillAtPos(X, Y)
+	s.hoveredSkill = s.getSkillAtPos(x, y)
 
 	if previousHovered != s.hoveredSkill && s.hoveredSkill != nil {
 		skillDescription := d2tbl.TranslateString(s.hoveredSkill.ShortKey)
 		s.hoverTooltipText.SetText(fmt.Sprintf("%s\n%s", s.hoveredSkill.Skill, skillDescription))
 
-		listRow := s.GetListRowByPos(X, Y)
+		listRow := s.GetListRowByPos(x, y)
 		textWidth, textHeight := s.hoverTooltipText.GetSize()
 
-		tooltipX := (s.getSkillIdxAtPos(X, Y) * skillIconWidth) + s.getRowStartX(listRow)
+		tooltipX := (s.getSkillIdxAtPos(x, y) * skillIconWidth) + s.getRowStartX(listRow)
 		tooltipWidth := textWidth + tooltipPadLeft + tooltipPadRight
 
 		if tooltipX+tooltipWidth >= screenWidth {

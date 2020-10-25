@@ -84,7 +84,7 @@ func (ob *Object) Render(target d2interface.Surface) {
 	)
 
 	if ob.highlight {
-		target.PushBrightness(2)
+		target.PushBrightness(highlightBrightness)
 		defer target.Pop()
 	}
 

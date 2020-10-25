@@ -10,6 +10,21 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
+const (
+	miniPanelX      = 325
+	miniPanelY      = 526
+	miniPanelWidth  = 156
+	miniPanelHeight = 26
+)
+
+const (
+	containerOffsetX = -75
+	containerOffsetY = -48
+
+	buttonOffsetX = -72
+	buttonOffsetY = -51
+)
+
 type miniPanel struct {
 	asset          *d2asset.AssetManager
 	container      *d2ui.Sprite
@@ -37,7 +52,12 @@ func newMiniPanel(asset *d2asset.AssetManager, uiManager *d2ui.UIManager, isSing
 		return nil
 	}
 
-	rectangle := d2geom.Rectangle{Left: 325, Top: 526, Width: 156, Height: 26}
+	rectangle := d2geom.Rectangle{
+		Left:   miniPanelX,
+		Top:    miniPanelY,
+		Width:  miniPanelWidth,
+		Height: miniPanelHeight,
+	}
 
 	if !isSinglePlayer {
 		rectangle.Width = 182
@@ -79,8 +99,10 @@ func (m *miniPanel) Render(target d2interface.Surface) error {
 	}
 
 	width, height := target.GetSize()
+	halfW, halfH := width>>1, height>>1
+	x, y := halfW+containerOffsetX, halfH+containerOffsetY
 
-	m.container.SetPosition((width/2)-75, height-48)
+	m.container.SetPosition(x, y)
 
 	if err := m.container.Render(target); err != nil {
 		return err
@@ -98,7 +120,10 @@ func (m *miniPanel) Render(target d2interface.Surface) error {
 			return err
 		}
 
-		m.button.SetPosition((width/2)-72+(buttonWidth*i), height-51)
+		offsetX := buttonOffsetX + (buttonWidth * i)
+		x, y := halfW+offsetX, height+buttonOffsetY
+
+		m.button.SetPosition(x, y)
 
 		if err := m.button.Render(target); err != nil {
 			return err

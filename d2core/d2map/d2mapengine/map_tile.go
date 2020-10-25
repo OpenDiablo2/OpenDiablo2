@@ -30,7 +30,7 @@ func (t *MapTile) GetSubTileFlags(x, y int) *d2dt1.SubTileFlags {
 func (t *MapTile) PrepareTile(x, y int, me *MapEngine) {
 	for wIdx := range t.Components.Walls {
 		wall := &t.Components.Walls[wIdx]
-		options := me.GetTiles(int(wall.Style), int(wall.Sequence), int(wall.Type))
+		options := me.GetTiles(int(wall.Style), int(wall.Sequence), wall.Type)
 
 		if options == nil {
 			break

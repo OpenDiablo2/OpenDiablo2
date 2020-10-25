@@ -557,16 +557,20 @@ func (mr *MapRenderer) renderTileDebug(ax, ay, debugVisLevel int, target d2inter
 	}
 }
 
-// Advance is called once per frame and maintains the MapRenderer's record previous render timestamp and current frame.
-func (mr *MapRenderer) Advance(elapsed float64) {
-	frameLength := 0.1
+const (
+	frameOverflow = 10
+	frameLength   = 1.0 / frameOverflow
+)
 
+// Advance is called once per frame and maintains the MapRenderer's previous
+// render timestamp and current frame.
+func (mr *MapRenderer) Advance(elapsed float64) {
 	mr.lastFrameTime += elapsed
 	framesAdvanced := int(mr.lastFrameTime / frameLength)
 	mr.lastFrameTime -= float64(framesAdvanced) * frameLength
 
 	mr.currentFrame += framesAdvanced
-	if mr.currentFrame > 9 {
+	if mr.currentFrame >= frameOverflow {
 		mr.currentFrame = 0
 	}
 

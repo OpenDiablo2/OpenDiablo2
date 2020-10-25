@@ -78,6 +78,10 @@ func (p *Player) IsInTown() bool {
 	return p.isInTown
 }
 
+const (
+	half = 0.5
+)
+
 // Advance is called once per frame and processes a
 // single game tick.
 func (p *Player) Advance(tickTime float64) {
@@ -92,7 +96,9 @@ func (p *Player) Advance(tickTime float64) {
 		}
 
 		// skills are casted after the first half of the casting animation is played
-		isHalfDoneCasting := float64(p.composite.GetCurrentFrame())/float64(p.composite.GetFrameCount()) >= 0.5
+		percentDone := float64(p.composite.GetCurrentFrame()) / float64(p.composite.GetFrameCount())
+		isHalfDoneCasting := percentDone >= half
+
 		if isHalfDoneCasting && p.onFinishedCasting != nil {
 			p.onFinishedCasting()
 			p.onFinishedCasting = nil
