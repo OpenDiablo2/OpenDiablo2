@@ -21,6 +21,7 @@ import (
 const (
 	skillIconWidth    = 48
 	screenWidth       = 800
+	screenHeight      = 600
 	skillIconHeight   = 48
 	rightPanelEndX    = 720
 	leftPanelStartX   = 90
@@ -44,7 +45,7 @@ type SkillPanel struct {
 	ui                   *d2ui.UIManager
 	hoveredSkill         *d2hero.HeroSkill
 	hoverTooltipRect     *d2geom.Rectangle
-	hoverTooltipText *d2ui.Label
+	hoverTooltipText     *d2ui.Label
 }
 
 // NewHeroSkillsPanel creates a new hero status panel
