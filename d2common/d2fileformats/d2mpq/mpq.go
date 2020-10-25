@@ -192,7 +192,7 @@ func (v *MPQ) loadHashTable() error {
 		v.hashEntryMap.Insert(&HashTableEntry{
 			NamePartA: hashData[i*4],
 			NamePartB: hashData[(i*4)+1],
-			//nolint:godox    // TODO: Verify that we're grabbing the right high/lo word for the vars below
+			// https://github.com/OpenDiablo2/OpenDiablo2/issues/812
 			Locale:     uint16(hashData[(i*4)+2] >> 16),    //nolint:gomnd binary data
 			Platform:   uint16(hashData[(i*4)+2] & 0xFFFF), //nolint:gomnd binary data
 			BlockIndex: hashData[(i*4)+3],

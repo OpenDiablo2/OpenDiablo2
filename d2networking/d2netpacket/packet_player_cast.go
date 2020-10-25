@@ -10,7 +10,6 @@ import (
 // CastPacket contains a cast command for an entity. It is sent by the server
 // and instructs the client to trigger the use of the given skill on the given
 // entity.
-// TODO: Need to handle being on different maps
 type CastPacket struct {
 	SourceEntityID string  `json:"sourceEntityId"`
 	SkillID        int     `json:"skillId"`
@@ -27,7 +26,7 @@ func CreateCastPacket(entityID string, skillID int, targetX, targetY float64) Ne
 		SkillID:        skillID,
 		TargetX:        targetX,
 		TargetY:        targetY,
-		TargetEntityID: "", // TODO implement targeting entities
+		TargetEntityID: "", // https://github.com/OpenDiablo2/OpenDiablo2/issues/826
 	}
 
 	b, err := json.Marshal(castPacket)

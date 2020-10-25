@@ -776,7 +776,7 @@ func (v *SelectHeroClass) loadSprite(animationPath string, position image.Point,
 	}
 
 	if playLength != 0 {
-		sprite.SetPlayLengthMs(playLength)
+		sprite.SetPlayLength(float64(playLength) / 1000.0)
 	}
 
 	sprite.SetPosition(position.X, position.Y)

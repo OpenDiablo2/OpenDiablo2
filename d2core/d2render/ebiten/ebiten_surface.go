@@ -192,7 +192,7 @@ func (s *ebitenSurface) handleStateEffect(opts *ebiten.DrawImageOptions) {
 		opts.ColorM.Translate(0, 0, 0, -transparency75)
 	case d2enum.DrawEffectModulate:
 		opts.CompositeMode = ebiten.CompositeModeLighter
-	// TODO: idk what to do when ebiten doesn't exactly match, pick closest?
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/822
 	case d2enum.DrawEffectBurn:
 	case d2enum.DrawEffectNormal:
 	case d2enum.DrawEffectMod2XTrans:

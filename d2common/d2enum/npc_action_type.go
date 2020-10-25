@@ -4,7 +4,7 @@ package d2enum
 type NPCActionType int
 
 // NPCAction types
-// TODO: Figure out what 1-3 are for
+// https://github.com/OpenDiablo2/OpenDiablo2/issues/811
 const (
 	NPCActionInvalid NPCActionType = iota
 	NPCAction1

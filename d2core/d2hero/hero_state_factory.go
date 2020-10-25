@@ -131,7 +131,6 @@ func (f *HeroStateFactory) CreateHeroSkillsState(classStats *d2records.CharStats
 		}
 	}
 
-
 	skillRecord, err := f.CreateHeroSkill(1, "Attack")
 	if err != nil {
 		return nil, err
@@ -158,7 +157,7 @@ func (f *HeroStateFactory) CreateHeroSkill(points int, name string) (*HeroSkill,
 		SkillPoints:            points,
 		SkillRecord:            skillRecord,
 		SkillDescriptionRecord: skillDescRecord,
-		shallow: &shallowHeroSkill{SkillID: skillRecord.ID, SkillPoints: points},
+		shallow:                &shallowHeroSkill{SkillID: skillRecord.ID, SkillPoints: points},
 	}
 
 	return result, nil
@@ -200,7 +199,6 @@ func (f *HeroStateFactory) LoadHeroState(filePath string) *HeroState {
 	for idx := range result.Skills {
 		hs := result.Skills[idx]
 
-		// TODO: figure out why this can be nil
 		if hs == nil {
 			continue
 		}

@@ -354,7 +354,7 @@ func (p *Property) fnClassSkills(
 
 // fnStateApplyToTarget property applied to character or target monster ???
 func (p *Property) fnStateApplyToTarget(iscRecord *d2records.ItemStatCostRecord) d2stats.Stat {
-	// todo need to implement states
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/818
 	return nil
 }
 

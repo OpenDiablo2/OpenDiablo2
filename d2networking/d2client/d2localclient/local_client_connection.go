@@ -92,7 +92,6 @@ func (l *LocalClientConnection) Close() error {
 
 // SendPacketToServer calls d2server.OnPacketReceived with the given packet.
 func (l *LocalClientConnection) SendPacketToServer(packet d2netpacket.NetPacket) error {
-	// TODO: This is going to blow up if the server has ceased to be.
 	return d2server.OnPacketReceived(l, packet)
 }
 

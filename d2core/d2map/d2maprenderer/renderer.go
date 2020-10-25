@@ -124,7 +124,7 @@ func (mr *MapRenderer) SetMapEngine(mapEngine *d2mapengine.MapEngine) {
 //
 // Pass 4: Roof tiles.
 func (mr *MapRenderer) Render(target d2interface.Surface) {
-	// TODO:(temp hack) should not render before the map has been fully generated -
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/789
 	// Prevents concurrent map read & write exceptions that otherwise occur when we join a TCP game
 	// as a remote client, due to rendering before we have handled the GenerateMapPacket.
 	if mr.mapEngine.IsLoading {
@@ -208,7 +208,8 @@ func (mr *MapRenderer) renderPass2(target d2interface.Surface, startX, startY, e
 
 			tileEnt := make([]d2interface.MapEntity, 0)
 
-			// TODO: Do not loop over every entity every frame
+			// need to add render culling
+			// https://github.com/OpenDiablo2/OpenDiablo2/issues/821
 			for _, mapEntity := range mr.mapEngine.Entities() {
 				pos := mapEntity.GetPosition()
 				vec := pos.World()
@@ -255,7 +256,8 @@ func (mr *MapRenderer) renderPass3(target d2interface.Surface, startX, startY, e
 
 			tileEnt := make([]d2interface.MapEntity, 0)
 
-			// TODO: Do not loop over every entity every frame
+			// need to add render culling
+			// https://github.com/OpenDiablo2/OpenDiablo2/issues/821
 			for _, mapEntity := range mr.mapEngine.Entities() {
 				pos := mapEntity.GetPosition()
 				vec := pos.World()

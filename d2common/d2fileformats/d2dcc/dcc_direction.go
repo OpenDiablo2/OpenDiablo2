@@ -192,7 +192,7 @@ func (v *DCCDirection) generateFrames(pcd *d2datautils.BitMuncher) {
 			if (pbe.Frame != frameIndex) || (pbe.FrameCellIndex != c) {
 				// This buffer cell has an EqualCell bit set to 1, so copy the frame cell or clear it
 				if (cell.Width != bufferCell.LastWidth) || (cell.Height != bufferCell.LastHeight) {
-					// Different sizes TODO: Clear the pixels of the frame cell
+					// Different sizes
 					for y := 0; y < cell.Height; y++ {
 						for x := 0; x < cell.Width; x++ {
 							v.PixelData[x+cell.XOffset+((y+cell.YOffset)*v.Box.Width)] = 0

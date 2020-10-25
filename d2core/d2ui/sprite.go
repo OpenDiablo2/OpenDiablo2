@@ -186,11 +186,6 @@ func (s *Sprite) SetPlayLength(playLength float64) {
 	s.animation.SetPlayLength(playLength)
 }
 
-// SetPlayLengthMs sets the play length of the sprite animation in milliseconds
-func (s *Sprite) SetPlayLengthMs(playLengthMs int) {
-	s.animation.SetPlayLengthMs(playLengthMs)
-}
-
 // SetColorMod sets the color modifier
 func (s *Sprite) SetColorMod(c color.Color) {
 	s.animation.SetColorMod(c)
