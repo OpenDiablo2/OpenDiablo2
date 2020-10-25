@@ -312,8 +312,8 @@ func (s *skillTree) setHeroTypeResourcePath() {
 
 	s.resources = entry.resources
 	s.tab[firstTab].buttonText = entry.str1
-	s.tab[secondTab].buttonText = entry.str1
-	s.tab[thirdTab].buttonText = entry.str1
+	s.tab[secondTab].buttonText = entry.str2
+	s.tab[thirdTab].buttonText = entry.str3
 
 	for i:= 0; i < 3; i++ {
 		s.tab[i].closeButtonPosX = entry.closeButtonPos[i]
