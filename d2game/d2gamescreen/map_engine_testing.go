@@ -223,6 +223,7 @@ func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 
 // OnUnload releases the resources for the Map Engine Test screen
 func (met *MapEngineTest) OnUnload() error {
+	//  https://github.com/OpenDiablo2/OpenDiablo2/issues/792
 	if err := met.inputManager.UnbindHandler(met); err != nil {
 		return err
 	}
