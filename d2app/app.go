@@ -616,7 +616,7 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 	}
 
 	if err = gameClient.Open(host, filePath); err != nil {
-		// TODO an error screen should be shown in this case
+		// https://github.com/OpenDiablo2/OpenDiablo2/issues/805
 		fmt.Printf("can not connect to the host: %s", host)
 	}
 

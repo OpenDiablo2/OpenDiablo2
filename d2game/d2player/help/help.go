@@ -147,8 +147,6 @@ type Overlay struct {
 	text        []*d2ui.Label
 	lines       []line
 	uiManager   *d2ui.UIManager
-	originX     int
-	originY     int
 	layout      *d2gui.Layout
 	closeButton *d2ui.Button
 	guiManager  *d2gui.GuiManager
@@ -207,7 +205,6 @@ func (h *Overlay) IsOpen() bool {
 
 // IsInRect checks if the given point is within the overlay layout rectangle
 func (h *Overlay) IsInRect(px, py int) bool {
-
 	ww, hh := h.layout.GetSize()
 	x, y := h.layout.GetPosition()
 
@@ -323,18 +320,20 @@ func (h *Overlay) Load() {
 	h.text = append(h.text, newLabel)
 
 	// Bullets
-
+	// the hotkeys displayed here should be pulled from a mapping of input events to game events
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/793
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/794
 	callouts := []struct{ text string }{
-		// TODO "Ctrl" should be hotkey // "Hold Down <%s> to Run"
+		// "Ctrl" should be hotkey // "Hold Down <%s> to Run"
 		{text: fmt.Sprintf(d2tbl.TranslateString("StrHelp2"), "Ctrl")},
 
-		// TODO "Alt" should be hotkey // "Hold down <%s> to highlight items on the ground"
+		// "Alt" should be hotkey // "Hold down <%s> to highlight items on the ground"
 		{text: fmt.Sprintf(d2tbl.TranslateString("StrHelp3"), "Alt")},
 
-		// TODO "Shift" should be hotkey // "Hold down <%s> to attack while standing still"
+		// "Shift" should be hotkey // "Hold down <%s> to attack while standing still"
 		{text: fmt.Sprintf(d2tbl.TranslateString("StrHelp4"), "Shift")},
 
-		// TODO "Tab" should be hotkey // "Hit <%s> to toggle the automap on and off"
+		// "Tab" should be hotkey // "Hit <%s> to toggle the automap on and off"
 		{text: fmt.Sprintf(d2tbl.TranslateString("StrHelp5"), "Tab")},
 
 		// "Hit <Esc> to bring up the Game Menu"
@@ -346,7 +345,7 @@ func (h *Overlay) Load() {
 		// "Hit F1-F8 to set your Left or Right Mouse Buttton Skills."
 		{text: d2tbl.TranslateString("StrHelp8")},
 
-		// TODO "H" should be hotkey,
+		// "H" should be hotkey,
 		{text: fmt.Sprintf(d2tbl.TranslateString("StrHelp8a"), "H")},
 	}
 

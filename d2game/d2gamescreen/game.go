@@ -249,7 +249,6 @@ func (v *Game) Advance(elapsed float64) error {
 
 				// skip showing zone change text the first time we enter the world
 				if v.lastRegionType != d2enum.RegionNone && v.lastRegionType != tile.RegionType {
-					//TODO: Should not be using RegionType as an index - this will return incorrect LevelDetails record for most of the zones.
 					areaName := levelDetails.LevelDisplayName
 					areaChgStr := fmt.Sprintf("Entering The %s", areaName)
 					v.gameControls.SetZoneChangeText(areaChgStr)

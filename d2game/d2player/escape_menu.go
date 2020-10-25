@@ -12,8 +12,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 )
 
-// TODO: fix pentagram
-
 type (
 	layoutID int
 	optionID int

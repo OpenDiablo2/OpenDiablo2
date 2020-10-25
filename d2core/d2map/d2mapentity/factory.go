@@ -96,7 +96,7 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 		Equipment: equipment,
 		Stats:     heroState.Stats,
 		Skills:    heroState.Skills,
-		//TODO: active left & right skill should be loaded from save file instead
+		// https://github.com/OpenDiablo2/OpenDiablo2/issues/799
 		LeftSkill:  heroState.Skills[attackSkillID],
 		RightSkill: heroState.Skills[attackSkillID],
 		name:       name,
@@ -108,7 +108,7 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 	}
 
 	result.mapEntity.uuid = id
-	//TODO: should be based on Player.isRunning after we store isRunning in the save file
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/799
 	result.SetSpeed(baseWalkSpeed)
 	result.mapEntity.directioner = result.rotate
 	err = composite.SetMode(d2enum.PlayerAnimationModeTownNeutral, equipment.RightHand.GetWeaponClass())
@@ -184,6 +184,7 @@ func (f *MapEntityFactory) NewItem(x, y int, codes ...string) (*Item, error) {
 
 // NewNPC creates a new NPC and returns a pointer to it.
 func (f *MapEntityFactory) NewNPC(x, y int, monstat *d2records.MonStatsRecord, direction int) (*NPC, error) {
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/803
 	result := &NPC{
 		mapEntity:     newMapEntity(x, y),
 		HasPaths:      false,
@@ -239,12 +240,12 @@ func (f *MapEntityFactory) NewCastOverlay(x, y int, overlayRecord *d2records.Ove
 		return nil, err
 	}
 
-	// TODO: Frame index and played count seem to be shared across the cloned animation objects when we retrieve the animation from the asset manager cache.
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/767
 	animation.Rewind()
 	animation.ResetPlayedCount()
 
 	animationSpeed := float64(overlayRecord.AnimRate*retailFps) / millisecondsPerSecond
-	playLoop := false // TODO: should be based on the overlay record, some overlays can repeat(e.g. Bone Shield, Frozen Armor)
+	playLoop := false // https://github.com/OpenDiablo2/OpenDiablo2/issues/804
 
 	animation.SetPlayLength(animationSpeed)
 	animation.SetPlayLoop(playLoop)
