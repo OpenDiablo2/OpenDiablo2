@@ -21,6 +21,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 )
 
+const (
+	millisecondsPerSecond = 1000.0
+)
+
 type heroRenderConfig struct {
 	idleAnimationPath               string
 	idleSelectedAnimationPath       string
@@ -486,18 +490,19 @@ func (v *SelectHeroClass) onExitButtonClicked() {
 }
 
 func (v *SelectHeroClass) onOkButtonClicked() {
-
 	heroName := v.heroNameTextbox.GetText()
 	defaultStats := v.asset.Records.Character.Stats[v.selectedHero]
 	statsState := v.CreateHeroStatsState(v.selectedHero, defaultStats)
 
 	playerState, err := v.CreateHeroState(heroName, v.selectedHero, statsState)
-
-	if err := v.Save(playerState); err != nil {
-		fmt.Printf("failed to save game state!, err: %v\n", err)
+	if err != nil {
+		fmt.Printf("failed to create hero state!, err: %v\n", err)
+		return
 	}
 
+	err = v.Save(playerState)
 	if err != nil {
+		fmt.Printf("failed to save game state!, err: %v\n", err)
 		return
 	}
 
@@ -776,7 +781,7 @@ func (v *SelectHeroClass) loadSprite(animationPath string, position image.Point,
 	}
 
 	if playLength != 0 {
-		sprite.SetPlayLength(float64(playLength) / 1000.0)
+		sprite.SetPlayLength(float64(playLength) / millisecondsPerSecond)
 	}
 
 	sprite.SetPosition(position.X, position.Y)
