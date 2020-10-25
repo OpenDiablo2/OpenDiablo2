@@ -29,6 +29,7 @@ func createLabel(renderer d2interface.Renderer, text string, font *d2asset.Font)
 		log.Print(err)
 		return nil
 	}
+
 	label.SetVisible(true)
 
 	return label

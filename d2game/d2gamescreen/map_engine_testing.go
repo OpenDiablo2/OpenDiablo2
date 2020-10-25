@@ -20,6 +20,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 )
 
+const (
+	subtilesPerTile = 5
+)
+
 type regionSpec struct {
 	regionType       d2enum.RegionIdType
 	startPresetIndex int
@@ -226,111 +230,141 @@ func (met *MapEngineTest) OnUnload() error {
 	return nil
 }
 
+const (
+	lineSmallOffsetY  = 12
+	lineNormalOffsetY = 16
+	lineSmallIndentX  = 10
+	lineNormalIndentX = 15
+	lineBigIndentX    = 170 // distance between text columns
+)
+
 // Render renders the Map Engine Test screen
 func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 	met.mapRenderer.Render(screen)
 
-	screen.PushTranslation(0, 16)
-	screen.DrawTextf("N - next region, P - previous region")
-	screen.PushTranslation(0, 16)
-	screen.DrawTextf("Shift+N - next preset, Shift+P - previous preset")
-	screen.PushTranslation(0, 16)
-	screen.DrawTextf("Ctrl+N - next file, Ctrl+P - previous file")
-	screen.PushTranslation(0, 16)
-	screen.DrawTextf("Left click selects tile, right click unselects")
-	screen.PushTranslation(0, 16)
+	screen.PushTranslation(0, lineNormalOffsetY)
+	defer screen.Pop()
 
-	popN := 5
+	screen.DrawTextf("N - next region, P - previous region")
+
+	screen.PushTranslation(0, lineNormalOffsetY)
+	defer screen.Pop()
+
+	screen.DrawTextf("Shift+N - next preset, Shift+P - previous preset")
+
+	screen.PushTranslation(0, lineNormalOffsetY)
+	defer screen.Pop()
+
+	screen.DrawTextf("Ctrl+N - next file, Ctrl+P - previous file")
+
+	screen.PushTranslation(0, lineNormalOffsetY)
+	defer screen.Pop()
+
+	screen.DrawTextf("Left click selects tile, right click unselects")
+
+	screen.PushTranslation(0, lineNormalOffsetY)
+	defer screen.Pop()
 
 	if met.selectedTile == nil {
-		screen.PushTranslation(15, 16)
-		popN++
+		screen.PushTranslation(lineNormalIndentX, lineNormalOffsetY)
+		defer screen.Pop()
 
 		screen.DrawTextf("No tile selected")
 	} else {
-		screen.PushTranslation(10, 32)
+		screen.PushTranslation(lineSmallIndentX, lineNormalOffsetY)
+		defer screen.Pop()
+		screen.PushTranslation(0, lineNormalOffsetY) // extra vspace
+		defer screen.Pop()
+
 		screen.DrawTextf("Tile %v,%v", met.selX, met.selY)
 
-		screen.PushTranslation(15, 16)
+		screen.PushTranslation(lineNormalIndentX, lineNormalOffsetY)
+		defer screen.Pop()
+
 		screen.DrawTextf("Walls")
+
 		tpop := 0
 		for _, wall := range met.selectedTile.Components.Walls {
-			screen.PushTranslation(0, 12)
+			screen.PushTranslation(0, lineSmallOffsetY)
 			tpop++
 			tmpString := fmt.Sprintf("%#v", wall)
 			stringSlice := strings.Split(tmpString, " ")
 			tmp2 := strings.Split(stringSlice[0], "{")
 			stringSlice[0] = tmp2[1]
 			for _, str := range stringSlice {
-				screen.PushTranslation(0, 12)
+				screen.PushTranslation(0, lineSmallOffsetY)
 				tpop++
 				screen.DrawTextf(str)
 			}
 		}
+
 		screen.PopN(tpop)
 
-		screen.PushTranslation(170, 0)
+		screen.PushTranslation(lineBigIndentX, 0)
+		defer screen.Pop()
 		screen.DrawTextf("Floors")
+
 		tpop = 0
 		for _, floor := range met.selectedTile.Components.Floors {
-			screen.PushTranslation(0, 12)
+			screen.PushTranslation(0, lineSmallOffsetY)
 			tpop++
 			tmpString := fmt.Sprintf("%#v", floor)
 			stringSlice := strings.Split(tmpString, " ")
 			tmp2 := strings.Split(stringSlice[0], "{")
 			stringSlice[0] = tmp2[1]
 			for _, str := range stringSlice {
-				screen.PushTranslation(0, 12)
+				screen.PushTranslation(0, lineSmallOffsetY)
 				tpop++
 				screen.DrawTextf(str)
 			}
 		}
 		screen.PopN(tpop)
 
-		tpop = 0
-		screen.PushTranslation(170, 0)
+		screen.PushTranslation(lineBigIndentX, 0)
+		defer screen.Pop()
 		screen.DrawTextf("Shadows")
+
+		tpop = 0
 		for _, shadow := range met.selectedTile.Components.Shadows {
-			screen.PushTranslation(0, 12)
+			screen.PushTranslation(0, lineSmallOffsetY)
 			tpop++
 			tmpString := fmt.Sprintf("%#v", shadow)
 			stringSlice := strings.Split(tmpString, " ")
 			tmp2 := strings.Split(stringSlice[0], "{")
 			stringSlice[0] = tmp2[1]
 			for _, str := range stringSlice {
-				screen.PushTranslation(0, 12)
+				screen.PushTranslation(0, lineSmallOffsetY)
 				tpop++
 				screen.DrawTextf(str)
 			}
 		}
 		screen.PopN(tpop)
 
-		tpop = 0
-		screen.PushTranslation(170, 0)
+		screen.PushTranslation(lineBigIndentX, 0)
+		defer screen.Pop()
 		screen.DrawTextf("Substitutions")
+
+		tpop = 0
 		for _, subst := range met.selectedTile.Components.Substitutions {
-			screen.PushTranslation(0, 12)
+			screen.PushTranslation(0, lineSmallOffsetY)
 			tpop++
 			tmpString := fmt.Sprintf("%#v", subst)
 			stringSlice := strings.Split(tmpString, " ")
 			tmp2 := strings.Split(stringSlice[0], "{")
 			stringSlice[0] = tmp2[1]
 			for _, str := range stringSlice {
-				screen.PushTranslation(0, 12)
+				screen.PushTranslation(0, lineSmallOffsetY)
 				tpop++
 				screen.DrawTextf(str)
 			}
 		}
 		screen.PopN(tpop)
-
-		popN += 5
 	}
-
-	screen.PopN(popN)
 
 	return nil
 }
 
+// OnMouseMove is the mouse move handler
 func (met *MapEngineTest) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	mx, my := event.X(), event.Y()
 	met.lastMouseX = mx
@@ -375,7 +409,11 @@ func (met *MapEngineTest) handleLeftClick() {
 
 	camVect := met.mapRenderer.Camera.GetPosition().Vector
 
-	x, y := float64(met.lastMouseX-400)/5, float64(met.lastMouseY-300)/5
+	halfScreenWidth, halfScreenHeight := screenWidth>>1, screenHeight>>1
+
+	x := float64(met.lastMouseX-halfScreenWidth) / subtilesPerTile
+	y := float64(met.lastMouseY-halfScreenHeight) / subtilesPerTile
+
 	targetPosition := d2vector.NewPositionTile(x, y)
 	targetPosition.Add(&camVect)
 

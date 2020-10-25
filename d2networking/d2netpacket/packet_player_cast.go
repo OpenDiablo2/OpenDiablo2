@@ -29,6 +29,7 @@ func CreateCastPacket(entityID string, skillID int, targetX, targetY float64) Ne
 		TargetY:        targetY,
 		TargetEntityID: "", // TODO implement targeting entities
 	}
+
 	b, err := json.Marshal(castPacket)
 	if err != nil {
 		log.Print(err)
@@ -40,6 +41,7 @@ func CreateCastPacket(entityID string, skillID int, targetX, targetY float64) Ne
 	}
 }
 
+// UnmarshalCast unmarshals the given data to a CastPacket struct
 func UnmarshalCast(packet []byte) (CastPacket, error) {
 	var p CastPacket
 	if err := json.Unmarshal(packet, &p); err != nil {

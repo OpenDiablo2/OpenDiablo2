@@ -78,20 +78,30 @@ func (p *Player) IsInTown() bool {
 	return p.isInTown
 }
 
+const (
+	half = 0.5
+)
+
 // Advance is called once per frame and processes a
 // single game tick.
 func (p *Player) Advance(tickTime float64) {
 	p.Step(tickTime)
 
-	if p.IsCasting() && p.composite.GetPlayedCount() >= 1 {
-		p.isCasting = false
-		if p.onFinishedCasting != nil {
-			p.onFinishedCasting()
-			p.onFinishedCasting = nil
+	if p.IsCasting() {
+		if p.composite.GetPlayedCount() >= 1 {
+			p.isCasting = false
+			if err := p.SetAnimationMode(p.GetAnimationMode()); err != nil {
+				fmt.Printf("failed to set animationMode to: %d, err: %v\n", p.GetAnimationMode(), err)
+			}
 		}
 
-		if err := p.SetAnimationMode(p.GetAnimationMode()); err != nil {
-			fmt.Printf("failed to set animationMode to: %d, err: %v\n", p.GetAnimationMode(), err)
+		// skills are casted after the first half of the casting animation is played
+		percentDone := float64(p.composite.GetCurrentFrame()) / float64(p.composite.GetFrameCount())
+		isHalfDoneCasting := percentDone >= half
+
+		if isHalfDoneCasting && p.onFinishedCasting != nil {
+			p.onFinishedCasting()
+			p.onFinishedCasting = nil
 		}
 	}
 
@@ -106,14 +116,37 @@ func (p *Player) Advance(tickTime float64) {
 	if p.composite.GetAnimationMode() != p.animationMode {
 		p.animationMode = p.composite.GetAnimationMode()
 	}
+
+	charstats := p.composite.AssetManager.Records.Character.Stats[p.Class]
+	staminaDrain := float64(charstats.StaminaRunDrain)
+
+	// This number has been determined by trying it out and checking if the stamina drain is
+	// the same as in d2 with the drain value from the assets.
+	// (We stopped the time for a lvl 1 babarian to loose all stamina which is around 25 seconds
+	// if i Remember correctly)
+	const magicStaminaDrainDivisor = 5
+
+	// Drain and regenerate Stamina
+	if p.IsRunning() && !p.atTarget() && !p.IsInTown() {
+		p.Stats.Stamina -= staminaDrain * tickTime / magicStaminaDrainDivisor
+		if p.Stats.Stamina <= 0 {
+			p.SetSpeed(baseWalkSpeed)
+			p.Stats.Stamina = 0
+		}
+	} else if p.Stats.Stamina < float64(p.Stats.MaxStamina) {
+		p.Stats.Stamina += staminaDrain * tickTime / magicStaminaDrainDivisor
+		if p.IsRunning() {
+			p.SetSpeed(baseRunSpeed)
+		}
+	}
 }
 
 // Render renders the animated composite for this entity.
 func (p *Player) Render(target d2interface.Surface) {
 	renderOffset := p.Position.RenderOffset()
 	target.PushTranslation(
-		int((renderOffset.X()-renderOffset.Y())*16),
-		int(((renderOffset.X()+renderOffset.Y())*8)-5),
+		int((renderOffset.X()-renderOffset.Y())*subtileWidth),
+		int(((renderOffset.X()+renderOffset.Y())*subtileHeight)+subtileOffsetY),
 	)
 
 	defer target.Pop()
@@ -186,6 +219,7 @@ func (p *Player) IsCasting() bool {
 // StartCasting sets a flag indicating the player is casting a skill and
 // sets the animation mode to the casting animation.
 // This handles all types of skills - melee, ranged, kick, summon, etc.
+// NB: onFinishedCasting is called when the casting animation is >50% complete
 func (p *Player) StartCasting(animMode d2enum.PlayerAnimationMode, onFinishedCasting func()) {
 	// passive skills, auras, etc.
 	if animMode == d2enum.PlayerAnimationModeNone {
@@ -220,7 +254,7 @@ func (p *Player) GetVelocity() d2vector.Vector {
 // GetSize returns the current frame size
 func (p *Player) GetSize() (width, height int) {
 	width, height = p.composite.GetSize()
-	// hack: we need to get full size of composite animations, currently only gets legs
+	// todo: we need to get full size of composite animations, currently only gets legs
 	height = (height * 2) - (height / 2)
 
 	return width, height

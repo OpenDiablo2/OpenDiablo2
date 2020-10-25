@@ -1,15 +1,15 @@
 package d2records
 
 const (
-	NumMonProps  = 6
-	FmtProp      = "prop%d%s"
-	FmtChance    = "chance%d%s"
-	FmtPar       = "par%d%s"
-	FmtMin       = "min%d%s"
-	FmtMax       = "max%d%s"
-	FmtNormal    = ""
-	FmtNightmare = " (N)"
-	FmtHell      = " (H)"
+	numMonProps  = 6
+	fmtProp      = "prop%d%s"
+	fmtChance    = "chance%d%s"
+	fmtPar       = "par%d%s"
+	fmtMin       = "min%d%s"
+	fmtMax       = "max%d%s"
+	fmtNormal    = ""
+	fmtNightmare = " (N)"
+	fmtHell      = " (H)"
 )
 
 // MonsterProperties stores all of the MonPropRecords
@@ -20,9 +20,9 @@ type MonPropRecord struct {
 	ID string
 
 	Properties struct {
-		Normal    [NumMonProps]*MonProp
-		Nightmare [NumMonProps]*MonProp
-		Hell      [NumMonProps]*MonProp
+		Normal    [numMonProps]*MonProp
+		Nightmare [numMonProps]*MonProp
+		Hell      [numMonProps]*MonProp
 	}
 }
 

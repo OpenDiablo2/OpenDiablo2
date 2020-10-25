@@ -30,7 +30,7 @@ func (t *MapTile) GetSubTileFlags(x, y int) *d2dt1.SubTileFlags {
 func (t *MapTile) PrepareTile(x, y int, me *MapEngine) {
 	for wIdx := range t.Components.Walls {
 		wall := &t.Components.Walls[wIdx]
-		options := me.GetTiles(int(wall.Style), int(wall.Sequence), int(wall.Type))
+		options := me.GetTiles(int(wall.Style), int(wall.Sequence), wall.Type)
 
 		if options == nil {
 			break
@@ -86,9 +86,15 @@ func getRandomTile(tiles []d2dt1.Tile, x, y int, seed int64) byte {
 	tileSeed = uint64(seed) + uint64(x)
 	tileSeed *= uint64(y)
 
-	tileSeed ^= tileSeed << 13
-	tileSeed ^= tileSeed >> 17
-	tileSeed ^= tileSeed << 5
+	const (
+		xorshiftA = 13
+		xorshiftB = 17
+		xorshiftC = 5
+	)
+
+	tileSeed ^= tileSeed << xorshiftA
+	tileSeed ^= tileSeed >> xorshiftB
+	tileSeed ^= tileSeed << xorshiftC
 
 	weightSum := 0
 

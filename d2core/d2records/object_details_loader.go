@@ -14,7 +14,7 @@ func objectDetailsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	for d.Next() {
 		record := &ObjectDetailsRecord{
-			Index: i,
+			Index:       i,
 			Name:        d.String("Name"),
 			Description: d.String("description - not loaded"),
 			id:          d.Number("Id"),

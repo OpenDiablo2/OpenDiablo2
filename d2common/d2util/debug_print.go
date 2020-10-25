@@ -92,9 +92,11 @@ func (p *GlyphPrinter) drawDebugText(target *ebiten.Image, str string, ox, oy in
 
 		op.CompositeMode = ebiten.CompositeModeLighter
 		err := target.DrawImage(s, op)
+
 		if err != nil {
 			log.Print(err)
 		}
+
 		x += cw
 	}
 }

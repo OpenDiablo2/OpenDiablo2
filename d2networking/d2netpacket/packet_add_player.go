@@ -38,6 +38,7 @@ func CreateAddPlayerPacket(id, name string, x, y int, heroType d2enum.Hero,
 		Stats:     stats,
 		Skills:    skills,
 	}
+
 	b, err := json.Marshal(addPlayerPacket)
 	if err != nil {
 		log.Print(err)
@@ -49,6 +50,7 @@ func CreateAddPlayerPacket(id, name string, x, y int, heroType d2enum.Hero,
 	}
 }
 
+// UnmarshalAddPlayer unmarshals the packet data into an AddPlayerPacket struct
 func UnmarshalAddPlayer(packet []byte) (AddPlayerPacket, error) {
 	var p AddPlayerPacket
 	if err := json.Unmarshal(packet, &p); err != nil {

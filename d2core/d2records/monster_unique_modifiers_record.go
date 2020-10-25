@@ -49,10 +49,11 @@ type MonUModRecord struct {
 	}
 }
 
+// PickFreq restricts the range of modifiers that can spawn ...
 type PickFreq struct {
-	// Champion pick frequency
+	// ...on champion monsters
 	Champion int
 
-	// Unique pick frequency
+	// ... on unique monsters
 	Unique int
 }

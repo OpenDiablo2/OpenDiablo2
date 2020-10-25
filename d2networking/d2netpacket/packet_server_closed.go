@@ -20,6 +20,7 @@ func CreateServerClosedPacket() NetPacket {
 	serverClosed := ServerClosedPacket{
 		TS: time.Now(),
 	}
+
 	b, err := json.Marshal(serverClosed)
 	if err != nil {
 		log.Print(err)
@@ -31,6 +32,7 @@ func CreateServerClosedPacket() NetPacket {
 	}
 }
 
+// UnmarshalServerClosed unmarshals the given data to a ServerClosedPacket struct
 func UnmarshalServerClosed(packet []byte) (ServerClosedPacket, error) {
 	var resp ServerClosedPacket
 

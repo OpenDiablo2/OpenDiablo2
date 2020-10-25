@@ -130,6 +130,7 @@ func (mr *MapRenderer) Render(target d2interface.Surface) {
 	if mr.mapEngine.IsLoading {
 		return
 	}
+
 	mapSize := mr.mapEngine.Size()
 
 	stxf, styf := mr.viewport.ScreenToWorld(screenMiddleX, -200)
@@ -533,7 +534,7 @@ func (mr *MapRenderer) renderTileDebug(ax, ay, debugVisLevel int, target d2inter
 
 		for i, wall := range tile.Components.Walls {
 			if wall.Type.Special() {
-				target.PushTranslation(-20, 10+(i+1)*14) // what are these magic numbers??
+				target.PushTranslation(-20, 10+(i+1)*14) // nolint:gomnd // just for debug
 				target.DrawTextf("s: %v-%v", wall.Style, wall.Sequence)
 				target.Pop()
 			}
@@ -556,16 +557,20 @@ func (mr *MapRenderer) renderTileDebug(ax, ay, debugVisLevel int, target d2inter
 	}
 }
 
-// Advance is called once per frame and maintains the MapRenderer's record previous render timestamp and current frame.
-func (mr *MapRenderer) Advance(elapsed float64) {
-	frameLength := 0.1
+const (
+	frameOverflow = 10
+	frameLength   = 1.0 / frameOverflow
+)
 
+// Advance is called once per frame and maintains the MapRenderer's previous
+// render timestamp and current frame.
+func (mr *MapRenderer) Advance(elapsed float64) {
 	mr.lastFrameTime += elapsed
 	framesAdvanced := int(mr.lastFrameTime / frameLength)
 	mr.lastFrameTime -= float64(framesAdvanced) * frameLength
 
 	mr.currentFrame += framesAdvanced
-	if mr.currentFrame > 9 {
+	if mr.currentFrame >= frameOverflow {
 		mr.currentFrame = 0
 	}
 

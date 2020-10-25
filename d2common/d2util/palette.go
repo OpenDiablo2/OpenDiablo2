@@ -6,6 +6,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
+// ImgIndexToRGBA converts the given indices byte slice and palette into
+// a byte slice of RGBA values
 func ImgIndexToRGBA(indexData []byte, palette d2interface.Palette) []byte {
 	bytesPerPixel := 4
 	colorData := make([]byte, len(indexData)*bytesPerPixel)
@@ -20,6 +22,7 @@ func ImgIndexToRGBA(indexData []byte, palette d2interface.Palette) []byte {
 		if err != nil {
 			log.Print(err)
 		}
+
 		colorData[i*bytesPerPixel] = c.R()
 		colorData[i*bytesPerPixel+1] = c.G()
 		colorData[i*bytesPerPixel+2] = c.B()

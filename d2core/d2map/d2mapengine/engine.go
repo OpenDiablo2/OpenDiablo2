@@ -32,8 +32,12 @@ type MapEngine struct {
 	startSubTileY int                       // Starting Y position
 	dt1Files      []string                  // List of DS1 strings
 	// TODO: remove this flag and show loading screen until the initial server packets are handled and the map is generated (only for remote client)
-	IsLoading     bool                      // (temp) Whether we have processed the GenerateMapPacket(only for remote client)
+	IsLoading bool // (temp) Whether we have processed the GenerateMapPacket(only for remote client)
 }
+
+const (
+	subtilesPerTile = 5
+)
 
 // CreateMapEngine creates a new instance of the map engine and returns a pointer to it.
 func CreateMapEngine(asset *d2asset.AssetManager) *MapEngine {
@@ -45,7 +49,7 @@ func CreateMapEngine(asset *d2asset.AssetManager) *MapEngine {
 		MapEntityFactory: entity,
 		StampFactory:     stamp,
 		// This will be set to true when we are using a remote client connection, and then set to false after we process the GenerateMapPacket
-		IsLoading:        false,
+		IsLoading: false,
 	}
 
 	return engine
@@ -93,6 +97,7 @@ func (m *MapEngine) addDT1(fileName string) {
 	if err != nil {
 		log.Print(err)
 	}
+
 	m.dt1TileData = append(m.dt1TileData, dt1.Tiles...)
 	m.dt1Files = append(m.dt1Files, fileName)
 }
@@ -203,9 +208,9 @@ func (m *MapEngine) tileIndexToCoordinate(index int) (x, y int) {
 
 // SubTileAt gets the flags for the given subtile
 func (m *MapEngine) SubTileAt(subX, subY int) *d2dt1.SubTileFlags {
-	tile := m.TileAt(subX/5, subY/5)
+	tile := m.TileAt(subX/subtilesPerTile, subY/subtilesPerTile)
 
-	return tile.GetSubTileFlags(subX%5, subY%5)
+	return tile.GetSubTileFlags(subX%subtilesPerTile, subY%subtilesPerTile)
 }
 
 // TileAt returns a pointer to the data for the map tile at the given
@@ -245,7 +250,7 @@ func (m *MapEngine) RemoveEntity(entity d2interface.MapEntity) {
 
 // GetTiles returns a slice of all tiles matching the given style,
 // sequence and tileType.
-func (m *MapEngine) GetTiles(style, sequence, tileType int) []d2dt1.Tile {
+func (m *MapEngine) GetTiles(style, sequence int, tileType d2enum.TileType) []d2dt1.Tile {
 	tiles := make([]d2dt1.Tile, 0, len(m.dt1TileData))
 
 	for idx := range m.dt1TileData {

@@ -1,4 +1,4 @@
-// Package d2object implements objects placed on the map and their functionality
+// Package d2mapentity implements map entities
 package d2mapentity
 
 import (
@@ -79,12 +79,12 @@ func (ob *Object) Selectable() bool {
 func (ob *Object) Render(target d2interface.Surface) {
 	renderOffset := ob.Position.RenderOffset()
 	target.PushTranslation(
-		int((renderOffset.X()-renderOffset.Y())*16),
-		int(((renderOffset.X() + renderOffset.Y()) * 8)),
+		int((renderOffset.X()-renderOffset.Y())*subtileWidth),
+		int(((renderOffset.X() + renderOffset.Y()) * subtileHeight)),
 	)
 
 	if ob.highlight {
-		target.PushBrightness(2)
+		target.PushBrightness(highlightBrightness)
 		defer target.Pop()
 	}
 

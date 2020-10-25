@@ -23,6 +23,7 @@ func CreatePlayerConnectionRequestPacket(id string, playerState *d2hero.HeroStat
 		ID:          id,
 		PlayerState: playerState,
 	}
+
 	b, err := json.Marshal(playerConnectionRequest)
 	if err != nil {
 		log.Print(err)
@@ -34,6 +35,8 @@ func CreatePlayerConnectionRequestPacket(id string, playerState *d2hero.HeroStat
 	}
 }
 
+// UnmarshalPlayerConnectionRequest unmarshals the given data to a
+// PlayerConnectionRequestPacket struct
 func UnmarshalPlayerConnectionRequest(packet []byte) (PlayerConnectionRequestPacket, error) {
 	var resp PlayerConnectionRequestPacket
 

@@ -143,6 +143,7 @@ const (
 // OnLoad loads the resources for the Character Select screen
 func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	var err error
+
 	v.audioProvider.PlayBGM(d2resource.BGMTitle)
 
 	if err := v.inputManager.BindHandler(v); err != nil {
@@ -152,10 +153,12 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	loading.Progress(tenPercent)
 
 	bgX, bgY := 0, 0
+
 	v.background, err = v.uiManager.NewSprite(d2resource.CharacterSelectionBackground, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
 	}
+
 	v.background.SetPosition(bgX, bgY)
 
 	v.createButtons(loading)
@@ -178,6 +181,7 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	if err != nil {
 		log.Print(err)
 	}
+
 	selBoxX, selBoxY := 37, 86
 	v.selectionBox.SetPosition(selBoxX, selBoxY)
 
@@ -185,6 +189,7 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	if err != nil {
 		log.Print(err)
 	}
+
 	okCancelX, okCancelY := 270, 175
 	v.okCancelBox.SetPosition(okCancelX, okCancelY)
 
@@ -196,6 +201,7 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 
 	for i := 0; i < 8; i++ {
 		offsetX, offsetY := rootLabelOffsetX, rootLabelOffsetY+((i/2)*95)
+
 		if i&1 > 0 {
 			offsetX = 385
 		}
@@ -205,10 +211,12 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 		v.characterNameLabel[i].Color[0] = rgbaColor(lightBrown)
 
 		offsetY += labelHeight
+
 		v.characterStatsLabel[i] = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 		v.characterStatsLabel[i].SetPosition(offsetX, offsetY)
 
 		offsetY += labelHeight
+
 		v.characterExpLabel[i] = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
 		v.characterExpLabel[i].SetPosition(offsetX, offsetY)
 		v.characterExpLabel[i].Color[0] = rgbaColor(lightGreen)
@@ -287,6 +295,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 
 	for i := 0; i < 8; i++ {
 		idx := i + (v.charScrollbar.GetCurrentOffset() * 2)
+
 		if idx >= len(v.gameStates) {
 			v.characterNameLabel[i].SetText("")
 			v.characterStatsLabel[i].SetText("")
@@ -455,6 +464,7 @@ func (v *CharacterSelect) onDeleteCharacterConfirmClicked() {
 	if err != nil {
 		log.Print(err)
 	}
+
 	v.charScrollbar.SetCurrentOffset(0)
 	v.refreshGameStates()
 	v.toggleDeleteCharacterDialog(false)
@@ -503,6 +513,7 @@ func (v *CharacterSelect) onOkButtonClicked() {
 	v.navigator.ToCreateGame(v.gameStates[v.selectedCharacter].FilePath, v.connectionType, v.connectionHost)
 }
 
+// OnUnload candles cleanup when this screen is closed
 func (v *CharacterSelect) OnUnload() error {
 	if err := v.inputManager.UnbindHandler(v); err != nil { // TODO: hack
 		return err

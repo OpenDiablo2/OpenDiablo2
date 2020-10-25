@@ -59,6 +59,10 @@ const (
 	optAutomapShowNames
 )
 
+const (
+	singleFrame = time.Millisecond * 16
+)
+
 // EscapeMenu represents the in-game menu that shows up when the esc key is pressed
 type EscapeMenu struct {
 	isOpen        bool
@@ -229,6 +233,7 @@ func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
 	left := center.AddLayout(d2gui.PositionTypeVertical)
 	left.SetSize(sidePanelsSize, pentSize)
 	leftPent, err := left.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionBackward)
+
 	if err != nil {
 		log.Print(err)
 		return nil
@@ -248,6 +253,7 @@ func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
 	right.AddSpacerStatic(sidePanelsSize-pentSize, 0)
 	right.SetSize(sidePanelsSize, pentSize)
 	rightPent, err := right.AddAnimatedSprite(d2resource.PentSpin, d2resource.PaletteUnits, d2gui.DirectionForward)
+
 	if err != nil {
 		log.Print(err)
 		return nil
@@ -290,12 +296,14 @@ func (m *EscapeMenu) addBigSelectionLabel(l *layout, text string, targetLayout l
 	label.SetMouseEnterHandler(func(_ d2interface.MouseMoveEvent) {
 		m.onHoverElement(elID)
 	})
+
 	l.AddSpacerStatic(spacerWidth, labelGutter)
 	l.actionableElements = append(l.actionableElements, label)
 }
 
 func (m *EscapeMenu) addPreviousMenuLabel(l *layout) {
 	l.AddSpacerStatic(spacerWidth, labelGutter)
+
 	guiLabel, err := l.AddLabel("PREVIOUS MENU", d2gui.FontStyle30Units)
 	if err != nil {
 		log.Print(err)
@@ -330,7 +338,9 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 	layout.SetMouseEnterHandler(func(_ d2interface.MouseMoveEvent) {
 		m.onHoverElement(elID)
 	})
+
 	layout.AddSpacerDynamic()
+
 	guiLabel, err := layout.AddLabel(values[0], d2gui.FontStyle30Units)
 	if err != nil {
 		log.Print(err)
@@ -350,17 +360,21 @@ func (m *EscapeMenu) addEnumLabel(l *layout, optID optionID, text string, values
 		label.Trigger()
 	})
 	l.AddSpacerStatic(spacerWidth, labelGutter)
+
 	l.actionableElements = append(l.actionableElements, label)
 }
 
+// OnLoad loads the necessary files for the escape menu
 func (m *EscapeMenu) OnLoad() {
 	var err error
+
 	m.selectSound, err = m.audioProvider.LoadSound(d2resource.SFXCursorSelect, false, false)
 	if err != nil {
 		log.Print(err)
 	}
 }
 
+// OnEscKey is called when the escape key is pressed
 func (m *EscapeMenu) OnEscKey() {
 	// note: original D2 returns straight to the game from however deep in the menu we are
 	switch m.currentLayout {
@@ -415,6 +429,7 @@ func (m *EscapeMenu) onHoverElement(id int) {
 
 	x, _ := m.leftPent.GetPosition()
 	m.leftPent.SetPosition(x, y+spacerWidth)
+
 	x, _ = m.rightPent.GetPosition()
 	m.rightPent.SetPosition(x, y+spacerWidth)
 }
@@ -428,6 +443,7 @@ func (m *EscapeMenu) setLayout(id layoutID) {
 	m.rightPent = m.layouts[id].rightPent
 	m.currentLayout = id
 	m.layouts[id].currentEl = len(m.layouts[id].actionableElements) - 1 // default to Previous Menu
+
 	m.guiManager.SetLayout(m.layouts[id].Layout)
 
 	// when first rendering a layout, widgets don't have offsets so we hide pentagrams for a frame
@@ -435,8 +451,9 @@ func (m *EscapeMenu) setLayout(id layoutID) {
 		m.layouts[id].rendered = true
 		m.leftPent.SetVisible(false)
 		m.rightPent.SetVisible(false)
+
 		go func() {
-			time.Sleep(16 * time.Millisecond)
+			time.Sleep(singleFrame)
 			m.onHoverElement(m.layouts[id].currentEl)
 			m.leftPent.SetVisible(true)
 			m.rightPent.SetVisible(true)
@@ -454,6 +471,7 @@ func (m *EscapeMenu) onUpKey() {
 	if m.layouts[m.currentLayout].currentEl == 0 {
 		return
 	}
+
 	m.layouts[m.currentLayout].currentEl--
 	m.onHoverElement(m.layouts[m.currentLayout].currentEl)
 }
@@ -466,6 +484,7 @@ func (m *EscapeMenu) onDownKey() {
 	if m.layouts[m.currentLayout].currentEl == len(m.layouts[m.currentLayout].actionableElements)-1 {
 		return
 	}
+
 	m.layouts[m.currentLayout].currentEl++
 	m.onHoverElement(m.layouts[m.currentLayout].currentEl)
 }
@@ -478,6 +497,7 @@ func (m *EscapeMenu) onEnterKey() {
 	m.layouts[m.currentLayout].actionableElements[m.layouts[m.currentLayout].currentEl].Trigger()
 }
 
+// IsOpen returns whether the escape menu is open (visible) or not
 func (m *EscapeMenu) IsOpen() bool {
 	return m.isOpen
 }

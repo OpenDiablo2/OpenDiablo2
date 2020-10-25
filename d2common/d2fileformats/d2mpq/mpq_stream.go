@@ -166,10 +166,12 @@ func (v *Stream) bufferData() {
 
 func (v *Stream) loadSingleUnit() {
 	fileData := make([]byte, v.BlockSize)
+
 	_, err := v.MPQData.file.Seek(int64(v.MPQData.data.HeaderSize), 0)
 	if err != nil {
 		log.Print(err)
 	}
+
 	_, err = v.MPQData.file.Read(fileData)
 	if err != nil {
 		log.Print(err)
@@ -204,6 +206,7 @@ func (v *Stream) loadBlock(blockIndex, expectedLength uint32) []byte {
 	if err != nil {
 		log.Print(err)
 	}
+
 	_, err = v.MPQData.file.Read(data)
 	if err != nil {
 		log.Print(err)
@@ -294,14 +297,13 @@ func deflate(data []byte) []byte {
 	}
 
 	buffer := new(bytes.Buffer)
-	_, err = buffer.ReadFrom(r)
 
+	_, err = buffer.ReadFrom(r)
 	if err != nil {
 		log.Panic(err)
 	}
 
 	err = r.Close()
-
 	if err != nil {
 		log.Panic(err)
 	}
@@ -318,14 +320,13 @@ func pkDecompress(data []byte) []byte {
 	}
 
 	buffer := new(bytes.Buffer)
-	_, err = buffer.ReadFrom(r)
 
+	_, err = buffer.ReadFrom(r)
 	if err != nil {
 		panic(err)
 	}
 
 	err = r.Close()
-
 	if err != nil {
 		panic(err)
 	}

@@ -22,6 +22,7 @@ func CreateSpawnItemPacket(x, y int, codes ...string) NetPacket {
 		Y:     y,
 		Codes: codes,
 	}
+
 	b, err := json.Marshal(spawnItemPacket)
 	if err != nil {
 		log.Print(err)
@@ -33,6 +34,7 @@ func CreateSpawnItemPacket(x, y int, codes ...string) NetPacket {
 	}
 }
 
+// UnmarshalSpawnItem unmarshals the given data to a SpawnItemPacket struct
 func UnmarshalSpawnItem(packet []byte) (SpawnItemPacket, error) {
 	var p SpawnItemPacket
 	if err := json.Unmarshal(packet, &p); err != nil {

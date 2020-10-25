@@ -65,6 +65,7 @@ type Layout struct {
 	entries         []*layoutEntry
 }
 
+// CreateLayout creates a new  GUI layout
 func CreateLayout(renderer d2interface.Renderer, positionType PositionType, assetManager *d2asset.AssetManager) *Layout {
 	layout := &Layout{
 		renderer:     renderer,
@@ -268,6 +269,7 @@ func (l *Layout) getContentSize() (width, height int) {
 	return width, height
 }
 
+// GetSize returns the layout width and height
 func (l *Layout) GetSize() (width, height int) {
 	return l.getSize()
 }

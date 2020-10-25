@@ -90,10 +90,12 @@ func (v *Credits) LoadContributors() []string {
 // OnLoad is called to load the resources for the credits screen
 func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 	var err error
+
 	v.creditsBackground, err = v.uiManager.NewSprite(d2resource.CreditsBackground, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
 	}
+
 	v.creditsBackground.SetPosition(creditsX, creditsY)
 	loading.Progress(twentyPercent)
 

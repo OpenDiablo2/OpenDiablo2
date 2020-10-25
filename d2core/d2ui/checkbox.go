@@ -26,6 +26,7 @@ type Checkbox struct {
 // NewCheckbox creates a new instance of a checkbox
 func (ui *UIManager) NewCheckbox(checkState bool) *Checkbox {
 	var err error
+
 	result := &Checkbox{
 		checkState: checkState,
 		visible:    true,
@@ -45,6 +46,7 @@ func (ui *UIManager) NewCheckbox(checkState bool) *Checkbox {
 		log.Print(err)
 		return nil
 	}
+
 	checkboxSprite.SetPosition(0, 0)
 
 	result.Image, err = ui.renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
@@ -84,6 +86,7 @@ func (v *Checkbox) bindManager(manager *UIManager) {
 // Render renders the checkbox
 func (v *Checkbox) Render(target d2interface.Surface) error {
 	var err error
+
 	target.PushTranslation(v.x, v.y)
 	defer target.Pop()
 

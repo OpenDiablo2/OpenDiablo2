@@ -44,9 +44,15 @@ const (
 	rareJewelAffixMax  = 4
 )
 
+const (
+	maxAffixesOnMagicItem = 2
+	sidesOnACoin          = 2 // for random coin flip
+)
+
 // static check to ensure Item implements Item
 var _ d2item.Item = &Item{}
 
+// Item is a representation of a diablo2 item
 type Item struct {
 	factory *ItemFactory
 	name    string
@@ -137,11 +143,11 @@ func (i *Item) Label() string {
 
 	numAffixes := len(i.PrefixRecords()) + len(i.SuffixRecords())
 
-	if numAffixes > 0 && numAffixes < 3 {
+	if numAffixes > 0 && numAffixes <= maxAffixesOnMagicItem {
 		return d2ui.ColorTokenize(str, d2ui.ColorTokenMagicItem)
 	}
 
-	if numAffixes > 2 {
+	if numAffixes > maxAffixesOnMagicItem {
 		return d2ui.ColorTokenize(str, d2ui.ColorTokenRareItem)
 	}
 
@@ -249,53 +255,53 @@ func (i *Item) Description() string {
 // affix records, depending on the drop modifier given. If an unsupported
 // drop modifier is supplied, it will attempt to reconcile by picked
 // magic affixes as if it were a rare.
-func (i *Item) applyDropModifier(modifier DropModifier) {
+func (i *Item) applyDropModifier(modifier dropModifier) {
 	modifier = i.sanitizeDropModifier(modifier)
 
 	switch modifier {
-	case DropModifierUnique:
+	case dropModifierUnique:
 		i.pickUniqueRecord()
 
 		if i.UniqueRecord() == nil {
-			i.applyDropModifier(DropModifierRare)
+			i.applyDropModifier(dropModifierRare)
 			return
 		}
-	case DropModifierSet:
+	case dropModifierSet:
 		i.pickSetRecords()
 
 		if i.SetRecord() == nil || i.SetItemRecord() == nil {
-			i.applyDropModifier(DropModifierRare)
+			i.applyDropModifier(dropModifierRare)
 			return
 		}
-	case DropModifierRare, DropModifierMagic:
+	case dropModifierRare, dropModifierMagic:
 		// the method of picking stays the same for magic/rare
 		// but magic gets to pick more, and jewels have a special
 		// way of picking affixes
 		i.pickMagicAffixes(modifier)
-	case DropModifierNone:
+	case dropModifierNone:
 	default:
 		return
 	}
 }
 
-func (i *Item) sanitizeDropModifier(modifier DropModifier) DropModifier {
+func (i *Item) sanitizeDropModifier(modifier dropModifier) dropModifier {
 	if i.TypeRecord() == nil {
 		i.TypeCode = i.CommonRecord().Type
 	}
 
 	// should this item always be normal?
 	if i.TypeRecord().Normal {
-		modifier = DropModifierNone
+		modifier = dropModifierNone
 	}
 
 	// should this item always be magic?
 	if i.TypeRecord().Magic {
-		modifier = DropModifierMagic
+		modifier = dropModifierMagic
 	}
 
 	// if it isn't allowed to be rare, force it to be magic
-	if modifier == DropModifierRare && !i.TypeRecord().Rare {
-		modifier = DropModifierMagic
+	if modifier == dropModifierRare && !i.TypeRecord().Rare {
+		modifier = dropModifierMagic
 	}
 
 	return modifier
@@ -320,7 +326,7 @@ func (i *Item) pickSetRecords() {
 	}
 }
 
-func (i *Item) pickMagicAffixes(mod DropModifier) {
+func (i *Item) pickMagicAffixes(mod dropModifier) {
 	if i.PrefixCodes == nil {
 		i.PrefixCodes = make([]string, 0)
 	}
@@ -332,7 +338,7 @@ func (i *Item) pickMagicAffixes(mod DropModifier) {
 	totalAffixes, numSuffixes, numPrefixes := 0, 0, 0
 
 	switch mod {
-	case DropModifierRare:
+	case dropModifierRare:
 		if i.CommonRecord().Type == jewelItemCode {
 			numPrefixes, numSuffixes = rareJewelPrefixMax, rareJewelSuffixMax
 			totalAffixes = rareJewelAffixMax
@@ -340,7 +346,7 @@ func (i *Item) pickMagicAffixes(mod DropModifier) {
 			numPrefixes, numSuffixes = rareItemPrefixMax, rareItemSuffixMax
 			totalAffixes = numPrefixes + numSuffixes
 		}
-	case DropModifierMagic:
+	case dropModifierMagic:
 		numPrefixes, numSuffixes = magicItemPrefixMax, magicItemSuffixMax
 		totalAffixes = numPrefixes + numSuffixes
 	}
@@ -359,7 +365,8 @@ func (i *Item) pickRandomAffixes(max, totalMax int,
 	for numPicks := 0; numPicks < max; numPicks++ {
 		matches := i.factory.FindMatchingAffixes(i.CommonRecord(), affixMap)
 
-		if rollPrefix := i.rand.Intn(2); rollPrefix > 0 {
+		// flip a coin for whether to get an affix on this pick
+		if coinToss := i.rand.Intn(sidesOnACoin) > 0; coinToss {
 			affixCount := len(i.PrefixRecords()) + len(i.SuffixRecords())
 			if len(i.PrefixRecords()) > max || affixCount > totalMax {
 				break
@@ -654,7 +661,7 @@ func (i *Item) generateName() {
 	// if it has more than 2 affixes, it's a rare item
 	// rare items use entries from rareprefix.txt and raresuffix.txt to make their names,
 	// and the prefix and suffix actually go before thec current item name
-	if numAffixes >= 3 {
+	if numAffixes > maxAffixesOnMagicItem {
 		i.rand.Seed(i.Seed)
 
 		prefixes := i.factory.asset.Records.Item.Rare.Prefix
@@ -775,31 +782,38 @@ func (i *Item) GetInventoryItemType() d2enum.InventoryItemType {
 	return d2enum.InventoryItemTypeItem
 }
 
+// InventoryGridSize returns the size of the item in grid units
 func (i *Item) InventoryGridSize() (width, height int) {
 	r := i.CommonRecord()
 	return r.InventoryWidth, r.InventoryHeight
 }
 
+// GetItemCode returns the item code
 func (i *Item) GetItemCode() string {
 	return i.CommonRecord().Code
 }
 
+// Serialize the item to a byte slize
 func (i *Item) Serialize() []byte {
 	panic("item serialization not yet implemented")
 }
 
+// InventoryGridSlot returns the inventory grid slot x and y
 func (i *Item) InventoryGridSlot() (x, y int) {
 	return i.GridX, i.GridY
 }
 
+// SetInventoryGridSlot sets the inventory grid slot x and y
 func (i *Item) SetInventoryGridSlot(x, y int) {
 	i.GridX, i.GridY = x, y
 }
 
+// GetInventoryGridSize returns the inventory grid size in grid units
 func (i *Item) GetInventoryGridSize() (x, y int) {
 	return i.GridX, i.GridY
 }
 
+// Identify sets the identified attribute of the item
 func (i *Item) Identify() *Item {
 	i.attributes.identitified = true
 	return i
@@ -825,6 +839,8 @@ const (
 	reqLevel     = "ItemStats1p" // "Required Level:",
 )
 
+// GetItemDescription gets the complete item description as a slice of strings.
+// This is what is used in the item's hover-tooltip
 func (i *Item) GetItemDescription() []string {
 	lines := make([]string, 0)
 

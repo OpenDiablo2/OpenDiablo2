@@ -277,7 +277,6 @@ func skillDetailsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	return nil
 }
 
-
 func animToEnum(anim string) d2enum.PlayerAnimationMode {
 	switch anim {
 	case "SC":
@@ -296,7 +295,7 @@ func animToEnum(anim string) d2enum.PlayerAnimationMode {
 		return d2enum.PlayerAnimationModeSkill1
 
 	case "S2":
-		return d2enum.PlayerAnimationModeSkill1
+		return d2enum.PlayerAnimationModeSkill2
 
 	case "S3":
 		return d2enum.PlayerAnimationModeSkill3

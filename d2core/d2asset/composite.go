@@ -10,6 +10,12 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
+const (
+	hardcodedFPS     = 25.0
+	hardcodedDivisor = 1.0 / 256.0
+	speedUnit        = hardcodedFPS * hardcodedDivisor
+)
+
 // Composite is a composite entity animation
 type Composite struct {
 	*AssetManager
@@ -92,6 +98,16 @@ func (c *Composite) GetAnimationMode() string {
 	return c.mode.animationMode.String()
 }
 
+// GetCurrentFrame returns the frame index in the current animation mode.
+func (c *Composite) GetCurrentFrame() int {
+	return c.mode.frameIndex
+}
+
+// GetFrameCount returns the number of frames in the current animation mode.
+func (c *Composite) GetFrameCount() int {
+	return c.mode.frameCount
+}
+
 // GetWeaponClass returns the currently loaded weapon class
 func (c *Composite) GetWeaponClass() string {
 	return c.mode.weaponClass
@@ -134,7 +150,7 @@ func (c *Composite) Equip(equipment *[d2enum.CompositeTypeMax]string) error {
 
 // SetAnimSpeed sets the speed at which the Composite's animation should advance through its frames
 func (c *Composite) SetAnimSpeed(speed int) {
-	c.mode.animationSpeed = 1.0 / ((float64(speed) * 25.0) / 256.0)
+	c.mode.animationSpeed = 1.0 / (float64(speed) * speedUnit) // nolint:mnd inverse of freq is time
 	for layerIdx := range c.mode.layers {
 		layer := c.mode.layers[layerIdx]
 		if layer != nil {
@@ -254,7 +270,7 @@ func (c *Composite) createMode(animationMode animationMode, weaponClass string) 
 		weaponClass:    weaponClass,
 		layers:         make([]d2interface.Animation, d2enum.CompositeTypeMax),
 		frameCount:     animationData[0].FramesPerDirection,
-		animationSpeed: 1.0 / ((float64(animationData[0].AnimationSpeed) * 25.0) / 256.0),
+		animationSpeed: 1.0 / (float64(animationData[0].AnimationSpeed) * speedUnit), // nolint:mnd inverse of freq is time
 	}
 
 	for _, cofLayer := range cof.CofLayers {

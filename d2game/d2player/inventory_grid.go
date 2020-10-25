@@ -21,6 +21,7 @@ import (
 // for each row in inventory, we need to account for this padding
 const cellPadding = 1
 
+// InventoryItem is an interface for an items that can be placed in the inventory grid
 type InventoryItem interface {
 	InventoryGridSize() (width int, height int)
 	GetItemCode() string
@@ -46,6 +47,7 @@ type ItemGrid struct {
 	slotSize       int
 }
 
+// NewItemGrid creates a new ItemGrid instance
 func NewItemGrid(asset *d2asset.AssetManager, ui *d2ui.UIManager,
 	record *d2records.InventoryRecord) *ItemGrid {
 	grid := record.Grid
@@ -63,6 +65,7 @@ func NewItemGrid(asset *d2asset.AssetManager, ui *d2ui.UIManager,
 	}
 }
 
+// SlotToScreen translates slot coordinates to screen coordinates
 func (g *ItemGrid) SlotToScreen(slotX, slotY int) (screenX, screenY int) {
 	screenX = g.originX + slotX*g.slotSize
 	screenY = g.originY + slotY*g.slotSize
@@ -70,6 +73,7 @@ func (g *ItemGrid) SlotToScreen(slotX, slotY int) (screenX, screenY int) {
 	return screenX, screenY
 }
 
+// ScreenToSlot translates screen coordinates to slot coordinates
 func (g *ItemGrid) ScreenToSlot(screenX, screenY int) (slotX, slotY int) {
 	slotX = (screenX - g.originX) / g.slotSize
 	slotY = (screenY - g.originY) / g.slotSize
@@ -77,6 +81,7 @@ func (g *ItemGrid) ScreenToSlot(screenX, screenY int) (slotX, slotY int) {
 	return slotX, slotY
 }
 
+// GetSlot returns the inventory item at a given slot (can return nil)
 func (g *ItemGrid) GetSlot(x, y int) InventoryItem {
 	for _, item := range g.items {
 		slotX, slotY := item.InventoryGridSlot()
@@ -90,6 +95,7 @@ func (g *ItemGrid) GetSlot(x, y int) InventoryItem {
 	return nil
 }
 
+// ChangeEquippedSlot sets the item for an equipment slot
 func (g *ItemGrid) ChangeEquippedSlot(slot d2enum.EquippedSlot, item InventoryItem) {
 	var curItem = g.equipmentSlots[slot]
 	curItem.item = item
@@ -123,6 +129,7 @@ func (g *ItemGrid) loadItem(item InventoryItem) {
 
 		// TODO: Put the pattern into D2Shared
 		imgPath := fmt.Sprintf("/data/global/items/inv%s.dc6", item.GetItemCode())
+
 		itemSprite, err := g.uiManager.NewSprite(imgPath, d2resource.PaletteSky)
 		if err != nil {
 			log.Printf("Failed to load sprite, error: " + err.Error())
@@ -185,6 +192,7 @@ func (g *ItemGrid) canFit(x, y int, item InventoryItem) bool {
 	return true
 }
 
+// Set an inventory item at the given grid coordinate
 func (g *ItemGrid) Set(x, y int, item InventoryItem) error {
 	if !g.canFit(x, y, item) {
 		return fmt.Errorf("can not set item (%s) to position (%v, %v)", item.GetItemCode(), x, y)
@@ -223,6 +231,7 @@ func (g *ItemGrid) renderItem(item InventoryItem, target d2interface.Surface, x,
 	if itemSprite != nil {
 		itemSprite.SetPosition(x, y)
 		itemSprite.GetCurrentFrameSize()
+
 		err := itemSprite.Render(target)
 		if err != nil {
 			log.Print(err)
@@ -230,6 +239,7 @@ func (g *ItemGrid) renderItem(item InventoryItem, target d2interface.Surface, x,
 	}
 }
 
+// Render the item grid to the given surface
 func (g *ItemGrid) Render(target d2interface.Surface) {
 	g.renderInventoryItems(target)
 	g.renderEquippedItems(target)

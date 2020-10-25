@@ -2,9 +2,8 @@ package d2player
 
 import (
 	"fmt"
-	"image/color"
-	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -16,12 +15,23 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
+const (
+	frameInventoryTopLeft     = 4
+	frameInventoryTopRight    = 5
+	frameInventoryBottomLeft  = 6
+	frameInventoryBottomRight = 7
+)
+
+const (
+	blackAlpha70 = 0x000000C8
+)
+
 // Inventory represents the inventory
 type Inventory struct {
 	asset      *d2asset.AssetManager
 	item       *diablo2item.ItemFactory
 	uiManager  *d2ui.UIManager
-	frame      *d2ui.Sprite
+	frame      *d2ui.UIFrame
 	panel      *d2ui.Sprite
 	grid       *ItemGrid
 	hoverLabel *d2ui.Label
@@ -77,12 +87,7 @@ func (g *Inventory) Close() {
 
 // Load the resources required by the inventory
 func (g *Inventory) Load() {
-	sprite, err := g.uiManager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
-	if err != nil {
-		log.Print(err)
-	}
-
-	g.frame = sprite
+	g.frame = d2ui.NewUIFrame(g.asset, g.uiManager, d2ui.FrameRight)
 
 	g.panel, _ = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 
@@ -129,7 +134,7 @@ func (g *Inventory) Load() {
 	}
 
 	// TODO: Load the player's actual items
-	_, err = g.grid.Add(inventoryItems...)
+	_, err := g.grid.Add(inventoryItems...)
 	if err != nil {
 		fmt.Printf("could not add items to the inventory, err: %v\n", err)
 	}
@@ -141,93 +146,20 @@ func (g *Inventory) Render(target d2interface.Surface) error {
 		return nil
 	}
 
-	x, y := g.originX, g.originY
-
-	// Frame
-	// Top left
-	if err := g.frame.SetCurrentFrame(5); err != nil {
-		return err
-	}
-
-	w, h := g.frame.GetCurrentFrameSize()
-
-	g.frame.SetPosition(x, y+h)
-
 	if err := g.frame.Render(target); err != nil {
 		return err
 	}
 
-	x += w
-
-	// Top right
-	if err := g.frame.SetCurrentFrame(6); err != nil {
-		return err
-	}
-
-	w, h = g.frame.GetCurrentFrameSize()
-
-	g.frame.SetPosition(x, y+h)
-
-	if err := g.frame.Render(target); err != nil {
-		return err
-	}
-
-	x += w
-	y += h
-
-	// Right
-	if err := g.frame.SetCurrentFrame(7); err != nil {
-		return err
-	}
-
-	w, h = g.frame.GetCurrentFrameSize()
-
-	g.frame.SetPosition(x-w, y+h)
-
-	if err := g.frame.Render(target); err != nil {
-		return err
-	}
-
-	y += h
-
-	// Bottom right
-	if err := g.frame.SetCurrentFrame(8); err != nil {
-		return err
-	}
-
-	w, h = g.frame.GetCurrentFrameSize()
-
-	g.frame.SetPosition(x-w, y+h)
-
-	if err := g.frame.Render(target); err != nil {
-		return err
-	}
-
-	x -= w
-
-	// Bottom left
-	if err := g.frame.SetCurrentFrame(9); err != nil {
-		return err
-	}
-
-	w, h = g.frame.GetCurrentFrameSize()
-
-	g.frame.SetPosition(x-w, y+h)
-
-	if err := g.frame.Render(target); err != nil {
-		return err
-	}
-
-	x, y = g.originX+1, g.originY
+	x, y := g.originX+1, g.originY
 	y += 64
 
 	// Panel
 	// Top left
-	if err := g.panel.SetCurrentFrame(4); err != nil {
+	if err := g.panel.SetCurrentFrame(frameInventoryTopLeft); err != nil {
 		return err
 	}
 
-	w, h = g.panel.GetCurrentFrameSize()
+	w, h := g.panel.GetCurrentFrameSize()
 
 	g.panel.SetPosition(x, y+h)
 
@@ -238,7 +170,7 @@ func (g *Inventory) Render(target d2interface.Surface) error {
 	x += w
 
 	// Top right
-	if err := g.panel.SetCurrentFrame(5); err != nil {
+	if err := g.panel.SetCurrentFrame(frameInventoryTopRight); err != nil {
 		return err
 	}
 
@@ -253,7 +185,7 @@ func (g *Inventory) Render(target d2interface.Surface) error {
 	y += h
 
 	// Bottom right
-	if err := g.panel.SetCurrentFrame(7); err != nil {
+	if err := g.panel.SetCurrentFrame(frameInventoryBottomRight); err != nil {
 		return err
 	}
 
@@ -265,7 +197,7 @@ func (g *Inventory) Render(target d2interface.Surface) error {
 	}
 
 	// Bottom left
-	if err := g.panel.SetCurrentFrame(6); err != nil {
+	if err := g.panel.SetCurrentFrame(frameInventoryBottomLeft); err != nil {
 		return err
 	}
 
@@ -322,21 +254,27 @@ func (g *Inventory) renderItemDescription(target d2interface.Surface, i Inventor
 		maxH += h
 	}
 
-	halfW, halfH := maxW/2, maxH/2
+	halfW, halfH := maxW>>1, maxH>>1
 	centerX, centerY := g.hoverX, iy-halfH
 
-	if (centerX + halfW) > 800 {
-		centerX = 800 - halfW
+	if (centerX + halfW) > screenWidth {
+		centerX = screenWidth - halfW
 	}
 
-	if (centerY + halfH) > 600 {
-		centerY = 600 - halfH
+	if (centerY + halfH) > screenHeight {
+		centerY = screenHeight - halfH
 	}
 
 	target.PushTranslation(centerX, centerY)
+	defer target.Pop()
+
 	target.PushTranslation(-halfW, -halfH)
-	target.DrawRect(maxW, maxH, color.RGBA{0, 0, 0, uint8(200)})
+	defer target.Pop()
+
+	target.DrawRect(maxW, maxH, d2util.Color(blackAlpha70))
+
 	target.PushTranslation(halfW, 0)
+	defer target.Pop()
 
 	for idx := range lines {
 		g.hoverLabel.SetText(lines[idx])
@@ -346,5 +284,4 @@ func (g *Inventory) renderItemDescription(target d2interface.Surface, i Inventor
 	}
 
 	target.PopN(len(lines))
-	target.PopN(3)
 }

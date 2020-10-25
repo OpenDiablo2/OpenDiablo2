@@ -1,9 +1,9 @@
 package d2records
 
-// StorePages struct contains all store page records
+// StorePages is a map of all store page records
 type StorePages map[string]*StorePageRecord
 
-// StorePageRecords represent a row in the storepage.txt file
+// StorePageRecord represent a row in the storepage.txt file
 type StorePageRecord struct {
 	StorePage string
 	Code      string

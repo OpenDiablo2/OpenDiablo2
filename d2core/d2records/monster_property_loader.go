@@ -15,39 +15,39 @@ func monsterPropertiesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 			ID: d.String("Id"),
 
 			Properties: struct {
-				Normal    [NumMonProps]*MonProp
-				Nightmare [NumMonProps]*MonProp
-				Hell      [NumMonProps]*MonProp
+				Normal    [numMonProps]*MonProp
+				Nightmare [numMonProps]*MonProp
+				Hell      [numMonProps]*MonProp
 			}{
-				[NumMonProps]*MonProp{},
-				[NumMonProps]*MonProp{},
-				[NumMonProps]*MonProp{},
+				[numMonProps]*MonProp{},
+				[numMonProps]*MonProp{},
+				[numMonProps]*MonProp{},
 			},
 		}
 
-		for idx := 1; idx <= NumMonProps; idx++ {
+		for idx := 1; idx <= numMonProps; idx++ {
 			record.Properties.Normal[idx-1] = &MonProp{
-				Code:   d.String(fmt.Sprintf(FmtProp, idx, FmtNormal)),
-				Param:  d.String(fmt.Sprintf(FmtPar, idx, FmtNormal)),
-				Chance: d.Number(fmt.Sprintf(FmtChance, idx, FmtNormal)),
-				Min:    d.Number(fmt.Sprintf(FmtMin, idx, FmtNormal)),
-				Max:    d.Number(fmt.Sprintf(FmtMax, idx, FmtNormal)),
+				Code:   d.String(fmt.Sprintf(fmtProp, idx, fmtNormal)),
+				Param:  d.String(fmt.Sprintf(fmtPar, idx, fmtNormal)),
+				Chance: d.Number(fmt.Sprintf(fmtChance, idx, fmtNormal)),
+				Min:    d.Number(fmt.Sprintf(fmtMin, idx, fmtNormal)),
+				Max:    d.Number(fmt.Sprintf(fmtMax, idx, fmtNormal)),
 			}
 
 			record.Properties.Nightmare[idx-1] = &MonProp{
-				Code:   d.String(fmt.Sprintf(FmtProp, idx, FmtNightmare)),
-				Param:  d.String(fmt.Sprintf(FmtPar, idx, FmtNightmare)),
-				Chance: d.Number(fmt.Sprintf(FmtChance, idx, FmtNightmare)),
-				Min:    d.Number(fmt.Sprintf(FmtMin, idx, FmtNightmare)),
-				Max:    d.Number(fmt.Sprintf(FmtMax, idx, FmtNightmare)),
+				Code:   d.String(fmt.Sprintf(fmtProp, idx, fmtNightmare)),
+				Param:  d.String(fmt.Sprintf(fmtPar, idx, fmtNightmare)),
+				Chance: d.Number(fmt.Sprintf(fmtChance, idx, fmtNightmare)),
+				Min:    d.Number(fmt.Sprintf(fmtMin, idx, fmtNightmare)),
+				Max:    d.Number(fmt.Sprintf(fmtMax, idx, fmtNightmare)),
 			}
 
 			record.Properties.Hell[idx-1] = &MonProp{
-				Code:   d.String(fmt.Sprintf(FmtProp, idx, FmtHell)),
-				Param:  d.String(fmt.Sprintf(FmtPar, idx, FmtHell)),
-				Chance: d.Number(fmt.Sprintf(FmtChance, idx, FmtHell)),
-				Min:    d.Number(fmt.Sprintf(FmtMin, idx, FmtHell)),
-				Max:    d.Number(fmt.Sprintf(FmtMax, idx, FmtHell)),
+				Code:   d.String(fmt.Sprintf(fmtProp, idx, fmtHell)),
+				Param:  d.String(fmt.Sprintf(fmtPar, idx, fmtHell)),
+				Chance: d.Number(fmt.Sprintf(fmtChance, idx, fmtHell)),
+				Min:    d.Number(fmt.Sprintf(fmtMin, idx, fmtHell)),
+				Max:    d.Number(fmt.Sprintf(fmtMax, idx, fmtHell)),
 			}
 		}
 

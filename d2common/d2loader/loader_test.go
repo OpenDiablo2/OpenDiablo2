@@ -81,6 +81,7 @@ func TestLoader_AddSource(t *testing.T) {
 	}
 }
 
+// nolint:gocyclo // this is just a test, not a big deal if we ignore linter here
 func TestLoader_Load(t *testing.T) {
 	loader := NewLoader(nil)
 
@@ -89,21 +90,25 @@ func TestLoader_Load(t *testing.T) {
 		t.Fail()
 		log.Print(err)
 	}
+
 	_, err = loader.AddSource(sourcePathD)
 	if err != nil {
 		t.Fail()
 		log.Print(err)
 	}
+
 	_, err = loader.AddSource(sourcePathA)
 	if err != nil {
 		t.Fail()
 		log.Print(err)
 	}
+
 	_, err = loader.AddSource(sourcePathC)
 	if err != nil {
 		t.Fail()
 		log.Print(err)
 	}
+
 	entryCommon, errCommon := loader.Load(commonFile) // common file exists in all three Sources
 
 	entryA, errA := loader.Load(exclusiveA) // each source has a file exclusive to itself

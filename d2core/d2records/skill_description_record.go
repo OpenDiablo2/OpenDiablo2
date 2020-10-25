@@ -9,10 +9,10 @@ type SkillDescriptions map[string]*SkillDescriptionRecord
 // generating text strings for skills.
 type SkillDescriptionRecord struct {
 	Name         string                    // skilldesc
-	SkillPage    string                    // SkillPage
-	SkillRow     string                    // SkillRow
-	SkillColumn  string                    // SkillColumn
-	ListRow      string                    // ListRow
+	SkillPage    int                       // SkillPage
+	SkillRow     int                       // SkillRow
+	SkillColumn  int                       // SkillColumn
+	ListRow      int                       // ListRow
 	ListPool     string                    // ListPool
 	IconCel      int                       // IconCel
 	NameKey      string                    // str name

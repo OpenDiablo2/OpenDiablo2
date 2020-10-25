@@ -18,23 +18,23 @@ const (
 )
 
 const (
-	DropModifierBaseProbability = 1024 // base DropModifier probability total
+	dropModifierBaseProbability = 1024 // base dropModifier probability total
 )
 
-type DropModifier int
+type dropModifier int
 
 const (
-	DropModifierNone DropModifier = iota
-	DropModifierUnique
-	DropModifierSet
-	DropModifierRare
-	DropModifierMagic
+	dropModifierNone dropModifier = iota
+	dropModifierUnique
+	dropModifierSet
+	dropModifierRare
+	dropModifierMagic
 )
 
 const (
-	// DynamicItemLevelRange for treasure codes like `armo33`, this code is used to
+	// dynamicItemLevelRange for treasure codes like `armo33`, this code is used to
 	// select all equivalent items (matching `armo` in this case) with item levels 33,34,35
-	DynamicItemLevelRange = 3
+	dynamicItemLevelRange = 3
 )
 
 const (
@@ -42,6 +42,7 @@ const (
 	goldItemCode         = "gld"
 )
 
+// NewItemFactory creates a new ItemFactory instance
 func NewItemFactory(asset *d2asset.AssetManager) (*ItemFactory, error) {
 	itemFactory := &ItemFactory{
 		asset: asset,
@@ -79,6 +80,7 @@ func (f *ItemFactory) SetSeed(seed int64) {
 	f.Seed = seed
 }
 
+// NewItem creates a new item instance from the given codes
 func (f *ItemFactory) NewItem(codes ...string) (*Item, error) {
 	var item *Item
 
@@ -149,6 +151,7 @@ func (f *ItemFactory) NewItem(codes ...string) (*Item, error) {
 		}
 
 		item.factory = f
+
 		return item.init(), nil
 	}
 
@@ -172,17 +175,17 @@ func (f *ItemFactory) NewProperty(code string, values ...int) *Property {
 	return result.init()
 }
 
-func (f *ItemFactory) rollDropModifier(tcr *d2records.TreasureClassRecord) DropModifier {
-	modMap := map[int]DropModifier{
-		0: DropModifierNone,
-		1: DropModifierUnique,
-		2: DropModifierSet,
-		3: DropModifierRare,
-		4: DropModifierMagic,
+func (f *ItemFactory) rollDropModifier(tcr *d2records.TreasureClassRecord) dropModifier {
+	modMap := map[int]dropModifier{
+		0: dropModifierNone,
+		1: dropModifierUnique,
+		2: dropModifierSet,
+		3: dropModifierRare,
+		4: dropModifierMagic,
 	}
 
 	dropModifiers := []int{
-		DropModifierBaseProbability,
+		dropModifierBaseProbability,
 		tcr.FreqUnique,
 		tcr.FreqSet,
 		tcr.FreqRare,
@@ -205,7 +208,7 @@ func (f *ItemFactory) rollDropModifier(tcr *d2records.TreasureClassRecord) DropM
 		}
 	}
 
-	return DropModifierNone
+	return dropModifierNone
 }
 
 func (f *ItemFactory) rollTreasurePick(tcr *d2records.TreasureClassRecord) *d2records.Treasure {
@@ -395,7 +398,7 @@ func (f *ItemFactory) resolveDynamicTreasureCode(code string) []*d2records.ItemC
 	for idx := range equivList {
 		record := equivList[idx]
 		minLevel := numericComponent
-		maxLevel := minLevel + DynamicItemLevelRange
+		maxLevel := minLevel + dynamicItemLevelRange
 
 		if record.Level >= minLevel && record.Level < maxLevel {
 			result = append(result, record)

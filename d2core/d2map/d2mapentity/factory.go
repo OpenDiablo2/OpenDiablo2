@@ -17,6 +17,12 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 )
 
+const (
+	subtilesPerTile       = 5
+	retailFps             = 25.0
+	millisecondsPerSecond = 1000.0
+)
+
 // NewMapEntityFactory creates a MapEntityFactory instance with the given asset manager
 func NewMapEntityFactory(asset *d2asset.AssetManager) (*MapEntityFactory, error) {
 	itemFactory, err := diablo2item.NewItemFactory(asset)
@@ -77,7 +83,7 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 	}
 
 	stats.NextLevelExp = f.asset.Records.GetExperienceBreakpoint(heroType, stats.Level)
-	stats.Stamina = stats.MaxStamina
+	stats.Stamina = float64(stats.MaxStamina)
 
 	defaultCharStats := f.asset.Records.Character.Stats[heroType]
 	statsState := f.HeroStateFactory.CreateHeroStatsState(heroType, defaultCharStats)
@@ -102,7 +108,8 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 	}
 
 	result.mapEntity.uuid = id
-	result.SetSpeed(baseRunSpeed)
+	//TODO: should be based on Player.isRunning after we store isRunning in the save file
+	result.SetSpeed(baseWalkSpeed)
 	result.mapEntity.directioner = result.rotate
 	err = composite.SetMode(d2enum.PlayerAnimationModeTownNeutral, equipment.RightHand.GetWeaponClass())
 
@@ -165,7 +172,7 @@ func (f *MapEntityFactory) NewItem(x, y int, codes ...string) (*Item, error) {
 
 	animation.PlayForward()
 	animation.SetPlayLoop(false)
-	entity := NewAnimatedEntity(x*5, y*5, animation)
+	entity := NewAnimatedEntity(x*subtilesPerTile, y*subtilesPerTile, animation)
 
 	result := &Item{
 		AnimatedEntity: entity,
@@ -192,9 +199,11 @@ func (f *MapEntityFactory) NewNPC(x, y int, monstat *d2records.MonStatsRecord, d
 
 	composite, err := f.asset.LoadComposite(d2enum.ObjectTypeCharacter, monstat.AnimationDirectoryToken,
 		d2resource.PaletteUnits)
+
 	if err != nil {
 		return nil, err
 	}
+
 	result.composite = composite
 
 	if err := composite.SetMode(d2enum.MonsterAnimationModeNeutral,
@@ -226,15 +235,15 @@ func (f *MapEntityFactory) NewCastOverlay(x, y int, overlayRecord *d2records.Ove
 		d2enum.DrawEffectModulate,
 	)
 
-	// TODO: Frame index and played count seem to be shared across the cloned animation objects when we retrieve the animation from the asset manager cache.
-	animation.Rewind()
-	animation.ResetPlayedCount()
-
 	if err != nil {
 		return nil, err
 	}
 
-	animationSpeed := float64(overlayRecord.AnimRate*25.0) / 1000.0
+	// TODO: Frame index and played count seem to be shared across the cloned animation objects when we retrieve the animation from the asset manager cache.
+	animation.Rewind()
+	animation.ResetPlayedCount()
+
+	animationSpeed := float64(overlayRecord.AnimRate*retailFps) / millisecondsPerSecond
 	playLoop := false // TODO: should be based on the overlay record, some overlays can repeat(e.g. Bone Shield, Frozen Armor)
 
 	animation.SetPlayLength(animationSpeed)
@@ -249,7 +258,7 @@ func (f *MapEntityFactory) NewCastOverlay(x, y int, overlayRecord *d2records.Ove
 	result := &CastOverlay{
 		AnimatedEntity: entity,
 		record:         overlayRecord,
-		playLoop: playLoop,
+		playLoop:       playLoop,
 	}
 
 	return result, nil

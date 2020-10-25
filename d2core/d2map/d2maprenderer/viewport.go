@@ -20,6 +20,10 @@ const (
 	half       = 2
 )
 
+const (
+	worldToOrthoOffsetX = 3
+)
+
 // Viewport is used for converting vectors between screen (pixel), orthogonal (Camera) and world (isometric) space.
 type Viewport struct {
 	defaultScreenRect d2geom.Rectangle
@@ -113,8 +117,8 @@ func (v *Viewport) OrthoToScreenF(x, y float64) (screenX, screenY float64) {
 
 // IsTileVisible returns false if no part of the tile is within the game screen.
 func (v *Viewport) IsTileVisible(x, y float64) bool {
-	orthoX1, orthoY1 := v.WorldToOrtho(x-3, y)
-	orthoX2, orthoY2 := v.WorldToOrtho(x+3, y)
+	orthoX1, orthoY1 := v.WorldToOrtho(x-worldToOrthoOffsetX, y)
+	orthoX2, orthoY2 := v.WorldToOrtho(x+worldToOrthoOffsetX, y)
 
 	return v.IsOrthoRectVisible(orthoX1, orthoY1, orthoX2, orthoY2)
 }

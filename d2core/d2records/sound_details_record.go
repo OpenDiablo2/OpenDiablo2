@@ -1,6 +1,6 @@
 package d2records
 
-// Sounds stores all of the SoundEntries
+// SoundDetails is a map of the SoundEntries
 type SoundDetails map[string]*SoundDetailsRecord
 
 // SoundDetailsRecord represents a sound entry

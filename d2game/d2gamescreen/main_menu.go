@@ -183,28 +183,33 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 
 func (v *MainMenu) loadBackgroundSprites() {
 	var err error
+
 	v.background, err = v.uiManager.NewSprite(d2resource.GameSelectScreen, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
 	}
+
 	v.background.SetPosition(backgroundX, backgroundY)
 
 	v.trademarkBackground, err = v.uiManager.NewSprite(d2resource.TrademarkScreen, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
 	}
+
 	v.trademarkBackground.SetPosition(backgroundX, backgroundY)
 
 	v.tcpIPBackground, err = v.uiManager.NewSprite(d2resource.TCPIPBackground, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
 	}
+
 	v.tcpIPBackground.SetPosition(backgroundX, backgroundY)
 
 	v.serverIPBackground, err = v.uiManager.NewSprite(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
 	if err != nil {
 		log.Print(err)
 	}
+
 	v.serverIPBackground.SetPosition(serverIPbackgroundX, serverIPbackgroundY)
 }
 
@@ -248,18 +253,22 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 
 	v.tcpJoinGameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.tcpJoinGameLabel.Alignment = d2gui.HorizontalAlignCenter
+
 	v.tcpJoinGameLabel.SetText("Enter Host IP Address\nto Join Game")
 
 	v.tcpJoinGameLabel.Color[0] = rgbaColor(gold)
+
 	v.tcpJoinGameLabel.SetPosition(joinGameX, joinGameY)
 }
 
 func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
 	var err error
+
 	v.diabloLogoLeft, err = v.uiManager.NewSprite(d2resource.Diablo2LogoFireLeft, d2resource.PaletteUnits)
 	if err != nil {
 		log.Print(err)
 	}
+
 	v.diabloLogoLeft.SetEffect(d2enum.DrawEffectModulate)
 	v.diabloLogoLeft.PlayForward()
 	v.diabloLogoLeft.SetPosition(diabloLogoX, diabloLogoY)
@@ -269,6 +278,7 @@ func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
 	if err != nil {
 		log.Print(err)
 	}
+
 	v.diabloLogoRight.SetEffect(d2enum.DrawEffectModulate)
 	v.diabloLogoRight.PlayForward()
 	v.diabloLogoRight.SetPosition(diabloLogoX, diabloLogoY)
@@ -277,12 +287,14 @@ func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
 	if err != nil {
 		log.Print(err)
 	}
+
 	v.diabloLogoLeftBack.SetPosition(diabloLogoX, diabloLogoY)
 
 	v.diabloLogoRightBack, err = v.uiManager.NewSprite(d2resource.Diablo2LogoBlackRight, d2resource.PaletteUnits)
 	if err != nil {
 		log.Print(err)
 	}
+
 	v.diabloLogoRightBack.SetPosition(diabloLogoX, diabloLogoY)
 }
 

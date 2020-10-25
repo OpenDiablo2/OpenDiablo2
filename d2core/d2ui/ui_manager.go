@@ -53,6 +53,7 @@ func (ui *UIManager) addWidget(widget Widget) {
 	if err != nil {
 		log.Print(err)
 	}
+
 	ui.widgets = append(ui.widgets, widget)
 
 	widget.bindManager(ui)

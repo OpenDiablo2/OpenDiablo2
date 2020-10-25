@@ -22,6 +22,7 @@ func CreatePongPacket(id string) NetPacket {
 		ID: id,
 		TS: time.Now(),
 	}
+
 	b, err := json.Marshal(pong)
 	if err != nil {
 		log.Print(err)
@@ -33,6 +34,7 @@ func CreatePongPacket(id string) NetPacket {
 	}
 }
 
+// UnmarshalPong unmarshals the given data to a PongPacket struct
 func UnmarshalPong(packet []byte) (PongPacket, error) {
 	var resp PongPacket
 

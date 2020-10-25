@@ -21,6 +21,7 @@ func CreateUpdateServerInfoPacket(seed int64, playerID string) NetPacket {
 		Seed:     seed,
 		PlayerID: playerID,
 	}
+
 	b, err := json.Marshal(updateServerInfo)
 	if err != nil {
 		log.Print(err)
@@ -32,6 +33,7 @@ func CreateUpdateServerInfoPacket(seed int64, playerID string) NetPacket {
 	}
 }
 
+// UnmarshalUpdateServerInfo unmarshals the data to a UpdateServerInfoPacket struct
 func UnmarshalUpdateServerInfo(packet []byte) (UpdateServerInfoPacket, error) {
 	var resp UpdateServerInfoPacket
 

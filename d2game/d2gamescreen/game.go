@@ -31,6 +31,10 @@ const (
 	spawnItemErrStr    = "failed to send SpawnItem packet to the server: (%d, %d) %+v"
 )
 
+const (
+	black50alpha = 0x0000007f // rgba
+)
+
 // Game represents the Gameplay screen
 type Game struct {
 	*d2mapentity.MapEntityFactory
@@ -205,9 +209,9 @@ func (v *Game) Render(screen d2interface.Surface) error {
 
 	if v.gameControls != nil {
 		if v.gameControls.HelpOverlay != nil && v.gameControls.HelpOverlay.IsOpen() {
-			// When help overlay is open, put transparent black screen. Magic noumber is hex for RGBA.
-			screen.DrawRect(800, 600, d2util.Color(0x0000007f))
+			screen.DrawRect(screenWidth, screenHeight, d2util.Color(black50alpha))
 		}
+
 		if err := v.gameControls.Render(screen); err != nil {
 			return err
 		}
@@ -231,7 +235,7 @@ func (v *Game) Advance(elapsed float64) error {
 	}
 
 	v.ticksSinceLevelCheck += elapsed
-	if v.ticksSinceLevelCheck > 1.0 {
+	if v.ticksSinceLevelCheck > 1 {
 		v.ticksSinceLevelCheck = 0
 		if v.localPlayer != nil {
 			tilePosition := v.localPlayer.Position.Tile()

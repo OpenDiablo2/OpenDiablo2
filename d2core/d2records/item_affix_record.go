@@ -62,6 +62,7 @@ type ItemAffixCommonRecord struct {
 	Transform bool
 }
 
+// AddMember adds an affix to the group
 func (g *ItemAffixCommonGroup) AddMember(a *ItemAffixCommonRecord) {
 	if g.Members == nil {
 		g.Members = make(map[string]*ItemAffixCommonRecord)
@@ -70,6 +71,7 @@ func (g *ItemAffixCommonGroup) AddMember(a *ItemAffixCommonRecord) {
 	g.Members[a.Name] = a
 }
 
+// GetTotalFrequency returns the cumulative frequency of the affix group
 func (g *ItemAffixCommonGroup) GetTotalFrequency() int {
 	total := 0
 
