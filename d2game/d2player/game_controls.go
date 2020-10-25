@@ -43,7 +43,8 @@ const (
 	globeHeight              = 80
 	globeWidth               = 80
 	hoverLabelOuterPad       = 5
-	mouseBtnActionsTreshhold = 0.25
+	mouseBtnActionsThreshold = 0.25
+	percentStaminaBarLow     = 0.25
 )
 
 const (
@@ -204,6 +205,7 @@ const (
 
 const (
 	lightBrownAlpha72 = 0xaf8848c8
+	redAlpha72        = 0xff0000c8
 	whiteAlpha100     = 0xffffffff
 )
 
@@ -658,8 +660,8 @@ func (g *GameControls) OnMouseButtonRepeat(event d2interface.MouseEvent) bool {
 	lastLeft := now - g.lastLeftBtnActionTime
 	lastRight := now - g.lastRightBtnActionTime
 	inRect := !g.isInActiveMenusRect(event.X(), event.Y())
-	shouldDoLeft := lastLeft >= mouseBtnActionsTreshhold
-	shouldDoRight := lastRight >= mouseBtnActionsTreshhold
+	shouldDoLeft := lastLeft >= mouseBtnActionsThreshold
+	shouldDoRight := lastRight >= mouseBtnActionsThreshold
 
 	if isLeft && shouldDoLeft && inRect && !g.hero.IsCasting() {
 		g.lastLeftBtnActionTime = now
@@ -1079,6 +1081,10 @@ func (g *GameControls) renderHUD(target d2interface.Surface) error {
 	staminaPercent := g.hero.Stats.Stamina / float64(g.hero.Stats.MaxStamina)
 
 	staminaBarColor := d2util.Color(lightBrownAlpha72)
+	if staminaPercent < percentStaminaBarLow {
+		staminaBarColor = d2util.Color(redAlpha72)
+	}
+
 	target.DrawRect(int(staminaPercent*staminaBarWidth), staminaBarHeight, staminaBarColor)
 	target.Pop()
 	target.Pop()
