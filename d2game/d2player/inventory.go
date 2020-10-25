@@ -51,7 +51,8 @@ func NewInventory(asset *d2asset.AssetManager, ui *d2ui.UIManager,
 	hoverLabel := ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
 	hoverLabel.Alignment = d2gui.HorizontalAlignCenter
 
-	itemFactory, _ := diablo2item.NewItemFactory(asset) // TODO handle errors
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/797
+	itemFactory, _ := diablo2item.NewItemFactory(asset)
 
 	return &Inventory{
 		asset:      asset,
@@ -91,7 +92,7 @@ func (g *Inventory) Load() {
 
 	g.panel, _ = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 
-	// TODO: remove this item test code
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/795
 	testInventoryCodes := [][]string{
 		{"kit", "Crimson", "of the Bat", "of Frost"},
 		{"rin", "Steel", "of Shock"},
@@ -111,6 +112,7 @@ func (g *Inventory) Load() {
 		inventoryItems = append(inventoryItems, item)
 	}
 
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/795
 	testEquippedItemCodes := map[d2enum.EquippedSlot][]string{
 		d2enum.EquippedSlotLeftArm:   {"wnd"},
 		d2enum.EquippedSlotRightArm:  {"buc"},
@@ -133,7 +135,6 @@ func (g *Inventory) Load() {
 		g.grid.ChangeEquippedSlot(slot, item)
 	}
 
-	// TODO: Load the player's actual items
 	_, err := g.grid.Add(inventoryItems...)
 	if err != nil {
 		fmt.Printf("could not add items to the inventory, err: %v\n", err)

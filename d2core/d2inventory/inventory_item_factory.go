@@ -24,6 +24,7 @@ type InventoryItemFactory struct {
 
 // LoadHeroObjects loads the equipment objects of the hero
 func (f *InventoryItemFactory) loadHeroObjects() {
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/795
 	//Mode:  d2enum.AnimationModePlayerNeutral.String(),
 	//Base:  "/data/global/chars",
 	f.DefaultHeroItems = map[d2enum.Hero]CharacterEquipment{
@@ -69,7 +70,7 @@ func (f *InventoryItemFactory) GetArmorItemByCode(code string) *InventoryItemArm
 		InventorySizeY: result.InventoryHeight,
 		ItemName:       result.Name,
 		ItemCode:       result.Code,
-		ArmorClass:     "lit", // TODO: Where does this come from?
+		ArmorClass:     d2enum.ArmorClassLite, // comes from ArmType.txt
 	}
 }
 
@@ -90,7 +91,7 @@ func (f *InventoryItemFactory) GetMiscItemByCode(code string) *InventoryItemMisc
 
 // GetWeaponItemByCode returns the weapon item for the given code
 func (f *InventoryItemFactory) GetWeaponItemByCode(code string) *InventoryItemWeapon {
-	// TODO: Non-normal codes will fail here...
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/796
 	result := f.asset.Records.Item.Weapons[code]
 	if result == nil {
 		log.Fatalf("Could not find weapon entry for code '%s'", code)

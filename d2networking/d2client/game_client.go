@@ -51,7 +51,7 @@ func Create(connectionType d2clientconnectiontype.ClientConnectionType,
 	asset *d2asset.AssetManager, scriptEngine *d2script.ScriptEngine) (*GameClient, error) {
 	result := &GameClient{
 		asset:          asset,
-		MapEngine:      d2mapengine.CreateMapEngine(asset), // TODO: Mapgen - Needs levels.txt stuff
+		MapEngine:      d2mapengine.CreateMapEngine(asset),
 		Players:        make(map[string]*d2mapentity.Player),
 		connectionType: connectionType,
 		scriptEngine:   scriptEngine,
@@ -152,7 +152,7 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		// Not implemented
 		log.Printf("RemoteClientConnection: received disconnect: %s", packet.PacketData)
 	case d2netpackettype.ServerClosed:
-		// TODO: Need to be tied into a character save and exit
+		// https://github.com/OpenDiablo2/OpenDiablo2/issues/802
 		log.Print("Server has been closed")
 		os.Exit(0)
 	default:
@@ -321,7 +321,7 @@ func (g *GameClient) createSummonedNpcEntity(skillRecord *d2records.SkillRecord,
 		return nil, fmt.Errorf("Cannot cast skill - No monstat entry for \"%s\"", skillRecord.Summon)
 	}
 
-	// TODO: overlay animations for the summon
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/803
 	summonedNpcEntity, err := g.MapEngine.NewNPC(X, Y, monsterStatsRecord, 0)
 	if err != nil {
 		return nil, err
@@ -342,7 +342,7 @@ func (g *GameClient) createMissileEntities(skillRecord *d2records.SkillRecord, p
 	missileEntities := make([]*d2mapentity.Missile, 0)
 	for _, missileRecord := range missileRecords {
 		if missileRecord == nil {
-			continue;
+			continue
 		}
 
 		missileEntity, err := g.createMissileEntity(missileRecord, player, castX, castY)
@@ -356,7 +356,7 @@ func (g *GameClient) createMissileEntities(skillRecord *d2records.SkillRecord, p
 	return missileEntities, nil
 }
 
-func (g *GameClient) createMissileEntity(missileRecord *d2records.MissileRecord, player *d2mapentity.Player, castX, castY float64) (*d2mapentity.Missile, error){
+func (g *GameClient) createMissileEntity(missileRecord *d2records.MissileRecord, player *d2mapentity.Player, castX, castY float64) (*d2mapentity.Missile, error) {
 	if missileRecord == nil {
 		return nil, nil
 	}

@@ -68,7 +68,8 @@ func CreateCharacterSelect(
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	connectionHost string,
 ) *CharacterSelect {
-	playerStateFactory, _ := d2hero.NewHeroStateFactory(asset) // TODO: handle errors
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/790
+	playerStateFactory, _ := d2hero.NewHeroStateFactory(asset)
 	entityFactory, _ := d2mapentity.NewMapEntityFactory(asset)
 
 	return &CharacterSelect{
@@ -142,11 +143,10 @@ const (
 
 // OnLoad loads the resources for the Character Select screen
 func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
-	var err error
-
 	v.audioProvider.PlayBGM(d2resource.BGMTitle)
 
-	if err := v.inputManager.BindHandler(v); err != nil {
+	err := v.inputManager.BindHandler(v)
+	if err != nil {
 		fmt.Println("failed to add Character Select screen as event handler")
 	}
 
@@ -315,7 +315,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		heroType := v.gameStates[idx].HeroType
 		equipment := v.DefaultHeroItems[heroType]
 
-		// TODO: Generate or load the object from the actual player data...
+		// https://github.com/OpenDiablo2/OpenDiablo2/issues/791
 		v.characterImage[i] = v.NewPlayer("", "", 0, 0, 0,
 			v.gameStates[idx].HeroType,
 			v.gameStates[idx].Stats,
@@ -396,51 +396,53 @@ func (v *CharacterSelect) moveSelectionBox() {
 
 // OnMouseButtonDown is called when a mouse button is clicked
 func (v *CharacterSelect) OnMouseButtonDown(event d2interface.MouseEvent) bool {
-	if !v.showDeleteConfirmation {
-		if event.Button() == d2enum.MouseButtonLeft {
-			mx, my := event.X(), event.Y()
-
-			bw := selectionBoxWidth
-			bh := selectionBoxHeight
-			localMouseX := mx - selectionBoxOffsetX
-			localMouseY := my - selectionBoxOffsetY
-
-			// if Mouse is within character selection bounds.
-			if localMouseX > 0 && localMouseX < bw*2 && localMouseY >= 0 && localMouseY < bh*4 {
-				adjustY := localMouseY / bh
-				// sets current verticle index for selected character in left column.
-				selectedIndex := adjustY * selectionBoxNumColumns
-
-				// if selected character in left column should be in right column, add 1.
-				if localMouseX > bw {
-					selectedIndex++
-				}
-
-				// Make sure selection takes the scrollbar into account to make proper selection.
-				if (v.charScrollbar.GetCurrentOffset()*2)+selectedIndex < len(v.gameStates) {
-					selectedIndex = (v.charScrollbar.GetCurrentOffset() * 2) + selectedIndex
-				}
-
-				// if the selection box didn't move, check if it was a double click, otherwise set selectedCharacter to
-				// selectedIndex and move selection box over both.
-				if v.selectedCharacter == selectedIndex {
-					// We clicked twice within character selection box within  v.doubleClickTime seconds.
-					if (v.tickTimer - v.storedTickTimer) < doubleClickTime {
-						v.onOkButtonClicked()
-					}
-				} else if selectedIndex < len(v.gameStates) {
-					v.selectedCharacter = selectedIndex
-					v.moveSelectionBox()
-				}
-				// Keep track of when we last clicked so we can determine if we double clicked a character.
-				v.storedTickTimer = v.tickTimer
-			}
-
-			return true
-		}
+	if v.showDeleteConfirmation {
+		return false
 	}
 
-	return false
+	if event.Button() != d2enum.MouseButtonLeft {
+		return false
+	}
+
+	mx, my := event.X(), event.Y()
+
+	bw := selectionBoxWidth
+	bh := selectionBoxHeight
+	localMouseX := mx - selectionBoxOffsetX
+	localMouseY := my - selectionBoxOffsetY
+
+	// if Mouse is within character selection bounds.
+	if localMouseX > 0 && localMouseX < bw*2 && localMouseY >= 0 && localMouseY < bh*4 {
+		adjustY := localMouseY / bh
+		// sets current verticle index for selected character in left column.
+		selectedIndex := adjustY * selectionBoxNumColumns
+
+		// if selected character in left column should be in right column, add 1.
+		if localMouseX > bw {
+			selectedIndex++
+		}
+
+		// Make sure selection takes the scrollbar into account to make proper selection.
+		if (v.charScrollbar.GetCurrentOffset()*2)+selectedIndex < len(v.gameStates) {
+			selectedIndex = (v.charScrollbar.GetCurrentOffset() * 2) + selectedIndex
+		}
+
+		// if the selection box didn't move, check if it was a double click, otherwise set selectedCharacter to
+		// selectedIndex and move selection box over both.
+		if v.selectedCharacter == selectedIndex {
+			// We clicked twice within character selection box within  v.doubleClickTime seconds.
+			if (v.tickTimer - v.storedTickTimer) < doubleClickTime {
+				v.onOkButtonClicked()
+			}
+		} else if selectedIndex < len(v.gameStates) {
+			v.selectedCharacter = selectedIndex
+			v.moveSelectionBox()
+		}
+		// Keep track of when we last clicked so we can determine if we double clicked a character.
+		v.storedTickTimer = v.tickTimer
+	}
+
+	return true
 }
 
 // Advance runs the update logic on the Character Select screen
@@ -515,7 +517,8 @@ func (v *CharacterSelect) onOkButtonClicked() {
 
 // OnUnload candles cleanup when this screen is closed
 func (v *CharacterSelect) OnUnload() error {
-	if err := v.inputManager.UnbindHandler(v); err != nil { // TODO: hack
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/792
+	if err := v.inputManager.UnbindHandler(v); err != nil {
 		return err
 	}
 

@@ -42,7 +42,7 @@ type Game struct {
 	gameClient           *d2client.GameClient
 	mapRenderer          *d2maprenderer.MapRenderer
 	uiManager            *d2ui.UIManager
-	gameControls         *d2player.GameControls // TODO: Hack
+	gameControls         *d2player.GameControls
 	localPlayer          *d2mapentity.Player
 	lastRegionType       d2enum.RegionIdType
 	ticksSinceLevelCheck float64
@@ -152,9 +152,9 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 				return
 			}
 
-			monster, err := v.gameClient.MapEngine.NewNPC(x, y, monstat, 0)
-			if err != nil {
-				v.terminal.OutputErrorf("error generating monster \"%s\": %v", name, err)
+			monster, npcErr := v.gameClient.MapEngine.NewNPC(x, y, monstat, 0)
+			if npcErr != nil {
+				v.terminal.OutputErrorf("error generating monster \"%s\": %v", name, npcErr)
 				return
 			}
 
@@ -168,11 +168,13 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 
 // OnUnload releases the resources of Gameplay screen
 func (v *Game) OnUnload() error {
-	if err := v.inputManager.UnbindHandler(v.gameControls); err != nil { // TODO: hack
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/792
+	if err := v.inputManager.UnbindHandler(v.gameControls); err != nil {
 		return err
 	}
 
-	if err := v.inputManager.UnbindHandler(v.escapeMenu); err != nil { // TODO: hack
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/792
+	if err := v.inputManager.UnbindHandler(v.escapeMenu); err != nil {
 		return err
 	}
 
@@ -225,7 +227,7 @@ func (v *Game) Advance(elapsed float64) error {
 	v.soundEngine.Advance(elapsed)
 
 	if (v.escapeMenu != nil && !v.escapeMenu.IsOpen()) || len(v.gameClient.Players) != 1 {
-		v.gameClient.MapEngine.Advance(elapsed) // TODO: Hack
+		v.gameClient.MapEngine.Advance(elapsed)
 	}
 
 	if v.gameControls != nil {
@@ -247,7 +249,6 @@ func (v *Game) Advance(elapsed float64) error {
 
 				// skip showing zone change text the first time we enter the world
 				if v.lastRegionType != d2enum.RegionNone && v.lastRegionType != tile.RegionType {
-					//TODO: Should not be using RegionType as an index - this will return incorrect LevelDetails record for most of the zones.
 					areaName := levelDetails.LevelDisplayName
 					areaChgStr := fmt.Sprintf("Entering The %s", areaName)
 					v.gameControls.SetZoneChangeText(areaChgStr)

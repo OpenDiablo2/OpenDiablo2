@@ -105,13 +105,12 @@ type MapEngineTest struct {
 	selX, selY             int
 	selectedTile           *d2mapengine.MapTile
 
-	//TODO: this is region specific properties, should be refactored for multi-region rendering
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/806
 	currentRegion int
 	levelPreset   int
 	fileIndex     int
 	regionSpec    regionSpec
 	filesCount    int
-	debugVisLevel int
 }
 
 // CreateMapEngineTest creates the Map Engine Test screen and returns a pointer to it
@@ -223,6 +222,7 @@ func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 
 // OnUnload releases the resources for the Map Engine Test screen
 func (met *MapEngineTest) OnUnload() error {
+	//  https://github.com/OpenDiablo2/OpenDiablo2/issues/792
 	if err := met.inputManager.UnbindHandler(met); err != nil {
 		return err
 	}
@@ -302,6 +302,7 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 
 		screen.PushTranslation(lineBigIndentX, 0)
 		defer screen.Pop()
+
 		screen.DrawTextf("Floors")
 
 		tpop = 0
@@ -322,6 +323,7 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 
 		screen.PushTranslation(lineBigIndentX, 0)
 		defer screen.Pop()
+
 		screen.DrawTextf("Shadows")
 
 		tpop = 0
@@ -342,6 +344,7 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 
 		screen.PushTranslation(lineBigIndentX, 0)
 		defer screen.Pop()
+
 		screen.DrawTextf("Substitutions")
 
 		tpop = 0

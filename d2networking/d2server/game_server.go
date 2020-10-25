@@ -86,7 +86,7 @@ func NewGameServer(asset *d2asset.AssetManager, networkServer bool,
 	//   load files independent of the app.
 	mapEngine := d2mapengine.CreateMapEngine(asset)
 	mapEngine.SetSeed(gameServer.seed)
-	mapEngine.ResetMap(d2enum.RegionAct1Town, 100, 100) // TODO: Mapgen - Needs levels.txt stuff
+	mapEngine.ResetMap(d2enum.RegionAct1Town, 100, 100)
 
 	mapGen, err := d2mapgen.NewMapGenerator(asset, mapEngine)
 	if err != nil {
