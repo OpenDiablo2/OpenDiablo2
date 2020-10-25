@@ -1084,6 +1084,7 @@ func (g *GameControls) renderHUD(target d2interface.Surface) error {
 	if staminaPercent < percentStaminaBarLow {
 		staminaBarColor = d2util.Color(redAlpha72)
 	}
+
 	target.DrawRect(int(staminaPercent*staminaBarWidth), staminaBarHeight, staminaBarColor)
 	target.Pop()
 	target.Pop()
