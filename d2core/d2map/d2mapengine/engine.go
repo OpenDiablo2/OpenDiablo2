@@ -31,7 +31,8 @@ type MapEngine struct {
 	startSubTileX int                       // Starting X position
 	startSubTileY int                       // Starting Y position
 	dt1Files      []string                  // List of DS1 strings
-	// TODO: remove this flag and show loading screen until the initial server packets are handled and the map is generated (only for remote client)
+
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/789
 	IsLoading bool // (temp) Whether we have processed the GenerateMapPacket(only for remote client)
 }
 
@@ -201,11 +202,6 @@ func (m *MapEngine) tileCoordinateToIndex(x, y int) int {
 	return x + (y * m.size.Width)
 }
 
-// tileIndexToCoordinate converts tile index from MapEngine.tiles to x,y coordinate
-func (m *MapEngine) tileIndexToCoordinate(index int) (x, y int) {
-	return index % m.size.Width, index / m.size.Width
-}
-
 // SubTileAt gets the flags for the given subtile
 func (m *MapEngine) SubTileAt(subX, subY int) *d2dt1.SubTileFlags {
 	tile := m.TileAt(subX/subtilesPerTile, subY/subtilesPerTile)
@@ -294,9 +290,8 @@ func (m *MapEngine) GetCenterPosition() (x, y float64) {
 // Advance calls the Advance() method for all entities,
 // processing a single tick.
 func (m *MapEngine) Advance(tickTime float64) {
-	// TODO:(temp hack) prevents concurrent map read & write exceptions that occur when we join a TCP game as a remote client
-	// due to the engine updating entities before handling the GenerateMapPacket
 	if m.IsLoading {
+		// https://github.com/OpenDiablo2/OpenDiablo2/issues/789
 		return
 	}
 
