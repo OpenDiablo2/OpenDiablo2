@@ -280,7 +280,6 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 
 		screen.PushTranslation(lineNormalIndentX, lineNormalOffsetY)
 		defer screen.Pop()
-
 		screen.DrawTextf("Walls")
 
 		tpop := 0
