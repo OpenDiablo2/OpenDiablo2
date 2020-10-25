@@ -13,10 +13,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
-const (
-	AutoFileIndex = -1
-)
-
 // NewStampFactory creates a MapStamp factory instance
 func NewStampFactory(asset *d2asset.AssetManager, entity *d2mapentity.MapEntityFactory) *StampFactory {
 	return &StampFactory{asset, entity}
@@ -67,6 +63,7 @@ func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fil
 		}
 	}
 
+	// nolint:gosec // not a big deal for now
 	levelIndex := int(math.Round(float64(len(levelFilesToPick)-1) * rand.Float64()))
 	if fileIndex >= 0 && fileIndex < len(levelFilesToPick) {
 		levelIndex = fileIndex

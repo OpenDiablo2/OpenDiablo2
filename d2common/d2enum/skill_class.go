@@ -2,10 +2,11 @@ package d2enum
 
 import "log"
 
+// SkillClass represents the skills for a character class
 type SkillClass int
 
+// Skill classes
 const (
-	// SkillClassGeneric is ""
 	SkillClassGeneric SkillClass = iota
 	SkillClassBarbarian
 	SkillClassNecromancer

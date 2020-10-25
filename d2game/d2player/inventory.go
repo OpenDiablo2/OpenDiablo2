@@ -40,15 +40,15 @@ type Inventory struct {
 	grid        *ItemGrid
 	hoverLabel  *d2ui.Label
 	closeButton *d2ui.Button
-	hoverX     int
-	hoverY     int
-	originX    int
-	originY    int
-	lastMouseX int
-	lastMouseY int
-	hovering   bool
-	isOpen     bool
-	onCloseCb  func()
+	hoverX      int
+	hoverY      int
+	originX     int
+	originY     int
+	lastMouseX  int
+	lastMouseY  int
+	hovering    bool
+	isOpen      bool
+	onCloseCb   func()
 }
 
 // NewInventory creates an inventory instance and returns a pointer to it
@@ -99,9 +99,9 @@ func (g *Inventory) Close() {
 	g.onCloseCb()
 }
 
-// Set the callback run on closing the inventory
+// SetOnCloseCb the callback run on closing the inventory
 func (g *Inventory) SetOnCloseCb(cb func()) {
-       g.onCloseCb = cb
+	g.onCloseCb = cb
 }
 
 // Load the resources required by the inventory
