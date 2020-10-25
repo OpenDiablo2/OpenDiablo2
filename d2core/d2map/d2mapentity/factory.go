@@ -18,7 +18,9 @@ import (
 )
 
 const (
-	subtilesPerTile = 5
+	subtilesPerTile       = 5
+	retailFps             = 25.0
+	millisecondsPerSecond = 1000.0
 )
 
 // NewMapEntityFactory creates a MapEntityFactory instance with the given asset manager
@@ -233,15 +235,15 @@ func (f *MapEntityFactory) NewCastOverlay(x, y int, overlayRecord *d2records.Ove
 		d2enum.DrawEffectModulate,
 	)
 
-	// TODO: Frame index and played count seem to be shared across the cloned animation objects when we retrieve the animation from the asset manager cache.
-	animation.Rewind()
-	animation.ResetPlayedCount()
-
 	if err != nil {
 		return nil, err
 	}
 
-	animationSpeed := float64(overlayRecord.AnimRate*25.0) / 1000.0
+	// TODO: Frame index and played count seem to be shared across the cloned animation objects when we retrieve the animation from the asset manager cache.
+	animation.Rewind()
+	animation.ResetPlayedCount()
+
+	animationSpeed := float64(overlayRecord.AnimRate*retailFps) / millisecondsPerSecond
 	playLoop := false // TODO: should be based on the overlay record, some overlays can repeat(e.g. Bone Shield, Frozen Armor)
 
 	animation.SetPlayLength(animationSpeed)

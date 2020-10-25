@@ -17,6 +17,12 @@ const (
 	defaultFloorTileHeight       = 10
 )
 
+const (
+	blockOffsetY      = 32
+	tileSurfaceWidth  = 160
+	tileSurfaceHeight = 80
+)
+
 func (mr *MapRenderer) generateTileCache() {
 	var err error
 	mr.palette, err = mr.loadPaletteForAct(d2enum.RegionIdType(mr.mapEngine.LevelType().ID))
@@ -113,10 +119,8 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord) {
 	}
 }
 
-const shadowTileType = 13
-
 func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord) {
-	tileOptions := mr.mapEngine.GetTiles(int(tile.Style), int(tile.Sequence), shadowTileType)
+	tileOptions := mr.mapEngine.GetTiles(int(tile.Style), int(tile.Sequence), d2enum.TileShadow)
 
 	var tileData *d2dt1.Tile
 
@@ -165,7 +169,7 @@ func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord) {
 }
 
 func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord) {
-	tileOptions := mr.mapEngine.GetTiles(int(tile.Style), int(tile.Sequence), int(tile.Type))
+	tileOptions := mr.mapEngine.GetTiles(int(tile.Style), int(tile.Sequence), tile.Type)
 
 	var tileData *d2dt1.Tile
 
@@ -177,8 +181,11 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord) {
 
 	var newTileData *d2dt1.Tile = nil
 
-	if tile.Type == 3 {
-		newTileOptions := mr.mapEngine.GetTiles(int(tile.Style), int(tile.Sequence), int(4))
+	if tile.Type == d2enum.TileRightPartOfNorthCornerWall {
+		newTileOptions := mr.mapEngine.GetTiles(
+			int(tile.Style), int(tile.Sequence),
+			d2enum.TileLeftPartOfNorthCornerWall,
+		)
 		newTileData = &newTileOptions[tile.RandomIndex]
 	}
 
@@ -193,16 +200,16 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord) {
 
 	for _, block := range target.Blocks {
 		tileMinY = d2math.MinInt32(tileMinY, int32(block.Y))
-		tileMaxY = d2math.MaxInt32(tileMaxY, int32(block.Y+32))
+		tileMaxY = d2math.MaxInt32(tileMaxY, int32(block.Y+blockOffsetY))
 	}
 
 	realHeight := d2math.MaxInt32(d2math.AbsInt32(tileData.Height), tileMaxY-tileMinY)
 	tileYOffset := -tileMinY
 
-	if tile.Type == 15 {
+	if tile.Type == d2enum.TileRoof {
 		tile.YAdjust = -int(tileData.RoofHeight)
 	} else {
-		tile.YAdjust = int(tileMinY) + 80
+		tile.YAdjust = int(tileMinY) + tileSurfaceHeight
 	}
 
 	cachedImage := mr.getImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tile.RandomIndex)
@@ -215,17 +222,17 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord) {
 		return
 	}
 
-	image, err := mr.renderer.NewSurface(160, int(realHeight), d2enum.FilterNearest)
+	image, err := mr.renderer.NewSurface(tileSurfaceWidth, int(realHeight), d2enum.FilterNearest)
 	if err != nil {
 		log.Print(err)
 	}
 
-	indexData := make([]byte, 160*realHeight)
+	indexData := make([]byte, tileSurfaceWidth*realHeight)
 
-	d2dt1.DecodeTileGfxData(tileData.Blocks, &indexData, tileYOffset, 160)
+	d2dt1.DecodeTileGfxData(tileData.Blocks, &indexData, tileYOffset, tileSurfaceWidth)
 
 	if newTileData != nil {
-		d2dt1.DecodeTileGfxData(newTileData.Blocks, &indexData, tileYOffset, 160)
+		d2dt1.DecodeTileGfxData(newTileData.Blocks, &indexData, tileYOffset, tileSurfaceWidth)
 	}
 
 	pixels := d2util.ImgIndexToRGBA(indexData, mr.palette)

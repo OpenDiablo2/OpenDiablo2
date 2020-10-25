@@ -250,7 +250,7 @@ func (m *MapEngine) RemoveEntity(entity d2interface.MapEntity) {
 
 // GetTiles returns a slice of all tiles matching the given style,
 // sequence and tileType.
-func (m *MapEngine) GetTiles(style, sequence, tileType int) []d2dt1.Tile {
+func (m *MapEngine) GetTiles(style, sequence int, tileType d2enum.TileType) []d2dt1.Tile {
 	tiles := make([]d2dt1.Tile, 0, len(m.dt1TileData))
 
 	for idx := range m.dt1TileData {
