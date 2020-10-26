@@ -53,6 +53,7 @@ const (
 var _ d2item.Item = &Item{}
 
 // Item is a representation of a diablo2 item
+// nolint:structcheck,unused // WIP
 type Item struct {
 	factory *ItemFactory
 	name    string
@@ -83,6 +84,7 @@ type Item struct {
 	sockets []*d2item.Item // there will be checks for handling the craziness this might entail
 }
 
+// nolint:structcheck,unused // WIP
 type itemAttributes struct {
 	worldSprite     *d2ui.Sprite
 	inventorySprite *d2ui.Sprite
@@ -118,7 +120,7 @@ type itemAttributes struct {
 type minMaxEnhanceable struct {
 	min     int
 	max     int
-	enhance int
+	enhance int // nolint:structcheck,unused // WIP
 }
 
 // Label returns the item name

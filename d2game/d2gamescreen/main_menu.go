@@ -116,7 +116,7 @@ type MainMenu struct {
 	inputManager  d2interface.InputManager
 	renderer      d2interface.Renderer
 	audioProvider d2interface.AudioProvider
-	scriptEngine  *d2script.ScriptEngine
+	scriptEngine  *d2script.ScriptEngine // nolint:structcheck,unused // it will be used...
 	navigator     d2interface.Navigator
 	uiManager     *d2ui.UIManager
 	heroState     *d2hero.HeroStateFactory

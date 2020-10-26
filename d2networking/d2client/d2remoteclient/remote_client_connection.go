@@ -36,6 +36,7 @@ func Create(asset *d2asset.AssetManager) (*RemoteClientConnection, error) {
 	}
 
 	result := &RemoteClientConnection{
+		asset:     asset,
 		heroState: heroStateFactory,
 		uniqueID:  uuid.New().String(),
 	}
@@ -149,6 +150,7 @@ func (r *RemoteClientConnection) serverListener() {
 }
 
 // bytesToJSON reads the packet type, decompresses the packet and returns a JSON string.
+// nolint:unused // WIP
 func (r *RemoteClientConnection) bytesToJSON(buffer []byte) (string, d2netpackettype.NetPacketType, error) {
 	packet, err := d2netpacket.UnmarshalNetPacket(buffer)
 	if err != nil {

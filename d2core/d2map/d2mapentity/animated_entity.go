@@ -7,6 +7,7 @@ import (
 )
 
 // AnimatedEntity represents an animation that can be projected onto the map.
+// nolint:structcheck,unused // variables are unused because it is incomplete
 type AnimatedEntity struct {
 	mapEntity
 	animation d2interface.Animation

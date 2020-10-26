@@ -425,6 +425,9 @@ func (am *AssetManager) loadDCC(path string,
 	}
 
 	animation, err := newDCCAnimation(dcc, palette, effect)
+	if err != nil {
+		return nil, err
+	}
 
 	return animation, nil
 }
