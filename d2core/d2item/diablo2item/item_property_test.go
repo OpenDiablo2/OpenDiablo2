@@ -13,6 +13,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 )
 
+// nolint:gochecknoglobals // just a test
 var itemStatCosts = map[string]*d2records.ItemStatCostRecord{
 	"strength": {
 		Name:       "strength",
@@ -275,6 +276,7 @@ var itemStatCosts = map[string]*d2records.ItemStatCostRecord{
 	},
 }
 
+// nolint:gochecknoglobals // just a test
 var charStats = map[d2enum.Hero]*d2records.CharStatsRecord{
 	d2enum.HeroPaladin: {
 		Class:             d2enum.HeroPaladin,
@@ -288,15 +290,18 @@ var charStats = map[d2enum.Hero]*d2records.CharStatsRecord{
 	},
 }
 
+// nolint:gochecknoglobals // just a test
 var skillDetails = map[int]*d2records.SkillRecord{
 	37: {Skill: "Warmth"},
 	64: {Skill: "Frozen Orb"},
 }
 
+// nolint:gochecknoglobals // just a test
 var monStats = map[string]*d2records.MonStatsRecord{
 	"Specter": {NameString: "Specter", ID: 40},
 }
 
+// nolint:gochecknoglobals // just a test
 var properties = map[string]*d2records.PropertyRecord{
 	"allstats": {
 		Code: "allstats",
@@ -407,8 +412,10 @@ var properties = map[string]*d2records.PropertyRecord{
 	},
 }
 
+// nolint:gochecknoglobals // just a test
 var testAssetManager *d2asset.AssetManager
 
+// nolint:gochecknoglobals // just a test
 var testItemFactory *ItemFactory
 
 func TestSetup(t *testing.T) {
