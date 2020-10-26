@@ -188,6 +188,10 @@ func (a *DC6Animation) createFrameSurface(directionIndex, frameIndex int) (d2int
 
 // Clone creates a copy of the animation
 func (a *DC6Animation) Clone() d2interface.Animation {
-	animation := *a
-	return &animation
+	clone := &DC6Animation{}
+	clone.Animation = a.Animation.Clone()
+	clone.dc6 = a.dc6.Clone()
+	clone.palette = a.palette
+
+	return clone
 }

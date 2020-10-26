@@ -57,7 +57,22 @@ func Load(fileData []byte) (*DCC, error) {
 }
 
 // decodeDirection decodes and returns the given direction
-func (dcc *DCC) decodeDirection(direction int) *DCCDirection {
-	return CreateDCCDirection(d2datautils.CreateBitMuncher(dcc.fileData,
-		dcc.directionOffsets[direction]*directionOffsetMultiplier), dcc)
+func (d *DCC) decodeDirection(direction int) *DCCDirection {
+	return CreateDCCDirection(d2datautils.CreateBitMuncher(d.fileData,
+		d.directionOffsets[direction]*directionOffsetMultiplier), d)
+}
+
+// Clone creates a copy of the DCC
+func (d *DCC) Clone() *DCC {
+	clone := *d
+	copy(clone.directionOffsets, d.directionOffsets)
+	copy(clone.fileData, d.fileData)
+	clone.Directions = make([]*DCCDirection, len(d.Directions))
+
+	for i := range d.Directions {
+		cloneDirection := *d.Directions[i]
+		clone.Directions = append(clone.Directions, &cloneDirection)
+	}
+
+	return &clone
 }

@@ -124,3 +124,18 @@ func scanlineType(b int) scanlineState {
 
 	return runOfOpaquePixels
 }
+
+// Clone creates a copy of the DC6
+func (d *DC6) Clone() *DC6 {
+	clone := *d
+	copy(clone.Termination, d.Termination)
+	copy(clone.FramePointers, d.FramePointers)
+	clone.Frames = make([]*DC6Frame, len(d.Frames))
+
+	for i := range d.Frames {
+		cloneFrame := *d.Frames[i]
+		clone.Frames = append(clone.Frames, &cloneFrame)
+	}
+
+	return &clone
+}
