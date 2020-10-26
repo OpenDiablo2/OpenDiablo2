@@ -52,6 +52,7 @@ func (ob *Object) setMode(animationMode d2enum.ObjectAnimationMode, direction in
 	ob.composite.SetCurrentFrame(ob.objectRecord.StartFrame[animationMode])
 
 	if randomFrame {
+		// nolint:gosec // not concerned with crypto-strong randomness
 		n := rand.Intn(frameCount)
 		ob.composite.SetCurrentFrame(n)
 	}
@@ -80,7 +81,7 @@ func (ob *Object) Render(target d2interface.Surface) {
 	renderOffset := ob.Position.RenderOffset()
 	target.PushTranslation(
 		int((renderOffset.X()-renderOffset.Y())*subtileWidth),
-		int(((renderOffset.X() + renderOffset.Y()) * subtileHeight)),
+		int((renderOffset.X()+renderOffset.Y())*subtileHeight),
 	)
 
 	if ob.highlight {

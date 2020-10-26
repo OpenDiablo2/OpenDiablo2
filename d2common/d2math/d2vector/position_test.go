@@ -7,7 +7,9 @@ import (
 )
 
 func TestNewPosition(t *testing.T) {
-	x, y := rand.Intn(1000), rand.Intn(1000)
+	const maxXY = 1000
+
+	x, y := rand.Intn(maxXY), rand.Intn(maxXY) // nolint:gosec // just a test
 	locX, locY := float64(x), float64(y)
 	pos := NewPosition(locX, locY)
 

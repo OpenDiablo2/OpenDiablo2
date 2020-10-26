@@ -61,6 +61,7 @@ func (s *SoundEnvironment) Advance(elapsed float64) {
 
 		snd := s.engine.PlaySoundID(s.environment.DayEvent)
 		if snd != nil {
+			// nolint:gosec // client-side, no big deal if rand number isn't securely generated
 			pan := (rand.Float64() * 2) - 1
 			snd.SetPan(pan)
 		}

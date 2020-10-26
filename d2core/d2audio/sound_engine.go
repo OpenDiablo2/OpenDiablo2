@@ -200,7 +200,9 @@ func (s *SoundEngine) PlaySoundID(id int) *Sound {
 	entry := s.asset.Records.SelectSoundByIndex(id)
 
 	if entry.GroupSize > 0 {
-		entry = s.asset.Records.SelectSoundByIndex(entry.Index + rand.Intn(entry.GroupSize))
+		// nolint:gosec // this is client-only, no big deal if rand index isn't securely generated
+		indexOffset := rand.Intn(entry.GroupSize)
+		entry = s.asset.Records.SelectSoundByIndex(entry.Index + indexOffset)
 	}
 
 	effect, err := s.provider.LoadSound(entry.FileName, entry.Loop, entry.MusicVol)

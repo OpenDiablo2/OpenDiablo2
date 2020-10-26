@@ -188,6 +188,7 @@ func (p *Property) fnValuesToStat(iscRecord *d2records.ItemStatCostRecord) d2sta
 		min, max = max, min
 	}
 
+	// nolint:gosec // not concerned with crypto-strong randomness
 	statValue = float64(rand.Intn(max-min+1) + min)
 
 	return p.factory.stat.NewStat(iscRecord.Name, statValue, propParam)
@@ -204,6 +205,7 @@ func (p *Property) fnComputeInteger() int {
 		min, max = p.inputParams[0], p.inputParams[1]
 	}
 
+	// nolint:gosec // not concerned with crypto-strong randomness
 	statValue := rand.Intn(max-min+1) + min
 
 	return statValue
@@ -243,6 +245,8 @@ func (p *Property) fnClassSkillTab(iscRecord *d2records.ItemStatCostRecord) d2st
 	param, min, max := p.inputParams[0], p.inputParams[1], p.inputParams[2]
 	skillTabIdx := float64(param % skillTabsPerClass)
 	classIdx := float64(param / skillTabsPerClass)
+
+	// nolint:gosec // not concerned with crypto-strong randomness
 	level := float64(rand.Intn(max-min+1) + min)
 
 	return p.factory.stat.NewStat(iscRecord.Name, level, classIdx, skillTabIdx)
@@ -276,6 +280,7 @@ func (p *Property) fnRandomSkill(iscRecord *d2records.ItemStatCostRecord) d2stat
 	default:
 		skillLevel = float64(p.inputParams[0])
 		min, max := p.inputParams[1], p.inputParams[2]
+		// nolint:gosec // not concerned with crypto-strong randomness
 		skillID = float64(rand.Intn(max-min+1) + min)
 	}
 
@@ -320,6 +325,7 @@ func (p *Property) fnBoolean() bool {
 		min, max = p.inputParams[0], p.inputParams[1]
 	}
 
+	// nolint:gosec // not concerned with crypto-strong randomness
 	statValue := rand.Intn(max-min+1) + min
 
 	return statValue > 0
@@ -346,6 +352,7 @@ func (p *Property) fnClassSkills(
 		min, max = p.inputParams[0], p.inputParams[1]
 	}
 
+	// nolint:gosec // not concerned with crypto-strong randomness
 	statValue := rand.Intn(max-min+1) + min
 	classIdx = propStatRecord.Value
 
@@ -353,12 +360,12 @@ func (p *Property) fnClassSkills(
 }
 
 // fnStateApplyToTarget property applied to character or target monster ???
-func (p *Property) fnStateApplyToTarget(iscRecord *d2records.ItemStatCostRecord) d2stats.Stat {
+func (p *Property) fnStateApplyToTarget(_ *d2records.ItemStatCostRecord) d2stats.Stat {
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/818
 	return nil
 }
 
 // fnRandClassSkill property applied to character or target monster ???
-func (p *Property) fnRandClassSkill(iscRecord *d2records.ItemStatCostRecord) d2stats.Stat {
+func (p *Property) fnRandClassSkill(_ *d2records.ItemStatCostRecord) d2stats.Stat {
 	return nil
 }

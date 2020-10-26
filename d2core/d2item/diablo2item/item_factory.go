@@ -73,8 +73,8 @@ type ItemFactory struct {
 // SetSeed sets the item generator seed
 func (f *ItemFactory) SetSeed(seed int64) {
 	if f.rand == nil || f.source == nil {
-		f.source = rand.NewSource(seed)
-		f.rand = rand.New(f.source)
+		// nolint:gosec // we're not concerned with crypto-strong randomness
+		f.rand = rand.New(rand.NewSource(seed))
 	}
 
 	f.Seed = seed
@@ -300,6 +300,7 @@ func (f *ItemFactory) ItemsFromTreasureClass(tcr *d2records.TreasureClassRecord)
 // ItemFromTreasure rolls for a f.rand.m item using the Treasure struct (from d2datadict)
 func (f *ItemFactory) ItemFromTreasure(treasure *d2records.Treasure) *Item {
 	result := &Item{
+		// nolint:gosec // we're not concerned with crypto-strong randomness
 		rand: rand.New(rand.NewSource(f.Seed)),
 	}
 

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -14,6 +15,11 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+)
+
+const (
+	mkdirPermission     = 0750
+	writefilePermission = 0600
 )
 
 // NewHeroStateFactory creates a new HeroStateFactory and initializes it.
@@ -180,7 +186,7 @@ func (f *HeroStateFactory) CreateTestGameState() *HeroState {
 
 // LoadHeroState loads the player state from the file
 func (f *HeroStateFactory) LoadHeroState(filePath string) *HeroState {
-	strData, err := ioutil.ReadFile(filePath)
+	strData, err := ioutil.ReadFile(filepath.Clean(filePath))
 	if err != nil {
 		return nil
 	}
@@ -239,12 +245,12 @@ func (f *HeroStateFactory) Save(state *HeroState) error {
 	if state.FilePath == "" {
 		state.FilePath = f.getFirstFreeFileName()
 	}
-	if err := os.MkdirAll(path.Dir(state.FilePath), 0755); err != nil {
+	if err := os.MkdirAll(path.Dir(state.FilePath), mkdirPermission); err != nil {
 		return err
 	}
 
 	fileJSON, _ := json.MarshalIndent(state, "", "   ")
-	if err := ioutil.WriteFile(state.FilePath, fileJSON, 0644); err != nil {
+	if err := ioutil.WriteFile(state.FilePath, fileJSON, writefilePermission); err != nil {
 		return err
 	}
 
