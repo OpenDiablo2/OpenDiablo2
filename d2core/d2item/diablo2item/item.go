@@ -385,8 +385,7 @@ func (i *Item) pickRandomAffixes(max, totalMax int,
 // SetSeed sets the item generator seed
 func (i *Item) SetSeed(seed int64) {
 	if i.rand == nil {
-		source := rand.NewSource(seed)
-		i.rand = rand.New(source)
+		i.rand = rand.New(rand.NewSource(seed))
 	}
 
 	i.Seed = seed
@@ -441,8 +440,7 @@ func (i *Item) generateProperties(pool PropertyPool) {
 		if generated := i.generateSetItemProperties(); generated != nil {
 			props = generated
 		}
-	case PropertyPoolSet:
-		// https://github.com/OpenDiablo2/OpenDiablo2/issues/817
+	case PropertyPoolSet: // https://github.com/OpenDiablo2/OpenDiablo2/issues/817
 	}
 
 	if props == nil {

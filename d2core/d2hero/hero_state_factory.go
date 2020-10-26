@@ -124,6 +124,7 @@ func (f *HeroStateFactory) CreateHeroSkillsState(classStats *d2records.CharStats
 
 	skillList := f.asset.Records.Skill.Details
 	token := strings.ToLower(heroType.GetToken3())
+
 	for idx := range skillList {
 		if skillList[idx].Charclass == token {
 			skill, _ := f.CreateHeroSkill(0, skillList[idx].Skill)
@@ -145,12 +146,12 @@ func (f *HeroStateFactory) CreateHeroSkillsState(classStats *d2records.CharStats
 func (f *HeroStateFactory) CreateHeroSkill(points int, name string) (*HeroSkill, error) {
 	skillRecord := f.asset.Records.GetSkillByName(name)
 	if skillRecord == nil {
-		return nil, fmt.Errorf("Skill not found: %s", name)
+		return nil, fmt.Errorf("skill not found: %s", name)
 	}
 
 	skillDescRecord, found := f.asset.Records.Skill.Descriptions[skillRecord.Skilldesc]
 	if !found {
-		return nil, fmt.Errorf("Skill Description not found: %s", name)
+		return nil, fmt.Errorf("skill Description not found: %s", name)
 	}
 
 	result := &HeroSkill{

@@ -64,5 +64,6 @@ func (h Hero) GetToken3() string {
 	default:
 		log.Fatalf("Unknown hero token: %d", h)
 	}
+
 	return ""
 }
