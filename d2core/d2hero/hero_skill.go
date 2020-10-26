@@ -15,7 +15,8 @@ type HeroSkill struct {
 	shallow     *shallowHeroSkill
 }
 
-// An auxilary struct which only stores the ID of the SkillRecord, instead of the whole SkillRecord and SkillDescrptionRecord.
+// An auxiliary struct which only stores the ID of the SkillRecord, instead of the whole SkillRecord
+// and SkillDescrptionRecord.
 type shallowHeroSkill struct {
 	SkillID     int `json:"skillId"`
 	SkillPoints int `json:"skillPoints"`
