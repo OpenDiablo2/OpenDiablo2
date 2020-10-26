@@ -206,25 +206,7 @@ func (mr *MapRenderer) renderPass2(target d2interface.Surface, startX, startY, e
 		for tileX := startX; tileX < endX; tileX++ {
 			mr.viewport.PushTranslationWorld(float64(tileX), float64(tileY))
 
-			tileEnt := make([]d2interface.MapEntity, 0)
-
-			// need to add render culling
-			// https://github.com/OpenDiablo2/OpenDiablo2/issues/821
-			for _, mapEntity := range mr.mapEngine.Entities() {
-				pos := mapEntity.GetPosition()
-				vec := pos.World()
-				entityX, entityY := vec.X(), vec.Y()
-
-				if mapEntity.GetLayer() != 1 {
-					continue
-				}
-
-				if (int(entityX) != tileX) || (int(entityY) != tileY) {
-					continue
-				}
-
-				tileEnt = append(tileEnt, mapEntity)
-			}
+			tileEnt := mr.getEntitiesBelowWalls(tileX, tileY)
 
 			for subY := 0; subY < 5; subY++ {
 				for subX := 0; subX < 5; subX++ {
@@ -246,6 +228,30 @@ func (mr *MapRenderer) renderPass2(target d2interface.Surface, startX, startY, e
 	}
 }
 
+func (mr *MapRenderer) getEntitiesBelowWalls(tileX, tileY int) []d2interface.MapEntity {
+	entities := make([]d2interface.MapEntity, 0)
+
+	// need to add render culling
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/821
+	for _, mapEntity := range mr.mapEngine.Entities() {
+		pos := mapEntity.GetPosition()
+		vec := pos.World()
+		entityX, entityY := vec.X(), vec.Y()
+
+		if mapEntity.GetLayer() != 1 {
+			continue
+		}
+
+		if (int(entityX) != tileX) || (int(entityY) != tileY) {
+			continue
+		}
+
+		entities = append(entities, mapEntity)
+	}
+
+	return entities
+}
+
 // Upper wall tiles and entities above walls.
 func (mr *MapRenderer) renderPass3(target d2interface.Surface, startX, startY, endX, endY int) {
 	for tileY := startY; tileY < endY; tileY++ {
@@ -254,36 +260,18 @@ func (mr *MapRenderer) renderPass3(target d2interface.Surface, startX, startY, e
 			mr.viewport.PushTranslationWorld(float64(tileX), float64(tileY))
 			mr.renderTilePass2(tile, target)
 
-			tileEnt := make([]d2interface.MapEntity, 0)
-
-			// need to add render culling
-			// https://github.com/OpenDiablo2/OpenDiablo2/issues/821
-			for _, mapEntity := range mr.mapEngine.Entities() {
-				pos := mapEntity.GetPosition()
-				vec := pos.World()
-				entityX, entityY := vec.X(), vec.Y()
-
-				if mapEntity.GetLayer() == 1 {
-					continue
-				}
-
-				if (int(entityX) != tileX) || (int(entityY) != tileY) {
-					continue
-				}
-
-				tileEnt = append(tileEnt, mapEntity)
-			}
+			entities := mr.getEntitiesAboveWalls(tileX, tileY)
 
 			for subY := 0; subY < 5; subY++ {
 				for subX := 0; subX < 5; subX++ {
-					for _, mapEntity := range tileEnt {
-						pos := mapEntity.GetPosition()
+					for _, entity := range entities {
+						pos := entity.GetPosition()
 						if (int(pos.SubTileOffset().X()) != subX) || (int(pos.SubTileOffset().Y()) != subY) {
 							continue
 						}
 
 						target.PushTranslation(mr.viewport.GetTranslationScreen())
-						mapEntity.Render(target)
+						entity.Render(target)
 						target.Pop()
 					}
 				}
@@ -292,6 +280,30 @@ func (mr *MapRenderer) renderPass3(target d2interface.Surface, startX, startY, e
 			mr.viewport.PopTranslation()
 		}
 	}
+}
+
+func (mr *MapRenderer) getEntitiesAboveWalls(tileX, tileY int) []d2interface.MapEntity {
+	entities := make([]d2interface.MapEntity, 0)
+
+	// need to add render culling
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/821
+	for _, mapEntity := range mr.mapEngine.Entities() {
+		pos := mapEntity.GetPosition()
+		vec := pos.World()
+		entityX, entityY := vec.X(), vec.Y()
+
+		if mapEntity.GetLayer() != 1 {
+			continue
+		}
+
+		if (int(entityX) != tileX) || (int(entityY) != tileY) {
+			continue
+		}
+
+		entities = append(entities, mapEntity)
+	}
+
+	return entities
 }
 
 // Roof tiles.
