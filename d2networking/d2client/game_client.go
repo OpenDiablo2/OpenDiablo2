@@ -118,6 +118,7 @@ func (g *GameClient) Destroy() error {
 
 // OnPacketReceived is called by the ClientConection and processes incoming
 // packets.
+// nolint:gocyclo // switch statement on packet type makes sense, no need to change
 func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 	switch packet.PacketType {
 	case d2netpackettype.GenerateMap:

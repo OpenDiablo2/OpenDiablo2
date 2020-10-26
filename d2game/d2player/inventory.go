@@ -170,71 +170,59 @@ func (g *Inventory) Render(target d2interface.Surface) error {
 		return nil
 	}
 
-	if err := g.frame.Render(target); err != nil {
-		return err
-	}
-
-	x, y := g.originX+1, g.originY
-	y += 64
-
-	// Panel
-	// Top left
-	if err := g.panel.SetCurrentFrame(frameInventoryTopLeft); err != nil {
-		return err
-	}
-
-	w, h := g.panel.GetCurrentFrameSize()
-
-	g.panel.SetPosition(x, y+h)
-
-	if err := g.panel.Render(target); err != nil {
-		return err
-	}
-
-	x += w
-
-	// Top right
-	if err := g.panel.SetCurrentFrame(frameInventoryTopRight); err != nil {
-		return err
-	}
-
-	_, h = g.panel.GetCurrentFrameSize()
-
-	g.panel.SetPosition(x, y+h)
-
-	if err := g.panel.Render(target); err != nil {
-		return err
-	}
-
-	y += h
-
-	// Bottom right
-	if err := g.panel.SetCurrentFrame(frameInventoryBottomRight); err != nil {
-		return err
-	}
-
-	_, h = g.panel.GetCurrentFrameSize()
-	g.panel.SetPosition(x, y+h)
-
-	if err := g.panel.Render(target); err != nil {
-		return err
-	}
-
-	// Bottom left
-	if err := g.panel.SetCurrentFrame(frameInventoryBottomLeft); err != nil {
-		return err
-	}
-
-	w, h = g.panel.GetCurrentFrameSize()
-
-	g.panel.SetPosition(x-w, y+h)
-
-	if err := g.panel.Render(target); err != nil {
+	if err := g.renderFrame(target); err != nil {
 		return err
 	}
 
 	g.grid.Render(target)
 
+	g.renderItemHover(target)
+
+	return nil
+}
+
+func (g *Inventory) renderFrame(target d2interface.Surface) error {
+	if err := g.frame.Render(target); err != nil {
+		return err
+	}
+
+	frames := []int{
+		frameInventoryTopLeft,
+		frameInventoryTopRight,
+		frameInventoryBottomRight,
+		frameInventoryBottomLeft,
+	}
+
+	x, y := g.originX+1, g.originY
+	y += 64
+
+	for _, frame := range frames {
+		if err := g.panel.SetCurrentFrame(frame); err != nil {
+			return err
+		}
+
+		w, h := g.panel.GetCurrentFrameSize()
+
+		g.panel.SetPosition(x, y+h)
+
+		if err := g.panel.Render(target); err != nil {
+			return err
+		}
+
+		switch frame {
+		case frameInventoryTopLeft:
+			x += w
+		case frameInventoryTopRight:
+			y += h
+		case frameInventoryBottomRight:
+			x -= w
+		}
+	}
+
+	return nil
+}
+
+func (g *Inventory) renderItemHover(target d2interface.Surface) {
 	hovering := false
 
 	for idx := range g.grid.items {
@@ -258,8 +246,6 @@ func (g *Inventory) Render(target d2interface.Surface) error {
 	}
 
 	g.hovering = hovering
-
-	return nil
 }
 
 func (g *Inventory) renderItemDescription(target d2interface.Surface, i InventoryItem) {
