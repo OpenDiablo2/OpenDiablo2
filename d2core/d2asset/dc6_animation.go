@@ -102,11 +102,7 @@ func (a *DC6Animation) decode() error {
 
 func (a *DC6Animation) decodeDirection(directionIndex int) error {
 	for frameIndex := 0; frameIndex < int(a.dc6.FramesPerDirection); frameIndex++ {
-		frame, err := a.decodeFrame(directionIndex, frameIndex)
-		if err != nil {
-			return err
-		}
-
+		frame := a.decodeFrame(directionIndex, frameIndex)
 		a.directions[directionIndex].frames[frameIndex] = frame
 	}
 
@@ -115,7 +111,7 @@ func (a *DC6Animation) decodeDirection(directionIndex int) error {
 	return nil
 }
 
-func (a *DC6Animation) decodeFrame(directionIndex, frameIndex int) (animationFrame, error) {
+func (a *DC6Animation) decodeFrame(directionIndex, frameIndex int) animationFrame {
 	startFrame := directionIndex * int(a.dc6.FramesPerDirection)
 
 	dc6Frame := a.dc6.Frames[startFrame+frameIndex]
@@ -129,7 +125,7 @@ func (a *DC6Animation) decodeFrame(directionIndex, frameIndex int) (animationFra
 
 	a.directions[directionIndex].frames[frameIndex].decoded = true
 
-	return frame, nil
+	return frame
 }
 
 func (a *DC6Animation) createSurfaces() error {
@@ -165,11 +161,7 @@ func (a *DC6Animation) createDirectionSurfaces(directionIndex int) error {
 
 func (a *DC6Animation) createFrameSurface(directionIndex, frameIndex int) (d2interface.Surface, error) {
 	if !a.directions[directionIndex].frames[frameIndex].decoded {
-		frame, err := a.decodeFrame(directionIndex, frameIndex)
-		if err != nil {
-			return nil, err
-		}
-
+		frame := a.decodeFrame(directionIndex, frameIndex)
 		a.directions[directionIndex].frames[frameIndex] = frame
 	}
 
