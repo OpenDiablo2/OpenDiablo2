@@ -114,6 +114,7 @@ func NewGameServer(asset *d2asset.AssetManager, networkServer bool,
 // Start essentially starts all of the game server go routines as well as begins listening for connection. This will
 // return an error if it is unable to bind to a socket.
 func (g *GameServer) Start() error {
+
 	listenerAddress := "127.0.0.1:" + port
 	if g.networkServer {
 		listenerAddress = "0.0.0.0:" + port
