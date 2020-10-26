@@ -314,7 +314,7 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 	return nil
 }
 
-func (g *GameClient) createSummonedNpcEntity(skillRecord *d2records.SkillRecord, X, Y int) (*d2mapentity.NPC, error) {
+func (g *GameClient) createSummonedNpcEntity(skillRecord *d2records.SkillRecord, x, y int) (*d2mapentity.NPC, error) {
 	monsterStatsRecord := g.asset.Records.Monster.Stats[skillRecord.Summon]
 
 	if monsterStatsRecord == nil {
@@ -322,7 +322,7 @@ func (g *GameClient) createSummonedNpcEntity(skillRecord *d2records.SkillRecord,
 	}
 
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/803
-	summonedNpcEntity, err := g.MapEngine.NewNPC(X, Y, monsterStatsRecord, 0)
+	summonedNpcEntity, err := g.MapEngine.NewNPC(x, y, monsterStatsRecord, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -330,7 +330,7 @@ func (g *GameClient) createSummonedNpcEntity(skillRecord *d2records.SkillRecord,
 	return summonedNpcEntity, nil
 }
 
-func (g *GameClient) createMissileEntities(skillRecord *d2records.SkillRecord, player *d2mapentity.Player, castX float64, castY float64) ([]*d2mapentity.Missile, error) {
+func (g *GameClient) createMissileEntities(skillRecord *d2records.SkillRecord, player *d2mapentity.Player, castX, castY float64) ([]*d2mapentity.Missile, error) {
 	missileRecords := []*d2records.MissileRecord{
 		g.asset.Records.GetMissileByName(skillRecord.Cltmissile),
 		g.asset.Records.GetMissileByName(skillRecord.Cltmissilea),
@@ -385,7 +385,7 @@ func (g *GameClient) createMissileEntity(missileRecord *d2records.MissileRecord,
 	return missileEntity, nil
 }
 
-func (g *GameClient) playCastOverlay(overlayRecord *d2records.OverlayRecord, x int, y int) error {
+func (g *GameClient) playCastOverlay(overlayRecord *d2records.OverlayRecord, x, y int) error {
 	if overlayRecord == nil {
 		return nil
 	}
