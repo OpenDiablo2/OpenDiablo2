@@ -38,6 +38,7 @@ const (
 	firstTab = iota
 	secondTab
 	thirdTab
+	numTabs
 )
 
 const (
@@ -97,7 +98,7 @@ type skillTree struct {
 	frame        *d2ui.UIFrame
 	availSPLabel *d2ui.Label
 	closeButton  *d2ui.Button
-	tab          [3]*skillTreeTab
+	tab          [numTabs]*skillTreeTab
 	isOpen       bool
 	originX      int
 	originY      int
@@ -122,7 +123,7 @@ func newSkillTree(
 		guiManager: guiManager,
 		originX:    skillTreePanelX,
 		originY:    skillTreePanelY,
-		tab: [3]*skillTreeTab{
+		tab: [numTabs]*skillTreeTab{
 			{},
 			{},
 			{},
@@ -176,7 +177,7 @@ func (s *skillTree) loadForHeroType() {
 type heroTabData struct {
 	resources        *skillTreeHeroTypeResources
 	str1, str2, str3 string
-	closeButtonPos   [3]int
+	closeButtonPos   [numTabs]int
 }
 
 func makeTabString(keys ...interface{}) string {
@@ -196,8 +197,8 @@ func makeTabString(keys ...interface{}) string {
 	return fmt.Sprintf(format, translations...)
 }
 
-func makeCloseButtonPos(close1, close2, close3 int) [3]int {
-	return [3]int{close1, close2, close3}
+func makeCloseButtonPos(close1, close2, close3 int) [numTabs]int {
+	return [numTabs]int{close1, close2, close3}
 }
 
 func (s *skillTree) getTab(class d2enum.Hero) (heroTabData, bool) {
@@ -315,7 +316,7 @@ func (s *skillTree) setHeroTypeResourcePath() {
 	s.tab[secondTab].buttonText = entry.str2
 	s.tab[thirdTab].buttonText = entry.str3
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < numTabs; i++ {
 		s.tab[i].closeButtonPosX = entry.closeButtonPos[i]
 	}
 }
@@ -336,9 +337,11 @@ func (s *skillTree) Close() {
 	s.isOpen = false
 	s.guiManager.SetLayout(nil)
 	s.closeButton.SetVisible(false)
-	for i := 0; i < 3; i++ {
+
+	for i := 0; i < numTabs; i++ {
 		s.tab[i].button.SetVisible(false)
 	}
+
 	s.onCloseCb()
 }
 
@@ -350,7 +353,8 @@ func (s *skillTree) Open() {
 	}
 
 	s.closeButton.SetVisible(true)
-	for i := 0; i < 3; i++ {
+
+	for i := 0; i < numTabs; i++ {
 		s.tab[i].button.SetVisible(true)
 	}
 

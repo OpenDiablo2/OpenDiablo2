@@ -340,6 +340,7 @@ func (g *GameClient) createMissileEntities(skillRecord *d2records.SkillRecord, p
 	}
 
 	missileEntities := make([]*d2mapentity.Missile, 0)
+
 	for _, missileRecord := range missileRecords {
 		if missileRecord == nil {
 			continue
