@@ -44,7 +44,11 @@ func createSprite(imagePath, palettePath string, assetManager *d2asset.AssetMana
 	return sprite, nil
 }
 
-func createAnimatedSprite(imagePath, palettePath string, direction AnimationDirection, assetManager *d2asset.AssetManager) (*AnimatedSprite, error) {
+func createAnimatedSprite(
+	imagePath, palettePath string,
+	direction AnimationDirection,
+	assetManager *d2asset.AssetManager,
+) (*AnimatedSprite, error) {
 	animation, err := assetManager.LoadAnimation(imagePath, palettePath)
 	if err != nil {
 		return nil, err
