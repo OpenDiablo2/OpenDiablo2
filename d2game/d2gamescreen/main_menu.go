@@ -521,6 +521,21 @@ func (v *MainMenu) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	return false
 }
 
+// OnKeyUp is called when a key is released
+func (v *MainMenu) OnKeyUp(event d2interface.KeyEvent) bool {
+	/*
+		On retail version of D2 any key event puts you onto the main menu, so this is a supplement to that code up there
+		on line 515.
+	*/
+
+	if v.screenMode == ScreenModeTrademark {
+		v.SetScreenMode(ScreenModeMainMenu)
+		return true
+	}
+
+	return false
+}
+
 // SetScreenMode sets the screen mode (which sub-menu the screen is on)
 func (v *MainMenu) SetScreenMode(screenMode mainMenuScreenMode) {
 	v.screenMode = screenMode
