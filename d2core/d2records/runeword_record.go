@@ -25,16 +25,4 @@ type RunesRecord struct {
 }
 
 // RunewordProperty is a representation of a stat possessed by this runeword
-type RunewordProperty struct {
-	// Code is the property code
-	Code string
-
-	// Param is either string or int, parameter for the property
-	Param string
-
-	// Min is the minimum value for the property
-	Min int
-
-	// Max is the maximum value for the property
-	Max int
-}
+type RunewordProperty = PropertyDescriptor

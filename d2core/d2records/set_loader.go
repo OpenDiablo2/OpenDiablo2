@@ -55,10 +55,10 @@ func setLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 				maxColumn := fmt.Sprintf(fmtPropMax, setPartialToken, num, setPartialTokenA)
 
 				propA := &SetProperty{
-					Code:  codeA,
-					Param: d.String(paramColumn),
-					Min:   d.Number(minColumn),
-					Max:   d.Number(maxColumn),
+					Code:      codeA,
+					Parameter: d.String(paramColumn),
+					Min:       d.Number(minColumn),
+					Max:       d.Number(maxColumn),
 				}
 
 				record.Properties.PartialA = append(record.Properties.PartialA, propA)
@@ -70,10 +70,10 @@ func setLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 				maxColumn := fmt.Sprintf(fmtPropMax, setPartialToken, num, setPartialTokenB)
 
 				propB := &SetProperty{
-					Code:  codeB,
-					Param: d.String(paramColumn),
-					Min:   d.Number(minColumn),
-					Max:   d.Number(maxColumn),
+					Code:      codeB,
+					Parameter: d.String(paramColumn),
+					Min:       d.Number(minColumn),
+					Max:       d.Number(maxColumn),
 				}
 
 				record.Properties.PartialB = append(record.Properties.PartialB, propB)
@@ -89,10 +89,10 @@ func setLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 			if code := d.String(codeColumn); code != "" {
 				prop := &SetProperty{
-					Code:  code,
-					Param: d.String(paramColumn),
-					Min:   d.Number(minColumn),
-					Max:   d.Number(maxColumn),
+					Code:      code,
+					Parameter: d.String(paramColumn),
+					Min:       d.Number(minColumn),
+					Max:       d.Number(maxColumn),
 				}
 
 				record.Properties.Full = append(record.Properties.Full, prop)

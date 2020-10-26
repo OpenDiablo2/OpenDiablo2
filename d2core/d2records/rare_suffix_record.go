@@ -4,8 +4,4 @@ package d2records
 type RareSuffixes []*RareItemSuffixRecord
 
 // RareItemSuffixRecord is a name suffix for rare items (items with more than 2 affixes)
-type RareItemSuffixRecord struct {
-	Name          string
-	IncludedTypes []string
-	ExcludedTypes []string
-}
+type RareItemSuffixRecord = RareItemAffix
