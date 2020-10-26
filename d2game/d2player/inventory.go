@@ -215,7 +215,7 @@ func (g *Inventory) renderFrame(target d2interface.Surface) error {
 		case frameInventoryTopRight:
 			y += h
 		case frameInventoryBottomRight:
-			x -= w
+			x = g.originX + 1
 		}
 	}
 
