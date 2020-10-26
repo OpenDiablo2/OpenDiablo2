@@ -17,6 +17,7 @@ const (
 	SkillClassDruid
 )
 
+// Skill class tokens
 const (
 	SkillClassTokenGeneric     = ""
 	SkillClassTokenBarbarian   = "bar"
