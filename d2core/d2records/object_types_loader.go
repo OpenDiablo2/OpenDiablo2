@@ -7,11 +7,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
-const (
-	nameSize  = 32
-	tokenSize = 20
-)
-
 // LoadObjectTypes loads ObjectTypeRecords from objtype.txt
 func objectTypesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	records := make(ObjectTypes, 0)

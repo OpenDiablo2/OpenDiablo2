@@ -25,7 +25,7 @@ import (
 
 const (
 	port                   = "6669"
-	chunkSize          int = 4096
+	chunkSize          int = 4096 // nolint:deadcode,unused,varcheck // WIP
 	subtilesPerTile        = 5
 	middleOfTileOffset     = 3
 )
