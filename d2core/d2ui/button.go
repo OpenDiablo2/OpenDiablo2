@@ -315,21 +315,28 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 	buttonSprite.SetPosition(0, 0)
 	buttonSprite.SetEffect(d2enum.DrawEffectModulate)
 
-	ui.addWidget(btn) // important that this comes before renderFrames!
+	ui.addWidget(btn) // important that this comes before prerender!
 
-	btn.renderFrames(buttonSprite, &buttonLayout, lbl)
+	btn.prerender(buttonSprite, &buttonLayout, lbl)
 
 	return btn
 }
 
-func (v *Button) renderFrames(btnSprite *Sprite, btnLayout *ButtonLayout, label *Label) {
+type buttonStateDescriptor struct {
+	baseFrame        int
+	offsetX, offsetY int
+	whereToRender    *d2interface.Surface
+	fmtErr           string
+}
+
+func (v *Button) prerender(btnSprite *Sprite, btnLayout *ButtonLayout, label *Label) {
 	var err error
 
-	totalButtonTypes := btnSprite.GetFrameCount() / (btnLayout.XSegments * btnLayout.YSegments)
+	totalButtonStates := btnSprite.GetFrameCount() / (btnLayout.XSegments * btnLayout.YSegments)
 
+	// buttons always have a base image
 	if v.buttonLayout.HasImage {
 		err = btnSprite.RenderSegmented(v.normalSurface, btnLayout.XSegments, btnLayout.YSegments, btnLayout.BaseFrame)
-
 		if err != nil {
 			fmt.Printf("failed to render button normalSurface, err: %v\n", err)
 		}
@@ -342,89 +349,67 @@ func (v *Button) renderFrames(btnSprite *Sprite, btnLayout *ButtonLayout, label 
 	label.SetPosition(xOffset, textY)
 	label.Render(v.normalSurface)
 
-	if btnLayout.HasImage && btnLayout.AllowFrameChange {
-		frameOffset := 0
-		xSeg, ySeg, baseFrame := btnLayout.XSegments, btnLayout.YSegments, btnLayout.BaseFrame
+	if !btnLayout.HasImage || !btnLayout.AllowFrameChange {
+		return
+	}
 
-		totalButtonTypes--
-		if totalButtonTypes > 0 { // button has more than one type
-			frameOffset++
+	xSeg, ySeg, baseFrame := btnLayout.XSegments, btnLayout.YSegments, btnLayout.BaseFrame
 
-			v.pressedSurface, err = v.manager.renderer.NewSurface(v.width, v.height,
-				d2enum.FilterNearest)
-			if err != nil {
-				log.Print(err)
-			}
+	possibleButtonStates := []*buttonStateDescriptor{
+		{ // pressed button
+			baseFrame + 1,
+			xOffset - pressedButtonOffset, textY + pressedButtonOffset,
+			&v.pressedSurface,
+			"failed to render button pressedSurface, err: %v\n",
+		},
+		{ // toggle button
+			baseFrame + 2,
+			xOffset, textY,
+			&v.toggledSurface,
+			"failed to render button toggledSurface, err: %v\n",
+		},
+		{ // pressed+toggled
+			baseFrame + 3,
+			xOffset, textY,
+			&v.pressedToggledSurface,
+			"failed to render button pressedToggledSurface, err: %v\n",
+		},
+	}
 
-			err = btnSprite.RenderSegmented(v.pressedSurface, xSeg, ySeg, baseFrame+frameOffset)
-			if err != nil {
-				fmt.Printf("failed to render button pressedSurface, err: %v\n", err)
-			}
-
-			label.SetPosition(xOffset-pressedButtonOffset, textY+pressedButtonOffset)
-			label.Render(v.pressedSurface)
+	// disabled button
+	if btnLayout.DisabledFrame != -1 {
+		disabledState := &buttonStateDescriptor{
+			xOffset, textY,
+			btnLayout.DisabledFrame,
+			&v.disabledSurface,
+			"failed to render button disabledSurface, err: %v\n",
 		}
 
-		if btnLayout.ResourceName == d2resource.BuySellButton {
-			// Without returning early, the button UI gets all subsequent (unrelated) frames stacked on top
-			// Only 2 frames from this sprite are applicable to the button in question
-			// The presentation is incorrect without this hack
+		possibleButtonStates = append(possibleButtonStates, disabledState)
+	}
+
+	for stateIdx, w, h := 0, v.width, v.height; stateIdx < totalButtonStates; stateIdx++ {
+		state := possibleButtonStates[stateIdx]
+
+		if stateIdx == 2 && btnLayout.ResourceName == d2resource.BuySellButton {
+			// Without returning early, the button UI gets all subsequent (unrelated) frames
+			// stacked on top. Only 2 frames from this sprite are applicable to the button
+			// in question. The presentation is incorrect without this hack!
 			return
 		}
 
-		totalButtonTypes--
-		if totalButtonTypes > 0 { // button has more than two types
-			frameOffset++
-
-			v.toggledSurface, err = v.manager.renderer.NewSurface(v.width, v.height,
-				d2enum.FilterNearest)
-			if err != nil {
-				log.Print(err)
-			}
-
-			err = btnSprite.RenderSegmented(v.toggledSurface, xSeg, ySeg, baseFrame+frameOffset)
-			if err != nil {
-				fmt.Printf("failed to render button toggledSurface, err: %v\n", err)
-			}
-
-			label.SetPosition(xOffset, textY)
-			label.Render(v.toggledSurface)
+		*state.whereToRender, err = v.manager.renderer.NewSurface(w, h, d2enum.FilterNearest)
+		if err != nil {
+			log.Print(err)
 		}
 
-		totalButtonTypes--
-		if totalButtonTypes > 0 { // button has more than three types
-			frameOffset++
-
-			v.pressedToggledSurface, err = v.manager.renderer.NewSurface(v.width, v.height,
-				d2enum.FilterNearest)
-			if err != nil {
-				log.Print(err)
-			}
-
-			err = btnSprite.RenderSegmented(v.pressedSurface, xSeg, ySeg, baseFrame+frameOffset)
-			if err != nil {
-				fmt.Printf("failed to render button pressedToggledSurface, err: %v\n", err)
-			}
-
-			label.SetPosition(xOffset, textY)
-			label.Render(v.pressedToggledSurface)
+		err = btnSprite.RenderSegmented(v.pressedSurface, xSeg, ySeg, state.baseFrame)
+		if err != nil {
+			fmt.Printf(state.fmtErr, err)
 		}
 
-		if btnLayout.DisabledFrame != -1 {
-			v.disabledSurface, err = v.manager.renderer.NewSurface(v.width, v.height,
-				d2enum.FilterNearest)
-			if err != nil {
-				log.Print(err)
-			}
-
-			err = btnSprite.RenderSegmented(v.disabledSurface, xSeg, ySeg, btnLayout.DisabledFrame)
-			if err != nil {
-				fmt.Printf("failed to render button disabledSurface, err: %v\n", err)
-			}
-
-			label.SetPosition(xOffset, textY)
-			label.Render(v.disabledSurface)
-		}
+		label.SetPosition(state.offsetX, state.offsetY)
+		label.Render(v.pressedSurface)
 	}
 }
 
