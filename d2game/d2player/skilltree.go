@@ -196,8 +196,8 @@ func makeTabString(keys ...interface{}) string {
 	return fmt.Sprintf(format, translations...)
 }
 
-func makeCloseButtonPos(close1 int , close2 int, close3 int) [3]int {
-	return [3]int{ close1, close2, close3 }
+func makeCloseButtonPos(close1, close2, close3 int) [3]int {
+	return [3]int{close1, close2, close3}
 }
 
 func (s *skillTree) getTab(class d2enum.Hero) (heroTabData, bool) {
@@ -315,7 +315,7 @@ func (s *skillTree) setHeroTypeResourcePath() {
 	s.tab[secondTab].buttonText = entry.str2
 	s.tab[thirdTab].buttonText = entry.str3
 
-	for i:= 0; i < 3; i++ {
+	for i := 0; i < 3; i++ {
 		s.tab[i].closeButtonPosX = entry.closeButtonPos[i]
 	}
 }
@@ -363,9 +363,8 @@ func (s *skillTree) IsOpen() bool {
 
 // Set the callback run on closing the skilltree
 func (s *skillTree) SetOnCloseCb(cb func()) {
-       s.onCloseCb = cb
+	s.onCloseCb = cb
 }
-
 
 func (s *skillTree) setTab(tab int) {
 	s.selectedTab = tab

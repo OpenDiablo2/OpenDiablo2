@@ -526,7 +526,6 @@ type callout struct {
 func (h *Overlay) createBullet(c callout) {
 	newLabel := h.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteSky)
 	newLabel.SetText(c.LabelText)
-	//ww, hh = newLabel.GetSize()
 	newLabel.SetPosition(c.LabelX, c.LabelY)
 	h.text = append(h.text, newLabel)
 
@@ -547,7 +546,6 @@ func (h *Overlay) createBullet(c callout) {
 func (h *Overlay) createLabel(c callout) {
 	newLabel := h.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteSky)
 	newLabel.SetText(c.LabelText)
-	//ww, hh = newLabel.GetSize()
 	newLabel.SetPosition(c.LabelX, c.LabelY)
 	h.text = append(h.text, newLabel)
 	newLabel.Alignment = d2gui.HorizontalAlignCenter

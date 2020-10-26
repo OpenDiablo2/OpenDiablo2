@@ -13,6 +13,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2mpq"
 )
 
+const (
+	directoryPermissions = 0750
+)
+
 func main() {
 	var (
 		outPath string
@@ -40,7 +44,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	_, mpqFile := filepath.Split(strings.Replace(filename, "\\", "/", -1))
+	_, mpqFile := filepath.Split(strings.ReplaceAll(filename, "\\", "/"))
 
 	for _, filename := range list {
 		extractFile(mpq, mpqFile, filename, outPath)
@@ -51,16 +55,17 @@ func main() {
 	}
 }
 
-func extractFile(mpq d2interface.Archive, mpqFile string, filename string, outPath string) {
+func extractFile(mpq d2interface.Archive, mpqFile, filename, outPath string) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("recovered from panic in file: %s, %v", filename, r)
 		}
 	}()
-	dir, file := filepath.Split(strings.Replace(filename, "\\", "/", -1))
+
+	dir, file := filepath.Split(strings.ReplaceAll(filename, "\\", "/"))
 	dir = mpqFile + "/" + dir
 
-	err := os.MkdirAll(outPath+dir, 0755)
+	err := os.MkdirAll(outPath+dir, directoryPermissions)
 	if err != nil {
 		log.Printf("failed to create directory: %s, %v", outPath+dir, err)
 		return
@@ -72,7 +77,9 @@ func extractFile(mpq d2interface.Archive, mpqFile string, filename string, outPa
 		return
 	}
 
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 
 	buf, err := mpq.ReadFile(filename)
 	if err != nil {
@@ -80,5 +87,5 @@ func extractFile(mpq d2interface.Archive, mpqFile string, filename string, outPa
 		return
 	}
 
-	f.Write(buf)
+	_, _ = f.Write(buf)
 }

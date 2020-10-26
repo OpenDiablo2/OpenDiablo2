@@ -29,7 +29,7 @@ func (s *SkillListRow) GetRectangle() d2geom.Rectangle {
 }
 
 // IsInRect returns true when the list has any skills and coordinates are in the rectangle of the list.
-func (s *SkillListRow) IsInRect(X int, Y int) bool {
+func (s *SkillListRow) IsInRect(x, y int) bool {
 	// if there are no skills, row won't be rendered and it shouldn't be considered visible
-	return len(s.Skills) > 0 && s.Rectangle.IsInRect(X, Y)
+	return len(s.Skills) > 0 && s.Rectangle.IsInRect(x, y)
 }

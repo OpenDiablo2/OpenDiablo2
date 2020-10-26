@@ -16,7 +16,7 @@ type SkillSelectMenu struct {
 // NewSkillSelectMenu creates a skill select menu.
 func NewSkillSelectMenu(asset *d2asset.AssetManager, ui *d2ui.UIManager, hero *d2mapentity.Player) *SkillSelectMenu {
 	skillSelectMenu := &SkillSelectMenu{
-		LeftPanel: NewHeroSkillsPanel(asset, ui, hero, true),
+		LeftPanel:  NewHeroSkillsPanel(asset, ui, hero, true),
 		RightPanel: NewHeroSkillsPanel(asset, ui, hero, false),
 	}
 
@@ -24,12 +24,12 @@ func NewSkillSelectMenu(asset *d2asset.AssetManager, ui *d2ui.UIManager, hero *d
 }
 
 // HandleClick will propagate the click to the panels.
-func (sm *SkillSelectMenu) HandleClick(X int, Y int) bool {
-	if sm.LeftPanel.HandleClick(X, Y) {
+func (sm *SkillSelectMenu) HandleClick(x, y int) bool {
+	if sm.LeftPanel.HandleClick(x, y) {
 		return true
 	}
 
-	if sm.RightPanel.HandleClick(X, Y) {
+	if sm.RightPanel.HandleClick(x, y) {
 		return true
 	}
 
@@ -37,12 +37,11 @@ func (sm *SkillSelectMenu) HandleClick(X int, Y int) bool {
 }
 
 // HandleMouseMove will propagate the mouse move event to the panels.
-func (sm *SkillSelectMenu) HandleMouseMove(X int, Y int) {
+func (sm *SkillSelectMenu) HandleMouseMove(x, y int) {
 	if sm.LeftPanel.IsOpen() {
-		sm.LeftPanel.HandleMouseMove(X, Y)
-
+		sm.LeftPanel.HandleMouseMove(x, y)
 	} else if sm.RightPanel.IsOpen() {
-		sm.RightPanel.HandleMouseMove(X, Y)
+		sm.RightPanel.HandleMouseMove(x, y)
 	}
 }
 
@@ -65,8 +64,8 @@ func (sm *SkillSelectMenu) IsOpen() bool {
 }
 
 // IsInRect returns whether the coordinates are in one of the panels(left or right)
-func (sm *SkillSelectMenu) IsInRect(X int, Y int) bool {
-	return sm.LeftPanel.IsInRect(X, Y) || sm.RightPanel.IsInRect(X, Y)
+func (sm *SkillSelectMenu) IsInRect(x, y int) bool {
+	return sm.LeftPanel.IsInRect(x, y) || sm.RightPanel.IsInRect(x, y)
 }
 
 // ClosePanels will close both panels
