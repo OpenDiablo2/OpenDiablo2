@@ -113,7 +113,7 @@ func createItemAffixRecords(
 			maxKey := fmt.Sprintf("mod%dmax", i)
 			modifier := &ItemAffixCommonModifier{
 				Code:      d.String(codeKey),
-				Parameter: d.Number(paramKey),
+				Parameter: d.String(paramKey),
 				Min:       d.Number(minKey),
 				Max:       d.Number(maxKey),
 			}

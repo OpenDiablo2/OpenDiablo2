@@ -23,12 +23,7 @@ const (
 )
 
 // SetItemProperty is describes a property of a set item
-type SetItemProperty struct {
-	Code      string
-	Parameter string // depending on the property, this may be an int (usually), or a string
-	Min       int
-	Max       int
-}
+type SetItemProperty = PropertyDescriptor
 
 // Loadrecords loads all of the SetItemRecords from records.txt
 func setItemLoader(r *RecordManager, d *d2txt.DataDictionary) error {

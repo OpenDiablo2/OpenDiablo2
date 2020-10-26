@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
@@ -544,7 +545,12 @@ func (i *Item) generateAffixProperties(pool PropertyPool) []*Property {
 		for modIdx := range affix.Modifiers {
 			mod := affix.Modifiers[modIdx]
 
-			prop := i.factory.NewProperty(mod.Code, mod.Parameter, mod.Min, mod.Max)
+			paramInt, err := strconv.Atoi(mod.Parameter)
+			if err != nil {
+				paramInt = 0
+			}
+
+			prop := i.factory.NewProperty(mod.Code, paramInt, mod.Min, mod.Max)
 			if prop == nil {
 				continue
 			}
@@ -557,48 +563,26 @@ func (i *Item) generateAffixProperties(pool PropertyPool) []*Property {
 }
 
 func (i *Item) generateUniqueProperties() []*Property {
-	if i.UniqueRecord() == nil {
-		return nil
+	if record := i.UniqueRecord(); record != nil {
+		return i.generateItemProperties(record.Properties[:])
 	}
 
-	result := make([]*Property, 0)
-
-	for propIdx := range i.UniqueRecord().Properties {
-		propInfo := i.UniqueRecord().Properties[propIdx]
-
-		// sketchy ass unique records, the param should be an int but sometimes it's the name
-		// of a skill, which needs to be converted to the skill index
-		paramStr := getStringComponent(propInfo.Parameter)
-		paramInt := getNumericComponent(propInfo.Parameter)
-
-		if paramStr != "" {
-			for skillID := range i.factory.asset.Records.Skill.Details {
-				if i.factory.asset.Records.Skill.Details[skillID].Skill == paramStr {
-					paramInt = skillID
-				}
-			}
-		}
-
-		prop := i.factory.NewProperty(propInfo.Code, paramInt, propInfo.Min, propInfo.Max)
-		if prop == nil {
-			continue
-		}
-
-		result = append(result, prop)
-	}
-
-	return result
+	return nil
 }
 
 func (i *Item) generateSetItemProperties() []*Property {
-	if i.SetItemRecord() == nil {
-		return nil
+	if record := i.SetItemRecord(); record != nil {
+		return i.generateItemProperties(record.Properties[:])
 	}
 
+	return nil
+}
+
+func (i *Item) generateItemProperties(properties []*d2records.PropertyDescriptor) []*Property {
 	result := make([]*Property, 0)
 
-	for propIdx := range i.SetItemRecord().Properties {
-		setProp := i.SetItemRecord().Properties[propIdx]
+	for propIdx := range properties {
+		setProp := properties[propIdx]
 
 		// like with unique records, the property param is sometimes a skill name
 		// as a string, not an integer index

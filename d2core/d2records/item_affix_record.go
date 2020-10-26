@@ -14,12 +14,7 @@ type ItemAffixGroups map[int]*ItemAffixCommonGroup
 // ItemAffixCommonModifier is the generic modifier form that prefix/suffix shares
 // modifiers are like dynamic properties, they have a key that points to a property
 // a parameter for the property, and a min/max value
-type ItemAffixCommonModifier struct {
-	Code      string
-	Parameter int
-	Min       int
-	Max       int
-}
+type ItemAffixCommonModifier = PropertyDescriptor
 
 // ItemAffixCommonGroup is a grouping that is common between prefix/suffix
 type ItemAffixCommonGroup struct {

@@ -5,7 +5,7 @@ type UniqueItems map[string]*UniqueItemRecord
 
 // UniqueItemRecord is a representation of a row from uniqueitems.txt
 type UniqueItemRecord struct {
-	Properties [12]UniqueItemProperty
+	Properties [12]*UniqueItemProperty
 
 	Name                  string
 	Code                  string // three letter code, points to a record in Weapons, Armor, or Misc
@@ -37,9 +37,4 @@ type UniqueItemRecord struct {
 }
 
 // UniqueItemProperty is describes a property of a unique item
-type UniqueItemProperty struct {
-	Code      string
-	Parameter string // depending on the property, this may be an int (usually), or a string
-	Min       int
-	Max       int
-}
+type UniqueItemProperty = PropertyDescriptor
