@@ -820,7 +820,8 @@ func (i *Item) Identify() *Item {
 	return i
 }
 
-// from a string table
+// string table keys
+// nolint:deadcode,unused,varcheck // WIP
 const (
 	reqNotMet    = "ItemStats1a" // "Requirements not met",
 	unidentified = "ItemStats1b" // "Unidentified",
