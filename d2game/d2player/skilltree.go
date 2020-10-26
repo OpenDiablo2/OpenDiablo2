@@ -201,8 +201,8 @@ func makeCloseButtonPos(close1, close2, close3 int) [numTabs]int {
 	return [numTabs]int{close1, close2, close3}
 }
 
-func (s *skillTree) getTab(class d2enum.Hero) (heroTabData, bool) {
-	tabMap := map[d2enum.Hero]heroTabData{
+func (s *skillTree) getTab(class d2enum.Hero) *heroTabData {
+	tabMap := map[d2enum.Hero]*heroTabData{
 		d2enum.HeroBarbarian: {
 			&skillTreeHeroTypeResources{
 				skillPanelPath: d2resource.SkillsPanelBarbarian,
@@ -242,13 +242,11 @@ func (s *skillTree) getTab(class d2enum.Hero) (heroTabData, bool) {
 				skillCloseButtonXMiddle,
 				skillCloseButtonXLeft),
 		},
-
 		d2enum.HeroAssassin: {
 			&skillTreeHeroTypeResources{
 				skillPanelPath: d2resource.SkillsPanelAssassin,
 				skillIconPath:  d2resource.AssassinSkills,
 			},
-
 			makeTabString("StrSklTree30"),
 			makeTabString("StrSklTree31", "StrSklTree32"),
 			makeTabString("StrSklTree33", "StrSklTree34"),
@@ -270,7 +268,6 @@ func (s *skillTree) getTab(class d2enum.Hero) (heroTabData, bool) {
 				skillCloseButtonXLeft,
 				skillCloseButtonXRight),
 		},
-
 		d2enum.HeroAmazon: {
 			&skillTreeHeroTypeResources{
 				skillPanelPath: d2resource.SkillsPanelAmazon,
@@ -284,7 +281,6 @@ func (s *skillTree) getTab(class d2enum.Hero) (heroTabData, bool) {
 				skillCloseButtonXMiddle,
 				skillCloseButtonXLeft),
 		},
-
 		d2enum.HeroDruid: {
 			&skillTreeHeroTypeResources{
 				skillPanelPath: d2resource.SkillsPanelDruid,
@@ -300,14 +296,12 @@ func (s *skillTree) getTab(class d2enum.Hero) (heroTabData, bool) {
 		},
 	}
 
-	entry, found := tabMap[class]
-
-	return entry, found
+	return tabMap[class]
 }
 
 func (s *skillTree) setHeroTypeResourcePath() {
-	entry, found := s.getTab(s.heroClass)
-	if !found {
+	entry := s.getTab(s.heroClass)
+	if entry == nil {
 		log.Fatal("Unknown Hero Type")
 	}
 
