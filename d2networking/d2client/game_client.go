@@ -309,16 +309,16 @@ func (g *GameClient) handleCastSkillPacket(packet d2netpacket.NetPacket) error {
 	})
 
 	overlayRecord := g.asset.Records.Layout.Overlays[skillRecord.Castoverlay]
-	g.playCastOverlay(overlayRecord, int(player.Position.X()), int(player.Position.Y()))
 
-	return nil
+	return g.playCastOverlay(overlayRecord, int(player.Position.X()), int(player.Position.Y()))
 }
 
 func (g *GameClient) createSummonedNpcEntity(skillRecord *d2records.SkillRecord, x, y int) (*d2mapentity.NPC, error) {
 	monsterStatsRecord := g.asset.Records.Monster.Stats[skillRecord.Summon]
 
 	if monsterStatsRecord == nil {
-		return nil, fmt.Errorf("Cannot cast skill - No monstat entry for \"%s\"", skillRecord.Summon)
+		fmtErr := "cannot cast skill - No monstat entry for \"%s\""
+		return nil, fmt.Errorf(fmtErr, skillRecord.Summon)
 	}
 
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/803
@@ -330,7 +330,11 @@ func (g *GameClient) createSummonedNpcEntity(skillRecord *d2records.SkillRecord,
 	return summonedNpcEntity, nil
 }
 
-func (g *GameClient) createMissileEntities(skillRecord *d2records.SkillRecord, player *d2mapentity.Player, castX, castY float64) ([]*d2mapentity.Missile, error) {
+func (g *GameClient) createMissileEntities(
+	skillRecord *d2records.SkillRecord,
+	player *d2mapentity.Player,
+	castX, castY float64,
+) ([]*d2mapentity.Missile, error) {
 	missileRecords := []*d2records.MissileRecord{
 		g.asset.Records.GetMissileByName(skillRecord.Cltmissile),
 		g.asset.Records.GetMissileByName(skillRecord.Cltmissilea),
@@ -357,7 +361,11 @@ func (g *GameClient) createMissileEntities(skillRecord *d2records.SkillRecord, p
 	return missileEntities, nil
 }
 
-func (g *GameClient) createMissileEntity(missileRecord *d2records.MissileRecord, player *d2mapentity.Player, castX, castY float64) (*d2mapentity.Missile, error) {
+func (g *GameClient) createMissileEntity(
+	missileRecord *d2records.MissileRecord,
+	player *d2mapentity.Player,
+	castX, castY float64,
+) (*d2mapentity.Missile, error) {
 	if missileRecord == nil {
 		return nil, nil
 	}
