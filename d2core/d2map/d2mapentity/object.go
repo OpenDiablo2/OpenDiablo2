@@ -26,6 +26,7 @@ type Object struct {
 }
 
 // setMode changes the graphical mode of this animated entity
+// nolint:unparam // direction may not always be passed 0 in the future
 func (ob *Object) setMode(animationMode d2enum.ObjectAnimationMode, direction int, randomFrame bool) error {
 	err := ob.composite.SetMode(animationMode, "HTH")
 	if err != nil {
