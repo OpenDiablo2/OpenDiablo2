@@ -88,7 +88,7 @@ func (v *linkedNode) insert(other *linkedNode) *linkedNode {
 	return v
 }
 
-//nolint:funlen // Makes no sense to split
+//nolint:funlen,dupl // it's ok to have duplicates and a long func here
 func getPrimes() [][]byte {
 	return [][]byte{
 		{
