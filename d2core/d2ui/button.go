@@ -48,6 +48,12 @@ const (
 )
 
 const (
+	buttonStatePressed = iota + 1
+	buttonStateToggled
+	buttonStatePressedToggled
+)
+
+const (
 	closeButtonBaseFrame = 10 // base frame offset of the "close" button dc6
 )
 
@@ -315,24 +321,24 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 	buttonSprite.SetPosition(0, 0)
 	buttonSprite.SetEffect(d2enum.DrawEffectModulate)
 
-	ui.addWidget(btn) // important that this comes before prerender!
+	ui.addWidget(btn) // important that this comes before prerenderStates!
 
-	btn.prerender(buttonSprite, &buttonLayout, lbl)
+	btn.prerenderStates(buttonSprite, &buttonLayout, lbl)
 
 	return btn
 }
 
 type buttonStateDescriptor struct {
-	baseFrame        int
-	offsetX, offsetY int
-	whereToRender    *d2interface.Surface
-	fmtErr           string
+	baseFrame            int
+	offsetX, offsetY     int
+	prerenderdestination *d2interface.Surface
+	fmtErr               string
 }
 
-func (v *Button) prerender(btnSprite *Sprite, btnLayout *ButtonLayout, label *Label) {
+func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, label *Label) {
 	var err error
 
-	totalButtonStates := btnSprite.GetFrameCount() / (btnLayout.XSegments * btnLayout.YSegments)
+	numButtonStates := btnSprite.GetFrameCount() / (btnLayout.XSegments * btnLayout.YSegments)
 
 	// buttons always have a base image
 	if v.buttonLayout.HasImage {
@@ -355,61 +361,76 @@ func (v *Button) prerender(btnSprite *Sprite, btnLayout *ButtonLayout, label *La
 
 	xSeg, ySeg, baseFrame := btnLayout.XSegments, btnLayout.YSegments, btnLayout.BaseFrame
 
-	possibleButtonStates := []*buttonStateDescriptor{
-		{ // pressed button
-			baseFrame + 1,
+	buttonStateConfigs := make([]*buttonStateDescriptor, 0)
+
+	// pressed button
+	if numButtonStates >= buttonStatePressed {
+		state := &buttonStateDescriptor{
+			baseFrame + buttonStatePressed,
 			xOffset - pressedButtonOffset, textY + pressedButtonOffset,
 			&v.pressedSurface,
 			"failed to render button pressedSurface, err: %v\n",
-		},
-		{ // toggle button
-			baseFrame + 2,
+		}
+
+		buttonStateConfigs = append(buttonStateConfigs, state)
+	}
+
+	// toggle button
+	if numButtonStates >= buttonStateToggled {
+		buttonStateConfigs = append(buttonStateConfigs, &buttonStateDescriptor{
+			baseFrame + buttonStateToggled,
 			xOffset, textY,
 			&v.toggledSurface,
 			"failed to render button toggledSurface, err: %v\n",
-		},
-		{ // pressed+toggled
-			baseFrame + 3,
+		})
+	}
+
+	// pressed+toggled
+	if numButtonStates >= buttonStatePressedToggled {
+		buttonStateConfigs = append(buttonStateConfigs, &buttonStateDescriptor{
+			baseFrame + buttonStatePressedToggled,
 			xOffset, textY,
 			&v.pressedToggledSurface,
 			"failed to render button pressedToggledSurface, err: %v\n",
-		},
+		})
 	}
 
 	// disabled button
 	if btnLayout.DisabledFrame != -1 {
 		disabledState := &buttonStateDescriptor{
-			xOffset, textY,
 			btnLayout.DisabledFrame,
+			xOffset, textY,
 			&v.disabledSurface,
 			"failed to render button disabledSurface, err: %v\n",
 		}
 
-		possibleButtonStates = append(possibleButtonStates, disabledState)
+		buttonStateConfigs = append(buttonStateConfigs, disabledState)
 	}
 
-	for stateIdx, w, h := 0, v.width, v.height; stateIdx < totalButtonStates; stateIdx++ {
-		state := possibleButtonStates[stateIdx]
+	for stateIdx, w, h := 0, v.width, v.height; stateIdx < len(buttonStateConfigs); stateIdx++ {
+		state := buttonStateConfigs[stateIdx]
 
-		if stateIdx == 2 && btnLayout.ResourceName == d2resource.BuySellButton {
+		if stateIdx >= 2 && btnLayout.ResourceName == d2resource.BuySellButton {
 			// Without returning early, the button UI gets all subsequent (unrelated) frames
 			// stacked on top. Only 2 frames from this sprite are applicable to the button
 			// in question. The presentation is incorrect without this hack!
-			return
+			continue
 		}
 
-		*state.whereToRender, err = v.manager.renderer.NewSurface(w, h, d2enum.FilterNearest)
+		surface, err := v.manager.renderer.NewSurface(w, h, d2enum.FilterNearest)
 		if err != nil {
 			log.Print(err)
 		}
 
-		err = btnSprite.RenderSegmented(v.pressedSurface, xSeg, ySeg, state.baseFrame)
+		*state.prerenderdestination = surface
+
+		err = btnSprite.RenderSegmented(*state.prerenderdestination, xSeg, ySeg, state.baseFrame)
 		if err != nil {
 			fmt.Printf(state.fmtErr, err)
 		}
 
 		label.SetPosition(state.offsetX, state.offsetY)
-		label.Render(v.pressedSurface)
+		label.Render(*state.prerenderdestination)
 	}
 }
 
