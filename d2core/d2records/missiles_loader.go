@@ -9,6 +9,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2calculation"
 )
 
+// nolint:funlen // cant reduce
 func missilesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	records := make(Missiles)
 	r.missilesByName = make(missilesByName)

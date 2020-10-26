@@ -8,6 +8,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
+// nolint:funlen // cant reduce
 func levelDetailsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	records := make(LevelDetails)
 

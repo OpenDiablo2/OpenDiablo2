@@ -7,7 +7,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
-// LoadInventory loads all of the inventory records from inventory.txt
+// nolint:funlen // cant reduce
 func inventoryLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	records := make(Inventory)
 
