@@ -54,8 +54,13 @@ func (sm *SkillSelectMenu) RegenerateImageCache() {
 
 // Render gets called on every frame
 func (sm *SkillSelectMenu) Render(target d2interface.Surface) {
-	sm.LeftPanel.Render(target)
-	sm.RightPanel.Render(target)
+	if err := sm.LeftPanel.Render(target); err != nil {
+		panic(err)
+	}
+
+	if err := sm.RightPanel.Render(target); err != nil {
+		panic(err)
+	}
 }
 
 // IsOpen returns whether one of the panels(left or right) is open
