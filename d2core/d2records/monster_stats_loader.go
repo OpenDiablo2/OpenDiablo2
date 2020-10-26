@@ -7,7 +7,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
-// LoadMonStats loads monstats
+// nolint:funlen // cant reduce
 func monsterStatsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	records := make(MonStats)
 

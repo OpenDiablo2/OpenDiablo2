@@ -10,6 +10,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )
 
+// nolint:funlen // cant reduce
 func loadCommonItems(d *d2txt.DataDictionary, source d2enum.InventoryItemType) (CommonItems, error) {
 	records := make(CommonItems)
 

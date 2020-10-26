@@ -7,6 +7,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
+// nolint:funlen // cant reduce
 func charStatsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	records := make(CharStats)
 

@@ -152,50 +152,16 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 
 	loading.Progress(tenPercent)
 
-	bgX, bgY := 0, 0
-
-	v.background, err = v.uiManager.NewSprite(d2resource.CharacterSelectionBackground, d2resource.PaletteSky)
-	if err != nil {
-		log.Print(err)
-	}
-
-	v.background.SetPosition(bgX, bgY)
-
+	v.loadBackground()
 	v.createButtons(loading)
-
-	heroTitleX, heroTitleY := 320, 23
-	v.d2HeroTitle = v.uiManager.NewLabel(d2resource.Font42, d2resource.PaletteUnits)
-	v.d2HeroTitle.SetPosition(heroTitleX, heroTitleY)
-	v.d2HeroTitle.Alignment = d2gui.HorizontalAlignCenter
+	v.loadHeroTitle()
 
 	loading.Progress(thirtyPercent)
 
-	v.deleteCharConfirmLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
-	lines := "Are you sure that you want\nto delete this character?\nTake note: this will delete all\nversions of this Character."
-	v.deleteCharConfirmLabel.SetText(lines)
-	v.deleteCharConfirmLabel.Alignment = d2gui.HorizontalAlignCenter
-	deleteConfirmX, deleteConfirmY := 400, 185
-	v.deleteCharConfirmLabel.SetPosition(deleteConfirmX, deleteConfirmY)
-
-	v.selectionBox, err = v.uiManager.NewSprite(d2resource.CharacterSelectionSelectBox, d2resource.PaletteSky)
-	if err != nil {
-		log.Print(err)
-	}
-
-	selBoxX, selBoxY := 37, 86
-	v.selectionBox.SetPosition(selBoxX, selBoxY)
-
-	v.okCancelBox, err = v.uiManager.NewSprite(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
-	if err != nil {
-		log.Print(err)
-	}
-
-	okCancelX, okCancelY := 270, 175
-	v.okCancelBox.SetPosition(okCancelX, okCancelY)
-
-	scrollBarX, scrollBarY, scrollBarHeight := 586, 87, 369
-	v.charScrollbar = v.uiManager.NewScrollbar(scrollBarX, scrollBarY, scrollBarHeight)
-	v.charScrollbar.OnActivated(func() { v.onScrollUpdate() })
+	v.loadDeleteCharConfirm()
+	v.loadSelectionBox()
+	v.loadOkCancelBox()
+	v.loadCharScrollbar()
 
 	loading.Progress(fiftyPercent)
 
@@ -221,7 +187,67 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 		v.characterExpLabel[i].SetPosition(offsetX, offsetY)
 		v.characterExpLabel[i].Color[0] = rgbaColor(lightGreen)
 	}
+
 	v.refreshGameStates()
+}
+
+func (v *CharacterSelect) loadBackground() {
+	var err error
+
+	bgX, bgY := 0, 0
+
+	v.background, err = v.uiManager.NewSprite(d2resource.CharacterSelectionBackground, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
+
+	v.background.SetPosition(bgX, bgY)
+}
+
+func (v *CharacterSelect) loadHeroTitle() {
+	heroTitleX, heroTitleY := 320, 23
+	v.d2HeroTitle = v.uiManager.NewLabel(d2resource.Font42, d2resource.PaletteUnits)
+	v.d2HeroTitle.SetPosition(heroTitleX, heroTitleY)
+	v.d2HeroTitle.Alignment = d2gui.HorizontalAlignCenter
+}
+
+func (v *CharacterSelect) loadDeleteCharConfirm() {
+	v.deleteCharConfirmLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
+	lines := "Are you sure that you want\nto delete this character?\nTake note: this will delete all\nversions of this Character."
+	v.deleteCharConfirmLabel.SetText(lines)
+	v.deleteCharConfirmLabel.Alignment = d2gui.HorizontalAlignCenter
+	deleteConfirmX, deleteConfirmY := 400, 185
+	v.deleteCharConfirmLabel.SetPosition(deleteConfirmX, deleteConfirmY)
+}
+
+func (v *CharacterSelect) loadSelectionBox() {
+	var err error
+
+	v.selectionBox, err = v.uiManager.NewSprite(d2resource.CharacterSelectionSelectBox, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
+
+	selBoxX, selBoxY := 37, 86
+	v.selectionBox.SetPosition(selBoxX, selBoxY)
+}
+
+func (v *CharacterSelect) loadOkCancelBox() {
+	var err error
+
+	v.okCancelBox, err = v.uiManager.NewSprite(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
+	if err != nil {
+		log.Print(err)
+	}
+
+	okCancelX, okCancelY := 270, 175
+	v.okCancelBox.SetPosition(okCancelX, okCancelY)
+}
+
+func (v *CharacterSelect) loadCharScrollbar() {
+	scrollBarX, scrollBarY, scrollBarHeight := 586, 87, 369
+	v.charScrollbar = v.uiManager.NewScrollbar(scrollBarX, scrollBarY, scrollBarHeight)
+	v.charScrollbar.OnActivated(func() { v.onScrollUpdate() })
 }
 
 func rgbaColor(rgba uint32) color.RGBA {

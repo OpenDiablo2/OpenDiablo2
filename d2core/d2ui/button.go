@@ -116,6 +116,7 @@ const (
 	pressedButtonOffset = 2
 )
 
+// nolint:funlen // cant reduce
 func getButtonLayouts() map[ButtonType]ButtonLayout {
 	return map[ButtonType]ButtonLayout{
 		ButtonTypeWide: {
