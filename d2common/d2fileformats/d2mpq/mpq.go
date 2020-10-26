@@ -212,7 +212,7 @@ func (v *MPQ) loadBlockTable() {
 	hash := make([]byte, 4)
 
 	for i := range blockData {
-		_, err = v.file.Read(hash[:]) //nolint:errcheck // Will fix later
+		_, err = v.file.Read(hash) //nolint:errcheck // Will fix later
 		if err != nil {
 			log.Print(err)
 		}

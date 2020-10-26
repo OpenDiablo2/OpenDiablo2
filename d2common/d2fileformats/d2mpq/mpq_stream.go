@@ -270,18 +270,19 @@ func decompressMulti(data []byte /*expectedLength*/, _ uint32) []byte {
 
 		return tmp
 	case 0x48:
-		//byte[] result = PKDecompress(sinput, outputLength);
-		//return MpqWavCompression.Decompress(new MemoryStream(result), 1);
+		// byte[] result = PKDecompress(sinput, outputLength);
+		// return MpqWavCompression.Decompress(new MemoryStream(result), 1);
 		panic("pk + mpqwav decompression not supported")
 	case 0x81:
 		sinput := d2compression.HuffmanDecompress(data[1:])
 		sinput = d2compression.WavDecompress(sinput, 2)
 		tmp := make([]byte, len(sinput))
 		copy(tmp, sinput)
+
 		return tmp
 	case 0x88:
-		//byte[] result = PKDecompress(sinput, outputLength);
-		//return MpqWavCompression.Decompress(new MemoryStream(result), 2);
+		// byte[] result = PKDecompress(sinput, outputLength);
+		// return MpqWavCompression.Decompress(new MemoryStream(result), 2);
 		panic("pk + wav decompression not supported")
 	default:
 		panic(fmt.Sprintf("decompression not supported for unknown compression type %X", compressionType))
