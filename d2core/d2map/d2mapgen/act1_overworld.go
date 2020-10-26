@@ -80,6 +80,7 @@ func (g *MapGenerator) GenerateAct1Overworld() {
 	}
 }
 
+// nolint:gosec // we're not concerned with crypto-strong randomness
 func (g *MapGenerator) generateWilderness1TownEast(startX, startY int) {
 	levelDetails := g.asset.Records.GetLevelDetails(wildernessDetailsRecordID)
 
@@ -145,6 +146,7 @@ func (g *MapGenerator) generateWilderness1TownEast(startX, startY int) {
 	g.engine.PlaceStamp(fenceSouthEastStamp, startX+levelDetails.SizeXNormal, startY+levelDetails.SizeYNormal+6)
 }
 
+// nolint:gosec // we're not concerned with crypto-strong randomness
 func (g *MapGenerator) generateWilderness1TownSouth(startX, startY int) {
 	levelDetails := g.asset.Records.GetLevelDetails(wildernessDetailsRecordID)
 
@@ -198,6 +200,7 @@ func (g *MapGenerator) generateWilderness1TownSouth(startX, startY int) {
 	g.engine.PlaceStamp(fenceWaterBorderSouthEast, startX+(9*9)-4, startY+(8*9)+1)
 }
 
+// nolint:gosec // we're not concerned with crypto-strong randomness
 func (g *MapGenerator) generateWilderness1TownWest(startX, startY int) {
 	levelDetails := g.asset.Records.GetLevelDetails(wildernessDetailsRecordID)
 
@@ -264,6 +267,7 @@ func (g *MapGenerator) generateWilderness1TownWest(startX, startY int) {
 	g.generateWilderness1Contents(areaRect)
 }
 
+// nolint:gosec // we're not concerned with crypto-strong randomness
 func (g *MapGenerator) generateWilderness1Contents(rect d2geom.Rectangle) {
 	levelDetails := g.asset.Records.GetLevelDetails(wildernessDetailsRecordID)
 

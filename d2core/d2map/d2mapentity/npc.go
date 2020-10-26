@@ -38,6 +38,7 @@ const (
 
 func selectEquip(slice []string) string {
 	if len(slice) != 0 {
+		// nolint:gosec // not concerned with crypto-strong randomness
 		return slice[rand.Intn(len(slice))]
 	}
 
@@ -120,6 +121,8 @@ func (v *NPC) next() {
 	var newAnimationMode d2enum.MonsterAnimationMode
 
 	v.isDone = true
+
+	// nolint:gosec // not concerned with crypto-strong randomness
 	v.repetitions = minAnimationRepetitions + rand.Intn(maxAnimationRepetitions)
 
 	switch d2enum.NPCActionType(v.action) {

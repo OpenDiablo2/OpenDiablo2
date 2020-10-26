@@ -387,6 +387,7 @@ func (i *Item) pickRandomAffixes(max, totalMax int,
 // SetSeed sets the item generator seed
 func (i *Item) SetSeed(seed int64) {
 	if i.rand == nil {
+		// nolint:gosec // not concerned with crypto-strong randomness
 		i.rand = rand.New(rand.NewSource(seed))
 	}
 

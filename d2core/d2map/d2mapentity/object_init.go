@@ -47,7 +47,8 @@ func initWaypoint(ob *Object) error {
 
 // Randomly spawns in either NU or OP
 func initTorchRnd(ob *Object) error {
-	n := rand.Intn(2)
+	const coinToss = 2
+	n := rand.Intn(coinToss) // nolint:gosec // not concerned with crypto-strong randomness
 
 	if n > 0 {
 		return ob.setMode(d2enum.ObjectAnimationModeNeutral, 0, true)
