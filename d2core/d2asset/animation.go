@@ -396,3 +396,11 @@ func (a *Animation) SetEffect(e d2enum.DrawEffect) {
 func (a *Animation) SetShadow(shadow bool) {
 	a.hasShadow = shadow
 }
+
+// Clone creates a copy of the Animation
+func (a *Animation) Clone() Animation {
+	clone := *a
+	copy(clone.directions, a.directions)
+
+	return clone
+}

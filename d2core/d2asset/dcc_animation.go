@@ -72,8 +72,12 @@ func (a *DCCAnimation) init() error {
 
 // Clone creates a copy of the animation
 func (a *DCCAnimation) Clone() d2interface.Animation {
-	animation := *a
-	return &animation
+	clone := &DCCAnimation{}
+	clone.Animation = a.Animation.Clone()
+	clone.dcc = a.dcc.Clone()
+	clone.palette = a.palette
+
+	return clone
 }
 
 // SetDirection places the animation in the direction of an animation
