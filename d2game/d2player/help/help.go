@@ -15,6 +15,25 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
+/*
+	the 800x600 help screen dc6 file frames look like this
+	the position we set for frames is the lower-left corner x,y
+	+----+------------------+-------------------+------------+----+
+	| 1  | 3                | 4                 | 5          | 6  |
+	|    |------------------+-------------------|            |    |
+	|    |                                      |            |    |
+	|    |                                      |            |    |
+	+----+                                      +------------+----+
+	| 2  |                                                   | 7  |
+	|    |                                                   |    |
+	|    |                                                   |    |
+	+----+                                                   +----+
+*/
+const (
+	// if you add up frame widths 1,3,4,5,6 you get (65+255+255+245+20) = 840
+	magicHelpBorderOffsetX = -40
+)
+
 const (
 	frameTopLeft = iota
 	frameBottomLeft
@@ -217,25 +236,13 @@ func (h *Overlay) IsInRect(px, py int) bool {
 
 // Load the overlay graphical assets
 func (h *Overlay) Load() {
-	/*
-		the 800x600 help screen dc6 file frames look like this
-		the position we set for frames is the lower-left corner x,y
-		+----+------------------+-------------------+------------+----+
-		| 1  | 3                | 4                 | 5          | 6  |
-		|    |------------------+-------------------|            |    |
-		|    |                                      |            |    |
-		|    |                                      |            |    |
-		+----+                                      +------------+----+
-		| 2  |                                                   | 7  |
-		|    |                                                   |    |
-		|    |                                                   |    |
-		+----+                                                   +----+
-	*/
-	const (
-		// if you add up frame widths 1,3,4,5,6 you get (65+255+255+245+20) = 840
-		magicHelpBorderOffsetX = -40
-	)
+	h.setupOverlayFrame()
+	h.setupTitleAndButton()
+	h.setupBulletedList()
+	h.setupLabelsWithLines()
+}
 
+func (h *Overlay) setupOverlayFrame() {
 	frames := []int{
 		frameTopLeft,
 		frameBottomLeft,
@@ -295,9 +302,10 @@ func (h *Overlay) Load() {
 
 		h.frames = append(h.frames, f)
 	}
+}
 
+func (h *Overlay) setupTitleAndButton() {
 	// Title
-
 	text := d2tbl.TranslateString("Strhelp1") // "Diablo II Help"
 	newLabel := h.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
 	newLabel.SetText(text)
@@ -307,8 +315,7 @@ func (h *Overlay) Load() {
 	newLabel.SetPosition((windowWidth/inHalf)-(titleLabelWidth/inHalf)+titleLabelOffsetX, 0)
 	h.text = append(h.text, newLabel)
 
-	// Close
-
+	// Button
 	h.closeButton = h.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
 	h.closeButton.SetPosition(closeButtonX, closeButtonY)
 	h.closeButton.SetVisible(false)
@@ -318,7 +325,9 @@ func (h *Overlay) Load() {
 	newLabel.SetText(d2tbl.TranslateString("strClose")) // "Close"
 	newLabel.SetPosition(closeButtonLabelX, closeButtonLabelY)
 	h.text = append(h.text, newLabel)
+}
 
+func (h *Overlay) setupBulletedList() {
 	// Bullets
 	// the hotkeys displayed here should be pulled from a mapping of input events to game events
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/793
@@ -360,9 +369,10 @@ func (h *Overlay) Load() {
 			DotY:      listBulletRootY + listItemOffsetY,
 		})
 	}
+}
 
-	// Callouts
-
+// nolint:funlen // can't reduce
+func (h *Overlay) setupLabelsWithLines() {
 	h.createCallout(callout{
 		LabelText: d2tbl.TranslateString("strlvlup"), // "New Stats"
 		LabelX:    newStatsLabelX,

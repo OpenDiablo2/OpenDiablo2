@@ -265,6 +265,14 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 	screen.PushTranslation(0, lineNormalOffsetY)
 	defer screen.Pop()
 
+	if err := met.renderTileInfo(screen); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (met *MapEngineTest) renderTileInfo(screen d2interface.Surface) error {
 	if met.selectedTile == nil {
 		screen.PushTranslation(lineNormalIndentX, lineNormalOffsetY)
 		defer screen.Pop()
