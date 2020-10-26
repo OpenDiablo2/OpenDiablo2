@@ -292,7 +292,7 @@ func (mr *MapRenderer) getEntitiesAboveWalls(tileX, tileY int) []d2interface.Map
 		vec := pos.World()
 		entityX, entityY := vec.X(), vec.Y()
 
-		if mapEntity.GetLayer() != 1 {
+		if mapEntity.GetLayer() == 1 {
 			continue
 		}
 
