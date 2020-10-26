@@ -7,19 +7,12 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 )
 
-var stepEntity mapEntity
-
 const (
 	normalTickTime float64 = 0.05
 )
 
 func TestMain(m *testing.M) {
-	setup()
 	os.Exit(m.Run())
-}
-
-func setup() {
-	setupBenchmarkMapEntityStep()
 }
 
 func entity() mapEntity {
@@ -79,11 +72,9 @@ func TestMapEntity_Step(t *testing.T) {
 	}
 }
 
-func setupBenchmarkMapEntityStep() {
-	stepEntity = movingEntity()
-}
-
 func BenchmarkMapEntity_Step(b *testing.B) {
+	stepEntity := movingEntity()
+
 	for n := 0; n < b.N; n++ {
 		stepEntity.Step(normalTickTime)
 	}

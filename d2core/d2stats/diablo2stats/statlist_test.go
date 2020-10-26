@@ -9,8 +9,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 )
 
+// nolint:gochecknoglobals // just a test
 var testAssetManager *d2asset.AssetManager
 
+// nolint:gochecknoglobals // just a test
 var testStatFactory *StatFactory
 
 func TestSetup_StatList(t *testing.T) {
