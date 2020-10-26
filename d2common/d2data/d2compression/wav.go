@@ -6,7 +6,7 @@ import (
 
 // WavDecompress decompresses wav files
 //nolint:gomnd // binary decode magic
-func WavDecompress(data []byte, channelCount int) []byte { //nolint:funlen doesn't make sense to split
+func WavDecompress(data []byte, channelCount int) []byte { //nolint:funlen // can't reduce
 	Array1 := []int{0x2c, 0x2c}
 	Array2 := make([]int, channelCount)
 

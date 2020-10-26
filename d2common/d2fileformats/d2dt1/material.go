@@ -15,7 +15,7 @@ type MaterialFlags struct {
 }
 
 // NewMaterialFlags  represents the material flags
-// nolint:gomnd Binary values
+// nolint:gomnd // Binary values
 func NewMaterialFlags(data uint16) MaterialFlags {
 	return MaterialFlags{
 		Other:        data&0x0001 == 0x0001,

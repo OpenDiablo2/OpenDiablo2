@@ -61,20 +61,20 @@ func (v *DCCDirectionFrame) recalculateCells(direction *DCCDirection) {
 		v.HorizontalCellCount = 1
 	} else {
 		tmp := v.Width - w - 1
-		v.HorizontalCellCount = 2 + (tmp / 4) //nolint:gomnd magic math
+		v.HorizontalCellCount = 2 + (tmp / 4) //nolint:gomnd // magic math
 		if (tmp % 4) == 0 {
 			v.HorizontalCellCount--
 		}
 	}
 
 	// Height of the first column (in pixels)
-	h := 4 - ((v.Box.Top - direction.Box.Top) % 4) //nolint:gomnd data decode
+	h := 4 - ((v.Box.Top - direction.Box.Top) % 4) //nolint:gomnd // data decode
 
 	if (v.Height - h) <= 1 {
 		v.VerticalCellCount = 1
 	} else {
 		tmp := v.Height - h - 1
-		v.VerticalCellCount = 2 + (tmp / 4) //nolint:gomnd data decode
+		v.VerticalCellCount = 2 + (tmp / 4) //nolint:gomnd // data decode
 		if (tmp % 4) == 0 {
 			v.VerticalCellCount--
 		}

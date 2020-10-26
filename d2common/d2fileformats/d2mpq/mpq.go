@@ -106,7 +106,7 @@ func Load(fileName string) (d2interface.Archive, error) {
 	if runtime.GOOS == "linux" {
 		result.file, err = openIgnoreCase(fileName)
 	} else {
-		result.file, err = os.Open(fileName) //nolint:gosec Will fix later
+		result.file, err = os.Open(fileName) //nolint:gosec // Will fix later
 	}
 
 	if err != nil {
@@ -122,7 +122,7 @@ func Load(fileName string) (d2interface.Archive, error) {
 
 func openIgnoreCase(mpqPath string) (*os.File, error) {
 	// First see if file exists with specified case
-	mpqFile, err := os.Open(mpqPath) //nolint:gosec Will fix later
+	mpqFile, err := os.Open(mpqPath) //nolint:gosec // Will fix later
 	if err == nil {
 		return mpqFile, err
 	}
@@ -142,7 +142,7 @@ func openIgnoreCase(mpqPath string) (*os.File, error) {
 		}
 	}
 
-	file, err := os.Open(path.Join(mpqDir, mpqName)) //nolint:gosec Will fix later
+	file, err := os.Open(path.Join(mpqDir, mpqName)) //nolint:gosec // Will fix later
 
 	return file, err
 }
@@ -174,7 +174,7 @@ func (v *MPQ) loadHashTable() error {
 		log.Panic(err)
 	}
 
-	hashData := make([]uint32, v.data.HashTableEntries*4) //nolint:gomnd Decryption magic
+	hashData := make([]uint32, v.data.HashTableEntries*4) //nolint:gomnd // // Decryption magic
 	hash := make([]byte, 4)
 
 	for i := range hashData {
@@ -193,8 +193,8 @@ func (v *MPQ) loadHashTable() error {
 			NamePartA: hashData[i*4],
 			NamePartB: hashData[(i*4)+1],
 			// https://github.com/OpenDiablo2/OpenDiablo2/issues/812
-			Locale:     uint16(hashData[(i*4)+2] >> 16),    //nolint:gomnd binary data
-			Platform:   uint16(hashData[(i*4)+2] & 0xFFFF), //nolint:gomnd binary data
+			Locale:     uint16(hashData[(i*4)+2] >> 16),    //nolint:gomnd // // binary data
+			Platform:   uint16(hashData[(i*4)+2] & 0xFFFF), //nolint:gomnd // // binary data
 			BlockIndex: hashData[(i*4)+3],
 		})
 	}
@@ -208,11 +208,11 @@ func (v *MPQ) loadBlockTable() {
 		log.Panic(err)
 	}
 
-	blockData := make([]uint32, v.data.BlockTableEntries*4) //nolint:gomnd binary data
+	blockData := make([]uint32, v.data.BlockTableEntries*4) //nolint:gomnd // // binary data
 	hash := make([]byte, 4)
 
 	for i := range blockData {
-		_, err = v.file.Read(hash[:]) //nolint:errcheck Will fix later
+		_, err = v.file.Read(hash[:]) //nolint:errcheck // Will fix later
 		if err != nil {
 			log.Print(err)
 		}
@@ -233,43 +233,43 @@ func (v *MPQ) loadBlockTable() {
 }
 
 func decrypt(data []uint32, seed uint32) {
-	seed2 := uint32(0xeeeeeeee) //nolint:gomnd Decryption magic
+	seed2 := uint32(0xeeeeeeee) //nolint:gomnd // Decryption magic
 
 	for i := 0; i < len(data); i++ {
-		seed2 += cryptoLookup(0x400 + (seed & 0xff)) //nolint:gomnd Decryption magic
+		seed2 += cryptoLookup(0x400 + (seed & 0xff)) //nolint:gomnd // Decryption magic
 		result := data[i]
 		result ^= seed + seed2
 
 		seed = ((^seed << 21) + 0x11111111) | (seed >> 11)
-		seed2 = result + seed2 + (seed2 << 5) + 3 //nolint:gomnd Decryption magic
+		seed2 = result + seed2 + (seed2 << 5) + 3 //nolint:gomnd // Decryption magic
 		data[i] = result
 	}
 }
 
 func decryptBytes(data []byte, seed uint32) {
-	seed2 := uint32(0xEEEEEEEE) //nolint:gomnd Decryption magic
+	seed2 := uint32(0xEEEEEEEE) //nolint:gomnd // Decryption magic
 	for i := 0; i < len(data)-3; i += 4 {
-		seed2 += cryptoLookup(0x400 + (seed & 0xFF)) //nolint:gomnd Decryption magic
+		seed2 += cryptoLookup(0x400 + (seed & 0xFF)) //nolint:gomnd // Decryption magic
 		result := binary.LittleEndian.Uint32(data[i : i+4])
 		result ^= seed + seed2
 		seed = ((^seed << 21) + 0x11111111) | (seed >> 11)
-		seed2 = result + seed2 + (seed2 << 5) + 3 //nolint:gomnd Decryption magic
+		seed2 = result + seed2 + (seed2 << 5) + 3 //nolint:gomnd // Decryption magic
 
-		data[i+0] = uint8(result & 0xff)         //nolint:gomnd Decryption magic
-		data[i+1] = uint8((result >> 8) & 0xff)  //nolint:gomnd Decryption magic
-		data[i+2] = uint8((result >> 16) & 0xff) //nolint:gomnd Decryption magic
-		data[i+3] = uint8((result >> 24) & 0xff) //nolint:gomnd Decryption magic
+		data[i+0] = uint8(result & 0xff)         //nolint:gomnd // Decryption magic
+		data[i+1] = uint8((result >> 8) & 0xff)  //nolint:gomnd // Decryption magic
+		data[i+2] = uint8((result >> 16) & 0xff) //nolint:gomnd // Decryption magic
+		data[i+3] = uint8((result >> 24) & 0xff) //nolint:gomnd // Decryption magic
 	}
 }
 
 func hashString(key string, hashType uint32) uint32 {
-	seed1 := uint32(0x7FED7FED) //nolint:gomnd Decryption magic
-	seed2 := uint32(0xEEEEEEEE) //nolint:gomnd Decryption magic
+	seed1 := uint32(0x7FED7FED) //nolint:gomnd // Decryption magic
+	seed2 := uint32(0xEEEEEEEE) //nolint:gomnd // Decryption magic
 
 	/* prepare seeds. */
 	for _, char := range strings.ToUpper(key) {
 		seed1 = cryptoLookup((hashType*0x100)+uint32(char)) ^ (seed1 + seed2)
-		seed2 = uint32(char) + seed1 + seed2 + (seed2 << 5) + 3 //nolint:gomnd Decryption magic
+		seed2 = uint32(char) + seed1 + seed2 + (seed2 << 5) + 3 //nolint:gomnd // Decryption magic
 	}
 
 	return seed1

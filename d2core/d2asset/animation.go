@@ -202,7 +202,7 @@ func (a *Animation) RenderFromOrigin(target d2interface.Surface, shadow bool) er
 	if shadow && !a.effect.Transparent() && a.hasShadow {
 		_, height := a.GetFrameBounds()
 		height = int(math.Abs(float64(height)))
-		halfHeight := height / 2 //nolint:mnd // this ain't rocket surgery...
+		halfHeight := height / 2 //nolint:gomnd // this ain't rocket surgery...
 
 		target.PushTranslation(-halfHeight, 0)
 		defer target.Pop()

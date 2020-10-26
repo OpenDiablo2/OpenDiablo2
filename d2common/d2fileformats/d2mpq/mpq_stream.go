@@ -33,7 +33,7 @@ func CreateStream(mpq *MPQ, blockTableEntry BlockTableEntry, fileName string) (*
 	result := &Stream{
 		MPQData:           mpq,
 		BlockTableEntry:   blockTableEntry,
-		CurrentBlockIndex: 0xFFFFFFFF, //nolint:gomnd MPQ magic
+		CurrentBlockIndex: 0xFFFFFFFF, //nolint:gomnd // MPQ magic
 	}
 	fileSegs := strings.Split(fileName, `\`)
 	result.EncryptionSeed = hashString(fileSegs[len(fileSegs)-1], 3)
@@ -42,7 +42,7 @@ func CreateStream(mpq *MPQ, blockTableEntry BlockTableEntry, fileName string) (*
 		result.EncryptionSeed = (result.EncryptionSeed + result.BlockTableEntry.FilePosition) ^ result.BlockTableEntry.UncompressedFileSize
 	}
 
-	result.BlockSize = 0x200 << result.MPQData.data.BlockSize //nolint:gomnd MPQ magic
+	result.BlockSize = 0x200 << result.MPQData.data.BlockSize //nolint:gomnd // MPQ magic
 
 	if result.BlockTableEntry.HasFlag(FilePatchFile) {
 		log.Fatal("Patching is not supported")
@@ -67,7 +67,7 @@ func (v *Stream) loadBlockOffsets() error {
 		return err
 	}
 
-	mpqBytes := make([]byte, blockPositionCount*4) //nolint:gomnd MPQ magic
+	mpqBytes := make([]byte, blockPositionCount*4) //nolint:gomnd // MPQ magic
 
 	_, err = v.MPQData.file.Read(mpqBytes)
 	if err != nil {
@@ -75,11 +75,11 @@ func (v *Stream) loadBlockOffsets() error {
 	}
 
 	for i := range v.BlockPositions {
-		idx := i * 4 //nolint:gomnd MPQ magic
+		idx := i * 4 //nolint:gomnd // MPQ magic
 		v.BlockPositions[i] = binary.LittleEndian.Uint32(mpqBytes[idx : idx+4])
 	}
 
-	blockPosSize := blockPositionCount << 2 //nolint:gomnd MPQ magic
+	blockPosSize := blockPositionCount << 2 //nolint:gomnd // MPQ magic
 
 	if v.BlockTableEntry.HasFlag(FileEncrypted) {
 		decrypt(v.BlockPositions, v.EncryptionSeed-1)
@@ -235,7 +235,7 @@ func (v *Stream) loadBlock(blockIndex, expectedLength uint32) []byte {
 	return data
 }
 
-//nolint:gomnd Will fix enum values later
+//nolint:gomnd // Will fix enum values later
 func decompressMulti(data []byte /*expectedLength*/, _ uint32) []byte {
 	compressionType := data[0]
 

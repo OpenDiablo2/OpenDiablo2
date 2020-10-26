@@ -52,12 +52,12 @@ type diablo2Stat struct {
 // depending on the stat record, sets up the proper number of values,
 // as well as set up the stat value number types, value combination types, and
 // the value stringer functions used
-func (s *diablo2Stat) init(numbers ...float64) { //nolint:funlen doesn't make sense to split
+func (s *diablo2Stat) init(numbers ...float64) { //nolint:funlen,gocyclo // can't reduce
 	if s.record == nil {
 		return
 	}
 
-	//nolint:gomdn introducing a const for these would be worse
+	//nolint:gomnd // introducing a const for these would be worse
 	switch s.record.DescFnID {
 	case 0:
 		// special case for poisonlength, or other stats, which have a
@@ -345,7 +345,7 @@ func (s *diablo2Stat) canBeCombinedWith(other d2stats.Stat) bool {
 }
 
 // String returns the formatted description string
-func (s *diablo2Stat) String() string { //nolint:gocyclo switch statement is not so bad
+func (s *diablo2Stat) String() string { //nolint:gocyclo // switch statement is not so bad
 	var result string
 
 	for idx := range s.values {
@@ -354,7 +354,7 @@ func (s *diablo2Stat) String() string { //nolint:gocyclo switch statement is not
 		}
 	}
 
-	//nolint:gomdn introducing a const for these would be worse
+	//nolint:gomnd // introducing a const for these would be worse
 	switch s.record.DescFnID {
 	case 1, 2, 3, 4, 5, 12, 20:
 		result = s.descFn1()
