@@ -2,15 +2,18 @@ package main
 
 import (
 	"log"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking"
+	"os"
+	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
@@ -33,6 +36,7 @@ func main() {
 
 	// NewAssetManager our providers
 	renderer, err := ebiten.CreateRenderer()
+	renderer = nil
 	if err != nil {
 		panic(err)
 	}
@@ -42,35 +46,50 @@ func main() {
 		panic(err)
 	}
 
-	srvChanIn := make(chan byte)
-	srvChanOut := make(chan byte)
-	srvChanLog := make(chan string)
-	srvErr := d2networking.StartDedicatedServer(asset, srvChanIn, srvChanOut, srvChanLog)
-	if srvErr != nil {
-		panic(err)
+	var listen bool
+
+	var maxplayers int = 3
+
+	// Checks whether or not the listen parameter exists and also tries to do a max players thing
+	// TODO: see if I can make this smaller - Zaprit
+	for argCount, arg := range os.Args {
+		if arg == "-listen" {
+			listen = true
+		}
+
+		if arg == "-maxplayers" {
+			max, _ := strconv.ParseInt(os.Args[argCount+1], 10, 32)
+			maxplayers = int(max)
+		}
 	}
 
-	audio, err := ebiten2.CreateAudio(asset)
-	if err != nil {
-		panic(err)
-	}
+	if listen {
+		server, _ := d2server.NewGameServer(asset, true, maxplayers)
+		server.Start()
 
-	inputManager := d2input.NewInputManager()
+	} else {
+		audio, err := ebiten2.CreateAudio(asset)
+		if err != nil {
+			panic(err)
+		}
 
-	term, err := d2term.New(inputManager)
-	if err != nil {
-		log.Fatal(err)
-	}
+		inputManager := d2input.NewInputManager()
 
-	err = asset.BindTerminalCommands(term)
-	if err != nil {
-		log.Fatal(err)
-	}
+		term, err := d2term.New(inputManager)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	scriptEngine := d2script.CreateScriptEngine()
+		err = asset.BindTerminalCommands(term)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	app := d2app.Create(GitBranch, GitCommit, inputManager, term, scriptEngine, audio, renderer, asset)
-	if err := app.Run(); err != nil {
-		log.Fatal(err)
+		scriptEngine := d2script.CreateScriptEngine()
+
+		app := d2app.Create(GitBranch, GitCommit, inputManager, term, scriptEngine, audio, renderer, asset)
+		if err := app.Run(); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
