@@ -23,7 +23,7 @@ const (
 )
 
 // LoadDT1 loads a DT1 record
-//nolint:funlen Can't reduce
+//nolint:funlen // Can't reduce
 func LoadDT1(fileData []byte) (*DT1, error) {
 	result := &DT1{}
 	br := d2datautils.CreateStreamReader(fileData)

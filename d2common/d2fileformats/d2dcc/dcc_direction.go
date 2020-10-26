@@ -162,7 +162,7 @@ func (v *DCCDirection) verify(
 	}
 }
 
-//nolint:gocognit nolint:gocyclo // Can't reduce
+// nolint:gocognit,gocyclo // Can't reduce
 func (v *DCCDirection) generateFrames(pcd *d2datautils.BitMuncher) {
 	pbIdx := 0
 
@@ -265,7 +265,7 @@ func (v *DCCDirection) generateFrames(pcd *d2datautils.BitMuncher) {
 	v.PixelBuffer = nil
 }
 
-//nolint:funlen nolint:gocognit // can't reduce
+//nolint:funlen,gocognit // can't reduce
 func (v *DCCDirection) fillPixelBuffer(pcd, ec, pm, et, rp *d2datautils.BitMuncher) {
 	var pixelMaskLookup = []int{0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4}
 

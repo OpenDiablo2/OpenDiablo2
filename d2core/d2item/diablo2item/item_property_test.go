@@ -429,7 +429,7 @@ func TestSetup(t *testing.T) {
 	testAssetManager.Records.Properties = properties
 }
 
-func TestNewProperty(t *testing.T) { //nolint:funlen it's mostly test-case definitions
+func TestNewProperty(t *testing.T) { //nolint:funlen // it's mostly test-case definitions
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	tests := []struct {

@@ -150,7 +150,7 @@ func (c *Composite) Equip(equipment *[d2enum.CompositeTypeMax]string) error {
 
 // SetAnimSpeed sets the speed at which the Composite's animation should advance through its frames
 func (c *Composite) SetAnimSpeed(speed int) {
-	c.mode.animationSpeed = 1.0 / (float64(speed) * speedUnit) // nolint:mnd inverse of freq is time
+	c.mode.animationSpeed = 1.0 / (float64(speed) * speedUnit) //nolint:gomnd // taking inverse
 	for layerIdx := range c.mode.layers {
 		layer := c.mode.layers[layerIdx]
 		if layer != nil {
@@ -270,7 +270,7 @@ func (c *Composite) createMode(animationMode animationMode, weaponClass string) 
 		weaponClass:    weaponClass,
 		layers:         make([]d2interface.Animation, d2enum.CompositeTypeMax),
 		frameCount:     animationData[0].FramesPerDirection,
-		animationSpeed: 1.0 / (float64(animationData[0].AnimationSpeed) * speedUnit), // nolint:mnd inverse of freq is time
+		animationSpeed: 1.0 / (float64(animationData[0].AnimationSpeed) * speedUnit), //nolint:gomnd // taking inverse
 	}
 
 	for _, cofLayer := range cof.CofLayers {

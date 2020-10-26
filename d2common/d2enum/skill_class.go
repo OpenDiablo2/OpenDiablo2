@@ -17,26 +17,38 @@ const (
 	SkillClassDruid
 )
 
+// Skill class tokens
+const (
+	SkillClassTokenGeneric     = ""
+	SkillClassTokenBarbarian   = "bar"
+	SkillClassTokenNecromancer = "nec"
+	SkillClassTokenPaladin     = "pal"
+	SkillClassTokenAssassin    = "ass"
+	SkillClassTokenSorceress   = "sor"
+	SkillClassTokenAmazon      = "ama"
+	SkillClassTokenDruid       = "dru"
+)
+
 // FromToken returns the enum which corresponds to the given class token
 func (sc *SkillClass) FromToken(classToken string) SkillClass {
 	resource := SkillClassGeneric
 
 	switch classToken {
-	case "":
+	case SkillClassTokenGeneric:
 		return SkillClassGeneric
-	case "bar":
+	case SkillClassTokenBarbarian:
 		return SkillClassBarbarian
-	case "nec":
+	case SkillClassTokenNecromancer:
 		return SkillClassNecromancer
-	case "pal":
+	case SkillClassTokenPaladin:
 		return SkillClassPaladin
-	case "ass":
+	case SkillClassTokenAssassin:
 		return SkillClassAssassin
-	case "sor":
+	case SkillClassTokenSorceress:
 		return SkillClassSorceress
-	case "ama":
+	case SkillClassTokenAmazon:
 		return SkillClassAmazon
-	case "dru":
+	case SkillClassTokenDruid:
 		return SkillClassDruid
 	default:
 		log.Fatalf("Unknown skill class token: '%s'", classToken)

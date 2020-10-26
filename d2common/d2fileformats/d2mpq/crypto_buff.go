@@ -1,7 +1,7 @@
 package d2mpq
 
-var cryptoBuffer [0x500]uint32 //nolint:gochecknoglobals will fix later..
-var cryptoBufferReady bool     //nolint:gochecknoglobals will fix later..
+var cryptoBuffer [0x500]uint32 //nolint:gochecknoglobals // will fix later..
+var cryptoBufferReady bool     //nolint:gochecknoglobals // will fix later..
 
 func cryptoLookup(index uint32) uint32 {
 	if !cryptoBufferReady {
@@ -13,7 +13,7 @@ func cryptoLookup(index uint32) uint32 {
 	return cryptoBuffer[index]
 }
 
-//nolint:gomnd magic cryptographic stuff here...
+//nolint:gomnd // magic cryptographic stuff here...
 func cryptoInitialize() {
 	seed := uint32(0x00100001)
 

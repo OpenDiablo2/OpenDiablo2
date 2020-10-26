@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	//nolint:gochecknoglobals This is a constant in all but by name, no constant map in go
+	//nolint:gochecknoglobals // This is a constant in all but by name, no constant map in go
 	keyToEbiten = map[d2enum.Key]ebiten.Key{
 		d2enum.Key0:            ebiten.Key0,
 		d2enum.Key1:            ebiten.Key1,
@@ -112,7 +112,7 @@ var (
 		d2enum.KeyControl:      ebiten.KeyControl,
 		d2enum.KeyShift:        ebiten.KeyShift,
 	}
-	//nolint:gochecknoglobals This is a constant in all but by name, no constant map in go
+	//nolint:gochecknoglobals // This is a constant in all but by name, no constant map in go
 	mouseButtonToEbiten = map[d2enum.MouseButton]ebiten.MouseButton{
 		d2enum.MouseButtonLeft:   ebiten.MouseButtonLeft,
 		d2enum.MouseButtonMiddle: ebiten.MouseButtonMiddle,

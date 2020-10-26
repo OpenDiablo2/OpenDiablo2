@@ -245,6 +245,7 @@ func (f *HeroStateFactory) Save(state *HeroState) error {
 	if state.FilePath == "" {
 		state.FilePath = f.getFirstFreeFileName()
 	}
+
 	if err := os.MkdirAll(path.Dir(state.FilePath), mkdirPermission); err != nil {
 		return err
 	}
