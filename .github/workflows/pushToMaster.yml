@@ -41,14 +41,6 @@ jobs:
             -   name: Build binary Windows
                 run: GOOS=windows GOARCH=amd64 go build
 
-            -   name: Upload binary for this Workflow run
-                uses: actions/upload-artifact@v2
-                with:
-                    name: Release
-                    path: |
-                        OpenDiablo2
-                        OpenDiablo2.exe
-
             -   name: Make Release
                 uses: "marvinpinto/action-automatic-releases@latest"
                 with:
