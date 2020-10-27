@@ -37,6 +37,8 @@ jobs:
 
             -   name: Build binary
                 run: go build .
+
+            -   name: Upload binary
                 uses: actions/upload-artifact@v2
                 with:
                     name: Release
