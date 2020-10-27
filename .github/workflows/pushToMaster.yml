@@ -42,4 +42,4 @@ jobs:
                 uses: actions/upload-artifact@v2
                 with:
                     name: Release
-                    path: OpenDiablo2.exe
+                    path: ./OpenDiablo2.exe
