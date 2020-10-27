@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-	"os"
-	"strconv"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -12,7 +12,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
-	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server"
 	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
 
@@ -32,43 +31,6 @@ func main() {
 		panic(err)
 	}
 
-	var listen bool
-
-	var maxplayers int = 3
-
-	for argCount, arg := range os.Args {
-		if arg == "-listen" {
-			listen = true
-		}
-
-		if arg == "-maxplayers" {
-			max, _ := strconv.ParseInt(os.Args[argCount+1], 10, 32)
-			maxplayers = int(max)
-		}
-	}
-
-	if listen {
-		srvAsset, err := d2asset.NewAssetManager(d2config.Config)
-		if err != nil {
-			panic(err)
-		}
-
-		server, _ := d2server.NewGameServer(srvAsset, true, maxplayers)
-		serverErr := server.Start()
-		serverChannel := make(chan string)
-
-		if serverErr != nil {
-			log.Fatal(serverErr)
-		}
-
-		for {
-			message := <-serverChannel // this is blocking
-			if message == "stop" {
-				break
-			}
-		}
-	}
-
 	// NewAssetManager our providers
 	renderer, err := ebiten.CreateRenderer()
 	if err != nil {
@@ -77,6 +39,14 @@ func main() {
 
 	asset, err := d2asset.NewAssetManager(d2config.Config)
 	if err != nil {
+		panic(err)
+	}
+
+	srvChanIn := make(chan byte)
+	srvChanOut := make(chan byte)
+	srvChanLog := make(chan string)
+	srvErr := d2networking.StartDedicatedServer(asset, srvChanIn, srvChanOut, srvChanLog)
+	if srvErr != nil {
 		panic(err)
 	}
 
