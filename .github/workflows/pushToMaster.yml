@@ -41,9 +41,6 @@ jobs:
             -   name: Buld binary Windows
                 run: GOOS=windows GOARCH=amd64 go build
 
-            -   name: Buld binary MacOs
-                run: GOOS=darwin GOARCH=amd64 go build
-
             -   name: Upload binary
                 uses: actions/upload-artifact@v2
                 with:
