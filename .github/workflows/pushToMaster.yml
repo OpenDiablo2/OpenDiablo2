@@ -37,3 +37,7 @@ jobs:
 
             -   name: Build binary
                 run: go build .
+                uses: actions/upload-artifact@v2
+                with:
+                    name: Release
+                    path: OpenDiablo2.exe
