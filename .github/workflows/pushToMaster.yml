@@ -35,11 +35,20 @@ jobs:
                 run: |
                     xvfb-run --auto-servernum go test -v -race ./...
 
-            -   name: Build binary
+            -   name: Build binary Linux
                 run: go build .
+
+            -   name: Buld binary Windows
+                run: GOOS=windows GOARCH=amd64 go build
+
+            -   name: Buld binary MacOs
+                run: GOOS=darwin GOARCH=amd64 go build
 
             -   name: Upload binary
                 uses: actions/upload-artifact@v2
                 with:
                     name: Release
-                    path: ./OpenDiablo2.exe
+                    path: |
+                        OpenDiablo
+                        OpenDiablo2.exe
+
