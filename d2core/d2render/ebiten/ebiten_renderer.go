@@ -2,10 +2,9 @@ package ebiten
 
 import (
 	"errors"
-	"image"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"image"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -69,13 +68,14 @@ func (r *Renderer) Layout(_, _ int) (width, height int) {
 func CreateRenderer() (*Renderer, error) {
 	result := &Renderer{}
 
-	config := d2config.Config
-
-	ebiten.SetCursorMode(ebiten.CursorModeHidden)
-	ebiten.SetFullscreen(config.FullScreen)
-	ebiten.SetRunnableOnUnfocused(config.RunInBackground)
-	ebiten.SetVsyncEnabled(config.VsyncEnabled)
-	ebiten.SetMaxTPS(config.TicksPerSecond)
+	if d2config.Config != nil {
+		config := d2config.Config
+		ebiten.SetCursorMode(ebiten.CursorModeHidden)
+		ebiten.SetFullscreen(config.FullScreen)
+		ebiten.SetRunnableOnUnfocused(config.RunInBackground)
+		ebiten.SetVsyncEnabled(config.VsyncEnabled)
+		ebiten.SetMaxTPS(config.TicksPerSecond)
+	}
 
 	return result, nil
 }
@@ -163,4 +163,14 @@ func (r *Renderer) GetCursorPos() (x, y int) {
 // CurrentFPS returns the current frames per second of the renderer
 func (r *Renderer) CurrentFPS() float64 {
 	return ebiten.CurrentFPS()
+}
+
+// ShowPanicScreen shows a panic message in a forever loop
+func (r *Renderer) ShowPanicScreen(message string) {
+	errorScreen := CreatePanicScreen(message)
+
+	err := ebiten.RunGame(errorScreen)
+	if err != nil {
+		panic(err)
+	}
 }
