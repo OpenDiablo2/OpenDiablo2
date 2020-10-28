@@ -13,8 +13,33 @@ const (
 	treasureProbFmt       = "Prob%d"
 )
 
-//nolint:funlen // Makes no sense to split
 func treasureClassLoader(r *RecordManager, d *d2txt.DataDictionary) error {
+	records, err := treasureClassCommonLoader(d)
+	if err != nil {
+		return err
+	}
+
+	r.Item.Treasure.Normal = records
+
+	log.Printf("Loaded %d treasure class (normal) records", len(records))
+
+	return nil
+}
+
+func treasureClassExLoader(r *RecordManager, d *d2txt.DataDictionary) error {
+	records, err := treasureClassCommonLoader(d)
+	if err != nil {
+		return err
+	}
+
+	r.Item.Treasure.Expansion = records
+
+	log.Printf("Loaded %d treasure class (expansion) records", len(records))
+
+	return nil
+}
+
+func treasureClassCommonLoader(d *d2txt.DataDictionary) (TreasureClass, error) {
 	records := make(TreasureClass)
 
 	for d.Next() {
@@ -60,13 +85,5 @@ func treasureClassLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		records[record.Name] = record
 	}
 
-	if d.Err != nil {
-		return d.Err
-	}
-
-	r.Item.TreasureClass = records
-
-	log.Printf("Loaded %d records records", len(records))
-
-	return nil
+	return records, d.Err
 }
