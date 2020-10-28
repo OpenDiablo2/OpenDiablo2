@@ -265,12 +265,10 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) {
 	screen.PushTranslation(0, lineNormalOffsetY)
 	defer screen.Pop()
 
-	if err := met.renderTileInfo(screen); err != nil {
-		return
-	}
+	met.renderTileInfo(screen)
 }
 
-func (met *MapEngineTest) renderTileInfo(screen d2interface.Surface) error {
+func (met *MapEngineTest) renderTileInfo(screen d2interface.Surface) {
 	if met.selectedTile == nil {
 		screen.PushTranslation(lineNormalIndentX, lineNormalOffsetY)
 		defer screen.Pop()
@@ -369,8 +367,6 @@ func (met *MapEngineTest) renderTileInfo(screen d2interface.Surface) error {
 		}
 		screen.PopN(tpop)
 	}
-
-	return nil
 }
 
 // OnMouseMove is the mouse move handler

@@ -1,6 +1,8 @@
 package d2gui
 
 import (
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -87,7 +89,10 @@ func (s *Sprite) SetSegmented(segmentsX, segmentsY, frameOffset int) {
 }
 
 func (s *Sprite) render(target d2interface.Surface) {
-	renderSegmented(s.animation, s.segmentsX, s.segmentsY, s.frameOffset, target)
+	err := renderSegmented(s.animation, s.segmentsX, s.segmentsY, s.frameOffset, target)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (s *Sprite) advance(elapsed float64) error {

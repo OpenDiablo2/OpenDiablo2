@@ -2,6 +2,7 @@ package d2player
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
@@ -163,7 +164,11 @@ func (g *Inventory) Render(target d2interface.Surface) {
 		return
 	}
 
-	g.renderFrame(target)
+	err := g.renderFrame(target)
+	if err != nil {
+		log.Println(err)
+	}
+
 	g.grid.Render(target)
 	g.renderItemHover(target)
 }

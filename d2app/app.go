@@ -217,9 +217,9 @@ func (a *App) loadStrings() error {
 	return nil
 }
 
-func (a *App) renderDebug(target d2interface.Surface) error {
+func (a *App) renderDebug(target d2interface.Surface) {
 	if !a.showFPS {
-		return nil
+		return
 	}
 
 	vsyncEnabled := a.renderer.GetVSyncEnabled()
@@ -246,8 +246,6 @@ func (a *App) renderDebug(target d2interface.Surface) error {
 	target.PushTranslation(0, debugLineHeight)
 	target.DrawTextf("Coords   " + strconv.FormatInt(int64(cx), 10) + "," + strconv.FormatInt(int64(cy), 10))
 	target.PopN(debugPopN)
-
-	return nil
 }
 
 func (a *App) renderCapture(target d2interface.Surface) error {
@@ -287,9 +285,7 @@ func (a *App) render(target d2interface.Surface) {
 		return
 	}
 
-	if err := a.renderDebug(target); err != nil {
-		return
-	}
+	a.renderDebug(target)
 
 	if err := a.renderCapture(target); err != nil {
 		return

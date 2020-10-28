@@ -966,7 +966,11 @@ func (g *GameControls) renderForSelectableEntitiesHovered(target d2interface.Sur
 func (g *GameControls) renderPanels(target d2interface.Surface) error {
 	g.heroStatsPanel.Render(target)
 	g.inventory.Render(target)
-	g.skilltree.Render(target)
+
+	err := g.skilltree.Render(target)
+	if err != nil {
+		log.Println(err)
+	}
 
 	return nil
 }

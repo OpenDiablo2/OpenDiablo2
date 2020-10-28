@@ -179,7 +179,9 @@ func (a *Animation) BindRenderer(r d2interface.Renderer) {
 		return
 	}
 
-	a.onBindRenderer(r)
+	if err := a.onBindRenderer(r); err != nil {
+		log.Println(err)
+	}
 }
 
 // RenderFromOrigin renders the animation from the animation origin

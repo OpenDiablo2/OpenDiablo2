@@ -186,7 +186,10 @@ func (s *HeroStatsPanel) Render(target d2interface.Surface) {
 
 		s.staticMenuImageCache = &surface
 
-		s.renderStaticMenu(*s.staticMenuImageCache)
+		err := s.renderStaticMenu(*s.staticMenuImageCache)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	target.Render(*s.staticMenuImageCache)

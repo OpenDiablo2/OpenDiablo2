@@ -544,8 +544,6 @@ func (v *SelectHeroClass) Render(screen d2interface.Surface) {
 		v.expansionCharLabel.Render(screen)
 		v.hardcoreCharLabel.Render(screen)
 	}
-
-	return
 }
 
 // Advance runs the update logic on the Select Hero Class screen

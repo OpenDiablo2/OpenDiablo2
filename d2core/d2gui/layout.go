@@ -192,9 +192,7 @@ func (l *Layout) render(target d2interface.Surface) {
 		l.renderEntry(entry, target)
 
 		if layoutDebug {
-			if err := l.renderEntryDebug(entry, target); err != nil {
-				return
-			}
+			l.renderEntryDebug(entry, target)
 		}
 	}
 }
@@ -216,7 +214,7 @@ func (l *Layout) renderEntry(entry *layoutEntry, target d2interface.Surface) {
 	entry.widget.render(target)
 }
 
-func (l *Layout) renderEntryDebug(entry *layoutEntry, target d2interface.Surface) error {
+func (l *Layout) renderEntryDebug(entry *layoutEntry, target d2interface.Surface) {
 	target.PushTranslation(entry.x, entry.y)
 	defer target.Pop()
 
@@ -242,8 +240,6 @@ func (l *Layout) renderEntryDebug(entry *layoutEntry, target d2interface.Surface
 	target.PushTranslation(0, entry.height)
 	target.DrawLine(entry.width, 0, drawColor)
 	target.Pop()
-
-	return nil
 }
 
 func (l *Layout) getContentSize() (width, height int) {
