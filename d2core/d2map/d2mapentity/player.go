@@ -87,12 +87,13 @@ const (
 func (p *Player) Advance(tickTime float64) {
 	p.Step(tickTime)
 
+	if err := p.SetAnimationMode(p.GetAnimationMode()); err != nil {
+		fmt.Printf("failed to set animationMode to: %d, err: %v\n", p.GetAnimationMode(), err)
+	}
+
 	if p.IsCasting() {
 		if p.composite.GetPlayedCount() >= 1 {
 			p.isCasting = false
-			if err := p.SetAnimationMode(p.GetAnimationMode()); err != nil {
-				fmt.Printf("failed to set animationMode to: %d, err: %v\n", p.GetAnimationMode(), err)
-			}
 		}
 
 		// skills are casted after the first half of the casting animation is played
