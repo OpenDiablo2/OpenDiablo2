@@ -11,7 +11,7 @@ type MouseHandler func(d2interface.MouseEvent)
 type MouseMoveHandler func(d2interface.MouseMoveEvent)
 
 type widget interface {
-	render(target d2interface.Surface) error
+	render(target d2interface.Surface)
 	advance(elapsed float64) error
 
 	onMouseMove(event d2interface.MouseMoveEvent) bool
@@ -130,9 +130,7 @@ func (w *widgetBase) isExpanding() bool {
 	return w.expanding
 }
 
-func (w *widgetBase) render(_ d2interface.Surface) error {
-	return nil
-}
+func (w *widgetBase) render(_ d2interface.Surface) { /* NOOP */ }
 
 func (w *widgetBase) advance(_ float64) error {
 	return nil

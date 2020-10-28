@@ -260,7 +260,7 @@ func (f *ItemFactory) ItemsFromTreasureClass(tcr *d2records.TreasureClassRecord)
 	// case we will roll that treasure class, eventually getting a slice of items
 	for idx := range treasurePicks {
 		picked := treasurePicks[idx]
-		if record, found := f.asset.Records.Item.TreasureClass[picked.Code]; found {
+		if record, found := f.asset.Records.Item.Treasure.Normal[picked.Code]; found {
 			// the code is for a treasure class, we roll again using that TC
 			itemSlice := f.ItemsFromTreasureClass(record)
 			for itemIdx := range itemSlice {

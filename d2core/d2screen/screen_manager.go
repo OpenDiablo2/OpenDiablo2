@@ -93,12 +93,8 @@ func (sm *ScreenManager) Advance(elapsed float64) error {
 }
 
 // Render renders the UI by a given surface
-func (sm *ScreenManager) Render(surface d2interface.Surface) error {
+func (sm *ScreenManager) Render(surface d2interface.Surface) {
 	if handler, ok := sm.currentScreen.(ScreenRenderHandler); ok {
-		if err := handler.Render(surface); err != nil {
-			return err
-		}
+		handler.Render(surface)
 	}
-
-	return nil
 }

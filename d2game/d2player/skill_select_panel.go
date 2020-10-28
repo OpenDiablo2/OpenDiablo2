@@ -5,15 +5,11 @@ import (
 	"log"
 	"sort"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -28,9 +24,6 @@ const (
 	leftPanelStartX   = 90
 	skillPanelOffsetY = 465
 	skillListsLength  = 5 // 0 to 4. 0 - General Skills, 1 to 3 - Class-specific skills(based on the 3 different skill trees), 4 - Other skills
-	tooltipPadLeft    = 3
-	tooltipPadRight   = 3
-	tooltipPadBottom  = 5
 )
 
 // SkillPanel represents a skill select menu popup that is displayed when the player left clicks on his active left/right skill.
@@ -42,8 +35,7 @@ type SkillPanel struct {
 	renderer             d2interface.Renderer
 	ui                   *d2ui.UIManager
 	hoveredSkill         *d2hero.HeroSkill
-	hoverTooltipRect     *d2geom.Rectangle
-	hoverTooltipText     *d2ui.Label
+	hoverTooltip         *d2ui.Tooltip
 	isOpen               bool
 	regenerateImageCache bool
 	isLeftPanel          bool
@@ -58,19 +50,18 @@ func NewHeroSkillsPanel(asset *d2asset.AssetManager, ui *d2ui.UIManager, hero *d
 		activeSkill = hero.RightSkill
 	}
 
-	hoverTooltipText := ui.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
-	hoverTooltipText.Alignment = d2gui.HorizontalAlignCenter
+	hoverTooltip := ui.NewTooltip(d2resource.Font16, d2resource.PaletteStatic, d2ui.TooltipXLeft, d2ui.TooltipYTop)
 
 	return &SkillPanel{
-		asset:            asset,
-		activeSkill:      activeSkill,
-		ui:               ui,
-		isOpen:           false,
-		ListRows:         make([]*SkillListRow, skillListsLength),
-		renderer:         ui.Renderer(),
-		isLeftPanel:      isLeftPanel,
-		hero:             hero,
-		hoverTooltipText: hoverTooltipText,
+		asset:        asset,
+		activeSkill:  activeSkill,
+		ui:           ui,
+		isOpen:       false,
+		ListRows:     make([]*SkillListRow, skillListsLength),
+		renderer:     ui.Renderer(),
+		isLeftPanel:  isLeftPanel,
+		hero:         hero,
+		hoverTooltip: hoverTooltip,
 	}
 }
 
@@ -132,29 +123,14 @@ func (s *SkillPanel) Render(target d2interface.Surface) error {
 		rowOffsetY := skillPanelOffsetY - (renderedRows * skillIconHeight)
 
 		target.PushTranslation(startX, rowOffsetY)
-
-		if err := target.Render(skillListRow.cachedImage); err != nil {
-			return err
-		}
-
+		target.Render(skillListRow.cachedImage)
 		target.Pop()
 
 		renderedRows++
 	}
 
 	if s.hoveredSkill != nil {
-		target.PushTranslation(s.hoverTooltipRect.Left, s.hoverTooltipRect.Top)
-
-		black70 := d2util.Color(blackAlpha70)
-		target.DrawRect(s.hoverTooltipRect.Width, s.hoverTooltipRect.Height, black70)
-
-		// the text should be centered horizontally in the tooltip rect
-		centerX := s.hoverTooltipRect.Width >> 1
-		target.PushTranslation(centerX, 0)
-		s.hoverTooltipText.Render(target)
-
-		target.Pop()
-		target.Pop()
+		s.hoverTooltip.Render(target)
 	}
 
 	return nil
@@ -241,11 +217,7 @@ func (s *SkillPanel) generateSkillRowImageCache() error {
 }
 
 func (s *SkillPanel) createSkillListImage(skillsListRow *SkillListRow) (d2interface.Surface, error) {
-	surface, err := s.renderer.NewSurface(len(skillsListRow.Skills)*skillIconWidth, skillIconHeight, d2enum.FilterNearest)
-
-	if err != nil {
-		return nil, err
-	}
+	surface := s.renderer.NewSurface(len(skillsListRow.Skills)*skillIconWidth, skillIconHeight)
 
 	lastSkillResourcePath := d2resource.GenericSkills
 	skillSprite, _ := s.ui.NewSprite(s.getSkillResourceByClass(""), d2resource.PaletteSky)
@@ -269,11 +241,7 @@ func (s *SkillPanel) createSkillListImage(skillsListRow *SkillListRow) (d2interf
 		}
 
 		surface.PushTranslation(idx*skillIconWidth, 50)
-
-		if err := skillSprite.Render(surface); err != nil {
-			return nil, err
-		}
-
+		skillSprite.Render(surface)
 		surface.Pop()
 	}
 
@@ -353,26 +321,13 @@ func (s *SkillPanel) HandleMouseMove(x, y int) bool {
 
 	if previousHovered != s.hoveredSkill && s.hoveredSkill != nil {
 		skillDescription := d2tbl.TranslateString(s.hoveredSkill.ShortKey)
-		s.hoverTooltipText.SetText(fmt.Sprintf("%s\n%s", s.hoveredSkill.Skill, skillDescription))
+		s.hoverTooltip.SetText(fmt.Sprintf("%s\n%s", s.hoveredSkill.Skill, skillDescription))
 
 		listRow := s.GetListRowByPos(x, y)
-		textWidth, textHeight := s.hoverTooltipText.GetSize()
 
 		tooltipX := (s.getSkillIdxAtPos(x, y) * skillIconWidth) + s.getRowStartX(listRow)
-		tooltipWidth := textWidth + tooltipPadLeft + tooltipPadRight
-
-		if tooltipX+tooltipWidth >= screenWidth {
-			tooltipX = screenWidth - tooltipWidth
-		}
-
 		tooltipY := listRow.Rectangle.Top + listRow.Rectangle.Height
-		tooltipHeight := textHeight + tooltipPadBottom
-
-		s.hoverTooltipRect = &d2geom.Rectangle{
-			Left:   tooltipX,
-			Top:    tooltipY,
-			Width:  tooltipWidth,
-			Height: tooltipHeight}
+		s.hoverTooltip.SetPosition(tooltipX, tooltipY)
 	}
 
 	return true

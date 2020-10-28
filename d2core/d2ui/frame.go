@@ -225,9 +225,7 @@ func (u *UIFrame) renderFramePiece(sfc d2interface.Surface, x, y, idx int) error
 
 	u.frame.SetPosition(x, y)
 
-	if err := u.frame.Render(sfc); err != nil {
-		return err
-	}
+	u.frame.Render(sfc)
 
 	return nil
 }

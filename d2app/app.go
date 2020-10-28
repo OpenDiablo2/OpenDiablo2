@@ -111,6 +111,10 @@ func Create(gitBranch, gitCommit string,
 	return result
 }
 
+func updateNOOP() error {
+	return nil
+}
+
 // Run executes the application and kicks off the entire game process
 func (a *App) Run() error {
 	profileOption := kingpin.Flag("profile", "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)").String()
@@ -126,7 +130,8 @@ func (a *App) Run() error {
 	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", a.gitBranch)
 	// If we fail to initialize, we will show the error screen
 	if err := a.initialize(); err != nil {
-		if gameErr := a.renderer.Run(updateInitError, 800, 600, windowTitle); gameErr != nil {
+		if gameErr := a.renderer.Run(updateInitError, updateNOOP, 800, 600,
+			windowTitle); gameErr != nil {
 			return gameErr
 		}
 
@@ -135,7 +140,7 @@ func (a *App) Run() error {
 
 	a.ToMainMenu()
 
-	if err := a.renderer.Run(a.update, 800, 600, windowTitle); err != nil {
+	if err := a.renderer.Run(a.update, a.advance, 800, 600, windowTitle); err != nil {
 		return err
 	}
 
@@ -212,9 +217,9 @@ func (a *App) loadStrings() error {
 	return nil
 }
 
-func (a *App) renderDebug(target d2interface.Surface) error {
+func (a *App) renderDebug(target d2interface.Surface) {
 	if !a.showFPS {
-		return nil
+		return
 	}
 
 	vsyncEnabled := a.renderer.GetVSyncEnabled()
@@ -241,8 +246,6 @@ func (a *App) renderDebug(target d2interface.Surface) error {
 	target.PushTranslation(0, debugLineHeight)
 	target.DrawTextf("Coords   " + strconv.FormatInt(int64(cx), 10) + "," + strconv.FormatInt(int64(cy), 10))
 	target.PopN(debugPopN)
-
-	return nil
 }
 
 func (a *App) renderCapture(target d2interface.Surface) error {
@@ -274,35 +277,33 @@ func (a *App) renderCapture(target d2interface.Surface) error {
 	return nil
 }
 
-func (a *App) render(target d2interface.Surface) error {
-	if err := a.screen.Render(target); err != nil {
-		return err
-	}
-
+func (a *App) render(target d2interface.Surface) {
+	a.screen.Render(target)
 	a.ui.Render(target)
 
 	if err := a.guiManager.Render(target); err != nil {
-		return err
+		return
 	}
 
-	if err := a.renderDebug(target); err != nil {
-		return err
-	}
+	a.renderDebug(target)
 
 	if err := a.renderCapture(target); err != nil {
-		return err
+		return
 	}
 
 	if err := a.terminal.Render(target); err != nil {
-		return err
+		return
 	}
-
-	return nil
 }
 
-func (a *App) advance(elapsed, elapsedUnscaled, current float64) error {
-	elapsedLastScreenAdvance := (current - a.lastScreenAdvance) * a.timeScale
+func (a *App) advance() error {
+	current := d2util.Now()
+	elapsedUnscaled := current - a.lastTime
+	elapsed := elapsedUnscaled * a.timeScale
 
+	a.lastTime = current
+
+	elapsedLastScreenAdvance := (current - a.lastScreenAdvance) * a.timeScale
 	a.lastScreenAdvance = current
 
 	if err := a.screen.Advance(elapsedLastScreenAdvance); err != nil {
@@ -327,18 +328,7 @@ func (a *App) advance(elapsed, elapsedUnscaled, current float64) error {
 }
 
 func (a *App) update(target d2interface.Surface) error {
-	currentTime := d2util.Now()
-	elapsedTimeUnscaled := currentTime - a.lastTime
-	elapsedTime := elapsedTimeUnscaled * a.timeScale
-	a.lastTime = currentTime
-
-	if err := a.advance(elapsedTime, elapsedTimeUnscaled, currentTime); err != nil {
-		return err
-	}
-
-	if err := a.render(target); err != nil {
-		return err
-	}
+	a.render(target)
 
 	if target.GetDepth() > 0 {
 		return errors.New("detected surface stack leak")
@@ -572,11 +562,7 @@ func enableProfiler(profileOption string) interface{ Stop() } {
 }
 
 func updateInitError(target d2interface.Surface) error {
-	err := target.Clear(colornames.Darkred)
-	if err != nil {
-		return err
-	}
-
+	target.Clear(colornames.Darkred)
 	target.PushTranslation(errMsgPadding, errMsgPadding)
 	target.DrawTextf(`Could not find the MPQ files in the directory: 
 		%s\nPlease put the files and re-run the game.`, d2config.Config.MpqPath)

@@ -964,16 +964,12 @@ func (g *GameControls) renderForSelectableEntitiesHovered(target d2interface.Sur
 }
 
 func (g *GameControls) renderPanels(target d2interface.Surface) error {
-	if err := g.heroStatsPanel.Render(target); err != nil {
-		return err
-	}
+	g.heroStatsPanel.Render(target)
+	g.inventory.Render(target)
 
-	if err := g.inventory.Render(target); err != nil {
-		return err
-	}
-
-	if err := g.skilltree.Render(target); err != nil {
-		return err
+	err := g.skilltree.Render(target)
+	if err != nil {
+		log.Println(err)
 	}
 
 	return nil
@@ -1104,10 +1100,7 @@ func (g *GameControls) renderPanel(x, y int, target d2interface.Surface) error {
 	}
 
 	g.mainPanel.SetPosition(x, y)
-
-	if err := g.mainPanel.Render(target); err != nil {
-		return err
-	}
+	g.mainPanel.Render(target)
 
 	return nil
 }
@@ -1123,9 +1116,7 @@ func (g *GameControls) renderHealthGlobe(x, y int, target d2interface.Surface) e
 	g.hpManaStatusSprite.SetPosition(x+healthStatusOffsetX, y+healthStatusOffsetY)
 
 	healthMaskRect := image.Rect(0, globeHeight-hpBarHeight, globeWidth, globeHeight)
-	if err := g.hpManaStatusSprite.RenderSection(target, healthMaskRect); err != nil {
-		return err
-	}
+	g.hpManaStatusSprite.RenderSection(target, healthMaskRect)
 
 	// Left globe
 	if err := g.globeSprite.SetCurrentFrame(frameHealthStatus); err != nil {
@@ -1133,10 +1124,7 @@ func (g *GameControls) renderHealthGlobe(x, y int, target d2interface.Surface) e
 	}
 
 	g.globeSprite.SetPosition(x+globeSpriteOffsetX, y+globeSpriteOffsetY)
-
-	if err := g.globeSprite.Render(target); err != nil {
-		return err
-	}
+	g.globeSprite.Render(target)
 
 	return nil
 }
@@ -1153,10 +1141,7 @@ func (g *GameControls) renderLeftSkill(x, y int, target d2interface.Surface) err
 	}
 
 	g.leftSkillResource.SkillIcon.SetPosition(x, y)
-
-	if err := g.leftSkillResource.SkillIcon.Render(target); err != nil {
-		return err
-	}
+	g.leftSkillResource.SkillIcon.Render(target)
 
 	return nil
 }
@@ -1167,10 +1152,7 @@ func (g *GameControls) renderNewStatsButton(x, y int, target d2interface.Surface
 	}
 
 	g.mainPanel.SetPosition(x, y)
-
-	if err := g.mainPanel.Render(target); err != nil {
-		return err
-	}
+	g.mainPanel.Render(target)
 
 	return nil
 }
@@ -1181,10 +1163,7 @@ func (g *GameControls) renderStamina(x, y int, target d2interface.Surface) error
 	}
 
 	g.mainPanel.SetPosition(x, y)
-
-	if err := g.mainPanel.Render(target); err != nil {
-		return err
-	}
+	g.mainPanel.Render(target)
 
 	return nil
 }
@@ -1235,14 +1214,8 @@ func (g *GameControls) renderMiniPanel(target d2interface.Surface) error {
 	buttonX, buttonY := (width>>1)+miniPanelButtonOffsetX, height+miniPanelButtonOffsetY
 
 	g.menuButton.SetPosition(buttonX, buttonY)
-
-	if err := g.menuButton.Render(target); err != nil {
-		return err
-	}
-
-	if err := g.miniPanel.Render(target); err != nil {
-		return err
-	}
+	g.menuButton.Render(target)
+	g.miniPanel.Render(target)
 
 	miniPanelButtons := map[actionableType]string{
 		miniPanelCharacter:  "minipanelchar",
@@ -1292,10 +1265,7 @@ func (g *GameControls) renderPotions(x, _ int, target d2interface.Surface) error
 	}
 
 	g.mainPanel.SetPosition(x, height)
-
-	if err := g.mainPanel.Render(target); err != nil {
-		return err
-	}
+	g.mainPanel.Render(target)
 
 	return nil
 }
@@ -1308,10 +1278,7 @@ func (g *GameControls) renderNewSkillsButton(x, _ int, target d2interface.Surfac
 	}
 
 	g.mainPanel.SetPosition(x, height)
-
-	if err := g.mainPanel.Render(target); err != nil {
-		return err
-	}
+	g.mainPanel.Render(target)
 
 	return nil
 }
@@ -1330,10 +1297,7 @@ func (g *GameControls) renderRightSkill(x, _ int, target d2interface.Surface) er
 	}
 
 	g.rightSkillResource.SkillIcon.SetPosition(x, height)
-
-	if err := g.rightSkillResource.SkillIcon.Render(target); err != nil {
-		return err
-	}
+	g.rightSkillResource.SkillIcon.Render(target)
 
 	return nil
 }
@@ -1347,9 +1311,7 @@ func (g *GameControls) renderManaGlobe(x, _ int, target d2interface.Surface) err
 
 	g.mainPanel.SetPosition(x, height)
 
-	if err := g.mainPanel.Render(target); err != nil {
-		return err
-	}
+	g.mainPanel.Render(target)
 
 	// Mana status bar
 	manaPercent := float64(g.hero.Stats.Mana) / float64(g.hero.Stats.MaxMana)
@@ -1362,9 +1324,7 @@ func (g *GameControls) renderManaGlobe(x, _ int, target d2interface.Surface) err
 	g.hpManaStatusSprite.SetPosition(x+manaStatusOffsetX, height+manaStatusOffsetY)
 
 	manaMaskRect := image.Rect(0, globeHeight-manaBarHeight, globeWidth, globeHeight)
-	if err := g.hpManaStatusSprite.RenderSection(target, manaMaskRect); err != nil {
-		return err
-	}
+	g.hpManaStatusSprite.RenderSection(target, manaMaskRect)
 
 	// Right globe
 	if err := g.globeSprite.SetCurrentFrame(frameRightGlobe); err != nil {
@@ -1373,13 +1333,8 @@ func (g *GameControls) renderManaGlobe(x, _ int, target d2interface.Surface) err
 
 	g.globeSprite.SetPosition(x+rightGlobeOffsetX, height+rightGlobeOffsetY)
 
-	if err := g.globeSprite.Render(target); err != nil {
-		return err
-	}
-
-	if err := g.globeSprite.Render(target); err != nil {
-		return err
-	}
+	g.globeSprite.Render(target)
+	g.globeSprite.Render(target)
 
 	return nil
 }

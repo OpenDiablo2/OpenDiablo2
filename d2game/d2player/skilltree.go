@@ -376,9 +376,7 @@ func (s *skillTree) renderPanelSegment(
 		return err
 	}
 
-	if err := s.resources.skillPanel.Render(target); err != nil {
-		return err
-	}
+	s.resources.skillPanel.Render(target)
 
 	return nil
 }
@@ -520,10 +518,7 @@ func (s *skillTree) renderSkillIcons(target d2interface.Surface, tab int) error 
 		y := skillIconYOff + skill.SkillRow*skillIconDistY
 
 		skillIcon.SetPosition(x, y)
-
-		if err := skillIcon.Render(target); err != nil {
-			return err
-		}
+		skillIcon.Render(target)
 	}
 
 	return nil

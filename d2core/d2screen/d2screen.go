@@ -22,7 +22,7 @@ type ScreenUnloadHandler interface {
 
 // ScreenRenderHandler is an exported interface
 type ScreenRenderHandler interface {
-	Render(target d2interface.Surface) error
+	Render(target d2interface.Surface)
 }
 
 // ScreenAdvanceHandler is an exported interface

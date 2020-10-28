@@ -49,11 +49,7 @@ func (ui *UIManager) NewCheckbox(checkState bool) *Checkbox {
 
 	checkboxSprite.SetPosition(0, 0)
 
-	result.Image, err = ui.renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
-	if err != nil {
-		log.Print(err)
-		return nil
-	}
+	result.Image = ui.renderer.NewSurface(result.width, result.height)
 
 	err = checkboxSprite.RenderSegmented(result.Image, 1, 1, 0)
 	if err != nil {
@@ -61,11 +57,7 @@ func (ui *UIManager) NewCheckbox(checkState bool) *Checkbox {
 		return nil
 	}
 
-	result.checkedImage, err = ui.renderer.NewSurface(result.width, result.height, d2enum.FilterNearest)
-	if err != nil {
-		log.Print(err)
-		return nil
-	}
+	result.checkedImage = ui.renderer.NewSurface(result.width, result.height)
 
 	err = checkboxSprite.RenderSegmented(result.checkedImage, 1, 1, 1)
 	if err != nil {
@@ -85,8 +77,6 @@ func (v *Checkbox) bindManager(manager *UIManager) {
 
 // Render renders the checkbox
 func (v *Checkbox) Render(target d2interface.Surface) error {
-	var err error
-
 	target.PushTranslation(v.x, v.y)
 	defer target.Pop()
 
@@ -94,15 +84,9 @@ func (v *Checkbox) Render(target d2interface.Surface) error {
 	defer target.Pop()
 
 	if v.checkState {
-		err = target.Render(v.checkedImage)
-		if err != nil {
-			return err
-		}
+		target.Render(v.checkedImage)
 	} else {
-		err = target.Render(v.Image)
-		if err != nil {
-			return err
-		}
+		target.Render(v.Image)
 	}
 
 	return nil

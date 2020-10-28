@@ -2,15 +2,14 @@ package d2player
 
 import (
 	"fmt"
+	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2item/diablo2item"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -20,10 +19,6 @@ const (
 	frameInventoryTopRight    = 5
 	frameInventoryBottomLeft  = 6
 	frameInventoryBottomRight = 7
-)
-
-const (
-	blackAlpha70 = 0x000000C8
 )
 
 const (
@@ -38,7 +33,7 @@ type Inventory struct {
 	frame       *d2ui.UIFrame
 	panel       *d2ui.Sprite
 	grid        *ItemGrid
-	hoverLabel  *d2ui.Label
+	itemTooltip *d2ui.Tooltip
 	closeButton *d2ui.Button
 	hoverX      int
 	hoverY      int
@@ -54,19 +49,18 @@ type Inventory struct {
 // NewInventory creates an inventory instance and returns a pointer to it
 func NewInventory(asset *d2asset.AssetManager, ui *d2ui.UIManager,
 	record *d2records.InventoryRecord) *Inventory {
-	hoverLabel := ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteStatic)
-	hoverLabel.Alignment = d2gui.HorizontalAlignCenter
+	itemTooltip := ui.NewTooltip(d2resource.FontFormal11, d2resource.PaletteStatic, d2ui.TooltipXCenter, d2ui.TooltipYBottom)
 
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/797
 	itemFactory, _ := diablo2item.NewItemFactory(asset)
 
 	return &Inventory{
-		asset:      asset,
-		uiManager:  ui,
-		item:       itemFactory,
-		grid:       NewItemGrid(asset, ui, record),
-		originX:    record.Panel.Left,
-		hoverLabel: hoverLabel,
+		asset:       asset,
+		uiManager:   ui,
+		item:        itemFactory,
+		grid:        NewItemGrid(asset, ui, record),
+		originX:     record.Panel.Left,
+		itemTooltip: itemTooltip,
 		// originY: record.Panel.Top,
 		originY: 0, // expansion data has these all offset by +60 ...
 	}
@@ -165,20 +159,18 @@ func (g *Inventory) Load() {
 }
 
 // Render draws the inventory onto the given surface
-func (g *Inventory) Render(target d2interface.Surface) error {
+func (g *Inventory) Render(target d2interface.Surface) {
 	if !g.isOpen {
-		return nil
+		return
 	}
 
-	if err := g.renderFrame(target); err != nil {
-		return err
+	err := g.renderFrame(target)
+	if err != nil {
+		log.Println(err)
 	}
 
 	g.grid.Render(target)
-
 	g.renderItemHover(target)
-
-	return nil
 }
 
 func (g *Inventory) renderFrame(target d2interface.Surface) error {
@@ -204,10 +196,7 @@ func (g *Inventory) renderFrame(target d2interface.Surface) error {
 		w, h := g.panel.GetCurrentFrameSize()
 
 		g.panel.SetPosition(x, y+h)
-
-		if err := g.panel.Render(target); err != nil {
-			return err
-		}
+		g.panel.Render(target)
 
 		switch frame {
 		case frameInventoryTopLeft:
@@ -250,48 +239,8 @@ func (g *Inventory) renderItemHover(target d2interface.Surface) {
 
 func (g *Inventory) renderItemDescription(target d2interface.Surface, i InventoryItem) {
 	lines := i.GetItemDescription()
-
-	maxW, maxH := 0, 0
-	_, iy := g.grid.SlotToScreen(i.InventoryGridSlot())
-
-	for idx := range lines {
-		w, h := g.hoverLabel.GetTextMetrics(lines[idx])
-
-		if maxW < w {
-			maxW = w
-		}
-
-		maxH += h
-	}
-
-	halfW, halfH := maxW>>1, maxH>>1
-	centerX, centerY := g.hoverX, iy-halfH
-
-	if (centerX + halfW) > screenWidth {
-		centerX = screenWidth - halfW
-	}
-
-	if (centerY + halfH) > screenHeight {
-		centerY = screenHeight - halfH
-	}
-
-	target.PushTranslation(centerX, centerY)
-	defer target.Pop()
-
-	target.PushTranslation(-halfW, -halfH)
-	defer target.Pop()
-
-	target.DrawRect(maxW, maxH, d2util.Color(blackAlpha70))
-
-	target.PushTranslation(halfW, 0)
-	defer target.Pop()
-
-	for idx := range lines {
-		g.hoverLabel.SetText(lines[idx])
-		_, h := g.hoverLabel.GetTextMetrics(lines[idx])
-		g.hoverLabel.Render(target)
-		target.PushTranslation(0, h)
-	}
-
-	target.PopN(len(lines))
+	g.itemTooltip.SetTextLines(lines)
+	_, y := g.grid.SlotToScreen(i.InventoryGridSlot())
+	g.itemTooltip.SetPosition(g.hoverX, y)
+	g.itemTooltip.Render(target)
 }

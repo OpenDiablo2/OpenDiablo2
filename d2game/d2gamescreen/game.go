@@ -196,17 +196,14 @@ func (v *Game) OnUnload() error {
 }
 
 // Render renders the Gameplay screen
-func (v *Game) Render(screen d2interface.Surface) error {
+func (v *Game) Render(screen d2interface.Surface) {
 	if v.gameClient.RegenMap {
 		v.gameClient.RegenMap = false
 		v.mapRenderer.RegenerateTileCache()
 		v.gameClient.MapEngine.IsLoading = false
 	}
 
-	if err := screen.Clear(color.Black); err != nil {
-		return err
-	}
-
+	screen.Clear(color.Black)
 	v.mapRenderer.Render(screen)
 
 	if v.gameControls != nil {
@@ -215,11 +212,9 @@ func (v *Game) Render(screen d2interface.Surface) error {
 		}
 
 		if err := v.gameControls.Render(screen); err != nil {
-			return err
+			return
 		}
 	}
-
-	return nil
 }
 
 // Advance runs the update logic on the Gameplay screen

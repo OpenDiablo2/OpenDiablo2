@@ -373,9 +373,7 @@ func (mr *MapRenderer) renderFloor(tile d2ds1.FloorShadowRecord, target d2interf
 	target.PushTranslation(mr.viewport.GetTranslationScreen())
 	defer target.Pop()
 
-	if err := target.Render(img); err != nil {
-		fmt.Printf("failed to render the floor, err: %v\n", err)
-	}
+	target.Render(img)
 }
 
 func (mr *MapRenderer) renderWall(tile d2ds1.WallRecord, viewport *Viewport, target d2interface.Surface) {
@@ -391,9 +389,7 @@ func (mr *MapRenderer) renderWall(tile d2ds1.WallRecord, viewport *Viewport, tar
 	target.PushTranslation(viewport.GetTranslationScreen())
 	defer target.Pop()
 
-	if err := target.Render(img); err != nil {
-		fmt.Printf("failed to render the wall, err: %v\n", err)
-	}
+	target.Render(img)
 }
 
 func (mr *MapRenderer) renderShadow(tile d2ds1.FloorShadowRecord, target d2interface.Surface) {
@@ -411,9 +407,7 @@ func (mr *MapRenderer) renderShadow(tile d2ds1.FloorShadowRecord, target d2inter
 	target.PushColor(color.RGBA{R: 255, G: 255, B: 255, A: 160}) //nolint:gomnd // Not a magic number...
 	defer target.Pop()
 
-	if err := target.Render(img); err != nil {
-		fmt.Printf("failed to render the shadow, err: %v\n", err)
-	}
+	target.Render(img)
 }
 
 func (mr *MapRenderer) renderMapDebug(mapDebugVisLevel int, target d2interface.Surface, startX, startY, endX, endY int) {

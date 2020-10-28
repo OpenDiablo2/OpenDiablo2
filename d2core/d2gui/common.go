@@ -20,12 +20,8 @@ func renderSegmented(animation d2interface.Animation, segmentsX, segmentsY, fram
 			}
 
 			target.PushTranslation(x+currentX, y+currentY)
-			err := animation.Render(target)
+			animation.Render(target)
 			target.Pop()
-
-			if err != nil {
-				return err
-			}
 
 			width, height := animation.GetCurrentFrameSize()
 			maxHeight = d2math.MaxInt(maxHeight, height)

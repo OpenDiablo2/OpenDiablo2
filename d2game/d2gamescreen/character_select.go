@@ -360,9 +360,9 @@ func (v *CharacterSelect) onExitButtonClicked() {
 }
 
 // Render renders the Character Select screen
-func (v *CharacterSelect) Render(screen d2interface.Surface) error {
+func (v *CharacterSelect) Render(screen d2interface.Surface) {
 	if err := v.background.RenderSegmented(screen, 4, 3, 0); err != nil {
-		return err
+		return
 	}
 
 	v.d2HeroTitle.Render(screen)
@@ -370,7 +370,7 @@ func (v *CharacterSelect) Render(screen d2interface.Surface) error {
 
 	if v.selectedCharacter > -1 && actualSelectionIndex >= 0 && actualSelectionIndex < 8 {
 		if err := v.selectionBox.RenderSegmented(screen, 2, 1, 0); err != nil {
-			return err
+			return
 		}
 	}
 
@@ -395,13 +395,11 @@ func (v *CharacterSelect) Render(screen d2interface.Surface) error {
 		screen.DrawRect(screenWidth, screenHeight, rgbaColor(blackHalfOpacity))
 
 		if err := v.okCancelBox.RenderSegmented(screen, 2, 1, 0); err != nil {
-			return err
+			return
 		}
 
 		v.deleteCharConfirmLabel.Render(screen)
 	}
-
-	return nil
 }
 
 func (v *CharacterSelect) moveSelectionBox() {

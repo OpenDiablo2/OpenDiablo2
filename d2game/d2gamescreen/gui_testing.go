@@ -94,9 +94,7 @@ func (g *GuiTestMain) OnLoad(loading d2screen.LoadingState) {
 }
 
 // Render does nothing for the GuiTestMain screen
-func (g *GuiTestMain) Render(_ d2interface.Surface) error {
-	return nil
-}
+func (g *GuiTestMain) Render(_ d2interface.Surface) { /* NOOP */ }
 
 // Advance does nothing for the GuiTestMain screen
 func (g *GuiTestMain) Advance(_ float64) error {

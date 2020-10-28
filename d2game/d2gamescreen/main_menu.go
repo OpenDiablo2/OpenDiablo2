@@ -406,69 +406,44 @@ func (v *MainMenu) onCreditsButtonClicked() {
 }
 
 // Render renders the main menu
-func (v *MainMenu) Render(screen d2interface.Surface) error {
-	if err := v.renderBackgrounds(screen); err != nil {
-		return err
-	}
-
-	if err := v.renderLogos(screen); err != nil {
-		return err
-	}
-
-	if err := v.renderLabels(screen); err != nil {
-		return err
-	}
-
-	return nil
+func (v *MainMenu) Render(screen d2interface.Surface) {
+	v.renderBackgrounds(screen)
+	v.renderLogos(screen)
+	v.renderLabels(screen)
 }
 
-func (v *MainMenu) renderBackgrounds(screen d2interface.Surface) error {
+func (v *MainMenu) renderBackgrounds(screen d2interface.Surface) {
 	switch v.screenMode {
 	case ScreenModeTrademark:
 		if err := v.trademarkBackground.RenderSegmented(screen, 4, 3, 0); err != nil {
-			return err
+			return
 		}
 	case ScreenModeServerIP:
 		if err := v.serverIPBackground.RenderSegmented(screen, 2, 1, 0); err != nil {
-			return err
+			return
 		}
 	case ScreenModeTCPIP:
 		if err := v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0); err != nil {
-			return err
+			return
 		}
 	default:
 		if err := v.background.RenderSegmented(screen, 4, 3, 0); err != nil {
-			return err
+			return
 		}
 	}
-
-	return nil
 }
 
-func (v *MainMenu) renderLogos(screen d2interface.Surface) error {
+func (v *MainMenu) renderLogos(screen d2interface.Surface) {
 	switch v.screenMode {
 	case ScreenModeTrademark, ScreenModeMainMenu, ScreenModeMultiplayer:
-		if err := v.diabloLogoLeftBack.Render(screen); err != nil {
-			return err
-		}
-
-		if err := v.diabloLogoRightBack.Render(screen); err != nil {
-			return err
-		}
-
-		if err := v.diabloLogoLeft.Render(screen); err != nil {
-			return err
-		}
-
-		if err := v.diabloLogoRight.Render(screen); err != nil {
-			return err
-		}
+		v.diabloLogoLeftBack.Render(screen)
+		v.diabloLogoRightBack.Render(screen)
+		v.diabloLogoLeft.Render(screen)
+		v.diabloLogoRight.Render(screen)
 	}
-
-	return nil
 }
 
-func (v *MainMenu) renderLabels(screen d2interface.Surface) error {
+func (v *MainMenu) renderLabels(screen d2interface.Surface) {
 	switch v.screenMode {
 	case ScreenModeServerIP:
 		v.tcpIPOptionsLabel.Render(screen)
@@ -483,8 +458,6 @@ func (v *MainMenu) renderLabels(screen d2interface.Surface) error {
 		v.versionLabel.Render(screen)
 		v.commitLabel.Render(screen)
 	}
-
-	return nil
 }
 
 // Advance runs the update logic on the main menu

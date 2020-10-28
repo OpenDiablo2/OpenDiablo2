@@ -24,7 +24,7 @@ func newDC6Animation(
 		palette: pal,
 	}
 
-	anim := Animation{
+	anim := &Animation{
 		playLength:     defaultPlayLength,
 		playLoop:       true,
 		originAtBottom: true,
@@ -39,7 +39,7 @@ func newDC6Animation(
 		},
 	}
 
-	DC6.Animation = anim
+	DC6.Animation = *anim
 
 	err := DC6.init()
 	if err != nil {
@@ -174,14 +174,9 @@ func (a *DC6Animation) createFrameSurface(directionIndex, frameIndex int) (d2int
 		return nil, errors.New("no renderer")
 	}
 
-	sfc, err := a.renderer.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height), d2enum.FilterNearest)
-	if err != nil {
-		return nil, err
-	}
+	sfc := a.renderer.NewSurface(int(dc6Frame.Width), int(dc6Frame.Height))
 
-	if err := sfc.ReplacePixels(colorData); err != nil {
-		return nil, err
-	}
+	sfc.ReplacePixels(colorData)
 
 	return sfc, nil
 }
@@ -189,7 +184,7 @@ func (a *DC6Animation) createFrameSurface(directionIndex, frameIndex int) (d2int
 // Clone creates a copy of the animation
 func (a *DC6Animation) Clone() d2interface.Animation {
 	clone := &DC6Animation{}
-	clone.Animation = a.Animation.Clone()
+	clone.Animation = *a.Animation.Clone().(*Animation)
 	clone.dc6 = a.dc6.Clone()
 	clone.palette = a.palette
 

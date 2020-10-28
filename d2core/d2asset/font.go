@@ -60,11 +60,7 @@ func (f *Font) GetTextMetrics(text string) (width, height int) {
 // RenderText prints a text using its configured style on a Surface (multi-lines are left-aligned, use label otherwise)
 func (f *Font) RenderText(text string, target d2interface.Surface) error {
 	if f.glyphs == nil {
-		err := f.sheet.BindRenderer(target.Renderer())
-		if err != nil {
-			return err
-		}
-
+		f.sheet.BindRenderer(target.Renderer())
 		f.initGlyphs()
 	}
 
@@ -88,9 +84,7 @@ func (f *Font) RenderText(text string, target d2interface.Surface) error {
 				return err
 			}
 
-			if err := f.sheet.Render(target); err != nil {
-				return err
-			}
+			f.sheet.Render(target)
 
 			lineHeight = d2math.MaxInt(lineHeight, glyph.height)
 			lineLength++

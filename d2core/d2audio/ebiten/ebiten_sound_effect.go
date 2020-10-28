@@ -1,13 +1,14 @@
 package ebiten
 
 import (
+	"io"
 	"math"
 
-	"github.com/hajimehoshi/ebiten/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
 type panStream struct {
-	audio.ReadSeekCloser
+	io.ReadSeeker
 	pan float64 // -1: left; 0: center; 1: right
 }
 
@@ -15,15 +16,15 @@ const (
 	bitsPerByte = 8
 )
 
-func newPanStreamFromReader(src audio.ReadSeekCloser) *panStream {
+func newPanStreamFromReader(src io.ReadSeeker) *panStream {
 	return &panStream{
-		ReadSeekCloser: src,
-		pan:            0,
+		ReadSeeker: src,
+		pan:        0,
 	}
 }
 
 func (s *panStream) Read(p []byte) (n int, err error) {
-	n, err = s.ReadSeekCloser.Read(p)
+	n, err = s.ReadSeeker.Read(p)
 	if err != nil {
 		return
 	}
@@ -74,18 +75,10 @@ func (v *SoundEffect) Play() {
 		panic(err)
 	}
 
-	err = v.player.Play()
-
-	if err != nil {
-		panic(err)
-	}
+	v.player.Play()
 }
 
 // Stop stops the sound effect
 func (v *SoundEffect) Stop() {
-	err := v.player.Pause()
-
-	if err != nil {
-		panic(err)
-	}
+	v.player.Pause()
 }

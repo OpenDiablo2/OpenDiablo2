@@ -9,13 +9,13 @@ import (
 
 // Animation is an animation
 type Animation interface {
-	BindRenderer(Renderer) error
+	BindRenderer(Renderer)
 	Clone() Animation
 	SetSubLoop(startFrame, EndFrame int)
 	Advance(elapsed float64) error
-	Render(target Surface) error
-	RenderFromOrigin(target Surface, shadow bool) error
-	RenderSection(sfc Surface, bound image.Rectangle) error
+	Render(target Surface)
+	RenderFromOrigin(target Surface, shadow bool)
+	RenderSection(sfc Surface, bound image.Rectangle)
 	GetFrameSize(frameIndex int) (int, int, error)
 	GetCurrentFrameSize() (int, int)
 	GetFrameBounds() (int, int)

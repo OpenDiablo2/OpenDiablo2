@@ -128,10 +128,10 @@ func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 }
 
 // Render renders the credits screen
-func (v *Credits) Render(screen d2interface.Surface) error {
+func (v *Credits) Render(screen d2interface.Surface) {
 	err := v.creditsBackground.RenderSegmented(screen, 4, 3, 0)
 	if err != nil {
-		return err
+		return
 	}
 
 	for _, label := range v.labels {
@@ -141,8 +141,6 @@ func (v *Credits) Render(screen d2interface.Surface) error {
 
 		label.Label.Render(screen)
 	}
-
-	return nil
 }
 
 // Advance runs the update logic on the credits screen

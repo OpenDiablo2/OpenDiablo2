@@ -70,18 +70,14 @@ func (c *Composite) Render(target d2interface.Surface) error {
 		layer := c.mode.layers[layerIndex]
 
 		if layer != nil {
-			if err := layer.RenderFromOrigin(target, true); err != nil {
-				return err
-			}
+			layer.RenderFromOrigin(target, true)
 		}
 	}
 
 	for _, layerIndex := range c.mode.cof.Priority[direction][c.mode.frameIndex] {
 		layer := c.mode.layers[layerIndex]
 		if layer != nil {
-			if err := layer.RenderFromOrigin(target, false); err != nil {
-				return err
-			}
+			layer.RenderFromOrigin(target, false)
 		}
 	}
 
@@ -259,7 +255,7 @@ func (c *Composite) createMode(animationMode animationMode, weaponClass string) 
 
 	animationKey := strings.ToLower(c.token + animationMode.String() + weaponClass)
 
-	animationData := c.Records.Animations[animationKey]
+	animationData := c.Records.Animation.Data[animationKey]
 	if len(animationData) == 0 {
 		return nil, errors.New("could not find Animation data")
 	}
