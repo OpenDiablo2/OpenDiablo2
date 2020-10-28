@@ -72,6 +72,7 @@ func CreateCharacterSelect(
 	if err != nil {
 		return &CharacterSelect{}, err
 	}
+
 	entityFactory, err := d2mapentity.NewMapEntityFactory(asset)
 	if err != nil {
 		return &CharacterSelect{}, err
