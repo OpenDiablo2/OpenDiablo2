@@ -67,10 +67,15 @@ func CreateCharacterSelect(
 	ui *d2ui.UIManager,
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	connectionHost string,
-) *CharacterSelect {
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/790
-	playerStateFactory, _ := d2hero.NewHeroStateFactory(asset)
-	entityFactory, _ := d2mapentity.NewMapEntityFactory(asset)
+) (*CharacterSelect, error) {
+	playerStateFactory, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return &CharacterSelect{}, err
+	}
+	entityFactory, err := d2mapentity.NewMapEntityFactory(asset)
+	if err != nil {
+		return &CharacterSelect{}, err
+	}
 
 	return &CharacterSelect{
 		selectedCharacter: -1,
@@ -84,7 +89,7 @@ func CreateCharacterSelect(
 		navigator:         navigator,
 		uiManager:         ui,
 		HeroStateFactory:  playerStateFactory,
-	}
+	}, nil
 }
 
 const (
