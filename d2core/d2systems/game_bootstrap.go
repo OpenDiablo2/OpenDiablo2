@@ -1,19 +1,23 @@
 package d2systems
 
 import (
-	"encoding/json"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"os"
+	"path"
 
 	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
 
-// static check that the game config system implements the system interface
-var _ akara.System = &GameConfigSystem{}
+const (
+	configDirectoryName = "OpenDiablo2"
+	configFileName      = "config.json"
+)
 
-func NewGameConfigSystem() *GameConfigSystem {
+// static check that the game config system implements the system interface
+var _ akara.System = &GameBootstrapSystem{}
+
+func NewGameBootstrapSystem() *GameBootstrapSystem {
 	// we are going to check entities that dont yet have loaded asset types
 	thingsToCheck := akara.NewFilter().
 		Require(d2components.FilePath).
@@ -36,7 +40,7 @@ func NewGameConfigSystem() *GameConfigSystem {
 	// we are interested in actual game config instances, too
 	gameConfigs := akara.NewFilter().Require(d2components.GameConfig).Build()
 
-	gcs := &GameConfigSystem{
+	gcs := &GameBootstrapSystem{
 		SubscriberSystem: akara.NewSubscriberSystem(thingsToCheck, gameConfigs),
 		maps: struct {
 			gameConfigs *d2components.GameConfigMap
@@ -44,24 +48,14 @@ func NewGameConfigSystem() *GameConfigSystem {
 			fileTypes   *d2components.FileTypeMap
 			fileHandles *d2components.FileHandleMap
 			fileSources *d2components.FileSourceMap
-			dirty       *d2components.DirtyMap
 		}{},
 	}
 
 	return gcs
 }
 
-// GameConfigSystem is responsible for game config bootstrap procedure, as well as
-// clearing the `Dirty` component of game configs. In the `bootstrap` method of this system
-// you can see that this system will add entities for the directories it expects config files
-// to be found in, and it also adds an entity for the initial config file to be loaded.
-//
-// This system is dependant on the FileTypeResolver, FileSourceResolver, and
-// FileHandleResolver systems because this system subscribes to entities
-// with components created by these other systems. Nothing will  break if these
-// other systems are not present in the world, but no config files will be loaded by
-// this system either...
-type GameConfigSystem struct {
+// GameBootstrapSystem is responsible for setting up the regular diablo2 game launch
+type GameBootstrapSystem struct {
 	*akara.SubscriberSystem
 	filesToCheck *akara.Subscription
 	gameConfigs  *akara.Subscription
@@ -71,11 +65,10 @@ type GameConfigSystem struct {
 		fileTypes   *d2components.FileTypeMap
 		fileHandles *d2components.FileHandleMap
 		fileSources *d2components.FileSourceMap
-		dirty       *d2components.DirtyMap
 	}
 }
 
-func (m *GameConfigSystem) Init(world *akara.World) {
+func (m *GameBootstrapSystem) Init(world *akara.World) {
 	m.World = world
 
 	if world == nil {
@@ -97,56 +90,60 @@ func (m *GameConfigSystem) Init(world *akara.World) {
 	m.maps.fileHandles = world.InjectMap(d2components.FileHandle).(*d2components.FileHandleMap)
 	m.maps.fileSources = world.InjectMap(d2components.FileSource).(*d2components.FileSourceMap)
 	m.maps.gameConfigs = world.InjectMap(d2components.GameConfig).(*d2components.GameConfigMap)
-	m.maps.dirty = world.InjectMap(d2components.Dirty).(*d2components.DirtyMap)
+
+	m.bootstrap()
 }
 
-func (m *GameConfigSystem) Process() {
-	m.clearDirty(m.gameConfigs.GetEntities())
-	m.checkForNewConfig(m.filesToCheck.GetEntities())
-}
+// bootstrap sets up the config directories and config file for processing by other systems.
+// when the config is loaded, it sets up the mpq files as sources.
+func (m *GameBootstrapSystem) bootstrap() {
+	// we make two entities and assign file paths for the two directories that
+	// we assume a config file may be inside of. These will be processed in the future by
+	// the file type resolver system, and then the file source resolver system. At that point,
+	// there will be sources for these two directories that can resolve the config file.
+	e1, e2 := m.NewEntity(), m.NewEntity()
+	fp1, fp2 := m.maps.filePaths.AddFilePath(e1), m.maps.filePaths.AddFilePath(e2)
 
-func (m *GameConfigSystem) clearDirty(entities []akara.EID) {
-	for _, eid := range entities {
-		dc, found := m.maps.dirty.GetDirty(eid)
-		if !found {
-			m.maps.dirty.AddDirty(eid) // adds it, but it's false
-			continue
-		}
+	// the od2 directory has the highest priority
+	fp1.Path = path.Dir(os.Args[0])
 
-		dc.IsDirty = false
+	// the user config directory is second highest
+	configDir, err := os.UserConfigDir()
+	if err == nil {
+		fp2.Path = path.Join(configDir, configDirectoryName)
+	} else {
+		// we couldn't find the directory
+		m.RemoveEntity(e2)
 	}
+
+	// now we set up the config file to be loaded. this happens after the directories
+	// above are recognized as file sources.
+	e3 := m.NewEntity()
+	fp3 := m.maps.filePaths.AddFilePath(e3)
+	fp3.Path = configFileName
 }
 
-func (m *GameConfigSystem) checkForNewConfig(entities []akara.EID) {
-	for _, eid := range entities {
-		fp, found := m.maps.filePaths.GetFilePath(eid)
-		if !found {
-			continue
-		}
-
-		ft, found := m.maps.fileTypes.GetFileType(eid)
-		if !found {
-			continue
-		}
-
-		if fp.Path != configFileName || ft.Type != d2enum.FileTypeJSON {
-			continue
-		}
-
-		m.loadConfig(eid)
+func (m *GameBootstrapSystem) Process() {
+	configs := m.gameConfigs.GetEntities()
+	if len(configs) < 1 {
+		return
 	}
-}
 
-func (m *GameConfigSystem) loadConfig(eid akara.EID) {
-	fh, found := m.maps.fileHandles.GetFileHandle(eid)
+	cfg, found := m.maps.gameConfigs.GetGameConfig(configs[0])
 	if !found {
 		return
 	}
 
-	gameConfig := m.maps.gameConfigs.AddGameConfig(eid)
+	m.initMpqSources(cfg)
+	m.SetActive(false) // bootstrap is complete!
+}
 
-	if err := json.NewDecoder(fh.Data).Decode(gameConfig); err != nil {
-		m.maps.gameConfigs.Remove(eid)
-		return
+func (m *GameBootstrapSystem) initMpqSources(cfg *d2components.GameConfigComponent) {
+	for _, mpqFileName := range cfg.MpqLoadOrder {
+		fullMpqFilePath := path.Join(cfg.MpqPath, mpqFileName)
+
+		// make a new entity for the mpq file source
+		mpqSource := m.maps.filePaths.AddFilePath(m.NewEntity())
+		mpqSource.Path = fullMpqFilePath
 	}
 }

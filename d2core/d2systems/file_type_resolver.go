@@ -51,7 +51,7 @@ func (m *FileTypeResolver) Init(world *akara.World) {
 	}
 
 	for subIdx := range m.Subscriptions {
-		m.AddSubscription(m.Subscriptions[subIdx])
+		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
 	}
 
 	m.filesToCheck = m.Subscriptions[0]

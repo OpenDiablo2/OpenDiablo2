@@ -44,7 +44,7 @@ func (m *FileSourceResolver) Init(world *akara.World) {
 	}
 
 	for subIdx := range m.Subscriptions {
-		m.AddSubscription(m.Subscriptions[subIdx])
+		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
 	}
 
 	m.fileSub = m.Subscriptions[0]

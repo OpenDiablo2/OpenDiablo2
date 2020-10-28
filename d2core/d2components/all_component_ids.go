@@ -24,7 +24,15 @@ const (
 	AssetWavCID
 	AssetD2AnimDataCID
 	PositionCID
+	StaticPositionCID
 	VelocityCID
 	DirtyCID
 	PriorityCID
+	SurfaceCID
+	RenderCullCID
+	SceneCID
+	CameraCID
+	ViewportCID
+	OriginCID
+	SizeCID
 )
