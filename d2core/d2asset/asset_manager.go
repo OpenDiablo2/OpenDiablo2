@@ -115,6 +115,7 @@ func (am *AssetManager) initDataDictionaries() error {
 		d2resource.SetItems,
 		d2resource.AutoMagic,
 		d2resource.TreasureClass,
+		d2resource.TreasureClassEx,
 		d2resource.States,
 		d2resource.SoundEnvirons,
 		d2resource.Shrines,
@@ -137,6 +138,17 @@ func (am *AssetManager) initDataDictionaries() error {
 		d2resource.RareSuffix,
 		d2resource.Events,
 		d2resource.Colors,
+		d2resource.ArmorType,
+		d2resource.WeaponClass,
+		d2resource.PlayerType,
+		d2resource.Composite,
+		d2resource.HitClass,
+		d2resource.UniquePrefix,
+		d2resource.UniqueSuffix,
+		d2resource.CubeModifier,
+		d2resource.CubeType,
+		d2resource.HirelingDescription,
+		d2resource.LowQualityItems,
 	}
 
 	for _, path := range dictPaths {
@@ -440,7 +452,7 @@ func (am *AssetManager) initAnimationData(path string) error {
 
 	animData := d2data.LoadAnimationData(animDataBytes)
 
-	am.Records.Animations = animData
+	am.Records.Animation.Data = animData
 
 	return nil
 }

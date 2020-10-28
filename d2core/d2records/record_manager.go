@@ -28,7 +28,16 @@ func NewRecordManager() (*RecordManager, error) {
 // RecordManager stores all of the records loaded from txt files
 type RecordManager struct {
 	boundLoaders map[string][]recordLoader // there can be more than one loader bound for a file
-	Animations   d2data.AnimationData
+	Animation    struct {
+		Data  d2data.AnimationData
+		Token struct {
+			Player    PlayerTypes
+			Composite CompositeTypes
+			Armor     ArmorTypes
+			Weapon    WeaponClasses
+			HitClass  HitClasses
+		}
+	}
 	BodyLocations
 	Calculation struct {
 		Skills   Calculations
@@ -47,7 +56,10 @@ type RecordManager struct {
 	DifficultyLevels
 	ElemTypes
 	Gamble
-	Hirelings
+	Hireling struct {
+		Details      Hirelings
+		Descriptions HirelingDescriptions
+	}
 	Item struct {
 		All CommonItems // NOTE: populated when armor, weapons, and misc items are ALL loaded
 
@@ -66,20 +78,28 @@ type RecordManager struct {
 			Prefix MagicPrefix
 			Suffix MagicSuffix
 		}
-		MagicPrefixGroups ItemAffixGroups
-		MagicSuffixGroups ItemAffixGroups
-		Quality           ItemQualities
-		Rare              struct {
+		MagicPrefixGroups  ItemAffixGroups
+		MagicSuffixGroups  ItemAffixGroups
+		Quality            ItemQualities
+		LowQualityPrefixes LowQualities
+		Rare               struct {
 			Prefix RarePrefixes
 			Suffix RareSuffixes
 		}
-		Ratios  ItemRatios
-		Recipes CubeRecipes
+		Ratios ItemRatios
+		Cube   struct {
+			Recipes   CubeRecipes
+			Modifiers CubeModifiers
+			Types     CubeTypes
+		}
 		Runewords
 		Sets
 		SetItems
-		Stats ItemStatCosts
-		TreasureClass
+		Stats    ItemStatCosts
+		Treasure struct {
+			Normal    TreasureClass
+			Expansion TreasureClass
+		}
 		Types  ItemTypes
 		Unique UniqueItems
 		StorePages
@@ -100,10 +120,14 @@ type RecordManager struct {
 	Missiles
 	missilesByName
 	Monster struct {
-		AI         MonsterAI
-		Equipment  MonsterEquipment
-		Levels     MonsterLevels
-		Modes      MonModes
+		AI        MonsterAI
+		Equipment MonsterEquipment
+		Levels    MonsterLevels
+		Modes     MonModes
+		Name      struct {
+			Prefix UniqueMonsterAffixes
+			Suffix UniqueMonsterAffixes
+		}
 		Placements MonsterPlacements
 		Presets    MonPresets
 		Props      MonsterProperties
@@ -140,7 +164,7 @@ type RecordManager struct {
 	States
 }
 
-func (r *RecordManager) init() error {
+func (r *RecordManager) init() error { // nolint:funlen // can't reduce
 	loaders := []struct {
 		path   string
 		loader recordLoader
@@ -198,6 +222,7 @@ func (r *RecordManager) init() error {
 		{d2resource.SetItems, setItemLoader},
 		{d2resource.AutoMagic, autoMagicLoader},
 		{d2resource.TreasureClass, treasureClassLoader},
+		{d2resource.TreasureClassEx, treasureClassExLoader},
 		{d2resource.States, statesLoader},
 		{d2resource.SoundEnvirons, soundEnvironmentLoader},
 		{d2resource.Shrines, shrineLoader},
@@ -219,6 +244,17 @@ func (r *RecordManager) init() error {
 		{d2resource.RarePrefix, rareItemPrefixLoader},
 		{d2resource.RareSuffix, rareItemSuffixLoader},
 		{d2resource.Events, eventsLoader},
+		{d2resource.ArmorType, armorTypesLoader},      // anim mode tokens
+		{d2resource.WeaponClass, weaponClassesLoader}, // anim mode tokens
+		{d2resource.PlayerType, playerTypeLoader},     // anim mode tokens
+		{d2resource.Composite, compositeTypeLoader},   // anim mode tokens
+		{d2resource.HitClass, hitClassLoader},         // anim mode tokens
+		{d2resource.UniquePrefix, uniqueMonsterPrefixLoader},
+		{d2resource.UniqueSuffix, uniqueMonsterSuffixLoader},
+		{d2resource.CubeModifier, cubeModifierLoader},
+		{d2resource.CubeType, cubeTypeLoader},
+		{d2resource.HirelingDescription, hirelingDescriptionLoader},
+		{d2resource.LowQualityItems, lowQualityLoader},
 	}
 
 	for idx := range loaders {

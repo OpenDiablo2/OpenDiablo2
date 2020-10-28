@@ -259,7 +259,7 @@ func (c *Composite) createMode(animationMode animationMode, weaponClass string) 
 
 	animationKey := strings.ToLower(c.token + animationMode.String() + weaponClass)
 
-	animationData := c.Records.Animations[animationKey]
+	animationData := c.Records.Animation.Data[animationKey]
 	if len(animationData) == 0 {
 		return nil, errors.New("could not find Animation data")
 	}
