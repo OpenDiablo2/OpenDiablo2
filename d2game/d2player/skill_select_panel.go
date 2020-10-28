@@ -25,9 +25,6 @@ const (
 	leftPanelStartX   = 90
 	skillPanelOffsetY = 465
 	skillListsLength  = 5 // 0 to 4. 0 - General Skills, 1 to 3 - Class-specific skills(based on the 3 different skill trees), 4 - Other skills
-	tooltipPadLeft    = 3
-	tooltipPadRight   = 3
-	tooltipPadBottom  = 5
 )
 
 // SkillPanel represents a skill select menu popup that is displayed when the player left clicks on his active left/right skill.
@@ -54,18 +51,18 @@ func NewHeroSkillsPanel(asset *d2asset.AssetManager, ui *d2ui.UIManager, hero *d
 		activeSkill = hero.RightSkill
 	}
 
-	hoverTooltip := ui.NewToolTip(d2resource.Font16, d2resource.PaletteStatic, d2ui.TooltipXLeft, d2ui.TooltipYTop)
+	hoverTooltip := ui.NewTooltip(d2resource.Font16, d2resource.PaletteStatic, d2ui.TooltipXLeft, d2ui.TooltipYTop)
 
 	return &SkillPanel{
-		asset:            asset,
-		activeSkill:      activeSkill,
-		ui:               ui,
-		isOpen:           false,
-		ListRows:         make([]*SkillListRow, skillListsLength),
-		renderer:         ui.Renderer(),
-		isLeftPanel:      isLeftPanel,
-		hero:             hero,
-		hoverTooltip:     hoverTooltip,
+		asset:        asset,
+		activeSkill:  activeSkill,
+		ui:           ui,
+		isOpen:       false,
+		ListRows:     make([]*SkillListRow, skillListsLength),
+		renderer:     ui.Renderer(),
+		isLeftPanel:  isLeftPanel,
+		hero:         hero,
+		hoverTooltip: hoverTooltip,
 	}
 }
 

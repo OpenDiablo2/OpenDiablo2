@@ -21,10 +21,6 @@ const (
 )
 
 const (
-	blackAlpha70 = 0x000000C8
-)
-
-const (
 	invCloseButtonX, invCloseButtonY = 419, 449
 )
 
@@ -52,17 +48,17 @@ type Inventory struct {
 // NewInventory creates an inventory instance and returns a pointer to it
 func NewInventory(asset *d2asset.AssetManager, ui *d2ui.UIManager,
 	record *d2records.InventoryRecord) *Inventory {
-	itemTooltip := ui.NewToolTip(d2resource.FontFormal11, d2resource.PaletteStatic, d2ui.TooltipXCenter, d2ui.TooltipYBottom)
+	itemTooltip := ui.NewTooltip(d2resource.FontFormal11, d2resource.PaletteStatic, d2ui.TooltipXCenter, d2ui.TooltipYBottom)
 
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/797
 	itemFactory, _ := diablo2item.NewItemFactory(asset)
 
 	return &Inventory{
-		asset:      asset,
-		uiManager:  ui,
-		item:       itemFactory,
-		grid:       NewItemGrid(asset, ui, record),
-		originX:    record.Panel.Left,
+		asset:       asset,
+		uiManager:   ui,
+		item:        itemFactory,
+		grid:        NewItemGrid(asset, ui, record),
+		originX:     record.Panel.Left,
 		itemTooltip: itemTooltip,
 		// originY: record.Panel.Top,
 		originY: 0, // expansion data has these all offset by +60 ...

@@ -14,64 +14,77 @@ const (
 	screenHeight = 600
 )
 
+// Tooltip contains a label containing text with a transparent, black background
 type Tooltip struct {
 	manager         *UIManager
 	lines           []string
 	label           *Label
 	backgroundColor int
 	x, y            int
-	originX         TooltipXOrigin
-	originY         TooltipYOrigin
+	originX         tooltipXOrigin
+	originY         tooltipYOrigin
 }
 
-type TooltipXOrigin = int
-type TooltipYOrigin = int
+type tooltipXOrigin = int
+type tooltipYOrigin = int
+
 const (
-	TooltipYTop TooltipYOrigin = iota
+	// TooltipYTop sets the Y origin of the tooltip to the top
+	TooltipYTop tooltipYOrigin = iota
+	// TooltipYCenter sets the Y origin of the tooltip to the center
 	TooltipYCenter
+	// TooltipYBottom sets the Y origin of the tooltip to the bottom
 	TooltipYBottom
 )
 
 const (
-	TooltipXLeft TooltipXOrigin = iota
+	// TooltipXLeft sets the X origin of the tooltip to the left
+	TooltipXLeft tooltipXOrigin = iota
+	// TooltipXCenter sets the X origin of the tooltip to the center
 	TooltipXCenter
+	// TooltipXRight sets the X origin of the tooltip to the right
 	TooltipXRight
 )
 
-
-func (ui *UIManager) NewToolTip(font string,
+// NewTooltip creates a tooltip instance. Note here, that we need to define the
+// orign point of the tooltip rect using tooltipXOrigin and tooltinYOrigin
+func (ui *UIManager) NewTooltip(font string,
 	palette string,
-	originX TooltipXOrigin,
-	originY TooltipYOrigin) *Tooltip {
+	originX tooltipXOrigin,
+	originY tooltipYOrigin) *Tooltip {
 	label := ui.NewLabel(font, palette)
 	label.Alignment = d2gui.HorizontalAlignCenter
 
-	res := &Tooltip {
+	res := &Tooltip{
 		backgroundColor: blackAlpha70,
-		label: label,
-		x: 0,
-		y: 0,
-		originX: originX,
-		originY: originY,
+		label:           label,
+		x:               0,
+		y:               0,
+		originX:         originX,
+		originY:         originY,
 	}
 	res.manager = ui
+
 	return res
 }
 
-func (t *Tooltip) SetPosition(x int, y int) {
+// SetPosition sets the position of the origin point of the tooltip
+func (t *Tooltip) SetPosition(x, y int) {
 	t.x = x
 	t.y = y
 }
 
+// SetTextLines sets the tooltip text in the form of an array of strings
 func (t *Tooltip) SetTextLines(lines []string) {
 	t.lines = lines
 }
 
+// SetText sets the tooltip text and splits \n into lines
 func (t *Tooltip) SetText(text string) {
 	t.lines = strings.Split(text, "\n")
 }
 
-func (t *Tooltip) adjustCoordinatesToScreen(maxW int, maxH int, halfW int, halfH int) (int, int){
+func (t *Tooltip) adjustCoordinatesToScreen(maxW, maxH, halfW, halfH int) (rx, ry int) {
 	var xOffset, yOffset int
 
 	switch t.originX {
@@ -82,6 +95,7 @@ func (t *Tooltip) adjustCoordinatesToScreen(maxW int, maxH int, halfW int, halfH
 	case TooltipXRight:
 		xOffset = 0
 	}
+
 	renderX := t.x
 	if (t.x + xOffset) > screenWidth {
 		renderX = screenWidth - xOffset
@@ -95,6 +109,7 @@ func (t *Tooltip) adjustCoordinatesToScreen(maxW int, maxH int, halfW int, halfH
 	case TooltipYBottom:
 		yOffset = maxH
 	}
+
 	renderY := t.y
 	if (t.y + yOffset) > screenHeight {
 		renderY = screenHeight - yOffset
@@ -103,22 +118,28 @@ func (t *Tooltip) adjustCoordinatesToScreen(maxW int, maxH int, halfW int, halfH
 	return renderX, renderY
 }
 
-func (t *Tooltip) getTextSize() (int, int){
+func (t *Tooltip) getTextSize() (sx, sy int) {
 	maxW, maxH := 0, 0
+
 	for i := range t.lines {
 		w, h := t.label.GetTextMetrics(t.lines[i])
 
 		if maxW < w {
 			maxW = w
 		}
+
 		maxH += h
 	}
+
 	return maxW, maxH
 }
 
+// Render draws the tooltip
 func (t *Tooltip) Render(target d2interface.Surface) {
+	const two = 2
+
 	maxW, maxH := t.getTextSize()
-	halfW, halfH := maxW/2, maxH/2
+	halfW, halfH := maxW/two, maxH/two
 
 	renderX, renderY := t.adjustCoordinatesToScreen(maxW, maxH, halfW, halfH)
 
@@ -135,6 +156,7 @@ func (t *Tooltip) Render(target d2interface.Surface) {
 	case TooltipXRight:
 		target.PushTranslation(-maxW, 0)
 	}
+
 	defer target.Pop()
 
 	switch t.originY {
@@ -143,8 +165,9 @@ func (t *Tooltip) Render(target d2interface.Surface) {
 	case TooltipYCenter:
 		target.PushTranslation(0, -halfH)
 	case TooltipXRight:
-		target.PushTranslation(0 , -maxH)
+		target.PushTranslation(0, -maxH)
 	}
+
 	defer target.Pop()
 
 	// tooltip background
@@ -153,11 +176,13 @@ func (t *Tooltip) Render(target d2interface.Surface) {
 	// text
 	target.PushTranslation(halfW, 0) // text is centered, our box is not
 	defer target.Pop()
-	for i:= range t.lines {
+
+	for i := range t.lines {
 		t.label.SetText(t.lines[i])
 		_, h := t.label.GetTextMetrics(t.lines[i])
 		t.label.Render(target)
 		target.PushTranslation(0, h)
 	}
+
 	target.PopN(len(t.lines))
 }
