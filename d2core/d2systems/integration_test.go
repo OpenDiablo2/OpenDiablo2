@@ -2,56 +2,56 @@ package d2systems
 
 import (
 	"testing"
-	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 
 	"github.com/gravestench/akara"
 )
 
-func Test_SystemIntegrationTest(t *testing.T) {
+func Test_integration(t *testing.T) {
 	cfg := akara.NewWorldConfig()
 
-	scale := NewTimeScaleSystem()
-	movement := NewMovementSystem()
+	bootstrap := NewGameBootstrapSystem()
+	fileTypeResolver := NewFileTypeResolver()
+	fileHandleResolver := NewFileHandleResolver()
+	fileSourceResolver := NewFileSourceResolver()
+	gameConfig := NewGameConfigSystem()
+	assetLoader := NewAssetLoader()
+	renderer := NewRenderSystem()
 
-	cfg.With(scale)
-	cfg.With(movement)
+	cfg.With(fileTypeResolver).
+		With(fileSourceResolver).
+		With(fileHandleResolver).
+		With(gameConfig).
+		With(assetLoader).
+		With(renderer).
+		With(bootstrap)
 
 	world := akara.NewWorld(cfg)
 
-	e := world.NewEntity()
-	pos := movement.positions.AddPosition(e)
-	vel := movement.velocities.AddVelocity(e)
-
-	vel.Set(1, 2)
-
-	// first test without time scaling active
-	scale.scale = 0.001
-	scale.SetActive(false)
-
-	timeDelta := time.Millisecond
-
-	expectX, expectY := pos.X()+vel.X(), pos.Y()+vel.Y()
-
-	for idx := 0; idx < 1000; idx++ {
-		_ = world.Update(timeDelta)
+	e1 := world.NewEntity()
+	m, err := world.GetMap(d2components.FilePath)
+	if err != nil {
+		t.Error("cannot find file path component map")
+		return
 	}
 
-	if !pos.EqualsApprox(vel.Vector) {
-		fmtStr := "position component not updated, expected (%v,%v) but got (%v,%v)"
-		t.Errorf(fmtStr, expectX, expectY, pos.X(), pos.Y())
-	}
+	filepaths := m.(*d2components.FilePathMap)
 
-	// now enable time scaling
-	scale.SetActive(true)
+	filepaths.AddFilePath(e1).Path = "Data/Global/Monsters/DI/LA/DILALITDTHTH.DC6"
 
-	expectX, expectY = pos.X()+vel.X(), pos.Y()+vel.Y()
+	mm, _ := world.ComponentManager.GetMap(d2components.Dc6)
+	dc6map := mm.(*d2components.Dc6Map)
 
-	for idx := 0; idx < 1000000; idx++ {
-		_ = world.Update(timeDelta)
-	}
+	updateCount := 0
 
-	if pos.EqualsApprox(vel.Vector.Clone().Scale(2)) {
-		fmtStr := "position component not updated, expected (%v,%v) but got (%v,%v)"
-		t.Errorf(fmtStr, expectX, expectY, pos.X(), pos.Y())
+	for {
+		world.Update(0)
+		updateCount++
+		_, found := dc6map.GetDc6(e1)
+
+		if found {
+			break
+		}
 	}
 }

@@ -39,7 +39,7 @@ func (m *MovementSystem) Init(world *akara.World) {
 	}
 
 	for subIdx := range m.Subscriptions {
-		m.AddSubscription(m.Subscriptions[subIdx])
+		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
 	}
 
 	// try to inject the components we require, then cast the returned

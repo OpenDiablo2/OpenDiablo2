@@ -1,7 +1,6 @@
 package d2systems
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -64,7 +63,7 @@ func (m *FileHandleResolutionSystem) Init(world *akara.World) {
 	m.World = world
 
 	for subIdx := range m.Subscriptions {
-		m.AddSubscription(m.Subscriptions[subIdx])
+		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
 	}
 
 	if world == nil {
@@ -170,7 +169,7 @@ func (m *FileHandleResolutionSystem) loadFileWithSource(fileID, sourceID akara.E
 		}
 	}
 
-	fmt.Printf("%s -> %s\n", sourceFp.Path, fp.Path)
+	//fmt.Printf("%s -> %s\n", sourceFp.Path, fp.Path)
 
 	component := m.fileHandles.AddFileHandle(fileID)
 	component.Data = data

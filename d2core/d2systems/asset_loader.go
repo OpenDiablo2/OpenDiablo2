@@ -1,7 +1,6 @@
 package d2systems
 
 import (
-	"errors"
 	"io"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -97,7 +96,7 @@ func (m *AssetLoaderSystem) Init(world *akara.World) {
 	}
 
 	for subIdx := range m.Subscriptions {
-		m.AddSubscription(m.Subscriptions[subIdx])
+		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
 	}
 
 	m.fileSub = m.Subscriptions[0]
@@ -163,10 +162,7 @@ func (m *AssetLoaderSystem) loadAsset(id akara.EID) {
 		}
 	}
 
-	err := m.parseAndCache(id, fp.Path, ft.Type, data)
-	if err != nil {
-		ft.Type = d2enum.FileTypeUnknown
-	}
+	m.parseAndCache(id, fp.Path, ft.Type, data)
 }
 
 func (m *AssetLoaderSystem) pullFromCache(id akara.EID, path string, t d2enum.FileType) bool {
@@ -205,42 +201,40 @@ func (m *AssetLoaderSystem) pullFromCache(id akara.EID, path string, t d2enum.Fi
 	return found
 }
 
-func (m *AssetLoaderSystem) parseAndCache(id akara.EID, path string, t d2enum.FileType, data []byte) error {
-	var err error
+func (m *AssetLoaderSystem) parseAndCache(id akara.EID, path string, t d2enum.FileType, data []byte) {
+	go func() {
+		switch t {
+		case d2enum.FileTypeStringTable:
+			m.loadFileTypeStringTable(id, path, data) // TODO: add error handling for string table load
+		case d2enum.FileTypeFontTable:
+			m.loadFileTypeFontTable(id, path, data) // TODO: add error handling for string table load
+		case d2enum.FileTypeDataDictionary:
+			m.loadFileTypeDataDictionary(id, path, data) // TODO: add error handling for data dict load
+		case d2enum.FileTypePalette:
+			m.loadFileTypePalette(id, path, data)
+		case d2enum.FileTypePaletteTransform:
+			m.loadFileTypePaletteTransform(id, path, data)
+		case d2enum.FileTypeCOF:
+			m.loadFileTypeCOF(id, path, data)
+		case d2enum.FileTypeDC6:
+			m.loadFileTypeDC6(id, path, data)
+		case d2enum.FileTypeDCC:
+			m.loadFileTypeDCC(id, path, data)
+		case d2enum.FileTypeDS1:
+			m.loadFileTypeDS1(id, path, data)
+		case d2enum.FileTypeDT1:
+			m.loadFileTypeDT1(id, path, data)
+		case d2enum.FileTypeWAV:
+			fh, found := m.fileHandles.GetFileHandle(id)
+			if !found {
+				return
+			}
 
-	switch t {
-	case d2enum.FileTypeStringTable:
-		m.loadFileTypeStringTable(id, path, data) // TODO: add error handling for string table load
-	case d2enum.FileTypeFontTable:
-		m.loadFileTypeFontTable(id, path, data) // TODO: add error handling for string table load
-	case d2enum.FileTypeDataDictionary:
-		m.loadFileTypeDataDictionary(id, path, data) // TODO: add error handling for data dict load
-	case d2enum.FileTypePalette:
-		err = m.loadFileTypePalette(id, path, data)
-	case d2enum.FileTypePaletteTransform:
-		err = m.loadFileTypePaletteTransform(id, path, data)
-	case d2enum.FileTypeCOF:
-		err = m.loadFileTypeCOF(id, path, data)
-	case d2enum.FileTypeDC6:
-		err = m.loadFileTypeDC6(id, path, data)
-	case d2enum.FileTypeDCC:
-		err = m.loadFileTypeDCC(id, path, data)
-	case d2enum.FileTypeDS1:
-		err = m.loadFileTypeDS1(id, path, data)
-	case d2enum.FileTypeDT1:
-		err = m.loadFileTypeDT1(id, path, data)
-	case d2enum.FileTypeWAV:
-		fh, found := m.fileHandles.GetFileHandle(id)
-		if !found {
-			return errors.New("no file handle for wav file")
+			m.loadFileTypeWAV(id, path, fh.Data)
+		case d2enum.FileTypeD2:
+			m.loadFileTypeD2(id, path, data)
 		}
-
-		m.loadFileTypeWAV(id, path, fh.Data)
-	case d2enum.FileTypeD2:
-		err = m.loadFileTypeD2(id, path, data)
-	}
-
-	return err
+	}()
 }
 
 func (m *AssetLoaderSystem) loadFileTypeStringTable(id akara.EID, path string, data []byte) {
