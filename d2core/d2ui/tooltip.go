@@ -48,7 +48,7 @@ const (
 
 // NewTooltip creates a tooltip instance. Note here, that we need to define the
 // orign point of the tooltip rect using tooltipXOrigin and tooltinYOrigin
-func (ui *UIManager) NewTooltip(font string,
+func (ui *UIManager) NewTooltip(font,
 	palette string,
 	originX tooltipXOrigin,
 	originY tooltipYOrigin) *Tooltip {
