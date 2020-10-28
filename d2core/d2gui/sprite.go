@@ -1,6 +1,8 @@
 package d2gui
 
 import (
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -14,6 +16,9 @@ const (
 	DirectionForward AnimationDirection = iota
 	DirectionBackward
 )
+
+// static check that Sprite implements widget
+var _ widget = &Sprite{}
 
 // Sprite is an image
 type Sprite struct {
@@ -67,13 +72,13 @@ func createAnimatedSprite(
 	return sprite, nil
 }
 
-func (s *AnimatedSprite) render(target d2interface.Surface) error {
+func (s *AnimatedSprite) render(target d2interface.Surface) {
 	_, frameHeight := s.animation.GetCurrentFrameSize()
 
 	target.PushTranslation(s.x, s.y-frameHeight)
 	defer target.Pop()
 
-	return s.animation.Render(target)
+	s.animation.Render(target)
 }
 
 // SetSegmented sets the segment properties of the sprite
@@ -83,8 +88,11 @@ func (s *Sprite) SetSegmented(segmentsX, segmentsY, frameOffset int) {
 	s.frameOffset = frameOffset
 }
 
-func (s *Sprite) render(target d2interface.Surface) error {
-	return renderSegmented(s.animation, s.segmentsX, s.segmentsY, s.frameOffset, target)
+func (s *Sprite) render(target d2interface.Surface) {
+	err := renderSegmented(s.animation, s.segmentsX, s.segmentsY, s.frameOffset, target)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (s *Sprite) advance(elapsed float64) error {

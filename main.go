@@ -40,10 +40,7 @@ func main() {
 		panic(err)
 	}
 
-	audio, err := ebiten2.CreateAudio(asset)
-	if err != nil {
-		panic(err)
-	}
+	audio := ebiten2.CreateAudio(asset)
 
 	inputManager := d2input.NewInputManager()
 

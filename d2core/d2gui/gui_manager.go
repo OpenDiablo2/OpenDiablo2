@@ -91,29 +91,21 @@ func (m *GuiManager) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 // Render renders the GuiManager to the given surface
 func (m *GuiManager) Render(target d2interface.Surface) error {
 	if m.loading {
-		if err := m.renderLoadScreen(target); err != nil {
-			return err
-		}
+		m.renderLoadScreen(target)
 	} else if m.layout != nil {
 		m.layout.SetSize(target.GetSize())
-		if err := m.layout.render(target); err != nil {
-			return err
-		}
+		m.layout.render(target)
 	}
 
 	if m.cursorVisible {
-		if err := m.renderCursor(target); err != nil {
-			return err
-		}
+		m.renderCursor(target)
 	}
 
 	return nil
 }
 
-func (m *GuiManager) renderLoadScreen(target d2interface.Surface) error {
-	if clearErr := target.Clear(color.Black); clearErr != nil {
-		return clearErr
-	}
+func (m *GuiManager) renderLoadScreen(target d2interface.Surface) {
+	target.Clear(color.Black)
 
 	pushCount := 0
 
@@ -128,10 +120,10 @@ func (m *GuiManager) renderLoadScreen(target d2interface.Surface) error {
 
 	defer target.PopN(pushCount)
 
-	return m.loadingAnim.Render(target)
+	m.loadingAnim.Render(target)
 }
 
-func (m *GuiManager) renderCursor(target d2interface.Surface) error {
+func (m *GuiManager) renderCursor(target d2interface.Surface) {
 	_, height := m.cursorAnim.GetCurrentFrameSize()
 	pushCount := 0
 
@@ -143,7 +135,7 @@ func (m *GuiManager) renderCursor(target d2interface.Surface) error {
 
 	defer target.PopN(pushCount)
 
-	return m.cursorAnim.Render(target)
+	m.cursorAnim.Render(target)
 }
 
 // Advance advances the GuiManager state

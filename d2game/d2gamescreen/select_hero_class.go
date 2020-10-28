@@ -511,9 +511,9 @@ func (v *SelectHeroClass) onOkButtonClicked() {
 }
 
 // Render renders the Select Hero Class screen
-func (v *SelectHeroClass) Render(screen d2interface.Surface) error {
+func (v *SelectHeroClass) Render(screen d2interface.Surface) {
 	if err := v.bgImage.RenderSegmented(screen, 4, 3, 0); err != nil {
-		return err
+		return
 	}
 
 	v.headingLabel.Render(screen)
@@ -537,17 +537,13 @@ func (v *SelectHeroClass) Render(screen d2interface.Surface) error {
 		}
 	}
 
-	if err := v.campfire.Render(screen); err != nil {
-		return err
-	}
+	v.campfire.Render(screen)
 
 	if v.heroNameTextbox.GetVisible() {
 		v.heroNameLabel.Render(screen)
 		v.expansionCharLabel.Render(screen)
 		v.hardcoreCharLabel.Render(screen)
 	}
-
-	return nil
 }
 
 // Advance runs the update logic on the Select Hero Class screen
@@ -744,10 +740,7 @@ func setSpriteToFirstFrame(sprite *d2ui.Sprite) {
 
 func drawSprite(sprite *d2ui.Sprite, target d2interface.Surface) {
 	if sprite != nil {
-		if err := sprite.Render(target); err != nil {
-			x, y := sprite.GetPosition()
-			fmt.Printf("could not render the sprite to the position(x: %d, y: %d)\n", x, y)
-		}
+		sprite.Render(target)
 	}
 }
 

@@ -10,7 +10,7 @@ import (
 // Surface represents a renderable surface.
 type Surface interface {
 	Renderer() Renderer
-	Clear(color color.Color) error
+	Clear(color color.Color)
 	DrawRect(width, height int, color color.Color)
 	DrawLine(x, y int, color color.Color)
 	DrawTextf(format string, params ...interface{})
@@ -26,9 +26,9 @@ type Surface interface {
 	PushScale(x, y float64)
 	PushBrightness(brightness float64)
 	PushSaturation(saturation float64)
-	Render(surface Surface) error
+	Render(surface Surface)
 	// Renders a section of the surface enclosed by bounds
-	RenderSection(surface Surface, bound image.Rectangle) error
-	ReplacePixels(pixels []byte) error
+	RenderSection(surface Surface, bound image.Rectangle)
+	ReplacePixels(pixels []byte)
 	Screenshot() *image.RGBA
 }

@@ -39,6 +39,9 @@ type animationDirection struct {
 	frames  []animationFrame
 }
 
+// static check that we implement the animation interface
+var _ d2interface.Animation = &Animation{}
+
 // Animation has directionality, play modes, and frame counting
 type Animation struct {
 	renderer         d2interface.Renderer
@@ -123,7 +126,7 @@ const (
 	zero = 0.0
 )
 
-func (a *Animation) renderShadow(target d2interface.Surface) error {
+func (a *Animation) renderShadow(target d2interface.Surface) {
 	direction := a.directions[a.directionIndex]
 	frame := direction.frames[a.frameIndex]
 
@@ -145,16 +148,13 @@ func (a *Animation) renderShadow(target d2interface.Surface) error {
 	target.PushBrightness(zero)
 	defer target.Pop()
 
-	return target.Render(frame.image)
+	target.Render(frame.image)
 }
 
 // Render renders the animation to the given surface
-func (a *Animation) Render(target d2interface.Surface) error {
+func (a *Animation) Render(target d2interface.Surface) {
 	if a.renderer == nil {
-		err := a.BindRenderer(target.Renderer())
-		if err != nil {
-			return err
-		}
+		a.BindRenderer(target.Renderer())
 	}
 
 	direction := a.directions[a.directionIndex]
@@ -169,26 +169,25 @@ func (a *Animation) Render(target d2interface.Surface) error {
 	target.PushColor(a.colorMod)
 	defer target.Pop()
 
-	return target.Render(frame.image)
+	target.Render(frame.image)
 }
 
 // BindRenderer binds the given renderer to the animation so that it can initialize
 // the required surfaces
-func (a *Animation) BindRenderer(r d2interface.Renderer) error {
+func (a *Animation) BindRenderer(r d2interface.Renderer) {
 	if a.onBindRenderer == nil {
-		return errors.New("the Animation does not have a onBindRenderer handler")
+		return
 	}
 
-	return a.onBindRenderer(r)
+	if err := a.onBindRenderer(r); err != nil {
+		log.Println(err)
+	}
 }
 
 // RenderFromOrigin renders the animation from the animation origin
-func (a *Animation) RenderFromOrigin(target d2interface.Surface, shadow bool) error {
+func (a *Animation) RenderFromOrigin(target d2interface.Surface, shadow bool) {
 	if a.renderer == nil {
-		err := a.BindRenderer(target.Renderer())
-		if err != nil {
-			return err
-		}
+		a.BindRenderer(target.Renderer())
 	}
 
 	if a.originAtBottom {
@@ -207,19 +206,18 @@ func (a *Animation) RenderFromOrigin(target d2interface.Surface, shadow bool) er
 		target.PushTranslation(-halfHeight, 0)
 		defer target.Pop()
 
-		return a.renderShadow(target)
+		a.renderShadow(target)
+
+		return
 	}
 
-	return a.Render(target)
+	a.Render(target)
 }
 
 // RenderSection renders the section of the animation frame enclosed by bounds
-func (a *Animation) RenderSection(target d2interface.Surface, bound image.Rectangle) error {
+func (a *Animation) RenderSection(target d2interface.Surface, bound image.Rectangle) {
 	if a.renderer == nil {
-		err := a.BindRenderer(target.Renderer())
-		if err != nil {
-			return err
-		}
+		a.BindRenderer(target.Renderer())
 	}
 
 	direction := a.directions[a.directionIndex]
@@ -234,7 +232,7 @@ func (a *Animation) RenderSection(target d2interface.Surface, bound image.Rectan
 	target.PushColor(a.colorMod)
 	defer target.Pop()
 
-	return target.RenderSection(frame.image, bound)
+	target.RenderSection(frame.image, bound)
 }
 
 // GetFrameSize gets the Size(width, height) of a indexed frame.
@@ -398,9 +396,9 @@ func (a *Animation) SetShadow(shadow bool) {
 }
 
 // Clone creates a copy of the Animation
-func (a *Animation) Clone() Animation {
+func (a *Animation) Clone() d2interface.Animation {
 	clone := *a
 	copy(clone.directions, a.directions)
 
-	return clone
+	return &clone
 }

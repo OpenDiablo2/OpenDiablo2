@@ -312,11 +312,7 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 		}
 	}
 
-	btn.normalSurface, err = ui.renderer.NewSurface(btn.width, btn.height, d2enum.FilterNearest)
-	if err != nil {
-		log.Print(err)
-		return nil
-	}
+	btn.normalSurface = ui.renderer.NewSurface(btn.width, btn.height)
 
 	buttonSprite.SetPosition(0, 0)
 	buttonSprite.SetEffect(d2enum.DrawEffectModulate)
@@ -336,13 +332,12 @@ type buttonStateDescriptor struct {
 }
 
 func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, label *Label) {
-	var err error
-
 	numButtonStates := btnSprite.GetFrameCount() / (btnLayout.XSegments * btnLayout.YSegments)
 
 	// buttons always have a base image
 	if v.buttonLayout.HasImage {
-		err = btnSprite.RenderSegmented(v.normalSurface, btnLayout.XSegments, btnLayout.YSegments, btnLayout.BaseFrame)
+		err := btnSprite.RenderSegmented(v.normalSurface, btnLayout.XSegments,
+			btnLayout.YSegments, btnLayout.BaseFrame)
 		if err != nil {
 			fmt.Printf("failed to render button normalSurface, err: %v\n", err)
 		}
@@ -364,7 +359,7 @@ func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, lab
 	buttonStateConfigs := make([]*buttonStateDescriptor, 0)
 
 	// pressed button
-	if numButtonStates >= buttonStatePressed {
+	if numButtonStates > buttonStatePressed {
 		state := &buttonStateDescriptor{
 			baseFrame + buttonStatePressed,
 			xOffset - pressedButtonOffset, textY + pressedButtonOffset,
@@ -376,7 +371,7 @@ func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, lab
 	}
 
 	// toggle button
-	if numButtonStates >= buttonStateToggled {
+	if numButtonStates > buttonStateToggled {
 		buttonStateConfigs = append(buttonStateConfigs, &buttonStateDescriptor{
 			baseFrame + buttonStateToggled,
 			xOffset, textY,
@@ -386,7 +381,7 @@ func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, lab
 	}
 
 	// pressed+toggled
-	if numButtonStates >= buttonStatePressedToggled {
+	if numButtonStates > buttonStatePressedToggled {
 		buttonStateConfigs = append(buttonStateConfigs, &buttonStateDescriptor{
 			baseFrame + buttonStatePressedToggled,
 			xOffset, textY,
@@ -410,21 +405,18 @@ func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, lab
 	for stateIdx, w, h := 0, v.width, v.height; stateIdx < len(buttonStateConfigs); stateIdx++ {
 		state := buttonStateConfigs[stateIdx]
 
-		if stateIdx >= 2 && btnLayout.ResourceName == d2resource.BuySellButton {
+		if stateIdx > 1 && btnLayout.ResourceName == d2resource.BuySellButton {
 			// Without returning early, the button UI gets all subsequent (unrelated) frames
 			// stacked on top. Only 2 frames from this sprite are applicable to the button
 			// in question. The presentation is incorrect without this hack!
 			continue
 		}
 
-		surface, err := v.manager.renderer.NewSurface(w, h, d2enum.FilterNearest)
-		if err != nil {
-			log.Print(err)
-		}
+		surface := v.manager.renderer.NewSurface(w, h)
 
 		*state.prerenderdestination = surface
 
-		err = btnSprite.RenderSegmented(*state.prerenderdestination, xSeg, ySeg, state.baseFrame)
+		err := btnSprite.RenderSegmented(*state.prerenderdestination, xSeg, ySeg, state.baseFrame)
 		if err != nil {
 			fmt.Printf(state.fmtErr, err)
 		}
@@ -461,29 +453,23 @@ func (v *Button) Render(target d2interface.Surface) error {
 	target.PushTranslation(v.x, v.y)
 	defer target.Pop()
 
-	var err error
-
 	switch {
 	case !v.enabled:
 		target.PushColor(d2util.Color(lightGreyAlpha75))
 		defer target.Pop()
-		err = target.Render(v.disabledSurface)
+		target.Render(v.disabledSurface)
 	case v.toggled && v.pressed:
-		err = target.Render(v.pressedToggledSurface)
+		target.Render(v.pressedToggledSurface)
 	case v.pressed:
 		if v.buttonLayout.AllowFrameChange {
-			err = target.Render(v.pressedSurface)
+			target.Render(v.pressedSurface)
 		} else {
-			err = target.Render(v.normalSurface)
+			target.Render(v.normalSurface)
 		}
 	case v.toggled:
-		err = target.Render(v.toggledSurface)
+		target.Render(v.toggledSurface)
 	default:
-		err = target.Render(v.normalSurface)
-	}
-
-	if err != nil {
-		fmt.Printf("failed to render button surface, err: %v\n", err)
+		target.Render(v.normalSurface)
 	}
 
 	return nil

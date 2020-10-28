@@ -10,10 +10,11 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/gravestench/akara v0.0.0-20201014060234-a64208a7fd3c
 	github.com/hajimehoshi/ebiten v1.11.4
+	github.com/hajimehoshi/ebiten/v2 v2.0.0
 	github.com/pkg/profile v1.5.0
 	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
 	github.com/stretchr/testify v1.4.0
-	golang.org/x/image v0.0.0-20200618115811-c13761719519
+	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 )

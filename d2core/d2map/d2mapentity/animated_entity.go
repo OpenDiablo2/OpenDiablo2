@@ -50,9 +50,7 @@ func (ae *AnimatedEntity) Render(target d2interface.Surface) {
 		ae.highlight = false
 	}
 
-	if err := ae.animation.Render(target); err != nil {
-		fmt.Printf("failed to render animated entity, err: %v\n", err)
-	}
+	ae.animation.Render(target)
 }
 
 // GetDirection returns the current facing direction of this entity.

@@ -7,8 +7,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
-	"github.com/hajimehoshi/ebiten/audio"
-	"github.com/hajimehoshi/ebiten/audio/wav"
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/wav"
 )
 
 const sampleRate = 44100
@@ -16,20 +16,14 @@ const sampleRate = 44100
 var _ d2interface.AudioProvider = &AudioProvider{} // Static check to confirm struct conforms to interface
 
 // CreateAudio creates an instance of ebiten's audio provider
-func CreateAudio(am *d2asset.AssetManager) (*AudioProvider, error) {
+func CreateAudio(am *d2asset.AssetManager) *AudioProvider {
 	result := &AudioProvider{
 		asset: am,
 	}
 
-	var err error
-	result.audioContext, err = audio.NewContext(sampleRate)
+	result.audioContext = audio.NewContext(sampleRate)
 
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
-
-	return result, nil
+	return result
 }
 
 // AudioProvider represents a provider capable of playing audio
@@ -51,10 +45,7 @@ func (eap *AudioProvider) PlayBGM(song string) {
 	eap.lastBgm = song
 
 	if song == "" && eap.bgmAudio != nil && eap.bgmAudio.IsPlaying() {
-		err := eap.bgmAudio.Pause()
-		if err != nil {
-			log.Print(err)
-		}
+		eap.bgmAudio.Pause()
 
 		return
 	}
@@ -95,11 +86,7 @@ func (eap *AudioProvider) PlayBGM(song string) {
 		panic(err)
 	}
 
-	err = eap.bgmAudio.Play()
-
-	if err != nil {
-		panic(err)
-	}
+	eap.bgmAudio.Play()
 }
 
 // LoadSound loads a sound affect so that it canb e played

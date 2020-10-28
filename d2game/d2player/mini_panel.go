@@ -89,13 +89,13 @@ func (m *miniPanel) Close() {
 	m.isOpen = false
 }
 
-func (m *miniPanel) Render(target d2interface.Surface) error {
+func (m *miniPanel) Render(target d2interface.Surface) {
 	if !m.isOpen {
-		return nil
+		return
 	}
 
 	if err := m.container.SetCurrentFrame(0); err != nil {
-		return err
+		return
 	}
 
 	width, height := target.GetSize()
@@ -104,9 +104,7 @@ func (m *miniPanel) Render(target d2interface.Surface) error {
 
 	m.container.SetPosition(x, y)
 
-	if err := m.container.Render(target); err != nil {
-		return err
-	}
+	m.container.Render(target)
 
 	buttonWidth, _ := m.button.GetCurrentFrameSize()
 	buttonWidth++
@@ -117,22 +115,17 @@ func (m *miniPanel) Render(target d2interface.Surface) error {
 		}
 
 		if err := m.button.SetCurrentFrame(j); err != nil {
-			return err
+			return
 		}
 
 		offsetX := buttonOffsetX + (buttonWidth * i)
 		x, y := halfW+offsetX, height+buttonOffsetY
 
 		m.button.SetPosition(x, y)
-
-		if err := m.button.Render(target); err != nil {
-			return err
-		}
+		m.button.Render(target)
 
 		j += 2
 	}
-
-	return nil
 }
 
 func (m *miniPanel) isInRect(x, y int) bool {

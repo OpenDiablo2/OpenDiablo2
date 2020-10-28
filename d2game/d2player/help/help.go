@@ -602,10 +602,7 @@ func (h *Overlay) Render(target d2interface.Surface) error {
 	}
 
 	for _, f := range h.frames {
-		err := f.Render(target)
-		if err != nil {
-			return err
-		}
+		f.Render(target)
 	}
 
 	for _, t := range h.text {

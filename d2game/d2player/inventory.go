@@ -2,6 +2,7 @@ package d2player
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
@@ -158,20 +159,18 @@ func (g *Inventory) Load() {
 }
 
 // Render draws the inventory onto the given surface
-func (g *Inventory) Render(target d2interface.Surface) error {
+func (g *Inventory) Render(target d2interface.Surface) {
 	if !g.isOpen {
-		return nil
+		return
 	}
 
-	if err := g.renderFrame(target); err != nil {
-		return err
+	err := g.renderFrame(target)
+	if err != nil {
+		log.Println(err)
 	}
 
 	g.grid.Render(target)
-
 	g.renderItemHover(target)
-
-	return nil
 }
 
 func (g *Inventory) renderFrame(target d2interface.Surface) error {
@@ -197,10 +196,7 @@ func (g *Inventory) renderFrame(target d2interface.Surface) error {
 		w, h := g.panel.GetCurrentFrameSize()
 
 		g.panel.SetPosition(x, y+h)
-
-		if err := g.panel.Render(target); err != nil {
-			return err
-		}
+		g.panel.Render(target)
 
 		switch frame {
 		case frameInventoryTopLeft:

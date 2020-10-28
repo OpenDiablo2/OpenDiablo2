@@ -6,13 +6,16 @@ import (
 	"image/color"
 	"math"
 
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
+
+// static check that we implement our interface
+var _ d2interface.Surface = &ebitenSurface{}
 
 const (
 	maxAlpha       = 0xff
@@ -135,7 +138,7 @@ func (s *ebitenSurface) PopN(n int) {
 }
 
 // Render renders the given surface
-func (s *ebitenSurface) Render(sfc d2interface.Surface) error {
+func (s *ebitenSurface) Render(sfc d2interface.Surface) {
 	opts := s.createDrawImageOptions()
 
 	if s.stateCurrent.brightness != 1 || s.stateCurrent.saturation != 1 {
@@ -144,11 +147,11 @@ func (s *ebitenSurface) Render(sfc d2interface.Surface) error {
 
 	s.handleStateEffect(opts)
 
-	return s.image.DrawImage(sfc.(*ebitenSurface).image, opts)
+	s.image.DrawImage(sfc.(*ebitenSurface).image, opts)
 }
 
 // Renders the section of the surface, given the bounds
-func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Rectangle) error {
+func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Rectangle) {
 	opts := s.createDrawImageOptions()
 
 	if s.stateCurrent.brightness != 0 {
@@ -157,7 +160,7 @@ func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Recta
 
 	s.handleStateEffect(opts)
 
-	return s.image.DrawImage(sfc.(*ebitenSurface).image.SubImage(bound).(*ebiten.Image), opts)
+	s.image.DrawImage(sfc.(*ebitenSurface).image.SubImage(bound).(*ebiten.Image), opts)
 }
 
 func (s *ebitenSurface) createDrawImageOptions() *ebiten.DrawImageOptions {
@@ -233,8 +236,8 @@ func (s *ebitenSurface) DrawRect(width, height int, fillColor color.Color) {
 }
 
 // Clear clears the entire surface, filling with the given color
-func (s *ebitenSurface) Clear(fillColor color.Color) error {
-	return s.image.Fill(fillColor)
+func (s *ebitenSurface) Clear(fillColor color.Color) {
+	s.image.Fill(fillColor)
 }
 
 // GetSize gets the size of the surface
@@ -248,8 +251,8 @@ func (s *ebitenSurface) GetDepth() int {
 }
 
 // ReplacePixels replaces pixels in the surface with the given pixels
-func (s *ebitenSurface) ReplacePixels(pixels []byte) error {
-	return s.image.ReplacePixels(pixels)
+func (s *ebitenSurface) ReplacePixels(pixels []byte) {
+	s.image.ReplacePixels(pixels)
 }
 
 // Screenshot returns an *image.RGBA of the surface
