@@ -44,8 +44,8 @@ func (b *Button) onMouseLeave(_ d2interface.MouseMoveEvent) bool {
 	return false
 }
 
-func (b *Button) render(target d2interface.Surface) error {
-	return target.Render(b.surfaces[b.state])
+func (b *Button) render(target d2interface.Surface) {
+	target.Render(b.surfaces[b.state])
 }
 
 func (b *Button) getSize() (width, height int) {

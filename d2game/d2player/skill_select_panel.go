@@ -5,7 +5,6 @@ import (
 	"log"
 	"sort"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -124,11 +123,7 @@ func (s *SkillPanel) Render(target d2interface.Surface) error {
 		rowOffsetY := skillPanelOffsetY - (renderedRows * skillIconHeight)
 
 		target.PushTranslation(startX, rowOffsetY)
-
-		if err := target.Render(skillListRow.cachedImage); err != nil {
-			return err
-		}
-
+		target.Render(skillListRow.cachedImage)
 		target.Pop()
 
 		renderedRows++
@@ -222,11 +217,7 @@ func (s *SkillPanel) generateSkillRowImageCache() error {
 }
 
 func (s *SkillPanel) createSkillListImage(skillsListRow *SkillListRow) (d2interface.Surface, error) {
-	surface, err := s.renderer.NewSurface(len(skillsListRow.Skills)*skillIconWidth, skillIconHeight, d2enum.FilterNearest)
-
-	if err != nil {
-		return nil, err
-	}
+	surface := s.renderer.NewSurface(len(skillsListRow.Skills)*skillIconWidth, skillIconHeight)
 
 	lastSkillResourcePath := d2resource.GenericSkills
 	skillSprite, _ := s.ui.NewSprite(s.getSkillResourceByClass(""), d2resource.PaletteSky)
@@ -250,11 +241,7 @@ func (s *SkillPanel) createSkillListImage(skillsListRow *SkillListRow) (d2interf
 		}
 
 		surface.PushTranslation(idx*skillIconWidth, 50)
-
-		if err := skillSprite.Render(surface); err != nil {
-			return nil, err
-		}
-
+		skillSprite.Render(surface)
 		surface.Pop()
 	}
 

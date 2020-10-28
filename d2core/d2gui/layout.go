@@ -3,7 +3,6 @@ package d2gui
 import (
 	"errors"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -48,6 +47,9 @@ const (
 	PositionTypeVertical
 	PositionTypeHorizontal
 )
+
+// static check that Layout implements a widget
+var _ widget = &Layout{}
 
 // Layout is a gui element container which will automatically position/align gui elements.
 // Layouts are gui elements as well, so they can be nested in other layouts.
@@ -179,7 +181,7 @@ func (l *Layout) Clear() {
 	l.entries = nil
 }
 
-func (l *Layout) render(target d2interface.Surface) error {
+func (l *Layout) render(target d2interface.Surface) {
 	l.AdjustEntryPlacement()
 
 	for _, entry := range l.entries {
@@ -187,18 +189,14 @@ func (l *Layout) render(target d2interface.Surface) error {
 			continue
 		}
 
-		if err := l.renderEntry(entry, target); err != nil {
-			return err
-		}
+		l.renderEntry(entry, target)
 
 		if layoutDebug {
 			if err := l.renderEntryDebug(entry, target); err != nil {
-				return err
+				return
 			}
 		}
 	}
-
-	return nil
 }
 
 func (l *Layout) advance(elapsed float64) error {
@@ -211,11 +209,11 @@ func (l *Layout) advance(elapsed float64) error {
 	return nil
 }
 
-func (l *Layout) renderEntry(entry *layoutEntry, target d2interface.Surface) error {
+func (l *Layout) renderEntry(entry *layoutEntry, target d2interface.Surface) {
 	target.PushTranslation(entry.x, entry.y)
 	defer target.Pop()
 
-	return entry.widget.render(target)
+	entry.widget.render(target)
 }
 
 func (l *Layout) renderEntryDebug(entry *layoutEntry, target d2interface.Surface) error {
@@ -471,10 +469,7 @@ func (l *Layout) createButton(renderer d2interface.Renderer, text string,
 	surfaces := make([]d2interface.Surface, surfaceCount)
 
 	for i := 0; i < surfaceCount; i++ {
-		surface, surfaceErr := renderer.NewSurface(buttonWidth, buttonHeight, d2enum.FilterNearest)
-		if surfaceErr != nil {
-			return nil, surfaceErr
-		}
+		surface := renderer.NewSurface(buttonWidth, buttonHeight)
 
 		segX, segY, frame := config.segmentsX, config.segmentsY, i
 		if segErr := renderSegmented(animation, segX, segY, frame, surface); segErr != nil {
@@ -492,7 +487,7 @@ func (l *Layout) createButton(renderer d2interface.Renderer, text string,
 		}
 
 		surface.PushTranslation(textX+textOffsetX, textY+textOffsetY)
-		surfaceErr = font.RenderText(text, surface)
+		surfaceErr := font.RenderText(text, surface)
 		surface.Pop()
 
 		if surfaceErr != nil {

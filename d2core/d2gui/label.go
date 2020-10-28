@@ -3,7 +3,6 @@ package d2gui
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
@@ -35,8 +34,8 @@ func createLabel(renderer d2interface.Renderer, text string, font *d2asset.Font)
 	return label
 }
 
-func (l *Label) render(target d2interface.Surface) error {
-	return target.Render(l.surface)
+func (l *Label) render(target d2interface.Surface) {
+	target.Render(l.surface)
 }
 
 func (l *Label) getSize() (width, height int) {
@@ -60,10 +59,7 @@ func (l *Label) SetText(text string) error {
 func (l *Label) setText(text string) error {
 	width, height := l.font.GetTextMetrics(text)
 
-	surface, err := l.renderer.NewSurface(width, height, d2enum.FilterNearest)
-	if err != nil {
-		return err
-	}
+	surface := l.renderer.NewSurface(width, height)
 
 	if err := l.font.RenderText(text, surface); err != nil {
 		return err

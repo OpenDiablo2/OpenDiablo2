@@ -100,20 +100,13 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord) {
 
 		tileYOffset := d2math.AbsInt32(tileYMinimum)
 		tileHeight := d2math.AbsInt32(tileData[i].Height)
-		image, err := mr.renderer.NewSurface(int(tileData[i].Width), int(tileHeight), d2enum.FilterNearest)
-
-		if err != nil {
-			log.Print(err)
-		}
+		image := mr.renderer.NewSurface(int(tileData[i].Width), int(tileHeight))
 
 		indexData := make([]byte, tileData[i].Width*tileHeight)
 		d2dt1.DecodeTileGfxData(tileData[i].Blocks, &indexData, tileYOffset, tileData[i].Width)
 		pixels := d2util.ImgIndexToRGBA(indexData, mr.palette)
 
-		err = image.ReplacePixels(pixels)
-		if err != nil {
-			log.Print(err)
-		}
+		image.ReplacePixels(pixels)
 
 		mr.setImageCacheRecord(tile.Style, tile.Sequence, 0, tileIndex, image)
 	}
@@ -151,19 +144,13 @@ func (mr *MapRenderer) generateShadowCache(tile *d2ds1.FloorShadowRecord) {
 		return
 	}
 
-	image, err := mr.renderer.NewSurface(int(tileData.Width), tileHeight, d2enum.FilterNearest)
-	if err != nil {
-		log.Print(err)
-	}
+	image := mr.renderer.NewSurface(int(tileData.Width), tileHeight)
 
 	indexData := make([]byte, tileData.Width*int32(tileHeight))
 	d2dt1.DecodeTileGfxData(tileData.Blocks, &indexData, tileYOffset, tileData.Width)
 	pixels := d2util.ImgIndexToRGBA(indexData, mr.palette)
 
-	err = image.ReplacePixels(pixels)
-	if err != nil {
-		log.Print(err)
-	}
+	image.ReplacePixels(pixels)
 
 	mr.setImageCacheRecord(tile.Style, tile.Sequence, d2enum.TileShadow, tile.RandomIndex, image)
 }
@@ -222,10 +209,7 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord) {
 		return
 	}
 
-	image, err := mr.renderer.NewSurface(tileSurfaceWidth, int(realHeight), d2enum.FilterNearest)
-	if err != nil {
-		log.Print(err)
-	}
+	image := mr.renderer.NewSurface(tileSurfaceWidth, int(realHeight))
 
 	indexData := make([]byte, tileSurfaceWidth*realHeight)
 
@@ -237,9 +221,7 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord) {
 
 	pixels := d2util.ImgIndexToRGBA(indexData, mr.palette)
 
-	if err := image.ReplacePixels(pixels); err != nil {
-		log.Panicf(err.Error())
-	}
+	image.ReplacePixels(pixels)
 
 	mr.setImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tile.RandomIndex, image)
 }

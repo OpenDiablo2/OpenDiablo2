@@ -2,8 +2,8 @@
 package ebiten
 
 import (
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/inpututil"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )

@@ -239,7 +239,7 @@ const (
 )
 
 // Render renders the Map Engine Test screen
-func (met *MapEngineTest) Render(screen d2interface.Surface) error {
+func (met *MapEngineTest) Render(screen d2interface.Surface) {
 	met.mapRenderer.Render(screen)
 
 	screen.PushTranslation(0, lineNormalOffsetY)
@@ -266,10 +266,8 @@ func (met *MapEngineTest) Render(screen d2interface.Surface) error {
 	defer screen.Pop()
 
 	if err := met.renderTileInfo(screen); err != nil {
-		return err
+		return
 	}
-
-	return nil
 }
 
 func (met *MapEngineTest) renderTileInfo(screen d2interface.Surface) error {

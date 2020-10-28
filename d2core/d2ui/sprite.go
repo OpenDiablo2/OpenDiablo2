@@ -29,30 +29,27 @@ func (ui *UIManager) NewSprite(animationPath, palettePath string) (*Sprite, erro
 		return nil, fmt.Errorf(errNoAnimation)
 	}
 
-	err = animation.BindRenderer(ui.renderer)
-	if err != nil {
-		return nil, err
-	}
+	animation.BindRenderer(ui.renderer)
 
 	return &Sprite{animation: animation}, nil
 }
 
 // Render renders the sprite on the given surface
-func (s *Sprite) Render(target d2interface.Surface) error {
+func (s *Sprite) Render(target d2interface.Surface) {
 	_, frameHeight := s.animation.GetCurrentFrameSize()
 
 	target.PushTranslation(s.x, s.y-frameHeight)
 	defer target.Pop()
 
-	return s.animation.Render(target)
+	s.animation.Render(target)
 }
 
 // RenderSection renders the section of the sprite enclosed by bounds
-func (s *Sprite) RenderSection(sfc d2interface.Surface, bound image.Rectangle) error {
+func (s *Sprite) RenderSection(sfc d2interface.Surface, bound image.Rectangle) {
 	sfc.PushTranslation(s.x, s.y-bound.Dy())
 	defer sfc.Pop()
 
-	return s.animation.RenderSection(sfc, bound)
+	s.animation.RenderSection(sfc, bound)
 }
 
 // RenderSegmented renders a sprite that is internally segmented as frames
@@ -69,12 +66,8 @@ func (s *Sprite) RenderSegmented(target d2interface.Surface, segmentsX, segments
 			}
 
 			target.PushTranslation(s.x+currentX, s.y+currentY)
-			err := s.animation.Render(target)
+			s.animation.Render(target)
 			target.Pop()
-
-			if err != nil {
-				return err
-			}
 
 			frameWidth, frameHeight := s.GetCurrentFrameSize()
 			maxFrameHeight = d2math.MaxInt(maxFrameHeight, frameHeight)

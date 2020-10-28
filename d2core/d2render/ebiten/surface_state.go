@@ -3,7 +3,7 @@ package ebiten
 import (
 	"image/color"
 
-	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 )

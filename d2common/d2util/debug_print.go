@@ -2,11 +2,10 @@ package d2util
 
 import (
 	"image"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util/assets"
 
-	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 const (
@@ -19,10 +18,7 @@ var DebugPrinter = NewDebugPrinter() //nolint:gochecknoglobals // currently glob
 
 // NewDebugPrinter creates a new debug printer
 func NewDebugPrinter() *GlyphPrinter {
-	img, err := ebiten.NewImageFromImage(assets.CreateTextImage(), ebiten.FilterDefault)
-	if err != nil {
-		return nil
-	}
+	img := ebiten.NewImageFromImage(assets.CreateTextImage())
 
 	printer := &GlyphPrinter{
 		glyphImageTable: img,
@@ -91,11 +87,7 @@ func (p *GlyphPrinter) drawDebugText(target *ebiten.Image, str string, ox, oy in
 		op.GeoM.Translate(float64(ox+1), float64(oy))
 
 		op.CompositeMode = ebiten.CompositeModeLighter
-		err := target.DrawImage(s, op)
-
-		if err != nil {
-			log.Print(err)
-		}
+		target.DrawImage(s, op)
 
 		x += cw
 	}

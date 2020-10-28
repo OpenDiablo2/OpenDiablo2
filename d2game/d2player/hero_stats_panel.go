@@ -174,34 +174,24 @@ func (s *HeroStatsPanel) SetOnCloseCb(cb func()) {
 }
 
 // Render renders the hero status panel
-func (s *HeroStatsPanel) Render(target d2interface.Surface) error {
+func (s *HeroStatsPanel) Render(target d2interface.Surface) {
 	if !s.isOpen {
-		return nil
+		return
 	}
 
 	if s.staticMenuImageCache == nil {
 		frameWidth, frameHeight := s.frame.GetFrameBounds()
 		framesCount := s.frame.GetFrameCount()
-		surface, err := s.renderer.NewSurface(frameWidth*framesCount, frameHeight*framesCount, d2enum.FilterNearest)
-
-		if err != nil {
-			return err
-		}
+		surface := s.renderer.NewSurface(frameWidth*framesCount, frameHeight*framesCount)
 
 		s.staticMenuImageCache = &surface
 
-		if err := s.renderStaticMenu(*s.staticMenuImageCache); err != nil {
-			return err
-		}
+		s.renderStaticMenu(*s.staticMenuImageCache)
 	}
 
-	if err := target.Render(*s.staticMenuImageCache); err != nil {
-		return err
-	}
+	target.Render(*s.staticMenuImageCache)
 
 	s.renderStatValues(target)
-
-	return nil
 }
 
 func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) error {
@@ -249,9 +239,7 @@ func (s *HeroStatsPanel) renderStaticPanelFrames(target d2interface.Surface) err
 			s.panel.SetPosition(currentX-w, currentY+h)
 		}
 
-		if err := s.panel.Render(target); err != nil {
-			return err
-		}
+		s.panel.Render(target)
 	}
 
 	return nil
