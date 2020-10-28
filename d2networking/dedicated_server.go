@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server"
 )
 
@@ -17,52 +16,59 @@ const (
 StartDedicatedServer Checks whether or not we should start a server i.e the -listen parameter has been passed in, and if so launches a
 server hosted to the network, in theory. (this is still WIP)
 */
-func StartDedicatedServer(manager *d2asset.AssetManager, in, out chan byte, log chan string) (e error) {
+func StartDedicatedServer(manager *d2asset.AssetManager, in chan byte, log chan string) (started bool, e error) {
 	var listen bool
 
-	var maxPlayers int = 3
+	maxPlayers := 3
 
 	for argCount, arg := range os.Args {
-		if arg == "-listen" {
+		if arg == "--listen" || arg == "-L" {
 			listen = true
 		}
 
-		if arg == "-maxplayers" {
+		if arg == "--maxplayers" || arg == "-p" {
 			max, _ := strconv.ParseInt(os.Args[argCount+1], 10, 32)
 			maxPlayers = int(max)
 		}
 	}
 
 	if !listen {
-		return nil
+		return false, nil
 	}
 
-	srvAsset, err := d2asset.NewAssetManager(d2config.Config)
+	server, err := d2server.NewGameServer(manager, true, maxPlayers)
+
 	if err != nil {
-		panic(err)
+		return false, err
 	}
 
-	server, _ := d2server.NewGameServer(srvAsset, true, maxPlayers)
-	serverErr := server.Start()
+	err = server.Start()
 
-	if serverErr != nil {
-		panic(err)
+	if err != nil {
+		return false, err
 	}
 
-	// I have done the messaging with a bitmask for memory efficiency, this can easilly be translated to pretty error
+	// I have done the messaging with a bitmask for memory efficiency, this can easily be translated to pretty error
 	// messages later, sue me.
-	for {
-		msgIn := <-in
-		/* For those who do not know an AND operation denoted by & discards bits which do not line up so for instance:
-		01011001 & 00000001 = 00000001 or 1
-		00100101 & 00000010 = 00000000 or 0
-		01100110 & 01100000 = 01100000 or 96
-		these can be used to have multiple messages in just 8 bits, that's a quarter of a rune in go!
-		*/
-		if (msgIn & stopServer) == stopServer {
-			break
-		}
-	}
+	go func() {
+		for {
+			msgIn := <-in
+			/* For those who do not know an AND operation denoted by & discards bits which do not line up so for instance:
+			01011001 & 00000001 = 00000001 or 1
+			00100101 & 00000010 = 00000000 or 0
+			01100110 & 01100000 = 01100000 or 96
+			these can be used to have multiple messages in just 8 bits, that's a quarter of a rune in go!
+			*/
+			if (msgIn & stopServer) == stopServer {
+				log <- "Stopping server"
 
-	return nil
+				server.Stop()
+				log <- "Exiting..."
+
+				os.Exit(0)
+			}
+		}
+	}()
+
+	return true, nil
 }
