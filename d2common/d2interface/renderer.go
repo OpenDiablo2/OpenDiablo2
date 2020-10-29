@@ -18,4 +18,5 @@ type Renderer interface {
 	GetVSyncEnabled() bool
 	GetCursorPos() (int, int)
 	CurrentFPS() float64
+	ShowPanicScreen(message string)
 }

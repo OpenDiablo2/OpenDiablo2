@@ -25,19 +25,26 @@ func main() {
 	log.SetFlags(log.Lshortfile)
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
 
-	if err := d2config.Load(); err != nil {
-		panic(err)
-	}
+	// Attempt to load the configuration file
+	configError := d2config.Load()
 
-	// NewAssetManager our providers
+	// Create our renderer
 	renderer, err := ebiten.CreateRenderer()
 	if err != nil {
 		panic(err)
 	}
 
+	// If we failed to load our config, lets show the boot panic screen
+	if configError != nil {
+		renderer.ShowPanicScreen(configError.Error())
+		return
+	}
+
+	// Create the asset manager
 	asset, err := d2asset.NewAssetManager(d2config.Config)
 	if err != nil {
-		panic(err)
+		renderer.ShowPanicScreen(err.Error())
+		return
 	}
 
 	audio := ebiten2.CreateAudio(asset)
@@ -46,18 +53,21 @@ func main() {
 
 	term, err := d2term.New(inputManager)
 	if err != nil {
-		log.Fatal(err)
+		renderer.ShowPanicScreen(err.Error())
+		return
 	}
 
 	err = asset.BindTerminalCommands(term)
 	if err != nil {
-		log.Fatal(err)
+		renderer.ShowPanicScreen(err.Error())
+		return
 	}
 
 	scriptEngine := d2script.CreateScriptEngine()
 
 	app := d2app.Create(GitBranch, GitCommit, inputManager, term, scriptEngine, audio, renderer, asset)
 	if err := app.Run(); err != nil {
-		log.Fatal(err)
+		renderer.ShowPanicScreen(err.Error())
+		return
 	}
 }
