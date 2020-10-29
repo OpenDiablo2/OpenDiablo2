@@ -1709,7 +1709,7 @@ func (g *GameControls) bindLearnSkillsCommand(term d2interface.Terminal) error {
 		learnedSkillsCount := 0
 
 		for _, skillDetailRecord := range g.asset.Records.Skill.Details {
-			if skillDetailRecord.Charclass != classToken && skillDetailRecord.Charclass != "" {
+			if skillDetailRecord.Charclass != classToken {
 				continue
 			}
 

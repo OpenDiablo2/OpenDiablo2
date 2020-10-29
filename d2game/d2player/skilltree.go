@@ -3,6 +3,7 @@ package d2player
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
@@ -27,6 +28,9 @@ const (
 	skillIconYOff  = 59
 	skillIconDistX = 69
 	skillIconDistY = 68
+
+	skillLabelXOffset = 49
+	skillLabelYOffset = -4
 
 	skillCloseButtonXLeft   = 416
 	skillCloseButtonXMiddle = 501
@@ -67,6 +71,11 @@ const (
 	skillTreePanelY = 64
 )
 
+const (
+	skillIconGreySat    = 0.2
+	skillIconGreyBright = 0.44
+)
+
 type skillTreeTab struct {
 	buttonText      string
 	button          *d2ui.Button
@@ -87,23 +96,24 @@ type skillTreeHeroTypeResources struct {
 }
 
 type skillTree struct {
-	resources    *skillTreeHeroTypeResources
-	asset        *d2asset.AssetManager
-	renderer     d2interface.Renderer
-	guiManager   *d2gui.GuiManager
-	uiManager    *d2ui.UIManager
-	layout       *d2gui.Layout
-	skills       map[int]*d2hero.HeroSkill
-	heroClass    d2enum.Hero
-	frame        *d2ui.UIFrame
-	availSPLabel *d2ui.Label
-	closeButton  *d2ui.Button
-	tab          [numTabs]*skillTreeTab
-	isOpen       bool
-	originX      int
-	originY      int
-	selectedTab  int
-	onCloseCb    func()
+	resources     *skillTreeHeroTypeResources
+	asset         *d2asset.AssetManager
+	renderer      d2interface.Renderer
+	guiManager    *d2gui.GuiManager
+	uiManager     *d2ui.UIManager
+	layout        *d2gui.Layout
+	skills        map[int]*d2hero.HeroSkill
+	heroClass     d2enum.Hero
+	frame         *d2ui.UIFrame
+	availSPLabel  *d2ui.Label
+	skillLvlLabel *d2ui.Label
+	closeButton   *d2ui.Button
+	tab           [numTabs]*skillTreeTab
+	isOpen        bool
+	originX       int
+	originY       int
+	selectedTab   int
+	onCloseCb     func()
 }
 
 func newSkillTree(
@@ -138,6 +148,8 @@ func (s *skillTree) load() {
 	s.closeButton = s.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
 	s.closeButton.SetVisible(false)
 	s.closeButton.OnActivated(func() { s.Close() })
+
+	s.skillLvlLabel = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
 
 	s.setHeroTypeResourcePath()
 	s.loadForHeroType()
@@ -501,24 +513,54 @@ func (s *skillTree) renderTab(target d2interface.Surface, tab int) error {
 	return nil
 }
 
-func (s *skillTree) renderSkillIcons(target d2interface.Surface, tab int) error {
+func (s *skillTree) renderSkillIcon(target d2interface.Surface, skill *d2hero.HeroSkill) error {
 	skillIcon := s.resources.skillIcon
+	if err := skillIcon.SetCurrentFrame(skill.IconCel); err != nil {
+		return err
+	}
 
+	x := skillIconXOff + skill.SkillColumn*skillIconDistX
+	y := skillIconYOff + skill.SkillRow*skillIconDistY
+
+	skillIcon.SetPosition(x, y)
+
+	if skill.SkillPoints == 0 {
+		target.PushSaturation(skillIconGreySat)
+		defer target.Pop()
+
+		target.PushBrightness(skillIconGreyBright)
+		defer target.Pop()
+	}
+
+	skillIcon.Render(target)
+
+	return nil
+}
+
+func (s *skillTree) renderSkillIconLabel(target d2interface.Surface, skill *d2hero.HeroSkill) {
+	if skill.SkillPoints == 0 {
+		return
+	}
+
+	s.skillLvlLabel.SetText(strconv.Itoa(skill.SkillPoints))
+	x := skillIconXOff + skill.SkillColumn*skillIconDistX + skillLabelXOffset
+	y := skillIconYOff + skill.SkillRow*skillIconDistY + skillLabelYOffset
+	s.skillLvlLabel.SetPosition(x, y)
+	s.skillLvlLabel.Render(target)
+}
+
+func (s *skillTree) renderSkillIcons(target d2interface.Surface, tab int) error {
 	for idx := range s.skills {
 		skill := s.skills[idx]
 		if skill.SkillPage != tab+1 {
 			continue
 		}
 
-		if err := skillIcon.SetCurrentFrame(skill.IconCel); err != nil {
+		if err := s.renderSkillIcon(target, skill); err != nil {
 			return err
 		}
 
-		x := skillIconXOff + skill.SkillColumn*skillIconDistX
-		y := skillIconYOff + skill.SkillRow*skillIconDistY
-
-		skillIcon.SetPosition(x, y)
-		skillIcon.Render(target)
+		s.renderSkillIconLabel(target, skill)
 	}
 
 	return nil
