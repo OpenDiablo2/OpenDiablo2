@@ -2,6 +2,11 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -45,6 +50,28 @@ func main() {
 	if err != nil {
 		renderer.ShowPanicScreen(err.Error())
 		return
+	}
+
+	srvChanIn := make(chan byte)
+	srvChanLog := make(chan string)
+	started, srvErr := d2networking.StartDedicatedServer(asset, srvChanIn, srvChanLog)
+
+	if srvErr != nil {
+		panic(err)
+	}
+
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM) // This traps Control-c to safely shut down the server
+
+	go func() {
+		<-c
+		srvChanIn <- 0b1
+	}()
+
+	if started {
+		for data := range srvChanLog {
+			log.Println(data)
+		}
 	}
 
 	audio := ebiten2.CreateAudio(asset)
