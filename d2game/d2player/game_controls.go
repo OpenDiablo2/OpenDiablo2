@@ -1348,7 +1348,7 @@ func (g *GameControls) renderHealthTooltip(target d2interface.Surface) {
 	strPanelHealth := fmt.Sprintf(fmtHealth, healthCurr, healthMax)
 
 	// Display current hp and mana stats hpGlobe or manaGlobe region is clicked
-	if !g.actionableRegions[hpGlobe].rect.IsInRect(mx, my) || g.hpStatsIsVisible {
+	if !(g.actionableRegions[hpGlobe].rect.IsInRect(mx, my) || g.hpStatsIsVisible) {
 		return
 	}
 
@@ -1365,7 +1365,7 @@ func (g *GameControls) renderManaTooltip(target d2interface.Surface) {
 	manaCurr, manaMax := g.hero.Stats.Mana, g.hero.Stats.MaxMana
 	strPanelMana := fmt.Sprintf(fmtMana, manaCurr, manaMax)
 
-	if !g.actionableRegions[manaGlobe].rect.IsInRect(mx, my) || g.manaStatsIsVisible {
+	if !(g.actionableRegions[manaGlobe].rect.IsInRect(mx, my) || g.manaStatsIsVisible) {
 		return
 	}
 
