@@ -2,6 +2,7 @@
 package ebiten
 
 import (
+	"io"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -31,6 +32,7 @@ type AudioProvider struct {
 	asset        *d2asset.AssetManager
 	audioContext *audio.Context // The Audio context
 	bgmAudio     *audio.Player  // The audio player
+	bgmStream    *wav.Stream
 	lastBgm      string
 	sfxVolume    float64
 	bgmVolume    float64
@@ -46,7 +48,6 @@ func (eap *AudioProvider) PlayBGM(song string) {
 
 	if song == "" && eap.bgmAudio != nil && eap.bgmAudio.IsPlaying() {
 		eap.bgmAudio.Pause()
-
 		return
 	}
 
@@ -64,13 +65,17 @@ func (eap *AudioProvider) PlayBGM(song string) {
 		panic(err)
 	}
 
-	d, err := wav.Decode(eap.audioContext, audioStream)
+	if _, err = audioStream.Seek(0, io.SeekStart); err != nil {
+		log.Fatal(err)
+	}
+
+	eap.bgmStream, err = wav.Decode(eap.audioContext, audioStream)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	s := audio.NewInfiniteLoop(d, d.Length())
+	s := audio.NewInfiniteLoop(eap.bgmStream, eap.bgmStream.Length())
 	eap.bgmAudio, err = audio.NewPlayer(eap.audioContext, s)
 
 	if err != nil {
