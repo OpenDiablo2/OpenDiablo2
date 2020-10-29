@@ -2,9 +2,10 @@ package ebiten
 
 import (
 	"errors"
+	"image"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"image"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -70,6 +71,7 @@ func CreateRenderer() (*Renderer, error) {
 
 	if d2config.Config != nil {
 		config := d2config.Config
+
 		ebiten.SetCursorMode(ebiten.CursorModeHidden)
 		ebiten.SetFullscreen(config.FullScreen)
 		ebiten.SetRunnableOnUnfocused(config.RunInBackground)
