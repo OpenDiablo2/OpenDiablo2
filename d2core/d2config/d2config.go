@@ -2,9 +2,11 @@ package d2config
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"os"
 	"path"
+	"strings"
 )
 
 // Config holds the configuration from config.json
@@ -58,12 +60,20 @@ func (c *Configuration) Load() error {
 			return err
 		}
 
+		if err := verifyMpqFileReferences(); err != nil {
+			return err
+		}
+
 		return nil
 	}
 
 	log.Println("failed to load configuration file, saving default configuration...")
 
 	Config = defaultConfig()
+
+	if err := verifyMpqFileReferences(); err != nil {
+		return err
+	}
 
 	return Config.Save()
 }
@@ -105,4 +115,30 @@ func defaultConfigPath() string {
 
 func localConfigPath() string {
 	return path.Join(path.Dir(os.Args[0]), "config.json")
+}
+
+func verifyMpqFileReferences() error {
+	badFiles := []string{}
+
+	for fileIdx := range Config.MpqLoadOrder {
+		actualPath := path.Join(Config.MpqPath, Config.MpqLoadOrder[fileIdx])
+		info, err := os.Stat(actualPath)
+
+		if !os.IsNotExist(err) {
+			continue
+		}
+
+		if info != nil && !info.IsDir() {
+			continue
+		}
+
+		badFiles = append(badFiles, actualPath)
+	}
+
+	if len(badFiles) > 0 {
+		return errors.New("The following MPQ file(s) could not be found:\n" + strings.Join(badFiles, "\n") +
+			"\n\nPlease check your configuration file located at:\n" + defaultConfigPath())
+	}
+
+	return nil
 }

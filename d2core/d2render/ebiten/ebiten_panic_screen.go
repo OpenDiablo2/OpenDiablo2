@@ -17,6 +17,7 @@ func CreatePanicScreen(errorMessage string) *PanicScreen {
 		errorMessage: errorMessage,
 	}
 
+	ebiten.SetWindowTitle("OpenDiablo 2 - PANIC SCREEN")
 	ebiten.SetWindowResizable(true)
 
 	return result
