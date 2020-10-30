@@ -372,6 +372,8 @@ func handleClientConnection(gameServer *GameServer, client ClientConnection, x, 
 		playerState.Stats,
 		playerState.Skills,
 		playerState.Equipment,
+		playerState.LeftSkill,
+		playerState.RightSkill,
 	)
 
 	for _, connection := range gameServer.connections {
@@ -397,6 +399,8 @@ func handleClientConnection(gameServer *GameServer, client ClientConnection, x, 
 				conPlayerState.Stats,
 				conPlayerState.Skills,
 				conPlayerState.Equipment,
+				conPlayerState.LeftSkill,
+				conPlayerState.RightSkill,
 			),
 		)
 
@@ -414,6 +418,7 @@ func OnClientDisconnected(client ClientConnection) {
 }
 
 // OnPacketReceived is called by the local client to 'send' a packet to the server.
+// nolint:gocyclo // switch statement on packet type makes sense, no need to change
 func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) error {
 	if singletonServer == nil {
 		return errors.New("singleton server is nil")

@@ -14,29 +14,34 @@ import (
 // It is sent by the server to create the entity for a newly connected
 // player on a client.
 type AddPlayerPacket struct {
-	ID        string                         `json:"id"`
-	Name      string                         `json:"name"`
-	X         int                            `json:"x"`
-	Y         int                            `json:"y"`
-	HeroType  d2enum.Hero                    `json:"hero"`
-	Equipment d2inventory.CharacterEquipment `json:"equipment"`
-	Stats     *d2hero.HeroStatsState         `json:"heroStats"`
-	Skills    map[int]*d2hero.HeroSkill      `json:"heroSkills"`
+	ID         string                         `json:"id"`
+	Name       string                         `json:"name"`
+	X          int                            `json:"x"`
+	Y          int                            `json:"y"`
+	HeroType   d2enum.Hero                    `json:"hero"`
+	Equipment  d2inventory.CharacterEquipment `json:"equipment"`
+	Stats      *d2hero.HeroStatsState         `json:"heroStats"`
+	Skills     map[int]*d2hero.HeroSkill      `json:"heroSkills"`
+	LeftSkill  int                            `json:"leftSkill"`
+	RightSkill int                            `json:"rightSkill"`
 }
 
 // CreateAddPlayerPacket returns a NetPacket which declares an
 // AddPlayerPacket with the data in given parameters.
 func CreateAddPlayerPacket(id, name string, x, y int, heroType d2enum.Hero,
-	stats *d2hero.HeroStatsState, skills map[int]*d2hero.HeroSkill, equipment d2inventory.CharacterEquipment) NetPacket {
+	stats *d2hero.HeroStatsState, skills map[int]*d2hero.HeroSkill, equipment d2inventory.CharacterEquipment,
+	leftSkill int, rightSkill int) NetPacket {
 	addPlayerPacket := AddPlayerPacket{
-		ID:        id,
-		Name:      name,
-		X:         x,
-		Y:         y,
-		HeroType:  heroType,
-		Equipment: equipment,
-		Stats:     stats,
-		Skills:    skills,
+		ID:         id,
+		Name:       name,
+		X:          x,
+		Y:          y,
+		HeroType:   heroType,
+		Equipment:  equipment,
+		Stats:      stats,
+		Skills:     skills,
+		LeftSkill:  leftSkill,
+		RightSkill: rightSkill,
 	}
 
 	b, err := json.Marshal(addPlayerPacket)

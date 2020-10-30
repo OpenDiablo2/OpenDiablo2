@@ -17,6 +17,6 @@ type HeroState struct {
 	Skills     map[int]*HeroSkill             `json:"skills"`
 	X          float64                        `json:"x"`
 	Y          float64                        `json:"y"`
-	LeftSkill  *HeroSkill                     `json:"leftSkill"`
-	RightSkill *HeroSkill                     `json:"rightSkill"`
+	LeftSkill  int                            `json:"leftSkill"`
+	RightSkill int                            `json:"rightSkill"`
 }

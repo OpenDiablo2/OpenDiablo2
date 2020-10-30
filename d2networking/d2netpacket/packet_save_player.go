@@ -2,24 +2,24 @@ package d2netpacket
 
 import (
 	"encoding/json"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
+	"log"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
-	"log"
 )
 
 // SavePlayerPacket has the actual selected left and right skill
 // the Server has to check if these skills are actually allowed for the Player
 type SavePlayerPacket struct {
-	LeftSkill  *d2hero.HeroSkill `json:"leftSkill"`
-	RightSkill *d2hero.HeroSkill `json:"rightSkill"`
+	LeftSkill  int `json:"leftSkill"`
+	RightSkill int `json:"rightSkill"`
 }
 
 // CreateSavePlayerPacket sends a packet which instructs the server to save the Player
 func CreateSavePlayerPacket(playerState *d2mapentity.Player) NetPacket {
 	ping := SavePlayerPacket{
-		LeftSkill:  playerState.LeftSkill,
-		RightSkill: playerState.RightSkill,
+		LeftSkill:  playerState.LeftSkill.ID,
+		RightSkill: playerState.RightSkill.ID,
 	}
 
 	b, err := json.Marshal(ping)

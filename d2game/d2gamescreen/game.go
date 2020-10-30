@@ -313,8 +313,8 @@ func (v *Game) OnPlayerMove(targetX, targetY float64) {
 	worldPosition := v.localPlayer.Position.World()
 
 	playerID, worldX, worldY := v.gameClient.PlayerID, worldPosition.X(), worldPosition.Y()
-	createPlayerPacket := d2netpacket.CreateMovePlayerPacket(playerID, worldX, worldY, targetX, targetY)
-	err := v.gameClient.SendPacketToServer(createPlayerPacket)
+	createMovePlayerPacket := d2netpacket.CreateMovePlayerPacket(playerID, worldX, worldY, targetX, targetY)
+	err := v.gameClient.SendPacketToServer(createMovePlayerPacket)
 
 	if err != nil {
 		fmt.Printf(moveErrStr, v.gameClient.PlayerID, targetX, targetY)
