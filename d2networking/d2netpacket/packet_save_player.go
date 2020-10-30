@@ -17,12 +17,12 @@ type SavePlayerPacket struct {
 
 // CreateSavePlayerPacket sends a packet which instructs the server to save the Player
 func CreateSavePlayerPacket(playerState *d2mapentity.Player) NetPacket {
-	ping := SavePlayerPacket{
+	savePlayerData := SavePlayerPacket{
 		LeftSkill:  playerState.LeftSkill.ID,
 		RightSkill: playerState.RightSkill.ID,
 	}
 
-	b, err := json.Marshal(ping)
+	b, err := json.Marshal(savePlayerData)
 	if err != nil {
 		log.Print(err)
 	}
@@ -33,7 +33,7 @@ func CreateSavePlayerPacket(playerState *d2mapentity.Player) NetPacket {
 	}
 }
 
-// UnmarshalSavePlayer unmarshals the given data to a SavePlayerPacket struct
+// UnmarshalSavePlayer unmarshalls the given data to a SavePlayerPacket struct
 func UnmarshalSavePlayer(packet []byte) (SavePlayerPacket, error) {
 	var p SavePlayerPacket
 	if err := json.Unmarshal(packet, &p); err != nil {
