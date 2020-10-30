@@ -70,12 +70,12 @@ func CreateCharacterSelect(
 ) (*CharacterSelect, error) {
 	playerStateFactory, err := d2hero.NewHeroStateFactory(asset)
 	if err != nil {
-		return &CharacterSelect{}, err
+		return nil, err
 	}
 
 	entityFactory, err := d2mapentity.NewMapEntityFactory(asset)
 	if err != nil {
-		return &CharacterSelect{}, err
+		return nil, err
 	}
 
 	return &CharacterSelect{
