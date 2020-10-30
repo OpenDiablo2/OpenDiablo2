@@ -69,12 +69,12 @@ func NewGameServer(asset *d2asset.AssetManager, networkServer bool,
 		maxConnections = []int{8}
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-
 	heroStateFactory, err := d2hero.NewHeroStateFactory(asset)
 	if err != nil {
 		return nil, err
 	}
+
+	ctx, cancel := context.WithCancel(context.Background())
 
 	gameServer := &GameServer{
 		ctx:               ctx,

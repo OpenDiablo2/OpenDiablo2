@@ -30,7 +30,7 @@ type AddPlayerPacket struct {
 // AddPlayerPacket with the data in given parameters.
 func CreateAddPlayerPacket(id, name string, x, y int, heroType d2enum.Hero,
 	stats *d2hero.HeroStatsState, skills map[int]*d2hero.HeroSkill, equipment d2inventory.CharacterEquipment,
-	leftSkill int, rightSkill int) NetPacket {
+	leftSkill, rightSkill int) NetPacket {
 	addPlayerPacket := AddPlayerPacket{
 		ID:         id,
 		Name:       name,
