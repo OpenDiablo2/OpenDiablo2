@@ -186,6 +186,10 @@ func (v *Game) OnUnload() error {
 		return err
 	}
 
+	if err := v.OnPlayerSave(); err != nil {
+		return err
+	}
+
 	if err := v.gameClient.Close(); err != nil {
 		return err
 	}
@@ -315,6 +319,18 @@ func (v *Game) OnPlayerMove(targetX, targetY float64) {
 	if err != nil {
 		fmt.Printf(moveErrStr, v.gameClient.PlayerID, targetX, targetY)
 	}
+}
+
+// OnPlayerSave instructs the server to save our player data
+func (v *Game) OnPlayerSave() error {
+	playerState := v.gameClient.Players[v.gameClient.PlayerID]
+	err := v.gameClient.SendPacketToServer(d2netpacket.CreateSavePlayerPacket(playerState))
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // OnPlayerCast sends the casting skill action to the server
