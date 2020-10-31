@@ -30,6 +30,7 @@ const (
 	ServerClosed                                         // Sent by the local host when it has closed the server
 	CastSkill                                            // Sent by client or server, indicates entity casting skill
 	SpawnItem                                            // Sent by server
+	SavePlayer                                           // Sent by the client, saves the player
 
 	UnknownPacketType = 666
 )
@@ -47,6 +48,7 @@ func (n NetPacketType) String() string {
 		ServerClosed:                    "ServerClosed",
 		CastSkill:                       "CastSkill",
 		SpawnItem:                       "SpawnItem",
+		SavePlayer:                      "SavePlayer",
 	}
 
 	return strings[n]

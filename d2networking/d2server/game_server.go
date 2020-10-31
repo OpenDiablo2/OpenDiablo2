@@ -50,6 +50,7 @@ type GameServer struct {
 	seed              int64
 	maxConnections    int
 	packetManagerChan chan []byte
+	heroStateFactory  *d2hero.HeroStateFactory
 }
 
 // https://github.com/OpenDiablo2/OpenDiablo2/issues/824
@@ -68,6 +69,11 @@ func NewGameServer(asset *d2asset.AssetManager, networkServer bool,
 		maxConnections = []int{8}
 	}
 
+	heroStateFactory, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	gameServer := &GameServer{
@@ -81,6 +87,7 @@ func NewGameServer(asset *d2asset.AssetManager, networkServer bool,
 		mapEngines:        make([]*d2mapengine.MapEngine, 0),
 		scriptEngine:      d2script.CreateScriptEngine(),
 		seed:              time.Now().UnixNano(),
+		heroStateFactory:  heroStateFactory,
 	}
 
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/827
@@ -365,6 +372,8 @@ func handleClientConnection(gameServer *GameServer, client ClientConnection, x, 
 		playerState.Stats,
 		playerState.Skills,
 		playerState.Equipment,
+		playerState.LeftSkill,
+		playerState.RightSkill,
 	)
 
 	for _, connection := range gameServer.connections {
@@ -390,6 +399,8 @@ func handleClientConnection(gameServer *GameServer, client ClientConnection, x, 
 				conPlayerState.Stats,
 				conPlayerState.Skills,
 				conPlayerState.Equipment,
+				conPlayerState.LeftSkill,
+				conPlayerState.RightSkill,
 			),
 		)
 
@@ -407,6 +418,7 @@ func OnClientDisconnected(client ClientConnection) {
 }
 
 // OnPacketReceived is called by the local client to 'send' a packet to the server.
+// nolint:gocyclo // switch statement on packet type makes sense, no need to change
 func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) error {
 	if singletonServer == nil {
 		return errors.New("singleton server is nil")
@@ -442,6 +454,20 @@ func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) err
 			if err != nil {
 				log.Printf("GameServer: error sending %T to client %s: %s", packet, player.GetUniqueID(), err)
 			}
+		}
+	case d2netpackettype.SavePlayer:
+		savePacket, err := d2netpacket.UnmarshalSavePlayer(packet.PacketData)
+		if err != nil {
+			return err
+		}
+
+		playerState := singletonServer.connections[client.GetUniqueID()].GetPlayerState()
+		playerState.LeftSkill = savePacket.LeftSkill
+		playerState.RightSkill = savePacket.RightSkill
+
+		err = singletonServer.heroStateFactory.Save(playerState)
+		if err != nil {
+			log.Printf("GameServer: error saving saving Player: %s", err)
 		}
 	default:
 		log.Printf("GameServer: received unknown packet %T", packet)

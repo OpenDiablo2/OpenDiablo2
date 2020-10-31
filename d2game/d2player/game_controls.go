@@ -801,7 +801,6 @@ func (g *GameControls) Load() {
 		log.Print(err)
 	}
 
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/799
 	genericSkillsSprite, err := g.ui.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)

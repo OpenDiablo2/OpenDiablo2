@@ -353,6 +353,8 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 			v.gameStates[idx].Stats,
 			v.gameStates[idx].Skills,
 			&equipment,
+			v.gameStates[idx].LeftSkill,
+			v.gameStates[idx].RightSkill,
 		)
 	}
 }

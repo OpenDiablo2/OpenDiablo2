@@ -207,7 +207,7 @@ func (g *GameClient) handleAddPlayerPacket(packet d2netpacket.NetPacket) error {
 	d2hero.HydrateSkills(player.Skills, g.asset)
 
 	newPlayer := g.MapEngine.NewPlayer(player.ID, player.Name, player.X, player.Y, 0,
-		player.HeroType, player.Stats, player.Skills, &player.Equipment)
+		player.HeroType, player.Stats, player.Skills, &player.Equipment, player.LeftSkill, player.RightSkill)
 
 	g.Players[newPlayer.ID()] = newPlayer
 	g.MapEngine.AddEntity(newPlayer)
