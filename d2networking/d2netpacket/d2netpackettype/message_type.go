@@ -31,6 +31,7 @@ const (
 	CastSkill                                            // Sent by client or server, indicates entity casting skill
 	SpawnItem                                            // Sent by server
 	SavePlayer                                           // Sent by the client, saves the player
+	ServerFull                                           // Sent by server when server has reached max connections
 
 	UnknownPacketType = 666
 )
@@ -49,6 +50,7 @@ func (n NetPacketType) String() string {
 		CastSkill:                       "CastSkill",
 		SpawnItem:                       "SpawnItem",
 		SavePlayer:                      "SavePlayer",
+		ServerFull:                      "ServerFull",
 	}
 
 	return strings[n]
