@@ -167,3 +167,8 @@ func GetRadiansBetween(p1X, p1Y, p2X, p2Y float64) float64 {
 
 	return math.Atan2(deltaY, deltaX)
 }
+
+// ClampInt ensures that the given value is between or equal to the given min or max
+func ClampInt(value, min, max int) int {
+	return int(math.Min(math.Max(float64(value), float64(min)), float64(max)))
+}
