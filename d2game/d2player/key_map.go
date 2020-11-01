@@ -118,8 +118,6 @@ func getDefaultKeyMap() *KeyMap {
 		d2enum.UseSkill14:               {-1, -1},
 		d2enum.UseSkill15:               {-1, -1},
 		d2enum.UseSkill16:               {-1, -1},
-		d2enum.UseSkill17:               {-1, -1},
-		d2enum.UseSkill18:               {-1, -1},
 		d2enum.ToggleBelts:              {d2enum.KeyTilde, -1},
 		d2enum.UseBeltSlot1:             {d2enum.Key1, -1},
 		d2enum.UseBeltSlot2:             {d2enum.Key2, -1},
