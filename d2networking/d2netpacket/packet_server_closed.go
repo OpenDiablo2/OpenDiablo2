@@ -32,7 +32,7 @@ func CreateServerClosedPacket() NetPacket {
 	}
 }
 
-// UnmarshalServerClosed unmarshals the given data to a ServerClosedPacket struct
+// UnmarshalServerClosed unmarshalls the given data to a ServerClosedPacket struct
 func UnmarshalServerClosed(packet []byte) (ServerClosedPacket, error) {
 	var resp ServerClosedPacket
 
