@@ -86,9 +86,7 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 	stats.NextLevelExp = f.asset.Records.GetExperienceBreakpoint(heroType, stats.Level)
 	stats.Stamina = float64(stats.MaxStamina)
 
-	defaultCharStats := f.asset.Records.Character.Stats[heroType]
-	statsState := f.HeroStateFactory.CreateHeroStatsState(heroType, defaultCharStats)
-	heroState, _ := f.CreateHeroState(name, heroType, statsState)
+	heroState, _ := f.CreateHeroState(name, heroType, stats)
 
 	result := &Player{
 		mapEntity:  newMapEntity(x, y),
