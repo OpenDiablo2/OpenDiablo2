@@ -246,13 +246,13 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 			if err := g.registerConnection(packet.PacketData, conn); err != nil {
 				switch err {
 				case errServerFull: // Server is currently full and not accepting new connections.
-					// https://github.com/OpenDiablo2/OpenDiablo2/issues/828
-					log.Println(err)
-					return
+					_, errServerFullPacket := conn.Write(d2netpacket.MarshalPacket(d2netpacket.CreateServerFullPacket()))
+					log.Println(errServerFullPacket)
 				case errPlayerAlreadyExists: // Player is already registered and did not disconnection correctly.
 					log.Println(err)
-					return
 				}
+
+				return
 			}
 
 			connected = 1

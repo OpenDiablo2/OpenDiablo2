@@ -156,6 +156,9 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		// https://github.com/OpenDiablo2/OpenDiablo2/issues/802
 		log.Print("Server has been closed")
 		os.Exit(0)
+	case d2netpackettype.ServerFull:
+		log.Println("Server is full")
+		os.Exit(0)
 	default:
 		log.Fatalf("Invalid packet type: %d", packet.PacketType)
 	}
