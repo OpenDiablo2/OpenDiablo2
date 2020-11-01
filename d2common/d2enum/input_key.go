@@ -3,6 +3,28 @@ package d2enum
 // Key represents button on a traditional keyboard.
 type Key int
 
+// GetString returns a string representing the key
+func (k Key) GetString() string {
+	switch k {
+	case -1:
+		return "None"
+	case KeyControl:
+		return "Ctrl"
+	case KeyShift:
+		return "Shift"
+	case KeySpace:
+		return "Space"
+	case KeyAlt:
+		return "Alt"
+	case KeyTab:
+		return "Tab"
+	case KeyH:
+		return "H"
+	default:
+		return "Unknown"
+	}
+}
+
 const (
 	// Key0 is the number 0
 	Key0 Key = iota
@@ -204,6 +226,8 @@ const (
 	KeyControl
 	// KeyShift is the shift key
 	KeyShift
+	// KeyTilde is the tilde key
+	KeyTilde
 
 	// KeyMin is the lowest key
 	KeyMin = Key0
