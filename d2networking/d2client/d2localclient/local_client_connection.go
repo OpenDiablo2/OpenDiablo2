@@ -73,7 +73,7 @@ func (l *LocalClientConnection) Open(_, saveFilePath string) error {
 		return err
 	}
 
-	d2server.OnClientConnected(l)
+	l.gameServer.OnClientConnected(l)
 
 	return nil
 }
@@ -85,7 +85,7 @@ func (l *LocalClientConnection) Close() error {
 		return err
 	}
 
-	d2server.OnClientDisconnected(l)
+	l.gameServer.OnClientDisconnected(l)
 	l.gameServer.Stop()
 
 	return nil
@@ -93,7 +93,7 @@ func (l *LocalClientConnection) Close() error {
 
 // SendPacketToServer calls d2server.OnPacketReceived with the given packet.
 func (l *LocalClientConnection) SendPacketToServer(packet d2netpacket.NetPacket) error {
-	return d2server.OnPacketReceived(l, packet)
+	return l.gameServer.OnPacketReceived(l, packet)
 }
 
 // SetClientListener sets LocalClientConnection.clientListener to the given value.

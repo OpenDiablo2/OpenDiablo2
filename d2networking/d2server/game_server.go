@@ -53,10 +53,6 @@ type GameServer struct {
 	heroStateFactory  *d2hero.HeroStateFactory
 }
 
-// https://github.com/OpenDiablo2/OpenDiablo2/issues/824
-//nolint:gochecknoglobals // currently singleton by design
-var singletonServer *GameServer
-
 // NewGameServer builds a new GameServer that can be started
 //
 // ctx: required context item
@@ -90,7 +86,6 @@ func NewGameServer(asset *d2asset.AssetManager, networkServer bool,
 		heroStateFactory:  heroStateFactory,
 	}
 
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/827
 	mapEngine := d2mapengine.CreateMapEngine(asset)
 	mapEngine.SetSeed(gameServer.seed)
 	mapEngine.ResetMap(d2enum.RegionAct1Town, 100, 100)
@@ -105,15 +100,12 @@ func NewGameServer(asset *d2asset.AssetManager, networkServer bool,
 	gameServer.mapEngines = append(gameServer.mapEngines, mapEngine)
 
 	gameServer.scriptEngine.AddFunction("getMapEngines", func(call otto.FunctionCall) otto.Value {
-		val, err := gameServer.scriptEngine.ToValue(singletonServer.mapEngines)
+		val, err := gameServer.scriptEngine.ToValue(gameServer.mapEngines)
 		if err != nil {
 			fmt.Print(err.Error())
 		}
 		return val
 	})
-
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/824
-	singletonServer = gameServer
 
 	return gameServer, nil
 }
@@ -316,7 +308,7 @@ func (g *GameServer) registerConnection(b []byte, conn net.Conn) error {
 	// This really should be deferred however to much time will be spend holding a lock when we attempt to send a packet
 	g.Unlock()
 
-	handleClientConnection(g, client, sx, sy)
+	g.handleClientConnection(client, sx, sy)
 
 	return nil
 }
@@ -329,23 +321,23 @@ func (g *GameServer) registerConnection(b []byte, conn net.Conn) error {
 // player and vice versa, so all player entities exist on all clients.
 //
 // For more information, see d2networking.d2netpacket.
-func OnClientConnected(client ClientConnection) {
+func (g *GameServer) OnClientConnected(client ClientConnection) {
 	// Temporary position hack --------------------------------------------
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/829
-	sx, sy := singletonServer.mapEngines[0].GetStartPosition()
+	sx, sy := g.mapEngines[0].GetStartPosition()
 	clientPlayerState := client.GetPlayerState()
 	clientPlayerState.X = sx
 	clientPlayerState.Y = sy
 	// --------------------------------------------------------------------
 
 	log.Printf("Client connected with an id of %s", client.GetUniqueID())
-	singletonServer.connections[client.GetUniqueID()] = client
+	g.connections[client.GetUniqueID()] = client
 
-	handleClientConnection(singletonServer, client, sx, sy)
+	g.handleClientConnection(client, sx, sy)
 }
 
-func handleClientConnection(gameServer *GameServer, client ClientConnection, x, y float64) {
-	err := client.SendPacketToClient(d2netpacket.CreateUpdateServerInfoPacket(gameServer.seed, client.GetUniqueID()))
+func (g *GameServer) handleClientConnection(client ClientConnection, x, y float64) {
+	err := client.SendPacketToClient(d2netpacket.CreateUpdateServerInfoPacket(g.seed, client.GetUniqueID()))
 	if err != nil {
 		log.Printf("GameServer: error sending UpdateServerInfoPacket to client %s: %s", client.GetUniqueID(), err)
 	}
@@ -361,7 +353,7 @@ func handleClientConnection(gameServer *GameServer, client ClientConnection, x, 
 	playerX := int(x*subtilesPerTile) + middleOfTileOffset
 	playerY := int(y*subtilesPerTile) + middleOfTileOffset
 
-	d2hero.HydrateSkills(playerState.Skills, gameServer.asset)
+	d2hero.HydrateSkills(playerState.Skills, g.asset)
 
 	createPlayerPacket := d2netpacket.CreateAddPlayerPacket(
 		client.GetUniqueID(),
@@ -376,7 +368,7 @@ func handleClientConnection(gameServer *GameServer, client ClientConnection, x, 
 		playerState.RightSkill,
 	)
 
-	for _, connection := range gameServer.connections {
+	for _, connection := range g.connections {
 		err := connection.SendPacketToClient(createPlayerPacket)
 		if err != nil {
 			log.Printf("GameServer: error sending %T to client %s: %s", createPlayerPacket, connection.GetUniqueID(), err)
@@ -412,16 +404,16 @@ func handleClientConnection(gameServer *GameServer, client ClientConnection, x, 
 
 // OnClientDisconnected removes the given client from the list
 // of client connections.
-func OnClientDisconnected(client ClientConnection) {
+func (g *GameServer) OnClientDisconnected(client ClientConnection) {
 	log.Printf("Client disconnected with an id of %s", client.GetUniqueID())
-	delete(singletonServer.connections, client.GetUniqueID())
+	delete(g.connections, client.GetUniqueID())
 }
 
 // OnPacketReceived is called by the local client to 'send' a packet to the server.
 // nolint:gocyclo // switch statement on packet type makes sense, no need to change
-func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) error {
-	if singletonServer == nil {
-		return errors.New("singleton server is nil")
+func (g *GameServer) OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) error {
+	if g == nil {
+		return errors.New("game server is nil")
 	}
 
 	switch packet.PacketType {
@@ -430,42 +422,25 @@ func OnPacketReceived(client ClientConnection, packet d2netpacket.NetPacket) err
 		if err != nil {
 			return err
 		}
-		// https://github.com/OpenDiablo2/OpenDiablo2/issues/830
-		playerState := singletonServer.connections[client.GetUniqueID()].GetPlayerState()
+
+		playerState := g.connections[client.GetUniqueID()].GetPlayerState()
 		playerState.X = movePacket.DestX
 		playerState.Y = movePacket.DestY
-		// ----------------------------------------------------------------
-		for _, player := range singletonServer.connections {
-			err := player.SendPacketToClient(packet)
-			if err != nil {
-				log.Printf("GameServer: error sending %T to client %s: %s", packet, player.GetUniqueID(), err)
-			}
-		}
-	case d2netpackettype.CastSkill:
-		for _, player := range singletonServer.connections {
-			err := player.SendPacketToClient(packet)
-			if err != nil {
-				log.Printf("GameServer: error sending %T to client %s: %s", packet, player.GetUniqueID(), err)
-			}
-		}
-	case d2netpackettype.SpawnItem:
-		for _, player := range singletonServer.connections {
-			err := player.SendPacketToClient(packet)
-			if err != nil {
-				log.Printf("GameServer: error sending %T to client %s: %s", packet, player.GetUniqueID(), err)
-			}
-		}
+
+		g.sendPacketToClients(packet)
+	case d2netpackettype.CastSkill, d2netpackettype.SpawnItem:
+		g.sendPacketToClients(packet)
 	case d2netpackettype.SavePlayer:
 		savePacket, err := d2netpacket.UnmarshalSavePlayer(packet.PacketData)
 		if err != nil {
 			return err
 		}
 
-		playerState := singletonServer.connections[client.GetUniqueID()].GetPlayerState()
+		playerState := g.connections[client.GetUniqueID()].GetPlayerState()
 		playerState.LeftSkill = savePacket.LeftSkill
 		playerState.RightSkill = savePacket.RightSkill
 
-		err = singletonServer.heroStateFactory.Save(playerState)
+		err = g.heroStateFactory.Save(playerState)
 		if err != nil {
 			log.Printf("GameServer: error saving saving Player: %s", err)
 		}
