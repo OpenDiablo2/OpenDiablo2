@@ -37,13 +37,11 @@ func StartDedicatedServer(manager *d2asset.AssetManager, in chan byte, log chan 
 	}
 
 	server, err := d2server.NewGameServer(manager, true, maxPlayers)
-
 	if err != nil {
 		return false, err
 	}
 
 	err = server.Start()
-
 	if err != nil {
 		return false, err
 	}
