@@ -202,6 +202,7 @@ func (h *HelpOverlay) Toggle() {
 	}
 }
 
+// Close will hide the help overlay
 func (h *HelpOverlay) Close() {
 	h.isOpen = false
 	h.closeButton.SetVisible(false)
@@ -339,25 +340,25 @@ func (h *HelpOverlay) setupBulletedList() {
 		// "Ctrl" should be hotkey // "Hold Down <%s> to Run"
 		{text: fmt.Sprintf(
 			d2tbl.TranslateString("StrHelp2"),
-			h.keyMap.GetKeysForGameEvent(d2enum.HoldRun)[0].GetString(),
+			h.keyMap.GetKeysForGameEvent(d2enum.HoldRun).Primary.GetString(),
 		)},
 
 		// "Alt" should be hotkey // "Hold down <%s> to highlight items on the ground"
 		{text: fmt.Sprintf(
 			d2tbl.TranslateString("StrHelp3"),
-			h.keyMap.GetKeysForGameEvent(d2enum.HoldShowGroundItems)[0].GetString(),
+			h.keyMap.GetKeysForGameEvent(d2enum.HoldShowGroundItems).Primary.GetString(),
 		)},
 
 		// "Shift" should be hotkey // "Hold down <%s> to attack while standing still"
 		{text: fmt.Sprintf(
 			d2tbl.TranslateString("StrHelp4"),
-			h.keyMap.GetKeysForGameEvent(d2enum.HoldStandStill)[0].GetString(),
+			h.keyMap.GetKeysForGameEvent(d2enum.HoldStandStill).Primary.GetString(),
 		)},
 
 		// "Tab" should be hotkey // "Hit <%s> to toggle the automap on and off"
 		{text: fmt.Sprintf(
 			d2tbl.TranslateString("StrHelp5"),
-			h.keyMap.GetKeysForGameEvent(d2enum.ToggleAutomap)[0].GetString(),
+			h.keyMap.GetKeysForGameEvent(d2enum.ToggleAutomap).Primary.GetString(),
 		)},
 
 		// "Hit <Esc> to bring up the Game Menu"
@@ -372,7 +373,7 @@ func (h *HelpOverlay) setupBulletedList() {
 		// "H" should be hotkey,
 		{text: fmt.Sprintf(
 			d2tbl.TranslateString("StrHelp8a"),
-			h.keyMap.GetKeysForGameEvent(d2enum.ToggleHelpScreen)[0].GetString(),
+			h.keyMap.GetKeysForGameEvent(d2enum.ToggleHelpScreen).Primary.GetString(),
 		)},
 	}
 

@@ -352,11 +352,7 @@ func NewGameControls(
 		return nil, err
 	}
 
-	keyMap := NewKeyMap()
-	for gameEvent, keys := range defaultControls {
-		keyMap.SetBinding1(gameEvent, keys[0])
-		keyMap.SetBinding2(gameEvent, keys[1])
-	}
+	keyMap := getDefaultKeyMap()
 
 	gc := &GameControls{
 		keyMap:           keyMap,
