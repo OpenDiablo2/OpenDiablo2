@@ -1,6 +1,7 @@
 package d2networking
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 
@@ -17,6 +18,7 @@ StartDedicatedServer Checks whether or not we should start a server i.e the -lis
 server hosted to the network, in theory. (this is still WIP)
 */
 func StartDedicatedServer(manager *d2asset.AssetManager, in chan byte, log chan string) (started bool, e error) {
+	fmt.Println("One")
 	var listen bool
 
 	maxPlayers := 3
@@ -37,13 +39,11 @@ func StartDedicatedServer(manager *d2asset.AssetManager, in chan byte, log chan 
 	}
 
 	server, err := d2server.NewGameServer(manager, true, maxPlayers)
-
 	if err != nil {
 		return false, err
 	}
 
 	err = server.Start()
-
 	if err != nil {
 		return false, err
 	}
