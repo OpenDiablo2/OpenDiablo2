@@ -73,6 +73,15 @@ type App struct {
 	ui                *d2ui.UIManager
 	tAllocSamples     *ring.Ring
 	guiManager        *d2gui.GuiManager
+	*Options
+}
+
+// Options is used to store all of the app options that can be set with arguments
+type Options struct {
+	printVersion *bool
+	Debug        *bool
+	profiler     *string
+	Server       *d2networking.ServerOptions
 }
 
 type bindTerminalEntry struct {
@@ -92,6 +101,9 @@ func Create(gitBranch, gitCommit string) *App {
 	return &App{
 		gitBranch: gitBranch,
 		gitCommit: gitCommit,
+		Options: &Options{
+			Server: &d2networking.ServerOptions{},
+		},
 	}
 }
 
@@ -100,10 +112,27 @@ func updateNOOP() error {
 }
 
 func (a *App) startDedicatedServer() error {
-	srvChanIn := make(chan byte)
-	srvChanLog := make(chan string)
-	started, srvErr := d2networking.StartDedicatedServer(a.asset, srvChanIn, srvChanLog)
+	// hack, for now we need to create the asset manager here
+	// Attempt to load the configuration file
+	err := d2config.Load()
+	if err != nil {
+		return err
+	}
 
+	asset, err := d2asset.NewAssetManager(d2config.Config)
+	if err != nil {
+		return err
+	}
+
+	a.asset = asset
+
+	min, max := d2networking.ServerMinPlayers, d2networking.ServerMaxPlayersDefault
+	maxPlayers := d2math.ClampInt(*a.Options.Server.MaxPlayers, min, max)
+
+	srvChanIn := make(chan int)
+	srvChanLog := make(chan string)
+
+	srvErr := d2networking.StartDedicatedServer(a.asset, srvChanIn, srvChanLog, maxPlayers)
 	if srvErr != nil {
 		return srvErr
 	}
@@ -113,16 +142,14 @@ func (a *App) startDedicatedServer() error {
 
 	go func() {
 		<-c
-		srvChanIn <- 0b1
+		srvChanIn <- d2networking.ServerEventStop
 	}()
 
-	if started {
+	for {
 		for data := range srvChanLog {
 			log.Println(data)
 		}
 	}
-
-	return nil
 }
 
 func (a *App) loadEngine() error {
@@ -180,24 +207,69 @@ func (a *App) loadEngine() error {
 	return nil
 }
 
+func (a *App) parseArguments() {
+	const (
+		versionArg   = "version"
+		versionShort = 'v'
+		versionDesc  = "Prints the version of the app"
+
+		profilerArg  = "profile"
+		profilerDesc = "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)"
+
+		serverArg   = "dedicated"
+		serverShort = 'd'
+		serverDesc  = "Starts a dedicated server"
+
+		playersArg  = "players"
+		playersDesc = "Sets the number of max players for the dedicated server"
+	)
+
+	a.Options.profiler = kingpin.Flag(profilerArg, profilerDesc).String()
+
+	a.Options.Server.Dedicated = kingpin.Flag(serverArg, serverDesc).Short(serverShort).Bool()
+
+	a.Options.printVersion = kingpin.Flag(versionArg, versionDesc).Short(versionShort).Bool()
+
+	a.Options.Server.MaxPlayers = kingpin.Flag(playersArg, playersDesc).Int()
+
+	kingpin.Parse()
+}
+
 // Run executes the application and kicks off the entire game process
 func (a *App) Run() error {
-	profileOption := kingpin.Flag("profile", "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)").String()
-	kingpin.Parse()
+	a.parseArguments()
 
-	if len(*profileOption) > 0 {
-		profiler := enableProfiler(*profileOption)
+	// print version and exit if `--version` was supplied
+	if *a.Options.printVersion {
+		fmtVersion := "OpenDiablo2 (%s %s)"
+
+		if a.gitBranch == "" {
+			a.gitBranch = "local"
+		}
+
+		if a.gitCommit == "" {
+			a.gitCommit = "build"
+		}
+
+		return fmt.Errorf(fmtVersion, a.gitBranch, a.gitCommit)
+	}
+
+	// start profiler if argument was supplied
+	if len(*a.Options.profiler) > 0 {
+		profiler := enableProfiler(*a.Options.profiler)
 		if profiler != nil {
 			defer profiler.Stop()
 		}
 	}
 
-	if err := a.loadEngine(); err != nil {
-		a.renderer.ShowPanicScreen(err.Error())
-		return err
+	// start the server if `--listen` option was supplied
+	if *a.Options.Server.Dedicated {
+		if err := a.startDedicatedServer(); err != nil {
+			return err
+		}
 	}
 
-	if err := a.startDedicatedServer(); err != nil {
+	if err := a.loadEngine(); err != nil {
 		a.renderer.ShowPanicScreen(err.Error())
 		return err
 	}
