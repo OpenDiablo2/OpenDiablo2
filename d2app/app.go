@@ -11,11 +11,13 @@ import (
 	"image/png"
 	"log"
 	"os"
+	"os/signal"
 	"runtime"
 	"runtime/pprof"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 
 	"github.com/pkg/profile"
 	"golang.org/x/image/colornames"
@@ -27,11 +29,16 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	ebiten2 "github.com/OpenDiablo2/OpenDiablo2/d2core/d2audio/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2render/ebiten"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen"
+	"github.com/OpenDiablo2/OpenDiablo2/d2networking"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 	"github.com/OpenDiablo2/OpenDiablo2/d2script"
@@ -66,6 +73,15 @@ type App struct {
 	ui                *d2ui.UIManager
 	tAllocSamples     *ring.Ring
 	guiManager        *d2gui.GuiManager
+	*Options
+}
+
+// Options is used to store all of the app options that can be set with arguments
+type Options struct {
+	printVersion *bool
+	Debug        *bool
+	profiler     *string
+	Server       *d2networking.ServerOptions
 }
 
 type bindTerminalEntry struct {
@@ -81,50 +97,181 @@ const (
 )
 
 // Create creates a new instance of the application
-func Create(gitBranch, gitCommit string,
-	inputManager d2interface.InputManager,
-	terminal d2interface.Terminal,
-	scriptEngine *d2script.ScriptEngine,
-	audio d2interface.AudioProvider,
-	renderer d2interface.Renderer,
-	asset *d2asset.AssetManager,
-) *App {
-	uiManager := d2ui.NewUIManager(asset, renderer, inputManager, audio)
-
-	result := &App{
-		gitBranch:     gitBranch,
-		gitCommit:     gitCommit,
-		inputManager:  inputManager,
-		terminal:      terminal,
-		scriptEngine:  scriptEngine,
-		audio:         audio,
-		renderer:      renderer,
-		ui:            uiManager,
-		asset:         asset,
-		tAllocSamples: createZeroedRing(nSamplesTAlloc),
+func Create(gitBranch, gitCommit string) *App {
+	return &App{
+		gitBranch: gitBranch,
+		gitCommit: gitCommit,
+		Options: &Options{
+			Server: &d2networking.ServerOptions{},
+		},
 	}
-
-	if result.gitBranch == "" {
-		result.gitBranch = "Local Build"
-	}
-
-	return result
 }
 
 func updateNOOP() error {
 	return nil
 }
 
+func (a *App) startDedicatedServer() error {
+	// hack, for now we need to create the asset manager here
+	// Attempt to load the configuration file
+	err := d2config.Load()
+	if err != nil {
+		return err
+	}
+
+	asset, err := d2asset.NewAssetManager(d2config.Config)
+	if err != nil {
+		return err
+	}
+
+	a.asset = asset
+
+	min, max := d2networking.ServerMinPlayers, d2networking.ServerMaxPlayersDefault
+	maxPlayers := d2math.ClampInt(*a.Options.Server.MaxPlayers, min, max)
+
+	srvChanIn := make(chan int)
+	srvChanLog := make(chan string)
+
+	srvErr := d2networking.StartDedicatedServer(a.asset, srvChanIn, srvChanLog, maxPlayers)
+	if srvErr != nil {
+		return srvErr
+	}
+
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM) // This traps Control-c to safely shut down the server
+
+	go func() {
+		<-c
+		srvChanIn <- d2networking.ServerEventStop
+	}()
+
+	for {
+		for data := range srvChanLog {
+			log.Println(data)
+		}
+	}
+}
+
+func (a *App) loadEngine() error {
+	// Attempt to load the configuration file
+	configError := d2config.Load()
+
+	// Create our renderer
+	renderer, err := ebiten.CreateRenderer()
+	if err != nil {
+		return err
+	}
+
+	// If we failed to load our config, lets show the boot panic screen
+	if configError != nil {
+		return configError
+	}
+
+	// Create the asset manager
+	asset, err := d2asset.NewAssetManager(d2config.Config)
+	if err != nil {
+		return err
+	}
+
+	audio := ebiten2.CreateAudio(asset)
+
+	inputManager := d2input.NewInputManager()
+
+	term, err := d2term.New(inputManager)
+	if err != nil {
+		return err
+	}
+
+	err = asset.BindTerminalCommands(term)
+	if err != nil {
+		return err
+	}
+
+	scriptEngine := d2script.CreateScriptEngine()
+
+	uiManager := d2ui.NewUIManager(asset, renderer, inputManager, audio)
+
+	a.inputManager = inputManager
+	a.terminal = term
+	a.scriptEngine = scriptEngine
+	a.audio = audio
+	a.renderer = renderer
+	a.ui = uiManager
+	a.asset = asset
+	a.tAllocSamples = createZeroedRing(nSamplesTAlloc)
+
+	if a.gitBranch == "" {
+		a.gitBranch = "Local Build"
+	}
+
+	return nil
+}
+
+func (a *App) parseArguments() {
+	const (
+		versionArg   = "version"
+		versionShort = 'v'
+		versionDesc  = "Prints the version of the app"
+
+		profilerArg  = "profile"
+		profilerDesc = "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)"
+
+		serverArg   = "dedicated"
+		serverShort = 'd'
+		serverDesc  = "Starts a dedicated server"
+
+		playersArg  = "players"
+		playersDesc = "Sets the number of max players for the dedicated server"
+	)
+
+	a.Options.profiler = kingpin.Flag(profilerArg, profilerDesc).String()
+
+	a.Options.Server.Dedicated = kingpin.Flag(serverArg, serverDesc).Short(serverShort).Bool()
+
+	a.Options.printVersion = kingpin.Flag(versionArg, versionDesc).Short(versionShort).Bool()
+
+	a.Options.Server.MaxPlayers = kingpin.Flag(playersArg, playersDesc).Int()
+
+	kingpin.Parse()
+}
+
 // Run executes the application and kicks off the entire game process
 func (a *App) Run() error {
-	profileOption := kingpin.Flag("profile", "Profiles the program, one of (cpu, mem, block, goroutine, trace, thread, mutex)").String()
-	kingpin.Parse()
+	a.parseArguments()
 
-	if len(*profileOption) > 0 {
-		profiler := enableProfiler(*profileOption)
+	// print version and exit if `--version` was supplied
+	if *a.Options.printVersion {
+		fmtVersion := "OpenDiablo2 (%s %s)"
+
+		if a.gitBranch == "" {
+			a.gitBranch = "local"
+		}
+
+		if a.gitCommit == "" {
+			a.gitCommit = "build"
+		}
+
+		return fmt.Errorf(fmtVersion, a.gitBranch, a.gitCommit)
+	}
+
+	// start profiler if argument was supplied
+	if len(*a.Options.profiler) > 0 {
+		profiler := enableProfiler(*a.Options.profiler)
 		if profiler != nil {
 			defer profiler.Stop()
 		}
+	}
+
+	// start the server if `--listen` option was supplied
+	if *a.Options.Server.Dedicated {
+		if err := a.startDedicatedServer(); err != nil {
+			return err
+		}
+	}
+
+	if err := a.loadEngine(); err != nil {
+		a.renderer.ShowPanicScreen(err.Error())
+		return err
 	}
 
 	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", a.gitBranch)
