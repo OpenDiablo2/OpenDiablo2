@@ -12,7 +12,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-	"github.com/OpenDiablo2/OpenDiablo2/d2game/d2player/help"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
@@ -235,6 +234,7 @@ const (
 
 // GameControls represents the game's controls on the screen
 type GameControls struct {
+	keyMap                 *KeyMap
 	actionableRegions      []actionableRegion
 	asset                  *d2asset.AssetManager
 	renderer               d2interface.Renderer // https://github.com/OpenDiablo2/OpenDiablo2/issues/798
@@ -248,7 +248,7 @@ type GameControls struct {
 	inventory              *Inventory
 	skilltree              *skillTree
 	heroStatsPanel         *HeroStatsPanel
-	HelpOverlay            *help.Overlay
+	HelpOverlay            *HelpOverlay
 	miniPanel              *miniPanel
 	bottomMenuRect         *d2geom.Rectangle
 	leftMenuRect           *d2geom.Rectangle
@@ -352,7 +352,10 @@ func NewGameControls(
 		return nil, err
 	}
 
+	keyMap := getDefaultKeyMap()
+
 	gc := &GameControls{
+		keyMap:           keyMap,
 		asset:            asset,
 		ui:               ui,
 		renderer:         renderer,
@@ -366,7 +369,7 @@ func NewGameControls(
 		skillSelectMenu:  NewSkillSelectMenu(asset, ui, hero),
 		skilltree:        newSkillTree(hero.Skills, hero.Class, asset, renderer, ui, guiManager),
 		heroStatsPanel:   NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
-		HelpOverlay:      help.NewHelpOverlay(asset, renderer, ui, guiManager),
+		HelpOverlay:      NewHelpOverlay(asset, renderer, ui, guiManager, keyMap),
 		miniPanel:        newMiniPanel(asset, ui, isSinglePlayer),
 		nameLabel:        hoverLabel,
 		zoneChangeText:   zoneLabel,
@@ -553,21 +556,34 @@ func (g *GameControls) OnKeyRepeat(event d2interface.KeyEvent) bool {
 
 // OnKeyDown handles key presses
 func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
-	switch event.Key() {
-	case d2enum.KeyEscape:
+	if event.Key() == d2enum.KeyEscape {
 		g.onEscKey()
-	case d2enum.KeyI:
+		return true
+	}
+
+	gameEvent := g.keyMap.getGameEvent(event.Key())
+
+	switch gameEvent {
+	case d2enum.ClearScreen:
+		g.inventory.Close()
+		g.skilltree.Close()
+		g.heroStatsPanel.Close()
+		g.HelpOverlay.Close()
+		g.updateLayout()
+	case d2enum.ToggleInventoryPanel:
 		g.inventory.Toggle()
 		g.updateLayout()
-	case d2enum.KeyT:
+	case d2enum.ToggleSkillTreePanel:
 		g.skilltree.Toggle()
 		g.updateLayout()
-	case d2enum.KeyC:
+	case d2enum.ToggleCharacterPanel:
 		g.heroStatsPanel.Toggle()
 		g.updateLayout()
-	case d2enum.KeyR, d2enum.KeyControl:
-		g.onToggleRunButton()
-	case d2enum.KeyH:
+	case d2enum.ToggleRunWalk:
+		g.onToggleRunButton(false)
+	case d2enum.HoldRun:
+		g.onToggleRunButton(true)
+	case d2enum.ToggleHelpScreen:
 		g.HelpOverlay.Toggle()
 		g.updateLayout()
 	default:
@@ -579,9 +595,11 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 
 // OnKeyUp handles key release
 func (g *GameControls) OnKeyUp(event d2interface.KeyEvent) bool {
-	switch event.Key() {
-	case d2enum.KeyControl:
-		g.onToggleRunButton()
+	gameEvent := g.keyMap.getGameEvent(event.Key())
+
+	switch gameEvent {
+	case d2enum.HoldRun:
+		g.onToggleRunButton(true)
 	default:
 		return false
 	}
@@ -833,15 +851,18 @@ func (g *GameControls) loadUIButtons() {
 	g.runButton = g.ui.NewButton(d2ui.ButtonTypeRun, "")
 
 	g.runButton.SetPosition(runButtonX, runButtonY)
-	g.runButton.OnActivated(func() { g.onToggleRunButton() })
+	g.runButton.OnActivated(func() { g.onToggleRunButton(false) })
 
 	if g.hero.IsRunToggled() {
 		g.runButton.Toggle()
 	}
 }
 
-func (g *GameControls) onToggleRunButton() {
-	g.runButton.Toggle()
+func (g *GameControls) onToggleRunButton(noButton bool) {
+	if !noButton {
+		g.runButton.Toggle()
+	}
+
 	g.hero.ToggleRunWalk()
 
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/800
