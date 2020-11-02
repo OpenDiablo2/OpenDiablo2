@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -15,7 +13,7 @@ func miscItemsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return err
 	}
 
-	log.Printf("Loaded %d misc items", len(records))
+	r.Logger.Infof("Loaded %d misc items", len(records))
 
 	r.Item.Misc = records
 

@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
@@ -44,7 +42,7 @@ func levelPresetLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		records[record.DefinitionID] = record
 	}
 
-	log.Printf("Loaded %d level presets", len(records))
+	r.Logger.Infof("Loaded %d level presets", len(records))
 
 	if d.Err != nil {
 		return d.Err

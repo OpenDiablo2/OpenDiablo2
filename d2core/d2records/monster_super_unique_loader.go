@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
@@ -42,7 +40,7 @@ func monsterSuperUniqeLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Monster.Unique.Super = records
 
-	log.Printf("Loaded %d SuperUnique records", len(records))
+	r.Logger.Infof("Loaded %d SuperUnique records", len(records))
 
 	return nil
 }

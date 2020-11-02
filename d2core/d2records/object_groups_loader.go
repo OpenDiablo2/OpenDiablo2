@@ -2,7 +2,6 @@ package d2records
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
@@ -33,7 +32,7 @@ func objectGroupsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	log.Printf("Loaded %d ObjectGroup records", len(records))
+	r.Logger.Infof("Loaded %d ObjectGroup records", len(records))
 
 	return nil
 }

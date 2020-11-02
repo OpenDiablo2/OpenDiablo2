@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
@@ -24,7 +22,7 @@ func cubeTypeLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.Cube.Types = records
 
-	log.Printf("Loaded %d Cube Type records", len(records))
+	r.Logger.Infof("Loaded %d Cube Type records", len(records))
 
 	return nil
 }

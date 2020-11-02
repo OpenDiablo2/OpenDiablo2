@@ -82,6 +82,7 @@ type Options struct {
 	Debug        *bool
 	profiler     *string
 	Server       *d2networking.ServerOptions
+	LogLevel     *d2util.LogLevel
 }
 
 type bindTerminalEntry struct {
@@ -119,7 +120,7 @@ func (a *App) startDedicatedServer() error {
 		return err
 	}
 
-	asset, err := d2asset.NewAssetManager(d2config.Config)
+	asset, err := d2asset.NewAssetManager(d2config.Config, *a.Options.LogLevel)
 	if err != nil {
 		return err
 	}
@@ -162,13 +163,21 @@ func (a *App) loadEngine() error {
 		return err
 	}
 
+	a.renderer = renderer
+
 	// If we failed to load our config, lets show the boot panic screen
 	if configError != nil {
 		return configError
 	}
 
+	// if the log level was specified at the command line, use it
+	logLevel := *a.Options.LogLevel
+	if logLevel == d2util.LogLevelUnspecified {
+		logLevel = d2config.Config.LogLevel
+	}
+
 	// Create the asset manager
-	asset, err := d2asset.NewAssetManager(d2config.Config)
+	asset, err := d2asset.NewAssetManager(d2config.Config, logLevel)
 	if err != nil {
 		return err
 	}
@@ -195,7 +204,6 @@ func (a *App) loadEngine() error {
 	a.terminal = term
 	a.scriptEngine = scriptEngine
 	a.audio = audio
-	a.renderer = renderer
 	a.ui = uiManager
 	a.asset = asset
 	a.tAllocSamples = createZeroedRing(nSamplesTAlloc)
@@ -222,15 +230,26 @@ func (a *App) parseArguments() {
 
 		playersArg  = "players"
 		playersDesc = "Sets the number of max players for the dedicated server"
+
+		loggingArg   = "loglevel"
+		loggingShort = 'l'
+		loggingDesc  = "Enables verbose logging. Log levels will include those below it. " +
+			"0 disables log messages, " +
+			"1 shows errors, " +
+			"2 shows warnings, " +
+			"3 shows info, " +
+			"4 shows debug" +
+			"5 uses value from config file (default)"
 	)
 
 	a.Options.profiler = kingpin.Flag(profilerArg, profilerDesc).String()
-
 	a.Options.Server.Dedicated = kingpin.Flag(serverArg, serverDesc).Short(serverShort).Bool()
-
 	a.Options.printVersion = kingpin.Flag(versionArg, versionDesc).Short(versionShort).Bool()
-
 	a.Options.Server.MaxPlayers = kingpin.Flag(playersArg, playersDesc).Int()
+	a.Options.LogLevel = kingpin.Flag(loggingArg, loggingDesc).
+		Short(loggingShort).
+		Default(strconv.Itoa(d2util.LogLevelUnspecified)).
+		Int()
 
 	kingpin.Parse()
 }

@@ -2,7 +2,6 @@ package d2records
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
@@ -14,7 +13,7 @@ func magicPrefixLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	subType := d2enum.ItemAffixMagic
 
-	affixes, groups, err := loadAffixDictionary(d, superType, subType)
+	affixes, groups, err := loadAffixDictionary(r, d, superType, subType)
 	if err != nil {
 		return err
 	}
@@ -31,7 +30,7 @@ func magicSuffixLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	subType := d2enum.ItemAffixMagic
 
-	affixes, groups, err := loadAffixDictionary(d, superType, subType)
+	affixes, groups, err := loadAffixDictionary(r, d, superType, subType)
 	if err != nil {
 		return err
 	}
@@ -60,6 +59,7 @@ func getAffixString(t1 d2enum.ItemAffixSuperType, t2 d2enum.ItemAffixSubType) st
 }
 
 func loadAffixDictionary(
+	r *RecordManager,
 	d *d2txt.DataDictionary,
 	superType d2enum.ItemAffixSuperType,
 	subType d2enum.ItemAffixSubType,
@@ -70,7 +70,7 @@ func loadAffixDictionary(
 	}
 
 	name := getAffixString(superType, subType)
-	log.Printf("Loaded %d %s records", len(records), name)
+	r.Logger.Infof("Loaded %d %s records", len(records), name)
 
 	return records, groups, nil
 }
