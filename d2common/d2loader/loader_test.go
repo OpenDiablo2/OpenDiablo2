@@ -26,7 +26,7 @@ const (
 )
 
 func TestLoader_NewLoader(t *testing.T) {
-	loader, _ := NewLoader(nil, d2util.LogLevelDefault)
+	loader, _ := NewLoader(d2util.LogLevelDefault)
 
 	if loader.Cache == nil {
 		t.Error("loader should not be nil")
@@ -34,7 +34,7 @@ func TestLoader_NewLoader(t *testing.T) {
 }
 
 func TestLoader_AddSource(t *testing.T) {
-	loader, _ := NewLoader(nil, d2util.LogLevelDefault)
+	loader, _ := NewLoader(d2util.LogLevelDefault)
 
 	sourceA, errA := loader.AddSource(sourcePathA)
 	sourceB, errB := loader.AddSource(sourcePathB)
@@ -85,7 +85,7 @@ func TestLoader_AddSource(t *testing.T) {
 
 // nolint:gocyclo // this is just a test, not a big deal if we ignore linter here
 func TestLoader_Load(t *testing.T) {
-	loader, _ := NewLoader(nil, d2util.LogLevelDefault)
+	loader, _ := NewLoader(d2util.LogLevelDefault)
 
 	_, err := loader.AddSource(sourcePathB) // we expect files common to any source to come from here
 	if err != nil {

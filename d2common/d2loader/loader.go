@@ -1,7 +1,6 @@
 package d2loader
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -35,10 +34,8 @@ const (
 )
 
 // NewLoader creates a new loader
-func NewLoader(config *d2config.Configuration, l d2util.LogLevel) (*Loader, error) {
-	loader := &Loader{
-		config: config,
-	}
+func NewLoader(l d2util.LogLevel) (*Loader, error) {
+	loader := &Loader{}
 
 	loader.Cache = d2cache.CreateCache(defaultCacheBudget)
 	loader.Logger = d2util.NewLogger()
@@ -46,9 +43,9 @@ func NewLoader(config *d2config.Configuration, l d2util.LogLevel) (*Loader, erro
 	loader.Logger.SetPrefix(logPrefix)
 	loader.Logger.SetLevel(l)
 
-	err := loader.initFromConfig()
+	loader.bootstrap()
 
-	return loader, err
+	return loader, nil
 }
 
 // Loader represents the manager that handles loading and caching assets with the asset Sources
@@ -60,35 +57,9 @@ type Loader struct {
 	Sources []asset.Source
 }
 
-const (
-	errConfigFileNotFound = "config file not found"
-	fmtErrSourceNotFound  = `file not found: %s
-
-Please check your config file at %s
-
-Also, verify that the MPQ files exist at %s
-
-Capitalization matters!
-`
-)
-
-func (l *Loader) initFromConfig() error {
-	if l.config == nil {
-		return errors.New(errConfigFileNotFound)
-	}
-
-	for _, mpqName := range l.config.MpqLoadOrder {
-		cleanDir := filepath.Clean(l.config.MpqPath)
-		srcPath := filepath.Join(cleanDir, mpqName)
-
-		_, err := l.AddSource(srcPath)
-		if err != nil {
-			// nolint:stylecheck // we want a multiline error message here..
-			return fmt.Errorf(fmtErrSourceNotFound, srcPath, l.config.Path(), l.config.MpqPath)
-		}
-	}
-
-	return nil
+func (l *Loader) bootstrap() {
+	_, _ = l.AddSource(filepath.Dir(d2config.LocalConfigPath()))
+	_, _ = l.AddSource(filepath.Dir(d2config.DefaultConfigPath()))
 }
 
 // Load attempts to load an asset with the given sub-path. The sub-path is relative to the root
@@ -125,7 +96,7 @@ func (l *Loader) Load(subPath string) (asset.Asset, error) {
 			continue
 		}
 
-		srcBase := filepath.Base(source.Path())
+		srcBase, _ := filepath.Abs(source.Path())
 		l.Info(fmt.Sprintf("from %s, loading %s", srcBase, subPath))
 
 		return loadedAsset, l.Insert(subPath, loadedAsset, defaultCacheEntryWeight)
