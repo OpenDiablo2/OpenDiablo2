@@ -1,8 +1,12 @@
 package d2asset
 
 import (
+	"encoding/json"
 	"fmt"
 	"image/color"
+	"path/filepath"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
@@ -33,16 +37,29 @@ const (
 const (
 	animationBudget        = 1024 * 1024 * 128
 	fontBudget             = 128
-	tableBudget            = 64
 	paletteBudget          = 64
 	paletteTransformBudget = 64
 )
 
+const (
+	logPrefix          = "Asset Manager"
+	fmtLoadAsset       = "could not load file stream %s (%v)"
+	fmtLoadAnimation   = "loading animation %s with palette %s, draw effect %d"
+	fmtLoadComposite   = "loading composite: type %d, token %s, palette %s"
+	fmtLoadFont        = "loading font: table %s, sprite %s, palette %s"
+	fmtLoadPalette     = "loading palette %s"
+	fmtLoadStringTable = "loading string table: %s"
+	fmtLoadTransform   = "loading palette transform: %s"
+	fmtLoadDict        = "loading data dictionary: %s"
+	fmtLoadAnimData    = "loading animation data from: %s"
+)
+
 // AssetManager loads files and game objects
 type AssetManager struct {
+	config     *d2config.Configuration
 	logger     *d2util.Logger
 	loader     *d2loader.Loader
-	tables     d2interface.Cache
+	tables     []d2tbl.TextDictionary
 	animations d2interface.Cache
 	fonts      d2interface.Cache
 	palettes   d2interface.Cache
@@ -51,13 +68,97 @@ type AssetManager struct {
 }
 
 func (am *AssetManager) init() error {
-	err := am.initDataDictionaries()
+	var err error
+
+	config, err := am.LoadConfig()
 	if err != nil {
+		return err
+	}
+
+	am.logger.SetLevel(config.LogLevel)
+	am.Records.Logger.SetLevel(config.LogLevel)
+	am.loader.Logger.SetLevel(config.LogLevel)
+
+	err = am.initConfig(config)
+	if err != nil {
+		return err
+	}
+
+	if err := am.initDataDictionaries(); err != nil {
 		return err
 	}
 
 	return nil
 }
+
+func (am *AssetManager) initConfig(config *d2config.Configuration) error {
+	am.config = config
+
+	for _, mpqName := range am.config.MpqLoadOrder {
+		cleanDir := filepath.Clean(am.config.MpqPath)
+		srcPath := filepath.Join(cleanDir, mpqName)
+
+		_, err := am.loader.AddSource(srcPath)
+		if err != nil {
+			// nolint:stylecheck // we want a multiline error message here..
+			return fmt.Errorf(fmtErrSourceNotFound, srcPath, am.config.Path(), am.config.MpqPath)
+		}
+	}
+
+	return nil
+}
+
+// SetLogLevel sets the log level for the asset manager,  record manager, and file loader
+func (am *AssetManager) SetLogLevel(level d2util.LogLevel) {
+	am.logger.SetLevel(level)
+	am.Records.Logger.SetLevel(level)
+	am.loader.Logger.SetLevel(level)
+}
+
+// LoadConfig loads the OpenDiablo2 config file
+func (am *AssetManager) LoadConfig() (*d2config.Configuration, error) {
+	// by now the, the loader has initialized and added our config dirs as sources...
+	configBaseName := filepath.Base(d2config.DefaultConfigPath())
+
+	configAsset, _ := am.LoadAsset(configBaseName)
+
+	config := &d2config.Configuration{}
+
+	// create the default if not found
+	if configAsset == nil {
+		config = d2config.DefaultConfig()
+
+		fullPath := filepath.Join(config.Dir(), config.Base())
+		config.SetPath(fullPath)
+
+		am.logger.Infof("creating default configuration file at %s...", fullPath)
+
+		saveErr := config.Save()
+
+		return config, saveErr
+	}
+
+	if err := json.NewDecoder(configAsset).Decode(config); err != nil {
+		return nil, err
+	}
+
+	config.SetPath(filepath.Join(configAsset.Source().Path(), configAsset.Path()))
+
+	am.logger.Infof("loaded configuration file from %s", config.Path())
+
+	return config, nil
+}
+
+const (
+	fmtErrSourceNotFound = `file not found: %s
+
+Please check your config file at %s
+
+Also, verify that the MPQ files exist at %s
+
+Capitalization matters!
+`
+)
 
 func (am *AssetManager) initDataDictionaries() error {
 	dictPaths := []string{
@@ -107,19 +208,6 @@ func (am *AssetManager) initDataDictionaries() error {
 
 	return nil
 }
-
-const (
-	logPrefix          = "Asset Manager"
-	fmtLoadAsset       = "could not load file stream %s (%v)"
-	fmtLoadAnimation   = "loading animation %s with palette %s, draw effect %d"
-	fmtLoadComposite   = "loading composite: type %d, token %s, palette %s"
-	fmtLoadFont        = "loading font: table %s, sprite %s, palette %s"
-	fmtLoadPalette     = "loading palette %s"
-	fmtLoadStringTable = "loading string table: %s"
-	fmtLoadTransform   = "loading palette transform: %s"
-	fmtLoadDict        = "loading data dictionary: %s"
-	fmtLoadAnimData    = "loading animation data from: %s"
-)
 
 // LoadAsset loads an asset
 func (am *AssetManager) LoadAsset(filePath string) (asset.Asset, error) {
@@ -296,10 +384,6 @@ func (am *AssetManager) LoadPalette(palettePath string) (d2interface.Palette, er
 
 // LoadStringTable loads a string table from the given path
 func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary, error) {
-	if cached, found := am.tables.Retrieve(tablePath); found {
-		return cached.(d2tbl.TextDictionary), nil
-	}
-
 	data, err := am.LoadFile(tablePath)
 	if err != nil {
 		return nil, err
@@ -312,9 +396,23 @@ func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary,
 
 	am.logger.Debug(fmt.Sprintf(fmtLoadStringTable, tablePath))
 
-	err = am.tables.Insert(tablePath, table, defaultCacheEntryWeight)
+	am.tables = append(am.tables, table)
 
 	return table, err
+}
+
+// TranslateString returns the translation of the given string. The string is retrieved from
+// the loaded string tables.
+func (am *AssetManager) TranslateString(key string) string {
+	for idx := range am.tables {
+		if value, found := am.tables[idx][key]; found {
+			return value
+		}
+	}
+
+	// Fix to allow v.setDescLabels("#123") to be bypassed for a patch in issue #360. Reenable later.
+	// log.Panicf("Could not find a string for the key '%s'", key)
+	return key
 }
 
 // LoadPaletteTransform loads a palette transform file

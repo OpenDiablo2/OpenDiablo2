@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -183,7 +182,7 @@ func (s *skillTree) loadForHeroType() {
 	s.availSPLabel = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
 	s.availSPLabel.SetPosition(availSPLabelX, availSPLabelY)
 	s.availSPLabel.Alignment = d2gui.HorizontalAlignCenter
-	s.availSPLabel.SetText(makeTabString("StrSklTree1", "StrSklTree2", "StrSklTree3"))
+	s.availSPLabel.SetText(s.makeTabString("StrSklTree1", "StrSklTree2", "StrSklTree3"))
 }
 
 type heroTabData struct {
@@ -192,7 +191,7 @@ type heroTabData struct {
 	closeButtonPos   [numTabs]int
 }
 
-func makeTabString(keys ...interface{}) string {
+func (s *skillTree) makeTabString(keys ...interface{}) string {
 	translations := make([]interface{}, len(keys))
 
 	token := "%s"
@@ -203,7 +202,7 @@ func makeTabString(keys ...interface{}) string {
 			format += "\n" + token
 		}
 
-		translations[idx] = d2tbl.TranslateString(key.(string))
+		translations[idx] = s.asset.TranslateString(key.(string))
 	}
 
 	return fmt.Sprintf(format, translations...)
@@ -220,9 +219,9 @@ func (s *skillTree) getTab(class d2enum.Hero) *heroTabData {
 				skillPanelPath: d2resource.SkillsPanelBarbarian,
 				skillIconPath:  d2resource.BarbarianSkills,
 			},
-			makeTabString("StrSklTree21", "StrSklTree4"),
-			makeTabString("StrSklTree21", "StrSklTree22"),
-			makeTabString("StrSklTree20"),
+			s.makeTabString("StrSklTree21", "StrSklTree4"),
+			s.makeTabString("StrSklTree21", "StrSklTree22"),
+			s.makeTabString("StrSklTree20"),
 			makeCloseButtonPos(
 				skillCloseButtonXRight,
 				skillCloseButtonXLeft,
@@ -233,9 +232,9 @@ func (s *skillTree) getTab(class d2enum.Hero) *heroTabData {
 				skillPanelPath: d2resource.SkillsPanelNecromancer,
 				skillIconPath:  d2resource.NecromancerSkills,
 			},
-			makeTabString("StrSklTree19"),
-			makeTabString("StrSklTree17", "StrSklTree18", "StrSklTree5"),
-			makeTabString("StrSklTree16", "StrSklTree5"),
+			s.makeTabString("StrSklTree19"),
+			s.makeTabString("StrSklTree17", "StrSklTree18", "StrSklTree5"),
+			s.makeTabString("StrSklTree16", "StrSklTree5"),
 			makeCloseButtonPos(
 				skillCloseButtonXLeft,
 				skillCloseButtonXRight,
@@ -246,9 +245,9 @@ func (s *skillTree) getTab(class d2enum.Hero) *heroTabData {
 				skillPanelPath: d2resource.SkillsPanelPaladin,
 				skillIconPath:  d2resource.PaladinSkills,
 			},
-			makeTabString("StrSklTree15", "StrSklTree4"),
-			makeTabString("StrSklTree14", "StrSklTree13"),
-			makeTabString("StrSklTree12", "StrSklTree13"),
+			s.makeTabString("StrSklTree15", "StrSklTree4"),
+			s.makeTabString("StrSklTree14", "StrSklTree13"),
+			s.makeTabString("StrSklTree12", "StrSklTree13"),
 			makeCloseButtonPos(
 				skillCloseButtonXLeft,
 				skillCloseButtonXMiddle,
@@ -259,9 +258,9 @@ func (s *skillTree) getTab(class d2enum.Hero) *heroTabData {
 				skillPanelPath: d2resource.SkillsPanelAssassin,
 				skillIconPath:  d2resource.AssassinSkills,
 			},
-			makeTabString("StrSklTree30"),
-			makeTabString("StrSklTree31", "StrSklTree32"),
-			makeTabString("StrSklTree33", "StrSklTree34"),
+			s.makeTabString("StrSklTree30"),
+			s.makeTabString("StrSklTree31", "StrSklTree32"),
+			s.makeTabString("StrSklTree33", "StrSklTree34"),
 			makeCloseButtonPos(
 				skillCloseButtonXMiddle,
 				skillCloseButtonXRight,
@@ -272,9 +271,9 @@ func (s *skillTree) getTab(class d2enum.Hero) *heroTabData {
 				skillPanelPath: d2resource.SkillsPanelSorcerer,
 				skillIconPath:  d2resource.SorcererSkills,
 			},
-			makeTabString("StrSklTree25", "StrSklTree5"),
-			makeTabString("StrSklTree24", "StrSklTree5"),
-			makeTabString("StrSklTree23", "StrSklTree5"),
+			s.makeTabString("StrSklTree25", "StrSklTree5"),
+			s.makeTabString("StrSklTree24", "StrSklTree5"),
+			s.makeTabString("StrSklTree23", "StrSklTree5"),
 			makeCloseButtonPos(
 				skillCloseButtonXLeft,
 				skillCloseButtonXLeft,
@@ -285,9 +284,9 @@ func (s *skillTree) getTab(class d2enum.Hero) *heroTabData {
 				skillPanelPath: d2resource.SkillsPanelAmazon,
 				skillIconPath:  d2resource.AmazonSkills,
 			},
-			makeTabString("StrSklTree10", "StrSklTree11", "StrSklTree4"),
-			makeTabString("StrSklTree8", "StrSklTree9", "StrSklTree4"),
-			makeTabString("StrSklTree6", "StrSklTree7", "StrSklTree4"),
+			s.makeTabString("StrSklTree10", "StrSklTree11", "StrSklTree4"),
+			s.makeTabString("StrSklTree8", "StrSklTree9", "StrSklTree4"),
+			s.makeTabString("StrSklTree6", "StrSklTree7", "StrSklTree4"),
 			makeCloseButtonPos(
 				skillCloseButtonXRight,
 				skillCloseButtonXMiddle,
@@ -298,9 +297,9 @@ func (s *skillTree) getTab(class d2enum.Hero) *heroTabData {
 				skillPanelPath: d2resource.SkillsPanelDruid,
 				skillIconPath:  d2resource.DruidSkills,
 			},
-			makeTabString("StrSklTree26"),
-			makeTabString("StrSklTree27", "StrSklTree28"),
-			makeTabString("StrSklTree29"),
+			s.makeTabString("StrSklTree26"),
+			s.makeTabString("StrSklTree27", "StrSklTree28"),
+			s.makeTabString("StrSklTree29"),
 			makeCloseButtonPos(
 				skillCloseButtonXRight,
 				skillCloseButtonXRight,

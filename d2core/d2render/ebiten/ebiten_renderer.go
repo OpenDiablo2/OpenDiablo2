@@ -69,13 +69,13 @@ func (r *Renderer) Layout(_, _ int) (width, height int) {
 }
 
 // CreateRenderer creates an ebiten renderer instance
-func CreateRenderer() (*Renderer, error) {
+func CreateRenderer(cfg *d2config.Configuration) (*Renderer, error) {
 	result := &Renderer{
 		GlyphPrinter: d2util.NewDebugPrinter(),
 	}
 
-	if d2config.Config != nil {
-		config := d2config.Config
+	if cfg != nil {
+		config := cfg
 
 		ebiten.SetCursorMode(ebiten.CursorModeHidden)
 		ebiten.SetFullscreen(config.FullScreen)

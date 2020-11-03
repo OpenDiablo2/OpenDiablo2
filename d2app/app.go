@@ -23,7 +23,6 @@ import (
 	"golang.org/x/image/colornames"
 	"gopkg.in/alecthomas/kingpin.v2"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -73,6 +72,8 @@ type App struct {
 	ui                *d2ui.UIManager
 	tAllocSamples     *ring.Ring
 	guiManager        *d2gui.GuiManager
+	config            *d2config.Configuration
+	errorMessage      error
 	*Options
 }
 
@@ -99,12 +100,20 @@ const (
 
 // Create creates a new instance of the application
 func Create(gitBranch, gitCommit string) *App {
+	assetManager, assetError := d2asset.NewAssetManager()
+
+	// we can throw away the error here because by this time it's already been loaded
+	config, _ := assetManager.LoadConfig()
+
 	return &App{
 		gitBranch: gitBranch,
 		gitCommit: gitCommit,
+		asset:     assetManager,
+		config:    config,
 		Options: &Options{
 			Server: &d2networking.ServerOptions{},
 		},
+		errorMessage: assetError,
 	}
 }
 
@@ -113,20 +122,6 @@ func updateNOOP() error {
 }
 
 func (a *App) startDedicatedServer() error {
-	// hack, for now we need to create the asset manager here
-	// Attempt to load the configuration file
-	err := d2config.Load()
-	if err != nil {
-		return err
-	}
-
-	asset, err := d2asset.NewAssetManager(d2config.Config, *a.Options.LogLevel)
-	if err != nil {
-		return err
-	}
-
-	a.asset = asset
-
 	min, max := d2networking.ServerMinPlayers, d2networking.ServerMaxPlayersDefault
 	maxPlayers := d2math.ClampInt(*a.Options.Server.MaxPlayers, min, max)
 
@@ -154,35 +149,27 @@ func (a *App) startDedicatedServer() error {
 }
 
 func (a *App) loadEngine() error {
-	// Attempt to load the configuration file
-	configError := d2config.Load()
-
 	// Create our renderer
-	renderer, err := ebiten.CreateRenderer()
+	renderer, err := ebiten.CreateRenderer(a.config)
 	if err != nil {
 		return err
 	}
 
 	a.renderer = renderer
 
-	// If we failed to load our config, lets show the boot panic screen
-	if configError != nil {
-		return configError
+	if a.errorMessage != nil {
+		return a.renderer.Run(a.updateInitError, updateNOOP, 800, 600, "OpenDiablo2")
 	}
 
 	// if the log level was specified at the command line, use it
 	logLevel := *a.Options.LogLevel
 	if logLevel == d2util.LogLevelUnspecified {
-		logLevel = d2config.Config.LogLevel
+		logLevel = a.config.LogLevel
 	}
 
-	// Create the asset manager
-	asset, err := d2asset.NewAssetManager(d2config.Config, logLevel)
-	if err != nil {
-		return err
-	}
+	a.asset.SetLogLevel(logLevel)
 
-	audio := ebiten2.CreateAudio(asset)
+	audio := ebiten2.CreateAudio(a.asset)
 
 	inputManager := d2input.NewInputManager()
 
@@ -191,21 +178,20 @@ func (a *App) loadEngine() error {
 		return err
 	}
 
-	err = asset.BindTerminalCommands(term)
+	err = a.asset.BindTerminalCommands(term)
 	if err != nil {
 		return err
 	}
 
 	scriptEngine := d2script.CreateScriptEngine()
 
-	uiManager := d2ui.NewUIManager(asset, renderer, inputManager, audio)
+	uiManager := d2ui.NewUIManager(a.asset, renderer, inputManager, audio)
 
 	a.inputManager = inputManager
 	a.terminal = term
 	a.scriptEngine = scriptEngine
 	a.audio = audio
 	a.ui = uiManager
-	a.asset = asset
 	a.tAllocSamples = createZeroedRing(nSamplesTAlloc)
 
 	if a.gitBranch == "" {
@@ -273,6 +259,13 @@ func (a *App) Run() error {
 		return fmt.Errorf(fmtVersion, a.gitBranch, a.gitCommit)
 	}
 
+	logLevel := *a.Options.LogLevel
+	if logLevel == d2util.LogLevelUnspecified {
+		logLevel = a.config.LogLevel
+	}
+
+	a.asset.SetLogLevel(logLevel)
+
 	// start profiler if argument was supplied
 	if len(*a.Options.profiler) > 0 {
 		profiler := enableProfiler(*a.Options.profiler)
@@ -296,7 +289,11 @@ func (a *App) Run() error {
 	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", a.gitBranch)
 	// If we fail to initialize, we will show the error screen
 	if err := a.initialize(); err != nil {
-		if gameErr := a.renderer.Run(updateInitError, updateNOOP, 800, 600,
+		if a.errorMessage == nil {
+			a.errorMessage = err // if there was an error during init, don't clobber it
+		}
+
+		if gameErr := a.renderer.Run(a.updateInitError, updateNOOP, 800, 600,
 			windowTitle); gameErr != nil {
 			return gameErr
 		}
@@ -352,8 +349,7 @@ func (a *App) initialize() error {
 
 	a.screen = d2screen.NewScreenManager(a.ui, a.guiManager)
 
-	config := d2config.Config
-	a.audio.SetVolumes(config.BgmVolume, config.SfxVolume)
+	a.audio.SetVolumes(a.config.BgmVolume, a.config.SfxVolume)
 
 	if err := a.loadStrings(); err != nil {
 		return err
@@ -372,12 +368,10 @@ func (a *App) loadStrings() error {
 	}
 
 	for _, tablePath := range tablePaths {
-		data, err := a.asset.LoadFile(tablePath)
+		_, err := a.asset.LoadStringTable(tablePath)
 		if err != nil {
 			return err
 		}
-
-		d2tbl.LoadTextDictionary(data)
 	}
 
 	return nil
@@ -727,11 +721,10 @@ func enableProfiler(profileOption string) interface{ Stop() } {
 	return nil
 }
 
-func updateInitError(target d2interface.Surface) error {
+func (a *App) updateInitError(target d2interface.Surface) error {
 	target.Clear(colornames.Darkred)
 	target.PushTranslation(errMsgPadding, errMsgPadding)
-	target.DrawTextf(`Could not find the MPQ files in the directory: 
-		%s\nPlease put the files and re-run the game.`, d2config.Config.MpqPath)
+	target.DrawTextf(a.errorMessage.Error())
 
 	return nil
 }
