@@ -2,15 +2,12 @@ package d2config
 
 import (
 	"encoding/json"
-	"log"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
-
-// Config holds the configuration from config.json
-var Config *Configuration //nolint:gochecknoglobals // Currently global by design
 
 // Configuration defines the configuration for the engine, loaded from config.json
 type Configuration struct {
@@ -29,72 +26,19 @@ type Configuration struct {
 	path            string
 }
 
-// Load loads a configuration object from disk
-func Load() error {
-	Config = new(Configuration)
-
-	if Config.Load() != nil {
-		return Config.Save()
-	}
-
-	return nil
-}
-
-// Load loads a configuration object from disk
-func (c *Configuration) Load() error {
-	configPaths := []string{
-		defaultConfigPath(),
-		localConfigPath(),
-	}
-
-	for _, configPath := range configPaths {
-		log.Printf("loading configuration file from %s...", configPath)
-
-		if _, err := os.Stat(configPath); os.IsNotExist(err) {
-			continue
-		}
-
-		configFile, err := os.Open(path.Clean(configPath))
-		if err != nil {
-			return err
-		}
-
-		if err := json.NewDecoder(configFile).Decode(&Config); err != nil {
-			return err
-		}
-
-		if err := configFile.Close(); err != nil {
-			return err
-		}
-
-		c.path = configPath
-
-		return nil
-	}
-
-	log.Println("failed to load configuration file, saving default configuration...")
-
-	Config = defaultConfig()
-
-	return Config.Save()
-}
-
 // Save saves the configuration object to disk
 func (c *Configuration) Save() error {
-	configPath := defaultConfigPath()
-	log.Printf("saving configuration file to %s...", configPath)
-
-	configDir := path.Dir(configPath)
+	configDir := path.Dir(c.path)
 	if err := os.MkdirAll(configDir, 0750); err != nil {
 		return err
 	}
 
-	configFile, err := os.Create(configPath)
+	configFile, err := os.Create(c.path)
 	if err != nil {
 		return err
 	}
 
-	buf, err := json.MarshalIndent(Config, "", "  ")
+	buf, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -106,23 +50,22 @@ func (c *Configuration) Save() error {
 	return configFile.Close()
 }
 
-// Path returns the path of the config file
-func (c *Configuration) Path() string {
-	if c.path == "" {
-		c.path = defaultConfigPath()
-	}
+// Dir returns the directory component of the path
+func (c *Configuration) Dir() string {
+	return filepath.Dir(c.path)
+}
 
+// Base returns the base component of the path
+func (c *Configuration) Base() string {
+	return filepath.Base(c.path)
+}
+
+// Path returns the config file path
+func (c *Configuration) Path() string {
 	return c.path
 }
 
-func defaultConfigPath() string {
-	if configDir, err := os.UserConfigDir(); err == nil {
-		return path.Join(configDir, "OpenDiablo2", "config.json")
-	}
-
-	return localConfigPath()
-}
-
-func localConfigPath() string {
-	return path.Join(path.Dir(os.Args[0]), "config.json")
+// SetPath sets where the config file is saved to (a full path)
+func (c *Configuration) SetPath(p string) {
+	c.path = p
 }

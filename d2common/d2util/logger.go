@@ -37,10 +37,10 @@ const colorEscapeReset = "\033[0m"
 // Log format strings for log levels
 const (
 	fmtPrefix     = "[%s]"
-	LogFmtDebug   = "[DEBUG]" + colorEscapeReset + " %s"
-	LogFmtInfo    = "[INFO]" + colorEscapeReset + " %s"
-	LogFmtWarning = "[WARNING]" + colorEscapeReset + " %s"
-	LogFmtError   = "[ERROR]" + colorEscapeReset + " %s"
+	LogFmtDebug   = "[DEBUG]" + colorEscapeReset + " %s\r\n"
+	LogFmtInfo    = "[INFO]" + colorEscapeReset + " %s\r\n"
+	LogFmtWarning = "[WARNING]" + colorEscapeReset + " %s\r\n"
+	LogFmtError   = "[ERROR]" + colorEscapeReset + " %s\r\n"
 )
 
 // NewLogger creates a new logger with a default
@@ -73,6 +73,10 @@ func (l *Logger) SetPrefix(s string) {
 
 // SetLevel sets the log level
 func (l *Logger) SetLevel(level LogLevel) {
+	if level == LogLevelUnspecified {
+		level = LogLevelDefault
+	}
+
 	l.level = level
 }
 
