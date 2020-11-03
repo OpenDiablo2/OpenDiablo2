@@ -6,7 +6,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 )
 
@@ -217,7 +216,8 @@ func (s *diablo2Stat) SetValues(values ...d2stats.StatValue) {
 // Clone returns a deep copy of the diablo2Stat
 func (s *diablo2Stat) Clone() d2stats.Stat {
 	clone := &diablo2Stat{
-		record: s.record,
+		factory: s.factory,
+		record:  s.record,
 	}
 
 	clone.init()
@@ -400,7 +400,7 @@ func (s *diablo2Stat) descFn1() string {
 		stringTableKey = s.record.DescStrPos
 	}
 
-	stringTableString := d2tbl.TranslateString(stringTableKey)
+	stringTableString := s.factory.asset.TranslateString(stringTableKey)
 
 	switch descValPosition(s.record.DescVal) {
 	case descValPrefix:
@@ -429,8 +429,8 @@ func (s *diablo2Stat) descFn6() string {
 		stringTableKey = s.record.DescStrPos
 	}
 
-	str1 := d2tbl.TranslateString(stringTableKey)
-	str2 := d2tbl.TranslateString(s.record.DescStr2)
+	str1 := s.factory.asset.TranslateString(stringTableKey)
+	str2 := s.factory.asset.TranslateString(s.record.DescStr2)
 
 	switch descValPosition(s.record.DescVal) {
 	case descValPrefix:
@@ -460,8 +460,8 @@ func (s *diablo2Stat) descFn9() string {
 		stringTableKey = s.record.DescStrPos
 	}
 
-	str1 := d2tbl.TranslateString(stringTableKey)
-	str2 := d2tbl.TranslateString(s.record.DescStr2)
+	str1 := s.factory.asset.TranslateString(stringTableKey)
+	str2 := s.factory.asset.TranslateString(s.record.DescStr2)
 
 	switch descValPosition(s.record.DescVal) {
 	case descValPrefix:
@@ -488,7 +488,7 @@ func (s *diablo2Stat) descFn11() string {
 		stringTableKey = s.record.DescStrPos
 	}
 
-	str1 := d2tbl.TranslateString(stringTableKey)
+	str1 := s.factory.asset.TranslateString(stringTableKey)
 
 	formatString := str1
 
@@ -531,7 +531,7 @@ func (s *diablo2Stat) descFn14() string {
 
 	// `to Combat Skills`
 	skillTabKey := classRecord.SkillStrTab[skillTabIndex]
-	skillTabStr := d2tbl.TranslateString(skillTabKey)
+	skillTabStr := s.factory.asset.TranslateString(skillTabKey)
 	skillTabStr = strings.ReplaceAll(skillTabStr, "+%d ", "") // has a token we dont need
 
 	// `(Paladin Only)`
@@ -544,7 +544,7 @@ func (s *diablo2Stat) descFn15() string {
 	chance, lvl, skill := s.values[0], s.values[1], s.values[2]
 
 	// Special case, `chance to cast` format is actually in the string table!
-	chanceToCastStr := d2tbl.TranslateString(s.record.DescStrPos)
+	chanceToCastStr := s.factory.asset.TranslateString(s.record.DescStrPos)
 
 	return fmt.Sprintf(chanceToCastStr, chance.Int(), lvl.Int(), skill)
 }
@@ -553,14 +553,14 @@ func (s *diablo2Stat) descFn16() string {
 	skillLevel, skillIndex := s.values[0], s.values[1]
 
 	// Special case, `Level # XYZ Aura When Equipped`, format is actually in the string table!
-	format := d2tbl.TranslateString(s.record.DescStrPos)
+	format := s.factory.asset.TranslateString(s.record.DescStrPos)
 
 	return fmt.Sprintf(format, skillLevel.Int(), skillIndex)
 }
 
 func (s *diablo2Stat) descFn22() string {
 	arBonus, monsterIndex := s.values[0], s.values[1]
-	arVersus := d2tbl.TranslateString(s.record.DescStrPos)
+	arVersus := s.factory.asset.TranslateString(s.record.DescStrPos)
 
 	return fmt.Sprintf(threeComponentStr, arBonus, arVersus, monsterIndex)
 }
@@ -574,7 +574,7 @@ func (s *diablo2Stat) descFn24() string {
 		s.values[2].Int(),
 		s.values[3].Int()
 
-	chargeStr := d2tbl.TranslateString(s.record.DescStrPos)
+	chargeStr := s.factory.asset.TranslateString(s.record.DescStrPos)
 	chargeStr = fmt.Sprintf(chargeStr, chargeCurrent, chargeMax)
 
 	return fmt.Sprintf(format, lvl, skill, chargeStr)
