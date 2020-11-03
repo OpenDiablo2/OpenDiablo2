@@ -4,6 +4,8 @@ import (
 	"errors"
 	"image"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 
@@ -34,6 +36,7 @@ var _ d2interface.Renderer = &Renderer{}
 type Renderer struct {
 	updateCallback
 	renderCallback
+	*d2util.GlyphPrinter
 	lastRenderError error
 }
 
@@ -67,7 +70,9 @@ func (r *Renderer) Layout(_, _ int) (width, height int) {
 
 // CreateRenderer creates an ebiten renderer instance
 func CreateRenderer(cfg *d2config.Configuration) (*Renderer, error) {
-	result := &Renderer{}
+	result := &Renderer{
+		GlyphPrinter: d2util.NewDebugPrinter(),
+	}
 
 	if cfg != nil {
 		config := cfg
