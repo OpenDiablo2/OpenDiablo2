@@ -87,7 +87,8 @@ func TestLoader_AddSource(t *testing.T) {
 func TestLoader_Load(t *testing.T) {
 	loader, _ := NewLoader(d2util.LogLevelDefault)
 
-	_, err := loader.AddSource(sourcePathB) // we expect files common to any source to come from here
+	// we expect files common to any source to come from here
+	commonSource, err := loader.AddSource(sourcePathB)
 	if err != nil {
 		t.Fail()
 		log.Print(err)
@@ -123,7 +124,7 @@ func TestLoader_Load(t *testing.T) {
 
 	if entryCommon == nil || errCommon != nil {
 		t.Error("common entry should exist")
-	} else if entryCommon.Source() != loader.Sources[0] {
+	} else if entryCommon.Source() != commonSource {
 		t.Error("common entry should come from the first loader source")
 	}
 
