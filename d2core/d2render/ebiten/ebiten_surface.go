@@ -11,7 +11,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 // static check that we implement our interface
@@ -208,7 +207,7 @@ func (s *ebitenSurface) handleStateEffect(opts *ebiten.DrawImageOptions) {
 // DrawTextf renders the string to the surface with the given format string and a set of parameters
 func (s *ebitenSurface) DrawTextf(format string, params ...interface{}) {
 	str := fmt.Sprintf(format, params...)
-	d2util.DebugPrinter.PrintAt(s.image, str, s.stateCurrent.x, s.stateCurrent.y)
+	s.Renderer().PrintAt(s.image, str, s.stateCurrent.x, s.stateCurrent.y)
 }
 
 // DrawLine draws a line
