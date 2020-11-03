@@ -23,7 +23,6 @@ import (
 	"golang.org/x/image/colornames"
 	"gopkg.in/alecthomas/kingpin.v2"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -372,12 +371,10 @@ func (a *App) loadStrings() error {
 	}
 
 	for _, tablePath := range tablePaths {
-		data, err := a.asset.LoadFile(tablePath)
+		_, err := a.asset.LoadStringTable(tablePath)
 		if err != nil {
 			return err
 		}
-
-		d2tbl.LoadTextDictionary(data)
 	}
 
 	return nil

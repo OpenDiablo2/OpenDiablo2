@@ -2,6 +2,7 @@ package d2asset
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
@@ -23,7 +24,7 @@ func NewAssetManager(config *d2config.Configuration, l d2util.LogLevel) (*AssetM
 	manager := &AssetManager{
 		d2util.NewLogger(),
 		loader,
-		d2cache.CreateCache(tableBudget),
+		make([]d2tbl.TextDictionary, 0),
 		d2cache.CreateCache(animationBudget),
 		d2cache.CreateCache(fontBudget),
 		d2cache.CreateCache(paletteBudget),
