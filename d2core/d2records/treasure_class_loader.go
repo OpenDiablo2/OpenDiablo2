@@ -2,7 +2,6 @@ package d2records
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
@@ -21,7 +20,7 @@ func treasureClassLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.Treasure.Normal = records
 
-	log.Printf("Loaded %d treasure class (normal) records", len(records))
+	r.Logger.Infof("Loaded %d treasure class (normal) records", len(records))
 
 	return nil
 }
@@ -34,7 +33,7 @@ func treasureClassExLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.Treasure.Expansion = records
 
-	log.Printf("Loaded %d treasure class (expansion) records", len(records))
+	r.Logger.Infof("Loaded %d treasure class (expansion) records", len(records))
 
 	return nil
 }

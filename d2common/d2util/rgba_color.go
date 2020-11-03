@@ -2,7 +2,7 @@ package d2util
 
 import "image/color"
 
-// Color converts an rgba uint32 to a color.RGBA
+// Color converts an rgba uint32 to a colorEnabled.RGBA
 func Color(rgba uint32) color.RGBA {
 	result := color.RGBA{}
 	a, b, g, r := 0, 1, 2, 3

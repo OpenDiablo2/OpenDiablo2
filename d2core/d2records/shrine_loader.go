@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
@@ -33,7 +31,7 @@ func shrineLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Object.Shrines = records
 
-	log.Printf("Loaded %d shrines", len(records))
+	r.Logger.Infof("Loaded %d shrines", len(records))
 
 	return nil
 }

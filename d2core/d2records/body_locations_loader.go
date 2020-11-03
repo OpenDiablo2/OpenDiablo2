@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
@@ -21,7 +19,7 @@ func bodyLocationsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		panic(d.Err)
 	}
 
-	log.Printf("Loaded %d Body Location records", len(records))
+	r.Logger.Infof("Loaded %d Body Location records", len(records))
 
 	r.BodyLocations = records
 

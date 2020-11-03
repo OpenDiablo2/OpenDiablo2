@@ -1,7 +1,6 @@
 package d2data
 
 import (
-	"log"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2datautils"
@@ -51,8 +50,6 @@ func LoadAnimationData(rawData []byte) AnimationData {
 			animdata[cofIndex] = append(animdata[cofIndex], data)
 		}
 	}
-
-	log.Printf("Loaded %d animation data records", len(animdata))
 
 	return animdata
 }

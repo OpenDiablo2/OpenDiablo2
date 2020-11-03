@@ -3,7 +3,8 @@ package d2asset
 import (
 	"fmt"
 	"image/color"
-	"log"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 
@@ -39,6 +40,7 @@ const (
 
 // AssetManager loads files and game objects
 type AssetManager struct {
+	logger     *d2util.Logger
 	loader     *d2loader.Loader
 	tables     d2interface.Cache
 	animations d2interface.Cache
@@ -49,14 +51,7 @@ type AssetManager struct {
 }
 
 func (am *AssetManager) init() error {
-	rm, err := d2records.NewRecordManager()
-	if err != nil {
-		return err
-	}
-
-	am.Records = rm
-
-	err = am.initDataDictionaries()
+	err := am.initDataDictionaries()
 	if err != nil {
 		return err
 	}
@@ -66,90 +61,37 @@ func (am *AssetManager) init() error {
 
 func (am *AssetManager) initDataDictionaries() error {
 	dictPaths := []string{
-		d2resource.LevelType,
-		d2resource.LevelPreset,
-		d2resource.LevelWarp,
-		d2resource.ObjectType,
-		d2resource.ObjectDetails,
-		d2resource.Weapons,
-		d2resource.Armor,
-		d2resource.Misc,
-		d2resource.Books,
-		d2resource.ItemTypes,
-		d2resource.UniqueItems,
-		d2resource.Missiles,
-		d2resource.SoundSettings,
-		d2resource.MonStats,
-		d2resource.MonStats2,
-		d2resource.MonPreset,
-		d2resource.MonProp,
-		d2resource.MonType,
-		d2resource.MonMode,
-		d2resource.MagicPrefix,
-		d2resource.MagicSuffix,
-		d2resource.ItemStatCost,
-		d2resource.ItemRatio,
-		d2resource.StorePage,
-		d2resource.Overlays,
-		d2resource.CharStats,
-		d2resource.Hireling,
-		d2resource.Experience,
-		d2resource.Gems,
-		d2resource.QualityItems,
-		d2resource.Runes,
-		d2resource.DifficultyLevels,
-		d2resource.AutoMap,
-		d2resource.LevelDetails,
-		d2resource.LevelMaze,
-		d2resource.LevelSubstitutions,
-		d2resource.CubeRecipes,
-		d2resource.SuperUniques,
-		d2resource.Inventory,
-		d2resource.Skills,
-		d2resource.SkillCalc,
-		d2resource.MissileCalc,
-		d2resource.Properties,
-		d2resource.SkillDesc,
-		d2resource.BodyLocations,
-		d2resource.Sets,
-		d2resource.SetItems,
-		d2resource.AutoMagic,
-		d2resource.TreasureClass,
-		d2resource.TreasureClassEx,
-		d2resource.States,
-		d2resource.SoundEnvirons,
-		d2resource.Shrines,
-		d2resource.ElemType,
-		d2resource.PlrMode,
-		d2resource.PetType,
-		d2resource.NPC,
-		d2resource.MonsterUniqueModifier,
-		d2resource.MonsterEquipment,
-		d2resource.UniqueAppellation,
-		d2resource.MonsterLevel,
-		d2resource.MonsterSound,
-		d2resource.MonsterSequence,
-		d2resource.PlayerClass,
-		d2resource.MonsterPlacement,
-		d2resource.ObjectGroup,
-		d2resource.CompCode,
-		d2resource.MonsterAI,
-		d2resource.RarePrefix,
-		d2resource.RareSuffix,
-		d2resource.Events,
-		d2resource.Colors,
-		d2resource.ArmorType,
-		d2resource.WeaponClass,
-		d2resource.PlayerType,
-		d2resource.Composite,
-		d2resource.HitClass,
-		d2resource.UniquePrefix,
-		d2resource.UniqueSuffix,
-		d2resource.CubeModifier,
-		d2resource.CubeType,
-		d2resource.HirelingDescription,
+		d2resource.LevelType, d2resource.LevelPreset, d2resource.LevelWarp,
+		d2resource.ObjectType, d2resource.ObjectDetails, d2resource.Weapons,
+		d2resource.Armor, d2resource.Misc, d2resource.Books, d2resource.ItemTypes,
+		d2resource.UniqueItems, d2resource.Missiles, d2resource.SoundSettings,
+		d2resource.MonStats, d2resource.MonStats2, d2resource.MonPreset,
+		d2resource.MonProp, d2resource.MonType, d2resource.MonMode,
+		d2resource.MagicPrefix, d2resource.MagicSuffix, d2resource.ItemStatCost,
+		d2resource.ItemRatio, d2resource.StorePage, d2resource.Overlays,
+		d2resource.CharStats, d2resource.Hireling, d2resource.Experience,
+		d2resource.Gems, d2resource.QualityItems, d2resource.Runes,
+		d2resource.DifficultyLevels, d2resource.AutoMap, d2resource.LevelDetails,
+		d2resource.LevelMaze, d2resource.LevelSubstitutions, d2resource.CubeRecipes,
+		d2resource.SuperUniques, d2resource.Inventory, d2resource.Skills,
+		d2resource.SkillCalc, d2resource.MissileCalc, d2resource.Properties,
+		d2resource.SkillDesc, d2resource.BodyLocations, d2resource.Sets,
+		d2resource.SetItems, d2resource.AutoMagic, d2resource.TreasureClass,
+		d2resource.TreasureClassEx, d2resource.States, d2resource.SoundEnvirons,
+		d2resource.Shrines, d2resource.ElemType, d2resource.PlrMode,
+		d2resource.PetType, d2resource.NPC, d2resource.MonsterUniqueModifier,
+		d2resource.MonsterEquipment, d2resource.UniqueAppellation, d2resource.MonsterLevel,
+		d2resource.MonsterSound, d2resource.MonsterSequence, d2resource.PlayerClass,
+		d2resource.MonsterPlacement, d2resource.ObjectGroup, d2resource.CompCode,
+		d2resource.MonsterAI, d2resource.RarePrefix, d2resource.RareSuffix,
+		d2resource.Events, d2resource.Colors, d2resource.ArmorType,
+		d2resource.WeaponClass, d2resource.PlayerType, d2resource.Composite,
+		d2resource.HitClass, d2resource.UniquePrefix, d2resource.UniqueSuffix,
+		d2resource.CubeModifier, d2resource.CubeType, d2resource.HirelingDescription,
 		d2resource.LowQualityItems,
 	}
+
+	am.logger.Info("Initializing asset manager")
 
 	for _, path := range dictPaths {
 		err := am.LoadRecords(path)
@@ -166,11 +108,26 @@ func (am *AssetManager) initDataDictionaries() error {
 	return nil
 }
 
+const (
+	logPrefix          = "Asset Manager"
+	fmtLoadAsset       = "could not load file stream %s (%v)"
+	fmtLoadAnimation   = "loading animation %s with palette %s, draw effect %d"
+	fmtLoadComposite   = "loading composite: type %d, token %s, palette %s"
+	fmtLoadFont        = "loading font: table %s, sprite %s, palette %s"
+	fmtLoadPalette     = "loading palette %s"
+	fmtLoadStringTable = "loading string table: %s"
+	fmtLoadTransform   = "loading palette transform: %s"
+	fmtLoadDict        = "loading data dictionary: %s"
+	fmtLoadAnimData    = "loading animation data from: %s"
+)
+
 // LoadAsset loads an asset
 func (am *AssetManager) LoadAsset(filePath string) (asset.Asset, error) {
 	data, err := am.loader.Load(filePath)
 	if err != nil {
-		log.Printf("error loading file stream %s (%v)", filePath, err.Error())
+		errStr := fmt.Sprintf(fmtLoadAsset, filePath, err.Error())
+
+		am.logger.Error(errStr)
 	}
 
 	return data, err
@@ -219,6 +176,8 @@ func (am *AssetManager) LoadAnimationWithEffect(animationPath, palettePath strin
 		return animation.(d2interface.Animation).Clone(), nil
 	}
 
+	am.logger.Debug(fmt.Sprintf(fmtLoadAnimation, animationPath, palettePath, effect))
+
 	animAsset, err := am.LoadAsset(animationPath)
 	if err != nil {
 		return nil, err
@@ -253,6 +212,8 @@ func (am *AssetManager) LoadAnimationWithEffect(animationPath, palettePath strin
 
 // LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it
 func (am *AssetManager) LoadComposite(baseType d2enum.ObjectType, token, palettePath string) (*Composite, error) {
+	am.logger.Debug(fmt.Sprintf(fmtLoadComposite, baseType, token, palettePath))
+
 	c := &Composite{
 		AssetManager: am,
 		baseType:     baseType,
@@ -288,6 +249,8 @@ func (am *AssetManager) LoadFont(tablePath, spritePath, palettePath string) (*Fo
 		return nil, fmt.Errorf("invalid font table format: %s", tablePath)
 	}
 
+	am.logger.Debug(fmt.Sprintf(fmtLoadFont, tablePath, spritePath, palettePath))
+
 	font := &Font{
 		table: tableData,
 		sheet: sheet,
@@ -313,6 +276,8 @@ func (am *AssetManager) LoadPalette(palettePath string) (d2interface.Palette, er
 	if paletteAsset.Type() != types.AssetTypePalette {
 		return nil, fmt.Errorf("not an instance of a palette: %s", palettePath)
 	}
+
+	am.logger.Debug(fmt.Sprintf(fmtLoadPalette, palettePath))
 
 	data, err := am.LoadFile(palettePath)
 	if err != nil {
@@ -345,6 +310,8 @@ func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary,
 		return nil, fmt.Errorf("table not found: %s", tablePath)
 	}
 
+	am.logger.Debug(fmt.Sprintf(fmtLoadStringTable, tablePath))
+
 	err = am.tables.Insert(tablePath, table, defaultCacheEntryWeight)
 
 	return table, err
@@ -366,6 +333,8 @@ func (am *AssetManager) LoadPaletteTransform(path string) (*d2pl2.PL2, error) {
 		return nil, err
 	}
 
+	am.logger.Debug(fmt.Sprintf(fmtLoadTransform, path))
+
 	if err := am.transforms.Insert(path, pl2, 1); err != nil {
 		return nil, err
 	}
@@ -385,6 +354,8 @@ func (am *AssetManager) LoadDataDictionary(path string) (*d2txt.DataDictionary, 
 	if err != nil {
 		return nil, err
 	}
+
+	am.logger.Debug(fmt.Sprintf(fmtLoadDict, path))
 
 	return d2txt.LoadDataDictionary(data), nil
 }
@@ -450,7 +421,11 @@ func (am *AssetManager) initAnimationData(path string) error {
 		return err
 	}
 
+	am.logger.Debug(fmt.Sprintf(fmtLoadAnimData, path))
+
 	animData := d2data.LoadAnimationData(animDataBytes)
+
+	am.logger.Infof("Loaded %d animation data records", len(animData))
 
 	am.Records.Animation.Data = animData
 

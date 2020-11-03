@@ -2,11 +2,11 @@ package d2config
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"os"
 	"path"
-	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 // Config holds the configuration from config.json
@@ -25,12 +25,19 @@ type Configuration struct {
 	RunInBackground bool
 	VsyncEnabled    bool
 	Backend         string
+	LogLevel        d2util.LogLevel
+	path            string
 }
 
 // Load loads a configuration object from disk
 func Load() error {
 	Config = new(Configuration)
-	return Config.Load()
+
+	if Config.Load() != nil {
+		return Config.Save()
+	}
+
+	return nil
 }
 
 // Load loads a configuration object from disk
@@ -60,9 +67,7 @@ func (c *Configuration) Load() error {
 			return err
 		}
 
-		if err := verifyMpqFileReferences(); err != nil {
-			return err
-		}
+		c.path = configPath
 
 		return nil
 	}
@@ -70,10 +75,6 @@ func (c *Configuration) Load() error {
 	log.Println("failed to load configuration file, saving default configuration...")
 
 	Config = defaultConfig()
-
-	if err := verifyMpqFileReferences(); err != nil {
-		return err
-	}
 
 	return Config.Save()
 }
@@ -105,6 +106,15 @@ func (c *Configuration) Save() error {
 	return configFile.Close()
 }
 
+// Path returns the path of the config file
+func (c *Configuration) Path() string {
+	if c.path == "" {
+		c.path = defaultConfigPath()
+	}
+
+	return c.path
+}
+
 func defaultConfigPath() string {
 	if configDir, err := os.UserConfigDir(); err == nil {
 		return path.Join(configDir, "OpenDiablo2", "config.json")
@@ -115,30 +125,4 @@ func defaultConfigPath() string {
 
 func localConfigPath() string {
 	return path.Join(path.Dir(os.Args[0]), "config.json")
-}
-
-func verifyMpqFileReferences() error {
-	badFiles := []string{}
-
-	for fileIdx := range Config.MpqLoadOrder {
-		actualPath := path.Join(Config.MpqPath, Config.MpqLoadOrder[fileIdx])
-		info, err := os.Stat(actualPath)
-
-		if !os.IsNotExist(err) {
-			continue
-		}
-
-		if info != nil && !info.IsDir() {
-			continue
-		}
-
-		badFiles = append(badFiles, actualPath)
-	}
-
-	if len(badFiles) > 0 {
-		return errors.New("The following MPQ file(s) could not be found:\n" + strings.Join(badFiles, "\n") +
-			"\n\nPlease check your configuration file located at:\n" + defaultConfigPath())
-	}
-
-	return nil
 }

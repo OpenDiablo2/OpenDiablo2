@@ -4,6 +4,8 @@ import (
 	"os/user"
 	"path"
 	"runtime"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 func defaultConfig() *Configuration {
@@ -35,6 +37,7 @@ func defaultConfig() *Configuration {
 			"d2video.mpq",
 			"d2speech.mpq",
 		},
+		LogLevel: d2util.LogLevelDefault,
 	}
 
 	switch runtime.GOOS {

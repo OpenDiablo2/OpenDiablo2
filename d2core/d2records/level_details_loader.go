@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -167,7 +165,7 @@ func levelDetailsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	log.Printf("Loaded %d LevelDetails records", len(records))
+	r.Logger.Infof("Loaded %d LevelDetails records", len(records))
 
 	r.Level.Details = records
 

@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
@@ -46,7 +44,7 @@ func soundEnvironmentLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Sound.Environment = records
 
-	log.Printf("Loaded %d SoundEnviron records", len(records))
+	r.Logger.Infof("Loaded %d SoundEnviron records", len(records))
 
 	return nil
 }
