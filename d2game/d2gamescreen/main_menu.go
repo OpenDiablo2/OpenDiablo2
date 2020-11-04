@@ -496,15 +496,15 @@ func (v *MainMenu) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 // OnKeyUp is called when a key is released
 func (v *MainMenu) OnKeyUp(event d2interface.KeyEvent) bool {
-	// On retail version of D2, any key event puts you onto the main menu.
-	if v.screenMode == ScreenModeTrademark {
+	switch v.screenMode {
+	case ScreenModeTrademark: // On retail version of D2, any key event puts you onto the main menu.
 		v.SetScreenMode(ScreenModeMainMenu)
 		return true
-	// also in d2 pressing escape in Main Menu close the game
-	} else if v.screenMode == ScreenModeMainMenu && event.Key() == d2enum.KeyEscape {
-		v.onExitButtonClicked()
+	case ScreenModeMainMenu: // pressing escape in Main Menu close the game
+		if event.Key() == d2enum.KeyEscape {
+			v.onExitButtonClicked()
+		}
 	}
-
 	return false
 }
 
