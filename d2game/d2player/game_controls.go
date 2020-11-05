@@ -29,15 +29,8 @@ type Panel interface {
 	Open()
 	Close()
 }
-
-const (
-	expBarWidth              = 120.0
-	staminaBarWidth          = 102.0
-	staminaBarHeight         = 19.0
-	globeHeight              = 80
-	globeWidth               = 80
+const(
 	mouseBtnActionsThreshold = 0.25
-	percentStaminaBarLow     = 0.25
 )
 
 const (
@@ -146,57 +139,6 @@ const (
 	miniPanelGameMenuY,
 	miniPanelGameMenuWidth,
 	miniPanelGameMenuHeight = 456, 528, 22, 26
-)
-
-const (
-	hpLabelX = 15
-	hpLabelY = 487
-
-	manaLabelX = 785
-	manaLabelY = 487
-
-	staminaExperienceY = 535
-)
-
-const (
-	frameMenuButton        = 2
-	frameHealthStatus      = 0
-	frameManaStatus        = 1
-	frameNewStatsSelector  = 1
-	frameStamina           = 2
-	framePotions           = 3
-	frameNewSkillsSelector = 4
-	frameRightGlobeHolder  = 5
-	frameRightGlobe        = 1
-)
-
-const (
-	manaStatusOffsetX = 7
-	manaStatusOffsetY = -12
-
-	healthStatusOffsetX = 30
-	healthStatusOffsetY = -13
-
-	globeSpriteOffsetX = 28
-	globeSpriteOffsetY = -5
-
-	staminaBarOffsetX = 273
-	staminaBarOffsetY = 572
-
-	experienceBarOffsetX = 256
-	experienceBarOffsetY = 561
-
-	rightGlobeOffsetX = 8
-	rightGlobeOffsetY = -8
-
-	miniPanelButtonOffsetX = -8
-	miniPanelButtonOffsetY = -16
-)
-
-const (
-	lightBrownAlpha72 = 0xaf8848c8
-	redAlpha72        = 0xff0000c8
-	whiteAlpha100     = 0xffffffff
 )
 
 const (
