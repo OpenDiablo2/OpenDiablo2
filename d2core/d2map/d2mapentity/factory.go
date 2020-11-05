@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -218,7 +217,7 @@ func (f *MapEntityFactory) NewNPC(x, y int, monstat *d2records.MonStatsRecord, d
 	result.composite.SetDirection(direction)
 
 	if result.monstatRecord != nil && result.monstatRecord.IsInteractable {
-		result.name = d2tbl.TranslateString(result.monstatRecord.NameString)
+		result.name = f.asset.TranslateString(result.monstatRecord.NameString)
 	}
 
 	return result, nil
@@ -269,7 +268,7 @@ func (f *MapEntityFactory) NewObject(x, y int, objectRec *d2records.ObjectDetail
 		uuid:         uuid.New().String(),
 		objectRecord: objectRec,
 		Position:     d2vector.NewPosition(locX, locY),
-		name:         d2tbl.TranslateString(objectRec.Name),
+		name:         f.asset.TranslateString(objectRec.Name),
 	}
 	objectType := f.asset.Records.Object.Types[objectRec.Index]
 

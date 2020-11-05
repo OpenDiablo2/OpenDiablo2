@@ -120,7 +120,7 @@ func (eap *AudioProvider) createSoundEffect(sfx string, context *audio.Context,
 	loop bool) *SoundEffect {
 	result := &SoundEffect{}
 
-	soundFile := "/data/global/sfx/"
+	soundFile := "data/global/sfx/"
 
 	if _, exists := eap.asset.Records.Sound.Details[sfx]; exists {
 		soundEntry := eap.asset.Records.Sound.Details[sfx]
@@ -132,7 +132,7 @@ func (eap *AudioProvider) createSoundEffect(sfx string, context *audio.Context,
 	audioData, err := eap.asset.LoadFileStream(soundFile)
 
 	if err != nil {
-		audioData, err = eap.asset.LoadFileStream("/data/global/music/" + sfx)
+		audioData, err = eap.asset.LoadFileStream("data/global/music/" + sfx)
 	}
 
 	if err != nil {

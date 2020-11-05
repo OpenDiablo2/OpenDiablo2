@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 )
@@ -109,7 +108,7 @@ func (f *StatFactory) stringerClassAllSkills(sv d2stats.StatValue) string {
 	heroMap := f.getHeroMap()
 	classRecord := f.asset.Records.Character.Stats[heroMap[heroIndex]]
 
-	return d2tbl.TranslateString(classRecord.SkillStrAll)
+	return f.asset.TranslateString(classRecord.SkillStrAll)
 }
 
 func (f *StatFactory) stringerClassOnly(sv d2stats.StatValue) string {
@@ -118,7 +117,7 @@ func (f *StatFactory) stringerClassOnly(sv d2stats.StatValue) string {
 	classRecord := f.asset.Records.Character.Stats[heroMap[heroIndex]]
 	classOnlyKey := classRecord.SkillStrClassOnly
 
-	return d2tbl.TranslateString(classOnlyKey)
+	return f.asset.TranslateString(classOnlyKey)
 }
 
 func (f *StatFactory) stringerSkillName(sv d2stats.StatValue) string {

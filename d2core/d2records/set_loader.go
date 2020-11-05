@@ -2,7 +2,6 @@ package d2records
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
@@ -108,7 +107,7 @@ func setLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.Sets = records
 
-	log.Printf("Loaded %d records records", len(records))
+	r.Logger.Infof("Loaded %d records records", len(records))
 
 	return nil
 }

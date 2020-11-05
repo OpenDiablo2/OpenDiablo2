@@ -4,9 +4,12 @@ import (
 	"os/user"
 	"path"
 	"runtime"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
-func defaultConfig() *Configuration {
+// DefaultConfig creates and returns a default configuration
+func DefaultConfig() *Configuration {
 	const (
 		defaultSfxVolume = 1.0
 		defaultBgmVolume = 0.3
@@ -35,6 +38,8 @@ func defaultConfig() *Configuration {
 			"d2video.mpq",
 			"d2speech.mpq",
 		},
+		LogLevel: d2util.LogLevelDefault,
+		path:     DefaultConfigPath(),
 	}
 
 	switch runtime.GOOS {

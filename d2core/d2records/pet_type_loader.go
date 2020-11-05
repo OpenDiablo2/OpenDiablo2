@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
@@ -41,7 +39,7 @@ func petTypesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	log.Printf("Loaded %d PetType records", len(records))
+	r.Logger.Infof("Loaded %d PetType records", len(records))
 
 	r.PetTypes = records
 

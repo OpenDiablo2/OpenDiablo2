@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
@@ -66,7 +64,7 @@ func npcLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.NPCs = records
 
-	log.Printf("Loaded %d NPC records", len(records))
+	r.Logger.Infof("Loaded %d NPC records", len(records))
 
 	return nil
 }

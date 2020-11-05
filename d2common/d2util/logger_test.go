@@ -16,7 +16,8 @@ func (tw *testWriter) Write(msg []byte) (int, error) {
 }
 
 func Test_logger_SetLevel(t *testing.T) {
-	l := &Logger{Writer: &testWriter{}}
+	l := NewLogger()
+	l.Writer = &testWriter{}
 
 	tests := []struct {
 		level LogLevel
@@ -39,8 +40,9 @@ func Test_logger_SetLevel(t *testing.T) {
 }
 
 func Test_logger_LogLevels(t *testing.T) {
+	l := NewLogger()
 	w := &testWriter{}
-	l := &Logger{Writer: w}
+	l.Writer = w
 
 	noMessage := ""
 	message := "test"
@@ -107,8 +109,12 @@ func Test_logger_LogLevels(t *testing.T) {
 
 			msgGot := string(w.data)
 
-			if msgGot != msgExpect {
-				t.Errorf("unexpected log message: expected `%s` but got `%s`", msgExpect, msgGot)
+			if len(msgGot) > 0 && len(msgExpect) < 1 {
+				t.Errorf("logger printed when it should not have")
+			}
+
+			if len(msgGot) < 1 && len(msgExpect) > 0 {
+				t.Errorf("logger didnt print when expected")
 			}
 		}
 	}

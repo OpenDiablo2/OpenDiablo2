@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
@@ -104,7 +102,7 @@ func beltsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	log.Printf("Loaded %d belts", len(records))
+	r.Logger.Infof("Loaded %d belts", len(records))
 
 	r.Item.Belts = records
 

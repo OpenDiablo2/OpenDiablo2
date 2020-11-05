@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
@@ -78,7 +76,7 @@ func itemTypesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	log.Printf("Loaded %d ItemType records", len(records))
+	r.Logger.Infof("Loaded %d ItemType records", len(records))
 
 	r.Item.Types = records
 	r.Item.Equivalency = equivMap

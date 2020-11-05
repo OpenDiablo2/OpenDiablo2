@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
@@ -91,7 +89,7 @@ func statesLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.States = records
 
-	log.Printf("Loaded %d State records", len(records))
+	r.Logger.Infof("Loaded %d State records", len(records))
 
 	return nil
 }

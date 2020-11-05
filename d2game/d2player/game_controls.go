@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
@@ -1257,7 +1255,7 @@ func (g *GameControls) renderMiniPanel(target d2interface.Surface) error {
 		}
 
 		rect := &g.actionableRegions[miniPanelButton].rect
-		g.nameLabel.SetText(d2tbl.TranslateString(stringTableKey))
+		g.nameLabel.SetText(g.asset.TranslateString(stringTableKey))
 
 		halfButtonWidth := rect.Width >> 1
 		halfButtonHeight := rect.Height >> 1
@@ -1363,7 +1361,7 @@ func (g *GameControls) renderHealthTooltip(target d2interface.Surface) {
 	mx, my := g.lastMouseX, g.lastMouseY
 
 	// Create and format Health string from string lookup table.
-	fmtHealth := d2tbl.TranslateString("panelhealth")
+	fmtHealth := g.asset.TranslateString("panelhealth")
 	healthCurr, healthMax := g.hero.Stats.Health, g.hero.Stats.MaxHealth
 	strPanelHealth := fmt.Sprintf(fmtHealth, healthCurr, healthMax)
 
@@ -1381,7 +1379,7 @@ func (g *GameControls) renderManaTooltip(target d2interface.Surface) {
 	mx, my := g.lastMouseX, g.lastMouseY
 
 	// Create and format Mana string from string lookup table.
-	fmtMana := d2tbl.TranslateString("panelmana")
+	fmtMana := g.asset.TranslateString("panelmana")
 	manaCurr, manaMax := g.hero.Stats.Mana, g.hero.Stats.MaxMana
 	strPanelMana := fmt.Sprintf(fmtMana, manaCurr, manaMax)
 
@@ -1415,7 +1413,7 @@ func (g *GameControls) renderRunWalkTooltip(target d2interface.Surface) {
 		stringTableKey = "RunOn"
 	}
 
-	g.nameLabel.SetText(d2tbl.TranslateString(stringTableKey))
+	g.nameLabel.SetText(g.asset.TranslateString(stringTableKey))
 
 	rect := &g.actionableRegions[walkRun].rect
 
@@ -1443,7 +1441,7 @@ func (g *GameControls) renderStaminaTooltip(target d2interface.Surface) {
 	}
 
 	// Create and format Stamina string from string lookup table.
-	fmtStamina := d2tbl.TranslateString("panelstamina")
+	fmtStamina := g.asset.TranslateString("panelstamina")
 	staminaCurr, staminaMax := int(g.hero.Stats.Stamina), g.hero.Stats.MaxStamina
 	strPanelStamina := fmt.Sprintf(fmtStamina, staminaCurr, staminaMax)
 
@@ -1473,7 +1471,7 @@ func (g *GameControls) renderExperienceTooltip(target d2interface.Surface) {
 	}
 
 	// Create and format Experience string from string lookup table.
-	fmtExp := d2tbl.TranslateString("panelexp")
+	fmtExp := g.asset.TranslateString("panelexp")
 
 	// The English string for "panelexp" is "Experience: %u / %u", however %u doesn't
 	// translate well. So we need to rewrite %u into a formatable Go verb. %d is used in other

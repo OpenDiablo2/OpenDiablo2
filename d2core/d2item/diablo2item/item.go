@@ -10,7 +10,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2item"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2stats"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -129,7 +128,7 @@ func (i *Item) Label() string {
 	str := i.name
 
 	if !i.attributes.identitified {
-		str = d2tbl.TranslateString(i.CommonRecord().NameString)
+		str = i.factory.asset.TranslateString(i.CommonRecord().NameString)
 	}
 
 	if i.attributes.crafted {
@@ -610,16 +609,16 @@ func (i *Item) generateItemProperties(properties []*d2records.PropertyDescriptor
 
 func (i *Item) generateName() {
 	if i.SetItemRecord() != nil {
-		i.name = d2tbl.TranslateString(i.SetItemRecord().SetItemKey)
+		i.name = i.factory.asset.TranslateString(i.SetItemRecord().SetItemKey)
 		return
 	}
 
 	if i.UniqueRecord() != nil {
-		i.name = d2tbl.TranslateString(i.UniqueRecord().Name)
+		i.name = i.factory.asset.TranslateString(i.UniqueRecord().Name)
 		return
 	}
 
-	name := d2tbl.TranslateString(i.CommonRecord().NameString)
+	name := i.factory.asset.TranslateString(i.CommonRecord().NameString)
 
 	numAffixes := 0
 	if prefixes := i.PrefixRecords(); prefixes != nil {
@@ -839,46 +838,52 @@ func (i *Item) GetItemDescription() []string {
 
 	if common.MinAC > 0 {
 		min, max := common.MinAC, common.MaxAC
-		str = fmt.Sprintf("%s %v %s %v", d2tbl.TranslateString(defense), min, d2tbl.TranslateString(to), max)
+		str = fmt.Sprintf("%s %v %s %v", i.factory.asset.TranslateString(defense), min,
+			i.factory.asset.TranslateString(to), max)
 		str = d2ui.ColorTokenize(str, d2ui.ColorTokenWhite)
 		lines = append(lines, str)
 	}
 
 	if common.MinDamage > 0 {
 		min, max := common.MinDamage, common.MaxDamage
-		str = fmt.Sprintf("%s %v %s %v", d2tbl.TranslateString(damage1h), min, d2tbl.TranslateString(to), max)
+		str = fmt.Sprintf("%s %v %s %v", i.factory.asset.TranslateString(damage1h), min,
+			i.factory.asset.TranslateString(to), max)
 		str = d2ui.ColorTokenize(str, d2ui.ColorTokenWhite)
 		lines = append(lines, str)
 	}
 
 	if common.Min2HandDamage > 0 {
 		min, max := common.Min2HandDamage, common.Max2HandDamage
-		str = fmt.Sprintf("%s %v %s %v", d2tbl.TranslateString(damage2h), min, d2tbl.TranslateString(to), max)
+		str = fmt.Sprintf("%s %v %s %v", i.factory.asset.TranslateString(damage2h), min,
+			i.factory.asset.TranslateString(to), max)
 		str = d2ui.ColorTokenize(str, d2ui.ColorTokenWhite)
 		lines = append(lines, str)
 	}
 
 	if common.MinMissileDamage > 0 {
 		min, max := common.MinMissileDamage, common.MaxMissileDamage
-		str = fmt.Sprintf("%s %v %s %v", d2tbl.TranslateString(damageThrow), min, d2tbl.TranslateString(to), max)
+		str = fmt.Sprintf("%s %v %s %v", i.factory.asset.TranslateString(damageThrow), min,
+			i.factory.asset.TranslateString(to), max)
 		str = d2ui.ColorTokenize(str, d2ui.ColorTokenWhite)
 		lines = append(lines, str)
 	}
 
 	if common.RequiredStrength > 1 {
-		str = fmt.Sprintf("%s %v", d2tbl.TranslateString(reqStrength), common.RequiredStrength)
+		str = fmt.Sprintf("%s %v", i.factory.asset.TranslateString(reqStrength),
+			common.RequiredStrength)
 		str = d2ui.ColorTokenize(str, d2ui.ColorTokenWhite)
 		lines = append(lines, str)
 	}
 
 	if common.RequiredDexterity > 1 {
-		str = fmt.Sprintf("%s %v", d2tbl.TranslateString(reqDexterity), common.RequiredDexterity)
+		str = fmt.Sprintf("%s %v", i.factory.asset.TranslateString(reqDexterity),
+			common.RequiredDexterity)
 		str = d2ui.ColorTokenize(str, d2ui.ColorTokenWhite)
 		lines = append(lines, str)
 	}
 
 	if common.RequiredLevel > 1 {
-		str = fmt.Sprintf("%s %v", d2tbl.TranslateString(reqLevel), common.RequiredLevel)
+		str = fmt.Sprintf("%s %v", i.factory.asset.TranslateString(reqLevel), common.RequiredLevel)
 		str = d2ui.ColorTokenize(str, d2ui.ColorTokenWhite)
 		lines = append(lines, str)
 	}
