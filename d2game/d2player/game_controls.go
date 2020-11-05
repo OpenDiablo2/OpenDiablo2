@@ -15,7 +15,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
@@ -37,7 +36,6 @@ const (
 	staminaBarHeight         = 19.0
 	globeHeight              = 80
 	globeWidth               = 80
-	hoverLabelOuterPad       = 5
 	mouseBtnActionsThreshold = 0.25
 	percentStaminaBarLow     = 0.25
 )
@@ -301,108 +299,108 @@ func NewGameControls(
 	}
 
 	actionableRegions := []actionableRegion{
-			{leftSkill, d2geom.Rectangle{
-				Left:   leftSkillX,
-				Top:    leftSkillY,
-				Width:  leftSkillWidth,
-				Height: leftSkillHeight,
-			}},
-			{newStats, d2geom.Rectangle{
-				Left:   newStatsX,
-				Top:    newStatsY,
-				Width:  newStatsWidth,
-				Height: newStatsHeight,
-			}},
-			{xp, d2geom.Rectangle{
-				Left:   xpX,
-				Top:    xpY,
-				Width:  xpWidth,
-				Height: xpHeight,
-			}},
-			{walkRun, d2geom.Rectangle{
-				Left:   walkRunX,
-				Top:    walkRunY,
-				Width:  walkRunWidth,
-				Height: walkRunHeight,
-			}},
-			{stamina, d2geom.Rectangle{
-				Left:   staminaX,
-				Top:    staminaY,
-				Width:  staminaWidth,
-				Height: staminaHeight,
-			}},
-			{miniPnl, d2geom.Rectangle{
-				Left:   miniPnlX,
-				Top:    miniPnlY,
-				Width:  miniPnlWidth,
-				Height: miniPnlHeight,
-			}},
-			{newSkills, d2geom.Rectangle{
-				Left:   newSkillsX,
-				Top:    newSkillsY,
-				Width:  newSkillsWidth,
-				Height: newSkillsHeight,
-			}},
-			{rightSkill, d2geom.Rectangle{
-				Left:   rightSkillX,
-				Top:    rightSkillY,
-				Width:  rightSkillWidth,
-				Height: rightSkillHeight,
-			}},
-			{hpGlobe, d2geom.Rectangle{
-				Left:   hpGlobeX,
-				Top:    hpGlobeY,
-				Width:  hpGlobeWidth,
-				Height: hpGlobeHeight,
-			}},
-			{manaGlobe, d2geom.Rectangle{
-				Left:   manaGlobeX,
-				Top:    manaGlobeY,
-				Width:  manaGlobeWidth,
-				Height: manaGlobeHeight,
-			}},
-			{miniPanelCharacter, d2geom.Rectangle{
-				Left:   miniPanelCharacterX,
-				Top:    miniPanelCharacterY,
-				Width:  miniPanelCharacterWidth,
-				Height: miniPanelCharacterHeight,
-			}},
-			{miniPanelInventory, d2geom.Rectangle{
-				Left:   miniPanelInventoryX,
-				Top:    miniPanelInventoryY,
-				Width:  miniPanelInventoryWidth,
-				Height: miniPanelInventoryHeight,
-			}},
-			{miniPanelSkillTree, d2geom.Rectangle{
-				Left:   miniPanelSkillTreeX,
-				Top:    miniPanelSkillTreeY,
-				Width:  miniPanelSkillTreeWidth,
-				Height: miniPanelSkillTreeHeight,
-			}},
-			{miniPanelAutomap, d2geom.Rectangle{
-				Left:   miniPanelAutomapX,
-				Top:    miniPanelAutomapY,
-				Width:  miniPanelAutomapWidth,
-				Height: miniPanelAutomapHeight,
-			}},
-			{miniPanelMessageLog, d2geom.Rectangle{
-				Left:   miniPanelMessageLogX,
-				Top:    miniPanelMessageLogY,
-				Width:  miniPanelMessageLogWidth,
-				Height: miniPanelMessageLogHeight,
-			}},
-			{miniPanelQuestLog, d2geom.Rectangle{
-				Left:   miniPanelQuestLogX,
-				Top:    miniPanelQuestLogY,
-				Width:  miniPanelQuestLogWidth,
-				Height: miniPanelQuestLogHeight,
-			}},
-			{miniPanelGameMenu, d2geom.Rectangle{
-				Left:   miniPanelGameMenuX,
-				Top:    miniPanelGameMenuY,
-				Width:  miniPanelGameMenuWidth,
-				Height: miniPanelGameMenuHeight,
-			}},
+		{leftSkill, d2geom.Rectangle{
+			Left:   leftSkillX,
+			Top:    leftSkillY,
+			Width:  leftSkillWidth,
+			Height: leftSkillHeight,
+		}},
+		{newStats, d2geom.Rectangle{
+			Left:   newStatsX,
+			Top:    newStatsY,
+			Width:  newStatsWidth,
+			Height: newStatsHeight,
+		}},
+		{xp, d2geom.Rectangle{
+			Left:   xpX,
+			Top:    xpY,
+			Width:  xpWidth,
+			Height: xpHeight,
+		}},
+		{walkRun, d2geom.Rectangle{
+			Left:   walkRunX,
+			Top:    walkRunY,
+			Width:  walkRunWidth,
+			Height: walkRunHeight,
+		}},
+		{stamina, d2geom.Rectangle{
+			Left:   staminaX,
+			Top:    staminaY,
+			Width:  staminaWidth,
+			Height: staminaHeight,
+		}},
+		{miniPnl, d2geom.Rectangle{
+			Left:   miniPnlX,
+			Top:    miniPnlY,
+			Width:  miniPnlWidth,
+			Height: miniPnlHeight,
+		}},
+		{newSkills, d2geom.Rectangle{
+			Left:   newSkillsX,
+			Top:    newSkillsY,
+			Width:  newSkillsWidth,
+			Height: newSkillsHeight,
+		}},
+		{rightSkill, d2geom.Rectangle{
+			Left:   rightSkillX,
+			Top:    rightSkillY,
+			Width:  rightSkillWidth,
+			Height: rightSkillHeight,
+		}},
+		{hpGlobe, d2geom.Rectangle{
+			Left:   hpGlobeX,
+			Top:    hpGlobeY,
+			Width:  hpGlobeWidth,
+			Height: hpGlobeHeight,
+		}},
+		{manaGlobe, d2geom.Rectangle{
+			Left:   manaGlobeX,
+			Top:    manaGlobeY,
+			Width:  manaGlobeWidth,
+			Height: manaGlobeHeight,
+		}},
+		{miniPanelCharacter, d2geom.Rectangle{
+			Left:   miniPanelCharacterX,
+			Top:    miniPanelCharacterY,
+			Width:  miniPanelCharacterWidth,
+			Height: miniPanelCharacterHeight,
+		}},
+		{miniPanelInventory, d2geom.Rectangle{
+			Left:   miniPanelInventoryX,
+			Top:    miniPanelInventoryY,
+			Width:  miniPanelInventoryWidth,
+			Height: miniPanelInventoryHeight,
+		}},
+		{miniPanelSkillTree, d2geom.Rectangle{
+			Left:   miniPanelSkillTreeX,
+			Top:    miniPanelSkillTreeY,
+			Width:  miniPanelSkillTreeWidth,
+			Height: miniPanelSkillTreeHeight,
+		}},
+		{miniPanelAutomap, d2geom.Rectangle{
+			Left:   miniPanelAutomapX,
+			Top:    miniPanelAutomapY,
+			Width:  miniPanelAutomapWidth,
+			Height: miniPanelAutomapHeight,
+		}},
+		{miniPanelMessageLog, d2geom.Rectangle{
+			Left:   miniPanelMessageLogX,
+			Top:    miniPanelMessageLogY,
+			Width:  miniPanelMessageLogWidth,
+			Height: miniPanelMessageLogHeight,
+		}},
+		{miniPanelQuestLog, d2geom.Rectangle{
+			Left:   miniPanelQuestLogX,
+			Top:    miniPanelQuestLogY,
+			Width:  miniPanelQuestLogWidth,
+			Height: miniPanelQuestLogHeight,
+		}},
+		{miniPanelGameMenu, d2geom.Rectangle{
+			Left:   miniPanelGameMenuX,
+			Top:    miniPanelGameMenuY,
+			Width:  miniPanelGameMenuWidth,
+			Height: miniPanelGameMenuHeight,
+		}},
 	}
 
 	inventoryRecord := asset.Records.Layout.Inventory[inventoryRecordKey]
@@ -422,21 +420,21 @@ func NewGameControls(
 	hoverLabel.SetBackgroundColor(d2util.Color(blackAlpha50percent))
 
 	gc := &GameControls{
-		keyMap:           keyMap,
-		asset:            asset,
-		ui:               ui,
-		renderer:         renderer,
-		hero:             hero,
-		heroState:        heroState,
-		mapEngine:        mapEngine,
-		escapeMenu:       escapeMenu,
-		inputListener:    inputListener,
-		mapRenderer:      mapRenderer,
-		inventory:        NewInventory(asset, ui, inventoryRecord),
-		skilltree:        newSkillTree(hero.Skills, hero.Class, asset, renderer, ui, guiManager),
-		heroStatsPanel:   NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
-		HelpOverlay:      helpOverlay,
-		hud:              hud,
+		keyMap:         keyMap,
+		asset:          asset,
+		ui:             ui,
+		renderer:       renderer,
+		hero:           hero,
+		heroState:      heroState,
+		mapEngine:      mapEngine,
+		escapeMenu:     escapeMenu,
+		inputListener:  inputListener,
+		mapRenderer:    mapRenderer,
+		inventory:      NewInventory(asset, ui, inventoryRecord),
+		skilltree:      newSkillTree(hero.Skills, hero.Class, asset, renderer, ui, guiManager),
+		heroStatsPanel: NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
+		HelpOverlay:    helpOverlay,
+		hud:            hud,
 		bottomMenuRect: &d2geom.Rectangle{
 			Left:   menuBottomRectX,
 			Top:    menuBottomRectY,
@@ -455,7 +453,7 @@ func NewGameControls(
 			Width:  menuRightRectW,
 			Height: menuRightRectH,
 		},
-		actionableRegions: actionableRegions,
+		actionableRegions:      actionableRegions,
 		lastLeftBtnActionTime:  0,
 		lastRightBtnActionTime: 0,
 		isSinglePlayer:         isSinglePlayer,
@@ -757,6 +755,7 @@ func (g *GameControls) Load() {
 	g.heroStatsPanel.Load()
 	g.HelpOverlay.Load()
 }
+
 // Advance advances the state of the GameControls
 func (g *GameControls) Advance(elapsed float64) error {
 	g.mapRenderer.Advance(elapsed)
@@ -1161,24 +1160,4 @@ func (g *GameControls) bindTerminalCommands(term d2interface.Terminal) error {
 	}
 
 	return nil
-}
-
-func (g *GameControls) getSkillResourceByClass(class string) string {
-	resourceMap := map[string]string{
-		"":    d2resource.GenericSkills,
-		"bar": d2resource.BarbarianSkills,
-		"nec": d2resource.NecromancerSkills,
-		"pal": d2resource.PaladinSkills,
-		"ass": d2resource.AssassinSkills,
-		"sor": d2resource.SorcererSkills,
-		"ama": d2resource.AmazonSkills,
-		"dru": d2resource.DruidSkills,
-	}
-
-	entry, found := resourceMap[class]
-	if !found {
-		log.Fatalf("Unknown class token: '%s'", class)
-	}
-
-	return entry
 }
