@@ -368,6 +368,7 @@ func (v *MainMenu) onMapTestClicked() {
 
 func (v *MainMenu) onSinglePlayerClicked() {
 	v.SetScreenMode(ScreenModeUnknown)
+
 	if v.heroState.HasGameStates() {
 		// Go here only if existing characters are available to select
 		v.navigator.ToCharacterSelect(d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText())
@@ -494,39 +495,44 @@ func (v *MainMenu) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	return false
 }
 
-// When Escape is pressed, back you to "mode" game screen
-func (v *MainMenu) EscapePressed(event d2interface.KeyEvent, mode mainMenuScreenMode) {
-        if event.Key() == d2enum.KeyEscape {
-                v.SetScreenMode(mode)
-        }
+func (v *MainMenu) onEscapePressed(event d2interface.KeyEvent, mode mainMenuScreenMode) {
+	if event.Key() == d2enum.KeyEscape {
+		v.SetScreenMode(mode)
+	}
 }
 
 // OnKeyUp is called when a key is released
 func (v *MainMenu) OnKeyUp(event d2interface.KeyEvent) bool {
-        switch v.screenMode {
-        case ScreenModeTrademark: // On retail version of D2, some specific key events (Escape, Space and Enter) puts you onto the main menu.
-                switch event.Key() {
-                case d2enum.KeyEscape, d2enum.KeyEnter, d2enum.KeySpace:
-                        v.SetScreenMode(ScreenModeMainMenu)
-                }
-                return true
-        case ScreenModeMainMenu: // pressing escape in Main Menu close the game
-                if event.Key() == d2enum.KeyEscape {
-                        v.onExitButtonClicked()
-                }
-        case ScreenModeMultiplayer: // back to previous menu
-                v.EscapePressed(event, ScreenModeMainMenu)
-                return true
-        case ScreenModeTCPIP: // back to previous menu
-                v.EscapePressed(event, ScreenModeMultiplayer)
-                return true
-        case ScreenModeServerIP: // back to previous menu
-                v.EscapePressed(event, ScreenModeTCPIP)
-                return true
-        }
-        return false
-}
+	preventKeyEventPropagation := false
 
+	switch v.screenMode {
+	case ScreenModeTrademark: // On retail version of D2, some specific key events (Escape, Space and Enter) puts you onto the main menu.
+		switch event.Key() {
+		case d2enum.KeyEscape, d2enum.KeyEnter, d2enum.KeySpace:
+			v.SetScreenMode(ScreenModeMainMenu)
+		}
+
+		preventKeyEventPropagation = true
+	case ScreenModeMainMenu: // pressing escape in Main Menu close the game
+		if event.Key() == d2enum.KeyEscape {
+			v.onExitButtonClicked()
+		}
+	case ScreenModeMultiplayer: // back to previous menu
+		v.onEscapePressed(event, ScreenModeMainMenu)
+
+		preventKeyEventPropagation = true
+	case ScreenModeTCPIP: // back to previous menu
+		v.onEscapePressed(event, ScreenModeMultiplayer)
+
+		preventKeyEventPropagation = true
+	case ScreenModeServerIP: // back to previous menu
+		v.onEscapePressed(event, ScreenModeTCPIP)
+
+		preventKeyEventPropagation = true
+	}
+
+	return preventKeyEventPropagation
+}
 
 // SetScreenMode sets the screen mode (which sub-menu the screen is on)
 func (v *MainMenu) SetScreenMode(screenMode mainMenuScreenMode) {
