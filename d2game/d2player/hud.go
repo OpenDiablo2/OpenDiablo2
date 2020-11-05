@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"math"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -11,8 +12,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -32,6 +35,7 @@ const (
 	staminaBarHeight         = 19.0
 	globeHeight              = 80
 	globeWidth               = 80
+	hoverLabelOuterPad       = 5
 	percentStaminaBarLow     = 0.25
 )
 
@@ -92,6 +96,8 @@ type HUD struct {
 	asset              *d2asset.AssetManager
 	uiManager          *d2ui.UIManager
 	help               *HelpOverlay
+	mapEngine          *d2mapengine.MapEngine
+	mapRenderer        *d2maprenderer.MapRenderer
 	lastMouseX         int
 	lastMouseY         int
 	hero               *d2mapentity.Player
@@ -125,6 +131,8 @@ func NewHUD(
 	help *HelpOverlay,
 	miniPanel *miniPanel,
 	actionableRegions []actionableRegion,
+	mapEngine *d2mapengine.MapEngine,
+	mapRenderer *d2maprenderer.MapRenderer,
 ) *HUD {
 	nameLabel := ui.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
 	nameLabel.Alignment = d2gui.HorizontalAlignCenter
@@ -138,6 +146,8 @@ func NewHUD(
 		uiManager:         ui,
 		hero:              hero,
 		help:              help,
+		mapEngine:         mapEngine,
+		mapRenderer:       mapRenderer,
 		miniPanel:         miniPanel,
 		actionableRegions: actionableRegions,
 		nameLabel:         nameLabel,
@@ -713,8 +723,48 @@ func (h *HUD) renderExperienceTooltip(target d2interface.Surface) {
 	h.experienceTooltip.Render(target)
 }
 
+func (h *HUD) renderForSelectableEntitiesHovered(target d2interface.Surface) {
+	mx, my := h.lastMouseX, h.lastMouseY
+
+	for entityIdx := range h.mapEngine.Entities() {
+		entity := (h.mapEngine.Entities())[entityIdx]
+		if !entity.Selectable() {
+			continue
+		}
+
+		entPos := entity.GetPosition()
+		entOffset := entPos.RenderOffset()
+		entScreenXf, entScreenYf := h.mapRenderer.WorldToScreenF(entity.GetPositionF())
+		entScreenX := int(math.Floor(entScreenXf))
+		entScreenY := int(math.Floor(entScreenYf))
+		entityWidth, entityHeight := entity.GetSize()
+		halfWidth, halfHeight := entityWidth>>1, entityHeight>>1
+		l, r := entScreenX-halfWidth-hoverLabelOuterPad, entScreenX+halfWidth+hoverLabelOuterPad
+		t, b := entScreenY-halfHeight-hoverLabelOuterPad, entScreenY+halfHeight-hoverLabelOuterPad
+		xWithin := (l <= mx) && (r >= mx)
+		yWithin := (t <= my) && (b >= my)
+		within := xWithin && yWithin
+
+		if within {
+			xOff, yOff := int(entOffset.X()), int(entOffset.Y())
+
+			h.nameLabel.SetText(entity.Label())
+
+			xLabel, yLabel := entScreenX-xOff, entScreenY-yOff-entityHeight-hoverLabelOuterPad
+			h.nameLabel.SetPosition(xLabel, yLabel)
+
+			h.nameLabel.Render(target)
+			entity.Highlight()
+
+			break
+		}
+	}
+}
+
+
 // Render draws the HUD to the screen
 func (h *HUD) Render(target d2interface.Surface) error {
+	h.renderForSelectableEntitiesHovered(target)
 	if err := h.renderGameControlPanelElements(target); err != nil {
 		return err
 	}

@@ -167,7 +167,6 @@ type GameControls struct {
 	inputListener          inputCallbackListener
 	hero                   *d2mapentity.Player
 	heroState              *d2hero.HeroStateFactory
-	mapEngine              *d2mapengine.MapEngine
 	mapRenderer            *d2maprenderer.MapRenderer
 	escapeMenu             *EscapeMenu
 	ui                     *d2ui.UIManager
@@ -354,7 +353,7 @@ func NewGameControls(
 
 	keyMap := getDefaultKeyMap()
 	helpOverlay := NewHelpOverlay(asset, renderer, ui, guiManager, keyMap)
-	hud := NewHUD(asset, ui, hero, helpOverlay, newMiniPanel(asset, ui, isSinglePlayer), actionableRegions)
+	hud := NewHUD(asset, ui, hero, helpOverlay, newMiniPanel(asset, ui, isSinglePlayer), actionableRegions, mapEngine, mapRenderer)
 
 	const blackAlpha50percent = 0x0000007f
 
@@ -368,7 +367,6 @@ func NewGameControls(
 		renderer:       renderer,
 		hero:           hero,
 		heroState:      heroState,
-		mapEngine:      mapEngine,
 		escapeMenu:     escapeMenu,
 		inputListener:  inputListener,
 		mapRenderer:    mapRenderer,
