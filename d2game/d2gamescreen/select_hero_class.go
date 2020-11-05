@@ -10,7 +10,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2inventory"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
@@ -683,25 +682,25 @@ func (v *SelectHeroClass) updateHeroText() {
 	case d2enum.HeroNone:
 		return
 	case d2enum.HeroBarbarian:
-		v.heroClassLabel.SetText(d2tbl.TranslateString("partycharbar"))
+		v.heroClassLabel.SetText(v.asset.TranslateString("partycharbar"))
 		v.setDescLabels("He is unequaled in close-quarters combat and mastery of weapons.")
 	case d2enum.HeroNecromancer:
-		v.heroClassLabel.SetText(d2tbl.TranslateString("partycharnec"))
+		v.heroClassLabel.SetText(v.asset.TranslateString("partycharnec"))
 		v.setDescLabels("Summoning undead minions and cursing his enemies are his specialties.")
 	case d2enum.HeroPaladin:
-		v.heroClassLabel.SetText(d2tbl.TranslateString("partycharpal"))
+		v.heroClassLabel.SetText(v.asset.TranslateString("partycharpal"))
 		v.setDescLabels("He is a natural party leader, holy man, and blessed warrior.")
 	case d2enum.HeroAssassin:
-		v.heroClassLabel.SetText(d2tbl.TranslateString("partycharass"))
+		v.heroClassLabel.SetText(v.asset.TranslateString("partycharass"))
 		v.setDescLabels("Schooled in the Martial Arts, her mind and body are deadly weapons.")
 	case d2enum.HeroSorceress:
-		v.heroClassLabel.SetText(d2tbl.TranslateString("partycharsor"))
+		v.heroClassLabel.SetText(v.asset.TranslateString("partycharsor"))
 		v.setDescLabels("She has mastered the elemental magicks -- fire, lightning, and ice.")
 	case d2enum.HeroAmazon:
-		v.heroClassLabel.SetText(d2tbl.TranslateString("partycharama"))
+		v.heroClassLabel.SetText(v.asset.TranslateString("partycharama"))
 		v.setDescLabels("Skilled with the spear and the bow, she is a very versatile fighter.")
 	case d2enum.HeroDruid:
-		v.heroClassLabel.SetText(d2tbl.TranslateString("partychardru"))
+		v.heroClassLabel.SetText(v.asset.TranslateString("partychardru"))
 		v.setDescLabels("Commanding the forces of nature, he summons wild beasts and raging storms to his side.")
 	}
 }
@@ -712,7 +711,7 @@ const (
 )
 
 func (v *SelectHeroClass) setDescLabels(descKey string) {
-	heroDesc := d2tbl.TranslateString(descKey)
+	heroDesc := v.asset.TranslateString(descKey)
 	parts := d2util.SplitIntoLinesWithMaxWidth(heroDesc, heroDescCharWidth)
 
 	numLines := len(parts)

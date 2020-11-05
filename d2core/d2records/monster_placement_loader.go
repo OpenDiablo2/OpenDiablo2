@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
@@ -20,7 +18,7 @@ func monsterPlacementsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Monster.Placements = records
 
-	log.Printf("Loaded %d MonsterPlacement records", len(records))
+	r.Logger.Infof("Loaded %d MonsterPlacement records", len(records))
 
 	return nil
 }

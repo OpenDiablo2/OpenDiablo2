@@ -1,7 +1,6 @@
 package d2records
 
 import (
-	"log"
 	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
@@ -56,7 +55,7 @@ func itemRatioLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	log.Printf("Loaded %d ItemRatio records", len(records))
+	r.Logger.Infof("Loaded %d ItemRatio records", len(records))
 
 	r.Item.Ratios = records
 

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -11,11 +13,19 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 )
 
+const (
+	logPrefix = "Record Manager"
+)
+
 // NewRecordManager creates a new record manager (no loaders are bound!)
-func NewRecordManager() (*RecordManager, error) {
+func NewRecordManager(l d2util.LogLevel) (*RecordManager, error) {
 	rm := &RecordManager{
 		boundLoaders: make(map[string][]recordLoader),
 	}
+
+	rm.Logger = d2util.NewLogger()
+	rm.Logger.SetPrefix(logPrefix)
+	rm.Logger.SetLevel(l)
 
 	err := rm.init()
 	if err != nil {
@@ -27,6 +37,7 @@ func NewRecordManager() (*RecordManager, error) {
 
 // RecordManager stores all of the records loaded from txt files
 type RecordManager struct {
+	Logger       *d2util.Logger
 	boundLoaders map[string][]recordLoader // there can be more than one loader bound for a file
 	Animation    struct {
 		Data  d2data.AnimationData

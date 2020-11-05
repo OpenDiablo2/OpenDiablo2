@@ -2,7 +2,6 @@ package d2records
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/gravestench/akara"
 
@@ -60,7 +59,7 @@ func uniqueMonsterPrefixLoader(r *RecordManager, d *d2txt.DataDictionary) error 
 
 	r.Monster.Name.Prefix = records
 
-	log.Printf("Loaded %d unique monster prefix records", len(records))
+	r.Logger.Infof("Loaded %d unique monster prefix records", len(records))
 
 	return nil
 }
@@ -73,7 +72,7 @@ func uniqueMonsterSuffixLoader(r *RecordManager, d *d2txt.DataDictionary) error 
 
 	r.Monster.Name.Suffix = records
 
-	log.Printf("Loaded %d unique monster suffix records", len(records))
+	r.Logger.Infof("Loaded %d unique monster suffix records", len(records))
 
 	return nil
 }

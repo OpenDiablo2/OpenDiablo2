@@ -2,7 +2,6 @@ package d2records
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
@@ -50,7 +49,7 @@ func monsterEquipmentLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		length += len(records[k])
 	}
 
-	log.Printf("Loaded %d MonsterEquipment records", length)
+	r.Logger.Infof("Loaded %d MonsterEquipment records", length)
 
 	r.Monster.Equipment = records
 

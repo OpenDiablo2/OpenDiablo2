@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
@@ -22,7 +21,6 @@ func main() {
 	instance := d2app.Create(GitBranch, GitCommit)
 
 	if err := instance.Run(); err != nil {
-		fmt.Println(err)
 		return
 	}
 }

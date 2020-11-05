@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
@@ -69,7 +67,7 @@ func propertyLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Properties = records
 
-	log.Printf("Loaded %d Property records", len(records))
+	r.Logger.Infof("Loaded %d Property records", len(records))
 
 	return nil
 }

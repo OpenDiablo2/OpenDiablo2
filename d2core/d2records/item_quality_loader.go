@@ -1,7 +1,6 @@
 package d2records
 
 import (
-	"log"
 	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
@@ -46,7 +45,7 @@ func itemQualityLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.Quality = records
 
-	log.Printf("Loaded %d ItemQualities records", len(records))
+	r.Logger.Infof("Loaded %d ItemQualities records", len(records))
 
 	return nil
 }

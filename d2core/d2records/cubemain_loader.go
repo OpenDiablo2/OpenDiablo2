@@ -83,7 +83,7 @@ func cubeRecipeLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		return d.Err
 	}
 
-	log.Printf("Loaded %d CubeMainRecord records", len(records))
+	r.Logger.Infof("Loaded %d CubeMainRecord records", len(records))
 
 	r.Item.Cube.Recipes = records
 

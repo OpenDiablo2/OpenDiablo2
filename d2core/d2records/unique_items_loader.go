@@ -1,8 +1,6 @@
 package d2records
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
@@ -130,7 +128,7 @@ func uniqueItemsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 
 	r.Item.Unique = records
 
-	log.Printf("Loaded %d unique items", len(records))
+	r.Logger.Infof("Loaded %d unique items", len(records))
 
 	return nil
 }

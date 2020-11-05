@@ -25,6 +25,7 @@ const (
 
 const (
 	defaultLanguage = "ENG"
+	logPrefix       = "File Loader"
 )
 
 const (
@@ -33,16 +34,18 @@ const (
 )
 
 // NewLoader creates a new loader
-func NewLoader(config *d2config.Configuration) *Loader {
-	loader := &Loader{
-		config: config,
-	}
+func NewLoader(l d2util.LogLevel) (*Loader, error) {
+	loader := &Loader{}
 
 	loader.Cache = d2cache.CreateCache(defaultCacheBudget)
+	loader.Logger = d2util.NewLogger()
 
-	loader.initFromConfig()
+	loader.Logger.SetPrefix(logPrefix)
+	loader.Logger.SetLevel(l)
 
-	return loader
+	loader.bootstrap()
+
+	return loader, nil
 }
 
 // Loader represents the manager that handles loading and caching assets with the asset Sources
@@ -54,20 +57,9 @@ type Loader struct {
 	Sources []asset.Source
 }
 
-func (l *Loader) initFromConfig() {
-	if l.config == nil {
-		return
-	}
-
-	for _, mpqName := range l.config.MpqLoadOrder {
-		cleanDir := filepath.Clean(l.config.MpqPath)
-		srcPath := filepath.Join(cleanDir, mpqName)
-
-		_, err := l.AddSource(srcPath)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-	}
+func (l *Loader) bootstrap() {
+	_, _ = l.AddSource(filepath.Dir(d2config.LocalConfigPath()))
+	_, _ = l.AddSource(filepath.Dir(d2config.DefaultConfigPath()))
 }
 
 // Load attempts to load an asset with the given sub-path. The sub-path is relative to the root
@@ -85,7 +77,7 @@ func (l *Loader) Load(subPath string) (asset.Asset, error) {
 
 	// first, we check the cache for an existing entry
 	if cached, found := l.Retrieve(subPath); found {
-		l.Debug(fmt.Sprintf("file `%s` exists in loader cache", subPath))
+		l.Debug(fmt.Sprintf("Retrieved `%s` from cache", subPath))
 
 		a := cached.(asset.Asset)
 		_, err := a.Seek(0, 0)
@@ -98,10 +90,16 @@ func (l *Loader) Load(subPath string) (asset.Asset, error) {
 		source := l.Sources[idx]
 
 		// if the source can open the file, then we cache it and return it
-		if loadedAsset, err := source.Open(subPath); err == nil {
-			err := l.Insert(subPath, loadedAsset, defaultCacheEntryWeight)
-			return loadedAsset, err
+		loadedAsset, err := source.Open(subPath)
+		if err != nil {
+			l.Debug(fmt.Sprintf("Checked `%s`, file not found", source.Path()))
+			continue
 		}
+
+		srcBase, _ := filepath.Abs(source.Path())
+		l.Info(fmt.Sprintf("from %s, loading %s", srcBase, subPath))
+
+		return loadedAsset, l.Insert(subPath, loadedAsset, defaultCacheEntryWeight)
 	}
 
 	return nil, fmt.Errorf(errFmtFileNotFound, subPath)
@@ -120,7 +118,7 @@ func (l *Loader) AddSource(path string) (asset.Source, error) {
 
 	info, err := os.Lstat(cleanPath)
 	if err != nil {
-		l.Warning(err.Error())
+		l.Error(err.Error())
 		return nil, err
 	}
 
@@ -140,7 +138,7 @@ func (l *Loader) AddSource(path string) (asset.Source, error) {
 	case types.AssetSourceMPQ:
 		source, err := mpq.NewSource(cleanPath)
 		if err == nil {
-			l.Debug(fmt.Sprintf("adding MPQ source `%s`", cleanPath))
+			l.Info(fmt.Sprintf("adding MPQ source `%s`", cleanPath))
 			l.Sources = append(l.Sources, source)
 
 			return source, nil
@@ -150,7 +148,7 @@ func (l *Loader) AddSource(path string) (asset.Source, error) {
 			Root: cleanPath,
 		}
 
-		l.Debug(fmt.Sprintf("adding filesystem source `%s`", cleanPath))
+		l.Info(fmt.Sprintf("adding filesystem source `%s`", cleanPath))
 		l.Sources = append(l.Sources, source)
 
 		return source, nil

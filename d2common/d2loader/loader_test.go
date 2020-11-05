@@ -5,6 +5,8 @@ import (
 	"log"
 	"testing"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/asset"
 )
 
@@ -24,7 +26,7 @@ const (
 )
 
 func TestLoader_NewLoader(t *testing.T) {
-	loader := NewLoader(nil)
+	loader, _ := NewLoader(d2util.LogLevelDefault)
 
 	if loader.Cache == nil {
 		t.Error("loader should not be nil")
@@ -32,7 +34,7 @@ func TestLoader_NewLoader(t *testing.T) {
 }
 
 func TestLoader_AddSource(t *testing.T) {
-	loader := NewLoader(nil)
+	loader, _ := NewLoader(d2util.LogLevelDefault)
 
 	sourceA, errA := loader.AddSource(sourcePathA)
 	sourceB, errB := loader.AddSource(sourcePathB)
@@ -83,9 +85,10 @@ func TestLoader_AddSource(t *testing.T) {
 
 // nolint:gocyclo // this is just a test, not a big deal if we ignore linter here
 func TestLoader_Load(t *testing.T) {
-	loader := NewLoader(nil)
+	loader, _ := NewLoader(d2util.LogLevelDefault)
 
-	_, err := loader.AddSource(sourcePathB) // we expect files common to any source to come from here
+	// we expect files common to any source to come from here
+	commonSource, err := loader.AddSource(sourcePathB)
 	if err != nil {
 		t.Fail()
 		log.Print(err)
@@ -121,7 +124,7 @@ func TestLoader_Load(t *testing.T) {
 
 	if entryCommon == nil || errCommon != nil {
 		t.Error("common entry should exist")
-	} else if entryCommon.Source() != loader.Sources[0] {
+	} else if entryCommon.Source() != commonSource {
 		t.Error("common entry should come from the first loader source")
 	}
 
