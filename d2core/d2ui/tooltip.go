@@ -23,6 +23,7 @@ type Tooltip struct {
 	x, y            int
 	originX         tooltipXOrigin
 	originY         tooltipYOrigin
+	boxEnabled      bool
 }
 
 type tooltipXOrigin = int
@@ -62,6 +63,7 @@ func (ui *UIManager) NewTooltip(font,
 		y:               0,
 		originX:         originX,
 		originY:         originY,
+		boxEnabled:      true,
 	}
 	res.manager = ui
 
@@ -82,6 +84,11 @@ func (t *Tooltip) SetTextLines(lines []string) {
 // SetText sets the tooltip text and splits \n into lines
 func (t *Tooltip) SetText(text string) {
 	t.lines = strings.Split(text, "\n")
+}
+
+// SetBoxEnabled determines whether a black box is drawn around the text
+func (t *Tooltip) SetBoxEnabled(enable bool) {
+	t.boxEnabled = enable
 }
 
 func (t *Tooltip) adjustCoordinatesToScreen(maxW, maxH, halfW, halfH int) (rx, ry int) {
@@ -171,7 +178,9 @@ func (t *Tooltip) Render(target d2interface.Surface) {
 	defer target.Pop()
 
 	// tooltip background
-	target.DrawRect(maxW, maxH, d2util.Color(blackAlpha70))
+	if t.boxEnabled {
+		target.DrawRect(maxW, maxH, d2util.Color(blackAlpha70))
+	}
 
 	// text
 	target.PushTranslation(halfW, 0) // text is centered, our box is not
