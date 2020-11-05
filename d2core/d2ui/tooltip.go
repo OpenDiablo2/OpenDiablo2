@@ -125,7 +125,8 @@ func (t *Tooltip) adjustCoordinatesToScreen(maxW, maxH, halfW, halfH int) (rx, r
 	return renderX, renderY
 }
 
-func (t *Tooltip) getTextSize() (sx, sy int) {
+// GetSize returns the size of the tooltip
+func (t *Tooltip) GetSize() (sx, sy int) {
 	maxW, maxH := 0, 0
 
 	for i := range t.lines {
@@ -143,7 +144,7 @@ func (t *Tooltip) getTextSize() (sx, sy int) {
 
 // Render draws the tooltip
 func (t *Tooltip) Render(target d2interface.Surface) {
-	maxW, maxH := t.getTextSize()
+	maxW, maxH := t.GetSize()
 
 	// nolint:gomnd // no magic numbers, their meaning is obvious
 	halfW, halfH := maxW/2, maxH/2
