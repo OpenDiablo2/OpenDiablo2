@@ -494,6 +494,7 @@ func (v *MainMenu) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	return false
 }
 
+// When Escape is pressed, back you to "mode" game screen
 func (v *MainMenu) EscapePressed(event d2interface.KeyEvent, mode mainMenuScreenMode) {
         if event.Key() == d2enum.KeyEscape {
                 v.SetScreenMode(mode)
