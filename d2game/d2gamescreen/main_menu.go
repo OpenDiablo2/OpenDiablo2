@@ -367,6 +367,7 @@ func (v *MainMenu) onMapTestClicked() {
 }
 
 func (v *MainMenu) onSinglePlayerClicked() {
+	v.SetScreenMode(ScreenModeUnknown)
 	if v.heroState.HasGameStates() {
 		// Go here only if existing characters are available to select
 		v.navigator.ToCharacterSelect(d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText())
