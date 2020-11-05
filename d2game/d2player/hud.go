@@ -12,8 +12,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -30,13 +30,13 @@ const (
 )
 
 const (
-	expBarWidth              = 120.0
-	staminaBarWidth          = 102.0
-	staminaBarHeight         = 19.0
-	globeHeight              = 80
-	globeWidth               = 80
-	hoverLabelOuterPad       = 5
-	percentStaminaBarLow     = 0.25
+	expBarWidth          = 120.0
+	staminaBarWidth      = 102.0
+	staminaBarHeight     = 19.0
+	globeHeight          = 80
+	globeWidth           = 80
+	hoverLabelOuterPad   = 5
+	percentStaminaBarLow = 0.25
 )
 
 const (
@@ -761,10 +761,10 @@ func (h *HUD) renderForSelectableEntitiesHovered(target d2interface.Surface) {
 	}
 }
 
-
 // Render draws the HUD to the screen
 func (h *HUD) Render(target d2interface.Surface) error {
 	h.renderForSelectableEntitiesHovered(target)
+
 	if err := h.renderGameControlPanelElements(target); err != nil {
 		return err
 	}

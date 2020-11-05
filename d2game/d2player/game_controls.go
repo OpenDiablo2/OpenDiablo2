@@ -29,9 +29,8 @@ type Panel interface {
 	Open()
 	Close()
 }
-const(
-	mouseBtnActionsThreshold = 0.25
-)
+
+const mouseBtnActionsThreshold = 0.25
 
 const (
 	// Since they require special handling, not considering (1) globes, (2) content of the mini panel, (3) belt
