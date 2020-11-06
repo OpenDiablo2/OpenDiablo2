@@ -19,11 +19,9 @@ const (
 // UIFrame is a representation of a ui panel that occupies the left or right half of the screen
 // when it is visible.
 type UIFrame struct {
+	*BaseWidget
 	asset            *d2asset.AssetManager
-	uiManager        *UIManager
 	frame            *Sprite
-	originX          int
-	originY          int
 	frameOrientation frameOrientation
 }
 
@@ -58,12 +56,13 @@ func NewUIFrame(
 		originY = 0
 	}
 
+	base := NewBaseWidget(uiManager)
+	base.SetPosition(originX, originY)
+
 	frame := &UIFrame{
+		BaseWidget:       base,
 		asset:            asset,
-		uiManager:        uiManager,
 		frameOrientation: frameOrientation,
-		originX:          originX,
-		originY:          originY,
 	}
 	frame.Load()
 
@@ -72,7 +71,7 @@ func NewUIFrame(
 
 // Load the necessary frame resources
 func (u *UIFrame) Load() {
-	sprite, err := u.uiManager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
+	sprite, err := u.manager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
 	}
@@ -105,7 +104,7 @@ func (u *UIFrame) renderLeft(target d2interface.Surface) error {
 	// the frame coordinates
 	coord := make(map[int]*struct{ x, y int })
 
-	startX, startY := u.originX, u.originY
+	startX, startY := u.GetPosition()
 	currentX, currentY := startX, startY
 
 	// first determine the coordinates for each frame
@@ -162,7 +161,7 @@ func (u *UIFrame) renderRight(target d2interface.Surface) error {
 	// the frame coordinates
 	coord := make(map[int]*struct{ x, y int })
 
-	startX, startY := u.originX, u.originY
+	startX, startY := u.GetPosition()
 	currentX, currentY := startX, startY
 
 	// first determine the coordinates for each frame

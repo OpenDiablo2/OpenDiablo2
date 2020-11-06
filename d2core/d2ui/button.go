@@ -242,32 +242,28 @@ var _ Widget = &Button{} // static check to ensure button implements widget
 
 // Button defines a standard wide UI button
 type Button struct {
-	manager               *UIManager
+	*BaseWidget
 	buttonLayout          ButtonLayout
 	normalSurface         d2interface.Surface
 	pressedSurface        d2interface.Surface
 	toggledSurface        d2interface.Surface
 	pressedToggledSurface d2interface.Surface
 	disabledSurface       d2interface.Surface
-	x                     int
-	y                     int
-	width                 int
-	height                int
 	onClick               func()
 	enabled               bool
-	visible               bool
 	pressed               bool
 	toggled               bool
 }
 
 // NewButton creates an instance of Button
 func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
+	base := NewBaseWidget(ui)
+	base.SetVisible(true)
+
 	btn := &Button{
-		width:   0,
-		height:  0,
-		visible: true,
-		enabled: true,
-		pressed: false,
+		BaseWidget: base,
+		enabled:    true,
+		pressed:    false,
 	}
 
 	buttonLayout := getButtonLayouts()[buttonType]
@@ -426,11 +422,6 @@ func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, lab
 	}
 }
 
-// bindManager binds the button to the UI manager
-func (v *Button) bindManager(manager *UIManager) {
-	v.manager = manager
-}
-
 // OnActivated defines the callback handler for the activate event
 func (v *Button) OnActivated(callback func()) {
 	v.onClick = callback
@@ -493,32 +484,6 @@ func (v *Button) GetEnabled() bool {
 // SetEnabled sets the enabled state
 func (v *Button) SetEnabled(enabled bool) {
 	v.enabled = enabled
-}
-
-// GetSize returns the size of the button
-func (v *Button) GetSize() (width, height int) {
-	return v.width, v.height
-}
-
-// SetPosition moves the button
-func (v *Button) SetPosition(x, y int) {
-	v.x = x
-	v.y = y
-}
-
-// GetPosition returns the location of the button
-func (v *Button) GetPosition() (x, y int) {
-	return v.x, v.y
-}
-
-// GetVisible returns the visibility of the button
-func (v *Button) GetVisible() bool {
-	return v.visible
-}
-
-// SetVisible sets the visibility of the button
-func (v *Button) SetVisible(visible bool) {
-	v.visible = visible
 }
 
 // GetPressed returns the pressed state of the button

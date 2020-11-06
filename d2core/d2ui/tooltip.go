@@ -16,11 +16,10 @@ const (
 
 // Tooltip contains a label containing text with a transparent, black background
 type Tooltip struct {
-	manager         *UIManager
+	*BaseWidget
 	lines           []string
 	label           *Label
 	backgroundColor int
-	x, y            int
 	originX         tooltipXOrigin
 	originY         tooltipYOrigin
 	boxEnabled      bool
@@ -56,11 +55,12 @@ func (ui *UIManager) NewTooltip(font,
 	label := ui.NewLabel(font, palette)
 	label.Alignment = d2gui.HorizontalAlignCenter
 
+	base := NewBaseWidget(ui)
+
 	res := &Tooltip{
+		BaseWidget:      base,
 		backgroundColor: blackAlpha70,
 		label:           label,
-		x:               0,
-		y:               0,
 		originX:         originX,
 		originY:         originY,
 		boxEnabled:      true,
@@ -68,12 +68,6 @@ func (ui *UIManager) NewTooltip(font,
 	res.manager = ui
 
 	return res
-}
-
-// SetPosition sets the position of the origin point of the tooltip
-func (t *Tooltip) SetPosition(x, y int) {
-	t.x = x
-	t.y = y
 }
 
 // SetTextLines sets the tooltip text in the form of an array of strings

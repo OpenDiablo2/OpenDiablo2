@@ -159,11 +159,14 @@ func (v *Credits) Advance(tickTime float64) error {
 				continue
 			}
 
-			if label.Label.Y-1 < -15 {
+			_, y := label.Label.GetPosition()
+
+			if y-1 < -15 {
 				label.Available = true
 				continue
 			}
-			label.Label.Y--
+
+			label.Label.OffsetPosition(0, -1)
 		}
 	}
 

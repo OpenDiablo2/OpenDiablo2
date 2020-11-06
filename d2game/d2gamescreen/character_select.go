@@ -392,8 +392,9 @@ func (v *CharacterSelect) Render(screen d2interface.Surface) {
 		v.characterStatsLabel[i].Render(screen)
 		v.characterExpLabel[i].Render(screen)
 
-		charImgX := v.characterNameLabel[i].X - selectionBoxImageOffsetX
-		charImgY := v.characterNameLabel[i].Y + selectionBoxImageOffsetY
+		x, y := v.characterNameLabel[i].GetPosition()
+		charImgX := x - selectionBoxImageOffsetX
+		charImgY := y + selectionBoxImageOffsetY
 		screen.PushTranslation(charImgX, charImgY)
 		v.characterImage[i].Render(screen)
 		screen.Pop()

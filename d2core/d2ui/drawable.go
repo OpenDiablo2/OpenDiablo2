@@ -11,6 +11,7 @@ type Drawable interface {
 	GetSize() (width, height int)
 	SetPosition(x, y int)
 	GetPosition() (x, y int)
+	OffsetPosition(xo, yo int)
 	GetVisible() bool
 	SetVisible(visible bool)
 }
