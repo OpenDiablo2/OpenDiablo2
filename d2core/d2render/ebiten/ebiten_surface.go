@@ -12,6 +12,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
 // static check that we implement our interface
@@ -137,6 +138,20 @@ func (s *ebitenSurface) PopN(n int) {
 	}
 }
 
+func (s *ebitenSurface) RenderSprite(sprite *d2ui.Sprite) {
+	opts := s.createDrawImageOptions()
+
+	if s.stateCurrent.brightness != 1 || s.stateCurrent.saturation != 1 {
+		opts.ColorM.ChangeHSV(0, s.stateCurrent.saturation, s.stateCurrent.brightness)
+	}
+
+	s.handleStateEffect(opts)
+
+	opts.CompositeMode = ebiten.CompositeModeSourceOver
+
+	sprite.Render(s)
+}
+
 // Render renders the given surface
 func (s *ebitenSurface) Render(sfc d2interface.Surface) {
 	opts := s.createDrawImageOptions()
@@ -146,6 +161,8 @@ func (s *ebitenSurface) Render(sfc d2interface.Surface) {
 	}
 
 	s.handleStateEffect(opts)
+
+	opts.CompositeMode = ebiten.CompositeModeSourceOver
 
 	s.image.DrawImage(sfc.(*ebitenSurface).image, opts)
 }
@@ -221,6 +238,15 @@ func (s *ebitenSurface) DrawLine(x, y int, fillColor color.Color) {
 		float64(s.stateCurrent.y+y),
 		fillColor,
 	)
+}
+
+// DrawSurface draws a surface within the surface
+func (s *ebitenSurface) DrawSurface(sfc d2interface.Surface) {
+	if _, ok := sfc.(*ebitenSurface); !ok {
+		return
+	}
+
+	sfc.Render(s)
 }
 
 // DrawRect draws a rectangle

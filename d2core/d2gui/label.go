@@ -1,6 +1,7 @@
 package d2gui
 
 import (
+	"image/color"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -11,16 +12,21 @@ import (
 type Label struct {
 	widgetBase
 
-	renderer d2interface.Renderer
-	text     string
-	font     *d2asset.Font
-	surface  d2interface.Surface
+	renderer   d2interface.Renderer
+	text       string
+	font       *d2asset.Font
+	surface    d2interface.Surface
+	color      color.RGBA
+	hoverColor color.RGBA
+	isHovered  bool
 }
 
-func createLabel(renderer d2interface.Renderer, text string, font *d2asset.Font) *Label {
+func createLabel(renderer d2interface.Renderer, text string, font *d2asset.Font, col color.RGBA) *Label {
 	label := &Label{
-		font:     font,
-		renderer: renderer,
+		font:       font,
+		renderer:   renderer,
+		color:      col,
+		hoverColor: col,
 	}
 
 	err := label.setText(text)
@@ -32,6 +38,15 @@ func createLabel(renderer d2interface.Renderer, text string, font *d2asset.Font)
 	label.SetVisible(true)
 
 	return label
+}
+
+func (l *Label) SetHoverColor(col color.RGBA) {
+	l.hoverColor = col
+}
+
+func (l *Label) SetIsHovered(isHovered bool) {
+	l.isHovered = isHovered
+	l.setText(l.text)
 }
 
 func (l *Label) render(target d2interface.Surface) {
@@ -61,6 +76,12 @@ func (l *Label) setText(text string) error {
 
 	surface := l.renderer.NewSurface(width, height)
 
+	col := l.color
+	if l.isHovered {
+		col = l.hoverColor
+	}
+
+	l.font.SetColor(col)
 	if err := l.font.RenderText(text, surface); err != nil {
 		return err
 	}

@@ -44,6 +44,10 @@ func (s *Sprite) Render(target d2interface.Surface) {
 	s.animation.Render(target)
 }
 
+func (s *Sprite) GetSurface() d2interface.Surface {
+	return s.animation.GetCurrentFrameSurface()
+}
+
 // RenderSection renders the section of the sprite enclosed by bounds
 func (s *Sprite) RenderSection(sfc d2interface.Surface, bound image.Rectangle) {
 	sfc.PushTranslation(s.x, s.y-bound.Dy())

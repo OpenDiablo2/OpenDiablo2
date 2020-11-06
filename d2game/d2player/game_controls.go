@@ -234,16 +234,18 @@ const (
 
 // GameControls represents the game's controls on the screen
 type GameControls struct {
-	keyMap                 *KeyMap
-	actionableRegions      []actionableRegion
-	asset                  *d2asset.AssetManager
-	renderer               d2interface.Renderer // https://github.com/OpenDiablo2/OpenDiablo2/issues/798
-	inputListener          inputCallbackListener
-	hero                   *d2mapentity.Player
-	heroState              *d2hero.HeroStateFactory
-	mapEngine              *d2mapengine.MapEngine
-	mapRenderer            *d2maprenderer.MapRenderer
-	escapeMenu             *EscapeMenu
+	keyMap            *KeyMap
+	actionableRegions []actionableRegion
+	asset             *d2asset.AssetManager
+	renderer          d2interface.Renderer // https://github.com/OpenDiablo2/OpenDiablo2/issues/798
+	inputListener     inputCallbackListener
+	hero              *d2mapentity.Player
+	heroState         *d2hero.HeroStateFactory
+	mapEngine         *d2mapengine.MapEngine
+	mapRenderer       *d2maprenderer.MapRenderer
+	escapeMenu        *EscapeMenu
+	keyBindingMenu    *Box
+	// keyBindingMenu         *KeyBindingMenu
 	ui                     *d2ui.UIManager
 	inventory              *Inventory
 	skilltree              *skillTree
@@ -354,15 +356,53 @@ func NewGameControls(
 
 	keyMap := getDefaultKeyMap()
 
+	testLayout := d2gui.CreateLayout(renderer, d2gui.PositionTypeVertical, asset)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
+	testLayout.AddLabel("Test 1", d2gui.FontStyle42Units)
 	gc := &GameControls{
-		keyMap:           keyMap,
-		asset:            asset,
-		ui:               ui,
-		renderer:         renderer,
-		hero:             hero,
-		heroState:        heroState,
-		mapEngine:        mapEngine,
-		escapeMenu:       escapeMenu,
+		keyMap:         keyMap,
+		asset:          asset,
+		ui:             ui,
+		renderer:       renderer,
+		hero:           hero,
+		heroState:      heroState,
+		mapEngine:      mapEngine,
+		escapeMenu:     escapeMenu,
+		keyBindingMenu: NewBox(asset, renderer, ui, guiManager, testLayout, 620, 375, 90, 65),
+		// keyBindingMenu:   NewKeyBindingMenu(asset, renderer, ui, guiManager),
 		inputListener:    inputListener,
 		mapRenderer:      mapRenderer,
 		inventory:        NewInventory(asset, ui, inventoryRecord),
@@ -580,6 +620,7 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 		g.heroStatsPanel.Toggle()
 		g.updateLayout()
 	case d2enum.ToggleRunWalk:
+		g.keyBindingMenu.Toggle()
 		g.onToggleRunButton(false)
 	case d2enum.HoldRun:
 		g.onToggleRunButton(true)
@@ -844,6 +885,7 @@ func (g *GameControls) Load() {
 	g.skilltree.load()
 	g.heroStatsPanel.Load()
 	g.HelpOverlay.Load()
+	g.keyBindingMenu.Load()
 }
 
 func (g *GameControls) loadUIButtons() {
@@ -872,6 +914,7 @@ func (g *GameControls) onToggleRunButton(noButton bool) {
 // Advance advances the state of the GameControls
 func (g *GameControls) Advance(elapsed float64) error {
 	g.mapRenderer.Advance(elapsed)
+	g.keyBindingMenu.Update()
 	return nil
 }
 
@@ -920,6 +963,10 @@ func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 	}
 
 	if g.HelpOverlay.IsOpen() && g.HelpOverlay.IsInRect(px, py) {
+		return true
+	}
+
+	if g.keyBindingMenu.IsOpen() && g.keyBindingMenu.IsInRect(px, py) {
 		return true
 	}
 
@@ -1001,6 +1048,10 @@ func (g *GameControls) renderHUD(target d2interface.Surface) error {
 	}
 
 	if err := g.HelpOverlay.Render(target); err != nil {
+		return err
+	}
+
+	if err := g.keyBindingMenu.Render(target); err != nil {
 		return err
 	}
 
