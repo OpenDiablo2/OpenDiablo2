@@ -37,7 +37,6 @@ const (
 const (
 	animationBudget        = 1024 * 1024 * 128
 	fontBudget             = 128
-	tableBudget            = 64
 	paletteBudget          = 64
 	paletteTransformBudget = 64
 )
@@ -60,7 +59,7 @@ type AssetManager struct {
 	config     *d2config.Configuration
 	logger     *d2util.Logger
 	loader     *d2loader.Loader
-	tables     d2interface.Cache
+	tables     []d2tbl.TextDictionary
 	animations d2interface.Cache
 	fonts      d2interface.Cache
 	palettes   d2interface.Cache
@@ -385,10 +384,6 @@ func (am *AssetManager) LoadPalette(palettePath string) (d2interface.Palette, er
 
 // LoadStringTable loads a string table from the given path
 func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary, error) {
-	if cached, found := am.tables.Retrieve(tablePath); found {
-		return cached.(d2tbl.TextDictionary), nil
-	}
-
 	data, err := am.LoadFile(tablePath)
 	if err != nil {
 		return nil, err
@@ -401,9 +396,23 @@ func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary,
 
 	am.logger.Debug(fmt.Sprintf(fmtLoadStringTable, tablePath))
 
-	err = am.tables.Insert(tablePath, table, defaultCacheEntryWeight)
+	am.tables = append(am.tables, table)
 
 	return table, err
+}
+
+// TranslateString returns the translation of the given string. The string is retrieved from
+// the loaded string tables.
+func (am *AssetManager) TranslateString(key string) string {
+	for idx := range am.tables {
+		if value, found := am.tables[idx][key]; found {
+			return value
+		}
+	}
+
+	// Fix to allow v.setDescLabels("#123") to be bypassed for a patch in issue #360. Reenable later.
+	// log.Panicf("Could not find a string for the key '%s'", key)
+	return key
 }
 
 // LoadPaletteTransform loads a palette transform file

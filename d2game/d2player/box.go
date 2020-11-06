@@ -3,9 +3,7 @@ package d2player
 import (
 	"image/color"
 	"log"
-	"math"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
@@ -44,172 +42,6 @@ const (
 	boxBottomHorizontalEdge6
 )
 
-type BoxScrollbar struct {
-	x                 int
-	y                 int
-	maxY              int
-	minY              int
-	arrowSliderOffset int
-	parent            *Box
-	mainLayout        *d2gui.Layout
-	sliderLayout      *d2gui.Layout
-	sprites           []*d2ui.Sprite
-	viewportSize      int
-	contentSize       int
-
-	sliderClicked      bool
-	arrowUpClicked     bool
-	arrowDownClicked   bool
-	clickedAtY         int
-	mouseYOnSlider     int
-	lastY              int
-	gutterHeight       int
-	contentToViewRatio float32
-}
-
-const (
-	textSliderPartWidth  = 12
-	textSliderPartHeight = 13
-)
-
-type textSliderPart int
-
-const (
-	textSliderPartArrowDownHollow textSliderPart = 8
-	textSliderPartArrowUpHollow
-	textSliderPartArrowDownFilled
-	textSliderPartArrowUpFilled
-	textSliderPartSquare
-	textSliderPartInnerGutter
-	textSliderPartFillingVariation1
-)
-
-func newBoxScrollBar(
-	box *Box,
-	x, y int,
-	height int,
-	contentSize, viewportSize int,
-) *BoxScrollbar {
-	ret := &BoxScrollbar{}
-
-	arrowUpLayout := box.layout.AddLayout(d2gui.PositionTypeAbsolute)
-	arrowUpLayout.SetSize(textSliderPartWidth, textSliderPartHeight)
-	arrowUpLayout.SetPosition(x, y)
-	arrowUpLayout.SetMouseClickHandler(ret.onArrowUpClick)
-
-	arrowDownLayout := box.layout.AddLayout(d2gui.PositionTypeAbsolute)
-	arrowDownLayout.SetPosition(x, y+height-textSliderPartHeight)
-	arrowDownLayout.SetSize(textSliderPartWidth, textSliderPartHeight)
-	arrowDownLayout.SetMouseClickHandler(ret.onArrowDownClick)
-
-	viewportPercentage := 1.0 - (float32(contentSize-viewportSize) / float32(contentSize))
-	ret.contentToViewRatio = viewportPercentage
-	gutterHeight := height - 2*textSliderPartHeight
-	ret.contentToViewRatio = float32(contentSize) / float32(gutterHeight)
-	ret.gutterHeight = gutterHeight
-	sliderHeight := int(float32(gutterHeight) * viewportPercentage)
-
-	sliderLayout := box.layout.AddLayout(d2gui.PositionTypeAbsolute)
-	sliderLayout.SetSize(textSliderPartWidth, sliderHeight)
-	sliderLayout.SetPosition(x, y+textSliderPartHeight)
-	sliderLayout.SetMouseClickHandler(ret.onSliderMouseClick)
-
-	ret.minY = y + textSliderPartHeight
-	ret.maxY = (y + height) - (textSliderPartHeight + sliderHeight)
-
-	// ret.mainLayout = layout
-	ret.sliderLayout = sliderLayout
-	ret.viewportSize = viewportSize
-	ret.parent = box
-	ret.contentSize = contentSize
-	ret.arrowSliderOffset = int(float32(sliderHeight) * 0.02)
-	return ret
-}
-
-func (boxScroll *BoxScrollbar) onSliderMouseClick(event d2interface.MouseEvent) {
-	if event.Button() == d2enum.MouseButtonLeft {
-		boxScroll.sliderClicked = !boxScroll.sliderClicked
-		if boxScroll.sliderClicked {
-			boxScroll.clickedAtY = event.Y()
-			boxScroll.lastY = boxScroll.clickedAtY
-			boxScroll.mouseYOnSlider = event.Y() - boxScroll.sliderLayout.Sy
-		}
-	}
-}
-
-func (boxScroll *BoxScrollbar) onArrowUpClick(event d2interface.MouseEvent) {
-	if event.Button() == d2enum.MouseButtonLeft {
-		boxScroll.arrowUpClicked = !boxScroll.arrowUpClicked
-	}
-}
-
-func (boxScroll *BoxScrollbar) onArrowDownClick(event d2interface.MouseEvent) {
-	if event.Button() == d2enum.MouseButtonLeft {
-		boxScroll.arrowDownClicked = !boxScroll.arrowDownClicked
-	}
-}
-
-func (boxScroll *BoxScrollbar) update(cursorPosY int) {
-	if boxScroll.arrowDownClicked {
-		x, y := boxScroll.sliderLayout.GetPosition()
-		newY := y + boxScroll.arrowSliderOffset
-		if newY > boxScroll.maxY {
-			newY = boxScroll.maxY
-		}
-
-		boxScroll.sliderLayout.SetPosition(x, newY)
-	}
-
-	if boxScroll.arrowUpClicked {
-		x, y := boxScroll.sliderLayout.GetPosition()
-		newY := y - boxScroll.arrowSliderOffset
-		if newY < boxScroll.minY {
-			newY = boxScroll.minY
-		}
-
-		boxScroll.sliderLayout.SetPosition(x, newY)
-	}
-
-	if boxScroll.sliderClicked {
-		offset := cursorPosY - boxScroll.clickedAtY
-		x, y := boxScroll.sliderLayout.GetPosition()
-		newY := y + offset
-		outOfBoundsUp := false
-		outOfBoundsDown := false
-
-		if newY > boxScroll.maxY {
-			newY = boxScroll.maxY
-			outOfBoundsDown = true
-		}
-
-		if newY < boxScroll.minY {
-			newY = boxScroll.minY
-			outOfBoundsUp = true
-		}
-
-		boxScroll.sliderLayout.SetPosition(x, newY)
-		if !outOfBoundsUp && !outOfBoundsDown {
-			boxScroll.clickedAtY = boxScroll.clickedAtY + offset
-			if boxScroll.parent.contentLayout != nil {
-				contentX, contentY := boxScroll.parent.contentLayout.GetPosition()
-				scaledOffset := int(math.Round(float64(float32(offset) * boxScroll.contentToViewRatio)))
-				newContentY := contentY - scaledOffset
-				boxScroll.parent.contentLayout.SetPosition(contentX, newContentY)
-			}
-		}
-
-		if outOfBoundsDown && boxScroll.parent.contentLayout != nil {
-			newContentY := -boxScroll.contentSize + boxScroll.viewportSize
-			boxScroll.parent.contentLayout.SetPosition(0, newContentY)
-		}
-
-		if outOfBoundsUp && boxScroll.parent.contentLayout != nil {
-			boxScroll.parent.contentLayout.SetPosition(0, 0)
-		}
-
-	}
-}
-
 type BoxOption struct {
 	label      string
 	callback   func()
@@ -220,23 +52,24 @@ type BoxOption struct {
 // Box represents the menu to view/edit the
 // key bindings
 type Box struct {
-	asset           *d2asset.AssetManager
-	isOpen          bool
-	renderer        d2interface.Renderer
-	sprites         []*d2ui.Sprite
-	uiManager       *d2ui.UIManager
-	layout          *d2gui.Layout
-	innerLayout     *d2gui.Layout
-	contentLayout   *d2gui.Layout
-	scrollBar       *BoxScrollbar
-	guiManager      *d2gui.GuiManager
-	sfc             d2interface.Surface
-	width           int
-	height          int
-	x               int
-	y               int
-	Options         []*BoxOption
-	enableScrollbar bool
+	asset            *d2asset.AssetManager
+	isOpen           bool
+	renderer         d2interface.Renderer
+	sprites          []*d2ui.Sprite
+	uiManager        *d2ui.UIManager
+	layout           *d2gui.Layout
+	innerLayout      *d2gui.Layout
+	contentLayout    *d2gui.Layout
+	scrollbar        *BoxScrollbar
+	guiManager       *d2gui.GuiManager
+	sfc              d2interface.Surface
+	title            string
+	width            int
+	height           int
+	x                int
+	y                int
+	Options          []*BoxOption
+	disableScrollbar bool
 }
 
 func NewBox(
@@ -247,6 +80,7 @@ func NewBox(
 	contentLayout *d2gui.Layout,
 	width, height int,
 	x, y int,
+	title string,
 ) *Box {
 	return &Box{
 		asset:         asset,
@@ -257,6 +91,7 @@ func NewBox(
 		height:        height,
 		contentLayout: contentLayout,
 		sfc:           renderer.NewSurface(width, height),
+		title:         title,
 		x:             x,
 		y:             y,
 	}
@@ -298,8 +133,8 @@ func (box *Box) setupTopBorder(offsetY int) {
 	}
 
 	i := 0
-	currentX, currentY := box.x, box.y+offsetY
 	maxPieces := box.width / boxSpriteWidth
+	currentX, currentY := box.x, box.y+offsetY
 	for {
 		for _, frameIndex := range topEdgePiece {
 			f, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
@@ -326,7 +161,7 @@ func (box *Box) setupTopBorder(offsetY int) {
 		}
 	}
 }
-func (box *Box) setupBottomBorder() {
+func (box *Box) setupBottomBorder(offsetY int) {
 	bottomEdgePiece := []int{
 		boxBottomHorizontalEdge1,
 		boxBottomHorizontalEdge2,
@@ -337,7 +172,7 @@ func (box *Box) setupBottomBorder() {
 	}
 
 	i := 0
-	currentX, currentY := box.x, box.y+box.height-boxSpriteHeight+9
+	currentX, currentY := box.x, offsetY
 	maxPieces := box.width / boxSpriteWidth
 	for {
 		for _, frameIndex := range bottomEdgePiece {
@@ -479,19 +314,16 @@ func (box *Box) setupCorners() {
 
 func (box *Box) Load() {
 	box.layout = d2gui.CreateLayout(box.renderer, d2gui.PositionTypeAbsolute, box.asset)
-	box.innerLayout = box.layout.AddLayout(d2gui.PositionTypeAbsolute)
-
-	box.innerLayout.SetPosition(box.x, box.y-boxSpriteHeight-4)
-	if box.contentLayout != nil {
-		box.innerLayout.AddLayoutFromSource(box.contentLayout)
-	}
 	box.layout.SetPosition(box.x, box.y-boxSpriteHeight)
 	box.layout.SetSize(box.width, box.height)
 	box.layout.SetVisible(false)
 	box.layout.SetLayer(0)
 
+	box.innerLayout = box.layout.AddLayout(d2gui.PositionTypeAbsolute)
+	box.innerLayout.SetPosition(box.x, box.y-boxSpriteHeight-4)
+
 	box.setupTopBorder(0)
-	box.setupBottomBorder()
+	box.setupBottomBorder(box.y + box.height - boxSpriteHeight + 10)
 	box.setupLeftBorder()
 	box.setupRightBorder()
 	box.setupCorners()
@@ -502,12 +334,10 @@ func (box *Box) Load() {
 		{label: "Accept", hoverColor: d2util.Color(0x00D000FF), canHover: true},
 	}...)
 
-	bottomSectionHeight := int(float32(box.height) * 0.12)
-	optionsEnabled := len(box.Options) > 0 && bottomSectionHeight > 14
-	var innerSectionHeight int
+	sectionHeight := int(float32(box.height) * 0.12)
+	optionsEnabled := len(box.Options) > 0 && sectionHeight > 14
 	if optionsEnabled {
-		innerSectionHeight = box.height - bottomSectionHeight
-		box.innerLayout.SetSize(box.width+2, (box.height - bottomSectionHeight))
+		box.innerLayout.SetSize(box.width+2, (box.height - sectionHeight))
 		cornerLeft, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
 		if err != nil {
 			log.Print(err)
@@ -518,17 +348,17 @@ func (box *Box) Load() {
 			log.Print(err)
 		}
 
-		offsetY := box.y + box.height - bottomSectionHeight
+		offsetY := box.y + box.height - sectionHeight
 		cornerLeft.SetCurrentFrame(boxCornerTopLeft)
 		cornerLeft.SetPosition(box.x, offsetY)
 		cornerRight.SetCurrentFrame(boxCornerTopRight)
 		cornerRight.SetPosition(box.x+box.width-boxSpriteWidth, offsetY)
-		box.setupTopBorder(box.height - 4*boxSpriteHeight)
+		box.setupTopBorder(box.height - (4 * boxSpriteHeight) + 3)
 		box.sprites = append(box.sprites, cornerLeft, cornerRight)
 
 		buttonsLayoutWrapper := box.layout.AddLayout(d2gui.PositionTypeAbsolute)
-		buttonsLayoutWrapper.SetSize(box.width+2, bottomSectionHeight)
-		buttonsLayoutWrapper.SetPosition(box.x, box.y+box.height-bottomSectionHeight-boxSpriteHeight-4)
+		buttonsLayoutWrapper.SetSize(box.width+2, sectionHeight)
+		buttonsLayoutWrapper.SetPosition(box.x, box.y+box.height-sectionHeight-boxSpriteHeight)
 		buttonsLayout := buttonsLayoutWrapper.AddLayout(d2gui.PositionTypeHorizontal)
 		buttonsLayout.SetSize(buttonsLayoutWrapper.GetSize())
 		buttonsLayout.SetVerticalAlign(d2gui.VerticalAlignMiddle)
@@ -547,30 +377,66 @@ func (box *Box) Load() {
 			l.SetMouseLeaveHandler(func(event d2interface.MouseMoveEvent) {
 				l.SetIsHovered(false)
 			})
-
-			l.SetLayer(0)
 		}
 
 		buttonsLayout.AddSpacerDynamic()
 	} else {
-		innerSectionHeight = box.height
 		box.innerLayout.SetSize(box.width+2, box.height)
 	}
 
-	scrollBarX, scrollBarY, scrollBarHeight := box.x+box.width-12, box.y-boxSpriteHeight, box.height-5
-	if optionsEnabled {
-		scrollBarHeight -= bottomSectionHeight
+	if box.title != "" {
+		cornerLeft, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
+		if err != nil {
+			log.Print(err)
+		}
+
+		cornerRight, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
+		if err != nil {
+			log.Print(err)
+		}
+
+		offsetY := box.y + sectionHeight
+
+		cornerLeft.SetCurrentFrame(boxCornerBottomLeft)
+		cornerLeft.SetPosition(box.x, offsetY-10)
+
+		cornerRight.SetCurrentFrame(boxCornerBottomRight)
+		cornerRight.SetPosition(box.x+box.width-boxSpriteWidth, offsetY-10)
+
+		box.sprites = append(box.sprites, cornerLeft, cornerRight)
+
+		innerLayoutW, innerLayoutH := box.innerLayout.GetSize()
+		innerLayoutX, innerLayoutY := box.layout.GetPosition()
+		box.innerLayout.SetSize(innerLayoutW, innerLayoutH-sectionHeight)
+		box.innerLayout.SetPosition(innerLayoutX, innerLayoutY+sectionHeight)
+
+		titleLayout := box.layout.AddLayout(d2gui.PositionTypeHorizontal)
+		titleLayout.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
+		titleLayout.SetVerticalAlign(d2gui.VerticalAlignMiddle)
+		titleLayout.SetPosition(box.x, box.y-boxSpriteHeight)
+		titleLayout.SetSize(innerLayoutW, sectionHeight)
+		titleLayout.AddSpacerDynamic()
+		titleLayout.AddLabel(box.title, d2gui.FontStyle30Units)
+		titleLayout.AddSpacerDynamic()
+
+		box.setupBottomBorder(offsetY)
 	}
 
-	if box.contentLayout != nil {
-		_, contentH := box.contentLayout.GetSize()
-		box.scrollBar = newBoxScrollBar(box, scrollBarX, scrollBarY, scrollBarHeight, contentH, innerSectionHeight)
+	if !box.disableScrollbar && box.contentLayout != nil {
+		box.scrollbar = newBoxScrollBar(
+			box.innerLayout,
+			box.contentLayout,
+		)
+
+		box.innerLayout.AddLayoutFromSource(box.contentLayout)
 	}
 }
 
 func (box *Box) Update() {
-	_, cursorY := box.renderer.GetCursorPos()
-	box.scrollBar.update(cursorY)
+	if box.isOpen && box.scrollbar != nil {
+		_, cursorY := box.renderer.GetCursorPos()
+		box.scrollbar.update(cursorY)
+	}
 }
 
 // Render the overlay to the given surface

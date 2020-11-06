@@ -5,7 +5,6 @@ import (
 	"log"
 	"sort"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -320,7 +319,7 @@ func (s *SkillPanel) HandleMouseMove(x, y int) bool {
 	s.hoveredSkill = s.getSkillAtPos(x, y)
 
 	if previousHovered != s.hoveredSkill && s.hoveredSkill != nil {
-		skillDescription := d2tbl.TranslateString(s.hoveredSkill.ShortKey)
+		skillDescription := s.asset.TranslateString(s.hoveredSkill.ShortKey)
 		s.hoverTooltip.SetText(fmt.Sprintf("%s\n%s", s.hoveredSkill.Skill, skillDescription))
 
 		listRow := s.GetListRowByPos(x, y)

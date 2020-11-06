@@ -19,29 +19,13 @@ type textDictionaryHashEntry struct {
 	NameLength  uint16
 }
 
-var lookupTable TextDictionary //nolint:gochecknoglobals // currently global by design
-
 const (
 	crcByteCount = 2
 )
 
-// TranslateString returns the translation of the given string
-func TranslateString(key string) string {
-	result, ok := lookupTable[key]
-	if !ok {
-		// Fix to allow v.setDescLabels("#123") to be bypassed for a patch in issue #360. Reenable later.
-		// log.Panicf("Could not find a string for the key '%s'", key)
-		return key
-	}
-
-	return result
-}
-
 // LoadTextDictionary loads the text dictionary from the given data
 func LoadTextDictionary(dictionaryData []byte) TextDictionary {
-	if lookupTable == nil {
-		lookupTable = make(TextDictionary)
-	}
+	lookupTable := make(TextDictionary)
 
 	br := d2datautils.CreateStreamReader(dictionaryData)
 

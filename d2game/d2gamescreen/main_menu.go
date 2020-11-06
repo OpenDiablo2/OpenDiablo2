@@ -11,7 +11,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -324,7 +323,7 @@ func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
 	v.mapTestButton.OnActivated(func() { v.onMapTestClicked() })
 
 	v.btnTCPIPCancel = v.uiManager.NewButton(d2ui.ButtonTypeMedium,
-		d2tbl.TranslateString("cancel"))
+		v.asset.TranslateString("cancel"))
 	v.btnTCPIPCancel.SetPosition(tcpBtnX, tcpBtnY)
 	v.btnTCPIPCancel.OnActivated(func() { v.onTCPIPCancelClicked() })
 
@@ -350,7 +349,7 @@ func (v *MainMenu) createMultiplayerMenuButtons() {
 	v.networkTCPIPButton.OnActivated(func() { v.onNetworkTCPIPClicked() })
 
 	v.networkCancelButton = v.uiManager.NewButton(d2ui.ButtonTypeWide,
-		d2tbl.TranslateString("cancel"))
+		v.asset.TranslateString("cancel"))
 	v.networkCancelButton.SetPosition(networkCancelBtnX, networkCancelBtnY)
 	v.networkCancelButton.OnActivated(func() { v.onNetworkCancelClicked() })
 
@@ -368,6 +367,8 @@ func (v *MainMenu) onMapTestClicked() {
 }
 
 func (v *MainMenu) onSinglePlayerClicked() {
+	v.SetScreenMode(ScreenModeUnknown)
+
 	if v.heroState.HasGameStates() {
 		// Go here only if existing characters are available to select
 		v.navigator.ToCharacterSelect(d2clientconnectiontype.Local, v.tcpJoinGameEntry.GetText())
@@ -494,15 +495,43 @@ func (v *MainMenu) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	return false
 }
 
+func (v *MainMenu) onEscapePressed(event d2interface.KeyEvent, mode mainMenuScreenMode) {
+	if event.Key() == d2enum.KeyEscape {
+		v.SetScreenMode(mode)
+	}
+}
+
 // OnKeyUp is called when a key is released
-func (v *MainMenu) OnKeyUp(_ d2interface.KeyEvent) bool {
-	// On retail version of D2, any key event puts you onto the main menu.
-	if v.screenMode == ScreenModeTrademark {
-		v.SetScreenMode(ScreenModeMainMenu)
-		return true
+func (v *MainMenu) OnKeyUp(event d2interface.KeyEvent) bool {
+	preventKeyEventPropagation := false
+
+	switch v.screenMode {
+	case ScreenModeTrademark: // On retail version of D2, some specific key events (Escape, Space and Enter) puts you onto the main menu.
+		switch event.Key() {
+		case d2enum.KeyEscape, d2enum.KeyEnter, d2enum.KeySpace:
+			v.SetScreenMode(ScreenModeMainMenu)
+		}
+
+		preventKeyEventPropagation = true
+	case ScreenModeMainMenu: // pressing escape in Main Menu close the game
+		if event.Key() == d2enum.KeyEscape {
+			v.onExitButtonClicked()
+		}
+	case ScreenModeMultiplayer: // back to previous menu
+		v.onEscapePressed(event, ScreenModeMainMenu)
+
+		preventKeyEventPropagation = true
+	case ScreenModeTCPIP: // back to previous menu
+		v.onEscapePressed(event, ScreenModeMultiplayer)
+
+		preventKeyEventPropagation = true
+	case ScreenModeServerIP: // back to previous menu
+		v.onEscapePressed(event, ScreenModeTCPIP)
+
+		preventKeyEventPropagation = true
 	}
 
-	return false
+	return preventKeyEventPropagation
 }
 
 // SetScreenMode sets the screen mode (which sub-menu the screen is on)

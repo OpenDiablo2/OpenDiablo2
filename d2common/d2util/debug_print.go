@@ -13,9 +13,6 @@ const (
 	ch = assets.CharHeight
 )
 
-// DebugPrinter is the global debug printer
-var DebugPrinter = NewDebugPrinter() //nolint:gochecknoglobals // currently global by design
-
 // NewDebugPrinter creates a new debug printer
 func NewDebugPrinter() *GlyphPrinter {
 	img := ebiten.NewImageFromImage(assets.CreateTextImage())
