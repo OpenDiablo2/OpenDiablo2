@@ -4,9 +4,14 @@ package d2ui
 type Widget interface {
 	Drawable
 	bindManager(ui *UIManager)
-	GetEnabled() bool
+}
+
+// ClickableWidget defines an object that can be clicked
+type ClickableWidget interface {
+	Widget
 	SetEnabled(enabled bool)
 	SetPressed(pressed bool)
+	GetEnabled() bool
 	GetPressed() bool
 	OnActivated(callback func())
 	Activate()
