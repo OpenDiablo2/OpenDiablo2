@@ -2,6 +2,7 @@ package d2ui
 
 import (
 	"log"
+	"sort"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
@@ -17,6 +18,7 @@ type UIManager struct {
 	inputManager     d2interface.InputManager
 	audio            d2interface.AudioProvider
 	widgets          []Widget
+	widgetsGroups    []*WidgetGroup
 	clickableWidgets []ClickableWidget
 	cursorButtons    CursorButton
 	CursorX          int
@@ -47,6 +49,14 @@ func (ui *UIManager) Reset() {
 	ui.widgets = nil
 	ui.clickableWidgets = nil
 	ui.pressedWidget = nil
+}
+
+// addWidgetGroup adds a widgetGroup to the UI manager and sorts by priority
+func (ui *UIManager) addWidgetGroup(group *WidgetGroup) {
+	ui.widgetsGroups = append(ui.widgetsGroups, group)
+	sort.SliceStable(ui.widgetsGroups, func(i, j int) bool {
+		return ui.widgetsGroups[i].priority < ui.widgetsGroups[j].priority
+	})
 }
 
 // addWidget adds a widget to the UI manager
@@ -115,6 +125,15 @@ func (ui *UIManager) Render(target d2interface.Surface) {
 	for _, widget := range ui.widgets {
 		if widget.GetVisible() {
 			err := widget.Render(target)
+			if err != nil {
+				log.Print(err)
+			}
+		}
+	}
+
+	for _, widgetGroup := range ui.widgetsGroups {
+		if widgetGroup.GetVisible() {
+			err := widgetGroup.Render(target)
 			if err != nil {
 				log.Print(err)
 			}

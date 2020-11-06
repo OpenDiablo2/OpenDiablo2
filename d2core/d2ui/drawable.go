@@ -14,4 +14,6 @@ type Drawable interface {
 	OffsetPosition(xo, yo int)
 	GetVisible() bool
 	SetVisible(visible bool)
+	SetRenderPriority(priority RenderPriority)
+	GetRenderPriority() (priority RenderPriority)
 }
