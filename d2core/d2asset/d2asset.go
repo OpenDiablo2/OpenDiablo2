@@ -21,8 +21,8 @@ func NewAssetManager() (*AssetManager, error) {
 	}
 
 	manager := &AssetManager{
-		logger:     d2util.NewLogger(),
-		loader:     loader,
+		Logger:     d2util.NewLogger(),
+		Loader:     loader,
 		tables:     make([]d2tbl.TextDictionary, 0),
 		animations: d2cache.CreateCache(animationBudget),
 		fonts:      d2cache.CreateCache(fontBudget),
@@ -31,9 +31,7 @@ func NewAssetManager() (*AssetManager, error) {
 		Records:    records,
 	}
 
-	manager.logger.SetPrefix(logPrefix)
-
-	err = manager.init()
+	manager.SetPrefix(logPrefix)
 
 	return manager, err
 }
