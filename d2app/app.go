@@ -287,6 +287,10 @@ func (a *App) LoadConfig() (*d2config.Configuration, error) {
 func (a *App) Run() error {
 	a.parseArguments()
 
+	// add our possible config directories
+	_, _ = a.asset.AddSource(filepath.Dir(d2config.LocalConfigPath()))
+	_, _ = a.asset.AddSource(filepath.Dir(d2config.DefaultConfigPath()))
+
 	config, err := a.LoadConfig()
 	if err != nil {
 		return err

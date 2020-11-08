@@ -43,8 +43,6 @@ func NewLoader(l d2util.LogLevel) (*Loader, error) {
 	loader.Logger.SetPrefix(logPrefix)
 	loader.Logger.SetLevel(l)
 
-	loader.bootstrap()
-
 	return loader, nil
 }
 
@@ -55,11 +53,6 @@ type Loader struct {
 	d2interface.Cache
 	*d2util.Logger
 	Sources []asset.Source
-}
-
-func (l *Loader) bootstrap() {
-	_, _ = l.AddSource(filepath.Dir(d2config.LocalConfigPath()))
-	_, _ = l.AddSource(filepath.Dir(d2config.DefaultConfigPath()))
 }
 
 // Load attempts to load an asset with the given sub-path. The sub-path is relative to the root
