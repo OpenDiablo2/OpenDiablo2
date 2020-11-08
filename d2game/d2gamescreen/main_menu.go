@@ -59,12 +59,14 @@ const (
 	networkCancelBtnX, networkCancelBtnY     = 264, 540
 	tcpHostBtnX, tcpHostBtnY                 = 264, 280
 	tcpJoinBtnX, tcpJoinBtnY                 = 264, 320
+	errorLabelX, errorLabelY                 = 400, 250
 )
 
 const (
 	white       = 0xffffffff
 	lightYellow = 0xffff8cff
 	gold        = 0xd8c480ff
+	red         = 0xff0000ff
 )
 
 const (
@@ -107,6 +109,7 @@ type MainMenu struct {
 	commitLabel         *d2ui.Label
 	tcpIPOptionsLabel   *d2ui.Label
 	tcpJoinGameLabel    *d2ui.Label
+	errorLabel          *d2ui.Label
 	tcpJoinGameEntry    *d2ui.TextBox
 	screenMode          mainMenuScreenMode
 	leftButtonHeld      bool
@@ -132,6 +135,7 @@ func CreateMainMenu(
 	audioProvider d2interface.AudioProvider,
 	ui *d2ui.UIManager,
 	buildInfo BuildInfo,
+	errorMessageOptional ...string,
 ) (*MainMenu, error) {
 	heroStateFactory, err := d2hero.NewHeroStateFactory(asset)
 	if err != nil {
@@ -149,6 +153,11 @@ func CreateMainMenu(
 		buildInfo:      buildInfo,
 		uiManager:      ui,
 		heroState:      heroStateFactory,
+	}
+
+	if len(errorMessageOptional) != 0 {
+		mainMenu.errorLabel = ui.NewLabel(d2resource.FontFormal12, d2resource.PaletteUnits)
+		mainMenu.errorLabel.SetText(errorMessageOptional[0])
 	}
 
 	return mainMenu, nil
@@ -258,6 +267,12 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 	v.tcpJoinGameLabel.Color[0] = rgbaColor(gold)
 
 	v.tcpJoinGameLabel.SetPosition(joinGameX, joinGameY)
+
+	if v.errorLabel != nil {
+		v.errorLabel.SetPosition(errorLabelX, errorLabelY)
+		v.errorLabel.Alignment = d2gui.HorizontalAlignCenter
+		v.errorLabel.Color[0] = rgbaColor(red)
+	}
 }
 
 func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
@@ -454,6 +469,10 @@ func (v *MainMenu) renderLabels(screen d2interface.Surface) {
 	case ScreenModeTrademark:
 		v.copyrightLabel.Render(screen)
 		v.copyrightLabel2.Render(screen)
+
+		if v.errorLabel != nil {
+			v.errorLabel.Render(screen)
+		}
 	case ScreenModeMainMenu:
 		v.openDiabloLabel.Render(screen)
 		v.versionLabel.Render(screen)

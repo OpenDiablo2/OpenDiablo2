@@ -894,10 +894,10 @@ func (a *App) updateInitError(target d2interface.Surface) error {
 }
 
 // ToMainMenu forces the game to transition to the Main Menu
-func (a *App) ToMainMenu() {
+func (a *App) ToMainMenu(errorMessageOptional ...string) {
 	buildInfo := d2gamescreen.BuildInfo{Branch: a.gitBranch, Commit: a.gitCommit}
 
-	mainMenu, err := d2gamescreen.CreateMainMenu(a, a.asset, a.renderer, a.inputManager, a.audio, a.ui, buildInfo)
+	mainMenu, err := d2gamescreen.CreateMainMenu(a, a.asset, a.renderer, a.inputManager, a.audio, a.ui, buildInfo, errorMessageOptional...)
 	if err != nil {
 		log.Print(err)
 		return
@@ -925,12 +925,14 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 	}
 
 	if err = gameClient.Open(host, filePath); err != nil {
-		// https://github.com/OpenDiablo2/OpenDiablo2/issues/805
-		fmt.Printf("can not connect to the host: %s", host)
+		errorMessage := fmt.Sprintf("can not connect to the host: %s", host)
+		fmt.Println(errorMessage)
+		a.ToMainMenu(errorMessage)
+	} else {
+		a.screen.SetNextScreen(d2gamescreen.CreateGame(
+			a, a.asset, a.ui, a.renderer, a.inputManager, a.audio, gameClient, a.terminal, a.guiManager,
+		))
 	}
-
-	a.screen.SetNextScreen(d2gamescreen.CreateGame(a, a.asset, a.ui, a.renderer, a.inputManager,
-		a.audio, gameClient, a.terminal, a.guiManager))
 }
 
 // ToCharacterSelect forces the game to transition to the Character Select (load character) screen
