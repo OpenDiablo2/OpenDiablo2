@@ -59,7 +59,7 @@ type AssetManager struct {
 
 // SetLogLevel sets the log level for the asset manager,  record manager, and file loader
 func (am *AssetManager) SetLogLevel(level d2util.LogLevel) {
-	am.SetLevel(level)
+	am.Logger.SetLevel(level)
 	am.Records.Logger.SetLevel(level)
 	am.Loader.Logger.SetLevel(level)
 }
@@ -78,6 +78,7 @@ func (am *AssetManager) LoadAsset(filePath string) (asset.Asset, error) {
 
 // LoadFileStream streams an MPQ file from a source file path
 func (am *AssetManager) LoadFileStream(filePath string) (d2interface.DataStream, error) {
+	am.Logger.Debugf("Loading FileStream: %s", filePath)
 	return am.LoadAsset(filePath)
 }
 
@@ -98,6 +99,8 @@ func (am *AssetManager) LoadFile(filePath string) ([]byte, error) {
 
 // FileExists checks if a file exists on the underlying file system at the given file path.
 func (am *AssetManager) FileExists(filePath string) (bool, error) {
+	am.Logger.Debugf("Checking if file exists %s", filePath)
+
 	if loadedAsset, err := am.Loader.Load(filePath); err != nil || loadedAsset == nil {
 		return false, err
 	}
@@ -119,7 +122,7 @@ func (am *AssetManager) LoadAnimationWithEffect(animationPath, palettePath strin
 		return animation.(d2interface.Animation).Clone(), nil
 	}
 
-	am.Debug(fmt.Sprintf(fmtLoadAnimation, animationPath, palettePath, effect))
+	am.Debugf(fmtLoadAnimation, animationPath, palettePath, effect)
 
 	animAsset, err := am.LoadAsset(animationPath)
 	if err != nil {
@@ -155,7 +158,7 @@ func (am *AssetManager) LoadAnimationWithEffect(animationPath, palettePath strin
 
 // LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it
 func (am *AssetManager) LoadComposite(baseType d2enum.ObjectType, token, palettePath string) (*Composite, error) {
-	am.Debug(fmt.Sprintf(fmtLoadComposite, baseType, token, palettePath))
+	am.Debugf(fmtLoadComposite, baseType, token, palettePath)
 
 	c := &Composite{
 		AssetManager: am,
@@ -192,7 +195,7 @@ func (am *AssetManager) LoadFont(tablePath, spritePath, palettePath string) (*Fo
 		return nil, fmt.Errorf("invalid font table format: %s", tablePath)
 	}
 
-	am.Debug(fmt.Sprintf(fmtLoadFont, tablePath, spritePath, palettePath))
+	am.Debugf(fmtLoadFont, tablePath, spritePath, palettePath)
 
 	font := &Font{
 		table: tableData,
@@ -220,7 +223,7 @@ func (am *AssetManager) LoadPalette(palettePath string) (d2interface.Palette, er
 		return nil, fmt.Errorf("not an instance of a palette: %s", palettePath)
 	}
 
-	am.Debug(fmt.Sprintf(fmtLoadPalette, palettePath))
+	am.Debugf(fmtLoadPalette, palettePath)
 
 	data, err := am.LoadFile(palettePath)
 	if err != nil {
@@ -249,7 +252,7 @@ func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary,
 		return nil, fmt.Errorf("table not found: %s", tablePath)
 	}
 
-	am.Debug(fmt.Sprintf(fmtLoadStringTable, tablePath))
+	am.Debugf(fmtLoadStringTable, tablePath)
 
 	am.tables = append(am.tables, table)
 
@@ -286,7 +289,7 @@ func (am *AssetManager) LoadPaletteTransform(path string) (*d2pl2.PL2, error) {
 		return nil, err
 	}
 
-	am.Debug(fmt.Sprintf(fmtLoadTransform, path))
+	am.Debugf(fmtLoadTransform, path)
 
 	if err := am.transforms.Insert(path, pl2, 1); err != nil {
 		return nil, err
@@ -308,7 +311,7 @@ func (am *AssetManager) LoadDataDictionary(path string) (*d2txt.DataDictionary, 
 		return nil, err
 	}
 
-	am.Debug(fmt.Sprintf(fmtLoadDict, path))
+	am.Debugf(fmtLoadDict, path)
 
 	return d2txt.LoadDataDictionary(data), nil
 }
