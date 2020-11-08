@@ -6,7 +6,7 @@ import (
 
 // Navigator is used for transitioning between game screens
 type Navigator interface {
-	ToMainMenu()
+	ToMainMenu(errorMessageOptional ...string)
 	ToSelectHero(connType d2clientconnectiontype.ClientConnectionType, connHost string)
 	ToCreateGame(filePath string, connType d2clientconnectiontype.ClientConnectionType, connHost string)
 	ToCharacterSelect(connType d2clientconnectiontype.ClientConnectionType, connHost string)
