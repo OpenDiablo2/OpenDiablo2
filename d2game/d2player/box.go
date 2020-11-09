@@ -266,7 +266,7 @@ func (box *Box) setupLeftBorder() {
 		boxSideEdge3,
 	}
 
-	currentX, currentY := box.x-4, box.y
+	currentX, currentY := box.x-4, box.y+boxSpriteHeight
 	maxPieces := box.height / boxSpriteHeight
 	i := 0
 	for {
@@ -303,7 +303,7 @@ func (box *Box) setupRightBorder() {
 	}
 
 	i := 0
-	currentX, currentY := box.width+box.x-7, box.y
+	currentX, currentY := box.width+box.x-7, box.y+boxSpriteHeight
 	maxPieces := box.height / boxSpriteHeight
 	for {
 		for _, frameIndex := range rightBorderPiece {
@@ -353,16 +353,16 @@ func (box *Box) setupCorners() {
 
 		switch frameIndex {
 		case boxCornerTopLeft:
-			f.SetPosition(box.x, box.y)
+			f.SetPosition(box.x, box.y+boxSpriteHeight)
 			break
 		case boxCornerTopRight:
-			f.SetPosition(box.x+box.width-boxSpriteWidth, box.y)
+			f.SetPosition(box.x+box.width-boxSpriteWidth, box.y+boxSpriteHeight)
 			break
 		case boxCornerBottomLeft:
-			f.SetPosition(box.x, box.y+box.height-boxSpriteHeight)
+			f.SetPosition(box.x, box.y+box.height)
 			break
 		case boxCornerBottomRight:
-			f.SetPosition(box.x+box.width-boxSpriteWidth, box.y+box.height-boxSpriteHeight)
+			f.SetPosition(box.x+box.width-boxSpriteWidth, box.y+box.height)
 			break
 		}
 
@@ -377,8 +377,8 @@ func (box *Box) Load() {
 	box.contentLayout.SetPosition(box.x, box.y)
 
 	if !box.disableBorder {
-		box.setupTopBorder(0)
-		box.setupBottomBorder(box.y + box.height - boxSpriteHeight + 10)
+		box.setupTopBorder(boxSpriteHeight)
+		box.setupBottomBorder(box.y + box.height + boxSpriteHeight)
 		box.setupLeftBorder()
 		box.setupRightBorder()
 		box.setupCorners()
@@ -405,12 +405,12 @@ func (box *Box) Load() {
 				log.Print(err)
 			}
 
-			offsetY := box.y + box.height - sectionHeight
+			offsetY := box.y + box.height - sectionHeight + boxSpriteHeight
 			cornerLeft.SetCurrentFrame(boxCornerTopLeft)
 			cornerLeft.SetPosition(box.x, offsetY)
 			cornerRight.SetCurrentFrame(boxCornerTopRight)
 			cornerRight.SetPosition(box.x+box.width-boxSpriteWidth, offsetY)
-			box.setupTopBorder(box.height - (4 * boxSpriteHeight) + 3)
+			box.setupTopBorder(box.height - (4 * boxSpriteHeight) + boxSpriteHeight)
 			box.sprites = append(box.sprites, cornerLeft, cornerRight)
 		}
 
@@ -478,7 +478,7 @@ func (box *Box) Render(target d2interface.Surface) error {
 		return nil
 	}
 
-	target.PushTranslation(box.x, box.y-boxSpriteHeight)
+	target.PushTranslation(box.x, box.y)
 	target.DrawRect(box.width, box.height, d2util.Color(0x000000D0))
 	target.Pop()
 
@@ -488,25 +488,6 @@ func (box *Box) Render(target d2interface.Surface) error {
 
 	return nil
 }
-
-// func (box *Box) OnMouseButtonDown(event d2interface.MouseEvent) {
-//   if box.scrollbar != nil && box.scrollbar.IsInSliderRect(event.X(), event.Y()) {
-//     box.scrollbar.SetSliderClicked(true)
-//     box.scrollbar.onSliderMouseClick(event)
-//   }
-// }
-//
-// func (box *Box) OnMouseMove(event d2interface.MouseMoveEvent) {
-//   if box.scrollbar != nil {
-//     box.scrollbar.onMouseMove(event)
-//   }
-// }
-//
-// func (box *Box) OnMouseButtonUp(event d2interface.MouseEvent) {
-//   if box.scrollbar != nil {
-//     box.scrollbar.SetSliderClicked(false)
-//   }
-// }
 
 // IsInRect checks if the given point is within the overlay layout rectangle
 func (box *Box) IsInRect(px, py int) bool {

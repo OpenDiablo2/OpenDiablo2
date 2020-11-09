@@ -430,6 +430,11 @@ func (m *EscapeMenu) showLayout(id layoutID) {
 	}
 
 	m.setLayout(id)
+	if id == configureControlsLayoutID {
+		m.keyBindingMenu.Box.isOpen = true
+	} else {
+		m.keyBindingMenu.Box.isOpen = false
+	}
 }
 
 func (m *EscapeMenu) onHoverElement(id int) {
@@ -533,12 +538,12 @@ func (m *EscapeMenu) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 		return false
 	}
 
-	// fmt.Println("escape menu mouse down binding")
-	// if m.currentLayout == configureControlsLayoutID {
-	//   fmt.Println("configure controls layout mouse down")
-	//   m.keyBindingMenu.OnMouseButtonDown(event)
-	// }
-	//
+	fmt.Println("escape menu mouse down binding")
+	if m.currentLayout == configureControlsLayoutID {
+		fmt.Println("configure controls layout mouse down")
+		m.keyBindingMenu.OnMouseButtonDown(event)
+	}
+
 	return false
 }
 
@@ -547,12 +552,12 @@ func (m *EscapeMenu) OnMouseButtonUp(event d2interface.MouseEvent) bool {
 		return false
 	}
 
-	// fmt.Println("escape menu mouse up binding")
-	// if m.currentLayout == configureControlsLayoutID {
-	//   fmt.Println("configure controls layout mouse up")
-	//   m.keyBindingMenu.OnMouseButtonUp(event)
-	// }
-	//
+	fmt.Println("escape menu mouse up binding")
+	if m.currentLayout == configureControlsLayoutID {
+		fmt.Println("configure controls layout mouse up")
+		m.keyBindingMenu.OnMouseButtonUp(event)
+	}
+
 	return false
 }
 
@@ -560,16 +565,21 @@ func (m *EscapeMenu) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	if !m.isOpen {
 		return false
 	}
-	//
-	// if m.currentLayout == configureControlsLayoutID {
-	//   m.keyBindingMenu.OnMouseMove(event)
-	// }
+
+	if m.currentLayout == configureControlsLayoutID {
+		m.keyBindingMenu.OnMouseMove(event)
+	}
 
 	return false
 }
 
 // OnKeyDown defines the actions of the Escape Menu when a key is pressed
 func (m *EscapeMenu) OnKeyDown(event d2interface.KeyEvent) bool {
+	if m.keyBindingMenu.isOpen {
+		m.keyBindingMenu.OnKeyDown(event)
+		return false
+	}
+
 	switch event.Key() {
 	case d2enum.KeyUp:
 		m.onUpKey()

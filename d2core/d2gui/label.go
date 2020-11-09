@@ -62,6 +62,12 @@ func (l *Label) GetText() string {
 	return l.text
 }
 
+// SetColor sets the label text
+func (l *Label) SetColor(col color.RGBA) error {
+	l.color = col
+	return l.setText(l.text)
+}
+
 // SetText sets the label text
 func (l *Label) SetText(text string) error {
 	if text == l.text {

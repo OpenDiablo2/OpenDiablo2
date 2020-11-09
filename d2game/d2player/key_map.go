@@ -4,31 +4,55 @@ import (
 	"sync"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 // KeyMap represents the key mappings of the game. Each game event
 // can be associated to 2 different keys. A key of -1 means none
 type KeyMap struct {
-	mutex        sync.RWMutex
-	assetManager *d2asset.AssetManager
-	mapping      map[d2enum.Key]d2enum.GameEvent
-	controls     map[d2enum.GameEvent]*KeyBinding
+	mutex    sync.RWMutex
+	mapping  map[d2enum.Key]d2enum.GameEvent
+	controls map[d2enum.GameEvent]*KeyBinding
 }
 
+type KeyBindingType int
+
+const (
+	KeyBindingTypePrimary KeyBindingType = iota
+	KeyBindingTypeSecondary
+)
+
 // NewKeyMap returns a new instance of a KeyMap
-func NewKeyMap(assetManager *d2asset.AssetManager) *KeyMap {
+func NewKeyMap() *KeyMap {
 	return &KeyMap{
-		assetManager: assetManager,
-		mapping:      make(map[d2enum.Key]d2enum.GameEvent),
-		controls:     make(map[d2enum.GameEvent]*KeyBinding),
+		mapping:  make(map[d2enum.Key]d2enum.GameEvent),
+		controls: make(map[d2enum.GameEvent]*KeyBinding),
 	}
 }
 
+func (km *KeyMap) checkOverwrite(key d2enum.Key) (*KeyBinding, KeyBindingType) {
+	var overwrittenBinding *KeyBinding
+	var overwrittenBindingType KeyBindingType
+
+	for _, binding := range km.controls {
+		if binding.Primary == key {
+			binding.Primary = -1
+			overwrittenBinding = binding
+			overwrittenBindingType = KeyBindingTypePrimary
+		}
+		if binding.Secondary == key {
+			binding.Secondary = -1
+			overwrittenBinding = binding
+			overwrittenBindingType = KeyBindingTypeSecondary
+		}
+	}
+
+	return overwrittenBinding, overwrittenBindingType
+}
+
 // SetPrimaryBinding binds the first key for gameEvent
-func (km *KeyMap) SetPrimaryBinding(gameEvent d2enum.GameEvent, key d2enum.Key) {
+func (km *KeyMap) SetPrimaryBinding(gameEvent d2enum.GameEvent, key d2enum.Key) (*KeyBinding, KeyBindingType) {
 	if key == d2enum.KeyEscape {
-		return
+		return nil, -1
 	}
 
 	km.mutex.Lock()
@@ -37,18 +61,22 @@ func (km *KeyMap) SetPrimaryBinding(gameEvent d2enum.GameEvent, key d2enum.Key) 
 	if km.controls[gameEvent] == nil {
 		km.controls[gameEvent] = &KeyBinding{}
 	}
+
+	overwrittenBinding, overwrittenBindingType := km.checkOverwrite(key)
 
 	currentKey := km.controls[gameEvent].Primary
 	delete(km.mapping, currentKey)
 	km.mapping[key] = gameEvent
 
 	km.controls[gameEvent].Primary = key
+
+	return overwrittenBinding, overwrittenBindingType
 }
 
 // SetSecondaryBinding binds the second key for gameEvent
-func (km *KeyMap) SetSecondaryBinding(gameEvent d2enum.GameEvent, key d2enum.Key) {
+func (km *KeyMap) SetSecondaryBinding(gameEvent d2enum.GameEvent, key d2enum.Key) (*KeyBinding, KeyBindingType) {
 	if key == d2enum.KeyEscape {
-		return
+		return nil, -1
 	}
 
 	km.mutex.Lock()
@@ -57,6 +85,7 @@ func (km *KeyMap) SetSecondaryBinding(gameEvent d2enum.GameEvent, key d2enum.Key
 	if km.controls[gameEvent] == nil {
 		km.controls[gameEvent] = &KeyBinding{}
 	}
+	overwrittenBinding, overwrittenBindingType := km.checkOverwrite(key)
 
 	currentKey := km.controls[gameEvent].Secondary
 	delete(km.mapping, currentKey)
@@ -67,6 +96,8 @@ func (km *KeyMap) SetSecondaryBinding(gameEvent d2enum.GameEvent, key d2enum.Key
 	}
 
 	km.controls[gameEvent].Secondary = key
+
+	return overwrittenBinding, overwrittenBindingType
 }
 
 func (km *KeyMap) getGameEvent(key d2enum.Key) d2enum.GameEvent {
@@ -156,7 +187,7 @@ func GetDefaultKeyMap() *KeyMap {
 		d2enum.SayNowYouDie:    {d2enum.KeyKP6, -1},
 		d2enum.SayRetreat:      {d2enum.KeyKP7, -1},
 
-		d2enum.TakeScreenShot: {d2enum.PrintScreen, -1},
+		d2enum.TakeScreenShot: {d2enum.KeyPrintScreen, -1},
 		d2enum.ClearScreen:    {d2enum.KeySpace, -1},
 		d2enum.ClearMessages:  {d2enum.KeyN, -1},
 	}

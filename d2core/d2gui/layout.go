@@ -10,7 +10,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
-const layoutDebug = true // turns on debug rendering stuff for layouts
+const layoutDebug = false // turns on debug rendering stuff for layouts
 
 const (
 	white   = 0xffffff_ff

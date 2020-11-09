@@ -339,25 +339,25 @@ func (h *HelpOverlay) setupBulletedList() {
 		// "Ctrl" should be hotkey // "Hold Down <%s> to Run"
 		{text: fmt.Sprintf(
 			h.asset.TranslateString("StrHelp2"),
-			h.keyMap.GetKeysForGameEvent(d2enum.HoldRun).Primary.GetString(),
+			KeyToString(h.keyMap.GetKeysForGameEvent(d2enum.HoldRun).Primary, h.asset),
 		)},
 
 		// "Alt" should be hotkey // "Hold down <%s> to highlight items on the ground"
 		{text: fmt.Sprintf(
 			h.asset.TranslateString("StrHelp3"),
-			h.keyMap.GetKeysForGameEvent(d2enum.HoldShowGroundItems).Primary.GetString(),
+			KeyToString(h.keyMap.GetKeysForGameEvent(d2enum.HoldShowGroundItems).Primary, h.asset),
 		)},
 
 		// "Shift" should be hotkey // "Hold down <%s> to attack while standing still"
 		{text: fmt.Sprintf(
 			h.asset.TranslateString("StrHelp4"),
-			h.keyMap.GetKeysForGameEvent(d2enum.HoldStandStill).Primary.GetString(),
+			KeyToString(h.keyMap.GetKeysForGameEvent(d2enum.HoldStandStill).Primary, h.asset),
 		)},
 
 		// "Tab" should be hotkey // "Hit <%s> to toggle the automap on and off"
 		{text: fmt.Sprintf(
 			h.asset.TranslateString("StrHelp5"),
-			h.keyMap.GetKeysForGameEvent(d2enum.ToggleAutomap).Primary.GetString(),
+			KeyToString(h.keyMap.GetKeysForGameEvent(d2enum.ToggleAutomap).Primary, h.asset),
 		)},
 
 		// "Hit <Esc> to bring up the Game Menu"
@@ -372,7 +372,7 @@ func (h *HelpOverlay) setupBulletedList() {
 		// "H" should be hotkey,
 		{text: fmt.Sprintf(
 			h.asset.TranslateString("StrHelp8a"),
-			h.keyMap.GetKeysForGameEvent(d2enum.ToggleHelpScreen).Primary.GetString(),
+			KeyToString(h.keyMap.GetKeysForGameEvent(d2enum.ToggleHelpScreen).Primary, h.asset),
 		)},
 	}
 
