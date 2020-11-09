@@ -10,6 +10,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
 type (
@@ -72,11 +73,13 @@ type EscapeMenu struct {
 	rightPent *d2gui.AnimatedSprite
 	layouts   []*layout
 
-	renderer      d2interface.Renderer
-	audioProvider d2interface.AudioProvider
-	navigator     d2interface.Navigator
-	guiManager    *d2gui.GuiManager
-	assetManager  *d2asset.AssetManager
+	renderer       d2interface.Renderer
+	audioProvider  d2interface.AudioProvider
+	navigator      d2interface.Navigator
+	guiManager     *d2gui.GuiManager
+	assetManager   *d2asset.AssetManager
+	keyMap         *KeyMap
+	keyBindingMenu *KeyBindingMenu
 }
 
 type layout struct {
@@ -86,6 +89,7 @@ type layout struct {
 	currentEl          int
 	rendered           bool
 	actionableElements []actionableElement
+	isRaw              bool
 }
 
 func (l *layout) Trigger() {
@@ -134,15 +138,22 @@ type actionableElement interface {
 func NewEscapeMenu(navigator d2interface.Navigator,
 	renderer d2interface.Renderer,
 	audioProvider d2interface.AudioProvider,
+	uiManager *d2ui.UIManager,
 	guiManager *d2gui.GuiManager,
 	assetManager *d2asset.AssetManager,
+	keyMap *KeyMap,
 ) *EscapeMenu {
+	keyBindingMenu := NewKeyBindingMenu(assetManager, renderer, uiManager, guiManager, keyMap)
+	keyBindingMenu.Load()
+
 	m := &EscapeMenu{
-		audioProvider: audioProvider,
-		renderer:      renderer,
-		navigator:     navigator,
-		guiManager:    guiManager,
-		assetManager:  assetManager,
+		audioProvider:  audioProvider,
+		renderer:       renderer,
+		navigator:      navigator,
+		guiManager:     guiManager,
+		assetManager:   assetManager,
+		keyMap:         keyMap,
+		keyBindingMenu: keyBindingMenu,
 	}
 
 	m.layouts = []*layout{
@@ -151,7 +162,7 @@ func NewEscapeMenu(navigator d2interface.Navigator,
 		soundOptionsLayoutID:      m.newSoundOptionsLayout(),
 		videoOptionsLayoutID:      m.newVideoOptionsLayout(),
 		automapOptionsLayoutID:    m.newAutomapOptionsLayout(),
-		configureControlsLayoutID: m.newConfigureControlsLayout(),
+		configureControlsLayoutID: m.newConfigureControlsLayout(keyBindingMenu),
 	}
 
 	return m
@@ -213,11 +224,11 @@ func (m *EscapeMenu) newAutomapOptionsLayout() *layout {
 	})
 }
 
-func (m *EscapeMenu) newConfigureControlsLayout() *layout {
-	return m.wrapLayout(func(l *layout) {
-		m.addTitle(l, "CONFIGURE CONTROLS")
-		m.addPreviousMenuLabel(l)
-	})
+func (m *EscapeMenu) newConfigureControlsLayout(keyBindingMenu *KeyBindingMenu) *layout {
+	return &layout{
+		Layout: keyBindingMenu.layout,
+		isRaw:  true,
+	}
 }
 
 func (m *EscapeMenu) wrapLayout(fn func(*layout)) *layout {
@@ -437,6 +448,15 @@ func (m *EscapeMenu) onUpdateValue(optID optionID, value string) {
 }
 
 func (m *EscapeMenu) setLayout(id layoutID) {
+	layout := m.layouts[id]
+
+	if layout.isRaw {
+		m.guiManager.SetLayout(layout.Layout)
+		m.layouts[id].rendered = true
+		m.currentLayout = id
+		return
+	}
+
 	m.leftPent = m.layouts[id].leftPent
 	m.rightPent = m.layouts[id].rightPent
 	m.currentLayout = id
@@ -498,6 +518,54 @@ func (m *EscapeMenu) onEnterKey() {
 // IsOpen returns whether the escape menu is open (visible) or not
 func (m *EscapeMenu) IsOpen() bool {
 	return m.isOpen
+}
+
+func (m *EscapeMenu) Render(target d2interface.Surface) error {
+	if m.isOpen {
+		m.keyBindingMenu.Render(target)
+	}
+
+	return nil
+}
+
+func (m *EscapeMenu) OnMouseButtonDown(event d2interface.MouseEvent) bool {
+	if !m.isOpen {
+		return false
+	}
+
+	// fmt.Println("escape menu mouse down binding")
+	// if m.currentLayout == configureControlsLayoutID {
+	//   fmt.Println("configure controls layout mouse down")
+	//   m.keyBindingMenu.OnMouseButtonDown(event)
+	// }
+	//
+	return false
+}
+
+func (m *EscapeMenu) OnMouseButtonUp(event d2interface.MouseEvent) bool {
+	if !m.isOpen {
+		return false
+	}
+
+	// fmt.Println("escape menu mouse up binding")
+	// if m.currentLayout == configureControlsLayoutID {
+	//   fmt.Println("configure controls layout mouse up")
+	//   m.keyBindingMenu.OnMouseButtonUp(event)
+	// }
+	//
+	return false
+}
+
+func (m *EscapeMenu) OnMouseMove(event d2interface.MouseMoveEvent) bool {
+	if !m.isOpen {
+		return false
+	}
+	//
+	// if m.currentLayout == configureControlsLayoutID {
+	//   m.keyBindingMenu.OnMouseMove(event)
+	// }
+
+	return false
 }
 
 // OnKeyDown defines the actions of the Escape Menu when a key is pressed

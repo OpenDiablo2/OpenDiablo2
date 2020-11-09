@@ -111,6 +111,7 @@ var (
 		d2enum.KeyAlt:          ebiten.KeyAlt,
 		d2enum.KeyControl:      ebiten.KeyControl,
 		d2enum.KeyShift:        ebiten.KeyShift,
+		d2enum.KeyMouse3:       ebiten.MouseButtonMiddle,
 	}
 	//nolint:gochecknoglobals // This is a constant in all but by name, no constant map in go
 	mouseButtonToEbiten = map[d2enum.MouseButton]ebiten.MouseButton{

@@ -163,7 +163,6 @@ type GameControls struct {
 	actionableRegions      []actionableRegion
 	asset                  *d2asset.AssetManager
 	renderer               d2interface.Renderer // https://github.com/OpenDiablo2/OpenDiablo2/issues/798
-	keyBindingMenu         *Box
 	inputListener          inputCallbackListener
 	hero                   *d2mapentity.Player
 	heroState              *d2hero.HeroStateFactory
@@ -215,7 +214,7 @@ func NewGameControls(
 	term d2interface.Terminal,
 	ui *d2ui.UIManager,
 	guiManager *d2gui.GuiManager,
-
+	keyMap *KeyMap,
 	isSinglePlayer bool,
 ) (*GameControls, error) {
 	var inventoryRecordKey string
@@ -351,7 +350,6 @@ func NewGameControls(
 		return nil, err
 	}
 
-	keyMap := getDefaultKeyMap()
 	helpOverlay := NewHelpOverlay(asset, renderer, ui, guiManager, keyMap)
 	hud := NewHUD(asset, ui, hero, helpOverlay, newMiniPanel(asset, ui, isSinglePlayer), actionableRegions, mapEngine, mapRenderer)
 
@@ -360,32 +358,7 @@ func NewGameControls(
 	hoverLabel := hud.nameLabel
 	hoverLabel.SetBackgroundColor(d2util.Color(blackAlpha50percent))
 
-	layout := d2gui.CreateLayout(renderer, d2gui.PositionTypeVertical, asset)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
-	layout.AddLabel("Test label big layout", d2gui.FontStyle42Units)
 	gc := &GameControls{
-		keyMap:         keyMap,
 		asset:          asset,
 		ui:             ui,
 		renderer:       renderer,
@@ -394,11 +367,11 @@ func NewGameControls(
 		escapeMenu:     escapeMenu,
 		inputListener:  inputListener,
 		mapRenderer:    mapRenderer,
-		keyBindingMenu: NewBox(asset, renderer, ui, guiManager, layout, 620, 375, 90, 65, "Hello"),
 		inventory:      NewInventory(asset, ui, inventoryRecord),
 		skilltree:      newSkillTree(hero.Skills, hero.Class, asset, renderer, ui, guiManager),
 		heroStatsPanel: NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
 		HelpOverlay:    helpOverlay,
+		keyMap:         keyMap,
 		hud:            hud,
 		bottomMenuRect: &d2geom.Rectangle{
 			Left:   menuBottomRectX,
@@ -503,7 +476,6 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 		g.heroStatsPanel.Toggle()
 		g.updateLayout()
 	case d2enum.ToggleRunWalk:
-		g.keyBindingMenu.Toggle()
 		g.hud.onToggleRunButton(false)
 	case d2enum.HoldRun:
 		g.hud.onToggleRunButton(true)
@@ -666,6 +638,11 @@ func (g *GameControls) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	return false
 }
 
+// OnMouseButtonUp handles mouse button presses
+func (g *GameControls) OnMouseButtonUp(event d2interface.MouseEvent) bool {
+	return false
+}
+
 // OnMouseButtonDown handles mouse button presses
 func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	mx, my := event.X(), event.Y()
@@ -720,13 +697,11 @@ func (g *GameControls) Load() {
 	g.skilltree.load()
 	g.heroStatsPanel.Load()
 	g.HelpOverlay.Load()
-	g.keyBindingMenu.Load()
 }
 
 // Advance advances the state of the GameControls
 func (g *GameControls) Advance(elapsed float64) error {
 	g.mapRenderer.Advance(elapsed)
-	g.keyBindingMenu.Update()
 	return nil
 }
 
@@ -795,7 +770,7 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 		return err
 	}
 
-	if err := g.keyBindingMenu.Render(target); err != nil {
+	if err := g.escapeMenu.Render(target); err != nil {
 		return err
 	}
 

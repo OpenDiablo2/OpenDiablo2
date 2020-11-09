@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 
@@ -42,34 +43,91 @@ const (
 	boxBottomHorizontalEdge6
 )
 
-type BoxOption struct {
+type LabelButton struct {
 	label      string
 	callback   func()
 	hoverColor color.RGBA
 	canHover   bool
+	isHovered  bool
+	layout     *d2gui.Layout
+	x, y       int
+}
+
+func NewLabelButton(x, y int, text string, col color.RGBA, callback func()) *LabelButton {
+	return &LabelButton{
+		x:          x,
+		y:          y,
+		hoverColor: col,
+		label:      text,
+		callback:   callback,
+		canHover:   true,
+	}
+}
+
+func (lb *LabelButton) Load(renderer d2interface.Renderer, asset *d2asset.AssetManager) {
+	mainLayout := d2gui.CreateLayout(renderer, d2gui.PositionTypeAbsolute, asset)
+	l, _ := mainLayout.AddLabelWithColor(lb.label, d2gui.FontStyleFormal11Units, d2util.Color(0xA1925DFF))
+
+	if lb.canHover {
+		l.SetHoverColor(lb.hoverColor)
+	}
+
+	mainLayout.SetMouseClickHandler(func(d d2interface.MouseEvent) {
+		if lb.callback != nil {
+			lb.callback()
+		}
+	})
+
+	mainLayout.SetMouseEnterHandler(func(event d2interface.MouseMoveEvent) {
+		l.SetIsHovered(true)
+	})
+
+	mainLayout.SetMouseLeaveHandler(func(event d2interface.MouseMoveEvent) {
+		l.SetIsHovered(false)
+	})
+
+	lb.layout = mainLayout
+}
+
+func (lb *LabelButton) SetLabel(val string) {
+	lb.label = val
+}
+
+func (lb *LabelButton) SetHoverColor(col color.RGBA) {
+	lb.hoverColor = col
+}
+
+func (lb *LabelButton) SetCanHover(val bool) {
+	lb.canHover = val
+}
+
+func (lb *LabelButton) IsHovered() bool {
+	return lb.isHovered
+}
+
+func (lb *LabelButton) GetLayout() *d2gui.Layout {
+	return lb.layout
 }
 
 // Box represents the menu to view/edit the
 // key bindings
 type Box struct {
-	asset            *d2asset.AssetManager
-	isOpen           bool
-	renderer         d2interface.Renderer
-	sprites          []*d2ui.Sprite
-	uiManager        *d2ui.UIManager
-	layout           *d2gui.Layout
-	innerLayout      *d2gui.Layout
-	contentLayout    *d2gui.Layout
-	scrollbar        *BoxScrollbar
-	guiManager       *d2gui.GuiManager
-	sfc              d2interface.Surface
-	title            string
-	width            int
-	height           int
-	x                int
-	y                int
-	Options          []*BoxOption
-	disableScrollbar bool
+	renderer      d2interface.Renderer
+	asset         *d2asset.AssetManager
+	isOpen        bool
+	sprites       []*d2ui.Sprite
+	uiManager     *d2ui.UIManager
+	layout        *d2gui.Layout
+	contentLayout *d2gui.Layout
+	guiManager    *d2gui.GuiManager
+	sfc           d2interface.Surface
+	title         string
+	width         int
+	height        int
+	x             int
+	y             int
+	Options       []*LabelButton
+	disableBorder bool
 }
 
 func NewBox(
@@ -314,129 +372,104 @@ func (box *Box) setupCorners() {
 
 func (box *Box) Load() {
 	box.layout = d2gui.CreateLayout(box.renderer, d2gui.PositionTypeAbsolute, box.asset)
-	box.layout.SetPosition(box.x, box.y-boxSpriteHeight)
+	box.layout.SetPosition(box.x, box.y)
 	box.layout.SetSize(box.width, box.height)
-	box.layout.SetVisible(false)
-	box.layout.SetLayer(0)
+	box.contentLayout.SetPosition(box.x, box.y)
 
-	box.innerLayout = box.layout.AddLayout(d2gui.PositionTypeAbsolute)
-	box.innerLayout.SetPosition(box.x, box.y-boxSpriteHeight-4)
+	if !box.disableBorder {
+		box.setupTopBorder(0)
+		box.setupBottomBorder(box.y + box.height - boxSpriteHeight + 10)
+		box.setupLeftBorder()
+		box.setupRightBorder()
+		box.setupCorners()
+	}
 
-	box.setupTopBorder(0)
-	box.setupBottomBorder(box.y + box.height - boxSpriteHeight + 10)
-	box.setupLeftBorder()
-	box.setupRightBorder()
-	box.setupCorners()
-
-	box.Options = append(box.Options, []*BoxOption{
-		{label: "Cancel", hoverColor: d2util.Color(0xD03C39FF), canHover: true},
-		{label: "Default", hoverColor: d2util.Color(0x5450D1FF), canHover: true},
-		{label: "Accept", hoverColor: d2util.Color(0x00D000FF), canHover: true},
+	box.Options = append(box.Options, []*LabelButton{
+		NewLabelButton(0, 0, "Cancel", d2util.Color(0xD03C39FF), func() { fmt.Println("Cancel callback") }),
+		NewLabelButton(0, 0, "Default", d2util.Color(0x5450D1FF), func() { fmt.Println("Default callback") }),
+		NewLabelButton(0, 0, "Accept", d2util.Color(0x00D000FF), func() { fmt.Println("Accept callback") }),
 	}...)
 
 	sectionHeight := int(float32(box.height) * 0.12)
 	optionsEnabled := len(box.Options) > 0 && sectionHeight > 14
 	if optionsEnabled {
-		box.innerLayout.SetSize(box.width+2, (box.height - sectionHeight))
-		cornerLeft, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
-		if err != nil {
-			log.Print(err)
-		}
+		box.contentLayout.SetSize(box.width+2, (box.height - sectionHeight))
+		if !box.disableBorder {
+			cornerLeft, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
+			if err != nil {
+				log.Print(err)
+			}
 
-		cornerRight, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
-		if err != nil {
-			log.Print(err)
-		}
+			cornerRight, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
+			if err != nil {
+				log.Print(err)
+			}
 
-		offsetY := box.y + box.height - sectionHeight
-		cornerLeft.SetCurrentFrame(boxCornerTopLeft)
-		cornerLeft.SetPosition(box.x, offsetY)
-		cornerRight.SetCurrentFrame(boxCornerTopRight)
-		cornerRight.SetPosition(box.x+box.width-boxSpriteWidth, offsetY)
-		box.setupTopBorder(box.height - (4 * boxSpriteHeight) + 3)
-		box.sprites = append(box.sprites, cornerLeft, cornerRight)
+			offsetY := box.y + box.height - sectionHeight
+			cornerLeft.SetCurrentFrame(boxCornerTopLeft)
+			cornerLeft.SetPosition(box.x, offsetY)
+			cornerRight.SetCurrentFrame(boxCornerTopRight)
+			cornerRight.SetPosition(box.x+box.width-boxSpriteWidth, offsetY)
+			box.setupTopBorder(box.height - (4 * boxSpriteHeight) + 3)
+			box.sprites = append(box.sprites, cornerLeft, cornerRight)
+		}
 
 		buttonsLayoutWrapper := box.layout.AddLayout(d2gui.PositionTypeAbsolute)
 		buttonsLayoutWrapper.SetSize(box.width+2, sectionHeight)
-		buttonsLayoutWrapper.SetPosition(box.x, box.y+box.height-sectionHeight-boxSpriteHeight)
+		buttonsLayoutWrapper.SetPosition(box.x, box.y+box.height-sectionHeight)
 		buttonsLayout := buttonsLayoutWrapper.AddLayout(d2gui.PositionTypeHorizontal)
 		buttonsLayout.SetSize(buttonsLayoutWrapper.GetSize())
 		buttonsLayout.SetVerticalAlign(d2gui.VerticalAlignMiddle)
-		for _, option := range box.Options {
-			buttonsLayout.AddSpacerDynamic()
-			l, _ := buttonsLayout.AddLabelWithColor(option.label, d2gui.FontStyleFormal11Units, d2util.Color(0xA1925DFF))
-
-			if option.canHover {
-				l.SetHoverColor(option.hoverColor)
-			}
-
-			l.SetMouseEnterHandler(func(event d2interface.MouseMoveEvent) {
-				l.SetIsHovered(true)
-			})
-
-			l.SetMouseLeaveHandler(func(event d2interface.MouseMoveEvent) {
-				l.SetIsHovered(false)
-			})
-		}
-
 		buttonsLayout.AddSpacerDynamic()
+		for _, option := range box.Options {
+			option.Load(box.renderer, box.asset)
+			buttonsLayout.AddLayoutFromSource(option.GetLayout())
+			buttonsLayout.AddSpacerDynamic()
+		}
 	} else {
-		box.innerLayout.SetSize(box.width+2, box.height)
+		box.contentLayout.SetSize(box.width+2, box.height)
 	}
 
 	if box.title != "" {
-		cornerLeft, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
-		if err != nil {
-			log.Print(err)
+		if !box.disableBorder {
+			cornerLeft, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
+			if err != nil {
+				log.Print(err)
+			}
+
+			cornerRight, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
+			if err != nil {
+				log.Print(err)
+			}
+
+			offsetY := box.y + sectionHeight
+
+			cornerLeft.SetCurrentFrame(boxCornerBottomLeft)
+			cornerLeft.SetPosition(box.x, offsetY-10)
+
+			cornerRight.SetCurrentFrame(boxCornerBottomRight)
+			cornerRight.SetPosition(box.x+box.width-boxSpriteWidth, offsetY-10)
+
+			box.sprites = append(box.sprites, cornerLeft, cornerRight)
+			box.setupBottomBorder(offsetY)
 		}
 
-		cornerRight, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
-		if err != nil {
-			log.Print(err)
-		}
-
-		offsetY := box.y + sectionHeight
-
-		cornerLeft.SetCurrentFrame(boxCornerBottomLeft)
-		cornerLeft.SetPosition(box.x, offsetY-10)
-
-		cornerRight.SetCurrentFrame(boxCornerBottomRight)
-		cornerRight.SetPosition(box.x+box.width-boxSpriteWidth, offsetY-10)
-
-		box.sprites = append(box.sprites, cornerLeft, cornerRight)
-
-		innerLayoutW, innerLayoutH := box.innerLayout.GetSize()
-		innerLayoutX, innerLayoutY := box.layout.GetPosition()
-		box.innerLayout.SetSize(innerLayoutW, innerLayoutH-sectionHeight)
-		box.innerLayout.SetPosition(innerLayoutX, innerLayoutY+sectionHeight)
+		contentLayoutW, contentLayoutH := box.contentLayout.GetSize()
+		contentLayoutX, contentLayoutY := box.contentLayout.GetPosition()
+		box.contentLayout.SetSize(contentLayoutW, contentLayoutH-sectionHeight)
+		box.contentLayout.SetPosition(contentLayoutX, contentLayoutY+sectionHeight)
 
 		titleLayout := box.layout.AddLayout(d2gui.PositionTypeHorizontal)
 		titleLayout.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
 		titleLayout.SetVerticalAlign(d2gui.VerticalAlignMiddle)
-		titleLayout.SetPosition(box.x, box.y-boxSpriteHeight)
-		titleLayout.SetSize(innerLayoutW, sectionHeight)
+		titleLayout.SetPosition(box.x, box.y)
+		titleLayout.SetSize(contentLayoutW, sectionHeight)
 		titleLayout.AddSpacerDynamic()
 		titleLayout.AddLabel(box.title, d2gui.FontStyle30Units)
 		titleLayout.AddSpacerDynamic()
-
-		box.setupBottomBorder(offsetY)
 	}
 
-	if !box.disableScrollbar && box.contentLayout != nil {
-		box.scrollbar = newBoxScrollBar(
-			box.innerLayout,
-			box.contentLayout,
-		)
-
-		box.innerLayout.AddLayoutFromSource(box.contentLayout)
-	}
-}
-
-func (box *Box) Update() {
-	if box.isOpen && box.scrollbar != nil {
-		_, cursorY := box.renderer.GetCursorPos()
-		box.scrollbar.update(cursorY)
-	}
+	box.layout.AddLayoutFromSource(box.contentLayout)
 }
 
 // Render the overlay to the given surface
@@ -455,6 +488,25 @@ func (box *Box) Render(target d2interface.Surface) error {
 
 	return nil
 }
+
+// func (box *Box) OnMouseButtonDown(event d2interface.MouseEvent) {
+//   if box.scrollbar != nil && box.scrollbar.IsInSliderRect(event.X(), event.Y()) {
+//     box.scrollbar.SetSliderClicked(true)
+//     box.scrollbar.onSliderMouseClick(event)
+//   }
+// }
+//
+// func (box *Box) OnMouseMove(event d2interface.MouseMoveEvent) {
+//   if box.scrollbar != nil {
+//     box.scrollbar.onMouseMove(event)
+//   }
+// }
+//
+// func (box *Box) OnMouseButtonUp(event d2interface.MouseEvent) {
+//   if box.scrollbar != nil {
+//     box.scrollbar.SetSliderClicked(false)
+//   }
+// }
 
 // IsInRect checks if the given point is within the overlay layout rectangle
 func (box *Box) IsInRect(px, py int) bool {
