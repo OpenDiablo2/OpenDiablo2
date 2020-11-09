@@ -441,7 +441,7 @@ func (s *skillTree) renderTabCommon(target d2interface.Surface) error {
 	}
 
 	// available skill points label
-	s.availSPLabel.Render(target)
+	s.availSPLabel.RenderNoError(target)
 
 	return nil
 }
@@ -545,7 +545,7 @@ func (s *skillTree) renderSkillIconLabel(target d2interface.Surface, skill *d2he
 	x := skillIconXOff + skill.SkillColumn*skillIconDistX + skillLabelXOffset
 	y := skillIconYOff + skill.SkillRow*skillIconDistY + skillLabelYOffset
 	s.skillLvlLabel.SetPosition(x, y)
-	s.skillLvlLabel.Render(target)
+	s.skillLvlLabel.RenderNoError(target)
 }
 
 func (s *skillTree) renderSkillIcons(target d2interface.Surface, tab int) error {

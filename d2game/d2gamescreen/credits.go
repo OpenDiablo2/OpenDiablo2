@@ -139,7 +139,7 @@ func (v *Credits) Render(screen d2interface.Surface) {
 			continue
 		}
 
-		label.Label.Render(screen)
+		label.Label.RenderNoError(screen)
 	}
 }
 

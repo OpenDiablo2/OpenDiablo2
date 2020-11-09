@@ -462,21 +462,21 @@ func (v *MainMenu) renderLogos(screen d2interface.Surface) {
 func (v *MainMenu) renderLabels(screen d2interface.Surface) {
 	switch v.screenMode {
 	case ScreenModeServerIP:
-		v.tcpIPOptionsLabel.Render(screen)
-		v.tcpJoinGameLabel.Render(screen)
+		v.tcpIPOptionsLabel.RenderNoError(screen)
+		v.tcpJoinGameLabel.RenderNoError(screen)
 	case ScreenModeTCPIP:
-		v.tcpIPOptionsLabel.Render(screen)
+		v.tcpIPOptionsLabel.RenderNoError(screen)
 	case ScreenModeTrademark:
-		v.copyrightLabel.Render(screen)
-		v.copyrightLabel2.Render(screen)
+		v.copyrightLabel.RenderNoError(screen)
+		v.copyrightLabel2.RenderNoError(screen)
 
 		if v.errorLabel != nil {
-			v.errorLabel.Render(screen)
+			v.errorLabel.RenderNoError(screen)
 		}
 	case ScreenModeMainMenu:
-		v.openDiabloLabel.Render(screen)
-		v.versionLabel.Render(screen)
-		v.commitLabel.Render(screen)
+		v.openDiabloLabel.RenderNoError(screen)
+		v.versionLabel.RenderNoError(screen)
+		v.commitLabel.RenderNoError(screen)
 	}
 }
 

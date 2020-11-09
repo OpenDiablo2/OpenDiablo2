@@ -187,7 +187,7 @@ func (t *Tooltip) Render(target d2interface.Surface) error {
 	for i := range t.lines {
 		t.label.SetText(t.lines[i])
 		_, h := t.label.GetTextMetrics(t.lines[i])
-		t.label.Render(target)
+		t.label.RenderNoError(target)
 		target.PushTranslation(0, h)
 	}
 

@@ -344,7 +344,7 @@ func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, lab
 	xOffset := half(v.width)
 
 	label.SetPosition(xOffset, textY)
-	label.Render(v.normalSurface)
+	label.RenderNoError(v.normalSurface)
 
 	if !btnLayout.HasImage || !btnLayout.AllowFrameChange {
 		return
@@ -418,7 +418,7 @@ func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, lab
 		}
 
 		label.SetPosition(state.offsetX, state.offsetY)
-		label.Render(*state.prerenderdestination)
+		label.RenderNoError(*state.prerenderdestination)
 	}
 }
 
