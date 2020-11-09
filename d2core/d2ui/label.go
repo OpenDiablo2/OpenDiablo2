@@ -162,6 +162,11 @@ func (v *Label) getAlignOffset(textWidth int) int {
 	}
 }
 
+// Advance is a no-op
+func (v *Label) Advance(elapsed float64) error {
+	return nil
+}
+
 func getColor(token ColorToken) color.Color {
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/823
 	colors := map[ColorToken]color.Color{

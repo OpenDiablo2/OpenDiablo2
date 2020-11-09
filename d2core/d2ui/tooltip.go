@@ -14,6 +14,9 @@ const (
 	screenHeight = 600
 )
 
+// static check that Tooltip implements widget
+var _ Widget = &Tooltip{}
+
 // Tooltip contains a label containing text with a transparent, black background
 type Tooltip struct {
 	*BaseWidget
@@ -137,7 +140,7 @@ func (t *Tooltip) GetSize() (sx, sy int) {
 }
 
 // Render draws the tooltip
-func (t *Tooltip) Render(target d2interface.Surface) {
+func (t *Tooltip) Render(target d2interface.Surface) error {
 	maxW, maxH := t.GetSize()
 
 	// nolint:gomnd // no magic numbers, their meaning is obvious
@@ -189,4 +192,11 @@ func (t *Tooltip) Render(target d2interface.Surface) {
 	}
 
 	target.PopN(len(t.lines))
+
+	return nil
+}
+
+// Advance is a no-op
+func (t *Tooltip) Advance(elapsed float64) error {
+	return nil
 }

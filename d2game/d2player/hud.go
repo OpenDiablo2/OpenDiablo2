@@ -595,7 +595,10 @@ func (h *HUD) renderMiniPanel(target d2interface.Surface) error {
 		labelY := centerY - halfButtonHeight - labelHeight
 
 		h.miniPanelTooltip.SetPosition(labelX, labelY)
-		h.miniPanelTooltip.Render(target)
+
+		if err := h.miniPanelTooltip.Render(target); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -627,6 +630,7 @@ func (h *HUD) renderNewSkillsButton(x, _ int, target d2interface.Surface) error 
 	return nil
 }
 
+//nolint:golint,dupl // we clean this up later
 func (h *HUD) renderHealthTooltip(target d2interface.Surface) {
 	mx, my := h.lastMouseX, h.lastMouseY
 
@@ -641,9 +645,13 @@ func (h *HUD) renderHealthTooltip(target d2interface.Surface) {
 	}
 
 	h.healthTooltip.SetText(strPanelHealth)
-	h.healthTooltip.Render(target)
+
+	if err := h.healthTooltip.Render(target); err != nil {
+		log.Printf("Cannot render tooltip, %e", err)
+	}
 }
 
+//nolint:golint,dupl // we clean this up later
 func (h *HUD) renderManaTooltip(target d2interface.Surface) {
 	mx, my := h.lastMouseX, h.lastMouseY
 
@@ -657,7 +665,10 @@ func (h *HUD) renderManaTooltip(target d2interface.Surface) {
 	}
 
 	h.manaTooltip.SetText(strPanelMana)
-	h.manaTooltip.Render(target)
+
+	if err := h.manaTooltip.Render(target); err != nil {
+		log.Printf("Cannot render tooltip, %e", err)
+	}
 }
 
 func (h *HUD) renderRunWalkTooltip(target d2interface.Surface) {
@@ -679,7 +690,9 @@ func (h *HUD) renderRunWalkTooltip(target d2interface.Surface) {
 
 	h.runWalkTooltip.SetText(h.asset.TranslateString(stringTableKey))
 
-	h.runWalkTooltip.Render(target)
+	if err := h.runWalkTooltip.Render(target); err != nil {
+		log.Printf("Cannot render tooltip, %e", err)
+	}
 }
 
 func (h *HUD) renderStaminaTooltip(target d2interface.Surface) {
@@ -696,7 +709,10 @@ func (h *HUD) renderStaminaTooltip(target d2interface.Surface) {
 	strPanelStamina := fmt.Sprintf(fmtStamina, staminaCurr, staminaMax)
 
 	h.staminaTooltip.SetText(strPanelStamina)
-	h.staminaTooltip.Render(target)
+
+	if err := h.staminaTooltip.Render(target); err != nil {
+		log.Printf("Cannot render tooltip, %e", err)
+	}
 }
 
 func (h *HUD) renderExperienceTooltip(target d2interface.Surface) {
@@ -720,7 +736,10 @@ func (h *HUD) renderExperienceTooltip(target d2interface.Surface) {
 	strPanelExp := fmt.Sprintf(fmtExp, expCurr, expMax)
 
 	h.experienceTooltip.SetText(strPanelExp)
-	h.experienceTooltip.Render(target)
+
+	if err := h.experienceTooltip.Render(target); err != nil {
+		log.Printf("Cannot render tooltip, %e", err)
+	}
 }
 
 func (h *HUD) renderForSelectableEntitiesHovered(target d2interface.Surface) {

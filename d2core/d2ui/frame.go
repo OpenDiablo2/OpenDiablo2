@@ -8,6 +8,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
+// static check that UIFrame implements Widget
+var _ Widget = &UIFrame{}
+
 type frameOrientation = int
 
 // Frame orientations
@@ -226,5 +229,10 @@ func (u *UIFrame) renderFramePiece(sfc d2interface.Surface, x, y, idx int) error
 
 	u.frame.Render(sfc)
 
+	return nil
+}
+
+// Advance is a no-op
+func (u *UIFrame) Advance(elapsed float64) error {
 	return nil
 }
