@@ -21,6 +21,11 @@ const (
 	CreditsBackground = "/data/global/ui/CharSelect/creditsbckgexpand.dc6"
 	CreditsText       = "/data/local/ui/{LANG}/ExpansionCredits.txt"
 
+	// --- Cinematics ---
+
+	//CinematicsBackground = "/data/global/ui/FrontEnd/CinematicsSelectionEXP.dc6"
+	CinematicsBackground = "/data/global/ui/CharSelect/creditsbckgexpand.dc6"
+
 	// --- Character Select Screen ---
 
 	CharacterSelectBackground = "/data/global/ui/FrontEnd/charactercreationscreenEXP.dc6"

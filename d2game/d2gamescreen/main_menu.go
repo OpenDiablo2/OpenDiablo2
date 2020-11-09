@@ -323,6 +323,7 @@ func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
 
 	v.cinematicsButton = v.uiManager.NewButton(d2ui.ButtonTypeShort, "CINEMATICS")
 	v.cinematicsButton.SetPosition(cineBtnX, cineBtnY)
+	v.cinematicsButton.OnActivated(func() { v.onCinematicsButtonClicked() })
 	loading.Progress(seventyPercent)
 
 	v.singlePlayerButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, "SINGLE PLAYER")
@@ -419,6 +420,10 @@ func (v *MainMenu) onExitButtonClicked() {
 
 func (v *MainMenu) onCreditsButtonClicked() {
 	v.navigator.ToCredits()
+}
+
+func (v *MainMenu) onCinematicsButtonClicked() {
+	v.navigator.ToCinematics()
 }
 
 // Render renders the main menu
