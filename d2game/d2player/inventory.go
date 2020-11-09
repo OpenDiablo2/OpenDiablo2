@@ -196,7 +196,7 @@ func (g *Inventory) renderFrame(target d2interface.Surface) error {
 		w, h := g.panel.GetCurrentFrameSize()
 
 		g.panel.SetPosition(x, y+h)
-		g.panel.Render(target)
+		g.panel.RenderNoError(target)
 
 		switch frame {
 		case frameInventoryTopLeft:

@@ -387,7 +387,7 @@ func (s *skillTree) renderPanelSegment(
 		return err
 	}
 
-	s.resources.skillPanel.Render(target)
+	s.resources.skillPanel.RenderNoError(target)
 
 	return nil
 }
@@ -531,7 +531,7 @@ func (s *skillTree) renderSkillIcon(target d2interface.Surface, skill *d2hero.He
 		defer target.Pop()
 	}
 
-	skillIcon.Render(target)
+	skillIcon.RenderNoError(target)
 
 	return nil
 }

@@ -61,7 +61,7 @@ func (v *TextBox) Render(target d2interface.Surface) error {
 		return nil
 	}
 
-	v.bgSprite.Render(target)
+	v.bgSprite.RenderNoError(target)
 	v.textLabel.RenderNoError(target)
 
 	if (time.Now().UnixNano()/1e6)&(1<<8) > 0 {
