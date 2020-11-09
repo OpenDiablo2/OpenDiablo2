@@ -370,7 +370,7 @@ func NewGameControls(
 		inputListener:  inputListener,
 		mapRenderer:    mapRenderer,
 		inventory:      NewInventory(asset, ui, inventoryRecord),
-		skilltree:      newSkillTree(hero.Skills, hero.Class, asset, renderer, ui, guiManager),
+		skilltree:      newSkillTree(hero.Skills, hero.Class, asset, ui),
 		heroStatsPanel: NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
 		HelpOverlay:    helpOverlay,
 		hud:            hud,
@@ -773,11 +773,6 @@ func (g *GameControls) renderPanels(target d2interface.Surface) error {
 	g.heroStatsPanel.Render(target)
 	g.inventory.Render(target)
 
-	err := g.skilltree.Render(target)
-	if err != nil {
-		log.Println(err)
-	}
-
 	return nil
 }
 
@@ -1015,7 +1010,7 @@ func (g *GameControls) bindLearnSkillsCommand(term d2interface.Terminal) error {
 			}
 
 			if skill, ok := g.hero.Skills[skillDetailRecord.ID]; ok {
-				skill.SkillPoints++;
+				skill.SkillPoints++
 				learnedSkillsCount++
 			} else {
 				skill, skillErr := g.heroState.CreateHeroSkill(1, skillDetailRecord.Skill)

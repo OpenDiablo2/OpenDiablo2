@@ -7,6 +7,10 @@ type RenderPriority int
 const (
 	// RenderPriorityBackground is the first element drawn
 	RenderPriorityBackground RenderPriority = iota
+	// RenderPrioritySkilltree is the priority for the skilltree
+	RenderPrioritySkilltree
+	// RenderPrioritySkilltreeIcon is the priority for the skilltree icons
+	RenderPrioritySkilltreeIcon
 	// RenderPriorityForeground is the last element drawn
 	RenderPriorityForeground
 )
