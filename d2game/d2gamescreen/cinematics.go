@@ -11,6 +11,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	//"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2video"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -18,30 +19,33 @@ import (
 
 const (
 	cinematicsX, cinematicsY               = 100, 100
-	a1BtnX, a1BtnY                         = 0, 0
-	a2BtnX, a2BtnY                         = 0, 0
-	a3BtnX, a3BtnY                         = 0, 0
-	a4BtnX, a4BtnY                         = 0, 0
-	a5BtnX, a5BtnY                         = 0, 0
-	endCreditBtnX, endCreditBtnY           = 0, 0
-	cinematicsExitBtnX, cinematicsExitBtnY = 33, 543
+	a1BtnX, a1BtnY                         = 264, 100
+	a2BtnX, a2BtnY                         = 264, 160
+	a3BtnX, a3BtnY                         = 264, 220
+	a4BtnX, a4BtnY                         = 264, 280
+	endCreditClassBtnX, endCreditClassBtnY = 264, 340
+	a5BtnX, a5BtnY                         = 264, 400
+	endCreditExpBtnX, endCreditExpBtnY     = 264, 460
+	cinematicsExitBtnX, cinematicsExitBtnY = 264, 540
 )
 
 // Cinematics represents the cinematics screen
 type Cinematics struct {
 	cinematicsBackground *d2ui.Sprite
-	a1Btn                *d2ui.Sprite
-	a2Btn                *d2ui.Sprite
-	a3Btn                *d2ui.Sprite
-	a4Btn                *d2ui.Sprite
-	a5Btn                *d2ui.Sprite
-	endCreditBtn         *d2ui.Sprite
+	a1Btn                *d2ui.Button
+	a2Btn                *d2ui.Button
+	a3Btn                *d2ui.Button
+	a4Btn                *d2ui.Button
+	a5Btn                *d2ui.Button
+	endCreditClassBtn    *d2ui.Button
+	endCreditExpBtn      *d2ui.Button
 	cinematicsExitBtn    *d2ui.Button
 
-	asset     *d2asset.AssetManager
-	renderer  d2interface.Renderer
-	navigator d2interface.Navigator
-	uiManager *d2ui.UIManager
+	asset        *d2asset.AssetManager
+	renderer     d2interface.Renderer
+	navigator    d2interface.Navigator
+	uiManager    *d2ui.UIManager
+	videoDecoder *d2video.BinkDecoder
 }
 
 // CreateCinematics creates an instance of the credits screen
@@ -75,9 +79,7 @@ func (v *Cinematics) OnLoad(loading d2screen.LoadingState) {
 
 	loading.Progress(twentyPercent)
 
-	v.cinematicsExitBtn = v.uiManager.NewButton(d2ui.ButtonTypeMedium, "EXIT")
-	v.cinematicsExitBtn.SetPosition(charSelExitBtnX, charSelExitBtnY)
-	//	v.cinematicsExitBtn.OnActivated(func() { })
+	v.createButtons()
 	/*loading.Progress(fourtyPercent)
 
 	fileData, err := v.asset.LoadFile(d2resource.CreditsText)
@@ -102,6 +104,91 @@ func (v *Cinematics) OnLoad(loading d2screen.LoadingState) {
 	loading.Progress(eightyPercent)
 
 	v.creditsText = append(v.LoadContributors(), v.creditsText...)*/
+}
+
+func (v *Cinematics) createButtons() {
+	/*CINEMATICS NAMES:
+	Act 1: The Sister's Lament
+	Act 2: Dessert Journay
+	Act 3: Mephisto's Jungle
+	Act 4: Enter Hell
+	Act 5:
+	end Credit Classic:
+	end Credit Expansion:
+	*/
+	v.cinematicsExitBtn = v.uiManager.NewButton(d2ui.ButtonTypeWide, "CANCEL")
+	v.cinematicsExitBtn.SetPosition(cinematicsExitBtnX, cinematicsExitBtnY)
+	v.cinematicsExitBtn.OnActivated(func() { v.onCinematicsExitBtnClicked() })
+
+	v.a1Btn = v.uiManager.NewButton(d2ui.ButtonTypeWide, "THE SISTER'S LAMENT")
+	v.a1Btn.SetPosition(a1BtnX, a1BtnY)
+	v.a1Btn.OnActivated(func() { v.onA1BtnClicked() })
+
+	v.a2Btn = v.uiManager.NewButton(d2ui.ButtonTypeWide, "DESSERT JOURNAY")
+	v.a2Btn.SetPosition(a2BtnX, a2BtnY)
+	v.a2Btn.OnActivated(func() { v.onA2BtnClicked() })
+
+	v.a3Btn = v.uiManager.NewButton(d2ui.ButtonTypeWide, "MEPHISTO'S JUNGLE")
+	v.a3Btn.SetPosition(a3BtnX, a3BtnY)
+	v.a3Btn.OnActivated(func() { v.onA3BtnClicked() })
+
+	v.a4Btn = v.uiManager.NewButton(d2ui.ButtonTypeWide, "ENTER HELL")
+	v.a4Btn.SetPosition(a4BtnX, a4BtnY)
+	v.a4Btn.OnActivated(func() { v.onA4BtnClicked() })
+
+	v.endCreditClassBtn = v.uiManager.NewButton(d2ui.ButtonTypeWide, "DiabloII Classic End Credit")
+	v.endCreditClassBtn.SetPosition(endCreditClassBtnX, endCreditClassBtnY)
+	v.endCreditClassBtn.OnActivated(func() { v.onEndCreditClassBtnClicked() })
+
+	v.a5Btn = v.uiManager.NewButton(d2ui.ButtonTypeWide, "DiabloII Act 5 video")
+	v.a5Btn.SetPosition(a5BtnX, a5BtnY)
+	v.a5Btn.OnActivated(func() { v.onA5BtnClicked() })
+
+	v.endCreditExpBtn = v.uiManager.NewButton(d2ui.ButtonTypeWide, "DiabloII Expansion End Credit")
+	v.endCreditExpBtn.SetPosition(endCreditExpBtnX, endCreditExpBtnY)
+	v.endCreditExpBtn.OnActivated(func() { v.onEndCreditExpBtnClicked() })
+
+}
+
+func (v *Cinematics) onCinematicsExitBtnClicked() {
+	v.navigator.ToMainMenu()
+}
+
+func (v *Cinematics) onA1BtnClicked() {
+	v.playVideo(d2resource.Act1Intro)
+}
+
+func (v *Cinematics) onA2BtnClicked() {
+	v.playVideo(d2resource.Act2Intro)
+}
+
+func (v *Cinematics) onA3BtnClicked() {
+	v.playVideo(d2resource.Act3Intro)
+}
+
+func (v *Cinematics) onA4BtnClicked() {
+	v.playVideo(d2resource.Act4Intro)
+}
+
+func (v *Cinematics) onEndCreditClassBtnClicked() {
+	v.playVideo(d2resource.Act4Outro)
+}
+
+func (v *Cinematics) onA5BtnClicked() {
+	v.playVideo(d2resource.Act5Intro)
+}
+
+func (v *Cinematics) onEndCreditExpBtnClicked() {
+	v.playVideo(d2resource.Act5Outro)
+}
+
+func (v *Cinematics) playVideo(path string) {
+	videoBytes, err := v.asset.LoadFile(path)
+	if err != nil {
+		log.Printf(err.Error())
+		return
+	}
+	v.videoDecoder = d2video.CreateBinkDecoder(videoBytes)
 }
 
 /*

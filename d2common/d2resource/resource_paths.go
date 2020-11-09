@@ -6,6 +6,16 @@ const (
 
 	LoadingScreen = "/data/global/ui/Loading/loadingscreen.dc6"
 
+	// --- Video Paths ---
+
+	Act1Intro = "/data/local/video/eng/d2intro640x292.bik"
+	Act2Intro = "/data/local/video/eng/act02start640x292.bik"
+	Act3Intro = "/data/local/video/eng/act03start640x292.bik"
+	Act4Intro = "/data/local/video/eng/act04start640x292.bik"
+	Act4Outro = "/data/local/video/eng/act04end640x292.bik"
+	Act5Intro = "/data/local/video/eng/d2x_intro_640x292.bik"
+	Act5Outro = "/data/local/video/eng/d2x_out_640x292.bik"
+
 	// --- Main Menu ---
 
 	TrademarkScreen       = "/data/global/ui/FrontEnd/trademarkscreenEXP.dc6"
