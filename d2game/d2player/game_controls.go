@@ -1014,18 +1014,23 @@ func (g *GameControls) bindLearnSkillsCommand(term d2interface.Terminal) error {
 				continue
 			}
 
-			skill, skillErr := g.heroState.CreateHeroSkill(1, skillDetailRecord.Skill)
-			if skill == nil {
-				continue
-			}
+			if skill, ok := g.hero.Skills[skillDetailRecord.ID]; ok {
+				skill.SkillPoints++;
+				learnedSkillsCount++
+			} else {
+				skill, skillErr := g.heroState.CreateHeroSkill(1, skillDetailRecord.Skill)
+				if skill == nil {
+					continue
+				}
 
-			learnedSkillsCount++
+				learnedSkillsCount++
 
-			g.hero.Skills[skill.ID] = skill
+				g.hero.Skills[skill.ID] = skill
 
-			if skillErr != nil {
-				err = skillErr
-				break
+				if skillErr != nil {
+					err = skillErr
+					break
+				}
 			}
 		}
 
