@@ -323,6 +323,7 @@ func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
 
 	v.cinematicsButton = v.uiManager.NewButton(d2ui.ButtonTypeShort, "CINEMATICS")
 	v.cinematicsButton.SetPosition(cineBtnX, cineBtnY)
+	v.cinematicsButton.OnActivated(func() { v.onCinematicsButtonClicked() })
 	loading.Progress(seventyPercent)
 
 	v.singlePlayerButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, "SINGLE PLAYER")
@@ -421,6 +422,10 @@ func (v *MainMenu) onCreditsButtonClicked() {
 	v.navigator.ToCredits()
 }
 
+func (v *MainMenu) onCinematicsButtonClicked() {
+	v.navigator.ToCinematics()
+}
+
 // Render renders the main menu
 func (v *MainMenu) Render(screen d2interface.Surface) {
 	v.renderBackgrounds(screen)
@@ -435,6 +440,10 @@ func (v *MainMenu) renderBackgrounds(screen d2interface.Surface) {
 			return
 		}
 	case ScreenModeServerIP:
+		if err := v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0); err != nil {
+			return
+		}
+
 		if err := v.serverIPBackground.RenderSegmented(screen, 2, 1, 0); err != nil {
 			return
 		}

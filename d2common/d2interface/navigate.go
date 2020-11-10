@@ -12,4 +12,5 @@ type Navigator interface {
 	ToCharacterSelect(connType d2clientconnectiontype.ClientConnectionType, connHost string)
 	ToMapEngineTest(region int, level int)
 	ToCredits()
+	ToCinematics()
 }
