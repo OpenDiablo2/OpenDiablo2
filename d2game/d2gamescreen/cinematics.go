@@ -1,18 +1,21 @@
 package d2gamescreen
 
 import (
+	//"fmt"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2video"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
 const (
 	cinematicsX, cinematicsY               = 240, 90
+	cinematicsLabelX, cinematicsLabelY     = 400, 110
 	a1BtnX, a1BtnY                         = 264, 160
 	a2BtnX, a2BtnY                         = 264, 205
 	a3BtnX, a3BtnY                         = 264, 250
@@ -34,12 +37,14 @@ type Cinematics struct {
 	endCreditClassBtn    *d2ui.Button
 	endCreditExpBtn      *d2ui.Button
 	cinematicsExitBtn    *d2ui.Button
+	cinematicsLabel      *d2ui.Label
 
 	asset        *d2asset.AssetManager
 	renderer     d2interface.Renderer
 	navigator    d2interface.Navigator
 	uiManager    *d2ui.UIManager
 	videoDecoder *d2video.BinkDecoder
+	inputManager d2interface.InputManager
 }
 
 // CreateCinematics creates an instance of the credits screen
@@ -63,6 +68,7 @@ func (v *Cinematics) OnLoad(loading d2screen.LoadingState) {
 	var err error
 
 	v.cinematicsBackground, err = v.uiManager.NewSprite(d2resource.CinematicsBackground, d2resource.PaletteSky)
+
 	if err != nil {
 		log.Print(err)
 	}
@@ -73,6 +79,13 @@ func (v *Cinematics) OnLoad(loading d2screen.LoadingState) {
 
 	v.createButtons()
 	loading.Progress(fourtyPercent)
+
+	v.cinematicsLabel = v.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteStatic)
+	v.cinematicsLabel.Alignment = d2gui.HorizontalAlignCenter
+	v.cinematicsLabel.SetText("SELECT CINEMATIC")
+	v.cinematicsLabel.Color[0] = rgbaColor(lightBrown)
+	v.cinematicsLabel.SetPosition(cinematicsLabelX, cinematicsLabelY)
+
 	loading.Progress(sixtyPercent)
 	loading.Progress(eightyPercent)
 }
@@ -164,8 +177,10 @@ func (v *Cinematics) playVideo(path string) {
 
 // Render renders the credits screen
 func (v *Cinematics) Render(screen d2interface.Surface) {
-	err := v.cinematicsBackground.RenderSegmented(screen, 2, 3, 0)
+	err := v.cinematicsBackground.RenderSegmented(screen, 2, 2, 0)
 	if err != nil {
 		return
 	}
+	v.cinematicsLabel.Render(screen)
+
 }
