@@ -962,6 +962,7 @@ func (a *App) ToCredits() {
 	a.screen.SetNextScreen(d2gamescreen.CreateCredits(a, a.asset, a.renderer, a.ui))
 }
 
+// ToCinematics forces the game to transition to the cinematics menu
 func (a *App) ToCinematics() {
 	a.screen.SetNextScreen(d2gamescreen.CreateCinematics(a, a.asset, a.renderer, a.ui))
 }

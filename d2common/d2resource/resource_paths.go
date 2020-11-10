@@ -33,8 +33,7 @@ const (
 
 	// --- Cinematics ---
 
-	//CinematicsBackground = "/data/global/ui/FrontEnd/CinematicsSelectionEXP.dc6"
-	CinematicsBackground = "/data/global/ui/CharSelect/creditsbckgexpand.dc6"
+	CinematicsBackground = "/data/global/ui/FrontEnd/CinematicsSelectionEXP.dc6"
 
 	// --- Character Select Screen ---
 
