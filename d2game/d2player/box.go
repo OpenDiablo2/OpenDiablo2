@@ -64,6 +64,22 @@ func NewLabelButton(x, y int, text string, col color.RGBA, callback func()) *Lab
 	}
 }
 
+// IsInRect checks if the given point is within the overlay layout rectangle
+func (lb *LabelButton) IsInRect(px, py int) bool {
+	if lb.layout == nil {
+		return false
+	}
+
+	ww, hh := lb.layout.GetSize()
+	x, y := lb.layout.Sx, lb.layout.Sy
+
+	if px >= x && px <= x+ww && py >= y && py <= y+hh {
+		return true
+	}
+
+	return false
+}
+
 func (lb *LabelButton) Load(renderer d2interface.Renderer, asset *d2asset.AssetManager) {
 	mainLayout := d2gui.CreateLayout(renderer, d2gui.PositionTypeAbsolute, asset)
 	l, _ := mainLayout.AddLabelWithColor(lb.label, d2gui.FontStyleFormal11Units, d2util.Color(0xA1925DFF))
@@ -71,12 +87,6 @@ func (lb *LabelButton) Load(renderer d2interface.Renderer, asset *d2asset.AssetM
 	if lb.canHover {
 		l.SetHoverColor(lb.hoverColor)
 	}
-
-	mainLayout.SetMouseClickHandler(func(d d2interface.MouseEvent) {
-		if lb.callback != nil {
-			lb.callback()
-		}
-	})
 
 	mainLayout.SetMouseEnterHandler(func(event d2interface.MouseMoveEvent) {
 		l.SetIsHovered(true)
@@ -370,6 +380,10 @@ func (box *Box) setupCorners() {
 	}
 }
 
+func (box *Box) SetOptions(options []*LabelButton) {
+	box.Options = options
+}
+
 func (box *Box) Load() {
 	box.layout = d2gui.CreateLayout(box.renderer, d2gui.PositionTypeAbsolute, box.asset)
 	box.layout.SetPosition(box.x, box.y)
@@ -378,17 +392,11 @@ func (box *Box) Load() {
 
 	if !box.disableBorder {
 		box.setupTopBorder(boxSpriteHeight)
-		box.setupBottomBorder(box.y + box.height + boxSpriteHeight)
+		box.setupBottomBorder(box.y + box.height + boxSpriteHeight - 2)
 		box.setupLeftBorder()
 		box.setupRightBorder()
 		box.setupCorners()
 	}
-
-	box.Options = append(box.Options, []*LabelButton{
-		NewLabelButton(0, 0, "Cancel", d2util.Color(0xD03C39FF), func() { fmt.Println("Cancel callback") }),
-		NewLabelButton(0, 0, "Default", d2util.Color(0x5450D1FF), func() { fmt.Println("Default callback") }),
-		NewLabelButton(0, 0, "Accept", d2util.Color(0x00D000FF), func() { fmt.Println("Accept callback") }),
-	}...)
 
 	sectionHeight := int(float32(box.height) * 0.12)
 	optionsEnabled := len(box.Options) > 0 && sectionHeight > 14
@@ -410,7 +418,7 @@ func (box *Box) Load() {
 			cornerLeft.SetPosition(box.x, offsetY)
 			cornerRight.SetCurrentFrame(boxCornerTopRight)
 			cornerRight.SetPosition(box.x+box.width-boxSpriteWidth, offsetY)
-			box.setupTopBorder(box.height - (4 * boxSpriteHeight) + boxSpriteHeight)
+			box.setupTopBorder(box.height - (4 * boxSpriteHeight) + boxSpriteHeight + 3)
 			box.sprites = append(box.sprites, cornerLeft, cornerRight)
 		}
 
@@ -470,6 +478,18 @@ func (box *Box) Load() {
 	}
 
 	box.layout.AddLayoutFromSource(box.contentLayout)
+}
+
+func (box *Box) OnMouseButtonDown(event d2interface.MouseEvent) bool {
+	fmt.Println("box.OnMouseButtonDown")
+	for _, option := range box.Options {
+		if option.IsInRect(event.X(), event.Y()) {
+			option.callback()
+			return true
+		}
+	}
+
+	return false
 }
 
 // Render the overlay to the given surface

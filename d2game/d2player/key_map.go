@@ -142,9 +142,7 @@ func (b KeyBinding) IsEmpty() bool {
 	return b.Primary == -1 && b.Secondary == -1
 }
 
-func GetDefaultKeyMap() *KeyMap {
-	keyMap := NewKeyMap()
-
+func (keyMap *KeyMap) ResetToDefault() {
 	defaultControls := map[d2enum.GameEvent]KeyBinding{
 		d2enum.ToggleCharacterPanel: {d2enum.KeyA, d2enum.KeyC},
 		d2enum.ToggleInventoryPanel: {d2enum.KeyB, d2enum.KeyI},
@@ -182,7 +180,7 @@ func GetDefaultKeyMap() *KeyMap {
 		d2enum.UseBeltSlot4: {d2enum.Key4, -1},
 		d2enum.SwapWeapons:  {d2enum.KeyW, -1},
 
-		d2enum.ToggleChatOverlay:   {d2enum.KeyEnter, -1},
+		d2enum.ToggleChatBox:       {d2enum.KeyEnter, -1},
 		d2enum.HoldRun:             {d2enum.KeyControl, -1},
 		d2enum.ToggleRunWalk:       {d2enum.KeyR, -1},
 		d2enum.HoldStandStill:      {d2enum.KeyShift, -1},
@@ -208,10 +206,16 @@ func GetDefaultKeyMap() *KeyMap {
 		d2enum.ClearScreen:    {d2enum.KeySpace, -1},
 		d2enum.ClearMessages:  {d2enum.KeyN, -1},
 	}
+
 	for gameEvent, keys := range defaultControls {
 		keyMap.SetPrimaryBinding(gameEvent, keys.Primary)
 		keyMap.SetSecondaryBinding(gameEvent, keys.Secondary)
 	}
+}
+
+func GetDefaultKeyMap() *KeyMap {
+	keyMap := NewKeyMap()
+	keyMap.ResetToDefault()
 
 	return keyMap
 }

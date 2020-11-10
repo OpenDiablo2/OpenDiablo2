@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -108,6 +109,11 @@ func NewKeyBindingMenu(
 	}
 
 	ret.Box = NewBox(asset, renderer, ui, guiManager, ret.mainLayout, 620, 375, 90, 65, "")
+	ret.Box.SetOptions([]*LabelButton{
+		NewLabelButton(0, 0, "Cancel", d2util.Color(0xD03C39FF), func() { ret.onCancelClicked() }),
+		NewLabelButton(0, 0, "Default", d2util.Color(0x5450D1FF), func() { ret.onDefaultClicked() }),
+		NewLabelButton(0, 0, "Accept", d2util.Color(0x00D000FF), func() { ret.onAcceptClicked() }),
+	})
 
 	return ret
 }
@@ -182,7 +188,7 @@ func (menu *KeyBindingMenu) generateLayout() *d2gui.Layout {
 			},
 			{
 				label:     menu.asset.TranslateString("CfgSkillPick"),
-				gameEvent: d2enum.ToggleLeftSkillSelector,
+				gameEvent: d2enum.ToggleRightSkillSelector,
 			},
 			{
 				label:     menu.asset.TranslateString("CfgSkill1"),
@@ -285,7 +291,7 @@ func (menu *KeyBindingMenu) generateLayout() *d2gui.Layout {
 		},
 		{
 			{
-				label:     menu.asset.TranslateString("Cfgchat"),
+				label:     menu.asset.TranslateString("CfgChat"),
 				gameEvent: d2enum.ToggleChatBox,
 			},
 			{
@@ -451,6 +457,10 @@ func (menu *KeyBindingMenu) getKeyColor(key d2enum.Key) color.RGBA {
 }
 
 func (menu *KeyBindingMenu) OnMouseButtonDown(event d2interface.MouseEvent) {
+	if menu.Box.OnMouseButtonDown(event) {
+		return
+	}
+
 	if menu.scrollbar != nil && menu.scrollbar.IsInSliderRect(event.X(), event.Y()) {
 		menu.scrollbar.SetSliderClicked(true)
 		menu.scrollbar.onSliderMouseClick(event)
@@ -499,28 +509,27 @@ func (menu *KeyBindingMenu) saveKeyChange(key d2enum.Key) {
 	var (
 		existingBinding *KeyBinding
 		gameEvent       d2enum.GameEvent
-		bindingType     KeyBindingType
+		bindingType     KeyBindingType = -1
 
 		changeExisting *bindingChange
 	)
 
 	for ge, existingChange := range menu.changesToBeSaved {
 		if existingChange.primary == key {
-			existingBinding = existingChange.target
-			gameEvent = ge
 			bindingType = KeyBindingTypePrimary
-			changeExisting = existingChange
-			break
+		} else if existingChange.secondary == key {
+			bindingType = KeyBindingTypeSecondary
 		}
 
-		if existingChange.secondary == key {
+		if bindingType != -1 {
 			existingBinding = existingChange.target
-			gameEvent = ge
-			bindingType = KeyBindingTypeSecondary
 			changeExisting = existingChange
+			gameEvent = ge
+
 			break
 		}
 	}
+
 	if existingBinding == nil {
 		existingBinding, gameEvent, bindingType = menu.keyMap.GetBindingByKey(key)
 	}
@@ -552,13 +561,9 @@ func (menu *KeyBindingMenu) saveKeyChange(key d2enum.Key) {
 	switch menu.currentBindingModifierType {
 	case KeyBindingTypePrimary:
 		changeCurrent.primary = key
-		menu.currentBindingLayout.primaryLabel.SetText(KeyToString(key, menu.asset))
-		menu.currentBindingLayout.primaryLabel.SetColor(d2util.Color(0xA1925DFF))
 		break
 	case KeyBindingTypeSecondary:
 		changeCurrent.secondary = key
-		menu.currentBindingLayout.secondaryLabel.SetText(KeyToString(key, menu.asset))
-		menu.currentBindingLayout.secondaryLabel.SetColor(d2util.Color(0xA1925DFF))
 		break
 	}
 
@@ -572,37 +577,102 @@ func (menu *KeyBindingMenu) saveKeyChange(key d2enum.Key) {
 		}
 	}
 
-	noneStr := KeyToString(-1, menu.asset)
-	if changeCurrent.primary == -1 {
-		menu.currentBindingLayout.primaryLabel.SetText(noneStr)
-		menu.currentBindingLayout.primaryLabel.SetColor(d2util.Color(0x555555FF))
-	}
-
-	if changeCurrent.secondary == -1 {
-		menu.currentBindingLayout.secondaryLabel.SetText(noneStr)
-		menu.currentBindingLayout.secondaryLabel.SetColor(d2util.Color(0x555555FF))
-	}
+	menu.setBindingLabels(changeCurrent.primary, changeCurrent.secondary, menu.currentBindingLayout)
 
 	if changeExisting != nil {
 		for _, bindingLayout := range menu.bindingLayouts {
 			if bindingLayout.binding == changeExisting.target {
 
-				if changeExisting.primary == -1 {
-					bindingLayout.primaryLabel.SetText(noneStr)
-					bindingLayout.primaryLabel.SetColor(d2util.Color(0x555555FF))
-				}
-
-				if changeExisting.secondary == -1 {
-					bindingLayout.secondaryLabel.SetText(noneStr)
-					bindingLayout.secondaryLabel.SetColor(d2util.Color(0x555555FF))
-				}
-
-				if changeExisting.target != menu.currentBindingLayout.binding && changeExisting.primary == -1 && changeExisting.secondary == -1 {
-					bindingLayout.primaryLabel.SetColor(d2util.Color(0xDB3F3DFF))
-					bindingLayout.secondaryLabel.SetColor(d2util.Color(0xDB3F3DFF))
-				}
+				menu.setBindingLabels(changeExisting.primary, changeExisting.secondary, bindingLayout)
 			}
 		}
+	}
+}
+
+func (menu *KeyBindingMenu) setBindingLabels(primary, secondary d2enum.Key, bl *bindingLayout) {
+	noneStr := KeyToString(-1, menu.asset)
+
+	if primary != -1 {
+		bl.primaryLabel.SetText(KeyToString(primary, menu.asset))
+		bl.primaryLabel.SetColor(d2util.Color(0xA1925DFF))
+	} else {
+		bl.primaryLabel.SetText(noneStr)
+		bl.primaryLabel.SetColor(d2util.Color(0x555555FF))
+	}
+
+	if secondary != -1 {
+		bl.secondaryLabel.SetText(KeyToString(secondary, menu.asset))
+		bl.secondaryLabel.SetColor(d2util.Color(0xA1925DFF))
+	} else {
+		bl.secondaryLabel.SetText(noneStr)
+		bl.secondaryLabel.SetColor(d2util.Color(0x555555FF))
+	}
+
+	if primary == -1 && secondary == -1 {
+		bl.primaryLabel.SetColor(d2util.Color(0xDB3F3DFF))
+		bl.secondaryLabel.SetColor(d2util.Color(0xDB3F3DFF))
+	}
+}
+
+func (menu *KeyBindingMenu) onCancelClicked() {
+	fmt.Println("onCancelClicked")
+	for gameEvent := range menu.changesToBeSaved {
+		for _, bindingLayout := range menu.bindingLayouts {
+			if bindingLayout.gameEvent == gameEvent {
+				menu.setBindingLabels(bindingLayout.binding.Primary, bindingLayout.binding.Secondary, bindingLayout)
+			}
+		}
+	}
+
+	menu.changesToBeSaved = make(map[d2enum.GameEvent]*bindingChange)
+	if menu.currentBindingLayout != nil {
+		menu.currentBindingLayout.Reset()
+		menu.lastBindingLayout = nil
+		menu.currentBindingLayout = nil
+		menu.currentBindingModifier = -1
+		menu.currentBindingModifierType = -1
+	}
+}
+
+func (menu *KeyBindingMenu) reload() {
+	for _, bl := range menu.bindingLayouts {
+		if bl.binding != nil {
+			menu.setBindingLabels(bl.binding.Primary, bl.binding.Secondary, bl)
+		} else {
+			fmt.Println("missing binding for", bl.descLabel.GetText())
+		}
+	}
+}
+
+func (menu *KeyBindingMenu) onDefaultClicked() {
+	fmt.Println("onDefaultClicked")
+	menu.keyMap.ResetToDefault()
+	menu.reload()
+
+	menu.changesToBeSaved = make(map[d2enum.GameEvent]*bindingChange)
+	if menu.currentBindingLayout != nil {
+		menu.currentBindingLayout.Reset()
+		menu.lastBindingLayout = nil
+		menu.currentBindingLayout = nil
+		menu.currentBindingModifier = -1
+		menu.currentBindingModifierType = -1
+	}
+}
+
+func (menu *KeyBindingMenu) onAcceptClicked() {
+	fmt.Println("onAcceptClicked")
+	for gameEvent, change := range menu.changesToBeSaved {
+		menu.keyMap.SetPrimaryBinding(gameEvent, change.primary)
+		menu.keyMap.SetSecondaryBinding(gameEvent, change.primary)
+	}
+
+	menu.changesToBeSaved = make(map[d2enum.GameEvent]*bindingChange)
+	if menu.currentBindingLayout != nil {
+		menu.currentBindingLayout.Reset()
+		menu.lastBindingLayout = nil
+		menu.currentBindingLayout = nil
+		menu.currentBindingModifier = -1
+		menu.currentBindingModifierType = -1
 	}
 }
 
