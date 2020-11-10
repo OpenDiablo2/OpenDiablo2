@@ -39,12 +39,13 @@ type Cinematics struct {
 	cinematicsExitBtn    *d2ui.Button
 	cinematicsLabel      *d2ui.Label
 
-	asset        *d2asset.AssetManager
-	renderer     d2interface.Renderer
-	navigator    d2interface.Navigator
-	uiManager    *d2ui.UIManager
-	videoDecoder *d2video.BinkDecoder
-	inputManager d2interface.InputManager
+	asset         *d2asset.AssetManager
+	renderer      d2interface.Renderer
+	navigator     d2interface.Navigator
+	uiManager     *d2ui.UIManager
+	videoDecoder  *d2video.BinkDecoder
+	inputManager  d2interface.InputManager
+	audioProvider d2interface.AudioProvider
 }
 
 // CreateCinematics creates an instance of the credits screen
@@ -52,12 +53,14 @@ func CreateCinematics(
 	navigator d2interface.Navigator,
 	asset *d2asset.AssetManager,
 	renderer d2interface.Renderer,
+	aup d2interface.AudioProvider,
 	ui *d2ui.UIManager) *Cinematics {
 	result := &Cinematics{
-		asset:     asset,
-		renderer:  renderer,
-		navigator: navigator,
-		uiManager: ui,
+		asset:         asset,
+		renderer:      renderer,
+		navigator:     navigator,
+		uiManager:     ui,
+		audioProvider: aup,
 	}
 
 	return result
@@ -66,6 +69,9 @@ func CreateCinematics(
 // OnLoad is called to load the resources for the credits screen
 func (v *Cinematics) OnLoad(loading d2screen.LoadingState) {
 	var err error
+
+	//	v.audioProvider.SetVolumes(1, 1)
+	v.audioProvider.PlayBGM("")
 
 	v.cinematicsBackground, err = v.uiManager.NewSprite(d2resource.CinematicsBackground, d2resource.PaletteSky)
 
