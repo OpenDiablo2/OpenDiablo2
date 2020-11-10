@@ -28,6 +28,7 @@ const (
 // Cinematics represents the cinematics screen
 type Cinematics struct {
 	cinematicsBackground *d2ui.Sprite
+	background           *d2ui.Sprite
 	a1Btn                *d2ui.Button
 	a2Btn                *d2ui.Button
 	a3Btn                *d2ui.Button
@@ -65,10 +66,18 @@ func CreateCinematics(
 }
 
 // OnLoad is called to load the resources for the credits screen
-func (v *Cinematics) OnLoad(loading d2screen.LoadingState) {
+func (v *Cinematics) OnLoad(_ d2screen.LoadingState) {
 	var err error
 
 	v.audioProvider.PlayBGM("")
+
+	v.background, err = v.uiManager.NewSprite(d2resource.GameSelectScreen, d2resource.PaletteSky)
+
+	if err != nil {
+		log.Print(err)
+	}
+
+	v.background.SetPosition(backgroundX, backgroundY)
 
 	v.cinematicsBackground, err = v.uiManager.NewSprite(d2resource.CinematicsBackground, d2resource.PaletteSky)
 
@@ -78,19 +87,13 @@ func (v *Cinematics) OnLoad(loading d2screen.LoadingState) {
 
 	v.cinematicsBackground.SetPosition(cinematicsX, cinematicsY)
 
-	loading.Progress(twentyPercent)
-
 	v.createButtons()
-	loading.Progress(fourtyPercent)
 
 	v.cinematicsLabel = v.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteStatic)
 	v.cinematicsLabel.Alignment = d2gui.HorizontalAlignCenter
 	v.cinematicsLabel.SetText("SELECT CINEMATIC")
 	v.cinematicsLabel.Color[0] = rgbaColor(lightBrown)
 	v.cinematicsLabel.SetPosition(cinematicsLabelX, cinematicsLabelY)
-
-	loading.Progress(sixtyPercent)
-	loading.Progress(eightyPercent)
 }
 
 func (v *Cinematics) createButtons() {
@@ -180,10 +183,21 @@ func (v *Cinematics) playVideo(path string) {
 
 // Render renders the credits screen
 func (v *Cinematics) Render(screen d2interface.Surface) {
-	err := v.cinematicsBackground.RenderSegmented(screen, 2, 2, 0)
+	err := v.background.RenderSegmented(screen, 4, 3, 0)
+
+	if err != nil {
+		return
+	}
+
+	err = v.cinematicsBackground.RenderSegmented(screen, 2, 2, 0)
+
 	if err != nil {
 		return
 	}
 
 	v.cinematicsLabel.Render(screen)
+
+	if err != nil {
+		return
+	}
 }
