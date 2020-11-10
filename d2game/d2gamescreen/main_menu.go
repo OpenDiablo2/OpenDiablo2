@@ -440,6 +440,10 @@ func (v *MainMenu) renderBackgrounds(screen d2interface.Surface) {
 			return
 		}
 	case ScreenModeServerIP:
+		if err := v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0); err != nil {
+			return
+		}
+
 		if err := v.serverIPBackground.RenderSegmented(screen, 2, 1, 0); err != nil {
 			return
 		}
