@@ -11,34 +11,34 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
+type bindingChange struct {
+	target    *KeyBinding
+	primary   d2enum.Key
+	secondary d2enum.Key
+}
+
 // KeyBindingMenu represents the menu to view/edit the
 // key bindings
 type KeyBindingMenu struct {
 	*Box
 
-	asset          *d2asset.AssetManager
-	renderer       d2interface.Renderer
-	ui             *d2ui.UIManager
-	guiManager     *d2gui.GuiManager
-	keyMap         *KeyMap
-	mainLayout     *d2gui.Layout
-	contentLayout  *d2gui.Layout
-	scrollbar      *LayoutScrollbar
-	bindingLayouts []*bindingLayout
+	asset            *d2asset.AssetManager
+	renderer         d2interface.Renderer
+	ui               *d2ui.UIManager
+	guiManager       *d2gui.GuiManager
+	keyMap           *KeyMap
+	mainLayout       *d2gui.Layout
+	contentLayout    *d2gui.Layout
+	scrollbar        *LayoutScrollbar
+	bindingLayouts   []*bindingLayout
+	changesToBeSaved map[d2enum.GameEvent]*bindingChange
 
 	isAwaitingKeyDown          bool
-	currentBindingModifierType awaitingKeyDownType
+	currentBindingModifierType KeyBindingType
 	currentBindingModifier     d2enum.GameEvent
 	currentBindingLayout       *bindingLayout
 	lastBindingLayout          *bindingLayout
 }
-
-type awaitingKeyDownType int
-
-const (
-	awaitingKeyDownTypePrimary awaitingKeyDownType = iota
-	awaitingKeyDownTypeSecondary
-)
 
 type bindingLayout struct {
 	wrapperLayout   *d2gui.Layout
@@ -59,18 +59,18 @@ func (l *bindingLayout) Reset() {
 	l.secondaryLabel.SetIsHovered(false)
 }
 
-func (l *bindingLayout) GetPointedLayoutAndLabel(x, y int) (d2enum.GameEvent, awaitingKeyDownType) {
+func (l *bindingLayout) GetPointedLayoutAndLabel(x, y int) (d2enum.GameEvent, KeyBindingType) {
 	ww, hh := l.descLayout.GetSize()
 	xx, yy := l.descLayout.Sx, l.descLayout.Sy
 	if x >= xx && x <= xx+ww && y >= yy && y <= yy+hh {
-		return l.gameEvent, awaitingKeyDownTypePrimary
+		return l.gameEvent, KeyBindingTypePrimary
 	}
 
 	if l.primaryLayout != nil {
 		ww, hh = l.primaryLayout.GetSize()
 		xx, yy = l.primaryLayout.Sx, l.primaryLayout.Sy
 		if x >= xx && x <= xx+ww && y >= yy && y <= yy+hh {
-			return l.gameEvent, awaitingKeyDownTypePrimary
+			return l.gameEvent, KeyBindingTypePrimary
 		}
 	}
 
@@ -78,7 +78,7 @@ func (l *bindingLayout) GetPointedLayoutAndLabel(x, y int) (d2enum.GameEvent, aw
 		ww, hh = l.secondaryLayout.GetSize()
 		xx, yy = l.secondaryLayout.Sx, l.secondaryLayout.Sy
 		if x >= xx && x <= xx+ww && y >= yy && y <= yy+hh {
-			return l.gameEvent, awaitingKeyDownTypeSecondary
+			return l.gameEvent, KeyBindingTypeSecondary
 		}
 	}
 
@@ -96,14 +96,15 @@ func NewKeyBindingMenu(
 	contentLayout := mainLayout.AddLayout(d2gui.PositionTypeAbsolute)
 
 	ret := &KeyBindingMenu{
-		keyMap:         keyMap,
-		asset:          asset,
-		ui:             ui,
-		guiManager:     guiManager,
-		renderer:       renderer,
-		mainLayout:     mainLayout,
-		contentLayout:  contentLayout,
-		bindingLayouts: []*bindingLayout{},
+		keyMap:           keyMap,
+		asset:            asset,
+		ui:               ui,
+		guiManager:       guiManager,
+		renderer:         renderer,
+		mainLayout:       mainLayout,
+		contentLayout:    contentLayout,
+		bindingLayouts:   []*bindingLayout{},
+		changesToBeSaved: make(map[d2enum.GameEvent]*bindingChange),
 	}
 
 	ret.Box = NewBox(asset, renderer, ui, guiManager, ret.mainLayout, 620, 375, 90, 65, "")
@@ -138,244 +139,244 @@ func (menu *KeyBindingMenu) Load() error {
 }
 
 type keyBindingSetting struct {
-	label   string
-	binding *KeyBinding
+	label     string
+	gameEvent d2enum.GameEvent
 }
 
 func (menu *KeyBindingMenu) generateLayout() *d2gui.Layout {
 	groups := [][]keyBindingSetting{
 		{
 			{
-				label:   menu.asset.TranslateString("CfgCharacter"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ToggleCharacterPanel),
+				label:     menu.asset.TranslateString("CfgCharacter"),
+				gameEvent: d2enum.ToggleCharacterPanel,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgInventory"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ToggleInventoryPanel),
+				label:     menu.asset.TranslateString("CfgInventory"),
+				gameEvent: d2enum.ToggleInventoryPanel,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgParty"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.TogglePartyPanel),
+				label:     menu.asset.TranslateString("CfgParty"),
+				gameEvent: d2enum.TogglePartyPanel,
 			},
 			{
-				label:   menu.asset.TranslateString("Cfghireling"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ToggleHirelingPanel),
+				label:     menu.asset.TranslateString("Cfghireling"),
+				gameEvent: d2enum.ToggleHirelingPanel,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgMessageLog"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ToggleMessageLog),
+				label:     menu.asset.TranslateString("CfgMessageLog"),
+				gameEvent: d2enum.ToggleMessageLog,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgQuestLog"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ToggleQuestLog),
+				label:     menu.asset.TranslateString("CfgQuestLog"),
+				gameEvent: d2enum.ToggleQuestLog,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgHelp"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ToggleHelpScreen),
-			},
-		},
-		{
-			{
-				label:   menu.asset.TranslateString("CfgSkillTree"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ToggleSkillTreePanel),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkillPick"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ToggleLeftSkillSelector),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill1"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill1),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill2"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill2),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill3"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill3),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill4"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill4),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill5"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill5),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill6"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill6),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill7"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill7),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill8"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill8),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill9"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill9),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill10"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill10),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill11"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill11),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill12"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill12),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill13"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill13),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill14"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill14),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill15"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill15),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSkill16"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseSkill16),
-			},
-			{
-				label:   menu.asset.TranslateString("Cfgskillup"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.SelectPreviousSkill),
-			},
-			{
-				label:   menu.asset.TranslateString("Cfgskilldown"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.SelectNextSkill),
+				label:     menu.asset.TranslateString("CfgHelp"),
+				gameEvent: d2enum.ToggleHelpScreen,
 			},
 		},
 		{
 			{
-				label:   menu.asset.TranslateString("CfgBeltShow"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ToggleBelts),
+				label:     menu.asset.TranslateString("CfgSkillTree"),
+				gameEvent: d2enum.ToggleSkillTreePanel,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgBelt1"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseBeltSlot1),
+				label:     menu.asset.TranslateString("CfgSkillPick"),
+				gameEvent: d2enum.ToggleLeftSkillSelector,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgBelt2"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseBeltSlot2),
+				label:     menu.asset.TranslateString("CfgSkill1"),
+				gameEvent: d2enum.UseSkill1,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgBelt3"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseBeltSlot3),
+				label:     menu.asset.TranslateString("CfgSkill2"),
+				gameEvent: d2enum.UseSkill2,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgBelt4"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.UseBeltSlot4),
+				label:     menu.asset.TranslateString("CfgSkill3"),
+				gameEvent: d2enum.UseSkill3,
 			},
 			{
-				label:   menu.asset.TranslateString("Cfgswapweapons"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.SwapWeapons),
-			},
-		},
-		{
-			{
-				label:   menu.asset.TranslateString("Cfgchat"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ToggleChatBox),
+				label:     menu.asset.TranslateString("CfgSkill4"),
+				gameEvent: d2enum.UseSkill4,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgRun"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.HoldRun),
+				label:     menu.asset.TranslateString("CfgSkill5"),
+				gameEvent: d2enum.UseSkill5,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgRunLock"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ToggleRunWalk),
+				label:     menu.asset.TranslateString("CfgSkill6"),
+				gameEvent: d2enum.UseSkill6,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgStandStill"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.HoldStandStill),
+				label:     menu.asset.TranslateString("CfgSkill7"),
+				gameEvent: d2enum.UseSkill7,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgShowItems"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.HoldShowGroundItems),
+				label:     menu.asset.TranslateString("CfgSkill8"),
+				gameEvent: d2enum.UseSkill8,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgTogglePortraits"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.HoldShowPortraits),
-			},
-		},
-		{
-			{
-				label:   menu.asset.TranslateString("CfgAutoMap"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ToggleAutomap),
+				label:     menu.asset.TranslateString("CfgSkill9"),
+				gameEvent: d2enum.UseSkill9,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgAutoMapCenter"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.CenterAutomap),
+				label:     menu.asset.TranslateString("CfgSkill10"),
+				gameEvent: d2enum.UseSkill10,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgAutoMapParty"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.TogglePartyOnAutomap),
+				label:     menu.asset.TranslateString("CfgSkill11"),
+				gameEvent: d2enum.UseSkill11,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgAutoMapNames"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ToggleNamesOnAutomap),
+				label:     menu.asset.TranslateString("CfgSkill12"),
+				gameEvent: d2enum.UseSkill12,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgToggleminimap"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ToggleMiniMap),
-			},
-		},
-		{
-			{
-				label:   menu.asset.TranslateString("CfgSay0"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.SayHelp),
+				label:     menu.asset.TranslateString("CfgSkill13"),
+				gameEvent: d2enum.UseSkill13,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgSay1"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.SayFollowMe),
+				label:     menu.asset.TranslateString("CfgSkill14"),
+				gameEvent: d2enum.UseSkill14,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgSay2"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.SayThisIsForYou),
+				label:     menu.asset.TranslateString("CfgSkill15"),
+				gameEvent: d2enum.UseSkill15,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgSay3"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.SayThanks),
+				label:     menu.asset.TranslateString("CfgSkill16"),
+				gameEvent: d2enum.UseSkill16,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgSay4"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.SaySorry),
+				label:     menu.asset.TranslateString("Cfgskillup"),
+				gameEvent: d2enum.SelectPreviousSkill,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgSay5"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.SayBye),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSay6"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.SayNowYouDie),
-			},
-			{
-				label:   menu.asset.TranslateString("CfgSay7"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.SayNowYouDie),
+				label:     menu.asset.TranslateString("Cfgskilldown"),
+				gameEvent: d2enum.SelectNextSkill,
 			},
 		},
 		{
 			{
-				label:   menu.asset.TranslateString("CfgSnapshot"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.TakeScreenShot),
+				label:     menu.asset.TranslateString("CfgBeltShow"),
+				gameEvent: d2enum.ToggleBelts,
 			},
 			{
-				label:   menu.asset.TranslateString("CfgClearScreen"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ClearScreen),
+				label:     menu.asset.TranslateString("CfgBelt1"),
+				gameEvent: d2enum.UseBeltSlot1,
 			},
 			{
-				label:   menu.asset.TranslateString("Cfgcleartextmsg"),
-				binding: menu.keyMap.GetKeysForGameEvent(d2enum.ClearMessages),
+				label:     menu.asset.TranslateString("CfgBelt2"),
+				gameEvent: d2enum.UseBeltSlot2,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgBelt3"),
+				gameEvent: d2enum.UseBeltSlot3,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgBelt4"),
+				gameEvent: d2enum.UseBeltSlot4,
+			},
+			{
+				label:     menu.asset.TranslateString("Cfgswapweapons"),
+				gameEvent: d2enum.SwapWeapons,
+			},
+		},
+		{
+			{
+				label:     menu.asset.TranslateString("Cfgchat"),
+				gameEvent: d2enum.ToggleChatBox,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgRun"),
+				gameEvent: d2enum.HoldRun,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgRunLock"),
+				gameEvent: d2enum.ToggleRunWalk,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgStandStill"),
+				gameEvent: d2enum.HoldStandStill,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgShowItems"),
+				gameEvent: d2enum.HoldShowGroundItems,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgTogglePortraits"),
+				gameEvent: d2enum.HoldShowPortraits,
+			},
+		},
+		{
+			{
+				label:     menu.asset.TranslateString("CfgAutoMap"),
+				gameEvent: d2enum.ToggleAutomap,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgAutoMapCenter"),
+				gameEvent: d2enum.CenterAutomap,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgAutoMapParty"),
+				gameEvent: d2enum.TogglePartyOnAutomap,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgAutoMapNames"),
+				gameEvent: d2enum.ToggleNamesOnAutomap,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgToggleminimap"),
+				gameEvent: d2enum.ToggleMiniMap,
+			},
+		},
+		{
+			{
+				label:     menu.asset.TranslateString("CfgSay0"),
+				gameEvent: d2enum.SayHelp,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgSay1"),
+				gameEvent: d2enum.SayFollowMe,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgSay2"),
+				gameEvent: d2enum.SayThisIsForYou,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgSay3"),
+				gameEvent: d2enum.SayThanks,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgSay4"),
+				gameEvent: d2enum.SaySorry,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgSay5"),
+				gameEvent: d2enum.SayBye,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgSay6"),
+				gameEvent: d2enum.SayNowYouDie,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgSay7"),
+				gameEvent: d2enum.SayNowYouDie,
+			},
+		},
+		{
+			{
+				label:     menu.asset.TranslateString("CfgSnapshot"),
+				gameEvent: d2enum.TakeScreenShot,
+			},
+			{
+				label:     menu.asset.TranslateString("CfgClearScreen"),
+				gameEvent: d2enum.ClearScreen,
+			},
+			{
+				label:     menu.asset.TranslateString("Cfgcleartextmsg"),
+				gameEvent: d2enum.ClearMessages,
 			},
 		},
 	}
@@ -399,7 +400,7 @@ func (menu *KeyBindingMenu) generateLayout() *d2gui.Layout {
 			bl.wrapperLayout = settingLayout
 			bl.descLabel = descLabel
 			bl.descLayout = descLabelWrapper
-			if binding := setting.binding; binding != nil {
+			if binding := menu.keyMap.GetKeysForGameEvent(setting.gameEvent); binding != nil {
 				primaryStr := KeyToString(binding.Primary, menu.asset)
 				secondaryStr := KeyToString(binding.Secondary, menu.asset)
 				primaryCol := menu.getKeyColor(binding.Primary)
@@ -417,6 +418,7 @@ func (menu *KeyBindingMenu) generateLayout() *d2gui.Layout {
 
 				bl.primaryLabel = primaryLabel
 				bl.primaryLayout = primaryKeyLabelWrapper
+				bl.gameEvent = setting.gameEvent
 
 				secondaryKeyLabelWrapper := settingLayout.AddLayout(d2gui.PositionTypeAbsolute)
 				secondaryKeyLabelWrapper.SetSize(90, 0)
@@ -493,57 +495,132 @@ func (menu *KeyBindingMenu) OnMouseButtonUp(event d2interface.MouseEvent) {
 	}
 }
 
-func (menu *KeyBindingMenu) OnKeyDown(event d2interface.KeyEvent) {
-	if menu.isAwaitingKeyDown {
-		key := event.Key()
-		if key != d2enum.KeyEscape {
-			var (
-				overwrittenBinding *KeyBinding
-				bindingType        KeyBindingType = -1
-			)
+func (menu *KeyBindingMenu) saveKeyChange(key d2enum.Key) {
+	var (
+		existingBinding *KeyBinding
+		gameEvent       d2enum.GameEvent
+		bindingType     KeyBindingType
 
-			switch menu.currentBindingModifierType {
-			case awaitingKeyDownTypePrimary:
-				overwrittenBinding, bindingType = menu.keyMap.SetPrimaryBinding(menu.currentBindingModifier, key)
-				menu.currentBindingLayout.primaryLabel.SetText(KeyToString(key, menu.asset))
-				menu.currentBindingLayout.primaryLabel.SetColor(d2util.Color(0xA1925DFF))
-				break
-			case awaitingKeyDownTypeSecondary:
-				overwrittenBinding, bindingType = menu.keyMap.SetSecondaryBinding(menu.currentBindingModifier, key)
-				menu.currentBindingLayout.secondaryLabel.SetText(KeyToString(key, menu.asset))
-				menu.currentBindingLayout.secondaryLabel.SetColor(d2util.Color(0xA1925DFF))
-				break
+		changeExisting *bindingChange
+	)
+
+	for ge, existingChange := range menu.changesToBeSaved {
+		if existingChange.primary == key {
+			existingBinding = existingChange.target
+			gameEvent = ge
+			bindingType = KeyBindingTypePrimary
+			changeExisting = existingChange
+			break
+		}
+
+		if existingChange.secondary == key {
+			existingBinding = existingChange.target
+			gameEvent = ge
+			bindingType = KeyBindingTypeSecondary
+			changeExisting = existingChange
+			break
+		}
+	}
+	if existingBinding == nil {
+		existingBinding, gameEvent, bindingType = menu.keyMap.GetBindingByKey(key)
+	}
+
+	if changeExisting == nil {
+		changeExisting = menu.changesToBeSaved[gameEvent]
+		if existingBinding != nil && changeExisting == nil {
+			changeExisting = &bindingChange{
+				target:    existingBinding,
+				primary:   existingBinding.Primary,
+				secondary: existingBinding.Secondary,
 			}
 
-			if overwrittenBinding != nil {
-				for _, bindingLayout := range menu.bindingLayouts {
-					if bindingLayout.binding == overwrittenBinding {
-						noneStr := KeyToString(-1, menu.asset)
+			menu.changesToBeSaved[gameEvent] = changeExisting
+		}
+	}
 
-						switch bindingType {
-						case KeyBindingTypePrimary:
-							bindingLayout.primaryLabel.SetText(noneStr)
-							bindingLayout.primaryLabel.SetColor(d2util.Color(0x555555FF))
-							break
-						case KeyBindingTypeSecondary:
-							bindingLayout.secondaryLabel.SetText(noneStr)
-							bindingLayout.secondaryLabel.SetColor(d2util.Color(0x555555FF))
-							break
-						}
+	changeCurrent := menu.changesToBeSaved[menu.currentBindingLayout.gameEvent]
+	if changeCurrent == nil {
+		changeCurrent = &bindingChange{
+			target:    menu.currentBindingLayout.binding,
+			primary:   menu.currentBindingLayout.binding.Primary,
+			secondary: menu.currentBindingLayout.binding.Secondary,
+		}
 
-						if bindingLayout.binding.IsEmpty() {
-							bindingLayout.primaryLabel.SetColor(d2util.Color(0xDB3F3DFF))
-							bindingLayout.secondaryLabel.SetColor(d2util.Color(0xDB3F3DFF))
-						}
-					}
+		menu.changesToBeSaved[menu.currentBindingLayout.gameEvent] = changeCurrent
+	}
+
+	switch menu.currentBindingModifierType {
+	case KeyBindingTypePrimary:
+		changeCurrent.primary = key
+		menu.currentBindingLayout.primaryLabel.SetText(KeyToString(key, menu.asset))
+		menu.currentBindingLayout.primaryLabel.SetColor(d2util.Color(0xA1925DFF))
+		break
+	case KeyBindingTypeSecondary:
+		changeCurrent.secondary = key
+		menu.currentBindingLayout.secondaryLabel.SetText(KeyToString(key, menu.asset))
+		menu.currentBindingLayout.secondaryLabel.SetColor(d2util.Color(0xA1925DFF))
+		break
+	}
+
+	if changeExisting != nil {
+		if bindingType == KeyBindingTypePrimary {
+			changeExisting.primary = -1
+		}
+
+		if bindingType == KeyBindingTypeSecondary {
+			changeExisting.secondary = -1
+		}
+	}
+
+	noneStr := KeyToString(-1, menu.asset)
+	if changeCurrent.primary == -1 {
+		menu.currentBindingLayout.primaryLabel.SetText(noneStr)
+		menu.currentBindingLayout.primaryLabel.SetColor(d2util.Color(0x555555FF))
+	}
+
+	if changeCurrent.secondary == -1 {
+		menu.currentBindingLayout.secondaryLabel.SetText(noneStr)
+		menu.currentBindingLayout.secondaryLabel.SetColor(d2util.Color(0x555555FF))
+	}
+
+	if changeExisting != nil {
+		for _, bindingLayout := range menu.bindingLayouts {
+			if bindingLayout.binding == changeExisting.target {
+
+				if changeExisting.primary == -1 {
+					bindingLayout.primaryLabel.SetText(noneStr)
+					bindingLayout.primaryLabel.SetColor(d2util.Color(0x555555FF))
+				}
+
+				if changeExisting.secondary == -1 {
+					bindingLayout.secondaryLabel.SetText(noneStr)
+					bindingLayout.secondaryLabel.SetColor(d2util.Color(0x555555FF))
+				}
+
+				if changeExisting.target != menu.currentBindingLayout.binding && changeExisting.primary == -1 && changeExisting.secondary == -1 {
+					bindingLayout.primaryLabel.SetColor(d2util.Color(0xDB3F3DFF))
+					bindingLayout.secondaryLabel.SetColor(d2util.Color(0xDB3F3DFF))
 				}
 			}
 		}
+	}
+}
+
+func (menu *KeyBindingMenu) OnKeyDown(event d2interface.KeyEvent) {
+	if menu.isAwaitingKeyDown {
+		key := event.Key()
+
+		if key == d2enum.KeyEscape {
+			if menu.currentBindingLayout != nil {
+				menu.lastBindingLayout = menu.currentBindingLayout
+				menu.currentBindingLayout.Reset()
+				menu.currentBindingLayout = nil
+			}
+		} else {
+			menu.saveKeyChange(key)
+		}
 
 		menu.isAwaitingKeyDown = false
-		menu.lastBindingLayout = menu.currentBindingLayout
-		menu.currentBindingLayout.Reset()
-		menu.currentBindingLayout = nil
 	}
 }
 

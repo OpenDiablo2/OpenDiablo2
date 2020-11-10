@@ -115,6 +115,23 @@ func (km *KeyMap) GetKeysForGameEvent(gameEvent d2enum.GameEvent) *KeyBinding {
 	return km.controls[gameEvent]
 }
 
+// GetBindingByKey returns the bindings for a givent game event
+func (km *KeyMap) GetBindingByKey(key d2enum.Key) (*KeyBinding, d2enum.GameEvent, KeyBindingType) {
+	km.mutex.RLock()
+	defer km.mutex.RUnlock()
+
+	for gameEvent, binding := range km.controls {
+		if binding.Primary == key {
+			return binding, gameEvent, KeyBindingTypePrimary
+		}
+		if binding.Secondary == key {
+			return binding, gameEvent, KeyBindingTypeSecondary
+		}
+	}
+
+	return nil, -1, -1
+}
+
 // KeyBinding holds the primary and secondary keys assigned to a GameEvent
 type KeyBinding struct {
 	Primary   d2enum.Key
