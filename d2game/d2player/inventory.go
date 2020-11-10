@@ -196,7 +196,7 @@ func (g *Inventory) renderFrame(target d2interface.Surface) error {
 		w, h := g.panel.GetCurrentFrameSize()
 
 		g.panel.SetPosition(x, y+h)
-		g.panel.Render(target)
+		g.panel.RenderNoError(target)
 
 		switch frame {
 		case frameInventoryTopLeft:
@@ -242,5 +242,8 @@ func (g *Inventory) renderItemDescription(target d2interface.Surface, i Inventor
 	g.itemTooltip.SetTextLines(lines)
 	_, y := g.grid.SlotToScreen(i.InventoryGridSlot())
 	g.itemTooltip.SetPosition(g.hoverX, y)
-	g.itemTooltip.Render(target)
+
+	if err := g.itemTooltip.Render(target); err != nil {
+		log.Printf("Cannot render tooltip, %e", err)
+	}
 }

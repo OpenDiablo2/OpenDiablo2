@@ -15,11 +15,12 @@ const (
 	scrollbarWidth         = 10
 )
 
+// static check that Scrollbar implements widget
+var _ Widget = &Scrollbar{}
+
 // Scrollbar is a vertical slider ui element
 type Scrollbar struct {
-	manager         *UIManager
-	x, y, height    int
-	visible         bool
+	*BaseWidget
 	enabled         bool
 	currentOffset   int
 	maxOffset       int
@@ -36,12 +37,13 @@ func (ui *UIManager) NewScrollbar(x, y, height int) *Scrollbar {
 		return nil
 	}
 
+	base := NewBaseWidget(ui)
+	base.SetPosition(x, y)
+	base.height = height
+
 	result := &Scrollbar{
-		visible:         true,
+		BaseWidget:      base,
 		enabled:         true,
-		x:               x,
-		y:               y,
-		height:          height,
 		scrollbarSprite: scrollbarSprite,
 	}
 
@@ -146,11 +148,6 @@ func (v *Scrollbar) Render(target d2interface.Surface) error {
 	return nil
 }
 
-// bindManager binds the scrollbar to the UI manager
-func (v *Scrollbar) bindManager(manager *UIManager) {
-	v.manager = manager
-}
-
 // Advance advances the scrollbar sprite
 func (v *Scrollbar) Advance(elapsed float64) error {
 	return v.scrollbarSprite.Advance(elapsed)
@@ -159,27 +156,6 @@ func (v *Scrollbar) Advance(elapsed float64) error {
 // GetSize returns the scrollbar width and height
 func (v *Scrollbar) GetSize() (width, height int) {
 	return scrollbarWidth, v.height
-}
-
-// SetPosition sets the scrollbar x,y position
-func (v *Scrollbar) SetPosition(x, y int) {
-	v.x = x
-	v.y = y
-}
-
-// GetPosition returns the scrollbar x,y position
-func (v *Scrollbar) GetPosition() (x, y int) {
-	return v.x, v.y
-}
-
-// GetVisible returns whether or not the scrollbar is visible
-func (v *Scrollbar) GetVisible() bool {
-	return v.visible
-}
-
-// SetVisible sets the scrollbar visibility state
-func (v *Scrollbar) SetVisible(visible bool) {
-	v.visible = visible
 }
 
 // SetMaxOffset sets the maximum offset of the scrollbar

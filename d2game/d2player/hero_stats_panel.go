@@ -242,7 +242,7 @@ func (s *HeroStatsPanel) renderStaticPanelFrames(target d2interface.Surface) err
 			s.panel.SetPosition(currentX-w, currentY+h)
 		}
 
-		s.panel.Render(target)
+		s.panel.RenderNoError(target)
 	}
 
 	return nil
@@ -295,7 +295,7 @@ func (s *HeroStatsPanel) renderStaticLabels(target d2interface.Surface) {
 			cfg.centerAlign,
 		})
 
-		label.Render(target)
+		label.RenderNoError(target)
 	}
 }
 
@@ -348,7 +348,7 @@ func (s *HeroStatsPanel) renderStatValues(target d2interface.Surface) {
 func (s *HeroStatsPanel) renderStatValueNum(label *d2ui.Label, value int,
 	target d2interface.Surface) {
 	label.SetText(strconv.Itoa(value))
-	label.Render(target)
+	label.RenderNoError(target)
 }
 
 func (s *HeroStatsPanel) createStatValueLabel(stat, x, y int) *d2ui.Label {

@@ -373,7 +373,7 @@ func (v *CharacterSelect) Render(screen d2interface.Surface) {
 		return
 	}
 
-	v.d2HeroTitle.Render(screen)
+	v.d2HeroTitle.RenderNoError(screen)
 	actualSelectionIndex := v.selectedCharacter - (v.charScrollbar.GetCurrentOffset() * 2)
 
 	if v.selectedCharacter > -1 && actualSelectionIndex >= 0 && actualSelectionIndex < 8 {
@@ -388,12 +388,13 @@ func (v *CharacterSelect) Render(screen d2interface.Surface) {
 			continue
 		}
 
-		v.characterNameLabel[i].Render(screen)
-		v.characterStatsLabel[i].Render(screen)
-		v.characterExpLabel[i].Render(screen)
+		v.characterNameLabel[i].RenderNoError(screen)
+		v.characterStatsLabel[i].RenderNoError(screen)
+		v.characterExpLabel[i].RenderNoError(screen)
 
-		charImgX := v.characterNameLabel[i].X - selectionBoxImageOffsetX
-		charImgY := v.characterNameLabel[i].Y + selectionBoxImageOffsetY
+		x, y := v.characterNameLabel[i].GetPosition()
+		charImgX := x - selectionBoxImageOffsetX
+		charImgY := y + selectionBoxImageOffsetY
 		screen.PushTranslation(charImgX, charImgY)
 		v.characterImage[i].Render(screen)
 		screen.Pop()
@@ -406,7 +407,7 @@ func (v *CharacterSelect) Render(screen d2interface.Surface) {
 			return
 		}
 
-		v.deleteCharConfirmLabel.Render(screen)
+		v.deleteCharConfirmLabel.RenderNoError(screen)
 	}
 }
 

@@ -2,6 +2,7 @@ package d2ui
 
 import (
 	"log"
+	"sort"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
@@ -12,16 +13,18 @@ import (
 
 // UIManager manages a collection of UI elements (buttons, textboxes, labels)
 type UIManager struct {
-	asset         *d2asset.AssetManager
-	renderer      d2interface.Renderer
-	inputManager  d2interface.InputManager
-	audio         d2interface.AudioProvider
-	widgets       []Widget
-	cursorButtons CursorButton
-	CursorX       int
-	CursorY       int
-	pressedWidget Widget
-	clickSfx      d2interface.SoundEffect
+	asset            *d2asset.AssetManager
+	renderer         d2interface.Renderer
+	inputManager     d2interface.InputManager
+	audio            d2interface.AudioProvider
+	widgets          []Widget
+	widgetsGroups    []*WidgetGroup
+	clickableWidgets []ClickableWidget
+	cursorButtons    CursorButton
+	CursorX          int
+	CursorY          int
+	pressedWidget    ClickableWidget
+	clickSfx         d2interface.SoundEffect
 }
 
 // Note: methods for creating buttons and stuff are in their respective files
@@ -44,7 +47,16 @@ func (ui *UIManager) Initialize() {
 // Reset resets the state of the UI manager. Typically called for new screens
 func (ui *UIManager) Reset() {
 	ui.widgets = nil
+	ui.clickableWidgets = nil
 	ui.pressedWidget = nil
+}
+
+// addWidgetGroup adds a widgetGroup to the UI manager and sorts by priority
+func (ui *UIManager) addWidgetGroup(group *WidgetGroup) {
+	ui.widgetsGroups = append(ui.widgetsGroups, group)
+	sort.SliceStable(ui.widgetsGroups, func(i, j int) bool {
+		return ui.widgetsGroups[i].priority < ui.widgetsGroups[j].priority
+	})
 }
 
 // addWidget adds a widget to the UI manager
@@ -54,8 +66,12 @@ func (ui *UIManager) addWidget(widget Widget) {
 		log.Print(err)
 	}
 
-	ui.widgets = append(ui.widgets, widget)
+	clickable, ok := widget.(ClickableWidget)
+	if ok {
+		ui.clickableWidgets = append(ui.clickableWidgets, clickable)
+	}
 
+	ui.widgets = append(ui.widgets, widget)
 	widget.bindManager(ui)
 }
 
@@ -67,13 +83,12 @@ func (ui *UIManager) OnMouseButtonUp(event d2interface.MouseEvent) bool {
 		// activate previously pressed widget if cursor is still hovering
 		w := ui.pressedWidget
 
-		if w != nil && ui.contains(w, ui.CursorX, ui.CursorY) && w.GetVisible() && w.
-			GetEnabled() {
+		if w != nil && ui.contains(w, ui.CursorX, ui.CursorY) && w.GetVisible() && w.GetEnabled() {
 			w.Activate()
 		}
 
 		// unpress all widgets that are pressed
-		for _, w := range ui.widgets {
+		for _, w := range ui.clickableWidgets {
 			w.SetPressed(false)
 		}
 	}
@@ -87,7 +102,7 @@ func (ui *UIManager) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	if event.Button() == d2enum.MouseButtonLeft {
 		// find and press a widget on screen
 		ui.pressedWidget = nil
-		for _, w := range ui.widgets {
+		for _, w := range ui.clickableWidgets {
 			if ui.contains(w, ui.CursorX, ui.CursorY) && w.GetVisible() && w.GetEnabled() {
 				w.SetPressed(true)
 				ui.pressedWidget = w
@@ -110,6 +125,15 @@ func (ui *UIManager) Render(target d2interface.Surface) {
 	for _, widget := range ui.widgets {
 		if widget.GetVisible() {
 			err := widget.Render(target)
+			if err != nil {
+				log.Print(err)
+			}
+		}
+	}
+
+	for _, widgetGroup := range ui.widgetsGroups {
+		if widgetGroup.GetVisible() {
+			err := widgetGroup.Render(target)
 			if err != nil {
 				log.Print(err)
 			}

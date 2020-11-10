@@ -11,10 +11,12 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
+// static check that Sprite implements Widget
+var _ Widget = &Sprite{}
+
 // Sprite is a positioned visual object.
 type Sprite struct {
-	x         int
-	y         int
+	*BaseWidget
 	animation d2interface.Animation
 }
 
@@ -31,11 +33,21 @@ func (ui *UIManager) NewSprite(animationPath, palettePath string) (*Sprite, erro
 
 	animation.BindRenderer(ui.renderer)
 
-	return &Sprite{animation: animation}, nil
+	base := NewBaseWidget(ui)
+
+	return &Sprite{
+		BaseWidget: base,
+		animation:  animation}, nil
 }
 
 // Render renders the sprite on the given surface
-func (s *Sprite) Render(target d2interface.Surface) {
+func (s *Sprite) Render(target d2interface.Surface) error {
+	s.RenderNoError(target)
+	return nil
+}
+
+// RenderNoError renders the sprite on the given surface
+func (s *Sprite) RenderNoError(target d2interface.Surface) {
 	_, frameHeight := s.animation.GetCurrentFrameSize()
 
 	target.PushTranslation(s.x, s.y-frameHeight)
@@ -80,15 +92,9 @@ func (s *Sprite) RenderSegmented(target d2interface.Surface, segmentsX, segments
 	return nil
 }
 
-// SetPosition places the sprite in 2D
-func (s *Sprite) SetPosition(x, y int) {
-	s.x = x
-	s.y = y
-}
-
-// GetPosition retrieves the 2D position of the sprite
-func (s *Sprite) GetPosition() (x, y int) {
-	return s.x, s.y
+// GetSize returns the size of the current frame
+func (s *Sprite) GetSize() (width, height int) {
+	return s.GetCurrentFrameSize()
 }
 
 // GetFrameSize gets the Size(width, height) of a indexed frame.

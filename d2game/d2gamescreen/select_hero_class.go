@@ -515,13 +515,13 @@ func (v *SelectHeroClass) Render(screen d2interface.Surface) {
 		return
 	}
 
-	v.headingLabel.Render(screen)
+	v.headingLabel.RenderNoError(screen)
 
 	if v.selectedHero != d2enum.HeroNone {
-		v.heroClassLabel.Render(screen)
-		v.heroDesc1Label.Render(screen)
-		v.heroDesc2Label.Render(screen)
-		v.heroDesc3Label.Render(screen)
+		v.heroClassLabel.RenderNoError(screen)
+		v.heroDesc1Label.RenderNoError(screen)
+		v.heroDesc2Label.RenderNoError(screen)
+		v.heroDesc3Label.RenderNoError(screen)
 	}
 
 	for heroClass, heroInfo := range v.heroRenderInfo {
@@ -536,12 +536,12 @@ func (v *SelectHeroClass) Render(screen d2interface.Surface) {
 		}
 	}
 
-	v.campfire.Render(screen)
+	v.campfire.RenderNoError(screen)
 
 	if v.heroNameTextbox.GetVisible() {
-		v.heroNameLabel.Render(screen)
-		v.expansionCharLabel.Render(screen)
-		v.hardcoreCharLabel.Render(screen)
+		v.heroNameLabel.RenderNoError(screen)
+		v.expansionCharLabel.RenderNoError(screen)
+		v.hardcoreCharLabel.RenderNoError(screen)
 	}
 }
 
@@ -739,7 +739,7 @@ func setSpriteToFirstFrame(sprite *d2ui.Sprite) {
 
 func drawSprite(sprite *d2ui.Sprite, target d2interface.Surface) {
 	if sprite != nil {
-		sprite.Render(target)
+		sprite.RenderNoError(target)
 	}
 }
 

@@ -10,17 +10,17 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 )
 
+// static check that TextBox implements widget
+var _ Widget = &TextBox{}
+
 // TextBox represents a text input box
 type TextBox struct {
-	manager   *UIManager
+	*BaseWidget
 	textLabel *Label
 	lineBar   *Label
 	text      string
 	filter    string
-	x         int
-	y         int
 	bgSprite  *Sprite
-	visible   bool
 	enabled   bool
 	isFocused bool
 }
@@ -33,13 +33,15 @@ func (ui *UIManager) NewTextbox() *TextBox {
 		return nil
 	}
 
+	base := NewBaseWidget(ui)
+
 	tb := &TextBox{
-		filter:    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-		bgSprite:  bgSprite,
-		textLabel: ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
-		lineBar:   ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
-		enabled:   true,
-		visible:   true,
+		BaseWidget: base,
+		filter:     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+		bgSprite:   bgSprite,
+		textLabel:  ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
+		lineBar:    ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
+		enabled:    true,
 	}
 	tb.lineBar.SetText("_")
 
@@ -59,19 +61,14 @@ func (v *TextBox) Render(target d2interface.Surface) error {
 		return nil
 	}
 
-	v.bgSprite.Render(target)
-	v.textLabel.Render(target)
+	v.bgSprite.RenderNoError(target)
+	v.textLabel.RenderNoError(target)
 
 	if (time.Now().UnixNano()/1e6)&(1<<8) > 0 {
-		v.lineBar.Render(target)
+		v.lineBar.RenderNoError(target)
 	}
 
 	return nil
-}
-
-// bindManager binds the textbox to the UI manager
-func (v *TextBox) bindManager(manager *UIManager) {
-	v.manager = manager
 }
 
 // OnKeyChars handles key character events
@@ -187,21 +184,6 @@ func (v *TextBox) SetPosition(x, y int) {
 	v.textLabel.SetPosition(v.x+6, v.y+3)
 	v.lineBar.SetPosition(v.x+6+lw, v.y+3)
 	v.bgSprite.SetPosition(v.x, v.y+26)
-}
-
-// GetPosition returns the position of the text box
-func (v *TextBox) GetPosition() (x, y int) {
-	return v.x, v.y
-}
-
-// GetVisible returns the visibility of the text box
-func (v *TextBox) GetVisible() bool {
-	return v.visible
-}
-
-// SetVisible sets the visibility of the text box
-func (v *TextBox) SetVisible(visible bool) {
-	v.visible = visible
 }
 
 // GetEnabled returns the enabled state of the text box
