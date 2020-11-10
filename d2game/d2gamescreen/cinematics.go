@@ -1,7 +1,6 @@
 package d2gamescreen
 
 import (
-	//"fmt"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2video"
@@ -44,7 +43,6 @@ type Cinematics struct {
 	navigator     d2interface.Navigator
 	uiManager     *d2ui.UIManager
 	videoDecoder  *d2video.BinkDecoder
-	inputManager  d2interface.InputManager
 	audioProvider d2interface.AudioProvider
 }
 
@@ -70,7 +68,6 @@ func CreateCinematics(
 func (v *Cinematics) OnLoad(loading d2screen.LoadingState) {
 	var err error
 
-	//	v.audioProvider.SetVolumes(1, 1)
 	v.audioProvider.PlayBGM("")
 
 	v.cinematicsBackground, err = v.uiManager.NewSprite(d2resource.CinematicsBackground, d2resource.PaletteSky)
@@ -187,6 +184,6 @@ func (v *Cinematics) Render(screen d2interface.Surface) {
 	if err != nil {
 		return
 	}
-	v.cinematicsLabel.Render(screen)
 
+	v.cinematicsLabel.Render(screen)
 }
