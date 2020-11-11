@@ -13,9 +13,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 )
 
-// static check that UIFrame implements Widget
-var _ Widget = &Label{}
-
 // Label represents a user interface label
 type Label struct {
 	*BaseWidget
@@ -48,13 +45,8 @@ func (ui *UIManager) NewLabel(fontPath, palettePath string) *Label {
 	return result
 }
 
-// Render draws the label on the screen
+// Render draws the label on the screen, respliting the lines to allow for other alignments.
 func (v *Label) Render(target d2interface.Surface) {
-	v.RenderNoError(target)
-}
-
-// RenderNoError draws the label on the screen, respliting the lines to allow for other alignments.
-func (v *Label) RenderNoError(target d2interface.Surface) {
 	target.PushTranslation(v.GetPosition())
 
 	lines := strings.Split(v.text, "\n")

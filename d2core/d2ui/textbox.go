@@ -61,11 +61,11 @@ func (v *TextBox) Render(target d2interface.Surface) {
 		return
 	}
 
-	v.bgSprite.RenderNoError(target)
-	v.textLabel.RenderNoError(target)
+	v.bgSprite.Render(target)
+	v.textLabel.Render(target)
 
 	if (time.Now().UnixNano()/1e6)&(1<<8) > 0 {
-		v.lineBar.RenderNoError(target)
+		v.lineBar.Render(target)
 	}
 }
 

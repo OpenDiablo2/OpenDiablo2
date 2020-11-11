@@ -512,13 +512,13 @@ func (v *SelectHeroClass) onOkButtonClicked() {
 // Render renders the Select Hero Class screen
 func (v *SelectHeroClass) Render(screen d2interface.Surface) {
 	v.bgImage.RenderSegmented(screen, 4, 3, 0)
-	v.headingLabel.RenderNoError(screen)
+	v.headingLabel.Render(screen)
 
 	if v.selectedHero != d2enum.HeroNone {
-		v.heroClassLabel.RenderNoError(screen)
-		v.heroDesc1Label.RenderNoError(screen)
-		v.heroDesc2Label.RenderNoError(screen)
-		v.heroDesc3Label.RenderNoError(screen)
+		v.heroClassLabel.Render(screen)
+		v.heroDesc1Label.Render(screen)
+		v.heroDesc2Label.Render(screen)
+		v.heroDesc3Label.Render(screen)
 	}
 
 	for heroClass, heroInfo := range v.heroRenderInfo {
@@ -536,9 +536,9 @@ func (v *SelectHeroClass) Render(screen d2interface.Surface) {
 	v.campfire.RenderNoError(screen)
 
 	if v.heroNameTextbox.GetVisible() {
-		v.heroNameLabel.RenderNoError(screen)
-		v.expansionCharLabel.RenderNoError(screen)
-		v.hardcoreCharLabel.RenderNoError(screen)
+		v.heroNameLabel.Render(screen)
+		v.expansionCharLabel.Render(screen)
+		v.hardcoreCharLabel.Render(screen)
 	}
 }
 

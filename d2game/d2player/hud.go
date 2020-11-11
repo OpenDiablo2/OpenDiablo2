@@ -754,7 +754,7 @@ func (h *HUD) renderForSelectableEntitiesHovered(target d2interface.Surface) {
 			xLabel, yLabel := entScreenX-xOff, entScreenY-yOff-entityHeight-hoverLabelOuterPad
 			h.nameLabel.SetPosition(xLabel, yLabel)
 
-			h.nameLabel.RenderNoError(target)
+			h.nameLabel.Render(target)
 			entity.Highlight()
 
 			break
@@ -776,7 +776,7 @@ func (h *HUD) Render(target d2interface.Surface) error {
 
 	if h.isZoneTextShown {
 		h.zoneChangeText.SetPosition(zoneChangeTextX, zoneChangeTextY)
-		h.zoneChangeText.RenderNoError(target)
+		h.zoneChangeText.Render(target)
 	}
 
 	h.renderHealthTooltip(target)
