@@ -85,18 +85,15 @@ type StatsPanelLabels struct {
 
 // HeroStatsPanel represents the hero status panel
 type HeroStatsPanel struct {
-	asset       *d2asset.AssetManager
-	uiManager   *d2ui.UIManager
-	frame       *d2ui.UIFrame
-	panel       *d2ui.Sprite
-	heroState   *d2hero.HeroStatsState
-	heroName    string
-	heroClass   d2enum.Hero
-	labels      *StatsPanelLabels
-	closeButton *d2ui.Button
-	onCloseCb   func()
-	panelGroup  *d2ui.WidgetGroup
-	staticPanel *d2ui.CustomWidget
+	asset      *d2asset.AssetManager
+	uiManager  *d2ui.UIManager
+	panel      *d2ui.Sprite
+	heroState  *d2hero.HeroStatsState
+	heroName   string
+	heroClass  d2enum.Hero
+	labels     *StatsPanelLabels
+	onCloseCb  func()
+	panelGroup *d2ui.WidgetGroup
 
 	originX int
 	originY int
@@ -127,25 +124,25 @@ func (s *HeroStatsPanel) Load() {
 
 	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
 
-	s.frame = d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameLeft)
-	s.panelGroup.AddWidget(s.frame)
+	frame := d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameLeft)
+	s.panelGroup.AddWidget(frame)
 
 	s.panel, err = s.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
 	}
 
-	fw, fh := s.frame.GetFrameBounds()
-	fc := s.frame.GetFrameCount()
+	fw, fh := frame.GetFrameBounds()
+	fc := frame.GetFrameCount()
 	w, h := fw*fc, fh*fc
-	s.staticPanel = s.uiManager.NewCustomWidgetCached(s.renderStaticMenu, w, h)
-	s.panelGroup.AddWidget(s.staticPanel)
+	staticPanel := s.uiManager.NewCustomWidgetCached(s.renderStaticMenu, w, h)
+	s.panelGroup.AddWidget(staticPanel)
 
-	s.closeButton = s.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
-	s.closeButton.SetVisible(false)
-	s.closeButton.SetPosition(heroStatsCloseButtonX, heroStatsCloseButtonY)
-	s.closeButton.OnActivated(func() { s.Close() })
-	s.panelGroup.AddWidget(s.closeButton)
+	closeButton := s.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
+	closeButton.SetVisible(false)
+	closeButton.SetPosition(heroStatsCloseButtonX, heroStatsCloseButtonY)
+	closeButton.OnActivated(func() { s.Close() })
+	s.panelGroup.AddWidget(closeButton)
 
 	s.initStatValueLabels()
 	s.panelGroup.SetVisible(false)
