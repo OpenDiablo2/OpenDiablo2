@@ -4,6 +4,7 @@ package d2gamescreen
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"runtime"
@@ -57,9 +58,10 @@ const (
 	multiplayerBtnX, multiplayerBtnY         = 264, 330
 	tcpNetBtnX, tcpNetBtnY                   = 264, 280
 	networkCancelBtnX, networkCancelBtnY     = 264, 540
-	tcpHostBtnX, tcpHostBtnY                 = 264, 280
-	tcpJoinBtnX, tcpJoinBtnY                 = 264, 320
+	tcpHostBtnX, tcpHostBtnY                 = 264, 200
+	tcpJoinBtnX, tcpJoinBtnY                 = 264, 240
 	errorLabelX, errorLabelY                 = 400, 250
+	machineIPX, machineIPY                   = 400, 90
 )
 
 const (
@@ -110,6 +112,7 @@ type MainMenu struct {
 	tcpIPOptionsLabel   *d2ui.Label
 	tcpJoinGameLabel    *d2ui.Label
 	errorLabel          *d2ui.Label
+	machineIP           *d2ui.Label
 	tcpJoinGameEntry    *d2ui.TextBox
 	screenMode          mainMenuScreenMode
 	leftButtonHeld      bool
@@ -124,6 +127,7 @@ type MainMenu struct {
 	heroState     *d2hero.HeroStateFactory
 
 	buildInfo BuildInfo
+	ip        string
 }
 
 // CreateMainMenu creates an instance of MainMenu
@@ -261,12 +265,15 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 
 	v.tcpJoinGameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.tcpJoinGameLabel.Alignment = d2gui.HorizontalAlignCenter
-
 	v.tcpJoinGameLabel.SetText("Enter Host IP Address\nto Join Game")
-
 	v.tcpJoinGameLabel.Color[0] = rgbaColor(gold)
-
 	v.tcpJoinGameLabel.SetPosition(joinGameX, joinGameY)
+
+	v.machineIP = v.uiManager.NewLabel(d2resource.Font24, d2resource.PaletteUnits)
+	v.machineIP.Alignment = d2gui.HorizontalAlignCenter
+	v.machineIP.SetText("Your IP adress is:\n" + v.getLocalIP())
+	v.machineIP.Color[0] = rgbaColor(gold)
+	v.machineIP.SetPosition(machineIPX, machineIPY)
 
 	if v.errorLabel != nil {
 		v.errorLabel.SetPosition(errorLabelX, errorLabelY)
@@ -473,8 +480,10 @@ func (v *MainMenu) renderLabels(screen d2interface.Surface) {
 	case ScreenModeServerIP:
 		v.tcpIPOptionsLabel.RenderNoError(screen)
 		v.tcpJoinGameLabel.RenderNoError(screen)
+		v.machineIP.RenderNoError(screen)
 	case ScreenModeTCPIP:
 		v.tcpIPOptionsLabel.RenderNoError(screen)
+		v.machineIP.RenderNoError(screen)
 	case ScreenModeTrademark:
 		v.copyrightLabel.RenderNoError(screen)
 		v.copyrightLabel2.RenderNoError(screen)
@@ -622,4 +631,18 @@ func (v *MainMenu) onBtnTCPIPCancelClicked() {
 
 func (v *MainMenu) onBtnTCPIPOkClicked() {
 	v.navigator.ToCharacterSelect(d2clientconnectiontype.LANClient, v.tcpJoinGameEntry.GetText())
+}
+
+// getLocalIP returns local machine IP adress
+func (v *MainMenu) getLocalIP() string {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+
+	if err != nil {
+		log.Printf(err.Error())
+		return "cannot reach network"
+	}
+
+	defer conn.Close()
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	return localAddr.IP.String()
 }
