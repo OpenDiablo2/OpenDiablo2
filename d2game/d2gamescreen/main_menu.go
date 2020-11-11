@@ -270,7 +270,7 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 
 	v.machineIP = v.uiManager.NewLabel(d2resource.Font24, d2resource.PaletteUnits)
 	v.machineIP.Alignment = d2gui.HorizontalAlignCenter
-	v.machineIP.SetText("Your IP adress is:\n" + v.getLocalIP())
+	v.machineIP.SetText("Your IP address is:\n" + v.getLocalIP())
 	v.machineIP.Color[0] = rgbaColor(lightYellow)
 	v.machineIP.SetPosition(machineIPX, machineIPY)
 
@@ -621,16 +621,24 @@ func (v *MainMenu) onBtnTCPIPOkClicked() {
 	v.navigator.ToCharacterSelect(d2clientconnectiontype.LANClient, v.tcpJoinGameEntry.GetText())
 }
 
-// getLocalIP returns local machine IP adress
+// getLocalIP returns local machine IP address
 func (v *MainMenu) getLocalIP() string {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 
 	if err != nil {
-		log.Printf(err.Error())
+		log.Println(err)
+
 		return "cannot reach network"
 	}
 
-	defer conn.Close()
+	err = conn.Close()
+	if err != nil {
+		log.Println(err)
+
+		return "unexpected error occurred while closing test connection"
+	}
+
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
 	return localAddr.IP.String()
 }
