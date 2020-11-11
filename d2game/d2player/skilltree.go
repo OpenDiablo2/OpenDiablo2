@@ -425,9 +425,6 @@ func (s *skillTree) renderTabCommon(target d2interface.Surface) {
 
 	skillPanel.SetPosition(x+w, y)
 	s.renderPanelSegment(target, frameCommonTabBottomRight)
-
-	// available skill points label
-	s.availSPLabel.Render(target)
 }
 
 func (s *skillTree) renderTab(target d2interface.Surface, tab int) {
