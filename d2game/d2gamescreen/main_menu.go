@@ -468,33 +468,33 @@ func (v *MainMenu) renderBackgrounds(screen d2interface.Surface) {
 func (v *MainMenu) renderLogos(screen d2interface.Surface) {
 	switch v.screenMode {
 	case ScreenModeTrademark, ScreenModeMainMenu, ScreenModeMultiplayer:
-		v.diabloLogoLeftBack.RenderNoError(screen)
-		v.diabloLogoRightBack.RenderNoError(screen)
-		v.diabloLogoLeft.RenderNoError(screen)
-		v.diabloLogoRight.RenderNoError(screen)
+		v.diabloLogoLeftBack.Render(screen)
+		v.diabloLogoRightBack.Render(screen)
+		v.diabloLogoLeft.Render(screen)
+		v.diabloLogoRight.Render(screen)
 	}
 }
 
 func (v *MainMenu) renderLabels(screen d2interface.Surface) {
 	switch v.screenMode {
 	case ScreenModeServerIP:
-		v.tcpIPOptionsLabel.RenderNoError(screen)
-		v.tcpJoinGameLabel.RenderNoError(screen)
-		v.machineIP.RenderNoError(screen)
+		v.tcpIPOptionsLabel.Render(screen)
+		v.tcpJoinGameLabel.Render(screen)
+		v.machineIP.Render(screen)
 	case ScreenModeTCPIP:
-		v.tcpIPOptionsLabel.RenderNoError(screen)
-		v.machineIP.RenderNoError(screen)
+		v.tcpIPOptionsLabel.Render(screen)
+		v.machineIP.Render(screen)
 	case ScreenModeTrademark:
-		v.copyrightLabel.RenderNoError(screen)
-		v.copyrightLabel2.RenderNoError(screen)
+		v.copyrightLabel.Render(screen)
+		v.copyrightLabel2.Render(screen)
 
 		if v.errorLabel != nil {
-			v.errorLabel.RenderNoError(screen)
+			v.errorLabel.Render(screen)
 		}
 	case ScreenModeMainMenu:
-		v.openDiabloLabel.RenderNoError(screen)
-		v.versionLabel.RenderNoError(screen)
-		v.commitLabel.RenderNoError(screen)
+		v.openDiabloLabel.Render(screen)
+		v.versionLabel.Render(screen)
+		v.commitLabel.Render(screen)
 	}
 }
 
