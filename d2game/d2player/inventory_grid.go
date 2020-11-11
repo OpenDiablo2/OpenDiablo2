@@ -234,7 +234,7 @@ func (g *ItemGrid) renderItem(item InventoryItem, target d2interface.Surface, x,
 	if itemSprite != nil {
 		itemSprite.SetPosition(x, y)
 		itemSprite.GetCurrentFrameSize()
-		itemSprite.RenderNoError(target)
+		itemSprite.Render(target)
 	}
 }
 

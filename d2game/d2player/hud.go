@@ -391,7 +391,7 @@ func (h *HUD) renderManaGlobe(x, _ int, target d2interface.Surface) error {
 
 	h.mainPanel.SetPosition(x, height)
 
-	h.mainPanel.RenderNoError(target)
+	h.mainPanel.Render(target)
 
 	// Mana status bar
 	manaPercent := float64(h.hero.Stats.Mana) / float64(h.hero.Stats.MaxMana)
@@ -413,8 +413,8 @@ func (h *HUD) renderManaGlobe(x, _ int, target d2interface.Surface) error {
 
 	h.globeSprite.SetPosition(x+rightGlobeOffsetX, height+rightGlobeOffsetY)
 
-	h.globeSprite.RenderNoError(target)
-	h.globeSprite.RenderNoError(target)
+	h.globeSprite.Render(target)
+	h.globeSprite.Render(target)
 
 	return nil
 }
@@ -438,7 +438,7 @@ func (h *HUD) renderHealthGlobe(x, y int, target d2interface.Surface) error {
 	}
 
 	h.globeSprite.SetPosition(x+globeSpriteOffsetX, y+globeSpriteOffsetY)
-	h.globeSprite.RenderNoError(target)
+	h.globeSprite.Render(target)
 
 	return nil
 }
@@ -449,7 +449,7 @@ func (h *HUD) renderPanel(x, y int, target d2interface.Surface) error {
 	}
 
 	h.mainPanel.SetPosition(x, y)
-	h.mainPanel.RenderNoError(target)
+	h.mainPanel.Render(target)
 
 	return nil
 }
@@ -466,7 +466,7 @@ func (h *HUD) renderLeftSkill(x, y int, target d2interface.Surface) error {
 	}
 
 	h.leftSkillResource.SkillIcon.SetPosition(x, y)
-	h.leftSkillResource.SkillIcon.RenderNoError(target)
+	h.leftSkillResource.SkillIcon.Render(target)
 
 	return nil
 }
@@ -485,7 +485,7 @@ func (h *HUD) renderRightSkill(x, _ int, target d2interface.Surface) error {
 	}
 
 	h.rightSkillResource.SkillIcon.SetPosition(x, height)
-	h.rightSkillResource.SkillIcon.RenderNoError(target)
+	h.rightSkillResource.SkillIcon.Render(target)
 
 	return nil
 }
@@ -496,7 +496,7 @@ func (h *HUD) renderNewStatsButton(x, y int, target d2interface.Surface) error {
 	}
 
 	h.mainPanel.SetPosition(x, y)
-	h.mainPanel.RenderNoError(target)
+	h.mainPanel.Render(target)
 
 	return nil
 }
@@ -507,7 +507,7 @@ func (h *HUD) renderStamina(x, y int, target d2interface.Surface) error {
 	}
 
 	h.mainPanel.SetPosition(x, y)
-	h.mainPanel.RenderNoError(target)
+	h.mainPanel.Render(target)
 
 	return nil
 }
@@ -558,7 +558,7 @@ func (h *HUD) renderMiniPanel(target d2interface.Surface) error {
 	buttonX, buttonY := (width>>1)+miniPanelButtonOffsetX, height+miniPanelButtonOffsetY
 
 	h.menuButton.SetPosition(buttonX, buttonY)
-	h.menuButton.RenderNoError(target)
+	h.menuButton.Render(target)
 	h.miniPanel.Render(target)
 
 	miniPanelButtons := map[actionableType]string{
@@ -609,7 +609,7 @@ func (h *HUD) renderPotions(x, _ int, target d2interface.Surface) error {
 	}
 
 	h.mainPanel.SetPosition(x, height)
-	h.mainPanel.RenderNoError(target)
+	h.mainPanel.Render(target)
 
 	return nil
 }
@@ -622,7 +622,7 @@ func (h *HUD) renderNewSkillsButton(x, _ int, target d2interface.Surface) error 
 	}
 
 	h.mainPanel.SetPosition(x, height)
-	h.mainPanel.RenderNoError(target)
+	h.mainPanel.Render(target)
 
 	return nil
 }

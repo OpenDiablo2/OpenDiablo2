@@ -533,7 +533,7 @@ func (v *SelectHeroClass) Render(screen d2interface.Surface) {
 		}
 	}
 
-	v.campfire.RenderNoError(screen)
+	v.campfire.Render(screen)
 
 	if v.heroNameTextbox.GetVisible() {
 		v.heroNameLabel.Render(screen)
@@ -736,7 +736,7 @@ func setSpriteToFirstFrame(sprite *d2ui.Sprite) {
 
 func drawSprite(sprite *d2ui.Sprite, target d2interface.Surface) {
 	if sprite != nil {
-		sprite.RenderNoError(target)
+		sprite.Render(target)
 	}
 }
 

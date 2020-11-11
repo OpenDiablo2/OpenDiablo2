@@ -240,7 +240,7 @@ func (s *HeroStatsPanel) renderStaticPanelFrames(target d2interface.Surface) err
 			s.panel.SetPosition(currentX-w, currentY+h)
 		}
 
-		s.panel.RenderNoError(target)
+		s.panel.Render(target)
 	}
 
 	return nil

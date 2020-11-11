@@ -450,10 +450,10 @@ func (v *MainMenu) renderBackgrounds(screen d2interface.Surface) {
 func (v *MainMenu) renderLogos(screen d2interface.Surface) {
 	switch v.screenMode {
 	case ScreenModeTrademark, ScreenModeMainMenu, ScreenModeMultiplayer:
-		v.diabloLogoLeftBack.RenderNoError(screen)
-		v.diabloLogoRightBack.RenderNoError(screen)
-		v.diabloLogoLeft.RenderNoError(screen)
-		v.diabloLogoRight.RenderNoError(screen)
+		v.diabloLogoLeftBack.Render(screen)
+		v.diabloLogoRightBack.Render(screen)
+		v.diabloLogoLeft.Render(screen)
+		v.diabloLogoRight.Render(screen)
 	}
 }
 

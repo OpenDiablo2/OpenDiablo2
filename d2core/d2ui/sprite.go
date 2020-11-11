@@ -11,9 +11,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
-// static check that Sprite implements Widget
-var _ Widget = &Sprite{}
-
 // Sprite is a positioned visual object.
 type Sprite struct {
 	*BaseWidget
@@ -42,11 +39,6 @@ func (ui *UIManager) NewSprite(animationPath, palettePath string) (*Sprite, erro
 
 // Render renders the sprite on the given surface
 func (s *Sprite) Render(target d2interface.Surface) {
-	s.RenderNoError(target)
-}
-
-// RenderNoError renders the sprite on the given surface
-func (s *Sprite) RenderNoError(target d2interface.Surface) {
 	_, frameHeight := s.animation.GetCurrentFrameSize()
 
 	target.PushTranslation(s.x, s.y-frameHeight)

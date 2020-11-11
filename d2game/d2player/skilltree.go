@@ -389,7 +389,7 @@ func (s *skillTree) renderPanelSegment(
 		return
 	}
 
-	s.resources.skillPanel.RenderNoError(target)
+	s.resources.skillPanel.Render(target)
 }
 
 func (s *skillTree) renderTabCommon(target d2interface.Surface) {

@@ -240,7 +240,7 @@ func (s *SkillPanel) createSkillListImage(skillsListRow *SkillListRow) (d2interf
 		}
 
 		surface.PushTranslation(idx*skillIconWidth, 50)
-		skillSprite.RenderNoError(surface)
+		skillSprite.Render(surface)
 		surface.Pop()
 	}
 
