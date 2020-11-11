@@ -436,56 +436,45 @@ func (v *MainMenu) Render(screen d2interface.Surface) {
 func (v *MainMenu) renderBackgrounds(screen d2interface.Surface) {
 	switch v.screenMode {
 	case ScreenModeTrademark:
-		if err := v.trademarkBackground.RenderSegmented(screen, 4, 3, 0); err != nil {
-			return
-		}
+		v.trademarkBackground.RenderSegmented(screen, 4, 3, 0)
 	case ScreenModeServerIP:
-		if err := v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0); err != nil {
-			return
-		}
-
-		if err := v.serverIPBackground.RenderSegmented(screen, 2, 1, 0); err != nil {
-			return
-		}
+		v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0)
+		v.serverIPBackground.RenderSegmented(screen, 2, 1, 0)
 	case ScreenModeTCPIP:
-		if err := v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0); err != nil {
-			return
-		}
+		v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0)
 	default:
-		if err := v.background.RenderSegmented(screen, 4, 3, 0); err != nil {
-			return
-		}
+		v.background.RenderSegmented(screen, 4, 3, 0)
 	}
 }
 
 func (v *MainMenu) renderLogos(screen d2interface.Surface) {
 	switch v.screenMode {
 	case ScreenModeTrademark, ScreenModeMainMenu, ScreenModeMultiplayer:
-		v.diabloLogoLeftBack.RenderNoError(screen)
-		v.diabloLogoRightBack.RenderNoError(screen)
-		v.diabloLogoLeft.RenderNoError(screen)
-		v.diabloLogoRight.RenderNoError(screen)
+		v.diabloLogoLeftBack.Render(screen)
+		v.diabloLogoRightBack.Render(screen)
+		v.diabloLogoLeft.Render(screen)
+		v.diabloLogoRight.Render(screen)
 	}
 }
 
 func (v *MainMenu) renderLabels(screen d2interface.Surface) {
 	switch v.screenMode {
 	case ScreenModeServerIP:
-		v.tcpIPOptionsLabel.RenderNoError(screen)
-		v.tcpJoinGameLabel.RenderNoError(screen)
+		v.tcpIPOptionsLabel.Render(screen)
+		v.tcpJoinGameLabel.Render(screen)
 	case ScreenModeTCPIP:
-		v.tcpIPOptionsLabel.RenderNoError(screen)
+		v.tcpIPOptionsLabel.Render(screen)
 	case ScreenModeTrademark:
-		v.copyrightLabel.RenderNoError(screen)
-		v.copyrightLabel2.RenderNoError(screen)
+		v.copyrightLabel.Render(screen)
+		v.copyrightLabel2.Render(screen)
 
 		if v.errorLabel != nil {
-			v.errorLabel.RenderNoError(screen)
+			v.errorLabel.Render(screen)
 		}
 	case ScreenModeMainMenu:
-		v.openDiabloLabel.RenderNoError(screen)
-		v.versionLabel.RenderNoError(screen)
-		v.commitLabel.RenderNoError(screen)
+		v.openDiabloLabel.Render(screen)
+		v.versionLabel.Render(screen)
+		v.commitLabel.Render(screen)
 	}
 }
 

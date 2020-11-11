@@ -620,11 +620,11 @@ func (h *HelpOverlay) Render(target d2interface.Surface) error {
 	}
 
 	for _, f := range h.frames {
-		f.RenderNoError(target)
+		f.Render(target)
 	}
 
 	for _, t := range h.text {
-		t.RenderNoError(target)
+		t.Render(target)
 	}
 
 	for _, l := range h.lines {

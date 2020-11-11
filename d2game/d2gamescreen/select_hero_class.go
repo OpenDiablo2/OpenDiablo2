@@ -511,17 +511,14 @@ func (v *SelectHeroClass) onOkButtonClicked() {
 
 // Render renders the Select Hero Class screen
 func (v *SelectHeroClass) Render(screen d2interface.Surface) {
-	if err := v.bgImage.RenderSegmented(screen, 4, 3, 0); err != nil {
-		return
-	}
-
-	v.headingLabel.RenderNoError(screen)
+	v.bgImage.RenderSegmented(screen, 4, 3, 0)
+	v.headingLabel.Render(screen)
 
 	if v.selectedHero != d2enum.HeroNone {
-		v.heroClassLabel.RenderNoError(screen)
-		v.heroDesc1Label.RenderNoError(screen)
-		v.heroDesc2Label.RenderNoError(screen)
-		v.heroDesc3Label.RenderNoError(screen)
+		v.heroClassLabel.Render(screen)
+		v.heroDesc1Label.Render(screen)
+		v.heroDesc2Label.Render(screen)
+		v.heroDesc3Label.Render(screen)
 	}
 
 	for heroClass, heroInfo := range v.heroRenderInfo {
@@ -536,12 +533,12 @@ func (v *SelectHeroClass) Render(screen d2interface.Surface) {
 		}
 	}
 
-	v.campfire.RenderNoError(screen)
+	v.campfire.Render(screen)
 
 	if v.heroNameTextbox.GetVisible() {
-		v.heroNameLabel.RenderNoError(screen)
-		v.expansionCharLabel.RenderNoError(screen)
-		v.hardcoreCharLabel.RenderNoError(screen)
+		v.heroNameLabel.Render(screen)
+		v.expansionCharLabel.Render(screen)
+		v.hardcoreCharLabel.Render(screen)
 	}
 }
 
@@ -739,7 +736,7 @@ func setSpriteToFirstFrame(sprite *d2ui.Sprite) {
 
 func drawSprite(sprite *d2ui.Sprite, target d2interface.Surface) {
 	if sprite != nil {
-		sprite.RenderNoError(target)
+		sprite.Render(target)
 	}
 }
 

@@ -104,7 +104,7 @@ func (m *miniPanel) Render(target d2interface.Surface) {
 
 	m.container.SetPosition(x, y)
 
-	m.container.RenderNoError(target)
+	m.container.Render(target)
 
 	buttonWidth, _ := m.button.GetCurrentFrameSize()
 	buttonWidth++
@@ -122,7 +122,7 @@ func (m *miniPanel) Render(target d2interface.Surface) {
 		x, y := halfW+offsetX, height+buttonOffsetY
 
 		m.button.SetPosition(x, y)
-		m.button.RenderNoError(target)
+		m.button.Render(target)
 
 		j += 2
 	}

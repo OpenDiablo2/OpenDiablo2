@@ -83,15 +83,17 @@ func (u *UIFrame) Load() {
 }
 
 // Render the frame to the target surface
-func (u *UIFrame) Render(target d2interface.Surface) error {
+func (u *UIFrame) Render(target d2interface.Surface) {
 	switch u.frameOrientation {
 	case FrameLeft:
-		return u.renderLeft(target)
+		if err := u.renderLeft(target); err != nil {
+			log.Printf("Render error %e", err)
+		}
 	case FrameRight:
-		return u.renderRight(target)
+		if err := u.renderRight(target); err != nil {
+			log.Printf("Render error %e", err)
+		}
 	}
-
-	return nil
 }
 
 func (u *UIFrame) renderLeft(target d2interface.Surface) error {
@@ -227,7 +229,7 @@ func (u *UIFrame) renderFramePiece(sfc d2interface.Surface, x, y, idx int) error
 
 	u.frame.SetPosition(x, y)
 
-	u.frame.RenderNoError(sfc)
+	u.frame.Render(sfc)
 
 	return nil
 }
