@@ -129,10 +129,7 @@ func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 
 // Render renders the credits screen
 func (v *Credits) Render(screen d2interface.Surface) {
-	err := v.creditsBackground.RenderSegmented(screen, 4, 3, 0)
-	if err != nil {
-		return
-	}
+	v.creditsBackground.RenderSegmented(screen, 4, 3, 0)
 
 	for _, label := range v.labels {
 		if label.Available {

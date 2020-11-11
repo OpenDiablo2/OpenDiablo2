@@ -369,17 +369,12 @@ func (v *CharacterSelect) onExitButtonClicked() {
 
 // Render renders the Character Select screen
 func (v *CharacterSelect) Render(screen d2interface.Surface) {
-	if err := v.background.RenderSegmented(screen, 4, 3, 0); err != nil {
-		return
-	}
-
+	v.background.RenderSegmented(screen, 4, 3, 0)
 	v.d2HeroTitle.RenderNoError(screen)
 	actualSelectionIndex := v.selectedCharacter - (v.charScrollbar.GetCurrentOffset() * 2)
 
 	if v.selectedCharacter > -1 && actualSelectionIndex >= 0 && actualSelectionIndex < 8 {
-		if err := v.selectionBox.RenderSegmented(screen, 2, 1, 0); err != nil {
-			return
-		}
+		v.selectionBox.RenderSegmented(screen, 2, 1, 0)
 	}
 
 	for i := 0; i < 8; i++ {
@@ -402,11 +397,7 @@ func (v *CharacterSelect) Render(screen d2interface.Surface) {
 
 	if v.showDeleteConfirmation {
 		screen.DrawRect(screenWidth, screenHeight, rgbaColor(blackHalfOpacity))
-
-		if err := v.okCancelBox.RenderSegmented(screen, 2, 1, 0); err != nil {
-			return
-		}
-
+		v.okCancelBox.RenderSegmented(screen, 2, 1, 0)
 		v.deleteCharConfirmLabel.RenderNoError(screen)
 	}
 }

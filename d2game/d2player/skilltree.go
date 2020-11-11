@@ -383,71 +383,54 @@ func (s *skillTree) setTab(tab int) {
 
 func (s *skillTree) renderPanelSegment(
 	target d2interface.Surface,
-	frame int) error {
+	frame int) {
 	if err := s.resources.skillPanel.SetCurrentFrame(frame); err != nil {
-		return err
+		log.Printf("%e", err)
+		return
 	}
 
 	s.resources.skillPanel.RenderNoError(target)
-
-	return nil
 }
 
-func (s *skillTree) renderTabCommon(target d2interface.Surface) error {
+func (s *skillTree) renderTabCommon(target d2interface.Surface) {
 	skillPanel := s.resources.skillPanel
 	x, y := s.originX, s.originY
 
 	// top
 	w, h, err := skillPanel.GetFrameSize(frameCommonTabTopLeft)
 	if err != nil {
-		return err
+		log.Printf("%e", err)
+		return
 	}
 
 	y += h
 
 	skillPanel.SetPosition(x, y)
-
-	err = s.renderPanelSegment(target, frameCommonTabTopLeft)
-	if err != nil {
-		return err
-	}
+	s.renderPanelSegment(target, frameCommonTabTopLeft)
 
 	skillPanel.SetPosition(x+w, y)
-
-	err = s.renderPanelSegment(target, frameCommonTabTopRight)
-	if err != nil {
-		return err
-	}
+	s.renderPanelSegment(target, frameCommonTabTopRight)
 
 	// bottom
 	_, h, err = skillPanel.GetFrameSize(frameCommonTabBottomLeft)
 	if err != nil {
-		return err
+		log.Printf("%e", err)
+		return
 	}
 
 	y += h
 
 	skillPanel.SetPosition(x, y)
-
-	err = s.renderPanelSegment(target, frameCommonTabBottomLeft)
-	if err != nil {
-		return err
-	}
+	s.renderPanelSegment(target, frameCommonTabBottomLeft)
 
 	skillPanel.SetPosition(x+w, y)
-
-	err = s.renderPanelSegment(target, frameCommonTabBottomRight)
-	if err != nil {
-		return err
-	}
+	s.renderPanelSegment(target, frameCommonTabBottomRight)
 
 	// available skill points label
 	s.availSPLabel.RenderNoError(target)
-
-	return nil
 }
 
-func (s *skillTree) renderTab(target d2interface.Surface, tab int) error {
+func (s *skillTree) renderTab(target d2interface.Surface, tab int) {
 	topFrame := frameOffsetTop + (tabIndexOffset * tab)
 	bottomFrame := frameOffsetBottom + (tabIndexOffset * tab)
 
@@ -457,71 +440,46 @@ func (s *skillTree) renderTab(target d2interface.Surface, tab int) error {
 	// top
 	_, h0, err := skillPanel.GetFrameSize(topFrame)
 	if err != nil {
-		return err
+		log.Printf("%e", err)
+		return
 	}
 
 	y += h0
 
 	skillPanel.SetPosition(x, y)
-
-	err = s.renderPanelSegment(target, topFrame)
-	if err != nil {
-		return err
-	}
+	s.renderPanelSegment(target, topFrame)
 
 	// bottom
 	w, h1, err := skillPanel.GetFrameSize(bottomFrame)
 	if err != nil {
-		return err
+		log.Printf("%e", err)
+		return
 	}
 
 	skillPanel.SetPosition(x, y+h1)
 
-	if err := s.renderPanelSegment(target, bottomFrame); err != nil {
-		return err
-	}
+	s.renderPanelSegment(target, bottomFrame)
 
 	// tab button highlighted
 	switch tab {
 	case firstTab:
 		skillPanel.SetPosition(x+w, y+h1)
-
-		if err := s.renderPanelSegment(target, frameSelectedTab1Full); err != nil {
-			return err
-		}
+		s.renderPanelSegment(target, frameSelectedTab1Full)
 	case secondTab:
 		x += w
 		skillPanel.SetPosition(x, s.originY+h0)
-
-		if err := s.renderPanelSegment(target, frameSelectedTab2Top); err != nil {
-			return err
-		}
+		s.renderPanelSegment(target, frameSelectedTab2Top)
 
 		skillPanel.SetPosition(x, y+h1)
-
-		if err := s.renderPanelSegment(target, frameSelectedTab2Bottom); err != nil {
-			return err
-		}
+		s.renderPanelSegment(target, frameSelectedTab2Bottom)
 	case thirdTab:
 		skillPanel.SetPosition(x+w, y)
-
-		if err := s.renderPanelSegment(target, frameSelectedTab3Full); err != nil {
-			return err
-		}
+		s.renderPanelSegment(target, frameSelectedTab3Full)
 	}
-
-	return nil
 }
 
 // Render the skill tree panel
-func (s *skillTree) Render(target d2interface.Surface) error {
-	if err := s.renderTabCommon(target); err != nil {
-		return err
-	}
-
-	if err := s.renderTab(target, s.selectedTab); err != nil {
-		return err
-	}
-
-	return nil
+func (s *skillTree) Render(target d2interface.Surface) {
+	s.renderTabCommon(target)
+	s.renderTab(target, s.selectedTab)
 }

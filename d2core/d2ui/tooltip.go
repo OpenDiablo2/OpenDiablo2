@@ -140,7 +140,7 @@ func (t *Tooltip) GetSize() (sx, sy int) {
 }
 
 // Render draws the tooltip
-func (t *Tooltip) Render(target d2interface.Surface) error {
+func (t *Tooltip) Render(target d2interface.Surface) {
 	maxW, maxH := t.GetSize()
 
 	// nolint:gomnd // no magic numbers, their meaning is obvious
@@ -192,8 +192,6 @@ func (t *Tooltip) Render(target d2interface.Surface) error {
 	}
 
 	target.PopN(len(t.lines))
-
-	return nil
 }
 
 // Advance is a no-op

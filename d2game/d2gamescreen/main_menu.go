@@ -436,25 +436,14 @@ func (v *MainMenu) Render(screen d2interface.Surface) {
 func (v *MainMenu) renderBackgrounds(screen d2interface.Surface) {
 	switch v.screenMode {
 	case ScreenModeTrademark:
-		if err := v.trademarkBackground.RenderSegmented(screen, 4, 3, 0); err != nil {
-			return
-		}
+		v.trademarkBackground.RenderSegmented(screen, 4, 3, 0)
 	case ScreenModeServerIP:
-		if err := v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0); err != nil {
-			return
-		}
-
-		if err := v.serverIPBackground.RenderSegmented(screen, 2, 1, 0); err != nil {
-			return
-		}
+		v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0)
+		v.serverIPBackground.RenderSegmented(screen, 2, 1, 0)
 	case ScreenModeTCPIP:
-		if err := v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0); err != nil {
-			return
-		}
+		v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0)
 	default:
-		if err := v.background.RenderSegmented(screen, 4, 3, 0); err != nil {
-			return
-		}
+		v.background.RenderSegmented(screen, 4, 3, 0)
 	}
 }
 

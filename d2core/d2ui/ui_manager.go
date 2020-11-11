@@ -124,19 +124,13 @@ func (ui *UIManager) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 func (ui *UIManager) Render(target d2interface.Surface) {
 	for _, widget := range ui.widgets {
 		if widget.GetVisible() {
-			err := widget.Render(target)
-			if err != nil {
-				log.Print(err)
-			}
+			widget.Render(target)
 		}
 	}
 
 	for _, widgetGroup := range ui.widgetsGroups {
 		if widgetGroup.GetVisible() {
-			err := widgetGroup.Render(target)
-			if err != nil {
-				log.Print(err)
-			}
+			widgetGroup.Render(target)
 		}
 	}
 }

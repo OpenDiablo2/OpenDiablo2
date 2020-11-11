@@ -8,11 +8,11 @@ var _ Widget = &CustomWidget{}
 // CustomWidget is a widget with a fully custom render function
 type CustomWidget struct {
 	*BaseWidget
-	renderFunc func(target d2interface.Surface) error
+	renderFunc func(target d2interface.Surface)
 }
 
 // NewCustomWidget creates a new widget with custom render function
-func (ui *UIManager) NewCustomWidget(renderFunc func(target d2interface.Surface) error) *CustomWidget {
+func (ui *UIManager) NewCustomWidget(renderFunc func(target d2interface.Surface)) *CustomWidget {
 	base := NewBaseWidget(ui)
 
 	return &CustomWidget{
@@ -22,8 +22,8 @@ func (ui *UIManager) NewCustomWidget(renderFunc func(target d2interface.Surface)
 }
 
 // Render draws the custom widget
-func (c *CustomWidget) Render(target d2interface.Surface) error {
-	return c.renderFunc(target)
+func (c *CustomWidget) Render(target d2interface.Surface) {
+	c.renderFunc(target)
 }
 
 // Advance is a no-op

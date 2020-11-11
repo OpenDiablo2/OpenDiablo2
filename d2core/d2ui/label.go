@@ -49,9 +49,8 @@ func (ui *UIManager) NewLabel(fontPath, palettePath string) *Label {
 }
 
 // Render draws the label on the screen
-func (v *Label) Render(target d2interface.Surface) error {
+func (v *Label) Render(target d2interface.Surface) {
 	v.RenderNoError(target)
-	return nil
 }
 
 // RenderNoError draws the label on the screen, respliting the lines to allow for other alignments.

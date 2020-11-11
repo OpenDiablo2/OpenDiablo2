@@ -1,7 +1,6 @@
 package d2ui
 
 import (
-	"fmt"
 	"image"
 	"log"
 
@@ -332,11 +331,8 @@ func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, lab
 
 	// buttons always have a base image
 	if v.buttonLayout.HasImage {
-		err := btnSprite.RenderSegmented(v.normalSurface, btnLayout.XSegments,
+		btnSprite.RenderSegmented(v.normalSurface, btnLayout.XSegments,
 			btnLayout.YSegments, btnLayout.BaseFrame)
-		if err != nil {
-			fmt.Printf("failed to render button normalSurface, err: %v\n", err)
-		}
 	}
 
 	_, labelHeight := label.GetSize()
@@ -412,10 +408,7 @@ func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, lab
 
 		*state.prerenderdestination = surface
 
-		err := btnSprite.RenderSegmented(*state.prerenderdestination, xSeg, ySeg, state.baseFrame)
-		if err != nil {
-			fmt.Printf(state.fmtErr, err)
-		}
+		btnSprite.RenderSegmented(*state.prerenderdestination, xSeg, ySeg, state.baseFrame)
 
 		label.SetPosition(state.offsetX, state.offsetY)
 		label.RenderNoError(*state.prerenderdestination)
@@ -437,7 +430,7 @@ func (v *Button) Activate() {
 }
 
 // Render renders the button
-func (v *Button) Render(target d2interface.Surface) error {
+func (v *Button) Render(target d2interface.Surface) {
 	target.PushFilter(d2enum.FilterNearest)
 	defer target.Pop()
 
@@ -462,8 +455,6 @@ func (v *Button) Render(target d2interface.Surface) error {
 	default:
 		target.Render(v.normalSurface)
 	}
-
-	return nil
 }
 
 // Toggle negates the toggled state of the button

@@ -129,9 +129,7 @@ func (s *SkillPanel) Render(target d2interface.Surface) error {
 	}
 
 	if s.hoveredSkill != nil {
-		if err := s.hoverTooltip.Render(target); err != nil {
-			log.Printf("Cannot render tooltip, %e", err)
-		}
+		s.hoverTooltip.Render(target)
 	}
 
 	return nil

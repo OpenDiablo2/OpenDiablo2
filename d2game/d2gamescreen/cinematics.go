@@ -183,21 +183,7 @@ func (v *Cinematics) playVideo(path string) {
 
 // Render renders the credits screen
 func (v *Cinematics) Render(screen d2interface.Surface) {
-	err := v.background.RenderSegmented(screen, 4, 3, 0)
-
-	if err != nil {
-		return
-	}
-
-	err = v.cinematicsBackground.RenderSegmented(screen, 2, 2, 0)
-
-	if err != nil {
-		return
-	}
-
-	err = v.cinematicsLabel.Render(screen)
-
-	if err != nil {
-		return
-	}
+	v.background.RenderSegmented(screen, 4, 3, 0)
+	v.cinematicsBackground.RenderSegmented(screen, 2, 2, 0)
+	v.cinematicsLabel.Render(screen)
 }

@@ -49,19 +49,11 @@ func (ui *UIManager) NewCheckbox(checkState bool) *Checkbox {
 
 	result.Image = ui.renderer.NewSurface(result.width, result.height)
 
-	err = checkboxSprite.RenderSegmented(result.Image, 1, 1, 0)
-	if err != nil {
-		log.Print(err)
-		return nil
-	}
+	checkboxSprite.RenderSegmented(result.Image, 1, 1, 0)
 
 	result.checkedImage = ui.renderer.NewSurface(result.width, result.height)
 
-	err = checkboxSprite.RenderSegmented(result.checkedImage, 1, 1, 1)
-	if err != nil {
-		log.Print(err)
-		return nil
-	}
+	checkboxSprite.RenderSegmented(result.checkedImage, 1, 1, 1)
 
 	ui.addWidget(result)
 
@@ -69,7 +61,7 @@ func (ui *UIManager) NewCheckbox(checkState bool) *Checkbox {
 }
 
 // Render renders the checkbox
-func (v *Checkbox) Render(target d2interface.Surface) error {
+func (v *Checkbox) Render(target d2interface.Surface) {
 	target.PushTranslation(v.x, v.y)
 	defer target.Pop()
 
@@ -81,8 +73,6 @@ func (v *Checkbox) Render(target d2interface.Surface) error {
 	} else {
 		target.Render(v.Image)
 	}
-
-	return nil
 }
 
 // Advance does nothing for checkboxes

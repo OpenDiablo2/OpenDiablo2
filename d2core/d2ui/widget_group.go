@@ -71,17 +71,12 @@ func (wg *WidgetGroup) Advance(elapsed float64) error {
 }
 
 // Render draw the widgets to the screen
-func (wg *WidgetGroup) Render(target d2interface.Surface) error {
+func (wg *WidgetGroup) Render(target d2interface.Surface) {
 	for _, entry := range wg.entries {
 		if entry.GetVisible() {
-			err := entry.Render(target)
-			if err != nil {
-				return err
-			}
+			entry.Render(target)
 		}
 	}
-
-	return nil
 }
 
 // SetVisible sets the visibility of all widgets in the group
