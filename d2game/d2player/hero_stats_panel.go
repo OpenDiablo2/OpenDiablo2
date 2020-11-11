@@ -85,18 +85,18 @@ type StatsPanelLabels struct {
 
 // HeroStatsPanel represents the hero status panel
 type HeroStatsPanel struct {
-	asset                *d2asset.AssetManager
-	uiManager            *d2ui.UIManager
-	frame                *d2ui.UIFrame
-	panel                *d2ui.Sprite
-	heroState            *d2hero.HeroStatsState
-	heroName             string
-	heroClass            d2enum.Hero
-	renderer             d2interface.Renderer
-	staticMenuImageCache *d2interface.Surface
-	labels               *StatsPanelLabels
-	closeButton          *d2ui.Button
-	onCloseCb            func()
+	asset       *d2asset.AssetManager
+	uiManager   *d2ui.UIManager
+	frame       *d2ui.UIFrame
+	panel       *d2ui.Sprite
+	heroState   *d2hero.HeroStatsState
+	heroName    string
+	heroClass   d2enum.Hero
+	labels      *StatsPanelLabels
+	closeButton *d2ui.Button
+	onCloseCb   func()
+	panelGroup  *d2ui.WidgetGroup
+	staticPanel *d2ui.CustomWidget
 
 	originX int
 	originY int
@@ -112,7 +112,6 @@ func NewHeroStatsPanel(asset *d2asset.AssetManager, ui *d2ui.UIManager, heroName
 	return &HeroStatsPanel{
 		asset:     asset,
 		uiManager: ui,
-		renderer:  ui.Renderer(),
 		originX:   originX,
 		originY:   originY,
 		heroState: heroState,
@@ -126,19 +125,30 @@ func NewHeroStatsPanel(asset *d2asset.AssetManager, ui *d2ui.UIManager, heroName
 func (s *HeroStatsPanel) Load() {
 	var err error
 
-	s.frame = d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameLeft)
+	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
 
-	s.closeButton = s.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
-	s.closeButton.SetVisible(false)
-	s.closeButton.SetPosition(heroStatsCloseButtonX, heroStatsCloseButtonY)
-	s.closeButton.OnActivated(func() { s.Close() })
+	s.frame = d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameLeft)
+	s.panelGroup.AddWidget(s.frame)
 
 	s.panel, err = s.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
 	}
 
+	fw, fh := s.frame.GetFrameBounds()
+	fc := s.frame.GetFrameCount()
+	w, h := fw*fc, fh*fc
+	s.staticPanel = s.uiManager.NewCustomWidgetCached(s.renderStaticMenu, w, h)
+	s.panelGroup.AddWidget(s.staticPanel)
+
+	s.closeButton = s.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
+	s.closeButton.SetVisible(false)
+	s.closeButton.SetPosition(heroStatsCloseButtonX, heroStatsCloseButtonY)
+	s.closeButton.OnActivated(func() { s.Close() })
+	s.panelGroup.AddWidget(s.closeButton)
+
 	s.initStatValueLabels()
+	s.panelGroup.SetVisible(false)
 }
 
 // IsOpen returns true if the hero status panel is open
@@ -158,13 +168,13 @@ func (s *HeroStatsPanel) Toggle() {
 // Open opens the hero status panel
 func (s *HeroStatsPanel) Open() {
 	s.isOpen = true
-	s.closeButton.SetVisible(true)
+	s.panelGroup.SetVisible(true)
 }
 
 // Close closed the hero status panel
 func (s *HeroStatsPanel) Close() {
 	s.isOpen = false
-	s.closeButton.SetVisible(false)
+	s.panelGroup.SetVisible(false)
 	s.onCloseCb()
 }
 
@@ -173,43 +183,21 @@ func (s *HeroStatsPanel) SetOnCloseCb(cb func()) {
 	s.onCloseCb = cb
 }
 
-// Render renders the hero status panel
-func (s *HeroStatsPanel) Render(target d2interface.Surface) {
+// Advance updates labels on the panel
+func (s *HeroStatsPanel) Advance(elapsed float64) {
 	if !s.isOpen {
 		return
 	}
 
-	if s.staticMenuImageCache == nil {
-		frameWidth, frameHeight := s.frame.GetFrameBounds()
-		framesCount := s.frame.GetFrameCount()
-		surface := s.renderer.NewSurface(frameWidth*framesCount, frameHeight*framesCount)
-
-		s.staticMenuImageCache = &surface
-
-		err := s.renderStaticMenu(*s.staticMenuImageCache)
-		if err != nil {
-			log.Println(err)
-		}
-	}
-
-	target.Render(*s.staticMenuImageCache)
-
-	s.renderStatValues(target)
+	s.setStatValues()
 }
 
-func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) error {
-	if err := s.renderStaticPanelFrames(target); err != nil {
-		return err
-	}
-
+func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) {
+	s.renderStaticPanelFrames(target)
 	s.renderStaticLabels(target)
-
-	return nil
 }
 
-func (s *HeroStatsPanel) renderStaticPanelFrames(target d2interface.Surface) error {
-	s.frame.Render(target)
-
+func (s *HeroStatsPanel) renderStaticPanelFrames(target d2interface.Surface) {
 	frames := []int{
 		statsPanelTopLeft,
 		statsPanelTopRight,
@@ -222,7 +210,7 @@ func (s *HeroStatsPanel) renderStaticPanelFrames(target d2interface.Surface) err
 
 	for _, frameIndex := range frames {
 		if err := s.panel.SetCurrentFrame(frameIndex); err != nil {
-			return err
+			log.Printf("%e", err)
 		}
 
 		w, h := s.panel.GetCurrentFrameSize()
@@ -242,8 +230,6 @@ func (s *HeroStatsPanel) renderStaticPanelFrames(target d2interface.Surface) err
 
 		s.panel.Render(target)
 	}
-
-	return nil
 }
 
 func (s *HeroStatsPanel) renderStaticLabels(target d2interface.Surface) {
@@ -323,30 +309,24 @@ func (s *HeroStatsPanel) initStatValueLabels() {
 	}
 }
 
-func (s *HeroStatsPanel) renderStatValues(target d2interface.Surface) {
-	s.renderStatValueNum(s.labels.Level, s.heroState.Level, target)
-	s.renderStatValueNum(s.labels.Experience, s.heroState.Experience, target)
-	s.renderStatValueNum(s.labels.NextLevelExp, s.heroState.NextLevelExp, target)
+func (s *HeroStatsPanel) setStatValues() {
+	s.labels.Level.SetText(strconv.Itoa(s.heroState.Level))
+	s.labels.Experience.SetText(strconv.Itoa(s.heroState.Experience))
+	s.labels.NextLevelExp.SetText(strconv.Itoa(s.heroState.NextLevelExp))
 
-	s.renderStatValueNum(s.labels.Strength, s.heroState.Strength, target)
-	s.renderStatValueNum(s.labels.Dexterity, s.heroState.Dexterity, target)
-	s.renderStatValueNum(s.labels.Vitality, s.heroState.Vitality, target)
-	s.renderStatValueNum(s.labels.Energy, s.heroState.Energy, target)
+	s.labels.Strength.SetText(strconv.Itoa(s.heroState.Strength))
+	s.labels.Dexterity.SetText(strconv.Itoa(s.heroState.Dexterity))
+	s.labels.Vitality.SetText(strconv.Itoa(s.heroState.Vitality))
+	s.labels.Energy.SetText(strconv.Itoa(s.heroState.Energy))
 
-	s.renderStatValueNum(s.labels.MaxHealth, s.heroState.MaxHealth, target)
-	s.renderStatValueNum(s.labels.Health, s.heroState.Health, target)
+	s.labels.MaxHealth.SetText(strconv.Itoa(s.heroState.MaxHealth))
+	s.labels.Health.SetText(strconv.Itoa(s.heroState.Health))
 
-	s.renderStatValueNum(s.labels.MaxStamina, s.heroState.MaxStamina, target)
-	s.renderStatValueNum(s.labels.Stamina, int(s.heroState.Stamina), target)
+	s.labels.MaxStamina.SetText(strconv.Itoa(s.heroState.MaxStamina))
+	s.labels.Stamina.SetText(strconv.Itoa(int(s.heroState.Stamina)))
 
-	s.renderStatValueNum(s.labels.MaxMana, s.heroState.MaxMana, target)
-	s.renderStatValueNum(s.labels.Mana, s.heroState.Mana, target)
-}
-
-func (s *HeroStatsPanel) renderStatValueNum(label *d2ui.Label, value int,
-	target d2interface.Surface) {
-	label.SetText(strconv.Itoa(value))
-	label.Render(target)
+	s.labels.MaxMana.SetText(strconv.Itoa(s.heroState.MaxMana))
+	s.labels.Mana.SetText(strconv.Itoa(s.heroState.Mana))
 }
 
 func (s *HeroStatsPanel) createStatValueLabel(stat, x, y int) *d2ui.Label {
@@ -362,6 +342,7 @@ func (s *HeroStatsPanel) createTextLabel(element PanelText) *d2ui.Label {
 
 	label.SetText(element.Text)
 	label.SetPosition(element.X, element.Y)
+	s.panelGroup.AddWidget(label)
 
 	return label
 }

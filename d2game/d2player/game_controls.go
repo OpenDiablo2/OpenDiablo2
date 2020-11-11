@@ -698,6 +698,8 @@ func (g *GameControls) Load() {
 // Advance advances the state of the GameControls
 func (g *GameControls) Advance(elapsed float64) error {
 	g.mapRenderer.Advance(elapsed)
+	g.heroStatsPanel.Advance(elapsed)
+
 	return nil
 }
 
@@ -770,7 +772,6 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 }
 
 func (g *GameControls) renderPanels(target d2interface.Surface) error {
-	g.heroStatsPanel.Render(target)
 	g.inventory.Render(target)
 
 	return nil
