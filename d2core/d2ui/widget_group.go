@@ -13,8 +13,7 @@ var _ Widget = &WidgetGroup{}
 // widgets at once.
 type WidgetGroup struct {
 	*BaseWidget
-	entries  []Widget
-	priority RenderPriority
+	entries []Widget
 }
 
 // NewWidgetGroup creates a new widget group

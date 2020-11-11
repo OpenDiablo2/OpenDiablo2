@@ -54,8 +54,9 @@ func (ui *UIManager) Reset() {
 // addWidgetGroup adds a widgetGroup to the UI manager and sorts by priority
 func (ui *UIManager) addWidgetGroup(group *WidgetGroup) {
 	ui.widgetsGroups = append(ui.widgetsGroups, group)
+
 	sort.SliceStable(ui.widgetsGroups, func(i, j int) bool {
-		return ui.widgetsGroups[i].priority < ui.widgetsGroups[j].priority
+		return ui.widgetsGroups[i].renderPriority < ui.widgetsGroups[j].renderPriority
 	})
 }
 
