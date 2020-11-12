@@ -132,7 +132,7 @@ func (s *skillTree) load() {
 	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPrioritySkilltree)
 	s.iconGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPrioritySkilltreeIcon)
 
-	s.panel = s.uiManager.NewCustomWidget(s.Render)
+	s.panel = s.uiManager.NewCustomWidget(s.Render, 400, 600)
 	s.panelGroup.AddWidget(s.panel)
 
 	s.frame = d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameRight)

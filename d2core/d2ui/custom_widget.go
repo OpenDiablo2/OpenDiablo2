@@ -16,7 +16,7 @@ type CustomWidget struct {
 // NewCustomWidgetCached creates a new widget and caches anything rendered via the
 // renderFunc into a static image to be displayed
 func (ui *UIManager) NewCustomWidgetCached(renderFunc func(target d2interface.Surface), width, height int) *CustomWidget {
-	c := ui.NewCustomWidget(renderFunc)
+	c := ui.NewCustomWidget(renderFunc, width, height)
 	c.cached = true
 
 	// render using the renderFunc to a cache
@@ -28,8 +28,10 @@ func (ui *UIManager) NewCustomWidgetCached(renderFunc func(target d2interface.Su
 }
 
 // NewCustomWidget creates a new widget with custom render function
-func (ui *UIManager) NewCustomWidget(renderFunc func(target d2interface.Surface)) *CustomWidget {
+func (ui *UIManager) NewCustomWidget(renderFunc func(target d2interface.Surface), width, height int) *CustomWidget {
 	base := NewBaseWidget(ui)
+	base.width = width
+	base.height = height
 
 	return &CustomWidget{
 		BaseWidget: base,
