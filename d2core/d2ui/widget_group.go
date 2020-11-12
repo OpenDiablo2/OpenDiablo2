@@ -84,3 +84,16 @@ func (wg *WidgetGroup) SetVisible(visible bool) {
 		entry.SetVisible(visible)
 	}
 }
+
+// OnMouseMove handles mouse move events
+func (wg *WidgetGroup) OnMouseMove(x, y int) {
+	for _, entry := range wg.entries {
+		if entry.Contains(x, y) && entry.GetVisible() {
+			if !entry.isHovered() {
+				entry.hoverStart()
+			}
+		} else if entry.isHovered() {
+			entry.hoverEnd()
+		}
+	}
+}

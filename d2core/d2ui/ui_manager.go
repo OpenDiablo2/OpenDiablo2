@@ -97,6 +97,17 @@ func (ui *UIManager) OnMouseButtonUp(event d2interface.MouseEvent) bool {
 	return false
 }
 
+// OnMouseMove is the mouse move event handler
+func (ui *UIManager) OnMouseMove(event d2interface.MouseMoveEvent) bool {
+	for _, w := range ui.widgetsGroups {
+		if w.GetVisible() {
+			w.OnMouseMove(event.X(), event.Y())
+		}
+	}
+
+	return false
+}
+
 // OnMouseButtonDown is the mouse button down event handler
 func (ui *UIManager) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	ui.CursorX, ui.CursorY = event.X(), event.Y()
