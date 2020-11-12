@@ -3,6 +3,7 @@ package d2gui
 import (
 	"image/color"
 	"log"
+	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -12,13 +13,16 @@ import (
 type Label struct {
 	widgetBase
 
-	renderer   d2interface.Renderer
-	text       string
-	font       *d2asset.Font
-	surface    d2interface.Surface
-	color      color.RGBA
-	hoverColor color.RGBA
-	isHovered  bool
+	renderer    d2interface.Renderer
+	text        string
+	font        *d2asset.Font
+	surface     d2interface.Surface
+	color       color.RGBA
+	hoverColor  color.RGBA
+	isHovered   bool
+	isBlinking  bool
+	isDisplayed bool
+	blinkTimer  time.Time
 }
 
 func createLabel(renderer d2interface.Renderer, text string, font *d2asset.Font, col color.RGBA) *Label {
@@ -44,12 +48,24 @@ func (l *Label) SetHoverColor(col color.RGBA) {
 	l.hoverColor = col
 }
 
+func (l *Label) SetIsBlinking(isBlinking bool) {
+	l.isBlinking = isBlinking
+}
 func (l *Label) SetIsHovered(isHovered bool) {
 	l.isHovered = isHovered
 	l.setText(l.text)
 }
 
 func (l *Label) render(target d2interface.Surface) {
+	if l.isBlinking && time.Since(l.blinkTimer) >= 200*time.Millisecond {
+		l.isDisplayed = !l.isDisplayed
+		l.blinkTimer = time.Now()
+	}
+
+	if l.isBlinking && !l.isDisplayed {
+		return
+	}
+
 	target.Render(l.surface)
 }
 

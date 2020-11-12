@@ -59,6 +59,8 @@ func (l *bindingLayout) Reset() {
 	l.descLabel.SetIsHovered(false)
 	l.primaryLabel.SetIsHovered(false)
 	l.secondaryLabel.SetIsHovered(false)
+	l.primaryLabel.SetIsBlinking(false)
+	l.secondaryLabel.SetIsBlinking(false)
 }
 
 func (l *bindingLayout) isInLayoutRect(x, y int, targetLayout *d2gui.Layout) bool {
@@ -348,6 +350,11 @@ func (menu *KeyBindingMenu) OnMouseButtonDown(event d2interface.MouseEvent) {
 
 			menu.currentBindingModifier = gameEvent
 			menu.currentBindingLayout = bl
+			if typ == KeyBindingTypePrimary {
+				menu.currentBindingLayout.primaryLabel.SetIsBlinking(true)
+			} else if typ == KeyBindingTypeSecondary {
+				menu.currentBindingLayout.secondaryLabel.SetIsBlinking(true)
+			}
 			menu.currentBindingModifierType = typ
 			menu.isAwaitingKeyDown = true
 
