@@ -1,18 +1,10 @@
 package d2asset
 
 import (
-	"encoding/json"
 	"fmt"
 	"image/color"
-	"path/filepath"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
@@ -51,14 +43,12 @@ const (
 	fmtLoadStringTable = "loading string table: %s"
 	fmtLoadTransform   = "loading palette transform: %s"
 	fmtLoadDict        = "loading data dictionary: %s"
-	fmtLoadAnimData    = "loading animation data from: %s"
 )
 
 // AssetManager loads files and game objects
 type AssetManager struct {
-	config     *d2config.Configuration
-	logger     *d2util.Logger
-	loader     *d2loader.Loader
+	*d2util.Logger
+	*d2loader.Loader
 	tables     []d2tbl.TextDictionary
 	animations d2interface.Cache
 	fonts      d2interface.Cache
@@ -67,155 +57,20 @@ type AssetManager struct {
 	Records    *d2records.RecordManager
 }
 
-func (am *AssetManager) init() error {
-	var err error
-
-	config, err := am.LoadConfig()
-	if err != nil {
-		return err
-	}
-
-	am.logger.SetLevel(config.LogLevel)
-	am.Records.Logger.SetLevel(config.LogLevel)
-	am.loader.Logger.SetLevel(config.LogLevel)
-
-	err = am.initConfig(config)
-	if err != nil {
-		return err
-	}
-
-	if err := am.initDataDictionaries(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (am *AssetManager) initConfig(config *d2config.Configuration) error {
-	am.config = config
-
-	for _, mpqName := range am.config.MpqLoadOrder {
-		cleanDir := filepath.Clean(am.config.MpqPath)
-		srcPath := filepath.Join(cleanDir, mpqName)
-
-		_, err := am.loader.AddSource(srcPath)
-		if err != nil {
-			// nolint:stylecheck // we want a multiline error message here..
-			return fmt.Errorf(fmtErrSourceNotFound, srcPath, am.config.Path(), am.config.MpqPath)
-		}
-	}
-
-	return nil
-}
-
 // SetLogLevel sets the log level for the asset manager,  record manager, and file loader
 func (am *AssetManager) SetLogLevel(level d2util.LogLevel) {
-	am.logger.SetLevel(level)
+	am.Logger.SetLevel(level)
 	am.Records.Logger.SetLevel(level)
-	am.loader.Logger.SetLevel(level)
-}
-
-// LoadConfig loads the OpenDiablo2 config file
-func (am *AssetManager) LoadConfig() (*d2config.Configuration, error) {
-	// by now the, the loader has initialized and added our config dirs as sources...
-	configBaseName := filepath.Base(d2config.DefaultConfigPath())
-
-	configAsset, _ := am.LoadAsset(configBaseName)
-
-	config := &d2config.Configuration{}
-
-	// create the default if not found
-	if configAsset == nil {
-		config = d2config.DefaultConfig()
-
-		fullPath := filepath.Join(config.Dir(), config.Base())
-		config.SetPath(fullPath)
-
-		am.logger.Infof("creating default configuration file at %s...", fullPath)
-
-		saveErr := config.Save()
-
-		return config, saveErr
-	}
-
-	if err := json.NewDecoder(configAsset).Decode(config); err != nil {
-		return nil, err
-	}
-
-	config.SetPath(filepath.Join(configAsset.Source().Path(), configAsset.Path()))
-
-	am.logger.Infof("loaded configuration file from %s", config.Path())
-
-	return config, nil
-}
-
-const (
-	fmtErrSourceNotFound = `file not found: %s
-
-Please check your config file at %s
-
-Also, verify that the MPQ files exist at %s
-
-Capitalization matters!
-`
-)
-
-func (am *AssetManager) initDataDictionaries() error {
-	dictPaths := []string{
-		d2resource.LevelType, d2resource.LevelPreset, d2resource.LevelWarp,
-		d2resource.ObjectType, d2resource.ObjectDetails, d2resource.Weapons,
-		d2resource.Armor, d2resource.Misc, d2resource.Books, d2resource.ItemTypes,
-		d2resource.UniqueItems, d2resource.Missiles, d2resource.SoundSettings,
-		d2resource.MonStats, d2resource.MonStats2, d2resource.MonPreset,
-		d2resource.MonProp, d2resource.MonType, d2resource.MonMode,
-		d2resource.MagicPrefix, d2resource.MagicSuffix, d2resource.ItemStatCost,
-		d2resource.ItemRatio, d2resource.StorePage, d2resource.Overlays,
-		d2resource.CharStats, d2resource.Hireling, d2resource.Experience,
-		d2resource.Gems, d2resource.QualityItems, d2resource.Runes,
-		d2resource.DifficultyLevels, d2resource.AutoMap, d2resource.LevelDetails,
-		d2resource.LevelMaze, d2resource.LevelSubstitutions, d2resource.CubeRecipes,
-		d2resource.SuperUniques, d2resource.Inventory, d2resource.Skills,
-		d2resource.SkillCalc, d2resource.MissileCalc, d2resource.Properties,
-		d2resource.SkillDesc, d2resource.BodyLocations, d2resource.Sets,
-		d2resource.SetItems, d2resource.AutoMagic, d2resource.TreasureClass,
-		d2resource.TreasureClassEx, d2resource.States, d2resource.SoundEnvirons,
-		d2resource.Shrines, d2resource.ElemType, d2resource.PlrMode,
-		d2resource.PetType, d2resource.NPC, d2resource.MonsterUniqueModifier,
-		d2resource.MonsterEquipment, d2resource.UniqueAppellation, d2resource.MonsterLevel,
-		d2resource.MonsterSound, d2resource.MonsterSequence, d2resource.PlayerClass,
-		d2resource.MonsterPlacement, d2resource.ObjectGroup, d2resource.CompCode,
-		d2resource.MonsterAI, d2resource.RarePrefix, d2resource.RareSuffix,
-		d2resource.Events, d2resource.Colors, d2resource.ArmorType,
-		d2resource.WeaponClass, d2resource.PlayerType, d2resource.Composite,
-		d2resource.HitClass, d2resource.UniquePrefix, d2resource.UniqueSuffix,
-		d2resource.CubeModifier, d2resource.CubeType, d2resource.HirelingDescription,
-		d2resource.LowQualityItems,
-	}
-
-	am.logger.Info("Initializing asset manager")
-
-	for _, path := range dictPaths {
-		err := am.LoadRecords(path)
-		if err != nil {
-			return err
-		}
-	}
-
-	err := am.initAnimationData(d2resource.AnimationData)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	am.Loader.Logger.SetLevel(level)
 }
 
 // LoadAsset loads an asset
 func (am *AssetManager) LoadAsset(filePath string) (asset.Asset, error) {
-	data, err := am.loader.Load(filePath)
+	data, err := am.Loader.Load(filePath)
 	if err != nil {
 		errStr := fmt.Sprintf(fmtLoadAsset, filePath, err.Error())
 
-		am.logger.Error(errStr)
+		am.Error(errStr)
 	}
 
 	return data, err
@@ -223,6 +78,7 @@ func (am *AssetManager) LoadAsset(filePath string) (asset.Asset, error) {
 
 // LoadFileStream streams an MPQ file from a source file path
 func (am *AssetManager) LoadFileStream(filePath string) (d2interface.DataStream, error) {
+	am.Logger.Debugf("Loading FileStream: %s", filePath)
 	return am.LoadAsset(filePath)
 }
 
@@ -243,7 +99,9 @@ func (am *AssetManager) LoadFile(filePath string) ([]byte, error) {
 
 // FileExists checks if a file exists on the underlying file system at the given file path.
 func (am *AssetManager) FileExists(filePath string) (bool, error) {
-	if loadedAsset, err := am.loader.Load(filePath); err != nil || loadedAsset == nil {
+	am.Logger.Debugf("Checking if file exists %s", filePath)
+
+	if loadedAsset, err := am.Loader.Load(filePath); err != nil || loadedAsset == nil {
 		return false, err
 	}
 
@@ -264,7 +122,7 @@ func (am *AssetManager) LoadAnimationWithEffect(animationPath, palettePath strin
 		return animation.(d2interface.Animation).Clone(), nil
 	}
 
-	am.logger.Debug(fmt.Sprintf(fmtLoadAnimation, animationPath, palettePath, effect))
+	am.Debugf(fmtLoadAnimation, animationPath, palettePath, effect)
 
 	animAsset, err := am.LoadAsset(animationPath)
 	if err != nil {
@@ -300,7 +158,7 @@ func (am *AssetManager) LoadAnimationWithEffect(animationPath, palettePath strin
 
 // LoadComposite creates a composite object from a ObjectLookupRecord and palettePath describing it
 func (am *AssetManager) LoadComposite(baseType d2enum.ObjectType, token, palettePath string) (*Composite, error) {
-	am.logger.Debug(fmt.Sprintf(fmtLoadComposite, baseType, token, palettePath))
+	am.Debugf(fmtLoadComposite, baseType, token, palettePath)
 
 	c := &Composite{
 		AssetManager: am,
@@ -337,7 +195,7 @@ func (am *AssetManager) LoadFont(tablePath, spritePath, palettePath string) (*Fo
 		return nil, fmt.Errorf("invalid font table format: %s", tablePath)
 	}
 
-	am.logger.Debug(fmt.Sprintf(fmtLoadFont, tablePath, spritePath, palettePath))
+	am.Debugf(fmtLoadFont, tablePath, spritePath, palettePath)
 
 	font := &Font{
 		table: tableData,
@@ -365,7 +223,7 @@ func (am *AssetManager) LoadPalette(palettePath string) (d2interface.Palette, er
 		return nil, fmt.Errorf("not an instance of a palette: %s", palettePath)
 	}
 
-	am.logger.Debug(fmt.Sprintf(fmtLoadPalette, palettePath))
+	am.Debugf(fmtLoadPalette, palettePath)
 
 	data, err := am.LoadFile(palettePath)
 	if err != nil {
@@ -394,7 +252,7 @@ func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary,
 		return nil, fmt.Errorf("table not found: %s", tablePath)
 	}
 
-	am.logger.Debug(fmt.Sprintf(fmtLoadStringTable, tablePath))
+	am.Debugf(fmtLoadStringTable, tablePath)
 
 	am.tables = append(am.tables, table)
 
@@ -431,7 +289,7 @@ func (am *AssetManager) LoadPaletteTransform(path string) (*d2pl2.PL2, error) {
 		return nil, err
 	}
 
-	am.logger.Debug(fmt.Sprintf(fmtLoadTransform, path))
+	am.Debugf(fmtLoadTransform, path)
 
 	if err := am.transforms.Insert(path, pl2, 1); err != nil {
 		return nil, err
@@ -453,7 +311,7 @@ func (am *AssetManager) LoadDataDictionary(path string) (*d2txt.DataDictionary, 
 		return nil, err
 	}
 
-	am.logger.Debug(fmt.Sprintf(fmtLoadDict, path))
+	am.Debugf(fmtLoadDict, path)
 
 	return d2txt.LoadDataDictionary(data), nil
 }
@@ -511,23 +369,6 @@ func (am *AssetManager) loadDCC(path string,
 	}
 
 	return animation, nil
-}
-
-func (am *AssetManager) initAnimationData(path string) error {
-	animDataBytes, err := am.LoadFile(path)
-	if err != nil {
-		return err
-	}
-
-	am.logger.Debug(fmt.Sprintf(fmtLoadAnimData, path))
-
-	animData := d2data.LoadAnimationData(animDataBytes)
-
-	am.logger.Infof("Loaded %d animation data records", len(animData))
-
-	am.Records.Animation.Data = animData
-
-	return nil
 }
 
 // BindTerminalCommands binds the in-game terminal comands for the asset manager.

@@ -15,10 +15,8 @@ import (
 
 // Label represents a user interface label
 type Label struct {
-	manager         *UIManager
+	*BaseWidget
 	text            string
-	X               int
-	Y               int
 	Alignment       d2gui.HorizontalAlign
 	font            *d2asset.Font
 	Color           map[int]color.Color
@@ -33,10 +31,13 @@ func (ui *UIManager) NewLabel(fontPath, palettePath string) *Label {
 		return nil
 	}
 
+	base := NewBaseWidget(ui)
+
 	result := &Label{
-		Alignment: d2gui.HorizontalAlignLeft,
-		Color:     map[int]color.Color{0: color.White},
-		font:      font,
+		BaseWidget: base,
+		Alignment:  d2gui.HorizontalAlignLeft,
+		Color:      map[int]color.Color{0: color.White},
+		font:       font,
 	}
 
 	result.bindManager(ui)
@@ -46,7 +47,7 @@ func (ui *UIManager) NewLabel(fontPath, palettePath string) *Label {
 
 // Render draws the label on the screen, respliting the lines to allow for other alignments.
 func (v *Label) Render(target d2interface.Surface) {
-	target.PushTranslation(v.X, v.Y)
+	target.PushTranslation(v.GetPosition())
 
 	lines := strings.Split(v.text, "\n")
 	yOffset := 0
@@ -89,17 +90,6 @@ func (v *Label) Render(target d2interface.Surface) {
 	}
 
 	target.Pop()
-}
-
-// bindManager binds the label to the UI manager
-func (v *Label) bindManager(manager *UIManager) {
-	v.manager = manager
-}
-
-// SetPosition moves the label to the specified location
-func (v *Label) SetPosition(x, y int) {
-	v.X = x
-	v.Y = y
 }
 
 // GetSize returns the size of the label
@@ -181,6 +171,11 @@ func (v *Label) getAlignOffset(textWidth int) int {
 		log.Fatal("Invalid Alignment")
 		return 0
 	}
+}
+
+// Advance is a no-op
+func (v *Label) Advance(elapsed float64) error {
+	return nil
 }
 
 func getColor(token ColorToken) color.Color {

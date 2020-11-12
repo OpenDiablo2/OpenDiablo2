@@ -627,6 +627,7 @@ func (h *HUD) renderNewSkillsButton(x, _ int, target d2interface.Surface) error 
 	return nil
 }
 
+//nolint:golint,dupl // we clean this up later
 func (h *HUD) renderHealthTooltip(target d2interface.Surface) {
 	mx, my := h.lastMouseX, h.lastMouseY
 
@@ -644,6 +645,7 @@ func (h *HUD) renderHealthTooltip(target d2interface.Surface) {
 	h.healthTooltip.Render(target)
 }
 
+//nolint:golint,dupl // we clean this up later
 func (h *HUD) renderManaTooltip(target d2interface.Surface) {
 	mx, my := h.lastMouseX, h.lastMouseY
 
@@ -678,7 +680,6 @@ func (h *HUD) renderRunWalkTooltip(target d2interface.Surface) {
 	}
 
 	h.runWalkTooltip.SetText(h.asset.TranslateString(stringTableKey))
-
 	h.runWalkTooltip.Render(target)
 }
 

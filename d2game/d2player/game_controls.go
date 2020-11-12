@@ -368,7 +368,7 @@ func NewGameControls(
 		inputListener:  inputListener,
 		mapRenderer:    mapRenderer,
 		inventory:      NewInventory(asset, ui, inventoryRecord),
-		skilltree:      newSkillTree(hero.Skills, hero.Class, asset, renderer, ui, guiManager),
+		skilltree:      newSkillTree(hero.Skills, hero.Class, asset, ui),
 		heroStatsPanel: NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
 		HelpOverlay:    helpOverlay,
 		keyMap:         keyMap,
@@ -781,11 +781,6 @@ func (g *GameControls) renderPanels(target d2interface.Surface) error {
 	g.heroStatsPanel.Render(target)
 	g.inventory.Render(target)
 
-	err := g.skilltree.Render(target)
-	if err != nil {
-		log.Println(err)
-	}
-
 	return nil
 }
 
@@ -1022,18 +1017,23 @@ func (g *GameControls) bindLearnSkillsCommand(term d2interface.Terminal) error {
 				continue
 			}
 
-			skill, skillErr := g.heroState.CreateHeroSkill(1, skillDetailRecord.Skill)
-			if skill == nil {
-				continue
-			}
+			if skill, ok := g.hero.Skills[skillDetailRecord.ID]; ok {
+				skill.SkillPoints++
+				learnedSkillsCount++
+			} else {
+				skill, skillErr := g.heroState.CreateHeroSkill(1, skillDetailRecord.Skill)
+				if skill == nil {
+					continue
+				}
 
-			learnedSkillsCount++
+				learnedSkillsCount++
 
-			g.hero.Skills[skill.ID] = skill
+				g.hero.Skills[skill.ID] = skill
 
-			if skillErr != nil {
-				err = skillErr
-				break
+				if skillErr != nil {
+					err = skillErr
+					break
+				}
 			}
 		}
 

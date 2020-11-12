@@ -4,6 +4,7 @@ package d2app
 import (
 	"bytes"
 	"container/ring"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"image"
@@ -12,12 +13,15 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"runtime/pprof"
 	"strconv"
 	"strings"
 	"sync"
 	"syscall"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data"
 
 	"github.com/pkg/profile"
 	"golang.org/x/image/colornames"
@@ -73,6 +77,7 @@ type App struct {
 	tAllocSamples     *ring.Ring
 	guiManager        *d2gui.GuiManager
 	config            *d2config.Configuration
+	logger            *d2util.Logger
 	errorMessage      error
 	*Options
 }
@@ -98,21 +103,25 @@ const (
 	debugPopN       = 6
 )
 
+const (
+	appLoggerPrefix = "App"
+)
+
 // Create creates a new instance of the application
 func Create(gitBranch, gitCommit string) *App {
 	assetManager, assetError := d2asset.NewAssetManager()
-
-	// we can throw away the error here because by this time it's already been loaded
-	config, _ := assetManager.LoadConfig()
+	logger := d2util.NewLogger()
+	logger.SetPrefix(appLoggerPrefix)
+	logger.SetLevel(d2util.LogLevelNone)
 
 	return &App{
 		gitBranch: gitBranch,
 		gitCommit: gitCommit,
 		asset:     assetManager,
-		config:    config,
 		Options: &Options{
 			Server: &d2networking.ServerOptions{},
 		},
+		logger:       logger,
 		errorMessage: assetError,
 	}
 }
@@ -240,9 +249,56 @@ func (a *App) parseArguments() {
 	kingpin.Parse()
 }
 
+// LoadConfig loads the OpenDiablo2 config file
+func (a *App) LoadConfig() (*d2config.Configuration, error) {
+	// by now the, the loader has initialized and added our config dirs as sources...
+	configBaseName := filepath.Base(d2config.DefaultConfigPath())
+
+	configAsset, _ := a.asset.LoadAsset(configBaseName)
+
+	config := &d2config.Configuration{}
+
+	// create the default if not found
+	if configAsset == nil {
+		config = d2config.DefaultConfig()
+
+		fullPath := filepath.Join(config.Dir(), config.Base())
+		config.SetPath(fullPath)
+
+		a.logger.Infof("creating default configuration file at %s...", fullPath)
+
+		saveErr := config.Save()
+
+		return config, saveErr
+	}
+
+	if err := json.NewDecoder(configAsset).Decode(config); err != nil {
+		return nil, err
+	}
+
+	config.SetPath(filepath.Join(configAsset.Source().Path(), configAsset.Path()))
+
+	a.logger.Infof("loaded configuration file from %s", config.Path())
+
+	return config, nil
+}
+
 // Run executes the application and kicks off the entire game process
 func (a *App) Run() error {
 	a.parseArguments()
+
+	// add our possible config directories
+	_, _ = a.asset.AddSource(filepath.Dir(d2config.LocalConfigPath()))
+	_, _ = a.asset.AddSource(filepath.Dir(d2config.DefaultConfigPath()))
+
+	config, err := a.LoadConfig()
+	if err != nil {
+		return err
+	}
+
+	a.config = config
+
+	a.asset.SetLogLevel(config.LogLevel)
 
 	// print version and exit if `--version` was supplied
 	if *a.Options.printVersion {
@@ -256,7 +312,8 @@ func (a *App) Run() error {
 			a.gitCommit = "build"
 		}
 
-		return fmt.Errorf(fmtVersion, a.gitBranch, a.gitCommit)
+		fmt.Printf(fmtVersion, a.gitBranch, a.gitCommit)
+		os.Exit(0)
 	}
 
 	logLevel := *a.Options.LogLevel
@@ -287,14 +344,15 @@ func (a *App) Run() error {
 	}
 
 	windowTitle := fmt.Sprintf("OpenDiablo2 (%s)", a.gitBranch)
+
 	// If we fail to initialize, we will show the error screen
 	if err := a.initialize(); err != nil {
 		if a.errorMessage == nil {
 			a.errorMessage = err // if there was an error during init, don't clobber it
 		}
 
-		if gameErr := a.renderer.Run(a.updateInitError, updateNOOP, 800, 600,
-			windowTitle); gameErr != nil {
+		gameErr := a.renderer.Run(a.updateInitError, updateNOOP, 800, 600, windowTitle)
+		if gameErr != nil {
 			return gameErr
 		}
 
@@ -311,6 +369,14 @@ func (a *App) Run() error {
 }
 
 func (a *App) initialize() error {
+	if err := a.initConfig(a.config); err != nil {
+		return err
+	}
+
+	if err := a.initDataDictionaries(); err != nil {
+		return err
+	}
+
 	a.timeScale = 1.0
 	a.lastTime = d2util.Now()
 	a.lastScreenAdvance = a.lastTime
@@ -340,12 +406,12 @@ func (a *App) initialize() error {
 		}
 	}
 
-	var err error
-
-	a.guiManager, err = d2gui.CreateGuiManager(a.asset, a.inputManager)
+	gui, err := d2gui.CreateGuiManager(a.asset, a.inputManager)
 	if err != nil {
 		return err
 	}
+
+	a.guiManager = gui
 
 	a.screen = d2screen.NewScreenManager(a.ui, a.guiManager)
 
@@ -356,6 +422,104 @@ func (a *App) initialize() error {
 	}
 
 	a.ui.Initialize()
+
+	return nil
+}
+
+const (
+	fmtErrSourceNotFound = `file not found: %s
+
+Please check your config file at %s
+
+Also, verify that the MPQ files exist at %s
+
+Capitalization in the file name matters.
+`
+)
+
+func (a *App) initConfig(config *d2config.Configuration) error {
+	a.config = config
+
+	for _, mpqName := range a.config.MpqLoadOrder {
+		cleanDir := filepath.Clean(a.config.MpqPath)
+		srcPath := filepath.Join(cleanDir, mpqName)
+
+		_, err := a.asset.AddSource(srcPath)
+		if err != nil {
+			// nolint:stylecheck // we want a multiline error message here..
+			return fmt.Errorf(fmtErrSourceNotFound, srcPath, a.config.Path(), a.config.MpqPath)
+		}
+	}
+
+	return nil
+}
+
+func (a *App) initDataDictionaries() error {
+	dictPaths := []string{
+		d2resource.LevelType, d2resource.LevelPreset, d2resource.LevelWarp,
+		d2resource.ObjectType, d2resource.ObjectDetails, d2resource.Weapons,
+		d2resource.Armor, d2resource.Misc, d2resource.Books, d2resource.ItemTypes,
+		d2resource.UniqueItems, d2resource.Missiles, d2resource.SoundSettings,
+		d2resource.MonStats, d2resource.MonStats2, d2resource.MonPreset,
+		d2resource.MonProp, d2resource.MonType, d2resource.MonMode,
+		d2resource.MagicPrefix, d2resource.MagicSuffix, d2resource.ItemStatCost,
+		d2resource.ItemRatio, d2resource.StorePage, d2resource.Overlays,
+		d2resource.CharStats, d2resource.Hireling, d2resource.Experience,
+		d2resource.Gems, d2resource.QualityItems, d2resource.Runes,
+		d2resource.DifficultyLevels, d2resource.AutoMap, d2resource.LevelDetails,
+		d2resource.LevelMaze, d2resource.LevelSubstitutions, d2resource.CubeRecipes,
+		d2resource.SuperUniques, d2resource.Inventory, d2resource.Skills,
+		d2resource.SkillCalc, d2resource.MissileCalc, d2resource.Properties,
+		d2resource.SkillDesc, d2resource.BodyLocations, d2resource.Sets,
+		d2resource.SetItems, d2resource.AutoMagic, d2resource.TreasureClass,
+		d2resource.TreasureClassEx, d2resource.States, d2resource.SoundEnvirons,
+		d2resource.Shrines, d2resource.ElemType, d2resource.PlrMode,
+		d2resource.PetType, d2resource.NPC, d2resource.MonsterUniqueModifier,
+		d2resource.MonsterEquipment, d2resource.UniqueAppellation, d2resource.MonsterLevel,
+		d2resource.MonsterSound, d2resource.MonsterSequence, d2resource.PlayerClass,
+		d2resource.MonsterPlacement, d2resource.ObjectGroup, d2resource.CompCode,
+		d2resource.MonsterAI, d2resource.RarePrefix, d2resource.RareSuffix,
+		d2resource.Events, d2resource.Colors, d2resource.ArmorType,
+		d2resource.WeaponClass, d2resource.PlayerType, d2resource.Composite,
+		d2resource.HitClass, d2resource.UniquePrefix, d2resource.UniqueSuffix,
+		d2resource.CubeModifier, d2resource.CubeType, d2resource.HirelingDescription,
+		d2resource.LowQualityItems,
+	}
+
+	a.logger.Info("Initializing asset manager")
+
+	for _, path := range dictPaths {
+		err := a.asset.LoadRecords(path)
+		if err != nil {
+			return err
+		}
+	}
+
+	err := a.initAnimationData(d2resource.AnimationData)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+const (
+	fmtLoadAnimData = "loading animation data from: %s"
+)
+
+func (a *App) initAnimationData(path string) error {
+	animDataBytes, err := a.asset.LoadFile(path)
+	if err != nil {
+		return err
+	}
+
+	a.logger.Debug(fmt.Sprintf(fmtLoadAnimData, path))
+
+	animData := d2data.LoadAnimationData(animDataBytes)
+
+	a.logger.Infof("Loaded %d animation data records", len(animData))
+
+	a.asset.Records.Animation.Data = animData
 
 	return nil
 }
@@ -730,10 +894,10 @@ func (a *App) updateInitError(target d2interface.Surface) error {
 }
 
 // ToMainMenu forces the game to transition to the Main Menu
-func (a *App) ToMainMenu() {
+func (a *App) ToMainMenu(errorMessageOptional ...string) {
 	buildInfo := d2gamescreen.BuildInfo{Branch: a.gitBranch, Commit: a.gitCommit}
 
-	mainMenu, err := d2gamescreen.CreateMainMenu(a, a.asset, a.renderer, a.inputManager, a.audio, a.ui, buildInfo)
+	mainMenu, err := d2gamescreen.CreateMainMenu(a, a.asset, a.renderer, a.inputManager, a.audio, a.ui, buildInfo, errorMessageOptional...)
 	if err != nil {
 		log.Print(err)
 		return
@@ -761,12 +925,14 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 	}
 
 	if err = gameClient.Open(host, filePath); err != nil {
-		// https://github.com/OpenDiablo2/OpenDiablo2/issues/805
-		fmt.Printf("can not connect to the host: %s", host)
+		errorMessage := fmt.Sprintf("can not connect to the host: %s", host)
+		fmt.Println(errorMessage)
+		a.ToMainMenu(errorMessage)
+	} else {
+		a.screen.SetNextScreen(d2gamescreen.CreateGame(
+			a, a.asset, a.ui, a.renderer, a.inputManager, a.audio, gameClient, a.terminal, a.guiManager,
+		))
 	}
-
-	a.screen.SetNextScreen(d2gamescreen.CreateGame(a, a.asset, a.ui, a.renderer, a.inputManager,
-		a.audio, gameClient, a.terminal, a.guiManager))
 }
 
 // ToCharacterSelect forces the game to transition to the Character Select (load character) screen
@@ -794,4 +960,9 @@ func (a *App) ToMapEngineTest(region, level int) {
 // ToCredits forces the game to transition to the credits screen
 func (a *App) ToCredits() {
 	a.screen.SetNextScreen(d2gamescreen.CreateCredits(a, a.asset, a.renderer, a.ui))
+}
+
+// ToCinematics forces the game to transition to the cinematics menu
+func (a *App) ToCinematics() {
+	a.screen.SetNextScreen(d2gamescreen.CreateCinematics(a, a.asset, a.renderer, a.audio, a.ui))
 }

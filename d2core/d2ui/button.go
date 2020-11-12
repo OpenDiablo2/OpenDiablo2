@@ -1,7 +1,6 @@
 package d2ui
 
 import (
-	"fmt"
 	"image"
 	"log"
 
@@ -242,32 +241,28 @@ var _ Widget = &Button{} // static check to ensure button implements widget
 
 // Button defines a standard wide UI button
 type Button struct {
-	manager               *UIManager
+	*BaseWidget
 	buttonLayout          ButtonLayout
 	normalSurface         d2interface.Surface
 	pressedSurface        d2interface.Surface
 	toggledSurface        d2interface.Surface
 	pressedToggledSurface d2interface.Surface
 	disabledSurface       d2interface.Surface
-	x                     int
-	y                     int
-	width                 int
-	height                int
 	onClick               func()
 	enabled               bool
-	visible               bool
 	pressed               bool
 	toggled               bool
 }
 
 // NewButton creates an instance of Button
 func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
+	base := NewBaseWidget(ui)
+	base.SetVisible(true)
+
 	btn := &Button{
-		width:   0,
-		height:  0,
-		visible: true,
-		enabled: true,
-		pressed: false,
+		BaseWidget: base,
+		enabled:    true,
+		pressed:    false,
 	}
 
 	buttonLayout := getButtonLayouts()[buttonType]
@@ -336,11 +331,8 @@ func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, lab
 
 	// buttons always have a base image
 	if v.buttonLayout.HasImage {
-		err := btnSprite.RenderSegmented(v.normalSurface, btnLayout.XSegments,
+		btnSprite.RenderSegmented(v.normalSurface, btnLayout.XSegments,
 			btnLayout.YSegments, btnLayout.BaseFrame)
-		if err != nil {
-			fmt.Printf("failed to render button normalSurface, err: %v\n", err)
-		}
 	}
 
 	_, labelHeight := label.GetSize()
@@ -416,19 +408,11 @@ func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, lab
 
 		*state.prerenderdestination = surface
 
-		err := btnSprite.RenderSegmented(*state.prerenderdestination, xSeg, ySeg, state.baseFrame)
-		if err != nil {
-			fmt.Printf(state.fmtErr, err)
-		}
+		btnSprite.RenderSegmented(*state.prerenderdestination, xSeg, ySeg, state.baseFrame)
 
 		label.SetPosition(state.offsetX, state.offsetY)
 		label.Render(*state.prerenderdestination)
 	}
-}
-
-// bindManager binds the button to the UI manager
-func (v *Button) bindManager(manager *UIManager) {
-	v.manager = manager
 }
 
 // OnActivated defines the callback handler for the activate event
@@ -446,7 +430,7 @@ func (v *Button) Activate() {
 }
 
 // Render renders the button
-func (v *Button) Render(target d2interface.Surface) error {
+func (v *Button) Render(target d2interface.Surface) {
 	target.PushFilter(d2enum.FilterNearest)
 	defer target.Pop()
 
@@ -471,8 +455,6 @@ func (v *Button) Render(target d2interface.Surface) error {
 	default:
 		target.Render(v.normalSurface)
 	}
-
-	return nil
 }
 
 // Toggle negates the toggled state of the button
@@ -493,32 +475,6 @@ func (v *Button) GetEnabled() bool {
 // SetEnabled sets the enabled state
 func (v *Button) SetEnabled(enabled bool) {
 	v.enabled = enabled
-}
-
-// GetSize returns the size of the button
-func (v *Button) GetSize() (width, height int) {
-	return v.width, v.height
-}
-
-// SetPosition moves the button
-func (v *Button) SetPosition(x, y int) {
-	v.x = x
-	v.y = y
-}
-
-// GetPosition returns the location of the button
-func (v *Button) GetPosition() (x, y int) {
-	return v.x, v.y
-}
-
-// GetVisible returns the visibility of the button
-func (v *Button) GetVisible() bool {
-	return v.visible
-}
-
-// SetVisible sets the visibility of the button
-func (v *Button) SetVisible(visible bool) {
-	v.visible = visible
 }
 
 // GetPressed returns the pressed state of the button

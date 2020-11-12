@@ -174,9 +174,7 @@ func (g *Inventory) Render(target d2interface.Surface) {
 }
 
 func (g *Inventory) renderFrame(target d2interface.Surface) error {
-	if err := g.frame.Render(target); err != nil {
-		return err
-	}
+	g.frame.Render(target)
 
 	frames := []int{
 		frameInventoryTopLeft,
@@ -241,6 +239,7 @@ func (g *Inventory) renderItemDescription(target d2interface.Surface, i Inventor
 	lines := i.GetItemDescription()
 	g.itemTooltip.SetTextLines(lines)
 	_, y := g.grid.SlotToScreen(i.InventoryGridSlot())
+
 	g.itemTooltip.SetPosition(g.hoverX, y)
 	g.itemTooltip.Render(target)
 }

@@ -8,6 +8,9 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
+// static check that UIFrame implements Widget
+var _ Widget = &UIFrame{}
+
 type frameOrientation = int
 
 // Frame orientations
@@ -19,11 +22,9 @@ const (
 // UIFrame is a representation of a ui panel that occupies the left or right half of the screen
 // when it is visible.
 type UIFrame struct {
+	*BaseWidget
 	asset            *d2asset.AssetManager
-	uiManager        *UIManager
 	frame            *Sprite
-	originX          int
-	originY          int
 	frameOrientation frameOrientation
 }
 
@@ -58,12 +59,13 @@ func NewUIFrame(
 		originY = 0
 	}
 
+	base := NewBaseWidget(uiManager)
+	base.SetPosition(originX, originY)
+
 	frame := &UIFrame{
+		BaseWidget:       base,
 		asset:            asset,
-		uiManager:        uiManager,
 		frameOrientation: frameOrientation,
-		originX:          originX,
-		originY:          originY,
 	}
 	frame.Load()
 
@@ -72,7 +74,7 @@ func NewUIFrame(
 
 // Load the necessary frame resources
 func (u *UIFrame) Load() {
-	sprite, err := u.uiManager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
+	sprite, err := u.manager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
 	}
@@ -81,15 +83,17 @@ func (u *UIFrame) Load() {
 }
 
 // Render the frame to the target surface
-func (u *UIFrame) Render(target d2interface.Surface) error {
+func (u *UIFrame) Render(target d2interface.Surface) {
 	switch u.frameOrientation {
 	case FrameLeft:
-		return u.renderLeft(target)
+		if err := u.renderLeft(target); err != nil {
+			log.Printf("Render error %e", err)
+		}
 	case FrameRight:
-		return u.renderRight(target)
+		if err := u.renderRight(target); err != nil {
+			log.Printf("Render error %e", err)
+		}
 	}
-
-	return nil
 }
 
 func (u *UIFrame) renderLeft(target d2interface.Surface) error {
@@ -105,7 +109,7 @@ func (u *UIFrame) renderLeft(target d2interface.Surface) error {
 	// the frame coordinates
 	coord := make(map[int]*struct{ x, y int })
 
-	startX, startY := u.originX, u.originY
+	startX, startY := u.GetPosition()
 	currentX, currentY := startX, startY
 
 	// first determine the coordinates for each frame
@@ -162,7 +166,7 @@ func (u *UIFrame) renderRight(target d2interface.Surface) error {
 	// the frame coordinates
 	coord := make(map[int]*struct{ x, y int })
 
-	startX, startY := u.originX, u.originY
+	startX, startY := u.GetPosition()
 	currentX, currentY := startX, startY
 
 	// first determine the coordinates for each frame
@@ -227,5 +231,10 @@ func (u *UIFrame) renderFramePiece(sfc d2interface.Surface, x, y, idx int) error
 
 	u.frame.Render(sfc)
 
+	return nil
+}
+
+// Advance is a no-op
+func (u *UIFrame) Advance(elapsed float64) error {
 	return nil
 }

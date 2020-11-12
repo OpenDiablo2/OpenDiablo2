@@ -208,9 +208,7 @@ func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) error {
 }
 
 func (s *HeroStatsPanel) renderStaticPanelFrames(target d2interface.Surface) error {
-	if err := s.frame.Render(target); err != nil {
-		return err
-	}
+	s.frame.Render(target)
 
 	frames := []int{
 		statsPanelTopLeft,

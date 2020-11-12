@@ -511,10 +511,7 @@ func (v *SelectHeroClass) onOkButtonClicked() {
 
 // Render renders the Select Hero Class screen
 func (v *SelectHeroClass) Render(screen d2interface.Surface) {
-	if err := v.bgImage.RenderSegmented(screen, 4, 3, 0); err != nil {
-		return
-	}
-
+	v.bgImage.RenderSegmented(screen, 4, 3, 0)
 	v.headingLabel.Render(screen)
 
 	if v.selectedHero != d2enum.HeroNone {

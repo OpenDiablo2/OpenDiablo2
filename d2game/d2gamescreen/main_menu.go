@@ -4,6 +4,7 @@ package d2gamescreen
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"runtime"
@@ -57,14 +58,17 @@ const (
 	multiplayerBtnX, multiplayerBtnY         = 264, 330
 	tcpNetBtnX, tcpNetBtnY                   = 264, 280
 	networkCancelBtnX, networkCancelBtnY     = 264, 540
-	tcpHostBtnX, tcpHostBtnY                 = 264, 280
-	tcpJoinBtnX, tcpJoinBtnY                 = 264, 320
+	tcpHostBtnX, tcpHostBtnY                 = 264, 200
+	tcpJoinBtnX, tcpJoinBtnY                 = 264, 240
+	errorLabelX, errorLabelY                 = 400, 250
+	machineIPX, machineIPY                   = 400, 90
 )
 
 const (
 	white       = 0xffffffff
 	lightYellow = 0xffff8cff
 	gold        = 0xd8c480ff
+	red         = 0xff0000ff
 )
 
 const (
@@ -107,6 +111,8 @@ type MainMenu struct {
 	commitLabel         *d2ui.Label
 	tcpIPOptionsLabel   *d2ui.Label
 	tcpJoinGameLabel    *d2ui.Label
+	machineIP           *d2ui.Label
+	errorLabel          *d2ui.Label
 	tcpJoinGameEntry    *d2ui.TextBox
 	screenMode          mainMenuScreenMode
 	leftButtonHeld      bool
@@ -132,6 +138,7 @@ func CreateMainMenu(
 	audioProvider d2interface.AudioProvider,
 	ui *d2ui.UIManager,
 	buildInfo BuildInfo,
+	errorMessageOptional ...string,
 ) (*MainMenu, error) {
 	heroStateFactory, err := d2hero.NewHeroStateFactory(asset)
 	if err != nil {
@@ -149,6 +156,11 @@ func CreateMainMenu(
 		buildInfo:      buildInfo,
 		uiManager:      ui,
 		heroState:      heroStateFactory,
+	}
+
+	if len(errorMessageOptional) != 0 {
+		mainMenu.errorLabel = ui.NewLabel(d2resource.FontFormal12, d2resource.PaletteUnits)
+		mainMenu.errorLabel.SetText(errorMessageOptional[0])
 	}
 
 	return mainMenu, nil
@@ -252,12 +264,21 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 
 	v.tcpJoinGameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.tcpJoinGameLabel.Alignment = d2gui.HorizontalAlignCenter
-
 	v.tcpJoinGameLabel.SetText("Enter Host IP Address\nto Join Game")
-
 	v.tcpJoinGameLabel.Color[0] = rgbaColor(gold)
-
 	v.tcpJoinGameLabel.SetPosition(joinGameX, joinGameY)
+
+	v.machineIP = v.uiManager.NewLabel(d2resource.Font24, d2resource.PaletteUnits)
+	v.machineIP.Alignment = d2gui.HorizontalAlignCenter
+	v.machineIP.SetText("Your IP address is:\n" + v.getLocalIP())
+	v.machineIP.Color[0] = rgbaColor(lightYellow)
+	v.machineIP.SetPosition(machineIPX, machineIPY)
+
+	if v.errorLabel != nil {
+		v.errorLabel.SetPosition(errorLabelX, errorLabelY)
+		v.errorLabel.Alignment = d2gui.HorizontalAlignCenter
+		v.errorLabel.Color[0] = rgbaColor(red)
+	}
 }
 
 func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
@@ -308,6 +329,7 @@ func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
 
 	v.cinematicsButton = v.uiManager.NewButton(d2ui.ButtonTypeShort, "CINEMATICS")
 	v.cinematicsButton.SetPosition(cineBtnX, cineBtnY)
+	v.cinematicsButton.OnActivated(func() { v.onCinematicsButtonClicked() })
 	loading.Progress(seventyPercent)
 
 	v.singlePlayerButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, "SINGLE PLAYER")
@@ -406,6 +428,10 @@ func (v *MainMenu) onCreditsButtonClicked() {
 	v.navigator.ToCredits()
 }
 
+func (v *MainMenu) onCinematicsButtonClicked() {
+	v.navigator.ToCinematics()
+}
+
 // Render renders the main menu
 func (v *MainMenu) Render(screen d2interface.Surface) {
 	v.renderBackgrounds(screen)
@@ -416,21 +442,14 @@ func (v *MainMenu) Render(screen d2interface.Surface) {
 func (v *MainMenu) renderBackgrounds(screen d2interface.Surface) {
 	switch v.screenMode {
 	case ScreenModeTrademark:
-		if err := v.trademarkBackground.RenderSegmented(screen, 4, 3, 0); err != nil {
-			return
-		}
+		v.trademarkBackground.RenderSegmented(screen, 4, 3, 0)
 	case ScreenModeServerIP:
-		if err := v.serverIPBackground.RenderSegmented(screen, 2, 1, 0); err != nil {
-			return
-		}
+		v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0)
+		v.serverIPBackground.RenderSegmented(screen, 2, 1, 0)
 	case ScreenModeTCPIP:
-		if err := v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0); err != nil {
-			return
-		}
+		v.tcpIPBackground.RenderSegmented(screen, 4, 3, 0)
 	default:
-		if err := v.background.RenderSegmented(screen, 4, 3, 0); err != nil {
-			return
-		}
+		v.background.RenderSegmented(screen, 4, 3, 0)
 	}
 }
 
@@ -449,11 +468,17 @@ func (v *MainMenu) renderLabels(screen d2interface.Surface) {
 	case ScreenModeServerIP:
 		v.tcpIPOptionsLabel.Render(screen)
 		v.tcpJoinGameLabel.Render(screen)
+		v.machineIP.Render(screen)
 	case ScreenModeTCPIP:
 		v.tcpIPOptionsLabel.Render(screen)
+		v.machineIP.Render(screen)
 	case ScreenModeTrademark:
 		v.copyrightLabel.Render(screen)
 		v.copyrightLabel2.Render(screen)
+
+		if v.errorLabel != nil {
+			v.errorLabel.Render(screen)
+		}
 	case ScreenModeMainMenu:
 		v.openDiabloLabel.Render(screen)
 		v.versionLabel.Render(screen)
@@ -594,4 +619,26 @@ func (v *MainMenu) onBtnTCPIPCancelClicked() {
 
 func (v *MainMenu) onBtnTCPIPOkClicked() {
 	v.navigator.ToCharacterSelect(d2clientconnectiontype.LANClient, v.tcpJoinGameEntry.GetText())
+}
+
+// getLocalIP returns local machine IP address
+func (v *MainMenu) getLocalIP() string {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+
+	if err != nil {
+		log.Println(err)
+
+		return "cannot reach network"
+	}
+
+	err = conn.Close()
+	if err != nil {
+		log.Println(err)
+
+		return "unexpected error occurred while closing test connection"
+	}
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddr.IP.String()
 }
