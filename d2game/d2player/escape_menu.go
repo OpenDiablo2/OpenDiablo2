@@ -143,18 +143,19 @@ func NewEscapeMenu(navigator d2interface.Navigator,
 	assetManager *d2asset.AssetManager,
 	keyMap *KeyMap,
 ) *EscapeMenu {
-	keyBindingMenu := NewKeyBindingMenu(assetManager, renderer, uiManager, guiManager, keyMap)
-	keyBindingMenu.Load()
 
 	m := &EscapeMenu{
-		audioProvider:  audioProvider,
-		renderer:       renderer,
-		navigator:      navigator,
-		guiManager:     guiManager,
-		assetManager:   assetManager,
-		keyMap:         keyMap,
-		keyBindingMenu: keyBindingMenu,
+		audioProvider: audioProvider,
+		renderer:      renderer,
+		navigator:     navigator,
+		guiManager:    guiManager,
+		assetManager:  assetManager,
+		keyMap:        keyMap,
 	}
+
+	keyBindingMenu := NewKeyBindingMenu(assetManager, renderer, uiManager, guiManager, keyMap, m)
+	keyBindingMenu.Load()
+	m.keyBindingMenu = keyBindingMenu
 
 	m.layouts = []*layout{
 		mainLayoutID:              m.newMainLayout(),
@@ -395,6 +396,7 @@ func (m *EscapeMenu) OnEscKey() {
 		automapOptionsLayoutID,
 		configureControlsLayoutID:
 		m.setLayout(optionsLayoutID)
+		m.keyBindingMenu.Close()
 		return
 	}
 
@@ -538,9 +540,7 @@ func (m *EscapeMenu) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 		return false
 	}
 
-	fmt.Println("escape menu mouse down binding")
 	if m.currentLayout == configureControlsLayoutID {
-		fmt.Println("configure controls layout mouse down")
 		m.keyBindingMenu.OnMouseButtonDown(event)
 	}
 
@@ -552,9 +552,7 @@ func (m *EscapeMenu) OnMouseButtonUp(event d2interface.MouseEvent) bool {
 		return false
 	}
 
-	fmt.Println("escape menu mouse up binding")
 	if m.currentLayout == configureControlsLayoutID {
-		fmt.Println("configure controls layout mouse up")
 		m.keyBindingMenu.OnMouseButtonUp(event)
 	}
 

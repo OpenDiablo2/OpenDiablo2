@@ -1,7 +1,6 @@
 package d2player
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 
@@ -122,22 +121,21 @@ func (lb *LabelButton) GetLayout() *d2gui.Layout {
 // Box represents the menu to view/edit the
 // key bindings
 type Box struct {
-	renderer      d2interface.Renderer
-	asset         *d2asset.AssetManager
-	isOpen        bool
-	sprites       []*d2ui.Sprite
-	uiManager     *d2ui.UIManager
-	layout        *d2gui.Layout
-	contentLayout *d2gui.Layout
-	guiManager    *d2gui.GuiManager
-	sfc           d2interface.Surface
-	title         string
-	width         int
-	height        int
-	x             int
-	y             int
-	Options       []*LabelButton
-	disableBorder bool
+	renderer           d2interface.Renderer
+	asset              *d2asset.AssetManager
+	isOpen             bool
+	sprites            []*d2ui.Sprite
+	uiManager          *d2ui.UIManager
+	layout             *d2gui.Layout
+	contentLayout      *d2gui.Layout
+	guiManager         *d2gui.GuiManager
+	sfc                d2interface.Surface
+	title              string
+	x, y               int
+	paddingX, paddingY int
+	width, height      int
+	Options            []*LabelButton
+	disableBorder      bool
 }
 
 func NewBox(
@@ -172,6 +170,11 @@ func (box *Box) Toggle() {
 	} else {
 		box.open()
 	}
+}
+
+func (box *Box) SetPadding(paddingX, paddingY int) {
+	box.paddingX = paddingX
+	box.paddingY = paddingY
 }
 
 func (box *Box) open() {
@@ -477,11 +480,15 @@ func (box *Box) Load() {
 		titleLayout.AddSpacerDynamic()
 	}
 
+	contentLayoutW, contentLayoutH := box.contentLayout.GetSize()
+	contentLayoutX, contentLayoutY := box.contentLayout.GetPosition()
+	box.contentLayout.SetPosition(contentLayoutX+box.paddingX, contentLayoutY+box.paddingY)
+	box.contentLayout.SetSize(contentLayoutW-(2*box.paddingX), contentLayoutH-(2*box.paddingY))
+
 	box.layout.AddLayoutFromSource(box.contentLayout)
 }
 
 func (box *Box) OnMouseButtonDown(event d2interface.MouseEvent) bool {
-	fmt.Println("box.OnMouseButtonDown")
 	for _, option := range box.Options {
 		if option.IsInRect(event.X(), event.Y()) {
 			option.callback()
