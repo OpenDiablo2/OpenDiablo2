@@ -21,6 +21,7 @@ const (
 type Widget interface {
 	Drawable
 	bindManager(ui *UIManager)
+	Contains(x, y int) (contained bool)
 }
 
 // ClickableWidget defines an object that can be clicked
@@ -101,4 +102,12 @@ func (b *BaseWidget) GetRenderPriority() (prio RenderPriority) {
 // SetRenderPriority sets the order in which this widget is rendered
 func (b *BaseWidget) SetRenderPriority(prio RenderPriority) {
 	b.renderPriority = prio
+}
+
+// Contains determines whether a given x,y coordinate lands within a Widget
+func (b *BaseWidget) Contains(x, y int) bool {
+	wx, wy := b.GetPosition()
+	ww, wh := b.GetSize()
+
+	return x >= wx && x <= wx+ww && y >= wy && y <= wy+wh
 }

@@ -84,7 +84,7 @@ func (ui *UIManager) OnMouseButtonUp(event d2interface.MouseEvent) bool {
 		// activate previously pressed widget if cursor is still hovering
 		w := ui.pressedWidget
 
-		if w != nil && ui.contains(w, ui.CursorX, ui.CursorY) && w.GetVisible() && w.GetEnabled() {
+		if w != nil && w.Contains(ui.CursorX, ui.CursorY) && w.GetVisible() && w.GetEnabled() {
 			w.Activate()
 		}
 
@@ -104,7 +104,7 @@ func (ui *UIManager) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 		// find and press a widget on screen
 		ui.pressedWidget = nil
 		for _, w := range ui.clickableWidgets {
-			if ui.contains(w, ui.CursorX, ui.CursorY) && w.GetVisible() && w.GetEnabled() {
+			if w.Contains(ui.CursorX, ui.CursorY) && w.GetVisible() && w.GetEnabled() {
 				w.SetPressed(true)
 				ui.pressedWidget = w
 				ui.clickSfx.Play()
@@ -134,14 +134,6 @@ func (ui *UIManager) Render(target d2interface.Surface) {
 			widgetGroup.Render(target)
 		}
 	}
-}
-
-// contains determines whether a given x,y coordinate lands within a Widget
-func (ui *UIManager) contains(w Widget, x, y int) bool {
-	wx, wy := w.GetPosition()
-	ww, wh := w.GetSize()
-
-	return x >= wx && x <= wx+ww && y >= wy && y <= wy+wh
 }
 
 // Advance updates all of the UI elements
