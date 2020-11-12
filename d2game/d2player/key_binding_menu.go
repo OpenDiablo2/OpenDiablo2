@@ -131,7 +131,6 @@ func NewKeyBindingMenu(
 
 func (menu *KeyBindingMenu) Close() {
 	menu.Box.Close()
-	// menu.scrollbar.isVisible = false
 	menu.currentBindingLayout = nil
 	menu.currentBindingModifier = -1
 	menu.currentBindingModifierType = -1

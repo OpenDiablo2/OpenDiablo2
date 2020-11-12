@@ -148,17 +148,6 @@ func (v *Label) processColorTokens(str string) string {
 	return withoutTokens
 }
 
-func (v *Label) IsInRect(px, py int) bool {
-	ww, hh := v.GetSize()
-	x, y := v.X, v.Y
-
-	if px >= x && px <= x+ww && py >= y && py <= y+hh {
-		return true
-	}
-
-	return false
-}
-
 func (v *Label) getAlignOffset(textWidth int) int {
 	switch v.Alignment {
 	case d2gui.HorizontalAlignLeft:
