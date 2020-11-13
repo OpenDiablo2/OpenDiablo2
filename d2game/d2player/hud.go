@@ -2,7 +2,6 @@ package d2player
 
 import (
 	"fmt"
-	"image"
 	"log"
 	"math"
 	"strings"
@@ -33,8 +32,6 @@ const (
 	expBarWidth          = 120.0
 	staminaBarWidth      = 102.0
 	staminaBarHeight     = 19.0
-	globeHeight          = 80
-	globeWidth           = 80
 	hoverLabelOuterPad   = 5
 	percentStaminaBarLow = 0.25
 )
@@ -62,15 +59,6 @@ const (
 )
 
 const (
-	manaStatusOffsetX = 7
-	manaStatusOffsetY = -12
-
-	healthStatusOffsetX = 30
-	healthStatusOffsetY = -13
-
-	globeSpriteOffsetX = 28
-	globeSpriteOffsetY = -5
-
 	staminaBarOffsetX = 273
 	staminaBarOffsetY = 572
 
@@ -121,6 +109,8 @@ type HUD struct {
 	manaTooltip        *d2ui.Tooltip
 	miniPanelTooltip   *d2ui.Tooltip
 	nameLabel          *d2ui.Label
+	healthGlobe        *globeWidget
+	manaGlobe          *globeWidget
 }
 
 // NewHUD creates a HUD object
@@ -141,6 +131,9 @@ func NewHUD(
 	zoneLabel := ui.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
 	zoneLabel.Alignment = d2gui.HorizontalAlignCenter
 
+	healthGlobe := newGlobeWidget(ui, 0, screenHeight, typeHealthGlobe, &hero.Stats.Health, &hero.Stats.MaxHealth)
+	manaGlobe := newGlobeWidget(ui, screenWidth-manaGlobeScreenOffsetX, screenHeight, typeManaGlobe, &hero.Stats.Mana, &hero.Stats.MaxMana)
+
 	return &HUD{
 		asset:             asset,
 		uiManager:         ui,
@@ -153,12 +146,17 @@ func NewHUD(
 		nameLabel:         nameLabel,
 		skillSelectMenu:   NewSkillSelectMenu(asset, ui, hero),
 		zoneChangeText:    zoneLabel,
+		healthGlobe:       healthGlobe,
+		manaGlobe:         manaGlobe,
 	}
 }
 
 // Load creates the ui elemets
 func (h *HUD) Load() {
 	var err error
+
+	h.healthGlobe.load()
+	h.manaGlobe.load()
 
 	h.globeSprite, err = h.uiManager.NewSprite(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
 	if err != nil {
@@ -306,9 +304,7 @@ func (h *HUD) renderGameControlPanelElements(target d2interface.Surface) error {
 	// Health globe
 	w, _ := h.mainPanel.GetCurrentFrameSize()
 
-	if err := h.renderHealthGlobe(offsetX, offsetY, target); err != nil {
-		return err
-	}
+	h.healthGlobe.Render(target)
 
 	// Left Skill
 	offsetX += w
@@ -375,70 +371,14 @@ func (h *HUD) renderGameControlPanelElements(target d2interface.Surface) error {
 	w, _ = h.rightSkillResource.SkillIcon.GetCurrentFrameSize()
 	offsetX += w
 
-	if err := h.renderManaGlobe(offsetX, offsetY, target); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (h *HUD) renderManaGlobe(x, _ int, target d2interface.Surface) error {
-	_, height := target.GetSize()
-
 	if err := h.mainPanel.SetCurrentFrame(frameRightGlobeHolder); err != nil {
 		return err
 	}
 
-	h.mainPanel.SetPosition(x, height)
-
+	h.mainPanel.SetPosition(offsetX, height)
 	h.mainPanel.Render(target)
 
-	// Mana status bar
-	manaPercent := float64(h.hero.Stats.Mana) / float64(h.hero.Stats.MaxMana)
-	manaBarHeight := int(manaPercent * float64(globeHeight))
-
-	if err := h.hpManaStatusSprite.SetCurrentFrame(frameManaStatus); err != nil {
-		return err
-	}
-
-	h.hpManaStatusSprite.SetPosition(x+manaStatusOffsetX, height+manaStatusOffsetY)
-
-	manaMaskRect := image.Rect(0, globeHeight-manaBarHeight, globeWidth, globeHeight)
-	h.hpManaStatusSprite.RenderSection(target, manaMaskRect)
-
-	// Right globe
-	if err := h.globeSprite.SetCurrentFrame(frameRightGlobe); err != nil {
-		return err
-	}
-
-	h.globeSprite.SetPosition(x+rightGlobeOffsetX, height+rightGlobeOffsetY)
-
-	h.globeSprite.Render(target)
-	h.globeSprite.Render(target)
-
-	return nil
-}
-
-func (h *HUD) renderHealthGlobe(x, y int, target d2interface.Surface) error {
-	healthPercent := float64(h.hero.Stats.Health) / float64(h.hero.Stats.MaxHealth)
-	hpBarHeight := int(healthPercent * float64(globeHeight))
-
-	if err := h.hpManaStatusSprite.SetCurrentFrame(0); err != nil {
-		return err
-	}
-
-	h.hpManaStatusSprite.SetPosition(x+healthStatusOffsetX, y+healthStatusOffsetY)
-
-	healthMaskRect := image.Rect(0, globeHeight-hpBarHeight, globeWidth, globeHeight)
-	h.hpManaStatusSprite.RenderSection(target, healthMaskRect)
-
-	// Left globe
-	if err := h.globeSprite.SetCurrentFrame(frameHealthStatus); err != nil {
-		return err
-	}
-
-	h.globeSprite.SetPosition(x+globeSpriteOffsetX, y+globeSpriteOffsetY)
-	h.globeSprite.Render(target)
+	h.manaGlobe.Render(target)
 
 	return nil
 }
