@@ -21,6 +21,7 @@ const (
 type Widget interface {
 	Drawable
 	bindManager(ui *UIManager)
+	GetManager() (ui *UIManager)
 	OnHoverStart(callback func())
 	OnHoverEnd(callback func())
 	isHovered() bool
@@ -149,4 +150,9 @@ func (b *BaseWidget) Contains(x, y int) bool {
 	ww, wh := b.GetSize()
 
 	return x >= wx && x <= wx+ww && y >= wy && y <= wy+wh
+}
+
+// GetManager returns the uiManager
+func (b *BaseWidget) GetManager() (ui *UIManager) {
+	return b.manager
 }
