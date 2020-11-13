@@ -339,25 +339,25 @@ func (h *HelpOverlay) setupBulletedList() {
 		// "Ctrl" should be hotkey // "Hold Down <%s> to Run"
 		{text: fmt.Sprintf(
 			h.asset.TranslateString("StrHelp2"),
-			h.keyMap.GetKeysForGameEvent(d2enum.HoldRun).Primary.GetString(),
+			h.keyMap.KeyToString(h.keyMap.GetKeysForGameEvent(d2enum.HoldRun).Primary),
 		)},
 
 		// "Alt" should be hotkey // "Hold down <%s> to highlight items on the ground"
 		{text: fmt.Sprintf(
 			h.asset.TranslateString("StrHelp3"),
-			h.keyMap.GetKeysForGameEvent(d2enum.HoldShowGroundItems).Primary.GetString(),
+			h.keyMap.KeyToString(h.keyMap.GetKeysForGameEvent(d2enum.HoldShowGroundItems).Primary),
 		)},
 
 		// "Shift" should be hotkey // "Hold down <%s> to attack while standing still"
 		{text: fmt.Sprintf(
 			h.asset.TranslateString("StrHelp4"),
-			h.keyMap.GetKeysForGameEvent(d2enum.HoldStandStill).Primary.GetString(),
+			h.keyMap.KeyToString(h.keyMap.GetKeysForGameEvent(d2enum.HoldStandStill).Primary),
 		)},
 
 		// "Tab" should be hotkey // "Hit <%s> to toggle the automap on and off"
 		{text: fmt.Sprintf(
 			h.asset.TranslateString("StrHelp5"),
-			h.keyMap.GetKeysForGameEvent(d2enum.ToggleAutomap).Primary.GetString(),
+			h.keyMap.KeyToString(h.keyMap.GetKeysForGameEvent(d2enum.ToggleAutomap).Primary),
 		)},
 
 		// "Hit <Esc> to bring up the Game Menu"
@@ -372,7 +372,7 @@ func (h *HelpOverlay) setupBulletedList() {
 		// "H" should be hotkey,
 		{text: fmt.Sprintf(
 			h.asset.TranslateString("StrHelp8a"),
-			h.keyMap.GetKeysForGameEvent(d2enum.ToggleHelpScreen).Primary.GetString(),
+			h.keyMap.KeyToString(h.keyMap.GetKeysForGameEvent(d2enum.ToggleHelpScreen).Primary),
 		)},
 	}
 
@@ -576,7 +576,7 @@ func (h *HelpOverlay) createLabel(c callout) {
 	newLabel.SetText(c.LabelText)
 	newLabel.SetPosition(c.LabelX, c.LabelY)
 	h.text = append(h.text, newLabel)
-	newLabel.Alignment = d2gui.HorizontalAlignCenter
+	newLabel.Alignment = d2ui.HorizontalAlignCenter
 }
 
 func (h *HelpOverlay) createCallout(c callout) {
@@ -584,7 +584,7 @@ func (h *HelpOverlay) createCallout(c callout) {
 	newLabel.Color[0] = color.White
 	newLabel.SetText(c.LabelText)
 	newLabel.SetPosition(c.LabelX, c.LabelY)
-	newLabel.Alignment = d2gui.HorizontalAlignCenter
+	newLabel.Alignment = d2ui.HorizontalAlignCenter
 	ww, hh := newLabel.GetTextMetrics(c.LabelText)
 	h.text = append(h.text, newLabel)
 	_ = ww
