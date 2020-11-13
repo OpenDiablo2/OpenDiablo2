@@ -57,7 +57,7 @@ const (
 	leftSkillX,
 	leftSkillY,
 	leftSkillWidth,
-	leftSkillHeight = 115, 550, 50, 50
+	leftSkillHeight = 117, 550, 50, 50
 
 	newStatsX,
 	newStatsY,
@@ -92,7 +92,7 @@ const (
 	rightSkillX,
 	rightSkillY,
 	rightSkillWidth,
-	rightSkillHeight = 634, 550, 50, 50
+	rightSkillHeight = 635, 550, 50, 50
 
 	hpGlobeX,
 	hpGlobeY,

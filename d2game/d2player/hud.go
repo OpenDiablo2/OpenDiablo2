@@ -114,6 +114,8 @@ type HUD struct {
 	manaGlobe          *globeWidget
 	widgetStamina      *d2ui.CustomWidget
 	widgetExperience   *d2ui.CustomWidget
+	widgetLeftSkill    *d2ui.CustomWidget
+	widgetRightSkill   *d2ui.CustomWidget
 }
 
 // NewHUD creates a HUD object
@@ -172,6 +174,24 @@ func (h *HUD) loadCustomWidgets() {
 	h.widgetStamina.SetPosition(staminaBarOffsetX, staminaBarOffsetY)
 
 	h.widgetExperience = h.uiManager.NewCustomWidget(h.renderExperienceBar, expBarWidth, expBarHeight)
+
+	// Left skill widget
+	leftRenderFunc := func(target d2interface.Surface) {
+		x, y := h.widgetLeftSkill.GetPosition()
+		h.renderLeftSkill(x, y, target)
+	}
+
+	h.widgetLeftSkill = h.uiManager.NewCustomWidget(leftRenderFunc, skillIconWidth, skillIconHeight)
+	h.widgetLeftSkill.SetPosition(leftSkillX, screenHeight)
+
+	// Right skill widget
+	rightRenderFunc := func(target d2interface.Surface) {
+		x, y := h.widgetRightSkill.GetPosition()
+		h.renderRightSkill(x, y, target)
+	}
+
+	h.widgetRightSkill = h.uiManager.NewCustomWidget(rightRenderFunc, skillIconWidth, skillIconHeight)
+	h.widgetRightSkill.SetPosition(rightSkillX, screenHeight)
 }
 
 func (h *HUD) loadSkillResources() {
@@ -320,19 +340,14 @@ func (h *HUD) renderGameControlPanelElements(target d2interface.Surface) error {
 	}
 
 	// Health globe
-	w, _ := h.mainPanel.GetCurrentFrameSize()
-
 	h.healthGlobe.Render(target)
 
 	// Left Skill
-	offsetX += w
-	if err := h.renderLeftSkill(offsetX, offsetY, target); err != nil {
-		return err
-	}
+	h.widgetLeftSkill.Render(target)
 
 	// New Stats Button
-	w, _ = h.leftSkillResource.SkillIcon.GetCurrentFrameSize()
-	offsetX += w
+	w, _ := h.mainPanel.GetCurrentFrameSize()
+	offsetX += w + skillIconWidth
 
 	if err := h.renderNewStatsButton(offsetX, offsetY, target); err != nil {
 		return err
@@ -374,16 +389,11 @@ func (h *HUD) renderGameControlPanelElements(target d2interface.Surface) error {
 	}
 
 	// Right skill
-	w, _ = h.mainPanel.GetCurrentFrameSize()
-	offsetX += w
-
-	if err := h.renderRightSkill(offsetX, offsetY, target); err != nil {
-		return err
-	}
+	h.widgetRightSkill.Render(target)
 
 	// Mana Globe
-	w, _ = h.rightSkillResource.SkillIcon.GetCurrentFrameSize()
-	offsetX += w
+	w, _ = h.mainPanel.GetCurrentFrameSize()
+	offsetX += w + skillIconWidth
 
 	if err := h.mainPanel.SetCurrentFrame(frameRightGlobeHolder); err != nil {
 		return err
@@ -408,7 +418,7 @@ func (h *HUD) renderPanel(x, y int, target d2interface.Surface) error {
 	return nil
 }
 
-func (h *HUD) renderLeftSkill(x, y int, target d2interface.Surface) error {
+func (h *HUD) renderLeftSkill(x, y int, target d2interface.Surface) {
 	newSkillResourcePath := h.getSkillResourceByClass(h.hero.LeftSkill.Charclass)
 	if newSkillResourcePath != h.leftSkillResource.SkillResourcePath {
 		h.leftSkillResource.SkillResourcePath = newSkillResourcePath
@@ -416,16 +426,15 @@ func (h *HUD) renderLeftSkill(x, y int, target d2interface.Surface) error {
 	}
 
 	if err := h.leftSkillResource.SkillIcon.SetCurrentFrame(h.hero.LeftSkill.IconCel); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
 
 	h.leftSkillResource.SkillIcon.SetPosition(x, y)
 	h.leftSkillResource.SkillIcon.Render(target)
-
-	return nil
 }
 
-func (h *HUD) renderRightSkill(x, _ int, target d2interface.Surface) error {
+func (h *HUD) renderRightSkill(x, _ int, target d2interface.Surface) {
 	_, height := target.GetSize()
 
 	newSkillResourcePath := h.getSkillResourceByClass(h.hero.RightSkill.Charclass)
@@ -435,13 +444,12 @@ func (h *HUD) renderRightSkill(x, _ int, target d2interface.Surface) error {
 	}
 
 	if err := h.rightSkillResource.SkillIcon.SetCurrentFrame(h.hero.RightSkill.IconCel); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
 
 	h.rightSkillResource.SkillIcon.SetPosition(x, height)
 	h.rightSkillResource.SkillIcon.Render(target)
-
-	return nil
 }
 
 func (h *HUD) renderNewStatsButton(x, y int, target d2interface.Surface) error {
