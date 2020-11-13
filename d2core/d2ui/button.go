@@ -79,7 +79,20 @@ type ButtonLayout struct {
 	Toggleable       bool
 	AllowFrameChange bool
 	HasImage         bool
+	Tooltip          int
+	TooltipXOffset   int
+	TooltipYOffset   int
 }
+
+const (
+	buttonTooltipNone int = iota
+	buttonTooltipClose
+)
+
+const (
+	buttonCloseTooltipXOffset = 15
+	buttonCloseTooltipYOffset = -2
+)
 
 const (
 	buttonWideSegmentsX     = 2
@@ -107,8 +120,9 @@ const (
 	buttonBuySellSegmentsY     = 1
 	buttonBuySellDisabledFrame = 1
 
-	buttonSkillTreeTabXSegments     = 1
-	buttonSkillTreeTabYSegments     = 1
+	buttonSkillTreeTabXSegments = 1
+	buttonSkillTreeTabYSegments = 1
+
 	buttonSkillTreeTabDisabledFrame = 7
 	buttonSkillTreeTabBaseFrame     = 7
 	buttonSkillTreeTabFixedWidth    = 93
@@ -223,6 +237,9 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			FixedWidth:       ButtonNoFixedWidth,
 			FixedHeight:      ButtonNoFixedHeight,
 			LabelColor:       greyAlpha100,
+			Tooltip:          buttonTooltipClose,
+			TooltipXOffset:   buttonCloseTooltipXOffset,
+			TooltipYOffset:   buttonCloseTooltipYOffset,
 		},
 		ButtonTypeSkillTreeTab: {
 			XSegments:        buttonSkillTreeTabXSegments,
@@ -272,6 +289,7 @@ type Button struct {
 	enabled               bool
 	pressed               bool
 	toggled               bool
+	tooltip               *Tooltip
 }
 
 // NewButton creates an instance of Button
@@ -332,6 +350,8 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 	buttonSprite.SetPosition(0, 0)
 	buttonSprite.SetEffect(d2enum.DrawEffectModulate)
 
+	btn.createTooltip()
+
 	ui.addWidget(btn) // important that this comes before prerenderStates!
 
 	btn.prerenderStates(buttonSprite, &buttonLayout, lbl)
@@ -344,6 +364,21 @@ type buttonStateDescriptor struct {
 	offsetX, offsetY     int
 	prerenderdestination *d2interface.Surface
 	fmtErr               string
+}
+
+func (v *Button) createTooltip() {
+	var t *Tooltip
+
+	switch v.buttonLayout.Tooltip {
+	case buttonTooltipNone:
+		return
+	case buttonTooltipClose:
+		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		t.SetText(v.manager.asset.TranslateString("strClose"))
+	}
+
+	t.SetVisible(false)
+	v.SetTooltip(t)
 }
 
 func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, label *Label) {
@@ -505,6 +540,32 @@ func (v *Button) GetPressed() bool {
 // SetPressed sets the pressed state of the button
 func (v *Button) SetPressed(pressed bool) {
 	v.pressed = pressed
+}
+
+// SetVisible sets the pressed state of the button
+func (v *Button) SetVisible(visible bool) {
+	v.BaseWidget.SetVisible(visible)
+
+	if v.isHovered() && !visible {
+		v.hoverEnd()
+	}
+}
+
+// SetPosition sets the position of the widget
+func (v *Button) SetPosition(x, y int) {
+	v.BaseWidget.SetPosition(x, y)
+
+	if v.buttonLayout.Tooltip != buttonTooltipNone {
+		v.tooltip.SetPosition(x+v.buttonLayout.TooltipXOffset, y+v.buttonLayout.TooltipYOffset)
+	}
+}
+
+// SetTooltip adds a tooltip to the button
+func (v *Button) SetTooltip(t *Tooltip) {
+	v.tooltip = t
+	v.manager.addWidget(t)
+	v.OnHoverStart(func() { log.Print("HoverStart"); v.tooltip.SetVisible(true) })
+	v.OnHoverEnd(func() { v.tooltip.SetVisible(false) })
 }
 
 func half(n int) int {
