@@ -30,6 +30,7 @@ const (
 
 const (
 	expBarWidth          = 120.0
+	expBarHeight         = 4
 	staminaBarWidth      = 102.0
 	staminaBarHeight     = 19.0
 	hoverLabelOuterPad   = 5
@@ -111,6 +112,8 @@ type HUD struct {
 	nameLabel          *d2ui.Label
 	healthGlobe        *globeWidget
 	manaGlobe          *globeWidget
+	widgetStamina      *d2ui.CustomWidget
+	widgetExperience   *d2ui.CustomWidget
 }
 
 // NewHUD creates a HUD object
@@ -159,8 +162,16 @@ func (h *HUD) Load() {
 	h.manaGlobe.load()
 
 	h.loadSkillResources()
+	h.loadCustomWidgets()
 	h.loadUIButtons()
 	h.loadTooltips()
+}
+
+func (h *HUD) loadCustomWidgets() {
+	h.widgetStamina = h.uiManager.NewCustomWidget(h.renderStaminaBar, staminaBarWidth, staminaBarHeight)
+	h.widgetStamina.SetPosition(staminaBarOffsetX, staminaBarOffsetY)
+
+	h.widgetExperience = h.uiManager.NewCustomWidget(h.renderExperienceBar, expBarWidth, expBarHeight)
 }
 
 func (h *HUD) loadSkillResources() {
@@ -339,14 +350,10 @@ func (h *HUD) renderGameControlPanelElements(target d2interface.Surface) error {
 	w, _ = h.mainPanel.GetCurrentFrameSize()
 	offsetX += w
 
-	if err := h.renderStaminaBar(target); err != nil {
-		return err
-	}
+	h.widgetStamina.Render(target)
 
 	// Experience status bar
-	if err := h.renderExperienceBar(target); err != nil {
-		return err
-	}
+	h.widgetExperience.Render(target)
 
 	// Mini Panel and button
 	if err := h.renderMiniPanel(target); err != nil {
@@ -459,7 +466,7 @@ func (h *HUD) renderStamina(x, y int, target d2interface.Surface) error {
 	return nil
 }
 
-func (h *HUD) renderStaminaBar(target d2interface.Surface) error {
+func (h *HUD) renderStaminaBar(target d2interface.Surface) {
 	target.PushTranslation(staminaBarOffsetX, staminaBarOffsetY)
 	defer target.Pop()
 
@@ -474,19 +481,15 @@ func (h *HUD) renderStaminaBar(target d2interface.Surface) error {
 	}
 
 	target.DrawRect(int(staminaPercent*staminaBarWidth), staminaBarHeight, staminaBarColor)
-
-	return nil
 }
 
-func (h *HUD) renderExperienceBar(target d2interface.Surface) error {
+func (h *HUD) renderExperienceBar(target d2interface.Surface) {
 	target.PushTranslation(experienceBarOffsetX, experienceBarOffsetY)
 	defer target.Pop()
 
 	expPercent := float64(h.hero.Stats.Experience) / float64(h.hero.Stats.NextLevelExp)
 
 	target.DrawRect(int(expPercent*expBarWidth), 2, d2util.Color(whiteAlpha100))
-
-	return nil
 }
 
 func (h *HUD) renderMiniPanel(target d2interface.Surface) error {
