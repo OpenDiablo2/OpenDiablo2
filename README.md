@@ -124,6 +124,10 @@ which will be updated over time with new requirements.
 
 ![Select Hero](docs/areas.gif)
 
+![Gameplay](docs/Gameplay.png)
+
+![Inventory Window](docs/Inventory.png)
+
 ## Additional Credits
 
 -   Diablo2 Logo
