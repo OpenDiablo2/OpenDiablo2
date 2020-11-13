@@ -116,6 +116,7 @@ type HUD struct {
 	widgetExperience   *d2ui.CustomWidget
 	widgetLeftSkill    *d2ui.CustomWidget
 	widgetRightSkill   *d2ui.CustomWidget
+	panelBackground    *d2ui.CustomWidget
 }
 
 // NewHUD creates a HUD object
@@ -170,9 +171,21 @@ func (h *HUD) Load() {
 }
 
 func (h *HUD) loadCustomWidgets() {
+	// static background
+	_, height, err := h.mainPanel.GetFrameSize(0) // health globe is the frame with max height
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	h.panelBackground = h.uiManager.NewCustomWidgetCached(h.renderPanelStatic, screenWidth, height)
+	h.panelBackground.SetPosition(0, screenHeight-height)
+
+	// stamina bar
 	h.widgetStamina = h.uiManager.NewCustomWidget(h.renderStaminaBar, staminaBarWidth, staminaBarHeight)
 	h.widgetStamina.SetPosition(staminaBarOffsetX, staminaBarOffsetY)
 
+	// experience bar
 	h.widgetExperience = h.uiManager.NewCustomWidget(h.renderExperienceBar, expBarWidth, expBarHeight)
 
 	// Left skill widget
@@ -329,28 +342,23 @@ func (h *HUD) onToggleRunButton(noButton bool) {
 // NOTE: the positioning of all of the panel elements is coupled to the rendering order :(
 // don't change the order in which the render methods are called, as there is an x,y offset
 // that is updated between render calls
-func (h *HUD) renderGameControlPanelElements(target d2interface.Surface) error {
+func (h *HUD) renderPanelStatic(target d2interface.Surface) {
 	_, height := target.GetSize()
-	offsetX, offsetY := 0, 0
+	offsetX, offsetY := 0, height
 
 	// Main panel background
-	offsetY = height
 	if err := h.renderPanel(offsetX, offsetY, target); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
-
-	// Health globe
-	h.healthGlobe.Render(target)
-
-	// Left Skill
-	h.widgetLeftSkill.Render(target)
 
 	// New Stats Button
 	w, _ := h.mainPanel.GetCurrentFrameSize()
 	offsetX += w + skillIconWidth
 
 	if err := h.renderNewStatsButton(offsetX, offsetY, target); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
 
 	// Stamina
@@ -358,26 +366,17 @@ func (h *HUD) renderGameControlPanelElements(target d2interface.Surface) error {
 	offsetX += w
 
 	if err := h.renderStamina(offsetX, offsetY, target); err != nil {
-		return err
-	}
-
-	// Stamina status bar
-	w, _ = h.mainPanel.GetCurrentFrameSize()
-	offsetX += w
-
-	h.widgetStamina.Render(target)
-
-	// Experience status bar
-	h.widgetExperience.Render(target)
-
-	// Mini Panel and button
-	if err := h.renderMiniPanel(target); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
 
 	// Potions
+	w, _ = h.mainPanel.GetCurrentFrameSize()
+	offsetX += w
+
 	if err := h.renderPotions(offsetX, offsetY, target); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
 
 	// New Skills Button
@@ -385,26 +384,21 @@ func (h *HUD) renderGameControlPanelElements(target d2interface.Surface) error {
 	offsetX += w
 
 	if err := h.renderNewSkillsButton(offsetX, offsetY, target); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
 
-	// Right skill
-	h.widgetRightSkill.Render(target)
-
-	// Mana Globe
+	// Empty Mana Globe
 	w, _ = h.mainPanel.GetCurrentFrameSize()
 	offsetX += w + skillIconWidth
 
 	if err := h.mainPanel.SetCurrentFrame(frameRightGlobeHolder); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
 
 	h.mainPanel.SetPosition(offsetX, height)
 	h.mainPanel.Render(target)
-
-	h.manaGlobe.Render(target)
-
-	return nil
 }
 
 func (h *HUD) renderPanel(x, y int, target d2interface.Surface) error {
@@ -724,7 +718,17 @@ func (h *HUD) renderForSelectableEntitiesHovered(target d2interface.Surface) {
 func (h *HUD) Render(target d2interface.Surface) error {
 	h.renderForSelectableEntitiesHovered(target)
 
-	if err := h.renderGameControlPanelElements(target); err != nil {
+	h.panelBackground.Render(target)
+
+	h.healthGlobe.Render(target)
+	h.widgetLeftSkill.Render(target)
+	h.widgetRightSkill.Render(target)
+	h.manaGlobe.Render(target)
+	h.widgetStamina.Render(target)
+	h.widgetExperience.Render(target)
+
+	// Mini Panel and button
+	if err := h.renderMiniPanel(target); err != nil {
 		return err
 	}
 

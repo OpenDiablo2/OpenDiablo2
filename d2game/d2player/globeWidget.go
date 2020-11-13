@@ -52,6 +52,11 @@ func (gf *globeFrame) setPosition(x, y int) {
 	gf.sprite.SetPosition(x+gf.offsetX, y+gf.offsetY)
 }
 
+func (gf *globeFrame) getSize() (x, y int) {
+	w, h := gf.sprite.GetSize()
+	return w + gf.offsetX, h + gf.offsetY
+}
+
 type globeWidget struct {
 	*d2ui.BaseWidget
 	value    *int
@@ -129,6 +134,10 @@ func (g *globeWidget) Render(target d2interface.Surface) {
 
 	g.overlap.setPosition(g.GetPosition())
 	g.overlap.sprite.Render(target)
+}
+
+func (g *globeWidget) GetSize() (x, y int) {
+	return g.overlap.getSize()
 }
 
 func (g *globeWidget) Advance(elapsed float64) error {
