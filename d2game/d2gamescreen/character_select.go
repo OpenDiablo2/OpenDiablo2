@@ -47,6 +47,7 @@ type CharacterSelect struct {
 	tickTimer              float64
 	storedTickTimer        float64
 	showDeleteConfirmation bool
+	loaded                 bool
 	connectionType         d2clientconnectiontype.ClientConnectionType
 	connectionHost         string
 
@@ -195,6 +196,7 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 	}
 
 	v.refreshGameStates()
+	v.loaded = true
 }
 
 func (v *CharacterSelect) loadBackground() {
@@ -429,6 +431,10 @@ func (v *CharacterSelect) moveSelectionBox() {
 
 // OnMouseButtonDown is called when a mouse button is clicked
 func (v *CharacterSelect) OnMouseButtonDown(event d2interface.MouseEvent) bool {
+	if !v.loaded {
+		return false
+	}
+
 	if v.showDeleteConfirmation {
 		return false
 	}
@@ -554,6 +560,8 @@ func (v *CharacterSelect) OnUnload() error {
 	if err := v.inputManager.UnbindHandler(v); err != nil {
 		return err
 	}
+
+	v.loaded = false
 
 	return nil
 }
