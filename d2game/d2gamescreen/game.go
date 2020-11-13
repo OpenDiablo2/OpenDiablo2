@@ -50,6 +50,7 @@ type Game struct {
 	soundEngine          *d2audio.SoundEngine
 	soundEnv             d2audio.SoundEnvironment
 	guiManager           *d2gui.GuiManager
+	keyMap               *d2player.KeyMap
 
 	renderer      d2interface.Renderer
 	inputManager  d2interface.InputManager
@@ -83,6 +84,8 @@ func CreateGame(
 		break
 	}
 
+	keyMap := d2player.GetDefaultKeyMap(asset)
+
 	result := &Game{
 		asset:                asset,
 		gameClient:           gameClient,
@@ -92,7 +95,7 @@ func CreateGame(
 		ticksSinceLevelCheck: 0,
 		mapRenderer: d2maprenderer.CreateMapRenderer(asset, renderer,
 			gameClient.MapEngine, term, startX, startY),
-		escapeMenu:    d2player.NewEscapeMenu(navigator, renderer, audioProvider, guiManager, asset),
+		escapeMenu:    d2player.NewEscapeMenu(navigator, renderer, audioProvider, ui, guiManager, asset, keyMap),
 		inputManager:  inputManager,
 		audioProvider: audioProvider,
 		renderer:      renderer,
@@ -100,6 +103,7 @@ func CreateGame(
 		soundEngine:   d2audio.NewSoundEngine(audioProvider, asset, term),
 		uiManager:     ui,
 		guiManager:    guiManager,
+		keyMap:        keyMap,
 	}
 	result.soundEnv = d2audio.NewSoundEnvironment(result.soundEngine)
 
@@ -290,7 +294,7 @@ func (v *Game) bindGameControls() error {
 
 		var err error
 		v.gameControls, err = d2player.NewGameControls(v.asset, v.renderer, player, v.gameClient.MapEngine,
-			v.escapeMenu, v.mapRenderer, v, v.terminal, v.uiManager, v.guiManager, v.gameClient.IsSinglePlayer())
+			v.escapeMenu, v.mapRenderer, v, v.terminal, v.uiManager, v.guiManager, v.keyMap, v.gameClient.IsSinglePlayer())
 
 		if err != nil {
 			return err

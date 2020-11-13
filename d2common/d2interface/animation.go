@@ -13,6 +13,7 @@ type Animation interface {
 	Clone() Animation
 	SetSubLoop(startFrame, EndFrame int)
 	Advance(elapsed float64) error
+	GetCurrentFrameSurface() Surface
 	Render(target Surface)
 	RenderFromOrigin(target Surface, shadow bool)
 	RenderSection(sfc Surface, bound image.Rectangle)

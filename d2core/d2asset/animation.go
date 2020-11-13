@@ -151,6 +151,12 @@ func (a *Animation) renderShadow(target d2interface.Surface) {
 	target.Render(frame.image)
 }
 
+// GetCurrentFrameSurface returns the surface for the current frame of the
+// animation
+func (a *Animation) GetCurrentFrameSurface() d2interface.Surface {
+	return a.directions[a.directionIndex].frames[a.frameIndex].image
+}
+
 // Render renders the animation to the given surface
 func (a *Animation) Render(target d2interface.Surface) {
 	if a.renderer == nil {

@@ -14,7 +14,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
@@ -412,36 +411,36 @@ func (v *SelectHeroClass) createLabels() {
 
 	v.headingLabel.SetPosition(headingX-halfFontWidth, headingY)
 	v.headingLabel.SetText("Select Hero Class")
-	v.headingLabel.Alignment = d2gui.HorizontalAlignCenter
+	v.headingLabel.Alignment = d2ui.HorizontalAlignCenter
 
 	v.heroClassLabel = v.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
-	v.heroClassLabel.Alignment = d2gui.HorizontalAlignCenter
+	v.heroClassLabel.Alignment = d2ui.HorizontalAlignCenter
 	v.heroClassLabel.SetPosition(heroClassLabelX, heroClassLabelY)
 
 	v.heroDesc1Label = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
-	v.heroDesc1Label.Alignment = d2gui.HorizontalAlignCenter
+	v.heroDesc1Label.Alignment = d2ui.HorizontalAlignCenter
 	v.heroDesc1Label.SetPosition(heroDescLine1X, heroDescLine1Y)
 
 	v.heroDesc2Label = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
-	v.heroDesc2Label.Alignment = d2gui.HorizontalAlignCenter
+	v.heroDesc2Label.Alignment = d2ui.HorizontalAlignCenter
 	v.heroDesc2Label.SetPosition(heroDescLine2X, heroDescLine2Y)
 
 	v.heroDesc3Label = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
-	v.heroDesc3Label.Alignment = d2gui.HorizontalAlignCenter
+	v.heroDesc3Label.Alignment = d2ui.HorizontalAlignCenter
 	v.heroDesc3Label.SetPosition(heroDescLine3X, heroDescLine3Y)
 
 	v.heroNameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
-	v.heroNameLabel.Alignment = d2gui.HorizontalAlignLeft
+	v.heroNameLabel.Alignment = d2ui.HorizontalAlignLeft
 	v.heroNameLabel.SetText(d2ui.ColorTokenize("Character Name", d2ui.ColorTokenGold))
 	v.heroNameLabel.SetPosition(heroNameLabelX, heroNameLabelY)
 
 	v.expansionCharLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
-	v.expansionCharLabel.Alignment = d2gui.HorizontalAlignLeft
+	v.expansionCharLabel.Alignment = d2ui.HorizontalAlignLeft
 	v.expansionCharLabel.SetText(d2ui.ColorTokenize("EXPANSION CHARACTER", d2ui.ColorTokenGold))
 	v.expansionCharLabel.SetPosition(expansionLabelX, expansionLabelY)
 
 	v.hardcoreCharLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
-	v.hardcoreCharLabel.Alignment = d2gui.HorizontalAlignLeft
+	v.hardcoreCharLabel.Alignment = d2ui.HorizontalAlignLeft
 	v.hardcoreCharLabel.SetText(d2ui.ColorTokenize("Hardcore", d2ui.ColorTokenGold))
 	v.hardcoreCharLabel.SetPosition(hardcoreLabelX, hardcoreLabelY)
 }

@@ -214,7 +214,7 @@ func NewGameControls(
 	term d2interface.Terminal,
 	ui *d2ui.UIManager,
 	guiManager *d2gui.GuiManager,
-
+	keyMap *KeyMap,
 	isSinglePlayer bool,
 ) (*GameControls, error) {
 	var inventoryRecordKey string
@@ -350,7 +350,6 @@ func NewGameControls(
 		return nil, err
 	}
 
-	keyMap := getDefaultKeyMap()
 	helpOverlay := NewHelpOverlay(asset, renderer, ui, guiManager, keyMap)
 	hud := NewHUD(asset, ui, hero, helpOverlay, newMiniPanel(asset, ui, isSinglePlayer), actionableRegions, mapEngine, mapRenderer)
 
@@ -360,7 +359,6 @@ func NewGameControls(
 	hoverLabel.SetBackgroundColor(d2util.Color(blackAlpha50percent))
 
 	gc := &GameControls{
-		keyMap:         keyMap,
 		asset:          asset,
 		ui:             ui,
 		renderer:       renderer,
@@ -373,6 +371,7 @@ func NewGameControls(
 		skilltree:      newSkillTree(hero.Skills, hero.Class, asset, ui),
 		heroStatsPanel: NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
 		HelpOverlay:    helpOverlay,
+		keyMap:         keyMap,
 		hud:            hud,
 		bottomMenuRect: &d2geom.Rectangle{
 			Left:   menuBottomRectX,
@@ -639,6 +638,11 @@ func (g *GameControls) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	return false
 }
 
+// OnMouseButtonUp handles mouse button presses
+func (g *GameControls) OnMouseButtonUp(event d2interface.MouseEvent) bool {
+	return false
+}
+
 // OnMouseButtonDown handles mouse button presses
 func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	mx, my := event.X(), event.Y()
@@ -698,6 +702,11 @@ func (g *GameControls) Load() {
 // Advance advances the state of the GameControls
 func (g *GameControls) Advance(elapsed float64) error {
 	g.mapRenderer.Advance(elapsed)
+
+	if err := g.escapeMenu.Advance(elapsed); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -763,6 +772,10 @@ func (g *GameControls) Render(target d2interface.Surface) error {
 	}
 
 	if err := g.hud.Render(target); err != nil {
+		return err
+	}
+
+	if err := g.escapeMenu.Render(target); err != nil {
 		return err
 	}
 

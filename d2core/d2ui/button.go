@@ -8,7 +8,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 )
 
 // ButtonType defines the type of button
@@ -271,7 +270,7 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 
 	lbl.SetText(text)
 	lbl.Color[0] = d2util.Color(buttonLayout.LabelColor)
-	lbl.Alignment = d2gui.HorizontalAlignCenter
+	lbl.Alignment = HorizontalAlignCenter
 
 	buttonSprite, err := ui.NewSprite(buttonLayout.ResourceName, buttonLayout.PaletteName)
 	if err != nil {

@@ -8,7 +8,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -357,7 +356,7 @@ func (s *HeroStatsPanel) createStatValueLabel(stat, x, y int) *d2ui.Label {
 func (s *HeroStatsPanel) createTextLabel(element PanelText) *d2ui.Label {
 	label := s.uiManager.NewLabel(element.Font, d2resource.PaletteStatic)
 	if element.AlignCenter {
-		label.Alignment = d2gui.HorizontalAlignCenter
+		label.Alignment = d2ui.HorizontalAlignCenter
 	}
 
 	label.SetText(element.Text)
