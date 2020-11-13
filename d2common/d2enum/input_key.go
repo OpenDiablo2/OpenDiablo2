@@ -64,10 +64,6 @@ const (
 	KeyF10
 	KeyF11
 	KeyF12
-	KeyF13
-	KeyF14
-	KeyF15
-	KeyF16
 	KeyGraveAccent
 	KeyHome
 	KeyInsert

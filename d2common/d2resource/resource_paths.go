@@ -116,7 +116,7 @@ const (
 	BoxPieces = "/data/global/ui/MENU/boxpieces.DC6"
 
 	// TextSlider contains the pieces to build a scrollbar in the
-	// menus, such as the one int the configure keys menu
+	// menus, such as the one in the configure keys menu
 	TextSlider = "/data/global/ui/MENU/textslid.DC6"
 
 	// Issue #685 - used in the mini-panel
