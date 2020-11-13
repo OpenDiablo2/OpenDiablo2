@@ -153,10 +153,40 @@ func NewHUD(
 
 // Load creates the ui elemets
 func (h *HUD) Load() {
-	var err error
+	h.loadSprites()
 
 	h.healthGlobe.load()
 	h.manaGlobe.load()
+
+	h.loadSkillResources()
+	h.loadUIButtons()
+	h.loadTooltips()
+}
+
+func (h *HUD) loadSkillResources() {
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/799
+	genericSkillsSprite, err := h.uiManager.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
+
+	attackIconID := 2
+
+	h.leftSkillResource = &SkillResource{
+		SkillIcon:         genericSkillsSprite,
+		IconNumber:        attackIconID,
+		SkillResourcePath: d2resource.GenericSkills,
+	}
+
+	h.rightSkillResource = &SkillResource{
+		SkillIcon:         genericSkillsSprite,
+		IconNumber:        attackIconID,
+		SkillResourcePath: d2resource.GenericSkills,
+	}
+}
+
+func (h *HUD) loadSprites() {
+	var err error
 
 	h.globeSprite, err = h.uiManager.NewSprite(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
 	if err != nil {
@@ -182,29 +212,6 @@ func (h *HUD) Load() {
 	if err != nil {
 		log.Print(err)
 	}
-
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/799
-	genericSkillsSprite, err := h.uiManager.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
-	if err != nil {
-		log.Print(err)
-	}
-
-	attackIconID := 2
-
-	h.leftSkillResource = &SkillResource{
-		SkillIcon:         genericSkillsSprite,
-		IconNumber:        attackIconID,
-		SkillResourcePath: d2resource.GenericSkills,
-	}
-
-	h.rightSkillResource = &SkillResource{
-		SkillIcon:         genericSkillsSprite,
-		IconNumber:        attackIconID,
-		SkillResourcePath: d2resource.GenericSkills,
-	}
-
-	h.loadUIButtons()
-	h.loadTooltips()
 }
 
 func (h *HUD) loadTooltips() {
