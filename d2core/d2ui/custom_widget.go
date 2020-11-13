@@ -42,7 +42,9 @@ func (ui *UIManager) NewCustomWidget(renderFunc func(target d2interface.Surface)
 // Render draws the custom widget
 func (c *CustomWidget) Render(target d2interface.Surface) {
 	if c.cached {
+		target.PushTranslation(c.GetPosition())
 		target.Render(*c.cachedImg)
+		target.Pop()
 	} else {
 		c.renderFunc(target)
 	}
