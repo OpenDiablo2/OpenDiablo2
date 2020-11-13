@@ -79,11 +79,6 @@ const (
 	staminaWidth,
 	staminaHeight = 273, 573, 105, 20
 
-	miniPnlX,
-	miniPnlY,
-	miniPnlWidth,
-	miniPnlHeight = 393, 563, 12, 23
-
 	newSkillsX,
 	newSkillsY,
 	newSkillsWidth,
@@ -268,12 +263,6 @@ func NewGameControls(
 			Top:    staminaY,
 			Width:  staminaWidth,
 			Height: staminaHeight,
-		}},
-		{miniPnl, d2geom.Rectangle{
-			Left:   miniPnlX,
-			Top:    miniPnlY,
-			Width:  miniPnlWidth,
-			Height: miniPnlHeight,
 		}},
 		{newSkills, d2geom.Rectangle{
 			Left:   newSkillsX,
@@ -877,12 +866,6 @@ func (g *GameControls) onClickActionable(item actionableType) {
 
 		stamina: func() {
 			log.Println("Stamina Action Pressed")
-		},
-
-		miniPnl: func() {
-			log.Println("Mini Panel Action Pressed")
-
-			g.hud.miniPanel.Toggle()
 		},
 
 		newSkills: func() {

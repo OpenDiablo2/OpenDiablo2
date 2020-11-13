@@ -40,6 +40,7 @@ const (
 	ButtonTypeMinipanelMen       ButtonType = 19
 	ButtonTypeSquareClose        ButtonType = 20
 	ButtonTypeSkillTreeTab       ButtonType = 21
+	ButtonTypeMinipanelOpenClose ButtonType = 22
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -112,6 +113,11 @@ const (
 	buttonSkillTreeTabBaseFrame     = 7
 	buttonSkillTreeTabFixedWidth    = 93
 	buttonSkillTreeTabFixedHeight   = 107
+
+	buttonMinipanelOpenCloseBaseFrame = 0
+	buttonMinipanelDisabledFrame      = 2
+	buttonMinipanelXSegments          = 1
+	buttonMinipanelYSegments          = 1
 
 	buttonRunSegmentsX     = 1
 	buttonRunSegmentsY     = 1
@@ -231,6 +237,21 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			HasImage:         false,
 			FixedWidth:       buttonSkillTreeTabFixedWidth,
 			FixedHeight:      buttonSkillTreeTabFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelOpenClose: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelDisabledFrame,
+			BaseFrame:        buttonMinipanelOpenCloseBaseFrame,
+			ResourceName:     d2resource.MenuButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       true,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
 			LabelColor:       whiteAlpha100,
 		},
 	}
