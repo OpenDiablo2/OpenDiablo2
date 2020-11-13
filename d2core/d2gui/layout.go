@@ -167,7 +167,7 @@ func (l *Layout) AddLabel(text string, fontStyle FontStyle) (*Label, error) {
 		return nil, err
 	}
 
-	label := createLabel(l.renderer, text, font, d2util.Color(0xFFFFFFFF))
+	label := createLabel(l.renderer, text, font, d2util.Color(ColorWhite))
 
 	l.entries = append(l.entries, &layoutEntry{widget: label})
 
@@ -328,6 +328,7 @@ func (l *Layout) onMouseMove(event d2interface.MouseMoveEvent) bool {
 	for _, entry := range l.entries {
 		if entry.IsIn(event) {
 			entry.widget.onMouseMove(event)
+
 			if entry.mouseOver {
 				entry.widget.onMouseOver(event)
 			} else {

@@ -4,34 +4,125 @@ import (
 	"sync"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
 // KeyMap represents the key mappings of the game. Each game event
 // can be associated to 2 different keys. A key of -1 means none
 type KeyMap struct {
-	mutex    sync.RWMutex
-	mapping  map[d2enum.Key]d2enum.GameEvent
-	controls map[d2enum.GameEvent]*KeyBinding
+	mutex              sync.RWMutex
+	mapping            map[d2enum.Key]d2enum.GameEvent
+	controls           map[d2enum.GameEvent]*KeyBinding
+	keyToStringMapping map[d2enum.Key]string
 }
 
+// KeyBindingType defines whether it's a primary or
+// secondary binding
 type KeyBindingType int
 
+// Values defining the type of key binding
 const (
-	KeyBindingTypePrimary KeyBindingType = iota
+	KeyBindingTypeNone KeyBindingType = iota
+	KeyBindingTypePrimary
 	KeyBindingTypeSecondary
 )
 
 // NewKeyMap returns a new instance of a KeyMap
-func NewKeyMap() *KeyMap {
+func NewKeyMap(asset *d2asset.AssetManager) *KeyMap {
 	return &KeyMap{
-		mapping:  make(map[d2enum.Key]d2enum.GameEvent),
-		controls: make(map[d2enum.GameEvent]*KeyBinding),
+		mapping:            make(map[d2enum.Key]d2enum.GameEvent),
+		controls:           make(map[d2enum.GameEvent]*KeyBinding),
+		keyToStringMapping: getKeyStringMapping(asset),
 	}
 }
 
+func getKeyStringMapping(assetManager *d2asset.AssetManager) map[d2enum.Key]string {
+	return map[d2enum.Key]string{
+		-1:                       assetManager.TranslateString("KeyNone"),
+		d2enum.KeyTilde:          "~",
+		d2enum.KeyHome:           assetManager.TranslateString("KeyHome"),
+		d2enum.KeyControl:        assetManager.TranslateString("KeyControl"),
+		d2enum.KeyShift:          assetManager.TranslateString("KeyShift"),
+		d2enum.KeySpace:          assetManager.TranslateString("KeySpace"),
+		d2enum.KeyAlt:            assetManager.TranslateString("KeyAlt"),
+		d2enum.KeyTab:            assetManager.TranslateString("KeyTab"),
+		d2enum.Key0:              "0",
+		d2enum.Key1:              "1",
+		d2enum.Key2:              "2",
+		d2enum.Key3:              "3",
+		d2enum.Key4:              "4",
+		d2enum.Key5:              "5",
+		d2enum.Key6:              "6",
+		d2enum.Key7:              "7",
+		d2enum.Key8:              "8",
+		d2enum.Key9:              "9",
+		d2enum.KeyA:              "A",
+		d2enum.KeyB:              "B",
+		d2enum.KeyC:              "C",
+		d2enum.KeyD:              "D",
+		d2enum.KeyE:              "E",
+		d2enum.KeyF:              "F",
+		d2enum.KeyG:              "G",
+		d2enum.KeyH:              "H",
+		d2enum.KeyI:              "I",
+		d2enum.KeyJ:              "J",
+		d2enum.KeyK:              "K",
+		d2enum.KeyL:              "L",
+		d2enum.KeyM:              "M",
+		d2enum.KeyN:              "N",
+		d2enum.KeyO:              "O",
+		d2enum.KeyP:              "P",
+		d2enum.KeyQ:              "Q",
+		d2enum.KeyR:              "R",
+		d2enum.KeyS:              "S",
+		d2enum.KeyT:              "T",
+		d2enum.KeyU:              "U",
+		d2enum.KeyV:              "V",
+		d2enum.KeyW:              "W",
+		d2enum.KeyX:              "X",
+		d2enum.KeyY:              "Y",
+		d2enum.KeyZ:              "Z",
+		d2enum.KeyF1:             "F1",
+		d2enum.KeyF2:             "F2",
+		d2enum.KeyF3:             "F3",
+		d2enum.KeyF4:             "F4",
+		d2enum.KeyF5:             "F5",
+		d2enum.KeyF6:             "F6",
+		d2enum.KeyF7:             "F7",
+		d2enum.KeyF8:             "F8",
+		d2enum.KeyF9:             "F9",
+		d2enum.KeyF10:            "F10",
+		d2enum.KeyF11:            "F11",
+		d2enum.KeyF12:            "F12",
+		d2enum.KeyF13:            "F13",
+		d2enum.KeyF14:            "F14",
+		d2enum.KeyF15:            "F15",
+		d2enum.KeyF16:            "F16",
+		d2enum.KeyKP0:            assetManager.TranslateString("KeyNumPad0"),
+		d2enum.KeyKP1:            assetManager.TranslateString("KeyNumPad1"),
+		d2enum.KeyKP2:            assetManager.TranslateString("KeyNumPad2"),
+		d2enum.KeyKP3:            assetManager.TranslateString("KeyNumPad3"),
+		d2enum.KeyKP4:            assetManager.TranslateString("KeyNumPad4"),
+		d2enum.KeyKP5:            assetManager.TranslateString("KeyNumPad5"),
+		d2enum.KeyKP6:            assetManager.TranslateString("KeyNumPad6"),
+		d2enum.KeyKP7:            assetManager.TranslateString("KeyNumPad7"),
+		d2enum.KeyKP8:            assetManager.TranslateString("KeyNumPad8"),
+		d2enum.KeyKP9:            assetManager.TranslateString("KeyNumPad9"),
+		d2enum.KeyPrintScreen:    assetManager.TranslateString("KeySnapshot"),
+		d2enum.KeyRightBracket:   assetManager.TranslateString("KeyRBracket"),
+		d2enum.KeyLeftBracket:    assetManager.TranslateString("KeyLBracket"),
+		d2enum.KeyMouse3:         assetManager.TranslateString("KeyMButton"),
+		d2enum.KeyMouse4:         assetManager.TranslateString("Key4Button"),
+		d2enum.KeyMouse5:         assetManager.TranslateString("Key5Button"),
+		d2enum.KeyMouseWheelUp:   assetManager.TranslateString("KeyWheelUp"),
+		d2enum.KeyMouseWheelDown: assetManager.TranslateString("KeyWheelDown"),
+	}
+}
 func (km *KeyMap) checkOverwrite(key d2enum.Key) (*KeyBinding, KeyBindingType) {
-	var overwrittenBinding *KeyBinding
-	var overwrittenBindingType KeyBindingType
+	var (
+		overwrittenBinding     *KeyBinding
+		overwrittenBindingType KeyBindingType
+	)
 
 	for _, binding := range km.controls {
 		if binding.Primary == key {
@@ -39,6 +130,7 @@ func (km *KeyMap) checkOverwrite(key d2enum.Key) (*KeyBinding, KeyBindingType) {
 			overwrittenBinding = binding
 			overwrittenBindingType = KeyBindingTypePrimary
 		}
+
 		if binding.Secondary == key {
 			binding.Secondary = -1
 			overwrittenBinding = binding
@@ -85,6 +177,7 @@ func (km *KeyMap) SetSecondaryBinding(gameEvent d2enum.GameEvent, key d2enum.Key
 	if km.controls[gameEvent] == nil {
 		km.controls[gameEvent] = &KeyBinding{}
 	}
+
 	overwrittenBinding, overwrittenBindingType := km.checkOverwrite(key)
 
 	currentKey := km.controls[gameEvent].Secondary
@@ -124,6 +217,7 @@ func (km *KeyMap) GetBindingByKey(key d2enum.Key) (*KeyBinding, d2enum.GameEvent
 		if binding.Primary == key {
 			return binding, gameEvent, KeyBindingTypePrimary
 		}
+
 		if binding.Secondary == key {
 			return binding, gameEvent, KeyBindingTypeSecondary
 		}
@@ -138,11 +232,13 @@ type KeyBinding struct {
 	Secondary d2enum.Key
 }
 
+// IsEmpty checks if no keys are associated to the binding
 func (b KeyBinding) IsEmpty() bool {
 	return b.Primary == -1 && b.Secondary == -1
 }
 
-func (keyMap *KeyMap) ResetToDefault() {
+// ResetToDefault will reset the KeyMap to the default values
+func (km *KeyMap) ResetToDefault() {
 	defaultControls := map[d2enum.GameEvent]KeyBinding{
 		d2enum.ToggleCharacterPanel: {d2enum.KeyA, d2enum.KeyC},
 		d2enum.ToggleInventoryPanel: {d2enum.KeyB, d2enum.KeyI},
@@ -208,13 +304,20 @@ func (keyMap *KeyMap) ResetToDefault() {
 	}
 
 	for gameEvent, keys := range defaultControls {
-		keyMap.SetPrimaryBinding(gameEvent, keys.Primary)
-		keyMap.SetSecondaryBinding(gameEvent, keys.Secondary)
+		km.SetPrimaryBinding(gameEvent, keys.Primary)
+		km.SetSecondaryBinding(gameEvent, keys.Secondary)
 	}
 }
 
-func GetDefaultKeyMap() *KeyMap {
-	keyMap := NewKeyMap()
+// KeyToString returns a string representing the key
+func (km *KeyMap) KeyToString(k d2enum.Key) string {
+	return km.keyToStringMapping[k]
+}
+
+// GetDefaultKeyMap generates a KeyMap instance with the
+// default values
+func GetDefaultKeyMap(asset *d2asset.AssetManager) *KeyMap {
+	keyMap := NewKeyMap(asset)
 	keyMap.ResetToDefault()
 
 	return keyMap

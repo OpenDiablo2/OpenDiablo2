@@ -239,15 +239,6 @@ func (s *ebitenSurface) DrawLine(x, y int, fillColor color.Color) {
 	)
 }
 
-// DrawSurface draws a surface within the surface
-func (s *ebitenSurface) DrawSurface(sfc d2interface.Surface) {
-	if _, ok := sfc.(*ebitenSurface); !ok {
-		return
-	}
-
-	sfc.Render(s)
-}
-
 // DrawRect draws a rectangle
 func (s *ebitenSurface) DrawRect(width, height int, fillColor color.Color) {
 	ebitenutil.DrawRect(

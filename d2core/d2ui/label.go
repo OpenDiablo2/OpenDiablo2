@@ -10,14 +10,13 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 )
 
 // Label represents a user interface label
 type Label struct {
 	*BaseWidget
 	text            string
-	Alignment       d2gui.HorizontalAlign
+	Alignment       HorizontalAlign
 	font            *d2asset.Font
 	Color           map[int]color.Color
 	backgroundColor color.Color
@@ -35,7 +34,7 @@ func (ui *UIManager) NewLabel(fontPath, palettePath string) *Label {
 
 	result := &Label{
 		BaseWidget: base,
-		Alignment:  d2gui.HorizontalAlignLeft,
+		Alignment:  HorizontalAlignLeft,
 		Color:      map[int]color.Color{0: color.White},
 		font:       font,
 	}
@@ -150,11 +149,11 @@ func (v *Label) processColorTokens(str string) string {
 
 func (v *Label) getAlignOffset(textWidth int) int {
 	switch v.Alignment {
-	case d2gui.HorizontalAlignLeft:
+	case HorizontalAlignLeft:
 		return 0
-	case d2gui.HorizontalAlignCenter:
+	case HorizontalAlignCenter:
 		return -textWidth / 2
-	case d2gui.HorizontalAlignRight:
+	case HorizontalAlignRight:
 		return -textWidth
 	default:
 		log.Fatal("Invalid Alignment")

@@ -47,6 +47,7 @@ func (s *Sprite) Render(target d2interface.Surface) {
 	s.animation.Render(target)
 }
 
+// GetSurface returns the surface of the sprite at the given frame
 func (s *Sprite) GetSurface() d2interface.Surface {
 	return s.animation.GetCurrentFrameSurface()
 }

@@ -84,7 +84,7 @@ func CreateGame(
 		break
 	}
 
-	keyMap := d2player.GetDefaultKeyMap()
+	keyMap := d2player.GetDefaultKeyMap(asset)
 
 	result := &Game{
 		asset:                asset,

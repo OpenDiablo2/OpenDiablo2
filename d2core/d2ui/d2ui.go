@@ -15,6 +15,16 @@ const (
 	CursorButtonRight CursorButton = 2
 )
 
+// HorizontalAlign type, determines alignment along x-axis within a layout
+type HorizontalAlign int
+
+// Horizontal alignment types
+const (
+	HorizontalAlignLeft HorizontalAlign = iota
+	HorizontalAlignCenter
+	HorizontalAlignRight
+)
+
 // NewUIManager creates a UIManager instance with the given input and audio provider
 func NewUIManager(
 	asset *d2asset.AssetManager,

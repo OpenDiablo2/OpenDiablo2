@@ -9,6 +9,17 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
+// Constants defining the main shades of basic colors
+// found in the game
+const (
+	ColorWhite = 0xffffffff
+	ColorRed   = 0xdb3f3dff
+	ColorGreen = 0x00d000ff
+	ColorBlue  = 0x5450d1ff
+	ColorBrown = 0xa1925dff
+	ColorGrey  = 0x555555ff
+)
+
 // Label is renderable text
 type Label struct {
 	widgetBase
@@ -44,16 +55,21 @@ func createLabel(renderer d2interface.Renderer, text string, font *d2asset.Font,
 	return label
 }
 
+// SetHoverColor will set the value of hoverColor
 func (l *Label) SetHoverColor(col color.RGBA) {
 	l.hoverColor = col
 }
 
+// SetIsBlinking will set the isBlinking value
 func (l *Label) SetIsBlinking(isBlinking bool) {
 	l.isBlinking = isBlinking
 }
-func (l *Label) SetIsHovered(isHovered bool) {
+
+// SetIsHovered will set the isHovered value
+func (l *Label) SetIsHovered(isHovered bool) error {
 	l.isHovered = isHovered
-	l.setText(l.text)
+
+	return l.setText(l.text)
 }
 
 func (l *Label) render(target d2interface.Surface) {
@@ -104,6 +120,7 @@ func (l *Label) setText(text string) error {
 	}
 
 	l.font.SetColor(col)
+
 	if err := l.font.RenderText(text, surface); err != nil {
 		return err
 	}

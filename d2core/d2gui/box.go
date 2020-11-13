@@ -1,20 +1,26 @@
-package d2player
+package d2gui
 
 import (
-	"image/color"
 	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
 const (
-	boxSpriteHeight = 15 - 3
+	boxSpriteHeight = 15 - 5
 	boxSpriteWidth  = 14 - 2
+
+	boxBorderSpriteLeftBorderOffset       = 4
+	boxBorderSpriteRightBorderOffset      = 7
+	boxBorderSpriteTopBorderSectionOffset = 5
+
+	minimumAllowedSectionSize    = 14
+	sectionHeightPercentageOfBox = 0.12
+	boxBackgroundColor           = 0x000000d0
 )
 
 const (
@@ -42,108 +48,32 @@ const (
 	boxBottomHorizontalEdge6
 )
 
-type LabelButton struct {
-	label      string
-	callback   func()
-	hoverColor color.RGBA
-	canHover   bool
-	isHovered  bool
-	layout     *d2gui.Layout
-	x, y       int
-}
-
-func NewLabelButton(x, y int, text string, col color.RGBA, callback func()) *LabelButton {
-	return &LabelButton{
-		x:          x,
-		y:          y,
-		hoverColor: col,
-		label:      text,
-		callback:   callback,
-		canHover:   true,
-	}
-}
-
-// IsInRect checks if the given point is within the overlay layout rectangle
-func (lb *LabelButton) IsInRect(px, py int) bool {
-	if lb.layout == nil {
-		return false
-	}
-
-	ww, hh := lb.layout.GetSize()
-	x, y := lb.layout.Sx, lb.layout.Sy
-
-	if px >= x && px <= x+ww && py >= y && py <= y+hh {
-		return true
-	}
-
-	return false
-}
-
-func (lb *LabelButton) Load(renderer d2interface.Renderer, asset *d2asset.AssetManager) {
-	mainLayout := d2gui.CreateLayout(renderer, d2gui.PositionTypeAbsolute, asset)
-	l, _ := mainLayout.AddLabelWithColor(lb.label, d2gui.FontStyleFormal11Units, d2util.Color(0xA1925DFF))
-
-	if lb.canHover {
-		l.SetHoverColor(lb.hoverColor)
-	}
-
-	mainLayout.SetMouseEnterHandler(func(event d2interface.MouseMoveEvent) {
-		l.SetIsHovered(true)
-	})
-
-	mainLayout.SetMouseLeaveHandler(func(event d2interface.MouseMoveEvent) {
-		l.SetIsHovered(false)
-	})
-
-	lb.layout = mainLayout
-}
-
-func (lb *LabelButton) SetLabel(val string) {
-	lb.label = val
-}
-
-func (lb *LabelButton) SetHoverColor(col color.RGBA) {
-	lb.hoverColor = col
-}
-
-func (lb *LabelButton) SetCanHover(val bool) {
-	lb.canHover = val
-}
-
-func (lb *LabelButton) IsHovered() bool {
-	return lb.isHovered
-}
-
-func (lb *LabelButton) GetLayout() *d2gui.Layout {
-	return lb.layout
-}
-
-// Box represents the menu to view/edit the
-// key bindings
+// Box takes a content layout and wraps in
+// a box
 type Box struct {
-	renderer           d2interface.Renderer
-	asset              *d2asset.AssetManager
-	isOpen             bool
-	sprites            []*d2ui.Sprite
-	uiManager          *d2ui.UIManager
-	layout             *d2gui.Layout
-	contentLayout      *d2gui.Layout
-	guiManager         *d2gui.GuiManager
-	sfc                d2interface.Surface
-	title              string
+	renderer      d2interface.Renderer
+	asset         *d2asset.AssetManager
+	sprites       []*d2ui.Sprite
+	uiManager     *d2ui.UIManager
+	layout        *Layout
+	contentLayout *Layout
+	Options       []*LabelButton
+	sfc           d2interface.Surface
+
 	x, y               int
 	paddingX, paddingY int
 	width, height      int
-	Options            []*LabelButton
 	disableBorder      bool
+	isOpen             bool
+	title              string
 }
 
+// NewBox return a new Box instance
 func NewBox(
 	asset *d2asset.AssetManager,
 	renderer d2interface.Renderer,
 	ui *d2ui.UIManager,
-	guiManager *d2gui.GuiManager,
-	contentLayout *d2gui.Layout,
+	contentLayout *Layout,
 	width, height int,
 	x, y int,
 	title string,
@@ -152,7 +82,6 @@ func NewBox(
 		asset:         asset,
 		renderer:      renderer,
 		uiManager:     ui,
-		guiManager:    guiManager,
 		width:         width,
 		height:        height,
 		contentLayout: contentLayout,
@@ -163,32 +92,37 @@ func NewBox(
 	}
 }
 
+// GetLayout returns the box layout
+func (box *Box) GetLayout() *Layout {
+	return box.layout
+}
+
 // Toggle the visibility state of the menu
 func (box *Box) Toggle() {
 	if box.isOpen {
 		box.Close()
 	} else {
-		box.open()
+		box.Open()
 	}
 }
 
+// SetPadding sets the padding of the box content
 func (box *Box) SetPadding(paddingX, paddingY int) {
 	box.paddingX = paddingX
 	box.paddingY = paddingY
 }
 
-func (box *Box) open() {
+// Open will set the isOpen value to true
+func (box *Box) Open() {
 	box.isOpen = true
-	box.guiManager.SetLayout(box.layout)
 }
 
 // Close will hide the help overlay
 func (box *Box) Close() {
 	box.isOpen = false
-	box.guiManager.SetLayout(nil)
 }
 
-// IsOpen returns whether or not the overlay is visible/open
+// IsOpen returns whether or not the box is opened
 func (box *Box) IsOpen() bool {
 	return box.isOpen
 }
@@ -206,6 +140,7 @@ func (box *Box) setupTopBorder(offsetY int) {
 	i := 0
 	maxPieces := box.width / boxSpriteWidth
 	currentX, currentY := box.x, box.y+offsetY
+
 	for {
 		for _, frameIndex := range topEdgePiece {
 			f, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
@@ -219,14 +154,16 @@ func (box *Box) setupTopBorder(offsetY int) {
 			}
 
 			f.SetPosition(currentX, currentY)
-			currentX = currentX + boxSpriteWidth
-			i++
+			currentX += boxSpriteWidth
 
 			box.sprites = append(box.sprites, f)
+
+			i++
 			if i >= maxPieces {
 				break
 			}
 		}
+
 		if i >= maxPieces {
 			break
 		}
@@ -245,6 +182,7 @@ func (box *Box) setupBottomBorder(offsetY int) {
 	i := 0
 	currentX, currentY := box.x, offsetY
 	maxPieces := box.width / boxSpriteWidth
+
 	for {
 		for _, frameIndex := range bottomEdgePiece {
 			f, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
@@ -258,14 +196,16 @@ func (box *Box) setupBottomBorder(offsetY int) {
 			}
 
 			f.SetPosition(currentX, currentY)
-			currentX = currentX + boxSpriteWidth
-			i++
+			currentX += boxSpriteWidth
 
 			box.sprites = append(box.sprites, f)
+
+			i++
 			if i >= maxPieces {
 				break
 			}
 		}
+
 		if i >= maxPieces {
 			break
 		}
@@ -279,9 +219,10 @@ func (box *Box) setupLeftBorder() {
 		boxSideEdge3,
 	}
 
-	currentX, currentY := box.x-4, box.y+boxSpriteHeight
+	currentX, currentY := box.x-boxBorderSpriteLeftBorderOffset, box.y+boxSpriteHeight
 	maxPieces := box.height / boxSpriteHeight
 	i := 0
+
 	for {
 		for _, frameIndex := range leftBorderPiece {
 			f, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
@@ -295,14 +236,16 @@ func (box *Box) setupLeftBorder() {
 			}
 
 			f.SetPosition(currentX, currentY)
-			currentY = currentY + boxSpriteHeight
-			i++
+			currentY += boxSpriteHeight
 
 			box.sprites = append(box.sprites, f)
+
+			i++
 			if i >= maxPieces {
 				break
 			}
 		}
+
 		if i >= maxPieces {
 			break
 		}
@@ -316,8 +259,9 @@ func (box *Box) setupRightBorder() {
 	}
 
 	i := 0
-	currentX, currentY := box.width+box.x-7, box.y+boxSpriteHeight
+	currentX, currentY := box.width+box.x-boxBorderSpriteRightBorderOffset, box.y+boxSpriteHeight
 	maxPieces := box.height / boxSpriteHeight
+
 	for {
 		for _, frameIndex := range rightBorderPiece {
 			f, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
@@ -331,14 +275,16 @@ func (box *Box) setupRightBorder() {
 			}
 
 			f.SetPosition(currentX, currentY)
-			currentY = currentY + boxSpriteHeight
-			i++
+			currentY += boxSpriteHeight
 
 			box.sprites = append(box.sprites, f)
+
+			i++
 			if i >= maxPieces {
 				break
 			}
 		}
+
 		if i >= maxPieces {
 			break
 		}
@@ -367,117 +313,152 @@ func (box *Box) setupCorners() {
 		switch frameIndex {
 		case boxCornerTopLeft:
 			f.SetPosition(box.x, box.y+boxSpriteHeight)
-			break
 		case boxCornerTopRight:
 			f.SetPosition(box.x+box.width-boxSpriteWidth, box.y+boxSpriteHeight)
-			break
 		case boxCornerBottomLeft:
 			f.SetPosition(box.x, box.y+box.height)
-			break
 		case boxCornerBottomRight:
 			f.SetPosition(box.x+box.width-boxSpriteWidth, box.y+box.height)
-			break
 		}
 
 		box.sprites = append(box.sprites, f)
 	}
 }
 
+// SetOptions sets the box options that will show up at the bottom
 func (box *Box) SetOptions(options []*LabelButton) {
 	box.Options = options
 }
 
-func (box *Box) Load() {
-	box.layout = d2gui.CreateLayout(box.renderer, d2gui.PositionTypeAbsolute, box.asset)
+func (box *Box) setupTitle(sectionHeight int) error {
+	if !box.disableBorder {
+		cornerLeft, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
+		if err != nil {
+			return err
+		}
+
+		cornerRight, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
+		if err != nil {
+			return err
+		}
+
+		offsetY := box.y + sectionHeight
+
+		if err := cornerLeft.SetCurrentFrame(boxCornerBottomLeft); err != nil {
+			return err
+		}
+
+		cornerLeft.SetPosition(box.x, offsetY)
+
+		if err := cornerRight.SetCurrentFrame(boxCornerBottomRight); err != nil {
+			return err
+		}
+
+		cornerRight.SetPosition(box.x+box.width-boxSpriteWidth, offsetY)
+
+		box.sprites = append(box.sprites, cornerLeft, cornerRight)
+		box.setupBottomBorder(offsetY)
+	}
+
+	contentLayoutW, contentLayoutH := box.contentLayout.GetSize()
+	contentLayoutX, contentLayoutY := box.contentLayout.GetPosition()
+	box.contentLayout.SetSize(contentLayoutW, contentLayoutH-sectionHeight)
+	box.contentLayout.SetPosition(contentLayoutX, contentLayoutY+sectionHeight)
+
+	titleLayout := box.layout.AddLayout(PositionTypeHorizontal)
+	titleLayout.SetHorizontalAlign(HorizontalAlignCenter)
+	titleLayout.SetVerticalAlign(VerticalAlignMiddle)
+	titleLayout.SetPosition(box.x, box.y)
+	titleLayout.SetSize(contentLayoutW, sectionHeight)
+	titleLayout.AddSpacerDynamic()
+
+	if _, err := titleLayout.AddLabel(box.title, FontStyle30Units); err != nil {
+		return err
+	}
+
+	titleLayout.AddSpacerDynamic()
+
+	return nil
+}
+
+func (box *Box) setupOptions(sectionHeight int) error {
+	box.contentLayout.SetSize(box.width, (box.height - sectionHeight))
+
+	if !box.disableBorder {
+		cornerLeft, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
+		if err != nil {
+			return err
+		}
+
+		cornerRight, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
+		if err != nil {
+			return err
+		}
+
+		offsetY := box.y + box.height - sectionHeight + boxSpriteHeight
+
+		if err := cornerLeft.SetCurrentFrame(boxCornerTopLeft); err != nil {
+			return err
+		}
+
+		cornerLeft.SetPosition(box.x, offsetY)
+
+		if err := cornerRight.SetCurrentFrame(boxCornerTopRight); err != nil {
+			return err
+		}
+
+		cornerRight.SetPosition(box.x+box.width-boxSpriteWidth, offsetY)
+		box.setupTopBorder(box.height - (4 * boxSpriteHeight) + boxSpriteHeight - boxBorderSpriteTopBorderSectionOffset)
+		box.sprites = append(box.sprites, cornerLeft, cornerRight)
+	}
+
+	buttonsLayoutWrapper := box.layout.AddLayout(PositionTypeAbsolute)
+	buttonsLayoutWrapper.SetSize(box.width, sectionHeight)
+	buttonsLayoutWrapper.SetPosition(box.x, box.y+box.height-sectionHeight)
+	buttonsLayout := buttonsLayoutWrapper.AddLayout(PositionTypeHorizontal)
+	buttonsLayout.SetSize(buttonsLayoutWrapper.GetSize())
+	buttonsLayout.SetVerticalAlign(VerticalAlignMiddle)
+	buttonsLayout.AddSpacerDynamic()
+
+	for _, option := range box.Options {
+		option.Load(box.renderer, box.asset)
+		buttonsLayout.AddLayoutFromSource(option.GetLayout())
+		buttonsLayout.AddSpacerDynamic()
+	}
+
+	return nil
+}
+
+// Load will setup the layouts and sprites for the box deptending on the parameters
+func (box *Box) Load() error {
+	box.layout = CreateLayout(box.renderer, PositionTypeAbsolute, box.asset)
 	box.layout.SetPosition(box.x, box.y)
 	box.layout.SetSize(box.width, box.height)
 	box.contentLayout.SetPosition(box.x, box.y)
 
 	if !box.disableBorder {
 		box.setupTopBorder(boxSpriteHeight)
-		box.setupBottomBorder(box.y + box.height + boxSpriteHeight - 2)
+		box.setupBottomBorder(box.y + box.height + boxSpriteHeight)
 		box.setupLeftBorder()
 		box.setupRightBorder()
 		box.setupCorners()
 	}
 
-	sectionHeight := int(float32(box.height) * 0.12)
-	optionsEnabled := len(box.Options) > 0 && sectionHeight > 14
+	sectionHeight := int(float32(box.height) * sectionHeightPercentageOfBox)
+
+	optionsEnabled := len(box.Options) > 0 && sectionHeight >= minimumAllowedSectionSize
 	if optionsEnabled {
-		box.contentLayout.SetSize(box.width+2, (box.height - sectionHeight))
-		if !box.disableBorder {
-			cornerLeft, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
-			if err != nil {
-				log.Print(err)
-			}
-
-			cornerRight, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
-			if err != nil {
-				log.Print(err)
-			}
-
-			offsetY := box.y + box.height - sectionHeight + boxSpriteHeight
-			cornerLeft.SetCurrentFrame(boxCornerTopLeft)
-			cornerLeft.SetPosition(box.x, offsetY)
-			cornerRight.SetCurrentFrame(boxCornerTopRight)
-			cornerRight.SetPosition(box.x+box.width-boxSpriteWidth, offsetY)
-			box.setupTopBorder(box.height - (4 * boxSpriteHeight) + boxSpriteHeight + 3)
-			box.sprites = append(box.sprites, cornerLeft, cornerRight)
-		}
-
-		buttonsLayoutWrapper := box.layout.AddLayout(d2gui.PositionTypeAbsolute)
-		buttonsLayoutWrapper.SetSize(box.width+2, sectionHeight)
-		buttonsLayoutWrapper.SetPosition(box.x, box.y+box.height-sectionHeight)
-		buttonsLayout := buttonsLayoutWrapper.AddLayout(d2gui.PositionTypeHorizontal)
-		buttonsLayout.SetSize(buttonsLayoutWrapper.GetSize())
-		buttonsLayout.SetVerticalAlign(d2gui.VerticalAlignMiddle)
-		buttonsLayout.AddSpacerDynamic()
-		for _, option := range box.Options {
-			option.Load(box.renderer, box.asset)
-			buttonsLayout.AddLayoutFromSource(option.GetLayout())
-			buttonsLayout.AddSpacerDynamic()
+		if err := box.setupOptions(sectionHeight); err != nil {
+			return err
 		}
 	} else {
-		box.contentLayout.SetSize(box.width+2, box.height)
+		box.contentLayout.SetSize(box.width, box.height)
 	}
 
 	if box.title != "" {
-		if !box.disableBorder {
-			cornerLeft, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
-			if err != nil {
-				log.Print(err)
-			}
-
-			cornerRight, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
-			if err != nil {
-				log.Print(err)
-			}
-
-			offsetY := box.y + sectionHeight
-
-			cornerLeft.SetCurrentFrame(boxCornerBottomLeft)
-			cornerLeft.SetPosition(box.x, offsetY-10)
-
-			cornerRight.SetCurrentFrame(boxCornerBottomRight)
-			cornerRight.SetPosition(box.x+box.width-boxSpriteWidth, offsetY-10)
-
-			box.sprites = append(box.sprites, cornerLeft, cornerRight)
-			box.setupBottomBorder(offsetY)
+		if err := box.setupTitle(sectionHeight); err != nil {
+			return err
 		}
-
-		contentLayoutW, contentLayoutH := box.contentLayout.GetSize()
-		contentLayoutX, contentLayoutY := box.contentLayout.GetPosition()
-		box.contentLayout.SetSize(contentLayoutW, contentLayoutH-sectionHeight)
-		box.contentLayout.SetPosition(contentLayoutX, contentLayoutY+sectionHeight)
-
-		titleLayout := box.layout.AddLayout(d2gui.PositionTypeHorizontal)
-		titleLayout.SetHorizontalAlign(d2gui.HorizontalAlignCenter)
-		titleLayout.SetVerticalAlign(d2gui.VerticalAlignMiddle)
-		titleLayout.SetPosition(box.x, box.y)
-		titleLayout.SetSize(contentLayoutW, sectionHeight)
-		titleLayout.AddSpacerDynamic()
-		titleLayout.AddLabel(box.title, d2gui.FontStyle30Units)
-		titleLayout.AddSpacerDynamic()
 	}
 
 	contentLayoutW, contentLayoutH := box.contentLayout.GetSize()
@@ -486,8 +467,11 @@ func (box *Box) Load() {
 	box.contentLayout.SetSize(contentLayoutW-(2*box.paddingX), contentLayoutH-(2*box.paddingY))
 
 	box.layout.AddLayoutFromSource(box.contentLayout)
+
+	return nil
 }
 
+// OnMouseButtonDown will be called whenever a mouse button is triggered
 func (box *Box) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	for _, option := range box.Options {
 		if option.IsInRect(event.X(), event.Y()) {
@@ -499,14 +483,14 @@ func (box *Box) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	return false
 }
 
-// Render the overlay to the given surface
+// Render the box to the given surface
 func (box *Box) Render(target d2interface.Surface) error {
 	if !box.isOpen {
 		return nil
 	}
 
 	target.PushTranslation(box.x, box.y)
-	target.DrawRect(box.width, box.height, d2util.Color(0x000000D0))
+	target.DrawRect(box.width, box.height, d2util.Color(boxBackgroundColor))
 	target.Pop()
 
 	for _, s := range box.sprites {
@@ -516,7 +500,7 @@ func (box *Box) Render(target d2interface.Surface) error {
 	return nil
 }
 
-// IsInRect checks if the given point is within the overlay layout rectangle
+// IsInRect checks if the given point is within the box main layout rectangle
 func (box *Box) IsInRect(px, py int) bool {
 	ww, hh := box.layout.GetSize()
 	x, y := box.layout.GetPosition()

@@ -5,7 +5,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 )
 
 const (
@@ -56,7 +55,7 @@ func (ui *UIManager) NewTooltip(font,
 	originX tooltipXOrigin,
 	originY tooltipYOrigin) *Tooltip {
 	label := ui.NewLabel(font, palette)
-	label.Alignment = d2gui.HorizontalAlignCenter
+	label.Alignment = HorizontalAlignCenter
 
 	base := NewBaseWidget(ui)
 
