@@ -7,7 +7,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -90,7 +89,7 @@ func (v *Cinematics) OnLoad(_ d2screen.LoadingState) {
 	v.createButtons()
 
 	v.cinematicsLabel = v.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteStatic)
-	v.cinematicsLabel.Alignment = d2gui.HorizontalAlignCenter
+	v.cinematicsLabel.Alignment = d2ui.HorizontalAlignCenter
 	v.cinematicsLabel.SetText("SELECT CINEMATIC")
 	v.cinematicsLabel.Color[0] = rgbaColor(lightBrown)
 	v.cinematicsLabel.SetPosition(cinematicsLabelX, cinematicsLabelY)

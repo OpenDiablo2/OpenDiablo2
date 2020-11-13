@@ -8,7 +8,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -186,7 +185,7 @@ func (s *skillTree) loadForHeroType() {
 
 	s.availSPLabel = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
 	s.availSPLabel.SetPosition(availSPLabelX, availSPLabelY)
-	s.availSPLabel.Alignment = d2gui.HorizontalAlignCenter
+	s.availSPLabel.Alignment = d2ui.HorizontalAlignCenter
 	s.availSPLabel.SetText(s.makeTabString("StrSklTree1", "StrSklTree2", "StrSklTree3"))
 	s.panelGroup.AddWidget(s.availSPLabel)
 }

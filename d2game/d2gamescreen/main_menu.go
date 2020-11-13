@@ -15,7 +15,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
@@ -226,32 +225,32 @@ func (v *MainMenu) loadBackgroundSprites() {
 
 func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 	v.versionLabel = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
-	v.versionLabel.Alignment = d2gui.HorizontalAlignRight
+	v.versionLabel.Alignment = d2ui.HorizontalAlignRight
 	v.versionLabel.SetText("OpenDiablo2 - " + v.buildInfo.Branch)
 	v.versionLabel.Color[0] = rgbaColor(white)
 	v.versionLabel.SetPosition(versionLabelX, versionLabelY)
 
 	v.commitLabel = v.uiManager.NewLabel(d2resource.FontFormal10, d2resource.PaletteStatic)
-	v.commitLabel.Alignment = d2gui.HorizontalAlignLeft
+	v.commitLabel.Alignment = d2ui.HorizontalAlignLeft
 	v.commitLabel.SetText(v.buildInfo.Commit)
 	v.commitLabel.Color[0] = rgbaColor(white)
 	v.commitLabel.SetPosition(commitLabelX, commitLabelY)
 
 	v.copyrightLabel = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
-	v.copyrightLabel.Alignment = d2gui.HorizontalAlignCenter
+	v.copyrightLabel.Alignment = d2ui.HorizontalAlignCenter
 	v.copyrightLabel.SetText("Diablo 2 is © Copyright 2000-2016 Blizzard Entertainment")
 	v.copyrightLabel.Color[0] = rgbaColor(lightBrown)
 	v.copyrightLabel.SetPosition(copyrightX, copyrightY)
 	loading.Progress(thirtyPercent)
 
 	v.copyrightLabel2 = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
-	v.copyrightLabel2.Alignment = d2gui.HorizontalAlignCenter
+	v.copyrightLabel2.Alignment = d2ui.HorizontalAlignCenter
 	v.copyrightLabel2.SetText("All Rights Reserved.")
 	v.copyrightLabel2.Color[0] = rgbaColor(lightBrown)
 	v.copyrightLabel2.SetPosition(copyright2X, copyright2Y)
 
 	v.openDiabloLabel = v.uiManager.NewLabel(d2resource.FontFormal10, d2resource.PaletteStatic)
-	v.openDiabloLabel.Alignment = d2gui.HorizontalAlignCenter
+	v.openDiabloLabel.Alignment = d2ui.HorizontalAlignCenter
 	v.openDiabloLabel.SetText("OpenDiablo2 is neither developed by, nor endorsed by Blizzard or its parent company Activision")
 	v.openDiabloLabel.Color[0] = rgbaColor(lightYellow)
 	v.openDiabloLabel.SetPosition(od2LabelX, od2LabelY)
@@ -259,24 +258,24 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 
 	v.tcpIPOptionsLabel = v.uiManager.NewLabel(d2resource.Font42, d2resource.PaletteUnits)
 	v.tcpIPOptionsLabel.SetPosition(tcpOptionsX, tcpOptionsY)
-	v.tcpIPOptionsLabel.Alignment = d2gui.HorizontalAlignCenter
+	v.tcpIPOptionsLabel.Alignment = d2ui.HorizontalAlignCenter
 	v.tcpIPOptionsLabel.SetText("TCP/IP Options")
 
 	v.tcpJoinGameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
-	v.tcpJoinGameLabel.Alignment = d2gui.HorizontalAlignCenter
+	v.tcpJoinGameLabel.Alignment = d2ui.HorizontalAlignCenter
 	v.tcpJoinGameLabel.SetText("Enter Host IP Address\nto Join Game")
 	v.tcpJoinGameLabel.Color[0] = rgbaColor(gold)
 	v.tcpJoinGameLabel.SetPosition(joinGameX, joinGameY)
 
 	v.machineIP = v.uiManager.NewLabel(d2resource.Font24, d2resource.PaletteUnits)
-	v.machineIP.Alignment = d2gui.HorizontalAlignCenter
+	v.machineIP.Alignment = d2ui.HorizontalAlignCenter
 	v.machineIP.SetText("Your IP address is:\n" + v.getLocalIP())
 	v.machineIP.Color[0] = rgbaColor(lightYellow)
 	v.machineIP.SetPosition(machineIPX, machineIPY)
 
 	if v.errorLabel != nil {
 		v.errorLabel.SetPosition(errorLabelX, errorLabelY)
-		v.errorLabel.Alignment = d2gui.HorizontalAlignCenter
+		v.errorLabel.Alignment = d2ui.HorizontalAlignCenter
 		v.errorLabel.Color[0] = rgbaColor(red)
 	}
 }

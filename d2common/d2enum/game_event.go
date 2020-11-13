@@ -26,6 +26,7 @@ const (
 	FadeAutomap          // reduces the brightness of the map (not the players/npcs)
 	TogglePartyOnAutomap // toggles the display of the party members on the automap
 	ToggleNamesOnAutomap // toggles the display of party members names and npcs on the automap
+	ToggleMiniMap
 
 	// there can be 16 hotkeys, each hotkey can have a skill assigned
 	UseSkill1
@@ -58,7 +59,17 @@ const (
 	UseBeltSlot4
 
 	SwapWeapons
+	ToggleChatBox
 	ToggleRunWalk
+
+	SayHelp
+	SayFollowMe
+	SayThisIsForYou
+	SayThanks
+	SaySorry
+	SayBye
+	SayNowYouDie
+	SayRetreat
 
 	// these events are fired while a player holds the corresponding key
 	HoldRun
@@ -66,5 +77,7 @@ const (
 	HoldShowGroundItems
 	HoldShowPortraits
 
+	TakeScreenShot
 	ClearScreen // closes all active menus/panels
+	ClearMessages
 )

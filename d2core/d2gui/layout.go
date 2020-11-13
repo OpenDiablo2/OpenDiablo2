@@ -2,9 +2,11 @@ package d2gui
 
 import (
 	"errors"
+	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
@@ -105,6 +107,14 @@ func (l *Layout) AddLayout(positionType PositionType) *Layout {
 	return layout
 }
 
+// AddLayoutFromSource adds a nested layout to this layout, given a position type.
+// Returns a pointer to the nested layout
+func (l *Layout) AddLayoutFromSource(source *Layout) *Layout {
+	l.entries = append(l.entries, &layoutEntry{widget: source})
+
+	return source
+}
+
 // AddSpacerStatic adds a spacer with explicitly defined height and width
 func (l *Layout) AddSpacerStatic(width, height int) *SpacerStatic {
 	spacer := createSpacerStatic(width, height)
@@ -157,7 +167,21 @@ func (l *Layout) AddLabel(text string, fontStyle FontStyle) (*Label, error) {
 		return nil, err
 	}
 
-	label := createLabel(l.renderer, text, font)
+	label := createLabel(l.renderer, text, font, d2util.Color(ColorWhite))
+
+	l.entries = append(l.entries, &layoutEntry{widget: label})
+
+	return label, nil
+}
+
+// AddLabelWithColor given a string and a FontStyle and a Color, adds a text label as a layout entry
+func (l *Layout) AddLabelWithColor(text string, fontStyle FontStyle, col color.RGBA) (*Label, error) {
+	font, err := l.loadFont(fontStyle)
+	if err != nil {
+		return nil, err
+	}
+
+	label := createLabel(l.renderer, text, font, col)
 
 	l.entries = append(l.entries, &layoutEntry{widget: label})
 
@@ -276,6 +300,7 @@ func (l *Layout) getSize() (width, height int) {
 func (l *Layout) onMouseButtonDown(event d2interface.MouseEvent) bool {
 	for _, entry := range l.entries {
 		if entry.IsIn(event) {
+			entry.widget.onMouseButtonClick(event)
 			entry.widget.onMouseButtonDown(event)
 			entry.mouseDown[event.Button()] = true
 		}

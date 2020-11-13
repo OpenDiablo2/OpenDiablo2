@@ -3,28 +3,6 @@ package d2enum
 // Key represents button on a traditional keyboard.
 type Key int
 
-// GetString returns a string representing the key
-func (k Key) GetString() string {
-	switch k {
-	case -1:
-		return "None"
-	case KeyControl:
-		return "Ctrl"
-	case KeyShift:
-		return "Shift"
-	case KeySpace:
-		return "Space"
-	case KeyAlt:
-		return "Alt"
-	case KeyTab:
-		return "Tab"
-	case KeyH:
-		return "H"
-	default:
-		return "Unknown"
-	}
-}
-
 // Input keys
 const (
 	Key0 Key = iota
@@ -128,9 +106,14 @@ const (
 	KeyControl
 	KeyShift
 	KeyTilde
+	KeyMouse3
+	KeyMouse4
+	KeyMouse5
+	KeyMouseWheelUp
+	KeyMouseWheelDown
 
 	KeyMin = Key0
-	KeyMax = KeyShift
+	KeyMax = KeyMouseWheelDown
 )
 
 // KeyMod represents a "modified" key action. This could mean, for example, ctrl-S

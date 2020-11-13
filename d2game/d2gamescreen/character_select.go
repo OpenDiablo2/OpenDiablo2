@@ -13,7 +13,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -216,14 +215,14 @@ func (v *CharacterSelect) loadHeroTitle() {
 	heroTitleX, heroTitleY := 320, 23
 	v.d2HeroTitle = v.uiManager.NewLabel(d2resource.Font42, d2resource.PaletteUnits)
 	v.d2HeroTitle.SetPosition(heroTitleX, heroTitleY)
-	v.d2HeroTitle.Alignment = d2gui.HorizontalAlignCenter
+	v.d2HeroTitle.Alignment = d2ui.HorizontalAlignCenter
 }
 
 func (v *CharacterSelect) loadDeleteCharConfirm() {
 	v.deleteCharConfirmLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	lines := "Are you sure that you want\nto delete this character?\nTake note: this will delete all\nversions of this Character."
 	v.deleteCharConfirmLabel.SetText(lines)
-	v.deleteCharConfirmLabel.Alignment = d2gui.HorizontalAlignCenter
+	v.deleteCharConfirmLabel.Alignment = d2ui.HorizontalAlignCenter
 	deleteConfirmX, deleteConfirmY := 400, 185
 	v.deleteCharConfirmLabel.SetPosition(deleteConfirmX, deleteConfirmY)
 }

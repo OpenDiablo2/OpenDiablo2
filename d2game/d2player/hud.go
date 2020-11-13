@@ -11,7 +11,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2maprenderer"
@@ -131,11 +130,11 @@ func NewHUD(
 	mapRenderer *d2maprenderer.MapRenderer,
 ) *HUD {
 	nameLabel := ui.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
-	nameLabel.Alignment = d2gui.HorizontalAlignCenter
+	nameLabel.Alignment = d2ui.HorizontalAlignCenter
 	nameLabel.SetText(d2ui.ColorTokenize("", d2ui.ColorTokenServer))
 
 	zoneLabel := ui.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
-	zoneLabel.Alignment = d2gui.HorizontalAlignCenter
+	zoneLabel.Alignment = d2ui.HorizontalAlignCenter
 
 	healthGlobe := newGlobeWidget(ui, 0, screenHeight, typeHealthGlobe, &hero.Stats.Health, &hero.Stats.MaxHealth)
 	manaGlobe := newGlobeWidget(ui, screenWidth-manaGlobeScreenOffsetX, screenHeight, typeManaGlobe, &hero.Stats.Mana, &hero.Stats.MaxMana)
