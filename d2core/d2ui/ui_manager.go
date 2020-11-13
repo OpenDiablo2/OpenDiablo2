@@ -54,8 +54,9 @@ func (ui *UIManager) Reset() {
 // addWidgetGroup adds a widgetGroup to the UI manager and sorts by priority
 func (ui *UIManager) addWidgetGroup(group *WidgetGroup) {
 	ui.widgetsGroups = append(ui.widgetsGroups, group)
+
 	sort.SliceStable(ui.widgetsGroups, func(i, j int) bool {
-		return ui.widgetsGroups[i].priority < ui.widgetsGroups[j].priority
+		return ui.widgetsGroups[i].renderPriority < ui.widgetsGroups[j].renderPriority
 	})
 }
 
@@ -83,13 +84,24 @@ func (ui *UIManager) OnMouseButtonUp(event d2interface.MouseEvent) bool {
 		// activate previously pressed widget if cursor is still hovering
 		w := ui.pressedWidget
 
-		if w != nil && ui.contains(w, ui.CursorX, ui.CursorY) && w.GetVisible() && w.GetEnabled() {
+		if w != nil && w.Contains(ui.CursorX, ui.CursorY) && w.GetVisible() && w.GetEnabled() {
 			w.Activate()
 		}
 
 		// unpress all widgets that are pressed
 		for _, w := range ui.clickableWidgets {
 			w.SetPressed(false)
+		}
+	}
+
+	return false
+}
+
+// OnMouseMove is the mouse move event handler
+func (ui *UIManager) OnMouseMove(event d2interface.MouseMoveEvent) bool {
+	for _, w := range ui.widgetsGroups {
+		if w.GetVisible() {
+			w.OnMouseMove(event.X(), event.Y())
 		}
 	}
 
@@ -103,7 +115,7 @@ func (ui *UIManager) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 		// find and press a widget on screen
 		ui.pressedWidget = nil
 		for _, w := range ui.clickableWidgets {
-			if ui.contains(w, ui.CursorX, ui.CursorY) && w.GetVisible() && w.GetEnabled() {
+			if w.Contains(ui.CursorX, ui.CursorY) && w.GetVisible() && w.GetEnabled() {
 				w.SetPressed(true)
 				ui.pressedWidget = w
 				ui.clickSfx.Play()
@@ -133,14 +145,6 @@ func (ui *UIManager) Render(target d2interface.Surface) {
 			widgetGroup.Render(target)
 		}
 	}
-}
-
-// contains determines whether a given x,y coordinate lands within a Widget
-func (ui *UIManager) contains(w Widget, x, y int) bool {
-	wx, wy := w.GetPosition()
-	ww, wh := w.GetSize()
-
-	return x >= wx && x <= wx+ww && y >= wy && y <= wy+wh
 }
 
 // Advance updates all of the UI elements

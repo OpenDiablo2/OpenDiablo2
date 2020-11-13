@@ -2,7 +2,6 @@ package d2player
 
 import (
 	"fmt"
-	"image"
 	"log"
 	"math"
 	"strings"
@@ -30,10 +29,9 @@ const (
 
 const (
 	expBarWidth          = 120.0
+	expBarHeight         = 4
 	staminaBarWidth      = 102.0
 	staminaBarHeight     = 19.0
-	globeHeight          = 80
-	globeWidth           = 80
 	hoverLabelOuterPad   = 5
 	percentStaminaBarLow = 0.25
 )
@@ -61,15 +59,6 @@ const (
 )
 
 const (
-	manaStatusOffsetX = 7
-	manaStatusOffsetY = -12
-
-	healthStatusOffsetX = 30
-	healthStatusOffsetY = -13
-
-	globeSpriteOffsetX = 28
-	globeSpriteOffsetY = -5
-
 	staminaBarOffsetX = 273
 	staminaBarOffsetY = 572
 
@@ -120,6 +109,13 @@ type HUD struct {
 	manaTooltip        *d2ui.Tooltip
 	miniPanelTooltip   *d2ui.Tooltip
 	nameLabel          *d2ui.Label
+	healthGlobe        *globeWidget
+	manaGlobe          *globeWidget
+	widgetStamina      *d2ui.CustomWidget
+	widgetExperience   *d2ui.CustomWidget
+	widgetLeftSkill    *d2ui.CustomWidget
+	widgetRightSkill   *d2ui.CustomWidget
+	panelBackground    *d2ui.CustomWidget
 }
 
 // NewHUD creates a HUD object
@@ -140,6 +136,9 @@ func NewHUD(
 	zoneLabel := ui.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
 	zoneLabel.Alignment = d2ui.HorizontalAlignCenter
 
+	healthGlobe := newGlobeWidget(ui, 0, screenHeight, typeHealthGlobe, &hero.Stats.Health, &hero.Stats.MaxHealth)
+	manaGlobe := newGlobeWidget(ui, screenWidth-manaGlobeScreenOffsetX, screenHeight, typeManaGlobe, &hero.Stats.Mana, &hero.Stats.MaxMana)
+
 	return &HUD{
 		asset:             asset,
 		uiManager:         ui,
@@ -152,11 +151,84 @@ func NewHUD(
 		nameLabel:         nameLabel,
 		skillSelectMenu:   NewSkillSelectMenu(asset, ui, hero),
 		zoneChangeText:    zoneLabel,
+		healthGlobe:       healthGlobe,
+		manaGlobe:         manaGlobe,
 	}
 }
 
 // Load creates the ui elemets
 func (h *HUD) Load() {
+	h.loadSprites()
+
+	h.healthGlobe.load()
+	h.manaGlobe.load()
+
+	h.loadSkillResources()
+	h.loadCustomWidgets()
+	h.loadUIButtons()
+	h.loadTooltips()
+}
+
+func (h *HUD) loadCustomWidgets() {
+	// static background
+	_, height, err := h.mainPanel.GetFrameSize(0) // health globe is the frame with max height
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	h.panelBackground = h.uiManager.NewCustomWidgetCached(h.renderPanelStatic, screenWidth, height)
+	h.panelBackground.SetPosition(0, screenHeight-height)
+
+	// stamina bar
+	h.widgetStamina = h.uiManager.NewCustomWidget(h.renderStaminaBar, staminaBarWidth, staminaBarHeight)
+	h.widgetStamina.SetPosition(staminaBarOffsetX, staminaBarOffsetY)
+
+	// experience bar
+	h.widgetExperience = h.uiManager.NewCustomWidget(h.renderExperienceBar, expBarWidth, expBarHeight)
+
+	// Left skill widget
+	leftRenderFunc := func(target d2interface.Surface) {
+		x, y := h.widgetLeftSkill.GetPosition()
+		h.renderLeftSkill(x, y, target)
+	}
+
+	h.widgetLeftSkill = h.uiManager.NewCustomWidget(leftRenderFunc, skillIconWidth, skillIconHeight)
+	h.widgetLeftSkill.SetPosition(leftSkillX, screenHeight)
+
+	// Right skill widget
+	rightRenderFunc := func(target d2interface.Surface) {
+		x, y := h.widgetRightSkill.GetPosition()
+		h.renderRightSkill(x, y, target)
+	}
+
+	h.widgetRightSkill = h.uiManager.NewCustomWidget(rightRenderFunc, skillIconWidth, skillIconHeight)
+	h.widgetRightSkill.SetPosition(rightSkillX, screenHeight)
+}
+
+func (h *HUD) loadSkillResources() {
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/799
+	genericSkillsSprite, err := h.uiManager.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
+	if err != nil {
+		log.Print(err)
+	}
+
+	attackIconID := 2
+
+	h.leftSkillResource = &SkillResource{
+		SkillIcon:         genericSkillsSprite,
+		IconNumber:        attackIconID,
+		SkillResourcePath: d2resource.GenericSkills,
+	}
+
+	h.rightSkillResource = &SkillResource{
+		SkillIcon:         genericSkillsSprite,
+		IconNumber:        attackIconID,
+		SkillResourcePath: d2resource.GenericSkills,
+	}
+}
+
+func (h *HUD) loadSprites() {
 	var err error
 
 	h.globeSprite, err = h.uiManager.NewSprite(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
@@ -183,29 +255,6 @@ func (h *HUD) Load() {
 	if err != nil {
 		log.Print(err)
 	}
-
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/799
-	genericSkillsSprite, err := h.uiManager.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
-	if err != nil {
-		log.Print(err)
-	}
-
-	attackIconID := 2
-
-	h.leftSkillResource = &SkillResource{
-		SkillIcon:         genericSkillsSprite,
-		IconNumber:        attackIconID,
-		SkillResourcePath: d2resource.GenericSkills,
-	}
-
-	h.rightSkillResource = &SkillResource{
-		SkillIcon:         genericSkillsSprite,
-		IconNumber:        attackIconID,
-		SkillResourcePath: d2resource.GenericSkills,
-	}
-
-	h.loadUIButtons()
-	h.loadTooltips()
 }
 
 func (h *HUD) loadTooltips() {
@@ -292,35 +341,23 @@ func (h *HUD) onToggleRunButton(noButton bool) {
 // NOTE: the positioning of all of the panel elements is coupled to the rendering order :(
 // don't change the order in which the render methods are called, as there is an x,y offset
 // that is updated between render calls
-func (h *HUD) renderGameControlPanelElements(target d2interface.Surface) error {
+func (h *HUD) renderPanelStatic(target d2interface.Surface) {
 	_, height := target.GetSize()
-	offsetX, offsetY := 0, 0
+	offsetX, offsetY := 0, height
 
 	// Main panel background
-	offsetY = height
 	if err := h.renderPanel(offsetX, offsetY, target); err != nil {
-		return err
-	}
-
-	// Health globe
-	w, _ := h.mainPanel.GetCurrentFrameSize()
-
-	if err := h.renderHealthGlobe(offsetX, offsetY, target); err != nil {
-		return err
-	}
-
-	// Left Skill
-	offsetX += w
-	if err := h.renderLeftSkill(offsetX, offsetY, target); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
 
 	// New Stats Button
-	w, _ = h.leftSkillResource.SkillIcon.GetCurrentFrameSize()
-	offsetX += w
+	w, _ := h.mainPanel.GetCurrentFrameSize()
+	offsetX += w + skillIconWidth
 
 	if err := h.renderNewStatsButton(offsetX, offsetY, target); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
 
 	// Stamina
@@ -328,30 +365,17 @@ func (h *HUD) renderGameControlPanelElements(target d2interface.Surface) error {
 	offsetX += w
 
 	if err := h.renderStamina(offsetX, offsetY, target); err != nil {
-		return err
-	}
-
-	// Stamina status bar
-	w, _ = h.mainPanel.GetCurrentFrameSize()
-	offsetX += w
-
-	if err := h.renderStaminaBar(target); err != nil {
-		return err
-	}
-
-	// Experience status bar
-	if err := h.renderExperienceBar(target); err != nil {
-		return err
-	}
-
-	// Mini Panel and button
-	if err := h.renderMiniPanel(target); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
 
 	// Potions
+	w, _ = h.mainPanel.GetCurrentFrameSize()
+	offsetX += w
+
 	if err := h.renderPotions(offsetX, offsetY, target); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
 
 	// New Skills Button
@@ -359,87 +383,21 @@ func (h *HUD) renderGameControlPanelElements(target d2interface.Surface) error {
 	offsetX += w
 
 	if err := h.renderNewSkillsButton(offsetX, offsetY, target); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
 
-	// Right skill
+	// Empty Mana Globe
 	w, _ = h.mainPanel.GetCurrentFrameSize()
-	offsetX += w
-
-	if err := h.renderRightSkill(offsetX, offsetY, target); err != nil {
-		return err
-	}
-
-	// Mana Globe
-	w, _ = h.rightSkillResource.SkillIcon.GetCurrentFrameSize()
-	offsetX += w
-
-	if err := h.renderManaGlobe(offsetX, offsetY, target); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (h *HUD) renderManaGlobe(x, _ int, target d2interface.Surface) error {
-	_, height := target.GetSize()
+	offsetX += w + skillIconWidth
 
 	if err := h.mainPanel.SetCurrentFrame(frameRightGlobeHolder); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
 
-	h.mainPanel.SetPosition(x, height)
-
+	h.mainPanel.SetPosition(offsetX, height)
 	h.mainPanel.Render(target)
-
-	// Mana status bar
-	manaPercent := float64(h.hero.Stats.Mana) / float64(h.hero.Stats.MaxMana)
-	manaBarHeight := int(manaPercent * float64(globeHeight))
-
-	if err := h.hpManaStatusSprite.SetCurrentFrame(frameManaStatus); err != nil {
-		return err
-	}
-
-	h.hpManaStatusSprite.SetPosition(x+manaStatusOffsetX, height+manaStatusOffsetY)
-
-	manaMaskRect := image.Rect(0, globeHeight-manaBarHeight, globeWidth, globeHeight)
-	h.hpManaStatusSprite.RenderSection(target, manaMaskRect)
-
-	// Right globe
-	if err := h.globeSprite.SetCurrentFrame(frameRightGlobe); err != nil {
-		return err
-	}
-
-	h.globeSprite.SetPosition(x+rightGlobeOffsetX, height+rightGlobeOffsetY)
-
-	h.globeSprite.Render(target)
-	h.globeSprite.Render(target)
-
-	return nil
-}
-
-func (h *HUD) renderHealthGlobe(x, y int, target d2interface.Surface) error {
-	healthPercent := float64(h.hero.Stats.Health) / float64(h.hero.Stats.MaxHealth)
-	hpBarHeight := int(healthPercent * float64(globeHeight))
-
-	if err := h.hpManaStatusSprite.SetCurrentFrame(0); err != nil {
-		return err
-	}
-
-	h.hpManaStatusSprite.SetPosition(x+healthStatusOffsetX, y+healthStatusOffsetY)
-
-	healthMaskRect := image.Rect(0, globeHeight-hpBarHeight, globeWidth, globeHeight)
-	h.hpManaStatusSprite.RenderSection(target, healthMaskRect)
-
-	// Left globe
-	if err := h.globeSprite.SetCurrentFrame(frameHealthStatus); err != nil {
-		return err
-	}
-
-	h.globeSprite.SetPosition(x+globeSpriteOffsetX, y+globeSpriteOffsetY)
-	h.globeSprite.Render(target)
-
-	return nil
 }
 
 func (h *HUD) renderPanel(x, y int, target d2interface.Surface) error {
@@ -453,7 +411,7 @@ func (h *HUD) renderPanel(x, y int, target d2interface.Surface) error {
 	return nil
 }
 
-func (h *HUD) renderLeftSkill(x, y int, target d2interface.Surface) error {
+func (h *HUD) renderLeftSkill(x, y int, target d2interface.Surface) {
 	newSkillResourcePath := h.getSkillResourceByClass(h.hero.LeftSkill.Charclass)
 	if newSkillResourcePath != h.leftSkillResource.SkillResourcePath {
 		h.leftSkillResource.SkillResourcePath = newSkillResourcePath
@@ -461,16 +419,15 @@ func (h *HUD) renderLeftSkill(x, y int, target d2interface.Surface) error {
 	}
 
 	if err := h.leftSkillResource.SkillIcon.SetCurrentFrame(h.hero.LeftSkill.IconCel); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
 
 	h.leftSkillResource.SkillIcon.SetPosition(x, y)
 	h.leftSkillResource.SkillIcon.Render(target)
-
-	return nil
 }
 
-func (h *HUD) renderRightSkill(x, _ int, target d2interface.Surface) error {
+func (h *HUD) renderRightSkill(x, _ int, target d2interface.Surface) {
 	_, height := target.GetSize()
 
 	newSkillResourcePath := h.getSkillResourceByClass(h.hero.RightSkill.Charclass)
@@ -480,13 +437,12 @@ func (h *HUD) renderRightSkill(x, _ int, target d2interface.Surface) error {
 	}
 
 	if err := h.rightSkillResource.SkillIcon.SetCurrentFrame(h.hero.RightSkill.IconCel); err != nil {
-		return err
+		log.Print(err)
+		return
 	}
 
 	h.rightSkillResource.SkillIcon.SetPosition(x, height)
 	h.rightSkillResource.SkillIcon.Render(target)
-
-	return nil
 }
 
 func (h *HUD) renderNewStatsButton(x, y int, target d2interface.Surface) error {
@@ -511,7 +467,7 @@ func (h *HUD) renderStamina(x, y int, target d2interface.Surface) error {
 	return nil
 }
 
-func (h *HUD) renderStaminaBar(target d2interface.Surface) error {
+func (h *HUD) renderStaminaBar(target d2interface.Surface) {
 	target.PushTranslation(staminaBarOffsetX, staminaBarOffsetY)
 	defer target.Pop()
 
@@ -526,19 +482,15 @@ func (h *HUD) renderStaminaBar(target d2interface.Surface) error {
 	}
 
 	target.DrawRect(int(staminaPercent*staminaBarWidth), staminaBarHeight, staminaBarColor)
-
-	return nil
 }
 
-func (h *HUD) renderExperienceBar(target d2interface.Surface) error {
+func (h *HUD) renderExperienceBar(target d2interface.Surface) {
 	target.PushTranslation(experienceBarOffsetX, experienceBarOffsetY)
 	defer target.Pop()
 
 	expPercent := float64(h.hero.Stats.Experience) / float64(h.hero.Stats.NextLevelExp)
 
 	target.DrawRect(int(expPercent*expBarWidth), 2, d2util.Color(whiteAlpha100))
-
-	return nil
 }
 
 func (h *HUD) renderMiniPanel(target d2interface.Surface) error {
@@ -765,7 +717,17 @@ func (h *HUD) renderForSelectableEntitiesHovered(target d2interface.Surface) {
 func (h *HUD) Render(target d2interface.Surface) error {
 	h.renderForSelectableEntitiesHovered(target)
 
-	if err := h.renderGameControlPanelElements(target); err != nil {
+	h.panelBackground.Render(target)
+
+	h.healthGlobe.Render(target)
+	h.widgetLeftSkill.Render(target)
+	h.widgetRightSkill.Render(target)
+	h.manaGlobe.Render(target)
+	h.widgetStamina.Render(target)
+	h.widgetExperience.Render(target)
+
+	// Mini Panel and button
+	if err := h.renderMiniPanel(target); err != nil {
 		return err
 	}
 

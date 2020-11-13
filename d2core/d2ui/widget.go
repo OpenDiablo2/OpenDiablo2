@@ -11,6 +11,8 @@ const (
 	RenderPrioritySkilltree
 	// RenderPrioritySkilltreeIcon is the priority for the skilltree icons
 	RenderPrioritySkilltreeIcon
+	// RenderPriorityHeroStatsPanel is the priority for the hero_stats_panel
+	RenderPriorityHeroStatsPanel
 	// RenderPriorityForeground is the last element drawn
 	RenderPriorityForeground
 )
@@ -19,6 +21,13 @@ const (
 type Widget interface {
 	Drawable
 	bindManager(ui *UIManager)
+	GetManager() (ui *UIManager)
+	OnHoverStart(callback func())
+	OnHoverEnd(callback func())
+	isHovered() bool
+	hoverStart()
+	hoverEnd()
+	Contains(x, y int) (contained bool)
 }
 
 // ClickableWidget defines an object that can be clicked
@@ -41,6 +50,10 @@ type BaseWidget struct {
 	height         int
 	renderPriority RenderPriority
 	visible        bool
+
+	hovered        bool
+	onHoverStartCb func()
+	onHoverEndCb   func()
 }
 
 // NewBaseWidget creates a new BaseWidget with defaults
@@ -99,4 +112,47 @@ func (b *BaseWidget) GetRenderPriority() (prio RenderPriority) {
 // SetRenderPriority sets the order in which this widget is rendered
 func (b *BaseWidget) SetRenderPriority(prio RenderPriority) {
 	b.renderPriority = prio
+}
+
+// OnHoverStart sets a function that is called if the hovering of the widget starts
+func (b *BaseWidget) OnHoverStart(callback func()) {
+	b.onHoverStartCb = callback
+}
+
+// HoverStart is called when the hovering of the widget starts
+func (b *BaseWidget) hoverStart() {
+	b.hovered = true
+	if b.onHoverStartCb != nil {
+		b.onHoverStartCb()
+	}
+}
+
+// OnHoverEnd sets a function that is called if the hovering of the widget ends
+func (b *BaseWidget) OnHoverEnd(callback func()) {
+	b.onHoverEndCb = callback
+}
+
+// hoverEnd is called when the widget hovering ends
+func (b *BaseWidget) hoverEnd() {
+	b.hovered = false
+	if b.onHoverEndCb != nil {
+		b.onHoverEndCb()
+	}
+}
+
+func (b *BaseWidget) isHovered() bool {
+	return b.hovered
+}
+
+// Contains determines whether a given x,y coordinate lands within a Widget
+func (b *BaseWidget) Contains(x, y int) bool {
+	wx, wy := b.GetPosition()
+	ww, wh := b.GetSize()
+
+	return x >= wx && x <= wx+ww && y >= wy && y <= wy+wh
+}
+
+// GetManager returns the uiManager
+func (b *BaseWidget) GetManager() (ui *UIManager) {
+	return b.manager
 }

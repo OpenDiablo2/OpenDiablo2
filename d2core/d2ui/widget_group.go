@@ -13,8 +13,7 @@ var _ Widget = &WidgetGroup{}
 // widgets at once.
 type WidgetGroup struct {
 	*BaseWidget
-	entries  []Widget
-	priority RenderPriority
+	entries []Widget
 }
 
 // NewWidgetGroup creates a new widget group
@@ -83,5 +82,18 @@ func (wg *WidgetGroup) Render(target d2interface.Surface) {
 func (wg *WidgetGroup) SetVisible(visible bool) {
 	for _, entry := range wg.entries {
 		entry.SetVisible(visible)
+	}
+}
+
+// OnMouseMove handles mouse move events
+func (wg *WidgetGroup) OnMouseMove(x, y int) {
+	for _, entry := range wg.entries {
+		if entry.Contains(x, y) && entry.GetVisible() {
+			if !entry.isHovered() {
+				entry.hoverStart()
+			}
+		} else if entry.isHovered() {
+			entry.hoverEnd()
+		}
 	}
 }

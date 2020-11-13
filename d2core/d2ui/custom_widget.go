@@ -9,11 +9,29 @@ var _ Widget = &CustomWidget{}
 type CustomWidget struct {
 	*BaseWidget
 	renderFunc func(target d2interface.Surface)
+	cached     bool
+	cachedImg  *d2interface.Surface
+}
+
+// NewCustomWidgetCached creates a new widget and caches anything rendered via the
+// renderFunc into a static image to be displayed
+func (ui *UIManager) NewCustomWidgetCached(renderFunc func(target d2interface.Surface), width, height int) *CustomWidget {
+	c := ui.NewCustomWidget(renderFunc, width, height)
+	c.cached = true
+
+	// render using the renderFunc to a cache
+	surface := ui.Renderer().NewSurface(width, height)
+	c.cachedImg = &surface
+	renderFunc(*c.cachedImg)
+
+	return c
 }
 
 // NewCustomWidget creates a new widget with custom render function
-func (ui *UIManager) NewCustomWidget(renderFunc func(target d2interface.Surface)) *CustomWidget {
+func (ui *UIManager) NewCustomWidget(renderFunc func(target d2interface.Surface), width, height int) *CustomWidget {
 	base := NewBaseWidget(ui)
+	base.width = width
+	base.height = height
 
 	return &CustomWidget{
 		BaseWidget: base,
@@ -23,7 +41,13 @@ func (ui *UIManager) NewCustomWidget(renderFunc func(target d2interface.Surface)
 
 // Render draws the custom widget
 func (c *CustomWidget) Render(target d2interface.Surface) {
-	c.renderFunc(target)
+	if c.cached {
+		target.PushTranslation(c.GetPosition())
+		target.Render(*c.cachedImg)
+		target.Pop()
+	} else {
+		c.renderFunc(target)
+	}
 }
 
 // Advance is a no-op

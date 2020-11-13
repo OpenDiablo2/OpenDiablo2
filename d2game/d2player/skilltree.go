@@ -131,7 +131,7 @@ func (s *skillTree) load() {
 	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPrioritySkilltree)
 	s.iconGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPrioritySkilltreeIcon)
 
-	s.panel = s.uiManager.NewCustomWidget(s.Render)
+	s.panel = s.uiManager.NewCustomWidget(s.Render, 400, 600)
 	s.panelGroup.AddWidget(s.panel)
 
 	s.frame = d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameRight)
@@ -424,9 +424,6 @@ func (s *skillTree) renderTabCommon(target d2interface.Surface) {
 
 	skillPanel.SetPosition(x+w, y)
 	s.renderPanelSegment(target, frameCommonTabBottomRight)
-
-	// available skill points label
-	s.availSPLabel.Render(target)
 }
 
 func (s *skillTree) renderTab(target d2interface.Surface, tab int) {
