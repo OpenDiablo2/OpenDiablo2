@@ -9,6 +9,7 @@ require (
 	github.com/go-restruct/restruct v1.2.0-alpha
 	github.com/google/uuid v1.1.2
 	github.com/gravestench/akara v0.0.0-20201014060234-a64208a7fd3c
+	github.com/hajimehoshi/ebiten v1.12.3
 	github.com/hajimehoshi/ebiten/v2 v2.0.2
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/profile v1.5.0

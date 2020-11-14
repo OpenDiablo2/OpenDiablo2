@@ -1,6 +1,7 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"io"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -29,14 +30,18 @@ const (
 	assetCacheEntryWeight = 1 // may want to make different weights for different asset types
 )
 
+const (
+	LogPrefixAssetLoader = "Asset Loader System"
+)
+
 // NewAssetLoader creates a new asset loader instance
 func NewAssetLoader() *AssetLoaderSystem {
 	// we are going to check entities that dont yet have loaded asset types
 	filesToLoad := akara.NewFilter().
-		Require(d2components.FilePath).
+		Require(d2components.FilePath). // we want to process entities with these file components
 		Require(d2components.FileType).
 		Require(d2components.FileHandle).
-		Forbid(d2components.FileSource).
+		Forbid(d2components.FileSource). // but we forbid files that are already loaded
 		Forbid(d2components.GameConfig).
 		Forbid(d2components.StringTable).
 		Forbid(d2components.DataDictionary).
@@ -55,16 +60,22 @@ func NewAssetLoader() *AssetLoaderSystem {
 		Require(d2components.FileSource).
 		Build()
 
-	return &AssetLoaderSystem{
+	assetLoader := &AssetLoaderSystem{
 		SubscriberSystem: akara.NewSubscriberSystem(filesToLoad, fileSources),
 		cache:            d2cache.CreateCache(assetCacheBudget).(*d2cache.Cache),
+		Logger: d2util.NewLogger(),
 	}
+
+	assetLoader.SetPrefix(LogPrefixAssetLoader)
+
+	return assetLoader
 }
 
 var _ akara.System = &AssetLoaderSystem{}
 
 type AssetLoaderSystem struct {
 	*akara.SubscriberSystem
+	*d2util.Logger
 	fileSub          *akara.Subscription
 	sourceSub        *akara.Subscription
 	cache            *d2cache.Cache
@@ -94,6 +105,8 @@ func (m *AssetLoaderSystem) Init(world *akara.World) {
 		m.SetActive(false)
 		return
 	}
+
+	m.Info("initializing ...")
 
 	for subIdx := range m.Subscriptions {
 		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
@@ -130,29 +143,37 @@ func (m *AssetLoaderSystem) Process() {
 }
 
 func (m *AssetLoaderSystem) loadAsset(id akara.EID) {
+	// make sure everything is kosher
 	fp, found := m.filePaths.GetFilePath(id)
 	if !found {
+		m.Errorf("filepath component not found for entity %d", id)
 		return
 	}
 
 	ft, found := m.fileTypes.GetFileType(id)
 	if !found {
+		m.Errorf("filetype component not found for entity %d", id)
 		return
 	}
 
 	fh, found := m.fileHandles.GetFileHandle(id)
 	if !found {
+		m.Errorf("filehandle component not found for entity %d", id)
 		return
 	}
 
-	if found := m.pullFromCache(id, fp.Path, ft.Type); found {
+	// try to pull from the cache and assign to the given entity id
+	if found := m.assignFromCache(id, fp.Path, ft.Type); found {
+		m.Debugf("Retrieving %s from cache", fp.Path)
 		return
 	}
 
+	// make sure to seek back to 0 if the filehandle was cached
 	_, _ = fh.Data.Seek(0, 0)
 
 	data, buf := make([]byte, 0), make([]byte, 16)
 
+	// read, parse, and cache the data
 	for {
 		numRead, err := fh.Data.Read(buf)
 		data = append(data, buf[:numRead]...)
@@ -165,12 +186,13 @@ func (m *AssetLoaderSystem) loadAsset(id akara.EID) {
 	m.parseAndCache(id, fp.Path, ft.Type, data)
 }
 
-func (m *AssetLoaderSystem) pullFromCache(id akara.EID, path string, t d2enum.FileType) bool {
+func (m *AssetLoaderSystem) assignFromCache(id akara.EID, path string, t d2enum.FileType) bool {
 	entry, found := m.cache.Retrieve(path)
 	if !found {
 		return found
 	}
 
+	// if we found what we're looking for, create the appropriate component and assign what we retrieved
 	switch t {
 	case d2enum.FileTypeStringTable:
 		m.stringTables.AddStringTable(id).TextDictionary = entry.(*d2tbl.TextDictionary)

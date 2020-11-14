@@ -1,6 +1,7 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,6 +14,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
 
+const (
+	logPrefixFileSourceResolver = "File Source Resolver"
+)
+
 func NewFileSourceResolver() *FileSourceResolver {
 	// subscribe to entities with a file type and file path, but no file source type
 	filesToCheck := akara.NewFilter().
@@ -21,13 +26,19 @@ func NewFileSourceResolver() *FileSourceResolver {
 		Forbid(d2components.FileSource).
 		Build()
 
-	return &FileSourceResolver{
+	fsr := &FileSourceResolver{
 		SubscriberSystem: akara.NewSubscriberSystem(filesToCheck),
+		Logger: d2util.NewLogger(),
 	}
+
+	fsr.SetPrefix(logPrefixFileSourceResolver)
+
+	return fsr
 }
 
 type FileSourceResolver struct {
 	*akara.SubscriberSystem
+	*d2util.Logger
 	fileSub     *akara.Subscription
 	filePaths   *d2components.FilePathMap
 	fileTypes   *d2components.FileTypeMap
@@ -42,6 +53,8 @@ func (m *FileSourceResolver) Init(world *akara.World) {
 		m.SetActive(false)
 		return
 	}
+
+	m.Info("initializing ...")
 
 	for subIdx := range m.Subscriptions {
 		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
@@ -60,13 +73,12 @@ func (m *FileSourceResolver) Init(world *akara.World) {
 func (m *FileSourceResolver) Process() {
 	for subIdx := range m.Subscriptions {
 		for _, sourceEntityID := range m.Subscriptions[subIdx].GetEntities() {
-			m.ProcessEntity(sourceEntityID)
+			m.processSourceEntity(sourceEntityID)
 		}
 	}
 }
 
-// ProcessEntity updates an individual entity in the system
-func (m *FileSourceResolver) ProcessEntity(id akara.EID) {
+func (m *FileSourceResolver) processSourceEntity(id akara.EID) {
 	fp, found := m.filePaths.GetFilePath(id)
 	if !found {
 		return
@@ -79,9 +91,9 @@ func (m *FileSourceResolver) ProcessEntity(id akara.EID) {
 
 	switch ft.Type {
 	case d2enum.FileTypeUnknown:
+		m.Errorf("unknown file type for file `%s`", fp.Path)
 		return
 	case d2enum.FileTypeMPQ:
-		source := m.fileSources.AddFileSource(id)
 		instance, err := m.makeMpqSource(fp.Path)
 
 		if err != nil {
@@ -89,9 +101,11 @@ func (m *FileSourceResolver) ProcessEntity(id akara.EID) {
 			break
 		}
 
+		source := m.fileSources.AddFileSource(id)
+
+		m.Infof("creating MPQ source for `%s`", fp.Path)
 		source.AbstractSource = instance
 	case d2enum.FileTypeDirectory:
-		source := m.fileSources.AddFileSource(id)
 		instance, err := m.makeFileSystemSource(fp.Path)
 
 		if err != nil {
@@ -99,6 +113,9 @@ func (m *FileSourceResolver) ProcessEntity(id akara.EID) {
 			break
 		}
 
+		source := m.fileSources.AddFileSource(id)
+
+		m.Infof("creating FILESYSTEM source for `%s`", fp.Path)
 		source.AbstractSource = instance
 	}
 }
@@ -123,6 +140,10 @@ func (s *fsSource) Open(path *d2components.FilePathComponent) (d2interface.DataS
 
 func (s *fsSource) fullPath(path string) string {
 	return filepath.Clean(filepath.Join(s.rootDir, path))
+}
+
+func (s *fsSource) Path() string {
+	return filepath.Clean(s.rootDir)
 }
 
 // mpq source
@@ -156,4 +177,8 @@ func (s *mpqSource) cleanMpqPath(path string) string {
 	}
 
 	return path
+}
+
+func (s *mpqSource) Path() string {
+	return filepath.Clean(s.mpq.Path())
 }
