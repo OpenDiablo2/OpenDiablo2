@@ -11,21 +11,13 @@ import (
 func Test_integration(t *testing.T) {
 	cfg := akara.NewWorldConfig()
 
-	bootstrap := NewGameBootstrapSystem()
-	fileTypeResolver := NewFileTypeResolver()
-	fileHandleResolver := NewFileHandleResolver()
-	fileSourceResolver := NewFileSourceResolver()
-	gameConfig := NewGameConfigSystem()
-	assetLoader := NewAssetLoader()
-	renderer := NewRenderSystem()
-
-	cfg.With(fileTypeResolver).
-		With(fileSourceResolver).
-		With(fileHandleResolver).
-		With(gameConfig).
-		With(assetLoader).
-		With(renderer).
-		With(bootstrap)
+	cfg.With(NewFileTypeResolver()).
+		With(NewFileSourceResolver()).
+		With(NewFileHandleResolver()).
+		With(NewGameConfigSystem()).
+		With(NewAssetLoader()).
+		With(NewRenderSystem()).
+		With(NewGameBootstrapSystem())
 
 	world := akara.NewWorld(cfg)
 
@@ -43,11 +35,8 @@ func Test_integration(t *testing.T) {
 	mm, _ := world.ComponentManager.GetMap(d2components.Dc6)
 	dc6map := mm.(*d2components.Dc6Map)
 
-	updateCount := 0
-
 	for {
 		world.Update(0)
-		updateCount++
 		_, found := dc6map.GetDc6(e1)
 
 		if found {

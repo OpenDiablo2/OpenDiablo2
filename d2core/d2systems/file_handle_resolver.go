@@ -1,6 +1,7 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -24,6 +25,10 @@ const (
 	fileHandleCacheEntryWeight = 1
 )
 
+const (
+	logPrefixFileHandleResolver = "File Handle Resolver"
+)
+
 func NewFileHandleResolver() *FileHandleResolutionSystem {
 	// this filter is for entities that have a file path and file type but no file handle.
 	filesToSource := akara.NewFilter().
@@ -37,18 +42,20 @@ func NewFileHandleResolver() *FileHandleResolutionSystem {
 		RequireOne(d2components.FileSource).
 		Build()
 
-	configsToUse := akara.NewFilter().
-		Require(d2components.GameConfig).
-		Build()
-
-	return &FileHandleResolutionSystem{
-		SubscriberSystem: akara.NewSubscriberSystem(filesToSource, sourcesToUse, configsToUse),
+	fhr := &FileHandleResolutionSystem{
+		SubscriberSystem: akara.NewSubscriberSystem(filesToSource, sourcesToUse),
 		cache:            d2cache.CreateCache(fileHandleCacheBudget).(*d2cache.Cache),
+		Logger: d2util.NewLogger(),
 	}
+
+	fhr.SetPrefix(logPrefixFileHandleResolver)
+
+	return fhr
 }
 
 type FileHandleResolutionSystem struct {
 	*akara.SubscriberSystem
+	*d2util.Logger
 	cache        *d2cache.Cache
 	filesToLoad  *akara.Subscription
 	sourcesToUse *akara.Subscription
@@ -62,14 +69,16 @@ type FileHandleResolutionSystem struct {
 func (m *FileHandleResolutionSystem) Init(world *akara.World) {
 	m.World = world
 
-	for subIdx := range m.Subscriptions {
-		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
-	}
-
 	if world == nil {
 		m.SetActive(false)
 		return
 	}
+
+	for subIdx := range m.Subscriptions {
+		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
+	}
+
+	m.Info("initializing ...")
 
 	m.filesToLoad = m.Subscriptions[0]
 	m.sourcesToUse = m.Subscriptions[1]
@@ -169,7 +178,7 @@ func (m *FileHandleResolutionSystem) loadFileWithSource(fileID, sourceID akara.E
 		}
 	}
 
-	//fmt.Printf("%s -> %s\n", sourceFp.Path, fp.Path)
+	m.Infof("resolved `%s` with source `%s`", fp.Path, sourceFp.Path)
 
 	component := m.fileHandles.AddFileHandle(fileID)
 	component.Data = data

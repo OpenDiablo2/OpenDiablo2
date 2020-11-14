@@ -1,11 +1,16 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"time"
 
 	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
+)
+
+const (
+	logPrefixMovementSystem = "Movement System"
 )
 
 // NewMovementSystem creates a movement system
@@ -16,6 +21,7 @@ func NewMovementSystem() *MovementSystem {
 
 	return &MovementSystem{
 		SubscriberSystem: akara.NewSubscriberSystem(filter),
+		Logger: d2util.NewLogger(),
 	}
 }
 
@@ -25,6 +31,7 @@ var _ akara.System = &MovementSystem{}
 // MovementSystem handles entity movement based on velocity and position components
 type MovementSystem struct {
 	*akara.SubscriberSystem
+	*d2util.Logger
 	positions  *d2components.PositionMap
 	velocities *d2components.VelocityMap
 }
@@ -37,6 +44,8 @@ func (m *MovementSystem) Init(world *akara.World) {
 		m.SetActive(false)
 		return
 	}
+
+	m.Info("initializing ...")
 
 	for subIdx := range m.Subscriptions {
 		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
@@ -52,6 +61,9 @@ func (m *MovementSystem) Init(world *akara.World) {
 func (m *MovementSystem) Process() {
 	for subIdx := range m.Subscriptions {
 		entities := m.Subscriptions[subIdx].GetEntities()
+
+		m.Infof("Processing movement for %d entities ...", len(entities))
+
 		for entIdx := range entities {
 			m.ProcessEntity(entities[entIdx])
 		}

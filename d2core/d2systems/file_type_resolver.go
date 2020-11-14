@@ -1,6 +1,7 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,6 +13,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
 
+const (
+	logPrefixFileTypeResolver = "File Type Resolver"
+)
+
 // NewFileTypeResolver creates a new file type resolution system.
 func NewFileTypeResolver() *FileTypeResolver {
 	// we subscribe only to entities that have a filepath
@@ -21,9 +26,14 @@ func NewFileTypeResolver() *FileTypeResolver {
 		Forbid(d2components.FileType).
 		Build()
 
-	return &FileTypeResolver{
+	ftr := &FileTypeResolver{
 		SubscriberSystem: akara.NewSubscriberSystem(filesToCheck),
+		Logger: d2util.NewLogger(),
 	}
+
+	ftr.SetPrefix(logPrefixFileTypeResolver)
+
+	return ftr
 }
 
 // static check that FileTypeResolver implements the System interface
@@ -36,6 +46,7 @@ var _ akara.System = &FileTypeResolver{}
 // from its subscription.
 type FileTypeResolver struct {
 	*akara.SubscriberSystem
+	*d2util.Logger
 	filesToCheck *akara.Subscription
 	filePaths    *d2components.FilePathMap
 	fileTypes    *d2components.FileTypeMap
@@ -49,6 +60,8 @@ func (m *FileTypeResolver) Init(world *akara.World) {
 		m.SetActive(false)
 		return
 	}
+
+	m.Info("initializing ...")
 
 	for subIdx := range m.Subscriptions {
 		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)

@@ -2,8 +2,8 @@ package d2systems
 
 import (
 	"encoding/json"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
 	"github.com/gravestench/akara"
 
@@ -13,9 +13,13 @@ import (
 // static check that the game config system implements the system interface
 var _ akara.System = &GameConfigSystem{}
 
+const (
+	loggerPrefixGameConfig = "Game Config"
+)
+
 func NewGameConfigSystem() *GameConfigSystem {
 	// we are going to check entities that dont yet have loaded asset types
-	thingsToCheck := akara.NewFilter().
+	filesToCheck := akara.NewFilter().
 		Require(d2components.FilePath).
 		Require(d2components.FileType).
 		Require(d2components.FileHandle).
@@ -34,19 +38,16 @@ func NewGameConfigSystem() *GameConfigSystem {
 		Build()
 
 	// we are interested in actual game config instances, too
-	gameConfigs := akara.NewFilter().Require(d2components.GameConfig).Build()
+	gameConfigs := akara.NewFilter().
+		Require(d2components.GameConfig).
+		Build()
 
 	gcs := &GameConfigSystem{
-		SubscriberSystem: akara.NewSubscriberSystem(thingsToCheck, gameConfigs),
-		maps: struct {
-			gameConfigs *d2components.GameConfigMap
-			filePaths   *d2components.FilePathMap
-			fileTypes   *d2components.FileTypeMap
-			fileHandles *d2components.FileHandleMap
-			fileSources *d2components.FileSourceMap
-			dirty       *d2components.DirtyMap
-		}{},
+		SubscriberSystem: akara.NewSubscriberSystem(filesToCheck, gameConfigs),
+		Logger: d2util.NewLogger(),
 	}
+
+	gcs.SetPrefix(loggerPrefixGameConfig)
 
 	return gcs
 }
@@ -63,16 +64,15 @@ func NewGameConfigSystem() *GameConfigSystem {
 // this system either...
 type GameConfigSystem struct {
 	*akara.SubscriberSystem
+	*d2util.Logger
 	filesToCheck *akara.Subscription
 	gameConfigs  *akara.Subscription
-	maps         struct {
-		gameConfigs *d2components.GameConfigMap
-		filePaths   *d2components.FilePathMap
-		fileTypes   *d2components.FileTypeMap
-		fileHandles *d2components.FileHandleMap
-		fileSources *d2components.FileSourceMap
-		dirty       *d2components.DirtyMap
-	}
+	*d2components.GameConfigMap
+	*d2components.FilePathMap
+	*d2components.FileTypeMap
+	*d2components.FileHandleMap
+	*d2components.FileSourceMap
+	*d2components.DirtyMap
 }
 
 func (m *GameConfigSystem) Init(world *akara.World) {
@@ -83,6 +83,8 @@ func (m *GameConfigSystem) Init(world *akara.World) {
 		return
 	}
 
+	m.Info("initializing ...")
+
 	for subIdx := range m.Subscriptions {
 		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
 	}
@@ -92,39 +94,26 @@ func (m *GameConfigSystem) Init(world *akara.World) {
 
 	// try to inject the components we require, then cast the returned
 	// abstract ComponentMap back to the concrete implementation
-	m.maps.filePaths = world.InjectMap(d2components.FilePath).(*d2components.FilePathMap)
-	m.maps.fileTypes = world.InjectMap(d2components.FileType).(*d2components.FileTypeMap)
-	m.maps.fileHandles = world.InjectMap(d2components.FileHandle).(*d2components.FileHandleMap)
-	m.maps.fileSources = world.InjectMap(d2components.FileSource).(*d2components.FileSourceMap)
-	m.maps.gameConfigs = world.InjectMap(d2components.GameConfig).(*d2components.GameConfigMap)
-	m.maps.dirty = world.InjectMap(d2components.Dirty).(*d2components.DirtyMap)
+	m.FilePathMap = world.InjectMap(d2components.FilePath).(*d2components.FilePathMap)
+	m.FileTypeMap = world.InjectMap(d2components.FileType).(*d2components.FileTypeMap)
+	m.FileHandleMap = world.InjectMap(d2components.FileHandle).(*d2components.FileHandleMap)
+	m.FileSourceMap = world.InjectMap(d2components.FileSource).(*d2components.FileSourceMap)
+	m.GameConfigMap = world.InjectMap(d2components.GameConfig).(*d2components.GameConfigMap)
+	m.DirtyMap = world.InjectMap(d2components.Dirty).(*d2components.DirtyMap)
 }
 
 func (m *GameConfigSystem) Process() {
-	m.clearDirty(m.gameConfigs.GetEntities())
 	m.checkForNewConfig(m.filesToCheck.GetEntities())
-}
-
-func (m *GameConfigSystem) clearDirty(entities []akara.EID) {
-	for _, eid := range entities {
-		dc, found := m.maps.dirty.GetDirty(eid)
-		if !found {
-			m.maps.dirty.AddDirty(eid) // adds it, but it's false
-			continue
-		}
-
-		dc.IsDirty = false
-	}
 }
 
 func (m *GameConfigSystem) checkForNewConfig(entities []akara.EID) {
 	for _, eid := range entities {
-		fp, found := m.maps.filePaths.GetFilePath(eid)
+		fp, found := m.GetFilePath(eid)
 		if !found {
 			continue
 		}
 
-		ft, found := m.maps.fileTypes.GetFileType(eid)
+		ft, found := m.GetFileType(eid)
 		if !found {
 			continue
 		}
@@ -133,20 +122,21 @@ func (m *GameConfigSystem) checkForNewConfig(entities []akara.EID) {
 			continue
 		}
 
+		m.Info("loading config file ...")
 		m.loadConfig(eid)
 	}
 }
 
 func (m *GameConfigSystem) loadConfig(eid akara.EID) {
-	fh, found := m.maps.fileHandles.GetFileHandle(eid)
+	fh, found := m.GetFileHandle(eid)
 	if !found {
 		return
 	}
 
-	gameConfig := m.maps.gameConfigs.AddGameConfig(eid)
+	gameConfig := m.AddGameConfig(eid)
 
 	if err := json.NewDecoder(fh.Data).Decode(gameConfig); err != nil {
-		m.maps.gameConfigs.Remove(eid)
+		m.GameConfigMap.Remove(eid)
 		return
 	}
 }

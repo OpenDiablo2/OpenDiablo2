@@ -1,6 +1,7 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"time"
 
 	"github.com/gravestench/akara"
@@ -10,11 +11,18 @@ const (
 	defaultScale float64 = 1
 )
 
+const (
+	logPrefixTimeScaleSystem = "Time Scale"
+)
+
 // NewTimeScaleSystem creates a timescale system
 func NewTimeScaleSystem() *TimeScaleSystem {
 	m := &TimeScaleSystem{
 		BaseSystem: &akara.BaseSystem{},
+		Logger: d2util.NewLogger(),
 	}
+
+	m.SetPrefix(logPrefixTimeScaleSystem)
 
 	return m
 }
@@ -27,20 +35,28 @@ var _ akara.System = &TimeScaleSystem{}
 // up the game time without affecting the render rate.
 type TimeScaleSystem struct {
 	*akara.BaseSystem
+	*d2util.Logger
 	scale float64
+	lastScale float64
 }
 
 // Init will initialize the TimeScale system
 func (t *TimeScaleSystem) Init(world *akara.World) {
 	t.World = world
+
+	t.Info("initializing ...")
+
 	t.scale = defaultScale
 }
 
 // Process scales the worlds time delta for this frame
 func (t *TimeScaleSystem) Process() {
-	if !t.Active() {
+	if !t.Active() || t.scale == t.lastScale{
 		return
 	}
+
+	t.Infof("setting time scale to %.1f", t.scale)
+	t.lastScale = t.scale
 
 	t.World.TimeDelta *= time.Duration(t.scale)
 }
