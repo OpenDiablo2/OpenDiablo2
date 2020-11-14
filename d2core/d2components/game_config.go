@@ -1,6 +1,7 @@
 package d2components
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"os/user"
 	"path"
 	"runtime"
@@ -26,6 +27,7 @@ type GameConfigComponent struct {
 	RunInBackground bool
 	VsyncEnabled    bool
 	Backend         string
+	LogLevel        d2util.LogLevel
 }
 
 // ID returns a unique identifier for the component type
@@ -140,6 +142,7 @@ func defaultConfig() *GameConfigComponent {
 			"d2video.mpq",
 			"d2speech.mpq",
 		},
+		LogLevel: d2util.LogLevelDefault,
 	}
 
 	switch runtime.GOOS {
