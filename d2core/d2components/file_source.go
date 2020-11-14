@@ -14,6 +14,7 @@ var _ akara.ComponentMap = &FileSourceMap{}
 
 // AbstractSource is the abstract representation of what a file source is
 type AbstractSource interface {
+	Path() string
 	Open(path *FilePathComponent) (d2interface.DataStream, error)
 }
 
