@@ -1,11 +1,10 @@
 package d2gamescreen
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2data/d2video"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -23,6 +22,29 @@ const (
 	endCreditExpBtnX, endCreditExpBtnY     = 264, 430
 	cinematicsExitBtnX, cinematicsExitBtnY = 340, 470
 )
+
+// CreateCinematics creates an instance of the credits screen
+func CreateCinematics(
+	navigator d2interface.Navigator,
+	asset *d2asset.AssetManager,
+	renderer d2interface.Renderer,
+	aup d2interface.AudioProvider,
+	l d2util.LogLevel,
+	ui *d2ui.UIManager) *Cinematics {
+	cinematics := &Cinematics{
+		asset:         asset,
+		renderer:      renderer,
+		navigator:     navigator,
+		uiManager:     ui,
+		audioProvider: aup,
+	}
+
+	cinematics.logger = d2util.NewLogger()
+	cinematics.logger.SetPrefix(logPrefix)
+	cinematics.logger.SetLevel(l)
+
+	return cinematics
+}
 
 // Cinematics represents the cinematics screen
 type Cinematics struct {
@@ -44,24 +66,7 @@ type Cinematics struct {
 	uiManager     *d2ui.UIManager
 	videoDecoder  *d2video.BinkDecoder
 	audioProvider d2interface.AudioProvider
-}
-
-// CreateCinematics creates an instance of the credits screen
-func CreateCinematics(
-	navigator d2interface.Navigator,
-	asset *d2asset.AssetManager,
-	renderer d2interface.Renderer,
-	aup d2interface.AudioProvider,
-	ui *d2ui.UIManager) *Cinematics {
-	result := &Cinematics{
-		asset:         asset,
-		renderer:      renderer,
-		navigator:     navigator,
-		uiManager:     ui,
-		audioProvider: aup,
-	}
-
-	return result
+	logger        *d2util.Logger
 }
 
 // OnLoad is called to load the resources for the credits screen
@@ -73,7 +78,7 @@ func (v *Cinematics) OnLoad(_ d2screen.LoadingState) {
 	v.background, err = v.uiManager.NewSprite(d2resource.GameSelectScreen, d2resource.PaletteSky)
 
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 	}
 
 	v.background.SetPosition(backgroundX, backgroundY)
@@ -81,7 +86,7 @@ func (v *Cinematics) OnLoad(_ d2screen.LoadingState) {
 	v.cinematicsBackground, err = v.uiManager.NewSprite(d2resource.CinematicsBackground, d2resource.PaletteSky)
 
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 	}
 
 	v.cinematicsBackground.SetPosition(cinematicsX, cinematicsY)
@@ -173,7 +178,7 @@ func (v *Cinematics) onEndCreditExpBtnClicked() {
 func (v *Cinematics) playVideo(path string) {
 	videoBytes, err := v.asset.LoadFile(path)
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 		return
 	}
 

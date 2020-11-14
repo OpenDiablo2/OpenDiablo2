@@ -4,25 +4,36 @@ import (
 	"fmt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 )
+
+// CreateGuiTestMain creates a GuiTestMain screen
+func CreateGuiTestMain(renderer d2interface.Renderer,
+	guiManager *d2gui.GuiManager,
+	l d2util.LogLevel,
+	assetManager *d2asset.AssetManager) *GuiTestMain {
+	guiTestMain := &GuiTestMain{
+		renderer:     renderer,
+		guiManager:   guiManager,
+		assetManager: assetManager,
+	}
+
+	guiTestMain.logger = d2util.NewLogger()
+	guiTestMain.logger.SetLevel(l)
+	guiTestMain.logger.SetPrefix(logPrefix)
+
+	return guiTestMain
+}
 
 // GuiTestMain is a playground screen for the gui components
 type GuiTestMain struct {
 	renderer     d2interface.Renderer
 	guiManager   *d2gui.GuiManager
 	assetManager *d2asset.AssetManager
-}
-
-// CreateGuiTestMain creates a GuiTestMain screen
-func CreateGuiTestMain(renderer d2interface.Renderer, guiManager *d2gui.GuiManager, assetManager *d2asset.AssetManager) *GuiTestMain {
-	return &GuiTestMain{
-		renderer:     renderer,
-		guiManager:   guiManager,
-		assetManager: assetManager,
-	}
+	logger       *d2util.Logger
 }
 
 // OnLoad loads the resources and creates the gui components
