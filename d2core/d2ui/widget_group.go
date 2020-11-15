@@ -1,10 +1,13 @@
 package d2ui
 
 import (
+	"image/color"
 	"sort"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
+
+const widgetGroupDebug = false // turns on debug rendering stuff for groups
 
 // static check that WidgetGroup implements widget
 var _ Widget = &WidgetGroup{}
@@ -76,6 +79,23 @@ func (wg *WidgetGroup) Render(target d2interface.Surface) {
 			entry.Render(target)
 		}
 	}
+
+	if widgetGroupDebug && wg.GetVisible() {
+		wg.renderDebug(target)
+	}
+}
+
+
+func (wg *WidgetGroup) renderDebug(target d2interface.Surface) {
+	target.PushTranslation(wg.GetPosition())
+	defer target.Pop()
+	target.DrawLine(wg.width, 0, color.White)
+	target.DrawLine(0, wg.height, color.White)
+
+	target.PushTranslation(wg.width, wg.height)
+	target.DrawLine(-wg.width, 0, color.White)
+	target.DrawLine(0, -wg.height, color.White)
+	target.Pop()
 }
 
 // SetVisible sets the visibility of all widgets in the group
