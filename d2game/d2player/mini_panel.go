@@ -13,6 +13,9 @@ const (
 	miniPanelY      = 526
 	miniPanelWidth  = 156
 	miniPanelHeight = 26
+
+	panelOffsetLeft  = 130
+	panelOffsetRight = 130
 )
 
 const (
@@ -41,6 +44,8 @@ type miniPanel struct {
 	sprite         *d2ui.Sprite
 	isOpen         bool
 	isSinglePlayer bool
+	movedLeft      bool
+	movedRight     bool
 	panelGroup     *d2ui.WidgetGroup
 }
 
@@ -163,3 +168,61 @@ func (m *miniPanel) Close() {
 func (m *miniPanel) IsInRect(px, py int) bool {
 	return m.panelGroup.Contains(px, py)
 }
+
+func (m *miniPanel) moveRight() {
+	m.panelGroup.OffsetPosition(panelOffsetRight, 0)
+}
+
+func (m *miniPanel) undoMoveRight() {
+	m.panelGroup.OffsetPosition(-panelOffsetRight, 0)
+}
+
+func (m *miniPanel) moveLeft() {
+	m.panelGroup.OffsetPosition(-panelOffsetLeft, 0)
+}
+
+func (m *miniPanel) undoMoveLeft() {
+	m.panelGroup.OffsetPosition(panelOffsetLeft, 0)
+}
+
+
+func (m *miniPanel) SetMovedLeft(moveLeft bool) {
+	if m.movedRight == true {
+		if moveLeft {
+			m.undoMoveRight()
+			m.panelGroup.SetVisible(false)
+		} else {
+			m.moveRight()
+			m.panelGroup.SetVisible(true)
+		}
+	} else {
+		if moveLeft {
+			m.moveLeft()
+		} else {
+			m.undoMoveLeft()
+		}
+	}
+
+	m.movedLeft = moveLeft
+}
+
+func (m *miniPanel) SetMovedRight(moveRight bool) {
+	if m.movedLeft == true {
+		if moveRight {
+			m.undoMoveLeft()
+			m.panelGroup.SetVisible(false)
+		} else {
+			m.moveLeft()
+			m.panelGroup.SetVisible(true)
+		}
+	} else {
+		if moveRight {
+			m.moveRight()
+		} else {
+			m.undoMoveRight()
+		}
+	}
+
+	m.movedRight = moveRight
+}
+

@@ -636,18 +636,21 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 func (g *GameControls) toggleHeroStatsPanel() {
 	g.heroStatsPanel.Toggle()
+	g.hud.miniPanel.SetMovedRight(g.heroStatsPanel.IsOpen())
 	g.updateLayout()
 }
 
 func (g *GameControls) toggleInventoryPanel() {
 	g.skilltree.Close()
 	g.inventory.Toggle()
+	g.hud.miniPanel.SetMovedLeft(g.inventory.IsOpen())
 	g.updateLayout()
 }
 
 func (g *GameControls) toggleSkilltreePanel() {
 	g.inventory.Close()
 	g.skilltree.Toggle()
+	g.hud.miniPanel.SetMovedLeft(g.skilltree.IsOpen())
 	g.updateLayout()
 }
 
