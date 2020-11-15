@@ -44,8 +44,8 @@ func (wg *WidgetGroup) adjustSize(w Widget) {
 	x, y := w.GetPosition()
 	width, height := w.GetSize()
 
-	if x+width > wg.width {
-		wg.width = x + width
+	if x+width > wg.x + wg.width {
+		wg.width += (x + width) - (wg.x + wg.width)
 	}
 
 	if wg.x > x {
@@ -53,8 +53,8 @@ func (wg *WidgetGroup) adjustSize(w Widget) {
 		wg.x = x
 	}
 
-	if y+height > wg.height {
-		wg.height = x + height
+	if y+height > wg.y + wg.height {
+		wg.height += (y + height) - (wg.y + wg.height)
 	}
 
 	if wg.y > y {
