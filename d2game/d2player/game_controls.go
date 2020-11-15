@@ -347,6 +347,8 @@ func NewGameControls(
 	gc.inventory.SetOnCloseCb(closeCb)
 	gc.skilltree.SetOnCloseCb(closeCb)
 
+	gc.escapeMenu.SetOnCloseCb(gc.hud.restoreMinipanelFromTempClose)
+
 	err = gc.bindTerminalCommands(term)
 	if err != nil {
 		return nil, err
@@ -412,14 +414,11 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 		g.HelpOverlay.Close()
 		g.updateLayout()
 	case d2enum.ToggleInventoryPanel:
-		g.inventory.Toggle()
-		g.updateLayout()
+		g.toggleInventoryPanel()
 	case d2enum.ToggleSkillTreePanel:
-		g.skilltree.Toggle()
-		g.updateLayout()
+		g.toggleInventoryPanel()
 	case d2enum.ToggleCharacterPanel:
-		g.heroStatsPanel.Toggle()
-		g.updateLayout()
+		g.toggleHeroStatsPanel()
 	case d2enum.ToggleRunWalk:
 		g.hud.onToggleRunButton(false)
 	case d2enum.HoldRun:
@@ -492,7 +491,7 @@ func (g *GameControls) onEscKey() {
 		if g.escapeMenu.IsOpen() {
 			g.escapeMenu.OnEscKey()
 		} else {
-			g.escapeMenu.open()
+			g.openEscMenu()
 		}
 	}
 }
@@ -635,6 +634,33 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	return false
 }
 
+func (g *GameControls) toggleHeroStatsPanel() {
+	g.heroStatsPanel.Toggle()
+	g.updateLayout()
+}
+
+func (g *GameControls) toggleInventoryPanel() {
+	g.skilltree.Close()
+	g.inventory.Toggle()
+	g.updateLayout()
+}
+
+func (g *GameControls) toggleSkilltreePanel() {
+	g.inventory.Close()
+	g.skilltree.Toggle()
+	g.updateLayout()
+}
+
+func (g *GameControls) openEscMenu() {
+	g.inventory.Close()
+	g.skilltree.Close()
+	g.heroStatsPanel.Close()
+	g.hud.closeMinipanelTemporary()
+	g.escapeMenu.open()
+	g.updateLayout()
+}
+
+
 // Load the resources required for the GameControls
 func (g *GameControls) Load() {
 	g.hud.Load()
@@ -644,10 +670,10 @@ func (g *GameControls) Load() {
 	g.HelpOverlay.Load()
 
 	miniPanelActions := &miniPanelActions {
-		characterToggle: g.heroStatsPanel.Toggle,
-			inventoryToggle: g.inventory.Toggle,
-			skilltreeToggle: g.skilltree.Toggle,
-			menuToggle:      g.escapeMenu.open,
+			characterToggle: g.toggleHeroStatsPanel,
+			inventoryToggle: g.toggleInventoryPanel,
+			skilltreeToggle: g.toggleSkilltreePanel,
+			menuToggle:      g.openEscMenu,
 		}
 	g.hud.miniPanel.load(miniPanelActions)
 }

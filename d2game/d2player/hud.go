@@ -97,6 +97,7 @@ type HUD struct {
 	runButton          *d2ui.Button
 	zoneChangeText     *d2ui.Label
 	miniPanel          *miniPanel
+	isMiniPanelOpen    bool
 	isZoneTextShown    bool
 	hpStatsIsVisible   bool
 	manaStatsIsVisible bool
@@ -720,3 +721,21 @@ func (h *HUD) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 
 	return false
 }
+
+func (h *HUD) closeMinipanelTemporary() {
+	h.isMiniPanelOpen = h.miniPanel.IsOpen()
+	if h.isMiniPanelOpen {
+		h.menuButton.SetEnabled(false)
+		h.menuButton.Toggle()
+		h.miniPanel.Close()
+	}
+}
+
+func (h *HUD) restoreMinipanelFromTempClose() {
+	if h.isMiniPanelOpen {
+		h.menuButton.SetEnabled(true)
+		h.menuButton.Toggle()
+		h.miniPanel.Open()
+	}
+}
+
