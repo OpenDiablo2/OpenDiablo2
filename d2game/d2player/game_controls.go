@@ -342,10 +342,9 @@ func NewGameControls(
 		isSinglePlayer:         isSinglePlayer,
 	}
 
-	closeCb := func() { gc.updateLayout() }
-	gc.heroStatsPanel.SetOnCloseCb(closeCb)
-	gc.inventory.SetOnCloseCb(closeCb)
-	gc.skilltree.SetOnCloseCb(closeCb)
+	gc.heroStatsPanel.SetOnCloseCb(gc.onCloseHeroStatsPanel)
+	gc.inventory.SetOnCloseCb(gc.onCloseInventory)
+	gc.skilltree.SetOnCloseCb(gc.onCloseSkilltree)
 
 	gc.escapeMenu.SetOnCloseCb(gc.hud.restoreMinipanelFromTempClose)
 
@@ -640,6 +639,11 @@ func (g *GameControls) toggleHeroStatsPanel() {
 	g.updateLayout()
 }
 
+func (g *GameControls) onCloseHeroStatsPanel() {
+	g.hud.miniPanel.SetMovedRight(g.heroStatsPanel.IsOpen())
+	g.updateLayout()
+}
+
 func (g *GameControls) toggleInventoryPanel() {
 	g.skilltree.Close()
 	g.inventory.Toggle()
@@ -647,9 +651,19 @@ func (g *GameControls) toggleInventoryPanel() {
 	g.updateLayout()
 }
 
+func (g *GameControls) onCloseInventory() {
+	g.hud.miniPanel.SetMovedLeft(g.inventory.IsOpen())
+	g.updateLayout()
+}
+
 func (g *GameControls) toggleSkilltreePanel() {
 	g.inventory.Close()
 	g.skilltree.Toggle()
+	g.hud.miniPanel.SetMovedLeft(g.skilltree.IsOpen())
+	g.updateLayout()
+}
+
+func (g *GameControls) onCloseSkilltree() {
 	g.hud.miniPanel.SetMovedLeft(g.skilltree.IsOpen())
 	g.updateLayout()
 }

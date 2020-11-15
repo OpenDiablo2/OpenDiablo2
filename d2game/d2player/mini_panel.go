@@ -187,6 +187,10 @@ func (m *miniPanel) undoMoveLeft() {
 
 
 func (m *miniPanel) SetMovedLeft(moveLeft bool) {
+	if m.movedLeft == moveLeft {
+		return
+	}
+
 	if m.movedRight == true {
 		if moveLeft {
 			m.undoMoveRight()
@@ -207,6 +211,10 @@ func (m *miniPanel) SetMovedLeft(moveLeft bool) {
 }
 
 func (m *miniPanel) SetMovedRight(moveRight bool) {
+	if m.movedRight == moveRight {
+		return
+	}
+
 	if m.movedLeft == true {
 		if moveRight {
 			m.undoMoveLeft()
