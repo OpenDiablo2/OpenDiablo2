@@ -106,6 +106,15 @@ func (wg *WidgetGroup) SetVisible(visible bool) {
 	}
 }
 
+// OffsetPosition moves all widgets by x and y
+func (wg *WidgetGroup) OffsetPosition(x, y int) {
+	wg.BaseWidget.OffsetPosition(x, y)
+
+	for _, entry := range wg.entries {
+		entry.OffsetPosition(x, y)
+	}
+}
+
 // OnMouseMove handles mouse move events
 func (wg *WidgetGroup) OnMouseMove(x, y int) {
 	for _, entry := range wg.entries {
