@@ -73,7 +73,7 @@ func CreateGame(
 		ticksSinceLevelCheck: 0,
 		mapRenderer: d2maprenderer.CreateMapRenderer(asset, renderer,
 			gameClient.MapEngine, term, startX, startY),
-		escapeMenu:    d2player.NewEscapeMenu(navigator, renderer, audioProvider, ui, guiManager, asset, keyMap),
+		escapeMenu:    d2player.NewEscapeMenu(navigator, renderer, audioProvider, ui, guiManager, asset, l, keyMap),
 		inputManager:  inputManager,
 		audioProvider: audioProvider,
 		renderer:      renderer,
@@ -82,6 +82,7 @@ func CreateGame(
 		uiManager:     ui,
 		guiManager:    guiManager,
 		keyMap:        keyMap,
+		logLevel:      l,
 	}
 	game.logger = d2util.NewLogger()
 	game.logger.SetLevel(l)
@@ -120,6 +121,7 @@ type Game struct {
 	audioProvider d2interface.AudioProvider
 	terminal      d2interface.Terminal
 	logger        *d2util.Logger
+	logLevel      d2util.LogLevel
 }
 
 // OnLoad loads the resources for the Gameplay screen
@@ -300,7 +302,7 @@ func (v *Game) bindGameControls() error {
 
 		var err error
 		v.gameControls, err = d2player.NewGameControls(v.asset, v.renderer, player, v.gameClient.MapEngine,
-			v.escapeMenu, v.mapRenderer, v, v.terminal, v.uiManager, v.guiManager, v.keyMap, v.gameClient.IsSinglePlayer())
+			v.escapeMenu, v.mapRenderer, v, v.terminal, v.uiManager, v.guiManager, v.keyMap, v.logLevel, v.gameClient.IsSinglePlayer())
 
 		if err != nil {
 			return err

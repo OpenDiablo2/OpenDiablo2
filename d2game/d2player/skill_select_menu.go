@@ -2,6 +2,7 @@ package d2player
 
 import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -14,10 +15,10 @@ type SkillSelectMenu struct {
 }
 
 // NewSkillSelectMenu creates a skill select menu.
-func NewSkillSelectMenu(asset *d2asset.AssetManager, ui *d2ui.UIManager, hero *d2mapentity.Player) *SkillSelectMenu {
+func NewSkillSelectMenu(asset *d2asset.AssetManager, ui *d2ui.UIManager, l d2util.LogLevel, hero *d2mapentity.Player) *SkillSelectMenu {
 	skillSelectMenu := &SkillSelectMenu{
-		LeftPanel:  NewHeroSkillsPanel(asset, ui, hero, true),
-		RightPanel: NewHeroSkillsPanel(asset, ui, hero, false),
+		LeftPanel:  NewHeroSkillsPanel(asset, ui, hero, l, true),
+		RightPanel: NewHeroSkillsPanel(asset, ui, hero, l, false),
 	}
 
 	return skillSelectMenu

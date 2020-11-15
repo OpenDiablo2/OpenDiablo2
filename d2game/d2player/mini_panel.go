@@ -1,11 +1,10 @@
 package d2player
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -25,16 +24,10 @@ const (
 	buttonOffsetY = -51
 )
 
-type miniPanel struct {
-	asset          *d2asset.AssetManager
-	container      *d2ui.Sprite
-	button         *d2ui.Sprite
-	isOpen         bool
-	isSinglePlayer bool
-	rectangle      d2geom.Rectangle
-}
-
-func newMiniPanel(asset *d2asset.AssetManager, uiManager *d2ui.UIManager, isSinglePlayer bool) *miniPanel {
+func newMiniPanel(asset *d2asset.AssetManager,
+	uiManager *d2ui.UIManager,
+	l d2util.LogLevel,
+	isSinglePlayer bool) (*miniPanel, error) {
 	miniPanelContainerPath := d2resource.Minipanel
 	if isSinglePlayer {
 		miniPanelContainerPath = d2resource.MinipanelSmall
@@ -42,14 +35,12 @@ func newMiniPanel(asset *d2asset.AssetManager, uiManager *d2ui.UIManager, isSing
 
 	containerSprite, err := uiManager.NewSprite(miniPanelContainerPath, d2resource.PaletteSky)
 	if err != nil {
-		log.Print(err)
-		return nil
+		return nil, err
 	}
 
 	buttonSprite, err := uiManager.NewSprite(d2resource.MinipanelButton, d2resource.PaletteSky)
 	if err != nil {
-		log.Print(err)
-		return nil
+		return nil, err
 	}
 
 	rectangle := d2geom.Rectangle{
@@ -63,7 +54,7 @@ func newMiniPanel(asset *d2asset.AssetManager, uiManager *d2ui.UIManager, isSing
 		rectangle.Width = 182
 	}
 
-	return &miniPanel{
+	mp := &miniPanel{
 		asset:          asset,
 		container:      containerSprite,
 		button:         buttonSprite,
@@ -71,6 +62,19 @@ func newMiniPanel(asset *d2asset.AssetManager, uiManager *d2ui.UIManager, isSing
 		isSinglePlayer: isSinglePlayer,
 		rectangle:      rectangle,
 	}
+
+	return mp, nil
+}
+
+type miniPanel struct {
+	asset          *d2asset.AssetManager
+	container      *d2ui.Sprite
+	button         *d2ui.Sprite
+	isOpen         bool
+	isSinglePlayer bool
+	rectangle      d2geom.Rectangle
+
+	logger *d2util.Logger
 }
 
 func (m *miniPanel) IsOpen() bool {

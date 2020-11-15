@@ -2,10 +2,10 @@ package d2player
 
 import (
 	"image"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -40,11 +40,12 @@ type globeFrame struct {
 	offsetX int
 	offsetY int
 	idx     int
+	gw      *globeWidget
 }
 
 func (gf *globeFrame) setFrameIndex() {
 	if err := gf.sprite.SetCurrentFrame(gf.idx); err != nil {
-		log.Print(err)
+		gf.gw.logger.Error(err.Error())
 	}
 }
 
@@ -57,15 +58,7 @@ func (gf *globeFrame) getSize() (x, y int) {
 	return w + gf.offsetX, h + gf.offsetY
 }
 
-type globeWidget struct {
-	*d2ui.BaseWidget
-	value    *int
-	valueMax *int
-	globe    *globeFrame
-	overlap  *globeFrame
-}
-
-func newGlobeWidget(ui *d2ui.UIManager, x, y int, gtype globeType, value, valueMax *int) *globeWidget {
+func newGlobeWidget(ui *d2ui.UIManager, x, y int, gtype globeType, value *int, l d2util.LogLevel, valueMax *int) *globeWidget {
 	var globe, overlap *globeFrame
 
 	base := d2ui.NewBaseWidget(ui)
@@ -95,13 +88,28 @@ func newGlobeWidget(ui *d2ui.UIManager, x, y int, gtype globeType, value, valueM
 		}
 	}
 
-	return &globeWidget{
+	gw := &globeWidget{
 		BaseWidget: base,
 		value:      value,
 		valueMax:   valueMax,
 		globe:      globe,
 		overlap:    overlap,
 	}
+
+	gw.logger = d2util.NewLogger()
+	gw.logger.SetLevel(l)
+	gw.logger.SetPrefix(logPrefix)
+
+	return gw
+}
+
+type globeWidget struct {
+	*d2ui.BaseWidget
+	value    *int
+	valueMax *int
+	globe    *globeFrame
+	overlap  *globeFrame
+	logger   *d2util.Logger
 }
 
 func (g *globeWidget) load() {
@@ -109,14 +117,14 @@ func (g *globeWidget) load() {
 
 	g.globe.sprite, err = g.GetManager().NewSprite(d2resource.HealthManaIndicator, d2resource.PaletteSky)
 	if err != nil {
-		log.Print(err)
+		g.logger.Error(err.Error())
 	}
 
 	g.globe.setFrameIndex()
 
 	g.overlap.sprite, err = g.GetManager().NewSprite(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
 	if err != nil {
-		log.Print(err)
+		g.logger.Error(err.Error())
 	}
 
 	g.overlap.setFrameIndex()

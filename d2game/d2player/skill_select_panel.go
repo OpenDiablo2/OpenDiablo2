@@ -2,12 +2,12 @@ package d2player
 
 import (
 	"fmt"
-	"log"
 	"sort"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
@@ -25,6 +25,40 @@ const (
 	skillListsLength  = 5 // 0 to 4. 0 - General Skills, 1 to 3 - Class-specific skills(based on the 3 different skill trees), 4 - Other skills
 )
 
+// NewHeroSkillsPanel creates a new hero status panel
+func NewHeroSkillsPanel(asset *d2asset.AssetManager,
+	ui *d2ui.UIManager,
+	hero *d2mapentity.Player,
+	l d2util.LogLevel,
+	isLeftPanel bool) *SkillPanel {
+	var activeSkill *d2hero.HeroSkill
+	if isLeftPanel {
+		activeSkill = hero.LeftSkill
+	} else {
+		activeSkill = hero.RightSkill
+	}
+
+	hoverTooltip := ui.NewTooltip(d2resource.Font16, d2resource.PaletteStatic, d2ui.TooltipXLeft, d2ui.TooltipYTop)
+
+	skillPanel := &SkillPanel{
+		asset:        asset,
+		activeSkill:  activeSkill,
+		ui:           ui,
+		isOpen:       false,
+		ListRows:     make([]*SkillListRow, skillListsLength),
+		renderer:     ui.Renderer(),
+		isLeftPanel:  isLeftPanel,
+		hero:         hero,
+		hoverTooltip: hoverTooltip,
+	}
+
+	skillPanel.logger = d2util.NewLogger()
+	skillPanel.logger.SetLevel(l)
+	skillPanel.logger.SetPrefix(logPrefix)
+
+	return skillPanel
+}
+
 // SkillPanel represents a skill select menu popup that is displayed when the player left clicks on his active left/right skill.
 type SkillPanel struct {
 	asset                *d2asset.AssetManager
@@ -38,30 +72,8 @@ type SkillPanel struct {
 	isOpen               bool
 	regenerateImageCache bool
 	isLeftPanel          bool
-}
 
-// NewHeroSkillsPanel creates a new hero status panel
-func NewHeroSkillsPanel(asset *d2asset.AssetManager, ui *d2ui.UIManager, hero *d2mapentity.Player, isLeftPanel bool) *SkillPanel {
-	var activeSkill *d2hero.HeroSkill
-	if isLeftPanel {
-		activeSkill = hero.LeftSkill
-	} else {
-		activeSkill = hero.RightSkill
-	}
-
-	hoverTooltip := ui.NewTooltip(d2resource.Font16, d2resource.PaletteStatic, d2ui.TooltipXLeft, d2ui.TooltipYTop)
-
-	return &SkillPanel{
-		asset:        asset,
-		activeSkill:  activeSkill,
-		ui:           ui,
-		isOpen:       false,
-		ListRows:     make([]*SkillListRow, skillListsLength),
-		renderer:     ui.Renderer(),
-		isLeftPanel:  isLeftPanel,
-		hero:         hero,
-		hoverTooltip: hoverTooltip,
-	}
+	logger *d2util.Logger
 }
 
 // Open opens the hero skills panel
@@ -204,7 +216,7 @@ func (s *SkillPanel) generateSkillRowImageCache() error {
 		cachedImage, err := s.createSkillListImage(skillListRow)
 
 		if err != nil {
-			log.Println(err)
+			s.logger.Error(err.Error())
 			return err
 		}
 
@@ -231,7 +243,7 @@ func (s *SkillPanel) createSkillListImage(skillsListRow *SkillListRow) (d2interf
 
 		if skillSprite.GetFrameCount() <= skill.IconCel {
 			// happens for non-player skills, since they do not have an icon
-			log.Printf("Invalid IconCel(sprite frame index) [%d] - Skill name: %s, skipping.", skill.IconCel, skill.Name)
+			s.logger.Error(fmt.Sprintf("Invalid IconCel(sprite frame index) [%d] - Skill name: %s, skipping.", skill.IconCel, skill.Name))
 			continue
 		}
 
@@ -353,7 +365,7 @@ func (s *SkillPanel) getSkillResourceByClass(class string) string {
 	case "dru":
 		resource = d2resource.DruidSkills
 	default:
-		log.Fatalf("Unknown class token: '%s'", class)
+		s.logger.Error(fmt.Sprintf("Unknown class token: '%s'", class))
 	}
 
 	return resource
