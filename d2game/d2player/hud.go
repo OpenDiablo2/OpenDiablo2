@@ -738,4 +738,3 @@ func (h *HUD) restoreMinipanelFromTempClose() {
 		h.miniPanel.Open()
 	}
 }
-

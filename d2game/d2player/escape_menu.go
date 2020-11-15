@@ -81,7 +81,7 @@ type EscapeMenu struct {
 	keyMap         *KeyMap
 	keyBindingMenu *KeyBindingMenu
 
-	onCloseCb      func()
+	onCloseCb func()
 }
 
 type layout struct {
@@ -412,6 +412,7 @@ func (m *EscapeMenu) OnEscKey() {
 	m.close()
 }
 
+// SetOnCloseCb sets the callback that is run when close() is called
 func (m *EscapeMenu) SetOnCloseCb(cb func()) {
 	m.onCloseCb = cb
 }

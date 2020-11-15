@@ -47,7 +47,7 @@ func (wg *WidgetGroup) adjustSize(w Widget) {
 	x, y := w.GetPosition()
 	width, height := w.GetSize()
 
-	if x+width > wg.x + wg.width {
+	if x+width > wg.x+wg.width {
 		wg.width += (x + width) - (wg.x + wg.width)
 	}
 
@@ -56,7 +56,7 @@ func (wg *WidgetGroup) adjustSize(w Widget) {
 		wg.x = x
 	}
 
-	if y+height > wg.y + wg.height {
+	if y+height > wg.y+wg.height {
 		wg.height += (y + height) - (wg.y + wg.height)
 	}
 
@@ -85,7 +85,6 @@ func (wg *WidgetGroup) Render(target d2interface.Surface) {
 	}
 }
 
-
 func (wg *WidgetGroup) renderDebug(target d2interface.Surface) {
 	target.PushTranslation(wg.GetPosition())
 	defer target.Pop()
@@ -101,6 +100,7 @@ func (wg *WidgetGroup) renderDebug(target d2interface.Surface) {
 // SetVisible sets the visibility of all widgets in the group
 func (wg *WidgetGroup) SetVisible(visible bool) {
 	wg.BaseWidget.SetVisible(visible)
+
 	for _, entry := range wg.entries {
 		entry.SetVisible(visible)
 	}

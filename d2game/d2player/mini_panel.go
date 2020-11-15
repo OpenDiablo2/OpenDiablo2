@@ -9,10 +9,8 @@ import (
 )
 
 const (
-	miniPanelX      = 325
-	miniPanelY      = 526
-	miniPanelWidth  = 156
-	miniPanelHeight = 26
+	miniPanelX = 325
+	miniPanelY = 526
 
 	panelOffsetLeft  = 130
 	panelOffsetRight = 130
@@ -51,7 +49,7 @@ type miniPanel struct {
 
 func newMiniPanel(asset *d2asset.AssetManager, uiManager *d2ui.UIManager, isSinglePlayer bool) *miniPanel {
 	return &miniPanel{
-		ui: uiManager,
+		ui:             uiManager,
 		asset:          asset,
 		isOpen:         false,
 		isSinglePlayer: isSinglePlayer,
@@ -80,19 +78,22 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 	if m.isSinglePlayer {
 		miniPanelContainerPath = d2resource.MinipanelSmall
 	}
+
 	m.container, err = m.ui.NewSprite(miniPanelContainerPath, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
 		return
 	}
-	if err:=m.container.SetCurrentFrame(0); err != nil {
+
+	if err = m.container.SetCurrentFrame(0); err != nil {
 		log.Print(err)
 		return
 	}
+
+	// nolint:golint,gomnd // divide by 2 does not need a magic number
 	x, y := screenWidth/2+containerOffsetX, screenHeight+containerOffsetY
 	m.container.SetPosition(x, y)
 	m.panelGroup.AddWidget(m.container)
-
 
 	buttonWidth, buttonHeight, err := m.sprite.GetFrameSize(0)
 	if err != nil {
@@ -102,8 +103,12 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 
 	buttonWidth++
 
-	x, y = screenWidth/2 + buttonOffsetX, screenHeight + buttonOffsetY - buttonHeight
-	buttonsFirst := []struct{t d2ui.ButtonType; f func()} {
+	// nolint:golint,gomnd // divide by 2 does not need a magic number
+	x, y = screenWidth/2+buttonOffsetX, screenHeight+buttonOffsetY-buttonHeight
+	buttonsFirst := []struct {
+		t d2ui.ButtonType
+		f func()
+	}{
 		{d2ui.ButtonTypeMinipanelCharacter, actions.characterToggle},
 		{d2ui.ButtonTypeMinipanelInventory, actions.inventoryToggle},
 		{d2ui.ButtonTypeMinipanelSkill, actions.skilltreeToggle},
@@ -111,31 +116,35 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 
 	for i := range buttonsFirst {
 		btn := m.ui.NewButton(buttonsFirst[i].t, "")
-		btn.SetPosition(x + (i * buttonWidth), y)
+		btn.SetPosition(x+(i*buttonWidth), y)
 		btn.OnActivated(buttonsFirst[i].f)
 		m.panelGroup.AddWidget(btn)
 	}
+
 	idxOffset := len(buttonsFirst)
 
 	if !m.isSinglePlayer {
 		partyButton := m.ui.NewButton(d2ui.ButtonTypeMinipanelParty, "")
-		partyButton.SetPosition(x + (3 * buttonWidth), y)
+		partyButton.SetPosition(x+(3*buttonWidth), y)
 		partyButton.OnActivated(actions.partyToggle)
 		m.panelGroup.AddWidget(partyButton)
-		idxOffset += 1
+		idxOffset++
 	}
 
-	buttonsLast := []struct{t d2ui.ButtonType; f func()} {
+	buttonsLast := []struct {
+		t d2ui.ButtonType
+		f func()
+	}{
 		{d2ui.ButtonTypeMinipanelAutomap, actions.automapToggle},
-		{d2ui.ButtonTypeMinipanelMessage, actions.messageToggle },
-		{d2ui.ButtonTypeMinipanelQuest, actions.questToggle },
+		{d2ui.ButtonTypeMinipanelMessage, actions.messageToggle},
+		{d2ui.ButtonTypeMinipanelQuest, actions.questToggle},
 		{d2ui.ButtonTypeMinipanelMen, actions.menuToggle},
 	}
 
 	for i := range buttonsLast {
 		idx := i + idxOffset
 		btn := m.ui.NewButton(buttonsLast[i].t, "")
-		btn.SetPosition(x + (idx * buttonWidth), y)
+		btn.SetPosition(x+(idx*buttonWidth), y)
 		btn.OnActivated(buttonsLast[i].f)
 		m.panelGroup.AddWidget(btn)
 	}
@@ -185,13 +194,12 @@ func (m *miniPanel) undoMoveLeft() {
 	m.panelGroup.OffsetPosition(panelOffsetLeft, 0)
 }
 
-
 func (m *miniPanel) SetMovedLeft(moveLeft bool) {
 	if m.movedLeft == moveLeft {
 		return
 	}
 
-	if m.movedRight == true {
+	if m.movedRight {
 		if moveLeft {
 			m.undoMoveRight()
 			m.panelGroup.SetVisible(false)
@@ -215,7 +223,7 @@ func (m *miniPanel) SetMovedRight(moveRight bool) {
 		return
 	}
 
-	if m.movedLeft == true {
+	if m.movedLeft {
 		if moveRight {
 			m.undoMoveLeft()
 			m.panelGroup.SetVisible(false)
@@ -233,4 +241,3 @@ func (m *miniPanel) SetMovedRight(moveRight bool) {
 
 	m.movedRight = moveRight
 }
-

@@ -90,41 +90,6 @@ const (
 	manaGlobeY,
 	manaGlobeWidth,
 	manaGlobeHeight = 695, 525, 80, 60
-
-	miniPanelCharacterX,
-	miniPanelCharacterY,
-	miniPanelCharacterWidth,
-	miniPanelCharacterHeight = 324, 528, 22, 26
-
-	miniPanelInventoryX,
-	miniPanelInventoryY,
-	miniPanelInventoryWidth,
-	miniPanelInventoryHeight = 346, 528, 22, 26
-
-	miniPanelSkillTreeX,
-	miniPanelSkillTreeY,
-	miniPanelSkillTreeWidth,
-	miniPanelSkillTreeHeight = 368, 528, 22, 26
-
-	miniPanelAutomapX,
-	miniPanelAutomapY,
-	miniPanelAutomapWidth,
-	miniPanelAutomapHeight = 390, 528, 22, 26
-
-	miniPanelMessageLogX,
-	miniPanelMessageLogY,
-	miniPanelMessageLogWidth,
-	miniPanelMessageLogHeight = 412, 528, 22, 26
-
-	miniPanelQuestLogX,
-	miniPanelQuestLogY,
-	miniPanelQuestLogWidth,
-	miniPanelQuestLogHeight = 434, 528, 22, 26
-
-	miniPanelGameMenuX,
-	miniPanelGameMenuY,
-	miniPanelGameMenuWidth,
-	miniPanelGameMenuHeight = 456, 528, 22, 26
 )
 
 const (
@@ -286,7 +251,6 @@ func NewGameControls(
 	heroStatsPanel := NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats)
 	inventory := NewInventory(asset, ui, inventoryRecord)
 	skilltree := newSkillTree(hero.Skills, hero.Class, asset, ui)
-
 
 	miniPanel := newMiniPanel(asset, ui, isSinglePlayer)
 
@@ -677,7 +641,6 @@ func (g *GameControls) openEscMenu() {
 	g.updateLayout()
 }
 
-
 // Load the resources required for the GameControls
 func (g *GameControls) Load() {
 	g.hud.Load()
@@ -686,12 +649,12 @@ func (g *GameControls) Load() {
 	g.heroStatsPanel.Load()
 	g.HelpOverlay.Load()
 
-	miniPanelActions := &miniPanelActions {
-			characterToggle: g.toggleHeroStatsPanel,
-			inventoryToggle: g.toggleInventoryPanel,
-			skilltreeToggle: g.toggleSkilltreePanel,
-			menuToggle:      g.openEscMenu,
-		}
+	miniPanelActions := &miniPanelActions{
+		characterToggle: g.toggleHeroStatsPanel,
+		inventoryToggle: g.toggleInventoryPanel,
+		skilltreeToggle: g.toggleSkilltreePanel,
+		menuToggle:      g.openEscMenu,
+	}
 	g.hud.miniPanel.load(miniPanelActions)
 }
 
@@ -824,15 +787,15 @@ func (g *GameControls) ToggleManaStats() {
 // Handles what to do when an actionable is hovered
 func (g *GameControls) onHoverActionable(item actionableType) {
 	hoverMap := map[actionableType]func(){
-		leftSkill:           func() {},
-		newStats:            func() {},
-		xp:                  func() {},
-		walkRun:             func() {},
-		stamina:             func() {},
-		newSkills:           func() {},
-		rightSkill:          func() {},
-		hpGlobe:             func() {},
-		manaGlobe:           func() {},
+		leftSkill:  func() {},
+		newStats:   func() {},
+		xp:         func() {},
+		walkRun:    func() {},
+		stamina:    func() {},
+		newSkills:  func() {},
+		rightSkill: func() {},
+		hpGlobe:    func() {},
+		manaGlobe:  func() {},
 	}
 
 	onHover, found := hoverMap[item]
