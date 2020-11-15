@@ -666,7 +666,6 @@ func (h *HUD) Render(target d2interface.Surface) error {
 	h.manaGlobe.Render(target)
 	h.widgetStamina.Render(target)
 	h.widgetExperience.Render(target)
-	h.miniPanel.Render(target)
 
 	if err := h.help.Render(target); err != nil {
 		return err

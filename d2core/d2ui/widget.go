@@ -11,6 +11,8 @@ const (
 	RenderPrioritySkilltree
 	// RenderPrioritySkilltreeIcon is the priority for the skilltree icons
 	RenderPrioritySkilltreeIcon
+	// RenderPriorityMinipanel is the priority for the minipanel icons
+	RenderPriorityMinipanel
 	// RenderPriorityHeroStatsPanel is the priority for the hero_stats_panel
 	RenderPriorityHeroStatsPanel
 	// RenderPriorityForeground is the last element drawn
