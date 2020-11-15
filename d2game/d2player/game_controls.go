@@ -311,10 +311,12 @@ func NewGameControls(
 	}
 
 	helpOverlay := NewHelpOverlay(asset, renderer, ui, guiManager, keyMap)
-	mp, err := newMiniPanel(asset, ui, l, isSinglePlayer)
+	mp, err := newMiniPanel(asset, ui, isSinglePlayer)
+
 	if err != nil {
 		return nil, err
 	}
+
 	hud := NewHUD(asset, ui, hero, helpOverlay, mp, actionableRegions, mapEngine, l, mapRenderer)
 
 	const blackAlpha50percent = 0x0000007f
@@ -946,7 +948,7 @@ func (g *GameControls) onClickActionable(item actionableType) {
 
 	action, found := actionMap[item]
 	if !found {
-		// Warning, becouse some action types are still todo, and could return this error
+		// Warning, because some action types are still todo, and could return this error
 		g.logger.Warning(fmt.Sprintf("Unrecognized actionableType(%d) being clicked\n", item))
 		return
 	}

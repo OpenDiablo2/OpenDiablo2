@@ -4,7 +4,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -26,7 +25,6 @@ const (
 
 func newMiniPanel(asset *d2asset.AssetManager,
 	uiManager *d2ui.UIManager,
-	l d2util.LogLevel,
 	isSinglePlayer bool) (*miniPanel, error) {
 	miniPanelContainerPath := d2resource.Minipanel
 	if isSinglePlayer {
@@ -73,8 +71,6 @@ type miniPanel struct {
 	isOpen         bool
 	isSinglePlayer bool
 	rectangle      d2geom.Rectangle
-
-	logger *d2util.Logger
 }
 
 func (m *miniPanel) IsOpen() bool {
