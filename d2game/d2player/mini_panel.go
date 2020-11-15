@@ -24,6 +24,12 @@ const (
 	buttonOffsetY = -52
 )
 
+type miniPanelContent struct {
+	buttonType d2ui.ButtonType
+	onActivate func()
+	tooltip    string
+}
+
 type miniPanelActions struct {
 	characterToggle func()
 	inventoryToggle func()
@@ -45,6 +51,7 @@ type miniPanel struct {
 	movedLeft      bool
 	movedRight     bool
 	panelGroup     *d2ui.WidgetGroup
+	tooltipGroup   *d2ui.WidgetGroup
 }
 
 func newMiniPanel(asset *d2asset.AssetManager, uiManager *d2ui.UIManager, isSinglePlayer bool) *miniPanel {
@@ -73,6 +80,8 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 
 	m.panelGroup = m.ui.NewWidgetGroup(d2ui.RenderPriorityMinipanel)
 	m.panelGroup.SetPosition(miniPanelX, miniPanelY)
+
+	m.tooltipGroup = m.ui.NewWidgetGroup(d2ui.RenderPriorityForeground)
 
 	miniPanelContainerPath := d2resource.Minipanel
 	if m.isSinglePlayer {
@@ -105,51 +114,81 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 
 	// nolint:golint,gomnd // divide by 2 does not need a magic number
 	x, y = screenWidth/2+buttonOffsetX, screenHeight+buttonOffsetY-buttonHeight
-	buttonsFirst := []struct {
-		t d2ui.ButtonType
-		f func()
-	}{
-		{d2ui.ButtonTypeMinipanelCharacter, actions.characterToggle},
-		{d2ui.ButtonTypeMinipanelInventory, actions.inventoryToggle},
-		{d2ui.ButtonTypeMinipanelSkill, actions.skilltreeToggle},
+	buttonsFirst := []miniPanelContent{
+		{d2ui.ButtonTypeMinipanelCharacter,
+			actions.characterToggle,
+			m.asset.TranslateString("minipanelchar"),
+		},
+		{d2ui.ButtonTypeMinipanelInventory,
+			actions.inventoryToggle,
+			m.asset.TranslateString("minipanelinv"),
+		},
+		{d2ui.ButtonTypeMinipanelSkill,
+			actions.skilltreeToggle,
+			m.asset.TranslateString("minipaneltree"),
+		},
 	}
 
 	for i := range buttonsFirst {
-		btn := m.ui.NewButton(buttonsFirst[i].t, "")
-		btn.SetPosition(x+(i*buttonWidth), y)
-		btn.OnActivated(buttonsFirst[i].f)
+		btn := m.createButton(buttonsFirst[i], x+(i*buttonWidth), y, buttonHeight)
 		m.panelGroup.AddWidget(btn)
 	}
 
 	idxOffset := len(buttonsFirst)
 
 	if !m.isSinglePlayer {
-		partyButton := m.ui.NewButton(d2ui.ButtonTypeMinipanelParty, "")
-		partyButton.SetPosition(x+(3*buttonWidth), y)
-		partyButton.OnActivated(actions.partyToggle)
-		m.panelGroup.AddWidget(partyButton)
+		partyContent := miniPanelContent{d2ui.ButtonTypeMinipanelParty,
+			actions.partyToggle,
+			m.asset.TranslateString("minipanelparty"),
+		}
+		btn := m.createButton(partyContent, x+(3*buttonWidth), y, buttonHeight)
+		m.panelGroup.AddWidget(btn)
 		idxOffset++
 	}
 
-	buttonsLast := []struct {
-		t d2ui.ButtonType
-		f func()
-	}{
-		{d2ui.ButtonTypeMinipanelAutomap, actions.automapToggle},
-		{d2ui.ButtonTypeMinipanelMessage, actions.messageToggle},
-		{d2ui.ButtonTypeMinipanelQuest, actions.questToggle},
-		{d2ui.ButtonTypeMinipanelMen, actions.menuToggle},
+	buttonsLast := []miniPanelContent{
+		{d2ui.ButtonTypeMinipanelAutomap,
+			actions.automapToggle,
+			m.asset.TranslateString("minipanelautomap"),
+		},
+		{d2ui.ButtonTypeMinipanelMessage,
+			actions.messageToggle,
+			m.asset.TranslateString("minipanelmessage"),
+		},
+		{d2ui.ButtonTypeMinipanelQuest,
+			actions.questToggle,
+			m.asset.TranslateString("minipanelquest"),
+		},
+		{d2ui.ButtonTypeMinipanelMen,
+			actions.menuToggle,
+			m.asset.TranslateString("minipanelmenubtn"),
+		},
 	}
 
 	for i := range buttonsLast {
 		idx := i + idxOffset
-		btn := m.ui.NewButton(buttonsLast[i].t, "")
-		btn.SetPosition(x+(idx*buttonWidth), y)
-		btn.OnActivated(buttonsLast[i].f)
+		btn := m.createButton(buttonsLast[i], x+(idx*buttonWidth), y, buttonHeight)
 		m.panelGroup.AddWidget(btn)
 	}
 
 	m.panelGroup.SetVisible(false)
+}
+
+func (m *miniPanel) createButton(content miniPanelContent, x, y, buttonHeight int) *d2ui.Button {
+	// Tooltip
+	tt := m.ui.NewTooltip(d2resource.Font16, d2resource.PaletteSky, d2ui.TooltipXCenter, d2ui.TooltipYTop)
+	tt.SetPosition(x, y-buttonHeight)
+	tt.SetText(content.tooltip)
+	tt.SetVisible(false)
+	m.tooltipGroup.AddWidget(tt)
+
+	// Button
+	btn := m.ui.NewButton(content.buttonType, "")
+	btn.SetPosition(x, y)
+	btn.OnActivated(content.onActivate)
+	btn.SetTooltip(tt)
+
+	return btn
 }
 
 func (m *miniPanel) IsOpen() bool {
@@ -180,18 +219,22 @@ func (m *miniPanel) IsInRect(px, py int) bool {
 
 func (m *miniPanel) moveRight() {
 	m.panelGroup.OffsetPosition(panelOffsetRight, 0)
+	m.tooltipGroup.OffsetPosition(panelOffsetRight, 0)
 }
 
 func (m *miniPanel) undoMoveRight() {
 	m.panelGroup.OffsetPosition(-panelOffsetRight, 0)
+	m.tooltipGroup.OffsetPosition(-panelOffsetRight, 0)
 }
 
 func (m *miniPanel) moveLeft() {
 	m.panelGroup.OffsetPosition(-panelOffsetLeft, 0)
+	m.tooltipGroup.OffsetPosition(-panelOffsetLeft, 0)
 }
 
 func (m *miniPanel) undoMoveLeft() {
 	m.panelGroup.OffsetPosition(panelOffsetLeft, 0)
+	m.tooltipGroup.OffsetPosition(panelOffsetLeft, 0)
 }
 
 func (m *miniPanel) SetMovedLeft(moveLeft bool) {
