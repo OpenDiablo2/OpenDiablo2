@@ -73,6 +73,7 @@ type ButtonLayout struct {
 	YSegments        int
 	BaseFrame        int
 	DisabledFrame    int
+	DisabledColor    uint32
 	TextOffset       int
 	FixedWidth       int
 	FixedHeight      int
@@ -157,6 +158,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			XSegments:        buttonWideSegmentsX,
 			YSegments:        buttonWideSegmentsY,
 			DisabledFrame:    buttonWideDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
 			TextOffset:       buttonWideTextOffset,
 			ResourceName:     d2resource.WideButtonBlank,
 			PaletteName:      d2resource.PaletteUnits,
@@ -171,6 +173,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			XSegments:        buttonShortSegmentsX,
 			YSegments:        buttonShortSegmentsY,
 			DisabledFrame:    buttonShortDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
 			TextOffset:       buttonShortTextOffset,
 			ResourceName:     d2resource.ShortButtonBlank,
 			PaletteName:      d2resource.PaletteUnits,
@@ -184,6 +187,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMedium: {
 			XSegments:        buttonMediumSegmentsX,
 			YSegments:        buttonMediumSegmentsY,
+			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.MediumButtonBlank,
 			PaletteName:      d2resource.PaletteUnits,
 			FontPath:         d2resource.FontExocet10,
@@ -197,6 +201,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			XSegments:        buttonTallSegmentsX,
 			YSegments:        buttonTallSegmentsY,
 			TextOffset:       buttonTallTextOffset,
+			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.TallButtonBlank,
 			PaletteName:      d2resource.PaletteUnits,
 			FontPath:         d2resource.FontExocet10,
@@ -210,6 +215,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			XSegments:        buttonOkCancelSegmentsX,
 			YSegments:        buttonOkCancelSegmentsY,
 			DisabledFrame:    buttonOkCancelDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.CancelButton,
 			PaletteName:      d2resource.PaletteUnits,
 			FontPath:         d2resource.FontRediculous,
@@ -223,6 +229,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			XSegments:        buttonRunSegmentsX,
 			YSegments:        buttonRunSegmentsY,
 			DisabledFrame:    buttonRunDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.RunButton,
 			PaletteName:      d2resource.PaletteSky,
 			Toggleable:       true,
@@ -237,6 +244,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			XSegments:        buttonBuySellSegmentsX,
 			YSegments:        buttonBuySellSegmentsY,
 			DisabledFrame:    buttonBuySellDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.BuySellButton,
 			PaletteName:      d2resource.PaletteUnits,
 			Toggleable:       true,
@@ -255,6 +263,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			XSegments:        buttonSkillTreeTabXSegments,
 			YSegments:        buttonSkillTreeTabYSegments,
 			DisabledFrame:    buttonSkillTreeTabDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
 			BaseFrame:        buttonSkillTreeTabBaseFrame,
 			ResourceName:     d2resource.SkillsPanelAmazon,
 			PaletteName:      d2resource.PaletteSky,
@@ -270,6 +279,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
 			DisabledFrame:    buttonMinipanelDisabledFrame,
+			DisabledColor:    whiteAlpha100,
 			BaseFrame:        buttonMinipanelOpenCloseBaseFrame,
 			ResourceName:     d2resource.MenuButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -284,7 +294,6 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelCharacter: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
-			DisabledFrame:    buttonMinipanelDisabledFrame,
 			BaseFrame:        buttonMinipanelCharacterBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -299,7 +308,6 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelInventory: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
-			DisabledFrame:    buttonMinipanelDisabledFrame,
 			BaseFrame:        buttonMinipanelInventoryBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -314,7 +322,6 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelSkill: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
-			DisabledFrame:    buttonMinipanelDisabledFrame,
 			BaseFrame:        buttonMinipanelSkilltreeBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -329,7 +336,6 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelParty: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
-			DisabledFrame:    buttonMinipanelDisabledFrame,
 			BaseFrame:        buttonMinipanelPartyBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -344,7 +350,6 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelAutomap: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
-			DisabledFrame:    buttonMinipanelDisabledFrame,
 			BaseFrame:        buttonMinipanelAutomapBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -359,7 +364,6 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelMessage: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
-			DisabledFrame:    buttonMinipanelDisabledFrame,
 			BaseFrame:        buttonMinipanelMessageBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -374,7 +378,6 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelQuest: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
-			DisabledFrame:    buttonMinipanelDisabledFrame,
 			BaseFrame:        buttonMinipanelQuestBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -389,7 +392,6 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelMen: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
-			DisabledFrame:    buttonMinipanelDisabledFrame,
 			BaseFrame:        buttonMinipanelMenBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -624,7 +626,7 @@ func (v *Button) Render(target d2interface.Surface) {
 
 	switch {
 	case !v.enabled:
-		target.PushColor(d2util.Color(lightGreyAlpha75))
+		target.PushColor(d2util.Color(v.buttonLayout.DisabledColor))
 		defer target.Pop()
 		target.Render(v.disabledSurface)
 	case v.toggled && v.pressed:
