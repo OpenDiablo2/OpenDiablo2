@@ -100,6 +100,7 @@ func (wg *WidgetGroup) renderDebug(target d2interface.Surface) {
 
 // SetVisible sets the visibility of all widgets in the group
 func (wg *WidgetGroup) SetVisible(visible bool) {
+	wg.BaseWidget.SetVisible(visible)
 	for _, entry := range wg.entries {
 		entry.SetVisible(visible)
 	}
