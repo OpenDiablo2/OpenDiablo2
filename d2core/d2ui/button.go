@@ -41,6 +41,7 @@ const (
 	ButtonTypeSquareClose        ButtonType = 20
 	ButtonTypeSkillTreeTab       ButtonType = 21
 	ButtonTypeMinipanelOpenClose ButtonType = 22
+	ButtonTypeMinipanelParty     ButtonType = 23
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -132,6 +133,15 @@ const (
 	buttonMinipanelDisabledFrame      = 2
 	buttonMinipanelXSegments          = 1
 	buttonMinipanelYSegments          = 1
+
+	buttonMinipanelCharacterBaseFrame = 0
+	buttonMinipanelInventoryBaseFrame = 2
+	buttonMinipanelSkilltreeBaseFrame = 4
+	buttonMinipanelPartyBaseFrame     = 6
+	buttonMinipanelAutomapBaseFrame   = 8
+	buttonMinipanelMessageBaseFrame   = 10
+	buttonMinipanelQuestBaseFrame     = 12
+	buttonMinipanelMenBaseFrame       = 14
 
 	buttonRunSegmentsX     = 1
 	buttonRunSegmentsY     = 1
@@ -264,6 +274,126 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			ResourceName:     d2resource.MenuButton,
 			PaletteName:      d2resource.PaletteSky,
 			Toggleable:       true,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelCharacter: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelDisabledFrame,
+			BaseFrame:        buttonMinipanelCharacterBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelInventory: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelDisabledFrame,
+			BaseFrame:        buttonMinipanelInventoryBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelSkill: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelDisabledFrame,
+			BaseFrame:        buttonMinipanelSkilltreeBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelParty: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelDisabledFrame,
+			BaseFrame:        buttonMinipanelPartyBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelAutomap: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelDisabledFrame,
+			BaseFrame:        buttonMinipanelAutomapBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelMessage: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelDisabledFrame,
+			BaseFrame:        buttonMinipanelMessageBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelQuest: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelDisabledFrame,
+			BaseFrame:        buttonMinipanelQuestBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelMen: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelDisabledFrame,
+			BaseFrame:        buttonMinipanelMenBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
 			FontPath:         d2resource.Font16,
 			AllowFrameChange: true,
 			HasImage:         true,
