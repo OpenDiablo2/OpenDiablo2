@@ -357,6 +357,7 @@ func (s *skillTree) Open() {
 	s.isOpen = true
 
 	s.panelGroup.SetVisible(true)
+	s.iconGroup.SetVisible(true)
 
 	// we only want to enable the icons of our current tab again
 	s.setTab(s.selectedTab)
