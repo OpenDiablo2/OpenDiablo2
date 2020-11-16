@@ -24,3 +24,28 @@ func GetLanguageLiteral(code byte) string {
 
 	return languages[code]
 }
+
+// Source https://github.com/eezstreet/OpenD2/blob/065f6e466048482b28b9dbc6286908dc1e0d10f6/Shared/D2Shared.hpp#L36
+func getCharsets() map[string]string {
+	return map[string]string{
+		"ENG": "LATIN",   // (English)
+		"ESP": "LATIN",   // (Spanish)
+		"DEU": "LATIN",   // (German)
+		"FRA": "LATIN",   // (French)
+		"POR": "LATIN",   // (Portuguese)
+		"ITA": "LATIN",   // (Italian)
+		"JPN": "JAPAN",   // (Japanese)
+		"KOR": "KOREAN",  // (Korean)
+		"SIN": "LATIN",   //
+		"CHI": "CHINESE", // (Chinese)
+		"POL": "LATIN2",  // (Polish)
+		"RUS": "RUSSIAN", // (Russian)
+	}
+}
+
+// GetFontCharset returns string representation of font charset
+func GetFontCharset(language string) string {
+	charset := getCharsets()
+
+	return charset[language]
+}
