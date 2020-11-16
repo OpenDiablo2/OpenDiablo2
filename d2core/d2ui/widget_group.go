@@ -127,3 +127,12 @@ func (wg *WidgetGroup) OnMouseMove(x, y int) {
 		}
 	}
 }
+
+// SetEnabled sets enable on all clickable widgets of this group
+func (wg *WidgetGroup) SetEnabled(enabled bool) {
+	for _, entry := range wg.entries {
+		if v, ok := entry.(ClickableWidget); ok {
+			v.SetEnabled(enabled)
+		}
+	}
+}
