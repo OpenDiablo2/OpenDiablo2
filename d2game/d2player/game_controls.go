@@ -310,7 +310,7 @@ func NewGameControls(
 		return nil, err
 	}
 
-	helpOverlay := NewHelpOverlay(asset, renderer, ui, guiManager, keyMap)
+	helpOverlay := NewHelpOverlay(asset, renderer, ui, guiManager, l, keyMap)
 	mp, err := newMiniPanel(asset, ui, isSinglePlayer)
 
 	if err != nil {
@@ -335,7 +335,7 @@ func NewGameControls(
 		mapRenderer:    mapRenderer,
 		inventory:      NewInventory(asset, ui, l, inventoryRecord),
 		skilltree:      newSkillTree(hero.Skills, hero.Class, asset, l, ui),
-		heroStatsPanel: NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, hero.Stats),
+		heroStatsPanel: NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, l, hero.Stats),
 		HelpOverlay:    helpOverlay,
 		keyMap:         keyMap,
 		hud:            hud,

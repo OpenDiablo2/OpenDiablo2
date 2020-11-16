@@ -1,12 +1,12 @@
 package d2player
 
 import (
-	"log"
 	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -82,6 +82,34 @@ type StatsPanelLabels struct {
 	Stamina      *d2ui.Label
 }
 
+// NewHeroStatsPanel creates a new hero status panel
+func NewHeroStatsPanel(asset *d2asset.AssetManager,
+	ui *d2ui.UIManager,
+	heroName string,
+	heroClass d2enum.Hero,
+	l d2util.LogLevel,
+	heroState *d2hero.HeroStatsState) *HeroStatsPanel {
+	originX := 0
+	originY := 0
+
+	hsp := &HeroStatsPanel{
+		asset:     asset,
+		uiManager: ui,
+		originX:   originX,
+		originY:   originY,
+		heroState: heroState,
+		heroName:  heroName,
+		heroClass: heroClass,
+		labels:    &StatsPanelLabels{},
+	}
+
+	hsp.logger = d2util.NewLogger()
+	hsp.logger.SetLevel(l)
+	hsp.logger.SetPrefix(logPrefix)
+
+	return hsp
+}
+
 // HeroStatsPanel represents the hero status panel
 type HeroStatsPanel struct {
 	asset      *d2asset.AssetManager
@@ -97,24 +125,8 @@ type HeroStatsPanel struct {
 	originX int
 	originY int
 	isOpen  bool
-}
 
-// NewHeroStatsPanel creates a new hero status panel
-func NewHeroStatsPanel(asset *d2asset.AssetManager, ui *d2ui.UIManager, heroName string, heroClass d2enum.Hero,
-	heroState *d2hero.HeroStatsState) *HeroStatsPanel {
-	originX := 0
-	originY := 0
-
-	return &HeroStatsPanel{
-		asset:     asset,
-		uiManager: ui,
-		originX:   originX,
-		originY:   originY,
-		heroState: heroState,
-		heroName:  heroName,
-		heroClass: heroClass,
-		labels:    &StatsPanelLabels{},
-	}
+	logger *d2util.Logger
 }
 
 // Load the data for the hero status panel
@@ -128,7 +140,7 @@ func (s *HeroStatsPanel) Load() {
 
 	s.panel, err = s.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 	if err != nil {
-		log.Print(err)
+		s.logger.Error(err.Error())
 	}
 
 	fw, fh := frame.GetFrameBounds()
@@ -206,7 +218,7 @@ func (s *HeroStatsPanel) renderStaticPanelFrames(target d2interface.Surface) {
 
 	for _, frameIndex := range frames {
 		if err := s.panel.SetCurrentFrame(frameIndex); err != nil {
-			log.Printf("%e", err)
+			s.logger.Error(err.Error())
 		}
 
 		w, h := s.panel.GetCurrentFrameSize()
