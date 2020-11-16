@@ -100,7 +100,8 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 
 	m.container, err = m.ui.NewSprite(miniPanelContainerPath, d2resource.PaletteSky)
 	if err != nil {
-		return nil, err
+		m.logger.Error(err.Error())
+		return
 	}
 
 	if err = m.container.SetCurrentFrame(0); err != nil {
@@ -115,7 +116,8 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 
 	buttonWidth, buttonHeight, err := m.sprite.GetFrameSize(0)
 	if err != nil {
-		return nil, err
+		m.logger.Error(err.Error())
+		return
 	}
 
 	buttonWidth++
