@@ -644,7 +644,12 @@ func (v *Button) Render(target d2interface.Surface) {
 	case !v.enabled:
 		target.PushColor(d2util.Color(v.buttonLayout.DisabledColor))
 		defer target.Pop()
-		target.Render(v.disabledSurface)
+
+		if v.toggled {
+			target.Render(v.toggledSurface)
+		} else {
+			target.Render(v.disabledSurface)
+		}
 	case v.toggled && v.pressed:
 		target.Render(v.pressedToggledSurface)
 	case v.pressed:
