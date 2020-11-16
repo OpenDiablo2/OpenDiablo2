@@ -143,9 +143,7 @@ func (s *HeroStatsPanel) Load() {
 		s.logger.Error(err.Error())
 	}
 
-	fw, fh := frame.GetFrameBounds()
-	fc := frame.GetFrameCount()
-	w, h := fw*fc, fh*fc
+	w, h := frame.GetSize()
 	staticPanel := s.uiManager.NewCustomWidgetCached(s.renderStaticMenu, w, h)
 	s.panelGroup.AddWidget(staticPanel)
 

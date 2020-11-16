@@ -105,6 +105,12 @@ func (ui *UIManager) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 		}
 	}
 
+	for _, w := range ui.widgets {
+		if w.GetVisible() {
+			w.OnMouseMove(event.X(), event.Y())
+		}
+	}
+
 	return false
 }
 
@@ -134,15 +140,15 @@ func (ui *UIManager) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 // Render renders all of the UI elements
 func (ui *UIManager) Render(target d2interface.Surface) {
-	for _, widget := range ui.widgets {
-		if widget.GetVisible() {
-			widget.Render(target)
-		}
-	}
-
 	for _, widgetGroup := range ui.widgetsGroups {
 		if widgetGroup.GetVisible() {
 			widgetGroup.Render(target)
+		}
+	}
+
+	for _, widget := range ui.widgets {
+		if widget.GetVisible() {
+			widget.Render(target)
 		}
 	}
 }

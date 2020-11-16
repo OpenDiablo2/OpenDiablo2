@@ -42,18 +42,10 @@ const (
 	xp
 	walkRun
 	stamina
-	miniPnl
 	newSkills
 	rightSkill
 	hpGlobe
 	manaGlobe
-	miniPanelCharacter
-	miniPanelInventory
-	miniPanelSkillTree
-	miniPanelAutomap
-	miniPanelMessageLog
-	miniPanelQuestLog
-	miniPanelGameMenu
 )
 
 const (
@@ -82,11 +74,6 @@ const (
 	staminaWidth,
 	staminaHeight = 273, 573, 105, 20
 
-	miniPnlX,
-	miniPnlY,
-	miniPnlWidth,
-	miniPnlHeight = 393, 563, 12, 23
-
 	newSkillsX,
 	newSkillsY,
 	newSkillsWidth,
@@ -106,41 +93,6 @@ const (
 	manaGlobeY,
 	manaGlobeWidth,
 	manaGlobeHeight = 695, 525, 80, 60
-
-	miniPanelCharacterX,
-	miniPanelCharacterY,
-	miniPanelCharacterWidth,
-	miniPanelCharacterHeight = 324, 528, 22, 26
-
-	miniPanelInventoryX,
-	miniPanelInventoryY,
-	miniPanelInventoryWidth,
-	miniPanelInventoryHeight = 346, 528, 22, 26
-
-	miniPanelSkillTreeX,
-	miniPanelSkillTreeY,
-	miniPanelSkillTreeWidth,
-	miniPanelSkillTreeHeight = 368, 528, 22, 26
-
-	miniPanelAutomapX,
-	miniPanelAutomapY,
-	miniPanelAutomapWidth,
-	miniPanelAutomapHeight = 390, 528, 22, 26
-
-	miniPanelMessageLogX,
-	miniPanelMessageLogY,
-	miniPanelMessageLogWidth,
-	miniPanelMessageLogHeight = 412, 528, 22, 26
-
-	miniPanelQuestLogX,
-	miniPanelQuestLogY,
-	miniPanelQuestLogWidth,
-	miniPanelQuestLogHeight = 434, 528, 22, 26
-
-	miniPanelGameMenuX,
-	miniPanelGameMenuY,
-	miniPanelGameMenuWidth,
-	miniPanelGameMenuHeight = 456, 528, 22, 26
 )
 
 const (
@@ -229,12 +181,6 @@ func NewGameControls(
 			Width:  staminaWidth,
 			Height: staminaHeight,
 		}},
-		{miniPnl, d2geom.Rectangle{
-			Left:   miniPnlX,
-			Top:    miniPnlY,
-			Width:  miniPnlWidth,
-			Height: miniPnlHeight,
-		}},
 		{newSkills, d2geom.Rectangle{
 			Left:   newSkillsX,
 			Top:    newSkillsY,
@@ -259,51 +205,14 @@ func NewGameControls(
 			Width:  manaGlobeWidth,
 			Height: manaGlobeHeight,
 		}},
-		{miniPanelCharacter, d2geom.Rectangle{
-			Left:   miniPanelCharacterX,
-			Top:    miniPanelCharacterY,
-			Width:  miniPanelCharacterWidth,
-			Height: miniPanelCharacterHeight,
-		}},
-		{miniPanelInventory, d2geom.Rectangle{
-			Left:   miniPanelInventoryX,
-			Top:    miniPanelInventoryY,
-			Width:  miniPanelInventoryWidth,
-			Height: miniPanelInventoryHeight,
-		}},
-		{miniPanelSkillTree, d2geom.Rectangle{
-			Left:   miniPanelSkillTreeX,
-			Top:    miniPanelSkillTreeY,
-			Width:  miniPanelSkillTreeWidth,
-			Height: miniPanelSkillTreeHeight,
-		}},
-		{miniPanelAutomap, d2geom.Rectangle{
-			Left:   miniPanelAutomapX,
-			Top:    miniPanelAutomapY,
-			Width:  miniPanelAutomapWidth,
-			Height: miniPanelAutomapHeight,
-		}},
-		{miniPanelMessageLog, d2geom.Rectangle{
-			Left:   miniPanelMessageLogX,
-			Top:    miniPanelMessageLogY,
-			Width:  miniPanelMessageLogWidth,
-			Height: miniPanelMessageLogHeight,
-		}},
-		{miniPanelQuestLog, d2geom.Rectangle{
-			Left:   miniPanelQuestLogX,
-			Top:    miniPanelQuestLogY,
-			Width:  miniPanelQuestLogWidth,
-			Height: miniPanelQuestLogHeight,
-		}},
-		{miniPanelGameMenu, d2geom.Rectangle{
-			Left:   miniPanelGameMenuX,
-			Top:    miniPanelGameMenuY,
-			Width:  miniPanelGameMenuWidth,
-			Height: miniPanelGameMenuHeight,
-		}},
 	}
-
 	inventoryRecord := asset.Records.Layout.Inventory[inventoryRecordKey]
+
+	heroStatsPanel := NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
+	inventory := NewInventory(asset, ui, l, inventoryRecord)
+	skilltree := newSkillTree(hero.Skills, hero.Class, asset, l, ui)
+
+	miniPanel := newMiniPanel(asset, ui, l, isSinglePlayer)
 
 	heroState, err := d2hero.NewHeroStateFactory(asset)
 	if err != nil {
@@ -311,13 +220,7 @@ func NewGameControls(
 	}
 
 	helpOverlay := NewHelpOverlay(asset, renderer, ui, guiManager, l, keyMap)
-	mp, err := newMiniPanel(asset, ui, isSinglePlayer)
-
-	if err != nil {
-		return nil, err
-	}
-
-	hud := NewHUD(asset, ui, hero, helpOverlay, mp, actionableRegions, mapEngine, l, mapRenderer)
+	hud := NewHUD(asset, ui, hero, helpOverlay, miniPanel, actionableRegions, mapEngine, l, mapRenderer)
 
 	const blackAlpha50percent = 0x0000007f
 
@@ -333,9 +236,9 @@ func NewGameControls(
 		escapeMenu:     escapeMenu,
 		inputListener:  inputListener,
 		mapRenderer:    mapRenderer,
-		inventory:      NewInventory(asset, ui, l, inventoryRecord),
-		skilltree:      newSkillTree(hero.Skills, hero.Class, asset, l, ui),
-		heroStatsPanel: NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, l, hero.Stats),
+		inventory:      inventory,
+		skilltree:      skilltree,
+		heroStatsPanel: heroStatsPanel,
 		HelpOverlay:    helpOverlay,
 		keyMap:         keyMap,
 		hud:            hud,
@@ -363,10 +266,11 @@ func NewGameControls(
 		isSinglePlayer:         isSinglePlayer,
 	}
 
-	closeCb := func() { gc.updateLayout() }
-	gc.heroStatsPanel.SetOnCloseCb(closeCb)
-	gc.inventory.SetOnCloseCb(closeCb)
-	gc.skilltree.SetOnCloseCb(closeCb)
+	gc.heroStatsPanel.SetOnCloseCb(gc.onCloseHeroStatsPanel)
+	gc.inventory.SetOnCloseCb(gc.onCloseInventory)
+	gc.skilltree.SetOnCloseCb(gc.onCloseSkilltree)
+
+	gc.escapeMenu.SetOnCloseCb(gc.hud.restoreMinipanelFromTempClose)
 
 	err = gc.bindTerminalCommands(term)
 	if err != nil {
@@ -483,14 +387,11 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 		g.HelpOverlay.Close()
 		g.updateLayout()
 	case d2enum.ToggleInventoryPanel:
-		g.inventory.Toggle()
-		g.updateLayout()
+		g.toggleInventoryPanel()
 	case d2enum.ToggleSkillTreePanel:
-		g.skilltree.Toggle()
-		g.updateLayout()
+		g.toggleInventoryPanel()
 	case d2enum.ToggleCharacterPanel:
-		g.heroStatsPanel.Toggle()
-		g.updateLayout()
+		g.toggleHeroStatsPanel()
 	case d2enum.ToggleRunWalk:
 		g.hud.onToggleRunButton(false)
 	case d2enum.HoldRun:
@@ -563,7 +464,7 @@ func (g *GameControls) onEscKey() {
 		if g.escapeMenu.IsOpen() {
 			g.escapeMenu.OnEscKey()
 		} else {
-			g.escapeMenu.open()
+			g.openEscMenu()
 		}
 	}
 }
@@ -706,6 +607,50 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 	return false
 }
 
+func (g *GameControls) toggleHeroStatsPanel() {
+	g.heroStatsPanel.Toggle()
+	g.hud.miniPanel.SetMovedRight(g.heroStatsPanel.IsOpen())
+	g.updateLayout()
+}
+
+func (g *GameControls) onCloseHeroStatsPanel() {
+	g.hud.miniPanel.SetMovedRight(g.heroStatsPanel.IsOpen())
+	g.updateLayout()
+}
+
+func (g *GameControls) toggleInventoryPanel() {
+	g.skilltree.Close()
+	g.inventory.Toggle()
+	g.hud.miniPanel.SetMovedLeft(g.inventory.IsOpen())
+	g.updateLayout()
+}
+
+func (g *GameControls) onCloseInventory() {
+	g.hud.miniPanel.SetMovedLeft(g.inventory.IsOpen())
+	g.updateLayout()
+}
+
+func (g *GameControls) toggleSkilltreePanel() {
+	g.inventory.Close()
+	g.skilltree.Toggle()
+	g.hud.miniPanel.SetMovedLeft(g.skilltree.IsOpen())
+	g.updateLayout()
+}
+
+func (g *GameControls) onCloseSkilltree() {
+	g.hud.miniPanel.SetMovedLeft(g.skilltree.IsOpen())
+	g.updateLayout()
+}
+
+func (g *GameControls) openEscMenu() {
+	g.inventory.Close()
+	g.skilltree.Close()
+	g.heroStatsPanel.Close()
+	g.hud.closeMinipanelTemporary()
+	g.escapeMenu.open()
+	g.updateLayout()
+}
+
 // Load the resources required for the GameControls
 func (g *GameControls) Load() {
 	g.hud.Load()
@@ -713,6 +658,14 @@ func (g *GameControls) Load() {
 	g.skilltree.load()
 	g.heroStatsPanel.Load()
 	g.HelpOverlay.Load()
+
+	miniPanelActions := &miniPanelActions{
+		characterToggle: g.toggleHeroStatsPanel,
+		inventoryToggle: g.toggleInventoryPanel,
+		skilltreeToggle: g.toggleSkilltreePanel,
+		menuToggle:      g.openEscMenu,
+	}
+	g.hud.miniPanel.load(miniPanelActions)
 }
 
 // Advance advances the state of the GameControls
@@ -762,7 +715,7 @@ func (g *GameControls) isInActiveMenusRect(px, py int) bool {
 		return true
 	}
 
-	if g.hud.miniPanel.IsOpen() && g.hud.miniPanel.isInRect(px, py) {
+	if g.hud.miniPanel.IsOpen() && g.hud.miniPanel.IsInRect(px, py) {
 		return true
 	}
 
@@ -844,23 +797,15 @@ func (g *GameControls) ToggleManaStats() {
 // Handles what to do when an actionable is hovered
 func (g *GameControls) onHoverActionable(item actionableType) {
 	hoverMap := map[actionableType]func(){
-		leftSkill:           func() {},
-		newStats:            func() {},
-		xp:                  func() {},
-		walkRun:             func() {},
-		stamina:             func() {},
-		miniPnl:             func() {},
-		newSkills:           func() {},
-		rightSkill:          func() {},
-		hpGlobe:             func() {},
-		manaGlobe:           func() {},
-		miniPanelCharacter:  func() {},
-		miniPanelInventory:  func() {},
-		miniPanelSkillTree:  func() {},
-		miniPanelAutomap:    func() {},
-		miniPanelMessageLog: func() {},
-		miniPanelQuestLog:   func() {},
-		miniPanelGameMenu:   func() {},
+		leftSkill:  func() {},
+		newStats:   func() {},
+		xp:         func() {},
+		walkRun:    func() {},
+		stamina:    func() {},
+		newSkills:  func() {},
+		rightSkill: func() {},
+		hpGlobe:    func() {},
+		manaGlobe:  func() {},
 	}
 
 	onHover, found := hoverMap[item]
@@ -895,12 +840,6 @@ func (g *GameControls) onClickActionable(item actionableType) {
 			g.logger.Info("Stamina Action Pressed")
 		},
 
-		miniPnl: func() {
-			g.logger.Info("Mini Panel Action Pressed")
-
-			g.hud.miniPanel.Toggle()
-		},
-
 		newSkills: func() {
 			g.logger.Info("New Skills Selector Action Pressed")
 		},
@@ -917,32 +856,6 @@ func (g *GameControls) onClickActionable(item actionableType) {
 		manaGlobe: func() {
 			g.ToggleManaStats()
 			g.logger.Info("Mana Globe Pressed")
-		},
-
-		miniPanelCharacter: func() {
-			g.logger.Info("Character button on mini panel is pressed")
-
-			g.heroStatsPanel.Toggle()
-			g.updateLayout()
-		},
-
-		miniPanelInventory: func() {
-			g.logger.Info("Inventory button on mini panel is pressed")
-
-			g.inventory.Toggle()
-			g.updateLayout()
-		},
-
-		miniPanelSkillTree: func() {
-			g.logger.Info("Skilltree button on mini panel is pressed")
-
-			g.skilltree.Toggle()
-			g.updateLayout()
-		},
-
-		miniPanelGameMenu: func() {
-			g.hud.miniPanel.Close()
-			g.escapeMenu.open()
 		},
 	}
 

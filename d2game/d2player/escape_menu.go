@@ -117,6 +117,8 @@ type EscapeMenu struct {
 	keyMap         *KeyMap
 	keyBindingMenu *KeyBindingMenu
 
+	onCloseCb func()
+
 	logger *d2util.Logger
 }
 
@@ -418,10 +420,16 @@ func (m *EscapeMenu) OnEscKey() {
 	m.close()
 }
 
+// SetOnCloseCb sets the callback that is run when close() is called
+func (m *EscapeMenu) SetOnCloseCb(cb func()) {
+	m.onCloseCb = cb
+}
+
 func (m *EscapeMenu) close() {
 	m.isOpen = false
 
 	m.guiManager.SetLayout(nil)
+	m.onCloseCb()
 }
 
 func (m *EscapeMenu) open() {
