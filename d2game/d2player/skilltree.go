@@ -151,7 +151,10 @@ func (s *skillTree) load() {
 	s.closeButton.OnActivated(func() { s.Close() })
 	s.panelGroup.AddWidget(s.closeButton)
 
-	s.setHeroTypeResourcePath()
+	if err := s.setHeroTypeResourcePath(); err != nil {
+		s.logger.Error(err.Error())
+	}
+
 	s.loadForHeroType()
 
 	for _, skill := range s.skills {
@@ -324,10 +327,11 @@ func (s *skillTree) getTab(class d2enum.Hero) *heroTabData {
 	return tabMap[class]
 }
 
-func (s *skillTree) setHeroTypeResourcePath() {
+func (s *skillTree) setHeroTypeResourcePath() error {
 	entry := s.getTab(s.heroClass)
+
 	if entry == nil {
-		s.logger.Fatal("Unknown Hero Type")
+		return fmt.Errorf("Unknown Hero Type")
 	}
 
 	s.resources = entry.resources
@@ -338,6 +342,8 @@ func (s *skillTree) setHeroTypeResourcePath() {
 	for i := 0; i < numTabs; i++ {
 		s.tab[i].closeButtonPosX = entry.closeButtonPos[i]
 	}
+
+	return nil
 }
 
 // Toggle the skill tree visibility
