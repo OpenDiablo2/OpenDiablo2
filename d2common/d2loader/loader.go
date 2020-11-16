@@ -48,6 +48,7 @@ func NewLoader(l d2util.LogLevel) (*Loader, error) {
 // that have been added
 type Loader struct {
 	language *string
+	charset  *string
 	d2interface.Cache
 	*d2util.Logger
 	Sources []asset.Source
@@ -58,15 +59,22 @@ func (l *Loader) SetLanguage(language *string) {
 	l.language = language
 }
 
+// SetCharset sets the charset for loader
+func (l *Loader) SetCharset(charset *string) {
+	l.charset = charset
+}
+
 // Load attempts to load an asset with the given sub-path. The sub-path is relative to the root
 // of each asset source root (regardless of the type of asset source)
 func (l *Loader) Load(subPath string) (asset.Asset, error) {
 	subPath = filepath.Clean(subPath)
 
 	if l.language != nil {
-		lang := l.language
-		subPath = strings.ReplaceAll(subPath, fontToken, "latin")
-		subPath = strings.ReplaceAll(subPath, tableToken, *lang)
+		charset := l.charset
+		language := l.language
+
+		subPath = strings.ReplaceAll(subPath, fontToken, *charset)
+		subPath = strings.ReplaceAll(subPath, tableToken, *language)
 	}
 
 	// first, we check the cache for an existing entry

@@ -35,7 +35,7 @@ const (
 	// --- Credits ---
 
 	CreditsBackground = "/data/global/ui/CharSelect/creditsbckgexpand.dc6"
-	CreditsText       = "/data/local/ui/{LANG}/ExpansionCredits.txt"
+	CreditsText       = "/data/local/ui/" + LanguageTableToken + "/ExpansionCredits.txt"
 
 	// --- Cinematics ---
 
