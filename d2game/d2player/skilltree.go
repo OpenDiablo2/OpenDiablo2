@@ -331,7 +331,7 @@ func (s *skillTree) setHeroTypeResourcePath() error {
 	entry := s.getTab(s.heroClass)
 
 	if entry == nil {
-		return fmt.Errorf("Unknown Hero Type")
+		return fmt.Errorf("unknown hero type")
 	}
 
 	s.resources = entry.resources
