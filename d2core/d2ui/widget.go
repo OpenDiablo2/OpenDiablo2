@@ -11,6 +11,8 @@ const (
 	RenderPrioritySkilltree
 	// RenderPrioritySkilltreeIcon is the priority for the skilltree icons
 	RenderPrioritySkilltreeIcon
+	// RenderPriorityMinipanel is the priority for the minipanel icons
+	RenderPriorityMinipanel
 	// RenderPriorityHeroStatsPanel is the priority for the hero_stats_panel
 	RenderPriorityHeroStatsPanel
 	// RenderPriorityForeground is the last element drawn
@@ -22,6 +24,7 @@ type Widget interface {
 	Drawable
 	bindManager(ui *UIManager)
 	GetManager() (ui *UIManager)
+	OnMouseMove(x int, y int)
 	OnHoverStart(callback func())
 	OnHoverEnd(callback func())
 	isHovered() bool
@@ -155,4 +158,15 @@ func (b *BaseWidget) Contains(x, y int) bool {
 // GetManager returns the uiManager
 func (b *BaseWidget) GetManager() (ui *UIManager) {
 	return b.manager
+}
+
+// OnMouseMove is called when the mouse is moved
+func (b *BaseWidget) OnMouseMove(x, y int) {
+	if b.Contains(x, y) {
+		if !b.isHovered() {
+			b.hoverStart()
+		}
+	} else if b.isHovered() {
+		b.hoverEnd()
+	}
 }

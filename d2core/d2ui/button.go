@@ -40,6 +40,8 @@ const (
 	ButtonTypeMinipanelMen       ButtonType = 19
 	ButtonTypeSquareClose        ButtonType = 20
 	ButtonTypeSkillTreeTab       ButtonType = 21
+	ButtonTypeMinipanelOpenClose ButtonType = 22
+	ButtonTypeMinipanelParty     ButtonType = 23
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -71,6 +73,7 @@ type ButtonLayout struct {
 	YSegments        int
 	BaseFrame        int
 	DisabledFrame    int
+	DisabledColor    uint32
 	TextOffset       int
 	FixedWidth       int
 	FixedHeight      int
@@ -78,7 +81,20 @@ type ButtonLayout struct {
 	Toggleable       bool
 	AllowFrameChange bool
 	HasImage         bool
+	Tooltip          int
+	TooltipXOffset   int
+	TooltipYOffset   int
 }
+
+const (
+	buttonTooltipNone int = iota
+	buttonTooltipClose
+)
+
+const (
+	buttonCloseTooltipXOffset = 15
+	buttonCloseTooltipYOffset = -2
+)
 
 const (
 	buttonWideSegmentsX     = 2
@@ -106,12 +122,27 @@ const (
 	buttonBuySellSegmentsY     = 1
 	buttonBuySellDisabledFrame = 1
 
-	buttonSkillTreeTabXSegments     = 1
-	buttonSkillTreeTabYSegments     = 1
+	buttonSkillTreeTabXSegments = 1
+	buttonSkillTreeTabYSegments = 1
+
 	buttonSkillTreeTabDisabledFrame = 7
 	buttonSkillTreeTabBaseFrame     = 7
 	buttonSkillTreeTabFixedWidth    = 93
 	buttonSkillTreeTabFixedHeight   = 107
+
+	buttonMinipanelOpenCloseBaseFrame = 0
+	buttonMinipanelDisabledFrame      = 2
+	buttonMinipanelXSegments          = 1
+	buttonMinipanelYSegments          = 1
+
+	buttonMinipanelCharacterBaseFrame = 0
+	buttonMinipanelInventoryBaseFrame = 2
+	buttonMinipanelSkilltreeBaseFrame = 4
+	buttonMinipanelPartyBaseFrame     = 6
+	buttonMinipanelAutomapBaseFrame   = 8
+	buttonMinipanelMessageBaseFrame   = 10
+	buttonMinipanelQuestBaseFrame     = 12
+	buttonMinipanelMenBaseFrame       = 14
 
 	buttonRunSegmentsX     = 1
 	buttonRunSegmentsY     = 1
@@ -127,6 +158,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			XSegments:        buttonWideSegmentsX,
 			YSegments:        buttonWideSegmentsY,
 			DisabledFrame:    buttonWideDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
 			TextOffset:       buttonWideTextOffset,
 			ResourceName:     d2resource.WideButtonBlank,
 			PaletteName:      d2resource.PaletteUnits,
@@ -141,6 +173,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			XSegments:        buttonShortSegmentsX,
 			YSegments:        buttonShortSegmentsY,
 			DisabledFrame:    buttonShortDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
 			TextOffset:       buttonShortTextOffset,
 			ResourceName:     d2resource.ShortButtonBlank,
 			PaletteName:      d2resource.PaletteUnits,
@@ -154,6 +187,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMedium: {
 			XSegments:        buttonMediumSegmentsX,
 			YSegments:        buttonMediumSegmentsY,
+			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.MediumButtonBlank,
 			PaletteName:      d2resource.PaletteUnits,
 			FontPath:         d2resource.FontExocet10,
@@ -167,6 +201,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			XSegments:        buttonTallSegmentsX,
 			YSegments:        buttonTallSegmentsY,
 			TextOffset:       buttonTallTextOffset,
+			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.TallButtonBlank,
 			PaletteName:      d2resource.PaletteUnits,
 			FontPath:         d2resource.FontExocet10,
@@ -180,6 +215,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			XSegments:        buttonOkCancelSegmentsX,
 			YSegments:        buttonOkCancelSegmentsY,
 			DisabledFrame:    buttonOkCancelDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.CancelButton,
 			PaletteName:      d2resource.PaletteUnits,
 			FontPath:         d2resource.FontRediculous,
@@ -193,6 +229,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			XSegments:        buttonRunSegmentsX,
 			YSegments:        buttonRunSegmentsY,
 			DisabledFrame:    buttonRunDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.RunButton,
 			PaletteName:      d2resource.PaletteSky,
 			Toggleable:       true,
@@ -207,6 +244,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			XSegments:        buttonBuySellSegmentsX,
 			YSegments:        buttonBuySellSegmentsY,
 			DisabledFrame:    buttonBuySellDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.BuySellButton,
 			PaletteName:      d2resource.PaletteUnits,
 			Toggleable:       true,
@@ -217,11 +255,15 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			FixedWidth:       ButtonNoFixedWidth,
 			FixedHeight:      ButtonNoFixedHeight,
 			LabelColor:       greyAlpha100,
+			Tooltip:          buttonTooltipClose,
+			TooltipXOffset:   buttonCloseTooltipXOffset,
+			TooltipYOffset:   buttonCloseTooltipYOffset,
 		},
 		ButtonTypeSkillTreeTab: {
 			XSegments:        buttonSkillTreeTabXSegments,
 			YSegments:        buttonSkillTreeTabYSegments,
 			DisabledFrame:    buttonSkillTreeTabDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
 			BaseFrame:        buttonSkillTreeTabBaseFrame,
 			ResourceName:     d2resource.SkillsPanelAmazon,
 			PaletteName:      d2resource.PaletteSky,
@@ -231,6 +273,134 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			HasImage:         false,
 			FixedWidth:       buttonSkillTreeTabFixedWidth,
 			FixedHeight:      buttonSkillTreeTabFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelOpenClose: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelDisabledFrame,
+			DisabledColor:    whiteAlpha100,
+			BaseFrame:        buttonMinipanelOpenCloseBaseFrame,
+			ResourceName:     d2resource.MenuButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       true,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelCharacter: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			BaseFrame:        buttonMinipanelCharacterBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelInventory: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			BaseFrame:        buttonMinipanelInventoryBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelSkill: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			BaseFrame:        buttonMinipanelSkilltreeBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelParty: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			BaseFrame:        buttonMinipanelPartyBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelAutomap: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			BaseFrame:        buttonMinipanelAutomapBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelMessage: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			BaseFrame:        buttonMinipanelMessageBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelQuest: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			BaseFrame:        buttonMinipanelQuestBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       whiteAlpha100,
+		},
+		ButtonTypeMinipanelMen: {
+			XSegments:        buttonMinipanelXSegments,
+			YSegments:        buttonMinipanelYSegments,
+			BaseFrame:        buttonMinipanelMenBaseFrame,
+			ResourceName:     d2resource.MinipanelButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
 			LabelColor:       whiteAlpha100,
 		},
 	}
@@ -251,6 +421,7 @@ type Button struct {
 	enabled               bool
 	pressed               bool
 	toggled               bool
+	tooltip               *Tooltip
 }
 
 // NewButton creates an instance of Button
@@ -311,6 +482,8 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 	buttonSprite.SetPosition(0, 0)
 	buttonSprite.SetEffect(d2enum.DrawEffectModulate)
 
+	btn.createTooltip()
+
 	ui.addWidget(btn) // important that this comes before prerenderStates!
 
 	btn.prerenderStates(buttonSprite, &buttonLayout, lbl)
@@ -323,6 +496,21 @@ type buttonStateDescriptor struct {
 	offsetX, offsetY     int
 	prerenderdestination *d2interface.Surface
 	fmtErr               string
+}
+
+func (v *Button) createTooltip() {
+	var t *Tooltip
+
+	switch v.buttonLayout.Tooltip {
+	case buttonTooltipNone:
+		return
+	case buttonTooltipClose:
+		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		t.SetText(v.manager.asset.TranslateString("strClose"))
+	}
+
+	t.SetVisible(false)
+	v.SetTooltip(t)
 }
 
 func (v *Button) prerenderStates(btnSprite *Sprite, btnLayout *ButtonLayout, label *Label) {
@@ -438,7 +626,7 @@ func (v *Button) Render(target d2interface.Surface) {
 
 	switch {
 	case !v.enabled:
-		target.PushColor(d2util.Color(lightGreyAlpha75))
+		target.PushColor(d2util.Color(v.buttonLayout.DisabledColor))
 		defer target.Pop()
 		target.Render(v.disabledSurface)
 	case v.toggled && v.pressed:
@@ -484,6 +672,32 @@ func (v *Button) GetPressed() bool {
 // SetPressed sets the pressed state of the button
 func (v *Button) SetPressed(pressed bool) {
 	v.pressed = pressed
+}
+
+// SetVisible sets the pressed state of the button
+func (v *Button) SetVisible(visible bool) {
+	v.BaseWidget.SetVisible(visible)
+
+	if v.isHovered() && !visible {
+		v.hoverEnd()
+	}
+}
+
+// SetPosition sets the position of the widget
+func (v *Button) SetPosition(x, y int) {
+	v.BaseWidget.SetPosition(x, y)
+
+	if v.buttonLayout.Tooltip != buttonTooltipNone {
+		v.tooltip.SetPosition(x+v.buttonLayout.TooltipXOffset, y+v.buttonLayout.TooltipYOffset)
+	}
+}
+
+// SetTooltip adds a tooltip to the button
+func (v *Button) SetTooltip(t *Tooltip) {
+	v.tooltip = t
+	v.manager.addWidget(t)
+	v.OnHoverStart(func() { log.Print("HoverStart"); v.tooltip.SetVisible(true) })
+	v.OnHoverEnd(func() { v.tooltip.SetVisible(false) })
 }
 
 func half(n int) int {

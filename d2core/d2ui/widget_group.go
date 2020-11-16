@@ -1,10 +1,13 @@
 package d2ui
 
 import (
+	"image/color"
 	"sort"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
+
+const widgetGroupDebug = false // turns on debug rendering stuff for groups
 
 // static check that WidgetGroup implements widget
 var _ Widget = &WidgetGroup{}
@@ -44,8 +47,8 @@ func (wg *WidgetGroup) adjustSize(w Widget) {
 	x, y := w.GetPosition()
 	width, height := w.GetSize()
 
-	if x+width > wg.width {
-		wg.width = x + width
+	if x+width > wg.x+wg.width {
+		wg.width += (x + width) - (wg.x + wg.width)
 	}
 
 	if wg.x > x {
@@ -53,8 +56,8 @@ func (wg *WidgetGroup) adjustSize(w Widget) {
 		wg.x = x
 	}
 
-	if y+height > wg.height {
-		wg.height = x + height
+	if y+height > wg.y+wg.height {
+		wg.height += (y + height) - (wg.y + wg.height)
 	}
 
 	if wg.y > y {
@@ -76,12 +79,39 @@ func (wg *WidgetGroup) Render(target d2interface.Surface) {
 			entry.Render(target)
 		}
 	}
+
+	if widgetGroupDebug && wg.GetVisible() {
+		wg.renderDebug(target)
+	}
+}
+
+func (wg *WidgetGroup) renderDebug(target d2interface.Surface) {
+	target.PushTranslation(wg.GetPosition())
+	defer target.Pop()
+	target.DrawLine(wg.width, 0, color.White)
+	target.DrawLine(0, wg.height, color.White)
+
+	target.PushTranslation(wg.width, wg.height)
+	target.DrawLine(-wg.width, 0, color.White)
+	target.DrawLine(0, -wg.height, color.White)
+	target.Pop()
 }
 
 // SetVisible sets the visibility of all widgets in the group
 func (wg *WidgetGroup) SetVisible(visible bool) {
+	wg.BaseWidget.SetVisible(visible)
+
 	for _, entry := range wg.entries {
 		entry.SetVisible(visible)
+	}
+}
+
+// OffsetPosition moves all widgets by x and y
+func (wg *WidgetGroup) OffsetPosition(x, y int) {
+	wg.BaseWidget.OffsetPosition(x, y)
+
+	for _, entry := range wg.entries {
+		entry.OffsetPosition(x, y)
 	}
 }
 

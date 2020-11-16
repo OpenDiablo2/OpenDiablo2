@@ -32,7 +32,7 @@ type UIFrame struct {
 const (
 	leftFrameTopLeft = iota
 	leftFrameTopRight
-	leftFrameMiddleRight
+	leftFrameMiddleLeft
 	leftFrameBottomLeft
 	leftFrameBottomRight
 	rightFrameTopLeft
@@ -80,6 +80,51 @@ func (u *UIFrame) Load() {
 	}
 
 	u.frame = sprite
+	u.calculateSize()
+}
+
+func (u *UIFrame) calculateSize() {
+	var framesWidth, framesHeight []int
+
+	if u.frameOrientation == FrameLeft {
+		framesWidth = []int{
+			leftFrameTopLeft,
+			leftFrameTopRight,
+		}
+		framesHeight = []int{
+			leftFrameTopLeft,
+			leftFrameMiddleLeft,
+			leftFrameBottomLeft,
+		}
+	} else if u.frameOrientation == FrameRight {
+		framesWidth = []int{
+			rightFrameTopLeft,
+			rightFrameTopRight,
+		}
+		framesHeight = []int{
+			rightFrameTopRight,
+			rightFrameMiddleRight,
+			rightFrameBottomRight,
+		}
+	}
+
+	for i := range framesWidth {
+		w, _, err := u.frame.GetFrameSize(framesWidth[i])
+		if err != nil {
+			log.Print(err)
+		}
+
+		u.width += w
+	}
+
+	for i := range framesHeight {
+		_, h, err := u.frame.GetFrameSize(framesHeight[i])
+		if err != nil {
+			log.Print(err)
+		}
+
+		u.height += h
+	}
 }
 
 // Render the frame to the target surface
@@ -101,7 +146,7 @@ func (u *UIFrame) renderLeft(target d2interface.Surface) error {
 	framePieces := []int{
 		leftFrameTopLeft,
 		leftFrameTopRight,
-		leftFrameMiddleRight,
+		leftFrameMiddleLeft,
 		leftFrameBottomLeft,
 		leftFrameBottomRight,
 	}
@@ -129,7 +174,7 @@ func (u *UIFrame) renderLeft(target d2interface.Surface) error {
 		case leftFrameTopRight:
 			c.x, c.y = currentX, startY+height
 			currentX = startX
-		case leftFrameMiddleRight:
+		case leftFrameMiddleLeft:
 			c.x, c.y = currentX, currentY+height
 			currentY += height
 		case leftFrameBottomLeft:

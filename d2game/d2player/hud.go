@@ -47,7 +47,6 @@ const (
 )
 
 const (
-	frameMenuButton        = 2
 	frameHealthStatus      = 0
 	frameManaStatus        = 1
 	frameNewStatsSelector  = 1
@@ -69,7 +68,7 @@ const (
 	rightGlobeOffsetY = -8
 
 	miniPanelButtonOffsetX = -8
-	miniPanelButtonOffsetY = -16
+	miniPanelButtonOffsetY = -38
 )
 
 const (
@@ -91,13 +90,14 @@ type HUD struct {
 	hero               *d2mapentity.Player
 	mainPanel          *d2ui.Sprite
 	globeSprite        *d2ui.Sprite
-	menuButton         *d2ui.Sprite
+	menuButton         *d2ui.Button
 	hpManaStatusSprite *d2ui.Sprite
 	leftSkillResource  *SkillResource
 	rightSkillResource *SkillResource
 	runButton          *d2ui.Button
 	zoneChangeText     *d2ui.Label
 	miniPanel          *miniPanel
+	isMiniPanelOpen    bool
 	isZoneTextShown    bool
 	hpStatsIsVisible   bool
 	manaStatsIsVisible bool
@@ -241,16 +241,6 @@ func (h *HUD) loadSprites() {
 		log.Print(err)
 	}
 
-	h.menuButton, err = h.uiManager.NewSprite(d2resource.MenuButton, d2resource.PaletteSky)
-	if err != nil {
-		log.Print(err)
-	}
-
-	err = h.menuButton.SetCurrentFrame(frameMenuButton)
-	if err != nil {
-		log.Print(err)
-	}
-
 	h.mainPanel, err = h.uiManager.NewSprite(d2resource.GamePanels, d2resource.PaletteSky)
 	if err != nil {
 		log.Print(err)
@@ -325,6 +315,17 @@ func (h *HUD) loadUIButtons() {
 	if h.hero.IsRunToggled() {
 		h.runButton.Toggle()
 	}
+
+	// minipanel button
+	h.menuButton = h.uiManager.NewButton(d2ui.ButtonTypeMinipanelOpenClose, "")
+	//nolint:golint,gomnd // 2 is not a magic number
+	x := screenWidth/2 + miniPanelButtonOffsetX
+	y := screenHeight + miniPanelButtonOffsetY
+	h.menuButton.SetPosition(x, y)
+	h.menuButton.OnActivated(func() {
+		h.menuButton.Toggle()
+		h.miniPanel.Toggle()
+	})
 }
 
 func (h *HUD) onToggleRunButton(noButton bool) {
@@ -491,65 +492,6 @@ func (h *HUD) renderExperienceBar(target d2interface.Surface) {
 	expPercent := float64(h.hero.Stats.Experience) / float64(h.hero.Stats.NextLevelExp)
 
 	target.DrawRect(int(expPercent*expBarWidth), 2, d2util.Color(whiteAlpha100))
-}
-
-func (h *HUD) renderMiniPanel(target d2interface.Surface) error {
-	width, height := target.GetSize()
-	mx, my := h.lastMouseX, h.lastMouseY
-
-	menuButtonFrameIndex := 0
-	if h.miniPanel.isOpen {
-		menuButtonFrameIndex = 2
-	}
-
-	if err := h.menuButton.SetCurrentFrame(menuButtonFrameIndex); err != nil {
-		return err
-	}
-
-	buttonX, buttonY := (width>>1)+miniPanelButtonOffsetX, height+miniPanelButtonOffsetY
-
-	h.menuButton.SetPosition(buttonX, buttonY)
-	h.menuButton.Render(target)
-	h.miniPanel.Render(target)
-
-	miniPanelButtons := map[actionableType]string{
-		miniPanelCharacter:  "minipanelchar",
-		miniPanelInventory:  "minipanelinv",
-		miniPanelSkillTree:  "minipaneltree",
-		miniPanelAutomap:    "minipanelautomap",
-		miniPanelMessageLog: "minipanelmessage",
-		miniPanelQuestLog:   "minipanelquest",
-		miniPanelGameMenu:   "minipanelmenubtn",
-	}
-
-	if !h.miniPanel.IsOpen() {
-		return nil
-	}
-
-	for miniPanelButton, stringTableKey := range miniPanelButtons {
-		if !h.actionableRegions[miniPanelButton].rect.IsInRect(mx, my) {
-			continue
-		}
-
-		rect := &h.actionableRegions[miniPanelButton].rect
-		h.miniPanelTooltip.SetText(h.asset.TranslateString(stringTableKey))
-
-		halfButtonWidth := rect.Width >> 1
-		halfButtonHeight := rect.Height >> 1
-
-		centerX := rect.Left + halfButtonWidth
-		centerY := rect.Top + halfButtonHeight
-
-		_, labelHeight := h.miniPanelTooltip.GetSize()
-
-		labelX := centerX
-		labelY := centerY - halfButtonHeight - labelHeight
-
-		h.miniPanelTooltip.SetPosition(labelX, labelY)
-		h.miniPanelTooltip.Render(target)
-	}
-
-	return nil
 }
 
 func (h *HUD) renderPotions(x, _ int, target d2interface.Surface) error {
@@ -726,11 +668,6 @@ func (h *HUD) Render(target d2interface.Surface) error {
 	h.widgetStamina.Render(target)
 	h.widgetExperience.Render(target)
 
-	// Mini Panel and button
-	if err := h.renderMiniPanel(target); err != nil {
-		return err
-	}
-
 	if err := h.help.Render(target); err != nil {
 		return err
 	}
@@ -783,4 +720,21 @@ func (h *HUD) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	h.skillSelectMenu.RightPanel.HandleMouseMove(mx, my)
 
 	return false
+}
+
+func (h *HUD) closeMinipanelTemporary() {
+	h.isMiniPanelOpen = h.miniPanel.IsOpen()
+	if h.isMiniPanelOpen {
+		h.menuButton.SetEnabled(false)
+		h.menuButton.Toggle()
+		h.miniPanel.Close()
+	}
+}
+
+func (h *HUD) restoreMinipanelFromTempClose() {
+	if h.isMiniPanelOpen {
+		h.menuButton.SetEnabled(true)
+		h.menuButton.Toggle()
+		h.miniPanel.Open()
+	}
 }
