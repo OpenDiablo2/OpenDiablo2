@@ -649,6 +649,11 @@ func (v *Button) Toggle() {
 	v.toggled = !v.toggled
 }
 
+// GetToggled returns the toggled state of the button
+func (v *Button) GetToggled() bool {
+	return v.toggled
+}
+
 // Advance advances the button state
 func (v *Button) Advance(_ float64) error {
 	return nil
