@@ -1,6 +1,7 @@
 package d2player
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -331,7 +332,7 @@ func (s *skillTree) setHeroTypeResourcePath() error {
 	entry := s.getTab(s.heroClass)
 
 	if entry == nil {
-		return fmt.Errorf("unknown hero type")
+		return errors.New("unknown hero type")
 	}
 
 	s.resources = entry.resources
