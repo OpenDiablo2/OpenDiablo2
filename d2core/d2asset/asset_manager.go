@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
@@ -34,6 +35,7 @@ const (
 )
 
 const (
+	defaultLanguage    = "ENG"
 	logPrefix          = "Asset Manager"
 	fmtLoadAsset       = "could not load file stream %s (%v)"
 	fmtLoadAnimation   = "loading animation %s with palette %s, draw effect %d"
@@ -106,6 +108,23 @@ func (am *AssetManager) FileExists(filePath string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// LoadLanguage loads language from resource path
+func (am *AssetManager) LoadLanguage(languagePath string) string {
+	languageByte, err := am.LoadFile(languagePath)
+	if err != nil {
+		am.Debugf("Unable to load language file: %s", err)
+		return defaultLanguage
+	}
+
+	languageCode := languageByte[0]
+	am.Debugf("Language code: %#02x", languageCode)
+
+	language := d2resource.GetLanguageLiteral(languageCode)
+	am.Infof("Language: %s", language)
+
+	return language
 }
 
 // LoadAnimation loads an Animation by its resource path and its palette path

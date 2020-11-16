@@ -16,7 +16,6 @@ func DefaultConfig() *Configuration {
 	)
 
 	config := &Configuration{
-		Language:        "ENG",
 		FullScreen:      false,
 		TicksPerSecond:  -1,
 		RunInBackground: true,

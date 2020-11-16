@@ -66,6 +66,7 @@ type App struct {
 	captureFrames     []*image.RGBA
 	gitBranch         string
 	gitCommit         string
+	language          string
 	asset             *d2asset.AssetManager
 	inputManager      d2interface.InputManager
 	terminal          d2interface.Terminal
@@ -373,6 +374,8 @@ func (a *App) initialize() error {
 		return err
 	}
 
+	a.initLanguage()
+
 	if err := a.initDataDictionaries(); err != nil {
 		return err
 	}
@@ -452,6 +455,11 @@ func (a *App) initConfig(config *d2config.Configuration) error {
 	}
 
 	return nil
+}
+
+func (a *App) initLanguage() {
+	a.language = a.asset.LoadLanguage(d2resource.LocalLanguage)
+	a.asset.Loader.SetLanguage(&a.language)
 }
 
 func (a *App) initDataDictionaries() error {

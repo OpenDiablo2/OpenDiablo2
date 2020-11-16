@@ -2,19 +2,25 @@ package d2resource
 
 // Paths of the resources inside the mpq files.
 const (
+	// --- Language
+
+	LocalLanguage      = "/data/local/use"
+	LanguageFontToken  = "{LANG_FONT}" //nolint:gosec // this is just a format string
+	LanguageTableToken = "{LANG}"
+
 	// --- Screens ---
 
 	LoadingScreen = "/data/global/ui/Loading/loadingscreen.dc6"
 
 	// --- Video Paths ---
 
-	Act1Intro = "/data/local/video/eng/d2intro640x292.bik"
-	Act2Intro = "/data/local/video/eng/act02start640x292.bik"
-	Act3Intro = "/data/local/video/eng/act03start640x292.bik"
-	Act4Intro = "/data/local/video/eng/act04start640x292.bik"
-	Act4Outro = "/data/local/video/eng/act04end640x292.bik"
-	Act5Intro = "/data/local/video/eng/d2x_intro_640x292.bik"
-	Act5Outro = "/data/local/video/eng/d2x_out_640x292.bik"
+	Act1Intro = "/data/local/video/" + LanguageTableToken + "/d2intro640x292.bik"
+	Act2Intro = "/data/local/video/" + LanguageTableToken + "/act02start640x292.bik"
+	Act3Intro = "/data/local/video/" + LanguageTableToken + "/act03start640x292.bik"
+	Act4Intro = "/data/local/video/" + LanguageTableToken + "/act04start640x292.bik"
+	Act4Outro = "/data/local/video/" + LanguageTableToken + "/act04end640x292.bik"
+	Act5Intro = "/data/local/video/" + LanguageTableToken + "/d2x_intro_640x292.bik"
+	Act5Outro = "/data/local/video/" + LanguageTableToken + "/d2x_out_640x292.bik"
 
 	// --- Main Menu ---
 
@@ -128,9 +134,6 @@ const (
 	CursorDefault = "/data/global/ui/CURSOR/ohand.DC6"
 
 	// --- Fonts & Locale (strings) ---
-
-	LanguageFontToken    = "{LANG_FONT}" //nolint:gosec // this is just a format string
-	LanguageTableToken   = "{LANG}"
 	Font6                = "/data/local/FONT/" + LanguageFontToken + "/font6"
 	Font8                = "/data/local/FONT/" + LanguageFontToken + "/font8"
 	Font16               = "/data/local/FONT/" + LanguageFontToken + "/font16"
