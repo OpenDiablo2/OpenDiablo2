@@ -133,7 +133,11 @@ func (v *Label) processColorTokens(str string) string {
 		matchToken := tokenMatch.Find(match)
 		matchStr := string(tokenMatch.ReplaceAll(match, empty))
 		token := ColorToken(matchToken)
+
 		theColor := getColor(token)
+		if theColor == nil {
+			continue
+		}
 
 		if v.Color == nil {
 			v.Color = make(map[int]color.Color)
@@ -183,7 +187,7 @@ func getColor(token ColorToken) color.Color {
 	chosen := colors[token]
 
 	if chosen == nil {
-		return colors[ColorTokenWhite]
+		return nil
 	}
 
 	return chosen
