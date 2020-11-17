@@ -14,7 +14,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2loader/mpq"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
 )
 
 const (
@@ -24,8 +23,7 @@ const (
 )
 
 const (
-	defaultLanguage = "ENG"
-	logPrefix       = "File Loader"
+	logPrefix = "File Loader"
 )
 
 const (
@@ -49,24 +47,35 @@ func NewLoader(l d2util.LogLevel) (*Loader, error) {
 // Loader represents the manager that handles loading and caching assets with the asset Sources
 // that have been added
 type Loader struct {
-	config *d2config.Configuration
+	language *string
+	charset  *string
 	d2interface.Cache
 	*d2util.Logger
 	Sources []asset.Source
 }
 
+// SetLanguage sets the language for loader
+func (l *Loader) SetLanguage(language *string) {
+	l.language = language
+}
+
+// SetCharset sets the charset for loader
+func (l *Loader) SetCharset(charset *string) {
+	l.charset = charset
+}
+
 // Load attempts to load an asset with the given sub-path. The sub-path is relative to the root
 // of each asset source root (regardless of the type of asset source)
 func (l *Loader) Load(subPath string) (asset.Asset, error) {
-	lang := defaultLanguage
-
-	if l.config != nil {
-		lang = l.config.Language
-	}
-
 	subPath = filepath.Clean(subPath)
-	subPath = strings.ReplaceAll(subPath, fontToken, "latin")
-	subPath = strings.ReplaceAll(subPath, tableToken, lang)
+
+	if l.language != nil {
+		charset := l.charset
+		language := l.language
+
+		subPath = strings.ReplaceAll(subPath, fontToken, *charset)
+		subPath = strings.ReplaceAll(subPath, tableToken, *language)
+	}
 
 	// first, we check the cache for an existing entry
 	if cached, found := l.Retrieve(subPath); found {

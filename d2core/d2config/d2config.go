@@ -12,7 +12,6 @@ import (
 // Configuration defines the configuration for the engine, loaded from config.json
 type Configuration struct {
 	MpqLoadOrder    []string
-	Language        string
 	MpqPath         string
 	TicksPerSecond  int
 	FpsCap          int
