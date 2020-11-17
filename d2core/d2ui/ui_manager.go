@@ -18,6 +18,7 @@ type UIManager struct {
 	inputManager     d2interface.InputManager
 	audio            d2interface.AudioProvider
 	widgets          []Widget
+	tooltips         []*Tooltip
 	widgetsGroups    []*WidgetGroup
 	clickableWidgets []ClickableWidget
 	cursorButtons    CursorButton
@@ -67,6 +68,10 @@ func (ui *UIManager) addWidget(widget Widget) {
 		log.Print(err)
 	}
 
+	if tooltip, ok := widget.(*Tooltip); ok {
+		ui.addTooltip(tooltip)
+	}
+
 	clickable, ok := widget.(ClickableWidget)
 	if ok {
 		ui.clickableWidgets = append(ui.clickableWidgets, clickable)
@@ -74,6 +79,11 @@ func (ui *UIManager) addWidget(widget Widget) {
 
 	ui.widgets = append(ui.widgets, widget)
 	widget.bindManager(ui)
+}
+
+// addTooltip adds a widget to the UI manager
+func (ui *UIManager) addTooltip(t *Tooltip) {
+	ui.tooltips = append(ui.tooltips, t)
 }
 
 // OnMouseButtonUp is an event handler for input
@@ -149,6 +159,12 @@ func (ui *UIManager) Render(target d2interface.Surface) {
 	for _, widget := range ui.widgets {
 		if widget.GetVisible() {
 			widget.Render(target)
+		}
+	}
+
+	for _, tooltip := range ui.tooltips {
+		if tooltip.GetVisible() {
+			tooltip.Render(target)
 		}
 	}
 }
