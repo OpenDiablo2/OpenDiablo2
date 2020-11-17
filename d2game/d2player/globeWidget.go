@@ -5,7 +5,6 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -40,13 +39,14 @@ type globeFrame struct {
 	offsetX int
 	offsetY int
 	idx     int
-	gw      *globeWidget
 }
 
-func (gf *globeFrame) setFrameIndex() {
+func (gf *globeFrame) setFrameIndex() error {
 	if err := gf.sprite.SetCurrentFrame(gf.idx); err != nil {
-		gf.gw.logger.Error(err.Error())
+		return err
 	}
+
+	return nil
 }
 
 func (gf *globeFrame) setPosition(x, y int) {
@@ -58,7 +58,7 @@ func (gf *globeFrame) getSize() (x, y int) {
 	return w + gf.offsetX, h + gf.offsetY
 }
 
-func newGlobeWidget(ui *d2ui.UIManager, x, y int, gtype globeType, value *int, l d2util.LogLevel, valueMax *int) *globeWidget {
+func newGlobeWidget(ui *d2ui.UIManager, x, y int, gtype globeType, value *int, valueMax *int) *globeWidget {
 	var globe, overlap *globeFrame
 
 	base := d2ui.NewBaseWidget(ui)
@@ -96,10 +96,6 @@ func newGlobeWidget(ui *d2ui.UIManager, x, y int, gtype globeType, value *int, l
 		overlap:    overlap,
 	}
 
-	gw.logger = d2util.NewLogger()
-	gw.logger.SetLevel(l)
-	gw.logger.SetPrefix(logPrefix)
-
 	return gw
 }
 
@@ -109,25 +105,32 @@ type globeWidget struct {
 	valueMax *int
 	globe    *globeFrame
 	overlap  *globeFrame
-	logger   *d2util.Logger
 }
 
-func (g *globeWidget) load() {
+func (g *globeWidget) load() error {
 	var err error
 
 	g.globe.sprite, err = g.GetManager().NewSprite(d2resource.HealthManaIndicator, d2resource.PaletteSky)
 	if err != nil {
-		g.logger.Error(err.Error())
+		return err
 	}
 
-	g.globe.setFrameIndex()
+	err = g.globe.setFrameIndex()
+	if err != nil {
+		return err
+	}
 
 	g.overlap.sprite, err = g.GetManager().NewSprite(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
 	if err != nil {
-		g.logger.Error(err.Error())
+		return err
 	}
 
-	g.overlap.setFrameIndex()
+	err = g.overlap.setFrameIndex()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Render draws the widget to the screen
