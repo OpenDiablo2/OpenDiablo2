@@ -12,8 +12,8 @@ const (
 	RenderPrioritySkilltreeIcon
 	RenderPriorityMinipanel
 	RenderPriorityHeroStatsPanel
-	RenderPriorityHelpPanel
 	RenderPriorityHUDPanel
+	RenderPriorityHelpPanel
 	RenderPriorityForeground
 )
 
