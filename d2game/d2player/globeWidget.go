@@ -58,7 +58,15 @@ func (gf *globeFrame) getSize() (x, y int) {
 	return w + gf.offsetX, h + gf.offsetY
 }
 
-func newGlobeWidget(ui *d2ui.UIManager, x, y int, gtype globeType, value *int, valueMax *int) *globeWidget {
+type globeWidget struct {
+	*d2ui.BaseWidget
+	value    *int
+	valueMax *int
+	globe    *globeFrame
+	overlap  *globeFrame
+}
+
+func newGlobeWidget(ui *d2ui.UIManager, x, y int, gtype globeType, value, valueMax *int) *globeWidget {
 	var globe, overlap *globeFrame
 
 	base := d2ui.NewBaseWidget(ui)
@@ -88,23 +96,13 @@ func newGlobeWidget(ui *d2ui.UIManager, x, y int, gtype globeType, value *int, v
 		}
 	}
 
-	gw := &globeWidget{
+	return &globeWidget{
 		BaseWidget: base,
 		value:      value,
 		valueMax:   valueMax,
 		globe:      globe,
 		overlap:    overlap,
 	}
-
-	return gw
-}
-
-type globeWidget struct {
-	*d2ui.BaseWidget
-	value    *int
-	valueMax *int
-	globe    *globeFrame
-	overlap  *globeFrame
 }
 
 func (g *globeWidget) load() error {
