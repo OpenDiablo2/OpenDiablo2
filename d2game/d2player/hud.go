@@ -311,6 +311,7 @@ func (h *HUD) loadUIButtons() {
 	h.runButton.OnActivated(func() { h.onToggleRunButton(false) })
 	h.runButton.SetTooltip(h.runWalkTooltip)
 	h.updateRunTooltipText()
+	h.panelGroup.AddWidget(h.runButton)
 
 	if h.hero.IsRunToggled() {
 		h.runButton.Toggle()
