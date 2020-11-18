@@ -322,6 +322,7 @@ func (h *HelpOverlay) setupTitleAndButton() {
 	h.closeButton.SetPosition(closeButtonX, closeButtonY)
 	h.closeButton.SetVisible(false)
 	h.closeButton.OnActivated(func() { h.Close() })
+	h.closeButton.SetRenderPriority(d2ui.RenderPriorityForeground)
 	h.panelGroup.AddWidget(h.closeButton)
 
 	newLabel = h.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
