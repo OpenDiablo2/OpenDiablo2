@@ -437,8 +437,9 @@ func (g *GameServer) OnPacketReceived(client ClientConnection, packet d2netpacke
 		}
 
 		playerState := g.connections[client.GetUniqueID()].GetPlayerState()
-		playerState.LeftSkill = savePacket.LeftSkill
-		playerState.RightSkill = savePacket.RightSkill
+		playerState.LeftSkill = savePacket.Player.LeftSkill.Shallow.SkillID
+		playerState.RightSkill = savePacket.Player.RightSkill.Shallow.SkillID
+		playerState.Stats = savePacket.Player.Stats
 
 		err = g.heroStateFactory.Save(playerState)
 		if err != nil {

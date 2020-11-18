@@ -11,15 +11,13 @@ import (
 // SavePlayerPacket has the actual selected left and right skill
 // the Server has to check if these skills are actually allowed for the Player
 type SavePlayerPacket struct {
-	LeftSkill  int `json:"leftSkill"`
-	RightSkill int `json:"rightSkill"`
+	Player *d2mapentity.Player `json:"Player"`
 }
 
 // CreateSavePlayerPacket sends a packet which instructs the server to save the Player
 func CreateSavePlayerPacket(playerState *d2mapentity.Player) NetPacket {
 	savePlayerData := SavePlayerPacket{
-		LeftSkill:  playerState.LeftSkill.ID,
-		RightSkill: playerState.RightSkill.ID,
+		Player: playerState,
 	}
 
 	b, err := json.Marshal(savePlayerData)
