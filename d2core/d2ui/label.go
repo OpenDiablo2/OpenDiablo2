@@ -2,7 +2,6 @@ package d2ui
 
 import (
 	"image/color"
-	"log"
 	"regexp"
 	"strings"
 
@@ -20,13 +19,15 @@ type Label struct {
 	font            *d2asset.Font
 	Color           map[int]color.Color
 	backgroundColor color.Color
+
+	logger *d2util.Logger
 }
 
 // NewLabel creates a new instance of a UI label
 func (ui *UIManager) NewLabel(fontPath, palettePath string) *Label {
 	font, err := ui.asset.LoadFont(fontPath+".tbl", fontPath+".dc6", palettePath)
 	if err != nil {
-		log.Print(err)
+		ui.logger.Error(err.Error())
 		return nil
 	}
 
@@ -37,6 +38,7 @@ func (ui *UIManager) NewLabel(fontPath, palettePath string) *Label {
 		Alignment:  HorizontalAlignLeft,
 		Color:      map[int]color.Color{0: color.White},
 		font:       font,
+		logger:     ui.logger,
 	}
 
 	result.bindManager(ui)
@@ -75,7 +77,7 @@ func (v *Label) Render(target d2interface.Surface) {
 
 			err := v.font.RenderText(character, target)
 			if err != nil {
-				log.Print(err)
+				v.logger.Error(err.Error())
 			}
 
 			target.PushTranslation(charWidth, 0)
@@ -160,7 +162,7 @@ func (v *Label) getAlignOffset(textWidth int) int {
 	case HorizontalAlignRight:
 		return -textWidth
 	default:
-		log.Fatal("Invalid Alignment")
+		v.logger.Fatal("Invalid Alignment")
 		return 0
 	}
 }

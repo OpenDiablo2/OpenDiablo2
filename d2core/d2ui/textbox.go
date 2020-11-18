@@ -1,7 +1,6 @@
 package d2ui
 
 import (
-	"log"
 	"strings"
 	"time"
 
@@ -29,7 +28,7 @@ type TextBox struct {
 func (ui *UIManager) NewTextbox() *TextBox {
 	bgSprite, err := ui.NewSprite(d2resource.TextBox2, d2resource.PaletteUnits)
 	if err != nil {
-		log.Print(err)
+		ui.logger.Error(err.Error())
 		return nil
 	}
 

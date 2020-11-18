@@ -167,7 +167,10 @@ func (l *Layout) AddLabel(text string, fontStyle FontStyle) (*Label, error) {
 		return nil, err
 	}
 
-	label := createLabel(l.renderer, text, font, d2util.Color(ColorWhite))
+	label, err := createLabel(l.renderer, text, font, d2util.Color(ColorWhite)) //need to be changed
+	if err != nil {
+		return nil, err
+	}
 
 	l.entries = append(l.entries, &layoutEntry{widget: label})
 
@@ -181,7 +184,10 @@ func (l *Layout) AddLabelWithColor(text string, fontStyle FontStyle, col color.R
 		return nil, err
 	}
 
-	label := createLabel(l.renderer, text, font, col)
+	label, err := createLabel(l.renderer, text, font, col)
+	if err != nil {
+		return nil, err
+	}
 
 	l.entries = append(l.entries, &layoutEntry{widget: label})
 

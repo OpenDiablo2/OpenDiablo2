@@ -1,8 +1,6 @@
 package d2ui
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -35,13 +33,13 @@ func (ui *UIManager) NewCheckbox(checkState bool) *Checkbox {
 
 	checkboxSprite, err := ui.NewSprite(d2resource.Checkbox, d2resource.PaletteFechar)
 	if err != nil {
-		log.Print(err)
+		ui.logger.Error(err.Error())
 		return nil
 	}
 
 	result.width, result.height, err = checkboxSprite.GetFrameSize(0)
 	if err != nil {
-		log.Print(err)
+		ui.logger.Error(err.Error())
 		return nil
 	}
 

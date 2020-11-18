@@ -287,7 +287,7 @@ func CreateSelectHeroClass(
 		return nil, err
 	}
 
-	inventoryItemFactory, err := d2inventory.NewInventoryItemFactory(asset)
+	inventoryItemFactory, err := d2inventory.NewInventoryItemFactory(d2util.LogLevelDefault, asset) // need to be changed
 	if err != nil {
 		return nil, err
 	}

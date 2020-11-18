@@ -83,17 +83,17 @@ func NewKeyBindingMenu(
 	ret.Box.SetPadding(keyBindingMenuPaddingX, keyBindingSettingPaddingY)
 
 	ret.Box.SetOptions([]*d2gui.LabelButton{
-		d2gui.NewLabelButton(0, 0, "Cancel", d2util.Color(d2gui.ColorRed), func() {
+		d2gui.NewLabelButton(0, 0, "Cancel", d2util.Color(d2gui.ColorRed), d2util.LogLevelDefault, func() {
 			if err := ret.onCancelClicked(); err != nil {
 				ret.logger.Error("error while clicking option Cancel: %v" + err.Error())
 			}
 		}),
-		d2gui.NewLabelButton(0, 0, "Default", d2util.Color(d2gui.ColorBlue), func() {
+		d2gui.NewLabelButton(0, 0, "Default", d2util.Color(d2gui.ColorBlue), d2util.LogLevelDefault, func() {
 			if err := ret.onDefaultClicked(); err != nil {
 				ret.logger.Error("error while clicking option Default: %v" + err.Error())
 			}
 		}),
-		d2gui.NewLabelButton(0, 0, "Accept", d2util.Color(d2gui.ColorGreen), func() {
+		d2gui.NewLabelButton(0, 0, "Accept", d2util.Color(d2gui.ColorGreen), d2util.LogLevelDefault, func() {
 			if err := ret.onAcceptClicked(); err != nil {
 				ret.logger.Error("error while clicking option Accept: %v" + err.Error())
 			}

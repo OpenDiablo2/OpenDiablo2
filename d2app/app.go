@@ -195,7 +195,7 @@ func (a *App) loadEngine() error {
 
 	scriptEngine := d2script.CreateScriptEngine()
 
-	uiManager := d2ui.NewUIManager(a.asset, renderer, inputManager, audio)
+	uiManager := d2ui.NewUIManager(a.asset, renderer, inputManager, a.config.LogLevel, audio)
 
 	a.inputManager = inputManager
 	a.terminal = term
@@ -409,14 +409,14 @@ func (a *App) initialize() error {
 		}
 	}
 
-	gui, err := d2gui.CreateGuiManager(a.asset, a.inputManager)
+	gui, err := d2gui.CreateGuiManager(a.asset, a.config.LogLevel, a.inputManager)
 	if err != nil {
 		return err
 	}
 
 	a.guiManager = gui
 
-	a.screen = d2screen.NewScreenManager(a.ui, a.guiManager)
+	a.screen = d2screen.NewScreenManager(a.ui, a.config.LogLevel, a.guiManager)
 
 	a.audio.SetVolumes(a.config.BgmVolume, a.config.SfxVolume)
 

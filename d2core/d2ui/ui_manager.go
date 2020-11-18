@@ -1,7 +1,7 @@
 package d2ui
 
 import (
-	"log"
+	"fmt"
 	"sort"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -9,6 +9,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 // UIManager manages a collection of UI elements (buttons, textboxes, labels)
@@ -25,6 +26,8 @@ type UIManager struct {
 	CursorY          int
 	pressedWidget    ClickableWidget
 	clickSfx         d2interface.SoundEffect
+
+	logger *d2util.Logger
 }
 
 // Note: methods for creating buttons and stuff are in their respective files
@@ -34,13 +37,13 @@ type UIManager struct {
 func (ui *UIManager) Initialize() {
 	sfx, err := ui.audio.LoadSound(d2resource.SFXButtonClick, false, false)
 	if err != nil {
-		log.Fatalf("failed to initialize ui: %v", err)
+		ui.logger.Fatal(fmt.Sprintf("failed to initialize ui: %v", err))
 	}
 
 	ui.clickSfx = sfx
 
 	if err := ui.inputManager.BindHandler(ui); err != nil {
-		log.Fatalf("failed to initialize ui: %v", err)
+		ui.logger.Fatal(fmt.Sprintf("failed to initialize ui: %v", err))
 	}
 }
 
@@ -64,7 +67,7 @@ func (ui *UIManager) addWidgetGroup(group *WidgetGroup) {
 func (ui *UIManager) addWidget(widget Widget) {
 	err := ui.inputManager.BindHandler(widget)
 	if err != nil {
-		log.Print(err)
+		ui.logger.Error(err.Error())
 	}
 
 	clickable, ok := widget.(ClickableWidget)
@@ -159,7 +162,7 @@ func (ui *UIManager) Advance(elapsed float64) {
 		if widget.GetVisible() {
 			err := widget.Advance(elapsed)
 			if err != nil {
-				log.Print(err)
+				ui.logger.Error(err.Error())
 			}
 		}
 	}

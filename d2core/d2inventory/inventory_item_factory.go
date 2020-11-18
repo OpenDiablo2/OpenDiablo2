@@ -1,15 +1,24 @@
 package d2inventory
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
+const (
+	logPrefix = "Item Factory"
+)
+
 // NewInventoryItemFactory creates a new InventoryItemFactory and initializes it
-func NewInventoryItemFactory(asset *d2asset.AssetManager) (*InventoryItemFactory, error) {
+func NewInventoryItemFactory(l d2util.LogLevel, asset *d2asset.AssetManager) (*InventoryItemFactory, error) {
 	factory := &InventoryItemFactory{asset: asset}
+
+	factory.logger = d2util.NewLogger()
+	factory.logger.SetLevel(l)
+	factory.logger.SetPrefix(logPrefix)
 
 	factory.loadHeroObjects()
 
@@ -20,6 +29,8 @@ func NewInventoryItemFactory(asset *d2asset.AssetManager) (*InventoryItemFactory
 type InventoryItemFactory struct {
 	asset            *d2asset.AssetManager
 	DefaultHeroItems HeroObjects
+
+	logger *d2util.Logger
 }
 
 // LoadHeroObjects loads the equipment objects of the hero
@@ -59,10 +70,10 @@ func (f *InventoryItemFactory) loadHeroObjects() {
 }
 
 // GetArmorItemByCode returns the armor item for the given code
-func (f *InventoryItemFactory) GetArmorItemByCode(code string) *InventoryItemArmor {
+func (f *InventoryItemFactory) GetArmorItemByCode(code string) (*InventoryItemArmor, error) {
 	result := f.asset.Records.Item.Armors[code]
 	if result == nil {
-		log.Fatalf("Could not find armor entry for code '%s'", code)
+		f.logger.Error(fmt.Sprintf("Could not find armor entry for code '%s'", code))
 	}
 
 	return &InventoryItemArmor{
@@ -78,7 +89,7 @@ func (f *InventoryItemFactory) GetArmorItemByCode(code string) *InventoryItemArm
 func (f *InventoryItemFactory) GetMiscItemByCode(code string) *InventoryItemMisc {
 	result := f.asset.Records.Item.Misc[code]
 	if result == nil {
-		log.Fatalf("Could not find misc item entry for code '%s'", code)
+		f.logger.Error(fmt.Sprintf("Could not find misc item entry for code '%s'", code))
 	}
 
 	return &InventoryItemMisc{
@@ -94,7 +105,7 @@ func (f *InventoryItemFactory) GetWeaponItemByCode(code string) *InventoryItemWe
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/796
 	result := f.asset.Records.Item.Weapons[code]
 	if result == nil {
-		log.Fatalf("Could not find weapon entry for code '%s'", code)
+		f.logger.Error(fmt.Sprintf("Could not find weapon entry for code '%s'", code))
 	}
 
 	return &InventoryItemWeapon{
