@@ -15,6 +15,7 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
@@ -51,7 +52,7 @@ func Create(connectionType d2clientconnectiontype.ClientConnectionType,
 	asset *d2asset.AssetManager, scriptEngine *d2script.ScriptEngine) (*GameClient, error) {
 	result := &GameClient{
 		asset:          asset,
-		MapEngine:      d2mapengine.CreateMapEngine(asset),
+		MapEngine:      d2mapengine.CreateMapEngine(d2util.LogLevelDefault, asset), // need to be changed
 		Players:        make(map[string]*d2mapentity.Player),
 		connectionType: connectionType,
 		scriptEngine:   scriptEngine,
@@ -61,7 +62,7 @@ func Create(connectionType d2clientconnectiontype.ClientConnectionType,
 	// before we start updating map entites
 	result.MapEngine.IsLoading = connectionType == d2clientconnectiontype.LANClient
 
-	mapGen, err := d2mapgen.NewMapGenerator(asset, result.MapEngine)
+	mapGen, err := d2mapgen.NewMapGenerator(asset, d2util.LogLevelDefault, result.MapEngine) // need to be changed
 	if err != nil {
 		return nil, err
 	}

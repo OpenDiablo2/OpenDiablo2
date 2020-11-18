@@ -1,7 +1,7 @@
 package d2maprenderer
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
@@ -28,7 +28,7 @@ func (mr *MapRenderer) generateTileCache() {
 	mr.palette, err = mr.loadPaletteForAct(d2enum.RegionIdType(mr.mapEngine.LevelType().ID))
 
 	if err != nil {
-		log.Print(err)
+		mr.logger.Error(err.Error())
 	}
 
 	tiles := *mr.mapEngine.Tiles()
@@ -61,7 +61,7 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord) {
 	var tileData []*d2dt1.Tile
 
 	if tileOptions == nil {
-		log.Printf("Could not locate tile Style:%d, Seq: %d, Type: %d\n", tile.Style, tile.Sequence, 0)
+		mr.logger.Error(fmt.Sprintf("Could not locate tile Style:%d, Seq: %d, Type: %d", tile.Style, tile.Sequence, 0))
 
 		tileData = append(tileData, &d2dt1.Tile{})
 		tileData[0].Width = defaultFloorTileWidth
@@ -205,7 +205,7 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord) {
 	}
 
 	if realHeight == 0 {
-		log.Printf("Invalid 0 height for wall tile")
+		mr.logger.Error("Invalid 0 height for wall tile")
 		return
 	}
 

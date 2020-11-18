@@ -13,6 +13,7 @@ import (
 	"github.com/robertkrimen/otto"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
@@ -86,11 +87,11 @@ func NewGameServer(asset *d2asset.AssetManager, networkServer bool,
 		heroStateFactory:  heroStateFactory,
 	}
 
-	mapEngine := d2mapengine.CreateMapEngine(asset)
+	mapEngine := d2mapengine.CreateMapEngine(d2util.LogLevelDefault, asset) // need to be changed
 	mapEngine.SetSeed(gameServer.seed)
 	mapEngine.ResetMap(d2enum.RegionAct1Town, 100, 100)
 
-	mapGen, err := d2mapgen.NewMapGenerator(asset, mapEngine)
+	mapGen, err := d2mapgen.NewMapGenerator(asset, d2util.LogLevelDefault, mapEngine) // need to be changed
 	if err != nil {
 		return nil, err
 	}

@@ -4,7 +4,7 @@ package d2mapgen
 // is experiemental, and mapgen will likely change dramatically in the future.
 
 import (
-	"log"
+	"fmt"
 	"math/rand"
 	"strings"
 
@@ -49,7 +49,7 @@ func (g *MapGenerator) GenerateAct1Overworld() {
 	townStamp.RegionPath()
 	townSize := townStamp.Size()
 
-	log.Printf("Region Path: %s", townStamp.RegionPath())
+	g.logger.Info(fmt.Sprintf("Region Path: %s", townStamp.RegionPath()))
 
 	switch {
 	case strings.Contains(townStamp.RegionPath(), "E1"):

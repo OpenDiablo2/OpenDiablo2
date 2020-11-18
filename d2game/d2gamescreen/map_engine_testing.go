@@ -187,14 +187,14 @@ func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 		met.levelPreset = levelPreset
 	}
 
-	mapGen, _ := d2mapgen.NewMapGenerator(met.asset, met.mapEngine)
+	mapGen, _ := d2mapgen.NewMapGenerator(met.asset, d2util.LogLevelDefault, met.mapEngine) // need to be changed
 	met.mapGen = mapGen
 
 	if n == 0 {
 		met.mapEngine.SetSeed(time.Now().UnixNano())
 		met.mapGen.GenerateAct1Overworld()
 	} else {
-		met.mapEngine = d2mapengine.CreateMapEngine(met.asset) // necessary for map name update
+		met.mapEngine = d2mapengine.CreateMapEngine(d2util.LogLevelDefault, met.asset) // necessary for map name update // need to be changed (logleveldefault)
 		met.mapEngine.SetSeed(time.Now().UnixNano())
 		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 	}
@@ -216,12 +216,12 @@ func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 
 	loading.Progress(twentyPercent)
 
-	met.mapEngine = d2mapengine.CreateMapEngine(met.asset)
+	met.mapEngine = d2mapengine.CreateMapEngine(d2util.LogLevelDefault, met.asset) // need to be changed
 
 	loading.Progress(fiftyPercent)
 
 	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.asset, met.renderer, met.mapEngine,
-		met.terminal, 0.0, 0.0)
+		met.terminal, d2util.LogLevelDefault, 0.0, 0.0) // need to be changed
 
 	loading.Progress(seventyPercent)
 	met.loadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
