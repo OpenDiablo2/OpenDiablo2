@@ -137,8 +137,8 @@ func NewHUD(
 	zoneLabel := ui.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
 	zoneLabel.Alignment = d2ui.HorizontalAlignCenter
 
-	healthGlobe := newGlobeWidget(ui, 0, screenHeight, typeHealthGlobe, &hero.Stats.Health, &hero.Stats.MaxHealth)
-	manaGlobe := newGlobeWidget(ui, screenWidth-manaGlobeScreenOffsetX, screenHeight, typeManaGlobe, &hero.Stats.Mana, &hero.Stats.MaxMana)
+	healthGlobe := newGlobeWidget(ui, 0, screenHeight, typeHealthGlobe, &hero.Stats.Health, l, &hero.Stats.MaxHealth)
+	manaGlobe := newGlobeWidget(ui, screenWidth-manaGlobeScreenOffsetX, screenHeight, typeManaGlobe, &hero.Stats.Mana, l, &hero.Stats.MaxMana)
 
 	hud := &HUD{
 		asset:             asset,
@@ -165,19 +165,10 @@ func NewHUD(
 
 // Load creates the ui elemets
 func (h *HUD) Load() {
-	var err error
-
 	h.loadSprites()
 
-	err = h.healthGlobe.load()
-	if err != nil {
-		h.logger.Error(err.Error())
-	}
-
-	err = h.manaGlobe.load()
-	if err != nil {
-		h.logger.Error(err.Error())
-	}
+	h.healthGlobe.load()
+	h.manaGlobe.load()
 
 	h.loadSkillResources()
 	h.loadCustomWidgets()
