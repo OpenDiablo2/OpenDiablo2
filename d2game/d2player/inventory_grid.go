@@ -3,7 +3,6 @@ package d2player
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 // images for 1x1 grid tile items (rings and stuff) are 28x28 pixel
@@ -36,6 +36,32 @@ type InventoryItem interface {
 
 var errorInventoryFull = errors.New("inventory full")
 
+// NewItemGrid creates a new ItemGrid instance
+func NewItemGrid(asset *d2asset.AssetManager,
+	ui *d2ui.UIManager,
+	l d2util.LogLevel,
+	record *d2records.InventoryRecord) *ItemGrid {
+	grid := record.Grid
+
+	itemGrid := &ItemGrid{
+		asset:          asset,
+		uiManager:      ui,
+		width:          grid.Box.Width,
+		height:         grid.Box.Height,
+		originX:        grid.Box.Left,
+		originY:        grid.Box.Top + (grid.Rows * cellPadding),
+		slotSize:       grid.CellWidth,
+		sprites:        make(map[string]*d2ui.Sprite),
+		equipmentSlots: genEquipmentSlotsMap(record),
+	}
+
+	itemGrid.logger = d2util.NewLogger()
+	itemGrid.logger.SetLevel(l)
+	itemGrid.logger.SetPrefix(logPrefix)
+
+	return itemGrid
+}
+
 // ItemGrid is a reusable grid for use with player and merchant inventory.
 // Handles layout and rendering item icons based on code.
 type ItemGrid struct {
@@ -49,24 +75,8 @@ type ItemGrid struct {
 	originY        int
 	sprites        map[string]*d2ui.Sprite
 	slotSize       int
-}
 
-// NewItemGrid creates a new ItemGrid instance
-func NewItemGrid(asset *d2asset.AssetManager, ui *d2ui.UIManager,
-	record *d2records.InventoryRecord) *ItemGrid {
-	grid := record.Grid
-
-	return &ItemGrid{
-		asset:          asset,
-		uiManager:      ui,
-		width:          grid.Box.Width,
-		height:         grid.Box.Height,
-		originX:        grid.Box.Left,
-		originY:        grid.Box.Top + (grid.Rows * cellPadding),
-		slotSize:       grid.CellWidth,
-		sprites:        make(map[string]*d2ui.Sprite),
-		equipmentSlots: genEquipmentSlotsMap(record),
-	}
+	logger *d2util.Logger
 }
 
 // SlotToScreen translates slot coordinates to screen coordinates
@@ -135,7 +145,7 @@ func (g *ItemGrid) loadItem(item InventoryItem) {
 
 		itemSprite, err := g.uiManager.NewSprite(imgPath, d2resource.PaletteSky)
 		if err != nil {
-			log.Printf("Failed to load sprite, error: " + err.Error())
+			g.logger.Error("Failed to load sprite, error: " + err.Error())
 		}
 
 		g.sprites[item.GetItemCode()] = itemSprite

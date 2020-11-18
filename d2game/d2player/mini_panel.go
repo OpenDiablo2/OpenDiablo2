@@ -1,9 +1,8 @@
 package d2player
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -41,6 +40,24 @@ type miniPanelActions struct {
 	menuToggle      func()
 }
 
+func newMiniPanel(asset *d2asset.AssetManager,
+	uiManager *d2ui.UIManager,
+	l d2util.LogLevel,
+	isSinglePlayer bool) *miniPanel {
+	mp := &miniPanel{
+		ui:             uiManager,
+		asset:          asset,
+		isOpen:         false,
+		isSinglePlayer: isSinglePlayer,
+	}
+
+	mp.logger = d2util.NewLogger()
+	mp.logger.SetLevel(l)
+	mp.logger.SetPrefix(logPrefix)
+
+	return mp
+}
+
 type miniPanel struct {
 	ui             *d2ui.UIManager
 	asset          *d2asset.AssetManager
@@ -52,15 +69,8 @@ type miniPanel struct {
 	movedRight     bool
 	panelGroup     *d2ui.WidgetGroup
 	tooltipGroup   *d2ui.WidgetGroup
-}
 
-func newMiniPanel(asset *d2asset.AssetManager, uiManager *d2ui.UIManager, isSinglePlayer bool) *miniPanel {
-	return &miniPanel{
-		ui:             uiManager,
-		asset:          asset,
-		isOpen:         false,
-		isSinglePlayer: isSinglePlayer,
-	}
+	logger *d2util.Logger
 }
 
 func (m *miniPanel) load(actions *miniPanelActions) {
@@ -68,7 +78,7 @@ func (m *miniPanel) load(actions *miniPanelActions) {
 
 	m.sprite, err = m.ui.NewSprite(d2resource.MinipanelButton, d2resource.PaletteSky)
 	if err != nil {
-		log.Print(err)
+		m.logger.Error(err.Error())
 		return
 	}
 
@@ -90,12 +100,12 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 
 	m.container, err = m.ui.NewSprite(miniPanelContainerPath, d2resource.PaletteSky)
 	if err != nil {
-		log.Print(err)
+		m.logger.Error(err.Error())
 		return
 	}
 
 	if err = m.container.SetCurrentFrame(0); err != nil {
-		log.Print(err)
+		m.logger.Error(err.Error())
 		return
 	}
 
@@ -106,7 +116,7 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 
 	buttonWidth, buttonHeight, err := m.sprite.GetFrameSize(0)
 	if err != nil {
-		log.Print(err)
+		m.logger.Error(err.Error())
 		return
 	}
 

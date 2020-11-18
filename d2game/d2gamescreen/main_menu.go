@@ -3,7 +3,6 @@ package d2gamescreen
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -14,6 +13,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -74,9 +74,55 @@ const (
 	joinGameCharacterFilter = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890._:"
 )
 
+const (
+	logPrefix = "Game Screen"
+)
+
 // BuildInfo contains information about the current build
 type BuildInfo struct {
 	Branch, Commit string
+}
+
+// CreateMainMenu creates an instance of MainMenu
+func CreateMainMenu(
+	navigator d2interface.Navigator,
+	asset *d2asset.AssetManager,
+	renderer d2interface.Renderer,
+	inputManager d2interface.InputManager,
+	audioProvider d2interface.AudioProvider,
+	ui *d2ui.UIManager,
+	buildInfo BuildInfo,
+	l d2util.LogLevel,
+	errorMessageOptional ...string,
+) (*MainMenu, error) {
+	heroStateFactory, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
+	mainMenu := &MainMenu{
+		asset:          asset,
+		screenMode:     ScreenModeUnknown,
+		leftButtonHeld: true,
+		renderer:       renderer,
+		inputManager:   inputManager,
+		audioProvider:  audioProvider,
+		navigator:      navigator,
+		buildInfo:      buildInfo,
+		uiManager:      ui,
+		heroState:      heroStateFactory,
+	}
+
+	mainMenu.logger = d2util.NewLogger()
+	mainMenu.logger.SetPrefix(logPrefix)
+	mainMenu.logger.SetLevel(l)
+
+	if len(errorMessageOptional) != 0 {
+		mainMenu.errorLabel = ui.NewLabel(d2resource.FontFormal12, d2resource.PaletteUnits)
+		mainMenu.errorLabel.SetText(errorMessageOptional[0])
+	}
+
+	return mainMenu, nil
 }
 
 // MainMenu represents the main menu
@@ -126,43 +172,8 @@ type MainMenu struct {
 	heroState     *d2hero.HeroStateFactory
 
 	buildInfo BuildInfo
-}
 
-// CreateMainMenu creates an instance of MainMenu
-func CreateMainMenu(
-	navigator d2interface.Navigator,
-	asset *d2asset.AssetManager,
-	renderer d2interface.Renderer,
-	inputManager d2interface.InputManager,
-	audioProvider d2interface.AudioProvider,
-	ui *d2ui.UIManager,
-	buildInfo BuildInfo,
-	errorMessageOptional ...string,
-) (*MainMenu, error) {
-	heroStateFactory, err := d2hero.NewHeroStateFactory(asset)
-	if err != nil {
-		return nil, err
-	}
-
-	mainMenu := &MainMenu{
-		asset:          asset,
-		screenMode:     ScreenModeUnknown,
-		leftButtonHeld: true,
-		renderer:       renderer,
-		inputManager:   inputManager,
-		audioProvider:  audioProvider,
-		navigator:      navigator,
-		buildInfo:      buildInfo,
-		uiManager:      ui,
-		heroState:      heroStateFactory,
-	}
-
-	if len(errorMessageOptional) != 0 {
-		mainMenu.errorLabel = ui.NewLabel(d2resource.FontFormal12, d2resource.PaletteUnits)
-		mainMenu.errorLabel.SetText(errorMessageOptional[0])
-	}
-
-	return mainMenu, nil
+	logger *d2util.Logger
 }
 
 // OnLoad is called to load the resources for the main menu
@@ -187,7 +198,7 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	}
 
 	if err := v.inputManager.BindHandler(v); err != nil {
-		fmt.Println("failed to add main menu as event handler")
+		v.logger.Error("failed to add main menu as event handler")
 	}
 }
 
@@ -196,28 +207,28 @@ func (v *MainMenu) loadBackgroundSprites() {
 
 	v.background, err = v.uiManager.NewSprite(d2resource.GameSelectScreen, d2resource.PaletteSky)
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 	}
 
 	v.background.SetPosition(backgroundX, backgroundY)
 
 	v.trademarkBackground, err = v.uiManager.NewSprite(d2resource.TrademarkScreen, d2resource.PaletteSky)
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 	}
 
 	v.trademarkBackground.SetPosition(backgroundX, backgroundY)
 
 	v.tcpIPBackground, err = v.uiManager.NewSprite(d2resource.TCPIPBackground, d2resource.PaletteSky)
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 	}
 
 	v.tcpIPBackground.SetPosition(backgroundX, backgroundY)
 
 	v.serverIPBackground, err = v.uiManager.NewSprite(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 	}
 
 	v.serverIPBackground.SetPosition(serverIPbackgroundX, serverIPbackgroundY)
@@ -285,7 +296,7 @@ func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
 
 	v.diabloLogoLeft, err = v.uiManager.NewSprite(d2resource.Diablo2LogoFireLeft, d2resource.PaletteUnits)
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 	}
 
 	v.diabloLogoLeft.SetEffect(d2enum.DrawEffectModulate)
@@ -295,7 +306,7 @@ func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
 
 	v.diabloLogoRight, err = v.uiManager.NewSprite(d2resource.Diablo2LogoFireRight, d2resource.PaletteUnits)
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 	}
 
 	v.diabloLogoRight.SetEffect(d2enum.DrawEffectModulate)
@@ -304,14 +315,14 @@ func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
 
 	v.diabloLogoLeftBack, err = v.uiManager.NewSprite(d2resource.Diablo2LogoBlackLeft, d2resource.PaletteUnits)
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 	}
 
 	v.diabloLogoLeftBack.SetPosition(diabloLogoX, diabloLogoY)
 
 	v.diabloLogoRightBack, err = v.uiManager.NewSprite(d2resource.Diablo2LogoBlackRight, d2resource.PaletteUnits)
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 	}
 
 	v.diabloLogoRightBack.SetPosition(diabloLogoX, diabloLogoY)
@@ -415,7 +426,7 @@ func (v *MainMenu) onGithubButtonClicked() {
 	}
 
 	if err != nil {
-		log.Fatal(err)
+		v.logger.Error(err.Error())
 	}
 }
 
@@ -625,15 +636,13 @@ func (v *MainMenu) getLocalIP() string {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 
 	if err != nil {
-		log.Println(err)
-
+		v.logger.Error(err.Error())
 		return "cannot reach network"
 	}
 
 	err = conn.Close()
 	if err != nil {
-		log.Println(err)
-
+		v.logger.Error(err.Error())
 		return "unexpected error occurred while closing test connection"
 	}
 

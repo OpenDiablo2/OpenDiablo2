@@ -3,12 +3,12 @@ package d2player
 import (
 	"fmt"
 	"image/color"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -156,6 +156,30 @@ const (
 	beltDotY   = 568
 )
 
+// NewHelpOverlay creates a new HelpOverlay instance
+func NewHelpOverlay(
+	asset *d2asset.AssetManager,
+	renderer d2interface.Renderer,
+	ui *d2ui.UIManager,
+	guiManager *d2gui.GuiManager,
+	l d2util.LogLevel,
+	keyMap *KeyMap,
+) *HelpOverlay {
+	h := &HelpOverlay{
+		asset:      asset,
+		renderer:   renderer,
+		uiManager:  ui,
+		guiManager: guiManager,
+		keyMap:     keyMap,
+	}
+
+	h.logger = d2util.NewLogger()
+	h.logger.SetLevel(l)
+	h.logger.SetPrefix(logPrefix)
+
+	return h
+}
+
 // HelpOverlay represents the in-game overlay that toggles visibility when the h key is pressed
 type HelpOverlay struct {
 	asset       *d2asset.AssetManager
@@ -169,30 +193,13 @@ type HelpOverlay struct {
 	closeButton *d2ui.Button
 	guiManager  *d2gui.GuiManager
 	keyMap      *KeyMap
-}
 
-// NewHelpOverlay creates a new HelpOverlay instance
-func NewHelpOverlay(
-	asset *d2asset.AssetManager,
-	renderer d2interface.Renderer,
-	ui *d2ui.UIManager,
-	guiManager *d2gui.GuiManager,
-	keyMap *KeyMap,
-) *HelpOverlay {
-	h := &HelpOverlay{
-		asset:      asset,
-		renderer:   renderer,
-		uiManager:  ui,
-		guiManager: guiManager,
-		keyMap:     keyMap,
-	}
-
-	return h
+	logger *d2util.Logger
 }
 
 // Toggle the visibility state of the overlay
 func (h *HelpOverlay) Toggle() {
-	fmt.Print("Help overlay toggled\n")
+	h.logger.Info("Help overlay toggled")
 
 	if h.isOpen {
 		h.Close()
@@ -265,12 +272,12 @@ func (h *HelpOverlay) setupOverlayFrame() {
 	for _, frameIndex := range frames {
 		f, err := h.uiManager.NewSprite(d2resource.HelpBorder, d2resource.PaletteSky)
 		if err != nil {
-			log.Print(err)
+			h.logger.Error(err.Error())
 		}
 
 		err = f.SetCurrentFrame(frameIndex)
 		if err != nil {
-			log.Print(err)
+			h.logger.Error(err.Error())
 		}
 
 		frameWidth, frameHeight := f.GetCurrentFrameSize()
@@ -559,12 +566,12 @@ func (h *HelpOverlay) createBullet(c callout) {
 
 	newDot, err := h.uiManager.NewSprite(d2resource.HelpYellowBullet, d2resource.PaletteSky)
 	if err != nil {
-		log.Print(err)
+		h.logger.Error(err.Error())
 	}
 
 	err = newDot.SetCurrentFrame(0)
 	if err != nil {
-		log.Print(err)
+		h.logger.Error(err.Error())
 	}
 
 	newDot.SetPosition(c.DotX, c.DotY+bulletOffsetY)
@@ -601,12 +608,12 @@ func (h *HelpOverlay) createCallout(c callout) {
 
 	newDot, err := h.uiManager.NewSprite(d2resource.HelpWhiteBullet, d2resource.PaletteSky)
 	if err != nil {
-		log.Print(err)
+		h.logger.Error(err.Error())
 	}
 
 	err = newDot.SetCurrentFrame(0)
 	if err != nil {
-		log.Print(err)
+		h.logger.Error(err.Error())
 	}
 
 	newDot.SetPosition(c.DotX, c.DotY)

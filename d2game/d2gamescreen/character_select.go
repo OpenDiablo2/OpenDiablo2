@@ -1,9 +1,7 @@
 package d2gamescreen
 
 import (
-	"fmt"
 	"image/color"
-	"log"
 	"math"
 	"os"
 
@@ -12,12 +10,56 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2screen"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 )
+
+// CreateCharacterSelect creates the character select screen and returns a pointer to it
+func CreateCharacterSelect(
+	navigator d2interface.Navigator,
+	asset *d2asset.AssetManager,
+	renderer d2interface.Renderer,
+	inputManager d2interface.InputManager,
+	audioProvider d2interface.AudioProvider,
+	ui *d2ui.UIManager,
+	connectionType d2clientconnectiontype.ClientConnectionType,
+	l d2util.LogLevel,
+	connectionHost string,
+) (*CharacterSelect, error) {
+	playerStateFactory, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
+	entityFactory, err := d2mapentity.NewMapEntityFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
+	characterSelect := &CharacterSelect{
+		selectedCharacter: -1,
+		asset:             asset,
+		MapEntityFactory:  entityFactory,
+		renderer:          renderer,
+		connectionType:    connectionType,
+		connectionHost:    connectionHost,
+		inputManager:      inputManager,
+		audioProvider:     audioProvider,
+		navigator:         navigator,
+		uiManager:         ui,
+		HeroStateFactory:  playerStateFactory,
+	}
+
+	characterSelect.logger = d2util.NewLogger()
+	characterSelect.logger.SetLevel(l)
+	characterSelect.logger.SetPrefix(logPrefix)
+
+	return characterSelect, nil
+}
 
 // CharacterSelect represents the character select screen
 type CharacterSelect struct {
@@ -55,42 +97,7 @@ type CharacterSelect struct {
 	audioProvider d2interface.AudioProvider
 	renderer      d2interface.Renderer
 	navigator     d2interface.Navigator
-}
-
-// CreateCharacterSelect creates the character select screen and returns a pointer to it
-func CreateCharacterSelect(
-	navigator d2interface.Navigator,
-	asset *d2asset.AssetManager,
-	renderer d2interface.Renderer,
-	inputManager d2interface.InputManager,
-	audioProvider d2interface.AudioProvider,
-	ui *d2ui.UIManager,
-	connectionType d2clientconnectiontype.ClientConnectionType,
-	connectionHost string,
-) (*CharacterSelect, error) {
-	playerStateFactory, err := d2hero.NewHeroStateFactory(asset)
-	if err != nil {
-		return nil, err
-	}
-
-	entityFactory, err := d2mapentity.NewMapEntityFactory(asset)
-	if err != nil {
-		return nil, err
-	}
-
-	return &CharacterSelect{
-		selectedCharacter: -1,
-		asset:             asset,
-		MapEntityFactory:  entityFactory,
-		renderer:          renderer,
-		connectionType:    connectionType,
-		connectionHost:    connectionHost,
-		inputManager:      inputManager,
-		audioProvider:     audioProvider,
-		navigator:         navigator,
-		uiManager:         ui,
-		HeroStateFactory:  playerStateFactory,
-	}, nil
+	logger        *d2util.Logger
 }
 
 const (
@@ -153,7 +160,7 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 
 	err := v.inputManager.BindHandler(v)
 	if err != nil {
-		fmt.Println("failed to add Character Select screen as event handler")
+		v.logger.Error("failed to add Character Select screen as event handler")
 	}
 
 	loading.Progress(tenPercent)
@@ -205,7 +212,7 @@ func (v *CharacterSelect) loadBackground() {
 
 	v.background, err = v.uiManager.NewSprite(d2resource.CharacterSelectionBackground, d2resource.PaletteSky)
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 	}
 
 	v.background.SetPosition(bgX, bgY)
@@ -232,7 +239,7 @@ func (v *CharacterSelect) loadSelectionBox() {
 
 	v.selectionBox, err = v.uiManager.NewSprite(d2resource.CharacterSelectionSelectBox, d2resource.PaletteSky)
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 	}
 
 	selBoxX, selBoxY := 37, 86
@@ -244,7 +251,7 @@ func (v *CharacterSelect) loadOkCancelBox() {
 
 	v.okCancelBox, err = v.uiManager.NewSprite(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 	}
 
 	okCancelX, okCancelY := 270, 175
@@ -494,7 +501,7 @@ func (v *CharacterSelect) onDeleteCharButtonClicked() {
 func (v *CharacterSelect) onDeleteCharacterConfirmClicked() {
 	err := os.Remove(v.gameStates[v.selectedCharacter].FilePath)
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 	}
 
 	v.charScrollbar.SetCurrentOffset(0)

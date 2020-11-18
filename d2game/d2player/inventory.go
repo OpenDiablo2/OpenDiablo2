@@ -1,14 +1,12 @@
 package d2player
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2item/diablo2item"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
@@ -24,6 +22,34 @@ const (
 const (
 	invCloseButtonX, invCloseButtonY = 419, 449
 )
+
+// NewInventory creates an inventory instance and returns a pointer to it
+func NewInventory(asset *d2asset.AssetManager,
+	ui *d2ui.UIManager,
+	l d2util.LogLevel,
+	record *d2records.InventoryRecord) *Inventory {
+	itemTooltip := ui.NewTooltip(d2resource.FontFormal11, d2resource.PaletteStatic, d2ui.TooltipXCenter, d2ui.TooltipYBottom)
+
+	// https://github.com/OpenDiablo2/OpenDiablo2/issues/797
+	itemFactory, _ := diablo2item.NewItemFactory(asset)
+
+	inventory := &Inventory{
+		asset:       asset,
+		uiManager:   ui,
+		item:        itemFactory,
+		grid:        NewItemGrid(asset, ui, l, record),
+		originX:     record.Panel.Left,
+		itemTooltip: itemTooltip,
+		// originY: record.Panel.Top,
+		originY: 0, // expansion data has these all offset by +60 ...
+	}
+
+	inventory.logger = d2util.NewLogger()
+	inventory.logger.SetLevel(l)
+	inventory.logger.SetPrefix(logPrefix)
+
+	return inventory
+}
 
 // Inventory represents the inventory
 type Inventory struct {
@@ -44,26 +70,8 @@ type Inventory struct {
 	hovering    bool
 	isOpen      bool
 	onCloseCb   func()
-}
 
-// NewInventory creates an inventory instance and returns a pointer to it
-func NewInventory(asset *d2asset.AssetManager, ui *d2ui.UIManager,
-	record *d2records.InventoryRecord) *Inventory {
-	itemTooltip := ui.NewTooltip(d2resource.FontFormal11, d2resource.PaletteStatic, d2ui.TooltipXCenter, d2ui.TooltipYBottom)
-
-	// https://github.com/OpenDiablo2/OpenDiablo2/issues/797
-	itemFactory, _ := diablo2item.NewItemFactory(asset)
-
-	return &Inventory{
-		asset:       asset,
-		uiManager:   ui,
-		item:        itemFactory,
-		grid:        NewItemGrid(asset, ui, record),
-		originX:     record.Panel.Left,
-		itemTooltip: itemTooltip,
-		// originY: record.Panel.Top,
-		originY: 0, // expansion data has these all offset by +60 ...
-	}
+	logger *d2util.Logger
 }
 
 // IsOpen returns true if the inventory is open
@@ -154,7 +162,7 @@ func (g *Inventory) Load() {
 
 	_, err := g.grid.Add(inventoryItems...)
 	if err != nil {
-		fmt.Printf("could not add items to the inventory, err: %v\n", err)
+		g.logger.Error("could not add items to the inventory, err: %v\n" + err.Error())
 	}
 }
 
@@ -166,7 +174,7 @@ func (g *Inventory) Render(target d2interface.Surface) {
 
 	err := g.renderFrame(target)
 	if err != nil {
-		log.Println(err)
+		g.logger.Error(err.Error())
 	}
 
 	g.grid.Render(target)

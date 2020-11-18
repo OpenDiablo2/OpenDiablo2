@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"runtime"
 )
 
@@ -13,6 +14,7 @@ type LogLevel = int
 // Log levels
 const (
 	LogLevelNone LogLevel = iota
+	LogLevelFatal
 	LogLevelError
 	LogLevelWarning
 	LogLevelInfo
@@ -41,6 +43,7 @@ const (
 	LogFmtInfo    = "[INFO]" + colorEscapeReset + " %s\r\n"
 	LogFmtWarning = "[WARNING]" + colorEscapeReset + " %s\r\n"
 	LogFmtError   = "[ERROR]" + colorEscapeReset + " %s\r\n"
+	LogFmtFatal   = "[FATAL]" + colorEscapeReset + " %s\r\n"
 )
 
 // NewLogger creates a new logger with a default
@@ -131,6 +134,21 @@ func (l *Logger) Errorf(fmtMsg string, args ...interface{}) {
 	l.Error(fmt.Sprintf(fmtMsg, args...))
 }
 
+// Fatal logs an fatal error message and exits programm
+func (l *Logger) Fatal(msg string) {
+	if l == nil || l.level < LogLevelFatal {
+		return
+	}
+
+	l.print(LogLevelFatal, msg)
+	os.Exit(1)
+}
+
+// Fatalf formats and then logs a error message
+func (l *Logger) Fatalf(fmtMsg string, args ...interface{}) {
+	l.Fatal(fmt.Sprintf(fmtMsg, args...))
+}
+
 // Debug logs a debug message
 func (l *Logger) Debug(msg string) {
 	if l == nil || l.level < LogLevelDebug {
@@ -155,6 +173,7 @@ func (l *Logger) print(level LogLevel, msg string) {
 		LogLevelInfo:    green,
 		LogLevelWarning: yellow,
 		LogLevelError:   red,
+		LogLevelFatal:   red,
 	}
 
 	fmtString := ""
@@ -180,6 +199,8 @@ func (l *Logger) print(level LogLevel, msg string) {
 		fmtString += LogFmtWarning
 	case LogLevelError:
 		fmtString += LogFmtError
+	case LogLevelFatal:
+		fmtString += LogFmtFatal
 	case LogLevelNone:
 	default:
 		return

@@ -2,7 +2,6 @@ package d2player
 
 import (
 	"image/color"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -44,6 +43,66 @@ type bindingChange struct {
 	secondary d2enum.Key
 }
 
+// NewKeyBindingMenu generates a new instance of the "Configure Keys"
+// menu found in the options
+func NewKeyBindingMenu(
+	asset *d2asset.AssetManager,
+	renderer d2interface.Renderer,
+	ui *d2ui.UIManager,
+	guiManager *d2gui.GuiManager,
+	keyMap *KeyMap,
+	l d2util.LogLevel,
+	escapeMenu *EscapeMenu,
+) *KeyBindingMenu {
+	mainLayout := d2gui.CreateLayout(renderer, d2gui.PositionTypeAbsolute, asset)
+	contentLayout := mainLayout.AddLayout(d2gui.PositionTypeAbsolute)
+
+	ret := &KeyBindingMenu{
+		keyMap:           keyMap,
+		asset:            asset,
+		ui:               ui,
+		guiManager:       guiManager,
+		renderer:         renderer,
+		mainLayout:       mainLayout,
+		contentLayout:    contentLayout,
+		bindingLayouts:   []*bindingLayout{},
+		changesToBeSaved: make(map[d2enum.GameEvent]*bindingChange),
+		escapeMenu:       escapeMenu,
+	}
+
+	ret.logger = d2util.NewLogger()
+	ret.logger.SetLevel(l)
+	ret.logger.SetPrefix(logPrefix)
+
+	ret.Box = d2gui.NewBox(
+		asset, renderer, ui, ret.mainLayout,
+		keyBindingMenuWidth, keyBindingMenuHeight,
+		keyBindingMenuX, keyBindingMenuY, "",
+	)
+
+	ret.Box.SetPadding(keyBindingMenuPaddingX, keyBindingSettingPaddingY)
+
+	ret.Box.SetOptions([]*d2gui.LabelButton{
+		d2gui.NewLabelButton(0, 0, "Cancel", d2util.Color(d2gui.ColorRed), func() {
+			if err := ret.onCancelClicked(); err != nil {
+				ret.logger.Error("error while clicking option Cancel: %v" + err.Error())
+			}
+		}),
+		d2gui.NewLabelButton(0, 0, "Default", d2util.Color(d2gui.ColorBlue), func() {
+			if err := ret.onDefaultClicked(); err != nil {
+				ret.logger.Error("error while clicking option Default: %v" + err.Error())
+			}
+		}),
+		d2gui.NewLabelButton(0, 0, "Accept", d2util.Color(d2gui.ColorGreen), func() {
+			if err := ret.onAcceptClicked(); err != nil {
+				ret.logger.Error("error while clicking option Accept: %v" + err.Error())
+			}
+		}),
+	})
+
+	return ret
+}
+
 // KeyBindingMenu represents the menu to view/edit the
 // key bindings
 type KeyBindingMenu struct {
@@ -67,61 +126,8 @@ type KeyBindingMenu struct {
 	currentBindingModifier     d2enum.GameEvent
 	currentBindingLayout       *bindingLayout
 	lastBindingLayout          *bindingLayout
-}
 
-// NewKeyBindingMenu generates a new instance of the "Configure Keys"
-// menu found in the options
-func NewKeyBindingMenu(
-	asset *d2asset.AssetManager,
-	renderer d2interface.Renderer,
-	ui *d2ui.UIManager,
-	guiManager *d2gui.GuiManager,
-	keyMap *KeyMap,
-	escapeMenu *EscapeMenu,
-) *KeyBindingMenu {
-	mainLayout := d2gui.CreateLayout(renderer, d2gui.PositionTypeAbsolute, asset)
-	contentLayout := mainLayout.AddLayout(d2gui.PositionTypeAbsolute)
-
-	ret := &KeyBindingMenu{
-		keyMap:           keyMap,
-		asset:            asset,
-		ui:               ui,
-		guiManager:       guiManager,
-		renderer:         renderer,
-		mainLayout:       mainLayout,
-		contentLayout:    contentLayout,
-		bindingLayouts:   []*bindingLayout{},
-		changesToBeSaved: make(map[d2enum.GameEvent]*bindingChange),
-		escapeMenu:       escapeMenu,
-	}
-
-	ret.Box = d2gui.NewBox(
-		asset, renderer, ui, ret.mainLayout,
-		keyBindingMenuWidth, keyBindingMenuHeight,
-		keyBindingMenuX, keyBindingMenuY, "",
-	)
-
-	ret.Box.SetPadding(keyBindingMenuPaddingX, keyBindingSettingPaddingY)
-
-	ret.Box.SetOptions([]*d2gui.LabelButton{
-		d2gui.NewLabelButton(0, 0, "Cancel", d2util.Color(d2gui.ColorRed), func() {
-			if err := ret.onCancelClicked(); err != nil {
-				log.Printf("error while clicking option Cancel: %v", err)
-			}
-		}),
-		d2gui.NewLabelButton(0, 0, "Default", d2util.Color(d2gui.ColorBlue), func() {
-			if err := ret.onDefaultClicked(); err != nil {
-				log.Printf("error while clicking option Default: %v", err)
-			}
-		}),
-		d2gui.NewLabelButton(0, 0, "Accept", d2util.Color(d2gui.ColorGreen), func() {
-			if err := ret.onAcceptClicked(); err != nil {
-				log.Printf("error while clicking option Accept: %v", err)
-			}
-		}),
-	})
-
-	return ret
+	logger *d2util.Logger
 }
 
 // Close will disable the render of the menu and clear

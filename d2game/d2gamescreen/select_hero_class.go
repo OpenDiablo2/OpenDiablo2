@@ -3,7 +3,6 @@ package d2gamescreen
 import (
 	"fmt"
 	"image"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 
@@ -258,17 +257,60 @@ type HeroRenderInfo struct {
 	SelectionBounds          image.Rectangle
 	SelectSfx                d2interface.SoundEffect
 	DeselectSfx              d2interface.SoundEffect
+	shc                      *SelectHeroClass
 }
 
 func (hri *HeroRenderInfo) advance(elapsed float64) {
-	advanceSprite(hri.IdleSprite, elapsed)
-	advanceSprite(hri.IdleSelectedSprite, elapsed)
-	advanceSprite(hri.ForwardWalkSprite, elapsed)
-	advanceSprite(hri.ForwardWalkSpriteOverlay, elapsed)
-	advanceSprite(hri.SelectedSprite, elapsed)
-	advanceSprite(hri.SelectedSpriteOverlay, elapsed)
-	advanceSprite(hri.BackWalkSprite, elapsed)
-	advanceSprite(hri.BackWalkSpriteOverlay, elapsed)
+	advanceSprite(hri.shc, hri.IdleSprite, elapsed)
+	advanceSprite(hri.shc, hri.IdleSelectedSprite, elapsed)
+	advanceSprite(hri.shc, hri.ForwardWalkSprite, elapsed)
+	advanceSprite(hri.shc, hri.ForwardWalkSpriteOverlay, elapsed)
+	advanceSprite(hri.shc, hri.SelectedSprite, elapsed)
+	advanceSprite(hri.shc, hri.SelectedSpriteOverlay, elapsed)
+	advanceSprite(hri.shc, hri.BackWalkSprite, elapsed)
+	advanceSprite(hri.shc, hri.BackWalkSpriteOverlay, elapsed)
+}
+
+// CreateSelectHeroClass creates an instance of a SelectHeroClass
+func CreateSelectHeroClass(
+	navigator d2interface.Navigator,
+	asset *d2asset.AssetManager,
+	renderer d2interface.Renderer,
+	audioProvider d2interface.AudioProvider,
+	ui *d2ui.UIManager,
+	connectionType d2clientconnectiontype.ClientConnectionType,
+	l d2util.LogLevel,
+	connectionHost string,
+) (*SelectHeroClass, error) {
+	playerStateFactory, err := d2hero.NewHeroStateFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
+	inventoryItemFactory, err := d2inventory.NewInventoryItemFactory(asset)
+	if err != nil {
+		return nil, err
+	}
+
+	selectHeroClass := &SelectHeroClass{
+		asset:                asset,
+		heroRenderInfo:       make(map[d2enum.Hero]*HeroRenderInfo),
+		selectedHero:         d2enum.HeroNone,
+		connectionType:       connectionType,
+		connectionHost:       connectionHost,
+		audioProvider:        audioProvider,
+		renderer:             renderer,
+		navigator:            navigator,
+		uiManager:            ui,
+		HeroStateFactory:     playerStateFactory,
+		InventoryItemFactory: inventoryItemFactory,
+	}
+
+	selectHeroClass.logger = d2util.NewLogger()
+	selectHeroClass.logger.SetLevel(l)
+	selectHeroClass.logger.SetPrefix(logPrefix)
+
+	return selectHeroClass, nil
 }
 
 // SelectHeroClass represents the Select Hero Class screen
@@ -300,43 +342,7 @@ type SelectHeroClass struct {
 	audioProvider d2interface.AudioProvider
 	renderer      d2interface.Renderer
 	navigator     d2interface.Navigator
-}
-
-// CreateSelectHeroClass creates an instance of a SelectHeroClass
-func CreateSelectHeroClass(
-	navigator d2interface.Navigator,
-	asset *d2asset.AssetManager,
-	renderer d2interface.Renderer,
-	audioProvider d2interface.AudioProvider,
-	ui *d2ui.UIManager,
-	connectionType d2clientconnectiontype.ClientConnectionType,
-	connectionHost string,
-) (*SelectHeroClass, error) {
-	playerStateFactory, err := d2hero.NewHeroStateFactory(asset)
-	if err != nil {
-		return nil, err
-	}
-
-	inventoryItemFactory, err := d2inventory.NewInventoryItemFactory(asset)
-	if err != nil {
-		return nil, err
-	}
-
-	result := &SelectHeroClass{
-		asset:                asset,
-		heroRenderInfo:       make(map[d2enum.Hero]*HeroRenderInfo),
-		selectedHero:         d2enum.HeroNone,
-		connectionType:       connectionType,
-		connectionHost:       connectionHost,
-		audioProvider:        audioProvider,
-		renderer:             renderer,
-		navigator:            navigator,
-		uiManager:            ui,
-		HeroStateFactory:     playerStateFactory,
-		InventoryItemFactory: inventoryItemFactory,
-	}
-
-	return result, nil
+	logger        *d2util.Logger
 }
 
 // OnLoad loads the resources for the Select Hero Class screen
@@ -494,13 +500,13 @@ func (v *SelectHeroClass) onOkButtonClicked() {
 
 	playerState, err := v.CreateHeroState(heroName, v.selectedHero, statsState)
 	if err != nil {
-		fmt.Printf("failed to create hero state!, err: %v\n", err)
+		v.logger.Error("failed to create hero state!, err: %v\n" + err.Error())
 		return
 	}
 
 	err = v.Save(playerState)
 	if err != nil {
-		fmt.Printf("failed to save game state!, err: %v\n", err)
+		v.logger.Error("failed to save game state!, err: %v\n" + err.Error())
 		return
 	}
 
@@ -640,13 +646,13 @@ func (v *SelectHeroClass) handleCursorButtonPress(hero d2enum.Hero, renderInfo *
 func (v *SelectHeroClass) setCurrentFrame(mouseHover bool, renderInfo *HeroRenderInfo) {
 	if mouseHover && renderInfo.Stance != d2enum.HeroStanceIdleSelected {
 		if err := renderInfo.IdleSelectedSprite.SetCurrentFrame(renderInfo.IdleSprite.GetCurrentFrame()); err != nil {
-			fmt.Printf("could not set current frame to: %d\n", renderInfo.IdleSprite.GetCurrentFrame())
+			v.logger.Error(fmt.Sprintf("could not set current frame to: %d\n", renderInfo.IdleSprite.GetCurrentFrame()))
 		}
 
 		renderInfo.Stance = d2enum.HeroStanceIdleSelected
 	} else if !mouseHover && renderInfo.Stance != d2enum.HeroStanceIdle {
 		if err := renderInfo.IdleSprite.SetCurrentFrame(renderInfo.IdleSelectedSprite.GetCurrentFrame()); err != nil {
-			fmt.Printf("could not set current frame to: %d\n", renderInfo.IdleSelectedSprite.GetCurrentFrame())
+			v.logger.Error(fmt.Sprintf("could not set current frame to: %d\n", renderInfo.IdleSelectedSprite.GetCurrentFrame()))
 		}
 
 		renderInfo.Stance = d2enum.HeroStanceIdle
@@ -739,10 +745,10 @@ func drawSprite(sprite *d2ui.Sprite, target d2interface.Surface) {
 	}
 }
 
-func advanceSprite(sprite *d2ui.Sprite, elapsed float64) {
+func advanceSprite(v *SelectHeroClass, sprite *d2ui.Sprite, elapsed float64) {
 	if sprite != nil {
 		if err := sprite.Advance(elapsed); err != nil {
-			fmt.Printf("could not advance the sprite\n")
+			v.logger.Error("could not advance the sprite:" + err.Error())
 		}
 	}
 }
@@ -757,7 +763,7 @@ func (v *SelectHeroClass) loadSprite(animationPath string, position image.Point,
 
 	sprite, err := v.uiManager.NewSprite(animationPath, d2resource.PaletteFechar)
 	if err != nil {
-		fmt.Printf("could not load sprite for the animation: %s\n", animationPath)
+		v.logger.Error("could not load sprite for the animation: %s\n" + animationPath + "with error: " + err.Error())
 		return nil
 	}
 
@@ -780,7 +786,7 @@ func (v *SelectHeroClass) loadSprite(animationPath string, position image.Point,
 func (v *SelectHeroClass) loadSoundEffect(sfx string) d2interface.SoundEffect {
 	result, err := v.audioProvider.LoadSound(sfx, false, false)
 	if err != nil {
-		log.Print(err)
+		v.logger.Error(err.Error())
 		return nil
 	}
 

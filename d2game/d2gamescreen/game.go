@@ -35,6 +35,70 @@ const (
 	black50alpha = 0x0000007f // rgba
 )
 
+// CreateGame creates the Gameplay screen and returns a pointer to it
+func CreateGame(
+	navigator d2interface.Navigator,
+	asset *d2asset.AssetManager,
+	ui *d2ui.UIManager,
+	renderer d2interface.Renderer,
+	inputManager d2interface.InputManager,
+	audioProvider d2interface.AudioProvider,
+	gameClient *d2client.GameClient,
+	term d2interface.Terminal,
+	l d2util.LogLevel,
+	guiManager *d2gui.GuiManager,
+) *Game {
+	// find the local player and its initial location
+	var startX, startY float64
+
+	for _, player := range gameClient.Players {
+		if player.ID() != gameClient.PlayerID {
+			continue
+		}
+
+		worldPosition := player.Position.World()
+		startX, startY = worldPosition.X(), worldPosition.Y()
+
+		break
+	}
+
+	keyMap := d2player.GetDefaultKeyMap(asset)
+
+	game := &Game{
+		asset:                asset,
+		gameClient:           gameClient,
+		gameControls:         nil,
+		localPlayer:          nil,
+		lastRegionType:       d2enum.RegionNone,
+		ticksSinceLevelCheck: 0,
+		mapRenderer: d2maprenderer.CreateMapRenderer(asset, renderer,
+			gameClient.MapEngine, term, startX, startY),
+		escapeMenu:    d2player.NewEscapeMenu(navigator, renderer, audioProvider, ui, guiManager, asset, l, keyMap),
+		inputManager:  inputManager,
+		audioProvider: audioProvider,
+		renderer:      renderer,
+		terminal:      term,
+		soundEngine:   d2audio.NewSoundEngine(audioProvider, asset, term),
+		uiManager:     ui,
+		guiManager:    guiManager,
+		keyMap:        keyMap,
+		logLevel:      l,
+	}
+	game.logger = d2util.NewLogger()
+	game.logger.SetLevel(l)
+	game.logger.SetPrefix(logPrefix)
+
+	game.soundEnv = d2audio.NewSoundEnvironment(game.soundEngine)
+
+	game.escapeMenu.OnLoad()
+
+	if err := inputManager.BindHandler(game.escapeMenu); err != nil {
+		game.logger.Error("failed to add gameplay screen as event handler")
+	}
+
+	return game
+}
+
 // Game represents the Gameplay screen
 type Game struct {
 	*d2mapentity.MapEntityFactory
@@ -56,64 +120,8 @@ type Game struct {
 	inputManager  d2interface.InputManager
 	audioProvider d2interface.AudioProvider
 	terminal      d2interface.Terminal
-}
-
-// CreateGame creates the Gameplay screen and returns a pointer to it
-func CreateGame(
-	navigator d2interface.Navigator,
-	asset *d2asset.AssetManager,
-	ui *d2ui.UIManager,
-	renderer d2interface.Renderer,
-	inputManager d2interface.InputManager,
-	audioProvider d2interface.AudioProvider,
-	gameClient *d2client.GameClient,
-	term d2interface.Terminal,
-	guiManager *d2gui.GuiManager,
-) *Game {
-	// find the local player and its initial location
-	var startX, startY float64
-
-	for _, player := range gameClient.Players {
-		if player.ID() != gameClient.PlayerID {
-			continue
-		}
-
-		worldPosition := player.Position.World()
-		startX, startY = worldPosition.X(), worldPosition.Y()
-
-		break
-	}
-
-	keyMap := d2player.GetDefaultKeyMap(asset)
-
-	result := &Game{
-		asset:                asset,
-		gameClient:           gameClient,
-		gameControls:         nil,
-		localPlayer:          nil,
-		lastRegionType:       d2enum.RegionNone,
-		ticksSinceLevelCheck: 0,
-		mapRenderer: d2maprenderer.CreateMapRenderer(asset, renderer,
-			gameClient.MapEngine, term, startX, startY),
-		escapeMenu:    d2player.NewEscapeMenu(navigator, renderer, audioProvider, ui, guiManager, asset, keyMap),
-		inputManager:  inputManager,
-		audioProvider: audioProvider,
-		renderer:      renderer,
-		terminal:      term,
-		soundEngine:   d2audio.NewSoundEngine(audioProvider, asset, term),
-		uiManager:     ui,
-		guiManager:    guiManager,
-		keyMap:        keyMap,
-	}
-	result.soundEnv = d2audio.NewSoundEnvironment(result.soundEngine)
-
-	result.escapeMenu.OnLoad()
-
-	if err := inputManager.BindHandler(result.escapeMenu); err != nil {
-		fmt.Println("failed to add gameplay screen as event handler")
-	}
-
-	return result
+	logger        *d2util.Logger
+	logLevel      d2util.LogLevel
 }
 
 // OnLoad loads the resources for the Gameplay screen
@@ -129,7 +137,7 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 		},
 	)
 	if err != nil {
-		fmt.Printf("failed to bind the '%s' action, err: %v\n", "spawnitem", err)
+		v.logger.Error("failed to bind the '%s' action, err: %v\nspawnitem" + err.Error())
 	}
 
 	err = v.terminal.BindAction(
@@ -141,7 +149,7 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 		},
 	)
 	if err != nil {
-		fmt.Printf("failed to bind the '%s' action, err: %v\n", "spawnitemat", err)
+		v.logger.Error("failed to bind the '%s' action, err: %v\nspawnitemat" + err.Error())
 	}
 
 	err = v.terminal.BindAction(
@@ -166,7 +174,7 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 		},
 	)
 	if err != nil {
-		fmt.Printf("failed to bind the '%s' action, err: %v\n", "spawnmon", err)
+		v.logger.Error("failed to bind the '%s' action, err: %v\nspawnmon" + err.Error())
 	}
 }
 
@@ -294,7 +302,7 @@ func (v *Game) bindGameControls() error {
 
 		var err error
 		v.gameControls, err = d2player.NewGameControls(v.asset, v.renderer, player, v.gameClient.MapEngine,
-			v.escapeMenu, v.mapRenderer, v, v.terminal, v.uiManager, v.guiManager, v.keyMap, v.gameClient.IsSinglePlayer())
+			v.escapeMenu, v.mapRenderer, v, v.terminal, v.uiManager, v.guiManager, v.keyMap, v.logLevel, v.gameClient.IsSinglePlayer())
 
 		if err != nil {
 			return err
@@ -303,7 +311,7 @@ func (v *Game) bindGameControls() error {
 		v.gameControls.Load()
 
 		if err := v.inputManager.BindHandler(v.gameControls); err != nil {
-			fmt.Printf(bindControlsErrStr, player.ID())
+			v.logger.Error(bindControlsErrStr + player.ID())
 		}
 
 		break
@@ -321,7 +329,7 @@ func (v *Game) OnPlayerMove(targetX, targetY float64) {
 	err := v.gameClient.SendPacketToServer(createMovePlayerPacket)
 
 	if err != nil {
-		fmt.Printf(moveErrStr, v.gameClient.PlayerID, targetX, targetY)
+		v.logger.Error(fmt.Sprintf(moveErrStr, v.gameClient.PlayerID, targetX, targetY))
 	}
 }
 
@@ -341,7 +349,7 @@ func (v *Game) OnPlayerSave() error {
 func (v *Game) OnPlayerCast(skillID int, targetX, targetY float64) {
 	err := v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerID, skillID, targetX, targetY))
 	if err != nil {
-		fmt.Printf(castErrStr, v.gameClient.PlayerID, skillID, targetX, targetY)
+		v.logger.Error(fmt.Sprintf(castErrStr, v.gameClient.PlayerID, skillID, targetX, targetY))
 	}
 }
 
@@ -362,6 +370,6 @@ func (v *Game) debugSpawnItemAtLocation(x, y int, codes ...string) {
 
 	err := v.gameClient.SendPacketToServer(packet)
 	if err != nil {
-		fmt.Printf(spawnItemErrStr, x, y, codes)
+		v.logger.Error(fmt.Sprintf(spawnItemErrStr, x, y, codes))
 	}
 }

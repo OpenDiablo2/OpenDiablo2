@@ -1,11 +1,11 @@
 package d2player
 
 import (
-	"log"
 	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
@@ -20,14 +20,10 @@ const (
 	skillIconDistY = 68
 )
 
-type skillIcon struct {
-	*d2ui.BaseWidget
-	lvlLabel *d2ui.Label
-	sprite   *d2ui.Sprite
-	skill    *d2hero.HeroSkill
-}
-
-func newSkillIcon(ui *d2ui.UIManager, baseSprite *d2ui.Sprite, skill *d2hero.HeroSkill) *skillIcon {
+func newSkillIcon(ui *d2ui.UIManager,
+	baseSprite *d2ui.Sprite,
+	l d2util.LogLevel,
+	skill *d2hero.HeroSkill) *skillIcon {
 	base := d2ui.NewBaseWidget(ui)
 	label := ui.NewLabel(d2resource.Font16, d2resource.PaletteSky)
 
@@ -41,9 +37,22 @@ func newSkillIcon(ui *d2ui.UIManager, baseSprite *d2ui.Sprite, skill *d2hero.Her
 		lvlLabel:   label,
 	}
 
+	res.logger = d2util.NewLogger()
+	res.logger.SetLevel(l)
+	res.logger.SetPrefix(logPrefix)
+
 	res.SetPosition(x, y)
 
 	return res
+}
+
+type skillIcon struct {
+	*d2ui.BaseWidget
+	lvlLabel *d2ui.Label
+	sprite   *d2ui.Sprite
+	skill    *d2hero.HeroSkill
+
+	logger *d2util.Logger
 }
 
 func (si *skillIcon) SetVisible(visible bool) {
@@ -55,7 +64,7 @@ func (si *skillIcon) renderSprite(target d2interface.Surface) {
 	x, y := si.GetPosition()
 
 	if err := si.sprite.SetCurrentFrame(si.skill.IconCel); err != nil {
-		log.Printf("Cannot set Frame %e", err)
+		si.logger.Error("Cannot set Frame %e" + err.Error())
 		return
 	}
 
