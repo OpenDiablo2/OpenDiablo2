@@ -104,7 +104,7 @@ go_install
 
 echo "Install libraries"
 if [ ! -e "$HOME/.config/OpenDiablo2" ]; then
-	mkdir -P $HOME/.config/OpenDiablo2
+	mkdir -p $HOME/.config/OpenDiablo2
 fi
 
 if [ -e "$HOME/.config/OpenDiablo2/.libs" ]; then
