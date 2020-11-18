@@ -4,21 +4,12 @@ import (
 	"fmt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
-const (
-	logPrefix = "Item Factory"
-)
-
 // NewInventoryItemFactory creates a new InventoryItemFactory and initializes it
-func NewInventoryItemFactory(l d2util.LogLevel, asset *d2asset.AssetManager) (*InventoryItemFactory, error) {
+func NewInventoryItemFactory(asset *d2asset.AssetManager) (*InventoryItemFactory, error) {
 	factory := &InventoryItemFactory{asset: asset}
-
-	factory.logger = d2util.NewLogger()
-	factory.logger.SetLevel(l)
-	factory.logger.SetPrefix(logPrefix)
 
 	err := factory.loadHeroObjects()
 	if err != nil {
@@ -32,8 +23,6 @@ func NewInventoryItemFactory(l d2util.LogLevel, asset *d2asset.AssetManager) (*I
 type InventoryItemFactory struct {
 	asset            *d2asset.AssetManager
 	DefaultHeroItems HeroObjects
-
-	logger *d2util.Logger
 }
 
 // LoadHeroObjects loads the equipment objects of the hero

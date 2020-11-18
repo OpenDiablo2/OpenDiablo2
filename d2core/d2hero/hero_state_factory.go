@@ -14,7 +14,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
@@ -25,7 +24,7 @@ const (
 
 // NewHeroStateFactory creates a new HeroStateFactory and initializes it.
 func NewHeroStateFactory(asset *d2asset.AssetManager) (*HeroStateFactory, error) {
-	inventoryItemFactory, err := d2inventory.NewInventoryItemFactory(d2util.LogLevelDefault, asset)
+	inventoryItemFactory, err := d2inventory.NewInventoryItemFactory(asset)
 	if err != nil {
 		return nil, err
 	}
