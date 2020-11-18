@@ -20,7 +20,10 @@ func NewInventoryItemFactory(l d2util.LogLevel, asset *d2asset.AssetManager) (*I
 	factory.logger.SetLevel(l)
 	factory.logger.SetPrefix(logPrefix)
 
-	factory.loadHeroObjects()
+	err := factory.loadHeroObjects()
+	if err != nil {
+		return nil, err
+	}
 
 	return factory, nil
 }
@@ -34,46 +37,89 @@ type InventoryItemFactory struct {
 }
 
 // LoadHeroObjects loads the equipment objects of the hero
-func (f *InventoryItemFactory) loadHeroObjects() {
+func (f *InventoryItemFactory) loadHeroObjects() error {
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/795
 	//Mode:  d2enum.AnimationModePlayerNeutral.String(),
 	//Base:  "/data/global/chars",
+	shield, err := f.GetArmorItemByCode("buc")
+	if err != nil {
+		return err
+	}
+
+	// there are some workarounds, which need to be changed
+	rhhex, err := f.GetWeaponItemByCode("hax")
+	if err != nil {
+		return err
+	}
+
+	rhwnd, err := f.GetWeaponItemByCode("wnd")
+	if err != nil {
+		return err
+	}
+
+	rhssd, err := f.GetWeaponItemByCode("ssd")
+	if err != nil {
+		return err
+	}
+
+	rhktr, err := f.GetWeaponItemByCode("ktr")
+	if err != nil {
+		return err
+	}
+
+	rhsst, err := f.GetWeaponItemByCode("sst")
+	if err != nil {
+		return err
+	}
+
+	rhjav, err := f.GetWeaponItemByCode("jav")
+	if err != nil {
+		return err
+	}
+
+	rhclb, err := f.GetWeaponItemByCode("clb")
+	if err != nil {
+		return err
+	}
+
 	f.DefaultHeroItems = map[d2enum.Hero]CharacterEquipment{
 		d2enum.HeroBarbarian: {
-			RightHand: f.GetWeaponItemByCode("hax"),
-			Shield:    f.GetArmorItemByCode("buc"),
+			RightHand: rhhex,
+			Shield:    shield,
 		},
 		d2enum.HeroNecromancer: {
-			RightHand: f.GetWeaponItemByCode("wnd"),
+			RightHand: rhwnd,
 		},
 		d2enum.HeroPaladin: {
-			RightHand: f.GetWeaponItemByCode("ssd"),
-			Shield:    f.GetArmorItemByCode("buc"),
+			RightHand: rhssd,
+			Shield:    shield,
 		},
 		d2enum.HeroAssassin: {
-			RightHand: f.GetWeaponItemByCode("ktr"),
-			Shield:    f.GetArmorItemByCode("buc"),
+			RightHand: rhktr,
+			Shield:    shield,
 		},
 		d2enum.HeroSorceress: {
-			RightHand: f.GetWeaponItemByCode("sst"),
-			LeftHand:  f.GetWeaponItemByCode("sst"),
+			RightHand: rhsst,
+			LeftHand:  rhsst,
 		},
 		d2enum.HeroAmazon: {
-			RightHand: f.GetWeaponItemByCode("jav"),
-			Shield:    f.GetArmorItemByCode("buc"),
+			RightHand: rhjav,
+			Shield:    shield,
 		},
 		d2enum.HeroDruid: {
-			RightHand: f.GetWeaponItemByCode("clb"),
-			Shield:    f.GetArmorItemByCode("buc"),
+			RightHand: rhclb,
+			Shield:    shield,
 		},
 	}
+
+	return nil
 }
 
 // GetArmorItemByCode returns the armor item for the given code
 func (f *InventoryItemFactory) GetArmorItemByCode(code string) (*InventoryItemArmor, error) {
 	result := f.asset.Records.Item.Armors[code]
 	if result == nil {
-		f.logger.Error(fmt.Sprintf("Could not find armor entry for code '%s'", code))
+		return nil, fmt.Errorf("could not find misc item entry for code '%s'", code)
 	}
 
 	return &InventoryItemArmor{
@@ -82,14 +128,14 @@ func (f *InventoryItemFactory) GetArmorItemByCode(code string) (*InventoryItemAr
 		ItemName:       result.Name,
 		ItemCode:       result.Code,
 		ArmorClass:     d2enum.ArmorClassLite, // comes from ArmType.txt
-	}
+	}, nil
 }
 
 // GetMiscItemByCode returns the miscellaneous item for the given code
-func (f *InventoryItemFactory) GetMiscItemByCode(code string) *InventoryItemMisc {
+func (f *InventoryItemFactory) GetMiscItemByCode(code string) (*InventoryItemMisc, error) {
 	result := f.asset.Records.Item.Misc[code]
 	if result == nil {
-		f.logger.Error(fmt.Sprintf("Could not find misc item entry for code '%s'", code))
+		return nil, fmt.Errorf("could not find misc item entry for code '%s'", code)
 	}
 
 	return &InventoryItemMisc{
@@ -97,15 +143,15 @@ func (f *InventoryItemFactory) GetMiscItemByCode(code string) *InventoryItemMisc
 		InventorySizeY: result.InventoryHeight,
 		ItemName:       result.Name,
 		ItemCode:       result.Code,
-	}
+	}, nil
 }
 
 // GetWeaponItemByCode returns the weapon item for the given code
-func (f *InventoryItemFactory) GetWeaponItemByCode(code string) *InventoryItemWeapon {
+func (f *InventoryItemFactory) GetWeaponItemByCode(code string) (*InventoryItemWeapon, error) {
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/796
 	result := f.asset.Records.Item.Weapons[code]
 	if result == nil {
-		f.logger.Error(fmt.Sprintf("Could not find weapon entry for code '%s'", code))
+		return nil, fmt.Errorf("could not find weapon entry for code '%s'", code)
 	}
 
 	return &InventoryItemWeapon{
@@ -115,5 +161,5 @@ func (f *InventoryItemFactory) GetWeaponItemByCode(code string) *InventoryItemWe
 		ItemCode:           result.Code,
 		WeaponClass:        result.WeaponClass,
 		WeaponClassOffHand: result.WeaponClass2Hand,
-	}
+	}, nil
 }

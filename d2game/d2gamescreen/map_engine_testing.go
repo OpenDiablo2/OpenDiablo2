@@ -194,7 +194,8 @@ func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 		met.mapEngine.SetSeed(time.Now().UnixNano())
 		met.mapGen.GenerateAct1Overworld()
 	} else {
-		met.mapEngine = d2mapengine.CreateMapEngine(d2util.LogLevelDefault, met.asset) // necessary for map name update // need to be changed (logleveldefault)
+		// necessary for map name update // need to be changed (logleveldefault)
+		met.mapEngine = d2mapengine.CreateMapEngine(d2util.LogLevelDefault, met.asset)
 		met.mapEngine.SetSeed(time.Now().UnixNano())
 		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 	}

@@ -61,7 +61,6 @@ func (eap *AudioProvider) PlayBGM(song string) {
 
 		if err != nil {
 			eap.logger.Fatal(err.Error())
-
 		}
 	}
 

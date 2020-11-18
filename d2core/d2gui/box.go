@@ -92,7 +92,7 @@ func NewBox(
 		logger:        asset.Logger, // workaound
 	}
 
-	box.logger.SetPrefix(logPrefix) //workaround
+	box.logger.SetPrefix(logPrefix) // workaround
 
 	return box
 }

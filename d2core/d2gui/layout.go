@@ -167,7 +167,7 @@ func (l *Layout) AddLabel(text string, fontStyle FontStyle) (*Label, error) {
 		return nil, err
 	}
 
-	label, err := createLabel(l.renderer, text, font, d2util.Color(ColorWhite)) //need to be changed
+	label, err := createLabel(l.renderer, text, font, d2util.Color(ColorWhite)) // need to be changed
 	if err != nil {
 		return nil, err
 	}
