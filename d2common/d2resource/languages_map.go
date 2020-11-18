@@ -28,18 +28,18 @@ func GetLanguageLiteral(code byte) string {
 // Source https://github.com/eezstreet/OpenD2/blob/065f6e466048482b28b9dbc6286908dc1e0d10f6/Shared/D2Shared.hpp#L36
 func getCharsets() map[string]string {
 	return map[string]string{
-		"ENG": "LATIN",   // (English)
-		"ESP": "LATIN",   // (Spanish)
-		"DEU": "LATIN",   // (German)
-		"FRA": "LATIN",   // (French)
-		"POR": "LATIN",   // (Portuguese)
-		"ITA": "LATIN",   // (Italian)
-		"JPN": "JAPAN",   // (Japanese)
-		"KOR": "KOREAN",  // (Korean)
-		"SIN": "LATIN",   //
-		"CHI": "CHINESE", // (Chinese)
-		"POL": "LATIN2",  // (Polish)
-		"RUS": "RUSSIAN", // (Russian)
+		"ENG": "LATIN",  // (English)
+		"ESP": "LATIN",  // (Spanish)
+		"DEU": "LATIN",  // (German)
+		"FRA": "LATIN",  // (French)
+		"POR": "LATIN",  // (Portuguese)
+		"ITA": "LATIN",  // (Italian)
+		"JPN": "JPN",    // (Japanese)
+		"KOR": "KOR",    // (Korean)
+		"SIN": "LATIN",  //
+		"CHI": "CHI",    // (Chinese)
+		"POL": "LATIN2", // (Polish)
+		"RUS": "CYR",    // (Russian)
 	}
 }
 
