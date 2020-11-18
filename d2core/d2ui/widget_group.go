@@ -28,7 +28,7 @@ func (ui *UIManager) NewWidgetGroup(priority RenderPriority) *WidgetGroup {
 		BaseWidget: base,
 	}
 
-	ui.addWidgetGroup(group)
+	ui.addWidget(group)
 
 	return group
 }
@@ -136,3 +136,14 @@ func (wg *WidgetGroup) SetEnabled(enabled bool) {
 		}
 	}
 }
+
+func (wg *WidgetGroup) getClickableWidgets() []ClickableWidget {
+	var res []ClickableWidget
+	for _, entry := range wg.entries {
+		if v, ok := entry.(ClickableWidget); ok {
+			res = append(res, v)
+		}
+	}
+	return res
+}
+

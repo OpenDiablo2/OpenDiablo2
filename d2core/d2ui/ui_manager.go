@@ -52,15 +52,6 @@ func (ui *UIManager) Reset() {
 	ui.pressedWidget = nil
 }
 
-// addWidgetGroup adds a widgetGroup to the UI manager and sorts by priority
-func (ui *UIManager) addWidgetGroup(group *WidgetGroup) {
-	ui.widgetsGroups = append(ui.widgetsGroups, group)
-
-	sort.SliceStable(ui.widgetsGroups, func(i, j int) bool {
-		return ui.widgetsGroups[i].renderPriority < ui.widgetsGroups[j].renderPriority
-	})
-}
-
 // addWidget adds a widget to the UI manager
 func (ui *UIManager) addWidget(widget Widget) {
 	err := ui.inputManager.BindHandler(widget)
@@ -73,7 +64,17 @@ func (ui *UIManager) addWidget(widget Widget) {
 		ui.clickableWidgets = append(ui.clickableWidgets, clickable)
 	}
 
+	if widgetGroup, ok := widget.(*WidgetGroup); ok {
+		ui.widgetsGroups = append(ui.widgetsGroups, widgetGroup)
+		ui.clickableWidgets = append(ui.clickableWidgets, widgetGroup.getClickableWidgets()...)
+	}
+
 	ui.widgets = append(ui.widgets, widget)
+
+	sort.SliceStable(ui.widgets, func(i, j int) bool {
+		return ui.widgets[i].GetRenderPriority() < ui.widgets[j].GetRenderPriority()
+	})
+
 	widget.bindManager(ui)
 }
 
@@ -146,12 +147,6 @@ func (ui *UIManager) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 // Render renders all of the UI elements
 func (ui *UIManager) Render(target d2interface.Surface) {
-	for _, widgetGroup := range ui.widgetsGroups {
-		if widgetGroup.GetVisible() {
-			widgetGroup.Render(target)
-		}
-	}
-
 	for _, widget := range ui.widgets {
 		if widget.GetVisible() {
 			widget.Render(target)
