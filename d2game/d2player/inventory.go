@@ -1,6 +1,8 @@
 package d2player
 
 import (
+	"fmt"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -21,11 +23,14 @@ const (
 
 const (
 	invCloseButtonX, invCloseButtonY = 419, 449
+	invGoldButtonX, invGoldButtonY   = 485, 455
+	invGoldLabelX, invGoldLabelY     = 500, 455
 )
 
 // NewInventory creates an inventory instance and returns a pointer to it
 func NewInventory(asset *d2asset.AssetManager,
 	ui *d2ui.UIManager,
+	gold int,
 	l d2util.LogLevel,
 	record *d2records.InventoryRecord) *Inventory {
 	itemTooltip := ui.NewTooltip(d2resource.FontFormal11, d2resource.PaletteStatic, d2ui.TooltipXCenter, d2ui.TooltipYBottom)
@@ -41,7 +46,8 @@ func NewInventory(asset *d2asset.AssetManager,
 		originX:     record.Panel.Left,
 		itemTooltip: itemTooltip,
 		// originY: record.Panel.Top,
-		originY: 0, // expansion data has these all offset by +60 ...
+		originY:   0, // expansion data has these all offset by +60 ...
+		goldValue: gold,
 	}
 
 	inventory.logger = d2util.NewLogger()
@@ -61,6 +67,9 @@ type Inventory struct {
 	grid        *ItemGrid
 	itemTooltip *d2ui.Tooltip
 	closeButton *d2ui.Button
+	goldButton  *d2ui.Button
+	goldLabel   *d2ui.Label
+	goldValue   int
 	hoverX      int
 	hoverY      int
 	originX     int
@@ -92,18 +101,26 @@ func (g *Inventory) Toggle() {
 func (g *Inventory) Open() {
 	g.isOpen = true
 	g.closeButton.SetVisible(true)
+	g.goldButton.SetVisible(true)
+	g.goldLabel.SetVisible(true)
 }
 
 // Close closes the inventory
 func (g *Inventory) Close() {
 	g.isOpen = false
 	g.closeButton.SetVisible(false)
+	g.goldButton.SetVisible(false)
+	g.goldLabel.SetVisible(false)
 	g.onCloseCb()
 }
 
 // SetOnCloseCb the callback run on closing the inventory
 func (g *Inventory) SetOnCloseCb(cb func()) {
 	g.onCloseCb = cb
+}
+
+func (g *Inventory) onGoldClicked() {
+	return
 }
 
 // Load the resources required by the inventory
@@ -114,6 +131,20 @@ func (g *Inventory) Load() {
 	g.closeButton.SetVisible(false)
 	g.closeButton.SetPosition(invCloseButtonX, invCloseButtonY)
 	g.closeButton.OnActivated(func() { g.Close() })
+
+	g.goldButton = g.uiManager.NewButton(d2ui.ButtonTypeGoldCoin, "")
+	g.goldButton.SetVisible(false)
+	g.goldButton.SetPosition(invGoldButtonX, invGoldButtonY)
+	g.goldButton.OnActivated(func() { g.onGoldClicked() })
+
+	//g.goldLabel = g.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
+	g.goldLabel = g.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
+	g.goldLabel.Alignment = d2ui.HorizontalAlignLeft
+	//g.goldLabel.SetText(fmt.Sprintln(g.goldValue))
+	g.goldLabel.SetText("lalala")
+	fmt.Println("elo")
+	g.goldLabel.SetVisible(true)
+	g.goldLabel.SetPosition(invGoldLabelX, invGoldLabelY)
 
 	g.panel, _ = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 
@@ -171,6 +202,8 @@ func (g *Inventory) Render(target d2interface.Surface) {
 	if !g.isOpen {
 		return
 	}
+
+	g.goldLabel.Render(target)
 
 	err := g.renderFrame(target)
 	if err != nil {

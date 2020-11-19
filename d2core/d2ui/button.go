@@ -148,6 +148,10 @@ const (
 	buttonRunSegmentsY     = 1
 	buttonRunDisabledFrame = -1
 
+	buttonGoldCoinSegmentsX     = 1
+	buttonGoldCoinSegmentsY     = 1
+	buttonGoldCoinDisabledFrame = -1
+
 	pressedButtonOffset = 2
 )
 
@@ -231,6 +235,21 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			DisabledFrame:    buttonRunDisabledFrame,
 			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.RunButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       true,
+			FontPath:         d2resource.FontRediculous,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+		},
+		ButtonTypeGoldCoin: {
+			XSegments:        buttonGoldCoinSegmentsX,
+			YSegments:        buttonGoldCoinSegmentsY,
+			DisabledFrame:    buttonGoldCoinDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.GoldCoinButton,
 			PaletteName:      d2resource.PaletteSky,
 			Toggleable:       true,
 			FontPath:         d2resource.FontRediculous,
