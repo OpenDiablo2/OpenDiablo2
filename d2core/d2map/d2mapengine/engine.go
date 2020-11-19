@@ -269,7 +269,7 @@ func (m *MapEngine) GetTiles(style, sequence int, tileType d2enum.TileType) []d2
 	}
 
 	if len(tiles) == 0 {
-		m.logger.Error(fmt.Sprintf("Unknown tile ID [%d %d %d]", style, sequence, tileType))
+		m.logger.Warning(fmt.Sprintf("Unknown tile ID [%d %d %d]", style, sequence, tileType))
 		return nil
 	}
 
