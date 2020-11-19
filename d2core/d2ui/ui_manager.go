@@ -52,6 +52,10 @@ func (ui *UIManager) Reset() {
 	ui.pressedWidget = nil
 }
 
+func (ui *UIManager) addClickable(widget ClickableWidget) {
+	ui.clickableWidgets = append(ui.clickableWidgets, widget)
+}
+
 // addWidget adds a widget to the UI manager
 func (ui *UIManager) addWidget(widget Widget) {
 	err := ui.inputManager.BindHandler(widget)
@@ -61,12 +65,11 @@ func (ui *UIManager) addWidget(widget Widget) {
 
 	clickable, ok := widget.(ClickableWidget)
 	if ok {
-		ui.clickableWidgets = append(ui.clickableWidgets, clickable)
+		ui.addClickable(clickable)
 	}
 
 	if widgetGroup, ok := widget.(*WidgetGroup); ok {
 		ui.widgetsGroups = append(ui.widgetsGroups, widgetGroup)
-		ui.clickableWidgets = append(ui.clickableWidgets, widgetGroup.getClickableWidgets()...)
 	}
 
 	ui.widgets = append(ui.widgets, widget)

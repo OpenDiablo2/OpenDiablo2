@@ -40,6 +40,10 @@ func (wg *WidgetGroup) AddWidget(w Widget) {
 	sort.SliceStable(wg.entries, func(i, j int) bool {
 		return wg.entries[i].GetRenderPriority() < wg.entries[j].GetRenderPriority()
 	})
+
+	if clickable, ok := w.(ClickableWidget); ok {
+		wg.manager.addClickable(clickable)
+	}
 }
 
 // adjustSize recalculates the bounding box if a new widget is added
@@ -136,14 +140,3 @@ func (wg *WidgetGroup) SetEnabled(enabled bool) {
 		}
 	}
 }
-
-func (wg *WidgetGroup) getClickableWidgets() []ClickableWidget {
-	var res []ClickableWidget
-	for _, entry := range wg.entries {
-		if v, ok := entry.(ClickableWidget); ok {
-			res = append(res, v)
-		}
-	}
-	return res
-}
-
