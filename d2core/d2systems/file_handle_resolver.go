@@ -43,7 +43,7 @@ func NewFileHandleResolver() *FileHandleResolutionSystem {
 		Build()
 
 	fhr := &FileHandleResolutionSystem{
-		SubscriberSystem: akara.NewSubscriberSystem(filesToSource, sourcesToUse),
+		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToSource, sourcesToUse),
 		cache:            d2cache.CreateCache(fileHandleCacheBudget).(*d2cache.Cache),
 		Logger: d2util.NewLogger(),
 	}
@@ -54,7 +54,7 @@ func NewFileHandleResolver() *FileHandleResolutionSystem {
 }
 
 type FileHandleResolutionSystem struct {
-	*akara.SubscriberSystem
+	*akara.BaseSubscriberSystem
 	*d2util.Logger
 	cache        *d2cache.Cache
 	filesToLoad  *akara.Subscription
@@ -67,17 +67,6 @@ type FileHandleResolutionSystem struct {
 
 // Init initializes the system with the given world
 func (m *FileHandleResolutionSystem) Init(world *akara.World) {
-	m.World = world
-
-	if world == nil {
-		m.SetActive(false)
-		return
-	}
-
-	for subIdx := range m.Subscriptions {
-		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
-	}
-
 	m.Info("initializing ...")
 
 	m.filesToLoad = m.Subscriptions[0]

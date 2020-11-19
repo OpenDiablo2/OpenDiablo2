@@ -61,7 +61,7 @@ func NewAssetLoader() *AssetLoaderSystem {
 		Build()
 
 	assetLoader := &AssetLoaderSystem{
-		SubscriberSystem: akara.NewSubscriberSystem(filesToLoad, fileSources),
+		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToLoad, fileSources),
 		cache:            d2cache.CreateCache(assetCacheBudget).(*d2cache.Cache),
 		Logger:           d2util.NewLogger(),
 	}
@@ -75,7 +75,7 @@ var _ akara.System = &AssetLoaderSystem{}
 
 // AssetLoaderSystem is responsible for parsing file handle data into various structs, like COF or DC6
 type AssetLoaderSystem struct {
-	*akara.SubscriberSystem
+	*akara.BaseSubscriberSystem
 	*d2util.Logger
 	fileSub          *akara.Subscription
 	sourceSub        *akara.Subscription
@@ -100,18 +100,7 @@ type AssetLoaderSystem struct {
 
 // Init injects component maps related to various asset types
 func (m *AssetLoaderSystem) Init(world *akara.World) {
-	m.World = world
-
-	if world == nil {
-		m.SetActive(false)
-		return
-	}
-
 	m.Info("initializing ...")
-
-	for subIdx := range m.Subscriptions {
-		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
-	}
 
 	m.fileSub = m.Subscriptions[0]
 	m.sourceSub = m.Subscriptions[1]

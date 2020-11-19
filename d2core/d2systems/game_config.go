@@ -43,7 +43,7 @@ func NewGameConfigSystem() *GameConfigSystem {
 		Build()
 
 	gcs := &GameConfigSystem{
-		SubscriberSystem: akara.NewSubscriberSystem(filesToCheck, gameConfigs),
+		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToCheck, gameConfigs),
 		Logger: d2util.NewLogger(),
 	}
 
@@ -63,7 +63,7 @@ func NewGameConfigSystem() *GameConfigSystem {
 // other systems are not present in the world, but no config files will be loaded by
 // this system either...
 type GameConfigSystem struct {
-	*akara.SubscriberSystem
+	*akara.BaseSubscriberSystem
 	*d2util.Logger
 	filesToCheck *akara.Subscription
 	gameConfigs  *akara.Subscription
@@ -77,18 +77,7 @@ type GameConfigSystem struct {
 }
 
 func (m *GameConfigSystem) Init(world *akara.World) {
-	m.World = world
-
-	if world == nil {
-		m.SetActive(false)
-		return
-	}
-
 	m.Info("initializing ...")
-
-	for subIdx := range m.Subscriptions {
-		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
-	}
 
 	m.filesToCheck = m.Subscriptions[0]
 	m.gameConfigs = m.Subscriptions[1]

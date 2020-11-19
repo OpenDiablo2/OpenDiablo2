@@ -25,19 +25,19 @@ func TestMovementSystem_Init(t *testing.T) {
 }
 
 func TestMovementSystem_Active(t *testing.T) {
-	movement := NewMovementSystem()
+	sys := NewMovementSystem()
 
-	if movement.Active() {
+	if sys.Active() {
 		t.Error("system should not be active at creation")
 	}
 }
 
 func TestMovementSystem_SetActive(t *testing.T) {
-	movement := NewMovementSystem()
+	sys := NewMovementSystem()
 
-	movement.SetActive(false)
+	sys.SetActive(false)
 
-	if movement.Active() {
+	if sys.Active() {
 		t.Error("system should be inactive after being set inactive")
 	}
 }
@@ -45,9 +45,9 @@ func TestMovementSystem_SetActive(t *testing.T) {
 func TestMovementSystem_EntityAdded(t *testing.T) {
 	cfg := akara.NewWorldConfig()
 
-	movement := NewMovementSystem()
+	sys := NewMovementSystem()
 
-	cfg.With(movement).
+	cfg.With(sys).
 		With(d2components.NewPositionMap()).
 		With(d2components.NewVelocityMap())
 
@@ -55,8 +55,8 @@ func TestMovementSystem_EntityAdded(t *testing.T) {
 
 	e := world.NewEntity()
 
-	position := movement.positions.AddPosition(e)
-	velocity := movement.velocities.AddVelocity(e)
+	position := sys.AddPosition(e)
+	velocity := sys.AddVelocity(e)
 
 	px, py := 10., 10.
 	vx, vy := 1., 0.
@@ -64,18 +64,18 @@ func TestMovementSystem_EntityAdded(t *testing.T) {
 	position.Set(px, py)
 	velocity.Set(vx, vy)
 
-	if len(movement.Subscriptions[0].GetEntities()) != 1 {
+	if len(sys.Subscriptions[0].GetEntities()) != 1 {
 		t.Error("entity not added to the system")
 	}
 
-	if p, found := movement.positions.GetPosition(e); !found {
+	if p, found := sys.GetPosition(e); !found {
 		t.Error("position component not found")
 	} else if p.X() != px || p.Y() != py {
 		fmtError := "position component values incorrect:\n\t expected %v, %v but got %v, %v"
 		t.Errorf(fmtError, px, py, p.X(), p.Y())
 	}
 
-	if v, found := movement.velocities.GetVelocity(e); !found {
+	if v, found := sys.GetVelocity(e); !found {
 		t.Error("position component not found")
 	} else if v.X() != vx || v.Y() != vy {
 		fmtError := "velocity component values incorrect:\n\t expected %v, %v but got %v, %v"
@@ -97,8 +97,8 @@ func TestMovementSystem_Update(t *testing.T) {
 
 	// lets make an entity and add some components to it
 	e := world.NewEntity()
-	position := movementSystem.positions.AddPosition(e)
-	velocity := movementSystem.velocities.AddVelocity(e)
+	position := movementSystem.AddPosition(e)
+	velocity := movementSystem.AddVelocity(e)
 
 	px, py := 10., 10.
 	vx, vy := 1., -1.
@@ -127,8 +127,8 @@ func bench_N_entities(n int, b *testing.B) {
 
 	for idx := 0; idx < n; idx++ {
 		e := world.NewEntity()
-		p := movementSystem.positions.AddPosition(e)
-		v := movementSystem.velocities.AddVelocity(e)
+		p := movementSystem.AddPosition(e)
+		v := movementSystem.AddVelocity(e)
 
 		p.Set(0, 0)
 		v.Set(rand.Float64(), rand.Float64())

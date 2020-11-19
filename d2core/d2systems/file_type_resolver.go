@@ -27,7 +27,7 @@ func NewFileTypeResolver() *FileTypeResolver {
 		Build()
 
 	ftr := &FileTypeResolver{
-		SubscriberSystem: akara.NewSubscriberSystem(filesToCheck),
+		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToCheck),
 		Logger: d2util.NewLogger(),
 	}
 
@@ -45,34 +45,23 @@ var _ akara.System = &FileTypeResolver{}
 // and it will then create the file type component for the entity, thus removing the entity
 // from its subscription.
 type FileTypeResolver struct {
-	*akara.SubscriberSystem
+	*akara.BaseSubscriberSystem
 	*d2util.Logger
 	filesToCheck *akara.Subscription
-	filePaths    *d2components.FilePathMap
-	fileTypes    *d2components.FileTypeMap
+	*d2components.FilePathMap
+	*d2components.FileTypeMap
 }
 
 // Init initializes the system with the given world
 func (m *FileTypeResolver) Init(world *akara.World) {
-	m.World = world
-
-	if world == nil {
-		m.SetActive(false)
-		return
-	}
-
 	m.Info("initializing ...")
-
-	for subIdx := range m.Subscriptions {
-		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
-	}
 
 	m.filesToCheck = m.Subscriptions[0]
 
 	// try to inject the components we require, then cast the returned
 	// abstract ComponentMap back to the concrete implementation
-	m.filePaths = m.InjectMap(d2components.FilePath).(*d2components.FilePathMap)
-	m.fileTypes = m.InjectMap(d2components.FileType).(*d2components.FileTypeMap)
+	m.FilePathMap = m.InjectMap(d2components.FilePath).(*d2components.FilePathMap)
+	m.FileTypeMap = m.InjectMap(d2components.FileType).(*d2components.FileTypeMap)
 }
 
 // Process processes all of the Entities
@@ -83,12 +72,12 @@ func (m *FileTypeResolver) Update() {
 }
 
 func (m *FileTypeResolver) determineFileType(id akara.EID) {
-	fp, found := m.filePaths.GetFilePath(id)
+	fp, found := m.GetFilePath(id)
 	if !found {
 		return
 	}
 
-	ft := m.fileTypes.AddFileType(id)
+	ft := m.AddFileType(id)
 	if _, err := d2mpq.Load(fp.Path); err == nil {
 		ft.Type = d2enum.FileTypeMPQ
 		return

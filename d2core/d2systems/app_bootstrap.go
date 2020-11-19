@@ -51,7 +51,7 @@ func NewAppBootstrapSystem() *AppBootstrapSystem {
 	gameConfigs := akara.NewFilter().Require(d2components.GameConfig).Build()
 
 	sys := &AppBootstrapSystem{
-		SubscriberSystem: akara.NewSubscriberSystem(filesToCheck, gameConfigs),
+		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToCheck, gameConfigs),
 		Logger: d2util.NewLogger(),
 	}
 
@@ -64,7 +64,7 @@ func NewAppBootstrapSystem() *AppBootstrapSystem {
 // AppBootstrapSystem is responsible for the common initialization process between
 // the app modes (eg common to the game client as well as the headless server)
 type AppBootstrapSystem struct {
-	*akara.SubscriberSystem
+	*akara.BaseSubscriberSystem
 	*d2util.Logger
 	subscribedFiles   *akara.Subscription
 	subscribedConfigs *akara.Subscription
@@ -77,19 +77,7 @@ type AppBootstrapSystem struct {
 
 // Init will inject (or use existing) components related to setting up the config sources and
 func (m *AppBootstrapSystem) Init(world *akara.World) {
-	m.World = world
-
-	if world == nil {
-		m.Error("world is nil, deactivating.")
-		m.SetActive(false)
-		return
-	}
-
 	m.Info("initializing ...")
-
-	for subIdx := range m.Subscriptions {
-		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
-	}
 
 	m.subscribedFiles = m.Subscriptions[0]
 	m.subscribedConfigs = m.Subscriptions[1]
@@ -114,6 +102,7 @@ func (m *AppBootstrapSystem) injectSystems() {
 	m.World.AddSystem(NewGameConfigSystem())
 	m.World.AddSystem(NewAssetLoader())
 	m.World.AddSystem(NewGameObjectFactory())
+	m.World.AddSystem(NewUpdateCounterSystem())
 }
 
 // we make two entities and assign file paths for the two directories that

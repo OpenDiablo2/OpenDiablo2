@@ -28,18 +28,11 @@ var _ akara.System = &GameObjectFactory{}
 type GameObjectFactory struct {
 	*akara.BaseSystem
 	*d2util.Logger
-	*SpriteFactory
+	SpriteFactory *SpriteFactory
 }
 
 // Init will initialize the Game Object Factory by injecting all of the factory subsystems into the world
 func (t *GameObjectFactory) Init(world *akara.World) {
-	t.World = world
-
-	if t.World == nil {
-		t.SetActive(false)
-		return
-	}
-
 	t.Info("initializing ...")
 	t.injectSubSystems()
 }

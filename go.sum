@@ -11,18 +11,16 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200707082815-5321531c36a2 h1:Ac1OEHHkbAZ6EUnJahF0GKcU0FjPc/V8F1DvjhKngFE=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200707082815-5321531c36a2/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
+github.com/go-gl/glfw/v3.3/glfw v0.0.0-20201108214237-06ea97f0c265 h1:BcbKYUZo/TKPsiSh7LymK3p+TNAJJW3OfGO/21sBbiA=
+github.com/go-gl/glfw/v3.3/glfw v0.0.0-20201108214237-06ea97f0c265/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-restruct/restruct v1.2.0-alpha h1:2Lp474S/9660+SJjpVxoKuWX09JsXHSrdV7Nv3/gkvc=
 github.com/go-restruct/restruct v1.2.0-alpha/go.mod h1:KqrpKpn4M8OLznErihXTGLlsXFGeLxHUrLRRI/1YjGk=
 github.com/gofrs/flock v0.8.0 h1:MSdYClljsF3PbENUUEx85nkWfJSGfzYI9yEBZOJz6CY=
 github.com/gofrs/flock v0.8.0/go.mod h1:F1TvTiK9OcQqauNUHlbJvyl9Qa1QvF/gOUDKA14jxHU=
 github.com/google/uuid v1.1.2 h1:EVhdT+1Kseyi1/pUmXKaFxYsDNy9RQYkMWRH68J/W7Y=
 github.com/google/uuid v1.1.2/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/gravestench/akara v0.0.0-20201116065138-18ffa6f837bc h1:eoMJAvxAPxdEaVfHzeNnf2ol/veXaxjrlQ/1n7BWI14=
-github.com/gravestench/akara v0.0.0-20201116065138-18ffa6f837bc/go.mod h1:fTeda1SogMg5Lkd4lXMEd/Pk/a5/gQuLGaAI2rn1PBQ=
-github.com/gravestench/akara v0.0.0-20201116232210-fbb24ff2bbcd h1:+W6qXRjp4MFnydLWTMPwPKI4zRAaweM8foRSqY1tT6E=
-github.com/gravestench/akara v0.0.0-20201116232210-fbb24ff2bbcd/go.mod h1:fTeda1SogMg5Lkd4lXMEd/Pk/a5/gQuLGaAI2rn1PBQ=
-github.com/gravestench/akara v0.0.0-20201116232645-e565ce5957f4 h1:fYVCKWnyudBIyfmTHHcF/PE8NhAE7TFb5yZnm4fQXFo=
-github.com/gravestench/akara v0.0.0-20201116232645-e565ce5957f4/go.mod h1:fTeda1SogMg5Lkd4lXMEd/Pk/a5/gQuLGaAI2rn1PBQ=
+github.com/gravestench/akara v0.0.0-20201119221449-924b47999403 h1:hoCEhoSD+4Hvg3xdbfbVleJXhyHqP/1jUa1QqexE1UQ=
+github.com/gravestench/akara v0.0.0-20201119221449-924b47999403/go.mod h1:fTeda1SogMg5Lkd4lXMEd/Pk/a5/gQuLGaAI2rn1PBQ=
 github.com/hajimehoshi/bitmapfont/v2 v2.1.0/go.mod h1:2BnYrkTQGThpr/CY6LorYtt/zEPNzvE/ND69CRTaHMs=
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -102,8 +100,8 @@ golang.org/x/sys v0.0.0-20191001151750-bb3f8db39f24/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20201009025420-dfb3f7c4e634 h1:bNEHhJCnrwMKNMmOx3yAynp5vs5/gRy+XWFtZFu7NBM=
 golang.org/x/sys v0.0.0-20201009025420-dfb3f7c4e634/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
-golang.org/x/sys v0.0.0-20201028215240-c5abc1b1d397 h1:YZ169h3kkKEXsueizzMwOT9AaiffbOa6oXSmUFJ4vxM=
-golang.org/x/sys v0.0.0-20201028215240-c5abc1b1d397/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20201119102817-f84b799fce68 h1:nxC68pudNYkKU6jWhgrqdreuFiOQWj1Fs7T3VrH4Pjw=
+golang.org/x/sys v0.0.0-20201119102817-f84b799fce68/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/tools v0.0.0-20190312151545-0bb0c0a6e846/go.mod h1:LCzVGOaR6xXOjkQ3onu1FJEFr0SW1gC7cKk1uF8kGRs=
 golang.org/x/tools v0.0.0-20191119224855-298f0cb1881e/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=

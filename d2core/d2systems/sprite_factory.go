@@ -20,7 +20,7 @@ func NewSpriteFactorySubsystem(b *akara.BaseSystem, l *d2util.Logger) *SpriteFac
 		Build()
 
 	sys := &SpriteFactory{
-		SubscriberSystem: akara.NewSubscriberSystem(spritesToRender),
+		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(spritesToRender),
 		Logger:           l,
 	}
 
@@ -38,7 +38,7 @@ type spriteLoadQueueEntry struct {
 type spriteLoadQueue = map[akara.EID]spriteLoadQueueEntry
 
 type SpriteFactory struct {
-	*akara.SubscriberSystem
+	*akara.BaseSubscriberSystem
 	*d2util.Logger
 	*RenderSystem
 	*d2components.FilePathMap
@@ -53,18 +53,11 @@ type SpriteFactory struct {
 }
 
 func (t *SpriteFactory) Init(world *akara.World) {
+	t.Info("initializing sprite factory ...")
+
 	t.loadQueue = make(spriteLoadQueue, 0)
 
 	t.spritesToRender = t.Subscriptions[0]
-
-	t.World = world
-
-	if t.World == nil {
-		t.SetActive(false)
-		return
-	}
-
-	t.Info("initializing sprite factory ...")
 
 	t.FilePathMap = t.InjectMap(d2components.FilePath).(*d2components.FilePathMap)
 	t.PositionMap = t.InjectMap(d2components.Position).(*d2components.PositionMap)
@@ -76,10 +69,6 @@ func (t *SpriteFactory) Init(world *akara.World) {
 }
 
 func (t *SpriteFactory) Update() {
-	if t.RenderSystem == nil {
-		return
-	}
-
 	for _, eid := range t.spritesToRender.GetEntities() {
 		t.tryRenderingSprite(eid)
 	}
@@ -151,20 +140,24 @@ func (t *SpriteFactory) tryCreatingAnimation(id akara.EID) {
 }
 
 func (t *SpriteFactory) tryRenderingSprite(eid akara.EID) {
+	if t.RenderSystem == nil {
+		return
+	}
+
+	if t.RenderSystem.renderer == nil {
+		return
+	}
+
 	anim, found := t.GetAnimation(eid)
 	if !found {
 		return
 	}
 
-	path, found := t.GetFilePath(eid)
-	if !found {
-		return
-	}
-
-	t.Infof("rendering sprite: %s", path.Path)
 	anim.BindRenderer(t.renderer)
 
-	t.AddSurface(eid).Surface = anim.GetCurrentFrameSurface()
+	sfc := anim.GetCurrentFrameSurface()
+
+	t.AddSurface(eid).Surface = sfc
 }
 
 func (t *SpriteFactory) createDc6Animation(

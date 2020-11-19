@@ -20,6 +20,7 @@ func NewBaseScene(key string) *BaseScene {
 		key: key,
 		Viewports: make([]akara.EID, 0),
 		GameObjects: make([]akara.EID, 0),
+		systems: &baseSystems{},
 	}
 
 	base.SetPrefix(key)
@@ -68,16 +69,14 @@ func (s *BaseScene) Init(world *akara.World) {
 	if s.World == nil {
 		return
 	}
-
-	s.Add = &sceneObjectAssigner{BaseScene: s}
-	s.systems = &baseSystems{}
-
-	s.injectComponentMaps()
-	s.createDefaultViewport()
 }
 
 func (s *BaseScene) boot() {
 	s.Info("booting ...")
+
+	s.injectComponentMaps()
+
+	s.Add = &sceneObjectAssigner{BaseScene: s}
 
 	for idx := range s.Systems {
 		if rendersys, ok := s.Systems[idx].(*RenderSystem); ok {
@@ -106,9 +105,11 @@ func (s *BaseScene) boot() {
 		return
 	}
 
-	s.Info("booted!")
-	s.systems.GameObjectFactory.RenderSystem = s.systems.RenderSystem
+	s.systems.SpriteFactory.RenderSystem = s.systems.RenderSystem
 
+	s.createDefaultViewport()
+
+	s.Info("booted!")
 	s.booted = true
 }
 
@@ -127,9 +128,13 @@ func (s *BaseScene) createDefaultViewport() {
 	viewportID := s.NewEntity()
 	s.AddViewport(viewportID)
 
-	if s.Viewports == nil {
-		s.Viewports = make([]akara.EID, 0)
-	}
+	camera := s.AddCamera(viewportID)
+	camera.Width = 800
+	camera.Height = 600
+	camera.Zoom = 1
+
+	s.AddSurface(viewportID)
+	s.AddMainViewport(viewportID)
 
 	s.Viewports = append(s.Viewports, viewportID)
 }
@@ -208,15 +213,15 @@ func (s *BaseScene) renderViewport(idx int, objects []akara.EID) {
 
 	camera, found := s.GetCamera(id)
 	if !found {
-		camera = s.AddCamera(id)
-		camera.Width = 800
-		camera.Height = 600
-		camera.Zoom = 1
+		return
 	}
 
 	sfc, found := s.GetSurface(id)
 	if !found {
-		sfc = s.AddSurface(id)
+		return
+	}
+
+	if sfc.Surface == nil {
 		sfc.Surface = s.systems.renderer.NewSurface(camera.Width, camera.Height)
 	}
 
@@ -266,15 +271,8 @@ type sceneObjectAssigner struct {
 func (s *sceneObjectAssigner) Sprite(x, y float64, imgPath, palPath string) akara.EID {
 	s.Infof("creating sprite: %s, %s", filepath.Base(imgPath), palPath)
 
-	eid := s.systems.GameObjectFactory.Sprite(x, y, imgPath, palPath)
+	eid := s.systems.SpriteFactory.Sprite(x, y, imgPath, palPath)
 	s.GameObjects = append(s.GameObjects, eid)
-
-	if s.systems.renderer != nil {
-		if anim, found := s.GetAnimation(eid); found {
-			anim.BindRenderer(s.BaseScene.systems.renderer)
-			s.AddSurface(eid).Surface = anim.GetCurrentFrameSurface()
-		}
-	}
 
 	return eid
 }
