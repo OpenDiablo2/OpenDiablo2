@@ -38,7 +38,7 @@ type Sound struct {
 	state   envState
 	// panning float64 // lets forget about this for now
 
-	*SoundEngine
+	logger *d2util.Logger
 }
 
 func (s *Sound) update(elapsed float64) {
@@ -227,6 +227,7 @@ func (s *SoundEngine) PlaySoundID(id int) *Sound {
 	snd := Sound{
 		entry:  entry,
 		effect: effect,
+		logger: s.logger,
 	}
 
 	s.sounds[&snd] = struct{}{}

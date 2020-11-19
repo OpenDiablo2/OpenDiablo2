@@ -1,7 +1,6 @@
 package d2records
 
 import (
-	"log"
 	"testing"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
@@ -12,12 +11,12 @@ import (
 )
 
 // Verify the lookup returns the right object after indexing.
-func TestIndexObjects(t *testing.T) {
+func TestIndexObjects(t *testing.T) error {
 	assert := testify.New(t)
 
 	r, err := NewRecordManager(d2util.LogLevelDefault)
 	if err != nil {
-		log.Print(err)
+		return err
 	}
 
 	testObjects := []ObjectLookupRecord{
@@ -48,4 +47,6 @@ func TestIndexObjects(t *testing.T) {
 	assert.Equal("Act1ItemId0", r.lookupObject(1, typeItem, 0).Description)
 	assert.Equal("Act2CharId3", r.lookupObject(2, typeCharacter, 3).Description)
 	assert.Equal("Act2ItemId1", r.lookupObject(2, typeItem, 1).Description)
+
+	return nil
 }
