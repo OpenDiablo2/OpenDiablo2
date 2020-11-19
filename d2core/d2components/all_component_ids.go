@@ -33,6 +33,10 @@ const (
 	SceneCID
 	CameraCID
 	ViewportCID
+	ViewportFilterCID
+	MainViewportCID
 	OriginCID
 	SizeCID
+	AnimationCID
+	ScaleCID
 )

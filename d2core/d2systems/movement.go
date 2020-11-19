@@ -58,7 +58,7 @@ func (m *MovementSystem) Init(world *akara.World) {
 }
 
 // Process processes all of the Entities
-func (m *MovementSystem) Process() {
+func (m *MovementSystem) Update() {
 	for subIdx := range m.Subscriptions {
 		entities := m.Subscriptions[subIdx].GetEntities()
 

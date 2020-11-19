@@ -83,10 +83,6 @@ func (m *FileHandleResolutionSystem) Init(world *akara.World) {
 	m.filesToLoad = m.Subscriptions[0]
 	m.sourcesToUse = m.Subscriptions[1]
 
-	testBS := akara.NewBitSet(int(d2components.FileSourceCID), 1)
-	truth := m.sourcesToUse.Filter.Allow(testBS)
-	_ = truth
-
 	// try to inject the components we require, then cast the returned
 	// abstract ComponentMap back to the concrete implementation
 	m.filePaths = m.InjectMap(d2components.FilePath).(*d2components.FilePathMap)
@@ -96,7 +92,7 @@ func (m *FileHandleResolutionSystem) Init(world *akara.World) {
 }
 
 // Process processes all of the Entities
-func (m *FileHandleResolutionSystem) Process() {
+func (m *FileHandleResolutionSystem) Update() {
 	filesToLoad := m.filesToLoad.GetEntities()
 	sourcesToUse := m.sourcesToUse.GetEntities()
 

@@ -21,7 +21,12 @@ const (
 
 // NewRenderSystem creates a movement system
 func NewRenderSystem() *RenderSystem {
-	viewports := akara.NewFilter().Require(d2components.ViewPort).Build()
+	viewports := akara.NewFilter().
+		Require(d2components.Viewport).
+		Require(d2components.MainViewport).
+		Require(d2components.Surface).
+		Build()
+
 	gameConfigs := akara.NewFilter().Require(d2components.GameConfig).Build()
 
 	r := &RenderSystem{
@@ -46,7 +51,9 @@ type RenderSystem struct {
 	viewports     *akara.Subscription
 	configs       *akara.Subscription
 	*d2components.GameConfigMap
-	*d2components.ViewPortMap
+	*d2components.ViewportMap
+	*d2components.MainViewportMap
+	*d2components.SurfaceMap
 	lastUpdate    time.Time
 }
 
@@ -71,18 +78,25 @@ func (m *RenderSystem) Init(world *akara.World) {
 	// try to inject the components we require, then cast the returned
 	// abstract ComponentMap back to the concrete implementation
 	m.GameConfigMap = m.InjectMap(d2components.GameConfig).(*d2components.GameConfigMap)
-	m.ViewPortMap = m.InjectMap(d2components.ViewPort).(*d2components.ViewPortMap)
+	m.ViewportMap = m.InjectMap(d2components.Viewport).(*d2components.ViewportMap)
+	m.MainViewportMap = m.InjectMap(d2components.MainViewport).(*d2components.MainViewportMap)
+	m.SurfaceMap = m.InjectMap(d2components.Surface).(*d2components.SurfaceMap)
 }
 
 // Process will create a renderer if it doesnt exist yet,
 // and then
-func (m *RenderSystem) Process() {
-	if m.renderer == nil {
-		m.createRenderer()
+func (m *RenderSystem) Update() {
+	if m.renderer != nil {
+		return
 	}
+
+	m.createRenderer()
+	m.SetActive(false)
 }
 
 func (m *RenderSystem) createRenderer() {
+	m.Info("creating renderer instance")
+
 	configs := m.configs.GetEntities()
 	if len(configs) < 1 {
 		return
@@ -111,6 +125,7 @@ func (m *RenderSystem) createRenderer() {
 
 	renderer, err := d2render.CreateRenderer(oldStyleConfig)
 	if err != nil {
+		m.Error(err.Error())
 		panic(err)
 	}
 
@@ -122,24 +137,33 @@ func (m *RenderSystem) createRenderer() {
 	ebiten.SetMaxTPS(config.TicksPerSecond)
 
 	m.renderer = renderer
-
-	m.lastUpdate = time.Now()
-
-	_ = m.renderer.Run(m.render, m.updateWorld, 800, 600, gameTitle)
 }
 
 func (m *RenderSystem) render(screen d2interface.Surface) error {
-	m.screenSurface = screen
-
 	for _, id := range m.viewports.GetEntities() {
-		vp, found := m.GetViewPort(id)
+		vp, found := m.GetViewport(id)
 		if !found {
-			return errors.New("viewport not found")
+			return errors.New("main viewport not found")
 		}
 
-		if m.screenSurface != nil {
-			m.screenSurface.Render(vp.Surface)
+		screenW, screenH := screen.GetSize()
+
+		sfc, found := m.GetSurface(id)
+		if !found {
+			sfc = m.AddSurface(id)
+			sfc.Surface = m.renderer.NewSurface(vp.Width, vp.Height)
 		}
+
+		targetW, targetH := vp.Width, vp.Height
+		scaleX, scaleY := float64(targetW)/float64(screenW), float64(targetH)/float64(screenH)
+
+		screen.PushTranslation(vp.Left, vp.Top)
+		screen.PushScale(scaleX, scaleY)
+
+		sfc.Render(screen)
+
+		screen.Pop()
+		screen.Pop()
 	}
 
 	return nil
@@ -148,6 +172,17 @@ func (m *RenderSystem) render(screen d2interface.Surface) error {
 func (m *RenderSystem) updateWorld() error {
 	currentTime := time.Now()
 	elapsed := currentTime.Sub(m.lastUpdate)
+	m.lastUpdate = currentTime
 
 	return m.World.Update(elapsed)
+}
+
+func (m *RenderSystem) Loop() error {
+	m.Infof("entering game run loop ...")
+
+	m.World.Update(0) // update a few times to make sure the config gets loaded
+	m.World.Update(0) // because the renderer gets init'd from the config file
+	m.World.Update(0)
+
+	return m.renderer.Run(m.render, m.updateWorld, 800, 600, gameTitle)
 }

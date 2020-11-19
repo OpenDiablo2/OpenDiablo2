@@ -50,7 +50,7 @@ func (t *TimeScaleSystem) Init(world *akara.World) {
 }
 
 // Process scales the worlds time delta for this frame
-func (t *TimeScaleSystem) Process() {
+func (t *TimeScaleSystem) Update() {
 	if !t.Active() || t.scale == t.lastScale{
 		return
 	}

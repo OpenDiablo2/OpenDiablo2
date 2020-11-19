@@ -76,7 +76,7 @@ func (m *FileTypeResolver) Init(world *akara.World) {
 }
 
 // Process processes all of the Entities
-func (m *FileTypeResolver) Process() {
+func (m *FileTypeResolver) Update() {
 	for _, eid := range m.filesToCheck.GetEntities() {
 		m.determineFileType(eid)
 	}

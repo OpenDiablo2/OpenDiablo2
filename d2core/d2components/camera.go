@@ -13,9 +13,9 @@ var _ akara.ComponentMap = &CameraMap{}
 
 // CameraComponent represents a camera that can be rendered to
 type CameraComponent struct {
-	*d2vector.Position
-	Width  uint
-	Height uint
+	*d2vector.Vector
+	Width  int
+	Height int
 	Zoom   float64
 }
 
@@ -69,8 +69,8 @@ func (cm *CameraMap) Add(id akara.EID) akara.Component {
 		return com
 	}
 
-	position := d2vector.NewPosition(0, 0)
-	cm.components[id] = &CameraComponent{Position: &position}
+	position := d2vector.NewVector(0, 0)
+	cm.components[id] = &CameraComponent{Vector: position}
 
 	cm.world.UpdateEntity(id)
 
