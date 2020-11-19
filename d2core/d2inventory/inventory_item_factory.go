@@ -35,7 +35,6 @@ func (f *InventoryItemFactory) loadHeroObjects() error {
 		return err
 	}
 
-	// there are some workarounds, which need to be changed
 	rhhex, err := f.GetWeaponItemByCode("hax")
 	if err != nil {
 		return err

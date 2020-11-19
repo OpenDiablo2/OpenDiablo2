@@ -116,6 +116,7 @@ func CreateMapEngineTest(currentRegion,
 		audioProvider:      audioProvider,
 		screen:             screen,
 		playerStateFactory: heroStateFactory,
+		logLevel:           l,
 	}
 
 	mapEngineTest.playerState = heroStateFactory.CreateTestGameState()
@@ -152,7 +153,8 @@ type MapEngineTest struct {
 	regionSpec    regionSpec
 	filesCount    int
 
-	logger *d2util.Logger
+	logger   *d2util.Logger
+	logLevel d2util.LogLevel
 }
 
 func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
@@ -187,15 +189,14 @@ func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 		met.levelPreset = levelPreset
 	}
 
-	mapGen, _ := d2mapgen.NewMapGenerator(met.asset, d2util.LogLevelDefault, met.mapEngine) // need to be changed
+	mapGen, _ := d2mapgen.NewMapGenerator(met.asset, met.logLevel, met.mapEngine)
 	met.mapGen = mapGen
 
 	if n == 0 {
 		met.mapEngine.SetSeed(time.Now().UnixNano())
 		met.mapGen.GenerateAct1Overworld()
 	} else {
-		// necessary for map name update // need to be changed (logleveldefault)
-		met.mapEngine = d2mapengine.CreateMapEngine(d2util.LogLevelDefault, met.asset)
+		met.mapEngine = d2mapengine.CreateMapEngine(met.logLevel, met.asset) // necessary for map name update
 		met.mapEngine.SetSeed(time.Now().UnixNano())
 		met.mapEngine.GenerateMap(d2enum.RegionIdType(n), levelPreset, fileIndex)
 	}
@@ -217,12 +218,12 @@ func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 
 	loading.Progress(twentyPercent)
 
-	met.mapEngine = d2mapengine.CreateMapEngine(d2util.LogLevelDefault, met.asset) // need to be changed
+	met.mapEngine = d2mapengine.CreateMapEngine(met.logLevel, met.asset)
 
 	loading.Progress(fiftyPercent)
 
 	met.mapRenderer = d2maprenderer.CreateMapRenderer(met.asset, met.renderer, met.mapEngine,
-		met.terminal, d2util.LogLevelDefault, 0.0, 0.0) // need to be changed
+		met.terminal, met.logLevel, 0.0, 0.0)
 
 	loading.Progress(seventyPercent)
 	met.loadRegionByIndex(met.currentRegion, met.levelPreset, met.fileIndex)
