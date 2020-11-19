@@ -20,7 +20,7 @@ func NewMovementSystem() *MovementSystem {
 	filter := cfg.Build()
 
 	return &MovementSystem{
-		SubscriberSystem: akara.NewSubscriberSystem(filter),
+		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filter),
 		Logger: d2util.NewLogger(),
 	}
 }
@@ -30,31 +30,20 @@ var _ akara.System = &MovementSystem{}
 
 // MovementSystem handles entity movement based on velocity and position components
 type MovementSystem struct {
-	*akara.SubscriberSystem
+	*akara.BaseSubscriberSystem
 	*d2util.Logger
-	positions  *d2components.PositionMap
-	velocities *d2components.VelocityMap
+	*d2components.PositionMap
+	*d2components.VelocityMap
 }
 
 // Init initializes the system with the given world
 func (m *MovementSystem) Init(world *akara.World) {
-	m.World = world
-
-	if world == nil {
-		m.SetActive(false)
-		return
-	}
-
 	m.Info("initializing ...")
-
-	for subIdx := range m.Subscriptions {
-		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
-	}
 
 	// try to inject the components we require, then cast the returned
 	// abstract ComponentMap back to the concrete implementation
-	m.positions = m.InjectMap(d2components.Position).(*d2components.PositionMap)
-	m.velocities = m.InjectMap(d2components.Velocity).(*d2components.VelocityMap)
+	m.PositionMap = m.InjectMap(d2components.Position).(*d2components.PositionMap)
+	m.VelocityMap = m.InjectMap(d2components.Velocity).(*d2components.VelocityMap)
 }
 
 // Process processes all of the Entities
@@ -72,12 +61,12 @@ func (m *MovementSystem) Update() {
 
 // ProcessEntity updates an individual entity in the movement system
 func (m *MovementSystem) ProcessEntity(id akara.EID) {
-	position, found := m.positions.GetPosition(id)
+	position, found := m.GetPosition(id)
 	if !found {
 		return
 	}
 
-	velocity, found := m.velocities.GetVelocity(id)
+	velocity, found := m.GetVelocity(id)
 	if !found {
 		return
 	}

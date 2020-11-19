@@ -30,7 +30,7 @@ func NewRenderSystem() *RenderSystem {
 	gameConfigs := akara.NewFilter().Require(d2components.GameConfig).Build()
 
 	r := &RenderSystem{
-		SubscriberSystem: akara.NewSubscriberSystem(viewports, gameConfigs),
+		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(viewports, gameConfigs),
 		Logger: d2util.NewLogger(),
 	}
 
@@ -44,7 +44,7 @@ var _ akara.System = &RenderSystem{}
 
 // RenderSystem handles entity movement based on velocity and position components
 type RenderSystem struct {
-	*akara.SubscriberSystem
+	*akara.BaseSubscriberSystem
 	*d2util.Logger
 	renderer      d2interface.Renderer
 	screenSurface d2interface.Surface
@@ -55,22 +55,14 @@ type RenderSystem struct {
 	*d2components.MainViewportMap
 	*d2components.SurfaceMap
 	lastUpdate    time.Time
+	gameLoopInitDelay time.Duration // there is a race condition, this is a hack
 }
 
 // Init initializes the system with the given world
 func (m *RenderSystem) Init(world *akara.World) {
-	m.World = world
-
-	if world == nil {
-		m.SetActive(false)
-		return
-	}
-
 	m.Info("initializing ...")
 
-	for subIdx := range m.Subscriptions {
-		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
-	}
+	m.gameLoopInitDelay = time.Millisecond
 
 	m.viewports = m.Subscriptions[0]
 	m.configs = m.Subscriptions[1]
@@ -140,29 +132,23 @@ func (m *RenderSystem) createRenderer() {
 }
 
 func (m *RenderSystem) render(screen d2interface.Surface) error {
+	if m.gameLoopInitDelay > 0 {
+		return nil
+	}
+
 	for _, id := range m.viewports.GetEntities() {
 		vp, found := m.GetViewport(id)
 		if !found {
 			return errors.New("main viewport not found")
 		}
 
-		screenW, screenH := screen.GetSize()
-
 		sfc, found := m.GetSurface(id)
 		if !found {
-			sfc = m.AddSurface(id)
-			sfc.Surface = m.renderer.NewSurface(vp.Width, vp.Height)
+			return errors.New("main viewport doesn't have a surface")
 		}
 
-		targetW, targetH := vp.Width, vp.Height
-		scaleX, scaleY := float64(targetW)/float64(screenW), float64(targetH)/float64(screenH)
-
 		screen.PushTranslation(vp.Left, vp.Top)
-		screen.PushScale(scaleX, scaleY)
-
-		sfc.Render(screen)
-
-		screen.Pop()
+		screen.Render(sfc.Surface)
 		screen.Pop()
 	}
 
@@ -174,15 +160,16 @@ func (m *RenderSystem) updateWorld() error {
 	elapsed := currentTime.Sub(m.lastUpdate)
 	m.lastUpdate = currentTime
 
+	if m.gameLoopInitDelay > 0 {
+		m.gameLoopInitDelay -= elapsed
+		return nil
+	}
+
 	return m.World.Update(elapsed)
 }
 
 func (m *RenderSystem) Loop() error {
 	m.Infof("entering game run loop ...")
-
-	m.World.Update(0) // update a few times to make sure the config gets loaded
-	m.World.Update(0) // because the renderer gets init'd from the config file
-	m.World.Update(0)
 
 	return m.renderer.Run(m.render, m.updateWorld, 800, 600, gameTitle)
 }

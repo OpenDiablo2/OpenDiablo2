@@ -33,7 +33,7 @@ func Test_FileSourceResolution(t *testing.T) {
 
 	_ = world.Update(0)
 
-	ft, found := fileTypeResolver.fileTypes.GetFileType(sourceEntity)
+	ft, found := fileTypeResolver.GetFileType(sourceEntity)
 	if !found {
 		t.Error("file source type not created for entity")
 	}

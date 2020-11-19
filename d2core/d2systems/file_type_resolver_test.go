@@ -19,7 +19,7 @@ func TestNewFileTypeResolver_KnownType(t *testing.T) {
 
 	e := world.NewEntity()
 
-	fp := resolver.filePaths.AddFilePath(e)
+	fp := resolver.AddFilePath(e)
 	fp.Path = "/some/path/to/a/file.dcc"
 
 	if len(resolver.Subscriptions[0].GetEntities()) != 1 {
@@ -32,7 +32,7 @@ func TestNewFileTypeResolver_KnownType(t *testing.T) {
 		t.Error("entity with existing file type not removed from file type resolver subscription")
 	}
 
-	ft, found := resolver.fileTypes.GetFileType(e)
+	ft, found := resolver.GetFileType(e)
 	if !found {
 		t.Error("file type component not added to entity with file path component")
 	}
@@ -53,12 +53,12 @@ func TestNewFileTypeResolver_UnknownType(t *testing.T) {
 
 	e := world.NewEntity()
 
-	fp := resolver.filePaths.AddFilePath(e)
+	fp := resolver.AddFilePath(e)
 	fp.Path = "/some/path/to/a/file.XYZ"
 
 	_ = world.Update(0)
 
-	ft, _ := resolver.fileTypes.GetFileType(e)
+	ft, _ := resolver.GetFileType(e)
 
 	if ft.Type != d2enum.FileTypeUnknown {
 		t.Error("unexpected file type")

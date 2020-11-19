@@ -27,7 +27,7 @@ func NewFileSourceResolver() *FileSourceResolver {
 		Build()
 
 	fsr := &FileSourceResolver{
-		SubscriberSystem: akara.NewSubscriberSystem(filesToCheck),
+		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToCheck),
 		Logger: d2util.NewLogger(),
 	}
 
@@ -37,7 +37,7 @@ func NewFileSourceResolver() *FileSourceResolver {
 }
 
 type FileSourceResolver struct {
-	*akara.SubscriberSystem
+	*akara.BaseSubscriberSystem
 	*d2util.Logger
 	fileSub     *akara.Subscription
 	filePaths   *d2components.FilePathMap
@@ -47,18 +47,7 @@ type FileSourceResolver struct {
 
 // Init initializes the system with the given world
 func (m *FileSourceResolver) Init(world *akara.World) {
-	m.World = world
-
-	if world == nil {
-		m.SetActive(false)
-		return
-	}
-
 	m.Info("initializing ...")
-
-	for subIdx := range m.Subscriptions {
-		m.Subscriptions[subIdx] = m.AddSubscription(m.Subscriptions[subIdx].Filter)
-	}
 
 	m.fileSub = m.Subscriptions[0]
 

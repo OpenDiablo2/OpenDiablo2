@@ -29,15 +29,6 @@ type Scene struct {
 }
 
 func (s *Scene) Init(world *akara.World) {
-	s.World = world
-
-	if s.World == nil {
-		s.SetActive(false)
-		return
-	}
-
-	s.BaseScene.Init(world)
-
 	s.Info("initializing ...")
 }
 
@@ -47,8 +38,9 @@ func (s *Scene) boot() {
 	}
 
 	s.createBackground()
-	s.createButtons()
-	s.createTrademarkScreen() // done last so that it's on top of everything
+	//s.createButtons()
+	//s.createTrademarkScreen() // done last so that it's on top of everything
+
 	s.booted = true
 }
 
@@ -73,10 +65,6 @@ func (s *Scene) createTrademarkScreen() {
 }
 
 func (s *Scene) Update() {
-	if !s.Booted() {
-		s.BaseScene.Init(s.World)
-	}
-
 	if s.Paused() {
 		return
 	}
