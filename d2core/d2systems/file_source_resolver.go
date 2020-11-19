@@ -70,7 +70,7 @@ func (m *FileSourceResolver) Init(world *akara.World) {
 }
 
 // Process processes all of the Entities
-func (m *FileSourceResolver) Process() {
+func (m *FileSourceResolver) Update() {
 	for subIdx := range m.Subscriptions {
 		for _, sourceEntityID := range m.Subscriptions[subIdx].GetEntities() {
 			m.processSourceEntity(sourceEntityID)
@@ -103,7 +103,7 @@ func (m *FileSourceResolver) processSourceEntity(id akara.EID) {
 
 		source := m.fileSources.AddFileSource(id)
 
-		m.Infof("creating MPQ source for `%s`", fp.Path)
+		m.Infof("using MPQ source for `%s`", fp.Path)
 		source.AbstractSource = instance
 	case d2enum.FileTypeDirectory:
 		instance, err := m.makeFileSystemSource(fp.Path)
@@ -115,7 +115,7 @@ func (m *FileSourceResolver) processSourceEntity(id akara.EID) {
 
 		source := m.fileSources.AddFileSource(id)
 
-		m.Infof("creating FILESYSTEM source for `%s`", fp.Path)
+		m.Infof("using FILESYSTEM source for `%s`", fp.Path)
 		source.AbstractSource = instance
 	}
 }

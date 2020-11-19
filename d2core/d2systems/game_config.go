@@ -52,8 +52,8 @@ func NewGameConfigSystem() *GameConfigSystem {
 	return gcs
 }
 
-// GameConfigSystem is responsible for game config bootstrap procedure, as well as
-// clearing the `Dirty` component of game configs. In the `bootstrap` method of this system
+// GameConfigSystem is responsible for game config configFileBootstrap procedure, as well as
+// clearing the `Dirty` component of game configs. In the `configFileBootstrap` method of this system
 // you can see that this system will add entities for the directories it expects config files
 // to be found in, and it also adds an entity for the initial config file to be loaded.
 //
@@ -73,6 +73,7 @@ type GameConfigSystem struct {
 	*d2components.FileHandleMap
 	*d2components.FileSourceMap
 	*d2components.DirtyMap
+	ActiveConfig *d2components.GameConfigComponent
 }
 
 func (m *GameConfigSystem) Init(world *akara.World) {
@@ -102,7 +103,7 @@ func (m *GameConfigSystem) Init(world *akara.World) {
 	m.DirtyMap = world.InjectMap(d2components.Dirty).(*d2components.DirtyMap)
 }
 
-func (m *GameConfigSystem) Process() {
+func (m *GameConfigSystem) Update() {
 	m.checkForNewConfig(m.filesToCheck.GetEntities())
 }
 
@@ -137,6 +138,7 @@ func (m *GameConfigSystem) loadConfig(eid akara.EID) {
 
 	if err := json.NewDecoder(fh.Data).Decode(gameConfig); err != nil {
 		m.GameConfigMap.Remove(eid)
-		return
 	}
+
+	m.ActiveConfig = gameConfig
 }

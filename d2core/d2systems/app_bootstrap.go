@@ -15,13 +15,15 @@ const (
 )
 
 const (
-	LoggerPrefixBootstrap = "Bootstrap System"
+	logPrefixAppBootstrap = "App Bootstrap"
 )
 
 // static check that the game config system implements the system interface
-var _ akara.System = &GameBootstrapSystem{}
+var _ akara.System = &AppBootstrapSystem{}
 
-func NewGameBootstrapSystem() *GameBootstrapSystem {
+// NewAppBootstrapSystem creates a system that initializes the common application facilities, namely
+// config file source directories and loading/creating the OpenDiablo2 config file.
+func NewAppBootstrapSystem() *AppBootstrapSystem {
 	// we are going to check entities that dont yet have loaded asset types
 	filesToCheck := akara.NewFilter().
 		Require( // files that need to be loaded
@@ -48,19 +50,20 @@ func NewGameBootstrapSystem() *GameBootstrapSystem {
 	// we are interested in actual game config instances, too
 	gameConfigs := akara.NewFilter().Require(d2components.GameConfig).Build()
 
-	bootstrapSys := &GameBootstrapSystem{
+	sys := &AppBootstrapSystem{
 		SubscriberSystem: akara.NewSubscriberSystem(filesToCheck, gameConfigs),
 		Logger: d2util.NewLogger(),
 	}
 
-	bootstrapSys.SetPrefix(LoggerPrefixBootstrap)
-	bootstrapSys.Debug("Created")
+	sys.SetPrefix(logPrefixAppBootstrap)
+	sys.Debug("Created")
 
-	return bootstrapSys
+	return sys
 }
 
-// GameBootstrapSystem is responsible for setting up the regular diablo2 game launch
-type GameBootstrapSystem struct {
+// AppBootstrapSystem is responsible for the common initialization process between
+// the app modes (eg common to the game client as well as the headless server)
+type AppBootstrapSystem struct {
 	*akara.SubscriberSystem
 	*d2util.Logger
 	subscribedFiles   *akara.Subscription
@@ -72,7 +75,8 @@ type GameBootstrapSystem struct {
 	*d2components.FileSourceMap
 }
 
-func (m *GameBootstrapSystem) Init(world *akara.World) {
+// Init will inject (or use existing) components related to setting up the config sources and
+func (m *AppBootstrapSystem) Init(world *akara.World) {
 	m.World = world
 
 	if world == nil {
@@ -98,18 +102,26 @@ func (m *GameBootstrapSystem) Init(world *akara.World) {
 	m.FileHandleMap = world.InjectMap(d2components.FileHandle).(*d2components.FileHandleMap)
 	m.FileSourceMap = world.InjectMap(d2components.FileSource).(*d2components.FileSourceMap)
 
-	m.bootstrap()
+	m.injectSystems()
+	m.setupConfigSources()
+	m.setupConfigFile()
 }
 
-// bootstrap sets up the config directories and config file for processing by other systems.
-// when the config is loaded, it sets up the mpq files as sources.
-func (m *GameBootstrapSystem) bootstrap() {
-	// we make two entities and assign file paths for the two directories that
-	// we assume a config file may be inside of. These will be processed in the future by
-	// the file type resolver system, and then the file source resolver system. At that point,
-	// there will be sources for these two directories that can possibly resolve a config file.
-	// A new config file is created if one is not found.
+func (m *AppBootstrapSystem) injectSystems() {
+	m.World.AddSystem(NewFileTypeResolver())
+	m.World.AddSystem(NewFileSourceResolver())
+	m.World.AddSystem(NewFileHandleResolver())
+	m.World.AddSystem(NewGameConfigSystem())
+	m.World.AddSystem(NewAssetLoader())
+	m.World.AddSystem(NewGameObjectFactory())
+}
 
+// we make two entities and assign file paths for the two directories that
+// we assume a config file may be inside of. These will be processed in the future by
+// the file type resolver system, and then the file source resolver system. At that point,
+// there will be sources for these two directories that can possibly resolve a config file.
+// A new config file is created if one is not found.
+func (m *AppBootstrapSystem) setupConfigSources() {
 	// make the two entities, these will be the file sources
 	e1, e2 := m.NewEntity(), m.NewEntity()
 
@@ -133,16 +145,18 @@ func (m *GameBootstrapSystem) bootstrap() {
 		m.Error("user config directory not found, skipping")
 		m.RemoveEntity(e2)
 	}
-
-	// now that we have set up where we look for config files,
-	// we need to make an entity for the config file we want to load
-	m.AddFilePath(m.NewEntity()).Path = configFileName
-
-	// The actual processing of all of this happens when the world updates the systems.
-	// this process may take more than one iteration over the systems
 }
 
-func (m *GameBootstrapSystem) Process() {
+
+func (m *AppBootstrapSystem) setupConfigFile() {
+	// add an entity that will get picked up by the game config system and loaded
+	m.AddFilePath(m.NewEntity()).Path = configFileName
+	m.Infof("setting up config file `%s` for processing", configFileName)
+}
+
+// Update will look for the first entity with a game config component
+// and then add the mpq's as file sources
+func (m *AppBootstrapSystem) Update() {
 	configs := m.subscribedConfigs.GetEntities()
 	if len(configs) < 1 {
 		return
@@ -158,11 +172,11 @@ func (m *GameBootstrapSystem) Process() {
 
 	m.initMpqSources(cfg)
 
-	m.Info("game bootstrap complete, deactivating system")
+	m.Info("app bootstrap complete, deactivating system")
 	m.SetActive(false) // bootstrap is complete!
 }
 
-func (m *GameBootstrapSystem) initMpqSources(cfg *d2components.GameConfigComponent) {
+func (m *AppBootstrapSystem) initMpqSources(cfg *d2components.GameConfigComponent) {
 	for _, mpqFileName := range cfg.MpqLoadOrder {
 		fullMpqFilePath := path.Join(cfg.MpqPath, mpqFileName)
 

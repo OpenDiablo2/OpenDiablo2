@@ -84,7 +84,7 @@ func TestMovementSystem_EntityAdded(t *testing.T) {
 }
 
 func TestMovementSystem_Update(t *testing.T) {
-	// world bootstrap
+	// world configFileBootstrap
 	cfg := akara.NewWorldConfig()
 
 	movementSystem := NewMovementSystem()

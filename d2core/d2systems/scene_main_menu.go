@@ -1,67 +1,91 @@
-package d2mainmenu
+package d2systems
 
 import (
-	"time"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/gravestench/akara"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2scene"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	//"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 )
 
 const (
-	mainMenuSceneKey = "Main Menu"
+	SceneKeyMainMenu = "Main Menu"
 )
 
+func NewMainMenuScene() *Scene {
+	scene := &Scene{
+		BaseScene: NewBaseScene(SceneKeyMainMenu),
+	}
+
+	return scene
+}
+
 // static check that MainMenuScene implements the scene interface
-var _ d2scene.Scene = &Scene{}
+var _ d2interface.Scene = &Scene{}
 
 type Scene struct {
-	*d2scene.BasicScene
-	trademark      *d2scene.Image
-	menuBackground *d2scene.Image
-}
-
-func (s *Scene) Create() {
-	s.createBackground()
-	s.createButtons()
-	s.createTrademarkScreen() // done last so that it's on top of everything
-}
-
-func (s *Scene) Update(delta time.Duration) {
-	panic("implement me")
-}
-
-func (s *Scene) Destroy() {
-	panic("implement me")
+	*BaseScene
+	booted bool
 }
 
 func (s *Scene) Init(world *akara.World) {
-	s.BasicScene = d2scene.NewBasicScene(world)
-	s.BasicScene.Init()
+	s.World = world
 
-	s.BasicScene.Key = mainMenuSceneKey
+	if s.World == nil {
+		s.SetActive(false)
+		return
+	}
+
+	s.BaseScene.Init(world)
+
+	s.Info("initializing ...")
 }
 
-func (s *Scene) Key() string {
-	return s.BasicScene.Key
+func (s *Scene) boot() {
+	if !s.BaseScene.booted {
+		return
+	}
+
+	s.createBackground()
+	s.createButtons()
+	s.createTrademarkScreen() // done last so that it's on top of everything
+	s.booted = true
 }
 
 func (s *Scene) createBackground() {
-	s.Add.Image(0, 0, d2resource.GameSelectScreen, d2resource.PaletteSky)
+	s.Info("creating background")
+	s.Add.Sprite(0, 0, d2resource.GameSelectScreen, d2resource.PaletteSky)
 }
 
 func (s *Scene) createButtons() {
+	s.Info("creating buttons")
 
 }
 
 func (s *Scene) createTrademarkScreen() {
-	image := s.Add.Image(0, 0, d2resource.TrademarkScreen, d2resource.PaletteSky).
-		SetOrigin(0, 0).
-		SetDisplaySize(s.Camera.Width, s.Camera.Height).
-		SetInteractive(true, nil)
+	s.Info("creating trademark screen")
+	//image := s.Add.Sprite(0, 0, d2resource.TrademarkScreen, d2resource.PaletteSky).
+	//	SetOrigin(0, 0).
+	//	SetDisplaySize(s.Camera.Width, s.Camera.Height).
+	//	SetInteractive(true, nil)
+	//
+	//s.trademark = image
+}
 
-	s.trademark = image
+func (s *Scene) Update() {
+	if !s.Booted() {
+		s.BaseScene.Init(s.World)
+	}
+
+	if s.Paused() {
+		return
+	}
+
+	if !s.booted {
+		s.boot()
+	}
+
+	s.BaseScene.Update()
 }
 
 type mainMenuScreenMode int
