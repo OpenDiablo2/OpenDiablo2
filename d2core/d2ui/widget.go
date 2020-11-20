@@ -10,9 +10,9 @@ const (
 	RenderPriorityBackground RenderPriority = iota
 	RenderPrioritySkilltree
 	RenderPrioritySkilltreeIcon
-	RenderPriorityMinipanel
 	RenderPriorityHeroStatsPanel
 	RenderPriorityHUDPanel
+	RenderPriorityMinipanel
 	RenderPriorityHelpPanel
 	RenderPriorityForeground
 )

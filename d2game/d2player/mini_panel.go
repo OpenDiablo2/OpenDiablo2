@@ -72,7 +72,7 @@ type miniPanel struct {
 	movedLeft      bool
 	movedRight     bool
 	panelGroup     *d2ui.WidgetGroup
-	tooltipGroup   *d2ui.WidgetGroup
+	groupAlwaysVis *d2ui.WidgetGroup
 
 	logger *d2util.Logger
 }
@@ -95,7 +95,7 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 	m.panelGroup = m.ui.NewWidgetGroup(d2ui.RenderPriorityMinipanel)
 	m.panelGroup.SetPosition(miniPanelX, miniPanelY)
 
-	m.tooltipGroup = m.ui.NewWidgetGroup(d2ui.RenderPriorityForeground)
+	m.groupAlwaysVis = m.ui.NewWidgetGroup(d2ui.RenderPriorityMinipanel)
 
 	// container sprite
 	miniPanelContainerPath := d2resource.Minipanel
@@ -203,6 +203,7 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 	})
 	m.menuButton.SetTooltip(m.miniPanelTooltip)
 	m.updateMinipanelTooltipText()
+	m.groupAlwaysVis.AddWidget(m.menuButton)
 
 	m.panelGroup.SetVisible(false)
 }
@@ -213,13 +214,13 @@ func (m *miniPanel) createButton(content miniPanelContent, x, y, buttonHeight in
 	tt.SetPosition(x, y-buttonHeight)
 	tt.SetText(content.tooltip)
 	tt.SetVisible(false)
-	m.tooltipGroup.AddWidget(tt)
 
 	// Button
 	btn := m.ui.NewButton(content.buttonType, "")
 	btn.SetPosition(x, y)
 	btn.OnActivated(content.onActivate)
 	btn.SetTooltip(tt)
+	btn.SetRenderPriority(d2ui.RenderPriorityForeground)
 
 	return btn
 }
@@ -273,22 +274,18 @@ func (m *miniPanel) IsInRect(px, py int) bool {
 
 func (m *miniPanel) moveRight() {
 	m.panelGroup.OffsetPosition(panelOffsetRight, 0)
-	m.tooltipGroup.OffsetPosition(panelOffsetRight, 0)
 }
 
 func (m *miniPanel) undoMoveRight() {
 	m.panelGroup.OffsetPosition(-panelOffsetRight, 0)
-	m.tooltipGroup.OffsetPosition(-panelOffsetRight, 0)
 }
 
 func (m *miniPanel) moveLeft() {
 	m.panelGroup.OffsetPosition(-panelOffsetLeft, 0)
-	m.tooltipGroup.OffsetPosition(-panelOffsetLeft, 0)
 }
 
 func (m *miniPanel) undoMoveLeft() {
 	m.panelGroup.OffsetPosition(panelOffsetLeft, 0)
-	m.tooltipGroup.OffsetPosition(panelOffsetLeft, 0)
 }
 
 func (m *miniPanel) SetMovedLeft(moveLeft bool) {
