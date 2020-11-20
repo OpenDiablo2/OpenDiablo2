@@ -131,7 +131,6 @@ const (
 	buttonSkillTreeTabFixedHeight   = 107
 
 	buttonMinipanelOpenCloseBaseFrame = 0
-	buttonMinipanelDisabledFrame      = 2
 	buttonMinipanelXSegments          = 1
 	buttonMinipanelYSegments          = 1
 

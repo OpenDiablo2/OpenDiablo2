@@ -59,21 +59,21 @@ func newMiniPanel(asset *d2asset.AssetManager,
 }
 
 type miniPanel struct {
-	ui             *d2ui.UIManager
-	asset          *d2asset.AssetManager
-	container      *d2ui.Sprite
-	sprite         *d2ui.Sprite
-	menuButton     *d2ui.Button
-	miniPanelTooltip   *d2ui.Tooltip
-	isOpen         bool
-	tempIsOpen     bool
-	disabled       bool
-	isSinglePlayer bool
-	movedLeft      bool
-	movedRight     bool
-	panelGroup     *d2ui.WidgetGroup
-	groupAlwaysVis *d2ui.WidgetGroup
-	tooltipGroup   *d2ui.WidgetGroup
+	ui               *d2ui.UIManager
+	asset            *d2asset.AssetManager
+	container        *d2ui.Sprite
+	sprite           *d2ui.Sprite
+	menuButton       *d2ui.Button
+	miniPanelTooltip *d2ui.Tooltip
+	isOpen           bool
+	tempIsOpen       bool
+	disabled         bool
+	isSinglePlayer   bool
+	movedLeft        bool
+	movedRight       bool
+	panelGroup       *d2ui.WidgetGroup
+	groupAlwaysVis   *d2ui.WidgetGroup
+	tooltipGroup     *d2ui.WidgetGroup
 
 	logger *d2util.Logger
 }
@@ -121,6 +121,14 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 	x, y := screenWidth/2+containerOffsetX, screenHeight+containerOffsetY
 	m.container.SetPosition(x, y)
 	m.panelGroup.AddWidget(m.container)
+
+	m.createButtons(actions)
+
+	m.panelGroup.SetVisible(false)
+}
+
+func (m *miniPanel) createButtons(actions *miniPanelActions) {
+	var x, y int
 
 	buttonWidth, buttonHeight, err := m.sprite.GetFrameSize(0)
 	if err != nil {
@@ -189,6 +197,7 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 		m.panelGroup.AddWidget(btn)
 	}
 
+	//nolint:gomnd // divide by 2 is not a magic number
 	x = screenWidth/2 + miniPanelButtonOffsetX
 	y = screenHeight + miniPanelButtonOffsetY
 	// minipanel open/close tooltip
@@ -197,18 +206,12 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 
 	// minipanel button
 	m.menuButton = m.ui.NewButton(d2ui.ButtonTypeMinipanelOpenClose, "")
-	//nolint:golint,gomnd // 2 is not a magic number
 	m.menuButton.SetPosition(x, y)
-	m.menuButton.OnActivated(func() {
-		m.menuButton.Toggle()
-		m.Toggle()
-		m.updateMinipanelTooltipText()
-	})
+	m.menuButton.OnActivated(m.onMenuButtonClicked)
+
 	m.menuButton.SetTooltip(m.miniPanelTooltip)
 	m.updateMinipanelTooltipText()
 	m.groupAlwaysVis.AddWidget(m.menuButton)
-
-	m.panelGroup.SetVisible(false)
 }
 
 func (m *miniPanel) createButton(content miniPanelContent, x, y, buttonHeight int) *d2ui.Button {
@@ -227,6 +230,12 @@ func (m *miniPanel) createButton(content miniPanelContent, x, y, buttonHeight in
 	btn.SetRenderPriority(d2ui.RenderPriorityForeground)
 
 	return btn
+}
+
+func (m *miniPanel) onMenuButtonClicked() {
+	m.menuButton.Toggle()
+	m.Toggle()
+	m.updateMinipanelTooltipText()
 }
 
 func (m *miniPanel) updateMinipanelTooltipText() {

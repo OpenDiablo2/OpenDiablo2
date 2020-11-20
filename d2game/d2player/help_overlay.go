@@ -163,9 +163,9 @@ func NewHelpOverlay(
 	keyMap *KeyMap,
 ) *HelpOverlay {
 	h := &HelpOverlay{
-		asset:      asset,
-		uiManager:  ui,
-		keyMap:     keyMap,
+		asset:     asset,
+		uiManager: ui,
+		keyMap:    keyMap,
 	}
 
 	h.logger = d2util.NewLogger()
@@ -177,16 +177,16 @@ func NewHelpOverlay(
 
 // HelpOverlay represents the in-game overlay that toggles visibility when the h key is pressed
 type HelpOverlay struct {
-	asset       *d2asset.AssetManager
-	isOpen      bool
-	frames      []*d2ui.Sprite
-	text        []*d2ui.Label
-	lines       []line
-	uiManager   *d2ui.UIManager
-	closeButton *d2ui.Button
-	keyMap      *KeyMap
-	onCloseCb   func()
-	panelGroup  *d2ui.WidgetGroup
+	asset            *d2asset.AssetManager
+	isOpen           bool
+	frames           []*d2ui.Sprite
+	text             []*d2ui.Label
+	lines            []line
+	uiManager        *d2ui.UIManager
+	closeButton      *d2ui.Button
+	keyMap           *KeyMap
+	onCloseCb        func()
+	panelGroup       *d2ui.WidgetGroup
 	backgroundWidget *d2ui.CustomWidget
 
 	logger *d2util.Logger

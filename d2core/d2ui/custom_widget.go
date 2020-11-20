@@ -51,6 +51,7 @@ func (c *CustomWidget) Render(target d2interface.Surface) {
 	}
 }
 
+// SetTooltip gives this widget a Tooltip that is displayed if the widget is hovered
 func (c *CustomWidget) SetTooltip(t *Tooltip) {
 	c.tooltip = t
 	c.OnHoverStart(func() { c.tooltip.SetVisible(true) })

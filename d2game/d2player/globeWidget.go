@@ -6,8 +6,8 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -64,14 +64,16 @@ func (gf *globeFrame) setPosition(x, y int) {
 	gf.sprite.SetPosition(x+gf.offsetX, y+gf.offsetY)
 }
 
-func (gf *globeFrame) getSize() (x, y int) {
-	w, h := gf.sprite.GetSize()
-	return w + gf.offsetX, h + gf.offsetY
-}
-
-func newGlobeWidget(ui *d2ui.UIManager, asset *d2asset.AssetManager, x, y int, gtype globeType, value *int, l d2util.LogLevel, valueMax *int) *globeWidget {
+func newGlobeWidget(ui *d2ui.UIManager,
+	asset *d2asset.AssetManager,
+	x, y int,
+	gtype globeType,
+	value *int, valueMax *int,
+	l d2util.LogLevel) *globeWidget {
 	var globe, overlap *globeFrame
+
 	var tooltipX, tooltipY int
+
 	var tooltipTrans string
 
 	base := d2ui.NewBaseWidget(ui)
@@ -106,16 +108,16 @@ func newGlobeWidget(ui *d2ui.UIManager, asset *d2asset.AssetManager, x, y int, g
 	}
 
 	gw := &globeWidget{
-		BaseWidget: base,
-		asset:      asset,
-		value:      value,
-		valueMax:   valueMax,
-		globe:      globe,
-		overlap:    overlap,
+		BaseWidget:      base,
+		asset:           asset,
+		value:           value,
+		valueMax:        valueMax,
+		globe:           globe,
+		overlap:         overlap,
 		isTooltipLocked: false,
-		tooltipX:   tooltipX,
-		tooltipY:   tooltipY,
-		tooltipTrans: tooltipTrans,
+		tooltipX:        tooltipX,
+		tooltipY:        tooltipY,
+		tooltipTrans:    tooltipTrans,
 	}
 
 	gw.OnHoverStart(func() {
@@ -146,12 +148,12 @@ type globeWidget struct {
 	overlap  *globeFrame
 	logger   *d2util.Logger
 
-	pressed  bool
+	pressed         bool
 	isTooltipLocked bool
-	tooltip  *d2ui.Tooltip
-	tooltipX int
-	tooltipY int
-	tooltipTrans string
+	tooltip         *d2ui.Tooltip
+	tooltipX        int
+	tooltipY        int
+	tooltipTrans    string
 }
 
 func (g *globeWidget) load() {
@@ -197,9 +199,8 @@ func (g *globeWidget) Contains(px, py int) bool {
 	wx, wy := g.globe.sprite.GetPosition()
 	width, height := g.globe.sprite.GetSize()
 
-	return px >= wx && px <= wx + width && py <= wy && py >= wy - height
+	return px >= wx && px <= wx+width && py <= wy && py >= wy-height
 }
-
 
 func (g *globeWidget) updateTooltip() {
 	// Create and format string from string lookup table.

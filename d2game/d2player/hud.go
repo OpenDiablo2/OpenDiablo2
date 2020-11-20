@@ -47,8 +47,8 @@ const (
 )
 
 const (
-	staminaBarOffsetX = 273
-	staminaBarOffsetY = 572
+	staminaBarOffsetX  = 273
+	staminaBarOffsetY  = 572
 	staminaExperienceY = 535
 
 	experienceBarOffsetX = 256
@@ -88,7 +88,6 @@ type HUD struct {
 	runButton          *d2ui.Button
 	zoneChangeText     *d2ui.Label
 	miniPanel          *miniPanel
-	isMiniPanelOpen    bool
 	isZoneTextShown    bool
 	hpStatsIsVisible   bool
 	manaStatsIsVisible bool
@@ -126,8 +125,16 @@ func NewHUD(
 	zoneLabel := ui.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
 	zoneLabel.Alignment = d2ui.HorizontalAlignCenter
 
-	healthGlobe := newGlobeWidget(ui, asset, 0, screenHeight, typeHealthGlobe, &hero.Stats.Health, l, &hero.Stats.MaxHealth)
-	manaGlobe := newGlobeWidget(ui, asset, screenWidth-manaGlobeScreenOffsetX, screenHeight, typeManaGlobe, &hero.Stats.Mana, l, &hero.Stats.MaxMana)
+	healthGlobe := newGlobeWidget(ui, asset,
+		0, screenHeight,
+		typeHealthGlobe,
+		&hero.Stats.Health, &hero.Stats.MaxHealth,
+		l)
+	manaGlobe := newGlobeWidget(ui, asset,
+		screenWidth-manaGlobeScreenOffsetX, screenHeight,
+		typeManaGlobe,
+		&hero.Stats.Mana, &hero.Stats.MaxMana,
+		l)
 
 	hud := &HUD{
 		asset:             asset,
@@ -621,11 +628,19 @@ func (h *HUD) getSkillResourceByClass(class string) string {
 	return entry
 }
 
+// Advance updates syncs data on widgets that might have changed. I.e. the current stamina value
+// in the stamina tooltip
 func (h *HUD) Advance(elapsed float64) {
 	h.setStaminaTooltipText()
 	h.setExperienceTooltipText()
-	h.healthGlobe.Advance(elapsed)
-	h.manaGlobe.Advance(elapsed)
+
+	if err := h.healthGlobe.Advance(elapsed); err != nil {
+		h.logger.Error(err.Error())
+	}
+
+	if err := h.manaGlobe.Advance(elapsed); err != nil {
+		h.logger.Error(err.Error())
+	}
 }
 
 // OnMouseMove handles mouse move events
