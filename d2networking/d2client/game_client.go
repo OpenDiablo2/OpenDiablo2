@@ -2,7 +2,6 @@ package d2client
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
@@ -27,6 +26,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2script"
 )
 
+const logPrefix = "Game Client"
+
 const (
 	numSubtilesPerTile = 5
 )
@@ -45,24 +46,32 @@ type GameClient struct {
 	Players          map[string]*d2mapentity.Player // IDs of the other players
 	Seed             int64                          // Map seed
 	RegenMap         bool                           // Regenerate tile cache on render (map has changed)
+
+	*d2util.Logger
 }
 
 // Create constructs a new GameClient and returns a pointer to it.
 func Create(connectionType d2clientconnectiontype.ClientConnectionType,
-	asset *d2asset.AssetManager, scriptEngine *d2script.ScriptEngine) (*GameClient, error) {
+	asset *d2asset.AssetManager,
+	l d2util.LogLevel,
+	scriptEngine *d2script.ScriptEngine) (*GameClient, error) {
 	result := &GameClient{
 		asset:          asset,
-		MapEngine:      d2mapengine.CreateMapEngine(d2util.LogLevelDefault, asset), // need to be changed
+		MapEngine:      d2mapengine.CreateMapEngine(l, asset),
 		Players:        make(map[string]*d2mapentity.Player),
 		connectionType: connectionType,
 		scriptEngine:   scriptEngine,
 	}
 
+	result.Logger = d2util.NewLogger()
+	result.Logger.SetPrefix(logPrefix)
+	result.Logger.SetLevel(l)
+
 	// for a remote client connection, set loading to true - wait until we process the GenerateMapPacket
 	// before we start updating map entites
 	result.MapEngine.IsLoading = connectionType == d2clientconnectiontype.LANClient
 
-	mapGen, err := d2mapgen.NewMapGenerator(asset, d2util.LogLevelDefault, result.MapEngine) // need to be changed
+	mapGen, err := d2mapgen.NewMapGenerator(asset, l, result.MapEngine)
 	if err != nil {
 		return nil, err
 	}
@@ -71,11 +80,11 @@ func Create(connectionType d2clientconnectiontype.ClientConnectionType,
 
 	switch connectionType {
 	case d2clientconnectiontype.LANClient:
-		result.clientConnection, err = d2remoteclient.Create(asset)
+		result.clientConnection, err = d2remoteclient.Create(l, asset)
 	case d2clientconnectiontype.LANServer:
-		result.clientConnection, err = d2localclient.Create(asset, true)
+		result.clientConnection, err = d2localclient.Create(asset, l, true)
 	case d2clientconnectiontype.Local:
-		result.clientConnection, err = d2localclient.Create(asset, false)
+		result.clientConnection, err = d2localclient.Create(asset, l, false)
 	default:
 		err = fmt.Errorf("unknown client connection type specified: %d", connectionType)
 	}
@@ -148,20 +157,20 @@ func (g *GameClient) OnPacketReceived(packet d2netpacket.NetPacket) error {
 		}
 	case d2netpackettype.Ping:
 		if err := g.handlePingPacket(); err != nil {
-			log.Printf("GameClient: error responding to server ping: %s", err)
+			g.Errorf("GameClient: error responding to server ping: %s", err)
 		}
 	case d2netpackettype.PlayerDisconnectionNotification:
 		// Not implemented
-		log.Printf("RemoteClientConnection: received disconnect: %s", packet.PacketData)
+		g.Infof("RemoteClientConnection: received disconnect: %s", packet.PacketData)
 	case d2netpackettype.ServerClosed:
 		// https://github.com/OpenDiablo2/OpenDiablo2/issues/802
-		log.Print("Server has been closed")
+		g.Infof("Server has been closed")
 		os.Exit(0)
 	case d2netpackettype.ServerFull:
-		log.Println("Server is full")
+		g.Infof("Server is full") // need to be verified
 		os.Exit(0)
 	default:
-		log.Fatalf("Invalid packet type: %d", packet.PacketType)
+		g.Fatalf("Invalid packet type: %d", packet.PacketType)
 	}
 
 	return nil
@@ -197,7 +206,7 @@ func (g *GameClient) handleUpdateServerInfoPacket(packet d2netpacket.NetPacket) 
 	g.MapEngine.SetSeed(serverInfo.Seed)
 	g.PlayerID = serverInfo.PlayerID
 	g.Seed = serverInfo.Seed
-	log.Printf("Player id set to %s", serverInfo.PlayerID)
+	g.Infof("Player id set to %s", serverInfo.PlayerID)
 
 	return nil
 }
@@ -260,7 +269,7 @@ func (g *GameClient) handleMovePlayerPacket(packet d2netpacket.NetPacket) error 
 
 			if err != nil {
 				fmtStr := "GameClient: error setting animation mode for player %s: %s"
-				log.Printf(fmtStr, player.ID(), err)
+				g.Errorf(fmtStr, player.ID(), err)
 			}
 		})
 	}

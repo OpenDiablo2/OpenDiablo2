@@ -138,7 +138,7 @@ func (a *App) startDedicatedServer() error {
 	srvChanIn := make(chan int)
 	srvChanLog := make(chan string)
 
-	srvErr := d2networking.StartDedicatedServer(a.asset, srvChanIn, srvChanLog, maxPlayers)
+	srvErr := d2networking.StartDedicatedServer(a.asset, srvChanIn, srvChanLog, a.config.LogLevel, maxPlayers)
 	if srvErr != nil {
 		return srvErr
 	}
@@ -931,7 +931,7 @@ func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType,
 
 // ToCreateGame forces the game to transition to the Create Game screen
 func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.ClientConnectionType, host string) {
-	gameClient, err := d2client.Create(connType, a.asset, a.scriptEngine)
+	gameClient, err := d2client.Create(connType, a.asset, a.config.LogLevel, a.scriptEngine)
 	if err != nil {
 		a.logger.Error(err.Error())
 	}

@@ -3,6 +3,7 @@ package d2networking
 import (
 	"os"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2server"
 )
@@ -33,9 +34,10 @@ func StartDedicatedServer(
 	manager *d2asset.AssetManager,
 	in chan int,
 	log chan string,
+	l d2util.LogLevel,
 	maxPlayers int,
 ) error {
-	server, err := d2server.NewGameServer(manager, true, maxPlayers)
+	server, err := d2server.NewGameServer(manager, true, l, maxPlayers)
 	if err != nil {
 		return err
 	}
