@@ -721,7 +721,6 @@ func (v *Button) SetPosition(x, y int) {
 // SetTooltip adds a tooltip to the button
 func (v *Button) SetTooltip(t *Tooltip) {
 	v.tooltip = t
-	v.manager.addWidget(t)
 	v.OnHoverStart(func() { log.Print("HoverStart"); v.tooltip.SetVisible(true) })
 	v.OnHoverEnd(func() { v.tooltip.SetVisible(false) })
 }

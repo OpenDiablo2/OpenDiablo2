@@ -69,6 +69,7 @@ func (ui *UIManager) NewTooltip(font,
 		boxEnabled:      true,
 	}
 	res.manager = ui
+	ui.addTooltip(res)
 
 	return res
 }

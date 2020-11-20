@@ -68,10 +68,6 @@ func (ui *UIManager) addWidget(widget Widget) {
 		log.Print(err)
 	}
 
-	if tooltip, ok := widget.(*Tooltip); ok {
-		ui.addTooltip(tooltip)
-	}
-
 	clickable, ok := widget.(ClickableWidget)
 	if ok {
 		ui.clickableWidgets = append(ui.clickableWidgets, clickable)

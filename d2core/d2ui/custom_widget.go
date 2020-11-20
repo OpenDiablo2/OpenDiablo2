@@ -53,7 +53,6 @@ func (c *CustomWidget) Render(target d2interface.Surface) {
 
 func (c *CustomWidget) SetTooltip(t *Tooltip) {
 	c.tooltip = t
-	c.manager.addWidget(t)
 	c.OnHoverStart(func() { c.tooltip.SetVisible(true) })
 	c.OnHoverEnd(func() { c.tooltip.SetVisible(false) })
 }
