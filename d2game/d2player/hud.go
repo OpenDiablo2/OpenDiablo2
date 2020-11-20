@@ -36,16 +36,6 @@ const (
 )
 
 const (
-	hpLabelX = 15
-	hpLabelY = 487
-
-	manaLabelX = 785
-	manaLabelY = 487
-
-	staminaExperienceY = 535
-)
-
-const (
 	frameHealthStatus      = 0
 	frameManaStatus        = 1
 	frameNewStatsSelector  = 1
@@ -59,6 +49,7 @@ const (
 const (
 	staminaBarOffsetX = 273
 	staminaBarOffsetY = 572
+	staminaExperienceY = 535
 
 	experienceBarOffsetX = 256
 	experienceBarOffsetY = 561
@@ -105,8 +96,6 @@ type HUD struct {
 	staminaTooltip     *d2ui.Tooltip
 	runWalkTooltip     *d2ui.Tooltip
 	experienceTooltip  *d2ui.Tooltip
-	healthTooltip      *d2ui.Tooltip
-	manaTooltip        *d2ui.Tooltip
 	nameLabel          *d2ui.Label
 	healthGlobe        *globeWidget
 	manaGlobe          *globeWidget
@@ -137,8 +126,8 @@ func NewHUD(
 	zoneLabel := ui.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
 	zoneLabel.Alignment = d2ui.HorizontalAlignCenter
 
-	healthGlobe := newGlobeWidget(ui, 0, screenHeight, typeHealthGlobe, &hero.Stats.Health, l, &hero.Stats.MaxHealth)
-	manaGlobe := newGlobeWidget(ui, screenWidth-manaGlobeScreenOffsetX, screenHeight, typeManaGlobe, &hero.Stats.Mana, l, &hero.Stats.MaxMana)
+	healthGlobe := newGlobeWidget(ui, asset, 0, screenHeight, typeHealthGlobe, &hero.Stats.Health, l, &hero.Stats.MaxHealth)
+	manaGlobe := newGlobeWidget(ui, asset, screenWidth-manaGlobeScreenOffsetX, screenHeight, typeManaGlobe, &hero.Stats.Mana, l, &hero.Stats.MaxMana)
 
 	hud := &HUD{
 		asset:             asset,
@@ -313,16 +302,6 @@ func (h *HUD) loadTooltips() {
 	labelX = centerX
 	labelY = staminaExperienceY - halfLabelHeight
 	h.experienceTooltip.SetPosition(labelX, labelY)
-
-	// Health tooltip
-	h.healthTooltip = h.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteUnits, d2ui.TooltipXLeft, d2ui.TooltipYTop)
-	h.healthTooltip.SetPosition(hpLabelX, hpLabelY)
-	h.healthTooltip.SetBoxEnabled(false)
-
-	// Health tooltip
-	h.manaTooltip = h.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteUnits, d2ui.TooltipXLeft, d2ui.TooltipYTop)
-	h.manaTooltip.SetPosition(manaLabelX, manaLabelY)
-	h.manaTooltip.SetBoxEnabled(false)
 }
 
 func (h *HUD) loadUIButtons() {
@@ -529,41 +508,6 @@ func (h *HUD) renderNewSkillsButton(x, _ int, target d2interface.Surface) error 
 	return nil
 }
 
-//nolint:golint,dupl // we clean this up later
-func (h *HUD) renderHealthTooltip(target d2interface.Surface) {
-	mx, my := h.lastMouseX, h.lastMouseY
-
-	// Create and format Health string from string lookup table.
-	fmtHealth := h.asset.TranslateString("panelhealth")
-	healthCurr, healthMax := h.hero.Stats.Health, h.hero.Stats.MaxHealth
-	strPanelHealth := fmt.Sprintf(fmtHealth, healthCurr, healthMax)
-
-	// Display current hp and mana stats hpGlobe or manaGlobe region is clicked
-	if !(h.actionableRegions[hpGlobe].rect.IsInRect(mx, my) || h.hpStatsIsVisible) {
-		return
-	}
-
-	h.healthTooltip.SetText(strPanelHealth)
-	h.healthTooltip.Render(target)
-}
-
-//nolint:golint,dupl // we clean this up later
-func (h *HUD) renderManaTooltip(target d2interface.Surface) {
-	mx, my := h.lastMouseX, h.lastMouseY
-
-	// Create and format Mana string from string lookup table.
-	fmtMana := h.asset.TranslateString("panelmana")
-	manaCurr, manaMax := h.hero.Stats.Mana, h.hero.Stats.MaxMana
-	strPanelMana := fmt.Sprintf(fmtMana, manaCurr, manaMax)
-
-	if !(h.actionableRegions[manaGlobe].rect.IsInRect(mx, my) || h.manaStatsIsVisible) {
-		return
-	}
-
-	h.manaTooltip.SetText(strPanelMana)
-	h.manaTooltip.Render(target)
-}
-
 func (h *HUD) renderRunWalkTooltip(target d2interface.Surface) {
 	mx, my := h.lastMouseX, h.lastMouseY
 
@@ -657,8 +601,6 @@ func (h *HUD) Render(target d2interface.Surface) error {
 		h.zoneChangeText.Render(target)
 	}
 
-	h.renderHealthTooltip(target)
-	h.renderManaTooltip(target)
 	h.renderRunWalkTooltip(target)
 
 	if h.skillSelectMenu.IsOpen() {
@@ -691,6 +633,8 @@ func (h *HUD) getSkillResourceByClass(class string) string {
 func (h *HUD) Advance(elapsed float64) {
 	h.setStaminaTooltipText()
 	h.setExperienceTooltipText()
+	h.healthGlobe.Advance(elapsed)
+	h.manaGlobe.Advance(elapsed)
 }
 
 // OnMouseMove handles mouse move events
