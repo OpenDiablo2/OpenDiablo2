@@ -92,7 +92,6 @@ type HUD struct {
 	hero               *d2mapentity.Player
 	mainPanel          *d2ui.Sprite
 	globeSprite        *d2ui.Sprite
-	menuButton         *d2ui.Button
 	hpManaStatusSprite *d2ui.Sprite
 	leftSkillResource  *SkillResource
 	rightSkillResource *SkillResource
@@ -109,7 +108,6 @@ type HUD struct {
 	experienceTooltip  *d2ui.Tooltip
 	healthTooltip      *d2ui.Tooltip
 	manaTooltip        *d2ui.Tooltip
-	miniPanelTooltip   *d2ui.Tooltip
 	nameLabel          *d2ui.Label
 	healthGlobe        *globeWidget
 	manaGlobe          *globeWidget
@@ -310,10 +308,6 @@ func (h *HUD) loadTooltips() {
 	h.manaTooltip = h.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteUnits, d2ui.TooltipXLeft, d2ui.TooltipYTop)
 	h.manaTooltip.SetPosition(manaLabelX, manaLabelY)
 	h.manaTooltip.SetBoxEnabled(false)
-
-	// minipanel open/close tooltip
-	h.miniPanelTooltip = h.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteUnits, d2ui.TooltipXCenter, d2ui.TooltipYTop)
-	h.miniPanelTooltip.SetPosition(screenWidth/2+miniPanelButtonOffsetX+miniPanelTooltipOffsetX, screenHeight+miniPanelButtonOffsetY+miniPanelTooltipOffsetY)
 }
 
 func (h *HUD) loadUIButtons() {
@@ -326,31 +320,6 @@ func (h *HUD) loadUIButtons() {
 	if h.hero.IsRunToggled() {
 		h.runButton.Toggle()
 	}
-
-	// minipanel button
-	h.menuButton = h.uiManager.NewButton(d2ui.ButtonTypeMinipanelOpenClose, "")
-	//nolint:golint,gomnd // 2 is not a magic number
-	x := screenWidth/2 + miniPanelButtonOffsetX
-	y := screenHeight + miniPanelButtonOffsetY
-	h.menuButton.SetPosition(x, y)
-	h.menuButton.OnActivated(func() {
-		h.menuButton.Toggle()
-		h.miniPanel.Toggle()
-		h.updateMinipanelTooltipText()
-	})
-	h.menuButton.SetTooltip(h.miniPanelTooltip)
-	h.updateMinipanelTooltipText()
-}
-
-func (h *HUD) updateMinipanelTooltipText() {
-	var stringTableKey string
-	if h.menuButton.GetToggled() {
-		stringTableKey = "panelcmini"
-	} else {
-		stringTableKey = "panelmini"
-	}
-
-	h.miniPanelTooltip.SetText(h.asset.TranslateString(stringTableKey))
 }
 
 func (h *HUD) onToggleRunButton(noButton bool) {
@@ -745,21 +714,4 @@ func (h *HUD) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	h.skillSelectMenu.RightPanel.HandleMouseMove(mx, my)
 
 	return false
-}
-
-func (h *HUD) closeMinipanelTemporary() {
-	h.isMiniPanelOpen = h.miniPanel.IsOpen()
-	if h.isMiniPanelOpen {
-		h.menuButton.SetEnabled(false)
-		h.menuButton.Toggle()
-		h.miniPanel.Close()
-	}
-}
-
-func (h *HUD) restoreMinipanelFromTempClose() {
-	if h.isMiniPanelOpen {
-		h.menuButton.SetEnabled(true)
-		h.menuButton.Toggle()
-		h.miniPanel.Open()
-	}
 }

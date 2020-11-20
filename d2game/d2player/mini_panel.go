@@ -63,7 +63,11 @@ type miniPanel struct {
 	asset          *d2asset.AssetManager
 	container      *d2ui.Sprite
 	sprite         *d2ui.Sprite
+	menuButton     *d2ui.Button
+	miniPanelTooltip   *d2ui.Tooltip
 	isOpen         bool
+	tempIsOpen     bool
+	disabled       bool
 	isSinglePlayer bool
 	movedLeft      bool
 	movedRight     bool
@@ -93,6 +97,7 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 
 	m.tooltipGroup = m.ui.NewWidgetGroup(d2ui.RenderPriorityForeground)
 
+	// container sprite
 	miniPanelContainerPath := d2resource.Minipanel
 	if m.isSinglePlayer {
 		miniPanelContainerPath = d2resource.MinipanelSmall
@@ -181,6 +186,24 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 		m.panelGroup.AddWidget(btn)
 	}
 
+	x = screenWidth/2 + miniPanelButtonOffsetX
+	y = screenHeight + miniPanelButtonOffsetY
+	// minipanel open/close tooltip
+	m.miniPanelTooltip = m.ui.NewTooltip(d2resource.Font16, d2resource.PaletteUnits, d2ui.TooltipXCenter, d2ui.TooltipYTop)
+	m.miniPanelTooltip.SetPosition(x+miniPanelTooltipOffsetX, y+miniPanelTooltipOffsetY)
+
+	// minipanel button
+	m.menuButton = m.ui.NewButton(d2ui.ButtonTypeMinipanelOpenClose, "")
+	//nolint:golint,gomnd // 2 is not a magic number
+	m.menuButton.SetPosition(x, y)
+	m.menuButton.OnActivated(func() {
+		m.menuButton.Toggle()
+		m.Toggle()
+		m.updateMinipanelTooltipText()
+	})
+	m.menuButton.SetTooltip(m.miniPanelTooltip)
+	m.updateMinipanelTooltipText()
+
 	m.panelGroup.SetVisible(false)
 }
 
@@ -201,6 +224,17 @@ func (m *miniPanel) createButton(content miniPanelContent, x, y, buttonHeight in
 	return btn
 }
 
+func (m *miniPanel) updateMinipanelTooltipText() {
+	var stringTableKey string
+	if m.menuButton.GetToggled() {
+		stringTableKey = "panelcmini"
+	} else {
+		stringTableKey = "panelmini"
+	}
+
+	m.miniPanelTooltip.SetText(m.asset.TranslateString(stringTableKey))
+}
+
 func (m *miniPanel) IsOpen() bool {
 	return m.isOpen
 }
@@ -215,11 +249,21 @@ func (m *miniPanel) Toggle() {
 
 func (m *miniPanel) Open() {
 	m.panelGroup.SetVisible(true)
+
+	if !m.menuButton.GetToggled() {
+		m.menuButton.Toggle()
+	}
+
 	m.isOpen = true
 }
 
 func (m *miniPanel) Close() {
 	m.panelGroup.SetVisible(false)
+
+	if m.menuButton.GetToggled() {
+		m.menuButton.Toggle()
+	}
+
 	m.isOpen = false
 }
 
@@ -293,4 +337,52 @@ func (m *miniPanel) SetMovedRight(moveRight bool) {
 	}
 
 	m.movedRight = moveRight
+}
+
+func (m *miniPanel) openDisabled() {
+	if m.disabled {
+		return
+	}
+
+	m.tempIsOpen = m.isOpen
+
+	if !m.isOpen {
+		m.Open()
+	}
+
+	m.menuButton.SetEnabled(false)
+	m.panelGroup.SetEnabled(false)
+	m.disabled = true
+}
+
+func (m *miniPanel) closeDisabled() {
+	if m.disabled {
+		return
+	}
+
+	m.tempIsOpen = m.isOpen
+
+	if m.isOpen {
+		m.Close()
+	}
+
+	m.menuButton.SetEnabled(false)
+	m.panelGroup.SetEnabled(false)
+	m.disabled = true
+}
+
+func (m *miniPanel) restoreDisabled() {
+	if !m.disabled {
+		return
+	}
+
+	m.disabled = false
+	m.menuButton.SetEnabled(true)
+	m.panelGroup.SetEnabled(true)
+
+	if m.tempIsOpen {
+		m.Open()
+	} else {
+		m.Close()
+	}
 }

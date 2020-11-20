@@ -270,7 +270,7 @@ func NewGameControls(
 	gc.inventory.SetOnCloseCb(gc.onCloseInventory)
 	gc.skilltree.SetOnCloseCb(gc.onCloseSkilltree)
 
-	gc.escapeMenu.SetOnCloseCb(gc.hud.restoreMinipanelFromTempClose)
+	gc.escapeMenu.SetOnCloseCb(gc.hud.miniPanel.restoreDisabled)
 
 	err = gc.bindTerminalCommands(term)
 	if err != nil {
@@ -646,7 +646,7 @@ func (g *GameControls) openEscMenu() {
 	g.inventory.Close()
 	g.skilltree.Close()
 	g.heroStatsPanel.Close()
-	g.hud.closeMinipanelTemporary()
+	g.hud.miniPanel.closeDisabled()
 	g.escapeMenu.open()
 	g.updateLayout()
 }
