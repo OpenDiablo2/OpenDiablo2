@@ -28,13 +28,13 @@ type LocalClientConnection struct {
 }
 
 // GetUniqueID returns LocalClientConnection.uniqueID.
-func (l LocalClientConnection) GetUniqueID() string {
+func (l *LocalClientConnection) GetUniqueID() string {
 	return l.uniqueID
 }
 
 // GetConnectionType returns an enum representing the connection type.
 // See: d2clientconnectiontype
-func (l LocalClientConnection) GetConnectionType() d2clientconnectiontype.ClientConnectionType {
+func (l *LocalClientConnection) GetConnectionType() d2clientconnectiontype.ClientConnectionType {
 	return d2clientconnectiontype.Local
 }
 
