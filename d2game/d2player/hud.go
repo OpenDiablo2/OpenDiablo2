@@ -307,13 +307,25 @@ func (h *HUD) loadTooltips() {
 func (h *HUD) loadUIButtons() {
 	// Run button
 	h.runButton = h.uiManager.NewButton(d2ui.ButtonTypeRun, "")
-
 	h.runButton.SetPosition(runButtonX, runButtonY)
 	h.runButton.OnActivated(func() { h.onToggleRunButton(false) })
+	h.runButton.SetTooltip(h.runWalkTooltip)
+	h.updateRunTooltipText()
 
 	if h.hero.IsRunToggled() {
 		h.runButton.Toggle()
 	}
+}
+
+func (h *HUD) updateRunTooltipText() {
+	var stringTableKey string
+	if h.hero.IsRunToggled() {
+		stringTableKey = "RunOff"
+	} else {
+		stringTableKey = "RunOn"
+	}
+
+	h.runWalkTooltip.SetText(h.asset.TranslateString(stringTableKey))
 }
 
 func (h *HUD) onToggleRunButton(noButton bool) {
@@ -322,6 +334,7 @@ func (h *HUD) onToggleRunButton(noButton bool) {
 	}
 
 	h.hero.ToggleRunWalk()
+	h.updateRunTooltipText()
 
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/800
 	h.hero.SetIsRunning(h.hero.IsRunToggled())
@@ -508,27 +521,6 @@ func (h *HUD) renderNewSkillsButton(x, _ int, target d2interface.Surface) error 
 	return nil
 }
 
-func (h *HUD) renderRunWalkTooltip(target d2interface.Surface) {
-	mx, my := h.lastMouseX, h.lastMouseY
-
-	// Display run/walk tooltip when hovered.
-	// Note that whether the player is walking or running, the tooltip is the same in Diablo 2.
-	if !h.actionableRegions[walkRun].rect.IsInRect(mx, my) {
-		return
-	}
-
-	var stringTableKey string
-
-	if h.hero.IsRunToggled() {
-		stringTableKey = "RunOff"
-	} else {
-		stringTableKey = "RunOn"
-	}
-
-	h.runWalkTooltip.SetText(h.asset.TranslateString(stringTableKey))
-	h.runWalkTooltip.Render(target)
-}
-
 func (h *HUD) setStaminaTooltipText() {
 	// Create and format Stamina string from string lookup table.
 	fmtStamina := h.asset.TranslateString("panelstamina")
@@ -600,8 +592,6 @@ func (h *HUD) Render(target d2interface.Surface) error {
 		h.zoneChangeText.SetPosition(zoneChangeTextX, zoneChangeTextY)
 		h.zoneChangeText.Render(target)
 	}
-
-	h.renderRunWalkTooltip(target)
 
 	if h.skillSelectMenu.IsOpen() {
 		h.skillSelectMenu.Render(target)
