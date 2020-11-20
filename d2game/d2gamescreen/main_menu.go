@@ -633,20 +633,16 @@ func (v *MainMenu) onBtnTCPIPOkClicked() {
 
 // getLocalIP returns local machine IP address
 func (v *MainMenu) getLocalIP() string {
-	conn, err := net.Dial("udp", "8.8.8.8:80")
+	host, _ := os.Hostname()
+	addrs, _ := net.LookupIP(host)
 
-	if err != nil {
-		v.logger.Error(err.Error())
-		return "cannot reach network"
+	for _, addr := range addrs {
+		if ipv4 := addr.To4(); ipv4 != nil {
+			return ipv4.String()
+		}
 	}
 
-	err = conn.Close()
-	if err != nil {
-		v.logger.Error(err.Error())
-		return "unexpected error occurred while closing test connection"
-	}
+	v.logger.Warning("no IPv4 Address could be found")
 
-	localAddr := conn.LocalAddr().(*net.UDPAddr)
-
-	return localAddr.IP.String()
+	return "no IPv4 Address could be found"
 }
