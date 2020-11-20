@@ -1,8 +1,6 @@
 package d2maprenderer
 
 import (
-	"fmt"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
@@ -61,7 +59,7 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord) {
 	var tileData []*d2dt1.Tile
 
 	if tileOptions == nil {
-		mr.Error(fmt.Sprintf("Could not locate tile Style:%d, Seq: %d, Type: %d", tile.Style, tile.Sequence, 0))
+		mr.Errorf("Could not locate tile Style:%d, Seq: %d, Type: %d", tile.Style, tile.Sequence, 0)
 
 		tileData = append(tileData, &d2dt1.Tile{})
 		tileData[0].Width = defaultFloorTileWidth

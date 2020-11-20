@@ -410,7 +410,7 @@ func (r *RecordManager) initObjectRecords(lookups []ObjectLookupRecord) {
 func (r *RecordManager) LookupObject(act, typ, id int) *ObjectLookupRecord {
 	object := r.lookupObject(act, typ, id)
 	if object == nil {
-		r.Fatal(fmt.Sprintf("Failed to look up object Act: %d, Type: %d, ID: %d", act, typ, id))
+		r.Fatalf("Failed to look up object Act: %d, Type: %d, ID: %d", act, typ, id)
 	}
 
 	return object

@@ -1,7 +1,6 @@
 package d2ui
 
 import (
-	"fmt"
 	"sort"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -37,13 +36,13 @@ type UIManager struct {
 func (ui *UIManager) Initialize() {
 	sfx, err := ui.audio.LoadSound(d2resource.SFXButtonClick, false, false)
 	if err != nil {
-		ui.Fatal(fmt.Sprintf("failed to initialize ui: %v", err))
+		ui.Fatalf("failed to initialize ui: %v", err)
 	}
 
 	ui.clickSfx = sfx
 
 	if err := ui.inputManager.BindHandler(ui); err != nil {
-		ui.Fatal(fmt.Sprintf("failed to initialize ui: %v", err))
+		ui.Fatalf("failed to initialize ui: %v", err)
 	}
 }
 

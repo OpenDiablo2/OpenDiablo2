@@ -1,7 +1,6 @@
 package d2mapengine
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
@@ -100,7 +99,7 @@ func (m *MapEngine) addDT1(fileName string) {
 
 	fileData, err := m.asset.LoadFile("/data/global/tiles/" + fileName)
 	if err != nil {
-		m.Fatal(fmt.Sprintf("Could not load /data/global/tiles/%s", fileName))
+		m.Fatalf("Could not load /data/global/tiles/%s", fileName)
 		return
 	}
 
@@ -148,7 +147,7 @@ func (m *MapEngine) LevelType() d2records.LevelTypeRecord {
 
 // SetSeed sets the seed of the map for generation.
 func (m *MapEngine) SetSeed(seed int64) {
-	m.Info(fmt.Sprintf("Setting map engine seed to %d", seed))
+	m.Infof("Setting map engine seed to %d", seed)
 	m.seed = seed
 }
 
@@ -269,7 +268,7 @@ func (m *MapEngine) GetTiles(style, sequence int, tileType d2enum.TileType) []d2
 	}
 
 	if len(tiles) == 0 {
-		m.Warning(fmt.Sprintf("Unknown tile ID [%d %d %d]", style, sequence, tileType))
+		m.Warningf("Unknown tile ID [%d %d %d]", style, sequence, tileType)
 		return nil
 	}
 

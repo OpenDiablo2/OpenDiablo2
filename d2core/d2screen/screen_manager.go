@@ -1,8 +1,6 @@
 package d2screen
 
 import (
-	"fmt"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
@@ -55,7 +53,7 @@ func (sm *ScreenManager) Advance(elapsed float64) error {
 		}
 
 		if load.err != nil {
-			sm.logger.Error(fmt.Sprintf("PROBLEM LOADING THE SCREEN: %v", load.err))
+			sm.logger.Errorf("PROBLEM LOADING THE SCREEN: %v", load.err)
 			return load.err
 		}
 

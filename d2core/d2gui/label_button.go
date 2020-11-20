@@ -1,7 +1,6 @@
 package d2gui
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -68,13 +67,13 @@ func (lb *LabelButton) Load(renderer d2interface.Renderer, asset *d2asset.AssetM
 
 	mainLayout.SetMouseEnterHandler(func(event d2interface.MouseMoveEvent) {
 		if err := l.SetIsHovered(true); err != nil {
-			lb.Error(fmt.Sprintf("could not change label to hover state: %v", err))
+			lb.Errorf("could not change label to hover state: %v", err)
 		}
 	})
 
 	mainLayout.SetMouseLeaveHandler(func(event d2interface.MouseMoveEvent) {
 		if err := l.SetIsHovered(false); err != nil {
-			lb.Error(fmt.Sprintf("could not change label to hover state: %v", err))
+			lb.Errorf("could not change label to hover state: %v", err)
 		}
 	})
 
