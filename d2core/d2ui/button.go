@@ -278,7 +278,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelOpenClose: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
-			DisabledFrame:    buttonMinipanelDisabledFrame,
+			DisabledFrame:    buttonMinipanelOpenCloseBaseFrame,
 			DisabledColor:    whiteAlpha100,
 			BaseFrame:        buttonMinipanelOpenCloseBaseFrame,
 			ResourceName:     d2resource.MenuButton,

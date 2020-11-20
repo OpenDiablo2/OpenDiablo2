@@ -84,7 +84,6 @@ type HUD struct {
 	actionableRegions  []actionableRegion
 	asset              *d2asset.AssetManager
 	uiManager          *d2ui.UIManager
-	help               *HelpOverlay
 	mapEngine          *d2mapengine.MapEngine
 	mapRenderer        *d2maprenderer.MapRenderer
 	lastMouseX         int
@@ -124,7 +123,6 @@ func NewHUD(
 	asset *d2asset.AssetManager,
 	ui *d2ui.UIManager,
 	hero *d2mapentity.Player,
-	help *HelpOverlay,
 	miniPanel *miniPanel,
 	actionableRegions []actionableRegion,
 	mapEngine *d2mapengine.MapEngine,
@@ -145,7 +143,6 @@ func NewHUD(
 		asset:             asset,
 		uiManager:         ui,
 		hero:              hero,
-		help:              help,
 		mapEngine:         mapEngine,
 		mapRenderer:       mapRenderer,
 		miniPanel:         miniPanel,
@@ -661,10 +658,6 @@ func (h *HUD) Render(target d2interface.Surface) error {
 	h.manaGlobe.Render(target)
 	h.widgetStamina.Render(target)
 	h.widgetExperience.Render(target)
-
-	if err := h.help.Render(target); err != nil {
-		return err
-	}
 
 	if h.isZoneTextShown {
 		h.zoneChangeText.SetPosition(zoneChangeTextX, zoneChangeTextY)

@@ -219,8 +219,8 @@ func NewGameControls(
 		return nil, err
 	}
 
-	helpOverlay := NewHelpOverlay(asset, renderer, ui, guiManager, l, keyMap)
-	hud := NewHUD(asset, ui, hero, helpOverlay, miniPanel, actionableRegions, mapEngine, l, mapRenderer)
+	helpOverlay := NewHelpOverlay(asset, ui, l, keyMap)
+	hud := NewHUD(asset, ui, hero, miniPanel, actionableRegions, mapEngine, l, mapRenderer)
 
 	const blackAlpha50percent = 0x0000007f
 
@@ -271,6 +271,7 @@ func NewGameControls(
 	gc.skilltree.SetOnCloseCb(gc.onCloseSkilltree)
 
 	gc.escapeMenu.SetOnCloseCb(gc.hud.miniPanel.restoreDisabled)
+	gc.HelpOverlay.SetOnCloseCb(gc.hud.miniPanel.restoreDisabled)
 
 	err = gc.bindTerminalCommands(term)
 	if err != nil {
@@ -397,6 +398,8 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 	case d2enum.HoldRun:
 		g.hud.onToggleRunButton(true)
 	case d2enum.ToggleHelpScreen:
+		g.hud.miniPanel.openDisabled()
+
 		g.HelpOverlay.Toggle()
 		g.updateLayout()
 	default:
