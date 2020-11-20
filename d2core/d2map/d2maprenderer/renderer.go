@@ -63,7 +63,7 @@ type MapRenderer struct {
 	lastFrameTime       float64 // The last time the map was rendered
 	currentFrame        int     // Current render frame (for animations)
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 // CreateMapRenderer creates a new MapRenderer, sets the required fields and returns a pointer to it.
@@ -77,9 +77,9 @@ func CreateMapRenderer(asset *d2asset.AssetManager, renderer d2interface.Rendere
 		viewport:  NewViewport(0, 0, 800, 600),
 	}
 
-	result.logger = d2util.NewLogger()
-	result.logger.SetPrefix(logPrefix)
-	result.logger.SetLevel(l)
+	result.Logger = d2util.NewLogger()
+	result.Logger.SetPrefix(logPrefix)
+	result.Logger.SetLevel(l)
 
 	result.Camera = Camera{}
 	rx, ry := result.WorldToOrtho(startX, startY)
@@ -93,7 +93,7 @@ func CreateMapRenderer(asset *d2asset.AssetManager, renderer d2interface.Rendere
 	})
 
 	if err != nil {
-		result.logger.Error(fmt.Sprintf("could not bind the mapdebugvis action, err: %v", err))
+		result.Error(fmt.Sprintf("could not bind the mapdebugvis action, err: %v", err))
 	}
 
 	err = term.BindAction("entitydebugvis", "set entity debug visualization level", func(level int) {
@@ -101,7 +101,7 @@ func CreateMapRenderer(asset *d2asset.AssetManager, renderer d2interface.Rendere
 	})
 
 	if err != nil {
-		result.logger.Error(fmt.Sprintf("could not bind the entitydebugvis action, err: %v", err))
+		result.Error(fmt.Sprintf("could not bind the entitydebugvis action, err: %v", err))
 	}
 
 	if mapEngine.LevelType().ID != 0 {
@@ -372,7 +372,7 @@ func (mr *MapRenderer) renderFloor(tile d2ds1.FloorShadowRecord, target d2interf
 	}
 
 	if img == nil {
-		mr.logger.Warning(fmt.Sprintf("Render called on uncached floor {%v,%v}", tile.Style, tile.Sequence))
+		mr.Warning(fmt.Sprintf("Render called on uncached floor {%v,%v}", tile.Style, tile.Sequence))
 		return
 	}
 
@@ -388,7 +388,7 @@ func (mr *MapRenderer) renderFloor(tile d2ds1.FloorShadowRecord, target d2interf
 func (mr *MapRenderer) renderWall(tile d2ds1.WallRecord, viewport *Viewport, target d2interface.Surface) {
 	img := mr.getImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tile.RandomIndex)
 	if img == nil {
-		mr.logger.Warning(fmt.Sprintf("Render called on uncached wall {%v,%v,%v}", tile.Style, tile.Sequence, tile.Type))
+		mr.Warning(fmt.Sprintf("Render called on uncached wall {%v,%v,%v}", tile.Style, tile.Sequence, tile.Type))
 		return
 	}
 
@@ -404,7 +404,7 @@ func (mr *MapRenderer) renderWall(tile d2ds1.WallRecord, viewport *Viewport, tar
 func (mr *MapRenderer) renderShadow(tile d2ds1.FloorShadowRecord, target d2interface.Surface) {
 	img := mr.getImageCacheRecord(tile.Style, tile.Sequence, 13, tile.RandomIndex)
 	if img == nil {
-		mr.logger.Warning(fmt.Sprintf("Render called on uncached shadow {%v,%v}", tile.Style, tile.Sequence))
+		mr.Warning(fmt.Sprintf("Render called on uncached shadow {%v,%v}", tile.Style, tile.Sequence))
 		return
 	}
 

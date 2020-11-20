@@ -38,7 +38,7 @@ type Sound struct {
 	state   envState
 	// panning float64 // lets forget about this for now
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 func (s *Sound) update(elapsed float64) {
@@ -73,7 +73,7 @@ func (s *Sound) SetPan(pan float64) {
 
 // Play the sound
 func (s *Sound) Play() {
-	s.logger.Info("starting sound" + s.entry.Handle)
+	s.Info("starting sound" + s.entry.Handle)
 	s.effect.Play()
 
 	if s.entry.FadeIn != 0 {
@@ -111,7 +111,7 @@ type SoundEngine struct {
 	accTime  float64
 	sounds   map[*Sound]struct{}
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 // NewSoundEngine creates a new sound engine
@@ -124,15 +124,15 @@ func NewSoundEngine(provider d2interface.AudioProvider,
 		timer:    1,
 	}
 
-	r.logger = d2util.NewLogger()
-	r.logger.SetPrefix(logPrefix)
-	r.logger.SetLevel(l)
+	r.Logger = d2util.NewLogger()
+	r.Logger.SetPrefix(logPrefix)
+	r.Logger.SetLevel(l)
 
 	err := term.BindAction("playsoundid", "plays the sound for a given id", func(id int) {
 		r.PlaySoundID(id)
 	})
 	if err != nil {
-		r.logger.Error(err.Error())
+		r.Error(err.Error())
 		return nil
 	}
 
@@ -140,25 +140,25 @@ func NewSoundEngine(provider d2interface.AudioProvider,
 		r.PlaySoundHandle(handle)
 	})
 	if err != nil {
-		r.logger.Error(err.Error())
+		r.Error(err.Error())
 		return nil
 	}
 
 	err = term.BindAction("activesounds", "list currently active sounds", func() {
 		for s := range r.sounds {
 			if err != nil {
-				r.logger.Error(err.Error())
+				r.Error(err.Error())
 				return
 			}
 
-			r.logger.Info(fmt.Sprint(s))
+			r.Info(fmt.Sprint(s))
 		}
 	})
 
 	err = term.BindAction("killsounds", "kill active sounds", func() {
 		for s := range r.sounds {
 			if err != nil {
-				r.logger.Error(err.Error())
+				r.Error(err.Error())
 				return
 			}
 
@@ -220,14 +220,14 @@ func (s *SoundEngine) PlaySoundID(id int) *Sound {
 
 	effect, err := s.provider.LoadSound(entry.FileName, entry.Loop, entry.MusicVol)
 	if err != nil {
-		s.logger.Error(err.Error())
+		s.Error(err.Error())
 		return nil
 	}
 
 	snd := Sound{
 		entry:  entry,
 		effect: effect,
-		logger: s.logger,
+		Logger: s.Logger,
 	}
 
 	s.sounds[&snd] = struct{}{}

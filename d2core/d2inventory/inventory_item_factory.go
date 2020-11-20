@@ -107,7 +107,7 @@ func (f *InventoryItemFactory) loadHeroObjects() error {
 func (f *InventoryItemFactory) GetArmorItemByCode(code string) (*InventoryItemArmor, error) {
 	result := f.asset.Records.Item.Armors[code]
 	if result == nil {
-		return nil, fmt.Errorf("could not find misc item entry for code '%s'", code)
+		return nil, fmt.Errorf("could not find armor entry for code '%s'", code)
 	}
 
 	return &InventoryItemArmor{

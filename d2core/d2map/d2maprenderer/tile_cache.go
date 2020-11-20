@@ -28,7 +28,7 @@ func (mr *MapRenderer) generateTileCache() {
 	mr.palette, err = mr.loadPaletteForAct(d2enum.RegionIdType(mr.mapEngine.LevelType().ID))
 
 	if err != nil {
-		mr.logger.Error(err.Error())
+		mr.Error(err.Error())
 	}
 
 	tiles := *mr.mapEngine.Tiles()
@@ -61,7 +61,7 @@ func (mr *MapRenderer) generateFloorCache(tile *d2ds1.FloorShadowRecord) {
 	var tileData []*d2dt1.Tile
 
 	if tileOptions == nil {
-		mr.logger.Error(fmt.Sprintf("Could not locate tile Style:%d, Seq: %d, Type: %d", tile.Style, tile.Sequence, 0))
+		mr.Error(fmt.Sprintf("Could not locate tile Style:%d, Seq: %d, Type: %d", tile.Style, tile.Sequence, 0))
 
 		tileData = append(tileData, &d2dt1.Tile{})
 		tileData[0].Width = defaultFloorTileWidth
@@ -205,7 +205,7 @@ func (mr *MapRenderer) generateWallCache(tile *d2ds1.WallRecord) {
 	}
 
 	if realHeight == 0 {
-		mr.logger.Error("Invalid 0 height for wall tile")
+		mr.Error("Invalid 0 height for wall tile")
 		return
 	}
 

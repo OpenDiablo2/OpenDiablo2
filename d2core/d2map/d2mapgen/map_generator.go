@@ -21,9 +21,9 @@ func NewMapGenerator(a *d2asset.AssetManager, l d2util.LogLevel, e *d2mapengine.
 		engine: e,
 	}
 
-	generator.logger = d2util.NewLogger()
-	generator.logger.SetLevel(l)
-	generator.logger.SetPrefix(logPrefix)
+	generator.Logger = d2util.NewLogger()
+	generator.Logger.SetLevel(l)
+	generator.Logger.SetPrefix(logPrefix)
 
 	return generator, nil
 }
@@ -33,7 +33,7 @@ type MapGenerator struct {
 	asset  *d2asset.AssetManager
 	engine *d2mapengine.MapEngine
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 func (g *MapGenerator) loadPreset(id, index int) *d2mapstamp.Stamp {

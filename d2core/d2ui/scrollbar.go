@@ -31,7 +31,7 @@ type Scrollbar struct {
 func (ui *UIManager) NewScrollbar(x, y, height int) *Scrollbar {
 	scrollbarSprite, err := ui.NewSprite(d2resource.Scrollbar, d2resource.PaletteSky)
 	if err != nil {
-		ui.logger.Error(err.Error())
+		ui.Error(err.Error())
 		return nil
 	}
 

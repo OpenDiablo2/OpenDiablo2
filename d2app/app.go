@@ -179,7 +179,7 @@ func (a *App) loadEngine() error {
 
 	a.asset.SetLogLevel(logLevel)
 
-	audio := ebiten2.CreateAudio(a.asset)
+	audio := ebiten2.CreateAudio(a.config.LogLevel, a.asset)
 
 	inputManager := d2input.NewInputManager()
 

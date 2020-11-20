@@ -25,7 +25,7 @@ type GuiManager struct {
 	cursorVisible bool
 	loading       bool
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 // CreateGuiManager creates an instance of the GuiManager
@@ -47,9 +47,9 @@ func CreateGuiManager(asset *d2asset.AssetManager, l d2util.LogLevel, inputManag
 		cursorVisible: true,
 	}
 
-	manager.logger = d2util.NewLogger()
-	manager.logger.SetPrefix(logPrefix)
-	manager.logger.SetLevel(l)
+	manager.Logger = d2util.NewLogger()
+	manager.Logger.SetPrefix(logPrefix)
+	manager.Logger.SetLevel(l)
 
 	manager.clear()
 
@@ -169,7 +169,7 @@ func (m *GuiManager) ShowLoadScreen(progress float64) {
 
 	err := animation.SetCurrentFrame(int(float64(frameCount-1) * progress))
 	if err != nil {
-		m.logger.Error(err.Error())
+		m.Error(err.Error())
 	}
 
 	m.loading = true

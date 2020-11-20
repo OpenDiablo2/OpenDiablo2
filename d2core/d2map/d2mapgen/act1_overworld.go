@@ -49,7 +49,7 @@ func (g *MapGenerator) GenerateAct1Overworld() {
 	townStamp.RegionPath()
 	townSize := townStamp.Size()
 
-	g.logger.Info(fmt.Sprintf("Region Path: %s", townStamp.RegionPath()))
+	g.Info(fmt.Sprintf("Region Path: %s", townStamp.RegionPath()))
 
 	switch {
 	case strings.Contains(townStamp.RegionPath(), "E1"):

@@ -45,9 +45,9 @@ func NewUIManager(
 		audio:        audio,
 	}
 
-	ui.logger = d2util.NewLogger()
-	ui.logger.SetPrefix(logPrefix)
-	ui.logger.SetLevel(l)
+	ui.Logger = d2util.NewLogger()
+	ui.Logger.SetPrefix(logPrefix)
+	ui.Logger.SetLevel(l)
 
 	return ui
 }

@@ -16,7 +16,7 @@ type Sprite struct {
 	*BaseWidget
 	animation d2interface.Animation
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 const (
@@ -37,7 +37,7 @@ func (ui *UIManager) NewSprite(animationPath, palettePath string) (*Sprite, erro
 	return &Sprite{
 		BaseWidget: base,
 		animation:  animation,
-		logger:     ui.logger,
+		Logger:     ui.Logger,
 	}, nil
 }
 
@@ -74,7 +74,7 @@ func (s *Sprite) RenderSegmented(target d2interface.Surface, segmentsX, segments
 		for x := 0; x < segmentsX; x++ {
 			idx := x + y*segmentsX + frameOffset*segmentsX*segmentsY
 			if err := s.animation.SetCurrentFrame(idx); err != nil {
-				s.logger.Error("SetCurrentFrame error" + err.Error())
+				s.Error("SetCurrentFrame error" + err.Error())
 			}
 
 			target.PushTranslation(s.x+currentX, s.y+currentY)
@@ -154,7 +154,7 @@ func (s *Sprite) SetCurrentFrame(frameIndex int) error {
 func (s *Sprite) Rewind() {
 	err := s.animation.SetCurrentFrame(0)
 	if err != nil {
-		s.logger.Error(err.Error())
+		s.Error(err.Error())
 	}
 }
 

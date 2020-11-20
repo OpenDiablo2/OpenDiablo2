@@ -20,7 +20,7 @@ type LabelButton struct {
 	layout     *Layout
 	x, y       int
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 // NewLabelButton generates a new instance of LabelButton
@@ -34,9 +34,9 @@ func NewLabelButton(x, y int, text string, col color.RGBA, l d2util.LogLevel, ca
 		canHover:   true,
 	}
 
-	lb.logger = d2util.NewLogger()
-	lb.logger.SetLevel(l)
-	lb.logger.SetPrefix(logPrefix)
+	lb.Logger = d2util.NewLogger()
+	lb.Logger.SetLevel(l)
+	lb.Logger.SetPrefix(logPrefix)
 
 	return lb
 }
@@ -68,13 +68,13 @@ func (lb *LabelButton) Load(renderer d2interface.Renderer, asset *d2asset.AssetM
 
 	mainLayout.SetMouseEnterHandler(func(event d2interface.MouseMoveEvent) {
 		if err := l.SetIsHovered(true); err != nil {
-			lb.logger.Error(fmt.Sprintf("could not change label to hover state: %v", err))
+			lb.Error(fmt.Sprintf("could not change label to hover state: %v", err))
 		}
 	})
 
 	mainLayout.SetMouseLeaveHandler(func(event d2interface.MouseMoveEvent) {
 		if err := l.SetIsHovered(false); err != nil {
-			lb.logger.Error(fmt.Sprintf("could not change label to hover state: %v", err))
+			lb.Error(fmt.Sprintf("could not change label to hover state: %v", err))
 		}
 	})
 

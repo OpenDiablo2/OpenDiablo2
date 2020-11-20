@@ -65,7 +65,7 @@ type Box struct {
 	isOpen             bool
 	title              string
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 // NewBox return a new Box instance
@@ -76,6 +76,7 @@ func NewBox(
 	contentLayout *Layout,
 	width, height int,
 	x, y int,
+	l d2util.LogLevel,
 	title string,
 ) *Box {
 	box := &Box{
@@ -89,10 +90,11 @@ func NewBox(
 		title:         title,
 		x:             x,
 		y:             y,
-		logger:        asset.Logger, // workaound
 	}
 
-	box.logger.SetPrefix(logPrefix) // workaround
+	box.Logger = d2util.NewLogger()
+	box.Logger.SetLevel(l)
+	box.Logger.SetPrefix(logPrefix)
 
 	return box
 }
@@ -150,12 +152,12 @@ func (box *Box) setupTopBorder(offsetY int) {
 		for _, frameIndex := range topEdgePiece {
 			f, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
 			if err != nil {
-				box.logger.Error(err.Error())
+				box.Error(err.Error())
 			}
 
 			err = f.SetCurrentFrame(frameIndex)
 			if err != nil {
-				box.logger.Error(err.Error())
+				box.Error(err.Error())
 			}
 
 			f.SetPosition(currentX, currentY)
@@ -192,12 +194,12 @@ func (box *Box) setupBottomBorder(offsetY int) {
 		for _, frameIndex := range bottomEdgePiece {
 			f, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
 			if err != nil {
-				box.logger.Error(err.Error())
+				box.Error(err.Error())
 			}
 
 			err = f.SetCurrentFrame(frameIndex)
 			if err != nil {
-				box.logger.Error(err.Error())
+				box.Error(err.Error())
 			}
 
 			f.SetPosition(currentX, currentY)
@@ -232,12 +234,12 @@ func (box *Box) setupLeftBorder() {
 		for _, frameIndex := range leftBorderPiece {
 			f, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
 			if err != nil {
-				box.logger.Error(err.Error())
+				box.Error(err.Error())
 			}
 
 			err = f.SetCurrentFrame(frameIndex)
 			if err != nil {
-				box.logger.Error(err.Error())
+				box.Error(err.Error())
 			}
 
 			f.SetPosition(currentX, currentY)
@@ -271,12 +273,12 @@ func (box *Box) setupRightBorder() {
 		for _, frameIndex := range rightBorderPiece {
 			f, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
 			if err != nil {
-				box.logger.Error(err.Error())
+				box.Error(err.Error())
 			}
 
 			err = f.SetCurrentFrame(frameIndex)
 			if err != nil {
-				box.logger.Error(err.Error())
+				box.Error(err.Error())
 			}
 
 			f.SetPosition(currentX, currentY)
@@ -307,12 +309,12 @@ func (box *Box) setupCorners() {
 	for _, frameIndex := range cornersFrames {
 		f, err := box.uiManager.NewSprite(d2resource.BoxPieces, d2resource.PaletteSky)
 		if err != nil {
-			box.logger.Error(err.Error())
+			box.Error(err.Error())
 		}
 
 		err = f.SetCurrentFrame(frameIndex)
 		if err != nil {
-			box.logger.Error(err.Error())
+			box.Error(err.Error())
 		}
 
 		switch frameIndex {

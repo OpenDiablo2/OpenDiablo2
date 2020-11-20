@@ -33,13 +33,13 @@ func (ui *UIManager) NewCheckbox(checkState bool) *Checkbox {
 
 	checkboxSprite, err := ui.NewSprite(d2resource.Checkbox, d2resource.PaletteFechar)
 	if err != nil {
-		ui.logger.Error(err.Error())
+		ui.Error(err.Error())
 		return nil
 	}
 
 	result.width, result.height, err = checkboxSprite.GetFrameSize(0)
 	if err != nil {
-		ui.logger.Error(err.Error())
+		ui.Error(err.Error())
 		return nil
 	}
 

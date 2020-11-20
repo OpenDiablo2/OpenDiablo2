@@ -40,7 +40,7 @@ type MapEngine struct {
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/789
 	IsLoading bool // (temp) Whether we have processed the GenerateMapPacket(only for remote client)
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 const (
@@ -60,9 +60,9 @@ func CreateMapEngine(l d2util.LogLevel, asset *d2asset.AssetManager) *MapEngine 
 		IsLoading: false,
 	}
 
-	engine.logger = d2util.NewLogger()
-	engine.logger.SetLevel(l)
-	engine.logger.SetPrefix(logPrefix)
+	engine.Logger = d2util.NewLogger()
+	engine.Logger.SetLevel(l)
+	engine.Logger.SetPrefix(logPrefix)
 
 	return engine
 }
@@ -100,13 +100,13 @@ func (m *MapEngine) addDT1(fileName string) {
 
 	fileData, err := m.asset.LoadFile("/data/global/tiles/" + fileName)
 	if err != nil {
-		m.logger.Fatal(fmt.Sprintf("Could not load /data/global/tiles/%s", fileName))
+		m.Fatal(fmt.Sprintf("Could not load /data/global/tiles/%s", fileName))
 		return
 	}
 
 	dt1, err := d2dt1.LoadDT1(fileData)
 	if err != nil {
-		m.logger.Error(err.Error())
+		m.Error(err.Error())
 	}
 
 	m.dt1TileData = append(m.dt1TileData, dt1.Tiles...)
@@ -128,7 +128,7 @@ func (m *MapEngine) AddDS1(fileName string) {
 
 	ds1, err := d2ds1.LoadDS1(fileData)
 	if err != nil {
-		m.logger.Error(err.Error())
+		m.Error(err.Error())
 	}
 
 	for idx := range ds1.Files {
@@ -148,7 +148,7 @@ func (m *MapEngine) LevelType() d2records.LevelTypeRecord {
 
 // SetSeed sets the seed of the map for generation.
 func (m *MapEngine) SetSeed(seed int64) {
-	m.logger.Info(fmt.Sprintf("Setting map engine seed to %d", seed))
+	m.Info(fmt.Sprintf("Setting map engine seed to %d", seed))
 	m.seed = seed
 }
 
@@ -269,7 +269,7 @@ func (m *MapEngine) GetTiles(style, sequence int, tileType d2enum.TileType) []d2
 	}
 
 	if len(tiles) == 0 {
-		m.logger.Warning(fmt.Sprintf("Unknown tile ID [%d %d %d]", style, sequence, tileType))
+		m.Warning(fmt.Sprintf("Unknown tile ID [%d %d %d]", style, sequence, tileType))
 		return nil
 	}
 

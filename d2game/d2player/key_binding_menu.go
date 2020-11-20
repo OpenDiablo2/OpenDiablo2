@@ -77,7 +77,7 @@ func NewKeyBindingMenu(
 	ret.Box = d2gui.NewBox(
 		asset, renderer, ui, ret.mainLayout,
 		keyBindingMenuWidth, keyBindingMenuHeight,
-		keyBindingMenuX, keyBindingMenuY, "",
+		keyBindingMenuX, keyBindingMenuY, l, "",
 	)
 
 	ret.Box.SetPadding(keyBindingMenuPaddingX, keyBindingSettingPaddingY)

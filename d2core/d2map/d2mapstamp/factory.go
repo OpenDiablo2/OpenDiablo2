@@ -13,6 +13,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
+const logPrefix = "Map Stamp"
+
 // NewStampFactory creates a MapStamp factory instance
 func NewStampFactory(asset *d2asset.AssetManager, l d2util.LogLevel, entity *d2mapentity.MapEntityFactory) *StampFactory {
 	result := &StampFactory{
@@ -20,9 +22,9 @@ func NewStampFactory(asset *d2asset.AssetManager, l d2util.LogLevel, entity *d2m
 		entity: entity,
 	}
 
-	result.logger = d2util.NewLogger()
-	result.logger.SetLevel(l)
-	result.logger.SetPrefix("Map Stamp")
+	result.Logger = d2util.NewLogger()
+	result.Logger.SetLevel(l)
+	result.Logger.SetPrefix(logPrefix)
 
 	return result
 }
@@ -33,7 +35,7 @@ type StampFactory struct {
 	asset  *d2asset.AssetManager
 	entity *d2mapentity.MapEntityFactory
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 // LoadStamp loads the Stamp data from file, using the given level type, level preset index, and
@@ -59,7 +61,7 @@ func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fil
 
 		dt1, err := d2dt1.LoadDT1(fileData)
 		if err != nil {
-			f.logger.Error(err.Error())
+			f.Error(err.Error())
 			return nil
 		}
 
@@ -93,7 +95,7 @@ func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fil
 
 	stamp.ds1, err = d2ds1.LoadDS1(fileData)
 	if err != nil {
-		f.logger.Error(err.Error())
+		f.Error(err.Error())
 		return nil
 	}
 
