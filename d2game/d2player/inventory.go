@@ -24,7 +24,7 @@ const (
 const (
 	invCloseButtonX, invCloseButtonY = 419, 449
 	invGoldButtonX, invGoldButtonY   = 485, 455
-	invGoldLabelX, invGoldLabelY     = 500, 455
+	invGoldLabelX, invGoldLabelY     = 510, 455
 )
 
 // NewInventory creates an inventory instance and returns a pointer to it
@@ -69,6 +69,7 @@ type Inventory struct {
 	closeButton *d2ui.Button
 	goldButton  *d2ui.Button
 	goldLabel   *d2ui.Label
+	panelGroup  *d2ui.WidgetGroup
 	goldValue   int
 	hoverX      int
 	hoverY      int
@@ -83,11 +84,6 @@ type Inventory struct {
 	logger *d2util.Logger
 }
 
-// IsOpen returns true if the inventory is open
-func (g *Inventory) IsOpen() bool {
-	return g.isOpen
-}
-
 // Toggle negates the open state of the inventory
 func (g *Inventory) Toggle() {
 	if g.isOpen {
@@ -97,56 +93,39 @@ func (g *Inventory) Toggle() {
 	}
 }
 
-// Open opens the inventory
-func (g *Inventory) Open() {
-	g.isOpen = true
-	g.closeButton.SetVisible(true)
-	g.goldButton.SetVisible(true)
-	g.goldLabel.SetVisible(true)
-}
-
-// Close closes the inventory
-func (g *Inventory) Close() {
-	g.isOpen = false
-	g.closeButton.SetVisible(false)
-	g.goldButton.SetVisible(false)
-	g.goldLabel.SetVisible(false)
-	g.onCloseCb()
-}
-
-// SetOnCloseCb the callback run on closing the inventory
-func (g *Inventory) SetOnCloseCb(cb func()) {
-	g.onCloseCb = cb
-}
-
-func (g *Inventory) onGoldClicked() {
-	return
-}
-
 // Load the resources required by the inventory
 func (g *Inventory) Load() {
+	var err error
+
+	g.panelGroup = g.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
+
 	g.frame = d2ui.NewUIFrame(g.asset, g.uiManager, d2ui.FrameRight)
+	g.panelGroup.AddWidget(g.frame)
 
 	g.closeButton = g.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
 	g.closeButton.SetVisible(false)
 	g.closeButton.SetPosition(invCloseButtonX, invCloseButtonY)
 	g.closeButton.OnActivated(func() { g.Close() })
+	g.panelGroup.AddWidget(g.closeButton)
 
 	g.goldButton = g.uiManager.NewButton(d2ui.ButtonTypeGoldCoin, "")
 	g.goldButton.SetVisible(false)
 	g.goldButton.SetPosition(invGoldButtonX, invGoldButtonY)
 	g.goldButton.OnActivated(func() { g.onGoldClicked() })
+	g.panelGroup.AddWidget(g.goldButton)
 
-	//g.goldLabel = g.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
-	g.goldLabel = g.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
+	g.goldLabel = g.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
 	g.goldLabel.Alignment = d2ui.HorizontalAlignLeft
-	//g.goldLabel.SetText(fmt.Sprintln(g.goldValue))
-	g.goldLabel.SetText("lalala")
-	fmt.Println("elo")
-	g.goldLabel.SetVisible(true)
+	g.goldLabel.SetText(fmt.Sprintln(g.goldValue))
 	g.goldLabel.SetPosition(invGoldLabelX, invGoldLabelY)
+	g.panelGroup.AddWidget(g.goldLabel)
 
-	g.panel, _ = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
+	g.panel, err = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
+	if err != nil {
+		g.logger.Error(err.Error())
+	}
+
+	g.panelGroup.SetVisible(false)
 
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/795
 	testInventoryCodes := [][]string{
@@ -191,10 +170,43 @@ func (g *Inventory) Load() {
 		g.grid.ChangeEquippedSlot(slot, item)
 	}
 
-	_, err := g.grid.Add(inventoryItems...)
+	_, err = g.grid.Add(inventoryItems...)
 	if err != nil {
 		g.logger.Error("could not add items to the inventory, err: %v\n" + err.Error())
 	}
+}
+
+// Open opens the inventory
+func (g *Inventory) Open() {
+	g.isOpen = true
+	/*g.closeButton.SetVisible(true)
+	g.goldButton.SetVisible(true)
+	g.goldLabel.SetVisible(true)*/
+	g.panelGroup.SetVisible(true)
+}
+
+// Close closes the inventory
+func (g *Inventory) Close() {
+	g.isOpen = false
+	/*g.closeButton.SetVisible(false)
+	g.goldButton.SetVisible(false)
+	g.goldLabel.SetVisible(false)*/
+	g.panelGroup.SetVisible(false)
+	g.onCloseCb()
+}
+
+// SetOnCloseCb the callback run on closing the inventory
+func (g *Inventory) SetOnCloseCb(cb func()) {
+	g.onCloseCb = cb
+}
+
+func (g *Inventory) onGoldClicked() {
+	return
+}
+
+// IsOpen returns true if the inventory is open
+func (g *Inventory) IsOpen() bool {
+	return g.isOpen
 }
 
 // Render draws the inventory onto the given surface
