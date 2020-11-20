@@ -13,6 +13,7 @@ const (
 	RenderPriorityMinipanel
 	RenderPriorityHeroStatsPanel
 	RenderPriorityHelpPanel
+	RenderPriorityHUDPanel
 	RenderPriorityForeground
 )
 

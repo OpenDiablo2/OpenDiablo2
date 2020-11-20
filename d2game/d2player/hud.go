@@ -115,6 +115,7 @@ type HUD struct {
 	widgetLeftSkill    *d2ui.CustomWidget
 	widgetRightSkill   *d2ui.CustomWidget
 	panelBackground    *d2ui.CustomWidget
+	panelGroup         *d2ui.WidgetGroup
 	logger             *d2util.Logger
 }
 
@@ -163,15 +164,24 @@ func NewHUD(
 
 // Load creates the ui elemets
 func (h *HUD) Load() {
+	h.panelGroup = h.uiManager.NewWidgetGroup(d2ui.RenderPriorityHUDPanel)
+
 	h.loadSprites()
 
 	h.healthGlobe.load()
+	h.healthGlobe.SetRenderPriority(d2ui.RenderPriorityForeground)
+	h.panelGroup.AddWidget(h.healthGlobe)
+
 	h.manaGlobe.load()
+	h.manaGlobe.SetRenderPriority(d2ui.RenderPriorityForeground)
+	h.panelGroup.AddWidget(h.manaGlobe)
 
 	h.loadSkillResources()
 	h.loadCustomWidgets()
 	h.loadTooltips()
 	h.loadUIButtons()
+
+	h.panelGroup.SetVisible(true)
 }
 
 func (h *HUD) loadCustomWidgets() {
@@ -184,13 +194,17 @@ func (h *HUD) loadCustomWidgets() {
 
 	h.panelBackground = h.uiManager.NewCustomWidgetCached(h.renderPanelStatic, screenWidth, height)
 	h.panelBackground.SetPosition(0, screenHeight-height)
+	h.panelGroup.AddWidget(h.panelBackground)
 
 	// stamina bar
 	h.widgetStamina = h.uiManager.NewCustomWidget(h.renderStaminaBar, staminaBarWidth, staminaBarHeight)
 	h.widgetStamina.SetPosition(staminaBarOffsetX, staminaBarOffsetY)
+	h.widgetStamina.SetTooltip(h.staminaTooltip)
+	h.panelGroup.AddWidget(h.widgetStamina)
 
 	// experience bar
 	h.widgetExperience = h.uiManager.NewCustomWidget(h.renderExperienceBar, expBarWidth, expBarHeight)
+	h.panelGroup.AddWidget(h.widgetExperience)
 
 	// Left skill widget
 	leftRenderFunc := func(target d2interface.Surface) {
@@ -200,6 +214,7 @@ func (h *HUD) loadCustomWidgets() {
 
 	h.widgetLeftSkill = h.uiManager.NewCustomWidget(leftRenderFunc, skillIconWidth, skillIconHeight)
 	h.widgetLeftSkill.SetPosition(leftSkillX, screenHeight)
+	h.panelGroup.AddWidget(h.widgetLeftSkill)
 
 	// Right skill widget
 	rightRenderFunc := func(target d2interface.Surface) {
@@ -209,6 +224,7 @@ func (h *HUD) loadCustomWidgets() {
 
 	h.widgetRightSkill = h.uiManager.NewCustomWidget(rightRenderFunc, skillIconWidth, skillIconHeight)
 	h.widgetRightSkill.SetPosition(rightSkillX, screenHeight)
+	h.panelGroup.AddWidget(h.widgetRightSkill)
 }
 
 func (h *HUD) loadSkillResources() {
@@ -649,15 +665,6 @@ func (h *HUD) renderForSelectableEntitiesHovered(target d2interface.Surface) {
 // Render draws the HUD to the screen
 func (h *HUD) Render(target d2interface.Surface) error {
 	h.renderForSelectableEntitiesHovered(target)
-
-	h.panelBackground.Render(target)
-
-	h.healthGlobe.Render(target)
-	h.widgetLeftSkill.Render(target)
-	h.widgetRightSkill.Render(target)
-	h.manaGlobe.Render(target)
-	h.widgetStamina.Render(target)
-	h.widgetExperience.Render(target)
 
 	if h.isZoneTextShown {
 		h.zoneChangeText.SetPosition(zoneChangeTextX, zoneChangeTextY)
