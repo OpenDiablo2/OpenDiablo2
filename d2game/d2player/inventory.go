@@ -22,9 +22,13 @@ const (
 )
 
 const (
-	invCloseButtonX, invCloseButtonY = 419, 449
-	invGoldButtonX, invGoldButtonY   = 485, 455
-	invGoldLabelX, invGoldLabelY     = 510, 455
+	invCloseButtonX, invCloseButtonY       = 419, 449
+	invGoldButtonX, invGoldButtonY         = 485, 455
+	invGoldLabelX, invGoldLabelY           = 510, 455
+	invMoveGoldX, invMoveGoldY             = 0, 0
+	invMoveGoldOkX, invMoveGoldOkY         = 0, 0
+	invMoveGoldCancelX, invMoveGoldCancelY = 0, 0
+	invMoveGoldValueX, invMoveGoldValueY   = 0, 0
 )
 
 // NewInventory creates an inventory instance and returns a pointer to it
@@ -59,27 +63,33 @@ func NewInventory(asset *d2asset.AssetManager,
 
 // Inventory represents the inventory
 type Inventory struct {
-	asset       *d2asset.AssetManager
-	item        *diablo2item.ItemFactory
-	uiManager   *d2ui.UIManager
-	frame       *d2ui.UIFrame
-	panel       *d2ui.Sprite
-	grid        *ItemGrid
-	itemTooltip *d2ui.Tooltip
-	closeButton *d2ui.Button
-	goldButton  *d2ui.Button
-	goldLabel   *d2ui.Label
-	panelGroup  *d2ui.WidgetGroup
-	goldValue   int
-	hoverX      int
-	hoverY      int
-	originX     int
-	originY     int
-	lastMouseX  int
-	lastMouseY  int
-	hovering    bool
-	isOpen      bool
-	onCloseCb   func()
+	asset         *d2asset.AssetManager
+	item          *diablo2item.ItemFactory
+	uiManager     *d2ui.UIManager
+	frame         *d2ui.UIFrame
+	panel         *d2ui.Sprite
+	grid          *ItemGrid
+	itemTooltip   *d2ui.Tooltip
+	closeButton   *d2ui.Button
+	goldButton    *d2ui.Button
+	goldLabel     *d2ui.Label
+	panelGroup    *d2ui.WidgetGroup
+	moveGold      *d2ui.Sprite
+	moveGoldOk    *d2ui.Button
+	moveGoldOk    *d2ui.Button
+	moveGoldValue *d2ui.TextBox
+	panelMoveGold *d2ui.WidgetGroup
+	goldValue     int
+	hoverX        int
+	hoverY        int
+	originX       int
+	originY       int
+	lastMouseX    int
+	lastMouseY    int
+	hovering      bool
+	isOpen        bool
+	isChest       bool
+	onCloseCb     func()
 
 	logger *d2util.Logger
 }
@@ -98,6 +108,7 @@ func (g *Inventory) Load() {
 	var err error
 
 	g.panelGroup = g.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
+	g.panelMoveGold = g.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
 
 	g.frame = d2ui.NewUIFrame(g.asset, g.uiManager, d2ui.FrameRight)
 	g.panelGroup.AddWidget(g.frame)
@@ -119,6 +130,8 @@ func (g *Inventory) Load() {
 	g.goldLabel.SetText(fmt.Sprintln(g.goldValue))
 	g.goldLabel.SetPosition(invGoldLabelX, invGoldLabelY)
 	g.panelGroup.AddWidget(g.goldLabel)
+
+	g.goldButton = g.uiManager.NewButton(d2ui.ButtonTypeGoldCoin, "")
 
 	g.panel, err = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 	if err != nil {
@@ -179,18 +192,12 @@ func (g *Inventory) Load() {
 // Open opens the inventory
 func (g *Inventory) Open() {
 	g.isOpen = true
-	/*g.closeButton.SetVisible(true)
-	g.goldButton.SetVisible(true)
-	g.goldLabel.SetVisible(true)*/
 	g.panelGroup.SetVisible(true)
 }
 
 // Close closes the inventory
 func (g *Inventory) Close() {
 	g.isOpen = false
-	/*g.closeButton.SetVisible(false)
-	g.goldButton.SetVisible(false)
-	g.goldLabel.SetVisible(false)*/
 	g.panelGroup.SetVisible(false)
 	g.onCloseCb()
 }
