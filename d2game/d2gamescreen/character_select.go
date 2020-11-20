@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"math"
 	"os"
+	"strconv"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 
@@ -346,7 +347,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		}
 
 		heroName := v.gameStates[idx].HeroName
-		heroInfo := "Level 1 " + v.gameStates[idx].HeroType.String()
+		heroInfo := "Level " + strconv.FormatInt(int64(v.gameStates[idx].Stats.Level), 10) + " " + v.gameStates[idx].HeroType.String()
 
 		v.characterNameLabel[i].SetText(d2ui.ColorTokenize(heroName, d2ui.ColorTokenGold))
 		v.characterStatsLabel[i].SetText(d2ui.ColorTokenize(heroInfo, d2ui.ColorTokenWhite))

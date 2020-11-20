@@ -9,7 +9,6 @@ import (
 type HeroState struct {
 	HeroName   string                         `json:"heroName"`
 	HeroType   d2enum.Hero                    `json:"heroType"`
-	HeroLevel  int                            `json:"heroLevel"`
 	Act        int                            `json:"act"`
 	FilePath   string                         `json:"-"`
 	Equipment  d2inventory.CharacterEquipment `json:"equipment"`
