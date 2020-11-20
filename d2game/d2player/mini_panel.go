@@ -249,7 +249,9 @@ func (m *miniPanel) Toggle() {
 }
 
 func (m *miniPanel) Open() {
-	m.panelGroup.SetVisible(true)
+	if !m.movedLeft && !m.movedRight {
+		m.panelGroup.SetVisible(true)
+	}
 
 	if !m.menuButton.GetToggled() {
 		m.menuButton.Toggle()
@@ -299,7 +301,7 @@ func (m *miniPanel) SetMovedLeft(moveLeft bool) {
 			m.panelGroup.SetVisible(false)
 		} else {
 			m.moveRight()
-			m.panelGroup.SetVisible(true)
+			m.panelGroup.SetVisible(m.isOpen)
 		}
 	} else {
 		if moveLeft {
@@ -323,7 +325,7 @@ func (m *miniPanel) SetMovedRight(moveRight bool) {
 			m.panelGroup.SetVisible(false)
 		} else {
 			m.moveLeft()
-			m.panelGroup.SetVisible(true)
+			m.panelGroup.SetVisible(m.isOpen)
 		}
 	} else {
 		if moveRight {

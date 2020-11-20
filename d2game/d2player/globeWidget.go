@@ -43,6 +43,9 @@ const (
 // static check that globeWidget implements Widget
 var _ d2ui.Widget = &globeWidget{}
 
+// static check that globeWidget implements ClickableWidget
+var _ d2ui.ClickableWidget = &globeWidget{}
+
 type globeFrame struct {
 	sprite  *d2ui.Sprite
 	offsetX int
@@ -109,13 +112,23 @@ func newGlobeWidget(ui *d2ui.UIManager, asset *d2asset.AssetManager, x, y int, g
 		valueMax:   valueMax,
 		globe:      globe,
 		overlap:    overlap,
+		isTooltipLocked: false,
 		tooltipX:   tooltipX,
 		tooltipY:   tooltipY,
 		tooltipTrans: tooltipTrans,
 	}
 
-	gw.OnHoverStart(func() { gw.tooltip.SetVisible(true) })
-	gw.OnHoverEnd(func() { gw.tooltip.SetVisible(false) })
+	gw.OnHoverStart(func() {
+		if !gw.isTooltipLocked {
+			gw.tooltip.SetVisible(true)
+		}
+	})
+
+	gw.OnHoverEnd(func() {
+		if !gw.isTooltipLocked {
+			gw.tooltip.SetVisible(false)
+		}
+	})
 
 	gw.logger = d2util.NewLogger()
 	gw.logger.SetLevel(l)
@@ -133,6 +146,8 @@ type globeWidget struct {
 	overlap  *globeFrame
 	logger   *d2util.Logger
 
+	pressed  bool
+	isTooltipLocked bool
 	tooltip  *d2ui.Tooltip
 	tooltipX int
 	tooltipY int
@@ -197,4 +212,29 @@ func (g *globeWidget) Advance(elapsed float64) error {
 	g.updateTooltip()
 
 	return nil
+}
+
+func (g *globeWidget) Activate() {
+	g.isTooltipLocked = !g.isTooltipLocked
+	g.tooltip.SetVisible(g.isTooltipLocked)
+}
+
+func (g *globeWidget) GetEnabled() bool {
+	return true
+}
+
+func (g *globeWidget) SetEnabled(enable bool) {
+	// No-op
+}
+
+func (g *globeWidget) GetPressed() bool {
+	return g.pressed
+}
+
+func (g *globeWidget) SetPressed(pressed bool) {
+	g.pressed = pressed
+}
+
+func (g *globeWidget) OnActivated(callback func()) {
+	// No-op
 }
