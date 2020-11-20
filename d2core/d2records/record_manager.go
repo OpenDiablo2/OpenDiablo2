@@ -36,7 +36,7 @@ func NewRecordManager(l d2util.LogLevel) (*RecordManager, error) {
 
 // RecordManager stores all of the records loaded from txt files
 type RecordManager struct {
-	Logger       *d2util.Logger
+	*d2util.Logger
 	boundLoaders map[string][]recordLoader // there can be more than one loader bound for a file
 	Animation    struct {
 		Data  d2data.AnimationData
