@@ -68,6 +68,9 @@ const (
 
 	miniPanelButtonOffsetX = -8
 	miniPanelButtonOffsetY = -38
+
+	miniPanelTooltipOffsetX = 7
+	miniPanelTooltipOffsetY = -14
 )
 
 const (
@@ -172,8 +175,8 @@ func (h *HUD) Load() {
 
 	h.loadSkillResources()
 	h.loadCustomWidgets()
-	h.loadUIButtons()
 	h.loadTooltips()
+	h.loadUIButtons()
 }
 
 func (h *HUD) loadCustomWidgets() {
@@ -308,8 +311,9 @@ func (h *HUD) loadTooltips() {
 	h.manaTooltip.SetPosition(manaLabelX, manaLabelY)
 	h.manaTooltip.SetBoxEnabled(false)
 
-	// minipanel tooltip
+	// minipanel open/close tooltip
 	h.miniPanelTooltip = h.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteUnits, d2ui.TooltipXCenter, d2ui.TooltipYTop)
+	h.miniPanelTooltip.SetPosition(screenWidth/2+miniPanelButtonOffsetX+miniPanelTooltipOffsetX, screenHeight+miniPanelButtonOffsetY+miniPanelTooltipOffsetY)
 }
 
 func (h *HUD) loadUIButtons() {
@@ -332,7 +336,21 @@ func (h *HUD) loadUIButtons() {
 	h.menuButton.OnActivated(func() {
 		h.menuButton.Toggle()
 		h.miniPanel.Toggle()
+		h.updateMinipanelTooltipText()
 	})
+	h.menuButton.SetTooltip(h.miniPanelTooltip)
+	h.updateMinipanelTooltipText()
+}
+
+func (h *HUD) updateMinipanelTooltipText() {
+	var stringTableKey string
+	if h.menuButton.GetToggled() {
+		stringTableKey = "panelcmini"
+	} else {
+		stringTableKey = "panelmini"
+	}
+
+	h.miniPanelTooltip.SetText(h.asset.TranslateString(stringTableKey))
 }
 
 func (h *HUD) onToggleRunButton(noButton bool) {
