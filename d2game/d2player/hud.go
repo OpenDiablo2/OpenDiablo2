@@ -176,9 +176,9 @@ func (h *HUD) Load() {
 	h.manaGlobe.SetRenderPriority(d2ui.RenderPriorityForeground)
 	h.panelGroup.AddWidget(h.manaGlobe)
 
+	h.loadTooltips()
 	h.loadSkillResources()
 	h.loadCustomWidgets()
-	h.loadTooltips()
 	h.loadUIButtons()
 
 	h.panelGroup.SetVisible(true)
@@ -583,21 +583,13 @@ func (h *HUD) renderRunWalkTooltip(target d2interface.Surface) {
 	h.runWalkTooltip.Render(target)
 }
 
-func (h *HUD) renderStaminaTooltip(target d2interface.Surface) {
-	mx, my := h.lastMouseX, h.lastMouseY
-
-	// Display stamina tooltip when hovered.
-	if !h.actionableRegions[stamina].rect.IsInRect(mx, my) {
-		return
-	}
-
+func (h *HUD) setStaminaTooltipText() {
 	// Create and format Stamina string from string lookup table.
 	fmtStamina := h.asset.TranslateString("panelstamina")
 	staminaCurr, staminaMax := int(h.hero.Stats.Stamina), h.hero.Stats.MaxStamina
 	strPanelStamina := fmt.Sprintf(fmtStamina, staminaCurr, staminaMax)
 
 	h.staminaTooltip.SetText(strPanelStamina)
-	h.staminaTooltip.Render(target)
 }
 
 func (h *HUD) renderExperienceTooltip(target d2interface.Surface) {
@@ -674,7 +666,6 @@ func (h *HUD) Render(target d2interface.Surface) error {
 	h.renderHealthTooltip(target)
 	h.renderManaTooltip(target)
 	h.renderRunWalkTooltip(target)
-	h.renderStaminaTooltip(target)
 	h.renderExperienceTooltip(target)
 
 	if h.skillSelectMenu.IsOpen() {
@@ -702,6 +693,10 @@ func (h *HUD) getSkillResourceByClass(class string) string {
 	}
 
 	return entry
+}
+
+func (h *HUD) Advance(elapsed float64) {
+	h.setStaminaTooltipText()
 }
 
 // OnMouseMove handles mouse move events

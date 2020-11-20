@@ -674,6 +674,7 @@ func (g *GameControls) Load() {
 // Advance advances the state of the GameControls
 func (g *GameControls) Advance(elapsed float64) error {
 	g.mapRenderer.Advance(elapsed)
+	g.hud.Advance(elapsed)
 
 	if err := g.escapeMenu.Advance(elapsed); err != nil {
 		return err
