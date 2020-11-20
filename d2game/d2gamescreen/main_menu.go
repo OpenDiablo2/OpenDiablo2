@@ -633,6 +633,7 @@ func (v *MainMenu) onBtnTCPIPOkClicked() {
 
 // getLocalIP returns local machine IP address
 func (v *MainMenu) getLocalIP() string {
+	// https://stackoverflow.com/a/28862477
 	host, _ := os.Hostname()
 	addrs, _ := net.LookupIP(host)
 
