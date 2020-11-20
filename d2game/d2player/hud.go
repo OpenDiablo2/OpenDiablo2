@@ -204,6 +204,8 @@ func (h *HUD) loadCustomWidgets() {
 
 	// experience bar
 	h.widgetExperience = h.uiManager.NewCustomWidget(h.renderExperienceBar, expBarWidth, expBarHeight)
+	h.widgetExperience.SetPosition(experienceBarOffsetX, experienceBarOffsetY)
+	h.widgetExperience.SetTooltip(h.experienceTooltip)
 	h.panelGroup.AddWidget(h.widgetExperience)
 
 	// Left skill widget
@@ -592,14 +594,7 @@ func (h *HUD) setStaminaTooltipText() {
 	h.staminaTooltip.SetText(strPanelStamina)
 }
 
-func (h *HUD) renderExperienceTooltip(target d2interface.Surface) {
-	mx, my := h.lastMouseX, h.lastMouseY
-
-	// Display experience tooltip when hovered.
-	if !h.actionableRegions[xp].rect.IsInRect(mx, my) {
-		return
-	}
-
+func (h *HUD) setExperienceTooltipText() {
 	// Create and format Experience string from string lookup table.
 	fmtExp := h.asset.TranslateString("panelexp")
 
@@ -613,7 +608,6 @@ func (h *HUD) renderExperienceTooltip(target d2interface.Surface) {
 	strPanelExp := fmt.Sprintf(fmtExp, expCurr, expMax)
 
 	h.experienceTooltip.SetText(strPanelExp)
-	h.experienceTooltip.Render(target)
 }
 
 func (h *HUD) renderForSelectableEntitiesHovered(target d2interface.Surface) {
@@ -666,7 +660,6 @@ func (h *HUD) Render(target d2interface.Surface) error {
 	h.renderHealthTooltip(target)
 	h.renderManaTooltip(target)
 	h.renderRunWalkTooltip(target)
-	h.renderExperienceTooltip(target)
 
 	if h.skillSelectMenu.IsOpen() {
 		h.skillSelectMenu.Render(target)
@@ -697,6 +690,7 @@ func (h *HUD) getSkillResourceByClass(class string) string {
 
 func (h *HUD) Advance(elapsed float64) {
 	h.setStaminaTooltipText()
+	h.setExperienceTooltipText()
 }
 
 // OnMouseMove handles mouse move events
