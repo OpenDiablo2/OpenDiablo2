@@ -20,7 +20,7 @@ type ScreenManager struct {
 	currentScreen Screen
 	guiManager    *d2gui.GuiManager
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 // NewScreenManager creates a screen manager
@@ -30,9 +30,9 @@ func NewScreenManager(ui *d2ui.UIManager, l d2util.LogLevel, guiManager *d2gui.G
 		guiManager: guiManager,
 	}
 
-	sm.logger = d2util.NewLogger()
-	sm.logger.SetPrefix(logPrefix)
-	sm.logger.SetLevel(l)
+	sm.Logger = d2util.NewLogger()
+	sm.Logger.SetPrefix(logPrefix)
+	sm.Logger.SetLevel(l)
 
 	return sm
 }
@@ -49,11 +49,11 @@ func (sm *ScreenManager) Advance(elapsed float64) error {
 		// this call blocks execution and could lead to deadlock if a screen implements OnLoad incorreclty
 		load, ok := <-sm.loadingState.updates
 		if !ok {
-			sm.logger.Warning("loadingState chan should not be closed while in a loading screen")
+			sm.Warning("loadingState chan should not be closed while in a loading screen")
 		}
 
 		if load.err != nil {
-			sm.logger.Errorf("PROBLEM LOADING THE SCREEN: %v", load.err)
+			sm.Errorf("PROBLEM LOADING THE SCREEN: %v", load.err)
 			return load.err
 		}
 
