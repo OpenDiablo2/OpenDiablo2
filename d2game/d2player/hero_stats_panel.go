@@ -103,9 +103,9 @@ func NewHeroStatsPanel(asset *d2asset.AssetManager,
 		labels:    &StatsPanelLabels{},
 	}
 
-	hsp.logger = d2util.NewLogger()
-	hsp.logger.SetLevel(l)
-	hsp.logger.SetPrefix(logPrefix)
+	hsp.Logger = d2util.NewLogger()
+	hsp.Logger.SetLevel(l)
+	hsp.Logger.SetPrefix(logPrefix)
 
 	return hsp
 }
@@ -126,7 +126,7 @@ type HeroStatsPanel struct {
 	originY int
 	isOpen  bool
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 // Load the data for the hero status panel
@@ -140,7 +140,7 @@ func (s *HeroStatsPanel) Load() {
 
 	s.panel, err = s.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 	if err != nil {
-		s.logger.Error(err.Error())
+		s.Error(err.Error())
 	}
 
 	w, h := frame.GetSize()
@@ -216,7 +216,7 @@ func (s *HeroStatsPanel) renderStaticPanelFrames(target d2interface.Surface) {
 
 	for _, frameIndex := range frames {
 		if err := s.panel.SetCurrentFrame(frameIndex); err != nil {
-			s.logger.Error(err.Error())
+			s.Error(err.Error())
 		}
 
 		w, h := s.panel.GetCurrentFrameSize()

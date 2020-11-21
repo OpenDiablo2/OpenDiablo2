@@ -44,9 +44,9 @@ func CreateCredits(navigator d2interface.Navigator,
 		uiManager:          ui,
 	}
 
-	credits.logger = d2util.NewLogger()
-	credits.logger.SetLevel(l)
-	credits.logger.SetPrefix(logPrefix)
+	credits.Logger = d2util.NewLogger()
+	credits.Logger.SetLevel(l)
+	credits.Logger.SetPrefix(logPrefix)
 
 	return credits
 }
@@ -65,20 +65,21 @@ type Credits struct {
 	renderer  d2interface.Renderer
 	navigator d2interface.Navigator
 	uiManager *d2ui.UIManager
-	logger    *d2util.Logger
+
+	*d2util.Logger
 }
 
 // LoadContributors loads the contributors data from file
 func (v *Credits) LoadContributors() []string {
 	file, err := os.Open(path.Join("./", "CONTRIBUTORS"))
 	if err != nil || file == nil {
-		v.logger.Warning("CONTRIBUTORS file is missing")
+		v.Warning("CONTRIBUTORS file is missing")
 		return []string{"MISSING CONTRIBUTOR FILES!"}
 	}
 
 	defer func() {
 		if err = file.Close(); err != nil {
-			v.logger.Error("an error occurred while closing file: %s, err: %q\n" + file.Name() + err.Error())
+			v.Errorf("an error occurred while closing file: %s, err: %e", file.Name(), err)
 		}
 	}()
 
@@ -98,7 +99,7 @@ func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 
 	v.creditsBackground, err = v.uiManager.NewSprite(d2resource.CreditsBackground, d2resource.PaletteSky)
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 	}
 
 	v.creditsBackground.SetPosition(creditsX, creditsY)
@@ -119,7 +120,7 @@ func (v *Credits) OnLoad(loading d2screen.LoadingState) {
 
 	creditData, err := d2util.Utf16BytesToString(fileData[2:])
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 	}
 
 	v.creditsText = strings.Split(creditData, "\r\n")

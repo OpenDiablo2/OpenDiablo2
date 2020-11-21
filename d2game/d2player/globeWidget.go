@@ -56,7 +56,7 @@ type globeFrame struct {
 
 func (gf *globeFrame) setFrameIndex() {
 	if err := gf.sprite.SetCurrentFrame(gf.idx); err != nil {
-		gf.gw.logger.Error(err.Error())
+		gf.gw.Error(err.Error())
 	}
 }
 
@@ -132,9 +132,9 @@ func newGlobeWidget(ui *d2ui.UIManager,
 		}
 	})
 
-	gw.logger = d2util.NewLogger()
-	gw.logger.SetLevel(l)
-	gw.logger.SetPrefix(logPrefix)
+	gw.Logger = d2util.NewLogger()
+	gw.Logger.SetLevel(l)
+	gw.Logger.SetPrefix(logPrefix)
 
 	return gw
 }
@@ -146,7 +146,7 @@ type globeWidget struct {
 	valueMax *int
 	globe    *globeFrame
 	overlap  *globeFrame
-	logger   *d2util.Logger
+	*d2util.Logger
 
 	pressed         bool
 	isTooltipLocked bool
@@ -161,14 +161,14 @@ func (g *globeWidget) load() {
 
 	g.globe.sprite, err = g.GetManager().NewSprite(d2resource.HealthManaIndicator, d2resource.PaletteSky)
 	if err != nil {
-		g.logger.Error(err.Error())
+		g.Error(err.Error())
 	}
 
 	g.globe.setFrameIndex()
 
 	g.overlap.sprite, err = g.GetManager().NewSprite(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
 	if err != nil {
-		g.logger.Error(err.Error())
+		g.Error(err.Error())
 	}
 
 	g.overlap.setFrameIndex()

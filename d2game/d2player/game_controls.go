@@ -278,9 +278,9 @@ func NewGameControls(
 		return nil, err
 	}
 
-	gc.logger = d2util.NewLogger()
-	gc.logger.SetLevel(l)
-	gc.logger.SetPrefix(logPrefix)
+	gc.Logger = d2util.NewLogger()
+	gc.Logger.SetLevel(l)
+	gc.Logger.SetPrefix(logPrefix)
 
 	return gc, nil
 }
@@ -312,7 +312,7 @@ type GameControls struct {
 	FreeCam                bool
 	isSinglePlayer         bool
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 type actionableType int
@@ -814,7 +814,7 @@ func (g *GameControls) onHoverActionable(item actionableType) {
 
 	onHover, found := hoverMap[item]
 	if !found {
-		g.logger.Error(fmt.Sprintf("Unrecognized actionableType(%d) being hovered\n", item))
+		g.Errorf("Unrecognized actionableType(%d) being hovered", item)
 		return
 	}
 
@@ -829,23 +829,23 @@ func (g *GameControls) onClickActionable(item actionableType) {
 		},
 
 		newStats: func() {
-			g.logger.Info("New Stats Selector Action Pressed")
+			g.Info("New Stats Selector Action Pressed")
 		},
 
 		xp: func() {
-			g.logger.Info("XP Action Pressed")
+			g.Info("XP Action Pressed")
 		},
 
 		walkRun: func() {
-			g.logger.Info("Walk/Run Action Pressed")
+			g.Info("Walk/Run Action Pressed")
 		},
 
 		stamina: func() {
-			g.logger.Info("Stamina Action Pressed")
+			g.Info("Stamina Action Pressed")
 		},
 
 		newSkills: func() {
-			g.logger.Info("New Skills Selector Action Pressed")
+			g.Info("New Skills Selector Action Pressed")
 		},
 
 		rightSkill: func() {
@@ -854,19 +854,19 @@ func (g *GameControls) onClickActionable(item actionableType) {
 
 		hpGlobe: func() {
 			g.ToggleHpStats()
-			g.logger.Info("HP Globe Pressed")
+			g.Info("HP Globe Pressed")
 		},
 
 		manaGlobe: func() {
 			g.ToggleManaStats()
-			g.logger.Info("Mana Globe Pressed")
+			g.Info("Mana Globe Pressed")
 		},
 	}
 
 	action, found := actionMap[item]
 	if !found {
 		// Warning, because some action types are still todo, and could return this error
-		g.logger.Warning(fmt.Sprintf("Unrecognized actionableType(%d) being clicked\n", item))
+		g.Warningf("Unrecognized actionableType(%d) being clicked", item)
 		return
 	}
 
@@ -976,7 +976,7 @@ func (g *GameControls) bindLearnSkillsCommand(term d2interface.Terminal) error {
 		}
 
 		g.hud.skillSelectMenu.RegenerateImageCache()
-		g.logger.Info(fmt.Sprintf("Learned %d skills", learnedSkillsCount))
+		g.Infof("Learned %d skills", learnedSkillsCount)
 
 		if err != nil {
 			term.OutputErrorf("cannot learn skill for class, error: %s", err)
@@ -1013,7 +1013,7 @@ func (g *GameControls) bindLearnSkillByIDCommand(term d2interface.Terminal) erro
 		}
 
 		g.hud.skillSelectMenu.RegenerateImageCache()
-		g.logger.Info("Learned skill: " + skill.Skill)
+		g.Info("Learned skill: " + skill.Skill)
 	}
 
 	return term.BindAction(

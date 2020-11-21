@@ -113,9 +113,9 @@ func CreateMainMenu(
 		heroState:      heroStateFactory,
 	}
 
-	mainMenu.logger = d2util.NewLogger()
-	mainMenu.logger.SetPrefix(logPrefix)
-	mainMenu.logger.SetLevel(l)
+	mainMenu.Logger = d2util.NewLogger()
+	mainMenu.Logger.SetPrefix(logPrefix)
+	mainMenu.Logger.SetLevel(l)
 
 	if len(errorMessageOptional) != 0 {
 		mainMenu.errorLabel = ui.NewLabel(d2resource.FontFormal12, d2resource.PaletteUnits)
@@ -173,7 +173,7 @@ type MainMenu struct {
 
 	buildInfo BuildInfo
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 // OnLoad is called to load the resources for the main menu
@@ -198,7 +198,7 @@ func (v *MainMenu) OnLoad(loading d2screen.LoadingState) {
 	}
 
 	if err := v.inputManager.BindHandler(v); err != nil {
-		v.logger.Error("failed to add main menu as event handler")
+		v.Error("failed to add main menu as event handler")
 	}
 }
 
@@ -207,28 +207,28 @@ func (v *MainMenu) loadBackgroundSprites() {
 
 	v.background, err = v.uiManager.NewSprite(d2resource.GameSelectScreen, d2resource.PaletteSky)
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 	}
 
 	v.background.SetPosition(backgroundX, backgroundY)
 
 	v.trademarkBackground, err = v.uiManager.NewSprite(d2resource.TrademarkScreen, d2resource.PaletteSky)
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 	}
 
 	v.trademarkBackground.SetPosition(backgroundX, backgroundY)
 
 	v.tcpIPBackground, err = v.uiManager.NewSprite(d2resource.TCPIPBackground, d2resource.PaletteSky)
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 	}
 
 	v.tcpIPBackground.SetPosition(backgroundX, backgroundY)
 
 	v.serverIPBackground, err = v.uiManager.NewSprite(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 	}
 
 	v.serverIPBackground.SetPosition(serverIPbackgroundX, serverIPbackgroundY)
@@ -296,7 +296,7 @@ func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
 
 	v.diabloLogoLeft, err = v.uiManager.NewSprite(d2resource.Diablo2LogoFireLeft, d2resource.PaletteUnits)
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 	}
 
 	v.diabloLogoLeft.SetEffect(d2enum.DrawEffectModulate)
@@ -306,7 +306,7 @@ func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
 
 	v.diabloLogoRight, err = v.uiManager.NewSprite(d2resource.Diablo2LogoFireRight, d2resource.PaletteUnits)
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 	}
 
 	v.diabloLogoRight.SetEffect(d2enum.DrawEffectModulate)
@@ -315,14 +315,14 @@ func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
 
 	v.diabloLogoLeftBack, err = v.uiManager.NewSprite(d2resource.Diablo2LogoBlackLeft, d2resource.PaletteUnits)
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 	}
 
 	v.diabloLogoLeftBack.SetPosition(diabloLogoX, diabloLogoY)
 
 	v.diabloLogoRightBack, err = v.uiManager.NewSprite(d2resource.Diablo2LogoBlackRight, d2resource.PaletteUnits)
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 	}
 
 	v.diabloLogoRightBack.SetPosition(diabloLogoX, diabloLogoY)
@@ -426,7 +426,7 @@ func (v *MainMenu) onGithubButtonClicked() {
 	}
 
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 	}
 }
 
@@ -643,7 +643,7 @@ func (v *MainMenu) getLocalIP() string {
 		}
 	}
 
-	v.logger.Warning("no IPv4 Address could be found")
+	v.Warning("no IPv4 Address could be found")
 
 	return "no IPv4 Address could be found"
 }

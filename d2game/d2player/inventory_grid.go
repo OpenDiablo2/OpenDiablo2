@@ -55,9 +55,9 @@ func NewItemGrid(asset *d2asset.AssetManager,
 		equipmentSlots: genEquipmentSlotsMap(record),
 	}
 
-	itemGrid.logger = d2util.NewLogger()
-	itemGrid.logger.SetLevel(l)
-	itemGrid.logger.SetPrefix(logPrefix)
+	itemGrid.Logger = d2util.NewLogger()
+	itemGrid.Logger.SetLevel(l)
+	itemGrid.Logger.SetPrefix(logPrefix)
 
 	return itemGrid
 }
@@ -76,7 +76,7 @@ type ItemGrid struct {
 	sprites        map[string]*d2ui.Sprite
 	slotSize       int
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 // SlotToScreen translates slot coordinates to screen coordinates
@@ -145,7 +145,7 @@ func (g *ItemGrid) loadItem(item InventoryItem) {
 
 		itemSprite, err := g.uiManager.NewSprite(imgPath, d2resource.PaletteSky)
 		if err != nil {
-			g.logger.Error("Failed to load sprite, error: " + err.Error())
+			g.Error("Failed to load sprite, error: " + err.Error())
 		}
 
 		g.sprites[item.GetItemCode()] = itemSprite

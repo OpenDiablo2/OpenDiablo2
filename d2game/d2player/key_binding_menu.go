@@ -70,9 +70,9 @@ func NewKeyBindingMenu(
 		escapeMenu:       escapeMenu,
 	}
 
-	ret.logger = d2util.NewLogger()
-	ret.logger.SetLevel(l)
-	ret.logger.SetPrefix(logPrefix)
+	ret.Logger = d2util.NewLogger()
+	ret.Logger.SetLevel(l)
+	ret.Logger.SetPrefix(logPrefix)
 
 	ret.Box = d2gui.NewBox(
 		asset, renderer, ui, ret.mainLayout,
@@ -85,17 +85,17 @@ func NewKeyBindingMenu(
 	ret.Box.SetOptions([]*d2gui.LabelButton{
 		d2gui.NewLabelButton(0, 0, "Cancel", d2util.Color(d2gui.ColorRed), d2util.LogLevelDefault, func() {
 			if err := ret.onCancelClicked(); err != nil {
-				ret.logger.Error("error while clicking option Cancel: %v" + err.Error())
+				ret.Errorf("error while clicking option Cancel: %v", err.Error())
 			}
 		}),
 		d2gui.NewLabelButton(0, 0, "Default", d2util.Color(d2gui.ColorBlue), d2util.LogLevelDefault, func() {
 			if err := ret.onDefaultClicked(); err != nil {
-				ret.logger.Error("error while clicking option Default: %v" + err.Error())
+				ret.Errorf("error while clicking option Default: %v", err)
 			}
 		}),
 		d2gui.NewLabelButton(0, 0, "Accept", d2util.Color(d2gui.ColorGreen), d2util.LogLevelDefault, func() {
 			if err := ret.onAcceptClicked(); err != nil {
-				ret.logger.Error("error while clicking option Accept: %v" + err.Error())
+				ret.Errorf("error while clicking option Accept: %v", err)
 			}
 		}),
 	})
@@ -127,7 +127,7 @@ type KeyBindingMenu struct {
 	currentBindingLayout       *bindingLayout
 	lastBindingLayout          *bindingLayout
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 // Close will disable the render of the menu and clear

@@ -51,9 +51,9 @@ func newMiniPanel(asset *d2asset.AssetManager,
 		isSinglePlayer: isSinglePlayer,
 	}
 
-	mp.logger = d2util.NewLogger()
-	mp.logger.SetLevel(l)
-	mp.logger.SetPrefix(logPrefix)
+	mp.Logger = d2util.NewLogger()
+	mp.Logger.SetLevel(l)
+	mp.Logger.SetPrefix(logPrefix)
 
 	return mp
 }
@@ -75,7 +75,7 @@ type miniPanel struct {
 	groupAlwaysVis   *d2ui.WidgetGroup
 	tooltipGroup     *d2ui.WidgetGroup
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 func (m *miniPanel) load(actions *miniPanelActions) {
@@ -83,7 +83,7 @@ func (m *miniPanel) load(actions *miniPanelActions) {
 
 	m.sprite, err = m.ui.NewSprite(d2resource.MinipanelButton, d2resource.PaletteSky)
 	if err != nil {
-		m.logger.Error(err.Error())
+		m.Error(err.Error())
 		return
 	}
 
@@ -108,12 +108,12 @@ func (m *miniPanel) createWidgets(actions *miniPanelActions) {
 
 	m.container, err = m.ui.NewSprite(miniPanelContainerPath, d2resource.PaletteSky)
 	if err != nil {
-		m.logger.Error(err.Error())
+		m.Error(err.Error())
 		return
 	}
 
 	if err = m.container.SetCurrentFrame(0); err != nil {
-		m.logger.Error(err.Error())
+		m.Error(err.Error())
 		return
 	}
 
@@ -132,7 +132,7 @@ func (m *miniPanel) createButtons(actions *miniPanelActions) {
 
 	buttonWidth, buttonHeight, err := m.sprite.GetFrameSize(0)
 	if err != nil {
-		m.logger.Error(err.Error())
+		m.Error(err.Error())
 		return
 	}
 
