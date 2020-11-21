@@ -2,9 +2,7 @@ package d2maprenderer
 
 import (
 	"errors"
-	"fmt"
 	"image/color"
-	"log"
 	"math"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -15,6 +13,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
+)
+
+const (
+	logPrefix = "Map Renderer"
 )
 
 const (
@@ -59,18 +61,24 @@ type MapRenderer struct {
 	entityDebugVisLevel int     // Entity Debug visibility index (0=none, 1=vectors)
 	lastFrameTime       float64 // The last time the map was rendered
 	currentFrame        int     // Current render frame (for animations)
+
+	*d2util.Logger
 }
 
 // CreateMapRenderer creates a new MapRenderer, sets the required fields and returns a pointer to it.
 func CreateMapRenderer(asset *d2asset.AssetManager, renderer d2interface.Renderer,
 	mapEngine *d2mapengine.MapEngine,
-	term d2interface.Terminal, startX, startY float64) *MapRenderer {
+	term d2interface.Terminal, l d2util.LogLevel, startX, startY float64) *MapRenderer {
 	result := &MapRenderer{
 		asset:     asset,
 		renderer:  renderer,
 		mapEngine: mapEngine,
 		viewport:  NewViewport(0, 0, 800, 600),
 	}
+
+	result.Logger = d2util.NewLogger()
+	result.Logger.SetPrefix(logPrefix)
+	result.Logger.SetLevel(l)
 
 	result.Camera = Camera{}
 	rx, ry := result.WorldToOrtho(startX, startY)
@@ -84,7 +92,7 @@ func CreateMapRenderer(asset *d2asset.AssetManager, renderer d2interface.Rendere
 	})
 
 	if err != nil {
-		fmt.Printf("could not bind the mapdebugvis action, err: %v\n", err)
+		result.Errorf("could not bind the mapdebugvis action, err: %v", err)
 	}
 
 	err = term.BindAction("entitydebugvis", "set entity debug visualization level", func(level int) {
@@ -92,7 +100,7 @@ func CreateMapRenderer(asset *d2asset.AssetManager, renderer d2interface.Rendere
 	})
 
 	if err != nil {
-		fmt.Printf("could not bind the entitydebugvis action, err: %v\n", err)
+		result.Errorf("could not bind the entitydebugvis action, err: %v", err)
 	}
 
 	if mapEngine.LevelType().ID != 0 {
@@ -363,7 +371,7 @@ func (mr *MapRenderer) renderFloor(tile d2ds1.FloorShadowRecord, target d2interf
 	}
 
 	if img == nil {
-		log.Printf("Render called on uncached floor {%v,%v}", tile.Style, tile.Sequence)
+		mr.Warningf("Render called on uncached floor {%v,%v}", tile.Style, tile.Sequence)
 		return
 	}
 
@@ -379,7 +387,7 @@ func (mr *MapRenderer) renderFloor(tile d2ds1.FloorShadowRecord, target d2interf
 func (mr *MapRenderer) renderWall(tile d2ds1.WallRecord, viewport *Viewport, target d2interface.Surface) {
 	img := mr.getImageCacheRecord(tile.Style, tile.Sequence, tile.Type, tile.RandomIndex)
 	if img == nil {
-		log.Printf("Render called on uncached wall {%v,%v,%v}", tile.Style, tile.Sequence, tile.Type)
+		mr.Warningf("Render called on uncached wall {%v,%v,%v}", tile.Style, tile.Sequence, tile.Type)
 		return
 	}
 
@@ -395,7 +403,7 @@ func (mr *MapRenderer) renderWall(tile d2ds1.WallRecord, viewport *Viewport, tar
 func (mr *MapRenderer) renderShadow(tile d2ds1.FloorShadowRecord, target d2interface.Surface) {
 	img := mr.getImageCacheRecord(tile.Style, tile.Sequence, 13, tile.RandomIndex)
 	if img == nil {
-		log.Printf("Render called on uncached shadow {%v,%v}", tile.Style, tile.Sequence)
+		mr.Warningf("Render called on uncached shadow {%v,%v}", tile.Style, tile.Sequence)
 		return
 	}
 

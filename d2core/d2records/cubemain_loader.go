@@ -1,7 +1,7 @@
 package d2records
 
 import (
-	"log"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -24,6 +24,11 @@ func cubeRecipeLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	var inputFields = []string{"input 1", "input 2", "input 3", "input 4", "input 5", "input 6", "input 7"}
 
 	for d.Next() {
+		class, err := classFieldToEnum(d.String("class"))
+		if err != nil {
+			return err
+		}
+
 		record := &CubeRecipeRecord{
 			Description: d.String("description"),
 
@@ -37,7 +42,7 @@ func cubeRecipeLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 			ReqOperation: d.Number("op"),
 			ReqValue:     d.Number("value"),
 
-			Class: classFieldToEnum(d.String("class")),
+			Class: class,
 
 			NumInputs: d.Number("numinputs"),
 		}
@@ -45,17 +50,25 @@ func cubeRecipeLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 		// Create inputs - input 1-7
 		record.Inputs = make([]CubeRecipeItem, len(inputFields))
 		for i := range inputFields {
-			record.Inputs[i] = newCubeRecipeItem(
+			record.Inputs[i], err = newCubeRecipeItem(
 				d.String(inputFields[i]))
+			if err != nil {
+				return err
+			}
 		}
 
 		// Create outputs - output "", b, c
 		record.Outputs = make([]CubeRecipeResult, len(outputLabels))
-		for o, outLabel := range outputLabels {
-			record.Outputs[o] = CubeRecipeResult{
-				Item: newCubeRecipeItem(
-					d.String(outputFields[o])),
 
+		for o, outLabel := range outputLabels {
+			item, err := newCubeRecipeItem(
+				d.String(outputFields[o]))
+			if err != nil {
+				return err
+			}
+
+			record.Outputs[o] = CubeRecipeResult{
+				Item:   item,
 				Level:  d.Number(outLabel + "lvl"),
 				ILevel: d.Number(outLabel + "plvl"),
 				PLevel: d.Number(outLabel + "ilvl"),
@@ -94,7 +107,7 @@ func cubeRecipeLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 // arguments. arguments include at least an item and sometimes
 // parameters and/or a count (qty parameter). For example:
 // "weap,sock,mag,qty=10"
-func newCubeRecipeItem(f string) CubeRecipeItem {
+func newCubeRecipeItem(f string) (CubeRecipeItem, error) {
 	args := splitFieldValue(f)
 
 	item := CubeRecipeItem{
@@ -115,7 +128,8 @@ func newCubeRecipeItem(f string) CubeRecipeItem {
 		count, err := strconv.Atoi(strings.Split(arg, "=")[1])
 
 		if err != nil {
-			log.Fatal("Error parsing item count:", err)
+			// need to be verified
+			return item, fmt.Errorf("error parsing item count %e", err)
 		}
 
 		item.Count = count
@@ -132,7 +146,7 @@ func newCubeRecipeItem(f string) CubeRecipeItem {
 
 	// No other arguments were provided
 	if len(args) == 0 {
-		return item
+		return item, nil
 	}
 
 	// Record the argument strings
@@ -141,11 +155,11 @@ func newCubeRecipeItem(f string) CubeRecipeItem {
 		item.Params[idx] = arg
 	}
 
-	return item
+	return item, nil
 }
 
 // classFieldToEnum converts class tokens to s2enum.Hero.
-func classFieldToEnum(f string) []d2enum.Hero {
+func classFieldToEnum(f string) ([]d2enum.Hero, error) {
 	split := splitFieldValue(f)
 	enums := make([]d2enum.Hero, len(split))
 
@@ -170,11 +184,11 @@ func classFieldToEnum(f string) []d2enum.Hero {
 		case "dru":
 			enums[idx] = d2enum.HeroDruid
 		default:
-			log.Fatalf("Unknown hero token: '%s'", class)
+			return nil, fmt.Errorf("unknown hero token: '%s'", class)
 		}
 	}
 
-	return enums
+	return enums, nil
 }
 
 // splitFieldValue splits a string array from the following format:

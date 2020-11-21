@@ -2,7 +2,6 @@ package d2gui
 
 import (
 	"image/color"
-	"log"
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -36,7 +35,7 @@ type Label struct {
 	blinkTimer  time.Time
 }
 
-func createLabel(renderer d2interface.Renderer, text string, font *d2asset.Font, col color.RGBA) *Label {
+func createLabel(renderer d2interface.Renderer, text string, font *d2asset.Font, col color.RGBA) (*Label, error) {
 	label := &Label{
 		font:       font,
 		renderer:   renderer,
@@ -46,13 +45,12 @@ func createLabel(renderer d2interface.Renderer, text string, font *d2asset.Font,
 
 	err := label.setText(text)
 	if err != nil {
-		log.Print(err)
-		return nil
+		return nil, err
 	}
 
 	label.SetVisible(true)
 
-	return label
+	return label, nil
 }
 
 // SetHoverColor will set the value of hoverColor

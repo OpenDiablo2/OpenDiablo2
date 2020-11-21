@@ -1,7 +1,7 @@
 package d2records
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2calculation/d2parser"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
@@ -18,6 +18,11 @@ func skillDetailsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	for d.Next() {
 		name := d.String("skill")
 		parser.SetCurrentReference("skill", name)
+
+		anim, err := animToEnum(d.String("anim"))
+		if err != nil {
+			return err
+		}
 
 		record := &SkillRecord{
 			Skill:             d.String("skill"),
@@ -141,7 +146,7 @@ func skillDetailsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 			Itypeb3:           d.String("itypeb3"),
 			Etypeb1:           d.String("etypeb1"),
 			Etypeb2:           d.String("etypeb2"),
-			Anim:              animToEnum(d.String("anim")),
+			Anim:              anim,
 			Seqtrans:          d.String("seqtrans"),
 			Monanim:           d.String("monanim"),
 			Seqnum:            d.Number("seqnum"),
@@ -277,45 +282,42 @@ func skillDetailsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 	return nil
 }
 
-func animToEnum(anim string) d2enum.PlayerAnimationMode {
+func animToEnum(anim string) (d2enum.PlayerAnimationMode, error) {
 	switch anim {
 	case "SC":
-		return d2enum.PlayerAnimationModeCast
+		return d2enum.PlayerAnimationModeCast, nil
 
 	case "TH":
-		return d2enum.PlayerAnimationModeThrow
+		return d2enum.PlayerAnimationModeThrow, nil
 
 	case "KK":
-		return d2enum.PlayerAnimationModeKick
+		return d2enum.PlayerAnimationModeKick, nil
 
 	case "SQ":
-		return d2enum.PlayerAnimationModeSequence
+		return d2enum.PlayerAnimationModeSequence, nil
 
 	case "S1":
-		return d2enum.PlayerAnimationModeSkill1
+		return d2enum.PlayerAnimationModeSkill1, nil
 
 	case "S2":
-		return d2enum.PlayerAnimationModeSkill2
+		return d2enum.PlayerAnimationModeSkill2, nil
 
 	case "S3":
-		return d2enum.PlayerAnimationModeSkill3
+		return d2enum.PlayerAnimationModeSkill3, nil
 
 	case "S4":
-		return d2enum.PlayerAnimationModeSkill4
+		return d2enum.PlayerAnimationModeSkill4, nil
 
 	case "A1":
-		return d2enum.PlayerAnimationModeAttack1
+		return d2enum.PlayerAnimationModeAttack1, nil
 
 	case "A2":
-		return d2enum.PlayerAnimationModeAttack2
+		return d2enum.PlayerAnimationModeAttack2, nil
 
 	case "":
-		return d2enum.PlayerAnimationModeNone
-
-	default:
-		log.Fatalf("Unknown skill anim value [%s]", anim)
+		return d2enum.PlayerAnimationModeNone, nil
 	}
 
 	// should not be reached
-	return d2enum.PlayerAnimationModeNone
+	return d2enum.PlayerAnimationModeNone, fmt.Errorf("unknown skill anim value [%s]", anim)
 }

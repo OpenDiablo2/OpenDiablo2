@@ -1,8 +1,6 @@
 package d2ui
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -69,6 +67,8 @@ func NewUIFrame(
 	}
 	frame.Load()
 
+	frame.asset.Logger.SetPrefix(logPrefix) // workaround
+
 	return frame
 }
 
@@ -76,7 +76,7 @@ func NewUIFrame(
 func (u *UIFrame) Load() {
 	sprite, err := u.manager.NewSprite(d2resource.Frame, d2resource.PaletteSky)
 	if err != nil {
-		log.Print(err)
+		u.asset.Logger.Error(err.Error())
 	}
 
 	u.frame = sprite
@@ -111,7 +111,7 @@ func (u *UIFrame) calculateSize() {
 	for i := range framesWidth {
 		w, _, err := u.frame.GetFrameSize(framesWidth[i])
 		if err != nil {
-			log.Print(err)
+			u.asset.Logger.Error(err.Error())
 		}
 
 		u.width += w
@@ -120,7 +120,7 @@ func (u *UIFrame) calculateSize() {
 	for i := range framesHeight {
 		_, h, err := u.frame.GetFrameSize(framesHeight[i])
 		if err != nil {
-			log.Print(err)
+			u.asset.Logger.Error(err.Error())
 		}
 
 		u.height += h
@@ -132,11 +132,11 @@ func (u *UIFrame) Render(target d2interface.Surface) {
 	switch u.frameOrientation {
 	case FrameLeft:
 		if err := u.renderLeft(target); err != nil {
-			log.Printf("Render error %e", err)
+			u.asset.Logger.Error("Render error" + err.Error())
 		}
 	case FrameRight:
 		if err := u.renderRight(target); err != nil {
-			log.Printf("Render error %e", err)
+			u.asset.Logger.Error("Render error" + err.Error())
 		}
 	}
 }

@@ -3,6 +3,7 @@ package d2localclient
 import (
 	"github.com/google/uuid"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 
@@ -22,16 +23,18 @@ type LocalClientConnection struct {
 	openNetworkServer bool                        // True if this is a server
 	playerState       *d2hero.HeroState           // Local player state
 	gameServer        *d2server.GameServer        // Game Server
+
+	logLevel d2util.LogLevel
 }
 
 // GetUniqueID returns LocalClientConnection.uniqueID.
-func (l LocalClientConnection) GetUniqueID() string {
+func (l *LocalClientConnection) GetUniqueID() string {
 	return l.uniqueID
 }
 
 // GetConnectionType returns an enum representing the connection type.
 // See: d2clientconnectiontype
-func (l LocalClientConnection) GetConnectionType() d2clientconnectiontype.ClientConnectionType {
+func (l *LocalClientConnection) GetConnectionType() d2clientconnectiontype.ClientConnectionType {
 	return d2clientconnectiontype.Local
 }
 
@@ -42,7 +45,10 @@ func (l *LocalClientConnection) SendPacketToClient(packet d2netpacket.NetPacket)
 
 // Create constructs a new LocalClientConnection and returns
 // a pointer to it.
-func Create(asset *d2asset.AssetManager, openNetworkServer bool) (*LocalClientConnection, error) {
+func Create(
+	asset *d2asset.AssetManager,
+	l d2util.LogLevel,
+	openNetworkServer bool) (*LocalClientConnection, error) {
 	heroStateFactory, err := d2hero.NewHeroStateFactory(asset)
 	if err != nil {
 		return nil, err
@@ -53,6 +59,7 @@ func Create(asset *d2asset.AssetManager, openNetworkServer bool) (*LocalClientCo
 		asset:             asset,
 		uniqueID:          uuid.New().String(),
 		openNetworkServer: openNetworkServer,
+		logLevel:          l,
 	}
 
 	return result, nil
@@ -64,7 +71,7 @@ func (l *LocalClientConnection) Open(_, saveFilePath string) error {
 
 	l.SetPlayerState(l.heroState.LoadHeroState(saveFilePath))
 
-	l.gameServer, err = d2server.NewGameServer(l.asset, l.openNetworkServer, 30)
+	l.gameServer, err = d2server.NewGameServer(l.asset, l.openNetworkServer, l.logLevel, 30)
 	if err != nil {
 		return err
 	}

@@ -1,7 +1,7 @@
 package d2audio
 
 import (
-	"log"
+	"fmt"
 	"math/rand"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -9,9 +9,14 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 type envState int
+
+const (
+	logPrefix = "Sound Engine"
+)
 
 const (
 	envAttack  = 0
@@ -32,6 +37,8 @@ type Sound struct {
 	vRate   float64
 	state   envState
 	// panning float64 // lets forget about this for now
+
+	*d2util.Logger
 }
 
 func (s *Sound) update(elapsed float64) {
@@ -66,7 +73,7 @@ func (s *Sound) SetPan(pan float64) {
 
 // Play the sound
 func (s *Sound) Play() {
-	log.Println("starting sound", s.entry.Handle)
+	s.Info("starting sound" + s.entry.Handle)
 	s.effect.Play()
 
 	if s.entry.FadeIn != 0 {
@@ -103,11 +110,13 @@ type SoundEngine struct {
 	timer    float64
 	accTime  float64
 	sounds   map[*Sound]struct{}
+
+	*d2util.Logger
 }
 
 // NewSoundEngine creates a new sound engine
 func NewSoundEngine(provider d2interface.AudioProvider,
-	asset *d2asset.AssetManager, term d2interface.Terminal) *SoundEngine {
+	asset *d2asset.AssetManager, l d2util.LogLevel, term d2interface.Terminal) *SoundEngine {
 	r := SoundEngine{
 		asset:    asset,
 		provider: provider,
@@ -115,11 +124,15 @@ func NewSoundEngine(provider d2interface.AudioProvider,
 		timer:    1,
 	}
 
+	r.Logger = d2util.NewLogger()
+	r.Logger.SetPrefix(logPrefix)
+	r.Logger.SetLevel(l)
+
 	err := term.BindAction("playsoundid", "plays the sound for a given id", func(id int) {
 		r.PlaySoundID(id)
 	})
 	if err != nil {
-		log.Print(err)
+		r.Error(err.Error())
 		return nil
 	}
 
@@ -127,25 +140,25 @@ func NewSoundEngine(provider d2interface.AudioProvider,
 		r.PlaySoundHandle(handle)
 	})
 	if err != nil {
-		log.Print(err)
+		r.Error(err.Error())
 		return nil
 	}
 
 	err = term.BindAction("activesounds", "list currently active sounds", func() {
 		for s := range r.sounds {
 			if err != nil {
-				log.Print(err)
+				r.Error(err.Error())
 				return
 			}
 
-			log.Println(s)
+			r.Info(fmt.Sprint(s))
 		}
 	})
 
 	err = term.BindAction("killsounds", "kill active sounds", func() {
 		for s := range r.sounds {
 			if err != nil {
-				log.Print(err)
+				r.Error(err.Error())
 				return
 			}
 
@@ -207,13 +220,14 @@ func (s *SoundEngine) PlaySoundID(id int) *Sound {
 
 	effect, err := s.provider.LoadSound(entry.FileName, entry.Loop, entry.MusicVol)
 	if err != nil {
-		log.Print(err)
+		s.Error(err.Error())
 		return nil
 	}
 
 	snd := Sound{
 		entry:  entry,
 		effect: effect,
+		Logger: s.Logger,
 	}
 
 	s.sounds[&snd] = struct{}{}

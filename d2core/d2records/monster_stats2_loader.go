@@ -1,7 +1,7 @@
 package d2records
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
@@ -13,6 +13,11 @@ func monsterStats2Loader(r *RecordManager, d *d2txt.DataDictionary) error {
 	records := make(MonStats2)
 
 	for d.Next() {
+		resurrectMode, err := monsterAnimationModeFromString(d.String("ResurrectMode"))
+		if err != nil {
+			return err
+		}
+
 		record := &MonStats2Record{
 			Key:             d.String("Id"),
 			Height:          d.Number("Height"),
@@ -145,7 +150,7 @@ func monsterStats2Loader(r *RecordManager, d *d2txt.DataDictionary) error {
 			InfernoLen:         d.Number("InfernoLen"),
 			InfernoAnim:        d.Number("InfernoAnim"),
 			InfernoRollback:    d.Number("InfernoRollback"),
-			ResurrectMode:      monsterAnimationModeFromString(d.String("ResurrectMode")),
+			ResurrectMode:      resurrectMode,
 			ResurrectSkill:     d.String("ResurrectSkill"),
 		}
 
@@ -170,12 +175,11 @@ var monsterAnimationModeLookup = map[string]d2enum.MonsterAnimationMode{
 	d2enum.MonsterAnimationModeSequence.String(): d2enum.MonsterAnimationModeSequence,
 }
 
-func monsterAnimationModeFromString(s string) d2enum.MonsterAnimationMode {
+func monsterAnimationModeFromString(s string) (d2enum.MonsterAnimationMode, error) {
 	v, ok := monsterAnimationModeLookup[s]
 	if !ok {
-		log.Fatalf("unhandled MonsterAnimationMode %q", s)
-		return d2enum.MonsterAnimationModeNeutral
+		return d2enum.MonsterAnimationModeNeutral, fmt.Errorf("unhandled MonsterAnimationMode %q", s)
 	}
 
-	return v
+	return v, nil
 }

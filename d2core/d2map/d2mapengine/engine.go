@@ -1,7 +1,6 @@
 package d2mapengine
 
 import (
-	"log"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
@@ -13,8 +12,13 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapstamp"
+)
+
+const (
+	logPrefix = "Map Engine"
 )
 
 // MapEngine loads the tiles which make up the isometric map and the entities
@@ -34,6 +38,8 @@ type MapEngine struct {
 
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/789
 	IsLoading bool // (temp) Whether we have processed the GenerateMapPacket(only for remote client)
+
+	*d2util.Logger
 }
 
 const (
@@ -41,9 +47,9 @@ const (
 )
 
 // CreateMapEngine creates a new instance of the map engine and returns a pointer to it.
-func CreateMapEngine(asset *d2asset.AssetManager) *MapEngine {
+func CreateMapEngine(l d2util.LogLevel, asset *d2asset.AssetManager) *MapEngine {
 	entity, _ := d2mapentity.NewMapEntityFactory(asset)
-	stamp := d2mapstamp.NewStampFactory(asset, entity)
+	stamp := d2mapstamp.NewStampFactory(asset, l, entity)
 
 	engine := &MapEngine{
 		asset:            asset,
@@ -52,6 +58,10 @@ func CreateMapEngine(asset *d2asset.AssetManager) *MapEngine {
 		// This will be set to true when we are using a remote client connection, and then set to false after we process the GenerateMapPacket
 		IsLoading: false,
 	}
+
+	engine.Logger = d2util.NewLogger()
+	engine.Logger.SetLevel(l)
+	engine.Logger.SetPrefix(logPrefix)
 
 	return engine
 }
@@ -89,14 +99,13 @@ func (m *MapEngine) addDT1(fileName string) {
 
 	fileData, err := m.asset.LoadFile("/data/global/tiles/" + fileName)
 	if err != nil {
-		log.Printf("Could not load /data/global/tiles/%s", fileName)
-		// panic(err)
+		m.Fatalf("Could not load /data/global/tiles/%s", fileName)
 		return
 	}
 
 	dt1, err := d2dt1.LoadDT1(fileData)
 	if err != nil {
-		log.Print(err)
+		m.Error(err.Error())
 	}
 
 	m.dt1TileData = append(m.dt1TileData, dt1.Tiles...)
@@ -118,7 +127,7 @@ func (m *MapEngine) AddDS1(fileName string) {
 
 	ds1, err := d2ds1.LoadDS1(fileData)
 	if err != nil {
-		log.Print(err)
+		m.Error(err.Error())
 	}
 
 	for idx := range ds1.Files {
@@ -138,7 +147,7 @@ func (m *MapEngine) LevelType() d2records.LevelTypeRecord {
 
 // SetSeed sets the seed of the map for generation.
 func (m *MapEngine) SetSeed(seed int64) {
-	log.Printf("Setting map engine seed to %d", seed)
+	m.Infof("Setting map engine seed to %d", seed)
 	m.seed = seed
 }
 
@@ -259,7 +268,7 @@ func (m *MapEngine) GetTiles(style, sequence int, tileType d2enum.TileType) []d2
 	}
 
 	if len(tiles) == 0 {
-		log.Printf("Unknown tile ID [%d %d %d]\n", style, sequence, tileType)
+		m.Warningf("Unknown tile ID [%d %d %d]", style, sequence, tileType)
 		return nil
 	}
 

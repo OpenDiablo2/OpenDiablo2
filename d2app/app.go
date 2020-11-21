@@ -138,7 +138,7 @@ func (a *App) startDedicatedServer() error {
 	srvChanIn := make(chan int)
 	srvChanLog := make(chan string)
 
-	srvErr := d2networking.StartDedicatedServer(a.asset, srvChanIn, srvChanLog, maxPlayers)
+	srvErr := d2networking.StartDedicatedServer(a.asset, srvChanIn, srvChanLog, a.config.LogLevel, maxPlayers)
 	if srvErr != nil {
 		return srvErr
 	}
@@ -179,7 +179,7 @@ func (a *App) loadEngine() error {
 
 	a.asset.SetLogLevel(logLevel)
 
-	audio := ebiten2.CreateAudio(a.asset)
+	audio := ebiten2.CreateAudio(a.config.LogLevel, a.asset)
 
 	inputManager := d2input.NewInputManager()
 
@@ -195,7 +195,7 @@ func (a *App) loadEngine() error {
 
 	scriptEngine := d2script.CreateScriptEngine()
 
-	uiManager := d2ui.NewUIManager(a.asset, renderer, inputManager, audio)
+	uiManager := d2ui.NewUIManager(a.asset, renderer, inputManager, a.config.LogLevel, audio)
 
 	a.inputManager = inputManager
 	a.terminal = term
@@ -409,14 +409,14 @@ func (a *App) initialize() error {
 		}
 	}
 
-	gui, err := d2gui.CreateGuiManager(a.asset, a.inputManager)
+	gui, err := d2gui.CreateGuiManager(a.asset, a.config.LogLevel, a.inputManager)
 	if err != nil {
 		return err
 	}
 
 	a.guiManager = gui
 
-	a.screen = d2screen.NewScreenManager(a.ui, a.guiManager)
+	a.screen = d2screen.NewScreenManager(a.ui, a.config.LogLevel, a.guiManager)
 
 	a.audio.SetVolumes(a.config.BgmVolume, a.config.SfxVolume)
 
@@ -931,7 +931,7 @@ func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType,
 
 // ToCreateGame forces the game to transition to the Create Game screen
 func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.ClientConnectionType, host string) {
-	gameClient, err := d2client.Create(connType, a.asset, a.scriptEngine)
+	gameClient, err := d2client.Create(connType, a.asset, a.config.LogLevel, a.scriptEngine)
 	if err != nil {
 		a.logger.Error(err.Error())
 	}

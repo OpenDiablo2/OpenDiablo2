@@ -3,9 +3,9 @@ package ebiten
 
 import (
 	"io"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 
 	"github.com/hajimehoshi/ebiten/v2/audio"
@@ -14,13 +14,19 @@ import (
 
 const sampleRate = 44100
 
+const logPrefix = "Ebiten Audio Provider"
+
 var _ d2interface.AudioProvider = &AudioProvider{} // Static check to confirm struct conforms to interface
 
 // CreateAudio creates an instance of ebiten's audio provider
-func CreateAudio(am *d2asset.AssetManager) *AudioProvider {
+func CreateAudio(l d2util.LogLevel, am *d2asset.AssetManager) *AudioProvider {
 	result := &AudioProvider{
 		asset: am,
 	}
+
+	result.Logger = d2util.NewLogger()
+	result.Logger.SetLevel(l)
+	result.Logger.SetPrefix(logPrefix)
 
 	result.audioContext = audio.NewContext(sampleRate)
 
@@ -36,6 +42,8 @@ type AudioProvider struct {
 	lastBgm      string
 	sfxVolume    float64
 	bgmVolume    float64
+
+	*d2util.Logger
 }
 
 // PlayBGM loads an audio stream and plays it in the background
@@ -55,7 +63,7 @@ func (eap *AudioProvider) PlayBGM(song string) {
 		err := eap.bgmAudio.Close()
 
 		if err != nil {
-			log.Panic(err)
+			eap.Fatal(err.Error())
 		}
 	}
 
@@ -66,20 +74,20 @@ func (eap *AudioProvider) PlayBGM(song string) {
 	}
 
 	if _, err = audioStream.Seek(0, io.SeekStart); err != nil {
-		log.Fatal(err)
+		eap.Fatal(err.Error())
 	}
 
 	eap.bgmStream, err = wav.Decode(eap.audioContext, audioStream)
 
 	if err != nil {
-		log.Fatal(err)
+		eap.Fatal(err.Error())
 	}
 
 	s := audio.NewInfiniteLoop(eap.bgmStream, eap.bgmStream.Length())
 	eap.bgmAudio, err = audio.NewPlayer(eap.audioContext, s)
 
 	if err != nil {
-		log.Fatal(err)
+		eap.Fatal(err.Error())
 	}
 
 	eap.bgmAudio.SetVolume(eap.bgmVolume)
@@ -142,7 +150,7 @@ func (eap *AudioProvider) createSoundEffect(sfx string, context *audio.Context,
 	d, err := wav.Decode(context, audioData)
 
 	if err != nil {
-		log.Fatal(err)
+		eap.Fatal(err.Error())
 	}
 
 	var player *audio.Player
@@ -157,7 +165,7 @@ func (eap *AudioProvider) createSoundEffect(sfx string, context *audio.Context,
 	}
 
 	if err != nil {
-		log.Fatal(err)
+		eap.Fatal(err.Error())
 	}
 
 	result.player = player

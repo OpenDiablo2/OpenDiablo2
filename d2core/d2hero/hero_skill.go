@@ -2,7 +2,6 @@ package d2hero
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 )
@@ -27,10 +26,10 @@ func (hs *HeroSkill) MarshalJSON() ([]byte, error) {
 	// only serialize the Shallow object instead of the SkillRecord & SkillDescriptionRecord
 	bytes, err := json.Marshal(hs.Shallow)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
 
-	return bytes, err
+	return bytes, nil
 }
 
 // UnmarshalJSON overrides the default logic used when the HeroSkill is deserialized from a byte array.

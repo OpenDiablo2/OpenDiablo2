@@ -2,7 +2,6 @@ package d2records
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
@@ -37,7 +36,7 @@ func NewRecordManager(l d2util.LogLevel) (*RecordManager, error) {
 
 // RecordManager stores all of the records loaded from txt files
 type RecordManager struct {
-	Logger       *d2util.Logger
+	*d2util.Logger
 	boundLoaders map[string][]recordLoader // there can be more than one loader bound for a file
 	Animation    struct {
 		Data  d2data.AnimationData
@@ -411,7 +410,7 @@ func (r *RecordManager) initObjectRecords(lookups []ObjectLookupRecord) {
 func (r *RecordManager) LookupObject(act, typ, id int) *ObjectLookupRecord {
 	object := r.lookupObject(act, typ, id)
 	if object == nil {
-		log.Panicf("Failed to look up object Act: %d, Type: %d, ID: %d", act, typ, id)
+		r.Fatalf("Failed to look up object Act: %d, Type: %d, ID: %d", act, typ, id)
 	}
 
 	return object

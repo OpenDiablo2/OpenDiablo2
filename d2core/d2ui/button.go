@@ -445,7 +445,7 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 
 	buttonSprite, err := ui.NewSprite(buttonLayout.ResourceName, buttonLayout.PaletteName)
 	if err != nil {
-		log.Print(err)
+		ui.Error(err.Error())
 		return nil
 	}
 
@@ -455,7 +455,7 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 		for i := 0; i < buttonLayout.XSegments; i++ {
 			w, _, frameSizeErr := buttonSprite.GetFrameSize(i)
 			if frameSizeErr != nil {
-				log.Print(frameSizeErr)
+				ui.Error(frameSizeErr.Error())
 				return nil
 			}
 
@@ -469,7 +469,7 @@ func (ui *UIManager) NewButton(buttonType ButtonType, text string) *Button {
 		for i := 0; i < buttonLayout.YSegments; i++ {
 			_, h, frameSizeErr := buttonSprite.GetFrameSize(i * buttonLayout.YSegments)
 			if frameSizeErr != nil {
-				log.Print(frameSizeErr)
+				ui.Error(frameSizeErr.Error())
 				return nil
 			}
 
