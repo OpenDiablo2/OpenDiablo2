@@ -376,6 +376,7 @@ func (g *GameServer) handleClientConnection(client ClientConnection, x, y float6
 		playerState.Equipment,
 		playerState.LeftSkill,
 		playerState.RightSkill,
+		playerState.Gold,
 	)
 
 	for _, connection := range g.connections {
@@ -403,6 +404,7 @@ func (g *GameServer) handleClientConnection(client ClientConnection, x, y float6
 				conPlayerState.Equipment,
 				conPlayerState.LeftSkill,
 				conPlayerState.RightSkill,
+				conPlayerState.Gold,
 			),
 		)
 

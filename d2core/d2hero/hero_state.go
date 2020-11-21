@@ -18,4 +18,5 @@ type HeroState struct {
 	Y          float64                        `json:"y"`
 	LeftSkill  int                            `json:"leftSkill"`
 	RightSkill int                            `json:"rightSkill"`
+	Gold       int
 }

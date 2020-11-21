@@ -24,13 +24,20 @@ type AddPlayerPacket struct {
 	Skills     map[int]*d2hero.HeroSkill      `json:"heroSkills"`
 	LeftSkill  int                            `json:"leftSkill"`
 	RightSkill int                            `json:"rightSkill"`
+	Gold       int
 }
 
 // CreateAddPlayerPacket returns a NetPacket which declares an
 // AddPlayerPacket with the data in given parameters.
-func CreateAddPlayerPacket(id, name string, x, y int, heroType d2enum.Hero,
-	stats *d2hero.HeroStatsState, skills map[int]*d2hero.HeroSkill, equipment d2inventory.CharacterEquipment,
-	leftSkill, rightSkill int) NetPacket {
+func CreateAddPlayerPacket(
+	id, name string,
+	x, y int,
+	heroType d2enum.Hero,
+	stats *d2hero.HeroStatsState,
+	skills map[int]*d2hero.HeroSkill,
+	equipment d2inventory.CharacterEquipment,
+	leftSkill, rightSkill int,
+	gold int) NetPacket {
 	addPlayerPacket := AddPlayerPacket{
 		ID:         id,
 		Name:       name,
@@ -42,6 +49,7 @@ func CreateAddPlayerPacket(id, name string, x, y int, heroType d2enum.Hero,
 		Skills:     skills,
 		LeftSkill:  leftSkill,
 		RightSkill: rightSkill,
+		Gold:       gold,
 	}
 
 	b, err := json.Marshal(addPlayerPacket)
