@@ -4,18 +4,16 @@ package d2ui
 // The higher the number the later an element is drawn.
 type RenderPriority int
 
+// Render priorities that determine the order in which widgets/widgetgroups are
+// rendered. The higher the later it is rendered
 const (
-	// RenderPriorityBackground is the first element drawn
 	RenderPriorityBackground RenderPriority = iota
-	// RenderPrioritySkilltree is the priority for the skilltree
 	RenderPrioritySkilltree
-	// RenderPrioritySkilltreeIcon is the priority for the skilltree icons
 	RenderPrioritySkilltreeIcon
-	// RenderPriorityMinipanel is the priority for the minipanel icons
-	RenderPriorityMinipanel
-	// RenderPriorityHeroStatsPanel is the priority for the hero_stats_panel
 	RenderPriorityHeroStatsPanel
-	// RenderPriorityForeground is the last element drawn
+	RenderPriorityHUDPanel
+	RenderPriorityMinipanel
+	RenderPriorityHelpPanel
 	RenderPriorityForeground
 )
 

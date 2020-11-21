@@ -1,11 +1,14 @@
 package d2screen
 
 import (
-	"log"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
+)
+
+const (
+	logPrefix = "Screen Manager"
 )
 
 // ScreenManager manages game screens (main menu, credits, character select, game, etc)
@@ -16,11 +19,22 @@ type ScreenManager struct {
 	loadingState  LoadingState
 	currentScreen Screen
 	guiManager    *d2gui.GuiManager
+
+	*d2util.Logger
 }
 
 // NewScreenManager creates a screen manager
-func NewScreenManager(ui *d2ui.UIManager, guiManager *d2gui.GuiManager) *ScreenManager {
-	return &ScreenManager{uiManager: ui, guiManager: guiManager}
+func NewScreenManager(ui *d2ui.UIManager, l d2util.LogLevel, guiManager *d2gui.GuiManager) *ScreenManager {
+	sm := &ScreenManager{
+		uiManager:  ui,
+		guiManager: guiManager,
+	}
+
+	sm.Logger = d2util.NewLogger()
+	sm.Logger.SetPrefix(logPrefix)
+	sm.Logger.SetLevel(l)
+
+	return sm
 }
 
 // SetNextScreen is about to set a given screen as next
@@ -35,11 +49,11 @@ func (sm *ScreenManager) Advance(elapsed float64) error {
 		// this call blocks execution and could lead to deadlock if a screen implements OnLoad incorreclty
 		load, ok := <-sm.loadingState.updates
 		if !ok {
-			log.Println("loadingState chan should not be closed while in a loading screen")
+			sm.Warning("loadingState chan should not be closed while in a loading screen")
 		}
 
 		if load.err != nil {
-			log.Printf("PROBLEM LOADING THE SCREEN: %v", load.err)
+			sm.Errorf("PROBLEM LOADING THE SCREEN: %v", load.err)
 			return load.err
 		}
 

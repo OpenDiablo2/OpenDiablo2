@@ -1,7 +1,6 @@
 package d2records
 
 import (
-	"log"
 	"testing"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
@@ -17,7 +16,7 @@ func TestIndexObjects(t *testing.T) {
 
 	r, err := NewRecordManager(d2util.LogLevelDefault)
 	if err != nil {
-		log.Print(err)
+		t.Error(err)
 	}
 
 	testObjects := []ObjectLookupRecord{

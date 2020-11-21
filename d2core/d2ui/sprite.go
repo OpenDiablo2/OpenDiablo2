@@ -4,17 +4,19 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 // Sprite is a positioned visual object.
 type Sprite struct {
 	*BaseWidget
 	animation d2interface.Animation
+
+	*d2util.Logger
 }
 
 const (
@@ -34,7 +36,9 @@ func (ui *UIManager) NewSprite(animationPath, palettePath string) (*Sprite, erro
 
 	return &Sprite{
 		BaseWidget: base,
-		animation:  animation}, nil
+		animation:  animation,
+		Logger:     ui.Logger,
+	}, nil
 }
 
 // Render renders the sprite on the given surface
@@ -70,7 +74,7 @@ func (s *Sprite) RenderSegmented(target d2interface.Surface, segmentsX, segments
 		for x := 0; x < segmentsX; x++ {
 			idx := x + y*segmentsX + frameOffset*segmentsX*segmentsY
 			if err := s.animation.SetCurrentFrame(idx); err != nil {
-				log.Printf("SetCurrentFrame error %e", err)
+				s.Error("SetCurrentFrame error" + err.Error())
 			}
 
 			target.PushTranslation(s.x+currentX, s.y+currentY)
@@ -150,7 +154,7 @@ func (s *Sprite) SetCurrentFrame(frameIndex int) error {
 func (s *Sprite) Rewind() {
 	err := s.animation.SetCurrentFrame(0)
 	if err != nil {
-		log.Print(err)
+		s.Error(err.Error())
 	}
 }
 

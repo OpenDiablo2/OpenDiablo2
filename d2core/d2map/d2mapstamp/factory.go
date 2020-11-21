@@ -1,7 +1,6 @@
 package d2mapstamp
 
 import (
-	"log"
 	"math"
 	"math/rand"
 
@@ -10,12 +9,24 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2ds1"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 )
 
+const logPrefix = "Map Stamp"
+
 // NewStampFactory creates a MapStamp factory instance
-func NewStampFactory(asset *d2asset.AssetManager, entity *d2mapentity.MapEntityFactory) *StampFactory {
-	return &StampFactory{asset, entity}
+func NewStampFactory(asset *d2asset.AssetManager, l d2util.LogLevel, entity *d2mapentity.MapEntityFactory) *StampFactory {
+	result := &StampFactory{
+		asset:  asset,
+		entity: entity,
+	}
+
+	result.Logger = d2util.NewLogger()
+	result.Logger.SetLevel(l)
+	result.Logger.SetPrefix(logPrefix)
+
+	return result
 }
 
 // StampFactory is responsible for loading map stamps. A stamp can be thought of like a
@@ -23,6 +34,8 @@ func NewStampFactory(asset *d2asset.AssetManager, entity *d2mapentity.MapEntityF
 type StampFactory struct {
 	asset  *d2asset.AssetManager
 	entity *d2mapentity.MapEntityFactory
+
+	*d2util.Logger
 }
 
 // LoadStamp loads the Stamp data from file, using the given level type, level preset index, and
@@ -48,7 +61,7 @@ func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fil
 
 		dt1, err := d2dt1.LoadDT1(fileData)
 		if err != nil {
-			log.Print(err)
+			f.Error(err.Error())
 			return nil
 		}
 
@@ -82,7 +95,7 @@ func (f *StampFactory) LoadStamp(levelType d2enum.RegionIdType, levelPreset, fil
 
 	stamp.ds1, err = d2ds1.LoadDS1(fileData)
 	if err != nil {
-		log.Print(err)
+		f.Error(err.Error())
 		return nil
 	}
 

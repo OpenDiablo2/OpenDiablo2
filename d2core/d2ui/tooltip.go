@@ -58,6 +58,7 @@ func (ui *UIManager) NewTooltip(font,
 	label.Alignment = HorizontalAlignCenter
 
 	base := NewBaseWidget(ui)
+	base.SetVisible(false)
 
 	res := &Tooltip{
 		BaseWidget:      base,
@@ -68,6 +69,7 @@ func (ui *UIManager) NewTooltip(font,
 		boxEnabled:      true,
 	}
 	res.manager = ui
+	ui.addTooltip(res)
 
 	return res
 }

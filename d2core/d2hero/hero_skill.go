@@ -2,7 +2,6 @@ package d2hero
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2records"
 )
@@ -12,7 +11,7 @@ type HeroSkill struct {
 	*d2records.SkillRecord
 	*d2records.SkillDescriptionRecord
 	SkillPoints int
-	shallow     *shallowHeroSkill
+	Shallow     *shallowHeroSkill
 }
 
 // An auxiliary struct which only stores the ID of the SkillRecord, instead of the whole SkillRecord
@@ -24,13 +23,13 @@ type shallowHeroSkill struct {
 
 // MarshalJSON overrides the default logic used when the HeroSkill is serialized to a byte array.
 func (hs *HeroSkill) MarshalJSON() ([]byte, error) {
-	// only serialize the shallow object instead of the SkillRecord & SkillDescriptionRecord
-	bytes, err := json.Marshal(hs.shallow)
+	// only serialize the Shallow object instead of the SkillRecord & SkillDescriptionRecord
+	bytes, err := json.Marshal(hs.Shallow)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
 
-	return bytes, err
+	return bytes, nil
 }
 
 // UnmarshalJSON overrides the default logic used when the HeroSkill is deserialized from a byte array.
@@ -40,7 +39,7 @@ func (hs *HeroSkill) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	hs.shallow = shallow
+	hs.Shallow = shallow
 
 	return nil
 }

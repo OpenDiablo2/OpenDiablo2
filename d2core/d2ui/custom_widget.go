@@ -11,6 +11,7 @@ type CustomWidget struct {
 	renderFunc func(target d2interface.Surface)
 	cached     bool
 	cachedImg  *d2interface.Surface
+	tooltip    *Tooltip
 }
 
 // NewCustomWidgetCached creates a new widget and caches anything rendered via the
@@ -48,6 +49,13 @@ func (c *CustomWidget) Render(target d2interface.Surface) {
 	} else {
 		c.renderFunc(target)
 	}
+}
+
+// SetTooltip gives this widget a Tooltip that is displayed if the widget is hovered
+func (c *CustomWidget) SetTooltip(t *Tooltip) {
+	c.tooltip = t
+	c.OnHoverStart(func() { c.tooltip.SetVisible(true) })
+	c.OnHoverEnd(func() { c.tooltip.SetVisible(false) })
 }
 
 // Advance is a no-op

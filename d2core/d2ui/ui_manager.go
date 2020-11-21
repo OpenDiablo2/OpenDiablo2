@@ -1,7 +1,6 @@
 package d2ui
 
 import (
-	"log"
 	"sort"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -9,6 +8,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 // UIManager manages a collection of UI elements (buttons, textboxes, labels)
@@ -18,6 +18,7 @@ type UIManager struct {
 	inputManager     d2interface.InputManager
 	audio            d2interface.AudioProvider
 	widgets          []Widget
+	tooltips         []*Tooltip
 	widgetsGroups    []*WidgetGroup
 	clickableWidgets []ClickableWidget
 	cursorButtons    CursorButton
@@ -25,6 +26,8 @@ type UIManager struct {
 	CursorY          int
 	pressedWidget    ClickableWidget
 	clickSfx         d2interface.SoundEffect
+
+	*d2util.Logger
 }
 
 // Note: methods for creating buttons and stuff are in their respective files
@@ -34,13 +37,13 @@ type UIManager struct {
 func (ui *UIManager) Initialize() {
 	sfx, err := ui.audio.LoadSound(d2resource.SFXButtonClick, false, false)
 	if err != nil {
-		log.Fatalf("failed to initialize ui: %v", err)
+		ui.Fatalf("failed to initialize ui: %v", err)
 	}
 
 	ui.clickSfx = sfx
 
 	if err := ui.inputManager.BindHandler(ui); err != nil {
-		log.Fatalf("failed to initialize ui: %v", err)
+		ui.Fatalf("failed to initialize ui: %v", err)
 	}
 }
 
@@ -51,29 +54,38 @@ func (ui *UIManager) Reset() {
 	ui.pressedWidget = nil
 }
 
-// addWidgetGroup adds a widgetGroup to the UI manager and sorts by priority
-func (ui *UIManager) addWidgetGroup(group *WidgetGroup) {
-	ui.widgetsGroups = append(ui.widgetsGroups, group)
-
-	sort.SliceStable(ui.widgetsGroups, func(i, j int) bool {
-		return ui.widgetsGroups[i].renderPriority < ui.widgetsGroups[j].renderPriority
-	})
+func (ui *UIManager) addClickable(widget ClickableWidget) {
+	ui.clickableWidgets = append(ui.clickableWidgets, widget)
 }
 
 // addWidget adds a widget to the UI manager
 func (ui *UIManager) addWidget(widget Widget) {
 	err := ui.inputManager.BindHandler(widget)
 	if err != nil {
-		log.Print(err)
+		ui.Error(err.Error())
 	}
 
 	clickable, ok := widget.(ClickableWidget)
 	if ok {
-		ui.clickableWidgets = append(ui.clickableWidgets, clickable)
+		ui.addClickable(clickable)
+	}
+
+	if widgetGroup, ok := widget.(*WidgetGroup); ok {
+		ui.widgetsGroups = append(ui.widgetsGroups, widgetGroup)
 	}
 
 	ui.widgets = append(ui.widgets, widget)
+
+	sort.SliceStable(ui.widgets, func(i, j int) bool {
+		return ui.widgets[i].GetRenderPriority() < ui.widgets[j].GetRenderPriority()
+	})
+
 	widget.bindManager(ui)
+}
+
+// addTooltip adds a widget to the UI manager
+func (ui *UIManager) addTooltip(t *Tooltip) {
+	ui.tooltips = append(ui.tooltips, t)
 }
 
 // OnMouseButtonUp is an event handler for input
@@ -140,15 +152,15 @@ func (ui *UIManager) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 
 // Render renders all of the UI elements
 func (ui *UIManager) Render(target d2interface.Surface) {
-	for _, widgetGroup := range ui.widgetsGroups {
-		if widgetGroup.GetVisible() {
-			widgetGroup.Render(target)
-		}
-	}
-
 	for _, widget := range ui.widgets {
 		if widget.GetVisible() {
 			widget.Render(target)
+		}
+	}
+
+	for _, tooltip := range ui.tooltips {
+		if tooltip.GetVisible() {
+			tooltip.Render(target)
 		}
 	}
 }
@@ -159,7 +171,7 @@ func (ui *UIManager) Advance(elapsed float64) {
 		if widget.GetVisible() {
 			err := widget.Advance(elapsed)
 			if err != nil {
-				log.Print(err)
+				ui.Error(err.Error())
 			}
 		}
 	}

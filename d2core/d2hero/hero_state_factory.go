@@ -164,7 +164,7 @@ func (f *HeroStateFactory) CreateHeroSkill(points int, name string) (*HeroSkill,
 		SkillPoints:            points,
 		SkillRecord:            skillRecord,
 		SkillDescriptionRecord: skillDescRecord,
-		shallow:                &shallowHeroSkill{SkillID: skillRecord.ID, SkillPoints: points},
+		Shallow:                &shallowHeroSkill{SkillID: skillRecord.ID, SkillPoints: points},
 	}
 
 	return result, nil
@@ -200,7 +200,7 @@ func (f *HeroStateFactory) LoadHeroState(filePath string) *HeroState {
 		return nil
 	}
 
-	// Here, we turn the shallow skill data back into records from the asset manager.
+	// Here, we turn the Shallow skill data back into records from the asset manager.
 	// This is because this factory has a reference to the asset manager with loaded records.
 	// We cant do this while unmarshalling because there is no reference to the asset manager.
 	for idx := range result.Skills {
@@ -210,9 +210,9 @@ func (f *HeroStateFactory) LoadHeroState(filePath string) *HeroState {
 			continue
 		}
 
-		hs.SkillRecord = f.asset.Records.Skill.Details[hs.shallow.SkillID]
+		hs.SkillRecord = f.asset.Records.Skill.Details[hs.Shallow.SkillID]
 		hs.SkillDescriptionRecord = f.asset.Records.Skill.Descriptions[hs.SkillRecord.Skilldesc]
-		hs.SkillPoints = hs.shallow.SkillPoints
+		hs.SkillPoints = hs.Shallow.SkillPoints
 	}
 
 	return result

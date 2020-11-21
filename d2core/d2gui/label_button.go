@@ -2,7 +2,6 @@ package d2gui
 
 import (
 	"image/color"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
@@ -19,11 +18,13 @@ type LabelButton struct {
 	isHovered  bool
 	layout     *Layout
 	x, y       int
+
+	*d2util.Logger
 }
 
 // NewLabelButton generates a new instance of LabelButton
-func NewLabelButton(x, y int, text string, col color.RGBA, callback func()) *LabelButton {
-	return &LabelButton{
+func NewLabelButton(x, y int, text string, col color.RGBA, l d2util.LogLevel, callback func()) *LabelButton {
+	lb := &LabelButton{
 		x:          x,
 		y:          y,
 		hoverColor: col,
@@ -31,6 +32,12 @@ func NewLabelButton(x, y int, text string, col color.RGBA, callback func()) *Lab
 		callback:   callback,
 		canHover:   true,
 	}
+
+	lb.Logger = d2util.NewLogger()
+	lb.Logger.SetLevel(l)
+	lb.Logger.SetPrefix(logPrefix)
+
+	return lb
 }
 
 // IsInRect checks if the given point is within the overlay layout rectangle
@@ -60,13 +67,13 @@ func (lb *LabelButton) Load(renderer d2interface.Renderer, asset *d2asset.AssetM
 
 	mainLayout.SetMouseEnterHandler(func(event d2interface.MouseMoveEvent) {
 		if err := l.SetIsHovered(true); err != nil {
-			log.Printf("could not change label to hover state: %v", err)
+			lb.Errorf("could not change label to hover state: %v", err)
 		}
 	})
 
 	mainLayout.SetMouseLeaveHandler(func(event d2interface.MouseMoveEvent) {
 		if err := l.SetIsHovered(false); err != nil {
-			log.Printf("could not change label to hover state: %v", err)
+			lb.Errorf("could not change label to hover state: %v", err)
 		}
 	})
 

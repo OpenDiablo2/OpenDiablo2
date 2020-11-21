@@ -1,11 +1,13 @@
 package d2player
 
 import (
+	"fmt"
 	"image"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -30,10 +32,19 @@ const (
 	manaStatusOffsetY = -12
 
 	manaGlobeScreenOffsetX = 117
+
+	hpLabelX = 15
+	hpLabelY = 487
+
+	manaLabelX = 785
+	manaLabelY = 487
 )
 
 // static check that globeWidget implements Widget
 var _ d2ui.Widget = &globeWidget{}
+
+// static check that globeWidget implements ClickableWidget
+var _ d2ui.ClickableWidget = &globeWidget{}
 
 type globeFrame struct {
 	sprite  *d2ui.Sprite
@@ -53,13 +64,17 @@ func (gf *globeFrame) setPosition(x, y int) {
 	gf.sprite.SetPosition(x+gf.offsetX, y+gf.offsetY)
 }
 
-func (gf *globeFrame) getSize() (x, y int) {
-	w, h := gf.sprite.GetSize()
-	return w + gf.offsetX, h + gf.offsetY
-}
-
-func newGlobeWidget(ui *d2ui.UIManager, x, y int, gtype globeType, value *int, l d2util.LogLevel, valueMax *int) *globeWidget {
+func newGlobeWidget(ui *d2ui.UIManager,
+	asset *d2asset.AssetManager,
+	x, y int,
+	gtype globeType,
+	value *int, valueMax *int,
+	l d2util.LogLevel) *globeWidget {
 	var globe, overlap *globeFrame
+
+	var tooltipX, tooltipY int
+
+	var tooltipTrans string
 
 	base := d2ui.NewBaseWidget(ui)
 	base.SetPosition(x, y)
@@ -75,6 +90,8 @@ func newGlobeWidget(ui *d2ui.UIManager, x, y int, gtype globeType, value *int, l
 			offsetY: globeSpriteOffsetY,
 			idx:     frameHealthStatus,
 		}
+		tooltipX, tooltipY = hpLabelX, hpLabelY
+		tooltipTrans = "panelhealth"
 	} else if gtype == typeManaGlobe {
 		globe = &globeFrame{
 			offsetX: manaStatusOffsetX,
@@ -86,15 +103,34 @@ func newGlobeWidget(ui *d2ui.UIManager, x, y int, gtype globeType, value *int, l
 			offsetY: rightGlobeOffsetY,
 			idx:     frameRightGlobe,
 		}
+		tooltipX, tooltipY = manaLabelX, manaLabelY
+		tooltipTrans = "panelmana"
 	}
 
 	gw := &globeWidget{
-		BaseWidget: base,
-		value:      value,
-		valueMax:   valueMax,
-		globe:      globe,
-		overlap:    overlap,
+		BaseWidget:      base,
+		asset:           asset,
+		value:           value,
+		valueMax:        valueMax,
+		globe:           globe,
+		overlap:         overlap,
+		isTooltipLocked: false,
+		tooltipX:        tooltipX,
+		tooltipY:        tooltipY,
+		tooltipTrans:    tooltipTrans,
 	}
+
+	gw.OnHoverStart(func() {
+		if !gw.isTooltipLocked {
+			gw.tooltip.SetVisible(true)
+		}
+	})
+
+	gw.OnHoverEnd(func() {
+		if !gw.isTooltipLocked {
+			gw.tooltip.SetVisible(false)
+		}
+	})
 
 	gw.logger = d2util.NewLogger()
 	gw.logger.SetLevel(l)
@@ -105,11 +141,19 @@ func newGlobeWidget(ui *d2ui.UIManager, x, y int, gtype globeType, value *int, l
 
 type globeWidget struct {
 	*d2ui.BaseWidget
+	asset    *d2asset.AssetManager
 	value    *int
 	valueMax *int
 	globe    *globeFrame
 	overlap  *globeFrame
 	logger   *d2util.Logger
+
+	pressed         bool
+	isTooltipLocked bool
+	tooltip         *d2ui.Tooltip
+	tooltipX        int
+	tooltipY        int
+	tooltipTrans    string
 }
 
 func (g *globeWidget) load() {
@@ -128,6 +172,11 @@ func (g *globeWidget) load() {
 	}
 
 	g.overlap.setFrameIndex()
+
+	// tooltip
+	g.tooltip = g.GetManager().NewTooltip(d2resource.Font16, d2resource.PaletteUnits, d2ui.TooltipXLeft, d2ui.TooltipYTop)
+	g.tooltip.SetPosition(g.tooltipX, g.tooltipY)
+	g.tooltip.SetBoxEnabled(false)
 }
 
 // Render draws the widget to the screen
@@ -144,10 +193,49 @@ func (g *globeWidget) Render(target d2interface.Surface) {
 	g.overlap.sprite.Render(target)
 }
 
-func (g *globeWidget) GetSize() (x, y int) {
-	return g.overlap.getSize()
+// Contains is special here as the point of origin is at the lower left corner
+// in contrast to any other element which is top left.
+func (g *globeWidget) Contains(px, py int) bool {
+	wx, wy := g.globe.sprite.GetPosition()
+	width, height := g.globe.sprite.GetSize()
+
+	return px >= wx && px <= wx+width && py <= wy && py >= wy-height
+}
+
+func (g *globeWidget) updateTooltip() {
+	// Create and format string from string lookup table.
+	fmtStr := g.asset.TranslateString(g.tooltipTrans)
+	strPanel := fmt.Sprintf(fmtStr, *g.value, *g.valueMax)
+	g.tooltip.SetText(strPanel)
 }
 
 func (g *globeWidget) Advance(elapsed float64) error {
+	g.updateTooltip()
+
 	return nil
+}
+
+func (g *globeWidget) Activate() {
+	g.isTooltipLocked = !g.isTooltipLocked
+	g.tooltip.SetVisible(g.isTooltipLocked)
+}
+
+func (g *globeWidget) GetEnabled() bool {
+	return true
+}
+
+func (g *globeWidget) SetEnabled(enable bool) {
+	// No-op
+}
+
+func (g *globeWidget) GetPressed() bool {
+	return g.pressed
+}
+
+func (g *globeWidget) SetPressed(pressed bool) {
+	g.pressed = pressed
+}
+
+func (g *globeWidget) OnActivated(callback func()) {
+	// No-op
 }

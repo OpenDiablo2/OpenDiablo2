@@ -5,16 +5,25 @@ import (
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapengine"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapstamp"
 )
 
+const (
+	logPrefix = "Map Generator"
+)
+
 // NewMapGenerator creates a map generator instance
-func NewMapGenerator(a *d2asset.AssetManager, e *d2mapengine.MapEngine) (*MapGenerator, error) {
+func NewMapGenerator(a *d2asset.AssetManager, l d2util.LogLevel, e *d2mapengine.MapEngine) (*MapGenerator, error) {
 	generator := &MapGenerator{
 		asset:  a,
 		engine: e,
 	}
+
+	generator.Logger = d2util.NewLogger()
+	generator.Logger.SetLevel(l)
+	generator.Logger.SetPrefix(logPrefix)
 
 	return generator, nil
 }
@@ -23,6 +32,8 @@ func NewMapGenerator(a *d2asset.AssetManager, e *d2mapengine.MapEngine) (*MapGen
 type MapGenerator struct {
 	asset  *d2asset.AssetManager
 	engine *d2mapengine.MapEngine
+
+	*d2util.Logger
 }
 
 func (g *MapGenerator) loadPreset(id, index int) *d2mapstamp.Stamp {
