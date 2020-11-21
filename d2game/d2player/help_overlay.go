@@ -68,7 +68,7 @@ const (
 	// the close button for the help panel
 	closeButtonX      = 685
 	closeButtonY      = 25
-	closeButtonLabelX = 680
+	closeButtonLabelX = 702
 	closeButtonLabelY = 60
 
 	// the rest of these are for text with a line and dot, towards the bottom of the screen
@@ -328,6 +328,7 @@ func (h *HelpOverlay) setupTitleAndButton() {
 	newLabel = h.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
 	newLabel.SetText(h.asset.TranslateString("strClose")) // "Close"
 	newLabel.SetPosition(closeButtonLabelX, closeButtonLabelY)
+	newLabel.Alignment = d2ui.HorizontalAlignCenter
 	h.text = append(h.text, newLabel)
 }
 
