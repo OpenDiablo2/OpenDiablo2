@@ -131,7 +131,6 @@ const (
 	buttonSkillTreeTabFixedHeight   = 107
 
 	buttonMinipanelOpenCloseBaseFrame = 0
-	buttonMinipanelDisabledFrame      = 2
 	buttonMinipanelXSegments          = 1
 	buttonMinipanelYSegments          = 1
 
@@ -278,7 +277,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelOpenClose: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
-			DisabledFrame:    buttonMinipanelDisabledFrame,
+			DisabledFrame:    buttonMinipanelOpenCloseBaseFrame,
 			DisabledColor:    whiteAlpha100,
 			BaseFrame:        buttonMinipanelOpenCloseBaseFrame,
 			ResourceName:     d2resource.MenuButton,
@@ -294,6 +293,8 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelCharacter: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelCharacterBaseFrame,
+			DisabledColor:    whiteAlpha100,
 			BaseFrame:        buttonMinipanelCharacterBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -308,6 +309,8 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelInventory: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelInventoryBaseFrame,
+			DisabledColor:    whiteAlpha100,
 			BaseFrame:        buttonMinipanelInventoryBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -322,6 +325,8 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelSkill: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelSkilltreeBaseFrame,
+			DisabledColor:    whiteAlpha100,
 			BaseFrame:        buttonMinipanelSkilltreeBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -336,6 +341,8 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelParty: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelPartyBaseFrame,
+			DisabledColor:    whiteAlpha100,
 			BaseFrame:        buttonMinipanelPartyBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -350,6 +357,8 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelAutomap: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelAutomapBaseFrame,
+			DisabledColor:    whiteAlpha100,
 			BaseFrame:        buttonMinipanelAutomapBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -364,6 +373,8 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelMessage: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelMessageBaseFrame,
+			DisabledColor:    whiteAlpha100,
 			BaseFrame:        buttonMinipanelMessageBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -378,6 +389,8 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelQuest: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelQuestBaseFrame,
+			DisabledColor:    whiteAlpha100,
 			BaseFrame:        buttonMinipanelQuestBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -392,6 +405,8 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeMinipanelMen: {
 			XSegments:        buttonMinipanelXSegments,
 			YSegments:        buttonMinipanelYSegments,
+			DisabledFrame:    buttonMinipanelMenBaseFrame,
+			DisabledColor:    whiteAlpha100,
 			BaseFrame:        buttonMinipanelMenBaseFrame,
 			ResourceName:     d2resource.MinipanelButton,
 			PaletteName:      d2resource.PaletteSky,
@@ -628,7 +643,12 @@ func (v *Button) Render(target d2interface.Surface) {
 	case !v.enabled:
 		target.PushColor(d2util.Color(v.buttonLayout.DisabledColor))
 		defer target.Pop()
-		target.Render(v.disabledSurface)
+
+		if v.toggled {
+			target.Render(v.toggledSurface)
+		} else {
+			target.Render(v.disabledSurface)
+		}
 	case v.toggled && v.pressed:
 		target.Render(v.pressedToggledSurface)
 	case v.pressed:
@@ -647,6 +667,11 @@ func (v *Button) Render(target d2interface.Surface) {
 // Toggle negates the toggled state of the button
 func (v *Button) Toggle() {
 	v.toggled = !v.toggled
+}
+
+// GetToggled returns the toggled state of the button
+func (v *Button) GetToggled() bool {
+	return v.toggled
 }
 
 // Advance advances the button state
@@ -695,8 +720,7 @@ func (v *Button) SetPosition(x, y int) {
 // SetTooltip adds a tooltip to the button
 func (v *Button) SetTooltip(t *Tooltip) {
 	v.tooltip = t
-	v.manager.addWidget(t)
-	v.OnHoverStart(func() { log.Print("HoverStart"); v.tooltip.SetVisible(true) })
+	v.OnHoverStart(func() { v.tooltip.SetVisible(true) })
 	v.OnHoverEnd(func() { v.tooltip.SetVisible(false) })
 }
 

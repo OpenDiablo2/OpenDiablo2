@@ -28,7 +28,7 @@ func (ui *UIManager) NewWidgetGroup(priority RenderPriority) *WidgetGroup {
 		BaseWidget: base,
 	}
 
-	ui.addWidgetGroup(group)
+	ui.addWidget(group)
 
 	return group
 }
@@ -40,6 +40,10 @@ func (wg *WidgetGroup) AddWidget(w Widget) {
 	sort.SliceStable(wg.entries, func(i, j int) bool {
 		return wg.entries[i].GetRenderPriority() < wg.entries[j].GetRenderPriority()
 	})
+
+	if clickable, ok := w.(ClickableWidget); ok {
+		wg.manager.addClickable(clickable)
+	}
 }
 
 // adjustSize recalculates the bounding box if a new widget is added
@@ -124,6 +128,15 @@ func (wg *WidgetGroup) OnMouseMove(x, y int) {
 			}
 		} else if entry.isHovered() {
 			entry.hoverEnd()
+		}
+	}
+}
+
+// SetEnabled sets enable on all clickable widgets of this group
+func (wg *WidgetGroup) SetEnabled(enabled bool) {
+	for _, entry := range wg.entries {
+		if v, ok := entry.(ClickableWidget); ok {
+			v.SetEnabled(enabled)
 		}
 	}
 }

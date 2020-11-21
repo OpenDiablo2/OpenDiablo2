@@ -36,16 +36,6 @@ const (
 )
 
 const (
-	hpLabelX = 15
-	hpLabelY = 487
-
-	manaLabelX = 785
-	manaLabelY = 487
-
-	staminaExperienceY = 535
-)
-
-const (
 	frameHealthStatus      = 0
 	frameManaStatus        = 1
 	frameNewStatsSelector  = 1
@@ -57,8 +47,9 @@ const (
 )
 
 const (
-	staminaBarOffsetX = 273
-	staminaBarOffsetY = 572
+	staminaBarOffsetX  = 273
+	staminaBarOffsetY  = 572
+	staminaExperienceY = 535
 
 	experienceBarOffsetX = 256
 	experienceBarOffsetY = 561
@@ -68,6 +59,9 @@ const (
 
 	miniPanelButtonOffsetX = -8
 	miniPanelButtonOffsetY = -38
+
+	miniPanelTooltipOffsetX = 7
+	miniPanelTooltipOffsetY = -14
 )
 
 const (
@@ -81,7 +75,6 @@ type HUD struct {
 	actionableRegions  []actionableRegion
 	asset              *d2asset.AssetManager
 	uiManager          *d2ui.UIManager
-	help               *HelpOverlay
 	mapEngine          *d2mapengine.MapEngine
 	mapRenderer        *d2maprenderer.MapRenderer
 	lastMouseX         int
@@ -89,14 +82,12 @@ type HUD struct {
 	hero               *d2mapentity.Player
 	mainPanel          *d2ui.Sprite
 	globeSprite        *d2ui.Sprite
-	menuButton         *d2ui.Button
 	hpManaStatusSprite *d2ui.Sprite
 	leftSkillResource  *SkillResource
 	rightSkillResource *SkillResource
 	runButton          *d2ui.Button
 	zoneChangeText     *d2ui.Label
 	miniPanel          *miniPanel
-	isMiniPanelOpen    bool
 	isZoneTextShown    bool
 	hpStatsIsVisible   bool
 	manaStatsIsVisible bool
@@ -104,9 +95,6 @@ type HUD struct {
 	staminaTooltip     *d2ui.Tooltip
 	runWalkTooltip     *d2ui.Tooltip
 	experienceTooltip  *d2ui.Tooltip
-	healthTooltip      *d2ui.Tooltip
-	manaTooltip        *d2ui.Tooltip
-	miniPanelTooltip   *d2ui.Tooltip
 	nameLabel          *d2ui.Label
 	healthGlobe        *globeWidget
 	manaGlobe          *globeWidget
@@ -115,6 +103,7 @@ type HUD struct {
 	widgetLeftSkill    *d2ui.CustomWidget
 	widgetRightSkill   *d2ui.CustomWidget
 	panelBackground    *d2ui.CustomWidget
+	panelGroup         *d2ui.WidgetGroup
 	logger             *d2util.Logger
 }
 
@@ -123,7 +112,6 @@ func NewHUD(
 	asset *d2asset.AssetManager,
 	ui *d2ui.UIManager,
 	hero *d2mapentity.Player,
-	help *HelpOverlay,
 	miniPanel *miniPanel,
 	actionableRegions []actionableRegion,
 	mapEngine *d2mapengine.MapEngine,
@@ -137,14 +125,21 @@ func NewHUD(
 	zoneLabel := ui.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
 	zoneLabel.Alignment = d2ui.HorizontalAlignCenter
 
-	healthGlobe := newGlobeWidget(ui, 0, screenHeight, typeHealthGlobe, &hero.Stats.Health, l, &hero.Stats.MaxHealth)
-	manaGlobe := newGlobeWidget(ui, screenWidth-manaGlobeScreenOffsetX, screenHeight, typeManaGlobe, &hero.Stats.Mana, l, &hero.Stats.MaxMana)
+	healthGlobe := newGlobeWidget(ui, asset,
+		0, screenHeight,
+		typeHealthGlobe,
+		&hero.Stats.Health, &hero.Stats.MaxHealth,
+		l)
+	manaGlobe := newGlobeWidget(ui, asset,
+		screenWidth-manaGlobeScreenOffsetX, screenHeight,
+		typeManaGlobe,
+		&hero.Stats.Mana, &hero.Stats.MaxMana,
+		l)
 
 	hud := &HUD{
 		asset:             asset,
 		uiManager:         ui,
 		hero:              hero,
-		help:              help,
 		mapEngine:         mapEngine,
 		mapRenderer:       mapRenderer,
 		miniPanel:         miniPanel,
@@ -165,15 +160,24 @@ func NewHUD(
 
 // Load creates the ui elemets
 func (h *HUD) Load() {
+	h.panelGroup = h.uiManager.NewWidgetGroup(d2ui.RenderPriorityHUDPanel)
+
 	h.loadSprites()
 
 	h.healthGlobe.load()
-	h.manaGlobe.load()
+	h.healthGlobe.SetRenderPriority(d2ui.RenderPriorityForeground)
+	h.panelGroup.AddWidget(h.healthGlobe)
 
+	h.manaGlobe.load()
+	h.manaGlobe.SetRenderPriority(d2ui.RenderPriorityForeground)
+	h.panelGroup.AddWidget(h.manaGlobe)
+
+	h.loadTooltips()
 	h.loadSkillResources()
 	h.loadCustomWidgets()
 	h.loadUIButtons()
-	h.loadTooltips()
+
+	h.panelGroup.SetVisible(true)
 }
 
 func (h *HUD) loadCustomWidgets() {
@@ -186,13 +190,19 @@ func (h *HUD) loadCustomWidgets() {
 
 	h.panelBackground = h.uiManager.NewCustomWidgetCached(h.renderPanelStatic, screenWidth, height)
 	h.panelBackground.SetPosition(0, screenHeight-height)
+	h.panelGroup.AddWidget(h.panelBackground)
 
 	// stamina bar
 	h.widgetStamina = h.uiManager.NewCustomWidget(h.renderStaminaBar, staminaBarWidth, staminaBarHeight)
 	h.widgetStamina.SetPosition(staminaBarOffsetX, staminaBarOffsetY)
+	h.widgetStamina.SetTooltip(h.staminaTooltip)
+	h.panelGroup.AddWidget(h.widgetStamina)
 
 	// experience bar
 	h.widgetExperience = h.uiManager.NewCustomWidget(h.renderExperienceBar, expBarWidth, expBarHeight)
+	h.widgetExperience.SetPosition(experienceBarOffsetX, experienceBarOffsetY)
+	h.widgetExperience.SetTooltip(h.experienceTooltip)
+	h.panelGroup.AddWidget(h.widgetExperience)
 
 	// Left skill widget
 	leftRenderFunc := func(target d2interface.Surface) {
@@ -202,6 +212,7 @@ func (h *HUD) loadCustomWidgets() {
 
 	h.widgetLeftSkill = h.uiManager.NewCustomWidget(leftRenderFunc, skillIconWidth, skillIconHeight)
 	h.widgetLeftSkill.SetPosition(leftSkillX, screenHeight)
+	h.panelGroup.AddWidget(h.widgetLeftSkill)
 
 	// Right skill widget
 	rightRenderFunc := func(target d2interface.Surface) {
@@ -211,6 +222,7 @@ func (h *HUD) loadCustomWidgets() {
 
 	h.widgetRightSkill = h.uiManager.NewCustomWidget(rightRenderFunc, skillIconWidth, skillIconHeight)
 	h.widgetRightSkill.SetPosition(rightSkillX, screenHeight)
+	h.panelGroup.AddWidget(h.widgetRightSkill)
 }
 
 func (h *HUD) loadSkillResources() {
@@ -297,42 +309,31 @@ func (h *HUD) loadTooltips() {
 	labelX = centerX
 	labelY = staminaExperienceY - halfLabelHeight
 	h.experienceTooltip.SetPosition(labelX, labelY)
-
-	// Health tooltip
-	h.healthTooltip = h.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteUnits, d2ui.TooltipXLeft, d2ui.TooltipYTop)
-	h.healthTooltip.SetPosition(hpLabelX, hpLabelY)
-	h.healthTooltip.SetBoxEnabled(false)
-
-	// Health tooltip
-	h.manaTooltip = h.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteUnits, d2ui.TooltipXLeft, d2ui.TooltipYTop)
-	h.manaTooltip.SetPosition(manaLabelX, manaLabelY)
-	h.manaTooltip.SetBoxEnabled(false)
-
-	// minipanel tooltip
-	h.miniPanelTooltip = h.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteUnits, d2ui.TooltipXCenter, d2ui.TooltipYTop)
 }
 
 func (h *HUD) loadUIButtons() {
 	// Run button
 	h.runButton = h.uiManager.NewButton(d2ui.ButtonTypeRun, "")
-
 	h.runButton.SetPosition(runButtonX, runButtonY)
 	h.runButton.OnActivated(func() { h.onToggleRunButton(false) })
+	h.runButton.SetTooltip(h.runWalkTooltip)
+	h.updateRunTooltipText()
+	h.panelGroup.AddWidget(h.runButton)
 
 	if h.hero.IsRunToggled() {
 		h.runButton.Toggle()
 	}
+}
 
-	// minipanel button
-	h.menuButton = h.uiManager.NewButton(d2ui.ButtonTypeMinipanelOpenClose, "")
-	//nolint:golint,gomnd // 2 is not a magic number
-	x := screenWidth/2 + miniPanelButtonOffsetX
-	y := screenHeight + miniPanelButtonOffsetY
-	h.menuButton.SetPosition(x, y)
-	h.menuButton.OnActivated(func() {
-		h.menuButton.Toggle()
-		h.miniPanel.Toggle()
-	})
+func (h *HUD) updateRunTooltipText() {
+	var stringTableKey string
+	if h.hero.IsRunToggled() {
+		stringTableKey = "RunOff"
+	} else {
+		stringTableKey = "RunOn"
+	}
+
+	h.runWalkTooltip.SetText(h.asset.TranslateString(stringTableKey))
 }
 
 func (h *HUD) onToggleRunButton(noButton bool) {
@@ -341,6 +342,7 @@ func (h *HUD) onToggleRunButton(noButton bool) {
 	}
 
 	h.hero.ToggleRunWalk()
+	h.updateRunTooltipText()
 
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/800
 	h.hero.SetIsRunning(h.hero.IsRunToggled())
@@ -527,87 +529,16 @@ func (h *HUD) renderNewSkillsButton(x, _ int, target d2interface.Surface) error 
 	return nil
 }
 
-//nolint:golint,dupl // we clean this up later
-func (h *HUD) renderHealthTooltip(target d2interface.Surface) {
-	mx, my := h.lastMouseX, h.lastMouseY
-
-	// Create and format Health string from string lookup table.
-	fmtHealth := h.asset.TranslateString("panelhealth")
-	healthCurr, healthMax := h.hero.Stats.Health, h.hero.Stats.MaxHealth
-	strPanelHealth := fmt.Sprintf(fmtHealth, healthCurr, healthMax)
-
-	// Display current hp and mana stats hpGlobe or manaGlobe region is clicked
-	if !(h.actionableRegions[hpGlobe].rect.IsInRect(mx, my) || h.hpStatsIsVisible) {
-		return
-	}
-
-	h.healthTooltip.SetText(strPanelHealth)
-	h.healthTooltip.Render(target)
-}
-
-//nolint:golint,dupl // we clean this up later
-func (h *HUD) renderManaTooltip(target d2interface.Surface) {
-	mx, my := h.lastMouseX, h.lastMouseY
-
-	// Create and format Mana string from string lookup table.
-	fmtMana := h.asset.TranslateString("panelmana")
-	manaCurr, manaMax := h.hero.Stats.Mana, h.hero.Stats.MaxMana
-	strPanelMana := fmt.Sprintf(fmtMana, manaCurr, manaMax)
-
-	if !(h.actionableRegions[manaGlobe].rect.IsInRect(mx, my) || h.manaStatsIsVisible) {
-		return
-	}
-
-	h.manaTooltip.SetText(strPanelMana)
-	h.manaTooltip.Render(target)
-}
-
-func (h *HUD) renderRunWalkTooltip(target d2interface.Surface) {
-	mx, my := h.lastMouseX, h.lastMouseY
-
-	// Display run/walk tooltip when hovered.
-	// Note that whether the player is walking or running, the tooltip is the same in Diablo 2.
-	if !h.actionableRegions[walkRun].rect.IsInRect(mx, my) {
-		return
-	}
-
-	var stringTableKey string
-
-	if h.hero.IsRunToggled() {
-		stringTableKey = "RunOff"
-	} else {
-		stringTableKey = "RunOn"
-	}
-
-	h.runWalkTooltip.SetText(h.asset.TranslateString(stringTableKey))
-	h.runWalkTooltip.Render(target)
-}
-
-func (h *HUD) renderStaminaTooltip(target d2interface.Surface) {
-	mx, my := h.lastMouseX, h.lastMouseY
-
-	// Display stamina tooltip when hovered.
-	if !h.actionableRegions[stamina].rect.IsInRect(mx, my) {
-		return
-	}
-
+func (h *HUD) setStaminaTooltipText() {
 	// Create and format Stamina string from string lookup table.
 	fmtStamina := h.asset.TranslateString("panelstamina")
 	staminaCurr, staminaMax := int(h.hero.Stats.Stamina), h.hero.Stats.MaxStamina
 	strPanelStamina := fmt.Sprintf(fmtStamina, staminaCurr, staminaMax)
 
 	h.staminaTooltip.SetText(strPanelStamina)
-	h.staminaTooltip.Render(target)
 }
 
-func (h *HUD) renderExperienceTooltip(target d2interface.Surface) {
-	mx, my := h.lastMouseX, h.lastMouseY
-
-	// Display experience tooltip when hovered.
-	if !h.actionableRegions[xp].rect.IsInRect(mx, my) {
-		return
-	}
-
+func (h *HUD) setExperienceTooltipText() {
 	// Create and format Experience string from string lookup table.
 	fmtExp := h.asset.TranslateString("panelexp")
 
@@ -621,7 +552,6 @@ func (h *HUD) renderExperienceTooltip(target d2interface.Surface) {
 	strPanelExp := fmt.Sprintf(fmtExp, expCurr, expMax)
 
 	h.experienceTooltip.SetText(strPanelExp)
-	h.experienceTooltip.Render(target)
 }
 
 func (h *HUD) renderForSelectableEntitiesHovered(target d2interface.Surface) {
@@ -666,29 +596,10 @@ func (h *HUD) renderForSelectableEntitiesHovered(target d2interface.Surface) {
 func (h *HUD) Render(target d2interface.Surface) error {
 	h.renderForSelectableEntitiesHovered(target)
 
-	h.panelBackground.Render(target)
-
-	h.healthGlobe.Render(target)
-	h.widgetLeftSkill.Render(target)
-	h.widgetRightSkill.Render(target)
-	h.manaGlobe.Render(target)
-	h.widgetStamina.Render(target)
-	h.widgetExperience.Render(target)
-
-	if err := h.help.Render(target); err != nil {
-		return err
-	}
-
 	if h.isZoneTextShown {
 		h.zoneChangeText.SetPosition(zoneChangeTextX, zoneChangeTextY)
 		h.zoneChangeText.Render(target)
 	}
-
-	h.renderHealthTooltip(target)
-	h.renderManaTooltip(target)
-	h.renderRunWalkTooltip(target)
-	h.renderStaminaTooltip(target)
-	h.renderExperienceTooltip(target)
 
 	if h.skillSelectMenu.IsOpen() {
 		h.skillSelectMenu.Render(target)
@@ -717,6 +628,21 @@ func (h *HUD) getSkillResourceByClass(class string) string {
 	return entry
 }
 
+// Advance updates syncs data on widgets that might have changed. I.e. the current stamina value
+// in the stamina tooltip
+func (h *HUD) Advance(elapsed float64) {
+	h.setStaminaTooltipText()
+	h.setExperienceTooltipText()
+
+	if err := h.healthGlobe.Advance(elapsed); err != nil {
+		h.logger.Error(err.Error())
+	}
+
+	if err := h.manaGlobe.Advance(elapsed); err != nil {
+		h.logger.Error(err.Error())
+	}
+}
+
 // OnMouseMove handles mouse move events
 func (h *HUD) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	mx, my := event.X(), event.Y()
@@ -727,21 +653,4 @@ func (h *HUD) OnMouseMove(event d2interface.MouseMoveEvent) bool {
 	h.skillSelectMenu.RightPanel.HandleMouseMove(mx, my)
 
 	return false
-}
-
-func (h *HUD) closeMinipanelTemporary() {
-	h.isMiniPanelOpen = h.miniPanel.IsOpen()
-	if h.isMiniPanelOpen {
-		h.menuButton.SetEnabled(false)
-		h.menuButton.Toggle()
-		h.miniPanel.Close()
-	}
-}
-
-func (h *HUD) restoreMinipanelFromTempClose() {
-	if h.isMiniPanelOpen {
-		h.menuButton.SetEnabled(true)
-		h.menuButton.Toggle()
-		h.miniPanel.Open()
-	}
 }

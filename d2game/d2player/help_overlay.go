@@ -10,7 +10,6 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2gui"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -159,18 +158,14 @@ const (
 // NewHelpOverlay creates a new HelpOverlay instance
 func NewHelpOverlay(
 	asset *d2asset.AssetManager,
-	renderer d2interface.Renderer,
 	ui *d2ui.UIManager,
-	guiManager *d2gui.GuiManager,
 	l d2util.LogLevel,
 	keyMap *KeyMap,
 ) *HelpOverlay {
 	h := &HelpOverlay{
-		asset:      asset,
-		renderer:   renderer,
-		uiManager:  ui,
-		guiManager: guiManager,
-		keyMap:     keyMap,
+		asset:     asset,
+		uiManager: ui,
+		keyMap:    keyMap,
 	}
 
 	h.logger = d2util.NewLogger()
@@ -182,17 +177,17 @@ func NewHelpOverlay(
 
 // HelpOverlay represents the in-game overlay that toggles visibility when the h key is pressed
 type HelpOverlay struct {
-	asset       *d2asset.AssetManager
-	isOpen      bool
-	renderer    d2interface.Renderer
-	frames      []*d2ui.Sprite
-	text        []*d2ui.Label
-	lines       []line
-	uiManager   *d2ui.UIManager
-	layout      *d2gui.Layout
-	closeButton *d2ui.Button
-	guiManager  *d2gui.GuiManager
-	keyMap      *KeyMap
+	asset            *d2asset.AssetManager
+	isOpen           bool
+	frames           []*d2ui.Sprite
+	text             []*d2ui.Label
+	lines            []line
+	uiManager        *d2ui.UIManager
+	closeButton      *d2ui.Button
+	keyMap           *KeyMap
+	onCloseCb        func()
+	panelGroup       *d2ui.WidgetGroup
+	backgroundWidget *d2ui.CustomWidget
 
 	logger *d2util.Logger
 }
@@ -211,20 +206,18 @@ func (h *HelpOverlay) Toggle() {
 // Close will hide the help overlay
 func (h *HelpOverlay) Close() {
 	h.isOpen = false
-	h.closeButton.SetVisible(false)
-	h.guiManager.SetLayout(nil)
+	h.panelGroup.SetVisible(false)
+	h.onCloseCb()
+}
+
+// SetOnCloseCb sets the callback run when Close() is called
+func (h *HelpOverlay) SetOnCloseCb(cb func()) {
+	h.onCloseCb = cb
 }
 
 func (h *HelpOverlay) open() {
 	h.isOpen = true
-	if h.layout == nil {
-		h.layout = d2gui.CreateLayout(h.renderer, d2gui.PositionTypeHorizontal, h.asset)
-	}
-
-	h.closeButton.SetVisible(true)
-	h.closeButton.SetPressed(false)
-
-	h.guiManager.SetLayout(h.layout)
+	h.panelGroup.SetVisible(true)
 }
 
 // IsOpen returns whether or not the overlay is visible/open
@@ -234,22 +227,21 @@ func (h *HelpOverlay) IsOpen() bool {
 
 // IsInRect checks if the given point is within the overlay layout rectangle
 func (h *HelpOverlay) IsInRect(px, py int) bool {
-	ww, hh := h.layout.GetSize()
-	x, y := h.layout.GetPosition()
-
-	if px >= x && px <= x+ww && py >= y && py <= y+hh {
-		return true
-	}
-
-	return false
+	return h.panelGroup.Contains(px, py)
 }
 
 // Load the overlay graphical assets
 func (h *HelpOverlay) Load() {
+	h.panelGroup = h.uiManager.NewWidgetGroup(d2ui.RenderPriorityHelpPanel)
+
 	h.setupOverlayFrame()
 	h.setupTitleAndButton()
 	h.setupBulletedList()
 	h.setupLabelsWithLines()
+
+	h.backgroundWidget = h.uiManager.NewCustomWidgetCached(h.Render, screenWidth, screenHeight)
+	h.panelGroup.AddWidget(h.backgroundWidget)
+	h.panelGroup.SetVisible(false)
 }
 
 func (h *HelpOverlay) setupOverlayFrame() {
@@ -330,6 +322,8 @@ func (h *HelpOverlay) setupTitleAndButton() {
 	h.closeButton.SetPosition(closeButtonX, closeButtonY)
 	h.closeButton.SetVisible(false)
 	h.closeButton.OnActivated(func() { h.Close() })
+	h.closeButton.SetRenderPriority(d2ui.RenderPriorityForeground)
+	h.panelGroup.AddWidget(h.closeButton)
 
 	newLabel = h.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
 	newLabel.SetText(h.asset.TranslateString("strClose")) // "Close"
@@ -621,11 +615,7 @@ func (h *HelpOverlay) createCallout(c callout) {
 }
 
 // Render the overlay to the given surface
-func (h *HelpOverlay) Render(target d2interface.Surface) error {
-	if !h.isOpen {
-		return nil
-	}
-
+func (h *HelpOverlay) Render(target d2interface.Surface) {
 	for _, f := range h.frames {
 		f.Render(target)
 	}
@@ -639,6 +629,4 @@ func (h *HelpOverlay) Render(target d2interface.Surface) error {
 		target.DrawLine(l.MoveX, l.MoveY, l.Color)
 		target.Pop()
 	}
-
-	return nil
 }
