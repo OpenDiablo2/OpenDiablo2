@@ -1,11 +1,12 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-	"github.com/gravestench/akara"
 	"os"
 	"path"
 
+	"github.com/gravestench/akara"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
 
@@ -30,7 +31,7 @@ func NewAppBootstrapSystem() *AppBootstrapSystem {
 			d2components.FileType,
 			d2components.FileHandle,
 			d2components.FilePath,
-			).
+		).
 		Forbid( // files which have been loaded
 			d2components.GameConfig,
 			d2components.StringTable,
@@ -44,7 +45,7 @@ func NewAppBootstrapSystem() *AppBootstrapSystem {
 			d2components.Dt1,
 			d2components.Wav,
 			d2components.AnimData,
-			).
+		).
 		Build()
 
 	// we are interested in actual game config instances, too
@@ -52,7 +53,7 @@ func NewAppBootstrapSystem() *AppBootstrapSystem {
 
 	sys := &AppBootstrapSystem{
 		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToCheck, gameConfigs),
-		Logger: d2util.NewLogger(),
+		Logger:               d2util.NewLogger(),
 	}
 
 	sys.SetPrefix(logPrefixAppBootstrap)
@@ -75,7 +76,7 @@ type AppBootstrapSystem struct {
 	*d2components.FileSourceMap
 }
 
-// Init will inject (or use existing) components related to setting up the config sources and
+// Init will inject (or use existing) components related to setting up the config sources
 func (m *AppBootstrapSystem) Init(world *akara.World) {
 	m.Info("initializing ...")
 
@@ -102,7 +103,6 @@ func (m *AppBootstrapSystem) injectSystems() {
 	m.World.AddSystem(NewGameConfigSystem())
 	m.World.AddSystem(NewAssetLoader())
 	m.World.AddSystem(NewGameObjectFactory())
-	m.World.AddSystem(NewUpdateCounterSystem())
 }
 
 // we make two entities and assign file paths for the two directories that
@@ -136,7 +136,6 @@ func (m *AppBootstrapSystem) setupConfigSources() {
 	}
 }
 
-
 func (m *AppBootstrapSystem) setupConfigFile() {
 	// add an entity that will get picked up by the game config system and loaded
 	m.AddFilePath(m.NewEntity()).Path = configFileName
@@ -154,6 +153,7 @@ func (m *AppBootstrapSystem) Update() {
 	m.Infof("found %d new configs to parse", len(configs))
 
 	firstConfigEntityID := configs[0]
+
 	cfg, found := m.GetGameConfig(firstConfigEntityID)
 	if !found {
 		return

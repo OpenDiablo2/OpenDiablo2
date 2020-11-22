@@ -97,4 +97,3 @@ func (cm *AnimationMap) Remove(id akara.EID) {
 	delete(cm.components, id)
 	cm.world.UpdateEntity(id)
 }
-

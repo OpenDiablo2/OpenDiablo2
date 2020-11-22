@@ -2,6 +2,7 @@ package d2systems
 
 import (
 	"encoding/json"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
@@ -17,6 +18,7 @@ const (
 	loggerPrefixGameConfig = "Game Config"
 )
 
+// NewGameConfigSystem creates a new game config system
 func NewGameConfigSystem() *GameConfigSystem {
 	// we are going to check entities that dont yet have loaded asset types
 	filesToCheck := akara.NewFilter().
@@ -44,7 +46,7 @@ func NewGameConfigSystem() *GameConfigSystem {
 
 	gcs := &GameConfigSystem{
 		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToCheck, gameConfigs),
-		Logger: d2util.NewLogger(),
+		Logger:               d2util.NewLogger(),
 	}
 
 	gcs.SetPrefix(loggerPrefixGameConfig)
@@ -76,6 +78,7 @@ type GameConfigSystem struct {
 	ActiveConfig *d2components.GameConfigComponent
 }
 
+// Init the world with the necessary components related to game config files
 func (m *GameConfigSystem) Init(world *akara.World) {
 	m.Info("initializing ...")
 
@@ -92,6 +95,7 @@ func (m *GameConfigSystem) Init(world *akara.World) {
 	m.DirtyMap = world.InjectMap(d2components.Dirty).(*d2components.DirtyMap)
 }
 
+// Update checks for new config files
 func (m *GameConfigSystem) Update() {
 	m.checkForNewConfig(m.filesToCheck.GetEntities())
 }

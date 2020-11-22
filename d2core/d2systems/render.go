@@ -2,9 +2,10 @@ package d2systems
 
 import (
 	"errors"
+	"time"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2config"
-	"time"
 
 	"github.com/gravestench/akara"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -15,11 +16,11 @@ import (
 )
 
 const (
-	gameTitle = "Open Diablo 2"
+	gameTitle             = "Open Diablo 2"
 	logPrefixRenderSystem = "Render System"
 )
 
-// NewRenderSystem creates a movement system
+// NewRenderSystem creates a new render system
 func NewRenderSystem() *RenderSystem {
 	viewports := akara.NewFilter().
 		Require(d2components.Viewport).
@@ -31,7 +32,7 @@ func NewRenderSystem() *RenderSystem {
 
 	r := &RenderSystem{
 		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(viewports, gameConfigs),
-		Logger: d2util.NewLogger(),
+		Logger:               d2util.NewLogger(),
 	}
 
 	r.SetPrefix(logPrefixRenderSystem)
@@ -42,24 +43,24 @@ func NewRenderSystem() *RenderSystem {
 // static check that RenderSystem implements the System interface
 var _ akara.System = &RenderSystem{}
 
-// RenderSystem handles entity movement based on velocity and position components
+// RenderSystem is responsible for rendering the main viewports of scenes
+// to the game screen.
 type RenderSystem struct {
 	*akara.BaseSubscriberSystem
 	*d2util.Logger
-	renderer      d2interface.Renderer
-	screenSurface d2interface.Surface
-	viewports     *akara.Subscription
-	configs       *akara.Subscription
+	renderer  d2interface.Renderer
+	viewports *akara.Subscription
+	configs   *akara.Subscription
 	*d2components.GameConfigMap
 	*d2components.ViewportMap
 	*d2components.MainViewportMap
 	*d2components.SurfaceMap
-	lastUpdate    time.Time
+	lastUpdate        time.Time
 	gameLoopInitDelay time.Duration // there is a race condition, this is a hack
 }
 
-// Init initializes the system with the given world
-func (m *RenderSystem) Init(world *akara.World) {
+// Init initializes the system with the given world, injecting the necessary components
+func (m *RenderSystem) Init(_ *akara.World) {
 	m.Info("initializing ...")
 
 	m.gameLoopInitDelay = time.Millisecond
@@ -75,15 +76,30 @@ func (m *RenderSystem) Init(world *akara.World) {
 	m.SurfaceMap = m.InjectMap(d2components.Surface).(*d2components.SurfaceMap)
 }
 
-// Process will create a renderer if it doesnt exist yet,
-// and then
+// Update will initialize the renderer, start the game loop, and
+// disable the system (to prevent it from being called during the game loop).
+//
+// The reason why this isn't in the init step is because we use other systems
+// for loading the config file, and it may take more than one iteration
 func (m *RenderSystem) Update() {
 	if m.renderer != nil {
-		return
+		return // we already created the renderer
 	}
 
 	m.createRenderer()
+
+	if m.renderer == nil {
+		return // the renderer has not yet been created!
+	}
+
+	// if we have created the renderer, we can safely disable
+	// this system and start the run loop.
 	m.SetActive(false)
+
+	err := m.startGameLoop()
+	if err != nil {
+		m.Fatal(err.Error())
+	}
 }
 
 func (m *RenderSystem) createRenderer() {
@@ -99,10 +115,9 @@ func (m *RenderSystem) createRenderer() {
 		return
 	}
 
-	// d2render.CreateRenderer should use a GameConfigComponent instead ...
+	// we should get rid of d2config.Configuration and use components instead...
 	oldStyleConfig := &d2config.Configuration{
 		MpqLoadOrder:    config.MpqLoadOrder,
-		Language:        config.Language,
 		MpqPath:         config.MpqPath,
 		TicksPerSecond:  config.TicksPerSecond,
 		FpsCap:          config.FpsCap,
@@ -117,8 +132,7 @@ func (m *RenderSystem) createRenderer() {
 
 	renderer, err := d2render.CreateRenderer(oldStyleConfig)
 	if err != nil {
-		m.Error(err.Error())
-		panic(err)
+		m.Fatal(err.Error())
 	}
 
 	// HACK: hardcoded with ebiten for now
@@ -147,6 +161,10 @@ func (m *RenderSystem) render(screen d2interface.Surface) error {
 			return errors.New("main viewport doesn't have a surface")
 		}
 
+		if sfc.Surface == nil {
+			sfc.Surface = m.renderer.NewSurface(vp.Width, vp.Height)
+		}
+
 		screen.PushTranslation(vp.Left, vp.Top)
 		screen.Render(sfc.Surface)
 		screen.Pop()
@@ -168,8 +186,8 @@ func (m *RenderSystem) updateWorld() error {
 	return m.World.Update(elapsed)
 }
 
-func (m *RenderSystem) Loop() error {
-	m.Infof("entering game run loop ...")
+func (m *RenderSystem) startGameLoop() error {
+	m.Infof("starting game loop ...")
 
 	return m.renderer.Run(m.render, m.updateWorld, 800, 600, gameTitle)
 }

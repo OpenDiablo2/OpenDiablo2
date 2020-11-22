@@ -33,7 +33,9 @@ func TestTimeScaleSystem_Process(t *testing.T) {
 	actual := time.Second
 	expected := time.Duration(timescaleSystem.scale) * actual
 
-	world.Update(actual)
+	if err := world.Update(actual); err != nil {
+		timescaleSystem.Error(err.Error())
+	}
 
 	if world.TimeDelta != expected {
 		t.Error("world time delta not scaled")

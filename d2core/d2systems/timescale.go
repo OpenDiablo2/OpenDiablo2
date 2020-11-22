@@ -1,8 +1,9 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
 	"github.com/gravestench/akara"
 )
@@ -19,7 +20,7 @@ const (
 func NewTimeScaleSystem() *TimeScaleSystem {
 	m := &TimeScaleSystem{
 		BaseSystem: &akara.BaseSystem{},
-		Logger: d2util.NewLogger(),
+		Logger:     d2util.NewLogger(),
 	}
 
 	m.SetPrefix(logPrefixTimeScaleSystem)
@@ -36,7 +37,7 @@ var _ akara.System = &TimeScaleSystem{}
 type TimeScaleSystem struct {
 	*akara.BaseSystem
 	*d2util.Logger
-	scale float64
+	scale     float64
 	lastScale float64
 }
 
@@ -49,9 +50,9 @@ func (t *TimeScaleSystem) Init(world *akara.World) {
 	t.scale = defaultScale
 }
 
-// Process scales the worlds time delta for this frame
+// Update scales the worlds time delta for this frame
 func (t *TimeScaleSystem) Update() {
-	if !t.Active() || t.scale == t.lastScale{
+	if !t.Active() || t.scale == t.lastScale {
 		return
 	}
 

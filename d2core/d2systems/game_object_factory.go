@@ -1,8 +1,9 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/gravestench/akara"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 const (
@@ -13,7 +14,7 @@ const (
 func NewGameObjectFactory() *GameObjectFactory {
 	m := &GameObjectFactory{
 		BaseSystem: &akara.BaseSystem{},
-		Logger: d2util.NewLogger(),
+		Logger:     d2util.NewLogger(),
 	}
 
 	m.SetPrefix(logPrefixGameObjectFactory)
@@ -24,7 +25,8 @@ func NewGameObjectFactory() *GameObjectFactory {
 // static check that GameObjectFactory implements the System interface
 var _ akara.System = &GameObjectFactory{}
 
-// GameObjectFactory
+// GameObjectFactory is a wrapper system for subordinate systems that
+// do the actual object creation work.
 type GameObjectFactory struct {
 	*akara.BaseSystem
 	*d2util.Logger
@@ -41,8 +43,7 @@ func (t *GameObjectFactory) injectSubSystems() {
 	t.SpriteFactory = NewSpriteFactorySubsystem(t.BaseSystem, t.Logger)
 }
 
+// Update updates all the sub-systems
 func (t *GameObjectFactory) Update() {
 	t.SpriteFactory.Update()
 }
-
-

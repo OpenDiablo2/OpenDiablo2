@@ -1,7 +1,6 @@
 package d2systems
 
 import (
-	"fmt"
 	"math/rand"
 	"strconv"
 	"testing"
@@ -116,7 +115,7 @@ func TestMovementSystem_Update(t *testing.T) {
 	}
 }
 
-func bench_N_entities(n int, b *testing.B) {
+func benchN(n int, b *testing.B) {
 	cfg := akara.NewWorldConfig()
 
 	movementSystem := NewMovementSystem()
@@ -131,7 +130,7 @@ func bench_N_entities(n int, b *testing.B) {
 		v := movementSystem.AddVelocity(e)
 
 		p.Set(0, 0)
-		v.Set(rand.Float64(), rand.Float64())
+		v.Set(rand.Float64(), rand.Float64()) //nolint:gosec // it's just a test
 	}
 
 	benchName := strconv.Itoa(n) + "_entity update"
@@ -140,15 +139,13 @@ func bench_N_entities(n int, b *testing.B) {
 			_ = world.Update(time.Millisecond)
 		}
 	})
-
-	fmt.Println("done!")
 }
 
 func BenchmarkMovementSystem_Update(b *testing.B) {
-	bench_N_entities(1e1, b)
-	bench_N_entities(1e2, b)
-	bench_N_entities(1e3, b)
-	bench_N_entities(1e4, b)
-	bench_N_entities(1e5, b)
-	bench_N_entities(1e6, b)
+	benchN(1e1, b)
+	benchN(1e2, b)
+	benchN(1e3, b)
+	benchN(1e4, b)
+	benchN(1e5, b)
+	benchN(1e6, b)
 }

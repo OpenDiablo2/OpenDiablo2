@@ -10,6 +10,8 @@ import (
 )
 
 func Test_FileSourceResolution(t *testing.T) {
+	const testDataPath = "./testdata/"
+
 	cfg := akara.NewWorldConfig()
 
 	srcResolver := NewFileSourceResolver()
@@ -29,7 +31,7 @@ func Test_FileSourceResolution(t *testing.T) {
 
 	sourceEntity := world.NewEntity()
 	sourceFp := filePaths.AddFilePath(sourceEntity)
-	sourceFp.Path = "./testdata/"
+	sourceFp.Path = testDataPath
 
 	_ = world.Update(0)
 

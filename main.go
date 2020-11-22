@@ -3,6 +3,10 @@ package main
 import (
 	"log"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2systems"
+	"github.com/gravestench/akara"
+	"gopkg.in/alecthomas/kingpin.v2"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
 )
 
@@ -15,6 +19,21 @@ var GitBranch string
 var GitCommit string
 
 func main() {
+	ecs := kingpin.Flag("ecs", "start the ecs implementation").Bool()
+	kingpin.Parse()
+
+	if *ecs {
+		cfg := akara.NewWorldConfig()
+
+		cfg.
+			With(d2systems.NewAppBootstrapSystem()).
+			With(d2systems.NewGameClientBootstrapSystem())
+
+		akara.NewWorld(cfg)
+
+		return
+	}
+
 	log.SetFlags(log.Lshortfile)
 	log.Println("OpenDiablo2 - Open source Diablo 2 engine")
 

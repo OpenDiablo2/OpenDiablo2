@@ -13,15 +13,17 @@ const (
 	fmtCreateSpriteErr = "could not create sprite from image `%s` and palette `%s`"
 )
 
+// NewSpriteFactorySubsystem creates a new sprite factory which is intended
+// to be embedded in the game object factory system.
 func NewSpriteFactorySubsystem(b *akara.BaseSystem, l *d2util.Logger) *SpriteFactory {
 	spritesToRender := akara.NewFilter().
 		Require(d2components.Animation). // we want to process entities that have an animation ...
-		Forbid(d2components.Surface). // ... but are missing a surface
+		Forbid(d2components.Surface).    // ... but are missing a surface
 		Build()
 
 	sys := &SpriteFactory{
 		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(spritesToRender),
-		Logger:           l,
+		Logger:               l,
 	}
 
 	sys.BaseSystem = b
@@ -37,6 +39,8 @@ type spriteLoadQueueEntry struct {
 
 type spriteLoadQueue = map[akara.EID]spriteLoadQueueEntry
 
+// SpriteFactory is responsible for queueing sprites to be loaded (as animations),
+// as well as binding the animation to a renderer if one is present (which generates the sprite surfaces).
 type SpriteFactory struct {
 	*akara.BaseSubscriberSystem
 	*d2util.Logger
@@ -52,10 +56,11 @@ type SpriteFactory struct {
 	spritesToRender *akara.Subscription
 }
 
+// Init the sprite factory, injecting the necessary components
 func (t *SpriteFactory) Init(world *akara.World) {
 	t.Info("initializing sprite factory ...")
 
-	t.loadQueue = make(spriteLoadQueue, 0)
+	t.loadQueue = make(spriteLoadQueue)
 
 	t.spritesToRender = t.Subscriptions[0]
 
@@ -68,6 +73,8 @@ func (t *SpriteFactory) Init(world *akara.World) {
 	t.SurfaceMap = t.InjectMap(d2components.Surface).(*d2components.SurfaceMap)
 }
 
+// Update processes the load queue which attempting to create animations, as well as
+// binding existing animations to a renderer if one is present.
 func (t *SpriteFactory) Update() {
 	for _, eid := range t.spritesToRender.GetEntities() {
 		t.tryRenderingSprite(eid)
@@ -78,6 +85,7 @@ func (t *SpriteFactory) Update() {
 	}
 }
 
+// Sprite queues a sprite animation to be loaded
 func (t *SpriteFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID {
 	spriteID := t.NewEntity()
 
@@ -150,6 +158,10 @@ func (t *SpriteFactory) tryRenderingSprite(eid akara.EID) {
 
 	anim, found := t.GetAnimation(eid)
 	if !found {
+		return
+	}
+
+	if anim.Animation == nil {
 		return
 	}
 

@@ -11,6 +11,8 @@ import (
 )
 
 func Test_FileHandleResolver_Process(t *testing.T) {
+	const testDataPath = "./testdata/"
+
 	cfg := akara.NewWorldConfig()
 
 	fileTypeResolver := NewFileTypeResolver()
@@ -32,9 +34,7 @@ func Test_FileHandleResolver_Process(t *testing.T) {
 
 	sourceEntity := world.NewEntity()
 	sourceFp := filePaths.AddFilePath(sourceEntity)
-	sourceFp.Path = "./testdata/"
-
-	//_ = world.Update(0)
+	sourceFp.Path = testDataPath
 
 	fileEntity := world.NewEntity()
 	fileFp := filePaths.AddFilePath(fileEntity)
