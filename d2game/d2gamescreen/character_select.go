@@ -55,9 +55,9 @@ func CreateCharacterSelect(
 		HeroStateFactory:  playerStateFactory,
 	}
 
-	characterSelect.logger = d2util.NewLogger()
-	characterSelect.logger.SetLevel(l)
-	characterSelect.logger.SetPrefix(logPrefix)
+	characterSelect.Logger = d2util.NewLogger()
+	characterSelect.Logger.SetLevel(l)
+	characterSelect.Logger.SetPrefix(logPrefix)
 
 	return characterSelect, nil
 }
@@ -98,7 +98,8 @@ type CharacterSelect struct {
 	audioProvider d2interface.AudioProvider
 	renderer      d2interface.Renderer
 	navigator     d2interface.Navigator
-	logger        *d2util.Logger
+
+	*d2util.Logger
 }
 
 const (
@@ -161,7 +162,7 @@ func (v *CharacterSelect) OnLoad(loading d2screen.LoadingState) {
 
 	err := v.inputManager.BindHandler(v)
 	if err != nil {
-		v.logger.Error("failed to add Character Select screen as event handler")
+		v.Error("failed to add Character Select screen as event handler")
 	}
 
 	loading.Progress(tenPercent)
@@ -213,7 +214,7 @@ func (v *CharacterSelect) loadBackground() {
 
 	v.background, err = v.uiManager.NewSprite(d2resource.CharacterSelectionBackground, d2resource.PaletteSky)
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 	}
 
 	v.background.SetPosition(bgX, bgY)
@@ -240,7 +241,7 @@ func (v *CharacterSelect) loadSelectionBox() {
 
 	v.selectionBox, err = v.uiManager.NewSprite(d2resource.CharacterSelectionSelectBox, d2resource.PaletteSky)
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 	}
 
 	selBoxX, selBoxY := 37, 86
@@ -252,7 +253,7 @@ func (v *CharacterSelect) loadOkCancelBox() {
 
 	v.okCancelBox, err = v.uiManager.NewSprite(d2resource.PopUpOkCancel, d2resource.PaletteFechar)
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 	}
 
 	okCancelX, okCancelY := 270, 175
@@ -503,7 +504,7 @@ func (v *CharacterSelect) onDeleteCharButtonClicked() {
 func (v *CharacterSelect) onDeleteCharacterConfirmClicked() {
 	err := os.Remove(v.gameStates[v.selectedCharacter].FilePath)
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 	}
 
 	v.charScrollbar.SetCurrentOffset(0)

@@ -84,16 +84,16 @@ func CreateGame(
 		keyMap:        keyMap,
 		logLevel:      l,
 	}
-	game.logger = d2util.NewLogger()
-	game.logger.SetLevel(l)
-	game.logger.SetPrefix(logPrefix)
+	game.Logger = d2util.NewLogger()
+	game.Logger.SetLevel(l)
+	game.Logger.SetPrefix(logPrefix)
 
 	game.soundEnv = d2audio.NewSoundEnvironment(game.soundEngine)
 
 	game.escapeMenu.OnLoad()
 
 	if err := inputManager.BindHandler(game.escapeMenu); err != nil {
-		game.logger.Error("failed to add gameplay screen as event handler")
+		game.Error("failed to add gameplay screen as event handler")
 	}
 
 	return game
@@ -120,8 +120,9 @@ type Game struct {
 	inputManager  d2interface.InputManager
 	audioProvider d2interface.AudioProvider
 	terminal      d2interface.Terminal
-	logger        *d2util.Logger
-	logLevel      d2util.LogLevel
+
+	*d2util.Logger
+	logLevel d2util.LogLevel
 }
 
 // OnLoad loads the resources for the Gameplay screen
@@ -137,7 +138,7 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 		},
 	)
 	if err != nil {
-		v.logger.Error("failed to bind the '%s' action, err: %v\nspawnitem" + err.Error())
+		v.Errorf("failed to bind the '%s' action, err: %v\n", "spawnitem", err)
 	}
 
 	err = v.terminal.BindAction(
@@ -149,7 +150,7 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 		},
 	)
 	if err != nil {
-		v.logger.Error("failed to bind the '%s' action, err: %v\nspawnitemat" + err.Error())
+		v.Errorf("failed to bind the '%s' action, err: %v\n", "spawnitemat", err)
 	}
 
 	err = v.terminal.BindAction(
@@ -174,7 +175,7 @@ func (v *Game) OnLoad(_ d2screen.LoadingState) {
 		},
 	)
 	if err != nil {
-		v.logger.Error("failed to bind the '%s' action, err: %v\nspawnmon" + err.Error())
+		v.Errorf("failed to bind the '%s' action, err: %v\n", "spawnmon", err)
 	}
 }
 
@@ -311,7 +312,7 @@ func (v *Game) bindGameControls() error {
 		v.gameControls.Load()
 
 		if err := v.inputManager.BindHandler(v.gameControls); err != nil {
-			v.logger.Error(bindControlsErrStr + player.ID())
+			v.Error(bindControlsErrStr + player.ID())
 		}
 
 		break
@@ -329,7 +330,7 @@ func (v *Game) OnPlayerMove(targetX, targetY float64) {
 	err := v.gameClient.SendPacketToServer(createMovePlayerPacket)
 
 	if err != nil {
-		v.logger.Error(fmt.Sprintf(moveErrStr, v.gameClient.PlayerID, targetX, targetY))
+		v.Errorf(moveErrStr, v.gameClient.PlayerID, targetX, targetY)
 	}
 }
 
@@ -349,7 +350,7 @@ func (v *Game) OnPlayerSave() error {
 func (v *Game) OnPlayerCast(skillID int, targetX, targetY float64) {
 	err := v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerID, skillID, targetX, targetY))
 	if err != nil {
-		v.logger.Error(fmt.Sprintf(castErrStr, v.gameClient.PlayerID, skillID, targetX, targetY))
+		v.Errorf(castErrStr, v.gameClient.PlayerID, skillID, targetX, targetY)
 	}
 }
 
@@ -370,6 +371,6 @@ func (v *Game) debugSpawnItemAtLocation(x, y int, codes ...string) {
 
 	err := v.gameClient.SendPacketToServer(packet)
 	if err != nil {
-		v.logger.Error(fmt.Sprintf(spawnItemErrStr, x, y, codes))
+		v.Errorf(spawnItemErrStr, x, y, codes)
 	}
 }

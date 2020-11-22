@@ -121,9 +121,9 @@ func CreateMapEngineTest(currentRegion,
 
 	mapEngineTest.playerState = heroStateFactory.CreateTestGameState()
 
-	mapEngineTest.logger = d2util.NewLogger()
-	mapEngineTest.logger.SetLevel(l)
-	mapEngineTest.logger.SetPrefix(logPrefix)
+	mapEngineTest.Logger = d2util.NewLogger()
+	mapEngineTest.Logger.SetLevel(l)
+	mapEngineTest.Logger.SetPrefix(logPrefix)
 
 	return mapEngineTest, nil
 }
@@ -153,12 +153,12 @@ type MapEngineTest struct {
 	regionSpec    regionSpec
 	filesCount    int
 
-	logger   *d2util.Logger
+	*d2util.Logger
 	logLevel d2util.LogLevel
 }
 
 func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
-	met.logger.Info(fmt.Sprintf("Loaded region: Type(%d) LevelPreset(%d) FileIndex(%d)", n, levelPreset, fileIndex))
+	met.Infof("Loaded region: Type(%d) LevelPreset(%d) FileIndex(%d)", n, levelPreset, fileIndex)
 	met.mapRenderer.InvalidateImageCache()
 
 	for _, spec := range getRegions() {
@@ -213,7 +213,7 @@ func (met *MapEngineTest) loadRegionByIndex(n, levelPreset, fileIndex int) {
 // OnLoad loads the resources for the Map Engine Test screen
 func (met *MapEngineTest) OnLoad(loading d2screen.LoadingState) {
 	if err := met.inputManager.BindHandler(met); err != nil {
-		met.logger.Error("could not add MapEngineTest as event handler")
+		met.Error("could not add MapEngineTest as event handler")
 	}
 
 	loading.Progress(twentyPercent)

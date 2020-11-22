@@ -78,8 +78,8 @@ type App struct {
 	tAllocSamples     *ring.Ring
 	guiManager        *d2gui.GuiManager
 	config            *d2config.Configuration
-	logger            *d2util.Logger
-	errorMessage      error
+	*d2util.Logger
+	errorMessage error
 	*Options
 }
 
@@ -111,20 +111,22 @@ const (
 // Create creates a new instance of the application
 func Create(gitBranch, gitCommit string) *App {
 	assetManager, assetError := d2asset.NewAssetManager()
-	logger := d2util.NewLogger()
-	logger.SetPrefix(appLoggerPrefix)
-	logger.SetLevel(d2util.LogLevelNone)
 
-	return &App{
+	app := &App{
 		gitBranch: gitBranch,
 		gitCommit: gitCommit,
 		asset:     assetManager,
 		Options: &Options{
 			Server: &d2networking.ServerOptions{},
 		},
-		logger:       logger,
 		errorMessage: assetError,
 	}
+
+	app.Logger = d2util.NewLogger()
+	app.Logger.SetPrefix(appLoggerPrefix)
+	app.Logger.SetLevel(d2util.LogLevelNone)
+
+	return app
 }
 
 func updateNOOP() error {
@@ -153,7 +155,7 @@ func (a *App) startDedicatedServer() error {
 
 	for {
 		for data := range srvChanLog {
-			a.logger.Info(data)
+			a.Info(data)
 		}
 	}
 }
@@ -266,7 +268,7 @@ func (a *App) LoadConfig() (*d2config.Configuration, error) {
 		fullPath := filepath.Join(config.Dir(), config.Base())
 		config.SetPath(fullPath)
 
-		a.logger.Infof("creating default configuration file at %s...", fullPath)
+		a.Infof("creating default configuration file at %s...", fullPath)
 
 		saveErr := config.Save()
 
@@ -279,7 +281,7 @@ func (a *App) LoadConfig() (*d2config.Configuration, error) {
 
 	config.SetPath(filepath.Join(configAsset.Source().Path(), configAsset.Path()))
 
-	a.logger.Infof("loaded configuration file from %s", config.Path())
+	a.Infof("loaded configuration file from %s", config.Path())
 
 	return config, nil
 }
@@ -405,7 +407,7 @@ func (a *App) initialize() error {
 		action := &terminalActions[idx]
 
 		if err := a.terminal.BindAction(action.name, action.description, action.action); err != nil {
-			a.logger.Fatal(err.Error())
+			a.Fatal(err.Error())
 		}
 	}
 
@@ -497,7 +499,7 @@ func (a *App) initDataDictionaries() error {
 		d2resource.LowQualityItems,
 	}
 
-	a.logger.Info("Initializing asset manager")
+	a.Info("Initializing asset manager")
 
 	for _, path := range dictPaths {
 		err := a.asset.LoadRecords(path)
@@ -524,11 +526,11 @@ func (a *App) initAnimationData(path string) error {
 		return err
 	}
 
-	a.logger.Debug(fmt.Sprintf(fmtLoadAnimData, path))
+	a.Debugf(fmtLoadAnimData, path)
 
 	animData := d2data.LoadAnimationData(animDataBytes)
 
-	a.logger.Infof("Loaded %d animation data records", len(animData))
+	a.Infof("Loaded %d animation data records", len(animData))
 
 	a.asset.Records.Animation.Data = animData
 
@@ -683,21 +685,21 @@ func (a *App) allocRate(totalAlloc uint64, fps float64) float64 {
 func (a *App) dumpHeap() {
 	if _, err := os.Stat("./pprof/"); os.IsNotExist(err) {
 		if err := os.Mkdir("./pprof/", 0750); err != nil {
-			a.logger.Fatal(err.Error())
+			a.Fatal(err.Error())
 		}
 	}
 
 	fileOut, err := os.Create("./pprof/heap.pprof")
 	if err != nil {
-		a.logger.Error(err.Error())
+		a.Error(err.Error())
 	}
 
 	if err := pprof.WriteHeapProfile(fileOut); err != nil {
-		a.logger.Fatal(err.Error())
+		a.Fatal(err.Error())
 	}
 
 	if err := fileOut.Close(); err != nil {
-		a.logger.Fatal(err.Error())
+		a.Fatal(err.Error())
 	}
 }
 
@@ -708,7 +710,7 @@ func (a *App) evalJS(code string) {
 		return
 	}
 
-	a.logger.Info("%s" + val)
+	a.Info("%s" + val)
 }
 
 func (a *App) toggleFullScreen() {
@@ -731,7 +733,7 @@ func (a *App) doCaptureFrame(target d2interface.Surface) error {
 
 	defer func() {
 		if err := fp.Close(); err != nil {
-			a.logger.Fatal(err.Error())
+			a.Fatal(err.Error())
 		}
 	}()
 
@@ -740,7 +742,7 @@ func (a *App) doCaptureFrame(target d2interface.Surface) error {
 		return err
 	}
 
-	a.logger.Info(fmt.Sprintf("saved frame to %s", a.capturePath))
+	a.Info(fmt.Sprintf("saved frame to %s", a.capturePath))
 
 	return nil
 }
@@ -758,7 +760,7 @@ func (a *App) convertFramesToGif() error {
 
 	defer func() {
 		if err := fp.Close(); err != nil {
-			a.logger.Fatal(err.Error())
+			a.Fatal(err.Error())
 		}
 	}()
 
@@ -800,7 +802,7 @@ func (a *App) convertFramesToGif() error {
 		return err
 	}
 
-	a.logger.Info(fmt.Sprintf("saved animation to %s", a.capturePath))
+	a.Info(fmt.Sprintf("saved animation to %s", a.capturePath))
 
 	return nil
 }
@@ -858,31 +860,31 @@ func enableProfiler(profileOption string, a *App) interface{ Stop() } {
 
 	switch strings.ToLower(strings.Trim(profileOption, " ")) {
 	case "cpu":
-		a.logger.Debug("CPU profiling is enabled.")
+		a.Logger.Debug("CPU profiling is enabled.")
 
 		options = append(options, profile.CPUProfile)
 	case "mem":
-		a.logger.Debug("Memory profiling is enabled.")
+		a.Logger.Debug("Memory profiling is enabled.")
 
 		options = append(options, profile.MemProfile)
 	case "block":
-		a.logger.Debug("Block profiling is enabled.")
+		a.Logger.Debug("Block profiling is enabled.")
 
 		options = append(options, profile.BlockProfile)
 	case "goroutine":
-		a.logger.Debug("Goroutine profiling is enabled.")
+		a.Logger.Debug("Goroutine profiling is enabled.")
 
 		options = append(options, profile.GoroutineProfile)
 	case "trace":
-		a.logger.Debug("Trace profiling is enabled.")
+		a.Logger.Debug("Trace profiling is enabled.")
 
 		options = append(options, profile.TraceProfile)
 	case "thread":
-		a.logger.Debug("Thread creation profiling is enabled.")
+		a.Logger.Debug("Thread creation profiling is enabled.")
 
 		options = append(options, profile.ThreadcreationProfile)
 	case "mutex":
-		a.logger.Debug("Mutex profiling is enabled.")
+		a.Logger.Debug("Mutex profiling is enabled.")
 
 		options = append(options, profile.MutexProfile)
 	}
@@ -911,7 +913,7 @@ func (a *App) ToMainMenu(errorMessageOptional ...string) {
 	mainMenu, err := d2gamescreen.CreateMainMenu(a, a.asset, a.renderer, a.inputManager, a.audio, a.ui, buildInfo,
 		a.config.LogLevel, errorMessageOptional...)
 	if err != nil {
-		a.logger.Error(err.Error())
+		a.Error(err.Error())
 		return
 	}
 
@@ -922,7 +924,7 @@ func (a *App) ToMainMenu(errorMessageOptional ...string) {
 func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType, host string) {
 	selectHero, err := d2gamescreen.CreateSelectHeroClass(a, a.asset, a.renderer, a.audio, a.ui, connType, a.config.LogLevel, host)
 	if err != nil {
-		a.logger.Error(err.Error())
+		a.Error(err.Error())
 		return
 	}
 
@@ -933,7 +935,7 @@ func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType,
 func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.ClientConnectionType, host string) {
 	gameClient, err := d2client.Create(connType, a.asset, a.config.LogLevel, a.scriptEngine)
 	if err != nil {
-		a.logger.Error(err.Error())
+		a.Error(err.Error())
 	}
 
 	if err = gameClient.Open(host, filePath); err != nil {
@@ -963,7 +965,7 @@ func (a *App) ToMapEngineTest(region, level int) {
 	met, err := d2gamescreen.CreateMapEngineTest(region, level, a.asset, a.terminal, a.renderer, a.inputManager, a.audio,
 		a.config.LogLevel, a.screen)
 	if err != nil {
-		a.logger.Error(err.Error())
+		a.Error(err.Error())
 		return
 	}
 

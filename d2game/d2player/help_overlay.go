@@ -68,7 +68,7 @@ const (
 	// the close button for the help panel
 	closeButtonX      = 685
 	closeButtonY      = 25
-	closeButtonLabelX = 680
+	closeButtonLabelX = 702
 	closeButtonLabelY = 60
 
 	// the rest of these are for text with a line and dot, towards the bottom of the screen
@@ -168,9 +168,9 @@ func NewHelpOverlay(
 		keyMap:    keyMap,
 	}
 
-	h.logger = d2util.NewLogger()
-	h.logger.SetLevel(l)
-	h.logger.SetPrefix(logPrefix)
+	h.Logger = d2util.NewLogger()
+	h.Logger.SetLevel(l)
+	h.Logger.SetPrefix(logPrefix)
 
 	return h
 }
@@ -189,12 +189,12 @@ type HelpOverlay struct {
 	panelGroup       *d2ui.WidgetGroup
 	backgroundWidget *d2ui.CustomWidget
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 // Toggle the visibility state of the overlay
 func (h *HelpOverlay) Toggle() {
-	h.logger.Info("Help overlay toggled")
+	h.Info("Help overlay toggled")
 
 	if h.isOpen {
 		h.Close()
@@ -264,12 +264,12 @@ func (h *HelpOverlay) setupOverlayFrame() {
 	for _, frameIndex := range frames {
 		f, err := h.uiManager.NewSprite(d2resource.HelpBorder, d2resource.PaletteSky)
 		if err != nil {
-			h.logger.Error(err.Error())
+			h.Error(err.Error())
 		}
 
 		err = f.SetCurrentFrame(frameIndex)
 		if err != nil {
-			h.logger.Error(err.Error())
+			h.Error(err.Error())
 		}
 
 		frameWidth, frameHeight := f.GetCurrentFrameSize()
@@ -328,6 +328,7 @@ func (h *HelpOverlay) setupTitleAndButton() {
 	newLabel = h.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteSky)
 	newLabel.SetText(h.asset.TranslateString("strClose")) // "Close"
 	newLabel.SetPosition(closeButtonLabelX, closeButtonLabelY)
+	newLabel.Alignment = d2ui.HorizontalAlignCenter
 	h.text = append(h.text, newLabel)
 }
 
@@ -560,12 +561,12 @@ func (h *HelpOverlay) createBullet(c callout) {
 
 	newDot, err := h.uiManager.NewSprite(d2resource.HelpYellowBullet, d2resource.PaletteSky)
 	if err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 	}
 
 	err = newDot.SetCurrentFrame(0)
 	if err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 	}
 
 	newDot.SetPosition(c.DotX, c.DotY+bulletOffsetY)
@@ -602,12 +603,12 @@ func (h *HelpOverlay) createCallout(c callout) {
 
 	newDot, err := h.uiManager.NewSprite(d2resource.HelpWhiteBullet, d2resource.PaletteSky)
 	if err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 	}
 
 	err = newDot.SetCurrentFrame(0)
 	if err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 	}
 
 	newDot.SetPosition(c.DotX, c.DotY)
