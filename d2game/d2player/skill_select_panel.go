@@ -52,9 +52,9 @@ func NewHeroSkillsPanel(asset *d2asset.AssetManager,
 		hoverTooltip: hoverTooltip,
 	}
 
-	skillPanel.logger = d2util.NewLogger()
-	skillPanel.logger.SetLevel(l)
-	skillPanel.logger.SetPrefix(logPrefix)
+	skillPanel.Logger = d2util.NewLogger()
+	skillPanel.Logger.SetLevel(l)
+	skillPanel.Logger.SetPrefix(logPrefix)
 
 	return skillPanel
 }
@@ -73,7 +73,7 @@ type SkillPanel struct {
 	regenerateImageCache bool
 	isLeftPanel          bool
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 // Open opens the hero skills panel
@@ -216,7 +216,7 @@ func (s *SkillPanel) generateSkillRowImageCache() error {
 		cachedImage, err := s.createSkillListImage(skillListRow)
 
 		if err != nil {
-			s.logger.Error(err.Error())
+			s.Error(err.Error())
 			return err
 		}
 
@@ -243,7 +243,7 @@ func (s *SkillPanel) createSkillListImage(skillsListRow *SkillListRow) (d2interf
 
 		if skillSprite.GetFrameCount() <= skill.IconCel {
 			// happens for non-player skills, since they do not have an icon
-			s.logger.Error(fmt.Sprintf("Invalid IconCel(sprite frame index) [%d] - Skill name: %s, skipping.", skill.IconCel, skill.Name))
+			s.Errorf("Invalid IconCel(sprite frame index) [%d] - Skill name: %s, skipping.", skill.IconCel, skill.Name)
 			continue
 		}
 
@@ -365,7 +365,7 @@ func (s *SkillPanel) getSkillResourceByClass(class string) string {
 	case "dru":
 		resource = d2resource.DruidSkills
 	default:
-		s.logger.Error(fmt.Sprintf("Unknown class token: '%s'", class))
+		s.Errorf("Unknown class token: '%s'", class)
 	}
 
 	return resource

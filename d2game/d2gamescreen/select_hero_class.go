@@ -1,7 +1,6 @@
 package d2gamescreen
 
 import (
-	"fmt"
 	"image"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
@@ -306,9 +305,9 @@ func CreateSelectHeroClass(
 		InventoryItemFactory: inventoryItemFactory,
 	}
 
-	selectHeroClass.logger = d2util.NewLogger()
-	selectHeroClass.logger.SetLevel(l)
-	selectHeroClass.logger.SetPrefix(logPrefix)
+	selectHeroClass.Logger = d2util.NewLogger()
+	selectHeroClass.Logger.SetLevel(l)
+	selectHeroClass.Logger.SetPrefix(logPrefix)
 
 	return selectHeroClass, nil
 }
@@ -342,7 +341,8 @@ type SelectHeroClass struct {
 	audioProvider d2interface.AudioProvider
 	renderer      d2interface.Renderer
 	navigator     d2interface.Navigator
-	logger        *d2util.Logger
+
+	*d2util.Logger
 }
 
 // OnLoad loads the resources for the Select Hero Class screen
@@ -500,13 +500,13 @@ func (v *SelectHeroClass) onOkButtonClicked() {
 
 	playerState, err := v.CreateHeroState(heroName, v.selectedHero, statsState)
 	if err != nil {
-		v.logger.Error("failed to create hero state!, err: %v\n" + err.Error())
+		v.Errorf("failed to create hero state!, err: %v", err.Error())
 		return
 	}
 
 	err = v.Save(playerState)
 	if err != nil {
-		v.logger.Error("failed to save game state!, err: %v\n" + err.Error())
+		v.Errorf("failed to save game state!, err: %v", err.Error())
 		return
 	}
 
@@ -646,13 +646,13 @@ func (v *SelectHeroClass) handleCursorButtonPress(hero d2enum.Hero, renderInfo *
 func (v *SelectHeroClass) setCurrentFrame(mouseHover bool, renderInfo *HeroRenderInfo) {
 	if mouseHover && renderInfo.Stance != d2enum.HeroStanceIdleSelected {
 		if err := renderInfo.IdleSelectedSprite.SetCurrentFrame(renderInfo.IdleSprite.GetCurrentFrame()); err != nil {
-			v.logger.Error(fmt.Sprintf("could not set current frame to: %d\n", renderInfo.IdleSprite.GetCurrentFrame()))
+			v.Errorf("could not set current frame to: %d\n", renderInfo.IdleSprite.GetCurrentFrame())
 		}
 
 		renderInfo.Stance = d2enum.HeroStanceIdleSelected
 	} else if !mouseHover && renderInfo.Stance != d2enum.HeroStanceIdle {
 		if err := renderInfo.IdleSprite.SetCurrentFrame(renderInfo.IdleSelectedSprite.GetCurrentFrame()); err != nil {
-			v.logger.Error(fmt.Sprintf("could not set current frame to: %d\n", renderInfo.IdleSelectedSprite.GetCurrentFrame()))
+			v.Errorf("could not set current frame to: %d\n", renderInfo.IdleSelectedSprite.GetCurrentFrame())
 		}
 
 		renderInfo.Stance = d2enum.HeroStanceIdle
@@ -748,7 +748,7 @@ func drawSprite(sprite *d2ui.Sprite, target d2interface.Surface) {
 func advanceSprite(v *SelectHeroClass, sprite *d2ui.Sprite, elapsed float64) {
 	if sprite != nil {
 		if err := sprite.Advance(elapsed); err != nil {
-			v.logger.Error("could not advance the sprite:" + err.Error())
+			v.Error("could not advance the sprite:" + err.Error())
 		}
 	}
 }
@@ -763,7 +763,7 @@ func (v *SelectHeroClass) loadSprite(animationPath string, position image.Point,
 
 	sprite, err := v.uiManager.NewSprite(animationPath, d2resource.PaletteFechar)
 	if err != nil {
-		v.logger.Error("could not load sprite for the animation: %s\n" + animationPath + "with error: " + err.Error())
+		v.Error("could not load sprite for the animation: %s\n" + animationPath + "with error: " + err.Error())
 		return nil
 	}
 
@@ -786,7 +786,7 @@ func (v *SelectHeroClass) loadSprite(animationPath string, position image.Point,
 func (v *SelectHeroClass) loadSoundEffect(sfx string) d2interface.SoundEffect {
 	result, err := v.audioProvider.LoadSound(sfx, false, false)
 	if err != nil {
-		v.logger.Error(err.Error())
+		v.Error(err.Error())
 		return nil
 	}
 

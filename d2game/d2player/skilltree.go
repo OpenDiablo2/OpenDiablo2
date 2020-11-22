@@ -106,9 +106,9 @@ func newSkillTree(
 		l: l,
 	}
 
-	st.logger = d2util.NewLogger()
-	st.logger.SetLevel(l)
-	st.logger.SetPrefix(logPrefix)
+	st.Logger = d2util.NewLogger()
+	st.Logger.SetLevel(l)
+	st.Logger.SetPrefix(logPrefix)
 
 	return st
 }
@@ -133,8 +133,8 @@ type skillTree struct {
 	iconGroup    *d2ui.WidgetGroup
 	panel        *d2ui.CustomWidget
 
-	logger *d2util.Logger
-	l      d2util.LogLevel
+	*d2util.Logger
+	l d2util.LogLevel
 }
 
 func (s *skillTree) load() {
@@ -153,7 +153,7 @@ func (s *skillTree) load() {
 	s.panelGroup.AddWidget(s.closeButton)
 
 	if err := s.setHeroTypeResourcePath(); err != nil {
-		s.logger.Error(err.Error())
+		s.Error(err.Error())
 	}
 
 	s.loadForHeroType()
@@ -172,14 +172,14 @@ func (s *skillTree) load() {
 func (s *skillTree) loadForHeroType() {
 	sp, err := s.uiManager.NewSprite(s.resources.skillPanelPath, d2resource.PaletteSky)
 	if err != nil {
-		s.logger.Error(err.Error())
+		s.Error(err.Error())
 	}
 
 	s.resources.skillPanel = sp
 
 	si, err := s.uiManager.NewSprite(s.resources.skillIconPath, d2resource.PaletteSky)
 	if err != nil {
-		s.logger.Error(err.Error())
+		s.Error(err.Error())
 	}
 
 	s.resources.skillSprite = si
@@ -349,7 +349,7 @@ func (s *skillTree) setHeroTypeResourcePath() error {
 
 // Toggle the skill tree visibility
 func (s *skillTree) Toggle() {
-	s.logger.Info("SkillTree toggled")
+	s.Info("SkillTree toggled")
 
 	if s.isOpen {
 		s.Close()
@@ -401,7 +401,7 @@ func (s *skillTree) renderPanelSegment(
 	target d2interface.Surface,
 	frame int) {
 	if err := s.resources.skillPanel.SetCurrentFrame(frame); err != nil {
-		s.logger.Error("%e" + err.Error())
+		s.Error(err.Error())
 		return
 	}
 
@@ -415,7 +415,7 @@ func (s *skillTree) renderTabCommon(target d2interface.Surface) {
 	// top
 	w, h, err := skillPanel.GetFrameSize(frameCommonTabTopLeft)
 	if err != nil {
-		s.logger.Error("%e" + err.Error())
+		s.Error(err.Error())
 		return
 	}
 
@@ -430,7 +430,7 @@ func (s *skillTree) renderTabCommon(target d2interface.Surface) {
 	// bottom
 	_, h, err = skillPanel.GetFrameSize(frameCommonTabBottomLeft)
 	if err != nil {
-		s.logger.Error("%e" + err.Error())
+		s.Error(err.Error())
 		return
 	}
 
@@ -453,7 +453,7 @@ func (s *skillTree) renderTab(target d2interface.Surface, tab int) {
 	// top
 	_, h0, err := skillPanel.GetFrameSize(topFrame)
 	if err != nil {
-		s.logger.Error("%e" + err.Error())
+		s.Error(err.Error())
 		return
 	}
 
@@ -465,7 +465,7 @@ func (s *skillTree) renderTab(target d2interface.Surface, tab int) {
 	// bottom
 	w, h1, err := skillPanel.GetFrameSize(bottomFrame)
 	if err != nil {
-		s.logger.Error("%e" + err.Error())
+		s.Error(err.Error())
 		return
 	}
 

@@ -104,7 +104,7 @@ type HUD struct {
 	widgetRightSkill   *d2ui.CustomWidget
 	panelBackground    *d2ui.CustomWidget
 	panelGroup         *d2ui.WidgetGroup
-	logger             *d2util.Logger
+	*d2util.Logger
 }
 
 // NewHUD creates a HUD object
@@ -151,9 +151,9 @@ func NewHUD(
 		manaGlobe:         manaGlobe,
 	}
 
-	hud.logger = d2util.NewLogger()
-	hud.logger.SetPrefix(logPrefix)
-	hud.logger.SetLevel(l)
+	hud.Logger = d2util.NewLogger()
+	hud.Logger.SetPrefix(logPrefix)
+	hud.Logger.SetLevel(l)
 
 	return hud
 }
@@ -184,7 +184,7 @@ func (h *HUD) loadCustomWidgets() {
 	// static background
 	_, height, err := h.mainPanel.GetFrameSize(0) // health globe is the frame with max height
 	if err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 		return
 	}
 
@@ -229,7 +229,7 @@ func (h *HUD) loadSkillResources() {
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/799
 	genericSkillsSprite, err := h.uiManager.NewSprite(d2resource.GenericSkills, d2resource.PaletteSky)
 	if err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 	}
 
 	attackIconID := 2
@@ -252,17 +252,17 @@ func (h *HUD) loadSprites() {
 
 	h.globeSprite, err = h.uiManager.NewSprite(d2resource.GameGlobeOverlap, d2resource.PaletteSky)
 	if err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 	}
 
 	h.hpManaStatusSprite, err = h.uiManager.NewSprite(d2resource.HealthManaIndicator, d2resource.PaletteSky)
 	if err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 	}
 
 	h.mainPanel, err = h.uiManager.NewSprite(d2resource.GamePanels, d2resource.PaletteSky)
 	if err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 	}
 }
 
@@ -357,7 +357,7 @@ func (h *HUD) renderPanelStatic(target d2interface.Surface) {
 
 	// Main panel background
 	if err := h.renderPanel(offsetX, offsetY, target); err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 		return
 	}
 
@@ -366,7 +366,7 @@ func (h *HUD) renderPanelStatic(target d2interface.Surface) {
 	offsetX += w + skillIconWidth
 
 	if err := h.renderNewStatsButton(offsetX, offsetY, target); err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 		return
 	}
 
@@ -375,7 +375,7 @@ func (h *HUD) renderPanelStatic(target d2interface.Surface) {
 	offsetX += w
 
 	if err := h.renderStamina(offsetX, offsetY, target); err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 		return
 	}
 
@@ -384,7 +384,7 @@ func (h *HUD) renderPanelStatic(target d2interface.Surface) {
 	offsetX += w
 
 	if err := h.renderPotions(offsetX, offsetY, target); err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 		return
 	}
 
@@ -393,7 +393,7 @@ func (h *HUD) renderPanelStatic(target d2interface.Surface) {
 	offsetX += w
 
 	if err := h.renderNewSkillsButton(offsetX, offsetY, target); err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 		return
 	}
 
@@ -402,7 +402,7 @@ func (h *HUD) renderPanelStatic(target d2interface.Surface) {
 	offsetX += w + skillIconWidth
 
 	if err := h.mainPanel.SetCurrentFrame(frameRightGlobeHolder); err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 		return
 	}
 
@@ -429,7 +429,7 @@ func (h *HUD) renderLeftSkill(x, y int, target d2interface.Surface) {
 	}
 
 	if err := h.leftSkillResource.SkillIcon.SetCurrentFrame(h.hero.LeftSkill.IconCel); err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 		return
 	}
 
@@ -447,7 +447,7 @@ func (h *HUD) renderRightSkill(x, _ int, target d2interface.Surface) {
 	}
 
 	if err := h.rightSkillResource.SkillIcon.SetCurrentFrame(h.hero.RightSkill.IconCel); err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 		return
 	}
 
@@ -622,7 +622,7 @@ func (h *HUD) getSkillResourceByClass(class string) string {
 
 	entry, found := resourceMap[class]
 	if !found {
-		h.logger.Error("Unknown class token: '%s'" + class)
+		h.Errorf("Unknown class token: '%s'", class)
 	}
 
 	return entry
@@ -635,11 +635,11 @@ func (h *HUD) Advance(elapsed float64) {
 	h.setExperienceTooltipText()
 
 	if err := h.healthGlobe.Advance(elapsed); err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 	}
 
 	if err := h.manaGlobe.Advance(elapsed); err != nil {
-		h.logger.Error(err.Error())
+		h.Error(err.Error())
 	}
 }
 

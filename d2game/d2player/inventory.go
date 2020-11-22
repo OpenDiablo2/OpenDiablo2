@@ -44,9 +44,9 @@ func NewInventory(asset *d2asset.AssetManager,
 		originY: 0, // expansion data has these all offset by +60 ...
 	}
 
-	inventory.logger = d2util.NewLogger()
-	inventory.logger.SetLevel(l)
-	inventory.logger.SetPrefix(logPrefix)
+	inventory.Logger = d2util.NewLogger()
+	inventory.Logger.SetLevel(l)
+	inventory.Logger.SetPrefix(logPrefix)
 
 	return inventory
 }
@@ -71,7 +71,7 @@ type Inventory struct {
 	isOpen      bool
 	onCloseCb   func()
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 // IsOpen returns true if the inventory is open
@@ -162,7 +162,7 @@ func (g *Inventory) Load() {
 
 	_, err := g.grid.Add(inventoryItems...)
 	if err != nil {
-		g.logger.Error("could not add items to the inventory, err: %v\n" + err.Error())
+		g.Errorf("could not add items to the inventory, err: %v", err.Error())
 	}
 }
 
@@ -174,7 +174,7 @@ func (g *Inventory) Render(target d2interface.Surface) {
 
 	err := g.renderFrame(target)
 	if err != nil {
-		g.logger.Error(err.Error())
+		g.Error(err.Error())
 	}
 
 	g.grid.Render(target)

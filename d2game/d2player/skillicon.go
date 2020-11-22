@@ -37,9 +37,9 @@ func newSkillIcon(ui *d2ui.UIManager,
 		lvlLabel:   label,
 	}
 
-	res.logger = d2util.NewLogger()
-	res.logger.SetLevel(l)
-	res.logger.SetPrefix(logPrefix)
+	res.Logger = d2util.NewLogger()
+	res.Logger.SetLevel(l)
+	res.Logger.SetPrefix(logPrefix)
 
 	res.SetPosition(x, y)
 
@@ -52,7 +52,7 @@ type skillIcon struct {
 	sprite   *d2ui.Sprite
 	skill    *d2hero.HeroSkill
 
-	logger *d2util.Logger
+	*d2util.Logger
 }
 
 func (si *skillIcon) SetVisible(visible bool) {
@@ -64,7 +64,7 @@ func (si *skillIcon) renderSprite(target d2interface.Surface) {
 	x, y := si.GetPosition()
 
 	if err := si.sprite.SetCurrentFrame(si.skill.IconCel); err != nil {
-		si.logger.Error("Cannot set Frame %e" + err.Error())
+		si.Errorf("Cannot set Frame %e", err)
 		return
 	}
 
