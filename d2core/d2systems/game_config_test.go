@@ -9,7 +9,7 @@ import (
 )
 
 func Test_GameConfigSystem_Bootstrap(t *testing.T) {
-	const testDataPath = "./testdata/"
+	const testDataPath = "testdata"
 
 	cfg := akara.NewWorldConfig()
 

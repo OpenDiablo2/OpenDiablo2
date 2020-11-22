@@ -10,7 +10,7 @@ import (
 )
 
 func Test_FileSourceResolution(t *testing.T) {
-	const testDataPath = "./testdata/"
+	const testDataPath = "testdata"
 
 	cfg := akara.NewWorldConfig()
 

@@ -11,7 +11,7 @@ import (
 )
 
 func Test_FileHandleResolver_Process(t *testing.T) {
-	const testDataPath = "./testdata/"
+	const testDataPath = "testdata"
 
 	cfg := akara.NewWorldConfig()
 
