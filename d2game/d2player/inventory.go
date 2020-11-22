@@ -142,8 +142,8 @@ func (g *Inventory) Load() {
 	inventoryItems := make([]InventoryItem, 0)
 
 	for idx := range testInventoryCodes {
-		item, err := g.item.NewItem(testInventoryCodes[idx]...)
-		if err != nil {
+		item, itemErr := g.item.NewItem(testInventoryCodes[idx]...)
+		if itemErr != nil {
 			continue
 		}
 
@@ -166,8 +166,8 @@ func (g *Inventory) Load() {
 	}
 
 	for slot := range testEquippedItemCodes {
-		item, err := g.item.NewItem(testEquippedItemCodes[slot]...)
-		if err != nil {
+		item, itemErr := g.item.NewItem(testEquippedItemCodes[slot]...)
+		if itemErr != nil {
 			continue
 		}
 

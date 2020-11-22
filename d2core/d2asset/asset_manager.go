@@ -286,7 +286,6 @@ func (am *AssetManager) TranslateString(key string) string {
 			return value
 		}
 	}
-
 	// Fix to allow v.setDescLabels("#123") to be bypassed for a patch in issue #360. Reenable later.
 	// log.Panicf("Could not find a string for the key '%s'", key)
 	return key
