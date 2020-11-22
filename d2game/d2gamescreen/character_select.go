@@ -364,6 +364,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 			&equipment,
 			v.gameStates[idx].LeftSkill,
 			v.gameStates[idx].RightSkill,
+			v.gameStates[idx].Gold,
 		)
 	}
 }

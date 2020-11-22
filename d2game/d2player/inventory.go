@@ -22,19 +22,16 @@ const (
 )
 
 const (
-	invCloseButtonX, invCloseButtonY       = 419, 449
-	invGoldButtonX, invGoldButtonY         = 485, 455
-	invGoldLabelX, invGoldLabelY           = 510, 455
-	invMoveGoldX, invMoveGoldY             = 0, 0
-	invMoveGoldOkX, invMoveGoldOkY         = 0, 0
-	invMoveGoldCancelX, invMoveGoldCancelY = 0, 0
-	invMoveGoldValueX, invMoveGoldValueY   = 0, 0
+	invCloseButtonX, invCloseButtonY = 419, 449
+	invGoldButtonX, invGoldButtonY   = 485, 455
+	invGoldLabelX, invGoldLabelY     = 510, 455
 )
 
 // NewInventory creates an inventory instance and returns a pointer to it
 func NewInventory(asset *d2asset.AssetManager,
 	ui *d2ui.UIManager,
 	l d2util.LogLevel,
+	gold int,
 	record *d2records.InventoryRecord) *Inventory {
 	itemTooltip := ui.NewTooltip(d2resource.FontFormal11, d2resource.PaletteStatic, d2ui.TooltipXCenter, d2ui.TooltipYBottom)
 
@@ -50,6 +47,7 @@ func NewInventory(asset *d2asset.AssetManager,
 		itemTooltip: itemTooltip,
 		// originY: record.Panel.Top,
 		originY: 0, // expansion data has these all offset by +60 ...
+		gold:    gold,
 	}
 
 	inventory.logger = d2util.NewLogger()
@@ -61,39 +59,30 @@ func NewInventory(asset *d2asset.AssetManager,
 
 // Inventory represents the inventory
 type Inventory struct {
-	asset          *d2asset.AssetManager
-	item           *diablo2item.ItemFactory
-	uiManager      *d2ui.UIManager
-	frame          *d2ui.UIFrame
-	panel          *d2ui.Sprite
-	grid           *ItemGrid
-	itemTooltip    *d2ui.Tooltip
-	closeButton    *d2ui.Button
-	goldButton     *d2ui.Button
-	goldLabel      *d2ui.Label
-	panelGroup     *d2ui.WidgetGroup
-	moveGold       *d2ui.Sprite
-	moveGoldOk     *d2ui.Button
-	moveGoldCancel *d2ui.Button
-	moveGoldValue  *d2ui.TextBox
-	panelMoveGold  *d2ui.WidgetGroup
-	goldValue      int
-	hoverX         int
-	hoverY         int
-	originX        int
-	originY        int
-	lastMouseX     int
-	lastMouseY     int
-	hovering       bool
-	isOpen         bool
-	isChest        bool
-	onCloseCb      func()
+	asset         *d2asset.AssetManager
+	item          *diablo2item.ItemFactory
+	uiManager     *d2ui.UIManager
+	frame         *d2ui.UIFrame
+	panel         *d2ui.Sprite
+	grid          *ItemGrid
+	itemTooltip   *d2ui.Tooltip
+	closeButton   *d2ui.Button
+	goldButton    *d2ui.Button
+	goldLabel     *d2ui.Label
+	panelGroup    *d2ui.WidgetGroup
+	panelMoveGold *d2ui.WidgetGroup
+	hoverX        int
+	hoverY        int
+	originX       int
+	originY       int
+	lastMouseX    int
+	lastMouseY    int
+	hovering      bool
+	isOpen        bool
+	onCloseCb     func()
+	gold          int
 
 	logger *d2util.Logger
-}
-
-func (g *Inventory) SetGoldValue(value int) {
-	g.goldLabel.SetText(fmt.Sprintln(value))
 }
 
 // Toggle negates the open state of the inventory
@@ -129,6 +118,7 @@ func (g *Inventory) Load() {
 
 	g.goldLabel = g.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
 	g.goldLabel.Alignment = d2ui.HorizontalAlignLeft
+	g.goldLabel.SetText(fmt.Sprintln(g.gold))
 	g.goldLabel.SetPosition(invGoldLabelX, invGoldLabelY)
 	g.panelGroup.AddWidget(g.goldLabel)
 
@@ -209,7 +199,7 @@ func (g *Inventory) SetOnCloseCb(cb func()) {
 }
 
 func (g *Inventory) onGoldClicked() {
-	return
+	g.logger.Info("Gold action clicked")
 }
 
 // IsOpen returns true if the inventory is open
