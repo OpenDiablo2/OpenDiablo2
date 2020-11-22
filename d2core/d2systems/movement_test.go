@@ -47,8 +47,8 @@ func TestMovementSystem_EntityAdded(t *testing.T) {
 	sys := NewMovementSystem()
 
 	cfg.With(sys).
-		With(d2components.NewPositionMap()).
-		With(d2components.NewVelocityMap())
+		With(d2components.Position).
+		With(d2components.Velocity)
 
 	world := akara.NewWorld(cfg)
 
@@ -87,8 +87,8 @@ func TestMovementSystem_Update(t *testing.T) {
 	cfg := akara.NewWorldConfig()
 
 	movementSystem := NewMovementSystem()
-	positions := d2components.NewPositionMap()
-	velocities := d2components.NewVelocityMap()
+	positions := d2components.Position.NewMap()
+	velocities := d2components.Velocity.NewMap()
 
 	cfg.With(movementSystem).With(positions).With(velocities)
 
