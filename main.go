@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2systems"
 	"github.com/gravestench/akara"
 	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2app"
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2systems"
 )
 
 // GitBranch is set by the CI build process to the name of the branch
