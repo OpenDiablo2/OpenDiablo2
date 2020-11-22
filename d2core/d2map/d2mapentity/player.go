@@ -23,6 +23,7 @@ type Player struct {
 	LeftSkill         *d2hero.HeroSkill
 	RightSkill        *d2hero.HeroSkill
 	Class             d2enum.Hero
+	Gold              int
 	lastPathSize      int
 	isInTown          bool
 	isRunToggled      bool

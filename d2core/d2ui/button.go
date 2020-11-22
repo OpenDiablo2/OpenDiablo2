@@ -38,9 +38,16 @@ const (
 	ButtonTypeMinipanelQuest     ButtonType = 18
 	ButtonTypeMinipanelMen       ButtonType = 19
 	ButtonTypeSquareClose        ButtonType = 20
-	ButtonTypeSkillTreeTab       ButtonType = 21
-	ButtonTypeMinipanelOpenClose ButtonType = 22
-	ButtonTypeMinipanelParty     ButtonType = 23
+	ButtonTypeSquareOk           ButtonType = 21
+	ButtonTypeSkillTreeTab       ButtonType = 22
+	ButtonTypeMinipanelOpenClose ButtonType = 23
+	ButtonTypeMinipanelParty     ButtonType = 24
+	ButtonTypeBuy                ButtonType = 25
+	ButtonTypeSell               ButtonType = 26
+	ButtonTypeRepair             ButtonType = 27
+	ButtonTypeRepairAll          ButtonType = 28
+	ButtonTypeLeftArrow          ButtonType = 29
+	ButtonTypeRightArrow         ButtonType = 30
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -53,7 +60,16 @@ const (
 )
 
 const (
+	// buyButtonBaseFrame        = 2  // base frame offset of the "buy" button dc6
+	// sellButtonBaseFrame       = 4  // base frame offset of the "sell" button dc6
+	// repairButtonBaseFrame     = 6  // base frame offset of the "repair" button dc6
+	// quaryButtonBaseFrame      = 8  // base frame offset of the "quary" button dc6
 	closeButtonBaseFrame = 10 // base frame offset of the "close" button dc6
+	// leftArrowButtonBaseFrame  = 12 // base frame offset of the "leftArrow" button dc6
+	// rightArrowButtonBaseFrame = 14 // base frame offset of the "rightArrow" button dc6
+	okButtonBaseFrame = 16 // base frame offset of the "ok" button dc6
+	// repairAllButtonBaseFrame = 18 // base frame offset of the "repair all" button dc6
+	// ?AllButtonBaseFrame  = 20 // base frame offset of the "?" button dc6
 )
 
 const (
@@ -88,6 +104,7 @@ type ButtonLayout struct {
 const (
 	buttonTooltipNone int = iota
 	buttonTooltipClose
+	buttonTooltipOk
 )
 
 const (
@@ -145,6 +162,10 @@ const (
 	buttonRunSegmentsX     = 1
 	buttonRunSegmentsY     = 1
 	buttonRunDisabledFrame = -1
+
+	buttonGoldCoinSegmentsX     = 1
+	buttonGoldCoinSegmentsY     = 1
+	buttonGoldCoinDisabledFrame = -1
 
 	pressedButtonOffset = 2
 )
@@ -238,6 +259,21 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			FixedHeight:      ButtonNoFixedHeight,
 			LabelColor:       greyAlpha100,
 		},
+		ButtonTypeGoldCoin: {
+			XSegments:        buttonGoldCoinSegmentsX,
+			YSegments:        buttonGoldCoinSegmentsY,
+			DisabledFrame:    buttonGoldCoinDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.GoldCoinButton,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       true,
+			FontPath:         d2resource.FontRediculous,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+		},
 		ButtonTypeSquareClose: {
 			XSegments:        buttonBuySellSegmentsX,
 			YSegments:        buttonBuySellSegmentsY,
@@ -254,6 +290,25 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			FixedHeight:      ButtonNoFixedHeight,
 			LabelColor:       greyAlpha100,
 			Tooltip:          buttonTooltipClose,
+			TooltipXOffset:   buttonCloseTooltipXOffset,
+			TooltipYOffset:   buttonCloseTooltipYOffset,
+		},
+		ButtonTypeSquareOk: {
+			XSegments:        buttonBuySellSegmentsX,
+			YSegments:        buttonBuySellSegmentsY,
+			DisabledFrame:    buttonBuySellDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.BuySellButton,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			BaseFrame:        okButtonBaseFrame,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+			Tooltip:          buttonTooltipOk,
 			TooltipXOffset:   buttonCloseTooltipXOffset,
 			TooltipYOffset:   buttonCloseTooltipYOffset,
 		},
@@ -521,6 +576,9 @@ func (v *Button) createTooltip() {
 	case buttonTooltipClose:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
 		t.SetText(v.manager.asset.TranslateString("strClose"))
+	case buttonTooltipOk:
+		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		t.SetText(v.manager.asset.TranslateString("#971"))
 	}
 
 	t.SetVisible(false)
