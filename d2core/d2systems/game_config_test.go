@@ -9,6 +9,8 @@ import (
 )
 
 func Test_GameConfigSystem_Bootstrap(t *testing.T) {
+	const testDataPath = "./testdata/"
+
 	cfg := akara.NewWorldConfig()
 
 	typeSys := NewFileTypeResolver()
@@ -34,7 +36,7 @@ func Test_GameConfigSystem_Bootstrap(t *testing.T) {
 	filePaths := filePathsAbstract.(*d2components.FilePathMap)
 
 	cfgDir := filePaths.AddFilePath(world.NewEntity())
-	cfgDir.Path = "./testdata/"
+	cfgDir.Path = testDataPath
 
 	cfgFile := filePaths.AddFilePath(world.NewEntity())
 	cfgFile.Path = "config.json"

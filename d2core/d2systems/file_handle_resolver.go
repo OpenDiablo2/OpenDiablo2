@@ -1,8 +1,9 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 
@@ -16,7 +17,7 @@ import (
 )
 
 const (
-	languageTokenFont        = "{LANG_FONT}"
+	languageTokenFont        = "{LANG_FONT}" // nolint:gosec // no security issue here...
 	languageTokenStringTable = "{LANG}"
 )
 
@@ -29,6 +30,7 @@ const (
 	logPrefixFileHandleResolver = "File Handle Resolver"
 )
 
+// NewFileHandleResolver creates a new file handle resolver system
 func NewFileHandleResolver() *FileHandleResolutionSystem {
 	// this filter is for entities that have a file path and file type but no file handle.
 	filesToSource := akara.NewFilter().
@@ -44,8 +46,8 @@ func NewFileHandleResolver() *FileHandleResolutionSystem {
 
 	fhr := &FileHandleResolutionSystem{
 		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToSource, sourcesToUse),
-		cache:            d2cache.CreateCache(fileHandleCacheBudget).(*d2cache.Cache),
-		Logger: d2util.NewLogger(),
+		cache:                d2cache.CreateCache(fileHandleCacheBudget).(*d2cache.Cache),
+		Logger:               d2util.NewLogger(),
 	}
 
 	fhr.SetPrefix(logPrefixFileHandleResolver)
@@ -53,6 +55,13 @@ func NewFileHandleResolver() *FileHandleResolutionSystem {
 	return fhr
 }
 
+// FileHandleResolutionSystem is responsible for using file sources to resolve files.
+// File sources are checked in the order that the sources were added.
+//
+// A file source can be something like an MPQ archive or a file system directory on the host machine.
+//
+// A file handle is a primitive representation of  a loaded file; something that has data
+// in the form of a byte slice, but has not been parsed into a more meaningful struct, like a DC6 animation.
 type FileHandleResolutionSystem struct {
 	*akara.BaseSubscriberSystem
 	*d2util.Logger
@@ -66,7 +75,7 @@ type FileHandleResolutionSystem struct {
 }
 
 // Init initializes the system with the given world
-func (m *FileHandleResolutionSystem) Init(world *akara.World) {
+func (m *FileHandleResolutionSystem) Init(_ *akara.World) {
 	m.Info("initializing ...")
 
 	m.filesToLoad = m.Subscriptions[0]
@@ -80,7 +89,9 @@ func (m *FileHandleResolutionSystem) Init(world *akara.World) {
 	m.fileSources = m.InjectMap(d2components.FileSource).(*d2components.FileSourceMap)
 }
 
-// Process processes all of the Entities
+// Update iterates over entities which have not had a file handle resolved.
+// For each source, it attempts to load this file with the given source.
+// If the file can be opened by the source, we create the file handle using that source.
 func (m *FileHandleResolutionSystem) Update() {
 	filesToLoad := m.filesToLoad.GetEntities()
 	sourcesToUse := m.sourcesToUse.GetEntities()
@@ -146,21 +157,21 @@ func (m *FileHandleResolutionSystem) loadFileWithSource(fileID, sourceID akara.E
 		tryPath := strings.ReplaceAll(fp.Path, "sfx", "music")
 		tmpComponent := &d2components.FilePathComponent{Path: tryPath}
 
-		cacheKey := m.makeCacheKey(tryPath, sourceFp.Path)
+		cacheKey = m.makeCacheKey(tryPath, sourceFp.Path)
 		if entry, found := m.cache.Retrieve(cacheKey); found {
 			component := m.fileHandles.AddFileHandle(fileID)
 			component.Data = entry.(d2interface.DataStream)
 			fp.Path = tryPath
 
 			return true
-		} else {
-			data, err = source.Open(tmpComponent)
-			if err != nil {
-				return false
-			}
-
-			fp.Path = tryPath
 		}
+
+		data, err = source.Open(tmpComponent)
+		if err != nil {
+			return false
+		}
+
+		fp.Path = tryPath
 	}
 
 	m.Infof("resolved `%s` with source `%s`", fp.Path, sourceFp.Path)
@@ -168,7 +179,9 @@ func (m *FileHandleResolutionSystem) loadFileWithSource(fileID, sourceID akara.E
 	component := m.fileHandles.AddFileHandle(fileID)
 	component.Data = data
 
-	m.cache.Insert(cacheKey, data, assetCacheEntryWeight)
+	if err := m.cache.Insert(cacheKey, data, fileHandleCacheEntryWeight); err != nil {
+		m.Error(err.Error())
+	}
 
 	return true
 }

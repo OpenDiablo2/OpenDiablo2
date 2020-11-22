@@ -1,8 +1,9 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
 	"github.com/gravestench/akara"
 
@@ -19,10 +20,14 @@ func NewMovementSystem() *MovementSystem {
 
 	filter := cfg.Build()
 
-	return &MovementSystem{
+	sys := &MovementSystem{
 		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filter),
-		Logger: d2util.NewLogger(),
+		Logger:               d2util.NewLogger(),
 	}
+
+	sys.SetPrefix(logPrefixMovementSystem)
+
+	return sys
 }
 
 // static check that MovementSystem implements the System interface
@@ -37,7 +42,7 @@ type MovementSystem struct {
 }
 
 // Init initializes the system with the given world
-func (m *MovementSystem) Init(world *akara.World) {
+func (m *MovementSystem) Init(_ *akara.World) {
 	m.Info("initializing ...")
 
 	// try to inject the components we require, then cast the returned
@@ -46,7 +51,7 @@ func (m *MovementSystem) Init(world *akara.World) {
 	m.VelocityMap = m.InjectMap(d2components.Velocity).(*d2components.VelocityMap)
 }
 
-// Process processes all of the Entities
+// Update positions of all entities with their velocities
 func (m *MovementSystem) Update() {
 	for subIdx := range m.Subscriptions {
 		entities := m.Subscriptions[subIdx].GetEntities()

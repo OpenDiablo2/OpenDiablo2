@@ -1,10 +1,11 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
 	"github.com/gravestench/akara"
 
@@ -18,6 +19,7 @@ const (
 	logPrefixFileSourceResolver = "File Source Resolver"
 )
 
+// NewFileSourceResolver creates a new file source resolver system
 func NewFileSourceResolver() *FileSourceResolver {
 	// subscribe to entities with a file type and file path, but no file source type
 	filesToCheck := akara.NewFilter().
@@ -28,7 +30,7 @@ func NewFileSourceResolver() *FileSourceResolver {
 
 	fsr := &FileSourceResolver{
 		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToCheck),
-		Logger: d2util.NewLogger(),
+		Logger:               d2util.NewLogger(),
 	}
 
 	fsr.SetPrefix(logPrefixFileSourceResolver)
@@ -36,6 +38,9 @@ func NewFileSourceResolver() *FileSourceResolver {
 	return fsr
 }
 
+// FileSourceResolver is responsible for determining if files can be used as a file source.
+// If it can, it sets the file up as a source, and the file handle resolver system can
+// then use the source to open files.
 type FileSourceResolver struct {
 	*akara.BaseSubscriberSystem
 	*d2util.Logger
@@ -45,8 +50,8 @@ type FileSourceResolver struct {
 	fileSources *d2components.FileSourceMap
 }
 
-// Init initializes the system with the given world
-func (m *FileSourceResolver) Init(world *akara.World) {
+// Init initializes the file source resolver, injecting the necessary components into the world
+func (m *FileSourceResolver) Init(_ *akara.World) {
 	m.Info("initializing ...")
 
 	m.fileSub = m.Subscriptions[0]
@@ -58,7 +63,7 @@ func (m *FileSourceResolver) Init(world *akara.World) {
 	m.fileSources = m.InjectMap(d2components.FileSource).(*d2components.FileSourceMap)
 }
 
-// Process processes all of the Entities
+// Update iterates over entities from its subscription, and checks if it can be used as a file source
 func (m *FileSourceResolver) Update() {
 	for subIdx := range m.Subscriptions {
 		for _, sourceEntityID := range m.Subscriptions[subIdx].GetEntities() {
@@ -91,27 +96,22 @@ func (m *FileSourceResolver) processSourceEntity(id akara.EID) {
 		}
 
 		source := m.fileSources.AddFileSource(id)
+		source.AbstractSource = instance
 
 		m.Infof("using MPQ source for `%s`", fp.Path)
-		source.AbstractSource = instance
 	case d2enum.FileTypeDirectory:
-		instance, err := m.makeFileSystemSource(fp.Path)
-
-		if err != nil {
-			ft.Type = d2enum.FileTypeUnknown
-			break
-		}
+		instance := m.makeFileSystemSource(fp.Path)
 
 		source := m.fileSources.AddFileSource(id)
+		source.AbstractSource = instance
 
 		m.Infof("using FILESYSTEM source for `%s`", fp.Path)
-		source.AbstractSource = instance
 	}
 }
 
 // filesystem source
-func (m *FileSourceResolver) makeFileSystemSource(path string) (d2components.AbstractSource, error) {
-	return &fsSource{rootDir: path}, nil
+func (m *FileSourceResolver) makeFileSystemSource(path string) d2components.AbstractSource {
+	return &fsSource{rootDir: path}
 }
 
 type fsSource struct {

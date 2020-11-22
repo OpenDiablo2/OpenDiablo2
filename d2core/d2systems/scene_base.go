@@ -1,10 +1,11 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/gravestench/akara"
 	"path/filepath"
 
+	"github.com/gravestench/akara"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
@@ -13,14 +14,15 @@ const (
 	mainViewport int = 0
 )
 
+// NewBaseScene creates a new base scene instance
 func NewBaseScene(key string) *BaseScene {
 	base := &BaseScene{
-		BaseSystem: &akara.BaseSystem{},
-		Logger: d2util.NewLogger(),
-		key: key,
-		Viewports: make([]akara.EID, 0),
+		BaseSystem:  &akara.BaseSystem{},
+		Logger:      d2util.NewLogger(),
+		key:         key,
+		Viewports:   make([]akara.EID, 0),
 		GameObjects: make([]akara.EID, 0),
-		systems: &baseSystems{},
+		systems:     &baseSystems{},
 	}
 
 	base.SetPrefix(key)
@@ -35,15 +37,20 @@ type baseSystems struct {
 	*GameObjectFactory
 }
 
+// BaseScene encapsulates common behaviors for systems that are considered "scenes",
+// such as the main menu, the in-game map, the console, etc.
+//
+// The base scene is responsible for generic behaviors common to all scenes,
+// like initializing the default viewport, or rendering game objects to the viewports.
 type BaseScene struct {
 	*akara.BaseSystem
 	*d2util.Logger
-	key string
-	booted bool
-	paused bool
-	systems *baseSystems
-	Add *sceneObjectAssigner
-	Viewports []akara.EID
+	key         string
+	booted      bool
+	paused      bool
+	systems     *baseSystems
+	Add         *sceneObjectAssigner
+	Viewports   []akara.EID
 	GameObjects []akara.EID
 	*d2components.MainViewportMap
 	*d2components.ViewportMap
@@ -55,14 +62,17 @@ type BaseScene struct {
 	*d2components.AnimationMap
 }
 
+// Booted returns whether or not the scene has booted
 func (s *BaseScene) Booted() bool {
 	return s.booted
 }
 
+// Paused returns whether or not the scene is paused
 func (s *BaseScene) Paused() bool {
 	return s.paused
 }
 
+// Init the base scene
 func (s *BaseScene) Init(world *akara.World) {
 	s.World = world
 
@@ -125,6 +135,7 @@ func (s *BaseScene) injectComponentMaps() {
 }
 
 func (s *BaseScene) createDefaultViewport() {
+	s.Info("creating default viewport")
 	viewportID := s.NewEntity()
 	s.AddViewport(viewportID)
 
@@ -133,16 +144,18 @@ func (s *BaseScene) createDefaultViewport() {
 	camera.Height = 600
 	camera.Zoom = 1
 
-	s.AddSurface(viewportID)
+	s.AddSurface(viewportID).Surface = s.systems.renderer.NewSurface(camera.Width, camera.Height)
 	s.AddMainViewport(viewportID)
 
 	s.Viewports = append(s.Viewports, viewportID)
 }
 
+// Key returns the scene's key
 func (s *BaseScene) Key() string {
 	return s.key
 }
 
+// Update performs scene boot and renders the scene viewports
 func (s *BaseScene) Update() {
 	if !s.booted {
 		s.boot()
@@ -152,27 +165,29 @@ func (s *BaseScene) Update() {
 		return
 	}
 
-	s.RenderViewports()
+	s.renderViewports()
 }
 
-func (s *BaseScene) RenderViewports() {
+func (s *BaseScene) renderViewports() {
 	if s.systems.RenderSystem == nil {
+		s.Warning("render system not present")
 		return
 	}
 
 	if s.systems.RenderSystem.renderer == nil {
+		s.Warning("render system doesn't have a renderer instance")
 		return
 	}
 
 	numViewports := len(s.Viewports)
 
 	if numViewports < 1 {
-		return
+		s.createDefaultViewport()
 	}
 
 	viewportObjects := s.binGameObjectsByViewport()
 
-	for idx := numViewports-1; idx >= 0; idx-- {
+	for idx := numViewports - 1; idx >= 0; idx-- {
 		s.renderViewport(idx, viewportObjects[idx])
 	}
 }
@@ -225,10 +240,10 @@ func (s *BaseScene) renderViewport(idx int, objects []akara.EID) {
 		sfc.Surface = s.systems.renderer.NewSurface(camera.Width, camera.Height)
 	}
 
-	cx, cy := int(camera.X()) + camera.Width>>1, int(camera.Y()) + camera.Height>>1
+	cx, cy := int(camera.X())+camera.Width>>1, int(camera.Y())+camera.Height>>1
 
 	sfc.Surface.PushTranslation(-cx, -cy) // negative because we're offsetting everything that gets rendered
-	sfc.Surface.PushScale(-camera.Zoom, -camera.Zoom)
+	sfc.Surface.PushScale(camera.Zoom, camera.Zoom)
 
 	for _, object := range objects {
 		s.renderObject(sfc.Surface, object)

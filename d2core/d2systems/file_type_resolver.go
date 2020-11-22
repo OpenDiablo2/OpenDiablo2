@@ -1,10 +1,11 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
 	"github.com/gravestench/akara"
 
@@ -28,7 +29,7 @@ func NewFileTypeResolver() *FileTypeResolver {
 
 	ftr := &FileTypeResolver{
 		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToCheck),
-		Logger: d2util.NewLogger(),
+		Logger:               d2util.NewLogger(),
 	}
 
 	ftr.SetPrefix(logPrefixFileTypeResolver)
@@ -53,7 +54,7 @@ type FileTypeResolver struct {
 }
 
 // Init initializes the system with the given world
-func (m *FileTypeResolver) Init(world *akara.World) {
+func (m *FileTypeResolver) Init(_ *akara.World) {
 	m.Info("initializing ...")
 
 	m.filesToCheck = m.Subscriptions[0]
@@ -64,13 +65,14 @@ func (m *FileTypeResolver) Init(world *akara.World) {
 	m.FileTypeMap = m.InjectMap(d2components.FileType).(*d2components.FileTypeMap)
 }
 
-// Process processes all of the Entities
+// Update processes all of the Entities
 func (m *FileTypeResolver) Update() {
 	for _, eid := range m.filesToCheck.GetEntities() {
 		m.determineFileType(eid)
 	}
 }
 
+//nolint:gocyclo // this big switch statement is unfortunate, but necessary
 func (m *FileTypeResolver) determineFileType(id akara.EID) {
 	fp, found := m.GetFilePath(id)
 	if !found {

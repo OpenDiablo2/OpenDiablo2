@@ -1,15 +1,13 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"io"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2cache"
-
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2animdata"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dat"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dc6"
@@ -19,9 +17,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2pl2"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
-	"github.com/gravestench/akara"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
 
@@ -31,7 +28,7 @@ const (
 )
 
 const (
-	LogPrefixAssetLoader = "Asset Loader System"
+	logPrefixAssetLoader = "Asset Loader System"
 )
 
 // NewAssetLoader creates a new asset loader instance
@@ -62,24 +59,24 @@ func NewAssetLoader() *AssetLoaderSystem {
 
 	assetLoader := &AssetLoaderSystem{
 		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToLoad, fileSources),
-		cache:            d2cache.CreateCache(assetCacheBudget).(*d2cache.Cache),
-		Logger:           d2util.NewLogger(),
+		cache:                d2cache.CreateCache(assetCacheBudget).(*d2cache.Cache),
+		Logger:               d2util.NewLogger(),
 	}
 
-	assetLoader.SetPrefix(LogPrefixAssetLoader)
+	assetLoader.SetPrefix(logPrefixAssetLoader)
 
 	return assetLoader
 }
 
 var _ akara.System = &AssetLoaderSystem{}
 
-// AssetLoaderSystem is responsible for parsing file handle data into various structs, like COF or DC6
+// AssetLoaderSystem is responsible for parsing data from file handles into various structs, like COF or DC6
 type AssetLoaderSystem struct {
 	*akara.BaseSubscriberSystem
 	*d2util.Logger
-	fileSub          *akara.Subscription
-	sourceSub        *akara.Subscription
-	cache            *d2cache.Cache
+	fileSub   *akara.Subscription
+	sourceSub *akara.Subscription
+	cache     *d2cache.Cache
 	*d2components.FilePathMap
 	*d2components.FileTypeMap
 	*d2components.FileHandleMap
@@ -99,7 +96,7 @@ type AssetLoaderSystem struct {
 }
 
 // Init injects component maps related to various asset types
-func (m *AssetLoaderSystem) Init(world *akara.World) {
+func (m *AssetLoaderSystem) Init(_ *akara.World) {
 	m.Info("initializing ...")
 
 	m.fileSub = m.Subscriptions[0]
@@ -213,41 +210,64 @@ func (m *AssetLoaderSystem) assignFromCache(id akara.EID, path string, t d2enum.
 	return found
 }
 
+//nolint:gocyclo // this big switch statement is unfortunate, but necessary
 func (m *AssetLoaderSystem) parseAndCache(id akara.EID, path string, t d2enum.FileType, data []byte) {
 	go func() {
 		switch t {
 		case d2enum.FileTypeStringTable:
 			m.Infof("Loading string table: %s", path)
-			m.loadStringTable(id, path, data) // TODO: add error handling for string table load
+			m.loadStringTable(id, path, data)
 		case d2enum.FileTypeFontTable:
 			m.Infof("Loading font table: %s", path)
-			m.loadFontTable(id, path, data) // TODO: add error handling for string table load
+			m.loadFontTable(id, path, data)
 		case d2enum.FileTypeDataDictionary:
 			m.Infof("Loading data dictionary: %s", path)
-			m.loadDataDictionary(id, path, data) // TODO: add error handling for data dict load
+			m.loadDataDictionary(id, path, data)
 		case d2enum.FileTypePalette:
 			m.Infof("Loading palette: %s", path)
-			m.loadPalette(id, path, data)
+
+			if err := m.loadPalette(id, path, data); err != nil {
+				m.Error(err.Error())
+			}
 		case d2enum.FileTypePaletteTransform:
 			m.Infof("Loading palette transform: %s", path)
-			m.loadPaletteTransform(id, path, data)
+
+			if err := m.loadPaletteTransform(id, path, data); err != nil {
+				m.Error(err.Error())
+			}
 		case d2enum.FileTypeCOF:
 			m.Infof("Loading COF: %s", path)
-			m.loadCOF(id, path, data)
+
+			if err := m.loadCOF(id, path, data); err != nil {
+				m.Error(err.Error())
+			}
 		case d2enum.FileTypeDC6:
 			m.Infof("Loading DC6: %s", path)
-			m.loadDC6(id, path, data)
+
+			if err := m.loadDC6(id, path, data); err != nil {
+				m.Error(err.Error())
+			}
 		case d2enum.FileTypeDCC:
 			m.Infof("Loading DCC: %s", path)
-			m.loadDCC(id, path, data)
+
+			if err := m.loadDCC(id, path, data); err != nil {
+				m.Error(err.Error())
+			}
 		case d2enum.FileTypeDS1:
 			m.Infof("Loading DS1: %s", path)
-			m.loadDS1(id, path, data)
+
+			if err := m.loadDS1(id, path, data); err != nil {
+				m.Error(err.Error())
+			}
 		case d2enum.FileTypeDT1:
 			m.Infof("Loading DT1: %s", path)
-			m.loadDT1(id, path, data)
+
+			if err := m.loadDT1(id, path, data); err != nil {
+				m.Error(err.Error())
+			}
 		case d2enum.FileTypeWAV:
 			m.Infof("Loading WAV: %s", path)
+
 			fh, found := m.GetFileHandle(id)
 			if !found {
 				return
@@ -256,7 +276,10 @@ func (m *AssetLoaderSystem) parseAndCache(id akara.EID, path string, t d2enum.Fi
 			m.loadWAV(id, path, fh.Data)
 		case d2enum.FileTypeD2:
 			m.Infof("Loading animation data: %s", path)
-			m.loadAnimData(id, path, data)
+
+			if err := m.loadAnimData(id, path, data); err != nil {
+				m.Error(err.Error())
+			}
 		}
 	}()
 }
@@ -265,25 +288,37 @@ func (m *AssetLoaderSystem) loadStringTable(id akara.EID, path string, data []by
 	txt := d2tbl.LoadTextDictionary(data)
 	loaded := &txt
 	m.AddStringTable(id).TextDictionary = loaded
-	m.cache.Insert(path, loaded, assetCacheEntryWeight)
+
+	if cacheErr := m.cache.Insert(path, loaded, assetCacheEntryWeight); cacheErr != nil {
+		m.Error(cacheErr.Error())
+	}
 }
 
 func (m *AssetLoaderSystem) loadFontTable(id akara.EID, path string, data []byte) {
 	m.AddFontTable(id).Data = data
-	m.cache.Insert(path, data, assetCacheEntryWeight)
+
+	if cacheErr := m.cache.Insert(path, data, assetCacheEntryWeight); cacheErr != nil {
+		m.Error(cacheErr.Error())
+	}
 }
 
 func (m *AssetLoaderSystem) loadDataDictionary(id akara.EID, path string, data []byte) {
 	loaded := d2txt.LoadDataDictionary(data)
 	m.AddDataDictionary(id).DataDictionary = loaded
-	m.cache.Insert(path, loaded, assetCacheEntryWeight)
+
+	if cacheErr := m.cache.Insert(path, loaded, assetCacheEntryWeight); cacheErr != nil {
+		m.Error(cacheErr.Error())
+	}
 }
 
 func (m *AssetLoaderSystem) loadPalette(id akara.EID, path string, data []byte) error {
 	loaded, err := d2dat.Load(data)
 	if err == nil {
 		m.AddPalette(id).Palette = loaded
-		m.cache.Insert(path, loaded, assetCacheEntryWeight)
+
+		if cacheErr := m.cache.Insert(path, loaded, assetCacheEntryWeight); cacheErr != nil {
+			m.Error(cacheErr.Error())
+		}
 	}
 
 	return err
@@ -293,7 +328,10 @@ func (m *AssetLoaderSystem) loadPaletteTransform(id akara.EID, path string, data
 	loaded, err := d2pl2.Load(data)
 	if err == nil {
 		m.AddPaletteTransform(id).Transform = loaded
-		m.cache.Insert(path, loaded, assetCacheEntryWeight)
+
+		if cacheErr := m.cache.Insert(path, loaded, assetCacheEntryWeight); cacheErr != nil {
+			m.Error(cacheErr.Error())
+		}
 	}
 
 	return err
@@ -303,7 +341,10 @@ func (m *AssetLoaderSystem) loadCOF(id akara.EID, path string, data []byte) erro
 	loaded, err := d2cof.Load(data)
 	if err == nil {
 		m.AddCof(id).COF = loaded
-		m.cache.Insert(path, loaded, assetCacheEntryWeight)
+
+		if cacheErr := m.cache.Insert(path, loaded, assetCacheEntryWeight); cacheErr != nil {
+			m.Error(cacheErr.Error())
+		}
 	}
 
 	return err
@@ -313,7 +354,10 @@ func (m *AssetLoaderSystem) loadDC6(id akara.EID, path string, data []byte) erro
 	loaded, err := d2dc6.Load(data)
 	if err == nil {
 		m.AddDc6(id).DC6 = loaded
-		m.cache.Insert(path, loaded, assetCacheEntryWeight)
+
+		if cacheErr := m.cache.Insert(path, loaded, assetCacheEntryWeight); cacheErr != nil {
+			m.Error(cacheErr.Error())
+		}
 	}
 
 	return err
@@ -323,7 +367,10 @@ func (m *AssetLoaderSystem) loadDCC(id akara.EID, path string, data []byte) erro
 	loaded, err := d2dcc.Load(data)
 	if err == nil {
 		m.AddDcc(id).DCC = loaded
-		m.cache.Insert(path, loaded, assetCacheEntryWeight)
+
+		if cacheErr := m.cache.Insert(path, loaded, assetCacheEntryWeight); cacheErr != nil {
+			m.Error(cacheErr.Error())
+		}
 	}
 
 	return err
@@ -333,7 +380,10 @@ func (m *AssetLoaderSystem) loadDS1(id akara.EID, path string, data []byte) erro
 	loaded, err := d2ds1.LoadDS1(data)
 	if err == nil {
 		m.AddDs1(id).DS1 = loaded
-		m.cache.Insert(path, loaded, assetCacheEntryWeight)
+
+		if cacheErr := m.cache.Insert(path, loaded, assetCacheEntryWeight); cacheErr != nil {
+			m.Error(cacheErr.Error())
+		}
 	}
 
 	return err
@@ -343,7 +393,10 @@ func (m *AssetLoaderSystem) loadDT1(id akara.EID, path string, data []byte) erro
 	loaded, err := d2dt1.LoadDT1(data)
 	if err == nil {
 		m.AddDt1(id).DT1 = loaded
-		m.cache.Insert(path, loaded, assetCacheEntryWeight)
+
+		if cacheErr := m.cache.Insert(path, loaded, assetCacheEntryWeight); cacheErr != nil {
+			m.Error(cacheErr.Error())
+		}
 	}
 
 	return err
@@ -352,14 +405,20 @@ func (m *AssetLoaderSystem) loadDT1(id akara.EID, path string, data []byte) erro
 func (m *AssetLoaderSystem) loadWAV(id akara.EID, path string, seeker io.ReadSeeker) {
 	component := m.AddWav(id)
 	component.Data = seeker
-	m.cache.Insert(path, seeker, assetCacheEntryWeight)
+
+	if cacheErr := m.cache.Insert(path, seeker, assetCacheEntryWeight); cacheErr != nil {
+		m.Error(cacheErr.Error())
+	}
 }
 
 func (m *AssetLoaderSystem) loadAnimData(id akara.EID, path string, data []byte) error {
 	loaded, err := d2animdata.Load(data)
 	if err == nil {
 		m.AddAnimData(id).AnimationData = loaded
-		m.cache.Insert(path, loaded, assetCacheEntryWeight)
+
+		if cacheErr := m.cache.Insert(path, loaded, assetCacheEntryWeight); cacheErr != nil {
+			m.Error(cacheErr.Error())
+		}
 	}
 
 	return err
