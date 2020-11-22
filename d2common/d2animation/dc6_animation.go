@@ -14,6 +14,7 @@ import (
 var _ d2interface.Animation = &DC6Animation{} // Static check to confirm struct conforms to
 // interface
 
+// NewDC6Animation creates an animation from a dc6 file
 func NewDC6Animation(
 	dc6 *d2dc6.DC6,
 	pal d2interface.Palette,
