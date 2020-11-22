@@ -54,7 +54,7 @@ type RenderSystem struct {
 	*d2components.GameConfigMap
 	*d2components.ViewportMap
 	*d2components.MainViewportMap
-	*d2components.SurfaceMap
+	*d2components.RenderableMap
 	lastUpdate        time.Time
 	gameLoopInitDelay time.Duration // there is a race condition, this is a hack
 }
@@ -73,7 +73,7 @@ func (m *RenderSystem) Init(_ *akara.World) {
 	m.GameConfigMap = m.InjectMap(d2components.GameConfig).(*d2components.GameConfigMap)
 	m.ViewportMap = m.InjectMap(d2components.Viewport).(*d2components.ViewportMap)
 	m.MainViewportMap = m.InjectMap(d2components.MainViewport).(*d2components.MainViewportMap)
-	m.SurfaceMap = m.InjectMap(d2components.Surface).(*d2components.SurfaceMap)
+	m.RenderableMap = m.InjectMap(d2components.Surface).(*d2components.RenderableMap)
 }
 
 // Update will initialize the renderer, start the game loop, and
@@ -156,7 +156,7 @@ func (m *RenderSystem) render(screen d2interface.Surface) error {
 			return errors.New("main viewport not found")
 		}
 
-		sfc, found := m.GetSurface(id)
+		sfc, found := m.GetRenderable(id)
 		if !found {
 			return errors.New("main viewport doesn't have a surface")
 		}

@@ -11,7 +11,7 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/hajimehoshi/ebiten v1.12.3
 	github.com/hajimehoshi/ebiten/v2 v2.0.2
-	github.com/gravestench/akara v0.0.0-20201119221449-924b47999403
+	github.com/gravestench/akara v0.0.0-20201122210148-a1ee8ea83994
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/profile v1.5.0
 	github.com/robertkrimen/otto v0.0.0-20200922221731-ef014fd054ac
