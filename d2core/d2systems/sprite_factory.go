@@ -51,7 +51,7 @@ type SpriteFactory struct {
 	*d2components.DccMap
 	*d2components.PaletteMap
 	*d2components.AnimationMap
-	*d2components.SurfaceMap
+	*d2components.RenderableMap
 	loadQueue       spriteLoadQueue
 	spritesToRender *akara.Subscription
 }
@@ -70,7 +70,7 @@ func (t *SpriteFactory) Init(world *akara.World) {
 	t.DccMap = t.InjectMap(d2components.Dcc).(*d2components.DccMap)
 	t.PaletteMap = t.InjectMap(d2components.Palette).(*d2components.PaletteMap)
 	t.AnimationMap = t.InjectMap(d2components.Animation).(*d2components.AnimationMap)
-	t.SurfaceMap = t.InjectMap(d2components.Surface).(*d2components.SurfaceMap)
+	t.RenderableMap = t.InjectMap(d2components.Surface).(*d2components.RenderableMap)
 }
 
 // Update processes the load queue which attempting to create animations, as well as
@@ -169,7 +169,7 @@ func (t *SpriteFactory) tryRenderingSprite(eid akara.EID) {
 
 	sfc := anim.GetCurrentFrameSurface()
 
-	t.AddSurface(eid).Surface = sfc
+	t.AddRenderable(eid).Surface = sfc
 }
 
 func (t *SpriteFactory) createDc6Animation(

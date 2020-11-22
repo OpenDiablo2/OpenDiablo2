@@ -56,7 +56,7 @@ type BaseScene struct {
 	*d2components.ViewportMap
 	*d2components.ViewportFilterMap
 	*d2components.CameraMap
-	*d2components.SurfaceMap
+	*d2components.RenderableMap
 	*d2components.PositionMap
 	*d2components.ScaleMap
 	*d2components.AnimationMap
@@ -128,7 +128,7 @@ func (s *BaseScene) injectComponentMaps() {
 	s.ViewportMap = s.World.InjectMap(d2components.Viewport).(*d2components.ViewportMap)
 	s.ViewportFilterMap = s.World.InjectMap(d2components.ViewportFilter).(*d2components.ViewportFilterMap)
 	s.CameraMap = s.World.InjectMap(d2components.Camera).(*d2components.CameraMap)
-	s.SurfaceMap = s.World.InjectMap(d2components.Surface).(*d2components.SurfaceMap)
+	s.RenderableMap = s.World.InjectMap(d2components.Surface).(*d2components.RenderableMap)
 	s.PositionMap = s.World.InjectMap(d2components.Position).(*d2components.PositionMap)
 	s.ScaleMap = s.World.InjectMap(d2components.Scale).(*d2components.ScaleMap)
 	s.AnimationMap = s.World.InjectMap(d2components.Animation).(*d2components.AnimationMap)
@@ -144,7 +144,7 @@ func (s *BaseScene) createDefaultViewport() {
 	camera.Height = 600
 	camera.Zoom = 1
 
-	s.AddSurface(viewportID).Surface = s.systems.renderer.NewSurface(camera.Width, camera.Height)
+	s.AddRenderable(viewportID).Surface = s.systems.renderer.NewSurface(camera.Width, camera.Height)
 	s.AddMainViewport(viewportID)
 
 	s.Viewports = append(s.Viewports, viewportID)
@@ -231,7 +231,7 @@ func (s *BaseScene) renderViewport(idx int, objects []akara.EID) {
 		return
 	}
 
-	sfc, found := s.GetSurface(id)
+	sfc, found := s.GetRenderable(id)
 	if !found {
 		return
 	}
@@ -254,7 +254,7 @@ func (s *BaseScene) renderViewport(idx int, objects []akara.EID) {
 }
 
 func (s *BaseScene) renderObject(target d2interface.Surface, id akara.EID) {
-	sfc, found := s.GetSurface(id)
+	sfc, found := s.GetRenderable(id)
 	if !found {
 		return
 	}

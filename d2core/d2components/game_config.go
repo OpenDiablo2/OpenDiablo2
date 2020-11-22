@@ -1,10 +1,12 @@
+//nolint:dupl,golint,stylecheck // component declarations are supposed to look the same
 package d2components
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"os/user"
 	"path"
 	"runtime"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 
 	"github.com/gravestench/akara"
 )
@@ -15,9 +17,10 @@ var _ akara.Component = &GameConfigComponent{}
 // static check that GameConfigMap implements ComponentMap
 var _ akara.ComponentMap = &GameConfigMap{}
 
+// GameConfigComponent represents an OpenDiablo2 game configuration
 type GameConfigComponent struct {
+	*akara.BaseComponent
 	MpqLoadOrder    []string
-	Language        string
 	MpqPath         string
 	TicksPerSecond  int
 	FpsCap          int
@@ -30,120 +33,76 @@ type GameConfigComponent struct {
 	LogLevel        d2util.LogLevel
 }
 
-// ID returns a unique identifier for the component type
-func (*GameConfigComponent) ID() akara.ComponentID {
-	return GameConfigCID
+// GameConfigMap is a map of entity ID's to GameConfig
+type GameConfigMap struct {
+	*akara.BaseComponentMap
 }
 
-// NewMap returns a new component map for the component type
-func (*GameConfigComponent) NewMap() akara.ComponentMap {
-	return NewGameConfigMap()
+// AddGameConfig adds a new GameConfigComponent for the given entity id and returns it.
+// this is a convenience method for the generic Add method, as it returns a
+// *GameConfigComponent instead of an akara.Component
+func (cm *GameConfigMap) AddGameConfig(id akara.EID) *GameConfigComponent {
+	return defaultConfig(cm.Add(id).(*GameConfigComponent))
+}
+
+// GetGameConfig returns the GameConfigComponent associated with the given entity id
+func (cm *GameConfigMap) GetGameConfig(id akara.EID) (*GameConfigComponent, bool) {
+	entry, found := cm.Get(id)
+	if entry == nil {
+		return nil, false
+	}
+
+	return entry.(*GameConfigComponent), found
 }
 
 // GameConfig is a convenient reference to be used as a component identifier
-var GameConfig = (*GameConfigComponent)(nil) // nolint:gochecknoglobals // global by design
+var GameConfig = newGameConfig() // nolint:gochecknoglobals // global by design
 
-// NewGameConfigMap creates a new map of entity ID's to GameConfigComponent components
-func NewGameConfigMap() *GameConfigMap {
+func newGameConfig() akara.Component {
+	return &GameConfigComponent{
+		BaseComponent: akara.NewBaseComponent(GameConfigCID, newGameConfig, newGameConfigMap),
+	}
+}
+
+func newGameConfigMap() akara.ComponentMap {
+	baseComponent := akara.NewBaseComponent(GameConfigCID, newGameConfig, newGameConfigMap)
+	baseMap := akara.NewBaseComponentMap(baseComponent)
+
 	cm := &GameConfigMap{
-		components: make(map[akara.EID]*GameConfigComponent),
+		BaseComponentMap: baseMap,
 	}
 
 	return cm
 }
 
-// GameConfigMap is a map of entity ID's to GameConfigComponent components
-type GameConfigMap struct {
-	world      *akara.World
-	components map[akara.EID]*GameConfigComponent
-}
-
-// Init initializes the component map with the given world
-func (cm *GameConfigMap) Init(world *akara.World) {
-	cm.world = world
-}
-
-// Add a new GameConfigComponent for the given entity id, return that component.
-// If the entity already has a component, just return that one.
-func (cm *GameConfigMap) Add(id akara.EID) akara.Component {
-	if com, has := cm.components[id]; has {
-		return com
-	}
-
-	cm.components[id] = defaultConfig()
-
-	cm.world.UpdateEntity(id)
-
-	return cm.components[id]
-}
-
-// ID returns a unique identifier for the component type
-func (*GameConfigMap) ID() akara.ComponentID {
-	return GameConfigCID
-}
-
-// NewMap returns a new component map for the component type
-func (*GameConfigMap) NewMap() akara.ComponentMap {
-	return NewGameConfigMap()
-}
-
-// AddGameConfig adds a new GameConfigComponent for the given entity id and returns it.
-// If the entity already has a GameConfigComponent component, just return that one.
-// this is a convenience method for the generic Add method, as it returns a
-// *GameConfigComponent instead of an akara.Component
-func (cm *GameConfigMap) AddGameConfig(id akara.EID) *GameConfigComponent {
-	return cm.Add(id).(*GameConfigComponent)
-}
-
-// Get returns the component associated with the given entity id
-func (cm *GameConfigMap) Get(id akara.EID) (akara.Component, bool) {
-	entry, found := cm.components[id]
-	return entry, found
-}
-
-// GetGameConfig returns the GameConfigComponent component associated with the given entity id
-func (cm *GameConfigMap) GetGameConfig(id akara.EID) (*GameConfigComponent, bool) {
-	entry, found := cm.components[id]
-	return entry, found
-}
-
-// Remove a component for the given entity id, return the component.
-func (cm *GameConfigMap) Remove(id akara.EID) {
-	delete(cm.components, id)
-	cm.world.UpdateEntity(id)
-}
-
-func defaultConfig() *GameConfigComponent {
+func defaultConfig(config *GameConfigComponent) *GameConfigComponent {
 	const (
 		defaultSfxVolume = 1.0
 		defaultBgmVolume = 0.3
 	)
 
-	config := &GameConfigComponent{
-		Language:        "ENG",
-		FullScreen:      false,
-		TicksPerSecond:  -1,
-		RunInBackground: true,
-		VsyncEnabled:    true,
-		SfxVolume:       defaultSfxVolume,
-		BgmVolume:       defaultBgmVolume,
-		MpqPath:         "C:/Program Files (x86)/Diablo II",
-		Backend:         "Ebiten",
-		MpqLoadOrder: []string{
-			"Patch_D2.mpq",
-			"d2exp.mpq",
-			"d2xmusic.mpq",
-			"d2xtalk.mpq",
-			"d2xvideo.mpq",
-			"d2data.mpq",
-			"d2char.mpq",
-			"d2music.mpq",
-			"d2sfx.mpq",
-			"d2video.mpq",
-			"d2speech.mpq",
-		},
-		LogLevel: d2util.LogLevelDefault,
+	config.FullScreen = false
+	config.TicksPerSecond = -1
+	config.RunInBackground = true
+	config.VsyncEnabled = true
+	config.SfxVolume = defaultSfxVolume
+	config.BgmVolume = defaultBgmVolume
+	config.MpqPath = "C:/Program Files (x86)/Diablo II"
+	config.Backend = "Ebiten"
+	config.MpqLoadOrder = []string{
+		"Patch_D2.mpq",
+		"d2exp.mpq",
+		"d2xmusic.mpq",
+		"d2xtalk.mpq",
+		"d2xvideo.mpq",
+		"d2data.mpq",
+		"d2char.mpq",
+		"d2music.mpq",
+		"d2sfx.mpq",
+		"d2video.mpq",
+		"d2speech.mpq",
 	}
+	config.LogLevel = d2util.LogLevelDefault
 
 	switch runtime.GOOS {
 	case "windows":
