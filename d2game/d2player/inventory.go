@@ -126,7 +126,7 @@ func (g *Inventory) Load() {
 
 	g.panel, err = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 	if err != nil {
-		g.logger.Error(err.Error())
+		g.Error(err.Error())
 	}
 
 	g.panelGroup.SetVisible(false)
@@ -199,7 +199,7 @@ func (g *Inventory) SetOnCloseCb(cb func()) {
 }
 
 func (g *Inventory) onGoldClicked() {
-	g.logger.Info("Gold action clicked")
+	g.Info("Gold action clicked")
 }
 
 // IsOpen returns true if the inventory is open
