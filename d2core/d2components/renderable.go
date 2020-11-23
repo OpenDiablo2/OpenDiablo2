@@ -19,7 +19,7 @@ type RenderableComponent struct {
 	d2interface.Surface
 }
 
-// RenderableMap is a map of entity ID's to Surface
+// RenderableMap is a map of entity ID's to Renderable
 type RenderableMap struct {
 	*akara.BaseComponentMap
 }
@@ -41,8 +41,8 @@ func (cm *RenderableMap) GetRenderable(id akara.EID) (*RenderableComponent, bool
 	return entry.(*RenderableComponent), found
 }
 
-// Surface is a convenient reference to be used as a component identifier
-var Surface = newRenderable() // nolint:gochecknoglobals // global by design
+// Renderable is a convenient reference to be used as a component identifier
+var Renderable = newRenderable() // nolint:gochecknoglobals // global by design
 
 func newRenderable() akara.Component {
 	return &RenderableComponent{

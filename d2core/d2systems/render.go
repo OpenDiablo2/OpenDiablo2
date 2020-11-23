@@ -25,7 +25,7 @@ func NewRenderSystem() *RenderSystem {
 	viewports := akara.NewFilter().
 		Require(d2components.Viewport).
 		Require(d2components.MainViewport).
-		Require(d2components.Surface).
+		Require(d2components.Renderable).
 		Build()
 
 	gameConfigs := akara.NewFilter().Require(d2components.GameConfig).Build()
@@ -73,7 +73,7 @@ func (m *RenderSystem) Init(_ *akara.World) {
 	m.GameConfigMap = m.InjectMap(d2components.GameConfig).(*d2components.GameConfigMap)
 	m.ViewportMap = m.InjectMap(d2components.Viewport).(*d2components.ViewportMap)
 	m.MainViewportMap = m.InjectMap(d2components.MainViewport).(*d2components.MainViewportMap)
-	m.RenderableMap = m.InjectMap(d2components.Surface).(*d2components.RenderableMap)
+	m.RenderableMap = m.InjectMap(d2components.Renderable).(*d2components.RenderableMap)
 }
 
 // Update will initialize the renderer, start the game loop, and
@@ -156,17 +156,17 @@ func (m *RenderSystem) render(screen d2interface.Surface) error {
 			return errors.New("main viewport not found")
 		}
 
-		sfc, found := m.GetRenderable(id)
+		renderable, found := m.GetRenderable(id)
 		if !found {
 			return errors.New("main viewport doesn't have a surface")
 		}
 
-		if sfc.Surface == nil {
-			sfc.Surface = m.renderer.NewSurface(vp.Width, vp.Height)
+		if renderable.Surface == nil {
+			renderable.Surface = m.renderer.NewSurface(vp.Width, vp.Height)
 		}
 
 		screen.PushTranslation(vp.Left, vp.Top)
-		screen.Render(sfc.Surface)
+		screen.Render(renderable.Surface)
 		screen.Pop()
 	}
 

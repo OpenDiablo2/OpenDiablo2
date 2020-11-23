@@ -3,6 +3,8 @@ package d2systems
 import (
 	"path/filepath"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
+
 	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -128,7 +130,7 @@ func (s *BaseScene) injectComponentMaps() {
 	s.ViewportMap = s.World.InjectMap(d2components.Viewport).(*d2components.ViewportMap)
 	s.ViewportFilterMap = s.World.InjectMap(d2components.ViewportFilter).(*d2components.ViewportFilterMap)
 	s.CameraMap = s.World.InjectMap(d2components.Camera).(*d2components.CameraMap)
-	s.RenderableMap = s.World.InjectMap(d2components.Surface).(*d2components.RenderableMap)
+	s.RenderableMap = s.World.InjectMap(d2components.Renderable).(*d2components.RenderableMap)
 	s.PositionMap = s.World.InjectMap(d2components.Position).(*d2components.PositionMap)
 	s.ScaleMap = s.World.InjectMap(d2components.Scale).(*d2components.ScaleMap)
 	s.AnimationMap = s.World.InjectMap(d2components.Animation).(*d2components.AnimationMap)
@@ -240,9 +242,9 @@ func (s *BaseScene) renderViewport(idx int, objects []akara.EID) {
 		sfc.Surface = s.systems.renderer.NewSurface(camera.Width, camera.Height)
 	}
 
-	cx, cy := int(camera.X())+camera.Width>>1, int(camera.Y())+camera.Height>>1
+	cx, cy := int(camera.X()), int(camera.Y())
 
-	sfc.Surface.PushTranslation(-cx, -cy) // negative because we're offsetting everything that gets rendered
+	sfc.Surface.PushTranslation(cx, cy) // negative because we're offsetting everything that gets rendered
 	sfc.Surface.PushScale(camera.Zoom, camera.Zoom)
 
 	for _, object := range objects {
@@ -254,7 +256,7 @@ func (s *BaseScene) renderViewport(idx int, objects []akara.EID) {
 }
 
 func (s *BaseScene) renderObject(target d2interface.Surface, id akara.EID) {
-	sfc, found := s.GetRenderable(id)
+	renderable, found := s.GetRenderable(id)
 	if !found {
 		return
 	}
@@ -269,13 +271,51 @@ func (s *BaseScene) renderObject(target d2interface.Surface, id akara.EID) {
 		scale = s.AddScale(id)
 	}
 
-	sfc.PushTranslation(int(position.X()), int(position.Y()))
-	sfc.PushScale(scale.X(), scale.Y())
+	x, y := int(position.X()), int(position.Y())
 
-	target.Render(sfc.Surface)
+	target.PushTranslation(x, y)
+	defer target.Pop()
 
-	sfc.Pop()
-	sfc.Pop()
+	target.PushScale(scale.X(), scale.Y())
+	defer target.Pop()
+
+	segment, found := s.systems.SpriteFactory.GetSegmentedSprite(id)
+	if found {
+		animation, found := s.GetAnimation(id)
+		if !found {
+			return
+		}
+
+		var offsetY int
+
+		segmentsX, segmentsY := segment.Xsegments, segment.Ysegments
+		frameOffset := segment.FrameOffset
+
+		for y := 0; y < segmentsY; y++ {
+			var offsetX, maxFrameHeight int
+
+			for x := 0; x < segmentsX; x++ {
+				idx := x + y*segmentsX + frameOffset*segmentsX*segmentsY
+				if err := animation.SetCurrentFrame(idx); err != nil {
+					s.Error("SetCurrentFrame error" + err.Error())
+				}
+
+				target.PushTranslation(x+offsetX, y+offsetY)
+				target.Render(animation.GetCurrentFrameSurface())
+				target.Pop()
+
+				frameWidth, frameHeight := animation.GetCurrentFrameSize()
+				maxFrameHeight = d2math.MaxInt(maxFrameHeight, frameHeight)
+				offsetX += frameWidth - 1
+			}
+
+			offsetY += maxFrameHeight - 1
+		}
+
+		return
+	}
+
+	target.Render(renderable.Surface)
 }
 
 // responsible for wrapping the object factory calls and assigning the created object entity id's to the scene
@@ -287,6 +327,15 @@ func (s *sceneObjectAssigner) Sprite(x, y float64, imgPath, palPath string) akar
 	s.Infof("creating sprite: %s, %s", filepath.Base(imgPath), palPath)
 
 	eid := s.systems.SpriteFactory.Sprite(x, y, imgPath, palPath)
+	s.GameObjects = append(s.GameObjects, eid)
+
+	return eid
+}
+
+func (s *sceneObjectAssigner) SegmentedSprite(x, y float64, imgPath, palPath string, xseg, yseg, frame int) akara.EID {
+	s.Infof("creating segmented sprite: %s, %s", filepath.Base(imgPath), palPath)
+
+	eid := s.systems.SpriteFactory.SegmentedSprite(x, y, imgPath, palPath, xseg, yseg, frame)
 	s.GameObjects = append(s.GameObjects, eid)
 
 	return eid

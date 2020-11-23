@@ -18,11 +18,16 @@ const (
 func NewSpriteFactorySubsystem(b *akara.BaseSystem, l *d2util.Logger) *SpriteFactory {
 	spritesToRender := akara.NewFilter().
 		Require(d2components.Animation). // we want to process entities that have an animation ...
-		Forbid(d2components.Surface).    // ... but are missing a surface
+		Forbid(d2components.Renderable). // ... but are missing a surface
+		Build()
+
+	spritesToUpdate := akara.NewFilter().
+		Require(d2components.Animation).  // we want to process entities that have an animation ...
+		Require(d2components.Renderable). // ... but are missing a surface
 		Build()
 
 	sys := &SpriteFactory{
-		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(spritesToRender),
+		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(spritesToRender, spritesToUpdate),
 		Logger:               l,
 	}
 
@@ -52,8 +57,10 @@ type SpriteFactory struct {
 	*d2components.PaletteMap
 	*d2components.AnimationMap
 	*d2components.RenderableMap
+	*d2components.SegmentedSpriteMap
 	loadQueue       spriteLoadQueue
 	spritesToRender *akara.Subscription
+	spritesToUpdate *akara.Subscription
 }
 
 // Init the sprite factory, injecting the necessary components
@@ -63,6 +70,7 @@ func (t *SpriteFactory) Init(world *akara.World) {
 	t.loadQueue = make(spriteLoadQueue)
 
 	t.spritesToRender = t.Subscriptions[0]
+	t.spritesToUpdate = t.Subscriptions[1]
 
 	t.FilePathMap = t.InjectMap(d2components.FilePath).(*d2components.FilePathMap)
 	t.PositionMap = t.InjectMap(d2components.Position).(*d2components.PositionMap)
@@ -70,12 +78,17 @@ func (t *SpriteFactory) Init(world *akara.World) {
 	t.DccMap = t.InjectMap(d2components.Dcc).(*d2components.DccMap)
 	t.PaletteMap = t.InjectMap(d2components.Palette).(*d2components.PaletteMap)
 	t.AnimationMap = t.InjectMap(d2components.Animation).(*d2components.AnimationMap)
-	t.RenderableMap = t.InjectMap(d2components.Surface).(*d2components.RenderableMap)
+	t.RenderableMap = t.InjectMap(d2components.Renderable).(*d2components.RenderableMap)
+	t.SegmentedSpriteMap = t.InjectMap(d2components.SegmentedSprite).(*d2components.SegmentedSpriteMap)
 }
 
 // Update processes the load queue which attempting to create animations, as well as
 // binding existing animations to a renderer if one is present.
 func (t *SpriteFactory) Update() {
+	for _, eid := range t.spritesToUpdate.GetEntities() {
+		t.updateSprite(eid)
+	}
+
 	for _, eid := range t.spritesToRender.GetEntities() {
 		t.tryRenderingSprite(eid)
 	}
@@ -99,6 +112,19 @@ func (t *SpriteFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID 
 		spriteImage:   imgID,
 		spritePalette: palID,
 	}
+
+	return spriteID
+}
+
+// SegmentedSprite queues a segmented sprite animation to be loaded.
+// A segmented sprite is a sprite that has many frames that form the entire sprite.
+func (t *SpriteFactory) SegmentedSprite(x, y float64, imgPath, palPath string, xseg, yseg, frame int) akara.EID {
+	spriteID := t.Sprite(x, y, imgPath, palPath)
+
+	s := t.AddSegmentedSprite(spriteID)
+	s.Xsegments = xseg
+	s.Ysegments = yseg
+	s.FrameOffset = frame
 
 	return spriteID
 }
@@ -170,6 +196,32 @@ func (t *SpriteFactory) tryRenderingSprite(eid akara.EID) {
 	sfc := anim.GetCurrentFrameSurface()
 
 	t.AddRenderable(eid).Surface = sfc
+}
+
+func (t *SpriteFactory) updateSprite(eid akara.EID) {
+	if t.RenderSystem == nil {
+		return
+	}
+
+	if t.RenderSystem.renderer == nil {
+		return
+	}
+
+	anim, found := t.GetAnimation(eid)
+	if !found {
+		return
+	}
+
+	if anim.Animation == nil {
+		return
+	}
+
+	renderable, found := t.GetRenderable(eid)
+	if !found {
+		return
+	}
+
+	renderable.Surface = anim.GetCurrentFrameSurface()
 }
 
 func (t *SpriteFactory) createDc6Animation(
