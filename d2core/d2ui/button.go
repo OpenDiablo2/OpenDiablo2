@@ -48,7 +48,7 @@ const (
 	ButtonTypeRepairAll          ButtonType = 28
 	ButtonTypeLeftArrow          ButtonType = 29
 	ButtonTypeRightArrow         ButtonType = 30
-	ButtonTypeQuary              ButtonType = 31
+	ButtonTypeQuery              ButtonType = 31
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -64,7 +64,7 @@ const (
 	buyButtonBaseFrame        = 2  // base frame offset of the "buy" button dc6
 	sellButtonBaseFrame       = 4  // base frame offset of the "sell" button dc6
 	repairButtonBaseFrame     = 6  // base frame offset of the "repair" button dc6
-	quaryButtonBaseFrame      = 8  // base frame offset of the "quary" button dc6
+	queryButtonBaseFrame      = 8  // base frame offset of the "query" button dc6
 	closeButtonBaseFrame      = 10 // base frame offset of the "close" button dc6
 	leftArrowButtonBaseFrame  = 12 // base frame offset of the "leftArrow" button dc6
 	rightArrowButtonBaseFrame = 14 // base frame offset of the "rightArrow" button dc6
@@ -112,7 +112,7 @@ const (
 	buttonTooltipRepairAll
 	buttonTooltipLeftArrow
 	buttonTooltipRightArrow
-	buttonTooltipQuary
+	buttonTooltipQuery
 )
 
 const (
@@ -453,7 +453,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			TooltipXOffset:   buttonBuySellTooltipXOffset,
 			TooltipYOffset:   buttonBuySellTooltipYOffset,
 		},
-		ButtonTypeQuary: {
+		ButtonTypeQuery: {
 			XSegments:        buttonBuySellSegmentsX,
 			YSegments:        buttonBuySellSegmentsY,
 			DisabledFrame:    buttonBuySellDisabledFrame,
@@ -463,12 +463,12 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			Toggleable:       true,
 			FontPath:         d2resource.Font30,
 			AllowFrameChange: true,
-			BaseFrame:        quaryButtonBaseFrame,
+			BaseFrame:        queryButtonBaseFrame,
 			HasImage:         true,
 			FixedWidth:       ButtonNoFixedWidth,
 			FixedHeight:      ButtonNoFixedHeight,
 			LabelColor:       greyAlpha100,
-			Tooltip:          buttonTooltipQuary,
+			Tooltip:          buttonTooltipQuery,
 			TooltipXOffset:   buttonBuySellTooltipXOffset,
 			TooltipYOffset:   buttonBuySellTooltipYOffset,
 		},
@@ -758,7 +758,7 @@ func (v *Button) createTooltip() {
 	case buttonTooltipRightArrow:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
 		t.SetText(v.manager.asset.TranslateString("KeyRight"))
-	case buttonTooltipQuary:
+	case buttonTooltipQuery:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
 		t.SetText(v.manager.asset.TranslateString("")) // need to be set up
 	}
