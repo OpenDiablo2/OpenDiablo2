@@ -2,7 +2,6 @@ package d2netpacket
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
@@ -17,20 +16,20 @@ type GenerateMapPacket struct {
 
 // CreateGenerateMapPacket returns a NetPacket which declares a
 // GenerateMapPacket with the given regionType.
-func CreateGenerateMapPacket(regionType d2enum.RegionIdType) NetPacket {
+func CreateGenerateMapPacket(regionType d2enum.RegionIdType) (NetPacket, error) {
 	generateMapPacket := GenerateMapPacket{
 		RegionType: regionType,
 	}
 
 	b, err := json.Marshal(generateMapPacket)
 	if err != nil {
-		log.Print(err)
+		return NetPacket{PacketType: d2netpackettype.GenerateMap}, err
 	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.GenerateMap,
 		PacketData: b,
-	}
+	}, nil
 }
 
 // UnmarshalGenerateMap unmarshals the given packet data into a GenerateMapPacket struct

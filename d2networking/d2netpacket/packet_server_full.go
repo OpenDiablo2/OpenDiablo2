@@ -2,7 +2,6 @@ package d2netpacket
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
@@ -12,18 +11,18 @@ import (
 type ServerFullPacket struct{}
 
 // CreateServerFullPacket returns a NetPacket which declares a ServerFullPacket.
-func CreateServerFullPacket() NetPacket {
+func CreateServerFullPacket() (NetPacket, error) {
 	serverClosed := ServerFullPacket{}
 
 	b, err := json.Marshal(serverClosed)
 	if err != nil {
-		log.Print(err)
+		return NetPacket{PacketType: d2netpackettype.ServerFull}, err
 	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.ServerFull,
 		PacketData: b,
-	}
+	}, nil
 }
 
 // UnmarshalServerFull unmarshalls the given data to a ServerFullPacket struct

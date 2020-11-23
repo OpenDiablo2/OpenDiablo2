@@ -6,7 +6,6 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
@@ -14,7 +13,11 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2client/d2clientconnectiontype"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
+
+const logPrefix = "UDP Connection"
 
 // UDPClientConnection is the implementation of the
 // d2server.ClientConnection interface to represent remote client from the
@@ -24,16 +27,22 @@ type UDPClientConnection struct {
 	address       *net.UDPAddr      // IP address of the associated RemoteClientConnection
 	udpConnection *net.UDPConn      // Server's UDP Connection
 	playerState   *d2hero.HeroState // Client's game state
+
+	*d2util.Logger
 }
 
 // CreateUDPClientConnection constructs a new UDPClientConnection and
 // returns a pointer to it.
-func CreateUDPClientConnection(udpConnection *net.UDPConn, id string, address *net.UDPAddr) *UDPClientConnection {
+func CreateUDPClientConnection(udpConnection *net.UDPConn, id string, l d2util.LogLevel, address *net.UDPAddr) *UDPClientConnection {
 	result := &UDPClientConnection{
 		id:            id,
 		address:       address,
 		udpConnection: udpConnection,
 	}
+
+	result.Logger = d2util.NewLogger()
+	result.Logger.SetPrefix(logPrefix)
+	result.Logger.SetLevel(l)
 
 	return result
 }
@@ -63,7 +72,7 @@ func (u *UDPClientConnection) SendPacketToClient(packet d2netpacket.NetPacket) e
 
 	writer, err := gzip.NewWriterLevel(&buff, gzip.BestCompression)
 	if err != nil {
-		log.Print(err)
+		u.Error(err.Error())
 	}
 
 	if written, writeErr := writer.Write(data); writeErr != nil {

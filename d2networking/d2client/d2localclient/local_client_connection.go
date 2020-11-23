@@ -87,7 +87,12 @@ func (l *LocalClientConnection) Open(_, saveFilePath string) error {
 
 // Close disconnects from the server and destroys it.
 func (l *LocalClientConnection) Close() error {
-	err := l.SendPacketToServer(d2netpacket.CreateServerClosedPacket())
+	sc, err := d2netpacket.CreateServerClosedPacket()
+	if err != nil {
+		return err
+	}
+
+	err = l.SendPacketToServer(sc)
 	if err != nil {
 		return err
 	}

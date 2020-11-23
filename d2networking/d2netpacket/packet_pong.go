@@ -2,7 +2,6 @@ package d2netpacket
 
 import (
 	"encoding/json"
-	"log"
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
@@ -17,7 +16,7 @@ type PongPacket struct {
 
 // CreatePongPacket returns a NetPacket which declares a PongPacket with
 // the current time and given ID.
-func CreatePongPacket(id string) NetPacket {
+func CreatePongPacket(id string) (NetPacket, error) {
 	pong := PongPacket{
 		ID: id,
 		TS: time.Now(),
@@ -25,13 +24,13 @@ func CreatePongPacket(id string) NetPacket {
 
 	b, err := json.Marshal(pong)
 	if err != nil {
-		log.Print(err)
+		return NetPacket{PacketType: d2netpackettype.Pong}, err
 	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.Pong,
 		PacketData: b,
-	}
+	}, nil
 }
 
 // UnmarshalPong unmarshals the given data to a PongPacket struct

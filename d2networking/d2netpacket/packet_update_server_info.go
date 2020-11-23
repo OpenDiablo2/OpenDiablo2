@@ -2,7 +2,6 @@ package d2netpacket
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
@@ -16,7 +15,7 @@ type UpdateServerInfoPacket struct {
 
 // CreateUpdateServerInfoPacket returns a NetPacket which declares an
 // UpdateServerInfoPacket with the given player ID and map seed.
-func CreateUpdateServerInfoPacket(seed int64, playerID string) NetPacket {
+func CreateUpdateServerInfoPacket(seed int64, playerID string) (NetPacket, error) {
 	updateServerInfo := UpdateServerInfoPacket{
 		Seed:     seed,
 		PlayerID: playerID,
@@ -24,13 +23,13 @@ func CreateUpdateServerInfoPacket(seed int64, playerID string) NetPacket {
 
 	b, err := json.Marshal(updateServerInfo)
 	if err != nil {
-		log.Print(err)
+		return NetPacket{PacketType: d2netpackettype.UpdateServerInfo}, err
 	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.UpdateServerInfo,
 		PacketData: b,
-	}
+	}, nil
 }
 
 // UnmarshalUpdateServerInfo unmarshals the data to a UpdateServerInfoPacket struct
