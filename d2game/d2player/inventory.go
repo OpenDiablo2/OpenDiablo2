@@ -122,8 +122,6 @@ func (g *Inventory) Load() {
 	g.goldLabel.SetPosition(invGoldLabelX, invGoldLabelY)
 	g.panelGroup.AddWidget(g.goldLabel)
 
-	g.goldButton = g.uiManager.NewButton(d2ui.ButtonTypeGoldCoin, "")
-
 	g.panel, err = g.uiManager.NewSprite(d2resource.InventoryCharacterPanel, d2resource.PaletteSky)
 	if err != nil {
 		g.Error(err.Error())
