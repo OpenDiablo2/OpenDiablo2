@@ -182,7 +182,7 @@ func (r *RemoteClientConnection) bytesToJSON(buffer []byte) (string, d2netpacket
 
 // decodeToPacket unmarshals the JSON string into the correct struct
 // and returns a NetPacket declaring that struct.
-// nolint:gocyclo // switch statement on packet type makes sense, no need to change
+// nolint:gocyclo,funlen // switch statement on packet type makes sense, no need to change
 func (r *RemoteClientConnection) decodeToPacket(
 	t d2netpackettype.NetPacketType,
 	data string) (d2netpacket.NetPacket, error) {
