@@ -26,7 +26,11 @@ type AlphaMap struct {
 // this is a convenience method for the generic Add method, as it returns a
 // *AlphaComponent instead of an akara.Component
 func (cm *AlphaMap) AddAlpha(id akara.EID) *AlphaComponent {
-	return cm.Add(id).(*AlphaComponent)
+	c := cm.Add(id).(*AlphaComponent)
+
+	c.Alpha = 1
+
+	return c
 }
 
 // GetAlpha returns the AlphaComponent associated with the given entity id

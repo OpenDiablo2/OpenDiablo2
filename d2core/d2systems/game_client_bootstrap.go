@@ -56,6 +56,7 @@ func (m *GameClientBootstrapSystem) injectSystems() {
 
 	m.World.AddSystem(m.RenderSystem)
 	m.World.AddSystem(NewUpdateCounterSystem())
+	m.World.AddSystem(NewLoadingScene())
 	m.World.AddSystem(NewMainMenuScene())
 }
 
