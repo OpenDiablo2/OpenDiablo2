@@ -49,6 +49,7 @@ const (
 	ButtonTypeLeftArrow          ButtonType = 29
 	ButtonTypeRightArrow         ButtonType = 30
 	ButtonTypeQuery              ButtonType = 31
+	ButtonTypeSquelchChat        ButtonType = 32
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -61,16 +62,16 @@ const (
 )
 
 const (
-	buyButtonBaseFrame        = 2  // base frame offset of the "buy" button dc6
-	sellButtonBaseFrame       = 4  // base frame offset of the "sell" button dc6
-	repairButtonBaseFrame     = 6  // base frame offset of the "repair" button dc6
-	queryButtonBaseFrame      = 8  // base frame offset of the "query" button dc6
-	closeButtonBaseFrame      = 10 // base frame offset of the "close" button dc6
-	leftArrowButtonBaseFrame  = 12 // base frame offset of the "leftArrow" button dc6
-	rightArrowButtonBaseFrame = 14 // base frame offset of the "rightArrow" button dc6
-	okButtonBaseFrame         = 16 // base frame offset of the "ok" button dc6
-	repairAllButtonBaseFrame  = 18 // base frame offset of the "repair all" button dc6
-	// ?AllButtonBaseFrame  = 20 // base frame offset of the "?" button dc6
+	buyButtonBaseFrame         = 2  // base frame offset of the "buy" button dc6
+	sellButtonBaseFrame        = 4  // base frame offset of the "sell" button dc6
+	repairButtonBaseFrame      = 6  // base frame offset of the "repair" button dc6
+	queryButtonBaseFrame       = 8  // base frame offset of the "query" button dc6
+	closeButtonBaseFrame       = 10 // base frame offset of the "close" button dc6
+	leftArrowButtonBaseFrame   = 12 // base frame offset of the "leftArrow" button dc6
+	rightArrowButtonBaseFrame  = 14 // base frame offset of the "rightArrow" button dc6
+	okButtonBaseFrame          = 16 // base frame offset of the "ok" button dc6
+	repairAllButtonBaseFrame   = 18 // base frame offset of the "repair all" button dc6
+	squelchChatButtonBaseFrame = 20 // base frame offset of the "?" button dc6
 )
 
 const (
@@ -113,6 +114,7 @@ const (
 	buttonTooltipLeftArrow
 	buttonTooltipRightArrow
 	buttonTooltipQuery
+	buttonTooltipSquelchChat
 )
 
 const (
@@ -472,6 +474,25 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			TooltipXOffset:   buttonBuySellTooltipXOffset,
 			TooltipYOffset:   buttonBuySellTooltipYOffset,
 		},
+		ButtonTypeSquelchChat: {
+			XSegments:        buttonBuySellSegmentsX,
+			YSegments:        buttonBuySellSegmentsY,
+			DisabledFrame:    buttonBuySellDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.BuySellButton,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			BaseFrame:        squelchChatButtonBaseFrame,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+			Tooltip:          buttonTooltipSquelchChat,
+			TooltipXOffset:   buttonBuySellTooltipXOffset,
+			TooltipYOffset:   buttonBuySellTooltipYOffset,
+		},
 		ButtonTypeSkillTreeTab: {
 			XSegments:        buttonSkillTreeTabXSegments,
 			YSegments:        buttonSkillTreeTabYSegments,
@@ -761,6 +782,9 @@ func (v *Button) createTooltip() {
 	case buttonTooltipQuery:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
 		t.SetText(v.manager.asset.TranslateString("")) // need to be set up
+	case buttonTooltipSquelchChat:
+		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		t.SetText(v.manager.asset.TranslateString("strParty19")) // need to be verivied
 	}
 
 	t.SetVisible(false)
