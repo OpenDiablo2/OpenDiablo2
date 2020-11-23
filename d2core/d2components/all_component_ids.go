@@ -36,4 +36,5 @@ const (
 	SizeCID
 	AnimationCID
 	ScaleCID
+	SegmentedSpriteCID
 )

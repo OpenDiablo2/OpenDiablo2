@@ -41,16 +41,16 @@ func (s *MainMenuScene) boot() {
 		return
 	}
 
-	s.createBackground()
-	s.createButtons()
 	s.createTrademarkScreen()
+	s.createButtons()
+	s.createBackground()
 
 	s.booted = true
 }
 
 func (s *MainMenuScene) createBackground() {
 	s.Info("creating background")
-	s.Add.Sprite(0, 0, d2resource.GameSelectScreen, d2resource.PaletteSky)
+	s.Add.SegmentedSprite(0, 0, d2resource.GameSelectScreen, d2resource.PaletteSky, 4, 3, 0)
 }
 
 func (s *MainMenuScene) createButtons() {
@@ -59,7 +59,7 @@ func (s *MainMenuScene) createButtons() {
 
 func (s *MainMenuScene) createTrademarkScreen() {
 	s.Info("creating trademark screen")
-	s.Add.Sprite(0, 0, d2resource.TrademarkScreen, d2resource.PaletteSky)
+	s.Add.SegmentedSprite(0, 0, d2resource.TrademarkScreen, d2resource.PaletteSky, 4, 3, 0)
 }
 
 // Update the main menu scene
