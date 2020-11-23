@@ -49,6 +49,7 @@ const (
 	ButtonTypeLeftArrow          ButtonType = 29
 	ButtonTypeRightArrow         ButtonType = 30
 	ButtonTypeQuary              ButtonType = 31
+	ButtonTypeTest               ButtonType = 32
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -138,6 +139,10 @@ const (
 	buttonTallSegmentsY  = 1
 	buttonTallTextOffset = 5
 
+	buttonCancelSegmentsX  = 1
+	buttonCancelSegmentsY  = 1
+	buttonCancelTextOffset = 1
+
 	buttonOkCancelSegmentsX     = 1
 	buttonOkCancelSegmentsY     = 1
 	buttonOkCancelDisabledFrame = -1
@@ -181,6 +186,21 @@ const (
 // nolint:funlen // cant reduce
 func getButtonLayouts() map[ButtonType]ButtonLayout {
 	return map[ButtonType]ButtonLayout{
+		ButtonTypeTest: {
+			XSegments:        2,
+			YSegments:        2,
+			DisabledFrame:    -1,
+			DisabledColor:    lightGreyAlpha75,
+			TextOffset:       buttonWideTextOffset,
+			ResourceName:     d2resource.NarrowButtonBlank,
+			PaletteName:      d2resource.PaletteUnits,
+			FontPath:         d2resource.FontExocet10,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+		},
 		ButtonTypeWide: {
 			XSegments:        buttonWideSegmentsX,
 			YSegments:        buttonWideSegmentsY,
@@ -188,6 +208,21 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			DisabledColor:    lightGreyAlpha75,
 			TextOffset:       buttonWideTextOffset,
 			ResourceName:     d2resource.WideButtonBlank,
+			PaletteName:      d2resource.PaletteUnits,
+			FontPath:         d2resource.FontExocet10,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+		},
+		ButtonTypeCancel: {
+			XSegments:        buttonCancelSegmentsX,
+			YSegments:        buttonCancelSegmentsY,
+			DisabledFrame:    0,
+			DisabledColor:    lightGreyAlpha75,
+			TextOffset:       buttonCancelTextOffset,
+			ResourceName:     d2resource.CancelButton,
 			PaletteName:      d2resource.PaletteUnits,
 			FontPath:         d2resource.FontExocet10,
 			AllowFrameChange: true,
