@@ -49,7 +49,6 @@ const (
 	ButtonTypeLeftArrow          ButtonType = 29
 	ButtonTypeRightArrow         ButtonType = 30
 	ButtonTypeQuary              ButtonType = 31
-	ButtonTypeTest               ButtonType = 32
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -186,21 +185,6 @@ const (
 // nolint:funlen // cant reduce
 func getButtonLayouts() map[ButtonType]ButtonLayout {
 	return map[ButtonType]ButtonLayout{
-		ButtonTypeTest: {
-			XSegments:        2,
-			YSegments:        2,
-			DisabledFrame:    -1,
-			DisabledColor:    lightGreyAlpha75,
-			TextOffset:       buttonWideTextOffset,
-			ResourceName:     d2resource.NarrowButtonBlank,
-			PaletteName:      d2resource.PaletteUnits,
-			FontPath:         d2resource.FontExocet10,
-			AllowFrameChange: true,
-			HasImage:         true,
-			FixedWidth:       ButtonNoFixedWidth,
-			FixedHeight:      ButtonNoFixedHeight,
-			LabelColor:       greyAlpha100,
-		},
 		ButtonTypeWide: {
 			XSegments:        buttonWideSegmentsX,
 			YSegments:        buttonWideSegmentsY,
