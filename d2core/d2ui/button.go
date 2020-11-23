@@ -48,6 +48,7 @@ const (
 	ButtonTypeRepairAll          ButtonType = 28
 	ButtonTypeLeftArrow          ButtonType = 29
 	ButtonTypeRightArrow         ButtonType = 30
+	ButtonTypeQuary              ButtonType = 31
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -60,15 +61,15 @@ const (
 )
 
 const (
-	// buyButtonBaseFrame        = 2  // base frame offset of the "buy" button dc6
-	// sellButtonBaseFrame       = 4  // base frame offset of the "sell" button dc6
-	// repairButtonBaseFrame     = 6  // base frame offset of the "repair" button dc6
-	// quaryButtonBaseFrame      = 8  // base frame offset of the "quary" button dc6
-	closeButtonBaseFrame = 10 // base frame offset of the "close" button dc6
-	// leftArrowButtonBaseFrame  = 12 // base frame offset of the "leftArrow" button dc6
-	// rightArrowButtonBaseFrame = 14 // base frame offset of the "rightArrow" button dc6
-	okButtonBaseFrame = 16 // base frame offset of the "ok" button dc6
-	// repairAllButtonBaseFrame = 18 // base frame offset of the "repair all" button dc6
+	buyButtonBaseFrame        = 2  // base frame offset of the "buy" button dc6
+	sellButtonBaseFrame       = 4  // base frame offset of the "sell" button dc6
+	repairButtonBaseFrame     = 6  // base frame offset of the "repair" button dc6
+	quaryButtonBaseFrame      = 8  // base frame offset of the "quary" button dc6
+	closeButtonBaseFrame      = 10 // base frame offset of the "close" button dc6
+	leftArrowButtonBaseFrame  = 12 // base frame offset of the "leftArrow" button dc6
+	rightArrowButtonBaseFrame = 14 // base frame offset of the "rightArrow" button dc6
+	okButtonBaseFrame         = 16 // base frame offset of the "ok" button dc6
+	repairAllButtonBaseFrame  = 18 // base frame offset of the "repair all" button dc6
 	// ?AllButtonBaseFrame  = 20 // base frame offset of the "?" button dc6
 )
 
@@ -105,11 +106,18 @@ const (
 	buttonTooltipNone int = iota
 	buttonTooltipClose
 	buttonTooltipOk
+	buttonTooltipBuy
+	buttonTooltipSell
+	buttonTooltipRepair
+	buttonTooltipRepairAll
+	buttonTooltipLeftArrow
+	buttonTooltipRightArrow
+	buttonTooltipQuary
 )
 
 const (
-	buttonCloseTooltipXOffset = 15
-	buttonCloseTooltipYOffset = -2
+	buttonBuySellTooltipXOffset = 15
+	buttonBuySellTooltipYOffset = -2
 )
 
 const (
@@ -290,8 +298,8 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			FixedHeight:      ButtonNoFixedHeight,
 			LabelColor:       greyAlpha100,
 			Tooltip:          buttonTooltipClose,
-			TooltipXOffset:   buttonCloseTooltipXOffset,
-			TooltipYOffset:   buttonCloseTooltipYOffset,
+			TooltipXOffset:   buttonBuySellTooltipXOffset,
+			TooltipYOffset:   buttonBuySellTooltipYOffset,
 		},
 		ButtonTypeSquareOk: {
 			XSegments:        buttonBuySellSegmentsX,
@@ -309,8 +317,141 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			FixedHeight:      ButtonNoFixedHeight,
 			LabelColor:       greyAlpha100,
 			Tooltip:          buttonTooltipOk,
-			TooltipXOffset:   buttonCloseTooltipXOffset,
-			TooltipYOffset:   buttonCloseTooltipYOffset,
+			TooltipXOffset:   buttonBuySellTooltipXOffset,
+			TooltipYOffset:   buttonBuySellTooltipYOffset,
+		},
+		ButtonTypeBuy: {
+			XSegments:        buttonBuySellSegmentsX,
+			YSegments:        buttonBuySellSegmentsY,
+			DisabledFrame:    buttonBuySellDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.BuySellButton,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			BaseFrame:        buyButtonBaseFrame,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+			Tooltip:          buttonTooltipBuy,
+			TooltipXOffset:   buttonBuySellTooltipXOffset,
+			TooltipYOffset:   buttonBuySellTooltipYOffset,
+		},
+		ButtonTypeSell: {
+			XSegments:        buttonBuySellSegmentsX,
+			YSegments:        buttonBuySellSegmentsY,
+			DisabledFrame:    buttonBuySellDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.BuySellButton,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			BaseFrame:        sellButtonBaseFrame,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+			Tooltip:          buttonTooltipSell,
+			TooltipXOffset:   buttonBuySellTooltipXOffset,
+			TooltipYOffset:   buttonBuySellTooltipYOffset,
+		},
+		ButtonTypeRepair: {
+			XSegments:        buttonBuySellSegmentsX,
+			YSegments:        buttonBuySellSegmentsY,
+			DisabledFrame:    buttonBuySellDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.BuySellButton,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			BaseFrame:        repairButtonBaseFrame,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+			Tooltip:          buttonTooltipRepair,
+			TooltipXOffset:   buttonBuySellTooltipXOffset,
+			TooltipYOffset:   buttonBuySellTooltipYOffset,
+		},
+		ButtonTypeRepairAll: {
+			XSegments:        buttonBuySellSegmentsX,
+			YSegments:        buttonBuySellSegmentsY,
+			DisabledFrame:    buttonBuySellDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.BuySellButton,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			BaseFrame:        repairAllButtonBaseFrame,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+			Tooltip:          buttonTooltipRepairAll,
+			TooltipXOffset:   buttonBuySellTooltipXOffset,
+			TooltipYOffset:   buttonBuySellTooltipYOffset,
+		},
+		ButtonTypeLeftArrow: {
+			XSegments:        buttonBuySellSegmentsX,
+			YSegments:        buttonBuySellSegmentsY,
+			DisabledFrame:    buttonBuySellDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.BuySellButton,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			BaseFrame:        leftArrowButtonBaseFrame,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+			Tooltip:          buttonTooltipLeftArrow,
+			TooltipXOffset:   buttonBuySellTooltipXOffset,
+			TooltipYOffset:   buttonBuySellTooltipYOffset,
+		},
+		ButtonTypeRightArrow: {
+			XSegments:        buttonBuySellSegmentsX,
+			YSegments:        buttonBuySellSegmentsY,
+			DisabledFrame:    buttonBuySellDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.BuySellButton,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			BaseFrame:        rightArrowButtonBaseFrame,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+			Tooltip:          buttonTooltipRightArrow,
+			TooltipXOffset:   buttonBuySellTooltipXOffset,
+			TooltipYOffset:   buttonBuySellTooltipYOffset,
+		},
+		ButtonTypeQuary: {
+			XSegments:        buttonBuySellSegmentsX,
+			YSegments:        buttonBuySellSegmentsY,
+			DisabledFrame:    buttonBuySellDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.BuySellButton,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			BaseFrame:        quaryButtonBaseFrame,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+			Tooltip:          buttonTooltipQuary,
+			TooltipXOffset:   buttonBuySellTooltipXOffset,
+			TooltipYOffset:   buttonBuySellTooltipYOffset,
 		},
 		ButtonTypeSkillTreeTab: {
 			XSegments:        buttonSkillTreeTabXSegments,
@@ -569,7 +710,8 @@ type buttonStateDescriptor struct {
 
 func (v *Button) createTooltip() {
 	var t *Tooltip
-
+	// this is also related with https://github.com/OpenDiablo2/OpenDiablo2/issues/944
+	// all strings starting with "#" could be wrong translated to another locales
 	switch v.buttonLayout.Tooltip {
 	case buttonTooltipNone:
 		return
@@ -579,6 +721,27 @@ func (v *Button) createTooltip() {
 	case buttonTooltipOk:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
 		t.SetText(v.manager.asset.TranslateString("#971"))
+	case buttonTooltipBuy:
+		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		t.SetText(v.manager.asset.TranslateString("NPCPurchaseItems"))
+	case buttonTooltipSell:
+		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		t.SetText(v.manager.asset.TranslateString("NPCSellItems"))
+	case buttonTooltipRepair:
+		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		t.SetText(v.manager.asset.TranslateString("NPCRepairItems"))
+	case buttonTooltipRepairAll:
+		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		t.SetText(v.manager.asset.TranslateString("#128"))
+	case buttonTooltipLeftArrow:
+		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		t.SetText(v.manager.asset.TranslateString("KeyLeft"))
+	case buttonTooltipRightArrow:
+		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		t.SetText(v.manager.asset.TranslateString("KeyRight"))
+	case buttonTooltipQuary:
+		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
+		t.SetText(v.manager.asset.TranslateString("")) // need to be set up
 	}
 
 	t.SetVisible(false)
