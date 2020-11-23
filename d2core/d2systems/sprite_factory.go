@@ -64,7 +64,7 @@ type SpriteFactory struct {
 }
 
 // Init the sprite factory, injecting the necessary components
-func (t *SpriteFactory) Init(world *akara.World) {
+func (t *SpriteFactory) Init(_ *akara.World) {
 	t.Info("initializing sprite factory ...")
 
 	t.loadQueue = make(spriteLoadQueue)

@@ -2,6 +2,7 @@ package d2systems
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
@@ -100,6 +101,8 @@ func (m *RenderSystem) Update() {
 	if err != nil {
 		m.Fatal(err.Error())
 	}
+
+	os.Exit(0)
 }
 
 func (m *RenderSystem) createRenderer() {

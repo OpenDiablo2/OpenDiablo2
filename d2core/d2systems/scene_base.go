@@ -1,13 +1,14 @@
 package d2systems
 
 import (
+	"fmt"
+	"image/color"
 	"path/filepath"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 
 	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
@@ -51,17 +52,19 @@ type BaseScene struct {
 	booted      bool
 	paused      bool
 	systems     *baseSystems
-	Add         *sceneObjectAssigner
+	Add         *sceneObjectFactory
 	Viewports   []akara.EID
 	GameObjects []akara.EID
-	*d2components.MainViewportMap
 	*d2components.ViewportMap
+	*d2components.MainViewportMap
 	*d2components.ViewportFilterMap
 	*d2components.CameraMap
 	*d2components.RenderableMap
 	*d2components.PositionMap
 	*d2components.ScaleMap
 	*d2components.AnimationMap
+	*d2components.OriginMap
+	*d2components.AlphaMap
 }
 
 // Booted returns whether or not the scene has booted
@@ -88,7 +91,12 @@ func (s *BaseScene) boot() {
 
 	s.injectComponentMaps()
 
-	s.Add = &sceneObjectAssigner{BaseScene: s}
+	s.Add = &sceneObjectFactory{
+		BaseScene: s,
+		Logger:    d2util.NewLogger(),
+	}
+
+	s.Add.SetPrefix(fmt.Sprintf("%s -> %s", s.key, "Object Factory"))
 
 	for idx := range s.Systems {
 		if rendersys, ok := s.Systems[idx].(*RenderSystem); ok {
@@ -134,6 +142,8 @@ func (s *BaseScene) injectComponentMaps() {
 	s.PositionMap = s.World.InjectMap(d2components.Position).(*d2components.PositionMap)
 	s.ScaleMap = s.World.InjectMap(d2components.Scale).(*d2components.ScaleMap)
 	s.AnimationMap = s.World.InjectMap(d2components.Animation).(*d2components.AnimationMap)
+	s.OriginMap = s.World.InjectMap(d2components.Origin).(*d2components.OriginMap)
+	s.AlphaMap = s.World.InjectMap(d2components.Alpha).(*d2components.AlphaMap)
 }
 
 func (s *BaseScene) createDefaultViewport() {
@@ -146,7 +156,11 @@ func (s *BaseScene) createDefaultViewport() {
 	camera.Height = 600
 	camera.Zoom = 1
 
-	s.AddRenderable(viewportID).Surface = s.systems.renderer.NewSurface(camera.Width, camera.Height)
+	sfc := s.systems.renderer.NewSurface(camera.Width, camera.Height)
+
+	sfc.Clear(color.Transparent)
+
+	s.AddRenderable(viewportID).Surface = sfc
 	s.AddMainViewport(viewportID)
 
 	s.Viewports = append(s.Viewports, viewportID)
@@ -319,24 +333,36 @@ func (s *BaseScene) renderObject(target d2interface.Surface, id akara.EID) {
 }
 
 // responsible for wrapping the object factory calls and assigning the created object entity id's to the scene
-type sceneObjectAssigner struct {
+type sceneObjectFactory struct {
 	*BaseScene
+	*d2util.Logger
 }
 
-func (s *sceneObjectAssigner) Sprite(x, y float64, imgPath, palPath string) akara.EID {
+func (s *sceneObjectFactory) addBasicComponenets(id akara.EID) {
+	_ = s.AddScale(id)
+	_ = s.AddOrigin(id)
+	_ = s.AddPosition(id)
+	_ = s.AddAlpha(id)
+}
+
+func (s *sceneObjectFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID {
 	s.Infof("creating sprite: %s, %s", filepath.Base(imgPath), palPath)
 
 	eid := s.systems.SpriteFactory.Sprite(x, y, imgPath, palPath)
 	s.GameObjects = append(s.GameObjects, eid)
 
+	s.addBasicComponenets(eid)
+
 	return eid
 }
 
-func (s *sceneObjectAssigner) SegmentedSprite(x, y float64, imgPath, palPath string, xseg, yseg, frame int) akara.EID {
+func (s *sceneObjectFactory) SegmentedSprite(x, y float64, imgPath, palPath string, xseg, yseg, frame int) akara.EID {
 	s.Infof("creating segmented sprite: %s, %s", filepath.Base(imgPath), palPath)
 
 	eid := s.systems.SpriteFactory.SegmentedSprite(x, y, imgPath, palPath, xseg, yseg, frame)
 	s.GameObjects = append(s.GameObjects, eid)
+
+	s.addBasicComponenets(eid)
 
 	return eid
 }
