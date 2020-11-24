@@ -102,44 +102,35 @@ func (v *Cinematics) OnLoad(_ d2screen.LoadingState) {
 }
 
 func (v *Cinematics) createButtons() {
-	/*CINEMATICS NAMES:
-	Act 1: The Sister's Lament
-	Act 2: Dessert Journay
-	Act 3: Mephisto's Jungle
-	Act 4: Enter Hell
-	Act 5: Search For Ball
-	end Credit Classic: Terror's End
-	end Credit Expansion: Destruction's End
-	*/
-	v.cinematicsExitBtn = v.uiManager.NewButton(d2ui.ButtonTypeMedium, "CANCEL")
+	v.cinematicsExitBtn = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateString("cancel"))
 	v.cinematicsExitBtn.SetPosition(cinematicsExitBtnX, cinematicsExitBtnY)
 	v.cinematicsExitBtn.OnActivated(func() { v.onCinematicsExitBtnClicked() })
 
-	v.a1Btn = v.uiManager.NewButton(d2ui.ButtonTypeWide, "THE SISTER'S LAMENT")
+	v.a1Btn = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateString("act1X"))
 	v.a1Btn.SetPosition(a1BtnX, a1BtnY)
 	v.a1Btn.OnActivated(func() { v.onA1BtnClicked() })
 
-	v.a2Btn = v.uiManager.NewButton(d2ui.ButtonTypeWide, "DESSERT JOURNAY")
+	v.a2Btn = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateString("act2X"))
 	v.a2Btn.SetPosition(a2BtnX, a2BtnY)
 	v.a2Btn.OnActivated(func() { v.onA2BtnClicked() })
 
-	v.a3Btn = v.uiManager.NewButton(d2ui.ButtonTypeWide, "MEPHISTO'S JUNGLE")
+	v.a3Btn = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateString("act3X"))
 	v.a3Btn.SetPosition(a3BtnX, a3BtnY)
 	v.a3Btn.OnActivated(func() { v.onA3BtnClicked() })
 
-	v.a4Btn = v.uiManager.NewButton(d2ui.ButtonTypeWide, "ENTER HELL")
+	v.a4Btn = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateString("act4X"))
 	v.a4Btn.SetPosition(a4BtnX, a4BtnY)
 	v.a4Btn.OnActivated(func() { v.onA4BtnClicked() })
 
-	v.endCreditClassBtn = v.uiManager.NewButton(d2ui.ButtonTypeWide, "TERROR'S END")
+	v.endCreditClassBtn = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateString("strepilogueX"))
 	v.endCreditClassBtn.SetPosition(endCreditClassBtnX, endCreditClassBtnY)
 	v.endCreditClassBtn.OnActivated(func() { v.onEndCreditClassBtnClicked() })
 
-	v.a5Btn = v.uiManager.NewButton(d2ui.ButtonTypeWide, "SEARCH FOR BAAL")
+	v.a5Btn = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateString("act5X"))
 	v.a5Btn.SetPosition(a5BtnX, a5BtnY)
 	v.a5Btn.OnActivated(func() { v.onA5BtnClicked() })
 
-	v.endCreditExpBtn = v.uiManager.NewButton(d2ui.ButtonTypeWide, "DESTRUCTION'S END")
+	v.endCreditExpBtn = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateString("strlastcinematic"))
 	v.endCreditExpBtn.SetPosition(endCreditExpBtnX, endCreditExpBtnY)
 	v.endCreditExpBtn.OnActivated(func() { v.onEndCreditExpBtnClicked() })
 }
