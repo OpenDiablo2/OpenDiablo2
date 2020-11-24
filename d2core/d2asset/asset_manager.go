@@ -291,6 +291,30 @@ func (am *AssetManager) TranslateString(key string) string {
 	return key
 }
 
+func (am *AssetManager) TranslateHeroClass(h d2enum.Hero) string {
+	switch h {
+	case 1:
+		return am.TranslateString("Barbarian")
+	case 2:
+		return am.TranslateString("Necromancer")
+	case 3:
+		return am.TranslateString("Paladin")
+	case 4:
+		return am.TranslateString("Assassin")
+	case 5:
+		return am.TranslateString("Sorceress")
+	case 6:
+		return am.TranslateString("Amazon")
+	case 7:
+		return am.TranslateString("Druid")
+	default:
+		am.Error("Unknown Hero Class")
+	}
+
+	// should not be reached
+	return "---"
+}
+
 // LoadPaletteTransform loads a palette transform file
 func (am *AssetManager) LoadPaletteTransform(path string) (*d2pl2.PL2, error) {
 	if pl2, found := am.transforms.Retrieve(path); found {

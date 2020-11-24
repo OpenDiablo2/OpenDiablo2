@@ -333,7 +333,7 @@ func (v *CharacterSelect) onScrollUpdate() {
 }
 
 func (v *CharacterSelect) updateCharacterBoxes() {
-	expText := "EXPANSION CHARACTER"
+	expText := v.asset.TranslateString("#803")
 
 	for i := 0; i < 8; i++ {
 		idx := i + (v.charScrollbar.GetCurrentOffset() * 2)
@@ -348,7 +348,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 		}
 
 		heroName := v.gameStates[idx].HeroName
-		heroInfo := "Level " + strconv.FormatInt(int64(v.gameStates[idx].Stats.Level), 10) + " " + v.gameStates[idx].HeroType.String()
+		heroInfo := v.asset.TranslateString("level") + " " + strconv.FormatInt(int64(v.gameStates[idx].Stats.Level), 10) + " " + v.asset.TranslateHeroClass(v.gameStates[idx].HeroType)
 
 		v.characterNameLabel[i].SetText(d2ui.ColorTokenize(heroName, d2ui.ColorTokenGold))
 		v.characterStatsLabel[i].SetText(d2ui.ColorTokenize(heroInfo, d2ui.ColorTokenWhite))

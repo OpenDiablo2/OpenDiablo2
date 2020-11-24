@@ -27,14 +27,14 @@ const (
 	labelLevelX, labelLevelY = 110, 100
 
 	labelHeroNameX, labelHeroNameY   = 165, 72
-	labelHeroClassX, labelHeroClassY = 330, 72
+	labelHeroClassX, labelHeroClassY = 330, 74
 
 	labelExperienceX, labelExperienceY = 200, 100
 	labelNextLevelX, labelNextLevelY   = 330, 100
 
 	labelStrengthX, labelStrengthY   = 100, 150
 	labelDexterityX, labelDexterityY = 100, 213
-	labelVitalityX, labelVitalityY   = 100, 300
+	labelVitalityX, labelVitalityY   = 95, 300
 	labelEnergyX, labelEnergyY       = 100, 360
 
 	labelDefenseX, labelDefenseY = 280, 260
@@ -249,19 +249,19 @@ func (s *HeroStatsPanel) renderStaticLabels(target d2interface.Surface) {
 		centerAlign bool
 	}{
 		{labelHeroNameX, labelHeroNameY, s.heroName, d2resource.Font16, true},
-		{labelHeroClassX, labelHeroClassY, s.heroClass.String(), d2resource.Font16, true},
+		{labelHeroClassX, labelHeroClassY, s.asset.TranslateHeroClass(s.heroClass), d2resource.Font16, true},
 
-		{labelLevelX, labelLevelY, "Level", d2resource.Font6, true},
-		{labelExperienceX, labelExperienceY, "Experience", d2resource.Font6, true},
-		{labelNextLevelX, labelNextLevelY, "Next Level", d2resource.Font6, true},
-		{labelStrengthX, labelStrengthY, "Strength", d2resource.Font6, false},
-		{labelDexterityX, labelDexterityY, "Dexterity", d2resource.Font6, false},
-		{labelVitalityX, labelVitalityY, "Vitality", d2resource.Font6, false},
-		{labelEnergyX, labelEnergyY, "Energy", d2resource.Font6, false},
-		{labelDefenseX, labelDefenseY, "Defense", d2resource.Font6, false},
-		{labelStaminaX, labelStaminaY, "Stamina", d2resource.Font6, true},
-		{labelLifeX, labelLifeY, "Life", d2resource.Font6, true},
-		{labelManaX, labelManaY, "Mana", d2resource.Font6, true},
+		{labelLevelX, labelLevelY, s.asset.TranslateString("strchrlvl"), d2resource.Font6, true},
+		{labelExperienceX, labelExperienceY, s.asset.TranslateString("strchrexp"), d2resource.Font6, true},
+		{labelNextLevelX, labelNextLevelY, s.asset.TranslateString("strchrnxtlvl"), d2resource.Font6, true},
+		{labelStrengthX, labelStrengthY, s.asset.TranslateString("strchrstr"), d2resource.Font6, false},
+		{labelDexterityX, labelDexterityY, s.asset.TranslateString("strchrdex"), d2resource.Font6, false},
+		{labelVitalityX, labelVitalityY, s.asset.TranslateString("strchrvit"), d2resource.Font6, false},
+		{labelEnergyX, labelEnergyY, s.asset.TranslateString("strchreng"), d2resource.Font6, false},
+		{labelDefenseX, labelDefenseY, s.asset.TranslateString("strchrdef"), d2resource.Font6, false},
+		{labelStaminaX, labelStaminaY, s.asset.TranslateString("strchrstm"), d2resource.Font6, true},
+		{labelLifeX, labelLifeY, s.asset.TranslateString("strchrlif"), d2resource.Font6, true},
+		{labelManaX, labelManaY, s.asset.TranslateString("strchrman"), d2resource.Font6, true},
 
 		// can't use "Fire\nResistance" because line spacing is too big and breaks the layout
 		{labelResFireLine1X, labelResFireLine1Y, "Fire", d2resource.Font6, true},
