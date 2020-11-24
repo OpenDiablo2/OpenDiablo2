@@ -2,6 +2,7 @@ package d2player
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -42,14 +43,14 @@ const (
 	labelLifeX, labelLifeY       = 280, 322
 	labelManaX, labelManaY       = 280, 360
 
-	labelResFireLine1X, labelResFireLine1Y   = 310, 395
-	labelResFireLine2X, labelResFireLine2Y   = 310, 402
-	labelResColdLine1X, labelResColdLine1Y   = 310, 445
+	labelResFireLine1X, labelResFireLine1Y   = 310, 396
+	labelResFireLine2X, labelResFireLine2Y   = 310, 403
+	labelResColdLine1X, labelResColdLine1Y   = 310, 444
 	labelResColdLine2X, labelResColdLine2Y   = 310, 452
 	labelResLightLine1X, labelResLightLine1Y = 310, 420
-	labelResLightLine2X, labelResLightLine2Y = 310, 427
+	labelResLightLine2X, labelResLightLine2Y = 310, 428
 	labelResPoisLine1X, labelResPoisLine1Y   = 310, 468
-	labelResPoisLine2X, labelResPoisLine2Y   = 310, 477
+	labelResPoisLine2X, labelResPoisLine2Y   = 310, 476
 )
 
 const (
@@ -241,6 +242,10 @@ func (s *HeroStatsPanel) renderStaticPanelFrames(target d2interface.Surface) {
 func (s *HeroStatsPanel) renderStaticLabels(target d2interface.Surface) {
 	var label *d2ui.Label
 
+	fr := strings.Split(s.asset.TranslateString("strchrfir"), "\n")
+	lr := strings.Split(s.asset.TranslateString("strchrlit"), "\n")
+	cr := strings.Split(s.asset.TranslateString("strchrcol"), "\n")
+	pr := strings.Split(s.asset.TranslateString("strchrpos"), "\n")
 	// all static labels are not stored since we use them only once to generate the image cache
 	var staticLabelConfigs = []struct {
 		x, y        int
@@ -264,17 +269,17 @@ func (s *HeroStatsPanel) renderStaticLabels(target d2interface.Surface) {
 		{labelManaX, labelManaY, s.asset.TranslateString("strchrman"), d2resource.Font6, true},
 
 		// can't use "Fire\nResistance" because line spacing is too big and breaks the layout
-		{labelResFireLine1X, labelResFireLine1Y, "Fire", d2resource.Font6, true},
-		{labelResFireLine2X, labelResFireLine2Y, "Resistance", d2resource.Font6, true},
+		{labelResFireLine1X, labelResFireLine1Y, fr[0], d2resource.Font6, true},
+		{labelResFireLine2X, labelResFireLine2Y, fr[len(fr)-1], d2resource.Font6, true},
 
-		{labelResColdLine1X, labelResColdLine1Y, "Cold", d2resource.Font6, true},
-		{labelResColdLine2X, labelResColdLine2Y, "Resistance", d2resource.Font6, true},
+		{labelResColdLine1X, labelResColdLine1Y, cr[0], d2resource.Font6, true},
+		{labelResColdLine2X, labelResColdLine2Y, cr[len(cr)-1], d2resource.Font6, true},
 
-		{labelResLightLine1X, labelResLightLine1Y, "Lightning", d2resource.Font6, true},
-		{labelResLightLine2X, labelResLightLine2Y, "Resistance", d2resource.Font6, true},
+		{labelResLightLine1X, labelResLightLine1Y, lr[0], d2resource.Font6, true},
+		{labelResLightLine2X, labelResLightLine2Y, lr[len(lr)-1], d2resource.Font6, true},
 
-		{labelResPoisLine1X, labelResPoisLine1Y, "Poison", d2resource.Font6, true},
-		{labelResPoisLine2X, labelResPoisLine2Y, "Resistance", d2resource.Font6, true},
+		{labelResPoisLine1X, labelResPoisLine1Y, pr[0], d2resource.Font6, true},
+		{labelResPoisLine2X, labelResPoisLine2Y, pr[len(pr)-1], d2resource.Font6, true},
 	}
 
 	for _, cfg := range staticLabelConfigs {
