@@ -135,7 +135,7 @@ func SplitIntoLinesWithMaxWidth(fullSentence string, maxChars int) []string {
 	return lines
 }
 
-// SplitIntoLineWithMaxWidthOneLine do the same as SplitIntoLinesWithMaxWidth but return string with newline char
+// SplitIntoLinesWithMaxWidthOneLine does the same as SplitIntoLinesWithMaxWidth but return string with newline char
 func SplitIntoLinesWithMaxWidthOneLine(s string, l int) string {
 	return strings.Join(SplitIntoLinesWithMaxWidth(s, l), "\n")
 }

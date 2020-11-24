@@ -296,11 +296,13 @@ func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
 	v.newCharButton.SetPosition(newCharBtnX, newCharBtnY)
 	v.newCharButton.OnActivated(func() { v.onNewCharButtonClicked() })
 
-	v.convertCharButton = v.uiManager.NewButton(d2ui.ButtonTypeTall, d2util.SplitIntoLinesWithMaxWidthOneLine(v.asset.TranslateString("#825"), 13))
+	v.convertCharButton = v.uiManager.NewButton(d2ui.ButtonTypeTall,
+		d2util.SplitIntoLinesWithMaxWidthOneLine(v.asset.TranslateString("#825"), 13))
 	v.convertCharButton.SetPosition(convertCharBtnX, convertCharBtnY)
 	v.convertCharButton.SetEnabled(false)
 
-	v.deleteCharButton = v.uiManager.NewButton(d2ui.ButtonTypeTall, d2util.SplitIntoLinesWithMaxWidthOneLine(v.asset.TranslateString("#832"), 13))
+	v.deleteCharButton = v.uiManager.NewButton(d2ui.ButtonTypeTall,
+		d2util.SplitIntoLinesWithMaxWidthOneLine(v.asset.TranslateString("#832"), 13))
 	v.deleteCharButton.OnActivated(func() { v.onDeleteCharButtonClicked() })
 	v.deleteCharButton.SetPosition(deleteCharBtnX, deleteCharBtnY)
 
