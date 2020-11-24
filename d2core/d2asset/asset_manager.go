@@ -291,21 +291,22 @@ func (am *AssetManager) TranslateString(key string) string {
 	return key
 }
 
+// TranslateHeroClass translates her class given to game locale
 func (am *AssetManager) TranslateHeroClass(h d2enum.Hero) string {
 	switch h {
-	case 1:
+	case d2enum.HeroBarbarian:
 		return am.TranslateString("Barbarian")
-	case 2:
+	case d2enum.HeroNecromancer:
 		return am.TranslateString("Necromancer")
-	case 3:
+	case d2enum.HeroPaladin:
 		return am.TranslateString("Paladin")
-	case 4:
+	case d2enum.HeroAssassin:
 		return am.TranslateString("Assassin")
-	case 5:
+	case d2enum.HeroSorceress:
 		return am.TranslateString("Sorceress")
-	case 6:
+	case d2enum.HeroAmazon:
 		return am.TranslateString("Amazon")
-	case 7:
+	case d2enum.HeroDruid:
 		return am.TranslateString("Druid")
 	default:
 		am.Error("Unknown Hero Class")
