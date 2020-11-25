@@ -291,6 +291,31 @@ func (am *AssetManager) TranslateString(key string) string {
 	return key
 }
 
+// TranslateHeroClass translates her class given to game locale
+func (am *AssetManager) TranslateHeroClass(h d2enum.Hero) string {
+	switch h {
+	case d2enum.HeroBarbarian:
+		return am.TranslateString("Barbarian")
+	case d2enum.HeroNecromancer:
+		return am.TranslateString("Necromancer")
+	case d2enum.HeroPaladin:
+		return am.TranslateString("Paladin")
+	case d2enum.HeroAssassin:
+		return am.TranslateString("Assassin")
+	case d2enum.HeroSorceress:
+		return am.TranslateString("Sorceress")
+	case d2enum.HeroAmazon:
+		return am.TranslateString("Amazon")
+	case d2enum.HeroDruid:
+		return am.TranslateString("Druid")
+	default:
+		am.Error("Unknown Hero Class")
+	}
+
+	// should not be reached
+	return "---"
+}
+
 // LoadPaletteTransform loads a palette transform file
 func (am *AssetManager) LoadPaletteTransform(path string) (*d2pl2.PL2, error) {
 	if pl2, found := am.transforms.Retrieve(path); found {

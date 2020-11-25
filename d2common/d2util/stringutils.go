@@ -135,6 +135,11 @@ func SplitIntoLinesWithMaxWidth(fullSentence string, maxChars int) []string {
 	return lines
 }
 
+// SplitIntoLinesWithMaxWidthOneLine does the same as SplitIntoLinesWithMaxWidth but return string with newline char
+func SplitIntoLinesWithMaxWidthOneLine(s string, l int) string {
+	return strings.Join(SplitIntoLinesWithMaxWidth(s, l), "\n")
+}
+
 func splitCjkIntoChunks(str string, chars int) []string {
 	chunks := make([]string, chars/len(str))
 	i, count := 0, 0

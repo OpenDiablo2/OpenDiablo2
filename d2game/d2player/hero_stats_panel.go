@@ -2,6 +2,7 @@ package d2player
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -27,14 +28,14 @@ const (
 	labelLevelX, labelLevelY = 110, 100
 
 	labelHeroNameX, labelHeroNameY   = 165, 72
-	labelHeroClassX, labelHeroClassY = 330, 72
+	labelHeroClassX, labelHeroClassY = 330, 74
 
 	labelExperienceX, labelExperienceY = 200, 100
 	labelNextLevelX, labelNextLevelY   = 330, 100
 
 	labelStrengthX, labelStrengthY   = 100, 150
 	labelDexterityX, labelDexterityY = 100, 213
-	labelVitalityX, labelVitalityY   = 100, 300
+	labelVitalityX, labelVitalityY   = 95, 300
 	labelEnergyX, labelEnergyY       = 100, 360
 
 	labelDefenseX, labelDefenseY = 280, 260
@@ -42,14 +43,14 @@ const (
 	labelLifeX, labelLifeY       = 280, 322
 	labelManaX, labelManaY       = 280, 360
 
-	labelResFireLine1X, labelResFireLine1Y   = 310, 395
-	labelResFireLine2X, labelResFireLine2Y   = 310, 402
-	labelResColdLine1X, labelResColdLine1Y   = 310, 445
+	labelResFireLine1X, labelResFireLine1Y   = 310, 396
+	labelResFireLine2X, labelResFireLine2Y   = 310, 403
+	labelResColdLine1X, labelResColdLine1Y   = 310, 444
 	labelResColdLine2X, labelResColdLine2Y   = 310, 452
 	labelResLightLine1X, labelResLightLine1Y = 310, 420
-	labelResLightLine2X, labelResLightLine2Y = 310, 427
+	labelResLightLine2X, labelResLightLine2Y = 310, 428
 	labelResPoisLine1X, labelResPoisLine1Y   = 310, 468
-	labelResPoisLine2X, labelResPoisLine2Y   = 310, 477
+	labelResPoisLine2X, labelResPoisLine2Y   = 310, 476
 )
 
 const (
@@ -241,6 +242,10 @@ func (s *HeroStatsPanel) renderStaticPanelFrames(target d2interface.Surface) {
 func (s *HeroStatsPanel) renderStaticLabels(target d2interface.Surface) {
 	var label *d2ui.Label
 
+	fr := strings.Split(s.asset.TranslateString("strchrfir"), "\n")
+	lr := strings.Split(s.asset.TranslateString("strchrlit"), "\n")
+	cr := strings.Split(s.asset.TranslateString("strchrcol"), "\n")
+	pr := strings.Split(s.asset.TranslateString("strchrpos"), "\n")
 	// all static labels are not stored since we use them only once to generate the image cache
 	var staticLabelConfigs = []struct {
 		x, y        int
@@ -249,32 +254,32 @@ func (s *HeroStatsPanel) renderStaticLabels(target d2interface.Surface) {
 		centerAlign bool
 	}{
 		{labelHeroNameX, labelHeroNameY, s.heroName, d2resource.Font16, true},
-		{labelHeroClassX, labelHeroClassY, s.heroClass.String(), d2resource.Font16, true},
+		{labelHeroClassX, labelHeroClassY, s.asset.TranslateHeroClass(s.heroClass), d2resource.Font16, true},
 
-		{labelLevelX, labelLevelY, "Level", d2resource.Font6, true},
-		{labelExperienceX, labelExperienceY, "Experience", d2resource.Font6, true},
-		{labelNextLevelX, labelNextLevelY, "Next Level", d2resource.Font6, true},
-		{labelStrengthX, labelStrengthY, "Strength", d2resource.Font6, false},
-		{labelDexterityX, labelDexterityY, "Dexterity", d2resource.Font6, false},
-		{labelVitalityX, labelVitalityY, "Vitality", d2resource.Font6, false},
-		{labelEnergyX, labelEnergyY, "Energy", d2resource.Font6, false},
-		{labelDefenseX, labelDefenseY, "Defense", d2resource.Font6, false},
-		{labelStaminaX, labelStaminaY, "Stamina", d2resource.Font6, true},
-		{labelLifeX, labelLifeY, "Life", d2resource.Font6, true},
-		{labelManaX, labelManaY, "Mana", d2resource.Font6, true},
+		{labelLevelX, labelLevelY, s.asset.TranslateString("strchrlvl"), d2resource.Font6, true},
+		{labelExperienceX, labelExperienceY, s.asset.TranslateString("strchrexp"), d2resource.Font6, true},
+		{labelNextLevelX, labelNextLevelY, s.asset.TranslateString("strchrnxtlvl"), d2resource.Font6, true},
+		{labelStrengthX, labelStrengthY, s.asset.TranslateString("strchrstr"), d2resource.Font6, false},
+		{labelDexterityX, labelDexterityY, s.asset.TranslateString("strchrdex"), d2resource.Font6, false},
+		{labelVitalityX, labelVitalityY, s.asset.TranslateString("strchrvit"), d2resource.Font6, false},
+		{labelEnergyX, labelEnergyY, s.asset.TranslateString("strchreng"), d2resource.Font6, false},
+		{labelDefenseX, labelDefenseY, s.asset.TranslateString("strchrdef"), d2resource.Font6, false},
+		{labelStaminaX, labelStaminaY, s.asset.TranslateString("strchrstm"), d2resource.Font6, true},
+		{labelLifeX, labelLifeY, s.asset.TranslateString("strchrlif"), d2resource.Font6, true},
+		{labelManaX, labelManaY, s.asset.TranslateString("strchrman"), d2resource.Font6, true},
 
 		// can't use "Fire\nResistance" because line spacing is too big and breaks the layout
-		{labelResFireLine1X, labelResFireLine1Y, "Fire", d2resource.Font6, true},
-		{labelResFireLine2X, labelResFireLine2Y, "Resistance", d2resource.Font6, true},
+		{labelResFireLine1X, labelResFireLine1Y, fr[0], d2resource.Font6, true},
+		{labelResFireLine2X, labelResFireLine2Y, fr[len(fr)-1], d2resource.Font6, true},
 
-		{labelResColdLine1X, labelResColdLine1Y, "Cold", d2resource.Font6, true},
-		{labelResColdLine2X, labelResColdLine2Y, "Resistance", d2resource.Font6, true},
+		{labelResColdLine1X, labelResColdLine1Y, cr[0], d2resource.Font6, true},
+		{labelResColdLine2X, labelResColdLine2Y, cr[len(cr)-1], d2resource.Font6, true},
 
-		{labelResLightLine1X, labelResLightLine1Y, "Lightning", d2resource.Font6, true},
-		{labelResLightLine2X, labelResLightLine2Y, "Resistance", d2resource.Font6, true},
+		{labelResLightLine1X, labelResLightLine1Y, lr[0], d2resource.Font6, true},
+		{labelResLightLine2X, labelResLightLine2Y, lr[len(lr)-1], d2resource.Font6, true},
 
-		{labelResPoisLine1X, labelResPoisLine1Y, "Poison", d2resource.Font6, true},
-		{labelResPoisLine2X, labelResPoisLine2Y, "Resistance", d2resource.Font6, true},
+		{labelResPoisLine1X, labelResPoisLine1Y, pr[0], d2resource.Font6, true},
+		{labelResPoisLine2X, labelResPoisLine2Y, pr[len(pr)-1], d2resource.Font6, true},
 	}
 
 	for _, cfg := range staticLabelConfigs {
