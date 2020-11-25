@@ -49,3 +49,28 @@ func GetFontCharset(language string) string {
 
 	return charset[language]
 }
+
+// modificators for labels (used in string tables
+func getModificators() map[string]int {
+	return map[string]int{
+		"ENG": 0, // (English) // checked
+		"ESP": 0, // (Spanish)
+		"DEU": 0, // (German) // checked
+		"FRA": 0, // (French)
+		"POR": 0, // (Portuguese)
+		"ITA": 0, // (Italian)
+		"JPN": 0, // (Japanese)
+		"KOR": 0, // (Korean)
+		"SIN": 0, //
+		"CHI": 0, // (Chinese)
+		"POL": 1, // (Polish) // checked
+		"RUS": 0, // (Russian) // checked
+	}
+}
+
+// GetFontCharset returns modificator for language
+func GetLabelModificator(language string) int {
+	mod := getModificators()
+
+	return mod[language]
+}

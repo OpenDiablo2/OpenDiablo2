@@ -83,6 +83,33 @@ type BuildInfo struct {
 	Branch, Commit string
 }
 
+const (
+	singlePlayerLabel = iota
+	battleNetLabel
+	otherMultiplayerLabel
+	exitLabel
+	creditsLabel
+	cinematicsLabel
+	viewAllCinematicsLabel // (View All Earned Cinematics)
+	epilogueLabel
+	selectCinematics
+)
+
+func baseLabelNumbers(idx int) int {
+	baseLabelNumbers := []int{
+		1620, // SINGLE PLAYER
+		1621, // BATTLE.NET
+		1623, // OTHER MULTIPLAYER
+		1625, // EXIT DIABLO II
+		1627, // CREDITS
+		1639, // CINEMATICS
+		1640, // View All Earned Cinematics
+		1659, // Epilogue
+		1660, // SELECT CINEMATICS
+	}
+	return baseLabelNumbers[idx]
+}
+
 // CreateMainMenu creates an instance of MainMenu
 func CreateMainMenu(
 	navigator d2interface.Navigator,
@@ -92,6 +119,7 @@ func CreateMainMenu(
 	audioProvider d2interface.AudioProvider,
 	ui *d2ui.UIManager,
 	buildInfo BuildInfo,
+	lng string,
 	l d2util.LogLevel,
 	errorMessageOptional ...string,
 ) (*MainMenu, error) {
@@ -111,6 +139,7 @@ func CreateMainMenu(
 		buildInfo:      buildInfo,
 		uiManager:      ui,
 		heroState:      heroStateFactory,
+		language:       lng,
 	}
 
 	mainMenu.Logger = d2util.NewLogger()
@@ -174,6 +203,8 @@ type MainMenu struct {
 	buildInfo BuildInfo
 
 	*d2util.Logger
+
+	language string
 }
 
 // OnLoad is called to load the resources for the main menu
@@ -328,21 +359,25 @@ func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
 	v.diabloLogoRightBack.SetPosition(diabloLogoX, diabloLogoY)
 }
 
+func (v *MainMenu) translateLabel(label int, lng string) string {
+	return v.asset.TranslateString(fmt.Sprintf("#%d", baseLabelNumbers(label+d2resource.GetLabelModificator(lng))))
+}
+
 func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
-	v.exitDiabloButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, "EXIT DIABLO II")
+	v.exitDiabloButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.translateLabel(exitLabel, v.language))
 	v.exitDiabloButton.SetPosition(exitDiabloBtnX, exitDiabloBtnY)
 	v.exitDiabloButton.OnActivated(func() { v.onExitButtonClicked() })
 
-	v.creditsButton = v.uiManager.NewButton(d2ui.ButtonTypeShort, "CREDITS")
+	v.creditsButton = v.uiManager.NewButton(d2ui.ButtonTypeShort, v.translateLabel(creditsLabel, v.language))
 	v.creditsButton.SetPosition(creditBtnX, creditBtnY)
 	v.creditsButton.OnActivated(func() { v.onCreditsButtonClicked() })
 
-	v.cinematicsButton = v.uiManager.NewButton(d2ui.ButtonTypeShort, "CINEMATICS")
+	v.cinematicsButton = v.uiManager.NewButton(d2ui.ButtonTypeShort, v.translateLabel(cinematicsLabel, v.language))
 	v.cinematicsButton.SetPosition(cineBtnX, cineBtnY)
 	v.cinematicsButton.OnActivated(func() { v.onCinematicsButtonClicked() })
 	loading.Progress(seventyPercent)
 
-	v.singlePlayerButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, "SINGLE PLAYER")
+	v.singlePlayerButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.translateLabel(singlePlayerLabel, v.language))
 	v.singlePlayerButton.SetPosition(singlePlayerBtnX, singlePlayerBtnY)
 	v.singlePlayerButton.OnActivated(func() { v.onSinglePlayerClicked() })
 
@@ -372,7 +407,8 @@ func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
 }
 
 func (v *MainMenu) createMultiplayerMenuButtons() {
-	v.multiplayerButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, "MULTIPLAYER")
+	v.multiplayerButton = v.uiManager.NewButton(d2ui.ButtonTypeWide,
+		v.translateLabel(otherMultiplayerLabel, v.language))
 	v.multiplayerButton.SetPosition(multiplayerBtnX, multiplayerBtnY)
 	v.multiplayerButton.OnActivated(func() { v.onMultiplayerClicked() })
 
