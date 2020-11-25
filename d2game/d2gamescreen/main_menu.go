@@ -84,15 +84,23 @@ type BuildInfo struct {
 }
 
 const (
-	singlePlayerLabel = iota
+	// main menu labels
+	cancelLabel = iota
+	copyrightLabel
+	allRightsReservedLabel
+	singlePlayerLabel
 	battleNetLabel
 	otherMultiplayerLabel
 	exitLabel
 	creditsLabel
 	cinematicsLabel
-	viewAllCinematicsLabel // (View All Earned Cinematics)
+
+	// cinematics menu labels
+	viewAllCinematicsLabel
 	epilogueLabel
-	selectCinematics
+	selectCinematicLabel
+
+	// multiplayer menu labels
 	openBattleNetLaBEL
 	tcpIpGameLabel
 	tcpIpOptionsLabel
@@ -100,19 +108,55 @@ const (
 	tcpIpJoinGameLabel
 	tcpIpEnterHostIpLabel
 	tcpIpYourIpLabel
+	tipHostLabel
+	tipJoinLabel
+	ipNotFoundLabel
+
+	// select hero class menu labels
+	charNameLabel
+	hardCoreLabel
+	selectHeroClassLabel
+	amazonDescr
+	necromancerDescr
+	barbarianDescr
+	sorceressDescr
+	paladinDescr
+
+	notUsed1 // this position isn't used here.
+
+	hellLabel
+	nightmareLabel
+	normalLabel
+	selectDifficultyLabel
+
+	notUsed2
+
+	delCharConfLabel
+	openLabel
+	notUsed3
+	yesLabel
+	noLabel
 )
 
 func baseLabelNumbers(idx int) int {
 	baseLabelNumbers := []int{
+		// main menu labels
+		1612, // CANCEL
+		1613, // (c) 2000 Blizzard Entertainment
+		1614, // All Rights Reserved.
 		1620, // SINGLE PLAYER
 		1621, // BATTLE.NET
 		1623, // OTHER MULTIPLAYER
 		1625, // EXIT DIABLO II
 		1627, // CREDITS
 		1639, // CINEMATICS
+
+		// cinematics menu labels
 		1640, // View All Earned Cinematics
 		1659, // Epilogue
 		1660, // SELECT CINEMATICS
+
+		// multiplayer labels
 		1663, // OPEN BATTLE.NET
 		1666, // TCP/IP GAME
 		1667, // TCP/IP Options
@@ -122,6 +166,39 @@ func baseLabelNumbers(idx int) int {
 		1680, // Your IP Address is:
 		1689, // Tip: host game
 		1690, // Tip: join game
+		1691, // Cannot detect a valid TCP/IP address.
+		1694, // Character Name
+		1696, // Hardcore
+		1697, // Select Hero Class
+
+		1698, // amazon description
+		1704, // nec description
+		1709, // barb description
+		1710, // sorc description
+		1711, // pal description
+
+		/* these items are for battle.net multiplayer
+		labels and are not used yet
+		in addition, as many elements as the value
+		of the highest modifier must be replaced*/
+		1712, // not used here
+
+		// difficulty levels:
+		1800, // Hell
+		1864, // Nightmare
+		1865, // Normal
+		1867, // Select Difficulty
+
+		1869, // not used, for locales with +1 mod
+
+		1878, // delete char confirm
+		1881, // Open
+		1889, // char name is currently taken (not used)
+		1896, // YES
+		1925, // NO
+
+		1926, // not used, for locales with +1 mod
+
 	}
 	return baseLabelNumbers[idx]
 }
@@ -300,14 +377,14 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 
 	v.copyrightLabel = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.copyrightLabel.Alignment = d2ui.HorizontalAlignCenter
-	v.copyrightLabel.SetText("Diablo 2 is © Copyright 2000-2016 Blizzard Entertainment")
+	v.copyrightLabel.SetText(translateLabel(copyrightLabel, v.language, v.asset))
 	v.copyrightLabel.Color[0] = rgbaColor(lightBrown)
 	v.copyrightLabel.SetPosition(copyrightX, copyrightY)
 	loading.Progress(thirtyPercent)
 
 	v.copyrightLabel2 = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.copyrightLabel2.Alignment = d2ui.HorizontalAlignCenter
-	v.copyrightLabel2.SetText("All Rights Reserved.")
+	v.copyrightLabel2.SetText(translateLabel(allRightsReservedLabel, v.language, v.asset))
 	v.copyrightLabel2.Color[0] = rgbaColor(lightBrown)
 	v.copyrightLabel2.SetPosition(copyright2X, copyright2Y)
 
@@ -325,14 +402,13 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 
 	v.tcpJoinGameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.tcpJoinGameLabel.Alignment = d2ui.HorizontalAlignCenter
-	//v.tcpJoinGameLabel.SetText("Enter Host IP Address\nto Join Game")
-	v.tcpJoinGameLabel.SetText(translateLabel(tcpIpEnterHostIpLabel, v.language, v.asset))
+	v.tcpJoinGameLabel.SetText(d2util.SplitIntoLinesWithMaxWidthOneLine(translateLabel(tcpIpEnterHostIpLabel, v.language, v.asset), 27))
 	v.tcpJoinGameLabel.Color[0] = rgbaColor(gold)
 	v.tcpJoinGameLabel.SetPosition(joinGameX, joinGameY)
 
 	v.machineIP = v.uiManager.NewLabel(d2resource.Font24, d2resource.PaletteUnits)
 	v.machineIP.Alignment = d2ui.HorizontalAlignCenter
-	v.machineIP.SetText("Your IP address is:\n" + v.getLocalIP())
+	v.machineIP.SetText(translateLabel(tcpIpYourIpLabel, v.language, v.asset) + "\n" + v.getLocalIP())
 	v.machineIP.Color[0] = rgbaColor(lightYellow)
 	v.machineIP.SetPosition(machineIPX, machineIPY)
 
@@ -407,11 +483,11 @@ func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
 	v.mapTestButton.OnActivated(func() { v.onMapTestClicked() })
 
 	v.btnTCPIPCancel = v.uiManager.NewButton(d2ui.ButtonTypeMedium,
-		v.asset.TranslateString("cancel"))
+		translateLabel(cancelLabel, v.language, v.asset))
 	v.btnTCPIPCancel.SetPosition(tcpBtnX, tcpBtnY)
 	v.btnTCPIPCancel.OnActivated(func() { v.onTCPIPCancelClicked() })
 
-	v.btnServerIPCancel = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, "CANCEL")
+	v.btnServerIPCancel = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, translateLabel(cancelLabel, v.language, v.asset))
 	v.btnServerIPCancel.SetPosition(srvCancelBtnX, srvCancelBtnY)
 	v.btnServerIPCancel.OnActivated(func() { v.onBtnTCPIPCancelClicked() })
 
@@ -434,7 +510,7 @@ func (v *MainMenu) createMultiplayerMenuButtons() {
 	v.networkTCPIPButton.OnActivated(func() { v.onNetworkTCPIPClicked() })
 
 	v.networkCancelButton = v.uiManager.NewButton(d2ui.ButtonTypeWide,
-		v.asset.TranslateString("cancel"))
+		translateLabel(cancelLabel, v.language, v.asset))
 	v.networkCancelButton.SetPosition(networkCancelBtnX, networkCancelBtnY)
 	v.networkCancelButton.OnActivated(func() { v.onNetworkCancelClicked() })
 
@@ -698,5 +774,5 @@ func (v *MainMenu) getLocalIP() string {
 
 	v.Warning("no IPv4 Address could be found")
 
-	return "no IPv4 Address could be found"
+	return translateLabel(ipNotFoundLabel, v.language, v.asset)
 }

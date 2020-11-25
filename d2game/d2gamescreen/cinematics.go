@@ -30,6 +30,7 @@ func CreateCinematics(
 	renderer d2interface.Renderer,
 	aup d2interface.AudioProvider,
 	l d2util.LogLevel,
+	lang string,
 	ui *d2ui.UIManager) *Cinematics {
 	cinematics := &Cinematics{
 		asset:         asset,
@@ -37,6 +38,7 @@ func CreateCinematics(
 		navigator:     navigator,
 		uiManager:     ui,
 		audioProvider: aup,
+		language:      lang,
 	}
 
 	cinematics.Logger = d2util.NewLogger()
@@ -68,6 +70,7 @@ type Cinematics struct {
 	audioProvider d2interface.AudioProvider
 
 	*d2util.Logger
+	language string
 }
 
 // OnLoad is called to load the resources for the credits screen
@@ -96,13 +99,13 @@ func (v *Cinematics) OnLoad(_ d2screen.LoadingState) {
 
 	v.cinematicsLabel = v.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteStatic)
 	v.cinematicsLabel.Alignment = d2ui.HorizontalAlignCenter
-	v.cinematicsLabel.SetText("SELECT CINEMATIC")
+	v.cinematicsLabel.SetText(translateLabel(selectCinematicLabel, v.language, v.asset))
 	v.cinematicsLabel.Color[0] = rgbaColor(lightBrown)
 	v.cinematicsLabel.SetPosition(cinematicsLabelX, cinematicsLabelY)
 }
 
 func (v *Cinematics) createButtons() {
-	v.cinematicsExitBtn = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateString("cancel"))
+	v.cinematicsExitBtn = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateString(translateLabel(cancelLabel, v.language, v.asset)))
 	v.cinematicsExitBtn.SetPosition(cinematicsExitBtnX, cinematicsExitBtnY)
 	v.cinematicsExitBtn.OnActivated(func() { v.onCinematicsExitBtnClicked() })
 

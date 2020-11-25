@@ -922,7 +922,7 @@ func (a *App) ToMainMenu(errorMessageOptional ...string) {
 
 // ToSelectHero forces the game to transition to the Select Hero (create character) screen
 func (a *App) ToSelectHero(connType d2clientconnectiontype.ClientConnectionType, host string) {
-	selectHero, err := d2gamescreen.CreateSelectHeroClass(a, a.asset, a.renderer, a.audio, a.ui, connType, a.config.LogLevel, host)
+	selectHero, err := d2gamescreen.CreateSelectHeroClass(a, a.asset, a.renderer, a.audio, a.ui, connType, a.config.LogLevel, a.language, host)
 	if err != nil {
 		a.Error(err.Error())
 		return
@@ -952,7 +952,7 @@ func (a *App) ToCreateGame(filePath string, connType d2clientconnectiontype.Clie
 // ToCharacterSelect forces the game to transition to the Character Select (load character) screen
 func (a *App) ToCharacterSelect(connType d2clientconnectiontype.ClientConnectionType, connHost string) {
 	characterSelect, err := d2gamescreen.CreateCharacterSelect(a, a.asset, a.renderer, a.inputManager,
-		a.audio, a.ui, connType, a.config.LogLevel, connHost)
+		a.audio, a.ui, connType, a.config.LogLevel, a.language, connHost)
 	if err != nil {
 		fmt.Printf("unable to create character select screen: %s", err)
 	}
@@ -979,5 +979,5 @@ func (a *App) ToCredits() {
 
 // ToCinematics forces the game to transition to the cinematics menu
 func (a *App) ToCinematics() {
-	a.screen.SetNextScreen(d2gamescreen.CreateCinematics(a, a.asset, a.renderer, a.audio, a.config.LogLevel, a.ui))
+	a.screen.SetNextScreen(d2gamescreen.CreateCinematics(a, a.asset, a.renderer, a.audio, a.config.LogLevel, a.language, a.ui))
 }
