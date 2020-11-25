@@ -2,7 +2,6 @@ package d2netpacket
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
@@ -37,7 +36,7 @@ func CreateAddPlayerPacket(
 	skills map[int]*d2hero.HeroSkill,
 	equipment d2inventory.CharacterEquipment,
 	leftSkill, rightSkill int,
-	gold int) NetPacket {
+	gold int) (NetPacket, error) {
 	addPlayerPacket := AddPlayerPacket{
 		ID:         id,
 		Name:       name,
@@ -54,13 +53,13 @@ func CreateAddPlayerPacket(
 
 	b, err := json.Marshal(addPlayerPacket)
 	if err != nil {
-		log.Print(err)
+		return NetPacket{PacketType: d2netpackettype.AddPlayer}, err
 	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.AddPlayer,
 		PacketData: b,
-	}
+	}, nil
 }
 
 // UnmarshalAddPlayer unmarshals the packet data into an AddPlayerPacket struct

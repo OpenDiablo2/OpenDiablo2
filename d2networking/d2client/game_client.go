@@ -432,8 +432,12 @@ func (g *GameClient) playCastOverlay(overlayRecord *d2records.OverlayRecord, x, 
 }
 
 func (g *GameClient) handlePingPacket() error {
-	pongPacket := d2netpacket.CreatePongPacket(g.PlayerID)
-	err := g.clientConnection.SendPacketToServer(pongPacket)
+	pongPacket, err := d2netpacket.CreatePongPacket(g.PlayerID)
+	if err != nil {
+		return err
+	}
+
+	err = g.clientConnection.SendPacketToServer(pongPacket)
 
 	if err != nil {
 		return err
