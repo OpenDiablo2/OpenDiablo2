@@ -50,7 +50,9 @@ func GetFontCharset(language string) string {
 	return charset[language]
 }
 
-// modificators for labels (used in string tables
+// modificators for labels (used in string tables)
+// some of values need to be set up. For now values with "checked" comment
+// was tested and works fine in main menu.
 func getModifiers() map[string]int {
 	return map[string]int{
 		"ENG": 0, // (English) // checked
