@@ -2,7 +2,6 @@ package d2netpacket
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
@@ -20,7 +19,7 @@ type CastPacket struct {
 
 // CreateCastPacket returns a NetPacket which declares a CastPacket with the
 // given skill command.
-func CreateCastPacket(entityID string, skillID int, targetX, targetY float64) NetPacket {
+func CreateCastPacket(entityID string, skillID int, targetX, targetY float64) (NetPacket, error) {
 	castPacket := CastPacket{
 		SourceEntityID: entityID,
 		SkillID:        skillID,
@@ -31,13 +30,13 @@ func CreateCastPacket(entityID string, skillID int, targetX, targetY float64) Ne
 
 	b, err := json.Marshal(castPacket)
 	if err != nil {
-		log.Print(err)
+		return NetPacket{PacketType: d2netpackettype.CastSkill}, err
 	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.CastSkill,
 		PacketData: b,
-	}
+	}, nil
 }
 
 // UnmarshalCast unmarshals the given data to a CastPacket struct

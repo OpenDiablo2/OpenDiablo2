@@ -2,7 +2,6 @@ package d2netpacket
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 
@@ -18,20 +17,20 @@ type PlayerDisconnectRequestPacket struct {
 
 // CreatePlayerDisconnectRequestPacket returns a NetPacket which defines a
 // PlayerDisconnectRequestPacket with the given ID.
-func CreatePlayerDisconnectRequestPacket(id string) NetPacket {
+func CreatePlayerDisconnectRequestPacket(id string) (NetPacket, error) {
 	playerDisconnectRequest := PlayerDisconnectRequestPacket{
 		ID: id,
 	}
 
 	b, err := json.Marshal(playerDisconnectRequest)
 	if err != nil {
-		log.Print(err)
+		return NetPacket{PacketType: d2netpackettype.PlayerDisconnectionNotification}, err
 	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.PlayerDisconnectionNotification,
 		PacketData: b,
-	}
+	}, nil
 }
 
 // UnmarshalPlayerDisconnectionRequest unmarshals the given data to a

@@ -326,8 +326,13 @@ func (v *Game) OnPlayerMove(targetX, targetY float64) {
 	worldPosition := v.localPlayer.Position.World()
 
 	playerID, worldX, worldY := v.gameClient.PlayerID, worldPosition.X(), worldPosition.Y()
-	createMovePlayerPacket := d2netpacket.CreateMovePlayerPacket(playerID, worldX, worldY, targetX, targetY)
-	err := v.gameClient.SendPacketToServer(createMovePlayerPacket)
+
+	createMovePlayerPacket, err := d2netpacket.CreateMovePlayerPacket(playerID, worldX, worldY, targetX, targetY)
+	if err != nil {
+		v.Errorf("MovePlayerPacket: %v", err)
+	}
+
+	err = v.gameClient.SendPacketToServer(createMovePlayerPacket)
 
 	if err != nil {
 		v.Errorf(moveErrStr, v.gameClient.PlayerID, targetX, targetY)
@@ -337,7 +342,13 @@ func (v *Game) OnPlayerMove(targetX, targetY float64) {
 // OnPlayerSave instructs the server to save our player data
 func (v *Game) OnPlayerSave() error {
 	playerState := v.gameClient.Players[v.gameClient.PlayerID]
-	err := v.gameClient.SendPacketToServer(d2netpacket.CreateSavePlayerPacket(playerState))
+
+	sp, err := d2netpacket.CreateSavePlayerPacket(playerState)
+	if err != nil {
+		return fmt.Errorf("SavePlayerPacket: %v", err)
+	}
+
+	err = v.gameClient.SendPacketToServer(sp)
 
 	if err != nil {
 		return err
@@ -348,7 +359,12 @@ func (v *Game) OnPlayerSave() error {
 
 // OnPlayerCast sends the casting skill action to the server
 func (v *Game) OnPlayerCast(skillID int, targetX, targetY float64) {
-	err := v.gameClient.SendPacketToServer(d2netpacket.CreateCastPacket(v.gameClient.PlayerID, skillID, targetX, targetY))
+	cp, err := d2netpacket.CreateCastPacket(v.gameClient.PlayerID, skillID, targetX, targetY)
+	if err != nil {
+		v.Errorf("CastPacket: %v", err)
+	}
+
+	err = v.gameClient.SendPacketToServer(cp)
 	if err != nil {
 		v.Errorf(castErrStr, v.gameClient.PlayerID, skillID, targetX, targetY)
 	}
@@ -367,9 +383,12 @@ func (v *Game) debugSpawnItemAtPlayer(codes ...string) {
 }
 
 func (v *Game) debugSpawnItemAtLocation(x, y int, codes ...string) {
-	packet := d2netpacket.CreateSpawnItemPacket(x, y, codes...)
+	packet, err := d2netpacket.CreateSpawnItemPacket(x, y, codes...)
+	if err != nil {
+		v.Errorf("SpawnItemPacket: %v", err)
+	}
 
-	err := v.gameClient.SendPacketToServer(packet)
+	err = v.gameClient.SendPacketToServer(packet)
 	if err != nil {
 		v.Errorf(spawnItemErrStr, x, y, codes)
 	}
