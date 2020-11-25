@@ -105,7 +105,8 @@ func (v *Cinematics) OnLoad(_ d2screen.LoadingState) {
 }
 
 func (v *Cinematics) createButtons() {
-	v.cinematicsExitBtn = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateString(translateLabel(cancelLabel, v.language, v.asset)))
+	v.cinematicsExitBtn = v.uiManager.NewButton(d2ui.ButtonTypeMedium,
+		v.asset.TranslateString(translateLabel(cancelLabel, v.language, v.asset)))
 	v.cinematicsExitBtn.SetPosition(cinematicsExitBtnX, cinematicsExitBtnY)
 	v.cinematicsExitBtn.OnActivated(func() { v.onCinematicsExitBtnClicked() })
 

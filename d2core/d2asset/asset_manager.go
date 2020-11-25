@@ -278,6 +278,8 @@ func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary,
 	return table, err
 }
 
+// TranslateString returns the translation of the given string. The string is retrieved from
+// the loaded string tables.
 func (am *AssetManager) TranslateString(input interface{}) string {
 	var key string
 

@@ -68,7 +68,7 @@ func getModifiers() map[string]int {
 	}
 }
 
-// GetFontCharset returns modificator for language
+// GetLabelModifier returns modificator for language
 func GetLabelModifier(language string) int {
 	mod := getModifiers()
 

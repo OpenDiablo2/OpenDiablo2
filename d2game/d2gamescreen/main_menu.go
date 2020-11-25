@@ -89,6 +89,7 @@ const (
 	copyrightLabel
 	allRightsReservedLabel
 	singlePlayerLabel
+	//nolint:deadcode,varcheck,unused // will be used, or is need
 	battleNetLabel
 	otherMultiplayerLabel
 	exitLabel
@@ -96,24 +97,30 @@ const (
 	cinematicsLabel
 
 	// cinematics menu labels
+	//nolint:deadcode,varcheck,unused // will be used, or is need
 	viewAllCinematicsLabel
+	//nolint:deadcode,varcheck,unused // will be used, or is need
 	epilogueLabel
 	selectCinematicLabel
 
 	// multiplayer menu labels
-	openBattleNetLaBEL
-	tcpIpGameLabel
-	tcpIpOptionsLabel
-	tcpIpHostGameLabel
-	tcpIpJoinGameLabel
-	tcpIpEnterHostIpLabel
-	tcpIpYourIpLabel
+	//nolint:deadcode,varcheck,unused // will be used, or is need
+	openBattleNetLabeL
+	tcpIPGameLabel
+	tcpIPOptionsLabel
+	tcpIPHostGameLabel
+	tcpIPJoinGameLabel
+	tcpIPEnterHostIPLabel
+	tcpIPYourIPLabel
+	//nolint:deadcode,varcheck,unused // will be used, or is need
 	tipHostLabel
+	//nolint:deadcode,varcheck,unused // will be used, or is need
 	tipJoinLabel
 	ipNotFoundLabel
 
 	// select hero class menu labels
 	charNameLabel
+	//nolint:deadcode,varcheck,unused // will be used, or is need
 	hardCoreLabel
 	selectHeroClassLabel
 	amazonDescr
@@ -122,17 +129,25 @@ const (
 	sorceressDescr
 	paladinDescr
 
+	//nolint:deadcode,varcheck,unused // will be used, or is need
 	notUsed1 // this position isn't used here.
 
+	//nolint:deadcode,varcheck,unused // will be used, or is need
 	hellLabel
+	//nolint:deadcode,varcheck,unused // will be used, or is need
 	nightmareLabel
+	//nolint:deadcode,varcheck,unused // will be used, or is need
 	normalLabel
+	//nolint:deadcode,varcheck,unused // will be used, or is need
 	selectDifficultyLabel
 
+	//nolint:deadcode,varcheck,unused // will be used, or is need
 	notUsed2
 
 	delCharConfLabel
+	//nolint:deadcode,varcheck,unused // will be used, or is need
 	openLabel
+	//nolint:deadcode,varcheck,unused // will be used, or is need
 	notUsed3
 	yesLabel
 	noLabel
@@ -200,6 +215,7 @@ func baseLabelNumbers(idx int) int {
 		1926, // not used, for locales with +1 mod
 
 	}
+
 	return baseLabelNumbers[idx]
 }
 
@@ -398,17 +414,17 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 	v.tcpIPOptionsLabel = v.uiManager.NewLabel(d2resource.Font42, d2resource.PaletteUnits)
 	v.tcpIPOptionsLabel.SetPosition(tcpOptionsX, tcpOptionsY)
 	v.tcpIPOptionsLabel.Alignment = d2ui.HorizontalAlignCenter
-	v.tcpIPOptionsLabel.SetText(translateLabel(tcpIpOptionsLabel, v.language, v.asset))
+	v.tcpIPOptionsLabel.SetText(translateLabel(tcpIPOptionsLabel, v.language, v.asset))
 
 	v.tcpJoinGameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.tcpJoinGameLabel.Alignment = d2ui.HorizontalAlignCenter
-	v.tcpJoinGameLabel.SetText(d2util.SplitIntoLinesWithMaxWidthOneLine(translateLabel(tcpIpEnterHostIpLabel, v.language, v.asset), 27))
+	v.tcpJoinGameLabel.SetText(d2util.SplitIntoLinesWithMaxWidthOneLine(translateLabel(tcpIPEnterHostIPLabel, v.language, v.asset), 27))
 	v.tcpJoinGameLabel.Color[0] = rgbaColor(gold)
 	v.tcpJoinGameLabel.SetPosition(joinGameX, joinGameY)
 
 	v.machineIP = v.uiManager.NewLabel(d2resource.Font24, d2resource.PaletteUnits)
 	v.machineIP.Alignment = d2ui.HorizontalAlignCenter
-	v.machineIP.SetText(translateLabel(tcpIpYourIpLabel, v.language, v.asset) + "\n" + v.getLocalIP())
+	v.machineIP.SetText(translateLabel(tcpIPYourIPLabel, v.language, v.asset) + "\n" + v.getLocalIP())
 	v.machineIP.Color[0] = rgbaColor(lightYellow)
 	v.machineIP.SetPosition(machineIPX, machineIPY)
 
@@ -505,7 +521,7 @@ func (v *MainMenu) createMultiplayerMenuButtons() {
 	v.multiplayerButton.SetPosition(multiplayerBtnX, multiplayerBtnY)
 	v.multiplayerButton.OnActivated(func() { v.onMultiplayerClicked() })
 
-	v.networkTCPIPButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, translateLabel(tcpIpGameLabel, v.language, v.asset))
+	v.networkTCPIPButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, translateLabel(tcpIPGameLabel, v.language, v.asset))
 	v.networkTCPIPButton.SetPosition(tcpNetBtnX, tcpNetBtnY)
 	v.networkTCPIPButton.OnActivated(func() { v.onNetworkTCPIPClicked() })
 
@@ -514,11 +530,11 @@ func (v *MainMenu) createMultiplayerMenuButtons() {
 	v.networkCancelButton.SetPosition(networkCancelBtnX, networkCancelBtnY)
 	v.networkCancelButton.OnActivated(func() { v.onNetworkCancelClicked() })
 
-	v.btnTCPIPHostGame = v.uiManager.NewButton(d2ui.ButtonTypeWide, translateLabel(tcpIpHostGameLabel, v.language, v.asset))
+	v.btnTCPIPHostGame = v.uiManager.NewButton(d2ui.ButtonTypeWide, translateLabel(tcpIPHostGameLabel, v.language, v.asset))
 	v.btnTCPIPHostGame.SetPosition(tcpHostBtnX, tcpHostBtnY)
 	v.btnTCPIPHostGame.OnActivated(func() { v.onTCPIPHostGameClicked() })
 
-	v.btnTCPIPJoinGame = v.uiManager.NewButton(d2ui.ButtonTypeWide, translateLabel(tcpIpJoinGameLabel, v.language, v.asset))
+	v.btnTCPIPJoinGame = v.uiManager.NewButton(d2ui.ButtonTypeWide, translateLabel(tcpIPJoinGameLabel, v.language, v.asset))
 	v.btnTCPIPJoinGame.SetPosition(tcpJoinBtnX, tcpJoinBtnY)
 	v.btnTCPIPJoinGame.OnActivated(func() { v.onTCPIPJoinGameClicked() })
 }

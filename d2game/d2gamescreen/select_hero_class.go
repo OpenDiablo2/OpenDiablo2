@@ -719,11 +719,13 @@ const (
 
 func (v *SelectHeroClass) setDescLabels(descKey int, key string) {
 	var heroDesc string
+
 	if key != "" {
 		heroDesc = v.asset.TranslateString(key)
 	} else {
 		heroDesc = translateLabel(descKey, v.language, v.asset)
 	}
+
 	parts := d2util.SplitIntoLinesWithMaxWidth(heroDesc, heroDescCharWidth)
 
 	numLines := len(parts)
