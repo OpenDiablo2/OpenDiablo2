@@ -3,6 +3,8 @@ package d2netpacket
 import (
 	"encoding/json"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2map/d2mapentity"
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
@@ -10,13 +12,15 @@ import (
 // SavePlayerPacket has the actual selected left and right skill
 // the Server has to check if these skills are actually allowed for the Player
 type SavePlayerPacket struct {
-	Player *d2mapentity.Player `json:"Player"`
+	Player     *d2mapentity.Player   `json:"Player"`
+	Difficulty d2enum.DifficultyType `json:"Difficulty"`
 }
 
 // CreateSavePlayerPacket sends a packet which instructs the server to save the Player
-func CreateSavePlayerPacket(playerState *d2mapentity.Player) (NetPacket, error) {
+func CreateSavePlayerPacket(playerState *d2mapentity.Player, difficulty d2enum.DifficultyType) (NetPacket, error) {
 	savePlayerData := SavePlayerPacket{
-		Player: playerState,
+		Player:     playerState,
+		Difficulty: difficulty,
 	}
 
 	b, err := json.Marshal(savePlayerData)

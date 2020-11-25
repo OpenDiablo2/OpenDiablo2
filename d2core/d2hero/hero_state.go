@@ -19,4 +19,5 @@ type HeroState struct {
 	LeftSkill  int                            `json:"leftSkill"`
 	RightSkill int                            `json:"rightSkill"`
 	Gold       int                            `json:"Gold"`
+	Difficulty d2enum.DifficultyType          `json:"difficulty"`
 }

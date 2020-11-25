@@ -343,7 +343,7 @@ func (v *Game) OnPlayerMove(targetX, targetY float64) {
 func (v *Game) OnPlayerSave() error {
 	playerState := v.gameClient.Players[v.gameClient.PlayerID]
 
-	sp, err := d2netpacket.CreateSavePlayerPacket(playerState)
+	sp, err := d2netpacket.CreateSavePlayerPacket(playerState, d2enum.DifficultyNormal)
 	if err != nil {
 		return fmt.Errorf("SavePlayerPacket: %v", err)
 	}
