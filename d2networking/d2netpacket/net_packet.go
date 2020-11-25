@@ -2,7 +2,6 @@ package d2netpacket
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
@@ -17,14 +16,14 @@ type NetPacket struct {
 }
 
 // InspectPacketType determines the packet type from the given data
-func InspectPacketType(b []byte) d2netpackettype.NetPacketType {
+func InspectPacketType(b []byte) (d2netpackettype.NetPacketType, error) {
 	var packet NetPacket
 
 	if err := json.Unmarshal(b, &packet); err != nil {
-		log.Println(err)
+		return d2netpackettype.UnknownPacketType, err
 	}
 
-	return packet.PacketType
+	return packet.PacketType, nil
 }
 
 // UnmarshalNetPacket unmarshals the byte slice into a NetPacket struct
@@ -38,11 +37,11 @@ func UnmarshalNetPacket(packet []byte) (NetPacket, error) {
 }
 
 // MarshalPacket is a quick helper function to Marshal very anything UNSAFELY, meaning the error is not checked before sending.
-func MarshalPacket(packet interface{}) []byte {
+func MarshalPacket(packet interface{}) ([]byte, error) {
 	b, err := json.Marshal(packet)
 	if err != nil {
-		log.Print(err)
+		return nil, err
 	}
 
-	return b
+	return b, nil
 }

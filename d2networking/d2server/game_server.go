@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net"
 	"sync"
 	"time"
@@ -112,7 +111,7 @@ func NewGameServer(asset *d2asset.AssetManager,
 	gameServer.scriptEngine.AddFunction("getMapEngines", func(call otto.FunctionCall) otto.Value {
 		val, err := gameServer.scriptEngine.ToValue(gameServer.mapEngines)
 		if err != nil {
-			fmt.Print(err.Error())
+			gameServer.Error(err.Error())
 		}
 		return val
 	})
@@ -174,7 +173,12 @@ func (g *GameServer) packetManager() {
 		case <-g.ctx.Done():
 			return
 		case p := <-g.packetManagerChan:
-			switch d2netpacket.InspectPacketType(p) {
+			ipt, err := d2netpacket.InspectPacketType(p)
+			if err != nil {
+				g.Errorf("InspectPacketType: %v", err)
+			}
+
+			switch ipt {
 			case d2netpackettype.PlayerConnectionRequest:
 				player, err := d2netpacket.UnmarshalNetPacket(p)
 				if err != nil {
@@ -256,10 +260,20 @@ func (g *GameServer) handleConnection(conn net.Conn) {
 			if err := g.registerConnection(packet.PacketData, conn); err != nil {
 				switch err {
 				case errServerFull: // Server is currently full and not accepting new connections.
-					_, errServerFullPacket := conn.Write(d2netpacket.MarshalPacket(d2netpacket.CreateServerFullPacket()))
-					g.Error(fmt.Sprintln(errServerFullPacket))
+					sf, serverFullErr := d2netpacket.CreateServerFullPacket()
+					if serverFullErr != nil {
+						g.Errorf("ServerFullPacket: %v", serverFullErr)
+					}
+
+					msf, marshalServerFullErr := d2netpacket.MarshalPacket(sf)
+					if marshalServerFullErr != nil {
+						g.Errorf("MarshalPacket: %v", marshalServerFullErr)
+					}
+
+					_, errServerFullPacket := conn.Write(msf)
+					g.Warningf("%v", errServerFullPacket)
 				case errPlayerAlreadyExists: // Player is already registered and did not disconnection correctly.
-					g.Error(fmt.Sprintln(err))
+					g.Errorf("%v", err)
 				}
 
 				return
@@ -347,12 +361,22 @@ func (g *GameServer) OnClientConnected(client ClientConnection) {
 }
 
 func (g *GameServer) handleClientConnection(client ClientConnection, x, y float64) {
-	err := client.SendPacketToClient(d2netpacket.CreateUpdateServerInfoPacket(g.seed, client.GetUniqueID()))
+	usi, err := d2netpacket.CreateUpdateServerInfoPacket(g.seed, client.GetUniqueID())
+	if err != nil {
+		g.Errorf("UpdateServerInfoPacket: %v", err)
+	}
+
+	err = client.SendPacketToClient(usi)
 	if err != nil {
 		g.Errorf("GameServer: error sending UpdateServerInfoPacket to client %s: %s", client.GetUniqueID(), err)
 	}
 
-	err = client.SendPacketToClient(d2netpacket.CreateGenerateMapPacket(d2enum.RegionAct1Town))
+	gmp, err := d2netpacket.CreateGenerateMapPacket(d2enum.RegionAct1Town)
+	if err != nil {
+		g.Errorf("GenerateMapPacket: %v", err)
+	}
+
+	err = client.SendPacketToClient(gmp)
 	if err != nil {
 		g.Errorf("GameServer: error sending GenerateMapPacket to client %s: %s", client.GetUniqueID(), err)
 	}
@@ -365,7 +389,7 @@ func (g *GameServer) handleClientConnection(client ClientConnection, x, y float6
 
 	d2hero.HydrateSkills(playerState.Skills, g.asset)
 
-	createPlayerPacket := d2netpacket.CreateAddPlayerPacket(
+	createPlayerPacket, err := d2netpacket.CreateAddPlayerPacket(
 		client.GetUniqueID(),
 		playerState.HeroName,
 		playerX,
@@ -378,6 +402,9 @@ func (g *GameServer) handleClientConnection(client ClientConnection, x, y float6
 		playerState.RightSkill,
 		playerState.Gold,
 	)
+	if err != nil {
+		g.Errorf("AddPlayerPacket: %v", err)
+	}
 
 	for _, connection := range g.connections {
 		err := connection.SendPacketToClient(createPlayerPacket)
@@ -392,21 +419,25 @@ func (g *GameServer) handleClientConnection(client ClientConnection, x, y float6
 		conPlayerState := connection.GetPlayerState()
 		playerX := int(conPlayerState.X*subtilesPerTile) + middleOfTileOffset
 		playerY := int(conPlayerState.Y*subtilesPerTile) + middleOfTileOffset
-		err = client.SendPacketToClient(
-			d2netpacket.CreateAddPlayerPacket(
-				connection.GetUniqueID(),
-				conPlayerState.HeroName,
-				playerX,
-				playerY,
-				conPlayerState.HeroType,
-				conPlayerState.Stats,
-				conPlayerState.Skills,
-				conPlayerState.Equipment,
-				conPlayerState.LeftSkill,
-				conPlayerState.RightSkill,
-				conPlayerState.Gold,
-			),
+		app, err := d2netpacket.CreateAddPlayerPacket(
+			connection.GetUniqueID(),
+			conPlayerState.HeroName,
+			playerX,
+			playerY,
+			conPlayerState.HeroType,
+			conPlayerState.Stats,
+			conPlayerState.Skills,
+			conPlayerState.Equipment,
+			conPlayerState.LeftSkill,
+			conPlayerState.RightSkill,
+			conPlayerState.Gold,
 		)
+
+		if err != nil {
+			g.Errorf("AddPlayerPacket: %v", err)
+		}
+
+		err = client.SendPacketToClient(app)
 
 		if err != nil {
 			g.Errorf("GameServer: error sending CreateAddPlayerPacket to client %s: %s", connection.GetUniqueID(), err)

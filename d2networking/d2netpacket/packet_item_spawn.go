@@ -2,7 +2,6 @@ package d2netpacket
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
@@ -16,7 +15,7 @@ type SpawnItemPacket struct {
 
 // CreateSpawnItemPacket returns a NetPacket which declares a
 // SpawnItemPacket with the data in given parameters.
-func CreateSpawnItemPacket(x, y int, codes ...string) NetPacket {
+func CreateSpawnItemPacket(x, y int, codes ...string) (NetPacket, error) {
 	spawnItemPacket := SpawnItemPacket{
 		X:     x,
 		Y:     y,
@@ -25,13 +24,13 @@ func CreateSpawnItemPacket(x, y int, codes ...string) NetPacket {
 
 	b, err := json.Marshal(spawnItemPacket)
 	if err != nil {
-		log.Print(err)
+		return NetPacket{PacketType: d2netpackettype.SpawnItem}, err
 	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.SpawnItem,
 		PacketData: b,
-	}
+	}, nil
 }
 
 // UnmarshalSpawnItem unmarshals the given data to a SpawnItemPacket struct

@@ -2,7 +2,6 @@ package d2netpacket
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2networking/d2netpacket/d2netpackettype"
 )
@@ -20,7 +19,7 @@ type MovePlayerPacket struct {
 
 // CreateMovePlayerPacket returns a NetPacket which declares a MovePlayerPacket
 // with the given ID and movement command.
-func CreateMovePlayerPacket(playerID string, startX, startY, destX, destY float64) NetPacket {
+func CreateMovePlayerPacket(playerID string, startX, startY, destX, destY float64) (NetPacket, error) {
 	movePlayerPacket := MovePlayerPacket{
 		PlayerID: playerID,
 		StartX:   startX,
@@ -31,13 +30,13 @@ func CreateMovePlayerPacket(playerID string, startX, startY, destX, destY float6
 
 	b, err := json.Marshal(movePlayerPacket)
 	if err != nil {
-		log.Print(err)
+		return NetPacket{PacketType: d2netpackettype.MovePlayer}, nil
 	}
 
 	return NetPacket{
 		PacketType: d2netpackettype.MovePlayer,
 		PacketData: b,
-	}
+	}, nil
 }
 
 // UnmarshalMovePlayer unmarshals the given data to a MovePlayerPacket struct
