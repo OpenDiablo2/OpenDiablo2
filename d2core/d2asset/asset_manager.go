@@ -278,42 +278,25 @@ func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary,
 	return table, err
 }
 
-// TranslateString returns the translation of the given string. The string is retrieved from
-// the loaded string tables.
-func (am *AssetManager) TranslateString(key string) string {
+func (am *AssetManager) TranslateString(input interface{}) string {
+	var key string
+
+	switch s := input.(type) {
+	case string:
+		key = s
+	case fmt.Stringer:
+		key = s.String()
+	}
+
 	for idx := range am.tables {
 		if value, found := am.tables[idx][key]; found {
 			return value
 		}
 	}
+
 	// Fix to allow v.setDescLabels("#123") to be bypassed for a patch in issue #360. Reenable later.
 	// log.Panicf("Could not find a string for the key '%s'", key)
 	return key
-}
-
-// TranslateHeroClass translates her class given to game locale
-func (am *AssetManager) TranslateHeroClass(h d2enum.Hero) string {
-	switch h {
-	case d2enum.HeroBarbarian:
-		return am.TranslateString("Barbarian")
-	case d2enum.HeroNecromancer:
-		return am.TranslateString("Necromancer")
-	case d2enum.HeroPaladin:
-		return am.TranslateString("Paladin")
-	case d2enum.HeroAssassin:
-		return am.TranslateString("Assassin")
-	case d2enum.HeroSorceress:
-		return am.TranslateString("Sorceress")
-	case d2enum.HeroAmazon:
-		return am.TranslateString("Amazon")
-	case d2enum.HeroDruid:
-		return am.TranslateString("Druid")
-	default:
-		am.Error("Unknown Hero Class")
-	}
-
-	// should not be reached
-	return "---"
 }
 
 // LoadPaletteTransform loads a palette transform file

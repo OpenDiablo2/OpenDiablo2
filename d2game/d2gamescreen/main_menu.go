@@ -282,7 +282,7 @@ func (v *MainMenu) loadBackgroundSprites() {
 }
 
 func translateLabel(label int, lng string, asset *d2asset.AssetManager) string {
-	return asset.TranslateString(fmt.Sprintf("#%d", baseLabelNumbers(label+d2resource.GetLabelModificator(lng))))
+	return asset.TranslateString(fmt.Sprintf("#%d", baseLabelNumbers(label+d2resource.GetLabelModifier(lng))))
 }
 
 func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
