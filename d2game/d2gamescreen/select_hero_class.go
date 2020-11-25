@@ -519,13 +519,6 @@ func (v *SelectHeroClass) Render(screen d2interface.Surface) {
 	v.bgImage.RenderSegmented(screen, 4, 3, 0)
 	v.headingLabel.Render(screen)
 
-	if v.selectedHero != d2enum.HeroNone {
-		v.heroClassLabel.Render(screen)
-		v.heroDesc1Label.Render(screen)
-		v.heroDesc2Label.Render(screen)
-		v.heroDesc3Label.Render(screen)
-	}
-
 	for heroClass, heroInfo := range v.heroRenderInfo {
 		if heroInfo.Stance == d2enum.HeroStanceIdle || heroInfo.Stance == d2enum.HeroStanceIdleSelected {
 			v.renderHero(screen, heroClass)
@@ -536,6 +529,13 @@ func (v *SelectHeroClass) Render(screen d2interface.Surface) {
 		if heroInfo.Stance != d2enum.HeroStanceIdle && heroInfo.Stance != d2enum.HeroStanceIdleSelected {
 			v.renderHero(screen, heroClass)
 		}
+	}
+
+	if v.selectedHero != d2enum.HeroNone {
+		v.heroClassLabel.Render(screen)
+		v.heroDesc1Label.Render(screen)
+		v.heroDesc2Label.Render(screen)
+		v.heroDesc3Label.Render(screen)
 	}
 
 	v.campfire.Render(screen)
