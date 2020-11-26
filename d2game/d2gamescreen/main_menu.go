@@ -162,7 +162,6 @@ func CreateMainMenu(
 	audioProvider d2interface.AudioProvider,
 	ui *d2ui.UIManager,
 	buildInfo BuildInfo,
-	lng string,
 	l d2util.LogLevel,
 	errorMessageOptional ...string,
 ) (*MainMenu, error) {
