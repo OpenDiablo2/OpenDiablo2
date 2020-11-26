@@ -191,12 +191,12 @@ func baseLabelNumbers(idx int) int {
 		1709, // barb description
 		1710, // sorc description
 		1711, // pal description
+		/*in addition, as many elements as the value
+		of the highest modifier must be listed*/
+		1712,
 
-		/* these items are for battle.net multiplayer
-		labels and are not used yet
-		in addition, as many elements as the value
-		of the highest modifier must be replaced*/
-		1712, // not used here
+		/* here, should be labels used to battle.net multiplayer, but they are not used yet,
+		therefore I don't list them here.*/
 
 		// difficulty levels:
 		1800, // Hell
