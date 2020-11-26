@@ -146,8 +146,6 @@ func (s *ebitenSurface) RenderSprite(sprite *d2ui.Sprite) {
 
 	s.handleStateEffect(opts)
 
-	opts.CompositeMode = ebiten.CompositeModeSourceOver
-
 	sprite.Render(s)
 }
 
@@ -160,8 +158,6 @@ func (s *ebitenSurface) Render(sfc d2interface.Surface) {
 	}
 
 	s.handleStateEffect(opts)
-
-	opts.CompositeMode = ebiten.CompositeModeSourceOver
 
 	s.image.DrawImage(sfc.(*ebitenSurface).image, opts)
 }
