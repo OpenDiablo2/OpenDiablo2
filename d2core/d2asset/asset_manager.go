@@ -126,6 +126,7 @@ func (am *AssetManager) LoadLanguage(languagePath string) string {
 	am.Infof("Language: %s", language)
 
 	am.language = language
+
 	return language
 }
 
@@ -303,7 +304,7 @@ func (am *AssetManager) TranslateString(input interface{}) string {
 	return key
 }
 
-func (a *AssetManager) baseLabelNumbers(idx int) int {
+func (am *AssetManager) baseLabelNumbers(idx int) int {
 	baseLabelNumbers := []int{
 		// main menu labels
 		1612, // CANCEL
@@ -369,8 +370,8 @@ func (a *AssetManager) baseLabelNumbers(idx int) int {
 }
 
 // TranslateLabel translates the label taking into account its shift in the table
-func (a *AssetManager) TranslateLabel(label int) string {
-	return a.TranslateString(fmt.Sprintf("#%d", a.baseLabelNumbers(label+d2resource.GetLabelModifier(a.language))))
+func (am *AssetManager) TranslateLabel(label int) string {
+	return am.TranslateString(fmt.Sprintf("#%d", am.baseLabelNumbers(label+d2resource.GetLabelModifier(am.language))))
 }
 
 // LoadPaletteTransform loads a palette transform file

@@ -50,6 +50,7 @@ func GetFontCharset(language string) string {
 	return charset[language]
 }
 
+// GetLabelModifier returns modifier for language
 /* modifiers for labels (used in string tables)
 modifier is something like that:
 english table:       polish table:
@@ -62,7 +63,6 @@ So, GetLabelModifier returns value of offset in locale languages table
 */
 // some of values need to be set up. For now values with "checked" comment
 // was tested and works fine in main menu.
-// GetLabelModifier returns modifier for language
 func GetLabelModifier(language string) int {
 	modifiers := map[string]int{
 		"ENG": 0, // (English) // checked
