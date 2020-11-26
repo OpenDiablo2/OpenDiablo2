@@ -262,7 +262,9 @@ func (m *miniPanel) Toggle() {
 }
 
 func (m *miniPanel) Open() {
-	m.panelGroup.SetVisible(true)
+	if !(m.movedRight && m.movedLeft) {
+		m.panelGroup.SetVisible(true)
+	}
 
 	if !m.menuButton.GetToggled() {
 		m.menuButton.Toggle()
