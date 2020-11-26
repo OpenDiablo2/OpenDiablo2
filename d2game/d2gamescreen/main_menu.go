@@ -153,72 +153,6 @@ const (
 	noLabel
 )
 
-func baseLabelNumbers(idx int) int {
-	baseLabelNumbers := []int{
-		// main menu labels
-		1612, // CANCEL
-		1613, // (c) 2000 Blizzard Entertainment
-		1614, // All Rights Reserved.
-		1620, // SINGLE PLAYER
-		1621, // BATTLE.NET
-		1623, // OTHER MULTIPLAYER
-		1625, // EXIT DIABLO II
-		1627, // CREDITS
-		1639, // CINEMATICS
-
-		// cinematics menu labels
-		1640, // View All Earned Cinematics
-		1659, // Epilogue
-		1660, // SELECT CINEMATICS
-
-		// multiplayer labels
-		1663, // OPEN BATTLE.NET
-		1666, // TCP/IP GAME
-		1667, // TCP/IP Options
-		1675, // HOST GAME
-		1676, // JOIN GAME
-		1678, // Enter Host IP Address to Join Game
-		1680, // Your IP Address is:
-		1689, // Tip: host game
-		1690, // Tip: join game
-		1691, // Cannot detect a valid TCP/IP address.
-		1694, // Character Name
-		1696, // Hardcore
-		1697, // Select Hero Class
-
-		1698, // amazon description
-		1704, // nec description
-		1709, // barb description
-		1710, // sorc description
-		1711, // pal description
-		/*in addition, as many elements as the value
-		of the highest modifier must be listed*/
-		1712,
-
-		/* here, should be labels used to battle.net multiplayer, but they are not used yet,
-		therefore I don't list them here.*/
-
-		// difficulty levels:
-		1800, // Hell
-		1864, // Nightmare
-		1865, // Normal
-		1867, // Select Difficulty
-
-		1869, // not used, for locales with +1 mod
-
-		1878, // delete char confirm
-		1881, // Open
-		1889, // char name is currently taken (not used)
-		1896, // YES
-		1925, // NO
-
-		1926, // not used, for locales with +1 mod
-
-	}
-
-	return baseLabelNumbers[idx]
-}
-
 // CreateMainMenu creates an instance of MainMenu
 func CreateMainMenu(
 	navigator d2interface.Navigator,
@@ -248,7 +182,6 @@ func CreateMainMenu(
 		buildInfo:      buildInfo,
 		uiManager:      ui,
 		heroState:      heroStateFactory,
-		language:       lng,
 	}
 
 	mainMenu.Logger = d2util.NewLogger()
@@ -312,8 +245,6 @@ type MainMenu struct {
 	buildInfo BuildInfo
 
 	*d2util.Logger
-
-	language string
 }
 
 // OnLoad is called to load the resources for the main menu
@@ -374,10 +305,6 @@ func (v *MainMenu) loadBackgroundSprites() {
 	v.serverIPBackground.SetPosition(serverIPbackgroundX, serverIPbackgroundY)
 }
 
-func translateLabel(label int, lng string, asset *d2asset.AssetManager) string {
-	return asset.TranslateString(fmt.Sprintf("#%d", baseLabelNumbers(label+d2resource.GetLabelModifier(lng))))
-}
-
 func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 	v.versionLabel = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.versionLabel.Alignment = d2ui.HorizontalAlignRight
@@ -393,14 +320,14 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 
 	v.copyrightLabel = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.copyrightLabel.Alignment = d2ui.HorizontalAlignCenter
-	v.copyrightLabel.SetText(translateLabel(copyrightLabel, v.language, v.asset))
+	v.copyrightLabel.SetText(v.asset.TranslateLabel(copyrightLabel))
 	v.copyrightLabel.Color[0] = rgbaColor(lightBrown)
 	v.copyrightLabel.SetPosition(copyrightX, copyrightY)
 	loading.Progress(thirtyPercent)
 
 	v.copyrightLabel2 = v.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	v.copyrightLabel2.Alignment = d2ui.HorizontalAlignCenter
-	v.copyrightLabel2.SetText(translateLabel(allRightsReservedLabel, v.language, v.asset))
+	v.copyrightLabel2.SetText(v.asset.TranslateLabel(allRightsReservedLabel))
 	v.copyrightLabel2.Color[0] = rgbaColor(lightBrown)
 	v.copyrightLabel2.SetPosition(copyright2X, copyright2Y)
 
@@ -414,17 +341,17 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 	v.tcpIPOptionsLabel = v.uiManager.NewLabel(d2resource.Font42, d2resource.PaletteUnits)
 	v.tcpIPOptionsLabel.SetPosition(tcpOptionsX, tcpOptionsY)
 	v.tcpIPOptionsLabel.Alignment = d2ui.HorizontalAlignCenter
-	v.tcpIPOptionsLabel.SetText(translateLabel(tcpIPOptionsLabel, v.language, v.asset))
+	v.tcpIPOptionsLabel.SetText(v.asset.TranslateLabel(tcpIPOptionsLabel))
 
 	v.tcpJoinGameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.tcpJoinGameLabel.Alignment = d2ui.HorizontalAlignCenter
-	v.tcpJoinGameLabel.SetText(d2util.SplitIntoLinesWithMaxWidthOneLine(translateLabel(tcpIPEnterHostIPLabel, v.language, v.asset), 27))
+	v.tcpJoinGameLabel.SetText(d2util.SplitIntoLinesWithMaxWidthOneLine(v.asset.TranslateLabel(tcpIPEnterHostIPLabel), 27))
 	v.tcpJoinGameLabel.Color[0] = rgbaColor(gold)
 	v.tcpJoinGameLabel.SetPosition(joinGameX, joinGameY)
 
 	v.machineIP = v.uiManager.NewLabel(d2resource.Font24, d2resource.PaletteUnits)
 	v.machineIP.Alignment = d2ui.HorizontalAlignCenter
-	v.machineIP.SetText(translateLabel(tcpIPYourIPLabel, v.language, v.asset) + "\n" + v.getLocalIP())
+	v.machineIP.SetText(v.asset.TranslateLabel(tcpIPYourIPLabel) + "\n" + v.getLocalIP())
 	v.machineIP.Color[0] = rgbaColor(lightYellow)
 	v.machineIP.SetPosition(machineIPX, machineIPY)
 
@@ -473,20 +400,20 @@ func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
 }
 
 func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
-	v.exitDiabloButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, translateLabel(exitLabel, v.language, v.asset))
+	v.exitDiabloButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateLabel(exitLabel))
 	v.exitDiabloButton.SetPosition(exitDiabloBtnX, exitDiabloBtnY)
 	v.exitDiabloButton.OnActivated(func() { v.onExitButtonClicked() })
 
-	v.creditsButton = v.uiManager.NewButton(d2ui.ButtonTypeShort, translateLabel(creditsLabel, v.language, v.asset))
+	v.creditsButton = v.uiManager.NewButton(d2ui.ButtonTypeShort, v.asset.TranslateLabel(creditsLabel))
 	v.creditsButton.SetPosition(creditBtnX, creditBtnY)
 	v.creditsButton.OnActivated(func() { v.onCreditsButtonClicked() })
 
-	v.cinematicsButton = v.uiManager.NewButton(d2ui.ButtonTypeShort, translateLabel(cinematicsLabel, v.language, v.asset))
+	v.cinematicsButton = v.uiManager.NewButton(d2ui.ButtonTypeShort, v.asset.TranslateLabel(cinematicsLabel))
 	v.cinematicsButton.SetPosition(cineBtnX, cineBtnY)
 	v.cinematicsButton.OnActivated(func() { v.onCinematicsButtonClicked() })
 	loading.Progress(seventyPercent)
 
-	v.singlePlayerButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, translateLabel(singlePlayerLabel, v.language, v.asset))
+	v.singlePlayerButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateLabel(singlePlayerLabel))
 	v.singlePlayerButton.SetPosition(singlePlayerBtnX, singlePlayerBtnY)
 	v.singlePlayerButton.OnActivated(func() { v.onSinglePlayerClicked() })
 
@@ -499,11 +426,11 @@ func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
 	v.mapTestButton.OnActivated(func() { v.onMapTestClicked() })
 
 	v.btnTCPIPCancel = v.uiManager.NewButton(d2ui.ButtonTypeMedium,
-		translateLabel(cancelLabel, v.language, v.asset))
+		v.asset.TranslateLabel(cancelLabel))
 	v.btnTCPIPCancel.SetPosition(tcpBtnX, tcpBtnY)
 	v.btnTCPIPCancel.OnActivated(func() { v.onTCPIPCancelClicked() })
 
-	v.btnServerIPCancel = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, translateLabel(cancelLabel, v.language, v.asset))
+	v.btnServerIPCancel = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, v.asset.TranslateLabel(cancelLabel))
 	v.btnServerIPCancel.SetPosition(srvCancelBtnX, srvCancelBtnY)
 	v.btnServerIPCancel.OnActivated(func() { v.onBtnTCPIPCancelClicked() })
 
@@ -517,24 +444,24 @@ func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
 
 func (v *MainMenu) createMultiplayerMenuButtons() {
 	v.multiplayerButton = v.uiManager.NewButton(d2ui.ButtonTypeWide,
-		translateLabel(otherMultiplayerLabel, v.language, v.asset))
+		v.asset.TranslateLabel(otherMultiplayerLabel))
 	v.multiplayerButton.SetPosition(multiplayerBtnX, multiplayerBtnY)
 	v.multiplayerButton.OnActivated(func() { v.onMultiplayerClicked() })
 
-	v.networkTCPIPButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, translateLabel(tcpIPGameLabel, v.language, v.asset))
+	v.networkTCPIPButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateLabel(tcpIPGameLabel))
 	v.networkTCPIPButton.SetPosition(tcpNetBtnX, tcpNetBtnY)
 	v.networkTCPIPButton.OnActivated(func() { v.onNetworkTCPIPClicked() })
 
 	v.networkCancelButton = v.uiManager.NewButton(d2ui.ButtonTypeWide,
-		translateLabel(cancelLabel, v.language, v.asset))
+		v.asset.TranslateLabel(cancelLabel))
 	v.networkCancelButton.SetPosition(networkCancelBtnX, networkCancelBtnY)
 	v.networkCancelButton.OnActivated(func() { v.onNetworkCancelClicked() })
 
-	v.btnTCPIPHostGame = v.uiManager.NewButton(d2ui.ButtonTypeWide, translateLabel(tcpIPHostGameLabel, v.language, v.asset))
+	v.btnTCPIPHostGame = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateLabel(tcpIPHostGameLabel))
 	v.btnTCPIPHostGame.SetPosition(tcpHostBtnX, tcpHostBtnY)
 	v.btnTCPIPHostGame.OnActivated(func() { v.onTCPIPHostGameClicked() })
 
-	v.btnTCPIPJoinGame = v.uiManager.NewButton(d2ui.ButtonTypeWide, translateLabel(tcpIPJoinGameLabel, v.language, v.asset))
+	v.btnTCPIPJoinGame = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateLabel(tcpIPJoinGameLabel))
 	v.btnTCPIPJoinGame.SetPosition(tcpJoinBtnX, tcpJoinBtnY)
 	v.btnTCPIPJoinGame.OnActivated(func() { v.onTCPIPJoinGameClicked() })
 }
@@ -790,5 +717,5 @@ func (v *MainMenu) getLocalIP() string {
 
 	v.Warning("no IPv4 Address could be found")
 
-	return translateLabel(ipNotFoundLabel, v.language, v.asset)
+	return v.asset.TranslateLabel(ipNotFoundLabel)
 }

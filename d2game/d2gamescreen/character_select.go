@@ -29,7 +29,6 @@ func CreateCharacterSelect(
 	ui *d2ui.UIManager,
 	connectionType d2clientconnectiontype.ClientConnectionType,
 	l d2util.LogLevel,
-	lang string,
 	connectionHost string,
 ) (*CharacterSelect, error) {
 	playerStateFactory, err := d2hero.NewHeroStateFactory(asset)
@@ -54,7 +53,6 @@ func CreateCharacterSelect(
 		navigator:         navigator,
 		uiManager:         ui,
 		HeroStateFactory:  playerStateFactory,
-		language:          lang,
 	}
 
 	characterSelect.Logger = d2util.NewLogger()
@@ -102,7 +100,6 @@ type CharacterSelect struct {
 	navigator     d2interface.Navigator
 
 	*d2util.Logger
-	language string
 }
 
 const (
@@ -232,7 +229,7 @@ func (v *CharacterSelect) loadHeroTitle() {
 
 func (v *CharacterSelect) loadDeleteCharConfirm() {
 	v.deleteCharConfirmLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
-	lines := d2util.SplitIntoLinesWithMaxWidthOneLine(translateLabel(delCharConfLabel, v.language, v.asset), 30)
+	lines := d2util.SplitIntoLinesWithMaxWidthOneLine(v.asset.TranslateLabel(delCharConfLabel), 30)
 	v.deleteCharConfirmLabel.SetText(lines)
 	v.deleteCharConfirmLabel.Alignment = d2ui.HorizontalAlignCenter
 	deleteConfirmX, deleteConfirmY := 400, 185
@@ -315,12 +312,12 @@ func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
 
 	loading.Progress(twentyPercent)
 
-	v.deleteCharCancelButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, translateLabel(noLabel, v.language, v.asset))
+	v.deleteCharCancelButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, v.asset.TranslateLabel(noLabel))
 	v.deleteCharCancelButton.SetPosition(deleteCancelX, deleteCancelY)
 	v.deleteCharCancelButton.SetVisible(false)
 	v.deleteCharCancelButton.OnActivated(func() { v.onDeleteCharacterCancelClicked() })
 
-	v.deleteCharOkButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, translateLabel(yesLabel, v.language, v.asset))
+	v.deleteCharOkButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, v.asset.TranslateLabel(yesLabel))
 	v.deleteCharOkButton.SetPosition(deleteOkX, deleteOkY)
 	v.deleteCharOkButton.SetVisible(false)
 	v.deleteCharOkButton.OnActivated(func() { v.onDeleteCharacterConfirmClicked() })
