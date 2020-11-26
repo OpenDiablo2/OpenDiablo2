@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 
@@ -344,7 +345,7 @@ func (v *MainMenu) createLabels(loading d2screen.LoadingState) {
 
 	v.tcpJoinGameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.tcpJoinGameLabel.Alignment = d2ui.HorizontalAlignCenter
-	v.tcpJoinGameLabel.SetText(d2util.SplitIntoLinesWithMaxWidthOneLine(v.asset.TranslateLabel(tcpIPEnterHostIPLabel), 27))
+	v.tcpJoinGameLabel.SetText(strings.Join(d2util.SplitIntoLinesWithMaxWidth(v.asset.TranslateLabel(tcpIPEnterHostIPLabel), 27), "\n"))
 	v.tcpJoinGameLabel.Color[0] = rgbaColor(gold)
 	v.tcpJoinGameLabel.SetPosition(joinGameX, joinGameY)
 

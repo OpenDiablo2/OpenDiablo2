@@ -5,6 +5,7 @@ import (
 	"math"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 
@@ -229,7 +230,7 @@ func (v *CharacterSelect) loadHeroTitle() {
 
 func (v *CharacterSelect) loadDeleteCharConfirm() {
 	v.deleteCharConfirmLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
-	lines := d2util.SplitIntoLinesWithMaxWidthOneLine(v.asset.TranslateLabel(delCharConfLabel), 30)
+	lines := strings.Join(d2util.SplitIntoLinesWithMaxWidth(v.asset.TranslateLabel(delCharConfLabel), 30), "\n")
 	v.deleteCharConfirmLabel.SetText(lines)
 	v.deleteCharConfirmLabel.Alignment = d2ui.HorizontalAlignCenter
 	deleteConfirmX, deleteConfirmY := 400, 185
@@ -292,17 +293,18 @@ func rgbaColor(rgba uint32) color.RGBA {
 }
 
 func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
-	v.newCharButton = v.uiManager.NewButton(d2ui.ButtonTypeTall, d2util.SplitIntoLinesWithMaxWidthOneLine(v.asset.TranslateString("#831"), 13))
+	v.newCharButton = v.uiManager.NewButton(d2ui.ButtonTypeTall, strings.Join(
+		d2util.SplitIntoLinesWithMaxWidth(v.asset.TranslateString("#831"), 13), "\n"))
 	v.newCharButton.SetPosition(newCharBtnX, newCharBtnY)
 	v.newCharButton.OnActivated(func() { v.onNewCharButtonClicked() })
 
 	v.convertCharButton = v.uiManager.NewButton(d2ui.ButtonTypeTall,
-		d2util.SplitIntoLinesWithMaxWidthOneLine(v.asset.TranslateString("#825"), 13))
+		strings.Join(d2util.SplitIntoLinesWithMaxWidth(v.asset.TranslateString("#825"), 13), "\n"))
 	v.convertCharButton.SetPosition(convertCharBtnX, convertCharBtnY)
 	v.convertCharButton.SetEnabled(false)
 
 	v.deleteCharButton = v.uiManager.NewButton(d2ui.ButtonTypeTall,
-		d2util.SplitIntoLinesWithMaxWidthOneLine(v.asset.TranslateString("#832"), 13))
+		strings.Join(d2util.SplitIntoLinesWithMaxWidth(v.asset.TranslateString("#832"), 13), "\n"))
 	v.deleteCharButton.OnActivated(func() { v.onDeleteCharButtonClicked() })
 	v.deleteCharButton.SetPosition(deleteCharBtnX, deleteCharBtnY)
 
