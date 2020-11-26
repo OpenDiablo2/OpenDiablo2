@@ -911,7 +911,7 @@ func (a *App) ToMainMenu(errorMessageOptional ...string) {
 	buildInfo := d2gamescreen.BuildInfo{Branch: a.gitBranch, Commit: a.gitCommit}
 
 	mainMenu, err := d2gamescreen.CreateMainMenu(a, a.asset, a.renderer, a.inputManager, a.audio, a.ui, buildInfo,
-		a.language, a.config.LogLevel, errorMessageOptional...)
+		a.config.LogLevel, errorMessageOptional...)
 	if err != nil {
 		a.Error(err.Error())
 		return
