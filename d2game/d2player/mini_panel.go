@@ -294,6 +294,7 @@ func (m *miniPanel) moveRight() {
 
 func (m *miniPanel) undoMoveRight() {
 	m.panelGroup.OffsetPosition(-panelOffsetRight, 0)
+	m.tooltipGroup.OffsetPosition(-panelOffsetRight, 0)
 }
 
 func (m *miniPanel) moveLeft() {
