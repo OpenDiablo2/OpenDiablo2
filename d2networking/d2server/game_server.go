@@ -483,6 +483,8 @@ func (g *GameServer) OnPacketReceived(client ClientConnection, packet d2netpacke
 		playerState.LeftSkill = savePacket.Player.LeftSkill.Shallow.SkillID
 		playerState.RightSkill = savePacket.Player.RightSkill.Shallow.SkillID
 		playerState.Stats = savePacket.Player.Stats
+		playerState.Act = savePacket.Player.Act
+		playerState.Difficulty = savePacket.Difficulty
 
 		err = g.heroStateFactory.Save(playerState)
 		if err != nil {

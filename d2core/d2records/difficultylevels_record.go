@@ -1,7 +1,9 @@
 package d2records
 
+import "github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
+
 // DifficultyLevels contain the difficulty records for each difficulty
-type DifficultyLevels map[string]*DifficultyLevelRecord
+type DifficultyLevels map[d2enum.DifficultyType]*DifficultyLevelRecord
 
 // DifficultyLevelRecord contain the parameters that change for different difficulties
 type DifficultyLevelRecord struct {

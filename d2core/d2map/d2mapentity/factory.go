@@ -102,6 +102,7 @@ func (f *MapEntityFactory) NewPlayer(id, name string, x, y, direction int, heroT
 		isInTown:     true,
 		isRunning:    false,
 		Gold:         gold,
+		Act:          1,
 	}
 
 	result.mapEntity.uuid = id

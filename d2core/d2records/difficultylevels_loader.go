@@ -1,6 +1,7 @@
 package d2records
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2txt"
 )
 
@@ -27,7 +28,14 @@ func difficultyLevelsLoader(r *RecordManager, d *d2txt.DataDictionary) error {
 			LifeStealDivisor:       d.Number("LifeStealDivisor"),
 			ManaStealDivisor:       d.Number("ManaStealDivisor"),
 		}
-		records[record.Name] = record
+		switch record.Name {
+		case "Normal":
+			records[d2enum.DifficultyNormal] = record
+		case "Nightmare":
+			records[d2enum.DifficultyNightmare] = record
+		case "Hell":
+			records[d2enum.DifficultyHell] = record
+		}
 	}
 
 	if d.Err != nil {
