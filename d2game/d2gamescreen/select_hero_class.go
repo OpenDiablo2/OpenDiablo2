@@ -442,8 +442,7 @@ func (v *SelectHeroClass) createLabels() {
 
 	v.expansionCharLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.expansionCharLabel.Alignment = d2ui.HorizontalAlignLeft
-	// to be honest, it should be TranslateString("#803"), but I suppose that's the same
-	v.expansionCharLabel.SetText(d2ui.ColorTokenize(v.asset.TranslateString("expansionchar2x"), d2ui.ColorTokenGold))
+	v.expansionCharLabel.SetText(d2ui.ColorTokenize(v.asset.TranslateString("#803"), d2ui.ColorTokenGold))
 	v.expansionCharLabel.SetPosition(expansionLabelX, expansionLabelY)
 
 	v.hardcoreCharLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
@@ -453,7 +452,7 @@ func (v *SelectHeroClass) createLabels() {
 }
 
 func (v *SelectHeroClass) createButtons() {
-	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, "EXIT")
+	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateLabel(exitLabel))
 	v.exitButton.SetPosition(selHeroExitBtnX, selHeroExitBtnY)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 

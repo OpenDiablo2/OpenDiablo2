@@ -308,7 +308,7 @@ func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
 	v.deleteCharButton.OnActivated(func() { v.onDeleteCharButtonClicked() })
 	v.deleteCharButton.SetPosition(deleteCharBtnX, deleteCharBtnY)
 
-	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, "EXIT")
+	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateLabel(exitLabel))
 	v.exitButton.SetPosition(exitBtnX, exitBtnY)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 

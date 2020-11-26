@@ -90,38 +90,35 @@ const (
 	copyrightLabel
 	allRightsReservedLabel
 	singlePlayerLabel
-	//nolint:deadcode,varcheck,unused // will be used, or is need
-	battleNetLabel
+	_
 	otherMultiplayerLabel
-	exitLabel
+	exitGameLabel
 	creditsLabel
 	cinematicsLabel
 
 	// cinematics menu labels
-	//nolint:deadcode,varcheck,unused // will be used, or is need
+	//nolint:deadcode,varcheck,unused // will be used
 	viewAllCinematicsLabel
-	//nolint:deadcode,varcheck,unused // will be used, or is need
+	//nolint:deadcode,varcheck,unused // will be used
 	epilogueLabel
 	selectCinematicLabel
 
 	// multiplayer menu labels
-	//nolint:deadcode,varcheck,unused // will be used, or is need
-	openBattleNetLabeL
+	_
 	tcpIPGameLabel
 	tcpIPOptionsLabel
 	tcpIPHostGameLabel
 	tcpIPJoinGameLabel
 	tcpIPEnterHostIPLabel
 	tcpIPYourIPLabel
-	//nolint:deadcode,varcheck,unused // will be used, or is need
+	//nolint:deadcode,varcheck,unused // will be used
 	tipHostLabel
-	//nolint:deadcode,varcheck,unused // will be used, or is need
+	//nolint:deadcode,varcheck,unused // will be used
 	tipJoinLabel
 	ipNotFoundLabel
 
 	// select hero class menu labels
 	charNameLabel
-	//nolint:deadcode,varcheck,unused // will be used, or is need
 	hardCoreLabel
 	selectHeroClassLabel
 	amazonDescr
@@ -130,28 +127,31 @@ const (
 	sorceressDescr
 	paladinDescr
 
-	//nolint:deadcode,varcheck,unused // will be used, or is need
-	notUsed1 // this position isn't used here.
+	_
 
-	//nolint:deadcode,varcheck,unused // will be used, or is need
+	//nolint:deadcode,varcheck,unused // will be used
 	hellLabel
-	//nolint:deadcode,varcheck,unused // will be used, or is need
+	//nolint:deadcode,varcheck,unused // will be used
 	nightmareLabel
-	//nolint:deadcode,varcheck,unused // will be used, or is need
+	//nolint:deadcode,varcheck,unused // will be used
 	normalLabel
-	//nolint:deadcode,varcheck,unused // will be used, or is need
+	//nolint:deadcode,varcheck,unused // will be used
 	selectDifficultyLabel
 
-	//nolint:deadcode,varcheck,unused // will be used, or is need
-	notUsed2
+	_
 
 	delCharConfLabel
-	//nolint:deadcode,varcheck,unused // will be used, or is need
+	//nolint:deadcode,varcheck,unused // will be used
 	openLabel
-	//nolint:deadcode,varcheck,unused // will be used, or is need
-	notUsed3
+
+	_
+
 	yesLabel
 	noLabel
+
+	_
+
+	exitLabel
 )
 
 // CreateMainMenu creates an instance of MainMenu
@@ -400,7 +400,7 @@ func (v *MainMenu) createLogos(loading d2screen.LoadingState) {
 }
 
 func (v *MainMenu) createButtons(loading d2screen.LoadingState) {
-	v.exitDiabloButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateLabel(exitLabel))
+	v.exitDiabloButton = v.uiManager.NewButton(d2ui.ButtonTypeWide, v.asset.TranslateLabel(exitGameLabel))
 	v.exitDiabloButton.SetPosition(exitDiabloBtnX, exitDiabloBtnY)
 	v.exitDiabloButton.OnActivated(func() { v.onExitButtonClicked() })
 

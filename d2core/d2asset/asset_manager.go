@@ -364,6 +364,8 @@ func (am *AssetManager) baseLabelNumbers(idx int) int {
 
 		1926, // not used, for locales with +1 mod
 
+		970, // EXIT
+		971,
 	}
 
 	return baseLabelNumbers[idx]
