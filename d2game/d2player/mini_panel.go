@@ -262,7 +262,7 @@ func (m *miniPanel) Toggle() {
 }
 
 func (m *miniPanel) Open() {
-	if !m.movedLeft && !m.movedRight {
+	if !(m.movedRight && m.movedLeft) {
 		m.panelGroup.SetVisible(true)
 	}
 
@@ -294,6 +294,7 @@ func (m *miniPanel) moveRight() {
 
 func (m *miniPanel) undoMoveRight() {
 	m.panelGroup.OffsetPosition(-panelOffsetRight, 0)
+	m.tooltipGroup.OffsetPosition(-panelOffsetRight, 0)
 }
 
 func (m *miniPanel) moveLeft() {
