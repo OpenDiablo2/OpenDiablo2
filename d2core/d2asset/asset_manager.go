@@ -57,6 +57,7 @@ type AssetManager struct {
 	palettes   d2interface.Cache
 	transforms d2interface.Cache
 	Records    *d2records.RecordManager
+	language   string
 }
 
 // SetLogLevel sets the log level for the asset manager,  record manager, and file loader
@@ -123,6 +124,8 @@ func (am *AssetManager) LoadLanguage(languagePath string) string {
 
 	language := d2resource.GetLanguageLiteral(languageCode)
 	am.Infof("Language: %s", language)
+
+	am.language = language
 
 	return language
 }
@@ -280,40 +283,97 @@ func (am *AssetManager) LoadStringTable(tablePath string) (d2tbl.TextDictionary,
 
 // TranslateString returns the translation of the given string. The string is retrieved from
 // the loaded string tables.
-func (am *AssetManager) TranslateString(key string) string {
+func (am *AssetManager) TranslateString(input interface{}) string {
+	var key string
+
+	switch s := input.(type) {
+	case string:
+		key = s
+	case fmt.Stringer:
+		key = s.String()
+	}
+
 	for idx := range am.tables {
 		if value, found := am.tables[idx][key]; found {
 			return value
 		}
 	}
+
 	// Fix to allow v.setDescLabels("#123") to be bypassed for a patch in issue #360. Reenable later.
 	// log.Panicf("Could not find a string for the key '%s'", key)
 	return key
 }
 
-// TranslateHeroClass translates her class given to game locale
-func (am *AssetManager) TranslateHeroClass(h d2enum.Hero) string {
-	switch h {
-	case d2enum.HeroBarbarian:
-		return am.TranslateString("Barbarian")
-	case d2enum.HeroNecromancer:
-		return am.TranslateString("Necromancer")
-	case d2enum.HeroPaladin:
-		return am.TranslateString("Paladin")
-	case d2enum.HeroAssassin:
-		return am.TranslateString("Assassin")
-	case d2enum.HeroSorceress:
-		return am.TranslateString("Sorceress")
-	case d2enum.HeroAmazon:
-		return am.TranslateString("Amazon")
-	case d2enum.HeroDruid:
-		return am.TranslateString("Druid")
-	default:
-		am.Error("Unknown Hero Class")
+func (am *AssetManager) baseLabelNumbers(idx int) int {
+	baseLabelNumbers := []int{
+		// main menu labels
+		1612, // CANCEL
+		1613, // (c) 2000 Blizzard Entertainment
+		1614, // All Rights Reserved.
+		1620, // SINGLE PLAYER
+		1621, // BATTLE.NET
+		1623, // OTHER MULTIPLAYER
+		1625, // EXIT DIABLO II
+		1627, // CREDITS
+		1639, // CINEMATICS
+
+		// cinematics menu labels
+		1640, // View All Earned Cinematics
+		1659, // Epilogue
+		1660, // SELECT CINEMATICS
+
+		// multiplayer labels
+		1663, // OPEN BATTLE.NET
+		1666, // TCP/IP GAME
+		1667, // TCP/IP Options
+		1675, // HOST GAME
+		1676, // JOIN GAME
+		1678, // Enter Host IP Address to Join Game
+		1680, // Your IP Address is:
+		1689, // Tip: host game
+		1690, // Tip: join game
+		1691, // Cannot detect a valid TCP/IP address.
+		1694, // Character Name
+		1696, // Hardcore
+		1697, // Select Hero Class
+
+		1698, // amazon description
+		1704, // nec description
+		1709, // barb description
+		1710, // sorc description
+		1711, // pal description
+		/*in addition, as many elements as the value
+		  of the highest modifier must be listed*/
+		1712,
+
+		/* here, should be labels used to battle.net multiplayer, but they are not used yet,
+		   therefore I don't list them here.*/
+
+		// difficulty levels:
+		1800, // Hell
+		1864, // Nightmare
+		1865, // Normal
+		1867, // Select Difficulty
+
+		1869, // not used, for locales with +1 mod
+		1878, // delete char confirm
+		1881, // Open
+		1889, // char name is currently taken (not used)
+		1896, // YES
+		1925, // NO
+
+		1926, // not used, for locales with +1 mod
+
+		970, // EXIT
+		971,
 	}
 
-	// should not be reached
-	return "---"
+	return baseLabelNumbers[idx]
+}
+
+// TranslateLabel translates the label taking into account its shift in the table
+func (am *AssetManager) TranslateLabel(label int) string {
+	return am.TranslateString(fmt.Sprintf("#%d", am.baseLabelNumbers(label+d2resource.GetLabelModifier(am.language))))
 }
 
 // LoadPaletteTransform loads a palette transform file

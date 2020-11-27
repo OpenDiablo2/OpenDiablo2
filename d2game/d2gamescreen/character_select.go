@@ -5,6 +5,7 @@ import (
 	"math"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 
@@ -229,7 +230,7 @@ func (v *CharacterSelect) loadHeroTitle() {
 
 func (v *CharacterSelect) loadDeleteCharConfirm() {
 	v.deleteCharConfirmLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
-	lines := "Are you sure that you want\nto delete this character?\nTake note: this will delete all\nversions of this Character."
+	lines := strings.Join(d2util.SplitIntoLinesWithMaxWidth(v.asset.TranslateLabel(delCharConfLabel), 30), "\n")
 	v.deleteCharConfirmLabel.SetText(lines)
 	v.deleteCharConfirmLabel.Alignment = d2ui.HorizontalAlignCenter
 	deleteConfirmX, deleteConfirmY := 400, 185
@@ -292,32 +293,33 @@ func rgbaColor(rgba uint32) color.RGBA {
 }
 
 func (v *CharacterSelect) createButtons(loading d2screen.LoadingState) {
-	v.newCharButton = v.uiManager.NewButton(d2ui.ButtonTypeTall, d2util.SplitIntoLinesWithMaxWidthOneLine(v.asset.TranslateString("#831"), 13))
+	v.newCharButton = v.uiManager.NewButton(d2ui.ButtonTypeTall, strings.Join(
+		d2util.SplitIntoLinesWithMaxWidth(v.asset.TranslateString("#831"), 13), "\n"))
 	v.newCharButton.SetPosition(newCharBtnX, newCharBtnY)
 	v.newCharButton.OnActivated(func() { v.onNewCharButtonClicked() })
 
 	v.convertCharButton = v.uiManager.NewButton(d2ui.ButtonTypeTall,
-		d2util.SplitIntoLinesWithMaxWidthOneLine(v.asset.TranslateString("#825"), 13))
+		strings.Join(d2util.SplitIntoLinesWithMaxWidth(v.asset.TranslateString("#825"), 13), "\n"))
 	v.convertCharButton.SetPosition(convertCharBtnX, convertCharBtnY)
 	v.convertCharButton.SetEnabled(false)
 
 	v.deleteCharButton = v.uiManager.NewButton(d2ui.ButtonTypeTall,
-		d2util.SplitIntoLinesWithMaxWidthOneLine(v.asset.TranslateString("#832"), 13))
+		strings.Join(d2util.SplitIntoLinesWithMaxWidth(v.asset.TranslateString("#832"), 13), "\n"))
 	v.deleteCharButton.OnActivated(func() { v.onDeleteCharButtonClicked() })
 	v.deleteCharButton.SetPosition(deleteCharBtnX, deleteCharBtnY)
 
-	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, "EXIT")
+	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateLabel(exitLabel))
 	v.exitButton.SetPosition(exitBtnX, exitBtnY)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 
 	loading.Progress(twentyPercent)
 
-	v.deleteCharCancelButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, "NO")
+	v.deleteCharCancelButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, v.asset.TranslateLabel(noLabel))
 	v.deleteCharCancelButton.SetPosition(deleteCancelX, deleteCancelY)
 	v.deleteCharCancelButton.SetVisible(false)
 	v.deleteCharCancelButton.OnActivated(func() { v.onDeleteCharacterCancelClicked() })
 
-	v.deleteCharOkButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, "YES")
+	v.deleteCharOkButton = v.uiManager.NewButton(d2ui.ButtonTypeOkCancel, v.asset.TranslateLabel(yesLabel))
 	v.deleteCharOkButton.SetPosition(deleteOkX, deleteOkY)
 	v.deleteCharOkButton.SetVisible(false)
 	v.deleteCharOkButton.OnActivated(func() { v.onDeleteCharacterConfirmClicked() })
@@ -349,7 +351,7 @@ func (v *CharacterSelect) updateCharacterBoxes() {
 
 		heroName := v.gameStates[idx].HeroName
 		heroInfo := v.asset.TranslateString("level") + " " + strconv.FormatInt(int64(v.gameStates[idx].Stats.Level), 10) +
-			" " + v.asset.TranslateHeroClass(v.gameStates[idx].HeroType)
+			" " + v.asset.TranslateString(v.gameStates[idx].HeroType.String())
 
 		v.characterNameLabel[i].SetText(d2ui.ColorTokenize(heroName, d2ui.ColorTokenGold))
 		v.characterStatsLabel[i].SetText(d2ui.ColorTokenize(heroInfo, d2ui.ColorTokenWhite))

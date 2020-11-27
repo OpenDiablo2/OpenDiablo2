@@ -416,7 +416,7 @@ func (v *SelectHeroClass) createLabels() {
 	halfFontWidth := fontWidth / half
 
 	v.headingLabel.SetPosition(headingX-halfFontWidth, headingY)
-	v.headingLabel.SetText("Select Hero Class")
+	v.headingLabel.SetText(v.asset.TranslateLabel(selectHeroClassLabel))
 	v.headingLabel.Alignment = d2ui.HorizontalAlignCenter
 
 	v.heroClassLabel = v.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteUnits)
@@ -437,22 +437,22 @@ func (v *SelectHeroClass) createLabels() {
 
 	v.heroNameLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.heroNameLabel.Alignment = d2ui.HorizontalAlignLeft
-	v.heroNameLabel.SetText(d2ui.ColorTokenize("Character Name", d2ui.ColorTokenGold))
+	v.heroNameLabel.SetText(d2ui.ColorTokenize(v.asset.TranslateLabel(charNameLabel), d2ui.ColorTokenGold))
 	v.heroNameLabel.SetPosition(heroNameLabelX, heroNameLabelY)
 
 	v.expansionCharLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.expansionCharLabel.Alignment = d2ui.HorizontalAlignLeft
-	v.expansionCharLabel.SetText(d2ui.ColorTokenize("EXPANSION CHARACTER", d2ui.ColorTokenGold))
+	v.expansionCharLabel.SetText(d2ui.ColorTokenize(v.asset.TranslateString("#803"), d2ui.ColorTokenGold))
 	v.expansionCharLabel.SetPosition(expansionLabelX, expansionLabelY)
 
 	v.hardcoreCharLabel = v.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteUnits)
 	v.hardcoreCharLabel.Alignment = d2ui.HorizontalAlignLeft
-	v.hardcoreCharLabel.SetText(d2ui.ColorTokenize("Hardcore", d2ui.ColorTokenGold))
+	v.hardcoreCharLabel.SetText(d2ui.ColorTokenize(v.asset.TranslateLabel(hardCoreLabel), d2ui.ColorTokenGold))
 	v.hardcoreCharLabel.SetPosition(hardcoreLabelX, hardcoreLabelY)
 }
 
 func (v *SelectHeroClass) createButtons() {
-	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, "EXIT")
+	v.exitButton = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateLabel(exitLabel))
 	v.exitButton.SetPosition(selHeroExitBtnX, selHeroExitBtnY)
 	v.exitButton.OnActivated(func() { v.onExitButtonClicked() })
 
@@ -685,25 +685,26 @@ func (v *SelectHeroClass) updateHeroText() {
 		return
 	case d2enum.HeroBarbarian:
 		v.heroClassLabel.SetText(v.asset.TranslateString("partycharbar"))
-		v.setDescLabels("He is unequaled in close-quarters combat and mastery of weapons.")
+		v.setDescLabels(barbarianDescr, "")
 	case d2enum.HeroNecromancer:
 		v.heroClassLabel.SetText(v.asset.TranslateString("partycharnec"))
-		v.setDescLabels("Summoning undead minions and cursing his enemies are his specialties.")
+		v.setDescLabels(necromancerDescr, "")
 	case d2enum.HeroPaladin:
 		v.heroClassLabel.SetText(v.asset.TranslateString("partycharpal"))
-		v.setDescLabels("He is a natural party leader, holy man, and blessed warrior.")
+		v.setDescLabels(paladinDescr, "")
 	case d2enum.HeroAssassin:
 		v.heroClassLabel.SetText(v.asset.TranslateString("partycharass"))
-		v.setDescLabels("Schooled in the Martial Arts, her mind and body are deadly weapons.")
+		v.setDescLabels(0, "#305")
 	case d2enum.HeroSorceress:
 		v.heroClassLabel.SetText(v.asset.TranslateString("partycharsor"))
-		v.setDescLabels("She has mastered the elemental magicks -- fire, lightning, and ice.")
+		v.setDescLabels(sorceressDescr, "")
 	case d2enum.HeroAmazon:
 		v.heroClassLabel.SetText(v.asset.TranslateString("partycharama"))
-		v.setDescLabels("Skilled with the spear and the bow, she is a very versatile fighter.")
+		v.setDescLabels(amazonDescr, "")
 	case d2enum.HeroDruid:
 		v.heroClassLabel.SetText(v.asset.TranslateString("partychardru"))
-		v.setDescLabels("Commanding the forces of nature, he summons wild beasts and raging storms to his side.")
+		// here is a problem with polish language: in polish string table, there are two items with key "#304"
+		v.setDescLabels(0, "#304")
 	}
 }
 
@@ -712,8 +713,15 @@ const (
 	twoLine = 2
 )
 
-func (v *SelectHeroClass) setDescLabels(descKey string) {
-	heroDesc := v.asset.TranslateString(descKey)
+func (v *SelectHeroClass) setDescLabels(descKey int, key string) {
+	var heroDesc string
+
+	if key != "" {
+		heroDesc = v.asset.TranslateString(key)
+	} else {
+		heroDesc = v.asset.TranslateLabel(descKey)
+	}
+
 	parts := d2util.SplitIntoLinesWithMaxWidth(heroDesc, heroDescCharWidth)
 
 	numLines := len(parts)

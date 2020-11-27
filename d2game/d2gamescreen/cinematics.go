@@ -96,13 +96,14 @@ func (v *Cinematics) OnLoad(_ d2screen.LoadingState) {
 
 	v.cinematicsLabel = v.uiManager.NewLabel(d2resource.Font30, d2resource.PaletteStatic)
 	v.cinematicsLabel.Alignment = d2ui.HorizontalAlignCenter
-	v.cinematicsLabel.SetText("SELECT CINEMATIC")
+	v.cinematicsLabel.SetText(v.asset.TranslateLabel(selectCinematicLabel))
 	v.cinematicsLabel.Color[0] = rgbaColor(lightBrown)
 	v.cinematicsLabel.SetPosition(cinematicsLabelX, cinematicsLabelY)
 }
 
 func (v *Cinematics) createButtons() {
-	v.cinematicsExitBtn = v.uiManager.NewButton(d2ui.ButtonTypeMedium, v.asset.TranslateString("cancel"))
+	v.cinematicsExitBtn = v.uiManager.NewButton(d2ui.ButtonTypeMedium,
+		v.asset.TranslateString(v.asset.TranslateLabel(cancelLabel)))
 	v.cinematicsExitBtn.SetPosition(cinematicsExitBtnX, cinematicsExitBtnY)
 	v.cinematicsExitBtn.OnActivated(func() { v.onCinematicsExitBtnClicked() })
 
