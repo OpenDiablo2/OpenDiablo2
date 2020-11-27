@@ -208,9 +208,9 @@ func (v *Credits) addNextItem() {
 	var label = v.getNewFontLabel(isHeading)
 
 	if isHeading {
-		label.SetText(text[1:])
+		label.SetText(d2ui.ColorTokenize(text[1:], d2ui.ColorTokenRed))
 	} else {
-		label.SetText(text)
+		label.SetText(d2ui.ColorTokenize(text, d2ui.ColorTokenGold))
 	}
 
 	isDoubled, isNextHeading := v.setItemLabelPosition(label, isHeading, isNextHeading, isNextSpace)
@@ -253,7 +253,7 @@ func (v *Credits) setItemLabelPosition(label *d2ui.Label, isHeading, isNextHeadi
 
 		nextHeading = len(v.creditsText) > 0 && len(v.creditsText[0]) > 0 && v.creditsText[0][0] == '*'
 		label2 := v.getNewFontLabel(isHeading)
-		label2.SetText(text2)
+		label2.SetText(d2ui.ColorTokenize(text2, d2ui.ColorTokenGold))
 
 		label2.SetPosition(itemLabelX+itemLabel2offsetX, itemLabelY)
 
@@ -265,37 +265,12 @@ func (v *Credits) setItemLabelPosition(label *d2ui.Label, isHeading, isNextHeadi
 	return isDoubled, isNextHeading
 }
 
-const (
-	lightRed = 0xff5852ff
-	beige    = 0xc6b296ff
-)
-
 func (v *Credits) getNewFontLabel(isHeading bool) *d2ui.Label {
-	for _, label := range v.labels {
-		if label.Available {
-			label.Available = false
-			if isHeading {
-				label.Label.Color[0] = rgbaColor(lightRed)
-			} else {
-				label.Label.Color[0] = rgbaColor(beige)
-			}
-
-			return label.Label
-		}
-	}
-
 	newLabelItem := &labelItem{
 		Available: false,
 		IsHeading: isHeading,
 		Label:     v.uiManager.NewLabel(d2resource.FontFormal10, d2resource.PaletteSky),
 	}
-
-	if isHeading {
-		newLabelItem.Label.Color[0] = rgbaColor(lightRed)
-	} else {
-		newLabelItem.Label.Color[0] = rgbaColor(beige)
-	}
-
 	v.labels = append(v.labels, newLabelItem)
 
 	return newLabelItem.Label
