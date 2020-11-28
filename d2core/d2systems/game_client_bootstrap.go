@@ -46,6 +46,9 @@ func (m *GameClientBootstrapSystem) injectSystems() {
 	m.Info("injecting render system")
 	m.AddSystem(&RenderSystem{})
 
+	m.Info("injecting input system")
+	m.AddSystem(&InputSystem{})
+
 	m.Info("injecting update counter system")
 	m.AddSystem(&UpdateCounter{})
 
@@ -54,6 +57,9 @@ func (m *GameClientBootstrapSystem) injectSystems() {
 
 	m.Info("injecting main menu scene")
 	m.AddSystem(NewMainMenuScene())
+
+	m.Info("injecting mouse cursor scene")
+	m.AddSystem(NewMouseCursorScene())
 }
 
 // Update does nothing, but exists to satisfy the `akara.System` interface
