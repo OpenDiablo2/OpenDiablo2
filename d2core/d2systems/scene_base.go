@@ -37,6 +37,7 @@ var _ akara.System = &BaseScene{}
 
 type baseSystems struct {
 	*RenderSystem
+	*InputSystem
 	*GameObjectFactory
 }
 
@@ -58,8 +59,10 @@ type BaseScene struct {
 	d2components.ViewportFactory
 	d2components.MainViewportFactory
 	d2components.ViewportFilterFactory
+	d2components.PriorityFactory
 	d2components.CameraFactory
 	d2components.RenderableFactory
+	d2components.InteractiveFactory
 	d2components.PositionFactory
 	d2components.ScaleFactory
 	d2components.AnimationFactory
@@ -82,6 +85,7 @@ func (s *BaseScene) Init(world *akara.World) {
 	s.World = world
 
 	if s.World == nil {
+		s.SetActive(false)
 		return
 	}
 }
@@ -99,12 +103,17 @@ func (s *BaseScene) boot() {
 	s.Add.SetPrefix(fmt.Sprintf("%s -> %s", s.key, "Object Factory"))
 
 	for idx := range s.Systems {
-		if rendersys, ok := s.Systems[idx].(*RenderSystem); ok {
+		if rendersys, ok := s.Systems[idx].(*RenderSystem); ok && s.systems.RenderSystem == nil {
 			s.systems.RenderSystem = rendersys
 			continue
 		}
 
-		if objFactory, ok := s.Systems[idx].(*GameObjectFactory); ok {
+		if inputSys, ok := s.Systems[idx].(*InputSystem); ok && s.systems.InputSystem == nil {
+			s.systems.InputSystem = inputSys
+			continue
+		}
+
+		if objFactory, ok := s.Systems[idx].(*GameObjectFactory); ok && s.systems.GameObjectFactory == nil {
 			s.systems.GameObjectFactory = objFactory
 			continue
 		}
@@ -119,6 +128,13 @@ func (s *BaseScene) boot() {
 		s.Info("waiting for renderer instance ...")
 		return
 	}
+
+	if s.systems.InputSystem == nil {
+		s.Info("waiting for input system")
+		return
+	}
+
+	s.systems.InputSystem.renderer = s.systems.RenderSystem.renderer
 
 	if s.systems.GameObjectFactory == nil {
 		s.Info("waiting for game object factory ...")
@@ -140,7 +156,9 @@ func (s *BaseScene) setupFactories() {
 	viewportID := s.RegisterComponent(&d2components.Viewport{})
 	viewportFilterID := s.RegisterComponent(&d2components.ViewportFilter{})
 	cameraID := s.RegisterComponent(&d2components.Camera{})
+	priorityID := s.RegisterComponent(&d2components.Priority{})
 	renderableID := s.RegisterComponent(&d2components.Renderable{})
+	interactiveID := s.RegisterComponent(&d2components.Interactive{})
 	positionID := s.RegisterComponent(&d2components.Position{})
 	scaleID := s.RegisterComponent(&d2components.Scale{})
 	animationID := s.RegisterComponent(&d2components.Animation{})
@@ -151,7 +169,9 @@ func (s *BaseScene) setupFactories() {
 	s.Viewport = s.GetComponentFactory(viewportID)
 	s.ViewportFilter = s.GetComponentFactory(viewportFilterID)
 	s.Camera = s.GetComponentFactory(cameraID)
+	s.Priority = s.GetComponentFactory(priorityID)
 	s.Renderable = s.GetComponentFactory(renderableID)
+	s.Interactive = s.GetComponentFactory(interactiveID)
 	s.Position = s.GetComponentFactory(positionID)
 	s.Scale = s.GetComponentFactory(scaleID)
 	s.Animation = s.GetComponentFactory(animationID)
@@ -163,13 +183,11 @@ func (s *BaseScene) createDefaultViewport() {
 	s.Info("creating default viewport")
 	viewportID := s.NewEntity()
 	s.AddViewport(viewportID)
+	s.AddPriority(viewportID)
 
 	camera := s.AddCamera(viewportID)
-	camera.Width = 800
-	camera.Height = 600
-	camera.Zoom = 1
 
-	sfc := s.systems.renderer.NewSurface(camera.Width, camera.Height)
+	sfc := s.systems.RenderSystem.renderer.NewSurface(camera.Width, camera.Height)
 
 	sfc.Clear(color.Transparent)
 
@@ -266,8 +284,10 @@ func (s *BaseScene) renderViewport(idx int, objects []akara.EID) {
 	}
 
 	if sfc.Surface == nil {
-		sfc.Surface = s.systems.renderer.NewSurface(camera.Width, camera.Height)
+		sfc.Surface = s.systems.RenderSystem.renderer.NewSurface(camera.Width, camera.Height)
 	}
+
+	sfc.Clear(color.Transparent)
 
 	cx, cy := int(camera.X()), int(camera.Y())
 
@@ -298,12 +318,20 @@ func (s *BaseScene) renderObject(target d2interface.Surface, id akara.EID) {
 		scale = s.AddScale(id)
 	}
 
+	alpha, found := s.GetAlpha(id)
+	if !found {
+		alpha = s.AddAlpha(id)
+	}
+
 	x, y := int(position.X()), int(position.Y())
 
 	target.PushTranslation(x, y)
 	defer target.Pop()
 
 	target.PushScale(scale.X(), scale.Y())
+	defer target.Pop()
+
+	target.PushColor(color.Alpha{A: uint8(alpha.Alpha * 255)})
 	defer target.Pop()
 
 	segment, found := s.systems.SpriteFactory.GetSegmentedSprite(id)
@@ -352,10 +380,10 @@ type sceneObjectFactory struct {
 }
 
 func (s *sceneObjectFactory) addBasicComponenets(id akara.EID) {
-	_ = s.AddScale(id)
-	_ = s.AddOrigin(id)
 	_ = s.AddPosition(id)
+	_ = s.AddScale(id)
 	_ = s.AddAlpha(id)
+	_ = s.AddOrigin(id)
 }
 
 func (s *sceneObjectFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID {

@@ -1,6 +1,7 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2input"
 	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -28,7 +29,11 @@ var _ d2interface.Scene = &MainMenuScene{}
 // or start the map engine test.
 type MainMenuScene struct {
 	*BaseScene
-	booted bool
+	booted  bool
+	sprites struct {
+		trademark      akara.EID
+		mainBackground akara.EID
+	}
 }
 
 // Init the main menu scene
@@ -43,16 +48,20 @@ func (s *MainMenuScene) boot() {
 		return
 	}
 
-	s.createTrademarkScreen()
-	s.createButtons()
 	s.createBackground()
+	s.createButtons()
+	s.createTrademarkScreen()
 
 	s.booted = true
 }
 
 func (s *MainMenuScene) createBackground() {
 	s.Info("creating background")
-	s.Add.SegmentedSprite(0, 0, d2resource.GameSelectScreen, d2resource.PaletteSky, 4, 3, 0)
+
+	imgPath := d2resource.GameSelectScreen
+	palPath := d2resource.PaletteSky
+
+	s.sprites.mainBackground = s.Add.SegmentedSprite(0, 0, imgPath, palPath, 4, 3, 0)
 }
 
 func (s *MainMenuScene) createButtons() {
@@ -61,7 +70,26 @@ func (s *MainMenuScene) createButtons() {
 
 func (s *MainMenuScene) createTrademarkScreen() {
 	s.Info("creating trademark screen")
-	s.Add.SegmentedSprite(0, 0, d2resource.TrademarkScreen, d2resource.PaletteSky, 4, 3, 0)
+
+	imgPath := d2resource.TrademarkScreen
+	palPath := d2resource.PaletteSky
+
+	s.sprites.trademark = s.Add.SegmentedSprite(0, 0, imgPath, palPath, 4, 3, 0)
+
+	interactive := s.AddInteractive(s.sprites.trademark)
+
+	interactive.InputVector.SetMouseButton(d2input.MouseButtonLeft)
+
+	interactive.Callback = func() bool {
+		s.Info("hiding trademark sprite")
+
+		alpha, _ := s.GetAlpha(s.sprites.trademark)
+		alpha.Alpha = 0
+
+		interactive.Enabled = false
+
+		return true // prevent propagation
+	}
 }
 
 // Update the main menu scene

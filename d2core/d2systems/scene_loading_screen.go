@@ -72,6 +72,7 @@ func (s *LoadingScene) Init(world *akara.World) {
 
 func (s *LoadingScene) boot() {
 	if !s.BaseScene.booted {
+		s.BaseScene.boot()
 		return
 	}
 
