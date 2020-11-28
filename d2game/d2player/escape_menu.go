@@ -195,8 +195,8 @@ func (m *EscapeMenu) newOptionsLayout() *layout {
 func (m *EscapeMenu) newSoundOptionsLayout() *layout {
 	return m.wrapLayout(func(l *layout) {
 		m.addTitle(l, "SOUND OPTIONS")
-		m.addEnumLabel(l, optAudioSoundVolume, "SOUND VOLUME", []string{"TODO"})
-		m.addEnumLabel(l, optAudioMusicVolume, "MUSIC VOLUME", []string{"TODO"})
+		m.addEnumLabel(l, optAudioSoundVolume, "SOUND", []string{"TODO"})
+		m.addEnumLabel(l, optAudioMusicVolume, "MUSIC", []string{"TODO"})
 		m.addEnumLabel(l, optAudio3dSound, "3D BIAS", []string{"TODO"})
 		m.addEnumLabel(l, optAudioHardwareAcceleration, "HARDWARE ACCELERATION", []string{"ON", "OFF"})
 		m.addEnumLabel(l, optAudioEnvEffects, "ENVIRONMENTAL EFFECTS", []string{"ON", "OFF"})

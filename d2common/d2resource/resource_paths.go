@@ -12,16 +12,6 @@ const (
 
 	LoadingScreen = "/data/global/ui/Loading/loadingscreen.dc6"
 
-	// --- Video Paths ---
-
-	Act1Intro = "/data/local/video/" + LanguageTableToken + "/d2intro640x292.bik"
-	Act2Intro = "/data/local/video/" + LanguageTableToken + "/act02start640x292.bik"
-	Act3Intro = "/data/local/video/" + LanguageTableToken + "/act03start640x292.bik"
-	Act4Intro = "/data/local/video/" + LanguageTableToken + "/act04start640x292.bik"
-	Act4Outro = "/data/local/video/" + LanguageTableToken + "/act04end640x292.bik"
-	Act5Intro = "/data/local/video/" + LanguageTableToken + "/d2x_intro_640x292.bik"
-	Act5Outro = "/data/local/video/" + LanguageTableToken + "/d2x_out_640x292.bik"
-
 	// --- Main Menu ---
 
 	TrademarkScreen       = "/data/global/ui/FrontEnd/trademarkscreenEXP.dc6"
@@ -40,6 +30,16 @@ const (
 	// --- Cinematics ---
 
 	CinematicsBackground = "/data/global/ui/FrontEnd/CinematicsSelectionEXP.dc6"
+
+	// --- Video Paths ---
+
+	Act1Intro = "/data/local/video/" + LanguageTableToken + "/d2intro640x292.bik"
+	Act2Intro = "/data/local/video/" + LanguageTableToken + "/act02start640x292.bik"
+	Act3Intro = "/data/local/video/" + LanguageTableToken + "/act03start640x292.bik"
+	Act4Intro = "/data/local/video/" + LanguageTableToken + "/act04start640x292.bik"
+	Act4Outro = "/data/local/video/" + LanguageTableToken + "/act04end640x292.bik"
+	Act5Intro = "/data/local/video/" + LanguageTableToken + "/d2x_intro_640x292.bik"
+	Act5Outro = "/data/local/video/" + LanguageTableToken + "/d2x_out_640x292.bik"
 
 	// --- Character Select Screen ---
 
@@ -109,6 +109,56 @@ const (
 	GameGlobeOverlap    = "/data/global/ui/PANEL/overlap.DC6"
 	HealthManaIndicator = "/data/global/ui/PANEL/hlthmana.DC6"
 	AddSkillButton      = "/data/global/ui/PANEL/level.DC6"
+
+	// --- Escape Menu ---
+	// main
+	EscapeOptions      = "/data/local/ui/" + LanguageTableToken + "/options.dc6"
+	EscapeExit         = "/data/local/ui/" + LanguageTableToken + "/exit.dc6"
+	EscapeReturnToGame = "/data/local/ui/" + LanguageTableToken + "/returntogame.dc6"
+	// options
+	EscapeOptSoundOptions   = "/data/local/ui/" + LanguageTableToken + "/soundoptions.dc6"
+	EscapeOptVideoOptions   = "/data/local/ui/" + LanguageTableToken + "/videoOptions.dc6"
+	EscapeOptAutoMapOptions = "/data/local/ui/" + LanguageTableToken + "/automapOptions.dc6"
+	EscapeOptCfgOptions     = "/data/local/ui/" + LanguageTableToken + "/cfgOptions.dc6"
+	EscapeOptPrevious       = "/data/local/ui/" + LanguageTableToken + "/previous.dc6"
+
+	// sound options
+	EscapeSndOptSoundVolume = "/data/local/ui/" + LanguageTableToken + "/sound.dc6"
+	EscapeSndOptMusicVolume = "/data/local/ui/" + LanguageTableToken + "/music.dc6"
+	EscapeSndOpt3DBias      = "/data/local/ui/" + LanguageTableToken + "/3dbias.dc6"
+	// EscapeSndOptHWAcceleration =
+	// EscapeSndOptENVEffects =
+	EscapeSndOptNPCSpeech             = "/data/local/ui/" + LanguageTableToken + "/npcspeech.dc6"
+	EscapeSndOptNPCSpeechAudioAndText = "/data/local/ui/" + LanguageTableToken + "/audiotext.dc6"
+	EscapeSndOptNPCSpeechAudioOnly    = "/data/local/ui/" + LanguageTableToken + "/audioonly.dc6"
+	EscapeSndOptNPCSpeechTextOnly     = "/data/local/ui/" + LanguageTableToken + "/textonly.dc6"
+
+	// video options
+	EscapeVidOptRes          = "/data/local/ui/" + LanguageTableToken + "/resolution.dc6"
+	EscapeVidOptLightQuality = "/data/local/ui/" + LanguageTableToken + "/lightquality.dc6"
+	EscapeVidOptBlendShadow  = "/data/local/ui/" + LanguageTableToken + "/blendshadow.dc6"
+	EscapeVidOptPerspective  = "/data/local/ui/" + LanguageTableToken + "/prespective.dc6"
+	EscapeVidOptGamma        = "/data/local/ui/" + LanguageTableToken + "/gamma.dc6"
+	EscapeVidOptContrast     = "/data/local/ui/" + LanguageTableToken + "/contrast.dc6"
+
+	// auto map
+	EscapeAutoMapOptSize   = "/data/local/ui/" + LanguageTableToken + "/automapmode.dc6"
+	EscapeAutoMapOptFade   = "/data/local/ui/" + LanguageTableToken + "/automapfade.dc6"
+	EscapeAutoMapOptCenter = "/data/local/ui/" + LanguageTableToken + "/automapcenter.dc6"
+	EscapeAutoMapOptNames  = "/data/local/ui/" + LanguageTableToken + "/automappartynames.dc6"
+
+	// automap size
+	EscapeAutoMapOptFullScreen = "/data/local/ui/" + LanguageTableToken + "/full.dc6"
+	EscapeAutoMapOptMiniMap    = "/data/local/ui/" + LanguageTableToken + "/mini.dc6"
+
+	// resolutions
+	EscapeVideoOptRes640x480 = "/data/local/ui/" + LanguageTableToken + "/640x480.dc6"
+	EscapeVideoOptRes800x600 = "/data/local/ui/" + LanguageTableToken + "/800x800.dc6"
+
+	EscapeOn  = "/data/local/ui/" + LanguageTableToken + "/smallon.dc6"
+	EscapeOff = "/data/local/ui/" + LanguageTableToken + "/smalloff.dc6"
+	EscapeYes = "/data/local/ui/" + LanguageTableToken + "/smallyes.dc6"
+	EscapeNo  = "/data/local/ui/" + LanguageTableToken + "/smallno.dc6"
 
 	// --- Help Overlay ---
 
