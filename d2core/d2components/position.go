@@ -7,62 +7,41 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 )
 
-// static check that PositionComponent implements Component
-var _ akara.Component = &PositionComponent{}
+// static check that Position implements Component
+var _ akara.Component = &Position{}
 
-// static check that PositionMap implements ComponentMap
-var _ akara.ComponentMap = &PositionMap{}
-
-// PositionComponent contains an embedded d2vector.Position
-type PositionComponent struct {
-	*akara.BaseComponent
+// Position contains an embedded d2vector.Position, which is a vector with
+// helper methods for translating between screen, isometric, tile, and sub-tile space.
+type Position struct {
 	*d2vector.Position
 }
 
-// PositionMap is a map of entity ID's to Position
-type PositionMap struct {
-	*akara.BaseComponentMap
-}
-
-// AddPosition adds a new PositionComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *PositionComponent instead of an akara.Component
-func (cm *PositionMap) AddPosition(id akara.EID) *PositionComponent {
-	pos := cm.Add(id).(*PositionComponent)
-
+// New creates a new Position. By default, the position is (0,0)
+func (*Position) New() akara.Component {
 	p := d2vector.NewPosition(0, 0)
 
-	pos.Position = &p
-
-	return pos
-}
-
-// GetPosition returns the PositionComponent associated with the given entity id
-func (cm *PositionMap) GetPosition(id akara.EID) (*PositionComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
-	}
-
-	return entry.(*PositionComponent), found
-}
-
-// Position is a convenient reference to be used as a component identifier
-var Position = newPosition() // nolint:gochecknoglobals // global by design
-
-func newPosition() akara.Component {
-	return &PositionComponent{
-		BaseComponent: akara.NewBaseComponent(PositionCID, newPosition, newPositionMap),
+	return &Position{
+		Position: &p,
 	}
 }
 
-func newPositionMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(PositionCID, newPosition, newPositionMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
+// PositionFactory is a wrapper for the generic component factory that returns Position component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Position.
+type PositionFactory struct {
+	Position *akara.ComponentFactory
+}
 
-	cm := &PositionMap{
-		BaseComponentMap: baseMap,
+// AddPosition adds a Position component to the given entity and returns it
+func (m *PositionFactory) AddPosition(id akara.EID) *Position {
+	return m.Position.Add(id).(*Position)
+}
+
+// GetPosition returns the Position component for the given entity, and a bool for whether or not it exists
+func (m *PositionFactory) GetPosition(id akara.EID) (*Position, bool) {
+	component, found := m.Position.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return cm
+	return component.(*Position), found
 }

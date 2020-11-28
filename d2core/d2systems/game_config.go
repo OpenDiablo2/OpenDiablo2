@@ -18,42 +18,6 @@ const (
 	loggerPrefixGameConfig = "Game Config"
 )
 
-// NewGameConfigSystem creates a new game config system
-func NewGameConfigSystem() *GameConfigSystem {
-	// we are going to check entities that dont yet have loaded asset types
-	filesToCheck := akara.NewFilter().
-		Require(d2components.FilePath).
-		Require(d2components.FileType).
-		Require(d2components.FileHandle).
-		Forbid(d2components.GameConfig).
-		Forbid(d2components.StringTable).
-		Forbid(d2components.DataDictionary).
-		Forbid(d2components.Palette).
-		Forbid(d2components.PaletteTransform).
-		Forbid(d2components.Cof).
-		Forbid(d2components.Dc6).
-		Forbid(d2components.Dcc).
-		Forbid(d2components.Ds1).
-		Forbid(d2components.Dt1).
-		Forbid(d2components.Wav).
-		Forbid(d2components.AnimData).
-		Build()
-
-	// we are interested in actual game config instances, too
-	gameConfigs := akara.NewFilter().
-		Require(d2components.GameConfig).
-		Build()
-
-	gcs := &GameConfigSystem{
-		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToCheck, gameConfigs),
-		Logger:               d2util.NewLogger(),
-	}
-
-	gcs.SetPrefix(loggerPrefixGameConfig)
-
-	return gcs
-}
-
 // GameConfigSystem is responsible for game config configFileBootstrap procedure, as well as
 // clearing the `Dirty` component of game configs. In the `configFileBootstrap` method of this system
 // you can see that this system will add entities for the directories it expects config files
@@ -65,34 +29,87 @@ func NewGameConfigSystem() *GameConfigSystem {
 // other systems are not present in the world, but no config files will be loaded by
 // this system either...
 type GameConfigSystem struct {
-	*akara.BaseSubscriberSystem
+	akara.BaseSubscriberSystem
 	*d2util.Logger
 	filesToCheck *akara.Subscription
 	gameConfigs  *akara.Subscription
-	*d2components.GameConfigMap
-	*d2components.FilePathMap
-	*d2components.FileTypeMap
-	*d2components.FileHandleMap
-	*d2components.FileSourceMap
-	*d2components.DirtyMap
-	ActiveConfig *d2components.GameConfigComponent
+	d2components.GameConfigFactory
+	d2components.FilePathFactory
+	d2components.FileTypeFactory
+	d2components.FileHandleFactory
+	d2components.FileSourceFactory
+	d2components.DirtyFactory
+	activeConfig *d2components.GameConfig
 }
 
 // Init the world with the necessary components related to game config files
 func (m *GameConfigSystem) Init(world *akara.World) {
+	m.World = world
+
+	m.setupLogger()
+
 	m.Info("initializing ...")
 
-	m.filesToCheck = m.Subscriptions[0]
-	m.gameConfigs = m.Subscriptions[1]
+	m.setupFactories()
+	m.setupSubscriptions()
+}
 
-	// try to inject the components we require, then cast the returned
-	// abstract ComponentMap back to the concrete implementation
-	m.FilePathMap = world.InjectMap(d2components.FilePath).(*d2components.FilePathMap)
-	m.FileTypeMap = world.InjectMap(d2components.FileType).(*d2components.FileTypeMap)
-	m.FileHandleMap = world.InjectMap(d2components.FileHandle).(*d2components.FileHandleMap)
-	m.FileSourceMap = world.InjectMap(d2components.FileSource).(*d2components.FileSourceMap)
-	m.GameConfigMap = world.InjectMap(d2components.GameConfig).(*d2components.GameConfigMap)
-	m.DirtyMap = world.InjectMap(d2components.Dirty).(*d2components.DirtyMap)
+func (m *GameConfigSystem) setupLogger() {
+	m.Logger = d2util.NewLogger()
+	m.SetPrefix(loggerPrefixGameConfig)
+}
+
+func (m *GameConfigSystem) setupFactories() {
+	m.Info("setting up component factories")
+
+	filePathID := m.RegisterComponent(&d2components.FilePath{})
+	fileTypeID := m.RegisterComponent(&d2components.FileType{})
+	fileHandleID := m.RegisterComponent(&d2components.FileHandle{})
+	fileSourceID := m.RegisterComponent(&d2components.FileSource{})
+	gameConfigID := m.RegisterComponent(&d2components.GameConfig{})
+	dirtyID := m.RegisterComponent(&d2components.Dirty{})
+
+	m.FilePath = m.GetComponentFactory(filePathID)
+	m.FileType = m.GetComponentFactory(fileTypeID)
+	m.FileHandle = m.GetComponentFactory(fileHandleID)
+	m.FileSource = m.GetComponentFactory(fileSourceID)
+	m.GameConfig = m.GetComponentFactory(gameConfigID)
+	m.Dirty = m.GetComponentFactory(dirtyID)
+}
+
+func (m *GameConfigSystem) setupSubscriptions() {
+	m.Info("setting up component subscriptions")
+
+	// we are going to check entities that dont yet have loaded asset types
+	filesToCheck := m.NewComponentFilter().
+		Require(
+			&d2components.FilePath{},
+			&d2components.FileType{},
+			&d2components.FileHandle{},
+		).
+		Forbid(
+			&d2components.GameConfig{},
+			&d2components.StringTable{},
+			&d2components.DataDictionary{},
+			&d2components.Palette{},
+			&d2components.PaletteTransform{},
+			&d2components.Cof{},
+			&d2components.Dc6{},
+			&d2components.Dcc{},
+			&d2components.Ds1{},
+			&d2components.Dt1{},
+			&d2components.Wav{},
+			&d2components.AnimationData{},
+		).
+		Build()
+
+	// we are interested in actual game config instances, too
+	gameConfigs := m.NewComponentFilter().
+		Require(&d2components.GameConfig{}).
+		Build()
+
+	m.filesToCheck = m.AddSubscription(filesToCheck)
+	m.gameConfigs = m.AddSubscription(gameConfigs)
 }
 
 // Update checks for new config files
@@ -130,8 +147,8 @@ func (m *GameConfigSystem) loadConfig(eid akara.EID) {
 	gameConfig := m.AddGameConfig(eid)
 
 	if err := json.NewDecoder(fh.Data).Decode(gameConfig); err != nil {
-		m.GameConfigMap.Remove(eid)
+		m.RemoveEntity(eid)
 	}
 
-	m.ActiveConfig = gameConfig
+	m.activeConfig = gameConfig
 }

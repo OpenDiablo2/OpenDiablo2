@@ -7,7 +7,6 @@ import (
 	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
 
 func Test_FileHandleResolver_Process(t *testing.T) {
@@ -15,34 +14,30 @@ func Test_FileHandleResolver_Process(t *testing.T) {
 
 	cfg := akara.NewWorldConfig()
 
-	fileTypeResolver := NewFileTypeResolver()
-	fileHandleResolver := NewFileHandleResolver()
-	fileSourceResolver := NewFileSourceResolver()
+	typeSys := &FileTypeResolver{}
+	handleSys := &FileHandleResolver{}
+	sourceSys := &FileSourceResolver{}
 
-	cfg.With(fileTypeResolver).
-		With(fileSourceResolver).
-		With(fileHandleResolver)
+	cfg.With(typeSys).
+		With(sourceSys).
+		With(handleSys)
 
 	world := akara.NewWorld(cfg)
 
-	filepathMap, err := world.GetMap(d2components.FilePath)
-	if err != nil {
-		t.Error("file path component map not found")
-	}
-
-	filePaths := filepathMap.(*d2components.FilePathMap)
+	filePaths := typeSys.FilePathFactory
+	fileHandles := handleSys.FileHandleFactory
 
 	sourceEntity := world.NewEntity()
-	sourceFp := filePaths.AddFilePath(sourceEntity)
-	sourceFp.Path = testDataPath
+	source := filePaths.AddFilePath(sourceEntity)
+	source.Path = testDataPath
 
 	fileEntity := world.NewEntity()
-	fileFp := filePaths.AddFilePath(fileEntity)
-	fileFp.Path = "testfile_a.txt"
+	file := filePaths.AddFilePath(fileEntity)
+	file.Path = "testfile_a.txt"
 
 	_ = world.Update(0)
 
-	ft, found := fileTypeResolver.GetFileType(sourceEntity)
+	ft, found := typeSys.GetFileType(sourceEntity)
 	if !found {
 		t.Error("file source type not created for entity")
 		return
@@ -52,14 +47,6 @@ func Test_FileHandleResolver_Process(t *testing.T) {
 		t.Error("expected file system source type for entity")
 		return
 	}
-
-	handleMap, err := world.GetMap(d2components.FileHandle)
-	if err != nil {
-		t.Error("file handle component map is nil")
-		return
-	}
-
-	fileHandles := handleMap.(*d2components.FileHandleMap)
 
 	handle, found := fileHandles.GetFileHandle(fileEntity)
 	if !found {

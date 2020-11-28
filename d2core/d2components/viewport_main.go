@@ -4,55 +4,34 @@ import (
 	"github.com/gravestench/akara"
 )
 
-// static check that MainViewportComponent implements Component
-var _ akara.Component = &MainViewportComponent{}
+// static check that MainViewport implements Component
+var _ akara.Component = &MainViewport{}
 
-// static check that MainViewportMap implements ComponentMap
-var _ akara.ComponentMap = &MainViewportMap{}
+// MainViewport is used to flag viewports as the main viewport of a scene
+type MainViewport struct{}
 
-// MainViewportComponent is used to flag viewports as the main viewport of a scene
-type MainViewportComponent struct {
-	*akara.BaseComponent
+// New returns a new MainViewport instance. It is always a nil instance.
+func (*MainViewport) New() akara.Component {
+	return (*MainViewport)(nil)
 }
 
-// MainViewportMap is a map of entity ID's to MainViewport
-type MainViewportMap struct {
-	*akara.BaseComponentMap
+// MainViewportFactory is a wrapper for the generic component factory that returns MainViewport component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a MainViewport.
+type MainViewportFactory struct {
+	MainViewport *akara.ComponentFactory
 }
 
-// AddMainViewport adds a new MainViewportComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *MainViewportComponent instead of an akara.Component
-func (cm *MainViewportMap) AddMainViewport(id akara.EID) *MainViewportComponent {
-	return cm.Add(id).(*MainViewportComponent)
+// AddMainViewport adds a MainViewport component to the given entity and returns it
+func (m *MainViewportFactory) AddMainViewport(id akara.EID) *MainViewport {
+	return m.MainViewport.Add(id).(*MainViewport)
 }
 
-// GetMainViewport returns the MainViewportComponent associated with the given entity id
-func (cm *MainViewportMap) GetMainViewport(id akara.EID) (*MainViewportComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
+// GetMainViewport returns the MainViewport component for the given entity, and a bool for whether or not it exists
+func (m *MainViewportFactory) GetMainViewport(id akara.EID) (*MainViewport, bool) {
+	component, found := m.MainViewport.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return entry.(*MainViewportComponent), found
-}
-
-// MainViewport is a convenient reference to be used as a component identifier
-var MainViewport = newMainViewport() // nolint:gochecknoglobals // global by design
-
-func newMainViewport() akara.Component {
-	return &MainViewportComponent{
-		BaseComponent: akara.NewBaseComponent(MainViewportCID, newMainViewport, newMainViewportMap),
-	}
-}
-
-func newMainViewportMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(MainViewportCID, newMainViewport, newMainViewportMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &MainViewportMap{
-		BaseComponentMap: baseMap,
-	}
-
-	return cm
+	return component.(*MainViewport), found
 }

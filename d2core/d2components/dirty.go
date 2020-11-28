@@ -5,56 +5,36 @@ import (
 	"github.com/gravestench/akara"
 )
 
-// static check that DirtyComponent implements Component
-var _ akara.Component = &DirtyComponent{}
+// static check that Dirty implements Component
+var _ akara.Component = &Dirty{}
 
-// static check that DirtyMap implements ComponentMap
-var _ akara.ComponentMap = &DirtyMap{}
-
-// DirtyComponent is a flag component that is used to denote a "dirty" state
-type DirtyComponent struct {
-	*akara.BaseComponent
+// Dirty is a flag component that is used to denote a "dirty" state
+type Dirty struct {
 	IsDirty bool
 }
 
-// DirtyMap is a map of entity ID's to Dirty
-type DirtyMap struct {
-	*akara.BaseComponentMap
+// New creates a new Dirty. By default, IsDirty is false.
+func (*Dirty) New() akara.Component {
+	return &Dirty{}
 }
 
-// AddDirty adds a new DirtyComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *DirtyComponent instead of an akara.Component
-func (cm *DirtyMap) AddDirty(id akara.EID) *DirtyComponent {
-	return cm.Add(id).(*DirtyComponent)
+// DirtyFactory is a wrapper for the generic component factory that returns Dirty component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Dirty.
+type DirtyFactory struct {
+	Dirty *akara.ComponentFactory
 }
 
-// GetDirty returns the DirtyComponent associated with the given entity id
-func (cm *DirtyMap) GetDirty(id akara.EID) (*DirtyComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
+// AddDirty adds a Dirty component to the given entity and returns it
+func (m *DirtyFactory) AddDirty(id akara.EID) *Dirty {
+	return m.Dirty.Add(id).(*Dirty)
+}
+
+// GetDirty returns the Dirty component for the given entity, and a bool for whether or not it exists
+func (m *DirtyFactory) GetDirty(id akara.EID) (*Dirty, bool) {
+	component, found := m.Dirty.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return entry.(*DirtyComponent), found
-}
-
-// Dirty is a convenient reference to be used as a component identifier
-var Dirty = newDirty() // nolint:gochecknoglobals // global by design
-
-func newDirty() akara.Component {
-	return &DirtyComponent{
-		BaseComponent: akara.NewBaseComponent(DirtyCID, newDirty, newDirtyMap),
-	}
-}
-
-func newDirtyMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(DirtyCID, newDirty, newDirtyMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &DirtyMap{
-		BaseComponentMap: baseMap,
-	}
-
-	return cm
+	return component.(*Dirty), found
 }

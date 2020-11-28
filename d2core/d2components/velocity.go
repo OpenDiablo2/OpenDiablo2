@@ -7,60 +7,38 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 )
 
-// static check that VelocityComponent implements Component
-var _ akara.Component = &VelocityComponent{}
+// static check that Velocity implements Component
+var _ akara.Component = &Velocity{}
 
-// static check that VelocityMap implements ComponentMap
-var _ akara.ComponentMap = &VelocityMap{}
-
-// VelocityComponent contains an embedded velocity as a vector
-type VelocityComponent struct {
-	*akara.BaseComponent
+// Velocity contains an embedded velocity as a vector
+type Velocity struct {
 	*d2vector.Vector
 }
 
-// VelocityMap is a map of entity ID's to Velocity
-type VelocityMap struct {
-	*akara.BaseComponentMap
-}
-
-// AddVelocity adds a new VelocityComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *VelocityComponent instead of an akara.Component
-func (cm *VelocityMap) AddVelocity(id akara.EID) *VelocityComponent {
-	c := cm.Add(id).(*VelocityComponent)
-
-	c.Vector = d2vector.NewVector(0, 0)
-
-	return c
-}
-
-// GetVelocity returns the VelocityComponent associated with the given entity id
-func (cm *VelocityMap) GetVelocity(id akara.EID) (*VelocityComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
-	}
-
-	return entry.(*VelocityComponent), found
-}
-
-// Velocity is a convenient reference to be used as a component identifier
-var Velocity = newVelocity() // nolint:gochecknoglobals // global by design
-
-func newVelocity() akara.Component {
-	return &VelocityComponent{
-		BaseComponent: akara.NewBaseComponent(VelocityCID, newVelocity, newVelocityMap),
+// New creates a new Velocity. By default, the velocity is (0,0).
+func (*Velocity) New() akara.Component {
+	return &Velocity{
+		Vector: d2vector.NewVector(0, 0),
 	}
 }
 
-func newVelocityMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(VelocityCID, newVelocity, newVelocityMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
+// VelocityFactory is a wrapper for the generic component factory that returns Velocity component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Velocity.
+type VelocityFactory struct {
+	Velocity *akara.ComponentFactory
+}
 
-	cm := &VelocityMap{
-		BaseComponentMap: baseMap,
+// AddVelocity adds a Velocity component to the given entity and returns it
+func (m *VelocityFactory) AddVelocity(id akara.EID) *Velocity {
+	return m.Velocity.Add(id).(*Velocity)
+}
+
+// GetVelocity returns the Velocity component for the given entity, and a bool for whether or not it exists
+func (m *VelocityFactory) GetVelocity(id akara.EID) (*Velocity, bool) {
+	component, found := m.Velocity.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return cm
+	return component.(*Velocity), found
 }

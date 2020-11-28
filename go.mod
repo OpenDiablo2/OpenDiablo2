@@ -9,9 +9,9 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20201108214237-06ea97f0c265 // indirect
 	github.com/go-restruct/restruct v1.2.0-alpha
 	github.com/google/uuid v1.1.2
+	github.com/gravestench/akara v0.0.0-20201128054238-892de9d70d6b
 	github.com/hajimehoshi/ebiten v1.12.3
 	github.com/hajimehoshi/ebiten/v2 v2.0.2
-	github.com/gravestench/akara v0.0.0-20201122210148-a1ee8ea83994
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/profile v1.5.0
 	github.com/robertkrimen/otto v0.0.0-20200922221731-ef014fd054ac

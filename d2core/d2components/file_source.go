@@ -7,62 +7,42 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
+// static check that FileSource implements Component
+var _ akara.Component = &FileSource{}
+
 // AbstractSource is the abstract representation of what a file source is
 type AbstractSource interface {
 	Path() string // the path of the source itself
-	Open(path *FilePathComponent) (d2interface.DataStream, error)
+	Open(path *FilePath) (d2interface.DataStream, error)
 }
 
-// static check that FileSourceComponent implements Component
-var _ akara.Component = &FileSourceComponent{}
-
-// static check that FileSourceMap implements ComponentMap
-var _ akara.ComponentMap = &FileSourceMap{}
-
-// FileSourceComponent contains an embedded file source interface, something that can open files
-type FileSourceComponent struct {
-	*akara.BaseComponent
+// FileSource contains an embedded file source interface, something that can open files
+type FileSource struct {
 	AbstractSource
 }
 
-// FileSourceMap is a map of entity ID's to FileSource
-type FileSourceMap struct {
-	*akara.BaseComponentMap
+// New returns a FileSource component. By default, it contains a nil instance.
+func (*FileSource) New() akara.Component {
+	return &FileSource{}
 }
 
-// AddFileSource adds a new FileSourceComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *FileSourceComponent instead of an akara.Component
-func (cm *FileSourceMap) AddFileSource(id akara.EID) *FileSourceComponent {
-	return cm.Add(id).(*FileSourceComponent)
+// FileSourceFactory is a wrapper for the generic component factory that returns FileSource component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a FileSource.
+type FileSourceFactory struct {
+	FileSource *akara.ComponentFactory
 }
 
-// GetFileSource returns the FileSourceComponent associated with the given entity id
-func (cm *FileSourceMap) GetFileSource(id akara.EID) (*FileSourceComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
+// AddFileSource adds a FileSource component to the given entity and returns it
+func (m *FileSourceFactory) AddFileSource(id akara.EID) *FileSource {
+	return m.FileSource.Add(id).(*FileSource)
+}
+
+// GetFileSource returns the FileSource component for the given entity, and a bool for whether or not it exists
+func (m *FileSourceFactory) GetFileSource(id akara.EID) (*FileSource, bool) {
+	component, found := m.FileSource.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return entry.(*FileSourceComponent), found
-}
-
-// FileSource is a convenient reference to be used as a component identifier
-var FileSource = newFileSource() // nolint:gochecknoglobals // global by design
-
-func newFileSource() akara.Component {
-	return &FileSourceComponent{
-		BaseComponent: akara.NewBaseComponent(FileSourceCID, newFileSource, newFileSourceMap),
-	}
-}
-
-func newFileSourceMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(FileSourceCID, newFileSource, newFileSourceMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &FileSourceMap{
-		BaseComponentMap: baseMap,
-	}
-
-	return cm
+	return component.(*FileSource), found
 }

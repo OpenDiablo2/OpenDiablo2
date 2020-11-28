@@ -7,56 +7,36 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2cof"
 )
 
-// static check that CofComponent implements Component
-var _ akara.Component = &CofComponent{}
+// static check that Cof implements Component
+var _ akara.Component = &Cof{}
 
-// static check that CofMap implements ComponentMap
-var _ akara.ComponentMap = &CofMap{}
-
-// CofComponent is a component that contains an embedded cof struct
-type CofComponent struct {
-	*akara.BaseComponent
+// Cof is a component that contains an embedded cof struct
+type Cof struct {
 	*d2cof.COF
 }
 
-// CofMap is a map of entity ID's to Cof
-type CofMap struct {
-	*akara.BaseComponentMap
+// New returns a new Cof component. By default, it contains a nil instance.
+func (*Cof) New() akara.Component {
+	return &Cof{}
 }
 
-// AddCof adds a new CofComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *CofComponent instead of an akara.Component
-func (cm *CofMap) AddCof(id akara.EID) *CofComponent {
-	return cm.Add(id).(*CofComponent)
+// CofFactory is a wrapper for the generic component factory that returns Cof component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Cof.
+type CofFactory struct {
+	Cof *akara.ComponentFactory
 }
 
-// GetCof returns the CofComponent associated with the given entity id
-func (cm *CofMap) GetCof(id akara.EID) (*CofComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
+// AddCof adds a Cof component to the given entity and returns it
+func (m *CofFactory) AddCof(id akara.EID) *Cof {
+	return m.Cof.Add(id).(*Cof)
+}
+
+// GetCof returns the Cof component for the given entity, and a bool for whether or not it exists
+func (m *CofFactory) GetCof(id akara.EID) (*Cof, bool) {
+	component, found := m.Cof.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return entry.(*CofComponent), found
-}
-
-// Cof is a convenient reference to be used as a component identifier
-var Cof = newCof() // nolint:gochecknoglobals // global by design
-
-func newCof() akara.Component {
-	return &CofComponent{
-		BaseComponent: akara.NewBaseComponent(AssetCofCID, newCof, newCofMap),
-	}
-}
-
-func newCofMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(AssetCofCID, newCof, newCofMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &CofMap{
-		BaseComponentMap: baseMap,
-	}
-
-	return cm
+	return component.(*Cof), found
 }

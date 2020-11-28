@@ -7,56 +7,36 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
 )
 
-// static check that DccComponent implements Component
-var _ akara.Component = &DccComponent{}
+// static check that Dcc implements Component
+var _ akara.Component = &Dcc{}
 
-// static check that DccMap implements ComponentMap
-var _ akara.ComponentMap = &DccMap{}
-
-// DccComponent is a component that contains an embedded DCC struct
-type DccComponent struct {
-	*akara.BaseComponent
+// Dcc is a component that contains an embedded DCC struct
+type Dcc struct {
 	*d2dcc.DCC
 }
 
-// DccMap is a map of entity ID's to Dcc
-type DccMap struct {
-	*akara.BaseComponentMap
+// New returns a Dcc component. By default, it contains a nil instance.
+func (*Dcc) New() akara.Component {
+	return &Dcc{}
 }
 
-// AddDcc adds a new DccComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *DccComponent instead of an akara.Component
-func (cm *DccMap) AddDcc(id akara.EID) *DccComponent {
-	return cm.Add(id).(*DccComponent)
+// DccFactory is a wrapper for the generic component factory that returns Dcc component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Dcc.
+type DccFactory struct {
+	Dcc *akara.ComponentFactory
 }
 
-// GetDcc returns the DccComponent associated with the given entity id
-func (cm *DccMap) GetDcc(id akara.EID) (*DccComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
+// AddDcc adds a Dcc component to the given entity and returns it
+func (m *DccFactory) AddDcc(id akara.EID) *Dcc {
+	return m.Dcc.Add(id).(*Dcc)
+}
+
+// GetDcc returns the Dcc component for the given entity, and a bool for whether or not it exists
+func (m *DccFactory) GetDcc(id akara.EID) (*Dcc, bool) {
+	component, found := m.Dcc.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return entry.(*DccComponent), found
-}
-
-// Dcc is a convenient reference to be used as a component identifier
-var Dcc = newDcc() // nolint:gochecknoglobals // global by design
-
-func newDcc() akara.Component {
-	return &DccComponent{
-		BaseComponent: akara.NewBaseComponent(AssetDccCID, newDcc, newDccMap),
-	}
-}
-
-func newDccMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(AssetDccCID, newDcc, newDccMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &DccMap{
-		BaseComponentMap: baseMap,
-	}
-
-	return cm
+	return component.(*Dcc), found
 }

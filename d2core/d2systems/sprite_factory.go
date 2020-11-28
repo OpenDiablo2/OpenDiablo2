@@ -15,20 +15,9 @@ const (
 
 // NewSpriteFactorySubsystem creates a new sprite factory which is intended
 // to be embedded in the game object factory system.
-func NewSpriteFactorySubsystem(b *akara.BaseSystem, l *d2util.Logger) *SpriteFactory {
-	spritesToRender := akara.NewFilter().
-		Require(d2components.Animation). // we want to process entities that have an animation ...
-		Forbid(d2components.Renderable). // ... but are missing a surface
-		Build()
-
-	spritesToUpdate := akara.NewFilter().
-		Require(d2components.Animation).  // we want to process entities that have an animation ...
-		Require(d2components.Renderable). // ... but are missing a surface
-		Build()
-
+func NewSpriteFactorySubsystem(b akara.BaseSystem, l *d2util.Logger) *SpriteFactory {
 	sys := &SpriteFactory{
-		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(spritesToRender, spritesToUpdate),
-		Logger:               l,
+		Logger: l,
 	}
 
 	sys.BaseSystem = b
@@ -47,39 +36,67 @@ type spriteLoadQueue = map[akara.EID]spriteLoadQueueEntry
 // SpriteFactory is responsible for queueing sprites to be loaded (as animations),
 // as well as binding the animation to a renderer if one is present (which generates the sprite surfaces).
 type SpriteFactory struct {
-	*akara.BaseSubscriberSystem
+	akara.BaseSubscriberSystem
 	*d2util.Logger
-	*RenderSystem
-	*d2components.FilePathMap
-	*d2components.PositionMap
-	*d2components.Dc6Map
-	*d2components.DccMap
-	*d2components.PaletteMap
-	*d2components.AnimationMap
-	*d2components.RenderableMap
-	*d2components.SegmentedSpriteMap
+	RenderSystem *RenderSystem
+	d2components.FilePathFactory
+	d2components.PositionFactory
+	d2components.Dc6Factory
+	d2components.DccFactory
+	d2components.PaletteFactory
+	d2components.AnimationFactory
+	d2components.RenderableFactory
+	d2components.SegmentedSpriteFactory
 	loadQueue       spriteLoadQueue
 	spritesToRender *akara.Subscription
 	spritesToUpdate *akara.Subscription
 }
 
 // Init the sprite factory, injecting the necessary components
-func (t *SpriteFactory) Init(_ *akara.World) {
+func (t *SpriteFactory) Init(world *akara.World) {
+	t.World = world
+
 	t.Info("initializing sprite factory ...")
 
+	t.setupFactories()
+	t.setupSubscriptions()
+
 	t.loadQueue = make(spriteLoadQueue)
+}
 
-	t.spritesToRender = t.Subscriptions[0]
-	t.spritesToUpdate = t.Subscriptions[1]
+func (t *SpriteFactory) setupFactories() {
+	filePathID := t.RegisterComponent(&d2components.FilePath{})
+	positionID := t.RegisterComponent(&d2components.Position{})
+	dc6ID := t.RegisterComponent(&d2components.Dc6{})
+	dccID := t.RegisterComponent(&d2components.Dcc{})
+	paletteID := t.RegisterComponent(&d2components.Palette{})
+	animationID := t.RegisterComponent(&d2components.Animation{})
+	renderableID := t.RegisterComponent(&d2components.Renderable{})
+	segmentedSpriteID := t.RegisterComponent(&d2components.SegmentedSprite{})
 
-	t.FilePathMap = t.InjectMap(d2components.FilePath).(*d2components.FilePathMap)
-	t.PositionMap = t.InjectMap(d2components.Position).(*d2components.PositionMap)
-	t.Dc6Map = t.InjectMap(d2components.Dc6).(*d2components.Dc6Map)
-	t.DccMap = t.InjectMap(d2components.Dcc).(*d2components.DccMap)
-	t.PaletteMap = t.InjectMap(d2components.Palette).(*d2components.PaletteMap)
-	t.AnimationMap = t.InjectMap(d2components.Animation).(*d2components.AnimationMap)
-	t.RenderableMap = t.InjectMap(d2components.Renderable).(*d2components.RenderableMap)
-	t.SegmentedSpriteMap = t.InjectMap(d2components.SegmentedSprite).(*d2components.SegmentedSpriteMap)
+	t.FilePath = t.GetComponentFactory(filePathID)
+	t.Position = t.GetComponentFactory(positionID)
+	t.Dc6 = t.GetComponentFactory(dc6ID)
+	t.Dcc = t.GetComponentFactory(dccID)
+	t.Palette = t.GetComponentFactory(paletteID)
+	t.Animation = t.GetComponentFactory(animationID)
+	t.Renderable = t.GetComponentFactory(renderableID)
+	t.SegmentedSpriteFactory.SegmentedSprite = t.GetComponentFactory(segmentedSpriteID)
+}
+
+func (t *SpriteFactory) setupSubscriptions() {
+	spritesToRender := t.NewComponentFilter().
+		Require(&d2components.Animation{}). // we want to process entities that have an animation ...
+		Forbid(&d2components.Renderable{}). // ... but are missing a surface
+		Build()
+
+	spritesToUpdate := t.NewComponentFilter().
+		Require(&d2components.Animation{}).  // we want to process entities that have an animation ...
+		Require(&d2components.Renderable{}). // ... but are missing a surface
+		Build()
+
+	t.spritesToRender = t.AddSubscription(spritesToRender)
+	t.spritesToUpdate = t.AddSubscription(spritesToUpdate)
 }
 
 // Update processes the load queue which attempting to create animations, as well as
@@ -191,7 +208,7 @@ func (t *SpriteFactory) tryRenderingSprite(eid akara.EID) {
 		return
 	}
 
-	anim.BindRenderer(t.renderer)
+	anim.BindRenderer(t.RenderSystem.renderer)
 
 	sfc := anim.GetCurrentFrameSurface()
 
@@ -225,15 +242,15 @@ func (t *SpriteFactory) updateSprite(eid akara.EID) {
 }
 
 func (t *SpriteFactory) createDc6Animation(
-	dc6 *d2components.Dc6Component,
-	pal *d2components.PaletteComponent,
+	dc6 *d2components.Dc6,
+	pal *d2components.Palette,
 ) (d2interface.Animation, error) {
 	return d2animation.NewDC6Animation(dc6.DC6, pal.Palette, 0)
 }
 
 func (t *SpriteFactory) createDccAnimation(
-	dcc *d2components.DccComponent,
-	pal *d2components.PaletteComponent,
+	dcc *d2components.Dcc,
+	pal *d2components.Palette,
 ) (d2interface.Animation, error) {
 	return d2animation.NewDCCAnimation(dcc.DCC, pal.Palette, 0)
 }

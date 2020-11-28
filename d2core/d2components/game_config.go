@@ -6,20 +6,16 @@ import (
 	"path"
 	"runtime"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-
 	"github.com/gravestench/akara"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
-// static check that GameConfigComponent implements Component
-var _ akara.Component = &GameConfigComponent{}
+// static check that GameConfig implements Component
+var _ akara.Component = &GameConfig{}
 
-// static check that GameConfigMap implements ComponentMap
-var _ akara.ComponentMap = &GameConfigMap{}
-
-// GameConfigComponent represents an OpenDiablo2 game configuration
-type GameConfigComponent struct {
-	*akara.BaseComponent
+// GameConfig represents an OpenDiablo2 game configuration
+type GameConfig struct {
 	MpqLoadOrder    []string
 	MpqPath         string
 	TicksPerSecond  int
@@ -33,53 +29,14 @@ type GameConfigComponent struct {
 	LogLevel        d2util.LogLevel
 }
 
-// GameConfigMap is a map of entity ID's to GameConfig
-type GameConfigMap struct {
-	*akara.BaseComponentMap
-}
-
-// AddGameConfig adds a new GameConfigComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *GameConfigComponent instead of an akara.Component
-func (cm *GameConfigMap) AddGameConfig(id akara.EID) *GameConfigComponent {
-	return defaultConfig(cm.Add(id).(*GameConfigComponent))
-}
-
-// GetGameConfig returns the GameConfigComponent associated with the given entity id
-func (cm *GameConfigMap) GetGameConfig(id akara.EID) (*GameConfigComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
-	}
-
-	return entry.(*GameConfigComponent), found
-}
-
-// GameConfig is a convenient reference to be used as a component identifier
-var GameConfig = newGameConfig() // nolint:gochecknoglobals // global by design
-
-func newGameConfig() akara.Component {
-	return &GameConfigComponent{
-		BaseComponent: akara.NewBaseComponent(GameConfigCID, newGameConfig, newGameConfigMap),
-	}
-}
-
-func newGameConfigMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(GameConfigCID, newGameConfig, newGameConfigMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &GameConfigMap{
-		BaseComponentMap: baseMap,
-	}
-
-	return cm
-}
-
-func defaultConfig(config *GameConfigComponent) *GameConfigComponent {
+// New creates the default GameConfig
+func (*GameConfig) New() akara.Component {
 	const (
 		defaultSfxVolume = 1.0
 		defaultBgmVolume = 0.3
 	)
+
+	config := &GameConfig{}
 
 	config.FullScreen = false
 	config.TicksPerSecond = -1
@@ -131,4 +88,25 @@ func defaultConfig(config *GameConfigComponent) *GameConfigComponent {
 	}
 
 	return config
+}
+
+// GameConfigFactory is a wrapper for the generic component factory that returns GameConfig component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a GameConfig.
+type GameConfigFactory struct {
+	GameConfig *akara.ComponentFactory
+}
+
+// AddGameConfig adds a GameConfig component to the given entity and returns it
+func (m *GameConfigFactory) AddGameConfig(id akara.EID) *GameConfig {
+	return m.GameConfig.Add(id).(*GameConfig)
+}
+
+// GetGameConfig returns the GameConfig component for the given entity, and a bool for whether or not it exists
+func (m *GameConfigFactory) GetGameConfig(id akara.EID) (*GameConfig, bool) {
+	component, found := m.GameConfig.Get(id)
+	if !found {
+		return nil, found
+	}
+
+	return component.(*GameConfig), found
 }

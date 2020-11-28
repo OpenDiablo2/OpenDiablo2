@@ -31,95 +31,123 @@ const (
 	logPrefixAssetLoader = "Asset Loader System"
 )
 
-// NewAssetLoader creates a new asset loader instance
-func NewAssetLoader() *AssetLoaderSystem {
-	// we are going to check entities that dont yet have loaded asset types
-	filesToLoad := akara.NewFilter().
-		Require(d2components.FilePath). // we want to process entities with these file components
-		Require(d2components.FileType).
-		Require(d2components.FileHandle).
-		Forbid(d2components.FileSource). // but we forbid files that are already loaded
-		Forbid(d2components.GameConfig).
-		Forbid(d2components.StringTable).
-		Forbid(d2components.DataDictionary).
-		Forbid(d2components.Palette).
-		Forbid(d2components.PaletteTransform).
-		Forbid(d2components.Cof).
-		Forbid(d2components.Dc6).
-		Forbid(d2components.Dcc).
-		Forbid(d2components.Ds1).
-		Forbid(d2components.Dt1).
-		Forbid(d2components.Wav).
-		Forbid(d2components.AnimData).
-		Build()
-
-	fileSources := akara.NewFilter().
-		Require(d2components.FileSource).
-		Build()
-
-	assetLoader := &AssetLoaderSystem{
-		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToLoad, fileSources),
-		cache:                d2cache.CreateCache(assetCacheBudget).(*d2cache.Cache),
-		Logger:               d2util.NewLogger(),
-	}
-
-	assetLoader.SetPrefix(logPrefixAssetLoader)
-
-	return assetLoader
-}
-
 var _ akara.System = &AssetLoaderSystem{}
 
 // AssetLoaderSystem is responsible for parsing data from file handles into various structs, like COF or DC6
 type AssetLoaderSystem struct {
-	*akara.BaseSubscriberSystem
+	akara.BaseSubscriberSystem
 	*d2util.Logger
 	fileSub   *akara.Subscription
 	sourceSub *akara.Subscription
 	cache     *d2cache.Cache
-	*d2components.FilePathMap
-	*d2components.FileTypeMap
-	*d2components.FileHandleMap
-	*d2components.FileSourceMap
-	*d2components.StringTableMap
-	*d2components.FontTableMap
-	*d2components.DataDictionaryMap
-	*d2components.PaletteMap
-	*d2components.PaletteTransformMap
-	*d2components.CofMap
-	*d2components.Dc6Map
-	*d2components.DccMap
-	*d2components.Ds1Map
-	*d2components.Dt1Map
-	*d2components.WavMap
-	*d2components.AnimDataMap
+	d2components.FilePathFactory
+	d2components.FileTypeFactory
+	d2components.FileHandleFactory
+	d2components.FileSourceFactory
+	d2components.StringTableFactory
+	d2components.FontTableFactory
+	d2components.DataDictionaryFactory
+	d2components.PaletteFactory
+	d2components.PaletteTransformFactory
+	d2components.CofFactory
+	d2components.Dc6Factory
+	d2components.DccFactory
+	d2components.Ds1Factory
+	d2components.Dt1Factory
+	d2components.WavFactory
+	d2components.AnimationDataFactory
 }
 
 // Init injects component maps related to various asset types
-func (m *AssetLoaderSystem) Init(_ *akara.World) {
+func (m *AssetLoaderSystem) Init(world *akara.World) {
+	m.World = world
+
+	m.setupLogger()
+
 	m.Info("initializing ...")
 
-	m.fileSub = m.Subscriptions[0]
-	m.sourceSub = m.Subscriptions[1]
+	m.setupSubscriptions()
+	m.setupFactories()
 
-	// try to inject the components we require, then cast the returned
-	// abstract ComponentMap back to the concrete implementation
-	m.FilePathMap = m.InjectMap(d2components.FilePath).(*d2components.FilePathMap)
-	m.FileTypeMap = m.InjectMap(d2components.FileType).(*d2components.FileTypeMap)
-	m.FileHandleMap = m.InjectMap(d2components.FileHandle).(*d2components.FileHandleMap)
-	m.FileSourceMap = m.InjectMap(d2components.FileSource).(*d2components.FileSourceMap)
-	m.StringTableMap = m.InjectMap(d2components.StringTable).(*d2components.StringTableMap)
-	m.DataDictionaryMap = m.InjectMap(d2components.DataDictionary).(*d2components.DataDictionaryMap)
-	m.PaletteMap = m.InjectMap(d2components.Palette).(*d2components.PaletteMap)
-	m.PaletteTransformMap = m.InjectMap(d2components.PaletteTransform).(*d2components.PaletteTransformMap)
-	m.FontTableMap = m.InjectMap(d2components.FontTable).(*d2components.FontTableMap)
-	m.CofMap = m.InjectMap(d2components.Cof).(*d2components.CofMap)
-	m.Dc6Map = m.InjectMap(d2components.Dc6).(*d2components.Dc6Map)
-	m.DccMap = m.InjectMap(d2components.Dcc).(*d2components.DccMap)
-	m.Ds1Map = m.InjectMap(d2components.Ds1).(*d2components.Ds1Map)
-	m.Dt1Map = m.InjectMap(d2components.Dt1).(*d2components.Dt1Map)
-	m.WavMap = m.InjectMap(d2components.Wav).(*d2components.WavMap)
-	m.AnimDataMap = m.InjectMap(d2components.AnimData).(*d2components.AnimDataMap)
+	m.cache = d2cache.CreateCache(assetCacheBudget).(*d2cache.Cache)
+}
+
+func (m *AssetLoaderSystem) setupLogger() {
+	m.Logger = d2util.NewLogger()
+	m.SetPrefix(logPrefixAssetLoader)
+}
+
+func (m *AssetLoaderSystem) setupSubscriptions() {
+	m.Info("setting up component subscriptions")
+
+	// we are going to check entities that dont yet have loaded asset types
+	filesToLoad := m.NewComponentFilter().
+		Require(
+			&d2components.FilePath{}, // we want to process entities with these file components
+			&d2components.FileType{},
+			&d2components.FileHandle{},
+		).
+		Forbid(
+			&d2components.FileSource{}, // but we forbid files that are already loaded
+			&d2components.GameConfig{},
+			&d2components.StringTable{},
+			&d2components.DataDictionary{},
+			&d2components.Palette{},
+			&d2components.PaletteTransform{},
+			&d2components.Cof{},
+			&d2components.Dc6{},
+			&d2components.Dcc{},
+			&d2components.Ds1{},
+			&d2components.Dt1{},
+			&d2components.Wav{},
+			&d2components.AnimationData{},
+		).
+		Build()
+
+	fileSources := m.NewComponentFilter().
+		Require(&d2components.FileSource{}).
+		Build()
+
+	m.fileSub = m.AddSubscription(filesToLoad)
+	m.sourceSub = m.AddSubscription(fileSources)
+}
+
+func (m *AssetLoaderSystem) setupFactories() {
+	m.Info("setting up component factories")
+
+	filePathID := m.RegisterComponent(&d2components.FilePath{})
+	fileTypeID := m.RegisterComponent(&d2components.FileType{})
+	fileHandleID := m.RegisterComponent(&d2components.FileHandle{})
+	fileSourceID := m.RegisterComponent(&d2components.FileSource{})
+	stringTableID := m.RegisterComponent(&d2components.StringTable{})
+	fontTableID := m.RegisterComponent(&d2components.FontTable{})
+	dataDictionaryID := m.RegisterComponent(&d2components.DataDictionary{})
+	paletteID := m.RegisterComponent(&d2components.Palette{})
+	paletteTransformID := m.RegisterComponent(&d2components.PaletteTransform{})
+	cofID := m.RegisterComponent(&d2components.Cof{})
+	dc6ID := m.RegisterComponent(&d2components.Dc6{})
+	dccID := m.RegisterComponent(&d2components.Dcc{})
+	ds1ID := m.RegisterComponent(&d2components.Ds1{})
+	dt1ID := m.RegisterComponent(&d2components.Dt1{})
+	wavID := m.RegisterComponent(&d2components.Wav{})
+	animationDataID := m.RegisterComponent(&d2components.AnimationData{})
+
+	m.FilePath = m.GetComponentFactory(filePathID)
+	m.FileType = m.GetComponentFactory(fileTypeID)
+	m.FileHandle = m.GetComponentFactory(fileHandleID)
+	m.FileSource = m.GetComponentFactory(fileSourceID)
+	m.StringTable = m.GetComponentFactory(stringTableID)
+	m.DataDictionary = m.GetComponentFactory(dataDictionaryID)
+	m.Palette = m.GetComponentFactory(paletteID)
+	m.PaletteTransform = m.GetComponentFactory(paletteTransformID)
+	m.FontTable = m.GetComponentFactory(fontTableID)
+	m.Cof = m.GetComponentFactory(cofID)
+	m.Dc6 = m.GetComponentFactory(dc6ID)
+	m.Dcc = m.GetComponentFactory(dccID)
+	m.Ds1 = m.GetComponentFactory(ds1ID)
+	m.Dt1 = m.GetComponentFactory(dt1ID)
+	m.Wav = m.GetComponentFactory(wavID)
+	m.AnimationData = m.GetComponentFactory(animationDataID)
 }
 
 // Update processes all of the Entities in the subscription of file entities that need to be processed
@@ -190,7 +218,7 @@ func (m *AssetLoaderSystem) assignFromCache(id akara.EID, path string, t d2enum.
 	case d2enum.FileTypePalette:
 		m.AddPalette(id).Palette = entry.(d2interface.Palette)
 	case d2enum.FileTypePaletteTransform:
-		m.AddPaletteTransform(id).Transform = entry.(*d2pl2.PL2)
+		m.AddPaletteTransform(id).PL2 = entry.(*d2pl2.PL2)
 	case d2enum.FileTypeCOF:
 		m.AddCof(id).COF = entry.(*d2cof.COF)
 	case d2enum.FileTypeDC6:
@@ -204,7 +232,7 @@ func (m *AssetLoaderSystem) assignFromCache(id akara.EID, path string, t d2enum.
 	case d2enum.FileTypeWAV:
 		m.AddWav(id).Data = entry.(d2interface.DataStream)
 	case d2enum.FileTypeD2:
-		m.AddAnimData(id).AnimationData = entry.(*d2animdata.AnimationData)
+		m.AddAnimationData(id).AnimationData = entry.(*d2animdata.AnimationData)
 	}
 
 	return found
@@ -277,7 +305,7 @@ func (m *AssetLoaderSystem) parseAndCache(id akara.EID, path string, t d2enum.Fi
 		case d2enum.FileTypeD2:
 			m.Infof("Loading animation data: %s", path)
 
-			if err := m.loadAnimData(id, path, data); err != nil {
+			if err := m.loadAnimationData(id, path, data); err != nil {
 				m.Error(err.Error())
 			}
 		}
@@ -327,7 +355,7 @@ func (m *AssetLoaderSystem) loadPalette(id akara.EID, path string, data []byte) 
 func (m *AssetLoaderSystem) loadPaletteTransform(id akara.EID, path string, data []byte) error {
 	loaded, err := d2pl2.Load(data)
 	if err == nil {
-		m.AddPaletteTransform(id).Transform = loaded
+		m.AddPaletteTransform(id).PL2 = loaded
 
 		if cacheErr := m.cache.Insert(path, loaded, assetCacheEntryWeight); cacheErr != nil {
 			m.Error(cacheErr.Error())
@@ -411,10 +439,10 @@ func (m *AssetLoaderSystem) loadWAV(id akara.EID, path string, seeker io.ReadSee
 	}
 }
 
-func (m *AssetLoaderSystem) loadAnimData(id akara.EID, path string, data []byte) error {
+func (m *AssetLoaderSystem) loadAnimationData(id akara.EID, path string, data []byte) error {
 	loaded, err := d2animdata.Load(data)
 	if err == nil {
-		m.AddAnimData(id).AnimationData = loaded
+		m.AddAnimationData(id).AnimationData = loaded
 
 		if cacheErr := m.cache.Insert(path, loaded, assetCacheEntryWeight); cacheErr != nil {
 			m.Error(cacheErr.Error())

@@ -10,23 +10,11 @@ const (
 	logPrefixUpdateCounter = "Update Counter"
 )
 
-// NewUpdateCounterSystem creates a new update counter system
-func NewUpdateCounterSystem() *UpdateCounter {
-	uc := &UpdateCounter{
-		BaseSystem: &akara.BaseSystem{},
-		Logger:     d2util.NewLogger(),
-	}
-
-	uc.SetPrefix(logPrefixUpdateCounter)
-
-	return uc
-}
-
 var _ akara.System = &UpdateCounter{}
 
 // UpdateCounter is a utility system that logs the number of updates per second
 type UpdateCounter struct {
-	*akara.BaseSystem
+	akara.BaseSystem
 	*d2util.Logger
 	secondsElapsed float64
 	count          int
@@ -36,11 +24,18 @@ type UpdateCounter struct {
 func (u *UpdateCounter) Init(world *akara.World) {
 	u.World = world
 
+	u.setupLogger()
+
 	if u.World == nil {
 		u.SetActive(false)
 	}
 
 	u.Info("initializing")
+}
+
+func (u *UpdateCounter) setupLogger() {
+	u.Logger = d2util.NewLogger()
+	u.SetPrefix(logPrefixUpdateCounter)
 }
 
 // Update the world update count in 1 second intervals

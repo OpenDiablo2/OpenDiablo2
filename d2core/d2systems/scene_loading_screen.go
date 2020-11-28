@@ -12,6 +12,9 @@ const (
 	sceneKeyLoading = "Loading"
 )
 
+// static check that LoadingScene implements the scene interface
+var _ d2interface.Scene = &LoadingScene{}
+
 // NewLoadingScene creates a new main menu scene. This is the first screen that the user
 // will see when launching the game.
 func NewLoadingScene() *LoadingScene {
@@ -22,9 +25,6 @@ func NewLoadingScene() *LoadingScene {
 	return scene
 }
 
-// static check that LoadingScene implements the scene interface
-var _ d2interface.Scene = &LoadingScene{}
-
 // LoadingScene represents the game's main menu, where users can select single or multi player,
 // or start the map engine test.
 type LoadingScene struct {
@@ -34,32 +34,40 @@ type LoadingScene struct {
 	booted        bool
 }
 
-// Init the main menu scene
-func (s *LoadingScene) Init(_ *akara.World) {
-	s.Info("initializing ...")
+func (s *LoadingScene) setupSubscriptions() {
+	s.Info("setting up component subscriptions")
 
-	s.setupSubscription()
-}
-
-func (s *LoadingScene) setupSubscription() {
-	filesToLoad := akara.NewFilter().
-		Require(d2components.FileHandle).
-		Forbid(d2components.FileSource). // but we forbid files that are already loaded
-		Forbid(d2components.GameConfig).
-		Forbid(d2components.StringTable).
-		Forbid(d2components.DataDictionary).
-		Forbid(d2components.Palette).
-		Forbid(d2components.PaletteTransform).
-		Forbid(d2components.Cof).
-		Forbid(d2components.Dc6).
-		Forbid(d2components.Dcc).
-		Forbid(d2components.Ds1).
-		Forbid(d2components.Dt1).
-		Forbid(d2components.Wav).
-		Forbid(d2components.AnimData).
+	filesToLoad := s.NewComponentFilter().
+		Require(
+			&d2components.FileHandle{},
+		).
+		Forbid( // but we forbid files that are already loaded
+			&d2components.FileSource{},
+			&d2components.GameConfig{},
+			&d2components.StringTable{},
+			&d2components.DataDictionary{},
+			&d2components.Palette{},
+			&d2components.PaletteTransform{},
+			&d2components.Cof{},
+			&d2components.Dc6{},
+			&d2components.Dcc{},
+			&d2components.Ds1{},
+			&d2components.Dt1{},
+			&d2components.Wav{},
+			&d2components.AnimationData{},
+		).
 		Build()
 
 	s.filesToLoad = s.World.AddSubscription(filesToLoad)
+}
+
+// Init the main menu scene
+func (s *LoadingScene) Init(world *akara.World) {
+	s.World = world
+
+	s.Info("initializing ...")
+
+	s.setupSubscriptions()
 }
 
 func (s *LoadingScene) boot() {
