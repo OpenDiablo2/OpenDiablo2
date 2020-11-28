@@ -5,56 +5,36 @@ import (
 	"github.com/gravestench/akara"
 )
 
-// static check that FilePathComponent implements Component
-var _ akara.Component = &FilePathComponent{}
+// static check that FilePath implements Component
+var _ akara.Component = &FilePath{}
 
-// static check that FilePathMap implements ComponentMap
-var _ akara.ComponentMap = &FilePathMap{}
-
-// FilePathComponent represents a file path for a file
-type FilePathComponent struct {
-	*akara.BaseComponent
+// FilePath represents a file path for a file
+type FilePath struct {
 	Path string
 }
 
-// FilePathMap is a map of entity ID's to FilePath
-type FilePathMap struct {
-	*akara.BaseComponentMap
+// New returns a FilePath component. By default, it contains an empty string.
+func (*FilePath) New() akara.Component {
+	return &FilePath{}
 }
 
-// AddFilePath adds a new FilePathComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *FilePathComponent instead of an akara.Component
-func (cm *FilePathMap) AddFilePath(id akara.EID) *FilePathComponent {
-	return cm.Add(id).(*FilePathComponent)
+// FilePathFactory is a wrapper for the generic component factory that returns FilePath component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a FilePath.
+type FilePathFactory struct {
+	FilePath *akara.ComponentFactory
 }
 
-// GetFilePath returns the FilePathComponent associated with the given entity id
-func (cm *FilePathMap) GetFilePath(id akara.EID) (*FilePathComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
+// AddFilePath adds a FilePath component to the given entity and returns it
+func (m *FilePathFactory) AddFilePath(id akara.EID) *FilePath {
+	return m.FilePath.Add(id).(*FilePath)
+}
+
+// GetFilePath returns the FilePath component for the given entity, and a bool for whether or not it exists
+func (m *FilePathFactory) GetFilePath(id akara.EID) (*FilePath, bool) {
+	component, found := m.FilePath.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return entry.(*FilePathComponent), found
-}
-
-// FilePath is a convenient reference to be used as a component identifier
-var FilePath = newFilePath() // nolint:gochecknoglobals // global by design
-
-func newFilePath() akara.Component {
-	return &FilePathComponent{
-		BaseComponent: akara.NewBaseComponent(FilePathCID, newFilePath, newFilePathMap),
-	}
-}
-
-func newFilePathMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(FilePathCID, newFilePath, newFilePathMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &FilePathMap{
-		BaseComponentMap: baseMap,
-	}
-
-	return cm
+	return component.(*FilePath), found
 }

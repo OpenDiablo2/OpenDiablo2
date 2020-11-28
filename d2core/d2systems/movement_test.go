@@ -7,14 +7,12 @@ import (
 	"time"
 
 	"github.com/gravestench/akara"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
 
 func TestMovementSystem_Init(t *testing.T) {
 	cfg := akara.NewWorldConfig()
 
-	cfg.With(NewMovementSystem())
+	cfg.With(&MovementSystem{})
 
 	world := akara.NewWorld(cfg)
 
@@ -24,7 +22,7 @@ func TestMovementSystem_Init(t *testing.T) {
 }
 
 func TestMovementSystem_Active(t *testing.T) {
-	sys := NewMovementSystem()
+	sys := &MovementSystem{}
 
 	if sys.Active() {
 		t.Error("system should not be active at creation")
@@ -32,7 +30,7 @@ func TestMovementSystem_Active(t *testing.T) {
 }
 
 func TestMovementSystem_SetActive(t *testing.T) {
-	sys := NewMovementSystem()
+	sys := &MovementSystem{}
 
 	sys.SetActive(false)
 
@@ -42,20 +40,13 @@ func TestMovementSystem_SetActive(t *testing.T) {
 }
 
 func TestMovementSystem_EntityAdded(t *testing.T) {
-	cfg := akara.NewWorldConfig()
-
-	sys := NewMovementSystem()
-
-	cfg.With(sys).
-		With(d2components.Position).
-		With(d2components.Velocity)
-
+	moveSys := &MovementSystem{}
+	cfg := akara.NewWorldConfig().With(moveSys)
 	world := akara.NewWorld(cfg)
 
 	e := world.NewEntity()
-
-	position := sys.AddPosition(e)
-	velocity := sys.AddVelocity(e)
+	position := moveSys.AddPosition(e)
+	velocity := moveSys.AddVelocity(e)
 
 	px, py := 10., 10.
 	vx, vy := 1., 0.
@@ -63,18 +54,18 @@ func TestMovementSystem_EntityAdded(t *testing.T) {
 	position.Set(px, py)
 	velocity.Set(vx, vy)
 
-	if len(sys.Subscriptions[0].GetEntities()) != 1 {
+	if len(moveSys.movableEntities.GetEntities()) != 1 {
 		t.Error("entity not added to the system")
 	}
 
-	if p, found := sys.GetPosition(e); !found {
+	if p, found := moveSys.GetPosition(e); !found {
 		t.Error("position component not found")
 	} else if p.X() != px || p.Y() != py {
 		fmtError := "position component values incorrect:\n\t expected %v, %v but got %v, %v"
 		t.Errorf(fmtError, px, py, p.X(), p.Y())
 	}
 
-	if v, found := sys.GetVelocity(e); !found {
+	if v, found := moveSys.GetVelocity(e); !found {
 		t.Error("position component not found")
 	} else if v.X() != vx || v.Y() != vy {
 		fmtError := "velocity component values incorrect:\n\t expected %v, %v but got %v, %v"
@@ -86,12 +77,9 @@ func TestMovementSystem_Update(t *testing.T) {
 	// world configFileBootstrap
 	cfg := akara.NewWorldConfig()
 
-	movementSystem := NewMovementSystem()
-	positions := d2components.Position.NewMap()
-	velocities := d2components.Velocity.NewMap()
+	movementSystem := &MovementSystem{}
 
-	cfg.With(movementSystem).With(positions).With(velocities)
-
+	cfg.With(movementSystem)
 	world := akara.NewWorld(cfg)
 
 	// lets make an entity and add some components to it
@@ -118,7 +106,7 @@ func TestMovementSystem_Update(t *testing.T) {
 func benchN(n int, b *testing.B) {
 	cfg := akara.NewWorldConfig()
 
-	movementSystem := NewMovementSystem()
+	movementSystem := &MovementSystem{}
 
 	cfg.With(movementSystem)
 

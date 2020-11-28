@@ -5,61 +5,42 @@ import (
 	"github.com/gravestench/akara"
 )
 
-// static check that ViewportFilterComponent implements Component
-var _ akara.Component = &ViewportFilterComponent{}
+// static check that ViewportFilter implements Component
+var _ akara.Component = &ViewportFilter{}
 
-// static check that ViewportFilterMap implements ComponentMap
-var _ akara.ComponentMap = &ViewportFilterMap{}
-
-// ViewportFilterComponent is a component that contains a bitset that denotes which viewport
+// ViewportFilter is a component that contains a bitset that denotes which viewport
 // the entity will be rendered.
-type ViewportFilterComponent struct {
-	*akara.BaseComponent
+type ViewportFilter struct {
 	*akara.BitSet
 }
 
-// ViewportFilterMap is a map of entity ID's to ViewportFilter
-type ViewportFilterMap struct {
-	*akara.BaseComponentMap
-}
+// New creates a new ViewportFilter.
+// By default, the filter is set to only allow the main scene viewport.
+func (*ViewportFilter) New() akara.Component {
+	const mainViewport = 0
 
-// AddViewportFilter adds a new ViewportFilterComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *ViewportFilterComponent instead of an akara.Component
-func (cm *ViewportFilterMap) AddViewportFilter(id akara.EID) *ViewportFilterComponent {
-	c := cm.Add(id).(*ViewportFilterComponent)
-
-	c.BitSet = akara.NewBitSet(0)
-
-	return c
-}
-
-// GetViewportFilter returns the ViewportFilterComponent associated with the given entity id
-func (cm *ViewportFilterMap) GetViewportFilter(id akara.EID) (*ViewportFilterComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
-	}
-
-	return entry.(*ViewportFilterComponent), found
-}
-
-// ViewportFilter is a convenient reference to be used as a component identifier
-var ViewportFilter = newViewportFilter() // nolint:gochecknoglobals // global by design
-
-func newViewportFilter() akara.Component {
-	return &ViewportFilterComponent{
-		BaseComponent: akara.NewBaseComponent(ViewportFilterCID, newViewportFilter, newViewportFilterMap),
+	return &ViewportFilter{
+		BitSet: akara.NewBitSet(mainViewport),
 	}
 }
 
-func newViewportFilterMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(ViewportFilterCID, newViewportFilter, newViewportFilterMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
+// ViewportFilterFactory is a wrapper for the generic component factory that returns ViewportFilter component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a ViewportFilter.
+type ViewportFilterFactory struct {
+	ViewportFilter *akara.ComponentFactory
+}
 
-	cm := &ViewportFilterMap{
-		BaseComponentMap: baseMap,
+// AddViewportFilter adds a ViewportFilter component to the given entity and returns it
+func (m *ViewportFilterFactory) AddViewportFilter(id akara.EID) *ViewportFilter {
+	return m.ViewportFilter.Add(id).(*ViewportFilter)
+}
+
+// GetViewportFilter returns the ViewportFilter component for the given entity, and a bool for whether or not it exists
+func (m *ViewportFilterFactory) GetViewportFilter(id akara.EID) (*ViewportFilter, bool) {
+	component, found := m.ViewportFilter.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return cm
+	return component.(*ViewportFilter), found
 }

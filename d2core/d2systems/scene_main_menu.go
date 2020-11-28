@@ -32,7 +32,9 @@ type MainMenuScene struct {
 }
 
 // Init the main menu scene
-func (s *MainMenuScene) Init(_ *akara.World) {
+func (s *MainMenuScene) Init(world *akara.World) {
+	s.World = world
+
 	s.Info("initializing ...")
 }
 

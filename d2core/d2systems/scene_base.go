@@ -55,16 +55,16 @@ type BaseScene struct {
 	Add         *sceneObjectFactory
 	Viewports   []akara.EID
 	GameObjects []akara.EID
-	*d2components.ViewportMap
-	*d2components.MainViewportMap
-	*d2components.ViewportFilterMap
-	*d2components.CameraMap
-	*d2components.RenderableMap
-	*d2components.PositionMap
-	*d2components.ScaleMap
-	*d2components.AnimationMap
-	*d2components.OriginMap
-	*d2components.AlphaMap
+	d2components.ViewportFactory
+	d2components.MainViewportFactory
+	d2components.ViewportFilterFactory
+	d2components.CameraFactory
+	d2components.RenderableFactory
+	d2components.PositionFactory
+	d2components.ScaleFactory
+	d2components.AnimationFactory
+	d2components.OriginFactory
+	d2components.AlphaFactory
 }
 
 // Booted returns whether or not the scene has booted
@@ -87,9 +87,9 @@ func (s *BaseScene) Init(world *akara.World) {
 }
 
 func (s *BaseScene) boot() {
-	s.Info("booting ...")
+	s.Info("base scene booting ...")
 
-	s.injectComponentMaps()
+	s.setupFactories()
 
 	s.Add = &sceneObjectFactory{
 		BaseScene: s,
@@ -129,21 +129,34 @@ func (s *BaseScene) boot() {
 
 	s.createDefaultViewport()
 
-	s.Info("booted!")
+	s.Info("base scene booted!")
 	s.booted = true
 }
 
-func (s *BaseScene) injectComponentMaps() {
-	s.MainViewportMap = s.World.InjectMap(d2components.MainViewport).(*d2components.MainViewportMap)
-	s.ViewportMap = s.World.InjectMap(d2components.Viewport).(*d2components.ViewportMap)
-	s.ViewportFilterMap = s.World.InjectMap(d2components.ViewportFilter).(*d2components.ViewportFilterMap)
-	s.CameraMap = s.World.InjectMap(d2components.Camera).(*d2components.CameraMap)
-	s.RenderableMap = s.World.InjectMap(d2components.Renderable).(*d2components.RenderableMap)
-	s.PositionMap = s.World.InjectMap(d2components.Position).(*d2components.PositionMap)
-	s.ScaleMap = s.World.InjectMap(d2components.Scale).(*d2components.ScaleMap)
-	s.AnimationMap = s.World.InjectMap(d2components.Animation).(*d2components.AnimationMap)
-	s.OriginMap = s.World.InjectMap(d2components.Origin).(*d2components.OriginMap)
-	s.AlphaMap = s.World.InjectMap(d2components.Alpha).(*d2components.AlphaMap)
+func (s *BaseScene) setupFactories() {
+	s.Info("setting up component factories")
+
+	mainViewportID := s.RegisterComponent(&d2components.MainViewport{})
+	viewportID := s.RegisterComponent(&d2components.Viewport{})
+	viewportFilterID := s.RegisterComponent(&d2components.ViewportFilter{})
+	cameraID := s.RegisterComponent(&d2components.Camera{})
+	renderableID := s.RegisterComponent(&d2components.Renderable{})
+	positionID := s.RegisterComponent(&d2components.Position{})
+	scaleID := s.RegisterComponent(&d2components.Scale{})
+	animationID := s.RegisterComponent(&d2components.Animation{})
+	originID := s.RegisterComponent(&d2components.Origin{})
+	alphaID := s.RegisterComponent(&d2components.Alpha{})
+
+	s.MainViewport = s.GetComponentFactory(mainViewportID)
+	s.Viewport = s.GetComponentFactory(viewportID)
+	s.ViewportFilter = s.GetComponentFactory(viewportFilterID)
+	s.Camera = s.GetComponentFactory(cameraID)
+	s.Renderable = s.GetComponentFactory(renderableID)
+	s.Position = s.GetComponentFactory(positionID)
+	s.Scale = s.GetComponentFactory(scaleID)
+	s.Animation = s.GetComponentFactory(animationID)
+	s.Origin = s.GetComponentFactory(originID)
+	s.Alpha = s.GetComponentFactory(alphaID)
 }
 
 func (s *BaseScene) createDefaultViewport() {
@@ -239,7 +252,7 @@ func (s *BaseScene) renderViewport(idx int, objects []akara.EID) {
 	if idx == mainViewport {
 		s.AddMainViewport(id)
 	} else {
-		s.MainViewportMap.Remove(id)
+		s.MainViewport.Remove(id)
 	}
 
 	camera, found := s.GetCamera(id)

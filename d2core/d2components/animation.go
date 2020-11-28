@@ -8,55 +8,35 @@ import (
 )
 
 // static check that AnimationComponent implements Component
-var _ akara.Component = &AnimationComponent{}
+var _ akara.Component = &Animation{}
 
-// static check that AnimationMap implements ComponentMap
-var _ akara.ComponentMap = &AnimationMap{}
-
-// AnimationComponent is a component that contains a width and height
-type AnimationComponent struct {
-	*akara.BaseComponent
+// Animation is a component that contains a width and height
+type Animation struct {
 	d2interface.Animation
 }
 
-// AnimationMap is a map of entity ID's to Animation
-type AnimationMap struct {
-	*akara.BaseComponentMap
+// New returns an animation component. By default, it contains a nil instance of an animation.
+func (*Animation) New() akara.Component {
+	return &Animation{}
 }
 
-// AddAnimation adds a new AnimationComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *AnimationComponent instead of an akara.Component
-func (cm *AnimationMap) AddAnimation(id akara.EID) *AnimationComponent {
-	return cm.Add(id).(*AnimationComponent)
+// AnimationFactory is a wrapper for the generic component factory that returns Animation component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Animation.
+type AnimationFactory struct {
+	Animation *akara.ComponentFactory
 }
 
-// GetAnimation returns the AnimationComponent associated with the given entity id
-func (cm *AnimationMap) GetAnimation(id akara.EID) (*AnimationComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
+// AddAnimation adds a Animation component to the given entity and returns it
+func (m *AnimationFactory) AddAnimation(id akara.EID) *Animation {
+	return m.Animation.Add(id).(*Animation)
+}
+
+// GetAnimation returns the Animation component for the given entity, and a bool for whether or not it exists
+func (m *AnimationFactory) GetAnimation(id akara.EID) (*Animation, bool) {
+	component, found := m.Animation.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return entry.(*AnimationComponent), found
-}
-
-// Animation is a convenient reference to be used as a component identifier
-var Animation = newAnimation() // nolint:gochecknoglobals // global by design
-
-func newAnimation() akara.Component {
-	return &AnimationComponent{
-		BaseComponent: akara.NewBaseComponent(AnimationCID, newAnimation, newAnimationMap),
-	}
-}
-
-func newAnimationMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(AnimationCID, newAnimation, newAnimationMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &AnimationMap{
-		BaseComponentMap: baseMap,
-	}
-
-	return cm
+	return component.(*Animation), found
 }

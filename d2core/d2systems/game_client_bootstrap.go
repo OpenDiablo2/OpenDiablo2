@@ -4,7 +4,6 @@ import (
 	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
 
 const (
@@ -14,53 +13,51 @@ const (
 // static check that the game config system implements the system interface
 var _ akara.System = &GameClientBootstrapSystem{}
 
-// NewGameClientBootstrapSystem makes a new client bootstrap system
-func NewGameClientBootstrapSystem() *GameClientBootstrapSystem {
-	// we are interested in actual game config instances, too
-	gameConfigs := akara.NewFilter().Require(d2components.GameConfig).Build()
-
-	sys := &GameClientBootstrapSystem{
-		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(gameConfigs),
-		Logger:               d2util.NewLogger(),
-	}
-
-	sys.SetPrefix(logPrefixGameClientBootstrap)
-
-	return sys
-}
-
 // GameClientBootstrapSystem is responsible for setting up other
 // systems that are common to both the game client and the headless game server
 type GameClientBootstrapSystem struct {
-	*akara.BaseSubscriberSystem
+	akara.BaseSubscriberSystem
 	*d2util.Logger
-	*RenderSystem
 }
 
 // Init injects the common systems required by both the game client and headless server
-func (m *GameClientBootstrapSystem) Init(_ *akara.World) {
+func (m *GameClientBootstrapSystem) Init(world *akara.World) {
+	m.World = world
+
+	m.setupLogger()
+
 	m.Info("initializing ...")
 
 	m.injectSystems()
 
-	m.Info("game client bootstrap complete, deactivating")
-	m.SetActive(false)
+	m.Info("initialization complete")
 
 	if err := m.World.Update(0); err != nil {
 		m.Error(err.Error())
 	}
 }
 
-func (m *GameClientBootstrapSystem) injectSystems() {
-	m.RenderSystem = NewRenderSystem()
+func (m *GameClientBootstrapSystem) setupLogger() {
+	m.Logger = d2util.NewLogger()
+	m.SetPrefix(logPrefixGameClientBootstrap)
+}
 
-	m.World.AddSystem(m.RenderSystem)
-	m.World.AddSystem(NewUpdateCounterSystem())
-	m.World.AddSystem(NewLoadingScene())
-	m.World.AddSystem(NewMainMenuScene())
+func (m *GameClientBootstrapSystem) injectSystems() {
+	m.Info("injecting render system")
+	m.AddSystem(&RenderSystem{})
+
+	m.Info("injecting update counter system")
+	m.AddSystem(&UpdateCounter{})
+
+	m.Info("injecting loading scene")
+	m.AddSystem(NewLoadingScene())
+
+	m.Info("injecting main menu scene")
+	m.AddSystem(NewMainMenuScene())
 }
 
 // Update does nothing, but exists to satisfy the `akara.System` interface
 func (m *GameClientBootstrapSystem) Update() {
-	// nothing to do after init ...
+	m.Info("game client bootstrap complete, deactivating")
+	m.RemoveSystem(m)
 }

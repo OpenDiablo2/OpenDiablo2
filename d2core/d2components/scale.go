@@ -7,60 +7,38 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 )
 
-// static check that ScaleComponent implements Component
-var _ akara.Component = &ScaleComponent{}
+// static check that Scale implements Component
+var _ akara.Component = &Scale{}
 
-// static check that ScaleMap implements ComponentMap
-var _ akara.ComponentMap = &ScaleMap{}
-
-// ScaleComponent represents an entities x,y axis scale as a vector
-type ScaleComponent struct {
-	*akara.BaseComponent
+// Scale represents an entities x,y axis scale as a vector
+type Scale struct {
 	*d2vector.Vector
 }
 
-// ScaleMap is a map of entity ID's to Scale
-type ScaleMap struct {
-	*akara.BaseComponentMap
-}
-
-// AddScale adds a new ScaleComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *ScaleComponent instead of an akara.Component
-func (cm *ScaleMap) AddScale(id akara.EID) *ScaleComponent {
-	c := cm.Add(id).(*ScaleComponent)
-
-	c.Vector = d2vector.NewVector(1, 1)
-
-	return c
-}
-
-// GetScale returns the ScaleComponent associated with the given entity id
-func (cm *ScaleMap) GetScale(id akara.EID) (*ScaleComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
-	}
-
-	return entry.(*ScaleComponent), found
-}
-
-// Scale is a convenient reference to be used as a component identifier
-var Scale = newScale() // nolint:gochecknoglobals // global by design
-
-func newScale() akara.Component {
-	return &ScaleComponent{
-		BaseComponent: akara.NewBaseComponent(ScaleCID, newScale, newScaleMap),
+// New creates a new Scale instance. By default, the scale is (1,1)
+func (*Scale) New() akara.Component {
+	return &Scale{
+		Vector: d2vector.NewVector(1, 1),
 	}
 }
 
-func newScaleMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(ScaleCID, newScale, newScaleMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
+// ScaleFactory is a wrapper for the generic component factory that returns Scale component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Scale.
+type ScaleFactory struct {
+	Scale *akara.ComponentFactory
+}
 
-	cm := &ScaleMap{
-		BaseComponentMap: baseMap,
+// AddScale adds a Scale component to the given entity and returns it
+func (m *ScaleFactory) AddScale(id akara.EID) *Scale {
+	return m.Scale.Add(id).(*Scale)
+}
+
+// GetScale returns the Scale component for the given entity, and a bool for whether or not it exists
+func (m *ScaleFactory) GetScale(id akara.EID) (*Scale, bool) {
+	component, found := m.Scale.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return cm
+	return component.(*Scale), found
 }

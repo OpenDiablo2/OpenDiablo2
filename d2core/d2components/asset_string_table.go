@@ -7,56 +7,36 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2tbl"
 )
 
-// static check that StringTableComponent implements Component
-var _ akara.Component = &StringTableComponent{}
+// static check that StringTable implements Component
+var _ akara.Component = &StringTable{}
 
-// static check that StringTableMap implements ComponentMap
-var _ akara.ComponentMap = &StringTableMap{}
-
-// StringTableComponent is a component that contains an embedded text table struct
-type StringTableComponent struct {
-	*akara.BaseComponent
+// StringTable is a component that contains an embedded text table struct
+type StringTable struct {
 	*d2tbl.TextDictionary
 }
 
-// StringTableMap is a map of entity ID's to StringTable
-type StringTableMap struct {
-	*akara.BaseComponentMap
+// New returns a new StringTable component. By default, it contains a nil instance.
+func (*StringTable) New() akara.Component {
+	return &StringTable{}
 }
 
-// AddStringTable adds a new StringTableComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *StringTableComponent instead of an akara.Component
-func (cm *StringTableMap) AddStringTable(id akara.EID) *StringTableComponent {
-	return cm.Add(id).(*StringTableComponent)
+// StringTableFactory is a wrapper for the generic component factory that returns StringTable component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a StringTable.
+type StringTableFactory struct {
+	StringTable *akara.ComponentFactory
 }
 
-// GetStringTable returns the StringTableComponent associated with the given entity id
-func (cm *StringTableMap) GetStringTable(id akara.EID) (*StringTableComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
+// AddStringTable adds a StringTable component to the given entity and returns it
+func (m *StringTableFactory) AddStringTable(id akara.EID) *StringTable {
+	return m.StringTable.Add(id).(*StringTable)
+}
+
+// GetStringTable returns the StringTable component for the given entity, and a bool for whether or not it exists
+func (m *StringTableFactory) GetStringTable(id akara.EID) (*StringTable, bool) {
+	component, found := m.StringTable.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return entry.(*StringTableComponent), found
-}
-
-// StringTable is a convenient reference to be used as a component identifier
-var StringTable = newStringTable() // nolint:gochecknoglobals // global by design
-
-func newStringTable() akara.Component {
-	return &StringTableComponent{
-		BaseComponent: akara.NewBaseComponent(AssetStringTableCID, newStringTable, newStringTableMap),
-	}
-}
-
-func newStringTableMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(AssetStringTableCID, newStringTable, newStringTableMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &StringTableMap{
-		BaseComponentMap: baseMap,
-	}
-
-	return cm
+	return component.(*StringTable), found
 }

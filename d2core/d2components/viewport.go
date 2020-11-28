@@ -7,29 +7,19 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom"
 )
 
-// static check that ViewportComponent implements Component
-var _ akara.Component = &ViewportComponent{}
+// static check that Viewport implements Component
+var _ akara.Component = &Viewport{}
 
-// static check that ViewportMap implements ComponentMap
-var _ akara.ComponentMap = &ViewportMap{}
-
-// ViewportComponent represents the size and position of a scene viewport. This is used
+// Viewport represents the size and position of a scene viewport. This is used
 // to control where on screen a viewport is rendered.
-type ViewportComponent struct {
-	*akara.BaseComponent
+type Viewport struct {
 	*d2geom.Rectangle
 }
 
-// ViewportMap is a map of entity ID's to Viewport
-type ViewportMap struct {
-	*akara.BaseComponentMap
-}
-
-// AddViewport adds a new ViewportComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *ViewportComponent instead of an akara.Component
-func (cm *ViewportMap) AddViewport(id akara.EID) *ViewportComponent {
-	c := cm.Add(id).(*ViewportComponent)
+// New creates a new Viewport. By default, the viewport size is 800x600,
+// and is positioned at the top-left of the screen.
+func (*Viewport) New() akara.Component {
+	c := &Viewport{}
 
 	const defaultWidth, defaultHeight = 800, 600
 
@@ -43,32 +33,23 @@ func (cm *ViewportMap) AddViewport(id akara.EID) *ViewportComponent {
 	return c
 }
 
-// GetViewport returns the ViewportComponent associated with the given entity id
-func (cm *ViewportMap) GetViewport(id akara.EID) (*ViewportComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
-	}
-
-	return entry.(*ViewportComponent), found
+// ViewportFactory is a wrapper for the generic component factory that returns Viewport component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Viewport.
+type ViewportFactory struct {
+	Viewport *akara.ComponentFactory
 }
 
-// Viewport is a convenient reference to be used as a component identifier
-var Viewport = newViewport() // nolint:gochecknoglobals // global by design
-
-func newViewport() akara.Component {
-	return &ViewportComponent{
-		BaseComponent: akara.NewBaseComponent(ViewportCID, newViewport, newViewportMap),
-	}
+// AddViewport adds a Viewport component to the given entity and returns it
+func (m *ViewportFactory) AddViewport(id akara.EID) *Viewport {
+	return m.Viewport.Add(id).(*Viewport)
 }
 
-func newViewportMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(ViewportCID, newViewport, newViewportMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &ViewportMap{
-		BaseComponentMap: baseMap,
+// GetViewport returns the Viewport component for the given entity, and a bool for whether or not it exists
+func (m *ViewportFactory) GetViewport(id akara.EID) (*Viewport, bool) {
+	component, found := m.Viewport.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return cm
+	return component.(*Viewport), found
 }

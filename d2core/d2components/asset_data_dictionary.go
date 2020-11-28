@@ -8,55 +8,35 @@ import (
 )
 
 // static check that DataDictionaryComponent implements Component
-var _ akara.Component = &DataDictionaryComponent{}
+var _ akara.Component = &DataDictionary{}
 
-// static check that DataDictionaryMap implements ComponentMap
-var _ akara.ComponentMap = &DataDictionaryMap{}
-
-// DataDictionaryComponent is a component that contains an embedded txt data dictionary struct
-type DataDictionaryComponent struct {
-	*akara.BaseComponent
+// DataDictionary is a component that contains an embedded txt data dictionary struct
+type DataDictionary struct {
 	*d2txt.DataDictionary
 }
 
-// DataDictionaryMap is a map of entity ID's to DataDictionary
-type DataDictionaryMap struct {
-	*akara.BaseComponentMap
+// New returns a DataDictionary component. By default, it contains a nil instance.
+func (*DataDictionary) New() akara.Component {
+	return &AnimationData{}
 }
 
-// AddDataDictionary adds a new DataDictionaryComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *DataDictionaryComponent instead of an akara.Component
-func (cm *DataDictionaryMap) AddDataDictionary(id akara.EID) *DataDictionaryComponent {
-	return cm.Add(id).(*DataDictionaryComponent)
+// DataDictionaryFactory is a wrapper for the generic component factory that returns DataDictionary component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a DataDictionary.
+type DataDictionaryFactory struct {
+	DataDictionary *akara.ComponentFactory
 }
 
-// GetDataDictionary returns the DataDictionaryComponent associated with the given entity id
-func (cm *DataDictionaryMap) GetDataDictionary(id akara.EID) (*DataDictionaryComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
+// AddDataDictionary adds a DataDictionary component to the given entity and returns it
+func (m *DataDictionaryFactory) AddDataDictionary(id akara.EID) *DataDictionary {
+	return m.DataDictionary.Add(id).(*DataDictionary)
+}
+
+// GetDataDictionary returns the DataDictionary component for the given entity, and a bool for whether or not it exists
+func (m *DataDictionaryFactory) GetDataDictionary(id akara.EID) (*DataDictionary, bool) {
+	component, found := m.DataDictionary.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return entry.(*DataDictionaryComponent), found
-}
-
-// DataDictionary is a convenient reference to be used as a component identifier
-var DataDictionary = newDataDictionary() // nolint:gochecknoglobals // global by design
-
-func newDataDictionary() akara.Component {
-	return &DataDictionaryComponent{
-		BaseComponent: akara.NewBaseComponent(AssetDataDictionaryCID, newDataDictionary, newDataDictionaryMap),
-	}
-}
-
-func newDataDictionaryMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(AssetDataDictionaryCID, newDataDictionary, newDataDictionaryMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &DataDictionaryMap{
-		BaseComponentMap: baseMap,
-	}
-
-	return cm
+	return component.(*DataDictionary), found
 }

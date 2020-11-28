@@ -22,87 +22,109 @@ const (
 // static check that the game config system implements the system interface
 var _ akara.System = &AppBootstrapSystem{}
 
-// NewAppBootstrapSystem creates a system that initializes the common application facilities, namely
-// config file source directories and loading/creating the OpenDiablo2 config file.
-func NewAppBootstrapSystem() *AppBootstrapSystem {
-	// we are going to check entities that dont yet have loaded asset types
-	filesToCheck := akara.NewFilter().
-		Require( // files that need to be loaded
-			d2components.FileType,
-			d2components.FileHandle,
-			d2components.FilePath,
-		).
-		Forbid( // files which have been loaded
-			d2components.GameConfig,
-			d2components.StringTable,
-			d2components.DataDictionary,
-			d2components.Palette,
-			d2components.PaletteTransform,
-			d2components.Cof,
-			d2components.Dc6,
-			d2components.Dcc,
-			d2components.Ds1,
-			d2components.Dt1,
-			d2components.Wav,
-			d2components.AnimData,
-		).
-		Build()
-
-	// we are interested in actual game config instances, too
-	gameConfigs := akara.NewFilter().Require(d2components.GameConfig).Build()
-
-	sys := &AppBootstrapSystem{
-		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToCheck, gameConfigs),
-		Logger:               d2util.NewLogger(),
-	}
-
-	sys.SetPrefix(logPrefixAppBootstrap)
-	sys.Debug("Created")
-
-	return sys
-}
-
 // AppBootstrapSystem is responsible for the common initialization process between
 // the app modes (eg common to the game client as well as the headless server)
 type AppBootstrapSystem struct {
-	*akara.BaseSubscriberSystem
+	akara.BaseSubscriberSystem
 	*d2util.Logger
 	subscribedFiles   *akara.Subscription
 	subscribedConfigs *akara.Subscription
-	*d2components.GameConfigMap
-	*d2components.FilePathMap
-	*d2components.FileTypeMap
-	*d2components.FileHandleMap
-	*d2components.FileSourceMap
+	d2components.GameConfigFactory
+	d2components.FilePathFactory
+	d2components.FileTypeFactory
+	d2components.FileHandleFactory
+	d2components.FileSourceFactory
 }
 
 // Init will inject (or use existing) components related to setting up the config sources
 func (m *AppBootstrapSystem) Init(world *akara.World) {
+	m.World = world
+
+	m.setupLogger()
+
 	m.Info("initializing ...")
 
-	m.subscribedFiles = m.Subscriptions[0]
-	m.subscribedConfigs = m.Subscriptions[1]
-
-	// try to inject the components we require, then cast the returned
-	// abstract ComponentMap back to the concrete implementation
-	m.GameConfigMap = world.InjectMap(d2components.GameConfig).(*d2components.GameConfigMap)
-	m.FilePathMap = world.InjectMap(d2components.FilePath).(*d2components.FilePathMap)
-	m.FileTypeMap = world.InjectMap(d2components.FileType).(*d2components.FileTypeMap)
-	m.FileHandleMap = world.InjectMap(d2components.FileHandle).(*d2components.FileHandleMap)
-	m.FileSourceMap = world.InjectMap(d2components.FileSource).(*d2components.FileSourceMap)
-
+	m.setupSubscriptions()
+	m.setupFactories()
 	m.injectSystems()
 	m.setupConfigSources()
 	m.setupConfigFile()
+
+	m.Info("... initialization complete!")
+}
+
+func (m *AppBootstrapSystem) setupLogger() {
+	m.Logger = d2util.NewLogger()
+	m.SetPrefix(logPrefixAppBootstrap)
+}
+
+func (m *AppBootstrapSystem) setupSubscriptions() {
+	m.Info("setting up component subscriptions")
+
+	// we are going to check entities that dont yet have loaded asset types
+	filesToCheck := m.NewComponentFilter().
+		Require( // files that need to be loaded
+			&d2components.FileType{},
+			&d2components.FileHandle{},
+			&d2components.FilePath{},
+		).
+		Forbid( // files which have been loaded
+			&d2components.GameConfig{},
+			&d2components.StringTable{},
+			&d2components.DataDictionary{},
+			&d2components.Palette{},
+			&d2components.PaletteTransform{},
+			&d2components.Cof{},
+			&d2components.Dc6{},
+			&d2components.Dcc{},
+			&d2components.Ds1{},
+			&d2components.Dt1{},
+			&d2components.Wav{},
+			&d2components.AnimationData{},
+		).
+		Build()
+
+	// we are interested in actual game config instances, too
+	gameConfigs := m.NewComponentFilter().Require(&d2components.GameConfig{}).Build()
+
+	m.subscribedFiles = m.World.AddSubscription(filesToCheck)
+	m.subscribedConfigs = m.World.AddSubscription(gameConfigs)
+}
+
+func (m *AppBootstrapSystem) setupFactories() {
+	m.Info("setting up component factories")
+
+	gameConfigID := m.RegisterComponent(&d2components.GameConfig{})
+	filePathID := m.RegisterComponent(&d2components.FilePath{})
+	fileTypeID := m.RegisterComponent(&d2components.FileType{})
+	fileHandleID := m.RegisterComponent(&d2components.FileHandle{})
+	fileSourceID := m.RegisterComponent(&d2components.FileSource{})
+
+	m.GameConfig = m.GetComponentFactory(gameConfigID)
+	m.FilePath = m.GetComponentFactory(filePathID)
+	m.FileType = m.GetComponentFactory(fileTypeID)
+	m.FileHandle = m.GetComponentFactory(fileHandleID)
+	m.FileSource = m.GetComponentFactory(fileSourceID)
 }
 
 func (m *AppBootstrapSystem) injectSystems() {
-	m.World.AddSystem(NewFileTypeResolver())
-	m.World.AddSystem(NewFileSourceResolver())
-	m.World.AddSystem(NewFileHandleResolver())
-	m.World.AddSystem(NewGameConfigSystem())
-	m.World.AddSystem(NewAssetLoader())
-	m.World.AddSystem(NewGameObjectFactory())
+	m.Info("injecting file type resolution system")
+	m.AddSystem(&FileTypeResolver{})
+
+	m.Info("injecting file source resolution system")
+	m.AddSystem(&FileSourceResolver{})
+
+	m.Info("injecting file handle resolution system")
+	m.AddSystem(&FileHandleResolver{})
+
+	m.Info("injecting game configuration system")
+	m.AddSystem(&GameConfigSystem{})
+
+	m.Info("injecting asset loader system")
+	m.AddSystem(&AssetLoaderSystem{})
+
+	m.Info("injecting game object factory system")
+	m.AddSystem(&GameObjectFactory{})
 }
 
 // we make two entities and assign file paths for the two directories that
@@ -159,13 +181,14 @@ func (m *AppBootstrapSystem) Update() {
 		return
 	}
 
+	m.Info("adding mpq's from config file")
 	m.initMpqSources(cfg)
 
 	m.Info("app bootstrap complete, deactivating system")
-	m.SetActive(false) // bootstrap is complete!
+	m.SetActive(false)
 }
 
-func (m *AppBootstrapSystem) initMpqSources(cfg *d2components.GameConfigComponent) {
+func (m *AppBootstrapSystem) initMpqSources(cfg *d2components.GameConfig) {
 	for _, mpqFileName := range cfg.MpqLoadOrder {
 		fullMpqFilePath := path.Join(cfg.MpqPath, mpqFileName)
 

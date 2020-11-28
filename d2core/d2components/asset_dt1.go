@@ -7,56 +7,36 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dt1"
 )
 
-// static check that Dt1Component implements Component
-var _ akara.Component = &Dt1Component{}
+// static check that Dt1 implements Component
+var _ akara.Component = &Dt1{}
 
-// static check that Dt1Map implements ComponentMap
-var _ akara.ComponentMap = &Dt1Map{}
-
-// Dt1Component is a component that contains an embedded DT1 struct
-type Dt1Component struct {
-	*akara.BaseComponent
+// Dt1 is a component that contains an embedded DT1 struct
+type Dt1 struct {
 	*d2dt1.DT1
 }
 
-// Dt1Map is a map of entity ID's to Dt1
-type Dt1Map struct {
-	*akara.BaseComponentMap
+// New returns a Dt1 component. By default, it contains a nil instance.
+func (*Dt1) New() akara.Component {
+	return &Dt1{}
 }
 
-// AddDt1 adds a new Dt1Component for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *Dt1Component instead of an akara.Component
-func (cm *Dt1Map) AddDt1(id akara.EID) *Dt1Component {
-	return cm.Add(id).(*Dt1Component)
+// Dt1Factory is a wrapper for the generic component factory that returns Dt1 component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Dt1.
+type Dt1Factory struct {
+	Dt1 *akara.ComponentFactory
 }
 
-// GetDt1 returns the Dt1Component associated with the given entity id
-func (cm *Dt1Map) GetDt1(id akara.EID) (*Dt1Component, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
+// AddDt1 adds a Dt1 component to the given entity and returns it
+func (m *Dt1Factory) AddDt1(id akara.EID) *Dt1 {
+	return m.Dt1.Add(id).(*Dt1)
+}
+
+// GetDt1 returns the Dt1 component for the given entity, and a bool for whether or not it exists
+func (m *Dt1Factory) GetDt1(id akara.EID) (*Dt1, bool) {
+	component, found := m.Dt1.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return entry.(*Dt1Component), found
-}
-
-// Dt1 is a convenient reference to be used as a component identifier
-var Dt1 = newDt1() // nolint:gochecknoglobals // global by design
-
-func newDt1() akara.Component {
-	return &Dt1Component{
-		BaseComponent: akara.NewBaseComponent(AssetDt1CID, newDt1, newDt1Map),
-	}
-}
-
-func newDt1Map() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(AssetDt1CID, newDt1, newDt1Map)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &Dt1Map{
-		BaseComponentMap: baseMap,
-	}
-
-	return cm
+	return component.(*Dt1), found
 }

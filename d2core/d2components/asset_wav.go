@@ -7,56 +7,36 @@ import (
 	"github.com/gravestench/akara"
 )
 
-// static check that WavComponent implements Component
-var _ akara.Component = &WavComponent{}
+// static check that Wav implements Component
+var _ akara.Component = &Wav{}
 
-// static check that WavMap implements ComponentMap
-var _ akara.ComponentMap = &WavMap{}
-
-// WavComponent is a component that contains an embedded io.ReadSeeker for streaming wav audio files
-type WavComponent struct {
-	*akara.BaseComponent
+// Wav is a component that contains an embedded io.ReadSeeker for streaming wav audio files
+type Wav struct {
 	Data io.ReadSeeker
 }
 
-// WavMap is a map of entity ID's to Wav
-type WavMap struct {
-	*akara.BaseComponentMap
+// New returns a new Wav component. By default, it contains a nil instance.
+func (*Wav) New() akara.Component {
+	return &Wav{}
 }
 
-// AddWav adds a new WavComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *WavComponent instead of an akara.Component
-func (cm *WavMap) AddWav(id akara.EID) *WavComponent {
-	return cm.Add(id).(*WavComponent)
+// WavFactory is a wrapper for the generic component factory that returns Wav component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Wav.
+type WavFactory struct {
+	Wav *akara.ComponentFactory
 }
 
-// GetWav returns the WavComponent associated with the given entity id
-func (cm *WavMap) GetWav(id akara.EID) (*WavComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
+// AddWav adds a Wav component to the given entity and returns it
+func (m *WavFactory) AddWav(id akara.EID) *Wav {
+	return m.Wav.Add(id).(*Wav)
+}
+
+// GetWav returns the Wav component for the given entity, and a bool for whether or not it exists
+func (m *WavFactory) GetWav(id akara.EID) (*Wav, bool) {
+	component, found := m.Wav.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return entry.(*WavComponent), found
-}
-
-// Wav is a convenient reference to be used as a component identifier
-var Wav = newWav() // nolint:gochecknoglobals // global by design
-
-func newWav() akara.Component {
-	return &WavComponent{
-		BaseComponent: akara.NewBaseComponent(AssetWavCID, newWav, newWavMap),
-	}
-}
-
-func newWavMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(AssetWavCID, newWav, newWavMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &WavMap{
-		BaseComponentMap: baseMap,
-	}
-
-	return cm
+	return component.(*Wav), found
 }

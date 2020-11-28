@@ -18,25 +18,6 @@ const (
 	logPrefixFileTypeResolver = "File Type Resolver"
 )
 
-// NewFileTypeResolver creates a new file type resolution system.
-func NewFileTypeResolver() *FileTypeResolver {
-	// we subscribe only to entities that have a filepath
-	// and have not yet been given a file type
-	filesToCheck := akara.NewFilter().
-		Require(d2components.FilePath).
-		Forbid(d2components.FileType).
-		Build()
-
-	ftr := &FileTypeResolver{
-		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToCheck),
-		Logger:               d2util.NewLogger(),
-	}
-
-	ftr.SetPrefix(logPrefixFileTypeResolver)
-
-	return ftr
-}
-
 // static check that FileTypeResolver implements the System interface
 var _ akara.System = &FileTypeResolver{}
 
@@ -46,23 +27,47 @@ var _ akara.System = &FileTypeResolver{}
 // and it will then create the file type component for the entity, thus removing the entity
 // from its subscription.
 type FileTypeResolver struct {
-	*akara.BaseSubscriberSystem
+	akara.BaseSubscriberSystem
 	*d2util.Logger
 	filesToCheck *akara.Subscription
-	*d2components.FilePathMap
-	*d2components.FileTypeMap
+	d2components.FilePathFactory
+	d2components.FileTypeFactory
 }
 
 // Init initializes the system with the given world
-func (m *FileTypeResolver) Init(_ *akara.World) {
+func (m *FileTypeResolver) Init(world *akara.World) {
+	m.World = world
+
+	m.setupLogger()
+
 	m.Info("initializing ...")
 
-	m.filesToCheck = m.Subscriptions[0]
+	m.setupFactories()
+	m.setupSubscriptions()
+}
 
-	// try to inject the components we require, then cast the returned
-	// abstract ComponentMap back to the concrete implementation
-	m.FilePathMap = m.InjectMap(d2components.FilePath).(*d2components.FilePathMap)
-	m.FileTypeMap = m.InjectMap(d2components.FileType).(*d2components.FileTypeMap)
+func (m *FileTypeResolver) setupLogger() {
+	m.Logger = d2util.NewLogger()
+	m.SetPrefix(logPrefixFileTypeResolver)
+}
+
+func (m *FileTypeResolver) setupFactories() {
+	filePathID := m.RegisterComponent(&d2components.FilePath{})
+	fileTypeID := m.RegisterComponent(&d2components.FileType{})
+
+	m.FilePath = m.GetComponentFactory(filePathID)
+	m.FileType = m.GetComponentFactory(fileTypeID)
+}
+
+func (m *FileTypeResolver) setupSubscriptions() {
+	// we subscribe only to entities that have a filepath
+	// and have not yet been given a file type
+	filesToCheck := m.NewComponentFilter().
+		Require(&d2components.FilePath{}).
+		Forbid(&d2components.FileType{}).
+		Build()
+
+	m.filesToCheck = m.AddSubscription(filesToCheck)
 }
 
 // Update processes all of the Entities

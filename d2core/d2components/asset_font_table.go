@@ -5,56 +5,36 @@ import (
 	"github.com/gravestench/akara"
 )
 
-// static check that FontTableComponent implements Component
-var _ akara.Component = &FontTableComponent{}
+// static check that FontTable implements Component
+var _ akara.Component = &FontTable{}
 
-// static check that FontTableMap implements ComponentMap
-var _ akara.ComponentMap = &FontTableMap{}
-
-// FontTableComponent is a component that contains font table data as a byte slice
-type FontTableComponent struct {
-	*akara.BaseComponent
+// FontTable is a component that contains font table data as a byte slice
+type FontTable struct {
 	Data []byte
 }
 
-// FontTableMap is a map of entity ID's to FontTable
-type FontTableMap struct {
-	*akara.BaseComponentMap
+// New returns a FontTable component. By default, Data is a nil instance.
+func (*FontTable) New() akara.Component {
+	return &FontTable{}
 }
 
-// AddFontTable adds a new FontTableComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *FontTableComponent instead of an akara.Component
-func (cm *FontTableMap) AddFontTable(id akara.EID) *FontTableComponent {
-	return cm.Add(id).(*FontTableComponent)
+// FontTableFactory is a wrapper for the generic component factory that returns FontTable component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a FontTable.
+type FontTableFactory struct {
+	FontTable *akara.ComponentFactory
 }
 
-// GetFontTable returns the FontTableComponent associated with the given entity id
-func (cm *FontTableMap) GetFontTable(id akara.EID) (*FontTableComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
+// AddFontTable adds a FontTable component to the given entity and returns it
+func (m *FontTableFactory) AddFontTable(id akara.EID) *FontTable {
+	return m.FontTable.Add(id).(*FontTable)
+}
+
+// GetFontTable returns the FontTable component for the given entity, and a bool for whether or not it exists
+func (m *FontTableFactory) GetFontTable(id akara.EID) (*FontTable, bool) {
+	component, found := m.FontTable.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return entry.(*FontTableComponent), found
-}
-
-// FontTable is a convenient reference to be used as a component identifier
-var FontTable = newFontTable() // nolint:gochecknoglobals // global by design
-
-func newFontTable() akara.Component {
-	return &FontTableComponent{
-		BaseComponent: akara.NewBaseComponent(AssetFontTableCID, newFontTable, newFontTableMap),
-	}
-}
-
-func newFontTableMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(AssetFontTableCID, newFontTable, newFontTableMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &FontTableMap{
-		BaseComponentMap: baseMap,
-	}
-
-	return cm
+	return component.(*FontTable), found
 }

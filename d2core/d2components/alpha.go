@@ -5,60 +5,40 @@ import (
 	"github.com/gravestench/akara"
 )
 
-// static check that AlphaComponent implements Component
-var _ akara.Component = &AlphaComponent{}
+// static check that Alpha implements Component
+var _ akara.Component = &Alpha{}
 
-// static check that AlphaMap implements ComponentMap
-var _ akara.ComponentMap = &AlphaMap{}
-
-// AlphaComponent is a component that contains an embedded cof struct
-type AlphaComponent struct {
-	*akara.BaseComponent
+// Alpha is a component that contains normalized alpha transparency (0.0 ... 1.0)
+type Alpha struct {
 	Alpha float64
 }
 
-// AlphaMap is a map of entity ID's to Alpha
-type AlphaMap struct {
-	*akara.BaseComponentMap
-}
+// New creates a new alpha component instance. The default alpha is opaque with value 1.0
+func (*Alpha) New() akara.Component {
+	const defaultAlpha = 1.0
 
-// AddAlpha adds a new AlphaComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *AlphaComponent instead of an akara.Component
-func (cm *AlphaMap) AddAlpha(id akara.EID) *AlphaComponent {
-	c := cm.Add(id).(*AlphaComponent)
-
-	c.Alpha = 1
-
-	return c
-}
-
-// GetAlpha returns the AlphaComponent associated with the given entity id
-func (cm *AlphaMap) GetAlpha(id akara.EID) (*AlphaComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
-	}
-
-	return entry.(*AlphaComponent), found
-}
-
-// Alpha is a convenient reference to be used as a component identifier
-var Alpha = newAlpha() // nolint:gochecknoglobals // global by design
-
-func newAlpha() akara.Component {
-	return &AlphaComponent{
-		BaseComponent: akara.NewBaseComponent(AlphaCID, newAlpha, newAlphaMap),
+	return &Alpha{
+		Alpha: defaultAlpha,
 	}
 }
 
-func newAlphaMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(AlphaCID, newAlpha, newAlphaMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
+// AlphaFactory is a wrapper for the generic component factory that returns Alpha component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Alpha.
+type AlphaFactory struct {
+	Alpha *akara.ComponentFactory
+}
 
-	cm := &AlphaMap{
-		BaseComponentMap: baseMap,
+// AddAlpha adds a Alpha component to the given entity and returns it
+func (m *AlphaFactory) AddAlpha(id akara.EID) *Alpha {
+	return m.Alpha.Add(id).(*Alpha)
+}
+
+// GetAlpha returns the Alpha component for the given entity, and a bool for whether or not it exists
+func (m *AlphaFactory) GetAlpha(id akara.EID) (*Alpha, bool) {
+	component, found := m.Alpha.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return cm
+	return component.(*Alpha), found
 }

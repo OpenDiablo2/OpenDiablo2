@@ -21,60 +21,71 @@ const (
 	logPrefixRenderSystem = "Render System"
 )
 
-// NewRenderSystem creates a new render system
-func NewRenderSystem() *RenderSystem {
-	viewports := akara.NewFilter().
-		Require(d2components.Viewport).
-		Require(d2components.MainViewport).
-		Require(d2components.Renderable).
-		Build()
-
-	gameConfigs := akara.NewFilter().Require(d2components.GameConfig).Build()
-
-	r := &RenderSystem{
-		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(viewports, gameConfigs),
-		Logger:               d2util.NewLogger(),
-	}
-
-	r.SetPrefix(logPrefixRenderSystem)
-
-	return r
-}
-
 // static check that RenderSystem implements the System interface
 var _ akara.System = &RenderSystem{}
 
 // RenderSystem is responsible for rendering the main viewports of scenes
 // to the game screen.
 type RenderSystem struct {
-	*akara.BaseSubscriberSystem
+	akara.BaseSubscriberSystem
 	*d2util.Logger
 	renderer  d2interface.Renderer
 	viewports *akara.Subscription
 	configs   *akara.Subscription
-	*d2components.GameConfigMap
-	*d2components.ViewportMap
-	*d2components.MainViewportMap
-	*d2components.RenderableMap
+	d2components.GameConfigFactory
+	d2components.ViewportFactory
+	d2components.MainViewportFactory
+	d2components.RenderableFactory
 	lastUpdate        time.Time
 	gameLoopInitDelay time.Duration // there is a race condition, this is a hack
 }
 
 // Init initializes the system with the given world, injecting the necessary components
-func (m *RenderSystem) Init(_ *akara.World) {
+func (m *RenderSystem) Init(world *akara.World) {
+	m.World = world
+
+	m.setupLogger()
+
 	m.Info("initializing ...")
 
+	m.setupFactories()
+	m.setupSubscriptions()
+
 	m.gameLoopInitDelay = time.Millisecond
+}
 
-	m.viewports = m.Subscriptions[0]
-	m.configs = m.Subscriptions[1]
+func (m *RenderSystem) setupLogger() {
+	m.Logger = d2util.NewLogger()
+	m.SetPrefix(logPrefixRenderSystem)
+}
 
-	// try to inject the components we require, then cast the returned
-	// abstract ComponentMap back to the concrete implementation
-	m.GameConfigMap = m.InjectMap(d2components.GameConfig).(*d2components.GameConfigMap)
-	m.ViewportMap = m.InjectMap(d2components.Viewport).(*d2components.ViewportMap)
-	m.MainViewportMap = m.InjectMap(d2components.MainViewport).(*d2components.MainViewportMap)
-	m.RenderableMap = m.InjectMap(d2components.Renderable).(*d2components.RenderableMap)
+func (m *RenderSystem) setupFactories() {
+	gameConfigID := m.RegisterComponent(&d2components.GameConfig{})
+	viewportID := m.RegisterComponent(&d2components.Viewport{})
+	mainViewportID := m.RegisterComponent(&d2components.MainViewport{})
+	renderableID := m.RegisterComponent(&d2components.Renderable{})
+
+	m.GameConfig = m.GetComponentFactory(gameConfigID)
+	m.Viewport = m.GetComponentFactory(viewportID)
+	m.MainViewport = m.GetComponentFactory(mainViewportID)
+	m.Renderable = m.GetComponentFactory(renderableID)
+}
+
+func (m *RenderSystem) setupSubscriptions() {
+	viewports := m.NewComponentFilter().
+		Require(
+			&d2components.Viewport{},
+			&d2components.MainViewport{},
+			&d2components.Renderable{},
+		).
+		Build()
+
+	gameConfigs := m.NewComponentFilter().
+		Require(&d2components.GameConfig{}).
+		Build()
+
+	m.viewports = m.AddSubscription(viewports)
+	m.configs = m.AddSubscription(gameConfigs)
 }
 
 // Update will initialize the renderer, start the game loop, and

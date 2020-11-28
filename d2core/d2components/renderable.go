@@ -7,56 +7,36 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
-// static check that RenderableComponent implements Component
-var _ akara.Component = &RenderableComponent{}
+// static check that Renderable implements Component
+var _ akara.Component = &Renderable{}
 
-// static check that RenderableMap implements ComponentMap
-var _ akara.ComponentMap = &RenderableMap{}
-
-// RenderableComponent is a component that contains an embedded surface interface, which is used for rendering
-type RenderableComponent struct {
-	*akara.BaseComponent
+// Renderable is a component that contains an embedded surface interface, which is used for rendering
+type Renderable struct {
 	d2interface.Surface
 }
 
-// RenderableMap is a map of entity ID's to Renderable
-type RenderableMap struct {
-	*akara.BaseComponentMap
+// New returns a Renderable component. By default, it contains a nil instance.
+func (*Renderable) New() akara.Component {
+	return &Renderable{}
 }
 
-// AddRenderable adds a new RenderableComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *RenderableComponent instead of an akara.Component
-func (cm *RenderableMap) AddRenderable(id akara.EID) *RenderableComponent {
-	return cm.Add(id).(*RenderableComponent)
+// RenderableFactory is a wrapper for the generic component factory that returns Renderable component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Renderable.
+type RenderableFactory struct {
+	Renderable *akara.ComponentFactory
 }
 
-// GetRenderable returns the RenderableComponent associated with the given entity id
-func (cm *RenderableMap) GetRenderable(id akara.EID) (*RenderableComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
+// AddRenderable adds a Renderable component to the given entity and returns it
+func (m *RenderableFactory) AddRenderable(id akara.EID) *Renderable {
+	return m.Renderable.Add(id).(*Renderable)
+}
+
+// GetRenderable returns the Renderable component for the given entity, and a bool for whether or not it exists
+func (m *RenderableFactory) GetRenderable(id akara.EID) (*Renderable, bool) {
+	component, found := m.Renderable.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return entry.(*RenderableComponent), found
-}
-
-// Renderable is a convenient reference to be used as a component identifier
-var Renderable = newRenderable() // nolint:gochecknoglobals // global by design
-
-func newRenderable() akara.Component {
-	return &RenderableComponent{
-		BaseComponent: akara.NewBaseComponent(RenderableCID, newRenderable, newRenderableMap),
-	}
-}
-
-func newRenderableMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(RenderableCID, newRenderable, newRenderableMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &RenderableMap{
-		BaseComponentMap: baseMap,
-	}
-
-	return cm
+	return component.(*Renderable), found
 }

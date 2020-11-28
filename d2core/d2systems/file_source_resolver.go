@@ -19,48 +19,64 @@ const (
 	logPrefixFileSourceResolver = "File Source Resolver"
 )
 
-// NewFileSourceResolver creates a new file source resolver system
-func NewFileSourceResolver() *FileSourceResolver {
-	// subscribe to entities with a file type and file path, but no file source type
-	filesToCheck := akara.NewFilter().
-		Require(d2components.FilePath).
-		Require(d2components.FileType).
-		Forbid(d2components.FileSource).
-		Build()
-
-	fsr := &FileSourceResolver{
-		BaseSubscriberSystem: akara.NewBaseSubscriberSystem(filesToCheck),
-		Logger:               d2util.NewLogger(),
-	}
-
-	fsr.SetPrefix(logPrefixFileSourceResolver)
-
-	return fsr
-}
-
 // FileSourceResolver is responsible for determining if files can be used as a file source.
 // If it can, it sets the file up as a source, and the file handle resolver system can
 // then use the source to open files.
 type FileSourceResolver struct {
-	*akara.BaseSubscriberSystem
+	akara.BaseSubscriberSystem
 	*d2util.Logger
-	fileSub     *akara.Subscription
-	filePaths   *d2components.FilePathMap
-	fileTypes   *d2components.FileTypeMap
-	fileSources *d2components.FileSourceMap
+	filesToCheck *akara.Subscription
+	d2components.FilePathFactory
+	d2components.FileTypeFactory
+	d2components.FileSourceFactory
 }
 
 // Init initializes the file source resolver, injecting the necessary components into the world
-func (m *FileSourceResolver) Init(_ *akara.World) {
+func (m *FileSourceResolver) Init(world *akara.World) {
+	m.World = world
+
+	m.setupLogger()
+
 	m.Info("initializing ...")
 
-	m.fileSub = m.Subscriptions[0]
+	m.setupSubscriptions()
+	m.setupFactories()
 
-	// try to inject the components we require, then cast the returned
-	// abstract ComponentMap back to the concrete implementation
-	m.filePaths = m.InjectMap(d2components.FilePath).(*d2components.FilePathMap)
-	m.fileTypes = m.InjectMap(d2components.FileType).(*d2components.FileTypeMap)
-	m.fileSources = m.InjectMap(d2components.FileSource).(*d2components.FileSourceMap)
+	m.Info("... initialization complete!")
+}
+
+func (m *FileSourceResolver) setupLogger() {
+	m.Logger = d2util.NewLogger()
+	m.SetPrefix(logPrefixFileSourceResolver)
+}
+
+func (m *FileSourceResolver) setupSubscriptions() {
+	m.Info("setting up component subscriptions")
+
+	// subscribe to entities with a file type and file path, but no file source type
+	filesToCheck := m.NewComponentFilter().
+		Require(
+			&d2components.FilePath{},
+			&d2components.FileType{},
+		).
+		Forbid(
+			&d2components.FileSource{},
+		).
+		Build()
+
+	m.filesToCheck = m.AddSubscription(filesToCheck)
+}
+
+func (m *FileSourceResolver) setupFactories() {
+	m.Info("setting up component factories")
+
+	filePathID := m.RegisterComponent(&d2components.FilePath{})
+	fileTypeID := m.RegisterComponent(&d2components.FileType{})
+	fileSourceID := m.RegisterComponent(&d2components.FileSource{})
+
+	m.FilePath = m.GetComponentFactory(filePathID)
+	m.FileType = m.GetComponentFactory(fileTypeID)
+	m.FileSource = m.GetComponentFactory(fileSourceID)
 }
 
 // Update iterates over entities from its subscription, and checks if it can be used as a file source
@@ -73,12 +89,12 @@ func (m *FileSourceResolver) Update() {
 }
 
 func (m *FileSourceResolver) processSourceEntity(id akara.EID) {
-	fp, found := m.filePaths.GetFilePath(id)
+	fp, found := m.GetFilePath(id)
 	if !found {
 		return
 	}
 
-	ft, found := m.fileTypes.GetFileType(id)
+	ft, found := m.GetFileType(id)
 	if !found {
 		return
 	}
@@ -95,16 +111,11 @@ func (m *FileSourceResolver) processSourceEntity(id akara.EID) {
 			break
 		}
 
-		source := m.fileSources.AddFileSource(id)
-		source.AbstractSource = instance
+		m.AddFileSource(id).AbstractSource = instance
 
 		m.Infof("using MPQ source for `%s`", fp.Path)
 	case d2enum.FileTypeDirectory:
-		instance := m.makeFileSystemSource(fp.Path)
-
-		source := m.fileSources.AddFileSource(id)
-		source.AbstractSource = instance
-
+		m.AddFileSource(id).AbstractSource = m.makeFileSystemSource(fp.Path)
 		m.Infof("using FILESYSTEM source for `%s`", fp.Path)
 	}
 }
@@ -118,7 +129,7 @@ type fsSource struct {
 	rootDir string
 }
 
-func (s *fsSource) Open(path *d2components.FilePathComponent) (d2interface.DataStream, error) {
+func (s *fsSource) Open(path *d2components.FilePath) (d2interface.DataStream, error) {
 	fileData, err := os.Open(s.fullPath(path.Path))
 	if err != nil {
 		return nil, err
@@ -149,7 +160,7 @@ type mpqSource struct {
 	mpq d2interface.Archive
 }
 
-func (s *mpqSource) Open(path *d2components.FilePathComponent) (d2interface.DataStream, error) {
+func (s *mpqSource) Open(path *d2components.FilePath) (d2interface.DataStream, error) {
 	fileData, err := s.mpq.ReadFileStream(s.cleanMpqPath(path.Path))
 	if err != nil {
 		return nil, err

@@ -26,8 +26,8 @@ func main() {
 		cfg := akara.NewWorldConfig()
 
 		cfg.
-			With(d2systems.NewAppBootstrapSystem()).
-			With(d2systems.NewGameClientBootstrapSystem())
+			With(&d2systems.AppBootstrapSystem{}).
+			With(&d2systems.GameClientBootstrapSystem{})
 
 		akara.NewWorld(cfg)
 

@@ -7,56 +7,36 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
-// static check that PaletteComponent implements Component
-var _ akara.Component = &PaletteComponent{}
+// static check that Palette implements Component
+var _ akara.Component = &Palette{}
 
-// static check that PaletteMap implements ComponentMap
-var _ akara.ComponentMap = &PaletteMap{}
-
-// PaletteComponent is a component that contains an embedded palette interface
-type PaletteComponent struct {
-	*akara.BaseComponent
+// Palette is a component that contains an embedded palette interface
+type Palette struct {
 	d2interface.Palette
 }
 
-// PaletteMap is a map of entity ID's to Palette
-type PaletteMap struct {
-	*akara.BaseComponentMap
+// New returns a new Palette component. By default, it contains a nil instance.
+func (*Palette) New() akara.Component {
+	return &Palette{}
 }
 
-// AddPalette adds a new PaletteComponent for the given entity id and returns it.
-// this is a convenience method for the generic Add method, as it returns a
-// *PaletteComponent instead of an akara.Component
-func (cm *PaletteMap) AddPalette(id akara.EID) *PaletteComponent {
-	return cm.Add(id).(*PaletteComponent)
+// PaletteFactory is a wrapper for the generic component factory that returns Palette component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Palette.
+type PaletteFactory struct {
+	Palette *akara.ComponentFactory
 }
 
-// GetPalette returns the PaletteComponent associated with the given entity id
-func (cm *PaletteMap) GetPalette(id akara.EID) (*PaletteComponent, bool) {
-	entry, found := cm.Get(id)
-	if entry == nil {
-		return nil, false
+// AddPalette adds a Palette component to the given entity and returns it
+func (m *PaletteFactory) AddPalette(id akara.EID) *Palette {
+	return m.Palette.Add(id).(*Palette)
+}
+
+// GetPalette returns the Palette component for the given entity, and a bool for whether or not it exists
+func (m *PaletteFactory) GetPalette(id akara.EID) (*Palette, bool) {
+	component, found := m.Palette.Get(id)
+	if !found {
+		return nil, found
 	}
 
-	return entry.(*PaletteComponent), found
-}
-
-// Palette is a convenient reference to be used as a component identifier
-var Palette = newPalette() // nolint:gochecknoglobals // global by design
-
-func newPalette() akara.Component {
-	return &PaletteComponent{
-		BaseComponent: akara.NewBaseComponent(AssetPaletteCID, newPalette, newPaletteMap),
-	}
-}
-
-func newPaletteMap() akara.ComponentMap {
-	baseComponent := akara.NewBaseComponent(AssetPaletteCID, newPalette, newPaletteMap)
-	baseMap := akara.NewBaseComponentMap(baseComponent)
-
-	cm := &PaletteMap{
-		BaseComponentMap: baseMap,
-	}
-
-	return cm
+	return component.(*Palette), found
 }
