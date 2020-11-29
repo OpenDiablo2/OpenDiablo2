@@ -142,13 +142,9 @@ func (m *InputSystem) applyInputState(id akara.EID) (preventPropagation bool) {
 		return false
 	}
 
-	if !v.Enabled {
-		return
+	if !v.Enabled || !m.inputState.Contains(v.InputVector) {
+		return false
 	}
 
-	if m.inputState.Contains(v.InputVector) {
-		return v.Callback()
-	}
-
-	return false
+	return v.Callback()
 }
