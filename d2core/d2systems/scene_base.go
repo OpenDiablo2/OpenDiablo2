@@ -329,7 +329,9 @@ func (s *BaseScene) renderObject(target d2interface.Surface, id akara.EID) {
 	target.PushScale(scale.X(), scale.Y())
 	defer target.Pop()
 
-	target.PushColor(color.Alpha{A: uint8(alpha.Alpha * 255)})
+	const maxAlpha = 255
+
+	target.PushColor(color.Alpha{A: uint8(alpha.Alpha * maxAlpha)})
 	defer target.Pop()
 
 	segment, found := s.systems.SpriteFactory.GetSegmentedSprite(id)

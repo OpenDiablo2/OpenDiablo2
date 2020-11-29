@@ -1,13 +1,14 @@
 package d2systems
 
 import (
+	"github.com/gravestench/akara"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 	ebiten_input "github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/ebiten"
-	"github.com/gravestench/akara"
 )
 
 const (

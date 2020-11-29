@@ -1,9 +1,9 @@
 package d2systems
 
 import (
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2input"
 	"github.com/gravestench/akara"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2input"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 )
