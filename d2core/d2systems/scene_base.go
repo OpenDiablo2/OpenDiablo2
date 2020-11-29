@@ -134,8 +134,6 @@ func (s *BaseScene) boot() {
 		return
 	}
 
-	s.systems.InputSystem.renderer = s.systems.RenderSystem.renderer
-
 	if s.systems.GameObjectFactory == nil {
 		s.Info("waiting for game object factory ...")
 		return
