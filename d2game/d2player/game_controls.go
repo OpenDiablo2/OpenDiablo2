@@ -209,7 +209,7 @@ func NewGameControls(
 	inventoryRecord := asset.Records.Layout.Inventory[inventoryRecordKey]
 
 	heroStatsPanel := NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
-	questLog := NewQuestLog(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
+	questLog := NewQuestLog(asset, ui, l)
 	inventory := NewInventory(asset, ui, l, hero.Gold, inventoryRecord)
 	skilltree := newSkillTree(hero.Skills, hero.Class, asset, l, ui)
 
@@ -398,6 +398,8 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 		g.toggleInventoryPanel()
 	case d2enum.ToggleCharacterPanel:
 		g.toggleHeroStatsPanel()
+	case d2enum.ToggleQuestLog:
+		g.toggleQuestLog()
 	case d2enum.ToggleRunWalk:
 		g.hud.onToggleRunButton(false)
 	case d2enum.HoldRun:
@@ -455,6 +457,12 @@ func (g *GameControls) onEscKey() {
 
 	if g.heroStatsPanel.IsOpen() {
 		g.heroStatsPanel.Close()
+
+		escHandled = true
+	}
+
+	if g.questLog.IsOpen() {
+		g.questLog.Close()
 
 		escHandled = true
 	}
@@ -616,6 +624,7 @@ func (g *GameControls) OnMouseButtonDown(event d2interface.MouseEvent) bool {
 }
 
 func (g *GameControls) toggleHeroStatsPanel() {
+	g.questLog.Close()
 	g.heroStatsPanel.Toggle()
 	g.hud.miniPanel.SetMovedRight(g.heroStatsPanel.IsOpen())
 	g.updateLayout()
@@ -627,6 +636,7 @@ func (g *GameControls) onCloseHeroStatsPanel() {
 }
 
 func (g *GameControls) toggleQuestLog() {
+	g.heroStatsPanel.Close()
 	g.questLog.Toggle()
 	g.hud.miniPanel.SetMovedRight(g.questLog.IsOpen())
 	g.updateLayout()

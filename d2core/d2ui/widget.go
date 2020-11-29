@@ -9,8 +9,10 @@ type RenderPriority int
 const (
 	RenderPriorityBackground RenderPriority = iota
 	RenderPrioritySkilltree
+	RenderPriorityInventory
 	RenderPrioritySkilltreeIcon
 	RenderPriorityHeroStatsPanel
+	RenderPriorityQuestLog
 	RenderPriorityHUDPanel
 	RenderPriorityMinipanel
 	RenderPriorityHelpPanel

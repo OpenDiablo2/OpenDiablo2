@@ -1,15 +1,10 @@
 package d2player
 
 import (
-	"strconv"
-	"strings"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2hero"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
@@ -34,7 +29,7 @@ const (
 )
 
 const (
-	questLogCloseButtonX, questLogCloseButtonY = 357, 455
+	questLogCloseButtonX, questLogCloseButtonY = 358, 455
 	questLogDescrButtonX, questLogDescrButtonY = 308, 457
 )
 
@@ -66,13 +61,10 @@ type StatsPanelLabels struct {
 }
 */
 
-// NewHeroStatsPanel creates a new hero status panel
+// NewQuestLog creates a new quest log
 func NewQuestLog(asset *d2asset.AssetManager,
 	ui *d2ui.UIManager,
-	heroName string,
-	heroClass d2enum.Hero,
-	l d2util.LogLevel,
-	heroState *d2hero.HeroStatsState) *QuestLog {
+	l d2util.LogLevel) *QuestLog {
 	originX := 0
 	originY := 0
 
@@ -81,9 +73,6 @@ func NewQuestLog(asset *d2asset.AssetManager,
 		uiManager: ui,
 		originX:   originX,
 		originY:   originY,
-		heroState: heroState,
-		heroName:  heroName,
-		heroClass: heroClass,
 		labels:    &StatsPanelLabels{},
 	}
 
@@ -94,14 +83,11 @@ func NewQuestLog(asset *d2asset.AssetManager,
 	return ql
 }
 
-// HeroStatsPanel represents the hero status panel
+// QuestLog represents the quest log
 type QuestLog struct {
 	asset      *d2asset.AssetManager
 	uiManager  *d2ui.UIManager
 	panel      *d2ui.Sprite
-	heroState  *d2hero.HeroStatsState
-	heroName   string
-	heroClass  d2enum.Hero
 	labels     *StatsPanelLabels
 	onCloseCb  func()
 	panelGroup *d2ui.WidgetGroup
@@ -117,7 +103,7 @@ type QuestLog struct {
 func (s *QuestLog) Load() {
 	var err error
 
-	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
+	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
 
 	frame := d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameLeft)
 	s.panelGroup.AddWidget(frame)
@@ -233,7 +219,7 @@ func (s *QuestLog) renderStaticPanelFrames(target d2interface.Surface) {
 }
 
 func (s *QuestLog) renderStaticLabels(target d2interface.Surface) {
-	var label *d2ui.Label
+	/*var label *d2ui.Label
 
 	fr := strings.Split(s.asset.TranslateString("strchrfir"), "\n")
 	lr := strings.Split(s.asset.TranslateString("strchrlit"), "\n")
@@ -284,11 +270,11 @@ func (s *QuestLog) renderStaticLabels(target d2interface.Surface) {
 		})
 
 		label.Render(target)
-	}
+	}*/
 }
 
 func (s *QuestLog) initStatValueLabels() {
-	valueLabelConfigs := []struct {
+	/*valueLabelConfigs := []struct {
 		assignTo **d2ui.Label
 		value    int
 		x, y     int
@@ -310,7 +296,7 @@ func (s *QuestLog) initStatValueLabels() {
 
 	for _, cfg := range valueLabelConfigs {
 		*cfg.assignTo = s.createStatValueLabel(cfg.value, cfg.x, cfg.y)
-	}
+	}*/
 }
 
 /*
@@ -334,11 +320,13 @@ func (s *HeroStatsPanel) setStatValues() {
 	s.labels.Mana.SetText(strconv.Itoa(s.heroState.Mana))
 }
 */
+/*
 func (s *QuestLog) createStatValueLabel(stat, x, y int) *d2ui.Label {
 	text := strconv.Itoa(stat)
 	return s.createTextLabel(PanelText{X: x, Y: y, Text: text, Font: d2resource.Font16, AlignCenter: true})
-}
+}*/
 
+/*
 func (s *QuestLog) createTextLabel(element PanelText) *d2ui.Label {
 	label := s.uiManager.NewLabel(element.Font, d2resource.PaletteStatic)
 	if element.AlignCenter {
@@ -350,4 +338,4 @@ func (s *QuestLog) createTextLabel(element PanelText) *d2ui.Label {
 	s.panelGroup.AddWidget(label)
 
 	return label
-}
+}*/
