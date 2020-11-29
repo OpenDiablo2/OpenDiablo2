@@ -2,8 +2,10 @@ package d2input
 
 import "github.com/hajimehoshi/ebiten/v2"
 
+// Key represents a keyboard key
 type Key = int
 
+// Keys
 const (
 	Key0            = Key(ebiten.Key0)
 	Key1            = Key(ebiten.Key1)
