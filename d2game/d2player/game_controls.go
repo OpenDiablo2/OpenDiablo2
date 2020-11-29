@@ -209,6 +209,7 @@ func NewGameControls(
 	inventoryRecord := asset.Records.Layout.Inventory[inventoryRecordKey]
 
 	heroStatsPanel := NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
+	questLog := NewQuestLog(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
 	inventory := NewInventory(asset, ui, l, hero.Gold, inventoryRecord)
 	skilltree := newSkillTree(hero.Skills, hero.Class, asset, l, ui)
 
@@ -239,6 +240,7 @@ func NewGameControls(
 		inventory:      inventory,
 		skilltree:      skilltree,
 		heroStatsPanel: heroStatsPanel,
+		questLog:       questLog,
 		HelpOverlay:    helpOverlay,
 		keyMap:         keyMap,
 		hud:            hud,
@@ -267,6 +269,7 @@ func NewGameControls(
 	}
 
 	gc.heroStatsPanel.SetOnCloseCb(gc.onCloseHeroStatsPanel)
+	gc.questLog.SetOnCloseCb(gc.onCloseQuestLog)
 	gc.inventory.SetOnCloseCb(gc.onCloseInventory)
 	gc.skilltree.SetOnCloseCb(gc.onCloseSkilltree)
 
@@ -301,6 +304,7 @@ type GameControls struct {
 	hud                    *HUD
 	skilltree              *skillTree
 	heroStatsPanel         *HeroStatsPanel
+	questLog               *QuestLog
 	HelpOverlay            *HelpOverlay
 	bottomMenuRect         *d2geom.Rectangle
 	leftMenuRect           *d2geom.Rectangle
@@ -385,6 +389,7 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 		g.inventory.Close()
 		g.skilltree.Close()
 		g.heroStatsPanel.Close()
+		g.questLog.Close()
 		g.HelpOverlay.Close()
 		g.updateLayout()
 	case d2enum.ToggleInventoryPanel:
@@ -621,6 +626,17 @@ func (g *GameControls) onCloseHeroStatsPanel() {
 	g.updateLayout()
 }
 
+func (g *GameControls) toggleQuestLog() {
+	g.questLog.Toggle()
+	g.hud.miniPanel.SetMovedRight(g.questLog.IsOpen())
+	g.updateLayout()
+}
+
+func (g *GameControls) onCloseQuestLog() {
+	g.hud.miniPanel.SetMovedRight(g.questLog.IsOpen())
+	g.updateLayout()
+}
+
 func (g *GameControls) toggleInventoryPanel() {
 	g.skilltree.Close()
 	g.inventory.Toggle()
@@ -649,6 +665,7 @@ func (g *GameControls) openEscMenu() {
 	g.inventory.Close()
 	g.skilltree.Close()
 	g.heroStatsPanel.Close()
+	g.questLog.Close()
 	g.hud.miniPanel.closeDisabled()
 	g.escapeMenu.open()
 	g.updateLayout()
@@ -660,6 +677,7 @@ func (g *GameControls) Load() {
 	g.inventory.Load()
 	g.skilltree.load()
 	g.heroStatsPanel.Load()
+	g.questLog.Load()
 	g.HelpOverlay.Load()
 
 	miniPanelActions := &miniPanelActions{
@@ -667,6 +685,7 @@ func (g *GameControls) Load() {
 		inventoryToggle: g.toggleInventoryPanel,
 		skilltreeToggle: g.toggleSkilltreePanel,
 		menuToggle:      g.openEscMenu,
+		questToggle:     g.toggleQuestLog,
 	}
 	g.hud.miniPanel.load(miniPanelActions)
 }
@@ -699,7 +718,7 @@ func (g *GameControls) updateLayout() {
 
 func (g *GameControls) isLeftPanelOpen() bool {
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/801
-	return g.heroStatsPanel.IsOpen()
+	return g.heroStatsPanel.IsOpen() || g.questLog.IsOpen()
 }
 
 func (g *GameControls) isRightPanelOpen() bool {
