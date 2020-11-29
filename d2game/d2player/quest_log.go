@@ -13,51 +13,32 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
-/*
 const ( // for the dc6 frames
-	statsPanelTopLeft = iota
-	statsPanelTopRight
-	statsPanelBottomLeft
-	statsPanelBottomRight
+	questLogTopLeft = iota
+	questLogTopRight
+	questLogBottomLeft
+	questLogBottomRight
 )
 
 const (
-	statsPanelOffsetX, statsPanelOffsetY = 80, 64
+	questLogOffsetX, questLogOffsetY = 80, 64
 )
 
 const (
-	labelLevelX, labelLevelY = 110, 100
-
-	labelHeroNameX, labelHeroNameY   = 165, 72
-	labelHeroClassX, labelHeroClassY = 330, 74
-
-	labelExperienceX, labelExperienceY = 200, 100
-	labelNextLevelX, labelNextLevelY   = 330, 100
-
-	labelStrengthX, labelStrengthY   = 100, 150
-	labelDexterityX, labelDexterityY = 100, 213
-	labelVitalityX, labelVitalityY   = 95, 300
-	labelEnergyX, labelEnergyY       = 100, 360
-
-	labelDefenseX, labelDefenseY = 280, 260
-	labelStaminaX, labelStaminaY = 280, 300
-	labelLifeX, labelLifeY       = 280, 322
-	labelManaX, labelManaY       = 280, 360
-
-	labelResFireLine1X, labelResFireLine1Y   = 310, 396
-	labelResFireLine2X, labelResFireLine2Y   = 310, 403
-	labelResColdLine1X, labelResColdLine1Y   = 310, 444
-	labelResColdLine2X, labelResColdLine2Y   = 310, 452
-	labelResLightLine1X, labelResLightLine1Y = 310, 420
-	labelResLightLine2X, labelResLightLine2Y = 310, 428
-	labelResPoisLine1X, labelResPoisLine1Y   = 310, 468
-	labelResPoisLine2X, labelResPoisLine2Y   = 310, 476
+	q1SocketX, q1SocketY = 200, 200
+	q2SocketX, q2SocketY = 250, 200
+	q3SocketX, q3SocketY = 300, 200
+	q4SocketX, q4SocketY = 200, 300
+	q5SocketX, q5SocketY = 250, 300
+	q6SocketX, q6SocketY = 300, 300
 )
 
 const (
-	heroStatsCloseButtonX, heroStatsCloseButtonY = 208, 453
+	questLogCloseButtonX, questLogCloseButtonY = 357, 455
+	questLogDescrButtonX, questLogDescrButtonY = 308, 457
 )
 
+/*
 // PanelText represents text on the panel
 type PanelText struct {
 	X           int
@@ -152,12 +133,22 @@ func (s *QuestLog) Load() {
 
 	closeButton := s.uiManager.NewButton(d2ui.ButtonTypeSquareClose, "")
 	closeButton.SetVisible(false)
-	closeButton.SetPosition(heroStatsCloseButtonX, heroStatsCloseButtonY)
+	closeButton.SetPosition(questLogCloseButtonX, questLogCloseButtonY)
 	closeButton.OnActivated(func() { s.Close() })
 	s.panelGroup.AddWidget(closeButton)
 
+	descrButton := s.uiManager.NewButton(d2ui.ButtonTypeQuestDescr, "")
+	descrButton.SetVisible(false)
+	descrButton.SetPosition(questLogDescrButtonX, questLogDescrButtonY)
+	descrButton.OnActivated(s.onDescrClicked)
+	s.panelGroup.AddWidget(descrButton)
+
 	s.initStatValueLabels()
 	s.panelGroup.SetVisible(false)
+}
+
+func (s *QuestLog) onDescrClicked() {
+	//
 }
 
 // IsOpen returns true if the hero status panel is open
@@ -208,14 +199,14 @@ func (s *QuestLog) renderStaticMenu(target d2interface.Surface) {
 }
 func (s *QuestLog) renderStaticPanelFrames(target d2interface.Surface) {
 	frames := []int{
-		statsPanelTopLeft,
-		statsPanelTopRight,
-		statsPanelBottomRight,
-		statsPanelBottomLeft,
+		questLogTopLeft,
+		questLogTopRight,
+		questLogBottomRight,
+		questLogBottomLeft,
 	}
 
-	currentX := s.originX + statsPanelOffsetX
-	currentY := s.originY + statsPanelOffsetY
+	currentX := s.originX + questLogOffsetX
+	currentY := s.originY + questLogOffsetY
 
 	for _, frameIndex := range frames {
 		if err := s.panel.SetCurrentFrame(frameIndex); err != nil {

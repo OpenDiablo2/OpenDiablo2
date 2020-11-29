@@ -50,6 +50,7 @@ const (
 	ButtonTypeRightArrow         ButtonType = 30
 	ButtonTypeQuery              ButtonType = 31
 	ButtonTypeSquelchChat        ButtonType = 32
+	ButtonTypeQuestDescr         ButtonType = 33
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -492,6 +493,21 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			Tooltip:          buttonTooltipSquelchChat,
 			TooltipXOffset:   buttonBuySellTooltipXOffset,
 			TooltipYOffset:   buttonBuySellTooltipYOffset,
+		},
+		ButtonTypeQuestDescr: {
+			XSegments:        buttonBuySellSegmentsX,
+			YSegments:        buttonBuySellSegmentsY,
+			DisabledFrame:    buttonBuySellDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.QuestLogQDescrBtn,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
 		},
 		ButtonTypeSkillTreeTab: {
 			XSegments:        buttonSkillTreeTabXSegments,
