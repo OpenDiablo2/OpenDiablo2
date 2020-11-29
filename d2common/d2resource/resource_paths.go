@@ -109,6 +109,10 @@ const (
 	GameGlobeOverlap    = "/data/global/ui/PANEL/overlap.DC6"
 	HealthManaIndicator = "/data/global/ui/PANEL/hlthmana.DC6"
 	AddSkillButton      = "/data/global/ui/PANEL/level.DC6"
+	GoldMoveDialog      = "/data/global/ui/menu/dialogbackground.DC6"
+	WPTabs              = "/data/global/ui/menu/expwaygatetabs.dc6"
+	WPBg                = "/data/global/ui/menu/waygatebackground.dc6"
+	WPIcons             = "/data/global/ui/menu/waygateicons.dc6"
 
 	// --- Escape Menu ---
 	// main
@@ -155,10 +159,12 @@ const (
 	EscapeVideoOptRes640x480 = "/data/local/ui/" + LanguageTableToken + "/640x480.dc6"
 	EscapeVideoOptRes800x600 = "/data/local/ui/" + LanguageTableToken + "/800x800.dc6"
 
-	EscapeOn  = "/data/local/ui/" + LanguageTableToken + "/smallon.dc6"
-	EscapeOff = "/data/local/ui/" + LanguageTableToken + "/smalloff.dc6"
-	EscapeYes = "/data/local/ui/" + LanguageTableToken + "/smallyes.dc6"
-	EscapeNo  = "/data/local/ui/" + LanguageTableToken + "/smallno.dc6"
+	EscapeOn            = "/data/local/ui/" + LanguageTableToken + "/smallon.dc6"
+	EscapeOff           = "/data/local/ui/" + LanguageTableToken + "/smalloff.dc6"
+	EscapeYes           = "/data/local/ui/" + LanguageTableToken + "/smallyes.dc6"
+	EscapeNo            = "/data/local/ui/" + LanguageTableToken + "/smallno.dc6"
+	EscapeSlideBar      = "/data/global/ui/widgets/optbarc.dc6"
+	EscapeSlideBarSkull = "/data/global/ui/widgets/optskull.dc6"
 
 	// --- Help Overlay ---
 
@@ -178,6 +184,36 @@ const (
 	// Issue #685 - used in the mini-panel
 	GameSmallMenuButton = "/data/global/ui/PANEL/menubutton.DC6"
 	SkillIcon           = "/data/global/ui/PANEL/Skillicon.DC6"
+
+	// --- Quest Log---
+	QuestLogBg     = "/data/global/ui/menu/questbackground.dc6"
+	QuestLogDone   = "/data/global/ui/menu/questdone.dc6"
+	QuestLogQDescr = "/data/global/ui/menu/questlast.dc6"
+	QuestLogSocket = "/data/global/ui/menu/questsocket.dc6"
+	QuestLogA1Q1   = "/data/global/ui/menu/a1q1.dc6"
+	QuestLogA1Q2   = "/data/global/ui/menu/a1q2.dc6"
+	QuestLogA1Q3   = "/data/global/ui/menu/a1q3.dc6"
+	QuestLogA1Q4   = "/data/global/ui/menu/a1q4.dc6"
+	QuestLogA1Q5   = "/data/global/ui/menu/a1q5.dc6"
+	QuestLogA1Q6   = "/data/global/ui/menu/a1q6.dc6"
+	QuestLogA2Q1   = "/data/global/ui/menu/a2q1.dc6"
+	QuestLogA2Q2   = "/data/global/ui/menu/a2q2.dc6"
+	QuestLogA2Q3   = "/data/global/ui/menu/a2q3.dc6"
+	QuestLogA2Q4   = "/data/global/ui/menu/a2q4.dc6"
+	QuestLogA2Q5   = "/data/global/ui/menu/a2q5.dc6"
+	QuestLogA2Q6   = "/data/global/ui/menu/a2q6.dc6"
+	QuestLogA3Q1   = "/data/global/ui/menu/a3q1.dc6"
+	QuestLogA3Q2   = "/data/global/ui/menu/a3q2.dc6"
+	QuestLogA3Q3   = "/data/global/ui/menu/a3q3.dc6"
+	QuestLogA3Q4   = "/data/global/ui/menu/a3q4.dc6"
+	QuestLogA3Q5   = "/data/global/ui/menu/a3q5.dc6"
+	QuestLogA3Q6   = "/data/global/ui/menu/a3q6.dc6"
+	QuestLogA4Q1   = "/data/global/ui/menu/a4q1.dc6"
+	QuestLogA4Q2   = "/data/global/ui/menu/a4q2.dc6"
+	QuestLogA4Q3   = "/data/global/ui/menu/a4q3.dc6"
+	QuestLogA4Q4   = "/data/global/ui/menu/a4q4.dc6"
+	QuestLogA4Q5   = "/data/global/ui/menu/a4q5.dc6"
+	QuestLogA4Q6   = "/data/global/ui/menu/a4q6.dc6"
 
 	// --- Mouse Pointers ---
 
