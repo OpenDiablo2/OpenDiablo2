@@ -1,12 +1,12 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2input"
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
+	ebiten_input "github.com/OpenDiablo2/OpenDiablo2/d2core/d2input/ebiten"
 	"github.com/gravestench/akara"
 )
 
@@ -21,7 +21,7 @@ var _ akara.System = &InputSystem{}
 type InputSystem struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
-	renderer     d2interface.Renderer
+	inputService d2interface.InputService
 	configs      *akara.Subscription
 	interactives *akara.Subscription
 	d2components.GameConfigFactory
@@ -32,6 +32,8 @@ type InputSystem struct {
 // Init initializes the system with the given world, injecting the necessary components
 func (m *InputSystem) Init(world *akara.World) {
 	m.World = world
+
+	m.inputService = ebiten_input.InputService{}
 
 	m.setupLogger()
 
@@ -118,17 +120,17 @@ func (m *InputSystem) updateInputState() {
 	}
 
 	for _, key := range keysToCheck {
-		truth := ebiten.IsKeyPressed(ebiten.Key(key))
+		truth := m.inputService.IsKeyPressed(d2enum.Key(key))
 		m.inputState.KeyVector.Set(key, truth)
 	}
 
 	for _, mod := range modifiersToCheck {
-		truth := ebiten.IsKeyPressed(ebiten.Key(mod))
+		truth := m.inputService.IsKeyPressed(d2enum.Key(mod))
 		m.inputState.ModifierVector.Set(mod, truth)
 	}
 
 	for _, btn := range buttonsToCheck {
-		truth := ebiten.IsMouseButtonPressed(ebiten.MouseButton(btn))
+		truth := m.inputService.IsMouseButtonPressed(d2enum.MouseButton(btn))
 		m.inputState.MouseButtonVector.Set(btn, truth)
 	}
 }

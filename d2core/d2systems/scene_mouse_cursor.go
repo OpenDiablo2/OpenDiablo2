@@ -77,7 +77,7 @@ func (s *MouseCursorScene) updateCursorPosition() {
 		return
 	}
 
-	cx, cy := s.systems.InputSystem.renderer.GetCursorPos()
+	cx, cy := s.systems.InputSystem.inputService.CursorPosition()
 
 	spritePosition.Set(float64(cx), float64(cy))
 }
