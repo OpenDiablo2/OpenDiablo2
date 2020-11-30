@@ -56,6 +56,7 @@ const (
 	ButtonTypeTab3               ButtonType = 36
 	ButtonTypeTab4               ButtonType = 37
 	ButtonTypeTab5               ButtonType = 38
+	ButtonTypeBlangQuestBtn      ButtonType = 39
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -602,6 +603,21 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			AllowFrameChange: true,
 			BaseFrame:        tab5BaseFrame,
 			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+		},
+		ButtonTypeBlangQuestBtn: {
+			XSegments:        1,
+			YSegments:        1,
+			DisabledFrame:    2,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.QuestLogDone,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: false,
+			HasImage:         false,
 			FixedWidth:       ButtonNoFixedWidth,
 			FixedHeight:      ButtonNoFixedHeight,
 			LabelColor:       greyAlpha100,
