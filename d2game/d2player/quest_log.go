@@ -20,17 +20,29 @@ const (
 )
 
 const (
-	q1SocketX, q1SocketY = 200, 200
-	q2SocketX, q2SocketY = 250, 200
-	q3SocketX, q3SocketY = 300, 200
-	q4SocketX, q4SocketY = 200, 300
-	q5SocketX, q5SocketY = 250, 300
-	q6SocketX, q6SocketY = 300, 300
+	q1SocketX, q1SocketY = 100, 95
+	q2SocketX, q2SocketY = 200, 95
+	q3SocketX, q3SocketY = 300, 95
+	q4SocketX, q4SocketY = 100, 190
+	q5SocketX, q5SocketY = 200, 190
+	q6SocketX, q6SocketY = 300, 190
 )
 
 const (
 	questLogCloseButtonX, questLogCloseButtonY = 358, 455
 	questLogDescrButtonX, questLogDescrButtonY = 308, 457
+)
+
+// toset
+const (
+	questNameX, questNameY               = 150, 220
+	questDescriptionX, questDescriptionY = 50, 250
+)
+
+// toset
+const (
+	baseTabX, baseTabY = 50, 50
+	tabOffset          = 50
 )
 
 /*
@@ -64,6 +76,7 @@ type StatsPanelLabels struct {
 // NewQuestLog creates a new quest log
 func NewQuestLog(asset *d2asset.AssetManager,
 	ui *d2ui.UIManager,
+	act int,
 	l d2util.LogLevel) *QuestLog {
 	originX := 0
 	originY := 0
@@ -73,7 +86,7 @@ func NewQuestLog(asset *d2asset.AssetManager,
 		uiManager: ui,
 		originX:   originX,
 		originY:   originY,
-		labels:    &StatsPanelLabels{},
+		act:       act,
 	}
 
 	ql.Logger = d2util.NewLogger()
@@ -91,12 +104,24 @@ type QuestLog struct {
 	labels     *StatsPanelLabels
 	onCloseCb  func()
 	panelGroup *d2ui.WidgetGroup
+	act        int
 
 	originX int
 	originY int
 	isOpen  bool
 
 	*d2util.Logger
+}
+
+type questField struct {
+	status      int // for now -1 = complete, 0 = not started > 0 in progress
+	picture     *d2ui.Sprite
+	description *d2ui.Label
+}
+
+// IsAct4 returns true, when game act is act 4 (in this act, there are only 3 quests)
+func (s *QuestLog) IsAct4() bool {
+	return s.act == 4
 }
 
 // Load the data for the hero status panel
@@ -181,7 +206,7 @@ func (s *HeroStatsPanel) Advance(elapsed float64) {
 
 func (s *QuestLog) renderStaticMenu(target d2interface.Surface) {
 	s.renderStaticPanelFrames(target)
-	s.renderStaticLabels(target)
+	s.renderSockets(target)
 }
 func (s *QuestLog) renderStaticPanelFrames(target d2interface.Surface) {
 	frames := []int{
@@ -218,59 +243,48 @@ func (s *QuestLog) renderStaticPanelFrames(target d2interface.Surface) {
 	}
 }
 
-func (s *QuestLog) renderStaticLabels(target d2interface.Surface) {
-	/*var label *d2ui.Label
+func (s *QuestLog) renderSockets(target d2interface.Surface) {
+	var socket *d2ui.Sprite
 
-	fr := strings.Split(s.asset.TranslateString("strchrfir"), "\n")
-	lr := strings.Split(s.asset.TranslateString("strchrlit"), "\n")
-	cr := strings.Split(s.asset.TranslateString("strchrcol"), "\n")
-	pr := strings.Split(s.asset.TranslateString("strchrpos"), "\n")
+	var err error
+
+	var sockets []struct{ x, y int }
+
+	socketPath := d2resource.QuestLogSocket
+
 	// all static labels are not stored since we use them only once to generate the image cache
-	var staticLabelConfigs = []struct {
-		x, y        int
-		txt         string
-		font        string
-		centerAlign bool
-	}{
-		{labelHeroNameX, labelHeroNameY, s.heroName, d2resource.Font16, true},
-		{labelHeroClassX, labelHeroClassY, s.asset.TranslateString(s.heroClass), d2resource.Font16, true},
-
-		{labelLevelX, labelLevelY, s.asset.TranslateString("strchrlvl"), d2resource.Font6, true},
-		{labelExperienceX, labelExperienceY, s.asset.TranslateString("strchrexp"), d2resource.Font6, true},
-		{labelNextLevelX, labelNextLevelY, s.asset.TranslateString("strchrnxtlvl"), d2resource.Font6, true},
-		{labelStrengthX, labelStrengthY, s.asset.TranslateString("strchrstr"), d2resource.Font6, false},
-		{labelDexterityX, labelDexterityY, s.asset.TranslateString("strchrdex"), d2resource.Font6, false},
-		{labelVitalityX, labelVitalityY, s.asset.TranslateString("strchrvit"), d2resource.Font6, false},
-		{labelEnergyX, labelEnergyY, s.asset.TranslateString("strchreng"), d2resource.Font6, false},
-		{labelDefenseX, labelDefenseY, s.asset.TranslateString("strchrdef"), d2resource.Font6, false},
-		{labelStaminaX, labelStaminaY, s.asset.TranslateString("strchrstm"), d2resource.Font6, true},
-		{labelLifeX, labelLifeY, s.asset.TranslateString("strchrlif"), d2resource.Font6, true},
-		{labelManaX, labelManaY, s.asset.TranslateString("strchrman"), d2resource.Font6, true},
-
-		// can't use "Fire\nResistance" because line spacing is too big and breaks the layout
-		{labelResFireLine1X, labelResFireLine1Y, fr[0], d2resource.Font6, true},
-		{labelResFireLine2X, labelResFireLine2Y, fr[len(fr)-1], d2resource.Font6, true},
-
-		{labelResColdLine1X, labelResColdLine1Y, cr[0], d2resource.Font6, true},
-		{labelResColdLine2X, labelResColdLine2Y, cr[len(cr)-1], d2resource.Font6, true},
-
-		{labelResLightLine1X, labelResLightLine1Y, lr[0], d2resource.Font6, true},
-		{labelResLightLine2X, labelResLightLine2Y, lr[len(lr)-1], d2resource.Font6, true},
-
-		{labelResPoisLine1X, labelResPoisLine1Y, pr[0], d2resource.Font6, true},
-		{labelResPoisLine2X, labelResPoisLine2Y, pr[len(pr)-1], d2resource.Font6, true},
+	if s.IsAct4() {
+		sockets = []struct {
+			x, y int
+		}{
+			{q1SocketX, q1SocketY},
+			{q2SocketX, q2SocketY},
+			{q3SocketX, q3SocketY},
+		}
+	} else {
+		sockets = []struct {
+			x, y int
+		}{
+			{q1SocketX, q1SocketY},
+			{q2SocketX, q2SocketY},
+			{q3SocketX, q3SocketY},
+			{q4SocketX, q4SocketY},
+			{q5SocketX, q5SocketY},
+			{q6SocketX, q6SocketY},
+		}
 	}
 
-	for _, cfg := range staticLabelConfigs {
-		label = s.createTextLabel(PanelText{
-			cfg.x, cfg.y,
-			cfg.txt,
-			cfg.font,
-			cfg.centerAlign,
-		})
+	for _, cfg := range sockets {
+		socket, err = s.uiManager.NewSprite(socketPath, d2resource.PaletteSky)
+		if err != nil {
+			s.Error(err.Error())
+		}
 
-		label.Render(target)
-	}*/
+		socket.SetPosition(cfg.x, cfg.y)
+		s.panelGroup.AddWidget(socket)
+
+		socket.RenderSegmented(target, 1, 1, 0)
+	}
 }
 
 func (s *QuestLog) initStatValueLabels() {
