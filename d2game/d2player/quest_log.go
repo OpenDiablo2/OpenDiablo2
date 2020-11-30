@@ -60,7 +60,6 @@ const (
 	questTabSelectedFrame3 = 3
 	questTabSelectedFrame4 = 4
 	questTabSelectedFrame5 = 5
-	questTabSelectedFrame6 = 6
 )
 
 const (
@@ -69,7 +68,6 @@ const (
 	questLogTab3
 	questLogTab4
 	questLogTab5
-	questLogTab6
 	questLogNumTabs
 )
 
@@ -87,7 +85,7 @@ func NewQuestLog(asset *d2asset.AssetManager,
 		originX:   originX,
 		originY:   originY,
 		//act:       act,
-		act: 5,
+		act: 1,
 		tab: [questLogNumTabs]*questLogTab{
 			{},
 			{},
@@ -115,20 +113,19 @@ type QuestLog struct {
 	selectedTab int
 	act         int
 	tab         [questLogNumTabs]*questLogTab
-	q1          *d2ui.Button
-	q2          *d2ui.Button
-	q3          *d2ui.Button
-	q4          *d2ui.Button
-	q5          *d2ui.Button
-	q6          *d2ui.Button
-	name        *d2ui.Label
-	descr       *d2ui.Label
-	quests      []*questField
-	questsa1    *d2ui.WidgetGroup
-	questsa2    *d2ui.WidgetGroup
+
+	q1       *d2ui.Button
+	q2       *d2ui.Button
+	q3       *d2ui.Button
+	q4       *d2ui.Button
+	q5       *d2ui.Button
+	q6       *d2ui.Button
+	quests   []*questField
+	questsa1 *d2ui.WidgetGroup
+	/*questsa2    *d2ui.WidgetGroup
 	questsa3    *d2ui.WidgetGroup
 	questsa4    *d2ui.WidgetGroup
-	questsa5    *d2ui.WidgetGroup
+	questsa5    *d2ui.WidgetGroup*/
 
 	originX int
 	originY int
@@ -138,23 +135,63 @@ type QuestLog struct {
 }
 
 type questField struct {
-	name              string
-	status            int // for now -1 = complete, 0 = not started > 0 in progress
-	ID                int
-	notStarted        *d2ui.Sprite
-	inProgress        *d2ui.Sprite
-	completed         *d2ui.Sprite
-	completeAnimation *d2ui.Sprite
-	description       *d2ui.Label
+	*d2ui.BaseWidget
+	name   d2ui.Label
+	descr  d2ui.Label
+	sprite *d2ui.Sprite
+	status int // for now -1 = complete, 0 = not started > 0 in progress
+	act    int
+	number int
 }
 
-func (q *questField) createQuest(act, number int, asset *d2asset.AssetManager) *questField {
-	var quests []*questField
-	quests = []*questField{
-		{name: asset.TranslateString("qstsa1q1"), ID: 0},
-		{name: asset.TranslateString("qstsa1q2"), ID: 1},
+func newQuestField(ui *d2ui.UIManager,
+	baseSpritePath string,
+	x, y int,
+	act, number int) *questField {
+	baseSprite, err := ui.NewSprite(baseSpritePath, d2resource.PaletteSky)
+	if err != nil {
+		fmt.Sprintln(err)
 	}
-	return quests[(act-1)*(number-1)]
+	base := d2ui.NewBaseWidget(ui)
+
+	res := &questField{
+		BaseWidget: base,
+		sprite:     baseSprite,
+		act:        act,
+		number:     number,
+	}
+
+	res.SetPosition(x, y)
+
+	return res
+
+}
+
+func (q *questField) SetVisible(visible bool) {
+	q.BaseWidget.SetVisible(visible)
+	q.name.SetVisible(visible)
+	q.descr.SetVisible(visible)
+}
+
+func (q *questField) Advance(_ float64) error {
+	return nil
+}
+
+func (q *questField) renderSprite(target d2interface.Surface) {
+	x, y := q.GetPosition()
+
+	if err := q.sprite.SetCurrentFrame(q.act * q.number); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	q.sprite.SetPosition(x, y)
+	q.sprite.Render(target)
+}
+
+func (q *questField) Render(target d2interface.Surface) {
+	q.renderSprite(target)
+
 }
 
 type questLogTab struct {
@@ -174,7 +211,6 @@ func (s *QuestLog) Load() {
 	var err error
 
 	s.questsa1 = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
-
 	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
 
 	frame := d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameLeft)
@@ -201,9 +237,17 @@ func (s *QuestLog) Load() {
 	descrButton.OnActivated(s.onDescrClicked)
 	s.panelGroup.AddWidget(descrButton)
 
+	for _, _ = range []int{0} {
+		q := newQuestField(s.uiManager, d2resource.QuestLogDone, q1SocketX+questOffsetX, q1SocketX+questOffsetY, s.act, 1)
+		s.quests = append(s.quests, q)
+		s.questsa1.AddWidget(q.sprite)
+	}
+
 	s.loadTabs()
 	s.setQuestButtons()
 	s.initStatValueLabels()
+
+	s.questsa1.SetVisible(false)
 	s.panelGroup.SetVisible(false)
 }
 
@@ -233,14 +277,15 @@ func (s *QuestLog) loadTabs() {
 	s.tab[questLogTab5].button.OnActivated(func() { s.setTab(questLogTab5) })
 	s.panelGroup.AddWidget(s.tab[questLogTab5].button)
 
-	s.setTab(1)
+	s.setTab(s.act - 1)
 }
 
 func (s *QuestLog) setTab(tab int) {
 	s.selectedTab = tab
-	for i := 0; i < questLogNumTabs-1; i++ {
-		s.tab[i].button.SetEnabled(i == tab-1)
-		//s.tab[i].button.SetPressed(!(i == tab-1))
+	for i := 0; i < questLogNumTabs; i++ {
+		//s.tab[i].button.SetEnabled(i == tab-1)
+		s.tab[:][i].button.SetPressed(!(i == tab))
+		fmt.Println("!(i==tab): ", !(i == tab))
 	}
 }
 
@@ -302,12 +347,14 @@ func (s *QuestLog) Toggle() {
 func (s *QuestLog) Open() {
 	s.isOpen = true
 	s.panelGroup.SetVisible(true)
+	s.questsa1.SetVisible(true)
 }
 
 // Close closed the hero status panel
 func (s *QuestLog) Close() {
 	s.isOpen = false
 	s.panelGroup.SetVisible(false)
+	s.questsa1.SetVisible(false)
 	s.onCloseCb()
 }
 
