@@ -21,11 +21,17 @@ const (
 
 const (
 	q1SocketX, q1SocketY = 100, 95
+	q1X, q1Y             = 100, 95
 	q2SocketX, q2SocketY = 200, 95
+	q2X, q2Y             = 100, 95
 	q3SocketX, q3SocketY = 300, 95
+	q3X, q3Y             = 100, 95
 	q4SocketX, q4SocketY = 100, 190
+	q4X, q4Y             = 100, 95
 	q5SocketX, q5SocketY = 200, 190
+	q5X, q5Y             = 100, 95
 	q6SocketX, q6SocketY = 300, 190
+	q6X, q6Y             = 100, 95
 )
 
 const (
@@ -41,37 +47,34 @@ const (
 
 // toset
 const (
-	baseTabX, baseTabY = 50, 50
-	tabOffset          = 50
+	questTabY  = 66
+	questTab1X = 85
+	questTab2X = 143
+	questTab3X = 201
+	questTab4X = 259
+	questTab5X = 317
+	questTab6X = 375
 )
 
-/*
-// PanelText represents text on the panel
-type PanelText struct {
-	X           int
-	Y           int
-	Text        string
-	Font        string
-	AlignCenter bool
-}
+//toset
+const (
+	questTabSelectedFrame1 = 1
+	questTabSelectedFrame2 = 2
+	questTabSelectedFrame3 = 3
+	questTabSelectedFrame4 = 4
+	questTabSelectedFrame5 = 5
+	questTabSelectedFrame6 = 6
+)
 
-// StatsPanelLabels represents the labels in the status panel
-type StatsPanelLabels struct {
-	Level        *d2ui.Label
-	Experience   *d2ui.Label
-	NextLevelExp *d2ui.Label
-	Strength     *d2ui.Label
-	Dexterity    *d2ui.Label
-	Vitality     *d2ui.Label
-	Energy       *d2ui.Label
-	Health       *d2ui.Label
-	MaxHealth    *d2ui.Label
-	Mana         *d2ui.Label
-	MaxMana      *d2ui.Label
-	MaxStamina   *d2ui.Label
-	Stamina      *d2ui.Label
-}
-*/
+const (
+	questLogTab1 = iota
+	questLogTab2
+	questLogTab3
+	questLogTab4
+	questLogTab5
+	questLogTab6
+	questLogNumTabs
+)
 
 // NewQuestLog creates a new quest log
 func NewQuestLog(asset *d2asset.AssetManager,
@@ -86,7 +89,15 @@ func NewQuestLog(asset *d2asset.AssetManager,
 		uiManager: ui,
 		originX:   originX,
 		originY:   originY,
-		act:       act,
+		//act:       act,
+		act: 5,
+		tab: [questLogNumTabs]*questLogTab{
+			{},
+			{},
+			{},
+			{},
+			{},
+		},
 	}
 
 	ql.Logger = d2util.NewLogger()
@@ -105,6 +116,7 @@ type QuestLog struct {
 	onCloseCb  func()
 	panelGroup *d2ui.WidgetGroup
 	act        int
+	tab        [questLogNumTabs]*questLogTab
 
 	originX int
 	originY int
@@ -114,9 +126,20 @@ type QuestLog struct {
 }
 
 type questField struct {
-	status      int // for now -1 = complete, 0 = not started > 0 in progress
-	picture     *d2ui.Sprite
-	description *d2ui.Label
+	name              *d2ui.Label
+	status            int // for now -1 = complete, 0 = not started > 0 in progress
+	notStarted        *d2ui.Sprite
+	inProgress        *d2ui.Sprite
+	completed         *d2ui.Sprite
+	completeAnimation *d2ui.Sprite
+	description       *d2ui.Label
+}
+
+type questLogTab struct {
+	button *d2ui.Button
+}
+
+func (qt *questLogTab) createButton(uiManager *d2ui.UIManager, x, y int) {
 }
 
 // IsAct4 returns true, when game act is act 4 (in this act, there are only 3 quests)
@@ -154,8 +177,50 @@ func (s *QuestLog) Load() {
 	descrButton.OnActivated(s.onDescrClicked)
 	s.panelGroup.AddWidget(descrButton)
 
+	s.loadTabs()
 	s.initStatValueLabels()
 	s.panelGroup.SetVisible(false)
+}
+
+func (s *QuestLog) loadTabs() {
+	s.tab[questLogTab1].button = s.uiManager.NewButton(d2ui.ButtonTypeTab1, "")
+	s.tab[questLogTab1].button.SetPosition(questTab1X, questTabY)
+	s.tab[questLogTab1].button.OnActivated(func() { s.setTab(questLogTab1) })
+	//s.tab[questLogTab1].button.SetEnabled(false)
+	s.panelGroup.AddWidget(s.tab[questLogTab1].button)
+
+	s.tab[questLogTab2].button = s.uiManager.NewButton(d2ui.ButtonTypeTab2, "")
+	s.tab[questLogTab2].button.SetPosition(questTab2X, questTabY)
+	s.tab[questLogTab2].button.OnActivated(func() { s.setTab(questLogTab2) })
+	//s.tab[questLogTab2].button.SetEnabled(false)
+	s.panelGroup.AddWidget(s.tab[questLogTab2].button)
+
+	s.tab[questLogTab3].button = s.uiManager.NewButton(d2ui.ButtonTypeTab3, "")
+	s.tab[questLogTab3].button.SetPosition(questTab3X, questTabY)
+	s.tab[questLogTab3].button.OnActivated(func() { s.setTab(questLogTab3) })
+	//s.tab[questLogTab1].button.SetEnabled(false)
+	s.panelGroup.AddWidget(s.tab[questLogTab3].button)
+
+	s.tab[questLogTab4].button = s.uiManager.NewButton(d2ui.ButtonTypeTab4, "")
+	s.tab[questLogTab4].button.SetPosition(questTab4X, questTabY)
+	s.tab[questLogTab4].button.OnActivated(func() { s.setTab(questLogTab4) })
+	//s.tab[questLogTab1].button.SetEnabled(false)
+	s.panelGroup.AddWidget(s.tab[questLogTab4].button)
+
+	s.tab[questLogTab5].button = s.uiManager.NewButton(d2ui.ButtonTypeTab5, "")
+	s.tab[questLogTab5].button.SetPosition(questTab5X, questTabY)
+	s.tab[questLogTab5].button.OnActivated(func() { s.setTab(questLogTab5) })
+	//s.tab[questLogTab1].button.SetEnabled(false)
+	s.panelGroup.AddWidget(s.tab[questLogTab5].button)
+
+	s.setTab(1)
+}
+
+func (s *QuestLog) setTab(tab int) {
+	for i := 0; i < questLogNumTabs-1; i++ {
+		s.tab[i].button.SetEnabled(i == tab-1)
+		//s.tab[i].button.SetPressed(!(i == tab-1))
+	}
 }
 
 func (s *QuestLog) onDescrClicked() {
@@ -281,7 +346,6 @@ func (s *QuestLog) renderSockets(target d2interface.Surface) {
 		}
 
 		socket.SetPosition(cfg.x, cfg.y)
-		s.panelGroup.AddWidget(socket)
 
 		socket.RenderSegmented(target, 1, 1, 0)
 	}

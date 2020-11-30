@@ -110,7 +110,7 @@ const (
 	HealthManaIndicator = "/data/global/ui/PANEL/hlthmana.DC6"
 	AddSkillButton      = "/data/global/ui/PANEL/level.DC6"
 	GoldMoveDialog      = "/data/global/ui/menu/dialogbackground.DC6"
-	WPTabs              = "/data/global/ui/menu/expwaygatetabs.dc6"
+	WPTabs              = "/data/global/ui/MENU/expwaygatetabs.dc6"
 	WPBg                = "/data/global/ui/menu/waygatebackground.dc6"
 	WPIcons             = "/data/global/ui/menu/waygateicons.dc6"
 
@@ -188,6 +188,7 @@ const (
 	// --- Quest Log---
 	QuestLogBg        = "/data/global/ui/MENU/questbackground.dc6"
 	QuestLogDone      = "/data/global/ui/MENU/questdone.dc6"
+	QuestLogTabs      = "/data/global/ui/MENU/expquesttabs.dc6"
 	QuestLogQDescrBtn = "/data/global/ui/MENU/questlast.dc6"
 	QuestLogSocket    = "/data/global/ui/MENU/questsockets.dc6"
 	QuestLogA1Q1      = "/data/global/ui/MENU/a1q1.dc6"
