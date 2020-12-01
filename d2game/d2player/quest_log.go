@@ -53,15 +53,6 @@ const (
 	questTab6X = 375
 )
 
-//toset
-const (
-	questTabSelectedFrame1 = 1
-	questTabSelectedFrame2 = 2
-	questTabSelectedFrame3 = 3
-	questTabSelectedFrame4 = 4
-	questTabSelectedFrame5 = 5
-)
-
 const (
 	questLogTab1 = iota
 	questLogTab2
@@ -69,6 +60,15 @@ const (
 	questLogTab4
 	questLogTab5
 	questLogNumTabs
+)
+
+const (
+	quest1 = iota + 1
+	quest2
+	quest3
+	quest4
+	quest5
+	quest6
 )
 
 // NewQuestLog creates a new quest log
@@ -107,7 +107,6 @@ type QuestLog struct {
 	asset       *d2asset.AssetManager
 	uiManager   *d2ui.UIManager
 	panel       *d2ui.Sprite
-	labels      *StatsPanelLabels
 	onCloseCb   func()
 	panelGroup  *d2ui.WidgetGroup
 	selectedTab int
@@ -152,6 +151,7 @@ func newQuestField(ui *d2ui.UIManager,
 	if err != nil {
 		fmt.Sprintln(err)
 	}
+
 	base := d2ui.NewBaseWidget(ui)
 
 	res := &questField{
@@ -164,7 +164,6 @@ func newQuestField(ui *d2ui.UIManager,
 	res.SetPosition(x, y)
 
 	return res
-
 }
 
 func (q *questField) SetVisible(visible bool) {
@@ -191,14 +190,18 @@ func (q *questField) renderSprite(target d2interface.Surface) {
 
 func (q *questField) Render(target d2interface.Surface) {
 	q.renderSprite(target)
-
 }
 
 type questLogTab struct {
-	button *d2ui.Button
+	button          *d2ui.Button
+	invisibleButton *d2ui.Button
 }
 
-func (qt *questLogTab) createButton(uiManager *d2ui.UIManager, x, y int) {
+func (q *questLogTab) newTab(ui *d2ui.UIManager, tabType d2ui.ButtonType, x int) {
+	q.button = ui.NewButton(tabType, "")
+	q.invisibleButton = ui.NewButton(d2ui.ButtonTypeTabBlank, "")
+	q.button.SetPosition(x, questTabY)
+	q.invisibleButton.SetPosition(x, questTabY)
 }
 
 // IsAct4 returns true, when game act is act 4 (in this act, there are only 3 quests)
@@ -252,72 +255,73 @@ func (s *QuestLog) Load() {
 }
 
 func (s *QuestLog) loadTabs() {
-	s.tab[questLogTab1].button = s.uiManager.NewButton(d2ui.ButtonTypeTab1, "")
-	s.tab[questLogTab1].button.SetPosition(questTab1X, questTabY)
-	s.tab[questLogTab1].button.OnActivated(func() { s.setTab(questLogTab1) })
+	s.tab[questLogTab1].newTab(s.uiManager, d2ui.ButtonTypeTab1, questTab1X)
+	s.tab[questLogTab1].invisibleButton.OnActivated(func() { s.setTab(questLogTab1) })
 	s.panelGroup.AddWidget(s.tab[questLogTab1].button)
+	s.panelGroup.AddWidget(s.tab[questLogTab1].invisibleButton)
 
-	s.tab[questLogTab2].button = s.uiManager.NewButton(d2ui.ButtonTypeTab2, "")
-	s.tab[questLogTab2].button.SetPosition(questTab2X, questTabY)
-	s.tab[questLogTab2].button.OnActivated(func() { s.setTab(questLogTab2) })
+	s.tab[questLogTab2].newTab(s.uiManager, d2ui.ButtonTypeTab2, questTab2X)
+	s.tab[questLogTab2].invisibleButton.OnActivated(func() { s.setTab(questLogTab2) })
 	s.panelGroup.AddWidget(s.tab[questLogTab2].button)
+	s.panelGroup.AddWidget(s.tab[questLogTab2].invisibleButton)
 
-	s.tab[questLogTab3].button = s.uiManager.NewButton(d2ui.ButtonTypeTab3, "")
-	s.tab[questLogTab3].button.SetPosition(questTab3X, questTabY)
-	s.tab[questLogTab3].button.OnActivated(func() { s.setTab(questLogTab3) })
+	s.tab[questLogTab3].newTab(s.uiManager, d2ui.ButtonTypeTab3, questTab3X)
+	s.tab[questLogTab3].invisibleButton.OnActivated(func() { s.setTab(questLogTab3) })
 	s.panelGroup.AddWidget(s.tab[questLogTab3].button)
+	s.panelGroup.AddWidget(s.tab[questLogTab3].invisibleButton)
 
-	s.tab[questLogTab4].button = s.uiManager.NewButton(d2ui.ButtonTypeTab4, "")
-	s.tab[questLogTab4].button.SetPosition(questTab4X, questTabY)
-	s.tab[questLogTab4].button.OnActivated(func() { s.setTab(questLogTab4) })
+	s.tab[questLogTab4].newTab(s.uiManager, d2ui.ButtonTypeTab4, questTab4X)
+	s.tab[questLogTab4].invisibleButton.OnActivated(func() { s.setTab(questLogTab4) })
 	s.panelGroup.AddWidget(s.tab[questLogTab4].button)
+	s.panelGroup.AddWidget(s.tab[questLogTab4].invisibleButton)
 
-	s.tab[questLogTab5].button = s.uiManager.NewButton(d2ui.ButtonTypeTab5, "")
-	s.tab[questLogTab5].button.SetPosition(questTab5X, questTabY)
-	s.tab[questLogTab5].button.OnActivated(func() { s.setTab(questLogTab5) })
+	s.tab[questLogTab5].newTab(s.uiManager, d2ui.ButtonTypeTab5, questTab5X)
+	s.tab[questLogTab5].invisibleButton.OnActivated(func() { s.setTab(questLogTab5) })
 	s.panelGroup.AddWidget(s.tab[questLogTab5].button)
+	s.panelGroup.AddWidget(s.tab[questLogTab5].invisibleButton)
 
 	s.setTab(s.act - 1)
 }
 
 func (s *QuestLog) setTab(tab int) {
 	s.selectedTab = tab
+
 	for i := 0; i < questLogNumTabs; i++ {
-		//s.tab[i].button.SetEnabled(i == tab-1)
-		s.tab[:][i].button.SetPressed(!(i == tab))
-		fmt.Println("!(i==tab): ", !(i == tab))
+		s.tab[i].button.SetEnabled(i == tab)
+		//s.tab[i].button.SetPressed(i != tab-1)
+		//fmt.Println("(i!=tab): ", (i != tab))
 	}
 }
 
 func (s *QuestLog) setQuestButtons() {
 	s.q1 = s.uiManager.NewButton(d2ui.ButtonTypeBlangQuestBtn, "")
 	s.q1.SetPosition(q1SocketX+questOffsetX, q1SocketY+questOffsetY)
-	s.q1.OnActivated(func() { s.onQuestClicked(1) })
+	s.q1.OnActivated(func() { s.onQuestClicked(quest1) })
 	s.panelGroup.AddWidget(s.q1)
 
 	s.q2 = s.uiManager.NewButton(d2ui.ButtonTypeBlangQuestBtn, "")
 	s.q2.SetPosition(q2SocketX+questOffsetX, q2SocketY+questOffsetY)
-	s.q2.OnActivated(func() { s.onQuestClicked(2) })
+	s.q2.OnActivated(func() { s.onQuestClicked(quest2) })
 	s.panelGroup.AddWidget(s.q2)
 
 	s.q3 = s.uiManager.NewButton(d2ui.ButtonTypeBlangQuestBtn, "")
 	s.q3.SetPosition(q3SocketX+questOffsetX, q3SocketY+questOffsetY)
-	s.q3.OnActivated(func() { s.onQuestClicked(3) })
+	s.q3.OnActivated(func() { s.onQuestClicked(quest3) })
 	s.panelGroup.AddWidget(s.q3)
 
 	s.q4 = s.uiManager.NewButton(d2ui.ButtonTypeBlangQuestBtn, "")
 	s.q4.SetPosition(q4SocketX+questOffsetX, q4SocketY+questOffsetY)
-	s.q4.OnActivated(func() { s.onQuestClicked(4) })
+	s.q4.OnActivated(func() { s.onQuestClicked(quest4) })
 	s.panelGroup.AddWidget(s.q4)
 
 	s.q5 = s.uiManager.NewButton(d2ui.ButtonTypeBlangQuestBtn, "")
 	s.q5.SetPosition(q5SocketX+questOffsetX, q5SocketY+questOffsetY)
-	s.q5.OnActivated(func() { s.onQuestClicked(5) })
+	s.q5.OnActivated(func() { s.onQuestClicked(quest5) })
 	s.panelGroup.AddWidget(s.q5)
 
 	s.q6 = s.uiManager.NewButton(d2ui.ButtonTypeBlangQuestBtn, "")
 	s.q6.SetPosition(q6SocketX+questOffsetX, q6SocketY+questOffsetY)
-	s.q6.OnActivated(func() { s.onQuestClicked(6) })
+	s.q6.OnActivated(func() { s.onQuestClicked(quest6) })
 	s.panelGroup.AddWidget(s.q6)
 }
 

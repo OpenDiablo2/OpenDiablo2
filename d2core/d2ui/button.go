@@ -56,7 +56,8 @@ const (
 	ButtonTypeTab3               ButtonType = 36
 	ButtonTypeTab4               ButtonType = 37
 	ButtonTypeTab5               ButtonType = 38
-	ButtonTypeBlangQuestBtn      ButtonType = 39
+	ButtonTypeTabBlank           ButtonType = 39
+	ButtonTypeBlangQuestBtn      ButtonType = 40
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -603,6 +604,21 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			AllowFrameChange: true,
 			BaseFrame:        tab5BaseFrame,
 			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+		},
+		ButtonTypeTabBlank: {
+			XSegments:        buttonTabXSegments,
+			YSegments:        buttonTabYSegments,
+			DisabledFrame:    0,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.WPTabs,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: false,
+			HasImage:         false,
 			FixedWidth:       ButtonNoFixedWidth,
 			FixedHeight:      ButtonNoFixedHeight,
 			LabelColor:       greyAlpha100,
