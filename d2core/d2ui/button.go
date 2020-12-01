@@ -57,7 +57,7 @@ const (
 	ButtonTypeTab4               ButtonType = 37
 	ButtonTypeTab5               ButtonType = 38
 	ButtonTypeTabBlank           ButtonType = 39
-	ButtonTypeBlangQuestBtn      ButtonType = 40
+	ButtonTypeBlankQuestBtn      ButtonType = 40
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -626,7 +626,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			FixedHeight:      ButtonNoFixedHeight,
 			LabelColor:       greyAlpha100,
 		},
-		ButtonTypeBlangQuestBtn: {
+		ButtonTypeBlankQuestBtn: {
 			XSegments:        blankQuestButtonXSegments,
 			YSegments:        blankQuestButtonYSegments,
 			DisabledFrame:    blankQuestButtonDisabledFrames,

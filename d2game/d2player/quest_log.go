@@ -74,13 +74,7 @@ const (
 )
 
 const (
-	questNone = iota
-	quest1
-	quest2
-	quest3
-	quest4
-	quest5
-	quest6
+	questNone = 0
 )
 
 // NewQuestLog creates a new quest log
@@ -96,8 +90,7 @@ func NewQuestLog(asset *d2asset.AssetManager,
 		uiManager: ui,
 		originX:   originX,
 		originY:   originY,
-		//act:       act,
-		act: 1,
+		act:       act,
 		tab: [questLogNumTabs]*questLogTab{
 			{},
 			{},
@@ -127,34 +120,18 @@ type QuestLog struct {
 	act           int
 	tab           [questLogNumTabs]*questLogTab
 
-	q1 *d2ui.Button
-	q2 *d2ui.Button
-	q3 *d2ui.Button
-	q4 *d2ui.Button
-	q5 *d2ui.Button
-	q6 *d2ui.Button
-	// quests    []*questField
 	questName *d2ui.Label
 	questsa1  *d2ui.WidgetGroup
 	questsa2  *d2ui.WidgetGroup
 	questsa3  *d2ui.WidgetGroup
 	questsa4  *d2ui.WidgetGroup
 	questsa5  *d2ui.WidgetGroup
-	downLine  *d2ui.WidgetGroup
 
 	originX int
 	originY int
 	isOpen  bool
 
 	*d2util.Logger
-}
-
-type questField struct {
-	//nolint:deadcode,structcheck,unused // I believe it'll be used
-	descr  *d2ui.Label
-	sprite *d2ui.Sprite
-	//nolint:deadcode,structcheck,unused // I believe it'll be used
-	status int // for now -1 = complete, 0 = not started > 0 in progress
 }
 
 type questLogTab struct {
@@ -178,7 +155,6 @@ func (s *QuestLog) Load() {
 	s.questsa3 = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
 	s.questsa4 = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
 	s.questsa5 = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
-	s.downLine = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
 	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
 
 	frame := d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameLeft)
@@ -212,7 +188,6 @@ func (s *QuestLog) Load() {
 	s.panelGroup.AddWidget(s.questName)
 
 	s.loadTabs()
-	s.setQuestButtons()
 	s.loadQuestIcons()
 
 	s.panelGroup.SetVisible(false)
@@ -278,12 +253,14 @@ func (s *QuestLog) loadQuestIcons() {
 	s.questsa5 = s.loadQuestIconsForAct(act5)
 }
 
+func (s *QuestLog) makeQuestCallback(n int) func() {
+	return func() {
+		s.onQuestClicked(n + 1)
+	}
+}
+
 func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 	wg := s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
-
-	var quest questField
-
-	var err error
 
 	var questsInAct int
 	if act == act4 {
@@ -295,19 +272,32 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 	for n := 0; n < questsInAct; n++ {
 		q := s.questTable(act, n)
 
-		quest.sprite, err = s.uiManager.NewSprite(d2resource.QuestLogDone, d2resource.PaletteSky)
+		button := s.uiManager.NewButton(d2ui.ButtonTypeBlankQuestBtn, "")
+		button.SetPosition(q.x+questOffsetX, q.y+questOffsetY)
+		button.OnActivated(s.makeQuestCallback(n))
+
+		socket, err := s.uiManager.NewSprite(d2resource.QuestLogSocket, d2resource.PaletteSky)
 		if err != nil {
 			s.Error(err.Error())
 		}
 
-		err = quest.sprite.SetCurrentFrame(q.frame)
+		socket.SetPosition(q.x+questOffsetX, q.y+iconOffsetY+2*questOffsetY)
+
+		icon, err := s.uiManager.NewSprite(d2resource.QuestLogDone, d2resource.PaletteSky)
 		if err != nil {
 			s.Error(err.Error())
 		}
 
-		quest.sprite.SetPosition(q.x+questOffsetX, q.y+questOffsetY+iconOffsetY)
+		err = icon.SetCurrentFrame(q.frame)
+		if err != nil {
+			s.Error(err.Error())
+		}
 
-		wg.AddWidget(quest.sprite)
+		icon.SetPosition(q.x+questOffsetX, q.y+questOffsetY+iconOffsetY)
+
+		wg.AddWidget(icon)
+		wg.AddWidget(socket)
+		wg.AddWidget(button)
 	}
 	wg.SetVisible(false)
 
@@ -362,52 +352,16 @@ func (s *QuestLog) setTab(tab int) {
 	s.questsa3.SetVisible(tab == questLogTab3)
 	s.questsa4.SetVisible(tab == questLogTab4)
 	s.questsa5.SetVisible(tab == questLogTab5)
-	s.downLine.SetVisible(tab != questLogTab4)
 
 	for i := 0; i < questLogNumTabs; i++ {
 		s.tab[i].button.SetEnabled(i == tab)
 	}
 }
 
-func (s *QuestLog) setQuestButtons() {
-	s.q1 = s.uiManager.NewButton(d2ui.ButtonTypeBlangQuestBtn, "")
-	s.q1.SetPosition(q1SocketX+questOffsetX, q1SocketY+questOffsetY)
-	s.q1.OnActivated(func() { s.onQuestClicked(quest1) })
-	s.panelGroup.AddWidget(s.q1)
-
-	s.q2 = s.uiManager.NewButton(d2ui.ButtonTypeBlangQuestBtn, "")
-	s.q2.SetPosition(q2SocketX+questOffsetX, q2SocketY+questOffsetY)
-	s.q2.OnActivated(func() { s.onQuestClicked(quest2) })
-	s.panelGroup.AddWidget(s.q2)
-
-	s.q3 = s.uiManager.NewButton(d2ui.ButtonTypeBlangQuestBtn, "")
-	s.q3.SetPosition(q3SocketX+questOffsetX, q3SocketY+questOffsetY)
-	s.q3.OnActivated(func() { s.onQuestClicked(quest3) })
-	s.panelGroup.AddWidget(s.q3)
-
-	s.q4 = s.uiManager.NewButton(d2ui.ButtonTypeBlangQuestBtn, "")
-	s.q4.SetPosition(q4SocketX+questOffsetX, q4SocketY+questOffsetY)
-	s.q4.OnActivated(func() { s.onQuestClicked(quest4) })
-	s.downLine.AddWidget(s.q4)
-	s.panelGroup.AddWidget(s.q4)
-
-	s.q5 = s.uiManager.NewButton(d2ui.ButtonTypeBlangQuestBtn, "")
-	s.q5.SetPosition(q5SocketX+questOffsetX, q5SocketY+questOffsetY)
-	s.q5.OnActivated(func() { s.onQuestClicked(quest5) })
-	s.downLine.AddWidget(s.q5)
-	s.panelGroup.AddWidget(s.q5)
-
-	s.q6 = s.uiManager.NewButton(d2ui.ButtonTypeBlangQuestBtn, "")
-	s.q6.SetPosition(q6SocketX+questOffsetX, q6SocketY+questOffsetY)
-	s.q6.OnActivated(func() { s.onQuestClicked(quest6) })
-	s.downLine.AddWidget(s.q6)
-	s.panelGroup.AddWidget(s.q6)
-}
-
 func (s *QuestLog) onQuestClicked(number int) {
 	s.selectedQuest = number
 	s.loadQuestLabels()
-	s.Infof("Quest number %d in tab %d clicked", number, v.selectedTab)
+	s.Infof("Quest number %d in tab %d clicked", number, s.selectedTab)
 }
 
 func (s *QuestLog) onDescrClicked() {
@@ -453,13 +407,12 @@ func (s *QuestLog) SetOnCloseCb(cb func()) {
 }
 
 // Advance updates labels on the panel
-func (s *HeroStatsPanel) Advance(elapsed float64) {
+func (s *QuestLog) Advance(elapsed float64) {
 	//
 }
 
 func (s *QuestLog) renderStaticMenu(target d2interface.Surface) {
 	s.renderStaticPanelFrames(target)
-	s.renderSockets(target)
 }
 
 // nolint:dupl // I think it is OK, to duplicate this function
@@ -495,38 +448,6 @@ func (s *QuestLog) renderStaticPanelFrames(target d2interface.Surface) {
 		}
 
 		s.panel.Render(target)
-	}
-}
-
-func (s *QuestLog) renderSockets(target d2interface.Surface) {
-	var socket *d2ui.Sprite
-
-	var err error
-
-	var sockets []struct{ x, y int }
-
-	socketPath := d2resource.QuestLogSocket
-
-	sockets = []struct {
-		x, y int
-	}{
-		{q1SocketX, q1SocketY},
-		{q2SocketX, q2SocketY},
-		{q3SocketX, q3SocketY},
-		{q4SocketX, q4SocketY},
-		{q5SocketX, q5SocketY},
-		{q6SocketX, q6SocketY},
-	}
-
-	for _, cfg := range sockets {
-		socket, err = s.uiManager.NewSprite(socketPath, d2resource.PaletteSky)
-		if err != nil {
-			s.Error(err.Error())
-		}
-
-		socket.SetPosition(cfg.x, cfg.y)
-
-		socket.RenderSegmented(target, 1, 1, 0)
 	}
 }
 
