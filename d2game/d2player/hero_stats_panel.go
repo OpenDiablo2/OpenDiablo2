@@ -204,6 +204,7 @@ func (s *HeroStatsPanel) renderStaticMenu(target d2interface.Surface) {
 	s.renderStaticLabels(target)
 }
 
+// nolint:dupl // see quest_log.go.renderStaticPanelFrames comment
 func (s *HeroStatsPanel) renderStaticPanelFrames(target d2interface.Surface) {
 	frames := []int{
 		statsPanelTopLeft,
