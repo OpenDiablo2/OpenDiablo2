@@ -2,9 +2,8 @@
 package d2components
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/gravestench/akara"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 )
 
 // static check that Size implements Component
@@ -12,13 +11,13 @@ var _ akara.Component = &Size{}
 
 // Size represents an entities width and height as a vector
 type Size struct {
-	*d2vector.Vector
+	*d2math.Vector2
 }
 
 // New creates a new Size. By default, size is (0,0).
 func (*Size) New() akara.Component {
 	return &Size{
-		Vector: d2vector.NewVector(0, 0),
+		Vector2: d2math.NewVector2(0, 0),
 	}
 }
 

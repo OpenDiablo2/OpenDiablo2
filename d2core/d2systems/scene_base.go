@@ -3,7 +3,8 @@ package d2systems
 import (
 	"fmt"
 	"image/color"
-	"path/filepath"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2scene"
 
 	"github.com/gravestench/akara"
 
@@ -20,12 +21,14 @@ const (
 // NewBaseScene creates a new base scene instance
 func NewBaseScene(key string) *BaseScene {
 	base := &BaseScene{
-		BaseSystem:  &akara.BaseSystem{},
-		Logger:      d2util.NewLogger(),
-		key:         key,
-		Viewports:   make([]akara.EID, 0),
-		GameObjects: make([]akara.EID, 0),
-		systems:     &baseSystems{},
+		Graph:           d2scene.NewNode(),
+		BaseSystem:      &akara.BaseSystem{},
+		Logger:          d2util.NewLogger(),
+		key:             key,
+		Viewports:       make([]akara.EID, 0),
+		GameObjects:     make([]akara.EID, 0),
+		systems:         &baseSystems{},
+		backgroundColor: color.Transparent,
 	}
 
 	base.SetPrefix(key)
@@ -49,25 +52,29 @@ type baseSystems struct {
 type BaseScene struct {
 	*akara.BaseSystem
 	*d2util.Logger
-	key         string
-	booted      bool
-	paused      bool
-	systems     *baseSystems
-	Add         *sceneObjectFactory
-	Viewports   []akara.EID
-	GameObjects []akara.EID
+	key             string
+	booted          bool
+	paused          bool
+	systems         *baseSystems
+	Add             *sceneObjectFactory
+	Viewports       []akara.EID
+	GameObjects     []akara.EID
+	Graph           *d2scene.Node // the root node
+	backgroundColor color.Color
+	d2components.SceneGraphNodeFactory
 	d2components.ViewportFactory
 	d2components.MainViewportFactory
 	d2components.ViewportFilterFactory
 	d2components.PriorityFactory
 	d2components.CameraFactory
-	d2components.RenderableFactory
+	d2components.TextureFactory
 	d2components.InteractiveFactory
 	d2components.PositionFactory
 	d2components.ScaleFactory
-	d2components.AnimationFactory
+	d2components.SpriteFactory
 	d2components.OriginFactory
 	d2components.AlphaFactory
+	d2components.DrawEffectFactory
 }
 
 // Booted returns whether or not the scene has booted
@@ -155,26 +162,30 @@ func (s *BaseScene) setupFactories() {
 	viewportFilterID := s.RegisterComponent(&d2components.ViewportFilter{})
 	cameraID := s.RegisterComponent(&d2components.Camera{})
 	priorityID := s.RegisterComponent(&d2components.Priority{})
-	renderableID := s.RegisterComponent(&d2components.Renderable{})
+	renderableID := s.RegisterComponent(&d2components.Texture{})
 	interactiveID := s.RegisterComponent(&d2components.Interactive{})
 	positionID := s.RegisterComponent(&d2components.Position{})
 	scaleID := s.RegisterComponent(&d2components.Scale{})
-	animationID := s.RegisterComponent(&d2components.Animation{})
+	animationID := s.RegisterComponent(&d2components.Sprite{})
 	originID := s.RegisterComponent(&d2components.Origin{})
 	alphaID := s.RegisterComponent(&d2components.Alpha{})
+	sceneGraphNodeID := s.RegisterComponent(&d2components.SceneGraphNode{})
+	drawEffectID := s.RegisterComponent(&d2components.DrawEffect{})
 
 	s.MainViewport = s.GetComponentFactory(mainViewportID)
 	s.Viewport = s.GetComponentFactory(viewportID)
 	s.ViewportFilter = s.GetComponentFactory(viewportFilterID)
 	s.Camera = s.GetComponentFactory(cameraID)
 	s.Priority = s.GetComponentFactory(priorityID)
-	s.Renderable = s.GetComponentFactory(renderableID)
+	s.Texture = s.GetComponentFactory(renderableID)
 	s.Interactive = s.GetComponentFactory(interactiveID)
 	s.Position = s.GetComponentFactory(positionID)
 	s.Scale = s.GetComponentFactory(scaleID)
-	s.Animation = s.GetComponentFactory(animationID)
+	s.Sprite = s.GetComponentFactory(animationID)
 	s.Origin = s.GetComponentFactory(originID)
 	s.Alpha = s.GetComponentFactory(alphaID)
+	s.SceneGraphNode = s.GetComponentFactory(sceneGraphNodeID)
+	s.DrawEffect = s.GetComponentFactory(drawEffectID)
 }
 
 func (s *BaseScene) createDefaultViewport() {
@@ -184,12 +195,15 @@ func (s *BaseScene) createDefaultViewport() {
 	s.AddPriority(viewportID)
 
 	camera := s.AddCamera(viewportID)
+	width, height := camera.Size.XY()
 
-	sfc := s.systems.RenderSystem.renderer.NewSurface(camera.Width, camera.Height)
+	s.AddSceneGraphNode(viewportID).SetParent(s.Graph)
+
+	sfc := s.systems.RenderSystem.renderer.NewSurface(int(width), int(height))
 
 	sfc.Clear(color.Transparent)
 
-	s.AddRenderable(viewportID).Surface = sfc
+	s.AddTexture(viewportID).Texture = sfc
 	s.AddMainViewport(viewportID)
 
 	s.Viewports = append(s.Viewports, viewportID)
@@ -210,6 +224,7 @@ func (s *BaseScene) Update() {
 		return
 	}
 
+	s.Graph.UpdateWorldMatrix()
 	s.renderViewports()
 }
 
@@ -265,6 +280,7 @@ func (s *BaseScene) binGameObjectsByViewport() map[int][]akara.EID {
 func (s *BaseScene) renderViewport(idx int, objects []akara.EID) {
 	id := s.Viewports[idx]
 
+	// the first viewport is always the main viewport
 	if idx == mainViewport {
 		s.AddMainViewport(id)
 	} else {
@@ -276,32 +292,39 @@ func (s *BaseScene) renderViewport(idx int, objects []akara.EID) {
 		return
 	}
 
-	sfc, found := s.GetRenderable(id)
+	node, found := s.GetSceneGraphNode(id)
+	if !found {
+		node = s.AddSceneGraphNode(id)
+	}
+
+	// translate the camera position using the camera's scene graph node
+	cx, cy := camera.Position.Clone().ApplyMatrix4(node.Local).XY()
+	cw, ch := camera.Size.XY()
+
+	sfc, found := s.GetTexture(id)
 	if !found {
 		return
 	}
 
-	if sfc.Surface == nil {
-		sfc.Surface = s.systems.RenderSystem.renderer.NewSurface(camera.Width, camera.Height)
+	if sfc.Texture == nil {
+		sfc.Texture = s.systems.RenderSystem.renderer.NewSurface(int(cw), int(ch))
 	}
 
-	sfc.Clear(color.Transparent)
+	if idx == mainViewport {
+		sfc.Texture.Clear(s.backgroundColor)
+	}
 
-	cx, cy := int(camera.X()), int(camera.Y())
-
-	sfc.Surface.PushTranslation(cx, cy) // negative because we're offsetting everything that gets rendered
-	sfc.Surface.PushScale(camera.Zoom, camera.Zoom)
+	sfc.Texture.PushTranslation(int(-cx), int(-cy)) // negative because we're offsetting everything that gets rendered
 
 	for _, object := range objects {
-		s.renderObject(sfc.Surface, object)
+		s.renderObject(sfc.Texture, object)
 	}
 
-	sfc.Pop()
-	sfc.Pop()
+	sfc.Texture.Pop()
 }
 
 func (s *BaseScene) renderObject(target d2interface.Surface, id akara.EID) {
-	renderable, found := s.GetRenderable(id)
+	texture, found := s.GetTexture(id)
 	if !found {
 		return
 	}
@@ -321,9 +344,30 @@ func (s *BaseScene) renderObject(target d2interface.Surface, id akara.EID) {
 		alpha = s.AddAlpha(id)
 	}
 
-	x, y := int(position.X()), int(position.Y())
+	origin, found := s.GetOrigin(id)
+	if !found {
+		origin = s.AddOrigin(id)
+	}
 
-	target.PushTranslation(x, y)
+	node, found := s.GetSceneGraphNode(id)
+	if !found {
+		node = s.AddSceneGraphNode(id)
+		node.SetParent(s.Graph)
+	}
+
+	drawEffect, found := s.GetDrawEffect(id)
+	if found {
+		target.PushEffect(drawEffect.DrawEffect)
+		defer target.Pop()
+	}
+
+	// translate the entity position using the scene graph node
+	x, y := position.Clone().
+		Add(origin.Vector3).
+		ApplyMatrix4(node.Local).
+		XY()
+
+	target.PushTranslation(int(x), int(y))
 	defer target.Pop()
 
 	target.PushScale(scale.X(), scale.Y())
@@ -336,7 +380,7 @@ func (s *BaseScene) renderObject(target d2interface.Surface, id akara.EID) {
 
 	segment, found := s.systems.SpriteFactory.GetSegmentedSprite(id)
 	if found {
-		animation, found := s.GetAnimation(id)
+		animation, found := s.GetSprite(id)
 		if !found {
 			return
 		}
@@ -370,40 +414,5 @@ func (s *BaseScene) renderObject(target d2interface.Surface, id akara.EID) {
 		return
 	}
 
-	target.Render(renderable.Surface)
-}
-
-// responsible for wrapping the object factory calls and assigning the created object entity id's to the scene
-type sceneObjectFactory struct {
-	*BaseScene
-	*d2util.Logger
-}
-
-func (s *sceneObjectFactory) addBasicComponenets(id akara.EID) {
-	_ = s.AddPosition(id)
-	_ = s.AddScale(id)
-	_ = s.AddAlpha(id)
-	_ = s.AddOrigin(id)
-}
-
-func (s *sceneObjectFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID {
-	s.Infof("creating sprite: %s, %s", filepath.Base(imgPath), palPath)
-
-	eid := s.systems.SpriteFactory.Sprite(x, y, imgPath, palPath)
-	s.GameObjects = append(s.GameObjects, eid)
-
-	s.addBasicComponenets(eid)
-
-	return eid
-}
-
-func (s *sceneObjectFactory) SegmentedSprite(x, y float64, imgPath, palPath string, xseg, yseg, frame int) akara.EID {
-	s.Infof("creating segmented sprite: %s, %s", filepath.Base(imgPath), palPath)
-
-	eid := s.systems.SpriteFactory.SegmentedSprite(x, y, imgPath, palPath, xseg, yseg, frame)
-	s.GameObjects = append(s.GameObjects, eid)
-
-	s.addBasicComponenets(eid)
-
-	return eid
+	target.Render(texture.Texture)
 }

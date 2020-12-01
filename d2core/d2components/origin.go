@@ -4,7 +4,7 @@ package d2components
 import (
 	"github.com/gravestench/akara"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
 // static check that Origin implements Component
@@ -14,13 +14,13 @@ var _ akara.Component = &Origin{}
 // The values should be interpreted as normalized to the width/height of the entity (depends on other components...).
 // For example, origin (0,0) should be top-left corner, (0.5, 0.5) should be center.
 type Origin struct {
-	*d2vector.Vector
+	*d2math.Vector3
 }
 
 // New creates a new Origin. By default, the origin is the top-left corner (0,0)
 func (*Origin) New() akara.Component {
 	return &Origin{
-		Vector: d2vector.NewVector(0, 0),
+		Vector3: d2math.NewVector3(0, 0, 0),
 	}
 }
 

@@ -3,8 +3,8 @@ package d2systems
 import (
 	"github.com/gravestench/akara"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2animation"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2sprite"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
@@ -33,8 +33,8 @@ type spriteLoadQueueEntry struct {
 
 type spriteLoadQueue = map[akara.EID]spriteLoadQueueEntry
 
-// SpriteFactory is responsible for queueing sprites to be loaded (as animations),
-// as well as binding the animation to a renderer if one is present (which generates the sprite surfaces).
+// SpriteFactory is responsible for queueing sprites to be loaded (as spriteations),
+// as well as binding the spriteation to a renderer if one is present (which generates the sprite surfaces).
 type SpriteFactory struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
@@ -44,8 +44,9 @@ type SpriteFactory struct {
 	d2components.Dc6Factory
 	d2components.DccFactory
 	d2components.PaletteFactory
-	d2components.AnimationFactory
-	d2components.RenderableFactory
+	d2components.SpriteFactory
+	d2components.TextureFactory
+	d2components.OriginFactory
 	d2components.SegmentedSpriteFactory
 	loadQueue       spriteLoadQueue
 	spritesToRender *akara.Subscription
@@ -70,8 +71,9 @@ func (t *SpriteFactory) setupFactories() {
 	dc6ID := t.RegisterComponent(&d2components.Dc6{})
 	dccID := t.RegisterComponent(&d2components.Dcc{})
 	paletteID := t.RegisterComponent(&d2components.Palette{})
-	animationID := t.RegisterComponent(&d2components.Animation{})
-	renderableID := t.RegisterComponent(&d2components.Renderable{})
+	spriteID := t.RegisterComponent(&d2components.Sprite{})
+	textureID := t.RegisterComponent(&d2components.Texture{})
+	originID := t.RegisterComponent(&d2components.Origin{})
 	segmentedSpriteID := t.RegisterComponent(&d2components.SegmentedSprite{})
 
 	t.FilePath = t.GetComponentFactory(filePathID)
@@ -79,29 +81,34 @@ func (t *SpriteFactory) setupFactories() {
 	t.Dc6 = t.GetComponentFactory(dc6ID)
 	t.Dcc = t.GetComponentFactory(dccID)
 	t.Palette = t.GetComponentFactory(paletteID)
-	t.Animation = t.GetComponentFactory(animationID)
-	t.Renderable = t.GetComponentFactory(renderableID)
+	t.Texture = t.GetComponentFactory(textureID)
+	t.Origin = t.GetComponentFactory(originID)
+	t.SpriteFactory.Sprite = t.GetComponentFactory(spriteID)
 	t.SegmentedSpriteFactory.SegmentedSprite = t.GetComponentFactory(segmentedSpriteID)
 }
 
 func (t *SpriteFactory) setupSubscriptions() {
 	spritesToRender := t.NewComponentFilter().
-		Require(&d2components.Animation{}). // we want to process entities that have an animation ...
-		Forbid(&d2components.Renderable{}). // ... but are missing a surface
+		Require(&d2components.Sprite{}). // we want to process entities that have an spriteation ...
+		Forbid(&d2components.Texture{}). // ... but are missing a surface
 		Build()
 
 	spritesToUpdate := t.NewComponentFilter().
-		Require(&d2components.Animation{}).  // we want to process entities that have an animation ...
-		Require(&d2components.Renderable{}). // ... but are missing a surface
+		Require(&d2components.Sprite{}).  // we want to process entities that have an spriteation ...
+		Require(&d2components.Texture{}). // ... but are missing a surface
 		Build()
 
 	t.spritesToRender = t.AddSubscription(spritesToRender)
 	t.spritesToUpdate = t.AddSubscription(spritesToUpdate)
 }
 
-// Update processes the load queue which attempting to create animations, as well as
-// binding existing animations to a renderer if one is present.
+// Update processes the load queue which attempting to create spriteations, as well as
+// binding existing spriteations to a renderer if one is present.
 func (t *SpriteFactory) Update() {
+	for spriteID := range t.loadQueue {
+		t.tryCreatingSprite(spriteID)
+	}
+
 	for _, eid := range t.spritesToUpdate.GetEntities() {
 		t.updateSprite(eid)
 	}
@@ -109,17 +116,14 @@ func (t *SpriteFactory) Update() {
 	for _, eid := range t.spritesToRender.GetEntities() {
 		t.tryRenderingSprite(eid)
 	}
-
-	for spriteID := range t.loadQueue {
-		t.tryCreatingAnimation(spriteID)
-	}
 }
 
-// Sprite queues a sprite animation to be loaded
+// Sprite queues a sprite spriteation to be loaded
 func (t *SpriteFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID {
 	spriteID := t.NewEntity()
 
-	t.AddPosition(spriteID).Set(x, y)
+	position := t.AddPosition(spriteID)
+	position.X, position.Y = x, y
 
 	imgID, palID := t.NewEntity(), t.NewEntity()
 	t.AddFilePath(imgID).Path = imgPath
@@ -133,7 +137,7 @@ func (t *SpriteFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID 
 	return spriteID
 }
 
-// SegmentedSprite queues a segmented sprite animation to be loaded.
+// SegmentedSprite queues a segmented sprite spriteation to be loaded.
 // A segmented sprite is a sprite that has many frames that form the entire sprite.
 func (t *SpriteFactory) SegmentedSprite(x, y float64, imgPath, palPath string, xseg, yseg, frame int) akara.EID {
 	spriteID := t.Sprite(x, y, imgPath, palPath)
@@ -146,7 +150,7 @@ func (t *SpriteFactory) SegmentedSprite(x, y float64, imgPath, palPath string, x
 	return spriteID
 }
 
-func (t *SpriteFactory) tryCreatingAnimation(id akara.EID) {
+func (t *SpriteFactory) tryCreatingSprite(id akara.EID) {
 	entry := t.loadQueue[id]
 	imageID, paletteID := entry.spriteImage, entry.spritePalette
 
@@ -165,16 +169,16 @@ func (t *SpriteFactory) tryCreatingAnimation(id akara.EID) {
 		return
 	}
 
-	var anim d2interface.Animation
+	var sprite d2interface.Sprite
 
 	var err error
 
 	if dc6, found := t.GetDc6(imageID); found {
-		anim, err = t.createDc6Animation(dc6, palette)
+		sprite, err = t.createDc6Sprite(dc6, palette)
 	}
 
 	if dcc, found := t.GetDcc(imageID); found {
-		anim, err = t.createDccAnimation(dcc, palette)
+		sprite, err = t.createDccSprite(dcc, palette)
 	}
 
 	if err != nil {
@@ -185,7 +189,7 @@ func (t *SpriteFactory) tryCreatingAnimation(id akara.EID) {
 		t.RemoveEntity(paletteID)
 	}
 
-	t.AddAnimation(id).Animation = anim
+	t.AddSprite(id).Sprite = sprite
 
 	delete(t.loadQueue, id)
 }
@@ -199,20 +203,20 @@ func (t *SpriteFactory) tryRenderingSprite(eid akara.EID) {
 		return
 	}
 
-	anim, found := t.GetAnimation(eid)
+	sprite, found := t.GetSprite(eid)
 	if !found {
 		return
 	}
 
-	if anim.Animation == nil {
+	if sprite.Sprite == nil {
 		return
 	}
 
-	anim.BindRenderer(t.RenderSystem.renderer)
+	sprite.BindRenderer(t.RenderSystem.renderer)
 
-	sfc := anim.GetCurrentFrameSurface()
+	sfc := sprite.GetCurrentFrameSurface()
 
-	t.AddRenderable(eid).Surface = sfc
+	t.AddTexture(eid).Texture = sfc
 }
 
 func (t *SpriteFactory) updateSprite(eid akara.EID) {
@@ -224,33 +228,48 @@ func (t *SpriteFactory) updateSprite(eid akara.EID) {
 		return
 	}
 
-	anim, found := t.GetAnimation(eid)
+	sprite, found := t.GetSprite(eid)
 	if !found {
 		return
 	}
 
-	if anim.Animation == nil {
+	if sprite.Sprite == nil {
 		return
 	}
 
-	renderable, found := t.GetRenderable(eid)
+	texture, found := t.GetTexture(eid)
 	if !found {
 		return
 	}
 
-	renderable.Surface = anim.GetCurrentFrameSurface()
+	origin, found := t.GetOrigin(eid)
+	if !found {
+		origin = t.AddOrigin(eid)
+	}
+
+	_ = sprite.Sprite.Advance(t.World.TimeDelta)
+
+	texture.Texture = sprite.GetCurrentFrameSurface()
+
+	ox, oy := sprite.GetCurrentFrameOffset()
+	origin.X, origin.Y = float64(ox), float64(oy)
+
+	if _, isSegmented := t.GetSegmentedSprite(eid); !isSegmented {
+		_, frameHeight := sprite.GetCurrentFrameSize()
+		origin.Y -= float64(frameHeight)
+	}
 }
 
-func (t *SpriteFactory) createDc6Animation(
+func (t *SpriteFactory) createDc6Sprite(
 	dc6 *d2components.Dc6,
 	pal *d2components.Palette,
-) (d2interface.Animation, error) {
-	return d2animation.NewDC6Animation(dc6.DC6, pal.Palette, 0)
+) (d2interface.Sprite, error) {
+	return d2sprite.NewDC6Sprite(dc6.DC6, pal.Palette, 0)
 }
 
-func (t *SpriteFactory) createDccAnimation(
+func (t *SpriteFactory) createDccSprite(
 	dcc *d2components.Dcc,
 	pal *d2components.Palette,
-) (d2interface.Animation, error) {
-	return d2animation.NewDCCAnimation(dcc.DCC, pal.Palette, 0)
+) (d2interface.Sprite, error) {
+	return d2sprite.NewDCCSprite(dcc.DCC, pal.Palette, 0)
 }

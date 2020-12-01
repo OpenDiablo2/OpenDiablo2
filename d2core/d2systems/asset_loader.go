@@ -240,76 +240,74 @@ func (m *AssetLoaderSystem) assignFromCache(id akara.EID, path string, t d2enum.
 
 //nolint:gocyclo // this big switch statement is unfortunate, but necessary
 func (m *AssetLoaderSystem) parseAndCache(id akara.EID, path string, t d2enum.FileType, data []byte) {
-	go func() {
-		switch t {
-		case d2enum.FileTypeStringTable:
-			m.Infof("Loading string table: %s", path)
-			m.loadStringTable(id, path, data)
-		case d2enum.FileTypeFontTable:
-			m.Infof("Loading font table: %s", path)
-			m.loadFontTable(id, path, data)
-		case d2enum.FileTypeDataDictionary:
-			m.Infof("Loading data dictionary: %s", path)
-			m.loadDataDictionary(id, path, data)
-		case d2enum.FileTypePalette:
-			m.Infof("Loading palette: %s", path)
+	switch t {
+	case d2enum.FileTypeStringTable:
+		m.Infof("Loading string table: %s", path)
+		m.loadStringTable(id, path, data)
+	case d2enum.FileTypeFontTable:
+		m.Infof("Loading font table: %s", path)
+		m.loadFontTable(id, path, data)
+	case d2enum.FileTypeDataDictionary:
+		m.Infof("Loading data dictionary: %s", path)
+		m.loadDataDictionary(id, path, data)
+	case d2enum.FileTypePalette:
+		m.Infof("Loading palette: %s", path)
 
-			if err := m.loadPalette(id, path, data); err != nil {
-				m.Error(err.Error())
-			}
-		case d2enum.FileTypePaletteTransform:
-			m.Infof("Loading palette transform: %s", path)
-
-			if err := m.loadPaletteTransform(id, path, data); err != nil {
-				m.Error(err.Error())
-			}
-		case d2enum.FileTypeCOF:
-			m.Infof("Loading COF: %s", path)
-
-			if err := m.loadCOF(id, path, data); err != nil {
-				m.Error(err.Error())
-			}
-		case d2enum.FileTypeDC6:
-			m.Infof("Loading DC6: %s", path)
-
-			if err := m.loadDC6(id, path, data); err != nil {
-				m.Error(err.Error())
-			}
-		case d2enum.FileTypeDCC:
-			m.Infof("Loading DCC: %s", path)
-
-			if err := m.loadDCC(id, path, data); err != nil {
-				m.Error(err.Error())
-			}
-		case d2enum.FileTypeDS1:
-			m.Infof("Loading DS1: %s", path)
-
-			if err := m.loadDS1(id, path, data); err != nil {
-				m.Error(err.Error())
-			}
-		case d2enum.FileTypeDT1:
-			m.Infof("Loading DT1: %s", path)
-
-			if err := m.loadDT1(id, path, data); err != nil {
-				m.Error(err.Error())
-			}
-		case d2enum.FileTypeWAV:
-			m.Infof("Loading WAV: %s", path)
-
-			fh, found := m.GetFileHandle(id)
-			if !found {
-				return
-			}
-
-			m.loadWAV(id, path, fh.Data)
-		case d2enum.FileTypeD2:
-			m.Infof("Loading animation data: %s", path)
-
-			if err := m.loadAnimationData(id, path, data); err != nil {
-				m.Error(err.Error())
-			}
+		if err := m.loadPalette(id, path, data); err != nil {
+			m.Error(err.Error())
 		}
-	}()
+	case d2enum.FileTypePaletteTransform:
+		m.Infof("Loading palette transform: %s", path)
+
+		if err := m.loadPaletteTransform(id, path, data); err != nil {
+			m.Error(err.Error())
+		}
+	case d2enum.FileTypeCOF:
+		m.Infof("Loading COF: %s", path)
+
+		if err := m.loadCOF(id, path, data); err != nil {
+			m.Error(err.Error())
+		}
+	case d2enum.FileTypeDC6:
+		m.Infof("Loading DC6: %s", path)
+
+		if err := m.loadDC6(id, path, data); err != nil {
+			m.Error(err.Error())
+		}
+	case d2enum.FileTypeDCC:
+		m.Infof("Loading DCC: %s", path)
+
+		if err := m.loadDCC(id, path, data); err != nil {
+			m.Error(err.Error())
+		}
+	case d2enum.FileTypeDS1:
+		m.Infof("Loading DS1: %s", path)
+
+		if err := m.loadDS1(id, path, data); err != nil {
+			m.Error(err.Error())
+		}
+	case d2enum.FileTypeDT1:
+		m.Infof("Loading DT1: %s", path)
+
+		if err := m.loadDT1(id, path, data); err != nil {
+			m.Error(err.Error())
+		}
+	case d2enum.FileTypeWAV:
+		m.Infof("Loading WAV: %s", path)
+
+		fh, found := m.GetFileHandle(id)
+		if !found {
+			return
+		}
+
+		m.loadWAV(id, path, fh.Data)
+	case d2enum.FileTypeD2:
+		m.Infof("Loading animation data: %s", path)
+
+		if err := m.loadAnimationData(id, path, data); err != nil {
+			m.Error(err.Error())
+		}
+	}
 }
 
 func (m *AssetLoaderSystem) loadStringTable(id akara.EID, path string, data []byte) {

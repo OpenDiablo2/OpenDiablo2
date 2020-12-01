@@ -4,7 +4,7 @@ package d2components
 import (
 	"github.com/gravestench/akara"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
 // static check that Position implements Component
@@ -13,15 +13,13 @@ var _ akara.Component = &Position{}
 // Position contains an embedded d2vector.Position, which is a vector with
 // helper methods for translating between screen, isometric, tile, and sub-tile space.
 type Position struct {
-	*d2vector.Position
+	*d2math.Vector3
 }
 
 // New creates a new Position. By default, the position is (0,0)
 func (*Position) New() akara.Component {
-	p := d2vector.NewPosition(0, 0)
-
 	return &Position{
-		Position: &p,
+		Vector3: d2math.NewVector3(0, 0, 0),
 	}
 }
 

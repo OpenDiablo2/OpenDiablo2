@@ -4,13 +4,15 @@ package d2components
 import (
 	"github.com/gravestench/akara"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
 const (
 	defaultCameraWidth  = 800
 	defaultCameraHeight = 600
-	defaultCameraZoom   = 1.0
+	defaultCameraNear   = -100
+	defaultCameraFar    = 100
+	defaultCameraZ      = -200
 )
 
 // static check that Camera implements Component
@@ -18,21 +20,32 @@ var _ akara.Component = &Camera{}
 
 // Camera represents a camera that can be rendered to
 type Camera struct {
-	*d2vector.Vector
-	Width  int
-	Height int
-	Zoom   float64
+	Position          *d2math.Vector3
+	PerspectiveMatrix *d2math.Matrix4
+	OrthogonalMatrix  *d2math.Matrix4
+	Size              *d2math.Vector2
+	Clip              *d2math.Vector2
 }
 
 // New returns a new Camera component.
 // The camera defaults to position (0,0), 800x600 resolution, and zoom of 1.0
 func (*Camera) New() akara.Component {
-	return &Camera{
-		Vector: d2vector.NewVector(0, 0),
-		Width:  defaultCameraWidth,
-		Height: defaultCameraHeight,
-		Zoom:   defaultCameraZoom,
+	c := &Camera{
+		Position: d2math.NewVector3(0, 0, defaultCameraZ),
+		Size:     d2math.NewVector2(defaultCameraWidth, defaultCameraHeight),
+		Clip:     d2math.NewVector2(defaultCameraNear, defaultCameraFar),
 	}
+
+	w, h := c.Size.XY()
+	n, f := c.Clip.XY()
+
+	c.PerspectiveMatrix = d2math.NewMatrix4(nil).PerspectiveLH(w, h, n, f)
+
+	l, r, t, b := -(w / 2), w/2, -(h / 2), h/2
+
+	c.OrthogonalMatrix = d2math.NewMatrix4(nil).Ortho(l, r, t, b, n, f)
+
+	return c
 }
 
 // CameraFactory is a wrapper for the generic component factory that returns Camera component instances.

@@ -2,7 +2,9 @@ package d2systems
 
 import (
 	"errors"
+	"image/color"
 	"os"
+	"sort"
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
@@ -35,14 +37,17 @@ type RenderSystem struct {
 	d2components.GameConfigFactory
 	d2components.ViewportFactory
 	d2components.MainViewportFactory
-	d2components.RenderableFactory
-	lastUpdate        time.Time
-	gameLoopInitDelay time.Duration // there is a race condition, this is a hack
+	d2components.TextureFactory
+	d2components.PriorityFactory
+	d2components.AlphaFactory
+	lastUpdate time.Time
 }
 
 // Init initializes the system with the given world, injecting the necessary components
 func (m *RenderSystem) Init(world *akara.World) {
 	m.World = world
+
+	m.lastUpdate = time.Now()
 
 	m.setupLogger()
 
@@ -50,8 +55,6 @@ func (m *RenderSystem) Init(world *akara.World) {
 
 	m.setupFactories()
 	m.setupSubscriptions()
-
-	m.gameLoopInitDelay = time.Millisecond
 }
 
 func (m *RenderSystem) setupLogger() {
@@ -63,12 +66,16 @@ func (m *RenderSystem) setupFactories() {
 	gameConfigID := m.RegisterComponent(&d2components.GameConfig{})
 	viewportID := m.RegisterComponent(&d2components.Viewport{})
 	mainViewportID := m.RegisterComponent(&d2components.MainViewport{})
-	renderableID := m.RegisterComponent(&d2components.Renderable{})
+	renderableID := m.RegisterComponent(&d2components.Texture{})
+	priorityID := m.RegisterComponent(&d2components.Priority{})
+	alphaID := m.RegisterComponent(&d2components.Alpha{})
 
 	m.GameConfig = m.GetComponentFactory(gameConfigID)
 	m.Viewport = m.GetComponentFactory(viewportID)
 	m.MainViewport = m.GetComponentFactory(mainViewportID)
-	m.Renderable = m.GetComponentFactory(renderableID)
+	m.Texture = m.GetComponentFactory(renderableID)
+	m.Priority = m.GetComponentFactory(priorityID)
+	m.Alpha = m.GetComponentFactory(alphaID)
 }
 
 func (m *RenderSystem) setupSubscriptions() {
@@ -76,7 +83,7 @@ func (m *RenderSystem) setupSubscriptions() {
 		Require(
 			&d2components.Viewport{},
 			&d2components.MainViewport{},
-			&d2components.Renderable{},
+			&d2components.Texture{},
 		).
 		Build()
 
@@ -160,27 +167,41 @@ func (m *RenderSystem) createRenderer() {
 }
 
 func (m *RenderSystem) render(screen d2interface.Surface) error {
-	if m.gameLoopInitDelay > 0 {
-		return nil
-	}
+	entities := m.viewports.GetEntities()
 
-	for _, id := range m.viewports.GetEntities() {
+	sort.Slice(entities, func(i, j int) bool {
+		pi, pj := m.AddPriority(entities[i]), m.AddPriority(entities[j])
+		return pi.Priority < pj.Priority
+	})
+
+	for _, id := range entities {
 		vp, found := m.GetViewport(id)
 		if !found {
 			return errors.New("main viewport not found")
 		}
 
-		renderable, found := m.GetRenderable(id)
+		renderable, found := m.GetTexture(id)
 		if !found {
 			return errors.New("main viewport doesn't have a surface")
 		}
 
-		if renderable.Surface == nil {
-			renderable.Surface = m.renderer.NewSurface(vp.Width, vp.Height)
+		if renderable.Texture == nil {
+			renderable.Texture = m.renderer.NewSurface(vp.Width, vp.Height)
 		}
 
+		alpha, found := m.GetAlpha(id)
+		if !found {
+			alpha = m.AddAlpha(id)
+		}
+
+		const maxAlpha = 255
+
+		screen.PushColor(color.Alpha{A: uint8(alpha.Alpha * maxAlpha)})
 		screen.PushTranslation(vp.Left, vp.Top)
-		screen.Render(renderable.Surface)
+
+		screen.Render(renderable.Texture)
+
+		screen.Pop()
 		screen.Pop()
 	}
 
@@ -191,11 +212,6 @@ func (m *RenderSystem) updateWorld() error {
 	currentTime := time.Now()
 	elapsed := currentTime.Sub(m.lastUpdate)
 	m.lastUpdate = currentTime
-
-	if m.gameLoopInitDelay > 0 {
-		m.gameLoopInitDelay -= elapsed
-		return nil
-	}
 
 	return m.World.Update(elapsed)
 }

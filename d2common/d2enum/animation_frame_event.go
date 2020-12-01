@@ -3,7 +3,7 @@ package d2enum
 // AnimationFrameEvent enumerates events used in d2datadict.MonsterSequenceFrame
 type AnimationFrameEvent int
 
-// Animation frame events
+// Sprite frame events
 const (
 	NoEvent AnimationFrameEvent = iota
 	MeleeAttack

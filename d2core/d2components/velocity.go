@@ -4,7 +4,7 @@ package d2components
 import (
 	"github.com/gravestench/akara"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 )
 
 // static check that Velocity implements Component
@@ -12,13 +12,13 @@ var _ akara.Component = &Velocity{}
 
 // Velocity contains an embedded velocity as a vector
 type Velocity struct {
-	*d2vector.Vector
+	*d2math.Vector3
 }
 
 // New creates a new Velocity. By default, the velocity is (0,0).
 func (*Velocity) New() akara.Component {
 	return &Velocity{
-		Vector: d2vector.NewVector(0, 0),
+		Vector3: d2math.NewVector3(0, 0, 0),
 	}
 }
 
