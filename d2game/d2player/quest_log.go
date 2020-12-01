@@ -121,14 +121,15 @@ type QuestLog struct {
 	act           int
 	tab           [questLogNumTabs]*questLogTab
 
-	q1       *d2ui.Button
-	q2       *d2ui.Button
-	q3       *d2ui.Button
-	q4       *d2ui.Button
-	q5       *d2ui.Button
-	q6       *d2ui.Button
-	quests   []*questField
-	questsa1 *d2ui.WidgetGroup
+	q1        *d2ui.Button
+	q2        *d2ui.Button
+	q3        *d2ui.Button
+	q4        *d2ui.Button
+	q5        *d2ui.Button
+	q6        *d2ui.Button
+	quests    []*questField
+	questsa1  *d2ui.WidgetGroup
+	questName *d2ui.Label
 	/*questsa2    *d2ui.WidgetGroup
 	questsa3    *d2ui.WidgetGroup
 	questsa4    *d2ui.WidgetGroup
@@ -149,84 +150,6 @@ type questField struct {
 	//act    int
 	//number int
 }
-
-/*type questField struct {
-	name   *d2ui.Label
-	descr  *d2ui.Label
-	sprite *d2ui.Sprite
-	status int // for now -1 = complete, 0 = not started > 0 in progress
-	act    int
-	number int
-}*/
-
-// newQuest creates new quest
-// probably it's need to use also sprite path in args
-// number is the quest number in log (e.g for Den of Evil number is 1)
-/*func (q *questField) newQuest(ui *d2ui.UIManager, act, number int, x, y int) *questField {
-	sprite, err := s.uiManager.NewSprite(d2resource.QuestLogDone, d2resource.PaletteSky)
-	if err != nil {
-		fmt.Println(err)
-	}
-	sprite.SetCurrentFrame(0)
-	sprite.SetPosition(q1SocketX+questOffsetX, questOffsetY+q1SocketY+iconOffsetY)
-
-	qf := &questField{
-		sprite: sprite,
-	}
-
-	return qf
-
-}*/
-
-/*func newQuestField(ui *d2ui.UIManager,
-	baseSpritePath string,
-	x, y int,
-	act, number int) *questField {
-	baseSprite, err := ui.NewSprite(baseSpritePath, d2resource.PaletteSky)
-	if err != nil {
-		fmt.Sprintln(err)
-	}
-
-	base := d2ui.NewBaseWidget(ui)
-
-	res := &questField{
-		BaseWidget: base,
-		sprite:     baseSprite,
-		act:        act,
-		number:     number,
-	}
-
-	res.SetPosition(x, y)
-	res.sprite.SetPosition(x, y)
-
-	return res
-}
-
-func (q *questField) SetVisible(visible bool) {
-	q.BaseWidget.SetVisible(visible)
-	//q.name.SetVisible(visible)
-	//q.descr.SetVisible(visible)
-}
-
-func (q *questField) Advance(_ float64) error {
-	return nil
-}
-
-func (q *questField) renderSprite(target d2interface.Surface) {
-	x, y := q.GetPosition()
-
-	if err := q.sprite.SetCurrentFrame(q.act * q.number); err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	q.sprite.SetPosition(x, y)
-	q.sprite.Render(target)
-}
-
-func (q *questField) Render(target d2interface.Surface) {
-	q.renderSprite(target)
-}*/
 
 type questLogTab struct {
 	button          *d2ui.Button
@@ -276,36 +199,29 @@ func (s *QuestLog) Load() {
 	descrButton.OnActivated(s.onDescrClicked)
 	s.panelGroup.AddWidget(descrButton)
 
-	/*quest, err := s.uiManager.NewSprite(d2resource.QuestLogDone, d2resource.PaletteSky)
-	if err != nil {
-		fmt.Println(err)
-	}
-	quest.SetCurrentFrame(0)
-	quest.SetPosition(50, 50)
-	s.panelGroup.AddWidget(quest)*/
-	//s.quests[0]
-	//var quest *questField
-
-	/*for _, _ = range []int{1} {
-		q := newQuestField(s.uiManager, d2resource.QuestLogDone, q1SocketX+questOffsetX, q1SocketX+questOffsetY, s.act, 1)
-		fmt.Println("added quest: ", q)
-		s.quests = append(s.quests, q)
-		//s.questsa1.AddWidget(q.sprite)
-		s.questsa1.AddWidget(q)
-	}*/
+	s.questName = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
+	s.questName.Alignment = d2ui.HorizontalAlignCenter
+	s.questName.Color[0] = rgbaColor(white)
+	s.questName.SetPosition(questLabelX, questLabelY)
+	s.panelGroup.AddWidget(s.questName)
 
 	s.loadTabs()
 	s.setQuestButtons()
 	s.initStatValueLabels()
-	s.loadQuestTable()
+	s.loadQuestIcons()
 
 	s.questsa1.SetVisible(false)
 	s.panelGroup.SetVisible(false)
 }
-func (s *QuestLog) loadQuestTable() {
-	var quest questField
-	var err error
 
+func (s *QuestLog) questTable(act, number int) struct {
+	name           string
+	numberOfDescrs int
+	status         int
+	frame          int
+	x              int
+	y              int
+} {
 	var quests = []struct {
 		name           string
 		numberOfDescrs int
@@ -321,25 +237,55 @@ func (s *QuestLog) loadQuestTable() {
 		{"qstsa1q6", 0, 0, 5, q6SocketX, q6SocketY},
 	}
 
-	for _, cfg := range quests {
-		quest.sprite, err = s.uiManager.NewSprite(d2resource.QuestLogDone, d2resource.PaletteSky)
-		if err != nil {
-			s.Error(err.Error())
-		}
-		quest.sprite.SetCurrentFrame(cfg.frame)
-		quest.sprite.SetPosition(cfg.x+questOffsetX, cfg.y+questOffsetY+iconOffsetY)
+	fmt.Println((act-1)*6 + (number))
+	return quests[(act-1)*6+(number)]
+}
 
-		quest.name = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
-		quest.name.Alignment = d2ui.HorizontalAlignCenter
-		quest.name.SetText(s.asset.TranslateString(cfg.name))
-		quest.name.Color[0] = rgbaColor(white)
-		quest.name.SetPosition(questLabelX, questLabelY)
+func (s *QuestLog) loadQuestIcons() {
+	var quest questField
+	var err error
 
-		s.panelGroup.AddWidget(quest.sprite)
-		if cfg.frame+1 == s.selectedQuest {
-			s.panelGroup.AddWidget(quest.name)
+	/*var quests = []struct {
+		name           string
+		numberOfDescrs int
+		status         int
+		frame          int
+		x, y           int
+	}{
+		{"qstsa1q1", 5, 0, 0, q1SocketX, q1SocketY},
+		{"qstsa1q2", 0, 0, 1, q2SocketX, q2SocketY},
+		{"qstsa1q3", 0, 0, 2, q3SocketX, q3SocketY},
+		{"qstsa1q4", 0, 0, 3, q4SocketX, q4SocketY},
+		{"qstsa1q5", 0, 0, 4, q5SocketX, q5SocketY},
+		{"qstsa1q6", 0, 0, 5, q6SocketX, q6SocketY},
+	}*/
+
+	for a := 0; a < 5; a++ {
+		for n := 0; n < 6; n++ {
+			q := s.questTable(1, n)
+			quest.sprite, err = s.uiManager.NewSprite(d2resource.QuestLogDone, d2resource.PaletteSky)
+			if err != nil {
+				s.Error(err.Error())
+			}
+			quest.sprite.SetCurrentFrame(q.frame)
+			quest.sprite.SetPosition(q.x+questOffsetX, q.y+questOffsetY+iconOffsetY)
+
+			/*quest.name = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
+			quest.name.Alignment = d2ui.HorizontalAlignCenter
+			quest.name.SetText(s.asset.TranslateString(q.name))
+			quest.name.Color[0] = rgbaColor(white)
+			quest.name.SetPosition(questLabelX, questLabelY)
+
+			if q.frame+1 == s.selectedQuest {
+				s.panelGroup.AddWidget(quest.name)
+			}*/
+			s.panelGroup.AddWidget(quest.sprite)
 		}
 	}
+}
+
+func (s *QuestLog) loadQuestLabels() {
+	s.questName.SetText(s.asset.TranslateString(fmt.Sprintf("qstsa%dq%d", s.selectedTab+1, s.selectedQuest-1)))
 }
 
 // copy from character select
@@ -439,6 +385,7 @@ func (s *QuestLog) setQuestButtons() {
 
 func (s *QuestLog) onQuestClicked(number int) {
 	s.selectedQuest = number + 1
+	s.loadQuestLabels()
 	fmt.Printf("\nQuest %d clicked", number)
 }
 
