@@ -176,13 +176,16 @@ const (
 	buttonSkillTreeTabFixedWidth    = 93
 	buttonSkillTreeTabFixedHeight   = 107
 
-	buttonTabXSegments     = 1
-	buttonTabYSegments     = 1
-	buttonTabDisabledFrame = -1
+	buttonTabXSegments = 1
+	buttonTabYSegments = 1
 
 	buttonMinipanelOpenCloseBaseFrame = 0
 	buttonMinipanelXSegments          = 1
 	buttonMinipanelYSegments          = 1
+
+	blankQuestButtonXSegments      = 1
+	blankQuestButtonYSegments      = 1
+	blankQuestButtonDisabledFrames = -1
 
 	buttonMinipanelCharacterBaseFrame = 0
 	buttonMinipanelInventoryBaseFrame = 2
@@ -531,7 +534,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeTab1: {
 			XSegments:        buttonTabXSegments,
 			YSegments:        buttonTabYSegments,
-			DisabledFrame:    1,
+			DisabledFrame:    tab1BaseFrame + 1,
 			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.WPTabs,
 			PaletteName:      d2resource.PaletteUnits,
@@ -547,7 +550,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeTab2: {
 			XSegments:        buttonTabXSegments,
 			YSegments:        buttonTabYSegments,
-			DisabledFrame:    3,
+			DisabledFrame:    tab2BaseFrame + 1,
 			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.WPTabs,
 			PaletteName:      d2resource.PaletteUnits,
@@ -563,7 +566,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeTab3: {
 			XSegments:        buttonTabXSegments,
 			YSegments:        buttonTabYSegments,
-			DisabledFrame:    5,
+			DisabledFrame:    tab3BaseFrame + 1,
 			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.WPTabs,
 			PaletteName:      d2resource.PaletteUnits,
@@ -579,7 +582,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeTab4: {
 			XSegments:        buttonTabXSegments,
 			YSegments:        buttonTabYSegments,
-			DisabledFrame:    7,
+			DisabledFrame:    tab4BaseFrame + 1,
 			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.WPTabs,
 			PaletteName:      d2resource.PaletteUnits,
@@ -595,7 +598,7 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 		ButtonTypeTab5: {
 			XSegments:        buttonTabXSegments,
 			YSegments:        buttonTabYSegments,
-			DisabledFrame:    9,
+			DisabledFrame:    tab5BaseFrame + 1,
 			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.WPTabs,
 			PaletteName:      d2resource.PaletteUnits,
@@ -624,9 +627,9 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			LabelColor:       greyAlpha100,
 		},
 		ButtonTypeBlangQuestBtn: {
-			XSegments:        1,
-			YSegments:        1,
-			DisabledFrame:    2,
+			XSegments:        blankQuestButtonXSegments,
+			YSegments:        blankQuestButtonYSegments,
+			DisabledFrame:    blankQuestButtonDisabledFrames,
 			DisabledColor:    lightGreyAlpha75,
 			ResourceName:     d2resource.QuestLogDone,
 			PaletteName:      d2resource.PaletteUnits,

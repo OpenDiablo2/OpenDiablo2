@@ -38,13 +38,7 @@ const (
 const (
 	questLogCloseButtonX, questLogCloseButtonY = 358, 455
 	questLogDescrButtonX, questLogDescrButtonY = 308, 457
-	questLabelX, questLabelY                   = 245, 297
-)
-
-// toset
-const (
-	questNameX, questNameY               = 150, 220
-	questDescriptionX, questDescriptionY = 50, 250
+	questLabelX, questLabelY                   = 240, 297
 )
 
 // toset
@@ -55,7 +49,6 @@ const (
 	questTab3X = 201
 	questTab4X = 259
 	questTab5X = 317
-	questTab6X = 375
 )
 
 const (
@@ -121,13 +114,13 @@ type QuestLog struct {
 	act           int
 	tab           [questLogNumTabs]*questLogTab
 
-	q1        *d2ui.Button
-	q2        *d2ui.Button
-	q3        *d2ui.Button
-	q4        *d2ui.Button
-	q5        *d2ui.Button
-	q6        *d2ui.Button
-	quests    []*questField
+	q1 *d2ui.Button
+	q2 *d2ui.Button
+	q3 *d2ui.Button
+	q4 *d2ui.Button
+	q5 *d2ui.Button
+	q6 *d2ui.Button
+	// quests    []*questField
 	questsa1  *d2ui.WidgetGroup
 	questName *d2ui.Label
 	/*questsa2    *d2ui.WidgetGroup
@@ -143,12 +136,9 @@ type QuestLog struct {
 }
 
 type questField struct {
-	name   *d2ui.Label
 	descr  *d2ui.Label
 	sprite *d2ui.Sprite
 	status int // for now -1 = complete, 0 = not started > 0 in progress
-	//act    int
-	//number int
 }
 
 type questLogTab struct {
@@ -207,7 +197,6 @@ func (s *QuestLog) Load() {
 
 	s.loadTabs()
 	s.setQuestButtons()
-	s.initStatValueLabels()
 	s.loadQuestIcons()
 
 	s.questsa1.SetVisible(false)
@@ -237,55 +226,42 @@ func (s *QuestLog) questTable(act, number int) struct {
 		{"qstsa1q6", 0, 0, 5, q6SocketX, q6SocketY},
 	}
 
-	fmt.Println((act-1)*6 + (number))
 	return quests[(act-1)*6+(number)]
 }
 
 func (s *QuestLog) loadQuestIcons() {
 	var quest questField
-	var err error
 
-	/*var quests = []struct {
-		name           string
-		numberOfDescrs int
-		status         int
-		frame          int
-		x, y           int
-	}{
-		{"qstsa1q1", 5, 0, 0, q1SocketX, q1SocketY},
-		{"qstsa1q2", 0, 0, 1, q2SocketX, q2SocketY},
-		{"qstsa1q3", 0, 0, 2, q3SocketX, q3SocketY},
-		{"qstsa1q4", 0, 0, 3, q4SocketX, q4SocketY},
-		{"qstsa1q5", 0, 0, 4, q5SocketX, q5SocketY},
-		{"qstsa1q6", 0, 0, 5, q6SocketX, q6SocketY},
-	}*/
+	var err error
 
 	for a := 0; a < 5; a++ {
 		for n := 0; n < 6; n++ {
 			q := s.questTable(1, n)
+
 			quest.sprite, err = s.uiManager.NewSprite(d2resource.QuestLogDone, d2resource.PaletteSky)
 			if err != nil {
 				s.Error(err.Error())
 			}
-			quest.sprite.SetCurrentFrame(q.frame)
+
+			err = quest.sprite.SetCurrentFrame(q.frame)
+			if err != nil {
+				s.Error(err.Error())
+			}
+
 			quest.sprite.SetPosition(q.x+questOffsetX, q.y+questOffsetY+iconOffsetY)
 
-			/*quest.name = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
-			quest.name.Alignment = d2ui.HorizontalAlignCenter
-			quest.name.SetText(s.asset.TranslateString(q.name))
-			quest.name.Color[0] = rgbaColor(white)
-			quest.name.SetPosition(questLabelX, questLabelY)
-
-			if q.frame+1 == s.selectedQuest {
-				s.panelGroup.AddWidget(quest.name)
-			}*/
 			s.panelGroup.AddWidget(quest.sprite)
 		}
 	}
 }
 
 func (s *QuestLog) loadQuestLabels() {
-	s.questName.SetText(s.asset.TranslateString(fmt.Sprintf("qstsa%dq%d", s.selectedTab+1, s.selectedQuest-1)))
+	if s.selectedQuest == 0 {
+		s.questName.SetText("")
+		return
+	}
+
+	s.questName.SetText(s.asset.TranslateString(fmt.Sprintf("qstsa%dq%d", s.selectedTab+1, s.selectedQuest)))
 }
 
 // copy from character select
@@ -345,6 +321,8 @@ func (s *QuestLog) loadTabs() {
 
 func (s *QuestLog) setTab(tab int) {
 	s.selectedTab = tab
+	s.selectedQuest = questNone
+	s.loadQuestLabels()
 
 	for i := 0; i < questLogNumTabs; i++ {
 		s.tab[i].button.SetEnabled(i == tab)
@@ -384,7 +362,7 @@ func (s *QuestLog) setQuestButtons() {
 }
 
 func (s *QuestLog) onQuestClicked(number int) {
-	s.selectedQuest = number + 1
+	s.selectedQuest = number
 	s.loadQuestLabels()
 	fmt.Printf("\nQuest %d clicked", number)
 }
@@ -518,70 +496,3 @@ func (s *QuestLog) renderSockets(target d2interface.Surface) {
 		socket.RenderSegmented(target, 1, 1, 0)
 	}
 }
-
-func (s *QuestLog) initStatValueLabels() {
-	/*valueLabelConfigs := []struct {
-		assignTo **d2ui.Label
-		value    int
-		x, y     int
-	}{
-		{&s.labels.Level, s.heroState.Level, 112, 110},
-		{&s.labels.Experience, s.heroState.Experience, 200, 110},
-		{&s.labels.NextLevelExp, s.heroState.NextLevelExp, 330, 110},
-		{&s.labels.Strength, s.heroState.Strength, 175, 147},
-		{&s.labels.Dexterity, s.heroState.Dexterity, 175, 207},
-		{&s.labels.Vitality, s.heroState.Vitality, 175, 295},
-		{&s.labels.Energy, s.heroState.Energy, 175, 355},
-		{&s.labels.MaxStamina, s.heroState.MaxStamina, 330, 295},
-		{&s.labels.Stamina, int(s.heroState.Stamina), 370, 295},
-		{&s.labels.MaxHealth, s.heroState.MaxHealth, 330, 320},
-		{&s.labels.Health, s.heroState.Health, 370, 320},
-		{&s.labels.MaxMana, s.heroState.MaxMana, 330, 355},
-		{&s.labels.Mana, s.heroState.Mana, 370, 355},
-	}
-
-	for _, cfg := range valueLabelConfigs {
-		*cfg.assignTo = s.createStatValueLabel(cfg.value, cfg.x, cfg.y)
-	}*/
-}
-
-/*
-func (s *HeroStatsPanel) setStatValues() {
-	s.labels.Level.SetText(strconv.Itoa(s.heroState.Level))
-	s.labels.Experience.SetText(strconv.Itoa(s.heroState.Experience))
-	s.labels.NextLevelExp.SetText(strconv.Itoa(s.heroState.NextLevelExp))
-
-	s.labels.Strength.SetText(strconv.Itoa(s.heroState.Strength))
-	s.labels.Dexterity.SetText(strconv.Itoa(s.heroState.Dexterity))
-	s.labels.Vitality.SetText(strconv.Itoa(s.heroState.Vitality))
-	s.labels.Energy.SetText(strconv.Itoa(s.heroState.Energy))
-
-	s.labels.MaxHealth.SetText(strconv.Itoa(s.heroState.MaxHealth))
-	s.labels.Health.SetText(strconv.Itoa(s.heroState.Health))
-
-	s.labels.MaxStamina.SetText(strconv.Itoa(s.heroState.MaxStamina))
-	s.labels.Stamina.SetText(strconv.Itoa(int(s.heroState.Stamina)))
-
-	s.labels.MaxMana.SetText(strconv.Itoa(s.heroState.MaxMana))
-	s.labels.Mana.SetText(strconv.Itoa(s.heroState.Mana))
-}
-*/
-/*
-func (s *QuestLog) createStatValueLabel(stat, x, y int) *d2ui.Label {
-	text := strconv.Itoa(stat)
-	return s.createTextLabel(PanelText{X: x, Y: y, Text: text, Font: d2resource.Font16, AlignCenter: true})
-}*/
-
-/*
-func (s *QuestLog) createTextLabel(element PanelText) *d2ui.Label {
-	label := s.uiManager.NewLabel(element.Font, d2resource.PaletteStatic)
-	if element.AlignCenter {
-		label.Alignment = d2ui.HorizontalAlignCenter
-	}
-
-	label.SetText(element.Text)
-	label.SetPosition(element.X, element.Y)
-	s.panelGroup.AddWidget(label)
-
-	return label
-}*/
