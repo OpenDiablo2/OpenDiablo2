@@ -2,6 +2,7 @@ package d2player
 
 import (
 	"fmt"
+	"image/color"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -9,6 +10,8 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
+
+const white = 0xffffffff
 
 const ( // for the dc6 frames
 	questLogTopLeft = iota
@@ -22,7 +25,8 @@ const (
 )
 
 const (
-	questOffsetX, questOffsetY = 5, 5
+	iconOffsetY                = 88
+	questOffsetX, questOffsetY = 4, 4
 	q1SocketX, q1SocketY       = 100, 95
 	q2SocketX, q2SocketY       = 200, 95
 	q3SocketX, q3SocketY       = 300, 95
@@ -34,6 +38,7 @@ const (
 const (
 	questLogCloseButtonX, questLogCloseButtonY = 358, 455
 	questLogDescrButtonX, questLogDescrButtonY = 308, 457
+	questLabelX, questLabelY                   = 245, 297
 )
 
 // toset
@@ -63,7 +68,8 @@ const (
 )
 
 const (
-	quest1 = iota + 1
+	questNone = iota
+	quest1
 	quest2
 	quest3
 	quest4
@@ -93,6 +99,7 @@ func NewQuestLog(asset *d2asset.AssetManager,
 			{},
 			{},
 		},
+		selectedQuest: 1,
 	}
 
 	ql.Logger = d2util.NewLogger()
@@ -104,14 +111,15 @@ func NewQuestLog(asset *d2asset.AssetManager,
 
 // QuestLog represents the quest log
 type QuestLog struct {
-	asset       *d2asset.AssetManager
-	uiManager   *d2ui.UIManager
-	panel       *d2ui.Sprite
-	onCloseCb   func()
-	panelGroup  *d2ui.WidgetGroup
-	selectedTab int
-	act         int
-	tab         [questLogNumTabs]*questLogTab
+	asset         *d2asset.AssetManager
+	uiManager     *d2ui.UIManager
+	panel         *d2ui.Sprite
+	onCloseCb     func()
+	panelGroup    *d2ui.WidgetGroup
+	selectedTab   int
+	selectedQuest int
+	act           int
+	tab           [questLogNumTabs]*questLogTab
 
 	q1       *d2ui.Button
 	q2       *d2ui.Button
@@ -134,16 +142,43 @@ type QuestLog struct {
 }
 
 type questField struct {
-	*d2ui.BaseWidget
-	name   d2ui.Label
-	descr  d2ui.Label
+	name   *d2ui.Label
+	descr  *d2ui.Label
+	sprite *d2ui.Sprite
+	status int // for now -1 = complete, 0 = not started > 0 in progress
+	//act    int
+	//number int
+}
+
+/*type questField struct {
+	name   *d2ui.Label
+	descr  *d2ui.Label
 	sprite *d2ui.Sprite
 	status int // for now -1 = complete, 0 = not started > 0 in progress
 	act    int
 	number int
-}
+}*/
 
-func newQuestField(ui *d2ui.UIManager,
+// newQuest creates new quest
+// probably it's need to use also sprite path in args
+// number is the quest number in log (e.g for Den of Evil number is 1)
+/*func (q *questField) newQuest(ui *d2ui.UIManager, act, number int, x, y int) *questField {
+	sprite, err := s.uiManager.NewSprite(d2resource.QuestLogDone, d2resource.PaletteSky)
+	if err != nil {
+		fmt.Println(err)
+	}
+	sprite.SetCurrentFrame(0)
+	sprite.SetPosition(q1SocketX+questOffsetX, questOffsetY+q1SocketY+iconOffsetY)
+
+	qf := &questField{
+		sprite: sprite,
+	}
+
+	return qf
+
+}*/
+
+/*func newQuestField(ui *d2ui.UIManager,
 	baseSpritePath string,
 	x, y int,
 	act, number int) *questField {
@@ -162,14 +197,15 @@ func newQuestField(ui *d2ui.UIManager,
 	}
 
 	res.SetPosition(x, y)
+	res.sprite.SetPosition(x, y)
 
 	return res
 }
 
 func (q *questField) SetVisible(visible bool) {
 	q.BaseWidget.SetVisible(visible)
-	q.name.SetVisible(visible)
-	q.descr.SetVisible(visible)
+	//q.name.SetVisible(visible)
+	//q.descr.SetVisible(visible)
 }
 
 func (q *questField) Advance(_ float64) error {
@@ -190,7 +226,7 @@ func (q *questField) renderSprite(target d2interface.Surface) {
 
 func (q *questField) Render(target d2interface.Surface) {
 	q.renderSprite(target)
-}
+}*/
 
 type questLogTab struct {
 	button          *d2ui.Button
@@ -240,18 +276,96 @@ func (s *QuestLog) Load() {
 	descrButton.OnActivated(s.onDescrClicked)
 	s.panelGroup.AddWidget(descrButton)
 
-	for _, _ = range []int{0} {
-		q := newQuestField(s.uiManager, d2resource.QuestLogDone, q1SocketX+questOffsetX, q1SocketX+questOffsetY, s.act, 1)
-		s.quests = append(s.quests, q)
-		s.questsa1.AddWidget(q.sprite)
+	/*quest, err := s.uiManager.NewSprite(d2resource.QuestLogDone, d2resource.PaletteSky)
+	if err != nil {
+		fmt.Println(err)
 	}
+	quest.SetCurrentFrame(0)
+	quest.SetPosition(50, 50)
+	s.panelGroup.AddWidget(quest)*/
+	//s.quests[0]
+	//var quest *questField
+
+	/*for _, _ = range []int{1} {
+		q := newQuestField(s.uiManager, d2resource.QuestLogDone, q1SocketX+questOffsetX, q1SocketX+questOffsetY, s.act, 1)
+		fmt.Println("added quest: ", q)
+		s.quests = append(s.quests, q)
+		//s.questsa1.AddWidget(q.sprite)
+		s.questsa1.AddWidget(q)
+	}*/
 
 	s.loadTabs()
 	s.setQuestButtons()
 	s.initStatValueLabels()
+	s.loadQuestTable()
 
 	s.questsa1.SetVisible(false)
 	s.panelGroup.SetVisible(false)
+}
+func (s *QuestLog) loadQuestTable() {
+	var quest questField
+	var err error
+
+	var quests = []struct {
+		name           string
+		numberOfDescrs int
+		status         int
+		frame          int
+		x, y           int
+	}{
+		{"qstsa1q1", 5, 0, 0, q1SocketX, q1SocketY},
+		{"qstsa1q2", 0, 0, 1, q2SocketX, q2SocketY},
+		{"qstsa1q3", 0, 0, 2, q3SocketX, q3SocketY},
+		{"qstsa1q4", 0, 0, 3, q4SocketX, q4SocketY},
+		{"qstsa1q5", 0, 0, 4, q5SocketX, q5SocketY},
+		{"qstsa1q6", 0, 0, 5, q6SocketX, q6SocketY},
+	}
+
+	for _, cfg := range quests {
+		quest.sprite, err = s.uiManager.NewSprite(d2resource.QuestLogDone, d2resource.PaletteSky)
+		if err != nil {
+			s.Error(err.Error())
+		}
+		quest.sprite.SetCurrentFrame(cfg.frame)
+		quest.sprite.SetPosition(cfg.x+questOffsetX, cfg.y+questOffsetY+iconOffsetY)
+
+		quest.name = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
+		quest.name.Alignment = d2ui.HorizontalAlignCenter
+		quest.name.SetText(s.asset.TranslateString(cfg.name))
+		quest.name.Color[0] = rgbaColor(white)
+		quest.name.SetPosition(questLabelX, questLabelY)
+
+		s.panelGroup.AddWidget(quest.sprite)
+		if cfg.frame+1 == s.selectedQuest {
+			s.panelGroup.AddWidget(quest.name)
+		}
+	}
+}
+
+// copy from character select
+func rgbaColor(rgba uint32) color.RGBA {
+	result := color.RGBA{}
+	a, b, g, r := 0, 1, 2, 3
+	byteWidth := 8
+	byteMask := 0xff
+
+	for idx := 0; idx < 4; idx++ {
+		shift := idx * byteWidth
+		component := uint8(rgba>>shift) & uint8(byteMask)
+
+		switch idx {
+		case a:
+			result.A = component
+		case b:
+			result.B = component
+		case g:
+			result.G = component
+		case r:
+			result.R = component
+		}
+	}
+
+	return result
 }
 
 func (s *QuestLog) loadTabs() {
@@ -288,8 +402,6 @@ func (s *QuestLog) setTab(tab int) {
 
 	for i := 0; i < questLogNumTabs; i++ {
 		s.tab[i].button.SetEnabled(i == tab)
-		//s.tab[i].button.SetPressed(i != tab-1)
-		//fmt.Println("(i!=tab): ", (i != tab))
 	}
 }
 
@@ -326,6 +438,7 @@ func (s *QuestLog) setQuestButtons() {
 }
 
 func (s *QuestLog) onQuestClicked(number int) {
+	s.selectedQuest = number + 1
 	fmt.Printf("\nQuest %d clicked", number)
 }
 
