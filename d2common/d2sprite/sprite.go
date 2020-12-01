@@ -1,4 +1,4 @@
-package d2animation
+package d2sprite
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"log"
 	"math"
+	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2fileformats/d2dcc"
@@ -21,9 +22,9 @@ const (
 	playModeBackward
 )
 
-const defaultPlayLength = 1.0
+const fps25 = 25
 
-type animationFrame struct {
+type spriteFrame struct {
 	decoded bool
 
 	width   int
@@ -34,53 +35,55 @@ type animationFrame struct {
 	image d2interface.Surface
 }
 
-type animationDirection struct {
+type spriteDirection struct {
 	decoded bool
-	frames  []animationFrame
+	frames  []spriteFrame
 }
 
-// static check that we implement the animation interface
-var _ d2interface.Animation = &Animation{}
+// static check that we implement the sprite interface
+var _ d2interface.Sprite = &Sprite{}
 
-// Animation has directionality, play modes, and frame counting
-type Animation struct {
+// Sprite has directionality, play modes, and frame counting
+type Sprite struct {
 	renderer         d2interface.Renderer
 	onBindRenderer   func(renderer d2interface.Renderer) error
-	directions       []animationDirection
+	directions       []spriteDirection
 	effect           d2enum.DrawEffect
 	colorMod         color.Color
 	frameIndex       int
 	directionIndex   int
-	lastFrameTime    float64
+	lastFrameTime    time.Duration
 	playedCount      int
 	playMode         playMode
-	playLength       float64 // https://github.com/OpenDiablo2/OpenDiablo2/issues/813
+	playLength       time.Duration // https://github.com/OpenDiablo2/OpenDiablo2/issues/813
 	subStartingFrame int
 	subEndingFrame   int
 	originAtBottom   bool
 	playLoop         bool
-	hasSubLoop       bool // runs after first animation ends
+	hasSubLoop       bool // runs after first sprite ends
 	hasShadow        bool
 }
 
-// SetSubLoop sets a sub loop for the animation
-func (a *Animation) SetSubLoop(startFrame, endFrame int) {
+// SetSubLoop sets a sub loop for the sprite
+func (a *Sprite) SetSubLoop(startFrame, endFrame int) {
 	a.subStartingFrame = startFrame
 	a.subEndingFrame = endFrame
 	a.hasSubLoop = true
 }
 
-// Advance advances the animation state
-func (a *Animation) Advance(elapsed float64) error {
+// Advance advances the sprite state
+func (a *Sprite) Advance(elapsed time.Duration) error {
 	if a.playMode == playModePause {
 		return nil
 	}
 
 	frameCount := a.GetFrameCount()
-	frameLength := a.playLength / float64(frameCount)
+	frameLength := time.Duration(float64(a.playLength) / float64(frameCount))
+
 	a.lastFrameTime += elapsed
-	framesAdvanced := int(a.lastFrameTime / frameLength)
-	a.lastFrameTime -= float64(framesAdvanced) * frameLength
+
+	framesAdvanced := int(float64(a.lastFrameTime) / float64(frameLength))
+	a.lastFrameTime -= time.Duration(float64(framesAdvanced) * float64(frameLength))
 
 	for i := 0; i < framesAdvanced; i++ {
 		startIndex := 0
@@ -126,7 +129,7 @@ const (
 	zero = 0.0
 )
 
-func (a *Animation) renderShadow(target d2interface.Surface) {
+func (a *Sprite) renderShadow(target d2interface.Surface) {
 	direction := a.directions[a.directionIndex]
 	frame := direction.frames[a.frameIndex]
 
@@ -152,13 +155,13 @@ func (a *Animation) renderShadow(target d2interface.Surface) {
 }
 
 // GetCurrentFrameSurface returns the surface for the current frame of the
-// animation
-func (a *Animation) GetCurrentFrameSurface() d2interface.Surface {
+// sprite
+func (a *Sprite) GetCurrentFrameSurface() d2interface.Surface {
 	return a.directions[a.directionIndex].frames[a.frameIndex].image
 }
 
-// Render renders the animation to the given surface
-func (a *Animation) Render(target d2interface.Surface) {
+// Render renders the sprite to the given surface
+func (a *Sprite) Render(target d2interface.Surface) {
 	if a.renderer == nil {
 		a.BindRenderer(target.Renderer())
 	}
@@ -178,9 +181,9 @@ func (a *Animation) Render(target d2interface.Surface) {
 	target.Render(frame.image)
 }
 
-// BindRenderer binds the given renderer to the animation so that it can initialize
+// BindRenderer binds the given renderer to the sprite so that it can initialize
 // the required surfaces
-func (a *Animation) BindRenderer(r d2interface.Renderer) {
+func (a *Sprite) BindRenderer(r d2interface.Renderer) {
 	if a.onBindRenderer == nil {
 		return
 	}
@@ -190,8 +193,8 @@ func (a *Animation) BindRenderer(r d2interface.Renderer) {
 	}
 }
 
-// RenderFromOrigin renders the animation from the animation origin
-func (a *Animation) RenderFromOrigin(target d2interface.Surface, shadow bool) {
+// RenderFromOrigin renders the sprite from the sprite origin
+func (a *Sprite) RenderFromOrigin(target d2interface.Surface, shadow bool) {
 	if a.renderer == nil {
 		a.BindRenderer(target.Renderer())
 	}
@@ -220,8 +223,8 @@ func (a *Animation) RenderFromOrigin(target d2interface.Surface, shadow bool) {
 	a.Render(target)
 }
 
-// RenderSection renders the section of the animation frame enclosed by bounds
-func (a *Animation) RenderSection(target d2interface.Surface, bound image.Rectangle) {
+// RenderSection renders the section of the sprite frame enclosed by bounds
+func (a *Sprite) RenderSection(target d2interface.Surface, bound image.Rectangle) {
 	if a.renderer == nil {
 		a.BindRenderer(target.Renderer())
 	}
@@ -242,7 +245,7 @@ func (a *Animation) RenderSection(target d2interface.Surface, bound image.Rectan
 }
 
 // GetFrameSize gets the Size(width, height) of a indexed frame.
-func (a *Animation) GetFrameSize(frameIndex int) (width, height int, err error) {
+func (a *Sprite) GetFrameSize(frameIndex int) (width, height int, err error) {
 	direction := a.directions[a.directionIndex]
 	if frameIndex >= len(direction.frames) {
 		return 0, 0, errors.New("invalid frame index")
@@ -254,7 +257,7 @@ func (a *Animation) GetFrameSize(frameIndex int) (width, height int, err error) 
 }
 
 // GetCurrentFrameSize gets the Size(width, height) of the current frame.
-func (a *Animation) GetCurrentFrameSize() (width, height int) {
+func (a *Sprite) GetCurrentFrameSize() (width, height int) {
 	width, height, err := a.GetFrameSize(a.frameIndex)
 	if err != nil {
 		log.Print(err)
@@ -263,8 +266,13 @@ func (a *Animation) GetCurrentFrameSize() (width, height int) {
 	return width, height
 }
 
+func (a *Sprite) GetCurrentFrameOffset() (int, int) {
+	f := a.directions[a.directionIndex].frames[a.frameIndex]
+	return f.offsetX, f.offsetY
+}
+
 // GetFrameBounds gets maximum Size(width, height) of all frame.
-func (a *Animation) GetFrameBounds() (maxWidth, maxHeight int) {
+func (a *Sprite) GetFrameBounds() (maxWidth, maxHeight int) {
 	maxWidth, maxHeight = 0, 0
 
 	direction := a.directions[a.directionIndex]
@@ -277,34 +285,34 @@ func (a *Animation) GetFrameBounds() (maxWidth, maxHeight int) {
 	return maxWidth, maxHeight
 }
 
-// GetCurrentFrame gets index of current frame in animation
-func (a *Animation) GetCurrentFrame() int {
+// GetCurrentFrame gets index of current frame in sprite
+func (a *Sprite) GetCurrentFrame() int {
 	return a.frameIndex
 }
 
-// GetFrameCount gets number of frames in animation
-func (a *Animation) GetFrameCount() int {
+// GetFrameCount gets number of frames in sprite
+func (a *Sprite) GetFrameCount() int {
 	direction := a.directions[a.directionIndex]
 	return len(direction.frames)
 }
 
-// IsOnFirstFrame gets if the animation on its first frame
-func (a *Animation) IsOnFirstFrame() bool {
+// IsOnFirstFrame gets if the sprite on its first frame
+func (a *Sprite) IsOnFirstFrame() bool {
 	return a.frameIndex == 0
 }
 
-// IsOnLastFrame gets if the animation on its last frame
-func (a *Animation) IsOnLastFrame() bool {
+// IsOnLastFrame gets if the sprite on its last frame
+func (a *Sprite) IsOnLastFrame() bool {
 	return a.frameIndex == a.GetFrameCount()-1
 }
 
-// GetDirectionCount gets the number of animation direction
-func (a *Animation) GetDirectionCount() int {
+// GetDirectionCount gets the number of sprite direction
+func (a *Sprite) GetDirectionCount() int {
 	return len(a.directions)
 }
 
-// SetDirection places the animation in the direction of an animation
-func (a *Animation) SetDirection(directionIndex int) error {
+// SetDirection places the sprite in the direction of an sprite
+func (a *Sprite) SetDirection(directionIndex int) error {
 	const smallestInvalidDirectionIndex = 64
 	if directionIndex >= smallestInvalidDirectionIndex {
 		return errors.New("invalid direction index")
@@ -316,13 +324,13 @@ func (a *Animation) SetDirection(directionIndex int) error {
 	return nil
 }
 
-// GetDirection get the current animation direction
-func (a *Animation) GetDirection() int {
+// GetDirection get the current sprite direction
+func (a *Sprite) GetDirection() int {
 	return a.directionIndex
 }
 
-// SetCurrentFrame sets animation at a specific frame
-func (a *Animation) SetCurrentFrame(frameIndex int) error {
+// SetCurrentFrame sets sprite at a specific frame
+func (a *Sprite) SetCurrentFrame(frameIndex int) error {
 	if frameIndex >= a.GetFrameCount() {
 		return errors.New("invalid frame index")
 	}
@@ -333,76 +341,82 @@ func (a *Animation) SetCurrentFrame(frameIndex int) error {
 	return nil
 }
 
-// Rewind animation to beginning
-func (a *Animation) Rewind() {
+// Rewind sprite to beginning
+func (a *Sprite) Rewind() {
 	err := a.SetCurrentFrame(0)
 	if err != nil {
 		log.Print(err)
 	}
 }
 
-// PlayForward plays animation forward
-func (a *Animation) PlayForward() {
+// PlayForward plays sprite forward
+func (a *Sprite) PlayForward() {
 	a.playMode = playModeForward
 	a.lastFrameTime = 0
 }
 
-// PlayBackward plays animation backward
-func (a *Animation) PlayBackward() {
+// PlayBackward plays sprite backward
+func (a *Sprite) PlayBackward() {
 	a.playMode = playModeBackward
 	a.lastFrameTime = 0
 }
 
-// Pause animation
-func (a *Animation) Pause() {
+// Pause sprite
+func (a *Sprite) Pause() {
 	a.playMode = playModePause
 	a.lastFrameTime = 0
 }
 
-// SetPlayLoop sets whether to loop the animation
-func (a *Animation) SetPlayLoop(loop bool) {
+// SetPlayLoop sets whether to loop the sprite
+func (a *Sprite) SetPlayLoop(loop bool) {
 	a.playLoop = loop
 }
 
-// SetPlaySpeed sets play speed of the animation
-func (a *Animation) SetPlaySpeed(playSpeed float64) {
-	a.SetPlayLength(playSpeed * float64(a.GetFrameCount()))
+// SetPlayFPS sets play speed of the sprite
+func (a *Sprite) SetPlayFPS(fps float64) {
+	a.SetPlayLength(time.Duration(float64(time.Second) / fps * float64(a.GetFrameCount())))
 }
 
-// SetPlayLength sets the Animation's play length in seconds
-func (a *Animation) SetPlayLength(playLength float64) {
+// SetPlaySpeed sets play speed of the sprite
+func (a *Sprite) SetPlaySpeed(playSpeed time.Duration) {
+	frameDuration := time.Duration(float64(a.GetFrameCount()) / float64(playSpeed))
+	a.SetPlayLength(frameDuration)
+}
+
+// SetPlayLength sets the Sprite's play length in seconds
+func (a *Sprite) SetPlayLength(playLength time.Duration) {
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/813
 	a.playLength = playLength
 	a.lastFrameTime = 0
 }
 
-// SetColorMod sets the Animation's color mod
-func (a *Animation) SetColorMod(colorMod color.Color) {
+// SetColorMod sets the Sprite's color mod
+func (a *Sprite) SetColorMod(colorMod color.Color) {
 	a.colorMod = colorMod
 }
 
 // GetPlayedCount gets the number of times the application played
-func (a *Animation) GetPlayedCount() int {
+func (a *Sprite) GetPlayedCount() int {
 	return a.playedCount
 }
 
 // ResetPlayedCount resets the play count
-func (a *Animation) ResetPlayedCount() {
+func (a *Sprite) ResetPlayedCount() {
 	a.playedCount = 0
 }
 
-// SetEffect sets the draw effect for the animation
-func (a *Animation) SetEffect(e d2enum.DrawEffect) {
+// SetEffect sets the draw effect for the sprite
+func (a *Sprite) SetEffect(e d2enum.DrawEffect) {
 	a.effect = e
 }
 
 // SetShadow sets bool for whether or not to draw a shadow
-func (a *Animation) SetShadow(shadow bool) {
+func (a *Sprite) SetShadow(shadow bool) {
 	a.hasShadow = shadow
 }
 
-// Clone creates a copy of the Animation
-func (a *Animation) Clone() d2interface.Animation {
+// Clone creates a copy of the Sprite
+func (a *Sprite) Clone() d2interface.Sprite {
 	clone := *a
 	copy(clone.directions, a.directions)
 

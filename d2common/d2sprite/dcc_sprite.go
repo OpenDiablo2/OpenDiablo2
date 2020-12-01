@@ -1,4 +1,4 @@
-package d2animation
+package d2sprite
 
 import (
 	"errors"
@@ -14,24 +14,23 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
-var _ d2interface.Animation = &DCCAnimation{} // Static check to confirm struct conforms to
+var _ d2interface.Sprite = &DCCSprite{} // Static check to confirm struct conforms to
 // interface
 
-// NewDCCAnimation creates an animation from a dcc file
-func NewDCCAnimation(
+// NewDCCSprite creates an sprite from a dcc file
+func NewDCCSprite(
 	dcc *d2dcc.DCC,
 	pal d2interface.Palette,
 	effect d2enum.DrawEffect,
-) (d2interface.Animation, error) {
-	DCC := &DCCAnimation{
+) (d2interface.Sprite, error) {
+	DCC := &DCCSprite{
 		dcc:     dcc,
 		palette: pal,
 	}
 
-	anim := &Animation{
-		playLength: defaultPlayLength,
-		playLoop:   true,
-		effect:     effect,
+	anim := &Sprite{
+		playLoop: true,
+		effect:   effect,
 		onBindRenderer: func(r d2interface.Renderer) error {
 			if DCC.renderer != r {
 				DCC.renderer = r
@@ -42,7 +41,7 @@ func NewDCCAnimation(
 		},
 	}
 
-	DCC.Animation = *anim
+	DCC.Sprite = *anim
 
 	err := DCC.init()
 	if err != nil {
@@ -52,37 +51,39 @@ func NewDCCAnimation(
 	return DCC, nil
 }
 
-// DCCAnimation represents an animation decoded from DCC
-type DCCAnimation struct {
-	Animation
+// DCCSprite represents an sprite decoded from DCC
+type DCCSprite struct {
+	Sprite
 	dcc     *d2dcc.DCC
 	palette d2interface.Palette
 }
 
-func (a *DCCAnimation) init() error {
-	a.directions = make([]animationDirection, a.dcc.NumberOfDirections)
+func (a *DCCSprite) init() error {
+	a.directions = make([]spriteDirection, a.dcc.NumberOfDirections)
 
 	for directionIndex := range a.directions {
-		a.directions[directionIndex].frames = make([]animationFrame, a.dcc.FramesPerDirection)
+		a.directions[directionIndex].frames = make([]spriteFrame, a.dcc.FramesPerDirection)
 	}
 
 	err := a.decode()
 
+	a.SetPlayFPS(fps25)
+
 	return err
 }
 
-// Clone creates a copy of the animation
-func (a *DCCAnimation) Clone() d2interface.Animation {
-	clone := &DCCAnimation{}
-	clone.Animation = *a.Animation.Clone().(*Animation)
+// Clone creates a copy of the sprite
+func (a *DCCSprite) Clone() d2interface.Sprite {
+	clone := &DCCSprite{}
+	clone.Sprite = *a.Sprite.Clone().(*Sprite)
 	clone.dcc = a.dcc.Clone()
 	clone.palette = a.palette
 
 	return clone
 }
 
-// SetDirection places the animation in the direction of an animation
-func (a *DCCAnimation) SetDirection(directionIndex int) error {
+// SetDirection places the sprite in the direction of an sprite
+func (a *DCCSprite) SetDirection(directionIndex int) error {
 	const smallestInvalidDirectionIndex = 64
 	if directionIndex >= smallestInvalidDirectionIndex {
 		return errors.New("invalid direction index")
@@ -102,7 +103,7 @@ func (a *DCCAnimation) SetDirection(directionIndex int) error {
 	return nil
 }
 
-func (a *DCCAnimation) decode() error {
+func (a *DCCSprite) decode() error {
 	for directionIndex := 0; directionIndex < len(a.directions); directionIndex++ {
 		err := a.decodeDirection(directionIndex)
 		if err != nil {
@@ -113,12 +114,12 @@ func (a *DCCAnimation) decode() error {
 	return nil
 }
 
-func (a *DCCAnimation) decodeDirection(directionIndex int) error {
+func (a *DCCSprite) decodeDirection(directionIndex int) error {
 	dccDirection := a.dcc.Directions[directionIndex]
 
 	for frameIndex := range dccDirection.Frames {
 		if a.directions[directionIndex].frames == nil {
-			a.directions[directionIndex].frames = make([]animationFrame, a.dcc.FramesPerDirection)
+			a.directions[directionIndex].frames = make([]spriteFrame, a.dcc.FramesPerDirection)
 		}
 
 		a.directions[directionIndex].decoded = true
@@ -130,7 +131,7 @@ func (a *DCCAnimation) decodeDirection(directionIndex int) error {
 	return nil
 }
 
-func (a *DCCAnimation) decodeFrame(directionIndex int) animationFrame {
+func (a *DCCSprite) decodeFrame(directionIndex int) spriteFrame {
 	dccDirection := a.dcc.Directions[directionIndex]
 
 	minX, minY := math.MaxInt32, math.MaxInt32
@@ -146,7 +147,7 @@ func (a *DCCAnimation) decodeFrame(directionIndex int) animationFrame {
 	frameWidth := maxX - minX
 	frameHeight := maxY - minY
 
-	frame := animationFrame{
+	frame := spriteFrame{
 		width:   frameWidth,
 		height:  frameHeight,
 		offsetX: minX,
@@ -157,7 +158,7 @@ func (a *DCCAnimation) decodeFrame(directionIndex int) animationFrame {
 	return frame
 }
 
-func (a *DCCAnimation) createSurfaces() error {
+func (a *DCCSprite) createSurfaces() error {
 	for directionIndex := 0; directionIndex < len(a.directions); directionIndex++ {
 		err := a.createDirectionSurfaces(directionIndex)
 		if err != nil {
@@ -168,7 +169,7 @@ func (a *DCCAnimation) createSurfaces() error {
 	return nil
 }
 
-func (a *DCCAnimation) createDirectionSurfaces(directionIndex int) error {
+func (a *DCCSprite) createDirectionSurfaces(directionIndex int) error {
 	for frameIndex := 0; frameIndex < a.dcc.FramesPerDirection; frameIndex++ {
 		if !a.directions[directionIndex].decoded {
 			err := a.decodeDirection(directionIndex)
@@ -188,7 +189,7 @@ func (a *DCCAnimation) createDirectionSurfaces(directionIndex int) error {
 	return nil
 }
 
-func (a *DCCAnimation) createFrameSurface(directionIndex, frameIndex int) (d2interface.Surface, error) {
+func (a *DCCSprite) createFrameSurface(directionIndex, frameIndex int) (d2interface.Surface, error) {
 	if !a.directions[directionIndex].frames[frameIndex].decoded {
 		frame := a.decodeFrame(directionIndex)
 		a.directions[directionIndex].frames[frameIndex] = frame

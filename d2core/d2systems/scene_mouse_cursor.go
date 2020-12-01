@@ -57,13 +57,16 @@ func (s *MouseCursorScene) createMouseCursor() {
 
 // Update the main menu scene
 func (s *MouseCursorScene) Update() {
+	for _, id := range s.Viewports {
+		s.AddPriority(id).Priority = scenePriorityMouseCursor
+	}
+
 	if s.Paused() {
 		return
 	}
 
 	if !s.booted {
 		s.boot()
-		return
 	}
 
 	s.updateCursorPosition()
@@ -72,12 +75,11 @@ func (s *MouseCursorScene) Update() {
 }
 
 func (s *MouseCursorScene) updateCursorPosition() {
-	spritePosition, found := s.GetPosition(s.cursor)
+	position, found := s.GetPosition(s.cursor)
 	if !found {
 		return
 	}
 
 	cx, cy := s.systems.InputSystem.inputService.CursorPosition()
-
-	spritePosition.Set(float64(cx), float64(cy))
+	position.X, position.Y = float64(cx), float64(cy)
 }

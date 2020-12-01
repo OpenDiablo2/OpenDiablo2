@@ -70,5 +70,5 @@ func (m *MovementSystem) move(id akara.EID) {
 	}
 
 	s := float64(m.World.TimeDelta) / float64(time.Second)
-	position.Vector.Add(velocity.Vector.Clone().Scale(s))
+	position.Add(velocity.Clone().Scale(s))
 }

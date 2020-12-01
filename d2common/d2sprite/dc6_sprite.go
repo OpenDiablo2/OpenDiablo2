@@ -1,4 +1,4 @@
-package d2animation
+package d2sprite
 
 import (
 	"errors"
@@ -11,22 +11,21 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
 
-var _ d2interface.Animation = &DC6Animation{} // Static check to confirm struct conforms to
+var _ d2interface.Sprite = &DC6Sprite{} // Static check to confirm struct conforms to
 // interface
 
-// NewDC6Animation creates an animation from a dc6 file
-func NewDC6Animation(
+// NewDC6Sprite creates an animation from a dc6 file
+func NewDC6Sprite(
 	dc6 *d2dc6.DC6,
 	pal d2interface.Palette,
 	effect d2enum.DrawEffect,
-) (d2interface.Animation, error) {
-	DC6 := &DC6Animation{
+) (d2interface.Sprite, error) {
+	DC6 := &DC6Sprite{
 		dc6:     dc6,
 		palette: pal,
 	}
 
-	anim := &Animation{
-		playLength:     defaultPlayLength,
+	anim := &Sprite{
 		playLoop:       true,
 		originAtBottom: true,
 		effect:         effect,
@@ -40,7 +39,7 @@ func NewDC6Animation(
 		},
 	}
 
-	DC6.Animation = *anim
+	DC6.Sprite = *anim
 
 	err := DC6.init()
 	if err != nil {
@@ -50,27 +49,29 @@ func NewDC6Animation(
 	return DC6, nil
 }
 
-// DC6Animation is an animation made from a DC6 file
-type DC6Animation struct {
-	Animation
+// DC6Sprite is an animation made from a DC6 file
+type DC6Sprite struct {
+	Sprite
 	dc6     *d2dc6.DC6
 	palette d2interface.Palette
 }
 
-func (a *DC6Animation) init() error {
-	a.directions = make([]animationDirection, a.dc6.Directions)
+func (a *DC6Sprite) init() error {
+	a.directions = make([]spriteDirection, a.dc6.Directions)
 
 	for directionIndex := range a.directions {
-		a.directions[directionIndex].frames = make([]animationFrame, a.dc6.FramesPerDirection)
+		a.directions[directionIndex].frames = make([]spriteFrame, a.dc6.FramesPerDirection)
 	}
 
 	err := a.decode()
+
+	a.SetPlayFPS(fps25)
 
 	return err
 }
 
 // SetDirection decodes and sets the direction
-func (a *DC6Animation) SetDirection(directionIndex int) error {
+func (a *DC6Sprite) SetDirection(directionIndex int) error {
 	const smallestInvalidDirectionIndex = 64
 	if directionIndex >= smallestInvalidDirectionIndex {
 		return errors.New("invalid direction index")
@@ -90,7 +91,7 @@ func (a *DC6Animation) SetDirection(directionIndex int) error {
 	return nil
 }
 
-func (a *DC6Animation) decode() error {
+func (a *DC6Sprite) decode() error {
 	for directionIndex := 0; directionIndex < len(a.directions); directionIndex++ {
 		err := a.decodeDirection(directionIndex)
 		if err != nil {
@@ -101,7 +102,7 @@ func (a *DC6Animation) decode() error {
 	return nil
 }
 
-func (a *DC6Animation) decodeDirection(directionIndex int) error {
+func (a *DC6Sprite) decodeDirection(directionIndex int) error {
 	for frameIndex := 0; frameIndex < int(a.dc6.FramesPerDirection); frameIndex++ {
 		frame := a.decodeFrame(directionIndex, frameIndex)
 		a.directions[directionIndex].frames[frameIndex] = frame
@@ -112,12 +113,12 @@ func (a *DC6Animation) decodeDirection(directionIndex int) error {
 	return nil
 }
 
-func (a *DC6Animation) decodeFrame(directionIndex, frameIndex int) animationFrame {
+func (a *DC6Sprite) decodeFrame(directionIndex, frameIndex int) spriteFrame {
 	startFrame := directionIndex * int(a.dc6.FramesPerDirection)
 
 	dc6Frame := a.dc6.Frames[startFrame+frameIndex]
 
-	frame := animationFrame{
+	frame := spriteFrame{
 		width:   int(dc6Frame.Width),
 		height:  int(dc6Frame.Height),
 		offsetX: int(dc6Frame.OffsetX),
@@ -129,7 +130,7 @@ func (a *DC6Animation) decodeFrame(directionIndex, frameIndex int) animationFram
 	return frame
 }
 
-func (a *DC6Animation) createSurfaces() error {
+func (a *DC6Sprite) createSurfaces() error {
 	for directionIndex := 0; directionIndex < len(a.directions); directionIndex++ {
 		err := a.createDirectionSurfaces(directionIndex)
 		if err != nil {
@@ -140,7 +141,7 @@ func (a *DC6Animation) createSurfaces() error {
 	return nil
 }
 
-func (a *DC6Animation) createDirectionSurfaces(directionIndex int) error {
+func (a *DC6Sprite) createDirectionSurfaces(directionIndex int) error {
 	for frameIndex := 0; frameIndex < int(a.dc6.FramesPerDirection); frameIndex++ {
 		if !a.directions[directionIndex].decoded {
 			err := a.decodeDirection(directionIndex)
@@ -160,7 +161,7 @@ func (a *DC6Animation) createDirectionSurfaces(directionIndex int) error {
 	return nil
 }
 
-func (a *DC6Animation) createFrameSurface(directionIndex, frameIndex int) (d2interface.Surface, error) {
+func (a *DC6Sprite) createFrameSurface(directionIndex, frameIndex int) (d2interface.Surface, error) {
 	if !a.directions[directionIndex].frames[frameIndex].decoded {
 		frame := a.decodeFrame(directionIndex, frameIndex)
 		a.directions[directionIndex].frames[frameIndex] = frame
@@ -183,9 +184,9 @@ func (a *DC6Animation) createFrameSurface(directionIndex, frameIndex int) (d2int
 }
 
 // Clone creates a copy of the animation
-func (a *DC6Animation) Clone() d2interface.Animation {
-	clone := &DC6Animation{}
-	clone.Animation = *a.Animation.Clone().(*Animation)
+func (a *DC6Sprite) Clone() d2interface.Sprite {
+	clone := &DC6Sprite{}
+	clone.Sprite = *a.Sprite.Clone().(*Sprite)
 	clone.dc6 = a.dc6.Clone()
 	clone.palette = a.palette
 
