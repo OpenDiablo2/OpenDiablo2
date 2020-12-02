@@ -29,6 +29,13 @@ const ( // for the dc6 frames
 )
 
 const (
+	questStatusCompleted  = iota - 2 // quest completed
+	questStatusCompleting            // quest completed (need to play animation)
+	questStatusNotStarted            // quest not started yet
+	questStatusInProgress            // quest is in progress
+)
+
+const (
 	normalActQuestsNumber = 6
 	act4QuestsNumber      = 3
 )
@@ -122,10 +129,7 @@ func (s *QuestLog) questTable(act, number int) struct {
 		{"qstsa5q6", 0, 0, 26, q6SocketX, q6SocketY},
 	}
 
-	key := (act-1)*normalActQuestsNumber + number
-	if act > act4 {
-		key -= act4QuestsNumber
-	}
+	key := s.cordsToQuestID(act, number)
 
 	return quests[key]
 }
@@ -137,6 +141,11 @@ func NewQuestLog(asset *d2asset.AssetManager,
 	act int) *QuestLog {
 	originX := 0
 	originY := 0
+
+	qs := map[int]int{
+		1: 1,
+		2: 0,
+	}
 
 	ql := &QuestLog{
 		asset:     asset,
@@ -151,6 +160,7 @@ func NewQuestLog(asset *d2asset.AssetManager,
 			{},
 			{},
 		},
+		questStatus: qs,
 	}
 
 	ql.Logger = d2util.NewLogger()
@@ -179,6 +189,20 @@ type QuestLog struct {
 	questsa3   *d2ui.WidgetGroup
 	questsa4   *d2ui.WidgetGroup
 	questsa5   *d2ui.WidgetGroup
+
+	/* I think, It should looks like that:
+	each quest has its own position in questStatus map
+	which should come from save file.
+	quests status values:
+		- -2 - done
+		- -1 - done, need to play animation
+		-  0 - not started yet
+		- and after that we have "in progress status"
+		  so for status (from 1 to n) we have appropriate
+		  quest descriptions and we'll have appropriate
+		  actions
+	*/
+	questStatus map[int]int
 
 	originX int
 	originY int
@@ -366,13 +390,6 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 	return wg
 }
 
-/*func (s *QuestLog) makeQuestCallback(n int) func() {
-	return func() {
-		s.onQuestClicked(n + 1)
-	}
-}*/
-
-// nolint:unparam // will be used
 func (s *QuestLog) setQuestLabel(status int) {
 	if s.selectedQuest == 0 {
 		s.questName.SetText("")
@@ -382,8 +399,15 @@ func (s *QuestLog) setQuestLabel(status int) {
 	}
 
 	s.questName.SetText(s.asset.TranslateString(fmt.Sprintf("qstsa%dq%d", s.selectedTab+1, s.selectedQuest)))
-	// s.questDescr.SetText(s.asset.TranslateString(fmt.Sprintf("qstsa%dq%d", s.selectedTab+1, s.selectedQuest)))
-	s.questDescr.SetText("sample quest description")
+
+	switch status {
+	case -1:
+		s.questDescr.SetText(s.asset.TranslateString("qstsprevious"))
+	case 0:
+		s.questDescr.SetText("")
+	default:
+		s.questDescr.SetText(s.asset.TranslateString(fmt.Sprintf("qstsa%dq%d%d", s.selectedTab+1, s.selectedQuest, status)))
+	}
 }
 
 func (s *QuestLog) setTab(tab int) {
@@ -404,7 +428,7 @@ func (s *QuestLog) setTab(tab int) {
 
 func (s *QuestLog) onQuestClicked(number int) {
 	s.selectedQuest = number
-	s.setQuestLabel(0)
+	s.setQuestLabel(1)
 	s.Infof("Quest number %d in tab %d clicked", number, s.selectedTab)
 }
 
@@ -519,4 +543,34 @@ func rgbaColor(rgba uint32) color.RGBA {
 	}
 
 	return result
+}
+
+func (s *QuestLog) cordsToQuestID(act, number int) int {
+	key := (act-1)*normalActQuestsNumber + number
+	if act > act4 {
+		key -= act4QuestsNumber
+	}
+
+	return key
+}
+
+func (s *QuestLog) questIDToCords(id int) (act, number int) {
+	act = act1
+
+	for i := 0; i < normalActQuestsNumber; i++ {
+		if id < normalActQuestsNumber {
+			break
+		}
+
+		act++
+
+		id -= normalActQuestsNumber
+	}
+
+	number = id
+	if act > act4 {
+		number -= act4QuestsNumber
+	}
+
+	return act, number
 }
