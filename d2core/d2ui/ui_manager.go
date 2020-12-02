@@ -52,6 +52,8 @@ func (ui *UIManager) Reset() {
 	ui.widgets = nil
 	ui.clickableWidgets = nil
 	ui.pressedWidget = nil
+	ui.widgetsGroups = nil
+	ui.tooltips = nil
 }
 
 func (ui *UIManager) addClickable(widget ClickableWidget) {
