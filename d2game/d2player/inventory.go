@@ -98,7 +98,7 @@ func (g *Inventory) Toggle() {
 func (g *Inventory) Load() {
 	var err error
 
-	g.panelGroup = g.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
+	g.panelGroup = g.uiManager.NewWidgetGroup(d2ui.RenderPriorityInventory)
 	g.panelMoveGold = g.uiManager.NewWidgetGroup(d2ui.RenderPriorityHeroStatsPanel)
 
 	g.frame = d2ui.NewUIFrame(g.asset, g.uiManager, d2ui.FrameRight)

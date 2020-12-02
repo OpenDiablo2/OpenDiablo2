@@ -40,16 +40,24 @@ const (
 	ButtonTypeSquareClose        ButtonType = 20
 	ButtonTypeSquareOk           ButtonType = 21
 	ButtonTypeSkillTreeTab       ButtonType = 22
-	ButtonTypeMinipanelOpenClose ButtonType = 23
-	ButtonTypeMinipanelParty     ButtonType = 24
-	ButtonTypeBuy                ButtonType = 25
-	ButtonTypeSell               ButtonType = 26
-	ButtonTypeRepair             ButtonType = 27
-	ButtonTypeRepairAll          ButtonType = 28
-	ButtonTypeLeftArrow          ButtonType = 29
-	ButtonTypeRightArrow         ButtonType = 30
-	ButtonTypeQuery              ButtonType = 31
-	ButtonTypeSquelchChat        ButtonType = 32
+	ButtonTypeQuestDescr         ButtonType = 23 // I suppose it should be also used in WP tabs
+	ButtonTypeMinipanelOpenClose ButtonType = 24
+	ButtonTypeMinipanelParty     ButtonType = 25
+	ButtonTypeBuy                ButtonType = 26
+	ButtonTypeSell               ButtonType = 27
+	ButtonTypeRepair             ButtonType = 28
+	ButtonTypeRepairAll          ButtonType = 29
+	ButtonTypeLeftArrow          ButtonType = 30
+	ButtonTypeRightArrow         ButtonType = 31
+	ButtonTypeQuery              ButtonType = 32
+	ButtonTypeSquelchChat        ButtonType = 33
+	ButtonTypeTab1               ButtonType = 34
+	ButtonTypeTab2               ButtonType = 35
+	ButtonTypeTab3               ButtonType = 36
+	ButtonTypeTab4               ButtonType = 37
+	ButtonTypeTab5               ButtonType = 38
+	ButtonTypeTabBlank           ButtonType = 39
+	ButtonTypeBlankQuestBtn      ButtonType = 40
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -72,6 +80,14 @@ const (
 	okButtonBaseFrame          = 16 // base frame offset of the "ok" button dc6
 	repairAllButtonBaseFrame   = 18 // base frame offset of the "repair all" button dc6
 	squelchChatButtonBaseFrame = 20 // base frame offset of the "?" button dc6
+)
+
+const (
+	tab1BaseFrame = 0
+	tab2BaseFrame = 2
+	tab3BaseFrame = 4
+	tab4BaseFrame = 6
+	tab5BaseFrame = 8
 )
 
 const (
@@ -160,9 +176,16 @@ const (
 	buttonSkillTreeTabFixedWidth    = 93
 	buttonSkillTreeTabFixedHeight   = 107
 
+	buttonTabXSegments = 1
+	buttonTabYSegments = 1
+
 	buttonMinipanelOpenCloseBaseFrame = 0
 	buttonMinipanelXSegments          = 1
 	buttonMinipanelYSegments          = 1
+
+	blankQuestButtonXSegments      = 1
+	blankQuestButtonYSegments      = 1
+	blankQuestButtonDisabledFrames = -1
 
 	buttonMinipanelCharacterBaseFrame = 0
 	buttonMinipanelInventoryBaseFrame = 2
@@ -492,6 +515,131 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			Tooltip:          buttonTooltipSquelchChat,
 			TooltipXOffset:   buttonBuySellTooltipXOffset,
 			TooltipYOffset:   buttonBuySellTooltipYOffset,
+		},
+		ButtonTypeQuestDescr: {
+			XSegments:        buttonBuySellSegmentsX,
+			YSegments:        buttonBuySellSegmentsY,
+			DisabledFrame:    buttonBuySellDisabledFrame,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.QuestLogQDescrBtn,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+		},
+		ButtonTypeTab1: {
+			XSegments:        buttonTabXSegments,
+			YSegments:        buttonTabYSegments,
+			DisabledFrame:    tab1BaseFrame + 1,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.WPTabs,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       false,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			BaseFrame:        tab1BaseFrame,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+		},
+		ButtonTypeTab2: {
+			XSegments:        buttonTabXSegments,
+			YSegments:        buttonTabYSegments,
+			DisabledFrame:    tab2BaseFrame + 1,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.WPTabs,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       false,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			BaseFrame:        tab2BaseFrame,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+		},
+		ButtonTypeTab3: {
+			XSegments:        buttonTabXSegments,
+			YSegments:        buttonTabYSegments,
+			DisabledFrame:    tab3BaseFrame + 1,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.WPTabs,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       false,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			BaseFrame:        tab3BaseFrame,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+		},
+		ButtonTypeTab4: {
+			XSegments:        buttonTabXSegments,
+			YSegments:        buttonTabYSegments,
+			DisabledFrame:    tab4BaseFrame + 1,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.WPTabs,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       false,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			BaseFrame:        tab4BaseFrame,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+		},
+		ButtonTypeTab5: {
+			XSegments:        buttonTabXSegments,
+			YSegments:        buttonTabYSegments,
+			DisabledFrame:    tab5BaseFrame + 1,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.WPTabs,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       false,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: true,
+			BaseFrame:        tab5BaseFrame,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+		},
+		ButtonTypeTabBlank: {
+			XSegments:        buttonTabXSegments,
+			YSegments:        buttonTabYSegments,
+			DisabledFrame:    0,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.WPTabs,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: false,
+			HasImage:         false,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
+		},
+		ButtonTypeBlankQuestBtn: {
+			XSegments:        blankQuestButtonXSegments,
+			YSegments:        blankQuestButtonYSegments,
+			DisabledFrame:    blankQuestButtonDisabledFrames,
+			DisabledColor:    lightGreyAlpha75,
+			ResourceName:     d2resource.QuestLogDone,
+			PaletteName:      d2resource.PaletteUnits,
+			Toggleable:       true,
+			FontPath:         d2resource.Font30,
+			AllowFrameChange: false,
+			HasImage:         false,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+			LabelColor:       greyAlpha100,
 		},
 		ButtonTypeSkillTreeTab: {
 			XSegments:        buttonSkillTreeTabXSegments,
