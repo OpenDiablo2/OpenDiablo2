@@ -240,7 +240,6 @@ func (s *QuestLog) Load() {
 	s.questName.SetPosition(questNameLabelX, questNameLabelY)
 	s.panelGroup.AddWidget(s.questName)
 
-	//s.questDescr = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
 	s.questDescr = s.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
 	s.questDescr.Alignment = d2ui.HorizontalAlignLeft
 	s.questDescr.Color[0] = rgbaColor(white)
@@ -300,12 +299,12 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 		questsInAct = normalActQuestsNumber
 	}
 
+	var sockets []*d2ui.Sprite
+
+	var buttons []*d2ui.Button
+
 	for n := 0; n < questsInAct; n++ {
 		q := s.questTable(act, n)
-
-		button := s.uiManager.NewButton(d2ui.ButtonTypeBlankQuestBtn, "")
-		button.SetPosition(q.x+questOffsetX, q.y+questOffsetY)
-		button.OnActivated(s.makeQuestCallback(n))
 
 		socket, err := s.uiManager.NewSprite(d2resource.QuestLogSocket, d2resource.PaletteSky)
 		if err != nil {
@@ -313,6 +312,11 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 		}
 
 		socket.SetPosition(q.x+questOffsetX, q.y+iconOffsetY+2*questOffsetY)
+		sockets = append(sockets, socket)
+
+		button := s.uiManager.NewButton(d2ui.ButtonTypeBlankQuestBtn, "")
+		button.SetPosition(q.x+questOffsetX, q.y+questOffsetY)
+		buttons = append(buttons, button)
 
 		icon, err := s.uiManager.NewSprite(d2resource.QuestLogDone, d2resource.PaletteSky)
 		if err != nil {
@@ -327,29 +331,58 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 		icon.SetPosition(q.x+questOffsetX, q.y+questOffsetY+iconOffsetY)
 
 		wg.AddWidget(icon)
-		wg.AddWidget(socket)
-		wg.AddWidget(button)
 	}
+
+	for i := 0; i < questsInAct; i++ {
+		currentQuest := i
+		buttons[i].OnActivated(func() {
+			var err error
+			for j := 0; j < questsInAct; j++ {
+				err = sockets[j].SetCurrentFrame(0)
+				if err != nil {
+					s.Error(err.Error())
+				}
+			}
+			if act-1 == s.selectedTab {
+				err = sockets[currentQuest].SetCurrentFrame(1)
+				if err != nil {
+					s.Error(err.Error())
+				}
+			}
+			s.onQuestClicked(currentQuest + 1)
+		})
+	}
+
+	for _, s := range sockets {
+		wg.AddWidget(s)
+	}
+
+	for _, b := range buttons {
+		wg.AddWidget(b)
+	}
+
 	wg.SetVisible(false)
 
 	return wg
 }
 
-func (s *QuestLog) makeQuestCallback(n int) func() {
+/*func (s *QuestLog) makeQuestCallback(n int) func() {
 	return func() {
 		s.onQuestClicked(n + 1)
 	}
-}
+}*/
 
+// nolint:unparam // will be used
 func (s *QuestLog) setQuestLabel(status int) {
 	if s.selectedQuest == 0 {
 		s.questName.SetText("")
 		s.questDescr.SetText("")
+
 		return
 	}
 
 	s.questName.SetText(s.asset.TranslateString(fmt.Sprintf("qstsa%dq%d", s.selectedTab+1, s.selectedQuest)))
-	//s.questDescr.SetText(s.asset.TranslateString(fmt.Sprintf("qstsa%dq%d", s.selectedTab+1, s.selectedQuest)))
+	// s.questDescr.SetText(s.asset.TranslateString(fmt.Sprintf("qstsa%dq%d", s.selectedTab+1, s.selectedQuest)))
 	s.questDescr.SetText("sample quest description")
 }
 
