@@ -395,7 +395,7 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 	case d2enum.ToggleInventoryPanel:
 		g.toggleInventoryPanel()
 	case d2enum.ToggleSkillTreePanel:
-		g.toggleInventoryPanel()
+		g.toggleSkilltreePanel()
 	case d2enum.ToggleCharacterPanel:
 		g.toggleHeroStatsPanel()
 	case d2enum.ToggleQuestLog:
