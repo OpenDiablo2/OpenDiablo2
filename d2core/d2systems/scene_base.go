@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"image/color"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom/rectangle"
+
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2scene"
 
 	"github.com/gravestench/akara"
@@ -27,7 +29,7 @@ func NewBaseScene(key string) *BaseScene {
 		key:             key,
 		Viewports:       make([]akara.EID, 0),
 		GameObjects:     make([]akara.EID, 0),
-		systems:         &baseSystems{},
+		baseSystems:     &baseSystems{},
 		backgroundColor: color.Transparent,
 	}
 
@@ -44,18 +46,21 @@ type baseSystems struct {
 	*GameObjectFactory
 }
 
-// BaseScene encapsulates common behaviors for systems that are considered "scenes",
+// BaseScene encapsulates common behaviors for baseSystems that are considered "scenes",
 // such as the main menu, the in-game map, the console, etc.
 //
 // The base scene is responsible for generic behaviors common to all scenes,
 // like initializing the default viewport, or rendering game objects to the viewports.
 type BaseScene struct {
 	*akara.BaseSystem
+	*baseSystems
+	Geom struct {
+		Rectangle rectangle.Namespace
+	}
 	*d2util.Logger
 	key             string
 	booted          bool
 	paused          bool
-	systems         *baseSystems
 	Add             *sceneObjectFactory
 	Viewports       []akara.EID
 	GameObjects     []akara.EID
@@ -75,6 +80,8 @@ type BaseScene struct {
 	d2components.OriginFactory
 	d2components.AlphaFactory
 	d2components.DrawEffectFactory
+	d2components.RectangleFactory
+	d2components.ColorFactory
 }
 
 // Booted returns whether or not the scene has booted
@@ -100,8 +107,6 @@ func (s *BaseScene) Init(world *akara.World) {
 func (s *BaseScene) boot() {
 	s.Info("base scene booting ...")
 
-	s.setupFactories()
-
 	s.Add = &sceneObjectFactory{
 		BaseScene: s,
 		Logger:    d2util.NewLogger(),
@@ -110,45 +115,52 @@ func (s *BaseScene) boot() {
 	s.Add.SetPrefix(fmt.Sprintf("%s -> %s", s.key, "Object Factory"))
 
 	for idx := range s.Systems {
-		if rendersys, ok := s.Systems[idx].(*RenderSystem); ok && s.systems.RenderSystem == nil {
-			s.systems.RenderSystem = rendersys
+		if rendersys, ok := s.Systems[idx].(*RenderSystem); ok && s.baseSystems.RenderSystem == nil {
+			s.baseSystems.RenderSystem = rendersys
 			continue
 		}
 
-		if inputSys, ok := s.Systems[idx].(*InputSystem); ok && s.systems.InputSystem == nil {
-			s.systems.InputSystem = inputSys
+		if inputSys, ok := s.Systems[idx].(*InputSystem); ok && s.baseSystems.InputSystem == nil {
+			s.baseSystems.InputSystem = inputSys
 			continue
 		}
 
-		if objFactory, ok := s.Systems[idx].(*GameObjectFactory); ok && s.systems.GameObjectFactory == nil {
-			s.systems.GameObjectFactory = objFactory
+		if objFactory, ok := s.Systems[idx].(*GameObjectFactory); ok && s.baseSystems.GameObjectFactory == nil {
+			s.baseSystems.GameObjectFactory = objFactory
 			continue
 		}
 	}
 
-	if s.systems.RenderSystem == nil {
+	if s.baseSystems.RenderSystem == nil {
 		s.Info("waiting for render system ...")
 		return
 	}
 
-	if s.systems.RenderSystem.renderer == nil {
+	if s.baseSystems.RenderSystem.renderer == nil {
 		s.Info("waiting for renderer instance ...")
 		return
 	}
 
-	if s.systems.InputSystem == nil {
+	if s.baseSystems.InputSystem == nil {
 		s.Info("waiting for input system")
 		return
 	}
 
-	if s.systems.GameObjectFactory == nil {
+	if s.baseSystems.GameObjectFactory == nil {
 		s.Info("waiting for game object factory ...")
 		return
 	}
 
-	s.systems.SpriteFactory.RenderSystem = s.systems.RenderSystem
+	s.setupFactories()
 
-	s.createDefaultViewport()
+	s.baseSystems.SpriteFactory.RenderSystem = s.baseSystems.RenderSystem
+
+	const (
+		defaultWidth  = 800
+		defaultHeight = 600
+	)
+
+	s.Add.Viewport(mainViewport, defaultWidth, defaultHeight)
 
 	s.Info("base scene booted!")
 	s.booted = true
@@ -157,56 +169,22 @@ func (s *BaseScene) boot() {
 func (s *BaseScene) setupFactories() {
 	s.Info("setting up component factories")
 
-	mainViewportID := s.RegisterComponent(&d2components.MainViewport{})
-	viewportID := s.RegisterComponent(&d2components.Viewport{})
-	viewportFilterID := s.RegisterComponent(&d2components.ViewportFilter{})
-	cameraID := s.RegisterComponent(&d2components.Camera{})
-	priorityID := s.RegisterComponent(&d2components.Priority{})
-	renderableID := s.RegisterComponent(&d2components.Texture{})
-	interactiveID := s.RegisterComponent(&d2components.Interactive{})
-	positionID := s.RegisterComponent(&d2components.Position{})
-	scaleID := s.RegisterComponent(&d2components.Scale{})
-	animationID := s.RegisterComponent(&d2components.Sprite{})
-	originID := s.RegisterComponent(&d2components.Origin{})
-	alphaID := s.RegisterComponent(&d2components.Alpha{})
-	sceneGraphNodeID := s.RegisterComponent(&d2components.SceneGraphNode{})
-	drawEffectID := s.RegisterComponent(&d2components.DrawEffect{})
-
-	s.MainViewport = s.GetComponentFactory(mainViewportID)
-	s.Viewport = s.GetComponentFactory(viewportID)
-	s.ViewportFilter = s.GetComponentFactory(viewportFilterID)
-	s.Camera = s.GetComponentFactory(cameraID)
-	s.Priority = s.GetComponentFactory(priorityID)
-	s.Texture = s.GetComponentFactory(renderableID)
-	s.Interactive = s.GetComponentFactory(interactiveID)
-	s.Position = s.GetComponentFactory(positionID)
-	s.Scale = s.GetComponentFactory(scaleID)
-	s.Sprite = s.GetComponentFactory(animationID)
-	s.Origin = s.GetComponentFactory(originID)
-	s.Alpha = s.GetComponentFactory(alphaID)
-	s.SceneGraphNode = s.GetComponentFactory(sceneGraphNodeID)
-	s.DrawEffect = s.GetComponentFactory(drawEffectID)
-}
-
-func (s *BaseScene) createDefaultViewport() {
-	s.Info("creating default viewport")
-	viewportID := s.NewEntity()
-	s.AddViewport(viewportID)
-	s.AddPriority(viewportID)
-
-	camera := s.AddCamera(viewportID)
-	width, height := camera.Size.XY()
-
-	s.AddSceneGraphNode(viewportID).SetParent(s.Graph)
-
-	sfc := s.systems.RenderSystem.renderer.NewSurface(int(width), int(height))
-
-	sfc.Clear(color.Transparent)
-
-	s.AddTexture(viewportID).Texture = sfc
-	s.AddMainViewport(viewportID)
-
-	s.Viewports = append(s.Viewports, viewportID)
+	s.InjectComponent(&d2components.MainViewport{}, &s.MainViewport)
+	s.InjectComponent(&d2components.Viewport{}, &s.Viewport)
+	s.InjectComponent(&d2components.ViewportFilter{}, &s.ViewportFilter)
+	s.InjectComponent(&d2components.Camera{}, &s.Camera)
+	s.InjectComponent(&d2components.Priority{}, &s.Priority)
+	s.InjectComponent(&d2components.Texture{}, &s.Texture)
+	s.InjectComponent(&d2components.Interactive{}, &s.Interactive)
+	s.InjectComponent(&d2components.Position{}, &s.Position)
+	s.InjectComponent(&d2components.Scale{}, &s.Scale)
+	s.InjectComponent(&d2components.Origin{}, &s.Origin)
+	s.InjectComponent(&d2components.Alpha{}, &s.Alpha)
+	s.InjectComponent(&d2components.SceneGraphNode{}, &s.SceneGraphNode)
+	s.InjectComponent(&d2components.DrawEffect{}, &s.DrawEffect)
+	s.InjectComponent(&d2components.Sprite{}, &s.SpriteFactory.Sprite)
+	s.InjectComponent(&d2components.Rectangle{}, &s.RectangleFactory.Rectangle)
+	s.InjectComponent(&d2components.Color{}, &s.Color)
 }
 
 // Key returns the scene's key
@@ -229,12 +207,12 @@ func (s *BaseScene) Update() {
 }
 
 func (s *BaseScene) renderViewports() {
-	if s.systems.RenderSystem == nil {
+	if s.baseSystems.RenderSystem == nil {
 		s.Warning("render system not present")
 		return
 	}
 
-	if s.systems.RenderSystem.renderer == nil {
+	if s.baseSystems.RenderSystem.renderer == nil {
 		s.Warning("render system doesn't have a renderer instance")
 		return
 	}
@@ -242,7 +220,8 @@ func (s *BaseScene) renderViewports() {
 	numViewports := len(s.Viewports)
 
 	if numViewports < 1 {
-		s.createDefaultViewport()
+		s.Warning("scene does not have a main viewport")
+		return
 	}
 
 	viewportObjects := s.binGameObjectsByViewport()
@@ -307,7 +286,7 @@ func (s *BaseScene) renderViewport(idx int, objects []akara.EID) {
 	}
 
 	if sfc.Texture == nil {
-		sfc.Texture = s.systems.RenderSystem.renderer.NewSurface(int(cw), int(ch))
+		sfc.Texture = s.baseSystems.RenderSystem.renderer.NewSurface(int(cw), int(ch))
 	}
 
 	if idx == mainViewport {
@@ -378,41 +357,44 @@ func (s *BaseScene) renderObject(target d2interface.Surface, id akara.EID) {
 	target.PushColor(color.Alpha{A: uint8(alpha.Alpha * maxAlpha)})
 	defer target.Pop()
 
-	segment, found := s.systems.SpriteFactory.GetSegmentedSprite(id)
+	segment, found := s.baseSystems.SpriteFactory.GetSegmentedSprite(id)
 	if found {
-		animation, found := s.GetSprite(id)
-		if !found {
-			return
-		}
-
-		var offsetY int
-
-		segmentsX, segmentsY := segment.Xsegments, segment.Ysegments
-		frameOffset := segment.FrameOffset
-
-		for y := 0; y < segmentsY; y++ {
-			var offsetX, maxFrameHeight int
-
-			for x := 0; x < segmentsX; x++ {
-				idx := x + y*segmentsX + frameOffset*segmentsX*segmentsY
-				if err := animation.SetCurrentFrame(idx); err != nil {
-					s.Error("SetCurrentFrame error" + err.Error())
-				}
-
-				target.PushTranslation(x+offsetX, y+offsetY)
-				target.Render(animation.GetCurrentFrameSurface())
-				target.Pop()
-
-				frameWidth, frameHeight := animation.GetCurrentFrameSize()
-				maxFrameHeight = d2math.MaxInt(maxFrameHeight, frameHeight)
-				offsetX += frameWidth - 1
-			}
-
-			offsetY += maxFrameHeight - 1
-		}
-
+		s.renderSegmentedSprite(target, id, segment)
 		return
 	}
 
 	target.Render(texture.Texture)
+}
+
+func (s *BaseScene) renderSegmentedSprite(target d2interface.Surface, id akara.EID, seg *d2components.SegmentedSprite) {
+	animation, found := s.GetSprite(id)
+	if !found {
+		return
+	}
+
+	var offsetY int
+
+	segmentsX, segmentsY := seg.Xsegments, seg.Ysegments
+	frameOffset := seg.FrameOffset
+
+	for y := 0; y < segmentsY; y++ {
+		var offsetX, maxFrameHeight int
+
+		for x := 0; x < segmentsX; x++ {
+			idx := x + y*segmentsX + frameOffset*segmentsX*segmentsY
+			if err := animation.SetCurrentFrame(idx); err != nil {
+				s.Error("SetCurrentFrame error" + err.Error())
+			}
+
+			target.PushTranslation(x+offsetX, y+offsetY)
+			target.Render(animation.GetCurrentFrameSurface())
+			target.Pop()
+
+			frameWidth, frameHeight := animation.GetCurrentFrameSize()
+			maxFrameHeight = d2math.MaxInt(maxFrameHeight, frameHeight)
+			offsetX += frameWidth - 1
+		}
+
+		offsetY += maxFrameHeight - 1
+	}
 }

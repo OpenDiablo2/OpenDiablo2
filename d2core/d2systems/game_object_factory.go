@@ -13,12 +13,13 @@ const (
 // static check that GameObjectFactory implements the System interface
 var _ akara.System = &GameObjectFactory{}
 
-// GameObjectFactory is a wrapper system for subordinate systems that
+// GameObjectFactory is a wrapper system for subordinate baseSystems that
 // do the actual object creation work.
 type GameObjectFactory struct {
 	akara.BaseSystem
 	*d2util.Logger
 	*SpriteFactory
+	*ShapeSystem
 }
 
 // Init will initialize the Game Object Factory by injecting all of the factory subsystems into the world
@@ -40,9 +41,11 @@ func (t *GameObjectFactory) setupLogger() {
 func (t *GameObjectFactory) injectSubSystems() {
 	t.Info("creating sprite factory")
 	t.SpriteFactory = NewSpriteFactorySubsystem(t.BaseSystem, t.Logger)
+	t.ShapeSystem = NewShapeSystem(t.BaseSystem, t.Logger)
 }
 
-// Update updates all the sub-systems
+// Update updates all the sub-baseSystems
 func (t *GameObjectFactory) Update() {
 	t.SpriteFactory.Update()
+	t.ShapeSystem.Update()
 }

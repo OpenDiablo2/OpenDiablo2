@@ -63,19 +63,12 @@ func (m *RenderSystem) setupLogger() {
 }
 
 func (m *RenderSystem) setupFactories() {
-	gameConfigID := m.RegisterComponent(&d2components.GameConfig{})
-	viewportID := m.RegisterComponent(&d2components.Viewport{})
-	mainViewportID := m.RegisterComponent(&d2components.MainViewport{})
-	renderableID := m.RegisterComponent(&d2components.Texture{})
-	priorityID := m.RegisterComponent(&d2components.Priority{})
-	alphaID := m.RegisterComponent(&d2components.Alpha{})
-
-	m.GameConfig = m.GetComponentFactory(gameConfigID)
-	m.Viewport = m.GetComponentFactory(viewportID)
-	m.MainViewport = m.GetComponentFactory(mainViewportID)
-	m.Texture = m.GetComponentFactory(renderableID)
-	m.Priority = m.GetComponentFactory(priorityID)
-	m.Alpha = m.GetComponentFactory(alphaID)
+	m.InjectComponent(&d2components.GameConfig{}, &m.GameConfig)
+	m.InjectComponent(&d2components.Viewport{}, &m.Viewport)
+	m.InjectComponent(&d2components.MainViewport{}, &m.MainViewport)
+	m.InjectComponent(&d2components.Texture{}, &m.Texture)
+	m.InjectComponent(&d2components.Priority{}, &m.Priority)
+	m.InjectComponent(&d2components.Alpha{}, &m.Alpha)
 }
 
 func (m *RenderSystem) setupSubscriptions() {
@@ -98,7 +91,7 @@ func (m *RenderSystem) setupSubscriptions() {
 // Update will initialize the renderer, start the game loop, and
 // disable the system (to prevent it from being called during the game loop).
 //
-// The reason why this isn't in the init step is because we use other systems
+// The reason why this isn't in the init step is because we use other baseSystems
 // for loading the config file, and it may take more than one iteration
 func (m *RenderSystem) Update() {
 	if m.renderer != nil {

@@ -22,7 +22,7 @@ var _ akara.System = &InputSystem{}
 type InputSystem struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
-	inputService d2interface.InputService
+	d2interface.InputService
 	configs      *akara.Subscription
 	interactives *akara.Subscription
 	d2components.GameConfigFactory
@@ -34,7 +34,7 @@ type InputSystem struct {
 func (m *InputSystem) Init(world *akara.World) {
 	m.World = world
 
-	m.inputService = ebiten_input.InputService{}
+	m.InputService = ebiten_input.InputService{}
 
 	m.setupLogger()
 
@@ -54,11 +54,8 @@ func (m *InputSystem) setupLogger() {
 func (m *InputSystem) setupFactories() {
 	m.Info("setting up component factories")
 
-	gameConfigID := m.RegisterComponent(&d2components.GameConfig{})
-	interactiveID := m.RegisterComponent(&d2components.Interactive{})
-
-	m.GameConfig = m.GetComponentFactory(gameConfigID)
-	m.Interactive = m.GetComponentFactory(interactiveID)
+	m.InjectComponent(&d2components.GameConfig{}, &m.GameConfig)
+	m.InjectComponent(&d2components.Interactive{}, &m.Interactive)
 }
 
 func (m *InputSystem) setupSubscriptions() {
@@ -121,17 +118,17 @@ func (m *InputSystem) updateInputState() {
 	}
 
 	for _, key := range keysToCheck {
-		truth := m.inputService.IsKeyPressed(d2enum.Key(key))
+		truth := m.InputService.IsKeyPressed(d2enum.Key(key))
 		m.inputState.KeyVector.Set(key, truth)
 	}
 
 	for _, mod := range modifiersToCheck {
-		truth := m.inputService.IsKeyPressed(d2enum.Key(mod))
+		truth := m.InputService.IsKeyPressed(d2enum.Key(mod))
 		m.inputState.ModifierVector.Set(mod, truth)
 	}
 
 	for _, btn := range buttonsToCheck {
-		truth := m.inputService.IsMouseButtonPressed(d2enum.MouseButton(btn))
+		truth := m.InputService.IsMouseButtonPressed(d2enum.MouseButton(btn))
 		m.inputState.MouseButtonVector.Set(btn, truth)
 	}
 }

@@ -1,6 +1,7 @@
 package d2systems
 
 import (
+	"image/color"
 	"path/filepath"
 
 	"github.com/gravestench/akara"
@@ -14,7 +15,7 @@ type sceneObjectFactory struct {
 	*d2util.Logger
 }
 
-func (s *sceneObjectFactory) addBasicComponenets(id akara.EID) {
+func (s *sceneObjectFactory) addBasicComponents(id akara.EID) {
 	node := s.AddSceneGraphNode(id)
 	node.SetParent(s.Graph)
 
@@ -25,10 +26,10 @@ func (s *sceneObjectFactory) addBasicComponenets(id akara.EID) {
 func (s *sceneObjectFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID {
 	s.Infof("creating sprite: %s, %s", filepath.Base(imgPath), palPath)
 
-	eid := s.systems.SpriteFactory.Sprite(x, y, imgPath, palPath)
+	eid := s.baseSystems.SpriteFactory.Sprite(x, y, imgPath, palPath)
 	s.GameObjects = append(s.GameObjects, eid)
 
-	s.addBasicComponenets(eid)
+	s.addBasicComponents(eid)
 
 	return eid
 }
@@ -36,10 +37,50 @@ func (s *sceneObjectFactory) Sprite(x, y float64, imgPath, palPath string) akara
 func (s *sceneObjectFactory) SegmentedSprite(x, y float64, imgPath, palPath string, xseg, yseg, frame int) akara.EID {
 	s.Infof("creating segmented sprite: %s, %s", filepath.Base(imgPath), palPath)
 
-	eid := s.systems.SpriteFactory.SegmentedSprite(x, y, imgPath, palPath, xseg, yseg, frame)
+	eid := s.baseSystems.SpriteFactory.SegmentedSprite(x, y, imgPath, palPath, xseg, yseg, frame)
 	s.GameObjects = append(s.GameObjects, eid)
 
-	s.addBasicComponenets(eid)
+	s.addBasicComponents(eid)
+
+	return eid
+}
+
+func (s *sceneObjectFactory) Viewport(priority, width, height int) akara.EID {
+	s.Infof("creating viewport #%d", priority)
+
+	eid := s.NewEntity()
+	s.AddViewport(eid)
+	s.AddPriority(eid).Priority = priority
+
+	if priority == mainViewport {
+		s.AddMainViewport(eid)
+	}
+
+	camera := s.AddCamera(eid)
+	camera.Size.X = float64(width)
+	camera.Size.Y = float64(height)
+
+	sfc := s.baseSystems.RenderSystem.renderer.NewSurface(width, height)
+
+	sfc.Clear(color.Transparent)
+
+	s.AddTexture(eid).Texture = sfc
+
+	s.Viewports = append(s.Viewports, eid)
+
+	s.addBasicComponents(eid)
+
+	return eid
+}
+
+func (s *sceneObjectFactory) Rectangle(x, y, width, height int, color color.Color) akara.EID {
+	s.Info("creating rectangle")
+
+	eid := s.baseSystems.ShapeSystem.Rectangle(x, y, width, height, color)
+
+	s.addBasicComponents(eid)
+
+	s.GameObjects = append(s.GameObjects, eid)
 
 	return eid
 }

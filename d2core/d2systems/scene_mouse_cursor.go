@@ -1,6 +1,9 @@
 package d2systems
 
 import (
+	"math"
+	"time"
+
 	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
@@ -9,6 +12,11 @@ import (
 
 const (
 	sceneKeyMouseCursor = "Mouse Cursor"
+)
+
+const (
+	fadeTimeout = time.Second * 4
+	fadeTime    = time.Second
 )
 
 // NewMouseCursorScene creates a new main menu scene. This is the first screen that the user
@@ -28,8 +36,9 @@ var _ d2interface.Scene = &MouseCursorScene{}
 // or start the map engine test.
 type MouseCursorScene struct {
 	*BaseScene
-	booted bool
-	cursor akara.EID
+	booted        bool
+	cursor        akara.EID
+	lastTimeMoved time.Time
 }
 
 // Init the main menu scene
@@ -70,6 +79,7 @@ func (s *MouseCursorScene) Update() {
 	}
 
 	s.updateCursorPosition()
+	s.handleCursorFade()
 
 	s.BaseScene.Update()
 }
@@ -80,6 +90,26 @@ func (s *MouseCursorScene) updateCursorPosition() {
 		return
 	}
 
-	cx, cy := s.systems.InputSystem.inputService.CursorPosition()
+	cx, cy := s.CursorPosition()
+
+	if int(position.X) != cx || int(position.Y) != cy {
+		s.lastTimeMoved = time.Now()
+	}
+
 	position.X, position.Y = float64(cx), float64(cy)
+}
+
+func (s *MouseCursorScene) handleCursorFade() {
+	alpha, found := s.GetAlpha(s.cursor)
+	if !found {
+		return
+	}
+
+	shouldFadeOut := time.Now().Sub(s.lastTimeMoved) > fadeTimeout
+
+	if shouldFadeOut {
+		alpha.Alpha = math.Max(alpha.Alpha*0.825, 0)
+	} else {
+		alpha.Alpha = math.Min(alpha.Alpha+0.125, 1)
+	}
 }

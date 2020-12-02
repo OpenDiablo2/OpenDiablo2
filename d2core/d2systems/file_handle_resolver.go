@@ -95,15 +95,10 @@ func (m *FileHandleResolver) setupSubscriptions() {
 func (m *FileHandleResolver) setupFactories() {
 	m.Info("setting up component factories")
 
-	filePathID := m.RegisterComponent(&d2components.FilePath{})
-	fileTypeID := m.RegisterComponent(&d2components.FileType{})
-	fileHandleID := m.RegisterComponent(&d2components.FileHandle{})
-	fileSourceID := m.RegisterComponent(&d2components.FileSource{})
-
-	m.FilePath = m.GetComponentFactory(filePathID)
-	m.FileType = m.GetComponentFactory(fileTypeID)
-	m.FileHandle = m.GetComponentFactory(fileHandleID)
-	m.FileSource = m.GetComponentFactory(fileSourceID)
+	m.InjectComponent(&d2components.FilePath{}, &m.FilePath)
+	m.InjectComponent(&d2components.FileType{}, &m.FileType)
+	m.InjectComponent(&d2components.FileHandle{}, &m.FileHandle)
+	m.InjectComponent(&d2components.FileSource{}, &m.FileSource)
 }
 
 // Update iterates over entities which have not had a file handle resolved.

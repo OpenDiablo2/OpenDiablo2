@@ -24,9 +24,9 @@ const (
 // to be found in, and it also adds an entity for the initial config file to be loaded.
 //
 // This system is dependant on the FileTypeResolver, FileSourceResolver, and
-// FileHandleResolver systems because this system subscribes to entities
-// with components created by these other systems. Nothing will  break if these
-// other systems are not present in the world, but no config files will be loaded by
+// FileHandleResolver baseSystems because this system subscribes to entities
+// with components created by these other baseSystems. Nothing will  break if these
+// other baseSystems are not present in the world, but no config files will be loaded by
 // this system either...
 type GameConfigSystem struct {
 	akara.BaseSubscriberSystem
@@ -62,19 +62,12 @@ func (m *GameConfigSystem) setupLogger() {
 func (m *GameConfigSystem) setupFactories() {
 	m.Info("setting up component factories")
 
-	filePathID := m.RegisterComponent(&d2components.FilePath{})
-	fileTypeID := m.RegisterComponent(&d2components.FileType{})
-	fileHandleID := m.RegisterComponent(&d2components.FileHandle{})
-	fileSourceID := m.RegisterComponent(&d2components.FileSource{})
-	gameConfigID := m.RegisterComponent(&d2components.GameConfig{})
-	dirtyID := m.RegisterComponent(&d2components.Dirty{})
-
-	m.FilePath = m.GetComponentFactory(filePathID)
-	m.FileType = m.GetComponentFactory(fileTypeID)
-	m.FileHandle = m.GetComponentFactory(fileHandleID)
-	m.FileSource = m.GetComponentFactory(fileSourceID)
-	m.GameConfig = m.GetComponentFactory(gameConfigID)
-	m.Dirty = m.GetComponentFactory(dirtyID)
+	m.InjectComponent(&d2components.FilePath{}, &m.FilePath)
+	m.InjectComponent(&d2components.FileType{}, &m.FileType)
+	m.InjectComponent(&d2components.FileHandle{}, &m.FileHandle)
+	m.InjectComponent(&d2components.FileSource{}, &m.FileSource)
+	m.InjectComponent(&d2components.GameConfig{}, &m.GameConfig)
+	m.InjectComponent(&d2components.Dirty{}, &m.Dirty)
 }
 
 func (m *GameConfigSystem) setupSubscriptions() {

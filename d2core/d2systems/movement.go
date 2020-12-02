@@ -35,11 +35,8 @@ func (m *MovementSystem) Init(world *akara.World) {
 
 	m.Info("initializing ...")
 
-	positionID := m.RegisterComponent(&d2components.Position{})
-	velocityID := m.RegisterComponent(&d2components.Velocity{})
-
-	m.Position = m.GetComponentFactory(positionID)
-	m.Velocity = m.GetComponentFactory(velocityID)
+	m.InjectComponent(&d2components.Position{}, &m.Position)
+	m.InjectComponent(&d2components.Velocity{}, &m.Velocity)
 
 	movable := m.NewComponentFilter().Require(
 		&d2components.Position{},

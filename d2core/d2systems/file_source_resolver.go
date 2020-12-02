@@ -70,13 +70,9 @@ func (m *FileSourceResolver) setupSubscriptions() {
 func (m *FileSourceResolver) setupFactories() {
 	m.Info("setting up component factories")
 
-	filePathID := m.RegisterComponent(&d2components.FilePath{})
-	fileTypeID := m.RegisterComponent(&d2components.FileType{})
-	fileSourceID := m.RegisterComponent(&d2components.FileSource{})
-
-	m.FilePath = m.GetComponentFactory(filePathID)
-	m.FileType = m.GetComponentFactory(fileTypeID)
-	m.FileSource = m.GetComponentFactory(fileSourceID)
+	m.InjectComponent(&d2components.FilePath{}, &m.FilePath)
+	m.InjectComponent(&d2components.FileType{}, &m.FileType)
+	m.InjectComponent(&d2components.FileSource{}, &m.FileSource)
 }
 
 // Update iterates over entities from its subscription, and checks if it can be used as a file source

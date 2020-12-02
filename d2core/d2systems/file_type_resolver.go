@@ -52,11 +52,8 @@ func (m *FileTypeResolver) setupLogger() {
 }
 
 func (m *FileTypeResolver) setupFactories() {
-	filePathID := m.RegisterComponent(&d2components.FilePath{})
-	fileTypeID := m.RegisterComponent(&d2components.FileType{})
-
-	m.FilePath = m.GetComponentFactory(filePathID)
-	m.FileType = m.GetComponentFactory(fileTypeID)
+	m.InjectComponent(&d2components.FilePath{}, &m.FilePath)
+	m.InjectComponent(&d2components.FileType{}, &m.FileType)
 }
 
 func (m *FileTypeResolver) setupSubscriptions() {
