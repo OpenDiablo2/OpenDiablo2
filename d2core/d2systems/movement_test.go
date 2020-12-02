@@ -51,8 +51,8 @@ func TestMovementSystem_EntityAdded(t *testing.T) {
 	px, py := 10., 10.
 	vx, vy := 1., 0.
 
-	position.Set(px, py)
-	velocity.Set(vx, vy)
+	position.X, position.Y = px, py
+	velocity.X, velocity.Y = vx, vy
 
 	if len(moveSys.movableEntities.GetEntities()) != 1 {
 		t.Error("entity not added to the system")
@@ -60,16 +60,16 @@ func TestMovementSystem_EntityAdded(t *testing.T) {
 
 	if p, found := moveSys.GetPosition(e); !found {
 		t.Error("position component not found")
-	} else if p.X() != px || p.Y() != py {
+	} else if p.X != px || p.Y != py {
 		fmtError := "position component values incorrect:\n\t expected %v, %v but got %v, %v"
-		t.Errorf(fmtError, px, py, p.X(), p.Y())
+		t.Errorf(fmtError, px, py, p.X, p.Y)
 	}
 
 	if v, found := moveSys.GetVelocity(e); !found {
 		t.Error("position component not found")
-	} else if v.X() != vx || v.Y() != vy {
+	} else if v.X != vx || v.Y != vy {
 		fmtError := "velocity component values incorrect:\n\t expected %v, %v but got %v, %v"
-		t.Errorf(fmtError, px, py, v.X(), v.Y())
+		t.Errorf(fmtError, px, py, v.X, v.Y)
 	}
 }
 
@@ -91,15 +91,15 @@ func TestMovementSystem_Update(t *testing.T) {
 	vx, vy := 1., -1.
 
 	// mutate the components a bit
-	position.Set(px, py)
-	velocity.Set(vx, vy)
+	position.X, position.Y = px, py
+	velocity.X, velocity.Y = vx, vy
 
 	// should apply the velocity to the position
 	_ = world.Update(time.Second)
 
-	if position.X() != px+vx || position.Y() != py+vy {
+	if position.X != px+vx || position.Y != py+vy {
 		fmtError := "expected position (%v, %v) but got (%v, %v)"
-		t.Errorf(fmtError, px+vx, py+vy, position.X(), position.Y())
+		t.Errorf(fmtError, px+vx, py+vy, position.X, position.Y)
 	}
 }
 
@@ -117,8 +117,8 @@ func benchN(n int, b *testing.B) {
 		p := movementSystem.AddPosition(e)
 		v := movementSystem.AddVelocity(e)
 
-		p.Set(0, 0)
-		v.Set(rand.Float64(), rand.Float64()) //nolint:gosec // it's just a test
+		p.X, p.Y = 0, 0
+		v.X, v.Y = rand.Float64(), rand.Float64() //nolint:gosec // it's just a test
 	}
 
 	benchName := strconv.Itoa(n) + "_entity update"

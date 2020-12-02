@@ -14,13 +14,13 @@ const (
 var _ akara.System = &GameClientBootstrapSystem{}
 
 // GameClientBootstrapSystem is responsible for setting up other
-// systems that are common to both the game client and the headless game server
+// baseSystems that are common to both the game client and the headless game server
 type GameClientBootstrapSystem struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
 }
 
-// Init injects the common systems required by both the game client and headless server
+// Init injects the common baseSystems required by both the game client and headless server
 func (m *GameClientBootstrapSystem) Init(world *akara.World) {
 	m.World = world
 

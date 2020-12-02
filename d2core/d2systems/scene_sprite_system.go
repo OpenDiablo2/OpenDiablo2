@@ -66,25 +66,15 @@ func (t *SpriteFactory) Init(world *akara.World) {
 }
 
 func (t *SpriteFactory) setupFactories() {
-	filePathID := t.RegisterComponent(&d2components.FilePath{})
-	positionID := t.RegisterComponent(&d2components.Position{})
-	dc6ID := t.RegisterComponent(&d2components.Dc6{})
-	dccID := t.RegisterComponent(&d2components.Dcc{})
-	paletteID := t.RegisterComponent(&d2components.Palette{})
-	spriteID := t.RegisterComponent(&d2components.Sprite{})
-	textureID := t.RegisterComponent(&d2components.Texture{})
-	originID := t.RegisterComponent(&d2components.Origin{})
-	segmentedSpriteID := t.RegisterComponent(&d2components.SegmentedSprite{})
-
-	t.FilePath = t.GetComponentFactory(filePathID)
-	t.Position = t.GetComponentFactory(positionID)
-	t.Dc6 = t.GetComponentFactory(dc6ID)
-	t.Dcc = t.GetComponentFactory(dccID)
-	t.Palette = t.GetComponentFactory(paletteID)
-	t.Texture = t.GetComponentFactory(textureID)
-	t.Origin = t.GetComponentFactory(originID)
-	t.SpriteFactory.Sprite = t.GetComponentFactory(spriteID)
-	t.SegmentedSpriteFactory.SegmentedSprite = t.GetComponentFactory(segmentedSpriteID)
+	t.InjectComponent(&d2components.FilePath{}, &t.FilePath)
+	t.InjectComponent(&d2components.Position{}, &t.Position)
+	t.InjectComponent(&d2components.Dc6{}, &t.Dc6)
+	t.InjectComponent(&d2components.Dcc{}, &t.Dcc)
+	t.InjectComponent(&d2components.Palette{}, &t.Palette)
+	t.InjectComponent(&d2components.Texture{}, &t.Texture)
+	t.InjectComponent(&d2components.Origin{}, &t.Origin)
+	t.InjectComponent(&d2components.Sprite{}, &t.SpriteFactory.Sprite)
+	t.InjectComponent(&d2components.SegmentedSprite{}, &t.SegmentedSpriteFactory.SegmentedSprite)
 }
 
 func (t *SpriteFactory) setupSubscriptions() {

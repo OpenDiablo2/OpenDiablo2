@@ -15,6 +15,12 @@ const (
 	sceneKeyMainMenu = "Main Menu"
 )
 
+const (
+	viewportMainBackground = iota + 1
+	viewportTrademark
+	viewport
+)
+
 // NewMainMenuScene creates a new main menu scene. This is the first screen that the user
 // will see when launching the game.
 func NewMainMenuScene() *MainMenuScene {
@@ -57,12 +63,22 @@ func (s *MainMenuScene) boot() {
 		return
 	}
 
+	s.setupViewports()
 	s.createBackground()
 	s.createButtons()
 	s.createTrademarkScreen()
 	s.createLogo()
 
 	s.booted = true
+}
+
+func (s *MainMenuScene) setupViewports() {
+	s.Info("setting up viewports")
+
+	imgPath := d2resource.GameSelectScreen
+	palPath := d2resource.PaletteSky
+
+	s.sprites.mainBackground = s.Add.SegmentedSprite(0, 0, imgPath, palPath, 4, 3, 0)
 }
 
 func (s *MainMenuScene) createBackground() {
@@ -113,10 +129,16 @@ func (s *MainMenuScene) createTrademarkScreen() {
 		alpha := s.AddAlpha(s.sprites.trademark)
 
 		go func() {
-			a := 1.0
-			for a > 0 {
-				a -= 0.125
-				alpha.Alpha = a
+			alpha.Alpha = 1.0
+
+			for alpha.Alpha > 0 {
+				alpha.Alpha *= 0.725
+
+				if alpha.Alpha <= 1e-3 {
+					alpha.Alpha = 0
+					return
+				}
+
 				time.Sleep(time.Second / 25)
 			}
 
@@ -187,7 +209,6 @@ func (s *MainMenuScene) initLogoSprites() {
 			continue
 		}
 
-		sprite.SetEffect(d2enum.DrawEffectModulate)
 		sprite.PlayForward()
 	}
 
