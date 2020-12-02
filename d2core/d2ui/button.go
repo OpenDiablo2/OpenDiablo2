@@ -83,11 +83,12 @@ const (
 )
 
 const (
-	tab1BaseFrame = 0
-	tab2BaseFrame = 2
-	tab3BaseFrame = 4
-	tab4BaseFrame = 6
-	tab5BaseFrame = 8
+
+	tab1BaseFrame = iota * 2
+	tab2BaseFrame
+	tab3BaseFrame
+	tab4BaseFrame
+	tab5BaseFrame
 )
 
 const (

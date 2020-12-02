@@ -209,7 +209,7 @@ func NewGameControls(
 	inventoryRecord := asset.Records.Layout.Inventory[inventoryRecordKey]
 
 	heroStatsPanel := NewHeroStatsPanel(asset, ui, hero.Name(), hero.Class, l, hero.Stats)
-	questLog := NewQuestLog(asset, ui, l, 1) // need to be changed
+	questLog := NewQuestLog(asset, ui, l, hero.Act)
 	inventory := NewInventory(asset, ui, l, hero.Gold, inventoryRecord)
 	skilltree := newSkillTree(hero.Skills, hero.Class, asset, l, ui)
 
