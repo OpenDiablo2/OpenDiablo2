@@ -77,11 +77,64 @@ const (
 	questNone = 0
 )
 
+
+func (s *QuestLog) questTable(act, number int) struct {
+	name           string
+	numberOfDescrs int
+	status         int
+	frame          int
+	x              int
+	y              int
+} {
+	var quests = []struct {
+		name           string // name of quest in string table
+		numberOfDescrs int    // number of possible descriptions (not used yet)
+		status         int    // status of quest (not used yet)
+		frame          int    // frame of quest
+		x, y           int    // position of quest
+	}{
+		{"qstsa1q1", 5, 0, 0, q1SocketX, q1SocketY},
+		{"qstsa1q2", 0, 0, 1, q2SocketX, q2SocketY},
+		{"qstsa1q3", 0, 0, 2, q3SocketX, q3SocketY},
+		{"qstsa1q4", 0, 0, 3, q4SocketX, q4SocketY},
+		{"qstsa1q5", 0, 0, 4, q5SocketX, q5SocketY},
+		{"qstsa1q6", 0, 0, 5, q6SocketX, q6SocketY},
+		{"qstsa2q1", 0, 0, 6, q1SocketX, q1SocketY},
+		{"qstsa2q2", 0, 0, 7, q2SocketX, q2SocketY},
+		{"qstsa2q3", 0, 0, 8, q3SocketX, q3SocketY},
+		{"qstsa2q4", 0, 0, 9, q4SocketX, q4SocketY},
+		{"qstsa2q5", 0, 0, 10, q5SocketX, q5SocketY},
+		{"qstsa2q6", 0, 0, 11, q6SocketX, q6SocketY},
+		{"qstsa3q1", 0, 0, 12, q1SocketX, q1SocketY},
+		{"qstsa3q2", 0, 0, 13, q2SocketX, q2SocketY},
+		{"qstsa3q3", 0, 0, 14, q3SocketX, q3SocketY},
+		{"qstsa3q4", 0, 0, 15, q4SocketX, q4SocketY},
+		{"qstsa3q5", 0, 0, 16, q5SocketX, q5SocketY},
+		{"qstsa3q6", 0, 0, 17, q6SocketX, q6SocketY},
+		{"qstsa4q1", 0, 0, 18, q1SocketX, q1SocketY},
+		{"qstsa4q2", 0, 0, 19, q2SocketX, q2SocketY},
+		{"qstsa4q3", 0, 0, 20, q3SocketX, q3SocketY},
+		{"qstsa5q1", 0, 0, 21, q1SocketX, q1SocketY},
+		{"qstsa5q2", 0, 0, 22, q2SocketX, q2SocketY},
+		{"qstsa5q3", 0, 0, 23, q3SocketX, q3SocketY},
+		{"qstsa5q4", 0, 0, 24, q4SocketX, q4SocketY},
+		{"qstsa5q5", 0, 0, 25, q5SocketX, q5SocketY},
+		{"qstsa5q6", 0, 0, 26, q6SocketX, q6SocketY},
+	}
+
+	key := (act-1)*normalActQuestsNumber + number
+	if act > act4 {
+		key -= act4QuestsNumber
+	}
+
+	return quests[key]
+}
+
 // NewQuestLog creates a new quest log
 func NewQuestLog(asset *d2asset.AssetManager,
 	ui *d2ui.UIManager,
-	act int,
-	l d2util.LogLevel) *QuestLog {
+	l d2util.LogLevel,
+	act int) *QuestLog {
 	originX := 0
 	originY := 0
 
@@ -98,7 +151,6 @@ func NewQuestLog(asset *d2asset.AssetManager,
 			{},
 			{},
 		},
-		selectedQuest: 1,
 	}
 
 	ql.Logger = d2util.NewLogger()
@@ -193,56 +245,33 @@ func (s *QuestLog) Load() {
 	s.panelGroup.SetVisible(false)
 }
 
-func (s *QuestLog) questTable(act, number int) struct {
-	name           string
-	numberOfDescrs int
-	status         int
-	frame          int
-	x              int
-	y              int
-} {
-	var quests = []struct {
-		name           string // name of quest in string table
-		numberOfDescrs int    // number of possible descriptions (not used yet)
-		status         int    // status of quest (not used yet)
-		frame          int    // frame of quest
-		x, y           int    // position of quest
-	}{
-		{"qstsa1q1", 5, 0, 0, q1SocketX, q1SocketY},
-		{"qstsa1q2", 0, 0, 1, q2SocketX, q2SocketY},
-		{"qstsa1q3", 0, 0, 2, q3SocketX, q3SocketY},
-		{"qstsa1q4", 0, 0, 3, q4SocketX, q4SocketY},
-		{"qstsa1q5", 0, 0, 4, q5SocketX, q5SocketY},
-		{"qstsa1q6", 0, 0, 5, q6SocketX, q6SocketY},
-		{"qstsa2q1", 0, 0, 6, q1SocketX, q1SocketY},
-		{"qstsa2q2", 0, 0, 7, q2SocketX, q2SocketY},
-		{"qstsa2q3", 0, 0, 8, q3SocketX, q3SocketY},
-		{"qstsa2q4", 0, 0, 9, q4SocketX, q4SocketY},
-		{"qstsa2q5", 0, 0, 10, q5SocketX, q5SocketY},
-		{"qstsa2q6", 0, 0, 11, q6SocketX, q6SocketY},
-		{"qstsa3q1", 0, 0, 12, q1SocketX, q1SocketY},
-		{"qstsa3q2", 0, 0, 13, q2SocketX, q2SocketY},
-		{"qstsa3q3", 0, 0, 14, q3SocketX, q3SocketY},
-		{"qstsa3q4", 0, 0, 15, q4SocketX, q4SocketY},
-		{"qstsa3q5", 0, 0, 16, q5SocketX, q5SocketY},
-		{"qstsa3q6", 0, 0, 17, q6SocketX, q6SocketY},
-		{"qstsa4q1", 0, 0, 18, q1SocketX, q1SocketY},
-		{"qstsa4q2", 0, 0, 19, q2SocketX, q2SocketY},
-		{"qstsa4q3", 0, 0, 20, q3SocketX, q3SocketY},
-		{"qstsa5q1", 0, 0, 21, q1SocketX, q1SocketY},
-		{"qstsa5q2", 0, 0, 22, q2SocketX, q2SocketY},
-		{"qstsa5q3", 0, 0, 23, q3SocketX, q3SocketY},
-		{"qstsa5q4", 0, 0, 24, q4SocketX, q4SocketY},
-		{"qstsa5q5", 0, 0, 25, q5SocketX, q5SocketY},
-		{"qstsa5q6", 0, 0, 26, q6SocketX, q6SocketY},
-	}
+func (s *QuestLog) loadTabs() {
+	s.tab[questLogTab1].newTab(s.uiManager, d2ui.ButtonTypeTab1, questTab1X)
+	s.tab[questLogTab1].invisibleButton.OnActivated(func() { s.setTab(questLogTab1) })
+	s.panelGroup.AddWidget(s.tab[questLogTab1].button)
+	s.panelGroup.AddWidget(s.tab[questLogTab1].invisibleButton)
 
-	key := (act-1)*normalActQuestsNumber + number
-	if act > act4 {
-		key -= act4QuestsNumber
-	}
+	s.tab[questLogTab2].newTab(s.uiManager, d2ui.ButtonTypeTab2, questTab2X)
+	s.tab[questLogTab2].invisibleButton.OnActivated(func() { s.setTab(questLogTab2) })
+	s.panelGroup.AddWidget(s.tab[questLogTab2].button)
+	s.panelGroup.AddWidget(s.tab[questLogTab2].invisibleButton)
 
-	return quests[key]
+	s.tab[questLogTab3].newTab(s.uiManager, d2ui.ButtonTypeTab3, questTab3X)
+	s.tab[questLogTab3].invisibleButton.OnActivated(func() { s.setTab(questLogTab3) })
+	s.panelGroup.AddWidget(s.tab[questLogTab3].button)
+	s.panelGroup.AddWidget(s.tab[questLogTab3].invisibleButton)
+
+	s.tab[questLogTab4].newTab(s.uiManager, d2ui.ButtonTypeTab4, questTab4X)
+	s.tab[questLogTab4].invisibleButton.OnActivated(func() { s.setTab(questLogTab4) })
+	s.panelGroup.AddWidget(s.tab[questLogTab4].button)
+	s.panelGroup.AddWidget(s.tab[questLogTab4].invisibleButton)
+
+	s.tab[questLogTab5].newTab(s.uiManager, d2ui.ButtonTypeTab5, questTab5X)
+	s.tab[questLogTab5].invisibleButton.OnActivated(func() { s.setTab(questLogTab5) })
+	s.panelGroup.AddWidget(s.tab[questLogTab5].button)
+	s.panelGroup.AddWidget(s.tab[questLogTab5].invisibleButton)
+
+	s.setTab(s.act - 1)
 }
 
 func (s *QuestLog) loadQuestIcons() {
@@ -251,12 +280,6 @@ func (s *QuestLog) loadQuestIcons() {
 	s.questsa3 = s.loadQuestIconsForAct(act3)
 	s.questsa4 = s.loadQuestIconsForAct(act4)
 	s.questsa5 = s.loadQuestIconsForAct(act5)
-}
-
-func (s *QuestLog) makeQuestCallback(n int) func() {
-	return func() {
-		s.onQuestClicked(n + 1)
-	}
 }
 
 func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
@@ -304,7 +327,14 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 	return wg
 }
 
-func (s *QuestLog) loadQuestLabels() {
+
+func (s *QuestLog) makeQuestCallback(n int) func() {
+	return func() {
+		s.onQuestClicked(n + 1)
+	}
+}
+
+func (s *QuestLog) setQuestLabels() {
 	if s.selectedQuest == 0 {
 		s.questName.SetText("")
 		return
@@ -313,40 +343,11 @@ func (s *QuestLog) loadQuestLabels() {
 	s.questName.SetText(s.asset.TranslateString(fmt.Sprintf("qstsa%dq%d", s.selectedTab+1, s.selectedQuest)))
 }
 
-func (s *QuestLog) loadTabs() {
-	s.tab[questLogTab1].newTab(s.uiManager, d2ui.ButtonTypeTab1, questTab1X)
-	s.tab[questLogTab1].invisibleButton.OnActivated(func() { s.setTab(questLogTab1) })
-	s.panelGroup.AddWidget(s.tab[questLogTab1].button)
-	s.panelGroup.AddWidget(s.tab[questLogTab1].invisibleButton)
-
-	s.tab[questLogTab2].newTab(s.uiManager, d2ui.ButtonTypeTab2, questTab2X)
-	s.tab[questLogTab2].invisibleButton.OnActivated(func() { s.setTab(questLogTab2) })
-	s.panelGroup.AddWidget(s.tab[questLogTab2].button)
-	s.panelGroup.AddWidget(s.tab[questLogTab2].invisibleButton)
-
-	s.tab[questLogTab3].newTab(s.uiManager, d2ui.ButtonTypeTab3, questTab3X)
-	s.tab[questLogTab3].invisibleButton.OnActivated(func() { s.setTab(questLogTab3) })
-	s.panelGroup.AddWidget(s.tab[questLogTab3].button)
-	s.panelGroup.AddWidget(s.tab[questLogTab3].invisibleButton)
-
-	s.tab[questLogTab4].newTab(s.uiManager, d2ui.ButtonTypeTab4, questTab4X)
-	s.tab[questLogTab4].invisibleButton.OnActivated(func() { s.setTab(questLogTab4) })
-	s.panelGroup.AddWidget(s.tab[questLogTab4].button)
-	s.panelGroup.AddWidget(s.tab[questLogTab4].invisibleButton)
-
-	s.tab[questLogTab5].newTab(s.uiManager, d2ui.ButtonTypeTab5, questTab5X)
-	s.tab[questLogTab5].invisibleButton.OnActivated(func() { s.setTab(questLogTab5) })
-	s.panelGroup.AddWidget(s.tab[questLogTab5].button)
-	s.panelGroup.AddWidget(s.tab[questLogTab5].invisibleButton)
-
-	s.setTab(s.act - 1)
-}
-
 func (s *QuestLog) setTab(tab int) {
 	s.selectedTab = tab
 	s.selectedQuest = questNone
-	s.loadQuestLabels()
-
+	s.setQuestLabels()
+  
 	s.questsa1.SetVisible(tab == questLogTab1)
 	s.questsa2.SetVisible(tab == questLogTab2)
 	s.questsa3.SetVisible(tab == questLogTab3)
@@ -360,7 +361,7 @@ func (s *QuestLog) setTab(tab int) {
 
 func (s *QuestLog) onQuestClicked(number int) {
 	s.selectedQuest = number
-	s.loadQuestLabels()
+	s.setQuestLabels()
 	s.Infof("Quest number %d in tab %d clicked", number, s.selectedTab)
 }
 
