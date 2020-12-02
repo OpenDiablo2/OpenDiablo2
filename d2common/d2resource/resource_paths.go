@@ -110,7 +110,7 @@ const (
 	HealthManaIndicator = "/data/global/ui/PANEL/hlthmana.DC6"
 	AddSkillButton      = "/data/global/ui/PANEL/level.DC6"
 	GoldMoveDialog      = "/data/global/ui/menu/dialogbackground.DC6"
-	WPTabs              = "/data/global/ui/MENU/expwaygatetabs.dc6"
+	WPTabs              = "/data/global/ui/menu/expwaygatetabs.dc6"
 	WPBg                = "/data/global/ui/menu/waygatebackground.dc6"
 	WPIcons             = "/data/global/ui/menu/waygateicons.dc6"
 

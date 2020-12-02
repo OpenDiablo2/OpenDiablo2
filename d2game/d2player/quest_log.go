@@ -77,7 +77,6 @@ const (
 	questNone = 0
 )
 
-
 func (s *QuestLog) questTable(act, number int) struct {
 	name           string
 	numberOfDescrs int
@@ -327,7 +326,6 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 	return wg
 }
 
-
 func (s *QuestLog) makeQuestCallback(n int) func() {
 	return func() {
 		s.onQuestClicked(n + 1)
@@ -347,7 +345,7 @@ func (s *QuestLog) setTab(tab int) {
 	s.selectedTab = tab
 	s.selectedQuest = questNone
 	s.setQuestLabels()
-  
+
 	s.questsa1.SetVisible(tab == questLogTab1)
 	s.questsa2.SetVisible(tab == questLogTab2)
 	s.questsa3.SetVisible(tab == questLogTab3)
