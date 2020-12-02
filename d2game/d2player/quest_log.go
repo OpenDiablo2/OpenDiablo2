@@ -51,7 +51,8 @@ const (
 const (
 	questLogCloseButtonX, questLogCloseButtonY = 358, 455
 	questLogDescrButtonX, questLogDescrButtonY = 308, 457
-	questLabelX, questLabelY                   = 240, 297
+	questNameLabelX, questNameLabelY           = 240, 297
+	questDescrLabelX, questDescrLabelY         = 90, 317
 )
 
 // toset
@@ -171,12 +172,13 @@ type QuestLog struct {
 	act           int
 	tab           [questLogNumTabs]*questLogTab
 
-	questName *d2ui.Label
-	questsa1  *d2ui.WidgetGroup
-	questsa2  *d2ui.WidgetGroup
-	questsa3  *d2ui.WidgetGroup
-	questsa4  *d2ui.WidgetGroup
-	questsa5  *d2ui.WidgetGroup
+	questName  *d2ui.Label
+	questDescr *d2ui.Label
+	questsa1   *d2ui.WidgetGroup
+	questsa2   *d2ui.WidgetGroup
+	questsa3   *d2ui.WidgetGroup
+	questsa4   *d2ui.WidgetGroup
+	questsa5   *d2ui.WidgetGroup
 
 	originX int
 	originY int
@@ -235,8 +237,15 @@ func (s *QuestLog) Load() {
 	s.questName = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
 	s.questName.Alignment = d2ui.HorizontalAlignCenter
 	s.questName.Color[0] = rgbaColor(white)
-	s.questName.SetPosition(questLabelX, questLabelY)
+	s.questName.SetPosition(questNameLabelX, questNameLabelY)
 	s.panelGroup.AddWidget(s.questName)
+
+	//s.questDescr = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
+	s.questDescr = s.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
+	s.questDescr.Alignment = d2ui.HorizontalAlignLeft
+	s.questDescr.Color[0] = rgbaColor(white)
+	s.questDescr.SetPosition(questDescrLabelX, questDescrLabelY)
+	s.panelGroup.AddWidget(s.questDescr)
 
 	s.loadTabs()
 	s.loadQuestIcons()
@@ -332,19 +341,22 @@ func (s *QuestLog) makeQuestCallback(n int) func() {
 	}
 }
 
-func (s *QuestLog) setQuestLabels() {
+func (s *QuestLog) setQuestLabel(status int) {
 	if s.selectedQuest == 0 {
 		s.questName.SetText("")
+		s.questDescr.SetText("")
 		return
 	}
 
 	s.questName.SetText(s.asset.TranslateString(fmt.Sprintf("qstsa%dq%d", s.selectedTab+1, s.selectedQuest)))
+	//s.questDescr.SetText(s.asset.TranslateString(fmt.Sprintf("qstsa%dq%d", s.selectedTab+1, s.selectedQuest)))
+	s.questDescr.SetText("sample quest description")
 }
 
 func (s *QuestLog) setTab(tab int) {
 	s.selectedTab = tab
 	s.selectedQuest = questNone
-	s.setQuestLabels()
+	s.setQuestLabel(0)
 
 	s.questsa1.SetVisible(tab == questLogTab1)
 	s.questsa2.SetVisible(tab == questLogTab2)
@@ -359,7 +371,7 @@ func (s *QuestLog) setTab(tab int) {
 
 func (s *QuestLog) onQuestClicked(number int) {
 	s.selectedQuest = number
-	s.setQuestLabels()
+	s.setQuestLabel(0)
 	s.Infof("Quest number %d in tab %d clicked", number, s.selectedTab)
 }
 
