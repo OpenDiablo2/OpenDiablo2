@@ -87,49 +87,20 @@ const (
 	questNone = 0
 )
 
-func (s *QuestLog) questTable(act, number int) struct {
-	numberOfDescrs int
-	status         int
-	x              int
-	y              int
-} {
-	var quests = []struct {
-		numberOfDescrs int // number of possible descriptions (not used yet)
-		status         int // status of quest (not used yet)
-		x, y           int // position of quest
+func (s *QuestLog) getPositionForSocket(number int) (x, y int) {
+	pos := []struct {
+		x int
+		y int
 	}{
-		{5, 0, q1SocketX, q1SocketY},
-		{0, 0, q2SocketX, q2SocketY},
-		{0, 0, q3SocketX, q3SocketY},
-		{0, 0, q4SocketX, q4SocketY},
-		{0, 0, q5SocketX, q5SocketY},
-		{0, 0, q6SocketX, q6SocketY},
-		{0, 0, q1SocketX, q1SocketY},
-		{0, 0, q2SocketX, q2SocketY},
-		{0, 0, q3SocketX, q3SocketY},
-		{0, 0, q4SocketX, q4SocketY},
-		{0, 0, q5SocketX, q5SocketY},
-		{0, 0, q6SocketX, q6SocketY},
-		{0, 0, q1SocketX, q1SocketY},
-		{0, 0, q2SocketX, q2SocketY},
-		{0, 0, q3SocketX, q3SocketY},
-		{0, 0, q4SocketX, q4SocketY},
-		{0, 0, q5SocketX, q5SocketY},
-		{0, 0, q6SocketX, q6SocketY},
-		{0, 0, q1SocketX, q1SocketY},
-		{0, 0, q2SocketX, q2SocketY},
-		{0, 0, q3SocketX, q3SocketY},
-		{0, 0, q1SocketX, q1SocketY},
-		{0, 0, q2SocketX, q2SocketY},
-		{0, 0, q3SocketX, q3SocketY},
-		{0, 0, q4SocketX, q4SocketY},
-		{0, 0, q5SocketX, q5SocketY},
-		{0, 0, q6SocketX, q6SocketY},
+		{q1SocketX, q1SocketY},
+		{q2SocketX, q2SocketY},
+		{q3SocketX, q3SocketY},
+		{q4SocketX, q4SocketY},
+		{q5SocketX, q5SocketY},
+		{q6SocketX, q6SocketY},
 	}
 
-	key := s.cordsToQuestID(act, number)
-
-	return quests[key]
+	return pos[number].x, pos[number].y
 }
 
 // NewQuestLog creates a new quest log
@@ -370,43 +341,49 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 	var icon *d2ui.Sprite
 
 	for n := 0; n < questsInAct; n++ {
-		q := s.questTable(act, n)
+		x, y := s.getPositionForSocket(n)
 
 		socket, err := s.uiManager.NewSprite(d2resource.QuestLogSocket, d2resource.PaletteSky)
 		if err != nil {
 			s.Error(err.Error())
 		}
 
-		socket.SetPosition(q.x+questOffsetX, q.y+iconOffsetY+2*questOffsetY)
+		socket.SetPosition(x+questOffsetX, y+iconOffsetY+2*questOffsetY)
 		sockets = append(sockets, socket)
 
 		button := s.uiManager.NewButton(d2ui.ButtonTypeBlankQuestBtn, "")
-		button.SetPosition(q.x+questOffsetX, q.y+questOffsetY)
+		button.SetPosition(x+questOffsetX, y+questOffsetY)
 		buttons = append(buttons, button)
 
 		icon, err = s.uiManager.NewSprite(s.questIconsTable(act, n), d2resource.PaletteSky)
 		if err != nil {
 			s.Error(err.Error())
 		}
+
 		switch s.questStatus[s.cordsToQuestID(act, n)] {
-		case questStatusCompleted, questStatusCompleting:
+		case questStatusCompleted:
 			err = icon.SetCurrentFrame(completedFrame)
+		case questStatusCompleting:
+			// that's not complet now
+			err = icon.SetCurrentFrame(0)
 			if err != nil {
 				s.Error(err.Error())
 			}
+
+			icon.PlayForward()
+			err = icon.SetCurrentFrame(completedFrame)
+			s.questStatus[s.cordsToQuestID(act, n)] = questStatusCompleted
 		case questStatusNotStarted:
 			err = icon.SetCurrentFrame(notStartedFrame)
-			if err != nil {
-				s.Error(err.Error())
-			}
 		default:
 			err = icon.SetCurrentFrame(inProgresFrame)
-			if err != nil {
-				s.Error(err.Error())
-			}
 		}
 
-		icon.SetPosition(q.x+questOffsetX, q.y+questOffsetY+iconOffsetY)
+		if err != nil {
+			s.Error(err.Error())
+		}
+
+		icon.SetPosition(x+questOffsetX, y+questOffsetY+iconOffsetY)
 		wg.AddWidget(icon)
 	}
 
