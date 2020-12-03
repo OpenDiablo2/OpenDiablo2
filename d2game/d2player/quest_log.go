@@ -33,7 +33,8 @@ const (
 	questStatusCompleted  = iota - 2 // quest completed
 	questStatusCompleting            // quest completed (need to play animation)
 	questStatusNotStarted            // quest not started yet
-	questStatusInProgress            // quest is in progress
+	// nolint:deadcode,varcheck // if will not be used, just remove
+	questStatusInProgress // quest is in progress
 )
 
 const (
@@ -87,47 +88,43 @@ const (
 )
 
 func (s *QuestLog) questTable(act, number int) struct {
-	name           string
 	numberOfDescrs int
 	status         int
-	frame          int
 	x              int
 	y              int
 } {
 	var quests = []struct {
-		name           string // name of quest in string table
-		numberOfDescrs int    // number of possible descriptions (not used yet)
-		status         int    // status of quest (not used yet)
-		frame          int    // frame of quest
-		x, y           int    // position of quest
+		numberOfDescrs int // number of possible descriptions (not used yet)
+		status         int // status of quest (not used yet)
+		x, y           int // position of quest
 	}{
-		{"qstsa1q1", 5, 0, 0, q1SocketX, q1SocketY},
-		{"qstsa1q2", 0, 0, 1, q2SocketX, q2SocketY},
-		{"qstsa1q3", 0, 0, 2, q3SocketX, q3SocketY},
-		{"qstsa1q4", 0, 0, 3, q4SocketX, q4SocketY},
-		{"qstsa1q5", 0, 0, 4, q5SocketX, q5SocketY},
-		{"qstsa1q6", 0, 0, 5, q6SocketX, q6SocketY},
-		{"qstsa2q1", 0, 0, 6, q1SocketX, q1SocketY},
-		{"qstsa2q2", 0, 0, 7, q2SocketX, q2SocketY},
-		{"qstsa2q3", 0, 0, 8, q3SocketX, q3SocketY},
-		{"qstsa2q4", 0, 0, 9, q4SocketX, q4SocketY},
-		{"qstsa2q5", 0, 0, 10, q5SocketX, q5SocketY},
-		{"qstsa2q6", 0, 0, 11, q6SocketX, q6SocketY},
-		{"qstsa3q1", 0, 0, 12, q1SocketX, q1SocketY},
-		{"qstsa3q2", 0, 0, 13, q2SocketX, q2SocketY},
-		{"qstsa3q3", 0, 0, 14, q3SocketX, q3SocketY},
-		{"qstsa3q4", 0, 0, 15, q4SocketX, q4SocketY},
-		{"qstsa3q5", 0, 0, 16, q5SocketX, q5SocketY},
-		{"qstsa3q6", 0, 0, 17, q6SocketX, q6SocketY},
-		{"qstsa4q1", 0, 0, 18, q1SocketX, q1SocketY},
-		{"qstsa4q2", 0, 0, 19, q2SocketX, q2SocketY},
-		{"qstsa4q3", 0, 0, 20, q3SocketX, q3SocketY},
-		{"qstsa5q1", 0, 0, 21, q1SocketX, q1SocketY},
-		{"qstsa5q2", 0, 0, 22, q2SocketX, q2SocketY},
-		{"qstsa5q3", 0, 0, 23, q3SocketX, q3SocketY},
-		{"qstsa5q4", 0, 0, 24, q4SocketX, q4SocketY},
-		{"qstsa5q5", 0, 0, 25, q5SocketX, q5SocketY},
-		{"qstsa5q6", 0, 0, 26, q6SocketX, q6SocketY},
+		{5, 0, q1SocketX, q1SocketY},
+		{0, 0, q2SocketX, q2SocketY},
+		{0, 0, q3SocketX, q3SocketY},
+		{0, 0, q4SocketX, q4SocketY},
+		{0, 0, q5SocketX, q5SocketY},
+		{0, 0, q6SocketX, q6SocketY},
+		{0, 0, q1SocketX, q1SocketY},
+		{0, 0, q2SocketX, q2SocketY},
+		{0, 0, q3SocketX, q3SocketY},
+		{0, 0, q4SocketX, q4SocketY},
+		{0, 0, q5SocketX, q5SocketY},
+		{0, 0, q6SocketX, q6SocketY},
+		{0, 0, q1SocketX, q1SocketY},
+		{0, 0, q2SocketX, q2SocketY},
+		{0, 0, q3SocketX, q3SocketY},
+		{0, 0, q4SocketX, q4SocketY},
+		{0, 0, q5SocketX, q5SocketY},
+		{0, 0, q6SocketX, q6SocketY},
+		{0, 0, q1SocketX, q1SocketY},
+		{0, 0, q2SocketX, q2SocketY},
+		{0, 0, q3SocketX, q3SocketY},
+		{0, 0, q1SocketX, q1SocketY},
+		{0, 0, q2SocketX, q2SocketY},
+		{0, 0, q3SocketX, q3SocketY},
+		{0, 0, q4SocketX, q4SocketY},
+		{0, 0, q5SocketX, q5SocketY},
+		{0, 0, q6SocketX, q6SocketY},
 	}
 
 	key := s.cordsToQuestID(act, number)
@@ -143,6 +140,7 @@ func NewQuestLog(asset *d2asset.AssetManager,
 	originX := 0
 	originY := 0
 
+	//nolint:gomnd // this is only test
 	qs := map[int]int{
 		0:  -2,
 		1:  -2,
@@ -246,9 +244,9 @@ func (s *QuestLog) questIconsTable(act, number int) string {
 }
 
 const (
-	questFrames     = 27
+	completedFrame  = 24
+	inProgresFrame  = 25
 	notStartedFrame = 26
-	inProgresFrame  = 27
 )
 
 const questDescriptionLenght = 30
@@ -386,41 +384,30 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 		button.SetPosition(q.x+questOffsetX, q.y+questOffsetY)
 		buttons = append(buttons, button)
 
+		icon, err = s.uiManager.NewSprite(s.questIconsTable(act, n), d2resource.PaletteSky)
+		if err != nil {
+			s.Error(err.Error())
+		}
 		switch s.questStatus[s.cordsToQuestID(act, n)] {
-		case questStatusCompleted:
-			icon, err = s.uiManager.NewSprite(d2resource.QuestLogDone, d2resource.PaletteSky)
-			if err != nil {
-				s.Error(err.Error())
-			}
-
-			err = icon.SetCurrentFrame(q.frame)
+		case questStatusCompleted, questStatusCompleting:
+			err = icon.SetCurrentFrame(completedFrame)
 			if err != nil {
 				s.Error(err.Error())
 			}
 		case questStatusNotStarted:
-			icon, err = s.uiManager.NewSprite(s.questIconsTable(act, n), d2resource.PaletteSky)
-			if err != nil {
-				s.Error(err.Error())
-			}
-
 			err = icon.SetCurrentFrame(notStartedFrame)
 			if err != nil {
 				s.Error(err.Error())
 			}
 		default:
-			icon, err = s.uiManager.NewSprite(s.questIconsTable(act, n), d2resource.PaletteSky)
-			if err != nil {
-				s.Error(err.Error())
-			}
-
 			err = icon.SetCurrentFrame(inProgresFrame)
 			if err != nil {
 				s.Error(err.Error())
 			}
 		}
+
 		icon.SetPosition(q.x+questOffsetX, q.y+questOffsetY+iconOffsetY)
 		wg.AddWidget(icon)
-
 	}
 
 	for i := 0; i < questsInAct; i++ {
@@ -473,7 +460,7 @@ func (s *QuestLog) setQuestLabel() {
 			strings.Join(
 				d2util.SplitIntoLinesWithMaxWidth(
 					s.asset.TranslateString("qstsprevious"),
-					30),
+					questDescriptionLenght),
 				"\n"),
 		)
 	case questStatusNotStarted:
@@ -484,7 +471,7 @@ func (s *QuestLog) setQuestLabel() {
 				s.asset.TranslateString(
 					fmt.Sprintf("qstsa%dq%d%d", s.selectedTab+1, s.selectedQuest, status),
 				),
-				30),
+				questDescriptionLenght),
 			"\n"),
 		)
 	}
@@ -634,6 +621,7 @@ func (s *QuestLog) cordsToQuestID(act, number int) int {
 	return key
 }
 
+//nolint:deadcode,unused // I think, it will be used, if not, we can just remove it
 func (s *QuestLog) questIDToCords(id int) (act, number int) {
 	act = act1
 
