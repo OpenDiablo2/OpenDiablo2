@@ -3,6 +3,7 @@ package d2player
 import (
 	"fmt"
 	"image/color"
+	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
@@ -143,8 +144,33 @@ func NewQuestLog(asset *d2asset.AssetManager,
 	originY := 0
 
 	qs := map[int]int{
-		1: 1,
-		2: 0,
+		0:  -2,
+		1:  -2,
+		2:  -1,
+		3:  0,
+		4:  1,
+		5:  2,
+		6:  3,
+		7:  0,
+		8:  0,
+		9:  0,
+		10: 0,
+		11: 0,
+		12: 0,
+		13: 0,
+		14: 0,
+		15: 0,
+		16: 0,
+		17: 0,
+		18: 0,
+		19: 0,
+		20: 0,
+		21: 0,
+		22: 0,
+		23: 0,
+		24: 0,
+		25: 0,
+		26: 0,
 	}
 
 	ql := &QuestLog{
@@ -211,6 +237,22 @@ type QuestLog struct {
 	*d2util.Logger
 }
 
+/* questIconTab returns path to quest animation using its
+act and number. From d2resource:
+        QuestLogAQuestAnimation = "/data/global/ui/MENU/a%dq%d.dc6"
+*/
+func (s *QuestLog) questIconsTable(act, number int) string {
+	return fmt.Sprintf(d2resource.QuestLogAQuestAnimation, act, number+1)
+}
+
+const (
+	questFrames     = 27
+	notStartedFrame = 26
+	inProgresFrame  = 27
+)
+
+const questDescriptionLenght = 30
+
 type questLogTab struct {
 	button          *d2ui.Button
 	invisibleButton *d2ui.Button
@@ -264,7 +306,7 @@ func (s *QuestLog) Load() {
 	s.questName.SetPosition(questNameLabelX, questNameLabelY)
 	s.panelGroup.AddWidget(s.questName)
 
-	s.questDescr = s.uiManager.NewLabel(d2resource.FontFormal12, d2resource.PaletteStatic)
+	s.questDescr = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
 	s.questDescr.Alignment = d2ui.HorizontalAlignLeft
 	s.questDescr.Color[0] = rgbaColor(white)
 	s.questDescr.SetPosition(questDescrLabelX, questDescrLabelY)
@@ -327,6 +369,8 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 
 	var buttons []*d2ui.Button
 
+	var icon *d2ui.Sprite
+
 	for n := 0; n < questsInAct; n++ {
 		q := s.questTable(act, n)
 
@@ -342,19 +386,41 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 		button.SetPosition(q.x+questOffsetX, q.y+questOffsetY)
 		buttons = append(buttons, button)
 
-		icon, err := s.uiManager.NewSprite(d2resource.QuestLogDone, d2resource.PaletteSky)
-		if err != nil {
-			s.Error(err.Error())
-		}
+		switch s.questStatus[s.cordsToQuestID(act, n)] {
+		case questStatusCompleted:
+			icon, err = s.uiManager.NewSprite(d2resource.QuestLogDone, d2resource.PaletteSky)
+			if err != nil {
+				s.Error(err.Error())
+			}
 
-		err = icon.SetCurrentFrame(q.frame)
-		if err != nil {
-			s.Error(err.Error())
-		}
+			err = icon.SetCurrentFrame(q.frame)
+			if err != nil {
+				s.Error(err.Error())
+			}
+		case questStatusNotStarted:
+			icon, err = s.uiManager.NewSprite(s.questIconsTable(act, n), d2resource.PaletteSky)
+			if err != nil {
+				s.Error(err.Error())
+			}
 
+			err = icon.SetCurrentFrame(notStartedFrame)
+			if err != nil {
+				s.Error(err.Error())
+			}
+		default:
+			icon, err = s.uiManager.NewSprite(s.questIconsTable(act, n), d2resource.PaletteSky)
+			if err != nil {
+				s.Error(err.Error())
+			}
+
+			err = icon.SetCurrentFrame(inProgresFrame)
+			if err != nil {
+				s.Error(err.Error())
+			}
+		}
 		icon.SetPosition(q.x+questOffsetX, q.y+questOffsetY+iconOffsetY)
-
 		wg.AddWidget(icon)
+
 	}
 
 	for i := 0; i < questsInAct; i++ {
@@ -390,7 +456,7 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 	return wg
 }
 
-func (s *QuestLog) setQuestLabel(status int) {
+func (s *QuestLog) setQuestLabel() {
 	if s.selectedQuest == 0 {
 		s.questName.SetText("")
 		s.questDescr.SetText("")
@@ -400,20 +466,34 @@ func (s *QuestLog) setQuestLabel(status int) {
 
 	s.questName.SetText(s.asset.TranslateString(fmt.Sprintf("qstsa%dq%d", s.selectedTab+1, s.selectedQuest)))
 
+	status := s.questStatus[s.cordsToQuestID(s.selectedTab+1, s.selectedQuest)]
 	switch status {
-	case -1:
-		s.questDescr.SetText(s.asset.TranslateString("qstsprevious"))
-	case 0:
+	case questStatusCompleted, questStatusCompleting:
+		s.questDescr.SetText(
+			strings.Join(
+				d2util.SplitIntoLinesWithMaxWidth(
+					s.asset.TranslateString("qstsprevious"),
+					30),
+				"\n"),
+		)
+	case questStatusNotStarted:
 		s.questDescr.SetText("")
 	default:
-		s.questDescr.SetText(s.asset.TranslateString(fmt.Sprintf("qstsa%dq%d%d", s.selectedTab+1, s.selectedQuest, status)))
+		s.questDescr.SetText(strings.Join(
+			d2util.SplitIntoLinesWithMaxWidth(
+				s.asset.TranslateString(
+					fmt.Sprintf("qstsa%dq%d%d", s.selectedTab+1, s.selectedQuest, status),
+				),
+				30),
+			"\n"),
+		)
 	}
 }
 
 func (s *QuestLog) setTab(tab int) {
 	s.selectedTab = tab
 	s.selectedQuest = questNone
-	s.setQuestLabel(0)
+	s.setQuestLabel()
 
 	s.questsa1.SetVisible(tab == questLogTab1)
 	s.questsa2.SetVisible(tab == questLogTab2)
@@ -428,7 +508,7 @@ func (s *QuestLog) setTab(tab int) {
 
 func (s *QuestLog) onQuestClicked(number int) {
 	s.selectedQuest = number
-	s.setQuestLabel(1)
+	s.setQuestLabel()
 	s.Infof("Quest number %d in tab %d clicked", number, s.selectedTab)
 }
 
