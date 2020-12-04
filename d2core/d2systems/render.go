@@ -173,13 +173,13 @@ func (m *RenderSystem) render(screen d2interface.Surface) error {
 			return errors.New("main viewport not found")
 		}
 
-		renderable, found := m.GetTexture(id)
+		texture, found := m.GetTexture(id)
 		if !found {
 			return errors.New("main viewport doesn't have a surface")
 		}
 
-		if renderable.Texture == nil {
-			renderable.Texture = m.renderer.NewSurface(vp.Width, vp.Height)
+		if texture.Texture == nil {
+			texture.Texture = m.renderer.NewSurface(vp.Width, vp.Height)
 		}
 
 		alpha, found := m.GetAlpha(id)
@@ -192,7 +192,7 @@ func (m *RenderSystem) render(screen d2interface.Surface) error {
 		screen.PushColor(color.Alpha{A: uint8(alpha.Alpha * maxAlpha)})
 		screen.PushTranslation(vp.Left, vp.Top)
 
-		screen.Render(renderable.Texture)
+		screen.Render(texture.Texture)
 
 		screen.Pop()
 		screen.Pop()

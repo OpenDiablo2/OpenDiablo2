@@ -2,15 +2,25 @@ package d2systems
 
 import (
 	"image/color"
+	"time"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2input"
+
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2term"
 
 	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
-	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 )
 
 const (
 	sceneKeyTerminal = "Terminal"
+)
+
+const (
+	viewportTerminal = iota + 1
 )
 
 // static check that TerminalScene implements the scene interface
@@ -23,59 +33,40 @@ func NewTerminalScene() *TerminalScene {
 		BaseScene: NewBaseScene(sceneKeyTerminal),
 	}
 
+	scene.backgroundColor = color.Transparent
+
 	return scene
 }
 
-// TerminalScene represents the game's loading screen, where loading progress is displayed
+// TerminalScene represents the in-game terminal for typing commands
 type TerminalScene struct {
 	*BaseScene
-	booted bool
+	d2interface.Terminal
+	d2interface.InputManager
+	commandsToRegister *akara.Subscription
+	booted             bool
 }
 
-// Init the loading scene
+// Init the terminal
 func (s *TerminalScene) Init(world *akara.World) {
 	s.World = world
 
 	s.Info("initializing ...")
 
-	s.backgroundColor = color.Black
-
-	s.setupFactories()
 	s.setupSubscriptions()
-}
-
-func (s *TerminalScene) setupFactories() {
-	texture := s.RegisterComponent(&d2components.Texture{})
-	s.Texture = s.GetComponentFactory(texture)
 }
 
 func (s *TerminalScene) setupSubscriptions() {
 	s.Info("setting up component subscriptions")
 
-	//stage1 := s.NewComponentFilter().
-	//	Require(
-	//		&d2components.FilePath{},
-	//	).
-	//	Forbid( // but we forbid files that are already loaded
-	//		&d2components.FileType{},
-	//		&d2components.FileHandle{},
-	//		&d2components.FileSource{},
-	//		&d2components.GameConfig{},
-	//		&d2components.StringTable{},
-	//		&d2components.DataDictionary{},
-	//		&d2components.Palette{},
-	//		&d2components.PaletteTransform{},
-	//		&d2components.Cof{},
-	//		&d2components.Dc6{},
-	//		&d2components.Dcc{},
-	//		&d2components.Ds1{},
-	//		&d2components.Dt1{},
-	//		&d2components.Wav{},
-	//		&d2components.AnimationData{},
-	//	).
-	//	Build()
+	commandsToRegister := s.NewComponentFilter().
+		Require(
+			&d2components.CommandRegistration{},
+			&d2components.Dirty{},
+		).
+		Build()
 
-	//s.loadStages.stage1 = s.World.AddSubscription(stage1)
+	s.commandsToRegister = s.World.AddSubscription(commandsToRegister)
 }
 
 func (s *TerminalScene) boot() {
@@ -84,15 +75,15 @@ func (s *TerminalScene) boot() {
 		return
 	}
 
-	//s.createTerminalScene()
+	s.createTerminal()
 
 	s.booted = true
 }
 
-// Update the loading scene
+// Update and render the terminal to the terminal viewport
 func (s *TerminalScene) Update() {
 	for _, id := range s.Viewports {
-		s.AddPriority(id).Priority = scenePriorityLoading
+		s.AddPriority(id).Priority = scenePriorityTerminal
 	}
 
 	if s.Paused() {
@@ -103,5 +94,72 @@ func (s *TerminalScene) Update() {
 		s.boot()
 	}
 
+	if !s.booted {
+		return
+	}
+
+	s.processCommandRegistrations()
+	s.updateTerminal()
+
 	s.BaseScene.Update()
+}
+
+func (s *TerminalScene) processCommandRegistrations() {
+	for _, eid := range s.commandsToRegister.GetEntities() {
+		s.processCommand(eid)
+	}
+}
+
+func (s *TerminalScene) processCommand(eid akara.EID) {
+	reg, found := s.GetCommandRegistration(eid)
+	if !found {
+		return
+	}
+
+	s.Infof("Registering command `%s` - %s", reg.Name, reg.Description)
+
+	err := s.Terminal.BindAction(reg.Name, reg.Description, reg.Callback)
+	if err != nil {
+		s.Error(err.Error())
+	}
+
+	s.Dirty.Remove(eid)
+}
+
+func (s *TerminalScene) createTerminal() {
+	inputManager := d2input.NewInputManager()
+
+	term, err := d2term.New(inputManager)
+	if err != nil {
+		panic(err)
+	}
+
+	s.InputManager = inputManager
+	s.Terminal = term
+
+	termVP := s.Add.Viewport(viewportTerminal, 800, 600)
+
+	texture, _ := s.GetTexture(termVP)
+	texture.Texture.Clear(color.Transparent)
+
+	alpha := s.AddAlpha(termVP)
+	alpha.Alpha = 0.5
+
+	vpFilter := s.AddViewportFilter(termVP)
+
+	vpFilter.Set(viewportTerminal, true)
+}
+
+func (s *TerminalScene) updateTerminal() {
+	// this is a hack to use the old-style input manager and terminal
+	// stuff inside of this ECS implementation
+	_ = s.InputManager.Advance(s.TimeDelta.Seconds(), float64(time.Now().Second()))
+	_ = s.Terminal.Advance(s.TimeDelta.Seconds())
+
+	termVP := s.Viewports[viewportTerminal]
+
+	texture, _ := s.GetTexture(termVP)
+	texture.Texture.Clear(color.Transparent)
+
+	_ = s.Terminal.Render(texture.Texture)
 }

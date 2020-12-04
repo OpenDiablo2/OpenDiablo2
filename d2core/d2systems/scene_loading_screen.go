@@ -196,7 +196,6 @@ func (s *LoadingScene) updateLoadProgress() {
 	loaded := float64(len(s.loadStages.stage4.GetEntities()))
 
 	s.progress = 1 - ((untyped + unhandled + unparsed) / 3 / loaded)
-	_ = s.progress
 }
 
 func (s *LoadingScene) updateViewportAlpha() {

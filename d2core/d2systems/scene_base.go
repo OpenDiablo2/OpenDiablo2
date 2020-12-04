@@ -3,6 +3,7 @@ package d2systems
 import (
 	"fmt"
 	"image/color"
+	"sort"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2geom/rectangle"
 
@@ -24,7 +25,7 @@ const (
 func NewBaseScene(key string) *BaseScene {
 	base := &BaseScene{
 		Graph:           d2scene.NewNode(),
-		BaseSystem:      &akara.BaseSystem{},
+		BaseSystem:      akara.NewBaseSystem(),
 		Logger:          d2util.NewLogger(),
 		key:             key,
 		Viewports:       make([]akara.EID, 0),
@@ -82,6 +83,8 @@ type BaseScene struct {
 	d2components.DrawEffectFactory
 	d2components.RectangleFactory
 	d2components.ColorFactory
+	d2components.CommandRegistrationFactory
+	d2components.DirtyFactory
 }
 
 // Booted returns whether or not the scene has booted
@@ -154,6 +157,7 @@ func (s *BaseScene) boot() {
 	s.setupFactories()
 
 	s.baseSystems.SpriteFactory.RenderSystem = s.baseSystems.RenderSystem
+	s.baseSystems.ShapeSystem.RenderSystem = s.baseSystems.RenderSystem
 
 	const (
 		defaultWidth  = 800
@@ -185,6 +189,8 @@ func (s *BaseScene) setupFactories() {
 	s.InjectComponent(&d2components.Sprite{}, &s.SpriteFactory.Sprite)
 	s.InjectComponent(&d2components.Rectangle{}, &s.RectangleFactory.Rectangle)
 	s.InjectComponent(&d2components.Color{}, &s.Color)
+	s.InjectComponent(&d2components.CommandRegistration{}, &s.CommandRegistration)
+	s.InjectComponent(&d2components.Dirty{}, &s.Dirty)
 }
 
 // Key returns the scene's key
@@ -228,6 +234,10 @@ func (s *BaseScene) renderViewports() {
 
 	for idx := numViewports - 1; idx >= 0; idx-- {
 		s.renderViewport(idx, viewportObjects[idx])
+	}
+
+	if len(s.Viewports) > 1 {
+		s.renderViewportsToMainViewport()
 	}
 }
 
@@ -349,7 +359,7 @@ func (s *BaseScene) renderObject(target d2interface.Surface, id akara.EID) {
 	target.PushTranslation(int(x), int(y))
 	defer target.Pop()
 
-	target.PushScale(scale.X(), scale.Y())
+	target.PushScale(scale.Clone().ApplyMatrix4(node.Local).XY())
 	defer target.Pop()
 
 	const maxAlpha = 255
@@ -397,4 +407,47 @@ func (s *BaseScene) renderSegmentedSprite(target d2interface.Surface, id akara.E
 
 		offsetY += maxFrameHeight - 1
 	}
+}
+
+func (s *BaseScene) renderViewportsToMainViewport() {
+	mainID := s.Viewports[mainViewport]
+	otherIDs := s.Viewports[mainViewport+1:]
+
+	sort.Slice(otherIDs, func(i, j int) bool {
+		p1, found := s.GetPriority(otherIDs[i])
+		if !found {
+			return false
+		}
+
+		p2, found := s.GetPriority(otherIDs[j])
+		if !found {
+			return false
+		}
+
+		return p1.Priority > p2.Priority
+	})
+
+	main, found := s.GetTexture(mainID)
+	if !found {
+		return
+	}
+
+	for _, id := range otherIDs {
+		other, found := s.GetTexture(id)
+		if !found {
+			continue
+		}
+
+		main.Texture.Render(other.Texture)
+	}
+}
+
+func (s *BaseScene) RegisterTerminalCommand(name, desc string, fn interface{}) {
+	regID := s.NewEntity()
+	reg := s.AddCommandRegistration(regID)
+	s.AddDirty(regID)
+
+	reg.Name = name
+	reg.Description = desc
+	reg.Callback = fn
 }

@@ -4,4 +4,6 @@ const (
 	scenePriorityMainMenu = iota
 	scenePriorityLoading
 	scenePriorityMouseCursor
+	scenePriorityTerminal
+	scenePriorityEbitenSplash
 )

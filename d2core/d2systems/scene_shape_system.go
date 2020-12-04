@@ -90,7 +90,7 @@ func (t *ShapeSystem) Update() {
 
 // Sprite queues a sprite spriteation to be loaded
 func (t *ShapeSystem) Rectangle(x, y, width, height int, color color.Color) akara.EID {
-	t.Info("creating rectangle")
+	t.Debug("creating rectangle")
 
 	eid := t.NewEntity()
 	r := t.AddRectangle(eid)
