@@ -54,15 +54,6 @@ const (
 	questTab5X = 317
 )
 
-const (
-	questLogTab1 = iota
-	questLogTab2
-	questLogTab3
-	questLogTab4
-	questLogTab5
-	questLogNumTabs
-)
-
 func (s *QuestLog) getPositionForSocket(number int) (x, y int) {
 	pos := []struct {
 		x int
@@ -129,7 +120,7 @@ func NewQuestLog(asset *d2asset.AssetManager,
 		originX:   originX,
 		originY:   originY,
 		act:       act,
-		tab: [questLogNumTabs]*questLogTab{
+		tab: [d2enum.ActsNumber]*questLogTab{
 			{},
 			{},
 			{},
@@ -157,11 +148,11 @@ type QuestLog struct {
 	selectedTab   int
 	selectedQuest int
 	act           int
-	tab           [questLogNumTabs]*questLogTab
+	tab           [d2enum.ActsNumber]*questLogTab
 
 	questName   *d2ui.Label
 	questDescr  *d2ui.Label
-	quests      [5]*d2ui.WidgetGroup
+	quests      [d2enum.ActsNumber]*d2ui.WidgetGroup
 	questStatus map[int]int
 
 	originX int
@@ -243,7 +234,7 @@ func (s *QuestLog) Load() {
 
 	s.loadTabs()
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < d2enum.ActsNumber; i++ {
 		s.quests[i] = s.loadQuestIconsForAct(i + 1)
 	}
 
@@ -251,30 +242,24 @@ func (s *QuestLog) Load() {
 }
 
 func (s *QuestLog) loadTabs() {
-	s.tab[questLogTab1].newTab(s.uiManager, d2ui.ButtonTypeTab1, questTab1X)
-	s.tab[questLogTab1].invisibleButton.OnActivated(func() { s.setTab(questLogTab1) })
-	s.panelGroup.AddWidget(s.tab[questLogTab1].button)
-	s.panelGroup.AddWidget(s.tab[questLogTab1].invisibleButton)
+	var buttonTypes = []struct {
+		bt d2ui.ButtonType
+		x  int
+	}{
+		{d2ui.ButtonTypeTab1, questTab1X},
+		{d2ui.ButtonTypeTab2, questTab2X},
+		{d2ui.ButtonTypeTab3, questTab3X},
+		{d2ui.ButtonTypeTab4, questTab4X},
+		{d2ui.ButtonTypeTab5, questTab5X},
+	}
 
-	s.tab[questLogTab2].newTab(s.uiManager, d2ui.ButtonTypeTab2, questTab2X)
-	s.tab[questLogTab2].invisibleButton.OnActivated(func() { s.setTab(questLogTab2) })
-	s.panelGroup.AddWidget(s.tab[questLogTab2].button)
-	s.panelGroup.AddWidget(s.tab[questLogTab2].invisibleButton)
-
-	s.tab[questLogTab3].newTab(s.uiManager, d2ui.ButtonTypeTab3, questTab3X)
-	s.tab[questLogTab3].invisibleButton.OnActivated(func() { s.setTab(questLogTab3) })
-	s.panelGroup.AddWidget(s.tab[questLogTab3].button)
-	s.panelGroup.AddWidget(s.tab[questLogTab3].invisibleButton)
-
-	s.tab[questLogTab4].newTab(s.uiManager, d2ui.ButtonTypeTab4, questTab4X)
-	s.tab[questLogTab4].invisibleButton.OnActivated(func() { s.setTab(questLogTab4) })
-	s.panelGroup.AddWidget(s.tab[questLogTab4].button)
-	s.panelGroup.AddWidget(s.tab[questLogTab4].invisibleButton)
-
-	s.tab[questLogTab5].newTab(s.uiManager, d2ui.ButtonTypeTab5, questTab5X)
-	s.tab[questLogTab5].invisibleButton.OnActivated(func() { s.setTab(questLogTab5) })
-	s.panelGroup.AddWidget(s.tab[questLogTab5].button)
-	s.panelGroup.AddWidget(s.tab[questLogTab5].invisibleButton)
+	for i := 0; i < d2enum.ActsNumber; i++ {
+		currentValue := i
+		s.tab[i].newTab(s.uiManager, buttonTypes[i].bt, buttonTypes[i].x)
+		s.tab[i].invisibleButton.OnActivated(func() { s.setTab(currentValue) })
+		s.panelGroup.AddWidget(s.tab[i].button)
+		s.panelGroup.AddWidget(s.tab[i].invisibleButton)
+	}
 
 	s.setTab(s.act - 1)
 }
@@ -310,31 +295,7 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 		button.SetPosition(x+questOffsetX, y+questOffsetY)
 		buttons = append(buttons, button)
 
-		icon, err = s.uiManager.NewSprite(s.questIconsTable(act, n), d2resource.PaletteSky)
-		if err != nil {
-			s.Error(err.Error())
-		}
-
-		switch s.questStatus[s.cordsToQuestID(act, n)] {
-		case d2enum.QuestStatusCompleted:
-			err = icon.SetCurrentFrame(completedFrame)
-		case d2enum.QuestStatusCompleting:
-			// that's not complet now
-			err = icon.SetCurrentFrame(0)
-			if err != nil {
-				s.Error(err.Error())
-			}
-
-			icon.PlayForward()
-			icon.SetPlayLoop(false)
-			err = icon.SetCurrentFrame(completedFrame)
-			s.questStatus[s.cordsToQuestID(act, n)] = d2enum.QuestStatusCompleted
-		case d2enum.QuestStatusNotStarted:
-			err = icon.SetCurrentFrame(notStartedFrame)
-		default:
-			err = icon.SetCurrentFrame(inProgresFrame)
-		}
-
+		icon, err = s.makeQuestIconForAct(act, n)
 		if err != nil {
 			s.Error(err.Error())
 		}
@@ -374,6 +335,35 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 	wg.SetVisible(false)
 
 	return wg
+}
+
+func (s *QuestLog) makeQuestIconForAct(act, n int) (*d2ui.Sprite, error) {
+	icon, err := s.uiManager.NewSprite(s.questIconsTable(act, n), d2resource.PaletteSky)
+	if err != nil {
+		s.Error(err.Error())
+	}
+
+	switch s.questStatus[s.cordsToQuestID(act, n)] {
+	case d2enum.QuestStatusCompleted:
+		err = icon.SetCurrentFrame(completedFrame)
+	case d2enum.QuestStatusCompleting:
+		// that's not complet now
+		err = icon.SetCurrentFrame(0)
+		if err != nil {
+			s.Error(err.Error())
+		}
+
+		icon.PlayForward()
+		icon.SetPlayLoop(false)
+		err = icon.SetCurrentFrame(completedFrame)
+		s.questStatus[s.cordsToQuestID(act, n)] = d2enum.QuestStatusCompleted
+	case d2enum.QuestStatusNotStarted:
+		err = icon.SetCurrentFrame(notStartedFrame)
+	default:
+		err = icon.SetCurrentFrame(inProgresFrame)
+	}
+
+	return icon, err
 }
 
 func (s *QuestLog) setQuestLabel() {
@@ -419,7 +409,7 @@ func (s *QuestLog) setTab(tab int) {
 		s.quests[i].SetVisible(tab == i)
 	}
 
-	for i := 0; i < questLogNumTabs; i++ {
+	for i := 0; i < d2enum.ActsNumber; i++ {
 		s.tab[i].button.SetEnabled(i == tab)
 	}
 }

@@ -23,9 +23,6 @@ const (
 	Act5
 )
 
-// ActsWithHalfQuestNumber is act, where is half quest number (act4)
-const ActsWithHalfQuestNumber = Act4
-
 /* I think, It should looks like that:
    each quest has its own position in questStatus map
    which should come from save file.
