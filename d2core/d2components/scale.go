@@ -2,9 +2,8 @@
 package d2components
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math"
 	"github.com/gravestench/akara"
-
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2math/d2vector"
 )
 
 // static check that Scale implements Component
@@ -12,13 +11,13 @@ var _ akara.Component = &Scale{}
 
 // Scale represents an entities x,y axis scale as a vector
 type Scale struct {
-	*d2vector.Vector
+	*d2math.Vector3
 }
 
 // New creates a new Scale instance. By default, the scale is (1,1)
 func (*Scale) New() akara.Component {
 	return &Scale{
-		Vector: d2vector.NewVector(1, 1),
+		Vector3: d2math.NewVector3(1, 1, 1),
 	}
 }
 

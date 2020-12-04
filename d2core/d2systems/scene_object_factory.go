@@ -24,7 +24,7 @@ func (s *sceneObjectFactory) addBasicComponents(id akara.EID) {
 }
 
 func (s *sceneObjectFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID {
-	s.Infof("creating sprite: %s, %s", filepath.Base(imgPath), palPath)
+	s.Debugf("creating sprite: %s, %s", filepath.Base(imgPath), palPath)
 
 	eid := s.baseSystems.SpriteFactory.Sprite(x, y, imgPath, palPath)
 	s.GameObjects = append(s.GameObjects, eid)
@@ -35,7 +35,7 @@ func (s *sceneObjectFactory) Sprite(x, y float64, imgPath, palPath string) akara
 }
 
 func (s *sceneObjectFactory) SegmentedSprite(x, y float64, imgPath, palPath string, xseg, yseg, frame int) akara.EID {
-	s.Infof("creating segmented sprite: %s, %s", filepath.Base(imgPath), palPath)
+	s.Debugf("creating segmented sprite: %s, %s", filepath.Base(imgPath), palPath)
 
 	eid := s.baseSystems.SpriteFactory.SegmentedSprite(x, y, imgPath, palPath, xseg, yseg, frame)
 	s.GameObjects = append(s.GameObjects, eid)
@@ -46,7 +46,7 @@ func (s *sceneObjectFactory) SegmentedSprite(x, y float64, imgPath, palPath stri
 }
 
 func (s *sceneObjectFactory) Viewport(priority, width, height int) akara.EID {
-	s.Infof("creating viewport #%d", priority)
+	s.Debugf("creating viewport #%d", priority)
 
 	eid := s.NewEntity()
 	s.AddViewport(eid)
@@ -74,11 +74,14 @@ func (s *sceneObjectFactory) Viewport(priority, width, height int) akara.EID {
 }
 
 func (s *sceneObjectFactory) Rectangle(x, y, width, height int, color color.Color) akara.EID {
-	s.Info("creating rectangle")
+	s.Debug("creating rectangle")
 
 	eid := s.baseSystems.ShapeSystem.Rectangle(x, y, width, height, color)
 
 	s.addBasicComponents(eid)
+
+	position := s.AddPosition(eid)
+	position.X, position.Y = float64(x), float64(y)
 
 	s.GameObjects = append(s.GameObjects, eid)
 

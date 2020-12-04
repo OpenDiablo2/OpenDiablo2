@@ -19,8 +19,6 @@ const (
 	fadeTime    = time.Second
 )
 
-// NewMouseCursorScene creates a new main menu scene. This is the first screen that the user
-// will see when launching the game.
 func NewMouseCursorScene() *MouseCursorScene {
 	scene := &MouseCursorScene{
 		BaseScene: NewBaseScene(sceneKeyMouseCursor),
@@ -32,16 +30,16 @@ func NewMouseCursorScene() *MouseCursorScene {
 // static check that MouseCursorScene implements the scene interface
 var _ d2interface.Scene = &MouseCursorScene{}
 
-// MouseCursorScene represents the game's main menu, where users can select single or multi player,
-// or start the map engine test.
 type MouseCursorScene struct {
 	*BaseScene
 	booted        bool
 	cursor        akara.EID
 	lastTimeMoved time.Time
+	debug         struct {
+		enabled bool
+	}
 }
 
-// Init the main menu scene
 func (s *MouseCursorScene) Init(world *akara.World) {
 	s.World = world
 
@@ -54,6 +52,8 @@ func (s *MouseCursorScene) boot() {
 		return
 	}
 
+	s.registerTerminalCommands()
+
 	s.createMouseCursor()
 
 	s.booted = true
@@ -64,7 +64,6 @@ func (s *MouseCursorScene) createMouseCursor() {
 	s.cursor = s.Add.Sprite(0, 0, d2resource.CursorDefault, d2resource.PaletteUnits)
 }
 
-// Update the main menu scene
 func (s *MouseCursorScene) Update() {
 	for _, id := range s.Viewports {
 		s.AddPriority(id).Priority = scenePriorityMouseCursor
@@ -94,6 +93,13 @@ func (s *MouseCursorScene) updateCursorPosition() {
 
 	if int(position.X) != cx || int(position.Y) != cy {
 		s.lastTimeMoved = time.Now()
+
+		switch s.debug.enabled {
+		case true:
+			s.Infof("position: (%d, %d)", int(position.X), int(position.Y))
+		default:
+			s.Debugf("position: (%d, %d)", int(position.X), int(position.Y))
+		}
 	}
 
 	position.X, position.Y = float64(cx), float64(cy)
@@ -112,4 +118,34 @@ func (s *MouseCursorScene) handleCursorFade() {
 	} else {
 		alpha.Alpha = math.Min(alpha.Alpha+0.125, 1)
 	}
+
+	if alpha.Alpha > 1e-1 && alpha.Alpha < 1 {
+		switch s.debug.enabled {
+		case true:
+			s.Infof("fading %.2f", alpha.Alpha)
+		default:
+			s.Debugf("fading %.2f", alpha.Alpha)
+		}
+	}
+}
+
+func (s *MouseCursorScene) registerTerminalCommands() {
+	s.registerDebugCommand()
+}
+
+func (s *MouseCursorScene) registerDebugCommand() {
+	s.Info("registering debug command")
+
+	const (
+		command     = "debug_mouse"
+		description = "show debug information about the mouse"
+	)
+
+	s.RegisterTerminalCommand(command, description, func(val bool) {
+		s.setDebug(val)
+	})
+}
+
+func (s *MouseCursorScene) setDebug(val bool) {
+	s.debug.enabled = val
 }
