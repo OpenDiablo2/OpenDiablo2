@@ -40,24 +40,26 @@ const (
 	ButtonTypeSquareClose        ButtonType = 20
 	ButtonTypeSquareOk           ButtonType = 21
 	ButtonTypeSkillTreeTab       ButtonType = 22
-	ButtonTypeQuestDescr         ButtonType = 23 // I suppose it should be also used in WP tabs
+	ButtonTypeQuestDescr         ButtonType = 23
 	ButtonTypeMinipanelOpenClose ButtonType = 24
 	ButtonTypeMinipanelParty     ButtonType = 25
 	ButtonTypeBuy                ButtonType = 26
 	ButtonTypeSell               ButtonType = 27
 	ButtonTypeRepair             ButtonType = 28
 	ButtonTypeRepairAll          ButtonType = 29
-	ButtonTypeLeftArrow          ButtonType = 30
-	ButtonTypeRightArrow         ButtonType = 31
-	ButtonTypeQuery              ButtonType = 32
-	ButtonTypeSquelchChat        ButtonType = 33
-	ButtonTypeTab1               ButtonType = 34
-	ButtonTypeTab2               ButtonType = 35
-	ButtonTypeTab3               ButtonType = 36
-	ButtonTypeTab4               ButtonType = 37
-	ButtonTypeTab5               ButtonType = 38
-	ButtonTypeTabBlank           ButtonType = 39
-	ButtonTypeBlankQuestBtn      ButtonType = 40
+	ButtonTypeUpArrow            ButtonType = 30
+	ButtonTypeDownArrow          ButtonType = 31
+	ButtonTypeLeftArrow          ButtonType = 32
+	ButtonTypeRightArrow         ButtonType = 33
+	ButtonTypeQuery              ButtonType = 34
+	ButtonTypeSquelchChat        ButtonType = 35
+	ButtonTypeTab1               ButtonType = 36 // It should be used in wp tabs and quest log tabs
+	ButtonTypeTab2               ButtonType = 37
+	ButtonTypeTab3               ButtonType = 38
+	ButtonTypeTab4               ButtonType = 39
+	ButtonTypeTab5               ButtonType = 40
+	ButtonTypeTabBlank           ButtonType = 41
+	ButtonTypeBlankQuestBtn      ButtonType = 42
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -439,6 +441,36 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			Tooltip:          buttonTooltipRepairAll,
 			TooltipXOffset:   buttonBuySellTooltipXOffset,
 			TooltipYOffset:   buttonBuySellTooltipYOffset,
+		},
+		ButtonTypeUpArrow: {
+			XSegments:        1,
+			YSegments:        1,
+			DisabledFrame:    -1,
+			DisabledColor:    whiteAlpha100,
+			BaseFrame:        0,
+			ResourceName:     d2resource.UpDownArrows,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
+		},
+		ButtonTypeDownArrow: {
+			XSegments:        1,
+			YSegments:        1,
+			DisabledFrame:    -1,
+			DisabledColor:    whiteAlpha100,
+			BaseFrame:        2,
+			ResourceName:     d2resource.UpDownArrows,
+			PaletteName:      d2resource.PaletteSky,
+			Toggleable:       false,
+			FontPath:         d2resource.Font16,
+			AllowFrameChange: true,
+			HasImage:         true,
+			FixedWidth:       ButtonNoFixedWidth,
+			FixedHeight:      ButtonNoFixedHeight,
 		},
 		ButtonTypeLeftArrow: {
 			XSegments:        buttonBuySellSegmentsX,

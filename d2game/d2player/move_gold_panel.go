@@ -2,11 +2,11 @@ package d2player
 
 import (
 	"fmt"
-	//"strconv"
-	"strings"
+	"strconv"
+	//"strings"
 
 	//"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	//"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -19,7 +19,10 @@ const (
 	moveGoldCloseButtonX, moveGoldCloseButtonY = moveGoldX + 35, moveGoldY - 42
 	moveGoldOkButtonX, moveGoldOkButtonY       = moveGoldX + 140, moveGoldY - 42
 	moveGoldValueX, moveGoldValueY             = moveGoldX + 29, moveGoldY - 90
-	moveGoldActionLabelX, moveGoldActionLabelY = 350, 200
+	moveGoldActionLabelX, moveGoldActionLabelY = moveGoldX + 105, moveGoldY - 150
+	moveGoldActionLabelOffsetY                 = 25
+	moveGoldUpArrowX, moveGoldUpArrowY         = 314, 259
+	moveGoldDownArrowX, moveGoldDownArrowY     = 314, 274
 )
 
 const goldValueFilter = "0123456789"
@@ -50,13 +53,15 @@ func NewMoveGoldPanel(asset *d2asset.AssetManager,
 
 // HeroStatsPanel represents the hero status panel
 type moveGoldPanel struct {
-	asset       *d2asset.AssetManager
-	uiManager   *d2ui.UIManager
-	panel       *d2ui.Sprite
-	onCloseCb   func()
-	panelGroup  *d2ui.WidgetGroup
-	gold        int
-	actionLabel *d2ui.Label
+	asset        *d2asset.AssetManager
+	uiManager    *d2ui.UIManager
+	panel        *d2ui.Sprite
+	onCloseCb    func()
+	panelGroup   *d2ui.WidgetGroup
+	gold         int
+	actionLabel1 *d2ui.Label
+	actionLabel2 *d2ui.Label
+	value        *d2ui.TextBox
 
 	originX int
 	originY int
@@ -91,33 +96,80 @@ func (s *moveGoldPanel) Load() {
 	okButton.OnActivated(func() { s.Close() })
 	s.panelGroup.AddWidget(okButton)
 
-	value := s.uiManager.NewTextbox()
-	value.SetFilter(goldValueFilter)
-	value.SetText(fmt.Sprintln(s.gold))
-	value.SetPosition(moveGoldValueX, moveGoldValueY)
-	s.panelGroup.AddWidget(value)
+	s.value = s.uiManager.NewTextbox()
+	s.value.SetFilter(goldValueFilter)
+	s.value.SetText(fmt.Sprintln(s.gold))
+	s.value.Activate()
+	s.value.SetPosition(moveGoldValueX, moveGoldValueY)
+	s.panelGroup.AddWidget(s.value)
 
-	s.actionLabel = s.uiManager.NewLabel(d2resource.Font24, d2resource.PaletteStatic)
-	s.actionLabel.Alignment = d2ui.HorizontalAlignCenter
-	s.actionLabel.SetPosition(moveGoldActionLabelX, moveGoldActionLabelY)
+	s.actionLabel1 = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
+	s.actionLabel1.Alignment = d2ui.HorizontalAlignCenter
+	s.actionLabel1.SetPosition(moveGoldActionLabelX, moveGoldActionLabelY)
+	s.panelGroup.AddWidget(s.actionLabel1)
+
+	s.actionLabel2 = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
+	s.actionLabel2.Alignment = d2ui.HorizontalAlignCenter
+	s.actionLabel2.SetPosition(moveGoldActionLabelX, moveGoldActionLabelY+moveGoldActionLabelOffsetY)
+	s.panelGroup.AddWidget(s.actionLabel2)
+
+	incrose := s.uiManager.NewButton(d2ui.ButtonTypeUpArrow, d2resource.PaletteSky)
+	incrose.SetPosition(moveGoldUpArrowX, moveGoldUpArrowY)
+	incrose.SetVisible(false)
+	incrose.OnActivated(func() { s.incrose() })
+	s.panelGroup.AddWidget(incrose)
+
+	decrose := s.uiManager.NewButton(d2ui.ButtonTypeDownArrow, d2resource.PaletteSky)
+	decrose.SetPosition(moveGoldDownArrowX, moveGoldDownArrowY)
+	decrose.SetVisible(false)
+	decrose.OnActivated(func() { s.decrose() })
+	s.panelGroup.AddWidget(decrose)
+
 	s.setActionText()
-	s.panelGroup.AddWidget(s.actionLabel)
 
 	s.panelGroup.SetVisible(false)
 }
 
+func (s *moveGoldPanel) OnKeyDown(event d2interface.KeyEvent) bool {
+	currentValue, err := strconv.Atoi(s.value.GetText())
+	if err != nil {
+		s.Errorf("Incorrect value in textbox (cannot be converted into intager) %s", err)
+	}
+	if currentValue > s.gold {
+		s.value.SetText(fmt.Sprintln(s.gold))
+	}
+	fmt.Println("keyPressed")
+	return true
+}
+
+func (s *moveGoldPanel) incrose() {
+	currentValue, err := strconv.Atoi(s.value.GetText())
+	if err != nil {
+		s.Errorf("Incorrect value in textbox (cannot be converted into intager) %s", err)
+	} else {
+		if currentValue < s.gold {
+			s.value.SetText(fmt.Sprintln(currentValue + 1))
+		}
+	}
+}
+
+func (s *moveGoldPanel) decrose() {
+	currentValue, err := strconv.Atoi(s.value.GetText())
+	if err != nil {
+		s.Errorf("Incorrect value in textbox (cannot be converted into intager) %s", err)
+	} else {
+		if currentValue > 0 {
+			s.value.SetText(fmt.Sprintln(currentValue - 1))
+		}
+	}
+}
+
 func (s *moveGoldPanel) setActionText() {
+	dropGoldStr := d2util.SplitIntoLinesWithMaxWidth(s.asset.TranslateString("strDropGoldHowMuch"), 20)
 	//if s.isChest {
 	if true {
-		s.actionLabel.SetText(
-			strings.Join(
-				d2util.SplitIntoLinesWithMaxWidth(
-					s.asset.TranslateString("strDropGoldHowMuch"),
-					20,
-				),
-				"\n",
-			),
-		)
+		s.actionLabel1.SetText(d2ui.ColorTokenize(dropGoldStr[0], d2ui.ColorTokenGold))
+		s.actionLabel2.SetText(d2ui.ColorTokenize(dropGoldStr[1], d2ui.ColorTokenGold))
 	}
 }
 

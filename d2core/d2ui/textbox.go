@@ -7,6 +7,7 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 )
 
 // static check that TextBox implements widget
@@ -22,6 +23,8 @@ type TextBox struct {
 	bgSprite  *Sprite
 	enabled   bool
 	isFocused bool
+
+	*d2util.Logger
 }
 
 // NewTextbox creates a new instance of a text box
@@ -41,6 +44,7 @@ func (ui *UIManager) NewTextbox() *TextBox {
 		textLabel:  ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
 		lineBar:    ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
 		enabled:    true,
+		Logger:     ui.Logger,
 	}
 	tb.lineBar.SetText("_")
 

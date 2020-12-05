@@ -113,6 +113,7 @@ const (
 	WPTabs              = "/data/global/ui/menu/expwaygatetabs.dc6"
 	WPBg                = "/data/global/ui/menu/waygatebackground.dc6"
 	WPIcons             = "/data/global/ui/menu/waygateicons.dc6"
+	UpDownArrows        = "/data/global/ui/BIGMENU/numberarrows.dc6"
 
 	// --- Escape Menu ---
 	// main

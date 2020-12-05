@@ -11,7 +11,10 @@ import (
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2ui"
 )
 
-const white = 0xffffffff
+const (
+	white      = 0xffffffff
+	lightBrown = 0xbca88cff
+)
 
 const (
 	act1 = iota + 1
@@ -450,7 +453,7 @@ func (s *QuestLog) renderStaticPanelFrames(target d2interface.Surface) {
 	}
 }
 
-// copy from character select
+// copy from character select (github.com/OpenDiablo2/OpenDiablo2/d2game/d2gamescreen/character_select.go)
 func rgbaColor(rgba uint32) color.RGBA {
 	result := color.RGBA{}
 	a, b, g, r := 0, 1, 2, 3
