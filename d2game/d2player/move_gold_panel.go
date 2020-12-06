@@ -6,7 +6,7 @@ import (
 	//"strings"
 
 	//"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
-	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
+	//"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
 	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2asset"
@@ -100,6 +100,7 @@ func (s *moveGoldPanel) Load() {
 	s.value.SetFilter(goldValueFilter)
 	s.value.SetText(fmt.Sprintln(s.gold))
 	s.value.Activate()
+	s.value.SetNumberOnly(s.gold)
 	s.value.SetPosition(moveGoldValueX, moveGoldValueY)
 	s.panelGroup.AddWidget(s.value)
 
@@ -128,18 +129,6 @@ func (s *moveGoldPanel) Load() {
 	s.setActionText()
 
 	s.panelGroup.SetVisible(false)
-}
-
-func (s *moveGoldPanel) OnKeyDown(event d2interface.KeyEvent) bool {
-	currentValue, err := strconv.Atoi(s.value.GetText())
-	if err != nil {
-		s.Errorf("Incorrect value in textbox (cannot be converted into intager) %s", err)
-	}
-	if currentValue > s.gold {
-		s.value.SetText(fmt.Sprintln(s.gold))
-	}
-	fmt.Println("keyPressed")
-	return true
 }
 
 func (s *moveGoldPanel) incrose() {

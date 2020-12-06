@@ -178,10 +178,6 @@ func (g *Inventory) Load() {
 	g.panelGroup.SetVisible(false)
 }
 
-func (g *Inventory) OnKeyDown(event d2interface.KeyEvent) bool {
-	return g.moveGoldPanel.OnKeyDown(event)
-}
-
 // Open opens the inventory
 func (g *Inventory) Open() {
 	g.isOpen = true

@@ -1,6 +1,7 @@
 package d2ui
 
 import (
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,13 +17,15 @@ var _ Widget = &TextBox{}
 // TextBox represents a text input box
 type TextBox struct {
 	*BaseWidget
-	textLabel *Label
-	lineBar   *Label
-	text      string
-	filter    string
-	bgSprite  *Sprite
-	enabled   bool
-	isFocused bool
+	textLabel    *Label
+	lineBar      *Label
+	text         string
+	filter       string
+	bgSprite     *Sprite
+	enabled      bool
+	isFocused    bool
+	isNumberOnly bool
+	maxValue     int
 
 	*d2util.Logger
 }
@@ -38,13 +41,15 @@ func (ui *UIManager) NewTextbox() *TextBox {
 	base := NewBaseWidget(ui)
 
 	tb := &TextBox{
-		BaseWidget: base,
-		filter:     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-		bgSprite:   bgSprite,
-		textLabel:  ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
-		lineBar:    ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
-		enabled:    true,
-		Logger:     ui.Logger,
+		BaseWidget:   base,
+		filter:       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+		bgSprite:     bgSprite,
+		textLabel:    ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
+		lineBar:      ui.NewLabel(d2resource.FontFormal11, d2resource.PaletteUnits),
+		enabled:      true,
+		Logger:       ui.Logger,
+		isNumberOnly: false, // (disabled)
+		maxValue:     -1,    // (disabled)
 	}
 	tb.lineBar.SetText("_")
 
@@ -81,7 +86,20 @@ func (v *TextBox) OnKeyChars(event d2interface.KeyCharsEvent) bool {
 	newText := string(event.Chars())
 
 	if len(newText) > 0 {
-		v.text += newText
+		if v.isNumberOnly {
+			number, err := strconv.Atoi(v.text + newText)
+			if err != nil {
+				v.Debugf("Unable to convert string %s to intager: %s", v.text+newText, err)
+				return false
+			}
+			if number <= v.maxValue {
+				v.text += newText
+			} else {
+				v.text = strconv.Itoa(v.maxValue)
+			}
+		} else {
+			v.text += newText
+		}
 
 		v.SetText(v.text)
 
@@ -215,4 +233,9 @@ func (v *TextBox) OnActivated(_ func()) {
 // Activate activates the text box
 func (v *TextBox) Activate() {
 	v.isFocused = true
+}
+
+func (v *TextBox) SetNumberOnly(max int) {
+	v.isNumberOnly = true
+	v.maxValue = max
 }

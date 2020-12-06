@@ -384,10 +384,6 @@ func (g *GameControls) OnKeyDown(event d2interface.KeyEvent) bool {
 
 	gameEvent := g.keyMap.getGameEvent(event.Key())
 
-	if g.inventory.IsOpen() {
-		g.inventory.OnKeyDown(event)
-	}
-
 	switch gameEvent {
 	case d2enum.ClearScreen:
 		g.inventory.Close()
