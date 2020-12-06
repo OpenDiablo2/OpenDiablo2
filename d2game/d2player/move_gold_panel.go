@@ -89,7 +89,7 @@ func (s *MoveGoldPanel) Load() {
 	okButton := s.uiManager.NewButton(d2ui.ButtonTypeSquareOk, "")
 	okButton.SetVisible(false)
 	okButton.SetPosition(moveGoldOkButtonX, moveGoldOkButtonY)
-	okButton.OnActivated(func() { s.Close() })
+	okButton.OnActivated(func() { s.action() })
 	s.panelGroup.AddWidget(okButton)
 
 	s.value = s.uiManager.NewTextbox()
@@ -127,6 +127,20 @@ func (s *MoveGoldPanel) Load() {
 	s.panelGroup.SetVisible(false)
 }
 
+func (s *MoveGoldPanel) action() {
+	value, err := strconv.Atoi(s.value.GetText())
+	if err != nil {
+		s.Errorf("Invalid value in textbox (%s): %s", s.value.GetText(), err)
+		return
+	}
+
+	// here should be placed move action (drop, deposite e.t.c.)
+
+	s.gold -= value
+	s.value.SetText(fmt.Sprintln(s.gold))
+	s.Close()
+}
+
 func (s *MoveGoldPanel) incrose() {
 	currentValue, err := strconv.Atoi(s.value.GetText())
 	if err != nil {
@@ -153,11 +167,11 @@ func (s *MoveGoldPanel) decrose() {
 
 func (s *MoveGoldPanel) setActionText() {
 	dropGoldStr := d2util.SplitIntoLinesWithMaxWidth(s.asset.TranslateString("strDropGoldHowMuch"), 20)
-	//if s.isChest {
-	if true {
-		s.actionLabel1.SetText(d2ui.ColorTokenize(dropGoldStr[0], d2ui.ColorTokenGold))
-		s.actionLabel2.SetText(d2ui.ColorTokenize(dropGoldStr[1], d2ui.ColorTokenGold))
-	}
+	// depositeGoldStr := d2util.SplitIntoLinesWithMaxWidth(s.asset.TranslateString("strBankGoldDeposit"), 20)
+	// witherawGoldStr := d2util.SplitIntoLinesWithMaxWidgh(s.asset.TranslateString("strBankGoldWithdraw"), 20)
+
+	s.actionLabel1.SetText(d2ui.ColorTokenize(dropGoldStr[0], d2ui.ColorTokenGold))
+	s.actionLabel2.SetText(d2ui.ColorTokenize(dropGoldStr[1], d2ui.ColorTokenGold))
 }
 
 // IsOpen returns true if the move gold panel is opened

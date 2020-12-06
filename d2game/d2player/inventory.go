@@ -68,6 +68,7 @@ type Inventory struct {
 	item          *diablo2item.ItemFactory
 	uiManager     *d2ui.UIManager
 	panel         *d2ui.Sprite
+	goldLabel     *d2ui.Label
 	grid          *ItemGrid
 	itemTooltip   *d2ui.Tooltip
 	panelGroup    *d2ui.WidgetGroup
@@ -121,11 +122,12 @@ func (g *Inventory) Load() {
 	goldButton.OnActivated(func() { g.onGoldClicked() })
 	g.panelGroup.AddWidget(goldButton)
 
-	goldLabel := g.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
-	goldLabel.Alignment = d2ui.HorizontalAlignLeft
-	goldLabel.SetText(fmt.Sprintln(g.gold))
-	goldLabel.SetPosition(invGoldLabelX, invGoldLabelY)
-	g.panelGroup.AddWidget(goldLabel)
+	g.goldLabel = g.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
+	g.goldLabel.Alignment = d2ui.HorizontalAlignLeft
+	//g.goldLabel.SetText(fmt.Sprintln(g.gold))
+	g.goldLabel.SetText(fmt.Sprintln(g.moveGoldPanel.gold))
+	g.goldLabel.SetPosition(invGoldLabelX, invGoldLabelY)
+	g.panelGroup.AddWidget(g.goldLabel)
 
 	// https://github.com/OpenDiablo2/OpenDiablo2/issues/795
 	testInventoryCodes := [][]string{
@@ -200,7 +202,7 @@ func (g *Inventory) SetOnCloseCb(cb func()) {
 
 func (g *Inventory) onGoldClicked() {
 	g.Info("Move gold action clicked")
-	g.moveGoldPanel.Toggle()
+	g.toggleMoveGoldPanel()
 }
 
 func (g *Inventory) toggleMoveGoldPanel() {
@@ -214,6 +216,14 @@ func (g *Inventory) onCloseGoldPanel() {
 // IsOpen returns true if the inventory is open
 func (g *Inventory) IsOpen() bool {
 	return g.isOpen
+}
+
+func (g *Inventory) Advance(_ float64) {
+	if !g.IsOpen() {
+		return
+	}
+	//g.goldLabel.SetText(fmt.Sprintln(g.gold))
+	g.goldLabel.SetText(fmt.Sprintln(g.moveGoldPanel.gold))
 }
 
 // Render draws the inventory onto the given surface
