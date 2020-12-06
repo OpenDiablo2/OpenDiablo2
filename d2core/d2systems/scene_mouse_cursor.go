@@ -38,6 +38,7 @@ type MouseCursorScene struct {
 	debug         struct {
 		enabled bool
 	}
+	test bool
 }
 
 func (s *MouseCursorScene) Init(world *akara.World) {
@@ -77,32 +78,33 @@ func (s *MouseCursorScene) Update() {
 		s.boot()
 	}
 
-	s.updateCursorPosition()
+	s.updateCursorTransform()
 	s.handleCursorFade()
 
 	s.BaseScene.Update()
 }
 
-func (s *MouseCursorScene) updateCursorPosition() {
-	position, found := s.GetPosition(s.cursor)
+func (s *MouseCursorScene) updateCursorTransform() {
+	transform, found := s.GetTransform(s.cursor)
 	if !found {
 		return
 	}
 
 	cx, cy := s.CursorPosition()
+	tx, ty := transform.Translation.XY()
 
-	if int(position.X) != cx || int(position.Y) != cy {
+	if int(tx) != cx || int(ty) != cy {
 		s.lastTimeMoved = time.Now()
 
 		switch s.debug.enabled {
 		case true:
-			s.Infof("position: (%d, %d)", int(position.X), int(position.Y))
+			s.Infof("transform: (%d, %d)", int(tx), int(ty))
 		default:
-			s.Debugf("position: (%d, %d)", int(position.X), int(position.Y))
+			s.Debugf("transform: (%d, %d)", int(tx), int(ty))
 		}
 	}
 
-	position.X, position.Y = float64(cx), float64(cy)
+	transform.Translation.X, transform.Translation.Y = float64(cx), float64(cy)
 }
 
 func (s *MouseCursorScene) handleCursorFade() {
@@ -141,11 +143,8 @@ func (s *MouseCursorScene) registerDebugCommand() {
 		description = "show debug information about the mouse"
 	)
 
-	s.RegisterTerminalCommand(command, description, func(val bool) {
-		s.setDebug(val)
+	s.RegisterTerminalCommand(command, description, nil, func(args []string) error {
+		s.debug.enabled = !s.debug.enabled
+		return nil
 	})
-}
-
-func (s *MouseCursorScene) setDebug(val bool) {
-	s.debug.enabled = val
 }

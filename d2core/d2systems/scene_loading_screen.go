@@ -234,7 +234,7 @@ func (s *LoadingScene) updateLoadingSpritePosition() {
 		return
 	}
 
-	position, found := s.GetPosition(s.loadingSprite)
+	transform, found := s.GetTransform(s.loadingSprite)
 	if !found {
 		return
 	}
@@ -243,7 +243,11 @@ func (s *LoadingScene) updateLoadingSpritePosition() {
 	frameW, frameH := sprite.GetCurrentFrameSize()
 
 	// we add the frameH in the Y because sprites are supposed to be drawn from bottom to top
-	position.X, position.Y = float64(centerX-(frameW/2)), float64(centerY+(frameH/2))
+	transform.Translation.Set(
+		float64(centerX-(frameW/2)),
+		float64(centerY+(frameH/2)),
+		transform.Translation.Z,
+		)
 }
 
 func (s *LoadingScene) updateLoadingSpriteFrame() {

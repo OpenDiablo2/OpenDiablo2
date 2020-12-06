@@ -1,6 +1,8 @@
 package d2systems
 
 import (
+	"fmt"
+	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 	"path"
 
@@ -19,12 +21,26 @@ const (
 	logPrefixAppBootstrap = "App Bootstrap"
 )
 
-// static check that the game config system implements the system interface
-var _ akara.System = &AppBootstrapSystem{}
+const (
+	sceneTestArg = "testscene"
+	sceneTestDesc = "test a scene"
 
-// AppBootstrapSystem is responsible for the common initialization process between
+	serverArg = "server"
+	serverDesc = "run dedicated server"
+
+	counterArg = "counter"
+	counterDesc = "print updates/sec"
+
+	skipSplashArg = "nosplash"
+	skipSplashDesc = "skip the ebiten splash screen"
+)
+
+// static check that the game config system implements the system interface
+var _ akara.System = &AppBootstrap{}
+
+// AppBootstrap is responsible for the common initialization process between
 // the app modes (eg common to the game client as well as the headless server)
-type AppBootstrapSystem struct {
+type AppBootstrap struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
 	subscribedFiles   *akara.Subscription
@@ -37,7 +53,7 @@ type AppBootstrapSystem struct {
 }
 
 // Init will inject (or use existing) components related to setting up the config sources
-func (m *AppBootstrapSystem) Init(world *akara.World) {
+func (m *AppBootstrap) Init(world *akara.World) {
 	m.World = world
 
 	m.setupLogger()
@@ -49,16 +65,17 @@ func (m *AppBootstrapSystem) Init(world *akara.World) {
 	m.injectSystems()
 	m.setupConfigSources()
 	m.setupConfigFile()
+	m.parseCommandLineArgs()
 
 	m.Info("... initialization complete!")
 }
 
-func (m *AppBootstrapSystem) setupLogger() {
+func (m *AppBootstrap) setupLogger() {
 	m.Logger = d2util.NewLogger()
 	m.SetPrefix(logPrefixAppBootstrap)
 }
 
-func (m *AppBootstrapSystem) setupSubscriptions() {
+func (m *AppBootstrap) setupSubscriptions() {
 	m.Info("setting up component subscriptions")
 
 	// we are going to check entities that dont yet have loaded asset types
@@ -91,7 +108,7 @@ func (m *AppBootstrapSystem) setupSubscriptions() {
 	m.subscribedConfigs = m.World.AddSubscription(gameConfigs)
 }
 
-func (m *AppBootstrapSystem) setupFactories() {
+func (m *AppBootstrap) setupFactories() {
 	m.Info("setting up component factories")
 
 	m.InjectComponent(&d2components.GameConfig{}, &m.GameConfig)
@@ -101,7 +118,7 @@ func (m *AppBootstrapSystem) setupFactories() {
 	m.InjectComponent(&d2components.FileSource{}, &m.FileSource)
 }
 
-func (m *AppBootstrapSystem) injectSystems() {
+func (m *AppBootstrap) injectSystems() {
 	m.Info("injecting file type resolution system")
 	m.AddSystem(&FileTypeResolver{})
 
@@ -116,9 +133,6 @@ func (m *AppBootstrapSystem) injectSystems() {
 
 	m.Info("injecting asset loader system")
 	m.AddSystem(&AssetLoaderSystem{})
-
-	m.Info("injecting game object factory system")
-	m.AddSystem(&GameObjectFactory{})
 }
 
 // we make two entities and assign file paths for the two directories that
@@ -126,7 +140,7 @@ func (m *AppBootstrapSystem) injectSystems() {
 // the file type resolver system, and then the file source resolver system. At that point,
 // there will be sources for these two directories that can possibly resolve a config file.
 // A new config file is created if one is not found.
-func (m *AppBootstrapSystem) setupConfigSources() {
+func (m *AppBootstrap) setupConfigSources() {
 	// make the two entities, these will be the file sources
 	e1, e2 := m.NewEntity(), m.NewEntity()
 
@@ -152,7 +166,7 @@ func (m *AppBootstrapSystem) setupConfigSources() {
 	}
 }
 
-func (m *AppBootstrapSystem) setupConfigFile() {
+func (m *AppBootstrap) setupConfigFile() {
 	// add an entity that will get picked up by the game config system and loaded
 	m.AddFilePath(m.NewEntity()).Path = configFileName
 	m.Infof("setting up config file `%s` for processing", configFileName)
@@ -160,7 +174,7 @@ func (m *AppBootstrapSystem) setupConfigFile() {
 
 // Update will look for the first entity with a game config component
 // and then add the mpq's as file sources
-func (m *AppBootstrapSystem) Update() {
+func (m *AppBootstrap) Update() {
 	configs := m.subscribedConfigs.GetEntities()
 	if len(configs) < 1 {
 		return
@@ -182,7 +196,7 @@ func (m *AppBootstrapSystem) Update() {
 	m.SetActive(false)
 }
 
-func (m *AppBootstrapSystem) initMpqSources(cfg *d2components.GameConfig) {
+func (m *AppBootstrap) initMpqSources(cfg *d2components.GameConfig) {
 	for _, mpqFileName := range cfg.MpqLoadOrder {
 		fullMpqFilePath := path.Join(cfg.MpqPath, mpqFileName)
 
@@ -191,5 +205,46 @@ func (m *AppBootstrapSystem) initMpqSources(cfg *d2components.GameConfig) {
 		// make a new entity for the mpq file source
 		mpqSource := m.AddFilePath(m.NewEntity())
 		mpqSource.Path = fullMpqFilePath
+	}
+}
+
+func (m *AppBootstrap) parseCommandLineArgs() {
+	sceneTest := kingpin.Flag(sceneTestArg, sceneTestDesc).String()
+	server := kingpin.Flag(serverArg, serverDesc).Bool()
+	enableCounter := kingpin.Flag(counterArg, counterDesc).Bool()
+	_ = kingpin.Flag(skipSplashArg, skipSplashDesc).Bool() // see game client bootstrap
+
+	kingpin.Parse()
+
+	if *enableCounter {
+		m.World.AddSystem(&UpdateCounter{})
+	}
+
+	if *server {
+		fmt.Println("not yet implemented")
+		os.Exit(0)
+	}
+
+	m.World.AddSystem(&RenderSystem{})
+	m.World.AddSystem(&InputSystem{})
+
+	switch *sceneTest {
+	case "splash":
+		m.Info("running ebiten splash scene")
+		m.World.AddSystem(NewEbitenSplashScene())
+	case "load":
+		m.Info("running loading scene")
+		m.World.AddSystem(NewLoadingScene())
+	case "mouse":
+		m.Info("running mouse cursor scene")
+		m.World.AddSystem(NewMouseCursorScene())
+	case "main":
+		m.Info("running main menu scene")
+		m.World.AddSystem(NewMainMenuScene())
+	case "terminal":
+		m.Info("running terminal scene")
+		m.World.AddSystem(NewTerminalScene())
+	default:
+		m.World.AddSystem(&GameClientBootstrap{})
 	}
 }

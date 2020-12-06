@@ -29,8 +29,7 @@ func NewBaseScene(key string) *BaseScene {
 		Logger:          d2util.NewLogger(),
 		key:             key,
 		Viewports:       make([]akara.EID, 0),
-		GameObjects:     make([]akara.EID, 0),
-		baseSystems:     &baseSystems{},
+		SceneObjects:    make([]akara.EID, 0),
 		backgroundColor: color.Transparent,
 	}
 
@@ -41,20 +40,41 @@ func NewBaseScene(key string) *BaseScene {
 
 var _ akara.System = &BaseScene{}
 
-type baseSystems struct {
+type sceneSystems struct {
 	*RenderSystem
 	*InputSystem
 	*GameObjectFactory
 }
 
-// BaseScene encapsulates common behaviors for baseSystems that are considered "scenes",
+type sceneComponents struct {
+	d2components.SceneGraphNodeFactory
+	d2components.ViewportFactory
+	d2components.MainViewportFactory
+	d2components.ViewportFilterFactory
+	d2components.PriorityFactory
+	d2components.CameraFactory
+	d2components.TextureFactory
+	d2components.InteractiveFactory
+	d2components.TransformFactory
+	d2components.SpriteFactory
+	d2components.OriginFactory
+	d2components.AlphaFactory
+	d2components.DrawEffectFactory
+	d2components.RectangleFactory
+	d2components.ColorFactory
+	d2components.CommandRegistrationFactory
+	d2components.DirtyFactory
+}
+
+// BaseScene encapsulates common behaviors for systems that are considered "scenes",
 // such as the main menu, the in-game map, the console, etc.
 //
 // The base scene is responsible for generic behaviors common to all scenes,
 // like initializing the default viewport, or rendering game objects to the viewports.
 type BaseScene struct {
 	*akara.BaseSystem
-	*baseSystems
+	sceneSystems
+	sceneComponents
 	Geom struct {
 		Rectangle rectangle.Namespace
 	}
@@ -64,27 +84,9 @@ type BaseScene struct {
 	paused          bool
 	Add             *sceneObjectFactory
 	Viewports       []akara.EID
-	GameObjects     []akara.EID
+	SceneObjects    []akara.EID
 	Graph           *d2scene.Node // the root node
 	backgroundColor color.Color
-	d2components.SceneGraphNodeFactory
-	d2components.ViewportFactory
-	d2components.MainViewportFactory
-	d2components.ViewportFilterFactory
-	d2components.PriorityFactory
-	d2components.CameraFactory
-	d2components.TextureFactory
-	d2components.InteractiveFactory
-	d2components.PositionFactory
-	d2components.ScaleFactory
-	d2components.SpriteFactory
-	d2components.OriginFactory
-	d2components.AlphaFactory
-	d2components.DrawEffectFactory
-	d2components.RectangleFactory
-	d2components.ColorFactory
-	d2components.CommandRegistrationFactory
-	d2components.DirtyFactory
 }
 
 // Booted returns whether or not the scene has booted
@@ -118,46 +120,46 @@ func (s *BaseScene) boot() {
 	s.Add.SetPrefix(fmt.Sprintf("%s -> %s", s.key, "Object Factory"))
 
 	for idx := range s.Systems {
-		if rendersys, ok := s.Systems[idx].(*RenderSystem); ok && s.baseSystems.RenderSystem == nil {
-			s.baseSystems.RenderSystem = rendersys
+		if rendersys, ok := s.Systems[idx].(*RenderSystem); ok && s.sceneSystems.RenderSystem == nil {
+			s.sceneSystems.RenderSystem = rendersys
 			continue
 		}
 
-		if inputSys, ok := s.Systems[idx].(*InputSystem); ok && s.baseSystems.InputSystem == nil {
-			s.baseSystems.InputSystem = inputSys
+		if inputSys, ok := s.Systems[idx].(*InputSystem); ok && s.sceneSystems.InputSystem == nil {
+			s.sceneSystems.InputSystem = inputSys
 			continue
 		}
 
-		if objFactory, ok := s.Systems[idx].(*GameObjectFactory); ok && s.baseSystems.GameObjectFactory == nil {
-			s.baseSystems.GameObjectFactory = objFactory
+		if objFactory, ok := s.Systems[idx].(*GameObjectFactory); ok && s.sceneSystems.GameObjectFactory == nil {
+			s.sceneSystems.GameObjectFactory = objFactory
 			continue
 		}
 	}
 
-	if s.baseSystems.RenderSystem == nil {
+	if s.sceneSystems.RenderSystem == nil {
 		s.Info("waiting for render system ...")
 		return
 	}
 
-	if s.baseSystems.RenderSystem.renderer == nil {
+	if s.sceneSystems.RenderSystem.renderer == nil {
 		s.Info("waiting for renderer instance ...")
 		return
 	}
 
-	if s.baseSystems.InputSystem == nil {
+	if s.sceneSystems.InputSystem == nil {
 		s.Info("waiting for input system")
 		return
 	}
 
-	if s.baseSystems.GameObjectFactory == nil {
+	if s.sceneSystems.GameObjectFactory == nil {
 		s.Info("waiting for game object factory ...")
 		return
 	}
 
 	s.setupFactories()
 
-	s.baseSystems.SpriteFactory.RenderSystem = s.baseSystems.RenderSystem
-	s.baseSystems.ShapeSystem.RenderSystem = s.baseSystems.RenderSystem
+	s.sceneSystems.SpriteFactory.RenderSystem = s.sceneSystems.RenderSystem
+	s.sceneSystems.ShapeSystem.RenderSystem = s.sceneSystems.RenderSystem
 
 	const (
 		defaultWidth  = 800
@@ -180,8 +182,7 @@ func (s *BaseScene) setupFactories() {
 	s.InjectComponent(&d2components.Priority{}, &s.Priority)
 	s.InjectComponent(&d2components.Texture{}, &s.Texture)
 	s.InjectComponent(&d2components.Interactive{}, &s.Interactive)
-	s.InjectComponent(&d2components.Position{}, &s.Position)
-	s.InjectComponent(&d2components.Scale{}, &s.Scale)
+	s.InjectComponent(&d2components.Transform{}, &s.Transform)
 	s.InjectComponent(&d2components.Origin{}, &s.Origin)
 	s.InjectComponent(&d2components.Alpha{}, &s.Alpha)
 	s.InjectComponent(&d2components.SceneGraphNode{}, &s.SceneGraphNode)
@@ -208,17 +209,35 @@ func (s *BaseScene) Update() {
 		return
 	}
 
-	s.Graph.UpdateWorldMatrix()
+	s.updateSceneGraph()
 	s.renderViewports()
 }
 
+func (s *BaseScene) updateSceneGraph() {
+	for _, eid := range s.SceneObjects {
+		node, found := s.GetSceneGraphNode(eid)
+		if !found {
+			continue
+		}
+
+		transform, found := s.GetTransform(eid)
+		if !found {
+			continue
+		}
+
+		node.Local = transform.GetMatrix()
+	}
+
+	s.Graph.UpdateWorldMatrix()
+}
+
 func (s *BaseScene) renderViewports() {
-	if s.baseSystems.RenderSystem == nil {
+	if s.sceneSystems.RenderSystem == nil {
 		s.Warning("render system not present")
 		return
 	}
 
-	if s.baseSystems.RenderSystem.renderer == nil {
+	if s.sceneSystems.RenderSystem.renderer == nil {
 		s.Warning("render system doesn't have a renderer instance")
 		return
 	}
@@ -244,7 +263,7 @@ func (s *BaseScene) renderViewports() {
 func (s *BaseScene) binGameObjectsByViewport() map[int][]akara.EID {
 	bins := make(map[int][]akara.EID)
 
-	for _, eid := range s.GameObjects {
+	for _, eid := range s.SceneObjects {
 		vpfilter, found := s.GetViewportFilter(eid)
 		if !found {
 			vpfilter = s.AddViewportFilter(eid)
@@ -267,116 +286,108 @@ func (s *BaseScene) binGameObjectsByViewport() map[int][]akara.EID {
 }
 
 func (s *BaseScene) renderViewport(idx int, objects []akara.EID) {
-	id := s.Viewports[idx]
+	viewportEID := s.Viewports[idx]
 
 	// the first viewport is always the main viewport
 	if idx == mainViewport {
-		s.AddMainViewport(id)
+		s.AddMainViewport(viewportEID)
 	} else {
-		s.MainViewport.Remove(id)
+		s.MainViewport.Remove(viewportEID)
 	}
 
-	camera, found := s.GetCamera(id)
-	if !found {
+	sfc, found := s.GetTexture(viewportEID)
+	if !found || sfc.Texture == nil {
 		return
-	}
-
-	node, found := s.GetSceneGraphNode(id)
-	if !found {
-		node = s.AddSceneGraphNode(id)
-	}
-
-	// translate the camera position using the camera's scene graph node
-	cx, cy := camera.Position.Clone().ApplyMatrix4(node.Local).XY()
-	cw, ch := camera.Size.XY()
-
-	sfc, found := s.GetTexture(id)
-	if !found {
-		return
-	}
-
-	if sfc.Texture == nil {
-		sfc.Texture = s.baseSystems.RenderSystem.renderer.NewSurface(int(cw), int(ch))
 	}
 
 	if idx == mainViewport {
 		sfc.Texture.Clear(s.backgroundColor)
 	}
 
-	sfc.Texture.PushTranslation(int(-cx), int(-cy)) // negative because we're offsetting everything that gets rendered
-
-	for _, object := range objects {
-		s.renderObject(sfc.Texture, object)
+	for _, objectEID := range objects {
+		s.renderObject(viewportEID, objectEID)
 	}
-
-	sfc.Texture.Pop()
 }
 
-func (s *BaseScene) renderObject(target d2interface.Surface, id akara.EID) {
-	texture, found := s.GetTexture(id)
+func (s *BaseScene) renderObject(viewportEID, objectEID akara.EID) {
+	vpTexture, found := s.GetTexture(viewportEID)
+	if !found || vpTexture.Texture == nil {
+		return
+	}
+
+	vpNode, found := s.GetSceneGraphNode(viewportEID)
+	if !found {
+		vpNode = s.AddSceneGraphNode(viewportEID)
+	}
+
+	// translation, rotation, and scale vec3's
+	vpTrans, vpRot, vpScale := vpNode.Local.Invert().Decompose()
+
+	objTexture, found := s.GetTexture(objectEID)
 	if !found {
 		return
 	}
 
-	position, found := s.GetPosition(id)
+
+	alpha, found := s.GetAlpha(objectEID)
 	if !found {
-		position = s.AddPosition(id)
+		alpha = s.AddAlpha(objectEID)
 	}
 
-	scale, found := s.GetScale(id)
+	origin, found := s.GetOrigin(objectEID)
 	if !found {
-		scale = s.AddScale(id)
+		origin = s.AddOrigin(objectEID)
 	}
 
-	alpha, found := s.GetAlpha(id)
+	node, found := s.GetSceneGraphNode(objectEID)
 	if !found {
-		alpha = s.AddAlpha(id)
-	}
-
-	origin, found := s.GetOrigin(id)
-	if !found {
-		origin = s.AddOrigin(id)
-	}
-
-	node, found := s.GetSceneGraphNode(id)
-	if !found {
-		node = s.AddSceneGraphNode(id)
+		node = s.AddSceneGraphNode(objectEID)
 		node.SetParent(s.Graph)
 	}
 
-	drawEffect, found := s.GetDrawEffect(id)
+	drawEffect, found := s.GetDrawEffect(objectEID)
 	if found {
-		target.PushEffect(drawEffect.DrawEffect)
-		defer target.Pop()
+		vpTexture.Texture.PushEffect(drawEffect.DrawEffect)
+		defer vpTexture.Texture.Pop()
 	}
 
-	// translate the entity position using the scene graph node
-	x, y := position.Clone().
-		Add(origin.Vector3).
-		ApplyMatrix4(node.Local).
-		XY()
+	objNode, found := s.GetSceneGraphNode(objectEID)
+	if !found {
+		objNode = s.AddSceneGraphNode(objectEID)
+	}
 
-	target.PushTranslation(int(x), int(y))
-	defer target.Pop()
+	// translation, rotation, and scale vec3's
+	objTrans, objRot, objScale := objNode.Local.Decompose()
 
-	target.PushScale(scale.Clone().ApplyMatrix4(node.Local).XY())
-	defer target.Pop()
+	ox, oy := origin.X, origin.Y
+	tx, ty := objTrans.Add(vpTrans).XY()
+
+	vpTexture.Texture.PushTranslation(int(tx+ox), int(ty+oy))
+	defer vpTexture.Texture.Pop()
+
+	vpTexture.Texture.PushScale(objScale.Multiply(vpScale).XY())
+	defer vpTexture.Texture.Pop()
+
+	vpTexture.Texture.PushRotate(objRot.Add(vpRot).Z)
+	defer vpTexture.Texture.Pop()
 
 	const maxAlpha = 255
 
-	target.PushColor(color.Alpha{A: uint8(alpha.Alpha * maxAlpha)})
-	defer target.Pop()
+	vpTexture.Texture.PushColor(color.Alpha{A: uint8(alpha.Alpha * maxAlpha)})
+	defer vpTexture.Texture.Pop()
 
-	segment, found := s.baseSystems.SpriteFactory.GetSegmentedSprite(id)
+	segment, found := s.sceneSystems.SpriteFactory.GetSegmentedSprite(objectEID)
 	if found {
-		s.renderSegmentedSprite(target, id, segment)
+		s.renderSegmentedSprite(vpTexture.Texture, objectEID, segment)
 		return
 	}
 
-	target.Render(texture.Texture)
+	vpTexture.Texture.Render(objTexture.Texture)
 }
 
-func (s *BaseScene) renderSegmentedSprite(target d2interface.Surface, id akara.EID, seg *d2components.SegmentedSprite) {
+func (s *BaseScene) renderSegmentedSprite(screen d2interface.Surface, id akara.EID, seg *d2components.SegmentedSprite) {
+	target := screen.Renderer().NewSurface(screen.GetSize())
+
 	animation, found := s.GetSprite(id)
 	if !found {
 		return
@@ -393,7 +404,7 @@ func (s *BaseScene) renderSegmentedSprite(target d2interface.Surface, id akara.E
 		for x := 0; x < segmentsX; x++ {
 			idx := x + y*segmentsX + frameOffset*segmentsX*segmentsY
 			if err := animation.SetCurrentFrame(idx); err != nil {
-				s.Error("SetCurrentFrame error" + err.Error())
+				s.Error("SetCurrentFrame error " + err.Error())
 			}
 
 			target.PushTranslation(x+offsetX, y+offsetY)
@@ -407,6 +418,8 @@ func (s *BaseScene) renderSegmentedSprite(target d2interface.Surface, id akara.E
 
 		offsetY += maxFrameHeight - 1
 	}
+
+	screen.Render(target)
 }
 
 func (s *BaseScene) renderViewportsToMainViewport() {
@@ -442,12 +455,13 @@ func (s *BaseScene) renderViewportsToMainViewport() {
 	}
 }
 
-func (s *BaseScene) RegisterTerminalCommand(name, desc string, fn interface{}) {
+func (s *BaseScene) RegisterTerminalCommand(name, desc string, args []string, fn func(args []string) error) {
 	regID := s.NewEntity()
 	reg := s.AddCommandRegistration(regID)
 	s.AddDirty(regID)
 
 	reg.Name = name
 	reg.Description = desc
+	reg.Arguments = args
 	reg.Callback = fn
 }

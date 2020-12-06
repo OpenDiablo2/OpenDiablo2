@@ -18,4 +18,5 @@ type surfaceState struct {
 	effect         d2enum.DrawEffect
 	skewX, skewY   float64
 	scaleX, scaleY float64
+	rotate         float64
 }

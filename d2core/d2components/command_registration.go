@@ -13,13 +13,15 @@ type CommandRegistration struct {
 	Enabled     bool
 	Name        string
 	Description string
-	Callback    interface{}
+	Arguments   []string
+	Callback    func(args []string) error
 }
 
 // New creates a new CommandRegistration. By default, IsCommandRegistration is false.
 func (*CommandRegistration) New() akara.Component {
 	return &CommandRegistration{
 		Enabled: true,
+		Arguments: make([]string, 0),
 	}
 }
 

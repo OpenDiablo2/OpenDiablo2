@@ -40,6 +40,7 @@ type RenderSystem struct {
 	d2components.TextureFactory
 	d2components.PriorityFactory
 	d2components.AlphaFactory
+	d2components.CameraFactory
 	lastUpdate time.Time
 }
 
@@ -69,6 +70,7 @@ func (m *RenderSystem) setupFactories() {
 	m.InjectComponent(&d2components.Texture{}, &m.Texture)
 	m.InjectComponent(&d2components.Priority{}, &m.Priority)
 	m.InjectComponent(&d2components.Alpha{}, &m.Alpha)
+	m.InjectComponent(&d2components.Camera{}, &m.Camera)
 }
 
 func (m *RenderSystem) setupSubscriptions() {
@@ -77,6 +79,7 @@ func (m *RenderSystem) setupSubscriptions() {
 			&d2components.Viewport{},
 			&d2components.MainViewport{},
 			&d2components.Texture{},
+			&d2components.Camera{},
 		).
 		Build()
 
@@ -91,7 +94,7 @@ func (m *RenderSystem) setupSubscriptions() {
 // Update will initialize the renderer, start the game loop, and
 // disable the system (to prevent it from being called during the game loop).
 //
-// The reason why this isn't in the init step is because we use other baseSystems
+// The reason why this isn't in the init step is because we use other sceneSystems
 // for loading the config file, and it may take more than one iteration
 func (m *RenderSystem) Update() {
 	if m.renderer != nil {
@@ -108,7 +111,7 @@ func (m *RenderSystem) Update() {
 	// this system and start the run loop.
 	m.SetActive(false)
 
-	err := m.startGameLoop()
+	err := m.StartGameLoop()
 	if err != nil {
 		m.Fatal(err.Error())
 	}
@@ -141,7 +144,6 @@ func (m *RenderSystem) createRenderer() {
 		RunInBackground: config.RunInBackground,
 		VsyncEnabled:    config.VsyncEnabled,
 		Backend:         config.Backend,
-		LogLevel:        config.LogLevel,
 	}
 
 	renderer, err := d2render.CreateRenderer(oldStyleConfig)
@@ -173,6 +175,11 @@ func (m *RenderSystem) render(screen d2interface.Surface) error {
 			return errors.New("main viewport not found")
 		}
 
+		cam, found := m.GetCamera(id)
+		if !found {
+			return errors.New("main viewport camera not found")
+		}
+
 		texture, found := m.GetTexture(id)
 		if !found {
 			return errors.New("main viewport doesn't have a surface")
@@ -191,9 +198,11 @@ func (m *RenderSystem) render(screen d2interface.Surface) error {
 
 		screen.PushColor(color.Alpha{A: uint8(alpha.Alpha * maxAlpha)})
 		screen.PushTranslation(vp.Left, vp.Top)
+		screen.PushScale(float64(vp.Width)/cam.Size.X, float64(vp.Height)/cam.Size.Y)
 
 		screen.Render(texture.Texture)
 
+		screen.Pop()
 		screen.Pop()
 		screen.Pop()
 	}
@@ -209,7 +218,7 @@ func (m *RenderSystem) updateWorld() error {
 	return m.World.Update(elapsed)
 }
 
-func (m *RenderSystem) startGameLoop() error {
+func (m *RenderSystem) StartGameLoop() error {
 	m.Infof("starting game loop ...")
 
 	return m.renderer.Run(m.render, m.updateWorld, 800, 600, gameTitle)

@@ -1,10 +1,10 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2input"
+	"github.com/gravestench/akara"
 	"image/color"
 	"math"
-
-	"github.com/gravestench/akara"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 )
@@ -121,6 +121,20 @@ func (s *EbitenSplashScene) createSplash() {
 		}
 	}
 
+	interactive := s.AddInteractive(s.NewEntity())
+
+	interactive.InputVector.SetMouseButton(d2input.MouseButtonLeft)
+
+	interactive.Callback = func() bool {
+		s.Info("hiding splash scene")
+
+		s.timeElapsed = splashTimeout
+
+		interactive.Enabled = false
+
+		return true // prevent propagation
+	}
+
 	s.squares = squares
 }
 
@@ -133,9 +147,11 @@ func (s *EbitenSplashScene) updateSplash() {
 	// fade out after timeout
 	if s.timeElapsed >= splashTimeout {
 		vpAlpha, _ := s.GetAlpha(s.Viewports[0])
-		vpAlpha.Alpha -= 0.1225
+		vpAlpha.Alpha -= 0.0425
 		if vpAlpha.Alpha <= 0 {
 			vpAlpha.Alpha = 0
+
+			s.Info("finished, deactivating")
 			s.SetActive(false)
 		}
 	}
@@ -145,7 +161,7 @@ func (s *EbitenSplashScene) updateSplash() {
 
 	// fade all of the squares
 	for idx, id := range s.squares {
-		a := math.Sin(s.timeElapsed + -90 + (float64(idx)/numSquares))
+		a := math.Sin(s.timeElapsed*2 + -90 + (float64(idx)/numSquares))
 		a = (a+1)/2 // clamp between 0..1
 
 		alpha, found := s.GetAlpha(id)

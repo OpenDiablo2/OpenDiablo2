@@ -26,7 +26,7 @@ func Test_GameConfigSystem_Bootstrap(t *testing.T) {
 	cfgSys.AddFilePath(world.NewEntity()).Path = testDataPath
 	cfgSys.AddFilePath(world.NewEntity()).Path = "config.json"
 
-	// at this point the world has initialized the baseSystems. when the world
+	// at this point the world has initialized the sceneSystems. when the world
 	// updates it should process the config dir to a source and then
 	// use the source to resolve a file handle, and finally the config file
 	// will get loaded by the config system.

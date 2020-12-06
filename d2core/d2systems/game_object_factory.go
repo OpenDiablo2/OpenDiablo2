@@ -13,7 +13,7 @@ const (
 // static check that GameObjectFactory implements the System interface
 var _ akara.System = &GameObjectFactory{}
 
-// GameObjectFactory is a wrapper system for subordinate baseSystems that
+// GameObjectFactory is a wrapper system for subordinate sceneSystems that
 // do the actual object creation work.
 type GameObjectFactory struct {
 	akara.BaseSystem
@@ -44,7 +44,7 @@ func (t *GameObjectFactory) injectSubSystems() {
 	t.ShapeSystem = NewShapeSystem(t.BaseSystem, t.Logger)
 }
 
-// Update updates all the sub-baseSystems
+// Update updates all the sub-sceneSystems
 func (t *GameObjectFactory) Update() {
 	t.SpriteFactory.Update()
 	t.ShapeSystem.Update()

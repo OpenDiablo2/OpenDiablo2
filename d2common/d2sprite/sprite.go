@@ -83,7 +83,7 @@ func (a *Sprite) Advance(elapsed time.Duration) error {
 	a.lastFrameTime += elapsed
 
 	framesAdvanced := int(float64(a.lastFrameTime) / float64(frameLength))
-	a.lastFrameTime -= time.Duration(float64(framesAdvanced) * float64(frameLength))
+	a.lastFrameTime -= time.Duration(float64(framesAdvanced)) * frameLength
 
 	for i := 0; i < framesAdvanced; i++ {
 		startIndex := 0
