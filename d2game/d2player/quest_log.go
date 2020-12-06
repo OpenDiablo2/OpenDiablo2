@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	white      = 0xffffffff
-	lightBrown = 0xbca88cff
+	white = 0xffffffff
 )
 
 const (

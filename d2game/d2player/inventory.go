@@ -53,6 +53,8 @@ func NewInventory(asset *d2asset.AssetManager,
 		moveGoldPanel: mgp,
 	}
 
+	inventory.moveGoldPanel.SetOnCloseCb(func() { inventory.onCloseGoldPanel() })
+
 	inventory.Logger = d2util.NewLogger()
 	inventory.Logger.SetLevel(l)
 	inventory.Logger.SetPrefix(logPrefix)
@@ -79,7 +81,7 @@ type Inventory struct {
 	isOpen        bool
 	onCloseCb     func()
 	gold          int
-	moveGoldPanel *moveGoldPanel
+	moveGoldPanel *MoveGoldPanel
 
 	*d2util.Logger
 }
@@ -199,6 +201,13 @@ func (g *Inventory) SetOnCloseCb(cb func()) {
 func (g *Inventory) onGoldClicked() {
 	g.Info("Move gold action clicked")
 	g.moveGoldPanel.Toggle()
+}
+
+func (g *Inventory) toggleMoveGoldPanel() {
+	g.moveGoldPanel.Toggle()
+}
+
+func (g *Inventory) onCloseGoldPanel() {
 
 }
 

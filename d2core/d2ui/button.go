@@ -166,6 +166,12 @@ const (
 	buttonOkCancelSegmentsY     = 1
 	buttonOkCancelDisabledFrame = -1
 
+	buttonUpDownArrowSegmentsX     = 1
+	buttonUpDownArrowSegmentsY     = 1
+	buttonUpDownArrowDisabledFrame = -1
+	buttonUpArrowBaseFrame         = 0
+	buttonDownArrowBaseFrame       = 2
+
 	buttonBuySellSegmentsX     = 1
 	buttonBuySellSegmentsY     = 1
 	buttonBuySellDisabledFrame = 1
@@ -443,11 +449,11 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			TooltipYOffset:   buttonBuySellTooltipYOffset,
 		},
 		ButtonTypeUpArrow: {
-			XSegments:        1,
-			YSegments:        1,
-			DisabledFrame:    -1,
+			XSegments:        buttonUpDownArrowSegmentsX,
+			YSegments:        buttonUpDownArrowSegmentsY,
+			DisabledFrame:    buttonUpDownArrowDisabledFrame,
 			DisabledColor:    whiteAlpha100,
-			BaseFrame:        0,
+			BaseFrame:        buttonUpArrowBaseFrame,
 			ResourceName:     d2resource.UpDownArrows,
 			PaletteName:      d2resource.PaletteSky,
 			Toggleable:       false,
@@ -458,11 +464,11 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			FixedHeight:      ButtonNoFixedHeight,
 		},
 		ButtonTypeDownArrow: {
-			XSegments:        1,
-			YSegments:        1,
-			DisabledFrame:    -1,
+			XSegments:        buttonUpDownArrowSegmentsX,
+			YSegments:        buttonUpDownArrowSegmentsY,
+			DisabledFrame:    buttonUpDownArrowDisabledFrame,
 			DisabledColor:    whiteAlpha100,
-			BaseFrame:        2,
+			BaseFrame:        buttonDownArrowBaseFrame,
 			ResourceName:     d2resource.UpDownArrows,
 			PaletteName:      d2resource.PaletteSky,
 			Toggleable:       false,

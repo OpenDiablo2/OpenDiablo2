@@ -92,6 +92,7 @@ func (v *TextBox) OnKeyChars(event d2interface.KeyCharsEvent) bool {
 				v.Debugf("Unable to convert string %s to intager: %s", v.text+newText, err)
 				return false
 			}
+
 			if number <= v.maxValue {
 				v.text += newText
 			} else {
@@ -235,6 +236,7 @@ func (v *TextBox) Activate() {
 	v.isFocused = true
 }
 
+// SetNumberOnly sets text box to support only numeric values
 func (v *TextBox) SetNumberOnly(max int) {
 	v.isNumberOnly = true
 	v.maxValue = max
