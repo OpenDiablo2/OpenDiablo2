@@ -138,6 +138,7 @@ func (s *MoveGoldPanel) action() {
 
 	s.gold -= value
 	s.value.SetText(fmt.Sprintln(s.gold))
+	s.value.SetNumberOnly(s.gold)
 	s.Close()
 }
 
@@ -167,6 +168,7 @@ func (s *MoveGoldPanel) decrose() {
 
 func (s *MoveGoldPanel) setActionText() {
 	dropGoldStr := d2util.SplitIntoLinesWithMaxWidth(s.asset.TranslateString("strDropGoldHowMuch"), 20)
+	// nolint:gocritic // it will be used
 	// depositeGoldStr := d2util.SplitIntoLinesWithMaxWidth(s.asset.TranslateString("strBankGoldDeposit"), 20)
 	// witherawGoldStr := d2util.SplitIntoLinesWithMaxWidgh(s.asset.TranslateString("strBankGoldWithdraw"), 20)
 

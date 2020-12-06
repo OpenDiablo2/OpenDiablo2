@@ -124,7 +124,6 @@ func (g *Inventory) Load() {
 
 	g.goldLabel = g.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
 	g.goldLabel.Alignment = d2ui.HorizontalAlignLeft
-	//g.goldLabel.SetText(fmt.Sprintln(g.gold))
 	g.goldLabel.SetText(fmt.Sprintln(g.moveGoldPanel.gold))
 	g.goldLabel.SetPosition(invGoldLabelX, invGoldLabelY)
 	g.panelGroup.AddWidget(g.goldLabel)
@@ -218,11 +217,12 @@ func (g *Inventory) IsOpen() bool {
 	return g.isOpen
 }
 
+// Advance advances the state of the Inventory
 func (g *Inventory) Advance(_ float64) {
 	if !g.IsOpen() {
 		return
 	}
-	//g.goldLabel.SetText(fmt.Sprintln(g.gold))
+
 	g.goldLabel.SetText(fmt.Sprintln(g.moveGoldPanel.gold))
 }
 
