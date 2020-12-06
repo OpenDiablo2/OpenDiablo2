@@ -1,6 +1,7 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2core/d2components"
 	"time"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
@@ -16,18 +17,6 @@ const (
 	logPrefixTimeScaleSystem = "Time Scale"
 )
 
-// NewTimeScaleSystem creates a timescale system
-func NewTimeScaleSystem() *TimeScaleSystem {
-	m := &TimeScaleSystem{
-		BaseSystem: &akara.BaseSystem{},
-		Logger:     d2util.NewLogger(),
-	}
-
-	m.SetPrefix(logPrefixTimeScaleSystem)
-
-	return m
-}
-
 // static check that TimeScaleSystem implements the System interface
 var _ akara.System = &TimeScaleSystem{}
 
@@ -35,29 +24,50 @@ var _ akara.System = &TimeScaleSystem{}
 // apply a scalar the world's TimeDelta between frames. It's useful for slowing down or speeding
 // up the game time without affecting the render rate.
 type TimeScaleSystem struct {
-	*akara.BaseSystem
+	akara.BaseSystem
 	*d2util.Logger
 	scale     float64
-	lastScale float64
+	d2components.DirtyFactory
+	d2components.CommandRegistrationFactory
 }
 
 // Init will initialize the TimeScale system
 func (t *TimeScaleSystem) Init(world *akara.World) {
 	t.World = world
 
+	t.Logger = d2util.NewLogger()
+	t.SetPrefix(logPrefixTimeScaleSystem)
+
 	t.Info("initializing ...")
+
+	t.InjectComponent(&d2components.CommandRegistration{}, &t.CommandRegistration)
+	t.InjectComponent(&d2components.Dirty{}, &t.Dirty)
+
+	t.registerCommands()
 
 	t.scale = defaultScale
 }
 
 // Update scales the worlds time delta for this frame
 func (t *TimeScaleSystem) Update() {
-	if !t.Active() || t.scale == t.lastScale {
+	if !t.Active() {
 		return
 	}
 
-	t.Infof("setting time scale to %.1f", t.scale)
-	t.lastScale = t.scale
+	t.World.TimeDelta = time.Duration(float64(t.World.TimeDelta) * t.scale)
+}
 
-	t.World.TimeDelta *= time.Duration(t.scale)
+func (t *TimeScaleSystem) registerCommands() {
+	e := t.NewEntity()
+
+	reg := t.AddCommandRegistration(e)
+
+	t.AddDirty(e)
+
+	reg.Name = "timescale"
+	reg.Description = "set the time scale of the game (default is 1.0)"
+	reg.Callback = func(scale float64) {
+		t.Infof("setting time scale to %.1f", scale)
+		t.scale = scale
+	}
 }

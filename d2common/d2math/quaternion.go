@@ -380,17 +380,15 @@ func (q *Quaternion) SetFromEuler(e *Euler) *Quaternion {
 
 // SetFromRotationMatrix sets the rotation of this Quaternion from the given Matrix4.
 func (q *Quaternion) SetFromRotationMatrix(m4 *Matrix4) *Quaternion {
-	m := m4.Values
-
-	m11 := m[0]
-	m12 := m[4]
-	m13 := m[8]
-	m21 := m[1]
-	m22 := m[5]
-	m23 := m[9]
-	m31 := m[2]
-	m32 := m[6]
-	m33 := m[10]
+	m11 := m4.Values[0]
+	m12 := m4.Values[4]
+	m13 := m4.Values[8]
+	m21 := m4.Values[1]
+	m22 := m4.Values[5]
+	m23 := m4.Values[9]
+	m31 := m4.Values[2]
+	m32 := m4.Values[6]
+	m33 := m4.Values[10]
 
 	trace := m11 + m22 + m33
 	var s float64

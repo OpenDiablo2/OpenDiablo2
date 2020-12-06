@@ -24,6 +24,7 @@ type Surface interface {
 	PushTranslation(x, y int)
 	PushSkew(x, y float64)
 	PushScale(x, y float64)
+	PushRotate(theta float64)
 	PushBrightness(brightness float64)
 	PushSaturation(saturation float64)
 	Render(surface Surface)

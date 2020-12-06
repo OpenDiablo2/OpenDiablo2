@@ -86,6 +86,8 @@ func (m *InputSystem) Update() {
 }
 
 func (m *InputSystem) updateInputState() {
+	m.inputState.Clear()
+
 	var keysToCheck = []d2input.Key{
 		d2input.Key0, d2input.Key1, d2input.Key2, d2input.Key3, d2input.Key4, d2input.Key5, d2input.Key6,
 		d2input.Key7, d2input.Key8, d2input.Key9, d2input.KeyA, d2input.KeyB, d2input.KeyC, d2input.KeyD,
@@ -118,17 +120,17 @@ func (m *InputSystem) updateInputState() {
 	}
 
 	for _, key := range keysToCheck {
-		truth := m.InputService.IsKeyPressed(d2enum.Key(key))
+		truth := m.InputService.IsKeyJustPressed(d2enum.Key(key))
 		m.inputState.KeyVector.Set(key, truth)
 	}
 
 	for _, mod := range modifiersToCheck {
-		truth := m.InputService.IsKeyPressed(d2enum.Key(mod))
+		truth := m.InputService.IsKeyJustPressed(d2enum.Key(mod))
 		m.inputState.ModifierVector.Set(mod, truth)
 	}
 
 	for _, btn := range buttonsToCheck {
-		truth := m.InputService.IsMouseButtonPressed(d2enum.MouseButton(btn))
+		truth := m.InputService.IsMouseButtonJustPressed(d2enum.MouseButton(btn))
 		m.inputState.MouseButtonVector.Set(btn, truth)
 	}
 }

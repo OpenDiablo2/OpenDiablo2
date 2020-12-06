@@ -40,7 +40,7 @@ type SpriteFactory struct {
 	*d2util.Logger
 	RenderSystem *RenderSystem
 	d2components.FilePathFactory
-	d2components.PositionFactory
+	d2components.TransformFactory
 	d2components.Dc6Factory
 	d2components.DccFactory
 	d2components.PaletteFactory
@@ -67,7 +67,7 @@ func (t *SpriteFactory) Init(world *akara.World) {
 
 func (t *SpriteFactory) setupFactories() {
 	t.InjectComponent(&d2components.FilePath{}, &t.FilePath)
-	t.InjectComponent(&d2components.Position{}, &t.Position)
+	t.InjectComponent(&d2components.Transform{}, &t.Transform)
 	t.InjectComponent(&d2components.Dc6{}, &t.Dc6)
 	t.InjectComponent(&d2components.Dcc{}, &t.Dcc)
 	t.InjectComponent(&d2components.Palette{}, &t.Palette)
@@ -112,8 +112,8 @@ func (t *SpriteFactory) Update() {
 func (t *SpriteFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID {
 	spriteID := t.NewEntity()
 
-	position := t.AddPosition(spriteID)
-	position.X, position.Y = x, y
+	transform := t.AddTransform(spriteID)
+	transform.Translation.X, transform.Translation.Y = x, y
 
 	imgID, palID := t.NewEntity(), t.NewEntity()
 	t.AddFilePath(imgID).Path = imgPath

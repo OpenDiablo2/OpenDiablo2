@@ -20,7 +20,6 @@ var _ akara.Component = &Camera{}
 
 // Camera represents a camera that can be rendered to
 type Camera struct {
-	Position          *d2math.Vector3
 	PerspectiveMatrix *d2math.Matrix4
 	OrthogonalMatrix  *d2math.Matrix4
 	Size              *d2math.Vector2
@@ -31,7 +30,6 @@ type Camera struct {
 // The camera defaults to position (0,0), 800x600 resolution, and zoom of 1.0
 func (*Camera) New() akara.Component {
 	c := &Camera{
-		Position: d2math.NewVector3(0, 0, defaultCameraZ),
 		Size:     d2math.NewVector2(defaultCameraWidth, defaultCameraHeight),
 		Clip:     d2math.NewVector2(defaultCameraNear, defaultCameraFar),
 	}

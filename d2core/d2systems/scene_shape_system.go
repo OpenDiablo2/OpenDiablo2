@@ -29,7 +29,7 @@ type ShapeSystem struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
 	RenderSystem *RenderSystem
-	d2components.PositionFactory
+	d2components.TransformFactory
 	d2components.ColorFactory
 	d2components.RectangleFactory
 	d2components.TextureFactory
@@ -54,7 +54,7 @@ func (t *ShapeSystem) Init(world *akara.World) {
 
 func (t *ShapeSystem) setupFactories() {
 	t.InjectComponent(&d2components.Color{}, &t.ColorFactory.Color)
-	t.InjectComponent(&d2components.Position{}, &t.PositionFactory.Position)
+	t.InjectComponent(&d2components.Transform{}, &t.TransformFactory.Transform)
 	t.InjectComponent(&d2components.Texture{}, &t.TextureFactory.Texture)
 	t.InjectComponent(&d2components.Origin{}, &t.OriginFactory.Origin)
 	t.InjectComponent(&d2components.Size{}, &t.SizeFactory.Size)
@@ -69,7 +69,7 @@ func (t *ShapeSystem) setupSubscriptions() {
 
 	shapesToUpdate := t.NewComponentFilter().
 		RequireOne(&d2components.Rectangle{}).
-		Require(&d2components.Position{}, &d2components.Size{}).
+		Require(&d2components.Transform{}, &d2components.Size{}).
 		Build()
 
 	t.shapesToRender = t.AddSubscription(shapesToRender)
@@ -109,7 +109,7 @@ func (t *ShapeSystem) Rectangle(x, y, width, height int, color color.Color) akar
 }
 
 func (t *ShapeSystem) updateShape(eid akara.EID) {
-	position, found := t.GetPosition(eid)
+	transform, found := t.GetTransform(eid)
 	if !found {
 		return
 	}
@@ -126,7 +126,7 @@ func (t *ShapeSystem) updateShape(eid akara.EID) {
 
 	rectangle, rectangleFound := t.GetRectangle(eid)
 	if rectangleFound {
-		position.X, position.Y = rectangle.X, rectangle.Y
+		transform.Translation.X, transform.Translation.Y = rectangle.X, rectangle.Y
 		size.X, size.Y = rectangle.Width, rectangle.Height
 
 		tw, th := texture.Texture.GetSize()

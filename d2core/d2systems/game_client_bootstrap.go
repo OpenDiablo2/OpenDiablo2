@@ -1,9 +1,9 @@
 package d2systems
 
 import (
-	"github.com/gravestench/akara"
-
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
+	"github.com/gravestench/akara"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 const (
@@ -11,17 +11,17 @@ const (
 )
 
 // static check that the game config system implements the system interface
-var _ akara.System = &GameClientBootstrapSystem{}
+var _ akara.System = &GameClientBootstrap{}
 
-// GameClientBootstrapSystem is responsible for setting up other
-// baseSystems that are common to both the game client and the headless game server
-type GameClientBootstrapSystem struct {
+// GameClientBootstrap is responsible for setting up other
+// sceneSystems that are common to both the game client and the headless game server
+type GameClientBootstrap struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
 }
 
-// Init injects the common baseSystems required by both the game client and headless server
-func (m *GameClientBootstrapSystem) Init(world *akara.World) {
+// Init injects the common sceneSystems required by both the game client and headless server
+func (m *GameClientBootstrap) Init(world *akara.World) {
 	m.World = world
 
 	m.setupLogger()
@@ -37,20 +37,20 @@ func (m *GameClientBootstrapSystem) Init(world *akara.World) {
 	}
 }
 
-func (m *GameClientBootstrapSystem) setupLogger() {
+func (m *GameClientBootstrap) setupLogger() {
 	m.Logger = d2util.NewLogger()
 	m.SetPrefix(logPrefixGameClientBootstrap)
 }
 
-func (m *GameClientBootstrapSystem) injectSystems() {
-	m.Info("injecting render system")
-	m.AddSystem(&RenderSystem{})
+func (m *GameClientBootstrap) injectSystems() {
+	m.Info("injecting terminal scene")
+	m.AddSystem(NewTerminalScene())
 
-	m.Info("injecting input system")
-	m.AddSystem(&InputSystem{})
+	m.Info("injecting timescale scene")
+	m.AddSystem(&TimeScaleSystem{})
 
-	m.Info("injecting update counter system")
-	m.AddSystem(&UpdateCounter{})
+	m.Info("injecting game object factory system")
+	m.AddSystem(&GameObjectFactory{})
 
 	m.Info("injecting loading scene")
 	m.AddSystem(NewLoadingScene())
@@ -58,18 +58,20 @@ func (m *GameClientBootstrapSystem) injectSystems() {
 	m.Info("injecting mouse cursor scene")
 	m.AddSystem(NewMouseCursorScene())
 
+	skipSplash := kingpin.Flag(skipSplashArg, skipSplashDesc).Bool()
+	kingpin.Parse()
+
+	if !*skipSplash {
+		m.Info("injecting ebiten splash scene")
+		m.AddSystem(NewEbitenSplashScene())
+	}
+
 	m.Info("injecting main menu scene")
 	m.AddSystem(NewMainMenuScene())
-
-	m.Info("injecting terminal scene")
-	m.AddSystem(NewTerminalScene())
-
-	m.Info("injecting ebiten splash scene")
-	m.AddSystem(NewEbitenSplashScene())
 }
 
 // Update does nothing, but exists to satisfy the `akara.System` interface
-func (m *GameClientBootstrapSystem) Update() {
+func (m *GameClientBootstrap) Update() {
 	m.Info("game client bootstrap complete, deactivating")
 	m.RemoveSystem(m)
 }

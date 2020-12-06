@@ -89,6 +89,12 @@ func (s *ebitenSurface) PushScale(scaleX, scaleY float64) {
 	s.stateCurrent.scaleY = scaleY
 }
 
+// PushRotate pushes a rotation to the state stack
+func (s *ebitenSurface) PushRotate(theta float64) {
+	s.stateStack = append(s.stateStack, s.stateCurrent)
+	s.stateCurrent.rotate = theta
+}
+
 // PushEffect pushes an effect to the state stack
 func (s *ebitenSurface) PushEffect(effect d2enum.DrawEffect) {
 	s.stateStack = append(s.stateStack, s.stateCurrent)
@@ -178,14 +184,9 @@ func (s *ebitenSurface) RenderSection(sfc d2interface.Surface, bound image.Recta
 func (s *ebitenSurface) createDrawImageOptions() *ebiten.DrawImageOptions {
 	opts := &ebiten.DrawImageOptions{}
 
-	if s.stateCurrent.skewX != 0 || s.stateCurrent.skewY != 0 {
-		opts.GeoM.Skew(s.stateCurrent.skewX, s.stateCurrent.skewY)
-	}
-
-	if s.stateCurrent.scaleX != 1.0 || s.stateCurrent.scaleY != 1.0 {
-		opts.GeoM.Scale(s.stateCurrent.scaleX, s.stateCurrent.scaleY)
-	}
-
+	opts.GeoM.Skew(s.stateCurrent.skewX, s.stateCurrent.skewY)
+	opts.GeoM.Scale(s.stateCurrent.scaleX, s.stateCurrent.scaleY)
+	opts.GeoM.Rotate(s.stateCurrent.rotate)
 	opts.GeoM.Translate(float64(s.stateCurrent.x), float64(s.stateCurrent.y))
 
 	opts.Filter = s.stateCurrent.filter

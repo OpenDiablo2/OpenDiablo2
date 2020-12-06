@@ -24,9 +24,9 @@ const (
 // to be found in, and it also adds an entity for the initial config file to be loaded.
 //
 // This system is dependant on the FileTypeResolver, FileSourceResolver, and
-// FileHandleResolver baseSystems because this system subscribes to entities
-// with components created by these other baseSystems. Nothing will  break if these
-// other baseSystems are not present in the world, but no config files will be loaded by
+// FileHandleResolver sceneSystems because this system subscribes to entities
+// with components created by these other sceneSystems. Nothing will  break if these
+// other sceneSystems are not present in the world, but no config files will be loaded by
 // this system either...
 type GameConfigSystem struct {
 	akara.BaseSubscriberSystem

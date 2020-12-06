@@ -21,7 +21,7 @@ var _ akara.System = &MovementSystem{}
 type MovementSystem struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
-	d2components.PositionFactory
+	d2components.TransformFactory
 	d2components.VelocityFactory
 	movableEntities *akara.Subscription
 }
@@ -35,11 +35,11 @@ func (m *MovementSystem) Init(world *akara.World) {
 
 	m.Info("initializing ...")
 
-	m.InjectComponent(&d2components.Position{}, &m.Position)
+	m.InjectComponent(&d2components.Transform{}, &m.Transform)
 	m.InjectComponent(&d2components.Velocity{}, &m.Velocity)
 
 	movable := m.NewComponentFilter().Require(
-		&d2components.Position{},
+		&d2components.Transform{},
 		&d2components.Velocity{},
 	).Build()
 
@@ -56,7 +56,7 @@ func (m *MovementSystem) Update() {
 }
 
 func (m *MovementSystem) move(id akara.EID) {
-	position, found := m.GetPosition(id)
+	transform, found := m.GetTransform(id)
 	if !found {
 		return
 	}
@@ -67,5 +67,5 @@ func (m *MovementSystem) move(id akara.EID) {
 	}
 
 	s := float64(m.World.TimeDelta) / float64(time.Second)
-	position.Add(velocity.Clone().Scale(s))
+	transform.Translation.Add(velocity.Clone().Scale(s))
 }

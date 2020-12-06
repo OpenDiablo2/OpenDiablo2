@@ -26,8 +26,8 @@ func (s *sceneObjectFactory) addBasicComponents(id akara.EID) {
 func (s *sceneObjectFactory) Sprite(x, y float64, imgPath, palPath string) akara.EID {
 	s.Debugf("creating sprite: %s, %s", filepath.Base(imgPath), palPath)
 
-	eid := s.baseSystems.SpriteFactory.Sprite(x, y, imgPath, palPath)
-	s.GameObjects = append(s.GameObjects, eid)
+	eid := s.sceneSystems.SpriteFactory.Sprite(x, y, imgPath, palPath)
+	s.SceneObjects = append(s.SceneObjects, eid)
 
 	s.addBasicComponents(eid)
 
@@ -37,8 +37,8 @@ func (s *sceneObjectFactory) Sprite(x, y float64, imgPath, palPath string) akara
 func (s *sceneObjectFactory) SegmentedSprite(x, y float64, imgPath, palPath string, xseg, yseg, frame int) akara.EID {
 	s.Debugf("creating segmented sprite: %s, %s", filepath.Base(imgPath), palPath)
 
-	eid := s.baseSystems.SpriteFactory.SegmentedSprite(x, y, imgPath, palPath, xseg, yseg, frame)
-	s.GameObjects = append(s.GameObjects, eid)
+	eid := s.sceneSystems.SpriteFactory.SegmentedSprite(x, y, imgPath, palPath, xseg, yseg, frame)
+	s.SceneObjects = append(s.SceneObjects, eid)
 
 	s.addBasicComponents(eid)
 
@@ -60,7 +60,7 @@ func (s *sceneObjectFactory) Viewport(priority, width, height int) akara.EID {
 	camera.Size.X = float64(width)
 	camera.Size.Y = float64(height)
 
-	sfc := s.baseSystems.RenderSystem.renderer.NewSurface(width, height)
+	sfc := s.sceneSystems.RenderSystem.renderer.NewSurface(width, height)
 
 	sfc.Clear(color.Transparent)
 
@@ -73,17 +73,17 @@ func (s *sceneObjectFactory) Viewport(priority, width, height int) akara.EID {
 	return eid
 }
 
-func (s *sceneObjectFactory) Rectangle(x, y, width, height int, color color.Color) akara.EID {
+func (s *sceneObjectFactory) Rectangle(x, y, width, height int, c color.Color) akara.EID {
 	s.Debug("creating rectangle")
 
-	eid := s.baseSystems.ShapeSystem.Rectangle(x, y, width, height, color)
+	eid := s.sceneSystems.ShapeSystem.Rectangle(x, y, width, height, c)
 
 	s.addBasicComponents(eid)
 
-	position := s.AddPosition(eid)
-	position.X, position.Y = float64(x), float64(y)
+	transform := s.AddTransform(eid)
+	transform.Translation.X, transform.Translation.Y = float64(x), float64(y)
 
-	s.GameObjects = append(s.GameObjects, eid)
+	s.SceneObjects = append(s.SceneObjects, eid)
 
 	return eid
 }

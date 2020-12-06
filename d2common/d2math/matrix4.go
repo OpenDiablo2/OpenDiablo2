@@ -20,6 +20,38 @@ type Matrix4 struct {
 	Values [numMatrix4Values]float64
 }
 
+// Decompose this matrix into vec3 for translation, rotation, and scale
+func (m *Matrix4) Decompose() (t, r, s *Vector3) {
+	t = NewVector3(m.Values[12], m.Values[13], m.Values[14])
+
+	s = NewVector3(
+		NewVector3(m.Values[0], m.Values[1], m.Values[2]).Length(),
+		NewVector3(m.Values[4], m.Values[5], m.Values[6]).Length(),
+		NewVector3(m.Values[8], m.Values[9], m.Values[10]).Length(),
+	)
+
+	e := NewEuler(0, 0, 0, EulerOrderDefault)
+
+	rotmat := m.Clone()
+	rotmat.Values[0] /= s.X
+	rotmat.Values[1] /= s.Y
+	rotmat.Values[2] /= s.Z
+
+	rotmat.Values[4] /= s.X
+	rotmat.Values[5] /= s.Y
+	rotmat.Values[6] /= s.Z
+
+	rotmat.Values[8] /= s.X
+	rotmat.Values[9] /= s.Y
+	rotmat.Values[10] /= s.Z
+
+	e.SetFromRotationMatrix(rotmat, EulerOrderZYX)
+
+	r = NewVector3(e.XYZ())
+
+	return t, r, s
+}
+
 // Clone makes a clone of this Matrix4.
 func (m *Matrix4) Clone() *Matrix4 {
 	return NewMatrix4(m)
@@ -47,12 +79,10 @@ func (m *Matrix4) Set(other *Matrix4) *Matrix4 {
 
 // SetValues sets the values of this Matrix4.
 func (m *Matrix4) SetValues(a, b, c, d, e, f, g, h, i, j, k, l, mm, n, o, p float64) *Matrix4 {
-	v := m.Values[:]
-
-	v[0], v[1], v[2], v[3] = a, b, c, d
-	v[4], v[5], v[6], v[7] = e, f, g, h
-	v[8], v[9], v[10], v[11] = i, j, k, l
-	v[12], v[13], v[14], v[15] = mm, n, o, p
+	m.Values[0], m.Values[1], m.Values[2], m.Values[3] = a, b, c, d
+	m.Values[4], m.Values[5], m.Values[6], m.Values[7] = e, f, g, h
+	m.Values[8], m.Values[9], m.Values[10], m.Values[11] = i, j, k, l
+	m.Values[12], m.Values[13], m.Values[14], m.Values[15] = mm, n, o, p
 
 	return m
 }
@@ -130,27 +160,25 @@ func (m *Matrix4) SetScaling(x, y, z float64) *Matrix4 {
 
 // Transpose this Matrix.
 func (m *Matrix4) Transpose() *Matrix4 {
-	a := m.Values[:]
+	a01 := m.Values[1]
+	a02 := m.Values[2]
+	a03 := m.Values[3]
+	a12 := m.Values[6]
+	a13 := m.Values[7]
+	a23 := m.Values[11]
 
-	a01 := a[1]
-	a02 := a[2]
-	a03 := a[3]
-	a12 := a[6]
-	a13 := a[7]
-	a23 := a[11]
-
-	a[1] = a[4]
-	a[2] = a[8]
-	a[3] = a[12]
-	a[4] = a01
-	a[6] = a[9]
-	a[7] = a[13]
-	a[8] = a02
-	a[9] = a12
-	a[11] = a[14]
-	a[12] = a03
-	a[13] = a13
-	a[14] = a23
+	m.Values[1] = m.Values[4]
+	m.Values[2] = m.Values[8]
+	m.Values[3] = m.Values[12]
+	m.Values[4] = a01
+	m.Values[6] = m.Values[9]
+	m.Values[7] = m.Values[13]
+	m.Values[8] = a02
+	m.Values[9] = a12
+	m.Values[11] = m.Values[14]
+	m.Values[12] = a03
+	m.Values[13] = a13
+	m.Values[14] = a23
 
 	return m
 }
@@ -162,12 +190,10 @@ func (m *Matrix4) GetInverse(other *Matrix4) *Matrix4 {
 
 // Invert this Matrix.
 func (m *Matrix4) Invert() *Matrix4 {
-	a := m.Values[:]
-
-	a00, a01, a02, a03 := a[0], a[1], a[2], a[3]
-	a10, a11, a12, a13 := a[4], a[5], a[6], a[7]
-	a20, a21, a22, a23 := a[8], a[9], a[10], a[11]
-	a30, a31, a32, a33 := a[12], a[13], a[14], a[15]
+	a00, a01, a02, a03 := m.Values[0], m.Values[1], m.Values[2], m.Values[3]
+	a10, a11, a12, a13 := m.Values[4], m.Values[5], m.Values[6], m.Values[7]
+	a20, a21, a22, a23 := m.Values[8], m.Values[9], m.Values[10], m.Values[11]
+	a30, a31, a32, a33 := m.Values[12], m.Values[13], m.Values[14], m.Values[15]
 
 	b00 := a00*a11 - a01*a10
 	b01 := a00*a12 - a02*a10
@@ -213,12 +239,10 @@ func (m *Matrix4) Invert() *Matrix4 {
 
 // Adjoint calculates the adjoint, or adjugate, of this Matrix.
 func (m *Matrix4) Adjoint() *Matrix4 {
-	a := m.Values[:]
-
-	a00, a01, a02, a03 := a[0], a[1], a[2], a[3]
-	a10, a11, a12, a13 := a[4], a[5], a[6], a[7]
-	a20, a21, a22, a23 := a[8], a[9], a[10], a[11]
-	a30, a31, a32, a33 := a[12], a[13], a[14], a[15]
+	a00, a01, a02, a03 := m.Values[0], m.Values[1], m.Values[2], m.Values[3]
+	a10, a11, a12, a13 := m.Values[4], m.Values[5], m.Values[6], m.Values[7]
+	a20, a21, a22, a23 := m.Values[8], m.Values[9], m.Values[10], m.Values[11]
+	a30, a31, a32, a33 := m.Values[12], m.Values[13], m.Values[14], m.Values[15]
 
 	return m.SetValues(
 		a11*(a22*a33-a23*a32)-a21*(a12*a33-a13*a32)+a31*(a12*a23-a13*a22),
@@ -242,12 +266,10 @@ func (m *Matrix4) Adjoint() *Matrix4 {
 
 // Determinant calculates the determinant of this Matrix.
 func (m *Matrix4) Determinant() float64 {
-	a := m.Values[:]
-
-	a00, a01, a02, a03 := a[0], a[1], a[2], a[3]
-	a10, a11, a12, a13 := a[4], a[5], a[6], a[7]
-	a20, a21, a22, a23 := a[8], a[9], a[10], a[11]
-	a30, a31, a32, a33 := a[12], a[13], a[14], a[15]
+	a00, a01, a02, a03 := m.Values[0], m.Values[1], m.Values[2], m.Values[3]
+	a10, a11, a12, a13 := m.Values[4], m.Values[5], m.Values[6], m.Values[7]
+	a20, a21, a22, a23 := m.Values[8], m.Values[9], m.Values[10], m.Values[11]
+	a30, a31, a32, a33 := m.Values[12], m.Values[13], m.Values[14], m.Values[15]
 
 	b00 := a00*a11 - a01*a10
 	b01 := a00*a12 - a02*a10
@@ -267,62 +289,58 @@ func (m *Matrix4) Determinant() float64 {
 
 // Multiply this Matrix4 by the given Matrix4.
 func (m *Matrix4) Multiply(other *Matrix4) *Matrix4 {
-	a, b := m.Values, other.Values
-
-	a00, a01, a02, a03 := a[0], a[1], a[2], a[3]
-	a10, a11, a12, a13 := a[4], a[5], a[6], a[7]
-	a20, a21, a22, a23 := a[8], a[9], a[10], a[11]
-	a30, a31, a32, a33 := a[12], a[13], a[14], a[15]
+	a00, a01, a02, a03 := m.Values[0], m.Values[1], m.Values[2], m.Values[3]
+	a10, a11, a12, a13 := m.Values[4], m.Values[5], m.Values[6], m.Values[7]
+	a20, a21, a22, a23 := m.Values[8], m.Values[9], m.Values[10], m.Values[11]
+	a30, a31, a32, a33 := m.Values[12], m.Values[13], m.Values[14], m.Values[15]
 
 	// Cache only the current line of the second matrix
-	b0, b1, b2, b3 := b[0], b[1], b[2], b[3]
-	a[0] = b0*a00 + b1*a10 + b2*a20 + b3*a30
-	a[1] = b0*a01 + b1*a11 + b2*a21 + b3*a31
-	a[2] = b0*a02 + b1*a12 + b2*a22 + b3*a32
-	a[3] = b0*a03 + b1*a13 + b2*a23 + b3*a33
+	b0, b1, b2, b3 := other.Values[0], other.Values[1], other.Values[2], other.Values[3]
+	m.Values[0] = b0*a00 + b1*a10 + b2*a20 + b3*a30
+	m.Values[1] = b0*a01 + b1*a11 + b2*a21 + b3*a31
+	m.Values[2] = b0*a02 + b1*a12 + b2*a22 + b3*a32
+	m.Values[3] = b0*a03 + b1*a13 + b2*a23 + b3*a33
 
-	b0, b1, b2, b3 = b[4], b[5], b[6], b[7]
-	a[4] = b0*a00 + b1*a10 + b2*a20 + b3*a30
-	a[5] = b0*a01 + b1*a11 + b2*a21 + b3*a31
-	a[6] = b0*a02 + b1*a12 + b2*a22 + b3*a32
-	a[7] = b0*a03 + b1*a13 + b2*a23 + b3*a33
+	b0, b1, b2, b3 = other.Values[4], other.Values[5], other.Values[6], other.Values[7]
+	m.Values[4] = b0*a00 + b1*a10 + b2*a20 + b3*a30
+	m.Values[5] = b0*a01 + b1*a11 + b2*a21 + b3*a31
+	m.Values[6] = b0*a02 + b1*a12 + b2*a22 + b3*a32
+	m.Values[7] = b0*a03 + b1*a13 + b2*a23 + b3*a33
 
-	b0, b1, b2, b3 = b[8], b[9], b[10], b[11]
-	a[8] = b0*a00 + b1*a10 + b2*a20 + b3*a30
-	a[9] = b0*a01 + b1*a11 + b2*a21 + b3*a31
-	a[10] = b0*a02 + b1*a12 + b2*a22 + b3*a32
-	a[11] = b0*a03 + b1*a13 + b2*a23 + b3*a33
+	b0, b1, b2, b3 = other.Values[8], other.Values[9], other.Values[10], other.Values[11]
+	m.Values[8] = b0*a00 + b1*a10 + b2*a20 + b3*a30
+	m.Values[9] = b0*a01 + b1*a11 + b2*a21 + b3*a31
+	m.Values[10] = b0*a02 + b1*a12 + b2*a22 + b3*a32
+	m.Values[11] = b0*a03 + b1*a13 + b2*a23 + b3*a33
 
-	b0, b1, b2, b3 = b[12], b[13], b[14], b[15]
-	a[12] = b0*a00 + b1*a10 + b2*a20 + b3*a30
-	a[13] = b0*a01 + b1*a11 + b2*a21 + b3*a31
-	a[14] = b0*a02 + b1*a12 + b2*a22 + b3*a32
-	a[15] = b0*a03 + b1*a13 + b2*a23 + b3*a33
+	b0, b1, b2, b3 = other.Values[12], other.Values[13], other.Values[14], other.Values[15]
+	m.Values[12] = b0*a00 + b1*a10 + b2*a20 + b3*a30
+	m.Values[13] = b0*a01 + b1*a11 + b2*a21 + b3*a31
+	m.Values[14] = b0*a02 + b1*a12 + b2*a22 + b3*a32
+	m.Values[15] = b0*a03 + b1*a13 + b2*a23 + b3*a33
 
 	return m
 }
 
 // MultiplyLocal multiplies the values of this Matrix4 by those given in the `other` argument.
 func (m *Matrix4) MultiplyLocal(other *Matrix4) *Matrix4 {
-	a, b := m.Values, other.Values
-
 	return m.SetValues(
-		a[0]*b[0]+a[1]*b[4]+a[2]*b[8]+a[3]*b[12],
-		a[0]*b[1]+a[1]*b[5]+a[2]*b[9]+a[3]*b[13],
-		a[0]*b[2]+a[1]*b[6]+a[2]*b[10]+a[3]*b[14],
-		a[0]*b[3]+a[1]*b[7]+a[2]*b[11]+a[3]*b[15],
-		a[4]*b[0]+a[5]*b[4]+a[6]*b[8]+a[7]*b[12],
-		a[4]*b[1]+a[5]*b[5]+a[6]*b[9]+a[7]*b[13],
-		a[4]*b[2]+a[5]*b[6]+a[6]*b[10]+a[7]*b[14],
-		a[4]*b[3]+a[5]*b[7]+a[6]*b[11]+a[7]*b[15],
-		a[8]*b[0]+a[9]*b[4]+a[10]*b[8]+a[11]*b[12],
-		a[8]*b[1]+a[9]*b[5]+a[10]*b[9]+a[11]*b[13],
-		a[8]*b[2]+a[9]*b[6]+a[10]*b[10]+a[11]*b[14],
-		a[8]*b[3]+a[9]*b[7]+a[10]*b[11]+a[11]*b[15],
-		a[12]*b[0]+a[13]*b[4]+a[14]*b[8]+a[15]*b[12],
-		a[12]*b[1]+a[13]*b[5]+a[14]*b[9]+a[15]*b[13],
-		a[12]*b[2]+a[13]*b[6]+a[14]*b[10]+a[15]*b[14],
-		a[12]*b[3]+a[13]*b[7]+a[14]*b[11]+a[15]*b[15],
+		m.Values[0]*other.Values[0]+m.Values[1]*other.Values[4]+m.Values[2]*other.Values[8]+m.Values[3]*other.Values[12],
+		m.Values[0]*other.Values[1]+m.Values[1]*other.Values[5]+m.Values[2]*other.Values[9]+m.Values[3]*other.Values[13],
+		m.Values[0]*other.Values[2]+m.Values[1]*other.Values[6]+m.Values[2]*other.Values[10]+m.Values[3]*other.Values[14],
+		m.Values[0]*other.Values[3]+m.Values[1]*other.Values[7]+m.Values[2]*other.Values[11]+m.Values[3]*other.Values[15],
+		m.Values[4]*other.Values[0]+m.Values[5]*other.Values[4]+m.Values[6]*other.Values[8]+m.Values[7]*other.Values[12],
+		m.Values[4]*other.Values[1]+m.Values[5]*other.Values[5]+m.Values[6]*other.Values[9]+m.Values[7]*other.Values[13],
+		m.Values[4]*other.Values[2]+m.Values[5]*other.Values[6]+m.Values[6]*other.Values[10]+m.Values[7]*other.Values[14],
+		m.Values[4]*other.Values[3]+m.Values[5]*other.Values[7]+m.Values[6]*other.Values[11]+m.Values[7]*other.Values[15],
+		m.Values[8]*other.Values[0]+m.Values[9]*other.Values[4]+m.Values[10]*other.Values[8]+m.Values[11]*other.Values[12],
+		m.Values[8]*other.Values[1]+m.Values[9]*other.Values[5]+m.Values[10]*other.Values[9]+m.Values[11]*other.Values[13],
+		m.Values[8]*other.Values[2]+m.Values[9]*other.Values[6]+m.Values[10]*other.Values[10]+m.Values[11]*other.Values[14],
+		m.Values[8]*other.Values[3]+m.Values[9]*other.Values[7]+m.Values[10]*other.Values[11]+m.Values[11]*other.Values[15],
+		m.Values[12]*other.Values[0]+m.Values[13]*other.Values[4]+m.Values[14]*other.Values[8]+m.Values[15]*other.Values[12],
+		m.Values[12]*other.Values[1]+m.Values[13]*other.Values[5]+m.Values[14]*other.Values[9]+m.Values[15]*other.Values[13],
+		m.Values[12]*other.Values[2]+m.Values[13]*other.Values[6]+m.Values[14]*other.Values[10]+m.Values[15]*other.Values[14],
+		m.Values[12]*other.Values[3]+m.Values[13]*other.Values[7]+m.Values[14]*other.Values[11]+m.Values[15]*other.Values[15],
 	)
 }
 
@@ -333,41 +351,39 @@ func (m *Matrix4) PreMultiply(other *Matrix4) *Matrix4 {
 
 // MultiplyMatrices multiplies the two given Matrix4 objects and stores the results in this Matrix.
 func (m *Matrix4) MultiplyMatrices(a, b *Matrix4) *Matrix4 {
-	am, bm := a.Values, b.Values
+	a11 := a.Values[0]
+	a12 := a.Values[4]
+	a13 := a.Values[8]
+	a14 := a.Values[12]
+	a21 := a.Values[1]
+	a22 := a.Values[5]
+	a23 := a.Values[9]
+	a24 := a.Values[13]
+	a31 := a.Values[2]
+	a32 := a.Values[6]
+	a33 := a.Values[10]
+	a34 := a.Values[14]
+	a41 := a.Values[3]
+	a42 := a.Values[7]
+	a43 := a.Values[11]
+	a44 := a.Values[15]
 
-	a11 := am[0]
-	a12 := am[4]
-	a13 := am[8]
-	a14 := am[12]
-	a21 := am[1]
-	a22 := am[5]
-	a23 := am[9]
-	a24 := am[13]
-	a31 := am[2]
-	a32 := am[6]
-	a33 := am[10]
-	a34 := am[14]
-	a41 := am[3]
-	a42 := am[7]
-	a43 := am[11]
-	a44 := am[15]
-
-	b11 := bm[0]
-	b12 := bm[4]
-	b13 := bm[8]
-	b14 := bm[12]
-	b21 := bm[1]
-	b22 := bm[5]
-	b23 := bm[9]
-	b24 := bm[13]
-	b31 := bm[2]
-	b32 := bm[6]
-	b33 := bm[10]
-	b34 := bm[14]
-	b41 := bm[3]
-	b42 := bm[7]
-	b43 := bm[11]
-	b44 := bm[15]
+	b11 := b.Values[0]
+	b12 := b.Values[4]
+	b13 := b.Values[8]
+	b14 := b.Values[12]
+	b21 := b.Values[1]
+	b22 := b.Values[5]
+	b23 := b.Values[9]
+	b24 := b.Values[13]
+	b31 := b.Values[2]
+	b32 := b.Values[6]
+	b33 := b.Values[10]
+	b34 := b.Values[14]
+	b41 := b.Values[3]
+	b42 := b.Values[7]
+	b43 := b.Values[11]
+	b44 := b.Values[15]
 
 	return m.SetValues(
 		a11*b11+a12*b21+a13*b31+a14*b41,
@@ -396,12 +412,10 @@ func (m *Matrix4) Translate(v Vector3Like) *Matrix4 {
 
 // TranslateXYZ translates this Matrix using the given values.
 func (m *Matrix4) TranslateXYZ(x, y, z float64) *Matrix4 {
-	a := m.Values[:]
-
-	a[12] = a[0]*x + a[4]*y + a[8]*z + a[12]
-	a[13] = a[1]*x + a[5]*y + a[9]*z + a[13]
-	a[14] = a[2]*x + a[6]*y + a[10]*z + a[14]
-	a[15] = a[3]*x + a[7]*y + a[11]*z + a[15]
+	m.Values[12] = m.Values[0]*x + m.Values[4]*y + m.Values[8]*z + m.Values[12]
+	m.Values[13] = m.Values[1]*x + m.Values[5]*y + m.Values[9]*z + m.Values[13]
+	m.Values[14] = m.Values[2]*x + m.Values[6]*y + m.Values[10]*z + m.Values[14]
+	m.Values[15] = m.Values[3]*x + m.Values[7]*y + m.Values[11]*z + m.Values[15]
 
 	return m
 }
@@ -413,11 +427,9 @@ func (m *Matrix4) Scale(v Vector3Like) *Matrix4 {
 
 // ScaleXYZ applies a scale transformation to this Matrix.
 func (m *Matrix4) ScaleXYZ(x, y, z float64) *Matrix4 {
-	a := m.Values[:]
-
-	a[0], a[1], a[2], a[3] = a[0]*x, a[1]*x, a[2]*x, a[3]*x
-	a[4], a[5], a[6], a[7] = a[4]*y, a[5]*y, a[6]*y, a[7]*y
-	a[8], a[9], a[10], a[11] = a[8]*z, a[9]*z, a[10]*z, a[11]*z
+	m.Values[0], m.Values[1], m.Values[2], m.Values[3] = m.Values[0]*x, m.Values[1]*x, m.Values[2]*x, m.Values[3]*x
+	m.Values[4], m.Values[5], m.Values[6], m.Values[7] = m.Values[4]*y, m.Values[5]*y, m.Values[6]*y, m.Values[7]*y
+	m.Values[8], m.Values[9], m.Values[10], m.Values[11] = m.Values[8]*z, m.Values[9]*z, m.Values[10]*z, m.Values[11]*z
 
 	return m
 }
@@ -439,7 +451,6 @@ func (m *Matrix4) MakeRotationAxis(axis Vector3Like, radians float64) *Matrix4 {
 
 // Rotate applies a rotation transformation to this Matrix.
 func (m *Matrix4) Rotate(radians float64, axis Vector3Like) *Matrix4 {
-	a := m.Values[:]
 	x, y, z := axis.XYZ()
 	length := math.Sqrt(x*x + y*y + z*z)
 
@@ -455,10 +466,10 @@ func (m *Matrix4) Rotate(radians float64, axis Vector3Like) *Matrix4 {
 	c, s := math.Cos(radians), math.Sin(radians)
 	t := 1 - c
 
-	a00, a01, a02, a03 := a[0], a[1], a[2], a[3]
-	a10, a11, a12, a13 := a[4], a[5], a[6], a[7]
-	a20, a21, a22, a23 := a[8], a[9], a[10], a[11]
-	a30, a31, a32, a33 := a[12], a[13], a[14], a[15]
+	a00, a01, a02, a03 := m.Values[0], m.Values[1], m.Values[2], m.Values[3]
+	a10, a11, a12, a13 := m.Values[4], m.Values[5], m.Values[6], m.Values[7]
+	a20, a21, a22, a23 := m.Values[8], m.Values[9], m.Values[10], m.Values[11]
+	a30, a31, a32, a33 := m.Values[12], m.Values[13], m.Values[14], m.Values[15]
 
 	b00, b01, b02 := x*x*t+c, y*x*t+z*s, z*x*t-y*s
 	b10, b11, b12 := x*y*t-z*s, y*y*t+c, z*y*t+x*s
@@ -483,63 +494,60 @@ func (m *Matrix4) Rotate(radians float64, axis Vector3Like) *Matrix4 {
 
 // RotateX rotates this matrix on its X axis.
 func (m *Matrix4) RotateX(radians float64) *Matrix4 {
-	a := m.Values[:]
 	c, s := math.Cos(radians), math.Sin(radians)
 
-	a10, a11, a12, a13 := a[4], a[5], a[6], a[7]
-	a20, a21, a22, a23 := a[8], a[9], a[10], a[11]
+	a10, a11, a12, a13 := m.Values[4], m.Values[5], m.Values[6], m.Values[7]
+	a20, a21, a22, a23 := m.Values[8], m.Values[9], m.Values[10], m.Values[11]
 
 	//  Perform axis-specific matrix multiplication
-	a[4] = a10*c + a20*s
-	a[5] = a11*c + a21*s
-	a[6] = a12*c + a22*s
-	a[7] = a13*c + a23*s
-	a[8] = a20*c - a10*s
-	a[9] = a21*c - a11*s
-	a[10] = a22*c - a12*s
-	a[11] = a23*c - a13*s
+	m.Values[4] = a10*c + a20*s
+	m.Values[5] = a11*c + a21*s
+	m.Values[6] = a12*c + a22*s
+	m.Values[7] = a13*c + a23*s
+	m.Values[8] = a20*c - a10*s
+	m.Values[9] = a21*c - a11*s
+	m.Values[10] = a22*c - a12*s
+	m.Values[11] = a23*c - a13*s
 
 	return m
 }
 
 // RotateY rotates this matrix on its X axis.
 func (m *Matrix4) RotateY(radians float64) *Matrix4 {
-	a := m.Values[:]
 	c, s := math.Cos(radians), math.Sin(radians)
 
-	a00, a01, a02, a03 := a[0], a[1], a[2], a[3]
-	a20, a21, a22, a23 := a[8], a[9], a[10], a[11]
+	a00, a01, a02, a03 := m.Values[0], m.Values[1], m.Values[2], m.Values[3]
+	a20, a21, a22, a23 := m.Values[8], m.Values[9], m.Values[10], m.Values[11]
 
 	//  Perform axis-specific matrix multiplication
-	a[0] = a00*c + a20*s
-	a[1] = a01*c + a21*s
-	a[2] = a02*c + a22*s
-	a[3] = a03*c + a23*s
-	a[4] = a20*c - a00*s
-	a[5] = a21*c - a01*s
-	a[6] = a22*c - a02*s
-	a[7] = a23*c - a03*s
+	m.Values[0] = a00*c + a20*s
+	m.Values[1] = a01*c + a21*s
+	m.Values[2] = a02*c + a22*s
+	m.Values[3] = a03*c + a23*s
+	m.Values[4] = a20*c - a00*s
+	m.Values[5] = a21*c - a01*s
+	m.Values[6] = a22*c - a02*s
+	m.Values[7] = a23*c - a03*s
 
 	return m
 }
 
 // RotateZ rotates this matrix on its X axis.
 func (m *Matrix4) RotateZ(radians float64) *Matrix4 {
-	a := m.Values[:]
 	c, s := math.Cos(radians), math.Sin(radians)
 
-	a00, a01, a02, a03 := a[0], a[1], a[2], a[3]
-	a10, a11, a12, a13 := a[4], a[5], a[6], a[7]
+	a00, a01, a02, a03 := m.Values[0], m.Values[1], m.Values[2], m.Values[3]
+	a10, a11, a12, a13 := m.Values[4], m.Values[5], m.Values[6], m.Values[7]
 
 	//  Perform axis-specific matrix multiplication
-	a[0] = a00*c + a10*s
-	a[1] = a01*c + a11*s
-	a[2] = a02*c + a12*s
-	a[3] = a03*c + a13*s
-	a[4] = a10*c - a00*s
-	a[5] = a11*c - a01*s
-	a[6] = a12*c - a02*s
-	a[7] = a13*c - a03*s
+	m.Values[0] = a00*c + a10*s
+	m.Values[1] = a01*c + a11*s
+	m.Values[2] = a02*c + a12*s
+	m.Values[3] = a03*c + a13*s
+	m.Values[4] = a10*c - a00*s
+	m.Values[5] = a11*c - a01*s
+	m.Values[6] = a12*c - a02*s
+	m.Values[7] = a13*c - a03*s
 
 	return m
 }

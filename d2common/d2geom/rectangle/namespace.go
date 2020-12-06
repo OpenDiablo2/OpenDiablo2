@@ -1,10 +1,9 @@
 package rectangle
 
-import (
-	"github.com/gravestench/pho/geom/point"
-)
+import "github.com/gravestench/pho/geom/point"
 
 type RectangleNamespace interface {
+	New(x, y, w, h float64) *Rectangle
 	Contains(r *Rectangle, x, y float64) bool
 	GetPoint(r *Rectangle, position float64, p *point.Point) *point.Point
 	GetPoints(r *Rectangle, quantity int, stepRate float64, points []*point.Point) []*point.Point
@@ -30,6 +29,11 @@ type RectangleNamespace interface {
 }
 
 type Namespace struct{}
+
+// New creates a new Rectangle instance.
+func (*Namespace) New(x, y, w, h float64) *Rectangle {
+	return New(x, y, w, h)
+}
 
 // Contains checks if the given x, y is inside the Rectangle's bounds.
 func (*Namespace) Contains(r *Rectangle, x, y float64) bool {
