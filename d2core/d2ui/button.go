@@ -946,7 +946,7 @@ func (v *Button) createTooltip() {
 		t.SetText(v.manager.asset.TranslateString("strClose"))
 	case buttonTooltipOk:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
-		t.SetText(v.manager.asset.TranslateString("#971"))
+		t.SetText(v.manager.asset.TranslateLabel(d2enum.OKLabel))
 	case buttonTooltipBuy:
 		t = v.manager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, TooltipXCenter, TooltipYBottom)
 		t.SetText(v.manager.asset.TranslateString("NPCPurchaseItems"))

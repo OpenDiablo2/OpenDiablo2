@@ -121,8 +121,10 @@ func (g *Inventory) Load() {
 	goldButton.SetPosition(invGoldButtonX, invGoldButtonY)
 	goldButton.OnActivated(func() { g.onGoldClicked() })
 
+	// nolint:gocritic // this variable will be used in future
 	// deposite := g.asset.TranslateString("strGoldDeposit")
 	drop := g.asset.TranslateString("strGoldDrop")
+	// nolint:gocritic // this variable will be used in future
 	// withdraw := g.asset.TranslateString("strGoldWithdraw")
 
 	tooltip := g.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, d2ui.TooltipXCenter, d2ui.TooltipYBottom)
