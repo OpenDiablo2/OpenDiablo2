@@ -121,15 +121,19 @@ func NewQuestLog(asset *d2asset.AssetManager,
 		tabs[i] = questLogTab{}
 	}
 
+	// nolint:gomnd // this is only test, it also should come from save file
+	mpa := 2
+
 	ql := &QuestLog{
-		asset:       asset,
-		uiManager:   ui,
-		originX:     originX,
-		originY:     originY,
-		act:         act,
-		tab:         tabs,
-		quests:      quests,
-		questStatus: qs,
+		asset:         asset,
+		uiManager:     ui,
+		originX:       originX,
+		originY:       originY,
+		act:           act,
+		tab:           tabs,
+		quests:        quests,
+		questStatus:   qs,
+		maxPlayersAct: mpa,
 	}
 
 	ql.Logger = d2util.NewLogger()
@@ -151,10 +155,11 @@ type QuestLog struct {
 	act           int
 	tab           [d2enum.ActsNumber]questLogTab
 
-	questName   *d2ui.Label
-	questDescr  *d2ui.Label
-	quests      [d2enum.ActsNumber]*d2ui.WidgetGroup
-	questStatus map[int]int
+	questName     *d2ui.Label
+	questDescr    *d2ui.Label
+	quests        [d2enum.ActsNumber]*d2ui.WidgetGroup
+	questStatus   map[int]int
+	maxPlayersAct int
 
 	originX int
 	originY int
@@ -165,8 +170,7 @@ type QuestLog struct {
 
 /* questIconTab returns path to quest animation using its
 act and number. From d2resource:
-        QuestLogAQuestAnimation = "/data/global/ui/MENU/a%dq%d.dc6"
-*/
+        QuestLogAQuestAnimation = "/data/global/ui/MENU/a%dq%d.dc6"*/
 func (s *QuestLog) questIconsTable(act, number int) string {
 	return fmt.Sprintf(d2resource.QuestLogAQuestAnimation, act, number+1)
 }
@@ -240,7 +244,7 @@ func (s *QuestLog) loadTabs() {
 
 	tabsResource := d2resource.WPTabs
 
-	for i := 0; i < d2enum.ActsNumber; i++ {
+	for i := 0; i < s.maxPlayersAct; i++ {
 		currentValue := i
 
 		s.tab[i].sprite, err = s.uiManager.NewSprite(tabsResource, d2resource.PaletteSky)
@@ -414,11 +418,11 @@ func (s *QuestLog) setTab(tab int) {
 	s.selectedQuest = d2enum.QuestNone
 	s.setQuestLabel()
 
-	for i := 0; i < d2enum.ActsNumber; i++ {
+	for i := 0; i < s.maxPlayersAct; i++ {
 		s.quests[i].SetVisible(tab == i)
 	}
 
-	for i := 0; i < d2enum.ActsNumber; i++ {
+	for i := 0; i < s.maxPlayersAct; i++ {
 		cv := i
 
 		if cv == s.selectedTab {
@@ -470,7 +474,7 @@ func (s *QuestLog) Close() {
 	s.isOpen = false
 	s.panelGroup.SetVisible(false)
 
-	for i := 0; i < d2enum.ActsNumber; i++ {
+	for i := 0; i < s.maxPlayersAct; i++ {
 		s.quests[i].SetVisible(false)
 	}
 
