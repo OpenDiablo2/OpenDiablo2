@@ -40,7 +40,7 @@ const (
 	ButtonTypeSquareClose        ButtonType = 20
 	ButtonTypeSquareOk           ButtonType = 21
 	ButtonTypeSkillTreeTab       ButtonType = 22
-	ButtonTypeQuestDescr         ButtonType = 23 // I suppose it should be also used in WP tabs
+	ButtonTypeQuestDescr         ButtonType = 23
 	ButtonTypeMinipanelOpenClose ButtonType = 24
 	ButtonTypeMinipanelParty     ButtonType = 25
 	ButtonTypeBuy                ButtonType = 26
@@ -51,13 +51,8 @@ const (
 	ButtonTypeRightArrow         ButtonType = 31
 	ButtonTypeQuery              ButtonType = 32
 	ButtonTypeSquelchChat        ButtonType = 33
-	ButtonTypeTab1               ButtonType = 34
-	ButtonTypeTab2               ButtonType = 35
-	ButtonTypeTab3               ButtonType = 36
-	ButtonTypeTab4               ButtonType = 37
-	ButtonTypeTab5               ButtonType = 38
-	ButtonTypeTabBlank           ButtonType = 39
-	ButtonTypeBlankQuestBtn      ButtonType = 40
+	ButtonTypeTabBlank           ButtonType = 34
+	ButtonTypeBlankQuestBtn      ButtonType = 35
 
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
@@ -80,14 +75,6 @@ const (
 	okButtonBaseFrame          = 16 // base frame offset of the "ok" button dc6
 	repairAllButtonBaseFrame   = 18 // base frame offset of the "repair all" button dc6
 	squelchChatButtonBaseFrame = 20 // base frame offset of the "?" button dc6
-)
-
-const (
-	tab1BaseFrame = iota * 2
-	tab2BaseFrame
-	tab3BaseFrame
-	tab4BaseFrame
-	tab5BaseFrame
 )
 
 const (
@@ -526,86 +513,6 @@ func getButtonLayouts() map[ButtonType]ButtonLayout {
 			Toggleable:       true,
 			FontPath:         d2resource.Font30,
 			AllowFrameChange: true,
-			HasImage:         true,
-			FixedWidth:       ButtonNoFixedWidth,
-			FixedHeight:      ButtonNoFixedHeight,
-			LabelColor:       greyAlpha100,
-		},
-		ButtonTypeTab1: {
-			XSegments:        buttonTabXSegments,
-			YSegments:        buttonTabYSegments,
-			DisabledFrame:    tab1BaseFrame + 1,
-			DisabledColor:    lightGreyAlpha75,
-			ResourceName:     d2resource.WPTabs,
-			PaletteName:      d2resource.PaletteUnits,
-			Toggleable:       false,
-			FontPath:         d2resource.Font30,
-			AllowFrameChange: true,
-			BaseFrame:        tab1BaseFrame,
-			HasImage:         true,
-			FixedWidth:       ButtonNoFixedWidth,
-			FixedHeight:      ButtonNoFixedHeight,
-			LabelColor:       greyAlpha100,
-		},
-		ButtonTypeTab2: {
-			XSegments:        buttonTabXSegments,
-			YSegments:        buttonTabYSegments,
-			DisabledFrame:    tab2BaseFrame + 1,
-			DisabledColor:    lightGreyAlpha75,
-			ResourceName:     d2resource.WPTabs,
-			PaletteName:      d2resource.PaletteUnits,
-			Toggleable:       false,
-			FontPath:         d2resource.Font30,
-			AllowFrameChange: true,
-			BaseFrame:        tab2BaseFrame,
-			HasImage:         true,
-			FixedWidth:       ButtonNoFixedWidth,
-			FixedHeight:      ButtonNoFixedHeight,
-			LabelColor:       greyAlpha100,
-		},
-		ButtonTypeTab3: {
-			XSegments:        buttonTabXSegments,
-			YSegments:        buttonTabYSegments,
-			DisabledFrame:    tab3BaseFrame + 1,
-			DisabledColor:    lightGreyAlpha75,
-			ResourceName:     d2resource.WPTabs,
-			PaletteName:      d2resource.PaletteUnits,
-			Toggleable:       false,
-			FontPath:         d2resource.Font30,
-			AllowFrameChange: true,
-			BaseFrame:        tab3BaseFrame,
-			HasImage:         true,
-			FixedWidth:       ButtonNoFixedWidth,
-			FixedHeight:      ButtonNoFixedHeight,
-			LabelColor:       greyAlpha100,
-		},
-		ButtonTypeTab4: {
-			XSegments:        buttonTabXSegments,
-			YSegments:        buttonTabYSegments,
-			DisabledFrame:    tab4BaseFrame + 1,
-			DisabledColor:    lightGreyAlpha75,
-			ResourceName:     d2resource.WPTabs,
-			PaletteName:      d2resource.PaletteUnits,
-			Toggleable:       false,
-			FontPath:         d2resource.Font30,
-			AllowFrameChange: true,
-			BaseFrame:        tab4BaseFrame,
-			HasImage:         true,
-			FixedWidth:       ButtonNoFixedWidth,
-			FixedHeight:      ButtonNoFixedHeight,
-			LabelColor:       greyAlpha100,
-		},
-		ButtonTypeTab5: {
-			XSegments:        buttonTabXSegments,
-			YSegments:        buttonTabYSegments,
-			DisabledFrame:    tab5BaseFrame + 1,
-			DisabledColor:    lightGreyAlpha75,
-			ResourceName:     d2resource.WPTabs,
-			PaletteName:      d2resource.PaletteUnits,
-			Toggleable:       false,
-			FontPath:         d2resource.Font30,
-			AllowFrameChange: true,
-			BaseFrame:        tab5BaseFrame,
 			HasImage:         true,
 			FixedWidth:       ButtonNoFixedWidth,
 			FixedHeight:      ButtonNoFixedHeight,
