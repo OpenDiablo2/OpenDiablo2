@@ -120,6 +120,17 @@ func (g *Inventory) Load() {
 	goldButton.SetVisible(false)
 	goldButton.SetPosition(invGoldButtonX, invGoldButtonY)
 	goldButton.OnActivated(func() { g.onGoldClicked() })
+
+	// deposite := g.asset.TranslateString("strGoldDeposit")
+	drop := g.asset.TranslateString("strGoldDrop")
+	// withdraw := g.asset.TranslateString("strGoldWithdraw")
+
+	tooltip := g.uiManager.NewTooltip(d2resource.Font16, d2resource.PaletteSky, d2ui.TooltipXCenter, d2ui.TooltipYBottom)
+	// here should be switch-case statement for each of move-gold button descr
+	tooltip.SetText(drop)
+	tooltip.SetPosition(invGoldButtonX, invGoldButtonY)
+	goldButton.SetTooltip(tooltip)
+
 	g.panelGroup.AddWidget(goldButton)
 
 	g.goldLabel = g.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
@@ -190,6 +201,7 @@ func (g *Inventory) Open() {
 // Close closes the inventory
 func (g *Inventory) Close() {
 	g.isOpen = false
+	g.moveGoldPanel.Close()
 	g.panelGroup.SetVisible(false)
 	g.onCloseCb()
 }
@@ -298,10 +310,12 @@ func (g *Inventory) renderItemHover(target d2interface.Surface) {
 }
 
 func (g *Inventory) renderItemDescription(target d2interface.Surface, i InventoryItem) {
-	lines := i.GetItemDescription()
-	g.itemTooltip.SetTextLines(lines)
-	_, y := g.grid.SlotToScreen(i.InventoryGridSlot())
+	if !g.moveGoldPanel.IsOpen() {
+		lines := i.GetItemDescription()
+		g.itemTooltip.SetTextLines(lines)
+		_, y := g.grid.SlotToScreen(i.InventoryGridSlot())
 
-	g.itemTooltip.SetPosition(g.hoverX, y)
-	g.itemTooltip.Render(target)
+		g.itemTooltip.SetPosition(g.hoverX, y)
+		g.itemTooltip.Render(target)
+	}
 }

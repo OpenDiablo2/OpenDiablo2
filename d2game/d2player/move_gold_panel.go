@@ -12,13 +12,13 @@ import (
 
 const (
 	moveGoldX, moveGoldY                       = 300, 350
-	moveGoldCloseButtonX, moveGoldCloseButtonY = moveGoldX + 35, moveGoldY - 42
-	moveGoldOkButtonX, moveGoldOkButtonY       = moveGoldX + 140, moveGoldY - 42
+	moveGoldCloseButtonX, moveGoldCloseButtonY = moveGoldX + 140, moveGoldY - 42
+	moveGoldOkButtonX, moveGoldOkButtonY       = moveGoldX + 35, moveGoldY - 42
 	moveGoldValueX, moveGoldValueY             = moveGoldX + 29, moveGoldY - 90
 	moveGoldActionLabelX, moveGoldActionLabelY = moveGoldX + 105, moveGoldY - 150
 	moveGoldActionLabelOffsetY                 = 25
-	moveGoldUpArrowX, moveGoldUpArrowY         = 314, 259
-	moveGoldDownArrowX, moveGoldDownArrowY     = 314, 274
+	moveGoldUpArrowX, moveGoldUpArrowY         = moveGoldX + 14, moveGoldY - 91
+	moveGoldDownArrowX, moveGoldDownArrowY     = moveGoldX + 14, moveGoldY - 76
 )
 
 const goldValueFilter = "0123456789"

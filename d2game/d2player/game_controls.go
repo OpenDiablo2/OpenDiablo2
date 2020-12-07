@@ -444,6 +444,12 @@ func (g *GameControls) onEscKey() {
 	}
 
 	if g.inventory.IsOpen() {
+		if g.inventory.moveGoldPanel.IsOpen() {
+			g.inventory.moveGoldPanel.Close()
+
+			return
+		}
+
 		g.inventory.Close()
 
 		escHandled = true
