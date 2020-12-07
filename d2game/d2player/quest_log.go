@@ -44,14 +44,10 @@ const (
 	questDescrLabelX, questDescrLabelY         = 90, 317
 )
 
-// toset
 const (
-	questTabY  = 66
-	questTab1X = 85
-	questTab2X = 143
-	questTab3X = 201
-	questTab4X = 259
-	questTab5X = 317
+	questTabY       = 66
+	questTabBaseX   = 85
+	questTabXOffset = 58
 )
 
 func (s *QuestLog) getPositionForSocket(number int) (x, y int) {
@@ -183,13 +179,6 @@ type questLogTab struct {
 	invisibleButton *d2ui.Button
 }
 
-func (q *questLogTab) newTab(ui *d2ui.UIManager, tabType d2ui.ButtonType, x int) {
-	q.button = ui.NewButton(tabType, "")
-	q.invisibleButton = ui.NewButton(d2ui.ButtonTypeTabBlank, "")
-	q.button.SetPosition(x, questTabY)
-	q.invisibleButton.SetPosition(x, questTabY)
-}
-
 // Load the data for the hero status panel
 func (s *QuestLog) Load() {
 	var err error
@@ -242,21 +231,24 @@ func (s *QuestLog) Load() {
 }
 
 func (s *QuestLog) loadTabs() {
-	var buttonTypes = []struct {
-		bt d2ui.ButtonType
-		x  int
-	}{
-		{d2ui.ButtonTypeTab1, questTab1X},
-		{d2ui.ButtonTypeTab2, questTab2X},
-		{d2ui.ButtonTypeTab3, questTab3X},
-		{d2ui.ButtonTypeTab4, questTab4X},
-		{d2ui.ButtonTypeTab5, questTab5X},
+	var buttonTypes = []d2ui.ButtonType{
+		d2ui.ButtonTypeTab1,
+		d2ui.ButtonTypeTab2,
+		d2ui.ButtonTypeTab3,
+		d2ui.ButtonTypeTab4,
+		d2ui.ButtonTypeTab5,
+		d2ui.ButtonTypeTab1,
 	}
 
 	for i := 0; i < d2enum.ActsNumber; i++ {
 		currentValue := i
-		s.tab[i].newTab(s.uiManager, buttonTypes[i].bt, buttonTypes[i].x)
+		s.tab[i].button = s.uiManager.NewButton(buttonTypes[i], "")
+		s.tab[i].button.SetPosition(questTabBaseX+i*questTabXOffset, questTabY)
+
+		s.tab[i].invisibleButton = s.uiManager.NewButton(d2ui.ButtonTypeTabBlank, "")
+		s.tab[i].invisibleButton.SetPosition(questTabBaseX+i*questTabXOffset, questTabY)
 		s.tab[i].invisibleButton.OnActivated(func() { s.setTab(currentValue) })
+
 		s.panelGroup.AddWidget(s.tab[i].button)
 		s.panelGroup.AddWidget(s.tab[i].invisibleButton)
 	}
@@ -297,7 +289,7 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 
 		icon, err = s.makeQuestIconForAct(act, n)
 		if err != nil {
-			s.Error(err.Error())
+			s.Fatal(err.Error())
 		}
 
 		icon.SetPosition(x+questOffsetX, y+questOffsetY+iconOffsetY)
@@ -340,7 +332,7 @@ func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 func (s *QuestLog) makeQuestIconForAct(act, n int) (*d2ui.Sprite, error) {
 	icon, err := s.uiManager.NewSprite(s.questIconsTable(act, n), d2resource.PaletteSky)
 	if err != nil {
-		s.Error(err.Error())
+		s.Fatalf("during creating new quest icons for act %d. %s", act, err.Error())
 	}
 
 	switch s.questStatus[s.cordsToQuestID(act, n)] {
