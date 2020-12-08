@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	logPrefixFileSourceResolver = "File Source Resolver"
+	logPrefixFileSourceResolver = "ComponentFactory Source Resolver"
 )
 
 // FileSourceResolver is responsible for determining if files can be used as a file source.
@@ -26,9 +26,11 @@ type FileSourceResolver struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
 	filesToCheck   *akara.Subscription
-	d2components.FileFactory
-	d2components.FileTypeFactory
-	d2components.FileSourceFactory
+	Components struct {
+		File d2components.FileFactory
+		FileType d2components.FileTypeFactory
+		FileSource d2components.FileSourceFactory
+	}
 }
 
 // Init initializes the file source resolver, injecting the necessary components into the world
@@ -64,15 +66,15 @@ func (m *FileSourceResolver) setupSubscriptions() {
 		).
 		Build()
 
-	m.filesToCheck = m.AddSubscription(filesToCheck)
+	m.filesToCheck = m.World.AddSubscription(filesToCheck)
 }
 
 func (m *FileSourceResolver) setupFactories() {
 	m.Debug("setting up component factories")
 
-	m.InjectComponent(&d2components.File{}, &m.File)
-	m.InjectComponent(&d2components.FileType{}, &m.FileType)
-	m.InjectComponent(&d2components.FileSource{}, &m.FileSource)
+	m.InjectComponent(&d2components.File{}, &m.Components.File.ComponentFactory)
+	m.InjectComponent(&d2components.FileType{}, &m.Components.FileType.ComponentFactory)
+	m.InjectComponent(&d2components.FileSource{}, &m.Components.FileSource.ComponentFactory)
 }
 
 // Update iterates over entities from its subscription, and checks if it can be used as a file source
@@ -83,12 +85,12 @@ func (m *FileSourceResolver) Update() {
 }
 
 func (m *FileSourceResolver) processSourceEntity(id akara.EID) {
-	fp, found := m.GetFile(id)
+	fp, found := m.Components.File.Get(id)
 	if !found {
 		return
 	}
 
-	ft, found := m.GetFileType(id)
+	ft, found := m.Components.FileType.Get(id)
 	if !found {
 		return
 	}
@@ -105,11 +107,11 @@ func (m *FileSourceResolver) processSourceEntity(id akara.EID) {
 			break
 		}
 
-		m.AddFileSource(id).AbstractSource = instance
+		m.Components.FileSource.Add(id).AbstractSource = instance
 
 		m.Debugf("adding MPQ source: `%s`", fp.Path)
 	case d2enum.FileTypeDirectory:
-		m.AddFileSource(id).AbstractSource = m.makeFileSystemSource(fp.Path)
+		m.Components.FileSource.Add(id).AbstractSource = m.makeFileSystemSource(fp.Path)
 		m.Debugf("adding FILESYSTEM source: `%s`", fp.Path)
 	}
 }

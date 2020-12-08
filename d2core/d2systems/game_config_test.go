@@ -23,8 +23,8 @@ func Test_GameConfigSystem_Bootstrap(t *testing.T) {
 
 	world := akara.NewWorld(cfg)
 
-	cfgSys.AddFile(world.NewEntity()).Path = testDataPath
-	cfgSys.AddFile(world.NewEntity()).Path = "config.json"
+	cfgSys.Components.File.Add(world.NewEntity()).Path = testDataPath
+	cfgSys.Components.File.Add(world.NewEntity()).Path = "config.json"
 
 	// at this point the world has initialized the sceneSystems. when the world
 	// updates it should process the config dir to a source and then

@@ -13,7 +13,7 @@ func TestNewFileTypeResolver_KnownType(t *testing.T) {
 	world := akara.NewWorld(akara.NewWorldConfig().With(typeSys))
 
 	e := world.NewEntity()
-	typeSys.AddFile(e).Path = "/some/path/to/a/file.dcc"
+	typeSys.Components.File.Add(e).Path = "/some/path/to/a/file.dcc"
 
 	if len(typeSys.filesToCheck.GetEntities()) != 1 {
 		t.Error("entity with file path not added to file type typeSys subscription")
@@ -25,7 +25,7 @@ func TestNewFileTypeResolver_KnownType(t *testing.T) {
 		t.Error("entity with existing file type not removed from file type typeSys subscription")
 	}
 
-	ft, found := typeSys.GetFileType(e)
+	ft, found := typeSys.Components.FileType.Get(e)
 	if !found {
 		t.Error("file type component not added to entity with file path component")
 	}
@@ -41,12 +41,12 @@ func TestNewFileTypeResolver_UnknownType(t *testing.T) {
 
 	e := world.NewEntity()
 
-	fp := typeSys.AddFile(e)
+	fp := typeSys.Components.File.Add(e)
 	fp.Path = "/some/path/to/a/file.XYZ"
 
 	_ = world.Update(0)
 
-	ft, _ := typeSys.GetFileType(e)
+	ft, _ := typeSys.Components.FileType.Get(e)
 
 	if ft.Type != d2enum.FileTypeUnknown {
 		t.Error("unexpected file type")

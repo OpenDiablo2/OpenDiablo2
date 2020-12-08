@@ -21,17 +21,17 @@ func (*File) New() akara.Component {
 // FileFactory is a wrapper for the generic component factory that returns File component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a File.
 type FileFactory struct {
-	File *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddFile adds a File component to the given entity and returns it
-func (m *FileFactory) AddFile(id akara.EID) *File {
-	return m.File.Add(id).(*File)
+// Add adds a File component to the given entity and returns it
+func (m *FileFactory) Add(id akara.EID) *File {
+	return m.ComponentFactory.Add(id).(*File)
 }
 
-// GetFile returns the File component for the given entity, and a bool for whether or not it exists
-func (m *FileFactory) GetFile(id akara.EID) (*File, bool) {
-	component, found := m.File.Get(id)
+// Get returns the File component for the given entity, and a bool for whether or not it exists
+func (m *FileFactory) Get(id akara.EID) (*File, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

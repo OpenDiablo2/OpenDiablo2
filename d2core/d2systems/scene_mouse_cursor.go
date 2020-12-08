@@ -67,7 +67,7 @@ func (s *MouseCursorScene) createMouseCursor() {
 
 func (s *MouseCursorScene) Update() {
 	for _, id := range s.Viewports {
-		s.AddPriority(id).Priority = scenePriorityMouseCursor
+		s.Components.Priority.Add(id).Priority = scenePriorityMouseCursor
 	}
 
 	if s.Paused() {
@@ -85,12 +85,12 @@ func (s *MouseCursorScene) Update() {
 }
 
 func (s *MouseCursorScene) updateCursorTransform() {
-	transform, found := s.GetTransform(s.cursor)
+	transform, found := s.Components.Transform.Get(s.cursor)
 	if !found {
 		return
 	}
 
-	cx, cy := s.CursorPosition()
+	cx, cy := s.Input.CursorPosition()
 	tx, ty := transform.Translation.XY()
 
 	if int(tx) != cx || int(ty) != cy {
@@ -108,7 +108,7 @@ func (s *MouseCursorScene) updateCursorTransform() {
 }
 
 func (s *MouseCursorScene) handleCursorFade() {
-	alpha, found := s.GetAlpha(s.cursor)
+	alpha, found := s.Components.Alpha.Get(s.cursor)
 	if !found {
 		return
 	}

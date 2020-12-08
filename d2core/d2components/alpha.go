@@ -25,17 +25,17 @@ func (*Alpha) New() akara.Component {
 // AlphaFactory is a wrapper for the generic component factory that returns Alpha component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Alpha.
 type AlphaFactory struct {
-	Alpha *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddAlpha adds a Alpha component to the given entity and returns it
-func (m *AlphaFactory) AddAlpha(id akara.EID) *Alpha {
-	return m.Alpha.Add(id).(*Alpha)
+// Add adds a Alpha component to the given entity and returns it
+func (m *AlphaFactory) Add(id akara.EID) *Alpha {
+	return m.ComponentFactory.Add(id).(*Alpha)
 }
 
-// GetAlpha returns the Alpha component for the given entity, and a bool for whether or not it exists
-func (m *AlphaFactory) GetAlpha(id akara.EID) (*Alpha, bool) {
-	component, found := m.Alpha.Get(id)
+// Get returns the Alpha component for the given entity, and a bool for whether or not it exists
+func (m *AlphaFactory) Get(id akara.EID) (*Alpha, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

@@ -21,17 +21,17 @@ func (*FontTable) New() akara.Component {
 // FontTableFactory is a wrapper for the generic component factory that returns FontTable component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a FontTable.
 type FontTableFactory struct {
-	FontTable *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddFontTable adds a FontTable component to the given entity and returns it
-func (m *FontTableFactory) AddFontTable(id akara.EID) *FontTable {
-	return m.FontTable.Add(id).(*FontTable)
+// Add adds a FontTable component to the given entity and returns it
+func (m *FontTableFactory) Add(id akara.EID) *FontTable {
+	return m.ComponentFactory.Add(id).(*FontTable)
 }
 
-// GetFontTable returns the FontTable component for the given entity, and a bool for whether or not it exists
-func (m *FontTableFactory) GetFontTable(id akara.EID) (*FontTable, bool) {
-	component, found := m.FontTable.Get(id)
+// Get returns the FontTable component for the given entity, and a bool for whether or not it exists
+func (m *FontTableFactory) Get(id akara.EID) (*FontTable, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

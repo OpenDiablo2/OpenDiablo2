@@ -24,17 +24,17 @@ func (*Sprite) New() akara.Component {
 // SpriteFactory is a wrapper for the generic component factory that returns Sprite component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Sprite.
 type SpriteFactory struct {
-	Sprite *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddSprite adds a Sprite component to the given entity and returns it
-func (m *SpriteFactory) AddSprite(id akara.EID) *Sprite {
-	return m.Sprite.Add(id).(*Sprite)
+// Add adds a Sprite component to the given entity and returns it
+func (m *SpriteFactory) Add(id akara.EID) *Sprite {
+	return m.ComponentFactory.Add(id).(*Sprite)
 }
 
-// GetSprite returns the Sprite component for the given entity, and a bool for whether or not it exists
-func (m *SpriteFactory) GetSprite(id akara.EID) (*Sprite, bool) {
-	component, found := m.Sprite.Get(id)
+// Get returns the Sprite component for the given entity, and a bool for whether or not it exists
+func (m *SpriteFactory) Get(id akara.EID) (*Sprite, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

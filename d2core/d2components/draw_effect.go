@@ -21,17 +21,17 @@ func (*DrawEffect) New() akara.Component {
 // DrawEffectFactory is a wrapper for the generic component factory that returns DrawEffect component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a DrawEffect.
 type DrawEffectFactory struct {
-	DrawEffect *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddDrawEffect adds a DrawEffect component to the given entity and returns it
-func (m *DrawEffectFactory) AddDrawEffect(id akara.EID) *DrawEffect {
-	return m.DrawEffect.Add(id).(*DrawEffect)
+// Add adds a DrawEffect component to the given entity and returns it
+func (m *DrawEffectFactory) Add(id akara.EID) *DrawEffect {
+	return m.ComponentFactory.Add(id).(*DrawEffect)
 }
 
-// GetDrawEffect returns the DrawEffect component for the given entity, and a bool for whether or not it exists
-func (m *DrawEffectFactory) GetDrawEffect(id akara.EID) (*DrawEffect, bool) {
-	component, found := m.DrawEffect.Get(id)
+// Get returns the DrawEffect component for the given entity, and a bool for whether or not it exists
+func (m *DrawEffectFactory) Get(id akara.EID) (*DrawEffect, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

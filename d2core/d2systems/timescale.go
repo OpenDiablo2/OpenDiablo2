@@ -29,8 +29,10 @@ type TimeScaleSystem struct {
 	akara.BaseSystem
 	*d2util.Logger
 	scale     float64
-	d2components.DirtyFactory
-	d2components.CommandRegistrationFactory
+	Components struct {
+		Dirty d2components.DirtyFactory
+		CommandRegistration d2components.CommandRegistrationFactory
+	}
 }
 
 // Init will initialize the TimeScale system
@@ -42,8 +44,8 @@ func (t *TimeScaleSystem) Init(world *akara.World) {
 
 	t.Debug("initializing ...")
 
-	t.InjectComponent(&d2components.CommandRegistration{}, &t.CommandRegistration)
-	t.InjectComponent(&d2components.Dirty{}, &t.Dirty)
+	t.InjectComponent(&d2components.CommandRegistration{}, &t.Components.CommandRegistration.ComponentFactory)
+	t.InjectComponent(&d2components.Dirty{}, &t.Components.Dirty.ComponentFactory)
 
 	t.registerCommands()
 
@@ -62,9 +64,9 @@ func (t *TimeScaleSystem) Update() {
 func (t *TimeScaleSystem) registerCommands() {
 	e := t.NewEntity()
 
-	reg := t.AddCommandRegistration(e)
+	reg := t.Components.CommandRegistration.Add(e)
 
-	t.AddDirty(e)
+	t.Components.Dirty.Add(e)
 
 	reg.Name = "timescale"
 	reg.Description = "set the time scale of the game (default is 1.0)"

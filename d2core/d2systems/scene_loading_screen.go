@@ -127,7 +127,7 @@ func (s *LoadingScene) createLoadingScreen() {
 // Update the loading scene
 func (s *LoadingScene) Update() {
 	for _, id := range s.Viewports {
-		s.AddPriority(id).Priority = scenePriorityLoading
+		s.Components.Priority.Add(id).Priority = scenePriorityLoading
 	}
 
 	if s.Paused() {
@@ -160,7 +160,7 @@ func (s *LoadingScene) updateViewportAlpha() {
 		return
 	}
 
-	alpha, found := s.GetAlpha(s.Viewports[0])
+	alpha, found := s.Components.Alpha.Get(s.Viewports[0])
 	if !found {
 		return
 	}
@@ -181,17 +181,17 @@ func (s *LoadingScene) updateLoadingSpritePosition() {
 		return
 	}
 
-	viewport, found := s.GetViewport(s.Viewports[0])
+	viewport, found := s.Components.Viewport.Get(s.Viewports[0])
 	if !found {
 		return
 	}
 
-	sprite, found := s.GetSprite(s.loadingSprite)
+	sprite, found := s.Components.Sprite.Get(s.loadingSprite)
 	if !found {
 		return
 	}
 
-	transform, found := s.GetTransform(s.loadingSprite)
+	transform, found := s.Components.Transform.Get(s.loadingSprite)
 	if !found {
 		return
 	}
@@ -208,7 +208,7 @@ func (s *LoadingScene) updateLoadingSpritePosition() {
 }
 
 func (s *LoadingScene) updateLoadingSpriteFrame() {
-	sprite, found := s.GetSprite(s.loadingSprite)
+	sprite, found := s.Components.Sprite.Get(s.loadingSprite)
 	if !found {
 		return
 	}

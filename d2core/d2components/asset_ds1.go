@@ -23,17 +23,17 @@ func (*Ds1) New() akara.Component {
 // Ds1Factory is a wrapper for the generic component factory that returns Ds1 component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Ds1.
 type Ds1Factory struct {
-	Ds1 *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddDs1 adds a Ds1 component to the given entity and returns it
-func (m *Ds1Factory) AddDs1(id akara.EID) *Ds1 {
-	return m.Ds1.Add(id).(*Ds1)
+// Add adds a Ds1 component to the given entity and returns it
+func (m *Ds1Factory) Add(id akara.EID) *Ds1 {
+	return m.ComponentFactory.Add(id).(*Ds1)
 }
 
-// GetDs1 returns the Ds1 component for the given entity, and a bool for whether or not it exists
-func (m *Ds1Factory) GetDs1(id akara.EID) (*Ds1, bool) {
-	component, found := m.Ds1.Get(id)
+// Get returns the Ds1 component for the given entity, and a bool for whether or not it exists
+func (m *Ds1Factory) Get(id akara.EID) (*Ds1, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

@@ -15,22 +15,23 @@ import (
 func New() *Label {
 	return &Label{
 		colors: map[int]color.Color{0: color.White},
+		backgroundColor: color.Transparent,
 	}
 }
 
 // Label represents a user interface label
 type Label struct {
-	dirty               bool // used to flag when to re-render the label
-	text                string
-	textWithColorTokens string
-	Alignment           d2ui.HorizontalAlign
-	Font                *d2bitmapfont.BitmapFont
-	colors              map[int]color.Color
-	backgroundColor     color.Color
+	dirty           bool // used to flag when to re-render the label
+	text            string
+	rawText         string
+	Alignment       d2ui.HorizontalAlign
+	Font            *d2bitmapfont.BitmapFont
+	colors          map[int]color.Color
+	backgroundColor color.Color
 }
 
 func (v *Label) Render(target d2interface.Surface) {
-	lines := strings.Split(v.GetText(), "\n")
+	lines := strings.Split(v.text, "\n")
 	yOffset := 0
 
 	lastColor := v.colors[0]
@@ -87,22 +88,29 @@ func (v *Label) GetTextMetrics(text string) (width, height int) {
 
 // SetText sets the label's text
 func (v *Label) SetText(newText string) {
-	if v.text == newText {
+	if v.rawText == newText {
 		return
 	}
 
-	v.text = newText
+	v.rawText = newText
 	v.dirty = true
-	v.textWithColorTokens = v.processColorTokens(v.text)
+	v.text = v.processColorTokens(newText)
 }
 
-// GetText returns the label's textWithColorTokens
+// GetText returns the label's rawText
 func (v *Label) GetText() string {
-	return v.text
+	return v.rawText
 }
 
 // SetBackgroundColor sets the background highlight color
 func (v *Label) SetBackgroundColor(c color.Color) {
+	r1, g1, b1, a1 := c.RGBA()
+	r2, g2, b2, a2 := v.backgroundColor.RGBA()
+
+	if (r1==r2) && (g1==g2) && (b1==b2) && (a1==a2) {
+		return
+	}
+
 	v.dirty = true
 	v.backgroundColor = c
 }

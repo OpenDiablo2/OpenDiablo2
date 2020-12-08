@@ -23,17 +23,17 @@ func (*PaletteTransform) New() akara.Component {
 // PaletteTransformFactory is a wrapper for the generic component factory that returns PaletteTransform component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a PaletteTransform.
 type PaletteTransformFactory struct {
-	PaletteTransform *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddPaletteTransform adds a PaletteTransform component to the given entity and returns it
-func (m *PaletteTransformFactory) AddPaletteTransform(id akara.EID) *PaletteTransform {
-	return m.PaletteTransform.Add(id).(*PaletteTransform)
+// Add adds a PaletteTransform component to the given entity and returns it
+func (m *PaletteTransformFactory) Add(id akara.EID) *PaletteTransform {
+	return m.ComponentFactory.Add(id).(*PaletteTransform)
 }
 
-// GetPaletteTransform returns the PaletteTransform component for the given entity, and a bool for whether or not it exists
-func (m *PaletteTransformFactory) GetPaletteTransform(id akara.EID) (*PaletteTransform, bool) {
-	component, found := m.PaletteTransform.Get(id)
+// Get returns the PaletteTransform component for the given entity, and a bool for whether or not it exists
+func (m *PaletteTransformFactory) Get(id akara.EID) (*PaletteTransform, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

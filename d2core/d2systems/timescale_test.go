@@ -10,7 +10,7 @@ import (
 func TestTimeScaleSystem_Init(t *testing.T) {
 	cfg := akara.NewWorldConfig()
 
-	cfg.With(NewTimeScaleSystem())
+	cfg.With(&TimeScaleSystem{})
 
 	world := akara.NewWorld(cfg)
 
@@ -22,7 +22,7 @@ func TestTimeScaleSystem_Init(t *testing.T) {
 func TestTimeScaleSystem_Process(t *testing.T) {
 	cfg := akara.NewWorldConfig()
 
-	timescaleSystem := NewTimeScaleSystem()
+	timescaleSystem := &TimeScaleSystem{}
 
 	cfg.With(timescaleSystem)
 

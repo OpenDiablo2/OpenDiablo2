@@ -23,17 +23,17 @@ func (*Dc6) New() akara.Component {
 // Dc6Factory is a wrapper for the generic component factory that returns Dc6 component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Dc6.
 type Dc6Factory struct {
-	Dc6 *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddDc6 adds a Dc6 component to the given entity and returns it
-func (m *Dc6Factory) AddDc6(id akara.EID) *Dc6 {
-	return m.Dc6.Add(id).(*Dc6)
+// Add adds a Dc6 component to the given entity and returns it
+func (m *Dc6Factory) Add(id akara.EID) *Dc6 {
+	return m.ComponentFactory.Add(id).(*Dc6)
 }
 
-// GetDc6 returns the Dc6 component for the given entity, and a bool for whether or not it exists
-func (m *Dc6Factory) GetDc6(id akara.EID) (*Dc6, bool) {
-	component, found := m.Dc6.Get(id)
+// Get returns the Dc6 component for the given entity, and a bool for whether or not it exists
+func (m *Dc6Factory) Get(id akara.EID) (*Dc6, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

@@ -22,17 +22,17 @@ func (*Locale) New() akara.Component {
 // LocaleFactory is a wrapper for the generic component factory that returns Locale component instances.
 // This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a Locale.
 type LocaleFactory struct {
-	Locale *akara.ComponentFactory
+	*akara.ComponentFactory
 }
 
-// AddLocale adds a Locale component to the given entity and returns it
-func (m *LocaleFactory) AddLocale(id akara.EID) *Locale {
-	return m.Locale.Add(id).(*Locale)
+// Add adds a Locale component to the given entity and returns it
+func (m *LocaleFactory) Add(id akara.EID) *Locale {
+	return m.ComponentFactory.Add(id).(*Locale)
 }
 
-// GetLocale returns the Locale component for the given entity, and a bool for whether or not it exists
-func (m *LocaleFactory) GetLocale(id akara.EID) (*Locale, bool) {
-	component, found := m.Locale.Get(id)
+// Get returns the Locale component for the given entity, and a bool for whether or not it exists
+func (m *LocaleFactory) Get(id akara.EID) (*Locale, bool) {
+	component, found := m.ComponentFactory.Get(id)
 	if !found {
 		return nil, found
 	}

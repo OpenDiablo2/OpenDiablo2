@@ -31,17 +31,19 @@ var _ akara.System = &RenderSystem{}
 type RenderSystem struct {
 	akara.BaseSubscriberSystem
 	*d2util.Logger
-	renderer  d2interface.Renderer
-	viewports *akara.Subscription
-	configs   *akara.Subscription
-	d2components.GameConfigFactory
-	d2components.ViewportFactory
-	d2components.MainViewportFactory
-	d2components.TextureFactory
-	d2components.PriorityFactory
-	d2components.AlphaFactory
-	d2components.CameraFactory
+	renderer   d2interface.Renderer
+	viewports  *akara.Subscription
+	configs    *akara.Subscription
 	lastUpdate time.Time
+	Components struct {
+		GameConfig   d2components.GameConfigFactory
+		Viewport     d2components.ViewportFactory
+		MainViewport d2components.MainViewportFactory
+		Texture      d2components.TextureFactory
+		Priority     d2components.PriorityFactory
+		Alpha        d2components.AlphaFactory
+		Camera       d2components.CameraFactory
+	}
 }
 
 // Init initializes the system with the given world, injecting the necessary components
@@ -64,13 +66,13 @@ func (m *RenderSystem) setupLogger() {
 }
 
 func (m *RenderSystem) setupFactories() {
-	m.InjectComponent(&d2components.GameConfig{}, &m.GameConfig)
-	m.InjectComponent(&d2components.Viewport{}, &m.Viewport)
-	m.InjectComponent(&d2components.MainViewport{}, &m.MainViewport)
-	m.InjectComponent(&d2components.Texture{}, &m.Texture)
-	m.InjectComponent(&d2components.Priority{}, &m.Priority)
-	m.InjectComponent(&d2components.Alpha{}, &m.Alpha)
-	m.InjectComponent(&d2components.Camera{}, &m.Camera)
+	m.InjectComponent(&d2components.GameConfig{}, &m.Components.GameConfig.ComponentFactory)
+	m.InjectComponent(&d2components.Viewport{}, &m.Components.Viewport.ComponentFactory)
+	m.InjectComponent(&d2components.MainViewport{}, &m.Components.MainViewport.ComponentFactory)
+	m.InjectComponent(&d2components.Texture{}, &m.Components.Texture.ComponentFactory)
+	m.InjectComponent(&d2components.Priority{}, &m.Components.Priority.ComponentFactory)
+	m.InjectComponent(&d2components.Alpha{}, &m.Components.Alpha.ComponentFactory)
+	m.InjectComponent(&d2components.Camera{}, &m.Components.Camera.ComponentFactory)
 }
 
 func (m *RenderSystem) setupSubscriptions() {
@@ -127,7 +129,7 @@ func (m *RenderSystem) createRenderer() {
 		return
 	}
 
-	config, found := m.GetGameConfig(configs[0])
+	config, found := m.Components.GameConfig.Get(configs[0])
 	if !found {
 		return
 	}
@@ -165,22 +167,22 @@ func (m *RenderSystem) render(screen d2interface.Surface) error {
 	entities := m.viewports.GetEntities()
 
 	sort.Slice(entities, func(i, j int) bool {
-		pi, pj := m.AddPriority(entities[i]), m.AddPriority(entities[j])
+		pi, pj := m.Components.Priority.Add(entities[i]), m.Components.Priority.Add(entities[j])
 		return pi.Priority < pj.Priority
 	})
 
 	for _, id := range entities {
-		vp, found := m.GetViewport(id)
+		vp, found := m.Components.Viewport.Get(id)
 		if !found {
 			return errors.New("main viewport not found")
 		}
 
-		cam, found := m.GetCamera(id)
+		cam, found := m.Components.Camera.Get(id)
 		if !found {
 			return errors.New("main viewport camera not found")
 		}
 
-		texture, found := m.GetTexture(id)
+		texture, found := m.Components.Texture.Get(id)
 		if !found {
 			return errors.New("main viewport doesn't have a surface")
 		}
@@ -189,9 +191,9 @@ func (m *RenderSystem) render(screen d2interface.Surface) error {
 			texture.Texture = m.renderer.NewSurface(vp.Width, vp.Height)
 		}
 
-		alpha, found := m.GetAlpha(id)
+		alpha, found := m.Components.Alpha.Get(id)
 		if !found {
-			alpha = m.AddAlpha(id)
+			alpha = m.Components.Alpha.Add(id)
 		}
 
 		const maxAlpha = 255

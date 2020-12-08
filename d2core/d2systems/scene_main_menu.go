@@ -103,8 +103,8 @@ func (s *MainMenuScene) createLogo() {
 	s.sprites.logoFireLeft = s.Add.Sprite(logoX, logoY, d2resource.Diablo2LogoFireLeft, d2resource.PaletteUnits)
 	s.sprites.logoFireRight = s.Add.Sprite(logoX, logoY, d2resource.Diablo2LogoFireRight, d2resource.PaletteUnits)
 
-	s.AddDrawEffect(s.sprites.logoFireLeft).DrawEffect = d2enum.DrawEffectModulate
-	s.AddDrawEffect(s.sprites.logoFireRight).DrawEffect = d2enum.DrawEffectModulate
+	s.Components.DrawEffect.Add(s.sprites.logoFireLeft).DrawEffect = d2enum.DrawEffectModulate
+	s.Components.DrawEffect.Add(s.sprites.logoFireRight).DrawEffect = d2enum.DrawEffectModulate
 }
 
 func (s *MainMenuScene) createButtons() {
@@ -119,14 +119,19 @@ func (s *MainMenuScene) createTrademarkScreen() {
 
 	s.sprites.trademark = s.Add.SegmentedSprite(0, 0, imgPath, palPath, 4, 3, 0)
 
-	interactive := s.AddInteractive(s.sprites.trademark)
+	interactive := s.Components.Interactive.Add(s.sprites.trademark)
 
 	interactive.InputVector.SetMouseButton(d2input.MouseButtonLeft)
 
 	interactive.Callback = func() bool {
+		if !s.Active() {
+			interactive.Enabled = false
+			return false
+		}
+
 		s.Debug("hiding trademark sprite")
 
-		alpha := s.AddAlpha(s.sprites.trademark)
+		alpha := s.Components.Alpha.Add(s.sprites.trademark)
 
 		go func() {
 			alpha.Alpha = 1.0
@@ -154,7 +159,7 @@ func (s *MainMenuScene) createTrademarkScreen() {
 // Update the main menu scene
 func (s *MainMenuScene) Update() {
 	for _, id := range s.Viewports {
-		s.AddPriority(id).Priority = scenePriorityMainMenu
+		s.Components.Priority.Add(id).Priority = scenePriorityMainMenu
 	}
 
 	if s.Paused() {
@@ -182,7 +187,7 @@ func (s *MainMenuScene) initLogoSprites() {
 	}
 
 	for _, id := range logoSprites {
-		sprite, found := s.GetSprite(id)
+		sprite, found := s.Components.Sprite.Get(id)
 		if !found {
 			return
 		}
@@ -191,7 +196,7 @@ func (s *MainMenuScene) initLogoSprites() {
 			return
 		}
 
-		texture, found := s.GetTexture(id)
+		texture, found := s.Components.Texture.Get(id)
 		if !found {
 			return
 		}
@@ -204,7 +209,7 @@ func (s *MainMenuScene) initLogoSprites() {
 	s.Debug("initializing logo sprites")
 
 	for _, id := range logoSprites {
-		sprite, _ := s.GetSprite(id)
+		sprite, _ := s.Components.Sprite.Get(id)
 		if sprite.Sprite == nil {
 			continue
 		}
