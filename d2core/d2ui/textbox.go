@@ -84,30 +84,32 @@ func (v *TextBox) OnKeyChars(event d2interface.KeyCharsEvent) bool {
 	}
 
 	newText := string(event.Chars())
+	if !(len(newText) > 0) {
+		return false
+	}
 
-	if len(newText) > 0 {
-		if v.isNumberOnly {
-			number, err := strconv.Atoi(v.text + newText)
-			if err != nil {
-				v.Debugf("Unable to convert string %s to intager: %s", v.text+newText, err)
-				return false
-			}
-
-			if number <= v.maxValue {
-				v.text += newText
-			} else {
-				v.text = strconv.Itoa(v.maxValue)
-			}
-		} else {
-			v.text += newText
-		}
-
+	if !v.isNumberOnly {
+		v.text += newText
 		v.SetText(v.text)
 
 		return true
 	}
 
-	return false
+	number, err := strconv.Atoi(v.text + newText)
+	if err != nil {
+		v.Debugf("Unable to convert string %s to intager: %s", v.text+newText, err)
+		return false
+	}
+
+	if number <= v.maxValue {
+		v.text += newText
+	} else {
+		v.text = strconv.Itoa(v.maxValue)
+	}
+
+	v.SetText(v.text)
+
+	return true
 }
 
 // OnKeyRepeat handles key repeat events

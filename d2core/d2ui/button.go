@@ -56,7 +56,6 @@ const (
 	ButtonTypeTabBlank           ButtonType = 36
 	ButtonTypeBlankQuestBtn      ButtonType = 37
 
-
 	ButtonNoFixedWidth  int = -1
 	ButtonNoFixedHeight int = -1
 )
