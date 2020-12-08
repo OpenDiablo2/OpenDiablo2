@@ -24,15 +24,15 @@ func Test_FileHandleResolver_Process(t *testing.T) {
 
 	world := akara.NewWorld(cfg)
 
-	filePaths := typeSys.FilePathFactory
+	filePaths := typeSys.FileFactory
 	fileHandles := handleSys.FileHandleFactory
 
 	sourceEntity := world.NewEntity()
-	source := filePaths.AddFilePath(sourceEntity)
+	source := filePaths.AddFile(sourceEntity)
 	source.Path = testDataPath
 
 	fileEntity := world.NewEntity()
-	file := filePaths.AddFilePath(fileEntity)
+	file := filePaths.AddFile(fileEntity)
 	file.Path = "testfile_a.txt"
 
 	_ = world.Update(0)

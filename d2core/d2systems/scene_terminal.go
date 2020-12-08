@@ -51,13 +51,13 @@ type TerminalScene struct {
 func (s *TerminalScene) Init(world *akara.World) {
 	s.World = world
 
-	s.Info("initializing ...")
+	s.Debug("initializing ...")
 
 	s.setupSubscriptions()
 }
 
 func (s *TerminalScene) setupSubscriptions() {
-	s.Info("setting up component subscriptions")
+	s.Debug("setting up component subscriptions")
 
 	commandsToRegister := s.NewComponentFilter().
 		Require(

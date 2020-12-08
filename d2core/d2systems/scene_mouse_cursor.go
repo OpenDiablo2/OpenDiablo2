@@ -44,7 +44,7 @@ type MouseCursorScene struct {
 func (s *MouseCursorScene) Init(world *akara.World) {
 	s.World = world
 
-	s.Info("initializing ...")
+	s.Debug("initializing ...")
 }
 
 func (s *MouseCursorScene) boot() {
@@ -61,7 +61,7 @@ func (s *MouseCursorScene) boot() {
 }
 
 func (s *MouseCursorScene) createMouseCursor() {
-	s.Info("creating mouse cursor")
+	s.Debug("creating mouse cursor")
 	s.cursor = s.Add.Sprite(0, 0, d2resource.CursorDefault, d2resource.PaletteUnits)
 }
 
@@ -136,7 +136,7 @@ func (s *MouseCursorScene) registerTerminalCommands() {
 }
 
 func (s *MouseCursorScene) registerDebugCommand() {
-	s.Info("registering debug command")
+	s.Debug("registering debug command")
 
 	const (
 		command     = "debug_mouse"

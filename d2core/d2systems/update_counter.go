@@ -30,7 +30,7 @@ func (u *UpdateCounter) Init(world *akara.World) {
 		u.SetActive(false)
 	}
 
-	u.Info("initializing")
+	u.Debug("initializing")
 }
 
 func (u *UpdateCounter) setupLogger() {

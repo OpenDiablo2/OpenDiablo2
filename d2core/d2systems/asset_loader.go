@@ -1,6 +1,7 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"io"
 
 	"github.com/gravestench/akara"
@@ -40,7 +41,8 @@ type AssetLoaderSystem struct {
 	fileSub   *akara.Subscription
 	sourceSub *akara.Subscription
 	cache     *d2cache.Cache
-	d2components.FilePathFactory
+	localeString string // related to file "/data/local/use"
+	d2components.FileFactory
 	d2components.FileTypeFactory
 	d2components.FileHandleFactory
 	d2components.FileSourceFactory
@@ -56,6 +58,9 @@ type AssetLoaderSystem struct {
 	d2components.Dt1Factory
 	d2components.WavFactory
 	d2components.AnimationDataFactory
+	d2components.LocaleFactory
+	d2components.BitmapFontFactory
+	d2components.FileLoadedFactory
 }
 
 // Init injects component maps related to various asset types
@@ -64,7 +69,7 @@ func (m *AssetLoaderSystem) Init(world *akara.World) {
 
 	m.setupLogger()
 
-	m.Info("initializing ...")
+	m.Debug("initializing ...")
 
 	m.setupSubscriptions()
 	m.setupFactories()
@@ -78,29 +83,18 @@ func (m *AssetLoaderSystem) setupLogger() {
 }
 
 func (m *AssetLoaderSystem) setupSubscriptions() {
-	m.Info("setting up component subscriptions")
+	m.Debug("setting up component subscriptions")
 
 	// we are going to check entities that dont yet have loaded asset types
 	filesToLoad := m.NewComponentFilter().
 		Require(
-			&d2components.FilePath{}, // we want to process entities with these file components
+			&d2components.File{}, // we want to process entities with these file components
 			&d2components.FileType{},
 			&d2components.FileHandle{},
 		).
 		Forbid(
-			&d2components.FileSource{}, // but we forbid files that are already loaded
-			&d2components.GameConfig{},
-			&d2components.StringTable{},
-			&d2components.DataDictionary{},
-			&d2components.Palette{},
-			&d2components.PaletteTransform{},
-			&d2components.Cof{},
-			&d2components.Dc6{},
-			&d2components.Dcc{},
-			&d2components.Ds1{},
-			&d2components.Dt1{},
-			&d2components.Wav{},
-			&d2components.AnimationData{},
+			&d2components.FileSource{},
+			&d2components.FileLoaded{},
 		).
 		Build()
 
@@ -113,9 +107,9 @@ func (m *AssetLoaderSystem) setupSubscriptions() {
 }
 
 func (m *AssetLoaderSystem) setupFactories() {
-	m.Info("setting up component factories")
+	m.Debug("setting up component factories")
 
-	m.InjectComponent(&d2components.FilePath{}, &m.FilePath)
+	m.InjectComponent(&d2components.File{}, &m.File)
 	m.InjectComponent(&d2components.FileType{}, &m.FileType)
 	m.InjectComponent(&d2components.FileHandle{}, &m.FileHandle)
 	m.InjectComponent(&d2components.FileSource{}, &m.FileSource)
@@ -131,6 +125,9 @@ func (m *AssetLoaderSystem) setupFactories() {
 	m.InjectComponent(&d2components.Dt1{}, &m.Dt1)
 	m.InjectComponent(&d2components.Wav{}, &m.Wav)
 	m.InjectComponent(&d2components.AnimationData{}, &m.AnimationData)
+	m.InjectComponent(&d2components.Locale{}, &m.Locale)
+	m.InjectComponent(&d2components.BitmapFont{}, &m.BitmapFont)
+	m.InjectComponent(&d2components.FileLoaded{}, &m.FileLoaded)
 }
 
 // Update processes all of the Entities in the subscription of file entities that need to be processed
@@ -142,7 +139,7 @@ func (m *AssetLoaderSystem) Update() {
 
 func (m *AssetLoaderSystem) loadAsset(id akara.EID) {
 	// make sure everything is kosher
-	fp, found := m.GetFilePath(id)
+	fp, found := m.GetFile(id)
 	if !found {
 		m.Errorf("filepath component not found for entity %d", id)
 		return
@@ -165,6 +162,8 @@ func (m *AssetLoaderSystem) loadAsset(id akara.EID) {
 		m.Debugf("Retrieving %s from cache", fp.Path)
 		return
 	}
+
+	m.Debugf("Loading file: %s", fp.Path)
 
 	// make sure to seek back to 0 if the filehandle was cached
 	_, _ = fh.Data.Seek(0, 0)
@@ -218,6 +217,8 @@ func (m *AssetLoaderSystem) assignFromCache(id akara.EID, path string, t d2enum.
 		m.AddAnimationData(id).AnimationData = entry.(*d2animdata.AnimationData)
 	}
 
+	m.AddFileLoaded(id)
+
 	return found
 }
 
@@ -225,58 +226,58 @@ func (m *AssetLoaderSystem) assignFromCache(id akara.EID, path string, t d2enum.
 func (m *AssetLoaderSystem) parseAndCache(id akara.EID, path string, t d2enum.FileType, data []byte) {
 	switch t {
 	case d2enum.FileTypeStringTable:
-		m.Infof("Loading string table: %s", path)
+		m.Debugf("Loading string table: %s", path)
 		m.loadStringTable(id, path, data)
 	case d2enum.FileTypeFontTable:
-		m.Infof("Loading font table: %s", path)
+		m.Debugf("Loading font table: %s", path)
 		m.loadFontTable(id, path, data)
 	case d2enum.FileTypeDataDictionary:
-		m.Infof("Loading data dictionary: %s", path)
+		m.Debugf("Loading data dictionary: %s", path)
 		m.loadDataDictionary(id, path, data)
 	case d2enum.FileTypePalette:
-		m.Infof("Loading palette: %s", path)
+		m.Debugf("Loading palette: %s", path)
 
 		if err := m.loadPalette(id, path, data); err != nil {
 			m.Error(err.Error())
 		}
 	case d2enum.FileTypePaletteTransform:
-		m.Infof("Loading palette transform: %s", path)
+		m.Debugf("Loading palette transform: %s", path)
 
 		if err := m.loadPaletteTransform(id, path, data); err != nil {
 			m.Error(err.Error())
 		}
 	case d2enum.FileTypeCOF:
-		m.Infof("Loading COF: %s", path)
+		m.Debugf("Loading COF: %s", path)
 
 		if err := m.loadCOF(id, path, data); err != nil {
 			m.Error(err.Error())
 		}
 	case d2enum.FileTypeDC6:
-		m.Infof("Loading DC6: %s", path)
+		m.Debugf("Loading DC6: %s", path)
 
 		if err := m.loadDC6(id, path, data); err != nil {
 			m.Error(err.Error())
 		}
 	case d2enum.FileTypeDCC:
-		m.Infof("Loading DCC: %s", path)
+		m.Debugf("Loading DCC: %s", path)
 
 		if err := m.loadDCC(id, path, data); err != nil {
 			m.Error(err.Error())
 		}
 	case d2enum.FileTypeDS1:
-		m.Infof("Loading DS1: %s", path)
+		m.Debugf("Loading DS1: %s", path)
 
 		if err := m.loadDS1(id, path, data); err != nil {
 			m.Error(err.Error())
 		}
 	case d2enum.FileTypeDT1:
-		m.Infof("Loading DT1: %s", path)
+		m.Debugf("Loading DT1: %s", path)
 
 		if err := m.loadDT1(id, path, data); err != nil {
 			m.Error(err.Error())
 		}
 	case d2enum.FileTypeWAV:
-		m.Infof("Loading WAV: %s", path)
+		m.Debugf("Loading WAV: %s", path)
 
 		fh, found := m.GetFileHandle(id)
 		if !found {
@@ -285,12 +286,27 @@ func (m *AssetLoaderSystem) parseAndCache(id akara.EID, path string, t d2enum.Fi
 
 		m.loadWAV(id, path, fh.Data)
 	case d2enum.FileTypeD2:
-		m.Infof("Loading animation data: %s", path)
+		m.Debugf("Loading animation data: %s", path)
 
 		if err := m.loadAnimationData(id, path, data); err != nil {
 			m.Error(err.Error())
 		}
+	case d2enum.FileTypeLocale:
+		m.Debugf("Loading locale: %s", path)
+
+		m.loadLocale(id, data)
 	}
+
+	m.AddFileLoaded(id)
+}
+
+func (m *AssetLoaderSystem) loadLocale(id akara.EID, data []byte) {
+	locale := m.AddLocale(id)
+
+	locale.Code = data[0]
+	locale.String = d2resource.GetLanguageLiteral(locale.Code)
+
+	m.localeString = locale.String
 }
 
 func (m *AssetLoaderSystem) loadStringTable(id akara.EID, path string, data []byte) {

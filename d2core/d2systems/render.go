@@ -52,7 +52,7 @@ func (m *RenderSystem) Init(world *akara.World) {
 
 	m.setupLogger()
 
-	m.Info("initializing ...")
+	m.Debug("initializing ...")
 
 	m.setupFactories()
 	m.setupSubscriptions()
@@ -120,7 +120,7 @@ func (m *RenderSystem) Update() {
 }
 
 func (m *RenderSystem) createRenderer() {
-	m.Info("creating renderer instance")
+	m.Debug("creating renderer instance")
 
 	configs := m.configs.GetEntities()
 	if len(configs) < 1 {
@@ -220,7 +220,7 @@ func (m *RenderSystem) updateWorld() error {
 }
 
 func (m *RenderSystem) StartGameLoop() error {
-	m.Infof("starting game loop ...")
+	m.Info("starting game loop ...")
 
 	return m.renderer.Run(m.render, m.updateWorld, 800, 600, gameTitle)
 }

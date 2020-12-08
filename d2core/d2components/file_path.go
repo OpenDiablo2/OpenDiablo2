@@ -5,36 +5,36 @@ import (
 	"github.com/gravestench/akara"
 )
 
-// static check that FilePath implements Component
-var _ akara.Component = &FilePath{}
+// static check that File implements Component
+var _ akara.Component = &File{}
 
-// FilePath represents a file path for a file
-type FilePath struct {
+// File represents a file as a path
+type File struct {
 	Path string
 }
 
-// New returns a FilePath component. By default, it contains an empty string.
-func (*FilePath) New() akara.Component {
-	return &FilePath{}
+// New returns a File component. By default, it contains an empty string.
+func (*File) New() akara.Component {
+	return &File{}
 }
 
-// FilePathFactory is a wrapper for the generic component factory that returns FilePath component instances.
-// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a FilePath.
-type FilePathFactory struct {
-	FilePath *akara.ComponentFactory
+// FileFactory is a wrapper for the generic component factory that returns File component instances.
+// This can be embedded inside of a system to give them the methods for adding, retrieving, and removing a File.
+type FileFactory struct {
+	File *akara.ComponentFactory
 }
 
-// AddFilePath adds a FilePath component to the given entity and returns it
-func (m *FilePathFactory) AddFilePath(id akara.EID) *FilePath {
-	return m.FilePath.Add(id).(*FilePath)
+// AddFile adds a File component to the given entity and returns it
+func (m *FileFactory) AddFile(id akara.EID) *File {
+	return m.File.Add(id).(*File)
 }
 
-// GetFilePath returns the FilePath component for the given entity, and a bool for whether or not it exists
-func (m *FilePathFactory) GetFilePath(id akara.EID) (*FilePath, bool) {
-	component, found := m.FilePath.Get(id)
+// GetFile returns the File component for the given entity, and a bool for whether or not it exists
+func (m *FileFactory) GetFile(id akara.EID) (*File, bool) {
+	component, found := m.File.Get(id)
 	if !found {
 		return nil, found
 	}
 
-	return component.(*FilePath), found
+	return component.(*File), found
 }

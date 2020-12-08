@@ -1,6 +1,7 @@
 package d2systems
 
 import (
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"strings"
 
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
@@ -35,7 +36,7 @@ const (
 //
 // A file source can be something like an MPQ archive or a file system directory on the host machine.
 //
-// A file handle is a primitive representation of  a loaded file; something that has data
+// A file handle is a primitive representation of a loaded file; something that has data
 // in the form of a byte slice, but has not been parsed into a more meaningful struct, like a DC6 animation.
 type FileHandleResolver struct {
 	akara.BaseSubscriberSystem
@@ -43,10 +44,16 @@ type FileHandleResolver struct {
 	cache        *d2cache.Cache
 	filesToLoad  *akara.Subscription
 	sourcesToUse *akara.Subscription
-	d2components.FilePathFactory
+	localesToCheck  *akara.Subscription
+	locale struct {
+		charset  string
+		language string
+	}
+	d2components.FileFactory
 	d2components.FileTypeFactory
 	d2components.FileSourceFactory
 	d2components.FileHandleFactory
+	d2components.LocaleFactory
 }
 
 // Init initializes the system with the given world
@@ -57,12 +64,12 @@ func (m *FileHandleResolver) Init(world *akara.World) {
 
 	m.setupLogger()
 
-	m.Info("initializing ...")
+	m.Debug("initializing ...")
 
 	m.setupSubscriptions()
 	m.setupFactories()
 
-	m.Info("... initialization complete!")
+	m.Debug("... initialization complete!")
 }
 
 func (m *FileHandleResolver) setupLogger() {
@@ -71,11 +78,11 @@ func (m *FileHandleResolver) setupLogger() {
 }
 
 func (m *FileHandleResolver) setupSubscriptions() {
-	m.Info("setting up component subscriptions")
+	m.Debug("setting up component subscriptions")
 	// this filter is for entities that have a file path and file type but no file handle.
 	filesToLoad := m.NewComponentFilter().
 		Require(
-			&d2components.FilePath{},
+			&d2components.File{},
 			&d2components.FileType{},
 		).
 		Forbid(
@@ -88,17 +95,23 @@ func (m *FileHandleResolver) setupSubscriptions() {
 		Require(&d2components.FileSource{}).
 		Build()
 
+	localesToCheck := m.NewComponentFilter().
+		Require(&d2components.Locale{}).
+		Build()
+
 	m.filesToLoad = m.AddSubscription(filesToLoad)
 	m.sourcesToUse = m.AddSubscription(sourcesToUse)
+	m.localesToCheck = m.AddSubscription(localesToCheck)
 }
 
 func (m *FileHandleResolver) setupFactories() {
-	m.Info("setting up component factories")
+	m.Debug("setting up component factories")
 
-	m.InjectComponent(&d2components.FilePath{}, &m.FilePath)
+	m.InjectComponent(&d2components.File{}, &m.File)
 	m.InjectComponent(&d2components.FileType{}, &m.FileType)
 	m.InjectComponent(&d2components.FileHandle{}, &m.FileHandle)
 	m.InjectComponent(&d2components.FileSource{}, &m.FileSource)
+	m.InjectComponent(&d2components.Locale{}, &m.Locale)
 }
 
 // Update iterates over entities which have not had a file handle resolved.
@@ -107,6 +120,20 @@ func (m *FileHandleResolver) setupFactories() {
 func (m *FileHandleResolver) Update() {
 	filesToLoad := m.filesToLoad.GetEntities()
 	sourcesToUse := m.sourcesToUse.GetEntities()
+	locales := m.localesToCheck.GetEntities()
+
+	if m.locale.charset == "" && m.locale.language == "" {
+		for _, eid := range locales {
+			locale, _ := m.GetLocale(eid)
+			m.locale.language = locale.String
+			m.locale.charset =  d2resource.GetFontCharset(locale.String)
+			m.RemoveEntity(eid)
+		}
+
+		if m.locale.charset != "" && m.locale.language != "" {
+			m.Infof("locale set to `%s`", m.locale.language)
+		}
+	}
 
 	for _, fileID := range filesToLoad {
 		for _, sourceID := range sourcesToUse {
@@ -119,7 +146,7 @@ func (m *FileHandleResolver) Update() {
 
 // try to load a file with a source, returns true if loaded
 func (m *FileHandleResolver) loadFileWithSource(fileID, sourceID akara.EID) bool {
-	fp, found := m.GetFilePath(fileID)
+	fp, found := m.GetFile(fileID)
 	if !found {
 		return false
 	}
@@ -134,16 +161,16 @@ func (m *FileHandleResolver) loadFileWithSource(fileID, sourceID akara.EID) bool
 		return false
 	}
 
-	sourceFp, found := m.GetFilePath(sourceID)
+	sourceFp, found := m.GetFile(sourceID)
 	if !found {
 		return false
 	}
 
 	// replace the locale tokens if present
-	if strings.Contains(fp.Path, languageTokenFont) {
-		fp.Path = strings.ReplaceAll(fp.Path, languageTokenFont, "latin")
-	} else if strings.Contains(fp.Path, languageTokenStringTable) {
-		fp.Path = strings.ReplaceAll(fp.Path, languageTokenStringTable, "ENG")
+	if strings.Contains(fp.Path, languageTokenFont) && m.locale.charset != "" {
+		fp.Path = strings.ReplaceAll(fp.Path, d2resource.LanguageFontToken, m.locale.charset)
+	} else if strings.Contains(fp.Path, languageTokenStringTable) && m.locale.language != "" {
+		fp.Path = strings.ReplaceAll(fp.Path, d2resource.LanguageTableToken, m.locale.language)
 	}
 
 	cacheKey := m.makeCacheKey(fp.Path, sourceFp.Path)
@@ -167,7 +194,7 @@ func (m *FileHandleResolver) loadFileWithSource(fileID, sourceID akara.EID) bool
 		}
 
 		tryPath := strings.ReplaceAll(fp.Path, "sfx", "music")
-		tmpComponent := &d2components.FilePath{Path: tryPath}
+		tmpComponent := &d2components.File{Path: tryPath}
 
 		cacheKey = m.makeCacheKey(tryPath, sourceFp.Path)
 		if entry, found := m.cache.Retrieve(cacheKey); found {
@@ -186,7 +213,7 @@ func (m *FileHandleResolver) loadFileWithSource(fileID, sourceID akara.EID) bool
 		fp.Path = tryPath
 	}
 
-	m.Infof("resolved `%s` with source `%s`", fp.Path, sourceFp.Path)
+	m.Debugf("resolved `%s` with source `%s`", fp.Path, sourceFp.Path)
 
 	component := m.AddFileHandle(fileID)
 	component.Data = data

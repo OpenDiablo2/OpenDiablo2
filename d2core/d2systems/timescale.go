@@ -38,7 +38,7 @@ func (t *TimeScaleSystem) Init(world *akara.World) {
 	t.Logger = d2util.NewLogger()
 	t.SetPrefix(logPrefixTimeScaleSystem)
 
-	t.Info("initializing ...")
+	t.Debug("initializing ...")
 
 	t.InjectComponent(&d2components.CommandRegistration{}, &t.CommandRegistration)
 	t.InjectComponent(&d2components.Dirty{}, &t.Dirty)

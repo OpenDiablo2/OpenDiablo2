@@ -21,11 +21,11 @@ func Test_FileSourceResolution(t *testing.T) {
 
 	world := akara.NewWorld(cfg)
 
-	filePaths := typeSys.FilePathFactory
+	filePaths := typeSys.FileFactory
 	fileSources := sourceSys.FileSourceFactory
 
 	sourceEntity := world.NewEntity()
-	sourceFp := filePaths.AddFilePath(sourceEntity)
+	sourceFp := filePaths.AddFile(sourceEntity)
 	sourceFp.Path = testDataPath
 
 	_ = world.Update(0)

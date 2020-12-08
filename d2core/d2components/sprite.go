@@ -13,6 +13,7 @@ var _ akara.Component = &Sprite{}
 // Sprite is a component that contains a width and height
 type Sprite struct {
 	d2interface.Sprite
+	SpritePath, PalettePath string
 }
 
 // New returns an animation component. By default, it contains a nil instance of an animation.

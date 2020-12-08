@@ -44,7 +44,7 @@ type ShapeSystem struct {
 func (t *ShapeSystem) Init(world *akara.World) {
 	t.World = world
 
-	t.Info("initializing sprite factory ...")
+	t.Debug("initializing sprite factory ...")
 
 	t.setupFactories()
 	t.setupSubscriptions()

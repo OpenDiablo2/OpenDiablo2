@@ -38,7 +38,7 @@ func (m *InputSystem) Init(world *akara.World) {
 
 	m.setupLogger()
 
-	m.Info("initializing ...")
+	m.Debug("initializing ...")
 
 	m.setupFactories()
 	m.setupSubscriptions()
@@ -52,14 +52,14 @@ func (m *InputSystem) setupLogger() {
 }
 
 func (m *InputSystem) setupFactories() {
-	m.Info("setting up component factories")
+	m.Debug("setting up component factories")
 
 	m.InjectComponent(&d2components.GameConfig{}, &m.GameConfig)
 	m.InjectComponent(&d2components.Interactive{}, &m.Interactive)
 }
 
 func (m *InputSystem) setupSubscriptions() {
-	m.Info("setting up component subscriptions")
+	m.Debug("setting up component subscriptions")
 
 	interactives := m.NewComponentFilter().
 		Require(&d2components.Interactive{}).

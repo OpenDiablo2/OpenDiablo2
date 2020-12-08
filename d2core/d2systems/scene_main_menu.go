@@ -54,7 +54,7 @@ type MainMenuScene struct {
 func (s *MainMenuScene) Init(world *akara.World) {
 	s.World = world
 
-	s.Info("initializing ...")
+	s.Debug("initializing ...")
 }
 
 func (s *MainMenuScene) boot() {
@@ -73,7 +73,7 @@ func (s *MainMenuScene) boot() {
 }
 
 func (s *MainMenuScene) setupViewports() {
-	s.Info("setting up viewports")
+	s.Debug("setting up viewports")
 
 	imgPath := d2resource.GameSelectScreen
 	palPath := d2resource.PaletteSky
@@ -82,7 +82,7 @@ func (s *MainMenuScene) setupViewports() {
 }
 
 func (s *MainMenuScene) createBackground() {
-	s.Info("creating background")
+	s.Debug("creating background")
 
 	imgPath := d2resource.GameSelectScreen
 	palPath := d2resource.PaletteSky
@@ -91,7 +91,7 @@ func (s *MainMenuScene) createBackground() {
 }
 
 func (s *MainMenuScene) createLogo() {
-	s.Info("creating logo")
+	s.Debug("creating logo")
 
 	const (
 		logoX, logoY = 400, 120
@@ -108,11 +108,11 @@ func (s *MainMenuScene) createLogo() {
 }
 
 func (s *MainMenuScene) createButtons() {
-	s.Info("creating buttons")
+	s.Debug("creating buttons")
 }
 
 func (s *MainMenuScene) createTrademarkScreen() {
-	s.Info("creating trademark screen")
+	s.Debug("creating trademark screen")
 
 	imgPath := d2resource.TrademarkScreen
 	palPath := d2resource.PaletteSky
@@ -124,7 +124,7 @@ func (s *MainMenuScene) createTrademarkScreen() {
 	interactive.InputVector.SetMouseButton(d2input.MouseButtonLeft)
 
 	interactive.Callback = func() bool {
-		s.Info("hiding trademark sprite")
+		s.Debug("hiding trademark sprite")
 
 		alpha := s.AddAlpha(s.sprites.trademark)
 
@@ -166,7 +166,7 @@ func (s *MainMenuScene) Update() {
 	}
 
 	if !s.logoInit {
-		s.Info("attempting logo sprite init")
+		s.Debug("attempting logo sprite init")
 		s.initLogoSprites()
 	}
 
@@ -201,7 +201,7 @@ func (s *MainMenuScene) initLogoSprites() {
 		}
 	}
 
-	s.Info("initializing logo sprites")
+	s.Debug("initializing logo sprites")
 
 	for _, id := range logoSprites {
 		sprite, _ := s.GetSprite(id)

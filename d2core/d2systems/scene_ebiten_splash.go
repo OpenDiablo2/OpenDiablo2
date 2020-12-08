@@ -47,7 +47,7 @@ type EbitenSplashScene struct {
 func (s *EbitenSplashScene) Init(world *akara.World) {
 	s.World = world
 
-	s.Info("initializing ...")
+	s.Debug("initializing ...")
 }
 
 func (s *EbitenSplashScene) boot() {
@@ -126,7 +126,7 @@ func (s *EbitenSplashScene) createSplash() {
 	interactive.InputVector.SetMouseButton(d2input.MouseButtonLeft)
 
 	interactive.Callback = func() bool {
-		s.Info("hiding splash scene")
+		s.Debug("hiding splash scene")
 
 		s.timeElapsed = splashTimeout
 
@@ -151,7 +151,7 @@ func (s *EbitenSplashScene) updateSplash() {
 		if vpAlpha.Alpha <= 0 {
 			vpAlpha.Alpha = 0
 
-			s.Info("finished, deactivating")
+			s.Debug("finished, deactivating")
 			s.SetActive(false)
 		}
 	}
