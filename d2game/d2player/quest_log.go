@@ -3,7 +3,9 @@ package d2player
 import (
 	"fmt"
 	"image/color"
+	"strings"
 
+	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2enum"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2interface"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2resource"
 	"github.com/OpenDiablo2/OpenDiablo2/d2common/d2util"
@@ -15,24 +17,11 @@ const (
 	white = 0xffffffff
 )
 
-const (
-	act1 = iota + 1
-	act2
-	act3
-	act4
-	act5
-)
-
 const ( // for the dc6 frames
 	questLogTopLeft = iota
 	questLogTopRight
 	questLogBottomLeft
 	questLogBottomRight
-)
-
-const (
-	normalActQuestsNumber = 6
-	act4QuestsNumber      = 3
 )
 
 const (
@@ -42,93 +31,41 @@ const (
 const (
 	iconOffsetY                = 88
 	questOffsetX, questOffsetY = 4, 4
-	q1SocketX, q1SocketY       = 100, 95
-	q2SocketX, q2SocketY       = 200, 95
-	q3SocketX, q3SocketY       = 300, 95
-	q4SocketX, q4SocketY       = 100, 190
-	q5SocketX, q5SocketY       = 200, 190
-	q6SocketX, q6SocketY       = 300, 190
+	socket1X                   = 100
+	socket2X                   = 200
+	socket3X                   = 300
+	socketUpY                  = 95
+	socketDownY                = 190
 )
 
 const (
 	questLogCloseButtonX, questLogCloseButtonY = 358, 455
 	questLogDescrButtonX, questLogDescrButtonY = 308, 457
-	questLabelX, questLabelY                   = 240, 297
-)
-
-// toset
-const (
-	questTabY  = 66
-	questTab1X = 85
-	questTab2X = 143
-	questTab3X = 201
-	questTab4X = 259
-	questTab5X = 317
+	questNameLabelX, questNameLabelY           = 240, 297
+	questDescrLabelX, questDescrLabelY         = 90, 317
 )
 
 const (
-	questLogTab1 = iota
-	questLogTab2
-	questLogTab3
-	questLogTab4
-	questLogTab5
-	questLogNumTabs
+	questTabY       = 66
+	questTabYOffset = 31
+	questTabBaseX   = 86
+	questTabXOffset = 61
 )
 
-const (
-	questNone = 0
-)
-
-func (s *QuestLog) questTable(act, number int) struct {
-	name           string
-	numberOfDescrs int
-	status         int
-	frame          int
-	x              int
-	y              int
-} {
-	var quests = []struct {
-		name           string // name of quest in string table
-		numberOfDescrs int    // number of possible descriptions (not used yet)
-		status         int    // status of quest (not used yet)
-		frame          int    // frame of quest
-		x, y           int    // position of quest
+func (s *QuestLog) getPositionForSocket(number int) (x, y int) {
+	pos := []struct {
+		x int
+		y int
 	}{
-		{"qstsa1q1", 5, 0, 0, q1SocketX, q1SocketY},
-		{"qstsa1q2", 0, 0, 1, q2SocketX, q2SocketY},
-		{"qstsa1q3", 0, 0, 2, q3SocketX, q3SocketY},
-		{"qstsa1q4", 0, 0, 3, q4SocketX, q4SocketY},
-		{"qstsa1q5", 0, 0, 4, q5SocketX, q5SocketY},
-		{"qstsa1q6", 0, 0, 5, q6SocketX, q6SocketY},
-		{"qstsa2q1", 0, 0, 6, q1SocketX, q1SocketY},
-		{"qstsa2q2", 0, 0, 7, q2SocketX, q2SocketY},
-		{"qstsa2q3", 0, 0, 8, q3SocketX, q3SocketY},
-		{"qstsa2q4", 0, 0, 9, q4SocketX, q4SocketY},
-		{"qstsa2q5", 0, 0, 10, q5SocketX, q5SocketY},
-		{"qstsa2q6", 0, 0, 11, q6SocketX, q6SocketY},
-		{"qstsa3q1", 0, 0, 12, q1SocketX, q1SocketY},
-		{"qstsa3q2", 0, 0, 13, q2SocketX, q2SocketY},
-		{"qstsa3q3", 0, 0, 14, q3SocketX, q3SocketY},
-		{"qstsa3q4", 0, 0, 15, q4SocketX, q4SocketY},
-		{"qstsa3q5", 0, 0, 16, q5SocketX, q5SocketY},
-		{"qstsa3q6", 0, 0, 17, q6SocketX, q6SocketY},
-		{"qstsa4q1", 0, 0, 18, q1SocketX, q1SocketY},
-		{"qstsa4q2", 0, 0, 19, q2SocketX, q2SocketY},
-		{"qstsa4q3", 0, 0, 20, q3SocketX, q3SocketY},
-		{"qstsa5q1", 0, 0, 21, q1SocketX, q1SocketY},
-		{"qstsa5q2", 0, 0, 22, q2SocketX, q2SocketY},
-		{"qstsa5q3", 0, 0, 23, q3SocketX, q3SocketY},
-		{"qstsa5q4", 0, 0, 24, q4SocketX, q4SocketY},
-		{"qstsa5q5", 0, 0, 25, q5SocketX, q5SocketY},
-		{"qstsa5q6", 0, 0, 26, q6SocketX, q6SocketY},
+		{socket1X, socketUpY},
+		{socket2X, socketUpY},
+		{socket3X, socketUpY},
+		{socket1X, socketDownY},
+		{socket2X, socketDownY},
+		{socket3X, socketDownY},
 	}
 
-	key := (act-1)*normalActQuestsNumber + number
-	if act > act4 {
-		key -= act4QuestsNumber
-	}
-
-	return quests[key]
+	return pos[number].x, pos[number].y
 }
 
 // NewQuestLog creates a new quest log
@@ -139,19 +76,66 @@ func NewQuestLog(asset *d2asset.AssetManager,
 	originX := 0
 	originY := 0
 
+	//nolint:gomnd // this is only test
+	qs := map[int]int{
+		0:  -2,
+		1:  -2,
+		2:  -1,
+		3:  0,
+		4:  1,
+		5:  2,
+		6:  3,
+		7:  0,
+		8:  0,
+		9:  0,
+		10: 0,
+		11: 0,
+		12: 0,
+		13: 0,
+		14: 0,
+		15: 0,
+		16: 0,
+		17: 0,
+		18: 0,
+		19: 0,
+		20: 0,
+		21: 0,
+		22: 0,
+		23: 0,
+		24: 0,
+		25: 0,
+		26: 0,
+		27: 0,
+		28: 0,
+		29: 0,
+		30: 0,
+		31: 0,
+		32: 1,
+	}
+
+	var quests [d2enum.ActsNumber]*d2ui.WidgetGroup
+	for i := 0; i < d2enum.ActsNumber; i++ {
+		quests[i] = ui.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
+	}
+
+	var tabs [d2enum.ActsNumber]questLogTab
+	for i := 0; i < d2enum.ActsNumber; i++ {
+		tabs[i] = questLogTab{}
+	}
+
+	// nolint:gomnd // this is only test, it also should come from save file
+	mpa := 2
+
 	ql := &QuestLog{
-		asset:     asset,
-		uiManager: ui,
-		originX:   originX,
-		originY:   originY,
-		act:       act,
-		tab: [questLogNumTabs]*questLogTab{
-			{},
-			{},
-			{},
-			{},
-			{},
-		},
+		asset:         asset,
+		uiManager:     ui,
+		originX:       originX,
+		originY:       originY,
+		act:           act,
+		tab:           tabs,
+		quests:        quests,
+		questStatus:   qs,
+		maxPlayersAct: mpa,
 	}
 
 	ql.Logger = d2util.NewLogger()
@@ -171,14 +155,13 @@ type QuestLog struct {
 	selectedTab   int
 	selectedQuest int
 	act           int
-	tab           [questLogNumTabs]*questLogTab
+	tab           [d2enum.ActsNumber]questLogTab
 
-	questName *d2ui.Label
-	questsa1  *d2ui.WidgetGroup
-	questsa2  *d2ui.WidgetGroup
-	questsa3  *d2ui.WidgetGroup
-	questsa4  *d2ui.WidgetGroup
-	questsa5  *d2ui.WidgetGroup
+	questName     *d2ui.Label
+	questDescr    *d2ui.Label
+	quests        [d2enum.ActsNumber]*d2ui.WidgetGroup
+	questStatus   map[int]int
+	maxPlayersAct int
 
 	originX int
 	originY int
@@ -187,27 +170,30 @@ type QuestLog struct {
 	*d2util.Logger
 }
 
-type questLogTab struct {
-	button          *d2ui.Button
-	invisibleButton *d2ui.Button
+/* questIconTab returns path to quest animation using its
+act and number. From d2resource:
+        QuestLogAQuestAnimation = "/data/global/ui/MENU/a%dq%d.dc6"*/
+func (s *QuestLog) questIconsTable(act, number int) string {
+	return fmt.Sprintf(d2resource.QuestLogAQuestAnimation, act, number+1)
 }
 
-func (q *questLogTab) newTab(ui *d2ui.UIManager, tabType d2ui.ButtonType, x int) {
-	q.button = ui.NewButton(tabType, "")
-	q.invisibleButton = ui.NewButton(d2ui.ButtonTypeTabBlank, "")
-	q.button.SetPosition(x, questTabY)
-	q.invisibleButton.SetPosition(x, questTabY)
+const (
+	completedFrame  = 24
+	inProgresFrame  = 25
+	notStartedFrame = 26
+)
+
+const questDescriptionLenght = 30
+
+type questLogTab struct {
+	sprite          *d2ui.Sprite
+	invisibleButton *d2ui.Button
 }
 
 // Load the data for the hero status panel
 func (s *QuestLog) Load() {
 	var err error
 
-	s.questsa1 = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
-	s.questsa2 = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
-	s.questsa3 = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
-	s.questsa4 = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
-	s.questsa5 = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
 	s.panelGroup = s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
 
 	frame := d2ui.NewUIFrame(s.asset, s.uiManager, d2ui.FrameLeft)
@@ -237,131 +223,226 @@ func (s *QuestLog) Load() {
 	s.questName = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
 	s.questName.Alignment = d2ui.HorizontalAlignCenter
 	s.questName.Color[0] = rgbaColor(white)
-	s.questName.SetPosition(questLabelX, questLabelY)
+	s.questName.SetPosition(questNameLabelX, questNameLabelY)
 	s.panelGroup.AddWidget(s.questName)
 
+	s.questDescr = s.uiManager.NewLabel(d2resource.Font16, d2resource.PaletteStatic)
+	s.questDescr.Alignment = d2ui.HorizontalAlignLeft
+	s.questDescr.Color[0] = rgbaColor(white)
+	s.questDescr.SetPosition(questDescrLabelX, questDescrLabelY)
+	s.panelGroup.AddWidget(s.questDescr)
+
 	s.loadTabs()
-	s.loadQuestIcons()
+
+	for i := 0; i < d2enum.ActsNumber; i++ {
+		s.quests[i] = s.loadQuestIconsForAct(i + 1)
+	}
 
 	s.panelGroup.SetVisible(false)
 }
 
 func (s *QuestLog) loadTabs() {
-	s.tab[questLogTab1].newTab(s.uiManager, d2ui.ButtonTypeTab1, questTab1X)
-	s.tab[questLogTab1].invisibleButton.OnActivated(func() { s.setTab(questLogTab1) })
-	s.panelGroup.AddWidget(s.tab[questLogTab1].button)
-	s.panelGroup.AddWidget(s.tab[questLogTab1].invisibleButton)
+	var err error
 
-	s.tab[questLogTab2].newTab(s.uiManager, d2ui.ButtonTypeTab2, questTab2X)
-	s.tab[questLogTab2].invisibleButton.OnActivated(func() { s.setTab(questLogTab2) })
-	s.panelGroup.AddWidget(s.tab[questLogTab2].button)
-	s.panelGroup.AddWidget(s.tab[questLogTab2].invisibleButton)
+	tabsResource := d2resource.WPTabs
 
-	s.tab[questLogTab3].newTab(s.uiManager, d2ui.ButtonTypeTab3, questTab3X)
-	s.tab[questLogTab3].invisibleButton.OnActivated(func() { s.setTab(questLogTab3) })
-	s.panelGroup.AddWidget(s.tab[questLogTab3].button)
-	s.panelGroup.AddWidget(s.tab[questLogTab3].invisibleButton)
+	for i := 0; i < s.maxPlayersAct; i++ {
+		currentValue := i
 
-	s.tab[questLogTab4].newTab(s.uiManager, d2ui.ButtonTypeTab4, questTab4X)
-	s.tab[questLogTab4].invisibleButton.OnActivated(func() { s.setTab(questLogTab4) })
-	s.panelGroup.AddWidget(s.tab[questLogTab4].button)
-	s.panelGroup.AddWidget(s.tab[questLogTab4].invisibleButton)
+		s.tab[i].sprite, err = s.uiManager.NewSprite(tabsResource, d2resource.PaletteSky)
+		if err != nil {
+			s.Error(err.Error())
+		}
 
-	s.tab[questLogTab5].newTab(s.uiManager, d2ui.ButtonTypeTab5, questTab5X)
-	s.tab[questLogTab5].invisibleButton.OnActivated(func() { s.setTab(questLogTab5) })
-	s.panelGroup.AddWidget(s.tab[questLogTab5].button)
-	s.panelGroup.AddWidget(s.tab[questLogTab5].invisibleButton)
+		// nolint:gomnd // it's constant
+		frame := 2 * currentValue
+
+		err := s.tab[i].sprite.SetCurrentFrame(frame)
+		if err != nil {
+			s.Errorf("Tabs sprite (%s) hasn't frame %d. %s", tabsResource, frame, err.Error())
+		}
+
+		s.tab[i].sprite.SetPosition(questTabBaseX+i*questTabXOffset, questTabY+questTabYOffset)
+
+		s.tab[i].invisibleButton = s.uiManager.NewButton(d2ui.ButtonTypeTabBlank, "")
+		s.tab[i].invisibleButton.SetPosition(questTabBaseX+i*questTabXOffset, questTabY)
+		s.tab[i].invisibleButton.OnActivated(func() { s.setTab(currentValue) })
+
+		s.panelGroup.AddWidget(s.tab[i].sprite)
+		s.panelGroup.AddWidget(s.tab[i].invisibleButton)
+	}
 
 	s.setTab(s.act - 1)
-}
-
-func (s *QuestLog) loadQuestIcons() {
-	s.questsa1 = s.loadQuestIconsForAct(act1)
-	s.questsa2 = s.loadQuestIconsForAct(act2)
-	s.questsa3 = s.loadQuestIconsForAct(act3)
-	s.questsa4 = s.loadQuestIconsForAct(act4)
-	s.questsa5 = s.loadQuestIconsForAct(act5)
 }
 
 func (s *QuestLog) loadQuestIconsForAct(act int) *d2ui.WidgetGroup {
 	wg := s.uiManager.NewWidgetGroup(d2ui.RenderPriorityQuestLog)
 
 	var questsInAct int
-	if act == act4 {
-		questsInAct = act4QuestsNumber
+	if act == d2enum.Act4 {
+		questsInAct = d2enum.HalfQuestsNumber
 	} else {
-		questsInAct = normalActQuestsNumber
+		questsInAct = d2enum.NormalActQuestsNumber
 	}
 
-	for n := 0; n < questsInAct; n++ {
-		q := s.questTable(act, n)
+	var sockets []*d2ui.Sprite
 
-		button := s.uiManager.NewButton(d2ui.ButtonTypeBlankQuestBtn, "")
-		button.SetPosition(q.x+questOffsetX, q.y+questOffsetY)
-		button.OnActivated(s.makeQuestCallback(n))
+	var buttons []*d2ui.Button
+
+	var icon *d2ui.Sprite
+
+	for n := 0; n < questsInAct; n++ {
+		x, y := s.getPositionForSocket(n)
 
 		socket, err := s.uiManager.NewSprite(d2resource.QuestLogSocket, d2resource.PaletteSky)
 		if err != nil {
 			s.Error(err.Error())
 		}
 
-		socket.SetPosition(q.x+questOffsetX, q.y+iconOffsetY+2*questOffsetY)
+		socket.SetPosition(x+questOffsetX, y+iconOffsetY+2*questOffsetY)
+		sockets = append(sockets, socket)
 
-		icon, err := s.uiManager.NewSprite(d2resource.QuestLogDone, d2resource.PaletteSky)
+		button := s.uiManager.NewButton(d2ui.ButtonTypeBlankQuestBtn, "")
+		button.SetPosition(x+questOffsetX, y+questOffsetY)
+		buttons = append(buttons, button)
+
+		icon, err = s.makeQuestIconForAct(act, n)
 		if err != nil {
 			s.Error(err.Error())
 		}
 
-		err = icon.SetCurrentFrame(q.frame)
-		if err != nil {
-			s.Error(err.Error())
-		}
-
-		icon.SetPosition(q.x+questOffsetX, q.y+questOffsetY+iconOffsetY)
-
+		icon.SetPosition(x+questOffsetX, y+questOffsetY+iconOffsetY)
 		wg.AddWidget(icon)
-		wg.AddWidget(socket)
-		wg.AddWidget(button)
 	}
+
+	for i := 0; i < questsInAct; i++ {
+		currentQuest := i
+		buttons[i].OnActivated(func() {
+			var err error
+			for j := 0; j < questsInAct; j++ {
+				err = sockets[j].SetCurrentFrame(0)
+				if err != nil {
+					s.Error(err.Error())
+				}
+			}
+			if act-1 == s.selectedTab {
+				err = sockets[currentQuest].SetCurrentFrame(1)
+				if err != nil {
+					s.Error(err.Error())
+				}
+			}
+			s.onQuestClicked(currentQuest + 1)
+		})
+	}
+
+	for _, s := range sockets {
+		wg.AddWidget(s)
+	}
+
+	for _, b := range buttons {
+		wg.AddWidget(b)
+	}
+
 	wg.SetVisible(false)
 
 	return wg
 }
 
-func (s *QuestLog) makeQuestCallback(n int) func() {
-	return func() {
-		s.onQuestClicked(n + 1)
+func (s *QuestLog) makeQuestIconForAct(act, n int) (*d2ui.Sprite, error) {
+	iconResource := s.questIconsTable(act, n)
+
+	icon, err := s.uiManager.NewSprite(iconResource, d2resource.PaletteSky)
+	if err != nil {
+		s.Fatalf("during creating new quest icons for act %d (icon sprite %s doesn't exist). %s", act, iconResource, err.Error())
 	}
+
+	switch s.questStatus[s.cordsToQuestID(act, n)] {
+	case d2enum.QuestStatusCompleted:
+		err = icon.SetCurrentFrame(completedFrame)
+	case d2enum.QuestStatusCompleting:
+		// that's not complet now
+		err = icon.SetCurrentFrame(0)
+		if err != nil {
+			s.Error(err.Error())
+		}
+
+		icon.PlayForward()
+		icon.SetPlayLoop(false)
+		err = icon.SetCurrentFrame(completedFrame)
+		s.questStatus[s.cordsToQuestID(act, n)] = d2enum.QuestStatusCompleted
+	case d2enum.QuestStatusNotStarted:
+		err = icon.SetCurrentFrame(notStartedFrame)
+	default:
+		err = icon.SetCurrentFrame(inProgresFrame)
+	}
+
+	return icon, err
 }
 
-func (s *QuestLog) setQuestLabels() {
+func (s *QuestLog) setQuestLabel() {
 	if s.selectedQuest == 0 {
 		s.questName.SetText("")
+		s.questDescr.SetText("")
+
 		return
 	}
 
 	s.questName.SetText(s.asset.TranslateString(fmt.Sprintf("qstsa%dq%d", s.selectedTab+1, s.selectedQuest)))
+
+	status := s.questStatus[s.cordsToQuestID(s.selectedTab+1, s.selectedQuest)]
+	switch status {
+	case d2enum.QuestStatusCompleted:
+		s.questDescr.SetText(
+			strings.Join(
+				d2util.SplitIntoLinesWithMaxWidth(
+					s.asset.TranslateString("qstsprevious"),
+					questDescriptionLenght),
+				"\n"),
+		)
+	case d2enum.QuestStatusNotStarted:
+		s.questDescr.SetText("")
+	default:
+		s.questDescr.SetText(strings.Join(
+			d2util.SplitIntoLinesWithMaxWidth(
+				s.asset.TranslateString(
+					fmt.Sprintf("qstsa%dq%d%d", s.selectedTab+1, s.selectedQuest, status),
+				),
+				questDescriptionLenght),
+			"\n"),
+		)
+	}
 }
 
 func (s *QuestLog) setTab(tab int) {
+	var mod int
+
 	s.selectedTab = tab
-	s.selectedQuest = questNone
-	s.setQuestLabels()
+	s.selectedQuest = d2enum.QuestNone
+	s.setQuestLabel()
 
-	s.questsa1.SetVisible(tab == questLogTab1)
-	s.questsa2.SetVisible(tab == questLogTab2)
-	s.questsa3.SetVisible(tab == questLogTab3)
-	s.questsa4.SetVisible(tab == questLogTab4)
-	s.questsa5.SetVisible(tab == questLogTab5)
+	for i := 0; i < s.maxPlayersAct; i++ {
+		s.quests[i].SetVisible(tab == i)
+	}
 
-	for i := 0; i < questLogNumTabs; i++ {
-		s.tab[i].button.SetEnabled(i == tab)
+	for i := 0; i < s.maxPlayersAct; i++ {
+		cv := i
+
+		if cv == s.selectedTab {
+			mod = 0
+		} else {
+			mod = 1
+		}
+
+		err := s.tab[cv].sprite.SetCurrentFrame(2*cv + mod)
+		if err != nil {
+			s.Error(err.Error())
+		}
 	}
 }
 
 func (s *QuestLog) onQuestClicked(number int) {
 	s.selectedQuest = number
-	s.setQuestLabels()
+	s.setQuestLabel()
 	s.Infof("Quest number %d in tab %d clicked", number, s.selectedTab)
 }
 
@@ -394,11 +475,11 @@ func (s *QuestLog) Open() {
 func (s *QuestLog) Close() {
 	s.isOpen = false
 	s.panelGroup.SetVisible(false)
-	s.questsa1.SetVisible(false)
-	s.questsa2.SetVisible(false)
-	s.questsa3.SetVisible(false)
-	s.questsa4.SetVisible(false)
-	s.questsa5.SetVisible(false)
+
+	for i := 0; i < s.maxPlayersAct; i++ {
+		s.quests[i].SetVisible(false)
+	}
+
 	s.onCloseCb()
 }
 
@@ -476,4 +557,35 @@ func rgbaColor(rgba uint32) color.RGBA {
 	}
 
 	return result
+}
+
+func (s *QuestLog) cordsToQuestID(act, number int) int {
+	key := (act-1)*d2enum.NormalActQuestsNumber + number
+	if act > d2enum.Act4 {
+		key -= d2enum.HalfQuestsNumber
+	}
+
+	return key
+}
+
+//nolint:deadcode,unused // I think, it will be used, if not, we can just remove it
+func (s *QuestLog) questIDToCords(id int) (act, number int) {
+	act = 1
+
+	for i := 0; i < d2enum.ActsNumber; i++ {
+		if id < d2enum.NormalActQuestsNumber {
+			break
+		}
+
+		act++
+
+		id -= d2enum.NormalActQuestsNumber
+	}
+
+	number = id
+	if act > d2enum.Act4 {
+		number -= d2enum.HalfQuestsNumber
+	}
+
+	return act, number
 }
